@@ -34,7 +34,6 @@ TEST(PriorityQueue, DoublingTestRandom) {
 }
 
 TEST(PriorityQueue, RandomSpeed) {  
-   int random_variable;
    int steps = 6;
    int count = 250000;
 
@@ -42,13 +41,11 @@ TEST(PriorityQueue, RandomSpeed) {
 
    for (int i = 0; i < steps; i++) {
       std::cout << "generating " << count << " random ints -";
-      std::priority_queue<int, std::vector<int>, std::greater<int> > pq;
       Timer tm;
 
       tm.Start();
       for (int i = 0; i < count; i++) {
-         random_variable = std::rand();
-         //pq.push( i );
+         int random_variable = std::rand();
       }
       tm.Stop();
       std::cout << " time (us): " << tm.ElapsedUS() << "\n";

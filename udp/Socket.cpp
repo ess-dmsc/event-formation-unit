@@ -4,8 +4,6 @@
 
 Socket::Socket(uint16_t port, uint16_t buflen)
 {
-    int retval;
-
     mPort = port;
     mBufLen = buflen;
 

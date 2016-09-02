@@ -20,7 +20,7 @@ int main(void)
 {
     struct sockaddr_in si_me, si_other;
      
-    int s, i, slen = sizeof(si_other) , recv_len;
+    int s, slen = sizeof(si_other);
     char buf[BUFLEN];
      
     //create a UDP socket
@@ -45,6 +45,7 @@ int main(void)
     //keep listening for data
     while(1)
     {
+        int recv_len;
         printf("Waiting for data...");
         fflush(stdout);
          
