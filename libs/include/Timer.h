@@ -1,12 +1,13 @@
-#include <sys/time.h>
 #include <inttypes.h>
+#include <sys/time.h>
 
 class Timer {
- public:
+public:
   Timer();
   void Start(void);
   void Stop(void);
   uint64_t ElapsedUS(void);
- private:
+
+private:
   struct timeval mTvStart, mTvStop;
 };
