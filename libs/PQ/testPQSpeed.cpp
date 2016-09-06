@@ -9,11 +9,17 @@ class PriorityQueueTest : public ::testing::Test {
 protected:
   virtual void SetUp() { std::srand(4242); }
 
-  // virtual void TearDown() {}
+  virtual void TearDown() {
+    ASSERT_EQ(x.size(), y.size());
+    for (int i = 0; i < x.size(); i++)
+      std::cout << x[i] << " , " << y[i] << "\n";
+  }
 
-  std::priority_queue<int, std::vector<int>, std::greater<int>> pq;
   std::vector<int> pqsizes{250000,  500000,  750000,  1000000, 1500000,
                            2000000, 3000000, 4000000, 5000000};
+
+  std::priority_queue<int, std::vector<int>, std::greater<int>> pq;
+  std::vector<int> x, y;
   Timer tm;
   int random_variable;
 };
@@ -32,6 +38,8 @@ TEST_F(PriorityQueueTest, DoublingTestRandom) {
       pq.pop();
     }
     tm.Stop();
+    x.push_back(count);
+    y.push_back(tm.ElapsedUS());
     std::cout << " time (us): " << tm.ElapsedUS() << "\n";
   }
 }
@@ -45,6 +53,8 @@ TEST_F(PriorityQueueTest, RandomSpeed) {
       int random_variable = std::rand();
     }
     tm.Stop();
+    x.push_back(count);
+    y.push_back(tm.ElapsedUS());
     std::cout << " time (us): " << tm.ElapsedUS() << "\n";
   }
 }
@@ -63,6 +73,8 @@ TEST_F(PriorityQueueTest, AlreadySortedIncreasing) {
     }
     tm.Stop();
 
+    x.push_back(count);
+    y.push_back(tm.ElapsedUS());
     std::cout << " time (us): " << tm.ElapsedUS() << "\n";
   }
 }
@@ -81,6 +93,8 @@ TEST_F(PriorityQueueTest, AlreadySortedDecreasing) {
     }
     tm.Stop();
 
+    x.push_back(count);
+    y.push_back(tm.ElapsedUS());
     std::cout << " time (us): " << tm.ElapsedUS() << "\n";
   }
 }
