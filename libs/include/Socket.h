@@ -15,7 +15,7 @@ public:
 
 private:
   int s_{-1};
-  uint16_t buflen_{3000};
+  uint16_t buflen_{9000};
   struct sockaddr_in local_;
   struct sockaddr_in remote_;
   char buffer_[9000];

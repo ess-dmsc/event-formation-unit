@@ -8,8 +8,8 @@
 
 TEST(Event, BasicTests) {
 
-  NMXEvent eva(100, 200, 300);
-  NMXEvent evb(101, 200, 300);
+  NMXData eva(100, 200, 300);
+  NMXData evb(101, 200, 300);
 
   ASSERT_EQ(100, eva.getdetector());
   ASSERT_EQ(200, eva.gettime());
@@ -27,11 +27,11 @@ TEST(Event, AllocationTime) {
 
   for (auto const &size : pqsizes) {
     Timer tm;
-    std::priority_queue<NMXEvent, std::vector<NMXEvent>, std::greater<NMXEvent>>
+    std::priority_queue<NMXData, std::vector<NMXData>, std::greater<NMXData>>
         pq;
     tm.Start();
     for (int i = 0; i < size; i++) {
-      auto ev = new NMXEvent(random(), size, 1);
+      auto ev = new NMXData(random(), size, 1);
       pq.push(*ev);
     }
     for (int i = 0; i < size; i++) {

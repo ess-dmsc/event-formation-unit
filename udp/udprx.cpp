@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
   uint64_t rx_total = 0;
   uint64_t rx = 0;
   const int intervalUs = 1000000;
-  const int bytes1M = 1000000;
+  const int B1M = 1000000;
 
   UDPServer NMX("0.0.0.0", 9000);
 
@@ -21,12 +21,12 @@ int main(int argc, char *argv[]) {
     auto t2 = Clock::now();
     auto usecs =
         std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-    // printf("Received %d bytes in %" PRIu64 " usecs\n", rx, usecs);
-    if (usecs > intervalUs) {
+
+    if (usecs >= intervalUs) {
       rx_total += rx;
-      printf("Rate: %.2f Mbps, rx %" PRIu64 " bytes (total: %" PRIu64
-             ") %ld usecs\n",
-             rx * 8.0 / (usecs / 1000000.0) / bytes1M, rx, rx_total, usecs);
+      printf("Rx rate: %.2f Mbps, rx %" PRIu64 " MB (total: %" PRIu64
+             " MB) %ld usecs\n",
+             rx * 8.0 / (usecs / 1000000.0) / B1M, rx/B1M, rx_total/B1M, usecs);
       rx = 0;
       t1 = Clock::now();
     }

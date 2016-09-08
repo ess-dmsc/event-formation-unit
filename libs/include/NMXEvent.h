@@ -1,13 +1,13 @@
+#include <vector>
 
-
-class NMXEvent {
+class NMXData {
 public:
-  NMXEvent(int detectorid, int timeval, int adc)
+  NMXData(int detectorid, int timeval, int adc)
       : mDetectorId(detectorid), mTimeVal(timeval), mAdc(adc) {}
-  bool operator<(NMXEvent other) const {
+  bool operator<(NMXData other) const {
     return mDetectorId < other.getdetector();
   }
-  bool operator>(NMXEvent other) const {
+  bool operator>(NMXData other) const {
     return mDetectorId > other.getdetector();
   }
   int getdetector() { return mDetectorId; }
@@ -18,4 +18,15 @@ private:
   int mDetectorId;
   int mTimeVal;
   int mAdc;
+};
+
+
+/** BulkData is just an array of NMXData */
+class BulkData {
+ public:
+  void add(NMXData d) {
+    data.emplace_back(d);
+  }
+ private:
+  std::vector<NMXData> data;;
 };

@@ -5,15 +5,12 @@ CFLAGS   = $(INCLUDE)
 
 VPATH = ../libs/include:../libs/Timer:../libs/Socket
 
-PROGS = udprx udptx
+PROGS = bulkdatagen 
 OBJECTS = Socket.o Timer.o
 
 all: $(PROGS)
 
-udprx: udprx.cpp $(OBJECTS) Socket.h Timer.h 
-	g++ $(CPPFLAGS) $< $(OBJECTS) -o $@
-
-udptx: udptx.cpp $(OBJECTS) Socket.h Timer.h
+bulkdatagen: bulkdatagen.cpp $(OBJECTS) Socket.h Timer.h 
 	g++ $(CPPFLAGS) $< $(OBJECTS) -o $@
 
 %.o:%.cpp
