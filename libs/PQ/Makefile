@@ -1,28 +1,37 @@
-
+#
+#
 
 Q=@
 ifdef V
 Q=
 endif
 
-CXXFLAGS = -O3 -std=c++11 -I../include -I/usr/include
+CXXFLAGS = -O3 -std=c++11 -I../include -I/usr/include 
+
+ifdef COV
+CXXFLAGS += -coverage
+endif
 
 VPATH = ../Timer
 
 all: testmain
 	@echo done
 
+%.o: %.c
+	$(Q)g++  $(CXXFLAGS) -c $<
+
 testmain: testmain.cpp testPQSpeed.o testPQMin.o testPQBasic.o Timer.cpp
 	g++ $(CXXFLAGS) $< testPQSpeed.o testPQMin.o testPQBasic.o ../Timer/Timer.cpp -o $@ -lgtest -pthread
 
-testPQMin.o: testPQMin.cpp
-	$(Q)g++  $(CXXFLAGS) -c $<
+testrun: testmain
+	./testmain
 
-testPQBasic.o: testPQBasic.cpp
-	$(Q)g++  $(CXXFLAGS) -c $<
+build:
+	mkdir build 
 
-testPQSpeed.o: testPQSpeed.cpp
-	$(Q)g++  $(CXXFLAGS) -c $<  
+coverage: build
+	lcov -c -b . -d . -o build/lcov.out
+	genhtml -o build build/lcov.out
 
 clean:
-	rm -f testmain *.o 
+	rm -fr testmain *.o *.gc* build

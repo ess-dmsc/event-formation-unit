@@ -1,37 +1,83 @@
 #include <Socket.h>
+#include <cassert>
+#include <cstdlib>
+#include <iostream>
 #include <stdio.h>
 #include <string.h>
 
-Socket::Socket(uint16_t port, uint16_t buflen) {
-  mPort = port;
-  mBufLen = buflen;
+using namespace std;
 
-  // create a UDP socket
-  if ((mSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP)) == -1) {
-    printf("socket() failed");
-  }
-
-  // zero out the structure
-  memset((char *)&mSiLocal, 0, sizeof(mSiLocal));
-
-  mSiLocal.sin_family = AF_INET;
-  mSiLocal.sin_port = htons(port);
-  mSiLocal.sin_addr.s_addr = htonl(INADDR_ANY);
+int Socket::Local(const char *ipaddr, int port) {
+  // zero out the structures
+  memset((char *)&local_, 0, sizeof(local_));
+  local_.sin_family = AF_INET;
+  local_.sin_port = htons(port);
+  inet_aton(ipaddr, &local_.sin_addr);
 
   // bind socket to port
-  if (bind(mSocket, (struct sockaddr *)&mSiLocal, sizeof(mSiLocal)) == -1) {
-    printf("bind() failed\n");
+  return bind(s_, (struct sockaddr *)&local_, sizeof(local_));
+}
+
+int Socket::Remote(const char *ipaddr, int port) {
+  // zero out the structures
+  memset((char *)&remote_, 0, sizeof(remote_));
+  remote_.sin_family = AF_INET;
+  remote_.sin_port = htons(port);
+  return inet_aton(ipaddr, &remote_.sin_addr);
+}
+
+int Socket::Send() {
+  int ret = sendto(s_, buffer_, buflen_, 0, (struct sockaddr *)&remote_,
+                   sizeof(remote_));
+  if (ret < 0) {
+    cout << "unable to send on socket" << endl;
+    perror("sendto");
+    exit(1);
+  }
+
+  return ret;
+}
+
+Socket::Socket(Socket::type stype, const char *ipaddr, int port) {
+
+  auto type = (stype == Socket::type::UDP) ? SOCK_DGRAM : SOCK_STREAM;
+  auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
+
+  if ((s_ = socket(AF_INET, type, proto)) == -1) {
+    cout << "socket() failed" << endl;
+    exit(1);
+  }
+
+  if (Local(ipaddr, port) < 0) {
+    cout << "error setting local address (" << ipaddr << ") and port (" << port
+         << ")" << endl;
+    exit(1);
   }
 }
 
 /** */
 int Socket::Receive() {
   int recv_len;
-  socklen_t slen;
+  socklen_t slen = 0;
   // try to receive some data, this is a blocking call
-  if ((recv_len = recvfrom(mSocket, mBuffer, mBufLen, 0,
-                           (struct sockaddr *)&mSiRemote, &slen)) < 0) {
-    printf("Receive() failed\n");
+  if ((recv_len = recvfrom(s_, buffer_, buflen_, 0, (struct sockaddr *)&remote_,
+                           &slen)) < 0) {
+    printf("Receive() failed: %d (sockt fd %d)\n", recv_len, s_);
+    perror("recvfrom: ");
+    return 0;
+  }
+  return recv_len;
+}
+
+/** */
+int Socket::Receive(void *buffer, int buflen) {
+  int recv_len;
+  socklen_t slen = 0;
+  // try to receive some data, this is a blocking call
+  if ((recv_len = recvfrom(s_, buffer, buflen, 0, (struct sockaddr *)&remote_,
+                           &slen)) < 0) {
+    printf("Receive() failed: %d (sockt fd %d)\n", recv_len, s_);
+    perror("recvfrom: ");
     return 0;
   }
   return recv_len;

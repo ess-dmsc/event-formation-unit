@@ -1,23 +1,23 @@
 
 INCLUDE  = -I. -I../libs/include
-CPPFLAGS = -std=c++11 $(INCLUDE)
+CPPFLAGS = -O3 -std=c++11 $(INCLUDE)
 CFLAGS   = $(INCLUDE)
 
 VPATH = ../libs/include:../libs/Timer 
 
-all: udpserver Server
+PROGS = udprx udptx
+OBJECTS = Socket.o Timer.o
 
-Server: Socket.o Timer.o Server.cpp
-	g++ $(CPPFLAGS) Server.cpp Socket.o Timer.o -o $@
+all: $(PROGS)
 
-udpserver: udpserver.c
-	gcc $(CFLAGS) $< -o $@ 
+udprx: udprx.cpp $(OBJECTS) Socket.h Timer.h 
+	g++ $(CPPFLAGS) $< $(OBJECTS) -o $@
 
-Socket.o: Socket.cpp Socket.h
+udptx: udptx.cpp $(OBJECTS) Socket.h Timer.h
+	g++ $(CPPFLAGS) $< $(OBJECTS) -o $@
+
+%.o:%.cpp
 	g++ $(CPPFLAGS) -c  $<
 
-Timer.o: Timer.cpp Timer.h
-	g++ $(CPPFLAGS) -c  $< 
-
 clean:
-	rm -f udpserver *.o Server *~
+	@rm -f $(OBJECTS) $(PROGS) *~
