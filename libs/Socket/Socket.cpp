@@ -38,19 +38,13 @@ int Socket::Send() {
   return ret;
 }
 
-Socket::Socket(Socket::type stype, const char *ipaddr, int port) {
+Socket::Socket(Socket::type stype) {
 
   auto type = (stype == Socket::type::UDP) ? SOCK_DGRAM : SOCK_STREAM;
   auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
 
   if ((s_ = socket(AF_INET, type, proto)) == -1) {
     cout << "socket() failed" << endl;
-    exit(1);
-  }
-
-  if (Local(ipaddr, port) < 0) {
-    cout << "error setting local address (" << ipaddr << ") and port (" << port
-         << ")" << endl;
     exit(1);
   }
 }

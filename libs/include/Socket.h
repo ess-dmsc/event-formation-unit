@@ -6,7 +6,7 @@ class Socket {
 public:
   enum class type { UDP, TCP };
 
-  Socket(Socket::type type, const char *ipaddr, int port);
+  Socket(Socket::type type);
   int Local(const char *ipaddr, int port);
   int Remote(const char *ipaddr, int port);
   int Receive();
@@ -27,13 +27,16 @@ protected:
 class UDPServer : public Socket {
 public:
   UDPServer(const char *ipaddr, int port)
-      : Socket(Socket::type::UDP, ipaddr, port){};
+      : Socket(Socket::type::UDP){
+      Local(ipaddr, port);
+  };
 };
 
 class UDPClient : public Socket {
 public:
   UDPClient(const char *ipaddr, int port)
-      : Socket(Socket::type::UDP, "0.0.0.0", 0) {
+      : Socket(Socket::type::UDP) {
+    Local("0.0.0.0", 0);
     Remote(ipaddr, port);
   };
 };
