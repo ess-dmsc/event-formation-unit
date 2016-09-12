@@ -3,30 +3,29 @@
 class NMXData {
 public:
   NMXData(int detectorid, int timeval, int adc)
-      : mDetectorId(detectorid), mTimeVal(timeval), mAdc(adc) {}
+      : detectorId_(detectorid), timeVal_(timeval), adc_(adc) {}
   bool operator<(NMXData other) const {
-    return mDetectorId < other.getdetector();
+    return detectorId_ < other.getdetector();
   }
   bool operator>(NMXData other) const {
-    return mDetectorId > other.getdetector();
+    return detectorId_ > other.getdetector();
   }
-  int getdetector() { return mDetectorId; }
-  int gettime() { return mTimeVal; }
-  int getadc() { return mAdc; }
+  int getdetector() { return detectorId_; }
+  int gettime() { return timeVal_; }
+  int getadc() { return adc_; }
 
 private:
-  int mDetectorId;
-  int mTimeVal;
-  int mAdc;
+  int detectorId_;
+  int timeVal_;
+  int adc_;
 };
 
-
 /** BulkData is just an array of NMXData */
-class BulkData {
- public:
-  void add(NMXData d) {
-    data.emplace_back(d);
-  }
- private:
-  std::vector<NMXData> data;;
+class VMMBulkData {
+public:
+  void add(NMXData d) { data.emplace_back(d); }
+
+private:
+  std::vector<NMXData> data;
+  ;
 };

@@ -2,6 +2,13 @@
 #include <inttypes.h>
 #include <sys/socket.h>
 
+struct Endpoint {
+  const char *ipaddr;
+  uint16_t port;
+  Endpoint(const char *ip_address, uint16_t port_number)
+      : ipaddr(ip_address), port(port_number) {}
+};
+
 class Socket {
 public:
   enum class type { UDP, TCP };
@@ -26,17 +33,16 @@ protected:
 
 class UDPServer : public Socket {
 public:
-  UDPServer(const char *ipaddr, int port)
-      : Socket(Socket::type::UDP){
-      Local(ipaddr, port);
+  UDPServer(struct Endpoint local) : Socket(Socket::type::UDP) {
+    Local(local.ipaddr, local.port);
   };
 };
 
 class UDPClient : public Socket {
 public:
-  UDPClient(const char *ipaddr, int port)
+  UDPClient(struct Endpoint local, struct Endpoint remote)
       : Socket(Socket::type::UDP) {
-    Local("0.0.0.0", 0);
-    Remote(ipaddr, port);
+    Local(local.ipaddr, local.port);
+    Remote(remote.ipaddr, remote.port);
   };
 };

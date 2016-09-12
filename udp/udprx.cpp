@@ -13,7 +13,8 @@ int main(int argc, char *argv[]) {
   const int intervalUs = 1000000;
   const int B1M = 1000000;
 
-  UDPServer NMX("0.0.0.0", 9000);
+  struct Endpoint local("0.0.0.0", 9000);
+  UDPServer NMX(local);
 
   auto t1 = Clock::now();
   for (;;) {
@@ -26,7 +27,8 @@ int main(int argc, char *argv[]) {
       rx_total += rx;
       printf("Rx rate: %.2f Mbps, rx %" PRIu64 " MB (total: %" PRIu64
              " MB) %ld usecs\n",
-             rx * 8.0 / (usecs / 1000000.0) / B1M, rx/B1M, rx_total/B1M, usecs);
+             rx * 8.0 / (usecs / 1000000.0) / B1M, rx / B1M, rx_total / B1M,
+             usecs);
       rx = 0;
       t1 = Clock::now();
     }

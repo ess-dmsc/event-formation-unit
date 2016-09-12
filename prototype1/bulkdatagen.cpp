@@ -1,3 +1,4 @@
+#include <NMXEvent.h>
 #include <Socket.h>
 #include <Timer.h>
 #include <chrono>
@@ -37,17 +38,22 @@ int main(int argc, char *argv[]) {
   uint64_t tx = 0;
   const int intervalUs = 1000000;
   const int B1M = 1000000;
+  struct Endpoint local("0.0.0.0", 0);
+  struct Endpoint remote("127.0.0.1", 9000);
 
-  UDPClient VMMBulkData("127.0.0.1", 9000);
+  VMMBulkData bd;
+  UDPClient DataSource(local, remote);
 
   auto t1 = Clock::now();
   for (;;) {
-    tx += VMMBulkData.Send();
+
+    // Generate Tx buffer eventuallys
+    tx += DataSource.Send();
     auto t2 = Clock::now();
     auto usecs =
         std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    if (usecs > intervalUs) {
+    if (usecs >= intervalUs) {
       tx_total += tx;
       printf("Tx rate: %.2f Mbps, tx %" PRIu64 " MB (total: %" PRIu64
              " MB) %ld usecs\n",
