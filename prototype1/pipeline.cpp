@@ -9,7 +9,7 @@ typedef std::chrono::high_resolution_clock Clock;
 
 std::queue<int> queue1;
 std::priority_queue<int> queue2;
-std::mutex m1, m2;
+std::mutex m1, m2, mcout;
 
 /**
  * Input thread - reads from UDP socket and enqueues in FIFO
@@ -47,6 +47,10 @@ void input_thread(void) {
  */
 void processing_thread(void) {
   auto t1 = Clock::now();
+  int reduction = 80;
+  int npops = 0;
+  int tpops = 0;
+
   for (;;) {
     auto t2 = Clock::now();
     auto usecs =
@@ -55,10 +59,21 @@ void processing_thread(void) {
       m1.lock();
       queue1.pop();
       m1.unlock();
+      npops++;
     }
     if (usecs >= 1000000) {
-      std::cout << "processing: queue1 size: " << queue1.size() << std::endl;
+      mcout.lock();
+      std::cout << "processing: queue1 size: " << queue1.size() << " (" << tpops
+                << " elements)" << std::endl;
+      mcout.unlock();
       t1 = Clock::now();
+    }
+    if (npops == 80) {
+      npops = 0;
+      tpops += 80;
+      m2.lock();
+      queue2.push(6);
+      m2.unlock();
     }
   }
 }
@@ -67,8 +82,26 @@ void processing_thread(void) {
  * Output thread - reads from Priority Queue and outputs to Kafka cluster
  */
 void output_thread(void) {
-  for (;;)
-    ;
+  auto t1 = Clock::now();
+  int npop = 0;
+  for (;;) {
+    auto t2 = Clock::now();
+    auto usecs =
+        std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+    if (!queue2.empty()) {
+      m2.lock();
+      queue2.pop();
+      m2.unlock();
+      npop++;
+    }
+    if (usecs >= 1000000) {
+      mcout.lock();
+      std::cout << "output: queue2 size: " << queue2.size() << " (" << npop
+                << " elements)" << std::endl;
+      mcout.unlock();
+      t1 = Clock::now();
+    }
+  }
 }
 
 /**

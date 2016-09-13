@@ -12,26 +12,37 @@ typedef std::chrono::high_resolution_clock Clock;
 int main(int argc, char *argv[]) {
   int c;
   int nmxtuples = 10; // nmx data tuples per bulk data packet
-  uint64_t bulkdatasz =
-      10000000000; // stop after this amount of bytes has been sent
+  uint64_t txGB = 10; // stop after this amount of Gbytes has been sent
+  int port = 9000;    // UDP destination port
 
-  while ((c = getopt(argc, argv, "n:s:")) != -1)
+  while ((c = getopt(argc, argv, "hn:s:p:")) != -1)
     switch (c) {
     case 'n':
       nmxtuples = atoi(optarg);
       break;
 
-    case 's':
-      bulkdatasz = atol(optarg);
+    case 'p':
+      port = atoi(optarg);
       break;
 
+    case 's':
+      txGB = atol(optarg);
+      break;
+
+    case 'h':
     default:
-      cout << "getopt error" << endl;
+      cout << "Usage: bulkdatagen [OPTIONS]" << endl;
+      cout << " -n tuples      number of data tuples in each UDP packet"
+           << endl;
+      cout << " -s size        size in GB of transmitted data" << endl;
+      cout << " -p port        UDP destination port" << endl;
+      cout << " -h             help - prints this message" << endl;
       exit(1);
     }
 
-  cout << "Generating " << bulkdatasz << " bytes of bulk data packets" << endl;
+  cout << "Generating " << txGB << " GB of bulk data packets" << endl;
   cout << "containing " << nmxtuples << " nmx data tuples per packet" << endl;
+  cout << "for udp port " << port << endl;
 
   uint64_t tx_total = 0;
   uint64_t tx = 0;
@@ -46,6 +57,10 @@ int main(int argc, char *argv[]) {
   auto t1 = Clock::now();
   for (;;) {
 
+    if (tx_total >= txGB * 1000000000) {
+      cout << "done" << endl;
+      exit(0);
+    }
     // Generate Tx buffer eventuallys
     tx += DataSource.Send();
     auto t2 = Clock::now();
@@ -58,9 +73,7 @@ int main(int argc, char *argv[]) {
              " MB) %ld usecs\n",
              tx * 8.0 / (usecs / 1000000.0) / B1M, tx / B1M, tx_total / B1M,
              usecs);
-      if (tx_total >= bulkdatasz) {
-        exit(0);
-      }
+
       tx = 0;
       t1 = Clock::now();
     }
