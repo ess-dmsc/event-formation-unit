@@ -1,6 +1,5 @@
 #include <NMXEvent.h>
 #include <Socket.h>
-#include <Timer.h>
 #include <chrono>
 #include <inttypes.h>
 #include <iostream>
