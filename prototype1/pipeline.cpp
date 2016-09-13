@@ -1,6 +1,7 @@
 #include <Socket.h>
 #include <Thread.h>
 #include <chrono>
+#include <iostream>
 #include <mutex>
 #include <queue>
 #include <unistd.h> // sleep()

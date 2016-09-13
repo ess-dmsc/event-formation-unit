@@ -11,8 +11,8 @@ ifdef COV
 CXXFLAGS += -coverage
 endif
 
-hdrs    = 
-sources = source/Socket.cpp source/Timer.cpp
+hdrs    =
+sources = source/Socket.cpp source/Timer.cpp source/Thread.cpp
 objects = $(sources:%.cpp=%.o)
 library = eventlib.a
 

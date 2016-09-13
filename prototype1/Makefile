@@ -1,20 +1,27 @@
 
 INCLUDE  = -I. -I../libs/include
-CPPFLAGS = -O3 -std=c++11 -pthread $(INCLUDE)
+CXXFLAGS = -O3 -std=c++11 -pthread $(INCLUDE)
 CFLAGS   = $(INCLUDE)
 
 VPATH = ../libs/include
 
 PROGS = bulkdatagen pipeline
 library = ../libs/eventlib.a
+source = Args.cpp
+objects =$(source:%.cpp=%.o)
+
+CXX=g++
 
 all: $(PROGS)
 
-bulkdatagen: bulkdatagen.cpp $(library) Socket.h Timer.h
-	g++ $(CPPFLAGS) $< $(library) -o $@
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) $< -c
+
+bulkdatagen: bulkdatagen.cpp $(library) $(objects) Args.h Socket.h Timer.h
+	$(CXX) $(CXXFLAGS) $< $(library) $(objects) -o $@
 
 pipeline: pipeline.cpp $(library) Socket.h Timer.h Thread.h
-	g++ $(CPPFLAGS) $< $(library) -o $@
+	$(CXX) $(CXXFLAGS) $< $(library) -o $@
 
 clean:
-	@rm -f $(OBJECTS) $(PROGS) *~
+	@rm -f $(objects) $(PROGS) *~
