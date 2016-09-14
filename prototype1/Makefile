@@ -1,6 +1,8 @@
 
 INCLUDE  = -I. -I../libs/include
-CXXFLAGS = -O3 -std=c++11 -pthread $(INCLUDE)
+WARNINGS = -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs
+OPTFLAGS = -O3
+CXXFLAGS = $(OPTFLAGS) -std=c++11 -pthread $(INCLUDE) $(WARNINGS)
 CFLAGS   = $(INCLUDE)
 
 VPATH = ../libs/include

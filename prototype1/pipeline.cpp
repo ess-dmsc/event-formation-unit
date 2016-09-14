@@ -52,9 +52,9 @@ void input_thread(void) {
  */
 void processing_thread(void) {
   auto t1 = Clock::now();
-  int reduction = 80;
   int npops = 0;
   int tpops = 0;
+  int reduction = 80;
 
   for (;;) {
     auto t2 = Clock::now();
@@ -71,7 +71,7 @@ void processing_thread(void) {
       npops++;
     }
 
-    if (npops == 80) {
+    if (npops == reduction) {
       npops = 0;
       tpops += 80;
       m2.lock();
@@ -125,7 +125,8 @@ void output_thread(void) {
 /**
  * Launch pipeline threads, then sleep forever
  */
-int main(int argc, char *argv[]) {
+// int main(int argc, char *argv[]) {
+int main() {
   Thread t1(12, output_thread);
   Thread t2(13, processing_thread);
   Thread t3(14, input_thread);

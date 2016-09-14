@@ -27,5 +27,4 @@ public:
 
 private:
   std::vector<NMXData> data;
-  ;
 };

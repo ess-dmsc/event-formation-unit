@@ -29,6 +29,7 @@ int main(int argc, char *argv[]) {
   for (;;) {
 
     if (tx_total >= opts.txGB * 1000000000) {
+      cout << "Sent " << tx_total << " bytes." << endl;
       cout << "done" << endl;
       exit(0);
     }
