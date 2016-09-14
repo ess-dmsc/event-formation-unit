@@ -19,6 +19,9 @@ all: $(PROGS)
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) $< -c
 
+$(library):
+	make -C ../libs
+
 bulkdatagen: bulkdatagen.cpp $(library) $(objects) Args.h Socket.h Timer.h
 	$(CXX) $(CXXFLAGS) $< $(library) $(objects) -o $@
 
@@ -26,4 +29,5 @@ pipeline: pipeline.cpp $(library) Socket.h Timer.h Thread.h
 	$(CXX) $(CXXFLAGS) $< $(library) -o $@
 
 clean:
+	make -C ../libs clean
 	@rm -f $(objects) $(PROGS) *~

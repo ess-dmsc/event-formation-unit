@@ -23,4 +23,4 @@ udptx: udptx.cpp $(library) $(objects) Args.h Socket.h Timer.h
 
 
 clean:
-	@rm -f $(OBJECTS) $(PROGS) *~
+	@rm -f $(objects) $(PROGS) *~
