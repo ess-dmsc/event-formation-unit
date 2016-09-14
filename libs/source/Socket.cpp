@@ -7,6 +7,27 @@
 
 using namespace std;
 
+Socket::Socket(Socket::type stype) {
+  auto type = (stype == Socket::type::UDP) ? SOCK_DGRAM : SOCK_STREAM;
+  auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
+
+  if ((s_ = socket(AF_INET, type, proto)) == -1) {
+    cout << "socket() failed" << endl;
+    exit(1);
+  }
+}
+
+int Socket::Buflen(uint16_t buflen) {
+  if (buflen > buflen_max) {
+    cout << "Specified buffer length " << buflen << " too large, adjusted to "
+         << buflen_max << endl;
+    buflen_ = buflen_max;
+  } else {
+    buflen_ = buflen;
+  }
+  return buflen_;
+}
+
 int Socket::Local(const char *ipaddr, int port) {
   // zero out the structures
   memset((char *)&local_, 0, sizeof(local_));
@@ -36,17 +57,6 @@ int Socket::Send() {
   }
 
   return ret;
-}
-
-Socket::Socket(Socket::type stype) {
-
-  auto type = (stype == Socket::type::UDP) ? SOCK_DGRAM : SOCK_STREAM;
-  auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
-
-  if ((s_ = socket(AF_INET, type, proto)) == -1) {
-    cout << "socket() failed" << endl;
-    exit(1);
-  }
 }
 
 /** */

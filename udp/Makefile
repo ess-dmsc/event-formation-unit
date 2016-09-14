@@ -1,20 +1,25 @@
 
 INCLUDE  = -I. -I../libs/include
-CPPFLAGS = -O3 -std=c++11 $(INCLUDE)
+CXXFLAGS = -O3 -std=c++11 $(INCLUDE)
 CFLAGS   = $(INCLUDE)
 
 VPATH = ../libs/include
 
 PROGS = udprx udptx
 library=../libs/eventlib.a
+sources = Args.cpp
+objects = $(sources:%.cpp=%.o)
 
 all: $(PROGS)
 
 udprx: udprx.cpp $(library) Socket.h Timer.h
-	g++ $(CPPFLAGS) $< $(OBJECTS) $(library) -o $@
+	g++ $(CXXFLAGS) $< $(library) -o $@
 
-udptx: udptx.cpp $(library) Socket.h Timer.h
-	g++ $(CPPFLAGS) $< $(OBJECTS) $(library) -o $@
+udptx: udptx.cpp $(library) $(objects) Args.h Socket.h Timer.h
+	g++ $(CXXFLAGS) $< $(objects) $(library) -o $@
+
+%.o: %.cpp
+	g++ $(CXXFLAGS) -c $<
 
 
 clean:

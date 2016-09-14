@@ -16,11 +16,12 @@ int main(int argc, char *argv[]) {
 
   const int intervalUs = 1000000;
   const int B1M = 1000000;
-  struct Endpoint local("0.0.0.0", 0);
-  struct Endpoint remote("127.0.0.1", opts.port);
+  Socket::Endpoint local("0.0.0.0", 0);
+  Socket::Endpoint remote("127.0.0.1", opts.port);
 
   VMMBulkData bd;
   UDPClient DataSource(local, remote);
+  DataSource.Buflen(opts.buflen);
 
   uint64_t tx_total = 0;
   uint64_t tx = 0;

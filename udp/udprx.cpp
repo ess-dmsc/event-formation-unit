@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
   const int intervalUs = 1000000;
   const int B1M = 1000000;
 
-  struct Endpoint local("0.0.0.0", 9000);
+  Socket::Endpoint local("0.0.0.0", 9000);
   UDPServer NMX(local);
 
   auto t1 = Clock::now();

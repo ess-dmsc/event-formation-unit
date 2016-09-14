@@ -1,11 +1,10 @@
-
+#include <string>
 
 class Args {
 public:
   Args(int argc, char *argv[]);
 
-  long long txGB{10};
-  int vmmtuples{20};
+  std::string dest_ip{"127.0.0.1"};
   int port{9000};
   int buflen{9000};
 };

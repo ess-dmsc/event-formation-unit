@@ -1,3 +1,4 @@
+#include <Args.h>
 #include <Socket.h>
 #include <Timer.h>
 #include <chrono>
@@ -9,14 +10,18 @@
 typedef std::chrono::high_resolution_clock Clock;
 
 int main(int argc, char *argv[]) {
+
+  Args opts(argc, argv);
+
   uint64_t tx_total = 0;
   uint64_t tx = 0;
   const int intervalUs = 1000000;
   const int B1M = 1000000;
 
-  struct Endpoint local("0.0.0.0", 0);
-  struct Endpoint remote("127.0.0.1", 9000);
+  Socket::Endpoint local("0.0.0.0", 0);
+  Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
   UDPClient VMMBulkData(local, remote);
+  VMMBulkData.Buflen(opts.buflen);
 
   auto t1 = Clock::now();
   for (;;) {
