@@ -4,6 +4,7 @@
 #include <chrono>
 #include <iostream>
 #include <mutex>
+#include <numeric>
 #include <queue>
 #include <unistd.h> // sleep()
 
@@ -11,7 +12,7 @@ typedef std::chrono::high_resolution_clock Clock;
 
 /** Warning GLOBAL VARIABLES */
 std::queue<int> queue1;
-std::priority_queue<int> queue2;
+std::priority_queue<float> queue2;
 std::mutex m1, m2, mcout;
 /** END WARNING */
 
@@ -59,13 +60,12 @@ void input_thread(void *args) {
  * Processing thread - reads from FIFO and writes to Priority Queue
  */
 void processing_thread(void *args) {
-
   EFUArgs *opts = (EFUArgs *)args;
+  std::vector<int> cluster;
 
   auto t1 = Clock::now();
   int npops = 0;
   int tpops = 0;
-  int reduction = 80;
 
   for (;;) {
     auto t2 = Clock::now();
@@ -77,16 +77,22 @@ void processing_thread(void *args) {
       usleep(100);
     } else {
       m1.lock();
+      cluster.push_back(queue1.front());
       queue1.pop();
       m1.unlock();
       npops++;
     }
 
-    if (npops == reduction) {
+    if (npops == opts->reduction) {
       npops = 0;
-      tpops += 80;
+      tpops += opts->reduction;
+
+      float avg =
+          std::accumulate(cluster.begin(), cluster.end(), 0.0) / cluster.size();
+      cluster.clear();
+
       m2.lock();
-      queue2.push(6);
+      queue2.push(avg);
       m2.unlock();
     }
     /** */

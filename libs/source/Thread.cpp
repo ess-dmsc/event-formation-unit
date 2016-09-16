@@ -4,14 +4,13 @@
 
 Thread::Thread(int lcore, void (*func)(void)) : lcore_(lcore) {
   t_ = std::thread(func);
-   SetAffinity(lcore);
+  SetAffinity(lcore_);
 }
 
-Thread::Thread(int lcore, void (*func)(void * a), void * arg) : lcore_(lcore) {
+Thread::Thread(int lcore, void (*func)(void *a), void *arg) : lcore_(lcore) {
   t_ = std::thread(func, arg);
-   SetAffinity(lcore);
+  SetAffinity(lcore);
 }
-
 
 void Thread::SetAffinity(int lcore) {
   cpu_set_t cpuset;
@@ -24,5 +23,4 @@ void Thread::SetAffinity(int lcore) {
     std::cout << "thread affinity error" << std::endl;
     exit(1);
   }
-
 }
