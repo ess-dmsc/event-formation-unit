@@ -7,6 +7,11 @@ Thread::Thread(int lcore, void (*func)(void)) : lcore_(lcore) {
    SetAffinity(lcore);
 }
 
+Thread::Thread(int lcore, void (*func)(void * a), void * arg) : lcore_(lcore) {
+  t_ = std::thread(func, arg);
+   SetAffinity(lcore);
+}
+
 
 void Thread::SetAffinity(int lcore) {
   cpu_set_t cpuset;

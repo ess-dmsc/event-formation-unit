@@ -9,6 +9,7 @@ class Thread {
 public:
 
   Thread(int cpu, void (*func)(void));
+  Thread(int cpu, void (*func)(void * a), void * arg);
 
 private:
   void SetAffinity(int lcore);

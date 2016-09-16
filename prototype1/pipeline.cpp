@@ -13,19 +13,21 @@ typedef std::chrono::high_resolution_clock Clock;
 std::queue<int> queue1;
 std::priority_queue<int> queue2;
 std::mutex m1, m2, mcout;
-
-uint16_t port;
-int updint;
 /** END WARNING */
 
 /**
  * Input thread - reads from UDP socket and enqueues in FIFO
  */
-void input_thread(void) {
+void input_thread(void *args) {
   uint64_t rx_total = 0;
   uint64_t rx = 0;
-  Socket::Endpoint local("0.0.0.0", port);
+
+  EFUArgs *opts = (EFUArgs *)args;
+
+  Socket::Endpoint local("0.0.0.0", opts->port);
   UDPServer bulkdata(local);
+  bulkdata.Buflen(opts->buflen);
+
   auto t1 = Clock::now();
   for (;;) {
     auto t2 = Clock::now();
@@ -42,7 +44,7 @@ void input_thread(void) {
     }
     /** */
 
-    if (usecs >= updint * 1000000) {
+    if (usecs >= opts->updint * 1000000) {
       rx_total += rx;
       std::cout << "input     : queue1 size: " << queue1.size()
                 << " - rate: " << rx * 8.0 / (usecs / 1000000.0) / 1000000
@@ -56,7 +58,10 @@ void input_thread(void) {
 /**
  * Processing thread - reads from FIFO and writes to Priority Queue
  */
-void processing_thread(void) {
+void processing_thread(void *args) {
+
+  EFUArgs *opts = (EFUArgs *)args;
+
   auto t1 = Clock::now();
   int npops = 0;
   int tpops = 0;
@@ -86,7 +91,7 @@ void processing_thread(void) {
     }
     /** */
 
-    if (usecs >= updint * 1000000) {
+    if (usecs >= opts->updint * 1000000) {
       mcout.lock();
       std::cout << "processing: queue1 size: " << queue1.size() << " - "
                 << tpops << " elements" << std::endl;
@@ -99,7 +104,10 @@ void processing_thread(void) {
 /**
  * Output thread - reads from Priority Queue and outputs to Kafka cluster
  */
-void output_thread(void) {
+void output_thread(void *args) {
+
+  EFUArgs *opts = (EFUArgs *)args;
+
   auto t1 = Clock::now();
   int npop = 0;
   for (;;) {
@@ -118,7 +126,7 @@ void output_thread(void) {
     }
     /** */
 
-    if (usecs >= updint * 1000000) {
+    if (usecs >= opts->updint * 1000000) {
       mcout.lock();
       std::cout << "output    : queue2 size: " << queue2.size() << " - " << npop
                 << " elements" << std::endl;
@@ -134,12 +142,10 @@ void output_thread(void) {
 int main(int argc, char *argv[]) {
 
   EFUArgs opts(argc, argv);
-  port = opts.port;
-  updint = opts.updint;
 
-  Thread t1(12, output_thread);
-  Thread t2(13, processing_thread);
-  Thread t3(14, input_thread);
+  Thread t1(12, output_thread, (void *)&opts);
+  Thread t2(13, processing_thread, (void *)&opts);
+  Thread t3(14, input_thread, (void *)&opts);
 
   while (1) {
     sleep(2);

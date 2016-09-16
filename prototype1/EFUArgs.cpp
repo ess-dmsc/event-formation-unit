@@ -29,7 +29,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
     }
   cout << "Starting event processing pipeline" << endl;
   cout << "Network properties" << endl;
-  cout << "  receive udp port:   " << port << endl;
+  cout << "  receive udp port:       " << port << endl;
   cout << "  rx buffer size:         " << buflen << "B" << endl;
   cout << "Other properties" << endl;
   cout << "  update interval:        " << updint << "s" << endl;
