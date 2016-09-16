@@ -11,7 +11,6 @@ using namespace std;
 typedef std::chrono::high_resolution_clock Clock;
 
 int main(int argc, char *argv[]) {
-
   DGArgs opts(argc, argv); // Parse command line opts
 
   const int intervalUs = 1000000;
@@ -39,7 +38,7 @@ int main(int argc, char *argv[]) {
     auto usecs =
         std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
-    if (usecs >= intervalUs) {
+    if (usecs >= opts.updint * intervalUs) {
       tx_total += tx;
       printf("Tx rate: %.2f Mbps, tx %" PRIu64 " MB (total: %" PRIu64
              " MB) %ld usecs\n",

@@ -9,9 +9,14 @@
 
 typedef std::chrono::high_resolution_clock Clock;
 
+/** Warning GLOBAL VARIABLES */
 std::queue<int> queue1;
 std::priority_queue<int> queue2;
 std::mutex m1, m2, mcout;
+
+uint16_t port;
+int updint;
+/** END WARNING */
 
 /**
  * Input thread - reads from UDP socket and enqueues in FIFO
@@ -19,7 +24,7 @@ std::mutex m1, m2, mcout;
 void input_thread(void) {
   uint64_t rx_total = 0;
   uint64_t rx = 0;
-  Socket::Endpoint local("0.0.0.0", 9000);
+  Socket::Endpoint local("0.0.0.0", port);
   UDPServer bulkdata(local);
   auto t1 = Clock::now();
   for (;;) {
@@ -37,7 +42,7 @@ void input_thread(void) {
     }
     /** */
 
-    if (usecs >= 1000000) {
+    if (usecs >= updint * 1000000) {
       rx_total += rx;
       std::cout << "input     : queue1 size: " << queue1.size()
                 << " - rate: " << rx * 8.0 / (usecs / 1000000.0) / 1000000
@@ -81,7 +86,7 @@ void processing_thread(void) {
     }
     /** */
 
-    if (usecs >= 1000000) {
+    if (usecs >= updint * 1000000) {
       mcout.lock();
       std::cout << "processing: queue1 size: " << queue1.size() << " - "
                 << tpops << " elements" << std::endl;
@@ -113,7 +118,7 @@ void output_thread(void) {
     }
     /** */
 
-    if (usecs >= 1000000) {
+    if (usecs >= updint * 1000000) {
       mcout.lock();
       std::cout << "output    : queue2 size: " << queue2.size() << " - " << npop
                 << " elements" << std::endl;
@@ -129,6 +134,8 @@ void output_thread(void) {
 int main(int argc, char *argv[]) {
 
   EFUArgs opts(argc, argv);
+  port = opts.port;
+  updint = opts.updint;
 
   Thread t1(12, output_thread);
   Thread t2(13, processing_thread);

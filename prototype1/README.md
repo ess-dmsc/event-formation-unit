@@ -2,16 +2,16 @@
 
 To run this prototype:
 
-`make`
+`> make`
 
 
 Run in terminal window A:
 
-`taskset -c 15 ./efu`
+`> taskset -c 15 ./efu`
 
 Run in terminal window B:
 
-`taskset -c 16 ./bulkdatagen`
+`> taskset -c 16 ./bulkdatagen`
 
 The efu creates a number of pthreads, currently on cpus 12, 13, 14.
 
