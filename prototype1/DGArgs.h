@@ -1,8 +1,8 @@
 
 
-class Args {
+class DGArgs {
 public:
-  Args(int argc, char *argv[]);
+  DGArgs(int argc, char *argv[]);
 
   unsigned long long txGB{10};
   int vmmtuples{20};

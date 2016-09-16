@@ -1,3 +1,4 @@
+#include <EFUArgs.h>
 #include <Socket.h>
 #include <Thread.h>
 #include <chrono>
@@ -125,8 +126,10 @@ void output_thread(void) {
 /**
  * Launch pipeline threads, then sleep forever
  */
-// int main(int argc, char *argv[]) {
-int main() {
+int main(int argc, char *argv[]) {
+
+  EFUArgs opts(argc, argv);
+
   Thread t1(12, output_thread);
   Thread t2(13, processing_thread);
   Thread t3(14, input_thread);

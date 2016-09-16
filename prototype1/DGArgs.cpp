@@ -1,9 +1,9 @@
-#include <Args.h>
+#include <DGArgs.h>
 #include <cstdio>
 #include <iostream>
 #include <unistd.h>
 
-Args::Args(int argc, char *argv[]) {
+DGArgs::DGArgs(int argc, char *argv[]) {
   using namespace std;
   int c;
   while ((c = getopt(argc, argv, "hn:s:p:b:")) != -1)
@@ -36,8 +36,4 @@ Args::Args(int argc, char *argv[]) {
       cout << " -h             help - prints this message" << endl;
       exit(1);
     }
-
-  cout << "Generating " << txGB << " GB of bulk data packets" << endl;
-  cout << "containing " << vmmtuples << " nmx data tuples per packet" << endl;
-  cout << "for udp port " << port << endl;
 }

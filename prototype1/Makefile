@@ -1,3 +1,7 @@
+#
+#
+
+CXX=g++
 
 INCLUDE  = -I. -I../libs/include
 WARNINGS = -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs
@@ -7,27 +11,31 @@ CFLAGS   = $(INCLUDE)
 
 VPATH = ../libs/include
 
-PROGS = bulkdatagen pipeline
+PROGS = bulkdatagen efu
 library = ../libs/eventlib.a
-source = Args.cpp
-objects =$(source:%.cpp=%.o)
 
-CXX=g++
+src.datagen = DGArgs.cpp
+obj.datagen =$(src.datagen:%.cpp=%.o)
+
+src.efu = EFUArgs.cpp
+obj.efu = $(src.efu:%.cpp=%.o)
 
 all: $(PROGS)
 
 %.o: %.cpp
-	$(CXX) $(CXXFLAGS) $< -c
+	$(CXX) $(CXXFLAGS) $< -c -o $@
 
 $(library):
 	make -C ../libs
 
-bulkdatagen: bulkdatagen.cpp $(library) $(objects) Args.h Socket.h Timer.h
-	$(CXX) $(CXXFLAGS) $< $(library) $(objects) -o $@
+bulkdatagen: bulkdatagen.cpp $(library) $(obj.datagen) DGArgs.h Socket.h Timer.h
+	$(CXX) $(CXXFLAGS) $< $(library) $(obj.datagen) -o $@
 
-pipeline: pipeline.cpp $(library) Socket.h Timer.h Thread.h
-	$(CXX) $(CXXFLAGS) $< $(library) -o $@
+efu: pipeline.cpp $(library) $(obj.efu) EFUArgs.h Socket.h Timer.h Thread.h
+	$(CXX) $(CXXFLAGS) $< $(library) $(obj.efu) -o $@
+
+realclean: clean
+	make -C ../libs clean
 
 clean:
-	make -C ../libs clean
-	@rm -f $(objects) $(PROGS) *~
+	@rm -f $(obj.efu) $(obj.datagen) $(PROGS) *~

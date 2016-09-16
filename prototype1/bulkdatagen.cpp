@@ -1,4 +1,4 @@
-#include <Args.h>
+#include <DGArgs.h>
 #include <NMXEvent.h>
 #include <Socket.h>
 #include <chrono>
@@ -12,7 +12,7 @@ typedef std::chrono::high_resolution_clock Clock;
 
 int main(int argc, char *argv[]) {
 
-  Args opts(argc, argv); // Parse command line opts
+  DGArgs opts(argc, argv); // Parse command line opts
 
   const int intervalUs = 1000000;
   const int B1M = 1000000;
