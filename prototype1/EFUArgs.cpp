@@ -27,7 +27,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
       cout << "Usage: efu [OPTIONS]" << endl;
       cout << " -b buflen      size of Tx/Tx buffer in bytes (max 9000)"
            << endl;
-      cout << " -k ipaddr      Ip address of Kafka broker" << endl;
+      cout << " -k ipaddr:port Address of Kafka broker" << endl;
       cout << " -p port        UDP destination port" << endl;
       cout << " -r reduction   data reduction when processing" << endl;
       cout << " -u interval    update interval (sec)" << endl;

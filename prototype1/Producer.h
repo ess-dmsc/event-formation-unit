@@ -2,11 +2,10 @@
 
 class Producer {
 public:
-  Producer(std::string topicstr);
-  int Produce(int partition);
+  Producer(std::string broker, std::string topicstr);
+  int Produce(void);
 
 private:
-  std::string tstr;
   std::string errstr;
   RdKafka::Conf *conf{0};
   RdKafka::Conf *tconf{0};

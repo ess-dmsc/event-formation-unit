@@ -1,7 +1,7 @@
 #include <Producer.h>
 #include <iostream>
 
-Producer::Producer(std::string topicstr) : tstr(topicstr) {
+Producer::Producer(std::string broker, std::string topicstr) {
   conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
   tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
 
@@ -15,8 +15,7 @@ Producer::Producer(std::string topicstr) : tstr(topicstr) {
     exit(1);
   }
 
-  // std::string brokers = "localhost";
-  // conf->set("metadata.broker.list", brokers, errstr);
+  conf->set("metadata.broker.list", broker, errstr);
 
   producer = RdKafka::Producer::create(conf, errstr);
   if (!producer) {
@@ -24,21 +23,23 @@ Producer::Producer(std::string topicstr) : tstr(topicstr) {
     exit(1);
   }
 
-  topic = RdKafka::Topic::create(producer, tstr, tconf, errstr);
+  topic = RdKafka::Topic::create(producer, topicstr, tconf, errstr);
   if (!topic) {
     std::cerr << "Failed to create topic: " << errstr << std::endl;
     exit(1);
   }
 }
 
-int Producer::Produce(int partition) {
+/** called to actually send data to Kafka cluster */
+int Producer::Produce(void) {
   std::string line = "producing...";
   RdKafka::ErrorCode resp = producer->produce(
-      topic, partition, RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
+      topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
       const_cast<char *>(line.c_str()), line.size(), NULL, NULL);
   if (resp != RdKafka::ERR_NO_ERROR) {
     std::cerr << "% Produce failed: " << RdKafka::err2str(resp) << std::endl;
     return resp;
   }
+  producer->poll(0);
   return 0;
 }

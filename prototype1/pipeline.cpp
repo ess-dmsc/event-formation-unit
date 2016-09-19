@@ -118,7 +118,7 @@ void output_thread(void *args) {
 
   EFUArgs *opts = (EFUArgs *)args;
 
-  Producer producer("MJCtopic");
+  Producer producer(opts->broker, "EFUTestTopic");
 
   auto t1 = Clock::now();
   int npop = 0;
@@ -142,7 +142,7 @@ void output_thread(void *args) {
 
     /** Produce message */
     if (!dontproduce) {
-      producer.Produce(0); /**< use partition 0 now ? */
+      producer.Produce(); /**< use partition 0 now ? */
       nprod++;
     }
     /** */
@@ -150,9 +150,8 @@ void output_thread(void *args) {
     if (usecs >= opts->updint * 1000000) {
       mcout.lock();
       std::cout << "output    : queue2 size: " << queue2.size() << " - " << npop
-                << " elements" << std::endl;
-      std::cout << "output    : producer " << nprod / (usecs / 1000000.0)
-                << " Msgs/s - total msgs: " << nprod_tot << std::endl;
+                << " elements - " << nprod / (usecs / 1000000.0)
+                << " msgs/s - total msgs: " << nprod_tot << std::endl;
       nprod_tot += nprod;
       nprod = 0;
       mcout.unlock();

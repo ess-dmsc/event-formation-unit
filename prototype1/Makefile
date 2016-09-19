@@ -6,7 +6,7 @@ cxx=g++
 include  = -I. -I../libs/include
 warnings = -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs
 optflags = -O3
-ldflags = -static -L/usr/local/lib -lrdkafka++ -lrdkafka -lpthread -lrt
+ldflags = -L/usr/local/lib -lrdkafka++ -lrdkafka -lpthread -lrt
 
 cxxflags = -std=c++11 $(optflags)  $(include) $(warnings)
 
