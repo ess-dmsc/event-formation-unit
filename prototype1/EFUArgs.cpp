@@ -6,11 +6,13 @@
 EFUArgs::EFUArgs(int argc, char *argv[]) {
   using namespace std;
   int c;
-  while ((c = getopt(argc, argv, "b:p:r:u:h")) != -1)
+  while ((c = getopt(argc, argv, "b:k:p:r:u:h")) != -1)
     switch (c) {
     case 'b':
       buflen = atoi(optarg);
       break;
+    case 'k':
+      broker.assign(optarg);
     case 'p':
       port = atoi(optarg);
       break;
@@ -22,13 +24,14 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
       break;
     case 'h':
     default:
-      cout << "Usage: bulkdatagen [OPTIONS]" << endl;
-      cout << " -p port        UDP destination port" << endl;
-      cout << " -r reduction   data reduction when processing" << endl;
+      cout << "Usage: efu [OPTIONS]" << endl;
       cout << " -b buflen      size of Tx/Tx buffer in bytes (max 9000)"
            << endl;
-      cout << " -h             help - prints this message" << endl;
+      cout << " -k ipaddr      Ip address of Kafka broker" << endl;
+      cout << " -p port        UDP destination port" << endl;
+      cout << " -r reduction   data reduction when processing" << endl;
       cout << " -u interval    update interval (sec)" << endl;
+      cout << " -h             help - prints this message" << endl;
       exit(1);
     }
   cout << "Starting event processing pipeline" << endl;
@@ -36,6 +39,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
   cout << "Network properties" << endl;
   cout << "  receive udp port:       " << port << endl;
   cout << "  rx buffer size:         " << buflen << " bytes" << endl;
+  cout << "  Kafka broker:           " << broker << endl;
   cout << "Other properties" << endl;
   cout << "  update interval:        " << updint << " sec" << endl;
 }

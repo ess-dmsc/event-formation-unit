@@ -1,11 +1,14 @@
 
+
+
+CXXFLAGS  = -Iinclude -std=c++11 -O3
+CXXFLAGS += -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs
+LDFLAGS   = -L.
+
 Q=@
 ifdef V
 Q=
 endif
-
-CXXFLAGS = -Iinclude -std=c++11 -O3
-LDFLAGS = -L.
 
 ifdef COV
 CXXFLAGS += -coverage

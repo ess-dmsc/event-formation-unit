@@ -12,7 +12,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
       buflen = atoi(optarg);
       break;
     case 'i':
-      dest_ip = optarg; // ??? strdup()
+      dest_ip.assign(optarg);
       break;
     case 'n':
       vmmtuples = atoi(optarg);

@@ -1,4 +1,5 @@
 #include <EFUArgs.h>
+#include <Producer.h>
 #include <Socket.h>
 #include <Thread.h>
 #include <chrono>
@@ -64,8 +65,9 @@ void processing_thread(void *args) {
   std::vector<int> cluster;
 
   auto t1 = Clock::now();
-  int npops = 0;
-  int tpops = 0;
+  int pops = 0;
+  int reduct = 0;
+  int pops_tot = 0;
 
   for (;;) {
     auto t2 = Clock::now();
@@ -77,16 +79,14 @@ void processing_thread(void *args) {
       usleep(100);
     } else {
       m1.lock();
-      cluster.push_back(queue1.front());
-      queue1.pop();
+      queue1.pop(); // At some point take element from queue
       m1.unlock();
-      npops++;
+      pops++;
+      reduct++;
+      cluster.push_back(queue1.front());
     }
 
-    if (npops == opts->reduction) {
-      npops = 0;
-      tpops += opts->reduction;
-
+    if (reduct == opts->reduction) {
       float avg =
           std::accumulate(cluster.begin(), cluster.end(), 0.0) / cluster.size();
       cluster.clear();
@@ -94,14 +94,18 @@ void processing_thread(void *args) {
       m2.lock();
       queue2.push(avg);
       m2.unlock();
+      reduct = 0;
     }
     /** */
 
     if (usecs >= opts->updint * 1000000) {
+      pops_tot += pops;
       mcout.lock();
       std::cout << "processing: queue1 size: " << queue1.size() << " - "
-                << tpops << " elements" << std::endl;
+                << pops_tot << " elements - " << pops / (usecs / 1000000.0)
+                << " per/s" << std::endl;
       mcout.unlock();
+      pops = 0;
       t1 = Clock::now();
     }
   }
@@ -114,15 +118,20 @@ void output_thread(void *args) {
 
   EFUArgs *opts = (EFUArgs *)args;
 
+  Producer producer("MJCtopic");
+
   auto t1 = Clock::now();
   int npop = 0;
+  int nprod = 0;
+  int nprod_tot = 0;
+  bool dontproduce = true;
   for (;;) {
     auto t2 = Clock::now();
     auto usecs =
         std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
     /** this is the processing step */
-    if (queue2.empty()) {
+    if ((dontproduce = queue2.empty())) {
       usleep(100);
     } else {
       m2.lock();
@@ -130,12 +139,22 @@ void output_thread(void *args) {
       m2.unlock();
       npop++;
     }
+
+    /** Produce message */
+    if (!dontproduce) {
+      producer.Produce(0); /**< use partition 0 now ? */
+      nprod++;
+    }
     /** */
 
     if (usecs >= opts->updint * 1000000) {
       mcout.lock();
       std::cout << "output    : queue2 size: " << queue2.size() << " - " << npop
                 << " elements" << std::endl;
+      std::cout << "output    : producer " << nprod / (usecs / 1000000.0)
+                << " Msgs/s - total msgs: " << nprod_tot << std::endl;
+      nprod_tot += nprod;
+      nprod = 0;
       mcout.unlock();
       t1 = Clock::now();
     }
