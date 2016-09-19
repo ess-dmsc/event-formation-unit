@@ -1,8 +1,5 @@
-
-##Prerequisites
-
 ## Prerequisites
-The following libraries applications must be installed
+The following libraries and utilities must be installed
 
 * Zookeeper
 * Apache Kafka
@@ -13,9 +10,10 @@ See details about how to start Kafka (if running locally) and Zookeeper at the e
 
 ## Build and Run
 
-To run this prototype:
+To build:
 
 `> make`
+
 
 
 __Run in terminal window__
@@ -26,8 +24,8 @@ In principle as simple as
 
 However for practical purposes 
 
-`> export LD_LIBRARY_PATH=/usr/local/lib`
-`> taskset -c 15 ./efu`
+`> export LD_LIBRARY_PATH=/usr/local/lib
+> taskset -c 15 ./efu`
 
 Where the first line is done once in the lifetime of a terminal session.
 
@@ -53,6 +51,9 @@ Starting zookeeper is only necessary once
 
 
 ##Kafka broker
-Starting Kafka broker is only necessary once (command is relative to kafka installation directory).
+Starting Kafka broker is only necessary once 
 
 `> ./bin/kafka-server-start.sh config/server.properties`
+
+
+Both commands are relative to the kafka installation directory.
