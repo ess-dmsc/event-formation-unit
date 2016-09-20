@@ -14,14 +14,15 @@ ifdef COV
 CXXFLAGS += -coverage
 endif
 
-hdrs    =
+hdrs    = include/Socket.h include/Timer.h include/Thread.h include/Counter.h
 sources = source/Socket.cpp source/Timer.cpp source/Thread.cpp
 objects = $(sources:%.cpp=%.o)
 library = eventlib.a
 
-testprogs = testevent testpqspeed testpqbasic testpqmin
+testprogs  = testevent testpqspeed testpqbasic testpqmin
+testprogs += testcounter
 
-all: $(library)
+all: $(library) $(hdrs)
 
 $(library): $(objects)
 	ar r $@ $^
@@ -29,16 +30,19 @@ $(library): $(objects)
 
 test: $(testprogs)
 
-testevent: NMXEvent/testmain.cpp NMXEvent/testEventBasic.cpp $(library)
+testevent: test/NMXEvent/testmain.cpp test/NMXEvent/testEventBasic.cpp $(library)
 	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -lgtest -pthread
 
-testpqbasic: PQ/testmain.cpp PQ/testPQBasic.cpp $(library)
+testpqbasic: test/PQ/testmain.cpp test/PQ/testPQBasic.cpp $(library)
 	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -lgtest -pthread
 
-testpqspeed: PQ/testmain.cpp PQ/testPQSpeed.cpp $(library)
+testpqspeed: test/PQ/testmain.cpp test/PQ/testPQSpeed.cpp $(library)
 	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -lgtest -pthread
 
-testpqmin: PQ/testmain.cpp PQ/testPQMin.cpp $(library)
+testpqmin: test/PQ/testmain.cpp test/PQ/testPQMin.cpp $(library)
+		g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -lgtest -pthread
+
+testcounter: test/Counter/testmain.cpp test/Counter/testCounter.cpp $(library)
 		g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -lgtest -pthread
 
 clean:

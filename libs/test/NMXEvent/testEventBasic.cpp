@@ -20,7 +20,6 @@ TEST(Event, BasicTests) {
 }
 
 TEST(Event, AllocationTime) {
-  int random_variable;
   srand(4242);
   std::vector<int> pqsizes{250000,  500000,  750000,  1000000, 1500000,
                            2000000, 3000000, 4000000, 5000000};

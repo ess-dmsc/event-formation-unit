@@ -11,7 +11,7 @@ protected:
 
   virtual void TearDown() {
     ASSERT_EQ(x.size(), y.size());
-    for (int i = 0; i < x.size(); i++)
+    for (int i = 0; i < (int)x.size(); i++)
       std::cout << x[i] << " , " << y[i] << "\n";
   }
 
@@ -50,7 +50,7 @@ TEST_F(PriorityQueueTest, RandomSpeed) {
 
     tm.Start();
     for (int i = 0; i < count; i++) {
-      int random_variable = std::rand();
+      int random_variable [[gnu::unused]] = std::rand();
     }
     tm.Stop();
     x.push_back(count);
