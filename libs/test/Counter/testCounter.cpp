@@ -4,7 +4,7 @@
 class CounterTest : public ::testing::Test {
 
 protected:
-  Counter<int> icount;
+  Counter<int> icount, icount2;
   Counter<long long> lcount;
   Counter<float> fcount;
   Counter<double> dcount;
@@ -45,13 +45,27 @@ TEST_F(CounterTest, TestMinMax) {
   ASSERT_EQ(lcount.max(), 999999);
   ASSERT_EQ(lcount.min(), 1);
 
-  EXPECT_NEAR(fcount.max(), 999999.0, 0.00001);
-  EXPECT_NEAR(fcount.min(), 1.0, 0.00001);
+  ASSERT_NEAR(fcount.max(), 999999.0, 0.00001);
+  ASSERT_NEAR(fcount.min(), 1.0, 0.00001);
 
-  EXPECT_NEAR(dcount.max(), 999999.0, 0.00001);
-  EXPECT_NEAR(dcount.min(), 1.0, 0.00001);
+  ASSERT_NEAR(dcount.max(), 999999.0, 0.00001);
+  ASSERT_NEAR(dcount.min(), 1.0, 0.00001);
 }
 
 TEST_F(CounterTest, TestAverage) {
-  ASSERT_TRUE(false); /** not implemented yet */
+  for (int i = 1; i <= 100; i++) {
+    icount.add(10 * i);
+    lcount.add(10 * i);
+    icount2.add(i);
+    fcount.add(1.0 * i);
+    dcount.add(1.0 * i);
+  }
+  ASSERT_EQ(icount.avg(), 505);
+  ASSERT_EQ(icount2.avg(), 50);
+
+  ASSERT_EQ(lcount.avg(), 505);
+
+  ASSERT_NEAR(fcount.avg(), 50.5, 0.000001);
+
+  ASSERT_NEAR(dcount.avg(), 50.5, 0.000001);
 }
