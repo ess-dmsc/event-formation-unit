@@ -50,7 +50,7 @@ TEST_F(PriorityQueueTest, RandomSpeed) {
 
     tm.Start();
     for (int i = 0; i < count; i++) {
-      int random_variable [[gnu::unused]] = std::rand();
+      int random_variable[[gnu::unused]] = std::rand();
     }
     tm.Stop();
     x.push_back(count);

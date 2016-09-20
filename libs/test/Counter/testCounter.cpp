@@ -1,5 +1,5 @@
-#include <gtest/gtest.h>
 #include <Counter.h>
+#include <gtest/gtest.h>
 
 class CounterTest : public ::testing::Test {
 
@@ -16,7 +16,6 @@ TEST_F(CounterTest, NewIsEmpty) {
   ASSERT_TRUE(fcount.empty());
   ASSERT_TRUE(dcount.empty());
 }
-
 
 TEST_F(CounterTest, AddedNotEmpty) {
 
