@@ -9,6 +9,7 @@ public:
   int port{9000};                       /**< udp receive port */
   int buflen{9000};                     /**< rx buffer length (B) */
   std::string broker{"localhost:9092"}; /**< Kafka broker */
+  bool kafka{true};                     /**< whether to use Kafka or not */
 
-  int updint{1}; /**< update interval (s) */
+  unsigned int updint{1}; /**< update interval (s) */
 };

@@ -4,7 +4,7 @@
  * specified lcore.
  *
  */
-class Thread {
+class Thread : public std::thread {
 
 public:
   Thread(int cpu, void (*func)(void));

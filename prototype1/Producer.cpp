@@ -1,7 +1,11 @@
 #include <Producer.h>
 #include <iostream>
 
-Producer::Producer(std::string broker, std::string topicstr) {
+Producer::Producer(std::string broker, bool enabled, std::string topicstr) {
+
+  if (!enabled)
+    return;
+
   conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
   tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
 

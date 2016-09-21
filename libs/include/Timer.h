@@ -1,13 +1,17 @@
-#include <inttypes.h>
-#include <sys/time.h>
+#include <chrono>
 
 class Timer {
+
+  typedef std::chrono::high_resolution_clock HRClock;
+  typedef std::chrono::time_point<HRClock> TP;
+
 public:
-  Timer();
-  void start(void);
-  void stop(void);
-  uint64_t timeus(void);
+  Timer(void);
+
+  void now(void); /**< record current time_point */
+
+  uint64_t timeus(void); /**< time since tp */
 
 private:
-  struct timeval mTvStart, mTvStop;
+  TP t1;
 };

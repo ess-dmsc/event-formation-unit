@@ -1,8 +1,9 @@
+#include <Counter.h>
 #include <EFUArgs.h>
 #include <Producer.h>
 #include <Socket.h>
 #include <Thread.h>
-#include <chrono>
+#include <Timer.h>
 #include <iostream>
 #include <mutex>
 #include <numeric>
@@ -21,38 +22,33 @@ std::mutex m1, m2, mcout;
  * Input thread - reads from UDP socket and enqueues in FIFO
  */
 void input_thread(void *args) {
-  uint64_t rx_total = 0;
-  uint64_t rx = 0;
-
   EFUArgs *opts = (EFUArgs *)args;
 
   Socket::Endpoint local("0.0.0.0", opts->port);
   UDPServer bulkdata(local);
   bulkdata.buflen(opts->buflen);
 
-  auto t1 = Clock::now();
+  uint64_t rx_total = 0;
+  uint64_t rx = 0;
+
+  Timer upd;
   for (;;) {
-    auto t2 = Clock::now();
-    auto usecs =
-        std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
     /** this is the processing step */
     if ((rx += bulkdata.receive()) > 0) {
-#if 1
       m1.lock();
       queue1.push(5);
       m1.unlock();
-#endif
     }
     /** */
-
+    auto usecs = upd.timeus();
     if (usecs >= opts->updint * 1000000) {
       rx_total += rx;
       std::cout << "input     : queue1 size: " << queue1.size()
                 << " - rate: " << rx * 8.0 / (usecs / 1000000.0) / 1000000
                 << " Mbps" << std::endl;
       rx = 0;
-      t1 = Clock::now();
+      upd.now();
     }
   }
 }
@@ -62,17 +58,14 @@ void input_thread(void *args) {
  */
 void processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
-  std::vector<int> cluster;
+  Counter<int> cluster;
 
-  auto t1 = Clock::now();
   int pops = 0;
   int reduct = 0;
   int pops_tot = 0;
 
+  Timer upd;
   for (;;) {
-    auto t2 = Clock::now();
-    auto usecs =
-        std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
     /** this is the processing step */
     if (queue1.empty()) {
@@ -83,13 +76,12 @@ void processing_thread(void *args) {
       m1.unlock();
       pops++;
       reduct++;
-      cluster.push_back(queue1.front());
+      cluster.add(queue1.front());
     }
 
     if (reduct == opts->reduction) {
-      float avg =
-          std::accumulate(cluster.begin(), cluster.end(), 0.0) / cluster.size();
-      cluster.clear();
+
+      float avg = cluster.avg();
 
       m2.lock();
       queue2.push(avg);
@@ -97,7 +89,7 @@ void processing_thread(void *args) {
       reduct = 0;
     }
     /** */
-
+    auto usecs = upd.timeus();
     if (usecs >= opts->updint * 1000000) {
       pops_tot += pops;
       mcout.lock();
@@ -106,7 +98,7 @@ void processing_thread(void *args) {
                 << " per/s" << std::endl;
       mcout.unlock();
       pops = 0;
-      t1 = Clock::now();
+      upd.now();
     }
   }
 }
@@ -118,17 +110,15 @@ void output_thread(void *args) {
 
   EFUArgs *opts = (EFUArgs *)args;
 
-  Producer producer(opts->broker, "EFUTestTopic");
+  Producer producer(opts->broker, opts->kafka, "EFUTestTopic");
 
-  auto t1 = Clock::now();
   int npop = 0;
   int nprod = 0;
   int nprod_tot = 0;
   bool dontproduce = true;
+
+  Timer upd;
   for (;;) {
-    auto t2 = Clock::now();
-    auto usecs =
-        std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
     /** this is the processing step */
     if ((dontproduce = queue2.empty())) {
@@ -141,12 +131,14 @@ void output_thread(void *args) {
     }
 
     /** Produce message */
-    if (!dontproduce) {
-      producer.Produce(); /**< use partition 0 now ? */
-      nprod++;
+    if (opts->kafka) {
+      if (!dontproduce) {
+        producer.Produce();
+        nprod++;
+      }
     }
     /** */
-
+    auto usecs = upd.timeus();
     if (usecs >= opts->updint * 1000000) {
       mcout.lock();
       std::cout << "output    : queue2 size: " << queue2.size() << " - " << npop
@@ -155,7 +147,7 @@ void output_thread(void *args) {
       nprod_tot += nprod;
       nprod = 0;
       mcout.unlock();
-      t1 = Clock::now();
+      upd.now();
     }
   }
 }

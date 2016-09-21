@@ -2,7 +2,7 @@
 
 class Producer {
 public:
-  Producer(std::string broker, std::string topicstr);
+  Producer(std::string broker, bool enabled, std::string topicstr);
   int Produce(void);
 
 private:
