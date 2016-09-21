@@ -4,14 +4,19 @@ class NMXData {
 public:
   NMXData(int detectorid, int timeval, int adc)
       : detectorId_(detectorid), timeVal_(timeval), adc_(adc) {}
+
   bool operator<(NMXData other) const {
     return detectorId_ < other.getdetector();
   }
+
   bool operator>(NMXData other) const {
     return detectorId_ > other.getdetector();
   }
+
   int getdetector() { return detectorId_; }
+
   int gettime() { return timeVal_; }
+
   int getadc() { return adc_; }
 
 private:

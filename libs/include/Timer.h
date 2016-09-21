@@ -4,9 +4,9 @@
 class Timer {
 public:
   Timer();
-  void Start(void);
-  void Stop(void);
-  uint64_t ElapsedUS(void);
+  void start(void);
+  void stop(void);
+  uint64_t timeus(void);
 
 private:
   struct timeval mTvStart, mTvStop;

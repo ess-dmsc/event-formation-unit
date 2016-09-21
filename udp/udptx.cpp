@@ -21,11 +21,11 @@ int main(int argc, char *argv[]) {
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
   UDPClient VMMBulkData(local, remote);
-  VMMBulkData.Buflen(opts.buflen);
+  VMMBulkData.buflen(opts.buflen);
 
   auto t1 = Clock::now();
   for (;;) {
-    tx += VMMBulkData.Send();
+    tx += VMMBulkData.send();
     auto t2 = Clock::now();
     auto usecs =
         std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();

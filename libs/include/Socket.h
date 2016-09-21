@@ -16,15 +16,15 @@ public:
   };
 
   Socket(Socket::type type);
-  int Buflen(uint16_t buflen);
+  int buflen(uint16_t buflen);
 
-  int Local(const char *ipaddr, int port);
-  int Remote(const char *ipaddr, int port);
+  int local(const char *ipaddr, int port);
+  int remote(const char *ipaddr, int port);
 
-  int Receive();
-  int Receive(void *buffer, int rcvlen);
+  int receive();
+  int receive(void *buffer, int rcvlen);
 
-  int Send();
+  int send();
 
 private:
   int s_{-1};
@@ -32,15 +32,12 @@ private:
   struct sockaddr_in local_;
   struct sockaddr_in remote_;
   char buffer_[buflen_max];
-
-protected:
-  Socket();
 };
 
 class UDPServer : public Socket {
 public:
   UDPServer(Endpoint local) : Socket(Socket::type::UDP) {
-    Local(local.ipaddr, local.port);
+    this->local(local.ipaddr, local.port);
   };
 };
 
@@ -48,7 +45,7 @@ class UDPClient : public Socket {
 public:
   UDPClient(Endpoint local, struct Endpoint remote)
       : Socket(Socket::type::UDP) {
-    Local(local.ipaddr, local.port);
-    Remote(remote.ipaddr, remote.port);
+    this->local(local.ipaddr, local.port);
+    this->remote(remote.ipaddr, remote.port);
   };
 };

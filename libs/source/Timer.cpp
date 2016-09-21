@@ -7,12 +7,12 @@ Timer::Timer(void) {
 }
 
 /** */
-void Timer::Start(void) { gettimeofday(&mTvStart, 0); }
+void Timer::start(void) { gettimeofday(&mTvStart, 0); }
 
 /** */
-void Timer::Stop(void) { gettimeofday(&mTvStop, 0); }
+void Timer::stop(void) { gettimeofday(&mTvStop, 0); }
 
-uint64_t Timer::ElapsedUS(void) {
+uint64_t Timer::timeus(void) {
   struct timeval res;
   timersub(&mTvStop, &mTvStart, &res);
   return res.tv_sec * 1000000 + res.tv_usec;

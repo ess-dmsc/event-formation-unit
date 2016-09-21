@@ -28,7 +28,7 @@ void input_thread(void *args) {
 
   Socket::Endpoint local("0.0.0.0", opts->port);
   UDPServer bulkdata(local);
-  bulkdata.Buflen(opts->buflen);
+  bulkdata.buflen(opts->buflen);
 
   auto t1 = Clock::now();
   for (;;) {
@@ -37,7 +37,7 @@ void input_thread(void *args) {
         std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
 
     /** this is the processing step */
-    if ((rx += bulkdata.Receive()) > 0) {
+    if ((rx += bulkdata.receive()) > 0) {
 #if 1
       m1.lock();
       queue1.push(5);

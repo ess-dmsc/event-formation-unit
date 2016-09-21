@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 
   VMMBulkData bd;
   UDPClient DataSource(local, remote);
-  DataSource.Buflen(opts.buflen);
+  DataSource.buflen(opts.buflen);
 
   uint64_t tx_total = 0;
   uint64_t tx = 0;
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
       exit(0);
     }
     // Generate Tx buffer eventually, for now do nothing
-    tx += DataSource.Send();
+    tx += DataSource.send();
     auto t2 = Clock::now();
     auto usecs =
         std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();

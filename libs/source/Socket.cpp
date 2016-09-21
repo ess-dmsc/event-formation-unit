@@ -17,7 +17,7 @@ Socket::Socket(Socket::type stype) {
   }
 }
 
-int Socket::Buflen(uint16_t buflen) {
+int Socket::buflen(uint16_t buflen) {
   if (buflen > buflen_max) {
     cout << "Specified buffer length " << buflen << " too large, adjusted to "
          << buflen_max << endl;
@@ -28,7 +28,7 @@ int Socket::Buflen(uint16_t buflen) {
   return buflen_;
 }
 
-int Socket::Local(const char *ipaddr, int port) {
+int Socket::local(const char *ipaddr, int port) {
   // zero out the structures
   memset((char *)&local_, 0, sizeof(local_));
   local_.sin_family = AF_INET;
@@ -39,7 +39,7 @@ int Socket::Local(const char *ipaddr, int port) {
   return bind(s_, (struct sockaddr *)&local_, sizeof(local_));
 }
 
-int Socket::Remote(const char *ipaddr, int port) {
+int Socket::remote(const char *ipaddr, int port) {
   // zero out the structures
   memset((char *)&remote_, 0, sizeof(remote_));
   remote_.sin_family = AF_INET;
@@ -47,7 +47,7 @@ int Socket::Remote(const char *ipaddr, int port) {
   return inet_aton(ipaddr, &remote_.sin_addr);
 }
 
-int Socket::Send() {
+int Socket::send() {
   int ret = sendto(s_, buffer_, buflen_, 0, (struct sockaddr *)&remote_,
                    sizeof(remote_));
   if (ret < 0) {
@@ -60,7 +60,7 @@ int Socket::Send() {
 }
 
 /** */
-int Socket::Receive() {
+int Socket::receive() {
   int recv_len;
   socklen_t slen = 0;
   // try to receive some data, this is a blocking call
@@ -74,7 +74,7 @@ int Socket::Receive() {
 }
 
 /** */
-int Socket::Receive(void *buffer, int buflen) {
+int Socket::receive(void *buffer, int buflen) {
   int recv_len;
   socklen_t slen = 0;
   // try to receive some data, this is a blocking call

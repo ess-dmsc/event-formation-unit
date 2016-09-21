@@ -11,7 +11,7 @@ public:
   Thread(int cpu, void (*func)(void *a), void *arg);
 
 private:
-  void SetAffinity(int lcore);
+  void affinity(int lcore);
 
   int lcore_;
   std::thread t_;
