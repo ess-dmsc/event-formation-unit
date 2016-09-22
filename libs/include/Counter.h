@@ -19,9 +19,15 @@ public:
   T min(void); /**< return min element of vector */
 
   bool empty(void); /**< check if vector is empty */
+
+  void clear(void); /**< clears the vector */
 };
 
 template <class T> void Counter<T>::add(T elem) { counts.push_back(elem); }
+
+template <class T> T Counter<T>::avg(void) {
+  return std::accumulate(counts.begin(), counts.end(), (T)0) / counts.size();
+}
 
 template <class T> T Counter<T>::max(void) {
   return *std::max_element(counts.begin(), counts.end());
@@ -33,6 +39,4 @@ template <class T> T Counter<T>::min(void) {
 
 template <class T> bool Counter<T>::empty(void) { return counts.empty(); }
 
-template <class T> T Counter<T>::avg(void) {
-  return std::accumulate(counts.begin(), counts.end(), (T)0) / counts.size();
-}
+template <class T> void Counter<T>::clear(void) { return counts.clear(); }

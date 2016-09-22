@@ -10,8 +10,6 @@
 #include <queue>
 #include <unistd.h> // sleep()
 
-typedef std::chrono::high_resolution_clock Clock;
-
 /** Warning GLOBAL VARIABLES */
 std::queue<int> queue1;
 std::priority_queue<float> queue2;
@@ -31,7 +29,7 @@ void input_thread(void *args) {
   uint64_t rx_total = 0;
   uint64_t rx = 0;
 
-  Timer upd;
+  Timer upd, stop;
   for (;;) {
 
     /** this is the processing step */
@@ -48,6 +46,12 @@ void input_thread(void *args) {
                 << " - rate: " << rx * 8.0 / (usecs / 1000000.0) / 1000000
                 << " Mbps" << std::endl;
       rx = 0;
+
+      if (stop.timeus() >= opts->stopafter * 1000000) {
+        std::cout << "stopping input thread " << std::endl;
+        return;
+      }
+
       upd.now();
     }
   }
@@ -64,7 +68,7 @@ void processing_thread(void *args) {
   int reduct = 0;
   int pops_tot = 0;
 
-  Timer upd;
+  Timer upd, stop;
   for (;;) {
 
     /** this is the processing step */
@@ -82,6 +86,7 @@ void processing_thread(void *args) {
     if (reduct == opts->reduction) {
 
       float avg = cluster.avg();
+      cluster.clear();
 
       m2.lock();
       queue2.push(avg);
@@ -98,6 +103,12 @@ void processing_thread(void *args) {
                 << " per/s" << std::endl;
       mcout.unlock();
       pops = 0;
+
+      if (stop.timeus() >= opts->stopafter * 1000000) {
+        std::cout << "stopping processing thread " << std::endl;
+        return;
+      }
+
       upd.now();
     }
   }
@@ -107,17 +118,17 @@ void processing_thread(void *args) {
  * Output thread - reads from Priority Queue and outputs to Kafka cluster
  */
 void output_thread(void *args) {
-
   EFUArgs *opts = (EFUArgs *)args;
 
-  Producer producer(opts->broker, opts->kafka, "EFUTestTopic");
+  bool kafka = opts->kafka;
+  Producer producer(opts->broker, kafka, "EFUTestTopic");
 
   int npop = 0;
   int nprod = 0;
   int nprod_tot = 0;
   bool dontproduce = true;
 
-  Timer upd;
+  Timer upd, stop;
   for (;;) {
 
     /** this is the processing step */
@@ -131,7 +142,7 @@ void output_thread(void *args) {
     }
 
     /** Produce message */
-    if (opts->kafka) {
+    if (kafka) {
       if (!dontproduce) {
         producer.Produce();
         nprod++;
@@ -144,9 +155,15 @@ void output_thread(void *args) {
       std::cout << "output    : queue2 size: " << queue2.size() << " - " << npop
                 << " elements - " << nprod / (usecs / 1000000.0)
                 << " msgs/s - total msgs: " << nprod_tot << std::endl;
+      mcout.unlock();
       nprod_tot += nprod;
       nprod = 0;
-      mcout.unlock();
+
+      if (stop.timeus() >= opts->stopafter * 1000000) {
+        std::cout << "stopping output thread " << std::endl;
+        return;
+      }
+
       upd.now();
     }
   }
@@ -163,9 +180,12 @@ int main(int argc, char *argv[]) {
   Thread t2(13, processing_thread, (void *)&opts);
   Thread t3(14, input_thread, (void *)&opts);
 
-  while (1) {
+  Timer stop;
+  while (stop.timeus() < opts.stopafter * 1000000) {
     sleep(2);
   }
+
+  std::cout << "Exiting..." << std::endl;
 
   return 0;
 }

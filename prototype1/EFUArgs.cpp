@@ -1,12 +1,13 @@
 #include <EFUArgs.h>
 #include <cstdio>
 #include <iostream>
+#include <string>
 #include <unistd.h>
 
 EFUArgs::EFUArgs(int argc, char *argv[]) {
   using namespace std;
   int c;
-  while ((c = getopt(argc, argv, "b:k:np:r:u:h")) != -1)
+  while ((c = getopt(argc, argv, "b:k:np:r:t:u:h")) != -1)
     switch (c) {
     case 'b':
       buflen = atoi(optarg);
@@ -22,6 +23,9 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
     case 'r':
       reduction = atoi(optarg);
       break;
+    case 't':
+      stopafter = atoi(optarg);
+      break;
     case 'u':
       updint = atoi(optarg);
       break;
@@ -34,6 +38,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
       cout << " -n             disable Kafka" << endl;
       cout << " -p port        UDP destination port" << endl;
       cout << " -r reduction   data reduction when processing" << endl;
+      cout << " -t interval    terminate after intercal seconds" << endl;
       cout << " -u interval    update interval (sec)" << endl;
       cout << " -h             help - prints this message" << endl;
       exit(1);
@@ -47,4 +52,8 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
   cout << "  Kafka enabled:        " << (kafka ? "yes" : "no") << endl;
   cout << "Other properties" << endl;
   cout << "  update interval:      " << updint << " sec" << endl;
+  cout << "  stopafter:            "
+       << (stopafter == 0xffffffff ? "never"
+                                   : (std::to_string(stopafter)) + " sec")
+       << endl;
 }
