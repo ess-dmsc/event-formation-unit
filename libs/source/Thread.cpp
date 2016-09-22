@@ -1,3 +1,5 @@
+/** Copyright (C) 2016 European Spallation Source */
+
 #include <Thread.h>
 #include <iostream>
 #include <pthread.h>

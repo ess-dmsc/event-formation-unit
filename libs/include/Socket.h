@@ -1,3 +1,5 @@
+/** Copyright (C) 2016 European Spallation Source */
+
 #include <arpa/inet.h>
 #include <inttypes.h>
 #include <sys/socket.h>

@@ -1,3 +1,5 @@
+/** Copyright (C) 2016 European Spallation Source */
+
 #include <thread>
 
 /** Wrapper class for pthread creation. Also 'locks' pthread to

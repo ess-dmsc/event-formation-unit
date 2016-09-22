@@ -39,4 +39,4 @@ realclean: clean
 	make -C ../libs clean
 
 clean:
-	@rm -f $(obj.efu) $(obj.datagen) $(PROGS) *~
+	@rm -f $(obj.efu) $(obj.datagen) $(PROGS) *.log *~

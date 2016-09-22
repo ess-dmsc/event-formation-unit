@@ -1,3 +1,5 @@
+/** Copyright (C) 2016 European Spallation Source */
+
 #include <cstdlib>
 #include <functional>
 #include <gtest/gtest.h>

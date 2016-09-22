@@ -1,0 +1,36 @@
+#!/bin/bash
+
+CMD=$1
+KHOME=${2:-~/kafka}
+
+function errexit() {
+   echo Error: $1
+   exit 1
+}
+
+test -d $KHOME || errexit "kafka directory does not exist"
+
+
+if [[ $CMD == "start" ]]; then
+  echo Starting services
+  echo " -- zookeeper"
+  $KHOME/bin/zookeeper-server-start.sh $KHOME/config/zookeeper.properties &> zookeeper.log &
+
+  echo " -- Kafka"
+  $KHOME/bin/kafka-server-start.sh $KHOME/config/server.properties &> kafka.log &
+  echo Done
+  exit 
+fi
+
+if [[ $CMD == "stop" ]]; then
+  echo Stopping services
+  echo " -- zookeeper"
+  $KHOME/bin/zookeeper-server-stop.sh 
+
+  echo " -- Kafka"
+  $KHOME/bin/kafka-server-stop.sh 
+  echo Done
+  exit 
+fi
+
+errexit "unknown command: "$CMD

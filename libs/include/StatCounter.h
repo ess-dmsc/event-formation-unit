@@ -26,7 +26,12 @@ public:
 template <class T> void StatCounter<T>::add(T value) {
   sum += value;
   n++;
-  if (value > max) {
+  if (n == 0) {
+    min = n;
+    max = n;
+    return;
+  }
+  if (value > max && ) {
      max = value;
    }
    if (value < min) {

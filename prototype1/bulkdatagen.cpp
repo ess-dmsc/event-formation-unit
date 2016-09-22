@@ -1,3 +1,5 @@
+/** Copyright (C) 2016 European Spallation Source */
+
 #include <DGArgs.h>
 #include <NMXEvent.h>
 #include <Socket.h>

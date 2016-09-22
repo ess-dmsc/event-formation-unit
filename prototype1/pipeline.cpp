@@ -1,3 +1,5 @@
+/** Copyright (C) 2016 European Spallation Source */
+
 #include <Counter.h>
 #include <EFUArgs.h>
 #include <Producer.h>

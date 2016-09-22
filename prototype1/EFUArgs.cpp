@@ -1,3 +1,5 @@
+/** Copyright (C) 2016 European Spallation Source */
+
 #include <EFUArgs.h>
 #include <cstdio>
 #include <iostream>

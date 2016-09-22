@@ -59,3 +59,10 @@ Starting Kafka broker is only necessary once
 
 
 Both commands are relative to the kafka installation directory.
+
+You can also use the bash script kafkaservice
+
+`> ./kafkaservice start`
+
+`> ./kafkaservice stop`
+
