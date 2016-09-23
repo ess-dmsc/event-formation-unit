@@ -6,6 +6,7 @@
 #include <Socket.h>
 #include <Thread.h>
 #include <Timer.h>
+#include <cstring>
 #include <iostream>
 #include <mutex>
 #include <numeric>
@@ -28,6 +29,11 @@ void input_thread(void *args) {
   UDPServer bulkdata(local);
   bulkdata.buflen(opts->buflen);
 
+  char buffer[9000];
+  unsigned int seqno = 1;
+  unsigned int seqno_exp = 1;
+  unsigned int lost = 0;
+
   uint64_t rx_total = 0;
   uint64_t rx = 0;
 
@@ -35,18 +41,29 @@ void input_thread(void *args) {
   for (;;) {
 
     /** this is the processing step */
-    if ((rx += bulkdata.receive()) > 0) {
+    if ((rx += bulkdata.receive(buffer, opts->buflen)) > 0) {
+      std::memcpy(&seqno, buffer, sizeof(seqno));
+
+      lost += (seqno - seqno_exp);
+      seqno_exp = seqno + 1;
+
       m1.lock();
-      queue1.push(5);
+      queue1.push(seqno);
       m1.unlock();
     }
     /** */
     auto usecs = upd.timeus();
     if (usecs >= opts->updint * 1000000) {
       rx_total += rx;
-      std::cout << "input     : queue1 size: " << queue1.size()
-                << " - rate: " << rx * 8.0 / (usecs / 1000000.0) / 1000000
-                << " Mbps" << std::endl;
+
+      mcout.lock();
+      printf("input     : %8.2f Mb/s, q1: %3d, rxpkt: %9d, rxbytes: %12" PRIu64
+             ", PER: %6.3e\n",
+             rx * 8.0 / (usecs / 1000000.0) / 1000000, (int)queue1.size(),
+             seqno, rx_total, 1.0 * lost / seqno);
+      fflush(stdout);
+      mcout.unlock();
+
       rx = 0;
 
       if (stop.timeus() >= opts->stopafter * 1000000) {
@@ -77,9 +94,11 @@ void processing_thread(void *args) {
     if (queue1.empty()) {
       usleep(100);
     } else {
+
       m1.lock();
       queue1.pop(); // At some point take element from queue
       m1.unlock();
+
       pops++;
       reduct++;
       cluster.add(queue1.front());
@@ -99,11 +118,13 @@ void processing_thread(void *args) {
     auto usecs = upd.timeus();
     if (usecs >= opts->updint * 1000000) {
       pops_tot += pops;
+
       mcout.lock();
-      std::cout << "processing: queue1 size: " << queue1.size() << " - "
-                << pops_tot << " elements - " << pops / (usecs / 1000000.0)
-                << " per/s" << std::endl;
+      printf("processing: q1: %3d, elements: %9d, rate: %7" PRIu64 " elems/s\n",
+             (int)queue1.size(), pops_tot, pops / (usecs / 1000000));
+      fflush(stdout);
       mcout.unlock();
+
       pops = 0;
 
       if (stop.timeus() >= opts->stopafter * 1000000) {
@@ -153,12 +174,14 @@ void output_thread(void *args) {
     /** */
     auto usecs = upd.timeus();
     if (usecs >= opts->updint * 1000000) {
-      mcout.lock();
-      std::cout << "output    : queue2 size: " << queue2.size() << " - " << npop
-                << " elements - " << nprod / (usecs / 1000000.0)
-                << " msgs/s - total msgs: " << nprod_tot << std::endl;
-      mcout.unlock();
       nprod_tot += nprod;
+
+      mcout.lock();
+      printf("output    : q2: %3d, elements: %9d, rate: %7" PRIu64 " elems/s\n",
+             (int)queue2.size(), npop, nprod / (usecs / 1000000));
+      fflush(stdout);
+      mcout.unlock();
+
       nprod = 0;
 
       if (stop.timeus() >= opts->stopafter * 1000000) {

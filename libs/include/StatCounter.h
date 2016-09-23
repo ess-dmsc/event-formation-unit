@@ -20,7 +20,6 @@ public:
   T max(void); /**< return max element of vector */
 
   T min(void); /**< return min element of vector */
-
 };
 
 template <class T> void StatCounter<T>::add(T value) {
@@ -31,30 +30,22 @@ template <class T> void StatCounter<T>::add(T value) {
     max = n;
     return;
   }
-  if (value > max && ) {
-     max = value;
-   }
-   if (value < min) {
-     min = value;
-   }
+  if (value > max &&) {
+    max = value;
+  }
+  if (value < min) {
+    min = value;
+  }
 }
 
-template <class T> T StatCounter<T>::counts(void) {
-  return n;
-}
+template <class T> T StatCounter<T>::counts(void) { return n; }
 
-template <class T> T StatCounter<T>::max(void) {
-  return max;
-}
+template <class T> T StatCounter<T>::max(void) { return max; }
 
-template <class T> T StatCounter<T>::min(void) {
-  return min;
-}
+template <class T> T StatCounter<T>::min(void) { return min; }
 
 template <class T> T StatCounter<T>::avg(void) {
   return sum / n; /**< divide by zero opportunity */
 }
 
-template <class T> T StatCounter<T>::sum(void) {
-  return sum;
-}
+template <class T> T StatCounter<T>::sum(void) { return sum; }

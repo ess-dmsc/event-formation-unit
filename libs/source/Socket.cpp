@@ -1,11 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
 #include <Socket.h>
-#include <cassert>
 #include <cstdlib>
+#include <cstring>
 #include <iostream>
-#include <stdio.h>
-#include <string.h>
 
 using namespace std;
 
@@ -32,7 +30,7 @@ int Socket::buflen(uint16_t buflen) {
 
 int Socket::local(const char *ipaddr, int port) {
   // zero out the structures
-  memset((char *)&local_, 0, sizeof(local_));
+  std::memset((char *)&local_, 0, sizeof(local_));
   local_.sin_family = AF_INET;
   local_.sin_port = htons(port);
   inet_aton(ipaddr, &local_.sin_addr);
@@ -43,7 +41,7 @@ int Socket::local(const char *ipaddr, int port) {
 
 int Socket::remote(const char *ipaddr, int port) {
   // zero out the structures
-  memset((char *)&remote_, 0, sizeof(remote_));
+  std::memset((char *)&remote_, 0, sizeof(remote_));
   remote_.sin_family = AF_INET;
   remote_.sin_port = htons(port);
   return inet_aton(ipaddr, &remote_.sin_addr);
@@ -52,6 +50,18 @@ int Socket::remote(const char *ipaddr, int port) {
 int Socket::send() {
   int ret = sendto(s_, buffer_, buflen_, 0, (struct sockaddr *)&remote_,
                    sizeof(remote_));
+  if (ret < 0) {
+    cout << "unable to send on socket" << endl;
+    perror("sendto");
+    exit(1);
+  }
+
+  return ret;
+}
+
+int Socket::send(void *buffer, int len) {
+  int ret =
+      sendto(s_, buffer, len, 0, (struct sockaddr *)&remote_, sizeof(remote_));
   if (ret < 0) {
     cout << "unable to send on socket" << endl;
     perror("sendto");

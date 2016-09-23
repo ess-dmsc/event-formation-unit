@@ -13,5 +13,5 @@ public:
   int port{9000};                   /**< destination udp port */
   int buflen{9000};                 /**< Tx buffer size */
 
-  int updint{1}; /**< update interval (seconds) */
+  unsigned int updint{1}; /**< update interval (seconds) */
 };

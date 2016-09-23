@@ -26,7 +26,8 @@ public:
   int receive();
   int receive(void *buffer, int rcvlen);
 
-  int send();
+  int send();                      /* send uninitialized data  (dummy)*/
+  int send(void *buffer, int len); /**< send user specified data */
 
 private:
   int s_{-1};
