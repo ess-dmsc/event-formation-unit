@@ -50,28 +50,34 @@ void input_thread(void *args) {
       m1.lock();
       queue1.push(seqno);
       m1.unlock();
+    } else {
+      std::cout << "Receive 0 " << std::endl;
     }
+
     /** */
-    auto usecs = upd.timeus();
-    if (usecs >= opts->updint * 1000000) {
-      rx_total += rx;
+    if (seqno % 100 == 0) {
+      auto usecs = upd.timeus();
+      if (usecs >= opts->updint * 1000000) {
+        rx_total += rx;
 
-      mcout.lock();
-      printf("input     : %8.2f Mb/s, q1: %3d, rxpkt: %9d, rxbytes: %12" PRIu64
-             ", PER: %6.3e\n",
-             rx * 8.0 / (usecs / 1000000.0) / 1000000, (int)queue1.size(),
-             seqno, rx_total, 1.0 * lost / seqno);
-      fflush(stdout);
-      mcout.unlock();
+        mcout.lock();
+        printf(
+            "input     : %8.2f Mb/s, q1: %3d, rxpkt: %9d, rxbytes: %12" PRIu64
+            ", PER: %6.3e\n",
+            rx * 8.0 / (usecs / 1000000.0) / 1000000, (int)queue1.size(), seqno,
+            rx_total, 1.0 * lost / seqno);
+        fflush(stdout);
+        mcout.unlock();
 
-      rx = 0;
+        rx = 0;
 
-      if (stop.timeus() >= opts->stopafter * 1000000) {
-        std::cout << "stopping input thread " << std::endl;
-        return;
+        if (stop.timeus() >= opts->stopafter * 1000000) {
+          std::cout << "stopping input thread " << std::endl;
+          return;
+        }
+
+        upd.now();
       }
-
-      upd.now();
     }
   }
 }
@@ -115,24 +121,27 @@ void processing_thread(void *args) {
       reduct = 0;
     }
     /** */
-    auto usecs = upd.timeus();
-    if (usecs >= opts->updint * 1000000) {
-      pops_tot += pops;
+    if ((pops % 100) == 0) {
+      auto usecs = upd.timeus();
+      if (usecs >= opts->updint * 1000000) {
+        pops_tot += pops;
 
-      mcout.lock();
-      printf("processing: q1: %3d, elements: %9d, rate: %7" PRIu64 " elems/s\n",
-             (int)queue1.size(), pops_tot, pops / (usecs / 1000000));
-      fflush(stdout);
-      mcout.unlock();
+        mcout.lock();
+        printf("processing: q1: %3d, elements: %9d, rate: %7" PRIu64
+               " elems/s\n",
+               (int)queue1.size(), pops_tot, pops / (usecs / 1000000));
+        fflush(stdout);
+        mcout.unlock();
 
-      pops = 0;
+        pops = 0;
 
-      if (stop.timeus() >= opts->stopafter * 1000000) {
-        std::cout << "stopping processing thread " << std::endl;
-        return;
+        if (stop.timeus() >= opts->stopafter * 1000000) {
+          std::cout << "stopping processing thread " << std::endl;
+          return;
+        }
+
+        upd.now();
       }
-
-      upd.now();
     }
   }
 }
@@ -205,12 +214,14 @@ int main(int argc, char *argv[]) {
   Thread t2(13, processing_thread, (void *)&opts);
   Thread t3(14, input_thread, (void *)&opts);
 
+#if 1
   Timer stop;
   while (stop.timeus() < opts.stopafter * 1000000) {
     sleep(2);
   }
+#endif
 
   std::cout << "Exiting..." << std::endl;
-
+  exit(1);
   return 0;
 }

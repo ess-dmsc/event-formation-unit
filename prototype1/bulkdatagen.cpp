@@ -47,21 +47,22 @@ int main(int argc, char *argv[]) {
       cout << "unable to send" << endl;
     }
 
-#if 1
-    if ((txp % 100) == 0) {
-      usleep(100);
+#if 0
+    if ((txp % 1000) == 0) {
+      usleep(10000);
     }
 #endif
-
-    auto usecs = upd.timeus();
-    if (usecs >= opts.updint * 1000000) {
-      tx_total += tx;
-      printf("Tx rate: %.2f Mbps, tx %5" PRIu64 " MB (total: %7" PRIu64
-             " MB) %ld usecs\n",
-             tx * 8.0 / (usecs / 1000000.0) / B1M, tx / B1M, tx_total / B1M,
-             usecs);
-      tx = 0;
-      upd.now();
+    if ((txp % 100) == 0) {
+      auto usecs = upd.timeus();
+      if (usecs >= opts.updint * 1000000) {
+        tx_total += tx;
+        printf("Tx rate: %.2f Mbps, tx %5" PRIu64 " MB (total: %7" PRIu64
+               " MB) %ld usecs\n",
+               tx * 8.0 / (usecs / 1000000.0) / B1M, tx / B1M, tx_total / B1M,
+               usecs);
+        tx = 0;
+        upd.now();
+      }
     }
   }
 }

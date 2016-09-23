@@ -1,14 +1,7 @@
+# Copyright (C) 2016 European Spallation Source
 #
-#
 
-cxx=g++
-
-include  = -I. -I../libs/include
-warnings = -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs
-optflags = -O3
-ldflags = -L/usr/local/lib -lrdkafka++ -lrdkafka -lpthread -lrt
-
-cxxflags = -std=c++11 $(optflags)  $(include) $(warnings)
+include Makefile.config
 
 VPATH = ../libs/include
 
@@ -24,7 +17,7 @@ obj.efu = $(src.efu:%.cpp=%.o)
 all: $(PROGS)
 
 %.o: %.cpp
-	$(cxx) $(cxxflags) $< -c -o $@
+	$(cxx) $(cxxflags) $< -c -o $@ $(prof)
 
 $(library):
 	make -C ../libs
@@ -33,10 +26,10 @@ bulkdatagen: bulkdatagen.cpp $(library) $(obj.datagen) DGArgs.h Socket.h Timer.h
 	$(cxx) $(cxxflags) $< $(library) $(obj.datagen) -o $@
 
 efu: pipeline.cpp $(library) $(obj.efu) EFUArgs.h Socket.h Timer.h Thread.h Producer.h
-	$(cxx) $(cxxflags) $< $(library) $(obj.efu) $(ldflags) -o $@
+	$(cxx) $(cxxflags) $(prof) $< $(library) $(obj.efu) $(ldflags) -o $@
 
 realclean: clean
 	make -C ../libs clean
 
 clean:
-	@rm -f $(obj.efu) $(obj.datagen) $(PROGS) *.log *~
+	@rm -f $(obj.efu) $(obj.datagen) $(PROGS) *.log *~ *.gc* gmon.out
