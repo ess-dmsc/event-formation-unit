@@ -17,6 +17,27 @@ Socket::Socket(Socket::type stype) {
   }
 }
 
+int Socket::getopt(int option) {
+  int optval, ret;
+  socklen_t optlen;
+  optlen = sizeof(optval);
+  if ((ret = getsockopt(s_, SOL_SOCKET, option, (void *)&optval, &optlen)) <
+      0) {
+    cout << "getsockopt() failed" << endl;
+    return ret;
+  }
+  return optval;
+}
+
+int Socket::setopt(int option, int value) {
+  int ret;
+  if ((ret = setsockopt(s_, SOL_SOCKET, option, (void *)&value,
+                        sizeof(value))) < 0) {
+    cout << "setsockopt() failed" << endl;
+  }
+  return ret;
+}
+
 int Socket::buflen(uint16_t buflen) {
   if (buflen > buflen_max) {
     cout << "Specified buffer length " << buflen << " too large, adjusted to "

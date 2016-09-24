@@ -26,8 +26,16 @@ void input_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
 
   Socket::Endpoint local("0.0.0.0", opts->port);
+
   UDPServer bulkdata(local);
   bulkdata.buflen(opts->buflen);
+  if (opts->rcvbuf) {
+    bulkdata.setopt(SO_RCVBUF, opts->rcvbuf);
+  }
+  std::cout << "Socket rcv buffer size: " << bulkdata.getopt(SO_RCVBUF)
+            << std::endl;
+  std::cout << "Socket sdn buffer size: " << bulkdata.getopt(SO_SNDBUF)
+            << std::endl;
 
   char buffer[9000];
   unsigned int seqno = 1;

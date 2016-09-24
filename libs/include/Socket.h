@@ -20,6 +20,9 @@ public:
   Socket(Socket::type type);
   int buflen(uint16_t buflen);
 
+  int getopt(int option);
+  int setopt(int option, int value);
+
   int local(const char *ipaddr, int port);
   int remote(const char *ipaddr, int port);
 

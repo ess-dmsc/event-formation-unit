@@ -2,54 +2,82 @@
 
 #include <DGArgs.h>
 #include <cstdio>
+#include <getopt.h>
 #include <iostream>
 #include <unistd.h>
 
 DGArgs::DGArgs(int argc, char *argv[]) {
+
   using namespace std;
+
   int c;
-  while ((c = getopt(argc, argv, "i:n:p:b:s:u:h")) != -1)
+  while (1) {
+    static struct option long_options[] = {
+        {"ipaddr", required_argument, 0, 'i'},
+        {"data", required_argument, 0, 'd'},
+        {"port", required_argument, 0, 'p'},
+        {"size", required_argument, 0, 's'},
+        {"tuples", required_argument, 0, 't'},
+        {"update", required_argument, 0, 'u'},
+        {"sndbuf", required_argument, 0, 'x'},
+        {"help", no_argument, 0, 'h'},
+        {0, 0, 0, 0}};
+
+    int option_index = 0;
+
+    c = getopt_long(argc, argv, "d:i:p:s:t:u:hx", long_options, &option_index);
+
+    if (c == -1)
+      break;
     switch (c) {
-    case 'b':
+    case 0:
+      if (long_options[option_index].flag != 0)
+        break;
+    case 'd':
       buflen = atoi(optarg);
       break;
     case 'i':
       dest_ip.assign(optarg);
       break;
-    case 'n':
-      vmmtuples = atoi(optarg);
-      break;
     case 'p':
       port = atoi(optarg);
       break;
     case 's':
-      txGB = atol(optarg);
+      txGB = atoi(optarg);
+      break;
+    case 't':
+      vmmtuples = atoi(optarg);
       break;
     case 'u':
-      updint = atol(optarg);
+      updint = atoi(optarg);
       break;
-
+    case 'x':
+      sndbuf = atoi(optarg);
+      break;
     case 'h':
     default:
-      cout << "Usage: bulkdatagen [OPTIONS]" << endl;
-      cout << " -n tuples      number of data tuples in each UDP packet"
-           << endl;
-      cout << " -s size        size in GB of transmitted data" << endl;
-      cout << " -i ipaddr       destination ip address" << endl;
-      cout << " -p port        UDP destination port" << endl;
-      cout << " -b buflen      size of Tx/Tx buffer in bytes (max 9000)"
-           << endl;
-      cout << " -u interval    update interval (seconds)" << endl;
-      cout << " -h             help - prints this message" << endl;
+      printf("Usage: bulkdatagen [OPTIONS] \n");
+      printf(" --tuples -t tuples     number of data tuples in each UDP packet "
+             "\n");
+      printf(" --size -s size         size in GB of transmitted data \n");
+      printf(" --ipaddr -i ipaddr     destination ip address \n");
+      printf(" --port -p port         UDP destination port \n");
+      printf(" --data -d len          size of Tx/Tx buffer in bytes (max 9000) "
+             "\n");
+      printf(" --update -u interval   update interval (seconds) \n");
+      printf(" --sndbuf -x len        kernel tx buffer size \n");
+      printf(" -h                     help - prints this message \n");
       exit(1);
     }
-  cout << "Generating a bulk data stream" << endl;
-  cout << "  number of bytes:        " << txGB << "GB" << endl;
-  cout << "  data tuples per packet: " << vmmtuples << endl;
-  cout << "Network properties" << endl;
-  cout << "  destination ip address: " << dest_ip << endl;
-  cout << "  destination udp port:   " << port << endl;
-  cout << "  tx buffer size:         " << buflen << "B" << endl;
-  cout << "Other properties" << endl;
-  cout << "  update interval:        " << updint << "s" << endl;
+  }
+  printf("Generating a bulk data stream\n");
+  printf("  number of bytes:        %d GB\n", txGB);
+  printf("  data tuples per packet: %d\n", vmmtuples);
+  printf("Network properties\n");
+  printf("  destination ip address: %s\n", dest_ip.c_str());
+  printf("  destination udp port:   %d\n", port);
+  printf("  tx buffer size:         %dB\n", buflen);
+  printf("  sndbuf:                 %dB\n", sndbuf);
+  printf("Other properties\n");
+  printf("  update interval:        %ds\n", updint);
 }

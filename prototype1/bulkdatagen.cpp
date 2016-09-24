@@ -24,6 +24,12 @@ int main(int argc, char *argv[]) {
 
   UDPClient DataSource(local, remote);
   DataSource.buflen(opts.buflen);
+  if (opts.sndbuf) {
+    cout << "sndbud: " << opts.sndbuf << endl;
+    DataSource.setopt(SO_SNDBUF, opts.sndbuf);
+  }
+  cout << "Socket rcv buffer size: " << DataSource.getopt(SO_RCVBUF) << endl;
+  cout << "Socket snd buffer size: " << DataSource.getopt(SO_SNDBUF) << endl;
 
   uint64_t tx_total = 0;
   uint64_t tx = 0;
