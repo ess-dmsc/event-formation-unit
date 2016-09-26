@@ -6,6 +6,7 @@
 #include <Socket.h>
 #include <Thread.h>
 #include <Timer.h>
+#include <cstdio>
 #include <cstring>
 #include <iostream>
 #include <mutex>
@@ -29,6 +30,10 @@ void input_thread(void *args) {
 
   UDPServer bulkdata(local);
   bulkdata.buflen(opts->buflen);
+  std::cout << "Socket rcv buffer org size: " << bulkdata.getopt(SO_RCVBUF)
+            << std::endl;
+  std::cout << "Socket snd buffer org size: " << bulkdata.getopt(SO_SNDBUF)
+            << std::endl;
   if (opts->rcvbuf) {
     bulkdata.setopt(SO_RCVBUF, opts->rcvbuf);
   }
@@ -62,7 +67,7 @@ void input_thread(void *args) {
       std::cout << "Receive 0 " << std::endl;
     }
 
-    /** */
+    /** This is the periodic reporting*/
     if (seqno % 100 == 0) {
       auto usecs = upd.timeus();
       if (usecs >= opts->updint * 1000000) {

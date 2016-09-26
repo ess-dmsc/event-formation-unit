@@ -9,8 +9,8 @@ public:
   int reduction{80}; /**< data tuples in a cluster */
 
   int port{9000};                       /**< udp receive port */
-  int buflen{9000};                     /**< rx buffer length (B) */
-  int rcvbuf{106496};                   /**< socket rx buffer size (rmem_max) */
+  int buflen { 9000 }                   /**< rx buffer length (B) */
+  int rcvbuf{500000};                   /**< socket rx buffer size (rmem_max) */
   std::string broker{"localhost:9092"}; /**< Kafka broker */
   bool kafka{true};                     /**< whether to use Kafka or not */
 

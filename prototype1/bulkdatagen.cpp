@@ -24,6 +24,10 @@ int main(int argc, char *argv[]) {
 
   UDPClient DataSource(local, remote);
   DataSource.buflen(opts.buflen);
+  cout << "Socket rcv buffer org size: " << DataSource.getopt(SO_RCVBUF)
+       << endl;
+  cout << "Socket snd buffer org size: " << DataSource.getopt(SO_SNDBUF)
+       << endl;
   if (opts.sndbuf) {
     cout << "sndbud: " << opts.sndbuf << endl;
     DataSource.setopt(SO_SNDBUF, opts.sndbuf);
@@ -35,16 +39,17 @@ int main(int argc, char *argv[]) {
   uint64_t tx = 0;
   uint64_t txp = 0;
   Timer upd;
+  auto usecs = upd.timeus();
   for (;;) {
-
-    if (tx_total >= opts.txGB * 1000000000) {
-      cout << "Sent " << tx_total << " bytes." << endl;
+    if ((tx_total + tx) >= (long unsigned int)opts.txGB * 1000000000) {
+      cout << "Sent " << tx_total + tx << " bytes." << endl;
       cout << "done" << endl;
       exit(0);
     }
     // Generate Tx buffer
     std::memcpy(buffer, &seqno, sizeof(seqno));
     // Send
+
     tx += DataSource.send(buffer, opts.buflen);
     if (tx > 0) {
       txp++;
@@ -53,22 +58,26 @@ int main(int argc, char *argv[]) {
       cout << "unable to send" << endl;
     }
 
-#if 0
-    if ((txp % 1000) == 0) {
-      usleep(10000);
+#if 1
+    if ((txp % 10000) == 0) {
+      usleep(25000);
     }
 #endif
+
+    if (usecs >= opts.updint * 1000000) {
+      tx_total += tx;
+      printf("Tx rate: %8.2f Mbps, tx %5" PRIu64 " MB (total: %7" PRIu64
+             " MB) %ld usecs\n",
+             tx * 8.0 / (usecs / 1000000.0) / B1M, tx / B1M, tx_total / B1M,
+             usecs);
+      tx = 0;
+
+      upd.now();
+      usecs = upd.timeus();
+    }
+
     if ((txp % 100) == 0) {
-      auto usecs = upd.timeus();
-      if (usecs >= opts.updint * 1000000) {
-        tx_total += tx;
-        printf("Tx rate: %.2f Mbps, tx %5" PRIu64 " MB (total: %7" PRIu64
-               " MB) %ld usecs\n",
-               tx * 8.0 / (usecs / 1000000.0) / B1M, tx / B1M, tx_total / B1M,
-               usecs);
-        tx = 0;
-        upd.now();
-      }
+      usecs = upd.timeus();
     }
   }
 }
