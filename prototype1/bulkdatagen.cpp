@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
     }
 
 #if 1
-    if ((txp % 10000) == 0) {
+    if ((txp % 10000) == 0) {   // Currently this givea approx 10Gbit/s - consider making is an option
       usleep(25000);
     }
 #endif
