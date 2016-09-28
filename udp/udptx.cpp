@@ -15,6 +15,7 @@ int main(int argc, char *argv[]) {
 
   uint64_t tx_total = 0;
   uint64_t tx = 0;
+  uint64_t txp = 0;
   const int intervalUs = 1000000;
   const int B1M = 1000000;
 
@@ -22,13 +23,21 @@ int main(int argc, char *argv[]) {
   Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
   UDPClient VMMBulkData(local, remote);
   VMMBulkData.buflen(opts.buflen);
+  VMMBulkData.printbuffers();
+  VMMBulkData.setbuffers(0, 500000);
+  VMMBulkData.printbuffers();
 
-  auto t1 = Clock::now();
+  Timer upd;
+  auto usecs = upd.timeus();
+
   for (;;) {
     tx += VMMBulkData.send();
-    auto t2 = Clock::now();
-    auto usecs =
-        std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+
+    if (tx > 0)
+      txp++;
+
+    if ((txp % 100) == 0)
+      usecs = upd.timeus();
 
     if (usecs >= intervalUs) {
       tx_total += tx;
@@ -37,7 +46,8 @@ int main(int argc, char *argv[]) {
              tx * 8.0 / (usecs / 1000000.0) / B1M, tx / B1M, tx_total / B1M,
              usecs);
       tx = 0;
-      t1 = Clock::now();
+      upd.now();
+      usecs = upd.timeus();
     }
   }
 }

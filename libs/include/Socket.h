@@ -20,8 +20,8 @@ public:
   Socket(Socket::type type);
   int buflen(uint16_t buflen);
 
-  int getopt(int option);
-  int setopt(int option, int value);
+  int setbuffers(int sndbuf, int rcvbuf);
+  void printbuffers(void);
 
   int local(const char *ipaddr, int port);
   int remote(const char *ipaddr, int port);
@@ -38,6 +38,9 @@ private:
   struct sockaddr_in local_;
   struct sockaddr_in remote_;
   char buffer_[buflen_max];
+
+  int getopt(int option);
+  int setopt(int option, int value);
 };
 
 class UDPServer : public Socket {

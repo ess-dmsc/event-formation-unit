@@ -30,17 +30,8 @@ void input_thread(void *args) {
 
   UDPServer bulkdata(local);
   bulkdata.buflen(opts->buflen);
-  std::cout << "Socket rcv buffer org size: " << bulkdata.getopt(SO_RCVBUF)
-            << std::endl;
-  std::cout << "Socket snd buffer org size: " << bulkdata.getopt(SO_SNDBUF)
-            << std::endl;
-  if (opts->rcvbuf) {
-    bulkdata.setopt(SO_RCVBUF, opts->rcvbuf);
-  }
-  std::cout << "Socket rcv buffer size: " << bulkdata.getopt(SO_RCVBUF)
-            << std::endl;
-  std::cout << "Socket sdn buffer size: " << bulkdata.getopt(SO_SNDBUF)
-            << std::endl;
+  bulkdata.setbuffers(0, opts->rcvbuf);
+  bulkdata.printbuffers();
 
   char buffer[9000];
   unsigned int seqno = 1;

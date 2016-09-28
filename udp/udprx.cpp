@@ -10,18 +10,27 @@ typedef std::chrono::high_resolution_clock Clock;
 int main(int argc, char *argv[]) {
   uint64_t rx_total = 0;
   uint64_t rx = 0;
+  uint64_t rxp = 0;
   const int intervalUs = 1000000;
   const int B1M = 1000000;
 
   Socket::Endpoint local("0.0.0.0", 9000);
   UDPServer NMX(local);
+  NMX.printbuffers();
+  NMX.setbuffers(0, 500000);
+  NMX.printbuffers();
 
-  auto t1 = Clock::now();
+  Timer upd;
+  auto usecs = upd.timeus();
+
   for (;;) {
     rx += NMX.receive();
-    auto t2 = Clock::now();
-    auto usecs =
-        std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+
+    if (rx > 0)
+      rxp++;
+
+    if ((rxp % 100) == 0)
+      usecs = upd.timeus();
 
     if (usecs >= intervalUs) {
       rx_total += rx;
@@ -30,7 +39,8 @@ int main(int argc, char *argv[]) {
              rx * 8.0 / (usecs / 1000000.0) / B1M, rx / B1M, rx_total / B1M,
              usecs);
       rx = 0;
-      t1 = Clock::now();
+      upd.now();
+      usecs = upd.timeus();
     }
   }
 }

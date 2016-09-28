@@ -17,25 +17,18 @@ Socket::Socket(Socket::type stype) {
   }
 }
 
-int Socket::getopt(int option) {
-  int optval, ret;
-  socklen_t optlen;
-  optlen = sizeof(optval);
-  if ((ret = getsockopt(s_, SOL_SOCKET, option, (void *)&optval, &optlen)) <
-      0) {
-    cout << "getsockopt() failed" << endl;
-    return ret;
-  }
-  return optval;
+int Socket::setbuffers(int sndbuf, int rcvbuf) {
+  int res = 0;
+  if (sndbuf)
+    res += setopt(SO_SNDBUF, sndbuf);
+  if (rcvbuf)
+    res += setopt(SO_RCVBUF, rcvbuf);
+  return res;
 }
 
-int Socket::setopt(int option, int value) {
-  int ret;
-  if ((ret = setsockopt(s_, SOL_SOCKET, option, (void *)&value,
-                        sizeof(value))) < 0) {
-    cout << "setsockopt() failed" << endl;
-  }
-  return ret;
+void Socket::printbuffers(void) {
+  cout << "Socket rcv buffer size: " << getopt(SO_RCVBUF) << endl;
+  cout << "Socket snd buffer size: " << getopt(SO_SNDBUF) << endl;
 }
 
 int Socket::buflen(uint16_t buflen) {
@@ -118,4 +111,29 @@ int Socket::receive(void *buffer, int buflen) {
     return 0;
   }
   return recv_len;
+}
+
+//
+// Private methods
+//
+
+int Socket::getopt(int option) {
+  int optval, ret;
+  socklen_t optlen;
+  optlen = sizeof(optval);
+  if ((ret = getsockopt(s_, SOL_SOCKET, option, (void *)&optval, &optlen)) <
+      0) {
+    cout << "getsockopt() failed" << endl;
+    return ret;
+  }
+  return optval;
+}
+
+int Socket::setopt(int option, int value) {
+  int ret;
+  if ((ret = setsockopt(s_, SOL_SOCKET, option, (void *)&value,
+                        sizeof(value))) < 0) {
+    cout << "setsockopt() failed" << endl;
+  }
+  return ret;
 }

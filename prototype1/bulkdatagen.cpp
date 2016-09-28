@@ -24,16 +24,8 @@ int main(int argc, char *argv[]) {
 
   UDPClient DataSource(local, remote);
   DataSource.buflen(opts.buflen);
-  cout << "Socket rcv buffer org size: " << DataSource.getopt(SO_RCVBUF)
-       << endl;
-  cout << "Socket snd buffer org size: " << DataSource.getopt(SO_SNDBUF)
-       << endl;
-  if (opts.sndbuf) {
-    cout << "sndbud: " << opts.sndbuf << endl;
-    DataSource.setopt(SO_SNDBUF, opts.sndbuf);
-  }
-  cout << "Socket rcv buffer size: " << DataSource.getopt(SO_RCVBUF) << endl;
-  cout << "Socket snd buffer size: " << DataSource.getopt(SO_SNDBUF) << endl;
+  DataSource.setbuffers(opts.sndbuf, 0);
+  DataSource.printbuffers();
 
   uint64_t tx_total = 0;
   uint64_t tx = 0;
@@ -58,7 +50,7 @@ int main(int argc, char *argv[]) {
       cout << "unable to send" << endl;
     }
 
-#if 1
+#if 0
     if ((txp % 10000) == 0) {   // Currently this givea approx 10Gbit/s - consider making is an option
       usleep(25000);
     }
