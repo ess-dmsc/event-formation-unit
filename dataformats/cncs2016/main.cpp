@@ -118,8 +118,8 @@ int main(int argc, char * argv[]) {
             stat.errors++;
             continue;
           }
-          unsigned int ch  = det.data.dw.channel;
-          unsigned int dat = det.data.dw.adc_data;
+          auto ch  = det.data.dw.channel;
+          auto dat = det.data.dw.adc_data;
           rxdata[ch] = dat;
           maxdata[ch] = std::max(maxdata[ch], dat);
           mindata[ch] = std::min(mindata[ch], dat);
