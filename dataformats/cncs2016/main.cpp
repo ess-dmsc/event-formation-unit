@@ -1,10 +1,21 @@
+#include <cassert>
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
 #include <algorithm>
-//#include <StatCounter.h>
 
-const char * df[] = {"w0 amp", "w1 amp", "w0 pos", "w1 pos", "g0 amp", "g1 amp", "g0 pos", "g1 pos", "time  "};
+int detectorid(unsigned int wirepos, unsigned int gridpos) {
+  // Should depend on the instance of a specific detector geomoetry
+  unsigned int wire = 128 * (wirepos - 0) / (1231);
+  unsigned int grid =  96 * (gridpos - 0) / (1920);
+  unsigned id;
+  assert(wire >= 0);
+  assert(wire <= 128);
+  assert(grid >= 0);
+  assert(grid <= 96);
+  id = grid * 128 + wire;
+  return id;
+}
 
 class DetMultiGrid {
 public:
@@ -38,12 +49,19 @@ typedef struct {
     DataWord dw;
     Footer ef;
   } data;
+
+  unsigned int wthresh{230};  // Current values from Anton
+  unsigned int gthresh{170};  // -=-
+
+  const char * df[9]= {"w0 amp", "w1 amp", "w0 pos", "w1 pos", "g0 amp",
+                       "g1 amp", "g0 pos", "g1 pos", "time  "};
+
+  unsigned int readsz{sizeof data};
 };
 
 int main(int argc, char * argv[]) {
   DetMultiGrid det;
   char * filename;
-  unsigned int thresh = 150;
 
   struct stat_t {
     int rx;      // file stats - Rx bytes
@@ -52,64 +70,64 @@ int main(int argc, char * argv[]) {
     int noise;   //
     int multi;   // event stat - number of multi events
   } stat;
+  bzero(&stat, sizeof(stat));
 
   unsigned int rxdata[9], maxdata[9], mindata[9];  // readout data
-
-  bzero(&stat, sizeof(stat));
+  memset(maxdata, 0x00, sizeof(maxdata));
+  memset(mindata, 0xff, sizeof(mindata));
 
   if (argc == 2) {  // Filename only
     filename = argv[1];
-  } else if (argc == 3) {
-    thresh = atoi(argv[1]);
-    filename = argv[2];
+  } else if (argc == 4) { // filename wthresh gthresh
+    det.wthresh = atoi(argv[2]); // signed int to unsigned int
+    det.gthresh = atoi(argv[3]);
+    assert(det.wthresh < 16384); // check for negative numbers
+    assert(det.gthresh < 16384);
+    filename = argv[1];
   } else {
-    printf("usage: %s [threshold] filename\n", argv[0]);
+    printf("usage: %s filename [wire_thresh grid_thresh]\n", argv[0]);
     return -1;
   }
 
   printf("file: %s\n", filename);
-  printf("Threshold value: %d\n", thresh);
-
+  printf("wire thresh: %u\n", det.wthresh);
+  printf("grid thresh: %u\n", det.gthresh);
 
   FILE *f = fopen(filename, "r");
   if (f == NULL) {
-    printf("Cannot find file \'%s\'\n", argv[1]);
+    printf("Cannot find file \'%s\'\n", filename);
     return -1;
   }
 
-  memset(maxdata, 0x00, sizeof(maxdata));
-  memset(mindata, 0xff, sizeof(mindata));
-
-  int readsz = sizeof det.data;
-  while (fread(&det.data, readsz, 1, f) > 0){
-    stat.rx += readsz;
+  assert(det.readsz == 4);
+  while (fread(&det.data, det.readsz, 1, f) > 0){
+    stat.rx += det.readsz;
 
     if (det.data.eh.header_sig == (int)DetMultiGrid::hdr::HDR) { // Read Header
-      //printf("\n%7d Header 0x%02x, subhdr: %3d, module id: %3d, words: %3d\n",
-      //        i, det.data.eh.header_sig, det.data.eh.sub_header, det.data.eh.module_id, det.data.eh.n_words);
+      int nread = det.data.eh.n_words;
+      assert(nread == 9);
 
       bzero(rxdata, sizeof(rxdata));
-      int nread = det.data.eh.n_words;
-
       for (int j = 0; j < nread - 1; j++) {
-        if (fread(&det.data, readsz, 1, f) > 0) {     // Read Data
-          stat.rx += readsz;
+        if (fread(&det.data, det.readsz, 1, f) > 0) {     // Read Data
+          stat.rx += det.readsz;
 
           if (det.data.dw.data_sig != (int)DetMultiGrid::hdr::DAT) {
             printf("Data Error x%02x\n", det.data.dw.data_sig);
             stat.errors++;
             continue;
           }
-          rxdata[det.data.dw.channel] = det.data.dw.adc_data;
-          maxdata[det.data.dw.channel] = std::max(maxdata[det.data.dw.channel], det.data.dw.adc_data);
-          mindata[det.data.dw.channel] = std::min(mindata[det.data.dw.channel], det.data.dw.adc_data);
-          //printf("%7d Data:  %s : %5u\n", stat.events, df[det.data.dw.channel], det.data.dw.adc_data);
+          unsigned int ch  = det.data.dw.channel;
+          unsigned int dat = det.data.dw.adc_data;
+          rxdata[ch] = dat;
+          maxdata[ch] = std::max(maxdata[ch], dat);
+          mindata[ch] = std::min(mindata[ch], dat);
         }
       }
 
       // Read Footer
-      if (fread(&det.data, readsz, 1, f) > 0) {
-        stat.rx += readsz;
+      if (fread(&det.data, det.readsz, 1, f) > 0) {
+        stat.rx += det.readsz;
 
         if (det.data.ef.footer_sig != (int)DetMultiGrid::hdr::END) {
           printf("Footer Error: x%02x (bytes read: %d)\n", det.data.ef.footer_sig, stat.rx);
@@ -118,32 +136,40 @@ int main(int argc, char * argv[]) {
         }
         maxdata[8] = std::max(maxdata[8], det.data.ef.trigger);
         mindata[8] = std::min(mindata[8], det.data.ef.trigger);
-        //printf("%7d Footer: timestamp %d\n", i, det.data.ef.trigger);
 
-
-        // Process event
-        if ((rxdata[0] < thresh) && (rxdata[4] < thresh)) {
+        // We have data - Process event
+        // Discard noisy data
+        if ((rxdata[0] < det.wthresh) || (rxdata[4] < det.gthresh)) {
           stat.noise++;
           continue;
         }
 
-        stat.events++;
-
-        if ((rxdata[1] > thresh) && (rxdata[5] > thresh)) {
+        // Detect and discard double neutron event
+        if ((rxdata[1] >= det.wthresh) && (rxdata[5] >= det.gthresh)) {
           stat.multi++;
-          printf("%7d: Double neutron Event (bytes read %d)\n", stat.events, stat.rx);
+          //printf("%7d: Double neutron Event (bytes read %d)\n", stat.events, stat.rx);
+          continue;
         }
+
+        // Real event
+        stat.events++;
+        detectorid(rxdata[2], rxdata[6]);
       }
     }
   }
-  printf("Bytes read:    %d\n", stat.rx);
-  printf("Events:        %d\n", stat.events);
-  printf("  double:      %d\n", stat.multi);
-  printf("Non Events:    %d\n", stat.noise);
-  printf("Errors:        %d\n", stat.errors);
 
+  printf("=======================\nStats\n");
+  printf("Bytes read:    %d\n", stat.rx);
+  printf("Total samples: %d\n", stat.multi + stat.noise + stat.events);
+  printf("  events:      %d\n", stat.events);
+  printf("  noise:       %d\n", stat.noise);
+  printf("  double:      %d\n", stat.multi);
+  printf("Errors:        %d\n", stat.errors);
+  printf("-----------------------\n");
+  printf("Name       Min     Max\n");
   for (int j = 0; j < 9; j++) {
-    printf("%s max: %5u, min: %5u\n", df[j], maxdata[j], mindata[j]);
+    printf("%s  %5u  %8u\n", det.df[j], mindata[j], maxdata[j]);
   }
+  printf("-----------------------\n");
   return 0;
 }
