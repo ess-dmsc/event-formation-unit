@@ -5,7 +5,8 @@
 #include <algorithm>
 
 int detectorid(unsigned int wirepos, unsigned int gridpos) {
-  // Should depend on the instance of a specific detector geomoetry
+  // Should depend on the instance of a specific detector geomoetry,
+  // and calibration data
   unsigned int wire = 128 * (wirepos - 0) / (1231);
   unsigned int grid =  96 * (gridpos - 0) / (1920);
   unsigned id;
@@ -19,7 +20,7 @@ int detectorid(unsigned int wirepos, unsigned int gridpos) {
 
 class DetMultiGrid {
 public:
-  enum class hdr { DAT = 0x00, HDR, END = 0x03  };
+  enum class hdr { DAT = 0x00, HDR, END = 0x03 };
 
   typedef struct {
     unsigned int    n_words    : 12;
@@ -50,8 +51,8 @@ typedef struct {
     Footer ef;
   } data;
 
-  unsigned int wthresh{230};  // Current values from Anton
-  unsigned int gthresh{170};  // -=-
+  unsigned int wthresh{230}; // Current values from Anton
+  unsigned int gthresh{170}; //          -=-
 
   const char * df[9]= {"w0 amp", "w1 amp", "w0 pos", "w1 pos", "g0 amp",
                        "g1 amp", "g0 pos", "g1 pos", "time  "};
@@ -70,11 +71,8 @@ int main(int argc, char * argv[]) {
     int noise;   //
     int multi;   // event stat - number of multi events
   } stat;
-  bzero(&stat, sizeof(stat));
 
   unsigned int rxdata[9], maxdata[9], mindata[9];  // readout data
-  memset(maxdata, 0x00, sizeof(maxdata));
-  memset(mindata, 0xff, sizeof(mindata));
 
   if (argc == 2) {  // Filename only
     filename = argv[1];
@@ -89,13 +87,17 @@ int main(int argc, char * argv[]) {
     return -1;
   }
 
+  bzero(&stat, sizeof(stat));
+  memset(maxdata, 0x00, sizeof(maxdata));
+  memset(mindata, 0xff, sizeof(mindata));
+
   printf("file: %s\n", filename);
   printf("wire thresh: %u\n", det.wthresh);
   printf("grid thresh: %u\n", det.gthresh);
 
   FILE *f = fopen(filename, "r");
   if (f == NULL) {
-    printf("Cannot find file \'%s\'\n", filename);
+    printf("error: cannot open file \'%s\'\n", filename);
     return -1;
   }
 
@@ -113,7 +115,6 @@ int main(int argc, char * argv[]) {
           stat.rx += det.readsz;
 
           if (det.data.dw.data_sig != (int)DetMultiGrid::hdr::DAT) {
-            printf("Data Error x%02x\n", det.data.dw.data_sig);
             stat.errors++;
             continue;
           }
@@ -130,7 +131,6 @@ int main(int argc, char * argv[]) {
         stat.rx += det.readsz;
 
         if (det.data.ef.footer_sig != (int)DetMultiGrid::hdr::END) {
-          printf("Footer Error: x%02x (bytes read: %d)\n", det.data.ef.footer_sig, stat.rx);
           stat.errors++;
           continue;
         }
@@ -147,7 +147,6 @@ int main(int argc, char * argv[]) {
         // Detect and discard double neutron event
         if ((rxdata[1] >= det.wthresh) && (rxdata[5] >= det.gthresh)) {
           stat.multi++;
-          //printf("%7d: Double neutron Event (bytes read %d)\n", stat.events, stat.rx);
           continue;
         }
 
