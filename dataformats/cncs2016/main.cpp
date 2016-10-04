@@ -7,6 +7,8 @@
 
 #define THRESH 150    // Threshold adc value for detecting a signal (for double events)
 
+const char * df[] = {"w0 amp", "w1 amp", "w0 pos", "w1 pos", "g0 amp", "g1 amp", "g0 pos", "g1 pos"};
+
 typedef struct {
    unsigned int    n_words       : 12;
    unsigned int    adc_res       : 3;
@@ -57,7 +59,7 @@ int main(int argc, char * argv[]) {
   }
 
 
-  int rxdata[8];    // event data
+  unsigned int rxdata[8];    // readout data 
   while (fread(&data, sizeof(data), 1, f) > 0){
     stat.rx += sizeof(data);
     // Read Header
@@ -66,8 +68,10 @@ int main(int argc, char * argv[]) {
       //        i, data.eh.header_sig, data.eh.sub_header, data.eh.module_id, data.eh.n_words);
 
       // Read Data
+      bzero(rxdata, sizeof(rxdata));
       int nread = data.eh.n_words;
-      for (int j = 1; j < nread; j++) {
+
+      for (int j = 0; j < nread - 1; j++) {
         if (fread(&data, sizeof(data), 1, f) > 0) {
           stat.rx += sizeof(data);
 
@@ -76,8 +80,8 @@ int main(int argc, char * argv[]) {
             stat.errors++;
             continue;
           }
-          rxdata[j] = data.dw.adc_data;
-          //printf("%7d Data:  chan id: %3d, adc: %5d\n", i, data.dw.channel, data.dw.adc_data);
+          rxdata[data.dw.channel] = data.dw.adc_data;
+          printf("%7d Data:  %s : %5u\n", stat.events, df[data.dw.channel], data.dw.adc_data);
         }
       }
 
@@ -92,6 +96,10 @@ int main(int argc, char * argv[]) {
         }
         //printf("%7d Footer: timestamp %d\n", i, data.ef.trigger);
         stat.events++;
+
+        printf("Stack1: grid %u, wire %u\n", rxdata[6], rxdata[2]);
+        printf("Stack2: grid %u, wire %u\n", rxdata[7], rxdata[3]);
+
         if ((rxdata[1] > THRESH) && (rxdata[2] > THRESH) && (rxdata[3] > THRESH) && (rxdata[4] > THRESH) ) {
           stat.multi++;
           printf("%7d: Double Neutron Event (bytes read %d)\n", stat.events, stat.rx);
@@ -106,4 +114,3 @@ int main(int argc, char * argv[]) {
   printf("Errors:        %d\n", stat.errors);
   return 0;
 }
-
