@@ -1,11 +1,15 @@
 #include <string.h>
 #include <stdio.h>
 
-#define ST_HDR 0x01   // Header signature
-#define ST_DAT 0x00   // Data signature
-#define ST_END 0x03   // Footer signature
-
 #define THRESH 150    // Threshold adc value for detecting a signal (for double events)
+
+class DetMultiGrid {
+
+struct hdr {
+  const int HDR{0x01};
+  const int DAT{0x02};
+  const int END{0x00};
+}
 
 typedef struct {
    unsigned int    n_words       : 12;
@@ -30,16 +34,19 @@ typedef struct {
    unsigned int    footer_sig   : 2;
 } Footer;
 
+union {
+  EventHeader eh;
+  DataWord dw;
+  Footer ef;
+} data;
+
+}:
 
 int main(int argc, char * argv[]) {
   printf("file: %s\n", argv[1]);
   printf("Threshold value: %d\n", THRESH);
 
-  union {
-    EventHeader eh;
-    DataWord dw;
-    Footer ef;
-  } data;
+  DetMultiGrid det;
 
   struct stat_t {
     int rx;      // file stats - Rx bytes
@@ -61,7 +68,7 @@ int main(int argc, char * argv[]) {
   while (fread(&data, sizeof(data), 1, f) > 0){
     stat.rx += sizeof(data);
     // Read Header
-    if (data.eh.header_sig == ST_HDR) {
+    if (det.data.eh.header_sig == DetMultigrid::hdr.HDR) {
       //printf("\n%7d Header 0x%02x, subhdr: %3d, module id: %3d, words: %3d\n",
       //        i, data.eh.header_sig, data.eh.sub_header, data.eh.module_id, data.eh.n_words);
 
@@ -106,4 +113,3 @@ int main(int argc, char * argv[]) {
   printf("Errors:        %d\n", stat.errors);
   return 0;
 }
-
