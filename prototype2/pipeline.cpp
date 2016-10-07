@@ -4,25 +4,22 @@
 #include <EFUArgs.h>
 #include <Loader.h>
 #include <cassert>
-#include <dlfcn.h>
+#include <thread>
 #include <iostream>
 #include <queue>
 #include <stdio.h>
-#include <thread>
 #include <unistd.h> // sleep()
 
-using namespace std;
-
-void input_thread(Loader *load, EFUArgs *args) {
-  load->detector->input_thread(NULL);
+static void input_thread(Loader *load, EFUArgs *args){
+    load->detector->input_thread(NULL);
 }
 
-void processing_thread(Loader *load, EFUArgs *args) {
-  load->detector->processing_thread(NULL);
+static void processing_thread(Loader *load, EFUArgs *args){
+    load->detector->processing_thread(NULL);
 }
 
-void output_thread(Loader *load, EFUArgs *args) {
-  load->detector->output_thread(NULL);
+static void output_thread(Loader *load, EFUArgs *args){
+    load->detector->output_thread(NULL);
 }
 /**
  * Load detector, launch pipeline threads, then sleep forever

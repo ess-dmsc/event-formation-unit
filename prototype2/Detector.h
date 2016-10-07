@@ -1,3 +1,5 @@
+/** Copyright (C) 2016 European Spallation Source */
+
 #include <stdio.h>
 
 using namespace std;

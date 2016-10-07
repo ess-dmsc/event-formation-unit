@@ -1,3 +1,5 @@
+/** Copyright (C) 2016 European Spallation Source */
+
 #include "Detector.h"
 #include <iostream>
 #include <stdio.h>

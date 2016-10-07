@@ -1,3 +1,6 @@
+/** Copyright (C) 2016 European Spallation Source */
+
+#include <Detector.h>
 #include <Loader.h>
 #include <dlfcn.h>
 #include <iostream>
