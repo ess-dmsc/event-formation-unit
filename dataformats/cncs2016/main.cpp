@@ -1,18 +1,16 @@
+#include <algorithm>
 #include <cassert>
-#include <cstring>
 #include <cstdio>
 #include <cstdlib>
-#include <algorithm>
+#include <cstring>
 
 int detectorid(unsigned int wirepos, unsigned int gridpos) {
   // Should depend on the instance of a specific detector geomoetry,
   // and calibration data
   unsigned int wire = 128 * (wirepos - 0) / (1231);
-  unsigned int grid =  96 * (gridpos - 0) / (1920);
+  unsigned int grid = 96 * (gridpos - 0) / (1920);
   unsigned id;
-  assert(wire >= 0);
   assert(wire <= 128);
-  assert(grid >= 0);
   assert(grid <= 96);
   id = grid * 128 + wire;
   return id;
@@ -23,26 +21,26 @@ public:
   enum class hdr { DAT = 0x00, HDR, END = 0x03 };
 
   typedef struct {
-    unsigned int    n_words    : 12;
-    unsigned int    adc_res    : 3;
-    unsigned int    out_format : 1;
-    unsigned int    module_id  : 8;
-    unsigned int    sub_header : 6;
-    unsigned int    header_sig : 2;
+    unsigned int n_words : 12;
+    unsigned int adc_res : 3;
+    unsigned int out_format : 1;
+    unsigned int module_id : 8;
+    unsigned int sub_header : 6;
+    unsigned int header_sig : 2;
   } EventHeader;
 
-typedef struct {
-    unsigned int    adc_data   : 14;
-    unsigned int    overflow   : 1;
-    unsigned int    nop        : 1;
-    unsigned int    channel    : 5;
-    unsigned int    fix        : 9;
-    unsigned int    data_sig   : 2;
+  typedef struct {
+    unsigned int adc_data : 14;
+    unsigned int overflow : 1;
+    unsigned int nop : 1;
+    unsigned int channel : 5;
+    unsigned int fix : 9;
+    unsigned int data_sig : 2;
   } DataWord;
 
   typedef struct {
-    unsigned int    trigger    : 30;
-    unsigned int    footer_sig : 2;
+    unsigned int trigger : 30;
+    unsigned int footer_sig : 2;
   } Footer;
 
   union {
@@ -54,29 +52,29 @@ typedef struct {
   unsigned int wthresh{230}; // Current values from Anton
   unsigned int gthresh{170}; //          -=-
 
-  const char * df[9]= {"w0 amp", "w1 amp", "w0 pos", "w1 pos", "g0 amp",
+  const char *df[9] = {"w0 amp", "w1 amp", "w0 pos", "w1 pos", "g0 amp",
                        "g1 amp", "g0 pos", "g1 pos", "time  "};
 
   unsigned int readsz{sizeof data};
 };
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
   DetMultiGrid det;
-  char * filename;
+  char *filename;
 
   struct stat_t {
-    int rx;      // file stats - Rx bytes
-    int errors;  // event stat - header errors
-    int events;  // event stat - number of events
-    int noise;   //
-    int multi;   // event stat - number of multi events
+    int rx;     // file stats - Rx bytes
+    int errors; // event stat - header errors
+    int events; // event stat - number of events
+    int noise;  //
+    int multi;  // event stat - number of multi events
   } stat;
 
-  unsigned int rxdata[9], maxdata[9], mindata[9];  // readout data
+  unsigned int rxdata[9], maxdata[9], mindata[9]; // readout data
 
-  if (argc == 2) {  // Filename only
+  if (argc == 2) { // Filename only
     filename = argv[1];
-  } else if (argc == 4) { // filename wthresh gthresh
+  } else if (argc == 4) {        // filename wthresh gthresh
     det.wthresh = atoi(argv[2]); // signed int to unsigned int
     det.gthresh = atoi(argv[3]);
     assert(det.wthresh < 16384); // check for negative numbers
@@ -102,7 +100,7 @@ int main(int argc, char * argv[]) {
   }
 
   assert(det.readsz == 4);
-  while (fread(&det.data, det.readsz, 1, f) > 0){
+  while (fread(&det.data, det.readsz, 1, f) > 0) {
     stat.rx += det.readsz;
 
     if (det.data.eh.header_sig == (int)DetMultiGrid::hdr::HDR) { // Read Header
@@ -111,14 +109,14 @@ int main(int argc, char * argv[]) {
 
       bzero(rxdata, sizeof(rxdata));
       for (int j = 0; j < nread - 1; j++) {
-        if (fread(&det.data, det.readsz, 1, f) > 0) {     // Read Data
+        if (fread(&det.data, det.readsz, 1, f) > 0) { // Read Data
           stat.rx += det.readsz;
 
           if (det.data.dw.data_sig != (int)DetMultiGrid::hdr::DAT) {
             stat.errors++;
             continue;
           }
-          auto ch  = det.data.dw.channel;
+          auto ch = det.data.dw.channel;
           auto dat = det.data.dw.adc_data;
           rxdata[ch] = dat;
           maxdata[ch] = std::max(maxdata[ch], dat);
