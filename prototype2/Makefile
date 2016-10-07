@@ -5,7 +5,7 @@ include Makefile.config
 
 VPATH = ../libs/include
 
-PROGS = efu2 nmx.so cspec.so
+PROGS = efu2 nmx.so cspec.so udpraw.so
 library = ../libs/eventlib.a
 
 src.efu = EFUArgs.cpp Loader.cpp
@@ -14,11 +14,15 @@ obj.efu = $(src.efu:%.cpp=%.o)
 all: $(PROGS)
 
 nmx.so: nmx.cpp Detector.h
-	$(cxx) -fPIC -shared $< -o $@
+	$(cxx) $(cxxflags) -fPIC -shared $< -o $@
+	chmod 440 $@
+
+udpraw.so: udpraw.cpp $(library) Detector.h Socket.h Timer.h
+	$(cxx) $(cxxflags) -Wl,--whole-archive $(library) -Wl,--no-whole-archive -fPIC -shared $< -o $@
 	chmod 440 $@
 
 cspec.so: cspec.cpp Detector.h
-	$(cxx) -fPIC -shared $< -o $@
+	$(cxx) $(cxxflags) -fPIC -shared $< -o $@
 	chmod 440 $@
 
 %.o: %.cpp
@@ -27,7 +31,7 @@ cspec.so: cspec.cpp Detector.h
 $(library):
 	make -C ../libs
 
-efu2: pipeline.cpp $(library) $(obj.efu) EFUArgs.h Socket.h Timer.h Thread.h
+efu2: pipeline.cpp $(library) $(obj.efu) EFUArgs.h Socket.h Timer.h
 	$(cxx) $(cxxflags) $(prof) $< $(library) $(obj.efu) $(ldflags) -o $@
 
 realclean: clean

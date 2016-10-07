@@ -3,6 +3,8 @@
 #include <Detector.h>
 #include <EFUArgs.h>
 #include <Loader.h>
+#include <Socket.h>
+#include <Timer.h>
 #include <cassert>
 #include <thread>
 #include <iostream>
@@ -43,6 +45,7 @@ int main(int argc, char *argv[]) {
   std::thread t3(processing_thread, &dynamic, &opts);
   t3.join();
 
+  Timer now;
   while (1) {
     sleep(2);
   }

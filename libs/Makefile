@@ -1,7 +1,7 @@
 
 
 
-CXXFLAGS  = -Iinclude -std=c++11 -O3
+CXXFLAGS  = -Iinclude -std=c++11 -O3 -fPIC
 CXXFLAGS += -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs
 LDFLAGS   = -L.
 
