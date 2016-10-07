@@ -15,9 +15,11 @@ all: $(PROGS)
 
 nmx.so: nmx.cpp Detector.h
 	$(cxx) -fPIC -shared $< -o $@
+	chmod 440 $@
 
 cspec.so: cspec.cpp Detector.h
 	$(cxx) -fPIC -shared $< -o $@
+	chmod 440 $@
 
 %.o: %.cpp
 	$(cxx) $(cxxflags) $< -c -o $@ $(prof)

@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 
   EFUArgs opts(argc, argv);
 
-  printf("Launching EFU as %s\n", opts.det.c_str());
+  std::cout << "Launching EFU as Instrument " << opts.det << std::endl;
 
   Loader dynamic(opts.det);
   if (dynamic.detector == NULL) {
