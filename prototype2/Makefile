@@ -8,7 +8,7 @@ VPATH = ../libs/include
 PROGS = efu2 nmx.so cspec.so udpraw.so
 library = ../libs/eventlib.a
 
-src.efu = EFUArgs.cpp Loader.cpp
+src.efu = EFUArgs.cpp Loader.cpp Launcher.cpp
 obj.efu = $(src.efu:%.cpp=%.o)
 
 all: $(PROGS)
@@ -31,7 +31,7 @@ cspec.so: cspec.cpp Detector.h
 $(library):
 	make -C ../libs
 
-efu2: pipeline.cpp $(library) $(obj.efu) EFUArgs.h Socket.h Timer.h
+efu2: pipeline.cpp $(library) $(obj.efu) EFUArgs.h Socket.h Timer.h Launcher.h Loader.h
 	$(cxx) $(cxxflags) $(prof) $< $(library) $(obj.efu) $(ldflags) -o $@
 
 realclean: clean

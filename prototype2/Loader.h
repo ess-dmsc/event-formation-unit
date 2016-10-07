@@ -1,5 +1,5 @@
 /** Copyright (C) 2016 European Spallation Source */
-
+#pragma once
 #include <string>
 
 class Detector;

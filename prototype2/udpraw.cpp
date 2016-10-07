@@ -20,7 +20,7 @@ public:
 };
 
 void UDPRaw::input_thread(void *args) {
-  EFUArgs * opts = (EFUArgs *)args;
+  EFUArgs *opts = (EFUArgs *)args;
   uint64_t rx_total = 0;
   uint64_t rx = 0;
   uint64_t rxp = 0;

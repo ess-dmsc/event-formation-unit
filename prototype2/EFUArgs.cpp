@@ -11,12 +11,10 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
   using namespace std;
 
   while (1) {
-    static struct option long_options[] = {
-       {"help", no_argument, 0, 'h'},
-       {"det", required_argument, 0, 'd'},
-       {"port", required_argument, 0, 'p'},
-       {0, 0, 0, 0}
-     };
+    static struct option long_options[] = {{"help", no_argument, 0, 'h'},
+                                           {"det", required_argument, 0, 'd'},
+                                           {"port", required_argument, 0, 'p'},
+                                           {0, 0, 0, 0}};
 
     int option_index = 0;
 
