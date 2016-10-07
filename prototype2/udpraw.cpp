@@ -4,6 +4,7 @@
 #include <EFUArgs.h>
 #include <Socket.h>
 #include <Timer.h>
+#include <cassert>
 #include <iostream>
 #include <stdio.h>
 #include <unistd.h>
@@ -18,24 +19,26 @@ public:
   ~UDPRaw() { cout << "    UDPRaw destroyed" << endl; };
 };
 
-void UDPRaw::input_thread(void *a) {
+void UDPRaw::input_thread(void *args) {
+  EFUArgs * opts = (EFUArgs *)args;
   uint64_t rx_total = 0;
   uint64_t rx = 0;
   uint64_t rxp = 0;
   const int intervalUs = 1000000;
   const int B1M = 1000000;
 
-  Socket::Endpoint local("0.0.0.0", 9000);
-  UDPServer NMX(local);
-  NMX.printbuffers();
-  NMX.setbuffers(0, 500000);
-  NMX.printbuffers();
+  assert(args != NULL);
 
+  Socket::Endpoint local("0.0.0.0", opts->port);
+  UDPServer raw(local);
+  raw.printbuffers();
+  raw.setbuffers(0, opts->rcvbuf);
+  raw.printbuffers();
   Timer upd;
   auto usecs = upd.timeus();
 
   for (;;) {
-    rx += NMX.receive();
+    rx += raw.receive();
 
     if (rx > 0)
       rxp++;
