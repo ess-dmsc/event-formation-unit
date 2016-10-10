@@ -35,7 +35,6 @@ void Launcher::launch(int lcore, void (*func)(Loader *, EFUArgs *), Loader *ld,
   t->join();
 }
 
-
 Launcher::Launcher(Loader *dynamic, EFUArgs *args, int input, int processing,
                    int output) {
   launch(input, input_thread, dynamic, args);

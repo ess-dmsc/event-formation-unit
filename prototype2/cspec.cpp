@@ -11,9 +11,9 @@ const char *classname = "CSPEC Object";
 
 class CSPEC : public Detector {
 public:
-  CSPEC() {};
+  CSPEC(){};
 
-  ~CSPEC() {};
+  ~CSPEC(){};
 
   void input_thread(void *a) {
     static int ctr = 0;

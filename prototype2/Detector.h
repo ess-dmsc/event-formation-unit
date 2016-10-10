@@ -8,7 +8,7 @@ class Detector {
 public:
   // default constructor
 
-  virtual void input_thread(void *arg) { printf("no input stage\n");};
+  virtual void input_thread(void *arg) { printf("no input stage\n"); };
 
   virtual void processing_thread(void *arg) {
     printf("no processing stage\n");
