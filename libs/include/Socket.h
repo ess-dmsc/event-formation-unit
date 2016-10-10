@@ -24,8 +24,8 @@ public:
   int setbuffers(int sndbuf, int rcvbuf);
   void printbuffers(void);
 
-  int local(const char *ipaddr, int port);
-  int remote(const char *ipaddr, int port);
+  void local(const char *ipaddr, int port);
+  void remote(const char *ipaddr, int port);
 
   int receive();
   int receive(void *buffer, int rcvlen);
@@ -47,8 +47,7 @@ private:
 class UDPServer : public Socket {
 public:
   UDPServer(Endpoint local) : Socket(Socket::type::UDP) {
-    auto ret = this->local(local.ipaddr, local.port);
-    assert(ret == 0);
+    this->local(local.ipaddr, local.port);
   };
 };
 

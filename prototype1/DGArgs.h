@@ -12,7 +12,7 @@ public:
   std::string dest_ip{"127.0.0.1"}; /**< destination ip address */
   int port{9000};                   /**< destination udp port */
   int buflen{9000};                 /**< Tx buffer size */
-  int sndbuf{500000};               /**< kernel sndbuf size */
+  int sndbuf{1000000};               /**< kernel sndbuf size */
 
   unsigned int updint{1}; /**< update interval (seconds) */
 };

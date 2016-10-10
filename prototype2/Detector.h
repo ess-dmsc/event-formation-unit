@@ -8,13 +8,17 @@ class Detector {
 public:
   // default constructor
 
-  virtual void input_thread(void *arg) { printf("no input stage\n"); };
+  virtual void input_thread(void *arg __attribute__((unused))) {
+    printf("no input stage\n");
+  };
 
-  virtual void processing_thread(void *arg) {
+  virtual void processing_thread(void *arg __attribute__((unused))) {
     printf("no processing stage\n");
   };
 
-  virtual void output_thread(void *arg) { printf("no output stage\n"); };
+  virtual void output_thread(void *arg __attribute__((unused))) {
+    printf("no output stage\n");
+  };
 
   virtual ~Detector(){};
 };

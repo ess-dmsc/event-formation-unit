@@ -5,8 +5,6 @@
 
 using namespace std;
 
-const char *classname = "Test Detector";
-
 class TestDetector : public Detector {
 public:
   TestDetector() { cout << "    TestDetector created" << endl; };
@@ -23,8 +21,7 @@ public:
 
 TestDetectorFactory Factory;
 
-/**
- */
+/** Test fixture and tests below */
 
 class DetectorTest : public ::testing::Test {
   virtual void SetUp() {det = Factory.create();}

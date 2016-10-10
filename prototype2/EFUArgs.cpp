@@ -13,6 +13,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
   while (1) {
     static struct option long_options[] = {{"help", no_argument, 0, 'h'},
                                            {"det", required_argument, 0, 'd'},
+                                           {"dip", required_argument, 0, 'i'},
                                            {"port", required_argument, 0, 'p'},
                                            {0, 0, 0, 0}};
 
@@ -28,6 +29,9 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
         break;
     case 'd':
       det.assign(optarg);
+      break;
+    case 'i':
+      dest_ip.assign(optarg);
       break;
     case 'p':
       port = atoi(optarg);

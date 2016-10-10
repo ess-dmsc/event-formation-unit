@@ -15,7 +15,7 @@ public:
 
   ~CSPEC(){};
 
-  void input_thread(void *a) {
+  void input_thread(void *a __attribute__((unused))) {
     static int ctr = 0;
     while (1) {
       printf("%s - ctr: %d\n", classname, ctr++);

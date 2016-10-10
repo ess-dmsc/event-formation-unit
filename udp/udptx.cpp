@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-typedef std::chrono::high_resolution_clock Clock;
-
 int main(int argc, char *argv[]) {
 
   Args opts(argc, argv);
@@ -21,17 +19,17 @@ int main(int argc, char *argv[]) {
 
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
-  UDPClient VMMBulkData(local, remote);
-  VMMBulkData.buflen(opts.buflen);
-  VMMBulkData.printbuffers();
-  VMMBulkData.setbuffers(0, 500000);
-  VMMBulkData.printbuffers();
+  UDPClient udptx(local, remote);
+  udptx.buflen(opts.buflen);
+  udptx.printbuffers();
+  udptx.setbuffers(0, 1000000);
+  udptx.printbuffers();
 
   Timer upd;
   auto usecs = upd.timeus();
 
   for (;;) {
-    tx += VMMBulkData.send();
+    tx += udptx.send();
 
     if (tx > 0)
       txp++;

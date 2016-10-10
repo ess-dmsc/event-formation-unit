@@ -42,7 +42,7 @@ int Socket::buflen(uint16_t buflen) {
   return buflen_;
 }
 
-int Socket::local(const char *ipaddr, int port) {
+void Socket::local(const char *ipaddr, int port) {
   // zero out the structures
   std::memset((char *)&local_, 0, sizeof(local_));
   local_.sin_family = AF_INET;
@@ -50,15 +50,23 @@ int Socket::local(const char *ipaddr, int port) {
   inet_aton(ipaddr, &local_.sin_addr);
 
   // bind socket to port
-  return bind(s_, (struct sockaddr *)&local_, sizeof(local_));
+  auto ret = bind(s_, (struct sockaddr *)&local_, sizeof(local_));
+  if (ret != 0) {
+    cout << "bind failed - is port " << port << " already in use?" << endl;
+  }
+  assert(ret == 0);
 }
 
-int Socket::remote(const char *ipaddr, int port) {
+void Socket::remote(const char *ipaddr, int port) {
   // zero out the structures
   std::memset((char *)&remote_, 0, sizeof(remote_));
   remote_.sin_family = AF_INET;
   remote_.sin_port = htons(port);
-  return inet_aton(ipaddr, &remote_.sin_addr);
+  auto ret = inet_aton(ipaddr, &remote_.sin_addr);
+  if (ret == 0) {
+    cout << "invalid ip address " << ipaddr << endl;
+  }
+  assert(ret != 0);
 }
 
 int Socket::send() {

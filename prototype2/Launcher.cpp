@@ -32,7 +32,7 @@ void Launcher::launch(int lcore, void (*func)(Loader *, EFUArgs *), Loader *ld,
   int s =
       pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
   assert(s == 0);
-  t->join();
+  //t->join();
 }
 
 Launcher::Launcher(Loader *dynamic, EFUArgs *args, int input, int processing,

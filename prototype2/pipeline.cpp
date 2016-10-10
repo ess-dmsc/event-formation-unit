@@ -3,9 +3,10 @@
 #include <EFUArgs.h>
 #include <Launcher.h>
 #include <iostream>
-#include <stdio.h>
 #include <thread>
 #include <unistd.h> // sleep()
+
+using namespace std;
 
 /**
  * Load detector, launch pipeline threads, then sleep forever
@@ -14,13 +15,14 @@ int main(int argc, char *argv[]) {
 
   EFUArgs opts(argc, argv);
 
-  std::cout << "Launching EFU as Instrument " << opts.det << std::endl;
+  cout << "Launching EFU as Instrument " << opts.det << endl;
 
   Loader dynamic(opts.det);
   if (dynamic.detector == NULL) {
-    printf("Detector not loadable, exiting..\n");
+    cout << "Detector not loadable, exiting..." << endl;
     exit(1);
   }
+
   Launcher(&dynamic, &opts, 12, 13, 14);
 
   while (1) {
