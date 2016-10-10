@@ -25,6 +25,7 @@ public:
   NMX() { cout << "    NMX created" << endl; };
   ~NMX() { cout << "    NMX destroyed" << endl; };
   virtual void test() { cout << "    NMX tested" << endl; };
+
 private:
   std::queue<int> queue1;
   std::priority_queue<float> queue2;

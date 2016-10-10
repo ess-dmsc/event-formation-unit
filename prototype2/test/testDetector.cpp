@@ -24,15 +24,13 @@ TestDetectorFactory Factory;
 /** Test fixture and tests below */
 
 class DetectorTest : public ::testing::Test {
-  virtual void SetUp() {det = Factory.create();}
+  virtual void SetUp() { det = Factory.create(); }
+
 protected:
-  Detector * det;
+  Detector *det;
 };
 
-
-TEST_F(DetectorTest, Factory) {
-  ASSERT_TRUE(det != NULL);
-}
+TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != NULL); }
 
 TEST_F(DetectorTest, DefaultThreads) {
   testing::internal::CaptureStdout();

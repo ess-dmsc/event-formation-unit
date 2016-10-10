@@ -7,10 +7,10 @@ public:
   EFUArgs(int argc, char *argv[]);
 
   std::string dest_ip{"127.0.0.1"}; /**< used for data generators */
-  int port{9000};     /**< udp receive port */
-  int buflen{9000};   /**< rx buffer length (B) */
-  int rcvbuf{1000000}; /**< socket rx buffer size (rmem_max) */
-  int sndbuf{1000000}; /**< soxket tx buffer size (wmem_max) */
+  int port{9000};                   /**< udp receive port */
+  int buflen{9000};                 /**< rx buffer length (B) */
+  int rcvbuf{1000000};              /**< socket rx buffer size (rmem_max) */
+  int sndbuf{1000000};              /**< soxket tx buffer size (wmem_max) */
 
   unsigned int updint{1};             /**< update interval (s) */
   unsigned int stopafter{0xffffffff}; /**< 'never' stop */
