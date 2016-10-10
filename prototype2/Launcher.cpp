@@ -5,6 +5,9 @@
 #include <cassert>
 #include <thread>
 
+/** Can't call detector threads directly from std:thread as
+ *  they are virtual functions, so need to add one step.
+ */
 void Launcher::input_thread(Loader *load, EFUArgs *args) {
   load->detector->input_thread(args);
 }
@@ -17,6 +20,7 @@ void Launcher::output_thread(Loader *load, EFUArgs *args) {
   load->detector->output_thread(args);
 }
 
+/** Create a thread 'func()', set its cpu affinity and calls join() */
 void Launcher::launch(int lcore, void (*func)(Loader *, EFUArgs *), Loader *ld,
                       EFUArgs *args) {
   cpu_set_t cpuset;
@@ -30,6 +34,7 @@ void Launcher::launch(int lcore, void (*func)(Loader *, EFUArgs *), Loader *ld,
   assert(s == 0);
   t->join();
 }
+
 
 Launcher::Launcher(Loader *dynamic, EFUArgs *args, int input, int processing,
                    int output) {

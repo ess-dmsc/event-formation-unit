@@ -12,6 +12,7 @@ private:
   static void input_thread(Loader *load, EFUArgs *args);
   static void processing_thread(Loader *load, EFUArgs *args);
   static void output_thread(Loader *load, EFUArgs *args);
+
   void launch(int lcore, void (*func)(Loader *, EFUArgs *), Loader *ld,
               EFUArgs *args);
 };

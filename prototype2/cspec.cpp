@@ -11,6 +11,10 @@ const char *classname = "CSPEC Object";
 
 class CSPEC : public Detector {
 public:
+  CSPEC() {};
+
+  ~CSPEC() {};
+
   void input_thread(void *a) {
     static int ctr = 0;
     while (1) {
@@ -18,16 +22,11 @@ public:
       sleep(1);
     }
   }
-  CSPEC() { cout << "    CSPEC created" << endl; };
-  ~CSPEC() { cout << "    CSPEC destroyed" << endl; };
 };
 
 class CSPECFactory : public DetectorFactory {
 public:
-  Detector *create() {
-    cout << "    making CSPEC" << endl;
-    return new CSPEC;
-  }
+  Detector *create() { return new CSPEC; }
 };
 
 CSPECFactory Factory;

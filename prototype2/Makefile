@@ -5,13 +5,19 @@ include Makefile.config
 
 VPATH = ../libs/include
 
-PROGS = efu2 nmx.so cspec.so udpraw.so
+progs = efu2 nmx.so cspec.so udpraw.so
+testprogs = testdetector
 library = ../libs/eventlib.a
 
 src.efu = EFUArgs.cpp Loader.cpp Launcher.cpp
 obj.efu = $(src.efu:%.cpp=%.o)
 
-all: $(PROGS)
+all: $(progs)
+
+test: $(testprogs)
+
+testdetector: test/testDetector.cpp
+	g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
 
 nmx.so: nmx.cpp Detector.h
 	$(cxx) $(cxxflags) -fPIC -shared $< -o $@
@@ -38,4 +44,4 @@ realclean: clean
 	make -C ../libs clean
 
 clean:
-	@rm -f $(obj) $(PROGS) *.log *~ *.gc* gmon.out *.o
+	@rm -f $(obj) $(progs) $(testprogs) *.log *~ *.gc* gmon.out *.o

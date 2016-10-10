@@ -1,6 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
 #include <arpa/inet.h>
+#include <cassert>
 #include <inttypes.h>
 #include <sys/socket.h>
 
@@ -46,7 +47,8 @@ private:
 class UDPServer : public Socket {
 public:
   UDPServer(Endpoint local) : Socket(Socket::type::UDP) {
-    this->local(local.ipaddr, local.port);
+    auto ret = this->local(local.ipaddr, local.port);
+    assert(ret == 0);
   };
 };
 
