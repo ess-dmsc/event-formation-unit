@@ -13,3 +13,4 @@ libs                  | utility classes and unit tests
 multicore_iperf_tests | testing tcp and udp performance across local cores
 udp                   | udp receive tests (bsd socket)
 prototype1            | first simple prototype of a complete processing
+prototype2            | second prototype - dynamic loading of detector pipeline 
