@@ -6,8 +6,10 @@ VPATH = ../libs/include
 progs = efu2 nmx.so cspec.so udpraw.so udprawtx.so
 nmx.so.src = Producer.cpp
 nmx.so.inc = Producer.h
+cspec.so.src = CSPECData.cpp
+cspec.so.inc = CSPECData.h
 
-testprogs = testdetector
+testprogs = testdetector testcspecdata
 library = ../libs/eventlib.a
 
 src.efu = EFUArgs.cpp Loader.cpp Launcher.cpp
@@ -21,9 +23,17 @@ all: $(progs)
 
 test: $(testprogs)
 
-testdetector: test/testDetector.cpp
+testcspecdata: test/testCspecData.cpp CSPECData.cpp CSPECData.h
 	@echo building $@
 	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
+
+testdetector: test/testDetector.cpp Detector.h
+	@echo building $@
+	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
+
+cspec.so: cspec.cpp Detector.h $(cspec.so.src) $(cspc.so.inc)
+	@echo building specific $@
+	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) $< -o $@
 
 %.so: %.cpp Detector.h
 	@echo building $@
