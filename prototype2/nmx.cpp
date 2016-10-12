@@ -37,7 +37,6 @@ private:
   std::mutex m1, m2, mcout;
 };
 
-
 void NMX::input_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
 
@@ -221,7 +220,6 @@ void NMX::output_thread(void *args) {
     }
   }
 }
-
 
 /** ----------------------------------------------------- */
 

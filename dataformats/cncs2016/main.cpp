@@ -104,14 +104,14 @@ int main(int argc, char *argv[]) {
     stat.rx += det.readsz;
 
     if (det.data.eh.header_sig == (int)DetMultiGrid::hdr::HDR) { // Read Header
-      printf("0x%08x\n", *(unsigned int*)&det.data);
+      printf("0x%08x\n", *(unsigned int *)&det.data);
       int nread = det.data.eh.n_words;
       assert(nread == 9);
 
       bzero(rxdata, sizeof(rxdata));
       for (int j = 0; j < nread - 1; j++) {
         if (fread(&det.data, det.readsz, 1, f) > 0) { // Read Data
-          printf("0x%08x\n", *(unsigned int*)&det.data);
+          printf("0x%08x\n", *(unsigned int *)&det.data);
           stat.rx += det.readsz;
 
           if (det.data.dw.data_sig != (int)DetMultiGrid::hdr::DAT) {
@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
 
       // Read Footer
       if (fread(&det.data, det.readsz, 1, f) > 0) {
-        printf("0x%08x\n", *(unsigned int*)&det.data);
+        printf("0x%08x\n", *(unsigned int *)&det.data);
         stat.rx += det.readsz;
 
         if (det.data.ef.footer_sig != (int)DetMultiGrid::hdr::END) {

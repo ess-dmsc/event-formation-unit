@@ -12,11 +12,10 @@ public:
     unsigned int time{0};
   };
 
-
-  CSPECData(char * buffer, int size);
+  CSPECData(char *buffer, int size);
 
   /** Generate simulated data, place in user specified buffer */
-  static int generate(char * buffer, int size, int elems);
+  static int generate(char *buffer, int size, int elems);
 
   Data data;
   uint64_t ierror{0};

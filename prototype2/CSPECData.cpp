@@ -11,9 +11,8 @@ struct multi_grid {
   unsigned int footer;
 } __attribute__((packed));
 
-
-CSPECData::CSPECData(char * buffer, int size) {
-  while (size >= 4*10) { // Enough data for processing
+CSPECData::CSPECData(char *buffer, int size) {
+  while (size >= 4 * 10) { // Enough data for processing
 
     auto mg = (struct multi_grid *)buffer;
 
@@ -47,7 +46,7 @@ CSPECData::CSPECData(char * buffer, int size) {
     }
     dataq.push(data);
     idata++;
-    size -= 4*10;
+    size -= 4 * 10;
   }
 
   if (size != 0) {
@@ -56,19 +55,19 @@ CSPECData::CSPECData(char * buffer, int size) {
 }
 
 /** first multi grid data generator - valid headers, all zero data*/
-int CSPECData::generate(char * buffer, int size, int elems) {
+int CSPECData::generate(char *buffer, int size, int elems) {
   int bytes = 0;
   auto mg = (struct multi_grid *)buffer;
-  while ((size >= 40) && elems) { //FIXME hardcoded
-      mg->header = 0x40000009;
-      for (int i = 0; i != 8; ++i) {
-        mg->data[i] =0x00000000;
-      }
-      mg->footer = 0xc0000000;
-      mg++;
-      elems--;
-      size-= 40; //FIXME hardcoded
-      bytes += 40; //FIXME hardcoded
+  while ((size >= 40) && elems) { // FIXME hardcoded
+    mg->header = 0x40000009;
+    for (int i = 0; i != 8; ++i) {
+      mg->data[i] = 0x00000000;
+    }
+    mg->footer = 0xc0000000;
+    mg++;
+    elems--;
+    size -= 40;  // FIXME hardcoded
+    bytes += 40; // FIXME hardcoded
   }
   return bytes;
 }
