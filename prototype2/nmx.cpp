@@ -15,22 +15,28 @@
 
 using namespace std;
 
-const char *classname = "NMX Object";
+const char *classname = "NMX Detector";
+
+/** ----------------------------------------------------- */
 
 class NMX : public Detector {
 public:
   void input_thread(void *args);
+
   void processing_thread(void *args);
+
   void output_thread(void *args);
+
   NMX() { cout << "    NMX created" << endl; };
+
   ~NMX() { cout << "    NMX destroyed" << endl; };
-  virtual void test() { cout << "    NMX tested" << endl; };
 
 private:
   std::queue<int> queue1;
   std::priority_queue<float> queue2;
   std::mutex m1, m2, mcout;
 };
+
 
 void NMX::input_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
@@ -216,7 +222,9 @@ void NMX::output_thread(void *args) {
   }
 }
 
-/** */
+
+/** ----------------------------------------------------- */
+
 class NMXFactory : DetectorFactory {
 public:
   NMX *create() {

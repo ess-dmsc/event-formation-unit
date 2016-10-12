@@ -10,7 +10,9 @@
 #include <unistd.h>
 
 using namespace std;
-const char *classname = "UDPRaw Object";
+const char *classname = "UDPRaw Detector";
+
+/** ----------------------------------------------------- */
 
 class UDPRaw : public Detector {
 public:
@@ -24,7 +26,6 @@ void UDPRaw::input_thread(void *args) {
   uint64_t rx_total = 0;
   uint64_t rx = 0;
   uint64_t rxp = 0;
-  const int intervalUs = 1000000;
   const int B1M = 1000000;
 
   assert(args != NULL);
@@ -46,11 +47,11 @@ void UDPRaw::input_thread(void *args) {
     if ((rxp % 100) == 0)
       usecs = upd.timeus();
 
-    if (usecs >= intervalUs) {
+    if (usecs >= 1000000) {
       rx_total += rx;
       printf("Rx rate: %.2f Mbps, rx %" PRIu64 " MB (total: %" PRIu64
              " MB) %ld usecs\n",
-             rx * 8.0 / (usecs / 1000000.0) / B1M, rx / B1M, rx_total / B1M,
+             rx * 8.0 / usecs, rx / B1M, rx_total / B1M,
              usecs);
       rx = 0;
       upd.now();
@@ -59,7 +60,9 @@ void UDPRaw::input_thread(void *args) {
   }
 }
 
-/** */
+
+/** ----------------------------------------------------- */
+
 class UDPRawFactory : public DetectorFactory {
 public:
   Detector *create() {
