@@ -75,6 +75,26 @@ for (auto v : err_size) {
   }
 }
 
+TEST_F(CspecDataTest, ValidateGenerator) {
+  char buffer[9000];
+  int size;
+  for (int i = 1; i < 225; i++) {
+    size = CSPECData::generate(buffer, 9000, i);
+    CSPECData dat(buffer, size);
+    ASSERT_EQ(dat.idata, i);
+    ASSERT_EQ(dat.ifrag, 0);
+    ASSERT_EQ(dat.ierror, 0);
+  }
+
+  /** Test for oversize specification */
+  size = CSPECData::generate(buffer, 9000, 300);
+  CSPECData dat(buffer, size);
+  ASSERT_EQ(dat.idata, 225);
+  ASSERT_EQ(dat.ifrag, 0);
+  ASSERT_EQ(dat.ierror, 0);
+}
+
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
