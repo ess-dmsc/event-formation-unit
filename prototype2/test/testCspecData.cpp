@@ -12,8 +12,8 @@ protected:
   char buffer[9000];
   int size;
 
-  virtual void SetUp() {dat = new CSPECData;}
-  virtual void TearDown() {delete dat;}
+  virtual void SetUp() { dat = new CSPECData; }
+  virtual void TearDown() { delete dat; }
 
   void assertdatfragerr(int data, int frag, int error) {
     ASSERT_EQ(dat->elems, data);
@@ -35,7 +35,6 @@ TEST_F(CspecDataTest, ValidData) {
     }
   }
 }
-
 
 TEST_F(CspecDataTest, InvalidData) {
   for (auto v : err_pkt) {
@@ -60,7 +59,7 @@ TEST_F(CspecDataTest, ValidateGenerator) {
     assertdatfragerr(i, 0, 0);
   }
 }
-  /** Test for oversize specification */
+/** Test for oversize specification */
 TEST_F(CspecDataTest, GeneratorOversize) {
   size = dat->generate(buffer, 9000, 300);
   dat->receive(buffer, size);
@@ -69,7 +68,7 @@ TEST_F(CspecDataTest, GeneratorOversize) {
 
 TEST_F(CspecDataTest, InputFilterConstructor) {
   size = err_below_thresh.size() * 4;
-  dat->receive((char*)&err_below_thresh[0], size);
+  dat->receive((char *)&err_below_thresh[0], size);
   assertdatfragerr(size / dat->datasize, 0, 0);
   int discard = dat->input_filter();
   ASSERT_EQ(discard, 2);

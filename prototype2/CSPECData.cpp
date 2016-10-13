@@ -64,7 +64,6 @@ int CSPECData::receive(const char *buffer, int size) {
   return elems;
 }
 
-
 int CSPECData::input_filter() {
   int discarded = 0;
   if (elems == 0)
