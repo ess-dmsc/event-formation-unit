@@ -34,8 +34,9 @@ public:
   /** Generate simulated data, place in user specified buffer */
   int generate(char *buffer, int size, int elems);
 
+  // This data is overwritten on receive()
   struct mgd data[250];
-  uint64_t ierror{0};
-  uint64_t idata{0};
-  uint64_t ifrag{0};
+  unsigned int elems{0};
+  unsigned int error{0};
+  unsigned int frag{0};
 };

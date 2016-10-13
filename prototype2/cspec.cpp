@@ -42,6 +42,8 @@ void CSPEC::input_thread(void *args) {
   uint64_t rx = 0;
   uint64_t rx_total = 0;
   uint64_t rxp = 0;
+  uint64_t ierror = 0;
+  uint64_t idata = 0;
   int rdsize;
 
   CSPECData dat;
@@ -53,6 +55,9 @@ void CSPEC::input_thread(void *args) {
       rxp++;
 
       dat.receive(buffer, rdsize);
+      ierror += dat.error;
+      idata += dat.elems;
+      dat.input_filter();
     }
     rx += rdsize;
 
@@ -66,8 +71,8 @@ void CSPEC::input_thread(void *args) {
         printf(
             "input     : %8.2f Mb/s, q1: %3d, rxpkt: %9d, rxbytes: %12" PRIu64
             ", errors: %" PRIu64 ", events: %" PRIu64 "\n",
-            rx * 8.0 / usecs, 0, (unsigned int)rxp, rx_total, dat.ierror,
-            dat.idata);
+            rx * 8.0 / usecs, 0, (unsigned int)rxp, rx_total, ierror,
+            idata);
         fflush(stdout);
         mcout.unlock();
 

@@ -12,8 +12,10 @@ struct multi_grid {
 } __attribute__((packed));
 
 int CSPECData::receive(const char *buffer, int size) {
-  int elems = 0;
-  int error = 0;
+  elems = 0;
+  error = 0;
+  frag = 0;
+
   auto mgp = (struct multi_grid *)buffer;
 
   while (size >= datasize) { // Enough data for processing
@@ -43,6 +45,8 @@ int CSPECData::receive(const char *buffer, int size) {
       }
       data[elems].d[i] = mgp->data[i] && 0x3fff;
     }
+    if (error)
+      break;
 
     // At this point we have a full dataset
     elems++;
@@ -51,14 +55,11 @@ int CSPECData::receive(const char *buffer, int size) {
   }
 
   if (error) {
-    ierror++;
     return elems;
   }
 
-  idata += elems;
-
   if (size != 0) {
-    ifrag++;
+    frag = 1;
   }
   return elems;
 }
@@ -66,10 +67,10 @@ int CSPECData::receive(const char *buffer, int size) {
 
 int CSPECData::input_filter() {
   int discarded = 0;
-  if (idata == 0)
+  if (elems == 0)
     return discarded;
 
-  for (unsigned int i = 0; i < idata; i++) {
+  for (unsigned int i = 0; i < elems; i++) {
     if ((data[i].d[0] < wire_thresh) || (data[i].d[4] < grid_thresh)) {
       discarded++;
       // TODO clear data
