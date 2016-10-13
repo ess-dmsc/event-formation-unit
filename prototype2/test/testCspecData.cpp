@@ -23,13 +23,19 @@ protected:
 };
 
 /** Test cases below */
+TEST_F(CspecDataTest, Constructor) {
+  assertdatfragerr(0,0,0);
+  ASSERT_LT(dat->wire_thresh, 16384);
+  ASSERT_LT(dat->grid_thresh, 16384);
+  ASSERT_EQ(dat->datasize, 40);
+}
 
 TEST_F(CspecDataTest, ValidData) {
   for (auto v : ok) {
     size = v.size() * 4;
     dat->receive((char *)&v[0], size);
-    ASSERT_EQ(dat->elems, size / dat->datasize);
     assertdatfragerr(size / dat->datasize, 0, 0);
+
     for (unsigned int i = 0; i < (dat->elems); i++) {
       ASSERT_EQ(dat->data[i].module, i);
     }
