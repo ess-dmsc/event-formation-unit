@@ -1,14 +1,14 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <CSPECData.h>
 #include "CSPECTestData.h"
+#include <CSPECData.h>
 #include <gtest/gtest.h>
 
 using namespace std;
 
 class CspecDataTest : public ::testing::Test {
 protected:
-  CSPECData * dat;
+  CSPECData *dat;
 
   void assertdatfragerr(int data, int frag, int error) {
     ASSERT_EQ(dat->idata, data);
@@ -25,7 +25,7 @@ TEST_F(CspecDataTest, ValidData) {
     int size = v.size() * 4;
     dat = new CSPECData;
     dat->receive((char *)&v[0], size);
-    assertdatfragerr(size/dat->datasize, 0, 0);
+    assertdatfragerr(size / dat->datasize, 0, 0);
     for (unsigned int i = 0; i < (dat->idata); i++) {
       ASSERT_EQ(dat->data[i].module, i);
     }
@@ -44,9 +44,9 @@ TEST_F(CspecDataTest, InvalidData) {
 TEST_F(CspecDataTest, OverUndersizeData) {
   for (auto v : err_size) {
     dat = new CSPECData;
-    int size = v.size() *4;
+    int size = v.size() * 4;
     dat->receive((char *)&v[0], size);
-    assertdatfragerr(size/dat->datasize, 1, 0);
+    assertdatfragerr(size / dat->datasize, 1, 0);
   }
 }
 

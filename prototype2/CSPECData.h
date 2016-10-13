@@ -5,15 +5,16 @@
 
 class CSPECData {
 public:
-  // See "multi grid detector data processing.docx" from DMG's Event Formation Files
+  // See "multi grid detector data processing.docx" from DMG's Event Formation
+  // Files
   static const int datasize = 40;
   static const unsigned int header_mask = 0xc0000000;
-  static const unsigned int header_id=  0x40000000;
-  static const unsigned int data_id =   0x00000000;
+  static const unsigned int header_id = 0x40000000;
+  static const unsigned int data_id = 0x00000000;
   static const unsigned int footer_id = 0xc0000000;
   static const unsigned int nwords = 9;
 
-  struct mgd {  // multi grid data
+  struct mgd { // multi grid data
     unsigned int module;
     unsigned int d[8];
     unsigned int time;

@@ -66,7 +66,8 @@ void CSPEC::input_thread(void *args) {
         printf(
             "input     : %8.2f Mb/s, q1: %3d, rxpkt: %9d, rxbytes: %12" PRIu64
             ", errors: %" PRIu64 ", events: %" PRIu64 "\n",
-            rx * 8.0 / usecs, 0, (unsigned int)rxp, rx_total, dat.ierror, dat.idata);
+            rx * 8.0 / usecs, 0, (unsigned int)rxp, rx_total, dat.ierror,
+            dat.idata);
         fflush(stdout);
         mcout.unlock();
 

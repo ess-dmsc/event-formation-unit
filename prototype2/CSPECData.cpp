@@ -20,7 +20,7 @@ int CSPECData::receive(const char *buffer, int size) {
 
     /** Header processing */
     if ((mgp->header & header_mask) != header_id) {
-      error=1;
+      error = 1;
       break;
     }
 
@@ -29,7 +29,8 @@ int CSPECData::receive(const char *buffer, int size) {
       break;
     }
     data[elems].module = (mgp->header >> 16) & 0xff;
-    //printf("data[%d].module == %d (header %08x)\n", elems, data[elems].module, mgp->header);
+    // printf("data[%d].module == %d (header %08x)\n", elems,
+    // data[elems].module, mgp->header);
 
     /** Footer processing */
     if ((mgp->footer & header_mask) != footer_id) {
