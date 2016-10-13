@@ -3,7 +3,10 @@
 #include <Detector.h>
 #include <Launcher.h>
 #include <cassert>
+#include <iostream>
 #include <thread>
+
+using namespace std;
 
 /** Can't call detector threads directly from std:thread as
  *  they are virtual functions, so need to add one step.
@@ -32,11 +35,14 @@ void Launcher::launch(int lcore, void (*func)(Loader *, EFUArgs *), Loader *ld,
   int s =
       pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
   assert(s == 0);
-  // t->join();
 }
 
 Launcher::Launcher(Loader *dynamic, EFUArgs *args, int input, int processing,
                    int output) {
+  if (dynamic->detector == NULL) {
+    cout << "Detector not loadable, no processing ..." << endl;
+    return;
+  }
   launch(input, input_thread, dynamic, args);
   launch(output, output_thread, dynamic, args);
   launch(processing, processing_thread, dynamic, args);

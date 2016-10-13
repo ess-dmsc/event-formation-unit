@@ -18,10 +18,6 @@ int main(int argc, char *argv[]) {
   cout << "Launching EFU as Instrument " << opts.det << endl;
 
   Loader dynamic(opts.det);
-  if (dynamic.detector == NULL) {
-    cout << "Detector not loadable, exiting..." << endl;
-    exit(1);
-  }
 
   Launcher(&dynamic, &opts, 12, 13, 14);
 

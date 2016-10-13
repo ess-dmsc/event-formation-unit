@@ -26,8 +26,7 @@ public:
   void input_thread(void *a);
 
 private:
-  std::mutex i2pqm, mcout;
-  std::queue<CSPECData::Data> i2pq;
+  std::mutex mcout;
 };
 
 void CSPEC::input_thread(void *args) {
@@ -44,8 +43,8 @@ void CSPEC::input_thread(void *args) {
   uint64_t rx_total = 0;
   uint64_t rxp = 0;
   int rdsize;
-  uint64_t ierrors = 0;
 
+  CSPECData dat;
   Timer upd, stop;
   for (;;) {
 
@@ -53,8 +52,7 @@ void CSPEC::input_thread(void *args) {
     if ((rdsize = cspecdata.receive(buffer, opts->buflen)) > 0) {
       rxp++;
 
-      CSPECData dat(buffer, rdsize);
-      ierrors += dat.ierror;
+      dat.receive(buffer, rdsize);
     }
     rx += rdsize;
 
@@ -67,8 +65,8 @@ void CSPEC::input_thread(void *args) {
         mcout.lock();
         printf(
             "input     : %8.2f Mb/s, q1: %3d, rxpkt: %9d, rxbytes: %12" PRIu64
-            ", errors: %" PRIu64 "\n",
-            rx * 8.0 / usecs, 0, (unsigned int)rxp, rx_total, ierrors);
+            ", errors: %" PRIu64 ", events: %" PRIu64 "\n",
+            rx * 8.0 / usecs, 0, (unsigned int)rxp, rx_total, dat.ierror, dat.idata);
         fflush(stdout);
         mcout.unlock();
 

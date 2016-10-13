@@ -3,12 +3,12 @@
 
 include Makefile.config
 
-VPATH = ../libs/include
+VPATH = ../libs/include ../prototype2
 
 PROGS = bulkdatagen efu
 library = ../libs/eventlib.a
 
-src.datagen = DGArgs.cpp
+src.datagen = DGArgs.cpp ../prototype2/CSPECData.cpp
 obj.datagen =$(src.datagen:%.cpp=%.o)
 
 src.efu = EFUArgs.cpp Producer.cpp

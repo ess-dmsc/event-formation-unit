@@ -1,7 +1,7 @@
 # Copyright (C) 2016 European Spallation Source
 #
 
-VPATH = ../libs/include
+VPATH = ../libs/include test
 
 progs = efu2 nmx.so cspec.so udpraw.so udprawtx.so
 nmx.so.src = Producer.cpp
@@ -23,7 +23,7 @@ all: $(progs)
 
 test: $(testprogs)
 
-testcspecdata: test/testCspecData.cpp CSPECData.cpp CSPECData.h
+testcspecdata: test/testCspecData.cpp CSPECData.cpp CSPECData.h CSPECTestData.h
 	@echo building $@
 	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
 
