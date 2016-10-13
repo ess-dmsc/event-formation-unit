@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
       exit(0);
     }
     // Generate Tx buffer
-    //std::memcpy(buffer, &seqno, sizeof(seqno));
+    //std::memcpy(buffer, &seqno, sizeof(seqno)); // For NMX
 
     // Send
 
@@ -58,8 +58,8 @@ int main(int argc, char *argv[]) {
     }
 
 #if 0
-    if ((txp % 10000) == 0) {   // Currently this givea approx 10Gbit/s - consider making is an option
-      usleep(25000);
+    if ((txp % 10000) == 0) {
+      usleep(15000);
     }
 #endif
 
