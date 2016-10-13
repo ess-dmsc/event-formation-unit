@@ -67,6 +67,15 @@ TEST_F(CspecDataTest, ValidateGenerator) {
   assertdatfragerr(225, 0, 0);
 }
 
+TEST_F(CspecDataTest, InputFilterConstructor) {
+  dat = new CSPECData;
+  int size = err_below_thresh.size() * 4;
+  dat->receive((char*)&err_below_thresh[0], size);
+  assertdatfragerr(size / dat->datasize, 0, 0);
+  int discard = dat->input_filter();
+  ASSERT_EQ(discard, 2);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

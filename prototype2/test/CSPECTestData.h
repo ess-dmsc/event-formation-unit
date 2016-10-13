@@ -94,6 +94,15 @@ vector<unsigned int> err_long
   0x0407002c, 0xc00211dd, 0x40010009
 };
 
+vector<unsigned int> err_below_thresh
+{ //                   *           *
+  0x40000009, 0x0400000f, 0x0400000f, 0x0402028f, 0x0403002b,
+  0x040402d3, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd,
+  0x40010009, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b,
+  //       *
+  0x04040003, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd
+};
+
 // clang-format on
 
 /** Raw packet data above, now collect into iterable containers */

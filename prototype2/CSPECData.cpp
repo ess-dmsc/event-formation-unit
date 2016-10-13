@@ -17,20 +17,16 @@ int CSPECData::receive(const char *buffer, int size) {
   auto mgp = (struct multi_grid *)buffer;
 
   while (size >= datasize) { // Enough data for processing
-
     /** Header processing */
     if ((mgp->header & header_mask) != header_id) {
       error = 1;
       break;
     }
-
     if ((mgp->header & 0xfff) != nwords) {
       error = 1;
       break;
     }
     data[elems].module = (mgp->header >> 16) & 0xff;
-    // printf("data[%d].module == %d (header %08x)\n", elems,
-    // data[elems].module, mgp->header);
 
     /** Footer processing */
     if ((mgp->footer & header_mask) != footer_id) {
@@ -65,6 +61,27 @@ int CSPECData::receive(const char *buffer, int size) {
     ifrag++;
   }
   return elems;
+}
+
+
+int CSPECData::input_filter() {
+  int discarded = 0;
+  if (idata == 0)
+    return discarded;
+
+  for (unsigned int i = 0; i < idata; i++) {
+    if ((data[i].d[0] < wire_thresh) || (data[i].d[4] < grid_thresh)) {
+      discarded++;
+      // TODO clear data
+      continue;
+    }
+    if ((data[i].d[1] < wire_thresh) || (data[i].d[5] < grid_thresh)) {
+      discarded++;
+      // TODO clear data
+      continue;
+    }
+  }
+  return discarded;
 }
 
 /** first multi grid data generator - valid headers, all zero data*/
