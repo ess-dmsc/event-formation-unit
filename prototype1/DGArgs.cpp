@@ -17,7 +17,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
         {"data", required_argument, 0, 'd'},
         {"port", required_argument, 0, 'p'},
         {"size", required_argument, 0, 's'},
-        {"tuples", required_argument, 0, 't'},
+        {"throttle", required_argument, 0, 't'},
         {"update", required_argument, 0, 'u'},
         {"sndbuf", required_argument, 0, 'x'},
         {"help", no_argument, 0, 'h'},
@@ -46,7 +46,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
       txGB = atoi(optarg);
       break;
     case 't':
-      vmmtuples = atoi(optarg);
+      speed_level = atoi(optarg);
       break;
     case 'u':
       updint = atoi(optarg);
@@ -57,7 +57,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
     case 'h':
     default:
       printf("Usage: bulkdatagen [OPTIONS] \n");
-      printf(" --tuples -t tuples     number of data tuples in each UDP packet "
+      printf(" --throttle -t val      speed throttle (0 fastest, then slower) "
              "\n");
       printf(" --size -s size         size in GB of transmitted data \n");
       printf(" --ipaddr -i ipaddr     destination ip address \n");
@@ -72,7 +72,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
   }
   printf("Generating a bulk data stream\n");
   printf("  number of bytes:        %d GB\n", txGB);
-  printf("  data tuples per packet: %d\n", vmmtuples);
+  printf("  speed throttle:         %d\n", speed_level);
   printf("Network properties\n");
   printf("  destination ip address: %s\n", dest_ip.c_str());
   printf("  destination udp port:   %d\n", port);

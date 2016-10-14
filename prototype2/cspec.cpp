@@ -38,6 +38,7 @@ void CSPEC::input_thread(void *args) {
   cspecdata.buflen(opts->buflen);
   cspecdata.setbuffers(0, opts->rcvbuf);
   cspecdata.printbuffers();
+  cspecdata.settimeout(1); // One second
 
   char buffer[9000];
   uint64_t rx = 0;
@@ -60,8 +61,8 @@ void CSPEC::input_thread(void *args) {
       ierror += dat.error;
       idata += dat.elems;
       dat.input_filter();
+      rx += rdsize;
     }
-    rx += rdsize;
 
     /** This is the periodic reporting*/
     if (unlikely(((tsc - tsc0) / 2400 >= opts->updint * 1000000))) {

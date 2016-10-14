@@ -23,6 +23,7 @@ public:
 
   int setbuffers(int sndbuf, int rcvbuf);
   void printbuffers(void);
+  int settimeout(int seconds);
 
   void local(const char *ipaddr, int port);
   void remote(const char *ipaddr, int port);
@@ -41,7 +42,7 @@ private:
   char buffer_[buflen_max];
 
   int getopt(int option);
-  int setopt(int option, int value);
+  int setopt(int option, void *value, int size);
 };
 
 class UDPServer : public Socket {

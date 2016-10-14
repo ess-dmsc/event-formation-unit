@@ -20,15 +20,22 @@ Socket::Socket(Socket::type stype) {
 int Socket::setbuffers(int sndbuf, int rcvbuf) {
   int res = 0;
   if (sndbuf)
-    res += setopt(SO_SNDBUF, sndbuf);
+    res += setopt(SO_SNDBUF, &sndbuf, sizeof(sndbuf));
   if (rcvbuf)
-    res += setopt(SO_RCVBUF, rcvbuf);
+    res += setopt(SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
   return res;
 }
 
 void Socket::printbuffers(void) {
   cout << "Socket rcv buffer size: " << getopt(SO_RCVBUF) << endl;
   cout << "Socket snd buffer size: " << getopt(SO_SNDBUF) << endl;
+}
+
+int Socket::settimeout(int seconds) {
+  struct timeval timeout;
+  timeout.tv_sec = seconds;
+  timeout.tv_usec = 0;
+  return setopt(SO_RCVTIMEO, &timeout, sizeof(timeout));
 }
 
 int Socket::buflen(uint16_t buflen) {
@@ -109,16 +116,9 @@ int Socket::receive() {
 
 /** */
 int Socket::receive(void *buffer, int buflen) {
-  int recv_len;
   socklen_t slen = 0;
   // try to receive some data, this is a blocking call
-  if ((recv_len = recvfrom(s_, buffer, buflen, 0, (struct sockaddr *)&remote_,
-                           &slen)) < 0) {
-    printf("Receive() failed: %d (sockt fd %d)\n", recv_len, s_);
-    perror("recvfrom: ");
-    return 0;
-  }
-  return recv_len;
+  return recvfrom(s_, buffer, buflen, 0, (struct sockaddr *)&remote_, &slen);
 }
 
 //
@@ -137,10 +137,9 @@ int Socket::getopt(int option) {
   return optval;
 }
 
-int Socket::setopt(int option, int value) {
+int Socket::setopt(int option, void *value, int size) {
   int ret;
-  if ((ret = setsockopt(s_, SOL_SOCKET, option, (void *)&value,
-                        sizeof(value))) < 0) {
+  if ((ret = setsockopt(s_, SOL_SOCKET, option, value, size)) < 0) {
     cout << "setsockopt() failed" << endl;
   }
   return ret;

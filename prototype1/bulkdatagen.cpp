@@ -36,10 +36,12 @@ int main(int argc, char *argv[]) {
   uint64_t tx = 0;
   uint64_t txp = 0;
   uint64_t tsc0 = rdtsc();
+  uint64_t tsc1 = rdtsc();
   uint64_t tsc;
   for (;;) {
     tsc = rdtsc();
-    if ((tx_total + tx) >= (long unsigned int)opts.txGB * 1000000000) {
+    if (unlikely((tx_total + tx) >=
+                 (long unsigned int)opts.txGB * 1000000000)) {
       cout << "Sent " << tx_total + tx << " bytes." << endl;
       cout << "done" << endl;
       exit(0);
@@ -47,8 +49,13 @@ int main(int argc, char *argv[]) {
     // Generate Tx buffer
     // std::memcpy(buffer, &seqno, sizeof(seqno)); // For NMX
 
-    // Send
+    // Sleep to throttle down speed
+    if (unlikely((tsc - tsc1) >= 2400UL * 10000)) {
+      usleep(opts.speed_level * 1000);
+      tsc1 = rdtsc();
+    }
 
+    // Send data
     tx += DataSource.send(buffer, size);
     if (tx > 0) {
       txp++;
@@ -63,7 +70,7 @@ int main(int argc, char *argv[]) {
     }
 #endif
 
-    if (((tsc - tsc0) / 2400) >= opts.updint * 1000000) {
+    if (unlikely(((tsc - tsc0) / 2400) >= opts.updint * 1000000)) {
       tx_total += tx;
       printf("Tx rate: %8.2f Mbps, tx %5" PRIu64 " MB (total: %7" PRIu64
              " MB) %ld usecs\n",
