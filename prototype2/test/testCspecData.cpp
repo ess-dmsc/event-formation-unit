@@ -2,11 +2,11 @@
 
 #include "CSPECTestData.h"
 #include <CSPECData.h>
-#include <gtest/gtest.h>
+#include "TestBase.h"
 
 using namespace std;
 
-class CspecDataTest : public ::testing::Test {
+class CspecDataTest : public TestBase {
 protected:
   CSPECData *dat;
   char buffer[9000];

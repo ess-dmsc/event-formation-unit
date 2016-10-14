@@ -1,7 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
 #include <Detector.h>
-#include <gtest/gtest.h>
+#include "TestBase.h"
 
 using namespace std;
 
@@ -23,10 +23,9 @@ TestDetectorFactory Factory;
 
 /** Test fixture and tests below */
 
-class DetectorTest : public ::testing::Test {
-  virtual void SetUp() { det = Factory.create(); }
-
+class DetectorTest : public TestBase {
 protected:
+  virtual void SetUp() { det = Factory.create(); }
   Detector *det;
 };
 

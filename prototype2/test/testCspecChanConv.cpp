@@ -1,16 +1,20 @@
 /** Copyright (C) 2016 European Spallation Source */
 
 #include <CSPECChanConv.h>
-#include <gtest/gtest.h>
+#include "TestBase.h"
 
 using namespace std;
 
-class CspecChanConvTest : public ::testing::Test {
+
+
+class CspecChanConvTest : public TestBase {
 protected:
   CSPECChanConv conv;
 };
 
 /** Test cases below */
+
+/** checking that arrays are cleared before use */
 TEST_F(CspecChanConvTest, Constructor) {
   for (int i = 0; i < CSPECChanConv::adcsize; i++) {
     ASSERT_EQ(conv.getWireId(i), 0) << "wrong wire id conversion at adc value "
@@ -20,7 +24,12 @@ TEST_F(CspecChanConvTest, Constructor) {
   }
 }
 
+/** test invalid ranges and resolutions */
 TEST_F(CspecChanConvTest, InvalidCalibrationParms) {
+  {
+    MESSAGE() << "ANother hello" << endl;
+  }
+
   int ret = conv.makewirecal(20000, 20500, 128);
   ASSERT_EQ(ret, -1);
 
@@ -34,6 +43,7 @@ TEST_F(CspecChanConvTest, InvalidCalibrationParms) {
   ASSERT_EQ(ret, -1);
 }
 
+/** Test boundaries of adc channel data */
 TEST_F(CspecChanConvTest, GenerateCalibration) {
   int ret = conv.makewirecal(400, 2000, 128);
   ASSERT_EQ(ret, 0);

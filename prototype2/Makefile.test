@@ -7,7 +7,7 @@ test: $(testprogs)
 	echo "done building tests"
 
 runtest: test
-	for test in $(testprogs) ; do ./$$test ; done
+	for test in $(testprogs) ; do ./$$test --gtest_output=xml:$$test.xml ; done
 
 testcspecchanconv: test/testCspecChanConv.cpp CSPECChanConv.cpp CSPECChanConv.h
 	@echo building $@
