@@ -1,0 +1,22 @@
+# Copyright (C) 2016 European Spallation Source
+#
+
+testprogs = testdetector testcspecdata testcspecchanconv
+
+test: $(testprogs)
+	echo "done building tests"
+
+runtest: test
+	for test in $(testprogs) ; do ./$$test ; done
+
+testcspecchanconv: test/testCspecChanConv.cpp CSPECChanConv.cpp CSPECChanConv.h
+	@echo building $@
+	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
+
+testcspecdata: test/testCspecData.cpp CSPECData.cpp CSPECData.h CSPECTestData.h
+	@echo building $@
+	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
+
+testdetector: test/testDetector.cpp Detector.h
+	@echo building $@
+	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread

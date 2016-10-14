@@ -6,30 +6,22 @@ VPATH = ../libs/include test
 progs = efu2 nmx.so cspec.so udpraw.so udprawtx.so
 nmx.so.src = Producer.cpp
 nmx.so.inc = Producer.h
-cspec.so.src = CSPECData.cpp
-cspec.so.inc = CSPECData.h
+cspec.so.src = CSPECData.cpp CSPECChanConv.cpp
+cspec.so.inc = CSPECData.h CSPECChanConv.h
 
-testprogs = testdetector testcspecdata
 library = ../libs/eventlib.a
 
 src.efu = EFUArgs.cpp Loader.cpp Launcher.cpp
 obj.efu = $(src.efu:%.cpp=%.o)
 
+.DEFAULT_GOAL = all
+
 include Makefile.config
+include Makefile.test
 
 all: $(progs)
 	@echo done
 	$(Q)chmod 440 *.so
-
-test: $(testprogs)
-
-testcspecdata: test/testCspecData.cpp CSPECData.cpp CSPECData.h CSPECTestData.h
-	@echo building $@
-	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
-
-testdetector: test/testDetector.cpp Detector.h
-	@echo building $@
-	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
 
 cspec.so: cspec.cpp Detector.h $(cspec.so.src) $(cspc.so.inc)
 	@echo building specific $@
