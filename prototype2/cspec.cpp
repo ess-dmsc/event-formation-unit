@@ -5,6 +5,7 @@
 #include <EFUArgs.h>
 #include <Socket.h>
 #include <Timer.h>
+#include <gccintel.h>
 #include <iostream>
 #include <mutex>
 #include <queue>
@@ -47,13 +48,14 @@ void CSPEC::input_thread(void *args) {
   int rdsize;
 
   CSPECData dat;
-  Timer upd, stop;
+  Timer stop;
+  uint64_t tsc0 = rdtsc();
+  uint64_t tsc;
   for (;;) {
-
+    tsc = rdtsc();
     /** this is the processing step */
     if ((rdsize = cspecdata.receive(buffer, opts->buflen)) > 0) {
       rxp++;
-
       dat.receive(buffer, rdsize);
       ierror += dat.error;
       idata += dat.elems;
@@ -62,27 +64,23 @@ void CSPEC::input_thread(void *args) {
     rx += rdsize;
 
     /** This is the periodic reporting*/
-    if (rxp % 100 == 0) {
-      auto usecs = upd.timeus();
-      if (usecs >= opts->updint * 1000000) {
-        rx_total += rx;
+    if (unlikely(((tsc-tsc0)/2400 >= opts->updint * 1000000))) {
+      rx_total += rx;
 
-        mcout.lock();
-        printf(
-            "input     : %8.2f Mb/s, q1: %3d, rxpkt: %9d, rxbytes: %12" PRIu64
-            ", errors: %" PRIu64 ", events: %" PRIu64 "\n",
-            rx * 8.0 / usecs, 0, (unsigned int)rxp, rx_total, ierror, idata);
-        fflush(stdout);
-        mcout.unlock();
+      mcout.lock();
+      printf(
+           "%" PRIu64 " input     : %8.2f Mb/s, q1: %3d, rxpkt: %12" PRIu64 ", rxbytes: %12" PRIu64
+            ", errors: %" PRIu64 ", events: %" PRIu64 "\n", tsc - tsc0,
+            rx * 8.0 / ((tsc-tsc0)/2400), 0, rxp, rx_total, ierror, idata);
+      fflush(stdout);
+      mcout.unlock();
 
-        rx = 0;
+      tsc0 = rdtsc();
+      rx = 0;
 
-        if (stop.timeus() >= opts->stopafter * 1000000) {
-          std::cout << "stopping input thread " << std::endl;
-          return;
-        }
-
-        upd.now();
+      if (stop.timeus() >= opts->stopafter * 1000000) {
+        std::cout << "stopping input thread, timeus" << stop.timeus() << std::endl;
+        return;
       }
     }
   }

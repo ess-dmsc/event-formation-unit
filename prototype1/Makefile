@@ -3,7 +3,7 @@
 
 include Makefile.config
 
-VPATH = ../libs/include ../prototype2
+VPATH = ../libs/include
 
 PROGS = bulkdatagen efu
 library = ../libs/eventlib.a
@@ -17,6 +17,7 @@ obj.efu = $(src.efu:%.cpp=%.o)
 all: $(PROGS)
 
 %.o: %.cpp
+	echo compiling
 	$(cxx) $(cxxflags) $< -c -o $@ $(prof)
 
 $(library):

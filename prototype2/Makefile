@@ -7,7 +7,7 @@ progs = efu2 nmx.so cspec.so udpraw.so udprawtx.so
 nmx.so.src = Producer.cpp
 nmx.so.inc = Producer.h
 cspec.so.src = CSPECData.cpp CSPECChanConv.cpp
-cspec.so.inc = CSPECData.h CSPECChanConv.h
+cspec.so.inc = CSPECData.h CSPECChanConv.h gccintel.h
 
 library = ../libs/eventlib.a
 
