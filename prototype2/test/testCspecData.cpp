@@ -24,7 +24,7 @@ protected:
 
 /** Test cases below */
 TEST_F(CspecDataTest, Constructor) {
-  assertdatfragerr(0,0,0);
+  assertdatfragerr(0, 0, 0);
   ASSERT_LT(dat->wire_thresh, 16384);
   ASSERT_LT(dat->grid_thresh, 16384);
   ASSERT_EQ(dat->datasize, 40);
