@@ -1,11 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <CSPECChanConv.h>
 #include "TestBase.h"
+#include <CSPECChanConv.h>
 
 using namespace std;
-
-
 
 class CspecChanConvTest : public TestBase {
 protected:
@@ -26,9 +24,7 @@ TEST_F(CspecChanConvTest, Constructor) {
 
 /** test invalid ranges and resolutions */
 TEST_F(CspecChanConvTest, InvalidCalibrationParms) {
-  {
-    MESSAGE() << "ANother hello" << endl;
-  }
+  { MESSAGE() << "ANother hello" << endl; }
 
   int ret = conv.makewirecal(20000, 20500, 128);
   ASSERT_EQ(ret, -1);

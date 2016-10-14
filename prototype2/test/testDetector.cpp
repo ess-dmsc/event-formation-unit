@@ -1,7 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <Detector.h>
 #include "TestBase.h"
+#include <Detector.h>
 
 using namespace std;
 

@@ -1,8 +1,8 @@
 /** Copyright (C) 2016 European Spallation Source */
 
 #include "CSPECTestData.h"
-#include <CSPECData.h>
 #include "TestBase.h"
+#include <CSPECData.h>
 
 using namespace std;
 
