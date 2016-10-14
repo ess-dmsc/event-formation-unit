@@ -4,7 +4,6 @@
 #include <cstdlib>
 #include <cstring>
 
-
 int detectorid(unsigned int wirepos, unsigned int gridpos) {
   // Should depend on the instance of a specific detector geomoetry,
   // and calibration data

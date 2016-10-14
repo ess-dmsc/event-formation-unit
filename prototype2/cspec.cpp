@@ -64,14 +64,15 @@ void CSPEC::input_thread(void *args) {
     rx += rdsize;
 
     /** This is the periodic reporting*/
-    if (unlikely(((tsc-tsc0)/2400 >= opts->updint * 1000000))) {
+    if (unlikely(((tsc - tsc0) / 2400 >= opts->updint * 1000000))) {
       rx_total += rx;
 
       mcout.lock();
-      printf(
-           "%" PRIu64 " input     : %8.2f Mb/s, q1: %3d, rxpkt: %12" PRIu64 ", rxbytes: %12" PRIu64
-            ", errors: %" PRIu64 ", events: %" PRIu64 "\n", tsc - tsc0,
-            rx * 8.0 / ((tsc-tsc0)/2400), 0, rxp, rx_total, ierror, idata);
+      printf("%" PRIu64 " input     : %8.2f Mb/s, q1: %3d, rxpkt: %12" PRIu64
+             ", rxbytes: %12" PRIu64 ", errors: %" PRIu64 ", events: %" PRIu64
+             "\n",
+             tsc - tsc0, rx * 8.0 / ((tsc - tsc0) / 2400), 0, rxp, rx_total,
+             ierror, idata);
       fflush(stdout);
       mcout.unlock();
 
@@ -79,7 +80,8 @@ void CSPEC::input_thread(void *args) {
       rx = 0;
 
       if (stop.timeus() >= opts->stopafter * 1000000) {
-        std::cout << "stopping input thread, timeus" << stop.timeus() << std::endl;
+        std::cout << "stopping input thread, timeus" << stop.timeus()
+                  << std::endl;
         return;
       }
     }
