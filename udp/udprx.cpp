@@ -1,5 +1,7 @@
+#include <Args.h>
 #include <Socket.h>
 #include <Timer.h>
+#include <cassert>
 #include <chrono>
 #include <inttypes.h>
 #include <iostream>
@@ -12,6 +14,8 @@
 typedef std::chrono::high_resolution_clock Clock;
 
 int main(int argc, char *argv[]) {
+  Args opts(argc, argv);
+
   uint64_t rx_total = 0;
   uint64_t rx = 0;
   uint64_t rxp = 0;
@@ -28,10 +32,14 @@ int main(int argc, char *argv[]) {
   auto usecs = upd.timeus();
 
   for (;;) {
-    rx += NMX.receive();
+    int rdsize = NMX.receive();
+    assert(rdsize > 0);
+    assert(rdsize == opts.buflen);
 
-    if (rx > 0)
+    if (rdsize > 0) {
+      rx += rdsize;
       rxp++;
+    }
 
     if ((rxp % 100) == 0)
       usecs = upd.timeus();

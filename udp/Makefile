@@ -12,8 +12,8 @@ objects = $(sources:%.cpp=%.o)
 
 all: $(PROGS)
 
-udprx: udprx.cpp $(library) Socket.h Timer.h
-	g++ $(CXXFLAGS) $< $(library) -o $@
+udprx: udprx.cpp $(library) $(objects) Socket.h Timer.h
+	g++ $(CXXFLAGS) $< $(objects) $(library) -o $@
 
 udptx: udptx.cpp $(library) $(objects) Args.h Socket.h Timer.h
 	g++ $(CXXFLAGS) $< $(objects) $(library) -o $@
