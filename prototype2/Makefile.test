@@ -20,3 +20,8 @@ testcspecdata: test/testCspecData.cpp CSPECData.cpp CSPECData.h CSPECTestData.h
 testdetector: test/testDetector.cpp Detector.h
 	@echo building $@
 	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
+
+coverage: runtest
+	gcov *.gcda
+	lcov -c -d . -o lcov.out
+	genhtml -o html lcov.out 

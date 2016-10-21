@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 
   const int B1M = 1000000;
   Socket::Endpoint local("0.0.0.0", 0);
-  Socket::Endpoint remote("127.0.0.1", opts.port);
+  Socket::Endpoint remote(opts.dest_ip, opts.port);
 
   UDPClient DataSource(local, remote);
   DataSource.buflen(opts.buflen);

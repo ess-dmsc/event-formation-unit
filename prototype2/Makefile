@@ -46,4 +46,5 @@ realclean: clean
 	make -C ../libs clean
 
 clean:
-	@rm -f $(obj) $(progs) $(testprogs) *.log *~ *.gc* gmon.out *.o gylle *.xml
+	@rm -f $(obj) $(progs) $(testprogs) *.log *~ *.gc* gmon.out *.o gylle *.xml 
+	@rm -fr html lcov.out
