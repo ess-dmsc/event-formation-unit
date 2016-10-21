@@ -5,6 +5,10 @@
 #include <iostream>
 #include <stdio.h>
 
+#ifndef PRIu64
+#define PRIu64 "ull"
+#endif
+
 typedef std::chrono::high_resolution_clock Clock;
 
 int main(int argc, char *argv[]) {

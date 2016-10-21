@@ -7,6 +7,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#ifndef PRIu64
+#define PRIu64 "ull"
+#endif
+
 int main(int argc, char *argv[]) {
 
   Args opts(argc, argv);
