@@ -23,7 +23,7 @@ public:
 
   int setbuffers(int sndbuf, int rcvbuf);
   void printbuffers(void);
-  int settimeout(int seconds);
+  int settimeout(int seconds, int usecs);
 
   void local(const char *ipaddr, int port);
   void remote(const char *ipaddr, int port);

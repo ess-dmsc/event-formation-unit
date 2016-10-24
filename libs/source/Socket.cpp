@@ -31,10 +31,10 @@ void Socket::printbuffers(void) {
   cout << "Socket snd buffer size: " << getopt(SO_SNDBUF) << endl;
 }
 
-int Socket::settimeout(int seconds) {
+int Socket::settimeout(int seconds, int usecs) {
   struct timeval timeout;
   timeout.tv_sec = seconds;
-  timeout.tv_usec = 0;
+  timeout.tv_usec = usecs;
   return setopt(SO_RCVTIMEO, &timeout, sizeof(timeout));
 }
 

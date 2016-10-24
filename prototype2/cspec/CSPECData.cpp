@@ -84,7 +84,8 @@ int CSPECData::input_filter() {
   return discarded;
 }
 
-/** first multi grid data generator - valid headers, all zero data*/
+/** First multi grid data generator - valid headers, all zero data*/
+/** Only used in google test - can be excluded from coverage      */
 int CSPECData::generate(char *buffer, int size, int elems) {
   int bytes = 0;
   auto mg = (struct multi_grid *)buffer;

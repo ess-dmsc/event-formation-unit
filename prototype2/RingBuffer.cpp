@@ -7,11 +7,16 @@
 RingBuffer::RingBuffer(int buffersize, int entries)
     : N_(entries), size_(buffersize) {
 
-  buffers = (char *)malloc(N_ * size_);
-  assert(buffers != 0);
+  data = (struct Data *)malloc(sizeof(struct Data) * entries);
+
+  assert(data != 0);
 }
 
-char *RingBuffer::getbuffer(void) { return &buffers[entry_ * size_]; }
+struct RingBuffer::Data *RingBuffer::getdatastruct(void) {
+  return &data[entry_];
+}
+
+void RingBuffer::setdatalength(int length) { data[entry_].length = length; }
 
 int RingBuffer::nextbuffer(void) {
   entry_ = (entry_ + 1) % N_;

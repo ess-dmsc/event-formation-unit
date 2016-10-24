@@ -12,6 +12,8 @@
 
 using namespace std;
 
+const int TSC_MHZ = 2900;
+
 int main(int argc, char *argv[]) {
   DGArgs opts(argc, argv); // Parse command line opts
 
@@ -50,7 +52,7 @@ int main(int argc, char *argv[]) {
     // std::memcpy(buffer, &seqno, sizeof(seqno)); // For NMX
 
     // Sleep to throttle down speed
-    if (unlikely((tsc - tsc1) >= 2400UL * 10000)) {
+    if (unlikely((tsc - tsc1) >= TSC_MHZ * 10000)) {
       usleep(opts.speed_level * 1000);
       tsc1 = rdtsc();
     }
@@ -70,12 +72,12 @@ int main(int argc, char *argv[]) {
     }
 #endif
 
-    if (unlikely(((tsc - tsc0) / 2400) >= opts.updint * 1000000)) {
+    if (unlikely(((tsc - tsc0) / TSC_MHZ) >= opts.updint * 1000000)) {
       tx_total += tx;
       printf("Tx rate: %8.2f Mbps, tx %5" PRIu64 " MB (total: %7" PRIu64
              " MB) %ld usecs\n",
-             tx * 8.0 / (((tsc - tsc0) / 2400) / 1000000.0) / B1M, tx / B1M,
-             tx_total / B1M, ((tsc - tsc0) / 2400));
+             tx * 8.0 / (((tsc - tsc0) / TSC_MHZ) / 1000000.0) / B1M, tx / B1M,
+             tx_total / B1M, ((tsc - tsc0) / TSC_MHZ));
       tx = 0;
       tsc0 = rdtsc();
     }

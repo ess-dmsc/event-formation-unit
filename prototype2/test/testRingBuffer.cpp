@@ -23,27 +23,26 @@ TEST_F(RingBufferTest, CircularWrap) {
   int size = 9000;
   RingBuffer buf(size, N);
 
-  char * first = buf.getbuffer();
+  struct RingBuffer::Data *first = buf.getdatastruct();
   ASSERT_EQ(buf.getelems(), N);
   ASSERT_EQ(buf.getsize(), size);
 
   for (int i = 0; i < N; i++) {
-    int  * ip = (int *)buf.getbuffer();
+    int *ip = (int *)buf.getdatastruct()->buffer;
     ASSERT_NE(ip, nullptr);
-    ASSERT_EQ(i, buf.getentry());
+    ASSERT_EQ(i, buf.getindex());
     *ip = N + i;
     buf.nextbuffer();
   }
-  ASSERT_EQ(0, buf.getentry());
+  ASSERT_EQ(0, buf.getindex());
 
   for (int i = 0; i < N; i++) {
-    int  * ip = (int *)buf.getbuffer();
+    int *ip = (int *)buf.getdatastruct()->buffer;
     ASSERT_EQ(*ip, N + i);
     buf.nextbuffer();
   }
-  ASSERT_EQ(first, buf.getbuffer());
+  ASSERT_EQ(first, buf.getdatastruct());
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

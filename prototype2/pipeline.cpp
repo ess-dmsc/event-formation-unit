@@ -2,8 +2,8 @@
 
 #include <EFUArgs.h>
 #include <Launcher.h>
+#include <Timer.h>
 #include <iostream>
-#include <thread>
 #include <unistd.h> // sleep()
 
 using namespace std;
@@ -21,8 +21,11 @@ int main(int argc, char *argv[]) {
 
   Launcher(&dynamic, &opts, 12, 13, 14);
 
-  while (1) {
+  Timer stop;
+  while (stop.timeus() < opts.stopafter * 1000000) {
     sleep(2);
   }
+  printf("Exiting...\n");
+  exit(1);
   return 0;
 }

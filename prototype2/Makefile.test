@@ -1,7 +1,7 @@
 # Copyright (C) 2016 European Spallation Source
 #
 
-testprogs = testdetector testcspecdata testcspecchanconv testbufferreader
+testprogs = testdetector testcspecdata testcspecchanconv testringbuffer
 
 test: $(testprogs)
 	echo "done building tests"
@@ -17,7 +17,7 @@ testcspecdata: test/testCspecData.cpp cspec/CSPECData.cpp cspec/CSPECData.h test
 	@echo building $@
 	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
 
-testbufferreader: test/testBufferReader.cpp BufferReader.cpp BufferReader.h
+testringbuffer: test/testRingBuffer.cpp RingBuffer.cpp RingBuffer.h
 	@echo building $@
 	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
 
@@ -25,7 +25,7 @@ testdetector: test/testDetector.cpp Detector.h
 	@echo building $@
 	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
 
-coverage: runtest
+coverage:
 	gcov *.gcda
 	lcov -c -d . -o lcov.out
 	genhtml -o html lcov.out

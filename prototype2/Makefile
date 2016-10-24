@@ -6,12 +6,12 @@ VPATH = ../libs/include test
 progs = efu2 nmx.so cspec.so udpraw.so udprawtx.so
 nmx.so.src = Producer.cpp
 nmx.so.inc = Producer.h
-cspec.so.src = cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
+cspec.so.src = cspec/CSPECData.cpp cspec/CSPECChanConv.cpp  RingBuffer.cpp
 cspec.so.inc = cspec/CSPECData.h cspec/CSPECChanConv.h gccintel.h
 
 library = ../libs/eventlib.a
 
-src.efu = EFUArgs.cpp Loader.cpp Launcher.cpp RingBuffer.cpp
+src.efu = EFUArgs.cpp Loader.cpp Launcher.cpp
 obj.efu = $(src.efu:%.cpp=%.o)
 
 .DEFAULT_GOAL = all
