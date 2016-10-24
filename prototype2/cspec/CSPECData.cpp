@@ -70,16 +70,16 @@ int CSPECData::input_filter() {
     return discarded;
 
   for (unsigned int i = 0; i < elems; i++) {
+    data[i].valid = 0;
     if ((data[i].d[0] < wire_thresh) || (data[i].d[4] < grid_thresh)) {
       discarded++;
-      // TODO clear data
       continue;
     }
     if ((data[i].d[1] < wire_thresh) || (data[i].d[5] < grid_thresh)) {
       discarded++;
-      // TODO clear data
       continue;
     }
+    data[i].valid = 1;
   }
   return discarded;
 }

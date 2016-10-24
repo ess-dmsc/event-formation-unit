@@ -22,6 +22,7 @@ public:
     unsigned int module;
     unsigned int d[8];
     unsigned int time;
+    unsigned int valid; // TODO  
   };
 
   /** parse a binary payload buffer, return number of data elements */

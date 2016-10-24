@@ -6,6 +6,7 @@
 #include <SPSCFifo.h>
 #include <Socket.h>
 #include <Timer.h>
+#include <cspec/CSPECChanConv.h>
 #include <cspec/CSPECData.h>
 #include <gccintel.h>
 #include <iostream>
@@ -15,7 +16,7 @@
 #include <unistd.h>
 
 using namespace std;
-using namespace memory_sequential_consistent;
+using namespace memory_sequential_consistent; // Lock free fifo
 
 const char *classname = "CSPEC Detector";
 
@@ -108,9 +109,15 @@ void CSPEC::input_thread(void *args) {
 void CSPEC::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
   CSPECData dat;
+
   uint64_t ierror = 0;
   uint64_t idata = 0;
   uint64_t iidle = 0;
+  uint64_t idisc = 0;
+
+  CSPECChanConv conv;
+  conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear dummy wire look-up table
+  conv.makegridcal(0, CSPECChanConv::adcsize - 1,  96);  // Linear dummy grid look-up table
 
   Timer stop;
   uint64_t tsc0 = rdtsc();
@@ -126,7 +133,7 @@ void CSPEC::processing_thread(void *args) {
       dat.receive(data->buffer, data->length);
       ierror += dat.error;
       idata += dat.elems;
-      dat.input_filter();
+      idisc += dat.input_filter();
     }
 
     /** This is the periodic reporting*/
@@ -134,8 +141,8 @@ void CSPEC::processing_thread(void *args) {
 
       mcout.lock();
       printf("%" PRIu64 " processing: idle: %" PRIu64 ", errors: %" PRIu64
-             ",events: %" PRIu64 " \n",
-             tsc - tsc0, iidle, ierror, idata);
+             ", discard: %" PRIu64 ", events: %" PRIu64 " \n",
+             tsc - tsc0, iidle, ierror, idisc, idata);
       fflush(stdout);
       mcout.unlock();
 
