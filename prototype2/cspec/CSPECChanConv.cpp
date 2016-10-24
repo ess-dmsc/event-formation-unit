@@ -1,6 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <CSPECChanConv.h>
+#include <cspec/CSPECChanConv.h>
 #include <cstring>
 
 CSPECChanConv::CSPECChanConv() {

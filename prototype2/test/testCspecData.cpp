@@ -2,7 +2,7 @@
 
 #include "CSPECTestData.h"
 #include "TestBase.h"
-#include <CSPECData.h>
+#include <cspec/CSPECData.h>
 
 using namespace std;
 

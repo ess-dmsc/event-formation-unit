@@ -1,6 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <CSPECData.h>
+#include <cspec/CSPECData.h>
 #include <iostream>
 
 using namespace std;

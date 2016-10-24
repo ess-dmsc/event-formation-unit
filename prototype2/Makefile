@@ -6,12 +6,12 @@ VPATH = ../libs/include test
 progs = efu2 nmx.so cspec.so udpraw.so udprawtx.so
 nmx.so.src = Producer.cpp
 nmx.so.inc = Producer.h
-cspec.so.src = CSPECData.cpp CSPECChanConv.cpp
-cspec.so.inc = CSPECData.h CSPECChanConv.h gccintel.h
+cspec.so.src = cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
+cspec.so.inc = cspec/CSPECData.h cspec/CSPECChanConv.h gccintel.h
 
 library = ../libs/eventlib.a
 
-src.efu = EFUArgs.cpp Loader.cpp Launcher.cpp
+src.efu = EFUArgs.cpp Loader.cpp Launcher.cpp RingBuffer.cpp
 obj.efu = $(src.efu:%.cpp=%.o)
 
 .DEFAULT_GOAL = all
@@ -23,7 +23,7 @@ all: $(progs)
 	@echo done
 	$(Q)chmod 440 *.so
 
-cspec.so: cspec.cpp Detector.h $(cspec.so.src) $(cspc.so.inc)
+cspec.so: cspec/cspec.cpp Detector.h $(cspec.so.src) $(cspc.so.inc)
 	@echo building specific $@
 	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) $< -o $@
 
@@ -46,5 +46,5 @@ realclean: clean
 	make -C ../libs clean
 
 clean:
-	@rm -f $(obj) $(progs) $(testprogs) *.log *~ *.gc* gmon.out *.o gylle *.xml 
+	@rm -f $(obj) $(progs) $(testprogs) *.log *~ *.gc* gmon.out *.o gylle *.xml
 	@rm -fr html lcov.out

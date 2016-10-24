@@ -1,7 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
 #include "TestBase.h"
-#include <CSPECChanConv.h>
+#include <cspec/CSPECChanConv.h>
 
 using namespace std;
 

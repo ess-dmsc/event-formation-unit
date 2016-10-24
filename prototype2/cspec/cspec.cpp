@@ -1,10 +1,12 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <CSPECData.h>
 #include <Detector.h>
 #include <EFUArgs.h>
+#include <RingBuffer.h>
+#include <SPSCFifo.h>
 #include <Socket.h>
 #include <Timer.h>
+#include <cspec/CSPECData.h>
 #include <gccintel.h>
 #include <iostream>
 #include <mutex>
@@ -40,7 +42,7 @@ void CSPEC::input_thread(void *args) {
   cspecdata.printbuffers();
   cspecdata.settimeout(1); // One second
 
-  char buffer[9000];
+  RingBuffer ringbuf(9000, 100);
   uint64_t rx = 0;
   uint64_t rx_total = 0;
   uint64_t rxp = 0;
@@ -55,9 +57,10 @@ void CSPEC::input_thread(void *args) {
   for (;;) {
     tsc = rdtsc();
     /** this is the processing step */
-    if ((rdsize = cspecdata.receive(buffer, opts->buflen)) > 0) {
+    char * bufptr = ringbuf.getbuffer();
+    if ((rdsize = cspecdata.receive(bufptr, opts->buflen)) > 0) {
       rxp++;
-      dat.receive(buffer, rdsize);
+      dat.receive(bufptr, rdsize);
       ierror += dat.error;
       idata += dat.elems;
       dat.input_filter();
