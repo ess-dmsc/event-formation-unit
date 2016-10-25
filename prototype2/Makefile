@@ -6,6 +6,7 @@ VPATH = ../libs/include test
 progs = efu2 cspecgen2 cspec.so nmx.so udp.so
 library = ../libs/eventlib.a
 
+# For each loadable detector add its .so.src and .so.inc dependencies
 udp.so.src = udp/udp.cpp
 udp.so.inc = common/Detector.h
 nmx.so.src = common/Producer.cpp
@@ -13,6 +14,7 @@ nmx.so.inc = common/Producer.h common/Detector.h
 cspec.so.src = cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp  common/RingBuffer.cpp
 cspec.so.inc = cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h gccintel.h
 
+# For each standalone program add .src and .inc and .obj below
 efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp
 efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h
 efu.obj = $(efu.src:%.cpp=%.o)
@@ -56,7 +58,6 @@ efu2: $(library) $(efu.obj) $(efu.inc)
 cspecgen2: $(library) $(cspecgen.obj) $(cspecgen.inc)
 		@echo building $@
 		$(Q)$(cxx) $(cxxflags) $(cspecgen.obj) $(library) $(ldflags) -o $@
-
 
 realclean: clean
 	make -C ../libs clean
