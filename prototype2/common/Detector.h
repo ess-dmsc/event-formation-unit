@@ -1,5 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+#pragma once
 #include <stdio.h>
 
 using namespace std;

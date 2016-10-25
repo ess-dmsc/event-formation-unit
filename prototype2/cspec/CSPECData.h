@@ -1,13 +1,15 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+#pragma once
 #include <cinttypes>
+#include <cspec/CSPECChanConv.h>
 
 class CSPECData {
 public:
-  // See "multi grid detector data processing.docx" from DMG's Event Formation
-  // Files
-  const unsigned int wire_thresh = 230; // From Anton 4 oct 2016
-  const unsigned int grid_thresh = 170; //  ...
+  // See "multi grid detector data processing.docx" from DMG's
+  // Event Formation Files
+  unsigned int wire_thresh{230}; // From Anton 4 oct 2016
+  unsigned int grid_thresh{170}; //  ...
 
   const int datasize = 40; /**< size (bytes) of a data readout */
   // clang-format off
@@ -25,6 +27,16 @@ public:
     unsigned int valid; // TODO
   };
 
+
+  /** Let user specify calibration parameters */
+  CSPECData(CSPECChanConv * calibration) : chanconv(calibration){ };
+
+  CSPECData(unsigned int wthresh, unsigned int gthresh,
+             CSPECChanConv * calibration)
+            : wire_thresh(wthresh)
+            , grid_thresh(gthresh)
+            , chanconv(calibration){ };
+
   /** parse a binary payload buffer, return number of data elements */
   int receive(const char *buffer, int size);
 
@@ -40,4 +52,6 @@ public:
   unsigned int elems{0};
   unsigned int error{0};
   unsigned int frag{0};
+
+  CSPECChanConv * chanconv{nullptr};
 };

@@ -1,5 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+#pragma once
+
 // Simple class to keep track of anumber of buffers
 // for receiving socket data. No bounds checking
 // So it is possible to corrupt data and write beyond

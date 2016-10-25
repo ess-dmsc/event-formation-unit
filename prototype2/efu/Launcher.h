@@ -1,5 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+#pragma once
 #include <efu/Loader.h>
 
 class EFUArgs;

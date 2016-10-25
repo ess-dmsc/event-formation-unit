@@ -108,7 +108,6 @@ void CSPEC::input_thread(void *args) {
 
 void CSPEC::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
-  CSPECData dat;
 
   uint64_t ierror = 0;
   uint64_t idata = 0;
@@ -120,6 +119,9 @@ void CSPEC::processing_thread(void *args) {
                    128); // Linear dummy wire look-up table
   conv.makegridcal(0, CSPECChanConv::adcsize - 1,
                    96); // Linear dummy grid look-up table
+
+  CSPECData dat(0, 0, &conv); // no signal threshold
+  //CSPECData dat(&conv); // Default signal thresholds
 
   Timer stop;
   uint64_t tsc0 = rdtsc();
