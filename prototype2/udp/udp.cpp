@@ -1,6 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
 #include <cassert>
+#include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <iostream>
