@@ -1,6 +1,7 @@
 # Copyright (C) 2016 European Spallation Source
 #
 
+
 testprogs = testdetector testcspecdata testcspecchanconv testringbuffer
 
 test: $(testprogs)
@@ -11,19 +12,19 @@ runtest: test
 
 testcspecchanconv: test/testCspecChanConv.cpp cspec/CSPECChanConv.cpp cspec/CSPECChanConv.h
 	@echo building $@
-	$(Q)g++ $(cxxflags) test/testCspecChanConv.cpp cspec/CSPECChanConv.cpp -o $@ $(ldflags) -lgtest -pthread
+	$(Q)g++ $(cxxflags) test/testCspecChanConv.cpp cspec/CSPECChanConv.cpp -o $@ $(ldflags)
 
 testcspecdata:  test/testCspecData.cpp cspec/CSPECData.cpp cspec/CSPECData.h test/CSPECTestData.h
 	@echo building $@
-	$(Q)g++ $(cxxflags) test/testCspecData.cpp cspec/CSPECData.cpp -o $@ $(ldflags) -lgtest -pthread
+	$(Q)g++ $(cxxflags) test/testCspecData.cpp cspec/CSPECData.cpp -o $@ $(ldflags)
 
 testringbuffer: test/testRingBuffer.cpp common/RingBuffer.cpp common/RingBuffer.h
 	@echo building $@
-	$(Q)g++ $(cxxflags) test/testRingBuffer.cpp common/RingBuffer.cpp  -o $@ $(ldflags) -lgtest -pthread
+	$(Q)g++ $(cxxflags) test/testRingBuffer.cpp common/RingBuffer.cpp  -o $@ $(ldflags)
 
 testdetector: test/testDetector.cpp common/Detector.h
 	@echo building $@
-	$(Q)g++ $(cxxflags) test/testDetector.cpp  -o $@ $(ldflags) -lgtest -pthread
+	$(Q)g++ $(cxxflags) test/testDetector.cpp  -o $@ $(ldflags)
 
 coverage:
 	gcov *.gcda
