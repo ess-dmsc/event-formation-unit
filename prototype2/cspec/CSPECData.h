@@ -37,6 +37,8 @@ public:
             , grid_thresh(gthresh)
             , chanconv(calibration){ };
 
+  CSPECData(); //TODO remove and fix cspecgen.cpp
+
   /** parse a binary payload buffer, return number of data elements */
   int receive(const char *buffer, int size);
 
