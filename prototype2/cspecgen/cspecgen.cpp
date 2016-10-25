@@ -42,14 +42,11 @@ int main(int argc, char *argv[]) {
   uint64_t tsc;
   for (;;) {
     tsc = rdtsc();
-    if (unlikely((tx_total + tx) >=
-                 (long unsigned int)opts.txGB * 1000000000)) {
+    if (unlikely((tx_total + tx) >= (long unsigned int)opts.txGB * 1000000000) {
       cout << "Sent " << tx_total + tx << " bytes." << endl;
       cout << "done" << endl;
       exit(0);
     }
-    // Generate Tx buffer
-    // std::memcpy(buffer, &seqno, sizeof(seqno)); // For NMX
 
     // Sleep to throttle down speed
     if (unlikely((tsc - tsc1) >= TSC_MHZ * 10000)) {
@@ -58,19 +55,14 @@ int main(int argc, char *argv[]) {
     }
 
     // Send data
-    tx += DataSource.send(buffer, size);
-    if (tx > 0) {
+    int wrsize = DataSource.send(buffer, size);
+    if (wrsize > 0) {
+      tx += wrsize;
       txp++;
       seqno++;
     } else {
       cout << "unable to send" << endl;
     }
-
-#if 0
-    if ((txp % 10000) == 0) {
-      usleep(15000);
-    }
-#endif
 
     if (unlikely(((tsc - tsc0) / TSC_MHZ) >= opts.updint * 1000000)) {
       tx_total += tx;
