@@ -1,6 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <DGArgs.h>
+#include <cspecgen/CspecArgs.h>
 #include <cstdio>
 #include <getopt.h>
 #include <iostream>

@@ -3,7 +3,7 @@
 
 VPATH = ../libs/include test
 
-progs = efu2 cspec.so nmx.so udp.so
+progs = efu2 cspecgen2 cspec.so nmx.so udp.so
 library = ../libs/eventlib.a
 
 udp.so.src = udp/udp.cpp
@@ -17,6 +17,9 @@ efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp
 efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h
 efu.obj = $(efu.src:%.cpp=%.o)
 
+cspecgen.src = cspecgen/cspecgen.cpp cspecgen/CspecArgs.cpp cspec/CSPECData.cpp
+cspecgen.inc = cspecgen/CspecArgs.h cspec/CSPECData.h
+cspecgen.obj = $(cspecgen.src:%.cpp=%.o)
 
 .DEFAULT_GOAL = all
 
@@ -50,7 +53,9 @@ efu2: $(library) $(efu.obj) $(efu.inc)
 	@echo building $@
 	$(Q)$(cxx) $(cxxflags) $(efu.obj) $(library) $(ldflags) -o $@
 
-
+cspecgen2: $(library) $(cspecgen.obj) $(cspecgen.inc)
+		@echo building $@
+		$(Q)$(cxx) $(cxxflags) $(cspecgen.obj) $(library) $(ldflags) -o $@
 
 
 realclean: clean

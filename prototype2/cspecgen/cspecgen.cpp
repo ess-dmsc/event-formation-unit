@@ -1,13 +1,13 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <CSPECData.h>
-#include <DGArgs.h>
-#include <Socket.h>
-#include <Timer.h>
+#include <cspec/CSPECData.h>
+#include <cspecgen/CspecArgs.h>
 #include <cstring>
-#include <gccintel.h>
 #include <inttypes.h>
 #include <iostream>
+#include <libs/include/Socket.h>
+#include <libs/include/Timer.h>
+#include <libs/include/gccintel.h>
 #include <unistd.h>
 
 using namespace std;
