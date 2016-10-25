@@ -9,8 +9,14 @@ library = ../libs/eventlib.a
 # For each loadable detector add its .so.src and .so.inc dependencies
 udp.so.src = udp/udp.cpp
 udp.so.inc = common/Detector.h
-nmx.so.src = common/Producer.cpp
-nmx.so.inc = common/Producer.h common/Detector.h
+
+nmx.so.src =
+nmx.so.inc = common/Detector.h
+ifndef NOKAFKA
+nmx.so.src += common/Producer.cpp
+nmx.so.inc += common/Producer.h
+endif
+
 cspec.so.src = cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp  common/RingBuffer.cpp
 cspec.so.inc = cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h gccintel.h
 

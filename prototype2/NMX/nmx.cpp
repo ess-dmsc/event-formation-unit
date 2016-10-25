@@ -171,7 +171,9 @@ void NMX::output_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
 
   bool kafka = opts->kafka;
+#ifndef NOKAFKA
   Producer producer(opts->broker, kafka, "EFUTestTopic");
+#endif
 
   int npop = 0;
   int nprod = 0;
@@ -194,7 +196,9 @@ void NMX::output_thread(void *args) {
     /** Produce message */
     if (kafka) {
       if (!dontproduce) {
+#ifndef NOKAFKA
         producer.Produce();
+#endif
         nprod++;
       }
     }

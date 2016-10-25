@@ -1,5 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+#ifndef NOKAFKA
 #include <common/Producer.h>
 #include <iostream>
 
@@ -51,3 +52,4 @@ int Producer::Produce(void) {
 
   return 0;
 }
+#endif
