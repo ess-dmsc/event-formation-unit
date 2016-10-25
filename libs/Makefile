@@ -1,6 +1,5 @@
 
 
-
 CXXFLAGS  = -Iinclude -std=c++11 -O3 -fPIC
 LDFLAGS   = -L. -lpthread
 CXXFLAGS += -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -Wno-error=sign-compare -Wno-error=conversion-null
@@ -37,6 +36,9 @@ $(library): $(objects)
 	ranlib $@
 
 test: $(testprogs)
+
+runtest: test
+	for test in $(testprogs) ; do ./$$test --gtest_output=xml:$$test.xml ; done
 
 testevent: test/NMXEvent/testmain.cpp test/NMXEvent/testEventBasic.cpp $(library)
 	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
