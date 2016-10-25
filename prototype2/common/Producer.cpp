@@ -38,6 +38,7 @@ Producer::Producer(std::string broker, bool enabled, std::string topicstr) {
 
 /** called to actually send data to Kafka cluster */
 int Producer::Produce(void) {
+
   std::string line = "producing...";
   RdKafka::ErrorCode resp = producer->produce(
       topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
@@ -47,5 +48,6 @@ int Producer::Produce(void) {
     return resp;
   }
   producer->poll(0);
+
   return 0;
 }

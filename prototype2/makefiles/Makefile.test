@@ -11,19 +11,19 @@ runtest: test
 
 testcspecchanconv: test/testCspecChanConv.cpp cspec/CSPECChanConv.cpp cspec/CSPECChanConv.h
 	@echo building $@
-	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
+	$(Q)g++ $(cxxflags) test/testCspecChanConv.cpp cspec/CSPECChanConv.cpp -o $@ $(ldflags) -lgtest -pthread
 
-testcspecdata: test/testCspecData.cpp cspec/CSPECData.cpp cspec/CSPECData.h test/CSPECTestData.h
+testcspecdata:  test/testCspecData.cpp cspec/CSPECData.cpp cspec/CSPECData.h test/CSPECTestData.h
 	@echo building $@
-	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
+	$(Q)g++ $(cxxflags) test/testCspecData.cpp cspec/CSPECData.cpp -o $@ $(ldflags) -lgtest -pthread
 
 testringbuffer: test/testRingBuffer.cpp common/RingBuffer.cpp common/RingBuffer.h
 	@echo building $@
-	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
+	$(Q)g++ $(cxxflags) test/testRingBuffer.cpp common/RingBuffer.cpp  -o $@ $(ldflags) -lgtest -pthread
 
 testdetector: test/testDetector.cpp common/Detector.h
 	@echo building $@
-	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
+	$(Q)g++ $(cxxflags) test/testDetector.cpp  -o $@ $(ldflags) -lgtest -pthread
 
 coverage:
 	gcov *.gcda
