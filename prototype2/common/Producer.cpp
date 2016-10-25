@@ -1,6 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <Producer.h>
+#include <common/Producer.h>
 #include <iostream>
 
 Producer::Producer(std::string broker, bool enabled, std::string topicstr) {

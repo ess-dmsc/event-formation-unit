@@ -1,9 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <EFUArgs.h>
-#include <Launcher.h>
-#include <Timer.h>
+#include <common/EFUArgs.h>
+#include <efu/Launcher.h>
 #include <iostream>
+#include <libs/include/Timer.h>
 #include <unistd.h> // sleep()
 
 using namespace std;

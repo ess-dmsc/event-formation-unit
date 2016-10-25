@@ -1,6 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <EFUArgs.h>
+#include <common/EFUArgs.h>
 #include <cstdio>
 #include <getopt.h>
 #include <iostream>

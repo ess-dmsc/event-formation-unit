@@ -17,11 +17,11 @@ testcspecdata: test/testCspecData.cpp cspec/CSPECData.cpp cspec/CSPECData.h test
 	@echo building $@
 	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
 
-testringbuffer: test/testRingBuffer.cpp RingBuffer.cpp RingBuffer.h
+testringbuffer: test/testRingBuffer.cpp common/RingBuffer.cpp common/RingBuffer.h
 	@echo building $@
 	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
 
-testdetector: test/testDetector.cpp Detector.h
+testdetector: test/testDetector.cpp common/Detector.h
 	@echo building $@
 	$(Q)g++ $(cxxflags) $^ -o $@ $(ldflags) -lgtest -pthread
 

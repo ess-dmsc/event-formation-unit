@@ -1,8 +1,8 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <Detector.h>
-#include <Launcher.h>
 #include <cassert>
+#include <common/Detector.h>
+#include <efu/Launcher.h>
 #include <iostream>
 #include <thread>
 

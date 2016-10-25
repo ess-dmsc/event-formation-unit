@@ -19,18 +19,18 @@ if [[ $CMD == "start" ]]; then
   echo " -- Kafka"
   $KHOME/bin/kafka-server-start.sh $KHOME/config/server.properties &> kafka.log &
   echo Done
-  exit 
+  exit
 fi
 
 if [[ $CMD == "stop" ]]; then
   echo Stopping services
   echo " -- zookeeper"
-  $KHOME/bin/zookeeper-server-stop.sh 
+  $KHOME/bin/zookeeper-server-stop.sh
 
   echo " -- Kafka"
-  $KHOME/bin/kafka-server-stop.sh 
+  $KHOME/bin/kafka-server-stop.sh
   echo Done
-  exit 
+  exit
 fi
 
 errexit "unknown command: "$CMD

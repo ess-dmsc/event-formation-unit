@@ -8,7 +8,7 @@ VPATH = ../libs/include
 PROGS = bulkdatagen efu
 library = ../libs/eventlib.a
 
-src.datagen = DGArgs.cpp ../prototype2/cspec/CSPECData.cpp
+src.datagen = DGArgs.cpp
 obj.datagen =$(src.datagen:%.cpp=%.o)
 
 src.efu = EFUArgs.cpp Producer.cpp

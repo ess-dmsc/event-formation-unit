@@ -1,7 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <RingBuffer.h>
 #include <cassert>
+#include <common/RingBuffer.h>
 #include <cstdlib>
 
 RingBuffer::RingBuffer(int buffersize, int entries)

@@ -1,7 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
 #include "TestBase.h"
-#include <RingBuffer.h>
+#include <common/RingBuffer.h>
 
 using namespace std;
 

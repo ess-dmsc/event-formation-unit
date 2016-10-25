@@ -1,8 +1,8 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <Detector.h>
-#include <Loader.h>
+#include <common/Detector.h>
 #include <dlfcn.h>
+#include <efu/Loader.h>
 #include <iostream>
 
 using namespace std;

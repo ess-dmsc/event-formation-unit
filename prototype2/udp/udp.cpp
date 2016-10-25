@@ -1,11 +1,11 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <Detector.h>
-#include <EFUArgs.h>
-#include <Socket.h>
-#include <Timer.h>
 #include <cassert>
+#include <common/Detector.h>
+#include <common/EFUArgs.h>
 #include <iostream>
+#include <libs/include/Socket.h>
+#include <libs/include/Timer.h>
 #include <stdio.h>
 #include <unistd.h>
 

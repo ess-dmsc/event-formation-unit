@@ -1,15 +1,15 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <Detector.h>
-#include <EFUArgs.h>
-#include <RingBuffer.h>
-#include <SPSCFifo.h>
-#include <Socket.h>
-#include <Timer.h>
+#include <common/Detector.h>
+#include <common/EFUArgs.h>
+#include <common/RingBuffer.h>
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CSPECData.h>
-#include <gccintel.h>
 #include <iostream>
+#include <libs/include/SPSCFifo.h>
+#include <libs/include/Socket.h>
+#include <libs/include/Timer.h>
+#include <libs/include/gccintel.h>
 #include <mutex>
 #include <queue>
 #include <stdio.h>
@@ -116,8 +116,10 @@ void CSPEC::processing_thread(void *args) {
   uint64_t idisc = 0;
 
   CSPECChanConv conv;
-  conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear dummy wire look-up table
-  conv.makegridcal(0, CSPECChanConv::adcsize - 1,  96);  // Linear dummy grid look-up table
+  conv.makewirecal(0, CSPECChanConv::adcsize - 1,
+                   128); // Linear dummy wire look-up table
+  conv.makegridcal(0, CSPECChanConv::adcsize - 1,
+                   96); // Linear dummy grid look-up table
 
   Timer stop;
   uint64_t tsc0 = rdtsc();

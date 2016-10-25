@@ -1,5 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+#include <CSPECData.h>
 #include <DGArgs.h>
 #include <Socket.h>
 #include <Timer.h>
@@ -28,6 +29,11 @@ int main(int argc, char *argv[]) {
   DataSource.setbuffers(opts.sndbuf, 0);
   DataSource.printbuffers();
 
+  CSPECData cspec;
+  int ndata = 100;
+  int size = cspec.generate(buffer, 9000, ndata);
+  assert(size == ndata * cspec.datasize);
+
   uint64_t tx_total = 0;
   uint64_t tx = 0;
   uint64_t txp = 0;
@@ -43,7 +49,7 @@ int main(int argc, char *argv[]) {
       exit(0);
     }
     // Generate Tx buffer
-    std::memcpy(buffer, &seqno, sizeof(seqno));
+    // std::memcpy(buffer, &seqno, sizeof(seqno)); // For NMX
 
     // Sleep to throttle down speed
     if (unlikely((tsc - tsc1) >= TSC_MHZ * 10000)) {
@@ -52,7 +58,7 @@ int main(int argc, char *argv[]) {
     }
 
     // Send data
-    tx += DataSource.send(buffer, opts.buflen);
+    tx += DataSource.send(buffer, size);
     if (tx > 0) {
       txp++;
       seqno++;

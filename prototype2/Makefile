@@ -3,48 +3,59 @@
 
 VPATH = ../libs/include test
 
-progs = efu2 nmx.so cspec.so udpraw.so udprawtx.so
-nmx.so.src = Producer.cpp
-nmx.so.inc = Producer.h
-cspec.so.src = cspec/CSPECData.cpp cspec/CSPECChanConv.cpp  RingBuffer.cpp
-cspec.so.inc = cspec/CSPECData.h cspec/CSPECChanConv.h gccintel.h
-
+progs = efu2 cspec.so nmx.so udp.so
 library = ../libs/eventlib.a
 
-src.efu = EFUArgs.cpp Loader.cpp Launcher.cpp
-obj.efu = $(src.efu:%.cpp=%.o)
+udp.so.src = udp/udp.cpp
+udp.so.inc = common/Detector.h
+nmx.so.src = common/Producer.cpp
+nmx.so.inc = common/Producer.h common/Detector.h
+cspec.so.src = cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp  common/RingBuffer.cpp
+cspec.so.inc = cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h gccintel.h
+
+efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp
+efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h
+efu.obj = $(efu.src:%.cpp=%.o)
+
 
 .DEFAULT_GOAL = all
 
-include Makefile.config
-include Makefile.test
+include makefiles/Makefile.config
+include makefiles/Makefile.test
 
 all: $(progs)
 	@echo done
 	$(Q)chmod 440 *.so
 
-cspec.so: cspec/cspec.cpp Detector.h $(cspec.so.src) $(cspc.so.inc)
+cspec.so: $(cspec.so.src) $(cspc.so.inc)
 	@echo building specific $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) $< -o $@
+	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
 
-%.so: %.cpp Detector.h
-	@echo building $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) $< -o $@
+nmx.so: $(nmx.so.src) $(nmx.so.inc)
+	@echo building specific $@
+	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
+
+udp.so: $(udp.so.src) $(udp.so.inc)
+	@echo building specific $@
+	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
 
 %.o: %.cpp
 	@echo building $@
-	$(Q)$(cxx) $(cxxflags) $< -c -o $@ $(prof)
+	$(Q)$(cxx) $(cxxflags) $< -c -o $@
 
 $(library): Socket.h Timer.h Counter.h
 	make -C ../libs
 
-efu2: pipeline.cpp $(library) $(obj.efu) EFUArgs.h Launcher.h Loader.h
+efu2: $(library) $(efu.obj) $(efu.inc)
 	@echo building $@
-	$(Q)$(cxx) $(cxxflags) $(prof) $< $(library) $(obj.efu) $(ldflags) -o $@
+	$(Q)$(cxx) $(cxxflags) $(efu.obj) $(library) $(ldflags) -o $@
+
+
+
 
 realclean: clean
 	make -C ../libs clean
 
 clean:
-	@rm -f $(obj) $(progs) $(testprogs) *.log *~ *.gc* gmon.out *.o gylle *.xml
+	@rm -f $(efu.obj) $(progs) $(testprogs) *.log *~ *.gc* gmon.out *.o gylle *.xml
 	@rm -fr html lcov.out
