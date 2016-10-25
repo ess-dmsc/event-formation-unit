@@ -30,7 +30,7 @@ TEST(Event, AllocationTime) {
     Timer tm;
     std::priority_queue<NMXData, std::vector<NMXData>, std::greater<NMXData>>
         pq;
-    tm.start();
+
     for (int i = 0; i < size; i++) {
       auto ev = new NMXData(random(), size, 1);
       pq.push(*ev);
@@ -38,7 +38,6 @@ TEST(Event, AllocationTime) {
     for (int i = 0; i < size; i++) {
       pq.pop();
     }
-    tm.stop();
     std::cout << size << " constructors " << tm.timeus() << " us\n";
   }
 }

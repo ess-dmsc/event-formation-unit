@@ -22,7 +22,6 @@ protected:
 
   std::priority_queue<int, std::vector<int>, std::greater<int>> pq;
   std::vector<int> x, y;
-  Timer tm;
   int random_variable;
 };
 
@@ -30,7 +29,7 @@ TEST_F(PriorityQueueTest, DoublingTestRandom) {
   for (auto const &count : pqsizes) {
     std::cout << "inserting " << count << " random ints -";
 
-    tm.start();
+    Timer tm;
     for (int i = 0; i < count; i++) {
       random_variable = std::rand();
       pq.push(random_variable);
@@ -39,7 +38,6 @@ TEST_F(PriorityQueueTest, DoublingTestRandom) {
     for (int i = 0; i < count; i++) {
       pq.pop();
     }
-    tm.stop();
     x.push_back(count);
     y.push_back(tm.timeus());
     std::cout << " time (us): " << tm.timeus() << "\n";
@@ -50,11 +48,10 @@ TEST_F(PriorityQueueTest, RandomSpeed) {
   for (auto const &count : pqsizes) {
     std::cout << "generating " << count << " random ints -";
 
-    tm.start();
+    Timer tm;
     for (int i = 0; i < count; i++) {
       int random_variable[[gnu::unused]] = std::rand();
     }
-    tm.stop();
     x.push_back(count);
     y.push_back(tm.timeus());
     std::cout << " time (us): " << tm.timeus() << "\n";
@@ -65,7 +62,7 @@ TEST_F(PriorityQueueTest, AlreadySortedIncreasing) {
   for (auto const &count : pqsizes) {
     std::cout << "generating " << count << " sorted ints (increasing) -";
 
-    tm.start();
+    Timer tm;
     for (int i = 0; i < count; i++) {
       pq.push(i);
     }
@@ -73,7 +70,6 @@ TEST_F(PriorityQueueTest, AlreadySortedIncreasing) {
     for (int i = 0; i < count; i++) {
       pq.pop();
     }
-    tm.stop();
 
     x.push_back(count);
     y.push_back(tm.timeus());
@@ -85,7 +81,7 @@ TEST_F(PriorityQueueTest, AlreadySortedDecreasing) {
   for (auto const &count : pqsizes) {
     std::cout << "generating " << count << " sorted ints (decreasing)-";
 
-    tm.start();
+    Timer tm;
     for (int i = 0; i < count; i++) {
       pq.push(count - i);
     }
@@ -93,7 +89,6 @@ TEST_F(PriorityQueueTest, AlreadySortedDecreasing) {
     for (int i = 0; i < count; i++) {
       pq.pop();
     }
-    tm.stop();
 
     x.push_back(count);
     y.push_back(tm.timeus());
