@@ -1,6 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
 #pragma once
+#ifndef NOKAFKA
 #include <librdkafka/rdkafkacpp.h>
 
 class Producer {
@@ -15,3 +16,4 @@ private:
   RdKafka::Topic *topic{0};
   RdKafka::Producer *producer{0};
 };
+#endif
