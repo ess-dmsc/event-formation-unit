@@ -26,6 +26,6 @@ testdetector: test/testDetector.cpp common/Detector.h
 	$(Q)g++ $(cxxflags_test) test/testDetector.cpp  -o $@ $(ldflags_test)
 
 coverage:
-	gcov -b *.gcda
-	lcov -c -d . -o lcov.out
+	gcov -r -b *.gcda
+	lcov -c -d . --no-external -o lcov.out
 	genhtml -o html lcov.out
