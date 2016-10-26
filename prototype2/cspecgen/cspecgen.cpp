@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
   uint64_t tsc;
   for (;;) {
     tsc = rdtsc();
-    if (unlikely((tx_total + tx) >= (long unsigned int)opts.txGB * 1000000000) {
+    if (unlikely((tx_total + tx) >= (long unsigned int)opts.txGB * 1000000000)) {
       cout << "Sent " << tx_total + tx << " bytes." << endl;
       cout << "done" << endl;
       exit(0);
