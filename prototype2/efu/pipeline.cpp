@@ -25,6 +25,7 @@ int main(int argc, char *argv[]) {
   while (stop.timeus() < opts.stopafter * 1000000) {
     sleep(2);
   }
+  sleep(2);
   printf("Exiting...\n");
   exit(1);
   return 0;

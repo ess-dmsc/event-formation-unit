@@ -15,6 +15,7 @@ public:
   };
 
   RingBuffer(int buffersize, int entries);
+  ~RingBuffer();
   struct Data *getdatastruct(void); /**< return pointer to current buffer */
   void setdatalength(int length);   /**< set the length field of curr buff */
   int nextbuffer(void);             /**< advance to next buffer, wraps around */

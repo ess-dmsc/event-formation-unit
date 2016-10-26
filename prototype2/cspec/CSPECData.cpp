@@ -43,7 +43,7 @@ int CSPECData::receive(const char *buffer, int size) {
         error = 1;
         break;
       }
-      data[elems].d[i] = mgp->data[i] && 0x3fff;
+      data[elems].d[i] = mgp->data[i] & 0x3fff;
     }
     if (error)
       break;

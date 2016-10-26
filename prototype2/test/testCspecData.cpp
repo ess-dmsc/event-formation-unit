@@ -2,17 +2,19 @@
 
 #include "CSPECTestData.h"
 #include "TestBase.h"
+#include <cspec/CSPECChanConv.h>
 #include <cspec/CSPECData.h>
 
 using namespace std;
 
 class CspecDataTest : public TestBase {
 protected:
+  CSPECChanConv conv;
   CSPECData *dat;
   char buffer[9000];
   int size;
 
-  virtual void SetUp() { dat = new CSPECData; }
+  virtual void SetUp() { dat = new CSPECData(&conv); }
   virtual void TearDown() { delete dat; }
 
   void assertdatfragerr(int data, int frag, int error) {
@@ -77,7 +79,7 @@ TEST_F(CspecDataTest, InputFilterConstructor) {
   dat->receive((char *)&err_below_thresh[0], size);
   assertdatfragerr(size / dat->datasize, 0, 0);
   int discard = dat->input_filter();
-  ASSERT_EQ(discard, 2);
+  ASSERT_EQ(discard, 4);
 }
 
 int main(int argc, char **argv) {

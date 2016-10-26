@@ -12,6 +12,12 @@ RingBuffer::RingBuffer(int buffersize, int entries)
   assert(data != 0);
 }
 
+RingBuffer::~RingBuffer() {
+  free(data);
+  data = 0;
+}
+
+
 struct RingBuffer::Data *RingBuffer::getdatastruct(void) {
   return &data[entry_];
 }

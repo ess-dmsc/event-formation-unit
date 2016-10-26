@@ -13,9 +13,9 @@ testcspecchanconv: test/testCspecChanConv.cpp cspec/CSPECChanConv.cpp cspec/CSPE
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) test/testCspecChanConv.cpp cspec/CSPECChanConv.cpp -o $@ $(ldflags_test)
 
-testcspecdata:  test/testCspecData.cpp cspec/CSPECData.cpp cspec/CSPECData.h test/CSPECTestData.h
+testcspecdata:  test/testCspecData.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp cspec/CSPECData.h cspec/CSPECChanConv.h test/CSPECTestData.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) test/testCspecData.cpp cspec/CSPECData.cpp -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) test/testCspecData.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp -o $@ $(ldflags_test)
 
 testringbuffer: test/testRingBuffer.cpp common/RingBuffer.cpp common/RingBuffer.h
 	@echo building $@
