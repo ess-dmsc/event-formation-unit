@@ -7,14 +7,14 @@ using namespace std;
 
 class TestDetector : public Detector {
 public:
-  TestDetector() { cout << "    TestDetector created" << endl; };
-  ~TestDetector() { cout << "    TestDetector destroyed" << endl; };
+  TestDetector() { cout << "TestDetector" << endl; };
+  ~TestDetector() { cout << "~TestDetector" << endl; };
 };
 
 class TestDetectorFactory : public DetectorFactory {
 public:
   Detector *create() {
-    cout << "    making TestDetector" << endl;
+    cout << "TestDetectorFactory" << endl;
     return new TestDetector;
   }
 };
@@ -28,6 +28,18 @@ protected:
   virtual void SetUp() { det = Factory.create(); }
   Detector *det;
 };
+
+TEST_F(DetectorTest, Destructor) {
+  testing::internal::CaptureStdout();
+  Detector * tmp = Factory.create();
+  std::string output = testing::internal::GetCapturedStdout();
+  ASSERT_EQ(output, "TestDetectorFactory\nTestDetector\n");
+
+  testing::internal::CaptureStdout();
+  delete(tmp);
+  output = testing::internal::GetCapturedStdout();
+  ASSERT_EQ(output, "~TestDetector\n");
+}
 
 TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != NULL); }
 

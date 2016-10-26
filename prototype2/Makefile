@@ -69,5 +69,6 @@ realclean: clean
 	make -C ../libs clean
 
 clean:
-	@rm -f $(efu.obj) $(progs) $(testprogs) *.log *~ *.gc* gmon.out *.o gylle *.xml
+	@rm -f $(efu.obj) $(progs) $(testprogs) *.log *~ gmon.out *.o gylle *.xml
 	@rm -fr html lcov.out
+	@find . -name "*.gc*" | xargs rm -f
