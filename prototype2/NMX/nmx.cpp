@@ -1,13 +1,13 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <Counter.h>
-#include <Detector.h>
-#include <EFUArgs.h>
-#include <Producer.h>
-#include <Socket.h>
-#include <Timer.h>
+#include <common/Detector.h>
+#include <common/EFUArgs.h>
+#include <common/Producer.h>
 #include <cstring>
 #include <iostream>
+#include <libs/include/Counter.h>
+#include <libs/include/Socket.h>
+#include <libs/include/Timer.h>
 #include <mutex>
 #include <queue>
 #include <stdio.h>
@@ -40,7 +40,7 @@ private:
 void NMX::input_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
 
-  Socket::Endpoint local("0.0.0.0", opts->port);
+  Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
 
   UDPServer bulkdata(local);
   bulkdata.buflen(opts->buflen);

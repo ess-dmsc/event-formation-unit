@@ -45,7 +45,7 @@ void CSPEC::input_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
 
   /** Connection setup */
-  Socket::Endpoint local("0.0.0.0", opts->port);
+  Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
   UDPServer cspecdata(local);
   cspecdata.buflen(opts->buflen);
   cspecdata.setbuffers(0, opts->rcvbuf);
@@ -121,7 +121,7 @@ void CSPEC::processing_thread(void *args) {
                    96); // Linear dummy grid look-up table
 
   CSPECData dat(0, 0, &conv); // no signal threshold
-  //CSPECData dat(&conv); // Default signal thresholds
+  // CSPECData dat(&conv); // Default signal thresholds
 
   Timer stop;
   uint64_t tsc0 = rdtsc();

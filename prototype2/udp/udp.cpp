@@ -31,7 +31,7 @@ void UDPRaw::input_thread(void *args) {
 
   assert(args != NULL);
 
-  Socket::Endpoint local("0.0.0.0", opts->port);
+  Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
   UDPServer raw(local);
   raw.printbuffers();
   raw.setbuffers(0, opts->rcvbuf);
@@ -50,7 +50,8 @@ void UDPRaw::input_thread(void *args) {
 
     if (usecs >= 1000000) {
       rx_total += rx;
-      printf("Rx rate: %.2f Mbps, rx %" PRIu64 " MB (total: %" PRIu64 " MB) %ld usecs\n",
+      printf("Rx rate: %.2f Mbps, rx %" PRIu64 " MB (total: %" PRIu64
+             " MB) %ld usecs\n",
              rx * 8.0 / usecs, rx / B1M, rx_total / B1M, usecs);
       rx = 0;
       upd.now();

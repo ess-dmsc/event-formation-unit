@@ -10,7 +10,7 @@ library = ../libs/eventlib.a
 udp.so.src = udp/udp.cpp
 udp.so.inc = common/Detector.h
 
-nmx.so.src =
+nmx.so.src = NMX/nmx.cpp
 nmx.so.inc = common/Detector.h
 ifndef NOKAFKA
 nmx.so.src += common/Producer.cpp

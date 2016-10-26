@@ -27,17 +27,14 @@ public:
     unsigned int valid; // TODO
   };
 
-
   /** Let user specify calibration parameters */
-  CSPECData(CSPECChanConv * calibration) : chanconv(calibration){ };
+  CSPECData(CSPECChanConv *calibration) : chanconv(calibration){};
 
   CSPECData(unsigned int wthresh, unsigned int gthresh,
-             CSPECChanConv * calibration)
-            : wire_thresh(wthresh)
-            , grid_thresh(gthresh)
-            , chanconv(calibration){ };
+            CSPECChanConv *calibration)
+      : wire_thresh(wthresh), grid_thresh(gthresh), chanconv(calibration){};
 
-  CSPECData() {}; //TODO remove and fix cspecgen.cpp
+  CSPECData(){}; // TODO remove and fix cspecgen.cpp
 
   /** parse a binary payload buffer, return number of data elements */
   int receive(const char *buffer, int size);
@@ -55,5 +52,5 @@ public:
   unsigned int error{0};
   unsigned int frag{0};
 
-  CSPECChanConv * chanconv{nullptr};
+  CSPECChanConv *chanconv{nullptr};
 };
