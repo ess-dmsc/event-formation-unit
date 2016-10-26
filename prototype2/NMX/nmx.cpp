@@ -1,5 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+#include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/Producer.h>
@@ -8,6 +9,7 @@
 #include <libs/include/Counter.h>
 #include <libs/include/Socket.h>
 #include <libs/include/Timer.h>
+#include <libs/include/gccintel.h>
 #include <mutex>
 #include <queue>
 #include <stdio.h>
@@ -16,6 +18,8 @@
 using namespace std;
 
 const char *classname = "NMX Detector";
+
+const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 /** ----------------------------------------------------- */
 
@@ -46,6 +50,7 @@ void NMX::input_thread(void *args) {
   bulkdata.buflen(opts->buflen);
   bulkdata.setbuffers(0, opts->rcvbuf);
   bulkdata.printbuffers();
+  bulkdata.settimeout(0, 100000); // One tenth of a second
 
   char buffer[9000];
   unsigned int seqno = 1;
@@ -54,47 +59,46 @@ void NMX::input_thread(void *args) {
 
   uint64_t rx_total = 0;
   uint64_t rx = 0;
+  int rdsize;
 
   Timer upd, stop;
+  uint64_t tsc0 = rdtsc();
+  uint64_t tsc;
   for (;;) {
+    tsc = rdtsc();
 
     /** this is the processing step */
-    if ((rx += bulkdata.receive(buffer, opts->buflen)) > 0) {
+    if ((rdsize = bulkdata.receive(buffer, opts->buflen)) > 0) {
       std::memcpy(&seqno, buffer, sizeof(seqno));
-
+      rx+= rdsize;
       lost += (seqno - seqno_exp);
       seqno_exp = seqno + 1;
 
       m1.lock();
       queue1.push(seqno);
       m1.unlock();
-    } else {
-      std::cout << "Receive 0 " << std::endl;
     }
 
     /** This is the periodic reporting*/
-    if (seqno % 100 == 0) {
+    if (unlikely(((tsc - tsc0) / TSC_MHZ >= opts->updint * 1000000))) {
       auto usecs = upd.timeus();
-      if (usecs >= opts->updint * 1000000) {
-        rx_total += rx;
+      rx_total += rx;
 
-        mcout.lock();
-        printf(
-            "input     : %8.2f Mb/s, q1: %3d, rxpkt: %9d, rxbytes: %12" PRIu64
-            ", PER: %6.3e\n",
-            rx * 8.0 / (usecs / 1000000.0) / 1000000, (int)queue1.size(), seqno,
-            rx_total, 1.0 * lost / seqno);
-        fflush(stdout);
-        mcout.unlock();
+      mcout.lock();
+      printf(
+          "input     : %8.2f Mb/s, q1: %3d, rxpkt: %9d, rxbytes: %12" PRIu64
+          ", PER: %6.3e\n",
+          rx * 8.0 /  usecs, (int)queue1.size(), seqno,
+          rx_total, 1.0 * lost / seqno);
+      fflush(stdout);
+      mcout.unlock();
 
-        rx = 0;
-
-        if (stop.timeus() >= opts->stopafter * 1000000) {
-          std::cout << "stopping input thread " << std::endl;
-          return;
-        }
-
-        upd.now();
+      upd.now();
+      tsc0 = rdtsc();
+      rx = 0;
+      if (stop.timeus() >= opts->stopafter * 1000000) {
+        std::cout << "stopping input thread " << std::endl;
+        return;
       }
     }
   }

@@ -34,6 +34,7 @@ int main(int argc, char *argv[]) {
   uint64_t tsc0 = rdtsc();
   uint64_t tsc1 = rdtsc();
   uint64_t tsc;
+  Timer upd;
   for (;;) {
     tsc = rdtsc();
     if (unlikely((tx_total + tx) >=
@@ -60,19 +61,14 @@ int main(int argc, char *argv[]) {
       cout << "unable to send" << endl;
     }
 
-#if 0
-    if ((txp % 10000) == 0) {
-      usleep(15000);
-    }
-#endif
-
     if (unlikely(((tsc - tsc0) / TSC_MHZ) >= opts.updint * 1000000)) {
+      auto usecs = upd.timeus();
       tx_total += tx;
       printf("Tx rate: %8.2f Mbps, tx %5" PRIu64 " MB (total: %7" PRIu64
              " MB) %ld usecs\n",
-             tx * 8.0 / (((tsc - tsc0) / TSC_MHZ) / 1000000.0) / B1M, tx / B1M,
-             tx_total / B1M, ((tsc - tsc0) / TSC_MHZ));
+             tx * 8.0 / usecs, tx / B1M, tx_total / B1M, usecs);
       tx = 0;
+      upd.now();
       tsc0 = rdtsc();
     }
   }
