@@ -5,8 +5,6 @@
 #include <cspec/CSPECChanConv.h>
 
 class CSPECData {
-private:
-  CSPECData(){};
 public:
   // See "multi grid detector data processing.docx" from DMG's
   // Event Formation Files
@@ -36,7 +34,7 @@ public:
             CSPECChanConv *calibration)
       : wire_thresh(wthresh), grid_thresh(gthresh), chanconv(calibration){};
 
-
+  CSPECData(){}; // Discouraged, but used in cspecgen
 
   /** parse a binary payload buffer, return number of data elements */
   int receive(const char *buffer, int size);
