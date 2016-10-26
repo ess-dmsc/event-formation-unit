@@ -111,6 +111,12 @@ vector<unsigned int> err_below_thresh
   0x04040203, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd
 };
 
+vector<unsigned int> ok_above_thresh
+{
+  0x40000009, 0x0400020f, 0x0401022f, 0x0402028f, 0x0403002b,
+  0x040402d3, 0x04050235, 0x04060385, 0x0407002c, 0xc00211dd
+};
+
 
 // clang-format on
 

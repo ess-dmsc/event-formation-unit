@@ -53,7 +53,7 @@ void CSPEC::input_thread(void *args) {
   cspecdata.settimeout(0, 100000); // One tenth of a second
 
   /** Buffer and stats setup */
-  RingBuffer ringbuf(9000, buffer_max_entries);
+  RingBuffer ringbuf(buffer_max_entries);
 
   uint64_t rx = 0;
   uint64_t rx_total = 0;

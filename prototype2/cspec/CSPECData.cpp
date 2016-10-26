@@ -75,11 +75,13 @@ int CSPECData::input_filter() {
       discarded++;
       continue;
     }
-    if ((data[i].d[1] < wire_thresh) || (data[i].d[5] < grid_thresh)) {
-      discarded++;
+    data[i].valid = 1;
+
+    if ((data[i].d[1] >= wire_thresh) || (data[i].d[5] >= grid_thresh)) {
+      discarded++; // double event
+      data[i].valid = 0; // invalidate
       continue;
     }
-    data[i].valid = 1;
   }
   return discarded;
 }

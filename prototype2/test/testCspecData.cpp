@@ -74,7 +74,15 @@ TEST_F(CspecDataTest, GeneratorOversize) {
   assertdatfragerr(225, 0, 0);
 }
 
-TEST_F(CspecDataTest, InputFilterConstructor) {
+TEST_F(CspecDataTest, InputFilterBelowThresh) {
+  size = err_below_thresh.size() * 4;
+  dat->receive((char *)&err_below_thresh[0], size);
+  assertdatfragerr(size / dat->datasize, 0, 0);
+  int discard = dat->input_filter();
+  ASSERT_EQ(discard, 4);
+}
+
+TEST_F(CspecDataTest, InputFilterAboveThresh) {
   size = err_below_thresh.size() * 4;
   dat->receive((char *)&err_below_thresh[0], size);
   assertdatfragerr(size / dat->datasize, 0, 0);
