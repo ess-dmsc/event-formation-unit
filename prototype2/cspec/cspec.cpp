@@ -61,9 +61,9 @@ void CSPEC::input_thread(void *args) {
   uint64_t ioverflow = 0;
   int rdsize;
 
-  Timer stop;
   uint64_t tsc0 = rdtsc();
   uint64_t tsc;
+  Timer upd, stop;
   for (;;) {
     tsc = rdtsc();
 
@@ -84,16 +84,18 @@ void CSPEC::input_thread(void *args) {
 
     /** This is the periodic reporting*/
     if (unlikely(((tsc - tsc0) / TSC_MHZ >= opts->updint * 1000000))) {
+      auto usecs = upd.timeus();
       rx_total += rx;
 
       mcout.lock();
       printf("%" PRIu64 " input     : %8.2f Mb/s, q1: %3d, rxpkt: %12" PRIu64
              ", rxbytes: %12" PRIu64 ", push errors: %" PRIu64 "\n",
-             tsc - tsc0, rx * 8.0 / ((tsc - tsc0) / TSC_MHZ), 0, rxp, rx_total,
+             tsc - tsc0, rx * 8.0 / usecs, 0, rxp, rx_total,
              ioverflow);
       fflush(stdout);
       mcout.unlock();
 
+      upd.now();
       tsc0 = rdtsc();
       rx = 0;
 
