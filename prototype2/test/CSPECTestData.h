@@ -117,7 +117,6 @@ vector<unsigned int> ok_above_thresh
   0x040402d3, 0x04050235, 0x04060385, 0x0407002c, 0xc00211dd
 };
 
-
 // clang-format on
 
 /** Raw packet data above, now collect into iterable containers */

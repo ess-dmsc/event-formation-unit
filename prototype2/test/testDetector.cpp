@@ -26,18 +26,18 @@ TestDetectorFactory Factory;
 class DetectorTest : public TestBase {
 protected:
   virtual void SetUp() { det = Factory.create(); }
-  virtual void TearDown() { delete(det); }
+  virtual void TearDown() { delete (det); }
   Detector *det;
 };
 
 TEST_F(DetectorTest, Destructor) {
   testing::internal::CaptureStdout();
-  Detector * tmp = Factory.create();
+  Detector *tmp = Factory.create();
   std::string output = testing::internal::GetCapturedStdout();
   ASSERT_EQ(output, "TestDetectorFactory\nTestDetector\n");
 
   testing::internal::CaptureStdout();
-  delete(tmp);
+  delete (tmp);
   output = testing::internal::GetCapturedStdout();
   ASSERT_EQ(output, "~TestDetector\n");
 }

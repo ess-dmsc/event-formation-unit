@@ -1,7 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <Thread.h>
 #include <iostream>
+#include <libs/include/Thread.h>
 #include <pthread.h>
 
 Thread::Thread(int lcore, void (*func)(void)) : lcore_(lcore) {

@@ -19,7 +19,7 @@ public:
   struct Data *getdatastruct(void); /**< return pointer to current buffer */
   void setdatalength(int length);   /**< set the length field of curr buff */
   int getdatalength(void);
-  int nextbuffer(void);             /**< advance to next buffer, wraps around */
+  int nextbuffer(void); /**< advance to next buffer, wraps around */
   int getsize(void) { return size_; }   /**< return buffer size in bytes */
   int getelems(void) { return N_; }     /**< return number of buffers */
   int getindex(void) { return entry_; } /** current buffer index */

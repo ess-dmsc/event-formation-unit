@@ -1,6 +1,6 @@
 
 
-CXXFLAGS  = -Iinclude -std=c++11 -O3 -fPIC
+CXXFLAGS  = -I.. -std=c++11 -O3 -fPIC
 LDFLAGS   = -L. -lpthread
 CXXFLAGS += -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -Wno-error=sign-compare -Wno-error=conversion-null
 
@@ -21,8 +21,8 @@ ifdef COV
 CXXFLAGS += -coverage
 endif
 
-hdrs    = include/Socket.h include/Timer.h include/Thread.h include/Counter.h
-sources = source/Socket.cpp source/Timer.cpp source/Thread.cpp
+hdrs    = include/Socket.h include/Timer.h include/Thread.h include/Counter.h include/TSCTimer.h
+sources = source/Socket.cpp source/Timer.cpp source/Thread.cpp source/TSCTimer.cpp
 objects = $(sources:%.cpp=%.o)
 library = eventlib.a
 

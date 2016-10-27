@@ -70,7 +70,7 @@ void NMX::input_thread(void *args) {
     /** this is the processing step */
     if ((rdsize = bulkdata.receive(buffer, opts->buflen)) > 0) {
       std::memcpy(&seqno, buffer, sizeof(seqno));
-      rx+= rdsize;
+      rx += rdsize;
       lost += (seqno - seqno_exp);
       seqno_exp = seqno + 1;
 
@@ -85,11 +85,10 @@ void NMX::input_thread(void *args) {
       rx_total += rx;
 
       mcout.lock();
-      printf(
-          "input     : %8.2f Mb/s, q1: %3d, rxpkt: %9d, rxbytes: %12" PRIu64
-          ", PER: %6.3e\n",
-          rx * 8.0 /  usecs, (int)queue1.size(), seqno,
-          rx_total, 1.0 * lost / seqno);
+      printf("input     : %8.2f Mb/s, q1: %3d, rxpkt: %9d, rxbytes: %12" PRIu64
+             ", PER: %6.3e\n",
+             rx * 8.0 / usecs, (int)queue1.size(), seqno, rx_total,
+             1.0 * lost / seqno);
       fflush(stdout);
       mcout.unlock();
 

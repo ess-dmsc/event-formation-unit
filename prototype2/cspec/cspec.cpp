@@ -8,8 +8,8 @@
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
+#include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
-#include <libs/include/gccintel.h>
 #include <mutex>
 #include <queue>
 #include <stdio.h>
@@ -18,12 +18,10 @@
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
-const char *classname = "CSPEC Detector";
-
-const int TSC_MHZ = 2900; // MJC's workstation - not reliable
-// const int TSC_MHZ = 2400; // dmsc-parallel (?)
+const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
 
 /** ----------------------------------------------------- */
+const char *classname = "CSPEC Detector";
 
 class CSPEC : public Detector {
 public:
@@ -61,11 +59,9 @@ void CSPEC::input_thread(void *args) {
   uint64_t ioverflow = 0;
   int rdsize;
 
-  uint64_t tsc0 = rdtsc();
-  uint64_t tsc;
-  Timer upd, stop;
+  Timer us_clock, stop_timer;
+  TSCTimer report_timer;
   for (;;) {
-    tsc = rdtsc();
 
     /** this is the processing step */
     struct RingBuffer::Data *data = ringbuf.getdatastruct();
@@ -83,24 +79,25 @@ void CSPEC::input_thread(void *args) {
     }
 
     /** This is the periodic reporting*/
-    if (unlikely(((tsc - tsc0) / TSC_MHZ >= opts->updint * 1000000))) {
-      auto usecs = upd.timeus();
+    if (unlikely(
+            (report_timer.timetsc() / TSC_MHZ >= opts->updint * 1000000))) {
+      auto usecs = us_clock.timeus();
       rx_total += rx;
 
       mcout.lock();
       printf("%" PRIu64 " input     : %8.2f Mb/s, q1: %3d, rxpkt: %12" PRIu64
              ", rxbytes: %12" PRIu64 ", push errors: %" PRIu64 "\n",
-             tsc - tsc0, rx * 8.0 / usecs, 0, rxp, rx_total,
+             report_timer.timetsc(), rx * 8.0 / usecs, 0, rxp, rx_total,
              ioverflow);
       fflush(stdout);
       mcout.unlock();
 
-      upd.now();
-      tsc0 = rdtsc();
+      us_clock.now();
+      report_timer.now();
       rx = 0;
 
-      if (stop.timeus() >= opts->stopafter * 1000000) {
-        std::cout << "stopping input thread, timeus " << stop.timeus()
+      if (stop_timer.timeus() >= opts->stopafter * 1000000) {
+        std::cout << "stopping input thread, timeus " << stop_timer.timeus()
                   << std::endl;
         return;
       }

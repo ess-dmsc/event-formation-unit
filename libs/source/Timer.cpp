@@ -1,6 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <Timer.h>
+#include <libs/include/Timer.h>
 
 /** */
 Timer::Timer(void) { t1 = HRClock::now(); }

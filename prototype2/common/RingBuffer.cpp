@@ -4,8 +4,7 @@
 #include <common/RingBuffer.h>
 #include <cstdlib>
 
-RingBuffer::RingBuffer(int entries)
-    : N_(entries) {
+RingBuffer::RingBuffer(int entries) : N_(entries) {
 
   data = (struct Data *)malloc(sizeof(struct Data) * entries);
 
@@ -17,7 +16,6 @@ RingBuffer::~RingBuffer() {
   data = 0;
 }
 
-
 struct RingBuffer::Data *RingBuffer::getdatastruct(void) {
   return &data[entry_];
 }
@@ -28,9 +26,7 @@ void RingBuffer::setdatalength(int length) {
   data[entry_].length = length;
 }
 
-int RingBuffer::getdatalength(void) {
-  return data[entry_].length;
-}
+int RingBuffer::getdatalength(void) { return data[entry_].length; }
 
 int RingBuffer::nextbuffer(void) {
   entry_ = (entry_ + 1) % N_;

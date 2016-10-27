@@ -6,8 +6,8 @@
 #include <inttypes.h>
 #include <iostream>
 #include <libs/include/Socket.h>
+#include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
-#include <libs/include/gccintel.h>
 #include <unistd.h>
 
 using namespace std;
@@ -37,12 +37,10 @@ int main(int argc, char *argv[]) {
   uint64_t tx_total = 0;
   uint64_t tx = 0;
   uint64_t txp = 0;
-  uint64_t tsc0 = rdtsc();
-  uint64_t tsc1 = rdtsc();
-  uint64_t tsc;
-  Timer upd;
+
+  TSCTimer report_timer, throttle_timer;
+  Timer us_clock;
   for (;;) {
-    tsc = rdtsc();
     if (unlikely((tx_total + tx) >=
                  (long unsigned int)opts.txGB * 1000000000)) {
       cout << "Sent " << tx_total + tx << " bytes." << endl;
@@ -51,9 +49,9 @@ int main(int argc, char *argv[]) {
     }
 
     // Sleep to throttle down speed
-    if (unlikely((tsc - tsc1) >= TSC_MHZ * 10000)) {
+    if (unlikely(throttle_timer.timetsc() >= TSC_MHZ * 10000)) {
       usleep(opts.speed_level * 1000);
-      tsc1 = rdtsc();
+      throttle_timer.now();
     }
 
     // Send data
@@ -66,15 +64,15 @@ int main(int argc, char *argv[]) {
       cout << "unable to send" << endl;
     }
 
-    if (unlikely(((tsc - tsc0) / TSC_MHZ) >= opts.updint * 1000000)) {
-      auto usecs = upd.timeus();
+    if (unlikely((report_timer.timetsc() / TSC_MHZ) >= opts.updint * 1000000)) {
+      auto usecs = us_clock.timeus();
       tx_total += tx;
       printf("Tx rate: %8.2f Mbps, tx %5" PRIu64 " MB (total: %7" PRIu64
              " MB) %ld usecs\n",
              tx * 8.0 / usecs, tx / B1M, tx_total / B1M, usecs);
       tx = 0;
-      upd.now();
-      tsc0 = rdtsc();
+      us_clock.now();
+      report_timer.now();
     }
   }
 }
