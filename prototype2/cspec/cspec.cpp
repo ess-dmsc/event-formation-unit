@@ -79,8 +79,7 @@ void CSPEC::input_thread(void *args) {
     }
 
     /** This is the periodic reporting*/
-    if (unlikely(
-            (report_timer.timetsc() / TSC_MHZ >= opts->updint * 1000000))) {
+    if (unlikely((report_timer.timetsc() / TSC_MHZ >= opts->updint * 1000000))) {
       auto usecs = us_clock.timeus();
       rx_total += rx;
 

@@ -1,6 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <Counter.h>
+#include <libs/include/Counter.h>
 #include <gtest/gtest.h>
 
 class CounterTest : public ::testing::Test {
