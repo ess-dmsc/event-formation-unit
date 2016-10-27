@@ -29,3 +29,8 @@ coverage:
 	gcov -r -b *.gcda
 	lcov -c -d . --no-external -o lcov.out
 	genhtml -o html lcov.out
+
+valgrind: test
+	rm -f valgrind_error
+	for test in $(testprogs) ; do valgrind --leak-check=full -v --log-file="$$test.valgrind" ./$$test  || echo error >> valgrind_error; done
+	test ! -e valgrind_error

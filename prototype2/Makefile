@@ -70,5 +70,5 @@ realclean: clean
 
 clean:
 	@rm -f $(efu.obj) $(progs) $(testprogs) *.log *~ gmon.out *.o gylle *.xml
-	@rm -fr html lcov.out
+	@rm -fr html lcov.out *.valgrind
 	@find . -name "*.gc*" | xargs rm -f

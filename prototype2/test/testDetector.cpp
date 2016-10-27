@@ -26,6 +26,7 @@ TestDetectorFactory Factory;
 class DetectorTest : public TestBase {
 protected:
   virtual void SetUp() { det = Factory.create(); }
+  virtual void TearDown() { delete(det); }
   Detector *det;
 };
 
