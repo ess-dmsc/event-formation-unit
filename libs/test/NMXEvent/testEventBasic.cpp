@@ -23,8 +23,9 @@ TEST(Event, BasicTests) {
 
 TEST(Event, AllocationTime) {
   srand(4242);
-  std::vector<int> pqsizes{250000,  500000,  750000,  1000000, 1500000,
-                           2000000, 3000000, 4000000, 5000000};
+  //std::vector<int> pqsizes{250000,  500000,  750000,  1000000, 1500000,
+  //                         2000000, 3000000, 4000000, 5000000};
+  std::vector<int> pqsizes{250000,  500000}; // Jenkins Valgrind
 
   for (auto const &size : pqsizes) {
     Timer tm;
