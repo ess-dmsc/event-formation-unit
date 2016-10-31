@@ -1,6 +1,7 @@
-/** Copyright (C) 2016 European Spallation Source */
+/** Copyright (C) 2016 European Spallation Source ERIC */
 
-/** @file CSPECTestData.h
+/** @file
+ *
  *  @brief Dataset for running unit tests - do not edit if unsure of what they do!
  */
 

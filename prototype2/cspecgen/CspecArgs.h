@@ -1,6 +1,7 @@
-/** Copyright (C) 2016 European Spallation Source */
+/** Copyright (C) 2016 European Spallation Source ERIC */
 
-/** @file CspecArgs.h
+/** @file
+ *
  *  @brief Command line argument parser for cspecgen
  */
 
@@ -9,6 +10,11 @@
 
 class DGArgs {
 public:
+
+  /** @brief constructor for program arguments parsed via getopt_long()
+   * @param argc Argument count - typically taken from main()
+   * @param argv Argument array - typically taken from main()
+   */
   DGArgs(int argc, char *argv[]);
 
   unsigned int txGB{10}; /**< total transmit size (GB) */

@@ -1,6 +1,7 @@
-/** Copyright (C) 2016 European Spallation Source */
+/** Copyright (C) 2016 European Spallation Source ERIC */
 
-/** @file Detector.h
+/** @file
+ *
  *  @brief Factory and Class for dynamically loadable detector types
  */
 
@@ -10,8 +11,11 @@
 class Detector {
 
 public:
-  // default constructor
 
+  // default constructor, all instruments must implement these methods
+  /** @brief generic pthread argument
+   * @param arg user supplied pointer to pthread argument data
+   */
   virtual void input_thread(void *arg __attribute__((unused))) {
     printf("no input stage\n");
   };
@@ -24,10 +28,14 @@ public:
     printf("no output stage\n");
   };
 
+  /** @brief optional destructor */
   virtual ~Detector(){};
 };
 
 class DetectorFactory {
 public:
+
+  /** @brief creates the detector object. All instruments must implement this
+  */
   virtual Detector *create() = 0;
 };

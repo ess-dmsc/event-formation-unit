@@ -1,6 +1,7 @@
-/** Copyright (C) 2016 European Spallation Source */
+/** Copyright (C) 2016 European Spallation Source ERIC */
 
-/** @file Producer.h
+/** @file
+ *
  *  @brief Wrapper class for sending data to Kafka broker
  */
 

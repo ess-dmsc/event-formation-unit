@@ -1,6 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-/** @file Loader.h
+/** @file
+ *
  *  @brief Loads detector plugins (shared objects)
  */
 
@@ -16,6 +17,11 @@ private:
 public:
   Detector *detector{NULL};
 
+  /** @brief Load instrument plugin from detector name
+   *  @param name Instrument name - .so suffix will be added
+   */
+  Loader(std::string name);
+
+  /** @brief minimal destructor */
   ~Loader();
-  Loader(std::string lib);
 };

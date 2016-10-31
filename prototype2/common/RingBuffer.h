@@ -1,28 +1,33 @@
-/** Copyright (C) 2016 European Spallation Source */
+/** Copyright (C) 2016 European Spallation Source ERIC */
 
-/** @file RingBuffer.h
- *  @brief Ringbuffer of fixed size elements for receiving network data
+/** @file
+ *
+ *  @brief Simple RingBuffer class to keep track of a number of buffers
+ *  for receiving socket data. No bounds checking so it is possible to corrupt
+ *  data and write beyond buffers
+ *  @todo add cookies around  each buffer
  */
 
 #pragma once
-
-// Simple class to keep track of anumber of buffers
-// for receiving socket data. No bounds checking
-// So it is possible to corrupt data and write beyond
-// buffers (TODO add cookies around  each buffer)
 
 class RingBuffer {
 public:
   struct Data {
     int length;
-    char buffer[9000]; // FIXME hardcoded
+    char buffer[9000]; /**< @todo Hardcoded buffersize */
   };
 
+  /** @brief construct a ringbuffer of specified size
+   *  @param entries size of the ringbuffer (in units of elements)
+   */
   RingBuffer(int entries);
+
+  /** @brief minimal destructor frees the allocated buffer */
   ~RingBuffer();
+
   struct Data *getdatastruct(void); /**< return pointer to current buffer */
-  void setdatalength(int length);   /**< set the length field of curr buff */
-  int getdatalength(void);
+  void setdatalength(int length);   /**< specify length of data in curr buffer */
+  int getdatalength(void); /**< get the length of data in current buffer */
   int nextbuffer(void); /**< advance to next buffer, wraps around */
   int getsize(void) { return size_; }   /**< return buffer size in bytes */
   int getelems(void) { return N_; }     /**< return number of buffers */
@@ -33,5 +38,5 @@ private:
 
   int entry_{0};
   int N_{0};
-  int size_{9000}; // FIXME hardcoded must be in sync with buffer above
+  int size_{9000}; /**< @todo  hardcoded must be in sync with buffer above */
 };

@@ -1,6 +1,7 @@
-/** Copyright (C) 2016 European Spallation Source */
+/** Copyright (C) 2016 European Spallation Source ERIC */
 
-/** @file Launcher.h
+/** @file
+ *
  *  @brief Class for launching processing threads
  */
 
@@ -11,6 +12,14 @@ class EFUArgs;
 
 class Launcher {
 public:
+
+  /** @brief Launches previously Loaded detector functions
+   *  @param ld Dynamic detector object (from Loader)
+   *  @param args Arguments to be passed to threads
+   *  @param lcore id for pthread affinity for input_thread
+   *  @param lcore id for pthread affinity for processing_thread
+   *  @param lcore id for pthread affinity for output_thread
+  */
   Launcher(Loader *ld, EFUArgs *args, int input, int processing, int output);
 
 private:

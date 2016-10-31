@@ -1,6 +1,7 @@
-/** Copyright (C) 2016 European Spallation Source */
+/** Copyright (C) 2016 European Spallation Source ERIC */
 
-/** @file EFUArgs.h
+/** @file
+ *
  *  @brief Command line argument parser for EFU
  */
 
@@ -9,6 +10,10 @@
 
 class EFUArgs {
 public:
+  /** @brief constructor for program arguments parsed via getopt_long()
+   * @param argc Argument count - typically taken from main()
+   * @param argv Argument array - typically taken from main()
+   */
   EFUArgs(int argc, char *argv[]);
 
   std::string ip_addr{"0.0.0.0"}; /**< used for data generators */
