@@ -37,7 +37,7 @@ function prototype()
   popd
 }
 
-tools
+#tools
 artifacts
-libs
+#libs
 prototype
