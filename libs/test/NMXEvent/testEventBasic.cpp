@@ -33,8 +33,8 @@ TEST(Event, AllocationTime) {
         pq;
 
     for (int i = 0; i < size; i++) {
-      auto ev = new NMXData(random(), size, 1);
-      pq.push(*ev);
+      NMXData data(random(), size, 1);
+      pq.push(data);
     }
     for (int i = 0; i < size; i++) {
       pq.pop();
