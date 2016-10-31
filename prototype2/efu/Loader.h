@@ -13,10 +13,10 @@ class Detector;
 
 class Loader {
 private:
-  void *handle{NULL};
+  void *handle{nullptr};
 
 public:
-  std::shared_ptr<Detector> detector{NULL};
+  std::shared_ptr<Detector> detector{nullptr};
 
   /** @brief Load instrument plugin from detector name
    *  @param name Instrument name - .so suffix will be added

@@ -13,7 +13,7 @@ RingBuffer::~RingBuffer() {
   data = 0;
 }
 
-struct RingBuffer::Data *RingBuffer::getdatastruct(void) {
+struct RingBuffer::Data *RingBuffer::getdatastruct() {
   return &data[entry_];
 }
 
@@ -23,9 +23,9 @@ void RingBuffer::setdatalength(int length) {
   data[entry_].length = length;
 }
 
-int RingBuffer::getdatalength(void) { return data[entry_].length; }
+int RingBuffer::getdatalength() { return data[entry_].length; }
 
-int RingBuffer::nextbuffer(void) {
+int RingBuffer::nextbuffer() {
   entry_ = (entry_ + 1) % N_;
   return entry_;
 }

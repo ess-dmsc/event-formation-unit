@@ -1,11 +1,11 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
 #include <cspec/CSPECChanConv.h>
-#include <cstring>
+#include <algorithm>
 
 CSPECChanConv::CSPECChanConv() {
-  bzero(wirecal, sizeof(wirecal));
-  bzero(gridcal, sizeof(gridcal));
+  std::fill_n(wirecal, adcsize, 0);
+  std::fill_n(gridcal, adcsize, 0);
 }
 
 int CSPECChanConv::makecal(uint16_t *array, unsigned int min, unsigned int max,

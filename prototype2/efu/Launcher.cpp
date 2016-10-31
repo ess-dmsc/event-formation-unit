@@ -39,7 +39,7 @@ void Launcher::launch(int lcore, void (*func)(Loader *, EFUArgs *), Loader *ld,
 
 Launcher::Launcher(Loader *dynamic, EFUArgs *args, int input, int processing,
                    int output) {
-  if (dynamic->detector == NULL) {
+  if (dynamic->detector == nullptr) {
     cout << "Detector not loadable, no processing ..." << endl;
     return;
   }

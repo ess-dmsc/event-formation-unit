@@ -22,7 +22,7 @@ public:
    *  @todo currently transmits a fixed hello world string, should take a
    *  data object reference or similar.
    */
-  int produce(void);
+  int produce();
 
 private:
   std::string errstr;

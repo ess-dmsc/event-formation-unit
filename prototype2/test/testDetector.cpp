@@ -48,7 +48,7 @@ TEST_F(DetectorTest, Destructor) {
   ASSERT_EQ(output, "~TestDetector\n");
 }
 
-TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != NULL); }
+TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != nullptr); }
 
 TEST_F(DetectorTest, DefaultThreads) {
   testing::internal::CaptureStdout();

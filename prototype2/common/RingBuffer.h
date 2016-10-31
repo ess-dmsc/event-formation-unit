@@ -25,13 +25,13 @@ public:
   /** @brief minimal destructor frees the allocated buffer */
   ~RingBuffer();
 
-  struct Data *getdatastruct(void); /**< return pointer to current buffer */
+  struct Data *getdatastruct(); /**< return pointer to current buffer */
   void setdatalength(int length);   /**< specify length of data in curr buffer */
-  int getdatalength(void); /**< get the length of data in current buffer */
-  int nextbuffer(void); /**< advance to next buffer, wraps around */
-  int getsize(void) { return size_; }   /**< return buffer size in bytes */
-  int getelems(void) { return N_; }     /**< return number of buffers */
-  int getindex(void) { return entry_; } /** current buffer index */
+  int getdatalength(); /**< get the length of data in current buffer */
+  int nextbuffer(); /**< advance to next buffer, wraps around */
+  int getsize() { return size_; }   /**< return buffer size in bytes */
+  int getelems() { return N_; }     /**< return number of buffers */
+  int getindex() { return entry_; } /** current buffer index */
 
 private:
   struct Data *data{nullptr};
