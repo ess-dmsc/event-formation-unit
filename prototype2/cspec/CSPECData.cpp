@@ -6,9 +6,9 @@
 using namespace std;
 
 struct multi_grid {
-  unsigned int header;
-  unsigned int data[8];
-  unsigned int footer;
+  uint32_t header;
+  uint32_t data[8];
+  uint32_t footer;
 } __attribute__((packed));
 
 int CSPECData::receive(const char *buffer, int size) {

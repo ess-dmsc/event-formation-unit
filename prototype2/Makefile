@@ -34,6 +34,10 @@ cspecgen.obj = $(cspecgen.src:%.cpp=%.o)
 include makefiles/Makefile.config
 include makefiles/Makefile.test
 
+doxygen:
+	mkdir -p doxygen
+	doxygen doxyfile
+
 all: $(progs)
 	@echo done
 	$(Q)chmod 440 *.so
@@ -68,7 +72,16 @@ cspecgen2: $(library) $(cspecgen.obj) $(cspecgen.inc)
 realclean: clean
 	make -C ../libs clean
 
-clean:
-	@rm -f $(efu.obj) $(progs) $(testprogs) *.log *~ gmon.out *.o gylle *.xml
-	@rm -fr html lcov.out *.valgrind
+doxygen-clean:
+	@rm -fr doxygen doxygen.warnings
+
+prog-clean:
+	@rm -f $(efu.obj) $(progs) $(testprogs) *.o
+
+test-clean:
+	@rm -f *.log gmon.out *.xml *.valgrind
+	@rm -fr html
 	@find . -name "*.gc*" | xargs rm -f
+
+clean: prog-clean test-clean doxygen-clean
+	@rm -f  *~  gylle lcov.out

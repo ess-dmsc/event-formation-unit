@@ -200,7 +200,7 @@ void NMX::output_thread(void *args) {
     if (kafka) {
       if (!dontproduce) {
 #ifndef NOKAFKA
-        producer.Produce();
+        producer.produce();
 #endif
         nprod++;
       }

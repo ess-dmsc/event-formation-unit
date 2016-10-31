@@ -1,7 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
 #pragma once
-#include <cinttypes>
+
 #include <cspec/CSPECChanConv.h>
 
 class CSPECData {
