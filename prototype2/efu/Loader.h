@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include <memory>
 #include <string>
 
 class Detector;
@@ -15,7 +16,7 @@ private:
   void *handle{NULL};
 
 public:
-  Detector *detector{NULL};
+  std::shared_ptr<Detector> detector{NULL};
 
   /** @brief Load instrument plugin from detector name
    *  @param name Instrument name - .so suffix will be added

@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include <memory>
 #include <stdio.h>
 
 class Detector {
@@ -37,5 +38,5 @@ public:
 
   /** @brief creates the detector object. All instruments must implement this
   */
-  virtual Detector *create() = 0;
+  virtual std::shared_ptr<Detector> create() = 0;
 };

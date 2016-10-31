@@ -2,6 +2,7 @@
 
 #include "TestBase.h"
 #include <common/Detector.h>
+#include <memory>
 
 using namespace std;
 
@@ -13,9 +14,9 @@ public:
 
 class TestDetectorFactory : public DetectorFactory {
 public:
-  Detector *create() {
+  std::shared_ptr<Detector> create() {
     cout << "TestDetectorFactory" << endl;
-    return new TestDetector;
+    return std::shared_ptr<Detector> (new TestDetector);
   }
 };
 
@@ -26,18 +27,23 @@ TestDetectorFactory Factory;
 class DetectorTest : public TestBase {
 protected:
   virtual void SetUp() { det = Factory.create(); }
-  virtual void TearDown() { delete (det); }
-  Detector *det;
+  virtual void TearDown() { }
+  std::shared_ptr<Detector> det;
+  void * dummyargs; // Used for calling thread functions
 };
 
 TEST_F(DetectorTest, Destructor) {
+  std::string output;
   testing::internal::CaptureStdout();
-  Detector *tmp = Factory.create();
-  std::string output = testing::internal::GetCapturedStdout();
-  ASSERT_EQ(output, "TestDetectorFactory\nTestDetector\n");
+  {
+    std::shared_ptr<Detector> tmp = Factory.create();
+    output = testing::internal::GetCapturedStdout();
+    ASSERT_EQ(output, "TestDetectorFactory\nTestDetector\n");
 
-  testing::internal::CaptureStdout();
-  delete (tmp);
+    testing::internal::CaptureStdout();
+  }
+
+  //delete tmp;
   output = testing::internal::GetCapturedStdout();
   ASSERT_EQ(output, "~TestDetector\n");
 }
@@ -46,17 +52,17 @@ TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != NULL); }
 
 TEST_F(DetectorTest, DefaultThreads) {
   testing::internal::CaptureStdout();
-  det->input_thread(det);
+  det->input_thread(dummyargs);
   std::string output = testing::internal::GetCapturedStdout();
   ASSERT_EQ(output, "no input stage\n");
 
   testing::internal::CaptureStdout();
-  det->processing_thread(det);
+  det->processing_thread(dummyargs);
   output = testing::internal::GetCapturedStdout();
   ASSERT_EQ(output, "no processing stage\n");
 
   testing::internal::CaptureStdout();
-  det->output_thread(det);
+  det->output_thread(dummyargs);
   output = testing::internal::GetCapturedStdout();
   ASSERT_EQ(output, "no output stage\n");
 }

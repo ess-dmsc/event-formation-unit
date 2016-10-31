@@ -10,6 +10,7 @@
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
+#include <memory>
 #include <mutex>
 #include <queue>
 #include <stdio.h>
@@ -163,7 +164,7 @@ void CSPEC::processing_thread(void *args) {
 
 class CSPECFactory : public DetectorFactory {
 public:
-  Detector *create() { return new CSPEC; }
+  std::shared_ptr<Detector> create() { return std::shared_ptr<Detector>(new CSPEC); }
 };
 
 CSPECFactory Factory;

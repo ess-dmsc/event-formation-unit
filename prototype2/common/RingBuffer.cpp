@@ -5,14 +5,11 @@
 #include <cstdlib>
 
 RingBuffer::RingBuffer(int entries) : N_(entries) {
-
-  data = (struct Data *)malloc(sizeof(struct Data) * entries);
-
-  assert(data != 0);
+  data = new Data[entries];
 }
 
 RingBuffer::~RingBuffer() {
-  free(data);
+  delete(data);
   data = 0;
 }
 

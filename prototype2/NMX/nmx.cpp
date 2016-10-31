@@ -10,6 +10,7 @@
 #include <libs/include/Socket.h>
 #include <libs/include/Timer.h>
 #include <libs/include/gccintel.h>
+#include <memory>
 #include <mutex>
 #include <queue>
 #include <stdio.h>
@@ -232,10 +233,7 @@ void NMX::output_thread(void *args) {
 
 class NMXFactory : DetectorFactory {
 public:
-  NMX *create() {
-    cout << "    making NMX" << endl;
-    return new NMX;
-  }
+  std::shared_ptr<Detector> create() {return std::shared_ptr<Detector> (new NMX); }
 };
 
 NMXFactory Factory;

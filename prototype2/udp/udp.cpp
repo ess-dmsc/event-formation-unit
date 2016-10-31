@@ -7,6 +7,7 @@
 #include <iostream>
 #include <libs/include/Socket.h>
 #include <libs/include/Timer.h>
+#include <memory>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -64,10 +65,7 @@ void UDPRaw::input_thread(void *args) {
 
 class UDPRawFactory : public DetectorFactory {
 public:
-  Detector *create() {
-    cout << "    making UDPRaw" << endl;
-    return new UDPRaw;
-  }
+  std::shared_ptr<Detector> create() {return std::shared_ptr<Detector> (new UDPRaw); }
 };
 
 UDPRawFactory Factory;
