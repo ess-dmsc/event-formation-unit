@@ -1,5 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+/** @file CSPECData.h
+ *  @brief Class to receive and generate CSPEC detector readout
+ */
+
 #pragma once
 
 #include <cspec/CSPECChanConv.h>

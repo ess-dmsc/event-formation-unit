@@ -1,5 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+/** @file Loader.h
+ *  @brief Loads detector plugins (shared objects)
+ */
+
 #pragma once
 #include <string>
 

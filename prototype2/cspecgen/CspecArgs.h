@@ -1,5 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+/** @file CspecArgs.h
+ *  @brief Command line argument parser for cspecgen
+ */
+
 #pragma once
 #include <string>
 

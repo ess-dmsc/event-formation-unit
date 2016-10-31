@@ -1,5 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+/** @file EFUArgs.h
+ *  @brief Command line argument parser for EFU
+ */
+
 #pragma once
 #include <string>
 

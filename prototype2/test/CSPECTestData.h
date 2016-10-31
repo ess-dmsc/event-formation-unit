@@ -1,5 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+/** @file CSPECTestData.h
+ *  @brief Dataset for running unit tests - do not edit if unsure of what they do!
+ */
+
 #include <vector>
 
 using namespace std;

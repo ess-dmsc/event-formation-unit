@@ -1,5 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+/** @file Launcher.h
+ *  @brief Class for launching processing threads
+ */
+
 #pragma once
 #include <efu/Loader.h>
 

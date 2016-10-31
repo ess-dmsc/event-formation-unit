@@ -1,5 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+/** @file Detector.h
+ *  @brief Factory and Class for dynamically loadable detector types
+ */
+
 #pragma once
 #include <stdio.h>
 

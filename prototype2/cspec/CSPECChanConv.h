@@ -1,5 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+/** @file CSPECChanConv.h
+ *  @brief Lookup (calibration) tables for conversion of CSPEC adc to wire/grid number
+ */
+
 #pragma once
 #include <cinttypes>
 

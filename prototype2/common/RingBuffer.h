@@ -1,5 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+/** @file RingBuffer.h
+ *  @brief Ringbuffer of fixed size elements for receiving network data
+ */
+
 #pragma once
 
 // Simple class to keep track of anumber of buffers

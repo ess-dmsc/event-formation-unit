@@ -1,5 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+/** @file TestBase.h
+ *  @brief Base class for all unit tests - provides colored print using MESSAGE
+ */
+
 #include <gtest/gtest.h>
 
 namespace testing {
