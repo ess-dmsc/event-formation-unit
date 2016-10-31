@@ -4,6 +4,7 @@
 #include "TestBase.h"
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CSPECData.h>
+#include <memory>
 
 using namespace std;
 
