@@ -5,6 +5,7 @@
 #include <common/RingBuffer.h>
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CSPECData.h>
+#include <cspec/CSPECEvent.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -37,7 +38,8 @@ public:
 
 private:
   CircularFifo<struct RingBuffer::Data *, buffer_max_entries> fifo;
-  std::mutex mcout;
+  std::priority_queue<CSPECEvent> eventq;
+  std::mutex eventq_mutex, cout_mutex;
 };
 
 void CSPEC::input_thread(void *args) {
@@ -84,13 +86,13 @@ void CSPEC::input_thread(void *args) {
       auto usecs = us_clock.timeus();
       rx_total += rx;
 
-      mcout.lock();
+      cout_mutex.lock();
       printf("%" PRIu64 " input     : %8.2f Mb/s, q1: %3d, rxpkt: %12" PRIu64
              ", rxbytes: %12" PRIu64 ", push errors: %" PRIu64 "\n",
              report_timer.timetsc(), rx * 8.0 / usecs, 0, rxp, rx_total,
              ioverflow);
       fflush(stdout);
-      mcout.unlock();
+      cout_mutex.unlock();
 
       us_clock.now();
       report_timer.now();
@@ -137,17 +139,21 @@ void CSPEC::processing_thread(void *args) {
       ierror += dat.error;
       idata += dat.elems;
       idisc += dat.input_filter();
+
+      /** Add CSPECEvents to Priority Queue */
+      eventq_mutex.lock();
+      eventq_mutex.unlock();
     }
 
     /** This is the periodic reporting*/
     if (unlikely(((tsc - tsc0) / TSC_MHZ >= opts->updint * 1000000))) {
 
-      mcout.lock();
+      cout_mutex.lock();
       printf("%" PRIu64 " processing: idle: %" PRIu64 ", errors: %" PRIu64
              ", discard: %" PRIu64 ", events: %" PRIu64 " \n",
              tsc - tsc0, iidle, ierror, idisc, idata);
       fflush(stdout);
-      mcout.unlock();
+      cout_mutex.unlock();
 
       tsc0 = rdtsc();
     }
