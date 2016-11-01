@@ -1,7 +1,7 @@
 # Copyright (C) 2016 European Spallation Source ERIC
 #
 
-testprogs = testdetector testcspecdata testcspecchanconv testringbuffer
+testprogs = testdetector testcspecdata testcspecchanconv testringbuffer testcspecevent
 
 test: $(testprogs)
 	echo "done building tests"
@@ -25,6 +25,10 @@ testdetector: test/testDetector.cpp common/Detector.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) test/testDetector.cpp  -o $@ $(ldflags_test)
 
+testcspecevent: test/CSPECEventTest.cpp cspec/CSPECEvent.h
+	@echo building $@
+	$(Q)g++ $(cxxflags_test) test/CSPECEventTest.cpp  -o $@ $(ldflags_test)
+
 coverage:
 	gcov -r -b *.gcda
 	lcov -c -d . --no-external -o lcov.out
@@ -34,3 +38,6 @@ valgrind: test
 	rm -f valgrind_error
 	for test in $(testprogs) ; do valgrind --leak-check=full -v --log-file="$$test.valgrind" ./$$test  || echo error >> valgrind_error; done
 	test ! -e valgrind_error
+
+release: clean all clean test runtest
+	echo Ready for checkin

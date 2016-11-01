@@ -9,7 +9,7 @@ RingBuffer::RingBuffer(int entries) : N_(entries) {
 }
 
 RingBuffer::~RingBuffer() {
-  delete(data);
+  delete[] data;
   data = 0;
 }
 
