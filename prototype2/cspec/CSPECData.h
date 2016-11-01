@@ -7,6 +7,8 @@
 #pragma once
 
 #include <cspec/CSPECChanConv.h>
+#include <cspec/CSPECEvent.h>
+#include <memory>
 
 class CSPECData {
 public:
@@ -24,11 +26,11 @@ public:
   const unsigned int nwords = 9;
   // clang-format on
 
-  struct mgd { // multi grid data
+  struct MultiGridData {
     unsigned int module;
     unsigned int d[8];
     unsigned int time;
-    unsigned int valid; // TODO
+    unsigned int valid;
   };
 
   /** Let user specify calibration parameters */
@@ -48,10 +50,13 @@ public:
   int input_filter();
 
   /** Generate simulated data, place in user specified buffer */
-  int generate(char *buffer, int size, int elems);
+  int generate(char *buffer, int size, int elems, unsigned int wire_thresh, unsigned int grid_thresh);
+
+  /** @todo comment */ 
+  std::shared_ptr<CSPECEvent> createevent(const MultiGridData& data);
 
   // This data is overwritten on receive()
-  struct mgd data[250];
+  struct MultiGridData data[250];
   unsigned int elems{0};
   unsigned int error{0};
   unsigned int frag{0};

@@ -33,12 +33,14 @@ public:
 
   void input_thread(void *args);
   void processing_thread(void *args);
+  void output_thread(void *args);
 
-  static const int buffer_max_entries = 1000;
+  static const int buffer_max_entries = 100000;
 
 private:
   CircularFifo<struct RingBuffer::Data *, buffer_max_entries> fifo;
-  std::priority_queue<CSPECEvent> eventq;
+  CircularFifo<std::shared_ptr<CSPECEvent>, buffer_max_entries> fifo2;
+  //std::priority_queue<CSPECEvent> eventq;
   std::mutex eventq_mutex, cout_mutex;
 };
 
@@ -121,13 +123,14 @@ void CSPEC::processing_thread(void *args) {
   conv.makegridcal(0, CSPECChanConv::adcsize - 1,
                    96); // Linear dummy grid look-up table
 
-  CSPECData dat(0, 0, &conv); // no signal threshold
-  // CSPECData dat(&conv); // Default signal thresholds
+  //CSPECData dat(0, 0, &conv); // no signal threshold
+  CSPECData dat(&conv); // Default signal thresholds
 
   Timer stop;
   uint64_t tsc0 = rdtsc();
   uint64_t tsc;
   struct RingBuffer::Data *data;
+  CSPECEvent testevent(0xffff, 0xffff);
   while (1) {
     tsc = rdtsc();
 
@@ -141,8 +144,12 @@ void CSPEC::processing_thread(void *args) {
       idisc += dat.input_filter();
 
       /** Add CSPECEvents to Priority Queue */
-      eventq_mutex.lock();
-      eventq_mutex.unlock();
+      for (auto d : dat.data) {
+        if (d.valid) {
+          auto evt = dat.createevent(d);
+          fifo2.push(evt);
+        }
+      }
     }
 
     /** This is the periodic reporting*/
@@ -163,6 +170,18 @@ void CSPEC::processing_thread(void *args) {
                 << std::endl;
       return;
     }
+  }
+}
+
+
+void CSPEC::output_thread(__attribute__((unused)) void *args) {
+  //EFUArgs *opts = (EFUArgs *)args;
+
+  std::shared_ptr<CSPECEvent> data;
+  while (1) {
+    if (fifo2.pop(data) == false) {
+      sleep(10);
+    } 
   }
 }
 

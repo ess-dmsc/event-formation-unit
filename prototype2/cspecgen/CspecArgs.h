@@ -18,6 +18,7 @@ public:
   DGArgs(int argc, char *argv[]);
 
   unsigned int txGB{10}; /**< total transmit size (GB) */
+  uint64_t txPkt{0xffffffffffffffff};
 
   std::string dest_ip{"127.0.0.1"}; /**< destination ip address */
   int port{9000};                   /**< destination udp port */

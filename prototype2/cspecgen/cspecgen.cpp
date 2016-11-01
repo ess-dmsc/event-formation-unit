@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 
   CSPECData cspec;
   int ndata = 100;
-  int size = cspec.generate(buffer, 9000, ndata);
+  int size = cspec.generate(buffer, 9000, ndata, cspec.wire_thresh + 1, cspec.grid_thresh + 1);
   assert(size == ndata * cspec.datasize);
 
   uint64_t tx_total = 0;
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
   Timer us_clock;
   for (;;) {
     if (unlikely((tx_total + tx) >=
-                 (long unsigned int)opts.txGB * 1000000000)) {
+                 (long unsigned int)opts.txGB * 1000000000) || txp >= opts.txPkt) {
       cout << "Sent " << tx_total + tx << " bytes." << endl;
       cout << "done" << endl;
       exit(0);

@@ -1,5 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
+#include <cinttypes>
 #include <cspecgen/CspecArgs.h>
 #include <cstdio>
 #include <getopt.h>
@@ -15,6 +16,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
     static struct option long_options[] = {
         {"ipaddr", required_argument, 0, 'i'},
         {"data", required_argument, 0, 'd'},
+        {"packets", required_argument, 0, 'a'},
         {"port", required_argument, 0, 'p'},
         {"size", required_argument, 0, 's'},
         {"throttle", required_argument, 0, 't'},
@@ -25,7 +27,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "d:i:p:s:t:u:hx", long_options, &option_index);
+    c = getopt_long(argc, argv, "a:d:i:p:s:t:u:hx", long_options, &option_index);
 
     if (c == -1)
       break;
@@ -33,6 +35,9 @@ DGArgs::DGArgs(int argc, char *argv[]) {
     case 0:
       if (long_options[option_index].flag != 0)
         break;
+    case 'a':
+      txPkt = atoi(optarg);
+      break;
     case 'd':
       buflen = atoi(optarg);
       break;
@@ -72,6 +77,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
   }
   printf("Generating a bulk data stream\n");
   printf("  number of bytes:        %d GB\n", txGB);
+  printf("  number of packets:      %" PRIu64 " packets\n", txPkt);
   printf("  speed throttle:         %d\n", speed_level);
   printf("Network properties\n");
   printf("  destination ip address: %s\n", dest_ip.c_str());

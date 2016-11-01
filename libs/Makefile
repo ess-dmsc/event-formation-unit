@@ -56,4 +56,4 @@ testcounter: test/Counter/testmain.cpp test/Counter/testCounter.cpp $(library)
 		g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
 
 clean:
-	rm -f $(objects) $(library) $(testprogs) *.gc*
+	rm -f $(objects) $(library) $(testprogs) *.gc* *.valgrind *.xml
