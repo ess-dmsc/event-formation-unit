@@ -22,6 +22,12 @@ function libs()
 {
   pushd libs
   make V=y 
+  popd
+}
+
+function libs_test() 
+{
+  pushd libs
   make V=y GTEST=../artifacts/code/googletest/build/usr/local test
   make V=y runtest
   popd
@@ -31,9 +37,15 @@ function prototype()
 {
   pushd prototype2
   make V=y NOKAFKA=y
+  popd
+}
+
+function prototype_test()
+{
+  pushd prototype2
   make V=y GTEST=../artifacts/code/googletest/build/usr/local test
   make V=y runtest
-  #make doxygen
+  make doxygen
   popd
 }
 
@@ -41,3 +53,5 @@ tools
 artifacts
 libs
 prototype
+libs_test
+prototype_test
