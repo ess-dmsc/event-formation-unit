@@ -1,5 +1,11 @@
 #!/bin/bash
 
+errexit()
+{
+    echo Error: $1
+    exit 1
+}
+
 
 function tools()
 {
@@ -7,7 +13,8 @@ function tools()
   gcov --version 
   lcov --version
   valgrind --version
-  dot --version
+  doxygen --version
+  dot -V
   lscpu
 }
 

@@ -80,16 +80,16 @@ int CSPECData::input_filter() {
   for (unsigned int i = 0; i < elems; i++) {
     data[i].valid = 0;
     if ((data[i].d[0] < wire_thresh) || (data[i].d[4] < grid_thresh)) {
-      printf("data 0 or 4 failed, thresholds: %d, %d\n", wire_thresh, grid_thresh);
-      assert(1==9);
+      //printf("data 0 or 4 failed, thresholds: %d, %d\n", wire_thresh, grid_thresh);
+      //assert(1==9);
       discarded++;
       continue;
     }
     data[i].valid = 1;
 
     if ((data[i].d[1] >= wire_thresh) || (data[i].d[5] >= grid_thresh)) {
-      printf("data 1 or 5 failed, thresholds: %d, %d\n", wire_thresh, grid_thresh);
-      assert(1==9);
+      //printf("data 1 or 5 failed, thresholds: %d, %d\n", wire_thresh, grid_thresh);
+      //assert(1==9);
       discarded++;       // double event
       data[i].valid = 0; // invalidate
       continue;
