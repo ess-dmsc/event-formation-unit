@@ -3,7 +3,7 @@
 
 VPATH = ../libs/include test
 
-progs = efu2 cspecgen2 cspec.so nmx.so udp.so cspec
+progs = efu2 cspecgen2 cspec.so nmx.so udp.so
 library = ../libs/eventlib.a
 
 # For each loadable detector add its .so.src and .so.inc dependencies
@@ -61,17 +61,13 @@ udp.so: $(udp.so.src) $(udp.so.inc)
 $(library): Socket.h Timer.h Counter.h
 	make -C ../libs
 
-cspec: $(cspec.so.src) $(cspc.so.inc) $(library) $(efu.obj) $(efu.inc)
-	@echo building specific $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(efu.obj) $(library) $(ldflags) -o $@
-
 efu2: $(library) $(efu.obj) $(efu.inc)
 	@echo building $@
 	$(Q)$(cxx) $(cxxflags) $(efu.obj) $(library) $(ldflags) -o $@
 
 cspecgen2: $(library) $(cspecgen.obj) $(cspecgen.inc)
-		@echo building $@
-		$(Q)$(cxx) $(cxxflags) $(cspecgen.obj) $(library) $(ldflags) -o $@
+	@echo building $@
+	$(Q)$(cxx) $(cxxflags) $(cspecgen.obj) $(library) $(ldflags) -o $@
 
 realclean: clean
 	make -C ../libs clean

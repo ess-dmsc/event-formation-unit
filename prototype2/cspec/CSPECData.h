@@ -52,7 +52,7 @@ public:
   /** Generate simulated data, place in user specified buffer */
   int generate(char *buffer, int size, int elems, unsigned int wire_thresh, unsigned int grid_thresh);
 
-  /** @todo comment */ 
+  /** @todo comment */
   std::shared_ptr<CSPECEvent> createevent(const MultiGridData& data);
 
   // This data is overwritten on receive()

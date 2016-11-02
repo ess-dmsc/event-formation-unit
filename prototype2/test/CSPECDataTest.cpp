@@ -63,14 +63,14 @@ TEST_F(CspecDataTest, OverUndersizeData) {
 
 TEST_F(CspecDataTest, ValidateGenerator) {
   for (int i = 1; i < 225; i++) {
-    size = dat->generate(buffer, 9000, i);
+    size = dat->generate(buffer, 9000, i, 0, 0);
     dat->receive(buffer, size);
     assertdatfragerr(i, 0, 0);
   }
 }
 /** Test for oversize specification */
 TEST_F(CspecDataTest, GeneratorOversize) {
-  size = dat->generate(buffer, 9000, 300);
+  size = dat->generate(buffer, 9000, 300, 0, 0);
   dat->receive(buffer, size);
   assertdatfragerr(225, 0, 0);
 }

@@ -39,5 +39,5 @@ valgrind: test
 	for test in $(testprogs) ; do valgrind --leak-check=full -v --log-file="$$test.valgrind" ./$$test  || echo error >> valgrind_error; done
 	test ! -e valgrind_error
 
-release: clean all clean test runtest
+release: realclean all clean test runtest
 	echo Ready for checkin
