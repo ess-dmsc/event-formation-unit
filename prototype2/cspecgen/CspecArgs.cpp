@@ -27,7 +27,8 @@ DGArgs::DGArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:d:i:p:s:t:u:hx", long_options, &option_index);
+    c = getopt_long(argc, argv, "a:d:i:p:s:t:u:hx", long_options,
+                    &option_index);
 
     if (c == -1)
       break;

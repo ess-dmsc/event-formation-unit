@@ -42,7 +42,7 @@ public:
 
   CSPECData(){}; // Discouraged, but used in cspecgen
 
-  /** @brief parse a binary payload buffer, return number of data elements 
+  /** @brief parse a binary payload buffer, return number of data elements
    */
   int receive(const char *buffer, int size);
 
@@ -51,10 +51,11 @@ public:
   int input_filter();
 
   /** Generate simulated data, place in user specified buffer */
-  int generate(char *buffer, int size, int elems, unsigned int wire_thresh, unsigned int grid_thresh);
+  int generate(char *buffer, int size, int elems, unsigned int wire_thresh,
+               unsigned int grid_thresh);
 
   /** @todo comment */
-  CSPECEvent * createevent(const MultiGridData& data);
+  CSPECEvent *createevent(const MultiGridData &data);
 
   // This data is overwritten on receive()
   struct MultiGridData data[250];

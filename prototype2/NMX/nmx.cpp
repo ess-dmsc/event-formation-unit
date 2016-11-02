@@ -233,7 +233,9 @@ void NMX::output_thread(void *args) {
 
 class NMXFactory : DetectorFactory {
 public:
-  std::shared_ptr<Detector> create() {return std::shared_ptr<Detector> (new NMX); }
+  std::shared_ptr<Detector> create() {
+    return std::shared_ptr<Detector>(new NMX);
+  }
 };
 
 NMXFactory Factory;

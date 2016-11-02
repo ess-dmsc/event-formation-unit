@@ -15,8 +15,10 @@ protected:
   char buffer[9000];
   int size;
 
-  virtual void SetUp() { dat = std::unique_ptr<CSPECData>(new CSPECData(&conv)); }
-  virtual void TearDown() { }
+  virtual void SetUp() {
+    dat = std::unique_ptr<CSPECData>(new CSPECData(&conv));
+  }
+  virtual void TearDown() {}
 
   void assertdatfragerr(int data, int frag, int error) {
     ASSERT_EQ(dat->elems, data);

@@ -25,10 +25,10 @@ public:
   /** @brief minimal destructor frees the allocated buffer */
   ~RingBuffer();
 
-  struct Data *getdatastruct(); /**< return pointer to current buffer */
-  void setdatalength(int length);   /**< specify length of data in curr buffer */
+  struct Data *getdatastruct();   /**< return pointer to current buffer */
+  void setdatalength(int length); /**< specify length of data in curr buffer */
   int getdatalength(); /**< get the length of data in current buffer */
-  int nextbuffer(); /**< advance to next buffer, wraps around */
+  int nextbuffer();    /**< advance to next buffer, wraps around */
   int getsize() { return size_; }   /**< return buffer size in bytes */
   int getelems() { return N_; }     /**< return number of buffers */
   int getindex() { return entry_; } /** current buffer index */

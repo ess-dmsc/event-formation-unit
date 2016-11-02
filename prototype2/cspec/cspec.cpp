@@ -36,7 +36,7 @@ public:
 private:
   CircularFifo<struct RingBuffer::Data *, buffer_max_entries> fifo;
   CircularFifo<CSPECEvent *, 300 * buffer_max_entries> fifo2;
-  //std::priority_queue<CSPECEvent> eventq;
+  // std::priority_queue<CSPECEvent> eventq;
   std::mutex eventq_mutex, cout_mutex;
 };
 
@@ -80,7 +80,8 @@ void CSPEC::input_thread(void *args) {
     }
 
     /** This is the periodic reporting*/
-    if (unlikely((report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
+    if (unlikely(
+            (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
       auto usecs = us_clock.timeus();
       rx_total += rx;
 
@@ -120,7 +121,7 @@ void CSPEC::processing_thread(void *args) {
   conv.makegridcal(0, CSPECChanConv::adcsize - 1,
                    96); // Linear dummy grid look-up table
 
-  //CSPECData dat(0, 0, &conv); // no signal threshold
+  // CSPECData dat(0, 0, &conv); // no signal threshold
   CSPECData dat(&conv); // Default signal thresholds
 
   Timer us_clock, stop;
@@ -151,25 +152,26 @@ void CSPEC::processing_thread(void *args) {
     }
 
     /** This is the periodic reporting*/
-    if (unlikely((report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
+    if (unlikely(
+            (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
       cout_mutex.lock();
       printf("%" PRIu64 " processing: idle: %" PRIu64 ", errors: %" PRIu64
-             ", discard: %" PRIu64 ", events: %" PRIu64 " , push errors: %" PRIu64 "\n",
+             ", discard: %" PRIu64 ", events: %" PRIu64
+             " , push errors: %" PRIu64 "\n",
              report_timer.timetsc(), iidle, ierror, idisc, idata, oerror);
       fflush(stdout);
       cout_mutex.unlock();
 
       report_timer.now();
-    }
 
-    if (stop.timeus() >= opts->stopafter * 1000000) {
-      std::cout << "stopping processing thread, timeus " << stop.timeus()
-                << std::endl;
-      return;
+      if (stop.timeus() >= opts->stopafter * 1000000) {
+        std::cout << "stopping processing thread, timeus " << stop.timeus()
+                  << std::endl;
+        return;
+      }
     }
   }
 }
-
 
 void CSPEC::output_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
@@ -191,20 +193,22 @@ void CSPEC::output_thread(void *args) {
 
     /** This is the periodic reporting*/
 
-    if (unlikely((report_timer2.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
+    if (unlikely(
+            (report_timer2.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
       cout_mutex.lock();
-      printf("%" PRIu64 " output    : events: %" PRIu64 ", idle: %" PRIu64 " \n",
-           report_timer2.timetsc(), rxevents, idle);
+      printf("%" PRIu64 " output    : events: %" PRIu64 ", idle: %" PRIu64
+             " \n",
+             report_timer2.timetsc(), rxevents, idle);
       fflush(stdout);
       cout_mutex.unlock();
 
       report_timer2.now();
-    }
 
-    if (stop.timeus() >= opts->stopafter * 1000000) {
-      std::cout << "stopping output thread, timeus " << stop.timeus()
-                << std::endl;
-      return;
+      if (stop.timeus() >= opts->stopafter * 1000000) {
+        std::cout << "stopping output thread, timeus " << stop.timeus()
+                  << std::endl;
+        return;
+      }
     }
   }
 }
@@ -213,7 +217,9 @@ void CSPEC::output_thread(void *args) {
 
 class CSPECFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create() { return std::shared_ptr<Detector>(new CSPEC); }
+  std::shared_ptr<Detector> create() {
+    return std::shared_ptr<Detector>(new CSPEC);
+  }
 };
 
 CSPECFactory Factory;

@@ -1,7 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
-#include <cspec/CSPECChanConv.h>
 #include <algorithm>
+#include <cspec/CSPECChanConv.h>
 
 CSPECChanConv::CSPECChanConv() {
   std::fill_n(wirecal, adcsize, 0);

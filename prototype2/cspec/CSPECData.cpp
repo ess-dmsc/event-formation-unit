@@ -14,8 +14,8 @@ struct multi_grid {
 } __attribute__((packed));
 
 /** @todo add unit test */
-CSPECEvent * CSPECData::createevent(const MultiGridData& data) {
-  uint32_t pixid = data.d[6]*64 + data.d[2]; /**< @todo not correct */
+CSPECEvent *CSPECData::createevent(const MultiGridData &data) {
+  uint32_t pixid = data.d[6] * 64 + data.d[2]; /**< @todo not correct */
   return new CSPECEvent(data.time, pixid);
 }
 
@@ -80,16 +80,18 @@ int CSPECData::input_filter() {
   for (unsigned int i = 0; i < elems; i++) {
     data[i].valid = 0;
     if ((data[i].d[0] < wire_thresh) || (data[i].d[4] < grid_thresh)) {
-      //printf("data 0 or 4 failed, thresholds: %d, %d\n", wire_thresh, grid_thresh);
-      //assert(1==9);
+      // printf("data 0 or 4 failed, thresholds: %d, %d\n", wire_thresh,
+      // grid_thresh);
+      // assert(1==9);
       discarded++;
       continue;
     }
     data[i].valid = 1;
 
     if ((data[i].d[1] >= wire_thresh) || (data[i].d[5] >= grid_thresh)) {
-      //printf("data 1 or 5 failed, thresholds: %d, %d\n", wire_thresh, grid_thresh);
-      //assert(1==9);
+      // printf("data 1 or 5 failed, thresholds: %d, %d\n", wire_thresh,
+      // grid_thresh);
+      // assert(1==9);
       discarded++;       // double event
       data[i].valid = 0; // invalidate
       continue;
@@ -100,7 +102,8 @@ int CSPECData::input_filter() {
 
 /** First multi grid data generator - valid headers, all zero data*/
 /** Only used in google test - can be excluded from coverage      */
-int CSPECData::generate(char *buffer, int size, int elems, unsigned int wire_thresh, unsigned int grid_thresh) {
+int CSPECData::generate(char *buffer, int size, int elems,
+                        unsigned int wire_thresh, unsigned int grid_thresh) {
   int bytes = 0;
   int events = 0;
   auto mg = (struct multi_grid *)buffer;
@@ -111,9 +114,9 @@ int CSPECData::generate(char *buffer, int size, int elems, unsigned int wire_thr
       mg->data[i] = data_id;
     }
     mg->data[0] += wire_thresh;
-    //mg->data[1] += wire_thresh;
+    // mg->data[1] += wire_thresh;
     mg->data[4] += grid_thresh;
-    //mg->data[5] += grid_thresh;
+    // mg->data[5] += grid_thresh;
 
     mg->footer = footer_id + events;
     mg++;

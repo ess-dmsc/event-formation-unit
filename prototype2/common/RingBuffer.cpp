@@ -4,9 +4,7 @@
 #include <common/RingBuffer.h>
 #include <cstdlib>
 
-RingBuffer::RingBuffer(int entries) : N_(entries) {
-  data = new Data[entries];
-}
+RingBuffer::RingBuffer(int entries) : N_(entries) { data = new Data[entries]; }
 
 RingBuffer::~RingBuffer() {
   delete[] data;

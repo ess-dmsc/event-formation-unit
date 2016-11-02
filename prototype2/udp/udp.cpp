@@ -65,7 +65,9 @@ void UDPRaw::input_thread(void *args) {
 
 class UDPRawFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create() {return std::shared_ptr<Detector> (new UDPRaw); }
+  std::shared_ptr<Detector> create() {
+    return std::shared_ptr<Detector>(new UDPRaw);
+  }
 };
 
 UDPRawFactory Factory;

@@ -23,8 +23,7 @@ public:
    */
   Loader(std::string name);
 
-
-  Loader(Detector * detector);
+  Loader(Detector *detector);
 
   /** @brief minimal destructor */
   ~Loader();

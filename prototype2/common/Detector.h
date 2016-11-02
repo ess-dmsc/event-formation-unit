@@ -12,7 +12,6 @@
 class Detector {
 
 public:
-
   // default constructor, all instruments must implement these methods
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
@@ -35,7 +34,6 @@ public:
 
 class DetectorFactory {
 public:
-
   /** @brief creates the detector object. All instruments must implement this
   */
   virtual std::shared_ptr<Detector> create() = 0;

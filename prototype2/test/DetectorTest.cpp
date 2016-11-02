@@ -16,7 +16,7 @@ class TestDetectorFactory : public DetectorFactory {
 public:
   std::shared_ptr<Detector> create() {
     cout << "TestDetectorFactory" << endl;
-    return std::shared_ptr<Detector> (new TestDetector);
+    return std::shared_ptr<Detector>(new TestDetector);
   }
 };
 
@@ -27,9 +27,9 @@ TestDetectorFactory Factory;
 class DetectorTest : public TestBase {
 protected:
   virtual void SetUp() { det = Factory.create(); }
-  virtual void TearDown() { }
+  virtual void TearDown() {}
   std::shared_ptr<Detector> det;
-  void * dummyargs; // Used for calling thread functions
+  void *dummyargs; // Used for calling thread functions
 };
 
 TEST_F(DetectorTest, Destructor) {
@@ -43,7 +43,7 @@ TEST_F(DetectorTest, Destructor) {
     testing::internal::CaptureStdout();
   }
 
-  //delete tmp;
+  // delete tmp;
   output = testing::internal::GetCapturedStdout();
   ASSERT_EQ(output, "~TestDetector\n");
 }

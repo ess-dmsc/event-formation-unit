@@ -12,7 +12,6 @@ class EFUArgs;
 
 class Launcher {
 public:
-
   /** @brief Launches previously Loaded detector functions
    *  @param ld Dynamic detector object (from Loader)
    *  @param args Arguments to be passed to threads
