@@ -2,6 +2,7 @@
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
+#include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CSPECData.h>
@@ -34,10 +35,15 @@ public:
   static const int buffer_max_entries = 100000;
 
 private:
+  /** Shared between input_thread and processing_thread*/
   CircularFifo<struct RingBuffer::Data *, buffer_max_entries> fifo;
+
+  /** Shared between processing_thread and output_thread */
   CircularFifo<CSPECEvent *, 300 * buffer_max_entries> fifo2;
-  // std::priority_queue<CSPECEvent> eventq;
+
   std::mutex eventq_mutex, cout_mutex;
+
+  char kafkabuffer[1000000]; /** @todo not hardcoded */
 };
 
 void CSPEC::input_thread(void *args) {
@@ -124,7 +130,7 @@ void CSPEC::processing_thread(void *args) {
   // CSPECData dat(0, 0, &conv); // no signal threshold
   CSPECData dat(&conv); // Default signal thresholds
 
-  Timer us_clock, stop;
+  Timer us_clock, stopafter_clock;
   TSCTimer report_timer;
   struct RingBuffer::Data *data;
   CSPECEvent testevent(0xffff, 0xffff);
@@ -164,9 +170,8 @@ void CSPEC::processing_thread(void *args) {
 
       report_timer.now();
 
-      if (stop.timeus() >= opts->stopafter * 1000000) {
-        std::cout << "stopping processing thread, timeus " << stop.timeus()
-                  << std::endl;
+      if (stopafter_clock.timeus() >= opts->stopafter * 1000000) {
+        std::cout << "stopping processing thread, timeus " << std::endl;
         return;
       }
     }
@@ -176,11 +181,13 @@ void CSPEC::processing_thread(void *args) {
 void CSPEC::output_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
 
+  Producer producer(opts->broker, true, "C-SPEC_detector");
   CSPECEvent *data;
   Timer stop;
   TSCTimer report_timer2;
 
   uint64_t rxevents = 0;
+  uint64_t produce = 0;
   uint64_t idle = 0;
   while (1) {
     if (fifo2.pop(data) == false) {
@@ -188,7 +195,15 @@ void CSPEC::output_thread(void *args) {
       usleep(10);
     } else {
       rxevents++;
+      produce++;
       delete data;
+    }
+
+    /** Add dummy producer of 1M bytes data*/
+    if (produce >= 83000) {
+      producer.produce(kafkabuffer, 1000000);
+      //producer.produce();
+      produce = 0;
     }
 
     /** This is the periodic reporting*/

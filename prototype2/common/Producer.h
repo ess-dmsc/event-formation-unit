@@ -25,6 +25,12 @@ public:
    */
   int produce();
 
+  /** @brief Function called to send data to a broker
+   *  @param buffer Pointer to char buffer containing data to be tx'ed
+   *  @param length Size of buffer data in bytes
+   */
+  int produce(char * buffer, int length);
+
 private:
   std::string errstr;
   RdKafka::Conf *conf{0};

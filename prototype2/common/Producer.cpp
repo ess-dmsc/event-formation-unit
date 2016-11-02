@@ -1,10 +1,12 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
 #ifndef NOKAFKA
+#include <cassert>
 #include <common/Producer.h>
 #include <iostream>
 
 Producer::Producer(std::string broker, bool enabled, std::string topicstr) {
+  using namespace std;
 
   if (!enabled)
     return;
@@ -23,6 +25,13 @@ Producer::Producer(std::string broker, bool enabled, std::string topicstr) {
   }
 
   conf->set("metadata.broker.list", broker, errstr);
+  assert(errstr.empty() == true);
+  conf->set("message.max.bytes", "10000000", errstr);
+  assert(errstr.empty() == true);
+  conf->set("fetch.message.max.bytes", "10000000", errstr);
+  assert(errstr.empty() == true);
+  conf->set("message.copy.max.bytes", "10000000", errstr);
+  assert(errstr.empty() == true);
 
   producer = RdKafka::Producer::create(conf, errstr);
   if (!producer) {
@@ -38,6 +47,19 @@ Producer::Producer(std::string broker, bool enabled, std::string topicstr) {
 }
 
 /** called to actually send data to Kafka cluster */
+int Producer::produce(char * buffer, int length) {
+  RdKafka::ErrorCode resp = producer->produce(
+      topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
+      buffer, length, NULL, NULL);
+  if (resp != RdKafka::ERR_NO_ERROR) {
+    std::cerr << "% Produce failed: " << RdKafka::err2str(resp) << std::endl;
+    return resp;
+  }
+  producer->poll(0);
+
+  return 0;
+}
+
 int Producer::produce() {
 
   std::string line = "producing...";
