@@ -65,6 +65,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
       printf(" --throttle -t val      speed throttle (0 fastest, then slower) "
              "\n");
       printf(" --size -s size         size in GB of transmitted data \n");
+      printf(" --packets -a number    number of packets to transmit \n");
       printf(" --ipaddr -i ipaddr     destination ip address \n");
       printf(" --port -p port         UDP destination port \n");
       printf(" --data -d len          size of Tx/Tx buffer in bytes (max 9000) "

@@ -85,3 +85,7 @@ test-clean:
 
 clean: prog-clean test-clean doxygen-clean
 	@rm -f  *~  gylle lcov.out
+
+release: realclean all clean test runtest
+	../jenkins/style.bash
+	@echo Ready for checkin

@@ -27,10 +27,6 @@ const char *classname = "CSPEC Detector";
 
 class CSPEC : public Detector {
 public:
-  CSPEC(){};
-
-  ~CSPEC(){};
-
   void input_thread(void *args);
   void processing_thread(void *args);
   void output_thread(void *args);
@@ -39,7 +35,7 @@ public:
 
 private:
   CircularFifo<struct RingBuffer::Data *, buffer_max_entries> fifo;
-  CircularFifo<std::shared_ptr<CSPECEvent>, buffer_max_entries> fifo2;
+  CircularFifo<CSPECEvent *, 300 * buffer_max_entries> fifo2;
   //std::priority_queue<CSPECEvent> eventq;
   std::mutex eventq_mutex, cout_mutex;
 };
@@ -76,7 +72,7 @@ void CSPEC::input_thread(void *args) {
       rx += rdsize;
       ringbuf.setdatalength(rdsize);
 
-      if (unlikely(fifo.push(data) == false)) {
+      if (fifo.push(data) == false) {
         ioverflow++;
       } else {
         ringbuf.nextbuffer();
@@ -84,7 +80,7 @@ void CSPEC::input_thread(void *args) {
     }
 
     /** This is the periodic reporting*/
-    if (unlikely((report_timer.timetsc() / TSC_MHZ >= opts->updint * 1000000))) {
+    if (unlikely((report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
       auto usecs = us_clock.timeus();
       rx_total += rx;
 
@@ -113,6 +109,7 @@ void CSPEC::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
 
   uint64_t ierror = 0;
+  uint64_t oerror = 0;
   uint64_t idata = 0;
   uint64_t iidle = 0;
   uint64_t idisc = 0;
@@ -126,13 +123,12 @@ void CSPEC::processing_thread(void *args) {
   //CSPECData dat(0, 0, &conv); // no signal threshold
   CSPECData dat(&conv); // Default signal thresholds
 
-  Timer stop;
-  uint64_t tsc0 = rdtsc();
-  uint64_t tsc;
+  Timer us_clock, stop;
+  TSCTimer report_timer;
   struct RingBuffer::Data *data;
   CSPECEvent testevent(0xffff, 0xffff);
+
   while (1) {
-    tsc = rdtsc();
 
     if ((fifo.pop(data)) == false) {
       iidle++;
@@ -143,26 +139,27 @@ void CSPEC::processing_thread(void *args) {
       idata += dat.elems;
       idisc += dat.input_filter();
 
-      /** Add CSPECEvents to Priority Queue */
       for (auto d : dat.data) {
         if (d.valid) {
           auto evt = dat.createevent(d);
-          fifo2.push(evt);
+          if (fifo2.push(evt) == false) {
+            oerror++;
+            delete evt;
+          }
         }
       }
     }
 
     /** This is the periodic reporting*/
-    if (unlikely(((tsc - tsc0) / TSC_MHZ >= opts->updint * 1000000))) {
-
+    if (unlikely((report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
       cout_mutex.lock();
       printf("%" PRIu64 " processing: idle: %" PRIu64 ", errors: %" PRIu64
-             ", discard: %" PRIu64 ", events: %" PRIu64 " \n",
-             tsc - tsc0, iidle, ierror, idisc, idata);
+             ", discard: %" PRIu64 ", events: %" PRIu64 " , push errors: %" PRIu64 "\n",
+             report_timer.timetsc(), iidle, ierror, idisc, idata, oerror);
       fflush(stdout);
       cout_mutex.unlock();
 
-      tsc0 = rdtsc();
+      report_timer.now();
     }
 
     if (stop.timeus() >= opts->stopafter * 1000000) {
@@ -174,14 +171,41 @@ void CSPEC::processing_thread(void *args) {
 }
 
 
-void CSPEC::output_thread(__attribute__((unused)) void *args) {
-  //EFUArgs *opts = (EFUArgs *)args;
+void CSPEC::output_thread(void *args) {
+  EFUArgs *opts = (EFUArgs *)args;
 
-  std::shared_ptr<CSPECEvent> data;
+  CSPECEvent *data;
+  Timer stop;
+  TSCTimer report_timer2;
+
+  uint64_t rxevents = 0;
+  uint64_t idle = 0;
   while (1) {
     if (fifo2.pop(data) == false) {
-      sleep(10);
-    } 
+      idle++;
+      usleep(10);
+    } else {
+      rxevents++;
+      delete data;
+    }
+
+    /** This is the periodic reporting*/
+
+    if (unlikely((report_timer2.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
+      cout_mutex.lock();
+      printf("%" PRIu64 " output    : events: %" PRIu64 ", idle: %" PRIu64 " \n",
+           report_timer2.timetsc(), rxevents, idle);
+      fflush(stdout);
+      cout_mutex.unlock();
+
+      report_timer2.now();
+    }
+
+    if (stop.timeus() >= opts->stopafter * 1000000) {
+      std::cout << "stopping output thread, timeus " << stop.timeus()
+                << std::endl;
+      return;
+    }
   }
 }
 

@@ -13,10 +13,10 @@ struct multi_grid {
   uint32_t footer;
 } __attribute__((packed));
 
-
-std::shared_ptr<CSPECEvent> CSPECData::createevent(const MultiGridData& data) {
-   
-   return std::shared_ptr<CSPECEvent> (new CSPECEvent(data.time, 0xdeafbeef)); 
+/** @todo add unit test */
+CSPECEvent * CSPECData::createevent(const MultiGridData& data) {
+  uint32_t pixid = data.d[6]*64 + data.d[2]; /**< @todo not correct */
+  return new CSPECEvent(data.time, pixid);
 }
 
 int CSPECData::receive(const char *buffer, int size) {
@@ -102,8 +102,10 @@ int CSPECData::input_filter() {
 /** Only used in google test - can be excluded from coverage      */
 int CSPECData::generate(char *buffer, int size, int elems, unsigned int wire_thresh, unsigned int grid_thresh) {
   int bytes = 0;
+  int events = 0;
   auto mg = (struct multi_grid *)buffer;
   while ((size >= CSPECData::datasize) && elems) {
+    events++;
     mg->header = header_id + nwords;
     for (int i = 0; i != 8; ++i) {
       mg->data[i] = data_id;
@@ -113,7 +115,7 @@ int CSPECData::generate(char *buffer, int size, int elems, unsigned int wire_thr
     mg->data[4] += grid_thresh;
     //mg->data[5] += grid_thresh;
 
-    mg->footer = footer_id;
+    mg->footer = footer_id + events;
     mg++;
     elems--;
     size -= CSPECData::datasize;
