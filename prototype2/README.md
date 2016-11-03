@@ -29,20 +29,22 @@ coverage | generate test coverage report in html/index.html
 valgrind | run valgrind on tests, generate reports
 clean | clean prototype2/
 realclean |  also clean libs/
-release | checks for missing copyright notice and doxygen file comments
+release | checks for missing copyright notice and doxygen `@file` comments
 doxygen | generate doxygen documentation
 
 
-Option            | Description
--------------         | -------------
+Option         | Description
+-------------  | -------------
 V | verbose
 COV | instrument for test coverage
 PROF | instrument for profiling (not useful for shared libraries)
 NOKAFKA | removes Kafka dependencies
 GTEST=path_to_gtest | specify an alternative google test library
 
+
 Except for GTEST, options are disabled by omission and  enabled by
 assignment. ex: make COV=y
+
 
 __Run in terminal window__
 
