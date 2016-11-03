@@ -29,8 +29,9 @@ coverage | generate test coverage report in html/index.html
 valgrind | run valgrind on tests, generate reports
 clean | clean prototype2/
 realclean |  also clean libs/
-release | checks for missing copyright notice and @file comments
-doxygen | generate docygen documentation
+release | checks for missing copyright notice and doxygen file comments
+doxygen | generate doxygen documentation
+
 
 Option            | Description
 -------------         | -------------
