@@ -16,8 +16,15 @@ public:
   MultiGridGeometry(int columns, int grids, int xwires, int zwires)
     : cols_(columns), grids_(grids), xwires_(xwires), zwires_(zwires) {}
 
+/** @brief returns the maximum available pixelid for this geometry
+ */
 int getmaxdetectorid() {return xwires_ * zwires_ * grids_ * cols_;}
 
+/** @brief Return the global detector pixel id from wires and grids
+ *  @param column Column ID, from module id of readoutsystem
+ *  @param gridid Grid ID, calculated from adc values
+ *  @param wireid Wire ID , calculated from adc values
+ */
 inline int getdetectorid(int column, int gridid, int wireid) {
    if ((column > cols_) || (gridid > grids_) || (wireid > xwires_ * zwires_)) {
      return -1;
