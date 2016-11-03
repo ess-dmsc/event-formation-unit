@@ -186,7 +186,9 @@ void CSPEC::processing_thread(void *args) {
 void CSPEC::output_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
 
+#ifndef NOKAFKA
   Producer producer(opts->broker, true, "C-SPEC_detector");
+#endif
   CSPECEvent *data;
   Timer stop;
   TSCTimer report_timer2;
@@ -206,8 +208,9 @@ void CSPEC::output_thread(void *args) {
 
     /** Add dummy producer of 1M bytes data*/
     if (produce >= 83000) {
+#ifndef NOKAFKA
       producer.produce(kafkabuffer, 1000000);
-      //producer.produce();
+#endif
       produce = 0;
     }
 
