@@ -10,12 +10,13 @@ errexit()
 function tools()
 {
   g++ --version
-  gcov --version 
+  gcov --version
   lcov --version
   valgrind --version
   doxygen --version
   dot -V
   lscpu
+  gcovr --version
 }
 
 function artifacts()
@@ -25,17 +26,17 @@ function artifacts()
   popd
 }
 
-function libs() 
+function libs()
 {
   pushd libs
-  make V=y 
+  make V=y
   popd
 }
 
-function libs_test() 
+function libs_test()
 {
   pushd libs
-  make V=y GTEST=../artifacts/code/googletest/build/usr/local test
+  make V=y $1 GTEST=../artifacts/code/googletest/build/usr/local test
   make V=y runtest
   popd
 }
@@ -50,15 +51,26 @@ function prototype()
 function prototype_test()
 {
   pushd prototype2
-  make V=y GTEST=../artifacts/code/googletest/build/usr/local test
+  make V=y $1 GTEST=../artifacts/code/googletest/build/usr/local test
   make V=y runtest
   make doxygen
   popd
 }
 
+function coverage()
+{
+  mkdir -p gcovr
+  pushd gcovr
+  gcovr -r .. -x -o coverage.xml
+  gcovr -r .. --html --html-details -e '.*Test.cpp' -o coverage
+  popd
+}
+
+
 tools
 artifacts
 libs
 prototype
-libs_test
-prototype_test
+libs_test COV=y
+prototype_test COV=y
+coverage

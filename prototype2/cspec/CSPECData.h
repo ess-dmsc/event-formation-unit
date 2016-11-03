@@ -1,6 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
-/** @file CSPECData.h
+/** @file
+ *
  *  @brief Class to receive and generate CSPEC detector readout
  */
 

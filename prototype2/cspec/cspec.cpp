@@ -18,6 +18,11 @@
 #include <stdio.h>
 #include <unistd.h>
 
+/** @file
+ *
+ *  @brief CSPEC Detector implementation
+ */
+
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 

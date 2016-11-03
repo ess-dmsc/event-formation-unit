@@ -1,6 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
-/** @file TestBase.h
+/** @file
+ *
  *  @brief Base class for all unit tests - provides colored print using MESSAGE
  */
 
