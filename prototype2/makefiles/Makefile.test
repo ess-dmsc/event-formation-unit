@@ -1,7 +1,7 @@
 # Copyright (C) 2016 European Spallation Source ERIC
 #
 
-testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest CSPECEventTest
+testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest CSPECEventTest MultiGridGeometryTest
 
 test: $(testprogs)
 	echo "done building tests"
@@ -28,6 +28,10 @@ DetectorTest: test/DetectorTest.cpp common/Detector.h
 CSPECEventTest: test/CSPECEventTest.cpp cspec/CSPECEvent.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) test/CSPECEventTest.cpp  -o $@ $(ldflags_test)
+
+MultiGridGeometryTest: test/MultiGridGeometryTest.cpp common/MultiGridGeometry.h
+	@echo building $@
+	$(Q)g++ $(cxxflags_test) test/MultiGridGeometryTest.cpp  -o $@ $(ldflags_test)
 
 coverage:
 	gcov -r -b *.gcda

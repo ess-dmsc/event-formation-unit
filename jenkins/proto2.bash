@@ -60,10 +60,8 @@ function prototype_test()
 function coverage()
 {
   mkdir -p gcovr
-  pushd gcovr
-  gcovr -r .. -x -e '.*Test.cpp' -o coverage.xml
-  gcovr -r .. --html --html-details -e '.*Test.cpp' -o coverage.html
-  popd
+  gcovr -r . -x -e '.*Test.cpp' -o gcovr/coverage.xml
+  gcovr -r . --html --html-details -e '.*Test.cpp' -o coverage.html
 }
 
 
