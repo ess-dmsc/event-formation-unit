@@ -13,7 +13,7 @@ public:
 
   T sum(void); /**< returns the value of the counter */
 
-  T count(void); /**< return number of adds */
+  int count(void); /**< return number of adds */
 
   T avg(void); /**< calculate 'average' of vector */
 
@@ -38,7 +38,7 @@ template <class T> void StatCounter<T>::add(T value) {
   }
 }
 
-template <class T> T StatCounter<T>::counts(void) { return n; }
+template <class T> int StatCounter<T>::count(void) { return n; }
 
 template <class T> T StatCounter<T>::max(void) { return max; }
 

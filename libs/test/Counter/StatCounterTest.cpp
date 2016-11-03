@@ -1,12 +1,12 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <Counter.h>
+#include <libs/include/StatCounter.h>
 #include <gtest/gtest.h>
 
 class StatCounterTest : public ::testing::Test {
 
 protected:
-  Counter<int> icount;
+  StatCounter<int> icount;
 };
 
 TEST_F(StatCounterTest, NewIsZero) { ASSERT_EQ(icount.counts(), 0); }

@@ -26,8 +26,8 @@ sources = source/Socket.cpp source/Timer.cpp source/Thread.cpp source/TSCTimer.c
 objects = $(sources:%.cpp=%.o)
 library = eventlib.a
 
-testprogs  = testevent testpqspeed testpqbasic testpqmin
-testprogs += testcounter
+testprogs  = NMXEventTest PQSpeedTest PQBasicTest PQMinTest CounterTest 
+# StatCounterTest
 
 all: $(library) $(hdrs)
 
@@ -40,20 +40,23 @@ test: $(testprogs)
 runtest: test
 	for test in $(testprogs) ; do ./$$test --gtest_output=xml:$$test.xml ; done
 
-testevent: test/NMXEvent/testmain.cpp test/NMXEvent/testEventBasic.cpp $(library)
+NMXEventTest: test/NMXEvent/testmain.cpp test/NMXEvent/NMXEventTest.cpp $(library)
 	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
 
-testpqbasic: test/PQ/testmain.cpp test/PQ/testPQBasic.cpp $(library)
+PQBasicTest: test/PQ/testmain.cpp test/PQ/PQBasicTest.cpp $(library)
 	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS)  -pthread
 
-testpqspeed: test/PQ/testmain.cpp test/PQ/testPQSpeed.cpp $(library)
+PQSpeedTest: test/PQ/testmain.cpp test/PQ/PQSpeedTest.cpp $(library)
 	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS)  -pthread
 
-testpqmin: test/PQ/testmain.cpp test/PQ/testPQMin.cpp $(library)
-		g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
+PQMinTest: test/PQ/testmain.cpp test/PQ/PQMinTest.cpp $(library)
+	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
 
-testcounter: test/Counter/testmain.cpp test/Counter/testCounter.cpp $(library)
-		g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
+CounterTest: test/Counter/testmain.cpp test/Counter/CounterTest.cpp $(library)
+	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
+
+StatCounterTest: test/Counter/testmain.cpp test/Counter/StatCounterTest.cpp $(library)
+	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
 
 clean:
 	rm -f $(objects) $(library) $(testprogs) *.gc* *.valgrind *.xml
