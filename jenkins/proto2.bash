@@ -60,8 +60,8 @@ function prototype_test()
 function coverage()
 {
   mkdir -p gcovr
-  gcovr -v -r . -x -e '.*Test.cpp' --exclude-directories='.*artifacts.*' -o gcovr/coverage.xml
-  gcovr -v -r . --html --html-details -e '.*Test.cpp' --exclude-directories='.*artifacts.*' -o coverage.html
+  gcovr -v -r . -x -e '.*Test.cpp' -e '.*gtest.*.h' -o gcovr/coverage.xml
+  gcovr -v -r . --html --html-details -e '.*Test.cpp' -e '.*gtest.*.h' -o coverage.html
 }
 
 
