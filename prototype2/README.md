@@ -25,10 +25,8 @@ Target            | Description
 all | default target, builds executables and loadable libraries
 test | build test executables
 runtest | run test executables, generate xml reports
-
 coverage | generate test coverage report in html/index.html
 valgrind | run valgrind on tests, generate reports
-
 clean | clean prototype2/
 realclean |  also clean libs/
 release | checks for missing copyright notice and @file comments
