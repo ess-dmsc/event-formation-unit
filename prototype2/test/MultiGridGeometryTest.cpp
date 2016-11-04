@@ -83,7 +83,8 @@ TEST_F(MultiGridGeometryTest, SpeedTest) {
   int grids = 160;
   int xwires = 4;
   int zwires = 16;
-  const uint64_t repeats = 1000000000; //1B
+  //const uint64_t repeats = 1000000000; //1B too much for Valgrind
+  const uint64_t repeats = 10000000;
   uint64_t sum = 0;
   TSCTimer start;
   MultiGridGeometry CSPEC(cols, grids, xwires, zwires);
