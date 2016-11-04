@@ -1,5 +1,8 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
+#include <cassert>
+#include <cstdlib>
+
 /** @file
  *
  *  @brief Simple RingBuffer class to keep track of a number of buffers
@@ -10,11 +13,12 @@
 
 #pragma once
 
+template <const unsigned int N>
 class RingBuffer {
 public:
   struct Data {
     int length;
-    char buffer[9000]; /**< @todo Hardcoded buffersize */
+    char buffer[N]; /**< @todo Hardcoded buffersize */
   };
 
   /** @brief construct a ringbuffer of specified size
@@ -38,5 +42,29 @@ private:
 
   int entry_{0};
   int N_{0};
-  int size_{9000}; /**< @todo  hardcoded must be in sync with buffer above */
+  int size_{N}; /**< @todo  hardcoded must be in sync with buffer above */
 };
+
+template <const unsigned int N> RingBuffer<N>::RingBuffer(int entries) : N_(entries) { data = new Data[entries]; }
+
+template <const unsigned int N> RingBuffer<N>::~RingBuffer() {
+  delete[] data;
+  data = 0;
+}
+
+template <const unsigned int N> struct RingBuffer<N>::Data *RingBuffer<N>::getdatastruct() {
+  return &data[entry_];
+}
+
+template <const unsigned int N> void RingBuffer<N>::setdatalength(int length) {
+  assert(length <= size_);
+  assert(length > 0);
+  data[entry_].length = length;
+}
+
+template <const unsigned int N> int RingBuffer<N>::getdatalength() { return data[entry_].length; }
+
+template <const unsigned int N> int RingBuffer<N>::nextbuffer() {
+  entry_ = (entry_ + 1) % N_;
+  return entry_;
+}

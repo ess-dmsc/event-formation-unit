@@ -61,6 +61,8 @@ public:
   /** @todo comment */
   CSPECEvent *createevent(const MultiGridData &data);
 
+  void createevent2(const MultiGridData &data, char * buffer);
+
   // This data is overwritten on receive()
   struct MultiGridData data[250];
   unsigned int elems{0};

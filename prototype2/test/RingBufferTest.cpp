@@ -13,13 +13,13 @@ protected:
 
 /** Test cases below */
 TEST_F(RingBufferTest, Constructor) {
-  RingBuffer buf(100);
+  RingBuffer<9000> buf(100);
   ASSERT_EQ(buf.getelems(), 100);
   ASSERT_EQ(buf.getsize(), 9000);
 }
 
 TEST_F(RingBufferTest, Datalength) {
-  RingBuffer buf(100);
+  RingBuffer<9000>  buf(100);
   buf.setdatalength(9000);
   ASSERT_EQ(9000, buf.getdatalength());
   buf.setdatalength(900);
@@ -29,9 +29,9 @@ TEST_F(RingBufferTest, Datalength) {
 TEST_F(RingBufferTest, CircularWrap) {
   int N = 997;
   int size = 9000;
-  RingBuffer buf(N);
+  RingBuffer<9000>  buf(N);
 
-  struct RingBuffer::Data *first = buf.getdatastruct();
+  struct RingBuffer<9000> ::Data *first = buf.getdatastruct();
   ASSERT_EQ(buf.getelems(), N);
   ASSERT_EQ(buf.getsize(), size);
 

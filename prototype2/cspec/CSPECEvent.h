@@ -19,6 +19,8 @@ public:
   CSPECEvent(uint64_t timestamp, uint32_t globalpixid)
       : time_(timestamp), pixelid_(globalpixid) {}
 
+  CSPECEvent(){}
+
   ~CSPECEvent() {
     time_ = 0;
     pixelid_ = 0x0;
@@ -44,7 +46,9 @@ public:
     return pixelid_ > other.getpixelid();
   }
 
+  char eventbuffer[32];
 private:
   uint64_t time_;
   uint32_t pixelid_;
+
 };

@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cspec/CSPECData.h>
+#include <cstring>
 #include <iostream>
 #include <memory>
 
@@ -20,6 +21,19 @@ CSPECEvent *CSPECData::createevent(const MultiGridData &data) {
   auto wire = chanconv->getWireId(data.d[2]);
   auto pixid = multigridgeom->getdetectorpixelid(col, grid, wire);
   return new CSPECEvent(data.time, pixid);
+}
+
+/** @todo add unit test */
+  void CSPECData::createevent2(const MultiGridData &data, char * buffer) {
+  auto col = data.module;
+  auto grid = chanconv->getGridId(data.d[6]);
+  auto wire = chanconv->getWireId(data.d[2]);
+  auto pixid = multigridgeom->getdetectorpixelid(col, grid, wire);
+  static_assert(sizeof(data.time) == 4, "time should be 32 bit");
+  static_assert(sizeof(pixid) == 4, "pixelid should be 32 bit");
+  std::memcpy(buffer + 0, &data.time, sizeof(data.time));
+  std::memcpy(buffer + 4, &pixid, sizeof(pixid));
+   /** @todo error checking ? */
 }
 
 int CSPECData::receive(const char *buffer, int size) {

@@ -1,5 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
+#include <cstring>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/Producer.h>
@@ -41,7 +42,10 @@ public:
 
 private:
   /** Shared between input_thread and processing_thread*/
-  CircularFifo<struct RingBuffer::Data *, buffer_max_entries> fifo;
+  CircularFifo<struct RingBuffer<9000>::Data *, buffer_max_entries> fifo;
+
+  /** Test might replace fifo2 */
+  CircularFifo<struct RingBuffer<32>::Data *, 300 * buffer_max_entries> fifo3;
 
   /** Shared between processing_thread and output_thread */
   CircularFifo<CSPECEvent *, 300 * buffer_max_entries> fifo2;
@@ -63,7 +67,7 @@ void CSPEC::input_thread(void *args) {
   cspecdata.settimeout(0, 100000); // One tenth of a second
 
   /** Buffer and stats setup */
-  RingBuffer ringbuf(buffer_max_entries);
+  RingBuffer<9000> ringbuf(buffer_max_entries);
 
   uint64_t rx = 0;
   uint64_t rx_total = 0;
@@ -76,7 +80,7 @@ void CSPEC::input_thread(void *args) {
   for (;;) {
 
     /** this is the processing step */
-    struct RingBuffer::Data *data = ringbuf.getdatastruct();
+    struct RingBuffer<9000>::Data *data = ringbuf.getdatastruct();
 
     if ((rdsize = cspecdata.receive(data->buffer, ringbuf.getsize())) > 0) {
       rxp++;
@@ -120,6 +124,8 @@ void CSPEC::input_thread(void *args) {
 void CSPEC::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
 
+  RingBuffer<32> ringbuf(300 * buffer_max_entries);
+
   uint64_t ierror = 0;
   uint64_t oerror = 0;
   uint64_t idata = 0;
@@ -139,7 +145,7 @@ void CSPEC::processing_thread(void *args) {
 
   Timer us_clock, stopafter_clock;
   TSCTimer report_timer;
-  struct RingBuffer::Data *data;
+  struct RingBuffer<9000>::Data *data;
   CSPECEvent testevent(0xffff, 0xffff);
 
   uint64_t eventcount = 0;
@@ -154,6 +160,7 @@ void CSPEC::processing_thread(void *args) {
       idata += dat.elems;
       idisc += dat.input_filter();
 
+#if 0
       for (auto d : dat.data) {
         if (d.valid) {
           auto evt = dat.createevent(d);
@@ -163,6 +170,19 @@ void CSPEC::processing_thread(void *args) {
           }
         }
       }
+#else
+     for (auto d : dat.data) {
+       if (d.valid) {
+         struct RingBuffer<32>::Data *data = ringbuf.getdatastruct();
+         dat.createevent2(d, data->buffer);
+         if (fifo3.push(data) == false) {
+           oerror++;
+         } else {
+           ringbuf.nextbuffer();
+         }
+       }
+     }
+#endif
     }
 
     /** This is the periodic reporting*/
@@ -197,7 +217,8 @@ void CSPEC::output_thread(void *args) {
 #ifndef NOKAFKA
   Producer producer(opts->broker, true, "C-SPEC_detector");
 #endif
-  CSPECEvent *data;
+
+  struct RingBuffer<32>::Data *data;
   Timer stop;
   TSCTimer report_timer2;
 
@@ -205,13 +226,13 @@ void CSPEC::output_thread(void *args) {
   uint64_t produce = 0;
   uint64_t idle = 0;
   while (1) {
-    if (fifo2.pop(data) == false) {
+    if (fifo3.pop(data) == false) {
       idle++;
       usleep(10);
     } else {
+      std::memcpy(kafkabuffer + produce * 12, data->buffer, 8 /** @todo not hardcode */ );
       rxevents++;
       produce++;
-      delete data;
     }
 
     /** Add dummy producer of 1M bytes data*/
