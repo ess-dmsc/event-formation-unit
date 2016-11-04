@@ -12,7 +12,8 @@ using namespace std;
 class CspecDataTest : public TestBase {
 protected:
   CSPECChanConv conv;
-  MultiGridGeometry * cspecgeometry{nullptr};
+
+  MultiGridGeometry * cspecgeometry;
 
   std::unique_ptr<CSPECData> dat;
   char buffer[9000];
@@ -20,9 +21,9 @@ protected:
 
   virtual void SetUp() {
     cspecgeometry = new MultiGridGeometry(80, 160, 4, 16);
-    dat = std::unique_ptr<CSPECData>(new CSPECData(&conv, cspecgeometry));
+    dat = std::unique_ptr<CSPECData> (new CSPECData(&conv, cspecgeometry));
   }
-  virtual void TearDown() {}
+  virtual void TearDown() { delete cspecgeometry; }
 
   void assertdatfragerr(int data, int frag, int error) {
     ASSERT_EQ(dat->elems, data);
