@@ -25,7 +25,7 @@ int getmaxdetectorid() {return xwires_ * zwires_ * grids_ * cols_;}
  *  @param gridid Grid ID, calculated from adc values
  *  @param wireid Wire ID , calculated from adc values
  */
-inline int getdetectorid(int column, int gridid, int wireid) {
+inline int getdetectorpixelid(int column, int gridid, int wireid) {
    if ((column > cols_) || (gridid > grids_) || (wireid > xwires_ * zwires_)) {
      return -1;
    }

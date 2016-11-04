@@ -1,7 +1,7 @@
 # Copyright (C) 2016 European Spallation Source ERIC
 #
 
-VPATH = ../libs/include test
+VPATH = .. ../libs/include test
 
 progs = efu2 cspecgen2 cspec.so nmx.so udp.so
 library = ../libs/eventlib.a

@@ -2,6 +2,7 @@
 
 #include "CSPECTestData.h"
 #include "TestBase.h"
+#include <common/MultiGridGeometry.h>
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CSPECData.h>
 #include <memory>
@@ -11,12 +12,15 @@ using namespace std;
 class CspecDataTest : public TestBase {
 protected:
   CSPECChanConv conv;
+  MultiGridGeometry * cspecgeometry{nullptr};
+
   std::unique_ptr<CSPECData> dat;
   char buffer[9000];
   int size;
 
   virtual void SetUp() {
-    dat = std::unique_ptr<CSPECData>(new CSPECData(&conv));
+    cspecgeometry = new MultiGridGeometry(80, 160, 4, 16);
+    dat = std::unique_ptr<CSPECData>(new CSPECData(&conv, cspecgeometry));
   }
   virtual void TearDown() {}
 

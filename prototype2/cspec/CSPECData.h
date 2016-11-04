@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <common/MultiGridGeometry.h>
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CSPECEvent.h>
 #include <memory>
@@ -35,11 +36,13 @@ public:
   };
 
   /** Let user specify calibration parameters */
-  CSPECData(CSPECChanConv *calibration) : chanconv(calibration){};
+  CSPECData(CSPECChanConv *calibration, MultiGridGeometry * geometry)
+     : chanconv(calibration), multigridgeom(geometry){};
 
   CSPECData(unsigned int wthresh, unsigned int gthresh,
-            CSPECChanConv *calibration)
-      : wire_thresh(wthresh), grid_thresh(gthresh), chanconv(calibration){};
+            CSPECChanConv *calibration, MultiGridGeometry * geometry)
+      : wire_thresh(wthresh), grid_thresh(gthresh)
+      , chanconv(calibration), multigridgeom(geometry){};
 
   CSPECData(){}; // Discouraged, but used in cspecgen
 
@@ -65,4 +68,5 @@ public:
   unsigned int frag{0};
 
   CSPECChanConv *chanconv{nullptr};
+  MultiGridGeometry * multigridgeom{nullptr};
 };

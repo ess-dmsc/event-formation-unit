@@ -32,7 +32,9 @@ void Launcher::launch(int lcore, void (*func)(Loader *, EFUArgs *), Loader *ld,
 
   std::thread *t = new std::thread(func, ld, args);
 
+#ifndef NDEBUG
   int s =
+#endif
       pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
   assert(s == 0);
 }

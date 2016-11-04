@@ -132,14 +132,17 @@ void CSPEC::processing_thread(void *args) {
   conv.makegridcal(0, CSPECChanConv::adcsize - 1,
                    96); // Linear dummy grid look-up table
 
-  // CSPECData dat(0, 0, &conv); // no signal threshold
-  CSPECData dat(&conv); // Default signal thresholds
+  MultiGridGeometry CSPEC(80, 160, 4, 16);
+
+  // CSPECData dat(0, 0, &conv, &CSPEC); // no signal threshold
+  CSPECData dat(&conv, &CSPEC); // Default signal thresholds
 
   Timer us_clock, stopafter_clock;
   TSCTimer report_timer;
   struct RingBuffer::Data *data;
   CSPECEvent testevent(0xffff, 0xffff);
 
+  uint64_t eventcount = 0;
   while (1) {
 
     if ((fifo.pop(data)) == false) {
@@ -165,14 +168,19 @@ void CSPEC::processing_thread(void *args) {
     /** This is the periodic reporting*/
     if (unlikely(
             (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
+      auto usecs = us_clock.timeus();
+      auto rate = idata - eventcount;
       cout_mutex.lock();
       printf("%" PRIu64 " processing: idle: %" PRIu64 ", errors: %" PRIu64
-             ", discard: %" PRIu64 ", events: %" PRIu64
+             ", discard: %" PRIu64 ", events: %" PRIu64 ", kevts/s: %" PRIu64
              " , push errors: %" PRIu64 "\n",
-             report_timer.timetsc(), iidle, ierror, idisc, idata, oerror);
+             report_timer.timetsc(), iidle, ierror, idisc, idata, rate*1000/usecs,
+             oerror);
       fflush(stdout);
       cout_mutex.unlock();
 
+      eventcount = idata;
+      us_clock.now();
       report_timer.now();
 
       if (stopafter_clock.timeus() >= opts->stopafter * 1000000) {

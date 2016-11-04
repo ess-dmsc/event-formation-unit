@@ -29,9 +29,10 @@ CSPECEventTest: test/CSPECEventTest.cpp cspec/CSPECEvent.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) test/CSPECEventTest.cpp  -o $@ $(ldflags_test)
 
-MultiGridGeometryTest: test/MultiGridGeometryTest.cpp common/MultiGridGeometry.h
+MultiGridGeometryTest: test/MultiGridGeometryTest.cpp common/MultiGridGeometry.h libs/include/TSCTimer.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) test/MultiGridGeometryTest.cpp  -o $@ $(ldflags_test)
+	pwd
+	$(Q)g++ $(cxxflags_test) test/MultiGridGeometryTest.cpp $(library)  -o $@ $(ldflags_test)
 
 coverage:
 	gcov -r -b *.gcda

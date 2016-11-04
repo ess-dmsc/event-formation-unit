@@ -4,6 +4,7 @@ CXXFLAGS  = -I.. -std=c++11 -O3 -fPIC
 LDFLAGS   = -L. -lpthread
 CXXFLAGS += -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -Wno-error=sign-compare -Wno-error=conversion-null
 
+
 Q=@
 ifdef V
 Q=
@@ -26,7 +27,7 @@ sources = source/Socket.cpp source/Timer.cpp source/Thread.cpp source/TSCTimer.c
 objects = $(sources:%.cpp=%.o)
 library = eventlib.a
 
-testprogs  = NMXEventTest PQSpeedTest PQBasicTest PQMinTest CounterTest 
+testprogs  = NMXEventTest PQSpeedTest PQBasicTest PQMinTest CounterTest
 # StatCounterTest
 
 all: $(library) $(hdrs)
