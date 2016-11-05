@@ -15,10 +15,14 @@
 
 template <const unsigned int N>
 class RingBuffer {
+  static const unsigned int COOKIE1 = 0xDEADC0DE;
+  static const unsigned int COOKIE2 = 0xFEE1DEAD;
 public:
   struct Data {
+    unsigned int cookie1 = COOKIE1;
     int length;
     char buffer[N];
+    unsigned int cookie2 = COOKIE2;
   };
 
   /** @brief construct a ringbuffer of specified size
@@ -53,6 +57,8 @@ template <const unsigned int N> RingBuffer<N>::~RingBuffer() {
 }
 
 template <const unsigned int N> struct RingBuffer<N>::Data *RingBuffer<N>::getdatastruct() {
+  assert(data[entry_].cookie1 == COOKIE1);
+  assert(data[entry_].cookie2 == COOKIE2);
   return &data[entry_];
 }
 
