@@ -163,7 +163,7 @@ void CSPEC::processing_thread(void *args) {
       for (auto d : dat.data) {
         if (d.valid) {
           struct RingBuffer<event_buffer_size>::Data *data = ringbuf.getdatastruct();
-          dat.createevent2(d, data->buffer);
+          dat.createevent(d, data->buffer);
           if (proc2output_fifo.push(data) == false) {
             oerror++;
           } else {

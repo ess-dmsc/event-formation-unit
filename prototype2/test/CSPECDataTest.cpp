@@ -2,6 +2,7 @@
 
 #include "CSPECTestData.h"
 #include "TestBase.h"
+#include <algorithm>
 #include <common/MultiGridGeometry.h>
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CSPECData.h>
@@ -96,6 +97,33 @@ TEST_F(CspecDataTest, InputFilterAboveThresh) {
   assertdatfragerr(size / dat->datasize, 0, 0);
   int discard = dat->input_filter();
   ASSERT_EQ(discard, 4);
+}
+
+TEST_F(CspecDataTest, CreateEvent) {
+  char buffer[32];
+  struct CSPECData::MultiGridData data;
+
+  std::fill_n(buffer, sizeof(buffer), 0x00);
+  data.module = 1;
+  data.time = 0xaabbccdd;
+  data.d[2] = 1;
+  data.d[6] = 1;
+
+  dat->createevent(data, buffer);
+  ASSERT_EQ(buffer[0], (char)0xdd);
+  ASSERT_EQ(buffer[1], (char)0xcc);
+  ASSERT_EQ(buffer[2], (char)0xbb);
+  ASSERT_EQ(buffer[3], (char)0xaa);
+  // -1 since there is no geometry specified
+  EXPECT_EQ(buffer[4], (char)0xff);
+  EXPECT_EQ(buffer[5], (char)0xff);
+  EXPECT_EQ(buffer[6], (char)0xff);
+  EXPECT_EQ(buffer[7], (char)0xff);
+
+  EXPECT_EQ(buffer[8], (char)0x00);
+  EXPECT_EQ(buffer[9], (char)0x00);
+  EXPECT_EQ(buffer[10], (char)0x00);
+  EXPECT_EQ(buffer[11], (char)0x00);
 }
 
 int main(int argc, char **argv) {

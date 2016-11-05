@@ -58,10 +58,11 @@ public:
   int generate(char *buffer, int size, int elems, unsigned int wire_thresh,
                unsigned int grid_thresh);
 
-  /** @todo comment */
-  CSPECEvent *createevent(const MultiGridData &data);
-
-  void createevent2(const MultiGridData &data, char * buffer);
+  /** @brief serialize event to buffer
+   *  @param data Multi grid data from event readout system
+   *  @param buffer User specified buffer (must be large enough to hold event
+   */
+  void createevent(const MultiGridData &data, char * buffer);
 
   // This data is overwritten on receive()
   struct MultiGridData data[250];

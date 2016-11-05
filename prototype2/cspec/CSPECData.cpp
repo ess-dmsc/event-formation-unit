@@ -14,17 +14,9 @@ struct multi_grid {
   uint32_t footer;
 } __attribute__((packed));
 
-/** @todo add unit test */
-CSPECEvent *CSPECData::createevent(const MultiGridData &data) {
-  auto col = data.module;
-  auto grid = chanconv->getGridId(data.d[6]);
-  auto wire = chanconv->getWireId(data.d[2]);
-  auto pixid = multigridgeom->getdetectorpixelid(col, grid, wire);
-  return new CSPECEvent(data.time, pixid);
-}
 
 /** @todo add unit test */
-  void CSPECData::createevent2(const MultiGridData &data, char * buffer) {
+  void CSPECData::createevent(const MultiGridData &data, char * buffer) {
   auto col = data.module;
   auto grid = chanconv->getGridId(data.d[6]);
   auto wire = chanconv->getWireId(data.d[2]);
