@@ -3,8 +3,6 @@
 #include <cassert>
 #include <cspec/CSPECData.h>
 #include <cstring>
-#include <iostream>
-#include <memory>
 
 using namespace std;
 
@@ -15,17 +13,19 @@ struct multi_grid {
 } __attribute__((packed));
 
 
-/** @todo add unit test */
-  void CSPECData::createevent(const MultiGridData &data, char * buffer) {
+/** @todo no error checking, assumes valid data and valid buffer
+ */
+void CSPECData::createevent(const MultiGridData &data, char * buffer) {
   auto col = data.module;
   auto grid = chanconv->getGridId(data.d[6]);
   auto wire = chanconv->getWireId(data.d[2]);
   auto pixid = multigridgeom->getdetectorpixelid(col, grid, wire);
+
   static_assert(sizeof(data.time) == 4, "time should be 32 bit");
   static_assert(sizeof(pixid) == 4, "pixelid should be 32 bit");
+
   std::memcpy(buffer + 0, &data.time, sizeof(data.time));
   std::memcpy(buffer + 4, &pixid, sizeof(pixid));
-   /** @todo error checking ? */
 }
 
 int CSPECData::receive(const char *buffer, int size) {
@@ -109,10 +109,13 @@ int CSPECData::input_filter() {
   return discarded;
 }
 
-/** First multi grid data generator - valid headers, all zero data*/
-/** Only used in google test - can be excluded from coverage      */
+
+/** First multi grid data generator - valid headers, custom
+ * wire and grid adc values. Only used in google test - can
+ * be excluded from coverage
+ */
 int CSPECData::generate(char *buffer, int size, int elems,
-                        unsigned int wire_thresh, unsigned int grid_thresh) {
+                        unsigned int wire_adc, unsigned int grid_adc) {
   int bytes = 0;
   int events = 0;
   auto mg = (struct multi_grid *)buffer;
@@ -122,10 +125,8 @@ int CSPECData::generate(char *buffer, int size, int elems,
     for (int i = 0; i != 8; ++i) {
       mg->data[i] = data_id;
     }
-    mg->data[0] += wire_thresh;
-    // mg->data[1] += wire_thresh;
-    mg->data[4] += grid_thresh;
-    // mg->data[5] += grid_thresh;
+    mg->data[0] += wire_adc;
+    mg->data[4] += grid_adc;
 
     mg->footer = footer_id + events;
     mg++;

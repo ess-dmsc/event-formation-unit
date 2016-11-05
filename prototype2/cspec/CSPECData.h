@@ -10,7 +10,6 @@
 #include <common/MultiGridGeometry.h>
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CSPECEvent.h>
-#include <memory>
 
 class CSPECData {
 public:
@@ -55,8 +54,8 @@ public:
   int input_filter();
 
   /** Generate simulated data, place in user specified buffer */
-  int generate(char *buffer, int size, int elems, unsigned int wire_thresh,
-               unsigned int grid_thresh);
+  int generate(char *buffer, int size, int elems, unsigned int wire_adc,
+               unsigned int grid_adc);
 
   /** @brief serialize event to buffer
    *  @param data Multi grid data from event readout system

@@ -18,7 +18,7 @@ class RingBuffer {
 public:
   struct Data {
     int length;
-    char buffer[N]; /**< @todo Hardcoded buffersize */
+    char buffer[N];
   };
 
   /** @brief construct a ringbuffer of specified size
@@ -42,7 +42,7 @@ private:
 
   int entry_{0};
   int N_{0};
-  int size_{N}; /**< @todo  hardcoded must be in sync with buffer above */
+  int size_{N};
 };
 
 template <const unsigned int N> RingBuffer<N>::RingBuffer(int entries) : N_(entries) { data = new Data[entries]; }
