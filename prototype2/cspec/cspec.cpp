@@ -38,25 +38,27 @@ public:
   void processing_thread(void *args);
   void output_thread(void *args);
 
-  static const int buffer_max_entries = 100000;
+  static const int eth_buffer_max_entries = 100000;
+  static const int eth_buffer_size = 9000;
+  static const int event_buffer_max_entries = 300 * eth_buffer_max_entries;
+  static const int event_buffer_size = 32;
+  static const int kafka_buffer_size = 1000000;
 
 private:
   /** Shared between input_thread and processing_thread*/
-  CircularFifo<struct RingBuffer<9000>::Data *, buffer_max_entries> fifo;
-
-  /** Test might replace fifo2 */
-  CircularFifo<struct RingBuffer<32>::Data *, 300 * buffer_max_entries> fifo3;
+  CircularFifo<struct RingBuffer<eth_buffer_size>::Data *, eth_buffer_max_entries> input2proc_fifo;
 
   /** Shared between processing_thread and output_thread */
-  CircularFifo<CSPECEvent *, 300 * buffer_max_entries> fifo2;
+  CircularFifo<struct RingBuffer<event_buffer_size>::Data *, event_buffer_max_entries> proc2output_fifo;
 
   std::mutex eventq_mutex, cout_mutex;
 
-  char kafkabuffer[1000000]; /** @todo not hardcoded */
+  char kafkabuffer[kafka_buffer_size];
 };
 
 void CSPEC::input_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
+  RingBuffer<eth_buffer_size> ringbuf(eth_buffer_max_entries);
 
   /** Connection setup */
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
@@ -67,7 +69,6 @@ void CSPEC::input_thread(void *args) {
   cspecdata.settimeout(0, 100000); // One tenth of a second
 
   /** Buffer and stats setup */
-  RingBuffer<9000> ringbuf(buffer_max_entries);
 
   uint64_t rx = 0;
   uint64_t rx_total = 0;
@@ -80,14 +81,14 @@ void CSPEC::input_thread(void *args) {
   for (;;) {
 
     /** this is the processing step */
-    struct RingBuffer<9000>::Data *data = ringbuf.getdatastruct();
+    struct RingBuffer<eth_buffer_size>::Data *data = ringbuf.getdatastruct();
 
     if ((rdsize = cspecdata.receive(data->buffer, ringbuf.getsize())) > 0) {
       rxp++;
       rx += rdsize;
       ringbuf.setdatalength(rdsize);
 
-      if (fifo.push(data) == false) {
+      if (input2proc_fifo.push(data) == false) {
         ioverflow++;
       } else {
         ringbuf.nextbuffer();
@@ -123,8 +124,9 @@ void CSPEC::input_thread(void *args) {
 
 void CSPEC::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
+  RingBuffer<event_buffer_size> ringbuf(event_buffer_max_entries);
 
-  RingBuffer<32> ringbuf(300 * buffer_max_entries);
+  struct RingBuffer<eth_buffer_size>::Data *data;
 
   uint64_t ierror = 0;
   uint64_t oerror = 0;
@@ -145,13 +147,11 @@ void CSPEC::processing_thread(void *args) {
 
   Timer us_clock, stopafter_clock;
   TSCTimer report_timer;
-  struct RingBuffer<9000>::Data *data;
-  CSPECEvent testevent(0xffff, 0xffff);
 
   uint64_t eventcount = 0;
   while (1) {
 
-    if ((fifo.pop(data)) == false) {
+    if ((input2proc_fifo.pop(data)) == false) {
       iidle++;
       usleep(10);
     } else {
@@ -160,29 +160,17 @@ void CSPEC::processing_thread(void *args) {
       idata += dat.elems;
       idisc += dat.input_filter();
 
-#if 0
       for (auto d : dat.data) {
         if (d.valid) {
-          auto evt = dat.createevent(d);
-          if (fifo2.push(evt) == false) {
+          struct RingBuffer<event_buffer_size>::Data *data = ringbuf.getdatastruct();
+          dat.createevent2(d, data->buffer);
+          if (proc2output_fifo.push(data) == false) {
             oerror++;
-            delete evt;
+          } else {
+            ringbuf.nextbuffer();
           }
         }
       }
-#else
-     for (auto d : dat.data) {
-       if (d.valid) {
-         struct RingBuffer<32>::Data *data = ringbuf.getdatastruct();
-         dat.createevent2(d, data->buffer);
-         if (fifo3.push(data) == false) {
-           oerror++;
-         } else {
-           ringbuf.nextbuffer();
-         }
-       }
-     }
-#endif
     }
 
     /** This is the periodic reporting*/
@@ -218,7 +206,7 @@ void CSPEC::output_thread(void *args) {
   Producer producer(opts->broker, true, "C-SPEC_detector");
 #endif
 
-  struct RingBuffer<32>::Data *data;
+  struct RingBuffer<event_buffer_size>::Data *data;
   Timer stop;
   TSCTimer report_timer2;
 
@@ -226,19 +214,20 @@ void CSPEC::output_thread(void *args) {
   uint64_t produce = 0;
   uint64_t idle = 0;
   while (1) {
-    if (fifo3.pop(data) == false) {
+    if (proc2output_fifo.pop(data) == false) {
       idle++;
       usleep(10);
     } else {
-      std::memcpy(kafkabuffer + produce * 12, data->buffer, 8 /** @todo not hardcode */ );
+      std::memcpy(kafkabuffer + produce, data->buffer, 8 /**< @todo not hardcode */ );
       rxevents++;
-      produce++;
+      produce += 12; /**< @todo should match actual data size */
     }
 
-    /** Add dummy producer of 1M bytes data*/
-    if (produce >= 83000) {
+    /** Produce when enough data has been accumulated */
+    if (produce >= kafka_buffer_size - 1000) {
+      assert(produce < kafka_buffer_size);
 #ifndef NOKAFKA
-      producer.produce(kafkabuffer, 1000000);
+      producer.produce(kafkabuffer, kafka_buffer_size);
 #endif
       produce = 0;
     }
