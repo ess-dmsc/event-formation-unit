@@ -7,8 +7,8 @@
  *
  *  @brief Simple RingBuffer class to keep track of a number of buffers
  *  for receiving socket data. No bounds checking so it is possible to corrupt
- *  data and write beyond buffers
- *  @todo add cookies around  each buffer
+ *  data and write beyond buffers. However overwrites are detected on the nextbuffer()
+ *  that would have provided a corrupt buffer.
  */
 
 #pragma once
