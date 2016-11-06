@@ -41,7 +41,7 @@ public:
   static const int eth_buffer_max_entries = 100000;
   static const int eth_buffer_size = 9000;
   static const int event_buffer_max_entries = 300 * eth_buffer_max_entries;
-  static const int event_buffer_size = 32;
+  static const int event_buffer_size = 12;
   static const int kafka_buffer_size = 1000000;
 
 private:
