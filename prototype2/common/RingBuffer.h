@@ -72,5 +72,7 @@ template <const unsigned int N> int RingBuffer<N>::getdatalength() { return data
 
 template <const unsigned int N> int RingBuffer<N>::nextbuffer() {
   entry_ = (entry_ + 1) % N_;
+  assert(data[entry_].cookie1 == COOKIE1);
+  assert(data[entry_].cookie2 == COOKIE2);
   return entry_;
 }

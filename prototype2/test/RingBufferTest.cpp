@@ -52,6 +52,25 @@ TEST_F(RingBufferTest, CircularWrap) {
   ASSERT_EQ(first, buf.getdatastruct());
 }
 
+
+TEST_F(RingBufferTest, OverWriteLocal) {
+  RingBuffer<9000>  buf(2);
+  char * buffer = buf.getdatastruct()->buffer;
+  std::fill_n(buffer, 9001, 0);
+  MESSAGE() << "Next buffer should be ok\n";
+  buf.nextbuffer();
+  MESSAGE() << "Next2 buffer should be corrupt\n";
+  ASSERT_DEATH(buf.nextbuffer(), "COOKIE2");
+}
+
+TEST_F(RingBufferTest, OverWriteNext) {
+  RingBuffer<9000>  buf(2);
+  char * buffer = buf.getdatastruct()->buffer;
+  std::fill_n(buffer, 9005, 0);
+  MESSAGE() << "Next buffer should be corrupt\n";
+  ASSERT_DEATH(buf.nextbuffer(), "COOKIE1");
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
