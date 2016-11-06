@@ -96,7 +96,7 @@ void CSPEC::input_thread(void *args) {
     }
 
     /** This is the periodic reporting*/
-    if (unlikely(
+   if (unlikely(
             (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
       auto usecs = us_clock.timeus();
       rx_total += rx;
@@ -135,14 +135,12 @@ void CSPEC::processing_thread(void *args) {
   uint64_t idisc = 0;
 
   CSPECChanConv conv;
-  conv.makewirecal(0, CSPECChanConv::adcsize - 1,
-                   128); // Linear dummy wire look-up table
-  conv.makegridcal(0, CSPECChanConv::adcsize - 1,
-                   96); // Linear dummy grid look-up table
+  conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear look-up table
+  conv.makegridcal(0, CSPECChanConv::adcsize - 1,  96); // Linear look-up table
 
   MultiGridGeometry CSPEC(80, 160, 4, 16);
 
-  // CSPECData dat(0, 0, &conv, &CSPEC); // no signal threshold
+  // CSPECData dat(0, 0, &conv, &CSPEC); // Custom signal thresholds
   CSPECData dat(&conv, &CSPEC); // Default signal thresholds
 
   Timer us_clock, stopafter_clock;

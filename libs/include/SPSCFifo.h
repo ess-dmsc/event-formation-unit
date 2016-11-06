@@ -15,8 +15,7 @@
 // it is a "controversy" whether what is tail and what is head
 // http://en.wikipedia.org/wiki/FIFO#Head_or_tail_first
 
-#ifndef CIRCULARFIFO_SEQUENTIAL_H_
-#define CIRCULARFIFO_SEQUENTIAL_H_
+#pragma once
 
 #include <atomic>
 #include <cstddef>
@@ -49,8 +48,8 @@ private:
 //
 // Push on tail. TailHead is only changed by producer and can be safely loaded
 // using memory_order_relexed
-//         head is updated by consumer and must be loaded using at least
-//         memory_order_acquire
+// head is updated by consumer and must be loaded using at least
+// memory_order_acquire
 template <typename Element, size_t Size>
 bool CircularFifo<Element, Size>::push(const Element &item) {
   const auto current_tail = _tail.load();
@@ -98,10 +97,10 @@ bool CircularFifo<Element, Size>::isLockFree() const {
   return (_tail.is_lock_free() && _head.is_lock_free());
 }
 
+/** @todo powers of two and bitmask faster than modulus */
 template <typename Element, size_t Size>
 size_t CircularFifo<Element, Size>::increment(size_t idx) const {
-  return (idx + 1) % Capacity;
+  return (idx + 1) % Capacity; 
 }
 
 } // sequential_consistent
-#endif /* CIRCULARFIFO_SEQUENTIAL_H_ */
