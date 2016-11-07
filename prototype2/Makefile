@@ -17,7 +17,7 @@ nmx.so.src += common/Producer.cpp
 nmx.so.inc += common/Producer.h
 endif
 
-cspec.so.src = cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp  common/Producer.cpp
+cspec.so.src = cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp  common/Producer.cpp common/Trace.h
 cspec.so.inc = cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h gccintel.h common/Producer.h
 
 # For each standalone program add .src and .inc and .obj below

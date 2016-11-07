@@ -93,13 +93,14 @@ void CSPEC::input_thread(void *args) {
 
     /** this is the processing step */
     if ((rdsize = cspecdata.receive(eth_ringbuf->getdatabuffer(eth_index), eth_ringbuf->getmaxbufsize())) > 0) {
-      XTRACE(TRC_G_INPUT, TRC_L_VER, "rdsize: %u\n", rdsize);
+      XTRACE(TRC_G_INPUT, DEB, "rdsize: %u\n", rdsize);
       rxp++;
       rx += rdsize;
       eth_ringbuf->setdatalength(eth_index, rdsize);
 
       if (input2proc_fifo.push(eth_index) == false) {
         ioverflow++;
+        XTRACE(TRC_G_INPUT, WAR, "Overflow :%lu\n", ioverflow);
       } else {
         eth_ringbuf->nextbuffer();
       }
