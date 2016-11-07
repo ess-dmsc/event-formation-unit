@@ -14,10 +14,10 @@ test -d $KHOME || errexit "kafka directory does not exist"
 if [[ $CMD == "start" ]]; then
   echo Starting services
   echo " -- zookeeper"
-  $KHOME/bin/zookeeper-server-start.sh $KHOME/config/zookeeper.properties &> zookeeper.log &
+  $KHOME/bin/zookeeper-server-start.sh $KHOME/config/zookeeper.properties &> /tmp/zookeeper.log &
 
   echo " -- Kafka"
-  $KHOME/bin/kafka-server-start.sh $KHOME/config/server.properties &> kafka.log &
+  $KHOME/bin/kafka-server-start.sh $KHOME/config/server.properties &> /tmp/kafka.log &
   echo Done
   exit
 fi

@@ -1,22 +1,21 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
-#include <cassert>
-#include <cstdlib>
-
 /** @file
  *
  *  @brief Simple RingBuffer class to keep track of a number of buffers
- *  for receiving socket data. No bounds checking so it is possible to corrupt
- *  data and write beyond buffers. However overwrites are detected on the nextbuffer()
- *  that would have provided a corrupt buffer.
+ *  for receiving socket data. User writes to buffers directly, so it is
+ *  possible to write beyond buffers. However overwrites are detected on
+ *  nextbuffer() and getdatabuffer() calls.
  */
 
-#pragma once
+ #pragma once
+ #include <cassert>
+ #include <cstdlib>
 
-template <const unsigned int N>
-class RingBuffer {
+template <const unsigned int N> class RingBuffer {
   static const unsigned int COOKIE1 = 0xDEADC0DE;
   static const unsigned int COOKIE2 = 0xFEE1DEAD;
+
 public:
   struct Data {
     unsigned int cookie1 = COOKIE1;
@@ -26,52 +25,90 @@ public:
   };
 
   /** @brief construct a ringbuffer of specified size
-   *  @param entries size of the ringbuffer (in units of elements)
+   *  @param entries Maximum number of entries in ring
    */
-  RingBuffer(int entries);
+  RingBuffer(const int entries);
 
   /** @brief minimal destructor frees the allocated buffer */
   ~RingBuffer();
 
-  struct Data *getdatastruct();   /**< return pointer to current buffer */
-  void setdatalength(int length); /**< specify length of data in curr buffer */
-  int getdatalength(); /**< get the length of data in current buffer */
-  int nextbuffer();    /**< advance to next buffer, wraps around */
-  int getsize() { return size_; }   /**< return buffer size in bytes */
-  int getelems() { return N_; }     /**< return number of buffers */
-  int getindex() { return entry_; } /** current buffer index */
+  /** @brief Get the index of current active buffer
+   * This function should only called by the Producer.
+   */
+  unsigned int getdataindex();
+
+  /** @brief Get pointer to data for specified buffer
+   * @param index Index of specified buffer
+   */
+  char *getdatabuffer(unsigned int index);
+
+  /** @brief  Set length of available data in specified buffer, this
+   * function is only called by Producer.
+   *  @param index Index of the specified buffer
+   *  @param length Size of data (Bytes)
+   */
+  void setdatalength(unsigned int index, unsigned int length);
+
+  /** @brief get the length of data in specified  buffer
+   *  @param index Index of specified buffer
+   */
+  int getdatalength(const unsigned int index);
+
+  /** @brief  Advance to next buffer in ringbuffer, updated internal
+   * data, checks for buffer overwrites, wraps around to first buffer.
+   * Only called by Producer.
+   */
+  int nextbuffer();
+
+  int getmaxbufsize() { return N; }   /**< return buffer size in bytes */
+  int getmaxelems() { return max_entries_; } /**< return number of buffers */
+  int getindex() { return entry_; }       /** current buffer index */
 
 private:
   struct Data *data{nullptr};
-
-  int entry_{0};
-  int N_{0};
-  int size_{N};
+  unsigned int entry_{0};
+  unsigned int max_entries_{0};
 };
 
-template <const unsigned int N> RingBuffer<N>::RingBuffer(int entries) : N_(entries) { data = new Data[entries]; }
+template <const unsigned int N>
+RingBuffer<N>::RingBuffer(int entries) : max_entries_(entries) {
+  data = new Data[entries];
+}
 
 template <const unsigned int N> RingBuffer<N>::~RingBuffer() {
   delete[] data;
   data = 0;
 }
 
-template <const unsigned int N> struct RingBuffer<N>::Data *RingBuffer<N>::getdatastruct() {
-  assert(data[entry_].cookie1 == COOKIE1);
-  assert(data[entry_].cookie2 == COOKIE2);
-  return &data[entry_];
+template <const unsigned int N> unsigned int RingBuffer<N>::getdataindex() {
+  return entry_;
 }
 
-template <const unsigned int N> void RingBuffer<N>::setdatalength(int length) {
-  assert(length <= size_);
+template <const unsigned int N>
+char *RingBuffer<N>::getdatabuffer(unsigned int index) {
+  assert(index < max_entries_);
+  assert(data[index].cookie1 == COOKIE1);
+  assert(data[index].cookie2 == COOKIE2);
+  return data[index].buffer;
+}
+
+template <const unsigned int N>
+int RingBuffer<N>::getdatalength(unsigned int index) {
+  assert(index < max_entries_);
+  return data[index].length;
+}
+
+template <const unsigned int N>
+void RingBuffer<N>::setdatalength(unsigned int index, unsigned int length) {
+  assert(length <= N);
   assert(length > 0);
-  data[entry_].length = length;
+  assert(index < max_entries_);
+  data[index].length = length;
 }
 
-template <const unsigned int N> int RingBuffer<N>::getdatalength() { return data[entry_].length; }
-
+/** @todo using powers of two and bitmask in stead of modulus */
 template <const unsigned int N> int RingBuffer<N>::nextbuffer() {
-  entry_ = (entry_ + 1) % N_;
+  entry_ = (entry_ + 1) % max_entries_;
   assert(data[entry_].cookie1 == COOKIE1);
   assert(data[entry_].cookie2 == COOKIE2);
   return entry_;

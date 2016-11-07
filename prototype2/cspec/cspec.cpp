@@ -5,6 +5,7 @@
 #include <common/EFUArgs.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
+#include <common/Trace.h>
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CSPECData.h>
 #include <cspec/CSPECEvent.h>
@@ -34,6 +35,7 @@ const char *classname = "CSPEC Detector";
 
 class CSPEC : public Detector {
 public:
+  CSPEC();
   void input_thread(void *args);
   void processing_thread(void *args);
   void output_thread(void *args);
@@ -46,19 +48,28 @@ public:
 
 private:
   /** Shared between input_thread and processing_thread*/
-  CircularFifo<struct RingBuffer<eth_buffer_size>::Data *, eth_buffer_max_entries> input2proc_fifo;
+  //CircularFifo<struct RingBuffer<eth_buffer_size>::Data *, eth_buffer_max_entries> input2proc_fifo;
+  CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
+  RingBuffer<eth_buffer_size> * eth_ringbuf;
 
   /** Shared between processing_thread and output_thread */
-  CircularFifo<struct RingBuffer<event_buffer_size>::Data *, event_buffer_max_entries> proc2output_fifo;
+  //CircularFifo<struct RingBuffer<event_buffer_size>::Data *, event_buffer_max_entries> proc2output_fifo;
+  CircularFifo<unsigned int, event_buffer_max_entries> proc2output_fifo;
+  RingBuffer<event_buffer_size> * event_ringbuf;
 
   std::mutex eventq_mutex, cout_mutex;
 
   char kafkabuffer[kafka_buffer_size];
 };
 
+CSPEC::CSPEC() {
+  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
+  event_ringbuf = new RingBuffer<event_buffer_size>(event_buffer_max_entries);
+}
+
 void CSPEC::input_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
-  RingBuffer<eth_buffer_size> ringbuf(eth_buffer_max_entries);
+
 
   /** Connection setup */
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
@@ -80,24 +91,24 @@ void CSPEC::input_thread(void *args) {
   TSCTimer report_timer;
   for (;;) {
 
-    /** this is the processing step */
-    struct RingBuffer<eth_buffer_size>::Data *data = ringbuf.getdatastruct();
+    unsigned int eth_index = eth_ringbuf->getindex();
 
-    if ((rdsize = cspecdata.receive(data->buffer, ringbuf.getsize())) > 0) {
+    /** this is the processing step */
+    if ((rdsize = cspecdata.receive(eth_ringbuf->getdatabuffer(eth_index), eth_ringbuf->getmaxbufsize())) > 0) {
+      XTRACE(TRC_G_INPUT, TRC_L_VER, "rdsize: %u\n", rdsize);
       rxp++;
       rx += rdsize;
-      ringbuf.setdatalength(rdsize);
+      eth_ringbuf->setdatalength(eth_index, rdsize);
 
-      if (input2proc_fifo.push(data) == false) {
+      if (input2proc_fifo.push(eth_index) == false) {
         ioverflow++;
       } else {
-        ringbuf.nextbuffer();
+        eth_ringbuf->nextbuffer();
       }
     }
 
     /** This is the periodic reporting*/
-   if (unlikely(
-            (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
+   if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
       auto usecs = us_clock.timeus();
       rx_total += rx;
 
@@ -124,9 +135,8 @@ void CSPEC::input_thread(void *args) {
 
 void CSPEC::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
-  RingBuffer<event_buffer_size> ringbuf(event_buffer_max_entries);
 
-  struct RingBuffer<eth_buffer_size>::Data *data;
+  unsigned int data_index;
 
   uint64_t ierror = 0;
   uint64_t oerror = 0;
@@ -149,31 +159,30 @@ void CSPEC::processing_thread(void *args) {
   uint64_t eventcount = 0;
   while (1) {
 
-    if ((input2proc_fifo.pop(data)) == false) {
+    if ((input2proc_fifo.pop(data_index)) == false) {
       iidle++;
       usleep(10);
     } else {
-      dat.receive(data->buffer, data->length);
+      dat.receive(eth_ringbuf->getdatabuffer(data_index), eth_ringbuf->getdatalength(data_index));
       ierror += dat.error;
       idata += dat.elems;
       idisc += dat.input_filter();
 
       for (auto d : dat.data) {
         if (d.valid) {
-          struct RingBuffer<event_buffer_size>::Data *data = ringbuf.getdatastruct();
-          dat.createevent(d, data->buffer);
-          if (proc2output_fifo.push(data) == false) {
+          unsigned int event_index = event_ringbuf->getindex();
+          dat.createevent(d, event_ringbuf->getdatabuffer(event_index));
+          if (proc2output_fifo.push(event_index) == false) {
             oerror++;
           } else {
-            ringbuf.nextbuffer();
+            event_ringbuf->nextbuffer();
           }
         }
       }
     }
 
     /** This is the periodic reporting*/
-    if (unlikely(
-            (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
+    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
       auto usecs = us_clock.timeus();
       auto rate = idata - eventcount;
       cout_mutex.lock();
@@ -204,7 +213,7 @@ void CSPEC::output_thread(void *args) {
   Producer producer(opts->broker, true, "C-SPEC_detector");
 #endif
 
-  struct RingBuffer<event_buffer_size>::Data *data;
+  unsigned int event_index;
   Timer stop;
   TSCTimer report_timer2;
 
@@ -212,11 +221,11 @@ void CSPEC::output_thread(void *args) {
   uint64_t produce = 0;
   uint64_t idle = 0;
   while (1) {
-    if (proc2output_fifo.pop(data) == false) {
+    if (proc2output_fifo.pop(event_index) == false) {
       idle++;
       usleep(10);
     } else {
-      std::memcpy(kafkabuffer + produce, data->buffer, 8 /**< @todo not hardcode */ );
+      std::memcpy(kafkabuffer + produce, event_ringbuf->getdatabuffer(event_index), 8 /**< @todo not hardcode */ );
       rxevents++;
       produce += 12; /**< @todo should match actual data size */
     }
