@@ -13,7 +13,15 @@ using namespace std;
 
 class MultiGridGeometry {
 public:
-  MultiGridGeometry(int columns, int grids, int xwires, int zwires)
+
+/** @brief Create a MG Geometry based on number of columns, grids and
+ * grid wire layout.
+ * @param columns Number of columns
+ * @param grids Number of grids in a column
+ * @param xwires Number of wires in the x-direction
+ * @param zwires Number of wires in the z-direction
+ */
+MultiGridGeometry(int columns, int grids, int xwires, int zwires)
     : cols_(columns), grids_(grids), xwires_(xwires), zwires_(zwires) {}
 
 /** @brief returns the maximum available pixelid for this geometry
@@ -33,12 +41,12 @@ inline int getdetectorpixelid(int column, int gridid, int wireid) {
      return -1;
    }
 
-   auto nxy = cols_ * xwires_ * grids_;
-   auto nx = cols_ * xwires_;
+   auto ncxg = cols_ * xwires_ * grids_;
+   auto ncx = cols_ * xwires_;
    auto z = (wireid - 1) % zwires_ + 1;
    auto x = (column - 1) * xwires_ + (wireid -1) / zwires_ + 1;
    //cout << "x: " << x << ", z: " << z << endl;
-   return (z - 1) * (nxy) + (gridid - 1)* nx + x;
+   return (z - 1) * (ncxg) + (gridid - 1)* ncx + x;
 }
 
 private:

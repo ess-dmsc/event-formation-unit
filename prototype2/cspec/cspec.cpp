@@ -122,7 +122,7 @@ void CSPEC::input_thread(void *args) {
       report_timer.now();
       rx = 0;
 
-      if (stop_timer.timeus() >= opts->stopafter * 1000000) {
+      if (stop_timer.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping input thread, timeus " << stop_timer.timeus()
                   << std::endl;
         return;
@@ -196,7 +196,7 @@ void CSPEC::processing_thread(void *args) {
       us_clock.now();
       report_timer.now();
 
-      if (stopafter_clock.timeus() >= opts->stopafter * 1000000) {
+      if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping processing thread, timeus " << std::endl;
         return;
       }
@@ -250,7 +250,7 @@ void CSPEC::output_thread(void *args) {
 
       report_timer2.now();
 
-      if (stop.timeus() >= opts->stopafter * 1000000) {
+      if (stop.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping output thread, timeus " << stop.timeus()
                   << std::endl;
         return;

@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
   Launcher(&dynamic, &opts, 12, 13, 14);
 
   Timer stop;
-  while (stop.timeus() < opts.stopafter * 1000000) {
+  while (stop.timeus() < opts.stopafter * 1000000LU) {
     sleep(2);
   }
   sleep(2);
