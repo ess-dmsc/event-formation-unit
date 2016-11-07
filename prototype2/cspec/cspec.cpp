@@ -48,12 +48,10 @@ public:
 
 private:
   /** Shared between input_thread and processing_thread*/
-  //CircularFifo<struct RingBuffer<eth_buffer_size>::Data *, eth_buffer_max_entries> input2proc_fifo;
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> * eth_ringbuf;
 
   /** Shared between processing_thread and output_thread */
-  //CircularFifo<struct RingBuffer<event_buffer_size>::Data *, event_buffer_max_entries> proc2output_fifo;
   CircularFifo<unsigned int, event_buffer_max_entries> proc2output_fifo;
   RingBuffer<event_buffer_size> * event_ringbuf;
 
