@@ -61,6 +61,7 @@ private:
 };
 
 CSPEC::CSPEC() {
+  //XTRACE(TRC_G_INIT, INF, "Creating CSPEC ringbuffers\n"); /** @todo make this work */
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
   event_ringbuf = new RingBuffer<event_buffer_size>(event_buffer_max_entries);
 }
