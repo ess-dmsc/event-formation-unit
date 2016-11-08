@@ -17,8 +17,8 @@ nmx.so.src += common/Producer.cpp
 nmx.so.inc += common/Producer.h
 endif
 
-cspec.so.src = cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp  common/Producer.cpp common/Trace.h
-cspec.so.inc = cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h gccintel.h common/Producer.h
+cspec.so.src = cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp  common/Producer.cpp
+cspec.so.inc = cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h gccintel.h common/Producer.h common/Trace.h
 
 # For each standalone program add .src and .inc and .obj below
 efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp

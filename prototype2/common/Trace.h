@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Command line argument parser for EFU
+ *  @brief Trace macros with masks and levels
  */
 
  /** Add trace groups below - must be powers of two */
@@ -31,7 +31,7 @@
 #endif
 
 #ifndef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#define TRC_LEVEL TRC_L_CRI
 #endif
 
 #define XTRACE(group, level, fmt, ...) \

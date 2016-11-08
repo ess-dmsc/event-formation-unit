@@ -25,6 +25,10 @@
  *  @brief CSPEC Detector implementation
  */
 
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
+
+
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
@@ -61,7 +65,7 @@ private:
 };
 
 CSPEC::CSPEC() {
-  //XTRACE(TRC_G_INIT, INF, "Creating CSPEC ringbuffers\n"); /** @todo make this work */
+  XTRACE(TRC_G_INIT, INF, "Creating CSPEC ringbuffers %d\n", 5); /** @todo make this work */
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
   event_ringbuf = new RingBuffer<event_buffer_size>(event_buffer_max_entries);
 }
