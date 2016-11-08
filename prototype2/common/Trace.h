@@ -26,8 +26,13 @@
  #define TRC_L_DEB   2
 
 
+#ifndef TRC_MASK
 #define TRC_MASK TRC_M_ALL
-#define TRC_LEVEL TRC_L_WAR
+#endif
+
+#ifndef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
+#endif
 
 #define XTRACE(group, level, fmt, ...) \
     (void)(((TRC_L_ ## level >= TRC_LEVEL) && (TRC_MASK & group)) ? \
