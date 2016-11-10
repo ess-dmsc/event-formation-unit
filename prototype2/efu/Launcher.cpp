@@ -39,18 +39,6 @@ void Launcher::launch(int lcore, void (*func)(Loader *, EFUArgs *), Loader *ld,
   assert(s == 0);
 }
 
-Launcher::Launcher(Loader *dynamic, EFUArgs *args, int input, int processing,
-                   int output) {
-  if (dynamic->detector == nullptr) {
-    cout << "Detector not loadable, no processing ..." << endl;
-    return;
-  }
-
-  launch(input, input_thread, dynamic, args);
-  launch(output, output_thread, dynamic, args);
-  launch(processing, processing_thread, dynamic, args);
-}
-
 Launcher::Launcher(Loader *dynamic, EFUArgs *args, std::vector<int>& cpus) {
   if (dynamic->detector == nullptr) {
     cout << "Detector not loadable, no processing ..." << endl;

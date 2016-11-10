@@ -5,7 +5,6 @@
 #include <getopt.h>
 #include <iostream>
 #include <string>
-#include <unistd.h>
 
 EFUArgs::EFUArgs(int argc, char *argv[]) {
   using namespace std;

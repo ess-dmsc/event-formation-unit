@@ -16,13 +16,9 @@ public:
   /** @brief Launches previously Loaded detector functions
    *  @param ld Dynamic detector object (from Loader)
    *  @param args Arguments to be passed to threads
-   *  @param lcore id for pthread affinity for input_thread
-   *  @param lcore id for pthread affinity for processing_thread
-   *  @param lcore id for pthread affinity for output_thread
-  */
-  Launcher(Loader *ld, EFUArgs *args, int input, int processing, int output);
-
-  /** @todo document */
+   *  @param cpus vector of three cpuids for launching input, processing and
+   *  output threads.
+   */
   Launcher(Loader *ld, EFUArgs *args, std::vector<int>& cpus);
 
 private:
