@@ -7,6 +7,7 @@
 
 #pragma once
 #include <efu/Loader.h>
+#include <vector>
 
 class EFUArgs;
 
@@ -20,6 +21,9 @@ public:
    *  @param lcore id for pthread affinity for output_thread
   */
   Launcher(Loader *ld, EFUArgs *args, int input, int processing, int output);
+
+  /** @todo document */
+  Launcher(Loader *ld, EFUArgs *args, std::vector<int>& cpus);
 
 private:
   static void input_thread(Loader *load, EFUArgs *args);

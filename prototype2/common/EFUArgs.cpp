@@ -14,6 +14,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
     static struct option long_options[] = {
         {"help", no_argument, 0, 'h'},
         {"broker", required_argument, 0, 'b'},
+        {"cpu", required_argument, 0, 'c'},
         {"det", required_argument, 0, 'd'},
         {"dip", required_argument, 0, 'i'},
         {"packets", required_argument, 0, 'n'},
@@ -22,7 +23,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    int c = getopt_long(argc, argv, "b:d:i:p:s:h", long_options, &option_index);
+    int c = getopt_long(argc, argv, "b:c:d:i:p:s:h", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -32,6 +33,9 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
         break;
     case 'b':
       broker.assign(optarg);
+      break;
+    case 'c':
+      cpustart = atoi(optarg);
       break;
     case 'd':
       det.assign(optarg);
@@ -48,7 +52,8 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
     case 'h':
     default:
       printf("Usage: efu2 [OPTIONS]\n");
-      printf(" --broker, -b broker      Kafka broker string \n");
+      printf(" --broker, -b broker     Kafka broker string \n");
+      printf(" --cpu, -c lcore         lcore id of first thread \n");
       printf(" --det -d name           detector name \n");
       printf(" --dip, -i ipaddr        ip address of receive interface \n");
       printf(" --port -p port          udp port \n");
@@ -59,6 +64,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
   }
   cout << "Starting event processing pipeline2" << endl;
   cout << "  Detector:     " << det << endl;
+  cout << "  CPU Offset:   " << cpustart << endl;
   cout << "  IP addr:      " << ip_addr << endl;
   cout << "  Kafka broker: " << broker << endl;
   cout << "  UDP Port:     " << port << endl;
