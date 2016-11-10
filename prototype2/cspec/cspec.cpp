@@ -65,7 +65,7 @@ private:
 };
 
 CSPEC::CSPEC() {
-  XTRACE(TRC_G_INIT, INF, "Creating CSPEC ringbuffers %d\n", 5); /** @todo make this work */
+  XTRACE(INIT, INF, "Creating CSPEC ringbuffers %d\n", 5); /** @todo make this work */
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
   event_ringbuf = new RingBuffer<event_buffer_size>(event_buffer_max_entries);
 }
@@ -98,14 +98,14 @@ void CSPEC::input_thread(void *args) {
 
     /** this is the processing step */
     if ((rdsize = cspecdata.receive(eth_ringbuf->getdatabuffer(eth_index), eth_ringbuf->getmaxbufsize())) > 0) {
-      XTRACE(TRC_G_INPUT, DEB, "rdsize: %u\n", rdsize);
+      XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
       rxp++;
       rx += rdsize;
       eth_ringbuf->setdatalength(eth_index, rdsize);
 
       if (input2proc_fifo.push(eth_index) == false) {
         ioverflow++;
-        XTRACE(TRC_G_INPUT, WAR, "Overflow :%lu\n", ioverflow);
+        XTRACE(INPUT, WAR, "Overflow :%lu\n", ioverflow);
       } else {
         eth_ringbuf->nextbuffer();
       }

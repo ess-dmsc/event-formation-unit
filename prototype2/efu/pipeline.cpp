@@ -1,6 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source ERIC*/
 
 #include <common/EFUArgs.h>
+#include <common/Trace.h>
 #include <efu/Launcher.h>
 #include <iostream>
 #include <libs/include/Timer.h>
@@ -15,7 +16,7 @@ int main(int argc, char *argv[]) {
 
   EFUArgs opts(argc, argv);
 
-  cout << "Launching EFU as Instrument " << opts.det << endl;
+  XTRACE(INIT, ALW, "Launching EFU as Instrument %s\n", opts.det.c_str());
 
   Loader dynamic(opts.det);
 
@@ -26,7 +27,7 @@ int main(int argc, char *argv[]) {
     sleep(2);
   }
   sleep(2);
-  printf("Exiting...\n");
+  XTRACE(INIT, ALW, "Exiting...\n");
   exit(1);
   return 0;
 }
