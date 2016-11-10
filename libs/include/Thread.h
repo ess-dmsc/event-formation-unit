@@ -17,5 +17,4 @@ private:
 
   int lcore_;
   std::thread t_;
-  void *args_;
 };

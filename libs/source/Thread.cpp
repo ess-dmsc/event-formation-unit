@@ -14,7 +14,8 @@ Thread::Thread(int lcore, void (*func)(void *a), void *arg) : lcore_(lcore) {
   affinity(lcore);
 }
 
-void Thread::affinity(int lcore) {
+void Thread::affinity(int __attribute__((unused)) lcore) {
+#ifdef __linux__
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
   CPU_SET(lcore, &cpuset);
@@ -25,4 +26,7 @@ void Thread::affinity(int lcore) {
     std::cout << "thread affinity error" << std::endl;
     exit(1);
   }
+#else
+#pragma message ("No thread affinity implemented on Mac OS X")
+#endif
 }
