@@ -22,7 +22,7 @@ cspec.so.inc = cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h gccinte
 
 # For each standalone program add .src and .inc and .obj below
 efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp
-efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h
+efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h common/Stats.h
 efu.obj = $(efu.src:%.cpp=%.o)
 
 gencspec.src = cspecgen/cspecgen.cpp cspecgen/CspecArgs.cpp cspec/CSPECData.cpp
@@ -46,6 +46,10 @@ all: $(progs)
 	@echo done
 	$(Q)chmod 440 *.so
 
+$(efu.obj): $(efu.inc)
+$(gencspec.obj): $(gencspec.inc)
+$(gencspecfile.obj): $(gencspecfile.inc)
+
 cspec.so: $(cspec.so.src) $(cspc.so.inc)
 	@echo building specific $@
 	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
@@ -58,14 +62,15 @@ udp.so: $(udp.so.src) $(udp.so.inc)
 	@echo building specific $@
 	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
 
+
 %.o: %.cpp
 	@echo building $@
 	$(Q)$(cxx) $(cxxflags) $< -c -o $@
 
-$(library): Socket.h Timer.h Counter.h
+$(library): Socket.h TSCTimer.h Timer.h SPSCFifo.h
 	make -C ../libs
 
-efu2: $(library) $(efu.obj) $(efu.inc)
+efu2: $(library) $(efu.obj)
 	@echo building $@
 	$(Q)$(cxx) $(cxxflags) $(efu.obj) $(library) $(ldflags) -o $@
 
@@ -84,7 +89,7 @@ doxygen-clean:
 	@rm -fr doxygen doxygen.warnings
 
 prog-clean:
-	@rm -f $(efu.obj) $(progs) $(testprogs) *.o
+	@rm -f $(efu.obj) $(gencspec.obj) $(gencspecfile.obj) $(progs) $(testprogs) *.o
 
 test-clean:
 	@rm -f *.log gmon.out *.xml *.valgrind

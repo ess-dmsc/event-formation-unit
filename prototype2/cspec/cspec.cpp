@@ -44,9 +44,9 @@ public:
   void processing_thread(void *args);
   void output_thread(void *args);
 
-  static const int eth_buffer_max_entries = 100000;
+  static const int eth_buffer_max_entries = 10000;
   static const int eth_buffer_size = 9000;
-  static const int event_buffer_max_entries = 300 * eth_buffer_max_entries;
+  static const int event_buffer_max_entries = 20 * eth_buffer_max_entries;
   static const int event_buffer_size = 12;
   static const int kafka_buffer_size = 1000000;
 
@@ -96,8 +96,9 @@ void CSPEC::input_thread(void *args) {
       opts->stat.i.rx_bytes += rdsize;
       eth_ringbuf->setdatalength(eth_index, rdsize);
 
+      opts->stat.i.fifo_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
-        opts->stat.p.push_errors++;
+        opts->stat.i.push_errors++;
 
         XTRACE(INPUT, WAR, "Overflow :%lu\n", opts->stat.i.push_errors);
       } else {
@@ -147,12 +148,13 @@ void CSPEC::processing_thread(void *args) {
       opts->stat.p.rx_events += dat.elems;
       opts->stat.p.rx_discards += dat.input_filter();
 
+      opts->stat.p.fifo_free = proc2output_fifo.free();
       for (auto d : dat.data) {
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();
           dat.createevent(d, event_ringbuf->getdatabuffer(event_index));
           if (proc2output_fifo.push(event_index) == false) {
-            opts->stat.i.push_errors++;;
+            opts->stat.p.push_errors++;;
           } else {
             event_ringbuf->nextbuffer();
           }

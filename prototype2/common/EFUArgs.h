@@ -37,4 +37,5 @@ public:
 
   // Runtime Stats
   Stats stat;
+  unsigned int reportmask{0xffffffff};
 };

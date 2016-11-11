@@ -17,12 +17,13 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
         {"det", required_argument, 0, 'd'},
         {"dip", required_argument, 0, 'i'},
         {"packets", required_argument, 0, 'n'},
+        {"reports", required_argument, 0, 'r'},
         {"stopafter", required_argument, 0, 's'},
         {0, 0, 0, 0}};
 
     int option_index = 0;
 
-    int c = getopt_long(argc, argv, "b:c:d:i:p:s:h", long_options, &option_index);
+    int c = getopt_long(argc, argv, "b:c:d:i:p:r:s:h", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -44,6 +45,9 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
       break;
     case 'p':
       port = atoi(optarg);
+      break;
+    case 'r':
+      reportmask = strtoul(optarg, 0, 0);
       break;
     case 's':
       stopafter = atoi(optarg);

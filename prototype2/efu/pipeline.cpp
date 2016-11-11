@@ -29,9 +29,7 @@ int main(int argc, char *argv[]) {
   Timer stop;
   while (stop.timeus() < opts.stopafter * 1000000LU) {
 
-    opts.stat.packet_stats();
-    opts.stat.reset();
-    printf("\n");
+    opts.stat.report(opts.reportmask);
 
     sleep(1);
   }
