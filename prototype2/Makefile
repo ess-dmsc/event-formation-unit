@@ -3,7 +3,7 @@
 
 VPATH = .. ../libs/include test
 
-progs = efu2 cspecgen2 cspec.so nmx.so udp.so
+progs = efu2 gencspec gencspecfile cspec.so nmx.so udp.so
 library = ../libs/eventlib.a
 
 # For each loadable detector add its .so.src and .so.inc dependencies
@@ -25,9 +25,13 @@ efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp
 efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h
 efu.obj = $(efu.src:%.cpp=%.o)
 
-cspecgen.src = cspecgen/cspecgen.cpp cspecgen/CspecArgs.cpp cspec/CSPECData.cpp
-cspecgen.inc = cspecgen/CspecArgs.h cspec/CSPECData.h
-cspecgen.obj = $(cspecgen.src:%.cpp=%.o)
+gencspec.src = cspecgen/cspecgen.cpp cspecgen/CspecArgs.cpp cspec/CSPECData.cpp
+gencspec.inc = cspecgen/CspecArgs.h cspec/CSPECData.h
+gencspec.obj = $(gencspec.src:%.cpp=%.o)
+
+gencspecfile.src = cspecgen/cspecfile.cpp cspecgen/CspecArgs.cpp
+gencspecfile.inc = cspecgen/CspecArgs.h
+gencspecfile.obj = $(gencspecfile.src:%.cpp=%.o)
 
 .DEFAULT_GOAL = all
 
@@ -65,9 +69,13 @@ efu2: $(library) $(efu.obj) $(efu.inc)
 	@echo building $@
 	$(Q)$(cxx) $(cxxflags) $(efu.obj) $(library) $(ldflags) -o $@
 
-cspecgen2: $(library) $(cspecgen.obj) $(cspecgen.inc)
+gencspec: $(library) $(gencspec.obj) $(gencspec.inc)
 	@echo building $@
-	$(Q)$(cxx) $(cxxflags) $(cspecgen.obj) $(library) $(ldflags) -o $@
+	$(Q)$(cxx) $(cxxflags) $(gencspec.obj) $(library) $(ldflags) -o $@
+
+gencspecfile: $(library) $(gencspecfile.obj) $(gencspecfile.inc)
+	@echo building $@
+	$(Q)$(cxx) $(gencspecfile.obj) $(library) $(ldflags) -o $@
 
 realclean: clean
 	make -C ../libs clean

@@ -14,6 +14,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
   int c;
   while (1) {
     static struct option long_options[] = {
+        {"filename", required_argument, 0, 'f'},
         {"ipaddr", required_argument, 0, 'i'},
         {"data", required_argument, 0, 'd'},
         {"packets", required_argument, 0, 'a'},
@@ -27,7 +28,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:d:i:p:s:t:u:hx", long_options,
+    c = getopt_long(argc, argv, "a:d:f:i:p:s:t:u:hx", long_options,
                     &option_index);
 
     if (c == -1)
@@ -41,6 +42,9 @@ DGArgs::DGArgs(int argc, char *argv[]) {
       break;
     case 'd':
       buflen = atoi(optarg);
+      break;
+    case 'f':
+      filename.assign(optarg);
       break;
     case 'i':
       dest_ip.assign(optarg);
@@ -63,6 +67,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
     case 'h':
     default:
       printf("Usage: bulkdatagen [OPTIONS] \n");
+      printf(" --filename -f name     read data from file \n");
       printf(" --throttle -t val      speed throttle (0 fastest, then slower) "
              "\n");
       printf(" --size -s size         size in GB of transmitted data \n");
@@ -78,6 +83,8 @@ DGArgs::DGArgs(int argc, char *argv[]) {
     }
   }
   printf("Generating a bulk data stream\n");
+  if (!filename.empty())
+    printf("  from file:              %s", filename.c_str());
   printf("  number of bytes:        %d GB\n", txGB);
   printf("  number of packets:      %" PRIu64 " packets\n", txPkt);
   printf("  speed throttle:         %d\n", speed_level);

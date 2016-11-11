@@ -16,6 +16,8 @@ public:
    */
   DGArgs(int argc, char *argv[]);
 
+  std::string filename{""}; /**< read data from file */
+
   unsigned int txGB{10}; /**< total transmit size (GB) */
   uint64_t txPkt{0xffffffffffffffff};
 
