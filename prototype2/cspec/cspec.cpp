@@ -82,15 +82,8 @@ void CSPEC::input_thread(void *args) {
   cspecdata.printbuffers();
   cspecdata.settimeout(0, 100000); // One tenth of a second
 
-  /** Buffer and stats setup */
-
-  uint64_t rx = 0;
-  uint64_t rx_total = 0;
-  uint64_t rxp = 0;
-  uint64_t ioverflow = 0;
   int rdsize;
-
-  Timer us_clock, stop_timer;
+  Timer stop_timer;
   TSCTimer report_timer;
   for (;;) {
 
@@ -99,54 +92,36 @@ void CSPEC::input_thread(void *args) {
     /** this is the processing step */
     if ((rdsize = cspecdata.receive(eth_ringbuf->getdatabuffer(eth_index), eth_ringbuf->getmaxbufsize())) > 0) {
       XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
-      rxp++;
-      rx += rdsize;
+      opts->stat.i.rx_packets++;
+      opts->stat.i.rx_bytes += rdsize;
       eth_ringbuf->setdatalength(eth_index, rdsize);
 
       if (input2proc_fifo.push(eth_index) == false) {
-        ioverflow++;
-        XTRACE(INPUT, WAR, "Overflow :%lu\n", ioverflow);
+        opts->stat.p.push_errors++;
+
+        XTRACE(INPUT, WAR, "Overflow :%lu\n", opts->stat.i.push_errors);
       } else {
         eth_ringbuf->nextbuffer();
       }
     }
 
-    /** This is the periodic reporting*/
+
+   // Checking for exit
    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-      auto usecs = us_clock.timeus();
-      rx_total += rx;
-
-      cout_mutex.lock();
-      printf("%" PRIu64 " input     : %8.2f Mb/s, q1: %3d, rxpkt: %12" PRIu64
-             ", rxbytes: %12" PRIu64 ", push errors: %" PRIu64 "\n",
-             report_timer.timetsc(), rx * 8.0 / usecs, 0, rxp, rx_total,
-             ioverflow);
-      fflush(stdout);
-      cout_mutex.unlock();
-
-      us_clock.now();
-      report_timer.now();
-      rx = 0;
 
       if (stop_timer.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping input thread, timeus " << stop_timer.timeus()
                   << std::endl;
         return;
       }
+      report_timer.now();
     }
   }
 }
 
+
 void CSPEC::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
-
-  unsigned int data_index;
-
-  uint64_t ierror = 0;
-  uint64_t oerror = 0;
-  uint64_t idata = 0;
-  uint64_t iidle = 0;
-  uint64_t idisc = 0;
 
   CSPECChanConv conv;
   conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear look-up table
@@ -157,27 +132,27 @@ void CSPEC::processing_thread(void *args) {
   // CSPECData dat(0, 0, &conv, &CSPEC); // Custom signal thresholds
   CSPECData dat(&conv, &CSPEC); // Default signal thresholds
 
-  Timer us_clock, stopafter_clock;
+  Timer stopafter_clock;
   TSCTimer report_timer;
 
-  uint64_t eventcount = 0;
+  unsigned int data_index;
   while (1) {
 
     if ((input2proc_fifo.pop(data_index)) == false) {
-      iidle++;
+      opts->stat.p.idle++;
       usleep(10);
     } else {
       dat.receive(eth_ringbuf->getdatabuffer(data_index), eth_ringbuf->getdatalength(data_index));
-      ierror += dat.error;
-      idata += dat.elems;
-      idisc += dat.input_filter();
+      opts->stat.p.rx_errors += dat.error;
+      opts->stat.p.rx_events += dat.elems;
+      opts->stat.p.rx_discards += dat.input_filter();
 
       for (auto d : dat.data) {
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();
           dat.createevent(d, event_ringbuf->getdatabuffer(event_index));
           if (proc2output_fifo.push(event_index) == false) {
-            oerror++;
+            opts->stat.i.push_errors++;;
           } else {
             event_ringbuf->nextbuffer();
           }
@@ -185,27 +160,14 @@ void CSPEC::processing_thread(void *args) {
       }
     }
 
-    /** This is the periodic reporting*/
+    // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-      auto usecs = us_clock.timeus();
-      auto rate = idata - eventcount;
-      cout_mutex.lock();
-      printf("%" PRIu64 " processing: idle: %" PRIu64 ", errors: %" PRIu64
-             ", discard: %" PRIu64 ", events: %" PRIu64 ", kevts/s: %" PRIu64
-             " , push errors: %" PRIu64 "\n",
-             report_timer.timetsc(), iidle, ierror, idisc, idata, rate*1000/usecs,
-             oerror);
-      fflush(stdout);
-      cout_mutex.unlock();
-
-      eventcount = idata;
-      us_clock.now();
-      report_timer.now();
 
       if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping processing thread, timeus " << std::endl;
         return;
       }
+      report_timer.now();
     }
   }
 }
@@ -219,18 +181,16 @@ void CSPEC::output_thread(void *args) {
 
   unsigned int event_index;
   Timer stop;
-  TSCTimer report_timer2;
+  TSCTimer report_timer;
 
-  uint64_t rxevents = 0;
   uint64_t produce = 0;
-  uint64_t idle = 0;
   while (1) {
     if (proc2output_fifo.pop(event_index) == false) {
-      idle++;
+      opts->stat.o.idle++;
       usleep(10);
     } else {
       std::memcpy(kafkabuffer + produce, event_ringbuf->getdatabuffer(event_index), 8 /**< @todo not hardcode */ );
-      rxevents++;
+      opts->stat.o.rx_events++;
       produce += 12; /**< @todo should match actual data size */
     }
 
@@ -239,28 +199,20 @@ void CSPEC::output_thread(void *args) {
       assert(produce < kafka_buffer_size);
 #ifndef NOKAFKA
       producer.produce(kafkabuffer, kafka_buffer_size);
+      opts->stat.o.tx_bytes += kafka_buffer_size;
 #endif
       produce = 0;
     }
 
-    /** This is the periodic reporting*/
-
-    if (unlikely(
-            (report_timer2.timetsc() >= opts->updint * 1000000 * TSC_MHZ))) {
-      cout_mutex.lock();
-      printf("%" PRIu64 " output    : events: %" PRIu64 ", idle: %" PRIu64
-             " \n",
-             report_timer2.timetsc(), rxevents, idle);
-      fflush(stdout);
-      cout_mutex.unlock();
-
-      report_timer2.now();
+    /** Cheking for exit*/
+    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
       if (stop.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping output thread, timeus " << stop.timeus()
                   << std::endl;
         return;
       }
+      report_timer.now();
     }
   }
 }

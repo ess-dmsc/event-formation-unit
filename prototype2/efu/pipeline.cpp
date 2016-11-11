@@ -8,6 +8,8 @@
 #include <unistd.h> // sleep()
 #include <vector>
 
+
+
 /**
  * Load detector, launch pipeline threads, then sleep forever
  */
@@ -26,8 +28,14 @@ int main(int argc, char *argv[]) {
 
   Timer stop;
   while (stop.timeus() < opts.stopafter * 1000000LU) {
-    sleep(2);
+
+    opts.stat.packet_stats();
+    opts.stat.reset();
+    printf("\n");
+
+    sleep(1);
   }
+
   sleep(2);
   XTRACE(INIT, ALW, "Exiting...\n");
   exit(1);

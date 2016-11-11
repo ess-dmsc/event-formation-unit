@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include <common/Stats.h>
 #include <string>
 
 class EFUArgs {
@@ -33,4 +34,7 @@ public:
 
   // NMX OPTIONS
   int reduction{80}; /**< data tuples in a cluster */
+
+  // Runtime Stats
+  Stats stat;
 };
