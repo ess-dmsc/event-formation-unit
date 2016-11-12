@@ -27,8 +27,8 @@ cspec.so.src = cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp  comm
 cspec.so.inc = cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h gccintel.h common/Producer.h common/Trace.h
 
 # For each standalone program add .src and .inc and .obj below
-efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp
-efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h common/Stats.h
+efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp efu/Server.cpp
+efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h common/Stats.h efu/Server.h
 efu.obj = $(efu.src:%.cpp=%.o)
 
 gencspec.src = cspecgen/cspecgen.cpp cspecgen/CspecArgs.cpp cspec/CSPECData.cpp

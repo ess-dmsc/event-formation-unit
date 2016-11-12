@@ -3,6 +3,7 @@
 #include <common/EFUArgs.h>
 #include <common/Trace.h>
 #include <efu/Launcher.h>
+#include <efu/Server.h>
 #include <iostream>
 #include <libs/include/Timer.h>
 #include <unistd.h> // sleep()
@@ -26,16 +27,26 @@ int main(int argc, char *argv[]) {
   //Launcher(&dynamic, &opts, 12, 13, 14);
   Launcher(&dynamic, &opts, cpus);
 
-  Timer stop;
-  while (stop.timeus() < opts.stopafter * 1000000LU) {
+  Server cmdAPI(8888);
 
-    opts.stat.report(opts.reportmask);
+  Timer stop, report;
+  while (1) {
+    if (stop.timeus() >= opts.stopafter * 1000000LU) {
+      sleep(2);
+      XTRACE(INIT, ALW, "Exiting...\n");
+      exit(1);
+    }
 
-    sleep(1);
+    if (report.timeus() >= 1000000U) {
+      opts.stat.report(opts.reportmask);
+      report.now();
+    }
+
+    cmdAPI.server_poll();
+
+    usleep(100000);
   }
 
-  sleep(2);
-  XTRACE(INIT, ALW, "Exiting...\n");
-  exit(1);
+
   return 0;
 }

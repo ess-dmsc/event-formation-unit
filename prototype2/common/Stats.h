@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief runtime statistics 
+ *  @brief runtime statistics
  */
 
 #pragma once
@@ -108,7 +108,7 @@ public:
     uint64_t idle;
     uint64_t tx_bytes;
   } output_stat_t;
- 
+
   input_stat_t i, ib;
   processing_stat_t p, pb;
   output_stat_t o, ob;
