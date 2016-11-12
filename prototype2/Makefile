@@ -3,6 +3,10 @@
 
 .SUFFIXES:
 
+ifndef _ARCH
+  _ARCH := $(shell uname -s)
+endif
+
 VPATH = .. ../libs/include test
 
 progs = efu2 gencspec gencspecfile cspec.so nmx.so udp.so
