@@ -68,7 +68,8 @@ public:
 
 
   void report(unsigned int mask) {
-    printf("%5" PRIu64 , time.timeus()/1000000);
+    if (mask)
+      printf("%5" PRIu64 , time.timeus()/1000000);
     if (mask & 0x01)
       packet_stats();
 
@@ -78,7 +79,8 @@ public:
     if (mask & 0x04)
       fifo_stats();
 
-    printf("\n");
+    if (mask)
+      printf("\n");
     reset();
   }
 

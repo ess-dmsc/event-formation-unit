@@ -1,6 +1,8 @@
 # Copyright (C) 2016 European Spallation Source ERIC
 #
 
+.SUFFIXES:
+
 VPATH = .. ../libs/include test
 
 progs = efu2 gencspec gencspecfile cspec.so nmx.so udp.so

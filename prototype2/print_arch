@@ -1,0 +1,15 @@
+#/bin/bash
+
+OS=unknown
+
+ARCH=$(uname -s)
+
+if [[ $ARCH == "Darwin" ]]; then
+OS=MAC
+fi
+
+if [[ $ARCH == "Linux" ]]; then
+OS=LINUX
+fi
+
+echo $OS

@@ -8,7 +8,7 @@
 #include <libs/include/TSCTimer.h>
 #include <unistd.h>
 
-const int TSC_MHZ = 2900;
+//const int TSC_MHZ = 2900;
 
 int main(int argc, char *argv[]) {
   DGArgs opts(argc, argv);

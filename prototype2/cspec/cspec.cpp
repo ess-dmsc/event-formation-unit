@@ -100,7 +100,7 @@ void CSPEC::input_thread(void *args) {
       if (input2proc_fifo.push(eth_index) == false) {
         opts->stat.i.push_errors++;
 
-        XTRACE(INPUT, WAR, "Overflow :%lu\n", opts->stat.i.push_errors);
+        XTRACE(INPUT, WAR, "Overflow :%" PRIu64 "\n", opts->stat.i.push_errors);
       } else {
         eth_ringbuf->nextbuffer();
       }
