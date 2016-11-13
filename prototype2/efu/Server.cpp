@@ -17,8 +17,11 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
+
 void Server::server_close() {
-  XTRACE(MAIN, ALW, "Closing socket %d\n", sock_client);
+  XTRACE(IPC, DEB, "Closing socket fd %d\n", sock_client);
   close(sock_client);
   sock_client = -1;
 }
@@ -26,7 +29,7 @@ void Server::server_close() {
 /** @brief Setup socket parameters
  */
 void Server::server_open() {
-  XTRACE(INIT, ALW, "Server::open() called on port %d\n", port_);
+  XTRACE(IPC, INF, "Server::open() called on port %d\n", port_);
 
   struct sockaddr_in socket_address;
   int ret;
@@ -73,37 +76,64 @@ void Server::server_poll() {
     return;
   }
 
-  // Server activity
+  // Server has activity
   if (ready > 0 && FD_ISSET(sock_server, &fd_working)) {
-    XTRACE(MAIN, ALW, "Incoming connection\n");
     if (sock_client < 0) {
+      XTRACE(IPC, INF, "Incoming connection\n");
       sock_client = accept(sock_server, NULL, NULL);
       if (sock_client < 0 && errno != EWOULDBLOCK) {
         assert(1 == 0);
       }
       FD_SET(sock_client, &fd_master);
-      XTRACE(MAIN, ALW, "sock_client: %d, ready: %d\n", sock_client, ready);
+      XTRACE(IPC, DEB, "sock_client: %d, ready: %d\n", sock_client, ready);
       ready--;
     }
   }
 
-  // Client activity
+  // Client has activity
   if (ready > 0 && FD_ISSET(sock_client, &fd_working)) {
     auto bytes = recv(sock_client, input.data + input.bytes, 9000 - input.bytes, 0);
 
     if ((bytes < 0) && (errno != EWOULDBLOCK || errno != EAGAIN)) {
-      XTRACE(MAIN, ALW, "recv() failed, errno: %d\n", errno);
+      XTRACE(IPC, WAR, "recv() failed, errno: %d\n", errno);
       perror("recv() failed");
       server_close();
       return;
     }
     if (bytes == 0) {
-      XTRACE(MAIN, ALW, "peer closed socket\n");
+      XTRACE(IPC, INF, "Peer closed socket\n");
       server_close();
       return;
     }
-    XTRACE(MAIN, ALW, "Received %ld bytes on socket %d\n", bytes, sock_client);
+    XTRACE(IPC, INF, "Received %ld bytes on socket %d\n", bytes, sock_client);
     input.bytes += bytes;
+
+    auto min = std::min(input.bytes, 9000U - 1U);
+    input.buffer[min] = '\0';
+    XTRACE(IPC, DEB, "buffer[] = %s", input.buffer);
+
     assert(input.bytes <= 9000);
+    XTRACE(IPC, DEB, "input.bytes: %d\n", input.bytes);
+
+    // Parse and generate reply
+    memcpy(output.buffer, input.buffer, input.bytes);
+    input.bytes = 0;
+    input.data = input.buffer;
+    if (server_send() < 0) {
+      server_close();
+      return;
+    }
+    ready--;
   }
+}
+
+
+int Server::server_send() {
+  if (send(sock_client, output.buffer, output.bytes, 0) < 0) {
+    XTRACE(MAIN, WAR, "Error sending command reply\n");
+    return -1;
+  }
+  output.bytes = 0;
+  output.data = output.buffer;
+  return 0;
 }

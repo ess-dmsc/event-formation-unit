@@ -9,8 +9,6 @@
 #include <unistd.h> // sleep()
 #include <vector>
 
-
-
 /**
  * Load detector, launch pipeline threads, then sleep forever
  */
@@ -20,12 +18,12 @@ int main(int argc, char *argv[]) {
 
   XTRACE(INIT, ALW, "Launching EFU as Instrument %s\n", opts.det.c_str());
 
-  Loader dynamic(opts.det);
+  Loader detector(opts.det);
 
   std::vector<int> cpus = {opts.cpustart, opts.cpustart + 1, opts.cpustart + 2};
 
   //Launcher(&dynamic, &opts, 12, 13, 14);
-  Launcher(&dynamic, &opts, cpus);
+  Launcher(&detector, &opts, cpus);
 
   Server cmdAPI(8888);
 
@@ -44,7 +42,7 @@ int main(int argc, char *argv[]) {
 
     cmdAPI.server_poll();
 
-    usleep(100000);
+    usleep(1000);
   }
 
 

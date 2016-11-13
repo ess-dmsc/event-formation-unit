@@ -39,6 +39,10 @@ public:
    */
   void server_poll();
 
+  /** @brief Send reply to Client
+   */
+  int server_send();
+
 private:
   typedef struct {
     uint8_t buffer[9000];

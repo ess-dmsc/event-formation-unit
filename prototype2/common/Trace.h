@@ -11,10 +11,11 @@
 #define TRC_G_PROCESS 0x00000004U
 #define TRC_G_MAIN    0x00000008U
 #define TRC_G_INIT    0x00000010U
+#define TRC_G_IPC     0x00000020U
 
 /** Add trace masks below, bitwise or of grouops */
 #define TRC_M_ALL (TRC_G_INPUT | TRC_G_OUTPUT | TRC_G_PROCESS | TRC_G_MAIN | \
-                  TRC_G_INIT)
+                   TRC_G_INIT   | TRC_G_IPC )
 
 /** Do not edit below */
 #define TRC_M_NONE 0
