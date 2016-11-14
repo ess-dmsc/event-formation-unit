@@ -56,9 +56,9 @@ private:
 
   /** @todo comment */
   void fifo_stats() {
-    printf(" | I - %12" PRIu64 " fifo free" \
-           " | P - %12" PRIu64 " fifo free"
-           , i.fifo_free, p.fifo_free);
+    printf(" | Fifo I - %6" PRIu64 " free, %10" PRIu64 " pusherr" \
+           " | P - %12" PRIu64 " fifo free, %10" PRIu64 " pusherr"
+           , i.fifo_free, i.push_errors, p.fifo_free, p.push_errors);
   }
 
 public:
