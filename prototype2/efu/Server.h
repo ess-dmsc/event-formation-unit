@@ -10,11 +10,12 @@
 #include <sys/types.h>
 #include <sys/select.h>
 
+/** @todo make this work with public static unsigned int */
+#define SERVER_BUFFER_SIZE 9000U
+
 class Server {
-
 public:
-
-  /** @brief Server for program control and stats
+    /** @brief Server for program control and stats
    *  @param port tcp port
    */
   Server(int port) : port_(port) {
@@ -43,9 +44,13 @@ public:
    */
   int server_send();
 
+  /** @brief Parse request and generate reply
+   */
+  int server_parse();
+
 private:
   typedef struct {
-    uint8_t buffer[9000];
+    uint8_t buffer[SERVER_BUFFER_SIZE + 1];
     uint8_t *data;
     uint32_t bytes;
   } socket_buffer_t;

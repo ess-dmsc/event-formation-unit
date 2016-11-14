@@ -42,5 +42,5 @@
 
 #define XTRACE(group, level, fmt, ...) \
     (void)(((TRC_L_ ## level >= TRC_LEVEL) && (TRC_MASK & TRC_G_ ##group)) \
-      ?  printf("%18s %5d %-s - " fmt, __FILE__, __LINE__, #group, ##__VA_ARGS__) \
+      ?  printf("%-3s %18s %5d %-s - " fmt, #level, __FILE__, __LINE__, #group, ##__VA_ARGS__) \
       :  0)

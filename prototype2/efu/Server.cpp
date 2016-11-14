@@ -8,17 +8,20 @@
 #include <algorithm>
 #include <arpa/inet.h>
 #include <cassert>
+#include <cinttypes>
 #include <cstdio>
 #include <common/Trace.h>
 #include <efu/Server.h>
 #include <errno.h>
 #include <netinet/in.h>
 #include <stdio.h>
+#include <string>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <vector>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_INF
 
 void Server::server_close() {
   XTRACE(IPC, DEB, "Closing socket fd %d\n", sock_client);
@@ -58,6 +61,18 @@ void Server::server_open() {
   FD_SET(sock_server, &fd_master);
 }
 
+
+int Server::server_send() {
+  XTRACE(IPC, DEB, "server_send() - %d bytes\n", output.bytes);
+  if (send(sock_client, output.buffer, output.bytes, 0) < 0) {
+    XTRACE(IPC, WAR, "Error sending command reply\n");
+    return -1;
+  }
+  output.bytes = 0;
+  output.data = output.buffer;
+  return 0;
+}
+
 /** @brief Called in main program loop
  */
 void Server::server_poll() {
@@ -92,7 +107,7 @@ void Server::server_poll() {
 
   // Client has activity
   if (ready > 0 && FD_ISSET(sock_client, &fd_working)) {
-    auto bytes = recv(sock_client, input.data + input.bytes, 9000 - input.bytes, 0);
+    auto bytes = recv(sock_client, input.data + input.bytes, SERVER_BUFFER_SIZE - input.bytes, 0);
 
     if ((bytes < 0) && (errno != EWOULDBLOCK || errno != EAGAIN)) {
       XTRACE(IPC, WAR, "recv() failed, errno: %d\n", errno);
@@ -108,18 +123,20 @@ void Server::server_poll() {
     XTRACE(IPC, INF, "Received %ld bytes on socket %d\n", bytes, sock_client);
     input.bytes += bytes;
 
-    auto min = std::min(input.bytes, 9000U - 1U);
+    auto min = std::min(input.bytes, SERVER_BUFFER_SIZE - 1U);
     input.buffer[min] = '\0';
     XTRACE(IPC, DEB, "buffer[] = %s", input.buffer);
 
-    assert(input.bytes <= 9000);
+    assert(input.bytes <= SERVER_BUFFER_SIZE);
     XTRACE(IPC, DEB, "input.bytes: %d\n", input.bytes);
 
     // Parse and generate reply
-    memcpy(output.buffer, input.buffer, input.bytes);
+    server_parse();
+
     input.bytes = 0;
     input.data = input.buffer;
     if (server_send() < 0) {
+      XTRACE(IPC, WAR, "server_send() failed\n");
       server_close();
       return;
     }
@@ -127,13 +144,45 @@ void Server::server_poll() {
   }
 }
 
-
-int Server::server_send() {
-  if (send(sock_client, output.buffer, output.bytes, 0) < 0) {
-    XTRACE(MAIN, WAR, "Error sending command reply\n");
-    return -1;
+int Server::server_parse() {
+  auto max = std::max(input.bytes, SERVER_BUFFER_SIZE);
+  assert(max > 1);
+  if (input.buffer[max - 1] != '\0') {
+    XTRACE(IPC, DEB, "Array is NOT null terminated!\n");
+    input.buffer[max -1] = '\0';
   }
-  output.bytes = 0;
-  output.data = output.buffer;
+  if (input.buffer[max - 2] == '\n') {
+    XTRACE(IPC, DEB, "Array conatains newline\n");
+    input.buffer[max -2] = '\0';
+  }
+
+
+  std::vector<std::string> tokens;
+  char * chars_array = strtok((char*)input.buffer, "\n ");
+  while(chars_array)
+  {
+    std::string token(chars_array);
+    tokens.push_back(token);
+    chars_array = strtok(NULL, "\n ");
+  }
+  XTRACE(IPC, DEB, "Tokens in command: %d\n", (int)tokens.size());
+  for (auto token : tokens) {
+    XTRACE(IPC, DEB, "Token: %s\n", token.c_str());
+  }
+
+  if (tokens.at(0).compare(std::string("STAT_INPUT")) == 0) {
+    XTRACE(IPC, INF, "STAT_INPUT\n");
+    output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE, "STAT_INPUT %" PRIu64 ", %" PRIu64 "\n", 0ULL, 0ULL);
+  } else if (tokens.at(0).compare(std::string("STAT_RESET")) == 0) {
+    XTRACE(IPC, INF, "STAT_RESET\n");
+    output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE, "<OK>\n");
+  } else if (tokens.at(0).compare(std::string("STAT_MASK")) == 0) {
+      unsigned int mask = std::stoul(tokens.at(1), nullptr, 0);
+      XTRACE(IPC, INF, "STAT_MASK 0x%08x\n", mask);
+      output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE, "<OK>\n");
+  } else {
+    XTRACE(IPC, WAR, "Unknown command: %s\n", tokens.at(0).c_str());
+    output.bytes = snprintf((char*)output.buffer, SERVER_BUFFER_SIZE, "Unknown command: %s\n", tokens.at(0).c_str());
+  }
   return 0;
 }
