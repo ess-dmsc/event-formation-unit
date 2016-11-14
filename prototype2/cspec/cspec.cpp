@@ -99,9 +99,9 @@ void CSPEC::input_thread(void *args) {
 
       opts->stat.i.fifo_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
-        opts->stat.i.push_errors++;
+        opts->stat.i.fifo_push_errors++;
 
-        XTRACE(INPUT, WAR, "Overflow :%" PRIu64 "\n", opts->stat.i.push_errors);
+        XTRACE(INPUT, WAR, "Overflow :%" PRIu64 "\n", opts->stat.i.fifo_push_errors);
       } else {
         eth_ringbuf->nextbuffer();
       }
@@ -155,7 +155,8 @@ void CSPEC::processing_thread(void *args) {
           unsigned int event_index = event_ringbuf->getindex();
           dat.createevent(d, event_ringbuf->getdatabuffer(event_index));
           if (proc2output_fifo.push(event_index) == false) {
-            opts->stat.p.push_errors++;;
+            opts->stat.p.fifo_push_errors++;
+            XTRACE(PROCESS, WAR, "Overflow :%" PRIu64 "\n", opts->stat.p.fifo_push_errors);
           } else {
             event_ringbuf->nextbuffer();
           }
