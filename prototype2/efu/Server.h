@@ -7,6 +7,7 @@
 
 #pragma once
 #include <algorithm>
+#include <common/EFUArgs.h>
 #include <sys/types.h>
 #include <sys/select.h>
 
@@ -18,7 +19,9 @@ public:
     /** @brief Server for program control and stats
    *  @param port tcp port
    */
-  Server(int port) : port_(port) {
+  Server(int port, EFUArgs & args)
+        : port_(port)
+        , opts(args) {
     FD_ZERO(&fd_master);
     FD_ZERO(&fd_working);
     std::fill_n((char*)&input, sizeof(input), 0);
@@ -62,4 +65,6 @@ private:
   int sock_server{-1};
   int sock_client{-1};
   fd_set fd_master, fd_working;
+
+  EFUArgs & opts; /** @todo dont like this */
 };

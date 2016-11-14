@@ -47,7 +47,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
       port = atoi(optarg);
       break;
     case 'r':
-      reportmask = strtoul(optarg, 0, 0);
+      reportmask = (unsigned int)strtoul(optarg, 0, 0);
       break;
     case 's':
       stopafter = atoi(optarg);

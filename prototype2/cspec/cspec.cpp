@@ -44,9 +44,9 @@ public:
   void processing_thread(void *args);
   void output_thread(void *args);
 
-  static const int eth_buffer_max_entries = 10000;
+  static const int eth_buffer_max_entries = 100000;
   static const int eth_buffer_size = 9000;
-  static const int event_buffer_max_entries = 20 * eth_buffer_max_entries;
+  static const int event_buffer_max_entries = 300 * eth_buffer_max_entries;
   static const int event_buffer_size = 12;
   static const int kafka_buffer_size = 1000000;
 
@@ -86,7 +86,8 @@ void CSPEC::input_thread(void *args) {
   Timer stop_timer;
   TSCTimer report_timer;
   for (;;) {
-
+    //assert(opts->guard1 == 0xdeadbeef);
+    //assert(opts->guard2 == 0xdeadbabe);
     unsigned int eth_index = eth_ringbuf->getindex();
 
     /** this is the processing step */

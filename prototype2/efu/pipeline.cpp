@@ -16,27 +16,27 @@ int main(int argc, char *argv[]) {
 
   EFUArgs opts(argc, argv);
 
-  XTRACE(INIT, ALW, "Launching EFU as Instrument %s\n", opts.det.c_str());
+  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", opts.det.c_str());
 
   Loader detector(opts.det);
 
   std::vector<int> cpus = {opts.cpustart, opts.cpustart + 1, opts.cpustart + 2};
 
-  //Launcher(&dynamic, &opts, 12, 13, 14);
   Launcher(&detector, &opts, cpus);
 
-  Server cmdAPI(8888);
+  Server cmdAPI(8888, opts);
+  opts.stat.set_mask(opts.reportmask);
 
   Timer stop, report;
   while (1) {
     if (stop.timeus() >= opts.stopafter * 1000000LU) {
       sleep(2);
-      XTRACE(INIT, ALW, "Exiting...\n");
+      XTRACE(MAIN, ALW, "Exiting...\n");
       exit(1);
     }
 
     if (report.timeus() >= 1000000U) {
-      opts.stat.report(opts.reportmask);
+      opts.stat.report();
       report.now();
     }
 
@@ -44,7 +44,6 @@ int main(int argc, char *argv[]) {
 
     usleep(1000);
   }
-
 
   return 0;
 }

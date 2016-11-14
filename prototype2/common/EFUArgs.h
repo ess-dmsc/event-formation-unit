@@ -37,5 +37,7 @@ public:
 
   // Runtime Stats
   Stats stat;
+  //unsigned int guard1{0xdeadbeef};
   unsigned int reportmask{0xffffffff};
+  //unsigned int guard2{0xdeadbabe};
 };

@@ -13,6 +13,7 @@
 class Stats {
 private:
    Timer usecs_elapsed, time;
+   unsigned int report_mask{0};
 
   /** @todo comment */
   void reset() {
@@ -20,14 +21,6 @@ private:
     pb = p;
     ob = o;
     usecs_elapsed.now();
-  }
-
-  /** @todo comment */
-  void clear() {
-    std::fill_n((char*)&i, sizeof(i), 0);
-    std::fill_n((char*)&p, sizeof(p), 0);
-    std::fill_n((char*)&o, sizeof(o), 0);
-    reset();
   }
 
   /** @todo comment */
@@ -58,7 +51,7 @@ private:
   void fifo_stats() {
     printf(" | Fifo I - %6" PRIu64 " free, %10" PRIu64 " pusherr" \
            " | P - %12" PRIu64 " fifo free, %10" PRIu64 " pusherr"
-           , i.fifo_free, i.push_errors, p.fifo_free, p.push_errors);
+           , i.fifo_free, i.fifo_push_errors, p.fifo_free, p.fifo_push_errors);
   }
 
 public:
@@ -66,20 +59,33 @@ public:
   /** @todo comment */
   Stats() { clear(); }
 
+  /** @todo comment */
+  void clear() {
+    std::fill_n((char*)&i, sizeof(i), 0);
+    std::fill_n((char*)&p, sizeof(p), 0);
+    std::fill_n((char*)&o, sizeof(o), 0);
+    reset();
+  }
 
-  void report(unsigned int mask) {
-    if (mask)
+  /** @todo comment */
+   void set_mask(unsigned int mask) {
+     report_mask = mask;
+   }
+
+  void report() {
+    if (report_mask)
       printf("%5" PRIu64 , time.timeus()/1000000);
-    if (mask & 0x01)
+
+    if (report_mask & 0x01)
       packet_stats();
 
-    if (mask & 0x02)
+    if (report_mask & 0x02)
       event_stats();
 
-    if (mask & 0x04)
+    if (report_mask & 0x04)
       fifo_stats();
 
-    if (mask)
+    if (report_mask)
       printf("\n");
     reset();
   }
@@ -88,8 +94,8 @@ public:
     // Counters
     uint64_t rx_packets;
     uint64_t rx_bytes;
-    uint64_t push_errors;
-    uint64_t  fifo_free;
+    uint64_t fifo_push_errors;
+    uint64_t fifo_free;
   } input_stat_t;
 
   typedef struct {
@@ -98,8 +104,8 @@ public:
     uint64_t rx_errors;
     uint64_t rx_discards;
     uint64_t idle;
-    uint64_t push_errors;
-    uint64_t  fifo_free;
+    uint64_t fifo_push_errors;
+    uint64_t fifo_free;
   } processing_stat_t;
 
   typedef struct {
