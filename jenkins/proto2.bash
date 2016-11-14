@@ -19,13 +19,6 @@ function tools()
   gcovr --version
 }
 
-function artifacts()
-{
-  pushd artifacts
-  tar xzvf librdkafka-0.9.1.tar.gz
-  popd
-}
-
 function libs()
 {
   pushd libs
@@ -44,7 +37,7 @@ function libs_test()
 function prototype()
 {
   pushd prototype2
-  make V=y NOKAFKA=y || errexit "prototype2 build failed"
+  make V=y KAFKA_ROOT=../artifacts/librdkafka || errexit "prototype2 build failed"
   popd
 }
 
@@ -66,7 +59,6 @@ function coverage()
 
 
 tools
-artifacts
 libs
 prototype
 libs_test COV=y
