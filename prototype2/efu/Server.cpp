@@ -10,6 +10,7 @@
 #include <cassert>
 #include <cinttypes>
 #include <cstdio>
+#include <cstring>
 #include <common/Trace.h>
 #include <efu/Server.h>
 #include <errno.h>
@@ -172,7 +173,7 @@ int Server::server_parse() {
 
   if (tokens.at(0).compare(std::string("STAT_INPUT")) == 0) {
     XTRACE(IPC, INF, "STAT_INPUT\n");
-    output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE, "STAT_INPUT %" PRIu64 ", %" PRIu64 "\n", 0ULL, 0ULL);
+    output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE, "STAT_INPUT %" PRIu64 ", %" PRIu64 "\n", (uint64_t)0, (uint64_t)0);
   } else if (tokens.at(0).compare(std::string("STAT_RESET")) == 0) {
     XTRACE(IPC, INF, "STAT_RESET\n");
     output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE, "<OK>\n");
