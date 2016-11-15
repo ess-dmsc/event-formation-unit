@@ -20,6 +20,11 @@ class EFUShell(cmd.Cmd):
       res = self.driver.Ask('STAT_RESET')
       print res
 
+   def do_stats_mask(self, line):
+      'Set reporting mask'
+      res = self.driver.Ask('STAT_MASK ' + line)
+      print res
+
    def do_stats_get(self, line):
       'Clear statistics'
       res = self.driver.Ask('STAT_INPUT')

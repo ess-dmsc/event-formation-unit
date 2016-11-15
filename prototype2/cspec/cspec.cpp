@@ -44,9 +44,10 @@ public:
   void processing_thread(void *args);
   void output_thread(void *args);
 
-  static const int eth_buffer_max_entries = 100000;
+  /** @todo figure out the right size  of the .._max_entries  */
+  static const int eth_buffer_max_entries = 20000;
   static const int eth_buffer_size = 9000;
-  static const int event_buffer_max_entries = 300 * eth_buffer_max_entries;
+  static const int event_buffer_max_entries = 200 * eth_buffer_max_entries;
   static const int event_buffer_size = 12;
   static const int kafka_buffer_size = 1000000;
 
@@ -89,6 +90,7 @@ void CSPEC::input_thread(void *args) {
     //assert(opts->guard1 == 0xdeadbeef);
     //assert(opts->guard2 == 0xdeadbabe);
     unsigned int eth_index = eth_ringbuf->getindex();
+
 
     /** this is the processing step */
     if ((rdsize = cspecdata.receive(eth_ringbuf->getdatabuffer(eth_index), eth_ringbuf->getmaxbufsize())) > 0) {
@@ -142,6 +144,7 @@ void CSPEC::processing_thread(void *args) {
 
     if ((input2proc_fifo.pop(data_index)) == false) {
       opts->stat.p.idle++;
+      opts->stat.p.fifo_free = proc2output_fifo.free();
       usleep(10);
     } else {
       dat.receive(eth_ringbuf->getdatabuffer(data_index), eth_ringbuf->getdatalength(data_index));
