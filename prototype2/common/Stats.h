@@ -44,7 +44,7 @@ private:
 
     printf(" | I - %12" PRIu64 " pkts" \
            " | P - %12" PRIu64 " events, %8" PRIu64 " kev/s, %12" PRIu64 " discards, %12" PRIu64 " errors" \
-           , i.rx_packets, p.rx_events , pkeps , p.rx_discards, p.rx_errors);
+           , i.rx_packets, p.rx_events , pkeps , p.rx_discards, p.rx_error_bytes);
   }
 
   /** @todo comment */
@@ -101,7 +101,7 @@ public:
   typedef struct {
     // Counters
     uint64_t rx_events;
-    uint64_t rx_errors;
+    uint64_t rx_error_bytes;
     uint64_t rx_discards;
     uint64_t idle;
     uint64_t fifo_push_errors;

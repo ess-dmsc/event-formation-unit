@@ -188,7 +188,7 @@ int Server::server_parse() {
     output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE,
          "STAT_PROCESSING %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 \
          ", %" PRIu64 ", %" PRIu64 "\n",
-        opts.stat.p.rx_events, opts.stat.p.rx_errors, opts.stat.p.rx_discards,
+        opts.stat.p.rx_events, opts.stat.p.rx_error_bytes, opts.stat.p.rx_discards,
         opts.stat.p.idle,
         opts.stat.p.fifo_push_errors, opts.stat.p.fifo_free);
 

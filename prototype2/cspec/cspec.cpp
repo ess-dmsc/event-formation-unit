@@ -145,7 +145,7 @@ void CSPEC::processing_thread(void *args) {
       usleep(10);
     } else {
       dat.receive(eth_ringbuf->getdatabuffer(data_index), eth_ringbuf->getdatalength(data_index));
-      opts->stat.p.rx_errors += dat.error;
+      opts->stat.p.rx_error_bytes += dat.error;
       opts->stat.p.rx_events += dat.elems;
       opts->stat.p.rx_discards += dat.input_filter();
 
