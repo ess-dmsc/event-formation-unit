@@ -67,7 +67,6 @@ public:
   struct MultiGridData data[250];
   unsigned int elems{0};
   unsigned int error{0};
-  unsigned int frag{0};
 
   CSPECChanConv *chanconv{nullptr};
   MultiGridGeometry * multigridgeom{nullptr};

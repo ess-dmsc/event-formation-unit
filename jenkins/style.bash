@@ -13,8 +13,7 @@ function copyright()
     FILES=$(find . -name "*.cpp" -o -name "*.c" -o -name "*.h")
     for file in $FILES; 
     do
-        echo $file
-        head -n 1 $file | grep "Copyright" &>/dev/null || err "No copyright" 
+        head -n 1 $file | grep "Copyright" &>/dev/null || err "No copyright in $file"
     done
     echo
 }
@@ -26,8 +25,7 @@ function doxygen()
     FILES=$(find . -name "*.h")
     for file in $FILES; 
     do
-        echo $file
-        grep "@file" $file &>/dev/null || err "Missing @file description" 
+        grep "@file" $file &>/dev/null || err "Missing @file description in $file"
     done
     echo
 }
