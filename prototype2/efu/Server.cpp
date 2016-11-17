@@ -22,7 +22,7 @@
 //#include <vector>
 
 //#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_INF
+//#define TRC_LEVEL TRC_L_DEB
 
 Server::Server(int port, Parser& parse, EFUArgs &args)
      : port_(port), parser(parse), opts(args) {
@@ -149,10 +149,6 @@ void Server::server_poll() {
       }
       XTRACE(IPC, INF, "Received %ld bytes on socket %d\n", bytes, cli);
       input.bytes += bytes;
-
-      auto min = std::min(input.bytes, SERVER_BUFFER_SIZE - 1U);
-      input.buffer[min] = '\0';
-      XTRACE(IPC, DEB, "buffer[] = %s", input.buffer);
 
       assert(input.bytes <= SERVER_BUFFER_SIZE);
       XTRACE(IPC, DEB, "input.bytes: %d\n", input.bytes);

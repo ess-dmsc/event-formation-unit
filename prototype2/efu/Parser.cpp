@@ -7,8 +7,8 @@
 #include <efu/Parser.h>
 #include <efu/Server.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int * obytes) {
   if (ibytes <= 1) {

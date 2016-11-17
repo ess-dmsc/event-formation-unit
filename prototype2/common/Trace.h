@@ -41,7 +41,7 @@
 #endif
 
 #ifndef TRC_LEVEL
-#define TRC_LEVEL TRC_L_CRI
+#define TRC_LEVEL TRC_L_WAR
 #endif
 
 #define XTRACE(group, level, fmt, ...)                                         \
