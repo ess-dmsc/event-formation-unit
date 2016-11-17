@@ -52,7 +52,7 @@ void UDPRaw::input_thread(void *args) {
     if (usecs >= 1000000) {
       rx_total += rx;
       printf("Rx rate: %.2f Mbps, rx %" PRIu64 " MB (total: %" PRIu64
-             " MB) %ld usecs\n",
+             " MB) %" PRIu64 " usecs\n",
              rx * 8.0 / usecs, rx / B1M, rx_total / B1M, usecs);
       rx = 0;
       upd.now();

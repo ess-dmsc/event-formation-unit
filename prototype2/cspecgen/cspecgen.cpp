@@ -1,9 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
+#include <cinttypes>
 #include <cspec/CSPECData.h>
 #include <cspecgen/CspecArgs.h>
 #include <cstring>
-#include <inttypes.h>
 #include <iostream>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
       auto usecs = us_clock.timeus();
       tx_total += tx;
       printf("Tx rate: %8.2f Mbps, tx %5" PRIu64 " MB (total: %7" PRIu64
-             " MB) %ld usecs\n",
+             " MB) %" PRIu64 " usecs\n",
              tx * 8.0 / usecs, tx / B1M, tx_total / B1M, usecs);
       tx = 0;
       us_clock.now();

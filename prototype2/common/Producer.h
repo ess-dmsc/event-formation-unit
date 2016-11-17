@@ -29,7 +29,7 @@ public:
    *  @param buffer Pointer to char buffer containing data to be tx'ed
    *  @param length Size of buffer data in bytes
    */
-  int produce(char * buffer, int length);
+  int produce(char *buffer, int length);
 
 private:
   std::string errstr;

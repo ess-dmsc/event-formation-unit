@@ -33,6 +33,7 @@ public:
 
   bool wasEmpty() const;
   bool wasFull() const;
+  int free() const;
   bool isLockFree() const;
 
 private:
@@ -90,6 +91,16 @@ template <typename Element, size_t Size>
 bool CircularFifo<Element, Size>::wasFull() const {
   const auto next_tail = increment(_tail.load());
   return (next_tail == _head.load());
+}
+
+template <typename Element, size_t Size>
+int CircularFifo<Element, Size>::free() const {
+  size_t free;
+  if (_head.load() < _tail.load())
+    free = Size + _head.load() - _tail.load();
+  else
+    free = _head.load() - _tail.load();
+  return free;
 }
 
 template <typename Element, size_t Size>

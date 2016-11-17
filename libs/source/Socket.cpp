@@ -5,14 +5,13 @@
 #include <iostream>
 #include <libs/include/Socket.h>
 
-using namespace std;
 
 Socket::Socket(Socket::type stype) {
   auto type = (stype == Socket::type::UDP) ? SOCK_DGRAM : SOCK_STREAM;
   auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
 
   if ((s_ = socket(AF_INET, type, proto)) == -1) {
-    cout << "socket() failed" << endl;
+    std::cout << "socket() failed" << std::endl;
     exit(1);
   }
 }
@@ -27,8 +26,8 @@ int Socket::setbuffers(int sndbuf, int rcvbuf) {
 }
 
 void Socket::printbuffers(void) {
-  cout << "Socket rcv buffer size: " << getopt(SO_RCVBUF) << endl;
-  cout << "Socket snd buffer size: " << getopt(SO_SNDBUF) << endl;
+  std::cout << "Socket rcv buffer size: " << getopt(SO_RCVBUF) << std::endl;
+  std::cout << "Socket snd buffer size: " << getopt(SO_SNDBUF) << std::endl;
 }
 
 int Socket::settimeout(int seconds, int usecs) {
@@ -40,8 +39,8 @@ int Socket::settimeout(int seconds, int usecs) {
 
 int Socket::buflen(uint16_t buflen) {
   if (buflen > buflen_max) {
-    cout << "Specified buffer length " << buflen << " too large, adjusted to "
-         << buflen_max << endl;
+    std::cout << "Specified buffer length " << buflen << " too large, adjusted to "
+         << buflen_max << std::endl;
     buflen_ = buflen_max;
   } else {
     buflen_ = buflen;
@@ -57,9 +56,9 @@ void Socket::local(const char *ipaddr, int port) {
   inet_aton(ipaddr, &local_.sin_addr);
 
   // bind socket to port
-  auto ret = bind(s_, (struct sockaddr *)&local_, sizeof(local_));
+  int ret = bind(s_, (struct sockaddr *)&local_, sizeof(local_));
   if (ret != 0) {
-    cout << "bind failed - is port " << port << " already in use?" << endl;
+    std::cout << "bind failed - is port " << port << " already in use?" << std::endl;
   }
   assert(ret == 0);
 }
@@ -69,9 +68,9 @@ void Socket::remote(const char *ipaddr, int port) {
   std::memset((char *)&remote_, 0, sizeof(remote_));
   remote_.sin_family = AF_INET;
   remote_.sin_port = htons(port);
-  auto ret = inet_aton(ipaddr, &remote_.sin_addr);
+  int ret = inet_aton(ipaddr, &remote_.sin_addr);
   if (ret == 0) {
-    cout << "invalid ip address " << ipaddr << endl;
+    std::cout << "invalid ip address " << ipaddr << std::endl;
   }
   assert(ret != 0);
 }
@@ -80,7 +79,7 @@ int Socket::send() {
   int ret = sendto(s_, buffer_, buflen_, 0, (struct sockaddr *)&remote_,
                    sizeof(remote_));
   if (ret < 0) {
-    cout << "unable to send on socket" << endl;
+    std::cout << "unable to send on socket" << std::endl;
     perror("sendto");
     exit(1);
   }
@@ -92,7 +91,7 @@ int Socket::send(void *buffer, int len) {
   int ret =
       sendto(s_, buffer, len, 0, (struct sockaddr *)&remote_, sizeof(remote_));
   if (ret < 0) {
-    cout << "unable to send on socket" << endl;
+    std::cout << "unable to send on socket" << std::endl;
     perror("sendto");
     exit(1);
   }
@@ -131,7 +130,7 @@ int Socket::getopt(int option) {
   optlen = sizeof(optval);
   if ((ret = getsockopt(s_, SOL_SOCKET, option, (void *)&optval, &optlen)) <
       0) {
-    cout << "getsockopt() failed" << endl;
+    std::cout << "getsockopt() failed" << std::endl;
     return ret;
   }
   return optval;
@@ -140,7 +139,7 @@ int Socket::getopt(int option) {
 int Socket::setopt(int option, void *value, int size) {
   int ret;
   if ((ret = setsockopt(s_, SOL_SOCKET, option, value, size)) < 0) {
-    cout << "setsockopt() failed" << endl;
+    std::cout << "setsockopt() failed" << std::endl;
   }
   return ret;
 }

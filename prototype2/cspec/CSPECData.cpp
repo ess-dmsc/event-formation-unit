@@ -1,6 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
 #include <cassert>
+#include <common/Trace.h>
 #include <cspec/CSPECData.h>
 #include <cstring>
 
@@ -12,10 +13,12 @@ struct multi_grid {
   uint32_t footer;
 } __attribute__((packed));
 
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 /** @todo no error checking, assumes valid data and valid buffer
  */
-void CSPECData::createevent(const MultiGridData &data, char * buffer) {
+void CSPECData::createevent(const MultiGridData &data, char *buffer) {
   auto col = data.module;
   auto grid = chanconv->getGridId(data.d[6]);
   auto wire = chanconv->getWireId(data.d[2]);
@@ -31,53 +34,69 @@ void CSPECData::createevent(const MultiGridData &data, char * buffer) {
 int CSPECData::receive(const char *buffer, int size) {
   elems = 0;
   error = 0;
-  frag = 0;
+  enum State { hdr = 1, dat, ftr };
+  int datctr = 0;
+  uint32_t *datap = (uint32_t *)buffer;
+  int state = State::hdr;
+  int oldsize = size;
 
-  auto mgp = (struct multi_grid *)buffer;
-
-  while (size >= datasize) { // Enough data for processing
-    /** Header processing */
-    if ((mgp->header & header_mask) != header_id) {
-      error = 1;
-      break;
-    }
-    if ((mgp->header & 0xfff) != nwords) {
-      error = 1;
-      break;
-    }
-    data[elems].module = (mgp->header >> 16) & 0xff;
-
-    /** Footer processing */
-    if ((mgp->footer & header_mask) != footer_id) {
-      error = 1;
-      break;
-    }
-    data[elems].time = mgp->footer & 0x3fffffff;
-
-    /** Data processing */
-    for (int i = 0; i != 8; ++i) {
-      if ((mgp->data[i] & header_mask) != data_id) {
-        error = 1;
+  while (size >= 4) {
+    XTRACE(PROCESS, DEB, "elems: %d, size: %d, datap: %p\n", elems, size,
+           datap);
+    switch (state) {
+    // Parse Header
+    case State::hdr:
+      if (((*datap & header_mask) != header_id) ||
+          ((*datap & 0xfff) != nwords)) {
+        XTRACE(PROCESS, INF, "State::hdr - header error\n");
         break;
       }
-      data[elems].d[i] = mgp->data[i] & 0x3fff;
-    }
-    if (error)
+      XTRACE(PROCESS, DEB, "State::hdr valid data, next state State:dat\n");
+      data[elems].module = (*datap >> 16) & 0xff;
+      datctr = 0;
+      state = State::dat;
       break;
 
-    // At this point we have a full dataset
-    elems++;
-    size -= datasize;
-    mgp++;
-  }
+    // Parse Data
+    case State::dat:
+      if ((*datap & header_mask) != data_id) {
+        XTRACE(PROCESS, INF, "State::dat - header error\n");
+        state = State::hdr;
+        break;
+      }
+      XTRACE(PROCESS, DEB, "State::dat valid data (%d), next state State:dat\n",
+             datctr);
+      data[elems].d[datctr] = (*datap) & 0x3fff;
+      datctr++;
+      if (datctr == 8) {
+        XTRACE(PROCESS, DEB, "State:dat all data, next state State:ftr\n");
+        state = State::ftr;
+      }
+      break;
 
-  if (error) {
-    return elems;
-  }
+    // Parse Footer
+    case State::ftr:
+      if ((*datap & header_mask) != footer_id) {
+        XTRACE(PROCESS, INF, "State::ftr - header error\n");
+        state = State::hdr;
+        break;
+      }
+      XTRACE(PROCESS, DEB, "State::ftr valid data, next state State:hdr\n");
+      data[elems].time = (*datap) & 0x3fffffff;
+      elems++;
+      state = State::hdr;
+      break;
 
-  if (size != 0) {
-    frag = 1;
+    // MUST not happen
+    default:
+      assert(1 == 0);
+      break;
+    }
+    size -= 4; // Parse 32 bit at a time
+    datap++;
   }
+  error = oldsize - (elems * datasize);
+
   return elems;
 }
 
@@ -108,7 +127,6 @@ int CSPECData::input_filter() {
   }
   return discarded;
 }
-
 
 /** First multi grid data generator - valid headers, custom
  * wire and grid adc values. Only used in google test - can

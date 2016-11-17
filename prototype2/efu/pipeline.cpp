@@ -1,12 +1,14 @@
 /** Copyright (C) 2016 European Spallation Source ERIC*/
 
 #include <common/EFUArgs.h>
+#include <common/Trace.h>
 #include <efu/Launcher.h>
+#include <efu/Parser.h>
+#include <efu/Server.h>
 #include <iostream>
 #include <libs/include/Timer.h>
 #include <unistd.h> // sleep()
-
-using namespace std;
+#include <vector>
 
 /**
  * Load detector, launch pipeline threads, then sleep forever
@@ -14,19 +16,36 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
   EFUArgs opts(argc, argv);
+  opts.stat.set_mask(opts.reportmask);
 
-  cout << "Launching EFU as Instrument " << opts.det << endl;
+  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", opts.det.c_str());
 
-  Loader dynamic(opts.det);
+  Loader detector(opts.det);
 
-  Launcher(&dynamic, &opts, 12, 13, 14);
+  std::vector<int> cpus = {opts.cpustart, opts.cpustart + 1, opts.cpustart + 2};
 
-  Timer stop;
-  while (stop.timeus() < opts.stopafter * 1000000LU) {
-    sleep(2);
+  Launcher(&detector, &opts, cpus);
+
+  Parser cmdParser(opts);
+  Server cmdAPI(8888, cmdParser, opts);
+
+  Timer stop, report;
+  while (1) {
+    if (stop.timeus() >= opts.stopafter * 1000000LU) {
+      sleep(2);
+      XTRACE(MAIN, ALW, "Exiting...\n");
+      exit(1);
+    }
+
+    if (report.timeus() >= 1000000U) {
+      opts.stat.report();
+      report.now();
+    }
+
+    cmdAPI.server_poll();
+
+    usleep(1000);
   }
-  sleep(2);
-  printf("Exiting...\n");
-  exit(1);
+
   return 0;
 }

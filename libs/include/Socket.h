@@ -1,8 +1,10 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+#pragma once
+
 #include <arpa/inet.h>
 #include <cassert>
-#include <inttypes.h>
+#include <cinttypes>
 #include <sys/socket.h>
 
 class Socket {
@@ -54,7 +56,7 @@ public:
 
 class UDPClient : public Socket {
 public:
-  UDPClient(Endpoint local, struct Endpoint remote)
+  UDPClient(Endpoint local, Endpoint remote)
       : Socket(Socket::type::UDP) {
     this->local(local.ipaddr, local.port);
     this->remote(remote.ipaddr, remote.port);

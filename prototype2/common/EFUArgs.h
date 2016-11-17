@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include <common/Stats.h>
 #include <string>
 
 class EFUArgs {
@@ -15,6 +16,8 @@ public:
    * @param argv Argument array - typically taken from main()
    */
   EFUArgs(int argc, char *argv[]);
+
+  int cpustart{12}; /**< lcore id for input processing thread */
 
   std::string ip_addr{"0.0.0.0"}; /**< used for data generators */
   int port{9000};                 /**< udp receive port */
@@ -31,4 +34,10 @@ public:
 
   // NMX OPTIONS
   int reduction{80}; /**< data tuples in a cluster */
+
+  // Runtime Stats
+  Stats stat;
+  // unsigned int guard1{0xdeadbeef};
+  unsigned int reportmask{0xffffffff};
+  // unsigned int guard2{0xdeadbabe};
 };
