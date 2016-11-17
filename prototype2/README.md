@@ -1,6 +1,6 @@
 ## Prerequisites
 The following libraries and utilities must be installed for full functionality.
-However all are optional.
+However all are optional. 
 
 * Zookeeper
 * Apache Kafka
