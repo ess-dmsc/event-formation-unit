@@ -143,7 +143,7 @@ void CSPEC::processing_thread(void *args) {
   while (1) {
 
     if ((input2proc_fifo.pop(data_index)) == false) {
-      opts->stat.p.idle++;
+      opts->stat.p.rx_idle++;
       opts->stat.p.fifo_free = proc2output_fifo.free();
       usleep(10);
     } else {
@@ -193,7 +193,7 @@ void CSPEC::output_thread(void *args) {
   uint64_t produce = 0;
   while (1) {
     if (proc2output_fifo.pop(event_index) == false) {
-      opts->stat.o.idle++;
+      opts->stat.o.rx_idle++;
       usleep(10);
     } else {
       std::memcpy(kafkabuffer + produce, event_ringbuf->getdatabuffer(event_index), 8 /**< @todo not hardcode */ );

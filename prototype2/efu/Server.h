@@ -7,6 +7,8 @@
 
 #pragma once
 #include <algorithm>
+#include <array>
+#include <cassert>
 #include <common/EFUArgs.h>
 #include <sys/types.h>
 #include <sys/select.h>
@@ -15,22 +17,14 @@
 #define SERVER_BUFFER_SIZE 9000U
 #define SERVER_MAX_CLIENTS 16
 
+static_assert(SERVER_MAX_CLIENTS <= FD_SETSIZE, "Too many clients");
+
 class Server {
 public:
     /** @brief Server for program control and stats
    *  @param port tcp port
    */
-  Server(int port, EFUArgs & args)
-        : port_(port)
-        , opts(args) {
-    FD_ZERO(&fd_master);
-    FD_ZERO(&fd_working);
-    std::fill_n((char*)&input, sizeof(input), 0);
-    input.data = input.buffer;
-    std::fill_n((char*)&output, sizeof(output), 0);
-    output.data = output.buffer;
-    server_open();
-  }
+  Server(int port, EFUArgs & args);
 
   /** @brief Setup socket parameters
    */
@@ -63,8 +57,8 @@ private:
   socket_buffer_t output;
 
   int port_{0};
-  int sock_server{-1};
-  int sock_client{-1};
+  int serverfd{-1};
+  std::array<int, SERVER_MAX_CLIENTS> clientfd;
   fd_set fd_master, fd_working;
 
   EFUArgs & opts; /** @todo dont like this */

@@ -24,11 +24,29 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_INF
 
-void Server::server_close(int socketfd) {
-  XTRACE(IPC, DEB, "Closing socket fd %d\n", sock_client);
-  close(socketfd);
-  sock_client = -1;
+Server::Server(int port, EFUArgs & args)
+      : port_(port)
+      , opts(args) {
+  for (auto & client : clientfd) {
+    client = -1;
+  }
+  assert(clientfd[0] == -1);
+  FD_ZERO(&fd_master);
+  FD_ZERO(&fd_working);
+  std::fill_n((char*)&input, sizeof(input), 0);
+  input.data = input.buffer;
+  std::fill_n((char*)&output, sizeof(output), 0);
+  output.data = output.buffer;
+  server_open();
 }
+
+void Server::server_close(int socket) {
+  XTRACE(IPC, DEB, "Closing socket fd %d\n", socket);
+  close(socket);
+  auto client = std::find(clientfd.begin(), clientfd.end(), socket);
+  assert(client != clientfd.end());
+  *client = -1;
+  }
 
 /** @brief Setup socket parameters
  */
@@ -39,13 +57,13 @@ void Server::server_open() {
   int ret;
   int option=1; // any nonzero value will do
 
-  sock_server = socket(AF_INET, SOCK_STREAM, 0);
-  assert(sock_server >= 0);
+  serverfd = socket(AF_INET, SOCK_STREAM, 0);
+  assert(serverfd >= 0);
 
-  ret = setsockopt(sock_server, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
+  ret = setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
   assert(ret >= 0);
 
-  ret = ioctl(sock_server, FIONBIO, &option);
+  ret = ioctl(serverfd, FIONBIO, &option);
   assert(ret >= 0);
 
   std::fill_n((char*)&socket_address, sizeof(socket_address), 0);
@@ -53,13 +71,13 @@ void Server::server_open() {
   socket_address.sin_addr.s_addr = htonl(INADDR_ANY);
   socket_address.sin_port = htons(port_);
 
-  ret = bind(sock_server, (struct sockaddr *)&socket_address, sizeof(socket_address));
+  ret = bind(serverfd, (struct sockaddr *)&socket_address, sizeof(socket_address));
   assert(ret >= 0);
 
-  ret = listen(sock_server, 32); // backlog == 32
+  ret = listen(serverfd, SERVER_MAX_CLIENTS);
   assert(ret >= 0);
 
-  FD_SET(sock_server, &fd_master);
+  FD_SET(serverfd, &fd_master);
 }
 
 
@@ -85,7 +103,8 @@ void Server::server_poll() {
   timeout.tv_sec = 0;
   timeout.tv_usec = 1000;
 
-  auto max_socket = std::max(sock_server, sock_client) + 1;
+  auto max_client = std::max_element(clientfd.begin(), clientfd.end());
+  auto max_socket = std::max(serverfd, *max_client) + 1;
 
   auto ready = select(max_socket, &fd_working, NULL, NULL, &timeout);
   if (ready < 0) {
@@ -93,58 +112,65 @@ void Server::server_poll() {
   }
 
   // Server has activity
-  if (ready > 0 && FD_ISSET(sock_server, &fd_working)) {
-    if (sock_client < 0) {
-      XTRACE(IPC, INF, "Incoming connection\n");
-      sock_client = accept(sock_server, NULL, NULL);
-      if (sock_client < 0 && errno != EWOULDBLOCK) {
+  if (ready > 0 && FD_ISSET(serverfd, &fd_working)) {
+    auto freefd = std::find(clientfd.begin(), clientfd.end(), -1);
+    if (freefd == clientfd.end()) {
+      XTRACE(IPC, WAR, "Max clients connected, can't accept()\n");
+      auto tmpsock = accept(serverfd, NULL, NULL);
+      close(tmpsock);
+    } else {
+      XTRACE(IPC, INF, "Accept new connection\n");
+      *freefd = accept(serverfd, NULL, NULL);
+      if (*freefd < 0 && errno != EWOULDBLOCK) {
         assert(1 == 0);
       }
-      FD_SET(sock_client, &fd_master);
-      XTRACE(IPC, DEB, "sock_client: %d, ready: %d\n", sock_client, ready);
-      ready--;
-    }
-  }
-
-  // Client has activity
-  if (ready > 0 && FD_ISSET(sock_client, &fd_working)) {
-    auto bytes = recv(sock_client, input.data + input.bytes, SERVER_BUFFER_SIZE - input.bytes, 0);
-
-    if ((bytes < 0) && (errno != EWOULDBLOCK || errno != EAGAIN)) {
-      XTRACE(IPC, WAR, "recv() failed, errno: %d\n", errno);
-      perror("recv() failed");
-      server_close(sock_client);
-      return;
-    }
-    if (bytes == 0) {
-      XTRACE(IPC, INF, "Peer closed socket\n");
-      server_close(sock_client);
-      return;
-    }
-    XTRACE(IPC, INF, "Received %ld bytes on socket %d\n", bytes, sock_client);
-    input.bytes += bytes;
-
-    auto min = std::min(input.bytes, SERVER_BUFFER_SIZE - 1U);
-    input.buffer[min] = '\0';
-    XTRACE(IPC, DEB, "buffer[] = %s", input.buffer);
-
-    assert(input.bytes <= SERVER_BUFFER_SIZE);
-    XTRACE(IPC, DEB, "input.bytes: %d\n", input.bytes);
-
-    // Parse and generate reply
-    if (server_parse() < 0) {
-      XTRACE(IPC, WAR, "Parse error (unknown command?)\n");
-      output.bytes = snprintf((char*)output.buffer, SERVER_BUFFER_SIZE, "Unknown command\n");
-    }
-
-    input.bytes = 0;
-    input.data = input.buffer;
-    if (server_send(sock_client) < 0) {
-      XTRACE(IPC, WAR, "server_send() failed\n");
-      server_close(sock_client);
-      return;
+      FD_SET(*freefd, &fd_master);
+      XTRACE(IPC, DEB, "New clent socket: %d, ready: %d\n", *freefd, ready);
     }
     ready--;
+  }
+
+  // Chek if some client has activity
+  for (auto cli : clientfd) {
+    if (ready > 0 && FD_ISSET(cli, &fd_working)) {
+      auto bytes = recv(cli, input.data + input.bytes, SERVER_BUFFER_SIZE - input.bytes, 0);
+
+      if ((bytes < 0) && (errno != EWOULDBLOCK || errno != EAGAIN)) {
+        XTRACE(IPC, WAR, "recv() failed, errno: %d\n", errno);
+        perror("recv() failed");
+        server_close(cli);
+        return;
+      }
+      if (bytes == 0) {
+        XTRACE(IPC, INF, "Peer closed socket %d\n", cli);
+        server_close(cli);
+        return;
+      }
+      XTRACE(IPC, INF, "Received %ld bytes on socket %d\n", bytes, cli);
+      input.bytes += bytes;
+
+      auto min = std::min(input.bytes, SERVER_BUFFER_SIZE - 1U);
+      input.buffer[min] = '\0';
+      XTRACE(IPC, DEB, "buffer[] = %s", input.buffer);
+
+      assert(input.bytes <= SERVER_BUFFER_SIZE);
+      XTRACE(IPC, DEB, "input.bytes: %d\n", input.bytes);
+
+      // Parse and generate reply
+      if (server_parse() < 0) {
+        XTRACE(IPC, WAR, "Parse error (unknown command?)\n");
+        output.bytes = snprintf((char*)output.buffer, SERVER_BUFFER_SIZE, "Unknown command\n");
+      }
+
+      input.bytes = 0;
+      input.data = input.buffer;
+      if (server_send(cli) < 0) {
+        XTRACE(IPC, WAR, "server_send() failed\n");
+        server_close(cli);
+        return;
+      }
+      ready--;
+    }
   }
 }
 
@@ -189,8 +215,14 @@ int Server::server_parse() {
          "STAT_PROCESSING %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 \
          ", %" PRIu64 ", %" PRIu64 "\n",
         opts.stat.p.rx_events, opts.stat.p.rx_error_bytes, opts.stat.p.rx_discards,
-        opts.stat.p.idle,
+        opts.stat.p.rx_idle,
         opts.stat.p.fifo_push_errors, opts.stat.p.fifo_free);
+
+  } else if (tokens.at(0).compare(std::string("STAT_OUTPUT")) == 0) {
+    XTRACE(IPC, INF, "STAT_OUTPUT\n");
+    output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE,
+         "STAT_OUTPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
+        opts.stat.o.rx_events, opts.stat.o.rx_idle, opts.stat.o.tx_bytes);
 
   } else if (tokens.at(0).compare(std::string("STAT_RESET")) == 0) {
     XTRACE(IPC, INF, "STAT_RESET\n");

@@ -103,7 +103,7 @@ public:
     uint64_t rx_events;
     uint64_t rx_error_bytes;
     uint64_t rx_discards;
-    uint64_t idle;
+    uint64_t rx_idle;
     uint64_t fifo_push_errors;
     uint64_t fifo_free;
   } processing_stat_t;
@@ -111,7 +111,7 @@ public:
   typedef struct {
     // Counters
     uint64_t rx_events;
-    uint64_t idle;
+    uint64_t rx_idle;
     uint64_t tx_bytes;
   } output_stat_t;
 

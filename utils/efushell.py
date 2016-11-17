@@ -31,8 +31,8 @@ class EFUShell(cmd.Cmd):
       print res
       res = self.driver.Ask('STAT_PROCESSING')
       print res
-#      res = self.driver.Ask('STAT_OUTPUT')
-#      print res
+      res = self.driver.Ask('STAT_OUTPUT')
+      print res
 
 
 
