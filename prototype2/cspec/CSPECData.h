@@ -35,13 +35,13 @@ public:
   };
 
   /** Let user specify calibration parameters */
-  CSPECData(CSPECChanConv *calibration, MultiGridGeometry * geometry)
-     : chanconv(calibration), multigridgeom(geometry){};
+  CSPECData(CSPECChanConv *calibration, MultiGridGeometry *geometry)
+      : chanconv(calibration), multigridgeom(geometry){};
 
   CSPECData(unsigned int wthresh, unsigned int gthresh,
-            CSPECChanConv *calibration, MultiGridGeometry * geometry)
-      : wire_thresh(wthresh), grid_thresh(gthresh)
-      , chanconv(calibration), multigridgeom(geometry){};
+            CSPECChanConv *calibration, MultiGridGeometry *geometry)
+      : wire_thresh(wthresh), grid_thresh(gthresh), chanconv(calibration),
+        multigridgeom(geometry){};
 
   CSPECData(){}; // Discouraged, but used in cspecgen
 
@@ -61,7 +61,7 @@ public:
    *  @param data Multi grid data from event readout system
    *  @param buffer User specified buffer (must be large enough to hold event
    */
-  void createevent(const MultiGridData &data, char * buffer);
+  void createevent(const MultiGridData &data, char *buffer);
 
   // This data is overwritten on receive()
   struct MultiGridData data[250];
@@ -69,5 +69,5 @@ public:
   unsigned int error{0};
 
   CSPECChanConv *chanconv{nullptr};
-  MultiGridGeometry * multigridgeom{nullptr};
+  MultiGridGeometry *multigridgeom{nullptr};
 };

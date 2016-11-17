@@ -18,7 +18,7 @@ struct multi_grid {
 
 /** @todo no error checking, assumes valid data and valid buffer
  */
-void CSPECData::createevent(const MultiGridData &data, char * buffer) {
+void CSPECData::createevent(const MultiGridData &data, char *buffer) {
   auto col = data.module;
   auto grid = chanconv->getGridId(data.d[6]);
   auto wire = chanconv->getWireId(data.d[2]);
@@ -34,59 +34,62 @@ void CSPECData::createevent(const MultiGridData &data, char * buffer) {
 int CSPECData::receive(const char *buffer, int size) {
   elems = 0;
   error = 0;
-  enum State { hdr = 1, dat, ftr};
+  enum State { hdr = 1, dat, ftr };
   int datctr = 0;
-  uint32_t * datap = (uint32_t *)buffer;
+  uint32_t *datap = (uint32_t *)buffer;
   int state = State::hdr;
   int oldsize = size;
 
   while (size >= 4) {
-    XTRACE(PROCESS, DEB, "elems: %d, size: %d, datap: %p\n", elems, size, datap);
+    XTRACE(PROCESS, DEB, "elems: %d, size: %d, datap: %p\n", elems, size,
+           datap);
     switch (state) {
-      // Parse Header
-      case State::hdr:
-        if (((*datap & header_mask) != header_id) || ((*datap & 0xfff) != nwords)) {
-          XTRACE(PROCESS, INF, "State::hdr - header error\n");
-          break;
-        }
-        XTRACE(PROCESS, DEB, "State::hdr valid data, next state State:dat\n");
-        data[elems].module = (*datap >> 16) & 0xff;
-        datctr = 0;
-        state = State::dat;
+    // Parse Header
+    case State::hdr:
+      if (((*datap & header_mask) != header_id) ||
+          ((*datap & 0xfff) != nwords)) {
+        XTRACE(PROCESS, INF, "State::hdr - header error\n");
+        break;
+      }
+      XTRACE(PROCESS, DEB, "State::hdr valid data, next state State:dat\n");
+      data[elems].module = (*datap >> 16) & 0xff;
+      datctr = 0;
+      state = State::dat;
       break;
 
-      // Parse Data
-      case State::dat:
-        if ((*datap & header_mask) != data_id) {
-          XTRACE(PROCESS, INF, "State::dat - header error\n");
-          state = State::hdr;
-          break;
-        }
-        XTRACE(PROCESS, DEB, "State::dat valid data (%d), next state State:dat\n", datctr);
-        data[elems].d[datctr] = (*datap) & 0x3fff;
-        datctr++;
-        if (datctr == 8) {
-          XTRACE(PROCESS, DEB, "State:dat all data, next state State:ftr\n");
-          state = State::ftr;
-        }
-      break;
-
-      // Parse Footer
-      case State::ftr:
-        if ((*datap & header_mask) != footer_id) {
-          XTRACE(PROCESS, INF, "State::ftr - header error\n");
-          state = State::hdr;
-          break;
-        }
-        XTRACE(PROCESS, DEB, "State::ftr valid data, next state State:hdr\n");
-        data[elems].time = (*datap) & 0x3fffffff;
-        elems++;
+    // Parse Data
+    case State::dat:
+      if ((*datap & header_mask) != data_id) {
+        XTRACE(PROCESS, INF, "State::dat - header error\n");
         state = State::hdr;
+        break;
+      }
+      XTRACE(PROCESS, DEB, "State::dat valid data (%d), next state State:dat\n",
+             datctr);
+      data[elems].d[datctr] = (*datap) & 0x3fff;
+      datctr++;
+      if (datctr == 8) {
+        XTRACE(PROCESS, DEB, "State:dat all data, next state State:ftr\n");
+        state = State::ftr;
+      }
       break;
 
-      // MUST not happen
-      default:
-        assert(1 == 0);
+    // Parse Footer
+    case State::ftr:
+      if ((*datap & header_mask) != footer_id) {
+        XTRACE(PROCESS, INF, "State::ftr - header error\n");
+        state = State::hdr;
+        break;
+      }
+      XTRACE(PROCESS, DEB, "State::ftr valid data, next state State:hdr\n");
+      data[elems].time = (*datap) & 0x3fffffff;
+      elems++;
+      state = State::hdr;
+      break;
+
+    // MUST not happen
+    default:
+      assert(1 == 0);
       break;
     }
     size -= 4; // Parse 32 bit at a time
@@ -124,7 +127,6 @@ int CSPECData::input_filter() {
   }
   return discarded;
 }
-
 
 /** First multi grid data generator - valid headers, custom
  * wire and grid adc values. Only used in google test - can

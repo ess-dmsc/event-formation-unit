@@ -1,6 +1,5 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
-#include <cstring>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/Producer.h>
@@ -9,6 +8,7 @@
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CSPECData.h>
 #include <cspec/CSPECEvent.h>
+#include <cstring>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -27,7 +27,6 @@
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
-
 
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
@@ -54,11 +53,11 @@ public:
 private:
   /** Shared between input_thread and processing_thread*/
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
-  RingBuffer<eth_buffer_size> * eth_ringbuf;
+  RingBuffer<eth_buffer_size> *eth_ringbuf;
 
   /** Shared between processing_thread and output_thread */
   CircularFifo<unsigned int, event_buffer_max_entries> proc2output_fifo;
-  RingBuffer<event_buffer_size> * event_ringbuf;
+  RingBuffer<event_buffer_size> *event_ringbuf;
 
   std::mutex eventq_mutex, cout_mutex;
 
@@ -66,14 +65,14 @@ private:
 };
 
 CSPEC::CSPEC() {
-  XTRACE(INIT, INF, "Creating CSPEC ringbuffers %d\n", 5); /** @todo make this work */
+  XTRACE(INIT, INF, "Creating CSPEC ringbuffers %d\n",
+         5); /** @todo make this work */
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
   event_ringbuf = new RingBuffer<event_buffer_size>(event_buffer_max_entries);
 }
 
 void CSPEC::input_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
-
 
   /** Connection setup */
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
@@ -87,13 +86,13 @@ void CSPEC::input_thread(void *args) {
   Timer stop_timer;
   TSCTimer report_timer;
   for (;;) {
-    //assert(opts->guard1 == 0xdeadbeef);
-    //assert(opts->guard2 == 0xdeadbabe);
+    // assert(opts->guard1 == 0xdeadbeef);
+    // assert(opts->guard2 == 0xdeadbabe);
     unsigned int eth_index = eth_ringbuf->getindex();
 
-
     /** this is the processing step */
-    if ((rdsize = cspecdata.receive(eth_ringbuf->getdatabuffer(eth_index), eth_ringbuf->getmaxbufsize())) > 0) {
+    if ((rdsize = cspecdata.receive(eth_ringbuf->getdatabuffer(eth_index),
+                                    eth_ringbuf->getmaxbufsize())) > 0) {
       XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
       opts->stat.i.rx_packets++;
       opts->stat.i.rx_bytes += rdsize;
@@ -103,15 +102,15 @@ void CSPEC::input_thread(void *args) {
       if (input2proc_fifo.push(eth_index) == false) {
         opts->stat.i.fifo_push_errors++;
 
-        XTRACE(INPUT, WAR, "Overflow :%" PRIu64 "\n", opts->stat.i.fifo_push_errors);
+        XTRACE(INPUT, WAR, "Overflow :%" PRIu64 "\n",
+               opts->stat.i.fifo_push_errors);
       } else {
         eth_ringbuf->nextbuffer();
       }
     }
 
-
-   // Checking for exit
-   if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+    // Checking for exit
+    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
       if (stop_timer.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping input thread, timeus " << stop_timer.timeus()
@@ -123,13 +122,12 @@ void CSPEC::input_thread(void *args) {
   }
 }
 
-
 void CSPEC::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
 
   CSPECChanConv conv;
   conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear look-up table
-  conv.makegridcal(0, CSPECChanConv::adcsize - 1,  96); // Linear look-up table
+  conv.makegridcal(0, CSPECChanConv::adcsize - 1, 96);  // Linear look-up table
 
   MultiGridGeometry CSPEC(80, 160, 4, 16);
 
@@ -147,7 +145,8 @@ void CSPEC::processing_thread(void *args) {
       opts->stat.p.fifo_free = proc2output_fifo.free();
       usleep(10);
     } else {
-      dat.receive(eth_ringbuf->getdatabuffer(data_index), eth_ringbuf->getdatalength(data_index));
+      dat.receive(eth_ringbuf->getdatabuffer(data_index),
+                  eth_ringbuf->getdatalength(data_index));
       opts->stat.p.rx_error_bytes += dat.error;
       opts->stat.p.rx_events += dat.elems;
       opts->stat.p.rx_discards += dat.input_filter();
@@ -159,7 +158,8 @@ void CSPEC::processing_thread(void *args) {
           dat.createevent(d, event_ringbuf->getdatabuffer(event_index));
           if (proc2output_fifo.push(event_index) == false) {
             opts->stat.p.fifo_push_errors++;
-            XTRACE(PROCESS, WAR, "Overflow :%" PRIu64 "\n", opts->stat.p.fifo_push_errors);
+            XTRACE(PROCESS, WAR, "Overflow :%" PRIu64 "\n",
+                   opts->stat.p.fifo_push_errors);
           } else {
             event_ringbuf->nextbuffer();
           }
@@ -196,7 +196,9 @@ void CSPEC::output_thread(void *args) {
       opts->stat.o.rx_idle++;
       usleep(10);
     } else {
-      std::memcpy(kafkabuffer + produce, event_ringbuf->getdatabuffer(event_index), 8 /**< @todo not hardcode */ );
+      std::memcpy(kafkabuffer + produce,
+                  event_ringbuf->getdatabuffer(event_index),
+                  8 /**< @todo not hardcode */);
       opts->stat.o.rx_events++;
       produce += 12; /**< @todo should match actual data size */
     }

@@ -9,7 +9,7 @@
 #include <libs/include/TSCTimer.h>
 #include <unistd.h>
 
-//const int TSC_MHZ = 2900;
+// const int TSC_MHZ = 2900;
 
 int main(int argc, char *argv[]) {
   DGArgs opts(argc, argv);
@@ -39,17 +39,16 @@ int main(int argc, char *argv[]) {
   uint64_t bytes = 0;
   TSCTimer throttle_timer;
 
-  while ((pkt <opts.txPkt) && ((readsz = fread(buffer, 1, readsize, f)) > 0)) {
-     DataSource.send(buffer, readsz);
-     bytes += readsz;
-     pkt++;
+  while ((pkt < opts.txPkt) && ((readsz = fread(buffer, 1, readsize, f)) > 0)) {
+    DataSource.send(buffer, readsz);
+    bytes += readsz;
+    pkt++;
 
-     usleep(opts.speed_level * 1000);
+    usleep(opts.speed_level * 1000);
   }
 
   printf("Sent: %" PRIu64 " packets\n", pkt);
   printf("Sent: %" PRIu64 " bytes\n", bytes);
-
 
   return 0;
 }

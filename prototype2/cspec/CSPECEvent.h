@@ -19,7 +19,7 @@ public:
   CSPECEvent(uint64_t timestamp, uint32_t globalpixid)
       : time_(timestamp), pixelid_(globalpixid) {}
 
-  CSPECEvent(){}
+  CSPECEvent() {}
 
   ~CSPECEvent() {
     time_ = 0;
@@ -47,8 +47,8 @@ public:
   }
 
   char eventbuffer[32];
+
 private:
   uint64_t time_;
   uint32_t pixelid_;
-
 };

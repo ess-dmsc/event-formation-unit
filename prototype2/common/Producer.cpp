@@ -47,10 +47,10 @@ Producer::Producer(std::string broker, bool enabled, std::string topicstr) {
 }
 
 /** called to actually send data to Kafka cluster */
-int Producer::produce(char * buffer, int length) {
+int Producer::produce(char *buffer, int length) {
   RdKafka::ErrorCode resp = producer->produce(
-      topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-      buffer, length, NULL, NULL);
+      topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */, buffer,
+      length, NULL, NULL);
   if (resp != RdKafka::ERR_NO_ERROR) {
     std::cerr << "% Produce failed: " << RdKafka::err2str(resp) << std::endl;
     return resp;

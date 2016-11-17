@@ -24,12 +24,13 @@ void Launcher::output_thread(Loader *load, EFUArgs *args) {
 }
 
 /** Create a thread 'func()', set its cpu affinity and calls join() */
-void Launcher::launch(int __attribute__((unused)) lcore, void (*func)(Loader *, EFUArgs *), Loader *ld,
+void Launcher::launch(int __attribute__((unused)) lcore,
+                      void (*func)(Loader *, EFUArgs *), Loader *ld,
                       EFUArgs *args) {
 #ifdef __linux__
   std::thread *t =
 #endif
-new std::thread(func, ld, args);
+      new std::thread(func, ld, args);
 
 #ifdef __linux__
   cpu_set_t cpuset;
@@ -41,11 +42,11 @@ new std::thread(func, ld, args);
       pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
   assert(s == 0);
 #else
-#pragma message ("setaffinity only implemented for Linux")
+#pragma message("setaffinity only implemented for Linux")
 #endif
 }
 
-Launcher::Launcher(Loader *dynamic, EFUArgs *args, std::vector<int>& cpus) {
+Launcher::Launcher(Loader *dynamic, EFUArgs *args, std::vector<int> &cpus) {
   if (dynamic->detector == nullptr) {
     cout << "Detector not loadable, no processing ..." << endl;
     return;

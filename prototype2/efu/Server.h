@@ -2,7 +2,9 @@
 
 /** @file
  *
- *  @brief Implements a command server
+ *  @brief Implements a command server. The server supports multiple
+ * clients, and is of type request-response. A client request is
+ * handled synchronously to completion before servring next request.
  */
 
 #pragma once
@@ -10,8 +12,8 @@
 #include <array>
 #include <cassert>
 #include <common/EFUArgs.h>
-#include <sys/types.h>
 #include <sys/select.h>
+#include <sys/types.h>
 
 /** @todo make this work with public static unsigned int */
 #define SERVER_BUFFER_SIZE 9000U
@@ -21,16 +23,18 @@ static_assert(SERVER_MAX_CLIENTS <= FD_SETSIZE, "Too many clients");
 
 class Server {
 public:
-    /** @brief Server for program control and stats
-   *  @param port tcp port
-   */
-  Server(int port, EFUArgs & args);
+  /** @brief Server for program control and stats
+ *  @param port tcp port
+ *  @param args - needed to access Stat.h counters
+ */
+  Server(int port, EFUArgs &args);
 
   /** @brief Setup socket parameters
    */
   void server_open();
 
   /** @brief Teardown socket
+   *  @param socketfd socket file descriptor
    */
   void server_close(int socketfd);
 
@@ -39,6 +43,7 @@ public:
   void server_poll();
 
   /** @brief Send reply to Client
+   *  @param socketfd socket file descriptor
    */
   int server_send(int socketfd);
 
@@ -61,5 +66,5 @@ private:
   std::array<int, SERVER_MAX_CLIENTS> clientfd;
   fd_set fd_master, fd_working;
 
-  EFUArgs & opts; /** @todo dont like this */
+  EFUArgs &opts; /** @todo dont like this */
 };

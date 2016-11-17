@@ -8,9 +8,9 @@
  *  nextbuffer() and getdatabuffer() calls.
  */
 
- #pragma once
- #include <cassert>
- #include <cstdlib>
+#pragma once
+#include <cassert>
+#include <cstdlib>
 
 template <const unsigned int N> class RingBuffer {
   static const unsigned int COOKIE1 = 0xDEADC0DE;
@@ -60,9 +60,9 @@ public:
    */
   int nextbuffer();
 
-  int getmaxbufsize() { return N; }   /**< return buffer size in bytes */
+  int getmaxbufsize() { return N; }          /**< return buffer size in bytes */
   int getmaxelems() { return max_entries_; } /**< return number of buffers */
-  int getindex() { return entry_; }       /** current buffer index */
+  int getindex() { return entry_; }          /** current buffer index */
 
 private:
   struct Data *data{nullptr};

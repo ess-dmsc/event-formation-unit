@@ -9,9 +9,9 @@
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>
+#include <common/Trace.h>
 #include <cstdio>
 #include <cstring>
-#include <common/Trace.h>
 #include <efu/Server.h>
 #include <errno.h>
 #include <netinet/in.h>
@@ -24,18 +24,16 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_INF
 
-Server::Server(int port, EFUArgs & args)
-      : port_(port)
-      , opts(args) {
-  for (auto & client : clientfd) {
+Server::Server(int port, EFUArgs &args) : port_(port), opts(args) {
+  for (auto &client : clientfd) {
     client = -1;
   }
   assert(clientfd[0] == -1);
   FD_ZERO(&fd_master);
   FD_ZERO(&fd_working);
-  std::fill_n((char*)&input, sizeof(input), 0);
+  std::fill_n((char *)&input, sizeof(input), 0);
   input.data = input.buffer;
-  std::fill_n((char*)&output, sizeof(output), 0);
+  std::fill_n((char *)&output, sizeof(output), 0);
   output.data = output.buffer;
   server_open();
 }
@@ -46,7 +44,7 @@ void Server::server_close(int socket) {
   auto client = std::find(clientfd.begin(), clientfd.end(), socket);
   assert(client != clientfd.end());
   *client = -1;
-  }
+}
 
 /** @brief Setup socket parameters
  */
@@ -55,7 +53,7 @@ void Server::server_open() {
 
   struct sockaddr_in socket_address;
   int ret;
-  int option=1; // any nonzero value will do
+  int option = 1; // any nonzero value will do
 
   serverfd = socket(AF_INET, SOCK_STREAM, 0);
   assert(serverfd >= 0);
@@ -66,12 +64,13 @@ void Server::server_open() {
   ret = ioctl(serverfd, FIONBIO, &option);
   assert(ret >= 0);
 
-  std::fill_n((char*)&socket_address, sizeof(socket_address), 0);
+  std::fill_n((char *)&socket_address, sizeof(socket_address), 0);
   socket_address.sin_family = AF_INET;
   socket_address.sin_addr.s_addr = htonl(INADDR_ANY);
   socket_address.sin_port = htons(port_);
 
-  ret = bind(serverfd, (struct sockaddr *)&socket_address, sizeof(socket_address));
+  ret = bind(serverfd, (struct sockaddr *)&socket_address,
+             sizeof(socket_address));
   assert(ret >= 0);
 
   ret = listen(serverfd, SERVER_MAX_CLIENTS);
@@ -79,7 +78,6 @@ void Server::server_open() {
 
   FD_SET(serverfd, &fd_master);
 }
-
 
 int Server::server_send(int socketfd) {
   XTRACE(IPC, DEB, "server_send() - %d bytes\n", output.bytes);
@@ -133,7 +131,8 @@ void Server::server_poll() {
   // Chek if some client has activity
   for (auto cli : clientfd) {
     if (ready > 0 && FD_ISSET(cli, &fd_working)) {
-      auto bytes = recv(cli, input.data + input.bytes, SERVER_BUFFER_SIZE - input.bytes, 0);
+      auto bytes = recv(cli, input.data + input.bytes,
+                        SERVER_BUFFER_SIZE - input.bytes, 0);
 
       if ((bytes < 0) && (errno != EWOULDBLOCK || errno != EAGAIN)) {
         XTRACE(IPC, WAR, "recv() failed, errno: %d\n", errno);
@@ -159,7 +158,8 @@ void Server::server_poll() {
       // Parse and generate reply
       if (server_parse() < 0) {
         XTRACE(IPC, WAR, "Parse error (unknown command?)\n");
-        output.bytes = snprintf((char*)output.buffer, SERVER_BUFFER_SIZE, "Unknown command\n");
+        output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE,
+                                "Unknown command\n");
       }
 
       input.bytes = 0;
@@ -179,16 +179,16 @@ int Server::server_parse() {
   assert(max > 1);
   if (input.buffer[max - 1] != '\0') {
     XTRACE(IPC, DEB, "Array is NOT null terminated!\n");
-    input.buffer[max -1] = '\0';
+    input.buffer[max - 1] = '\0';
   }
   if (input.buffer[max - 2] == '\n') {
     XTRACE(IPC, DEB, "Array conatains newline\n");
-    input.buffer[max -2] = '\0';
+    input.buffer[max - 2] = '\0';
   }
 
   std::vector<std::string> tokens;
-  char * chars_array = strtok((char*)input.buffer, "\n ");
-  while(chars_array) {
+  char *chars_array = strtok((char *)input.buffer, "\n ");
+  while (chars_array) {
     std::string token(chars_array);
     tokens.push_back(token);
     chars_array = strtok(NULL, "\n ");
@@ -204,30 +204,34 @@ int Server::server_parse() {
   /** @todo This is really ugly, consider using another approach later */
   if (tokens.at(0).compare(std::string("STAT_INPUT")) == 0) {
     XTRACE(IPC, INF, "STAT_INPUT\n");
-    output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE,
-         "STAT_INPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
+    output.bytes = snprintf(
+        (char *)output.buffer, SERVER_BUFFER_SIZE,
+        "STAT_INPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
         opts.stat.i.rx_packets, opts.stat.i.rx_bytes,
         opts.stat.i.fifo_push_errors, opts.stat.i.fifo_free);
 
   } else if (tokens.at(0).compare(std::string("STAT_PROCESSING")) == 0) {
     XTRACE(IPC, INF, "STAT_PROCESSING\n");
-    output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE,
-         "STAT_PROCESSING %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 \
-         ", %" PRIu64 ", %" PRIu64 "\n",
-        opts.stat.p.rx_events, opts.stat.p.rx_error_bytes, opts.stat.p.rx_discards,
-        opts.stat.p.rx_idle,
-        opts.stat.p.fifo_push_errors, opts.stat.p.fifo_free);
+    output.bytes =
+        snprintf((char *)output.buffer, SERVER_BUFFER_SIZE,
+                 "STAT_PROCESSING %" PRIu64 ", %" PRIu64 ", %" PRIu64
+                 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
+                 opts.stat.p.rx_events, opts.stat.p.rx_error_bytes,
+                 opts.stat.p.rx_discards, opts.stat.p.rx_idle,
+                 opts.stat.p.fifo_push_errors, opts.stat.p.fifo_free);
 
   } else if (tokens.at(0).compare(std::string("STAT_OUTPUT")) == 0) {
     XTRACE(IPC, INF, "STAT_OUTPUT\n");
-    output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE,
-         "STAT_OUTPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
+    output.bytes = snprintf(
+        (char *)output.buffer, SERVER_BUFFER_SIZE,
+        "STAT_OUTPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
         opts.stat.o.rx_events, opts.stat.o.rx_idle, opts.stat.o.tx_bytes);
 
   } else if (tokens.at(0).compare(std::string("STAT_RESET")) == 0) {
     XTRACE(IPC, INF, "STAT_RESET\n");
     opts.stat.clear();
-    output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE, "<OK>\n");
+    output.bytes =
+        snprintf((char *)output.buffer, SERVER_BUFFER_SIZE, "<OK>\n");
 
   } else if (tokens.at(0).compare(std::string("STAT_MASK")) == 0) {
     if ((int)tokens.size() != 2) {
@@ -237,7 +241,8 @@ int Server::server_parse() {
     unsigned int mask = (unsigned int)std::stoul(tokens.at(1), nullptr, 0);
     XTRACE(IPC, INF, "STAT_MASK 0x%08x\n", mask);
     opts.stat.set_mask(mask);
-    output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE, "<OK>\n");
+    output.bytes =
+        snprintf((char *)output.buffer, SERVER_BUFFER_SIZE, "<OK>\n");
 
   } else {
     return -1;

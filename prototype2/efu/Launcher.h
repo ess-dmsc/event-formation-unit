@@ -19,7 +19,7 @@ public:
    *  @param cpus vector of three cpuids for launching input, processing and
    *  output threads.
    */
-  Launcher(Loader *ld, EFUArgs *args, std::vector<int>& cpus);
+  Launcher(Loader *ld, EFUArgs *args, std::vector<int> &cpus);
 
 private:
   static void input_thread(Loader *load, EFUArgs *args);

@@ -1,9 +1,9 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
+#include <cinttypes>
 #include <cspec/CSPECData.h>
 #include <cspecgen/CspecArgs.h>
 #include <cstring>
-#include <cinttypes>
 #include <iostream>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>

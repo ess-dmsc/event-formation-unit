@@ -19,7 +19,7 @@ TEST_F(RingBufferTest, Constructor) {
 }
 
 TEST_F(RingBufferTest, Datalength) {
-  RingBuffer<9000>  buf(100);
+  RingBuffer<9000> buf(100);
   unsigned int index = buf.getindex();
   buf.setdatalength(index, 9000);
   ASSERT_EQ(9000, buf.getdatalength(index));
@@ -30,7 +30,7 @@ TEST_F(RingBufferTest, Datalength) {
 TEST_F(RingBufferTest, CircularWrap) {
   int N = 997;
   int size = 9000;
-  RingBuffer<9000>  buf(N);
+  RingBuffer<9000> buf(N);
 
   unsigned int index = buf.getindex();
   char *first = buf.getdatabuffer(index);
@@ -57,11 +57,10 @@ TEST_F(RingBufferTest, CircularWrap) {
   ASSERT_EQ(first, buf.getdatabuffer(index));
 }
 
-
 TEST_F(RingBufferTest, OverWriteLocal) {
-  RingBuffer<9000>  buf(2);
+  RingBuffer<9000> buf(2);
   unsigned int index = buf.getindex();
-  char * buffer = buf.getdatabuffer(index);
+  char *buffer = buf.getdatabuffer(index);
   std::fill_n(buffer, 9001, 0);
   MESSAGE() << "Next buffer should be ok\n";
   buf.nextbuffer();
@@ -70,9 +69,9 @@ TEST_F(RingBufferTest, OverWriteLocal) {
 }
 
 TEST_F(RingBufferTest, OverWriteNext) {
-  RingBuffer<9000>  buf(2);
+  RingBuffer<9000> buf(2);
   unsigned int index = buf.getindex();
-  char * buffer = buf.getdatabuffer(index);
+  char *buffer = buf.getdatabuffer(index);
   std::fill_n(buffer, 9005, 0);
   MESSAGE() << "Next buffer should be corrupt\n";
   ASSERT_DEATH(buf.nextbuffer(), "COOKIE1");

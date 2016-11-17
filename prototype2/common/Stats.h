@@ -12,8 +12,8 @@
 
 class Stats {
 private:
-   Timer usecs_elapsed, time;
-   unsigned int report_mask{0};
+  Timer usecs_elapsed, time;
+  unsigned int report_mask{0};
 
   /** @todo comment */
   void reset() {
@@ -27,14 +27,14 @@ private:
   void packet_stats() {
     auto usecs = usecs_elapsed.timeus();
     uint64_t ipps = (i.rx_packets - ib.rx_packets) * 1000000 / usecs;
-    uint64_t iMbps = 8*(i.rx_bytes - ib.rx_bytes) / usecs;
+    uint64_t iMbps = 8 * (i.rx_bytes - ib.rx_bytes) / usecs;
     uint64_t pkeps = (p.rx_events - pb.rx_events) * 1000 / usecs;
-    uint64_t oMbps = 8*(o.tx_bytes - ob.tx_bytes) / usecs;
+    uint64_t oMbps = 8 * (o.tx_bytes - ob.tx_bytes) / usecs;
 
-    printf(" | I - %12" PRIu64 " B, %8" PRIu64 " pkt/s, %5" PRIu64 " Mb/s" \
-           " | P - %5" PRIu64 " kev/s" \
-           " | O - %5" PRIu64 " Mb/s"
-           , i.rx_bytes , ipps , iMbps , pkeps , oMbps);
+    printf(" | I - %12" PRIu64 " B, %8" PRIu64 " pkt/s, %5" PRIu64 " Mb/s"
+           " | P - %5" PRIu64 " kev/s"
+           " | O - %5" PRIu64 " Mb/s",
+           i.rx_bytes, ipps, iMbps, pkeps, oMbps);
   }
 
   /** @todo comment */
@@ -42,39 +42,37 @@ private:
     auto usecs = usecs_elapsed.timeus();
     uint64_t pkeps = (p.rx_events - pb.rx_events) * 1000 / usecs;
 
-    printf(" | I - %12" PRIu64 " pkts" \
-           " | P - %12" PRIu64 " events, %8" PRIu64 " kev/s, %12" PRIu64 " discards, %12" PRIu64 " errors" \
-           , i.rx_packets, p.rx_events , pkeps , p.rx_discards, p.rx_error_bytes);
+    printf(" | I - %12" PRIu64 " pkts"
+           " | P - %12" PRIu64 " events, %8" PRIu64 " kev/s, %12" PRIu64
+           " discards, %12" PRIu64 " errors",
+           i.rx_packets, p.rx_events, pkeps, p.rx_discards, p.rx_error_bytes);
   }
 
   /** @todo comment */
   void fifo_stats() {
-    printf(" | Fifo I - %6" PRIu64 " free, %10" PRIu64 " pusherr" \
-           " | P - %12" PRIu64 " fifo free, %10" PRIu64 " pusherr"
-           , i.fifo_free, i.fifo_push_errors, p.fifo_free, p.fifo_push_errors);
+    printf(" | Fifo I - %6" PRIu64 " free, %10" PRIu64 " pusherr"
+           " | P - %12" PRIu64 " fifo free, %10" PRIu64 " pusherr",
+           i.fifo_free, i.fifo_push_errors, p.fifo_free, p.fifo_push_errors);
   }
 
 public:
-
   /** @todo comment */
   Stats() { clear(); }
 
   /** @todo comment */
   void clear() {
-    std::fill_n((char*)&i, sizeof(i), 0);
-    std::fill_n((char*)&p, sizeof(p), 0);
-    std::fill_n((char*)&o, sizeof(o), 0);
+    std::fill_n((char *)&i, sizeof(i), 0);
+    std::fill_n((char *)&p, sizeof(p), 0);
+    std::fill_n((char *)&o, sizeof(o), 0);
     reset();
   }
 
   /** @todo comment */
-   void set_mask(unsigned int mask) {
-     report_mask = mask;
-   }
+  void set_mask(unsigned int mask) { report_mask = mask; }
 
   void report() {
     if (report_mask)
-      printf("%5" PRIu64 , time.timeus()/1000000);
+      printf("%5" PRIu64, time.timeus() / 1000000);
 
     if (report_mask & 0x01)
       packet_stats();
