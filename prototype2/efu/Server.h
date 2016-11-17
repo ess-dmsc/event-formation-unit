@@ -13,6 +13,7 @@
 
 /** @todo make this work with public static unsigned int */
 #define SERVER_BUFFER_SIZE 9000U
+#define SERVER_MAX_CLIENTS 16
 
 class Server {
 public:
@@ -37,7 +38,7 @@ public:
 
   /** @brief Teardown socket
    */
-  void server_close();
+  void server_close(int socketfd);
 
   /** @brief Called in main program loop
    */
@@ -45,7 +46,7 @@ public:
 
   /** @brief Send reply to Client
    */
-  int server_send();
+  int server_send(int socketfd);
 
   /** @brief Parse request and generate reply
    */

@@ -39,20 +39,17 @@ class EFUShell(cmd.Cmd):
 #
 # CMD behavior customization
 #
+   def do_EOF(self, line):
+      print
+      return True
+
    def do_shell(self, line):
       'Run a shell command'
       output = os.popen(line).read()
       print output
 
-   def do_EOF(self, line):
-      return True
-
    def emptyline(self):
       print self.prompt
-
-   def do_quit(self, arg):
-      'Quit the shell'
-      sys.exit(0)
 
 if __name__ == '__main__':
    EFUShell().cmdloop()

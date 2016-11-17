@@ -24,9 +24,9 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_INF
 
-void Server::server_close() {
+void Server::server_close(int socketfd) {
   XTRACE(IPC, DEB, "Closing socket fd %d\n", sock_client);
-  close(sock_client);
+  close(socketfd);
   sock_client = -1;
 }
 
@@ -63,9 +63,9 @@ void Server::server_open() {
 }
 
 
-int Server::server_send() {
+int Server::server_send(int socketfd) {
   XTRACE(IPC, DEB, "server_send() - %d bytes\n", output.bytes);
-  if (send(sock_client, output.buffer, output.bytes, 0) < 0) {
+  if (send(socketfd, output.buffer, output.bytes, 0) < 0) {
     XTRACE(IPC, WAR, "Error sending command reply\n");
     return -1;
   }
@@ -113,12 +113,12 @@ void Server::server_poll() {
     if ((bytes < 0) && (errno != EWOULDBLOCK || errno != EAGAIN)) {
       XTRACE(IPC, WAR, "recv() failed, errno: %d\n", errno);
       perror("recv() failed");
-      server_close();
+      server_close(sock_client);
       return;
     }
     if (bytes == 0) {
       XTRACE(IPC, INF, "Peer closed socket\n");
-      server_close();
+      server_close(sock_client);
       return;
     }
     XTRACE(IPC, INF, "Received %ld bytes on socket %d\n", bytes, sock_client);
@@ -139,9 +139,9 @@ void Server::server_poll() {
 
     input.bytes = 0;
     input.data = input.buffer;
-    if (server_send() < 0) {
+    if (server_send(sock_client) < 0) {
       XTRACE(IPC, WAR, "server_send() failed\n");
-      server_close();
+      server_close(sock_client);
       return;
     }
     ready--;
