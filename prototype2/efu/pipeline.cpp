@@ -3,6 +3,7 @@
 #include <common/EFUArgs.h>
 #include <common/Trace.h>
 #include <efu/Launcher.h>
+#include <efu/Parser.h>
 #include <efu/Server.h>
 #include <iostream>
 #include <libs/include/Timer.h>
@@ -15,6 +16,7 @@
 int main(int argc, char *argv[]) {
 
   EFUArgs opts(argc, argv);
+  opts.stat.set_mask(opts.reportmask);
 
   XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", opts.det.c_str());
 
@@ -24,8 +26,8 @@ int main(int argc, char *argv[]) {
 
   Launcher(&detector, &opts, cpus);
 
-  Server cmdAPI(8888, opts);
-  opts.stat.set_mask(opts.reportmask);
+  Parser cmdParser(opts);
+  Server cmdAPI(8888, cmdParser, opts);
 
   Timer stop, report;
   while (1) {

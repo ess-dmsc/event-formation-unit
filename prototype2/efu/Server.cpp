@@ -5,26 +5,28 @@
  *  @brief Implements a command server
  */
 
-#include <algorithm>
+//#include <algorithm>
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>
 #include <common/Trace.h>
 #include <cstdio>
-#include <cstring>
+#include <efu/Parser.h>
 #include <efu/Server.h>
 #include <errno.h>
 #include <netinet/in.h>
 #include <stdio.h>
-#include <string>
+#include <cstring>
 #include <sys/ioctl.h>
 #include <unistd.h>
-#include <vector>
+//#include <vector>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_INF
 
-Server::Server(int port, EFUArgs &args) : port_(port), opts(args) {
+Server::Server(int port, Parser& parse, EFUArgs &args)
+     : port_(port), parser(parse), opts(args) {
+
   for (auto &client : clientfd) {
     client = -1;
   }
@@ -156,12 +158,11 @@ void Server::server_poll() {
       XTRACE(IPC, DEB, "input.bytes: %d\n", input.bytes);
 
       // Parse and generate reply
-      if (server_parse() < 0) {
+      if (parser.parse((char*)input.buffer, input.bytes, (char*)output.buffer, &output.bytes) < 0) {
         XTRACE(IPC, WAR, "Parse error (unknown command?)\n");
         output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE,
                                 "Unknown command\n");
       }
-
       input.bytes = 0;
       input.data = input.buffer;
       if (server_send(cli) < 0) {
@@ -172,80 +173,4 @@ void Server::server_poll() {
       ready--;
     }
   }
-}
-
-int Server::server_parse() {
-  auto max = std::max(input.bytes, SERVER_BUFFER_SIZE);
-  assert(max > 1);
-  if (input.buffer[max - 1] != '\0') {
-    XTRACE(IPC, DEB, "Array is NOT null terminated!\n");
-    input.buffer[max - 1] = '\0';
-  }
-  if (input.buffer[max - 2] == '\n') {
-    XTRACE(IPC, DEB, "Array conatains newline\n");
-    input.buffer[max - 2] = '\0';
-  }
-
-  std::vector<std::string> tokens;
-  char *chars_array = strtok((char *)input.buffer, "\n ");
-  while (chars_array) {
-    std::string token(chars_array);
-    tokens.push_back(token);
-    chars_array = strtok(NULL, "\n ");
-  }
-  XTRACE(IPC, DEB, "Tokens in command: %d\n", (int)tokens.size());
-  for (auto token : tokens) {
-    XTRACE(IPC, DEB, "Token: %s\n", token.c_str());
-  }
-
-  if ((int)tokens.size() < 1)
-    return -1;
-
-  /** @todo This is really ugly, consider using another approach later */
-  if (tokens.at(0).compare(std::string("STAT_INPUT")) == 0) {
-    XTRACE(IPC, INF, "STAT_INPUT\n");
-    output.bytes = snprintf(
-        (char *)output.buffer, SERVER_BUFFER_SIZE,
-        "STAT_INPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
-        opts.stat.i.rx_packets, opts.stat.i.rx_bytes,
-        opts.stat.i.fifo_push_errors, opts.stat.i.fifo_free);
-
-  } else if (tokens.at(0).compare(std::string("STAT_PROCESSING")) == 0) {
-    XTRACE(IPC, INF, "STAT_PROCESSING\n");
-    output.bytes =
-        snprintf((char *)output.buffer, SERVER_BUFFER_SIZE,
-                 "STAT_PROCESSING %" PRIu64 ", %" PRIu64 ", %" PRIu64
-                 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
-                 opts.stat.p.rx_events, opts.stat.p.rx_error_bytes,
-                 opts.stat.p.rx_discards, opts.stat.p.rx_idle,
-                 opts.stat.p.fifo_push_errors, opts.stat.p.fifo_free);
-
-  } else if (tokens.at(0).compare(std::string("STAT_OUTPUT")) == 0) {
-    XTRACE(IPC, INF, "STAT_OUTPUT\n");
-    output.bytes = snprintf(
-        (char *)output.buffer, SERVER_BUFFER_SIZE,
-        "STAT_OUTPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
-        opts.stat.o.rx_events, opts.stat.o.rx_idle, opts.stat.o.tx_bytes);
-
-  } else if (tokens.at(0).compare(std::string("STAT_RESET")) == 0) {
-    XTRACE(IPC, INF, "STAT_RESET\n");
-    opts.stat.clear();
-    output.bytes =
-        snprintf((char *)output.buffer, SERVER_BUFFER_SIZE, "<OK>\n");
-
-  } else if (tokens.at(0).compare(std::string("STAT_MASK")) == 0) {
-    if ((int)tokens.size() != 2) {
-      XTRACE(IPC, INF, "STAT_MASK wrong number of argument\n");
-      return -1;
-    }
-    unsigned int mask = (unsigned int)std::stoul(tokens.at(1), nullptr, 0);
-    XTRACE(IPC, INF, "STAT_MASK 0x%08x\n", mask);
-    opts.stat.set_mask(mask);
-    output.bytes =
-        snprintf((char *)output.buffer, SERVER_BUFFER_SIZE, "<OK>\n");
-
-  } else {
-    return -1;
-  }
-  return 0;
 }
