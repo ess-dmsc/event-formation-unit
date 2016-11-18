@@ -12,6 +12,7 @@
 
 int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int * obytes) {
   XTRACE(CMD, DEB, "parse() received %u bytes\n", ibytes);
+  *obytes = 0;
   if (ibytes == 0) {
     return -EUSIZE;
   }
@@ -44,7 +45,6 @@ int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int
 
 
   /** @todo This is really ugly, consider using another approach later */
-  *obytes = 0;
   if (tokens.at(0).compare(std::string("STAT_INPUT")) == 0) {
     XTRACE(CMD, INF, "STAT_INPUT\n");
     *obytes = snprintf(output, SERVER_BUFFER_SIZE,

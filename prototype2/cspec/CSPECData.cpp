@@ -86,11 +86,6 @@ int CSPECData::receive(const char *buffer, int size) {
       elems++;
       state = State::hdr;
       break;
-
-    // MUST not happen
-    default:
-      assert(1 == 0);
-      break;
     }
     size -= 4; // Parse 32 bit at a time
     datap++;

@@ -21,12 +21,18 @@ std::vector<std::string> commands {
 
 class ParserTest : public TestBase {
 protected:
-  EFUArgs *args;
-  Parser *parser;
+  EFUArgs * args;
+  Parser * parser;
 
   virtual void SetUp() {
     args = new EFUArgs(0, NULL);
     parser = new Parser(*args);
+  }
+
+
+  virtual void TearDown() {
+    delete parser;
+    delete args;
   }
 
   static const unsigned int buffer_size = 9000;
@@ -39,10 +45,13 @@ protected:
   char * output = (char*)outputbuffer;
 };
 
+
+
 /** Test cases below */
 TEST_F(ParserTest, InputBuffer) {
   auto res = parser->parse(input, 0, output, &obytes);
   ASSERT_EQ(-Parser::EUSIZE, res);
+
   ASSERT_EQ(0, obytes);
 
   input[0] = 'A';
@@ -69,6 +78,7 @@ TEST_F(ParserTest, InputBuffer) {
   ASSERT_EQ(0, obytes);
   ASSERT_EQ(-Parser::EBADCMD, res);
 }
+
 
 TEST_F(ParserTest, OversizeData) {
   memset(input, 0x41, buffer_size);
