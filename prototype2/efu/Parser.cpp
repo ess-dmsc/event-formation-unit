@@ -48,7 +48,7 @@ int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int
   if (tokens.at(0).compare(std::string("STAT_INPUT")) == 0) {
     XTRACE(CMD, INF, "STAT_INPUT\n");
     *obytes = snprintf(output, SERVER_BUFFER_SIZE,
-        "STAT_INPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
+        "STAT_INPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64,
         opts.stat.i.rx_packets, opts.stat.i.rx_bytes,
         opts.stat.i.fifo_push_errors, opts.stat.i.fifo_free);
 
@@ -56,7 +56,7 @@ int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int
     XTRACE(CMD, INF, "STAT_PROCESSING\n");
     *obytes = snprintf((char *)output, SERVER_BUFFER_SIZE,
                  "STAT_PROCESSING %" PRIu64 ", %" PRIu64 ", %" PRIu64
-                 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
+                 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64,
                  opts.stat.p.rx_events, opts.stat.p.rx_error_bytes,
                  opts.stat.p.rx_discards, opts.stat.p.rx_idle,
                  opts.stat.p.fifo_push_errors, opts.stat.p.fifo_free);
@@ -64,13 +64,13 @@ int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int
   } else if (tokens.at(0).compare(std::string("STAT_OUTPUT")) == 0) {
     XTRACE(CMD, INF, "STAT_OUTPUT\n");
     *obytes = snprintf((char *)output, SERVER_BUFFER_SIZE,
-        "STAT_OUTPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64 "\n",
+        "STAT_OUTPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64,
         opts.stat.o.rx_events, opts.stat.o.rx_idle, opts.stat.o.tx_bytes);
 
   } else if (tokens.at(0).compare(std::string("STAT_RESET")) == 0) {
     XTRACE(CMD, INF, "STAT_RESET\n");
     opts.stat.clear();
-    *obytes = snprintf((char *)output, SERVER_BUFFER_SIZE, "<OK>\n");
+    *obytes = snprintf((char *)output, SERVER_BUFFER_SIZE, "<OK>");
 
   } else if (tokens.at(0).compare(std::string("STAT_MASK")) == 0) {
     if ((int)tokens.size() != 2) {
@@ -80,7 +80,7 @@ int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int
     unsigned int mask = (unsigned int)std::stoul(tokens.at(1), nullptr, 0);
     XTRACE(CMD, WAR, "STAT_MASK 0x%08x\n", mask);
     opts.stat.set_mask(mask);
-    *obytes = snprintf((char *)output, SERVER_BUFFER_SIZE, "<OK>\n");
+    *obytes = snprintf((char *)output, SERVER_BUFFER_SIZE, "<OK>");
 
   } else {
     return -EBADCMD;

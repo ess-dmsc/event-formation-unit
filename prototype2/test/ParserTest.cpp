@@ -9,11 +9,28 @@
 
 using namespace std;
 
+// clang-format off
+std::vector<std::string> commands {
+  "STAT_INPUT",         "STAT_INPUT 0, 0, 0, 0",
+  "STAT_PROCESSING",    "STAT_PROCESSING 0, 0, 0, 0, 0, 0",
+  "STAT_OUTPUT",        "STAT_OUTPUT 0, 0, 0",
+  "STAT_MASK 0",        "<OK>",
+  "STAT_RESET",         "<OK>"
+};
+// clang-format on
 
 class ParserTest : public TestBase {
 protected:
+  EFUArgs *args;
+  Parser *parser;
+
+  virtual void SetUp() {
+    args = new EFUArgs(0, NULL);
+    parser = new Parser(*args);
+  }
+
   static const unsigned int buffer_size = 9000;
-  const unsigned int ok_size = 5;
+
   char * inputbuffer[buffer_size];
   unsigned int ibytes, obytes;
   char * outputbuffer[buffer_size];
@@ -24,22 +41,19 @@ protected:
 
 /** Test cases below */
 TEST_F(ParserTest, InputBuffer) {
-  EFUArgs args(0, NULL);
-  Parser parser(args);
-
-  auto res = parser.parse(input, 0, output, &obytes);
+  auto res = parser->parse(input, 0, output, &obytes);
   ASSERT_EQ(-Parser::EUSIZE, res);
   ASSERT_EQ(0, obytes);
 
   input[0] = 'A';
   input[1] = 'B';
-  res = parser.parse(input, 1 ,output, &obytes);
+  res = parser->parse(input, 1 ,output, &obytes);
   ASSERT_EQ(-Parser::EBADCMD, res);
   ASSERT_EQ('A', input[0]);
   ASSERT_EQ('\0', input[1]);
   ASSERT_EQ(0, obytes);
 
-  res = parser.parse(input, 2 ,output, &obytes);
+  res = parser->parse(input, 2 ,output, &obytes);
   ASSERT_EQ('A', input[0]);
   ASSERT_EQ('\0', input[1]);
   ASSERT_EQ(0, obytes);
@@ -48,7 +62,7 @@ TEST_F(ParserTest, InputBuffer) {
   input[0] = 'A';
   input[1] = '\n';
   input[2] = '\0';
-  res = parser.parse(input, 3 ,output, &obytes);
+  res = parser->parse(input, 3 ,output, &obytes);
   ASSERT_EQ('A', input[0]);
   ASSERT_EQ('\0', input[1]);
   ASSERT_EQ('\0', input[2]);
@@ -57,67 +71,47 @@ TEST_F(ParserTest, InputBuffer) {
 }
 
 TEST_F(ParserTest, OversizeData) {
-  EFUArgs args(0, NULL);
-  Parser parser(args);
-
   memset(input, 0x41, buffer_size);
   MESSAGE() << "Max buffer size\n";
-  auto res = parser.parse(input, buffer_size, output, &obytes);
+  auto res = parser->parse(input, buffer_size, output, &obytes);
   ASSERT_EQ(-Parser::EBADCMD, res);
   ASSERT_EQ('\0', input[buffer_size - 1]);
   ASSERT_EQ(0, obytes);
 
   MESSAGE() << "Max buffer size + 1\n";
-  res = parser.parse(input, buffer_size + 1, output, &obytes);
+  res = parser->parse(input, buffer_size + 1, output, &obytes);
   ASSERT_EQ(-Parser::EOSIZE, res);
   ASSERT_EQ(0, obytes);
 }
 
 TEST_F(ParserTest, NoTokens) {
-  EFUArgs args(0, NULL);
-  Parser parser(args);
-
   memset(input, 0x20, buffer_size);
   MESSAGE() << "Spaces only\n";
-  auto res = parser.parse(input, buffer_size, output, &obytes);
+  auto res = parser->parse(input, buffer_size, output, &obytes);
   ASSERT_EQ(-Parser::ENOTOKENS, res);
   ASSERT_EQ(0, obytes);
 }
 
-
-TEST_F(ParserTest, ValidCommand) {
-  EFUArgs args(0, NULL);
-  Parser parser(args);
-
-  char * stat_input = (char*)"STAT_INPUT";
-  char * stat_output = (char*)"STAT_INPUT 0, 0, 0, 0";
-  std::memcpy(input, stat_input, strlen(stat_input));
-
-  auto res = parser.parse(input, 10, output, &obytes);
-  ASSERT_GT(obytes, strlen(stat_output));
-  ASSERT_EQ(0, res);
-}
-
-TEST_F(ParserTest, ValidCommandStatMask) {
-  EFUArgs args(0, NULL);
-  Parser parser(args);
-
-  char * stat_input = (char*)"STAT_MASK 0 ";
-  std::memcpy(input, stat_input, strlen(stat_input));
-
-  auto res = parser.parse(input, 12, output, &obytes);
-  ASSERT_EQ(obytes, ok_size);
-  ASSERT_EQ(0, res);
+TEST_F(ParserTest, ValidCommands) {
+  ASSERT_EQ(0, commands.size() & 1);
+  for (auto i = 0U; i < commands.size(); i += 2) {
+    MESSAGE() << i << "\n";
+    const char * cmd = commands[i].c_str();
+    const char * reply = commands[i + 1].c_str();
+    std::memcpy(input, cmd, strlen(cmd));
+    MESSAGE() << "Checking command: " << cmd << "\n";
+    auto res = parser->parse(input, strlen(cmd), output, &obytes);
+    ASSERT_EQ(obytes, strlen(reply));
+    ASSERT_EQ(0, strcmp(output, reply));
+    ASSERT_EQ(0, res);
+  }
 }
 
 TEST_F(ParserTest, InvalidCommandStatMask) {
-  EFUArgs args(0, NULL);
-  Parser parser(args);
+  char * cmd = (char*)"STAT_MASK";
+  std::memcpy(input, cmd, strlen(cmd));
 
-  char * stat_input = (char*)"STAT_MASK ";
-  std::memcpy(input, stat_input, strlen(stat_input));
-
-  auto res = parser.parse(input, 10, output, &obytes);
+  auto res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(obytes, 0);
   ASSERT_EQ(-Parser::EBADARGS, res);
 }
