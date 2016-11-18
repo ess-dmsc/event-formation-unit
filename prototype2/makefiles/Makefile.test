@@ -1,7 +1,7 @@
 # Copyright (C) 2016 European Spallation Source ERIC
 #
 
-testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest CSPECEventTest MultiGridGeometryTest ParserTest
+testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest CSPECEventTest MultiGridGeometryTest ParserTest EFUArgsTest
 
 test: $(testprogs)
 	@echo "done building tests"
@@ -35,7 +35,11 @@ MultiGridGeometryTest: test/MultiGridGeometryTest.cpp common/MultiGridGeometry.h
 
 ParserTest: test/ParserTest.cpp efu/Parser.cpp common/EFUArgs.cpp efu/Parser.h common/EFUArgs.h
 		@echo building $@
-		$(Q)g++ $(cxxflags_test) test/ParserTest.cpp efu/Parser.cpp common/EFUArgs.cpp $(library)  -o $@ $(ldflags_test)
+		$(Q)g++ $(cxxflags_test) test/ParserTest.cpp efu/Parser.cpp common/EFUArgs.cpp $(library) -o $@ $(ldflags_test)
+
+EFUArgsTest: test/EFUArgsTest.cpp common/EFUArgs.cpp  common/EFUArgs.h
+				@echo building $@
+				$(Q)g++ $(cxxflags_test) test/EFUArgsTest.cpp  common/EFUArgs.cpp $(library) -o $@ $(ldflags_test)
 
 coverage:
 	$(Q)gcov -r -b *.gcda

@@ -16,7 +16,6 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
         {"cpu", required_argument, 0, 'c'},
         {"det", required_argument, 0, 'd'},
         {"dip", required_argument, 0, 'i'},
-        {"packets", required_argument, 0, 'n'},
         {"reports", required_argument, 0, 'r'},
         {"stopafter", required_argument, 0, 's'},
         {0, 0, 0, 0}};
