@@ -3,3 +3,9 @@
 *.o
 *.a
 *.so
+*.pyc
+*.gcda
+*.gcno
+
+# Misc programs
+cncsread
