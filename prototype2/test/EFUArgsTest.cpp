@@ -20,12 +20,6 @@ TEST_F(EFUArgsTest, Constructor) {
   ASSERT_EQ(0xffffffffU, opts.stopafter);
 }
 
-TEST_F(EFUArgsTest, HelpText) {
-  int argc = 2;
-  const char * argv[] = {"progname", "-h"};
-  EFUArgs opts(argc, (char**)argv);
-}
-
 TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   int argc = 15;
   // clang-format off
@@ -49,6 +43,15 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   ASSERT_EQ(5, opts.stopafter);
 }
 
+TEST_F(EFUArgsTest, HelpText) {
+  int argc = 2;
+  const char * argv[] = { "progname",
+                          "-h" };
+
+  EFUArgs opts(argc, (char**)argv);
+  ASSERT_EQ(argc, 2);
+  ASSERT_TRUE(argv != NULL);
+}
 
 int main(int argc,char **argv) {
   testing::InitGoogleTest(&argc, argv);
