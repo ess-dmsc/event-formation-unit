@@ -9,6 +9,8 @@
 EFUArgs::EFUArgs(int argc, char *argv[]) {
   using namespace std;
 
+  optind = 1; // global variable used by getopt
+
   while (1) {
     static struct option long_options[] = {
         {"help", no_argument, 0, 'h'},
