@@ -62,9 +62,11 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
       printf(" --port -p port          udp port \n");
       printf(" --stopafter, -s timeout terminate after timeout seconds \n");
       printf(" -h                      help - prints this message \n");
-      exit(0);
+      stopafter = 0;
+      return;
     }
   }
+
   cout << "Starting event processing pipeline2" << endl;
   cout << "  Detector:     " << det << endl;
   cout << "  CPU Offset:   " << cpustart << endl;

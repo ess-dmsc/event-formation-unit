@@ -21,9 +21,9 @@ TEST_F(EFUArgsTest, Constructor) {
 }
 
 TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
-  int argc = 15;
+  int myargc = 15;
   // clang-format off
-  const char *argv[] = {"progname",
+  const char *myargv[] = {"progname",
                         "-b", "mybroker:myport",
                         "-c" , "99",
                         "-d", "myinst",
@@ -32,7 +32,7 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
                         "-r", "43",
                         "-s", "5" };
   // clang-format on
-  EFUArgs opts(argc, (char**)argv);
+  EFUArgs opts(myargc, (char**)myargv);
 
   ASSERT_STREQ("mybroker:myport", opts.broker.c_str());
   ASSERT_EQ(99, opts.cpustart);
@@ -44,13 +44,13 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
 }
 
 TEST_F(EFUArgsTest, HelpText) {
-  int argc = 2;
-  const char * argv[] = { "progname",
-                          "-h" };
+  int myargc = 2;
+  const char *myargv[] = { "progname",
+                          "-h"};
 
-  EFUArgs opts(argc, (char**)argv);
-  ASSERT_EQ(argc, 2);
-  ASSERT_TRUE(argv != NULL);
+  EFUArgs opts2(myargc, (char**)myargv);
+  ASSERT_EQ(myargc, 2);
+  ASSERT_TRUE(myargv != NULL);
 }
 
 int main(int argc,char **argv) {

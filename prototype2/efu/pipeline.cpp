@@ -16,6 +16,9 @@
 int main(int argc, char *argv[]) {
 
   EFUArgs opts(argc, argv);
+  if (opts.stopafter == 0) {
+    return 0;
+  }
   opts.stat.set_mask(opts.reportmask);
 
   XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", opts.det.c_str());
