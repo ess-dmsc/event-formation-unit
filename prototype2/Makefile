@@ -104,7 +104,8 @@ prog-clean:
 test-clean:
 	@rm -f *.log gmon.out *.xml *.valgrind
 	@rm -fr html
-	@find . -name "*.gc*" | xargs rm -f
+	@find . -name "*.gcda" | xargs rm -f
+	@find . -name "*.gcno" | xargs rm -f
 
 clean: prog-clean test-clean doxygen-clean
 	@rm -f  *~  gylle lcov.out

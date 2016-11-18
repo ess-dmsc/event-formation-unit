@@ -8,12 +8,17 @@ class EFUShell(cmd.Cmd):
    intro = "Event Formation Unit  Shell"
    prompt = '(efushell) '
    ip = "127.0.0.1"
-   port = 8888 
+   port = 8888
    driver = SimpleSocket(ip, port)
 
 #
-# EFU Commands 
+# EFU Commands
 #
+
+   def do_cspec_load_calib(self, line):
+       'Load wire and grid calibrations from file'
+       res = self.driver.Ask('CSPEC_LOAD_CALIB ' + line)
+       print res
 
    def do_stats_clear(self, line):
       'Clear statistics'
