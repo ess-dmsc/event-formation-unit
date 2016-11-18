@@ -28,9 +28,9 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
       break;
 
     switch (c) {
-    case 0:
-      if (long_options[option_index].flag != 0)
-        break;
+    //case 0: // currently not using flags
+    //  if (long_options[option_index].flag != 0)
+    //    break;
     case 'b':
       broker.assign(optarg);
       break;
@@ -62,7 +62,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
       printf(" --port -p port          udp port \n");
       printf(" --stopafter, -s timeout terminate after timeout seconds \n");
       printf(" -h                      help - prints this message \n");
-      exit(1);
+      exit(0);
     }
   }
   cout << "Starting event processing pipeline2" << endl;
