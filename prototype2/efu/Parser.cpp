@@ -11,7 +11,8 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int * obytes) {
-  if (ibytes <= 1) {
+  XTRACE(CMD, DEB, "parse() received %u bytes\n", ibytes);
+  if (ibytes == 0) {
     return -EUSIZE;
   }
   if (ibytes > SERVER_BUFFER_SIZE) {
@@ -19,12 +20,9 @@ int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int
   }
 
   if (input[ibytes - 1] != '\0') {
-    XTRACE(CMD, DEB, "Array is NOT null terminated!\n");
-    input[ibytes - 1] = '\0';
-  }
-  if (input[ibytes - 2] == '\n') {
-    XTRACE(CMD, DEB, "Array contains newline\n");
-    input[ibytes - 2] = '\0';
+    XTRACE(CMD, DEB, "adding null termination\n");
+    auto end = std::min(ibytes, SERVER_BUFFER_SIZE - 1);
+    input[end] = '\0';
   }
 
   std::vector<std::string> tokens;
@@ -41,7 +39,7 @@ int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int
 
   XTRACE(CMD, DEB, "Tokens in command: %d\n", (int)tokens.size());
   for (auto token : tokens) {
-    XTRACE(CMD, DEB, "Token: %s\n", token.c_str());
+    XTRACE(CMD, INF, "Token: %s\n", token.c_str());
   }
 
 
@@ -77,10 +75,10 @@ int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int
   } else if (tokens.at(0).compare(std::string("STAT_MASK")) == 0) {
     if ((int)tokens.size() != 2) {
       XTRACE(CMD, INF, "STAT_MASK wrong number of argument\n");
-      return -1;
+      return -EBADARGS;
     }
     unsigned int mask = (unsigned int)std::stoul(tokens.at(1), nullptr, 0);
-    XTRACE(CMD, INF, "STAT_MASK 0x%08x\n", mask);
+    XTRACE(CMD, WAR, "STAT_MASK 0x%08x\n", mask);
     opts.stat.set_mask(mask);
     *obytes = snprintf((char *)output, SERVER_BUFFER_SIZE, "<OK>\n");
 

@@ -13,6 +13,7 @@ using namespace std;
 class ParserTest : public TestBase {
 protected:
   static const unsigned int buffer_size = 9000;
+  const unsigned int ok_size = 5;
   char * inputbuffer[buffer_size];
   unsigned int ibytes, obytes;
   char * outputbuffer[buffer_size];
@@ -33,9 +34,9 @@ TEST_F(ParserTest, InputBuffer) {
   input[0] = 'A';
   input[1] = 'B';
   res = parser.parse(input, 1 ,output, &obytes);
-  ASSERT_EQ(-Parser::EUSIZE, res);
+  ASSERT_EQ(-Parser::EBADCMD, res);
   ASSERT_EQ('A', input[0]);
-  ASSERT_EQ('B', input[1]);
+  ASSERT_EQ('\0', input[1]);
   ASSERT_EQ(0, obytes);
 
   res = parser.parse(input, 2 ,output, &obytes);
@@ -63,6 +64,7 @@ TEST_F(ParserTest, OversizeData) {
   MESSAGE() << "Max buffer size\n";
   auto res = parser.parse(input, buffer_size, output, &obytes);
   ASSERT_EQ(-Parser::EBADCMD, res);
+  ASSERT_EQ('\0', input[buffer_size - 1]);
   ASSERT_EQ(0, obytes);
 
   MESSAGE() << "Max buffer size + 1\n";
@@ -87,12 +89,37 @@ TEST_F(ParserTest, ValidCommand) {
   EFUArgs args(0, NULL);
   Parser parser(args);
 
-  char * stat_input = (char*)"STAT_INPUT ";
+  char * stat_input = (char*)"STAT_INPUT";
+  char * stat_output = (char*)"STAT_INPUT 0, 0, 0, 0";
+  std::memcpy(input, stat_input, strlen(stat_input));
+
+  auto res = parser.parse(input, 10, output, &obytes);
+  ASSERT_GT(obytes, strlen(stat_output));
+  ASSERT_EQ(0, res);
+}
+
+TEST_F(ParserTest, ValidCommandStatMask) {
+  EFUArgs args(0, NULL);
+  Parser parser(args);
+
+  char * stat_input = (char*)"STAT_MASK 0 ";
   std::memcpy(input, stat_input, strlen(stat_input));
 
   auto res = parser.parse(input, 12, output, &obytes);
-  ASSERT_GT(obytes, strlen(stat_input));
+  ASSERT_EQ(obytes, ok_size);
   ASSERT_EQ(0, res);
+}
+
+TEST_F(ParserTest, InvalidCommandStatMask) {
+  EFUArgs args(0, NULL);
+  Parser parser(args);
+
+  char * stat_input = (char*)"STAT_MASK ";
+  std::memcpy(input, stat_input, strlen(stat_input));
+
+  auto res = parser.parse(input, 10, output, &obytes);
+  ASSERT_EQ(obytes, 0);
+  ASSERT_EQ(-Parser::EBADARGS, res);
 }
 
 int main(int argc, char **argv) {
