@@ -9,6 +9,7 @@
 
 class Parser {
   public:
+    enum error {EUSIZE = 1, EOSIZE, ENOTOKENS, EBADCMD};
     /** @todo document
      */
     Parser(EFUArgs & args) : opts(args) {}

@@ -9,11 +9,13 @@
 
 using namespace std;
 
+
 class ParserTest : public TestBase {
 protected:
-  char * inputbuffer[9000];
+  static const unsigned int buffer_size = 9000;
+  char * inputbuffer[buffer_size];
   unsigned int ibytes, obytes;
-  char * outputbuffer[9000];
+  char * outputbuffer[buffer_size];
 
   char * input = (char*)inputbuffer;
   char * output = (char*)outputbuffer;
@@ -25,13 +27,13 @@ TEST_F(ParserTest, InputBuffer) {
   Parser parser(args);
 
   auto res = parser.parse(input, 0, output, &obytes);
-  ASSERT_EQ(-1, res);
+  ASSERT_EQ(-Parser::EUSIZE, res);
   ASSERT_EQ(0, obytes);
 
   input[0] = 'A';
   input[1] = 'B';
   res = parser.parse(input, 1 ,output, &obytes);
-  ASSERT_EQ(-1, res);
+  ASSERT_EQ(-Parser::EUSIZE, res);
   ASSERT_EQ('A', input[0]);
   ASSERT_EQ('B', input[1]);
   ASSERT_EQ(0, obytes);
@@ -40,7 +42,7 @@ TEST_F(ParserTest, InputBuffer) {
   ASSERT_EQ('A', input[0]);
   ASSERT_EQ('\0', input[1]);
   ASSERT_EQ(0, obytes);
-  ASSERT_EQ(-1, res);
+  ASSERT_EQ(-Parser::EBADCMD, res);
 
   input[0] = 'A';
   input[1] = '\n';
@@ -50,8 +52,36 @@ TEST_F(ParserTest, InputBuffer) {
   ASSERT_EQ('\0', input[1]);
   ASSERT_EQ('\0', input[2]);
   ASSERT_EQ(0, obytes);
-  ASSERT_EQ(-1, res);
+  ASSERT_EQ(-Parser::EBADCMD, res);
 }
+
+TEST_F(ParserTest, OversizeData) {
+  EFUArgs args(0, NULL);
+  Parser parser(args);
+
+  memset(input, 0x41, buffer_size);
+  MESSAGE() << "Max buffer size\n";
+  auto res = parser.parse(input, buffer_size, output, &obytes);
+  ASSERT_EQ(-Parser::EBADCMD, res);
+  ASSERT_EQ(0, obytes);
+
+  MESSAGE() << "Max buffer size + 1\n";
+  res = parser.parse(input, buffer_size + 1, output, &obytes);
+  ASSERT_EQ(-Parser::EOSIZE, res);
+  ASSERT_EQ(0, obytes);
+}
+
+TEST_F(ParserTest, NoTokens) {
+  EFUArgs args(0, NULL);
+  Parser parser(args);
+
+  memset(input, 0x20, buffer_size);
+  MESSAGE() << "Spaces only\n";
+  auto res = parser.parse(input, buffer_size, output, &obytes);
+  ASSERT_EQ(-Parser::ENOTOKENS, res);
+  ASSERT_EQ(0, obytes);
+}
+
 
 TEST_F(ParserTest, ValidCommand) {
   EFUArgs args(0, NULL);

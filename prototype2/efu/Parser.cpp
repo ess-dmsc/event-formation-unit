@@ -12,10 +12,10 @@
 
 int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int * obytes) {
   if (ibytes <= 1) {
-    return -1;
+    return -EUSIZE;
   }
   if (ibytes > SERVER_BUFFER_SIZE) {
-    return -1;
+    return -EOSIZE;
   }
 
   if (input[ibytes - 1] != '\0') {
@@ -36,7 +36,7 @@ int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int
   }
 
   if ((int)tokens.size() < 1) {
-    return -1;
+    return -ENOTOKENS;
   }
 
   XTRACE(CMD, DEB, "Tokens in command: %d\n", (int)tokens.size());
@@ -85,7 +85,7 @@ int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int
     *obytes = snprintf((char *)output, SERVER_BUFFER_SIZE, "<OK>\n");
 
   } else {
-    return -1;
+    return -EBADCMD;
   }
   return 0;
 }
