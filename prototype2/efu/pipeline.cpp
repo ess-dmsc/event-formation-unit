@@ -15,33 +15,35 @@
  */
 int main(int argc, char *argv[]) {
 
-  EFUArgs opts(argc, argv);
-  if (opts.stopafter == 0) {
+  efu_args = new EFUArgs(argc, argv);
+  if (efu_args->stopafter == 0) {
     return 0;
   }
-  opts.stat.set_mask(opts.reportmask);
+  efu_args->stat.set_mask(efu_args->reportmask);
 
-  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", opts.det.c_str());
+  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", efu_args->det.c_str());
 
-  Loader detector(opts.det);
+  Loader detector(efu_args->det);
 
-  std::vector<int> cpus = {opts.cpustart, opts.cpustart + 1, opts.cpustart + 2};
+  std::vector<int> cpus = {efu_args->cpustart, efu_args->cpustart + 1,
+                           efu_args->cpustart + 2};
 
-  Launcher(&detector, &opts, cpus);
+  Launcher(&detector, cpus);
 
-  Parser cmdParser(opts);
-  Server cmdAPI(8888, cmdParser, opts);
+  Parser cmdParser;
+
+  Server cmdAPI(8888, cmdParser);
 
   Timer stop, report;
   while (1) {
-    if (stop.timeus() >= opts.stopafter * 1000000LU) {
+    if (stop.timeus() >= efu_args->stopafter * 1000000LU) {
       sleep(2);
       XTRACE(MAIN, ALW, "Exiting...\n");
       exit(1);
     }
 
     if (report.timeus() >= 1000000U) {
-      opts.stat.report();
+      efu_args->stat.report();
       report.now();
     }
 

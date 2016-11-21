@@ -2,8 +2,9 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstring>
+#include <common/EFUArgs.h>
 #include <common/Trace.h>
+#include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
 #include <fcntl.h>
@@ -13,7 +14,90 @@
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB
 
-static int load_file(std::string file, char * buffer) {
+/** - */
+static int stat_mask_set(std::vector<std::string> cmdargs, char *output,
+                         unsigned int *obytes) {
+  XTRACE(CMD, INF, "STAT_MASK_SET\n");
+  *obytes = 0;
+  if (cmdargs.size() != 2) {
+    XTRACE(CMD, WAR, "STAT_MASK_SET: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+  unsigned int mask = (unsigned int)std::stoul(cmdargs.at(1), nullptr, 0);
+  XTRACE(CMD, INF, "STAT_MASK: 0x%08x\n", mask);
+  efu_args->stat.set_mask(mask);
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
+  return Parser::OK;
+}
+
+/** - */
+static int stat_input(std::vector<std::string> cmdargs, char *output,
+                      unsigned int *obytes) {
+  XTRACE(CMD, INF, "STAT_INPUT\n");
+  *obytes = 0;
+  if (cmdargs.size() != 1) {
+    XTRACE(CMD, WAR, "STAT_INPUT: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+  *obytes =
+      snprintf(output, SERVER_BUFFER_SIZE,
+               "STAT_INPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64,
+               efu_args->stat.i.rx_packets, efu_args->stat.i.rx_bytes,
+               efu_args->stat.i.fifo_push_errors, efu_args->stat.i.fifo_free);
+  return Parser::OK;
+}
+
+/** - */
+static int stat_processing(std::vector<std::string> cmdargs, char *output,
+                           unsigned int *obytes) {
+  XTRACE(CMD, INF, "STAT_PROCESSING\n");
+  *obytes = 0;
+  if (cmdargs.size() != 1) {
+    XTRACE(CMD, WAR, "STAT_PROCESSING: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+  *obytes =
+      snprintf(output, SERVER_BUFFER_SIZE,
+               "STAT_PROCESSING %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64
+               ", %" PRIu64 ", %" PRIu64,
+               efu_args->stat.p.rx_events, efu_args->stat.p.rx_error_bytes,
+               efu_args->stat.p.rx_discards, efu_args->stat.p.rx_idle,
+               efu_args->stat.p.fifo_push_errors, efu_args->stat.p.fifo_free);
+  return Parser::OK;
+}
+
+/** - */
+static int stat_output(std::vector<std::string> cmdargs, char *output,
+                       unsigned int *obytes) {
+  XTRACE(CMD, INF, "STAT_OUTPUT\n");
+  *obytes = 0;
+  if (cmdargs.size() != 1) {
+    XTRACE(CMD, WAR, "STAT_OUTPUT: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE,
+                     "STAT_OUTPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64,
+                     efu_args->stat.o.rx_events, efu_args->stat.o.rx_idle,
+                     efu_args->stat.o.tx_bytes);
+  return Parser::OK;
+}
+
+/** - */
+static int stat_reset(std::vector<std::string> cmdargs, char *output,
+                      unsigned int *obytes) {
+  XTRACE(CMD, INF, "STAT_RESET\n");
+  *obytes = 0;
+  if (cmdargs.size() != 1) {
+    XTRACE(CMD, WAR, "STAT_RESET: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+  efu_args->stat.clear();
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
+  return Parser::OK;
+}
+
+/** - */
+static int load_file(std::string file, char *buffer) {
   struct stat buf;
   const int cal_size = 16384;
 
@@ -31,13 +115,14 @@ static int load_file(std::string file, char * buffer) {
     return -11;
   }
 
-  if (buf.st_size != 16384*2) {
-    XTRACE(CMD, WAR, "file %s has wrong length: %d (should be %d)\n", file.c_str(), buf.st_size, 16384*2);
+  if (buf.st_size != 16384 * 2) {
+    XTRACE(CMD, WAR, "file %s has wrong length: %d (should be %d)\n",
+           file.c_str(), buf.st_size, 16384 * 2);
     close(fd);
     return -12;
   }
 
-  if (read(fd, buffer, cal_size*2) != cal_size*2) {
+  if (read(fd, buffer, cal_size * 2) != cal_size * 2) {
     XTRACE(CMD, ERR, "read() from %s incomplete\n", file.c_str());
     close(fd);
     return -13;
@@ -49,25 +134,66 @@ static int load_file(std::string file, char * buffer) {
 
 static int load_calib(std::string calibration) {
   const int cal_size = 16384;
-  char * wcal[cal_size * 2];
-  char * gcal[cal_size * 2];
+  char *wcal[cal_size * 2];
+  char *gcal[cal_size * 2];
 
   XTRACE(CMD, ALW, "Attempt to load calibration %s\n", calibration.c_str());
 
   auto file = calibration + std::string(".wcal");
-  if (load_file(file, (char*)&wcal) < 0) {
+  if (load_file(file, (char *)&wcal) < 0) {
     return -1;
   }
   file = calibration + std::string(".gcal");
-  if (load_file(file, (char*)&gcal) < 0) {
+  if (load_file(file, (char *)&gcal) < 0) {
     return -1;
   }
   return 0;
 }
 
-int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int * obytes) {
-  XTRACE(CMD, DEB, "parse() received %u bytes\n", ibytes);
+static int load_cspec_calib(std::vector<std::string> cmdargs, char *output,
+                            unsigned int *obytes) {
+  XTRACE(CMD, INF, "LOAD_CSPEC_CALIB\n");
   *obytes = 0;
+  if (cmdargs.size() != 2) {
+    XTRACE(CMD, WAR, "LOAD_CSPEC_CALIB: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+
+  auto ret = load_calib(cmdargs.at(1));
+  if (ret < 0) {
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<ERROR>");
+    return -Parser::EBADARGS;
+  }
+
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
+  return Parser::OK;
+}
+
+/******************************************************************************/
+/******************************************************************************/
+Parser::Parser() {
+  registercmd(std::string("STAT_MASK_SET"), stat_mask_set);
+  registercmd(std::string("STAT_INPUT"), stat_input);
+  registercmd(std::string("STAT_PROCESSING"), stat_processing);
+  registercmd(std::string("STAT_OUTPUT"), stat_output);
+  registercmd(std::string("STAT_RESET"), stat_reset);
+  registercmd(std::string("LOAD_CSPEC_CALIB"), load_cspec_calib);
+}
+
+int Parser::registercmd(std::string cmd_name, function_ptr cmd_fn) {
+  XTRACE(CMD, INF, "Registering command: %s\n", cmd_name.c_str());
+  if (commands[cmd_name] != 0) {
+    XTRACE(CMD, WAR, "Command already exist: %s\n", cmd_name.c_str());
+    return -1;
+  }
+  commands[cmd_name] = cmd_fn;
+  return 0;
+}
+
+int Parser::parse(char *input, unsigned int ibytes, char *output,
+                  unsigned int *obytes) {
+  XTRACE(CMD, DEB, "parse() received %u bytes\n", ibytes);
+
   if (ibytes == 0) {
     return -EUSIZE;
   }
@@ -98,61 +224,35 @@ int Parser::parse(char * input, unsigned int ibytes, char * output, unsigned int
     XTRACE(CMD, INF, "Token: %s\n", token.c_str());
   }
 
-
-  /** @todo This is really ugly, consider using another approach later */
-  if (tokens.at(0).compare(std::string("STAT_INPUT")) == 0) {
-    XTRACE(CMD, INF, "STAT_INPUT\n");
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE,
-        "STAT_INPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64,
-        opts.stat.i.rx_packets, opts.stat.i.rx_bytes,
-        opts.stat.i.fifo_push_errors, opts.stat.i.fifo_free);
-
-  } else if (tokens.at(0).compare(std::string("STAT_PROCESSING")) == 0) {
-    XTRACE(CMD, INF, "STAT_PROCESSING\n");
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE,
-                 "STAT_PROCESSING %" PRIu64 ", %" PRIu64 ", %" PRIu64
-                 ", %" PRIu64 ", %" PRIu64 ", %" PRIu64,
-                 opts.stat.p.rx_events, opts.stat.p.rx_error_bytes,
-                 opts.stat.p.rx_discards, opts.stat.p.rx_idle,
-                 opts.stat.p.fifo_push_errors, opts.stat.p.fifo_free);
-
-  } else if (tokens.at(0).compare(std::string("STAT_OUTPUT")) == 0) {
-    XTRACE(CMD, INF, "STAT_OUTPUT\n");
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE,
-        "STAT_OUTPUT %" PRIu64 ", %" PRIu64 ", %" PRIu64,
-        opts.stat.o.rx_events, opts.stat.o.rx_idle, opts.stat.o.tx_bytes);
-
-  } else if (tokens.at(0).compare(std::string("STAT_RESET")) == 0) {
-    XTRACE(CMD, INF, "STAT_RESET\n");
-    opts.stat.clear();
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
-
-  } else if (tokens.at(0).compare(std::string("STAT_MASK")) == 0) {
-    if ((int)tokens.size() != 2) {
-      XTRACE(CMD, INF, "STAT_MASK wrong number of arguments\n");
-      return -EBADARGS;
-    }
-    unsigned int mask = (unsigned int)std::stoul(tokens.at(1), nullptr, 0);
-    XTRACE(CMD, WAR, "STAT_MASK 0x%08x\n", mask);
-    opts.stat.set_mask(mask);
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
-
-
-  } else if (tokens.at(0).compare(std::string("CSPEC_LOAD_CALIB")) == 0) {
-    if ((int)tokens.size() != 2) {
-      XTRACE(CMD, INF, "CSPEC_LOAD_CALIB wrong number of arguments\n");
-      return -EBADARGS;
-    }
-    XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
-    auto ret = load_calib(tokens.at(1));
-    if (ret < 0) {
-      *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<ERROR>");
-      return -EBADARGS;
-    }
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
-
-  } else {
-    return -EBADCMD;
+  auto command = tokens.at(0);
+  int res = -EBADCMD;
+  *obytes = 0;
+  if ((commands[command] != 0) && (command.size() < max_command_size)) {
+    XTRACE(CMD, INF, "Calling registered command %s\n", command.c_str());
+    res = commands[command](tokens, output, obytes);
   }
-  return 0;
+
+  if (obytes == 0) { // no  reply specified, create one
+    switch (res) {
+    case OK:
+      *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
+      break;
+    case -ENOTOKENS:
+    case -EBADCMD:
+      *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <BADCMD>");
+      break;
+    case -EBADARGS:
+      *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <BADARGS>");
+      break;
+    case -EUSIZE:
+    case -EOSIZE:
+      *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <BADSIZE>");
+      break;
+    default:
+      *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <PARSER>");
+      break;
+    }
+  }
+  return res;
 }
+/******************************************************************************/

@@ -5,8 +5,7 @@
 
 using namespace std;
 
-class EFUArgsTest : public TestBase { };
-
+class EFUArgsTest : public TestBase {};
 
 TEST_F(EFUArgsTest, Constructor) {
   EFUArgs opts(0, NULL);
@@ -32,7 +31,7 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
                         "-r", "43",
                         "-s", "5" };
   // clang-format on
-  EFUArgs opts(myargc, (char**)myargv);
+  EFUArgs opts(myargc, (char **)myargv);
 
   ASSERT_STREQ("mybroker:myport", opts.broker.c_str());
   ASSERT_EQ(99, opts.cpustart);
@@ -45,15 +44,14 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
 
 TEST_F(EFUArgsTest, HelpText) {
   int myargc = 2;
-  const char *myargv[] = { "progname",
-                          "-h"};
+  const char *myargv[] = {"progname", "-h"};
 
-  EFUArgs opts2(myargc, (char**)myargv);
+  EFUArgs opts2(myargc, (char **)myargv);
   ASSERT_EQ(myargc, 2);
   ASSERT_TRUE(myargv != NULL);
 }
 
-int main(int argc,char **argv) {
+int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

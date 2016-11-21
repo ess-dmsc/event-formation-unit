@@ -11,12 +11,12 @@
 #include <cinttypes>
 #include <common/Trace.h>
 #include <cstdio>
+#include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
 #include <errno.h>
 #include <netinet/in.h>
 #include <stdio.h>
-#include <cstring>
 #include <sys/ioctl.h>
 #include <unistd.h>
 //#include <vector>
@@ -24,8 +24,7 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-Server::Server(int port, Parser& parse, EFUArgs &args)
-     : port_(port), parser(parse), opts(args) {
+Server::Server(int port, Parser &parse) : port_(port), parser(parse) {
 
   for (auto &client : clientfd) {
     client = -1;
@@ -154,10 +153,9 @@ void Server::server_poll() {
       XTRACE(IPC, DEB, "input.bytes: %d\n", input.bytes);
 
       // Parse and generate reply
-      if (parser.parse((char*)input.buffer, input.bytes, (char*)output.buffer, &output.bytes) < 0) {
-        XTRACE(IPC, WAR, "Parse error (unknown command?)\n");
-        output.bytes = snprintf((char *)output.buffer, SERVER_BUFFER_SIZE,
-                                "Unknown command\n");
+      if (parser.parse((char *)input.buffer, input.bytes, (char *)output.buffer,
+                       &output.bytes) < 0) {
+        XTRACE(IPC, WAR, "Parse error\n");
       }
       input.bytes = 0;
       input.data = input.buffer;

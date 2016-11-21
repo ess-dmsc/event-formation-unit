@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string>
 
+EFUArgs *efu_args; /** global var */
+
 EFUArgs::EFUArgs(int argc, char *argv[]) {
   using namespace std;
 
@@ -30,7 +32,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
       break;
 
     switch (c) {
-    //case 0: // currently not using flags
+    // case 0: // currently not using flags
     //  if (long_options[option_index].flag != 0)
     //    break;
     case 'b':

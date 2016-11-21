@@ -27,7 +27,7 @@ public:
  *  @param port tcp port
  *  @param args - needed to access Stat.h counters
  */
-  Server(int port, Parser& parse, EFUArgs& args);
+  Server(int port, Parser &parse);
 
   /** @brief Setup socket parameters
    */
@@ -62,6 +62,5 @@ private:
   std::array<int, SERVER_MAX_CLIENTS> clientfd;
   fd_set fd_master, fd_working;
 
-  Parser & parser;
-  EFUArgs & opts;
+  Parser &parser;
 };

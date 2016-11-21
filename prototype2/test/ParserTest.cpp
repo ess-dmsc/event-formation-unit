@@ -2,8 +2,8 @@
 
 #include "TestBase.h"
 #include <algorithm>
-#include <cstring>
 #include <common/EFUArgs.h>
+#include <cstring>
 #include <efu/Parser.h>
 #include <memory>
 
@@ -14,38 +14,34 @@ std::vector<std::string> commands {
   "STAT_INPUT",         "STAT_INPUT 0, 0, 0, 0",
   "STAT_PROCESSING",    "STAT_PROCESSING 0, 0, 0, 0, 0, 0",
   "STAT_OUTPUT",        "STAT_OUTPUT 0, 0, 0",
-  "STAT_MASK 0",        "<OK>",
+  "STAT_MASK_SET 0",    "<OK>",
   "STAT_RESET",         "<OK>"
 };
 // clang-format on
 
 class ParserTest : public TestBase {
 protected:
-  EFUArgs * args;
-  Parser * parser;
+  Parser *parser;
 
   virtual void SetUp() {
-    args = new EFUArgs(0, NULL);
-    parser = new Parser(*args);
+    parser = new Parser();
+    efu_args = new EFUArgs(0, NULL);
   }
-
 
   virtual void TearDown() {
     delete parser;
-    delete args;
+    delete efu_args;
   }
 
   static const unsigned int buffer_size = 9000;
 
-  char * inputbuffer[buffer_size];
+  char *inputbuffer[buffer_size];
   unsigned int ibytes, obytes;
-  char * outputbuffer[buffer_size];
+  char *outputbuffer[buffer_size];
 
-  char * input = (char*)inputbuffer;
-  char * output = (char*)outputbuffer;
+  char *input = (char *)inputbuffer;
+  char *output = (char *)outputbuffer;
 };
-
-
 
 /** Test cases below */
 TEST_F(ParserTest, InputBuffer) {
@@ -56,13 +52,13 @@ TEST_F(ParserTest, InputBuffer) {
 
   input[0] = 'A';
   input[1] = 'B';
-  res = parser->parse(input, 1 ,output, &obytes);
+  res = parser->parse(input, 1, output, &obytes);
   ASSERT_EQ(-Parser::EBADCMD, res);
   ASSERT_EQ('A', input[0]);
   ASSERT_EQ('\0', input[1]);
   ASSERT_EQ(0, obytes);
 
-  res = parser->parse(input, 2 ,output, &obytes);
+  res = parser->parse(input, 2, output, &obytes);
   ASSERT_EQ('A', input[0]);
   ASSERT_EQ('\0', input[1]);
   ASSERT_EQ(0, obytes);
@@ -71,14 +67,13 @@ TEST_F(ParserTest, InputBuffer) {
   input[0] = 'A';
   input[1] = '\n';
   input[2] = '\0';
-  res = parser->parse(input, 3 ,output, &obytes);
+  res = parser->parse(input, 3, output, &obytes);
   ASSERT_EQ('A', input[0]);
   ASSERT_EQ('\0', input[1]);
   ASSERT_EQ('\0', input[2]);
   ASSERT_EQ(0, obytes);
   ASSERT_EQ(-Parser::EBADCMD, res);
 }
-
 
 TEST_F(ParserTest, OversizeData) {
   memset(input, 0x41, buffer_size);
@@ -106,8 +101,8 @@ TEST_F(ParserTest, ValidCommands) {
   ASSERT_EQ(0, commands.size() & 1);
   for (auto i = 0U; i < commands.size(); i += 2) {
     MESSAGE() << i << "\n";
-    const char * cmd = commands[i].c_str();
-    const char * reply = commands[i + 1].c_str();
+    const char *cmd = commands[i].c_str();
+    const char *reply = commands[i + 1].c_str();
     std::memcpy(input, cmd, strlen(cmd));
     MESSAGE() << "Checking command: " << cmd << "\n";
     auto res = parser->parse(input, strlen(cmd), output, &obytes);
@@ -118,7 +113,7 @@ TEST_F(ParserTest, ValidCommands) {
 }
 
 TEST_F(ParserTest, InvalidCommandStatMask) {
-  char * cmd = (char*)"STAT_MASK";
+  char *cmd = (char *)"STAT_MASK_SET";
   std::memcpy(input, cmd, strlen(cmd));
 
   auto res = parser->parse(input, strlen(cmd), output, &obytes);

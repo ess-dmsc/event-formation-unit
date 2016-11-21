@@ -15,22 +15,22 @@ class EFUShell(cmd.Cmd):
 # EFU Commands
 #
 
-   def do_cspec_load_calib(self, line):
+   def do_load_cspec_calib(self, line):
        'Load wire and grid calibrations from file'
-       res = self.driver.Ask('CSPEC_LOAD_CALIB ' + line)
+       res = self.driver.Ask('LOAD_CSPEC_CALIB ' + line)
        print res
 
-   def do_stats_clear(self, line):
+   def do_stat_clear(self, line):
       'Clear statistics'
       res = self.driver.Ask('STAT_RESET')
       print res
 
-   def do_stats_mask(self, line):
+   def do_stat_mask_set(self, line):
       'Set reporting mask'
-      res = self.driver.Ask('STAT_MASK ' + line)
+      res = self.driver.Ask('STAT_MASK_SET ' + line)
       print res
 
-   def do_stats_get(self, line):
+   def do_stat_get(self, line):
       'Clear statistics'
       res = self.driver.Ask('STAT_INPUT')
       print res

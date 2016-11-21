@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <common/Detector.h>
+#include <common/EFUArgs.h>
 #include <efu/Launcher.h>
 #include <iostream>
 #include <thread>
@@ -46,13 +47,13 @@ void Launcher::launch(int __attribute__((unused)) lcore,
 #endif
 }
 
-Launcher::Launcher(Loader *dynamic, EFUArgs *args, std::vector<int> &cpus) {
+Launcher::Launcher(Loader *dynamic, std::vector<int> &cpus) {
   if (dynamic->detector == nullptr) {
     cout << "Detector not loadable, no processing ..." << endl;
     return;
   }
 
-  launch(cpus[0], input_thread, dynamic, args);
-  launch(cpus[2], output_thread, dynamic, args);
-  launch(cpus[1], processing_thread, dynamic, args);
+  launch(cpus[0], input_thread, dynamic, efu_args);
+  launch(cpus[2], output_thread, dynamic, efu_args);
+  launch(cpus[1], processing_thread, dynamic, efu_args);
 }
