@@ -11,14 +11,15 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
+
+#define UNUSED __attribute__((unused))
 
 /** - */
-static int stat_mask_set(std::vector<std::string> cmdargs, char *output,
-                         unsigned int *obytes) {
+static int stat_mask_set(std::vector<std::string> cmdargs, char UNUSED *output,
+                         unsigned int UNUSED *obytes) {
   XTRACE(CMD, INF, "STAT_MASK_SET\n");
-  *obytes = 0;
   if (cmdargs.size() != 2) {
     XTRACE(CMD, WAR, "STAT_MASK_SET: wrong number of arguments\n");
     return -Parser::EBADARGS;
@@ -34,7 +35,6 @@ static int stat_mask_set(std::vector<std::string> cmdargs, char *output,
 static int stat_input(std::vector<std::string> cmdargs, char *output,
                       unsigned int *obytes) {
   XTRACE(CMD, INF, "STAT_INPUT\n");
-  *obytes = 0;
   if (cmdargs.size() != 1) {
     XTRACE(CMD, WAR, "STAT_INPUT: wrong number of arguments\n");
     return -Parser::EBADARGS;
@@ -51,7 +51,6 @@ static int stat_input(std::vector<std::string> cmdargs, char *output,
 static int stat_processing(std::vector<std::string> cmdargs, char *output,
                            unsigned int *obytes) {
   XTRACE(CMD, INF, "STAT_PROCESSING\n");
-  *obytes = 0;
   if (cmdargs.size() != 1) {
     XTRACE(CMD, WAR, "STAT_PROCESSING: wrong number of arguments\n");
     return -Parser::EBADARGS;
@@ -70,7 +69,6 @@ static int stat_processing(std::vector<std::string> cmdargs, char *output,
 static int stat_output(std::vector<std::string> cmdargs, char *output,
                        unsigned int *obytes) {
   XTRACE(CMD, INF, "STAT_OUTPUT\n");
-  *obytes = 0;
   if (cmdargs.size() != 1) {
     XTRACE(CMD, WAR, "STAT_OUTPUT: wrong number of arguments\n");
     return -Parser::EBADARGS;
@@ -83,10 +81,9 @@ static int stat_output(std::vector<std::string> cmdargs, char *output,
 }
 
 /** - */
-static int stat_reset(std::vector<std::string> cmdargs, char *output,
-                      unsigned int *obytes) {
+static int stat_reset(std::vector<std::string> cmdargs, char UNUSED *output,
+                      unsigned int UNUSED *obytes) {
   XTRACE(CMD, INF, "STAT_RESET\n");
-  *obytes = 0;
   if (cmdargs.size() != 1) {
     XTRACE(CMD, WAR, "STAT_RESET: wrong number of arguments\n");
     return -Parser::EBADARGS;
@@ -153,7 +150,6 @@ static int load_calib(std::string calibration) {
 static int load_cspec_calib(std::vector<std::string> cmdargs, char *output,
                             unsigned int *obytes) {
   XTRACE(CMD, INF, "LOAD_CSPEC_CALIB\n");
-  *obytes = 0;
   if (cmdargs.size() != 2) {
     XTRACE(CMD, WAR, "LOAD_CSPEC_CALIB: wrong number of arguments\n");
     return -Parser::EBADARGS;

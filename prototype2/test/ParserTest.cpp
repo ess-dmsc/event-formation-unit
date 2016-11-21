@@ -11,11 +11,12 @@ using namespace std;
 
 // clang-format off
 std::vector<std::string> commands {
-  "STAT_INPUT",         "STAT_INPUT 0, 0, 0, 0",
-  "STAT_PROCESSING",    "STAT_PROCESSING 0, 0, 0, 0, 0, 0",
-  "STAT_OUTPUT",        "STAT_OUTPUT 0, 0, 0",
-  "STAT_MASK_SET 0",    "<OK>",
-  "STAT_RESET",         "<OK>"
+  "STAT_INPUT",                     "STAT_INPUT 0, 0, 0, 0",
+  "STAT_PROCESSING",                "STAT_PROCESSING 0, 0, 0, 0, 0, 0",
+  "STAT_OUTPUT",                    "STAT_OUTPUT 0, 0, 0",
+  "STAT_MASK_SET 0",                "<OK>",
+  "STAT_RESET",                     "<OK>",
+  "LOAD_CSPEC_CALIB data/cal_zero", "<OK>"
 };
 // clang-format on
 
@@ -100,7 +101,6 @@ TEST_F(ParserTest, NoTokens) {
 TEST_F(ParserTest, ValidCommands) {
   ASSERT_EQ(0, commands.size() & 1);
   for (auto i = 0U; i < commands.size(); i += 2) {
-    MESSAGE() << i << "\n";
     const char *cmd = commands[i].c_str();
     const char *reply = commands[i + 1].c_str();
     std::memcpy(input, cmd, strlen(cmd));
