@@ -217,6 +217,7 @@ int Parser::registercmd(std::string cmd_name, function_ptr cmd_fn) {
 int Parser::parse(char *input, unsigned int ibytes, char *output,
                   unsigned int *obytes) {
   XTRACE(CMD, DEB, "parse() received %u bytes\n", ibytes);
+  *obytes = 0;
 
   if (ibytes == 0) {
     return -EUSIZE;
@@ -240,6 +241,8 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
   }
 
   if ((int)tokens.size() < 1) {
+    XTRACE(CMD, WAR, "No tokens\n");
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <BADCMD>");
     return -ENOTOKENS;
   }
 
@@ -249,13 +252,14 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
   }
 
   auto command = tokens.at(0);
-  int res = -EBADCMD;;
-  *obytes = 0;
+  int res = -EBADCMD;
+
   if ((commands[command] != 0) && (command.size() < max_command_size)) {
     XTRACE(CMD, INF, "Calling registered command %s\n", command.c_str());
     res = commands[command](tokens, output, obytes);
   }
 
+  XTRACE(CMD, DEB, "parse1 res: %d, obytes: %d\n", res, *obytes);
   if (*obytes == 0) { // no  reply specified, create one
     XTRACE(CMD, INF, "creating response\n");
     switch (res) {
@@ -278,7 +282,7 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
       break;
     }
   }
-  XTRACE(CMD, DEB, "res: %d, obytes: %d\n", res, *obytes);
+  XTRACE(CMD, DEB, "parse2 res: %d, obytes: %d\n", res, *obytes);
   return res;
 }
 /******************************************************************************/
