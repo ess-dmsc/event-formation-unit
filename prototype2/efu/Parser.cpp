@@ -27,7 +27,7 @@ static int stat_mask_set(std::vector<std::string> cmdargs, char UNUSED *output,
   unsigned int mask = (unsigned int)std::stoul(cmdargs.at(1), nullptr, 0);
   XTRACE(CMD, INF, "STAT_MASK: 0x%08x\n", mask);
   efu_args->stat.set_mask(mask);
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
+  //*obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
   return Parser::OK;
 }
 
@@ -89,7 +89,7 @@ static int stat_reset(std::vector<std::string> cmdargs, char UNUSED *output,
     return -Parser::EBADARGS;
   }
   efu_args->stat.clear();
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
+  //*obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
   return Parser::OK;
 }
 
@@ -158,7 +158,7 @@ static int cspec_load_calib(std::vector<std::string> cmdargs, char *output,
     return -Parser::EBADARGS;
   }
 
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
+  //*obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
 
   /** @todo some other ipc between main and threads ? */
   efu_args->proc_cmd = 1; // send load command to processing thread
