@@ -19,7 +19,7 @@ struct multi_grid {
 /** @todo no error checking, assumes valid data and valid buffer
  */
 void CSPECData::createevent(const MultiGridData &data, char *buffer) {
-  auto col = data.module;
+  auto col = data.module + 1; /** @todo talk to Anton */
   auto grid = chanconv->getGridId(data.d[6]);
   auto wire = chanconv->getWireId(data.d[2]);
   auto pixid = multigridgeom->getdetectorpixelid(col, grid, wire);
@@ -41,8 +41,7 @@ int CSPECData::receive(const char *buffer, int size) {
   int oldsize = size;
 
   while (size >= 4) {
-    XTRACE(PROCESS, DEB, "elems: %d, size: %d, datap: %p\n", elems, size,
-           datap);
+    //XTRACE(PROCESS, DEB, "elems: %d, size: %d, datap: %p\n", elems, size, datap);
     switch (state) {
     // Parse Header
     case State::hdr:
@@ -67,6 +66,7 @@ int CSPECData::receive(const char *buffer, int size) {
       XTRACE(PROCESS, DEB, "State::dat valid data (%d), next state State:dat\n",
              datctr);
       data[elems].d[datctr] = (*datap) & 0x3fff;
+      XTRACE(PROCESS, DEB, "data[%d].d[%d]: %d\n", elems, datctr, data[elems].d[datctr]);
       datctr++;
       if (datctr == 8) {
         XTRACE(PROCESS, DEB, "State:dat all data, next state State:ftr\n");
@@ -83,6 +83,7 @@ int CSPECData::receive(const char *buffer, int size) {
       }
       XTRACE(PROCESS, DEB, "State::ftr valid data, next state State:hdr\n");
       data[elems].time = (*datap) & 0x3fffffff;
+      XTRACE(PROCESS, DEB, "time: %d\n", data[elems].time);
       elems++;
       state = State::hdr;
       break;
@@ -103,19 +104,17 @@ int CSPECData::input_filter() {
   for (unsigned int i = 0; i < elems; i++) {
     data[i].valid = 0;
     if ((data[i].d[0] < wire_thresh) || (data[i].d[4] < grid_thresh)) {
-      // printf("data 0 or 4 failed, thresholds: %d, %d\n", wire_thresh,
-      // grid_thresh);
-      // assert(1==9);
-      discarded++;
+      XTRACE(PROCESS, INF, "data 0 or 4 failed, thresholds: %d, %d\n",
+             wire_thresh, grid_thresh);
+      discarded++; // due to low signal
       continue;
     }
     data[i].valid = 1;
 
     if ((data[i].d[1] >= wire_thresh) || (data[i].d[5] >= grid_thresh)) {
-      // printf("data 1 or 5 failed, thresholds: %d, %d\n", wire_thresh,
-      // grid_thresh);
-      // assert(1==9);
-      discarded++;       // double event
+      XTRACE(PROCESS, INF, "data 1 or 5 failed, thresholds: %d, %d\n",
+             wire_thresh, grid_thresh);
+      discarded++; // due to duplicate neutron event
       data[i].valid = 0; // invalidate
       continue;
     }

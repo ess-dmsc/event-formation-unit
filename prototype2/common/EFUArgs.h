@@ -7,6 +7,7 @@
 
 #pragma once
 #include <common/Stats.h>
+#include <cspec/CSPECChanConv.h>
 #include <string>
 
 class EFUArgs {
@@ -28,7 +29,7 @@ public:
   unsigned int updint{1};             /**< update interval (s) */
   unsigned int stopafter{0xffffffff}; /**< 'never' stop */
 
-  std::string det{"nmx"};               /**< detector name */
+  std::string det{"cspec"};               /**< detector name */
   std::string broker{"localhost:9092"}; /**< Kafka broker */
   bool kafka{true};                     /**< whether to use Kafka or not */
 
@@ -38,6 +39,10 @@ public:
   // Runtime Stats
   Stats stat;
   unsigned int reportmask{0xffffffff};
+
+  uint16_t wirecal[CSPECChanConv::adcsize];
+  uint16_t gridcal[CSPECChanConv::adcsize];
+  uint32_t proc_cmd{0};
 };
 
 // Used all the tim and is not global variable

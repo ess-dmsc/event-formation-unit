@@ -18,6 +18,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
         {"ipaddr", required_argument, 0, 'i'},
         {"data", required_argument, 0, 'd'},
         {"packets", required_argument, 0, 'a'},
+        {"events", required_argument, 0, 'n'},
         {"port", required_argument, 0, 'p'},
         {"size", required_argument, 0, 's'},
         {"throttle", required_argument, 0, 't'},
@@ -28,7 +29,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:d:f:i:p:s:t:u:hx", long_options,
+    c = getopt_long(argc, argv, "a:d:f:i:n:p:s:t:u:hx", long_options,
                     &option_index);
 
     if (c == -1)
@@ -48,6 +49,9 @@ DGArgs::DGArgs(int argc, char *argv[]) {
       break;
     case 'i':
       dest_ip.assign(optarg);
+      break;
+    case 'n':
+      txEvt = atoi(optarg);
       break;
     case 'p':
       port = atoi(optarg);

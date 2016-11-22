@@ -30,10 +30,9 @@ int main(int argc, char *argv[]) {
   DataSource.printbuffers();
 
   CSPECData cspec;
-  int ndata = 100;
-  int size = cspec.generate(buffer, 9000, ndata, cspec.wire_thresh + 1,
+  int size = cspec.generate(buffer, 9000, opts.txEvt, cspec.wire_thresh + 1,
                             cspec.grid_thresh + 1);
-  assert(size == ndata * cspec.datasize);
+  assert(size == opts.txEvt * cspec.datasize);
 
   uint64_t tx_total = 0;
   uint64_t tx = 0;

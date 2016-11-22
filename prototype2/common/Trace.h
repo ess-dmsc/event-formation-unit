@@ -5,6 +5,8 @@
  *  @brief Trace macros with masks and levels
  */
 
+ #include <cstdio>
+
 /** Add trace groups below - must be powers of two */
 // clang-format off
 #define TRC_G_INPUT   0x00000001U

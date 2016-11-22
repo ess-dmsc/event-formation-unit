@@ -16,7 +16,7 @@
 
 #define UNUSED __attribute__((unused))
 
-/** - */
+//=============================================================================
 static int stat_mask_set(std::vector<std::string> cmdargs, char UNUSED *output,
                          unsigned int UNUSED *obytes) {
   XTRACE(CMD, INF, "STAT_MASK_SET\n");
@@ -31,7 +31,7 @@ static int stat_mask_set(std::vector<std::string> cmdargs, char UNUSED *output,
   return Parser::OK;
 }
 
-/** - */
+//=============================================================================
 static int stat_input(std::vector<std::string> cmdargs, char *output,
                       unsigned int *obytes) {
   XTRACE(CMD, INF, "STAT_INPUT\n");
@@ -47,7 +47,7 @@ static int stat_input(std::vector<std::string> cmdargs, char *output,
   return Parser::OK;
 }
 
-/** - */
+//=============================================================================
 static int stat_processing(std::vector<std::string> cmdargs, char *output,
                            unsigned int *obytes) {
   XTRACE(CMD, INF, "STAT_PROCESSING\n");
@@ -65,7 +65,7 @@ static int stat_processing(std::vector<std::string> cmdargs, char *output,
   return Parser::OK;
 }
 
-/** - */
+//=============================================================================
 static int stat_output(std::vector<std::string> cmdargs, char *output,
                        unsigned int *obytes) {
   XTRACE(CMD, INF, "STAT_OUTPUT\n");
@@ -80,7 +80,7 @@ static int stat_output(std::vector<std::string> cmdargs, char *output,
   return Parser::OK;
 }
 
-/** - */
+//=============================================================================
 static int stat_reset(std::vector<std::string> cmdargs, char UNUSED *output,
                       unsigned int UNUSED *obytes) {
   XTRACE(CMD, INF, "STAT_RESET\n");
@@ -93,10 +93,9 @@ static int stat_reset(std::vector<std::string> cmdargs, char UNUSED *output,
   return Parser::OK;
 }
 
-/** - */
+//=============================================================================
 static int load_file(std::string file, char *buffer) {
   struct stat buf;
-  const int cal_size = 16384;
 
   std::fill_n((char *)&buf, sizeof(struct stat), 0);
 
@@ -112,14 +111,14 @@ static int load_file(std::string file, char *buffer) {
     return -11;
   }
 
-  if (buf.st_size != 16384 * 2) {
+  if (buf.st_size != CSPECChanConv::adcsize * 2) {
     XTRACE(CMD, WAR, "file %s has wrong length: %d (should be %d)\n",
-           file.c_str(), buf.st_size, 16384 * 2);
+           file.c_str(), (int)buf.st_size, 16384 * 2);
     close(fd);
     return -12;
   }
 
-  if (read(fd, buffer, cal_size * 2) != cal_size * 2) {
+  if (read(fd, buffer, CSPECChanConv::adcsize * 2) != CSPECChanConv::adcsize * 2) {
     XTRACE(CMD, ERR, "read() from %s incomplete\n", file.c_str());
     close(fd);
     return -13;
@@ -130,28 +129,26 @@ static int load_file(std::string file, char *buffer) {
 }
 
 static int load_calib(std::string calibration) {
-  const int cal_size = 16384;
-  char *wcal[cal_size * 2];
-  char *gcal[cal_size * 2];
 
   XTRACE(CMD, ALW, "Attempt to load calibration %s\n", calibration.c_str());
 
   auto file = calibration + std::string(".wcal");
-  if (load_file(file, (char *)&wcal) < 0) {
+  if (load_file(file, (char *)efu_args->wirecal) < 0) {
     return -1;
   }
   file = calibration + std::string(".gcal");
-  if (load_file(file, (char *)&gcal) < 0) {
+  if (load_file(file, (char *)efu_args->gridcal) < 0) {
     return -1;
   }
   return 0;
 }
 
-static int load_cspec_calib(std::vector<std::string> cmdargs, char *output,
+//=============================================================================
+static int cspec_load_calib(std::vector<std::string> cmdargs, char *output,
                             unsigned int *obytes) {
-  XTRACE(CMD, INF, "LOAD_CSPEC_CALIB\n");
+  XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
   if (cmdargs.size() != 2) {
-    XTRACE(CMD, WAR, "LOAD_CSPEC_CALIB: wrong number of arguments\n");
+    XTRACE(CMD, WAR, "CSPEC_LOAD_CALIB: wrong number of arguments\n");
     return -Parser::EBADARGS;
   }
 
@@ -162,6 +159,36 @@ static int load_cspec_calib(std::vector<std::string> cmdargs, char *output,
   }
 
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
+
+  /** @todo some other ipc between main and threads ? */
+  efu_args->proc_cmd = 1; // send load command to processing thread
+
+  return Parser::OK;
+}
+
+//=============================================================================
+static int cspec_show_calib(std::vector<std::string> cmdargs, char *output,
+                            unsigned int *obytes) {
+  auto nargs = cmdargs.size();
+  unsigned int offset = 0;
+  XTRACE(CMD, INF, "CSPEC_SHOW_CALIB\n");
+  if (nargs == 1) {
+    offset = 0;
+  } else if (nargs == 2) {
+    offset = atoi(cmdargs.at(1).c_str());
+  } else {
+    XTRACE(CMD, WAR, "CSPEC_SHOW_CALIB: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+
+  if (offset > CSPECChanConv::adcsize -1) {
+    return -Parser::EBADARGS;
+  }
+
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE,
+            "wire %d 0x%04x, grid %d 0x%04x\n",
+            offset, efu_args->wirecal[offset], offset, efu_args->gridcal[offset]);
+
   return Parser::OK;
 }
 
@@ -173,7 +200,8 @@ Parser::Parser() {
   registercmd(std::string("STAT_PROCESSING"), stat_processing);
   registercmd(std::string("STAT_OUTPUT"), stat_output);
   registercmd(std::string("STAT_RESET"), stat_reset);
-  registercmd(std::string("LOAD_CSPEC_CALIB"), load_cspec_calib);
+  registercmd(std::string("CSPEC_LOAD_CALIB"), cspec_load_calib);
+  registercmd(std::string("CSPEC_SHOW_CALIB"), cspec_show_calib);
 }
 
 int Parser::registercmd(std::string cmd_name, function_ptr cmd_fn) {
@@ -221,14 +249,15 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
   }
 
   auto command = tokens.at(0);
-  int res = -EBADCMD;
+  int res = -EBADCMD;;
   *obytes = 0;
   if ((commands[command] != 0) && (command.size() < max_command_size)) {
     XTRACE(CMD, INF, "Calling registered command %s\n", command.c_str());
     res = commands[command](tokens, output, obytes);
   }
 
-  if (obytes == 0) { // no  reply specified, create one
+  if (*obytes == 0) { // no  reply specified, create one
+    XTRACE(CMD, INF, "creating response\n");
     switch (res) {
     case OK:
       *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
@@ -249,6 +278,7 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
       break;
     }
   }
+  XTRACE(CMD, DEB, "res: %d, obytes: %d\n", res, *obytes);
   return res;
 }
 /******************************************************************************/

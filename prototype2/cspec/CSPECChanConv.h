@@ -13,8 +13,7 @@ class CSPECChanConv {
 public:
   static const int adcsize = 16384;
   CSPECChanConv();
-  // CSPECChanConv(vector<unsigned )
-  // CSPECCHanConv(const char * wire_calibration, const char grid_calibration);
+
   uint16_t getWireId(unsigned int wire_adc) { return wirecal[wire_adc]; };
   uint16_t getGridId(unsigned int grid_adc) { return gridcal[grid_adc]; };
 
@@ -27,6 +26,10 @@ public:
                   unsigned int nb_channels) {
     return makecal(gridcal, min, max, nb_channels);
   }
+
+  /** @brief loads wire and grid calibrations from efu_args
+   */
+  void load_calibration(uint16_t * wirecal_new, uint16_t * gridcal_new);
 
 private:
   // Generate a linear map from adc values to N channels

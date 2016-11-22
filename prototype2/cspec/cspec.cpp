@@ -124,6 +124,7 @@ void CSPEC::input_thread(void *args) {
 
 void CSPEC::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
+  assert(opts != NULL);
 
   CSPECChanConv conv;
   conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear look-up table
@@ -139,6 +140,13 @@ void CSPEC::processing_thread(void *args) {
 
   unsigned int data_index;
   while (1) {
+
+    // Check for control from mothership (main)
+    if (opts->proc_cmd) {
+      opts->proc_cmd = 0; /** @todo other means of ipc? */
+      XTRACE(PROCESS, INF, "processing_thread loading new calibrations\n");
+      conv.load_calibration(opts->wirecal, opts->gridcal);
+    }
 
     if ((input2proc_fifo.pop(data_index)) == false) {
       opts->stat.p.rx_idle++;

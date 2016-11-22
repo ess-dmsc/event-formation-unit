@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
-//#include <vector>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
