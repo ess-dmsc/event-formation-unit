@@ -218,11 +218,14 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
                   unsigned int *obytes) {
   XTRACE(CMD, DEB, "parse() received %u bytes\n", ibytes);
   *obytes = 0;
+  memset(output, 0, SERVER_BUFFER_SIZE);
 
   if (ibytes == 0) {
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <SIZE>");
     return -EUSIZE;
   }
   if (ibytes > SERVER_BUFFER_SIZE) {
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <SIZE>");
     return -EOSIZE;
   }
 

@@ -50,8 +50,7 @@ protected:
 TEST_F(ParserTest, InputBuffer) {
   auto res = parser->parse(input, 0, output, &obytes);
   ASSERT_EQ(-Parser::EUSIZE, res);
-
-  ASSERT_EQ(0, obytes);
+  ASSERT_EQ( strcmp("Error: <SIZE>", output) , 0);
 
   input[0] = 'A';
   input[1] = 'B';
@@ -89,7 +88,7 @@ TEST_F(ParserTest, OversizeData) {
   MESSAGE() << "Max buffer size + 1\n";
   res = parser->parse(input, buffer_size + 1, output, &obytes);
   ASSERT_EQ(-Parser::EOSIZE, res);
-  ASSERT_EQ( strcmp("Error: <BADCMD>", output) , 0);
+  ASSERT_EQ( strcmp("Error: <SIZE>", output) , 0);
 }
 
 TEST_F(ParserTest, NoTokens) {
