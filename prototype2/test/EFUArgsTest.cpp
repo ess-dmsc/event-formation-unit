@@ -12,7 +12,7 @@ TEST_F(EFUArgsTest, Constructor) {
 
   ASSERT_STREQ("localhost:9092", opts.broker.c_str());
   ASSERT_EQ(12, opts.cpustart);
-  ASSERT_STREQ("nmx", opts.det.c_str());
+  ASSERT_STREQ("cspec", opts.det.c_str());
   ASSERT_STREQ("0.0.0.0", opts.ip_addr.c_str());
   ASSERT_EQ(9000, opts.port);
   ASSERT_EQ(0xffffffffU, opts.reportmask);
