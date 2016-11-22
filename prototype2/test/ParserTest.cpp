@@ -9,6 +9,13 @@
 
 using namespace std;
 
+#define UNUSED __attribute__((unused))
+
+static int dummy_command(std::vector<std::string> UNUSED cmdargs, char UNUSED *output,
+                            unsigned int UNUSED *obytes) {
+  return 0;
+}
+
 // clang-format off
 std::vector<std::string> commands {
   "STAT_INPUT",                     "STAT_INPUT 0, 0, 0, 0",
@@ -21,6 +28,19 @@ std::vector<std::string> commands {
   "CSPEC_SHOW_CALIB",               "wire 0 0x0000, grid 0 0x0000",
   "CSPEC_SHOW_CALIB 5",             "wire 5 0x0000, grid 5 0x0000",
 };
+
+std::vector<std::string> commands_badargs {
+  "STAT_INPUT all",
+  "STAT_PROCESSING a b",
+  "STAT_OUTPUT stuff",
+  "STAT_MASK_SET",
+  "STAT_MASK_SET 3 4",
+  "STAT_RESET 0",
+  "CSPEC_LOAD_CALIB",
+  "CSPEC_LOAD_CALIB file1 file2",
+  "CSPEC_SHOW_CALIB 1 2"
+};
+
 // clang-format on
 
 class ParserTest : public TestBase {
@@ -114,13 +134,22 @@ TEST_F(ParserTest, ValidCommands) {
   }
 }
 
-TEST_F(ParserTest, InvalidCommandStatMask) {
-  char *cmd = (char *)"STAT_MASK_SET";
-  std::memcpy(input, cmd, strlen(cmd));
+TEST_F(ParserTest, BadArgsCommands) {
+  for (auto cmdstr : commands_badargs) {
+    const char *cmd = cmdstr.c_str();
+    std::memcpy(input, cmd, strlen(cmd));
+    MESSAGE() << "Checking command: " << cmd << "\n";
+    auto res = parser->parse(input, strlen(cmd), output, &obytes);
+    ASSERT_EQ( strcmp("Error: <BADARGS>", output) , 0);
+    ASSERT_EQ(-Parser::EBADARGS, res);
+  }
+}
 
-  auto res = parser->parse(input, strlen(cmd), output, &obytes);
-  ASSERT_EQ( strcmp("Error: <BADARGS>", output) , 0);
-  ASSERT_EQ(-Parser::EBADARGS, res);
+TEST_F(ParserTest, DuplicateCommands) {
+  int res = parser->registercmd("DUMMY_COMMAND", dummy_command);
+  ASSERT_EQ(res, 0);
+  res = parser->registercmd("DUMMY_COMMAND", dummy_command);
+  ASSERT_EQ(res, -1);
 }
 
 int main(int argc, char **argv) {
