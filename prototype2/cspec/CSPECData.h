@@ -51,7 +51,7 @@ public:
   CSPECData(){}; // Discouraged, but used in cspecgen
 
   ~CSPECData() {
-    delete data;
+    delete [] data;
   }
 
   /** @brief parse a binary payload buffer, return number of data elements
