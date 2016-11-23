@@ -26,7 +26,7 @@
  */
 
 //#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+//#define TRC_LEVEL TRC_L_CRI
 
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
@@ -133,7 +133,7 @@ void CSPEC::processing_thread(void *args) {
   MultiGridGeometry CSPEC(80, 160, 4, 16);
 
   // CSPECData dat(0, 0, &conv, &CSPEC); // Custom signal thresholds
-  CSPECData dat(&conv, &CSPEC); // Default signal thresholds
+  CSPECData dat(250, &conv, &CSPEC); // Default signal thresholds
 
   Timer stopafter_clock;
   TSCTimer report_timer;
@@ -160,7 +160,8 @@ void CSPEC::processing_thread(void *args) {
       opts->stat.p.rx_discards += dat.input_filter();
 
       opts->stat.p.fifo_free = proc2output_fifo.free();
-      for (auto d : dat.data) {
+      for (unsigned int  id = 0; id < dat.datalen; id++) {
+        auto d = dat.data[id];
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();
           dat.createevent(d, event_ringbuf->getdatabuffer(event_index));

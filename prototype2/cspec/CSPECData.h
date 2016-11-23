@@ -35,13 +35,18 @@ public:
   };
 
   /** Let user specify calibration parameters */
-  CSPECData(CSPECChanConv *calibration, MultiGridGeometry *geometry)
-      : chanconv(calibration), multigridgeom(geometry){};
+  CSPECData(unsigned int maxevents, CSPECChanConv *calibration, MultiGridGeometry *geometry)
+      : datalen(maxevents), chanconv(calibration), multigridgeom(geometry){
 
-  CSPECData(unsigned int wthresh, unsigned int gthresh,
+        data = new struct MultiGridData [maxevents];
+      };
+
+  CSPECData(unsigned int maxevents, unsigned int wthresh, unsigned int gthresh,
             CSPECChanConv *calibration, MultiGridGeometry *geometry)
-      : wire_thresh(wthresh), grid_thresh(gthresh), chanconv(calibration),
-        multigridgeom(geometry){};
+      : wire_thresh(wthresh), grid_thresh(gthresh), datalen(maxevents), chanconv(calibration),
+        multigridgeom(geometry){
+          data = new struct MultiGridData [maxevents];
+      };
 
   CSPECData(){}; // Discouraged, but used in cspecgen
 
@@ -64,7 +69,9 @@ public:
   void createevent(const MultiGridData &data, char *buffer);
 
   // This data is overwritten on receive()
-  struct MultiGridData data[250];
+  //struct MultiGridData data[250];
+  struct MultiGridData * data;
+  unsigned datalen{0};
   unsigned int elems{0};
   unsigned int error{0};
 

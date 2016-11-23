@@ -40,11 +40,11 @@ public:
     XTRACE(PROCESS, DEB, "column: %d, gridid: %d, wireid:%d\n",
             column, gridid, wireid);
     if ((column > cols_) || (gridid > grids_) || (wireid > xwires_ * zwires_)) {
-      XTRACE(PROCESS, ERR, "oversize geometry input\n");
+      XTRACE(PROCESS, WAR, "oversize geometry input\n");
       return -1;
     }
     if ((column < 1) || (gridid < 1) || (wireid < 1)) {
-      XTRACE(PROCESS, ERR, "undersize geometry input\n");
+      XTRACE(PROCESS, WAR, "undersize geometry input\n");
       return -1;
     }
 

@@ -14,7 +14,7 @@ struct multi_grid {
 } __attribute__((packed));
 
 //#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+//#define TRC_LEVEL TRC_L_INF
 
 /** @todo no error checking, assumes valid data and valid buffer
  */
@@ -81,7 +81,7 @@ int CSPECData::receive(const char *buffer, int size) {
         state = State::hdr;
         break;
       }
-      XTRACE(PROCESS, DEB, "State::ftr valid data, next state State:hdr\n");
+      XTRACE(PROCESS, INF, "State::ftr valid data, next state State:hdr, events %u\n", elems);
       data[elems].time = (*datap) & 0x3fffffff;
       XTRACE(PROCESS, DEB, "time: %d\n", data[elems].time);
       elems++;

@@ -2,14 +2,17 @@
 
 CFLAGS=-Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs --std=c++11
 
-prog = cncsread
+prog = cncsread analyse
 
 all: $(prog)
 	@echo done.
 
 cncsread: main.cpp
-	gcc $(CFLAGS) main.cpp -o $(prog)
+	gcc $(CFLAGS) main.cpp -o $@
 
+analyse: analyse.cpp ../../prototype2/cspec/CSPECData.cpp ../../prototype2/cspec/CSPECChanConv.cpp 
+		g++ $(CFLAGS) analyse.cpp -I ../../prototype2 ../../prototype2/cspec/CSPECData.cpp \
+		../../prototype2/cspec/CSPECChanConv.cpp -o $@
 
 test: all
 	@echo "Run on a single file"
@@ -18,4 +21,4 @@ test: all
 	find . -name "*.bin" | xargs -n 1 ./$(prog) | grep "Double events"
 
 clean:
-	rm $(prog)
+	rm -f $(prog)
