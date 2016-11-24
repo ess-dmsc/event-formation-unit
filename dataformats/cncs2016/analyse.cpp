@@ -43,8 +43,10 @@ public:
   }
 
   void analyze() {
+    firstnonzero = -1;
+    lastnonzero = -1;
     nonzero = 0;
-    printf("tot entries: %6d - ", entries);
+    //printf("tot entries: %6d - ", entries);
     for (unsigned int i = 150; i < histsize; i++) {
       if ((hist[i] > 0) and (firstnonzero == -1)) {
         firstnonzero = i;
@@ -54,24 +56,23 @@ public:
         lastnonzero = i;
       }
     }
-    printf("nonzero %6d, firstnonzero %5d, lastnonzero %5d, span %5d\n",
-           nonzero, firstnonzero, lastnonzero, lastnonzero-firstnonzero);
+    //printf("nonzero %6d, firstnonzero %5d, lastnonzero %5d, span %5d\n",
+    //       nonzero, firstnonzero, lastnonzero, lastnonzero-firstnonzero);
   }
 };
 
-Histogram wirehist, gridhist;
 
-void populate(CSPECData & dat, int events) {
+void populate(CSPECData & dat, int events, Histogram& wglobal, Histogram& wlocal) {
   for (int i = 0; i < events; i++) {
      unsigned int wpos = dat.data[i].d[2];
-     unsigned int gpos = dat.data[i].d[6];
-     wirehist.add(wpos);
-     gridhist.add(gpos);
+     //unsigned int gpos = dat.data[i].d[6];
+     wglobal.add(wpos);
+     wlocal.add(wpos);
   }
 }
 
 
-int readfile(char * filename) {
+int readfile(char * filename, Histogram& wglobal, Histogram& wlocal) {
   struct stat sb;
   CSPECChanConv conv;
   conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear look-up table
@@ -96,7 +97,7 @@ int readfile(char * filename) {
   res = munmap(addr, sb.st_size);
   assert(res == 0);
 
-  populate(dat, events);
+  populate(dat, events, wglobal, wlocal);
   return events;
 }
 
@@ -171,21 +172,34 @@ Args::Args(int argc, char * argv[]) {
 
 int main(UNUSED int argc, UNUSED char * argv[]) {
   char filename[200];
+  char pathname[500];
   Args opts(argc, argv);
 
-  printf("Loading files %s(%d-%d)%s\n", opts.prefix.c_str(), opts.start, opts.end, opts.postfix.c_str());
-  printf("From directory %s\n", opts.dir.c_str());
+  Histogram global, local;
+
+  const char * fmt1 = " %-40s, %5s, %10s, %10s, %7s, %7s, %6s, %12s, %12s, %12s\n";
+  const char * fmt2 = " %-40s, %5d, %10d, %10d, %7d, %7d, %6d, %12d, %12d, %12d\n";
+
+  printf("#Loading files %s(%d-%d)%s\n", opts.prefix.c_str(), opts.start, opts.end, opts.postfix.c_str());
+  printf("#From directory %s\n", opts.dir.c_str());
+  printf("\n");
+
+  printf(fmt1, "#Filename",  "index", "events", "ev_gbl", "nonzero", "firstnz", "lastnz", "nonzero_gbl", "firstnz_glbl", "lastnz_glbl");
   for (int i = opts.start; i <= opts.end; i++) {
-    sprintf(filename, "%s%s%d%s", opts.dir.c_str(), opts.prefix.c_str(), i, opts.postfix.c_str());
-    printf("%s%d%s - ", opts.prefix.c_str(), i, opts.postfix.c_str());
-    auto events = readfile(filename);
+    sprintf(filename,"%s%03d%s", opts.prefix.c_str(), i, opts.postfix.c_str());
+    sprintf(pathname, "%s%s", opts.dir.c_str(), filename);
+
+
+    local.clear();
+    auto events = readfile(pathname, global, local);
     if (events > 0) {
-      printf("%5d events - ", events);
-      wirehist.analyze();
+      local.analyze();
+      global.analyze();
+      printf(fmt2, filename, i, local.entries, global.entries,
+             local.nonzero, local.firstnonzero, local.lastnonzero,
+             global.nonzero, global.firstnonzero, global.lastnonzero );
     } else {
-      printf("failed\n");
+      printf("# %s error, ignored\n", filename);
     }
   }
-  printf("\n");
-  wirehist.analyze();
 }
