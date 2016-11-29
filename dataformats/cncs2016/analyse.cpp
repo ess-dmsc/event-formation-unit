@@ -162,7 +162,7 @@ Args::Args(int argc, char * argv[]) {
         printf(" --start, -s number      sequence number of first file \n");
         printf(" --end -e number         sequence number of last file \n");
         printf(" -h                      help - prints this message \n");
-        return;
+        exit(0);
       }
     }
 
