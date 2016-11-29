@@ -5,6 +5,7 @@
 #include <common/Trace.h>
 #include <cspec/CSPECData.h>
 #include <cspec/CSPECChanConv.h>
+#include <errno.h>
 #include <sys/types.h>
 #include <sys/mman.h>
 #include <sys/stat.h>
@@ -12,6 +13,8 @@
 #include <getopt.h>
 #include <string.h>
 #include <string>
+#include <unistd.h>
+//#include <matplotlibcpp.h>
 
 #define UNUSED __attribute__((unused))
 
@@ -80,11 +83,13 @@ int readfile(char * filename, Histogram& wglobal, Histogram& wlocal) {
 
   MultiGridGeometry CNCS(2, 48, 4, 16);
 
-  CSPECData dat(100000, &conv, &CNCS); // Default signal thresholds
+  CSPECData dat(200000, &conv, &CNCS); // Default signal thresholds
 
   int fd = open(filename, O_RDONLY);
-  if (fd < 0)
+  if (fd < 0) {
+    perror("open() failed"); 
     return -1;
+  }
 
   auto res = fstat(fd, &sb);
   assert(res != -1);
@@ -96,6 +101,8 @@ int readfile(char * filename, Histogram& wglobal, Histogram& wlocal) {
 
   res = munmap(addr, sb.st_size);
   assert(res == 0);
+
+  close(fd);
 
   populate(dat, events, wglobal, wlocal);
   return events;
@@ -188,7 +195,6 @@ int main(UNUSED int argc, UNUSED char * argv[]) {
   for (int i = opts.start; i <= opts.end; i++) {
     sprintf(filename,"%s%03d%s", opts.prefix.c_str(), i, opts.postfix.c_str());
     sprintf(pathname, "%s%s", opts.dir.c_str(), filename);
-
 
     local.clear();
     auto events = readfile(pathname, global, local);
