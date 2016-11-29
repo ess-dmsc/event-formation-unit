@@ -38,6 +38,7 @@ std::vector<std::string> commands_badargs {
   "STAT_RESET 0",
   "CSPEC_LOAD_CALIB",
   "CSPEC_LOAD_CALIB file1 file2",
+  "CSPEC_LOAD_CALIB file_not_exist",
   "CSPEC_SHOW_CALIB 1 2"
 };
 

@@ -30,7 +30,9 @@ with open('1113.dat', 'rb') as csvfile:
      #print row[1]
      max = max + 1
      if (max == N):
-        #histogram("time", 50, dt)
+        subplot(211)
+        histogram("time", 50, dt)
+        subplot(212)
         histogram("w1pos", 100, w1pos)
         dt = []
         w1pos = []

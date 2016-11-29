@@ -144,8 +144,8 @@ static int load_calib(std::string calibration) {
 }
 
 //=============================================================================
-static int cspec_load_calib(std::vector<std::string> cmdargs, char *output,
-                            unsigned int *obytes) {
+static int cspec_load_calib(std::vector<std::string> cmdargs, UNUSED char *output,
+                            UNUSED unsigned int *obytes) {
   XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
   if (cmdargs.size() != 2) {
     XTRACE(CMD, WAR, "CSPEC_LOAD_CALIB: wrong number of arguments\n");
@@ -154,11 +154,8 @@ static int cspec_load_calib(std::vector<std::string> cmdargs, char *output,
 
   auto ret = load_calib(cmdargs.at(1));
   if (ret < 0) {
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<ERROR>");
     return -Parser::EBADARGS;
   }
-
-  //*obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
 
   /** @todo some other ipc between main and threads ? */
   efu_args->proc_cmd = 1; // send load command to processing thread
