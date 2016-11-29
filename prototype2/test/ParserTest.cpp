@@ -24,7 +24,7 @@ std::vector<std::string> commands {
   "STAT_MASK_SET 0",                "<OK>",
   "STAT_RESET",                     "<OK>",
   // doesnt work when tests are called outside prototype2/ dir
-  //"CSPEC_LOAD_CALIB data/cal_zero", "<OK>",
+  "CSPEC_LOAD_CALIB data/cal_zero", "<OK>",
   "CSPEC_SHOW_CALIB",               "wire 0 0x0000, grid 0 0x0000",
   "CSPEC_SHOW_CALIB 5",             "wire 5 0x0000, grid 5 0x0000",
 };
@@ -153,6 +153,7 @@ TEST_F(ParserTest, DuplicateCommands) {
 }
 
 int main(int argc, char **argv) {
+  int __attribute__((unused)) ret = chdir("prototype2");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
