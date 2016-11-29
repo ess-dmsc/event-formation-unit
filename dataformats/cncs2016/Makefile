@@ -11,7 +11,7 @@ cncsread: main.cpp
 	gcc $(CFLAGS) main.cpp -o $@
 
 analyse: analyse.cpp ../../prototype2/cspec/CSPECData.cpp ../../prototype2/cspec/CSPECChanConv.cpp 
-		g++ -std=c++11 $(CFLAGS) analyse.cpp -I. -I ../../prototype2 ../../prototype2/cspec/CSPECData.cpp \
+		g++ -O3 -std=c++11 $(CFLAGS) analyse.cpp -I. -I ../../prototype2 ../../prototype2/cspec/CSPECData.cpp \
 		../../prototype2/cspec/CSPECChanConv.cpp -o $@
 
 test: all

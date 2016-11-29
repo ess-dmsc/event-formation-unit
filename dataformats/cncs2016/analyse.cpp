@@ -16,6 +16,12 @@
 #include <unistd.h>
 //#include <matplotlibcpp.h>
 
+typedef struct {
+  unsigned int readouts;
+  unsigned int discards;
+  unsigned int events;
+} raw_stat_t;
+
 #define UNUSED __attribute__((unused))
 
 class Histogram {
@@ -27,9 +33,7 @@ public:
   int lastnonzero = -1;
   int nonzero = 0;
 
-  Histogram() {
-    clear();
-  }
+  Histogram() { clear(); }
 
   void add(unsigned int value) {
     assert(value < histsize);
@@ -40,16 +44,13 @@ public:
   void clear() {
     memset(hist, 0, sizeof(hist));
     entries = 0;
-    firstnonzero = -1;
-    lastnonzero = -1;
-    nonzero = 0;
   }
 
   void analyze() {
     firstnonzero = -1;
     lastnonzero = -1;
     nonzero = 0;
-    //printf("tot entries: %6d - ", entries);
+
     for (unsigned int i = 150; i < histsize; i++) {
       if ((hist[i] > 0) and (firstnonzero == -1)) {
         firstnonzero = i;
@@ -59,35 +60,43 @@ public:
         lastnonzero = i;
       }
     }
-    //printf("nonzero %6d, firstnonzero %5d, lastnonzero %5d, span %5d\n",
-    //       nonzero, firstnonzero, lastnonzero, lastnonzero-firstnonzero);
   }
 };
 
 
-void populate(CSPECData & dat, int events, Histogram& wglobal, Histogram& wlocal) {
-  for (int i = 0; i < events; i++) {
-     unsigned int wpos = dat.data[i].d[2];
-     //unsigned int gpos = dat.data[i].d[6];
-     wglobal.add(wpos);
-     wlocal.add(wpos);
+int  populate(CSPECData & dat, int readouts, Histogram& wglobal, Histogram& wlocal, int fd) {
+  static int seqno = 0;
+  int valid = 0;
+  for (int i = 0; i < readouts; i++) {
+     if (dat.data[i].valid == 1) {
+       valid++;
+       seqno++;
+       unsigned int wpos = dat.data[i].d[2];
+       //unsigned int gpos = dat.data[i].d[6];
+       #if 1
+       dprintf(fd, "%9d, %10d, %5d, %5d, %5d, %5d, %5d, %5d, %5d, %5d\n", seqno, dat.data[i].time,
+               dat.data[i].d[0], dat.data[i].d[1], dat.data[i].d[2], dat.data[i].d[3],
+               dat.data[i].d[4], dat.data[i].d[5], dat.data[i].d[6], dat.data[i].d[7] );
+      #endif
+       wglobal.add(wpos);
+       wlocal.add(wpos);
+     }
   }
+  return valid;
 }
 
+int readfile(char * filename, Histogram& wglobal, Histogram& wlocal, int ofd,
+             raw_stat_t * stat) {
 
-int readfile(char * filename, Histogram& wglobal, Histogram& wlocal) {
   struct stat sb;
+  int fd;
   CSPECChanConv conv;
-  conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear look-up table
-  conv.makegridcal(0, CSPECChanConv::adcsize - 1, 96);  // Linear look-up table
-
   MultiGridGeometry CNCS(2, 48, 4, 16);
 
   CSPECData dat(200000, &conv, &CNCS); // Default signal thresholds
 
-  int fd = open(filename, O_RDONLY);
-  if (fd < 0) {
-    perror("open() failed"); 
+  if ((fd = open(filename, O_RDONLY)) < 0) {
+    perror("open() failed");
     return -1;
   }
 
@@ -97,15 +106,16 @@ int readfile(char * filename, Histogram& wglobal, Histogram& wlocal) {
   auto addr = mmap(NULL, sb.st_size, PROT_READ,MAP_PRIVATE, fd, 0);
   assert(addr != MAP_FAILED);
 
-  auto events = dat.receive((const char *)addr, sb.st_size);
+  stat->readouts = dat.receive((const char *)addr, sb.st_size);
+  stat->discards = dat.input_filter();
+  stat->events = populate(dat, stat->readouts, wglobal, wlocal, ofd);
+  assert(stat->readouts - stat->discards == stat->events);
 
   res = munmap(addr, sb.st_size);
   assert(res == 0);
-
   close(fd);
 
-  populate(dat, events, wglobal, wlocal);
-  return events;
+  return stat->events;
 }
 
 
@@ -120,8 +130,9 @@ public:
   std::string dir{"/home/morten/cncsdata/vanadium_july_27/"};
   std::string prefix{"2016_07_26_1005_sample_"};
   std::string postfix{".bin"};
-  int start{643};
-  int end{765};
+  std::string ofile{"tmp.dat"};
+  int start{0};
+  int end{0};
 };
 
 Args::Args(int argc, char * argv[]) {
@@ -135,18 +146,22 @@ Args::Args(int argc, char * argv[]) {
           {"postfix", required_argument, 0, 'o'},
           {"start", required_argument, 0, 's'},
           {"end", required_argument, 0, 'e'},
+          {"output", required_argument, 0, 'f'},
           {0, 0, 0, 0}};
 
       int option_index = 0;
 
       int c =
-          getopt_long(argc, argv, "d:p:o:s:e:h", long_options, &option_index);
+          getopt_long(argc, argv, "d:p:o:s:e:f:h", long_options, &option_index);
       if (c == -1)
         break;
 
       switch (c) {
       case 'd':
         dir.assign(optarg);
+        break;
+      case 'f':
+        ofile.assign(optarg);
         break;
       case 'p':
         prefix.assign(optarg);
@@ -181,31 +196,43 @@ int main(UNUSED int argc, UNUSED char * argv[]) {
   char filename[200];
   char pathname[500];
   Args opts(argc, argv);
+  raw_stat_t stats;
+  int ofd;
 
   Histogram global, local;
 
-  const char * fmt1 = " %-40s, %5s, %10s, %10s, %7s, %7s, %6s, %12s, %12s, %12s\n";
-  const char * fmt2 = " %-40s, %5d, %10d, %10d, %7d, %7d, %6d, %12d, %12d, %12d\n";
+  const char * fmt1 = "%-40s, %5s, %10s, %10s, %10s, %10s, %7s, %7s, %6s, %12s, %12s, %12s\n";
+  const char * fmt2 = "%-40s, %5d, %10d, %10d, %10d, %10d, %7d, %7d, %6d, %12d, %12d, %12d\n";
 
   printf("#Loading files %s(%d-%d)%s\n", opts.prefix.c_str(), opts.start, opts.end, opts.postfix.c_str());
   printf("#From directory %s\n", opts.dir.c_str());
   printf("\n");
 
-  printf(fmt1, "#Filename",  "index", "events", "ev_gbl", "nonzero", "firstnz", "lastnz", "nonzero_gbl", "firstnz_glbl", "lastnz_glbl");
+  if ((ofd = open(opts.ofile.c_str(), O_TRUNC|O_CREAT|O_WRONLY, S_IRUSR|S_IWUSR)) < 0) {
+    perror("open() failed");
+  }
+
+  printf(fmt1, "#Filename",  "index", "readouts", "discards", "events", "ev_gbl",
+               "nonzero", "firstnz", "lastnz", "nonzero_gbl", "firstnz_glbl",
+               "lastnz_glbl");
+
   for (int i = opts.start; i <= opts.end; i++) {
     sprintf(filename,"%s%03d%s", opts.prefix.c_str(), i, opts.postfix.c_str());
     sprintf(pathname, "%s%s", opts.dir.c_str(), filename);
 
     local.clear();
-    auto events = readfile(pathname, global, local);
+    auto events = readfile(pathname, global, local, ofd, &stats);
     if (events > 0) {
       local.analyze();
       global.analyze();
-      printf(fmt2, filename, i, local.entries, global.entries,
+      printf(fmt2, filename, i, stats.readouts, stats.discards, local.entries, global.entries,
              local.nonzero, local.firstnonzero, local.lastnonzero,
              global.nonzero, global.firstnonzero, global.lastnonzero );
+    } else if (events == 0) {
+      printf("# %s no valid events, ignored\n", filename);
     } else {
-      printf("# %s error, ignored\n", filename);
+      printf("# %s file error, ignored\n", filename);
     }
   }
+  close(ofd);
 }
