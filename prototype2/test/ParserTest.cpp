@@ -39,6 +39,7 @@ std::vector<std::string> commands_badargs {
   "CSPEC_LOAD_CALIB",
   "CSPEC_LOAD_CALIB file1 file2",
   "CSPEC_LOAD_CALIB file_not_exist",
+  "CSPEC_LOAD_CALIB /etc/passwd",
   "CSPEC_SHOW_CALIB 1 2"
 };
 
