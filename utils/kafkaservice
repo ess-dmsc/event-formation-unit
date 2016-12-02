@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [[ $1 == "" ]]; then
+  echo "usage: ./kafkaservice [start|stop]"
+  exit 1
+fi
+
 CMD=$1
 KHOME=${2:-~/kafka}
 

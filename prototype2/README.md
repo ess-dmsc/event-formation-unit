@@ -54,7 +54,7 @@ In principle as simple as
 
 However for practical purposes
 
-`> taskset -c 15 ./efu -d detectorname`
+`> export LD_LIBRARY_PATH=/usr/lib64/ ; ./efu2`
 
 The efu process creates a number of pthreads, currently on cpus 12, 13, 14.
 
@@ -85,7 +85,7 @@ Starting Kafka broker is only necessary once
 
 Both commands are relative to the kafka installation directory.
 
-You can also use the bash script kafkaservice from prototype1
+You can also use the bash script kafkaservice from utils/
 
 `> ./kafkaservice start`
 

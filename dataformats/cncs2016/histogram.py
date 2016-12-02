@@ -17,6 +17,7 @@ def histogram(text, bins, rng, values):
 
 N=1000000
 max = 1
+tot = 0
 dt = []
 w1pos = []
 g1pos = []
@@ -29,6 +30,7 @@ with open('1113.dat', 'rb') as csvfile:
      max = max + 1
      if (max == N):
         plt.subplot(311)
+        plt.title("events " + str(tot) + " to " + str(tot+max))
         histogram("time", 50, None, dt)
         plt.subplot(312)
         histogram("w1pos", 100, (150, 4000), w1pos)
@@ -38,4 +40,5 @@ with open('1113.dat', 'rb') as csvfile:
         dt = []
         w1pos = []
         g1pos = []
+        tot = tot + max
         max = 1

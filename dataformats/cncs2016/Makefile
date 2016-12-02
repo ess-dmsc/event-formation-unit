@@ -1,18 +1,29 @@
+# Copyright (C) 2016 European Spallation Source ERIC
 
+CFLAGS= -O3 -std=c++11 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -I . -I ../../prototype2
 
-CFLAGS=-Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs --std=c++11
-
-prog = cncsread analyse
+prog = cncsread batchreader
 
 all: $(prog)
 	@echo done.
 
-cncsread: main.cpp
-	gcc $(CFLAGS) main.cpp -o $@
+cncsread: cncsread.cpp
+	g++ $(CFLAGS) cncsread.cpp -o $@
 
-analyse: analyse.cpp ../../prototype2/cspec/CSPECData.cpp ../../prototype2/cspec/CSPECChanConv.cpp 
-		g++ -O3 -std=c++11 $(CFLAGS) analyse.cpp -I. -I ../../prototype2 ../../prototype2/cspec/CSPECData.cpp \
-		../../prototype2/cspec/CSPECChanConv.cpp -o $@
+
+Analyse.o: Analyse.cpp Analyse.h
+	g++ -c $(CFLAGS) Analyse.cpp
+
+Args.o: Args.cpp Args.h
+	g++ -c $(CFLAGS) Args.cpp
+
+MapFile.o: MapFile.cpp MapFile.h
+	g++ -c $(CFLAGS) MapFile.cpp
+
+batchreader: batchreader.cpp Analyse.o Args.o MapFile.o
+		g++ $(CFLAGS) batchreader.cpp Analyse.o Args.o MapFile.o \
+      ../../prototype2/cspec/CSPECData.cpp \
+		  ../../prototype2/cspec/CSPECChanConv.cpp -o $@
 
 test: all
 	@echo "Run on a single file"
@@ -21,4 +32,4 @@ test: all
 	find . -name "*.bin" | xargs -n 1 ./$(prog) | grep "Double events"
 
 clean:
-	rm -f $(prog)
+	rm -f $(prog) *.o
