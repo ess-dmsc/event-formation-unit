@@ -4,19 +4,30 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import sys
+
+if len(sys.argv) != 2:
+   print "Usage ./heatmap.py xyzfile"
+   sys.exit(0)
+
+file = sys.argv[1]
 
 print "loading..."
-x,y, z =np.loadtxt('f1113.hist',delimiter=',',usecols=(0,1,2),unpack=True)
-nx = x.max() - x.min() + 1
+x, y, z =np.loadtxt(file, delimiter=',', usecols=(0,1,2), unpack=True)
 xmin = x.min()
-ny = y.max() + 1
+#ymin = y.min()
+ymin = 0
+nx = x.max() - xmin + 1
+ny = y.max() - ymin + 1
+
+
 Z = np.zeros((ny,nx))
 
 print "creating matrix..."
 assert x.shape == y.shape == z.shape
 
 for i in range(len(x)):
-    Z[int(y[i])][int(x[i]-xmin)] = z[i]
+    Z[ int(y[i]-ymin) ][ int(x[i]-xmin) ] = z[i]
 
 print "plotting..."
 fig = plt.figure()
