@@ -13,15 +13,17 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-Analyze::Analyze(std::string ofile_prefix) : ofile(ofile_prefix) {
-  if ((eventdatafd = open((ofile + ".events").c_str(),
-                          O_TRUNC | O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR)) <
-      0) {
+Analyze::Analyze(Args& opts) : ofile(opts.ofile), low_cut(opts.hist_low) {
+  static const int flags = O_TRUNC | O_CREAT | O_WRONLY;
+  static const int mode = S_IRUSR | S_IWUSR;
+
+  if ((eventdatafd = open((ofile + ".events").c_str(), flags, mode)) < 0) {
     perror("open() failed");
   }
-  if ((histdatafd = open((ofile + ".hist").c_str(),
-                         O_TRUNC | O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR)) <
-      0) {
+  if ((histdatafd = open((ofile + ".hist").c_str(), flags, mode)) < 0) {
+    perror("open() failed");
+  }
+  if ((csvdatafd = open((ofile + ".csv").c_str(), flags, mode)) < 0) {
     perror("open() failed");
   }
 }
@@ -29,6 +31,7 @@ Analyze::Analyze(std::string ofile_prefix) : ofile(ofile_prefix) {
 Analyze::~Analyze() {
   close(eventdatafd);
   close(histdatafd);
+  close(csvdatafd);
 }
 
 int Analyze::populate(CSPECData &dat, int readouts) {
@@ -84,6 +87,12 @@ int Analyze::batchreader(std::string dir, std::string prefix,
   printf(fmt1, "#Filename", "index", "readouts", "discards", "events", "ev_gbl",
          "nonzero", "firstnz", "lastnz", "nonzero_gbl", "firstnz_glbl",
          "lastnz_glbl");
+  dprintf(csvdatafd, "#Loading files %s(%d-%d)%s\n", prefix.c_str(), begin, end,
+          postfix.c_str());
+  dprintf(csvdatafd, "#From directory %s\n\n", dir.c_str());
+  dprintf(csvdatafd, fmt1, "#Filename", "index", "readouts", "discards", "events", "ev_gbl",
+                "nonzero", "firstnz", "lastnz", "nonzero_gbl", "firstnz_glbl",
+                "lastnz_glbl");
 
   for (int i = begin; i <= end; i++) {
     sprintf(buffer, "%s%03d%s", prefix.c_str(), i, postfix.c_str());
@@ -95,7 +104,9 @@ int Analyze::batchreader(std::string dir, std::string prefix,
     auto events = readfile(pathname);
     if (events > 0) {
       for (int j = 0; j < 4000; j++) {
-        dprintf(histdatafd, "%5d, %5d, %5d\n", i, j, local.hist[j]);
+        if (local.hist[j] >= low_cut) {
+          dprintf(histdatafd, "%5d, %5d, %5d\n", i, j, local.hist[j]);
+        }
       }
       local.analyze(0);  // was 150
       global.analyze(0); // was 150
@@ -103,10 +114,16 @@ int Analyze::batchreader(std::string dir, std::string prefix,
              local.entries, global.entries, local.nonzero, local.firstnonzero,
              local.lastnonzero, global.nonzero, global.firstnonzero,
              global.lastnonzero);
+      dprintf(csvdatafd, fmt2, filename.c_str(), i, stats.readouts, stats.discards,
+            local.entries, global.entries, local.nonzero, local.firstnonzero,
+            local.lastnonzero, global.nonzero, global.firstnonzero,
+            global.lastnonzero);
     } else if (events == 0) {
       printf("# %s no valid events, ignored\n", filename.c_str());
+      dprintf(csvdatafd, "# %s no valid events, ignored\n", filename.c_str());
     } else {
       printf("# %s file error, ignored\n", filename.c_str());
+      dprintf(csvdatafd, "# %s file error, ignored\n", filename.c_str());
     }
   }
   return 0;

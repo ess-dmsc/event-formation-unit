@@ -17,10 +17,13 @@ public:
    */
   Args(int argc, char *argv[]);
 
-  std::string dir{"/home/morten/cncsdata/vanadium_july_27/"};
-  std::string prefix{"2016_07_26_1005_sample_"};
-  std::string postfix{".bin"};
-  std::string ofile{"output"};
-  int start{0};
-  int end{0};
+  std::string dir{""};
+  std::string prefix{""};
+  std::string postfix{""};
+  std::string ofile{"output"}; /**< output filename prefix */
+  int start{0}; /**< start of file sequence number */
+  int end{0}; /**< end range of file sequence number */
+
+  int sample_size{-1}; /**< number of events to generate histograms from */
+  int hist_low{1}; /**< only include in heatmap/histogram values >= this */
 };

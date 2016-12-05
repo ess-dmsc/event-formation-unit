@@ -1,27 +1,27 @@
 # Copyright (C) 2016 European Spallation Source ERIC
 
-CFLAGS= -O3 -std=c++11 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -I . -I ../../prototype2
+CFLAGS= -O3 -std=c++11 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -I src -I ../../prototype2
 
 prog = cncsread batchreader
 
 all: $(prog)
 	@echo done.
 
-cncsread: cncsread.cpp
-	g++ $(CFLAGS) cncsread.cpp -o $@
+cncsread: src/cncsread.cpp
+	g++ $(CFLAGS) src/cncsread.cpp -o $@
 
 
-Analyse.o: Analyse.cpp Analyse.h
-	g++ -c $(CFLAGS) Analyse.cpp
+Analyse.o: src/Analyse.cpp src/Analyse.h
+	g++ -c $(CFLAGS) src/Analyse.cpp
 
-Args.o: Args.cpp Args.h
-	g++ -c $(CFLAGS) Args.cpp
+Args.o: src/Args.cpp src/Args.h
+	g++ -c $(CFLAGS) src/Args.cpp
 
-MapFile.o: MapFile.cpp MapFile.h
-	g++ -c $(CFLAGS) MapFile.cpp
+MapFile.o: src/MapFile.cpp src/MapFile.h
+	g++ -c $(CFLAGS) src/MapFile.cpp
 
-batchreader: batchreader.cpp Analyse.o Args.o MapFile.o
-		g++ $(CFLAGS) batchreader.cpp Analyse.o Args.o MapFile.o \
+batchreader: src/batchreader.cpp Analyse.o Args.o MapFile.o
+		g++ $(CFLAGS) src/batchreader.cpp Analyse.o Args.o MapFile.o \
       ../../prototype2/cspec/CSPECData.cpp \
 		  ../../prototype2/cspec/CSPECChanConv.cpp -o $@
 
