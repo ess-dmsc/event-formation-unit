@@ -166,9 +166,10 @@ TEST_F(ParserTest, SysCallFail) {
   ASSERT_EQ(0, forcefstatfail);
 
   forcereadfail = 1;
+  std::memcpy(input, cmd, strlen(cmd));
   res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(res, -Parser::EBADARGS);
-  ASSERT_EQ(1, forcereadfail);
+  ASSERT_EQ(0, forcereadfail);
 }
 
 int main(int argc, char **argv) {
