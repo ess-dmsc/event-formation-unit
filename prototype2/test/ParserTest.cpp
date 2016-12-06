@@ -9,6 +9,9 @@
 
 using namespace std;
 
+extern int forcefstatfail;
+extern int forcereadfail;
+
 #define UNUSED __attribute__((unused))
 
 static int dummy_command(std::vector<std::string> UNUSED cmdargs, char UNUSED *output,
@@ -152,6 +155,20 @@ TEST_F(ParserTest, DuplicateCommands) {
   ASSERT_EQ(res, 0);
   res = parser->registercmd("DUMMY_COMMAND", dummy_command);
   ASSERT_EQ(res, -1);
+}
+
+TEST_F(ParserTest, SysCallFail) {
+  const char * cmd = "CSPEC_LOAD_CALIB data/cal_zero";
+  std::memcpy(input, cmd, strlen(cmd));
+  forcefstatfail = 1;
+  int res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(res, -Parser::EBADARGS);
+  ASSERT_EQ(0, forcefstatfail);
+
+  forcereadfail = 1;
+  res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(res, -Parser::EBADARGS);
+  ASSERT_EQ(1, forcereadfail);
 }
 
 int main(int argc, char **argv) {

@@ -35,9 +35,10 @@ MultiGridGeometryTest: test/MultiGridGeometryTest.cpp common/MultiGridGeometry.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) test/MultiGridGeometryTest.cpp $(library)  -o $@ $(ldflags_test)
 
-ParserTest: test/ParserTest.cpp efu/Parser.cpp common/EFUArgs.cpp efu/Parser.h common/EFUArgs.h
-		@echo building $@
-		$(Q)g++ $(cxxflags_test) test/ParserTest.cpp efu/Parser.cpp common/EFUArgs.cpp $(library) -o $@ $(ldflags_test)
+ParserTest: test/ParserTest.cpp test/SyscallWrappers.cpp efu/Parser.cpp common/EFUArgs.cpp efu/Parser.h common/EFUArgs.h
+	@echo building $@
+	$(Q)g++ -Wl,--wrap=fstat,--wrap=read -c  -std=c++11 -I . -I .. test/SyscallWrappers.cpp test/ParserTest.cpp efu/Parser.cpp common/EFUArgs.cpp
+	$(Q)g++ -Wl,--wrap=fstat,--wrap=read SyscallWrappers.o ParserTest.o Parser.o EFUArgs.o $(library) -o $@ $(ldflags_test)
 
 EFUArgsTest: test/EFUArgsTest.cpp common/EFUArgs.cpp  common/EFUArgs.h
 				@echo building $@
