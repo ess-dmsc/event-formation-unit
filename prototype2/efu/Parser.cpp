@@ -218,11 +218,11 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
   memset(output, 0, SERVER_BUFFER_SIZE);
 
   if (ibytes == 0) {
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <SIZE>");
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <BADSIZE>");
     return -EUSIZE;
   }
   if (ibytes > SERVER_BUFFER_SIZE) {
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <SIZE>");
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <BADSIZE>");
     return -EOSIZE;
   }
 
@@ -272,10 +272,6 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
       break;
     case -EBADARGS:
       *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <BADARGS>");
-      break;
-    case -EUSIZE:
-    case -EOSIZE:
-      *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <BADSIZE>");
       break;
     default:
       *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <PARSER>");

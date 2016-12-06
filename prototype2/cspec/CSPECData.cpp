@@ -20,8 +20,8 @@ struct multi_grid {
  */
 void CSPECData::createevent(const MultiGridData &data, char *buffer) {
   auto col = data.module + 1; /** @todo talk to Anton */
-  auto grid = chanconv->getGridId(data.d[6]);
-  auto wire = chanconv->getWireId(data.d[2]);
+  auto grid = chanconv->getgridid(data.d[6]);
+  auto wire = chanconv->getwireid(data.d[2]);
   auto pixid = multigridgeom->getdetectorpixelid(col, grid, wire);
 
   static_assert(sizeof(data.time) == 4, "time should be 32 bit");
