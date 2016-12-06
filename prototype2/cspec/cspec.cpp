@@ -2,6 +2,7 @@
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
+#include <common/MultiGridGeometry.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
@@ -130,10 +131,10 @@ void CSPEC::processing_thread(void *args) {
   conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear look-up table
   conv.makegridcal(0, CSPECChanConv::adcsize - 1, 96);  // Linear look-up table
 
-  MultiGridGeometry CSPEC(80, 160, 4, 16);
+  MultiGridGeometry geom(1, 2, 48, 4, 16, 1, 1); /**< @todo test detector data */
 
   // CSPECData dat(0, 0, &conv, &CSPEC); // Custom signal thresholds
-  CSPECData dat(250, &conv, &CSPEC); // Default signal thresholds
+  CSPECData dat(250, &conv, &geom); // Default signal thresholds
 
   Timer stopafter_clock;
   TSCTimer report_timer;

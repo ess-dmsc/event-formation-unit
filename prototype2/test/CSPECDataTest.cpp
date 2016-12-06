@@ -21,7 +21,7 @@ protected:
   int size;
 
   virtual void SetUp() {
-    cspecgeometry = new MultiGridGeometry(80, 160, 4, 16);
+    cspecgeometry = new MultiGridGeometry(1, 80, 160, 4, 16, 0, 0);
     dat = std::unique_ptr<CSPECData>(new CSPECData(250, &conv, cspecgeometry));
   }
   virtual void TearDown() { delete cspecgeometry; }

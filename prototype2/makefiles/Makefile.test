@@ -1,7 +1,9 @@
 # Copyright (C) 2016 European Spallation Source ERIC
 #
 
-testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest CSPECEventTest MultiGridGeometryTest ParserTest EFUArgsTest
+testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest
+testprogs += CSPECEventTest ParserTest EFUArgsTest
+testprogs += MultiGridGeometryTest
 
 test: $(testprogs)
 	@echo "done building tests"
