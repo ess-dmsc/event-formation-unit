@@ -12,16 +12,23 @@
 class CSPECChanConv {
 public:
   static const int adcsize = 16384;
+
+  /** @todo document */
   CSPECChanConv();
 
-  uint16_t getWireId(unsigned int wire_adc) { return wirecal[wire_adc]; };
-  uint16_t getGridId(unsigned int grid_adc) { return gridcal[grid_adc]; };
+  /** @todo document */
+  uint16_t getwireid(unsigned int wire_adc) { return wirecal[wire_adc]; };
 
+  /** @todo document */
+  uint16_t getgridid(unsigned int grid_adc) { return gridcal[grid_adc]; };
+
+   /** @todo document */
   int makewirecal(unsigned int min, unsigned int max,
                   unsigned int nb_channels) {
     return makecal(wirecal, min, max, nb_channels);
   }
 
+   /** @todo document */
   int makegridcal(unsigned int min, unsigned int max,
                   unsigned int nb_channels) {
     return makecal(gridcal, min, max, nb_channels);

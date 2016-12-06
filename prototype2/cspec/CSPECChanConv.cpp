@@ -1,6 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
 #include <cstring>
+#include <common/Trace.h>
 #include <cspec/CSPECChanConv.h>
 
 CSPECChanConv::CSPECChanConv() {
@@ -34,6 +35,11 @@ int CSPECChanConv::makecal(uint16_t *array, unsigned int min, unsigned int max,
 }
 
 void CSPECChanConv::load_calibration(uint16_t * wirecal_new, uint16_t * gridcal_new) {
+  if ((wirecal_new == NULL) || (gridcal_new == NULL)) {
+    XTRACE(PROCESS, ERR, "Invalid calibration data\n");
+    return;
+  }
+  XTRACE(PROCESS, INF, "Loading calibration data\n");
   std::memcpy(wirecal, wirecal_new, sizeof(wirecal));
   std::memcpy(gridcal, gridcal_new, sizeof(gridcal));
 }
