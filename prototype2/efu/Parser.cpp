@@ -261,6 +261,9 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
 
   XTRACE(CMD, DEB, "parse1 res: %d, obytes: %d\n", res, *obytes);
   if (*obytes == 0) { // no  reply specified, create one
+
+    assert((res == OK) || (res == -ENOTOKENS) || (res == -EBADCMD) || (res == -EBADARGS));
+
     XTRACE(CMD, INF, "creating response\n");
     switch (res) {
     case OK:
@@ -272,9 +275,6 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
       break;
     case -EBADARGS:
       *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <BADARGS>");
-      break;
-    default:
-      *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <PARSER>");
       break;
     }
   }
