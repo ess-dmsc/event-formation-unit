@@ -13,3 +13,5 @@ function build()
   make || errexit "failed to build"
   popd
 }
+
+build
