@@ -99,6 +99,16 @@ TEST_F(CspecDataTest, InputFilterAboveThresh) {
   ASSERT_EQ(discard, 4);
 }
 
+TEST_F(CspecDataTest, InputFilterNoEvents) {
+  char buffer[200];
+  const int databytes = 40;
+  dat->receive(buffer, databytes);
+  assertdatanderr(0, databytes);
+  int discard = dat->input_filter();
+  ASSERT_EQ(discard, 0);
+}
+
+
 TEST_F(CspecDataTest, CreateEvent) {
   char buffer[32];
   struct CSPECData::MultiGridData data;

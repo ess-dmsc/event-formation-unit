@@ -43,7 +43,9 @@ std::vector<std::string> commands_badargs {
   "CSPEC_LOAD_CALIB file1 file2",
   "CSPEC_LOAD_CALIB file_not_exist",
   "CSPEC_LOAD_CALIB data/cal_badsize",
-  "CSPEC_SHOW_CALIB 1 2"
+  "CSPEC_LOAD_CALIB data/nogcal",
+  "CSPEC_SHOW_CALIB 1 2",
+  "CSPEC_SHOW_CALIB 16384"
 };
 
 // clang-format on
