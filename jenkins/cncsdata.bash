@@ -24,7 +24,7 @@ function build_tests()
 function run_tests()
 {
   pushd dataformats/cncs2016
-  make V=y runuest || errexit "failed to run tests"
+  make V=y runtest || errexit "failed to run tests"
   popd
 }
 
