@@ -12,6 +12,10 @@
 
  class PeakData{
  public:
+   /** @brief Specification of a peak:
+    * @param start start of peak_end
+    * @param end end of peak + 1
+    */
    PeakData(int start, int end) : start_(start), end_(end) {}
    int start_{0};
    int end_{0};
@@ -28,7 +32,11 @@
    /** @brief calculate the peak positions from histogram data
     * @param histogram pre-populated histogram data
     */
-   std::vector<PeakData *>& findpeaks(std::vector<int> data);
+   std::vector<PeakData *>& findpeaks(const std::vector<int> data);
+
+   /** @brief prints misc. stats from the peak list
+    */
+   void printstats();
 
    int getminwidth() {return minwidth;}
    int getthresh() {return thresh;}

@@ -9,17 +9,21 @@
 
 #include <cassert>
 #include <string.h>
+#include <vector>
 
 class Histogram {
 public:
   static const unsigned int histsize = 16384;
-  int hist[histsize];
+  std::vector<int> hist;
   int entries{0};
   int firstnonzero = -1;
   int lastnonzero = -1;
   int nonzero = 0;
 
-  Histogram() { clear(); }
+  Histogram() { /**< @todo parametrize with size */
+    hist.reserve(histsize);
+    clear();
+  }
 
   void add(unsigned int value) {
     assert(value < histsize);
@@ -28,7 +32,9 @@ public:
   }
 
   void clear() {
-    memset(hist, 0, sizeof(hist));
+    for (unsigned int i = 0; i < Histogram::histsize; i++) {
+      hist[i] = 0;
+    }
     entries = 0;
   }
 

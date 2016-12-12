@@ -3,9 +3,10 @@
 /** @file
  *
  *  @brief test data for PeakFinder also used in peakfinder.py
+ *  @todo add more test data to check algorithm sanity nd robustness
  */
 
-std::vector<int> testdata {
+const std::vector<int> testdata {
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,
     0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,  0,

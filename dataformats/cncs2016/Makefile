@@ -30,7 +30,7 @@ MapFile.o: src/MapFile.cpp src/MapFile.h
 	g++ -c $(CFLAGS) src/MapFile.cpp
 
 PeakFinder.o: src/PeakFinder.cpp src/PeakFinder.h
-	g++ -c $(CFLAGS) src/PeakFinder.cpp
+	g++ -c $(CFLAGS) -I../.. src/PeakFinder.cpp
 
 batchreader: src/batchreader.cpp Analyse.o Args.o MapFile.o PeakFinder.o
 		g++ $(CFLAGS) src/batchreader.cpp Analyse.o Args.o MapFile.o PeakFinder.o \
@@ -38,9 +38,13 @@ batchreader: src/batchreader.cpp Analyse.o Args.o MapFile.o PeakFinder.o
 		  ../../prototype2/cspec/CSPECChanConv.cpp -o $@
 
 PeakFinderTest: src/test/PeakFinderTest.cpp src/PeakFinder.cpp src/PeakFinder.h
-	g++ $(CFLAGS) $(cxxflags_test) -o $@ -I../../prototype2/test src/test/PeakFinderTest.cpp src/PeakFinder.cpp $(ldflags_test)
+	g++ $(CFLAGS) $(cxxflags_test) -o $@ -I../.. -I../../prototype2/test src/test/PeakFinderTest.cpp src/PeakFinder.cpp $(ldflags_test)
 
-test: PeakFinderTest
+HistogramTest: src/test/HistogramTest.cpp src/Histogram.h
+	g++ $(CFLAGS) $(cxxflags_test) -o $@ -I../../prototype2/test src/test/HistogramTest.cpp $(ldflags_test)
+
+
+test: PeakFinderTest HistogramTest
 	echo done
 
 runtest: all
@@ -50,4 +54,4 @@ runtest: all
 	find . -name "*.bin" | xargs -n 1 ./$(prog) | grep "Double events"
 
 clean:
-	rm -f $(prog) *.o
+	rm -f $(prog) *.o PeakFinderTest HistogramTest

@@ -4,12 +4,6 @@ CXXFLAGS  = -I.. -std=c++11 -O3 -fPIC
 LDFLAGS   = -L. -lpthread
 CXXFLAGS += -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -Wno-error=sign-compare -Wno-error=conversion-null
 
-
-Q=@
-ifdef V
-Q=
-endif
-
 ifndef GTEST
 LDFLAGS += -lgtest
 CXXFLAGS+= -I/usr/include
@@ -22,17 +16,18 @@ ifdef COV
 CXXFLAGS += -coverage
 endif
 
-hdrs    = include/Socket.h include/Timer.h include/Thread.h include/Counter.h include/TSCTimer.h
+hdrs    = include/Socket.h include/Timer.h include/Thread.h include/Counter.h
+hdrs+= include/TSCTimer.h include/Counter.h include/StatCounter.h
 sources = source/Socket.cpp source/Timer.cpp source/Thread.cpp source/TSCTimer.cpp
 objects = $(sources:%.cpp=%.o)
 library = eventlib.a
 
-testprogs  = NMXEventTest PQSpeedTest PQBasicTest PQMinTest CounterTest
+testprogs  = NMXEventTest PQSpeedTest PQBasicTest PQMinTest CounterTest StatCounterTest
 # StatCounterTest
 
-all: $(library) $(hdrs)
+all: $(library)
 
-$(library): $(objects)
+$(library): $(objects) $(hdrs)
 	ar r $@ $^
 	ranlib $@
 

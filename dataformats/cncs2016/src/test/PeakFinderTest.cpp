@@ -35,6 +35,7 @@ TEST_F(PeakFinderTest, ValidateFromTestData) {
    auto peaks = f.findpeaks(testdata);
    MESSAGE() << "Expecting 128 peaks in test dataset\n";
    ASSERT_EQ(128, peaks.size());
+   f.printstats();
 }
 
 int main(int argc, char **argv) {
