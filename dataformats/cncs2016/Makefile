@@ -9,49 +9,59 @@ ldflags_test  = $(ldflags) $(GTEST)/lib/libgtest.a -pthread
 cxxflags_test = $(cxxflags) -I$(GTEST)/include -Wno-error=sign-compare
 endif
 
+Q=@
+ifdef V
+Q=
+endif
+
 CFLAGS= -O3 -std=c++11 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -I src -I ../../prototype2
 
 prog = cncsread batchreader
+testprogs = PeakFinderTest HistogramTest
 
 all: $(prog)
 	@echo done.
 
 cncsread: src/cncsread.cpp
-	g++ $(CFLAGS) src/cncsread.cpp -o $@
+	@echo building $@
+	$(Q)g++ $(CFLAGS) src/cncsread.cpp -o $@
 
 
 Analyse.o: src/Analyse.cpp src/Analyse.h
-	g++ -c $(CFLAGS) src/Analyse.cpp
+	@echo building $@
+	$(Q)g++ -c $(CFLAGS) $<
 
 Args.o: src/Args.cpp src/Args.h
-	g++ -c $(CFLAGS) src/Args.cpp
+	@echo building $@
+	$(Q)g++ -c $(CFLAGS) $<
 
 MapFile.o: src/MapFile.cpp src/MapFile.h
-	g++ -c $(CFLAGS) src/MapFile.cpp
+	@echo building $@
+	$(Q)g++ -c $(CFLAGS) $<
 
 PeakFinder.o: src/PeakFinder.cpp src/PeakFinder.h
-	g++ -c $(CFLAGS) -I../.. src/PeakFinder.cpp
+	@echo building $@
+	$(Q)g++ -c $(CFLAGS) -I../.. $<
 
 batchreader: src/batchreader.cpp Analyse.o Args.o MapFile.o PeakFinder.o
-		g++ $(CFLAGS) src/batchreader.cpp Analyse.o Args.o MapFile.o PeakFinder.o \
+	@echo building $@
+	$(Q)g++ $(CFLAGS) src/batchreader.cpp Analyse.o Args.o MapFile.o PeakFinder.o \
       ../../prototype2/cspec/CSPECData.cpp \
 		  ../../prototype2/cspec/CSPECChanConv.cpp -o $@
 
 PeakFinderTest: src/test/PeakFinderTest.cpp src/PeakFinder.cpp src/PeakFinder.h
-	g++ $(CFLAGS) $(cxxflags_test) -o $@ -I../.. -I../../prototype2/test src/test/PeakFinderTest.cpp src/PeakFinder.cpp $(ldflags_test)
+	@echo building $@
+	$(Q)g++ $(CFLAGS) $(cxxflags_test) -o $@ -I../.. -I../../prototype2/test src/test/PeakFinderTest.cpp src/PeakFinder.cpp $(ldflags_test)
 
 HistogramTest: src/test/HistogramTest.cpp src/Histogram.h
-	g++ $(CFLAGS) $(cxxflags_test) -o $@ -I../../prototype2/test src/test/HistogramTest.cpp $(ldflags_test)
+	@echo building $@
+	$(Q)g++ $(CFLAGS) $(cxxflags_test) -o $@ -I../../prototype2/test src/test/HistogramTest.cpp $(ldflags_test)
 
-
-test: PeakFinderTest HistogramTest
+test: $(testprogs)
 	echo done
 
-runtest: all
-	@echo "Run on a single file"
-	./$(prog) 2016_07_13_beamOn_4p96A_135.bin
-	@echo "Run on multiple files"
-	find . -name "*.bin" | xargs -n 1 ./$(prog) | grep "Double events"
+runtest: test
+	for test in $(testprogs) ; do ./$$test --gtest_output=xml:$$test.xml ; done
 
 clean:
-	rm -f $(prog) *.o PeakFinderTest HistogramTest
+	rm -f $(prog) *.o $(testprogs) *.xml

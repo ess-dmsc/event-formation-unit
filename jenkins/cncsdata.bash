@@ -7,11 +7,27 @@ errexit()
 }
 
 
-function build()
+function build_progs()
 {
   pushd dataformats/cncs2016
-  make || errexit "failed to build"
+  make V=y || errexit "failed to build progs"
   popd
 }
 
-build
+function build_tests()
+{
+  pushd dataformats/cncs2016
+  make V=y test || errexit "failed to build tests"
+  popd
+}
+
+function run_tests()
+{
+  pushd dataformats/cncs2016
+  make V=y runuest || errexit "failed to run tests"
+  popd
+}
+
+build_progs
+build_tests
+run_tests
