@@ -6,7 +6,7 @@
 #include <common/Producer.h>
 #include <cstring>
 #include <iostream>
-#include <libs/include/Counter.h>
+#include <libs/include/StatCounter.h>
 #include <libs/include/Socket.h>
 #include <libs/include/Timer.h>
 #include <libs/include/gccintel.h>
@@ -109,7 +109,7 @@ void NMX::input_thread(void *args) {
  */
 void NMX::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
-  Counter<int> cluster;
+  StatCounter<int> cluster;
 
   int pops = 0;
   int reduct = 0;

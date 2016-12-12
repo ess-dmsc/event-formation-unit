@@ -21,6 +21,8 @@ public:
   T max(void); /**< return max element of vector */
 
   T min(void); /**< return min element of vector */
+
+  void clear();
 };
 
 template <class T> void StatCounter<T>::add(T value) {
@@ -37,6 +39,13 @@ template <class T> void StatCounter<T>::add(T value) {
   if (value < min_) {
     min_ = value;
   }
+}
+
+template <class T> void StatCounter<T>::clear() {
+  sum_ = 0;
+  n = 0;
+  max_ = 0;
+  min_ = 0;
 }
 
 template <class T> int StatCounter<T>::count(void) { return n; }
