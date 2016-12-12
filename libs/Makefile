@@ -25,9 +25,9 @@ library = eventlib.a
 testprogs  = NMXEventTest PQSpeedTest PQBasicTest PQMinTest CounterTest StatCounterTest
 # StatCounterTest
 
-all: $(library)
+all: $(library) $(hdrs)
 
-$(library): $(objects) $(hdrs)
+$(library): $(objects)
 	ar r $@ $^
 	ranlib $@
 
