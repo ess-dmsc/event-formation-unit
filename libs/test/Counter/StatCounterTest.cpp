@@ -38,7 +38,16 @@ TEST_F(StatCounterTest, NewIsZero) {
   ASSERT_EQ(0.0, dcount.avg());
 }
 
-TEST_F(StatCounterTest, TestMinMax) {
+TEST_F(StatCounterTest, TestMin) {
+  for (int i = 999999; i >= 5; i--) {
+    icount.add(i);
+  }
+  ASSERT_EQ(999995, icount.count());
+  ASSERT_EQ(icount.max(), 999999);
+  ASSERT_EQ(icount.min(), 5);
+}
+
+TEST_F(StatCounterTest, TestMax) {
   for (int i = 5; i <= 999999; i++) {
     icount.add(i);
     lcount.add((long long)i);

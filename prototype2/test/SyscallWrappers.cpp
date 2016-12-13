@@ -18,11 +18,14 @@ int __real_read(int fd, void * buf, size_t count);
 int __real_write(int fd, void * buf, size_t count);
 
 int __wrap_open(char * pathname, int flags, int mode) {
-  if (forceopenfail) {
+  if (forceopenfail == 1) {
     printf("Forcing open() to fail\n");
     forceopenfail=0;
     return -1;
   } else {
+    if (forceopenfail > 0) {
+      forceopenfail--;
+    }
     return __real_open(pathname, flags, mode);
   }
 }

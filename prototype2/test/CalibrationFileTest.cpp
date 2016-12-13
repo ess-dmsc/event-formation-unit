@@ -53,6 +53,48 @@ TEST_F(CalibrationFileTest, SaveUninitialized) {
   ASSERT_EQ(res, 0);
 }
 
+TEST_F(CalibrationFileTest, LoadNoGcal) {
+  uint16_t wbuffer[CSPECChanConv::adcsize];
+  uint16_t gbuffer[CSPECChanConv::adcsize];
+  CalibrationFile calibfile;
+  int res = calibfile.load(std::string("data/nogcal"), (char*)wbuffer,
+                    (char*)gbuffer);
+  ASSERT_EQ(res, -1);
+}
+
+TEST_F(CalibrationFileTest, LoadBadSize) {
+  uint16_t wbuffer[CSPECChanConv::adcsize];
+  uint16_t gbuffer[CSPECChanConv::adcsize];
+  CalibrationFile calibfile;
+  int res = calibfile.load(std::string("data/cal_badsize"), (char*)wbuffer,
+                    (char*)gbuffer);
+  ASSERT_EQ(res, -1);
+}
+
+TEST_F(CalibrationFileTest, LoadOpenFail) {
+  ASSERT_EQ(0, forceopenfail);
+  uint16_t wbuffer[CSPECChanConv::adcsize];
+  uint16_t gbuffer[CSPECChanConv::adcsize];
+  CalibrationFile calibfile;
+  forceopenfail = 1;
+  int res = calibfile.load(std::string("data/cal_zero"), (char*)wbuffer,
+                    (char*)gbuffer);
+  ASSERT_EQ(res, -1);
+  ASSERT_EQ(0, forceopenfail);
+}
+
+TEST_F(CalibrationFileTest, Load2OpenFail) {
+  ASSERT_EQ(0, forceopenfail);
+  uint16_t wbuffer[CSPECChanConv::adcsize];
+  uint16_t gbuffer[CSPECChanConv::adcsize];
+  CalibrationFile calibfile;
+  forceopenfail = 2;
+  int res = calibfile.load(std::string("data/cal_zero"), (char*)wbuffer,
+                    (char*)gbuffer);
+  ASSERT_EQ(res, -1);
+  ASSERT_EQ(0, forceopenfail);
+}
+
 TEST_F(CalibrationFileTest, LoadFstatFail) {
   ASSERT_EQ(0, forcefstatfail);
   uint16_t wbuffer[CSPECChanConv::adcsize];
@@ -95,6 +137,18 @@ TEST_F(CalibrationFileTest, SaveOpenFail) {
   uint16_t gbuffer[CSPECChanConv::adcsize];
   CalibrationFile calibfile;
   forceopenfail = 1;
+  int res = calibfile.save(std::string("CalibrationFileTest"), (char*)wbuffer,
+                    (char*)gbuffer);
+  ASSERT_EQ(res, -1);
+  ASSERT_EQ(0, forceopenfail);
+}
+
+TEST_F(CalibrationFileTest, Save2OpenFail) {
+  ASSERT_EQ(0, forceopenfail);
+  uint16_t wbuffer[CSPECChanConv::adcsize];
+  uint16_t gbuffer[CSPECChanConv::adcsize];
+  CalibrationFile calibfile;
+  forceopenfail = 2;
   int res = calibfile.save(std::string("CalibrationFileTest"), (char*)wbuffer,
                     (char*)gbuffer);
   ASSERT_EQ(res, -1);
