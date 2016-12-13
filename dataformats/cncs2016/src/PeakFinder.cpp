@@ -5,15 +5,18 @@
 #include <PeakFinder.h>
 #include <cstdio>
 
-PeakFinder::PeakFinder(int minimum_width, int signal_threshold)
-       : minwidth(minimum_width), thresh(signal_threshold) { }
+PeakFinder::PeakFinder(int minimum_width, int signal_threshold, int low_cut)
+       : minwidth(minimum_width), thresh(signal_threshold), low(low_cut) { }
 
-std::vector<PeakData *>& PeakFinder::findpeaks(const std::vector<int> data) {
+
+std::vector<PeakData *>& PeakFinder::findpeaks(const std::vector<int>& data) {
+  assert(data.size() != 0);
 
   std::vector<int> datacopy = data;
-  for (auto & d : datacopy) {
+  for (unsigned int i = 0; i < datacopy.size(); i++) {
+    auto & d = datacopy[i];
 
-    if (d <= thresh) {
+    if ((d <= thresh) || (i < (unsigned int)low)) {
       d = 0;
       capped++;
     }
@@ -44,6 +47,7 @@ std::vector<PeakData *>& PeakFinder::findpeaks(const std::vector<int> data) {
 
       // Handle potential peaks
       case peak:
+        //printf("%d, %d\n", i, val);
         if (val == 0) {
           if ((i < datacopy.size() - 1) && (datacopy[i + 1] > 0)) {
             //printf("single hole in data\n");
@@ -51,7 +55,8 @@ std::vector<PeakData *>& PeakFinder::findpeaks(const std::vector<int> data) {
           }
 
           peak_end = i;
-          if ((peak_end - peak_start >= minwidth) || (datacopy[i - 1] > 0)) { // this is a peak
+          //if ((peak_end - peak_start >= minwidth) || (datacopy[i - 1] > 0)) { // this is a peak
+          if ((peak_end - peak_start >= minwidth) ) { // this is a peak
             //printf("adding peak. begin %d, end %d\n", peak_start, peak_end);
             peaks.push_back(new PeakData(peak_start, peak_end));
           } else {
@@ -69,16 +74,13 @@ std::vector<PeakData *>& PeakFinder::findpeaks(const std::vector<int> data) {
   return peaks;
 }
 
-void PeakFinder::printstats() {
-  StatCounter<int> width;
-  StatCounter<int> gaps;
-  StatCounter<int> start;
-  StatCounter<int> end;
+void PeakFinder::printstats(std::string info) {
+  StatCounter<int> width, gaps, start, end;
+
   for (auto p : peaks) {
-    auto w = p->end_ - p->start_;
     start.add(p->start_);
-    width.add(w);
     end.add(p->end_);
+    width.add(p->end_ - p->start_);
   }
 
   for (unsigned int i = 1; i < peaks.size(); i++) {
@@ -86,12 +88,25 @@ void PeakFinder::printstats() {
     gaps.add(g);
   }
 
-  printf("Peak start %d\n", start.min());
-  printf("Peak end %d\n", end.max());
-  printf("Min width: %d\n", width.min());
-  printf("Max width: %d\n", width.max());
-  printf("Avg width: %d\n", width.avg());
-  printf("Min gap: %d\n", gaps.min());
-  printf("Max gap: %d\n", gaps.max());
-  printf("Avg gap: %d\n", gaps.avg());
+  printf("%s\n", info.c_str());
+  printf("Peaks:  %lu, start %d, end %d\n", peaks.size(), start.min(), end.max());
+  printf("Widths: min %d, max %d, avg %d\n", width.min(), width.max(), width.avg());
+  printf("Gaps:   min %d, max %d, avg %d\n", gaps.min(), gaps.max(), gaps.avg());
+}
+
+
+void PeakFinder::makecal(uint16_t * buffer, int table_size) {
+  for (int i = 0; i < table_size; i++) {
+    buffer[i] = 0;
+  }
+
+  int peakidx = 1;
+  for (auto pk : peaks) {
+    assert(pk->start_ < table_size);
+    assert(pk->end_ < table_size);
+    for (int j = pk->start_; j < pk->end_; j++) {
+      buffer[j] = peakidx;
+    }
+    peakidx++;
+  }
 }

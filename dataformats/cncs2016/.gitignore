@@ -1,3 +1,5 @@
 *.csv
 *.events
 *.hist
+*.wcal
+*.gcal

@@ -21,17 +21,14 @@ def histogram(text, bins, rng, values):
 
 def printhist(values):
    valmax = max(values)
-   H = np.zeros(valmax)
-   for i in range(valmax):
-      H[values[i]] += 1
+   H = np.zeros(valmax + 1)
+   for i in values:
+      H[i] += 1
 
    print(", ".join(str(int(x)) for x in H))
 
 
-
-
-
-N=1000000
+N = 1000000
 nmax = 1
 tot = 0
 dt = []
@@ -47,12 +44,14 @@ with open(file, 'rb') as csvfile:
      if (nmax == N):
         plt.subplot(311)
         plt.title("events " + str(tot) + " to " + str(tot + nmax))
-        histogram("time", 1000, (120000, 145000), dt)
+        histogram("time", 1000, (100000, 150000), dt)
         plt.subplot(312)
         printhist(w1pos)
-        histogram("w1pos", 1000, (250, 2500), w1pos)
+        histogram("w1pos", 1000, (min(w1pos), max(w1pos)), w1pos)
+        #histogram("w1pos", 1000, None, w1pos)
         plt.subplot(313)
-        histogram("g1pos", 1000, (250, 2000), g1pos)
+        histogram("g1pos", 1000, (min(g1pos), max(g1pos)), g1pos)
+        #histogram("g1pos", 1000, None, g1pos)
         plt.show()
         dt = []
         w1pos = []

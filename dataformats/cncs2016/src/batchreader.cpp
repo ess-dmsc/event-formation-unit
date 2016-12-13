@@ -9,4 +9,5 @@ int main(int argc, char *argv[]) {
   Analyze analyze(opts);
   analyze.batchreader(opts.dir, opts.prefix, opts.postfix, opts.start,
                       opts.end);
+  analyze.makecal();
 }

@@ -3,17 +3,19 @@
 #include <Analyse.h>
 #include <Histogram.h>
 #include <MapFile.h>
+#include <PeakFinder.h>
 #include <cassert>
 #include <common/MultiGridGeometry.h>
 #include <common/Trace.h>
 #include <cspec/CSPECChanConv.h>
+#include <cspec/CalibrationFile.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string>
 #include <sys/types.h>
 #include <unistd.h>
 
-Analyze::Analyze(Args& opts) : ofile(opts.ofile), low_cut(opts.hist_low) {
+Analyze::Analyze(Args& opts) : ofile(opts.ofile), cfile(opts.cfile), low_cut(opts.hist_low) {
   static const int flags = O_TRUNC | O_CREAT | O_WRONLY;
   static const int mode = S_IRUSR | S_IWUSR;
 
@@ -41,16 +43,20 @@ int Analyze::populate(CSPECData &dat, int readouts) {
     if (dat.data[i].valid == 1) {
       valid++;
       seqno++;
-      unsigned int w1pos = dat.data[i].d[2];
-      // unsigned int gpos = dat.data[i].d[6];
+
+      unsigned int wpos = dat.data[i].d[2]; /** wire 0 */
+      unsigned int gpos = dat.data[i].d[6]; /** grid 0 */
+
       dprintf(eventdatafd,
               "%9d, %10d, %5d, %5d, %5d, %5d, %5d, %5d, %5d, %5d\n", seqno,
               dat.data[i].time, dat.data[i].d[0], dat.data[i].d[1],
               dat.data[i].d[2], dat.data[i].d[3], dat.data[i].d[4],
               dat.data[i].d[5], dat.data[i].d[6], dat.data[i].d[7]);
 
-      global.add(w1pos);
-      local.add(w1pos);
+      global.add(wpos);
+      local.add(wpos);
+      w0pos.add(wpos);
+      g0pos.add(gpos);
     }
   }
   return valid;
@@ -87,6 +93,7 @@ int Analyze::batchreader(std::string dir, std::string prefix,
   printf(fmt1, "#Filename", "index", "readouts", "discards", "events", "ev_gbl",
          "nonzero", "firstnz", "lastnz", "nonzero_gbl", "firstnz_glbl",
          "lastnz_glbl");
+
   dprintf(csvdatafd, "#Loading files %s(%d-%d)%s\n", prefix.c_str(), begin, end,
           postfix.c_str());
   dprintf(csvdatafd, "#From directory %s\n\n", dir.c_str());
@@ -127,4 +134,28 @@ int Analyze::batchreader(std::string dir, std::string prefix,
     }
   }
   return 0;
+}
+
+void Analyze::makecal() {
+
+  PeakFinder wires(2, 10, 200);
+  PeakFinder grids(2, 10, 200);
+
+  wires.findpeaks(w0pos.hist);
+  wires.printstats(std::string("\nw0pos statistics"));
+
+  grids.findpeaks(g0pos.hist);
+  grids.printstats(std::string("\ng0pos statistics"));
+
+  if (!cfile.empty()) {
+    printf("Writing calibration to file\n");
+    uint16_t wcal[CSPECChanConv::adcsize];
+    uint16_t gcal[CSPECChanConv::adcsize];
+
+    wires.makecal(wcal, CSPECChanConv::adcsize);
+    grids.makecal(gcal, CSPECChanConv::adcsize);
+
+    CalibrationFile calibfile;
+    calibfile.save(std::string(cfile), (char*)wcal, (char*)gcal);
+  }
 }

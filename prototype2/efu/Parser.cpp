@@ -1,15 +1,12 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
-#include <algorithm>
 #include <cassert>
 #include <common/EFUArgs.h>
 #include <common/Trace.h>
+#include <cspec/CalibrationFile.h>
 #include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -94,56 +91,6 @@ static int stat_reset(std::vector<std::string> cmdargs, char UNUSED *output,
 }
 
 //=============================================================================
-static int load_file(std::string file, char *buffer) {
-  struct stat buf;
-
-  std::fill_n((char *)&buf, sizeof(struct stat), 0);
-
-  int fd = open(file.c_str(), O_RDONLY);
-  if (fd < 0) {
-    XTRACE(CMD, WAR, "file open() failed for %s\n", file.c_str());
-    return -10;
-  }
-
-  if (fstat(fd, &buf) != 0) {
-    XTRACE(CMD, ERR, "fstat() failed for %s\n", file.c_str());
-    close(fd);
-    return -11;
-  }
-
-  if (buf.st_size != CSPECChanConv::adcsize * 2) {
-    XTRACE(CMD, WAR, "file %s has wrong length: %d (should be %d)\n",
-           file.c_str(), (int)buf.st_size, 16384 * 2);
-    close(fd);
-    return -12;
-  }
-
-  if (read(fd, buffer, CSPECChanConv::adcsize * 2) != CSPECChanConv::adcsize * 2) {
-    XTRACE(CMD, ERR, "read() from %s incomplete\n", file.c_str());
-    close(fd);
-    return -13;
-  }
-  XTRACE(CMD, INF, "Calibration file %s sucessfully read\n", file.c_str());
-  close(fd);
-  return 0;
-}
-
-static int load_calib(std::string calibration) {
-
-  XTRACE(CMD, ALW, "Attempt to load calibration %s\n", calibration.c_str());
-
-  auto file = calibration + std::string(".wcal");
-  if (load_file(file, (char *)efu_args->wirecal) < 0) {
-    return -1;
-  }
-  file = calibration + std::string(".gcal");
-  if (load_file(file, (char *)efu_args->gridcal) < 0) {
-    return -1;
-  }
-  return 0;
-}
-
-//=============================================================================
 static int cspec_load_calib(std::vector<std::string> cmdargs, UNUSED char *output,
                             UNUSED unsigned int *obytes) {
   XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
@@ -151,8 +98,8 @@ static int cspec_load_calib(std::vector<std::string> cmdargs, UNUSED char *outpu
     XTRACE(CMD, WAR, "CSPEC_LOAD_CALIB: wrong number of arguments\n");
     return -Parser::EBADARGS;
   }
-
-  auto ret = load_calib(cmdargs.at(1));
+  CalibrationFile calibfile;
+  auto ret = calibfile.load(cmdargs.at(1), (char*)efu_args->wirecal, (char*)efu_args->gridcal);
   if (ret < 0) {
     return -Parser::EBADARGS;
   }

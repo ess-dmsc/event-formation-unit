@@ -45,5 +45,5 @@ public:
   uint32_t proc_cmd{0};
 };
 
-// Used all the tim and is not global variable
+// Used all the time and is not global variable
 extern EFUArgs *efu_args;

@@ -16,7 +16,7 @@ endif
 
 CFLAGS= -O3 -std=c++11 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -I src -I ../../prototype2
 
-prog = cncsread batchreader
+prog = cncsread batchreader genpixids
 testprogs = PeakFinderTest HistogramTest
 
 all: $(prog)
@@ -24,7 +24,13 @@ all: $(prog)
 
 cncsread: src/cncsread.cpp
 	@echo building $@
-	$(Q)g++ $(CFLAGS) src/cncsread.cpp -o $@
+	$(Q)g++ $(CFLAGS) $< -o $@
+
+genpixids: src/genpixids.cpp ../../prototype2/cspec/CalibrationFile.cpp \
+						../../prototype2/cspec/CSPECChanConv.cpp MapFile.o
+	@echo building $@
+	$(Q)g++ $(CFLAGS) ../../prototype2/cspec/CalibrationFile.cpp \
+						../../prototype2/cspec/CSPECChanConv.cpp MapFile.o $< -o $@
 
 
 Analyse.o: src/Analyse.cpp src/Analyse.h
@@ -46,7 +52,7 @@ PeakFinder.o: src/PeakFinder.cpp src/PeakFinder.h
 batchreader: src/batchreader.cpp Analyse.o Args.o MapFile.o PeakFinder.o
 	@echo building $@
 	$(Q)g++ $(CFLAGS) src/batchreader.cpp Analyse.o Args.o MapFile.o PeakFinder.o \
-      ../../prototype2/cspec/CSPECData.cpp \
+      ../../prototype2/cspec/CSPECData.cpp ../../prototype2/cspec/CalibrationFile.cpp \
 		  ../../prototype2/cspec/CSPECChanConv.cpp -o $@
 
 PeakFinderTest: src/test/PeakFinderTest.cpp src/PeakFinder.cpp src/PeakFinder.h

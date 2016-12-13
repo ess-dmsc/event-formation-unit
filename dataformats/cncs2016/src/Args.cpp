@@ -9,6 +9,7 @@ Args::Args(int argc, char *argv[]) {
   while (1) {
     static struct option long_options[] = {
         {"help", no_argument, 0, 'h'},
+        {"calibfile", required_argument, 0, 'c'},
         {"dir", required_argument, 0, 'd'},
         {"prefix", required_argument, 0, 'p'},
         {"postfix", required_argument, 0, 'o'},
@@ -21,11 +22,14 @@ Args::Args(int argc, char *argv[]) {
     int option_index = 0;
 
     int c =
-        getopt_long(argc, argv, "d:p:o:s:e:f:l:h", long_options, &option_index);
+        getopt_long(argc, argv, "d:p:o:s:e:f:l:c:h", long_options, &option_index);
     if (c == -1)
       break;
 
     switch (c) {
+    case 'c':
+      cfile.assign(optarg);
+      break;
     case 'd':
       dir.assign(optarg);
       break;
@@ -56,7 +60,9 @@ Args::Args(int argc, char *argv[]) {
       printf(" --start, -s number       sequence number of first file \n");
       printf(" --end, -e number         sequence number of last file \n");
       printf(" --histlow, -l number     low threshold for dumping hist. data to file \n");
-      printf(" -h                      help - prints this message \n");
+      printf(" --calibfile, -c file     wire and grid calibration file to load before parsing \n");
+      printf(" --output, f file         output filename");
+      printf(" --help, -h               help - prints this message \n");
       exit(0);
     }
   }

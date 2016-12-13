@@ -21,9 +21,11 @@ public:
   std::string prefix{""};
   std::string postfix{""};
   std::string ofile{"output"}; /**< output filename prefix */
+  std::string cfile{"output"}; /**< calibration file */
   int start{0}; /**< start of file sequence number */
   int end{0}; /**< end range of file sequence number */
 
   int sample_size{-1}; /**< number of events to generate histograms from */
   int hist_low{1}; /**< only include in heatmap/histogram values >= this */
+
 };
