@@ -53,6 +53,30 @@ TEST_F(CalibrationFileTest, SaveUninitialized) {
   ASSERT_EQ(res, 0);
 }
 
+TEST_F(CalibrationFileTest, LoadFstatFail) {
+  ASSERT_EQ(0, forcefstatfail);
+  uint16_t wbuffer[CSPECChanConv::adcsize];
+  uint16_t gbuffer[CSPECChanConv::adcsize];
+  CalibrationFile calibfile;
+  forcefstatfail = 1;
+  int res = calibfile.load(std::string("data/cal_zero"), (char*)wbuffer,
+                    (char*)gbuffer);
+  ASSERT_EQ(res, -1);
+  ASSERT_EQ(0, forcefstatfail);
+}
+
+TEST_F(CalibrationFileTest, LoadReadFail) {
+  ASSERT_EQ(0, forcereadfail);
+  uint16_t wbuffer[CSPECChanConv::adcsize];
+  uint16_t gbuffer[CSPECChanConv::adcsize];
+  CalibrationFile calibfile;
+  forcereadfail = 1;
+  int res = calibfile.load(std::string("data/cal_zero"), (char*)wbuffer,
+                    (char*)gbuffer);
+  ASSERT_EQ(res, -1);
+  ASSERT_EQ(0, forcereadfail);
+}
+
 TEST_F(CalibrationFileTest, SaveWriteFail) {
   ASSERT_EQ(0, forcewritefail);
   uint16_t wbuffer[CSPECChanConv::adcsize];
