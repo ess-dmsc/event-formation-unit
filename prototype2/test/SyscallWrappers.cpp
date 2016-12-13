@@ -9,9 +9,23 @@ extern "C" {
 
 int forcefstatfail = 0;
 int forcereadfail = 0;
+int forcewritefail = 0;
+int forceopenfail = 0;
 
+int __real_open(char * pathname, int flags, int mode);
 int __real_fstat(int fd, struct stat * buf);
 int __real_read(int fd, void * buf, size_t count);
+int __real_write(int fd, void * buf, size_t count);
+
+int __wrap_open(char * pathname, int flags, int mode) {
+  if (forceopenfail) {
+    printf("Forcing open() to fail\n");
+    forceopenfail=0;
+    return -1;
+  } else {
+    return __real_open(pathname, flags, mode);
+  }
+}
 
 int __wrap_fstat(int fd, struct stat * buf) {
   if (forcefstatfail) {
@@ -30,6 +44,16 @@ int __wrap_read(int fd, void * buf, size_t count) {
       return -1;
     } else {
       return __real_read(fd, buf, count);
+    }
+}
+
+int __wrap_write(int fd, void * buf, size_t count) {
+    if (forcewritefail) {
+      printf("Forcing write() to fail\n");
+      forcewritefail=0;
+      return -1;
+    } else {
+      return __real_write(fd, buf, count);
     }
 }
 
