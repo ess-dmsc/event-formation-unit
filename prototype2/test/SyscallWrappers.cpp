@@ -1,3 +1,4 @@
+/** Copyright (C) 2016 European Spallation Source ERIC */
 
 #include <sys/types.h>
 #include <sys/stat.h>
