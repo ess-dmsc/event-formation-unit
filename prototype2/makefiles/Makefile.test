@@ -39,10 +39,10 @@ ParserTest: test/ParserTest.cpp test/SyscallWrappers.cpp efu/Parser.cpp \
             common/EFUArgs.cpp cspec/CalibrationFile.cpp efu/Parser.h \
             common/EFUArgs.h cspec/CalibrationFile.h
 	@echo building $@
-	$(Q)g++ -Wl,--wrap=fstat,--wrap=read -c  $(cxxflags_test) -std=c++11 -I . \
+	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open -c  $(cxxflags_test) -std=c++11 -I . \
 				-I .. test/SyscallWrappers.cpp test/ParserTest.cpp efu/Parser.cpp \
 				common/EFUArgs.cpp cspec/CalibrationFile.cpp
-	$(Q)g++ -Wl,--wrap=fstat,--wrap=read SyscallWrappers.o ParserTest.o Parser.o \
+	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open SyscallWrappers.o ParserTest.o Parser.o \
 				CalibrationFile.o EFUArgs.o $(library) -o $@ $(ldflags_test)
 
 CalibrationFileTest: test/CalibrationFileTest.cpp cspec/CalibrationFile.cpp\
