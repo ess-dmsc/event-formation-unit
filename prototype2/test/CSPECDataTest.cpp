@@ -88,15 +88,7 @@ TEST_F(CspecDataTest, InputFilterBelowThresh) {
   dat->receive((char *)&err_below_thresh[0], size);
   assertdatanderr(size / dat->datasize, 0);
   int discard = dat->input_filter();
-  ASSERT_EQ(discard, 4);
-}
-
-TEST_F(CspecDataTest, InputFilterAboveThresh) {
-  size = err_below_thresh.size() * 4;
-  dat->receive((char *)&err_below_thresh[0], size);
-  assertdatanderr(size / dat->datasize, 0);
-  int discard = dat->input_filter();
-  ASSERT_EQ(discard, 4);
+  ASSERT_EQ(discard, 3);
 }
 
 TEST_F(CspecDataTest, InputFilterNoEvents) {
