@@ -2,6 +2,7 @@
 
 #include <Args.h>
 #include <getopt.h>
+#include <stdlib.h>
 
 Args::Args(int argc, char *argv[]) {
   optind = 1; // global variable used by getopt

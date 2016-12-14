@@ -138,8 +138,8 @@ int Analyze::batchreader(std::string dir, std::string prefix,
 
 void Analyze::makecal() {
 
-  PeakFinder wires(2, 10, 200);
-  PeakFinder grids(2, 10, 200);
+  PeakFinder wires(1, 50, 150);
+  PeakFinder grids(2, 50, 150);
 
   wires.findpeaks(w0pos.hist);
   wires.printstats(std::string("\nw0pos statistics"));

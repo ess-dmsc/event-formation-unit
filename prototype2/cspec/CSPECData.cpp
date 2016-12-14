@@ -111,7 +111,7 @@ int CSPECData::input_filter() {
     }
     data[i].valid = 1;
 
-    if ((data[i].d[1] >= wire_thresh) || (data[i].d[5] >= grid_thresh)) {
+    if (data[i].d[1] >= wire_thresh) {
       XTRACE(PROCESS, INF, "data 1 or 5 failed, thresholds: %d, %d\n",
              wire_thresh, grid_thresh);
       discarded++; // due to duplicate neutron event

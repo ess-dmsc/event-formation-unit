@@ -5,11 +5,12 @@ import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import sys, csv
 
-if len(sys.argv) != 2:
-   print "Usage ./histogram.py eventfilename"
+if len(sys.argv) != 3:
+   print "Usage ./histogram.py eventfilename samples"
    sys.exit(0)
 
 file = sys.argv[1]
+N = int(sys.argv[2])
 
 def histogram(text, bins, rng, values):
    n, bins, patches = plt.hist(values, bins, range=rng, normed=0, facecolor='green', alpha=0.75)
@@ -28,7 +29,6 @@ def printhist(values):
    print(", ".join(str(int(x)) for x in H))
 
 
-N = 1000000
 nmax = 1
 tot = 0
 dt = []
@@ -44,9 +44,10 @@ with open(file, 'rb') as csvfile:
      if (nmax == N):
         plt.subplot(311)
         plt.title("events " + str(tot) + " to " + str(tot + nmax))
-        histogram("time", 1000, (100000, 150000), dt)
+        #histogram("time", 1000, (100000, 150000), dt)
+        histogram("time", 1000, None, dt)
         plt.subplot(312)
-        printhist(w1pos)
+        #printhist(w1pos)
         histogram("w1pos", 1000, (min(w1pos), max(w1pos)), w1pos)
         #histogram("w1pos", 1000, None, w1pos)
         plt.subplot(313)

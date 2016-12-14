@@ -1,6 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
 #include <string>
+#include <stdlib.h>
 #include <common/MultiGridGeometry.h>
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CalibrationFile.h>
