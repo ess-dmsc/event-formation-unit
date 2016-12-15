@@ -39,7 +39,8 @@ public:
   } data;
 
   unsigned int wthresh{230}; // Current values from Anton
-  unsigned int gthresh{170}; //          -=-
+  unsigned int gthresh{180}; //          -=-
+  unsigned int zeropos{150}; // No specification
 
   const char *df[9] = {"w0 amp", "w1 amp", "w0 pos", "w1 pos", "g0 amp",
                        "g1 amp", "g0 pos", "g1 pos", "time  "};
@@ -55,6 +56,7 @@ int main(int argc, char *argv[]) {
     int rx;     // file stats - Rx bytes
     int errors; // event stat - header errors
     int events; // event stat - number of events
+    int zeropos;
     int noise;  //
     int multi;  // event stat - number of multi events
   } stat;
@@ -134,6 +136,11 @@ int main(int argc, char *argv[]) {
           continue;
         }
 
+        if ((rxdata[2] < det.zeropos) || (rxdata[6] < det.zeropos)) {
+          stat.zeropos++;
+          continue;
+        }
+
         // Detect and discard double neutron event
         if ((rxdata[1] >= det.wthresh) ) {
           stat.multi++;
@@ -147,13 +154,14 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  assert((stat.events + stat.multi + stat.noise)*40 == stat.rx - stat.errors*4);
+  assert((stat.events + stat.zeropos + stat.multi + stat.noise)*40 == stat.rx - stat.errors*4);
 
   printf("=======================\nStats\n");
   printf("Bytes read:    %d\n", stat.rx);
   printf("Bytes error:   %d\n", stat.errors*4);
   printf("Total samples: %d\n", stat.multi + stat.noise + stat.events);
   printf("  events:      %d\n", stat.events);
+  printf("  zeropos:     %d\n", stat.zeropos);
   printf("  noise:       %d\n", stat.noise);
   printf("  double:      %d\n", stat.multi);
   printf("-----------------------\n");
