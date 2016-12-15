@@ -4,18 +4,6 @@
 #include <cstdlib>
 #include <cstring>
 
-int detectorid(unsigned int wirepos, unsigned int gridpos) {
-  // Should depend on the instance of a specific detector geomoetry,
-  // and calibration data
-  unsigned int wire = 128 * (wirepos - 0) / (1231);
-  unsigned int grid = 96 * (gridpos - 0) / (1920);
-  unsigned id;
-  assert(wire <= 128);
-  assert(grid <= 96);
-  id = grid * 128 + wire;
-  return id;
-}
-
 class DetMultiGrid {
 public:
   enum class hdr { DAT = 0x00, HDR, END = 0x03 };
@@ -116,7 +104,7 @@ int main(int argc, char *argv[]) {
           stat.rx += det.readsz;
 
           if (det.data.dw.data_sig != (int)DetMultiGrid::hdr::DAT) {
-            stat.errors++;
+            stat.errors+= j + 2; // discard data and header read so far
             continue;
           }
           auto ch = det.data.dw.channel;
@@ -129,11 +117,11 @@ int main(int argc, char *argv[]) {
 
       // Read Footer
       if (fread(&det.data, det.readsz, 1, f) > 0) {
-        //printf("0x%08x\n", det.data.value);
+        //printf("0x%08xs\n", det.data.value);
         stat.rx += det.readsz;
 
         if (det.data.ef.footer_sig != (int)DetMultiGrid::hdr::END) {
-          stat.errors++;
+          stat.errors+= 10; // discard last 10 reads
           continue;
         }
         maxdata[8] = std::max(maxdata[8], det.data.ef.trigger);
@@ -147,25 +135,27 @@ int main(int argc, char *argv[]) {
         }
 
         // Detect and discard double neutron event
-        if ((rxdata[1] >= det.wthresh) && (rxdata[5] >= det.gthresh)) {
+        if ((rxdata[1] >= det.wthresh) ) {
           stat.multi++;
           continue;
         }
-
         // Real event
         stat.events++;
-        detectorid(rxdata[2], rxdata[6]);
       }
+    } else {
+      stat.errors++; // due to wrong header
     }
   }
 
+  assert((stat.events + stat.multi + stat.noise)*40 == stat.rx - stat.errors*4);
+
   printf("=======================\nStats\n");
   printf("Bytes read:    %d\n", stat.rx);
+  printf("Bytes error:   %d\n", stat.errors*4);
   printf("Total samples: %d\n", stat.multi + stat.noise + stat.events);
   printf("  events:      %d\n", stat.events);
   printf("  noise:       %d\n", stat.noise);
   printf("  double:      %d\n", stat.multi);
-  printf("Errors:        %d\n", stat.errors);
   printf("-----------------------\n");
   printf("Name       Min     Max\n");
   for (int j = 0; j < 9; j++) {
