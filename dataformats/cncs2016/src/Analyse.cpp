@@ -15,7 +15,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-Analyze::Analyze(Args& opts) : ofile(opts.ofile), cfile(opts.cfile), low_cut(opts.hist_low) {
+Analyze::Analyze(Args &opts)
+    : ofile(opts.ofile), cfile(opts.cfile), low_cut(opts.hist_low) {
   static const int flags = O_TRUNC | O_CREAT | O_WRONLY;
   static const int mode = S_IRUSR | S_IWUSR;
 
@@ -97,9 +98,9 @@ int Analyze::batchreader(std::string dir, std::string prefix,
   dprintf(csvdatafd, "#Loading files %s(%d-%d)%s\n", prefix.c_str(), begin, end,
           postfix.c_str());
   dprintf(csvdatafd, "#From directory %s\n\n", dir.c_str());
-  dprintf(csvdatafd, fmt1, "#Filename", "index", "readouts", "discards", "events", "ev_gbl",
-                "nonzero", "firstnz", "lastnz", "nonzero_gbl", "firstnz_glbl",
-                "lastnz_glbl");
+  dprintf(csvdatafd, fmt1, "#Filename", "index", "readouts", "discards",
+          "events", "ev_gbl", "nonzero", "firstnz", "lastnz", "nonzero_gbl",
+          "firstnz_glbl", "lastnz_glbl");
 
   for (int i = begin; i <= end; i++) {
     sprintf(buffer, "%s%03d%s", prefix.c_str(), i, postfix.c_str());
@@ -121,10 +122,10 @@ int Analyze::batchreader(std::string dir, std::string prefix,
              local.entries, global.entries, local.nonzero, local.firstnonzero,
              local.lastnonzero, global.nonzero, global.firstnonzero,
              global.lastnonzero);
-      dprintf(csvdatafd, fmt2, filename.c_str(), i, stats.readouts, stats.discards,
-            local.entries, global.entries, local.nonzero, local.firstnonzero,
-            local.lastnonzero, global.nonzero, global.firstnonzero,
-            global.lastnonzero);
+      dprintf(csvdatafd, fmt2, filename.c_str(), i, stats.readouts,
+              stats.discards, local.entries, global.entries, local.nonzero,
+              local.firstnonzero, local.lastnonzero, global.nonzero,
+              global.firstnonzero, global.lastnonzero);
     } else if (events == 0) {
       printf("# %s no valid events, ignored\n", filename.c_str());
       dprintf(csvdatafd, "# %s no valid events, ignored\n", filename.c_str());
@@ -156,6 +157,6 @@ void Analyze::makecal() {
     grids.makecal(gcal, CSPECChanConv::adcsize);
 
     CalibrationFile calibfile;
-    calibfile.save(std::string(cfile), (char*)wcal, (char*)gcal);
+    calibfile.save(std::string(cfile), (char *)wcal, (char *)gcal);
   }
 }

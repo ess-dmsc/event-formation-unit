@@ -1,15 +1,15 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
-#include <string>
-#include <stdlib.h>
+#include <MapFile.h>
 #include <common/MultiGridGeometry.h>
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CalibrationFile.h>
-#include <MapFile.h>
+#include <stdlib.h>
+#include <string>
 
 //#define UNUSED __attribute__((unused))
 
-int main(int argc, char * argv[]) {
+int main(int argc, char *argv[]) {
 
   if (argc != 3) {
     printf("usage: genpixids eventfile calibfile\n");
@@ -24,7 +24,7 @@ int main(int argc, char * argv[]) {
   uint16_t gcal[CSPECChanConv::adcsize];
 
   printf("Loading calibration data..\n");
-  auto ret = lcf.load(calibfile, (char*)wcal, (char*)gcal);
+  auto ret = lcf.load(calibfile, (char *)wcal, (char *)gcal);
   if (ret != 0) {
     printf("  loading failed, check if file exists and have correct sizes\n");
     exit(1);

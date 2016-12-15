@@ -20,14 +20,14 @@ public:
   int lastnonzero = -1;
   int nonzero = 0;
 
-  Histogram() :hist(histsize) { /**< @todo parametrize with size */
+  Histogram() : hist(histsize) { /**< @todo parametrize with size */
     clear();
   }
 
   void debug() {
     for (unsigned int i = 0; i < histsize; i++) {
       if (hist[i] != 0) {
-       printf("%d, %u\n", i, hist[i]);
+        printf("%d, %u\n", i, hist[i]);
       }
     }
   }

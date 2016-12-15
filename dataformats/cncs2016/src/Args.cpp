@@ -22,8 +22,8 @@ Args::Args(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    int c =
-        getopt_long(argc, argv, "d:p:o:s:e:f:l:c:h", long_options, &option_index);
+    int c = getopt_long(argc, argv, "d:p:o:s:e:f:l:c:h", long_options,
+                        &option_index);
     if (c == -1)
       break;
 
@@ -60,8 +60,10 @@ Args::Args(int argc, char *argv[]) {
       printf(" --postfix, -o postfix    last part of filename \n");
       printf(" --start, -s number       sequence number of first file \n");
       printf(" --end, -e number         sequence number of last file \n");
-      printf(" --histlow, -l number     low threshold for dumping hist. data to file \n");
-      printf(" --calibfile, -c file     wire and grid calibration file to load before parsing \n");
+      printf(" --histlow, -l number     low threshold for dumping hist. data "
+             "to file \n");
+      printf(" --calibfile, -c file     wire and grid calibration file to load "
+             "before parsing \n");
       printf(" --output, f file         output filename");
       printf(" --help, -h               help - prints this message \n");
       exit(0);

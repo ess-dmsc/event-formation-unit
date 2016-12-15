@@ -13,7 +13,7 @@
 
 class Analyze {
 public:
-  Analyze(Args& opts);
+  Analyze(Args &opts);
   ~Analyze();
   int batchreader(std::string dir, std::string fileprefix,
                   std::string filepostfix, int begin, int end);
@@ -24,7 +24,7 @@ private:
   int populate(CSPECData &dat, int readouts);
 
   Histogram global, local; /**< for file output */
-  Histogram w0pos, g0pos; /**< for use with PeakFinder */
+  Histogram w0pos, g0pos;  /**< for use with PeakFinder */
 
   std::string ofile{"data"};
   std::string cfile{""};
@@ -35,8 +35,8 @@ private:
     unsigned int events;
   } stats;
 
-  int low_cut{1}; /**< used when writing histogram data to file */
+  int low_cut{1};      /**< used when writing histogram data to file */
   int eventdatafd{-1}; /**< file descriptor for event data file */
-  int histdatafd{-1}; /**< file descriptor for histogram data file */
-  int csvdatafd{-1}; /**< file descriptor for csv data file */
+  int histdatafd{-1};  /**< file descriptor for histogram data file */
+  int csvdatafd{-1};   /**< file descriptor for csv data file */
 };

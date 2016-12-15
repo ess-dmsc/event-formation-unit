@@ -57,8 +57,8 @@ int main(int argc, char *argv[]) {
     int errors; // event stat - header errors
     int events; // event stat - number of events
     int zeropos;
-    int noise;  //
-    int multi;  // event stat - number of multi events
+    int noise; //
+    int multi; // event stat - number of multi events
   } stat;
 
   unsigned int rxdata[9], maxdata[9], mindata[9]; // readout data
@@ -95,18 +95,18 @@ int main(int argc, char *argv[]) {
     stat.rx += det.readsz;
 
     if (det.data.eh.header_sig == (int)DetMultiGrid::hdr::HDR) { // Read Header
-      //printf("0x%08x\n", det.data.value);
+      // printf("0x%08x\n", det.data.value);
       int nread = det.data.eh.n_words;
       assert(nread == 9);
 
       bzero(rxdata, sizeof(rxdata));
       for (int j = 0; j < nread - 1; j++) {
         if (fread(&det.data, det.readsz, 1, f) > 0) { // Read Data
-          //printf("0x%08x\n", det.data.value);
+          // printf("0x%08x\n", det.data.value);
           stat.rx += det.readsz;
 
           if (det.data.dw.data_sig != (int)DetMultiGrid::hdr::DAT) {
-            stat.errors+= j + 2; // discard data and header read so far
+            stat.errors += j + 2; // discard data and header read so far
             continue;
           }
           auto ch = det.data.dw.channel;
@@ -119,11 +119,11 @@ int main(int argc, char *argv[]) {
 
       // Read Footer
       if (fread(&det.data, det.readsz, 1, f) > 0) {
-        //printf("0x%08xs\n", det.data.value);
+        // printf("0x%08xs\n", det.data.value);
         stat.rx += det.readsz;
 
         if (det.data.ef.footer_sig != (int)DetMultiGrid::hdr::END) {
-          stat.errors+= 10; // discard last 10 reads
+          stat.errors += 10; // discard last 10 reads
           continue;
         }
         maxdata[8] = std::max(maxdata[8], det.data.ef.trigger);
@@ -142,7 +142,7 @@ int main(int argc, char *argv[]) {
         }
 
         // Detect and discard double neutron event
-        if ((rxdata[1] >= det.wthresh) ) {
+        if ((rxdata[1] >= det.wthresh)) {
           stat.multi++;
           continue;
         }
@@ -154,14 +154,16 @@ int main(int argc, char *argv[]) {
     }
   }
 
-  assert((stat.events + stat.zeropos + stat.multi + stat.noise)*40 == stat.rx - stat.errors*4);
+  assert((stat.events + stat.zeropos + stat.multi + stat.noise) * 40 ==
+         stat.rx - stat.errors * 4);
 
   printf("=======================\nStats\n");
   printf("Bytes read:    %d\n", stat.rx);
-  printf("Bytes error:   %d\n", stat.errors*4);
-  printf("Total samples: %d\n", stat.multi + stat.noise + stat.zeropos + stat.events);
+  printf("Bytes error:   %d\n", stat.errors * 4);
+  printf("Total samples: %d\n",
+         stat.multi + stat.noise + stat.zeropos + stat.events);
   printf("  events:      %d\n", stat.events);
-  printf("Discarded: %d\n", stat.zeropos + stat.noise + stat.multi);
+  printf("Discarded:     %d\n", stat.zeropos + stat.noise + stat.multi);
   printf("  zeropos:     %d\n", stat.zeropos);
   printf("  noise:       %d\n", stat.noise);
   printf("  double:      %d\n", stat.multi);
