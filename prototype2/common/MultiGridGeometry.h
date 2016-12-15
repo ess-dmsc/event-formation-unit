@@ -29,8 +29,8 @@ public:
    * @param panel_off offset from readout (should be 0 in real detector)
    * @param swap_wires swap 1<->2, 3<->4, etc. (should be 0 in real detector)
    */
-  MultiGridGeometry(int panels, int modules, int grids, int xwires,
-                    int zwires, int panel_off, int swap_wires)
+  MultiGridGeometry(int panels, int modules, int grids, int xwires, int zwires,
+                    int panel_off, int swap_wires)
       : panls_(panels), mods_(modules), grids_(grids), xwires_(xwires),
         zwires_(zwires), poff_(panel_off), swapw_(swap_wires) {}
 
@@ -45,13 +45,16 @@ public:
    */
   inline int getdetectorpixelid(int panel, int gridid, int wireid) {
     if (((panel + poff_) < 1) || (gridid < 1) || (wireid < 1)) {
-      XTRACE(PROCESS, WAR, "undersize geometry: panel %d, (off %d) gridid %d, wireid %d\n",
+      XTRACE(PROCESS, WAR,
+             "undersize geometry: panel %d, (off %d) gridid %d, wireid %d\n",
              panel, poff_, gridid, wireid);
       return -1;
     }
 
-    if ((panel + poff_ > panls_) || (gridid > grids_) || (wireid > (mods_ * xwires_ * zwires_) )) {
-      XTRACE(PROCESS, WAR, "oversize geometry: panel %d, (off %d) gridid %d, wireid %d\n",
+    if ((panel + poff_ > panls_) || (gridid > grids_) ||
+        (wireid > (mods_ * xwires_ * zwires_))) {
+      XTRACE(PROCESS, WAR,
+             "oversize geometry: panel %d, (off %d) gridid %d, wireid %d\n",
              panel, poff_, gridid, wireid);
       return -1;
     }
@@ -60,11 +63,11 @@ public:
      * on the prototype detector currently being tested
      */
     if (swapw_) {
-       if (wireid & 1) {
-         wireid++;
-       } else {
-         wireid--;
-       }
+      if (wireid & 1) {
+        wireid++;
+      } else {
+        wireid--;
+      }
     }
 
     int x = (wireid - 1) / zwires_ + 1;
@@ -72,7 +75,8 @@ public:
     int y = gridid / mods_ + 1;
     int z = (wireid - 1) % zwires_ + 1;
 
-    XTRACE(PROCESS, DEB, "(w, g) %d, %d, (x,y,z) %d %d %d\n", wireid, gridid, x, y, z);
+    XTRACE(PROCESS, DEB, "(w, g) %d, %d, (x,y,z) %d %d %d\n", wireid, gridid, x,
+           y, z);
     int nyz = grids_ * zwires_;
     int nxyz = nyz * xwires_ * mods_;
     return (y - 1) * zwires_ + z + (x - 1) * nyz + nxyz * (panel + poff_ - 1);

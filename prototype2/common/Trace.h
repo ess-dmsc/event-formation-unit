@@ -5,7 +5,7 @@
  *  @brief Trace macros with masks and levels
  */
 
- #include <cstdio>
+#include <cstdio>
 
 /** Add trace groups below - must be powers of two */
 // clang-format off

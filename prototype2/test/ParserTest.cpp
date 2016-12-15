@@ -14,8 +14,8 @@ extern int forcereadfail;
 
 #define UNUSED __attribute__((unused))
 
-static int dummy_command(std::vector<std::string> UNUSED cmdargs, char UNUSED *output,
-                            unsigned int UNUSED *obytes) {
+static int dummy_command(std::vector<std::string> UNUSED cmdargs,
+                         char UNUSED *output, unsigned int UNUSED *obytes) {
   return 0;
 }
 
@@ -78,20 +78,20 @@ protected:
 TEST_F(ParserTest, InputBuffer) {
   auto res = parser->parse(input, 0, output, &obytes);
   ASSERT_EQ(-Parser::EUSIZE, res);
-  ASSERT_EQ( strcmp("Error: <BADSIZE>", output) , 0);
+  ASSERT_EQ(strcmp("Error: <BADSIZE>", output), 0);
 
   input[0] = 'A';
   input[1] = 'B';
   res = parser->parse(input, 1, output, &obytes);
   ASSERT_EQ('A', input[0]);
   ASSERT_EQ('\0', input[1]);
-  ASSERT_EQ( strcmp("Error: <BADCMD>", output) , 0);
+  ASSERT_EQ(strcmp("Error: <BADCMD>", output), 0);
   ASSERT_EQ(-Parser::EBADCMD, res);
 
   res = parser->parse(input, 2, output, &obytes);
   ASSERT_EQ('A', input[0]);
   ASSERT_EQ('\0', input[1]);
-  ASSERT_EQ( strcmp("Error: <BADCMD>", output) , 0);
+  ASSERT_EQ(strcmp("Error: <BADCMD>", output), 0);
   ASSERT_EQ(-Parser::EBADCMD, res);
 
   input[0] = 'A';
@@ -101,7 +101,7 @@ TEST_F(ParserTest, InputBuffer) {
   ASSERT_EQ('A', input[0]);
   ASSERT_EQ('\0', input[1]);
   ASSERT_EQ('\0', input[2]);
-  ASSERT_EQ( strcmp("Error: <BADCMD>", output) , 0);
+  ASSERT_EQ(strcmp("Error: <BADCMD>", output), 0);
   ASSERT_EQ(-Parser::EBADCMD, res);
 }
 
@@ -110,13 +110,13 @@ TEST_F(ParserTest, OversizeData) {
   MESSAGE() << "Max buffer size\n";
   auto res = parser->parse(input, buffer_size, output, &obytes);
   ASSERT_EQ('\0', input[buffer_size - 1]);
-  ASSERT_EQ( strcmp("Error: <BADCMD>", output) , 0);
+  ASSERT_EQ(strcmp("Error: <BADCMD>", output), 0);
   ASSERT_EQ(-Parser::EBADCMD, res);
 
   MESSAGE() << "Max buffer size + 1\n";
   res = parser->parse(input, buffer_size + 1, output, &obytes);
   ASSERT_EQ(-Parser::EOSIZE, res);
-  ASSERT_EQ( strcmp("Error: <BADSIZE>", output) , 0);
+  ASSERT_EQ(strcmp("Error: <BADSIZE>", output), 0);
 }
 
 TEST_F(ParserTest, NoTokens) {
@@ -124,7 +124,7 @@ TEST_F(ParserTest, NoTokens) {
   MESSAGE() << "Spaces only\n";
   auto res = parser->parse(input, buffer_size, output, &obytes);
   ASSERT_EQ(-Parser::ENOTOKENS, res);
-  ASSERT_EQ( strcmp("Error: <BADCMD>", output) , 0);
+  ASSERT_EQ(strcmp("Error: <BADCMD>", output), 0);
 }
 
 TEST_F(ParserTest, ValidCommands) {
@@ -147,7 +147,7 @@ TEST_F(ParserTest, BadArgsCommands) {
     std::memcpy(input, cmd, strlen(cmd));
     MESSAGE() << "Checking command: " << cmd << "\n";
     auto res = parser->parse(input, strlen(cmd), output, &obytes);
-    ASSERT_EQ( strcmp("Error: <BADARGS>", output) , 0);
+    ASSERT_EQ(strcmp("Error: <BADARGS>", output), 0);
     ASSERT_EQ(-Parser::EBADARGS, res);
   }
 }
@@ -160,7 +160,7 @@ TEST_F(ParserTest, DuplicateCommands) {
 }
 
 TEST_F(ParserTest, SysCallFail) {
-  const char * cmd = "CSPEC_LOAD_CALIB data/cal_zero";
+  const char *cmd = "CSPEC_LOAD_CALIB data/cal_zero";
   std::memcpy(input, cmd, strlen(cmd));
   forcefstatfail = 1;
   int res = parser->parse(input, strlen(cmd), output, &obytes);

@@ -91,15 +91,16 @@ static int stat_reset(std::vector<std::string> cmdargs, char UNUSED *output,
 }
 
 //=============================================================================
-static int cspec_load_calib(std::vector<std::string> cmdargs, UNUSED char *output,
-                            UNUSED unsigned int *obytes) {
+static int cspec_load_calib(std::vector<std::string> cmdargs,
+                            UNUSED char *output, UNUSED unsigned int *obytes) {
   XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
   if (cmdargs.size() != 2) {
     XTRACE(CMD, WAR, "CSPEC_LOAD_CALIB: wrong number of arguments\n");
     return -Parser::EBADARGS;
   }
   CalibrationFile calibfile;
-  auto ret = calibfile.load(cmdargs.at(1), (char*)efu_args->wirecal, (char*)efu_args->gridcal);
+  auto ret = calibfile.load(cmdargs.at(1), (char *)efu_args->wirecal,
+                            (char *)efu_args->gridcal);
   if (ret < 0) {
     return -Parser::EBADARGS;
   }
@@ -125,13 +126,13 @@ static int cspec_show_calib(std::vector<std::string> cmdargs, char *output,
     return -Parser::EBADARGS;
   }
 
-  if (offset > CSPECChanConv::adcsize -1) {
+  if (offset > CSPECChanConv::adcsize - 1) {
     return -Parser::EBADARGS;
   }
 
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE,
-            "wire %d 0x%04x, grid %d 0x%04x",
-            offset, efu_args->wirecal[offset], offset, efu_args->gridcal[offset]);
+  *obytes = snprintf(
+      output, SERVER_BUFFER_SIZE, "wire %d 0x%04x, grid %d 0x%04x", offset,
+      efu_args->wirecal[offset], offset, efu_args->gridcal[offset]);
 
   return Parser::OK;
 }
@@ -209,7 +210,8 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
   XTRACE(CMD, DEB, "parse1 res: %d, obytes: %d\n", res, *obytes);
   if (*obytes == 0) { // no  reply specified, create one
 
-    assert((res == OK) || (res == -ENOTOKENS) || (res == -EBADCMD) || (res == -EBADARGS));
+    assert((res == OK) || (res == -ENOTOKENS) || (res == -EBADCMD) ||
+           (res == -EBADARGS));
 
     XTRACE(CMD, INF, "creating response\n");
     switch (res) {

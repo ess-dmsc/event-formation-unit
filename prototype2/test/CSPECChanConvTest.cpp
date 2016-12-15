@@ -51,7 +51,6 @@ TEST_F(CspecChanConvTest, GenerateCalibration) {
             CSPECChanConv::adcsize - 1);
 }
 
-
 TEST_F(CspecChanConvTest, LoadCalibration) {
   uint16_t wirecal[CSPECChanConv::adcsize];
   uint16_t gridcal[CSPECChanConv::adcsize];
@@ -61,12 +60,12 @@ TEST_F(CspecChanConvTest, LoadCalibration) {
   }
   conv.load_calibration(wirecal, gridcal);
   for (int i = 0; i < CSPECChanConv::adcsize; i++) {
-    ASSERT_EQ(i,      conv.getwireid(i));
+    ASSERT_EQ(i, conv.getwireid(i));
     ASSERT_EQ(i + 10, conv.getgridid(i));
   }
   conv.load_calibration(0, 0);
   for (int i = 0; i < CSPECChanConv::adcsize; i++) {
-    ASSERT_EQ(i,      conv.getwireid(i));
+    ASSERT_EQ(i, conv.getwireid(i));
     ASSERT_EQ(i + 10, conv.getgridid(i));
   }
 }

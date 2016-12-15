@@ -100,7 +100,6 @@ TEST_F(CspecDataTest, InputFilterNoEvents) {
   ASSERT_EQ(discard, 0);
 }
 
-
 TEST_F(CspecDataTest, CreateEvent) {
   char buffer[32];
   struct CSPECData::MultiGridData data;

@@ -1,8 +1,8 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
-#include <cstring>
 #include <common/Trace.h>
 #include <cspec/CSPECChanConv.h>
+#include <cstring>
 
 CSPECChanConv::CSPECChanConv() {
   static_assert(sizeof(wirecal) == adcsize * 2, "wirecal mismatch");
@@ -34,7 +34,8 @@ int CSPECChanConv::makecal(uint16_t *array, unsigned int min, unsigned int max,
   return 0;
 }
 
-void CSPECChanConv::load_calibration(uint16_t * wirecal_new, uint16_t * gridcal_new) {
+void CSPECChanConv::load_calibration(uint16_t *wirecal_new,
+                                     uint16_t *gridcal_new) {
   if ((wirecal_new == NULL) || (gridcal_new == NULL)) {
     XTRACE(PROCESS, ERR, "Invalid calibration data\n");
     return;

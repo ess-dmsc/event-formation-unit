@@ -131,7 +131,8 @@ void CSPEC::processing_thread(void *args) {
   conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear look-up table
   conv.makegridcal(0, CSPECChanConv::adcsize - 1, 96);  // Linear look-up table
 
-  MultiGridGeometry geom(1, 2, 48, 4, 16, 1, 1); /**< @todo test detector data */
+  MultiGridGeometry geom(1, 2, 48, 4, 16, 1,
+                         1); /**< @todo test detector data */
 
   // CSPECData dat(0, 0, &conv, &CSPEC); // Custom signal thresholds
   CSPECData dat(250, &conv, &geom); // Default signal thresholds
@@ -161,7 +162,7 @@ void CSPEC::processing_thread(void *args) {
       opts->stat.p.rx_discards += dat.input_filter();
 
       opts->stat.p.fifo_free = proc2output_fifo.free();
-      for (unsigned int  id = 0; id < dat.datalen; id++) {
+      for (unsigned int id = 0; id < dat.datalen; id++) {
         auto d = dat.data[id];
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();

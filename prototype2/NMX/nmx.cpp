@@ -6,8 +6,8 @@
 #include <common/Producer.h>
 #include <cstring>
 #include <iostream>
-#include <libs/include/StatCounter.h>
 #include <libs/include/Socket.h>
+#include <libs/include/StatCounter.h>
 #include <libs/include/Timer.h>
 #include <libs/include/gccintel.h>
 #include <memory>

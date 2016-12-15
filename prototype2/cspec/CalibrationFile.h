@@ -11,15 +11,13 @@
 
 class CalibrationFile {
 public:
-
   /** @todo document    */
-  int load(std::string calibration, char * wirecal, char * gridcal);
+  int load(std::string calibration, char *wirecal, char *gridcal);
 
   /** @todo document */
-  int save(std::string calibration, char * wirecal, char * gridcal);
+  int save(std::string calibration, char *wirecal, char *gridcal);
 
 private:
-
   /** @todo document    */
   int load_file(std::string file, char *buffer);
 

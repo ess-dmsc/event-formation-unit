@@ -41,7 +41,8 @@ int CSPECData::receive(const char *buffer, int size) {
   int oldsize = size;
 
   while (size >= 4) {
-    //XTRACE(PROCESS, DEB, "elems: %d, size: %d, datap: %p\n", elems, size, datap);
+    // XTRACE(PROCESS, DEB, "elems: %d, size: %d, datap: %p\n", elems, size,
+    // datap);
     switch (state) {
     // Parse Header
     case State::hdr:
@@ -66,7 +67,8 @@ int CSPECData::receive(const char *buffer, int size) {
       XTRACE(PROCESS, DEB, "State::dat valid data (%d), next state State:dat\n",
              datctr);
       data[elems].d[datctr] = (*datap) & 0x3fff;
-      XTRACE(PROCESS, DEB, "data[%d].d[%d]: %d\n", elems, datctr, data[elems].d[datctr]);
+      XTRACE(PROCESS, DEB, "data[%d].d[%d]: %d\n", elems, datctr,
+             data[elems].d[datctr]);
       datctr++;
       if (datctr == 8) {
         XTRACE(PROCESS, DEB, "State:dat all data, next state State:ftr\n");
@@ -81,7 +83,8 @@ int CSPECData::receive(const char *buffer, int size) {
         state = State::hdr;
         break;
       }
-      XTRACE(PROCESS, INF, "State::ftr valid data, next state State:hdr, events %u\n", elems);
+      XTRACE(PROCESS, INF,
+             "State::ftr valid data, next state State:hdr, events %u\n", elems);
       data[elems].time = (*datap) & 0x3fffffff;
       XTRACE(PROCESS, DEB, "time: %d\n", data[elems].time);
       elems++;
@@ -114,7 +117,7 @@ int CSPECData::input_filter() {
     if (data[i].d[1] >= wire_thresh) {
       XTRACE(PROCESS, INF, "data 1 or 5 failed, thresholds: %d, %d\n",
              wire_thresh, grid_thresh);
-      discarded++; // due to duplicate neutron event
+      discarded++;       // due to duplicate neutron event
       data[i].valid = 0; // invalidate
       continue;
     }

@@ -116,7 +116,6 @@ TEST_F(MultiGridGeometryTest, one_panel_swapwires) {
   ASSERT_EQ(17, p2m2g2_2x2.getdetectorpixelid(2, 1, 2));
   ASSERT_EQ(32, p2m2g2_2x2.getdetectorpixelid(2, 2, 7));
   ASSERT_EQ(31, p2m2g2_2x2.getdetectorpixelid(2, 2, 8));
-
 }
 
 #if 0
@@ -177,7 +176,7 @@ TEST_F(MultiGridGeometryTest, SpeedTest) {
   int xwires = 4;
   int zwires = 16;
   // const uint64_t repeats = 1000000000; //1B too much for Valgrind
-  int  repeats = 10000000;
+  int repeats = 10000000;
   uint64_t sum = 0;
   TSCTimer start;
   MultiGridGeometry CSPEC(panels, modules, grids, xwires, zwires, 0, 0);
