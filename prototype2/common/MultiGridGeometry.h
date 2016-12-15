@@ -67,7 +67,7 @@ public:
        }
     }
 
-    int x = (wireid -1) / zwires_;
+    int x = (wireid - 1) / zwires_ + 1;
 
     int y = gridid / mods_ + 1;
     int z = (wireid - 1) % zwires_ + 1;
@@ -75,7 +75,7 @@ public:
     XTRACE(PROCESS, DEB, "(w, g) %d, %d, (x,y,z) %d %d %d\n", wireid, gridid, x, y, z);
     int nyz = grids_ * zwires_;
     int nxyz = nyz * xwires_ * mods_;
-    return (y - 1) * zwires_ + z + x * nyz + nxyz * (panel + poff_ - 1);
+    return (y - 1) * zwires_ + z + (x - 1) * nyz + nxyz * (panel + poff_ - 1);
   }
 
 private:
