@@ -131,12 +131,12 @@ int main(int argc, char *argv[]) {
 
         // We have data - Process event
         // Discard noisy data
-        if ((rxdata[0] < det.wthresh) || (rxdata[4] < det.gthresh)) {
+        if ((rxdata[0] <= det.wthresh) || (rxdata[4] <= det.gthresh)) {
           stat.noise++;
           continue;
         }
 
-        if ((rxdata[2] < det.zeropos) || (rxdata[6] < det.zeropos)) {
+        if ((rxdata[2] == 0) || (rxdata[6] == 0)) {
           stat.zeropos++;
           continue;
         }
@@ -159,8 +159,9 @@ int main(int argc, char *argv[]) {
   printf("=======================\nStats\n");
   printf("Bytes read:    %d\n", stat.rx);
   printf("Bytes error:   %d\n", stat.errors*4);
-  printf("Total samples: %d\n", stat.multi + stat.noise + stat.events);
+  printf("Total samples: %d\n", stat.multi + stat.noise + stat.zeropos + stat.events);
   printf("  events:      %d\n", stat.events);
+  printf("Discarded: %d\n", stat.zeropos + stat.noise + stat.multi);
   printf("  zeropos:     %d\n", stat.zeropos);
   printf("  noise:       %d\n", stat.noise);
   printf("  double:      %d\n", stat.multi);
