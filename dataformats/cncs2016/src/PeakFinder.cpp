@@ -10,8 +10,23 @@ PeakFinder::PeakFinder(int minimum_width, int signal_threshold, int low_cut)
 
 std::vector<PeakData *> &PeakFinder::findpeaks(const std::vector<int> &data) {
   assert(data.size() != 0);
+  StatCounter<int> peakstats;
 
   std::vector<int> datacopy = data;
+
+  for (auto d : datacopy) {
+    if (d != 0) {
+      peakstats.add(d);
+    }
+  }
+
+  printf("histogram stats, min: %d, max %d, avg %d\n",peakstats.min(),
+         peakstats.max(), peakstats.avg());
+
+  if (thresh == 0) { /**< use automatic background level */
+    thresh = peakstats.avg()/5;
+  }
+
   for (unsigned int i = 0; i < datacopy.size(); i++) {
     auto &d = datacopy[i];
 
@@ -64,9 +79,7 @@ std::vector<PeakData *> &PeakFinder::findpeaks(const std::vector<int> &data) {
         }
         state = gap;
         continue;
-      } else {
       }
-
       break;
     }
   }

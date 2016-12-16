@@ -118,10 +118,17 @@ int Analyze::batchreader(std::string dir, std::string prefix,
       }
       local.analyze(0);  // was 150
       global.analyze(0); // was 150
-      printf(fmt2, filename.c_str(), i, stats.readouts, stats.discards,
-             local.entries, global.entries, local.nonzero, local.firstnonzero,
-             local.lastnonzero, global.nonzero, global.firstnonzero,
-             global.lastnonzero);
+
+      if (i % 1000 == 0) {
+        printf("%d", i);
+      }
+
+      if (i % 10 == 0) {
+        printf(".");
+      }
+
+      fflush(stdout);
+
       dprintf(csvdatafd, fmt2, filename.c_str(), i, stats.readouts,
               stats.discards, local.entries, global.entries, local.nonzero,
               local.firstnonzero, local.lastnonzero, global.nonzero,
@@ -134,13 +141,14 @@ int Analyze::batchreader(std::string dir, std::string prefix,
       dprintf(csvdatafd, "# %s file error, ignored\n", filename.c_str());
     }
   }
+  printf("\n");
   return 0;
 }
 
 void Analyze::makecal() {
 
-  PeakFinder wires(1, 50, 150);
-  PeakFinder grids(2, 50, 150);
+  PeakFinder wires(2, 0, 150); /**< min peak width 2, threshold 150*/
+  PeakFinder grids(2, 0, 150); /**< min peak width 2, threshold 150*/
 
   wires.findpeaks(w0pos.hist);
   wires.printstats(std::string("\nw0pos statistics"));

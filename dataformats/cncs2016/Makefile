@@ -49,7 +49,7 @@ PeakFinder.o: src/PeakFinder.cpp src/PeakFinder.h
 	@echo building $@
 	$(Q)g++ -c $(CFLAGS) -I../.. $<
 
-batchreader: src/batchreader.cpp Analyse.o Args.o MapFile.o PeakFinder.o
+batchreader: src/batchreader.cpp src/RawDataFiles.h Analyse.o Args.o MapFile.o PeakFinder.o
 	@echo building $@
 	$(Q)g++ $(CFLAGS) src/batchreader.cpp Analyse.o Args.o MapFile.o PeakFinder.o \
       ../../prototype2/cspec/CSPECData.cpp ../../prototype2/cspec/CalibrationFile.cpp \
