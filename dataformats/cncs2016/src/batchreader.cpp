@@ -6,9 +6,9 @@
 
 int main(int argc, char *argv[]) {
   Args opts(argc, argv);
-  if (1) { /**< @todo add cmd line option */
+  if (opts.runfile) { /**< @todo add cmd line option */
     for (auto run : filelist) {
-      if (run.index < 21) {
+      if ((run.index < opts.start) || (run.index > opts.end)) {
         continue;
       }
       std::string root("/home/morten/nfs/data/raw/MG_CNCS/");
@@ -25,5 +25,9 @@ int main(int argc, char *argv[]) {
       analyze.batchreader(opts.dir, opts.prefix, opts.postfix, opts.start, opts.end);
       analyze.makecal();
     }
+  } else {
+    Analyze analyze(opts);
+    analyze.batchreader(opts.dir, opts.prefix, opts.postfix, opts.start, opts.end);
+    analyze.makecal();
   }
 }

@@ -18,11 +18,12 @@ Args::Args(int argc, char *argv[]) {
         {"end", required_argument, 0, 'e'},
         {"output", required_argument, 0, 'f'},
         {"histlow", required_argument, 0, 'l'},
+        {"runfile", no_argument, 0, 'r'},
         {0, 0, 0, 0}};
 
     int option_index = 0;
 
-    int c = getopt_long(argc, argv, "d:p:o:s:e:f:l:c:h", long_options,
+    int c = getopt_long(argc, argv, "d:p:o:s:e:f:l:c:rh", long_options,
                         &option_index);
     if (c == -1)
       break;
@@ -42,6 +43,9 @@ Args::Args(int argc, char *argv[]) {
       break;
     case 'o':
       postfix.assign(optarg);
+      break;
+    case 'r':
+      runfile = 1;
       break;
     case 's':
       start = atoi(optarg);
