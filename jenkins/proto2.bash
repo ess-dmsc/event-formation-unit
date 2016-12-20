@@ -9,14 +9,13 @@ errexit()
 
 function tools()
 {
-  g++ --version
-  gcov --version
-  lcov --version
-  valgrind --version
-  doxygen --version
-  dot -V
+  g++ --version || errexit "g++ program is missing"
+  gcov --version || errexit "gcov program is missing"
+  valgrind --version  || errexit "valgrind program is missing"
+  doxygen --version  || errexit "doxygen program is missing"
+  dot -V  "dot program is missing"
   lscpu
-  gcovr --version
+  gcovr --version || errexit "gcovr program is missing"
 }
 
 function libs()
@@ -29,7 +28,6 @@ function libs()
 function libs_test()
 {
   pushd libs
-  #make V=y $1 GTEST=../artifacts/code/googletest/build/usr/local test || errexit "unable to build libs tests"
   make V=y $1 test || errexit "unable to build libs tests"
   make V=y runtest
   popd
@@ -45,7 +43,6 @@ function prototype()
 function prototype_test()
 {
   pushd prototype2
-  #make V=y $1 GTEST=../artifacts/code/googletest/build/usr/local test || errexit "unable to build prototype2 tests"
   make V=y $1 test || errexit "unable to build prototype2 tests"
   make V=y runtest
   make doxygen
