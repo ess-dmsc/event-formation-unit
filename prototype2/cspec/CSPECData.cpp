@@ -142,7 +142,7 @@ int CSPECData::generate(char *buffer, int size, int elems,
     events++;
     mg->header = header_id + nwords;
     for (int i = 0; i != 8; ++i) {
-      mg->data[i] = data_id;
+      mg->data[i] = data_id + (i << 16);
     }
     mg->data[0] += wire_adc;
     mg->data[4] += grid_adc;
