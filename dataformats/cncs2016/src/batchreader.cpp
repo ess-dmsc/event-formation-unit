@@ -7,23 +7,25 @@
 int main(int argc, char *argv[]) {
   Args opts(argc, argv);
   if (opts.runfile) { /**< @todo add cmd line option */
+    int start = opts.start;
+    int end = opts.end;
     for (auto run : filelist) {
-      if ((run.index < opts.start) || (run.index > opts.end)) {
-        continue;
-      }
-      std::string root("/home/morten/nfs/data/raw/MG_CNCS/");
-      std::string odir("output/");
-      opts.dir = root + run.sub_dir;
-      opts.prefix = run.file_prefix;
-      opts.postfix = run.file_postfix;
-      opts.start = run.range_start;
-      opts.end = run.range_end;
-      opts.ofile = odir + run.file_prefix;
-      opts.cfile = odir + run.file_prefix;
+      if ((run.index >= start) && (run.index <= end)) {
+        printf("run.index %d, start %d, end %d\n", run.index, start, end);
+        std::string root("/home/morten/nfsroot/groups/multigrid/data/raw/MG_CNCS/");
+        std::string odir("output/");
+        opts.dir = root + run.sub_dir;
+        opts.prefix = run.file_prefix;
+        opts.postfix = run.file_postfix;
+        opts.start = run.range_start;
+        opts.end = run.range_end;
+        opts.ofile = odir + run.file_prefix;
+        opts.cfile = odir + run.file_prefix;
 
-      Analyze analyze(opts);
-      analyze.batchreader(opts.dir, opts.prefix, opts.postfix, opts.start, opts.end);
-      analyze.makecal();
+        Analyze analyze(opts);
+        analyze.batchreader(opts.dir, opts.prefix, opts.postfix, opts.start, opts.end);
+        analyze.makecal();
+      }
     }
   } else {
     Analyze analyze(opts);

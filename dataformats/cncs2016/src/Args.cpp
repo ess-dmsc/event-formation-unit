@@ -59,6 +59,7 @@ Args::Args(int argc, char *argv[]) {
     case 'h':
     default:
       printf("Usage: analyze [OPTIONS]\n");
+      printf(" --runfile, -r            use filespecs from RawDataFiles.h \n");
       printf(" --dir, -d directory      path to data including last '/' \n");
       printf(" --prefix, -p prefix      first part of filename \n");
       printf(" --postfix, -o postfix    last part of filename \n");

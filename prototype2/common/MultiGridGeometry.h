@@ -44,14 +44,16 @@ public:
    *  @param wireid Wire ID , calculated from adc values
    */
   inline int getdetectorpixelid(int panel, int gridid, int wireid) {
-    if (((panel + poff_) < 1) || (gridid < 1) || (wireid < 1)) {
+    int p = panel + poff_;
+
+    if ((p < 1) || (gridid < 1) || (wireid < 1)) {
       XTRACE(PROCESS, WAR,
              "undersize geometry: panel %d, (off %d) gridid %d, wireid %d\n",
              panel, poff_, gridid, wireid);
       return -1;
     }
 
-    if ((panel + poff_ > panls_) || (gridid > grids_) ||
+    if ((p > panls_) || (gridid > mods_ * grids_) ||
         (wireid > (mods_ * xwires_ * zwires_))) {
       XTRACE(PROCESS, WAR,
              "oversize geometry: panel %d, (off %d) gridid %d, wireid %d\n",
@@ -59,7 +61,15 @@ public:
       return -1;
     }
 
-    /** @todo eventurlly get rid of this, but electronics is wrongly wired
+    int gridmin = ((wireid - 1)/(xwires_ * zwires_)) * grids_ + 1;
+    int gridmax = ((wireid - 1)/(xwires_ * zwires_)) * grids_ + grids_;
+    XTRACE(PROCESS, DEB, "grid: %d, min: %d, max: %d\n", gridid, gridmin, gridmax);
+    if ((gridid < gridmin) || (gridid > gridmax)) {
+      XTRACE(PROCESS, WAR, "geometry mismatch: wire %d, grid %d\n", wireid, gridid);
+      return -1;
+    }
+
+    /** @todo eventually get rid of this, but electronics is wrongly wired
      * on the prototype detector currently being tested
      */
     if (swapw_) {
@@ -70,16 +80,14 @@ public:
       }
     }
 
-    int x = (wireid - 1) / zwires_ + 1;
-
-    int y = gridid / mods_ + 1;
+    int x = mods_ * xwires_ * (p - 1) + (wireid - 1)/zwires_ + 1;
+    int y = grids_ - ((gridid - 1) % grids_);
     int z = (wireid - 1) % zwires_ + 1;
 
-    XTRACE(PROCESS, DEB, "(w, g) %d, %d, (x,y,z) %d %d %d\n", wireid, gridid, x,
+    XTRACE(PROCESS, DEB, "(p, w, g) %d, %d, %d, (x,y,z) %d %d %d\n", p, wireid, gridid, x,
            y, z);
-    int nyz = grids_ * zwires_;
-    int nxyz = nyz * xwires_ * mods_;
-    return (y - 1) * zwires_ + z + (x - 1) * nyz + nxyz * (panel + poff_ - 1);
+
+    return (x - 1) * grids_ * zwires_ + (y - 1) * zwires_ + z;
   }
 
 private:

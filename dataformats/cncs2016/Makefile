@@ -27,10 +27,10 @@ cncsread: src/cncsread.cpp
 	$(Q)g++ $(CFLAGS) $< -o $@
 
 genpixids: src/genpixids.cpp ../../prototype2/cspec/CalibrationFile.cpp \
-						../../prototype2/cspec/CSPECChanConv.cpp MapFile.o
+						../../prototype2/cspec/CSPECChanConv.cpp MapFile.o DataSave.o
 	@echo building $@
 	$(Q)g++ $(CFLAGS) ../../prototype2/cspec/CalibrationFile.cpp \
-						../../prototype2/cspec/CSPECChanConv.cpp MapFile.o $< -o $@
+						../../prototype2/cspec/CSPECChanConv.cpp MapFile.o DataSave.o $< -o $@
 
 
 Analyse.o: src/Analyse.cpp src/Analyse.h
@@ -48,6 +48,10 @@ MapFile.o: src/MapFile.cpp src/MapFile.h
 PeakFinder.o: src/PeakFinder.cpp src/PeakFinder.h
 	@echo building $@
 	$(Q)g++ -c $(CFLAGS) -I../.. $<
+
+DataSave.o: src/DataSave.cpp src/DataSave.h
+		@echo building $@
+		$(Q)g++ -c $(CFLAGS) -I../.. $<
 
 batchreader: src/batchreader.cpp src/RawDataFiles.h Analyse.o Args.o MapFile.o PeakFinder.o
 	@echo building $@

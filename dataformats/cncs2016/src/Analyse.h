@@ -35,6 +35,7 @@ private:
     unsigned int events;
   } stats;
 
+  int seqno{0};        /**< used to enumerate events */
   int low_cut{1};      /**< used when writing histogram data to file */
   int eventdatafd{-1}; /**< file descriptor for event data file */
   int histdatafd{-1};  /**< file descriptor for histogram data file */

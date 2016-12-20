@@ -38,7 +38,6 @@ Analyze::~Analyze() {
 }
 
 int Analyze::populate(CSPECData &dat, int readouts) {
-  static int seqno = 0;
   int valid = 0;
   for (int i = 0; i < readouts; i++) {
     if (dat.data[i].valid == 1) {

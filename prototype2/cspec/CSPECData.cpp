@@ -35,7 +35,8 @@ int CSPECData::receive(const char *buffer, int size) {
   elems = 0;
   error = 0;
   enum State { hdr = 1, dat, ftr };
-  int datctr = 0;
+  unsigned int datctr = 0;
+  unsigned int channel = 0;
   uint32_t *datap = (uint32_t *)buffer;
   int state = State::hdr;
   int oldsize = size;
@@ -66,6 +67,9 @@ int CSPECData::receive(const char *buffer, int size) {
       }
       XTRACE(PROCESS, DEB, "State::dat valid data (%d), next state State:dat\n",
              datctr);
+      channel = ((*datap) >> 16) & 0xff;
+      //printf("datctr %u, channel %u\n", datctr, channel);
+      assert(channel == datctr);
       data[elems].d[datctr] = (*datap) & 0x3fff;
       XTRACE(PROCESS, DEB, "data[%d].d[%d]: %d\n", elems, datctr,
              data[elems].d[datctr]);
