@@ -154,14 +154,14 @@ TEST_F(MultiGridGeometryTest, getdetectorpixelidCSPEC) {
 }
 
 
-TEST_F(MultiGridGeometryTest, Constructor) {
+TEST_F(MultiGridGeometryTest, NxNConstructor) {
   for (int i = 2; i < 16; i++) {
     MultiGridGeometry gridNxN(i, i, i, i, i, 0, 0);
     ASSERT_EQ(gridNxN.getmaxpixelid(), i * i * i * i * i);
   }
 }
 
-TEST_F(MultiGridGeometryTest, Bounds) {
+TEST_F(MultiGridGeometryTest, NxNGridBounds) {
   for (int i = 1; i < 16; i++) {
     MultiGridGeometry gridNxN(i, i, i, i, i, 0, 0);
     ASSERT_EQ(gridNxN.getdetectorpixelid(0, i, i * i), -1);
@@ -173,7 +173,7 @@ TEST_F(MultiGridGeometryTest, Bounds) {
   }
 }
 
-TEST_F(MultiGridGeometryTest, SpeedTest) {
+TEST_F(MultiGridGeometryTest, CSPECDetectorSpeedTest) {
   int panels = 8;
   int modules = 10;
   int grids = 160;
@@ -193,7 +193,7 @@ TEST_F(MultiGridGeometryTest, SpeedTest) {
   MESSAGE() << "SUM: " << sum << std::endl;
 }
 
-TEST_F(MultiGridGeometryTest, SpecificFindings) {
+TEST_F(MultiGridGeometryTest, TestDetectorModuleBoundaries) {
   int panels = 1;
   int modules = 2;
   int grids = 48;
@@ -221,6 +221,26 @@ TEST_F(MultiGridGeometryTest, SpecificFindings) {
   ASSERT_EQ(6129, testdetector.getdetectorpixelid(0, 49,113));
   ASSERT_EQ(6144, testdetector.getdetectorpixelid(0, 49,128));
 }
+
+
+TEST_F(MultiGridGeometryTest, TestDetectorIllegalWireAndGridid) {
+  int panels = 1;
+  int modules = 2;
+  int grids = 48;
+  int xwires = 4;
+  int zwires = 16;
+  MultiGridGeometry testdetector(panels, modules, grids, xwires, zwires, 1, 0);
+
+  ASSERT_EQ(-1, testdetector.getdetectorpixelid(1, 49,   1));
+  ASSERT_EQ(-1, testdetector.getdetectorpixelid(1, 96,   1));
+  ASSERT_EQ(-1, testdetector.getdetectorpixelid(1, 49,  64));
+  ASSERT_EQ(-1, testdetector.getdetectorpixelid(1, 96,  64));
+  ASSERT_EQ(-1, testdetector.getdetectorpixelid(1,  1,  65));
+  ASSERT_EQ(-1, testdetector.getdetectorpixelid(1, 48,  65));
+  ASSERT_EQ(-1, testdetector.getdetectorpixelid(1,  1, 128));
+  ASSERT_EQ(-1, testdetector.getdetectorpixelid(1, 48, 128));
+}
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
