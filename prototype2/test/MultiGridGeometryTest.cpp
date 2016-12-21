@@ -21,7 +21,7 @@ TEST_F(MultiGridGeometryTest, getmaxpixelid) {
 }
 
 
-TEST_F(MultiGridGeometryTest, underoversize) {
+TEST_F(MultiGridGeometryTest, UndersizeOversizeGeometry) {
   MultiGridGeometry p2m2g2_2x2(2, 2, 2, 2, 2, 0, 0);
 
   ASSERT_EQ(-1, p2m2g2_2x2.getdetectorpixelid(0, 1, 1));
@@ -34,7 +34,7 @@ TEST_F(MultiGridGeometryTest, underoversize) {
 }
 
 
-TEST_F(MultiGridGeometryTest, underoversize_offset) {
+TEST_F(MultiGridGeometryTest, UndersizeOversizeGeometryWOffset) {
   MultiGridGeometry p2m2g2_2x2_off(2, 2, 2, 2, 2, 1, 0);
 
   ASSERT_EQ(-1, p2m2g2_2x2_off.getdetectorpixelid(-1, 1, 1));
@@ -46,7 +46,7 @@ TEST_F(MultiGridGeometryTest, underoversize_offset) {
   ASSERT_EQ(-1, p2m2g2_2x2_off.getdetectorpixelid(1, 1, 9));
 }
 
-TEST_F(MultiGridGeometryTest, getpixelid_one_panel) {
+TEST_F(MultiGridGeometryTest, OnePanelGetPixelID) {
   MultiGridGeometry p1m2g2_2x2(1, 2, 2, 2, 2, 0, 0);
   ASSERT_EQ(16, p1m2g2_2x2.getmaxpixelid());
 
@@ -73,7 +73,7 @@ TEST_F(MultiGridGeometryTest, getpixelid_one_panel) {
 
 
 
-TEST_F(MultiGridGeometryTest, getpixelid_two_panels) {
+TEST_F(MultiGridGeometryTest, TwoPanelsGetPixelID) {
   MultiGridGeometry p2m2g2_2x2(2, 2, 2, 2, 2, 0, 0);
   ASSERT_EQ(32, p2m2g2_2x2.getmaxpixelid());
 
@@ -98,7 +98,7 @@ TEST_F(MultiGridGeometryTest, getpixelid_two_panels) {
   ASSERT_EQ(32, p2m2g2_2x2.getdetectorpixelid(2, 3, 8));
 }
 
-TEST_F(MultiGridGeometryTest, two_panel_offset) {
+TEST_F(MultiGridGeometryTest, TwoPanelsGetPixelIDWOffset) {
   MultiGridGeometry p2m2g2_2x2(2, 2, 2, 2, 2, 1, 0);
 
   ASSERT_EQ(32, p2m2g2_2x2.getmaxpixelid());
@@ -110,7 +110,7 @@ TEST_F(MultiGridGeometryTest, two_panel_offset) {
   ASSERT_EQ(32, p2m2g2_2x2.getdetectorpixelid(1, 3, 8));
 }
 
-TEST_F(MultiGridGeometryTest, two_panel_swapwires) {
+TEST_F(MultiGridGeometryTest, TwoPanelsSwappedWires) {
   MultiGridGeometry p2m2g2_2x2(2, 2, 2, 2, 2, 0, 1);
 
   ASSERT_EQ(32, p2m2g2_2x2.getmaxpixelid());
@@ -127,7 +127,7 @@ TEST_F(MultiGridGeometryTest, two_panel_swapwires) {
 }
 
 
-TEST_F(MultiGridGeometryTest, getdetectorpixelidCSPEC) {
+TEST_F(MultiGridGeometryTest, CSPECGetPixelID) {
   int panels = 1;
   int modules = 80;
   int grids = 160;
