@@ -41,6 +41,7 @@ data which can then be used by other utilities to visualize the dataset.
 `batchreader` takes several arguments `-h` produces a help text
 
 interactive batch mode example:
+
     > ./batchmode -d /home/morten/data -p 2016_07_13_beamOn_4p96A_ -o .bin -s 1 -e 1000 -f filename -c cfilename
 
 This will parse 1001 files with names 2016_07_13_beamOn_4p96A_000.bin to 2016_07_13_beamOn_4p96A_1000.bin. The 
@@ -56,7 +57,9 @@ and the calibration files are named
     cfilename.gcal
 
 filelist mode example:
+
     > ./batchmode -r -s 7 -e 10 
+
 This will analyse runs 7 to 10, both inclusive. The definition of runs are in src/RawDataFiles.h. Output
 filenames are generated automatically and corresponds the the filename prefix for the run.
 
