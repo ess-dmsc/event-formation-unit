@@ -44,12 +44,12 @@ data which can then be used by other utilities to visualize the dataset.
 interactive batch mode example:
  > ./batchmode -d /home/morten/data -p 2016_07_13_beamOn_4p96A_ -o .bin -s 1 -e 1000 -f filename -c cfilename
 
-This will parse 1001 files with names 2016_07_13_beamOn_4p96A_0005.bin to 2016_07_13_beamOn_4p96A_1000.bin. The 
+This will parse 1001 files with names 2016_07_13_beamOn_4p96A_000.bin to 2016_07_13_beamOn_4p96A_1000.bin. The 
 output files wil be named
 
  filename.events
  filename.csv
- filename.hist`
+ filename.hist
 
 and the calibration files are named 
 
@@ -66,9 +66,8 @@ filenames are generated automatically and corresponds the the filename prefix fo
 This program takes two inputs: an event file and a calibration file prefix. It then reads the 
 event file and generates a binary file of voxel intensities. Typically something like this:
 
-`
-> ./genpixids  2016_07_13_beamOn_4p96A_.events 2016_07_13_beamOn_4p96A_
-`
+`> ./genpixids  2016_07_13_beamOn_4p96A_.events 2016_07_13_beamOn_4p96A_`
+
 
 a binary .vox file is generated.
 
