@@ -13,29 +13,19 @@ filename = sys.argv[1]
 x = 8
 y = 48
 z = 16
-#data_matrix = zeros([z, y, x], dtype=uint8)
 
 data_matrix = fromfile(filename, dtype = int32).reshape([z, y, x]) * 1.0
 data_matrix = uint8((data_matrix / data_matrix.max()) * 255.0)
-#data_matrix[0:, 0, 0] = 1
-#data_matrix[0, 0:, 0] = 1
-#data_matrix[0, 0, 0:] = 1
 
-# For VTK to be able to use the data, it must be stored as a VTK-image. This can be done by the vtkImageImport-class which
-# imports raw data and stores it.
 dataImporter = vtk.vtkImageImport()
-# The preaviusly created array is converted to a string of chars and imported.
+
 data_string = data_matrix.tostring()
 dataImporter.CopyImportVoidPointer(data_string, len(data_string))
-# The type of the newly imported data is set to unsigned char (uint8)
+
 dataImporter.SetDataScalarTypeToUnsignedChar()
-# Because the data that is imported only contains an intensity value (it isnt RGB-coded or someting similar), the importer
-# must be told this is the case.
+
 dataImporter.SetNumberOfScalarComponents(1)
-# The following two functions describe how the data is stored and the dimensions of the array it is stored in. For this
-# simple case, all axes are of length 75 and begins with the first element. For other data, this is probably not the case.
-# I have to admit however, that I honestly dont know the difference between SetDataExtent() and SetWholeExtent() although
-# VTK complains if not both are used.
+
 dataImporter.SetDataExtent( 0, x - 1, 0, y - 1, 0, z - 1)
 dataImporter.SetWholeExtent(0, x - 1, 0, y - 1, 0, z - 1)
 
@@ -67,7 +57,6 @@ volumeProperty = vtk.vtkVolumeProperty()
 volumeProperty.SetColor(colorFunc)
 volumeProperty.SetScalarOpacity(alphaChannelFunc)
 
-
 # This class describes how the volume is rendered (through ray tracing).
 compositeFunction = vtk.vtkVolumeRayCastCompositeFunction()
 # We can finally create our volume. We also have to specify the data for it, as well as how the data will be rendered.
@@ -87,14 +76,25 @@ renderWin.AddRenderer(renderer)
 renderInteractor = vtk.vtkRenderWindowInteractor()
 renderInteractor.SetRenderWindow(renderWin)
 
-axes = vtk.vtkAxesActor()
 transform = vtk.vtkTransform()
-transform.Translate(-1.0, 0.0, 0.0)
+#transform.Translate(-1.0, 0.0, 0.0)
+transform.Scale(3.0, 3.0, 3.0)
+
+axes = vtk.vtkAxesActor()
 axes.SetUserTransform(transform)
 axes.SetXAxisLabelText("")
 axes.SetYAxisLabelText("")
 axes.SetZAxisLabelText("")
 renderer.AddActor(axes)
+
+txt = vtk.vtkTextActor()
+txt.SetInput(filename)
+txtprop=txt.GetTextProperty()
+txtprop.SetFontFamilyToArial()
+txtprop.SetFontSize(18)
+txtprop.SetColor(0.0, 0.0, 0.0)
+txt.SetDisplayPosition(10,1000)
+renderer.AddActor(txt)
 
 # We add the volume to the renderer ...
 renderer.AddVolume(volume)
@@ -102,6 +102,13 @@ renderer.AddVolume(volume)
 renderer.SetBackground(1, 1, 1)
 # ... and set window size.
 renderWin.SetSize(1024, 1024)
+
+ax2 = vtk.vtkOrientationMarkerWidget()
+ax2.SetOrientationMarker(axes)
+ax2.SetInteractor(renderInteractor)
+ax2.EnabledOn()
+ax2.InteractiveOn()
+renderer.ResetCamera()
 
 # A simple function to be called when the user decides to quit the application.
 def exitCheck(obj, event):

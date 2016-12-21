@@ -65,8 +65,8 @@ int main(int argc, char *argv[]) {
 
     int w0pos = data[4]; /** fifth field of the .events file */
     int g0pos = data[8]; /** ninth field of the .events file */
-    int gridid = gcal[g0pos];
-    int wireid = 128 - wcal[w0pos]; /** reverse wires @todo verify */
+    int gridid = 97 - gcal[g0pos];
+    int wireid = wcal[w0pos]; /** reverse wires @todo verify */
 
     int pixid = CNCS.getdetectorpixelid(0, gridid, wireid);
     if (pixid != -1) {
