@@ -13,7 +13,7 @@ file = sys.argv[1]
 N = int(sys.argv[2])
 
 def histogram(text, bins, rng, values):
-   n, bins, patches = plt.hist(values, bins, range=rng, normed=0, facecolor='green', alpha=0.75)
+   n, bins, patches = plt.hist(values, bins, range=rng, normed=0, log=True, facecolor='green', alpha=0.75)
    #plt.xlabel(text)
    plt.ylabel(text + ' count')
    #plt.title(text)
@@ -48,10 +48,10 @@ with open(file, 'rb') as csvfile:
         histogram("time", 1000, None, dt)
         plt.subplot(312)
         #printhist(w1pos)
-        histogram("w1pos", 1000, (min(w1pos), max(w1pos)), w1pos)
+        histogram("w0pos", 1000, (min(w1pos), max(w1pos)), w1pos)
         #histogram("w1pos", 1000, None, w1pos)
         plt.subplot(313)
-        histogram("g1pos", 1000, (min(g1pos), max(g1pos)), g1pos)
+        histogram("g0pos", 1000, (min(g1pos), max(g1pos)), g1pos)
         #histogram("g1pos", 1000, None, g1pos)
         plt.show()
         dt = []

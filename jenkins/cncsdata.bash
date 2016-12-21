@@ -17,7 +17,7 @@ function build_progs()
 function build_tests()
 {
   pushd dataformats/cncs2016
-  make V=y GTEST=../../artifacts/code/googletest/build/usr/local test || errexit "failed to build tests"
+  make V=y test || errexit "failed to build tests"
   popd
 }
 
