@@ -81,6 +81,12 @@ valid events etc.
 
 ## Visualization scripts
 
+### Voxel renderer
+Displays a 3D image of the detector based on the output.vox voxel intensity
+file. The script uses vtk whose Python bindings must be installed.
+
+    > ./voxelrender.py output.voxel
+
 ### Histograms
 Displays a histogram of time of flight values, wire0 amplitudes and positions and
 grid0 amplitudes and positions.
