@@ -65,18 +65,27 @@ int main(int argc, char *argv[]) {
 
     int w0pos = data[4]; /** fifth field of the .events file */
     int g0pos = data[8]; /** ninth field of the .events file */
-    int gridid = 97 - gcal[g0pos]; /** reverse grids @todo verify */
-    int wireid = wcal[w0pos]; 
+    int gridid = gcal[g0pos]; /** reverse grids @todo verify */
+    if (gridid <= 48)
+      gridid+= 48;  // swap modules
+    else
+      gridid-= 48;  // swap modules
+
+    int wireid = wcal[w0pos];
 
     int pixid = CNCS.getdetectorpixelid(0, gridid, wireid);
     if (pixid != -1) {
-      values[pixid]++;
+      values[pixid - 1]++;
     }
     printf("event: %d, wirepos %d, wire: %d, gridpos %d, grid: %d, pixel: %d\n",
            data[0], w0pos, wireid, g0pos, gridid, pixid);
   }
 
-  DataSave("voxel.bin", values, sizeof(values));
+  for (int i = 0; i < 6144; i++) {
+    printf("voxel: %4d, intensity %6d\n", i+1, values[i]);
+  }
+  auto ofile = eventfile + ".vox";
+  DataSave(ofile.c_str(), values, sizeof(values));
 
   return 0;
 }
