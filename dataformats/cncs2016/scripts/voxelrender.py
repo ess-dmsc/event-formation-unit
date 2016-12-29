@@ -45,7 +45,8 @@ def blackbody():
 
 def blackbodyII():
    cf = vtk.vtkColorTransferFunction()
-   cf.AddRGBPoint(  0, 1.0, 1.0, 1.0)
+   #cf.AddRGBPoint(  0, 1.0, 1.0, 1.0)
+   cf.AddRGBPoint(  0, 0.0, 0.0, 0.0)
    cf.AddRGBPoint( 50, 0.0, 0.0, 1.0)
    cf.AddRGBPoint(100, 0.0, 1.0, 1.0)
    cf.AddRGBPoint(150, 0.0, 1.0, 0.0)
@@ -67,6 +68,7 @@ z = 8
 # Read linear data from file, interpret as 3D matrix with X,Y,Z dimensions
 # specified above
 data_matrix = fromfile(filename, dtype = int32).reshape([z,y,x])*1.0
+#data_matrix = log10(data_matrix)
 
 # When viewed from the front, the image appears mirrored in the x-direction
 # so we swap elements
@@ -77,6 +79,7 @@ data_matrix = data_matrix[::-1,:,:]
 
 # Normalize to 255 (for RGB color scales and transparency)
 data_matrix = uint8((data_matrix / data_matrix.max()) * 255.0)
+
 
 # Import into VTK
 dataImporter = vtk.vtkImageImport()
@@ -138,7 +141,7 @@ txt.SetInput(filename)
 txtprop=txt.GetTextProperty()
 txtprop.SetFontFamilyToArial()
 txtprop.SetFontSize(18)
-txtprop.SetColor(1.0, 1.0, 1.0)
+txtprop.SetColor(0.5, 0.5, 0.5)
 txt.SetDisplayPosition(10,1000)
 renderer.AddActor(txt)
 

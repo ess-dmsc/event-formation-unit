@@ -12,7 +12,8 @@ int main(int argc, char *argv[]) {
     for (auto run : filelist) {
       if ((run.index >= start) && (run.index <= end)) {
         printf("run.index %d, start %d, end %d\n", run.index, start, end);
-        std::string root("/home/morten/nfsroot/groups/multigrid/data/raw/MG_CNCS/");
+        //std::string root("/home/morten/nfsroot/groups/multigrid/data/raw/MG_CNCS/");
+        std::string root("/Users/mortenchristensen/nfs/multigrid/data/raw/MG_CNCS/");
         std::string odir("output/");
         opts.dir = root + run.sub_dir;
         opts.prefix = run.file_prefix;

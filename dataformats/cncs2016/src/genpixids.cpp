@@ -15,13 +15,14 @@
 
 int main(int argc, char *argv[]) {
 
-  if (argc != 3) {
-    printf("usage: genpixids eventfile calibfile\n");
+  if (argc != 2) {
+    printf("usage: genpixids eventbasename\n");
     exit(1);
   }
 
-  std::string eventfile(argv[1]);
-  std::string calibfile(argv[2]);
+  std::string basename(argv[1]);
+  std::string eventfile = basename + ".events";
+  std::string calibfile = basename;
 
   CalibrationFile lcf;
   uint16_t wcal[CSPECChanConv::adcsize];
@@ -59,13 +60,11 @@ int main(int argc, char *argv[]) {
     if (ret == EOF) {
       break;
     }
-    //printf("string: %d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
-    //      data[0], data[1], data[2], data[3], data[4],
-    //      data[5], data[6], data[7], data[7], data[9]);
 
     int w0pos = data[4]; /** fifth field of the .events file */
     int g0pos = data[8]; /** ninth field of the .events file */
     int gridid = gcal[g0pos]; /** reverse grids @todo verify */
+
     if (gridid <= 48)
       gridid+= 48;  // swap modules
     else
@@ -74,6 +73,7 @@ int main(int argc, char *argv[]) {
     int wireid = wcal[w0pos];
 
     int pixid = CNCS.getdetectorpixelid(0, gridid, wireid);
+
     if (pixid != -1) {
       values[pixid - 1]++;
     }
