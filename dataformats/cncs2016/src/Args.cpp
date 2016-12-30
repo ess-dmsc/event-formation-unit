@@ -9,26 +9,36 @@ Args::Args(int argc, char *argv[]) {
 
   while (1) {
     static struct option long_options[] = {
-        {"help", no_argument, 0, 'h'},
+        // clang-format off
+        {"help",      no_argument,       0, 'h'},
+
+        {"basedir",   required_argument, 0, 'b'},
+        {"dir",       required_argument, 0, 'd'},
+        {"prefix",    required_argument, 0, 'p'},
+        {"postfix",   required_argument, 0, 'o'},
+        {"start",     required_argument, 0, 's'},
+        {"end",       required_argument, 0, 'e'},
+
         {"calibfile", required_argument, 0, 'c'},
-        {"dir", required_argument, 0, 'd'},
-        {"prefix", required_argument, 0, 'p'},
-        {"postfix", required_argument, 0, 'o'},
-        {"start", required_argument, 0, 's'},
-        {"end", required_argument, 0, 'e'},
-        {"output", required_argument, 0, 'f'},
-        {"histlow", required_argument, 0, 'l'},
-        {"runfile", no_argument, 0, 'r'},
-        {0, 0, 0, 0}};
+        {"output",    required_argument, 0, 'f'},
+        {"histlow",   required_argument, 0, 'l'},
+
+        {"runspec",   required_argument, 0, 'j'},
+        {"runfile",   no_argument,       0, 'r'},
+        {0,           0,                 0,   0}};
+        // clang-format on
 
     int option_index = 0;
 
-    int c = getopt_long(argc, argv, "d:p:o:s:e:f:l:c:rh", long_options,
+    int c = getopt_long(argc, argv, "b:d:p:o:s:e:f:l:c:j:r:h", long_options,
                         &option_index);
     if (c == -1)
       break;
 
     switch (c) {
+    case 'b':
+      basedir.assign(optarg);
+      break;
     case 'c':
       cfile.assign(optarg);
       break;
@@ -44,8 +54,11 @@ Args::Args(int argc, char *argv[]) {
     case 'o':
       postfix.assign(optarg);
       break;
+    case 'j':
+      runspec.assign(optarg);
+      break;
     case 'r':
-      runfile = 1;
+      runfile.assign(optarg);
       break;
     case 's':
       start = atoi(optarg);

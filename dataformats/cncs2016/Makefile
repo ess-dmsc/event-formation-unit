@@ -32,6 +32,9 @@ genpixids: src/genpixids.cpp ../../prototype2/cspec/CalibrationFile.cpp \
 	$(Q)g++ $(CFLAGS) ../../prototype2/cspec/CalibrationFile.cpp \
 						../../prototype2/cspec/CSPECChanConv.cpp MapFile.o DataSave.o $< -o $@
 
+jsoncpp.o: src/jsoncpp.cpp src/json.h
+	@echo building $@
+	$(Q)g++ -c $(CFLAGS) $<
 
 Analyse.o: src/Analyse.cpp src/Analyse.h
 	@echo building $@
@@ -53,9 +56,10 @@ DataSave.o: src/DataSave.cpp src/DataSave.h
 		@echo building $@
 		$(Q)g++ -c $(CFLAGS) -I../.. $<
 
-batchreader: src/batchreader.cpp src/RawDataFiles.h Analyse.o Args.o MapFile.o PeakFinder.o
+batchreader: src/batchreader.cpp src/RawDataFiles.h Analyse.o Args.o MapFile.o PeakFinder.o jsoncpp.o
 	@echo building $@
-	$(Q)g++ $(CFLAGS) src/batchreader.cpp Analyse.o Args.o MapFile.o PeakFinder.o \
+	$(Q)g++ $(CFLAGS) src/batchreader.cpp \
+	    Analyse.o Args.o MapFile.o PeakFinder.o jsoncpp.o \
       ../../prototype2/cspec/CSPECData.cpp ../../prototype2/cspec/CalibrationFile.cpp \
 		  ../../prototype2/cspec/CSPECChanConv.cpp -o $@
 

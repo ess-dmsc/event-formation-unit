@@ -15,17 +15,21 @@ public:
    * @param argc Argument count - typically taken from main()
    * @param argv Argument array - typically taken from main()
    */
+  // clang-format off
   Args(int argc, char *argv[]);
 
-  std::string dir{""};
-  std::string prefix{""};
-  std::string postfix{""};
+  std::string basedir{""}; /**< To support different locations for files */
+  std::string dir{""};       /**< location of file relative to basedir */
+  std::string prefix{""};    /**< filename prefix */
+  std::string postfix{""};   /**< filename postfix */
   std::string ofile{"output"}; /**< output filename prefix */
-  std::string cfile{"output"}; /**< calibration file */
-  int start{0};                /**< start of file sequence number */
-  int end{0};                  /**< end range of file sequence number */
+  std::string cfile{"output"}; /**< output calibration prefix */
+  int start{0};              /**< start of file sequence number */
+  int end{0};                /**< end range of file sequence number */
 
-  int runfile{0}; /**< if set, perform analysis from RawDataFiles.h */
-  int sample_size{-1}; /**< number of events to generate histograms from */
-  int hist_low{1};     /**< only include in heatmap/histogram values >= this */
+  std::string runfile{""};   /**< if set, perform analysis from json filelist */
+  std::string runspec{"validruns"};
+  int sample_size{-1};       /**< # of events to generate histograms from */
+  int hist_low{1};           /**< only include in heatmap/hist. values >= this */
+  // clang-format on
 };
