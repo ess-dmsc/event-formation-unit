@@ -2,14 +2,14 @@
 
 #include <DataSave.h>
 #include <MapFile.h>
-#include <common/MultiGridGeometry.h>
 #include <cassert>
+#include <common/MultiGridGeometry.h>
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CalibrationFile.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
 #include <string.h>
+#include <string>
 
 //#define UNUSED __attribute__((unused))
 
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
   //
   printf("reading event data...\n");
 
-  FILE * ff = fopen(eventfile.c_str(), "r");
+  FILE *ff = fopen(eventfile.c_str(), "r");
   assert(ff != NULL);
 
   int data[10];     /** holds channel data + time */
@@ -53,22 +53,22 @@ int main(int argc, char *argv[]) {
   memset(values, 0, 6144);
 
   while (1) {
-    ret = fscanf(ff, "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n",
-               &data[0], &data[1], &data[2], &data[3], &data[4],
-               &data[5], &data[6], &data[7], &data[8], &data[9]);
+    ret = fscanf(ff, "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n", &data[0],
+                 &data[1], &data[2], &data[3], &data[4], &data[5], &data[6],
+                 &data[7], &data[8], &data[9]);
 
     if (ret == EOF) {
       break;
     }
 
-    int w0pos = data[4]; /** fifth field of the .events file */
-    int g0pos = data[8]; /** ninth field of the .events file */
+    int w0pos = data[4];      /** fifth field of the .events file */
+    int g0pos = data[8];      /** ninth field of the .events file */
     int gridid = gcal[g0pos]; /** reverse grids @todo verify */
 
     if (gridid <= 48)
-      gridid+= 48;  // swap modules
+      gridid += 48; // swap modules
     else
-      gridid-= 48;  // swap modules
+      gridid -= 48; // swap modules
 
     int wireid = wcal[w0pos];
 
@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
   }
 
   for (int i = 0; i < 6144; i++) {
-    printf("voxel: %4d, intensity %6d\n", i+1, values[i]);
+    printf("voxel: %4d, intensity %6d\n", i + 1, values[i]);
   }
   auto ofile = eventfile + ".vox";
   DataSave(ofile.c_str(), values, sizeof(values));

@@ -5,7 +5,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-DataSave::DataSave(std::string filename, void * buffer, size_t datasize) {
+DataSave::DataSave(std::string filename, void *buffer, size_t datasize) {
   const int flags = O_TRUNC | O_CREAT | O_WRONLY;
   const int mode = S_IRUSR | S_IWUSR;
 
@@ -19,6 +19,4 @@ DataSave::DataSave(std::string filename, void * buffer, size_t datasize) {
   }
 }
 
-DataSave::~DataSave() {
-  close(fd);
-}
+DataSave::~DataSave() { close(fd); }

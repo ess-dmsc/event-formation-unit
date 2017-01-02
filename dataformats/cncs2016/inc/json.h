@@ -1,3 +1,4 @@
+// clang-format off
 /*
 The JsonCpp library's source code, including accompanying documentation,
 tests and demonstration applications, are licensed under the following

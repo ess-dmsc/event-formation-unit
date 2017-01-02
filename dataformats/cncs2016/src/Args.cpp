@@ -26,7 +26,7 @@ Args::Args(int argc, char *argv[]) {
         {"runspec",   required_argument, 0, 'j'},
         {"runfile",   no_argument,       0, 'r'},
         {0,           0,                 0,   0}};
-        // clang-format on
+    // clang-format on
 
     int option_index = 0;
 
