@@ -16,6 +16,9 @@ testprogs = PeakFinderTest HistogramTest
 all: $(prog)
 	@echo done.
 
+format:
+	find . -name "*.cpp" -o -name "*.h"| xargs clang-format -i
+
 cncsread: src/cncsread.cpp
 	@echo building $@
 	$(Q)g++ $(CFLAGS) $< -o $@
