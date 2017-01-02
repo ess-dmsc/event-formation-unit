@@ -1,20 +1,14 @@
 # Copyright (C) 2016 European Spallation Source ERIC
 
-# Specify alternative googletest library (suppress warnings on Jenkins)
-ifndef GTEST
 ldflags_test  = $(ldflags) -lgtest -pthread
-cxxflags_test = $(cxxflags) -I/usr/include
-else
-ldflags_test  = $(ldflags) $(GTEST)/lib/libgtest.a -pthread
-cxxflags_test = $(cxxflags) -I$(GTEST)/include -Wno-error=sign-compare
-endif
+cxxflags_test = $(cxxflags) -I inc -I/usr/include
 
 Q=@
 ifdef V
 Q=
 endif
 
-CFLAGS= -O3 -std=c++11 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -I src -I ../../prototype2
+CFLAGS= -O3 -std=c++11 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -I inc -I ../../prototype2
 
 prog = cncsread batchreader genpixids
 testprogs = PeakFinderTest HistogramTest
@@ -32,42 +26,47 @@ genpixids: src/genpixids.cpp ../../prototype2/cspec/CalibrationFile.cpp \
 	$(Q)g++ $(CFLAGS) ../../prototype2/cspec/CalibrationFile.cpp \
 						../../prototype2/cspec/CSPECChanConv.cpp MapFile.o DataSave.o $< -o $@
 
-jsoncpp.o: src/jsoncpp.cpp src/json.h
+jsoncpp.o: src/jsoncpp.cpp inc/json.h
 	@echo building $@
 	$(Q)g++ -c $(CFLAGS) $<
 
-Analyse.o: src/Analyse.cpp src/Analyse.h
+Analyse.o: src/Analyse.cpp inc/Analyse.h
 	@echo building $@
 	$(Q)g++ -c $(CFLAGS) $<
 
-Args.o: src/Args.cpp src/Args.h
+Args.o: src/Args.cpp inc/Args.h
 	@echo building $@
 	$(Q)g++ -c $(CFLAGS) $<
 
-MapFile.o: src/MapFile.cpp src/MapFile.h
+MapFile.o: src/MapFile.cpp inc/MapFile.h
 	@echo building $@
 	$(Q)g++ -c $(CFLAGS) $<
 
-PeakFinder.o: src/PeakFinder.cpp src/PeakFinder.h
+PeakFinder.o: src/PeakFinder.cpp inc/PeakFinder.h
 	@echo building $@
 	$(Q)g++ -c $(CFLAGS) -I../.. $<
 
-DataSave.o: src/DataSave.cpp src/DataSave.h
+RunSpecParse.o: src/RunSpecParse.cpp inc/RunSpecParse.h
 		@echo building $@
 		$(Q)g++ -c $(CFLAGS) -I../.. $<
 
-batchreader: src/batchreader.cpp src/RawDataFiles.h Analyse.o Args.o MapFile.o PeakFinder.o jsoncpp.o
+DataSave.o: src/DataSave.cpp inc/DataSave.h
+		@echo building $@
+		$(Q)g++ -c $(CFLAGS) -I../.. $<
+
+batchreader: src/batchreader.cpp inc/RawDataFiles.h Analyse.o Args.o MapFile.o \
+	           PeakFinder.o jsoncpp.o RunSpecParse.o
 	@echo building $@
 	$(Q)g++ $(CFLAGS) src/batchreader.cpp \
-	    Analyse.o Args.o MapFile.o PeakFinder.o jsoncpp.o \
+	    Analyse.o Args.o MapFile.o PeakFinder.o RunSpecParse.o jsoncpp.o  \
       ../../prototype2/cspec/CSPECData.cpp ../../prototype2/cspec/CalibrationFile.cpp \
 		  ../../prototype2/cspec/CSPECChanConv.cpp -o $@
 
-PeakFinderTest: src/test/PeakFinderTest.cpp src/PeakFinder.cpp src/PeakFinder.h
+PeakFinderTest: src/test/PeakFinderTest.cpp src/PeakFinder.cpp inc/PeakFinder.h
 	@echo building $@
 	$(Q)g++ $(CFLAGS) $(cxxflags_test) -o $@ -I../.. -I../../prototype2/test src/test/PeakFinderTest.cpp src/PeakFinder.cpp $(ldflags_test)
 
-HistogramTest: src/test/HistogramTest.cpp src/Histogram.h
+HistogramTest: src/test/HistogramTest.cpp inc/Histogram.h
 	@echo building $@
 	$(Q)g++ $(CFLAGS) $(cxxflags_test) -o $@ -I../../prototype2/test src/test/HistogramTest.cpp $(ldflags_test)
 

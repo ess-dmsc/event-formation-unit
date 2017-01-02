@@ -16,7 +16,7 @@ public:
   // See "multi grid detector data processing.docx" from DMG's
   // Event Formation Files
   unsigned int wire_thresh{230}; // From Anton 4 oct 2016
-  unsigned int grid_thresh{170}; //  ...
+  unsigned int grid_thresh{170}; //         -||-
 
   const int datasize = 40; /**< size (bytes) of a data readout */
   // clang-format off
