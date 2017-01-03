@@ -68,8 +68,13 @@ int CSPECData::receive(const char *buffer, int size) {
       XTRACE(PROCESS, DEB, "State::dat valid data (%d), next state State:dat\n",
              datctr);
       channel = ((*datap) >> 16) & 0xff;
-      //printf("datctr %u, channel %u\n", datctr, channel);
-      assert(channel == datctr);
+      //assert(channel == datctr); // asserts for 2016_08_16_0921_sample_ in late 9000s
+      if (channel != datctr) {
+        XTRACE(PROCESS, WAR, "State::dat - data order mismatch\n");
+        state = State::hdr;
+        break;
+      }
+
       data[elems].d[datctr] = (*datap) & 0x3fff;
       XTRACE(PROCESS, DEB, "data[%d].d[%d]: %d\n", elems, datctr,
              data[elems].d[datctr]);
