@@ -50,15 +50,33 @@
       {"id": 14, "dir": "11_29/",                     "prefix": "2016_12_06_0527_sample_",  "postfix": ".bin", "start": 0, "end":    24, "valid": 1},
       {"id": 15, "dir": "11_29/",                     "prefix": "2016_12_06_0555_sample_",  "postfix": ".bin", "start": 0, "end":   183, "valid": 1},
       {"id": 16, "dir": "11_29/",                     "prefix": "2016_12_06_1059_sample_",  "postfix": ".bin", "start": 0, "end": 12615, "valid": 1}
-      ],
+    ],
 
-  // from ~/nfsoffline
+  "invalidruns" :
+    [
+      {"id": 1,  "dir": "07_11/beamOn_resetOn/",      "prefix": "2016_07_11_beamOn1_",      "postfix": ".bin", "start": 0, "end":  1121, "valid": 0},
+      {"id": 2,  "dir": "07_11/no_reset/",            "prefix": "2016_07_11_background_",   "postfix": ".bin", "start": 0, "end":    59, "valid": 0},
+      {"id": 3,  "dir": "07_12_background/",          "prefix": "2016_07_12_beamOn2_",      "postfix": ".bin", "start": 0, "end":  1083, "valid": 0},
+      {"id": 4,  "dir": "07_13_12A_Vanadium_powder/", "prefix": "2016_07_14_12A_",          "postfix": ".bin", "start": 0, "end":    63, "valid": 0},
+      {"id": 5,  "dir": "07_13_7p2A/",                "prefix": "2016_07_13_beamOn_7p2A_",  "postfix": ".bin", "start": 0, "end":   285, "valid": 0},
+      {"id": 6,  "dir": "07_13_7p2A/1_t0_timing/",    "prefix": "2016_07_13_beamOn_7p2A_",  "postfix": ".bin", "start": 0, "end":    26, "valid": 0},
+      {"id": 7,  "dir": "07_14/",                     "prefix": "2016_07_14_2012_sample_",  "postfix": ".bin", "start": 0, "end":    22, "valid": 0},
+      {"id": 8 , "dir": "07_25/",                     "prefix": "2016_07_27_1113_sample_",  "postfix": ".bin", "start": 0, "end": 27901, "valid": 0},
+      {"id": 9 , "dir": "08_16/",                     "prefix": "2016_08_16_0850_sample_",  "postfix": ".bin", "start": 0, "end":     1, "valid": 0},
+      {"id": 10, "dir": "08_16/",                     "prefix": "2016_08_16_0907_sample_",  "postfix": ".bin", "start": 0, "end":     1, "valid": 0},
+      {"id": 11, "dir": "09_29/",                     "prefix": "2016_09_29_0849_sample_",  "postfix": ".bin", "start": 0, "end":  1250, "valid": 0},
+      {"id": 12, "dir": "09_29/",                     "prefix": "2016_09_30_0606_sample_",  "postfix": ".bin", "start": 0, "end":  4195, "valid": 0},
+      {"id": 13, "dir": "09_29/",                     "prefix": "2016_10_03_0606_sample_",  "postfix": ".bin", "start": 0, "end": 13785, "valid": 0}
+    ],
+
+  // available on mortens Mac at ~/nfsoffline
   "nfsoffline" :
     [
       {"id": 1,  "dir": "07_13_4p96A/",               "prefix": "2016_07_13_beamOn_4p96A_", "postfix": ".bin", "start": 0, "end":   162, "valid": 1},
-      {"id": 2,  "dir": "07_14/",                     "prefix": "2016_07_14_2041_sample_",  "postfix": ".bin", "start": 0, "end":    25, "valid": 1},
-      {"id": 3 , "dir": "07_14/",                     "prefix": "2016_07_14_2133_sample_",  "postfix": ".bin", "start": 0, "end":    78, "valid": 1},
-      {"id": 4 , "dir": "11_29/",                     "prefix": "2016_12_06_0527_sample_",  "postfix": ".bin", "start": 0, "end":    24, "valid": 1},
-      {"id": 5 , "dir": "11_29/",                     "prefix": "2016_12_06_0555_sample_",  "postfix": ".bin", "start": 0, "end":   183, "valid": 1}
+      {"id": 2,  "dir": "07_13_7p2A/",                "prefix": "2016_07_13_beamOn_7p2A_",  "postfix": ".bin", "start": 0, "end":   285, "valid": 0},
+      {"id": 3,  "dir": "07_14/",                     "prefix": "2016_07_14_2041_sample_",  "postfix": ".bin", "start": 0, "end":    25, "valid": 1},
+      {"id": 4 , "dir": "07_14/",                     "prefix": "2016_07_14_2133_sample_",  "postfix": ".bin", "start": 0, "end":    78, "valid": 1},
+      {"id": 5 , "dir": "11_29/",                     "prefix": "2016_12_06_0527_sample_",  "postfix": ".bin", "start": 0, "end":    24, "valid": 1},
+      {"id": 6 , "dir": "11_29/",                     "prefix": "2016_12_06_0555_sample_",  "postfix": ".bin", "start": 0, "end":   183, "valid": 1}
     ]
 }

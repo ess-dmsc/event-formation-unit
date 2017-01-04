@@ -57,20 +57,25 @@ and the calibration files are named
 
 filelist mode example:
 
-    > ./batchmode -r -s 7 -e 10
+    > ./batchmode -r runsfile.json -j runsobject -s 7 -e 10
 
-This will analyse runs 7 to 10, both inclusive. The definition of runs are in src/RawDataFiles.h. Output
-filenames are generated automatically and corresponds the the filename prefix for the run.
+This will analyse runs 7 to 10, both inclusive. The definition of runs are in the 
+runsobject  of runsfile.json. Output filenames are generated automatically and corresponds 
+the filename prefix or the individual runs.
 
 ### genpixids
 
-This program takes two inputs: an event file and a calibration file prefix. It then reads the
-event file and generates a binary file of voxel intensities. Typically something like this:
+This program takes either one or three inputs depending on whether event file and calibration filename
+prefixes are identical or different. It then reads the event file and generates a binary file of voxel 
+intensities. Typically something like this:
 
-    > ./genpixids  2016_07_13_beamOn_4p96A_.events 2016_07_13_beamOn_4p96A_
+    > ./genpixids  2016_07_13_beamOn_4p96A_.events testcalibrationfile voxeloutputfile
+or
+    > ./genpixids  2016_07_13_beamOn_4p96A_.
 
 
-a binary .vox file is generated.
+a binary .vox file is generated. Either with the filename prefix from the second example or with the 
+specified output filename from the first one.
 
 ### cncsread (obsolete)
 This utility is an (mostly) idenpendent parser of the multi grid data format. It can be used
