@@ -69,6 +69,8 @@ int main(int argc, char *argv[]) {
   int values[6144]; /** size is specific to CNCS object above */
   memset(values, 0, 6144);
 
+  int events = 0;
+  int errids = 0;
   while (1) {
     ret = fscanf(ff, "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n", &data[0],
                  &data[1], &data[2], &data[3], &data[4], &data[5], &data[6],
@@ -78,6 +80,7 @@ int main(int argc, char *argv[]) {
       break;
     }
 
+    events++;
     int w0pos = data[4]; /** fifth field of the .events file */
     int g0pos = data[8]; /** ninth field of the .events file */
     int wireid = wcal[w0pos];
@@ -92,14 +95,18 @@ int main(int argc, char *argv[]) {
 
     if (pixid != -1) { /**< create intensity volume image */
       values[pixid - 1]++;
+    } else {
+      errids++;
     }
-    printf("event: %d, wirepos %d, wire: %d, gridpos %d, grid: %d, pixel: %d\n",
-           data[0], w0pos, wireid, g0pos, gridid, pixid);
+    //printf("event: %d, wirepos %d, wire: %d, gridpos %d, grid: %d, pixel: %d\n",
+    //       data[0], w0pos, wireid, g0pos, gridid, pixid);
   }
 
-  for (int i = 0; i < 6144; i++) {
-    printf("voxel: %4d, intensity %6d\n", i + 1, values[i]);
-  }
+  //for (int i = 0; i < 6144; i++) {
+  //  printf("voxel: %4d, intensity %6d\n", i + 1, values[i]);
+  //}
+
+  printf("generated %d pixels, discarded %d.\n", events, errids);
 
   DataSave(outputfile, values, sizeof(values));
 
