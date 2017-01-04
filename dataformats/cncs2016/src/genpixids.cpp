@@ -15,23 +15,36 @@
 
 int main(int argc, char *argv[]) {
 
-  if (argc != 2) {
-    printf("usage: genpixids eventbasename\n");
+  std::string eventfile, calibfile, outputfile;
+
+  if (argc == 2) {
+    std::string basename(argv[1]);
+    eventfile = basename + ".events";
+    calibfile = basename;
+    outputfile = eventfile + ".vox";
+  } else if (argc == 4) {
+    eventfile = argv[1];
+    calibfile = argv[2];
+    outputfile = argv[3];
+  } else {
+    printf("Generate pixel ids from an event file and a calibration file.\n");
+    printf("usage:\n");
+    printf("  genpixids basename\n");
+    printf("   - use basename.events and basename.wcal/basename.gcal\n");
+    printf("  genpixids eventfile calibfile voxfile\n");
+    printf("   - use eventfile and calibfile.wcal/calibfile.gcal\n");
     exit(1);
   }
 
-  std::string basename(argv[1]);
-  std::string eventfile = basename + ".events";
-  std::string calibfile = basename;
-
-  CalibrationFile lcf;
+  CalibrationFile calibio;
   uint16_t wcal[CSPECChanConv::adcsize];
   uint16_t gcal[CSPECChanConv::adcsize];
 
-  printf("Loading calibration data..\n");
-  auto ret = lcf.load(calibfile, (char *)wcal, (char *)gcal);
+  printf("Loading calibration data from file %s ...\n", calibfile.c_str());
+  auto ret = calibio.load(calibfile, (char *)wcal, (char *)gcal);
   if (ret != 0) {
-    printf("  loading failed, check if file exists and have correct sizes\n");
+    printf("  loading failed, check if files %s.wcal and \n  %s.gcal exist and have correct sizes\n",
+            calibfile.c_str(), calibfile.c_str());
     exit(1);
   }
 
@@ -43,10 +56,14 @@ int main(int argc, char *argv[]) {
   calibration.load_calibration(wcal, gcal);
 
   //
-  printf("reading event data...\n");
+  printf("reading event data from file %s ...\n", eventfile.c_str());
 
   FILE * ff = fopen(eventfile.c_str(), "r");
-  assert(ff != NULL);
+  if (ff == NULL) {
+    printf("  reading failed, check if file %s exist and has read permissions\n",
+           eventfile.c_str());
+    exit(1);
+  }
 
   int data[10];     /** holds channel data + time */
   int values[6144]; /** size is specific to CNCS object above */
@@ -62,6 +79,8 @@ int main(int argc, char *argv[]) {
     }
 
     int w0pos = data[4]; /** fifth field of the .events file */
+    int wireid = wcal[w0pos];
+
     int g0pos = data[8]; /** ninth field of the .events file */
     int gridid = gcal[g0pos]; /** reverse grids @todo verify */
 
@@ -70,11 +89,9 @@ int main(int argc, char *argv[]) {
     else
       gridid-= 48;  // swap modules
 
-    int wireid = wcal[w0pos];
-
     int pixid = CNCS.getdetectorpixelid(0, gridid, wireid);
 
-    if (pixid != -1) {
+    if (pixid != -1) { /**< create intensity volume image */
       values[pixid - 1]++;
     }
     printf("event: %d, wirepos %d, wire: %d, gridpos %d, grid: %d, pixel: %d\n",
@@ -84,8 +101,8 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < 6144; i++) {
     printf("voxel: %4d, intensity %6d\n", i+1, values[i]);
   }
-  auto ofile = eventfile + ".vox";
-  DataSave(ofile.c_str(), values, sizeof(values));
+
+  DataSave(outputfile, values, sizeof(values));
 
   return 0;
 }
