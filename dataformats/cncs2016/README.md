@@ -69,11 +69,11 @@ This program takes either one or three inputs depending on whether event file an
 prefixes are identical or different. It then reads the event file and generates a binary file of voxel 
 intensities. Typically something like this:
 
-    > ./genpixids  2016_07_13_beamOn_4p96A_.events testcalibrationfile voxeloutputfile
+    > ./genpixids  runfile.events calibrationfile outputfile
 
-or
+or if runfile.events, runfile.wcal and runfile.gcal all exist
 
-    > ./genpixids  2016_07_13_beamOn_4p96A_.
+    > ./genpixids runfile 
 
 
 a binary .vox file is generated. Either with the filename prefix from the second example or with the 
