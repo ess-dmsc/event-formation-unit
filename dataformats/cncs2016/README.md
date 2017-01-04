@@ -70,7 +70,9 @@ prefixes are identical or different. It then reads the event file and generates 
 intensities. Typically something like this:
 
     > ./genpixids  2016_07_13_beamOn_4p96A_.events testcalibrationfile voxeloutputfile
+
 or
+
     > ./genpixids  2016_07_13_beamOn_4p96A_.
 
 
