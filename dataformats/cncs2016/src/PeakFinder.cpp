@@ -20,11 +20,11 @@ std::vector<PeakData *> &PeakFinder::findpeaks(const std::vector<int> &data) {
     }
   }
 
-  printf("histogram stats, min: %d, max %d, avg %d\n",peakstats.min(),
+  printf("histogram stats, min: %d, max %d, avg %d\n", peakstats.min(),
          peakstats.max(), peakstats.avg());
 
   if (thresh == 0) { /**< use automatic background level */
-    thresh = peakstats.avg()/5;
+    thresh = peakstats.avg() / 5;
   }
 
   for (unsigned int i = 0; i < datacopy.size(); i++) {

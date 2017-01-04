@@ -52,7 +52,7 @@
       {"id": 16, "dir": "11_29/",                     "prefix": "2016_12_06_1059_sample_",  "postfix": ".bin", "start": 0, "end": 12615, "valid": 1}
       ],
 
-// from ~/nfsoffline
+  // from ~/nfsoffline
   "nfsoffline" :
     [
       {"id": 1,  "dir": "07_13_4p96A/",               "prefix": "2016_07_13_beamOn_4p96A_", "postfix": ".bin", "start": 0, "end":   162, "valid": 1},

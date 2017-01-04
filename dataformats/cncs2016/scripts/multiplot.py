@@ -2,7 +2,11 @@
 
 import sys, pylab as pl, numpy as np
 
-title = sys.argv[1] 
+if len(sys.argv) != 4:
+    print "usage: multiplot.py title columns files"
+    sys.exit(0)
+
+title = sys.argv[1]
 cols = sys.argv[2]
 files = sys.argv[3:]
 n = len(files)
@@ -19,9 +23,9 @@ for idx, file in enumerate(files):
    data = np.loadtxt(file, delimiter=',', usecols = (1,2,3,4,5,6,7,8,9,10,11) )
    x = data[:,0]
    for yi in cols.split():
-     y = data[:,yi]
+     y = data[:,int(yi)]
      pl.plot(x,y, lw = 0.5)
 
 pl.legend(cols.split())
 pl.savefig('test.png')
-#pl.show()
+pl.show()

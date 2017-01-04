@@ -6,18 +6,18 @@
  */
 
 #pragma once
-#include <vector>
 #include <RunSpec.h>
+#include <vector>
 
 class RunSpecParse {
 public:
   RunSpecParse(std::string jsonfile);
 
-  std::vector<RunSpec*> & getruns(std::string runspec,
-                 std::string basedir, std::string ofile, std::string cfile,
-                 int start, int end);
+  std::vector<RunSpec *> &getruns(std::string runspec, std::string basedir,
+                                  std::string ofile, std::string cfile,
+                                  int start, int end);
 
 private:
   std::string file;
-  std::vector<RunSpec*> runs;
+  std::vector<RunSpec *> runs;
 };

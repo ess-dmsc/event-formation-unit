@@ -90,9 +90,6 @@ int Analyze::batchreader(std::string dir, std::string prefix,
   printf("#Loading files %s(%d-%d)%s\n", prefix.c_str(), begin, end,
          postfix.c_str());
   printf("#From directory %s\n\n", dir.c_str());
-  printf(fmt1, "#Filename", "index", "readouts", "discards", "events", "ev_gbl",
-         "nonzero", "firstnz", "lastnz", "nonzero_gbl", "firstnz_glbl",
-         "lastnz_glbl");
 
   dprintf(csvdatafd, "#Loading files %s(%d-%d)%s\n", prefix.c_str(), begin, end,
           postfix.c_str());

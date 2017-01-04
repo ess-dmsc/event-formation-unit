@@ -11,14 +11,10 @@
 class RunSpec {
 public:
   RunSpec(std::string dir, std::string prefix, std::string postfix,
-      unsigned int start, unsigned int end, std::string ofile, std::string cfile)
-        : dir_(dir)
-        , prefix_(prefix)
-        , postfix_(postfix)
-        , start_(start)
-        , end_(end)
-        , ofile_(ofile)
-        , cfile_(cfile) {};
+          unsigned int start, unsigned int end, std::string ofile,
+          std::string cfile)
+      : dir_(dir), prefix_(prefix), postfix_(postfix), start_(start), end_(end),
+        ofile_(ofile), cfile_(cfile){};
 
   std::string dir_;
   std::string prefix_;

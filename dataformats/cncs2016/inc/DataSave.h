@@ -5,13 +5,14 @@
  *  @brief saves data to file
  */
 
- #include <stddef.h>
- #include <string>
+#include <stddef.h>
+#include <string>
 
 class DataSave {
 public:
-  DataSave(std::string filename, void * data, size_t datasize);
+  DataSave(std::string filename, void *data, size_t datasize);
   ~DataSave();
+
 private:
   int fd;
 };
