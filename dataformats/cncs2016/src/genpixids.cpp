@@ -11,8 +11,6 @@
 #include <string.h>
 #include <string>
 
-//#define UNUSED __attribute__((unused))
-
 int main(int argc, char *argv[]) {
 
   std::string eventfile, calibfile, outputfile;
@@ -98,7 +96,7 @@ int main(int argc, char *argv[]) {
     } else {
       errids++;
     }
-    //printf("event: %d, wirepos %d, wire: %d, gridpos %d, grid: %d, pixel: %d\n",
+    //printf("event: %6d, wirepos %4d, wire: %3d, gridpos %4d, grid: %3d, pixel: %4d\n",
     //       data[0], w0pos, wireid, g0pos, gridid, pixid);
   }
 
