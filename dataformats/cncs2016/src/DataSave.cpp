@@ -10,12 +10,14 @@ DataSave::DataSave(std::string filename, void *buffer, size_t datasize) {
   const int mode = S_IRUSR | S_IWUSR;
 
   if ((fd = open(filename.c_str(), flags, mode)) < 0) {
-    perror("open() failed");
+    std::string msg = "DataSave: open(" + filename + ") failed";
+    perror(msg.c_str());
   }
 
   int ret;
   if ((ret = write(fd, buffer, datasize)) < 0) {
-    perror("open() failed");
+    std::string msg = "DataSave: write(" + filename + ") failed";
+    perror(msg.c_str());
   }
 }
 

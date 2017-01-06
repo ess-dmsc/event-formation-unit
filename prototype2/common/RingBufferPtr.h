@@ -5,9 +5,10 @@
 
 /** @file
  *
-         *  @brief Simple RingBuffer class to keep track of a number of buffers.
+ *  @brief Simple RingBuffer class to keep track of a number of buffers.
  * Similar to RingBuffer.h but uses a Fifo of pointers to struct Data
  * in stead of buffer indexes. Should currently be considered unsupported.
+ * @todo Consider RingBufferPtr.h unsupported
  */
 
 #pragma once
