@@ -1,13 +1,18 @@
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 3.5)
 set (CMAKE_CXX_STANDARD 11)
 
 option(BUILD_TESTS "Build test programs" OFF)
 
 project (mgtools)
+
+set(CMAKE_CXX_FLAGS_DEBUG " -O3 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
+set(CMAKE_CXX_FLAGS_RELEASE " -O3 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
+
 include_directories(
     ${mgtools_SOURCE_DIR}/inc
     ${mgtools_SOURCE_DIR}/../../prototype2
     ${mgtools_SOURCE_DIR}/../..)
+
 
 add_executable(batchreader
     src/batchreader.cpp src/Analyse.cpp src/Args.cpp
