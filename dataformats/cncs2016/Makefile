@@ -57,7 +57,7 @@ DataSave.o: src/DataSave.cpp inc/DataSave.h
 		@echo building $@
 		$(Q)g++ -c $(CFLAGS) -I../.. $<
 
-batchreader: src/batchreader.cpp inc/RawDataFiles.h Analyse.o Args.o MapFile.o \
+batchreader: src/batchreader.cpp Analyse.o Args.o MapFile.o \
 	           PeakFinder.o jsoncpp.o RunSpecParse.o
 	@echo building $@
 	$(Q)g++ $(CFLAGS) src/batchreader.cpp \

@@ -54,7 +54,7 @@ public:
   int getcapped() { return capped; }
 
 private:
-  std::vector<PeakData *> peaks;
+  std::vector<PeakData *> peaks{};
   int minwidth{1}; /**< minimum width for identifying peaks */
   int thresh{0};   /**< values above this are considered signals */
   int low{0};
