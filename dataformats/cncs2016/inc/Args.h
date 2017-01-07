@@ -23,7 +23,6 @@ public:
   std::string prefix{""};    /**< filename prefix */
   std::string postfix{""};   /**< filename postfix */
   std::string ofile{"output"}; /**< output filename prefix */
-  std::string cfile{"output"}; /**< output calibration prefix */
   int start{0};              /**< start of file sequence number */
   int end{0};                /**< end range of file sequence number */
 

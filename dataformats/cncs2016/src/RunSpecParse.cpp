@@ -3,13 +3,14 @@
 #include <RunSpecParse.h>
 #include <fstream>
 #include <json.h>
+#include <string>
 
 RunSpecParse::RunSpecParse(std::string jsonfile) : file(jsonfile) {}
 
 std::vector<RunSpec *> &RunSpecParse::getruns(std::string runspec,
                                               std::string basedir,
-                                              std::string ofile,
-                                              std::string cfile, int start,
+                                              std::string outputdir,
+                                              int start,
                                               int end) {
 
   std::ifstream t(file);
@@ -34,8 +35,20 @@ std::vector<RunSpec *> &RunSpecParse::getruns(std::string runspec,
       auto pos = plugins[index]["postfix"].asString();
       auto start = plugins[index]["start"].asInt();
       auto end = plugins[index]["end"].asInt();
-      runs.push_back(new RunSpec(dir, pre, pos, start, end, ofile + "/" + pre,
-                                 cfile + "/" + pre));
+
+      int thresh = -1;
+      auto object = plugins[index]["thresh"];
+      if (object == Json::Value::null) {
+        printf("No value for thresh use default\n");
+      } else {
+        thresh = plugins[index]["thresh"].asInt();
+      }
+
+      // Make unique filename from runspec and runid
+      std::string outputfile = outputdir + "/" + runspec + "_" + std::to_string(runid);
+      std::string outputcalib = outputfile;
+
+      runs.push_back(new RunSpec(dir, pre, pos, start, end, outputfile, thresh));
     }
   }
   return runs;

@@ -23,7 +23,8 @@ std::vector<PeakData *> &PeakFinder::findpeaks(const std::vector<int> &data) {
   printf("histogram stats, min: %d, max %d, avg %d\n", peakstats.min(),
          peakstats.max(), peakstats.avg());
 
-  if (thresh == 0) { /**< use automatic background level */
+  if (thresh == -1) { /**< use automatic background level */
+    printf("Automatic threshold\n");
     thresh = peakstats.avg() / 5; /**< @todo avoid hard coded value */
   }
 

@@ -14,8 +14,7 @@ public:
   RunSpecParse(std::string jsonfile);
 
   std::vector<RunSpec *> &getruns(std::string runspec, std::string basedir,
-                                  std::string ofile, std::string cfile,
-                                  int start, int end);
+                                  std::string outputdir, int start, int end);
 
 private:
   std::string file;

@@ -16,7 +16,7 @@
 #include <unistd.h>
 
 Analyze::Analyze(Args &opts)
-    : ofile(opts.ofile), cfile(opts.cfile), low_cut(opts.hist_low) {
+    : ofile(opts.ofile), low_cut(opts.hist_low) {
   static const int flags = O_TRUNC | O_CREAT | O_WRONLY;
   static const int mode = S_IRUSR | S_IWUSR;
 
@@ -141,10 +141,10 @@ int Analyze::batchreader(std::string dir, std::string prefix,
   return 0;
 }
 
-void Analyze::makecal() {
+void Analyze::makecal(unsigned int thresh) {
 
-  PeakFinder wires(2, 0, 150); /**< min peak width 2, threshold 150*/
-  PeakFinder grids(2, 0, 150); /**< min peak width 2, threshold 150*/
+  PeakFinder wires(2, thresh, 150); /**< min peak width 2, low cut 150*/
+  PeakFinder grids(2, -1, 150); /**< min peak width 2, low cut 150*/
 
   wires.findpeaks(w0pos.hist);
   wires.printstats(std::string("\nw0pos statistics"));
@@ -152,15 +152,13 @@ void Analyze::makecal() {
   grids.findpeaks(g0pos.hist);
   grids.printstats(std::string("\ng0pos statistics"));
 
-  if (!cfile.empty()) {
-    printf("Writing calibration to file\n");
-    uint16_t wcal[CSPECChanConv::adcsize];
-    uint16_t gcal[CSPECChanConv::adcsize];
+  printf("Writing calibration to file\n");
+  uint16_t wcal[CSPECChanConv::adcsize];
+  uint16_t gcal[CSPECChanConv::adcsize];
 
-    wires.makecal(wcal, CSPECChanConv::adcsize);
-    grids.makecal(gcal, CSPECChanConv::adcsize);
+  wires.makecal(wcal, CSPECChanConv::adcsize);
+  grids.makecal(gcal, CSPECChanConv::adcsize);
 
-    CalibrationFile calibfile;
-    calibfile.save(std::string(cfile), (char *)wcal, (char *)gcal);
-  }
+  CalibrationFile calibfile;
+  calibfile.save(std::string(ofile), (char *)wcal, (char *)gcal);
 }

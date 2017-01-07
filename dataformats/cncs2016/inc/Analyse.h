@@ -17,7 +17,7 @@ public:
   ~Analyze();
   int batchreader(std::string dir, std::string fileprefix,
                   std::string filepostfix, int begin, int end);
-  void makecal();
+  void makecal(unsigned int thresh);
 
 private:
   int readfile(std::string filename);
@@ -26,8 +26,7 @@ private:
   Histogram global, local; /**< for file output */
   Histogram w0pos, g0pos;  /**< for use with PeakFinder */
 
-  std::string ofile{"data"};
-  std::string cfile{""};
+  std::string ofile{};
 
   struct {
     unsigned int readouts;
