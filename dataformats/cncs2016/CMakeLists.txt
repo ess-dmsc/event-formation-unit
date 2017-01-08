@@ -1,7 +1,7 @@
 cmake_minimum_required (VERSION 3.5)
 set (CMAKE_CXX_STANDARD 11)
 
-option(BUILD_TESTS "Build test programs" OFF)
+option(BUILD_TESTS "Build test programs" ON)
 
 project (mgtools)
 
