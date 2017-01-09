@@ -6,6 +6,7 @@
  */
 
 #pragma once
+
 #ifndef NOKAFKA
 #include <librdkafka/rdkafkacpp.h>
 
@@ -20,8 +21,6 @@ public:
   Producer(std::string broker, bool enabled, std::string topicstr);
 
   /** @brief Function called to send data to a broker
-   *  @todo currently transmits a fixed hello world string, should take a
-   *  data object reference or similar.
    */
   int produce();
 

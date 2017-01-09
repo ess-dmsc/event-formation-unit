@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Class for mmap'ing a file
+ *  @brief Class for anstraction of mmap()
  */
 
 #pragma once
@@ -11,24 +11,25 @@
 
 class MapFile {
 public:
-  /** @todo document
+  /** @brief mmap a filename
+   *  @filename File to be mmap'ed
    */
   MapFile(std::string filename);
 
-  /** @todo document
+  /** @brief descructor handles cleanup
    */
   ~MapFile();
 
-  /** @todo document
+  /** @brief get the address of the mmap'ed file
    */
   const char *getaddress();
 
-  /** @todo document
+  /** @brief get the size of the mmap'ed file
    */
   size_t getsize();
 
 private:
   void *address{nullptr}; /**< address of mmap'ed file */
-  size_t filesize;
-  int fd;
+  size_t filesize{0}; /**< size of mmap'ed file */
+  int fd{-1}; /**< file descriptor used for mmap/munmap */
 };

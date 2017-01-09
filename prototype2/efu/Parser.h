@@ -17,18 +17,25 @@ class Parser {
 public:
   static const unsigned int max_command_size = 100;
   enum error { OK = 0, EUSIZE, EOSIZE, ENOTOKENS, EBADCMD, EBADARGS };
-  /** @todo document
+
+  /** @brief Create parser with the currently fixed commands
    */
   Parser();
 
-  /** @todo document
+  /** @brief used to register new commands with the Parser
+   *  @param cmd_name name of command
+   *  @param function pointer to command implementation
    */
   int registercmd(std::string cmd_name, function_ptr cmd_fn);
 
-  /** @todo document
+  /** @brief parse a command
+   *  @param[in] input char array holding command and its arguments
+   *  @param[in] isize input size in bytes
+   *  @param[out] output reply for the command
+   *  @param[out] osize output size in bytes
    */
   int parse(char *input, unsigned int isize, char *output, unsigned int *osize);
 
 private:
-  std::map<std::string, function_ptr> commands;
+  std::map<std::string, function_ptr> commands; /**< map of all commands */
 };

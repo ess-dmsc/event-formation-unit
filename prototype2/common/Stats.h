@@ -6,24 +6,25 @@
  */
 
 #pragma once
+
 #include <algorithm>
 #include <cinttypes>
 #include <libs/include/Timer.h>
 
 class Stats {
 private:
-  Timer usecs_elapsed, time;
-  unsigned int report_mask{0};
+  Timer usecs_elapsed, time;   /**< used for rate calculations */
+  unsigned int report_mask{0}; /**< bitmask for active statistics */
 
-  /** @todo comment */
-  void reset() {
+  /** @brief samples the current counter values */
+  void sample() {
     ib = i;
     pb = p;
     ob = o;
     usecs_elapsed.now();
   }
 
-  /** @todo comment */
+  /** @brief print out packet related statistics */
   void packet_stats() {
     auto usecs = usecs_elapsed.timeus();
     uint64_t ipps = (i.rx_packets - ib.rx_packets) * 1000000 / usecs;
@@ -37,7 +38,7 @@ private:
            i.rx_bytes, ipps, iMbps, pkeps, oMbps);
   }
 
-  /** @todo comment */
+  /** @brief print out event related statistics */
   void event_stats() {
     auto usecs = usecs_elapsed.timeus();
     uint64_t pkeps = (p.rx_events - pb.rx_events) * 1000 / usecs;
@@ -48,7 +49,7 @@ private:
            i.rx_packets, p.rx_events, pkeps, p.rx_discards, p.rx_error_bytes);
   }
 
-  /** @todo comment */
+  /** @brief print out fifo related statistics */
   void fifo_stats() {
     printf(" | Fifo I - %6" PRIu64 " free, %10" PRIu64 " pusherr"
            " | P - %12" PRIu64 " fifo free, %10" PRIu64 " pusherr",
@@ -56,20 +57,23 @@ private:
   }
 
 public:
-  /** @todo comment */
+  /** @brief Constructor starts by clear()'ing all counters */
   Stats() { clear(); }
 
-  /** @todo comment */
+  /** @brief clear counters and also sample() */
   void clear() {
     std::fill_n((char *)&i, sizeof(i), 0);
     std::fill_n((char *)&p, sizeof(p), 0);
     std::fill_n((char *)&o, sizeof(o), 0);
-    reset();
+    sample();
   }
 
-  /** @todo comment */
+  /** @brief set the mask determining what output is printed
+   * @param mask bit mask
+   */
   void set_mask(unsigned int mask) { report_mask = mask; }
 
+  /** @brief print out all active statistics */
   void report() {
     if (report_mask)
       printf("%5" PRIu64, time.timeus() / 1000000);
@@ -85,7 +89,7 @@ public:
 
     if (report_mask)
       printf("\n");
-    reset();
+    sample();
   }
 
   typedef struct {
