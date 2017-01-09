@@ -3,8 +3,8 @@
 #include <iostream>
 
 int main(int argc, char *argv[]) {
-  Pipeline nmx("./libnmx.so");
-  Pipeline beer("./libbeer.so");
+  Pipeline nmx("./nmx.inst");
+  Pipeline beer("./beer.inst");
 
   std::cout << "calling receive function nmx\n";
   for (int i = 0; i < 10; i++) {

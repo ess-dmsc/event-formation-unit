@@ -13,3 +13,6 @@ batchreader
 efu2
 gencspec
 gencspecfile
+
+#directories
+build/
