@@ -4,7 +4,7 @@
 #include <fstream>
 #include <string>
 
-RunSpecParse::RunSpecParse(std::string jsonfile) : file(jsonfile) {}
+RunSpecParse::RunSpecParse(std::string filename) : jsonfile(filename) {}
 
   std::vector<RunSpec *> &RunSpecParse::getruns(std::string runspec,
                                               std::string basedir,
@@ -25,7 +25,7 @@ RunSpecParse::RunSpecParse(std::string jsonfile) : file(jsonfile) {}
   }
 
   if (!reader.parse(str, root, 0)) {
-    printf("error: file \"%s\" is not valid json\n", file.c_str());
+    printf("error: file \"%s\" is not valid json\n", jsonfile.c_str());
     exit(1);
   }
 
