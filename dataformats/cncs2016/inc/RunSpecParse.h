@@ -22,7 +22,7 @@ public:
 private:
   Json::Value root{};    /**< for jsoncpp parser */
   Json::Reader reader{}; /**< for jsoncpp parser */
-  std::string file{};
+  std::string jsonfile{};
   std::vector<RunSpec *> runs{};
 
   const char * ID = "id";

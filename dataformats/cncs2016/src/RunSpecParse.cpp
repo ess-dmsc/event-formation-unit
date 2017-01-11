@@ -12,7 +12,7 @@ RunSpecParse::RunSpecParse(std::string jsonfile) : file(jsonfile) {}
                                               int start,
                                               int end) {
 
-  std::ifstream t(file);
+  std::ifstream t(jsonfile);
   std::string str((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
 
