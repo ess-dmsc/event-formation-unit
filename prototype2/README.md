@@ -90,3 +90,4 @@ You can also use the bash script kafkaservice from utils/
 `> ./kafkaservice start`
 
 `> ./kafkaservice stop`
+
