@@ -14,9 +14,6 @@ DGArgs::DGArgs(int argc, char *argv[]) {
   int c;
   while (1) {
     static struct option long_options[] = {
-        {"basedir", required_argument, 0, 'b'},
-        {"runfile", required_argument, 0, 'r'},
-        {"runspec", required_argument, 0, 'j'},
         {"filename", required_argument, 0, 'f'},
         {"ipaddr", required_argument, 0, 'i'},
         {"data", required_argument, 0, 'd'},
@@ -32,7 +29,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:b:d:f:i:j:n:p:r:s:t:u:hx", long_options,
+    c = getopt_long(argc, argv, "a:d:f:i:n:p:s:t:u:hx", long_options,
                     &option_index);
 
     if (c == -1)
@@ -44,9 +41,6 @@ DGArgs::DGArgs(int argc, char *argv[]) {
     case 'a':
       txPkt = atoi(optarg);
       break;
-    case 'b':
-      basedir.assign(optarg);
-      break;
     case 'd':
       buflen = atoi(optarg);
       break;
@@ -56,17 +50,11 @@ DGArgs::DGArgs(int argc, char *argv[]) {
     case 'i':
       dest_ip.assign(optarg);
       break;
-    case 'j':
-      runspecification.assign(optarg);
-      break;
     case 'n':
       txEvt = atoi(optarg);
       break;
     case 'p':
       port = atoi(optarg);
-      break;
-    case 'r':
-      runfile.assign(optarg);
       break;
     case 's':
       txGB = atoi(optarg);
@@ -84,7 +72,6 @@ DGArgs::DGArgs(int argc, char *argv[]) {
     default:
       printf("Usage: bulkdatagen [OPTIONS] \n");
       printf(" --filename -f name     read data from single file \n");
-      /**< @todo add -r -j */
       printf(" --throttle -t val      speed throttle (0 fastest, then slower) "
              "\n");
       printf(" --size -s size         size in GB of transmitted data \n");
