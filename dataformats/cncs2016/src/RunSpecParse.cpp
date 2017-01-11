@@ -50,7 +50,10 @@ RunSpecParse::RunSpecParse(std::string filename) : jsonfile(filename) {}
       }
 
       // Make unique filename from runspec and runid
-      std::string outputfile = outputdir + runspec + "_" + std::to_string(runid);
+      std::ostringstream seqno;
+      seqno.width(2);
+      seqno << std::setfill('0') << runid;
+      std::string outputfile = outputdir + runspec + "_" + seqno.str();
 
       runs.push_back(new RunSpec(dir, pre, pos, start, end, outputfile, thresh));
     }

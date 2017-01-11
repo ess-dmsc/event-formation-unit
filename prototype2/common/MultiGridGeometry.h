@@ -10,8 +10,6 @@
 #include <cinttypes>
 #include <common/Trace.h>
 
-#define UNUSED __attribute__((unused))
-
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 

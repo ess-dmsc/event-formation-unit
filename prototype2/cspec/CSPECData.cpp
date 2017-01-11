@@ -16,8 +16,7 @@ struct multi_grid {
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_INF
 
-/** @todo no error checking, assumes valid data and valid buffer
- */
+/** @todo no error checking, assumes valid data and valid buffer */
 void CSPECData::createevent(const MultiGridData &data, char *buffer) {
   auto col = data.module + 1; /** @todo talk to Anton */
   auto grid = chanconv->getgridid(data.d[6]);

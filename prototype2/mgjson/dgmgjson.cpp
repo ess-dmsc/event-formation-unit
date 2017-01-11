@@ -4,6 +4,8 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <iomanip>
+#include <sstream>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <unistd.h>
@@ -40,7 +42,10 @@ int main(int argc, char *argv[]) {
 
   for (auto run : runs) {
     for (unsigned int j = run->start_; j <= run->end_; j++) {
-      std::string file = run->dir_ + run->prefix_ + std::to_string(j) + run->postfix_;
+      std::ostringstream seqno;
+      seqno.width(3);
+      seqno << std::setfill('0') << j;
+      std::string file = run->dir_ + run->prefix_ + seqno.str() + run->postfix_;
       printf("Streaming file %s\n", file.c_str());
 
       FILE *f = fopen(file.c_str(), "r");
