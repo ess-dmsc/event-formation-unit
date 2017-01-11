@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <RunSpecParse.h>
+#include <iomanip>
 #include <fstream>
 #include <string>
 
