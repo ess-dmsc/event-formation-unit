@@ -82,6 +82,12 @@
 
   "makevalid" :
     [
-      {"id": 10, "dir": "09_29/",                     "prefix": "2016_10_03_0606_sample_",  "postfix": ".bin", "start": 10000, "end": 11000}
+      {"id": 10, "dir": "09_29/",                     "prefix": "2016_10_03_0606_sample_",  "postfix": ".bin", "start": 10000, "end": 10007}
+    ],
+
+
+  "streamtest" :
+    [
+      {"id": 10, "dir": "09_29/",                     "prefix": "2016_10_03_0606_sample_",  "postfix": ".bin", "start": 1, "end": 2}
     ]
 }

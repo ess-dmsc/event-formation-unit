@@ -16,14 +16,9 @@ public:
    */
   DGArgs(int argc, char *argv[]);
 
-  std::string filename{}; /**< for single file streaming */
   std::string basedir{}; /**< basedir for all files */
   std::string runfile{}; /**< read data from file */
   std::string runspecification{}; /**< use this run definition */
-
-  unsigned int txGB{10}; /**< total transmit size (GB) */
-  uint64_t txPkt{0xffffffffffffffff};
-  int txEvt{100}; /**< 100 events per packet */
 
   std::string dest_ip{"127.0.0.1"}; /**< destination ip address */
   int port{9000};                   /**< destination udp port */

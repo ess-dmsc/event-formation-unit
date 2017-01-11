@@ -7,16 +7,29 @@
 
 #pragma once
 #include <RunSpec.h>
+#include <json.h>
 #include <vector>
 
 class RunSpecParse {
 public:
+  /** @todo document */
   RunSpecParse(std::string jsonfile);
 
+  /** @todo document */
   std::vector<RunSpec *> &getruns(std::string runspec, std::string basedir,
                                   std::string outputdir, int start, int end);
 
 private:
-  std::string file;
-  std::vector<RunSpec *> runs;
+  Json::Value root{};    /**< for jsoncpp parser */
+  Json::Reader reader{}; /**< for jsoncpp parser */
+  std::string file{};
+  std::vector<RunSpec *> runs{};
+
+  const char * ID = "id";
+  const char * DIR = "dir";
+  const char * PREFIX = "prefix";
+  const char * POSTFIX = "postfix";
+  const char * START = "start";
+  const char * END = "end";
+  const char * THRESHOLD = "thresh";
 };
