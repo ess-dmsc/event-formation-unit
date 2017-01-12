@@ -25,7 +25,7 @@ endif
 
 cspec.so.src =  cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
 cspec.so.src += common/Producer.cpp
-cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h
+cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h common/MultiGridGeometry.h
 cspec.so.inc += gccintel.h common/Producer.h common/Stats.h common/Trace.h
 cspec.so.inc +=
 
@@ -67,7 +67,7 @@ $(efu.obj): $(efu.inc)
 $(gencspec.obj): $(gencspec.inc)
 $(gencspecfile.obj): $(gencspecfile.inc)
 
-cspec.so: $(cspec.so.src) $(cspc.so.inc)
+cspec.so: $(cspec.so.src) $(cspec.so.inc)
 	@echo building specific $@
 	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
 

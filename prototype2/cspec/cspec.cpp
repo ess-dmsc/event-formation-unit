@@ -131,8 +131,7 @@ void CSPEC::processing_thread(void *args) {
   conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear look-up table
   conv.makegridcal(0, CSPECChanConv::adcsize - 1, 96);  // Linear look-up table
 
-  MultiGridGeometry geom(1, 2, 48, 4, 16, 1,
-                         1); /**< @todo test detector data */
+  MultiGridGeometry geom(1, 2, 48, 4, 16);
 
   // CSPECData dat(0, 0, &conv, &CSPEC); // Custom signal thresholds
   CSPECData dat(250, &conv, &geom); // Default signal thresholds
@@ -166,13 +165,16 @@ void CSPEC::processing_thread(void *args) {
         auto d = dat.data[id];
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();
-          dat.createevent(d, event_ringbuf->getdatabuffer(event_index));
-          if (proc2output_fifo.push(event_index) == false) {
-            opts->stat.p.fifo_push_errors++;
-            XTRACE(PROCESS, WAR, "Overflow :%" PRIu64 "\n",
-                   opts->stat.p.fifo_push_errors);
+          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) < 0) {
+            opts->stat.p.geometry_errors++;
           } else {
-            event_ringbuf->nextbuffer();
+            if (proc2output_fifo.push(event_index) == false) {
+              opts->stat.p.fifo_push_errors++;
+              XTRACE(PROCESS, WAR, "Overflow :%" PRIu64 "\n",
+                   opts->stat.p.fifo_push_errors);
+            } else {
+              event_ringbuf->nextbuffer();
+            }
           }
         }
       }

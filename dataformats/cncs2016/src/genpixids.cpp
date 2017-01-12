@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 
   printf("Creating MultiGrid parser objects..\n");
   CSPECChanConv calibration;
-  MultiGridGeometry CNCS(1, 2, 48, 4, 16, 1, 1);
+  MultiGridGeometry CNCS(1, 2, 48, 4, 16);
 
   printf("Applying calibration data..\n");
   calibration.load_calibration(wcal, gcal);
@@ -84,12 +84,18 @@ int main(int argc, char *argv[]) {
     int wireid = wcal[w0pos];
     int gridid = gcal[g0pos];
 
+    if (wireid & 1) {
+      wireid++;
+    } else {
+      wireid--;
+    }
+
     if (gridid <= 48) /** reverse grids @todo verify */
       gridid += 48; // swap modules
     else
       gridid -= 48; // swap modules
 
-    int pixid = CNCS.getdetectorpixelid(0, gridid, wireid);
+    int pixid = CNCS.getdetectorpixelid(1, gridid, wireid);
 
     if (pixid != -1) { /**< create intensity volume image */
       values[pixid - 1]++;

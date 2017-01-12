@@ -10,19 +10,19 @@ class MultiGridGeometryTest : public TestBase {};
 
 /** Test cases below */
 TEST_F(MultiGridGeometryTest, getmaxpixelid) {
-  MultiGridGeometry p1m1grid1x1(1, 1, 1, 1, 1, 0, 0);
+  MultiGridGeometry p1m1grid1x1(1, 1, 1, 1, 1);
   ASSERT_EQ(1, p1m1grid1x1.getmaxpixelid());
 
-  MultiGridGeometry p1m2grid2x2(1, 2, 2, 2, 2, 0, 0);
+  MultiGridGeometry p1m2grid2x2(1, 2, 2, 2, 2);
   ASSERT_EQ(16, p1m2grid2x2.getmaxpixelid());
 
-  MultiGridGeometry cncs(1, 2, 48, 4, 16, 0, 0);
+  MultiGridGeometry cncs(1, 2, 48, 4, 16);
   ASSERT_EQ(6144, cncs.getmaxpixelid());
 }
 
 
 TEST_F(MultiGridGeometryTest, UndersizeOversizeGeometry) {
-  MultiGridGeometry p2m2g2_2x2(2, 2, 2, 2, 2, 0, 0);
+  MultiGridGeometry p2m2g2_2x2(2, 2, 2, 2, 2);
 
   ASSERT_EQ(-1, p2m2g2_2x2.getdetectorpixelid(0, 1, 1));
   ASSERT_EQ(-1, p2m2g2_2x2.getdetectorpixelid(1, 0, 1));
@@ -33,21 +33,8 @@ TEST_F(MultiGridGeometryTest, UndersizeOversizeGeometry) {
   ASSERT_EQ(-1, p2m2g2_2x2.getdetectorpixelid(1, 1, 9));
 }
 
-
-TEST_F(MultiGridGeometryTest, UndersizeOversizeGeometryWOffset) {
-  MultiGridGeometry p2m2g2_2x2_off(2, 2, 2, 2, 2, 1, 0);
-
-  ASSERT_EQ(-1, p2m2g2_2x2_off.getdetectorpixelid(-1, 1, 1));
-  ASSERT_EQ(-1, p2m2g2_2x2_off.getdetectorpixelid(1, 0, 1));
-  ASSERT_EQ(-1, p2m2g2_2x2_off.getdetectorpixelid(1, 1, 0));
-
-  ASSERT_EQ(-1, p2m2g2_2x2_off.getdetectorpixelid(2, 1, 1));
-  ASSERT_EQ(-1, p2m2g2_2x2_off.getdetectorpixelid(1, 5, 1));
-  ASSERT_EQ(-1, p2m2g2_2x2_off.getdetectorpixelid(1, 1, 9));
-}
-
 TEST_F(MultiGridGeometryTest, OnePanelGetPixelID) {
-  MultiGridGeometry p1m2g2_2x2(1, 2, 2, 2, 2, 0, 0);
+  MultiGridGeometry p1m2g2_2x2(1, 2, 2, 2, 2);
   ASSERT_EQ(16, p1m2g2_2x2.getmaxpixelid());
 
   ASSERT_EQ( 1, p1m2g2_2x2.getdetectorpixelid(1, 2, 1));
@@ -74,7 +61,7 @@ TEST_F(MultiGridGeometryTest, OnePanelGetPixelID) {
 
 
 TEST_F(MultiGridGeometryTest, TwoPanelsGetPixelID) {
-  MultiGridGeometry p2m2g2_2x2(2, 2, 2, 2, 2, 0, 0);
+  MultiGridGeometry p2m2g2_2x2(2, 2, 2, 2, 2);
   ASSERT_EQ(32, p2m2g2_2x2.getmaxpixelid());
 
   ASSERT_EQ( 1, p2m2g2_2x2.getdetectorpixelid(1, 2, 1));
@@ -98,42 +85,13 @@ TEST_F(MultiGridGeometryTest, TwoPanelsGetPixelID) {
   ASSERT_EQ(32, p2m2g2_2x2.getdetectorpixelid(2, 3, 8));
 }
 
-TEST_F(MultiGridGeometryTest, TwoPanelsGetPixelIDWOffset) {
-  MultiGridGeometry p2m2g2_2x2(2, 2, 2, 2, 2, 1, 0);
-
-  ASSERT_EQ(32, p2m2g2_2x2.getmaxpixelid());
-
-  ASSERT_EQ( 1, p2m2g2_2x2.getdetectorpixelid(0, 2, 1));
-  ASSERT_EQ(16, p2m2g2_2x2.getdetectorpixelid(0, 3, 8));
-  ASSERT_EQ(17, p2m2g2_2x2.getdetectorpixelid(1, 2, 1));
-
-  ASSERT_EQ(32, p2m2g2_2x2.getdetectorpixelid(1, 3, 8));
-}
-
-TEST_F(MultiGridGeometryTest, TwoPanelsSwappedWires) {
-  MultiGridGeometry p2m2g2_2x2(2, 2, 2, 2, 2, 0, 1);
-
-  ASSERT_EQ(32, p2m2g2_2x2.getmaxpixelid());
-
-  ASSERT_EQ(2, p2m2g2_2x2.getdetectorpixelid(1, 2, 1));
-  ASSERT_EQ(1, p2m2g2_2x2.getdetectorpixelid(1, 2, 2));
-  ASSERT_EQ(16, p2m2g2_2x2.getdetectorpixelid(1, 3, 7));
-  ASSERT_EQ(15, p2m2g2_2x2.getdetectorpixelid(1, 3, 8));
-
-  ASSERT_EQ(18, p2m2g2_2x2.getdetectorpixelid(2, 2, 1));
-  ASSERT_EQ(17, p2m2g2_2x2.getdetectorpixelid(2, 2, 2));
-  ASSERT_EQ(32, p2m2g2_2x2.getdetectorpixelid(2, 3, 7));
-  ASSERT_EQ(31, p2m2g2_2x2.getdetectorpixelid(2, 3, 8));
-}
-
-
 TEST_F(MultiGridGeometryTest, CSPECGetPixelID) {
   int panels = 1;
   int modules = 80;
   int grids = 160;
   int xwires = 4;
   int zwires = 16;
-  MultiGridGeometry gridCSPEC(panels, modules, grids, xwires, zwires, 0, 0);
+  MultiGridGeometry gridCSPEC(panels, modules, grids, xwires, zwires);
   MESSAGE() << "This test sucks, please improve\n";
   MESSAGE() << "A few steps in the z-direction\n";
   ASSERT_EQ(1, gridCSPEC.getdetectorpixelid(1, grids, 1));
@@ -156,14 +114,14 @@ TEST_F(MultiGridGeometryTest, CSPECGetPixelID) {
 
 TEST_F(MultiGridGeometryTest, NxNConstructor) {
   for (int i = 2; i < 16; i++) {
-    MultiGridGeometry gridNxN(i, i, i, i, i, 0, 0);
+    MultiGridGeometry gridNxN(i, i, i, i, i);
     ASSERT_EQ(gridNxN.getmaxpixelid(), i * i * i * i * i);
   }
 }
 
 TEST_F(MultiGridGeometryTest, NxNGridBounds) {
   for (int i = 1; i < 16; i++) {
-    MultiGridGeometry gridNxN(i, i, i, i, i, 0, 0);
+    MultiGridGeometry gridNxN(i, i, i, i, i);
     ASSERT_EQ(gridNxN.getdetectorpixelid(0, i, i * i), -1);
     ASSERT_EQ(gridNxN.getdetectorpixelid(i, 0, i * i), -1);
     ASSERT_EQ(gridNxN.getdetectorpixelid(i, i, 0), -1);
@@ -183,7 +141,7 @@ TEST_F(MultiGridGeometryTest, CSPECDetectorSpeedTest) {
   int repeats = 10000000;
   uint64_t sum = 0;
   TSCTimer start;
-  MultiGridGeometry CSPEC(panels, modules, grids, xwires, zwires, 0, 0);
+  MultiGridGeometry CSPEC(panels, modules, grids, xwires, zwires);
   for (int i = 1; i < repeats; i++) {
     sum += CSPEC.getdetectorpixelid(7 % i + 1, 40 + i % 31, 37);
   }
@@ -199,27 +157,27 @@ TEST_F(MultiGridGeometryTest, TestDetectorModuleBoundaries) {
   int grids = 48;
   int xwires = 4;
   int zwires = 16;
-  MultiGridGeometry testdetector(panels, modules, grids, xwires, zwires, 1, 0);
+  MultiGridGeometry testdetector(panels, modules, grids, xwires, zwires);
 
-  ASSERT_EQ(   1, testdetector.getdetectorpixelid(0, 48,  1));
-  ASSERT_EQ(  16, testdetector.getdetectorpixelid(0, 48, 16));
-  ASSERT_EQ(2305, testdetector.getdetectorpixelid(0, 48, 49));
-  ASSERT_EQ(2320, testdetector.getdetectorpixelid(0, 48, 64));
+  ASSERT_EQ(   1, testdetector.getdetectorpixelid(1, 48,  1));
+  ASSERT_EQ(  16, testdetector.getdetectorpixelid(1, 48, 16));
+  ASSERT_EQ(2305, testdetector.getdetectorpixelid(1, 48, 49));
+  ASSERT_EQ(2320, testdetector.getdetectorpixelid(1, 48, 64));
 
-  ASSERT_EQ( 753, testdetector.getdetectorpixelid(0,  1,  1));
-  ASSERT_EQ( 768, testdetector.getdetectorpixelid(0,  1, 16));
-  ASSERT_EQ(3057, testdetector.getdetectorpixelid(0,  1, 49));
-  ASSERT_EQ(3072, testdetector.getdetectorpixelid(0,  1, 64));
+  ASSERT_EQ( 753, testdetector.getdetectorpixelid(1,  1,  1));
+  ASSERT_EQ( 768, testdetector.getdetectorpixelid(1,  1, 16));
+  ASSERT_EQ(3057, testdetector.getdetectorpixelid(1,  1, 49));
+  ASSERT_EQ(3072, testdetector.getdetectorpixelid(1,  1, 64));
 
-  ASSERT_EQ(3073, testdetector.getdetectorpixelid(0, 96, 65));
-  ASSERT_EQ(3088, testdetector.getdetectorpixelid(0, 96, 80));
-  ASSERT_EQ(5377, testdetector.getdetectorpixelid(0, 96,113));
-  ASSERT_EQ(5392, testdetector.getdetectorpixelid(0, 96,128));
+  ASSERT_EQ(3073, testdetector.getdetectorpixelid(1, 96, 65));
+  ASSERT_EQ(3088, testdetector.getdetectorpixelid(1, 96, 80));
+  ASSERT_EQ(5377, testdetector.getdetectorpixelid(1, 96,113));
+  ASSERT_EQ(5392, testdetector.getdetectorpixelid(1, 96,128));
 
-  ASSERT_EQ(3825, testdetector.getdetectorpixelid(0, 49, 65));
-  ASSERT_EQ(3840, testdetector.getdetectorpixelid(0, 49, 80));
-  ASSERT_EQ(6129, testdetector.getdetectorpixelid(0, 49,113));
-  ASSERT_EQ(6144, testdetector.getdetectorpixelid(0, 49,128));
+  ASSERT_EQ(3825, testdetector.getdetectorpixelid(1, 49, 65));
+  ASSERT_EQ(3840, testdetector.getdetectorpixelid(1, 49, 80));
+  ASSERT_EQ(6129, testdetector.getdetectorpixelid(1, 49,113));
+  ASSERT_EQ(6144, testdetector.getdetectorpixelid(1, 49,128));
 }
 
 
@@ -229,7 +187,7 @@ TEST_F(MultiGridGeometryTest, TestDetectorIllegalWireAndGridid) {
   int grids = 48;
   int xwires = 4;
   int zwires = 16;
-  MultiGridGeometry testdetector(panels, modules, grids, xwires, zwires, 1, 0);
+  MultiGridGeometry testdetector(panels, modules, grids, xwires, zwires);
 
   ASSERT_EQ(-1, testdetector.getdetectorpixelid(1, 49,   1));
   ASSERT_EQ(-1, testdetector.getdetectorpixelid(1, 96,   1));

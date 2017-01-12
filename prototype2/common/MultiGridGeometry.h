@@ -24,13 +24,10 @@ public:
    * @param grids Number of grids per module
    * @param xwires Number of wires in the x-direction
    * @param zwires Number of wires in the z-direction
-   * @param panel_off offset from readout (should be 0 in real detector)
-   * @param swap_wires swap 1<->2, 3<->4, etc. (should be 0 in real detector)
    */
-  MultiGridGeometry(int panels, int modules, int grids, int xwires, int zwires,
-                    int panel_off, int swap_wires)
+  MultiGridGeometry(int panels, int modules, int grids, int xwires, int zwires)
       : panls_(panels), mods_(modules), grids_(grids), xwires_(xwires),
-        zwires_(zwires), poff_(panel_off), swapw_(swap_wires) {}
+        zwires_(zwires) {}
 
   /** @brief returns the maximum available pixelid for this geometry
    */
@@ -42,20 +39,20 @@ public:
    *  @param wireid Wire ID , calculated from adc values
    */
   inline int getdetectorpixelid(int panel, int gridid, int wireid) {
-    int p = panel + poff_;
+    XTRACE(PROCESS, DEB, "panel %d, gridid %d, wireid %d\n", panel, gridid, wireid);
 
-    if ((p < 1) || (gridid < 1) || (wireid < 1)) {
+    if ((panel < 1) || (gridid < 1) || (wireid < 1)) {
       XTRACE(PROCESS, WAR,
-             "undersize geometry: panel %d, (off %d) gridid %d, wireid %d\n",
-             panel, poff_, gridid, wireid);
+             "undersize geometry: panel %d, gridid %d, wireid %d\n",
+             panel, gridid, wireid);
       return -1;
     }
 
-    if ((p > panls_) || (gridid > mods_ * grids_) ||
+    if ((panel > panls_) || (gridid > mods_ * grids_) ||
         (wireid > (mods_ * xwires_ * zwires_))) {
       XTRACE(PROCESS, WAR,
-             "oversize geometry: panel %d, (off %d) gridid %d, wireid %d\n",
-             panel, poff_, gridid, wireid);
+             "oversize geometry: panel %d, gridid %d, wireid %d\n",
+             panel, gridid, wireid);
       return -1;
     }
 
@@ -66,26 +63,15 @@ public:
       XTRACE(PROCESS, WAR, "geometry mismatch: wire %d, grid %d\n", wireid, gridid);
       return -1;
     }
-
-    /** @todo eventually get rid of this, but electronics is wrongly wired
-     * on the prototype detector currently being tested
-     */
-    if (swapw_) {
-      if (wireid & 1) {
-        wireid++;
-      } else {
-        wireid--;
-      }
-    }
-
-    int x = mods_ * xwires_ * (p - 1) + (wireid - 1)/zwires_ + 1;
+    int x = mods_ * xwires_ * (panel - 1) + (wireid - 1)/zwires_ + 1;
     int y = grids_ - ((gridid - 1) % grids_);
     int z = (wireid - 1) % zwires_ + 1;
 
-    XTRACE(PROCESS, DEB, "(p, w, g) %d, %d, %d, (x,y,z) %d %d %d\n", p, wireid, gridid, x,
-           y, z);
+    int pixelid = (x - 1) * grids_ * zwires_ + (y - 1) * zwires_ + z;
 
-    return (x - 1) * grids_ * zwires_ + (y - 1) * zwires_ + z;
+    XTRACE(PROCESS, DEB, "x: %d, y: %d, z: %d (pixel %d)\n", x, y, z, pixelid);
+
+    return pixelid;
   }
 
 private:
@@ -94,6 +80,4 @@ private:
   int grids_;  /**< number of grids per module (grid column) */
   int xwires_; /**< number of cells in the x-direction */
   int zwires_; /**< number of cells in the z-direction */
-  int poff_;   /**< panel offset - temporary hack, shuld be 0 in production */
-  int swapw_;  /**< If nonzero: swap wireids 1-2, 3-4, 5-6, ... */
 };

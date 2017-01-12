@@ -68,8 +68,9 @@ public:
   /** @brief serialize event to buffer
    *  @param data Multi grid data from event readout system
    *  @param buffer User specified buffer (must be large enough to hold event
+   *  @todo document return value
    */
-  void createevent(const MultiGridData &data, char *buffer);
+  int createevent(const MultiGridData &data, char *buffer);
 
   // This data is overwritten on receive()
   // struct MultiGridData data[250];

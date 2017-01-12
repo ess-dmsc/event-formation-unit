@@ -17,17 +17,43 @@ struct multi_grid {
 //#define TRC_LEVEL TRC_L_INF
 
 /** @todo no error checking, assumes valid data and valid buffer */
-void CSPECData::createevent(const MultiGridData &data, char *buffer) {
-  auto col = data.module + 1; /** @todo talk to Anton */
+int CSPECData::createevent(const MultiGridData &data, char *buffer) {
+  auto panel = data.module;
   auto grid = chanconv->getgridid(data.d[6]);
   auto wire = chanconv->getwireid(data.d[2]);
-  auto pixid = multigridgeom->getdetectorpixelid(col, grid, wire);
+
+  /** @todo eventually get rid of this, but electronics is wrongly wired
+   * on the prototype detector currently being tested
+   */
+
+  if (wire & 1) {
+    wire++;
+  } else {
+    wire--;
+  }
+
+  if (grid <= 48) {
+    grid += 48;
+  } else {
+    grid -= 48;
+  }
+
+  auto pixid = multigridgeom->getdetectorpixelid(panel, grid, wire);
+  if (pixid < 1) {
+    XTRACE(PROCESS, WAR, "panel %d, grid %d, wire %d, pixel %d\n",
+           panel, grid, wire, pixid);
+    return -1;
+  }
+
+  XTRACE(PROCESS, INF, "panel %d, grid %d, wire %d, pixel %d\n",
+         panel, grid, wire, pixid);
 
   static_assert(sizeof(data.time) == 4, "time should be 32 bit");
   static_assert(sizeof(pixid) == 4, "pixelid should be 32 bit");
 
   std::memcpy(buffer + 0, &data.time, sizeof(data.time));
   std::memcpy(buffer + 4, &pixid, sizeof(pixid));
+  return 0;
 }
 
 int CSPECData::receive(const char *buffer, int size) {
@@ -51,7 +77,7 @@ int CSPECData::receive(const char *buffer, int size) {
         XTRACE(PROCESS, INF, "State::hdr - header error\n");
         break;
       }
-      XTRACE(PROCESS, DEB, "State::hdr valid data, next state State:dat\n");
+      //XTRACE(PROCESS, DEB, "State::hdr valid data, next state State:dat\n");
       data[elems].module = (*datap >> 16) & 0xff;
       datctr = 0;
       state = State::dat;
@@ -64,8 +90,8 @@ int CSPECData::receive(const char *buffer, int size) {
         state = State::hdr;
         break;
       }
-      XTRACE(PROCESS, DEB, "State::dat valid data (%d), next state State:dat\n",
-             datctr);
+      //XTRACE(PROCESS, DEB, "State::dat valid data (%d), next state State:dat\n",
+      //       datctr);
       channel = ((*datap) >> 16) & 0xff;
       //assert(channel == datctr); // asserts for 2016_08_16_0921_sample_ in late 9000s
       if (channel != datctr) {
@@ -79,7 +105,7 @@ int CSPECData::receive(const char *buffer, int size) {
              data[elems].d[datctr]);
       datctr++;
       if (datctr == 8) {
-        XTRACE(PROCESS, DEB, "State:dat all data, next state State:ftr\n");
+        //XTRACE(PROCESS, DEB, "State:dat all data, next state State:ftr\n");
         state = State::ftr;
       }
       break;
@@ -87,12 +113,12 @@ int CSPECData::receive(const char *buffer, int size) {
     // Parse Footer
     case State::ftr:
       if ((*datap & header_mask) != footer_id) {
-        XTRACE(PROCESS, INF, "State::ftr - header error\n");
+        XTRACE(PROCESS, WAR, "State::ftr - header error\n");
         state = State::hdr;
         break;
       }
-      XTRACE(PROCESS, INF,
-             "State::ftr valid data, next state State:hdr, events %u\n", elems);
+      //XTRACE(PROCESS, DEB,
+      //       "State::ftr valid data, next state State:hdr, events %u\n", elems);
       data[elems].time = (*datap) & 0x3fffffff;
       XTRACE(PROCESS, DEB, "time: %d\n", data[elems].time);
       elems++;

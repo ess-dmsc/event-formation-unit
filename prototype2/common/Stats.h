@@ -45,8 +45,8 @@ private:
 
     printf(" | I - %12" PRIu64 " pkts"
            " | P - %12" PRIu64 " events, %8" PRIu64 " kev/s, %12" PRIu64
-           " discards, %12" PRIu64 " errors",
-           i.rx_packets, p.rx_events, pkeps, p.rx_discards, p.rx_error_bytes);
+           " discards, %12" PRIu64 " pix_err, %12" PRIu64 " errors",
+           i.rx_packets, p.rx_events, pkeps, p.rx_discards, p.geometry_errors, p.rx_error_bytes);
   }
 
   /** @brief print out fifo related statistics */
@@ -106,6 +106,7 @@ public:
     uint64_t rx_error_bytes;
     uint64_t rx_discards;
     uint64_t rx_idle;
+    uint64_t geometry_errors;
     uint64_t fifo_push_errors;
     uint64_t fifo_free;
   } processing_stat_t;

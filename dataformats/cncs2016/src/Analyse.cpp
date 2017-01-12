@@ -64,7 +64,7 @@ int Analyze::populate(CSPECData &dat, int readouts) {
 
 int Analyze::readfile(std::string filename) {
   CSPECChanConv conv;
-  MultiGridGeometry CNCS(1, 2, 48, 4, 16, 1, 1);
+  MultiGridGeometry CNCS(1, 2, 48, 4, 16);
 
   CSPECData dat(200000, &conv, &CNCS); // Default signal thresholds
 
