@@ -17,6 +17,11 @@ public:
   /** @brief constructor, sets calibration data to 0 */
   CSPECChanConv();
 
+  /** @brief constructor, sets calibration data to 0
+   * @todo document
+   */
+  CSPECChanConv(uint16_t initval);
+
   /** @brief return the wireid from an adc value using calibration data
    *  @param wire_adc readout value for wire position
    */

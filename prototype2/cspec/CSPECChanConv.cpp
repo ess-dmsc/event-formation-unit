@@ -14,6 +14,16 @@ CSPECChanConv::CSPECChanConv() {
   }
 }
 
+CSPECChanConv::CSPECChanConv(uint16_t initval) {
+  static_assert(sizeof(wirecal) == adcsize * 2, "wirecal mismatch");
+  static_assert(sizeof(gridcal) == adcsize * 2, "gridcal mismatch");
+
+  for (int i = 0; i < adcsize; i++) {
+    wirecal[i] = initval;
+    gridcal[i] = initval;
+  }
+}
+
 int CSPECChanConv::makecal(uint16_t *array, unsigned int min, unsigned int max,
                            unsigned int nb_channels) {
   if ((min >= max) || (min >= CSPECChanConv::adcsize) ||

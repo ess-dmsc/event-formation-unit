@@ -12,7 +12,7 @@ using namespace std;
 
 class CspecDataTest : public TestBase {
 protected:
-  CSPECChanConv conv;
+  CSPECChanConv conv{1};
 
   MultiGridGeometry *cspecgeometry;
 
@@ -100,7 +100,7 @@ TEST_F(CspecDataTest, InputFilterNoEvents) {
   ASSERT_EQ(discard, 0);
 }
 
-TEST_F(CspecDataTest, CreateEvent) {
+TEST_F(CspecDataTest, CreateEventInvalidPixel) {
   char buffer[32];
   struct CSPECData::MultiGridData data;
 
@@ -110,21 +110,38 @@ TEST_F(CspecDataTest, CreateEvent) {
   data.d[2] = 1;
   data.d[6] = 1;
 
-  dat->createevent(data, buffer);
+  conv.makewirecal(500,16383, 1);
+  conv.makegridcal(500,16383, 1);
+  auto ret = dat->createevent(data, buffer);
+
+  ASSERT_EQ(ret, -1);
+}
+
+TEST_F(CspecDataTest, CreateEventValidPixel) {
+  char buffer[32];
+  struct CSPECData::MultiGridData data;
+
+  std::fill_n(buffer, sizeof(buffer), 0x00);
+  data.module = 1;
+  data.time = 0xaabbccdd;
+  data.d[2] = 1; // will be swapped to 1
+  data.d[6] = 1;// will be swapped to 1
+
+  //conv.makewirecal(0,16383, 1);
+  //conv.makegridcal(0,16383, 1);
+  auto ret = dat->createevent(data, buffer);
+
+  ASSERT_EQ(ret, 0);
+
   ASSERT_EQ(buffer[0], (char)0xdd);
   ASSERT_EQ(buffer[1], (char)0xcc);
   ASSERT_EQ(buffer[2], (char)0xbb);
   ASSERT_EQ(buffer[3], (char)0xaa);
-  // -1 since there is no geometry specified
-  EXPECT_EQ(buffer[4], (char)0xff);
-  EXPECT_EQ(buffer[5], (char)0xff);
-  EXPECT_EQ(buffer[6], (char)0xff);
-  EXPECT_EQ(buffer[7], (char)0xff);
 
-  EXPECT_EQ(buffer[8], (char)0x00);
-  EXPECT_EQ(buffer[9], (char)0x00);
-  EXPECT_EQ(buffer[10], (char)0x00);
-  EXPECT_EQ(buffer[11], (char)0x00);
+  EXPECT_EQ(buffer[4], (char)0xF2); //pixelid 1778 ?
+  EXPECT_EQ(buffer[5], (char)0x06);
+  EXPECT_EQ(buffer[6], (char)0x00);
+  EXPECT_EQ(buffer[7], (char)0x00);
 }
 
 int main(int argc, char **argv) {
