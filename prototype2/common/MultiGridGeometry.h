@@ -74,6 +74,15 @@ public:
     return pixelid;
   }
 
+  /** @brief return logical x-coordinate of a pixel */
+  int getxcoord(int pixelid) {return (pixelid - 1) / (grids_ * zwires_) + 1;}
+
+  /** @brief return logical x-coordinate of a pixel */
+  int getycoord(int pixelid) {return ((pixelid - 1) / zwires_ ) % grids_ + 1;}
+
+  /** @brief return logical x-coordinate of a pixel */
+  int getzcoord(int pixelid) {return (pixelid - 1) % zwires_ + 1;}
+
 private:
   int panls_;  /**< number of panels per detector */
   int mods_;   /**< number of modules per panel */
