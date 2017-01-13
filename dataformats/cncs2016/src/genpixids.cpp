@@ -97,8 +97,14 @@ int main(int argc, char *argv[]) {
 
     int pixid = CNCS.getdetectorpixelid(1, gridid, wireid);
 
+    auto time = data[1];
+    auto x = (pixid - 1) / (48 * 16) + 1;
+    auto y = ((pixid - 1) / 16 ) % 48 + 1;
+    auto z = (pixid - 1) % 16 + 1;
+
     if (pixid != -1) { /**< create intensity volume image */
       values[pixid - 1]++;
+      printf("%8d, w %5d, g %4d, p: %4d, x %3d, y %3d, z %3d\n", time, wireid, gridid, pixid, x, y, z);
     } else {
       errids++;
     }
