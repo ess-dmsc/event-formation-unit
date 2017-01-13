@@ -1,4 +1,9 @@
-/** Copyright (C) 2016 European Spallation Source */
+/** Copyright (C) 2016 European Spallation Source ERIC */
+
+/** @file
+ *
+ *  @brief Base class for all unit tests - provides colored print using MESSAGE
+ */
 
 #include <gtest/gtest.h>
 

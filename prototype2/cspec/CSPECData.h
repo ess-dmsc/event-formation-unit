@@ -1,13 +1,22 @@
-/** Copyright (C) 2016 European Spallation Source */
+/** Copyright (C) 2016 European Spallation Source ERIC */
 
-#include <cinttypes>
+/** @file
+ *
+ *  @brief Class to receive and generate CSPEC detector readout
+ */
+
+#pragma once
+
+#include <common/MultiGridGeometry.h>
+#include <cspec/CSPECChanConv.h>
+#include <cspec/CSPECEvent.h>
 
 class CSPECData {
 public:
-  // See "multi grid detector data processing.docx" from DMG's Event Formation
-  // Files
-  const unsigned int wire_thresh = 230; // From Anton 4 oct 2016
-  const unsigned int grid_thresh = 170; //  ...
+  // See "multi grid detector data processing.docx" from DMG's
+  // Event Formation Files
+  unsigned int wire_thresh{230}; // From Anton 4 oct 2016
+  unsigned int grid_thresh{170}; //         -||-
 
   const int datasize = 40; /**< size (bytes) of a data readout */
   // clang-format off
@@ -18,14 +27,34 @@ public:
   const unsigned int nwords = 9;
   // clang-format on
 
-  struct mgd { // multi grid data
+  struct MultiGridData {
     unsigned int module;
     unsigned int d[8];
     unsigned int time;
-    unsigned int valid; // TODO  
+    unsigned int valid;
   };
 
-  /** parse a binary payload buffer, return number of data elements */
+  /** Let user specify calibration parameters */
+  CSPECData(unsigned int maxevents, CSPECChanConv *calibration,
+            MultiGridGeometry *geometry)
+      : datalen(maxevents), chanconv(calibration), multigridgeom(geometry) {
+
+    data = new struct MultiGridData[maxevents];
+  };
+
+  CSPECData(unsigned int maxevents, unsigned int wthresh, unsigned int gthresh,
+            CSPECChanConv *calibration, MultiGridGeometry *geometry)
+      : wire_thresh(wthresh), grid_thresh(gthresh), datalen(maxevents),
+        chanconv(calibration), multigridgeom(geometry) {
+    data = new struct MultiGridData[maxevents];
+  };
+
+  CSPECData(){}; // Discouraged, but used in cspecgen
+
+  ~CSPECData() { delete[] data; }
+
+  /** @brief parse a binary payload buffer, return number of data elements
+   */
   int receive(const char *buffer, int size);
 
   /** Discard data below threshold, double events, etc., return number
@@ -33,11 +62,23 @@ public:
   int input_filter();
 
   /** Generate simulated data, place in user specified buffer */
-  int generate(char *buffer, int size, int elems);
+  int generate(char *buffer, int size, int elems, unsigned int wire_adc,
+               unsigned int grid_adc);
+
+  /** @brief serialize event to buffer
+   *  @param data Multi grid data from event readout system
+   *  @param buffer User specified buffer (must be large enough to hold event
+   *  @todo document return value
+   */
+  int createevent(const MultiGridData &data, char *buffer);
 
   // This data is overwritten on receive()
-  struct mgd data[250];
+  // struct MultiGridData data[250];
+  struct MultiGridData *data;
+  unsigned datalen{0};
   unsigned int elems{0};
   unsigned int error{0};
-  unsigned int frag{0};
+
+  CSPECChanConv *chanconv{nullptr};
+  MultiGridGeometry *multigridgeom{nullptr};
 };

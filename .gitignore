@@ -3,3 +3,16 @@
 *.o
 *.a
 *.so
+*.pyc
+*.gcda
+*.gcno
+
+# Misc programs
+cncsread
+batchreader
+efu2
+gencspec
+gencspecfile
+
+#directories
+build/

@@ -1,0 +1,93 @@
+{
+  "allruns" :
+    [
+      {"id": 1,  "dir": "07_11/beamOn_resetOn/",      "prefix": "2016_07_11_beamOn1_",      "postfix": ".bin", "start": 0, "end":  1121},
+      {"id": 2,  "dir": "07_11/no_reset/",            "prefix": "2016_07_11_background_",   "postfix": ".bin", "start": 0, "end":    59},
+      {"id": 3,  "dir": "07_12_background/",          "prefix": "2016_07_12_beamOn2_",      "postfix": ".bin", "start": 0, "end":  1083},
+      {"id": 4,  "dir": "07_13_12A_Vanadium_powder/", "prefix": "2016_07_14_12A_",          "postfix": ".bin", "start": 0, "end":    63},
+      {"id": 5,  "dir": "07_13_4p96A/",               "prefix": "2016_07_13_beamOn_4p96A_", "postfix": ".bin", "start": 0, "end":   162},
+      {"id": 6,  "dir": "07_13_7p2A/",                "prefix": "2016_07_13_beamOn_7p2A_",  "postfix": ".bin", "start": 0, "end":   285},
+      {"id": 7,  "dir": "07_13_7p2A/1_t0_timing/",    "prefix": "2016_07_13_beamOn_7p2A_",  "postfix": ".bin", "start": 0, "end":    26},
+      {"id": 8,  "dir": "07_14/",                     "prefix": "2016_07_14_2012_sample_",  "postfix": ".bin", "start": 0, "end":    22},
+      {"id": 9,  "dir": "07_14/",                     "prefix": "2016_07_14_2041_sample_",  "postfix": ".bin", "start": 0, "end":    25},
+      {"id": 10, "dir": "07_14/",                     "prefix": "2016_07_14_2133_sample_",  "postfix": ".bin", "start": 0, "end":    78},
+      {"id": 11, "dir": "07_15/",                     "prefix": "2016_07_14_1711_sample_",  "postfix": ".bin", "start": 0, "end": 15153},
+      {"id": 12, "dir": "07_25/",                     "prefix": "2016_07_25_1051_sample_",  "postfix": ".bin", "start": 0, "end":  1365},
+      {"id": 13, "dir": "07_25/",                     "prefix": "2016_07_26_1005_sample_",  "postfix": ".bin", "start": 0, "end":  1442},
+      {"id": 14, "dir": "07_25/",                     "prefix": "2016_07_27_1113_sample_",  "postfix": ".bin", "start": 0, "end": 27901},
+      {"id": 15, "dir": "08_16/",                     "prefix": "2016_08_16_0850_sample_",  "postfix": ".bin", "start": 0, "end":     1},
+      {"id": 16, "dir": "08_16/",                     "prefix": "2016_08_16_0907_sample_",  "postfix": ".bin", "start": 0, "end":     1},
+      {"id": 17, "dir": "08_16/",                     "prefix": "2016_08_16_0921_sample_",  "postfix": ".bin", "start": 0, "end": 60477},
+      {"id": 18, "dir": "09_29/",                     "prefix": "2016_09_29_0849_sample_",  "postfix": ".bin", "start": 0, "end":  1250},
+      {"id": 19, "dir": "09_29/",                     "prefix": "2016_09_30_0606_sample_",  "postfix": ".bin", "start": 0, "end":  4195},
+      {"id": 20, "dir": "09_29/",                     "prefix": "2016_10_03_0606_sample_",  "postfix": ".bin", "start": 0, "end": 13785},
+      {"id": 21, "dir": "10_13/",                     "prefix": "2016_10_13_0520_sample_",  "postfix": ".bin", "start": 0, "end":  9933},
+      {"id": 22, "dir": "10_13/",                     "prefix": "2016_10_20_0811_sample_",  "postfix": ".bin", "start": 0, "end":  1145},
+      {"id": 23, "dir": "10_13/",                     "prefix": "2016_10_21_0351_sample_",  "postfix": ".bin", "start": 0, "end": 14597},
+      {"id": 24, "dir": "10_13/",                     "prefix": "2016_10_31_1247_sample_",  "postfix": ".bin", "start": 0, "end":  8190},
+      {"id": 25, "dir": "10_13/",                     "prefix": "2016_11_07_0351_sample_",  "postfix": ".bin", "start": 0, "end": 25476},
+      {"id": 26, "dir": "11_29/",                     "prefix": "2016_11_30_0846_sample_",  "postfix": ".bin", "start": 0, "end":  8285},
+      {"id": 27, "dir": "11_29/",                     "prefix": "2016_12_06_0527_sample_",  "postfix": ".bin", "start": 0, "end":    24},
+      {"id": 28, "dir": "11_29/",                     "prefix": "2016_12_06_0555_sample_",  "postfix": ".bin", "start": 0, "end":   183},
+      {"id": 29, "dir": "11_29/",                     "prefix": "2016_12_06_1059_sample_",  "postfix": ".bin", "start": 0, "end": 12615}
+    ],
+
+  "validruns" :
+    [
+      {"id": 1,  "dir": "07_11/beamOn_resetOn/",      "prefix": "2016_07_11_beamOn1_",      "postfix": ".bin", "start": 150, "end":   1121, "thresh": 10},
+      {"id": 2,  "dir": "07_13_4p96A/",               "prefix": "2016_07_13_beamOn_4p96A_", "postfix": ".bin", "start":   0, "end":    162},
+      {"id": 3,  "dir": "07_13_7p2A/",                "prefix": "2016_07_13_beamOn_7p2A_",  "postfix": ".bin", "start":   0, "end":    285, "thresh": 10},
+      {"id": 4,  "dir": "07_13_7p2A/1_t0_timing/",    "prefix": "2016_07_13_beamOn_7p2A_",  "postfix": ".bin", "start":   0, "end":     26, "thresh":  0},
+      {"id": 5,  "dir": "07_14/",                     "prefix": "2016_07_14_2041_sample_",  "postfix": ".bin", "start":   0, "end":     25},
+      {"id": 6 , "dir": "07_14/",                     "prefix": "2016_07_14_2133_sample_",  "postfix": ".bin", "start":   0, "end":     78},
+      {"id": 7 , "dir": "07_15/",                     "prefix": "2016_07_14_1711_sample_",  "postfix": ".bin", "start":   0, "end":  15153},
+      {"id": 8 , "dir": "07_25/",                     "prefix": "2016_07_25_1051_sample_",  "postfix": ".bin", "start":   0, "end":   1365},
+      {"id": 9 , "dir": "07_25/",                     "prefix": "2016_07_26_1005_sample_",  "postfix": ".bin", "start":   0, "end":   1442},
+      {"id": 10, "dir": "08_16/",                     "prefix": "2016_08_16_0921_sample_",  "postfix": ".bin", "start":   0, "end":  60477},
+      {"id": 11, "dir": "10_13/",                     "prefix": "2016_10_13_0520_sample_",  "postfix": ".bin", "start":   0, "end":   9933},
+      {"id": 12, "dir": "10_13/",                     "prefix": "2016_10_20_0811_sample_",  "postfix": ".bin", "start":   0, "end":   1145},
+      {"id": 13, "dir": "10_13/",                     "prefix": "2016_10_21_0351_sample_",  "postfix": ".bin", "start":   0, "end":  14597},
+      {"id": 14, "dir": "10_13/",                     "prefix": "2016_10_31_1247_sample_",  "postfix": ".bin", "start":   0, "end":   8190},
+      {"id": 15, "dir": "10_13/",                     "prefix": "2016_11_07_0351_sample_",  "postfix": ".bin", "start":   0, "end":  25476},
+      {"id": 16, "dir": "11_29/",                     "prefix": "2016_11_30_0846_sample_",  "postfix": ".bin", "start":   0, "end":   8285},
+      {"id": 17, "dir": "11_29/",                     "prefix": "2016_12_06_0527_sample_",  "postfix": ".bin", "start":   0, "end":     24},
+      {"id": 18, "dir": "11_29/",                     "prefix": "2016_12_06_0555_sample_",  "postfix": ".bin", "start":   0, "end":    183},
+      {"id": 19, "dir": "11_29/",                     "prefix": "2016_12_06_1059_sample_",  "postfix": ".bin", "start":   0, "end":  12615}
+    ],
+
+  "invalidruns" :
+    [
+      {"id": 1 , "dir": "07_11/no_reset/",            "prefix": "2016_07_11_background_",   "postfix": ".bin", "start": 0, "end":    59}, // maybe with other cal file
+      {"id": 2 , "dir": "07_12_background/",          "prefix": "2016_07_12_beamOn2_",      "postfix": ".bin", "start": 0, "end":  1083}, // INVALID
+      {"id": 3 , "dir": "07_13_12A_Vanadium_powder/", "prefix": "2016_07_14_12A_",          "postfix": ".bin", "start": 0, "end":    63}, // maybe with other cal file
+      {"id": 4 , "dir": "07_14/",                     "prefix": "2016_07_14_2012_sample_",  "postfix": ".bin", "start": 0, "end":    22}, // INVALID
+      {"id": 5 , "dir": "07_25/",                     "prefix": "2016_07_27_1113_sample_",  "postfix": ".bin", "start": 0, "end": 27901}, // INVALID too few peaks?
+      {"id": 6 , "dir": "08_16/",                     "prefix": "2016_08_16_0850_sample_",  "postfix": ".bin", "start": 0, "end":     1}, // INVALID too little data
+      {"id": 7 , "dir": "08_16/",                     "prefix": "2016_08_16_0907_sample_",  "postfix": ".bin", "start": 0, "end":     1}, // INVALID too little data
+      {"id": 8 , "dir": "09_29/",                     "prefix": "2016_09_29_0849_sample_",  "postfix": ".bin", "start": 0, "end":  1250}, // INVALID too few peaks?
+      {"id": 9 , "dir": "09_29/",                     "prefix": "2016_09_30_0606_sample_",  "postfix": ".bin", "start": 0, "end":  4195}, // INVALID too few peaks?
+      {"id": 10, "dir": "09_29/",                     "prefix": "2016_10_03_0606_sample_",  "postfix": ".bin", "start": 0, "end": 13785}  // INVALID too few peaks?
+    ],
+
+  // available on mortens Mac at ~/nfsoffline
+  "nfsoffline" :
+    [
+      {"id": 1,  "dir": "07_13_4p96A/",               "prefix": "2016_07_13_beamOn_4p96A_", "postfix": ".bin", "start": 0, "end":   162},
+      {"id": 2,  "dir": "07_13_7p2A/",                "prefix": "2016_07_13_beamOn_7p2A_",  "postfix": ".bin", "start": 0, "end":   285, "thresh": 10},
+      {"id": 3,  "dir": "07_14/",                     "prefix": "2016_07_14_2041_sample_",  "postfix": ".bin", "start": 0, "end":    25},
+      {"id": 4 , "dir": "07_14/",                     "prefix": "2016_07_14_2133_sample_",  "postfix": ".bin", "start": 0, "end":    78},
+      {"id": 5 , "dir": "11_29/",                     "prefix": "2016_12_06_0527_sample_",  "postfix": ".bin", "start": 0, "end":    24},
+      {"id": 6 , "dir": "11_29/",                     "prefix": "2016_12_06_0555_sample_",  "postfix": ".bin", "start": 0, "end":   183}
+    ],
+
+  "makevalid" :
+    [
+      {"id": 10, "dir": "09_29/",                     "prefix": "2016_10_03_0606_sample_",  "postfix": ".bin", "start": 10000, "end": 10007}
+    ],
+
+
+  "streamtest" :
+    [
+        {"id": 15, "dir": "10_13/",                     "prefix": "2016_11_07_0351_sample_",  "postfix": ".bin", "start":   0, "end":  25476}
+    ]
+}

@@ -1,51 +1,64 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+#pragma once
 template <class T> class StatCounter {
 
 private:
-  T sum{(T)0};
+  T sum_{(T)0};
   long long n{0};
-  T max{0};
-  T min{0};
+  T max_{0};
+  T min_{0};
 
 public:
   void add(T value); /**< add element to template vector*/
 
   T sum(void); /**< returns the value of the counter */
 
-  T count(void); /**< return number of adds */
+  int count(void); /**< return number of adds */
 
   T avg(void); /**< calculate 'average' of vector */
 
   T max(void); /**< return max element of vector */
 
   T min(void); /**< return min element of vector */
+
+  void clear();
 };
 
 template <class T> void StatCounter<T>::add(T value) {
-  sum += value;
+  sum_ += value;
   n++;
-  if (n == 0) {
-    min = n;
-    max = n;
+  if (n == 1) {
+    min_ = value;
+    max_ = value;
     return;
   }
-  if (value > max &&) {
-    max = value;
+  if (value > max_) {
+    max_ = value;
   }
-  if (value < min) {
-    min = value;
+  if (value < min_) {
+    min_ = value;
   }
 }
 
-template <class T> T StatCounter<T>::counts(void) { return n; }
+template <class T> void StatCounter<T>::clear() {
+  sum_ = 0;
+  n = 0;
+  max_ = 0;
+  min_ = 0;
+}
 
-template <class T> T StatCounter<T>::max(void) { return max; }
+template <class T> int StatCounter<T>::count(void) { return n; }
 
-template <class T> T StatCounter<T>::min(void) { return min; }
+template <class T> T StatCounter<T>::max(void) { return max_; }
+
+template <class T> T StatCounter<T>::min(void) { return min_; }
 
 template <class T> T StatCounter<T>::avg(void) {
-  return sum / n; /**< divide by zero opportunity */
+  if (n == 0) {
+    return (T(0));
+  }
+  return sum_ / n;
 }
 
-template <class T> T StatCounter<T>::sum(void) { return sum; }
+template <class T> T StatCounter<T>::sum(void) { return sum_; }

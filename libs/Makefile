@@ -1,13 +1,15 @@
 
 
+CXXFLAGS  = -I.. -std=c++11 -O3 -fPIC
+LDFLAGS   = -L. -lpthread
+CXXFLAGS += -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -Wno-error=sign-compare -Wno-error=conversion-null
 
-CXXFLAGS  = -Iinclude -std=c++11 -O3 -fPIC
-CXXFLAGS += -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs
-LDFLAGS   = -L.
-
-Q=@
-ifdef V
-Q=
+ifndef GTEST
+LDFLAGS += -lgtest
+CXXFLAGS+= -I/usr/include
+else
+LDFLAGS += $(GTEST)/lib/libgtest.a
+CXXFLAGS+= -I$(GTEST)/include
 endif
 
 ifdef COV
@@ -15,12 +17,13 @@ CXXFLAGS += -coverage
 endif
 
 hdrs    = include/Socket.h include/Timer.h include/Thread.h include/Counter.h
-sources = source/Socket.cpp source/Timer.cpp source/Thread.cpp
+hdrs+= include/TSCTimer.h include/Counter.h include/StatCounter.h
+sources = source/Socket.cpp source/Timer.cpp source/Thread.cpp source/TSCTimer.cpp
 objects = $(sources:%.cpp=%.o)
 library = eventlib.a
 
-testprogs  = testevent testpqspeed testpqbasic testpqmin
-testprogs += testcounter
+testprogs  = PQSpeedTest PQBasicTest PQMinTest CounterTest StatCounterTest
+# StatCounterTest
 
 all: $(library) $(hdrs)
 
@@ -30,20 +33,23 @@ $(library): $(objects)
 
 test: $(testprogs)
 
-testevent: test/NMXEvent/testmain.cpp test/NMXEvent/testEventBasic.cpp $(library)
-	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -lgtest -pthread
+runtest: test
+	for test in $(testprogs) ; do ./$$test --gtest_output=xml:$$test.xml ; done
 
-testpqbasic: test/PQ/testmain.cpp test/PQ/testPQBasic.cpp $(library)
-	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -lgtest -pthread
+PQBasicTest: test/PQ/testmain.cpp test/PQ/PQBasicTest.cpp $(library)
+	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS)  -pthread
 
-testpqspeed: test/PQ/testmain.cpp test/PQ/testPQSpeed.cpp $(library)
-	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -lgtest -pthread
+PQSpeedTest: test/PQ/testmain.cpp test/PQ/PQSpeedTest.cpp $(library)
+	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS)  -pthread
 
-testpqmin: test/PQ/testmain.cpp test/PQ/testPQMin.cpp $(library)
-		g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -lgtest -pthread
+PQMinTest: test/PQ/testmain.cpp test/PQ/PQMinTest.cpp $(library)
+	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
 
-testcounter: test/Counter/testmain.cpp test/Counter/testCounter.cpp $(library)
-		g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -lgtest -pthread
+CounterTest: test/Counter/testmain.cpp test/Counter/CounterTest.cpp $(library)
+	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
+
+StatCounterTest: test/Counter/testmain.cpp test/Counter/StatCounterTest.cpp $(library)
+	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
 
 clean:
-	rm -f $(objects) $(library) $(testprogs) *.gc*
+	rm -f $(objects) $(library) $(testprogs) *.gc* *.valgrind *.xml

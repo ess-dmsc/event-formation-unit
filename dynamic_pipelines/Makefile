@@ -10,3 +10,4 @@ libs: liba.cpp liba.h libb.cpp libb.h
 
 clean:
 	rm -f main *.so
+	rm -fr *.dSYM
