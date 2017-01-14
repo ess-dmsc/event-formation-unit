@@ -5,14 +5,15 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
+import future #pip install future
 
 if len(sys.argv) != 2:
-   print "Usage ./heatmap.py xyzfile"
+   print("Usage ./heatmap.py xyzfile")
    sys.exit(0)
 
 file = sys.argv[1]
 
-print "loading..."
+print("loading...")
 x, y, z =np.loadtxt(file, delimiter=',', usecols=(0,1,2), unpack=True)
 xmin = x.min()
 #ymin = y.min()
@@ -23,13 +24,13 @@ ny = y.max() - ymin + 1
 
 Z = np.zeros((ny,nx))
 
-print "creating matrix..."
+print("creating matrix...")
 assert x.shape == y.shape == z.shape
 
 for i in range(len(x)):
     Z[ int(y[i]-ymin) ][ int(x[i]-xmin) ] = z[i]
 
-print "plotting..."
+print("plotting...")
 fig = plt.figure()
 ax = plt.subplot(111)
 plt.title('w1pos - files ' + str(x.min()) + ' to ' + str(x.max()))

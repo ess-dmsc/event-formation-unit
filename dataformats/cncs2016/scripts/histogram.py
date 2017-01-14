@@ -4,9 +4,10 @@ import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import sys, csv
+import future #pip install future
 
 if len(sys.argv) != 3:
-   print "Usage ./histogram.py eventfilename samples"
+   print("Usage ./histogram.py eventfilename samples")
    sys.exit(0)
 
 file = sys.argv[1]

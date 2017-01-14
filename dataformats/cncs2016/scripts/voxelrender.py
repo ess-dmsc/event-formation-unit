@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import vtk, sys
+import future #pip install future
 from numpy import *
 
 # A simple function to be called when the user decides to quit the application.
@@ -56,7 +57,7 @@ def blackbodyII():
 
 
 if len(sys.argv) != 2:
-   print "usage: voxelrender.py filename"
+   print("usage: voxelrender.py filename")
    sys.exit(0)
 
 filename = sys.argv[1]

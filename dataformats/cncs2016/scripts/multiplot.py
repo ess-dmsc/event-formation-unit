@@ -1,18 +1,18 @@
 #!/usr/bin/python
 
 import sys, pylab as pl, numpy as np
-import getopt
+import getopt, future
 
 def usage():
-    print "usage: multiplot.py [options] files"
-    print "options"
-    print " -b, --batch                  does not pause for plotting"
-    print " -c, --columns columstr       specify the number of columns to simultaneously plot"
-    print " -t, --title textstr          provide a title for the plot"
-    print " -o, --output files           name for saved png file"
-    print " -h, --help                   prints this text"
-    print
-    print " Plots columns of the .csv files."
+    print("usage: multiplot.py [options] files")
+    print("options")
+    print( " -b, --batch                  does not pause for plotting")
+    print(" -c, --columns columstr       specify the number of columns to simultaneously plot")
+    print(" -t, --title textstr          provide a title for the plot")
+    print(" -o, --output files           name for saved png file")
+    print(" -h, --help                   prints this text")
+    print("")
+    print(" Plots columns of the .csv files.")
     return
 
 try:
@@ -44,7 +44,7 @@ files = args
 n = len(files)
 
 if n == 0:
-    print "Error: no files specified"
+    print("Error: no files specified")
     usage()
     sys.exit(2)
 
