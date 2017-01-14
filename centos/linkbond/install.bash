@@ -16,9 +16,13 @@ SCRIPTPATH=/etc/sysconfig/network-scripts/
 
 test -e ifcfg-bond0.$1 || errexit "$1 is not a valid target. Please specify one of [test, fast, parallel]"
 
-cp $1 /etc/sysconfig/network-scripts/ifcfg-bond0
-cp ifcfg-eno49 /etc/sysconfig/network-scripts/
-cp ifcfg-eno50 /etc/sysconfig/network-scripts/
+FILES="ifcfg-bond0 ifcfg-eno49 ifcfg-eno50"
+for file in $FILES
+do
+    cp ${file}.$1 ${SCRIPTPATH}${file}$ || errexit "unable to copy file: $file"
+done
 
-echo "now execute the command: \n> sudo systemctl restart network"
-echo "probably better to \n> sudo reboot"
+echo "now execute the command:"
+echo "> sudo systemctl restart network"
+echo "if this does not work then"
+echo "> sudo reboot"
