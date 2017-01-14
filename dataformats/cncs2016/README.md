@@ -102,13 +102,21 @@ grid0 amplitudes and positions.
 
 ### Multiplot
 Reads a csv data file and generates a plot of one or more columns which is
-saved as a png file. First argument is a plot title, the second arguments are 
-the columns of the datafile that should be plotted simulteneously. Finally 
-the user can specify several csv files for this to be done.
+saved as a png file. Now takes several arguments to specify its behavior
+(see multiplot -h).
 
-    > ./multiplot.py "title" "2 1 7" output.csv [output2.csv ...]
+    > ./multiplot.py -t MyTitle -c "2 1 7" file1.csv
 
 Plots columns 2, 1 and 7 in a single figure.
+
+    > ./multiplot.py -b -o myfile.png -c "2 1 7" file1.csv
+
+Plots columns 2, 1 and 7 in a single figure. Saves to myfile.png but does not pause
+to display the plot (batch mode).
+
+    > ./multiplot.py file1.csv file2.csv file3.csv
+
+Plots columns 1 from each file in a separate graph.
 
 ### Heatmap
 Generates a heatmap of w0 positions as a function of file number.
