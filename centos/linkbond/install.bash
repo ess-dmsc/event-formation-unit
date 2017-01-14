@@ -19,7 +19,7 @@ test -e ifcfg-bond0.$1 || errexit "$1 is not a valid target. Please specify one 
 FILES="ifcfg-bond0 ifcfg-eno49 ifcfg-eno50"
 for file in $FILES
 do
-    cp ${file}.$1 ${SCRIPTPATH}${file}$ || errexit "unable to copy file: $file"
+    cp ${file}.$1 ${SCRIPTPATH}${file} || errexit "unable to copy file: $file"
 done
 
 echo "now execute the command:"
