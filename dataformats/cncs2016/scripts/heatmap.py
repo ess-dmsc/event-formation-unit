@@ -1,11 +1,11 @@
 #!/usr/bin/python
 
-# Copyright (C) 2016 European Spallation Source ERIC
+# Copyright (C) 2016, 2017 European Spallation Source ERIC
 
+from __future__ import print_function
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-import future #pip install future
 
 if len(sys.argv) != 2:
    print("Usage ./heatmap.py xyzfile")

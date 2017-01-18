@@ -2,6 +2,7 @@
 
 # Copyright (C) 2016, 2017 European Spallation Source ERIC
 
+from __future__ import print_function
 import sys
 from numpy import genfromtxt
 import pylab as pl

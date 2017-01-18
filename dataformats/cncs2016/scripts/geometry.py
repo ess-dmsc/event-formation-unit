@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
-import future #pip install future
+# Copyright (C) 2016, 2017 European Spallation Source ERIC
+
+from __future__ import print_function, absolute_import
 
 class MultiGridGeometry:
 

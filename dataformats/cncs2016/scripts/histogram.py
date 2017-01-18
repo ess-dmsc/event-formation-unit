@@ -1,10 +1,13 @@
 #!/usr/bin/env python
 
+# Copyright (C) 2016, 2017 European Spallation Source ERIC
+
+from __future__ import print_function
 import numpy as np
 import matplotlib.mlab as mlab
 import matplotlib.pyplot as plt
 import sys, csv
-import future #pip install future
+
 
 if len(sys.argv) != 3:
    print("Usage ./histogram.py eventfilename samples")

@@ -1,9 +1,11 @@
-#!/usr/bin/env python
+#!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-import vtk, sys
-import future #pip install future
+# Copyright (C) 2016, 2017 European Spallation Source ERIC
+
+from __future__ import print_function, absolute_import
 from numpy import *
+import vtk, sys
 
 # A simple function to be called when the user decides to quit the application.
 def exitCheck(obj, event):

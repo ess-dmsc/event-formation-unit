@@ -1,7 +1,10 @@
 #!/usr/bin/python
 
+# Copyright (C) 2016, 2017 European Spallation Source ERIC
+
+from __future__ import print_function
 import sys, pylab as pl, numpy as np
-import getopt, future
+import getopt
 
 def usage():
     print("usage: multiplot.py [options] files")

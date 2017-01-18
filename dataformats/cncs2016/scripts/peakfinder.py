@@ -1,6 +1,8 @@
 #!/usr/bin/python
 
-import future #pip install future
+# Copyright (C) 2016, 2017 European Spallation Source ERIC
+
+from __future__ import print_function
 
 #      | gap               | P1  | gap     | P2| gap           | P3     |  gap       |
 hist = [0,0,0,0,0,0,0,0,0,0,1,5,2,0,0,0,0,0,2,8,0,0,0,0,1,0,0,0,3,7,0,1,0,0,0,0,0,0,0]
