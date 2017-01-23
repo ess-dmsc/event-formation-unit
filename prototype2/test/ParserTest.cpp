@@ -21,9 +21,9 @@ static int dummy_command(std::vector<std::string> UNUSED cmdargs,
 
 // clang-format off
 std::vector<std::string> commands {
-  "STAT_INPUT",                     "STAT_INPUT 0, 0, 0, 0",
-  "STAT_PROCESSING",                "STAT_PROCESSING 0, 0, 0, 0, 0, 0",
-  "STAT_OUTPUT",                    "STAT_OUTPUT 0, 0, 0",
+  "STAT_INPUT",                     "STAT_INPUT 0 0 0 0",
+  "STAT_PROCESSING",                "STAT_PROCESSING 0 0 0 0 0 0 0",
+  "STAT_OUTPUT",                    "STAT_OUTPUT 0 0 0",
   "STAT_MASK_SET 0",                "<OK>",
   "STAT_RESET",                     "<OK>",
   // doesnt work when tests are called outside prototype2/ dir
