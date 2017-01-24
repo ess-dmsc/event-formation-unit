@@ -42,15 +42,18 @@ class Proj:
         plt.suptitle(title)
         plt.subplot(1,3,1)
         plt.title("x-y")
-        plt.imshow(self.xy)
+        plt.imshow(self.xy, interpolation="none")
+        plt.colorbar()
 
         plt.subplot(1,3,2)
         plt.title("z-y")
-        plt.imshow(self.zy)
+        plt.imshow(self.zy, interpolation="none")
+        plt.colorbar()
 
         plt.subplot(1,3,3)
         plt.title("x-z")
-        plt.imshow(self.xz)
+        plt.imshow(self.xz, interpolation="none")
+        plt.colorbar()
 
         pl.pause(0.001)
 
@@ -78,7 +81,7 @@ def main():
     plotevery =  plotint
     maxoffset = 0
     minoffset = 999999999
-    plotrange = 10000
+    plotrange = 80000
     while (True):
         try:
             msg = consumer.consume(block = True)
