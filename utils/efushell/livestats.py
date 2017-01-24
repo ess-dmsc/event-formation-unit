@@ -6,10 +6,21 @@ import curses, sys, os, time, thread
 
 driver = SimpleSocket("localhost", 8888)
 
+global statclear
+
+statclear = 0
+
 def printstats(val0, val1):
+    global statclear
     i = 0
     win = curses.newwin(13, 80, 0, 0)
+    then = time.time()
+    old_events = int(driver.Ask('STAT_OUTPUT').split()[1])
+    maxevrate = 0
     while (1):
+      if statclear:
+          maxevrate = 0
+          statclear = 0
       win.clear()
       win.border(0)
       curses.curs_set(0)
@@ -31,12 +42,18 @@ def printstats(val0, val1):
       oidle = int(ores[2])
       obytes = int(ores[3])
 
+      now = time.time()
+      evrate = (oevents - old_events)/(now - then)
+      maxevrate = max(evrate, maxevrate)
+      old_events = oevents
+      then = now
+
       win.addstr(1,2, "Input Counters           | Processing Counters        | Output Counters")
       win.addstr(2,2, "-"*73)
-      win.addstr(3,2, "Rx Bytes   %10d    | Evt Readouts %10d    | Events %10d" % (irxbytes, prxreadouts, oevents))
-      win.addstr(4,2, "Rx Packets %10d    | Evt Discards %10d    | Bytes  %10d" % (irxpkt, prxdiscards, obytes))
-      win.addstr(5,2, "                         | Evt Pixerrs  %10d    |" % (ppixerrs))
-      win.addstr(6,2, "                         | Evt Errbytes %10d    |" % (prxerrbytes))
+      win.addstr(3,2, "Rx Bytes   %10d    | Evt Readouts %10d    | Bytes  %10d" % (irxbytes, prxreadouts, obytes))
+      win.addstr(4,2, "Rx Packets %10d    | Evt Discards %10d    | Events %10d" % (irxpkt, prxdiscards, oevents))
+      win.addstr(5,2, "                         | Evt Pixerrs  %10d    | Event/s %9d" % (ppixerrs, evrate))
+      win.addstr(6,2, "                         | Evt Errbytes %10d    | Max     %9d" % (prxerrbytes, maxevrate))
       win.addstr(7,2, "-"*73)
       win.addstr(8,2, "Push Errs  %10d    |              %10d    |" % (ipusherr, ppusherrs))
       win.addstr(9,2, "Idle                     |              %10d    |        %10d" % (pidle, oidle))
@@ -47,6 +64,7 @@ def printstats(val0, val1):
       i += 1
 
 def command(line):
+    global statclear
     res = line.split()
     if len(res) <= 0:
         return ""
@@ -55,6 +73,7 @@ def command(line):
     ret = "Invalid command: " + cmd
     if cmd == "clear" or cmd == "c":
         ret = driver.Ask('STAT_RESET')
+        statclear = 1
 
     if (cmd == "load" or cmd == "l") and len(res) == 2:
         ret = driver.Ask('CSPEC_LOAD_CALIB ' + res[1])
@@ -76,7 +95,7 @@ def helptext():
 basewin = curses.initscr()
 thread.start_new_thread(printstats, (0, 0))
 
-bot = curses.newwin(10, 120, 20, 0)
+bot = curses.newwin(10, 120, 15, 0)
 curses.echo()
 curses.cbreak()
 bot.keypad(1)
@@ -86,9 +105,8 @@ line=""
 bot.clear()
 bot.addstr(1,2, CMD)
 
+helptext()
 while (1):
-    helptext()
-
     event = bot.getch()
     try:
         c = chr(event)

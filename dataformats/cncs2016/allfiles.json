@@ -85,9 +85,13 @@
       {"id": 10, "dir": "09_29/",                     "prefix": "2016_10_03_0606_sample_",  "postfix": ".bin", "start": 10000, "end": 10007}
     ],
 
+  "validation" :
+    [
+      {"id": 9 , "dir": "07_25/",                     "prefix": "2016_07_26_1005_sample_",  "postfix": ".bin", "start": 1071, "end":   1168}
+    ],
 
   "streamtest" :
     [
-        {"id": 15, "dir": "10_13/",                     "prefix": "2016_11_07_0351_sample_",  "postfix": ".bin", "start":   0, "end":  25476}
+      {"id": 15, "dir": "10_13/",                     "prefix": "2016_11_07_0351_sample_",  "postfix": ".bin", "start":    0, "end":  25476}
     ]
 }

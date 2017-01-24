@@ -38,7 +38,7 @@ public:
 
   // Runtime Stats
   Stats stat;
-  unsigned int reportmask{0xffffffff};
+  unsigned int reportmask{0x2};
 
   uint16_t wirecal[CSPECChanConv::adcsize];
   uint16_t gridcal[CSPECChanConv::adcsize];
