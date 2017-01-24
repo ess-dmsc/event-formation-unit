@@ -15,7 +15,7 @@ TEST_F(EFUArgsTest, Constructor) {
   ASSERT_STREQ("cspec", opts.det.c_str());
   ASSERT_STREQ("0.0.0.0", opts.ip_addr.c_str());
   ASSERT_EQ(9000, opts.port);
-  ASSERT_EQ(0xffffffffU, opts.reportmask);
+  ASSERT_EQ(0x2U, opts.reportmask);
   ASSERT_EQ(0xffffffffU, opts.stopafter);
 }
 
