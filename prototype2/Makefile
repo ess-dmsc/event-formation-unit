@@ -10,9 +10,7 @@ endif
 VPATH = .. ../libs/include test
 
 progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so
-ifdef HDF5
-progs += gennmxfile
-endif
+
 library = ../libs/eventlib.a
 
 # For each loadable detector add its .so.src and .so.inc dependencies
@@ -47,12 +45,6 @@ gencspecfile.src = cspecgen/cspecfile.cpp cspecgen/CspecArgs.cpp
 gencspecfile.inc = cspecgen/CspecArgs.h
 gencspecfile.obj = $(gencspecfile.src:%.cpp=%.o)
 
-ifdef HDF5
-gennmxfile.src = nmxgen/nmxfile.cpp nmxgen/NMXArgs.cpp
-gennmxfile.inc = nmxgen/NMXArgs.h
-gennmxfile.obj = $(gennmxfile.src:%.cpp=%.o)
-endif
-
 dgmgjson.src = mgjson/dgmgjson.cpp mgjson/MGJsonArgs.cpp ../dataformats/cncs2016/src/RunSpecParse.cpp\
        ../dataformats/cncs2016/src/jsoncpp.cpp
 dgmgjson.inc = mgjson/MGJsonArgs.h
@@ -63,6 +55,7 @@ dgmgjson.obj = $(dgmgjson.src:%.cpp=%.o)
 
 include makefiles/Makefile.config
 include makefiles/Makefile.test
+include makefiles/Makefile.hdf5
 
 doxygen:
 	mkdir -p doxygen
@@ -108,12 +101,6 @@ gencspecfile: $(library) $(gencspecfile.obj) $(gencspecfile.inc)
 	@echo building $@
 	$(Q)$(cxx) $(gencspecfile.obj) $(library) $(ldflags) -o $@
 
-ifdef HDF5
-gennmxfile: $(library) $(gennmxfile.obj) $(gennmxfile.inc)
-	@echo building $@
-	$(Q)$(cxx) $(gennmxfile.obj) $(library) $(ldflags) -o $@
-endif
-
 dgmgjson: $(library) $(dgmgjson.obj) $(dgmgjson.inc)
 	@echo building $@
 	$(Q)$(cxx) $(dgmgjson.obj) $(library) $(ldflags) -o $@
@@ -126,7 +113,7 @@ doxygen-clean:
 
 prog-clean:
 	@rm -f $(efu.obj) $(gencspec.obj) $(dgmgjson.obj) $(gencspecfile.obj) \
-	       $(gencspecfile.obj) $(progs) $(testprogs) *.o
+	       $(gennmxfile.obj) $(progs) $(testprogs) *.o
 
 test-clean:
 	@rm -f *.log gmon.out *.xml *.valgrind
