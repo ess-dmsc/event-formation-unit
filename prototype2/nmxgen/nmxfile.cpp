@@ -8,11 +8,14 @@
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <unistd.h>
+#include <h5cc/H5CC_File.h>
 
 // const int TSC_MHZ = 2900;
 
 int main(int argc, char *argv[]) {
   NMXArgs opts(argc, argv);
+  
+   H5CC::File file(opts.filename, H5CC::Access::r_existing);
 
   char buffer[9000];
   const int readoutdatasize = 40;
