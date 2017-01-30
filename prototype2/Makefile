@@ -9,7 +9,7 @@ endif
 
 VPATH = .. ../libs/include test
 
-progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so
+progs = efu2 gencspec gencspecfile gennmxfile dgmgjson cspec.so nmx.so udp.so
 library = ../libs/eventlib.a
 
 # For each loadable detector add its .so.src and .so.inc dependencies
@@ -43,6 +43,10 @@ gencspec.obj = $(gencspec.src:%.cpp=%.o)
 gencspecfile.src = cspecgen/cspecfile.cpp cspecgen/CspecArgs.cpp
 gencspecfile.inc = cspecgen/CspecArgs.h
 gencspecfile.obj = $(gencspecfile.src:%.cpp=%.o)
+
+gennmxfile.src = nmxgen/nmxfile.cpp nmxgen/NMXArgs.cpp
+gennmxfile.inc = nmxgen/NMXArgs.h
+gennmxfile.obj = $(gennmxfile.src:%.cpp=%.o)
 
 dgmgjson.src = mgjson/dgmgjson.cpp mgjson/MGJsonArgs.cpp ../dataformats/cncs2016/src/RunSpecParse.cpp\
        ../dataformats/cncs2016/src/jsoncpp.cpp
@@ -99,6 +103,10 @@ gencspecfile: $(library) $(gencspecfile.obj) $(gencspecfile.inc)
 	@echo building $@
 	$(Q)$(cxx) $(gencspecfile.obj) $(library) $(ldflags) -o $@
 
+gennmxfile: $(library) $(gennmxfile.obj) $(gennmxfile.inc)
+	@echo building $@
+	$(Q)$(cxx) $(gennmxfile.obj) $(library) $(ldflags) -o $@
+
 dgmgjson: $(library) $(dgmgjson.obj) $(dgmgjson.inc)
 	@echo building $@
 	$(Q)$(cxx) $(dgmgjson.obj) $(library) $(ldflags) -o $@
@@ -110,7 +118,8 @@ doxygen-clean:
 	@rm -fr doxygen doxygen.warnings
 
 prog-clean:
-	@rm -f $(efu.obj) $(gencspec.obj) $(dgmgjson.obj) $(gencspecfile.obj) $(progs) $(testprogs) *.o
+	@rm -f $(efu.obj) $(gencspec.obj) $(dgmgjson.obj) $(gencspecfile.obj) \
+	       $(gencspecfile.obj) $(progs) $(testprogs) *.o
 
 test-clean:
 	@rm -f *.log gmon.out *.xml *.valgrind
