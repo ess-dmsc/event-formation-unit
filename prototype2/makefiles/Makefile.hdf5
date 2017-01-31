@@ -9,8 +9,8 @@ progs += gennmxfile
 
 include+= -I../../h5cc/source -I/usr/include/hdf5/serial
 
-gennmxfile.src = nmxgen/nmxfile.cpp nmxgen/NMXArgs.cpp
-gennmxfile.inc = nmxgen/NMXArgs.h
+gennmxfile.src = nmxgen/nmxfile.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderVMM.cpp
+gennmxfile.inc = nmxgen/NMXArgs.h nmxgen/ReaderVMM.h
 gennmxfile.obj = $(gennmxfile.src:%.cpp=%.o)
 
 ldflags += -L../../h5cc/build -lh5cc -L/usr/lib/x86_64-linux-gnu/hdf5/serial  -lhdf5_hl_cpp -lhdf5_cpp -lhdf5
