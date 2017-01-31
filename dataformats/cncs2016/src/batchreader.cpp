@@ -14,7 +14,8 @@ int main(int argc, char *argv[]) {
                                opts.start, opts.end);
   } else { /**< get config from command line */
     runs.push_back(new RunSpec(opts.basedir + opts.dir, opts.prefix,
-                               opts.postfix, opts.start, opts.end, opts.ofile, -1));
+                               opts.postfix, opts.start, opts.end, opts.ofile,
+                               -1));
   }
 
   // Start the analysis

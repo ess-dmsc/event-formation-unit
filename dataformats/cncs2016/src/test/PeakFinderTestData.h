@@ -6,7 +6,7 @@
  *  @todo add more test data to check algorithm sanity nd robustness
  */
 
- #include <vector>
+#include <vector>
 
 const std::vector<int> testdata{
     0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,

@@ -30,6 +30,6 @@ public:
 
 private:
   void *address{nullptr}; /**< address of mmap'ed file */
-  size_t filesize{0}; /**< size of mmap'ed file */
-  int fd{-1}; /**< file descriptor used for mmap/munmap */
+  size_t filesize{0};     /**< size of mmap'ed file */
+  int fd{-1};             /**< file descriptor used for mmap/munmap */
 };

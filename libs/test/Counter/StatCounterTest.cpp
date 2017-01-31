@@ -1,7 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <libs/include/StatCounter.h>
 #include <gtest/gtest.h>
+#include <libs/include/StatCounter.h>
 
 class StatCounterTest : public ::testing::Test {
 

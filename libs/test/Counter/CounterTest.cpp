@@ -1,7 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <libs/include/Counter.h>
 #include <gtest/gtest.h>
+#include <libs/include/Counter.h>
 
 class CounterTest : public ::testing::Test {
 
@@ -9,9 +9,7 @@ protected:
   Counter count;
 };
 
-TEST_F(CounterTest, NewIsEmpty) {
-  ASSERT_EQ(0, count.count());
-}
+TEST_F(CounterTest, NewIsEmpty) { ASSERT_EQ(0, count.count()); }
 
 TEST_F(CounterTest, Add) {
   for (int i = 0; i < 98765; i++) {

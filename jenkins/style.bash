@@ -14,6 +14,7 @@ function copyright()
     for file in $FILES; 
     do
         head -n 1 $file | grep "Copyright" &>/dev/null || err "No copyright in $file"
+        head -n 1 $file | grep "Copyright" | grep "2017" &>/dev/null || err "Copyright missing 2017 in $file"
     done
     echo
 }

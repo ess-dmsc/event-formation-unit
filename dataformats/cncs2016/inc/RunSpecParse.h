@@ -25,11 +25,11 @@ private:
   std::string jsonfile{};
   std::vector<RunSpec *> runs{};
 
-  const char * ID = "id";
-  const char * DIR = "dir";
-  const char * PREFIX = "prefix";
-  const char * POSTFIX = "postfix";
-  const char * START = "start";
-  const char * END = "end";
-  const char * THRESHOLD = "thresh";
+  const char *ID = "id";
+  const char *DIR = "dir";
+  const char *PREFIX = "prefix";
+  const char *POSTFIX = "postfix";
+  const char *START = "start";
+  const char *END = "end";
+  const char *THRESHOLD = "thresh";
 };

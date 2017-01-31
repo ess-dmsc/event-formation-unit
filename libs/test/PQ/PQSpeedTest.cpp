@@ -1,10 +1,10 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <libs/include/Timer.h>
 #include <cstdlib>
 #include <functional>
 #include <gtest/gtest.h>
 #include <iostream>
+#include <libs/include/Timer.h>
 #include <queue>
 
 class PriorityQueueTest : public ::testing::Test {
