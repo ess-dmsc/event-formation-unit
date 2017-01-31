@@ -17,6 +17,7 @@ public:
   NMXArgs(int argc, char *argv[]);
 
   std::string filename{}; /**< for single file streaming */
+  std::string outfile{}; /**< for single file streaming */
 
   unsigned int txGB{10}; /**< total transmit size (GB) */
   uint64_t txPkt{0xffffffffffffffff};
