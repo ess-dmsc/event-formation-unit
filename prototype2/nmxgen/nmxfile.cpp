@@ -11,9 +11,6 @@
 
 // const int TSC_MHZ = 2900;
 
-
-
-
 int main(int argc, char *argv[])
 {
   NMXArgs opts(argc, argv);
@@ -31,7 +28,6 @@ int main(int argc, char *argv[])
   ReaderVMM file(opts.filename);
 
   int readsz;
-
   uint64_t pkt = 0;
   uint64_t bytes = 0;
 
