@@ -2,7 +2,6 @@
 
 #include <DataSave.h>
 
-
 DataSave::DataSave(std::string filename, void *buffer, size_t datasize) {
 
   if ((fd = open(filename.c_str(), flags, mode)) < 0) {
@@ -32,12 +31,11 @@ int DataSave::tofile(std::string text) {
   return write(fd, text.c_str(), text.size());
 }
 
-int DataSave::tofile(char * buffer, size_t len) {
+int DataSave::tofile(char *buffer, size_t len) {
   if (fd < 0)
     return -1;
 
   return write(fd, buffer, len);
 }
-
 
 DataSave::~DataSave() { close(fd); }

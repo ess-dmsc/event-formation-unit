@@ -1,16 +1,15 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <RunSpecParse.h>
-#include <iomanip>
 #include <fstream>
+#include <iomanip>
 #include <string>
 
 RunSpecParse::RunSpecParse(std::string filename) : jsonfile(filename) {}
 
-  std::vector<RunSpec *> &RunSpecParse::getruns(std::string runspec,
+std::vector<RunSpec *> &RunSpecParse::getruns(std::string runspec,
                                               std::string basedir,
-                                              std::string outputdir,
-                                              int start,
+                                              std::string outputdir, int start,
                                               int end) {
 
   std::ifstream t(jsonfile);
@@ -56,7 +55,8 @@ RunSpecParse::RunSpecParse(std::string filename) : jsonfile(filename) {}
       seqno << std::setfill('0') << runid;
       std::string outputfile = outputdir + runspec + "_" + seqno.str();
 
-      runs.push_back(new RunSpec(dir, pre, pos, start, end, outputfile, thresh));
+      runs.push_back(
+          new RunSpec(dir, pre, pos, start, end, outputfile, thresh));
     }
   }
   return runs;

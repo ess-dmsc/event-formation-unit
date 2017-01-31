@@ -1,10 +1,10 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
 #include <cinttypes>
-#include <nmxgen/NMXArgs.h>
 #include <cstdio>
 #include <getopt.h>
 #include <iostream>
+#include <nmxgen/NMXArgs.h>
 #include <unistd.h>
 
 NMXArgs::NMXArgs(int argc, char *argv[]) {

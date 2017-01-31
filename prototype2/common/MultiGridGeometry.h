@@ -39,31 +39,34 @@ public:
    *  @param wireid Wire ID , calculated from adc values
    */
   inline int getdetectorpixelid(int panel, int gridid, int wireid) {
-    XTRACE(PROCESS, DEB, "panel %d, gridid %d, wireid %d\n", panel, gridid, wireid);
+    XTRACE(PROCESS, DEB, "panel %d, gridid %d, wireid %d\n", panel, gridid,
+           wireid);
 
     if ((panel < 1) || (gridid < 1) || (wireid < 1)) {
       XTRACE(PROCESS, WAR,
-             "undersize geometry: panel %d, gridid %d, wireid %d\n",
-             panel, gridid, wireid);
+             "undersize geometry: panel %d, gridid %d, wireid %d\n", panel,
+             gridid, wireid);
       return -1;
     }
 
     if ((panel > panls_) || (gridid > mods_ * grids_) ||
         (wireid > (mods_ * xwires_ * zwires_))) {
       XTRACE(PROCESS, WAR,
-             "oversize geometry: panel %d, gridid %d, wireid %d\n",
-             panel, gridid, wireid);
+             "oversize geometry: panel %d, gridid %d, wireid %d\n", panel,
+             gridid, wireid);
       return -1;
     }
 
-    int gridmin = ((wireid - 1)/(xwires_ * zwires_)) * grids_ + 1;
-    int gridmax = ((wireid - 1)/(xwires_ * zwires_)) * grids_ + grids_;
-    XTRACE(PROCESS, DEB, "grid: %d, min: %d, max: %d\n", gridid, gridmin, gridmax);
+    int gridmin = ((wireid - 1) / (xwires_ * zwires_)) * grids_ + 1;
+    int gridmax = ((wireid - 1) / (xwires_ * zwires_)) * grids_ + grids_;
+    XTRACE(PROCESS, DEB, "grid: %d, min: %d, max: %d\n", gridid, gridmin,
+           gridmax);
     if ((gridid < gridmin) || (gridid > gridmax)) {
-      XTRACE(PROCESS, WAR, "geometry mismatch: wire %d, grid %d\n", wireid, gridid);
+      XTRACE(PROCESS, WAR, "geometry mismatch: wire %d, grid %d\n", wireid,
+             gridid);
       return -1;
     }
-    int x = mods_ * xwires_ * (panel - 1) + (wireid - 1)/zwires_ + 1;
+    int x = mods_ * xwires_ * (panel - 1) + (wireid - 1) / zwires_ + 1;
     int y = grids_ - ((gridid - 1) % grids_);
     int z = (wireid - 1) % zwires_ + 1;
 
@@ -75,13 +78,13 @@ public:
   }
 
   /** @brief return logical x-coordinate of a pixel */
-  int getxcoord(int pixelid) {return (pixelid - 1) / (grids_ * zwires_) + 1;}
+  int getxcoord(int pixelid) { return (pixelid - 1) / (grids_ * zwires_) + 1; }
 
   /** @brief return logical x-coordinate of a pixel */
-  int getycoord(int pixelid) {return ((pixelid - 1) / zwires_ ) % grids_ + 1;}
+  int getycoord(int pixelid) { return ((pixelid - 1) / zwires_) % grids_ + 1; }
 
   /** @brief return logical x-coordinate of a pixel */
-  int getzcoord(int pixelid) {return (pixelid - 1) % zwires_ + 1;}
+  int getzcoord(int pixelid) { return (pixelid - 1) % zwires_ + 1; }
 
 private:
   int panls_;  /**< number of panels per detector */

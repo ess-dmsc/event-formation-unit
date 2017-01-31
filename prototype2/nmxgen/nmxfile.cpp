@@ -1,18 +1,17 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
 #include <cassert>
-#include <nmxgen/NMXArgs.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <libs/include/Socket.h>
-#include <unistd.h>
+#include <nmxgen/NMXArgs.h>
 #include <nmxgen/ReaderVMM.h>
+#include <unistd.h>
 
 // const int TSC_MHZ = 2900;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   NMXArgs opts(argc, argv);
 
   char buffer[9000];
@@ -31,8 +30,7 @@ int main(int argc, char *argv[])
   uint64_t pkt = 0;
   uint64_t bytes = 0;
 
-  while ((pkt < opts.txPkt) && ((readsz = file.read(buffer)) > 0))
-  {
+  while ((pkt < opts.txPkt) && ((readsz = file.read(buffer)) > 0)) {
     DataSource.send(buffer, readsz);
     bytes += readsz;
     pkt++;

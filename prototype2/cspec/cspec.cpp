@@ -157,7 +157,8 @@ void CSPEC::processing_thread(void *args) {
       dat.receive(eth_ringbuf->getdatabuffer(data_index),
                   eth_ringbuf->getdatalength(data_index));
       opts->stat.p.rx_error_bytes += dat.error;
-      opts->stat.p.rx_events += dat.elems; /**< @todo both valid and invalid events */
+      opts->stat.p.rx_events +=
+          dat.elems; /**< @todo both valid and invalid events */
       opts->stat.p.rx_discards += dat.input_filter();
 
       opts->stat.p.fifo_free = proc2output_fifo.free();
@@ -165,13 +166,14 @@ void CSPEC::processing_thread(void *args) {
         auto d = dat.data[id];
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();
-          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) < 0) {
+          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) <
+              0) {
             opts->stat.p.geometry_errors++;
           } else {
             if (proc2output_fifo.push(event_index) == false) {
               opts->stat.p.fifo_push_errors++;
               XTRACE(PROCESS, WAR, "Overflow :%" PRIu64 "\n",
-                   opts->stat.p.fifo_push_errors);
+                     opts->stat.p.fifo_push_errors);
             } else {
               event_ringbuf->nextbuffer();
             }

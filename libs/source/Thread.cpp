@@ -27,6 +27,6 @@ void Thread::affinity(int __attribute__((unused)) lcore) {
     exit(1);
   }
 #else
-#pragma message ("No thread affinity implemented on Mac OS X")
+#pragma message("No thread affinity implemented on Mac OS X")
 #endif
 }

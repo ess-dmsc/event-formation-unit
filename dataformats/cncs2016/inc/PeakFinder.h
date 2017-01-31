@@ -56,7 +56,7 @@ public:
 private:
   std::vector<PeakData *> peaks{};
   int minwidth{1}; /**< minimum width for identifying peaks */
-  int thresh{-1};   /**< values above this are considered signals */
+  int thresh{-1};  /**< values above this are considered signals */
   int low{0};
   int capped{0}; /**< number of zero suppressions applied */
 

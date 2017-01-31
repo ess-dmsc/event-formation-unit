@@ -15,8 +15,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-Analyze::Analyze(Args &opts)
-    : ofile(opts.ofile), low_cut(opts.hist_low) {
+Analyze::Analyze(Args &opts) : ofile(opts.ofile), low_cut(opts.hist_low) {
   static const int flags = O_TRUNC | O_CREAT | O_WRONLY;
   static const int mode = S_IRUSR | S_IWUSR;
 
@@ -144,7 +143,7 @@ int Analyze::batchreader(std::string dir, std::string prefix,
 void Analyze::makecal(unsigned int thresh) {
 
   PeakFinder wires(2, thresh, 150); /**< min peak width 2, low cut 150*/
-  PeakFinder grids(2, -1, 150); /**< min peak width 2, low cut 150*/
+  PeakFinder grids(2, -1, 150);     /**< min peak width 2, low cut 150*/
 
   wires.findpeaks(w0pos.hist);
   wires.printstats(std::string("\nw0pos statistics"));

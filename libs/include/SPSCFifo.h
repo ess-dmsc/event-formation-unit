@@ -111,7 +111,7 @@ bool CircularFifo<Element, Size>::isLockFree() const {
 /** @todo powers of two and bitmask faster than modulus */
 template <typename Element, size_t Size>
 size_t CircularFifo<Element, Size>::increment(size_t idx) const {
-  return (idx + 1) % Capacity; 
+  return (idx + 1) % Capacity;
 }
 
 } // sequential_consistent

@@ -5,7 +5,6 @@
 #include <iostream>
 #include <libs/include/Socket.h>
 
-
 Socket::Socket(Socket::type stype) {
   auto type = (stype == Socket::type::UDP) ? SOCK_DGRAM : SOCK_STREAM;
   auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
@@ -39,8 +38,8 @@ int Socket::settimeout(int seconds, int usecs) {
 
 int Socket::buflen(uint16_t buflen) {
   if (buflen > buflen_max) {
-    std::cout << "Specified buffer length " << buflen << " too large, adjusted to "
-         << buflen_max << std::endl;
+    std::cout << "Specified buffer length " << buflen
+              << " too large, adjusted to " << buflen_max << std::endl;
     buflen_ = buflen_max;
   } else {
     buflen_ = buflen;
@@ -58,7 +57,8 @@ void Socket::local(const char *ipaddr, int port) {
   // bind socket to port
   int ret = bind(s_, (struct sockaddr *)&local_, sizeof(local_));
   if (ret != 0) {
-    std::cout << "bind failed - is port " << port << " already in use?" << std::endl;
+    std::cout << "bind failed - is port " << port << " already in use?"
+              << std::endl;
   }
   assert(ret == 0);
 }

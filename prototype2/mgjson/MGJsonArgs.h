@@ -16,8 +16,8 @@ public:
    */
   DGArgs(int argc, char *argv[]);
 
-  std::string basedir{}; /**< basedir for all files */
-  std::string runfile{}; /**< read data from file */
+  std::string basedir{};          /**< basedir for all files */
+  std::string runfile{};          /**< read data from file */
   std::string runspecification{}; /**< use this run definition */
 
   std::string dest_ip{"127.0.0.1"}; /**< destination ip address */
