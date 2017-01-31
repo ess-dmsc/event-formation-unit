@@ -1,5 +1,10 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
+/** @file
+ *
+ *  @brief Wrapper class for reading VMM data from HDF5 files
+ */
+
 #include <h5cc/H5CC_DataSet.h>
 #include <h5cc/H5CC_File.h>
 
