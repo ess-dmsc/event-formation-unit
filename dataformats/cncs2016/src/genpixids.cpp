@@ -152,7 +152,7 @@ int main(int argc, char *argv[]) {
     if ((totevents >= start) || start == 0) {
       sampleevents++;
       int w0pos = data[4]; /** fifth field of the .events file */
-      int wireid = wcal[w0pos];
+      int wireid = 65 - wcal[w0pos];
       if (wireid & 1) {
         wireid++;
       } else {
@@ -161,11 +161,13 @@ int main(int argc, char *argv[]) {
 
       int g0pos = data[8]; /** ninth field of the .events file */
       int gridid = gcal[g0pos];
+      #if 0
       if (gridid <= 48) { /** swap modules @todo verify */
         gridid += 48;
       } else {
         gridid -= 48;
       }
+      #endif
 
       auto time = data[1];
 
