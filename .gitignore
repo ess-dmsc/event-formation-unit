@@ -13,6 +13,8 @@ batchreader
 efu2
 gencspec
 gencspecfile
+gennmxfile
+dgmgjson
 
 #directories
 build/
