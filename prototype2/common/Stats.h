@@ -1,4 +1,4 @@
-/** Copyright (C) 2016 European Spallation Source ERIC */
+/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 /** @file
  *
@@ -46,7 +46,8 @@ private:
     printf(" | I - %12" PRIu64 " pkts"
            " | P - %12" PRIu64 " events, %8" PRIu64 " kev/s, %12" PRIu64
            " discards, %12" PRIu64 " pix_err, %12" PRIu64 " errors",
-           i.rx_packets, p.rx_events, pkeps, p.rx_discards, p.geometry_errors, p.rx_error_bytes);
+           i.rx_packets, p.rx_events, pkeps, p.rx_discards, p.geometry_errors,
+           p.rx_error_bytes);
   }
 
   /** @brief print out fifo related statistics */

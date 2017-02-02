@@ -5,9 +5,9 @@
  *  @brief saves data to file
  */
 
+#include <fcntl.h>
 #include <stddef.h>
 #include <string>
-#include <fcntl.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -22,7 +22,7 @@ public:
   /** @todo document */
   int tofile(std::string);
 
-  int tofile(char * buffer, size_t len);
+  int tofile(char *buffer, size_t len);
 
   /** @todo document */
   ~DataSave();

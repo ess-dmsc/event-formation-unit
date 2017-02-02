@@ -1,5 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#define UNUSED __attribute__((unused))
+
 #include <DataSave.h>
 #include <MapFile.h>
 #include <cassert>
@@ -29,13 +31,12 @@ int main(int argc, char *argv[]) {
   int start = 0;
   int end = 0;
   while (1) {
-    static struct option long_options[] = {
-        // clang-format off
+    static struct option long_options[] = {// clang-format off
         {"help",      no_argument,       0, 'h'},
         {"start",     required_argument, 0, 's'},
         {"end",       required_argument, 0, 'e'},
         {0,           0,                 0,   0}};
-       // clang-format on
+                                           // clang-format on
 
     int option_index = 0;
 
@@ -71,8 +72,8 @@ int main(int argc, char *argv[]) {
     outputfile = eventfile + ".vox";
   } else if (argc - optind == 3) {
     eventfile = argv[optind];
-    calibfile = argv[optind+1];
-    outputfile = argv[optind+2];
+    calibfile = argv[optind + 1];
+    outputfile = argv[optind + 2];
   } else {
     usage();
     exit(1);
@@ -85,8 +86,9 @@ int main(int argc, char *argv[]) {
   printf("Loading calibration data from file %s ...\n", calibfile.c_str());
   auto ret = calibio.load(calibfile, (char *)wcal, (char *)gcal);
   if (ret != 0) {
-    printf("  loading failed, check if files %s.wcal and \n  %s.gcal exist and have correct sizes\n",
-            calibfile.c_str(), calibfile.c_str());
+    printf("  loading failed, check if files %s.wcal and \n  %s.gcal exist and "
+           "have correct sizes\n",
+           calibfile.c_str(), calibfile.c_str());
     exit(1);
   }
 
@@ -99,10 +101,11 @@ int main(int argc, char *argv[]) {
 
   printf("reading event data from file %s ...\n", eventfile.c_str());
 
-  FILE * ff = fopen(eventfile.c_str(), "r");
+  FILE *ff = fopen(eventfile.c_str(), "r");
   if (ff == NULL) {
-    printf("  reading failed, check if file %s exist and has read permissions\n",
-           eventfile.c_str());
+    printf(
+        "  reading failed, check if file %s exist and has read permissions\n",
+        eventfile.c_str());
     exit(1);
   }
 
@@ -133,7 +136,8 @@ int main(int argc, char *argv[]) {
     printf("Generate pixelid for events from %d to %d\n", start, end);
   }
 
-  int data[10];     /** holds channel data + time */
+  int g1gtg0 = 0;
+  int data[10]; /** holds channel data + time */
   while (1) {
     ret = fscanf(ff, "%d, %d, %d, %d, %d, %d, %d, %d, %d, %d\n", &data[0],
                  &data[1], &data[2], &data[3], &data[4], &data[5], &data[6],
@@ -161,13 +165,17 @@ int main(int argc, char *argv[]) {
 
       int g0pos = data[8]; /** ninth field of the .events file */
       int gridid = gcal[g0pos];
-      #if 0
-      if (gridid <= 48) { /** swap modules @todo verify */
-        gridid += 48;
-      } else {
-        gridid -= 48;
+
+#if 0
+      int g0amp = data[6];
+      int g1amp = data[7];
+      int g1pos = data[9];
+      if (g1amp > g0amp) {
+        gridid = gcal[g1pos];
+        // gridid = 700;
+        g1gtg0++;
       }
-      #endif
+#endif
 
       auto time = data[1];
 
@@ -176,18 +184,19 @@ int main(int argc, char *argv[]) {
         auto x = CNCS.getxcoord(pixid);
         auto y = CNCS.getycoord(pixid);
         auto z = CNCS.getzcoord(pixid);
-        assert(x>=1 && x <= 8);
-        assert(y>=1 && y <= 48);
-        assert(z>=1 && z <= 16);
+        assert(x >= 1 && x <= 8);
+        assert(y >= 1 && y <= 48);
+        assert(z >= 1 && z <= 16);
 
         goodpixels++;
         values[pixid - 1]++; // 3D volume
-        xyproj[x-1][y-1]++;
-        zyproj[z-1][y-1]++;
-        xzproj[x-1][15 - (z-1)]++;
+        xyproj[x - 1][y - 1]++;
+        zyproj[z - 1][y - 1]++;
+        xzproj[x - 1][15 - (z - 1)]++;
 
         char buf[1000]; /**< @todo should be done in tofile() method */
-        auto len = snprintf(buf, 1000, "%8d, %5d, %4d, %4d, %3d, %3d, %2d\n", time, wireid, gridid, pixid, x, y, z);
+        auto len = snprintf(buf, 1000, "%8d, %5d, %4d, %4d, %3d, %3d, %2d\n",
+                            time, wireid, gridid, pixid, x, y, z);
         coords.tofile(buf, len);
       } else {
         badpixels++;
@@ -195,9 +204,8 @@ int main(int argc, char *argv[]) {
     }
   }
 
-
-   printf("Writing data\n");
-  //for (int i = 0; i < 6144; i++) {
+  printf("Writing data\n");
+  // for (int i = 0; i < 6144; i++) {
   //  printf("voxel: %4d, intensity %6d\n", i + 1, values[i]);
   //}
 
@@ -221,7 +229,9 @@ int main(int argc, char *argv[]) {
 
   assert(sampleevents == goodpixels + badpixels);
   printf("Events:     %8d\nGoodpixels: %8d\nBadpixels:  %8d (%.2f%s)\n",
-         sampleevents, goodpixels, badpixels, badpixels*100.0/sampleevents, "%");
+         sampleevents, goodpixels, badpixels, badpixels * 100.0 / sampleevents,
+         "%");
+  printf("g1amp > g0amp: %d\n", g1gtg0);
 
   DataSave(outputfile, values, sizeof(values));
 

@@ -71,7 +71,8 @@ Args::Args(int argc, char *argv[]) {
       printf(" --runfile, -r file       use <file> for batch processing \n");
       printf(" --runspec, -j file       get runspec from <file> \n");
       printf(" --basedir, -b directory  path to base directory of raw data \n");
-      printf(" --dir, -d directory      path to data including last '/' relative to basedir \n");
+      printf(" --dir, -d directory      path to data including last '/' "
+             "relative to basedir \n");
 
       printf(" --prefix, -p prefix      first part of filename \n");
       printf(" --postfix, -o postfix    last part of filename \n");

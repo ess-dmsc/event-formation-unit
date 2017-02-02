@@ -1,10 +1,10 @@
-/** Copyright (C) 2016 European Spallation Source ERIC */
+/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <cinttypes>
-#include <mgjson/MGJsonArgs.h>
 #include <cstdio>
 #include <getopt.h>
 #include <iostream>
+#include <mgjson/MGJsonArgs.h>
 #include <unistd.h>
 
 DGArgs::DGArgs(int argc, char *argv[]) {

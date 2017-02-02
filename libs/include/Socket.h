@@ -56,8 +56,7 @@ public:
 
 class UDPClient : public Socket {
 public:
-  UDPClient(Endpoint local, Endpoint remote)
-      : Socket(Socket::type::UDP) {
+  UDPClient(Endpoint local, Endpoint remote) : Socket(Socket::type::UDP) {
     this->local(local.ipaddr, local.port);
     this->remote(remote.ipaddr, remote.port);
   };

@@ -11,7 +11,7 @@ public:
   void add() { n++; }
 
   /** return number of adds */
-  long long count(void) {return n; }
+  long long count(void) { return n; }
 
   void clear() { n = 0; }
 };

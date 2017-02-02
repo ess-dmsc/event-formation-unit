@@ -1,10 +1,10 @@
-/** Copyright (C) 2016 European Spallation Source ERIC */
+/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <cinttypes>
-#include <nmxgen/NMXArgs.h>
 #include <cstdio>
 #include <getopt.h>
 #include <iostream>
+#include <nmxgen/NMXArgs.h>
 #include <unistd.h>
 
 NMXArgs::NMXArgs(int argc, char *argv[]) {
@@ -15,6 +15,7 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
   while (1) {
     static struct option long_options[] = {
         {"filename", required_argument, 0, 'f'},
+        {"outfile", required_argument, 0, 'o'},
         {"ipaddr", required_argument, 0, 'i'},
         {"data", required_argument, 0, 'd'},
         {"packets", required_argument, 0, 'a'},
@@ -28,7 +29,7 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:d:f:i:n:p:s:t:u:hx", long_options,
+    c = getopt_long(argc, argv, "a:d:f:o:i:n:p:s:t:u:hx", long_options,
                     &option_index);
 
     if (c == -1)
@@ -45,6 +46,9 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
       break;
     case 'f':
       filename.assign(optarg);
+      break;
+    case 'o':
+      outfile.assign(optarg);
       break;
     case 'i':
       dest_ip.assign(optarg);
@@ -68,6 +72,7 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
     default:
       printf("Usage: bulkdatagen [OPTIONS] \n");
       printf(" --filename -f name     read data from single file \n");
+      printf(" --outfile -o name      write image to file \n");
       printf(" --size -s size         size in GB of transmitted data \n");
       printf(" --packets -a number    number of packets to transmit \n");
       printf(" --ipaddr -i ipaddr     destination ip address \n");
@@ -83,6 +88,8 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
   printf("Generating a bulk data stream\n");
   if (!filename.empty())
     printf("  from file:              %s", filename.c_str());
+  if (!outfile.empty())
+    printf("  to file:                %s", outfile.c_str());
   printf("  number of bytes:        %d GB\n", txGB);
   printf("  number of packets:      %" PRIu64 " packets\n", txPkt);
   printf("Network properties\n");

@@ -1,16 +1,16 @@
-/** Copyright (C) 2016 European Spallation Source ERIC */
+/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <mgjson/MGJsonArgs.h>
+#include <RunSpec.h>
+#include <RunSpecParse.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <iomanip>
-#include <sstream>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
+#include <mgjson/MGJsonArgs.h>
+#include <sstream>
 #include <unistd.h>
-#include <RunSpecParse.h>
-#include <RunSpec.h>
 
 int main(int argc, char *argv[]) {
   DGArgs opts(argc, argv);
@@ -26,15 +26,13 @@ int main(int argc, char *argv[]) {
   DataSource.setbuffers(opts.sndbuf, 0);
   DataSource.printbuffers();
 
-
   std::vector<RunSpec *> runs;
   if (!opts.runfile.empty()) { /**< get config from json file */
     RunSpecParse runspecfile(opts.runfile);
 
     /** use all files in runfile:runspecification, output dir does not apply */
-    runs = runspecfile.getruns(opts.runspecification, opts.basedir, "", 0 , 0);
+    runs = runspecfile.getruns(opts.runspecification, opts.basedir, "", 0, 0);
   }
-
 
   uint64_t pkt = 0;
   uint64_t bytes = 0;
