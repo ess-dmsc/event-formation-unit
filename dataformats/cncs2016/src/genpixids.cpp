@@ -166,7 +166,7 @@ int main(int argc, char *argv[]) {
       int g0pos = data[8]; /** ninth field of the .events file */
       int gridid = gcal[g0pos];
 
-#if 1
+#if 0
       int g0amp = data[6];
       int g1amp = data[7];
       int g1pos = data[9];
@@ -176,12 +176,6 @@ int main(int argc, char *argv[]) {
         g1gtg0++;
       }
 #endif
-
-      if (gridid <= 48) { /** swap modules @todo verify */
-        gridid += 48;
-      } else {
-        gridid -= 48;
-      }
 
       auto time = data[1];
 
@@ -198,7 +192,7 @@ int main(int argc, char *argv[]) {
         values[pixid - 1]++; // 3D volume
         xyproj[x - 1][y - 1]++;
         zyproj[z - 1][y - 1]++;
-        xzproj[x - 1][15 - (z - 1)]++;
+        xzproj[x - 1][z - 1]++;
 
         char buf[1000]; /**< @todo should be done in tofile() method */
         auto len = snprintf(buf, 1000, "%8d, %5d, %4d, %4d, %3d, %3d, %2d\n",
@@ -206,6 +200,8 @@ int main(int argc, char *argv[]) {
         coords.tofile(buf, len);
       } else {
         badpixels++;
+        printf("%8d, %5d, %4d, %4d\n",
+                            time, wireid, gridid, pixid);
       }
     }
   }
