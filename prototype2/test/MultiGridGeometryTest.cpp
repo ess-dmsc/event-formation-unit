@@ -134,6 +134,50 @@ TEST_F(MultiGridGeometryTest, TestDetectorModuleBoundaries) {
   ASSERT_EQ(6144, testdetector.getdetectorpixelid(1, 96, 16));
 }
 
+TEST_F(MultiGridGeometryTest, Modules) {
+  int panels = 1;
+  int modules = 4;
+  int grids = 2;
+  int xwires = 2;
+  int zwires = 2;
+  MultiGridGeometry testdetector(panels, modules, grids, xwires, zwires);
+  ASSERT_EQ( 1, testdetector.getdetectorpixelid(1, 1, 15));
+  ASSERT_EQ( 2, testdetector.getdetectorpixelid(1, 1, 16));
+  ASSERT_EQ( 3, testdetector.getdetectorpixelid(1, 2, 15));
+  ASSERT_EQ( 4, testdetector.getdetectorpixelid(1, 2, 16));
+  ASSERT_EQ( 5, testdetector.getdetectorpixelid(1, 1, 13));
+  ASSERT_EQ( 6, testdetector.getdetectorpixelid(1, 1, 14));
+  ASSERT_EQ( 7, testdetector.getdetectorpixelid(1, 2, 13));
+  ASSERT_EQ( 8, testdetector.getdetectorpixelid(1, 2, 14));
+
+  ASSERT_EQ( 9, testdetector.getdetectorpixelid(1, 3, 11));
+  ASSERT_EQ( 10, testdetector.getdetectorpixelid(1, 3, 12));
+  ASSERT_EQ( 11, testdetector.getdetectorpixelid(1, 4, 11));
+  ASSERT_EQ( 12, testdetector.getdetectorpixelid(1, 4, 12));
+  ASSERT_EQ( 13, testdetector.getdetectorpixelid(1, 3, 9));
+  ASSERT_EQ( 14, testdetector.getdetectorpixelid(1, 3, 10));
+  ASSERT_EQ( 15, testdetector.getdetectorpixelid(1, 4, 9));
+  ASSERT_EQ( 16, testdetector.getdetectorpixelid(1, 4, 10));
+
+  ASSERT_EQ( 17, testdetector.getdetectorpixelid(1, 5, 7));
+  ASSERT_EQ( 18, testdetector.getdetectorpixelid(1, 5, 8));
+  ASSERT_EQ( 19, testdetector.getdetectorpixelid(1, 6, 7));
+  ASSERT_EQ( 20, testdetector.getdetectorpixelid(1, 6, 8));
+  ASSERT_EQ( 21, testdetector.getdetectorpixelid(1, 5, 5));
+  ASSERT_EQ( 22, testdetector.getdetectorpixelid(1, 5, 6));
+  ASSERT_EQ( 23, testdetector.getdetectorpixelid(1, 6, 5));
+  ASSERT_EQ( 24, testdetector.getdetectorpixelid(1, 6, 6));
+
+  ASSERT_EQ( 25, testdetector.getdetectorpixelid(1, 7, 3));
+  ASSERT_EQ( 26, testdetector.getdetectorpixelid(1, 7, 4));
+  ASSERT_EQ( 27, testdetector.getdetectorpixelid(1, 8, 3));
+  ASSERT_EQ( 28, testdetector.getdetectorpixelid(1, 8, 4));
+  ASSERT_EQ( 29, testdetector.getdetectorpixelid(1, 7, 1));
+  ASSERT_EQ( 30, testdetector.getdetectorpixelid(1, 7, 2));
+  ASSERT_EQ( 31, testdetector.getdetectorpixelid(1, 8, 1));
+  ASSERT_EQ( 32, testdetector.getdetectorpixelid(1, 8, 2));
+}
+
 TEST_F(MultiGridGeometryTest, TestDetectorIllegalWireAndGridid) {
   int panels = 1;
   int modules = 2;
@@ -151,6 +195,7 @@ TEST_F(MultiGridGeometryTest, TestDetectorIllegalWireAndGridid) {
   ASSERT_EQ(-1, testdetector.getdetectorpixelid(1, 1, 64));
   ASSERT_EQ(-1, testdetector.getdetectorpixelid(1, 48, 64));
 }
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

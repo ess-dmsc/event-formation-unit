@@ -58,8 +58,11 @@ public:
     }
 
 
-    int gridmin = grids_ - ((wireid - 1) / (xwires_ * zwires_)) * grids_ + 1;
-    int gridmax = grids_ - ((wireid - 1) / (xwires_ * zwires_)) * grids_ + grids_;
+    int column = mods_ - (wireid -1)/(zwires_ * xwires_);
+    //printf("debug: %d\n", (wireid -1)/(zwires_ * xwires_));
+    //printf("column: %d\n", column);
+    int gridmin = (column - 1) * grids_ + 1;
+    int gridmax = gridmin + grids_ - 1;
     XTRACE(PROCESS, DEB, "grid: %d, min: %d, max: %d\n", gridid, gridmin,
            gridmax);
     if ((gridid < gridmin) || (gridid > gridmax)) {
