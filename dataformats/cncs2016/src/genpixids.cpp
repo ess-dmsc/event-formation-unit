@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
         values[pixid - 1]++; // 3D volume
         xyproj[x - 1][y - 1]++;
         zyproj[z - 1][y - 1]++;
-        xzproj[x - 1][15 - (z - 1)]++;
+        xzproj[x - 1][z - 1]++;
 
         char buf[1000]; /**< @todo should be done in tofile() method */
         auto len = snprintf(buf, 1000, "%8d, %5d, %4d, %4d, %3d, %3d, %2d\n",
@@ -200,6 +200,8 @@ int main(int argc, char *argv[]) {
         coords.tofile(buf, len);
       } else {
         badpixels++;
+        printf("%8d, %5d, %4d, %4d\n",
+                            time, wireid, gridid, pixid);
       }
     }
   }
