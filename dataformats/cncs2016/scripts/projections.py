@@ -21,15 +21,15 @@ xzdata = genfromtxt(file +'.events.xzproj', delimiter=' ')
 plt.suptitle(file)
 plt.subplot(1,3,1)
 
-plt.imshow(xydata, interpolation="none")
+plt.imshow(xydata, interpolation="none", extent = [1,8, 48, 1])
 plt.colorbar()
 
 plt.subplot(1,3,2)
-plt.imshow(zydata, interpolation="none")
+plt.imshow(zydata, interpolation="none", extent = [1,16, 48, 1])
 plt.colorbar()
 
 plt.subplot(1,3,3)
-plt.imshow(xzdata, interpolation="none")
+plt.imshow(xzdata, interpolation="none", extent = [1,8, 16, 1])
 plt.colorbar()
 
 plt.tight_layout()
