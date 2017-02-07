@@ -4,16 +4,6 @@
 #include <cspec/CSPECChanConv.h>
 #include <cstring>
 
-CSPECChanConv::CSPECChanConv() {
-  static_assert(sizeof(wirecal) == adcsize * 2, "wirecal mismatch");
-  static_assert(sizeof(gridcal) == adcsize * 2, "gridcal mismatch");
-
-  for (int i = 0; i < adcsize; i++) {
-    wirecal[i] = 0;
-    gridcal[i] = 0;
-  }
-}
-
 CSPECChanConv::CSPECChanConv(uint16_t initval) {
   static_assert(sizeof(wirecal) == adcsize * 2, "wirecal mismatch");
   static_assert(sizeof(gridcal) == adcsize * 2, "gridcal mismatch");
@@ -21,6 +11,16 @@ CSPECChanConv::CSPECChanConv(uint16_t initval) {
   for (int i = 0; i < adcsize; i++) {
     wirecal[i] = initval;
     gridcal[i] = initval;
+  }
+}
+
+CSPECChanConv::CSPECChanConv() {
+  static_assert(sizeof(wirecal) == adcsize * 2, "wirecal mismatch");
+  static_assert(sizeof(gridcal) == adcsize * 2, "gridcal mismatch");
+
+  for (int i = 0; i < adcsize; i++) {
+    wirecal[i] = i; //Identity mapping
+    gridcal[i] = i;
   }
 }
 

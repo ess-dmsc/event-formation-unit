@@ -34,12 +34,6 @@ int CSPECData::createevent(const MultiGridData &data, char *buffer) {
     wire--;
   }
 
-  if (grid <= 48) {
-    grid += 48;
-  } else {
-    grid -= 48;
-  }
-
   auto pixid = multigridgeom->getdetectorpixelid(panel, grid, wire);
   if (pixid < 1) {
     XTRACE(PROCESS, WAR, "panel %d, grid %d, wire %d, pixel %d\n", panel, grid,

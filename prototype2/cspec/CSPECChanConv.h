@@ -14,13 +14,15 @@ class CSPECChanConv {
 public:
   static const int adcsize = 16384;
 
-  /** @brief constructor, sets calibration data to 0 */
-  CSPECChanConv();
+  /** @brief constructor, sets calibration data to initval */
+  CSPECChanConv(uint16_t initval);
 
-  /** @brief constructor, sets calibration data to 0
+
+  /** @brief constructor, sets calibration data to same as input
+   * (identity mapping)
    * @todo document
    */
-  CSPECChanConv(uint16_t initval);
+  CSPECChanConv();
 
   /** @brief return the wireid from an adc value using calibration data
    *  @param wire_adc readout value for wire position

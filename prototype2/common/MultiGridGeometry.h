@@ -57,8 +57,12 @@ public:
       return -1;
     }
 
-    int gridmin = ((wireid - 1) / (xwires_ * zwires_)) * grids_ + 1;
-    int gridmax = ((wireid - 1) / (xwires_ * zwires_)) * grids_ + grids_;
+
+    int column = mods_ - (wireid -1)/(zwires_ * xwires_);
+    //printf("debug: %d\n", (wireid -1)/(zwires_ * xwires_));
+    //printf("column: %d\n", column);
+    int gridmin = (column - 1) * grids_ + 1;
+    int gridmax = gridmin + grids_ - 1;
     XTRACE(PROCESS, DEB, "grid: %d, min: %d, max: %d\n", gridid, gridmin,
            gridmax);
     if ((gridid < gridmin) || (gridid > gridmax)) {
@@ -66,8 +70,13 @@ public:
              gridid);
       return -1;
     }
-    int x = mods_ * xwires_ * (panel - 1) + (wireid - 1) / zwires_ + 1;
-    int y = grids_ - ((gridid - 1) % grids_);
+
+    int panel_offset = mods_ * xwires_ * (panel - 1);
+    int x_offset = mods_ * xwires_ - (wireid - 1) / zwires_;
+    XTRACE(PROCESS, DEB, "panel_offset: %d\n",panel_offset);
+    XTRACE(PROCESS, DEB, "x_offset: %d\n",x_offset);
+    int x =  panel_offset + x_offset;
+    int y = (gridid - 1) % grids_ + 1;
     int z = (wireid - 1) % zwires_ + 1;
 
     int pixelid = (x - 1) * grids_ * zwires_ + (y - 1) * zwires_ + z;

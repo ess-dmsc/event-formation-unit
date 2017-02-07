@@ -13,11 +13,21 @@ protected:
 /** Test cases below */
 
 /** checking that arrays are cleared before use */
-TEST_F(CspecChanConvTest, Constructor) {
+TEST_F(CspecChanConvTest, ConstructorDefault) {
   for (int i = 0; i < CSPECChanConv::adcsize; i++) {
-    ASSERT_EQ(conv.getwireid(i), 0) << "wrong wire id conversion at adc value "
+    ASSERT_EQ(conv.getwireid(i), i) << "wrong wire id conversion at adc value "
                                     << i << endl;
-    ASSERT_EQ(conv.getgridid(i), 0) << "wrong grid id conversion at adc value "
+    ASSERT_EQ(conv.getgridid(i), i) << "wrong grid id conversion at adc value "
+                                    << i << endl;
+  }
+}
+
+TEST_F(CspecChanConvTest, ConstructorParametrized) {
+    CSPECChanConv conv(7);
+  for (int i = 0; i < CSPECChanConv::adcsize; i++) {
+    ASSERT_EQ(conv.getwireid(i), 7) << "wrong wire id conversion at adc value "
+                                    << i << endl;
+    ASSERT_EQ(conv.getgridid(i), 7) << "wrong grid id conversion at adc value "
                                     << i << endl;
   }
 }
@@ -69,6 +79,8 @@ TEST_F(CspecChanConvTest, LoadCalibration) {
     ASSERT_EQ(i + 10, conv.getgridid(i));
   }
 }
+
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
