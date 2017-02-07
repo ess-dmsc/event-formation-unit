@@ -61,3 +61,14 @@ public:
     this->remote(remote.ipaddr, remote.port);
   };
 };
+
+
+class TCPClient {
+public:
+  TCPClient(const char * ip, int port);
+  int senddata(char * buffer, int len);
+
+private:
+  int s_{-1};
+  sockaddr_in remote_;
+};

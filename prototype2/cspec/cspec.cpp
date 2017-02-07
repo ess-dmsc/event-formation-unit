@@ -95,16 +95,16 @@ void CSPEC::input_thread(void *args) {
     if ((rdsize = cspecdata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                     eth_ringbuf->getmaxbufsize())) > 0) {
       XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
-      opts->stat.i.rx_packets++;
-      opts->stat.i.rx_bytes += rdsize;
+      opts->stat.stats.rx_packets++;
+      opts->stat.stats.rx_bytes += rdsize;
       eth_ringbuf->setdatalength(eth_index, rdsize);
 
-      opts->stat.i.fifo_free = input2proc_fifo.free();
+      opts->stat.stats.fifo1_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
-        opts->stat.i.fifo_push_errors++;
+        opts->stat.stats.fifo1_push_errors++;
 
         XTRACE(INPUT, WAR, "Overflow :%" PRIu64 "\n",
-               opts->stat.i.fifo_push_errors);
+               opts->stat.stats.fifo1_push_errors);
       } else {
         eth_ringbuf->nextbuffer();
       }
@@ -150,30 +150,30 @@ void CSPEC::processing_thread(void *args) {
     }
 
     if ((input2proc_fifo.pop(data_index)) == false) {
-      opts->stat.p.rx_idle++;
-      opts->stat.p.fifo_free = proc2output_fifo.free();
+      opts->stat.stats.rx_idle1++;
+      opts->stat.stats.fifo1_free = proc2output_fifo.free();
       usleep(10);
     } else {
       dat.receive(eth_ringbuf->getdatabuffer(data_index),
                   eth_ringbuf->getdatalength(data_index));
-      opts->stat.p.rx_error_bytes += dat.error;
-      opts->stat.p.rx_events +=
+      opts->stat.stats.rx_error_bytes += dat.error;
+      opts->stat.stats.rx_readouts +=
           dat.elems; /**< @todo both valid and invalid events */
-      opts->stat.p.rx_discards += dat.input_filter();
+      opts->stat.stats.rx_discards += dat.input_filter();
 
-      opts->stat.p.fifo_free = proc2output_fifo.free();
+      opts->stat.stats.fifo2_free = proc2output_fifo.free();
       for (unsigned int id = 0; id < dat.datalen; id++) {
         auto d = dat.data[id];
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();
           if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) <
               0) {
-            opts->stat.p.geometry_errors++;
+            opts->stat.stats.geometry_errors++;
           } else {
             if (proc2output_fifo.push(event_index) == false) {
-              opts->stat.p.fifo_push_errors++;
+              opts->stat.stats.fifo2_push_errors++;
               XTRACE(PROCESS, WAR, "Overflow :%" PRIu64 "\n",
-                     opts->stat.p.fifo_push_errors);
+                     opts->stat.stats.fifo2_push_errors);
             } else {
               event_ringbuf->nextbuffer();
             }
@@ -208,13 +208,13 @@ void CSPEC::output_thread(void *args) {
   uint64_t produce = 0;
   while (1) {
     if (proc2output_fifo.pop(event_index) == false) {
-      opts->stat.o.rx_idle++;
+      opts->stat.stats.rx_idle2++;
       usleep(10);
     } else {
       std::memcpy(kafkabuffer + produce,
                   event_ringbuf->getdatabuffer(event_index),
                   8 /**< @todo not hardcode */);
-      opts->stat.o.rx_events++;
+      opts->stat.stats.rx_events++;
       produce += 12; /**< @todo should match actual data size */
     }
 
@@ -223,7 +223,7 @@ void CSPEC::output_thread(void *args) {
       assert(produce < kafka_buffer_size);
 #ifndef NOKAFKA
       producer.produce(kafkabuffer, kafka_buffer_size);
-      opts->stat.o.tx_bytes += kafka_buffer_size;
+      opts->stat.stats.tx_bytes += kafka_buffer_size;
 #endif
       produce = 0;
     }

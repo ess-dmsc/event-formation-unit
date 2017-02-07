@@ -143,3 +143,31 @@ int Socket::setopt(int option, void *value, int size) {
   }
   return ret;
 }
+
+
+TCPClient::TCPClient(const char * ipaddr, int port) {
+  s_ = socket(AF_INET, SOCK_STREAM, 0);
+  if (s_ < 0) {
+    std::cout << "TCPSocket(): socket() failed" << std::endl;
+  }
+  std::memset((char *)&remote_, 0, sizeof(remote_));
+  remote_.sin_family = AF_INET;
+  remote_.sin_port = htons(port);
+  int ret = inet_aton(ipaddr, &remote_.sin_addr);
+  if (ret == 0) {
+    std::cout << "invalid ip address " << ipaddr << std::endl;
+  }
+  assert(ret != 0);
+
+  ret = connect(s_, (struct sockaddr *)&remote_, sizeof(remote_));
+  if (ret< 0) {
+    std::cout << "connect() failed" << std::endl;
+  }
+}
+
+int TCPClient::senddata(char * buffer, int len) {
+  if (len <= 0) {
+     return 0;
+  }
+  return send(s_, buffer, len, 0);
+}

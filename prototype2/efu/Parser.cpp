@@ -39,8 +39,8 @@ static int stat_input(std::vector<std::string> cmdargs, char *output,
   *obytes =
       snprintf(output, SERVER_BUFFER_SIZE,
                "STAT_INPUT %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64,
-               efu_args->stat.i.rx_packets, efu_args->stat.i.rx_bytes,
-               efu_args->stat.i.fifo_push_errors, efu_args->stat.i.fifo_free);
+               efu_args->stat.stats.rx_packets, efu_args->stat.stats.rx_bytes,
+               efu_args->stat.stats.fifo1_push_errors, efu_args->stat.stats.fifo1_free);
   return Parser::OK;
 }
 
@@ -56,10 +56,10 @@ static int stat_processing(std::vector<std::string> cmdargs, char *output,
       snprintf(output, SERVER_BUFFER_SIZE,
                "STAT_PROCESSING %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64
                " %" PRIu64 " %" PRIu64 " %" PRIu64,
-               efu_args->stat.p.rx_events, efu_args->stat.p.rx_error_bytes,
-               efu_args->stat.p.rx_discards, efu_args->stat.p.rx_idle,
-               efu_args->stat.p.fifo_push_errors, efu_args->stat.p.fifo_free,
-               efu_args->stat.p.geometry_errors);
+               efu_args->stat.stats.rx_readouts, efu_args->stat.stats.rx_error_bytes,
+               efu_args->stat.stats.rx_discards, efu_args->stat.stats.rx_idle1,
+               efu_args->stat.stats.fifo2_push_errors, efu_args->stat.stats.fifo2_free,
+               efu_args->stat.stats.geometry_errors);
   return Parser::OK;
 }
 
@@ -73,8 +73,8 @@ static int stat_output(std::vector<std::string> cmdargs, char *output,
   }
   *obytes = snprintf(output, SERVER_BUFFER_SIZE,
                      "STAT_OUTPUT %" PRIu64 " %" PRIu64 " %" PRIu64,
-                     efu_args->stat.o.rx_events, efu_args->stat.o.rx_idle,
-                     efu_args->stat.o.tx_bytes);
+                     efu_args->stat.stats.rx_events, efu_args->stat.stats.rx_idle2,
+                     efu_args->stat.stats.tx_bytes);
   return Parser::OK;
 }
 

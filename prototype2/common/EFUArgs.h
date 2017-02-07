@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include <common/Stats.h>
+#include <common/EFUStats.h>
 #include <cspec/CSPECChanConv.h>
 #include <string>
 
@@ -37,7 +37,7 @@ public:
   int reduction{80}; /**< data tuples in a cluster */
 
   // Runtime Stats
-  Stats stat;
+  EFUStats stat;
   unsigned int reportmask{0x2};
 
   uint16_t wirecal[CSPECChanConv::adcsize];

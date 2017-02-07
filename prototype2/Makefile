@@ -27,13 +27,14 @@ endif
 cspec.so.src =  cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
 cspec.so.src += common/Producer.cpp
 cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h common/MultiGridGeometry.h
-cspec.so.inc += gccintel.h common/Producer.h common/Stats.h common/Trace.h
+cspec.so.inc += gccintel.h common/Producer.h common/EFUStats.h common/Trace.h
 cspec.so.inc +=
 
 # For each standalone program add .src and .inc and .obj below
 efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp
+efu.src += common/EFUStats.cpp
 efu.src += efu/Server.cpp efu/Parser.cpp cspec/CalibrationFile.cpp
-efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h common/Stats.h
+efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h common/EFUStats.h
 efu.inc += efu/Server.h efu/Parser.h common/Trace.h cspec/CalibrationFile.h
 efu.obj = $(efu.src:%.cpp=%.o)
 
