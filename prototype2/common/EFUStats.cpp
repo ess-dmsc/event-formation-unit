@@ -11,7 +11,8 @@ EFUStats::EFUStats() {
 
 void EFUStats::clear() {
   std::fill_n((char *)&stats, sizeof(stats), 0);
-  sample();
+  stats_old = stats;
+  usecs_elapsed.now();
 }
 
 void EFUStats::set_mask(unsigned int mask) { report_mask = mask; }
@@ -33,22 +34,61 @@ void EFUStats::report() {
   if (report_mask)
     printf("\n");
 
-  int len;
-  int unixtime = (int)time(NULL);
-  char buffer[1000];
-  len = sprintf(buffer, "efu2.input.rx_bytes %" PRIu64 " %d\n", stats.rx_bytes, unixtime);
-  statdb->senddata(buffer, len);
-  len = sprintf(buffer, "efu2.input.rx_packets %" PRIu64 " %d\n", stats.rx_packets, unixtime);
-  statdb->senddata(buffer, len);
-  len = sprintf(buffer, "efu2.input.rx_dropped %" PRIu64 " %d\n", stats.fifo1_push_errors, unixtime);
-  statdb->senddata(buffer, len);
-  sample();
-}
+  sendstats();
 
-void EFUStats::sample() {
     stats_old = stats;
     usecs_elapsed.now();
-  }
+}
+
+void EFUStats::sendstats() {
+  char buffer[1000];
+  int unixtime = (int)time(NULL);
+
+  int len = sprintf(buffer, "efu2.input.rx_bytes %" PRIu64 " %d\n", stats.rx_bytes, unixtime);
+  statdb->senddata(buffer, len);
+
+  len = sprintf(buffer, "efu2.input.rx_packets %" PRIu64 " %d\n", stats.rx_packets, unixtime);
+  statdb->senddata(buffer, len);
+
+  len = sprintf(buffer, "efu2.input.i2pfifo_dropped %" PRIu64 " %d\n", stats.fifo1_push_errors, unixtime);
+  statdb->senddata(buffer, len);
+
+  len = sprintf(buffer, "efu2.input.i2pfifo_free %" PRIu64 " %d\n", stats.fifo1_free, unixtime);
+  statdb->senddata(buffer, len);
+  //
+  //
+  len = sprintf(buffer, "efu2.processing.rx_readouts %" PRIu64 " %d\n", stats.rx_readouts, unixtime);
+  statdb->senddata(buffer, len);
+
+  len = sprintf(buffer, "efu2.processing.rx_error_bytes %" PRIu64 " %d\n", stats.rx_error_bytes, unixtime);
+  statdb->senddata(buffer, len);
+
+  len = sprintf(buffer, "efu2.processing.rx_discards %" PRIu64 " %d\n", stats.rx_discards, unixtime);
+  statdb->senddata(buffer, len);
+
+  len = sprintf(buffer, "efu2.processing.rx_idle %" PRIu64 " %d\n", stats.rx_idle1, unixtime);
+  statdb->senddata(buffer, len);
+
+  len = sprintf(buffer, "efu2.processing.geom_err %" PRIu64 " %d\n", stats.geometry_errors, unixtime);
+  statdb->senddata(buffer, len);
+
+  len = sprintf(buffer, "efu2.processing.p2ofifo_dropped %" PRIu64 " %d\n", stats.fifo2_push_errors, unixtime);
+  statdb->senddata(buffer, len);
+
+  len = sprintf(buffer, "efu2.processing.p2ofifo_free %" PRIu64 " %d\n", stats.fifo2_free, unixtime);
+  statdb->senddata(buffer, len);
+  //
+  //
+  len = sprintf(buffer, "efu2.output.rx_events %" PRIu64 " %d\n", stats.rx_events, unixtime);
+  statdb->senddata(buffer, len);
+
+  len = sprintf(buffer, "efu2.output.rx_idle %" PRIu64 " %d\n", stats.rx_idle2, unixtime);
+  statdb->senddata(buffer, len);
+
+  len = sprintf(buffer, "efu2.output.tx_bytes %" PRIu64 " %d\n", stats.tx_bytes, unixtime);
+  statdb->senddata(buffer, len);
+}
+
 
 void EFUStats::packet_stats() {
     auto usecs = usecs_elapsed.timeus();

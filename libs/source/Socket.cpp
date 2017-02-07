@@ -93,7 +93,7 @@ int Socket::send(void *buffer, int len) {
   if (ret < 0) {
     std::cout << "unable to send on socket" << std::endl;
     perror("sendto");
-    exit(1);
+    exit(1); /**< @todo a bit harsh maybe ? */
   }
 
   return ret;
@@ -162,12 +162,22 @@ TCPClient::TCPClient(const char * ipaddr, int port) {
   ret = connect(s_, (struct sockaddr *)&remote_, sizeof(remote_));
   if (ret< 0) {
     std::cout << "connect() failed" << std::endl;
+    s_ = -1;
   }
 }
 
 int TCPClient::senddata(char * buffer, int len) {
+  if (s_ < 0) {
+    return -1;
+  }
+
   if (len <= 0) {
+     printf("TCPClient::senddata() no data specified\n");
      return 0;
   }
-  return send(s_, buffer, len, 0);
+  int ret = send(s_, buffer, len, 0);
+  if (ret <= 0) {
+    printf("TCPClient::send() returns %d\n", ret);
+  }
+  return ret;
 }

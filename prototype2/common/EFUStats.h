@@ -24,6 +24,9 @@ public:
    */
   void set_mask(unsigned int mask);
 
+    /** @brief send stats to time series database */
+  void sendstats();
+
   /** @brief print out all active statistics */
   void report();
 
@@ -57,9 +60,6 @@ private:
   TCPClient * statdb;
   Timer usecs_elapsed, runtime;   /**< used for rate calculations */
   unsigned int report_mask{0}; /**< bitmask for active statistics */
-
-  /** @brief samples the current counter values */
-  void sample();
 
   /** @brief print out packet related statistics */
   void packet_stats();
