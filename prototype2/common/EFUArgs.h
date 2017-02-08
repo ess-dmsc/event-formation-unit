@@ -33,6 +33,9 @@ public:
   std::string broker{"localhost:9092"}; /**< Kafka broker */
   bool kafka{true};                     /**< whether to use Kafka or not */
 
+  std::string graphite_ip_addr{"127.0.0.1"}; /**< graphite time series db */
+  int graphite_port{2003}; /**< graphite time series db */
+
   // NMX OPTIONS
   int reduction{80}; /**< data tuples in a cluster */
 
@@ -40,6 +43,7 @@ public:
   EFUStats stat;
   unsigned int reportmask{0x2};
 
+  // IPC data for communicating between main and threads
   uint16_t wirecal[CSPECChanConv::adcsize];
   uint16_t gridcal[CSPECChanConv::adcsize];
   uint32_t proc_cmd{0};

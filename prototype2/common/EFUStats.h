@@ -8,7 +8,6 @@
 #pragma once
 
 #include <cinttypes>
-#include <libs/include/Socket.h>
 #include <libs/include/Timer.h>
 
 class EFUStats {
@@ -57,7 +56,6 @@ public:
   stat_t stats, stats_old;
 
 private:
-  TCPClient * statdb;
   Timer usecs_elapsed, runtime;   /**< used for rate calculations */
   unsigned int report_mask{0}; /**< bitmask for active statistics */
 

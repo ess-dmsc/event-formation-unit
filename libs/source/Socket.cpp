@@ -160,7 +160,7 @@ TCPClient::TCPClient(const char * ipaddr, int port) {
   assert(ret != 0);
 
   ret = connect(s_, (struct sockaddr *)&remote_, sizeof(remote_));
-  if (ret< 0) {
+  if (ret < 0) {
     std::cout << "connect() failed" << std::endl;
     s_ = -1;
   }
