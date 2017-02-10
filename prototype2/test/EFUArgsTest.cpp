@@ -15,12 +15,14 @@ TEST_F(EFUArgsTest, Constructor) {
   ASSERT_STREQ("cspec", opts.det.c_str());
   ASSERT_STREQ("0.0.0.0", opts.ip_addr.c_str());
   ASSERT_EQ(9000, opts.port);
+  ASSERT_STREQ("127.0.0.1", opts.graphite_ip_addr.c_str());
+  ASSERT_EQ(2003, opts.graphite_port);
   ASSERT_EQ(0x2U, opts.reportmask);
   ASSERT_EQ(0xffffffffU, opts.stopafter);
 }
 
 TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
-  int myargc = 15;
+  int myargc = 19;
   // clang-format off
   const char *myargv[] = {"progname",
                         "-b", "mybroker:myport",
@@ -29,6 +31,8 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
                         "-i", "1.2.3.4",
                         "-p", "9876",
                         "-r", "43",
+                        "-g", "4.3.2.1",
+                        "-o", "2323",
                         "-s", "5" };
   // clang-format on
   EFUArgs opts(myargc, (char **)myargv);
@@ -39,6 +43,8 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   ASSERT_STREQ("1.2.3.4", opts.ip_addr.c_str());
   ASSERT_EQ(9876, opts.port);
   ASSERT_EQ(43, opts.reportmask);
+  ASSERT_STREQ("4.3.2.1", opts.graphite_ip_addr.c_str());
+  ASSERT_EQ(2323, opts.graphite_port);
   ASSERT_EQ(5, opts.stopafter);
 }
 

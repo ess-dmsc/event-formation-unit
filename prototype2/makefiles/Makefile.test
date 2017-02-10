@@ -2,7 +2,7 @@
 #
 
 testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest
-testprogs += CSPECEventTest ParserTest EFUArgsTest CalibrationFileTest
+testprogs += CSPECEventTest ParserTest EFUArgsTest CalibrationFileTest EFUStats
 testprogs += MultiGridGeometryTest
 
 test: $(testprogs)
@@ -57,6 +57,10 @@ CalibrationFileTest: test/CalibrationFileTest.cpp cspec/CalibrationFile.cpp\
 EFUArgsTest: test/EFUArgsTest.cpp common/EFUArgs.cpp  common/EFUStats.cpp common/EFUArgs.h
 				@echo building $@
 				$(Q)g++ $(cxxflags_test) test/EFUArgsTest.cpp  common/EFUArgs.cpp common/EFUStats.cpp $(library) -o $@ $(ldflags_test)
+
+EFUStatsTest: test/EFUStatsTest.cpp common/EFUStats.cpp common/EFUStats.h
+								@echo building $@
+								$(Q)g++ $(cxxflags_test) test/EFUStatsTest.cpp  common/EFUStats.cpp $(library) -o $@ $(ldflags_test)
 
 coverage:
 	$(Q)gcov -r -b *.gcda
