@@ -59,8 +59,8 @@ EFUArgsTest: test/EFUArgsTest.cpp common/EFUArgs.cpp  common/EFUStats.cpp common
 	$(Q)g++ $(cxxflags_test) test/EFUArgsTest.cpp  common/EFUArgs.cpp common/EFUStats.cpp $(library) -o $@ $(ldflags_test)
 
 EFUStatsTest: test/EFUStatsTest.cpp common/EFUStats.cpp common/EFUStats.h
-@echo building $@
-$(Q)g++ $(cxxflags_test) test/EFUStatsTest.cpp  common/EFUStats.cpp $(library) -o $@ $(ldflags_test)
+	@echo building $@
+	$(Q)g++ $(cxxflags_test) test/EFUStatsTest.cpp  common/EFUStats.cpp $(library) -o $@ $(ldflags_test)
 
 coverage:
 	$(Q)gcov -r -b *.gcda
