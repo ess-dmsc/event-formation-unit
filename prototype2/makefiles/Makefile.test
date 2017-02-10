@@ -36,8 +36,8 @@ MultiGridGeometryTest: test/MultiGridGeometryTest.cpp common/MultiGridGeometry.h
 	$(Q)g++ $(cxxflags_test) test/MultiGridGeometryTest.cpp $(library)  -o $@ $(ldflags_test)
 
 ParserTest: test/ParserTest.cpp test/SyscallWrappers.cpp efu/Parser.cpp common/EFUStats.cpp \
-            common/EFUArgs.cpp cspec/CalibrationFile.cpp common/EFUStats.h efu/Parser.h \
-            common/EFUArgs.h cspec/CalibrationFile.h
+	common/EFUArgs.cpp cspec/CalibrationFile.cpp common/EFUStats.h efu/Parser.h \
+	common/EFUArgs.h cspec/CalibrationFile.h
 	@echo building $@
 	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open -c  $(cxxflags_test) -std=c++11 -I . \
 				-I .. test/SyscallWrappers.cpp test/ParserTest.cpp efu/Parser.cpp common/EFUStats.cpp \
@@ -46,7 +46,7 @@ ParserTest: test/ParserTest.cpp test/SyscallWrappers.cpp efu/Parser.cpp common/E
 				CalibrationFile.o EFUArgs.o $(library) -o $@ $(ldflags_test)
 
 CalibrationFileTest: test/CalibrationFileTest.cpp cspec/CalibrationFile.cpp\
-      cspec/CalibrationFile.h
+	cspec/CalibrationFile.h
 	@echo building $@
 	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open -c  $(cxxflags_test) -std=c++11 -I . \
 					-I .. test/SyscallWrappers.cpp \
@@ -55,12 +55,12 @@ CalibrationFileTest: test/CalibrationFileTest.cpp cspec/CalibrationFile.cpp\
 					CalibrationFile.o CalibrationFileTest.o $(library) -o $@ $(ldflags_test)
 
 EFUArgsTest: test/EFUArgsTest.cpp common/EFUArgs.cpp  common/EFUStats.cpp common/EFUArgs.h
-				@echo building $@
-				$(Q)g++ $(cxxflags_test) test/EFUArgsTest.cpp  common/EFUArgs.cpp common/EFUStats.cpp $(library) -o $@ $(ldflags_test)
+	@echo building $@
+	$(Q)g++ $(cxxflags_test) test/EFUArgsTest.cpp  common/EFUArgs.cpp common/EFUStats.cpp $(library) -o $@ $(ldflags_test)
 
 EFUStatsTest: test/EFUStatsTest.cpp common/EFUStats.cpp common/EFUStats.h
-								@echo building $@
-								$(Q)g++ $(cxxflags_test) test/EFUStatsTest.cpp  common/EFUStats.cpp $(library) -o $@ $(ldflags_test)
+@echo building $@
+$(Q)g++ $(cxxflags_test) test/EFUStatsTest.cpp  common/EFUStats.cpp $(library) -o $@ $(ldflags_test)
 
 coverage:
 	$(Q)gcov -r -b *.gcda
