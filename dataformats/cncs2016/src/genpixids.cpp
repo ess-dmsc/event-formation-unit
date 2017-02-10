@@ -156,11 +156,13 @@ int main(int argc, char *argv[]) {
     if ((totevents >= start) || start == 0) {
       sampleevents++;
       int w0pos = data[4]; /** fifth field of the .events file */
-      int wireid = 65 - wcal[w0pos];
-      if (wireid & 1) {
-        wireid++;
-      } else {
-        wireid--;
+      int wireid = wcal[w0pos];
+      if (wireid != 0) {
+        if (wireid & 1) {
+          wireid++;
+        } else {
+          wireid--;
+        }
       }
 
       int g0pos = data[8]; /** ninth field of the .events file */
@@ -178,6 +180,7 @@ int main(int argc, char *argv[]) {
 #endif
 
       auto time = data[1];
+
 
       int pixid = CNCS.getdetectorpixelid(1, gridid, wireid);
       if (pixid != -1) { /**< create intensity volume image */
@@ -200,8 +203,10 @@ int main(int argc, char *argv[]) {
         coords.tofile(buf, len);
       } else {
         badpixels++;
-        printf("%8d, %5d, %4d, %4d\n",
-                            time, wireid, gridid, pixid);
+        //printf("%8d, %5d, %4d, %4d\n",
+        //                    time, wireid, gridid, pixid);
+        assert(wireid >= 0);
+        assert(gridid >= 0);
       }
     }
   }

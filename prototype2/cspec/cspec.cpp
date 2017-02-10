@@ -162,13 +162,13 @@ void CSPEC::processing_thread(void *args) {
       opts->stat.stats.rx_discards += dat.input_filter();
 
       opts->stat.stats.fifo2_free = proc2output_fifo.free();
-      for (unsigned int id = 0; id < dat.datalen; id++) {
+      for (unsigned int id = 0; id < dat.elems; id++) {
         auto d = dat.data[id];
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();
-          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) <
-              0) {
+          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) < 0) {
             opts->stat.stats.geometry_errors++;
+            assert(opts->stat.stats.geometry_errors <= opts->stat.stats.rx_readouts);
           } else {
             if (proc2output_fifo.push(event_index) == false) {
               opts->stat.stats.fifo2_push_errors++;
