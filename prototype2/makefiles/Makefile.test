@@ -2,7 +2,7 @@
 #
 
 testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest
-testprogs += CSPECEventTest ParserTest EFUArgsTest CalibrationFileTest EFUStats
+testprogs += CSPECEventTest ParserTest EFUArgsTest CalibrationFileTest EFUStatsTest
 testprogs += MultiGridGeometryTest
 
 test: $(testprogs)
