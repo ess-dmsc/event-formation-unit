@@ -118,6 +118,20 @@ vector<unsigned int> err_below_thresh
 
 };
 
+vector<unsigned int> err_misorder
+{
+  0x40000009, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b,
+  0x040402d3, 0x04060035, 0x04050385, 0x0407002c, 0xc00211dd
+  //               ^--swapped--^
+};
+
+vector<unsigned int> err_nwords
+{
+  0x40000008, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b,
+  //       ^ should be 9
+  0x040402d3, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd
+};
+
 // clang-format on
 
 /** Raw packet data above, now collect into iterable containers */

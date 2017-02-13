@@ -91,6 +91,18 @@ TEST_F(CspecDataTest, InputFilterBelowThresh) {
   ASSERT_EQ(discard, 3);
 }
 
+TEST_F(CspecDataTest, InputFilterMisordered) {
+  size = err_misorder.size() * 4;
+  dat->receive((char *)&err_misorder[0], size);
+  assertdatanderr(0, 40);
+}
+
+TEST_F(CspecDataTest, InputFilterBadNwords) {
+  size = err_nwords.size() * 4;
+  dat->receive((char *)&err_nwords[0], size);
+  assertdatanderr(0, 40);
+}
+
 TEST_F(CspecDataTest, InputFilterNoEvents) {
   char buffer[200];
   const int databytes = 40;
