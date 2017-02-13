@@ -1,5 +1,10 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#pragma once
+
+#include<map>
+#include<nmxgen/EventNMX.h>
+
 class ParserClusterer
 {
 public:

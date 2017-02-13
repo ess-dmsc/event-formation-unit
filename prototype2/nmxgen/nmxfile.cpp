@@ -61,7 +61,7 @@ int main(int argc, char *argv[])
 
   printf("Sent: %" PRIu64 " packets\n", pkt);
   printf("Sent: %" PRIu64 " bytes\n", bytes);
-  printf("Image: %" PRIu64 " points\n", image.size());
+  printf("Image: %" PRIu64 " points\n", (uint64_t)image.size());
 
   if (opts.outfile.empty() || opts.filename.empty())
     return 0;
