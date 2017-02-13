@@ -63,9 +63,9 @@ EFUStatsTest: test/EFUStatsTest.cpp common/EFUStats.cpp common/EFUStats.h
 	$(Q)g++ $(cxxflags_test) test/EFUStatsTest.cpp  common/EFUStats.cpp $(library) -o $@ $(ldflags_test)
 
 coverage:
-	$(Q)gcov -r -b *.gcda
-	$(Q)lcov -c -d . --no-external -o lcov.out
-	$(Q)genhtml -o html lcov.out
+	$(Q)gcov -r -b -c *.gcda
+	$(Q)lcov --rc lcov_branch_coverage=1 -c -d . --no-external -o lcov.out
+	$(Q)genhtml --branch-coverage -o html lcov.out
 
 valgrind: test
 	$(Q)rm -f valgrind_error
