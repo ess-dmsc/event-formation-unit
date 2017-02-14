@@ -28,7 +28,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
         {"gport",     required_argument, 0, 'o'},
         {0, 0, 0, 0}
       };
-    // clang-format on
+        // clang-format on
 
     int option_index = 0;
 

@@ -4,19 +4,20 @@
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/Producer.h>
+#include <common/RingBuffer.h>
+#include <common/Trace.h>
 #include <cstring>
 #include <iostream>
+#include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
-#include <libs/include/StatCounter.h>
 #include <libs/include/Timer.h>
-#include <libs/include/gccintel.h>
+#include <libs/include/TSCTimer.h>
 #include <memory>
-#include <mutex>
-#include <queue>
 #include <stdio.h>
 #include <unistd.h>
 
 using namespace std;
+using namespace memory_sequential_consistent; // Lock free fifo
 
 const char *classname = "NMX Detector";
 
@@ -26,205 +27,112 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 class NMX : public Detector {
 public:
+  NMX();
   void input_thread(void *args);
-
   void processing_thread(void *args);
 
-  void output_thread(void *args);
-
-  NMX() { cout << "    NMX created" << endl; };
-
-  ~NMX() { cout << "    NMX destroyed" << endl; };
+  /** @todo figure out the right size  of the .._max_entries  */
+  static const int eth_buffer_max_entries = 20000;
+  static const int eth_buffer_size = 9000;
+  static const int kafka_buffer_size = 1000000;
 
 private:
-  std::queue<int> queue1;
-  std::priority_queue<float> queue2;
-  std::mutex m1, m2, mcout;
+  /** Shared between input_thread and processing_thread*/
+  CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
+  RingBuffer<eth_buffer_size> *eth_ringbuf;
+
+  char kafkabuffer[kafka_buffer_size];
 };
+
+
+NMX::NMX() {
+  XTRACE(INIT, INF, "Creating %d NMX Rx ringbuffers of size %d\n",
+      eth_buffer_max_entries, eth_buffer_size);
+  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
+  assert(eth_ringbuf != 0);
+}
 
 void NMX::input_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
 
+  /** Connection setup */
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
+  UDPServer nmxdata(local);
+  nmxdata.buflen(opts->buflen);
+  nmxdata.setbuffers(0, opts->rcvbuf);
+  nmxdata.printbuffers();
+  nmxdata.settimeout(0, 100000); // One tenth of a second
 
-  UDPServer bulkdata(local);
-  bulkdata.buflen(opts->buflen);
-  bulkdata.setbuffers(0, opts->rcvbuf);
-  bulkdata.printbuffers();
-  bulkdata.settimeout(0, 100000); // One tenth of a second
-
-  char buffer[9000];
-  unsigned int seqno = 1;
-  unsigned int seqno_exp = 1;
-  unsigned int lost = 0;
-
-  uint64_t rx_total = 0;
-  uint64_t rx = 0;
   int rdsize;
-
-  Timer upd, stop;
-  uint64_t tsc0 = rdtsc();
-  uint64_t tsc;
+  Timer stop_timer;
+  TSCTimer report_timer;
   for (;;) {
-    tsc = rdtsc();
+    unsigned int eth_index = eth_ringbuf->getindex();
 
     /** this is the processing step */
-    if ((rdsize = bulkdata.receive(buffer, opts->buflen)) > 0) {
-      std::memcpy(&seqno, buffer, sizeof(seqno));
-      rx += rdsize;
-      lost += (seqno - seqno_exp);
-      seqno_exp = seqno + 1;
+    if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
+                                    eth_ringbuf->getmaxbufsize())) > 0) {
+      XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
+      opts->stat.stats.rx_packets++;
+      opts->stat.stats.rx_bytes += rdsize;
+      eth_ringbuf->setdatalength(eth_index, rdsize);
 
-      m1.lock();
-      queue1.push(seqno);
-      m1.unlock();
+      opts->stat.stats.fifo1_free = input2proc_fifo.free();
+      if (input2proc_fifo.push(eth_index) == false) {
+        opts->stat.stats.fifo1_push_errors++;
+
+        XTRACE(INPUT, WAR, "Overflow :%" PRIu64 "\n",
+               opts->stat.stats.fifo1_push_errors);
+      } else {
+        eth_ringbuf->nextbuffer();
+      }
     }
 
-    /** This is the periodic reporting*/
-    if (unlikely(((tsc - tsc0) / TSC_MHZ >= opts->updint * 1000000))) {
-      auto usecs = upd.timeus();
-      rx_total += rx;
+    // Checking for exit
+    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-      mcout.lock();
-      printf("input     : %8.2f Mb/s, q1: %3d, rxpkt: %9d, rxbytes: %12" PRIu64
-             ", PER: %6.3e\n",
-             rx * 8.0 / usecs, (int)queue1.size(), seqno, rx_total,
-             1.0 * lost / seqno);
-      fflush(stdout);
-      mcout.unlock();
-
-      upd.now();
-      tsc0 = rdtsc();
-      rx = 0;
-      if (stop.timeus() >= opts->stopafter * 1000000) {
-        std::cout << "stopping input thread " << std::endl;
+      if (stop_timer.timeus() >= opts->stopafter * 1000000LU) {
+        std::cout << "stopping input thread, timeus " << stop_timer.timeus()
+                  << std::endl;
         return;
       }
+      report_timer.now();
     }
   }
 }
 
-/**
- * Processing thread - reads from FIFO and writes to Priority Queue
- */
+
 void NMX::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
-  StatCounter<int> cluster;
+  assert(opts != NULL);
 
-  int pops = 0;
-  int reduct = 0;
-  int pops_tot = 0;
+  //NMXData dat;
 
-  Timer upd, stop;
-  for (;;) {
+  Timer stopafter_clock;
+  TSCTimer report_timer;
 
-    /** this is the processing step */
-    if (queue1.empty()) {
-      usleep(100);
+  unsigned int data_index;
+  while (1) {
+    opts->stat.stats.fifo1_free = input2proc_fifo.free();
+    if ((input2proc_fifo.pop(data_index)) == false) {
+      opts->stat.stats.rx_idle1++;
+      usleep(10);
     } else {
-
-      m1.lock();
-      queue1.pop(); // At some point take element from queue
-      m1.unlock();
-
-      pops++;
-      reduct++;
-      cluster.add(queue1.front());
+      //dat.receive(eth_ringbuf->getdatabuffer(data_index),
+      //            eth_ringbuf->getdatalength(data_index));
+      opts->stat.stats.rx_readouts += 1;
+      opts->stat.stats.rx_error_bytes += 0;
+      opts->stat.stats.rx_discards += 1;
     }
 
-    if (reduct == opts->reduction) {
+    // Checking for exit
+    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-      float avg = cluster.avg();
-      cluster.clear();
-
-      m2.lock();
-      queue2.push(avg);
-      m2.unlock();
-      reduct = 0;
-    }
-    /** */
-    if ((pops % 100) == 0) {
-      auto usecs = upd.timeus();
-      if (usecs >= opts->updint * 1000000) {
-        pops_tot += pops;
-
-        mcout.lock();
-        printf("processing: q1: %3d, elements: %9d, rate: %7" PRIu64
-               " elems/s\n",
-               (int)queue1.size(), pops_tot, pops / (usecs / 1000000));
-        fflush(stdout);
-        mcout.unlock();
-
-        pops = 0;
-
-        if (stop.timeus() >= opts->stopafter * 1000000) {
-          std::cout << "stopping processing thread " << std::endl;
-          return;
-        }
-
-        upd.now();
-      }
-    }
-  }
-}
-
-/**
- * Output thread - reads from Priority Queue and outputs to Kafka cluster
- */
-void NMX::output_thread(void *args) {
-  EFUArgs *opts = (EFUArgs *)args;
-
-  bool kafka = opts->kafka;
-#ifndef NOKAFKA
-  Producer producer(opts->broker, kafka, "EFUTestTopic");
-#endif
-
-  int npop = 0;
-  int nprod = 0;
-  int nprod_tot = 0;
-  bool dontproduce = true;
-
-  Timer upd, stop;
-  for (;;) {
-
-    /** this is the processing step */
-    if ((dontproduce = queue2.empty())) {
-      usleep(100);
-    } else {
-      m2.lock();
-      queue2.pop();
-      m2.unlock();
-      npop++;
-    }
-
-    /** Produce message */
-    if (kafka) {
-      if (!dontproduce) {
-#ifndef NOKAFKA
-        producer.produce();
-#endif
-        nprod++;
-      }
-    }
-    /** */
-    auto usecs = upd.timeus();
-    if (usecs >= opts->updint * 1000000) {
-      nprod_tot += nprod;
-
-      mcout.lock();
-      printf("output    : q2: %3d, elements: %9d, rate: %7" PRIu64 " elems/s\n",
-             (int)queue2.size(), npop, nprod / (usecs / 1000000));
-      fflush(stdout);
-      mcout.unlock();
-
-      nprod = 0;
-
-      if (stop.timeus() >= opts->stopafter * 1000000) {
-        std::cout << "stopping output thread " << std::endl;
+      if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
+        std::cout << "stopping processing thread, timeus " << std::endl;
         return;
       }
-
-      upd.now();
+      report_timer.now();
     }
   }
 }

@@ -87,8 +87,6 @@ void CSPEC::input_thread(void *args) {
   Timer stop_timer;
   TSCTimer report_timer;
   for (;;) {
-    // assert(opts->guard1 == 0xdeadbeef);
-    // assert(opts->guard2 == 0xdeadbabe);
     unsigned int eth_index = eth_ringbuf->getindex();
 
     /** this is the processing step */
