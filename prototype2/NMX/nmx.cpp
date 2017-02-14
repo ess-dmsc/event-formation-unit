@@ -46,7 +46,7 @@ private:
 
 
 NMX::NMX() {
-  XTRACE(INIT, INF, "Creating %d NMX Rx ringbuffers of size %d\n",
+  XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
       eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
   assert(eth_ringbuf != 0);

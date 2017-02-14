@@ -5,8 +5,7 @@
  *  @brief Classes for NMX event formation
  */
 
-#ifndef EVENT_NMX_H
-#define EVENT_NMX_H
+#pragma once
 
 #include <inttypes.h>
 #include <limits>
@@ -41,5 +40,3 @@ struct EventNMX {
   bool good{false};
   PlaneNMX x, y;
 };
-
-#endif

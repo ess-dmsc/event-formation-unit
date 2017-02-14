@@ -147,9 +147,9 @@ void CSPEC::processing_thread(void *args) {
       conv.load_calibration(opts->wirecal, opts->gridcal);
     }
 
+    opts->stat.stats.fifo2_free = proc2output_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
       opts->stat.stats.rx_idle1++;
-      opts->stat.stats.fifo1_free = proc2output_fifo.free();
       usleep(10);
     } else {
       dat.receive(eth_ringbuf->getdatabuffer(data_index),
@@ -159,7 +159,6 @@ void CSPEC::processing_thread(void *args) {
           dat.elems; /**< @todo both valid and invalid events */
       opts->stat.stats.rx_discards += dat.input_filter();
 
-      opts->stat.stats.fifo2_free = proc2output_fifo.free();
       for (unsigned int id = 0; id < dat.elems; id++) {
         auto d = dat.data[id];
         if (d.valid) {
