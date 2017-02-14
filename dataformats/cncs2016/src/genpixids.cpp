@@ -181,7 +181,6 @@ int main(int argc, char *argv[]) {
 
       auto time = data[1];
 
-
       int pixid = CNCS.getdetectorpixelid(1, gridid, wireid);
       if (pixid != -1) { /**< create intensity volume image */
         auto x = CNCS.getxcoord(pixid);
@@ -203,7 +202,7 @@ int main(int argc, char *argv[]) {
         coords.tofile(buf, len);
       } else {
         badpixels++;
-        //printf("%8d, %5d, %4d, %4d\n",
+        // printf("%8d, %5d, %4d, %4d\n",
         //                    time, wireid, gridid, pixid);
         assert(wireid >= 0);
         assert(gridid >= 0);

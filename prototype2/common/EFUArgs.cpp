@@ -15,7 +15,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
 
   while (1) {
     static struct option long_options[] = {
-        // clang-format-off
+        // clang-format off
         {"help",      no_argument,       0, 'h'},
         {"broker",    required_argument, 0, 'b'},
         {"cpu",       required_argument, 0, 'c'},
@@ -26,13 +26,14 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
         {"stopafter", required_argument, 0, 's'},
         {"graphite",  required_argument, 0, 'g'},
         {"gport",     required_argument, 0, 'o'},
-        {0, 0, 0, 0}};
-        // clang-format_on
+        {0, 0, 0, 0}
+      };
+    // clang-format on
 
     int option_index = 0;
 
-    int c =
-        getopt_long(argc, argv, "b:c:d:g:o:i:p:r:s:h", long_options, &option_index);
+    int c = getopt_long(argc, argv, "b:c:d:g:o:i:p:r:s:h", long_options,
+                        &option_index);
     if (c == -1)
       break;
 
@@ -75,7 +76,8 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
       printf(" --det -d name           detector name \n");
       printf(" --dip, -i ipaddr        ip address of receive interface \n");
       printf(" --port -p port          udp port \n");
-      printf(" --graphite, -g ipaddr   ip address of graphite metrics server \n");
+      printf(
+          " --graphite, -g ipaddr   ip address of graphite metrics server \n");
       printf(" --gport -o port         Graphite tcp port \n");
       printf(" --stopafter, -s timeout terminate after timeout seconds \n");
       printf(" -h                      help - prints this message \n");

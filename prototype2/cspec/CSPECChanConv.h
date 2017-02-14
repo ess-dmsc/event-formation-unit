@@ -17,7 +17,6 @@ public:
   /** @brief constructor, sets calibration data to initval */
   CSPECChanConv(uint16_t initval);
 
-
   /** @brief constructor, sets calibration data to same as input
    * (identity mapping)
    * @todo document

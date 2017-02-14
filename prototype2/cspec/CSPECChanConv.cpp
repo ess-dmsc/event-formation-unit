@@ -19,7 +19,7 @@ CSPECChanConv::CSPECChanConv() {
   static_assert(sizeof(gridcal) == adcsize * 2, "gridcal mismatch");
 
   for (int i = 0; i < adcsize; i++) {
-    wirecal[i] = i; //Identity mapping
+    wirecal[i] = i; // Identity mapping
     gridcal[i] = i;
   }
 }

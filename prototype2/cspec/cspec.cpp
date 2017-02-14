@@ -166,9 +166,11 @@ void CSPEC::processing_thread(void *args) {
         auto d = dat.data[id];
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();
-          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) < 0) {
+          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) <
+              0) {
             opts->stat.stats.geometry_errors++;
-            assert(opts->stat.stats.geometry_errors <= opts->stat.stats.rx_readouts);
+            assert(opts->stat.stats.geometry_errors <=
+                   opts->stat.stats.rx_readouts);
           } else {
             if (proc2output_fifo.push(event_index) == false) {
               opts->stat.stats.fifo2_push_errors++;

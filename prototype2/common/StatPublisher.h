@@ -7,15 +7,16 @@
 
 #pragma once
 
-#include <string>
 #include <common/EFUStats.h>
 #include <libs/include/Socket.h>
+#include <string>
 
 class StatPublisher {
 public:
   StatPublisher(std::string ip, int port);
 
-  void publish(EFUStats::stat_t * s);
+  void publish(EFUStats::stat_t *s);
+
 private:
-  TCPClient * statdb;
+  TCPClient *statdb;
 };

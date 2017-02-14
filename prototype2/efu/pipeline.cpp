@@ -18,7 +18,9 @@ int main(int argc, char *argv[]) {
 
   efu_args = new EFUArgs(argc, argv);
 
-  if (efu_args->stopafter == 0) { return 0; }
+  if (efu_args->stopafter == 0) {
+    return 0;
+  }
 
   efu_args->stat.set_mask(efu_args->reportmask);
 
