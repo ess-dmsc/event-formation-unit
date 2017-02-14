@@ -177,7 +177,7 @@ int CSPECData::generate(char *buffer, int size, int elems,
   auto mg = (struct multi_grid *)buffer;
   while ((size >= CSPECData::datasize) && elems) {
     events++;
-    mg->header = header_id + nwords;
+    mg->header = header_id + (1 << 16) + nwords;
     for (int i = 0; i != 8; ++i) {
       mg->data[i] = data_id + (i << 16);
     }
