@@ -2,14 +2,13 @@
 
 #pragma once
 
-#include<map>
-#include<NMX/EventNMX.h>
+#include <NMX/EventNMX.h>
+#include <map>
 
-class ParserClusterer
-{
+class ParserClusterer {
 public:
   /** @todo Martin document */
-  void parse (char* buf, size_t size);
+  void parse(char *buf, size_t size);
 
   /** @todo Martin document */
   bool event_ready();

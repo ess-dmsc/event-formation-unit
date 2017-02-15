@@ -1,5 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <NMX/ParserClusterer.h>
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
@@ -10,9 +11,8 @@
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
-#include <libs/include/Timer.h>
 #include <libs/include/TSCTimer.h>
-#include <NMX/ParserClusterer.h>
+#include <libs/include/Timer.h>
 #include <memory>
 #include <stdio.h>
 #include <unistd.h>
@@ -45,10 +45,9 @@ private:
   char kafkabuffer[kafka_buffer_size];
 };
 
-
 NMX::NMX() {
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
-      eth_buffer_max_entries, eth_buffer_size);
+         eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
   assert(eth_ringbuf != 0);
 }
@@ -72,7 +71,7 @@ void NMX::input_thread(void *args) {
 
     /** this is the processing step */
     if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
-                                    eth_ringbuf->getmaxbufsize())) > 0) {
+                                  eth_ringbuf->getmaxbufsize())) > 0) {
       XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
       opts->stat.stats.rx_packets++;
       opts->stat.stats.rx_bytes += rdsize;
@@ -102,14 +101,13 @@ void NMX::input_thread(void *args) {
   }
 }
 
-
 void NMX::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
   assert(opts != NULL);
 
-  #ifndef NOKAFKA
-    Producer producer(opts->broker, true, "NMX_detector");
-  #endif
+#ifndef NOKAFKA
+  Producer producer(opts->broker, true, "NMX_detector");
+#endif
 
   ParserClusterer parser;
 
@@ -117,7 +115,7 @@ void NMX::processing_thread(void *args) {
   TSCTimer report_timer;
 
   unsigned int data_index;
-  int evtoff=0;
+  int evtoff = 0;
   while (1) {
     opts->stat.stats.fifo1_free = input2proc_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
@@ -125,19 +123,19 @@ void NMX::processing_thread(void *args) {
       usleep(10);
     } else {
       parser.parse(eth_ringbuf->getdatabuffer(data_index),
-                  eth_ringbuf->getdatalength(data_index));
+                   eth_ringbuf->getdatalength(data_index));
 
-      unsigned int readouts = eth_ringbuf->getdatalength(data_index)/sizeof(vmm_nugget); /**< @todo not hardocde */
+      unsigned int readouts = eth_ringbuf->getdatalength(data_index) /
+                              sizeof(vmm_nugget); /**< @todo not hardocde */
 
-                   opts->stat.stats.rx_readouts
-                    += readouts;
+      opts->stat.stats.rx_readouts += readouts;
       opts->stat.stats.rx_error_bytes += 0;
 
       while (parser.event_ready()) {
         auto event = parser.get();
         event.analyze(true, 3, 7);
         if (event.good) {
-          //image[c2d(static_cast<uint32_t>(event.x.center),
+          // image[c2d(static_cast<uint32_t>(event.x.center),
           //          static_cast<uint32_t>(event.y.center))]++;
           opts->stat.stats.rx_events++;
           int time = 42; /**< @todo get time from ? */
@@ -147,17 +145,18 @@ void NMX::processing_thread(void *args) {
           std::memcpy(kafkabuffer + evtoff + 4, &pixelid, sizeof(pixelid));
           evtoff += 8;
 
-          if (evtoff >= kafka_buffer_size/10 - 20) {
+          if (evtoff >= kafka_buffer_size / 10 - 20) {
             assert(evtoff < kafka_buffer_size);
 
-          #ifndef NOKAFKA
+#ifndef NOKAFKA
             producer.produce(kafkabuffer, evtoff);
             opts->stat.stats.tx_bytes += evtoff;
-          #endif
+#endif
             evtoff = 0;
           }
         } else {
-          opts->stat.stats.rx_discards += event.x.entries.size() + event.y.entries.size();
+          opts->stat.stats.rx_discards +=
+              event.x.entries.size() + event.y.entries.size();
         }
       }
     }

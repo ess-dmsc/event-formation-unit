@@ -9,8 +9,7 @@
 
 #include <inttypes.h>
 
-struct vmm_nugget 
-{
+struct vmm_nugget {
   uint64_t time;
   uint8_t plane_id;
   uint8_t strip;

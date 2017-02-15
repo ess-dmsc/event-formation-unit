@@ -9,9 +9,9 @@
 
 #include <limits>
 #include <list>
+#include <nmxgen/vmm_nugget.h>
 #include <numeric>
 #include <set>
-#include <nmxgen/vmm_nugget.h>
 
 struct PlaneNMX {
   void push(const vmm_nugget &e);
