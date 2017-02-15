@@ -15,7 +15,10 @@ gennmxfile.inc = nmxgen/NMXArgs.h nmxgen/ReaderVMM.h nmxgen/EventNMX.h
 gennmxfile.inc += nmxgen/ParserClusterer.h
 gennmxfile.obj = $(gennmxfile.src:%.cpp=%.o)
 
-ldflags += -L../../h5cc/build -lh5cc -L/usr/lib/x86_64-linux-gnu/hdf5/serial  -lhdf5_hl_cpp -lhdf5_cpp -lhdf5
+ifeq ($(_ARCH),Linux)
+H5LIBPATH = -L/usr/lib/x86_64-linux-gnu/hdf5/serial
+endif
+ldflags = -L../../h5cc/build -lh5cc $H5LIBPATH -lhdf5_hl_cpp -lhdf5_cpp -lhdf5
 
 gennmxfile: $(library) $(gennmxfile.obj) $(gennmxfile.inc)
 	@echo building $@
