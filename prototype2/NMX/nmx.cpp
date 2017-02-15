@@ -147,7 +147,7 @@ void NMX::processing_thread(void *args) {
           std::memcpy(kafkabuffer + evtoff + 4, &pixelid, sizeof(pixelid));
           evtoff += 8;
 
-          if (evtoff >= 10000 - 20) {
+          if (evtoff >= 100000 - 20) {
             assert(evtoff < kafka_buffer_size);
       #ifndef NOKAFKA
             producer.produce(kafkabuffer, evtoff);
