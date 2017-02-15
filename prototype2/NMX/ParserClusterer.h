@@ -7,6 +7,8 @@
 
 class ParserClusterer {
 public:
+  ParserClusterer();
+
   /** @todo Martin document */
   void parse(char *buf, size_t size);
 
@@ -17,5 +19,6 @@ public:
   EventNMX get();
 
 private:
-  std::multimap<uint64_t, vmm_nugget> backlog_; /**< @todo Martin document */
+  std::multimap<uint64_t, Eventlet> backlog_; /**< @todo Martin document */
+  std::vector<uint32_t> data;
 };

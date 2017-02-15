@@ -3,17 +3,24 @@
 #include <NMX/ParserClusterer.h>
 #include <string.h>
 
+ParserClusterer::ParserClusterer()
+{
+  data.resize(4);
+}
+
 void ParserClusterer::parse(char *buf, size_t size) {
-  vmm_nugget packet;
-  size_t psize = sizeof(packet);
+  Eventlet eventlet;
+  
+  size_t psize = sizeof(uint32_t) * 4;
 
   size_t limit = std::min(size / psize, size_t(9000 / psize));
   size_t byteidx = 0;
   for (; byteidx < limit; ++byteidx) {
-    memcpy(&packet, buf, sizeof(packet));
+    memcpy(data.data(), buf, psize);
+    eventlet.from_packet(data);
     buf += psize;
 
-    backlog_.insert(std::pair<uint64_t, vmm_nugget>(packet.time, packet));
+    backlog_.insert(std::pair<uint64_t, Eventlet>(eventlet.time, eventlet));
   }
 }
 

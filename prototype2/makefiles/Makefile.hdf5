@@ -9,8 +9,8 @@ progs += gennmxfile
 
 include+= -I../../h5cc/source -I/usr/include/hdf5/serial
 
-gennmxfile.src = nmxgen/nmxfile.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderVMM.cpp
-gennmxfile.inc = nmxgen/NMXArgs.h nmxgen/ReaderVMM.h
+gennmxfile.src = nmxgen/nmxfile.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderVMM.cpp NMX/Eventlet.cpp
+gennmxfile.inc = nmxgen/NMXArgs.h nmxgen/ReaderVMM.h NMX/Eventlet.h
 gennmxfile.obj = $(gennmxfile.src:%.cpp=%.o)
 
 ifeq ($(_ARCH),Linux)

@@ -28,6 +28,7 @@ private:
 
   const std::vector<hsize_t> slabsize{1, H5CC::kMax};
   std::vector<hsize_t> index{0, 0};
+  std::vector<uint32_t> data;
 };
 
 #endif

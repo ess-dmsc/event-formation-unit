@@ -2,9 +2,10 @@
 
 #include <cstring>
 #include <nmxgen/ReaderVMM.h>
-#include <nmxgen/vmm_nugget.h>
+//#include <nmxgen/Eventlet.h>
 
 ReaderVMM::ReaderVMM(std::string filename) {
+  data.resize(4, 0);
   if (filename.empty())
     return;
   file_ = H5CC::File(filename, H5CC::Access::r_existing);
@@ -22,23 +23,15 @@ ReaderVMM::ReaderVMM(std::string filename) {
 
 size_t ReaderVMM::read(char *buf) {
 
-  vmm_nugget packet;
-
-  size_t psize = sizeof(packet);
+  size_t psize = sizeof(uint32_t) * 4;
 
   size_t limit = std::min(current_ + (9000 / psize), total_);
   size_t byteidx = 0;
   for (; current_ < limit; ++current_) {
     index[0] = current_;
-    auto data = dataset_.read<uint32_t>(slabsize, index);
+    dataset_.read(data, slabsize, index);
 
-    packet.time = (static_cast<uint64_t>(data.at(0)) << 32) |
-                  static_cast<uint64_t>(data.at(1));
-    packet.plane_id = (data.at(2) >> 16);
-    packet.strip = static_cast<uint8_t>(data.at(2) & 0xFFFF);
-    packet.adc = static_cast<uint16_t>(data.at(3) & 0xFFFF);
-
-    memcpy(buf, &packet, sizeof(packet));
+    memcpy(buf, data.data(), psize);
 
     buf += psize;
     byteidx += psize;
