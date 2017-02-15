@@ -18,5 +18,5 @@ public:
   EventNMX get();
 
 private:
-  std::multimap<uint64_t, EntryNMX> backlog_; /**< @todo Martin document */
+  std::multimap<uint64_t, vmm_nugget> backlog_; /**< @todo Martin document */
 };
