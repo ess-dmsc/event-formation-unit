@@ -108,7 +108,7 @@ void NMX::processing_thread(void *args) {
   assert(opts != NULL);
 
   #ifndef NOKAFKA
-    Producer producer(opts->broker, true, "C-SPEC_detector");
+    Producer producer(opts->broker, true, "NMX_detector");
   #endif
 
   ParserClusterer parser;
@@ -139,6 +139,7 @@ void NMX::processing_thread(void *args) {
         if (event.good) {
           //image[c2d(static_cast<uint32_t>(event.x.center),
           //          static_cast<uint32_t>(event.y.center))]++;
+          opts->stat.stats.rx_events++;
           int time = 42;
           int pixelid = (int)event.x.center + (int)event.y.center * 256;
 
