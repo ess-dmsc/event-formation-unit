@@ -12,6 +12,7 @@
 #include <libs/include/Socket.h>
 #include <libs/include/Timer.h>
 #include <libs/include/TSCTimer.h>
+#include <nmxgen/ParserClusterer.h>
 #include <memory>
 #include <stdio.h>
 #include <unistd.h>
@@ -106,25 +107,47 @@ void NMX::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
   assert(opts != NULL);
 
-  //NMXData dat;
+  ParserClusterer parser;
 
   Timer stopafter_clock;
   TSCTimer report_timer;
 
   unsigned int data_index;
+  int evtoff=0;
   while (1) {
     opts->stat.stats.fifo1_free = input2proc_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
       opts->stat.stats.rx_idle1++;
       usleep(10);
     } else {
-      //dat.receive(eth_ringbuf->getdatabuffer(data_index),
-      //            eth_ringbuf->getdatalength(data_index));
-      opts->stat.stats.rx_readouts += 1;
-      opts->stat.stats.rx_error_bytes += 0;
-      opts->stat.stats.rx_discards += 1;
+      parser.parse(eth_ringbuf->getdatabuffer(data_index),
+                  eth_ringbuf->getdatalength(data_index));
 
-      kafkabuffer[0] = 0; /**< @todo for now , to please clang */
+      unsigned int readouts = eth_ringbuf->getdatalength(data_index)/12; /**< @todo not hardocde */
+
+      opts->stat.stats.rx_readouts += readouts;
+      opts->stat.stats.rx_error_bytes += 0;
+      opts->stat.stats.rx_discards += 0;
+
+      while (parser.event_ready()) {
+        auto event = parser.get();
+        event.analyze(true, 3, 7);
+        if (event.good) {
+          //image[c2d(static_cast<uint32_t>(event.x.center),
+          //          static_cast<uint32_t>(event.y.center))]++;
+          int time = 42;
+          int pixelid = (int)event.x.center + (int)event.y.center * 256;
+
+          std::memcpy(kafkabuffer + evtoff, &time, sizeof(time));
+          std::memcpy(kafkabuffer + evtoff + 4, &pixelid, sizeof(pixelid));
+          evtoff += 8;
+
+          if (evtoff >= 1000000 - 20) {
+            printf("KAfka produce\n");
+            evtoff=0;
+          }
+        }
+      }
     }
 
     // Checking for exit

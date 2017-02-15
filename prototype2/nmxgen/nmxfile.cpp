@@ -6,9 +6,7 @@
 #include <cstring>
 
 #include <libs/include/Socket.h>
-#include <nmxgen/EventNMX.h>
 #include <nmxgen/NMXArgs.h>
-#include <nmxgen/ParserClusterer.h>
 #include <nmxgen/ReaderVMM.h>
 #include <unistd.h>
 
@@ -34,22 +32,9 @@ int main(int argc, char *argv[]) {
   uint64_t pkt = 0;
   uint64_t bytes = 0;
 
-  HistMap2D image;
-
-  ParserClusterer parser;
-
   while ((pkt < opts.txPkt) && ((readsz = file.read(buffer)) > 0)) {
-    parser.parse(buffer, readsz);
 
     DataSource.send(buffer, readsz);
-
-    while (parser.event_ready()) {
-      auto event = parser.get();
-      event.analyze(true, 3, 7);
-      if (event.good)
-        image[c2d(static_cast<uint32_t>(event.x.center),
-                  static_cast<uint32_t>(event.y.center))]++;
-    }
 
     bytes += readsz;
     pkt++;
@@ -59,17 +44,11 @@ int main(int argc, char *argv[]) {
 
   printf("Sent: %" PRIu64 " packets\n", pkt);
   printf("Sent: %" PRIu64 " bytes\n", bytes);
-  printf("Image: %" PRIu64 " points\n", (uint64_t)image.size());
 
   if (opts.outfile.empty() || opts.filename.empty())
     return 0;
 
-  auto ofile = H5CC::File(opts.outfile, H5CC::Access::rw_truncate);
-  auto grp = ofile.require_group("images");
-
   printf("Success creating\n");
-
-  write(grp, "file", image, 1);
 
   return 0;
 }
