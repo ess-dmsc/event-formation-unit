@@ -123,6 +123,8 @@ void NMX::processing_thread(void *args) {
       opts->stat.stats.rx_readouts += 1;
       opts->stat.stats.rx_error_bytes += 0;
       opts->stat.stats.rx_discards += 1;
+
+      kafkabuffer[0] = 0; /**< @todo for now , to please clang */
     }
 
     // Checking for exit
