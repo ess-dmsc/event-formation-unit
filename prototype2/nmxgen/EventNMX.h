@@ -7,21 +7,14 @@
 
 #pragma once
 
-#include <inttypes.h>
 #include <limits>
 #include <list>
 #include <numeric>
 #include <set>
-
-struct EntryNMX {
-  uint64_t time;
-  uint8_t plane_id;
-  uint8_t strip;
-  uint16_t adc;
-};
+#include <nmxgen/vmm_nugget.h>
 
 struct PlaneNMX {
-  void push(const EntryNMX &e);
+  void push(const vmm_nugget &e);
   void analyze(bool weighted, uint16_t max_timebins, uint16_t max_timedif);
 
   double center;
@@ -30,11 +23,11 @@ struct PlaneNMX {
   uint64_t time_start, time_end;
   double integral;
 
-  std::list<EntryNMX> entries;
+  std::list<vmm_nugget> entries;
 };
 
 struct EventNMX {
-  void push(const EntryNMX &e);
+  void push(const vmm_nugget &e);
   void analyze(bool weighted, int16_t max_timebins, int16_t max_timedif);
 
   bool good{false};

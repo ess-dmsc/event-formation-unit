@@ -2,7 +2,7 @@
 
 #include <nmxgen/EventNMX.h>
 
-void PlaneNMX::push(const EntryNMX &e) {
+void PlaneNMX::push(const vmm_nugget &e) {
   if (!e.adc)
     return;
   if (entries.empty())
@@ -48,7 +48,7 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
   uncert_upper = uspan_max - uspan_min;
 }
 
-void EventNMX::push(const EntryNMX &e) {
+void EventNMX::push(const vmm_nugget &e) {
   if (e.plane_id)
     y.push(e);
   else

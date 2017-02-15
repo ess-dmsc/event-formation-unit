@@ -13,30 +13,6 @@
 #include <map>
 #include <vector>
 
-#include <nmxgen/EventNMX.h>
-
-struct PacketVMM {
-  uint32_t time_offset;
-  uint16_t timebin;
-  uint8_t plane_id;
-  uint8_t strip;
-  uint16_t adc;
-};
-
-struct c2d {
-  c2d(uint32_t xx, uint32_t yy) : x(xx), y(yy) {}
-  uint32_t x, y;
-};
-
-inline bool operator<(const c2d &a, const c2d &b) {
-  return a.x < b.x || (!(b.x < a.x) && a.y < b.y);
-}
-
-using HistMap2D = std::map<c2d, double>;
-
-bool write(H5CC::Group group, std::string name, const HistMap2D &hist,
-           uint16_t subdivisions = 10);
-
 class ReaderVMM {
 public:
   ReaderVMM(std::string filename);

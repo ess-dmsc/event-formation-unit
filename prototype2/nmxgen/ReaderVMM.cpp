@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <nmxgen/ReaderVMM.h>
+#include <nmxgen/vmm_nugget.h>
 
 ReaderVMM::ReaderVMM(std::string filename) {
   if (filename.empty())
@@ -20,61 +21,26 @@ ReaderVMM::ReaderVMM(std::string filename) {
 }
 
 size_t ReaderVMM::read(char *buf) {
-  // Event is timeoffset(32) timebin(16) planeID(8) stripnum(8) ADC(16)
-  //  total = 10 bytes, unsigned
-  // this should be quite close to the size of final data format
 
-  PacketVMM packet;
+  vmm_nugget packet;
+  
+  size_t psize = sizeof(packet);
 
-  size_t limit = std::min(current_ + (9000 / 12), total_);
+  size_t limit = std::min(current_ + (9000 / psize), total_);
   size_t byteidx = 0;
   for (; current_ < limit; ++current_) {
     index[0] = current_;
     auto data = dataset_.read<uint32_t>(slabsize, index);
 
-    packet.time_offset = data.at(0);
-    packet.timebin = static_cast<uint16_t>(data.at(1));
+    packet.time = (static_cast<uint64_t>(data.at(0)) << 32) | static_cast<uint64_t>(data.at(1));
     packet.plane_id = (data.at(2) >> 16);
-    packet.strip = static_cast<uint8_t>(data.at(2) & 0x000000FF);
+    packet.strip = static_cast<uint8_t>(data.at(2) & 0x0000FFFF);
     packet.adc = static_cast<uint16_t>(data.at(3));
 
     memcpy(buf, &packet, sizeof(packet));
 
-    buf += 12;
-    byteidx += 12;
+    buf += psize;
+    byteidx += psize;
   }
   return byteidx;
-}
-
-bool write(H5CC::Group group, std::string name, const HistMap2D &hist,
-           uint16_t subdivisions) {
-  if (hist.empty() || group.name().empty() || name.empty() ||
-      group.has_dataset(name))
-    return false;
-
-  uint32_t xmax{0};
-  uint32_t ymax{0};
-  for (auto d : hist) {
-    xmax = std::max(xmax, d.first.x);
-    ymax = std::max(ymax, d.first.y);
-  }
-
-  xmax++;
-  ymax++;
-
-  H5CC::DataSet dataset;
-
-  std::cout << "Xmax=" << xmax << " Ymax=" << ymax << "\n";
-
-  if (subdivisions > 1)
-    dataset = group.create_dataset<double>(
-        name, {xmax, ymax}, {xmax / subdivisions, ymax / subdivisions});
-  else
-    dataset = group.create_dataset<double>(name, {xmax, ymax});
-
-  for (auto d : hist)
-    if (d.second)
-      dataset.write<double>(d.second, {d.first.x, d.first.y});
-
-  return true;
 }

@@ -1,26 +1,21 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include<nmxgen/ParserClusterer.h>
-#include<nmxgen/ReaderVMM.h>
 #include<string.h>
 
 void ParserClusterer::parse (char* buf, size_t size)
 {
-  PacketVMM packet;
+  vmm_nugget packet;
+  size_t psize = sizeof(packet);
 
-  size_t limit = std::min(size / 12, size_t(9000/12));
+  size_t limit = std::min(size / psize, size_t(9000/psize));
   size_t byteidx = 0;
   for (; byteidx < limit; ++byteidx)
   {
     memcpy(&packet, buf, sizeof(packet));
-    buf += 12;
+    buf += psize;
 
-    EntryNMX entry;
-    entry.time = (static_cast<uint64_t>(packet.time_offset) << 32) + packet.timebin;
-    entry.plane_id = packet.plane_id;
-    entry.strip = packet.strip;
-    entry.adc = packet.adc;
-    backlog_.insert(std::pair<uint64_t, EntryNMX>(entry.time, entry));
+    backlog_.insert(std::pair<uint64_t, vmm_nugget>(packet.time, packet));
   }
 }
 
