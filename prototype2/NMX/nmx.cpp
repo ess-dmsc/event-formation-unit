@@ -107,6 +107,10 @@ void NMX::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
   assert(opts != NULL);
 
+  #ifndef NOKAFKA
+    Producer producer(opts->broker, true, "C-SPEC_detector");
+  #endif
+
   ParserClusterer parser;
 
   Timer stopafter_clock;
@@ -142,8 +146,12 @@ void NMX::processing_thread(void *args) {
           std::memcpy(kafkabuffer + evtoff + 4, &pixelid, sizeof(pixelid));
           evtoff += 8;
 
-          if (evtoff >= 1000000 - 20) {
-            printf("KAfka produce\n");
+          if (evtoff >= 10000 - 20) {
+            assert(evtoff < kafka_buffer_size);
+      #ifndef NOKAFKA
+            producer.produce(kafkabuffer, evtoff);
+            opts->stat.stats.tx_bytes += evtoff;
+      #endif
             evtoff=0;
           }
         }
