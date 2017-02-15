@@ -23,7 +23,7 @@ public:
    */
   void set_mask(unsigned int mask);
 
-    /** @brief send stats to time series database */
+  /** @brief send stats to time series database */
   void sendstats();
 
   /** @brief print out all active statistics */
@@ -35,7 +35,8 @@ public:
     uint64_t rx_bytes;
     uint64_t fifo1_push_errors;
     uint64_t fifo1_free;
-    uint64_t pad_a[4]; /**< @todo next counter is now on different cache boundary */
+    uint64_t
+        pad_a[4]; /**< @todo next counter is now on different cache boundary */
 
     // Processing Counters
     uint64_t rx_readouts;
@@ -45,7 +46,8 @@ public:
     uint64_t geometry_errors;
     uint64_t fifo2_push_errors;
     uint64_t fifo2_free;
-    uint64_t padb[1]; /**< @todo next counter is now on different cache boundary */
+    uint64_t
+        padb[1]; /**< @todo next counter is now on different cache boundary */
 
     // Output Counters
     uint64_t rx_events;
@@ -56,8 +58,8 @@ public:
   stat_t stats, stats_old;
 
 private:
-  Timer usecs_elapsed, runtime;   /**< used for rate calculations */
-  unsigned int report_mask{0}; /**< bitmask for active statistics */
+  Timer usecs_elapsed, runtime; /**< used for rate calculations */
+  unsigned int report_mask{0};  /**< bitmask for active statistics */
 
   /** @brief print out packet related statistics */
   void packet_stats();

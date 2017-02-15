@@ -23,7 +23,7 @@ TEST_F(CspecChanConvTest, ConstructorDefault) {
 }
 
 TEST_F(CspecChanConvTest, ConstructorParametrized) {
-    CSPECChanConv conv(7);
+  CSPECChanConv conv(7);
   for (int i = 0; i < CSPECChanConv::adcsize; i++) {
     ASSERT_EQ(conv.getwireid(i), 7) << "wrong wire id conversion at adc value "
                                     << i << endl;
@@ -79,8 +79,6 @@ TEST_F(CspecChanConvTest, LoadCalibration) {
     ASSERT_EQ(i + 10, conv.getgridid(i));
   }
 }
-
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

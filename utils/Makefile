@@ -1,6 +1,6 @@
 
 
-progs=lehexdump32 memspdtst
+progs=lehexdump32 gencalibfile 
 
 all: $(progs)
 	echo done
@@ -8,5 +8,5 @@ all: $(progs)
 lehexdump32: lehxdump.cpp
 	g++ --std=c++11 $< -o $@ 
 
-memspdtst: memspdtst.c
-	gcc $< -o $@ 
+gencalibfile: gencalibfile.c
+	g++ --std=c++11 $< -o $@ 

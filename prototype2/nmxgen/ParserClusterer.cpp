@@ -2,6 +2,7 @@
 
 #include<nmxgen/ParserClusterer.h>
 #include<nmxgen/ReaderVMM.h>
+#include<string.h>
 
 void ParserClusterer::parse (char* buf, size_t size)
 {

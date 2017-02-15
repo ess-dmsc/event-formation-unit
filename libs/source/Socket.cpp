@@ -144,8 +144,7 @@ int Socket::setopt(int option, void *value, int size) {
   return ret;
 }
 
-
-TCPClient::TCPClient(const char * ipaddr, int port) {
+TCPClient::TCPClient(const char *ipaddr, int port) {
   s_ = socket(AF_INET, SOCK_STREAM, 0);
   if (s_ < 0) {
     std::cout << "TCPSocket(): socket() failed" << std::endl;
@@ -166,14 +165,14 @@ TCPClient::TCPClient(const char * ipaddr, int port) {
   }
 }
 
-int TCPClient::senddata(char * buffer, int len) {
+int TCPClient::senddata(char *buffer, int len) {
   if (s_ < 0) {
     return -1;
   }
 
   if (len <= 0) {
-     printf("TCPClient::senddata() no data specified\n");
-     return 0;
+    printf("TCPClient::senddata() no data specified\n");
+    return 0;
   }
   int ret = send(s_, buffer, len, 0);
   if (ret <= 0) {

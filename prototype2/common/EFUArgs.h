@@ -34,7 +34,7 @@ public:
   bool kafka{true};                     /**< whether to use Kafka or not */
 
   std::string graphite_ip_addr{"127.0.0.1"}; /**< graphite time series db */
-  int graphite_port{2003}; /**< graphite time series db */
+  int graphite_port{2003};                   /**< graphite time series db */
 
   // NMX OPTIONS
   int reduction{80}; /**< data tuples in a cluster */

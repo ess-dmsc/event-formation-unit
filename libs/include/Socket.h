@@ -62,11 +62,10 @@ public:
   };
 };
 
-
 class TCPClient {
 public:
-  TCPClient(const char * ip, int port);
-  int senddata(char * buffer, int len);
+  TCPClient(const char *ip, int port);
+  int senddata(char *buffer, int len);
 
 private:
   int s_{-1};

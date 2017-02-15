@@ -6,16 +6,15 @@
 #include <cstring>
 
 #include <libs/include/Socket.h>
+#include <nmxgen/EventNMX.h>
 #include <nmxgen/NMXArgs.h>
 #include <nmxgen/ParserClusterer.h>
 #include <nmxgen/ReaderVMM.h>
-#include <nmxgen/EventNMX.h>
 #include <unistd.h>
 
 // const int TSC_MHZ = 2900;
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
   NMXArgs opts(argc, argv);
   H5::Exception::dontPrint();
 
@@ -44,8 +43,7 @@ int main(int argc, char *argv[])
 
     DataSource.send(buffer, readsz);
 
-    while (parser.event_ready())
-    {
+    while (parser.event_ready()) {
       auto event = parser.get();
       event.analyze(true, 3, 7);
       if (event.good)
@@ -56,7 +54,7 @@ int main(int argc, char *argv[])
     bytes += readsz;
     pkt++;
 
-    //usleep(opts.speed_level * 1000);
+    // usleep(opts.speed_level * 1000);
   }
 
   printf("Sent: %" PRIu64 " packets\n", pkt);

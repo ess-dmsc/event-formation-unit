@@ -9,7 +9,7 @@ endif
 
 VPATH = .. ../libs/include test
 
-progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so
+progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so cspec2.so
 
 library = ../libs/eventlib.a
 
@@ -28,7 +28,12 @@ cspec.so.src =  cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
 cspec.so.src += common/Producer.cpp
 cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h common/MultiGridGeometry.h
 cspec.so.inc += gccintel.h common/Producer.h common/EFUStats.h common/Trace.h
-cspec.so.inc +=
+
+cspec2.so.src =  cspec2/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
+cspec2.so.src += common/Producer.cpp
+cspec2.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h common/MultiGridGeometry.h
+cspec2.so.inc += gccintel.h common/Producer.h common/EFUStats.h common/Trace.h
+
 
 # For each standalone program add .src and .inc and .obj below
 efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp
@@ -72,6 +77,10 @@ $(gencspec.obj): $(gencspec.inc)
 $(gencspecfile.obj): $(gencspecfile.inc)
 
 cspec.so: $(cspec.so.src) $(cspec.so.inc)
+	@echo building specific $@
+	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
+
+cspec2.so: $(cspec2.so.src) $(cspec2.so.inc)
 	@echo building specific $@
 	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
 
