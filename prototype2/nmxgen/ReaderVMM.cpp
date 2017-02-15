@@ -34,8 +34,8 @@ size_t ReaderVMM::read(char *buf) {
 
     packet.time = (static_cast<uint64_t>(data.at(0)) << 32) | static_cast<uint64_t>(data.at(1));
     packet.plane_id = (data.at(2) >> 16);
-    packet.strip = static_cast<uint8_t>(data.at(2) & 0x0000FFFF);
-    packet.adc = static_cast<uint16_t>(data.at(3));
+    packet.strip = static_cast<uint8_t>(data.at(2) & 0xFFFF);
+    packet.adc = static_cast<uint16_t>(data.at(3) & 0xFFFF);
 
     memcpy(buf, &packet, sizeof(packet));
 
