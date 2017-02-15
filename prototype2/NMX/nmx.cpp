@@ -132,7 +132,6 @@ void NMX::processing_thread(void *args) {
       opts->stat.stats.rx_readouts += readouts;
       opts->stat.stats.rx_error_bytes += 0;
 
-
       while (parser.event_ready()) {
         auto event = parser.get();
         event.analyze(true, 3, 7);
@@ -147,14 +146,14 @@ void NMX::processing_thread(void *args) {
           std::memcpy(kafkabuffer + evtoff + 4, &pixelid, sizeof(pixelid));
           evtoff += 8;
 
-          if (evtoff >= 100000 - 20) {
+          if (evtoff >= kafka_buffer_size/10 - 20) {
             assert(evtoff < kafka_buffer_size);
-      #ifndef NOKAFKA
+
+          #ifndef NOKAFKA
             producer.produce(kafkabuffer, evtoff);
             opts->stat.stats.tx_bytes += evtoff;
-      #endif
-            evtoff=0;
-
+          #endif
+            evtoff = 0;
           }
         } else {
           opts->stat.stats.rx_discards += event.x.entries.size() + event.y.entries.size();
