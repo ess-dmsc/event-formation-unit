@@ -127,11 +127,11 @@ void NMX::processing_thread(void *args) {
       parser.parse(eth_ringbuf->getdatabuffer(data_index),
                   eth_ringbuf->getdatalength(data_index));
 
-      unsigned int readouts = eth_ringbuf->getdatalength(data_index)/12; /**< @todo not hardocde */
+      unsigned int readouts = eth_ringbuf->getdatalength(data_index)/sizeof(vmm_nugget); /**< @todo not hardocde */
 
       opts->stat.stats.rx_readouts += readouts;
       opts->stat.stats.rx_error_bytes += 0;
-      opts->stat.stats.rx_discards += 0;
+
 
       while (parser.event_ready()) {
         auto event = parser.get();
@@ -140,7 +140,7 @@ void NMX::processing_thread(void *args) {
           //image[c2d(static_cast<uint32_t>(event.x.center),
           //          static_cast<uint32_t>(event.y.center))]++;
           opts->stat.stats.rx_events++;
-          int time = 42;
+          int time = 42; /**< @todo get time from ? */
           int pixelid = (int)event.x.center + (int)event.y.center * 256;
 
           std::memcpy(kafkabuffer + evtoff, &time, sizeof(time));
@@ -154,7 +154,10 @@ void NMX::processing_thread(void *args) {
             opts->stat.stats.tx_bytes += evtoff;
       #endif
             evtoff=0;
+
           }
+        } else {
+          opts->stat.stats.rx_discards += event.x.entries.size() + event.y.entries.size();
         }
       }
     }
