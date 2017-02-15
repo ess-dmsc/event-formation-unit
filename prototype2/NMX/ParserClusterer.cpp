@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include<nmxgen/ParserClusterer.h>
+#include<NMX/ParserClusterer.h>
 #include<string.h>
 
 void ParserClusterer::parse (char* buf, size_t size)

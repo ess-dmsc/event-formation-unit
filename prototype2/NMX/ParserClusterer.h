@@ -3,7 +3,7 @@
 #pragma once
 
 #include<map>
-#include<nmxgen/EventNMX.h>
+#include<NMX/EventNMX.h>
 
 class ParserClusterer
 {

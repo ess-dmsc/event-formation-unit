@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <nmxgen/EventNMX.h>
+#include <NMX/EventNMX.h>
 
 void PlaneNMX::push(const vmm_nugget &e) {
   if (!e.adc)

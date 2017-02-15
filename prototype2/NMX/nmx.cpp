@@ -12,7 +12,7 @@
 #include <libs/include/Socket.h>
 #include <libs/include/Timer.h>
 #include <libs/include/TSCTimer.h>
-#include <nmxgen/ParserClusterer.h>
+#include <NMX/ParserClusterer.h>
 #include <memory>
 #include <stdio.h>
 #include <unistd.h>
