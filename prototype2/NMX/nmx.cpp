@@ -129,7 +129,8 @@ void NMX::processing_thread(void *args) {
 
       unsigned int readouts = eth_ringbuf->getdatalength(data_index)/sizeof(vmm_nugget); /**< @todo not hardocde */
 
-      opts->stat.stats.rx_readouts += readouts;
+                   opts->stat.stats.rx_readouts
+                    += readouts;
       opts->stat.stats.rx_error_bytes += 0;
 
       while (parser.event_ready()) {
