@@ -2,7 +2,6 @@
 
 #include <cstring>
 #include <nmxgen/ReaderVMM.h>
-//#include <nmxgen/Eventlet.h>
 
 ReaderVMM::ReaderVMM(std::string filename) {
   data.resize(4, 0);
@@ -30,7 +29,7 @@ size_t ReaderVMM::read(char *buf) {
   for (; current_ < limit; ++current_) {
     index[0] = current_;
     dataset_.read(data, slabsize, index);
-
+    
     memcpy(buf, data.data(), psize);
 
     buf += psize;

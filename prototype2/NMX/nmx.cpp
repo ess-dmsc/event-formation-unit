@@ -126,7 +126,7 @@ void NMX::processing_thread(void *args) {
                    eth_ringbuf->getdatalength(data_index));
 
       unsigned int readouts = eth_ringbuf->getdatalength(data_index) /
-                              sizeof(Eventlet); /**< @todo not hardocde */
+                              (sizeof(uint32_t) * 4); /**< @todo not hardocde */
 
       opts->stat.stats.rx_readouts += readouts;
       opts->stat.stats.rx_error_bytes += 0;
