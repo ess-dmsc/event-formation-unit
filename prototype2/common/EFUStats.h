@@ -7,6 +7,8 @@
 
 #pragma once
 
+int a=1;
+
 #include <cinttypes>
 #include <libs/include/Timer.h>
 
