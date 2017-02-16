@@ -7,6 +7,7 @@
 
 #pragma once
 #include <common/EFUStats.h>
+#include <common/NewStats.h>
 #include <cspec/CSPECChanConv.h>
 #include <string>
 

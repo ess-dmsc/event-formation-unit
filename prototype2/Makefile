@@ -9,7 +9,8 @@ endif
 
 VPATH = .. ../libs/include test
 
-progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so cspec2.so
+#progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so cspec2.so
+progs = efu2 cspec.so
 
 library = ../libs/eventlib.a
 
@@ -25,9 +26,10 @@ nmx.so.inc += common/Producer.h
 endif
 
 cspec.so.src =  cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
-cspec.so.src += common/Producer.cpp
+cspec.so.src += common/Producer.cpp common/NewStats.cpp
 cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h common/MultiGridGeometry.h
 cspec.so.inc += gccintel.h common/Producer.h common/EFUStats.h common/Trace.h
+cspec.so.inc += common/NewStats.h
 
 cspec2.so.src =  cspec2/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
 cspec2.so.src += common/Producer.cpp
@@ -41,7 +43,7 @@ efu.src += common/EFUStats.cpp common/StatPublisher.cpp
 efu.src += efu/Server.cpp efu/Parser.cpp cspec/CalibrationFile.cpp
 efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h common/EFUStats.h
 efu.inc += efu/Server.h efu/Parser.h common/Trace.h cspec/CalibrationFile.h
-efu.inc += common/StatPublisher.h
+efu.inc += common/StatPublisher.h common/NewStats.h
 efu.obj = $(efu.src:%.cpp=%.o)
 
 gencspec.src = cspecgen/cspecgen.cpp cspecgen/CspecArgs.cpp cspec/CSPECData.cpp
@@ -70,7 +72,7 @@ doxygen:
 
 all: $(progs)
 	@echo done
-	$(Q)chmod 440 *.so
+	$(Q)chmod 664 *.so
 
 $(efu.obj): $(efu.inc)
 $(gencspec.obj): $(gencspec.inc)
