@@ -21,6 +21,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#define UNUSED __attribute__((unused))
+
 /** @file
  *
  *  @brief CSPEC Detector implementation
@@ -39,10 +41,14 @@ const char *classname = "CSPEC Detector";
 
 class CSPEC : public Detector {
 public:
-  CSPEC();
+  CSPEC(void * UNUSED args);
   void input_thread(void *args);
   void processing_thread(void *args);
   void output_thread(void *args);
+
+  int statsize();
+  int64_t statvalue(size_t index);
+  std::string & statname(size_t index);
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
@@ -63,13 +69,60 @@ private:
   std::mutex eventq_mutex, cout_mutex;
 
   char kafkabuffer[kafka_buffer_size];
+
+  NewStats ns;
+
+  struct {
+    // Input Counters
+    int64_t rx_packets;
+    int64_t rx_bytes;
+    int64_t fifo1_push_errors;
+    int64_t fifo1_free;
+    int64_t pad_a[4]; /**< @todo check alignment*/
+
+    // Processing Counters
+    int64_t rx_readouts;
+    int64_t rx_error_bytes;
+    int64_t rx_discards;
+    int64_t rx_idle1;
+    int64_t geometry_errors;
+    int64_t fifo2_push_errors;
+    int64_t fifo2_free;
+    int64_t pad_b[1]; /**< @todo check alignment */
+
+    // Output Counters
+    int64_t rx_events;
+    int64_t rx_idle2;
+    int64_t tx_bytes;
+  } mystats;
+
 };
 
-CSPEC::CSPEC() {
-  XTRACE(INIT, INF, "Creating CSPEC ringbuffers %d\n",
-         5); /** @todo make this work */
+CSPEC::CSPEC(void * UNUSED args) {
+  //EFUArgs *opts = (EFUArgs *)args;
+
+  XTRACE(INIT, ALW, "Adding stats\n");
+  ns.create("efu2.mg.input.rx_packets", &mystats.rx_packets);
+
+  XTRACE(INIT, ALW, "Creating %d Ethernet ringbuffers of size %d\n",
+         eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
+
+  XTRACE(INIT, ALW, "Creating %d Event ringbuffers of size %d\n",
+         event_buffer_max_entries, event_buffer_size);
   event_ringbuf = new RingBuffer<event_buffer_size>(event_buffer_max_entries);
+}
+
+int CSPEC::statsize() {
+  return ns.size();
+}
+
+int64_t CSPEC::statvalue(size_t index) {
+  return ns.value(index);
+}
+
+std::string & CSPEC::statname(size_t index) {
+  return ns.name(index);
 }
 
 void CSPEC::input_thread(void *args) {
@@ -244,8 +297,8 @@ void CSPEC::output_thread(void *args) {
 
 class CSPECFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create() {
-    return std::shared_ptr<Detector>(new CSPEC);
+  std::shared_ptr<Detector> create(void * opts) {
+    return std::shared_ptr<Detector>(new CSPEC(opts));
   }
 };
 
