@@ -1,6 +1,6 @@
 # Code Snippets and Experiments
 This repository holds code snippets in C++, C and bash for testing ideas
-related to network packet processing and  event processing.
+ related to network packet processing and  event processing.
 
 ## Directories
 The repository contains the following directories
