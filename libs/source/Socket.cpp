@@ -92,7 +92,7 @@ int Socket::send(void *buffer, int len) {
       sendto(s_, buffer, len, 0, (struct sockaddr *)&remote_, sizeof(remote_));
   if (ret < 0) {
     std::cout << "unable to send on socket" << std::endl;
-    perror("sendto");
+    perror("send");
     exit(1); /**< @todo a bit harsh maybe ? */
   }
 
