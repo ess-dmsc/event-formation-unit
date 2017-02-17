@@ -52,10 +52,10 @@ void EFUStats::event_stats() {
   uint64_t pkeps = (stats.rx_readouts - stats_old.rx_readouts) * 1000 / usecs;
 
   printf(" | I - %12" PRIu64 " pkts"
-         " | P - %12" PRIu64 " events, %8" PRIu64 " kev/s, %12" PRIu64
-         " discards, %12" PRIu64 " pix_err, %12" PRIu64 " errors",
+         " | P - %12" PRIu64 " readouts, %8" PRIu64 " kev/s, %12" PRIu64
+         " discards, %12" PRIu64 " pix_err, %12" PRIu64 " errors, %12" PRIu64 " events", 
          stats.rx_packets, stats.rx_readouts, pkeps, stats.rx_discards,
-         stats.geometry_errors, stats.rx_error_bytes);
+         stats.geometry_errors, stats.rx_error_bytes, stats.rx_events);
 }
 
 void EFUStats::fifo_stats() {

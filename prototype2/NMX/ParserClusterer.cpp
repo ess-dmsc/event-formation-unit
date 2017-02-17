@@ -17,7 +17,8 @@ void ParserClusterer::parse(char *buf, size_t size) {
   size_t byteidx = 0;
   for (; byteidx < limit; ++byteidx) {
     memcpy(data.data(), buf, psize);
-    eventlet.from_packet(data);
+    eventlet.read_packet(data);
+
     buf += psize;
 
     backlog_.insert(std::pair<uint64_t, Eventlet>(eventlet.time, eventlet));
