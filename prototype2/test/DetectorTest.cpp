@@ -4,19 +4,21 @@
 #include <common/Detector.h>
 #include <memory>
 
+#define UNUSED __attribute__((unused))
+
 using namespace std;
 
 class TestDetector : public Detector {
 public:
-  TestDetector() { cout << "TestDetector" << endl; };
+  TestDetector(UNUSED void *args) { cout << "TestDetector" << endl; };
   ~TestDetector() { cout << "~TestDetector" << endl; };
 };
 
 class TestDetectorFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create() {
+  std::shared_ptr<Detector> create(void *args) {
     cout << "TestDetectorFactory" << endl;
-    return std::shared_ptr<Detector>(new TestDetector);
+    return std::shared_ptr<Detector>(new TestDetector(args));
   }
 };
 
@@ -26,7 +28,7 @@ TestDetectorFactory Factory;
 
 class DetectorTest : public TestBase {
 protected:
-  virtual void SetUp() { det = Factory.create(); }
+  virtual void SetUp() { det = Factory.create(0); }
   virtual void TearDown() {}
   std::shared_ptr<Detector> det;
   void *dummyargs; // Used for calling thread functions
@@ -36,7 +38,7 @@ TEST_F(DetectorTest, Destructor) {
   std::string output;
   testing::internal::CaptureStdout();
   {
-    std::shared_ptr<Detector> tmp = Factory.create();
+    std::shared_ptr<Detector> tmp = Factory.create(0);
     output = testing::internal::GetCapturedStdout();
     ASSERT_EQ(output, "TestDetectorFactory\nTestDetector\n");
 
