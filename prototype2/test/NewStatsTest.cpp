@@ -8,8 +8,17 @@ class NewStatsTest : public TestBase {};
 TEST_F(NewStatsTest, Constructor) {
   NewStats stats;
   ASSERT_EQ(0, stats.size());
-
   ASSERT_EQ("", stats.name(0));
+}
+
+TEST_F(NewStatsTest, ConstructorDynamic) {
+  auto stats = new NewStats();
+
+  ASSERT_EQ(0, stats->size());
+  ASSERT_EQ("", stats->name(0));
+
+  delete stats;
+  stats = 0;
 }
 
 TEST_F(NewStatsTest, CreateStat) {
