@@ -11,6 +11,8 @@
 #include <unistd.h> // sleep()
 #include <vector>
 
+#define ONE_SECOND_US 1000000U
+
 /**
  * Load detector, launch pipeline threads, then sleep forever
  */
@@ -52,7 +54,7 @@ int main(int argc, char *argv[]) {
       exit(1);
     }
 
-    if (livestats.timeus() >= 1000000U) {
+    if (livestats.timeus() >= ONE_SECOND_US) {
       metrics.publish(&efu_args->stat.stats);
       livestats.now();
       //printf("got here\n"); fflush(stdout);
@@ -60,7 +62,7 @@ int main(int argc, char *argv[]) {
       //printf("Detector stat size: %d\n", sz);
     }
 
-    if (report.timeus() >= 1000000U) {
+    if (report.timeus() >= ONE_SECOND_US) {
       efu_args->stat.report();
       report.now();
     }
