@@ -32,7 +32,7 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 class NMX : public Detector {
 public:
-  NMX(void * args);
+  NMX(void *args);
   void input_thread(void *args);
   void processing_thread(void *args);
 
@@ -68,6 +68,7 @@ private:
     int64_t rx_discards;
     int64_t rx_idle1;
     int64_t rx_events;
+    int64_t tx_bytes;
 
   } ALIGN(64) mystats;
 
@@ -87,7 +88,8 @@ NMX::NMX(void *UNUSED args) {
   ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
   ns.create("processing.rx_discards",          &mystats.rx_discards);
   ns.create("processing.rx_idle",              &mystats.rx_idle1);
-  ns.create("processing.rx_events",            &mystats.rx_events);
+  ns.create("output.rx_events",                &mystats.rx_events);
+  ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
 
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
@@ -224,7 +226,7 @@ void NMX::processing_thread(void *args) {
 
 class NMXFactory : DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(void * args) {
+  std::shared_ptr<Detector> create(void *args) {
     return std::shared_ptr<Detector>(new NMX(args));
   }
 };
