@@ -42,6 +42,8 @@ TEST_F(NewStatsTest, CreateStatPrefix) {
   stats.create(std::string("stat2"), &ctr2);
   ASSERT_EQ(2, stats.size());
   ASSERT_EQ("dmsc.efu.stat2", stats.name(2));
+
+  ASSERT_EQ("", stats.name(3));
 }
 
 TEST_F(NewStatsTest, DuplicateStatPrefix) {
