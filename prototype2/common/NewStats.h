@@ -6,44 +6,47 @@
  *  with names. All counters are int64_t
  */
 
- #pragma once
+#pragma once
 
- #include <string>
- #include <vector>
- #include <cinttypes>
+#include <cinttypes>
+#include <string>
+#include <vector>
 
- class StatTuple {
- public:
-   /** @brief holds a name, value pair defining a 'stat' */
-   StatTuple(std::string n, int64_t * ctr) : name(n), counter(ctr) {};
-   std::string name;
-   int64_t * counter;
- };
+class StatTuple {
+public:
+  /** @brief holds a name, value pair defining a 'stat' */
+  StatTuple(std::string n, int64_t *ctr) : name(n), counter(ctr){};
+  std::string name;
+  int64_t *counter;
+};
 
- class NewStats {
- public:
-   /** @brief null constructor */
-   NewStats();
+class NewStats {
+public:
+  /** @brief null constructor */
+  NewStats();
 
-   /** @brief constructor with prefix added */
-   NewStats(std::string prefix);
+  /** @brief constructor with prefix added */
+  NewStats(std::string prefix);
 
-   /** @brief creates a 'stat' entry with name and addres for counter
-    * duplicates are not allowed.
-    */
-   int create(std::string statname, int64_t * counter);
+  /** @brief destructor deletes stats list */
+  ~NewStats();
 
-   /** @brief returns the number of registered stats */
-   size_t size();
+  /** @brief creates a 'stat' entry with name and addres for counter
+   * duplicates are not allowed.
+   */
+  int create(std::string statname, int64_t *counter);
 
-   /** @brief returns the name of stat based on index */
-   std::string & name(size_t index);
+  /** @brief returns the number of registered stats */
+  size_t size();
 
-   /** @brief return value of stat based on index */
-   int64_t value(size_t index);
+  /** @brief returns the name of stat based on index */
+  std::string &name(size_t index);
 
- private:
-   std::string prefix{""}; /**< prepend to all stat names */
-   std::vector<StatTuple *> stats; /**< holds all registered stats */
-   std::string nostat{""}; /**< used to return when stats are not available */
- };
+  /** @brief return value of stat based on index */
+  int64_t value(size_t index);
+
+private:
+  std::string prefix{""};         /**< prepend to all stat names */
+  std::vector<StatTuple *> stats; /**< holds all registered stats */
+  std::string nostat{""}; /**< used to return when stats are not available */
+};

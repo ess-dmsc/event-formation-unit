@@ -4,6 +4,13 @@
 
 NewStats::NewStats() {}
 
+NewStats::~NewStats() {
+  for (auto s : stats) {
+    delete s;
+  }
+  stats.clear();
+}
+
 NewStats::NewStats(std::string pre) : prefix(pre) {}
 
 int NewStats::create(std::string statname, int64_t *counter) {
