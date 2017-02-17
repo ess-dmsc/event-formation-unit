@@ -152,6 +152,26 @@ TEST_F(CspecDataTest, CreateEventValidPixel) {
   EXPECT_EQ(buffer[5], (char)0x0);
   EXPECT_EQ(buffer[6], (char)0x00);
   EXPECT_EQ(buffer[7], (char)0x00);
+
+  std::fill_n(buffer, sizeof(buffer), 0x00);
+  data.module = 1;
+  data.time = 0xaabbccdd;
+  data.d[2] = 5105;
+  data.d[6] = 1;
+
+  ret = dat->createevent(data, buffer);
+
+  ASSERT_EQ(ret, 0);
+
+  ASSERT_EQ(buffer[0], (char)0xdd);
+  ASSERT_EQ(buffer[1], (char)0xcc);
+  ASSERT_EQ(buffer[2], (char)0xbb);
+  ASSERT_EQ(buffer[3], (char)0xaa);
+
+  EXPECT_EQ(buffer[4], (char)0x2); // pixelid 2
+  EXPECT_EQ(buffer[5], (char)0x0);
+  EXPECT_EQ(buffer[6], (char)0x00);
+  EXPECT_EQ(buffer[7], (char)0x00);
 }
 
 int main(int argc, char **argv) {

@@ -15,7 +15,9 @@ CSPECChanConvTest: test/CSPECChanConvTest.cpp cspec/CSPECChanConv.cpp cspec/CSPE
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) test/CSPECChanConvTest.cpp cspec/CSPECChanConv.cpp -o $@ $(ldflags_test)
 
-CSPECDataTest:  test/CSPECDataTest.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp cspec/CSPECData.h cspec/CSPECChanConv.h test/CSPECTestData.h
+CSPECDataTest:  test/CSPECDataTest.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp \
+     cspec/CSPECData.h cspec/CSPECChanConv.h test/CSPECTestData.h \
+     common/MultiGridGeometry.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) test/CSPECDataTest.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp -o $@ $(ldflags_test)
 
