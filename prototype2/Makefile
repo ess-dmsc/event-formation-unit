@@ -9,8 +9,7 @@ endif
 
 VPATH = .. ../libs/include test
 
-#progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so cspec2.so
-progs = efu2 cspec.so
+progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so cspec2.so
 
 library = ../libs/eventlib.a
 
@@ -19,7 +18,9 @@ udp.so.src = udp/udp.cpp
 udp.so.inc = common/Detector.h
 
 nmx.so.src = NMX/nmx.cpp nmxgen/ParserClusterer.cpp nmxgen/EventNMX.cpp
-nmx.so.inc = common/Detector.h nmxgen/ParserClusterer.h nmxgen/EventNMX.h nmxgen/vmm_nugget.h
+nmx.so.src += common/NewStats.cpp
+nmx.so.inc = common/Detector.h nmxgen/ParserClusterer.h nmxgen/EventNMX.h
+nms.so.inc += nmxgen/vmm_nugget.h ommon/NewStats.h
 ifndef NOKAFKA
 nmx.so.src += common/Producer.cpp
 nmx.so.inc += common/Producer.h
@@ -28,20 +29,20 @@ endif
 cspec.so.src =  cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
 cspec.so.src += common/Producer.cpp common/NewStats.cpp
 cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h common/MultiGridGeometry.h
-cspec.so.inc += gccintel.h common/Producer.h common/EFUStats.h common/Trace.h
+cspec.so.inc += gccintel.h common/Producer.h common/Trace.h
 cspec.so.inc += common/NewStats.h
 
-cspec2.so.src =  cspec2/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
-cspec2.so.src += common/Producer.cpp
+cspec2.so.src =  cspec2/cspec2.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
+cspec2.so.src += common/Producer.cpp common/NewStats.cpp
 cspec2.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h common/MultiGridGeometry.h
-cspec2.so.inc += gccintel.h common/Producer.h common/EFUStats.h common/Trace.h
+cspec2.so.inc += gccintel.h common/Producer.h common/Trace.h common/NewStats.h
 
 
 # For each standalone program add .src and .inc and .obj below
 efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp
-efu.src += common/EFUStats.cpp common/StatPublisher.cpp
+efu.src += common/StatPublisher.cpp
 efu.src += efu/Server.cpp efu/Parser.cpp cspec/CalibrationFile.cpp
-efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h common/EFUStats.h
+efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h
 efu.inc += efu/Server.h efu/Parser.h common/Trace.h cspec/CalibrationFile.h
 efu.inc += common/StatPublisher.h common/NewStats.h
 efu.obj = $(efu.src:%.cpp=%.o)

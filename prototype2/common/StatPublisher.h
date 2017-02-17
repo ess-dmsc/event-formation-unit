@@ -7,15 +7,17 @@
 
 #pragma once
 
-#include <common/EFUStats.h>
+#include <common/Detector.h>
 #include <libs/include/Socket.h>
 #include <string>
 
 class StatPublisher {
 public:
+  /** @todo document */
   StatPublisher(std::string ip, int port);
 
-  void publish(EFUStats::stat_t *s);
+  /** @todo document */
+  void publish(std::shared_ptr<Detector> detector);
 
 private:
   TCPClient *statdb;

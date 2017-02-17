@@ -14,85 +14,6 @@
 #define UNUSED __attribute__((unused))
 
 //=============================================================================
-static int stat_mask_set(std::vector<std::string> cmdargs, char UNUSED *output,
-                         unsigned int UNUSED *obytes) {
-  XTRACE(CMD, INF, "STAT_MASK_SET\n");
-  if (cmdargs.size() != 2) {
-    XTRACE(CMD, WAR, "STAT_MASK_SET: wrong number of arguments\n");
-    return -Parser::EBADARGS;
-  }
-  unsigned int mask = (unsigned int)std::stoul(cmdargs.at(1), nullptr, 0);
-  XTRACE(CMD, INF, "STAT_MASK: 0x%08x\n", mask);
-  efu_args->stat.set_mask(mask);
-  //*obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
-  return Parser::OK;
-}
-
-//=============================================================================
-static int stat_input(std::vector<std::string> cmdargs, char *output,
-                      unsigned int *obytes) {
-  XTRACE(CMD, INF, "STAT_INPUT\n");
-  if (cmdargs.size() != 1) {
-    XTRACE(CMD, WAR, "STAT_INPUT: wrong number of arguments\n");
-    return -Parser::EBADARGS;
-  }
-  *obytes = snprintf(
-      output, SERVER_BUFFER_SIZE,
-      "STAT_INPUT %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64,
-      efu_args->stat.stats.rx_packets, efu_args->stat.stats.rx_bytes,
-      efu_args->stat.stats.fifo1_push_errors, efu_args->stat.stats.fifo1_free);
-  return Parser::OK;
-}
-
-//=============================================================================
-static int stat_processing(std::vector<std::string> cmdargs, char *output,
-                           unsigned int *obytes) {
-  XTRACE(CMD, INF, "STAT_PROCESSING\n");
-  if (cmdargs.size() != 1) {
-    XTRACE(CMD, WAR, "STAT_PROCESSING: wrong number of arguments\n");
-    return -Parser::EBADARGS;
-  }
-  *obytes = snprintf(
-      output, SERVER_BUFFER_SIZE,
-      "STAT_PROCESSING %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64 " %" PRIu64
-      " %" PRIu64 " %" PRIu64,
-      efu_args->stat.stats.rx_readouts, efu_args->stat.stats.rx_error_bytes,
-      efu_args->stat.stats.rx_discards, efu_args->stat.stats.rx_idle1,
-      efu_args->stat.stats.fifo2_push_errors, efu_args->stat.stats.fifo2_free,
-      efu_args->stat.stats.geometry_errors);
-  return Parser::OK;
-}
-
-//=============================================================================
-static int stat_output(std::vector<std::string> cmdargs, char *output,
-                       unsigned int *obytes) {
-  XTRACE(CMD, INF, "STAT_OUTPUT\n");
-  if (cmdargs.size() != 1) {
-    XTRACE(CMD, WAR, "STAT_OUTPUT: wrong number of arguments\n");
-    return -Parser::EBADARGS;
-  }
-  *obytes =
-      snprintf(output, SERVER_BUFFER_SIZE,
-               "STAT_OUTPUT %" PRIu64 " %" PRIu64 " %" PRIu64,
-               efu_args->stat.stats.rx_events, efu_args->stat.stats.rx_idle2,
-               efu_args->stat.stats.tx_bytes);
-  return Parser::OK;
-}
-
-//=============================================================================
-static int stat_reset(std::vector<std::string> cmdargs, char UNUSED *output,
-                      unsigned int UNUSED *obytes) {
-  XTRACE(CMD, INF, "STAT_RESET\n");
-  if (cmdargs.size() != 1) {
-    XTRACE(CMD, WAR, "STAT_RESET: wrong number of arguments\n");
-    return -Parser::EBADARGS;
-  }
-  efu_args->stat.clear();
-  //*obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
-  return Parser::OK;
-}
-
-//=============================================================================
 static int cspec_load_calib(std::vector<std::string> cmdargs,
                             UNUSED char *output, UNUSED unsigned int *obytes) {
   XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
@@ -142,11 +63,8 @@ static int cspec_show_calib(std::vector<std::string> cmdargs, char *output,
 /******************************************************************************/
 /******************************************************************************/
 Parser::Parser() {
-  registercmd(std::string("STAT_MASK_SET"), stat_mask_set);
-  registercmd(std::string("STAT_INPUT"), stat_input);
-  registercmd(std::string("STAT_PROCESSING"), stat_processing);
-  registercmd(std::string("STAT_OUTPUT"), stat_output);
-  registercmd(std::string("STAT_RESET"), stat_reset);
+  // registercmd(std::string("STAT_GET_NAMEVAL"), stat_get_nameval);
+  // registercmd(std::string("STAT_GET_COUNT"), stat_get_count);
   registercmd(std::string("CSPEC_LOAD_CALIB"), cspec_load_calib);
   registercmd(std::string("CSPEC_SHOW_CALIB"), cspec_show_calib);
 }

@@ -6,7 +6,6 @@
  */
 
 #pragma once
-#include <common/EFUStats.h>
 #include <common/NewStats.h>
 #include <cspec/CSPECChanConv.h>
 #include <string>
@@ -41,7 +40,7 @@ public:
   int reduction{80}; /**< data tuples in a cluster */
 
   // Runtime Stats
-  EFUStats stat;
+  //EFUStats stat;
   unsigned int reportmask{0x2};
 
   // IPC data for communicating between main and threads
