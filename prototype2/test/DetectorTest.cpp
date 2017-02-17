@@ -69,6 +69,19 @@ TEST_F(DetectorTest, DefaultThreads) {
   ASSERT_EQ(output, "no output stage\n");
 }
 
+TEST_F(DetectorTest, StatAPI) {
+  int res = det->statsize();
+  ASSERT_EQ(res, 0);
+
+  int64_t val = det->statvalue(1);
+  ASSERT_EQ(val, -1);
+  val = det->statvalue(0);
+  ASSERT_EQ(val, -1);
+
+  auto name = det->statname(1);
+  ASSERT_EQ("", name);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

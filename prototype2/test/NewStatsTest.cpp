@@ -84,6 +84,23 @@ TEST_F(NewStatsTest, DuplicateStat) {
   ASSERT_EQ(1, stats.size());
 }
 
+TEST_F(NewStatsTest, StatValue) {
+  NewStats stats;
+  int64_t ctr1 = 0;
+
+  int res = stats.create(std::string("stat1"), &ctr1);
+  ASSERT_EQ(0, res);
+  ASSERT_EQ(1, stats.size());
+
+  ASSERT_EQ(ctr1, stats.value(1));
+
+  ctr1 = INT64_MAX;
+  ASSERT_EQ(INT64_MAX, stats.value(1));
+
+  ctr1++;
+  ASSERT_EQ(INT64_MIN, stats.value(1));
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
