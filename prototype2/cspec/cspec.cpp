@@ -1,5 +1,10 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+/** @file
+ *
+ *  @brief CSPEC Detector implementation
+ */
+
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/MultiGridGeometry.h>
@@ -22,11 +27,8 @@
 #include <unistd.h>
 
 #define UNUSED __attribute__((unused))
-
-/** @file
- *
- *  @brief CSPEC Detector implementation
- */
+#define ALIGN(x) __attribute__((aligned(x)))
+//#define ALIGN(x)
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_CRI
@@ -34,21 +36,21 @@
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
-const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
+const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this for time
 
 /** ----------------------------------------------------- */
 const char *classname = "CSPEC Detector";
 
 class CSPEC : public Detector {
 public:
-  CSPEC(void * UNUSED args);
+  CSPEC(void *UNUSED args);
   void input_thread(void *args);
   void processing_thread(void *args);
   void output_thread(void *args);
 
   int statsize();
   int64_t statvalue(size_t index);
-  std::string & statname(size_t index);
+  std::string &statname(size_t index);
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
@@ -70,7 +72,7 @@ private:
 
   char kafkabuffer[kafka_buffer_size];
 
-  NewStats ns;
+  NewStats ns{"efu2.cspec."};
 
   struct {
     // Input Counters
@@ -94,15 +96,31 @@ private:
     int64_t rx_events;
     int64_t rx_idle2;
     int64_t tx_bytes;
-  } mystats;
+  } ALIGN(64) mystats;
 
+  EFUArgs *opts;
 };
 
-CSPEC::CSPEC(void * UNUSED args) {
-  //EFUArgs *opts = (EFUArgs *)args;
+CSPEC::CSPEC(void *UNUSED args) {
+  opts = (EFUArgs *)args;
 
   XTRACE(INIT, ALW, "Adding stats\n");
-  ns.create("efu2.mg.input.rx_packets", &mystats.rx_packets);
+  // clang-format off
+  ns.create("input.rx_packets",                &mystats.rx_packets);
+  ns.create("input.rx_bytes",                  &mystats.rx_bytes);
+  ns.create("input.i2pfifo_dropped",           &mystats.fifo1_push_errors);
+  ns.create("input.i2pfifo_free",              &mystats.fifo1_free);
+  ns.create("processing.rx_readouts",          &mystats.rx_readouts);
+  ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
+  ns.create("processing.rx_discards",          &mystats.rx_discards);
+  ns.create("processing.rx_idle",              &mystats.rx_idle1);
+  ns.create("processing.rx_geometry_errors",   &mystats.geometry_errors);
+  ns.create("processing.p2ofifo_dropped",      &mystats.fifo2_push_errors);
+  ns.create("processing.p2ofifo_free",         &mystats.fifo2_free);
+  ns.create("output.rx_events",                &mystats.rx_events);
+  ns.create("output.rx_idle",                  &mystats.rx_idle2);
+  ns.create("output.tx_bytes",                 &mystats.tx_bytes);
+  // clang-format on
 
   XTRACE(INIT, ALW, "Creating %d Ethernet ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
@@ -113,20 +131,13 @@ CSPEC::CSPEC(void * UNUSED args) {
   event_ringbuf = new RingBuffer<event_buffer_size>(event_buffer_max_entries);
 }
 
-int CSPEC::statsize() {
-  return ns.size();
-}
+int CSPEC::statsize() { return ns.size(); }
 
-int64_t CSPEC::statvalue(size_t index) {
-  return ns.value(index);
-}
+int64_t CSPEC::statvalue(size_t index) { return ns.value(index); }
 
-std::string & CSPEC::statname(size_t index) {
-  return ns.name(index);
-}
+std::string &CSPEC::statname(size_t index) { return ns.name(index); }
 
-void CSPEC::input_thread(void *args) {
-  EFUArgs *opts = (EFUArgs *)args;
+void CSPEC::input_thread(void UNUSED *args) {
 
   /** Connection setup */
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
@@ -146,16 +157,16 @@ void CSPEC::input_thread(void *args) {
     if ((rdsize = cspecdata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                     eth_ringbuf->getmaxbufsize())) > 0) {
       XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
-      opts->stat.stats.rx_packets++;
-      opts->stat.stats.rx_bytes += rdsize;
+      mystats.rx_packets++;
+      mystats.rx_bytes += rdsize;
       eth_ringbuf->setdatalength(eth_index, rdsize);
 
-      opts->stat.stats.fifo1_free = input2proc_fifo.free();
+      mystats.fifo1_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
-        opts->stat.stats.fifo1_push_errors++;
+        mystats.fifo1_push_errors++;
 
         XTRACE(INPUT, WAR, "Overflow :%" PRIu64 "\n",
-               opts->stat.stats.fifo1_push_errors);
+               mystats.fifo1_push_errors);
       } else {
         eth_ringbuf->nextbuffer();
       }
@@ -174,9 +185,7 @@ void CSPEC::input_thread(void *args) {
   }
 }
 
-void CSPEC::processing_thread(void *args) {
-  EFUArgs *opts = (EFUArgs *)args;
-  assert(opts != NULL);
+void CSPEC::processing_thread(void UNUSED *args) {
 
   CSPECChanConv conv;
   conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear look-up table
@@ -200,17 +209,17 @@ void CSPEC::processing_thread(void *args) {
       conv.load_calibration(opts->wirecal, opts->gridcal);
     }
 
-    opts->stat.stats.fifo2_free = proc2output_fifo.free();
+    mystats.fifo2_free = proc2output_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
-      opts->stat.stats.rx_idle1++;
+      mystats.rx_idle1++;
       usleep(10);
     } else {
       dat.receive(eth_ringbuf->getdatabuffer(data_index),
                   eth_ringbuf->getdatalength(data_index));
-      opts->stat.stats.rx_error_bytes += dat.error;
-      opts->stat.stats.rx_readouts +=
+      mystats.rx_error_bytes += dat.error;
+      mystats.rx_readouts +=
           dat.elems; /**< @todo both valid and invalid events */
-      opts->stat.stats.rx_discards += dat.input_filter();
+      mystats.rx_discards += dat.input_filter();
 
       for (unsigned int id = 0; id < dat.elems; id++) {
         auto d = dat.data[id];
@@ -218,14 +227,13 @@ void CSPEC::processing_thread(void *args) {
           unsigned int event_index = event_ringbuf->getindex();
           if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) <
               0) {
-            opts->stat.stats.geometry_errors++;
-            assert(opts->stat.stats.geometry_errors <=
-                   opts->stat.stats.rx_readouts);
+            mystats.geometry_errors++;
+            assert(mystats.geometry_errors <= mystats.rx_readouts);
           } else {
             if (proc2output_fifo.push(event_index) == false) {
-              opts->stat.stats.fifo2_push_errors++;
+              mystats.fifo2_push_errors++;
               XTRACE(PROCESS, WAR, "Overflow :%" PRIu64 "\n",
-                     opts->stat.stats.fifo2_push_errors);
+                     mystats.fifo2_push_errors);
             } else {
               event_ringbuf->nextbuffer();
             }
@@ -246,8 +254,7 @@ void CSPEC::processing_thread(void *args) {
   }
 }
 
-void CSPEC::output_thread(void *args) {
-  EFUArgs *opts = (EFUArgs *)args;
+void CSPEC::output_thread(void UNUSED *args) {
 
 #ifndef NOKAFKA
   Producer producer(opts->broker, true, "C-SPEC_detector");
@@ -260,13 +267,13 @@ void CSPEC::output_thread(void *args) {
   uint64_t produce = 0;
   while (1) {
     if (proc2output_fifo.pop(event_index) == false) {
-      opts->stat.stats.rx_idle2++;
+      mystats.rx_idle2++;
       usleep(10);
     } else {
       std::memcpy(kafkabuffer + produce,
                   event_ringbuf->getdatabuffer(event_index),
                   8 /**< @todo not hardcode */);
-      opts->stat.stats.rx_events++;
+      mystats.rx_events++;
       produce += 12; /**< @todo should match actual data size */
     }
 
@@ -275,7 +282,7 @@ void CSPEC::output_thread(void *args) {
       assert(produce < kafka_buffer_size);
 #ifndef NOKAFKA
       producer.produce(kafkabuffer, kafka_buffer_size);
-      opts->stat.stats.tx_bytes += kafka_buffer_size;
+      mystats.tx_bytes += kafka_buffer_size;
 #endif
       produce = 0;
     }
@@ -297,7 +304,7 @@ void CSPEC::output_thread(void *args) {
 
 class CSPECFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(void * opts) {
+  std::shared_ptr<Detector> create(void *opts) {
     return std::shared_ptr<Detector>(new CSPEC(opts));
   }
 };

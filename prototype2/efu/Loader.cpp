@@ -9,7 +9,7 @@ using namespace std;
 
 Loader::~Loader() { dlclose(handle); }
 
-Loader::Loader(const std::string lib, void * args) {
+Loader::Loader(const std::string lib, void *args) {
   char **name;
   const char *libname = ("./" + lib + ".so").c_str();
   DetectorFactory *myFactory;

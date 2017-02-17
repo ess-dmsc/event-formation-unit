@@ -10,12 +10,16 @@
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
-#include <libs/include/Timer.h>
 #include <libs/include/TSCTimer.h>
-#include <nmxgen/ParserClusterer.h>
+#include <libs/include/Timer.h>
 #include <memory>
+#include <nmxgen/ParserClusterer.h>
 #include <stdio.h>
 #include <unistd.h>
+
+#define UNUSED __attribute__((unused))
+#define ALIGN(x) __attribute__((aligned(x)))
+//#define ALIGN(x)
 
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
@@ -28,9 +32,13 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 class NMX : public Detector {
 public:
-  NMX();
+  NMX(void * args);
   void input_thread(void *args);
   void processing_thread(void *args);
+
+  int statsize();
+  int64_t statvalue(size_t index);
+  std::string &statname(size_t index);
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
@@ -43,15 +51,56 @@ private:
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
   char kafkabuffer[kafka_buffer_size];
+
+  NewStats ns{"efu2.nmx."};
+
+  struct {
+    // Input Counters
+    int64_t rx_packets;
+    int64_t rx_bytes;
+    int64_t fifo1_push_errors;
+    int64_t fifo1_free;
+    int64_t pad_a[4]; /**< @todo check alignment*/
+
+    // Processing Counters
+    int64_t rx_readouts;
+    int64_t rx_error_bytes;
+    int64_t rx_discards;
+    int64_t rx_idle1;
+    int64_t rx_events;
+
+  } ALIGN(64) mystats;
+
+  EFUArgs *opts;
 };
 
+NMX::NMX(void *UNUSED args) {
+  opts = (EFUArgs *)args;
 
-NMX::NMX() {
+  XTRACE(INIT, ALW, "Adding stats\n");
+  // clang-format off
+  ns.create("input.rx_packets",                &mystats.rx_packets);
+  ns.create("input.rx_bytes",                  &mystats.rx_bytes);
+  ns.create("input.i2pfifo_dropped",           &mystats.fifo1_push_errors);
+  ns.create("input.i2pfifo_free",              &mystats.fifo1_free);
+  ns.create("processing.rx_readouts",          &mystats.rx_readouts);
+  ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
+  ns.create("processing.rx_discards",          &mystats.rx_discards);
+  ns.create("processing.rx_idle",              &mystats.rx_idle1);
+  ns.create("processing.rx_events",            &mystats.rx_events);
+  // clang-format on
+
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
-      eth_buffer_max_entries, eth_buffer_size);
+         eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
   assert(eth_ringbuf != 0);
 }
+
+int NMX::statsize() { return ns.size(); }
+
+int64_t NMX::statvalue(size_t index) { return ns.value(index); }
+
+std::string &NMX::statname(size_t index) { return ns.name(index); }
 
 void NMX::input_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
@@ -72,18 +121,18 @@ void NMX::input_thread(void *args) {
 
     /** this is the processing step */
     if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
-                                    eth_ringbuf->getmaxbufsize())) > 0) {
+                                  eth_ringbuf->getmaxbufsize())) > 0) {
       XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
-      opts->stat.stats.rx_packets++;
-      opts->stat.stats.rx_bytes += rdsize;
+      mystats.rx_packets++;
+      mystats.rx_bytes += rdsize;
       eth_ringbuf->setdatalength(eth_index, rdsize);
 
-      opts->stat.stats.fifo1_free = input2proc_fifo.free();
+      mystats.fifo1_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
-        opts->stat.stats.fifo1_push_errors++;
+        mystats.fifo1_push_errors++;
 
         XTRACE(INPUT, WAR, "Overflow :%" PRIu64 "\n",
-               opts->stat.stats.fifo1_push_errors);
+               mystats.fifo1_push_errors);
       } else {
         eth_ringbuf->nextbuffer();
       }
@@ -102,14 +151,13 @@ void NMX::input_thread(void *args) {
   }
 }
 
-
 void NMX::processing_thread(void *args) {
   EFUArgs *opts = (EFUArgs *)args;
   assert(opts != NULL);
 
-  #ifndef NOKAFKA
-    Producer producer(opts->broker, true, "NMX_detector");
-  #endif
+#ifndef NOKAFKA
+  Producer producer(opts->broker, true, "NMX_detector");
+#endif
 
   ParserClusterer parser;
 
@@ -117,29 +165,30 @@ void NMX::processing_thread(void *args) {
   TSCTimer report_timer;
 
   unsigned int data_index;
-  int evtoff=0;
+  int evtoff = 0;
   while (1) {
-    opts->stat.stats.fifo1_free = input2proc_fifo.free();
+    mystats.fifo1_free = input2proc_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
-      opts->stat.stats.rx_idle1++;
+      mystats.rx_idle1++;
       usleep(10);
     } else {
       parser.parse(eth_ringbuf->getdatabuffer(data_index),
-                  eth_ringbuf->getdatalength(data_index));
+                   eth_ringbuf->getdatalength(data_index));
 
-      unsigned int readouts = eth_ringbuf->getdatalength(data_index)/12; /**< @todo not hardocde */
+      unsigned int readouts = eth_ringbuf->getdatalength(data_index) /
+                              12; /**< @todo not hardocde */
 
-      opts->stat.stats.rx_readouts += readouts;
-      opts->stat.stats.rx_error_bytes += 0;
-      opts->stat.stats.rx_discards += 0;
+      mystats.rx_readouts += readouts;
+      mystats.rx_error_bytes += 0;
+      mystats.rx_discards += 0;
 
       while (parser.event_ready()) {
         auto event = parser.get();
         event.analyze(true, 3, 7);
         if (event.good) {
-          //image[c2d(static_cast<uint32_t>(event.x.center),
+          // image[c2d(static_cast<uint32_t>(event.x.center),
           //          static_cast<uint32_t>(event.y.center))]++;
-          opts->stat.stats.rx_events++;
+          mystats.rx_events++;
           int time = 42;
           int pixelid = (int)event.x.center + (int)event.y.center * 256;
 
@@ -149,11 +198,11 @@ void NMX::processing_thread(void *args) {
 
           if (evtoff >= 100000 - 20) {
             assert(evtoff < kafka_buffer_size);
-      #ifndef NOKAFKA
+#ifndef NOKAFKA
             producer.produce(kafkabuffer, evtoff);
-            opts->stat.stats.tx_bytes += evtoff;
-      #endif
-            evtoff=0;
+            mystats.tx_bytes += evtoff;
+#endif
+            evtoff = 0;
           }
         }
       }
@@ -175,8 +224,8 @@ void NMX::processing_thread(void *args) {
 
 class NMXFactory : DetectorFactory {
 public:
-  std::shared_ptr<Detector> create() {
-    return std::shared_ptr<Detector>(new NMX);
+  std::shared_ptr<Detector> create(void * args) {
+    return std::shared_ptr<Detector>(new NMX(args));
   }
 };
 

@@ -4,27 +4,26 @@
 
 NewStats::NewStats() {}
 
-int NewStats::create(std::string statname, int64_t * counter) {
- for (auto & s : stats) {
-   if (s->name == statname || s->counter == counter) {
-     return -1;
-   }
- }
+NewStats::NewStats(std::string pre) : prefix(pre) {}
 
- auto stat = new StatTuple();
- stat->name = statname;
- stat->counter = counter;
- stats.push_back(stat);
- return 0;
+int NewStats::create(std::string statname, int64_t *counter) {
+  auto pfname = prefix + statname;
+  for (auto s : stats) {
+    if (s->name == pfname || s->counter == counter) {
+      return -1;
+    }
+  }
+  stats.push_back(new StatTuple(pfname, counter));
+  return 0;
 }
 
-size_t NewStats::size() {return stats.size(); }
+size_t NewStats::size() { return stats.size(); }
 
-std::string & NewStats::name(size_t index) {
- if (index > stats.size() || index < 1) {
-   return nostat;
- }
- return stats[index - 1]->name;
+std::string &NewStats::name(size_t index) {
+  if (index > stats.size() || index < 1) {
+    return nostat;
+  }
+  return stats[index - 1]->name;
 }
 
 int64_t NewStats::value(size_t index) {

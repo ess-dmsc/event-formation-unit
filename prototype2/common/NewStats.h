@@ -3,7 +3,7 @@
 /** @file
  *
  *  @brief Class for registering stat counters and associating them
- *  with names.
+ *  with names. All counters are int64_t
  */
 
  #pragma once
@@ -14,28 +14,36 @@
 
  class StatTuple {
  public:
+   /** @brief holds a name, value pair defining a 'stat' */
+   StatTuple(std::string n, int64_t * ctr) : name(n), counter(ctr) {};
    std::string name;
    int64_t * counter;
  };
 
  class NewStats {
  public:
-   /** @todo document */
+   /** @brief null constructor */
    NewStats();
 
-   /** @todo document */
+   /** @brief constructor with prefix added */
+   NewStats(std::string prefix);
+
+   /** @brief creates a 'stat' entry with name and addres for counter
+    * duplicates are not allowed.
+    */
    int create(std::string statname, int64_t * counter);
 
-   /** @todo document */
+   /** @brief returns the number of registered stats */
    size_t size();
 
-   /** @todo document */
+   /** @brief returns the name of stat based on index */
    std::string & name(size_t index);
 
-   /** @todo document */
+   /** @brief return value of stat based on index */
    int64_t value(size_t index);
 
  private:
-   std::vector<StatTuple *> stats;
-   std::string nostat{""};
+   std::string prefix{""}; /**< prepend to all stat names */
+   std::vector<StatTuple *> stats; /**< holds all registered stats */
+   std::string nostat{""}; /**< used to return when stats are not available */
  };

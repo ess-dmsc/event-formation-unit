@@ -24,18 +24,9 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  efu_args->stat.set_mask(efu_args->reportmask);
-
   XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", efu_args->det.c_str());
 
   Loader loader(efu_args->det, (void *)efu_args);
-
-  int sz = loader.detector->statsize();
-  printf("Detector stat size: %d\n", sz);
-  for (int i = 1; i <= sz; i++) {
-    printf("stat %s, value %" PRIi64 "\n", loader.detector->statname(i).c_str(),
-       loader.detector->statvalue(i));
-  }
 
   std::vector<int> cpus = {efu_args->cpustart, efu_args->cpustart + 1,
                            efu_args->cpustart + 2};
@@ -46,25 +37,17 @@ int main(int argc, char *argv[]) {
   Parser cmdParser;
   Server cmdAPI(8888, cmdParser);
 
-  Timer stop, report, livestats;
+  Timer stop, livestats;
   while (1) {
-    if (stop.timeus() >= efu_args->stopafter * 1000000LU) {
+    if (stop.timeus() >= efu_args->stopafter * ONE_SECOND_US) {
       sleep(2);
       XTRACE(MAIN, ALW, "Exiting...\n");
       exit(1);
     }
 
     if (livestats.timeus() >= ONE_SECOND_US) {
-      metrics.publish(&efu_args->stat.stats);
+      metrics.publish(loader.detector);
       livestats.now();
-      //printf("got here\n"); fflush(stdout);
-      //int sz = loader.detector->detstats.size();
-      //printf("Detector stat size: %d\n", sz);
-    }
-
-    if (report.timeus() >= ONE_SECOND_US) {
-      efu_args->stat.report();
-      report.now();
     }
 
     cmdAPI.server_poll();
