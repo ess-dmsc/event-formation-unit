@@ -88,6 +88,9 @@ TEST_F(NewStatsTest, StatValue) {
   NewStats stats;
   int64_t ctr1 = 0;
 
+  ASSERT_EQ(-1, stats.value(0));
+  ASSERT_EQ(-1, stats.value(1));
+
   int res = stats.create(std::string("stat1"), &ctr1);
   ASSERT_EQ(0, res);
   ASSERT_EQ(1, stats.size());
