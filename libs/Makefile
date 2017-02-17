@@ -22,7 +22,7 @@ sources = source/Socket.cpp source/Timer.cpp source/Thread.cpp source/TSCTimer.c
 objects = $(sources:%.cpp=%.o)
 library = eventlib.a
 
-testprogs  = PQSpeedTest PQBasicTest PQMinTest CounterTest StatCounterTest
+testprogs  = CounterTest StatCounterTest
 # StatCounterTest
 
 all: $(library) $(hdrs)
@@ -35,15 +35,6 @@ test: $(testprogs)
 
 runtest: test
 	for test in $(testprogs) ; do ./$$test --gtest_output=xml:$$test.xml ; done
-
-PQBasicTest: test/PQ/testmain.cpp test/PQ/PQBasicTest.cpp $(library)
-	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS)  -pthread
-
-PQSpeedTest: test/PQ/testmain.cpp test/PQ/PQSpeedTest.cpp $(library)
-	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS)  -pthread
-
-PQMinTest: test/PQ/testmain.cpp test/PQ/PQMinTest.cpp $(library)
-	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
 
 CounterTest: test/Counter/testmain.cpp test/Counter/CounterTest.cpp $(library)
 	g++ $(CXXFLAGS) $^ -o $@ $(LDFLAGS) -pthread
