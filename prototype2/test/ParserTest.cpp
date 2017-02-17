@@ -21,11 +21,6 @@ static int dummy_command(std::vector<std::string> UNUSED cmdargs,
 
 // clang-format off
 std::vector<std::string> commands {
-  "STAT_INPUT",                     "STAT_INPUT 0 0 0 0",
-  "STAT_PROCESSING",                "STAT_PROCESSING 0 0 0 0 0 0 0",
-  "STAT_OUTPUT",                    "STAT_OUTPUT 0 0 0",
-  "STAT_MASK_SET 0",                "<OK>",
-  "STAT_RESET",                     "<OK>",
   // doesnt work when tests are called outside prototype2/ dir
   "CSPEC_LOAD_CALIB data/cal_zero", "<OK>",
   "CSPEC_SHOW_CALIB",               "wire 0 0x0000, grid 0 0x0000",
@@ -33,12 +28,6 @@ std::vector<std::string> commands {
 };
 
 std::vector<std::string> commands_badargs {
-  "STAT_INPUT all",
-  "STAT_PROCESSING a b",
-  "STAT_OUTPUT stuff",
-  "STAT_MASK_SET",
-  "STAT_MASK_SET 3 4",
-  "STAT_RESET 0",
   "CSPEC_LOAD_CALIB",
   "CSPEC_LOAD_CALIB file1 file2",
   "CSPEC_LOAD_CALIB file_not_exist",
