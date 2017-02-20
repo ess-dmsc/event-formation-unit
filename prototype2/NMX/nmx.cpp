@@ -9,6 +9,7 @@
 #include <common/Trace.h>
 #include <cstring>
 #include <iostream>
+#include <inttypes.h>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
@@ -133,9 +134,6 @@ void NMX::input_thread(void *args) {
       mystats.fifo1_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
         mystats.fifo1_push_errors++;
-
-        XTRACE(INPUT, WAR, "Overflow :%" PRIu64 "\n",
-               mystats.fifo1_push_errors);
       } else {
         eth_ringbuf->nextbuffer();
       }
