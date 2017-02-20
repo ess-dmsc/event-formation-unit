@@ -20,6 +20,9 @@ int main(int argc, char *argv[]) {
 
   efu_args = new EFUArgs(argc, argv);
 
+  //Log::AddLogHandler(new GraylogInterface("somehost.com", 12201));
+  GLOG_INF("Starting efu2");
+
   if (efu_args->stopafter == 0) {
     return 0;
   }

@@ -1,16 +1,15 @@
 ## Prerequisites
 The following libraries and utilities must be installed for full functionality.
-However all are optional. 
+However all are optional.
 
 * Zookeeper
 * Apache Kafka
 * librdkafka - needed for output_thread (can be disabled by NOKAFKA=y)
 * Googletest - needed for 'make test, make runtest' targets
+* HDF5
 * lcov - needed for 'make coverage' target
 * valgrind - needed for 'make valgrind' target
 
-See details about how to start Kafka (if running locally) and Zookeeper
-further down.
 
 ## Build and Run
 
@@ -39,24 +38,19 @@ V | verbose
 COV | instrument for test coverage
 PROF | instrument for profiling (not useful for shared libraries)
 NOKAFKA | removes Kafka dependencies
-GTEST=path_to_gtest | specify an alternative google test library
-
+KAFKAINC| directory for Kafka header files (default /usr/local/include)
+KAFKALIB| directory for Kafka libraries (default /usr/lib64)
+HDF5 | build with support for reading HDF5 files
+GTEST=path_to_gtest | specify an alternative location of google test library (def unset)
 
 Except for GTEST, options are disabled by omission and  enabled by
 assignment. ex: make COV=y
 
-
 __Run in terminal window__
-
-In principle as simple as
-
-`> ./efu2`
-
-However for practical purposes
 
 `> export LD_LIBRARY_PATH=/usr/lib64/ ; ./efu2`
 
-The efu process creates a number of pthreads, currently on cpus 12, 13, 14.
+library path points to librdkafka. The efu process creates a number of pthreads, currently on cpus 12, 13, 14.
 
 
 __Run in another terminal window__
@@ -64,11 +58,6 @@ __Run in another terminal window__
 `> taskset -c 16 ./cspecgen`
 
 Both programs shows help with -h option.
-
-
-If your workstation has less than 16 hyperthreads you need to modify
-the code. This will probably be changed soon.
-
 
 
 ##Zookeeper
