@@ -2,18 +2,28 @@
 #
 
 HDF5=
-HDF5LIB= -L/usr/lib/x86_64-linux-gnu/hdf5/serial
+HDF5INC=/opt/dm_group/usr/include
+HDF5LIB=/opt/dm_group/usr/lib
+
+#on my Mac
+#HDF5INC=/usr/local/include
+#HDF5LIB=/usr/local/lib
+#on my Ubuntu
+
+#HDF5INC=/usr/include/hdf5/serial
+#HDF5LIB=/usr/lib/x86_64-linux-gnu/hdf5/serial
+
 ifdef HDF5
 
 progs += gennmxfile
 
-include+= -I../../h5cc/source
+include+= -I../../h5cc/source -I$(HDF5INC)
 
 gennmxfile.src = nmxgen/nmxfile.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderVMM.cpp NMX/Eventlet.cpp
 gennmxfile.inc = nmxgen/NMXArgs.h nmxgen/ReaderVMM.h NMX/Eventlet.h
 gennmxfile.obj = $(gennmxfile.src:%.cpp=%.o)
 
-ldflags += -L../../h5cc/build -lh5cc $(HDF5LIB) -lhdf5_hl_cpp -lhdf5_cpp -lhdf5
+ldflags += -L../../h5cc/build -lh5cc -L$(HDF5LIB) -lhdf5_hl_cpp -lhdf5_cpp -lhdf5
 
 gennmxfile: $(library) $(gennmxfile.obj) $(gennmxfile.inc)
 	@echo building $@
