@@ -9,7 +9,6 @@
 #include <common/Trace.h>
 #include <cstring>
 #include <iostream>
-#include <inttypes.h>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
