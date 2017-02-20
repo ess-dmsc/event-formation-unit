@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <nmxgen/EventNMX.h>
+#include <NMX/EventNMX.h>
 
-void PlaneNMX::push(const vmm_nugget &e) {
+void PlaneNMX::push(const Eventlet &e) {
   if (!e.adc)
     return;
   if (entries.empty())
@@ -48,7 +48,7 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
   uncert_upper = uspan_max - uspan_min;
 }
 
-void EventNMX::push(const vmm_nugget &e) {
+void EventNMX::push(const Eventlet &e) {
   if (e.plane_id)
     y.push(e);
   else

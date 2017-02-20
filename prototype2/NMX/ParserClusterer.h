@@ -2,14 +2,15 @@
 
 #pragma once
 
-#include<map>
-#include<nmxgen/EventNMX.h>
+#include <NMX/EventNMX.h>
+#include <map>
 
-class ParserClusterer
-{
+class ParserClusterer {
 public:
+  ParserClusterer();
+
   /** @todo Martin document */
-  void parse (char* buf, size_t size);
+  void parse(char *buf, size_t size);
 
   /** @todo Martin document */
   bool event_ready();
@@ -18,5 +19,6 @@ public:
   EventNMX get();
 
 private:
-  std::multimap<uint64_t, vmm_nugget> backlog_; /**< @todo Martin document */
+  std::multimap<uint64_t, Eventlet> backlog_; /**< @todo Martin document */
+  std::vector<uint32_t> data;
 };

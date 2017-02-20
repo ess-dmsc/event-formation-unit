@@ -2,8 +2,8 @@
 #
 
 testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest
-testprogs += CSPECEventTest ParserTest EFUArgsTest CalibrationFileTest
-testprogs += MultiGridGeometryTest NewStatsTest
+testprogs += CSPECEventTest ParserTest EFUArgsTest CalibrationFileTest EFUStatsTest
+testprogs += MultiGridGeometryTest EventletTest NewStatsTest
 
 test: $(testprogs)
 	@echo "done building tests"
@@ -63,6 +63,10 @@ EFUArgsTest: test/EFUArgsTest.cpp common/EFUArgs.cpp common/EFUArgs.h
 NewStatsTest: test/NewStatsTest.cpp common/NewStats.cpp common/NewStats.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) test/NewStatsTest.cpp  common/NewStats.cpp $(library) -o $@ $(ldflags_test)
+
+EventletTest: test/EventletTest.cpp NMX/Eventlet.cpp NMX/Eventlet.h
+	@echo building $@
+	$(Q)g++ $(cxxflags_test) test/EventletTest.cpp  NMX/Eventlet.cpp $(library) -o $@ $(ldflags_test)
 
 coverage:
 	$(Q)gcov -r -b -c *.gcda

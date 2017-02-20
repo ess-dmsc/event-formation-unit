@@ -1,5 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <NMX/ParserClusterer.h>
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
@@ -13,7 +14,7 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
-#include <nmxgen/ParserClusterer.h>
+#include <NMX/ParserClusterer.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -178,11 +179,10 @@ void NMX::processing_thread(void *args) {
                    eth_ringbuf->getdatalength(data_index));
 
       unsigned int readouts = eth_ringbuf->getdatalength(data_index) /
-                              12; /**< @todo not hardocde */
+                              (sizeof(uint32_t) * 4); /**< @todo not hardocde */
 
       mystats.rx_readouts += readouts;
       mystats.rx_error_bytes += 0;
-      mystats.rx_discards += 0;
 
       while (parser.event_ready()) {
         auto event = parser.get();
@@ -191,21 +191,25 @@ void NMX::processing_thread(void *args) {
           // image[c2d(static_cast<uint32_t>(event.x.center),
           //          static_cast<uint32_t>(event.y.center))]++;
           mystats.rx_events++;
-          int time = 42;
+
+          int time = 42; /**< @todo get time from ? */
           int pixelid = (int)event.x.center + (int)event.y.center * 256;
 
           std::memcpy(kafkabuffer + evtoff, &time, sizeof(time));
           std::memcpy(kafkabuffer + evtoff + 4, &pixelid, sizeof(pixelid));
           evtoff += 8;
 
-          if (evtoff >= 100000 - 20) {
+          if (evtoff >= kafka_buffer_size / 10 - 20) {
             assert(evtoff < kafka_buffer_size);
+
 #ifndef NOKAFKA
             producer.produce(kafkabuffer, evtoff);
             mystats.tx_bytes += evtoff;
 #endif
             evtoff = 0;
           }
+        } else {
+          mystats.rx_discards += event.x.entries.size() + event.y.entries.size();
         }
       }
     }

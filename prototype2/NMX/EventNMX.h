@@ -9,12 +9,12 @@
 
 #include <limits>
 #include <list>
+#include <NMX/Eventlet.h>
 #include <numeric>
 #include <set>
-#include <nmxgen/vmm_nugget.h>
 
 struct PlaneNMX {
-  void push(const vmm_nugget &e);
+  void push(const Eventlet &e);
   void analyze(bool weighted, uint16_t max_timebins, uint16_t max_timedif);
 
   double center;
@@ -23,11 +23,11 @@ struct PlaneNMX {
   uint64_t time_start, time_end;
   double integral;
 
-  std::list<vmm_nugget> entries;
+  std::list<Eventlet> entries;
 };
 
 struct EventNMX {
-  void push(const vmm_nugget &e);
+  void push(const Eventlet &e);
   void analyze(bool weighted, int16_t max_timebins, int16_t max_timedif);
 
   bool good{false};
