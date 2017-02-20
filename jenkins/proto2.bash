@@ -35,8 +35,11 @@ function libs_test()
 
 function prototype()
 {
+  KAFKA_ROOT=../artifacts/librdkafka
+  kafinc=${KAFKA_ROOT}/usr/include
+  kaflib=${KAFKA_ROOT}/usr/lib64
   pushd prototype2
-  make V=y KAFKA_ROOT=../artifacts/librdkafka || errexit "prototype2 build failed"
+  make V=y KAFKAINC=$kafinc KAFKALIB=$kaflib || errexit "prototype2 build failed"
   popd
 }
 

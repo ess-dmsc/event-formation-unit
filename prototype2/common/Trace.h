@@ -6,6 +6,12 @@
  */
 
 #include <cstdio>
+#ifdef GRAYLOG
+#include <graylog_logger/Log.hpp>
+#define GLOG_INF(x) Log::Msg(Severity::Informational, x)
+#else
+#define GLOG_INF(x)
+#endif
 
 /** Add trace groups below - must be powers of two */
 // clang-format off
