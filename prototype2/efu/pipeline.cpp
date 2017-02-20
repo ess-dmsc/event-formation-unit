@@ -20,7 +20,10 @@ int main(int argc, char *argv[]) {
 
   efu_args = new EFUArgs(argc, argv);
 
+#ifdef GRAYLOG
   //Log::AddLogHandler(new GraylogInterface("somehost.com", 12201));
+  Log::SetMinimumSeverity(Severity::Debug);
+#endif
   GLOG_INF("Starting efu2");
 
   if (efu_args->stopafter == 0) {
