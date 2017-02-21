@@ -34,17 +34,34 @@ doxygen | generate doxygen documentation
 
 Option         | Description
 -------------  | -------------
-V | verbose
-COV | instrument for test coverage
-PROF | instrument for profiling (not useful for shared libraries)
-NOKAFKA | removes Kafka dependencies
-KAFKAINC| directory for Kafka header files (default /usr/local/include)
-KAFKALIB| directory for Kafka libraries (default /usr/lib64)
-HDF5 | build with support for reading HDF5 files
-GTEST=path_to_gtest | specify an alternative location of google test library (def unset)
+V              | verbose
+COV            | instrument for test coverage
+PROF           | instrument for profiling (not useful for shared libraries)
+NOKAFKA        | removes Kafka dependencies
+KAFKAINC       | directory for Kafka header files
+KAFKALIB       | directory for Kafka libraries
+HDF5           | build with support for reading HDF5 files
+HDF5INC        | directory for hdf5 header files
+HDF5LIB        | directory for hdf5 libraries
+GTEST=path     | specify an alternative location of google test library (def unset)
 
 Except for GTEST, options are disabled by omission and  enabled by
 assignment. ex: make COV=y
+
+### Platform differences
+On CentOS build as follows
+    > make HDF5=y
+
+On (Mortens) Ubuntu use the following arguments to build
+
+    > make NOKAFKA=y HDF5=y HDF5INC=/usr/include/hdf5/serial HDF5LIB=/usr/lib/x86_64-linux-gnu/hdf5/serial
+    > make KAFKAINC=/usr/local/include KAFKALIB=/usr/lib64
+
+On (Mortens) Mac
+    > make  NOKAFKA=y HDF5=y HDF5INC=/usr/local/include HDF5LIB=/usr/local/lib
+    > make NOKAFKA=y
+
+### Execution
 
 __Run in terminal window__
 
