@@ -23,6 +23,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+#define UNUSED __attribute__((unused))
+
 Server::Server(int port, Parser &parse) : port_(port), parser(parse) {
 
   for (auto &client : clientfd) {
@@ -52,7 +54,7 @@ void Server::server_open() {
   XTRACE(IPC, INF, "Server::open() called on port %d\n", port_);
 
   struct sockaddr_in socket_address;
-  int ret;
+  UNUSED int ret;
   int option = 1; // any nonzero value will do
 
   serverfd = socket(AF_INET, SOCK_STREAM, 0);
