@@ -9,7 +9,7 @@ endif
 
 VPATH = .. ../libs/include test
 
-progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so cspec2.so
+progs = efu2 gencspec gencspecfile gennmxpcap dgmgjson cspec.so nmx.so udp.so cspec2.so
 
 library = ../libs/eventlib.a
 
@@ -114,6 +114,9 @@ gencspec: $(library) $(gencspec.obj) $(gencspec.inc)
 gencspecfile: $(library) $(gencspecfile.obj) $(gencspecfile.inc)
 	@echo building $@
 	$(Q)$(cxx) $(gencspecfile.obj) $(library) $(ldflags) -o $@
+
+gennmxpcap: nmxgen/wireshark.cpp
+	g++ -std=c++11 nmxgen/wireshark.cpp -lpcap -o $@
 
 dgmgjson: $(library) $(dgmgjson.obj) $(dgmgjson.inc)
 	@echo building $@
