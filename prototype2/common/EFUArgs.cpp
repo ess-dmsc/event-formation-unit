@@ -26,13 +26,14 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
         {"stopafter", required_argument, 0, 's'},
         {"graphite",  required_argument, 0, 'g'},
         {"gport",     required_argument, 0, 'o'},
+        {"cmdport",   required_argument, 0, 'm'},
         {0, 0, 0, 0}
       };
     // clang-format on
 
     int option_index = 0;
 
-    int c = getopt_long(argc, argv, "b:c:d:g:o:i:p:r:s:h", long_options,
+    int c = getopt_long(argc, argv, "b:c:d:g:m:o:i:p:r:s:h", long_options,
                         &option_index);
     if (c == -1)
       break;
@@ -55,6 +56,9 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
       break;
     case 'o':
       graphite_port = atoi(optarg);
+      break;
+    case 'm':
+      cmdserver_port = atoi(optarg);
       break;
     case 'i':
       ip_addr.assign(optarg);

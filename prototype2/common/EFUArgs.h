@@ -36,6 +36,8 @@ public:
   std::string graphite_ip_addr{"127.0.0.1"}; /**< graphite time series db */
   int graphite_port{2003};                   /**< graphite time series db */
 
+  int cmdserver_port{8888}; /**< for command line API */
+
   // NMX OPTIONS
   int reduction{80}; /**< data tuples in a cluster */
 

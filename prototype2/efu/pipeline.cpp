@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 
   StatPublisher metrics(efu_args->graphite_ip_addr, efu_args->graphite_port);
   Parser cmdParser;
-  Server cmdAPI(8888, cmdParser);
+  Server cmdAPI(efu_args->cmdserver_port, cmdParser);
 
   Timer stop, livestats;
   while (1) {
