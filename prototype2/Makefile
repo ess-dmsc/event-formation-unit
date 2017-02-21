@@ -9,7 +9,7 @@ endif
 
 VPATH = .. ../libs/include test
 
-progs = efu2 gencspec gencspecfile gennmxpcap dgmgjson cspec.so nmx.so udp.so cspec2.so
+progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so cspec2.so
 
 library = ../libs/eventlib.a
 
