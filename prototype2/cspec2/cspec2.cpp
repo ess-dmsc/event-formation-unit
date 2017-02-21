@@ -8,6 +8,7 @@
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/MultiGridGeometry.h>
+#include <common/NewStats.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
