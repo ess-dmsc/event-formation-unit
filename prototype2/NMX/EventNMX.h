@@ -7,9 +7,9 @@
 
 #pragma once
 
+#include <NMX/Eventlet.h>
 #include <limits>
 #include <list>
-#include <NMX/Eventlet.h>
 #include <numeric>
 #include <set>
 

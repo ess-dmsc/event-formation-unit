@@ -30,16 +30,20 @@ public:
   }
 
   /** @brief optional destructor */
-  virtual ~Detector(){}
+  virtual ~Detector() {}
 
   /** @brief document */
-  virtual int statsize(){return 0;}
+  virtual int statsize() { return 0; }
 
   /** @brief document */
-  virtual int64_t statvalue(size_t __attribute__((unused)) index){return (int64_t)-1;}
+  virtual int64_t statvalue(size_t __attribute__((unused)) index) {
+    return (int64_t)-1;
+  }
 
   /** @brief document */
-  virtual std::string & statname(size_t __attribute__((unused)) index){return noname;}
+  virtual std::string &statname(size_t __attribute__((unused)) index) {
+    return noname;
+  }
 
 private:
   std::string noname{""};
@@ -49,5 +53,5 @@ class DetectorFactory {
 public:
   /** @brief creates the detector object. All instruments must implement this
   */
-  virtual std::shared_ptr<Detector> create(void * opts) = 0;
+  virtual std::shared_ptr<Detector> create(void *opts) = 0;
 };

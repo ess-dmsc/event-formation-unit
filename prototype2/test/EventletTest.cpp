@@ -7,9 +7,7 @@
 
 class EventletTest : public TestBase {};
 
-TEST_F(EventletTest, Constructor) {
-  ASSERT_EQ(1,1);
-}
+TEST_F(EventletTest, Constructor) { ASSERT_EQ(1, 1); }
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

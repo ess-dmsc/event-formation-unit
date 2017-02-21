@@ -14,6 +14,40 @@
 #define UNUSED __attribute__((unused))
 
 //=============================================================================
+static int stat_get_count(std::vector<std::string> cmdargs, char *output,
+                          unsigned int *obytes) {
+  auto nargs = cmdargs.size();
+  XTRACE(CMD, INF, "STAT_GET_COUNT\n");
+  if (nargs != 1) {
+    XTRACE(CMD, WAR, "STAT_GET_COUNT: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET_COUNT %d\n",
+                     efu_args->detectorif->statsize());
+
+  return Parser::OK;
+}
+
+//=============================================================================
+static int stat_get(std::vector<std::string> cmdargs, char *output,
+                    unsigned int *obytes) {
+  auto nargs = cmdargs.size();
+  XTRACE(CMD, INF, "STAT_GET\n");
+  if (nargs != 2) {
+    XTRACE(CMD, WAR, "STAT_GET: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+  auto index = atoi(cmdargs.at(1).c_str());
+  std::string name = efu_args->detectorif->statname(index);
+  int64_t value = efu_args->detectorif->statvalue(index);
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET %s %" PRIi64 "\n",
+                     name.c_str(), value);
+
+  return Parser::OK;
+}
+
+//=============================================================================
 static int cspec_load_calib(std::vector<std::string> cmdargs,
                             UNUSED char *output, UNUSED unsigned int *obytes) {
   XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
@@ -63,8 +97,8 @@ static int cspec_show_calib(std::vector<std::string> cmdargs, char *output,
 /******************************************************************************/
 /******************************************************************************/
 Parser::Parser() {
-  // registercmd(std::string("STAT_GET_NAMEVAL"), stat_get_nameval);
-  // registercmd(std::string("STAT_GET_COUNT"), stat_get_count);
+  registercmd(std::string("STAT_GET"), stat_get);
+  registercmd(std::string("STAT_GET_COUNT"), stat_get_count);
   registercmd(std::string("CSPEC_LOAD_CALIB"), cspec_load_calib);
   registercmd(std::string("CSPEC_SHOW_CALIB"), cspec_show_calib);
 }

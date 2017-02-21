@@ -6,10 +6,9 @@
  */
 
 #pragma once
+#include <common/Detector.h>
 #include <memory>
 #include <string>
-#include <common/Detector.h>
-
 
 class Loader {
 private:
@@ -21,7 +20,7 @@ public:
   /** @brief Load instrument plugin from detector name
    *  @param name Instrument name - .so suffix will be added
    */
-  Loader(std::string name, void * args);
+  Loader(std::string name, void *args);
 
   Loader(Detector *detector);
 

@@ -18,10 +18,10 @@ Loader::Loader(const std::string lib, void *args) {
 
   if ((handle = dlopen(libstr, RTLD_NOW)) == 0) {
     cout << "Could not open library " << libname << " : " << dlerror() << endl;
-    free((void*)libstr);
+    free((void *)libstr);
     return;
   }
-  free((void*)libstr);
+  free((void *)libstr);
 
   char **name;
   if ((name = (char **)dlsym(handle, "classname")) == 0) {

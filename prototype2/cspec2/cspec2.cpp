@@ -43,7 +43,7 @@ const char *classname = "CSPEC Detector (2 thread pipeline)";
 
 class CSPEC : public Detector {
 public:
-  CSPEC(void * args);
+  CSPEC(void *args);
   void input_thread(void *args);
   void processing_thread(void *args);
 
@@ -89,7 +89,7 @@ private:
   EFUArgs *opts;
 };
 
-CSPEC::CSPEC(UNUSED void * args) {
+CSPEC::CSPEC(UNUSED void *args) {
   opts = (EFUArgs *)args;
 
   XTRACE(INIT, ALW, "Adding stats\n");
@@ -212,8 +212,7 @@ void CSPEC::processing_thread(void *args) {
         if (d.valid) {
           if (dat.createevent(d, kafkabuffer + produce) < 0) {
             mystats.geometry_errors++;
-            assert(mystats.geometry_errors <=
-                   mystats.rx_readouts);
+            assert(mystats.geometry_errors <= mystats.rx_readouts);
           } else {
             mystats.rx_events++;
             produce += 8; /**< @todo should use sizeof () */
@@ -250,7 +249,7 @@ void CSPEC::processing_thread(void *args) {
 
 class CSPECFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(void * args) {
+  std::shared_ptr<Detector> create(void *args) {
     return std::shared_ptr<Detector>(new CSPEC(args));
   }
 };

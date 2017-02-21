@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
   efu_args = new EFUArgs(argc, argv);
 
 #ifdef GRAYLOG
-  //Log::AddLogHandler(new GraylogInterface("somehost.com", 12201));
+  // Log::AddLogHandler(new GraylogInterface("somehost.com", 12201));
   Log::SetMinimumSeverity(Severity::Debug);
 #endif
   GLOG_INF("Starting efu2");
@@ -33,6 +33,7 @@ int main(int argc, char *argv[]) {
   XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", efu_args->det.c_str());
 
   Loader loader(efu_args->det, (void *)efu_args);
+  efu_args->detectorif = loader.detector;
 
   std::vector<int> cpus = {efu_args->cpustart, efu_args->cpustart + 1,
                            efu_args->cpustart + 2};

@@ -25,26 +25,15 @@ class EFUShell(cmd.Cmd):
        res = self.driver.Ask('CSPEC_SHOW_CALIB ' + line)
        print res
 
-   def do_stat_clear(self, line):
-      'Clear statistics'
-      res = self.driver.Ask('STAT_RESET')
-      print res
-
-   def do_stat_mask_set(self, line):
-      'Set reporting mask'
-      res = self.driver.Ask('STAT_MASK_SET ' + line)
+   def do_stat_getcount(self, line):
+      'Get number of registered counters'
+      res = self.driver.Ask('STAT_GET_COUNT')
       print res
 
    def do_stat_get(self, line):
-      'Clear statistics'
-      res = self.driver.Ask('STAT_INPUT')
+      'Get specific counter'
+      res = self.driver.Ask('STAT_GET ' + line)
       print res
-      res = self.driver.Ask('STAT_PROCESSING')
-      print res
-      res = self.driver.Ask('STAT_OUTPUT')
-      print res
-
-
 
 #
 # CMD behavior customization

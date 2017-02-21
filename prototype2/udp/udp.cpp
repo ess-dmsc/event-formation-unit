@@ -21,7 +21,7 @@ const char *classname = "UDPRaw Detector";
 class UDPRaw : public Detector {
 public:
   void input_thread(void *a);
-  UDPRaw(void UNUSED * args) { cout << "    UDPRaw created" << endl; };
+  UDPRaw(void UNUSED *args) { cout << "    UDPRaw created" << endl; };
   ~UDPRaw() { cout << "    UDPRaw destroyed" << endl; };
 };
 
@@ -67,7 +67,7 @@ void UDPRaw::input_thread(void *args) {
 
 class UDPRawFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(void * args) {
+  std::shared_ptr<Detector> create(void *args) {
     return std::shared_ptr<Detector>(new UDPRaw(args));
   }
 };

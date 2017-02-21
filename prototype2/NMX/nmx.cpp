@@ -14,7 +14,6 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
-#include <NMX/ParserClusterer.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -206,7 +205,8 @@ void NMX::processing_thread(void *args) {
             evtoff = 0;
           }
         } else {
-          mystats.rx_discards += event.x.entries.size() + event.y.entries.size();
+          mystats.rx_discards +=
+              event.x.entries.size() + event.y.entries.size();
         }
       }
     }

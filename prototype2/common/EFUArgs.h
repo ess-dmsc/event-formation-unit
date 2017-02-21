@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include <common/NewStats.h>
+#include <common/Detector.h>
 #include <cspec/CSPECChanConv.h>
 #include <string>
 
@@ -40,13 +40,15 @@ public:
   int reduction{80}; /**< data tuples in a cluster */
 
   // Runtime Stats
-  //EFUStats stat;
+  // EFUStats stat;
   unsigned int reportmask{0x2};
 
   // IPC data for communicating between main and threads
   uint16_t wirecal[CSPECChanConv::adcsize];
   uint16_t gridcal[CSPECChanConv::adcsize];
   uint32_t proc_cmd{0};
+
+  std::shared_ptr<Detector> detectorif; /**< @todo is this the place? */
 };
 
 // Used all the time and is not global variable

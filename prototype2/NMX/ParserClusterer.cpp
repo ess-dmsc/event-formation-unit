@@ -3,14 +3,11 @@
 #include <NMX/ParserClusterer.h>
 #include <string.h>
 
-ParserClusterer::ParserClusterer()
-{
-  data.resize(4);
-}
+ParserClusterer::ParserClusterer() { data.resize(4); }
 
 void ParserClusterer::parse(char *buf, size_t size) {
   Eventlet eventlet;
-  
+
   size_t psize = sizeof(uint32_t) * 4;
 
   size_t limit = std::min(size / psize, size_t(9000 / psize));
