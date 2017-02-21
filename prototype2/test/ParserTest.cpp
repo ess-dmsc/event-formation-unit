@@ -25,6 +25,8 @@ std::vector<std::string> commands {
   "CSPEC_LOAD_CALIB data/cal_zero", "<OK>",
   "CSPEC_SHOW_CALIB",               "wire 0 0x0000, grid 0 0x0000",
   "CSPEC_SHOW_CALIB 5",             "wire 5 0x0000, grid 5 0x0000",
+  "STAT_GET_COUNT",                 "STAT_GET_COUNT 0",
+  "STAT_GET 1",                     "STAT_GET  -1"
 };
 
 std::vector<std::string> commands_badargs {
@@ -34,10 +36,28 @@ std::vector<std::string> commands_badargs {
   "CSPEC_LOAD_CALIB data/cal_badsize",
   "CSPEC_LOAD_CALIB data/nogcal",
   "CSPEC_SHOW_CALIB 1 2",
-  "CSPEC_SHOW_CALIB 16384"
+  "CSPEC_SHOW_CALIB 16384",
+  "STAT_GET_COUNT 1",
+  "STAT_GET"
 };
 
 // clang-format on
+
+class TestDetector : public Detector {
+public:
+  TestDetector(UNUSED void *args) { cout << "TestDetector" << endl; };
+  ~TestDetector() { cout << "~TestDetector" << endl; };
+};
+
+class TestDetectorFactory : public DetectorFactory {
+public:
+  std::shared_ptr<Detector> create(void *args) {
+    cout << "TestDetectorFactory" << endl;
+    return std::shared_ptr<Detector>(new TestDetector(args));
+  }
+};
+
+TestDetectorFactory Factory;
 
 class ParserTest : public TestBase {
 protected:
@@ -46,6 +66,7 @@ protected:
   virtual void SetUp() {
     parser = new Parser();
     efu_args = new EFUArgs(0, NULL);
+    efu_args->detectorif = Factory.create(0);
   }
 
   virtual void TearDown() {

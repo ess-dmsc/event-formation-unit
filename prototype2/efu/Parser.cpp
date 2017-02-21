@@ -23,7 +23,7 @@ static int stat_get_count(std::vector<std::string> cmdargs, char *output,
     return -Parser::EBADARGS;
   }
 
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET_COUNT %d\n",
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET_COUNT %d",
                      efu_args->detectorif->statsize());
 
   return Parser::OK;
@@ -41,7 +41,7 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
   auto index = atoi(cmdargs.at(1).c_str());
   std::string name = efu_args->detectorif->statname(index);
   int64_t value = efu_args->detectorif->statvalue(index);
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET %s %" PRIi64 "\n",
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET %s %" PRIi64 ,
                      name.c_str(), value);
 
   return Parser::OK;
