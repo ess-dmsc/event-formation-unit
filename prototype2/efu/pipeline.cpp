@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
   efu_args = new EFUArgs(argc, argv);
 
 #ifdef GRAYLOG
-  // Log::AddLogHandler(new GraylogInterface("somehost.com", 12201));
+  Log::AddLogHandler(new GraylogInterface(efu_args->graylog_ip, efu_args->graylog_port));
   Log::SetMinimumSeverity(Severity::Debug);
 #endif
   GLOG_INF("Starting efu2");

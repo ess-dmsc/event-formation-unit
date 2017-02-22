@@ -8,6 +8,7 @@
 #include <cstdio>
 #ifdef GRAYLOG
 #include <graylog_logger/Log.hpp>
+#include <graylog_logger/GraylogInterface.hpp>
 #define GLOG_INF(x) Log::Msg(Severity::Informational, x)
 #else
 #define GLOG_INF(x)

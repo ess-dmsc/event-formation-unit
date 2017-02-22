@@ -115,8 +115,9 @@ gencspecfile: $(library) $(gencspecfile.obj) $(gencspecfile.inc)
 	@echo building $@
 	$(Q)$(cxx) $(gencspecfile.obj) $(library) $(ldflags) -o $@
 
-gennmxpcap: nmxgen/wireshark.cpp
-	g++ -std=c++11 nmxgen/wireshark.cpp -lpcap -o $@
+gennmxpcap: $(library) nmxgen/wireshark.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderPcap.cpp \
+	      nmxgen/ReaderPcap.h nmxgen/NMXArgs.h
+	g++ -std=c++11 -I. -I.. nmxgen/wireshark.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderPcap.cpp $(library) -lpcap -o $@
 
 dgmgjson: $(library) $(dgmgjson.obj) $(dgmgjson.inc)
 	@echo building $@

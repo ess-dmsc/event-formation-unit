@@ -15,8 +15,10 @@
 
 class ReaderVMM {
 public:
+  /** @todo document */
   ReaderVMM(std::string filename);
 
+  /** @todo document */
   size_t read(char *buf);
 
 private:

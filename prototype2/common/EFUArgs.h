@@ -38,6 +38,9 @@ public:
 
   int cmdserver_port{8888}; /**< for command line API */
 
+  std::string graylog_ip{"127.0.0.1"};
+  int graylog_port{12201};
+
   // NMX OPTIONS
   int reduction{80}; /**< data tuples in a cluster */
 
