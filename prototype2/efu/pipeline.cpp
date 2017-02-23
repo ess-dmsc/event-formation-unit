@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 
   Timer stop, livestats;
   while (1) {
-    if (stop.timeus() >= efu_args->stopafter * ONE_SECOND_US) {
+    if (stop.timeus() >= (uint64_t)efu_args->stopafter * (uint64_t)ONE_SECOND_US) {
       sleep(2);
       XTRACE(MAIN, ALW, "Exiting...\n");
       exit(1);

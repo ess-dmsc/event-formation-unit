@@ -86,7 +86,9 @@ def main():
                     proj.plot("events: " + str(plotint * plotrange) +
                     "(total: " + str(accumulated) + ")\noffset: " 
                     + str(minoffset) + "-" + str(maxoffset))
-                    #proj.clear()
+                    if accumulated >= 100000:
+                       proj.clear()
+                       accumulated = 0
                     minoffset = 999999999
                     plotevery = plotint
             else:
