@@ -1,19 +1,15 @@
 
--- declare our protocol
-srsvmm_proto = Proto("srsvmm","SRSVMM Protocol")
+-- Copyright (C) 2016, 2017 European Spallation Source ERIC
+-- Wireshark plugin for dissecting VMM2/SRS readout data
 
-nibswap = {0, 8, 4, 0xc, 2, 0xa, 6, 0xe, 1, 9, 5, 0xd, 3, 0xb, 7, 0xf}
-shifts  = {28, 24, 20, 16, 12, 8, 4, 0}
+-- helper variable and functions
 
-local t0
-local fc0
+local t0=0
+local fc0=0
 
-function srsvmm_proto.init()
-  t0 = 0
-  fc0 = 0
-end
-
-function reverse(value)
+function reversebits(value)
+  nibswap = {0, 8, 4, 0xc, 2, 0xa, 6, 0xe, 1, 9, 5, 0xd, 3, 0xb, 7, 0xf}
+  shifts  = {28, 24, 20, 16, 12, 8, 4, 0}
   local sum = 0
   for j = 1, 8 do
     local shf = shifts[j]
@@ -22,6 +18,7 @@ function reverse(value)
   return bit.tohex(sum)
 end
 
+-- recombine data from one or two bit fields
 function shiftmask(value, sh1, ma1, sh2, ma2, sh3)
   return bit.band(bit.rshift(tonumber(value,16), sh1), ma1) +
          bit.lshift(bit.band(bit.rshift(tonumber(value,16), sh2), ma2), sh3)
@@ -36,6 +33,8 @@ function gray2bin32(ival)
   return ival
 end
 
+-- the protocol dissector
+srsvmm_proto = Proto("srsvmm","SRSVMM Protocol")
 
 function srsvmm_proto.dissector(buffer,pinfo,tree)
   pinfo.cols.protocol = "SRSVMM2"
@@ -67,28 +66,32 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
         for i=1,(protolen-12)/8 do
           local d1 = buffer(12 + (i-1)*8, 4)
           local d2 = buffer(16 + (i-1)*8, 4)
-          local d1rev = reverse(d1)
-          local d2rev = reverse(d2)
+          local d1rev = reversebits(d1)
+          local d2rev = reversebits(d2)
+          local hit = srshdr:add(buffer(12 + (i-1)*8, 8), "Hit " .. i)
 
-          local d1handle = srshdr:add(d1, "Data1 " .. d1)
+          local d1handle = hit:add(d1, "Data1 " .. d1)
 
-          local adc  = shiftmask(d1rev, 24, 0xff, 16, 0x03, 8)
-          local tdc  = shiftmask(d1rev, 18, 0x3f,  8, 0x03, 6)
-          local bcid = shiftmask(d1rev, 10, 0x3f,  0, 0x3f, 6)
-          bcid = gray2bin32(bcid)
+          local adc   = shiftmask(d1rev, 24, 0xff, 16, 0x03, 8)
+          local tdc   = shiftmask(d1rev, 18, 0x3f,  8, 0x03, 6)
+          local gbcid = shiftmask(d1rev, 10, 0x3f,  0, 0x3f, 6)
+          local bcid  = gray2bin32(gbcid)
 
-          d1handle:append_text(", (" .. d1rev .. "), tdc: " .. string.format("%5d", tdc) ..
-                                                  ", adc: " .. string.format("%5d", adc) ..
-                                                  ", bcid: " .. string.format("%5d", bcid))
+          d1handle:append_text(", (" .. d1rev .. ")")
+          d1handle:add(d1, "bcid(gray): " .. gbcid)
+          d1handle:add(d1, "bcid: " .. bcid)
+          d1handle:add(d1, "tdc: " .. tdc)
+          d1handle:add(d1, "adc: " .. adc)
 
-          local d2handle = srshdr:add(d2, "Data2 " .. d2)
+          local d2handle = hit:add(d2, "Data2 " .. d2)
           local chno = shiftmask(d2rev, 2, 0x3f, 0, 0, 0)
           local flag = shiftmask(d2rev, 0, 0x01, 0, 0, 0)
           local othr = shiftmask(d2rev, 1, 0x01, 0, 0, 0)
-          
-          d2handle:append_text(", (" .. d2rev .. "), chno: " .. string.format("%4d", chno) ..
-                                                  ", flag: " .. flag ..
-                                                  ", over threshold: " .. othr)
+
+          d2handle:append_text(", (" .. d2rev .. ")")
+          d2handle:add(d2, "chno: " .. chno)
+          d2handle:add(d2, "flag: " .. flag)
+          d2handle:add(d2, "ovr thresh: " .. othr)
         end
       end
     elseif dataid == 0x564132 then
@@ -99,8 +102,6 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
   end
 end
 
--- load the udp.port table
+-- Register the protocol
 udp_table = DissectorTable.get("udp.port")
-
--- register our protocol to handle udp port 6006
-udp_table:add(6006,srsvmm_proto)
+udp_table:add(6006, srsvmm_proto)
