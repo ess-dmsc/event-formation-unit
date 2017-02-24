@@ -9,21 +9,21 @@ errexit()
 
 function build_progs()
 {
-  pushd dataformats/cncs2016
+  pushd dataformats/multigrid
   make V=y || errexit "failed to build progs"
   popd
 }
 
 function build_tests()
 {
-  pushd dataformats/cncs2016
+  pushd dataformats/multigrid
   make V=y test || errexit "failed to build tests"
   popd
 }
 
 function run_tests()
 {
-  pushd dataformats/cncs2016
+  pushd dataformats/multigrid
   make V=y runtest || errexit "failed to run tests"
   popd
 }
