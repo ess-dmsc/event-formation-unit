@@ -55,8 +55,8 @@ gencspecfile.src = cspecgen/cspecfile.cpp cspecgen/CspecArgs.cpp
 gencspecfile.inc = cspecgen/CspecArgs.h
 gencspecfile.obj = $(gencspecfile.src:%.cpp=%.o)
 
-dgmgjson.src = mgjson/dgmgjson.cpp mgjson/MGJsonArgs.cpp ../dataformats/cncs2016/src/RunSpecParse.cpp\
-       ../dataformats/cncs2016/src/jsoncpp.cpp
+dgmgjson.src = mgjson/dgmgjson.cpp mgjson/MGJsonArgs.cpp ../dataformats/multigrid/src/RunSpecParse.cpp\
+       ../dataformats/multigrid/src/jsoncpp.cpp
 dgmgjson.inc = mgjson/MGJsonArgs.h
 dgmgjson.obj = $(dgmgjson.src:%.cpp=%.o)
 
