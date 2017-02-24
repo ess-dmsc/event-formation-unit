@@ -98,7 +98,7 @@ udp.so: $(udp.so.src) $(udp.so.inc)
 
 %.o: %.cpp
 	@echo building $@
-	$(Q)$(cxx) $(cxxflags) -I../dataformats/cncs2016/inc $< -c -o $@
+	$(Q)$(cxx) $(cxxflags) -I../dataformats/multigrid/inc $< -c -o $@
 
 $(library): Socket.h TSCTimer.h Timer.h SPSCFifo.h
 	make -C ../libs
