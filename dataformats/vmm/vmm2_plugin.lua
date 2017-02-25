@@ -33,7 +33,9 @@ function gray2bin32(ival)
   return ival
 end
 
+-- -----------------------------------------------------------------------------------------------
 -- the protocol dissector
+-- -----------------------------------------------------------------------------------------------
 srsvmm_proto = Proto("srsvmm","SRSVMM Protocol")
 
 function srsvmm_proto.dissector(buffer,pinfo,tree)
@@ -49,6 +51,7 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
 
   if fc == 0xfafafafa then
     srshdr:add("Frame Counter: 0xfafafafa (End of Frame)")
+    pinfo.cols.info = "End of Frame"
   else
     local dataid = buffer(4,3):uint()
     local time = buffer(8,4):uint()
@@ -58,25 +61,34 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
 
     srshdr:add(buffer(0,4),"Frame Counter: " .. fc .. " (" .. (fc-fc0) .. ")")
     if dataid == 0x564d32 then
+      local vmmid = buffer(7,1):uint()
       srshdr:add(buffer(4,3),"Data Id: VMM2 Data")
-      srshdr:add(buffer(7,1),"VMM2 ID: " .. buffer(7,1):uint())
+      srshdr:add(buffer(7,1),"VMM ID: " .. vmmid)
       srshdr:add(buffer(8,4),"SRS Timestamp: " .. time .. " (" .. (time - t0) .. ")")
 
-      if protolen > 12 then
-        for i=1,(protolen-12)/8 do
+
+      if protolen >= 12 then
+        local hits = (protolen-12)/8
+        pinfo.cols.info = string.format("VMM: %d, Hits: %3d", vmmid, hits)
+        for i=1,hits do
           local d1 = buffer(12 + (i-1)*8, 4)
           local d2 = buffer(16 + (i-1)*8, 4)
           local d1rev = reversebits(d1)
           local d2rev = reversebits(d2)
-          local hit = srshdr:add(buffer(12 + (i-1)*8, 8), "Hit " .. i)
-
-          local d1handle = hit:add(d1, "Data1 " .. d1)
 
           local adc   = shiftmask(d1rev, 24, 0xff, 16, 0x03, 8)
           local tdc   = shiftmask(d1rev, 18, 0x3f,  8, 0x03, 6)
           local gbcid = shiftmask(d1rev, 10, 0x3f,  0, 0x3f, 6)
           local bcid  = gray2bin32(gbcid)
 
+          local chno = shiftmask(d2rev, 2, 0x3f, 0, 0, 0)
+          local flag = shiftmask(d2rev, 0, 0x01, 0, 0, 0)
+          local othr = shiftmask(d2rev, 1, 0x01, 0, 0, 0)
+          local hit = srshdr:add(buffer(12 + (i-1)*8, 8),
+                        string.format("Hit: %3d, ch: %2d, bcid: %4d, tdc: %4d, adc: %4d",
+                        i, chno, bcid, tdc, adc))
+
+          local d1handle = hit:add(d1, "Data1 " .. d1)
           d1handle:append_text(", (" .. d1rev .. ")")
           d1handle:add(d1, "bcid(gray): " .. gbcid)
           d1handle:add(d1, "bcid: " .. bcid)
@@ -84,10 +96,6 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
           d1handle:add(d1, "adc: " .. adc)
 
           local d2handle = hit:add(d2, "Data2 " .. d2)
-          local chno = shiftmask(d2rev, 2, 0x3f, 0, 0, 0)
-          local flag = shiftmask(d2rev, 0, 0x01, 0, 0, 0)
-          local othr = shiftmask(d2rev, 1, 0x01, 0, 0, 0)
-
           d2handle:append_text(", (" .. d2rev .. ")")
           d2handle:add(d2, "chno: " .. chno)
           d2handle:add(d2, "flag: " .. flag)
@@ -96,6 +104,7 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
       end
     elseif dataid == 0x564132 then
       srshdr:add(buffer(4,4),"Data Id: No Data")
+      pinfo.cols.info = "No Data"
     else
       srshdr:add(buffer(4,4),"Data Id: Unknown data " .. buffer(5,3))
     end
