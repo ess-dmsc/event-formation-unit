@@ -9,7 +9,7 @@ endif
 
 VPATH = .. ../libs/include test
 
-progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so cspec2.so
+progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so cspec2.so nmxvmm2srs.so
 
 library = ../libs/eventlib.a
 
@@ -18,18 +18,20 @@ udp.so.src = udp/udp.cpp
 udp.so.inc = common/Detector.h
 
 nmx.so.src = NMX/nmx.cpp NMX/ParserClusterer.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp
-nmx.so.src += common/NewStats.cpp
+nmx.so.src += common/NewStats.cpp common/Producer.cpp
 nmx.so.inc = common/Detector.h NMX/ParserClusterer.h NMX/EventNMX.h NMX/Eventlet.h
-nmx.so.inc += common/NewStats.h
-ifndef NOKAFKA
-nmx.so.src += common/Producer.cpp
-nmx.so.inc += common/Producer.h
-endif
+nmx.so.inc += common/NewStats.h common/Producer.h
+
+nmxvmm2srs.so.src = nmxvmm2srs/nmxvmm2srs.cpp nmxvmm2srs/NMXVMM2SRSData.cpp NMX/ParserClusterer.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp
+nmxvmm2srs.so.src += common/NewStats.cpp common/Producer.cpp
+nmxvmm2srs.so.inc = common/Detector.h NMX/ParserClusterer.h NMX/EventNMX.h NMX/Eventlet.h
+nmxvmm2srs.so.inc += common/NewStats.h common/Producer.h nmxvmm2srs/NMXVMM2SRSData.h
+
 
 cspec.so.src =  cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
 cspec.so.src += common/Producer.cpp common/NewStats.cpp
 cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h common/MultiGridGeometry.h
-cspec.so.inc += gccintel.h common/Producer.h common/Trace.h
+cspec.so.inc += common/Producer.h common/Trace.h
 cspec.so.inc += common/NewStats.h
 
 cspec2.so.src =  cspec2/cspec2.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
@@ -88,6 +90,10 @@ cspec2.so: $(cspec2.so.src) $(cspec2.so.inc)
 	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
 
 nmx.so: $(nmx.so.src) $(nmx.so.inc)
+	@echo building specific $@
+	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
+
+nmxvmm2srs.so: $(nmxvmm2srs.so.src) $(nmxvmm2srs.so.inc)
 	@echo building specific $@
 	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
 

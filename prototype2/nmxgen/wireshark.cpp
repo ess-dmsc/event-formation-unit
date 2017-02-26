@@ -30,23 +30,23 @@ int main(int argc, char *argv[]) {
   std::string pcapfile(opts.filename);
   ReaderPcap pcap(pcapfile);
 
-  int ret;
+  int rdsize;
   uint64_t packets = 0;
-  while ((ret = pcap.read((char *)&buffer, sizeof(buffer))) != -1) {
-    if (ret == 0)
+  while ((rdsize = pcap.read((char *)&buffer, sizeof(buffer))) != -1) {
+    if (rdsize == 0)
        continue; // non udp data
-    //pcap.printpacket((unsigned char *)buffer, ret);
-    DataSource.send();
+
+    DataSource.send(buffer, rdsize);
     packets++;
     if (packets >= opts.txPkt) {
-      printf("Sent %" PRIu64 " packets, exiting...", packets);
+      printf("Sent %" PRIu64 " packets, exiting...\n", packets);
       pcap.printstats();
       exit(0);
     }
 
   }
-
-  pcap.printstats();
+  printf("Sent %" PRIu64 " packets, exiting...\n", packets);
+  //pcap.printstats();
 
   return 0;
 }
