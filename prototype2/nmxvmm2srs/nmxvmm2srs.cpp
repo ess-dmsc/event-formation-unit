@@ -151,7 +151,7 @@ void NMXVMM2SRS::processing_thread(void *args) {
   Producer producer(opts->broker, true, "NMX_detector");
 #endif
 
-  NMXVMM2SRSData data;
+  NMXVMM2SRSData data(4500);
   ParserClusterer parser;
 
   Timer stopafter_clock;
