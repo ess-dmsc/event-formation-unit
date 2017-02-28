@@ -69,6 +69,7 @@ private:
     int64_t rx_idle1;
     int64_t rx_discards;
     int64_t rx_events;
+    int64_t tx_bytes;
   } ALIGN(64) mystats;
 
   EFUArgs *opts;
