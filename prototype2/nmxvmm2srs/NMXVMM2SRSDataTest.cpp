@@ -100,6 +100,18 @@ TEST_F(NMXVMM2SRSDataTest, DataSizeError) {
   }
 }
 
+TEST_F(NMXVMM2SRSDataTest, GoodHits3) {
+  NMXVMM2SRSData data(4500);
+  int res = data.receive((char *)&data_3_ch0[0], data_3_ch0.size());
+  ASSERT_EQ(res, 3);
+  ASSERT_EQ(data.error, 0);
+  ASSERT_EQ(data.elems, 3);
+  ASSERT_EQ(data.data[0].adc, 64);
+  ASSERT_EQ(data.data[0].tdc, 73);
+  ASSERT_EQ(data.data[0].chno, 15);
+  ASSERT_EQ(data.data[0].bcid, 355);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

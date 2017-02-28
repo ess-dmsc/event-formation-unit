@@ -9,20 +9,27 @@
 
 #include <cinttypes>
 
-  struct VMM2Data {
-    uint16_t tdc;
-    uint16_t adc;
+class NMXVMM2SRSData {
+public:
+
+  struct SRSHdr {
+    uint32_t fc;
+    uint32_t dataid;
     uint32_t time;
   };
 
-class NMXVMM2SRSData {
-public:
+  struct VMM2Data {
+    uint16_t tdc;
+    uint16_t adc;
+    uint16_t chno;
+    uint16_t bcid;
+  };
 
   NMXVMM2SRSData(int maxevents){
     data = new struct VMM2Data[maxevents];
   };
 
-  ~NMXVMM2SRSData(){
+  ~NMXVMM2SRSData() {
     delete [] data;
     data = 0;
   };
@@ -31,12 +38,18 @@ public:
    */
   int receive(const char *buffer, int size);
 
+  /** @todo document */
+  int parse(uint32_t data1, uint32_t data2, struct VMM2Data * vmd);
 
-  // Fields common to all readouts
-  uint32_t frame_counter{0};
-  uint32_t timestamp{0};
 
+  struct SRSHdr srshdr; // Common to all readouts in a packet
   struct VMM2Data * data{nullptr};
+
+  // Results of the data parsing
   uint32_t elems{0}; // number of events
   uint32_t error{0}; // bytes of invalid data
+
+private:
+  uint32_t reverse(uint32_t data);
+  unsigned int grayToBinary32(unsigned int num);
 };
