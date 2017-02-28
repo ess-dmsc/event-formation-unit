@@ -33,83 +33,77 @@ vector<vector<uint8_t>> err_usize{err_usize1, err_usize3, err_usize4, err_usize7
 // clang-format on
 
 class NMXVMM2SRSDataTest : public TestBase {
+
 protected:
-
-  virtual void SetUp() { }
-  virtual void TearDown() { }
-
+  NMXVMM2SRSData * data;
+  virtual void SetUp() { data = new NMXVMM2SRSData(1125);}
+  virtual void TearDown() { delete data; }
 };
 
 /** Test cases below */
 TEST_F(NMXVMM2SRSDataTest, Constructor) {
-  NMXVMM2SRSData data(4500);
-  ASSERT_TRUE(data.data != nullptr);
-  ASSERT_EQ(data.elems, 0);
-  ASSERT_EQ(data.error, 0);
+  ASSERT_TRUE(data->data != nullptr);
+  ASSERT_EQ(data->elems, 0);
+  ASSERT_EQ(data->error, 0);
 }
 
 TEST_F(NMXVMM2SRSDataTest, UndersizeData) {
-  NMXVMM2SRSData data(4500);
 
   for (auto v : err_usize) {
-    int res = data.receive((char *)&v[0], v.size());
+    int res = data->receive((char *)&v[0], v.size());
     ASSERT_EQ(res, 0);
-    ASSERT_EQ(data.elems, 0);
-    ASSERT_EQ(data.error, v.size());
+    ASSERT_EQ(data->elems, 0);
+    ASSERT_EQ(data->error, v.size());
   }
 }
 
 TEST_F(NMXVMM2SRSDataTest, NoData) {
-  NMXVMM2SRSData data(4500);
-  int res = data.receive((char *)&no_data[0], no_data.size());
+  int res = data->receive((char *)&no_data[0], no_data.size());
   ASSERT_EQ(res, 0);
-  ASSERT_EQ(data.error, 0);
-  ASSERT_EQ(data.elems, 0);
+  ASSERT_EQ(data->error, 0);
+  ASSERT_EQ(data->elems, 0);
 }
 
 TEST_F(NMXVMM2SRSDataTest, UnknownData) {
-  NMXVMM2SRSData data(4500);
-  int res = data.receive((char *)&unknown_data[0], unknown_data.size());
+  int res = data->receive((char *)&unknown_data[0], unknown_data.size());
   ASSERT_EQ(res, 0);
-    ASSERT_EQ(data.error, unknown_data.size());
+    ASSERT_EQ(data->error, unknown_data.size());
 }
 
 TEST_F(NMXVMM2SRSDataTest, EndOfFrame) {
-  NMXVMM2SRSData data(4500);
-  int res = data.receive((char *)&end_of_frame[0], end_of_frame.size());
+  int res = data->receive((char *)&end_of_frame[0], end_of_frame.size());
   ASSERT_EQ(res, -1);
-  ASSERT_EQ(data.error, 0);
-  ASSERT_EQ(data.elems, 0);
+  ASSERT_EQ(data->error, 0);
+  ASSERT_EQ(data->elems, 0);
 }
 
 TEST_F(NMXVMM2SRSDataTest, DataSizeError) {
   std::vector<int> badsizes = {13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35};
   std::vector<int> goodsizes = {20, 28, 36};
-  NMXVMM2SRSData data(4500);
   for (auto datasize : badsizes) {
-    int res = data.receive((char *)&data_3_ch0[0], datasize);
+    int res = data->receive((char *)&data_3_ch0[0], datasize);
       ASSERT_EQ(res, 0);
-      ASSERT_EQ(data.error, datasize);
-      ASSERT_EQ(data.elems, 0);
+      ASSERT_EQ(data->error, datasize);
+      ASSERT_EQ(data->elems, 0);
   }
   for (auto datasize : goodsizes) {
-    int res = data.receive((char *)&data_3_ch0[0], datasize);
+    int res = data->receive((char *)&data_3_ch0[0], datasize);
       ASSERT_EQ(res, (datasize-12)/8);
-      ASSERT_EQ(data.error, 0);
-      ASSERT_EQ(data.elems, (datasize-12)/8);
+      ASSERT_EQ(data->error, 0);
+      ASSERT_EQ(data->elems, (datasize-12)/8);
   }
 }
 
 TEST_F(NMXVMM2SRSDataTest, GoodHits3) {
-  NMXVMM2SRSData data(4500);
-  int res = data.receive((char *)&data_3_ch0[0], data_3_ch0.size());
+  int res = data->receive((char *)&data_3_ch0[0], data_3_ch0.size());
   ASSERT_EQ(res, 3);
-  ASSERT_EQ(data.error, 0);
-  ASSERT_EQ(data.elems, 3);
-  ASSERT_EQ(data.data[0].adc, 64);
-  ASSERT_EQ(data.data[0].tdc, 73);
-  ASSERT_EQ(data.data[0].chno, 15);
-  ASSERT_EQ(data.data[0].bcid, 355);
+  ASSERT_EQ(data->srshdr.fc, 0x00337137);
+  ASSERT_EQ(data->error, 0);
+  ASSERT_EQ(data->elems, 3);
+  ASSERT_EQ(data->data[0].adc, 64);
+  ASSERT_EQ(data->data[0].tdc, 73);
+  ASSERT_EQ(data->data[0].chno, 15);
+  ASSERT_EQ(data->data[0].bcid, 355);
 }
 
 int main(int argc, char **argv) {
