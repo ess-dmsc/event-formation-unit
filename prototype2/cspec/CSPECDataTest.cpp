@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include "CSPECTestData.h"
-#include "TestBase.h"
+#include <test/CSPECTestData.h>
+#include <test/TestBase.h>
 #include <algorithm>
 #include <common/MultiGridGeometry.h>
 #include <cspec/CSPECChanConv.h>

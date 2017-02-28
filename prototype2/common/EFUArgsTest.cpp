@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include "TestBase.h"
+#include <test/TestBase.h>
 #include <common/EFUArgs.h>
 
 using namespace std;

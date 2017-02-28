@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include "TestBase.h"
+#include <test/TestBase.h>
 #include <cspec/CSPECChanConv.h>
 
 using namespace std;
