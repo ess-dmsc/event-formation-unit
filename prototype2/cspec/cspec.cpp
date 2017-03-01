@@ -27,6 +27,10 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#ifdef FLATBUFFERS
+#include <../streaming-data-types/build/schemas/f140_general_generated.h>
+#endif
+
 #define UNUSED __attribute__((unused))
 #define ALIGN(x) __attribute__((aligned(x)))
 //#define ALIGN(x)

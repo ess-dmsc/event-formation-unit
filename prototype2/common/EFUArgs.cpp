@@ -26,6 +26,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
         {"stopafter", required_argument, 0, 's'},
         {"graphite",  required_argument, 0, 'g'},
         {"gport",     required_argument, 0, 'o'},
+        {"logip",     required_argument, 0, 'a'},
         {"cmdport",   required_argument, 0, 'm'},
         {0, 0, 0, 0}
       };
@@ -33,7 +34,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    int c = getopt_long(argc, argv, "b:c:d:g:m:o:i:p:r:s:h", long_options,
+    int c = getopt_long(argc, argv, "a:b:c:d:g:m:o:i:p:r:s:h", long_options,
                         &option_index);
     if (c == -1)
       break;
@@ -42,6 +43,9 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
     // case 0: // currently not using flags
     //  if (long_options[option_index].flag != 0)
     //    break;
+    case 'a':
+      graylog_ip.assign(optarg);
+      break;
     case 'b':
       broker.assign(optarg);
       break;
