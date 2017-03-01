@@ -9,15 +9,15 @@
 #define UNUSED __attribute__((unused))
 
 #undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#define TRC_LEVEL TRC_L_WAR
 
 int NMXVMM2SRSData::parse(UNUSED uint32_t data1, UNUSED uint32_t data2, struct VMM2Data * vmd) {
-  data1 = reverse(data1);
-  data2 = reverse(data2);
+  data1 = reversebits(data1);
+  data2 = reversebits(data2);
 
   vmd->tdc  = ((data1 >> 18) & 0x3f) + (((data1 >>  8) & 0x03) << 6);
   vmd->adc  = ((data1 >> 24) & 0xff) + (((data1 >> 16) & 0x03) << 8);
-  vmd->bcid = grayToBinary32(((data1 >> 10) & 0x3f) + (((data1 >>  0) & 0x3f) << 6));
+  vmd->bcid = gray2bin32(((data1 >> 10) & 0x3f) + (((data1 >>  0) & 0x3f) << 6));
   vmd->chno =  (data2 >>  2) & 0x3f;
   return 0;
 }
@@ -36,12 +36,12 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
   struct SRSHdr * srsptr = (struct SRSHdr *)buffer;
   srshdr.fc = ntohl(srsptr->fc);
   if (srshdr.fc == 0xfafafafa) {
-    printf("End of Frame\n");
+    XTRACE(PROCESS, DEB, "End of Frame\n");
     return -1;
   }
 
   if (size < 12) {
-    XTRACE(PROCESS, DEB, "Undersize data II\n");
+    XTRACE(PROCESS, WAR, "Undersize data II\n");
     error += size;
     return 0;
   }
@@ -50,35 +50,36 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
   srshdr.dataid = ntohl(srsptr->dataid);
 
   if (srshdr.dataid == 0x56413200) {
-    printf("No Data\n");
+    XTRACE(PROCESS, DEB, "No Data\n");
     return 0;
   }
 
   if ((srshdr.dataid & 0xffffff00)!= 0x564d3200) {
-    printf("Unknown data\n");
+    XTRACE(PROCESS, WAR, "Unknown data\n");
     error += size;
     return 0;
   }
 
 
   if (size < 20) {
-    printf("No room for data in packet\n");
+    XTRACE(PROCESS, INF, "No room for data in packet, implicit empty?\n");
     error += size;
     return 0;
   }
 
   auto datalen = size - 12;
   if ((datalen & 0xfff8) != datalen) {
-    printf("Invalid data length: %d\n", datalen);
+    XTRACE(PROCESS, WAR, "Invalid data length: %d\n", datalen);
     error += size;
     return 0;
   }
 
   int vmmid = srshdr.dataid & 0xff;
-  printf("VMM2 Data, VMM Id %d\n", vmmid);
+  XTRACE(PROCESS, DEB, "VMM2 Data, VMM Id %d\n", vmmid);
 
   int index = 0;
-  while (datalen > 0) {
+  while (datalen >= 8) {
+    XTRACE(PROCESS, DEB, "index: %d, datalen %d, elems: %d\n", index, datalen, elems);
     uint32_t data1 = htonl(*(uint32_t *)&buffer[12 + 8 * index]);
     uint32_t data2 = htonl(*(uint32_t *)&buffer[16 + 8 * index]);
 
@@ -88,12 +89,16 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
       index++;
     }
     datalen -= 8;
+    if (elems == max_elements && datalen >= 8) {
+      XTRACE(PROCESS, DEB, "Data overflow, skipping %d bytes\n", datalen);
+      break;
+    }
   }
   return elems;
 }
 
 
-unsigned int NMXVMM2SRSData::grayToBinary32(unsigned int num) {
+unsigned int NMXVMM2SRSData::gray2bin32(unsigned int num) {
     num = num ^ (num >> 16);
     num = num ^ (num >> 8);
     num = num ^ (num >> 4);
@@ -103,7 +108,7 @@ unsigned int NMXVMM2SRSData::grayToBinary32(unsigned int num) {
 }
 
 
-unsigned int NMXVMM2SRSData::reverse(register unsigned int x) {
+unsigned int NMXVMM2SRSData::reversebits(register unsigned int x) {
     x = (((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1));
     x = (((x & 0xcccccccc) >> 2) | ((x & 0x33333333) << 2));
     x = (((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4));

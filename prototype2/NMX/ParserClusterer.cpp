@@ -5,6 +5,17 @@
 
 ParserClusterer::ParserClusterer() { data.resize(4); }
 
+void ParserClusterer::parse(unsigned int planeid, uint32_t timestamp, struct NMXVMM2SRSData::VMM2Data * data, size_t elements) {
+  Eventlet eventlet;
+  for (unsigned int i = 0; i < elements; i++) {
+    eventlet.time = ((uint64_t)timestamp << 32) + (data[i].bcid << 16) +  data[i].tdc;
+    eventlet.plane_id = planeid;     /**< @todo Geometry definitions */
+    eventlet.strip = data[i].chno; /**< @todo Geometry definitions */
+    eventlet.adc = data[i].adc;
+    backlog_.insert(std::pair<uint64_t, Eventlet>(eventlet.time, eventlet));
+  }
+}
+
 void ParserClusterer::parse(char *buf, size_t size) {
   Eventlet eventlet;
 

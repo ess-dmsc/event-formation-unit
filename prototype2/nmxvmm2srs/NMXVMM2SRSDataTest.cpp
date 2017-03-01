@@ -106,6 +106,14 @@ TEST_F(NMXVMM2SRSDataTest, GoodHits3) {
   ASSERT_EQ(data->data[0].bcid, 355);
 }
 
+TEST_F(NMXVMM2SRSDataTest, DataOverflow) {
+  auto data2 = new NMXVMM2SRSData(2);
+  int res = data2->receive((char *)&data_3_ch0[0], data_3_ch0.size());
+  ASSERT_EQ(res, 2);
+  ASSERT_EQ(data2->error, 0);
+  ASSERT_EQ(data2->elems, 2);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

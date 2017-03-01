@@ -12,21 +12,22 @@
 class NMXVMM2SRSData {
 public:
 
+  /**< Do NOT rearrange fields, used for casting to data pointer*/
   struct SRSHdr {
-    uint32_t fc;
-    uint32_t dataid;
-    uint32_t time;
+    uint32_t fc;     /**< frame counter packet field */
+    uint32_t dataid; /**< data type identifier packet field */
+    uint32_t time;   /**< timestamp packet field */
   };
 
   struct VMM2Data {
-    uint16_t tdc;
-    uint16_t adc;
-    uint16_t chno;
-    uint16_t bcid;
+    uint16_t bcid; /**< bcid after graydecode */
+    uint16_t tdc;  /**< tdc value from vmm readout */
+    uint16_t adc;  /**< adc value from vmm readout */
+    uint16_t chno; /**< channel number from readout */
   };
 
-  NMXVMM2SRSData(int maxevents){
-    data = new struct VMM2Data[maxevents];
+  NMXVMM2SRSData(int maxelements) : max_elements(maxelements){
+    data = new struct VMM2Data[max_elements];
   };
 
   ~NMXVMM2SRSData() {
@@ -48,8 +49,9 @@ public:
   // Results of the data parsing
   uint32_t elems{0}; // number of events
   uint32_t error{0}; // bytes of invalid data
+  uint32_t max_elements{0}; // Capacity of data array
 
 private:
-  uint32_t reverse(uint32_t data);
-  unsigned int grayToBinary32(unsigned int num);
+  uint32_t reversebits(uint32_t data);
+  unsigned int gray2bin32(unsigned int num);
 };

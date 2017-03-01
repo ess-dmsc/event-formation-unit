@@ -3,6 +3,7 @@
 #pragma once
 
 #include <NMX/EventNMX.h>
+#include <nmxvmm2srs/NMXVMM2SRSData.h>
 #include <map>
 
 class ParserClusterer {
@@ -11,6 +12,8 @@ public:
 
   /** @todo Martin document */
   void parse(char *buf, size_t size);
+
+  void parse(unsigned int planeid, uint32_t timestamp, struct NMXVMM2SRSData::VMM2Data * data, size_t elements);
 
   /** @todo Martin document */
   bool event_ready();

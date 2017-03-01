@@ -24,7 +24,7 @@
 //#define ALIGN(x)
 
 #undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#define TRC_LEVEL TRC_L_ERR
 
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
@@ -57,7 +57,7 @@ private:
 
   char kafkabuffer[kafka_buffer_size];
 
-  NewStats ns{"efu2.nmxvmm2srs."};
+  NewStats ns{"efu2.nmxvmm2srs."}; // Careful also uding this for other NMX pipeline
 
   struct {
     // Input Counters
@@ -67,6 +67,8 @@ private:
     int64_t pad[5];
 
     int64_t rx_idle1;
+    int64_t rx_readouts;
+    int64_t rx_errbytes;
     int64_t rx_discards;
     int64_t rx_events;
     int64_t tx_bytes;
@@ -84,6 +86,10 @@ NMXVMM2SRS::NMXVMM2SRS(void *UNUSED args) {
   ns.create("input.rx_bytes",                  &mystats.rx_bytes);
   ns.create("input.dropped",                   &mystats.fifo1_push_errors);
   ns.create("processing.idle",                 &mystats.rx_idle1);
+  ns.create("processing.rx_readouts",          &mystats.rx_readouts);
+  ns.create("processing.rx_errbytes",          &mystats.rx_errbytes);
+  ns.create("output.rx_events",                &mystats.rx_events);
+  ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
 
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
@@ -152,7 +158,7 @@ void NMXVMM2SRS::processing_thread(void *args) {
   Producer producer(opts->broker, true, "NMX_detector");
 #endif
 
-  NMXVMM2SRSData data(4500);
+  NMXVMM2SRSData data(1125);
   ParserClusterer parser;
 
   Timer stopafter_clock;
@@ -167,9 +173,14 @@ void NMXVMM2SRS::processing_thread(void *args) {
     } else {
       data.receive(eth_ringbuf->getdatabuffer(data_index),
                    eth_ringbuf->getdatalength(data_index));
-
+      if (data.elems > 0) {
+        parser.parse(data.srshdr.dataid & 0xf, data.srshdr.time, data.data, data.elems);
+        mystats.rx_readouts += data.elems;
+        mystats.rx_errbytes += data.error;
+      }
 
       while (parser.event_ready()) {
+        XTRACE(PROCESS, WAR, "Got here\n");
         auto event = parser.get();
         event.analyze(true, 3, 7);
         if (event.good) {
