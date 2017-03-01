@@ -19,7 +19,7 @@ int main(int argc, char *argv[]) {
   char buffer[9000];
 
   Socket::Endpoint local("0.0.0.0", 0);
-  Socket::Endpoint remote("127.0.0.1",9000);
+  Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
 
   UDPClient DataSource(local, remote);
   DataSource.buflen(9000);
