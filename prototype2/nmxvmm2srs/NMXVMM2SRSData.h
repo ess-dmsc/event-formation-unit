@@ -2,7 +2,8 @@
 
 /** @file
  *
- *  @brief Class to receive and generate CSPEC detector readout
+ *  @brief Class to receive and generate Gd-GEM detector readout
+ * from VMM2 ASICS via the SRS readout system
  */
 
 #pragma once
@@ -26,6 +27,9 @@ public:
     uint16_t chno; /**< channel number from readout */
   };
 
+  /** @brief create a data handler for VMM2 SRS data of fixed size Capacity
+   * @param maxelements The maximum number of readout elements
+   */
   NMXVMM2SRSData(int maxelements) : max_elements(maxelements){
     data = new struct VMM2Data[max_elements];
   };
@@ -35,23 +39,28 @@ public:
     data = 0;
   };
 
-  /** @brief parse a binary payload buffer, return number of data elements
+  /** @brief reveive readouts from a binary payload buffer, return number of data elements
    */
   int receive(const char *buffer, int size);
 
-  /** @todo document */
+  /** @brief parse the readouts into a data array
+   * @param data1 the raw (unbitreversed) data1 field of a SRS packet
+   * @param data2 the raw (unbitreversed) data2 field of a SRS packet
+   * @param vmd VMM2Data structure holding the parsed data (tdc, bcid, adc, ...)
+   */
   int parse(uint32_t data1, uint32_t data2, struct VMM2Data * vmd);
 
 
-  struct SRSHdr srshdr; // Common to all readouts in a packet
-  struct VMM2Data * data{nullptr};
+  struct SRSHdr srshdr;            /**< Holds data common to all readouts in a packet */
+  struct VMM2Data * data{nullptr}; /**< holds all readout data in a packet (up to max_elems) */
 
   // Results of the data parsing
   uint32_t elems{0}; // number of events
   uint32_t error{0}; // bytes of invalid data
-  uint32_t max_elements{0}; // Capacity of data array
+
+  uint32_t max_elements{0}; // Maximum cpacity of data array
 
 private:
-  uint32_t reversebits(uint32_t data);
-  unsigned int gray2bin32(unsigned int num);
+  uint32_t reversebits(uint32_t data); /**< helper function to reverse bits in a uint32_t */
+  unsigned int gray2bin32(unsigned int num); /**< helper function to decode gray codes */
 };

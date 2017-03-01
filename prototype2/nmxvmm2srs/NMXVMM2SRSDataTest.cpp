@@ -112,6 +112,7 @@ TEST_F(NMXVMM2SRSDataTest, DataOverflow) {
   ASSERT_EQ(res, 2);
   ASSERT_EQ(data2->error, 0);
   ASSERT_EQ(data2->elems, 2);
+  delete data2;
 }
 
 int main(int argc, char **argv) {

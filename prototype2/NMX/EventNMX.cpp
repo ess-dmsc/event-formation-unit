@@ -1,6 +1,10 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <NMX/EventNMX.h>
+#include <common/Trace.h>
+
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 void PlaneNMX::push(const Eventlet &e) {
   if (!e.adc)
@@ -57,9 +61,12 @@ void EventNMX::push(const Eventlet &e) {
 
 void EventNMX::analyze(bool weighted, int16_t max_timebins,
                        int16_t max_timedif) {
-  if (x.entries.size())
+  XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu\n", x.entries.size(), y.entries.size());
+  if (x.entries.size()) {
     x.analyze(weighted, max_timebins, max_timedif);
-  if (y.entries.size())
+  }
+  if (y.entries.size()) {
     y.analyze(weighted, max_timebins, max_timedif);
+  }
   good = x.entries.size() && y.entries.size();
 }

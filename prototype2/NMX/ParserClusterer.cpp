@@ -2,14 +2,23 @@
 
 #include <NMX/ParserClusterer.h>
 #include <string.h>
+#include <common/Trace.h>
+
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
+
+#define BCIDCLOCK 25
+#define TACSLOPE 125
 
 ParserClusterer::ParserClusterer() { data.resize(4); }
 
 void ParserClusterer::parse(unsigned int planeid, uint32_t timestamp, struct NMXVMM2SRSData::VMM2Data * data, size_t elements) {
   Eventlet eventlet;
   for (unsigned int i = 0; i < elements; i++) {
-    eventlet.time = ((uint64_t)timestamp << 32) + (data[i].bcid << 16) +  data[i].tdc;
-    eventlet.plane_id = planeid;     /**< @todo Geometry definitions */
+    XTRACE(PROCESS, DEB, "eventlet timestamp: hi 0x%08x, lo: 0x%08x\n", timestamp, (data[i].bcid << 16) +  data[i].tdc);
+    XTRACE(PROCESS, DEB, "eventlet  planeid: %d, strip: %d\n", planeid, data[i].chno);
+    eventlet.time = data[i].bcid * BCIDCLOCK +  (data[i].tdc*TACSLOPE/255);
+    eventlet.plane_id = planeid;   /**< @todo Geometry definitions */
     eventlet.strip = data[i].chno; /**< @todo Geometry definitions */
     eventlet.adc = data[i].adc;
     backlog_.insert(std::pair<uint64_t, Eventlet>(eventlet.time, eventlet));

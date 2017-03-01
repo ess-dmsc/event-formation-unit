@@ -23,8 +23,8 @@
 #define ALIGN(x) __attribute__((aligned(x)))
 //#define ALIGN(x)
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_ERR
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
@@ -87,6 +87,7 @@ NMXVMM2SRS::NMXVMM2SRS(void *UNUSED args) {
   ns.create("input.dropped",                   &mystats.fifo1_push_errors);
   ns.create("processing.idle",                 &mystats.rx_idle1);
   ns.create("processing.rx_readouts",          &mystats.rx_readouts);
+  ns.create("processing.rx_discards",          &mystats.rx_discards);
   ns.create("processing.rx_errbytes",          &mystats.rx_errbytes);
   ns.create("output.rx_events",                &mystats.rx_events);
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
@@ -124,7 +125,6 @@ void NMXVMM2SRS::input_thread(void *args) {
     /** this is the processing step */
     if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                   eth_ringbuf->getmaxbufsize())) > 0) {
-      XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
       eth_ringbuf->setdatalength(eth_index, rdsize);
@@ -177,34 +177,35 @@ void NMXVMM2SRS::processing_thread(void *args) {
         parser.parse(data.srshdr.dataid & 0xf, data.srshdr.time, data.data, data.elems);
         mystats.rx_readouts += data.elems;
         mystats.rx_errbytes += data.error;
-      }
 
-      while (parser.event_ready()) {
-        XTRACE(PROCESS, WAR, "Got here\n");
-        auto event = parser.get();
-        event.analyze(true, 3, 7);
-        if (event.good) {
-          mystats.rx_events++;
+        while (parser.event_ready()) {
+          XTRACE(PROCESS, WAR, "event_ready()\n");
+          auto event = parser.get();
+          event.analyze(true, 3, 7);
+          if (event.good) {
+            XTRACE(PROCESS, WAR, "event.good\n");
+            mystats.rx_events++;
 
-          int time = 42; /**< @todo get time from ? */
-          int pixelid = (int)event.x.center + (int)event.y.center * 256;
+            int time = 42; /**< @todo get time from ? */
+            int pixelid = (int)event.x.center + (int)event.y.center * 256;
 
-          std::memcpy(kafkabuffer + evtoff, &time, sizeof(time));
-          std::memcpy(kafkabuffer + evtoff + 4, &pixelid, sizeof(pixelid));
-          evtoff += 8;
+            std::memcpy(kafkabuffer + evtoff, &time, sizeof(time));
+            std::memcpy(kafkabuffer + evtoff + 4, &pixelid, sizeof(pixelid));
+            evtoff += 8;
 
-          if (evtoff >= kafka_buffer_size / 10 - 20) {
-            assert(evtoff < kafka_buffer_size);
+            if (evtoff >= kafka_buffer_size / 10 - 20) {
+              assert(evtoff < kafka_buffer_size);
 
-#ifndef NOKAFKA
-            producer.produce(kafkabuffer, evtoff);
-            mystats.tx_bytes += evtoff;
-#endif
-            evtoff = 0;
+  #ifndef NOKAFKA
+              producer.produce(kafkabuffer, evtoff);
+              mystats.tx_bytes += evtoff;
+  #endif
+              evtoff = 0;
+            }
+          } else {
+            mystats.rx_discards +=
+                event.x.entries.size() + event.y.entries.size();
           }
-        } else {
-          mystats.rx_discards +=
-              event.x.entries.size() + event.y.entries.size();
         }
       }
     }
