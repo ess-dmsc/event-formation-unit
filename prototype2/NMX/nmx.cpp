@@ -18,10 +18,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define UNUSED __attribute__((unused))
-#define ALIGN(x) __attribute__((aligned(x)))
-//#define ALIGN(x)
-
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 

@@ -19,10 +19,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define UNUSED __attribute__((unused))
-#define ALIGN(x) __attribute__((aligned(x)))
-//#define ALIGN(x)
-
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 

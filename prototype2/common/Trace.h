@@ -10,8 +10,10 @@
 #include <graylog_logger/Log.hpp>
 #include <graylog_logger/GraylogInterface.hpp>
 #define GLOG_INF(x) Log::Msg(Severity::Informational, x)
+#define GLOG_CRI(x) Log::Msg(Severity::Critical, x)
 #else
 #define GLOG_INF(x)
+#define GLOG_CRI(x)
 #endif
 
 /** Add trace groups below - must be powers of two */

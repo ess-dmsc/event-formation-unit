@@ -3,9 +3,11 @@
 #include <common/EFUArgs.h>
 #include <common/StatPublisher.h>
 #include <common/Trace.h>
+#include <efu/ExitHandler.h>
 #include <efu/Launcher.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
+#include <libs/include/gccintel.h>
 #include <iostream>
 #include <libs/include/Timer.h>
 #include <unistd.h> // sleep()
@@ -17,6 +19,8 @@
  * Load detector, launch pipeline threads, then sleep forever
  */
 int main(int argc, char *argv[]) {
+
+  ExitHandler exithandler;
 
   efu_args = new EFUArgs(argc, argv);
 
@@ -49,7 +53,7 @@ int main(int argc, char *argv[]) {
     if (stop.timeus() >= (uint64_t)efu_args->stopafter * (uint64_t)ONE_SECOND_US) {
       sleep(2);
       XTRACE(MAIN, ALW, "Exiting...\n");
-      exit(1);
+      exithandler.Exit();
     }
 
     if (livestats.timeus() >= ONE_SECOND_US) {

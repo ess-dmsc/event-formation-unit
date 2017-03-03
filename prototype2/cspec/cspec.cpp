@@ -31,10 +31,6 @@
 #include <../streaming-data-types/build/schemas/f140_general_generated.h>
 #endif
 
-#define UNUSED __attribute__((unused))
-#define ALIGN(x) __attribute__((aligned(x)))
-//#define ALIGN(x)
-
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_CRI
 
@@ -283,7 +279,10 @@ void CSPEC::output_thread(void UNUSED *args) {
     if (produce >= kafka_buffer_size - 1000) {
       assert(produce < kafka_buffer_size);
 #ifndef NOKAFKA
+  #ifdef FLATBUFFERS
+  #else
       producer.produce(kafkabuffer, kafka_buffer_size);
+  #endif
       mystats.tx_bytes += kafka_buffer_size;
 #endif
       produce = 0;
