@@ -17,15 +17,15 @@ public:
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
    */
-  virtual void input_thread(void *arg __attribute__((unused))) {
+  virtual void input_thread() {
     printf("no input stage\n");
   }
 
-  virtual void processing_thread(void *arg __attribute__((unused))) {
+  virtual void processing_thread() {
     printf("no processing stage\n");
   }
 
-  virtual void output_thread(void *arg __attribute__((unused))) {
+  virtual void output_thread() {
     printf("no output stage\n");
   }
 

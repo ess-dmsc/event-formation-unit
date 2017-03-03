@@ -41,7 +41,7 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
   auto index = atoi(cmdargs.at(1).c_str());
   std::string name = efu_args->detectorif->statname(index);
   int64_t value = efu_args->detectorif->statvalue(index);
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET %s %" PRIi64 ,
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET %s %" PRIi64,
                      name.c_str(), value);
 
   return Parser::OK;

@@ -41,8 +41,8 @@ const char *classname = "CSPEC Detector (2 thread pipeline)";
 class CSPEC : public Detector {
 public:
   CSPEC(void *args);
-  void input_thread(void *args);
-  void processing_thread(void *args);
+  void input_thread();
+  void processing_thread();
 
   int statsize();
   int64_t statvalue(size_t index);
@@ -86,7 +86,7 @@ private:
   EFUArgs *opts;
 };
 
-CSPEC::CSPEC(UNUSED void *args) {
+CSPEC::CSPEC(void *args) {
   opts = (EFUArgs *)args;
 
   XTRACE(INIT, ALW, "Adding stats\n");
@@ -115,9 +115,7 @@ int64_t CSPEC::statvalue(size_t index) { return ns.value(index); }
 
 std::string &CSPEC::statname(size_t index) { return ns.name(index); }
 
-void CSPEC::input_thread(void *args) {
-  EFUArgs *opts = (EFUArgs *)args;
-
+void CSPEC::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
   UDPServer cspecdata(local);
@@ -163,9 +161,7 @@ void CSPEC::input_thread(void *args) {
   }
 }
 
-void CSPEC::processing_thread(void *args) {
-  EFUArgs *opts = (EFUArgs *)args;
-  assert(opts != NULL);
+void CSPEC::processing_thread() {
 
   CSPECChanConv conv;
 

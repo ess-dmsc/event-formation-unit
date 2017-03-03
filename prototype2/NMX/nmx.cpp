@@ -30,8 +30,8 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 class NMX : public Detector {
 public:
   NMX(void *args);
-  void input_thread(void *args);
-  void processing_thread(void *args);
+  void input_thread();
+  void processing_thread();
 
   int statsize();
   int64_t statvalue(size_t index);
@@ -72,7 +72,7 @@ private:
   EFUArgs *opts;
 };
 
-NMX::NMX(void *UNUSED args) {
+NMX::NMX(void *args) {
   opts = (EFUArgs *)args;
 
   XTRACE(INIT, ALW, "Adding stats\n");
@@ -101,9 +101,7 @@ int64_t NMX::statvalue(size_t index) { return ns.value(index); }
 
 std::string &NMX::statname(size_t index) { return ns.name(index); }
 
-void NMX::input_thread(void *args) {
-  EFUArgs *opts = (EFUArgs *)args;
-
+void NMX::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
   UDPServer nmxdata(local);
@@ -147,9 +145,7 @@ void NMX::input_thread(void *args) {
   }
 }
 
-void NMX::processing_thread(void *args) {
-  EFUArgs *opts = (EFUArgs *)args;
-  assert(opts != NULL);
+void NMX::processing_thread() {
 
 #ifndef NOKAFKA
   Producer producer(opts->broker, true, "NMX_detector");

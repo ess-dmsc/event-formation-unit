@@ -1,9 +1,9 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <test/TestBase.h>
 #include <cspec/CSPECChanConv.h>
 #include <cspec/CalibrationFile.h>
 #include <string>
+#include <test/TestBase.h>
 
 using namespace std;
 

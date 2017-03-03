@@ -7,9 +7,9 @@
 #include <efu/Launcher.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <libs/include/gccintel.h>
 #include <iostream>
 #include <libs/include/Timer.h>
+#include <libs/include/gccintel.h>
 #include <unistd.h> // sleep()
 #include <vector>
 
@@ -25,7 +25,8 @@ int main(int argc, char *argv[]) {
   efu_args = new EFUArgs(argc, argv);
 
 #ifdef GRAYLOG
-  Log::AddLogHandler(new GraylogInterface(efu_args->graylog_ip, efu_args->graylog_port));
+  Log::AddLogHandler(
+      new GraylogInterface(efu_args->graylog_ip, efu_args->graylog_port));
   Log::SetMinimumSeverity(Severity::Debug);
 #endif
   GLOG_INF("Starting efu2");
@@ -50,7 +51,8 @@ int main(int argc, char *argv[]) {
 
   Timer stop, livestats;
   while (1) {
-    if (stop.timeus() >= (uint64_t)efu_args->stopafter * (uint64_t)ONE_SECOND_US) {
+    if (stop.timeus() >=
+        (uint64_t)efu_args->stopafter * (uint64_t)ONE_SECOND_US) {
       sleep(2);
       XTRACE(MAIN, ALW, "Exiting...\n");
       exithandler.Exit();

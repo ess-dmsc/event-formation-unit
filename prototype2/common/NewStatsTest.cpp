@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <test/TestBase.h>
 #include <common/NewStats.h>
+#include <test/TestBase.h>
 
 class NewStatsTest : public TestBase {};
 

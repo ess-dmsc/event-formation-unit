@@ -22,10 +22,9 @@ public:
   Launcher(Loader *ld, std::vector<int> &cpus);
 
 private:
-  static void input_thread(Loader *load, EFUArgs *args);
-  static void processing_thread(Loader *load, EFUArgs *args);
-  static void output_thread(Loader *load, EFUArgs *args);
+  static void input_thread(Loader *load);
+  static void processing_thread(Loader *load);
+  static void output_thread(Loader *load);
 
-  void launch(int lcore, void (*func)(Loader *, EFUArgs *), Loader *ld,
-              EFUArgs *args);
+  void launch(int lcore, void (*func)(Loader *), Loader *ld);
 };

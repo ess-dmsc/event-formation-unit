@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <NMX/ParserClusterer.h>
-#include <string.h>
 #include <common/Trace.h>
+#include <string.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -12,12 +12,16 @@
 
 ParserClusterer::ParserClusterer() { data.resize(4); }
 
-void ParserClusterer::parse(unsigned int planeid, uint32_t timestamp, struct NMXVMM2SRSData::VMM2Data * data, size_t elements) {
+void ParserClusterer::parse(unsigned int planeid, uint32_t timestamp,
+                            struct NMXVMM2SRSData::VMM2Data *data,
+                            size_t elements) {
   Eventlet eventlet;
   for (unsigned int i = 0; i < elements; i++) {
-    XTRACE(PROCESS, DEB, "eventlet timestamp: hi 0x%08x, lo: 0x%08x\n", timestamp, (data[i].bcid << 16) +  data[i].tdc);
-    XTRACE(PROCESS, DEB, "eventlet  planeid: %d, strip: %d\n", planeid, data[i].chno);
-    eventlet.time = data[i].bcid * BCIDCLOCK +  (data[i].tdc*TACSLOPE/255);
+    XTRACE(PROCESS, DEB, "eventlet timestamp: hi 0x%08x, lo: 0x%08x\n",
+           timestamp, (data[i].bcid << 16) + data[i].tdc);
+    XTRACE(PROCESS, DEB, "eventlet  planeid: %d, strip: %d\n", planeid,
+           data[i].chno);
+    eventlet.time = data[i].bcid * BCIDCLOCK + (data[i].tdc * TACSLOPE / 255);
     eventlet.plane_id = planeid;   /**< @todo Geometry definitions */
     eventlet.strip = data[i].chno; /**< @todo Geometry definitions */
     eventlet.adc = data[i].adc;

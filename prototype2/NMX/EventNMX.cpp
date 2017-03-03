@@ -61,7 +61,8 @@ void EventNMX::push(const Eventlet &e) {
 
 void EventNMX::analyze(bool weighted, int16_t max_timebins,
                        int16_t max_timedif) {
-  XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu\n", x.entries.size(), y.entries.size());
+  XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu\n",
+         x.entries.size(), y.entries.size());
   if (x.entries.size()) {
     x.analyze(weighted, max_timebins, max_timedif);
   }

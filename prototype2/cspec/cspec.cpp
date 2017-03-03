@@ -44,10 +44,10 @@ const char *classname = "CSPEC Detector";
 
 class CSPEC : public Detector {
 public:
-  CSPEC(void *UNUSED args);
-  void input_thread(void *args);
-  void processing_thread(void *args);
-  void output_thread(void *args);
+  CSPEC(void *args);
+  void input_thread();
+  void processing_thread();
+  void output_thread();
 
   int statsize();
   int64_t statvalue(size_t index);
@@ -102,7 +102,7 @@ private:
   EFUArgs *opts;
 };
 
-CSPEC::CSPEC(void *UNUSED args) {
+CSPEC::CSPEC(void *args) {
   opts = (EFUArgs *)args;
 
   XTRACE(INIT, ALW, "Adding stats\n");
@@ -138,7 +138,7 @@ int64_t CSPEC::statvalue(size_t index) { return ns.value(index); }
 
 std::string &CSPEC::statname(size_t index) { return ns.name(index); }
 
-void CSPEC::input_thread(void UNUSED *args) {
+void CSPEC::input_thread() {
 
   /** Connection setup */
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
@@ -183,7 +183,7 @@ void CSPEC::input_thread(void UNUSED *args) {
   }
 }
 
-void CSPEC::processing_thread(void UNUSED *args) {
+void CSPEC::processing_thread() {
 
   CSPECChanConv conv;
   conv.makewirecal(0, CSPECChanConv::adcsize - 1, 128); // Linear look-up table
@@ -252,7 +252,7 @@ void CSPEC::processing_thread(void UNUSED *args) {
   }
 }
 
-void CSPEC::output_thread(void UNUSED *args) {
+void CSPEC::output_thread() {
 
 #ifndef NOKAFKA
   Producer producer(opts->broker, true, "C-SPEC_detector");
@@ -279,10 +279,10 @@ void CSPEC::output_thread(void UNUSED *args) {
     if (produce >= kafka_buffer_size - 1000) {
       assert(produce < kafka_buffer_size);
 #ifndef NOKAFKA
-  #ifdef FLATBUFFERS
-  #else
+#ifdef FLATBUFFERS
+#else
       producer.produce(kafkabuffer, kafka_buffer_size);
-  #endif
+#endif
       mystats.tx_bytes += kafka_buffer_size;
 #endif
       produce = 0;

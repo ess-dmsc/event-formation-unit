@@ -1,7 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <NMX/ParserClusterer.h>
-#include <nmxvmm2srs/NMXVMM2SRSData.h>
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
@@ -16,6 +15,7 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
+#include <nmxvmm2srs/NMXVMM2SRSData.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -34,8 +34,8 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 class NMXVMM2SRS : public Detector {
 public:
   NMXVMM2SRS(void *args);
-  void input_thread(void *args);
-  void processing_thread(void *args);
+  void input_thread();
+  void processing_thread();
 
   int statsize();
   int64_t statvalue(size_t index);
@@ -53,7 +53,8 @@ private:
 
   char kafkabuffer[kafka_buffer_size];
 
-  NewStats ns{"efu2.nmxvmm2srs."}; // Careful also uding this for other NMX pipeline
+  NewStats ns{
+      "efu2.nmxvmm2srs."}; // Careful also uding this for other NMX pipeline
 
   struct {
     // Input Counters
@@ -73,7 +74,7 @@ private:
   EFUArgs *opts;
 };
 
-NMXVMM2SRS::NMXVMM2SRS(void *UNUSED args) {
+NMXVMM2SRS::NMXVMM2SRS(void *args) {
   opts = (EFUArgs *)args;
 
   XTRACE(INIT, ALW, "Adding stats\n");
@@ -101,9 +102,7 @@ int64_t NMXVMM2SRS::statvalue(size_t index) { return ns.value(index); }
 
 std::string &NMXVMM2SRS::statname(size_t index) { return ns.name(index); }
 
-void NMXVMM2SRS::input_thread(void *args) {
-  EFUArgs *opts = (EFUArgs *)args;
-
+void NMXVMM2SRS::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
   UDPServer nmxdata(local);
@@ -145,10 +144,7 @@ void NMXVMM2SRS::input_thread(void *args) {
   }
 }
 
-
-void NMXVMM2SRS::processing_thread(void *args) {
-  EFUArgs *opts = (EFUArgs *)args;
-  assert(opts != NULL);
+void NMXVMM2SRS::processing_thread() {
 
 #ifndef NOKAFKA
   Producer producer(opts->broker, true, "NMX_detector");
@@ -170,7 +166,8 @@ void NMXVMM2SRS::processing_thread(void *args) {
       data.receive(eth_ringbuf->getdatabuffer(data_index),
                    eth_ringbuf->getdatalength(data_index));
       if (data.elems > 0) {
-        parser.parse(data.srshdr.dataid & 0xf, data.srshdr.time, data.data, data.elems);
+        parser.parse(data.srshdr.dataid & 0xf, data.srshdr.time, data.data,
+                     data.elems);
         mystats.rx_readouts += data.elems;
         mystats.rx_errbytes += data.error;
 
@@ -192,10 +189,10 @@ void NMXVMM2SRS::processing_thread(void *args) {
             if (evtoff >= kafka_buffer_size / 10 - 20) {
               assert(evtoff < kafka_buffer_size);
 
-  #ifndef NOKAFKA
+#ifndef NOKAFKA
               producer.produce(kafkabuffer, evtoff);
               mystats.tx_bytes += evtoff;
-  #endif
+#endif
               evtoff = 0;
             }
           } else {

@@ -1,11 +1,11 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <test/TestBase.h>
 #include <algorithm>
 #include <common/EFUArgs.h>
 #include <cstring>
 #include <efu/Parser.h>
 #include <memory>
+#include <test/TestBase.h>
 
 using namespace std;
 

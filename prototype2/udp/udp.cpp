@@ -11,8 +11,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#define UNUSED __attribute__((unused))
-
 using namespace std;
 const char *classname = "UDPRaw Detector";
 
@@ -20,13 +18,22 @@ const char *classname = "UDPRaw Detector";
 
 class UDPRaw : public Detector {
 public:
-  void input_thread(void *a);
-  UDPRaw(void UNUSED *args) { cout << "    UDPRaw created" << endl; };
-  ~UDPRaw() { cout << "    UDPRaw destroyed" << endl; };
+  UDPRaw(void *args);
+
+  ~UDPRaw() { cout << "    UDPRaw destroyed" << endl; }
+
+  void input_thread();
+
+private:
+  EFUArgs *opts;
 };
 
-void UDPRaw::input_thread(void *args) {
-  EFUArgs *opts = (EFUArgs *)args;
+UDPRaw::UDPRaw(void *args) {
+  opts = (EFUArgs *)args;
+  cout << "    UDPRaw created" << endl;
+}
+
+void UDPRaw::input_thread() {
   uint64_t rx_total = 0;
   uint64_t rx = 0;
   uint64_t rxp = 0;
