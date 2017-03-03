@@ -54,17 +54,17 @@ TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != nullptr); }
 
 TEST_F(DetectorTest, DefaultThreads) {
   testing::internal::CaptureStdout();
-  det->input_thread(dummyargs);
+  det->input_thread();
   std::string output = testing::internal::GetCapturedStdout();
   ASSERT_EQ(output, "no input stage\n");
 
   testing::internal::CaptureStdout();
-  det->processing_thread(dummyargs);
+  det->processing_thread();
   output = testing::internal::GetCapturedStdout();
   ASSERT_EQ(output, "no processing stage\n");
 
   testing::internal::CaptureStdout();
-  det->output_thread(dummyargs);
+  det->output_thread();
   output = testing::internal::GetCapturedStdout();
   ASSERT_EQ(output, "no output stage\n");
 }
