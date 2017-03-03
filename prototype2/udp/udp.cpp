@@ -39,8 +39,6 @@ void UDPRaw::input_thread() {
   uint64_t rxp = 0;
   const int B1M = 1000000;
 
-  assert(args != NULL);
-
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
   UDPServer raw(local);
   raw.printbuffers();
