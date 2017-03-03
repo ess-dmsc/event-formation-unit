@@ -27,10 +27,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#ifdef FLATBUFFERS
-#include <../streaming-data-types/build/schemas/f140_general_generated.h>
-#endif
-
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_CRI
 

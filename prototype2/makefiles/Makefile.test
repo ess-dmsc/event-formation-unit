@@ -4,7 +4,7 @@
 testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest
 testprogs += CSPECEventTest ParserTest EFUArgsTest CalibrationFileTest
 testprogs += MultiGridGeometryTest EventletTest NewStatsTest
-testprogs += NMXVMM2SRSDataTest
+testprogs += NMXVMM2SRSDataTest FBSerializerTest
 
 test: $(testprogs)
 	@echo "done building tests"
@@ -72,6 +72,12 @@ NewStatsTest: common/NewStatsTest.cpp common/NewStats.cpp common/NewStats.h
 EventletTest: NMX/EventletTest.cpp NMX/Eventlet.cpp NMX/Eventlet.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) NMX/EventletTest.cpp  NMX/Eventlet.cpp $(library) -o $@ $(ldflags_test)
+
+# common/
+
+FBSerializerTest: common/FBSerializerTest.cpp common/FBSerializer.cpp common/FBSerializer.h
+	@echo building $@
+	$(Q)g++ $(cxxflags_test) common/FBSerializerTest.cpp common/FBSerializer.cpp $(library) -o $@ $(ldflags_test)
 
 coverage:
 	$(Q)gcov -r -b -c *.gcda

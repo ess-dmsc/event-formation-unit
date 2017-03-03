@@ -29,10 +29,10 @@ nmxvmm2srs.so.inc += common/NewStats.h common/Producer.h nmxvmm2srs/NMXVMM2SRSDa
 
 
 cspec.so.src =  cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
-cspec.so.src += common/Producer.cpp common/NewStats.cpp
+cspec.so.src += common/Producer.cpp common/NewStats.cpp common/FBSerializer.cpp
 cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h common/MultiGridGeometry.h
 cspec.so.inc += common/Producer.h common/Trace.h
-cspec.so.inc += common/NewStats.h
+cspec.so.inc += common/NewStats.h common/FBSerializer.h
 
 cspec2.so.src =  cspec2/cspec2.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
 cspec2.so.src += common/Producer.cpp common/NewStats.cpp

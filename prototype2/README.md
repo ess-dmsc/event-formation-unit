@@ -58,8 +58,9 @@ On (Mortens) Ubuntu use the following arguments to build
     > make KAFKAINC=/usr/local/include KAFKALIB=/usr/lib64
 
 On (Mortens) Mac
-    > make  NOKAFKA=y HDF5=y HDF5INC=/usr/local/include HDF5LIB=/usr/local/lib
+    > make HDF5=y HDF5INC=/usr/local/include HDF5LIB=/usr/local/lib KAFKAINC=/usr/local/include  KAFKALIB=/usr/local/lib
     > make NOKAFKA=y
+
 
 ### Execution
 

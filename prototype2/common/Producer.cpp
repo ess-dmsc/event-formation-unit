@@ -3,7 +3,10 @@
 #ifndef NOKAFKA
 #include <cassert>
 #include <common/Producer.h>
+#include <libs/include/gccintel.h>
 #include <iostream>
+
+//using namespace BrightnESS::EventGenerator::FlatBufs::EFU;
 
 Producer::Producer(std::string broker, bool enabled, std::string topicstr) {
   using namespace std;
@@ -59,6 +62,7 @@ int Producer::produce(char *buffer, int length) {
 
   return 0;
 }
+
 
 int Producer::produce() {
 
