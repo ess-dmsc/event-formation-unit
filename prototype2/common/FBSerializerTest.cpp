@@ -17,7 +17,7 @@ TEST_F(FBSerializerTest, Serialize) {
 
   auto res = fb.serialize(0x1000000020000000, 1, (char * )tarr, (char *)parr, 125000, &buffer, &len);
   ASSERT_EQ(len, res);
-  ASSERET(buffer != 0);
+  ASSERT_TRUE(buffer != 0);
 }
 
 
