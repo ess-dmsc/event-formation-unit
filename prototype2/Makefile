@@ -17,14 +17,14 @@ library = ../libs/eventlib.a
 udp.so.src = udp/udp.cpp
 udp.so.inc = common/Detector.h
 
-nmx.so.src = NMX/nmx.cpp NMX/ParserClusterer.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp
+nmx.so.src = NMX/nmx.cpp NMX/Parser.cpp NMX/Clusterer.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp
 nmx.so.src += common/NewStats.cpp common/Producer.cpp
-nmx.so.inc = common/Detector.h NMX/ParserClusterer.h NMX/EventNMX.h NMX/Eventlet.h
+nmx.so.inc = common/Detector.h NMX/Parser.h NMX/Clusterer.h NMX/EventNMX.h NMX/Eventlet.h
 nmx.so.inc += common/NewStats.h common/Producer.h
 
-nmxvmm2srs.so.src = nmxvmm2srs/nmxvmm2srs.cpp nmxvmm2srs/NMXVMM2SRSData.cpp NMX/ParserClusterer.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp
+nmxvmm2srs.so.src = nmxvmm2srs/nmxvmm2srs.cpp nmxvmm2srs/NMXVMM2SRSData.cpp NMX/Parser.cpp NMX/Clusterer.cpp NMX/Geometry.cpp NMX/Time.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp
 nmxvmm2srs.so.src += common/NewStats.cpp common/Producer.cpp
-nmxvmm2srs.so.inc = common/Detector.h NMX/ParserClusterer.h NMX/EventNMX.h NMX/Eventlet.h
+nmxvmm2srs.so.inc = common/Detector.h NMX/Parser.h NMX/Clusterer.h NMX/Geometry.h NMX/Time.h NMX/EventNMX.h NMX/Eventlet.h
 nmxvmm2srs.so.inc += common/NewStats.h common/Producer.h nmxvmm2srs/NMXVMM2SRSData.h
 
 

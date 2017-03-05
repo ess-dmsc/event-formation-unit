@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <NMX/ParserClusterer.h>
+#include <NMX/Parser.h>
+#include <NMX/Clusterer.h>
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
@@ -159,8 +160,9 @@ void NMX::processing_thread(void *args) {
   Producer producer(opts->broker, true, "NMX_detector");
 #endif
 
-  ParserClusterer parser;
-
+  Parser parser;
+  Clusterer clusterer(30); /**< @todo not hardocde */
+  
   Timer stopafter_clock;
   TSCTimer report_timer;
 
@@ -172,8 +174,8 @@ void NMX::processing_thread(void *args) {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      parser.parse(eth_ringbuf->getdatabuffer(data_index),
-                   eth_ringbuf->getdatalength(data_index));
+      clusterer.insert(parser.parse(eth_ringbuf->getdatabuffer(data_index),
+                                    eth_ringbuf->getdatalength(data_index)));
 
       unsigned int readouts = eth_ringbuf->getdatalength(data_index) /
                               (sizeof(uint32_t) * 4); /**< @todo not hardocde */
@@ -181,8 +183,8 @@ void NMX::processing_thread(void *args) {
       mystats.rx_readouts += readouts;
       mystats.rx_error_bytes += 0;
 
-      while (parser.event_ready()) {
-        auto event = parser.get();
+      while (clusterer.event_ready()) {
+        auto event = clusterer.get();
         event.analyze(true, 3, 7);
         if (event.good) {
           // image[c2d(static_cast<uint32_t>(event.x.center),

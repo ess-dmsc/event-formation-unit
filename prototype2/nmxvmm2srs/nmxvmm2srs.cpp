@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <NMX/ParserClusterer.h>
+#include <NMX/Parser.h>
+#include <NMX/Clusterer.h>
 #include <nmxvmm2srs/NMXVMM2SRSData.h>
 #include <cinttypes>
 #include <common/Detector.h>
@@ -159,7 +160,8 @@ void NMXVMM2SRS::processing_thread(void *args) {
 #endif
 
   NMXVMM2SRSData data(1125);
-  ParserClusterer parser;
+  Parser parser;
+  Clusterer clusterer(30); /**< @todo not hardocde */
 
   Timer stopafter_clock;
   TSCTimer report_timer;
@@ -174,13 +176,13 @@ void NMXVMM2SRS::processing_thread(void *args) {
       data.receive(eth_ringbuf->getdatabuffer(data_index),
                    eth_ringbuf->getdatalength(data_index));
       if (data.elems > 0) {
-        parser.parse(data.srshdr.dataid & 0xf, data.srshdr.time, data.data, data.elems);
+        clusterer.insert(parser.parse(data.srshdr.dataid & 0xf, data.srshdr.time, data.data, data.elems));
         mystats.rx_readouts += data.elems;
         mystats.rx_errbytes += data.error;
 
-        while (parser.event_ready()) {
+        while (clusterer.event_ready()) {
           XTRACE(PROCESS, WAR, "event_ready()\n");
-          auto event = parser.get();
+          auto event = clusterer.get();
           event.analyze(true, 3, 7);
           if (event.good) {
             XTRACE(PROCESS, WAR, "event.good\n");
