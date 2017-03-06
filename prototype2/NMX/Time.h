@@ -6,10 +6,15 @@
 
 class Time {
 public:
-  double timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) const;
-  uint16_t timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) const;
+  void set_bc_clock(double bc_clock);
+  void set_tac_slope(double tac_slope);
+  void set_trigger_resolution(double trigger_resolution);
+  void set_target_resolution(double target_resolution);
 
-//private:
+  double timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) const;
+  uint64_t timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) const;
+
+private:
   double bc_clock_ {40};
   double tac_slope_ {125};
   double trigger_resolution_ {3.125};

@@ -2,7 +2,6 @@
 
 #include <cinttypes>
 #include <string>
-#include <vector>
 
 struct Eventlet {
   uint64_t time{0};
@@ -13,10 +12,4 @@ struct Eventlet {
   bool over_threshold{false};
 
   std::string debug() const;
-
-  void write_packet(std::vector<uint32_t> &packet) const;
-  void read_packet(const std::vector<uint32_t> &packet);
-
-  std::vector<uint32_t> to_packet() const;
-  static Eventlet from_packet(const std::vector<uint32_t> &packet);
 };

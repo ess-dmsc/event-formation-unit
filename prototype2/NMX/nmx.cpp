@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <NMX/Parser.h>
+#include <nmxgen/EventletBuilderH5.h>
 #include <NMX/Clusterer.h>
 #include <cinttypes>
 #include <common/Detector.h>
@@ -160,7 +160,7 @@ void NMX::processing_thread(void *args) {
   Producer producer(opts->broker, true, "NMX_detector");
 #endif
 
-  Parser parser;
+  EventletBuilderH5 builder;
   Clusterer clusterer(30); /**< @todo not hardocde */
   
   Timer stopafter_clock;
@@ -174,24 +174,20 @@ void NMX::processing_thread(void *args) {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      clusterer.insert(parser.parse(eth_ringbuf->getdatabuffer(data_index),
-                                    eth_ringbuf->getdatalength(data_index)));
-
-      unsigned int readouts = eth_ringbuf->getdatalength(data_index) /
-                              (sizeof(uint32_t) * 4); /**< @todo not hardocde */
+      uint32_t readouts = builder.parse(eth_ringbuf->getdatabuffer(data_index),
+                                        eth_ringbuf->getdatalength(data_index),
+                                        clusterer);
 
       mystats.rx_readouts += readouts;
       mystats.rx_error_bytes += 0;
 
       while (clusterer.event_ready()) {
-        auto event = clusterer.get();
-        event.analyze(true, 3, 7);
-        if (event.good) {
-          // image[c2d(static_cast<uint32_t>(event.x.center),
-          //          static_cast<uint32_t>(event.y.center))]++;
+        auto event = clusterer.get_event();
+        event.analyze(true, 3, 7); /**< @todo not hardocde */
+        if (event.good()) {
           mystats.rx_events++;
 
-          int time = 42; /**< @todo get time from ? */
+          int time = 42; /**< @todo get time from event.time_start() */
           int pixelid = (int)event.x.center + (int)event.y.center * 256;
 
           std::memcpy(kafkabuffer + evtoff, &time, sizeof(time));

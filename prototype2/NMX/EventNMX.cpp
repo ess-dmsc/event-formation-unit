@@ -2,11 +2,14 @@
 
 #include <NMX/EventNMX.h>
 #include <common/Trace.h>
+#include <limits>
+#include <numeric>
+#include <set>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-void PlaneNMX::push(const Eventlet &e) {
+void PlaneNMX::insert_eventlet(const Eventlet &e) {
   if (!e.adc)
     return;
   if (entries.empty())
@@ -52,11 +55,11 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
   uncert_upper = uspan_max - uspan_min;
 }
 
-void EventNMX::push(const Eventlet &e) {
-  if (e.plane_id)
-    y.push(e);
+void EventNMX::insert_eventlet(const Eventlet &e) {
+  if (e.plane_id) /**< @todo deal with multiple panels */
+    y.insert_eventlet(e);
   else
-    x.push(e);
+    x.insert_eventlet(e);
 }
 
 void EventNMX::analyze(bool weighted, int16_t max_timebins,
@@ -68,5 +71,13 @@ void EventNMX::analyze(bool weighted, int16_t max_timebins,
   if (y.entries.size()) {
     y.analyze(weighted, max_timebins, max_timedif);
   }
-  good = x.entries.size() && y.entries.size();
+  good_ = x.entries.size() && y.entries.size();
+  if (good_) {
+    time_start_ = std::min(x.time_start, y.time_start);
+  }
 }
+
+bool EventNMX::good() const {
+  return good_;
+}
+

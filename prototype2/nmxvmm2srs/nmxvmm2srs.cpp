@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <NMX/Parser.h>
 #include <NMX/Clusterer.h>
 #include <nmxvmm2srs/NMXVMM2SRSData.h>
+#include <nmxvmm2srs/EventletBuilder.h>
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
@@ -160,7 +160,19 @@ void NMXVMM2SRS::processing_thread(void *args) {
 #endif
 
   NMXVMM2SRSData data(1125);
-  Parser parser;
+
+  Time time_interpreter;
+  time_interpreter.set_tac_slope(125); /**< @todo get from slow control? */
+  time_interpreter.set_bc_clock(40);   /**< @todo get from slow control? */
+  time_interpreter.set_trigger_resolution(3.125); /**< @todo get from slow control? */
+  time_interpreter.set_target_resolution(0.5); /**< @todo not hardcode */
+
+  Geometry geometry_intepreter; /**< @todo not hardocde chip mappings */
+  geometry_intepreter.define_plane(0, { {1,0},  {1,1},  {1,6}, {1,7} });
+  geometry_intepreter.define_plane(1, {{1,10}, {1,11}, {1,14}, {1,15}});
+  
+  EventletBuilder builder(time_interpreter, geometry_intepreter);
+
   Clusterer clusterer(30); /**< @todo not hardocde */
 
   Timer stopafter_clock;
@@ -176,19 +188,20 @@ void NMXVMM2SRS::processing_thread(void *args) {
       data.receive(eth_ringbuf->getdatabuffer(data_index),
                    eth_ringbuf->getdatalength(data_index));
       if (data.elems > 0) {
-        clusterer.insert(parser.parse(data.srshdr.dataid & 0xf, data.srshdr.time, data.data, data.elems));
+        builder.parse(data, clusterer);
+
         mystats.rx_readouts += data.elems;
         mystats.rx_errbytes += data.error;
 
         while (clusterer.event_ready()) {
           XTRACE(PROCESS, WAR, "event_ready()\n");
-          auto event = clusterer.get();
-          event.analyze(true, 3, 7);
-          if (event.good) {
+          auto event = clusterer.get_event();
+          event.analyze(true, 3, 7); /**< @todo not hardocde */
+          if (event.good()) {
             XTRACE(PROCESS, WAR, "event.good\n");
             mystats.rx_events++;
 
-            int time = 42; /**< @todo get time from ? */
+            int time = 42; /**< @todo get time from event.time_start() */
             int pixelid = (int)event.x.center + (int)event.y.center * 256;
 
             std::memcpy(kafkabuffer + evtoff, &time, sizeof(time));

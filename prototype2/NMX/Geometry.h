@@ -9,7 +9,7 @@
 #define VMM_TOTAL_CHANNELS 64
 #define VMM_INVALID ((uint16_t)(int16_t)(-1))
 
-class Geometry1 {
+class Geometry {
 public:
 
   void define_plane(uint16_t planeID,

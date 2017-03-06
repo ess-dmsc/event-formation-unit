@@ -8,13 +8,10 @@
 #pragma once
 
 #include <NMX/Eventlet.h>
-#include <limits>
 #include <list>
-#include <numeric>
-#include <set>
 
 struct PlaneNMX {
-  void push(const Eventlet &e);
+  void insert_eventlet(const Eventlet &e);
   void analyze(bool weighted, uint16_t max_timebins, uint16_t max_timedif);
 
   double center;
@@ -26,10 +23,17 @@ struct PlaneNMX {
   std::list<Eventlet> entries;
 };
 
-struct EventNMX {
-  void push(const Eventlet &e);
+class EventNMX {
+public:
+  void insert_eventlet(const Eventlet &e);
   void analyze(bool weighted, int16_t max_timebins, int16_t max_timedif);
 
-  bool good{false};
+  bool good() const;
+  uint64_t time_start() const;
+
   PlaneNMX x, y;
+
+private:
+  bool good_{false};
+  uint64_t time_start_;
 };

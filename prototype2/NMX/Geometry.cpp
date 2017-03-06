@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <NMX/Geometry1.h>
+#include <NMX/Geometry.h>
 
-void Geometry1::define_plane(uint16_t planeID,
+void Geometry::define_plane(uint16_t planeID,
                                 std::initializer_list<std::pair<uint16_t, uint16_t>> chips)
 {
   int offset = 0;
@@ -13,7 +13,7 @@ void Geometry1::define_plane(uint16_t planeID,
   }
 }
 
-void Geometry1::set_mapping(uint16_t fecID, uint16_t vmmID,
+void Geometry::set_mapping(uint16_t fecID, uint16_t vmmID,
                                uint16_t planeID, uint16_t strip_offset)
 {
   if (vmmID > 15)
@@ -33,7 +33,7 @@ void Geometry1::set_mapping(uint16_t fecID, uint16_t vmmID,
   planes_[fecID][vmmID] = planeID;
 }
 
-uint32_t Geometry1::get_strip_ID(uint16_t fecID, uint16_t vmmID,
+uint32_t Geometry::get_strip_ID(uint16_t fecID, uint16_t vmmID,
                                     uint32_t channelID) const 
 {
   if ((fecID < offsets_.size()) &&
@@ -44,7 +44,7 @@ uint32_t Geometry1::get_strip_ID(uint16_t fecID, uint16_t vmmID,
     return VMM_INVALID;
 }
 
-uint32_t Geometry1::get_plane_ID(uint16_t fecID, uint16_t vmmID) const 
+uint32_t Geometry::get_plane_ID(uint16_t fecID, uint16_t vmmID) const 
 {
   if ((fecID < planes_.size()) &&
       (vmmID < planes_.at(fecID).size()) &&
