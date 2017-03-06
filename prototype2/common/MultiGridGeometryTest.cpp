@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <test/TestBase.h>
 #include <common/MultiGridGeometry.h>
 #include <libs/include/TSCTimer.h>
+#include <test/TestBase.h>
 
 using namespace std;
 

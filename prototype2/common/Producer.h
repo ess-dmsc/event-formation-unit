@@ -10,6 +10,7 @@
 #ifndef NOKAFKA
 #include <librdkafka/rdkafkacpp.h>
 
+
 class Producer {
 public:
   /** @brief Construct a producer object.
@@ -29,6 +30,9 @@ public:
    *  @param length Size of buffer data in bytes
    */
   int produce(char *buffer, int length);
+
+  /** preparing for flatbuffers */
+  int produce(uint64_t time, char *buffer, size_t length, size_t entries);
 
 private:
   std::string errstr;

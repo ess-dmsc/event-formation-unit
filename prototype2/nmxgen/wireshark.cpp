@@ -8,11 +8,11 @@
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>
-#include <string>
-#include <string.h>
-#include <nmxgen/ReaderPcap.h>
-#include <nmxgen/NMXArgs.h>
 #include <libs/include/Socket.h>
+#include <nmxgen/NMXArgs.h>
+#include <nmxgen/ReaderPcap.h>
+#include <string.h>
+#include <string>
 
 int main(int argc, char *argv[]) {
   NMXArgs opts(argc, argv);
@@ -26,7 +26,6 @@ int main(int argc, char *argv[]) {
   DataSource.setbuffers(1000000, 0);
   DataSource.printbuffers();
 
-
   std::string pcapfile(opts.filename);
   ReaderPcap pcap(pcapfile);
 
@@ -34,7 +33,7 @@ int main(int argc, char *argv[]) {
   uint64_t packets = 0;
   while ((rdsize = pcap.read((char *)&buffer, sizeof(buffer))) != -1) {
     if (rdsize == 0)
-       continue; // non udp data
+      continue; // non udp data
 
     DataSource.send(buffer, rdsize);
     packets++;
@@ -43,10 +42,9 @@ int main(int argc, char *argv[]) {
       pcap.printstats();
       exit(0);
     }
-
   }
   printf("Sent %" PRIu64 " packets, exiting...\n", packets);
-  //pcap.printstats();
+  // pcap.printstats();
 
   return 0;
 }

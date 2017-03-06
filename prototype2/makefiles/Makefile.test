@@ -3,8 +3,10 @@
 
 testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest
 testprogs += CSPECEventTest ParserTest EFUArgsTest CalibrationFileTest
+
 testprogs += MultiGridGeometryTest EventletTest NewStatsTest EventTest
-testprogs += NMXVMM2SRSDataTest ClustererTest TimeTest GeometryTest
+testprogs += NMXVMM2SRSDataTest ClustererTest TimeTest GeometryTest FBSerializerTest
+
 
 test: $(testprogs)
 	@echo "done building tests"
@@ -73,7 +75,8 @@ EventletTest: NMX/EventletTest.cpp NMX/Eventlet.cpp NMX/Eventlet.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) NMX/EventletTest.cpp  NMX/Eventlet.cpp $(library) -o $@ $(ldflags_test)
 
-EventTest: NMX/EventTest.cpp NMX/EventNMX.cpp NMX/EventNMX.h 
+
+EventTest: NMX/EventTest.cpp NMX/EventNMX.cpp NMX/EventNMX.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) NMX/EventTest.cpp NMX/EventNMX.cpp $(library) -o $@ $(ldflags_test)
 
@@ -81,13 +84,19 @@ ClustererTest: NMX/ClustererTest.cpp NMX/Clusterer.cpp NMX/Clusterer.h NMX/Event
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) NMX/ClustererTest.cpp NMX/EventNMX.cpp NMX/Clusterer.cpp $(library) -o $@ $(ldflags_test)
 
-TimeTest: NMX/TimeTest.cpp NMX/Time.cpp NMX/Time.h 
+TimeTest: NMX/TimeTest.cpp NMX/Time.cpp NMX/Time.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) NMX/TimeTest.cpp NMX/Time.cpp $(library) -o $@ $(ldflags_test)
 
-GeometryTest: NMX/GeometryTest.cpp NMX/Geometry.cpp NMX/Geometry.h 
+GeometryTest: NMX/GeometryTest.cpp NMX/Geometry.cpp NMX/Geometry.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) NMX/GeometryTest.cpp NMX/Geometry.cpp $(library) -o $@ $(ldflags_test)
+
+# common/
+
+FBSerializerTest: common/FBSerializerTest.cpp common/FBSerializer.cpp common/FBSerializer.h
+	@echo building $@
+	$(Q)g++ $(cxxflags_test) common/FBSerializerTest.cpp common/FBSerializer.cpp $(library) -o $@ $(ldflags_test)
 
 coverage:
 	$(Q)gcov -r -b -c *.gcda

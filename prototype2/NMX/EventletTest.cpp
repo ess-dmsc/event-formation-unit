@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <test/TestBase.h>
 #include <NMX/Eventlet.h>
 #include <string>
+#include <test/TestBase.h>
 #include <unistd.h>
 
 class EventletTest : public TestBase {

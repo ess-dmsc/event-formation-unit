@@ -12,26 +12,21 @@ using namespace std;
 /** Can't call detector threads directly from std:thread as
  *  they are virtual functions, so need to add one step.
  */
-void Launcher::input_thread(Loader *load, EFUArgs *args) {
-  load->detector->input_thread(args);
+void Launcher::input_thread(Loader *load) { load->detector->input_thread(); }
+
+void Launcher::processing_thread(Loader *load) {
+  load->detector->processing_thread();
 }
 
-void Launcher::processing_thread(Loader *load, EFUArgs *args) {
-  load->detector->processing_thread(args);
-}
-
-void Launcher::output_thread(Loader *load, EFUArgs *args) {
-  load->detector->output_thread(args);
-}
+void Launcher::output_thread(Loader *load) { load->detector->output_thread(); }
 
 /** Create a thread 'func()', set its cpu affinity and calls join() */
-void Launcher::launch(int __attribute__((unused)) lcore,
-                      void (*func)(Loader *, EFUArgs *), Loader *ld,
-                      EFUArgs *args) {
+void Launcher::launch(int __attribute__((unused)) lcore, void (*func)(Loader *),
+                      Loader *ld) {
 #ifdef __linux__
   std::thread *t =
 #endif
-      new std::thread(func, ld, args);
+      new std::thread(func, ld);
 
 #ifdef __linux__
   cpu_set_t cpuset;
@@ -53,7 +48,7 @@ Launcher::Launcher(Loader *dynamic, std::vector<int> &cpus) {
     return;
   }
 
-  launch(cpus[0], input_thread, dynamic, efu_args);
-  launch(cpus[2], output_thread, dynamic, efu_args);
-  launch(cpus[1], processing_thread, dynamic, efu_args);
+  launch(cpus[0], input_thread, dynamic);
+  launch(cpus[2], output_thread, dynamic);
+  launch(cpus[1], processing_thread, dynamic);
 }

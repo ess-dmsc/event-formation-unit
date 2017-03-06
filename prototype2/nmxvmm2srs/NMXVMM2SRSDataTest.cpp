@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <vector>
-#include <test/TestBase.h>
 #include <nmxvmm2srs/NMXVMM2SRSData.h>
+#include <test/TestBase.h>
+#include <vector>
 
 using namespace std;
 
@@ -35,8 +35,8 @@ vector<vector<uint8_t>> err_usize{err_usize1, err_usize3, err_usize4, err_usize7
 class NMXVMM2SRSDataTest : public TestBase {
 
 protected:
-  NMXVMM2SRSData * data;
-  virtual void SetUp() { data = new NMXVMM2SRSData(1125);}
+  NMXVMM2SRSData *data;
+  virtual void SetUp() { data = new NMXVMM2SRSData(1125); }
   virtual void TearDown() { delete data; }
 };
 
@@ -67,7 +67,7 @@ TEST_F(NMXVMM2SRSDataTest, NoData) {
 TEST_F(NMXVMM2SRSDataTest, UnknownData) {
   int res = data->receive((char *)&unknown_data[0], unknown_data.size());
   ASSERT_EQ(res, 0);
-    ASSERT_EQ(data->error, unknown_data.size());
+  ASSERT_EQ(data->error, unknown_data.size());
 }
 
 TEST_F(NMXVMM2SRSDataTest, EndOfFrame) {
@@ -78,19 +78,20 @@ TEST_F(NMXVMM2SRSDataTest, EndOfFrame) {
 }
 
 TEST_F(NMXVMM2SRSDataTest, DataSizeError) {
-  std::vector<int> badsizes = {13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24, 25, 26, 27, 29, 30, 31, 32, 33, 34, 35};
+  std::vector<int> badsizes = {13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24,
+                               25, 26, 27, 29, 30, 31, 32, 33, 34, 35};
   std::vector<int> goodsizes = {20, 28, 36};
   for (auto datasize : badsizes) {
     int res = data->receive((char *)&data_3_ch0[0], datasize);
-      ASSERT_EQ(res, 0);
-      ASSERT_EQ(data->error, datasize);
-      ASSERT_EQ(data->elems, 0);
+    ASSERT_EQ(res, 0);
+    ASSERT_EQ(data->error, datasize);
+    ASSERT_EQ(data->elems, 0);
   }
   for (auto datasize : goodsizes) {
     int res = data->receive((char *)&data_3_ch0[0], datasize);
-      ASSERT_EQ(res, (datasize-12)/8);
-      ASSERT_EQ(data->error, 0);
-      ASSERT_EQ(data->elems, (datasize-12)/8);
+    ASSERT_EQ(res, (datasize - 12) / 8);
+    ASSERT_EQ(data->error, 0);
+    ASSERT_EQ(data->elems, (datasize - 12) / 8);
   }
 }
 
