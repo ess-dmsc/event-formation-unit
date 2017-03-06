@@ -9,6 +9,8 @@ import struct, codecs
 import pylab as pl
 import numpy
 import matplotlib.pyplot as plt
+from EventMessage import EventMessage
+
 
 class Proj:
     def __init__(self):
@@ -17,14 +19,26 @@ class Proj:
         self.z = 16
         self.clear()
 
+
     def coords(self, pixel):
         x = (pixel - 1) / (self.y * self.z)
         y = (pixel - 1) / self.z % self.y
         z = (pixel - 1) % self.z
         return [x,y,z]
 
+    def addpixels(self, pixel):
+        x,y,z = self.coords(pixel)
+
+        #print("pixel: %d, x, y, z: %d, %d, %d\n" % (pixel, x, y, z))
+        for i in range(len(x)):
+            self.xy[y[i],x[i]] += 1
+            self.zy[y[i],z[i]] += 1
+            self.xz[self.z - z[i] - 1,x[i]] += 1
+
     def addpixel(self, pixel):
         x,y,z = self.coords(pixel)
+
+        #print("pixel: %d, x, y, z: %d, %d, %d\n" % (pixel, x, y, z))
 
         self.xy[y,x] += 1
         self.zy[y,z] += 1
@@ -58,7 +72,6 @@ class Proj:
         pl.pause(0.001)
 
 
-
 def main():
     proj = Proj()
 
@@ -73,35 +86,30 @@ def main():
 
     client = KafkaClient(hosts=args.b)
     topic = client.topics[codecs.encode(args.t, "utf-8")]
-    consumer = topic.get_simple_consumer(fetch_message_max_bytes = 1024 * 1024 * 50, consumer_group=codecs.encode(args.t, "utf-8"), auto_offset_reset=OffsetType.LATEST, reset_offset_on_start=True, consumer_timeout_ms=50)
+    consumer = topic.get_simple_consumer(fetch_message_max_bytes = 1024 * 1024 * 50,
+       consumer_group=codecs.encode(args.t, "utf-8"), auto_offset_reset=OffsetType.LATEST,
+       reset_offset_on_start=True, consumer_timeout_ms=50)
 
     print("Starting main loop")
 
-    plotint = 1
-    plotevery =  plotint
-    maxoffset = 0
-    minoffset = 999999999
-    plotrange = 80000
+    clearplotafter = 5
     while (True):
         try:
             msg = consumer.consume(block = True)
             if (msg != None):
-
                 a = bytearray(msg.value)
-                for i in range(plotrange):
-                    pixel = a[i*12 +5]*256 + a[i*12 +4]
-                    #assert ?
-                    proj.addpixel(pixel)
-                plotevery -= 1
-                maxoffset = max(msg.offset, maxoffset)
-                minoffset = min(msg.offset, minoffset)
-                if plotevery == 0:
-                    proj.plot("events: " + str(plotint * plotrange) + ", offset: " + str(minoffset) + "-" + str(maxoffset))
-                    proj.clear()
-                    minoffset = 999999999
-                    plotevery = plotint
-                #print("data: %02x %02x %02x %02x, %02x %02x %02x %02x " %
-                #      (a[0], a[1], a[2], a[3], a[4], a[5], a[6], a[7]))
+                arr = EventMessage.GetRootAsEventMessage(a, 0)
+                print(arr.MessageId())
+                print(arr.PulseTime())
+                print(arr.DetectorIdLength())
+
+                pixels_raw = arr.DetectorId_as_numpy_array()
+                pixels = pixels_raw.view(numpy.uint32)
+
+                proj.addpixels(pixels)
+
+                proj.plot("events")
+                proj.clear()
             else:
                 pass
         except KeyboardInterrupt:

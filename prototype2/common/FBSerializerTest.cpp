@@ -12,12 +12,11 @@ TEST_F(FBSerializerTest, Serialize) {
   uint32_t tarr[200000];
   uint32_t parr[200000];
 
-  unsigned char *buffer = 0;
-  size_t len = 0;
+  char *buffer = 0;
 
   auto res = fb.serialize(0x1000000020000000, 1, (char *)tarr, (char *)parr,
-                          125000, &buffer, &len);
-  ASSERT_EQ(len, res);
+                          125000, &buffer);
+  ASSERT_TRUE(res >= 125000 * 8);
   ASSERT_TRUE(buffer != 0);
 }
 

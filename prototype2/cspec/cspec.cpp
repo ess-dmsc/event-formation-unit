@@ -7,6 +7,7 @@
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
+#include <common/FBSerializer.h>
 #include <common/MultiGridGeometry.h>
 #include <common/NewStats.h>
 #include <common/Producer.h>
@@ -28,7 +29,7 @@
 #include <unistd.h>
 
 //#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_CRI
+//#define TRC_LEVEL TRC_L_DEB
 
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
@@ -54,7 +55,7 @@ public:
   static const int eth_buffer_size = 9000;
   static const int event_buffer_max_entries = 200 * eth_buffer_max_entries;
   static const int event_buffer_size = 12;
-  static const int kafka_buffer_size = 1000000;
+  static const int kafka_buffer_size = 124000; /**< events */
 
 private:
   /** Shared between input_thread and processing_thread*/
@@ -67,7 +68,8 @@ private:
 
   std::mutex eventq_mutex, cout_mutex;
 
-  char kafkabuffer[kafka_buffer_size];
+  uint32_t pixelbuffer[kafka_buffer_size]; /**< @todo not hard code */
+  uint32_t timebuffer[kafka_buffer_size]; /**< @todo not hard code */
 
   NewStats ns{"efu2.cspec."};
 
@@ -257,6 +259,7 @@ void CSPEC::output_thread() {
   unsigned int event_index;
   Timer stop;
   TSCTimer report_timer;
+  FBSerializer flatbuffer(kafka_buffer_size); // Leaves room for fb overhead and still < 1MB
 
   uint64_t produce = 0;
   while (1) {
@@ -264,22 +267,23 @@ void CSPEC::output_thread() {
       mystats.rx_idle2++;
       usleep(10);
     } else {
-      std::memcpy(kafkabuffer + produce,
-                  event_ringbuf->getdatabuffer(event_index),
-                  8 /**< @todo not hardcode */);
+      auto evbuf = event_ringbuf->getdatabuffer(event_index);
+      XTRACE(OUTPUT, DEB, "output pixel: %d\n", *(uint32_t *)(evbuf + 4));
+      pixelbuffer[produce] = *(uint32_t *)(evbuf + 4);
+      timebuffer[produce] = *(uint32_t *)(evbuf + 0);
       mystats.rx_events++;
-      produce += 12; /**< @todo should match actual data size */
+      produce++;
     }
 
     /** Produce when enough data has been accumulated */
-    if (produce >= kafka_buffer_size - 1000) {
-      assert(produce < kafka_buffer_size);
+    if (produce >= kafka_buffer_size) {
 #ifndef NOKAFKA
-#ifdef FLATBUFFERS
-#else
-      producer.produce(kafkabuffer, kafka_buffer_size);
-#endif
-      mystats.tx_bytes += kafka_buffer_size;
+      char * txbuffer;
+      XTRACE(OUTPUT, DEB, "produce %d\n", produce);
+      auto txlen = flatbuffer.serialize((uint64_t)0x01, (uint64_t)0x02, (char*)timebuffer, (char*)pixelbuffer, produce, &txbuffer);
+      XTRACE(OUTPUT, DEB, "Flatbuffer tx length %lu\n", txlen);
+      producer.produce(txbuffer, txlen);
+      mystats.tx_bytes += txlen;
 #endif
       produce = 0;
     }

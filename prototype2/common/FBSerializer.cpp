@@ -13,23 +13,22 @@ FBSerializer::~FBSerializer() {}
 
 int FBSerializer::serialize(uint64_t time, uint64_t seqno, char *timearr,
                             char *pixarr, size_t entries,
-                            unsigned char **buffer, size_t *reslen) {
+                            char **buffer) {
   assert(entries <= maxlen);
 
   builder.Clear();
 
   auto timeoff =
-      builder.CreateUninitializedVector(entries * TIMESIZE, 1, &timeptr);
+      builder.CreateUninitializedVector(entries, TIMESIZE, &timeptr);
   std::memcpy(timeptr, timearr, entries * TIMESIZE);
 
   auto pixeloff =
-      builder.CreateUninitializedVector(entries * PIXELSIZE, 1, &pixelptr);
+      builder.CreateUninitializedVector(entries, PIXELSIZE, &pixelptr);
   std::memcpy(pixelptr, pixarr, entries * PIXELSIZE);
 
   auto msg = CreateEventMessage(builder, 0, seqno, time, timeoff, pixeloff);
 
   builder.Finish(msg);
-  *buffer = builder.GetBufferPointer();
-  *reslen = builder.GetSize();
-  return *reslen;
+  *buffer = (char *)builder.GetBufferPointer();
+  return builder.GetSize();
 }
