@@ -18,8 +18,8 @@ public:
   void set_mapping(uint16_t fecID, uint16_t vmmID,
                    uint16_t planeID, uint16_t strip_offset);
 
-  uint32_t get_strip_ID(uint16_t fecID, uint16_t vmmID, uint32_t channelID) const;
-  uint32_t get_plane_ID(uint16_t fecID, uint16_t vmmID) const;
+  uint16_t get_strip_ID(uint16_t fecID, uint16_t vmmID, uint32_t channelID) const;
+  uint16_t get_plane_ID(uint16_t fecID, uint16_t vmmID) const;
 
 private:
   std::vector<std::vector<uint16_t>> offsets_;

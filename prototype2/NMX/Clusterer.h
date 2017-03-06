@@ -10,7 +10,7 @@ class Clusterer {
 public:
   Clusterer(uint64_t min_time_span);
 
-  void insert(const Eventlet& events);
+  void insert(const Eventlet& eventlet);
 
   /** @todo Martin document */
   bool event_ready() const;

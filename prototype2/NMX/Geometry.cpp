@@ -33,7 +33,7 @@ void Geometry::set_mapping(uint16_t fecID, uint16_t vmmID,
   planes_[fecID][vmmID] = planeID;
 }
 
-uint32_t Geometry::get_strip_ID(uint16_t fecID, uint16_t vmmID,
+uint16_t Geometry::get_strip_ID(uint16_t fecID, uint16_t vmmID,
                                     uint32_t channelID) const 
 {
   if ((fecID < offsets_.size()) &&
@@ -44,7 +44,7 @@ uint32_t Geometry::get_strip_ID(uint16_t fecID, uint16_t vmmID,
     return VMM_INVALID;
 }
 
-uint32_t Geometry::get_plane_ID(uint16_t fecID, uint16_t vmmID) const 
+uint16_t Geometry::get_plane_ID(uint16_t fecID, uint16_t vmmID) const 
 {
   if ((fecID < planes_.size()) &&
       (vmmID < planes_.at(fecID).size()) &&

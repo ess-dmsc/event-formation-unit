@@ -5,9 +5,16 @@
 #include <string>
 #include <unistd.h>
 
-class EventletTest : public TestBase {};
+class EventletTest : public TestBase {
+protected:
+  Eventlet * eventlet;
+  virtual void SetUp() { eventlet = new Eventlet();}
+  virtual void TearDown() { delete eventlet; }
+};
 
-TEST_F(EventletTest, Constructor) { ASSERT_EQ(1, 1); }
+TEST_F(EventletTest, Debug) {
+  ASSERT_FALSE(eventlet->debug().empty());
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
