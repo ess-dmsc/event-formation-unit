@@ -10,7 +10,6 @@
 #ifndef NOKAFKA
 #include <librdkafka/rdkafkacpp.h>
 
-
 class Producer {
 public:
   /** @brief Construct a producer object.

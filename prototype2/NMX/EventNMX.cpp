@@ -78,7 +78,4 @@ void EventNMX::analyze(bool weighted, int16_t max_timebins,
   }
 }
 
-bool EventNMX::good() const {
-  return good_;
-}
-
+bool EventNMX::good() const { return good_; }

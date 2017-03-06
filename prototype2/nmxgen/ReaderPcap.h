@@ -6,10 +6,10 @@
  * one packet at a time.
  */
 
- #pragma once
- #include <cstdint>
- #include <pcap.h>
- #include <string>
+#pragma once
+#include <cstdint>
+#include <pcap.h>
+#include <string>
 
 class ReaderPcap {
 public:
@@ -25,7 +25,7 @@ public:
   int read(char *buffer, size_t bufferlen);
 
   void printstats();
-  void printpacket(unsigned char * data, size_t payloadlen);
+  void printpacket(unsigned char *data, size_t payloadlen);
 
   struct stats_t {
     uint64_t rx_pkt;

@@ -2,17 +2,17 @@
 
 #pragma once
 
-#include <nmxvmm2srs/NMXVMM2SRSData.h>
-#include <NMX/Time.h>
-#include <NMX/Geometry.h>
 #include <NMX/Clusterer.h>
+#include <NMX/Geometry.h>
+#include <NMX/Time.h>
+#include <nmxvmm2srs/NMXVMM2SRSData.h>
 
 class EventletBuilder {
 public:
   EventletBuilder(Time time_intepreter, Geometry geometry_interpreter);
 
   /** @todo Martin document */
-  uint32_t process_readout(const NMXVMM2SRSData& data, Clusterer& clusterer);
+  uint32_t process_readout(const NMXVMM2SRSData &data, Clusterer &clusterer);
 
 private:
   Time time_intepreter_;

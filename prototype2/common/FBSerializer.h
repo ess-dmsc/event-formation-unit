@@ -20,12 +20,12 @@ public:
 
   ~FBSerializer();
 
-  int serialize(uint64_t time, uint64_t seqno, char * timearr, char * pixarr, size_t entries,
-                unsigned char ** buffer, size_t * reslen);
+  int serialize(uint64_t time, uint64_t seqno, char *timearr, char *pixarr,
+                size_t entries, unsigned char **buffer, size_t *reslen);
 
 private:
   flatbuffers::FlatBufferBuilder builder;
   size_t maxlen{0};
-  uint8_t * timeptr{nullptr};
-  uint8_t * pixelptr{nullptr};
+  uint8_t *timeptr{nullptr};
+  uint8_t *pixelptr{nullptr};
 };

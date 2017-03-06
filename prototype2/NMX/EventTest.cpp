@@ -1,14 +1,14 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <test/TestBase.h>
 #include <NMX/EventNMX.h>
 #include <string>
+#include <test/TestBase.h>
 #include <unistd.h>
 
 class PlaneTest : public TestBase {
 protected:
-  PlaneNMX* plane;
-  virtual void SetUp() { plane = new PlaneNMX();}
+  PlaneNMX *plane;
+  virtual void SetUp() { plane = new PlaneNMX(); }
   virtual void TearDown() { delete plane; }
 };
 
@@ -23,11 +23,10 @@ TEST_F(PlaneTest, Insert) {
   ASSERT_EQ(plane->entries.size(), 2);
 }
 
-
 class EventTest : public TestBase {
 protected:
-  EventNMX * event;
-  virtual void SetUp() { event = new EventNMX();}
+  EventNMX *event;
+  virtual void SetUp() { event = new EventNMX(); }
   virtual void TearDown() { delete event; }
 };
 

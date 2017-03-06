@@ -12,7 +12,6 @@
 
 class NMXVMM2SRSData {
 public:
-
   /**< Do NOT rearrange fields, used for casting to data pointer*/
   struct SRSHdr {
     uint32_t fc;     /**< frame counter packet field */
@@ -31,16 +30,17 @@ public:
   /** @brief create a data handler for VMM2 SRS data of fixed size Capacity
    * @param maxelements The maximum number of readout elements
    */
-  NMXVMM2SRSData(int maxelements) : max_elements(maxelements){
+  NMXVMM2SRSData(int maxelements) : max_elements(maxelements) {
     data = new struct VMM2Data[max_elements];
   };
 
   ~NMXVMM2SRSData() {
-    delete [] data;
+    delete[] data;
     data = 0;
   };
 
-  /** @brief reveive readouts from a binary payload buffer, return number of data elements
+  /** @brief reveive readouts from a binary payload buffer, return number of
+   * data elements
    */
   int receive(const char *buffer, int size);
 
@@ -49,11 +49,11 @@ public:
    * @param data2 the raw (unbitreversed) data2 field of a SRS packet
    * @param vmd VMM2Data structure holding the parsed data (tdc, bcid, adc, ...)
    */
-  int parse(uint32_t data1, uint32_t data2, struct VMM2Data * vmd);
+  int parse(uint32_t data1, uint32_t data2, struct VMM2Data *vmd);
 
-
-  struct SRSHdr srshdr;            /**< Holds data common to all readouts in a packet */
-  struct VMM2Data * data{nullptr}; /**< holds all readout data in a packet (up to max_elems) */
+  struct SRSHdr srshdr; /**< Holds data common to all readouts in a packet */
+  struct VMM2Data *data{
+      nullptr}; /**< holds all readout data in a packet (up to max_elems) */
 
   // Results of the data parsing
   uint32_t elems{0}; // number of events
@@ -62,6 +62,8 @@ public:
   uint32_t max_elements{0}; // Maximum cpacity of data array
 
 private:
-  uint32_t reversebits(uint32_t data); /**< helper function to reverse bits in a uint32_t */
-  unsigned int gray2bin32(unsigned int num); /**< helper function to decode gray codes */
+  uint32_t reversebits(
+      uint32_t data); /**< helper function to reverse bits in a uint32_t */
+  unsigned int
+  gray2bin32(unsigned int num); /**< helper function to decode gray codes */
 };
