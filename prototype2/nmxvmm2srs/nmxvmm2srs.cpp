@@ -188,7 +188,7 @@ void NMXVMM2SRS::processing_thread(void *args) {
       data.receive(eth_ringbuf->getdatabuffer(data_index),
                    eth_ringbuf->getdatalength(data_index));
       if (data.elems > 0) {
-        builder.parse(data, clusterer);
+        builder.process_readout(data, clusterer);
 
         mystats.rx_readouts += data.elems;
         mystats.rx_errbytes += data.error;

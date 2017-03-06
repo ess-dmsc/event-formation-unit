@@ -9,9 +9,9 @@ EventletBuilder::EventletBuilder(Time time_intepreter, Geometry geometry_interpr
   , geometry_interpreter_(geometry_interpreter)
 {}
 
-uint32_t EventletBuilder::parse(const NMXVMM2SRSData& data, Clusterer& clusterer) {
+uint32_t EventletBuilder::process_readout(const NMXVMM2SRSData& data, Clusterer& clusterer) {
   uint16_t fec_id = 1; /**< @todo not hardcode */
-  uint16_t chip_id = data.srshdr.dataid & 0xf; /**< @todo may beling elswhere */
+  uint16_t chip_id = data.srshdr.dataid & 0xf; /**< @todo may belong elswhere */
 
   Eventlet eventlet;
   for (unsigned int i = 0; i < data.elems; i++) {
@@ -21,6 +21,7 @@ uint32_t EventletBuilder::parse(const NMXVMM2SRSData& data, Clusterer& clusterer
     eventlet.plane_id = geometry_interpreter_.get_plane_ID(fec_id, chip_id);
     eventlet.strip = geometry_interpreter_.get_strip_ID(fec_id, chip_id, data.data[i].chno);
     eventlet.adc = data.data[i].adc;
+    /**< @todo flags? */
     clusterer.insert(eventlet);
   }
 

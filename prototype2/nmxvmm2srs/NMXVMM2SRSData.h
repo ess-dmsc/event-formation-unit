@@ -25,6 +25,7 @@ public:
     uint16_t tdc;  /**< tdc value from vmm readout */
     uint16_t adc;  /**< adc value from vmm readout */
     uint16_t chno; /**< channel number from readout */
+    /**< @todo flags? */
   };
 
   /** @brief create a data handler for VMM2 SRS data of fixed size Capacity

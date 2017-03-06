@@ -4,7 +4,7 @@
 #include <nmxgen/ReaderVMM.h>
 
 ReaderVMM::ReaderVMM(std::string filename) {
-  data.resize(4, 0);
+  data.resize(max_in_buf_ * 4, 0);
   if (filename.empty())
     return;
   file_ = H5CC::File(filename, H5CC::Access::r_existing);
@@ -21,19 +21,11 @@ ReaderVMM::ReaderVMM(std::string filename) {
 }
 
 size_t ReaderVMM::read(char *buf) {
-
-  size_t psize = sizeof(uint32_t) * 4;
-
-  size_t limit = std::min(current_ + (9000 / psize), total_);
-  size_t byteidx = 0;
-  for (; current_ < limit; ++current_) {
-    index[0] = current_;
-    dataset_.read(data, slabsize, index);
-
-    memcpy(buf, data.data(), psize);
-
-    buf += psize;
-    byteidx += psize;
-  }
-  return byteidx;
+  size_t limit = std::min(current_ + max_in_buf_, total_);
+  slabsize[0] = (limit - current_);
+  current_ = limit;
+  index[0] = current_;
+  dataset_.read(data, slabsize, index);
+  memcpy(buf, data.data(), psize_ * slabsize[0]);
+  return psize_ * slabsize[0];
 }

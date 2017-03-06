@@ -10,7 +10,7 @@ public:
   EventletBuilderH5();
 
   /** @todo Martin document */
-  uint32_t parse(char *buf, size_t size, Clusterer& clusterer);
+  uint32_t process_readout(char *buf, size_t size, Clusterer& clusterer);
 
 private:
   size_t psize {sizeof(uint32_t) * 4};

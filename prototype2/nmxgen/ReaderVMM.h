@@ -27,8 +27,10 @@ private:
 
   size_t total_{0};
   size_t current_{0};
+  size_t psize_ {sizeof(uint32_t) * 4};
+  size_t max_in_buf_ {9000 / (sizeof(uint32_t) * 4)};
 
-  const std::vector<hsize_t> slabsize{1, H5CC::kMax};
+  std::vector<hsize_t> slabsize{1, H5CC::kMax};
   std::vector<hsize_t> index{0, 0};
   std::vector<uint32_t> data;
 };

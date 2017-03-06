@@ -8,7 +8,7 @@ EventletBuilderH5::EventletBuilderH5()
   data.resize(4);
 }
 
-uint32_t EventletBuilderH5::parse(char *buf, size_t size, Clusterer& clusterer) {
+uint32_t EventletBuilderH5::process_readout(char *buf, size_t size, Clusterer& clusterer) {
   size_t count = std::min(size / psize, size_t(9000 / psize));
   for (size_t i=0; i < count; ++i) {
     memcpy(data.data(), buf, psize);

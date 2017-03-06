@@ -174,9 +174,9 @@ void NMX::processing_thread(void *args) {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      uint32_t readouts = builder.parse(eth_ringbuf->getdatabuffer(data_index),
-                                        eth_ringbuf->getdatalength(data_index),
-                                        clusterer);
+      auto readouts = builder.process_readout(eth_ringbuf->getdatabuffer(data_index),
+                                              eth_ringbuf->getdatalength(data_index),
+                                              clusterer);
 
       mystats.rx_readouts += readouts;
       mystats.rx_error_bytes += 0;
