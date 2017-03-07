@@ -58,7 +58,7 @@ function coverage()
   gcovr -r . --html --html-details -e '.*Test.cpp' -e '.*gtest.*.h' -o coverage.html
 }
 
-
+cloc --by-file --xml --out=cloc.xml .
 tools
 libs
 prototype
