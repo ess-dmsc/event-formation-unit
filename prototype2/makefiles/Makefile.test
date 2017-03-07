@@ -31,19 +31,23 @@ runtest: test
 
 
 
+%.o: %.cpp
+	@echo building $@
+	$(Q)g++ $(cxxflags_test) %< -o $@ $(ldflags_test)
+
 #
 # EFU Tests
 #
 ifeq ($(_ARCH),Linux)
 ParserTest: efu/ParserTest.cpp test/SyscallWrappers.cpp efu/Parser.cpp \
-	common/EFUArgs.cpp cspec/CalibrationFile.cpp efu/Parser.h \
+	common/EFUArgs.o cspec/CalibrationFile.cpp efu/Parser.h \
 	common/EFUArgs.h cspec/CalibrationFile.h
 	@echo building $@
 	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open -c  $(cxxflags_test) -std=c++11 -I . \
 				-I .. test/SyscallWrappers.cpp efu/ParserTest.cpp efu/Parser.cpp \
-				common/EFUArgs.cpp cspec/CalibrationFile.cpp
+				cspec/CalibrationFile.cpp
 	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open SyscallWrappers.o ParserTest.o Parser.o \
-				CalibrationFile.o EFUArgs.o $(library) -o $@ $(ldflags_test)
+				CalibrationFile.o common/EFUArgs.o $(library) -o $@ $(ldflags_test)
 endif
 
 #
@@ -94,9 +98,9 @@ FBSerializerTest: common/FBSerializerTest.cpp common/FBSerializer.cpp common/FBS
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) common/FBSerializerTest.cpp common/FBSerializer.cpp $(library) -o $@ $(ldflags_test)
 
-EFUArgsTest: common/EFUArgsTest.cpp common/EFUArgs.cpp common/EFUArgs.h
+EFUArgsTest: common/EFUArgsTest.cpp common/EFUArgs.o common/EFUArgs.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) common/EFUArgsTest.cpp  common/EFUArgs.cpp $(library) -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) common/EFUArgsTest.cpp  common/EFUArgs.o $(library) -o $@ $(ldflags_test)
 
 NewStatsTest: common/NewStatsTest.cpp common/NewStats.cpp common/NewStats.h
 	@echo building $@
@@ -119,18 +123,18 @@ EventletBuilderH5Test: nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5
 
 EventletBuilderTest: nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.cpp \
 				nmxvmm2srs/EventletBuilder.h NMX/Clusterer.cpp NMX/Clusterer.h NMX/EventNMX.cpp \
-				NMX/EventNMX.h NMX/Time.cpp NMX/Time.h NMX/Geometry.cpp NMX/Geometry.h
+				NMX/EventNMX.h NMX/Time.cpp NMX/Time.h NMX/Geometry.o NMX/Geometry.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.cpp  \
-				NMX/Time.cpp NMX/EventNMX.cpp NMX/Geometry.cpp NMX/Clusterer.cpp -o $@ $(ldflags_test)
+				NMX/Time.cpp NMX/EventNMX.cpp NMX/Geometry.o NMX/Clusterer.cpp -o $@ $(ldflags_test)
 
 EventletTest: NMX/EventletTest.cpp NMX/Eventlet.cpp NMX/Eventlet.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) NMX/EventletTest.cpp  NMX/Eventlet.cpp $(library) -o $@ $(ldflags_test)
 
-GeometryTest: NMX/GeometryTest.cpp NMX/Geometry.cpp NMX/Geometry.h
+GeometryTest: NMX/GeometryTest.cpp NMX/Geometry.o NMX/Geometry.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) NMX/GeometryTest.cpp NMX/Geometry.cpp $(library) -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) NMX/GeometryTest.cpp NMX/Geometry.o $(library) -o $@ $(ldflags_test)
 
 TimeTest: NMX/TimeTest.cpp NMX/Time.cpp NMX/Time.h
 	@echo building $@
