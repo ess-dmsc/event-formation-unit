@@ -19,7 +19,27 @@ void Time::set_trigger_resolution(double trigger_resolution)
 
 void Time::set_target_resolution(double target_resolution)
 {
-  target_resolution_ns_ = target_resolution;
+  target_resolution_ = target_resolution;
+}
+
+double Time::bc_clock() const
+{
+  return bc_clock_;
+}
+
+double Time::tac_slope() const
+{
+  return tac_slope_;
+}
+
+double Time::trigger_resolution() const
+{
+  return trigger_resolution_;
+}
+
+double Time::target_resolution() const
+{
+  return target_resolution_;
 }
 
 double Time::timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) const
@@ -37,5 +57,5 @@ double Time::timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) const
 
 uint64_t Time::timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) const
 {
-  return static_cast<uint64_t>(timestamp_ns(trigger, bc, tdc) * target_resolution_ns_);
+  return static_cast<uint64_t>(timestamp_ns(trigger, bc, tdc) * target_resolution_);
 }

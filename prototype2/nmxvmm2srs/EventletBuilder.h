@@ -1,5 +1,11 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+/** @file
+ *
+ *  @brief Class for creating NMX eventlets from SRS/VMM data
+ */
+
+
 #pragma once
 
 #include <nmxvmm2srs/NMXVMM2SRSData.h>

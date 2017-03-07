@@ -1,5 +1,10 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+/** @file
+ *
+ *  @brief Class for NMX plane ID & strip mappings
+ */
+
 #pragma once
 
 #include <vector>

@@ -17,6 +17,9 @@ TEST_F(ClustererTest, Insert) {
   Eventlet e1;
   clusterer->insert(e1);
   ASSERT_FALSE(clusterer->event_ready());
+  e1.time = 12;
+  clusterer->insert(e1);
+  ASSERT_FALSE(clusterer->event_ready());
   e1.time = 32;
   clusterer->insert(e1);
   ASSERT_TRUE(clusterer->event_ready());
@@ -33,7 +36,11 @@ TEST_F(ClustererTest, GetBadEvent) {
   ASSERT_FALSE(event.good());
 }
 
-TEST_F(ClustererTest, GetGoodEvent) {
+TEST_F(ClustererTest, GetEvent) {
+  auto event1 = clusterer->get_event();
+  event1.analyze(true, 3, 7);
+  ASSERT_FALSE(event1.good());
+
   Eventlet e1, e2;
   e1.adc = e2.adc = 1;
   e2.plane_id = 1;
@@ -42,10 +49,9 @@ TEST_F(ClustererTest, GetGoodEvent) {
   e1.time = e2.time = 32;
   clusterer->insert(e1);
   clusterer->insert(e2);
-  ASSERT_TRUE(clusterer->event_ready());
-  auto event = clusterer->get_event();
-  event.analyze(true, 3, 7);
-  ASSERT_TRUE(event.good());
+  auto event2 = clusterer->get_event();
+  event2.analyze(true, 3, 7);
+  ASSERT_TRUE(event2.good());
 }
 
 int main(int argc, char **argv) {

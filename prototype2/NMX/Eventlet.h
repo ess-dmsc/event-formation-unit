@@ -1,3 +1,10 @@
+/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+
+/** @file
+ *
+ *  @brief Eventlet struct for NMX event formation
+ */
+
 #pragma once
 
 #include <cinttypes>

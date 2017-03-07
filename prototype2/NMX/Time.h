@@ -1,5 +1,10 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+/** @file
+ *
+ *  @brief Class for NMX timestemp interpretation
+ */
+
 #pragma once
 
 #include <inttypes.h>
@@ -11,6 +16,11 @@ public:
   void set_trigger_resolution(double trigger_resolution);
   void set_target_resolution(double target_resolution);
 
+  double bc_clock() const;
+  double tac_slope() const;
+  double trigger_resolution() const;
+  double target_resolution() const;
+
   double timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) const;
   uint64_t timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) const;
 
@@ -18,6 +28,5 @@ private:
   double bc_clock_ {40};
   double tac_slope_ {125};
   double trigger_resolution_ {3.125};
-
-  double target_resolution_ns_ {0.5};
+  double target_resolution_ {0.5};
 };
