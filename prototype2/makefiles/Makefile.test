@@ -111,17 +111,18 @@ NMXVMM2SRSDataTest:  nmxvmm2srs/NMXVMM2SRSDataTest.cpp nmxvmm2srs/NMXVMM2SRSData
 	$(Q)g++ $(cxxflags_test) nmxvmm2srs/NMXVMM2SRSDataTest.cpp nmxvmm2srs/NMXVMM2SRSData.cpp -o $@ $(ldflags_test)
 
 EventletBuilderH5Test: nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.cpp \
-				nmxgen/EventletBuilderH5.h NMX/Clusterer.cpp NMX/Clusterer.h \
-				NMX/EventNMX.cpp NMX/EventNMX.h
+		nmxgen/EventletBuilderH5.h NMX/Clusterer.cpp NMX/Clusterer.h \
+		NMX/EventNMX.cpp NMX/EventNMX.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.cpp $(library) -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.cpp \
+	NMX/Clusterer.cpp NMX/EventNMX.cpp -o $@ $(ldflags_test)
 
 EventletBuilderTest: nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.cpp \
 				nmxvmm2srs/EventletBuilder.h NMX/Clusterer.cpp NMX/Clusterer.h NMX/EventNMX.cpp \
 				NMX/EventNMX.h NMX/Time.cpp NMX/Time.h NMX/Geometry.cpp NMX/Geometry.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.cpp  \
-				NMX/Time.cpp NMX/Geometry.cpp $(library) -o $@ $(ldflags_test)
+				NMX/Time.cpp NMX/EventNMX.cpp NMX/Geometry.cpp NMX/Clusterer.cpp -o $@ $(ldflags_test)
 
 EventletTest: NMX/EventletTest.cpp NMX/Eventlet.cpp NMX/Eventlet.h
 	@echo building $@
