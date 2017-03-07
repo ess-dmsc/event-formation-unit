@@ -39,43 +39,43 @@ runtest: test
 # EFU Tests
 #
 ifeq ($(_ARCH),Linux)
-ParserTest: efu/ParserTest.cpp test/SyscallWrappers.cpp efu/Parser.cpp \
+ParserTest: efu/ParserTest.cpp test/SyscallWrappers.cpp efu/Parser.o \
 	common/EFUArgs.o cspec/CalibrationFile.cpp efu/Parser.h \
 	common/EFUArgs.h cspec/CalibrationFile.h
 	@echo building $@
 	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open -c  $(cxxflags_test) -std=c++11 -I . \
-				-I .. test/SyscallWrappers.cpp efu/ParserTest.cpp efu/Parser.cpp \
+				-I .. test/SyscallWrappers.cpp efu/ParserTest.cpp \
 				cspec/CalibrationFile.cpp
-	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open SyscallWrappers.o ParserTest.o Parser.o \
+	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open SyscallWrappers.o ParserTest.o efu/Parser.o \
 				CalibrationFile.o common/EFUArgs.o $(library) -o $@ $(ldflags_test)
 endif
 
 #
 # CSPEC / Multi Grid Tests
 #
-CSPECChanConvTest: cspec/CSPECChanConvTest.cpp cspec/CSPECChanConv.cpp cspec/CSPECChanConv.h
+CSPECChanConvTest: cspec/CSPECChanConvTest.cpp cspec/CSPECChanConv.o cspec/CSPECChanConv.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) cspec/CSPECChanConvTest.cpp cspec/CSPECChanConv.cpp -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) cspec/CSPECChanConvTest.cpp cspec/CSPECChanConv.o -o $@ $(ldflags_test)
 
-CSPECDataTest: cspec/CSPECDataTest.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp \
+CSPECDataTest: cspec/CSPECDataTest.cpp cspec/CSPECData.o cspec/CSPECChanConv.o \
      cspec/CSPECData.h cspec/CSPECChanConv.h test/CSPECTestData.h \
      common/MultiGridGeometry.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) cspec/CSPECDataTest.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) cspec/CSPECDataTest.cpp cspec/CSPECData.o cspec/CSPECChanConv.o -o $@ $(ldflags_test)
 
 CSPECEventTest: cspec/CSPECEventTest.cpp cspec/CSPECEvent.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) cspec/CSPECEventTest.cpp  -o $@ $(ldflags_test)
 
 ifeq ($(_ARCH),Linux) # --wrap only works with gcc
-CalibrationFileTest: cspec/CalibrationFileTest.cpp cspec/CalibrationFile.cpp\
+CalibrationFileTest: cspec/CalibrationFileTest.cpp cspec/CalibrationFile.o\
 	cspec/CalibrationFile.h
 	@echo building $@
 	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open -c  $(cxxflags_test) -std=c++11 -I . \
 					-I .. test/SyscallWrappers.cpp \
-					cspec/CalibrationFileTest.cpp cspec/CalibrationFile.cpp
+					cspec/CalibrationFileTest.cpp
 	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open SyscallWrappers.o \
-					CalibrationFile.o CalibrationFileTest.o $(library) -o $@ $(ldflags_test)
+					cspec/CalibrationFile.o CalibrationFileTest.o $(library) -o $@ $(ldflags_test)
 endif
 
 
@@ -94,55 +94,55 @@ MultiGridGeometryTest: common/MultiGridGeometryTest.cpp common/MultiGridGeometry
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) common/MultiGridGeometryTest.cpp $(library)  -o $@ $(ldflags_test)
 
-FBSerializerTest: common/FBSerializerTest.cpp common/FBSerializer.cpp common/FBSerializer.h
+FBSerializerTest: common/FBSerializerTest.cpp common/FBSerializer.o common/FBSerializer.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) common/FBSerializerTest.cpp common/FBSerializer.cpp $(library) -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) common/FBSerializerTest.cpp common/FBSerializer.o $(library) -o $@ $(ldflags_test)
 
 EFUArgsTest: common/EFUArgsTest.cpp common/EFUArgs.o common/EFUArgs.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) common/EFUArgsTest.cpp  common/EFUArgs.o $(library) -o $@ $(ldflags_test)
 
-NewStatsTest: common/NewStatsTest.cpp common/NewStats.cpp common/NewStats.h
+NewStatsTest: common/NewStatsTest.cpp common/NewStats.o common/NewStats.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) common/NewStatsTest.cpp  common/NewStats.cpp $(library) -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) common/NewStatsTest.cpp  common/NewStats.o $(library) -o $@ $(ldflags_test)
 
 
 #
 # NMX / VMM Tests
 #
-NMXVMM2SRSDataTest:  nmxvmm2srs/NMXVMM2SRSDataTest.cpp nmxvmm2srs/NMXVMM2SRSData.cpp nmxvmm2srs/NMXVMM2SRSData.h
+NMXVMM2SRSDataTest:  nmxvmm2srs/NMXVMM2SRSDataTest.cpp nmxvmm2srs/NMXVMM2SRSData.o nmxvmm2srs/NMXVMM2SRSData.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) nmxvmm2srs/NMXVMM2SRSDataTest.cpp nmxvmm2srs/NMXVMM2SRSData.cpp -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) nmxvmm2srs/NMXVMM2SRSDataTest.cpp nmxvmm2srs/NMXVMM2SRSData.o -o $@ $(ldflags_test)
 
-EventletBuilderH5Test: nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.cpp \
-		nmxgen/EventletBuilderH5.h NMX/Clusterer.cpp NMX/Clusterer.h \
+EventletBuilderH5Test: nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.o \
+		nmxgen/EventletBuilderH5.h NMX/Clusterer.o NMX/Clusterer.h \
 		NMX/EventNMX.o NMX/EventNMX.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.cpp \
-	NMX/Clusterer.cpp NMX/EventNMX.o -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.o \
+	NMX/Clusterer.o NMX/EventNMX.o -o $@ $(ldflags_test)
 
-EventletBuilderTest: nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.cpp \
-				nmxvmm2srs/EventletBuilder.h NMX/Clusterer.cpp NMX/Clusterer.h NMX/EventNMX.o \
-				NMX/EventNMX.h NMX/Time.cpp NMX/Time.h NMX/Geometry.o NMX/Geometry.h
+EventletBuilderTest: nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.o \
+				nmxvmm2srs/EventletBuilder.h NMX/Clusterer.o NMX/Clusterer.h NMX/EventNMX.o \
+				NMX/EventNMX.h NMX/Time.o NMX/Time.h NMX/Geometry.o NMX/Geometry.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.cpp  \
-				NMX/Time.cpp NMX/EventNMX.o NMX/Geometry.o NMX/Clusterer.cpp -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.o  \
+				NMX/Time.o NMX/EventNMX.o NMX/Geometry.o NMX/Clusterer.o -o $@ $(ldflags_test)
 
-EventletTest: NMX/EventletTest.cpp NMX/Eventlet.cpp NMX/Eventlet.h
+EventletTest: NMX/EventletTest.cpp NMX/Eventlet.o NMX/Eventlet.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) NMX/EventletTest.cpp  NMX/Eventlet.cpp $(library) -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) NMX/EventletTest.cpp  NMX/Eventlet.o $(library) -o $@ $(ldflags_test)
 
 GeometryTest: NMX/GeometryTest.cpp NMX/Geometry.o NMX/Geometry.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) NMX/GeometryTest.cpp NMX/Geometry.o $(library) -o $@ $(ldflags_test)
 
-TimeTest: NMX/TimeTest.cpp NMX/Time.cpp NMX/Time.h
+TimeTest: NMX/TimeTest.cpp NMX/Time.o NMX/Time.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) NMX/TimeTest.cpp NMX/Time.cpp $(library) -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) NMX/TimeTest.cpp NMX/Time.o $(library) -o $@ $(ldflags_test)
 
-ClustererTest: NMX/ClustererTest.cpp NMX/Clusterer.cpp NMX/Clusterer.h NMX/EventNMX.o NMX/EventNMX.h
+ClustererTest: NMX/ClustererTest.cpp NMX/Clusterer.o NMX/Clusterer.h NMX/EventNMX.o NMX/EventNMX.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) NMX/ClustererTest.cpp NMX/EventNMX.o NMX/Clusterer.cpp $(library) -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) NMX/ClustererTest.cpp NMX/EventNMX.o NMX/Clusterer.o $(library) -o $@ $(ldflags_test)
 
 EventTest: NMX/EventTest.cpp NMX/EventNMX.o NMX/EventNMX.h
 	@echo building $@

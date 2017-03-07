@@ -146,7 +146,7 @@ test-clean:
 	@find . -name "*.gcno" | xargs rm -f
 
 clean: prog-clean test-clean doxygen-clean
-	@rm -f  *~  gylle lcov.out CalibrationFileTest.*cal
+	@rm -f  *~  gylle lcov.out CalibrationFileTest.*cal */*.o
 
 release: realclean all clean test runtest
 	../jenkins/style.bash
