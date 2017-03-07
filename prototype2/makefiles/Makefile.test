@@ -15,7 +15,7 @@ endif
 # targets
 #
 coverage:
-	$(Q)gcov -r -b -c *.gcda
+	$(Q)gcov -b -c *.gcda
 	$(Q)lcov --rc lcov_branch_coverage=1 -c -d . --no-external -o lcov.out
 	$(Q)genhtml --branch-coverage -o html lcov.out
 
@@ -27,7 +27,7 @@ test: $(testprogs)
 	@echo "done building tests"
 
 runtest: test
-	$(Q)for test in $(testprogs) ; do ./$$test --gtest_output=xml:$$test.xml ; done
+	$(Q)for test in $(testprogs) ; do ./$$test --gtest_output=xml:$$test.xml; done
 
 
 
@@ -110,13 +110,18 @@ NMXVMM2SRSDataTest:  nmxvmm2srs/NMXVMM2SRSDataTest.cpp nmxvmm2srs/NMXVMM2SRSData
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) nmxvmm2srs/NMXVMM2SRSDataTest.cpp nmxvmm2srs/NMXVMM2SRSData.cpp -o $@ $(ldflags_test)
 
-EventletBuilderH5Test: nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.cpp nmxgen/EventletBuilderH5.h NMX/Clusterer.cpp NMX/Clusterer.h NMX/EventNMX.cpp NMX/EventNMX.h
+EventletBuilderH5Test: nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.cpp \
+				nmxgen/EventletBuilderH5.h NMX/Clusterer.cpp NMX/Clusterer.h \
+				NMX/EventNMX.cpp NMX/EventNMX.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.cpp NMX/Clusterer.cpp NMX/EventNMX.cpp $(library) -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.cpp $(library) -o $@ $(ldflags_test)
 
-EventletBuilderTest: nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.cpp nmxvmm2srs/EventletBuilder.h NMX/Clusterer.cpp NMX/Clusterer.h NMX/EventNMX.cpp NMX/EventNMX.h NMX/Time.cpp NMX/Time.h NMX/Geometry.cpp NMX/Geometry.h
+EventletBuilderTest: nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.cpp \
+				nmxvmm2srs/EventletBuilder.h NMX/Clusterer.cpp NMX/Clusterer.h NMX/EventNMX.cpp \
+				NMX/EventNMX.h NMX/Time.cpp NMX/Time.h NMX/Geometry.cpp NMX/Geometry.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.cpp NMX/Clusterer.cpp NMX/EventNMX.cpp NMX/Time.cpp NMX/Geometry.cpp $(library) -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.cpp  \
+				NMX/Time.cpp NMX/Geometry.cpp $(library) -o $@ $(ldflags_test)
 
 EventletTest: NMX/EventletTest.cpp NMX/Eventlet.cpp NMX/Eventlet.h
 	@echo building $@
