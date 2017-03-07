@@ -2,11 +2,16 @@
 #
 
 testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest
-testprogs += CSPECEventTest ParserTest EFUArgsTest CalibrationFileTest
+testprogs += CSPECEventTest EFUArgsTest
 
 testprogs += MultiGridGeometryTest EventletTest NewStatsTest EventTest
 testprogs += NMXVMM2SRSDataTest ClustererTest TimeTest GeometryTest FBSerializerTest
 testprogs += EventletBuilderH5Test EventletBuilderTest
+
+ifeq ($(_ARCH),Linux)
+testprogs += ParserTest CalibrationFileTest
+endif
+
 
 test: $(testprogs)
 	@echo "done building tests"
@@ -44,6 +49,7 @@ MultiGridGeometryTest: common/MultiGridGeometryTest.cpp common/MultiGridGeometry
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) common/MultiGridGeometryTest.cpp $(library)  -o $@ $(ldflags_test)
 
+ifeq ($(_ARCH),Linux)
 ParserTest: efu/ParserTest.cpp test/SyscallWrappers.cpp efu/Parser.cpp \
 	common/EFUArgs.cpp cspec/CalibrationFile.cpp efu/Parser.h \
 	common/EFUArgs.h cspec/CalibrationFile.h
@@ -62,6 +68,7 @@ CalibrationFileTest: cspec/CalibrationFileTest.cpp cspec/CalibrationFile.cpp\
 					cspec/CalibrationFileTest.cpp cspec/CalibrationFile.cpp
 	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open SyscallWrappers.o \
 					CalibrationFile.o CalibrationFileTest.o $(library) -o $@ $(ldflags_test)
+endif
 
 EFUArgsTest: common/EFUArgsTest.cpp common/EFUArgs.cpp common/EFUArgs.h
 	@echo building $@

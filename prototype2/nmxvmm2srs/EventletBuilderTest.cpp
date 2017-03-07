@@ -7,8 +7,8 @@
 
 class EventletBuilderTest : public TestBase {
 protected:
-  EventletBuilder * builder;
-  virtual void SetUp() { 
+  EventletBuilder *builder;
+  virtual void SetUp() {
     Time time;
     Geometry geometry;
     builder = new EventletBuilder(time, geometry);
@@ -27,7 +27,6 @@ TEST_F(EventletBuilderTest, Process) {
   auto num2 = builder->process_readout(data, clusterer);
   ASSERT_EQ(num2, 4);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

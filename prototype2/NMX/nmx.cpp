@@ -1,6 +1,5 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <nmxgen/EventletBuilderH5.h>
 #include <NMX/Clusterer.h>
 #include <cinttypes>
 #include <common/Detector.h>
@@ -16,6 +15,7 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
+#include <nmxgen/EventletBuilderH5.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -154,7 +154,7 @@ void NMX::processing_thread() {
 
   EventletBuilderH5 builder;
   Clusterer clusterer(30); /**< @todo not hardocde */
-  
+
   Timer stopafter_clock;
   TSCTimer report_timer;
 
@@ -166,9 +166,9 @@ void NMX::processing_thread() {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      auto readouts = builder.process_readout(eth_ringbuf->getdatabuffer(data_index),
-                                              eth_ringbuf->getdatalength(data_index),
-                                              clusterer);
+      auto readouts = builder.process_readout(
+          eth_ringbuf->getdatabuffer(data_index),
+          eth_ringbuf->getdatalength(data_index), clusterer);
 
       mystats.rx_readouts += readouts;
       mystats.rx_error_bytes += 0;

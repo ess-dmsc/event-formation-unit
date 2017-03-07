@@ -15,7 +15,7 @@ class Clusterer {
 public:
   Clusterer(uint64_t min_time_span);
 
-  void insert(const Eventlet& eventlet);
+  void insert(const Eventlet &eventlet);
 
   /** @todo Martin document */
   bool event_ready() const;
@@ -25,5 +25,5 @@ public:
 
 private:
   std::multimap<uint64_t, Eventlet> backlog_; /**< @todo Martin document */
-  uint64_t min_time_span_ {1};
+  uint64_t min_time_span_{1};
 };

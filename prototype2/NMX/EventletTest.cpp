@@ -7,8 +7,8 @@
 
 class EventletTest : public TestBase {
 protected:
-  Eventlet * eventlet;
-  virtual void SetUp() { eventlet = new Eventlet();}
+  Eventlet *eventlet;
+  virtual void SetUp() { eventlet = new Eventlet(); }
   virtual void TearDown() { delete eventlet; }
 };
 

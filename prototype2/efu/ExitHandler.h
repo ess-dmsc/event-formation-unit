@@ -11,7 +11,6 @@
 
 class ExitHandler {
 public:
-
   /** @brief constructor does nothing */
   ExitHandler();
 
@@ -19,7 +18,6 @@ public:
   void Exit();
 
 private:
-
   /** Traces an exit message, also sends to Graylog server */
   static void signalhandler(int a);
 };

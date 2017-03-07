@@ -17,17 +17,11 @@ public:
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
    */
-  virtual void input_thread() {
-    printf("no input stage\n");
-  }
+  virtual void input_thread() { printf("no input stage\n"); }
 
-  virtual void processing_thread() {
-    printf("no processing stage\n");
-  }
+  virtual void processing_thread() { printf("no processing stage\n"); }
 
-  virtual void output_thread() {
-    printf("no output stage\n");
-  }
+  virtual void output_thread() { printf("no output stage\n"); }
 
   /** @brief optional destructor */
   virtual ~Detector() {}

@@ -1,14 +1,14 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <test/TestBase.h>
 #include <NMX/Clusterer.h>
 #include <string>
+#include <test/TestBase.h>
 #include <unistd.h>
 
 class ClustererTest : public TestBase {
 protected:
-  Clusterer* clusterer;
-  virtual void SetUp() { clusterer = new Clusterer(30);}
+  Clusterer *clusterer;
+  virtual void SetUp() { clusterer = new Clusterer(30); }
   virtual void TearDown() { delete clusterer; }
 };
 

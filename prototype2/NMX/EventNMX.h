@@ -8,20 +8,20 @@
 #pragma once
 
 #include <NMX/Eventlet.h>
-#include <list>
 #include <limits>
+#include <list>
 
 struct PlaneNMX {
   void insert_eventlet(const Eventlet &e);
   void analyze(bool weighted, uint16_t max_timebins, uint16_t max_timedif);
 
-  double center {std::numeric_limits<double>::quiet_NaN()};
-  int16_t uncert_lower {-1};
-  int16_t uncert_upper {-1};
+  double center{std::numeric_limits<double>::quiet_NaN()};
+  int16_t uncert_lower{-1};
+  int16_t uncert_upper{-1};
 
-  uint64_t time_start {0};
-  uint16_t time_end {0};
-  double integral {0.0};
+  uint64_t time_start{0};
+  uint16_t time_end{0};
+  double integral{0.0};
 
   std::list<Eventlet> entries;
 };
@@ -38,5 +38,5 @@ public:
 
 private:
   bool good_{false};
-  uint64_t time_start_ {0};
+  uint64_t time_start_{0};
 };

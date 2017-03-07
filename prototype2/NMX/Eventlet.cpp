@@ -1,3 +1,5 @@
+/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+
 #include <NMX/Eventlet.h>
 #include <sstream>
 

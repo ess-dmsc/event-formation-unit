@@ -1,10 +1,5 @@
-/*
-* How to read a packet capture file.
-*/
+/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-/*
-* Step 1 - Add includes
-*/
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>

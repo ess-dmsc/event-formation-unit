@@ -1,17 +1,17 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <test/TestBase.h>
 #include <NMX/EventNMX.h>
-#include <string>
-#include <unistd.h>
 #include <cmath>
+#include <string>
+#include <test/TestBase.h>
+#include <unistd.h>
 
 #include <iostream>
 
 class PlaneTest : public TestBase {
 protected:
-  PlaneNMX* plane;
-  virtual void SetUp() { plane = new PlaneNMX();}
+  PlaneNMX *plane;
+  virtual void SetUp() { plane = new PlaneNMX(); }
   virtual void TearDown() { delete plane; }
 };
 
@@ -28,9 +28,9 @@ TEST_F(PlaneTest, Insert) {
 }
 
 TEST_F(PlaneTest, AnalyzeInvalid) {
-  ASSERT_TRUE( std::isnan(plane->center) );
+  ASSERT_TRUE(std::isnan(plane->center));
   plane->analyze(false, 2, 2);
-  ASSERT_TRUE( std::isnan(plane->center) );
+  ASSERT_TRUE(std::isnan(plane->center));
 }
 
 TEST_F(PlaneTest, AnalyzeAverage) {
@@ -87,12 +87,10 @@ TEST_F(PlaneTest, AnalyzeUncert) {
   ASSERT_EQ(plane->uncert_upper, 3);
 }
 
-
-
 class EventTest : public TestBase {
 protected:
-  EventNMX * event;
-  virtual void SetUp() { event = new EventNMX();}
+  EventNMX *event;
+  virtual void SetUp() { event = new EventNMX(); }
   virtual void TearDown() { delete event; }
 };
 

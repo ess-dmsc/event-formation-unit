@@ -7,8 +7,8 @@
 
 class EventletBuilderH5Test : public TestBase {
 protected:
-  EventletBuilderH5 * builder;
-  virtual void SetUp() { builder = new EventletBuilderH5();}
+  EventletBuilderH5 *builder;
+  virtual void SetUp() { builder = new EventletBuilderH5(); }
   virtual void TearDown() { delete builder; }
 };
 

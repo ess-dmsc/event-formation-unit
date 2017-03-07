@@ -1,16 +1,14 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <nmxgen/EventletBuilderH5.h>
 #include <cstring>
+#include <nmxgen/EventletBuilderH5.h>
 
-EventletBuilderH5::EventletBuilderH5()
-{
-  data.resize(4);
-}
+EventletBuilderH5::EventletBuilderH5() { data.resize(4); }
 
-uint32_t EventletBuilderH5::process_readout(char *buf, size_t size, Clusterer& clusterer) {
+uint32_t EventletBuilderH5::process_readout(char *buf, size_t size,
+                                            Clusterer &clusterer) {
   size_t count = std::min(size / psize, size_t(9000 / psize));
-  for (size_t i=0; i < count; ++i) {
+  for (size_t i = 0; i < count; ++i) {
     memcpy(data.data(), buf, psize);
     clusterer.insert(make_eventlet());
     buf += psize;

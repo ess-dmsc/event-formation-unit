@@ -15,8 +15,8 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
-#include <nmxvmm2srs/NMXVMM2SRSData.h>
 #include <nmxvmm2srs/EventletBuilder.h>
+#include <nmxvmm2srs/NMXVMM2SRSData.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -156,12 +156,13 @@ void NMXVMM2SRS::processing_thread() {
   Time time_interpreter;
   time_interpreter.set_tac_slope(125); /**< @todo get from slow control? */
   time_interpreter.set_bc_clock(40);   /**< @todo get from slow control? */
-  time_interpreter.set_trigger_resolution(3.125); /**< @todo get from slow control? */
+  time_interpreter.set_trigger_resolution(
+      3.125); /**< @todo get from slow control? */
   time_interpreter.set_target_resolution(0.5); /**< @todo not hardcode */
 
   Geometry geometry_intepreter; /**< @todo not hardocde chip mappings */
-  geometry_intepreter.define_plane(0, { {1,0},  {1,1},  {1,6}, {1,7} });
-  geometry_intepreter.define_plane(1, {{1,10}, {1,11}, {1,14}, {1,15}});
+  geometry_intepreter.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
+  geometry_intepreter.define_plane(1, {{1, 10}, {1, 11}, {1, 14}, {1, 15}});
 
   EventletBuilder builder(time_interpreter, geometry_intepreter);
 
@@ -181,7 +182,8 @@ void NMXVMM2SRS::processing_thread() {
                    eth_ringbuf->getdatalength(data_index));
       if (data.elems > 0) {
         builder.process_readout(data, clusterer);
-        //parser.parse(data.srshdr.dataid & 0xf, data.srshdr.time, data.data, data.elems);
+        // parser.parse(data.srshdr.dataid & 0xf, data.srshdr.time, data.data,
+        // data.elems);
 
         mystats.rx_readouts += data.elems;
         mystats.rx_errbytes += data.error;
