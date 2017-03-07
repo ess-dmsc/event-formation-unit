@@ -40,14 +40,13 @@ runtest: test
 #
 ifeq ($(_ARCH),Linux)
 ParserTest: efu/ParserTest.cpp test/SyscallWrappers.cpp efu/Parser.o \
-	common/EFUArgs.o cspec/CalibrationFile.cpp efu/Parser.h \
+	common/EFUArgs.o cspec/CalibrationFile.o efu/Parser.h \
 	common/EFUArgs.h cspec/CalibrationFile.h
 	@echo building $@
 	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open -c  $(cxxflags_test) -std=c++11 -I . \
-				-I .. test/SyscallWrappers.cpp efu/ParserTest.cpp \
-				cspec/CalibrationFile.cpp
+				-I .. test/SyscallWrappers.cpp efu/ParserTest.cpp
 	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open SyscallWrappers.o ParserTest.o efu/Parser.o \
-				CalibrationFile.o common/EFUArgs.o $(library) -o $@ $(ldflags_test)
+				cspec/CalibrationFile.o common/EFUArgs.o $(library) -o $@ $(ldflags_test)
 endif
 
 #
@@ -68,8 +67,7 @@ CSPECEventTest: cspec/CSPECEventTest.cpp cspec/CSPECEvent.h
 	$(Q)g++ $(cxxflags_test) cspec/CSPECEventTest.cpp  -o $@ $(ldflags_test)
 
 ifeq ($(_ARCH),Linux) # --wrap only works with gcc
-CalibrationFileTest: cspec/CalibrationFileTest.cpp cspec/CalibrationFile.o\
-	cspec/CalibrationFile.h
+CalibrationFileTest: cspec/CalibrationFileTest.cpp cspec/CalibrationFile.o cspec/CalibrationFile.h
 	@echo building $@
 	$(Q)g++ -Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open -c  $(cxxflags_test) -std=c++11 -I . \
 					-I .. test/SyscallWrappers.cpp \
