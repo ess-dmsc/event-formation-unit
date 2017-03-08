@@ -22,9 +22,9 @@ uint32_t EventletBuilder::process_readout(const NMXVMM2SRSData &data,
            data.data[i].chno);
     eventlet.time = time_intepreter_.timestamp(
         data.srshdr.time, data.data[i].bcid, data.data[i].tdc);
-    eventlet.plane_id = geometry_interpreter_.get_plane_ID(fec_id, chip_id);
+    eventlet.plane_id = geometry_interpreter_.get_plane(fec_id, chip_id);
     eventlet.strip =
-        geometry_interpreter_.get_strip_ID(fec_id, chip_id, data.data[i].chno);
+        geometry_interpreter_.get_strip(fec_id, chip_id, data.data[i].chno);
     eventlet.adc = data.data[i].adc;
     /**< @todo flags? */
     clusterer.insert(eventlet);

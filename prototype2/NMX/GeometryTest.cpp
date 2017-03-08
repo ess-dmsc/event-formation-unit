@@ -14,35 +14,35 @@ protected:
 
 TEST_F(GeometryTest, GoodMapping) {
   geometry->set_mapping(0, 0, 0, 0);
-  ASSERT_EQ(geometry->get_plane_ID(0, 0), 0);
-  ASSERT_EQ(geometry->get_strip_ID(0, 0, 0), 0);
+  ASSERT_EQ(geometry->get_plane(0, 0), 0);
+  ASSERT_EQ(geometry->get_strip(0, 0, 0), 0);
 }
 
 TEST_F(GeometryTest, BadMapping) {
   geometry->set_mapping(0, 16, 0, 0);
-  ASSERT_EQ(geometry->get_plane_ID(0, 0), VMM_INVALID);
-  ASSERT_EQ(geometry->get_strip_ID(0, 0, 0), VMM_INVALID);
+  ASSERT_EQ(geometry->get_plane(0, 0), NMX_INVALID_GEOM_ID);
+  ASSERT_EQ(geometry->get_strip(0, 0, 0), NMX_INVALID_GEOM_ID);
 }
 
 TEST_F(GeometryTest, BadFEC) {
   geometry->set_mapping(0, 0, 0, 0);
-  ASSERT_EQ(geometry->get_plane_ID(1, 0), VMM_INVALID);
-  ASSERT_EQ(geometry->get_strip_ID(1, 0, 0), VMM_INVALID);
+  ASSERT_EQ(geometry->get_plane(1, 0), NMX_INVALID_GEOM_ID);
+  ASSERT_EQ(geometry->get_strip(1, 0, 0), NMX_INVALID_GEOM_ID);
 }
 
 TEST_F(GeometryTest, BadVMM) {
   geometry->set_mapping(0, 0, 0, 0);
-  ASSERT_EQ(geometry->get_plane_ID(0, 15), VMM_INVALID);
-  ASSERT_EQ(geometry->get_plane_ID(0, 16), VMM_INVALID);
-  ASSERT_EQ(geometry->get_strip_ID(0, 15, 0), VMM_INVALID);
-  ASSERT_EQ(geometry->get_strip_ID(0, 16, 0), VMM_INVALID);
+  ASSERT_EQ(geometry->get_plane(0, 15), NMX_INVALID_GEOM_ID);
+  ASSERT_EQ(geometry->get_plane(0, 16), NMX_INVALID_GEOM_ID);
+  ASSERT_EQ(geometry->get_strip(0, 15, 0), NMX_INVALID_GEOM_ID);
+  ASSERT_EQ(geometry->get_strip(0, 16, 0), NMX_INVALID_GEOM_ID);
 }
 
 TEST_F(GeometryTest, PlaneDefinition) {
   geometry->define_plane(0, {{0, 0}, {0, 1}});
-  ASSERT_EQ(geometry->get_plane_ID(0, 0), 0);
-  ASSERT_EQ(geometry->get_strip_ID(0, 0, 0), 0);
-  ASSERT_EQ(geometry->get_strip_ID(0, 1, 0), VMM_TOTAL_CHANNELS);
+  ASSERT_EQ(geometry->get_plane(0, 0), 0);
+  ASSERT_EQ(geometry->get_strip(0, 0, 0), 0);
+  ASSERT_EQ(geometry->get_strip(0, 1, 0), NMX_CHIP_CHANNELS);
 }
 
 int main(int argc, char **argv) {
