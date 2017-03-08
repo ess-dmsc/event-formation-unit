@@ -6,10 +6,12 @@
 *.pyc
 *.gcda
 *.gcno
+*Test
 
 # Misc programs
 cncsread
 batchreader
+genpixids
 efu2
 gencspec
 gencspecfile
