@@ -6,6 +6,8 @@
 #define TIMESIZE 4
 #define PIXELSIZE 4
 
+static_assert(FLATBUFFERS_LITTLEENDIAN, "Flatbuffers only tested on little endian systems");
+
 FBSerializer::FBSerializer(size_t maxarraylength)
     : builder(maxarraylength * 8 + 2048), maxlen(maxarraylength) {}
 
