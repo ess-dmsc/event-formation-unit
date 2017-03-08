@@ -16,6 +16,10 @@ FBSerializer::~FBSerializer() {}
 int FBSerializer::serialize(uint64_t time, uint64_t seqno, char *timearr,
                             char *pixarr, size_t entries, char **buffer) {
   assert(entries <= maxlen);
+  if (entries > maxlen) {
+    *buffer = 0;
+    return 0;
+  }
 
   builder.Clear();
 

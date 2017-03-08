@@ -32,6 +32,12 @@ TEST_F(FBSerializerTest, Serialize) {
   ASSERT_TRUE(buffer != 0);
 }
 
+TEST_F(FBSerializerTest, SerializeOversize) {
+  auto length = fb.serialize(GLOBALTIME, 1, (char *)tarr, (char *)parr, ARRAYLENGTH + 1, &buffer);
+  ASSERT_EQ(length, 0);
+  ASSERT_EQ(buffer, nullptr);
+}
+
 TEST_F(FBSerializerTest, SerDeserialize) {
   auto length = fb.serialize(GLOBALTIME, 1, (char *)tarr, (char *)parr, ARRAYLENGTH, &buffer);
 
