@@ -61,6 +61,17 @@ TEST_F(CspecChanConvTest, GenerateCalibration) {
             CSPECChanConv::adcsize - 1);
 }
 
+TEST_F(CspecChanConvTest, GenerateCalibrationInvalidArgs) {
+  int ret = conv.makewirecal(4000, 200, 128);
+  ASSERT_EQ(ret, -1);
+
+  ret = conv.makewirecal(100000, 100000, 128);
+  ASSERT_EQ(ret, -1);
+
+  ret = conv.makewirecal(200, 100000, 128);
+  ASSERT_EQ(ret, -1);
+}
+
 TEST_F(CspecChanConvTest, LoadCalibration) {
   uint16_t wirecal[CSPECChanConv::adcsize];
   uint16_t gridcal[CSPECChanConv::adcsize];
@@ -78,6 +89,14 @@ TEST_F(CspecChanConvTest, LoadCalibration) {
     ASSERT_EQ(i, conv.getwireid(i));
     ASSERT_EQ(i + 10, conv.getgridid(i));
   }
+}
+
+TEST_F(CspecChanConvTest, LoadCalibrationInvalidArgs) {
+  uint16_t wirecal[CSPECChanConv::adcsize];
+  uint16_t gridcal[CSPECChanConv::adcsize];
+
+  conv.load_calibration(0, gridcal);
+  conv.load_calibration(wirecal, 0);
 }
 
 int main(int argc, char **argv) {

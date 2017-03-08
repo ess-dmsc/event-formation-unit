@@ -280,11 +280,11 @@ void CSPEC::output_thread() {
     if (produce >= kafka_buffer_size) {
 #ifndef NOKAFKA
       char *txbuffer;
-      XTRACE(OUTPUT, DEB, "produce %d\n", produce);
+      XTRACE(OUTPUT, DEB, "produce %" PRIu64 "\n", produce);
       auto txlen = flatbuffer.serialize((uint64_t)0x01, (uint64_t)0x02,
                                         (char *)timebuffer, (char *)pixelbuffer,
                                         produce, &txbuffer);
-      XTRACE(OUTPUT, DEB, "Flatbuffer tx length %lu\n", txlen);
+      XTRACE(OUTPUT, DEB, "Flatbuffer tx length %d\n", txlen);
       producer.produce(txbuffer, txlen);
       mystats.tx_bytes += txlen;
 #endif

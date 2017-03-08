@@ -6,6 +6,8 @@
 #define TIMESIZE 4
 #define PIXELSIZE 4
 
+static_assert(FLATBUFFERS_LITTLEENDIAN, "Flatbuffers only tested on little endian systems");
+
 FBSerializer::FBSerializer(size_t maxarraylength)
     : builder(maxarraylength * 8 + 2048), maxlen(maxarraylength) {}
 
@@ -13,7 +15,10 @@ FBSerializer::~FBSerializer() {}
 
 int FBSerializer::serialize(uint64_t time, uint64_t seqno, char *timearr,
                             char *pixarr, size_t entries, char **buffer) {
-  assert(entries <= maxlen);
+  if (entries > maxlen) {
+    *buffer = 0;
+    return 0;
+  }
 
   builder.Clear();
 
