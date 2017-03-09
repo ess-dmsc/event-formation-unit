@@ -13,19 +13,29 @@
 #pragma message("FLATBUFFERS not defined, using old schemas")
 #include <common/ev42_events_generated.h>
 #endif
+#include <common/Producer.h>
 
 class FBSerializer {
 public:
-  FBSerializer(size_t maxarraylength);
 
+  /** @todo document */
+  FBSerializer(size_t maxarraylength, Producer &prod);
+
+  /** @todo document */
   ~FBSerializer();
 
-  int serialize(uint64_t time, uint64_t seqno, char *timearr, char *pixarr,
-                size_t entries, char **buffer);
+  /** @todo document */
+  int serialize(uint64_t time, uint64_t seqno, size_t entries, char **buffer);
+
+  /** @todo document */
+  int addevent(uint32_t time, uint32_t pixel);
 
 private:
   flatbuffers::FlatBufferBuilder builder;
   size_t maxlen{0};
   uint8_t *timeptr{nullptr};
   uint8_t *pixelptr{nullptr};
+  Producer & producer;
+
+  size_t events{0};
 };

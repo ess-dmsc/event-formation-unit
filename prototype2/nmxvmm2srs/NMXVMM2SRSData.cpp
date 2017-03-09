@@ -5,6 +5,7 @@
 #include <common/Trace.h>
 #include <cstdio>
 #include <nmxvmm2srs/NMXVMM2SRSData.h>
+#include <string.h>
 
 #define UNUSED __attribute__((unused))
 
@@ -95,6 +96,10 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
     }
   }
   return elems;
+}
+
+void NMXVMM2SRSData::hist_clear() {
+  memset(xyhist, 0, sizeof(xyhist));
 }
 
 unsigned int NMXVMM2SRSData::gray2bin32(unsigned int num) {

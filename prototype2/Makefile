@@ -9,7 +9,7 @@ endif
 
 VPATH = .. ../libs/include test
 
-progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so cspec2.so nmxvmm2srs.so
+progs = efu2 gencspec gencspecfile gennmxpcap dgmgjson cspec.so nmx.so udp.so cspec2.so nmxvmm2srs.so
 
 library = ../libs/eventlib.a
 
@@ -22,10 +22,11 @@ nmx.so.src += common/NewStats.cpp common/Producer.cpp
 nmx.so.inc = common/Detector.h NMX/Clusterer.h NMX/EventNMX.h NMX/Eventlet.h nmxgen/EventletBuilderH5.h
 nmx.so.inc += common/NewStats.h common/Producer.h
 
-nmxvmm2srs.so.src = nmxvmm2srs/nmxvmm2srs.cpp nmxvmm2srs/NMXVMM2SRSData.cpp NMX/Clusterer.cpp NMX/Geometry.cpp NMX/Time.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp nmxvmm2srs/EventletBuilder.cpp
-nmxvmm2srs.so.src += common/NewStats.cpp common/Producer.cpp
+nmxvmm2srs.so.src = nmxvmm2srs/nmxvmm2srs.cpp nmxvmm2srs/NMXVMM2SRSData.cpp NMX/Clusterer.cpp NMX/Geometry.cpp
+nmxvmm2srs.so.src += NMX/Time.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp nmxvmm2srs/EventletBuilder.cpp
+nmxvmm2srs.so.src += common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp
 nmxvmm2srs.so.inc = common/Detector.h NMX/Clusterer.h NMX/Geometry.h NMX/Time.h NMX/EventNMX.h NMX/Eventlet.h nmxvmm2srs/EventletBuilder.h
-nmxvmm2srs.so.inc += common/NewStats.h common/Producer.h nmxvmm2srs/NMXVMM2SRSData.h
+nmxvmm2srs.so.inc += common/NewStats.h common/Producer.h nmxvmm2srs/NMXVMM2SRSData.h common/FBSerializer.h
 
 
 cspec.so.src =  cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp

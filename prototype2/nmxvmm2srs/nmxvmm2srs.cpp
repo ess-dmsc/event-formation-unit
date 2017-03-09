@@ -4,6 +4,7 @@
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
+#include <common/FBSerializer.h>
 #include <common/NewStats.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
@@ -45,17 +46,14 @@ public:
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
   static const int eth_buffer_size = 9000;
-  static const int kafka_buffer_size = 1000000;
+  static const int kafka_buffer_size = 124000; /**< events */
 
 private:
   /** Shared between input_thread and processing_thread*/
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
-  char kafkabuffer[kafka_buffer_size];
-
-  NewStats ns{
-      "efu2.nmxvmm2srs."}; // Careful also uding this for other NMX pipeline
+  NewStats ns{"efu2.nmxvmm2srs."}; // Careful also uding this for other NMX pipeline
 
   struct {
     // Input Counters
@@ -147,17 +145,16 @@ void NMXVMM2SRS::input_thread() {
 
 void NMXVMM2SRS::processing_thread() {
 
-#ifndef NOKAFKA
-  Producer producer(opts->broker, true, "NMX_detector");
-#endif
+  Producer eventprod(opts->broker, true, "NMX_detector");
+  FBSerializer flatbuffer(kafka_buffer_size, eventprod);
+  Producer monitorprod(opts->broker, true, "NMX_monitor");
 
   NMXVMM2SRSData data(1125);
 
   Time time_interpreter;
   time_interpreter.set_tac_slope(125); /**< @todo get from slow control? */
   time_interpreter.set_bc_clock(40);   /**< @todo get from slow control? */
-  time_interpreter.set_trigger_resolution(
-      3.125); /**< @todo get from slow control? */
+  time_interpreter.set_trigger_resolution(3.125); /**< @todo get from slow control? */
   time_interpreter.set_target_resolution(0.5); /**< @todo not hardcode */
 
   Geometry geometry_intepreter; /**< @todo not hardocde chip mappings */
@@ -172,18 +169,14 @@ void NMXVMM2SRS::processing_thread() {
   TSCTimer report_timer;
 
   unsigned int data_index;
-  int evtoff = 0;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      data.receive(eth_ringbuf->getdatabuffer(data_index),
-                   eth_ringbuf->getdatalength(data_index));
+      data.receive(eth_ringbuf->getdatabuffer(data_index), eth_ringbuf->getdatalength(data_index));
       if (data.elems > 0) {
         builder.process_readout(data, clusterer);
-        // parser.parse(data.srshdr.dataid & 0xf, data.srshdr.time, data.data,
-        // data.elems);
 
         mystats.rx_readouts += data.elems;
         mystats.rx_errbytes += data.error;
@@ -199,22 +192,10 @@ void NMXVMM2SRS::processing_thread() {
             int time = 42; /**< @todo get time from event.time_start() */
             int pixelid = (int)event.x.center + (int)event.y.center * 256;
 
-            std::memcpy(kafkabuffer + evtoff, &time, sizeof(time));
-            std::memcpy(kafkabuffer + evtoff + 4, &pixelid, sizeof(pixelid));
-            evtoff += 8;
-
-            if (evtoff >= kafka_buffer_size / 10 - 20) {
-              assert(evtoff < kafka_buffer_size);
-
-#ifndef NOKAFKA
-              producer.produce(kafkabuffer, evtoff);
-              mystats.tx_bytes += evtoff;
-#endif
-              evtoff = 0;
-            }
+            mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
+            mystats.rx_events++;
           } else {
-            mystats.rx_discards +=
-                event.x.entries.size() + event.y.entries.size();
+            mystats.rx_discards += event.x.entries.size() + event.y.entries.size();
           }
         }
       }
@@ -222,6 +203,15 @@ void NMXVMM2SRS::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+
+      monitorprod.produce((char *)&data.xyhist, sizeof(data.xyhist));
+      for (int p = 0; p <= 1; p++) {
+        printf("plane: %d\n", p);
+         for (int s = 0; s < 30; s++) {
+           printf("%d ", data.xyhist[p][s]);
+         }
+         printf("\n");
+       }
 
       if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping processing thread, timeus " << std::endl;

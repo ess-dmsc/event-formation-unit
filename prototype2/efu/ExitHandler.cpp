@@ -14,7 +14,7 @@ ExitHandler::ExitHandler() {
 }
 
 void ExitHandler::signalhandler(int sig) {
-  XTRACE(MAIN, ALW, "efu2 terminated with signal %d", sig);
+  XTRACE(MAIN, ALW, "efu2 terminated with signal %d\n", sig);
   std::string message =
       "efu2 terminated with signal " + std::to_string(sig) + "\n";
   GLOG_CRI(message);

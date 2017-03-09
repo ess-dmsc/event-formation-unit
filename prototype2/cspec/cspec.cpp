@@ -23,7 +23,6 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
-#include <mutex>
 #include <queue>
 #include <stdio.h>
 #include <unistd.h>
@@ -65,11 +64,6 @@ private:
   /** Shared between processing_thread and output_thread */
   CircularFifo<unsigned int, event_buffer_max_entries> proc2output_fifo;
   RingBuffer<event_buffer_size> *event_ringbuf;
-
-  std::mutex eventq_mutex, cout_mutex;
-
-  uint32_t pixelbuffer[kafka_buffer_size]; /**< @todo not hard code */
-  uint32_t timebuffer[kafka_buffer_size];  /**< @todo not hard code */
 
   NewStats ns{"efu2.cspec."};
 
@@ -181,6 +175,7 @@ void CSPEC::input_thread() {
   }
 }
 
+
 void CSPEC::processing_thread() {
 
   CSPECChanConv conv;
@@ -189,7 +184,6 @@ void CSPEC::processing_thread() {
 
   MultiGridGeometry geom(1, 2, 48, 4, 16);
 
-  // CSPECData dat(0, 0, &conv, &CSPEC); // Custom signal thresholds
   CSPECData dat(250, &conv, &geom); // Default signal thresholds
 
   Timer stopafter_clock;
@@ -213,16 +207,14 @@ void CSPEC::processing_thread() {
       dat.receive(eth_ringbuf->getdatabuffer(data_index),
                   eth_ringbuf->getdatalength(data_index));
       mystats.rx_error_bytes += dat.error;
-      mystats.rx_readouts +=
-          dat.elems; /**< @todo both valid and invalid events */
+      mystats.rx_readouts += dat.elems; /**< @todo both valid and invalid events */
       mystats.rx_discards += dat.input_filter();
 
       for (unsigned int id = 0; id < dat.elems; id++) {
         auto d = dat.data[id];
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();
-          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) <
-              0) {
+          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) < 0) {
             mystats.geometry_errors++;
             assert(mystats.geometry_errors <= mystats.rx_readouts);
           } else {
@@ -250,19 +242,15 @@ void CSPEC::processing_thread() {
   }
 }
 
-void CSPEC::output_thread() {
 
-#ifndef NOKAFKA
+void CSPEC::output_thread() {
   Producer producer(opts->broker, true, "C-SPEC_detector");
-#endif
+  FBSerializer flatbuffer(kafka_buffer_size, producer);
 
   unsigned int event_index;
   Timer stop;
   TSCTimer report_timer;
-  FBSerializer flatbuffer(
-      kafka_buffer_size); // Leaves room for fb overhead and still < 1MB
 
-  uint64_t produce = 0;
   while (1) {
     if (proc2output_fifo.pop(event_index) == false) {
       mystats.rx_idle2++;
@@ -270,25 +258,9 @@ void CSPEC::output_thread() {
     } else {
       auto evbuf = event_ringbuf->getdatabuffer(event_index);
       XTRACE(OUTPUT, DEB, "output pixel: %d\n", *(uint32_t *)(evbuf + 4));
-      pixelbuffer[produce] = *(uint32_t *)(evbuf + 4);
-      timebuffer[produce] = *(uint32_t *)(evbuf + 0);
-      mystats.rx_events++;
-      produce++;
-    }
 
-    /** Produce when enough data has been accumulated */
-    if (produce >= kafka_buffer_size) {
-#ifndef NOKAFKA
-      char *txbuffer;
-      XTRACE(OUTPUT, DEB, "produce %" PRIu64 "\n", produce);
-      auto txlen = flatbuffer.serialize((uint64_t)0x01, (uint64_t)0x02,
-                                        (char *)timebuffer, (char *)pixelbuffer,
-                                        produce, &txbuffer);
-      XTRACE(OUTPUT, DEB, "Flatbuffer tx length %d\n", txlen);
-      producer.produce(txbuffer, txlen);
-      mystats.tx_bytes += txlen;
-#endif
-      produce = 0;
+      mystats.tx_bytes += flatbuffer.addevent(*(uint32_t *)(evbuf + 0), *(uint32_t *)(evbuf + 4));
+      mystats.rx_events++;
     }
 
     /** Cheking for exit*/
