@@ -102,7 +102,7 @@ HistSerializerTest: nmxvmm2srs/HistSerializerTest.cpp nmxvmm2srs/HistSerializer.
     nmxvmm2srs/HistSerializer.h common/Producer.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) nmxvmm2srs/HistSerializerTest.cpp nmxvmm2srs/HistSerializer.o \
-	   $(library) -o $@ $(ldflags_test) -lrdkafka
+	   $(library) -o $@ $(ldflags_test)
 
 EFUArgsTest: common/EFUArgsTest.cpp common/EFUArgs.o common/EFUArgs.h
 	@echo building $@
