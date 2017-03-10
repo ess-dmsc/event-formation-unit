@@ -149,7 +149,7 @@ void NMX::input_thread() {
 void NMX::processing_thread() {
 
 #ifndef NOKAFKA
-  Producer producer(opts->broker, true, "NMX_detector");
+  Producer producer(opts->broker, "NMX_detector");
 #endif
 
   EventletBuilderH5 builder;

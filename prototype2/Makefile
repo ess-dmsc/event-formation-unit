@@ -14,31 +14,27 @@ progs = efu2 gencspec gencspecfile gennmxpcap dgmgjson cspec.so nmx.so udp.so cs
 library = ../libs/eventlib.a
 
 # For each loadable detector add its .so.src and .so.inc dependencies
+common.src = common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp
+common.inc = common/Detector.h common/NewStats.h common/Producer.h common/FBSerializer.h
+common.inc += common/Trace.h libs/include/gccintel.h common/EFUArgs.h
+common.obj = $(common.src:%.cpp=%.o)
+
 udp.so.src = udp/udp.cpp
-udp.so.inc = common/Detector.h
 
 nmx.so.src = NMX/nmx.cpp NMX/Clusterer.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp nmxgen/EventletBuilderH5.cpp
-nmx.so.src += common/NewStats.cpp common/Producer.cpp
-nmx.so.inc = common/Detector.h NMX/Clusterer.h NMX/EventNMX.h NMX/Eventlet.h nmxgen/EventletBuilderH5.h
-nmx.so.inc += common/NewStats.h common/Producer.h
+nmx.so.inc = NMX/Clusterer.h NMX/EventNMX.h NMX/Eventlet.h nmxgen/EventletBuilderH5.h
 
 nmxvmm2srs.so.src = nmxvmm2srs/nmxvmm2srs.cpp nmxvmm2srs/NMXVMM2SRSData.cpp NMX/Clusterer.cpp NMX/Geometry.cpp
 nmxvmm2srs.so.src += NMX/Time.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp nmxvmm2srs/EventletBuilder.cpp
-nmxvmm2srs.so.src += common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp
-nmxvmm2srs.so.inc = common/Detector.h NMX/Clusterer.h NMX/Geometry.h NMX/Time.h NMX/EventNMX.h NMX/Eventlet.h nmxvmm2srs/EventletBuilder.h
-nmxvmm2srs.so.inc += common/NewStats.h common/Producer.h nmxvmm2srs/NMXVMM2SRSData.h common/FBSerializer.h
+nmxvmm2srs.so.inc = NMX/Clusterer.h NMX/Geometry.h NMX/Time.h NMX/EventNMX.h NMX/Eventlet.h nmxvmm2srs/EventletBuilder.h
+nmxvmm2srs.so.inc += nmxvmm2srs/NMXVMM2SRSData.h
 
 
 cspec.so.src =  cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
-cspec.so.src += common/Producer.cpp common/NewStats.cpp common/FBSerializer.cpp
-cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h common/MultiGridGeometry.h
-cspec.so.inc += common/Producer.h common/Trace.h
-cspec.so.inc += common/NewStats.h common/FBSerializer.h
+cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/MultiGridGeometry.h
 
 cspec2.so.src =  cspec2/cspec2.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
-cspec2.so.src += common/Producer.cpp common/NewStats.cpp
-cspec2.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/Detector.h common/MultiGridGeometry.h
-cspec2.so.inc += gccintel.h common/Producer.h common/Trace.h common/NewStats.h
+cspec2.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/MultiGridGeometry.h
 
 
 # For each standalone program add .src and .inc and .obj below
@@ -81,26 +77,27 @@ all: $(progs)
 $(efu.obj): $(efu.inc)
 $(gencspec.obj): $(gencspec.inc)
 $(gencspecfile.obj): $(gencspecfile.inc)
+$(common.obj): $(common.inc)
 
-cspec.so: $(cspec.so.src) $(cspec.so.inc)
+cspec.so: $(cspec.so.src) $(cspec.so.inc) $(common.obj)
 	@echo building specific $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
+	$(Q)$(cxx) $(cxxflags) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
-cspec2.so: $(cspec2.so.src) $(cspec2.so.inc)
+cspec2.so: $(cspec2.so.src) $(cspec2.so.inc) $(common.obj)
 	@echo building specific $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
+	$(Q)$(cxx) $(cxxflags) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
-nmx.so: $(nmx.so.src) $(nmx.so.inc)
+nmx.so: $(nmx.so.src) $(nmx.so.inc) $(common.obj)
 	@echo building specific $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
+	$(Q)$(cxx) $(cxxflags) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
-nmxvmm2srs.so: $(nmxvmm2srs.so.src) $(nmxvmm2srs.so.inc)
+nmxvmm2srs.so: $(nmxvmm2srs.so.src) $(nmxvmm2srs.so.inc) $(common.obj)
 	@echo building specific $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
+	$(Q)$(cxx) $(cxxflags) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
-udp.so: $(udp.so.src) $(udp.so.inc)
+udp.so: $(udp.so.src) $(udp.so.inc) $(common.obj)
 	@echo building specific $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(ldflags.so) -o $@
+	$(Q)$(cxx) $(cxxflags) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
 
 %.o: %.cpp
@@ -124,7 +121,7 @@ gencspecfile: $(library) $(gencspecfile.obj) $(gencspecfile.inc)
 
 gennmxpcap: $(library) nmxgen/wireshark.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderPcap.cpp \
 	      nmxgen/ReaderPcap.h nmxgen/NMXArgs.h
-	g++ -std=c++11 -I. -I.. nmxgen/wireshark.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderPcap.cpp $(library) -lpcap -o $@
+	$(Q)$(cxx) -std=c++11 -I. -I.. nmxgen/wireshark.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderPcap.cpp $(library) -lpcap -o $@
 
 dgmgjson: $(library) $(dgmgjson.obj) $(dgmgjson.inc)
 	@echo building $@

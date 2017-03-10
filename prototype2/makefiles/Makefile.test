@@ -5,7 +5,7 @@ testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest
 testprogs += CSPECEventTest EFUArgsTest
 testprogs += MultiGridGeometryTest EventletTest NewStatsTest EventTest
 testprogs += NMXVMM2SRSDataTest ClustererTest TimeTest GeometryTest FBSerializerTest
-testprogs += EventletBuilderH5Test EventletBuilderTest
+testprogs += EventletBuilderH5Test EventletBuilderTest HistSerializerTest
 
 ifeq ($(_ARCH),Linux)
 testprogs += ParserTest CalibrationFileTest
@@ -92,9 +92,17 @@ MultiGridGeometryTest: common/MultiGridGeometryTest.cpp common/MultiGridGeometry
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) common/MultiGridGeometryTest.cpp $(library)  -o $@ $(ldflags_test)
 
-FBSerializerTest: common/FBSerializerTest.cpp common/FBSerializer.o common/FBSerializer.h
+FBSerializerTest: common/FBSerializerTest.cpp common/FBSerializer.o \
+  	common/Producer.o common/FBSerializer.h common/Producer.h
 	@echo building $@
-	$(Q)g++ $(cxxflags_test) common/FBSerializerTest.cpp common/FBSerializer.o $(library) -o $@ $(ldflags_test)
+	$(Q)g++ $(cxxflags_test) common/FBSerializerTest.cpp common/FBSerializer.o common/Producer.o \
+		$(library) -o $@ $(ldflags_test)
+
+HistSerializerTest: nmxvmm2srs/HistSerializerTest.cpp nmxvmm2srs/HistSerializer.o \
+    nmxvmm2srs/HistSerializer.h common/Producer.h
+	@echo building $@
+	$(Q)g++ $(cxxflags_test) nmxvmm2srs/HistSerializerTest.cpp nmxvmm2srs/HistSerializer.o \
+	   $(library) -o $@ $(ldflags_test) -lrdkafka
 
 EFUArgsTest: common/EFUArgsTest.cpp common/EFUArgs.o common/EFUArgs.h
 	@echo building $@
@@ -120,11 +128,12 @@ EventletBuilderH5Test: nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5
 	NMX/Clusterer.o NMX/EventNMX.o -o $@ $(ldflags_test)
 
 EventletBuilderTest: nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.o \
-				nmxvmm2srs/EventletBuilder.h NMX/Clusterer.o NMX/Clusterer.h NMX/EventNMX.o \
+				nmxvmm2srs/NMXVMM2SRSData.o  NMX/Clusterer.o  NMX/EventNMX.o \
+				nmxvmm2srs/NMXVMM2SRSData.h nmxvmm2srs/EventletBuilder.h NMX/Clusterer.h \
 				NMX/EventNMX.h NMX/Time.o NMX/Time.h NMX/Geometry.o NMX/Geometry.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.o  \
-				NMX/Time.o NMX/EventNMX.o NMX/Geometry.o NMX/Clusterer.o -o $@ $(ldflags_test)
+				NMX/Time.o NMX/EventNMX.o NMX/Geometry.o NMX/Clusterer.o nmxvmm2srs/NMXVMM2SRSData.o -o $@ $(ldflags_test)
 
 EventletTest: NMX/EventletTest.cpp NMX/Eventlet.o NMX/Eventlet.h
 	@echo building $@

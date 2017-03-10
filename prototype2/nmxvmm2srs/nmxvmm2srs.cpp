@@ -145,9 +145,9 @@ void NMXVMM2SRS::input_thread() {
 
 void NMXVMM2SRS::processing_thread() {
 
-  Producer eventprod(opts->broker, true, "NMX_detector");
+  Producer eventprod(opts->broker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
-  Producer monitorprod(opts->broker, true, "NMX_monitor");
+  Producer monitorprod(opts->broker, "NMX_monitor");
 
   NMXVMM2SRSData data(1125);
 
@@ -204,14 +204,10 @@ void NMXVMM2SRS::processing_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-      monitorprod.produce((char *)&data.xyhist, sizeof(data.xyhist));
-      for (int p = 0; p <= 1; p++) {
-        printf("plane: %d\n", p);
-         for (int s = 0; s < 30; s++) {
-           printf("%d ", data.xyhist[p][s]);
-         }
-         printf("\n");
-       }
+      if (data.xyhist_elems != 0) {
+        monitorprod.produce((char *)&data.xyhist, sizeof(data.xyhist));
+        data.hist_clear();
+      }
 
       if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping processing thread, timeus " << std::endl;

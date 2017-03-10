@@ -100,6 +100,7 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
 
 void NMXVMM2SRSData::hist_clear() {
   memset(xyhist, 0, sizeof(xyhist));
+  xyhist_elems = 0;
 }
 
 unsigned int NMXVMM2SRSData::gray2bin32(unsigned int num) {

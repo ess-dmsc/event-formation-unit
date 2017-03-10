@@ -7,11 +7,8 @@
 
 // using namespace BrightnESS::EventGenerator::FlatBufs::EFU;
 
-Producer::Producer(std::string broker, bool enabled, std::string topicstr) {
+Producer::Producer(std::string broker, std::string topicstr) {
   using namespace std;
-
-  if (!enabled)
-    return;
 
   conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
   tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
@@ -53,21 +50,6 @@ int Producer::produce(char *buffer, int length) {
   RdKafka::ErrorCode resp = producer->produce(
       topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */, buffer,
       length, NULL, NULL);
-  if (resp != RdKafka::ERR_NO_ERROR) {
-    std::cerr << "% Produce failed: " << RdKafka::err2str(resp) << std::endl;
-    return resp;
-  }
-  producer->poll(0);
-
-  return 0;
-}
-
-int Producer::produce() {
-
-  std::string line = "producing...";
-  RdKafka::ErrorCode resp = producer->produce(
-      topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */,
-      const_cast<char *>(line.c_str()), line.size(), NULL, NULL);
   if (resp != RdKafka::ERR_NO_ERROR) {
     std::cerr << "% Produce failed: " << RdKafka::err2str(resp) << std::endl;
     return resp;

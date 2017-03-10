@@ -64,6 +64,7 @@ public:
 
   uint32_t max_elements{0}; // Maximum capacity of data array
   uint32_t xyhist[2][1500];
+  uint32_t xyhist_elems{0};
 private:
   uint32_t reversebits(uint32_t data); /**< helper function to reverse bits in a uint32_t */
   unsigned int gray2bin32(unsigned int num); /**< helper function to decode gray codes */

@@ -38,4 +38,5 @@ private:
   Producer & producer;
 
   size_t events{0};
+  size_t seqno{1};
 };

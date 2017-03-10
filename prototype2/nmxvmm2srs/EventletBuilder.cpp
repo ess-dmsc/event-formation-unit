@@ -29,6 +29,7 @@ uint32_t EventletBuilder::process_readout(NMXVMM2SRSData &data, Clusterer &clust
     assert(eventlet.plane_id == 0 || eventlet.plane_id == 1);
     assert(eventlet.strip <= 1500);
     data.xyhist[eventlet.plane_id][eventlet.strip]++;
+    data.xyhist_elems++;
     clusterer.insert(eventlet);
   }
 

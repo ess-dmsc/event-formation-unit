@@ -166,7 +166,7 @@ void CSPEC::processing_thread() {
   CSPECChanConv conv;
 
 #ifndef NOKAFKA
-  Producer producer(opts->broker, true, "C-SPEC_detector");
+  Producer producer(opts->broker, "C-SPEC_detector");
 #endif
 
   MultiGridGeometry geom(1, 2, 48, 4, 16);

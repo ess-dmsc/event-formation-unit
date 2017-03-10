@@ -244,7 +244,7 @@ void CSPEC::processing_thread() {
 
 
 void CSPEC::output_thread() {
-  Producer producer(opts->broker, true, "C-SPEC_detector");
+  Producer producer(opts->broker, "C-SPEC_detector");
   FBSerializer flatbuffer(kafka_buffer_size, producer);
 
   unsigned int event_index;

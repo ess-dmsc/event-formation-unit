@@ -1,0 +1,17 @@
+//
+
+file_identifier "moXX";
+
+union DataField { GEMHist }
+
+table GEMHist {
+    xhist : [uint];
+    yhist : [uint];
+}
+
+table MonitorMessage {
+    source_name : string;
+    data : DataField;
+}
+
+root_type MonitorMessage;

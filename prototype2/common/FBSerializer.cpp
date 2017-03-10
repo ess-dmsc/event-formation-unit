@@ -8,10 +8,13 @@
 #define TIMESIZE 4
 #define PIXELSIZE 4
 
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
+
 static_assert(FLATBUFFERS_LITTLEENDIAN, "Flatbuffers only tested on little endian systems");
 
 FBSerializer::FBSerializer(size_t maxarraylength, Producer & prod)
-    : builder(maxarraylength * 8 + 2048)
+    : builder(maxarraylength * 8 + 256)
     , maxlen(maxarraylength)
     , producer(prod) {
       builder.Clear();
@@ -41,6 +44,7 @@ int FBSerializer::serialize(uint64_t time, uint64_t seqno, size_t entries, char 
 }
 
 int FBSerializer::addevent(uint32_t time, uint32_t pixel) {
+  XTRACE(OUTPUT, DEB, "Add event: %d %d\n", time, pixel);
   ((uint32_t *)timeptr)[events] = time;
   ((uint32_t *)pixelptr)[events] = pixel;
   events++;
@@ -50,10 +54,9 @@ int FBSerializer::addevent(uint32_t time, uint32_t pixel) {
   if (events >= maxlen) {
     char *txbuffer;
     XTRACE(OUTPUT, DEB, "produce %zu events \n", events);
-    txlen = serialize((uint64_t)0x01, (uint64_t)0x02, events, &txbuffer);
+    txlen = serialize((uint64_t)0x01, seqno++, events, &txbuffer);
     XTRACE(OUTPUT, DEB, "Flatbuffer tx length %d\n", txlen);
     producer.produce(txbuffer, txlen);
-
     events = 0;
   }
   return txlen;

@@ -1,11 +1,13 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/FBSerializer.h>
+#include <common/Producer.h>
 #include <test/TestBase.h>
 #include <cstring>
 
 #define GLOBALTIME 0x1000000020000000
-#define ARRAYLENGTH 125000
+//#define ARRAYLENGTH 125000
+#define ARRAYLENGTH 10
 
 class FBSerializerTest : public TestBase {
     virtual void SetUp() {
@@ -18,28 +20,29 @@ class FBSerializerTest : public TestBase {
     virtual void TearDown() {}
 
 protected:
+  Producer prod{"nobroker", "notopic"};
   char flatbuffer[1024*1024];
   uint32_t tarr[200000];
   uint32_t parr[200000];
   char * buffer;
-  FBSerializer fb{ARRAYLENGTH};
+  FBSerializer fb{ARRAYLENGTH, prod};
 };
 
 TEST_F(FBSerializerTest, Serialize) {
-  auto length = fb.serialize(GLOBALTIME, 1, (char *)tarr, (char *)parr, ARRAYLENGTH, &buffer);
+  auto length = fb.serialize(GLOBALTIME, 1, ARRAYLENGTH, &buffer);
   ASSERT_TRUE(length >= ARRAYLENGTH * 8);
   ASSERT_TRUE(length <= ARRAYLENGTH * 8 + 2048);
   ASSERT_TRUE(buffer != 0);
 }
 
 TEST_F(FBSerializerTest, SerializeOversize) {
-  auto length = fb.serialize(GLOBALTIME, 1, (char *)tarr, (char *)parr, ARRAYLENGTH + 1, &buffer);
+  auto length = fb.serialize(GLOBALTIME, 1, ARRAYLENGTH + 1, &buffer);
   ASSERT_EQ(length, 0);
   ASSERT_EQ(buffer, nullptr);
 }
 
 TEST_F(FBSerializerTest, SerDeserialize) {
-  auto length = fb.serialize(GLOBALTIME, 1, (char *)tarr, (char *)parr, ARRAYLENGTH, &buffer);
+  auto length = fb.serialize(GLOBALTIME, 1, ARRAYLENGTH, &buffer);
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
   auto events = GetEventMessage(flatbuffer);
@@ -54,7 +57,17 @@ TEST_F(FBSerializerTest, SerDeserialize) {
 
 
 TEST_F(FBSerializerTest, DeserializeCheckData) {
-  auto length = fb.serialize(GLOBALTIME, 1, (char *)tarr, (char *)parr, ARRAYLENGTH, &buffer);
+  for (int i = 0; i < ARRAYLENGTH - 1; i++) {
+    auto len = fb.addevent(tarr[i], parr[i]);
+    ASSERT_EQ(len, 0);
+  }
+
+  auto len = fb.addevent(tarr[ARRAYLENGTH - 1], parr[ARRAYLENGTH - 1]);
+  ASSERT_TRUE(len > 0);
+
+  auto length = fb.serialize(GLOBALTIME, 1, ARRAYLENGTH, &buffer);
+  ASSERT_TRUE(length > 0);
+  ASSERT_TRUE(buffer != nullptr);
 
   memcpy(flatbuffer, buffer, length);
   auto events = GetEventMessage(flatbuffer);

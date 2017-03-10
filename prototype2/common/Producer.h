@@ -13,15 +13,10 @@ class Producer {
 public:
   /** @brief Construct a producer object.
    * @param broker 'URL' specifying host and port, example "127.0.0.1:9009"
-   * @param enabled If false do not send data to broker when calling produce()
    * @param topicstr Name of Kafka topic according to agreement, example
    * "T-REX_detectors"
   */
-  Producer(std::string broker, bool enabled, std::string topicstr);
-
-  /** @brief Function called to send data to a broker
-   */
-  int produce();
+  Producer(std::string broker, std::string topicstr);
 
   /** @brief Function called to send data to a broker
    *  @param buffer Pointer to char buffer containing data to be tx'ed
