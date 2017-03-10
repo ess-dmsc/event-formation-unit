@@ -96,7 +96,7 @@ FBSerializerTest: common/FBSerializerTest.cpp common/FBSerializer.o \
   	common/Producer.o common/FBSerializer.h common/Producer.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) common/FBSerializerTest.cpp common/FBSerializer.o common/Producer.o \
-		$(library) -o $@ $(ldflags_test)
+		$(library) -o $@ $(ldflags_test) $(kafkalibs)
 
 HistSerializerTest: nmxvmm2srs/HistSerializerTest.cpp nmxvmm2srs/HistSerializer.o \
     nmxvmm2srs/HistSerializer.h common/Producer.h

@@ -9,7 +9,7 @@ endif
 
 VPATH = .. ../libs/include test
 
-progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so cspec2.so nmxvmm2srs.so
+progs = efu2  cspec.so nmx.so udp.so cspec2.so nmxvmm2srs.so gencspec gencspecfile dgmgjson
 # gennmxpcap removed as libpcap is not available on build node
 
 library = ../libs/eventlib.a
@@ -30,7 +30,6 @@ nmxvmm2srs.so.src += NMX/Time.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp nmxvmm2srs/E
 nmxvmm2srs.so.inc = NMX/Clusterer.h NMX/Geometry.h NMX/Time.h NMX/EventNMX.h NMX/Eventlet.h nmxvmm2srs/EventletBuilder.h
 nmxvmm2srs.so.inc += nmxvmm2srs/NMXVMM2SRSData.h
 
-
 cspec.so.src =  cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
 cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/MultiGridGeometry.h
 
@@ -45,20 +44,16 @@ efu.src += efu/Server.cpp efu/Parser.cpp cspec/CalibrationFile.cpp
 efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h
 efu.inc += efu/Server.h efu/Parser.h common/Trace.h cspec/CalibrationFile.h
 efu.inc += common/StatPublisher.h common/NewStats.h efu/ExitHandler.h
-efu.obj = $(efu.src:%.cpp=%.o)
 
 gencspec.src = cspecgen/cspecgen.cpp cspecgen/CspecArgs.cpp cspec/CSPECData.cpp
 gencspec.inc = cspecgen/CspecArgs.h cspec/CSPECData.h
-gencspec.obj = $(gencspec.src:%.cpp=%.o)
 
 gencspecfile.src = cspecgen/cspecfile.cpp cspecgen/CspecArgs.cpp
 gencspecfile.inc = cspecgen/CspecArgs.h
-gencspecfile.obj = $(gencspecfile.src:%.cpp=%.o)
 
 dgmgjson.src = mgjson/dgmgjson.cpp mgjson/MGJsonArgs.cpp ../dataformats/multigrid/src/RunSpecParse.cpp\
        ../dataformats/multigrid/src/jsoncpp.cpp
 dgmgjson.inc = mgjson/MGJsonArgs.h
-dgmgjson.obj = $(dgmgjson.src:%.cpp=%.o)
 
 
 .DEFAULT_GOAL = all
@@ -75,58 +70,54 @@ all: $(progs)
 	@echo done
 	$(Q)chmod 664 *.so
 
-$(efu.obj): $(efu.inc)
-$(gencspec.obj): $(gencspec.inc)
-$(gencspecfile.obj): $(gencspecfile.inc)
-$(common.obj): $(common.inc)
 
-cspec.so: $(cspec.so.src) $(cspec.so.inc) $(common.obj)
+cspec.so: $(cspec.so.src) $(common.obj) $(cspec.so.inc)
 	@echo building specific $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(common.obj) $(ldflags.so) -o $@
+	$(Q)$(cxx) $(cxxflags) $(cxxflags.so) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
 cspec2.so: $(cspec2.so.src) $(cspec2.so.inc) $(common.obj)
 	@echo building specific $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(common.obj) $(ldflags.so) -o $@
+	$(Q)$(cxx) $(cxxflags) $(cxxflags.so) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
 nmx.so: $(nmx.so.src) $(nmx.so.inc) $(common.obj)
 	@echo building specific $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(common.obj) $(ldflags.so) -o $@
+	$(Q)$(cxx) $(cxxflags) $(cxxflags.so) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
 nmxvmm2srs.so: $(nmxvmm2srs.so.src) $(nmxvmm2srs.so.inc) $(common.obj)
 	@echo building specific $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(common.obj) $(ldflags.so) -o $@
+	$(Q)$(cxx) $(cxxflags) $(cxxflags.so) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
 udp.so: $(udp.so.src) $(udp.so.inc) $(common.obj)
 	@echo building specific $@
-	$(Q)$(cxx) $(cxxflags) $($(@).src) $(common.obj) $(ldflags.so) -o $@
+	$(Q)$(cxx) $(cxxflags) $(cxxflags.so) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
 
 %.o: %.cpp
 	@echo building $@
-	$(Q)$(cxx) $(cxxflags) -I../dataformats/multigrid/inc $< -c -o $@
+	$(Q)$(cxx) $(cxxflags) $< -c -o $@
 
 $(library): Socket.h TSCTimer.h Timer.h SPSCFifo.h
 	make -C ../libs
 
-efu2: $(library) $(efu.obj)
+efu2: $(library) $(efu.src) $(efu.inc)
 	@echo building $@
-	$(Q)$(cxx) $(cxxflags) $(efu.obj) $(library) $(ldflags) -o $@
+	$(Q)$(cxx) $(cxxflags) $(efu.src) $(library) $(ldflags) -o $@
 
-gencspec: $(library) $(gencspec.obj) $(gencspec.inc)
+gencspec: $(library) $(gencspec.src) $(gencspec.inc)
 	@echo building $@
-	$(Q)$(cxx) $(cxxflags) $(gencspec.obj) $(library) $(ldflags) -o $@
+	$(Q)$(cxx) $(cxxflags) $(gencspec.src) $(library) $(ldflags) -o $@
 
-gencspecfile: $(library) $(gencspecfile.obj) $(gencspecfile.inc)
+gencspecfile: $(library) $(gencspecfile.src) $(gencspecfile.inc)
 	@echo building $@
-	$(Q)$(cxx) $(gencspecfile.obj) $(library) $(ldflags) -o $@
+	$(Q)$(cxx) $(cxxflags) $(gencspecfile.src) $(library) $(ldflags) -o $@
 
 gennmxpcap: $(library) nmxgen/wireshark.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderPcap.cpp \
 	      nmxgen/ReaderPcap.h nmxgen/NMXArgs.h
 	$(Q)$(cxx) -std=c++11 -I. -I.. nmxgen/wireshark.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderPcap.cpp $(library) -lpcap -o $@
 
-dgmgjson: $(library) $(dgmgjson.obj) $(dgmgjson.inc)
+dgmgjson: $(library) $(dgmgjson.src) $(dgmgjson.inc)
 	@echo building $@
-	$(Q)$(cxx) $(dgmgjson.obj) $(library) $(ldflags) -o $@
+	$(Q)$(cxx) $(cxxflags) $(dgmgjson.src) $(library) $(ldflags) -o $@
 
 realclean: clean
 	make -C ../libs clean

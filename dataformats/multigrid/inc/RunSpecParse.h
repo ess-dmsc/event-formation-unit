@@ -6,8 +6,8 @@
  */
 
 #pragma once
-#include <RunSpec.h>
-#include <json.h>
+#include <dataformats/multigrid/inc/RunSpec.h>
+#include <dataformats/multigrid/inc/json.h>
 #include <vector>
 
 class RunSpecParse {

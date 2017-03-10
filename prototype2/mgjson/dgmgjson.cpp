@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <RunSpec.h>
-#include <RunSpecParse.h>
+#include <dataformats/multigrid/inc/RunSpec.h>
+#include <dataformats/multigrid/inc/RunSpecParse.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

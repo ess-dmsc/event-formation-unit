@@ -8,7 +8,7 @@ ifdef V
 Q=
 endif
 
-CFLAGS= -O3 -std=c++11 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -I inc -I ../../prototype2
+CFLAGS= -O3 -std=c++11 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs -I inc -I ../../prototype2 -I ../..
 
 prog = cncsread batchreader genpixids
 testprogs = PeakFinderTest HistogramTest
