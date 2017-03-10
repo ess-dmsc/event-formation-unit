@@ -94,7 +94,7 @@ udp.so: $(udp.so.src) $(udp.so.inc) $(common.obj)
 
 %.o: %.cpp
 	@echo building $@
-	$(Q)$(cxx) $(cxxflags) $< -c -o $@
+	$(Q)$(cxx) $(cxxflags) $(cxxflags.so) $< -c -o $@
 
 $(library): Socket.h TSCTimer.h Timer.h SPSCFifo.h
 	make -C ../libs
