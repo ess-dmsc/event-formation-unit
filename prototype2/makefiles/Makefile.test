@@ -21,13 +21,13 @@ coverage:
 
 valgrind: test
 	$(Q)rm -f valgrind_error
-	$(Q)for test in $(testprogs) ; do valgrind --leak-check=full -v --log-file="$$test.valgrind" ./$$test  || echo error >> valgrind_error; done
+	$(Q)for test in $(testprogs) ; do LD_LIBRARY_PATH=$(KAFKALIB) valgrind --leak-check=full -v --log-file="$$test.valgrind" ./$$test  || echo error >> valgrind_error; done
 
 test: $(testprogs)
 	@echo "done building tests"
 
 runtest: test
-	$(Q)for test in $(testprogs) ; do ./$$test --gtest_output=xml:$$test.xml; done
+	$(Q)for test in $(testprogs) ; do LD_LIBRARY_PATH=$(KAFKALIB) ./$$test --gtest_output=xml:$$test.xml; done
 
 
 
