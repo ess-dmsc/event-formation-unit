@@ -9,7 +9,8 @@ endif
 
 VPATH = .. ../libs/include test
 
-progs = efu2 gencspec gencspecfile gennmxpcap dgmgjson cspec.so nmx.so udp.so cspec2.so nmxvmm2srs.so
+progs = efu2 gencspec gencspecfile dgmgjson cspec.so nmx.so udp.so cspec2.so nmxvmm2srs.so
+# gennmxpcap removed as libpcap is not available on build node
 
 library = ../libs/eventlib.a
 
