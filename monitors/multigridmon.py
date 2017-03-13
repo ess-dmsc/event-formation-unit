@@ -9,16 +9,15 @@ import struct, codecs
 import pylab as pl
 import numpy
 import matplotlib.pyplot as plt
-from EventMessage import EventMessage
+from schemas.EventMessage import EventMessage
 
 
-class Proj:
+class Proj(object):
     def __init__(self):
         self.x = 8
         self.y = 48
         self.z = 16
         self.clear()
-
 
     def coords(self, pixel):
         x = (pixel - 1) / (self.y * self.z)

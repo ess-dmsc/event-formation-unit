@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <../dataformats/multigrid/scripts/mon_efu_generated.h>
+#include <../monitors/schemas/mon_efu_generated.h>
 #include <common/Producer.h>
 #include <libs/include/gccintel.h>
 

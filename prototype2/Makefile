@@ -27,8 +27,9 @@ nmx.so.inc = NMX/Clusterer.h NMX/EventNMX.h NMX/Eventlet.h nmxgen/EventletBuilde
 
 nmxvmm2srs.so.src = nmxvmm2srs/nmxvmm2srs.cpp nmxvmm2srs/NMXVMM2SRSData.cpp NMX/Clusterer.cpp NMX/Geometry.cpp
 nmxvmm2srs.so.src += NMX/Time.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp nmxvmm2srs/EventletBuilder.cpp
+nmxvmm2srs.so.src += nmxvmm2srs/HistSerializer.cpp
 nmxvmm2srs.so.inc = NMX/Clusterer.h NMX/Geometry.h NMX/Time.h NMX/EventNMX.h NMX/Eventlet.h nmxvmm2srs/EventletBuilder.h
-nmxvmm2srs.so.inc += nmxvmm2srs/NMXVMM2SRSData.h
+nmxvmm2srs.so.inc += nmxvmm2srs/NMXVMM2SRSData.h nmxvmm2srs/HistSerializer.h
 
 cspec.so.src =  cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
 cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/MultiGridGeometry.h

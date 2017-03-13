@@ -17,6 +17,7 @@
 #include <libs/include/Timer.h>
 #include <memory>
 #include <nmxvmm2srs/EventletBuilder.h>
+#include <nmxvmm2srs/HistSerializer.h>
 #include <nmxvmm2srs/NMXVMM2SRSData.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -148,6 +149,7 @@ void NMXVMM2SRS::processing_thread() {
   Producer eventprod(opts->broker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
   Producer monitorprod(opts->broker, "NMX_monitor");
+  HistSerializer histfb(1500);
 
   NMXVMM2SRSData data(1125);
 
@@ -205,7 +207,9 @@ void NMXVMM2SRS::processing_thread() {
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
       if (data.xyhist_elems != 0) {
-        monitorprod.produce((char *)&data.xyhist, sizeof(data.xyhist));
+        char * txbuffer;
+        auto len = histfb.serialize(&data.xyhist[0][0], &data.xyhist[1][0], 1500, &txbuffer);
+        monitorprod.produce(txbuffer, len);
         data.hist_clear();
       }
 

@@ -2,7 +2,18 @@
 
 file_identifier "moXX";
 
-union DataField { GEMHist }
+union DataField { GEMHist, GEMTrack }
+
+table pos {
+    strip: uint;
+    time : uint;
+    adc  : uint;
+}
+
+table GEMTrack {
+    xtrack: [pos];
+    ytrack: [pos];
+}
 
 table GEMHist {
     xhist : [uint];
