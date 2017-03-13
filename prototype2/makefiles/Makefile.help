@@ -1,0 +1,36 @@
+# Copyright (C) 2016 European Spallation Source ERIC
+#
+
+printinfo:
+	$(info This build uses the following options)
+	$(info [Platform])
+	$(info Architecture: $(_ARCH))
+	$(info [Application and libraries])
+	$(info RELEASE=$(RELEASE) - $(origin RELEASE))
+	$(info GRAYLOG=$(GRAYLOG) - $(origin GRAYLOG))
+	$(info EXTSCHEMAS=$(EXTSCHEMAS) - $(origin EXTSCHEMAS))
+	$(info KAFKAINC $(KAFKAINC))
+	$(info KAFKALIB $(KAFKALIB))
+	$(info HDF5INC $(HDF5INC))
+	$(info HDF5LIB $(HDF5LIB))
+	$(info [Debug and Profiling])
+	$(info V=$(V) - $(origin V))
+	$(info COV=$(COV) - $(origin COV))
+
+	$(info --------------------------------------------------------)
+
+help:
+	@echo "To specify location of librdkafka and libhdf5, use"
+	@echo "> make HDF5=y HDF5INC=path1 HDF5LIB=path2 KAFKAINC=path3 KAFKAlib=path4"
+	@echo
+	@echo "Platform specific examples:"
+	@echo "OS      | KAFKAINC      | KAFKALIB    | HDF5INC          | HDF5LIB "
+	@echo "-------------------------------------------------------------------------------------------"
+	@echo 'CentOS  | $$DMG/include      | $$DMG/lib      | $$DMG/include            | $$DMG/lib'
+	@echo 'Mac     | /usr/local/include | /usr/local/lib | /usr/local/include       | /usr/local/lib'
+	@echo 'Ubuntu  | /usr/local/include | /usr/lib64     | /usr/include/hdf5/serial | /usr/lib/x86_64-linux-gnu/hdf5/serial'
+	@echo
+	@echo '$$DMG=/opt/dm_group/usr'
+	@echo
+	@echo '(mjc mac ) make HDF5=y KAFKALIB=/usr/lib64 KAFKAINC=/usr/local/include KAFKALIB=/usr/local/lib HDF5INC=/usr/local/include HDF5LIB=/usr/local/lib'
+	@echo '(mjc ws  ) make HDF5=y KAFKAINC=/usr/local/include KAFKALIB=/usr/local/lib HDF5INC=/usr/local/include HDF5LIB=/usr/local/lib'

@@ -61,12 +61,13 @@ dgmgjson.inc = mgjson/MGJsonArgs.h
 include makefiles/Makefile.config
 include makefiles/Makefile.test
 include makefiles/Makefile.hdf5
+include makefiles/Makefile.help
 
 doxygen:
 	mkdir -p doxygen
 	doxygen doxyfile
 
-all: $(progs)
+all: printinfo $(progs)
 	@echo done
 	$(Q)chmod 664 *.so
 
@@ -141,16 +142,3 @@ clean: prog-clean test-clean doxygen-clean
 release: realclean all clean test runtest
 	../jenkins/style.bash
 	@echo Ready for checkin
-
-help:
-	@echo "To specify location of librdkafka and libhdf5, use"
-	@echo "> make HDF5=y HDF5INC=path1 HDF5LIB=path2 KAFKAINC=path3 KAFKAlib=path4"
-	@echo
-	@echo "Platform specific examples:"
-	@echo "OS      | KAFKAINC      | KAFKALIB    | HDF5INC          | HDF5LIB "
-	@echo "-------------------------------------------------------------------------------------------"
-	@echo 'CentOS  | $$DMG/include      | $$DMG/lib   | $$DMG/include            | $$DMG/lib'
-	@echo 'Mac     | ?                  | ?           | /usr/local/include       | /usr/local/lib'
-	@echo 'Ubuntu  | /usr/local/include | /usr/lib64  | /usr/include/hdf5/serial | /usr/lib/x86_64-linux-gnu/hdf5/serial'
-	@echo
-	@echo '$$DMG=/opt/dm_group/usr'
