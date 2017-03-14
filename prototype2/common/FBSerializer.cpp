@@ -35,8 +35,8 @@ int FBSerializer::serialize(uint64_t time, uint64_t seqno, size_t entries, char 
   auto timeoff = builder.CreateUninitializedVector(entries, TIMESIZE, &timeptr);
 
   auto pixeloff = builder.CreateUninitializedVector(entries, PIXELSIZE, &pixelptr);
-
-  auto msg = CreateEventMessage(builder, 0, seqno, time, timeoff, pixeloff);
+  auto source = builder.CreateString("c_spec_data");
+  auto msg = CreateEventMessage(builder, source, seqno, time, timeoff, pixeloff);
 
   builder.Finish(msg);
   *buffer = (char *)builder.GetBufferPointer();
