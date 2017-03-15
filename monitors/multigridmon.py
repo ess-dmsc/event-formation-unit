@@ -91,7 +91,6 @@ def main():
 
     print("Starting main loop")
 
-    clearplotafter = 5
     while (True):
         try:
             msg = consumer.consume(block = True)

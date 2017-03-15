@@ -8,8 +8,8 @@
 #define TIMESIZE 4
 #define PIXELSIZE 4
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 static_assert(FLATBUFFERS_LITTLEENDIAN, "Flatbuffers only tested on little endian systems");
 
@@ -40,24 +40,42 @@ int FBSerializer::serialize(uint64_t time, uint64_t seqno, size_t entries, char 
 
   builder.Finish(msg);
   *buffer = (char *)builder.GetBufferPointer();
-  return builder.GetSize();
+  auto sz = builder.GetSize();
+  assert(sz > 0);
+  assert(buffer != nullptr);
+  return sz;
+}
+
+
+int FBSerializer::produce() {
+    int txlen = 0;
+    if (events != 0) {
+      // Debug
+      for (unsigned int i = 0; i < events; i++) {
+        printf("(%d, %d) ", i, ((uint32_t *)pixelptr)[i]);
+      }
+      printf("\n");
+
+      char *txbuffer;
+      XTRACE(OUTPUT, DEB, "forced produce %zu events \n", events);
+      txlen = serialize((uint64_t)0x01, seqno++, events, &txbuffer);
+      assert(txlen > 0);
+      XTRACE(OUTPUT, DEB, "Flatbuffer tx length %d\n", txlen);
+      producer.produce(txbuffer, txlen);
+      events = 0;
+    }
+    return txlen;
 }
 
 int FBSerializer::addevent(uint32_t time, uint32_t pixel) {
-  XTRACE(OUTPUT, DEB, "Add event: %d %d\n", time, pixel);
+  XTRACE(OUTPUT, DEB, "Add event: %d %u\n", time, pixel);
   ((uint32_t *)timeptr)[events] = time;
   ((uint32_t *)pixelptr)[events] = pixel;
   events++;
 
   /** Produce when enough data has been accumulated */
-  int txlen = 0;
   if (events >= maxlen) {
-    char *txbuffer;
-    XTRACE(OUTPUT, DEB, "produce %zu events \n", events);
-    txlen = serialize((uint64_t)0x01, seqno++, events, &txbuffer);
-    XTRACE(OUTPUT, DEB, "Flatbuffer tx length %d\n", txlen);
-    producer.produce(txbuffer, txlen);
-    events = 0;
+    return produce();
   }
-  return txlen;
+  return 0;
 }

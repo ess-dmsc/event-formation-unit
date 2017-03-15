@@ -19,11 +19,12 @@ uint32_t EventletBuilder::process_readout(NMXVMM2SRSData &data, Clusterer &clust
     auto & d = data.data[i];
     XTRACE(PROCESS, DEB, "eventlet timestamp: hi 0x%08x, lo: 0x%08x\n",
            data.srshdr.time, (d.bcid << 16) + d.tdc);
-    XTRACE(PROCESS, DEB, "eventlet  chip: %d, strip: %d\n", chip_id, d.chno);
+    XTRACE(PROCESS, DEB, "eventlet  chip: %d, channel: %d\n", chip_id, d.chno);
     eventlet.time = time_intepreter_.timestamp(data.srshdr.time, d.bcid, d.tdc);
     eventlet.plane_id = geometry_interpreter_.get_plane(fec_id, chip_id);
     eventlet.strip = geometry_interpreter_.get_strip(fec_id, chip_id, d.chno);
     eventlet.adc = d.adc;
+    XTRACE(PROCESS, DEB, "eventlet  plane_id: %d, strip: %d\n", eventlet.plane_id, eventlet.strip);
     /**< @todo flags? */
 
     assert(eventlet.plane_id == 0 || eventlet.plane_id == 1);

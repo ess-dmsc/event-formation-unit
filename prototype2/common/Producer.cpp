@@ -5,8 +5,6 @@
 #include <iostream>
 #include <libs/include/gccintel.h>
 
-// using namespace BrightnESS::EventGenerator::FlatBufs::EFU;
-
 Producer::Producer(std::string broker, std::string topicstr) {
   using namespace std;
 

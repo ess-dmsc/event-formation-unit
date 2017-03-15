@@ -147,7 +147,7 @@ void NMXVMM2SRS::input_thread() {
 void NMXVMM2SRS::processing_thread() {
 
   Producer eventprod(opts->broker, "NMX_detector");
-  FBSerializer flatbuffer(kafka_buffer_size, eventprod);
+  FBSerializer flatbuffer(400, eventprod);
   Producer monitorprod(opts->broker, "NMX_monitor");
   HistSerializer histfb(1500);
 
@@ -160,8 +160,8 @@ void NMXVMM2SRS::processing_thread() {
   time_interpreter.set_target_resolution(0.5); /**< @todo not hardcode */
 
   Geometry geometry_intepreter; /**< @todo not hardocde chip mappings */
-  geometry_intepreter.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
-  geometry_intepreter.define_plane(1, {{1, 10}, {1, 11}, {1, 14}, {1, 15}});
+  geometry_intepreter.define_plane(0, {{1, 0}, {1, 1}});
+  geometry_intepreter.define_plane(1, {{1, 14}, {1, 15}});
 
   EventletBuilder builder(time_interpreter, geometry_intepreter);
 
@@ -169,7 +169,6 @@ void NMXVMM2SRS::processing_thread() {
 
   Timer stopafter_clock;
   TSCTimer report_timer;
-
   unsigned int data_index;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
@@ -184,17 +183,19 @@ void NMXVMM2SRS::processing_thread() {
         mystats.rx_errbytes += data.error;
 
         while (clusterer.event_ready()) {
-          XTRACE(PROCESS, WAR, "event_ready()\n");
+          XTRACE(PROCESS, DEB, "event_ready()\n");
           auto event = clusterer.get_event();
           event.analyze(true, 3, 7); /**< @todo not hardocde */
           if (event.good()) {
-            XTRACE(PROCESS, WAR, "event.good\n");
+            XTRACE(PROCESS, DEB, "event.good\n");
             mystats.rx_events++;
 
-            int time = 42; /**< @todo get time from event.time_start() */
+            XTRACE(PROCESS, DEB, "x.center: %f, y.center %f\n", event.x.center, event.y.center);
             int pixelid = (int)event.x.center + (int)event.y.center * 256;
 
-            mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
+            assert(pixelid < 65535);
+
+            mystats.tx_bytes += flatbuffer.addevent((uint32_t)event.time_start(), pixelid);
             mystats.rx_events++;
           } else {
             mystats.rx_discards += event.x.entries.size() + event.y.entries.size();
@@ -205,8 +206,10 @@ void NMXVMM2SRS::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+      //flatbuffer.produce(); // periodic flush
 
       if (data.xyhist_elems != 0) {
+        XTRACE(PROCESS, ALW, "Sending histogram with %d events\n", data.xyhist_elems);
         char * txbuffer;
         auto len = histfb.serialize(&data.xyhist[0][0], &data.xyhist[1][0], 1500, &txbuffer);
         monitorprod.produce(txbuffer, len);

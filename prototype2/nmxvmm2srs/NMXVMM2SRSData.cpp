@@ -10,7 +10,7 @@
 #define UNUSED __attribute__((unused))
 
 //#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_WAR
+//#define TRC_LEVEL TRC_L_DEB
 
 int NMXVMM2SRSData::parse(UNUSED uint32_t data1, UNUSED uint32_t data2,
                           struct VMM2Data *vmd) {
@@ -99,6 +99,7 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
 }
 
 void NMXVMM2SRSData::hist_clear() {
+  printf("Sizeof xyhist: %lu\n", sizeof(xyhist));
   memset(xyhist, 0, sizeof(xyhist));
   xyhist_elems = 0;
 }

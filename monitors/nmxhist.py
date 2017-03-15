@@ -11,15 +11,22 @@ import matplotlib.pyplot as plt
 import argparse, codecs, numpy
 
 #
-def updateGemHist(gemhistdata, ax1, ax2):
+def updateGemHist(gemhistdata):
+    pl.ioff()
+    pl.clf()
+    plt.title("Strip histograms")
+    ax1 = plt.subplot(2,1,1)
+    ax2 = plt.subplot(2,1,2)
+
     x = GEMHist()
     x.Init(gemhistdata.Bytes, gemhistdata.Pos)
     xhist = x.Xhist_as_numpy_array()
+    print(xhist[80:100])
     yhist = x.Yhist_as_numpy_array()
-    print(len(xhist))
-    print(len(yhist))
+    pl.ion()
     ax1.bar(numpy.arange(1500), xhist, 1.0, color='r')
     ax2.bar(numpy.arange(1500), yhist, 1.0, color='r')
+    pl.ioff()
 
 def main():
     parser = argparse.ArgumentParser()
@@ -40,23 +47,17 @@ def main():
                      reset_offset_on_start=True,
                      consumer_timeout_ms=50)
 
-    pl.ion()
-    pl.clf()
-    plt.title("Strip histograms")
-    ax1 = plt.subplot(2,1,1)
-    ax1.bar(numpy.arange(1500), numpy.zeros(1500), 1.0, color='r')
-    ax2 = plt.subplot(2,1,2)
-    plt.bar(numpy.arange(1500), numpy.zeros(1500), 1.0, color='r')
-
     print("Starting main loop")
     while (True):
         try:
             msg = consumer.consume(block = True)
             if (msg != None):
+                print("Got a message")
                 a = bytearray(msg.value)
                 arr = MonitorMessage.GetRootAsMonitorMessage(a, 0)
                 if arr.DataType() == DataField.GEMHist:
-                    updateGemHist(arr.Data(), ax1, ax2)
+                    print("GEMHist\n")
+                    updateGemHist(arr.Data())
                 plt.pause(0.01)
             else:
                 pass

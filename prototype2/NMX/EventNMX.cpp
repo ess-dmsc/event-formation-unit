@@ -17,7 +17,7 @@ void PlaneNMX::insert_eventlet(const Eventlet &e) {
   entries.push_back(e);
   integral += e.adc;
   time_start = std::min(time_start, e.time);
-  time_end = std::max(time_start, e.time);
+  time_end = std::max(time_end, e.time);
 }
 
 void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
@@ -56,6 +56,7 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
   }
   // std::cout << "center_sum=" << center_sum
   //           << " center_count=" << center_count << "\n";
+
 
   center = center_sum / center_count;
   uncert_lower = lspan_max - lspan_min + 1;

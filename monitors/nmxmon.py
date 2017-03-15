@@ -9,22 +9,24 @@ import struct, codecs
 import pylab as pl
 import numpy
 import matplotlib.pyplot as plt
+from schemas.EventMessage import EventMessage
 
-class Proj:
+
+class Proj(object):
     def __init__(self):
         self.x = 256
         self.y = 256
         self.clear()
 
     def coords(self, pixel):
-        y = (pixel - 1) / 256
-        x = (pixel - 1) - y * 256
+        y = (pixel) / 256
+        x = (pixel) - y * 256
         return [x,y]
 
-    def addpixel(self, pixel):
-        x,y = self.coords(pixel)
-
-        self.xy[y,x] += 1
+    def addpixels(self, pixels):
+        x,y = self.coords(pixels)
+        for i in range(len(x)):
+            self.xy[y[i],x[i]] += 1
 
     def clear(self):
         self.xy = numpy.zeros((self.y, self.x))
@@ -43,54 +45,54 @@ class Proj:
 
 
 
+
 def main():
     proj = Proj()
 
     parser = argparse.ArgumentParser()
     parser.add_argument("-b", help = "Broker to connect to.", type = str)
-    parser.add_argument("-t", help = "Topic to subscribe to.", type = str)
     args = parser.parse_args()
 
-    if (args.b == None or args.t == None):
+    if (args.b == None):
         print("Broker and topic must be given as arguments.")
         exit(0)
 
+    envtopic = "NMX_detector"
     client = KafkaClient(hosts=args.b)
-    topic = client.topics[codecs.encode(args.t, "utf-8")]
-    consumer = topic.get_simple_consumer(fetch_message_max_bytes = 1024 * 1024 * 50, consumer_group=codecs.encode(args.t, "utf-8"), auto_offset_reset=OffsetType.LATEST, reset_offset_on_start=True, consumer_timeout_ms=50)
+    topic = client.topics[codecs.encode(envtopic, "utf-8")]
+    consumer = topic.get_simple_consumer(fetch_message_max_bytes = 1024 * 1024 * 50,
+       consumer_group=codecs.encode(envtopic, "utf-8"),
+       auto_offset_reset=OffsetType.LATEST,
+       reset_offset_on_start=True,
+       consumer_timeout_ms=50)
 
     print("Starting main loop")
 
-    plotint = 1
-    plotevery =  plotint
-    accumulated = 0
-    maxoffset = 0
-    minoffset = 999999999
-    plotrange = 10000
     while (True):
         try:
             msg = consumer.consume(block = True)
             if (msg != None):
+                print("Got a message")
                 a = bytearray(msg.value)
-                for i in range(plotrange):
-                    pixel = a[i*8 + 5]*256 + a[i*8 + 4]
-                    if  (pixel > 65535 or pixel < 0):
-                       printf("Geometry error pixel %d\n" % (pixel))
-                       sys.exit(1)
-                    proj.addpixel(pixel)
-                plotevery -= 1
-                maxoffset = max(msg.offset, maxoffset)
-                minoffset = min(msg.offset, minoffset)
-                accumulated += (plotint * plotrange)
-                if plotevery == 0:
-                    proj.plot("events: " + str(plotint * plotrange) +
-                    "(total: " + str(accumulated) + ")\noffset: " 
-                    + str(minoffset) + "-" + str(maxoffset))
-                    if accumulated >= 100000:
-                       proj.clear()
-                       accumulated = 0
-                    minoffset = 999999999
-                    plotevery = plotint
+                arr = EventMessage.GetRootAsEventMessage(a, 0)
+                print("pulse_time: %d" % (arr.PulseTime()))
+                print("seqno: %d" % (arr.MessageId()))
+                print("events: %d" % (arr.DetectorIdLength()))
+
+                print("Pixels")
+                pixels_raw = arr.DetectorId_as_numpy_array()
+                pixels = pixels_raw.view(numpy.uint32)
+                print(pixels)
+
+                print("Times")
+                times_raw = arr.TimeOfFlight_as_numpy_array()
+                times = times_raw.view(numpy.uint32)
+                print(times)
+
+                proj.addpixels(pixels)
+
+                proj.plot("events")
+                #proj.clear()
             else:
                 pass
         except KeyboardInterrupt:
