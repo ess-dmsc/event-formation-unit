@@ -38,7 +38,7 @@ class Proj(object):
         plt.suptitle(title)
         plt.subplot(1,1,1)
         plt.title("x-y")
-        plt.imshow(self.xy, interpolation="none")
+        plt.imshow(self.xy, interpolation="nearest")
         plt.colorbar()
 
         pl.pause(0.001)
@@ -77,17 +77,12 @@ def main():
                 arr = EventMessage.GetRootAsEventMessage(a, 0)
                 print("pulse_time: %d" % (arr.PulseTime()))
                 print("seqno: %d" % (arr.MessageId()))
-                print("events: %d" % (arr.DetectorIdLength()))
+                nbevents = arr.DetectorIdLength()
+                print("events: %d" % (nbevents))
 
-                print("Pixels")
                 pixels_raw = arr.DetectorId_as_numpy_array()
                 pixels = pixels_raw.view(numpy.uint32)
-                print(pixels)
-
-                print("Times")
-                times_raw = arr.TimeOfFlight_as_numpy_array()
-                times = times_raw.view(numpy.uint32)
-                print(times)
+                print(pixels[0:min(10, nbevents)])
 
                 proj.addpixels(pixels)
 

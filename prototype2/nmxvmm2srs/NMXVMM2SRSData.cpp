@@ -99,7 +99,6 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
 }
 
 void NMXVMM2SRSData::hist_clear() {
-  printf("Sizeof xyhist: %lu\n", sizeof(xyhist));
   memset(xyhist, 0, sizeof(xyhist));
   xyhist_elems = 0;
 }

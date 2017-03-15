@@ -168,7 +168,7 @@ void NMXVMM2SRS::processing_thread() {
   Clusterer clusterer(30); /**< @todo not hardocde */
 
   Timer stopafter_clock;
-  TSCTimer report_timer;
+  TSCTimer global_time, report_timer;
   unsigned int data_index;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
@@ -195,6 +195,7 @@ void NMXVMM2SRS::processing_thread() {
 
             assert(pixelid < 65535);
 
+            printf("event time: %" PRIu64 "\n", event.time_start());
             mystats.tx_bytes += flatbuffer.addevent((uint32_t)event.time_start(), pixelid);
             mystats.rx_events++;
           } else {
@@ -206,7 +207,7 @@ void NMXVMM2SRS::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-      //flatbuffer.produce(); // periodic flush
+      printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
 
       if (data.xyhist_elems != 0) {
         XTRACE(PROCESS, ALW, "Sending histogram with %d events\n", data.xyhist_elems);
