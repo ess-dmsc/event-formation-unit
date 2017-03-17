@@ -15,7 +15,7 @@ progs = efu2  cspec.so nmx.so udp.so cspec2.so nmxvmm2srs.so gencspec gencspecfi
 library = ../libs/eventlib.a
 
 # For each loadable detector add its .so.src and .so.inc dependencies
-common.src = common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp
+common.src = common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp ../dataformats/multigrid/src/DataSave.cpp
 common.inc = common/Detector.h common/NewStats.h common/Producer.h common/FBSerializer.h
 common.inc += common/Trace.h libs/include/gccintel.h common/EFUArgs.h
 common.obj = $(common.src:%.cpp=%.o)

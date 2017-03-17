@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <DataSave.h>
+#include <dataformats/multigrid/inc/DataSave.h>
 
 DataSave::DataSave(std::string filename, void *buffer, size_t datasize) {
 
