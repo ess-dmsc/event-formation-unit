@@ -86,7 +86,7 @@ def main():
                 proj.clear()
                 proj.addpixels(pixels)
 
-                proj.plot("events")
+                proj.plot("events: " + str(nbevents))
                 #proj.clear()
             else:
                 pass

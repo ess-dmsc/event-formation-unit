@@ -14,15 +14,18 @@ import argparse, codecs, numpy
 def updateGemHist(gemhistdata):
     pl.ioff()
     pl.clf()
-    plt.title("Strip histograms")
+
+    plt.suptitle("Detector strip histograms")
     ax1 = plt.subplot(2,1,1)
     ax2 = plt.subplot(2,1,2)
 
     x = GEMHist()
     x.Init(gemhistdata.Bytes, gemhistdata.Pos)
     xhist = x.Xhist_as_numpy_array()
-    print(xhist[80:100])
     yhist = x.Yhist_as_numpy_array()
+    ax1.set_title("x-strips - " + str(numpy.sum(xhist)) + " counts")
+    ax2.set_title("y-strips - " + str(numpy.sum(yhist)) + " counts")
+    #print(xhist[80:100])
     pl.ion()
     ax1.bar(numpy.arange(1500), xhist, 1.0, color='r')
     ax2.bar(numpy.arange(1500), yhist, 1.0, color='r')

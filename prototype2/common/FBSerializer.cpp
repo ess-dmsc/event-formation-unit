@@ -17,15 +17,19 @@ FBSerializer::FBSerializer(size_t maxarraylength, Producer & prod)
     : builder(maxarraylength * 8 + 256)
     , maxlen(maxarraylength)
     , producer(prod) {
-      auto timeoff = builder.CreateUninitializedVector(maxlen, TIMESIZE, &timeptr);
-      auto pixeloff = builder.CreateUninitializedVector(maxlen, PIXELSIZE, &pixelptr);
-      auto sourceName = builder.CreateString("n/a");
+
+      auto sourceName = builder.CreateString("c_spec_data");
       std::uint64_t sequenceNr = 1; //Placeholder, must not be 0
       std::uint64_t pulseTime = 1; //Placeholder, must not be 0
+      auto timeoff = builder.CreateUninitializedVector(maxlen, TIMESIZE, &timeptr);
+      auto pixeloff = builder.CreateUninitializedVector(maxlen, PIXELSIZE, &pixelptr);
+
       auto evMsgHeader = CreateEventMessage(builder, sourceName, sequenceNr, pulseTime, timeoff, pixeloff);
       builder.Finish(evMsgHeader);
       fbBufferPointer = (char *)builder.GetBufferPointer();
       fbSize = builder.GetSize();
+      assert(fbSize > 0);
+      assert(fbBufferPointer != nullptr);
 
       eventMsg = const_cast<EventMessage*>(GetEventMessage(fbBufferPointer));
       timeLenPtr = reinterpret_cast<flatbuffers::uoffset_t*>(const_cast<std::uint8_t*>(eventMsg->time_of_flight()->Data())) - 1;
@@ -45,12 +49,8 @@ int FBSerializer::serialize(uint64_t time, uint64_t seqno, size_t entries, char 
   *pixelLenPtr = entries;
 
   *buffer = fbBufferPointer;
-  auto sz = fbSize;
-  assert(sz > 0);
-  assert(buffer != nullptr);
-  return sz;
+  return fbSize;
 }
-
 
 int FBSerializer::produce() {
     int txlen = 0;
@@ -61,8 +61,8 @@ int FBSerializer::produce() {
       // }
       // printf("\n");
 
-      char *txbuffer;
       XTRACE(OUTPUT, DEB, "produce %zu events \n", events);
+      char *txbuffer;
       txlen = serialize((uint64_t)0x01, seqno++, events, &txbuffer);
       assert(txlen > 0);
       XTRACE(OUTPUT, DEB, "Flatbuffer tx length %d\n", txlen);
