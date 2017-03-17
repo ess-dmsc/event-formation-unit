@@ -147,7 +147,7 @@ void NMXVMM2SRS::input_thread() {
 void NMXVMM2SRS::processing_thread() {
 
   Producer eventprod(opts->broker, "NMX_detector");
-  FBSerializer flatbuffer(400, eventprod);
+  FBSerializer flatbuffer(kafka_buffer_size, eventprod);
   Producer monitorprod(opts->broker, "NMX_monitor");
   HistSerializer histfb(1500);
 
@@ -195,7 +195,7 @@ void NMXVMM2SRS::processing_thread() {
 
             assert(pixelid < 65535);
 
-            printf("event time: %" PRIu64 "\n", event.time_start());
+            //printf("event time: %" PRIu64 "\n", event.time_start());
             mystats.tx_bytes += flatbuffer.addevent((uint32_t)event.time_start(), pixelid);
             mystats.rx_events++;
           } else {
@@ -207,10 +207,12 @@ void NMXVMM2SRS::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-      printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
+      //printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
+
+      flatbuffer.produce();
 
       if (data.xyhist_elems != 0) {
-        XTRACE(PROCESS, ALW, "Sending histogram with %d events\n", data.xyhist_elems);
+        XTRACE(PROCESS, ALW, "Sending histogram with %d readouts\n", data.xyhist_elems);
         char * txbuffer;
         auto len = histfb.serialize(&data.xyhist[0][0], &data.xyhist[1][0], 1500, &txbuffer);
         monitorprod.produce(txbuffer, len);

@@ -83,7 +83,7 @@ def main():
                 pixels_raw = arr.DetectorId_as_numpy_array()
                 pixels = pixels_raw.view(numpy.uint32)
                 print(pixels[0:min(10, nbevents)])
-
+                proj.clear()
                 proj.addpixels(pixels)
 
                 proj.plot("events")
