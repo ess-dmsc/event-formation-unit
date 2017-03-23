@@ -43,6 +43,12 @@ Producer::Producer(std::string broker, std::string topicstr) {
   }
 }
 
+Producer::~Producer() {
+  delete producer;
+  delete tconf;
+  delete conf;
+}
+
 /** called to actually send data to Kafka cluster */
 int Producer::produce(char *buffer, int length) {
   RdKafka::ErrorCode resp = producer->produce(
