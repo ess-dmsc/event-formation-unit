@@ -7,7 +7,7 @@
 #define PLANEX 0
 #define PLANEY 1
 
-#define NB_ENTRIES 10
+#define NB_ENTRIES 256
 
 class TrackSerializerTest : public TestBase {
   virtual void SetUp() {}
@@ -97,7 +97,7 @@ TEST_F(TrackSerializerTest, DeSerialize) {
 
 TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
   MESSAGE() << "Allocating a TrackSerializer object on every iteration\n";
-  for (int i = 1; i <= 1000; i++) {
+  for (int i = 1; i <= 1000; i *= 2) {
     int entries = i;
     int entry_size = 4 * 3; // Three uint32_t's
 
@@ -140,7 +140,7 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
   int entry_size = 4 * 3; // Three uint32_t's
   MESSAGE() << "Reusing the same TrackSerializer object\n";
   TrackSerializer tser(entries);
-  for (int i = 1; i <= 1000; i++) {
+  for (int i = 1; i <= 100; i++) {
     for (int i = 0; i < entries; i++) {
       tser.add_track(PLANEX, i, i*2, i*3);
       tser.add_track(PLANEY, entries - i, i*2 + 0x10000000, i*3 + 0x20000000);

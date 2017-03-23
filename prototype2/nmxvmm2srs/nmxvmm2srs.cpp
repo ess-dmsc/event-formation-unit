@@ -18,6 +18,7 @@
 #include <memory>
 #include <nmxvmm2srs/EventletBuilder.h>
 #include <nmxvmm2srs/HistSerializer.h>
+#include <nmxvmm2srs/TrackSerializer.h>
 #include <nmxvmm2srs/NMXVMM2SRSData.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -150,6 +151,7 @@ void NMXVMM2SRS::processing_thread() {
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
   Producer monitorprod(opts->broker, "NMX_monitor");
   HistSerializer histfb(1500);
+  TrackSerializer trackfb(256);
 
   NMXVMM2SRSData data(1125);
 
@@ -192,10 +194,7 @@ void NMXVMM2SRS::processing_thread() {
             XTRACE(PROCESS, DEB, "event.good\n");
 
             if (sample_next_track) {
-              if (event.x.entries.size() > 3 && event.y.entries.size() > 3) {
-                printf("Track info - x: %lu, y: %lu\n", event.x.entries.size(), event.y.entries.size());
-                sample_next_track = 0;
-              }
+                sample_next_track = trackfb.add_track(event, 6);
             }
             mystats.rx_events++;
 
@@ -221,6 +220,13 @@ void NMXVMM2SRS::processing_thread() {
       sample_next_track = 1;
 
       flatbuffer.produce();
+
+      char * txbuffer;
+      auto len = trackfb.serialize(&txbuffer);
+      if (len != 0) {
+        XTRACE(PROCESS, ALW, "Sending tracks with size %d\n", len);
+        monitorprod.produce(txbuffer, len);
+      }
 
       if (data.xyhist_elems != 0) {
         XTRACE(PROCESS, ALW, "Sending histogram with %d readouts\n", data.xyhist_elems);

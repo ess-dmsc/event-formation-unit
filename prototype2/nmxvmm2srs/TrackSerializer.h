@@ -8,6 +8,7 @@
 #pragma once
 
 #include <../monitors/schemas/mon_efu_generated.h>
+#include <NMX/EventNMX.h>
 
 class TrackSerializer {
 public:
@@ -19,7 +20,8 @@ public:
   ~TrackSerializer();
 
   /** @todo document */
-  int add_track(uint32_t plane, uint32_t strip, uint32_t time, uint32_t adc);
+  //int add_track(uint32_t plane, uint32_t strip, uint32_t time, uint32_t adc);
+  int add_track(const EventNMX & event, size_t minhits);
 
   /** @todo document */
   int serialize(char ** buffer);
@@ -30,7 +32,4 @@ private:
 
   std::vector<flatbuffers::Offset<pos>> xpos;
   std::vector<flatbuffers::Offset<pos>> ypos;
-
-  uint32_t xentries{0};
-  uint32_t yentries{0};
 };

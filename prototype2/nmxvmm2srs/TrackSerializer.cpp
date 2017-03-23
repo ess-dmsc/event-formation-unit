@@ -16,30 +16,30 @@ TrackSerializer::TrackSerializer(size_t maxarraylength)
 
 TrackSerializer::~TrackSerializer() { }
 
-int TrackSerializer::add_track(uint32_t plane, uint32_t strip, uint32_t time, uint32_t adc) {
-  if (plane == 0) {
-    if (xentries == maxlen) {
-      return -1;
-    }
-    if (plane == 0) {
-      xpos.push_back(Createpos(builder, strip, time, adc));
-      xentries++;
-    }
+//int TrackSerializer::add_track(uint32_t plane, uint32_t strip, uint32_t time, uint32_t adc) {
+int TrackSerializer::add_track(const EventNMX & event, size_t minhits) {
 
-    return xentries;
-  } else if (plane == 1) {
-    if (yentries == maxlen) {
-      return -1;
-    }
-    ypos.push_back(Createpos(builder, strip, time, adc));
-    yentries++;
-    return yentries;
+  if ((event.x.entries.size() < minhits) || (event.y.entries.size() < minhits)) {
+    return 1;
   }
-  return -1;
+
+  if ((event.x.entries.size() > maxlen ) || (event.y.entries.size() > maxlen)) {
+    return 1;
+  }
+  auto timeoff = event.time_start();
+
+  for (auto & evx : event.x.entries ) {
+    xpos.push_back(Createpos(builder, evx.strip, evx.time - timeoff, evx.adc));
+  }
+
+  for (auto & evy : event.y.entries ) {
+    ypos.push_back(Createpos(builder, evy.strip, evy.time - timeoff, evy.adc));
+  }
+  return 0;
 }
 
 int TrackSerializer::serialize(char **buffer) {
-  if (xentries == 0 || yentries == 0) {
+  if ((xpos.size() == 0) || (ypos.size() == 0)) {
     *buffer = 0;
     return 0;
   }
@@ -52,8 +52,6 @@ int TrackSerializer::serialize(char **buffer) {
   *buffer = (char *)builder.GetBufferPointer();
   xpos.clear();
   ypos.clear();
-  xentries = 0;
-  yentries = 0;
   auto buffersize = builder.GetSize();
   builder.Clear();
   return buffersize;
