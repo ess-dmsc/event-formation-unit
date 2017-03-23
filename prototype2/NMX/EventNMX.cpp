@@ -12,8 +12,9 @@
 void PlaneNMX::insert_eventlet(const Eventlet &e) {
   if (!e.adc)
     return;
-  if (entries.empty())
+  if (entries.empty()) {
     time_start = time_end = e.time;
+  }
   entries.push_back(e);
   integral += e.adc;
   time_start = std::min(time_start, e.time);
@@ -64,10 +65,13 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
 }
 
 void EventNMX::insert_eventlet(const Eventlet &e) {
-  if (e.plane_id) /**< @todo deal with multiple panels */
+  if (e.plane_id == 1) { /**< @todo deal with multiple panels */
     y.insert_eventlet(e);
-  else
+  } else if (e.plane_id == 0) {
     x.insert_eventlet(e);
+  } else {
+    printf("Invalid plane id\n");
+  }
 }
 
 void EventNMX::analyze(bool weighted, int16_t max_timebins,

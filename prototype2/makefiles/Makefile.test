@@ -104,11 +104,11 @@ HistSerializerTest: nmxvmm2srs/HistSerializerTest.cpp nmxvmm2srs/HistSerializer.
 	$(Q)g++ $(cxxflags_test) nmxvmm2srs/HistSerializerTest.cpp nmxvmm2srs/HistSerializer.o \
 	   $(library) -o $@ $(ldflags_test)
 
-TrackSerializerTest: nmxvmm2srs/TrackSerializerTest.cpp nmxvmm2srs/TrackSerializer.o \
-    nmxvmm2srs/TrackSerializer.h
+TrackSerializerTest: nmxvmm2srs/TrackSerializerTest.cpp nmxvmm2srs/TrackSerializer.o NMX/Eventlet.o \
+    NMX/EventNMX.o nmxvmm2srs/TrackSerializer.h NMX/EventNMX.h NMX/Eventlet.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) nmxvmm2srs/TrackSerializerTest.cpp nmxvmm2srs/TrackSerializer.o \
-	   $(library) -o $@ $(ldflags_test)
+	   NMX/EventNMX.o NMX/Eventlet.o $(library) -o $@ $(ldflags_test)
 
 EFUArgsTest: common/EFUArgsTest.cpp common/EFUArgs.o common/EFUArgs.h
 	@echo building $@

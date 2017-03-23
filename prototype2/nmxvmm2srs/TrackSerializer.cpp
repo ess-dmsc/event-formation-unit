@@ -16,9 +16,7 @@ TrackSerializer::TrackSerializer(size_t maxarraylength)
 
 TrackSerializer::~TrackSerializer() { }
 
-//int TrackSerializer::add_track(uint32_t plane, uint32_t strip, uint32_t time, uint32_t adc) {
 int TrackSerializer::add_track(const EventNMX & event, size_t minhits) {
-
   if ((event.x.entries.size() < minhits) || (event.y.entries.size() < minhits)) {
     return 1;
   }
