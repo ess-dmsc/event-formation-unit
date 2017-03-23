@@ -44,6 +44,7 @@ Producer::Producer(std::string broker, std::string topicstr) {
 }
 
 Producer::~Producer() {
+  delete topic;
   delete producer;
   delete tconf;
   delete conf;
