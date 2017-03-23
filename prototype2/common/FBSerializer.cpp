@@ -68,7 +68,6 @@ int FBSerializer::produce() {
       txlen = serialize((uint64_t)0x01, seqno++, events, &txbuffer);
       assert(txlen > 0);
       XTRACE(OUTPUT, DEB, "Flatbuffer tx length %d\n", txlen);
-      printf("produce, save and exit\n");
       producer.produce(txbuffer, txlen);
 
       #if 0

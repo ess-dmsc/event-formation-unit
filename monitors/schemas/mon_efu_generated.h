@@ -6,6 +6,10 @@
 
 #include "flatbuffers/flatbuffers.h"
 
+struct pos;
+
+struct GEMTrack;
+
 struct GEMHist;
 
 struct MonitorMessage;
@@ -13,14 +17,16 @@ struct MonitorMessage;
 enum DataField {
   DataField_NONE = 0,
   DataField_GEMHist = 1,
+  DataField_GEMTrack = 2,
   DataField_MIN = DataField_NONE,
-  DataField_MAX = DataField_GEMHist
+  DataField_MAX = DataField_GEMTrack
 };
 
 inline const char **EnumNamesDataField() {
   static const char *names[] = {
     "NONE",
     "GEMHist",
+    "GEMTrack",
     nullptr
   };
   return names;
@@ -39,8 +45,136 @@ template<> struct DataFieldTraits<GEMHist> {
   static const DataField enum_value = DataField_GEMHist;
 };
 
+template<> struct DataFieldTraits<GEMTrack> {
+  static const DataField enum_value = DataField_GEMTrack;
+};
+
 bool VerifyDataField(flatbuffers::Verifier &verifier, const void *obj, DataField type);
 bool VerifyDataFieldVector(flatbuffers::Verifier &verifier, const flatbuffers::Vector<flatbuffers::Offset<void>> *values, const flatbuffers::Vector<uint8_t> *types);
+
+struct pos FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  enum {
+    VT_STRIP = 4,
+    VT_TIME = 6,
+    VT_ADC = 8
+  };
+  uint32_t strip() const {
+    return GetField<uint32_t>(VT_STRIP, 0);
+  }
+  uint32_t time() const {
+    return GetField<uint32_t>(VT_TIME, 0);
+  }
+  uint32_t adc() const {
+    return GetField<uint32_t>(VT_ADC, 0);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<uint32_t>(verifier, VT_STRIP) &&
+           VerifyField<uint32_t>(verifier, VT_TIME) &&
+           VerifyField<uint32_t>(verifier, VT_ADC) &&
+           verifier.EndTable();
+  }
+};
+
+struct posBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_strip(uint32_t strip) {
+    fbb_.AddElement<uint32_t>(pos::VT_STRIP, strip, 0);
+  }
+  void add_time(uint32_t time) {
+    fbb_.AddElement<uint32_t>(pos::VT_TIME, time, 0);
+  }
+  void add_adc(uint32_t adc) {
+    fbb_.AddElement<uint32_t>(pos::VT_ADC, adc, 0);
+  }
+  posBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  posBuilder &operator=(const posBuilder &);
+  flatbuffers::Offset<pos> Finish() {
+    const auto end = fbb_.EndTable(start_, 3);
+    auto o = flatbuffers::Offset<pos>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<pos> Createpos(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    uint32_t strip = 0,
+    uint32_t time = 0,
+    uint32_t adc = 0) {
+  posBuilder builder_(_fbb);
+  builder_.add_adc(adc);
+  builder_.add_time(time);
+  builder_.add_strip(strip);
+  return builder_.Finish();
+}
+
+struct GEMTrack FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  enum {
+    VT_XTRACK = 4,
+    VT_YTRACK = 6
+  };
+  const flatbuffers::Vector<flatbuffers::Offset<pos>> *xtrack() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<pos>> *>(VT_XTRACK);
+  }
+  const flatbuffers::Vector<flatbuffers::Offset<pos>> *ytrack() const {
+    return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<pos>> *>(VT_YTRACK);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_XTRACK) &&
+           verifier.Verify(xtrack()) &&
+           verifier.VerifyVectorOfTables(xtrack()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_YTRACK) &&
+           verifier.Verify(ytrack()) &&
+           verifier.VerifyVectorOfTables(ytrack()) &&
+           verifier.EndTable();
+  }
+};
+
+struct GEMTrackBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_xtrack(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<pos>>> xtrack) {
+    fbb_.AddOffset(GEMTrack::VT_XTRACK, xtrack);
+  }
+  void add_ytrack(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<pos>>> ytrack) {
+    fbb_.AddOffset(GEMTrack::VT_YTRACK, ytrack);
+  }
+  GEMTrackBuilder(flatbuffers::FlatBufferBuilder &_fbb)
+        : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  GEMTrackBuilder &operator=(const GEMTrackBuilder &);
+  flatbuffers::Offset<GEMTrack> Finish() {
+    const auto end = fbb_.EndTable(start_, 2);
+    auto o = flatbuffers::Offset<GEMTrack>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<GEMTrack> CreateGEMTrack(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<pos>>> xtrack = 0,
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<pos>>> ytrack = 0) {
+  GEMTrackBuilder builder_(_fbb);
+  builder_.add_ytrack(ytrack);
+  builder_.add_xtrack(xtrack);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<GEMTrack> CreateGEMTrackDirect(
+    flatbuffers::FlatBufferBuilder &_fbb,
+    const std::vector<flatbuffers::Offset<pos>> *xtrack = nullptr,
+    const std::vector<flatbuffers::Offset<pos>> *ytrack = nullptr) {
+  return CreateGEMTrack(
+      _fbb,
+      xtrack ? _fbb.CreateVector<flatbuffers::Offset<pos>>(*xtrack) : 0,
+      ytrack ? _fbb.CreateVector<flatbuffers::Offset<pos>>(*ytrack) : 0);
+}
 
 struct GEMHist FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   enum {
@@ -185,6 +319,10 @@ inline bool VerifyDataField(flatbuffers::Verifier &verifier, const void *obj, Da
     }
     case DataField_GEMHist: {
       auto ptr = reinterpret_cast<const GEMHist *>(obj);
+      return verifier.VerifyTable(ptr);
+    }
+    case DataField_GEMTrack: {
+      auto ptr = reinterpret_cast<const GEMTrack *>(obj);
       return verifier.VerifyTable(ptr);
     }
     default: return false;

@@ -30,7 +30,6 @@ runtest: test
 	$(Q)for test in $(testprogs) ; do ./$$test --gtest_output=xml:$$test.xml; done
 
 
-
 %.o: %.cpp
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) %< -o $@ $(ldflags_test)
@@ -102,6 +101,12 @@ HistSerializerTest: nmxvmm2srs/HistSerializerTest.cpp nmxvmm2srs/HistSerializer.
     nmxvmm2srs/HistSerializer.h common/Producer.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) nmxvmm2srs/HistSerializerTest.cpp nmxvmm2srs/HistSerializer.o \
+	   $(library) -o $@ $(ldflags_test)
+
+TrackSerializerTest: nmxvmm2srs/TrackSerializerTest.cpp nmxvmm2srs/TrackSerializer.o \
+    nmxvmm2srs/TrackSerializer.h
+	@echo building $@
+	$(Q)g++ $(cxxflags_test) nmxvmm2srs/TrackSerializerTest.cpp nmxvmm2srs/TrackSerializer.o \
 	   $(library) -o $@ $(ldflags_test)
 
 EFUArgsTest: common/EFUArgsTest.cpp common/EFUArgs.o common/EFUArgs.h

@@ -169,7 +169,9 @@ void NMXVMM2SRS::processing_thread() {
 
   Timer stopafter_clock;
   TSCTimer global_time, report_timer;
+  EventNMX event;
   unsigned int data_index;
+  int sample_next_track = 0;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
@@ -184,10 +186,17 @@ void NMXVMM2SRS::processing_thread() {
 
         while (clusterer.event_ready()) {
           XTRACE(PROCESS, DEB, "event_ready()\n");
-          auto event = clusterer.get_event();
+          event = clusterer.get_event();
           event.analyze(true, 3, 7); /**< @todo not hardocde */
           if (event.good()) {
             XTRACE(PROCESS, DEB, "event.good\n");
+
+            if (sample_next_track) {
+              if (event.x.entries.size() > 3 && event.y.entries.size() > 3) {
+                printf("Track info - x: %lu, y: %lu\n", event.x.entries.size(), event.y.entries.size());
+                sample_next_track = 0;
+              }
+            }
             mystats.rx_events++;
 
             XTRACE(PROCESS, DEB, "x.center: %f, y.center %f\n", event.x.center, event.y.center);
@@ -208,6 +217,8 @@ void NMXVMM2SRS::processing_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
       //printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
+
+      sample_next_track = 1;
 
       flatbuffer.produce();
 
