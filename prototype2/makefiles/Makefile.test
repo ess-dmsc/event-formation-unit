@@ -3,9 +3,10 @@
 
 testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest
 testprogs += CSPECEventTest EFUArgsTest
-testprogs += MultiGridGeometryTest EventletTest NewStatsTest EventTest
-testprogs += NMXVMM2SRSDataTest ClustererTest TimeTest GeometryTest FBSerializerTest
-testprogs += EventletBuilderH5Test EventletBuilderTest HistSerializerTest
+testprogs += MultiGridGeometryTest  NewStatsTest
+testprogs += NMXVMM2SRSDataTest ClustererTest TimeTest GeometryTest
+testprogs += EventletBuilderH5Test EventletBuilderTest EventletTest EventTest
+testprogs += FBSerializerTest HistSerializerTest TrackSerializerTest
 
 ifeq ($(_ARCH),Linux)
 testprogs += ParserTest CalibrationFileTest
