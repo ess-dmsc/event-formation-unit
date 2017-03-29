@@ -5,10 +5,13 @@ printinfo:
 	$(info This build uses the following options)
 	$(info [Platform])
 	$(info Architecture: $(_ARCH))
+	$(info COMP=$(COMP) - $(origin COMP))
+	$(info cxx=$(cxx))
 	$(info [Application and libraries])
 	$(info RELEASE=$(RELEASE) - $(origin RELEASE))
 	$(info GRAYLOG=$(GRAYLOG) - $(origin GRAYLOG))
 	$(info EXTSCHEMAS=$(EXTSCHEMAS) - $(origin EXTSCHEMAS))
+	$(info DUMPTOFILE=$(DUMPTOFILE) - $(origin DUMPTOFILE))
 	$(info KAFKAINC $(KAFKAINC))
 	$(info KAFKALIB $(KAFKALIB))
 	$(info HDF5INC $(HDF5INC))
@@ -16,6 +19,7 @@ printinfo:
 	$(info [Debug and Profiling])
 	$(info V=$(V) - $(origin V))
 	$(info COV=$(COV) - $(origin COV))
+
 
 	$(info --------------------------------------------------------)
 
@@ -34,5 +38,7 @@ help:
 	@echo
 	@echo "mjc workstation"
 	@echo 'make HDF5=y KAFKALIB=/usr/lib64 KAFKAINC=/usr/local/include KAFKALIB=/usr/local/lib HDF5INC=/usr/local/include HDF5LIB=/usr/local/lib'
+	@echo 'make KAFKALIB=/usr/lib64 KAFKAINC=/usr/local/include KAFKALIB=/usr/local/lib'
 	@echo "mjc mac"
 	@echo 'make HDF5=y KAFKAINC=/usr/local/include KAFKALIB=/usr/local/lib HDF5INC=/usr/local/include HDF5LIB=/usr/local/lib'
+	@echo 'make KAFKAINC=/usr/local/include KAFKALIB=/usr/local/lib'

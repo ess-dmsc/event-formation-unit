@@ -17,7 +17,7 @@ public:
   DataSave(std::string filename, void *data, size_t datasize);
 
   /** @todo document */
-  DataSave(std::string);
+  DataSave(std::string filename);
 
   /** @todo document */
   int tofile(std::string);
