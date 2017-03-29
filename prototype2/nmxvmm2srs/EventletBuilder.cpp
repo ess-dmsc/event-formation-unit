@@ -4,11 +4,23 @@
 #include <common/Trace.h>
 #include <nmxvmm2srs/EventletBuilder.h>
 #include <string.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
 
 EventletBuilder::EventletBuilder(Time time_intepreter,
                                  Geometry geometry_interpreter)
     : time_intepreter_(time_intepreter),
-      geometry_interpreter_(geometry_interpreter) {}
+      geometry_interpreter_(geometry_interpreter) {
+        fd = open("dumpfile.txt", O_RDWR|O_CREAT, S_IRWXU);
+        assert(fd >= 0);
+        time_t t = time(NULL);
+        struct tm * tm = localtime(&t);
+        char s[128];
+        strftime(s, sizeof(s), "%c", tm);
+        dprintf(fd, "%s\n", s);
+        dprintf(fd, "# fec, chip_id, srs timestamp, channel, bcid, tdc\n");
+      }
 
 uint32_t EventletBuilder::process_readout(NMXVMM2SRSData &data, Clusterer &clusterer) {
   uint16_t fec_id = 1;                         /**< @todo not hardcode */
@@ -26,6 +38,9 @@ uint32_t EventletBuilder::process_readout(NMXVMM2SRSData &data, Clusterer &clust
     eventlet.adc = d.adc;
     XTRACE(PROCESS, DEB, "eventlet  plane_id: %d, strip: %d\n", eventlet.plane_id, eventlet.strip);
     /**< @todo flags? */
+
+    dprintf(fd, "%2d, %2d, %u, %2d, %d, %d\n",
+            1, chip_id, data.srshdr.time, d.chno, d.bcid, d.tdc);
 
     assert(eventlet.plane_id == 0 || eventlet.plane_id == 1);
     assert(eventlet.strip <= 1500);

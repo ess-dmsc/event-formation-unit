@@ -1,0 +1,6 @@
+#!/bin/bash
+
+killall nmxmon.py
+killall nmxhist.py
+killall efu2
+killall efushell.py

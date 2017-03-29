@@ -1,0 +1,4 @@
+#!/bin/bash
+
+wireshark -X lua_script:/home/daq/essproj/event-formation-unit/dataformats/vmm/vmm2_plugin.lua 
+

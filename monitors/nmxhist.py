@@ -13,29 +13,31 @@ import argparse, codecs, numpy
 
 xtrack = numpy.zeros((50, 128))
 ytrack = numpy.zeros((50, 128))
-xhist = numpy.zeros(1500)
-yhist = numpy.zeros(1500)
+xhist = numpy.zeros(128)
+yhist = numpy.zeros(128)
 
 def Plotit():
     pl.ion()
     pl.clf()
     global xhist, yhist, xtrack, ytrack
-    plt.figure(1)
+    f1 = plt.figure(1)
+    f1.clf()
     plt.suptitle("Detector Monitor")
     ax1 = plt.subplot(2,1,1)
     ax2 = plt.subplot(2,1,2)
     ax1.set_title("x-strips - " + str(numpy.sum(xhist)) + " counts")
     ax2.set_title("y-strips - " + str(numpy.sum(yhist)) + " counts")
-    ax1.bar(numpy.arange(1500), xhist, 1.0, color='r')
-    ax2.bar(numpy.arange(1500), yhist, 1.0, color='r')
+    ax1.bar(numpy.arange(128), xhist[0:128], 1.0, color='r')
+    ax2.bar(numpy.arange(128), yhist[0:128], 1.0, color='r')
 
-    plt.figure(2)
+    f2 = plt.figure(2)
+    f2.clf()
     ax3 = plt.subplot(2,1,1)
     ax3.set_title("X-Tracks")
-    plt.imshow(xtrack, interpolation="none")
+    plt.imshow(xtrack[0:128], interpolation="none")
     ax4 = plt.subplot(2,1,2)
     ax4.set_title("Y-Tracks")
-    plt.imshow(ytrack, interpolation="none")
+    plt.imshow(ytrack[0:128], interpolation="none")
 
     #plt.show()
     pl.pause(0.0001)
@@ -82,7 +84,9 @@ def main():
     envtopic = "NMX_monitor"
     client = KafkaClient(hosts=args.b)
     topic = client.topics[codecs.encode(envtopic, "utf-8")]
-    consumer = topic.get_simple_consumer()
+    consumer = topic.get_simple_consumer(
+                    auto_offset_reset=OffsetType.LATEST,
+                    reset_offset_on_start=True)
                     #  fetch_message_max_bytes = 1024 * 1024 * 50,
                     #  consumer_group=codecs.encode(envtopic, "utf-8"),
                     #  auto_offset_reset=OffsetType.LATEST,

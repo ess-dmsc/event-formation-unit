@@ -14,8 +14,8 @@ from schemas.EventMessage import EventMessage
 
 class Proj(object):
     def __init__(self):
-        self.x = 256
-        self.y = 256
+        self.x = 128
+        self.y = 128
         self.clear()
 
     def coords(self, pixel):
@@ -38,7 +38,7 @@ class Proj(object):
         plt.suptitle(title)
         plt.subplot(1,1,1)
         plt.title("x-y")
-        plt.imshow(self.xy, interpolation="nearest")
+        plt.imshow(self.xy, interpolation="none")
         plt.colorbar()
 
         pl.pause(0.001)

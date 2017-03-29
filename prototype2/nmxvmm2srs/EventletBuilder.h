@@ -20,6 +20,7 @@ public:
   uint32_t process_readout(NMXVMM2SRSData &data, Clusterer &clusterer);
 
 private:
+  int fd;
   Time time_intepreter_;
   Geometry geometry_interpreter_;
 };
