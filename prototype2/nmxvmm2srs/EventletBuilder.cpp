@@ -43,7 +43,7 @@ uint32_t EventletBuilder::process_readout(NMXVMM2SRSData &data, Clusterer &clust
     /**< @todo flags? */
 
 #ifdef DUMPTOFILE
-    dprintf(fd, "%2d, %2d, %u, %2d, %d, %d\n",
+    dprintf(fd, "%2d, %2d, %u, %2d, %d, %d, %d\n",
             1, chip_id, data.srshdr.time, d.chno, d.bcid, d.tdc, d.adc);
 #endif
 
