@@ -13,6 +13,7 @@ EventletBuilder::EventletBuilder(Time time_intepreter,
     : time_intepreter_(time_intepreter),
       geometry_interpreter_(geometry_interpreter) {
 #ifdef DUMPTOFILE
+        //std::string fileName = "dumpfile_"
         fd = open("dumpfile.txt", O_RDWR|O_CREAT, S_IRWXU);
         assert(fd >= 0);
         time_t t = time(NULL);
@@ -20,7 +21,7 @@ EventletBuilder::EventletBuilder(Time time_intepreter,
         char s[128];
         strftime(s, sizeof(s), "%c", tm);
         dprintf(fd, "%s\n", s);
-        dprintf(fd, "# fec, chip_id, srs timestamp, channel, bcid, tdc\n");
+        dprintf(fd, "# fec, chip_id, srs timestamp, channel, bcid, tdc, adc\n");
 #endif
       }
 
@@ -43,7 +44,7 @@ uint32_t EventletBuilder::process_readout(NMXVMM2SRSData &data, Clusterer &clust
 
 #ifdef DUMPTOFILE
     dprintf(fd, "%2d, %2d, %u, %2d, %d, %d\n",
-            1, chip_id, data.srshdr.time, d.chno, d.bcid, d.tdc);
+            1, chip_id, data.srshdr.time, d.chno, d.bcid, d.tdc, d.adc);
 #endif
 
     assert(eventlet.plane_id == 0 || eventlet.plane_id == 1);
