@@ -7,12 +7,15 @@
 #include <iostream>
 #include <libs/include/Socket.h>
 #include <libs/include/Timer.h>
+#include <libs/include/TSCTimer.h>
 #include <memory>
 #include <stdio.h>
 #include <unistd.h>
 
 using namespace std;
 const char *classname = "UDPRaw Detector";
+
+#define TSC_MHZ 3000
 
 /** ----------------------------------------------------- */
 
@@ -41,30 +44,43 @@ void UDPRaw::input_thread() {
 
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
   UDPServer raw(local);
-  raw.printbuffers();
   raw.setbuffers(0, opts->rcvbuf);
   raw.printbuffers();
-  Timer upd;
-  auto usecs = upd.timeus();
 
+  Timer rate_timer;
+  TSCTimer report_timer;
+
+  uint32_t seqno = 1;
+  uint32_t dropped = 0;
   for (;;) {
-    rx += raw.receive();
+    char buffer[10000];
+    auto tmprx = raw.receive(buffer, opts->buflen);
+    auto tmpseq = *((uint32_t*)buffer);
 
-    if (rx > 0)
-      rxp++;
-
-    if ((rxp % 100) == 0)
-      usecs = upd.timeus();
-
-    if (usecs >= 1000000) {
-      rx_total += rx;
-      printf("Rx rate: %.2f Mbps, rx %" PRIu64 " MB (total: %" PRIu64
-             " MB) %" PRIu64 " usecs\n",
-             rx * 8.0 / usecs, rx / B1M, rx_total / B1M, usecs);
-      rx = 0;
-      upd.now();
-      usecs = upd.timeus();
+    if (seqno != tmpseq) {
+      printf("seqno: %u, tmpseq: %u\n", seqno, tmpseq);
+      dropped+= (tmpseq - seqno);
+      seqno = tmpseq + 1;
+    } else  {
+      seqno++;
     }
+
+    if (tmprx > 0) {
+      rx += tmprx;
+      rxp++;
+    }
+
+    if (report_timer.timetsc() >= opts->updint * 1000000UL * TSC_MHZ) {
+        auto usecs = rate_timer.timeus();
+        rx_total += rx;
+        printf("Rx rate: %.2f Mbps, rx %" PRIu64 " MB (total: %" PRIu64
+               " MB) %" PRIu64 " usecs, seq_err %u, PER %.2e\n",
+               rx * 8.0 / usecs, rx / B1M, rx_total / B1M, usecs,
+               dropped, 1.0*dropped/seqno);
+        rx = 0;
+        rate_timer.now();
+        report_timer.now();
+      }
   }
 }
 

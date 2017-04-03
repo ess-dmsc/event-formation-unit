@@ -24,7 +24,6 @@ int main(int argc, char *argv[]) {
 
   Socket::Endpoint local("0.0.0.0", 9000);
   UDPServer NMX(local);
-  NMX.printbuffers();
   NMX.setbuffers(0, 500000);
   NMX.printbuffers();
 

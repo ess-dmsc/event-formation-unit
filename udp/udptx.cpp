@@ -1,7 +1,7 @@
 #include <Args.h>
-#include <Socket.h>
-#include <Timer.h>
-#include <chrono>
+#include <libs/include/Socket.h>
+#include <libs/include/Timer.h>
+#include <libs/include/TSCTimer.h>
 #include <inttypes.h>
 #include <iostream>
 #include <stdio.h>
@@ -10,6 +10,8 @@
 #ifndef PRIu64
 #define PRIu64 "ull"
 #endif
+
+#define TSC_MHZ 3000
 
 int main(int argc, char *argv[]) {
 
@@ -25,31 +27,34 @@ int main(int argc, char *argv[]) {
   Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
   UDPClient udptx(local, remote);
   udptx.buflen(opts.buflen);
-  udptx.printbuffers();
   udptx.setbuffers(0, 1000000);
   udptx.printbuffers();
 
-  Timer upd;
-  auto usecs = upd.timeus();
+  Timer rate_timer;
+  TSCTimer report_timer;
 
+  uint32_t seqno = 1;
   for (;;) {
-    tx += udptx.send();
+    char buffer[10000];
+    *((uint32_t*)buffer) = seqno;
+    auto txtmp = udptx.send(buffer, opts.buflen);
+    seqno++;
 
-    if (tx > 0)
+    if (txtmp > 0) {
       txp++;
+      tx += txtmp;
+    }
 
-    if ((txp % 100) == 0)
-      usecs = upd.timeus();
-
-    if (usecs >= intervalUs) {
+    if (report_timer.timetsc() >= 1000000UL * TSC_MHZ) {
+      auto usecs = rate_timer.timeus();
       tx_total += tx;
       printf("Tx rate: %.2f Mbps, tx %" PRIu64 " MB (total: %" PRIu64
              " MB) %ld usecs\n",
              tx * 8.0 / (usecs / 1000000.0) / B1M, tx / B1M, tx_total / B1M,
              usecs);
       tx = 0;
-      upd.now();
-      usecs = upd.timeus();
+      rate_timer.now();
+      report_timer.now();
     }
   }
 }

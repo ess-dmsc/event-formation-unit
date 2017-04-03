@@ -1,5 +1,5 @@
 
-INCLUDE  = -I. -I../libs/include
+INCLUDE  = -I. -I..
 CXXFLAGS = -O3 -std=c++11 $(INCLUDE)
 CFLAGS   = $(INCLUDE)
 
