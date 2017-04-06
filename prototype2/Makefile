@@ -7,6 +7,19 @@ ifndef _ARCH
   _ARCH := $(shell uname -s)
 endif
 
+ifndef RELEASE
+  BSTR_NAME=$(shell whoami)
+  BSTR_DATE=$(shell date +%F-%H%M%S)
+  BSTR_NODE=$(shell uname -n)
+  BSTR_OS=$(shell uname -r)
+  BSTR_HASH=$(shell git log --oneline | head -n 1 | awk '{print $$1}')
+  BUILDSTR=$(BSTR_DATE)[$(BSTR_NODE):$(BSTR_NAME)][$(BSTR_OS)]$(BSTR_HASH)
+else
+  ifndef BUILDSTR
+    $(error Building release, but BUILDSTR not set)
+  endif
+endif
+
 VPATH = .. ../libs/include test
 
 progs = efu2  cspec.so nmx.so udp.so cspec2.so nmxvmm2srs.so gencspec gencspecfile dgmgjson
@@ -39,7 +52,7 @@ cspec2.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/MultiGridGeometr
 
 
 # For each standalone program add .src and .inc and .obj below
-efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp
+efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/main.cpp
 efu.src += common/StatPublisher.cpp efu/ExitHandler.cpp
 efu.src += efu/Server.cpp efu/Parser.cpp cspec/CalibrationFile.cpp
 efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h
@@ -95,7 +108,7 @@ udp.so: $(udp.so.src) $(udp.so.inc) $(common.obj)
 
 
 %.o: %.cpp
-	@echo building $@
+	@echo building object $@
 	$(Q)$(cxx) $(cxxflags) $(cxxflags.so) $< -c -o $@
 
 $(library): Socket.h TSCTimer.h Timer.h SPSCFifo.h
@@ -103,7 +116,7 @@ $(library): Socket.h TSCTimer.h Timer.h SPSCFifo.h
 
 efu2: $(library) $(efu.src) $(efu.inc)
 	@echo building $@
-	$(Q)$(cxx) $(cxxflags) $(efu.src) $(library) $(ldflags) -o $@
+	$(Q)$(cxx) $(cxxflags) $(cxxflags.efu) $(efu.src) $(library) $(ldflags) -o $@
 
 gencspec: $(library) $(gencspec.src) $(gencspec.inc)
 	@echo building $@

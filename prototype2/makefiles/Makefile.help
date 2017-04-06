@@ -6,6 +6,7 @@ printinfo:
 	$(info [Platform])
 	$(info Architecture: $(_ARCH))
 	$(info COMP=$(COMP) - $(origin COMP))
+	$(info BUILDSTR=$(BUILDSTR) - $(origin BUILDSTR))
 	$(info cxx=$(cxx))
 	$(info [Application and libraries])
 	$(info RELEASE=$(RELEASE) - $(origin RELEASE))

@@ -3,7 +3,7 @@
 
 testprogs = DetectorTest CSPECDataTest CSPECChanConvTest RingBufferTest
 testprogs += CSPECEventTest EFUArgsTest
-testprogs += MultiGridGeometryTest  NewStatsTest
+testprogs += MultiGridGeometryTest  NewStatsTest VersionTest
 testprogs += NMXVMM2SRSDataTest ClustererTest TimeTest GeometryTest
 testprogs += EventletBuilderH5Test EventletBuilderTest EventletTest EventTest
 testprogs += FBSerializerTest HistSerializerTest TrackSerializerTest
@@ -80,6 +80,10 @@ endif
 #
 # common/ Tests
 #
+VersionTest: common/Version.h
+	@echo building $@
+	$(Q)g++ $(cxxflags_test) common/VersionTest.cpp -o $@ $(ldflags_test)
+
 RingBufferTest: common/RingBufferTest.cpp common/RingBuffer.h
 	@echo building $@
 	$(Q)g++ $(cxxflags_test) common/RingBufferTest.cpp -o $@ $(ldflags_test)
