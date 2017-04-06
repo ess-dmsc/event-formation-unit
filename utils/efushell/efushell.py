@@ -35,6 +35,11 @@ class EFUShell(cmd.Cmd):
       res = self.driver.Ask('STAT_GET ' + line)
       print res
 
+   def do_version_get(self, line):
+      'Get version and build information'
+      res = self.driver.Ask('VERSION_GET ' + line)
+      print res
+
 #
 # CMD behavior customization
 #

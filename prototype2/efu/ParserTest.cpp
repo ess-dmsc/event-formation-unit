@@ -26,7 +26,8 @@ std::vector<std::string> commands {
   "CSPEC_SHOW_CALIB",               "wire 0 0x0000, grid 0 0x0000",
   "CSPEC_SHOW_CALIB 5",             "wire 5 0x0000, grid 5 0x0000",
   "STAT_GET_COUNT",                 "STAT_GET_COUNT 0",
-  "STAT_GET 1",                     "STAT_GET  -1"
+  "STAT_GET 1",                     "STAT_GET  -1",
+  "VERSION_GET"
 };
 
 std::vector<std::string> commands_badargs {
@@ -38,7 +39,8 @@ std::vector<std::string> commands_badargs {
   "CSPEC_SHOW_CALIB 1 2",
   "CSPEC_SHOW_CALIB 16384",
   "STAT_GET_COUNT 1",
-  "STAT_GET"
+  "STAT_GET",
+  "VERSION_GET 1"
 };
 
 // clang-format on
