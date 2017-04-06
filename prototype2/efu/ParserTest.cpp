@@ -26,8 +26,7 @@ std::vector<std::string> commands {
   "CSPEC_SHOW_CALIB",               "wire 0 0x0000, grid 0 0x0000",
   "CSPEC_SHOW_CALIB 5",             "wire 5 0x0000, grid 5 0x0000",
   "STAT_GET_COUNT",                 "STAT_GET_COUNT 0",
-  "STAT_GET 1",                     "STAT_GET  -1",
-  "VERSION_GET"
+  "STAT_GET 1",                     "STAT_GET  -1"
 };
 
 std::vector<std::string> commands_badargs {
@@ -162,6 +161,14 @@ TEST_F(ParserTest, BadArgsCommands) {
     ASSERT_EQ(strcmp("Error: <BADARGS>", output), 0);
     ASSERT_EQ(-Parser::EBADARGS, res);
   }
+}
+
+TEST_F(ParserTest, VersionGet) {
+  auto cmd = "VERSION_GET";
+  std::memcpy(input, cmd, strlen(cmd));
+  MESSAGE() << "Checking command: " << cmd << "\n";
+  auto res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(0, res);
 }
 
 TEST_F(ParserTest, DuplicateCommands) {
