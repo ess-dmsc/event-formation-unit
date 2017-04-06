@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/version.h>
+#include <common/Version.h>
 #include <test/TestBase.h>
 
 class VersionTest : public TestBase {};
