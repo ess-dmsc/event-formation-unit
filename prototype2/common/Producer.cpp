@@ -5,8 +5,6 @@
 #include <iostream>
 #include <libs/include/gccintel.h>
 
-// using namespace BrightnESS::EventGenerator::FlatBufs::EFU;
-
 Producer::Producer(std::string broker, std::string topicstr) {
   using namespace std;
 
@@ -43,6 +41,13 @@ Producer::Producer(std::string broker, std::string topicstr) {
     std::cerr << "Failed to create topic: " << errstr << std::endl;
     exit(1);
   }
+}
+
+Producer::~Producer() {
+  delete topic;
+  delete producer;
+  delete tconf;
+  delete conf;
 }
 
 /** called to actually send data to Kafka cluster */

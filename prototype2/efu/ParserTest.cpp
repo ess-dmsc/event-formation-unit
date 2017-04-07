@@ -38,7 +38,8 @@ std::vector<std::string> commands_badargs {
   "CSPEC_SHOW_CALIB 1 2",
   "CSPEC_SHOW_CALIB 16384",
   "STAT_GET_COUNT 1",
-  "STAT_GET"
+  "STAT_GET",
+  "VERSION_GET 1"
 };
 
 // clang-format on
@@ -160,6 +161,14 @@ TEST_F(ParserTest, BadArgsCommands) {
     ASSERT_EQ(strcmp("Error: <BADARGS>", output), 0);
     ASSERT_EQ(-Parser::EBADARGS, res);
   }
+}
+
+TEST_F(ParserTest, VersionGet) {
+  auto cmd = "VERSION_GET";
+  std::memcpy(input, cmd, strlen(cmd));
+  MESSAGE() << "Checking command: " << cmd << "\n";
+  auto res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(0, res);
 }
 
 TEST_F(ParserTest, DuplicateCommands) {

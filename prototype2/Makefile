@@ -7,6 +7,19 @@ ifndef _ARCH
   _ARCH := $(shell uname -s)
 endif
 
+ifndef RELEASE
+  BSTR_NAME=$(shell whoami)
+  BSTR_DATE=$(shell date +%F-%H%M%S)
+  BSTR_NODE=$(shell uname -n)
+  BSTR_OS=$(shell uname -r)
+  BSTR_HASH=$(shell git log --oneline | head -n 1 | awk '{print $$1}')
+  BUILDSTR=$(BSTR_DATE)[$(BSTR_NODE):$(BSTR_NAME)][$(BSTR_OS)]$(BSTR_HASH)
+else
+  ifndef BUILDSTR
+    $(error Building release, but BUILDSTR not set)
+  endif
+endif
+
 VPATH = .. ../libs/include test
 
 progs = efu2  cspec.so nmx.so udp.so cspec2.so nmxvmm2srs.so gencspec gencspecfile dgmgjson
@@ -15,7 +28,7 @@ progs = efu2  cspec.so nmx.so udp.so cspec2.so nmxvmm2srs.so gencspec gencspecfi
 library = ../libs/eventlib.a
 
 # For each loadable detector add its .so.src and .so.inc dependencies
-common.src = common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp
+common.src = common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp ../dataformats/multigrid/src/DataSave.cpp
 common.inc = common/Detector.h common/NewStats.h common/Producer.h common/FBSerializer.h
 common.inc += common/Trace.h libs/include/gccintel.h common/EFUArgs.h
 common.obj = $(common.src:%.cpp=%.o)
@@ -27,8 +40,9 @@ nmx.so.inc = NMX/Clusterer.h NMX/EventNMX.h NMX/Eventlet.h nmxgen/EventletBuilde
 
 nmxvmm2srs.so.src = nmxvmm2srs/nmxvmm2srs.cpp nmxvmm2srs/NMXVMM2SRSData.cpp NMX/Clusterer.cpp NMX/Geometry.cpp
 nmxvmm2srs.so.src += NMX/Time.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp nmxvmm2srs/EventletBuilder.cpp
+nmxvmm2srs.so.src += nmxvmm2srs/HistSerializer.cpp nmxvmm2srs/TrackSerializer.cpp
 nmxvmm2srs.so.inc = NMX/Clusterer.h NMX/Geometry.h NMX/Time.h NMX/EventNMX.h NMX/Eventlet.h nmxvmm2srs/EventletBuilder.h
-nmxvmm2srs.so.inc += nmxvmm2srs/NMXVMM2SRSData.h
+nmxvmm2srs.so.inc += nmxvmm2srs/NMXVMM2SRSData.h nmxvmm2srs/HistSerializer.h nmxvmm2srs/TrackSerializer.h
 
 cspec.so.src =  cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp
 cspec.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/MultiGridGeometry.h
@@ -38,7 +52,7 @@ cspec2.so.inc =  cspec/CSPECData.h cspec/CSPECChanConv.h common/MultiGridGeometr
 
 
 # For each standalone program add .src and .inc and .obj below
-efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/pipeline.cpp
+efu.src = common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/main.cpp
 efu.src += common/StatPublisher.cpp efu/ExitHandler.cpp
 efu.src += efu/Server.cpp efu/Parser.cpp cspec/CalibrationFile.cpp
 efu.inc = common/EFUArgs.h efu/Launcher.h efu/Loader.h
@@ -88,13 +102,13 @@ nmxvmm2srs.so: $(nmxvmm2srs.so.src) $(nmxvmm2srs.so.inc) $(common.obj)
 	@echo building specific $@
 	$(Q)$(cxx) $(cxxflags) $(cxxflags.so) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
-udp.so: $(udp.so.src) $(udp.so.inc) $(common.obj)
+udp.so: $(udp.so.src) $(udp.so.inc)
 	@echo building specific $@
 	$(Q)$(cxx) $(cxxflags) $(cxxflags.so) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
 
 %.o: %.cpp
-	@echo building $@
+	@echo building object $@
 	$(Q)$(cxx) $(cxxflags) $(cxxflags.so) $< -c -o $@
 
 $(library): Socket.h TSCTimer.h Timer.h SPSCFifo.h
@@ -102,7 +116,7 @@ $(library): Socket.h TSCTimer.h Timer.h SPSCFifo.h
 
 efu2: $(library) $(efu.src) $(efu.inc)
 	@echo building $@
-	$(Q)$(cxx) $(cxxflags) $(efu.src) $(library) $(ldflags) -o $@
+	$(Q)$(cxx) $(cxxflags) $(cxxflags.efu) $(efu.src) $(library) $(ldflags) -o $@
 
 gencspec: $(library) $(gencspec.src) $(gencspec.inc)
 	@echo building $@

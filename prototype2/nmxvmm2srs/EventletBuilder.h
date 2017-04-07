@@ -20,6 +20,9 @@ public:
   uint32_t process_readout(NMXVMM2SRSData &data, Clusterer &clusterer);
 
 private:
+#ifdef DUMPTOFILE
+  int fd;
+#endif
   Time time_intepreter_;
   Geometry geometry_interpreter_;
 };

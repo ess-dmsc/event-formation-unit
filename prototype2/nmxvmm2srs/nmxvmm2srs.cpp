@@ -17,6 +17,8 @@
 #include <libs/include/Timer.h>
 #include <memory>
 #include <nmxvmm2srs/EventletBuilder.h>
+#include <nmxvmm2srs/HistSerializer.h>
+#include <nmxvmm2srs/TrackSerializer.h>
 #include <nmxvmm2srs/NMXVMM2SRSData.h>
 #include <stdio.h>
 #include <unistd.h>
@@ -148,6 +150,8 @@ void NMXVMM2SRS::processing_thread() {
   Producer eventprod(opts->broker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
   Producer monitorprod(opts->broker, "NMX_monitor");
+  HistSerializer histfb(1500);
+  TrackSerializer trackfb(256);
 
   NMXVMM2SRSData data(1125);
 
@@ -158,17 +162,18 @@ void NMXVMM2SRS::processing_thread() {
   time_interpreter.set_target_resolution(0.5); /**< @todo not hardcode */
 
   Geometry geometry_intepreter; /**< @todo not hardocde chip mappings */
-  geometry_intepreter.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
-  geometry_intepreter.define_plane(1, {{1, 10}, {1, 11}, {1, 14}, {1, 15}});
+  geometry_intepreter.define_plane(0, {{1, 0}, {1, 1}});
+  geometry_intepreter.define_plane(1, {{1, 14}, {1, 15}});
 
   EventletBuilder builder(time_interpreter, geometry_intepreter);
 
   Clusterer clusterer(30); /**< @todo not hardocde */
 
   Timer stopafter_clock;
-  TSCTimer report_timer;
-
+  TSCTimer global_time, report_timer;
+  EventNMX event;
   unsigned int data_index;
+  int sample_next_track = 0;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
@@ -182,17 +187,24 @@ void NMXVMM2SRS::processing_thread() {
         mystats.rx_errbytes += data.error;
 
         while (clusterer.event_ready()) {
-          XTRACE(PROCESS, WAR, "event_ready()\n");
-          auto event = clusterer.get_event();
+          XTRACE(PROCESS, DEB, "event_ready()\n");
+          event = clusterer.get_event();
           event.analyze(true, 3, 7); /**< @todo not hardocde */
           if (event.good()) {
-            XTRACE(PROCESS, WAR, "event.good\n");
+            XTRACE(PROCESS, DEB, "event.good\n");
+
+            if (sample_next_track) {
+                sample_next_track = trackfb.add_track(event, 6);
+            }
             mystats.rx_events++;
 
-            int time = 42; /**< @todo get time from event.time_start() */
+            XTRACE(PROCESS, DEB, "x.center: %f, y.center %f\n", event.x.center, event.y.center);
             int pixelid = (int)event.x.center + (int)event.y.center * 256;
 
-            mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
+            assert(pixelid < 65535);
+
+            //printf("event time: %" PRIu64 "\n", event.time_start());
+            mystats.tx_bytes += flatbuffer.addevent((uint32_t)event.time_start(), pixelid);
             mystats.rx_events++;
           } else {
             mystats.rx_discards += event.x.entries.size() + event.y.entries.size();
@@ -203,9 +215,24 @@ void NMXVMM2SRS::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+      //printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
+
+      sample_next_track = 1;
+
+      flatbuffer.produce();
+
+      char * txbuffer;
+      auto len = trackfb.serialize(&txbuffer);
+      if (len != 0) {
+        XTRACE(PROCESS, ALW, "Sending tracks with size %d\n", len);
+        monitorprod.produce(txbuffer, len);
+      }
 
       if (data.xyhist_elems != 0) {
-        monitorprod.produce((char *)&data.xyhist, sizeof(data.xyhist));
+        XTRACE(PROCESS, ALW, "Sending histogram with %d readouts\n", data.xyhist_elems);
+        char * txbuffer;
+        auto len = histfb.serialize(&data.xyhist[0][0], &data.xyhist[1][0], 1500, &txbuffer);
+        monitorprod.produce(txbuffer, len);
         data.hist_clear();
       }
 

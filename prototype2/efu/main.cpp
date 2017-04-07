@@ -3,6 +3,7 @@
 #include <common/EFUArgs.h>
 #include <common/StatPublisher.h>
 #include <common/Trace.h>
+#include <common/Version.h>
 #include <efu/ExitHandler.h>
 #include <efu/Launcher.h>
 #include <efu/Parser.h>
@@ -19,19 +20,25 @@
  * Load detector, launch pipeline threads, then sleep forever
  */
 int main(int argc, char *argv[]) {
-
-  ExitHandler exithandler;
-
   efu_args = new EFUArgs(argc, argv);
+
+  ExitHandler exithandler; // Register signal handlers for program termination
 
 #ifdef GRAYLOG
   Log::AddLogHandler(
       new GraylogInterface(efu_args->graylog_ip, efu_args->graylog_port));
   Log::SetMinimumSeverity(Severity::Debug);
 #endif
-  GLOG_INF("Starting efu2");
+
+  GLOG_INF("Starting Event Formation Unit");
+  GLOG_INF("Event Formation Unit version: " + efu_version());
+  GLOG_INF("Event Formation Unit build: " + EFU_STR(BUILDSTR));
+  XTRACE(MAIN, ALW, "Starting Event Formation unit\n");
+  XTRACE(MAIN, ALW, "Event Formation Software Version: %s\n", efu_version());
+  XTRACE(MAIN, ALW, "Event Formation Unit build: %s\n", EFU_STR(BUILDSTR));
 
   if (efu_args->stopafter == 0) {
+    XTRACE(MAIN, ALW, "Event Formation Unit Exit (Immediate)\n");
     return 0;
   }
 
@@ -46,6 +53,7 @@ int main(int argc, char *argv[]) {
   Launcher(&loader, cpus);
 
   StatPublisher metrics(efu_args->graphite_ip_addr, efu_args->graphite_port);
+
   Parser cmdParser;
   Server cmdAPI(efu_args->cmdserver_port, cmdParser);
 
@@ -54,7 +62,8 @@ int main(int argc, char *argv[]) {
     if (stop.timeus() >=
         (uint64_t)efu_args->stopafter * (uint64_t)ONE_SECOND_US) {
       sleep(2);
-      XTRACE(MAIN, ALW, "Exiting...\n");
+      XTRACE(MAIN, ALW, "Application timeout, Exiting...\n");
+      GLOG_INF("Event Formation Unit Exiting (User timeout)");
       exithandler.Exit();
     }
 

@@ -10,7 +10,7 @@
 #define UNUSED __attribute__((unused))
 
 //#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_WAR
+//#define TRC_LEVEL TRC_L_DEB
 
 int NMXVMM2SRSData::parse(UNUSED uint32_t data1, UNUSED uint32_t data2,
                           struct VMM2Data *vmd) {

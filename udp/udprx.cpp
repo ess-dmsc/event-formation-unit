@@ -1,6 +1,6 @@
 #include <Args.h>
-#include <Socket.h>
-#include <Timer.h>
+#include <libs/include/Socket.h>
+#include <libs/include/Timer.h>
 #include <cassert>
 #include <chrono>
 #include <inttypes.h>
@@ -24,7 +24,6 @@ int main(int argc, char *argv[]) {
 
   Socket::Endpoint local("0.0.0.0", 9000);
   UDPServer NMX(local);
-  NMX.printbuffers();
   NMX.setbuffers(0, 500000);
   NMX.printbuffers();
 
@@ -47,7 +46,7 @@ int main(int argc, char *argv[]) {
     if (usecs >= intervalUs) {
       rx_total += rx;
       printf("Rx rate: %.2f Mbps, rx %" PRIu64 " MB (total: %" PRIu64
-             " MB) %ld usecs\n",
+             " MB) %" PRIu64 " usecs\n",
              rx * 8.0 / (usecs / 1000000.0) / B1M, rx / B1M, rx_total / B1M,
              usecs);
       rx = 0;

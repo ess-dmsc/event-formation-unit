@@ -3,6 +3,7 @@
 #include <cassert>
 #include <common/EFUArgs.h>
 #include <common/Trace.h>
+#include <common/Version.h>
 #include <cspec/CalibrationFile.h>
 #include <cstring>
 #include <efu/Parser.h>
@@ -94,6 +95,25 @@ static int cspec_show_calib(std::vector<std::string> cmdargs, char *output,
   return Parser::OK;
 }
 
+
+//=============================================================================
+static int version_get(std::vector<std::string> cmdargs, char *output,
+                    unsigned int *obytes) {
+  auto nargs = cmdargs.size();
+  XTRACE(CMD, INF, "VERSION_GET\n");
+  if (nargs != 1) {
+    XTRACE(CMD, WAR, "VERSION_GET: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "VERSION_GET %s %s",
+                  efu_version(),
+                  efu_buildstr());
+
+  return Parser::OK;
+}
+
+
 /******************************************************************************/
 /******************************************************************************/
 Parser::Parser() {
@@ -101,6 +121,7 @@ Parser::Parser() {
   registercmd(std::string("STAT_GET_COUNT"), stat_get_count);
   registercmd(std::string("CSPEC_LOAD_CALIB"), cspec_load_calib);
   registercmd(std::string("CSPEC_SHOW_CALIB"), cspec_show_calib);
+  registercmd(std::string("VERSION_GET"), version_get);
 }
 
 int Parser::registercmd(std::string cmd_name, function_ptr cmd_fn) {

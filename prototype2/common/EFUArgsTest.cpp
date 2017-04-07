@@ -22,7 +22,7 @@ TEST_F(EFUArgsTest, Constructor) {
 }
 
 TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
-  int myargc = 19;
+
   // clang-format off
   const char *myargv[] = {"progname",
                         "-b", "mybroker:myport",
@@ -33,8 +33,11 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
                         "-r", "43",
                         "-g", "4.3.2.1",
                         "-o", "2323",
-                        "-s", "5" };
+                        "-s", "5",
+                        "-a", "10.0.0.1",
+                        "-m", "8989" };
   // clang-format on
+  int myargc = 23;
   EFUArgs opts(myargc, (char **)myargv);
 
   ASSERT_STREQ("mybroker:myport", opts.broker.c_str());
@@ -46,6 +49,8 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   ASSERT_STREQ("4.3.2.1", opts.graphite_ip_addr.c_str());
   ASSERT_EQ(2323, opts.graphite_port);
   ASSERT_EQ(5, opts.stopafter);
+  ASSERT_STREQ("10.0.0.1", opts.graylog_ip.c_str());
+  ASSERT_EQ(8989, opts.cmdserver_port);
 }
 
 TEST_F(EFUArgsTest, HelpText) {

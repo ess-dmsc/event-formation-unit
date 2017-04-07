@@ -18,6 +18,8 @@ public:
   */
   Producer(std::string broker, std::string topicstr);
 
+  ~Producer();
+
   /** @brief Function called to send data to a broker
    *  @param buffer Pointer to char buffer containing data to be tx'ed
    *  @param length Size of buffer data in bytes
