@@ -6,11 +6,20 @@ set(event-formation-unit_VERSION_MINOR 0)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
 set(GENERAL_COMPILER_FLAGS -std=c++11 -pthread -fPIC)
+set(GENERAL_COMPILER_FLAGS ${GENERAL_COMPILER_FLAGS} "-D__FAVOR_BSD")
 
-if(${CMAKE_SYSTEM_NAME} EQUAL "Darwin")
+set(LINUX FALSE)
+if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+    message(STATUS "Detected MacOSX")
     
-elseif(${CMAKE_SYSTEM_NAME} EQUAL "Linux")
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+    message(STATUS "Detected Linux")
     
+    find_library(DL_LIB dl net REQUIRED)
+    
+    set(LINUX TRUE)
+else()
+    message(STATUS "Unknown system")
 endif()
 
 add_definitions(${GENERAL_COMPILER_FLAGS})
