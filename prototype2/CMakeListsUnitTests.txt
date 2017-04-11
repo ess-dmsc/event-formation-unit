@@ -1,4 +1,4 @@
-if(NOT GTEST_FOUND)
+if(NOT ${GTEST_FOUND})
     message(WARNING "Unable to build unit tests as GTest was not found.")
     return()
 endif()
