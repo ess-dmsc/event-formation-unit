@@ -75,3 +75,5 @@ if (PCAP_FOUND)
 else()
     message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
 endif()
+
+include(CMakeListsUnitTests.txt)

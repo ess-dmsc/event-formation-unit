@@ -5,7 +5,25 @@ set(event-formation-unit_VERSION_MINOR 0)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
+option(COV "Enable code coverage test for unit tests (if possible)." OFF)
+
 find_package(GTest)
 
 add_subdirectory(libs)
 add_subdirectory(prototype2)
+
+add_custom_target(hints
+    COMMAND echo ""
+    COMMAND echo "gnumake hints for accessing basic functionality"
+    COMMAND echo "-----------------------------------------------"
+    COMMAND echo "Run prototype2 unit tests:  make runtest"
+    COMMAND echo "Run libs unit tests:        make runtest_libs"
+    COMMAND echo "Run memcheck tests:         make valgrind"
+    COMMAND echo "Verbose output:             make VERBOSE=1"
+    COMMAND echo ""
+    COMMAND echo "CMake hints"
+    COMMAND echo "-----------------------------------------------"
+    COMMAND echo "List cmake variables:       cmake .. -LH     "
+    COMMAND echo "Enable code coverage:       cmake -DCOV=ON .."
+    COMMAND echo ""
+)
