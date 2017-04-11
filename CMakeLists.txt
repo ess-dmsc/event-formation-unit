@@ -5,6 +5,16 @@ set(event-formation-unit_VERSION_MINOR 0)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
+set(GENERAL_COMPILER_FLAGS -std=c++11 -pthread -fPIC)
+
+if(${CMAKE_SYSTEM_NAME} EQUAL "Darwin")
+    
+elseif(${CMAKE_SYSTEM_NAME} EQUAL "Linux")
+    
+endif()
+
+add_definitions(${GENERAL_COMPILER_FLAGS})
+
 option(COV "Enable code coverage test for unit tests (if possible)." OFF)
 
 find_package(GTest)

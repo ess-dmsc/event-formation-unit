@@ -1,7 +1,5 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
-add_definitions(-std=c++11 -pthread) #-v = verbose
-
 find_package(Threads REQUIRED)
 
 find_package(LibRDKafka)
@@ -20,9 +18,6 @@ function(create_module module_name source_files header_files link_libraries)
     add_library(${module_name} MODULE ${source_files} ${header_files})
     set_target_properties(${module_name} PROPERTIES PREFIX "")
     set_target_properties(${module_name} PROPERTIES SUFFIX ".so")
-    if(${CMAKE_SYSTEM_NAME} EQUAL "Linux")
-        set_target_properties(${module_name} PROPERTIES COMPILE_FLAGS "-fPIC")
-    endif()
     add_dependencies(${module_name} eventlib common)
     target_link_libraries(${module_name} ${CMAKE_THREAD_LIBS_INIT} eventlib common ${LibRDKafka_LIBRARIES} ${link_libraries})
 endfunction(create_module)
