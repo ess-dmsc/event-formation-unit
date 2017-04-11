@@ -71,7 +71,11 @@ int ReaderPcap::read(char *buffer, size_t bufferlen) {
   assert(stats.eth_ipv4 == stats.ip_udp + stats.ip_unkn);
 
   struct udphdr *udp = (struct udphdr *)&data[UDPHDROFF];
+#ifndef __FAVOR_BSD //Why is __FAVOR_BSD not defined here?
+  uint16_t udplen = htons(udp->len);
+#else
   uint16_t udplen = htons(udp->uh_ulen);
+#endif
   assert(udplen >= 8);
 
 #if 0
