@@ -24,10 +24,46 @@ else()
 endif()
 
 option(COV "Enable code coverage test for unit tests (if possible)." OFF)
-option(EXT_FB "Use flatbuffer headers defined in external \"streaming-data-types\" repository. That repository must be located in the root of this repository." OFF)
+
+option(EXTSCHEMAS "Use flatbuffer headers defined in external \"streaming-data-types\" repository. That repository must be located in the root of this repository." OFF)
 if(${EXTSCHEMAS})
-    set(GENERAL_COMPILER_FLAGS ${EXTRA_CXX_FLAGS} "-DFLATBUFFERS")
+    set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DFLATBUFFERS")
+    message(STATUS "Using external FB schema header files.")
+else()
+    message(STATUS "Using internal FB schema header files.")
 endif()
+
+option(TRACE "What does this option do?." OFF)
+if(${TRACE})
+    set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DTRACE -Ofast -flto -O3")
+    message(STATUS "TRACE activated.")
+else()
+    message(STATUS "TRACE de-activated.")
+endif()
+
+option(DUMPTOFILE "Dump something to file?" OFF)
+if(${DUMPTOFILE})
+    set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DDUMPTOFILE")
+    message(STATUS "Dumping to file.")
+else()
+    message(STATUS "Not dumping to file.")
+endif()
+
+option(CMAKE_BUILD_TYPE "Build in \"Release\" or \"Debug\" mode." "Release")
+
+option(PROF "Enable profiling." OFF)
+if(${PROF})
+    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -pg)
+    set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -pg)
+    set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -pg)
+    message(STATUS "Profiling enabled.")
+else()
+    message(STATUS "Profiling disabled.")
+endif()
+
+set(CMAKE_C_FLAGS_RELEASE)
+set(CMAKE_CXX_FLAGS_RELEASE)
+
 
 add_definitions(${EXTRA_CXX_FLAGS})
 
@@ -41,7 +77,7 @@ add_custom_target(hints
     COMMAND echo "Gnumake hints for accessing basic functionality."
     COMMAND echo "Most of these commands must be proceeded by a \\\"make all\\\""
     COMMAND echo "command."
-    COMMAND echo "---------------------------------------------------------------"
+    COMMAND echo "-------------------------------------------------------------------------"
     COMMAND echo "Run prototype2 unit tests:             make runtest"
     COMMAND echo "Run libs unit tests:                   make runtest_libs"
     COMMAND echo "Run memcheck tests:                    make valgrind"
@@ -51,9 +87,11 @@ add_custom_target(hints
     COMMAND echo "CMake hints"
     COMMAND echo "Note: it is possible to set several options at the same time"
     COMMAND echo "e.g. \\\"cmake -DCOV=ON -DEXTSCHEMAS=OFF ..\\\"."
-    COMMAND echo "---------------------------------------------------------------"
+    COMMAND echo "-------------------------------------------------------------------------"
     COMMAND echo "List cmake variables:                  cmake .. -LH     "
     COMMAND echo "Enable code coverage:                  cmake -DCOV=ON .."
     COMMAND echo "Use external flatbuffer headers:       cmake -DEXTSCHEMAS=ON .."
+    COMMAND echo "Set build type to release:             cmake -CMAKE_BUILD_TYPE=Release .."
+    COMMAND echo "Set build type to debug:               cmake -CMAKE_BUILD_TYPE=Debug .."
     COMMAND echo ""
 )
