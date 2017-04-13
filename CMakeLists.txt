@@ -5,9 +5,25 @@ set(event-formation-unit_VERSION_MINOR 0)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
+set(BUILDSTR "\"\"")
+
+function(MakeBuildStr)
+    execute_process(COMMAND "whoami" OUTPUT_VARIABLE user_name OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND "date" "+%F %H:%M:%S" OUTPUT_VARIABLE date OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND "uname" "-n" OUTPUT_VARIABLE m_name OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND "uname" "-r" OUTPUT_VARIABLE m_version OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND "git" "rev-parse" "--short" "HEAD" OUTPUT_VARIABLE hash OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(BUILDSTR "\"${date} [${m_name}:${user_name}] [${m_version}] ${hash}\"" PARENT_SCOPE)
+endfunction()
+
+MakeBuildStr()
+
+message(STATUS "Build str: ${BUILDSTR}")
+
 set(EXTRA_CXX_FLAGS -std=c++11 -pthread -fPIC)
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
+set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DBUILDSTR=${BUILDSTR}")
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     message(STATUS "Detected MacOSX")
