@@ -75,7 +75,7 @@ endfunction(create_test_executable)
 #
 # EFU Tests
 #
-if(${LINUX} AND ${CMAKE_COMPILER_IS_GNUCXX})
+if(${CMAKE_COMPILER_IS_GNUCXX})
     set(ParserTest_LIB_SRC efu/ParserTest.cpp test/SyscallWrappers.cpp)
     add_library(ParserTest_LIB STATIC ${ParserTest_LIB_SRC})
     set_target_properties(ParserTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
@@ -100,7 +100,7 @@ create_test_executable(CSPECDataTest "${CSPECDataTest_SRC}" "${CSPECDataTest_INC
 
 create_test_executable(CSPECEventTest cspec/CSPECEventTest.cpp cspec/CSPECEvent.h "")
 
-if(${LINUX} AND ${CMAKE_COMPILER_IS_GNUCXX})
+if(${CMAKE_COMPILER_IS_GNUCXX})
     set(CalibrationFileTest_LIB_SRC
     cspec/CalibrationFileTest.cpp
     test/SyscallWrappers.cpp)

@@ -9,7 +9,6 @@ set(EXTRA_CXX_FLAGS -std=c++11 -pthread -fPIC)
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
 
-set(LINUX FALSE)
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     message(STATUS "Detected MacOSX")
     
@@ -17,8 +16,6 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     message(STATUS "Detected Linux")
     
     find_library(DL_LIB dl REQUIRED)
-    
-    set(LINUX TRUE)
 else()
     message(STATUS "Unknown system")
 endif()
