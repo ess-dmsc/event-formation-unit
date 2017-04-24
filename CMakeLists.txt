@@ -5,7 +5,10 @@ set(event-formation-unit_VERSION_MINOR 0)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
-set(BUILDSTR "\"\"")
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    message(STATUS "Setting build type to 'Debug' as none was specified.")
+    set(CMAKE_BUILD_TYPE Debug)
+endif()
 
 function(MakeBuildStr)
     execute_process(COMMAND "whoami" OUTPUT_VARIABLE user_name OUTPUT_STRIP_TRAILING_WHITESPACE)
@@ -16,7 +19,21 @@ function(MakeBuildStr)
     set(BUILDSTR "\"${date} [${m_name}:${user_name}] [${m_version}] ${hash}\"" PARENT_SCOPE)
 endfunction()
 
-MakeBuildStr()
+if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
+    if (NOT DEFINED BUILDSTR)
+        message(FATAL_ERROR "Build string must be set manually when compiling using release mode e.g. \"-DBUILDSTR=v1.2.3\".")
+    else()
+        set(BUILDSTR "\"${BUILDSTR}\"")
+    endif()
+else()
+    # add_custom_command(OUTPUT BUILDSTR COMMAND echo "\\\"SomeOtherVersionStr\\\"")
+    # add_custom_target(dummy_target ALL DEPENDS BUILDSTR)
+    set(BUILDSTR "\"\"")
+    MakeBuildStr()
+endif()
+
+
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DRELEASE")
 
 message(STATUS "Build str: ${BUILDSTR}")
 
@@ -35,6 +52,8 @@ elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
 else()
     message(STATUS "Unknown system")
 endif()
+
+option(CMAKE_BUILD_TYPE "Build type; \"Release\" or \"Debug\"." Debug)
 
 option(COV "Enable code coverage test for unit tests (if possible)." OFF)
 
@@ -104,8 +123,10 @@ add_custom_target(hints
     COMMAND echo "List cmake variables:             cmake .. -LH     "
     COMMAND echo "Enable code coverage:             cmake -DCOV=ON .."
     COMMAND echo "Use external flatbuffer headers:  cmake -DEXTSCHEMAS=ON .."
-    COMMAND echo "Set build type to release:        cmake -CMAKE_BUILD_TYPE=Release .."
-    COMMAND echo "Set build type to debug:          cmake -CMAKE_BUILD_TYPE=Debug .."
+    COMMAND echo "Set build type to release:        cmake -DCMAKE_BUILD_TYPE=Release .."
+    COMMAND echo "            NOTE: Relase mode requires the you supply a build string"
+    COMMAND echo "                  e.g. \\\"-DBUILDSTR=v1.2.3\\\"."
+    COMMAND echo "Set build type to debug:          cmake -DCMAKE_BUILD_TYPE=Debug .."
     COMMAND echo "Suggest PCAP root:                cmake -DPCAP_ROOT_DIR=/opt/dmg_grp .."
     COMMAND echo "Suggest GraylogLogger root:       cmake -DGraylogLogger_ROOT_DIR=/opt/dmg_grp .."
     COMMAND echo "Suggest LibRDKafka root:          cmake -DLibRDKafka_ROOT_DIR=/opt/dmg_grp .."

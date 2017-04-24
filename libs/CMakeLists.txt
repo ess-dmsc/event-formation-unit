@@ -11,11 +11,11 @@ find_package(Threads)
 
 if(${GTEST_FOUND})
     enable_testing()
-    add_executable(CounterTest test/Counter/testmain.cpp test/Counter/CounterTest.cpp)
+    add_executable(CounterTest EXCLUDE_FROM_ALL test/Counter/testmain.cpp test/Counter/CounterTest.cpp)
     target_link_libraries(CounterTest ${CMAKE_THREAD_LIBS_INIT} ${GTEST_BOTH_LIBRARIES})
     set_target_properties(CounterTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
 
-    add_executable(StatCounterTest test/Counter/testmain.cpp test/Counter/StatCounterTest.cpp)
+    add_executable(StatCounterTest EXCLUDE_FROM_ALL test/Counter/testmain.cpp test/Counter/StatCounterTest.cpp)
     target_link_libraries(StatCounterTest ${CMAKE_THREAD_LIBS_INIT} ${GTEST_BOTH_LIBRARIES})
     set_target_properties(StatCounterTest PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
     

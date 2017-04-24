@@ -55,8 +55,9 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${CMAKE_BINARY_DIR}/proto
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/memcheck_res/)
 
 set(coverage_targets "")
+set(unit_test_targets "")
 function(create_test_executable exec_name source_files header_files link_libraries)
-    add_executable(${exec_name} ${source_files} ${header_files})
+    add_executable(${exec_name} EXCLUDE_FROM_ALL ${source_files} ${header_files})
     target_include_directories(${exec_name} PRIVATE ${GTEST_INCLUDE_DIRS})
     target_link_libraries(${exec_name} ${link_libraries} ${CMAKE_THREAD_LIBS_INIT} ${GTEST_LIBRARIES})
     set_target_properties(${exec_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
@@ -67,6 +68,7 @@ function(create_test_executable exec_name source_files header_files link_librari
         set(coverage_targets ${exec_name}_coverage ${coverage_targets} PARENT_SCOPE)
     endif()
     add_test(NAME regular_${exec_name} COMMAND ${exec_name} "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
+    set(unit_test_targets ${exec_name} ${unit_test_targets} PARENT_SCOPE)
     if (EXISTS ${VALGRIND_CMD})
         add_test(NAME memcheck_${exec_name} COMMAND ${VALGRIND_CMD} --leak-check=full -v --log-file=${CMAKE_BINARY_DIR}/memcheck_res/${exec_name}test.valgrind ${CMAKE_BINARY_DIR}/unit_tests/${exec_name})
     endif()
@@ -259,6 +261,6 @@ NMX/EventNMX.cpp
 )
 create_test_executable(EventTest "${EventTest_SRC}" "NMX/EventNMX.h" "")
 
-add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*)
-add_custom_target(valgrind COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*)
+add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_* DEPENDS ${unit_test_targets})
+add_custom_target(valgrind COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*  DEPENDS ${unit_test_targets})
 add_custom_target(coverage COMMAND echo "Done running coverage tests." DEPENDS ${coverage_targets})
