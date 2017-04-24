@@ -33,5 +33,5 @@ inline static const std::string efu_version() {
 }
 
 static inline const std::string efu_buildstr() {
-  return std::string(BUILDSTR);
+  return std::string(EFU_STR(BUILDSTR));
 }

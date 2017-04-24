@@ -32,10 +32,10 @@ int main(int argc, char *argv[]) {
 
   GLOG_INF("Starting Event Formation Unit");
   GLOG_INF("Event Formation Unit version: " + efu_version());
-  GLOG_INF("Event Formation Unit build: " + EFU_STR(BUILDSTR));
+  GLOG_INF("Event Formation Unit build: " + efu_buildstr());
   XTRACE(MAIN, ALW, "Starting Event Formation unit\n");
   XTRACE(MAIN, ALW, "Event Formation Software Version: %s\n", efu_version().c_str());
-  XTRACE(MAIN, ALW, "Event Formation Unit build: %s\n", EFU_STR(BUILDSTR).c_str());
+  XTRACE(MAIN, ALW, "Event Formation Unit build: %s\n", EFU_STR(BUILDSTR));
 
   if (efu_args->stopafter == 0) {
     XTRACE(MAIN, ALW, "Event Formation Unit Exit (Immediate)\n");
