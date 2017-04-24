@@ -107,8 +107,8 @@ static int version_get(std::vector<std::string> cmdargs, char *output,
   }
 
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "VERSION_GET %s %s",
-                  efu_version(),
-                  efu_buildstr());
+                  efu_version().c_str(),
+                  efu_buildstr().c_str());
 
   return Parser::OK;
 }

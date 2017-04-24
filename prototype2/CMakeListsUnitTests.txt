@@ -1,0 +1,266 @@
+if(NOT ${GTEST_FOUND})
+    message(WARNING "Unable to build unit tests as GTest was not found.")
+    return()
+endif()
+
+enable_testing()
+
+find_program(VALGRIND_CMD valgrind)
+if(EXISTS ${VALGRIND_CMD})
+    message(STATUS "Valgrind found.")
+else()
+    message(STATUS "Valgrind not found. Unable to run memory check.")
+endif()
+
+function(add_linker_flags target flags)
+    get_target_property(cur_link_flags ${target} LINK_FLAGS)
+    if(NOT cur_link_flags)
+        set(cur_link_flags "")
+    endif()
+    set(new_link_flags "${cur_link_flags} ${flags}")
+    set_target_properties(${target} PROPERTIES LINK_FLAGS "${new_link_flags}")
+endfunction(add_linker_flags)
+
+function(add_compile_flags target flags)
+    get_target_property(cur_compile_flags ${target} COMPILE_FLAGS)
+    if(NOT cur_compile_flags)
+        set(cur_compile_flags "")
+    endif()
+    set(new_compile_flags "${cur_compile_flags} ${flags}")
+    set_target_properties(${target} PROPERTIES COMPILE_FLAGS "${new_compile_flags}")
+endfunction(add_compile_flags)
+
+set(DO_COV OFF)
+
+mark_as_advanced(DO_COV VALGRIND_CMD)
+
+if (${COV})
+    if (EXISTS ${LCOV_CMD} AND EXISTS ${GCOV_CMD} AND EXISTS ${GENHTML_CMD})
+        if (${CMAKE_COMPILER_IS_GNUCXX})
+            message(STATUS "Code coverage enabled.")
+            set(DO_COV ON)
+            set(CMAKE_BUILD_TYPE Debug)
+            include(CodeCoverage)
+        else()
+            message(STATUS "Unable to enable code coverage as this functionality only works with the g++ compiler.")
+        endif()
+    else()
+        message(STATUS "Unable to enable code coverage as not all commands required are available.")    
+    endif()
+endif()
+
+add_definitions(-std=c++11 -pthread)
+
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${CMAKE_BINARY_DIR}/prototype2)
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/memcheck_res/)
+
+set(coverage_targets "")
+set(unit_test_targets "")
+function(create_test_executable exec_name source_files header_files link_libraries)
+    add_executable(${exec_name} EXCLUDE_FROM_ALL ${source_files} ${header_files})
+    target_include_directories(${exec_name} PRIVATE ${GTEST_INCLUDE_DIRS})
+    target_link_libraries(${exec_name} ${link_libraries} ${CMAKE_THREAD_LIBS_INIT} ${GTEST_LIBRARIES})
+    set_target_properties(${exec_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
+    if(DO_COV)
+        set_target_properties(${exec_name} PROPERTIES LINK_FLAGS "-coverage -fprofile-generate")
+        set_target_properties(${exec_name} PROPERTIES COMPILE_FLAGS "-g -O0 -coverage -fprofile-generate")
+        SETUP_TARGET_FOR_COVERAGE(${exec_name}_coverage ${exec_name} coverage/${exec_name}/)
+        set(coverage_targets ${exec_name}_coverage ${coverage_targets} PARENT_SCOPE)
+    endif()
+    add_test(NAME regular_${exec_name} COMMAND ${exec_name} "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
+    set(unit_test_targets ${exec_name} ${unit_test_targets} PARENT_SCOPE)
+    if (EXISTS ${VALGRIND_CMD})
+        add_test(NAME memcheck_${exec_name} COMMAND ${VALGRIND_CMD} --leak-check=full -v --log-file=${CMAKE_BINARY_DIR}/memcheck_res/${exec_name}test.valgrind ${CMAKE_BINARY_DIR}/unit_tests/${exec_name})
+    endif()
+endfunction(create_test_executable)
+
+#
+# EFU Tests
+#
+if(${CMAKE_COMPILER_IS_GNUCXX})
+    set(ParserTest_LIB_SRC efu/ParserTest.cpp test/SyscallWrappers.cpp)
+    add_library(ParserTest_LIB STATIC ${ParserTest_LIB_SRC})
+    set_target_properties(ParserTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
+    
+    set(ParserTest_SRC efu/Parser.cpp common/EFUArgs.cpp cspec/CalibrationFile.cpp)
+    set(ParserTest_INC efu/Parser.h common/EFUArgs.h cspec/CalibrationFile.h)
+    set(ParserTest_LINK ParserTest_LIB)
+    create_test_executable(ParserTest "${ParserTest_SRC}" "${ParserTest_INC}" "${ParserTest_LINK}")
+    add_compile_flags(ParserTest "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
+    add_linker_flags(ParserTest "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
+endif()
+
+#
+# CSPEC / Multi Grid Tests
+#
+set(CSPECChanConvTest_SRC cspec/CSPECChanConvTest.cpp cspec/CSPECChanConv.cpp)
+create_test_executable(CSPECChanConvTest "${CSPECChanConvTest_SRC}" "cspec/CSPECChanConv.h" "")
+
+set(CSPECDataTest_SRC cspec/CSPECDataTest.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp)
+set(CSPECDataTest_INC cspec/CSPECData.h cspec/CSPECChanConv.h test/CSPECTestData.h common/MultiGridGeometry.h)
+create_test_executable(CSPECDataTest "${CSPECDataTest_SRC}" "${CSPECDataTest_INC}" "")
+
+create_test_executable(CSPECEventTest cspec/CSPECEventTest.cpp cspec/CSPECEvent.h "")
+
+if(${CMAKE_COMPILER_IS_GNUCXX})
+    set(CalibrationFileTest_LIB_SRC
+    cspec/CalibrationFileTest.cpp
+    test/SyscallWrappers.cpp)
+    add_library(CalibrationFileTest_LIB STATIC ${CalibrationFileTest_LIB_SRC})
+    set_target_properties(CalibrationFileTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
+    
+    set(CalibrationFileTest_SRC cspec/CalibrationFile.cpp)
+    set(CalibrationFileTest_INC cspec/CalibrationFile.h)
+    set(CalibrationFileTest_LINK CalibrationFileTest_LIB ${GTEST_BOTH_LIBRARIES})
+    create_test_executable(CalibrationFileTest "${CalibrationFileTest_SRC}" "${CalibrationFileTest_INC}" "${CalibrationFileTest_LINK}")
+    add_compile_flags(CalibrationFileTest "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
+    add_linker_flags(CalibrationFileTest "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
+endif()
+
+
+#
+# common/ Tests
+#
+create_test_executable(VersionTest common/VersionTest.cpp common/Version.h "")
+
+create_test_executable(RingBufferTest common/RingBufferTest.cpp common/RingBuffer.h "")
+
+create_test_executable(DetectorTest common/DetectorTest.cpp common/Detector.h "")
+
+set(MultiGridGeometryTest_INC
+common/MultiGridGeometry.h
+../libs/include/TSCTimer.h
+)
+create_test_executable(MultiGridGeometryTest common/MultiGridGeometryTest.cpp "${MultiGridGeometryTest_INC}" "")
+
+
+set(FBSerializerTest_SRC
+common/FBSerializerTest.cpp
+common/FBSerializer.cpp
+common/Producer.cpp
+)
+set(FBSerializerTest_INC
+common/FBSerializer.h
+common/Producer.h
+)
+create_test_executable(FBSerializerTest "${FBSerializerTest_SRC}" "${FBSerializerTest_INC}" "${LibRDKafka_LIBRARIES}")
+
+
+set(HistSerializerTest_SRC
+nmxvmm2srs/HistSerializerTest.cpp
+nmxvmm2srs/HistSerializer.cpp
+)
+set(HistSerializerTest_INC
+nmxvmm2srs/HistSerializer.h
+common/Producer.h
+)
+create_test_executable(HistSerializerTest "${HistSerializerTest_SRC}" "${HistSerializerTest_INC}" "")
+
+
+set(TrackSerializerTest_SRC
+nmxvmm2srs/TrackSerializerTest.cpp
+nmxvmm2srs/TrackSerializer.cpp
+NMX/Eventlet.cpp
+NMX/EventNMX.cpp
+)
+set(TrackSerializerTest_INC
+nmxvmm2srs/TrackSerializer.h
+NMX/EventNMX.h
+NMX/Eventlet.h
+)
+create_test_executable(TrackSerializerTest "${TrackSerializerTest_SRC}" "${TrackSerializerTest_INC}" "")
+
+set(EFUArgsTest_SRC
+common/EFUArgsTest.cpp
+common/EFUArgs.cpp
+)
+create_test_executable(EFUArgsTest "${EFUArgsTest_SRC}" "common/EFUArgs.h" "")
+
+set(NewStatsTest_SRC
+common/NewStatsTest.cpp
+common/NewStats.cpp
+)
+create_test_executable(NewStatsTest "${NewStatsTest_SRC}" "common/NewStats.h" "")
+
+
+#
+# NMX / VMM Tests
+#
+set(NMXVMM2SRSDataTest_SRC
+nmxvmm2srs/NMXVMM2SRSDataTest.cpp
+nmxvmm2srs/NMXVMM2SRSData.cpp
+)
+create_test_executable(NMXVMM2SRSDataTest "${NMXVMM2SRSDataTest_SRC}" "nmxvmm2srs/NMXVMM2SRSData.h" "")
+
+
+set(EventletBuilderH5Test_SRC
+nmxgen/EventletBuilderH5Test.cpp
+nmxgen/EventletBuilderH5.cpp
+NMX/EventNMX.cpp
+NMX/Clusterer.cpp
+)
+set(EventletBuilderH5Test_INC
+nmxgen/EventletBuilderH5.h
+NMX/Clusterer.h
+NMX/EventNMX.h
+)
+create_test_executable(EventletBuilderH5Test "${EventletBuilderH5Test_SRC}" "${EventletBuilderH5Test_INC}" "")
+
+
+set(EventletBuilderTest_SRC
+nmxvmm2srs/EventletBuilderTest.cpp
+nmxvmm2srs/EventletBuilder.cpp
+nmxvmm2srs/NMXVMM2SRSData.cpp
+NMX/Clusterer.cpp
+NMX/EventNMX.cpp
+NMX/Geometry.cpp
+NMX/Time.cpp
+)
+set(EventletBuilderTest_INC
+nmxvmm2srs/NMXVMM2SRSData.h
+nmxvmm2srs/EventletBuilder.h
+NMX/Clusterer.h
+NMX/EventNMX.h
+NMX/Time.h
+NMX/Geometry.h
+)
+create_test_executable(EventletBuilderTest "${EventletBuilderTest_SRC}" "${EventletBuilderTest_INC}" "")
+
+set(EventletTest_SRC
+NMX/EventletTest.cpp
+NMX/Eventlet.cpp
+)
+create_test_executable(EventletTest "${EventletTest_SRC}" "NMX/Eventlet.h" "")
+
+set(GeometryTest_SRC
+NMX/GeometryTest.cpp
+NMX/Geometry.cpp
+)
+create_test_executable(GeometryTest "${GeometryTest_SRC}" "NMX/Geometry.h" "")
+
+set(TimeTest_SRC
+NMX/TimeTest.cpp
+NMX/Time.cpp
+)
+create_test_executable(TimeTest "${TimeTest_SRC}" "NMX/Time.h" "")
+
+set(ClustererTest_SRC
+NMX/ClustererTest.cpp
+NMX/Clusterer.cpp
+NMX/EventNMX.cpp
+)
+set(ClustererTest_INC
+NMX/Clusterer.h
+NMX/EventNMX.h
+)
+create_test_executable(ClustererTest "${ClustererTest_SRC}" "${ClustererTest_INC}" "")
+
+set(EventTest_SRC
+NMX/EventTest.cpp
+NMX/EventNMX.cpp
+)
+create_test_executable(EventTest "${EventTest_SRC}" "NMX/EventNMX.h" "")
+
+add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_* DEPENDS ${unit_test_targets})
+add_custom_target(valgrind COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*  DEPENDS ${unit_test_targets})
+add_custom_target(coverage COMMAND echo "Done running coverage tests." DEPENDS ${coverage_targets})
