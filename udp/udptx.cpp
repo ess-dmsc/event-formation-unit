@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
   Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
   UDPClient udptx(local, remote);
   udptx.buflen(opts.buflen);
-  udptx.setbuffers(0, 1000000);
+  udptx.setbuffers(4000000, 4000000);
   udptx.printbuffers();
 
   Timer rate_timer;
@@ -43,6 +43,9 @@ int main(int argc, char *argv[]) {
     if (txtmp > 0) {
       txp++;
       tx += txtmp;
+    }
+    if (txp % 500 == 0) {
+       usleep(1000);
     }
 
     if (report_timer.timetsc() >= 1000000UL * TSC_MHZ) {
