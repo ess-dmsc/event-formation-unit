@@ -44,7 +44,8 @@ void UDPRaw::input_thread() {
 
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
   UDPServer raw(local);
-  raw.setbuffers(0, opts->rcvbuf);
+  raw.setbuffers(4000000, 4000000);
+  //raw.settimeout(0, 100000);
   raw.printbuffers();
 
   Timer rate_timer;
@@ -58,7 +59,7 @@ void UDPRaw::input_thread() {
     auto tmpseq = *((uint32_t*)buffer);
 
     if (seqno != tmpseq) {
-      printf("seqno: %u, tmpseq: %u\n", seqno, tmpseq);
+      //printf("seqno: %u, tmpseq: %u\n", seqno, tmpseq);
       dropped+= (tmpseq - seqno);
       seqno = tmpseq + 1;
     } else  {
