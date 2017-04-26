@@ -45,7 +45,7 @@ if (${COV})
             message(STATUS "Unable to enable code coverage as this functionality only works with the g++ compiler.")
         endif()
     else()
-        message(STATUS "Unable to enable code coverage as not all commands required are available.")    
+        message(STATUS "Unable to enable code coverage as not all commands required are available.")
     endif()
 endif()
 
@@ -81,7 +81,7 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
     set(ParserTest_LIB_SRC efu/ParserTest.cpp test/SyscallWrappers.cpp)
     add_library(ParserTest_LIB STATIC ${ParserTest_LIB_SRC})
     set_target_properties(ParserTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
-    
+
     set(ParserTest_SRC efu/Parser.cpp common/EFUArgs.cpp cspec/CalibrationFile.cpp)
     set(ParserTest_INC efu/Parser.h common/EFUArgs.h cspec/CalibrationFile.h)
     set(ParserTest_LINK ParserTest_LIB)
@@ -108,7 +108,7 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
     test/SyscallWrappers.cpp)
     add_library(CalibrationFileTest_LIB STATIC ${CalibrationFileTest_LIB_SRC})
     set_target_properties(CalibrationFileTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
-    
+
     set(CalibrationFileTest_SRC cspec/CalibrationFile.cpp)
     set(CalibrationFileTest_INC cspec/CalibrationFile.h)
     set(CalibrationFileTest_LINK CalibrationFileTest_LIB ${GTEST_BOTH_LIBRARIES})
