@@ -17,13 +17,13 @@ ifdef HDF5
 
 progs += gennmxfile
 
-include+= -I../../h5cc/source -I$(HDF5INC)
+include+= -I../../h5cc/source/h5cc -I$(HDF5INC)
 
 gennmxfile.src = nmxgen/nmxfile.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderVMM.cpp NMX/Eventlet.cpp
 gennmxfile.inc = nmxgen/NMXArgs.h nmxgen/ReaderVMM.h NMX/Eventlet.h
 gennmxfile.obj = $(gennmxfile.src:%.cpp=%.o)
 
-ldflags += -L../../h5cc/build -lh5cc -L$(HDF5LIB) -lhdf5_hl_cpp -lhdf5_cpp -lhdf5
+ldflags += -L../../h5cc/build/h5cc -lh5cc -L$(HDF5LIB) -lhdf5_hl_cpp -lhdf5_cpp -lhdf5
 
 gennmxfile: $(library) $(gennmxfile.obj) $(gennmxfile.inc)
 	@echo building $@
