@@ -17,7 +17,7 @@ ifdef HDF5
 
 progs += gennmxfile
 
-include+= -I../../h5cc/source/h5cc -I$(HDF5INC)
+include+= -I../../h5cc/source -I$(HDF5INC)
 
 gennmxfile.src = nmxgen/nmxfile.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderVMM.cpp NMX/Eventlet.cpp
 gennmxfile.inc = nmxgen/NMXArgs.h nmxgen/ReaderVMM.h NMX/Eventlet.h
