@@ -1,0 +1,16 @@
+#!/bin/bash
+
+MTU=$1
+
+if [[ $MTU == "" ]]; then
+  echo "usage: mtuset <mtu_value>"
+  exit 1
+fi
+
+if (( MTU < 1500 || MTU > 9000)); then
+  echo "Valid MTU sizes are 1500 - 9000"
+  exit 1
+fi
+
+ifconfig eno49 mtu 1500 up
+ifconfig eno50 mtu 1500 up
