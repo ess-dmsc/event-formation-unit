@@ -102,7 +102,7 @@ nmxvmm2srs.so: $(nmxvmm2srs.so.src) $(nmxvmm2srs.so.inc) $(common.obj)
 	@echo building specific $@
 	$(Q)$(cxx) $(cxxflags) $(cxxflags.so) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 
-udp.so: $(udp.so.src) $(udp.so.inc)
+udp.so: $(library) $(udp.so.src) $(udp.so.inc)
 	@echo building specific $@
 	$(Q)$(cxx) $(cxxflags) $(cxxflags.so) $($(@).src) $(common.obj) $(ldflags.so) -o $@
 

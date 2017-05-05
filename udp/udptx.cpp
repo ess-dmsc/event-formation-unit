@@ -44,18 +44,22 @@ int main(int argc, char *argv[]) {
       txp++;
       tx += txtmp;
     }
-    if (txp % 500 == 0) {
-       usleep(1000);
-    }
+    // if (txp % 500 == 0) {
+    //    usleep(1000);
+    // }
 
     if (report_timer.timetsc() >= 1000000UL * TSC_MHZ) {
       auto usecs = rate_timer.timeus();
       tx_total += tx;
-      printf("Tx rate: %.2f Mbps, tx %" PRIu64 " MB (total: %" PRIu64
-             " MB) %ld usecs\n",
-             tx * 8.0 / (usecs / 1000000.0) / B1M, tx / B1M, tx_total / B1M,
+      printf("Tx rate: %.2f Mbps, %.0f pps, tx %" PRIu64 " MB (total: %" PRIu64
+             " MB) %llu usecs\n",
+             tx * 8.0 / usecs,
+             txp * 1000000.0 / usecs,
+             tx / B1M,
+             tx_total / B1M,
              usecs);
       tx = 0;
+      txp = 0;
       rate_timer.now();
       report_timer.now();
     }
