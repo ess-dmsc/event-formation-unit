@@ -1,0 +1,39 @@
+#!/bin/bash
+
+function printline() {
+   echo "---------------------------------------------"
+   echo $1
+   echo "---------------------------------------------"
+}
+
+IF="eno49"
+
+printline "Interface speed and other data"
+ethtool $IF
+echo
+
+printline "MTU and link speed"
+ip link show $IF 
+echo
+
+printline "Rx and Tx NIC buffer sizes"
+ethtool -g $IF 
+echo
+
+printline "Interrupt coalescnece"
+ethtool -c $IF
+echo
+
+printline "netdev_max_backlog"
+sysctl net.core.netdev_max_backlog
+echo
+
+printline "rmem_max"
+sysctl net.core.rmem_max
+echo
+
+printline "wmem_max"
+sysctl net.core.rmem_max
+echo
+
+
