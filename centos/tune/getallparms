@@ -6,7 +6,12 @@ function printline() {
    echo "---------------------------------------------"
 }
 
-IF="eno49"
+if [[ $1 == "" ]]; then
+   echo "Usage: getallparms interface"
+   exit
+fi
+
+IF=$1
 
 printline "Interface speed and other data"
 ethtool $IF
