@@ -70,6 +70,8 @@ TEST_F(FBSerializerTest, DeserializeCheckData) {
   ASSERT_TRUE(buffer != nullptr);
 
   memcpy(flatbuffer, buffer, length);
+  auto veri = flatbuffers::Verifier((uint8_t *)flatbuffer, length);
+  ASSERT_TRUE(VerifyEventMessageBuffer(veri));
   auto events = GetEventMessage(flatbuffer);
 
   auto detvec = events->detector_id();
