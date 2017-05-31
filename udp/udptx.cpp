@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
       auto usecs = rate_timer.timeus();
       tx_total += tx;
       printf("Tx rate: %.2f Mbps, %.0f pps, tx %" PRIu64 " MB (total: %" PRIu64
-             " MB) %llu usecs\n",
+             " MB) %" PRIu64 " usecs\n",
              tx * 8.0 / usecs,
              txp * 1000000.0 / usecs,
              tx / B1M,
