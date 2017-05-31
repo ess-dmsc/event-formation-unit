@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
 include_directories(. ..)
+set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -fno-strict-aliasing)
 set(udptx_SRC udptx.cpp Args.cpp)
 set(udptx_INC Args.h)
 add_executable(udptx ${udptx_SRC} ${udptx_INC})
