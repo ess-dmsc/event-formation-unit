@@ -52,6 +52,8 @@ create_module(cspec2 "${cspec2_so_SRC}" "${cspec2_so_INC}" "")
 create_module(nmxvmm2srs "${nmxvmm2srs_so_SRC}" "${nmxvmm2srs_so_INC}" "")
 create_module(udp "${udp_so_SRC}" "" "")
 
+SET_TARGET_PROPERTIES(udp PROPERTIES COMPILE_FLAGS "-fno-strict-aliasing" )
+
 function(create_executable exec_name source_files header_files link_libraries)
     add_executable(${exec_name} ${source_files} ${header_files})
     add_dependencies(${exec_name} eventlib)
