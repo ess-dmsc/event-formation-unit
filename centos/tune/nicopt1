@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#ethtool -C eno49 adaptive-rx on pkt-rate-low 200000 pkt-rate-high 400000 rx-frames 10
+#ethtool -C eno50 adaptive-rx on pkt-rate-low 200000 pkt-rate-high 400000 rx-frames 10
+ethtool -C eno49 rx-frames 10
+ethtool -C eno50 rx-frames 10
+
+ethtool -G eno49 rx 4078 tx 4078
+ethtool -G eno50 rx 4078 tx 4078

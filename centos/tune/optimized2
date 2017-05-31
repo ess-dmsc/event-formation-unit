@@ -1,0 +1,10 @@
+iecho Kernel settings before change
+sysctl -a | grep 'rmem_max\|wmem_max\|netdev_max_backlog'
+
+echo Changing values
+sysctl -w net.core.rmem_max=12582912
+sysctl -w net.core.wmem_max=12582912
+sysctl -w net.core.netdev_max_backlog=250000
+
+echo Kernel settings after change
+sysctl -a | grep 'rmem_max\|wmem_max\|netdev_max_backlog'
