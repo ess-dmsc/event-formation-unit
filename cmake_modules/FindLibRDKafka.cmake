@@ -19,7 +19,7 @@
 
 find_path(LibRDKafka_ROOT_DIR
         NAMES include/librdkafka/rdkafkacpp.h
-        PATHS /usr/local
+        PATHS /opt/dm_group/usr /usr/local
         )
 
 find_library(LibRDKafka_LIBRARIES
