@@ -24,16 +24,13 @@ if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
         message(FATAL_ERROR "Build string must be set manually when compiling using release mode e.g. \"-DBUILDSTR=v1.2.3\".")
     endif()
 else()
-    # add_custom_command(OUTPUT BUILDSTR COMMAND echo "\\\"SomeOtherVersionStr\\\"")
-    # add_custom_target(dummy_target ALL DEPENDS BUILDSTR)
     set(BUILDSTR "")
     MakeBuildStr()
 endif()
 
 
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -DRELEASE")
-
 message(STATUS "Build str: ${BUILDSTR}")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
 
 set(EXTRA_CXX_FLAGS -std=c++11 -pthread -fPIC)
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
@@ -42,10 +39,10 @@ set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DBUILDSTR=${BUILDSTR}")
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     message(STATUS "Detected MacOSX")
-    
+
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     message(STATUS "Detected Linux")
-    
+
     find_library(DL_LIB dl REQUIRED)
 else()
     message(STATUS "Unknown system")
@@ -63,15 +60,7 @@ else()
     message(STATUS "Using internal FB schema header files.")
 endif()
 
-option(TRACE "What does this option do?." OFF)
-if(${TRACE})
-    set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DTRACE -Ofast -flto -O3")
-    message(STATUS "TRACE activated.")
-else()
-    message(STATUS "TRACE de-activated.")
-endif()
-
-option(DUMPTOFILE "Dump something to file?" OFF)
+option(DUMPTOFILE "Dump vmm2srsdaq data to file (Doro option)" OFF)
 if(${DUMPTOFILE})
     set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DDUMPTOFILE")
     message(STATUS "Dumping to file.")
@@ -91,8 +80,8 @@ else()
     message(STATUS "Profiling disabled.")
 endif()
 
-set(CMAKE_C_FLAGS_RELEASE)
-set(CMAKE_CXX_FLAGS_RELEASE)
+#set(CMAKE_C_FLAGS_RELEASE)
+#set(CMAKE_CXX_FLAGS_RELEASE)
 
 
 add_definitions(${EXTRA_CXX_FLAGS})
@@ -100,6 +89,7 @@ add_definitions(${EXTRA_CXX_FLAGS})
 find_package(GTest)
 
 add_subdirectory(libs)
+add_subdirectory(udp)
 add_subdirectory(prototype2)
 
 add_custom_target(hints

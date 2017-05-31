@@ -20,7 +20,6 @@ int main(int argc, char *argv[]) {
   uint64_t tx_total = 0;
   uint64_t tx = 0;
   uint64_t txp = 0;
-  const int intervalUs = 1000000;
   const int B1M = 1000000;
 
   Socket::Endpoint local("0.0.0.0", 0);
