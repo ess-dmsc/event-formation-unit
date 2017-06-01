@@ -23,8 +23,8 @@ public:
   std::string ip_addr{"0.0.0.0"}; /**< used for data generators */
   int port{9000};                 /**< udp receive port */
   int buflen{9000};               /**< rx buffer length (B) */
-  int rcvbuf{4000000};            /**< socket rx buffer size (rmem_max) */
-  int sndbuf{4000000};            /**< soxket tx buffer size (wmem_max) */
+  int rcvbuf{2000000};            /**< socket rx buffer size (rmem_max) */
+  int sndbuf{2000000};            /**< soxket tx buffer size (wmem_max) */
 
   unsigned int updint{1};             /**< update interval (s) */
   unsigned int stopafter{0xffffffff}; /**< 'never' stop */

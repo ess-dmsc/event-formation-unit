@@ -16,10 +16,16 @@ syssettings
 echo changing values
 sysctl -w net.core.rmem_max=12582912
 sysctl -w net.core.wmem_max=12582912
-sysctl -w net.core.netdev_max_backlog=5000
+sysctl -w net.core.netdev_max_backlog=250000
+sysctl -w net.core.netdev_budget=600
 
 ifconfig eno49 mtu 9000 txqueuelen 10000 up
 ifconfig eno50 mtu 9000 txqueuelen 10000 up
+
+ethtool -G eno49 rx 4078 tx 4078 
+ethtool -G eno50 rx 4078 tx 4078
+ethtool -C eno49 rx-usecs 48 
+ethtool -C eno50 rx-usecs 48 
 
 echo System settings after change
 syssettings
