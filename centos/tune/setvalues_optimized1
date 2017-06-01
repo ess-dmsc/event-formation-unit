@@ -1,0 +1,26 @@
+#!/bin/bash
+
+function syssettings()
+{
+  sysctl -a | grep 'rmem_max\|wmem_max\|netdev_max_backlog'
+  ip link show | grep "eno49\|eno50"
+  ethtool -g eno49
+  ethtool -g eno50
+}
+
+echo System settings before change
+syssettings
+
+echo changing values
+sysctl -w net.core.rmem_max=12582912
+sysctl -w net.core.wmem_max=12582912
+sysctl -w net.core.netdev_max_backlog=5000
+
+ifconfig eno49 mtu 9000 txqueuelen 10000 up
+ifconfig eno50 mtu 9000 txqueuelen 10000 up
+
+ethtool -G eno49 rx 4078 tx 4078
+ethtool -G eno50 rx 4078 tx 4078
+
+echo System settings after change
+syssettings

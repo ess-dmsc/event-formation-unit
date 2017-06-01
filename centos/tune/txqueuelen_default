@@ -1,2 +1,0 @@
-sudo ifconfig eno49 txqueuelen 1000    # 1000 is default
-sudo ifconfig eno50 txqueuelen 1000    # 1000 is default
