@@ -60,12 +60,12 @@ void UDPRaw::input_thread() {
     auto tmprx = raw.receive(buffer, opts->buflen);
     auto tmpseq = *((uint32_t*)buffer);
 
-    if (seqno != tmpseq) {
+    if (seqno == tmpseq) {
+      seqno++;
+    } else  {
       //printf("seqno: %u, tmpseq: %u\n", seqno, tmpseq);
       dropped+= (tmpseq - seqno);
       seqno = tmpseq + 1;
-    } else  {
-      seqno++;
     }
 
     if (tmprx > 0) {
@@ -74,9 +74,11 @@ void UDPRaw::input_thread() {
     }
 
     if (report_timer.timetsc() >= opts->updint * 1000000UL * TSC_MHZ) {
+        timeseq++; 
         auto usecs = rate_timer.timeus();
         if (timeseq == 2) {
           first_dropped = dropped;
+          printf("Recorded %d dropped frames as baseline\n", first_dropped);
         }
         rx_total += rx;
         printf("Rx rate: %.2f Mbps, %.0f pps rx %" PRIu64 " MB (total: %" PRIu64
