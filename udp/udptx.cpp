@@ -29,27 +29,40 @@ int main(int argc, char *argv[]) {
   udptx.setbuffers(4000000, 4000000);
   udptx.printbuffers();
 
-  Timer rate_timer;
+  Timer rate_timer, pkt_rate;
   TSCTimer report_timer;
+  TSCTimer pkt_rate_timer;
 
   uint32_t seqno = 1;
+  uint32_t txremain = 0;
+  printf("TX: %d pps specified\n", opts.txpps);
   for (;;) {
     char buffer[10000];
-    *((uint32_t*)buffer) = seqno;
-    auto txtmp = udptx.send(buffer, opts.buflen);
-    seqno++;
+    if (txremain) {
+      *((uint32_t*)buffer) = seqno;
+      auto txtmp = udptx.send(buffer, opts.buflen);
+      seqno++;
 
-    if (txtmp > 0) {
-      txp++;
-      tx += txtmp;
+      if (txtmp > 0) {
+        txp++;
+        tx += txtmp;
+        txremain--;
+      }
+    } else {
+       usleep(1);
     }
-    // if (txp % 500 == 0) {
-    //    usleep(1000);
-    // }
+
+    if (pkt_rate_timer.timetsc() >= 10000UL * TSC_MHZ) {
+      auto usecs = pkt_rate.timeus();
+      txremain = usecs * opts.txpps / 1000000;
+      pkt_rate_timer.now();
+      pkt_rate.now();
+    }
 
     if (report_timer.timetsc() >= 1000000UL * TSC_MHZ) {
       auto usecs = rate_timer.timeus();
       tx_total += tx;
+      //printf("Txremain: %u\n", txremain);
       printf("Tx rate: %.2f Mbps, %.0f pps, tx %" PRIu64 " MB (total: %" PRIu64
              " MB) %" PRIu64 " usecs\n",
              tx * 8.0 / usecs,

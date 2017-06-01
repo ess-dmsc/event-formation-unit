@@ -6,7 +6,7 @@
 Args::Args(int argc, char *argv[]) {
   using namespace std;
   int c;
-  while ((c = getopt(argc, argv, "hi:p:b:")) != -1)
+  while ((c = getopt(argc, argv, "hi:p:b:t:")) != -1)
     switch (c) {
     case 'i':
       dest_ip = optarg;
@@ -14,6 +14,10 @@ Args::Args(int argc, char *argv[]) {
 
     case 'p':
       port = atoi(optarg);
+      break;
+
+    case 't':
+      txpps = atoi(optarg);
       break;
 
     case 'b':
