@@ -44,9 +44,6 @@ int main(int argc, char *argv[]) {
       txp++;
       tx += txtmp;
     }
-    // if (txp % 500 == 0) {
-    //    usleep(1000);
-    // }
 
     if (report_timer.timetsc() >= 1000000UL * TSC_MHZ) {
       auto usecs = rate_timer.timeus();
