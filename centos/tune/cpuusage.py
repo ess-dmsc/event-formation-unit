@@ -33,7 +33,7 @@ def main():
     old_stats = getStats()
     names = ["user", "nice", "system", "idle", "iowait", "irq", "softirq"]
     while (True):
-        time.sleep(10)
+        time.sleep(2)
         new_stats = getStats()
         cpu_list = list(new_stats.keys())
         cpu_list.sort(key = extract_cpu_nr)

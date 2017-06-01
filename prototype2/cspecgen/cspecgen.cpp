@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) {
   assert(size == opts.txEvt * cspec.datasize);
 
   uint64_t tx_total = 0;
+  uint64_t txp_total = 0;
   uint64_t tx = 0;
   uint64_t txp = 0;
 
@@ -43,7 +44,7 @@ int main(int argc, char *argv[]) {
   for (;;) {
     if (unlikely((tx_total + tx) >=
                  (long unsigned int)opts.txGB * 1000000000) ||
-        txp >= opts.txPkt) {
+        txp_total >= opts.txPkt) {
       cout << "Sent " << tx_total + tx << " bytes." << endl;
       cout << "done" << endl;
       exit(0);
@@ -68,10 +69,12 @@ int main(int argc, char *argv[]) {
     if (unlikely((report_timer.timetsc() / TSC_MHZ) >= opts.updint * 1000000)) {
       auto usecs = us_clock.timeus();
       tx_total += tx;
-      printf("Tx rate: %8.2f Mbps, tx %5" PRIu64 " MB (total: %7" PRIu64
-             " MB) %" PRIu64 " usecs\n",
-             tx * 8.0 / usecs, tx / B1M, tx_total / B1M, usecs);
+      txp_total += txp;
+      printf("Tx rate: %8.2f Mbps (%.2f pps), tx %5" PRIu64 " MB (total: %7" PRIu64
+             " MB) %" PRIu64 " usecs\n", 
+             tx * 8.0 / usecs, txp *1000000.0 / usecs, tx / B1M, tx_total / B1M, usecs);
       tx = 0;
+      txp = 0;
       us_clock.now();
       report_timer.now();
     }
