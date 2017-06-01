@@ -41,4 +41,8 @@ printline "wmem_max"
 sysctl net.core.rmem_max
 echo
 
+printline "netdev_budget"
+sysctl net.core.netdev_budget
+echo
+
 
