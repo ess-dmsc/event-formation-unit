@@ -127,140 +127,74 @@ create_test_executable(RingBufferTest common/RingBufferTest.cpp common/RingBuffe
 
 create_test_executable(DetectorTest common/DetectorTest.cpp common/Detector.h "")
 
-set(MultiGridGeometryTest_INC
-common/MultiGridGeometry.h
-../libs/include/TSCTimer.h
-)
+set(MultiGridGeometryTest_INC common/MultiGridGeometry.h ../libs/include/TSCTimer.h)
 create_test_executable(MultiGridGeometryTest common/MultiGridGeometryTest.cpp "${MultiGridGeometryTest_INC}" "")
 
 
-set(FBSerializerTest_SRC
-common/FBSerializerTest.cpp
-common/FBSerializer.cpp
-common/Producer.cpp
-)
-set(FBSerializerTest_INC
-common/FBSerializer.h
-common/Producer.h
-)
+set(FBSerializerTest_SRC common/FBSerializerTest.cpp common/FBSerializer.cpp common/Producer.cpp)
+set(FBSerializerTest_INC common/FBSerializer.h common/Producer.h)
 create_test_executable(FBSerializerTest "${FBSerializerTest_SRC}" "${FBSerializerTest_INC}" "${LibRDKafka_LIBRARIES}")
 
 
-set(HistSerializerTest_SRC
-nmxvmm2srs/HistSerializerTest.cpp
-nmxvmm2srs/HistSerializer.cpp
-)
-set(HistSerializerTest_INC
-nmxvmm2srs/HistSerializer.h
-common/Producer.h
-)
+set(HistSerializerTest_SRC nmxvmm2srs/HistSerializerTest.cpp nmxvmm2srs/HistSerializer.cpp)
+set(HistSerializerTest_INC nmxvmm2srs/HistSerializer.h common/Producer.h)
 create_test_executable(HistSerializerTest "${HistSerializerTest_SRC}" "${HistSerializerTest_INC}" "")
 
 
-set(TrackSerializerTest_SRC
-nmxvmm2srs/TrackSerializerTest.cpp
-nmxvmm2srs/TrackSerializer.cpp
-NMX/Eventlet.cpp
-NMX/EventNMX.cpp
-)
-set(TrackSerializerTest_INC
-nmxvmm2srs/TrackSerializer.h
-NMX/EventNMX.h
-NMX/Eventlet.h
-)
+set(TrackSerializerTest_SRC nmxvmm2srs/TrackSerializerTest.cpp nmxvmm2srs/TrackSerializer.cpp
+    NMX/Eventlet.cpp NMX/EventNMX.cpp)
+set(TrackSerializerTest_INC nmxvmm2srs/TrackSerializer.h NMX/EventNMX.h NMX/Eventlet.h)
 create_test_executable(TrackSerializerTest "${TrackSerializerTest_SRC}" "${TrackSerializerTest_INC}" "")
 
-set(EFUArgsTest_SRC
-common/EFUArgsTest.cpp
-common/EFUArgs.cpp
-)
+set(EFUArgsTest_SRC common/EFUArgsTest.cpp common/EFUArgs.cpp)
 create_test_executable(EFUArgsTest "${EFUArgsTest_SRC}" "common/EFUArgs.h" "")
 
-set(NewStatsTest_SRC
-common/NewStatsTest.cpp
-common/NewStats.cpp
-)
+set(NewStatsTest_SRC common/NewStatsTest.cpp common/NewStats.cpp)
 create_test_executable(NewStatsTest "${NewStatsTest_SRC}" "common/NewStats.h" "")
 
 
 #
 # NMX / VMM Tests
 #
-set(NMXVMM2SRSDataTest_SRC
-nmxvmm2srs/NMXVMM2SRSDataTest.cpp
-nmxvmm2srs/NMXVMM2SRSData.cpp
-)
+set(NMXVMM2SRSDataTest_SRC nmxvmm2srs/NMXVMM2SRSDataTest.cpp nmxvmm2srs/NMXVMM2SRSData.cpp)
 create_test_executable(NMXVMM2SRSDataTest "${NMXVMM2SRSDataTest_SRC}" "nmxvmm2srs/NMXVMM2SRSData.h" "")
 
 
-set(EventletBuilderH5Test_SRC
-nmxgen/EventletBuilderH5Test.cpp
-nmxgen/EventletBuilderH5.cpp
-NMX/EventNMX.cpp
-NMX/Clusterer.cpp
-)
-set(EventletBuilderH5Test_INC
-nmxgen/EventletBuilderH5.h
-NMX/Clusterer.h
-NMX/EventNMX.h
-)
+set(EventletBuilderH5Test_SRC nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.cpp
+    NMX/EventNMX.cpp NMX/Clusterer.cpp)
+set(EventletBuilderH5Test_INC nmxgen/EventletBuilderH5.h NMX/Clusterer.h NMX/EventNMX.h)
 create_test_executable(EventletBuilderH5Test "${EventletBuilderH5Test_SRC}" "${EventletBuilderH5Test_INC}" "")
 
 
-set(EventletBuilderTest_SRC
-nmxvmm2srs/EventletBuilderTest.cpp
-nmxvmm2srs/EventletBuilder.cpp
-nmxvmm2srs/NMXVMM2SRSData.cpp
-NMX/Clusterer.cpp
-NMX/EventNMX.cpp
-NMX/Geometry.cpp
-NMX/Time.cpp
-)
-set(EventletBuilderTest_INC
-nmxvmm2srs/NMXVMM2SRSData.h
-nmxvmm2srs/EventletBuilder.h
-NMX/Clusterer.h
-NMX/EventNMX.h
-NMX/Time.h
-NMX/Geometry.h
-)
+set(EventletBuilderTest_SRC nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.cpp
+    nmxvmm2srs/NMXVMM2SRSData.cpp NMX/Clusterer.cpp NMX/EventNMX.cpp NMX/Geometry.cpp NMX/Time.cpp)
+set(EventletBuilderTest_INC nmxvmm2srs/NMXVMM2SRSData.h nmxvmm2srs/EventletBuilder.h NMX/Clusterer.h
+    NMX/EventNMX.h NMX/Time.h NMX/Geometry.h)
 create_test_executable(EventletBuilderTest "${EventletBuilderTest_SRC}" "${EventletBuilderTest_INC}" "")
 
-set(EventletTest_SRC
-NMX/EventletTest.cpp
-NMX/Eventlet.cpp
-)
+set(EventletTest_SRC NMX/EventletTest.cpp NMX/Eventlet.cpp)
 create_test_executable(EventletTest "${EventletTest_SRC}" "NMX/Eventlet.h" "")
 
-set(GeometryTest_SRC
-NMX/GeometryTest.cpp
-NMX/Geometry.cpp
-)
+set(GeometryTest_SRC NMX/GeometryTest.cpp NMX/Geometry.cpp)
 create_test_executable(GeometryTest "${GeometryTest_SRC}" "NMX/Geometry.h" "")
 
-set(TimeTest_SRC
-NMX/TimeTest.cpp
-NMX/Time.cpp
-)
+set(TimeTest_SRC NMX/TimeTest.cpp NMX/Time.cpp)
 create_test_executable(TimeTest "${TimeTest_SRC}" "NMX/Time.h" "")
 
-set(ClustererTest_SRC
-NMX/ClustererTest.cpp
-NMX/Clusterer.cpp
-NMX/EventNMX.cpp
-)
-set(ClustererTest_INC
-NMX/Clusterer.h
-NMX/EventNMX.h
-)
+set(ClustererTest_SRC NMX/ClustererTest.cpp NMX/Clusterer.cpp NMX/EventNMX.cpp)
+set(ClustererTest_INC NMX/Clusterer.h NMX/EventNMX.h)
 create_test_executable(ClustererTest "${ClustererTest_SRC}" "${ClustererTest_INC}" "")
 
-set(EventTest_SRC
-NMX/EventTest.cpp
-NMX/EventNMX.cpp
-)
+set(EventTest_SRC NMX/EventTest.cpp NMX/EventNMX.cpp)
 create_test_executable(EventTest "${EventTest_SRC}" "NMX/EventNMX.h" "")
 
 add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_* DEPENDS ${unit_test_targets})
 add_custom_target(valgrind COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*  DEPENDS ${unit_test_targets})
 add_custom_target(coverage COMMAND echo "Done running coverage tests." DEPENDS ${coverage_targets})
+
+#
+# ESS Readout System Tests
+#
+set(ReadoutParseTest_SRC readout/ReadoutParseTest.cpp readout/Readout.cpp)
+set(ReadoutParseTest_INC test/TestBase.h readout/Readout.h readout/ReadoutTestData.h)
+create_test_executable(ReadoutParseTest "${ReadoutParseTest_SRC}" "${ReadoutParseTest_INC}" "")
