@@ -195,6 +195,6 @@ add_custom_target(coverage COMMAND echo "Done running coverage tests." DEPENDS $
 #
 # ESS Readout System Tests
 #
-set(ReadoutParseTest_SRC readout/ReadoutParseTest.cpp readout/Readout.cpp)
-set(ReadoutParseTest_INC test/TestBase.h readout/Readout.h readout/ReadoutTestData.h)
-create_test_executable(ReadoutParseTest "${ReadoutParseTest_SRC}" "${ReadoutParseTest_INC}" "")
+set(ReadoutTest_SRC readout/ReadoutTest.cpp readout/Readout.cpp)
+set(ReadoutTest_INC test/TestBase.h readout/Readout.h readout/ReadoutTestData.h)
+create_test_executable(ReadoutTest "${ReadoutTest_SRC}" "${ReadoutTest_INC}" "")

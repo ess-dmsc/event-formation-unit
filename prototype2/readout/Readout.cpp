@@ -6,35 +6,38 @@
 
 #define CKSUMSIZE 4U
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
-int Readout::receive(const char *buffer, int size) {
+int Readout::validate(const char *buffer, uint32_t size) {
   if (buffer == 0) {
-      XTRACE(PROCESS, WAR, "Zero length data\n"); /**< @todo increment counter */
-      return 0;
+      XTRACE(PROCESS, WAR, "no buffer specified\n"); /**< @todo increment counter */
+      return -Readout::EBUFFER;
   }
 
-  if (size <=0) {
-    XTRACE(PROCESS, WAR, "invalid data size (%d)\n", size);
-    return 0;
+  if ((size < 64) || (size > 8960)) {
+    XTRACE(PROCESS, WAR, "Invalid data size (%d)\n", size);
+    return -Readout::ESIZE;
   }
 
   if (size % 64 != 0) {
     XTRACE(PROCESS, WAR, "data size (%d) is not padded to multiple of 64 bytes\n", size);
-    return 0;
+    return -Readout::EPAD;
   }
+
+  // Add more checks - checksum, and padding
 
   auto hdrp = (struct Readout::Payload *)buffer;
   type = hdrp->type;
   wordcount = hdrp->wordcount;
   seqno = hdrp->seqno;
-  if ((unsigned long)size < sizeof(Readout::Payload) + CKSUMSIZE + 2 * wordcount) {
+  reserved = hdrp->reserved;
+
+  if (size < sizeof(Readout::Payload) + wordcount * 2U + CKSUMSIZE) {
     XTRACE(PROCESS, WAR, "Data size mismatch: size received %lu, headers and data %d\n",
            sizeof(Readout::Payload), CKSUMSIZE + wordcount * 2U);
-    return 0;
+    return -Readout::EHDR;
   }
-  reserved = hdrp->reserved;
 
   return 0;
 }
