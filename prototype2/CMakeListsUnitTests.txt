@@ -198,3 +198,7 @@ add_custom_target(coverage COMMAND echo "Done running coverage tests." DEPENDS $
 set(ReadoutTest_SRC readout/ReadoutTest.cpp readout/Readout.cpp)
 set(ReadoutTest_INC test/TestBase.h readout/Readout.h readout/ReadoutTestData.h)
 create_test_executable(ReadoutTest "${ReadoutTest_SRC}" "${ReadoutTest_INC}" "")
+
+set(ReadoutDummyTest_SRC readout/ReadoutDummyTest.cpp readout/Readout.cpp readout/ReadoutDummy.cpp)
+set(ReadoutDummyTest_INC test/TestBase.h readout/Readout.h readout/ReadoutDummy.h readout/ReadoutTestData.h)
+create_test_executable(ReadoutDummyTest "${ReadoutDummyTest_SRC}" "${ReadoutDummyTest_INC}" "")
