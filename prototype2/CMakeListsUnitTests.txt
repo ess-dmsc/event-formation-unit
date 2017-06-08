@@ -195,6 +195,32 @@ set(ReadoutDummyTest_SRC readout/ReadoutDummyTest.cpp readout/Readout.cpp readou
 set(ReadoutDummyTest_INC test/TestBase.h readout/Readout.h readout/ReadoutDummy.h readout/ReadoutTestData.h)
 create_test_executable(ReadoutDummyTest "${ReadoutDummyTest_SRC}" "${ReadoutDummyTest_INC}" "")
 
+#
+# Libs unit tests
+#
+
+include_directories(..)
+
+FUNCTION(PREPEND var prefix)
+   SET(listVar "")
+   FOREACH(f ${${var}})
+      LIST(APPEND listVar "${prefix}/${f}")
+   ENDFOREACH(f)
+   SET(${var} "${listVar}" PARENT_SCOPE)
+ENDFUNCTION(PREPEND)
+
+set(CounterTest_SRC testmain.cpp CounterTest.cpp)
+PREPEND(CounterTest_SRC "../libs/test/Counter")
+set(CounterTest_INC Counter.h)
+PREPEND(CounterTest_INC "../libs/include")
+create_test_executable(CounterTest "${CounterTest_SRC}" "${CounterTest_INC}" "")
+
+set(StatCounterTest_SRC testmain.cpp StatCounterTest.cpp)
+PREPEND(StatCounterTest_SRC "../libs/test/Counter")
+set(StatCounterTest_INC StatCounter.h)
+PREPEND(StatCounterTest_INC "../libs/include")
+create_test_executable(StatCounterTest "${StatCounterTest_SRC}" "${StatCounterTest_INC}" "")
+
 #  These should be at the end of this file
 add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_* DEPENDS ${unit_test_targets})
 add_custom_target(valgrind COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*  DEPENDS ${unit_test_targets})
