@@ -55,7 +55,7 @@ set(unit_test_targets "")
 function(create_test_executable exec_name source_files header_files link_libraries)
     add_executable(${exec_name} EXCLUDE_FROM_ALL ${source_files} ${header_files})
     target_include_directories(${exec_name} PRIVATE ${GTEST_INCLUDE_DIRS})
-    target_link_libraries(${exec_name} ${link_libraries} ${CMAKE_THREAD_LIBS_INIT} ${GTEST_LIBRARIES})
+    target_link_libraries(${exec_name} ${link_libraries} ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
     set_target_properties(${exec_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
     if(DO_COV)
         set_target_properties(${exec_name} PROPERTIES LINK_FLAGS "-coverage -fprofile-generate")
@@ -184,10 +184,6 @@ create_test_executable(ClustererTest "${ClustererTest_SRC}" "${ClustererTest_INC
 set(EventTest_SRC NMX/EventTest.cpp NMX/EventNMX.cpp)
 create_test_executable(EventTest "${EventTest_SRC}" "NMX/EventNMX.h" "")
 
-add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_* DEPENDS ${unit_test_targets})
-add_custom_target(valgrind COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*  DEPENDS ${unit_test_targets})
-add_custom_target(coverage COMMAND echo "Done running coverage tests." DEPENDS ${coverage_targets})
-
 #
 # ESS Readout System Tests
 #
@@ -198,3 +194,8 @@ create_test_executable(ReadoutTest "${ReadoutTest_SRC}" "${ReadoutTest_INC}" "")
 set(ReadoutDummyTest_SRC readout/ReadoutDummyTest.cpp readout/Readout.cpp readout/ReadoutDummy.cpp)
 set(ReadoutDummyTest_INC test/TestBase.h readout/Readout.h readout/ReadoutDummy.h readout/ReadoutTestData.h)
 create_test_executable(ReadoutDummyTest "${ReadoutDummyTest_SRC}" "${ReadoutDummyTest_INC}" "")
+
+#  These should be at the end of this file
+add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_* DEPENDS ${unit_test_targets})
+add_custom_target(valgrind COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*  DEPENDS ${unit_test_targets})
+add_custom_target(coverage COMMAND echo "Done running coverage tests." DEPENDS ${coverage_targets})
