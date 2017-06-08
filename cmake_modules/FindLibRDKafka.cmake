@@ -24,12 +24,12 @@ find_path(LibRDKafka_ROOT_DIR
 
 find_library(LibRDKafka_LIBRARIES
         NAMES rdkafka++
-        HINTS ${LibRDKafka_ROOT_DIR}/lib /usr/lib64
+        HINTS ${LibRDKafka_ROOT_DIR}/lib
         )
 
 find_library(LibRDKafka_C_LIBRARIES
         NAMES rdkafka
-        HINTS ${LibRDKafka_ROOT_DIR}/lib /usr/lib64
+        HINTS ${LibRDKafka_ROOT_DIR}/lib
         )
 
 find_path(LibRDKafka_INCLUDE_DIR

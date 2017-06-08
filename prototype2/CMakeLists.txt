@@ -92,4 +92,6 @@ else()
     message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
 endif()
 
+set(PYTHON_EXECUTABLE /usr/bin/python)
+
 include(CMakeListsUnitTests.txt)
