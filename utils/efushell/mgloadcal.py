@@ -1,12 +1,28 @@
 #!/usr/bin/python
 
-import sys
 from SocketDriver import SimpleSocket
+import argparse
 
-driver = SimpleSocket("localhost", 8888)
+svr_ip_addr = "127.0.0.1"
+svr_tcp_port = 8888
+
+parser = argparse.ArgumentParser()
+parser.add_argument("-i", metavar='ipaddr', help = "server ip address (default 127.0.0.1)", type = str)
+parser.add_argument("-p", metavar='port', help = "server tcp port (default 8888)", type = int)
+parser.add_argument('calibfile', help='multigrid calibration file for loading')
+args = parser.parse_args()
+
+if args.i != None:
+    svr_ip_addr = args.i
+
+if args.p != None:
+    svr_tcp_port = args.p
+ 
+print("Connection info. ip address: %s, tcp port: %s" % (svr_ip_addr, svr_tcp_port)) 
+driver = SimpleSocket(svr_ip_addr, svr_tcp_port)
 
 
-calibfile=sys.argv[1]
+calibfile=args.calibfile
 print("attempting to load file %s" % (calibfile))
 
 res = driver.Ask('CSPEC_LOAD_CALIB ' + calibfile)
