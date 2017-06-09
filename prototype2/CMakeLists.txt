@@ -94,4 +94,5 @@ endif()
 
 set(PYTHON_EXECUTABLE /usr/bin/python)
 
+include(CMakeListsUtils.txt)
 include(CMakeListsUnitTests.txt)
