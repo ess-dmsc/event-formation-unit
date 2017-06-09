@@ -25,5 +25,5 @@ mkdir build
 cloc --by-file --xml --out=cloc.xml .
 pushd build
 cmake -DCOV=y ..
-make runtest
+make coverage 
 popd
