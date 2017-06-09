@@ -21,8 +21,9 @@ function tools()
 function coverage()
 {
   mkdir -p gcovr
-  gcovr -r . -x -e '.*Test.cpp' -e '.*gtest.*.h' -o gcovr/coverage.xml
-  gcovr -r . --html --html-details -e '.*Test.cpp' -e '.*gtest.*.h' -o coverage.html
+  #gcovr -r . -x -e '.*Test.cpp' -e '.*gtest.*.h' -o gcovr/coverage.xml
+  gcovr -x -r .. -v -o coverage/cov.xml
+  #gcovr -r . --html --html-details -e '.*Test.cpp' -e '.*gtest.*.h' -o coverage.html
 }
 
 rm -fr build
