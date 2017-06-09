@@ -18,6 +18,13 @@ function tools()
   gcovr --version || errexit "gcovr program is missing"
 }
 
+function coverage()
+{
+  mkdir -p gcovr
+  gcovr -r . -x -e '.*Test.cpp' -e '.*gtest.*.h' -o gcovr/coverage.xml
+  gcovr -r . --html --html-details -e '.*Test.cpp' -e '.*gtest.*.h' -o coverage.html
+}
+
 rm -fr build
 mkdir build
 
@@ -26,5 +33,5 @@ cloc --by-file --xml --out=cloc.xml .
 pushd build
 cmake -DCOV=y ..
 make VERBOSE=y runtest
-make VERBOSE=y coverage 
+coverage
 popd
