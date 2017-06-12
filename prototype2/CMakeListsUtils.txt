@@ -18,6 +18,35 @@ function(add_compile_flags target flags)
     set_target_properties(${target} PROPERTIES COMPILE_FLAGS "${new_compile_flags}")
 endfunction(add_compile_flags)
 
+#
+# Function to generate a loadable detector module
+#
+function(create_module module_name link_libraries)
+    add_library(${module_name} MODULE ${${module_name}_SRC} ${${module_name}_INC})
+    set_target_properties(${module_name} PROPERTIES PREFIX "")
+    set_target_properties(${module_name} PROPERTIES SUFFIX ".so")
+    add_dependencies(${module_name} eventlib common)
+    set(module_LIB ${CMAKE_THREAD_LIBS_INIT} eventlib common ${LibRDKafka_LIBRARIES} ${link_libraries})
+    if(${GraylogLogger_FOUND})
+        set(module_LIB ${GraylogLogger_LIBRARIES} ${module_LIB})
+    endif()
+    target_link_libraries(${module_name} ${module_LIB})
+    install(TARGETS ${module_name} DESTINATION bin)
+endfunction(create_module)
+
+#
+# Function to generate an executable program
+#
+function(create_executable exec_name link_libraries)
+    add_executable(${exec_name}  ${${exec_name}_SRC} ${${exec_name}_INC} )
+    add_dependencies(${exec_name} eventlib)
+    set(exe_LIB ${CMAKE_THREAD_LIBS_INIT} eventlib ${LibRDKafka_LIBRARIES} ${link_libraries})
+    if(${GraylogLogger_FOUND})
+        set(exe_LIB ${GraylogLogger_LIBRARIES} ${exe_LIB})
+    endif()
+    install(TARGETS ${exec_name} DESTINATION bin)
+    target_link_libraries(${exec_name} ${exe_LIB})
+endfunction(create_executable)
 
 set(coverage_targets "")
 set(unit_test_targets "")
