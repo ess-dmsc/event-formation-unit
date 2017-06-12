@@ -72,6 +72,15 @@ set(gencspecfile_SRC cspecgen/cspecfile.cpp cspecgen/CspecArgs.cpp)
 set(gencspecfile_INC cspecgen/CspecArgs.h)
 create_executable(gencspecfile "${gencspecfile_SRC}" "${gencspecfile_INC}" "")
 
+set(gencspecfile_SRC cspecgen/cspecfile.cpp cspecgen/CspecArgs.cpp)
+set(gencspecfile_INC cspecgen/CspecArgs.h)
+create_executable(gencspecfile "${gencspecfile_SRC}" "${gencspecfile_INC}" "")
+
+
+set(gennmxfile_SRC nmxgen/nmxfile.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderVMM.cpp NMX/Eventlet.cpp)
+set(gennmxfile_INC nmxgen/NMXArgs.h nmxgen/ReaderVMM.h NMX/Eventlet.h)
+create_executable(gennmxfile "${gennmxfile_SRC}" "${gennmxfile_INC}" "")
+
 set(dgmgjson_SRC mgjson/dgmgjson.cpp mgjson/MGJsonArgs.cpp ../dataformats/multigrid/src/RunSpecParse.cpp ../dataformats/multigrid/src/jsoncpp.cpp)
 set(dgmgjson_INC mgjson/MGJsonArgs.h)
 create_executable(dgmgjson "${dgmgjson_SRC}" "${dgmgjson_INC}" "")
