@@ -1,0 +1,1 @@
+watch -n 0.1 '(ethtool -S eno49 ; ethtool -S eno50) | grep -i rx_ | grep -v ": 0" | grep -v ast_'

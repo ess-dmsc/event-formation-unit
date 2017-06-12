@@ -13,6 +13,7 @@
 #include <cassert>
 #include <common/version_num.h>
 #include <cstdio>
+#include <string>
 
 static_assert(EFU_VER_MAJ >= 0, "version number error");
 static_assert(EFU_VER_MIN >= 0, "version number error");
@@ -25,18 +26,12 @@ static_assert(EFU_VER_BUILD < 4096, "version number error");
 
 #define EFU_VERSION EFU_VERSION_NUM(EFU_VER_MAJ, EFU_VER_MIN, EFU_VER_BUILD)
 
-static inline const char * efu_version() {
-  static char version[32];
-  if (version[0] != 0)
-    return version;
-
-  snprintf(version, sizeof(version), "%d.%d.%d",
-            EFU_VER_MAJ,
-            EFU_VER_MIN,
-            EFU_VER_BUILD);
+inline static const std::string efu_version() {
+    //The following line is executed only once on startup or on first call to function
+  const static std::string version = std::to_string(EFU_VER_MAJ) + "." + std::to_string(EFU_VER_MIN) + "." + std::to_string(EFU_VER_BUILD);
   return version;
 }
 
-static inline const char * efu_buildstr() {
-  return EFU_STR(BUILDSTR);
+static inline const std::string efu_buildstr() {
+  return std::string(EFU_STR(BUILDSTR));
 }
