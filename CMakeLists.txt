@@ -30,6 +30,7 @@ endif()
 
 
 message(STATUS "Build str: ${BUILDSTR}")
+#set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
 
 set(EXTRA_CXX_FLAGS -std=c++11 -pthread -fPIC)
@@ -87,7 +88,9 @@ endif()
 add_definitions(${EXTRA_CXX_FLAGS})
 
 find_package(GTest)
-
+set(CMAKE_AR  "gcc-ar")
+SET(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+SET(CMAKE_CXX_ARCHIVE_FINISH   true)
 add_subdirectory(libs)
 add_subdirectory(udp)
 add_subdirectory(prototype2)
