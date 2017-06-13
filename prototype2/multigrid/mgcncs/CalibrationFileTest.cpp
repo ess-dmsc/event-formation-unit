@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <cspec/CSPECChanConv.h>
-#include <cspec/CalibrationFile.h>
+#include <multigrid/mgcncs/ChanConv.h>
+#include <multigrid/mgcncs/CalibrationFile.h>
 #include <string>
 #include <test/TestBase.h>
 
