@@ -61,7 +61,7 @@ function(create_test_executable exec_name link_libraries)
     add_test(NAME regular_${exec_name} COMMAND ${exec_name} "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
     set(unit_test_targets ${exec_name} ${unit_test_targets} PARENT_SCOPE)
     if (EXISTS ${VALGRIND_CMD})
-        add_test(NAME memcheck_${exec_name} COMMAND ${VALGRIND_CMD} --leak-check=full -v --log-file=${CMAKE_BINARY_DIR}/memcheck_res/${exec_name}test.valgrind ${CMAKE_BINARY_DIR}/unit_tests/${exec_name})
+        add_test(NAME memcheck_${exec_name} COMMAND ${VALGRIND_CMD} --leak-check=full -v --xml --xml-file=${CMAKE_BINARY_DIR}/memcheck_res/${exec_name}test.valgrind ${CMAKE_BINARY_DIR}/unit_tests/${exec_name})
     endif()
 endfunction(create_test_executable)
 
