@@ -34,5 +34,6 @@ cloc --by-file --xml --out=cloc.xml .
 pushd build
 cmake -DCOV=y ..
 make VERBOSE=y runtest
-coverage
+make coverage
+make valgrind
 popd
