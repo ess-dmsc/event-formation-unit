@@ -1,9 +1,9 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <algorithm>
-#include <common/MultiGridGeometry.h>
-#include <cspec/CSPECChanConv.h>
-#include <cspec/CSPECData.h>
+#include <multigrid/mgcncs/Geometry.h>
+#include <multigrid/mgcncs/ChanConv.h>
+#include <multigrid/mgcncs/Data.h>
 #include <memory>
 #include <test/CSPECTestData.h>
 #include <test/TestBase.h>

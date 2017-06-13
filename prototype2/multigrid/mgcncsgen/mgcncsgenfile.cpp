@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <cassert>
-#include <cspecgen/CspecArgs.h>
+#include <multigrid/mgcncsgen/DGArgs.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>

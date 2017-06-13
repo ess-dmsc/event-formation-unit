@@ -2,7 +2,7 @@
 
 #include <cassert>
 #include <common/Trace.h>
-#include <cspec/CSPECData.h>
+#include <multigrid/mgcncs/Data.h>
 #include <cstring>
 
 using namespace std;

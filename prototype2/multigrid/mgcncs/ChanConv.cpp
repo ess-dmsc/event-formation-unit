@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/Trace.h>
-#include <cspec/CSPECChanConv.h>
+#include <multigrid/mgcncs/ChanConv.h>
 #include <cstring>
 
 CSPECChanConv::CSPECChanConv(uint16_t initval) {

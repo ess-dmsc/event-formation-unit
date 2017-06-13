@@ -8,13 +8,13 @@
 #pragma once
 #include <string>
 
-class DGArgs {
+class JsonArgs {
 public:
   /** @brief constructor for program arguments parsed via getopt_long()
    * @param argc Argument count - typically taken from main()
    * @param argv Argument array - typically taken from main()
    */
-  DGArgs(int argc, char *argv[]);
+  JsonArgs(int argc, char *argv[]);
 
   std::string basedir{};          /**< basedir for all files */
   std::string runfile{};          /**< read data from file */

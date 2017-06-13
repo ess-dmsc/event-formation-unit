@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <cinttypes>
-#include <cspec/CSPECData.h>
-#include <cspecgen/CspecArgs.h>
+#include <multigrid/mgcncs/Data.h>
+#include <multigrid/mgcncsgen/DGArgs.h>
 #include <cstring>
 #include <iostream>
 #include <libs/include/Socket.h>
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
       tx_total += tx;
       txp_total += txp;
       printf("Tx rate: %8.2f Mbps (%.2f pps), tx %5" PRIu64 " MB (total: %7" PRIu64
-             " MB) %" PRIu64 " usecs\n", 
+             " MB) %" PRIu64 " usecs\n",
              tx * 8.0 / usecs, txp *1000000.0 / usecs, tx / B1M, tx_total / B1M, usecs);
       tx = 0;
       txp = 0;

@@ -7,7 +7,7 @@
 
 #pragma once
 #include <common/Detector.h>
-#include <cspec/CSPECChanConv.h>
+#include <multigrid/mgcncs/ChanConv.h>
 #include <string>
 
 class EFUArgs {

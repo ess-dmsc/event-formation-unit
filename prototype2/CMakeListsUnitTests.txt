@@ -29,7 +29,7 @@ endif()
 
 add_definitions(-std=c++11 -pthread)
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data DESTINATION ${CMAKE_BINARY_DIR}/prototype2)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/multigrid/calib_data DESTINATION ${CMAKE_BINARY_DIR}/prototype2)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/memcheck_res/)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/coverage/)
 
@@ -41,8 +41,8 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
     add_library(ParserTest_LIB STATIC ${ParserTest_LIB_SRC})
     set_target_properties(ParserTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 
-    set(ParserTest_SRC efu/Parser.cpp common/EFUArgs.cpp cspec/CalibrationFile.cpp)
-    set(ParserTest_INC efu/Parser.h common/EFUArgs.h cspec/CalibrationFile.h)
+    set(ParserTest_SRC efu/Parser.cpp common/EFUArgs.cpp multigrid/mgcncs/CalibrationFile.cpp)
+    set(ParserTest_INC efu/Parser.h common/EFUArgs.h multigrid/mgcncs/CalibrationFile.h)
     set(ParserTest_LINK ParserTest_LIB)
     create_test_executable(ParserTest "${ParserTest_LINK}")
     add_compile_flags(ParserTest "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
@@ -52,26 +52,26 @@ endif()
 #
 # CSPEC / Multi Grid Tests
 #
-set(CSPECChanConvTest_SRC cspec/CSPECChanConvTest.cpp cspec/CSPECChanConv.cpp)
-create_test_executable(CSPECChanConvTest "")
+set(MGCNCSChanConvTest_SRC multigrid/mgcncs/ChanConvTest.cpp multigrid/mgcncs/ChanConv.cpp)
+create_test_executable(MGCNCSChanConvTest "")
 
-set(CSPECDataTest_SRC cspec/CSPECDataTest.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp)
-set(CSPECDataTest_INC cspec/CSPECData.h cspec/CSPECChanConv.h test/CSPECTestData.h common/MultiGridGeometry.h)
-create_test_executable(CSPECDataTest "")
+set(MGCNCSDataTest_SRC multigrid/mgcncs/DataTest.cpp multigrid/mgcncs/Data.cpp multigrid/mgcncs/ChanConv.cpp)
+set(MGCNCSDataTest_INC multigrid/mgcncs/Data.h multigrid/mgcncs/ChanConv.h test/CSPECTestData.h multigrid/mgcncs/Geometry.h)
+create_test_executable(MGCNCSDataTest "")
 
-set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
-set(CSPECEventTest_INC cspec/CSPECEvent.h)
-create_test_executable(CSPECEventTest "")
+#set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
+#set(CSPECEventTest_INC cspec/CSPECEvent.h)
+#create_test_executable(CSPECEventTest "")
 
 if(${CMAKE_COMPILER_IS_GNUCXX})
     set(CalibrationFileTest_LIB_SRC
-    cspec/CalibrationFileTest.cpp
+    multigrid/mgcncs/CalibrationFileTest.cpp
     test/SyscallWrappers.cpp)
     add_library(CalibrationFileTest_LIB STATIC ${CalibrationFileTest_LIB_SRC})
     set_target_properties(CalibrationFileTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 
-    set(CalibrationFileTest_SRC cspec/CalibrationFile.cpp)
-    set(CalibrationFileTest_INC cspec/CalibrationFile.h)
+    set(CalibrationFileTest_SRC multigrid/mgcncs/CalibrationFile.cpp)
+    set(CalibrationFileTest_INC multigrid/mgcncs/CalibrationFile.h)
     set(CalibrationFileTest_LINK CalibrationFileTest_LIB ${GTEST_BOTH_LIBRARIES})
     create_test_executable(CalibrationFileTest "${CalibrationFileTest_LINK}")
     add_compile_flags(CalibrationFileTest "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
@@ -82,7 +82,7 @@ endif()
 #
 # common/ Tests
 #
-set(VersionTest_SRC cspec/CSPECEventTest.cpp cspec/CSPECEvent.h common/Version.h)
+set(VersionTest_SRC common/VersionTest.cpp common/Version.h)
 create_test_executable(VersionTest "")
 
 
@@ -94,7 +94,7 @@ set(DetectorTest_SRC common/DetectorTest.cpp common/Detector.h)
 create_test_executable(DetectorTest "")
 
 
-set(MultiGridGeometryTest_SRC common/MultiGridGeometryTest.cpp common/MultiGridGeometry.h
+set(MultiGridGeometryTest_SRC multigrid/mgcncs/GeometryTest.cpp multigrid/mgcncs/Geometry.h
     ../libs/include/TSCTimer.h)
 create_test_executable(MultiGridGeometryTest "")
 

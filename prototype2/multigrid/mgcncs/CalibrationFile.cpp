@@ -2,8 +2,8 @@
 
 #include <algorithm>
 #include <common/Trace.h>
-#include <cspec/CSPECChanConv.h>
-#include <cspec/CalibrationFile.h>
+#include <multigrid/mgcncs/ChanConv.h>
+#include <multigrid/mgcncs/CalibrationFile.h>
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>

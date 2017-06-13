@@ -40,15 +40,15 @@ SET_TARGET_PROPERTIES(udp PROPERTIES COMPILE_FLAGS "-fno-strict-aliasing" )
 
 
 # Multi Grid demonstrator detector
-set(cspec_SRC cspec/cspec.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp)
-set(cspec_INC cspec/CSPECData.h cspec/CSPECChanConv.h common/MultiGridGeometry.h)
-create_module(cspec "")
+set(mgcncs_SRC multigrid/mgcncs.cpp multigrid/mgcncs/Data.cpp multigrid/mgcncs/ChanConv.cpp)
+set(mgcncs_INC multigrid/mgcncs/Data.h multigrid/mgcncs/ChanConv.h multigrid/mgcncs/Geometry.h)
+create_module(mgcncs "")
 
 
 # Two-thread implementation of Multi Grid demonstrator detector
-set(cspec2_SRC cspec2/cspec2.cpp cspec/CSPECData.cpp cspec/CSPECChanConv.cpp)
-set(cspec2_INC cspec/CSPECData.h cspec/CSPECChanConv.h common/MultiGridGeometry.h)
-create_module(cspec2 "")
+set(mgcncs2_SRC multigrid/mgcncs2.cpp multigrid/mgcncs/Data.cpp multigrid/mgcncs/ChanConv.cpp)
+set(mgcncs2_INC multigrid/mgcncs/Data.h multigrid/mgcncs/ChanConv.h multigrid/mgcncs/Geometry.h)
+create_module(mgcncs2 "")
 
 
 #
@@ -67,9 +67,9 @@ create_module(nmxvmm2srs "")
 # the E F U
 #
 set(efu2_SRC common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/main.cpp common/StatPublisher.cpp
-    efu/ExitHandler.cpp efu/Server.cpp efu/Parser.cpp cspec/CalibrationFile.cpp)
+efu/ExitHandler.cpp efu/Server.cpp efu/Parser.cpp multigrid/mgcncs/CalibrationFile.cpp)
 set(efu2_INC common/EFUArgs.h efu/Launcher.h efu/Loader.h efu/Server.h efu/Parser.h common/Trace.h
-    cspec/CalibrationFile.h common/StatPublisher.h common/NewStats.h efu/ExitHandler.h)
+    multigrid/mgcncs/CalibrationFile.h common/StatPublisher.h common/NewStats.h efu/ExitHandler.h)
 set(efu_LIB ${LibRDKafka_LIBRARIES} ${CMAKE_DL_LIBS})
 create_executable(efu2 "${efu_LIB}")
 
@@ -79,15 +79,15 @@ create_executable(efu2 "${efu_LIB}")
 #
 
 # Generates dummy 'CSPEC' data matching the Multi Grid demonstrator
-set(gencspec_SRC cspecgen/cspecgen.cpp cspecgen/CspecArgs.cpp cspec/CSPECData.cpp)
-set(gencspec_INC cspecgen/CspecArgs.h cspec/CSPECData.h)
-create_executable(gencspec  "")
+set(mgcncsgen_SRC multigrid/mgcncsgen/mgcncsgen.cpp multigrid/mgcncsgen/DGArgs.cpp multigrid/mgcncs/Data.cpp)
+set(mgcncsgen_INC multigrid/mgcncsgen/DGArgs.h multigrid/mgcncs/Data.h)
+create_executable(mgcncsgen  "")
 
 
 #
-set(gencspecfile_SRC cspecgen/cspecfile.cpp cspecgen/CspecArgs.cpp)
-set(gencspecfile_INC cspecgen/CspecArgs.h)
-create_executable(gencspecfile "")
+set(mgcncsgenfile_SRC multigrid/mgcncsgen/mgcncsgenfile.cpp multigrid/mgcncsgen/DGArgs.cpp)
+set(mgcncsgenfile_INC multigrid/mgcncsgen/DGArgs.h)
+create_executable(mgcncsgenfile "")
 
 
 #
@@ -104,10 +104,11 @@ endif()
 
 
 # Data generator for raw cspec data
-set(dgmgjson_SRC mgjson/dgmgjson.cpp mgjson/MGJsonArgs.cpp ../dataformats/multigrid/src/RunSpecParse.cpp
+set(mgcncsgenjson_SRC multigrid/mgcncsgen/mgcncsgenjson.cpp multigrid/mgcncsgen/JsonArgs.cpp
+    ../dataformats/multigrid/src/RunSpecParse.cpp
     ../dataformats/multigrid/src/jsoncpp.cpp)
-set(dgmgjson_INC mgjson/MGJsonArgs.h)
-create_executable(dgmgjson "")
+set(mgcncsgenjson_INC multigrid/mgcncsgen/JsonArgs.h)
+create_executable(mgcncsgenjson "")
 
 
 #

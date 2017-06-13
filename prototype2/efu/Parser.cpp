@@ -4,7 +4,7 @@
 #include <common/EFUArgs.h>
 #include <common/Trace.h>
 #include <common/Version.h>
-#include <cspec/CalibrationFile.h>
+#include <multigrid/mgcncs/CalibrationFile.h>
 #include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>

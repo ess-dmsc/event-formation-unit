@@ -8,12 +8,12 @@
 #include <iomanip>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
-#include <mgjson/MGJsonArgs.h>
+#include <multigrid/mgcncsgen/JsonArgs.h>
 #include <sstream>
 #include <unistd.h>
 
 int main(int argc, char *argv[]) {
-  DGArgs opts(argc, argv);
+  JsonArgs opts(argc, argv);
 
   char buffer[9000];
   const int readoutdatasize = 40;
