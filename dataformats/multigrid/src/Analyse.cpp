@@ -5,10 +5,10 @@
 #include <MapFile.h>
 #include <PeakFinder.h>
 #include <cassert>
-#include <common/MultiGridGeometry.h>
+#include <multigrid/mgcncs/Geometry.h>
 #include <common/Trace.h>
-#include <cspec/CSPECChanConv.h>
-#include <cspec/CalibrationFile.h>
+#include <multigrid/mgcncs/ChanConv.h>
+#include <multigrid/mgcncs/CalibrationFile.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <string>

@@ -8,7 +8,7 @@
 
 #include <Args.h>
 #include <Histogram.h>
-#include <cspec/CSPECData.h>
+#include <multigrid/mgcncs/Data.h>
 #include <string>
 
 class Analyze {

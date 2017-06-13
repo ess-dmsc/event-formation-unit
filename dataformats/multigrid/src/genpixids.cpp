@@ -5,9 +5,9 @@
 #include <DataSave.h>
 #include <MapFile.h>
 #include <cassert>
-#include <common/MultiGridGeometry.h>
-#include <cspec/CSPECChanConv.h>
-#include <cspec/CalibrationFile.h>
+#include <multigrid/mgcncs/Geometry.h>
+#include <multigrid/mgcncs/ChanConv.h>
+#include <multigrid/mgcncs/CalibrationFile.h>
 #include <getopt.h>
 #include <stdio.h>
 #include <stdlib.h>
