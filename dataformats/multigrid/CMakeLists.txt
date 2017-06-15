@@ -6,7 +6,7 @@ option(BUILD_TESTS "Build test programs" ON)
 
 project (mgtools)
 
-set (CMAKE_INSTALL_PREFIX "/tmp/tools")
+set (CMAKE_INSTALL_PREFIX "")
 set(CMAKE_CXX_FLAGS_DEBUG " -O3 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
 set(CMAKE_CXX_FLAGS_RELEASE " -O3 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
 
@@ -19,16 +19,16 @@ include_directories(
 add_executable(batchreader
     src/batchreader.cpp src/Analyse.cpp src/Args.cpp
     src/MapFile.cpp src/PeakFinder.cpp src/RunSpecParse.cpp src/jsoncpp.cpp
-    ../../prototype2/cspec/CSPECChanConv.cpp
-    ../../prototype2/cspec/CalibrationFile.cpp
-    ../../prototype2/cspec/CSPECData.cpp)
+    ../../prototype2/multigrid/mgcncs/ChanConv.cpp
+    ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp
+    ../../prototype2/multigrid/mgcncs/Data.cpp)
 
 add_executable(cncsread src/cncsread.cpp)
 
 add_executable(genpixids src/genpixids.cpp
     src/DataSave.cpp
-    ../../prototype2/cspec/CSPECChanConv.cpp
-    ../../prototype2/cspec/CalibrationFile.cpp)
+    ../../prototype2/multigrid/mgcncs/ChanConv.cpp
+    ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp)
 
 #
 # Install Files
