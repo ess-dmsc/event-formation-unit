@@ -105,6 +105,7 @@ TEST_F(CspecDataTest, InputFilterBadNwords) {
 
 TEST_F(CspecDataTest, InputFilterNoEvents) {
   char buffer[200];
+  memset(buffer, 0, sizeof(buffer));
   const int databytes = 40;
   dat->receive(buffer, databytes);
   assertdatanderr(0, databytes);
