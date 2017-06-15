@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
       exithandler.Exit();
     }
 
-    if (livestats.timeus() >= ONE_SECOND_US) {
+    if (livestats.timeus() >= ONE_SECOND_US && loader.detector != nullptr) {
       metrics.publish(loader.detector);
       livestats.now();
     }

@@ -24,6 +24,11 @@ static int stat_get_count(std::vector<std::string> cmdargs, char *output,
     return -Parser::EBADARGS;
   }
 
+  if (efu_args->detectorif == nullptr) {
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET_COUNT error: no detector loaded");
+    return Parser::OK;
+  }
+
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET_COUNT %d",
                      efu_args->detectorif->statsize());
 
@@ -40,6 +45,12 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
     return -Parser::EBADARGS;
   }
   auto index = atoi(cmdargs.at(1).c_str());
+
+  if (efu_args->detectorif == nullptr) {
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET error: no detector loaded");
+    return Parser::OK;
+  }
+
   std::string name = efu_args->detectorif->statname(index);
   int64_t value = efu_args->detectorif->statvalue(index);
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET %s %" PRIi64,
@@ -113,6 +124,27 @@ static int version_get(std::vector<std::string> cmdargs, char *output,
   return Parser::OK;
 }
 
+//=============================================================================
+static int detector_info_get(std::vector<std::string> cmdargs, char *output,
+                    unsigned int *obytes) {
+  auto nargs = cmdargs.size();
+  XTRACE(CMD, INF, "DETECTOR_INFO_GET\n");
+  if (nargs != 1) {
+    XTRACE(CMD, WAR, "DETECTOR_INFO_GET: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+
+  if (efu_args->detectorif == nullptr) {
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "DETECTOR_INFO_GET no_detector_loaded");
+    return Parser::OK;
+  }
+
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "DETECTOR_INFO_GET %s",
+                     efu_args->detectorif->detectorname());
+
+  return Parser::OK;
+}
+
 
 /******************************************************************************/
 /******************************************************************************/
@@ -122,6 +154,7 @@ Parser::Parser() {
   registercmd(std::string("CSPEC_LOAD_CALIB"), cspec_load_calib);
   registercmd(std::string("CSPEC_SHOW_CALIB"), cspec_show_calib);
   registercmd(std::string("VERSION_GET"), version_get);
+  registercmd(std::string("DETECTOR_INFO_GET"), detector_info_get);
 }
 
 int Parser::registercmd(std::string cmd_name, function_ptr cmd_fn) {

@@ -39,6 +39,10 @@ public:
     return noname;
   }
 
+  virtual const char * detectorname() {
+    return "no detector";
+  }
+
 private:
   std::string noname{""};
 };

@@ -40,6 +40,11 @@ class EFUShell(cmd.Cmd):
       res = self.driver.Ask('VERSION_GET ' + line)
       print res
 
+   def do_detector_get(self, line):
+      'Get detector information'
+      res = self.driver.Ask('DETECTOR_INFO_GET')
+      print res
+
 #
 # CMD behavior customization
 #
