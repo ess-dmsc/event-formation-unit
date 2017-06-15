@@ -1,12 +1,11 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
+set(CMAKE_INSTALL_PREFIX "")
 
 option(BUILD_TESTS "Build test programs" ON)
 
 project (mgtools)
 
-set(CMAKE_INSTALL_PREFIX "")
-set(CMAKE_CXX_FLAGS_DEBUG " -O3 -std=c++11 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
-set(CMAKE_CXX_FLAGS_RELEASE " -O3-std=c++11 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
+set(CMAKE_CXX_FLAGS " -O3 -std=c++11 -Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
 
 include_directories(
     ${mgtools_SOURCE_DIR}/inc
