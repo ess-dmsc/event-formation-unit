@@ -4,7 +4,6 @@ set (CMAKE_CXX_STANDARD 11)
 
 option(BUILD_TESTS "Build test programs" ON)
 
-
 project (mgtools)
 
 set (CMAKE_INSTALL_PREFIX "")
@@ -34,12 +33,13 @@ add_executable(genpixids src/genpixids.cpp
 #
 # Install Files
 #
-INSTALL(TARGETS cncsread genpixids batchreader DESTINATION tools)
+install(TARGETS cncsread genpixids batchreader DESTINATION tools)
 
 
 #
 # Unit tests
 #
+set(unit_test_targets "")
 if(BUILD_TESTS)
   enable_testing()
   find_package(GTest REQUIRED)
@@ -50,9 +50,13 @@ if(BUILD_TESTS)
 
   add_executable(PeakFinderTest src/test/PeakFinderTest.cpp src/PeakFinder.cpp)
   target_link_libraries(PeakFinderTest ${GTEST_BOTH_LIBRARIES} pthread)
-  add_test(PeakFinderTest PeakFinderTest)
+  set(unit_test_targets PeakFinderTest ${unit_test_targets} )
+  add_test(NAME regular_PeakFinderTest COMMAND PeakFinderTest "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/PeakFinderTesttest.xml")
 
   add_executable(HistogramTest src/test/HistogramTest.cpp)
   target_link_libraries(HistogramTest ${GTEST_BOTH_LIBRARIES} pthread)
-  add_test(HistogramTest HistogramTest)
+  set(unit_test_targets HistogramTest ${unit_test_targets} )
+  add_test(NAME regular_HistogramTest COMMAND HistogramTest "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/HistogramTesttest.xml")
 endif(BUILD_TESTS)
+
+add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_* DEPENDS ${unit_test_targets})

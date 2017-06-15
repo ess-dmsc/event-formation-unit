@@ -94,10 +94,11 @@ if (${CMAKE_COMPILER_IS_GNUCXX})
     set(CMAKE_CXX_ARCHIVE_FINISH   true)
 endif()
 
-#add_subdirectory(dataformats)
+
 add_subdirectory(libs)
 add_subdirectory(prototype2)
 add_subdirectory(udp)
+#add_subdirectory(dataformats) # built separately for now
 
 add_custom_target(hints
     COMMAND echo ""
@@ -115,7 +116,7 @@ add_custom_target(hints
     COMMAND echo "Enable code coverage:                   cmake -DCOV=ON .."
     COMMAND echo "Use external flatbuffer headers:        cmake -DEXTSCHEMAS=ON .."
     COMMAND echo "Specify a build string:                 cmake -DBUILDSTR=v1.2.3 .."
-    COMMAND echo "Set build type to debug (default):      cmake -DCMAKE_BUILD_TYPE=Debug .."
+    COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug .."
     COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release .."
     COMMAND echo "    NOTE: Relase mode requires a build string"
     COMMAND echo ""
@@ -124,7 +125,7 @@ add_custom_target(hints
     COMMAND echo "Suggest PCAP root:                      cmake -DPCAP_ROOT_DIR=/opt/dmg_grp .."
     COMMAND echo "Suggest GraylogLogger root:             cmake -DGraylogLogger_ROOT_DIR=/opt/dmg_grp .."
     COMMAND echo "Suggest LibRDKafka root:                cmake -DLibRDKafka_ROOT_DIR=/opt/dmg_grp .."
-    COMMAND echo "Dump vmm readout to file (det. group):  cmake -DDUMPTOFILE=ON .."
+    COMMAND echo "Dump vmm readout to file - det. group:  cmake -DDUMPTOFILE=ON .."
     COMMAND echo "List cmake variables:                   cmake .. -LH     "
     COMMAND echo ""
 )
