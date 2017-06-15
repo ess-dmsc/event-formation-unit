@@ -45,6 +45,8 @@ TEST_F(CalibrationFileTest, LoadZeroAndMax) {
 TEST_F(CalibrationFileTest, SaveUninitialized) {
   uint16_t wbuffer[CSPECChanConv::adcsize];
   uint16_t gbuffer[CSPECChanConv::adcsize];
+  memset(wbuffer, 0, sizeof(wbuffer));
+  memset(gbuffer, 0, sizeof(gbuffer));
   CalibrationFile calibfile;
   int res = calibfile.save(std::string("CalibrationFileTest"), (char *)wbuffer,
                            (char *)gbuffer);
@@ -145,6 +147,8 @@ TEST_F(CalibrationFileTest, Save2OpenFail) {
   ASSERT_EQ(0, forceopenfail);
   uint16_t wbuffer[CSPECChanConv::adcsize];
   uint16_t gbuffer[CSPECChanConv::adcsize];
+  memset(wbuffer, 0, sizeof(wbuffer));
+  memset(gbuffer, 0, sizeof(gbuffer));
   CalibrationFile calibfile;
   forceopenfail = 2;
   int res = calibfile.save(std::string("CalibrationFileTest"), (char *)wbuffer,
