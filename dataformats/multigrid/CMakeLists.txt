@@ -1,4 +1,5 @@
-cmake_minimum_required (VERSION 3.5)
+cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
+
 set (CMAKE_CXX_STANDARD 11)
 
 option(BUILD_TESTS "Build test programs" ON)

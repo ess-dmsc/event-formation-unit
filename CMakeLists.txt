@@ -94,7 +94,7 @@ if (${CMAKE_COMPILER_IS_GNUCXX})
     set(CMAKE_CXX_ARCHIVE_FINISH   true)
 endif()
 
-add_subdirectory(dataformats)
+#add_subdirectory(dataformats)
 add_subdirectory(libs)
 add_subdirectory(prototype2)
 add_subdirectory(udp)
