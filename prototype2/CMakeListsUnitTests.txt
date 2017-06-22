@@ -48,34 +48,6 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(ParserTest "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 endif()
 
-#
-# CSPEC / Multi Grid Tests
-#
-set(MGCNCSChanConvTest_SRC multigrid/mgcncs/ChanConvTest.cpp multigrid/mgcncs/ChanConv.cpp)
-create_test_executable(MGCNCSChanConvTest "")
-
-set(MGCNCSDataTest_SRC multigrid/mgcncs/DataTest.cpp multigrid/mgcncs/Data.cpp multigrid/mgcncs/ChanConv.cpp)
-set(MGCNCSDataTest_INC multigrid/mgcncs/Data.h multigrid/mgcncs/ChanConv.h multigrid/mgcncs/TestData.h multigrid/mgcncs/Geometry.h)
-create_test_executable(MGCNCSDataTest "")
-
-#set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
-#set(CSPECEventTest_INC cspec/CSPECEvent.h)
-#create_test_executable(CSPECEventTest "")
-
-if(${CMAKE_COMPILER_IS_GNUCXX})
-    set(CalibrationFileTest_LIB_SRC
-    multigrid/mgcncs/CalibrationFileTest.cpp
-    test/SyscallWrappers.cpp)
-    add_library(CalibrationFileTest_LIB STATIC ${CalibrationFileTest_LIB_SRC})
-    set_target_properties(CalibrationFileTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
-
-    set(CalibrationFileTest_SRC multigrid/mgcncs/CalibrationFile.cpp)
-    set(CalibrationFileTest_INC multigrid/mgcncs/CalibrationFile.h)
-    set(CalibrationFileTest_LINK CalibrationFileTest_LIB ${GTEST_BOTH_LIBRARIES})
-    create_test_executable(CalibrationFileTest "${CalibrationFileTest_LINK}")
-    add_compile_flags(CalibrationFileTest "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
-    add_linker_flags(CalibrationFileTest "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
-endif()
 
 
 #
@@ -103,15 +75,10 @@ set(FBSerializerTest_INC common/FBSerializer.h common/Producer.h)
 create_test_executable(FBSerializerTest "${LibRDKafka_LIBRARIES}")
 
 
-set(HistSerializerTest_SRC gdgem/vmm2srs/HistSerializerTest.cpp gdgem/vmm2srs/HistSerializer.cpp)
-set(HistSerializerTest_INC gdgem/vmm2srs/HistSerializer.h common/Producer.h)
-create_test_executable(HistSerializerTest "")
 
 
-set(TrackSerializerTest_SRC gdgem/vmm2srs/TrackSerializerTest.cpp gdgem/vmm2srs/TrackSerializer.cpp
-    gdgem/nmx/Eventlet.cpp gdgem/nmx/EventNMX.cpp)
-set(TrackSerializerTest_INC gdgem/vmm2srs/TrackSerializer.h gdgem/nmx/EventNMX.h gdgem/nmx/Eventlet.h)
-create_test_executable(TrackSerializerTest "")
+
+
 
 set(EFUArgsTest_SRC common/EFUArgsTest.cpp common/EFUArgs.cpp common/EFUArgs.h)
 create_test_executable(EFUArgsTest "")
@@ -120,41 +87,6 @@ set(NewStatsTest_SRC common/NewStatsTest.cpp common/NewStats.cpp common/NewStats
 create_test_executable(NewStatsTest "")
 
 
-#
-# NMX / VMM Tests
-#
-set(NMXVMM2SRSDataTest_SRC gdgem/vmm2srs/NMXVMM2SRSDataTest.cpp gdgem/vmm2srs/NMXVMM2SRSData.cpp
-    gdgem/vmm2srs/NMXVMM2SRSData.h)
-create_test_executable(NMXVMM2SRSDataTest "")
-
-
-set(EventletBuilderH5Test_SRC gdgem/nmxgen/EventletBuilderH5Test.cpp gdgem/nmxgen/EventletBuilderH5.cpp
-    gdgem/nmx/EventNMX.cpp gdgem/nmx/Clusterer.cpp)
-set(EventletBuilderH5Test_INC gdgem/nmxgen/EventletBuilderH5.h gdgem/nmx/Clusterer.h gdgem/nmx/EventNMX.h)
-create_test_executable(EventletBuilderH5Test "")
-
-
-set(EventletBuilderTest_SRC gdgem/vmm2srs/EventletBuilderTest.cpp gdgem/vmm2srs/EventletBuilder.cpp
-    gdgem/vmm2srs/NMXVMM2SRSData.cpp gdgem/nmx/Clusterer.cpp gdgem/nmx/EventNMX.cpp gdgem/nmx/Geometry.cpp gdgem/nmx/Time.cpp)
-set(EventletBuilderTest_INC gdgem/vmm2srs/NMXVMM2SRSData.h gdgem/vmm2srs/EventletBuilder.h gdgem/nmx/Clusterer.h
-    gdgem/nmx/EventNMX.h gdgem/nmx/Time.h gdgem/nmx/Geometry.h)
-create_test_executable(EventletBuilderTest "")
-
-set(EventletTest_SRC gdgem/nmx/EventletTest.cpp gdgem/nmx/Eventlet.cpp gdgem/nmx/Eventlet.h)
-create_test_executable(EventletTest "")
-
-set(GeometryTest_SRC gdgem/nmx/GeometryTest.cpp gdgem/nmx/Geometry.cpp)
-create_test_executable(GeometryTest "")
-
-set(TimeTest_SRC gdgem/nmx/TimeTest.cpp gdgem/nmx/Time.cpp gdgem/nmx/Time.h)
-create_test_executable(TimeTest "")
-
-set(ClustererTest_SRC gdgem/nmx/ClustererTest.cpp gdgem/nmx/Clusterer.cpp gdgem/nmx/EventNMX.cpp)
-set(ClustererTest_INC gdgem/nmx/Clusterer.h gdgem/nmx/EventNMX.h)
-create_test_executable(ClustererTest "")
-
-set(EventTest_SRC gdgem/nmx/EventTest.cpp gdgem/nmx/EventNMX.cpp gdgem/nmx/EventNMX.h)
-create_test_executable(EventTest "")
 
 #
 # ESS Readout System Tests
@@ -168,12 +100,7 @@ set(ReadoutDummyTest_INC test/TestBase.h readout/Readout.h readout/ReadoutDummy.
 create_test_executable(ReadoutDummyTest "")
 
 
-#
-# Multiblade Tests
-#
-set(MBDummyTest_SRC multiblade/mbcaen/DummyClassTest.cpp multiblade/mbcaen/DummyClass.cpp)
-set(MBDummyTest_INC test/TestBase.h multiblade/mbcaen/DummyClass.h)
-create_test_executable(MBDummyTest "")
+
 
 
 #

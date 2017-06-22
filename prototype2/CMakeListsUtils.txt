@@ -5,7 +5,7 @@ function(add_linker_flags target flags)
     if(NOT cur_link_flags)
         set(cur_link_flags "")
     endif()
-    set(new_link_flags "${cur_link_flags} ${flags}")
+    set(new_link_flags "${cur_link_flags} ${flags}" PARENT_SCOPE)
     set_target_properties(${target} PROPERTIES LINK_FLAGS "${new_link_flags}")
 endfunction(add_linker_flags)
 
