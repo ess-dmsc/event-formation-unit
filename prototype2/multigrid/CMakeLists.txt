@@ -55,7 +55,7 @@ create_test_executable(MGCNCSDataTest "")
 #create_test_executable(CSPECEventTest "")
 
 if(${CMAKE_COMPILER_IS_GNUCXX})
-    set(CalibrationFileTest_LIB_SRC mgcncs/CalibrationFileTest.cpp test/SyscallWrappers.cpp)
+    set(CalibrationFileTest_LIB_SRC mgcncs/CalibrationFileTest.cpp ../test/SyscallWrappers.cpp)
     add_library(CalibrationFileTest_LIB STATIC ${CalibrationFileTest_LIB_SRC})
     set_target_properties(CalibrationFileTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 
