@@ -52,15 +52,15 @@ create_module(mgcncs2 "")
 
 
 #
-set(nmx_SRC NMX/nmx.cpp NMX/Clusterer.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp nmxgen/EventletBuilderH5.cpp)
-set(nmx_INC NMX/Clusterer.h NMX/EventNMX.h NMX/Eventlet.h nmxgen/EventletBuilderH5.h)
-create_module(nmx "")
+set(nmx_SRC gdgem/gdgemh5.cpp gdgem/nmx/Clusterer.cpp gdgem/nmx/EventNMX.cpp gdgem/nmx/Eventlet.cpp gdgem/nmxgen/EventletBuilderH5.cpp)
+set(nmx_INC gdgem/nmx/Clusterer.h gdgem/nmx/EventNMX.h gdgem/nmx/Eventlet.h gdgem/nmxgen/EventletBuilderH5.h)
+create_module(gdgemh5 "")
 
 
 # VMM2/SRS based detector (micromegas based CERN prototype)
-set(nmxvmm2srs_SRC nmxvmm2srs/nmxvmm2srs.cpp nmxvmm2srs/NMXVMM2SRSData.cpp NMX/Clusterer.cpp NMX/Geometry.cpp NMX/Time.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp nmxvmm2srs/EventletBuilder.cpp nmxvmm2srs/HistSerializer.cpp nmxvmm2srs/TrackSerializer.cpp)
-set(nmxvmm2srs_INC NMX/Clusterer.h NMX/Geometry.h NMX/Time.h NMX/EventNMX.h NMX/Eventlet.h nmxvmm2srs/EventletBuilder.h nmxvmm2srs/NMXVMM2SRSData.h nmxvmm2srs/HistSerializer.h nmxvmm2srs/TrackSerializer.h)
-create_module(nmxvmm2srs "")
+set(nmxvmm2srs_SRC gdgem/gdgemsrs.cpp gdgem/vmm2srs/NMXVMM2SRSData.cpp gdgem/nmx/Clusterer.cpp gdgem/nmx/Geometry.cpp gdgem/nmx/Time.cpp gdgem/nmx/EventNMX.cpp gdgem/nmx/Eventlet.cpp gdgem/vmm2srs/EventletBuilder.cpp gdgem/vmm2srs/HistSerializer.cpp gdgem/vmm2srs/TrackSerializer.cpp)
+set(nmxvmm2srs_INC gdgem/nmx/Clusterer.h gdgem/nmx/Geometry.h gdgem/nmx/Time.h gdgem/nmx/EventNMX.h gdgem/nmx/Eventlet.h gdgem/vmm2srs/EventletBuilder.h gdgem/vmm2srs/NMXVMM2SRSData.h gdgem/vmm2srs/HistSerializer.h gdgem/vmm2srs/TrackSerializer.h)
+create_module(gdgemsrs "")
 
 
 #
@@ -94,8 +94,8 @@ create_executable(mgcncsgenfile "")
 if(${H5CC_FOUND} AND ${HDF5_FOUND})
     include_directories(${H5CC_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
     message(STATUS "Found H5CC and HDF5 libraries. Will build gennmxfile.")
-    set(gennmxfile_SRC nmxgen/nmxfile.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderVMM.cpp NMX/Eventlet.cpp)
-    set(gennmxfile_INC nmxgen/NMXArgs.h nmxgen/ReaderVMM.h NMX/Eventlet.h)
+    set(gennmxfile_SRC gdgem/nmxgen/nmxfile.cpp gdgem/nmxgen/NMXArgs.cpp gdgem/nmxgen/ReaderVMM.cpp gdgem/nmx/Eventlet.cpp)
+    set(gennmxfile_INC gdgem/nmxgen/NMXArgs.h gdgem/nmxgen/ReaderVMM.h gdgem/nmx/Eventlet.h)
     create_executable(gennmxfile "${H5CC_LIBRARY}")
     target_link_libraries(gennmxfile ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 else()
@@ -114,8 +114,8 @@ create_executable(mgcncsgenjson "")
 #
 if (PCAP_FOUND)
     include_directories(${PCAP_INCLUDE_DIR})
-    set(gennmxpcap_SRC nmxgen/wireshark.cpp nmxgen/ReaderPcap.cpp nmxgen/NMXArgs.cpp)
-    set(gennmxpcap_INC nmxgen/ReaderPcap.h nmxgen/NMXArgs.h)
+    set(gennmxpcap_SRC gdgem/nmxgen/wireshark.cpp gdgem/nmxgen/ReaderPcap.cpp gdgem/nmxgen/NMXArgs.cpp)
+    set(gennmxpcap_INC gdgem/nmxgen/ReaderPcap.h gdgem/nmxgen/NMXArgs.h)
     create_executable(gennmxpcap "pcap")
 else()
     message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")

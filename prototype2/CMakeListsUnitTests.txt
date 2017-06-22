@@ -55,7 +55,7 @@ set(MGCNCSChanConvTest_SRC multigrid/mgcncs/ChanConvTest.cpp multigrid/mgcncs/Ch
 create_test_executable(MGCNCSChanConvTest "")
 
 set(MGCNCSDataTest_SRC multigrid/mgcncs/DataTest.cpp multigrid/mgcncs/Data.cpp multigrid/mgcncs/ChanConv.cpp)
-set(MGCNCSDataTest_INC multigrid/mgcncs/Data.h multigrid/mgcncs/ChanConv.h test/CSPECTestData.h multigrid/mgcncs/Geometry.h)
+set(MGCNCSDataTest_INC multigrid/mgcncs/Data.h multigrid/mgcncs/ChanConv.h multigrid/mgcncs/TestData.h multigrid/mgcncs/Geometry.h)
 create_test_executable(MGCNCSDataTest "")
 
 #set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
@@ -103,14 +103,14 @@ set(FBSerializerTest_INC common/FBSerializer.h common/Producer.h)
 create_test_executable(FBSerializerTest "${LibRDKafka_LIBRARIES}")
 
 
-set(HistSerializerTest_SRC nmxvmm2srs/HistSerializerTest.cpp nmxvmm2srs/HistSerializer.cpp)
-set(HistSerializerTest_INC nmxvmm2srs/HistSerializer.h common/Producer.h)
+set(HistSerializerTest_SRC gdgem/vmm2srs/HistSerializerTest.cpp gdgem/vmm2srs/HistSerializer.cpp)
+set(HistSerializerTest_INC gdgem/vmm2srs/HistSerializer.h common/Producer.h)
 create_test_executable(HistSerializerTest "")
 
 
-set(TrackSerializerTest_SRC nmxvmm2srs/TrackSerializerTest.cpp nmxvmm2srs/TrackSerializer.cpp
-    NMX/Eventlet.cpp NMX/EventNMX.cpp)
-set(TrackSerializerTest_INC nmxvmm2srs/TrackSerializer.h NMX/EventNMX.h NMX/Eventlet.h)
+set(TrackSerializerTest_SRC gdgem/vmm2srs/TrackSerializerTest.cpp gdgem/vmm2srs/TrackSerializer.cpp
+    gdgem/nmx/Eventlet.cpp gdgem/nmx/EventNMX.cpp)
+set(TrackSerializerTest_INC gdgem/vmm2srs/TrackSerializer.h gdgem/nmx/EventNMX.h gdgem/nmx/Eventlet.h)
 create_test_executable(TrackSerializerTest "")
 
 set(EFUArgsTest_SRC common/EFUArgsTest.cpp common/EFUArgs.cpp common/EFUArgs.h)
@@ -123,37 +123,37 @@ create_test_executable(NewStatsTest "")
 #
 # NMX / VMM Tests
 #
-set(NMXVMM2SRSDataTest_SRC nmxvmm2srs/NMXVMM2SRSDataTest.cpp nmxvmm2srs/NMXVMM2SRSData.cpp
-    nmxvmm2srs/NMXVMM2SRSData.h)
+set(NMXVMM2SRSDataTest_SRC gdgem/vmm2srs/NMXVMM2SRSDataTest.cpp gdgem/vmm2srs/NMXVMM2SRSData.cpp
+    gdgem/vmm2srs/NMXVMM2SRSData.h)
 create_test_executable(NMXVMM2SRSDataTest "")
 
 
-set(EventletBuilderH5Test_SRC nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBuilderH5.cpp
-    NMX/EventNMX.cpp NMX/Clusterer.cpp)
-set(EventletBuilderH5Test_INC nmxgen/EventletBuilderH5.h NMX/Clusterer.h NMX/EventNMX.h)
+set(EventletBuilderH5Test_SRC gdgem/nmxgen/EventletBuilderH5Test.cpp gdgem/nmxgen/EventletBuilderH5.cpp
+    gdgem/nmx/EventNMX.cpp gdgem/nmx/Clusterer.cpp)
+set(EventletBuilderH5Test_INC gdgem/nmxgen/EventletBuilderH5.h gdgem/nmx/Clusterer.h gdgem/nmx/EventNMX.h)
 create_test_executable(EventletBuilderH5Test "")
 
 
-set(EventletBuilderTest_SRC nmxvmm2srs/EventletBuilderTest.cpp nmxvmm2srs/EventletBuilder.cpp
-    nmxvmm2srs/NMXVMM2SRSData.cpp NMX/Clusterer.cpp NMX/EventNMX.cpp NMX/Geometry.cpp NMX/Time.cpp)
-set(EventletBuilderTest_INC nmxvmm2srs/NMXVMM2SRSData.h nmxvmm2srs/EventletBuilder.h NMX/Clusterer.h
-    NMX/EventNMX.h NMX/Time.h NMX/Geometry.h)
+set(EventletBuilderTest_SRC gdgem/vmm2srs/EventletBuilderTest.cpp gdgem/vmm2srs/EventletBuilder.cpp
+    gdgem/vmm2srs/NMXVMM2SRSData.cpp gdgem/nmx/Clusterer.cpp gdgem/nmx/EventNMX.cpp gdgem/nmx/Geometry.cpp gdgem/nmx/Time.cpp)
+set(EventletBuilderTest_INC gdgem/vmm2srs/NMXVMM2SRSData.h gdgem/vmm2srs/EventletBuilder.h gdgem/nmx/Clusterer.h
+    gdgem/nmx/EventNMX.h gdgem/nmx/Time.h gdgem/nmx/Geometry.h)
 create_test_executable(EventletBuilderTest "")
 
-set(EventletTest_SRC NMX/EventletTest.cpp NMX/Eventlet.cpp NMX/Eventlet.h)
+set(EventletTest_SRC gdgem/nmx/EventletTest.cpp gdgem/nmx/Eventlet.cpp gdgem/nmx/Eventlet.h)
 create_test_executable(EventletTest "")
 
-set(GeometryTest_SRC NMX/GeometryTest.cpp NMX/Geometry.cpp)
+set(GeometryTest_SRC gdgem/nmx/GeometryTest.cpp gdgem/nmx/Geometry.cpp)
 create_test_executable(GeometryTest "")
 
-set(TimeTest_SRC NMX/TimeTest.cpp NMX/Time.cpp NMX/Time.h)
+set(TimeTest_SRC gdgem/nmx/TimeTest.cpp gdgem/nmx/Time.cpp gdgem/nmx/Time.h)
 create_test_executable(TimeTest "")
 
-set(ClustererTest_SRC NMX/ClustererTest.cpp NMX/Clusterer.cpp NMX/EventNMX.cpp)
-set(ClustererTest_INC NMX/Clusterer.h NMX/EventNMX.h)
+set(ClustererTest_SRC gdgem/nmx/ClustererTest.cpp gdgem/nmx/Clusterer.cpp gdgem/nmx/EventNMX.cpp)
+set(ClustererTest_INC gdgem/nmx/Clusterer.h gdgem/nmx/EventNMX.h)
 create_test_executable(ClustererTest "")
 
-set(EventTest_SRC NMX/EventTest.cpp NMX/EventNMX.cpp NMX/EventNMX.h)
+set(EventTest_SRC gdgem/nmx/EventTest.cpp gdgem/nmx/EventNMX.cpp gdgem/nmx/EventNMX.h)
 create_test_executable(EventTest "")
 
 #

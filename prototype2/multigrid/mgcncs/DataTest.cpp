@@ -4,8 +4,8 @@
 #include <multigrid/mgcncs/Geometry.h>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/Data.h>
+#include <multigrid/mgcncs/TestData.h>
 #include <memory>
-#include <test/CSPECTestData.h>
 #include <test/TestBase.h>
 
 using namespace std;
