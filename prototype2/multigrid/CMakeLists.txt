@@ -54,7 +54,7 @@ create_test_executable(MGCNCSDataTest "")
 if(${CMAKE_COMPILER_IS_GNUCXX})
     set(CalibrationFileTest_LIB_SRC
     multigrid/mgcncs/CalibrationFileTest.cpp
-    test/SyscallWrappers.cpp)
+  test/SyscallWrappers.cpp PARENT_SCOPE)
     add_library(CalibrationFileTest_LIB STATIC ${CalibrationFileTest_LIB_SRC})
     set_target_properties(CalibrationFileTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 
