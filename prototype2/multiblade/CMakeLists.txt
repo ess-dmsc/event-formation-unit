@@ -1,8 +1,9 @@
-
-
+cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
+enable_testing()
 #
 # Multiblade Tests
 #
-set(MBDummyTest_SRC multiblade/mbcaen/DummyClassTest.cpp multiblade/mbcaen/DummyClass.cpp)
-set(MBDummyTest_INC test/TestBase.h multiblade/mbcaen/DummyClass.h)
+include_directories(..)
+set(MBDummyTest_SRC mbcaen/DummyClassTest.cpp mbcaen/DummyClass.cpp)
+set(MBDummyTest_INC ../test/TestBase.h mbcaen/DummyClass.h)
 create_test_executable(MBDummyTest "")

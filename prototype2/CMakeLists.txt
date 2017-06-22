@@ -7,12 +7,14 @@ find_package(GraylogLogger)
 find_package(H5CC)
 find_package(HDF5 1.8.15 COMPONENTS CXX HL)
 
+enable_testing()
 include(CMakeListsUtils.txt)
+add_subdirectory(gdgem)
+add_subdirectory(multiblade)
+add_subdirectory(multigrid)
+add_subdirectory(udp)
+
 include(CMakeListsUnitTests.txt)
-include(gdgem/CMakeLists.txt)
-include(multiblade/CMakeLists.txt)
-include(multigrid/CMakeLists.txt)
-include(udp/CMakeLists.txt)
 
 set(PYTHON_EXECUTABLE /usr/bin/python)
 
