@@ -4,7 +4,7 @@
 #ifndef FLATBUFFERS_GENERATED_MONEFU_H_
 #define FLATBUFFERS_GENERATED_MONEFU_H_
 
-#include "flatbuffers/flatbuffers.h"
+#include <flatbuffers/flatbuffers.h>
 
 struct pos;
 
