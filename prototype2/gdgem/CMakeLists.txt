@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 enable_testing()
 include_directories(..)
 include_directories(../..)
+include_directories(/usr/local/include)
 
 #
 # Detector Pipeline Plugins
