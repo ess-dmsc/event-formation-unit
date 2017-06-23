@@ -167,7 +167,7 @@ int main(int argc, char **argv) {
     ret = chdir("../../prototype2/calib_data");
     if (ret != 0) {
       printf("Unable to locate calibration data directory relative to:\n");
-      __attribute__((unused)) ret = system("pwd");
+      ret = __attribute__((unused)) system("pwd");
       return -1;
     }
   }
