@@ -159,7 +159,6 @@ TEST_F(CalibrationFileTest, Save2OpenFail) {
 }
 
 int main(int argc, char **argv) {
-
   // Assume root is build/ directory - for running manually
   int ret = chdir("prototype2/calib_data");
   if (ret != 0) {
