@@ -158,7 +158,7 @@ TEST_F(CalibrationFileTest, Save2OpenFail) {
 }
 
 int main(int argc, char **argv) {
-  int __attribute__((unused)) ret = chdir("prototype2");
+  //int __attribute__((unused)) ret = chdir("prototype2");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
