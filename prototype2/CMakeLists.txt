@@ -6,6 +6,7 @@ find_package(LibRDKafka)
 find_package(GraylogLogger)
 find_package(H5CC)
 find_package(HDF5 1.8.15 COMPONENTS CXX HL)
+find_package(FlatBuffers REQUIRED)
 
 enable_testing()
 include(CMakeListsUtils.txt)
@@ -27,7 +28,7 @@ if(${GraylogLogger_FOUND})
     add_definitions("-DGRAYLOG")
 endif()
 
-include_directories(. .. ${LibRDKafka_INCLUDE_DIR})
+include_directories(. .. ${LibRDKafka_INCLUDE_DIR} ${FLATBUFFERS_INCLUDE_DIR})
 
 
 #
