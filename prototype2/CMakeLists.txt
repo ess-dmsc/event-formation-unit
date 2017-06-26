@@ -38,7 +38,7 @@ set(common_SRC common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp
 set(common_INC common/Detector.h common/NewStats.h common/Producer.h common/FBSerializer.h
     common/Trace.h ../libs/include/gccintel.h common/EFUArgs.h)
 add_library(common STATIC ${common_SRC} ${common_INC})
-target_include_directories(common PUBLIC ${FLATBUFFERS_INCLUDE_DIR})
+target_include_directories(common INTERFACE ${FLATBUFFERS_INCLUDE_DIR})
 
 #
 # the E F U

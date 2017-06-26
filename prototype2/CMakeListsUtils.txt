@@ -31,7 +31,6 @@ function(create_module module_name link_libraries)
         set(module_LIB ${GraylogLogger_LIBRARIES} ${module_LIB})
     endif()
     target_link_libraries(${module_name} ${module_LIB})
-    target_include_directories(${module_name} PRIVATE ${FLATBUFFERS_INCLUDE_DIR})
     install(TARGETS ${module_name} DESTINATION bin)
 endfunction(create_module)
 
