@@ -8,8 +8,8 @@
 #ifndef READER_VMM_H
 #define READER_VMM_H
 
-#include <h5cc/H5CC_DataSet.h>
-#include <h5cc/H5CC_File.h>
+#include <H5CC_DataSet.h>
+#include <H5CC_File.h>
 #include <map>
 #include <vector>
 
