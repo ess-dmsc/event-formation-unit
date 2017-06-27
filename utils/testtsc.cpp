@@ -1,23 +1,31 @@
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <sys/shm.h>
 
-#define SHM_KEY  105205672
+#define SHM_KEY  105205673
 #define US_ONE_SEC 1000000
 #define MAX_CPU 6
 #define NSAMPLES 10
 #define OFFSET 64
-#define SHM_SIZE MAX_CPU * OFFSET
+#define SHM_SIZE 8192
+
+void helptext() {
+    printf("usage:  tsctest -r                  # start reader\n");
+    printf("        tsctest -c cpuiud ./a.out   # start writer\n");
+    printf("        tsctest -h                  # help text\n");
+    exit(0);
+}
 
 uint64_t rdtscp(int *chip, int *core)
 {
-  uint32_t a, d, c;
-  __asm__ volatile("rdtscp" : "=a"(a), "=d"(d), "=c"(c));
-  *chip = (c & 0xFFF000) >> 12;
-  *core =  c & 0xFFF;
-  return ((uint64_t)a) | (((uint64_t)d) << 32);
+  uint32_t lo, hi, cpuinfo;
+  __asm__ volatile("rdtscp" : "=a"(lo), "=d"(hi), "=c"(cpuinfo));
+  *chip = (cpuinfo & 0xFFF000) >> 12;
+  *core = (cpuinfo & 0x000FFF);
+  return ((uint64_t)lo) | (((uint64_t)hi) << 32);
 }
 
 uint64_t setup_shared_memory()
@@ -42,6 +50,7 @@ void writer(uint64_t addr)
 {
   int sock0, core0, sock, core;
   unsigned long tsc = rdtscp(&sock0, &core0);
+  printf("Starting tsctest writer\n");
   printf("timer: %" PRIu64 ", (core %d, socket %d)\n", tsc, core0, sock0);
   while (1) {
     tsc = rdtscp(&sock, &core);
@@ -57,17 +66,20 @@ void writer(uint64_t addr)
 }
 
 
-void reader(uint64_t addr, int index1, int index2) {
+void reader(uint64_t addr) {
   uint64_t tsc[MAX_CPU][NSAMPLES];
-  int64_t tdiff[MAX_CPU];
+  int64_t  tdiff[MAX_CPU];
 
+  printf("Starting tsctest reader\n");
   printf("Sampling tsc counters\n");
   for (int n = 0; n < NSAMPLES; n++) {
+    printf("."); fflush(stdout);
     for (int i = 0; i < MAX_CPU; i++) {
       tsc[i][n] = *(uint64_t *)(addr + i * OFFSET);
     }
     usleep(US_ONE_SEC);
   }
+  printf("done\n");
 
   printf("Calculating averages\n");
   for (int i = 0; i < MAX_CPU; i++) {
@@ -94,24 +106,20 @@ void reader(uint64_t addr, int index1, int index2) {
 }
 
 
+
 int main(int argc, char *argv[]) {
   int cpu1, cpu2;
 
-  if (argc != 1 && argc != 3) {
-    printf("usage: ./tsctest cpu1 cpu2       # start reader\n");
-    printf("       taskset -c cpu1 ./a.out   # start writer\n");
-    exit(0);
+  if ((argc != 1 && argc != 2) || strcmp(argv[0], "-h") ==0 ) {
+    helptext();
   }
 
   uint64_t addr = setup_shared_memory();
 
-  if (argc == 3) {
-    int cpu1 = atoi(argv[1]);
-    int cpu2 = atoi(argv[2]);
-    printf("%d %d\n", cpu1, cpu2);
-    reader(addr, cpu1, cpu2);
+  if (argc == 2 && strcmp(argv[1], "-r") == 0) {
+    reader(addr);
   } else if (argc == 1) {
     writer(addr);
   }
-  return 0;
+  helptext();
 }
