@@ -15,6 +15,8 @@ add_subdirectory(multiblade)
 add_subdirectory(multigrid)
 add_subdirectory(udp)
 
+add_library(calibfile OBJECT multigrid/mgcncs/CalibrationFile.cpp)
+
 include(CMakeListsUnitTests.txt)
 
 set(PYTHON_EXECUTABLE /usr/bin/python)
@@ -44,7 +46,7 @@ target_include_directories(common INTERFACE ${FLATBUFFERS_INCLUDE_DIR})
 # the E F U
 #
 set(efu2_SRC common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/main.cpp common/StatPublisher.cpp
-efu/ExitHandler.cpp efu/Server.cpp efu/Parser.cpp multigrid/mgcncs/CalibrationFile.cpp)
+efu/ExitHandler.cpp efu/Server.cpp efu/Parser.cpp $<TARGET_OBJECTS:calibfile>)
 set(efu2_INC common/EFUArgs.h efu/Launcher.h efu/Loader.h efu/Server.h efu/Parser.h common/Trace.h
     multigrid/mgcncs/CalibrationFile.h common/StatPublisher.h common/NewStats.h efu/ExitHandler.h)
 set(efu_LIB ${LibRDKafka_LIBRARIES} ${CMAKE_DL_LIBS})

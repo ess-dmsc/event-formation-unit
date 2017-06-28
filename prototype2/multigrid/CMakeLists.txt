@@ -59,7 +59,7 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
     add_library(CalibrationFileTest_LIB STATIC ${CalibrationFileTest_LIB_SRC})
     set_target_properties(CalibrationFileTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 
-    set(CalibrationFileTest_SRC mgcncs/CalibrationFile.cpp)
+    set(CalibrationFileTest_SRC $<TARGET_OBJECTS:calibfile>)
     set(CalibrationFileTest_INC mgcncs/CalibrationFile.h)
     set(CalibrationFileTest_LINK CalibrationFileTest_LIB ${GTEST_BOTH_LIBRARIES})
     create_test_executable(CalibrationFileTest "${CalibrationFileTest_LINK}")
