@@ -66,6 +66,7 @@ void writer(uint64_t addr)
 }
 
 
+#define CPUOFF 0
 void reader(uint64_t addr) {
   uint64_t tsc[MAX_CPU][NSAMPLES];
   int64_t  tdiff[MAX_CPU];
@@ -75,7 +76,7 @@ void reader(uint64_t addr) {
   for (int n = 0; n < NSAMPLES; n++) {
     printf("."); fflush(stdout);
     for (int i = 0; i < MAX_CPU; i++) {
-      tsc[i][n] = *(uint64_t *)(addr + i * OFFSET);
+      tsc[i][n] = *(uint64_t *)(addr + (i + CPUOFF) * OFFSET);
     }
     usleep(US_ONE_SEC);
   }
@@ -95,7 +96,7 @@ void reader(uint64_t addr) {
   printf("    dt0    dt1    dt2   dt3   dt4   dt5\n");
   while (1) {
     for (int i = 0; i < MAX_CPU; i++) {
-      tsc[i][0] = *(uint64_t *)(addr + i * OFFSET);
+      tsc[i][0] = *(uint64_t *)(addr + (i + CPUOFF) * OFFSET);
     }
     for (int i = 0; i < MAX_CPU; i++) {
       printf("%6" PRIi64 " ", tsc[i][0] - tdiff[i] - tsc[0][0]);
