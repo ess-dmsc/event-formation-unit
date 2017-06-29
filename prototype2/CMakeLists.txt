@@ -8,22 +8,9 @@ find_package(H5CC)
 find_package(HDF5 1.8.15 COMPONENTS CXX HL)
 find_package(FlatBuffers REQUIRED)
 
+set(coverage_flags "-coverage -fprofile-generate")
+
 enable_testing()
-
-set(DO_COV OFF)
-
-mark_as_advanced(DO_COV)
-
-if (${COV})
-    if (${CMAKE_COMPILER_IS_GNUCXX})
-        message(STATUS "Code coverage enabled.")
-        set(DO_COV ON)
-        set(CMAKE_BUILD_TYPE Debug)
-    else()
-        message(FATAL_ERROR "Unable to enable code coverage as this functionality only works with the g++ compiler.")
-    endif()
-endif()
-
 include(CMakeListsUtils.txt)
 add_subdirectory(gdgem)
 add_subdirectory(multiblade)
@@ -35,8 +22,8 @@ include(CMakeListsUnitTests.txt)
 add_library(calibfile OBJECT multigrid/mgcncs/CalibrationFile.cpp)
 
 if(DO_COV)
-  set_target_properties(calibfile PROPERTIES LINK_FLAGS "-coverage -fprofile-generate")
-  set_target_properties(calibfile PROPERTIES COMPILE_FLAGS "-g -O0 -coverage -fprofile-generate")
+  set_target_properties(calibfile PROPERTIES LINK_FLAGS ${coverage_flags})
+  set_target_properties(calibfile PROPERTIES COMPILE_FLAGS "-g -O0"  ${coverage_flags})
 endif()
 
 set(PYTHON_EXECUTABLE /usr/bin/python)
