@@ -15,10 +15,10 @@ add_subdirectory(multiblade)
 add_subdirectory(multigrid)
 add_subdirectory(udp)
 
-
 include(CMakeListsUnitTests.txt)
 
 add_library(calibfile OBJECT multigrid/mgcncs/CalibrationFile.cpp)
+
 if(DO_COV)
   set_target_properties(calibfile PROPERTIES LINK_FLAGS "-coverage -fprofile-generate")
   set_target_properties(calibfile PROPERTIES COMPILE_FLAGS "-g -O0 -coverage -fprofile-generate")
