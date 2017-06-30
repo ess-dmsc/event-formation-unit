@@ -30,7 +30,6 @@ endif()
 
 
 message(STATUS "Build str: ${BUILDSTR}")
-#set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
 
 set(EXTRA_CXX_FLAGS -std=c++11 -pthread -fPIC)
@@ -80,10 +79,6 @@ if(${PROF})
 else()
     message(STATUS "Profiling disabled.")
 endif()
-
-#set(CMAKE_C_FLAGS_RELEASE)
-#set(CMAKE_CXX_FLAGS_RELEASE)
-
 
 add_definitions(${EXTRA_CXX_FLAGS})
 

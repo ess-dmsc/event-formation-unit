@@ -48,6 +48,23 @@ TEST_F(TrackSerializerTest, Constructor) {
   ASSERT_EQ(buffer, nullptr);
 }
 
+TEST_F(TrackSerializerTest, AddTrackTooFewHits) {
+  int entries = NB_ENTRIES;
+  TrackSerializer tser(entries);
+  auto tres = tser.add_track(*event, 1);
+  ASSERT_EQ(tres, 1);
+}
+
+TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
+  int entries = NB_ENTRIES;
+  TrackSerializer tser(entries);
+  for (int i = 0; i < entries + 1; i++) {
+    addxandy(i, 2*i, 500, i-1, 3*i -1, 500);
+  }
+  auto tres = tser.add_track(*event, 1);
+  ASSERT_EQ(tres, 1);
+}
+
 TEST_F(TrackSerializerTest, Serialize) {
   int entries = NB_ENTRIES;
   TrackSerializer tser(entries);

@@ -135,7 +135,7 @@ static int detector_info_get(std::vector<std::string> cmdargs, char *output,
   }
 
   if (efu_args->detectorif == nullptr) {
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "DETECTOR_INFO_GET no_detector_loaded");
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "DETECTOR_INFO_GET error: no detector loaded");
     return Parser::OK;
   }
 
