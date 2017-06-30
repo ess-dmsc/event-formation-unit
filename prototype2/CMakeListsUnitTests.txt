@@ -62,7 +62,9 @@ set(FBSerializerTest_SRC common/FBSerializerTest.cpp common/FBSerializer.cpp com
 set(FBSerializerTest_INC common/FBSerializer.h common/Producer.h)
 create_test_executable(FBSerializerTest "${LibRDKafka_LIBRARIES}")
 
-
+set(ProducerTest_SRC common/ProducerTest.cpp common/Producer.cpp)
+set(ProducerTest_INC common/Producer.h)
+create_test_executable(ProducerTest "${LibRDKafka_LIBRARIES}")
 
 
 

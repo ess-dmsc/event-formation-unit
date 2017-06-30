@@ -131,6 +131,18 @@ TEST_F(EventTest, AnalyzeGood) {
   ASSERT_TRUE(event->good());
 }
 
+TEST_F(EventTest, InsertInvalid) {
+  Eventlet e1;
+  e1.adc = 1;
+  e1.plane_id = 0;
+  event->insert_eventlet(e1);
+  e1.plane_id = 1;
+  event->insert_eventlet(e1);
+  e1.plane_id = 2;
+  event->insert_eventlet(e1);
+  ASSERT_EQ(2, event->x.entries.size() + event->y.entries.size());
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

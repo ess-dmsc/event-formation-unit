@@ -51,6 +51,15 @@ TEST_F(ReadoutTest, BasicParsing) {
   ASSERT_EQ(readout.reserved, 0);
 }
 
+TEST_F(ReadoutTest, PktAndHeaderSizeMismatch) {
+  Readout readout;
+  int size = err_size_mismatch.size();
+  ASSERT_EQ(size, 64);
+
+  auto res = readout.validate((char *)&err_size_mismatch[0], size);
+  ASSERT_EQ(res, -Readout::EHDR);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
