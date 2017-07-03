@@ -61,6 +61,10 @@ RdKafka::Topic *RdKafka::Topic::create(RdKafka::Handle *handle,
   }
 }
 
+//
+// Google test code below
+//
+
 class ProducerTest : public TestBase {
   virtual void SetUp() { fail = -1; }
   virtual void TearDown() {}
@@ -98,6 +102,12 @@ TEST_F(ProducerTest, CreateTopicFail) {
   Producer prod{"nobroker", "notopic"};
   int ret = prod.produce(0, 0);
   ASSERT_EQ(ret, RdKafka::ERR_UNKNOWN);
+}
+
+TEST_F(ProducerTest, ProducerFail) {
+  Producer prod{"nobroker", "notopic"};
+  int ret = prod.produce((char *)10000, 100000000);
+  ASSERT_EQ(ret, RdKafka::ERR_MSG_SIZE_TOO_LARGE);
 }
 
 int main(int argc, char **argv) {
