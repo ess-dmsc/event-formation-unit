@@ -22,7 +22,8 @@ public:
    * @param chips list of (FEC, VMM) pairs in the order of increasing strip
    * number
    */
-  void define_plane(uint16_t planeID, std::initializer_list<std::pair<uint16_t, uint16_t>> chips);
+  void define_plane(uint16_t planeID,
+                    std::initializer_list<std::pair<uint16_t, uint16_t>> chips);
 
   /** @brief define channel mappings for one chip
    * @param fecID ID of FEC
@@ -30,7 +31,8 @@ public:
    * @param planeID ID of plane (edge of panel)
    * @param strip_offset starting strip for this chip's channels
    */
-  void set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t planeID, uint16_t strip_offset);
+  void set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t planeID,
+                   uint16_t strip_offset);
 
   /** @brief get strip number
    * @param fecID ID of FEC

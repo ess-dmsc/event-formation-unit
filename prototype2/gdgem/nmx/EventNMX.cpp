@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/EventNMX.h>
 #include <common/Trace.h>
+#include <gdgem/nmx/EventNMX.h>
 #include <set>
 
 //#undef TRC_LEVEL
@@ -58,7 +58,6 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
   // std::cout << "center_sum=" << center_sum
   //           << " center_count=" << center_count << "\n";
 
-
   center = center_sum / center_count;
   uncert_lower = lspan_max - lspan_min + 1;
   uncert_upper = uspan_max - uspan_min + 1;
@@ -92,7 +91,4 @@ void EventNMX::analyze(bool weighted, int16_t max_timebins,
 
 bool EventNMX::good() const { return good_; }
 
-uint64_t EventNMX::time_start() const
-{
-  return time_start_;
-}
+uint64_t EventNMX::time_start() const { return time_start_; }

@@ -13,7 +13,6 @@
 
 class HistSerializer {
 public:
-
   /** @todo document */
   HistSerializer(size_t maxarraylength);
 
@@ -21,7 +20,8 @@ public:
   ~HistSerializer();
 
   /** @todo document */
-  int serialize(uint32_t * xhist, uint32_t * yhist, size_t entries, char **buffer);
+  int serialize(uint32_t *xhist, uint32_t *yhist, size_t entries,
+                char **buffer);
 
 private:
   flatbuffers::FlatBufferBuilder builder;

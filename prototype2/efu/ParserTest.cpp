@@ -213,7 +213,7 @@ TEST_F(ParserTest, StatGetCountNoDetectorLoaded) {
   efu_args->detectorif = 0;
   for (auto cmdstr : check_detector_loaded) {
     MESSAGE() << cmdstr << "\n";
-    const char * cmd = cmdstr.c_str();
+    const char *cmd = cmdstr.c_str();
     std::memcpy(input, cmd, strlen(cmd));
     int res = parser->parse(input, strlen(cmd), output, &obytes);
     ASSERT_EQ(res, -Parser::OK);

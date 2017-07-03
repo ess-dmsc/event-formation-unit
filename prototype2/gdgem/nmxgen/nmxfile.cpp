@@ -5,9 +5,9 @@
 #include <cstdlib>
 #include <cstring>
 
-#include <libs/include/Socket.h>
 #include <gdgem/nmxgen/NMXArgs.h>
 #include <gdgem/nmxgen/ReaderVMM.h>
+#include <libs/include/Socket.h>
 #include <unistd.h>
 
 // const int TSC_MHZ = 2900;

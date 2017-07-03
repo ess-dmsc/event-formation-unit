@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <sys/shm.h>
+#include <unistd.h>
 
-#define SHM_KEY  105205673
+#define SHM_KEY 105205673
 #define US_ONE_SEC 1000000
 #define MAX_CPU 6
 #define NSAMPLES 10
@@ -13,14 +13,13 @@
 #define SHM_SIZE 8192
 
 void helptext() {
-    printf("usage:  tsctest -r                  # start reader\n");
-    printf("        tsctest -c cpuiud ./a.out   # start writer\n");
-    printf("        tsctest -h                  # help text\n");
-    exit(0);
+  printf("usage:  tsctest -r                  # start reader\n");
+  printf("        tsctest -c cpuiud ./a.out   # start writer\n");
+  printf("        tsctest -h                  # help text\n");
+  exit(0);
 }
 
-uint64_t rdtscp(int *chip, int *core)
-{
+uint64_t rdtscp(int *chip, int *core) {
   uint32_t lo, hi, cpuinfo;
   __asm__ volatile("rdtscp" : "=a"(lo), "=d"(hi), "=c"(cpuinfo));
   *chip = (cpuinfo & 0xFFF000) >> 12;
@@ -28,12 +27,11 @@ uint64_t rdtscp(int *chip, int *core)
   return ((uint64_t)lo) | (((uint64_t)hi) << 32);
 }
 
-uint64_t setup_shared_memory()
-{
+uint64_t setup_shared_memory() {
   uint64_t shmaddr;
   int shmid;
   key_t shmkey = SHM_KEY;
-  if  ((shmid = shmget(shmkey, SHM_SIZE, IPC_CREAT | 0666)) == -1) {
+  if ((shmid = shmget(shmkey, SHM_SIZE, IPC_CREAT | 0666)) == -1) {
     printf("Error creating shared memory segment\n");
     exit(0);
   }
@@ -45,9 +43,7 @@ uint64_t setup_shared_memory()
   return shmaddr;
 }
 
-
-void writer(uint64_t addr)
-{
+void writer(uint64_t addr) {
   int sock0, core0, sock, core;
   unsigned long tsc = rdtscp(&sock0, &core0);
   printf("Starting tsctest writer\n");
@@ -60,21 +56,21 @@ void writer(uint64_t addr)
       exit(1);
     }
 
-    volatile uint64_t * addrp = (uint64_t *)(addr + OFFSET * core0);
+    volatile uint64_t *addrp = (uint64_t *)(addr + OFFSET * core0);
     *addrp = tsc;
   }
 }
 
-
 #define CPUOFF 0
 void reader(uint64_t addr) {
   uint64_t tsc[MAX_CPU][NSAMPLES];
-  int64_t  tdiff[MAX_CPU];
+  int64_t tdiff[MAX_CPU];
 
   printf("Starting tsctest reader\n");
   printf("Sampling tsc counters\n");
   for (int n = 0; n < NSAMPLES; n++) {
-    printf("."); fflush(stdout);
+    printf(".");
+    fflush(stdout);
     for (int i = 0; i < MAX_CPU; i++) {
       tsc[i][n] = *(uint64_t *)(addr + (i + CPUOFF) * OFFSET);
     }
@@ -86,9 +82,9 @@ void reader(uint64_t addr) {
   for (int i = 0; i < MAX_CPU; i++) {
     int64_t diff = 0;
     for (int n = 0; n < NSAMPLES; n++) {
-      diff += tsc[i][n] -  tsc[0][n];
+      diff += tsc[i][n] - tsc[0][n];
     }
-    tdiff[i] = diff/NSAMPLES;
+    tdiff[i] = diff / NSAMPLES;
     printf("avg tsc diff. 0 - %d: %" PRIi64 "\n", i, tdiff[i]);
   }
 
@@ -106,12 +102,10 @@ void reader(uint64_t addr) {
   }
 }
 
-
-
 int main(int argc, char *argv[]) {
   int cpu1, cpu2;
 
-  if ((argc != 1 && argc != 2) || strcmp(argv[0], "-h") ==0 ) {
+  if ((argc != 1 && argc != 2) || strcmp(argv[0], "-h") == 0) {
     helptext();
   }
 

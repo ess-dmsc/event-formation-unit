@@ -61,7 +61,7 @@ int Producer::produce(char *buffer, int length) {
       topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */, buffer,
       length, NULL, NULL);
   if (resp != RdKafka::ERR_NO_ERROR) {
-    //std::cerr << "% Produce failed: " << RdKafka::err2str(resp) << std::endl;
+    // std::cerr << "% Produce failed: " << RdKafka::err2str(resp) << std::endl;
     printf("Produce failed: %s\n", RdKafka::err2str(resp).c_str());
     return resp;
   }

@@ -1,12 +1,12 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <cassert>
-#include <multigrid/mgcncsgen/DGArgs.h>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
+#include <multigrid/mgcncsgen/DGArgs.h>
 #include <unistd.h>
 
 // const int TSC_MHZ = 2900;

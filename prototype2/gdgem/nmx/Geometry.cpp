@@ -30,7 +30,7 @@ void Geometry::set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t planeID,
 }
 
 uint16_t Geometry::get_strip(uint16_t fecID, uint16_t vmmID,
-                                uint32_t channelID) const {
+                             uint32_t channelID) const {
   if ((fecID < offsets_.size()) && (vmmID < offsets_.at(fecID).size()) &&
       (offsets_.at(fecID).at(vmmID) != NMX_INVALID_GEOM_ID))
     return offsets_.at(fecID).at(vmmID) + channelID;

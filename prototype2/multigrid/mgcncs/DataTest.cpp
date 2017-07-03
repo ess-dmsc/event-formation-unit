@@ -1,11 +1,11 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <algorithm>
-#include <multigrid/mgcncs/Geometry.h>
+#include <memory>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/Data.h>
+#include <multigrid/mgcncs/Geometry.h>
 #include <multigrid/mgcncs/TestData.h>
-#include <memory>
 #include <test/TestBase.h>
 
 using namespace std;

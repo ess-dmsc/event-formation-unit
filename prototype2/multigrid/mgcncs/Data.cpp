@@ -2,8 +2,8 @@
 
 #include <cassert>
 #include <common/Trace.h>
-#include <multigrid/mgcncs/Data.h>
 #include <cstring>
+#include <multigrid/mgcncs/Data.h>
 
 using namespace std;
 

@@ -7,13 +7,11 @@ class VersionTest : public TestBase {};
 
 TEST_F(VersionTest, Constructor) {
 
-  ASSERT_TRUE(EFU_VERSION_NUM(0,0,1) > EFU_VERSION_NUM(0,0,0));
+  ASSERT_TRUE(EFU_VERSION_NUM(0, 0, 1) > EFU_VERSION_NUM(0, 0, 0));
 
-  ASSERT_TRUE(EFU_VERSION_NUM(0,1,0) > EFU_VERSION_NUM(0,0,1));
-  ASSERT_TRUE(EFU_VERSION_NUM(1,0,0) > EFU_VERSION_NUM(0,1,0));
+  ASSERT_TRUE(EFU_VERSION_NUM(0, 1, 0) > EFU_VERSION_NUM(0, 0, 1));
+  ASSERT_TRUE(EFU_VERSION_NUM(1, 0, 0) > EFU_VERSION_NUM(0, 1, 0));
 }
-
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

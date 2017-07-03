@@ -9,9 +9,7 @@
 class ReadoutDummyTest : public TestBase {
 protected:
   char buffer[9000];
-  virtual void SetUp() {
-    memset(buffer, 0, sizeof(buffer));
-  }
+  virtual void SetUp() { memset(buffer, 0, sizeof(buffer)); }
   virtual void TearDown() {}
 };
 

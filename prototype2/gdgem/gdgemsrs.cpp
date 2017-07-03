@@ -1,6 +1,5 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/Clusterer.h>
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
@@ -10,16 +9,17 @@
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <cstring>
+#include <gdgem/nmx/Clusterer.h>
+#include <gdgem/vmm2srs/EventletBuilder.h>
+#include <gdgem/vmm2srs/HistSerializer.h>
+#include <gdgem/vmm2srs/NMXVMM2SRSData.h>
+#include <gdgem/vmm2srs/TrackSerializer.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
-#include <gdgem/vmm2srs/EventletBuilder.h>
-#include <gdgem/vmm2srs/HistSerializer.h>
-#include <gdgem/vmm2srs/TrackSerializer.h>
-#include <gdgem/vmm2srs/NMXVMM2SRSData.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -55,7 +55,8 @@ private:
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
-  NewStats ns{"efu2.nmxvmm2srs."}; // Careful also uding this for other NMX pipeline
+  NewStats ns{
+      "efu2.nmxvmm2srs."}; // Careful also uding this for other NMX pipeline
 
   struct {
     // Input Counters
@@ -158,7 +159,8 @@ void NMXVMM2SRS::processing_thread() {
   Time time_interpreter;
   time_interpreter.set_tac_slope(125); /**< @todo get from slow control? */
   time_interpreter.set_bc_clock(40);   /**< @todo get from slow control? */
-  time_interpreter.set_trigger_resolution(3.125); /**< @todo get from slow control? */
+  time_interpreter.set_trigger_resolution(
+      3.125); /**< @todo get from slow control? */
   time_interpreter.set_target_resolution(0.5); /**< @todo not hardcode */
 
   Geometry geometry_intepreter; /**< @todo not hardocde chip mappings */
@@ -179,7 +181,8 @@ void NMXVMM2SRS::processing_thread() {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      data.receive(eth_ringbuf->getdatabuffer(data_index), eth_ringbuf->getdatalength(data_index));
+      data.receive(eth_ringbuf->getdatabuffer(data_index),
+                   eth_ringbuf->getdatalength(data_index));
       if (data.elems > 0) {
         builder.process_readout(data, clusterer);
 
@@ -194,20 +197,23 @@ void NMXVMM2SRS::processing_thread() {
             XTRACE(PROCESS, DEB, "event.good\n");
 
             if (sample_next_track) {
-                sample_next_track = trackfb.add_track(event, 6);
+              sample_next_track = trackfb.add_track(event, 6);
             }
             mystats.rx_events++;
 
-            XTRACE(PROCESS, DEB, "x.center: %f, y.center %f\n", event.x.center, event.y.center);
+            XTRACE(PROCESS, DEB, "x.center: %f, y.center %f\n", event.x.center,
+                   event.y.center);
             int pixelid = (int)event.x.center + (int)event.y.center * 256;
 
             assert(pixelid < 65535);
 
-            //printf("event time: %" PRIu64 "\n", event.time_start());
-            mystats.tx_bytes += flatbuffer.addevent((uint32_t)event.time_start(), pixelid);
+            // printf("event time: %" PRIu64 "\n", event.time_start());
+            mystats.tx_bytes +=
+                flatbuffer.addevent((uint32_t)event.time_start(), pixelid);
             mystats.rx_events++;
           } else {
-            mystats.rx_discards += event.x.entries.size() + event.y.entries.size();
+            mystats.rx_discards +=
+                event.x.entries.size() + event.y.entries.size();
           }
         }
       }
@@ -215,13 +221,13 @@ void NMXVMM2SRS::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-      //printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
+      // printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
 
       sample_next_track = 1;
 
       flatbuffer.produce();
 
-      char * txbuffer;
+      char *txbuffer;
       auto len = trackfb.serialize(&txbuffer);
       if (len != 0) {
         XTRACE(PROCESS, ALW, "Sending tracks with size %d\n", len);
@@ -229,9 +235,11 @@ void NMXVMM2SRS::processing_thread() {
       }
 
       if (data.xyhist_elems != 0) {
-        XTRACE(PROCESS, ALW, "Sending histogram with %d readouts\n", data.xyhist_elems);
-        char * txbuffer;
-        auto len = histfb.serialize(&data.xyhist[0][0], &data.xyhist[1][0], 1500, &txbuffer);
+        XTRACE(PROCESS, ALW, "Sending histogram with %d readouts\n",
+               data.xyhist_elems);
+        char *txbuffer;
+        auto len = histfb.serialize(&data.xyhist[0][0], &data.xyhist[1][0],
+                                    1500, &txbuffer);
         monitorprod.produce(txbuffer, len);
         data.hist_clear();
       }

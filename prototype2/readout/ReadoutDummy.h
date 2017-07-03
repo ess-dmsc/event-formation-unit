@@ -12,10 +12,9 @@
 
 class ReadoutDummy : public Readout {
 public:
+  ReadoutDummy(unsigned int type) : detectortype(type){};
 
-  ReadoutDummy(unsigned int type) :detectortype(type) {};
-
-  int parse(const char * buffer, uint32_t size);
+  int parse(const char *buffer, uint32_t size);
 
 private:
   unsigned int detectortype{0};

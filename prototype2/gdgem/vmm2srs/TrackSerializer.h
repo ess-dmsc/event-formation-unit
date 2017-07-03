@@ -12,7 +12,6 @@
 
 class TrackSerializer {
 public:
-
   /** @todo document */
   TrackSerializer(size_t maxarraylength);
 
@@ -20,11 +19,11 @@ public:
   ~TrackSerializer();
 
   /** @todo document */
-  //int add_track(uint32_t plane, uint32_t strip, uint32_t time, uint32_t adc);
-  int add_track(const EventNMX & event, size_t minhits);
+  // int add_track(uint32_t plane, uint32_t strip, uint32_t time, uint32_t adc);
+  int add_track(const EventNMX &event, size_t minhits);
 
   /** @todo document */
-  int serialize(char ** buffer);
+  int serialize(char **buffer);
 
 private:
   flatbuffers::FlatBufferBuilder builder;

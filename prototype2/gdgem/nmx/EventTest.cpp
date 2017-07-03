@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/EventNMX.h>
 #include <cmath>
+#include <gdgem/nmx/EventNMX.h>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>

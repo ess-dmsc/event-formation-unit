@@ -7,22 +7,20 @@
 class ReadoutTest : public TestBase {
 protected:
   char buffer[9000];
-  virtual void SetUp() {
-    memset(buffer, 0, sizeof(buffer));
-  }
+  virtual void SetUp() { memset(buffer, 0, sizeof(buffer)); }
   virtual void TearDown() {}
 };
 
 TEST_F(ReadoutTest, InvalidBuffer) {
   Readout readout;
-  ASSERT_EQ(readout.validate(0,0), -Readout::EBUFFER);
+  ASSERT_EQ(readout.validate(0, 0), -Readout::EBUFFER);
 }
 
 TEST_F(ReadoutTest, InvalidDataSize) {
   Readout readout;
-  ASSERT_EQ(readout.validate(buffer,-5), -Readout::ESIZE);
+  ASSERT_EQ(readout.validate(buffer, -5), -Readout::ESIZE);
   for (auto i = 0; i < 64; i++) {
-    ASSERT_EQ(readout.validate(buffer,i), -Readout::ESIZE);
+    ASSERT_EQ(readout.validate(buffer, i), -Readout::ESIZE);
   }
 }
 

@@ -1,6 +1,5 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/Clusterer.h>
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
@@ -9,13 +8,14 @@
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <cstring>
+#include <gdgem/nmx/Clusterer.h>
+#include <gdgem/nmxgen/EventletBuilderH5.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
-#include <gdgem/nmxgen/EventletBuilderH5.h>
 #include <stdio.h>
 #include <unistd.h>
 

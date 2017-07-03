@@ -13,7 +13,6 @@
 
 class Clusterer {
 public:
-
   /** @brief create an NMX event clusterer
    * @param min_time_span minimum timebins that constitute one event
    */
@@ -33,6 +32,7 @@ public:
   EventNMX get_event();
 
 private:
-  std::multimap<uint64_t, Eventlet> backlog_; //stack of chronologically ordered events
+  std::multimap<uint64_t, Eventlet>
+      backlog_; // stack of chronologically ordered events
   uint64_t min_time_span_{1};
 };

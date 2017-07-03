@@ -8,13 +8,13 @@
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/FBSerializer.h>
-#include <multigrid/mgcncs/Geometry.h>
 #include <common/NewStats.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/Data.h>
+#include <multigrid/mgcncs/Geometry.h>
 //#include <cspec/CSPECEvent.h>
 #include <cstring>
 #include <iostream>
@@ -48,7 +48,7 @@ public:
   int statsize();
   int64_t statvalue(size_t index);
   std::string &statname(size_t index);
-  const char * detectorname();
+  const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
@@ -131,7 +131,7 @@ int64_t CSPEC::statvalue(size_t index) { return ns.value(index); }
 
 std::string &CSPEC::statname(size_t index) { return ns.name(index); }
 
-const char * CSPEC::detectorname() { return classname; }
+const char *CSPEC::detectorname() { return classname; }
 
 void CSPEC::input_thread() {
 
@@ -178,7 +178,6 @@ void CSPEC::input_thread() {
   }
 }
 
-
 void CSPEC::processing_thread() {
 
   CSPECChanConv conv;
@@ -210,14 +209,16 @@ void CSPEC::processing_thread() {
       dat.receive(eth_ringbuf->getdatabuffer(data_index),
                   eth_ringbuf->getdatalength(data_index));
       mystats.rx_error_bytes += dat.error;
-      mystats.rx_readouts += dat.elems; /**< @todo both valid and invalid events */
+      mystats.rx_readouts +=
+          dat.elems; /**< @todo both valid and invalid events */
       mystats.rx_discards += dat.input_filter();
 
       for (unsigned int id = 0; id < dat.elems; id++) {
         auto d = dat.data[id];
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();
-          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) < 0) {
+          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) <
+              0) {
             mystats.geometry_errors++;
             assert(mystats.geometry_errors <= mystats.rx_readouts);
           } else {
@@ -245,7 +246,6 @@ void CSPEC::processing_thread() {
   }
 }
 
-
 void CSPEC::output_thread() {
   Producer producer(opts->broker, "C-SPEC_detector");
   FBSerializer flatbuffer(kafka_buffer_size, producer);
@@ -262,7 +262,8 @@ void CSPEC::output_thread() {
       auto evbuf = event_ringbuf->getdatabuffer(event_index);
       XTRACE(OUTPUT, DEB, "output pixel: %d\n", *(uint32_t *)(evbuf + 4));
 
-      mystats.tx_bytes += flatbuffer.addevent(*(uint32_t *)(evbuf + 0), *(uint32_t *)(evbuf + 4));
+      mystats.tx_bytes += flatbuffer.addevent(*(uint32_t *)(evbuf + 0),
+                                              *(uint32_t *)(evbuf + 4));
       mystats.rx_events++;
     }
 

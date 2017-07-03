@@ -1,10 +1,10 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/Eventlet.h>
+#include <cstring>
 #include <gdgem/nmx/EventNMX.h>
+#include <gdgem/nmx/Eventlet.h>
 #include <gdgem/vmm2srs/TrackSerializer.h>
 #include <test/TestBase.h>
-#include <cstring>
 
 #define NB_ENTRIES 256
 #define BASE_OVERHEAD 128
@@ -22,12 +22,13 @@ class TrackSerializerTest : public TestBase {
   }
 
 protected:
-  Eventlet * e;
-  EventNMX * event;
-  char * buffer;
+  Eventlet *e;
+  EventNMX *event;
+  char *buffer;
   char flatbuffer[100000];
 
-  void addxandy(uint16_t xs, uint16_t xt, uint16_t xa, uint16_t ys, uint16_t yt, uint16_t ya) {
+  void addxandy(uint16_t xs, uint16_t xt, uint16_t xa, uint16_t ys, uint16_t yt,
+                uint16_t ya) {
     e->strip = xs;
     e->time = xt;
     e->adc = xa;
@@ -59,7 +60,7 @@ TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
   int entries = NB_ENTRIES;
   TrackSerializer tser(entries);
   for (int i = 0; i < entries + 1; i++) {
-    addxandy(i, 2*i, 500, i-1, 3*i -1, 500);
+    addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
   auto tres = tser.add_track(*event, 1);
   ASSERT_EQ(tres, 1);
@@ -69,13 +70,14 @@ TEST_F(TrackSerializerTest, Serialize) {
   int entries = NB_ENTRIES;
   TrackSerializer tser(entries);
   for (int i = 0; i < entries; i++) {
-    addxandy(i, 2*i, 500, i-1, 3*i -1, 500);
+    addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
   auto tres = tser.add_track(*event, 1);
   ASSERT_EQ(tres, 0);
   auto len = tser.serialize(&buffer);
   ASSERT_TRUE(len > entries * 2 * 12);
-  ASSERT_TRUE(len < entries * 2 * 12 + BASE_OVERHEAD + entries * ENTRY_OVERHEAD);
+  ASSERT_TRUE(len <
+              entries * 2 * 12 + BASE_OVERHEAD + entries * ENTRY_OVERHEAD);
   ASSERT_TRUE(buffer != nullptr);
 }
 
@@ -94,7 +96,8 @@ TEST_F(TrackSerializerTest, DeSerialize) {
 
   auto len = tser.serialize(&buffer);
   ASSERT_TRUE(len > entries * entry_size * 2); //  x and y
-  ASSERT_TRUE(len < entries * entry_size * 2 + BASE_OVERHEAD + entries * ENTRY_OVERHEAD);
+  ASSERT_TRUE(len < entries * entry_size * 2 + BASE_OVERHEAD +
+                        entries * ENTRY_OVERHEAD);
   ASSERT_TRUE(buffer != nullptr);
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
@@ -104,13 +107,12 @@ TEST_F(TrackSerializerTest, DeSerialize) {
   auto dtype = monitor->data_type();
   ASSERT_EQ(dtype, DataField_GEMTrack);
 
-  auto track = static_cast<const GEMTrack*>(monitor->data());
+  auto track = static_cast<const GEMTrack *>(monitor->data());
   auto xdat = track->xtrack();
   auto ydat = track->ytrack();
   ASSERT_EQ(xdat->size(), entries);
   ASSERT_EQ(ydat->size(), entries);
 }
-
 
 TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
   MESSAGE() << "Allocating a TrackSerializer object on every iteration\n";
@@ -125,16 +127,19 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
 
     TrackSerializer tser(entries);
     for (int i = 0; i < entries; i++) {
-      addxandy(i, i*2, i*3 + 1, entries - i, i*2 + 0x1000, i*3 + 0x2000);
+      addxandy(i, i * 2, i * 3 + 1, entries - i, i * 2 + 0x1000,
+               i * 3 + 0x2000);
     }
     auto tres = tser.add_track(*event, 1);
     ASSERT_EQ(event->x.entries.size(), entries);
     ASSERT_EQ(event->y.entries.size(), entries);
     ASSERT_EQ(tres, 0);
     auto len = tser.serialize(&buffer);
-    //MESSAGE() << "entries: " << entries << ", buffer size: " << len << ", overhead: " << len - entries * entry_size * 2 << "\n";
+    // MESSAGE() << "entries: " << entries << ", buffer size: " << len << ",
+    // overhead: " << len - entries * entry_size * 2 << "\n";
     ASSERT_TRUE(len > entries * entry_size * 2); //  x and y
-    ASSERT_TRUE(len < entries * entry_size * 2 + BASE_OVERHEAD + entries * ENTRY_OVERHEAD);
+    ASSERT_TRUE(len < entries * entry_size * 2 + BASE_OVERHEAD +
+                          entries * ENTRY_OVERHEAD);
     ASSERT_TRUE(buffer != nullptr);
 
     memcpy(flatbuffer, buffer, len);
@@ -143,7 +148,7 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
     auto dtype = monitor->data_type();
     ASSERT_EQ(dtype, DataField_GEMTrack);
 
-    auto track = static_cast<const GEMTrack*>(monitor->data());
+    auto track = static_cast<const GEMTrack *>(monitor->data());
     auto xdat = track->xtrack();
     auto ydat = track->ytrack();
     ASSERT_EQ(xdat->size(), entries);
@@ -151,11 +156,11 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
 
     for (int i = 0; i < entries; i++) {
       ASSERT_EQ((*xdat)[i]->strip(), i);
-      ASSERT_EQ((*xdat)[i]->time(), i*2);
-      ASSERT_EQ((*xdat)[i]->adc(),  i*3 + 1);
+      ASSERT_EQ((*xdat)[i]->time(), i * 2);
+      ASSERT_EQ((*xdat)[i]->adc(), i * 3 + 1);
       ASSERT_EQ((*ydat)[i]->strip(), entries - i);
-      ASSERT_EQ((*ydat)[i]->time(), i*2 + 0x1000);
-      ASSERT_EQ((*ydat)[i]->adc(),  i*3 + 0x2000);
+      ASSERT_EQ((*ydat)[i]->time(), i * 2 + 0x1000);
+      ASSERT_EQ((*ydat)[i]->adc(), i * 3 + 0x2000);
     }
   }
 }
@@ -169,14 +174,17 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
     event->x.entries.clear();
     event->y.entries.clear();
     for (int i = 0; i < entries; i++) {
-      addxandy(i, i*2, i*3 + 1, entries - i, i*2 + 0x1000, i*3 + 0x2000);
+      addxandy(i, i * 2, i * 3 + 1, entries - i, i * 2 + 0x1000,
+               i * 3 + 0x2000);
     }
     auto tres = tser.add_track(*event, 1);
     ASSERT_EQ(tres, 0);
     auto len = tser.serialize(&buffer);
-    //MESSAGE() << "entries: " << entries << ", buffer size: " << len << ", overhead: " << len - entries * entry_size * 2 << "\n";
+    // MESSAGE() << "entries: " << entries << ", buffer size: " << len << ",
+    // overhead: " << len - entries * entry_size * 2 << "\n";
     ASSERT_TRUE(len > entries * entry_size * 2); //  x and y
-    ASSERT_TRUE(len < entries * entry_size * 2 + BASE_OVERHEAD + entries * ENTRY_OVERHEAD);
+    ASSERT_TRUE(len < entries * entry_size * 2 + BASE_OVERHEAD +
+                          entries * ENTRY_OVERHEAD);
     ASSERT_TRUE(buffer != nullptr);
 
     memcpy(flatbuffer, buffer, len);
@@ -185,7 +193,7 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
     auto dtype = monitor->data_type();
     ASSERT_EQ(dtype, DataField_GEMTrack);
 
-    auto track = static_cast<const GEMTrack*>(monitor->data());
+    auto track = static_cast<const GEMTrack *>(monitor->data());
     auto xdat = track->xtrack();
     auto ydat = track->ytrack();
     ASSERT_EQ(xdat->size(), entries);
@@ -193,15 +201,14 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
 
     for (int i = 0; i < entries; i++) {
       ASSERT_EQ((*xdat)[i]->strip(), i);
-      ASSERT_EQ((*xdat)[i]->time(), i*2);
-      ASSERT_EQ((*xdat)[i]->adc(),  i*3 + 1);
+      ASSERT_EQ((*xdat)[i]->time(), i * 2);
+      ASSERT_EQ((*xdat)[i]->adc(), i * 3 + 1);
       ASSERT_EQ((*ydat)[i]->strip(), entries - i);
-      ASSERT_EQ((*ydat)[i]->time(), i*2 + 0x1000);
-      ASSERT_EQ((*ydat)[i]->adc(),  i*3 + 0x2000);
+      ASSERT_EQ((*ydat)[i]->time(), i * 2 + 0x1000);
+      ASSERT_EQ((*ydat)[i]->adc(), i * 3 + 0x2000);
     }
   }
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

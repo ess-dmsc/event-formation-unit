@@ -5,9 +5,9 @@
 #include <cassert>
 #include <cinttypes>
 #include <cstring>
+#include <gdgem/nmxgen/ReaderPcap.h>
 #include <netinet/ip.h>
 #include <netinet/udp.h>
-#include <gdgem/nmxgen/ReaderPcap.h>
 
 ReaderPcap::ReaderPcap(std::string filename) {
   char errbuff[PCAP_ERRBUF_SIZE];
@@ -71,7 +71,7 @@ int ReaderPcap::read(char *buffer, size_t bufferlen) {
   assert(stats.eth_ipv4 == stats.ip_udp + stats.ip_unkn);
 
   struct udphdr *udp = (struct udphdr *)&data[UDPHDROFF];
-#ifndef __FAVOR_BSD //Why is __FAVOR_BSD not defined here?
+#ifndef __FAVOR_BSD // Why is __FAVOR_BSD not defined here?
   uint16_t udplen = htons(udp->len);
 #else
   uint16_t udplen = htons(udp->uh_ulen);

@@ -18,7 +18,6 @@ static __inline__ unsigned long long rdtsc(void) {
   return ((unsigned long long)lo) | (((unsigned long long)hi) << 32);
 }
 
-
 #ifdef RELEASE
 #define UNUSED
 #else

@@ -4,10 +4,10 @@
 #include <common/EFUArgs.h>
 #include <common/Trace.h>
 #include <common/Version.h>
-#include <multigrid/mgcncs/CalibrationFile.h>
 #include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
+#include <multigrid/mgcncs/CalibrationFile.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -25,7 +25,8 @@ static int stat_get_count(std::vector<std::string> cmdargs, char *output,
   }
 
   if (efu_args->detectorif == nullptr) {
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET_COUNT error: no detector loaded");
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE,
+                       "STAT_GET_COUNT error: no detector loaded");
     return Parser::OK;
   }
 
@@ -47,7 +48,8 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
   auto index = atoi(cmdargs.at(1).c_str());
 
   if (efu_args->detectorif == nullptr) {
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET error: no detector loaded");
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE,
+                       "STAT_GET error: no detector loaded");
     return Parser::OK;
   }
 
@@ -106,10 +108,9 @@ static int cspec_show_calib(std::vector<std::string> cmdargs, char *output,
   return Parser::OK;
 }
 
-
 //=============================================================================
 static int version_get(std::vector<std::string> cmdargs, char *output,
-                    unsigned int *obytes) {
+                       unsigned int *obytes) {
   auto nargs = cmdargs.size();
   XTRACE(CMD, INF, "VERSION_GET\n");
   if (nargs != 1) {
@@ -118,15 +119,14 @@ static int version_get(std::vector<std::string> cmdargs, char *output,
   }
 
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "VERSION_GET %s %s",
-                  efu_version().c_str(),
-                  efu_buildstr().c_str());
+                     efu_version().c_str(), efu_buildstr().c_str());
 
   return Parser::OK;
 }
 
 //=============================================================================
 static int detector_info_get(std::vector<std::string> cmdargs, char *output,
-                    unsigned int *obytes) {
+                             unsigned int *obytes) {
   auto nargs = cmdargs.size();
   XTRACE(CMD, INF, "DETECTOR_INFO_GET\n");
   if (nargs != 1) {
@@ -135,7 +135,8 @@ static int detector_info_get(std::vector<std::string> cmdargs, char *output,
   }
 
   if (efu_args->detectorif == nullptr) {
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE, "DETECTOR_INFO_GET error: no detector loaded");
+    *obytes = snprintf(output, SERVER_BUFFER_SIZE,
+                       "DETECTOR_INFO_GET error: no detector loaded");
     return Parser::OK;
   }
 
@@ -144,7 +145,6 @@ static int detector_info_get(std::vector<std::string> cmdargs, char *output,
 
   return Parser::OK;
 }
-
 
 /******************************************************************************/
 /******************************************************************************/

@@ -1,10 +1,9 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/vmm2srs/HistSerializer.h>
 #include <common/Producer.h>
-#include <test/TestBase.h>
 #include <cstring>
-
+#include <gdgem/vmm2srs/HistSerializer.h>
+#include <test/TestBase.h>
 
 #define HISTSIZE 1500
 #define ELEMSIZE 4
@@ -17,13 +16,13 @@ class HistSerializerTest : public TestBase {
     }
   }
 
-virtual void TearDown() {}
+  virtual void TearDown() {}
 
 protected:
   uint32_t xarr[HISTSIZE];
   uint32_t yarr[HISTSIZE];
-  char * buffer;
-  char flatbuffer[1024*1024];
+  char *buffer;
+  char flatbuffer[1024 * 1024];
 };
 
 TEST_F(HistSerializerTest, Serialize) {
@@ -48,7 +47,7 @@ TEST_F(HistSerializerTest, DeSerialize) {
   auto dtype = monitor->data_type();
   ASSERT_EQ(dtype, DataField_GEMHist);
 
-  auto hist = static_cast<const GEMHist*>(monitor->data());
+  auto hist = static_cast<const GEMHist *>(monitor->data());
   auto xdat = hist->xhist();
   auto ydat = hist->yhist();
   ASSERT_EQ(xdat->size(), HISTSIZE);
@@ -58,7 +57,6 @@ TEST_F(HistSerializerTest, DeSerialize) {
     ASSERT_EQ((*xdat)[i], i);
     ASSERT_EQ((*ydat)[i], 200000 - i);
   }
-
 }
 
 int main(int argc, char **argv) {

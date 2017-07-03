@@ -5,10 +5,10 @@
 #include <DataSave.h>
 #include <MapFile.h>
 #include <cassert>
-#include <multigrid/mgcncs/Geometry.h>
-#include <multigrid/mgcncs/ChanConv.h>
-#include <multigrid/mgcncs/CalibrationFile.h>
 #include <getopt.h>
+#include <multigrid/mgcncs/CalibrationFile.h>
+#include <multigrid/mgcncs/ChanConv.h>
+#include <multigrid/mgcncs/Geometry.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

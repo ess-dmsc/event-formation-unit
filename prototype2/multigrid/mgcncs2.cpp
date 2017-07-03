@@ -7,13 +7,13 @@
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
-#include <multigrid/mgcncs/Geometry.h>
 #include <common/NewStats.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/Data.h>
+#include <multigrid/mgcncs/Geometry.h>
 //#include <cspec/CSPECEvent.h>
 #include <cstring>
 #include <iostream>
