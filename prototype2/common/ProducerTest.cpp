@@ -11,7 +11,10 @@ int fail = -1; // Dont fail
 typedef RdKafka::Conf *(* pcreate) (RdKafka::Conf::ConfType);
 
 RdKafka::Conf * RdKafka::Conf::create(ConfType type) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
   pcreate real_create = (pcreate)dlsym(RTLD_NEXT, "_ZN7RdKafka4Conf6createENS0_8ConfTypeE"); // nm -C
+#pragma GCC diagnostic pop
   if (fail != -1 && type == fail) {
     printf("Forcing RdKafka::Conf::create() to fail\n");
     return nullptr;
@@ -22,8 +25,11 @@ RdKafka::Conf * RdKafka::Conf::create(ConfType type) {
 
 typedef RdKafka::Producer *(* pcreateprod) (RdKafka::Conf*, std::string&);
 RdKafka::Producer * RdKafka::Producer::create(RdKafka::Conf* type, std::string& str) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
   pcreateprod real_create = (pcreateprod)dlsym(RTLD_NEXT,
             "_ZN7RdKafka8Producer6createEPNS_4ConfERSs"); // nm -C librdkafka.a
+#pragma GCC diagnostic pop
   if (fail == 777) {
     printf("Forcing RdKafka::Producer::create() to fail\n");
     return nullptr;
@@ -34,8 +40,11 @@ RdKafka::Producer * RdKafka::Producer::create(RdKafka::Conf* type, std::string& 
 
 typedef RdKafka::Topic *(* pcreatetopic) (RdKafka::Handle*, std::string const&, RdKafka::Conf*, std::string&);
 RdKafka::Topic * RdKafka::Topic::create(RdKafka::Handle* handle, std::string const& topic, RdKafka::Conf* conf, std::string& str) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
   pcreatetopic real_create  = (pcreatetopic)dlsym(RTLD_NEXT,
              "_ZN7RdKafka5Topic6createEPNS_6HandleERKSsPNS_4ConfERSs"); // nm -C librdkafka.a
+#pragma GCC diagnostic pop
   if (fail == 888) {
     printf("Forcing RdKafka::Topic::create() to fail\n");
     return nullptr;
