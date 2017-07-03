@@ -42,10 +42,9 @@ if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     message(STATUS "Detected Linux")
-
     find_library(DL_LIB dl REQUIRED)
 else()
-    message(STATUS "Unknown system")
+    message(FATAL_ERROR "Unknown system")
 endif()
 
 option(CMAKE_BUILD_TYPE "Build type; \"Release\" or \"Debug\"." Debug)
@@ -67,8 +66,6 @@ if(${DUMPTOFILE})
 else()
     message(STATUS "Not dumping to file.")
 endif()
-
-option(CMAKE_BUILD_TYPE "Build in \"Release\" or \"Debug\" mode." "Release")
 
 option(PROF "Enable profiling." OFF)
 if(${PROF})

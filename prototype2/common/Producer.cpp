@@ -12,13 +12,13 @@ Producer::Producer(std::string broker, std::string topicstr) {
   tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
 
   if (conf == nullptr) {
-    std::cerr << "Unable to created global Conf object" << std::endl;
-    exit(1);
+    std::cerr << "Unable to create CONF_GLOBAL object" << std::endl;
+    return;
   }
 
   if (tconf == nullptr) {
-    std::cerr << "Unable to created topic Conf object" << std::endl;
-    exit(1);
+    std::cerr << "Unable to create CONF_TOPIC object" << std::endl;
+    return;
   }
 
   conf->set("metadata.broker.list", broker, errstr);
@@ -33,13 +33,15 @@ Producer::Producer(std::string broker, std::string topicstr) {
   producer = RdKafka::Producer::create(conf, errstr);
   if (!producer) {
     std::cerr << "Failed to create producer: " << errstr << std::endl;
-    exit(1);
+    /** @fixme add logging to Greylog */
+    return;
   }
 
   topic = RdKafka::Topic::create(producer, topicstr, tconf, errstr);
   if (!topic) {
     std::cerr << "Failed to create topic: " << errstr << std::endl;
-    exit(1);
+    /** @fixme add logging to Greylog */
+    return;
   }
 }
 
@@ -52,6 +54,9 @@ Producer::~Producer() {
 
 /** called to actually send data to Kafka cluster */
 int Producer::produce(char *buffer, int length) {
+  if (producer == nullptr) {
+    return RdKafka::ERR_UNKNOWN;
+  }
   RdKafka::ErrorCode resp = producer->produce(
       topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */, buffer,
       length, NULL, NULL);
