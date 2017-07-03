@@ -99,16 +99,12 @@ create_test_executable(ReadoutDummyTest "")
 
 include_directories(..)
 
-set(CounterTest_SRC testmain.cpp CounterTest.cpp)
-PREPEND(CounterTest_SRC "../libs/test/Counter")
-set(CounterTest_INC Counter.h)
-PREPEND(CounterTest_INC "../libs/include")
+set(CounterTest_SRC ../libs/test/Counter/testmain.cpp ../libs/test/Counter/CounterTest.cpp)
+set(CounterTest_INC ../libs/include/Counter.h)
 create_test_executable(CounterTest "")
 
-set(StatCounterTest_SRC testmain.cpp StatCounterTest.cpp)
-PREPEND(StatCounterTest_SRC "../libs/test/Counter")
-set(StatCounterTest_INC StatCounter.h)
-PREPEND(StatCounterTest_INC "../libs/include")
+set(StatCounterTest_SRC ../libs/test/Counter/testmain.cpp ../libs/test/Counter/StatCounterTest.cpp)
+set(StatCounterTest_INC ../libs/include/StatCounter.h)
 create_test_executable(StatCounterTest "")
 
 
