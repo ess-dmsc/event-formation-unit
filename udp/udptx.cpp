@@ -1,4 +1,5 @@
 #include <Args.h>
+#define __STDC_FORMAT_MACROS 1
 #include <cinttypes>
 #include <iostream>
 #include <libs/include/Socket.h>
