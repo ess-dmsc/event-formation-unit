@@ -1,15 +1,11 @@
 #include <Args.h>
-#include <inttypes.h>
+#include <cinttypes>
 #include <iostream>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <stdio.h>
 #include <unistd.h>
-
-#ifndef PRIu64
-#define PRIu64 "ull"
-#endif
 
 #define TSC_MHZ 3000
 
