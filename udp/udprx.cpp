@@ -1,3 +1,6 @@
+/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+#define __STDC_FORMAT_MACROS 1
+
 #include <Args.h>
 #include <cassert>
 #include <chrono>
@@ -6,10 +9,6 @@
 #include <libs/include/Socket.h>
 #include <libs/include/Timer.h>
 #include <stdio.h>
-
-#ifndef PRIu64
-#define PRIu64 "ull"
-#endif
 
 typedef std::chrono::high_resolution_clock Clock;
 

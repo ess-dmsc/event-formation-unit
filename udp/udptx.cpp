@@ -1,5 +1,7 @@
-#include <Args.h>
+/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 #define __STDC_FORMAT_MACROS 1
+
+#include <Args.h>
 #include <cinttypes>
 #include <iostream>
 #include <libs/include/Socket.h>
