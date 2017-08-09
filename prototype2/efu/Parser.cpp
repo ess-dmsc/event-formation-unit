@@ -165,10 +165,10 @@ Parser::Parser() {
 
 int Parser::registercmd(std::string cmd_name, function_ptr cmd_fn) {
   XTRACE(CMD, INF, "Registering command: %s\n", cmd_name.c_str());
-  GLOG_INF("Registering command: " + cmd_name.c_str());
+  GLOG_INF("Registering command: " + cmd_name);
   if (commands[cmd_name] != 0) {
     XTRACE(CMD, WAR, "Command already exist: %s\n", cmd_name.c_str());
-    GLOG_WAR("Command already exist: " + cmd_name.c_str());
+    GLOG_WAR("Command already exist: " + cmd_name);
     return -1;
   }
   commands[cmd_name] = cmd_fn;
