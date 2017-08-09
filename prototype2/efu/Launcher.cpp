@@ -31,7 +31,7 @@ void Launcher::output_thread(Loader *load) {
 /** Create a thread 'func()', set its cpu affinity and calls join() */
 void Launcher::launch(int __attribute__((unused)) lcore, void (*func)(Loader *),
                       Loader *ld) {
-  GLOG_INF("Setting thread affinity to core " + std::tostring(lcore));
+  GLOG_INF("Setting thread affinity to core " + std::to_string(lcore));
 #ifdef __linux__
   std::thread *t =
 #endif
