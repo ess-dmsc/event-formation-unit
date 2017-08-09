@@ -19,6 +19,7 @@ static int stat_get_count(std::vector<std::string> cmdargs, char *output,
                           unsigned int *obytes) {
   auto nargs = cmdargs.size();
   XTRACE(CMD, INF, "STAT_GET_COUNT\n");
+  GLOG_INF("STAT_GET_COUNT");
   if (nargs != 1) {
     XTRACE(CMD, WAR, "STAT_GET_COUNT: wrong number of arguments\n");
     return -Parser::EBADARGS;
@@ -41,6 +42,7 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
                     unsigned int *obytes) {
   auto nargs = cmdargs.size();
   XTRACE(CMD, INF, "STAT_GET\n");
+  GLOG_INF("STAT_GET");
   if (nargs != 2) {
     XTRACE(CMD, WAR, "STAT_GET: wrong number of arguments\n");
     return -Parser::EBADARGS;
@@ -65,6 +67,7 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
 static int cspec_load_calib(std::vector<std::string> cmdargs,
                             UNUSED char *output, UNUSED unsigned int *obytes) {
   XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
+  GLOG_INF("CSPEC_LOAD_CALIB");
   if (cmdargs.size() != 2) {
     XTRACE(CMD, WAR, "CSPEC_LOAD_CALIB: wrong number of arguments\n");
     return -Parser::EBADARGS;
@@ -88,6 +91,7 @@ static int cspec_show_calib(std::vector<std::string> cmdargs, char *output,
   auto nargs = cmdargs.size();
   unsigned int offset = 0;
   XTRACE(CMD, INF, "CSPEC_SHOW_CALIB\n");
+  GLOG_INF("CSPEC_SHOW_CALIB");
   if (nargs == 1) {
     offset = 0;
   } else if (nargs == 2) {
@@ -113,6 +117,7 @@ static int version_get(std::vector<std::string> cmdargs, char *output,
                        unsigned int *obytes) {
   auto nargs = cmdargs.size();
   XTRACE(CMD, INF, "VERSION_GET\n");
+  GLOG_INF("VERSION_GET");
   if (nargs != 1) {
     XTRACE(CMD, WAR, "VERSION_GET: wrong number of arguments\n");
     return -Parser::EBADARGS;
@@ -129,6 +134,7 @@ static int detector_info_get(std::vector<std::string> cmdargs, char *output,
                              unsigned int *obytes) {
   auto nargs = cmdargs.size();
   XTRACE(CMD, INF, "DETECTOR_INFO_GET\n");
+  GLOG_INF("DETECTOR_INFO_GET");
   if (nargs != 1) {
     XTRACE(CMD, WAR, "DETECTOR_INFO_GET: wrong number of arguments\n");
     return -Parser::EBADARGS;
@@ -159,8 +165,10 @@ Parser::Parser() {
 
 int Parser::registercmd(std::string cmd_name, function_ptr cmd_fn) {
   XTRACE(CMD, INF, "Registering command: %s\n", cmd_name.c_str());
+  GLOG_INF("Registering command: " + cmd_name.c_str());
   if (commands[cmd_name] != 0) {
     XTRACE(CMD, WAR, "Command already exist: %s\n", cmd_name.c_str());
+    GLOG_WAR("Command already exist: " + cmd_name.c_str());
     return -1;
   }
   commands[cmd_name] = cmd_fn;
