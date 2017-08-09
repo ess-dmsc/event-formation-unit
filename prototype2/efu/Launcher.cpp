@@ -3,6 +3,7 @@
 #include <cassert>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
+#include <common/Trace.h>
 #include <efu/Launcher.h>
 #include <iostream>
 #include <thread>
@@ -12,17 +13,25 @@ using namespace std;
 /** Can't call detector threads directly from std:thread as
  *  they are virtual functions, so need to add one step.
  */
-void Launcher::input_thread(Loader *load) { load->detector->input_thread(); }
+void Launcher::input_thread(Loader *load) {
+  GLOG_INF("Launching input thread");
+  load->detector->input_thread();
+}
 
 void Launcher::processing_thread(Loader *load) {
+  GLOG_INF("Launching processing thread");
   load->detector->processing_thread();
 }
 
-void Launcher::output_thread(Loader *load) { load->detector->output_thread(); }
+void Launcher::output_thread(Loader *load) {
+  GLOG_INF("Launching output thread");
+  load->detector->output_thread();
+}
 
 /** Create a thread 'func()', set its cpu affinity and calls join() */
 void Launcher::launch(int __attribute__((unused)) lcore, void (*func)(Loader *),
                       Loader *ld) {
+  GLOG_INF("Setting thread affinity to core " + std::tostring(lcore));
 #ifdef __linux__
   std::thread *t =
 #endif
@@ -39,12 +48,14 @@ void Launcher::launch(int __attribute__((unused)) lcore, void (*func)(Loader *),
   assert(s == 0);
 #else
 #pragma message("setaffinity only implemented for Linux")
+GLOG_WAR("setaffinity only implemented for Linux");
 #endif
 }
 
 Launcher::Launcher(Loader *dynamic, std::vector<int> &cpus) {
   if (dynamic->detector == nullptr) {
-    cout << "Detector not loadable, no processing ..." << endl;
+    GLOG_CRI("Detector not loadable, no processing ...");
+    XTRACE(MAIN, CRI, "Detector not loadable, no processing ...\n");
     return;
   }
 
