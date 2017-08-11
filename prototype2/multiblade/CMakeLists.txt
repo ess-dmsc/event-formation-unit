@@ -1,27 +1,26 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
+
+include_directories(..)
+
+# Create an excecutable for the event-builder to process recorded data from a text-file.
+set(mbprocesstextfile_INC mbcaen/multiBladeEventBuilder.h mbcaen/TextFile.h mbcaen/dumpEventBuilderInfo.h)
+set(mbprocesstextfile_SRC mbcaen/mbprocesstextfile.cpp mbcaen/multiBladeEventBuilder.cpp mbcaen/TextFile.cpp mbcaen/dumpEventBuilderInfo.cpp)
+create_executable(mbprocesstextfile "")
+
+# Create the tests
 enable_testing()
 
 include_directories(.. ../..)
 
-set(MBtest_INC  mbcaen/multiBladeEventBuilder.h  mbcaen/multiBladeTestData.h)
+# Common include path for both tests
+set(mbtest_INC  mbcaen/multiBladeEventBuilder.h  mbcaen/multiBladeTestData.h)
 
-set(MBtestcounter_SRC
-       mbcaen/multiBladeEventBuilder.cpp
-       mbcaen/multiBladeEventBuilderCounterTest.cpp
-       )
-set(MBtestcounter_INC ${MBtest_INC})
-create_test_executable(MBtestcounter "")
+# Create excecutable for the test of counters
+set(mbtestcounter_INC ${mbtest_INC})
+set(mbcountertest_SRC mbcaen/multiBladeEventBuilder.cpp mbcaen/multiBladeEventBuilderCounterTest.cpp)
+create_test_executable(mbcountertest "")
 
-set(MBtestcluster_SRC
-       mbcaen/multiBladeEventBuilder.cpp
-       mbcaen/multiBladeEventBuilderClusteringTest.cpp
-       )
-set(MBtestcluster_INC ${MBtest_INC})
-create_test_executable(MBtestcluster "")
-
-# set(MBtest_LINK
-#        ${GTEST_BOTH_LIBRARIES}
-#        Threads::Threads
-#        )
-
-#add_library(MBtestcounter_LIB STATIC ${MBtestcounter_SRC})
+# Create excecutable for the test of clustering
+set(mbclustertest_INC ${MBtest_INC})
+set(mbclustertest_SRC mbcaen/multiBladeEventBuilder.cpp mbcaen/multiBladeEventBuilderClusteringTest.cpp)
+create_test_executable(mbclustertest "")
