@@ -40,12 +40,10 @@ int main(int argc, char *argv[]) {
 
   if (efu_args->stopafter == 0) {
     XTRACE(MAIN, ALW, "Event Formation Unit Exit (Immediate)\n");
-    GLOG_INF("Event Formation Unit Exit (Immediate)");
     return 0;
   }
 
   XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", efu_args->det.c_str());
-  GLOG_INF("Launching EFU as Instrument " + efu_args->det);
 
   Loader loader(efu_args->det, (void *)efu_args);
   efu_args->detectorif = loader.detector;
