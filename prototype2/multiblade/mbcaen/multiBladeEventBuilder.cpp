@@ -253,10 +253,10 @@ void multiBladeEventBuilder::resetCounters() {
     m_nevents = 0;
     m_rejected_adjacency = 0;
     m_rejected_position = 0;
-    m_2D_wires  = {0, 0, 0, 0, 0, 0};
-    m_2D_strips = {0, 0, 0, 0, 0, 0};
-    m_1D_wires  = {0, 0, 0, 0, 0, 0};
-    m_1D_strips = {0, 0, 0, 0, 0, 0};
+    m_2D_wires  = {{0, 0, 0, 0, 0, 0}};
+    m_2D_strips = {{0, 0, 0, 0, 0, 0}};
+    m_1D_wires  = {{0, 0, 0, 0, 0, 0}};
+    m_1D_strips = {{0, 0, 0, 0, 0, 0}};
 }
 
 void multiBladeEventBuilder::incrementCounters(std::vector<datapoint> m_wire_cluster, std::vector<datapoint> m_strip_cluster) {

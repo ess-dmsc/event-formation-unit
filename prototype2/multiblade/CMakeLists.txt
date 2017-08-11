@@ -1,32 +1,27 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
-#enable_testing()
+enable_testing()
 
-#include_directories(.. ../..)
+include_directories(.. ../..)
 
-#set(MBtestcounter_SRC
-#        mbcaen/multiBladeEventBuilder.cpp
-#        mbcaen/multiBladeEventBuilderCounterTest.cpp
-#        )
+set(MBtest_INC  mbcaen/multiBladeEventBuilder.h  mbcaen/multiBladeTestData.h)
 
-#set(MBtestcluster_SRC
-#        mbcaen/multiBladeEventBuilder.cpp
-#        mbcaen/multiBladeEventBuilderClusteringTest.cpp
-#        )
+set(MBtestcounter_SRC
+       mbcaen/multiBladeEventBuilder.cpp
+       mbcaen/multiBladeEventBuilderCounterTest.cpp
+       )
+set(MBtestcounter_INC ${MBtest_INC})
+create_test_executable(MBtestcounter "")
 
-#set(MBtest_INC
-#        ../test/TestBase.h
-#        mbcaen/multiBladeEventBuilder.h
-#        mbcaen/multiBladeTestData.h
-#        )
+set(MBtestcluster_SRC
+       mbcaen/multiBladeEventBuilder.cpp
+       mbcaen/multiBladeEventBuilderClusteringTest.cpp
+       )
+set(MBtestcluster_INC ${MBtest_INC})
+create_test_executable(MBtestcluster "")
 
-#set(MBtestcounter_INC ${MBtest_INC})
-#set(MBtestcluster_INC ${MBtest_INC})
-
-#set(MBtest_LINK
+# set(MBtest_LINK
 #        ${GTEST_BOTH_LIBRARIES}
 #        Threads::Threads
 #        )
 
 #add_library(MBtestcounter_LIB STATIC ${MBtestcounter_SRC})
-
-#create_test_executable(MBtestcounter "")

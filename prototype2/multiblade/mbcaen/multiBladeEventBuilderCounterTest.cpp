@@ -96,15 +96,15 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
 
     // Validation counters (similar to those in the event-builder).
     // Index 0 = 1 datapoint, index 1 = 2 datapoints, etc.
-    std::array<uint64_t, 6> wireclusterpoints = { 0, 0, 0, 0, 0, 0 };
-    std::array<uint64_t, 6> stripclusterpoints = { 0, 0, 0, 0, 0, 0 };
+    std::array<uint64_t, 6> wireclusterpoints = { {0, 0, 0, 0, 0, 0} };
+    std::array<uint64_t, 6> stripclusterpoints = { {0, 0, 0, 0, 0, 0} };
 
     // Counters for number of points per event
     uint wirepoints = 0;
     uint strippoints = 0;
 
     // Iterator for validation data
-    std::vector<double>::iterator valw = validation_weighted.begin();
+    //std::vector<double>::iterator valw = validation_weighted.begin();
 
     // Test the case when there are both wire and strip points
     for (uint i = 0; i <= 15; i++) {
@@ -154,8 +154,8 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
     p.resetCounters();
 
     // Reset counters
-    wireclusterpoints = { 0, 0, 0, 0, 0, 0 };
-    stripclusterpoints = { 0, 0, 0, 0, 0, 0 };
+    wireclusterpoints = { {0, 0, 0, 0, 0, 0} };
+    stripclusterpoints = { {0, 0, 0, 0, 0, 0} };
 
     // Reset the counters to "start of run"
     wirepoints = 0;
@@ -202,8 +202,8 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
     p.resetCounters();
 
     // Reset validation counters
-    wireclusterpoints = { 0, 0, 0, 0, 0, 0 };
-    stripclusterpoints = { 0, 0, 0, 0, 0, 0 };
+    wireclusterpoints = { {0, 0, 0, 0, 0, 0} };
+    stripclusterpoints = { {0, 0, 0, 0, 0, 0} };
 
     // Reset event counters
     wirepoints = 0;
