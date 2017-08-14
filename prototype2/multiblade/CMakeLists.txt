@@ -1,11 +1,11 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
-include_directories(..)
+#include_directories(..)
 
 # Create an excecutable for the event-builder to process recorded data from a text-file.
-set(mbprocesstextfile_INC mbcaen/multiBladeEventBuilder.h mbcaen/TextFile.h mbcaen/dumpEventBuilderInfo.h)
-set(mbprocesstextfile_SRC mbcaen/mbprocesstextfile.cpp mbcaen/multiBladeEventBuilder.cpp mbcaen/TextFile.cpp mbcaen/dumpEventBuilderInfo.cpp)
-create_executable(mbprocesstextfile "")
+#set(mbprocesstextfile_INC mbcaen/multiBladeEventBuilder.h mbcaen/TextFile.h mbcaen/dumpEventBuilderInfo.h)
+#set(mbprocesstextfile_SRC mbcaen/mbprocesstextfile.cpp mbcaen/multiBladeEventBuilder.cpp mbcaen/TextFile.cpp mbcaen/dumpEventBuilderInfo.cpp)
+#create_executable(mbprocesstextfile "")
 
 # Create the tests
 enable_testing()
