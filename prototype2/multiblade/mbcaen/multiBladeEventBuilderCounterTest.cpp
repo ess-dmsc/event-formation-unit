@@ -248,6 +248,20 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
     }
 }
 
+TEST(MBEventBuilder__Test, NoDataRecieved) {
+
+    multiBladeEventBuilder p;
+
+    EXPECT_EQ(0, p.getNumberOfPositionRejected());
+
+    p.lastPoint();
+
+    EXPECT_DOUBLE_EQ(-1, p.getWirePosition());
+    EXPECT_DOUBLE_EQ(-1, p.getStripPosition());
+
+    EXPECT_EQ(1, p.getNumberOfPositionRejected());
+}
+
 int main(int argc, char **argv) {
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();

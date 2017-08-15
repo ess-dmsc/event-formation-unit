@@ -319,8 +319,11 @@ TEST(MBEventBuilder__Test, Clustering) {
     p.lastPoint();
     // Check that the last event is processed correctly
     EXPECT_DOUBLE_EQ(*valw, p.getWirePosition());
+    EXPECT_DOUBLE_EQ(*valw, p.getPosition()[0]);
     EXPECT_DOUBLE_EQ(*valw + 32, p.getStripPosition());
+    EXPECT_DOUBLE_EQ(*valw + 32, p.getPosition()[1]);
     EXPECT_DOUBLE_EQ(timestamp, p.getTimeStamp());
+    EXPECT_DOUBLE_EQ(timestamp, p.getPosition()[2]);
 
     // Maximim ADC-method
 
