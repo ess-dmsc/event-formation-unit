@@ -274,18 +274,18 @@ void multiBladeEventBuilder::incrementCounters(std::vector<datapoint> m_wire_clu
 
     // Increment counters for wire and strip cluster sizes, for clusters with both wire and strip signals
     if (m_wire_cluster.size() && m_strip_cluster.size()) {
-        try {
+        if (m_wire_cluster.size() <= 5) {
             m_2D_wires.at(m_wire_cluster.size() - 1)++;
-        } catch (const std::out_of_range &oor) {
+        } else {
             m_2D_wires.at(5)++;
 #ifdef TRACE
             std::cerr << "<addDataPoint> More datapoints than expected! Number of wire data points = "
                       << m_wire_cluster.size() << std::endl;
 #endif
         }
-        try {
+        if (m_strip_cluster.size() <= 5) {
             m_2D_strips.at(m_strip_cluster.size() - 1)++;
-        } catch (const std::out_of_range &oor) {
+        } else {
             m_2D_strips.at(5)++;
 #ifdef TRACE
             std::cerr << "<addDataPoint> More datapoints than expected! Number of strip data points = "
@@ -296,9 +296,9 @@ void multiBladeEventBuilder::incrementCounters(std::vector<datapoint> m_wire_clu
 
     // Increment counters for wire cluster sizes, for clusters with only wire signals
     if (m_wire_cluster.size() && !m_strip_cluster.size()) {
-        try {
+        if (m_wire_cluster.size() <= 5) {
             m_1D_wires.at(m_wire_cluster.size() - 1)++;
-        } catch (const std::out_of_range &oor) {
+        } else {
             m_1D_wires.at(5)++;
 #ifdef TRACE
             std::cerr << "<addDataPoint> More datapoints than expected! Number of wire data points = "
@@ -309,10 +309,10 @@ void multiBladeEventBuilder::incrementCounters(std::vector<datapoint> m_wire_clu
 
     // Increment counters for wire cluster sizes, for clusters with only wire signals
     if (!m_wire_cluster.size() && m_strip_cluster.size()) {
-        try {
+        if (m_strip_cluster.size() <= 5) {
             m_1D_strips.at(m_strip_cluster.size() - 1)++;
-        } catch (const std::out_of_range &oor) {
-            m_1D_strips.at(5)++;
+        } else {
+        m_1D_strips.at(5)++;
 #ifdef TRACE
             std::cerr << "<addDataPoint> More datapoints than expected! Number of strip data points = "
                       << m_strip_cluster.size() << std::endl;
