@@ -48,8 +48,15 @@ std::vector<uint> data {
         12, 44,  500, 5020, 0,
         13, 45,  600, 5030, 0,
         14, 46,  200, 5040, 0,
+        // Event # 6 - 6 data-points
+        15, 47, 1800, 6000, 1,
+        16, 48, 1000, 6010, 0,
+        17, 49,  500, 6020, 0,
+        18, 50,  600, 6030, 0,
+        19, 51,  200, 6040, 0,
+        20, 52,  100, 6050, 0,
         // Final event - 1 data-point (After this event lastPoint() should be called)
-        15, 47, 1800, 6000, 1
+        21, 53, 1800, 7000, 1
 };
 
 std::vector<double> validation_weighted {

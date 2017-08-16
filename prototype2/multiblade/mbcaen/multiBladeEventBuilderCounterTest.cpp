@@ -107,7 +107,7 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
     //std::vector<double>::iterator valw = validation_weighted.begin();
 
     // Test the case when there are both wire and strip points
-    for (uint i = 0; i <= 15; i++) {
+    for (uint i = 0; i <= 21; i++) {
         uint begin = i * 5;
         uint end = begin + 5;
         std::vector<uint> datapoint(&data[begin], &data[end]);
@@ -162,7 +162,7 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
     strippoints = 0;
 
     // Test the case of only wire points
-    for (uint i = 0; i <= 15; i++) {
+    for (uint i = 0; i <= 21; i++) {
         uint begin = i * 5;
         uint end = begin + 5;
         std::vector<uint> datapoint(&data[begin], &data[end]);
@@ -210,7 +210,7 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
     strippoints = 0;
 
     // Test the case of only strip points
-    for (uint i = 0; i <= 15; i++) {
+    for (uint i = 0; i <= 21; i++) {
         uint begin = i * 5;
         uint end = begin + 5;
         std::vector<uint> datapoint(&data[begin], &data[end]);
