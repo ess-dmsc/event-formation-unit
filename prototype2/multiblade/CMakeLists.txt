@@ -22,8 +22,6 @@ endif ()
 # Create the tests
 enable_testing()
 
-remove_definitions(-DTRACE)
-
 # Common include path for both tests
 set(mbtest_INC  mbcaen/multiBladeEventBuilder.h  mbcaen/multiBladeTestData.h)
 
