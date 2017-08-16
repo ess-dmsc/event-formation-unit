@@ -25,8 +25,10 @@ multiBladeEventBuilder::~multiBladeEventBuilder() {}
 
 bool multiBladeEventBuilder::addDataPoint(const uint8_t& channel, const uint64_t& ADC, const uint32_t& clock)
 {
-    if (m_verbose)
-        std::cout << "Data-point received (" << int(channel) << ", " << ADC << ", " << clock << ")\n";
+
+#ifdef TRACE
+    std::cout << "Data-point received (" << int(channel) << ", " << ADC << ", " << clock << ")\n";
+#endif
 
     // Increment the counter for number of data-points received.
     m_datapoints_received++;
@@ -42,8 +44,11 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t& channel, const uint64_t
 
     if (m_first_signal)
     {
-        if (m_verbose)
-            std::cout << "First signal. Setting start clock to : " << clock << std::endl;
+
+#ifdef TRACE
+        std::cout << "First signal. Setting start clock to : " << clock << std::endl;
+#endif
+
         m_cluster_clock = clock;
         m_first_signal = false;
     }
@@ -55,8 +60,10 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t& channel, const uint64_t
     if (clock_diff < m_time_window) {
 
         // Datapoint is within time-window
-        if (m_verbose)
-            std::cout << "Within time-window [" << clock_diff << " < " << m_time_window << "]" << std::endl;
+
+#ifdef TRACE
+        std::cout << "Within time-window [" << clock_diff << " < " << m_time_window << "]" << std::endl;
+#endif
 
         addPointToCluster(channel, ADC);
 
@@ -64,8 +71,10 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t& channel, const uint64_t
     }
 
     // Datapoint is outside time-window - the cluster is complete.
-    if (m_verbose)
-        std::cout << "Outside time-window [" << clock_diff << " > " << m_time_window << "]" << std::endl;
+
+#ifdef TRACE
+    std::cout << "Outside time-window [" << clock_diff << " > " << m_time_window << "]" << std::endl;
+#endif
 
     // multiBladeEventBuilder the stored clusters. True is returned if all checks pass.
     bool position_determined = processClusters();
@@ -83,7 +92,6 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t& channel, const uint64_t
 
     return position_determined;
 }
-
 
 bool multiBladeEventBuilder::processClusters() {
 
@@ -105,15 +113,17 @@ bool multiBladeEventBuilder::processClusters() {
     // Calculate the time-stamp
     m_time_stamp = static_cast<double>(m_cluster_clock) * m_clock_d;
 
-    if (m_verbose)
-        std::cout << "Calculated position : Pos(" << m_wire_pos << ", " << m_strip_pos << ")\n";
+#ifdef TRACE
+    std::cout << "Calculated position : Pos(" << m_wire_pos << ", " << m_strip_pos << ")\n";
+#endif
 
     if ((m_wire_pos < 0) && (m_strip_pos < 0)) {
 
         m_rejected_position++;
 
-        if (m_verbose)
-            std::cout << "Both positions less than 0 - not an event" << std::endl;
+#ifdef TRACE
+        std::cout << "Both positions less than 0 - not an event" << std::endl;
+#endif
 
         return false;
     } else {
@@ -135,9 +145,10 @@ bool multiBladeEventBuilder::pointsAdjacent() {
     // Both sets have to be adjacent for a valid cluster
     bool adjacent = wires_adjacent && strips_adjacent;
 
-    if (m_verbose)
-        std::cout << "Wires are " << (wires_adjacent ? "" : "not") << " adjacent, "
-                  << "strips are " << (strips_adjacent ? "" : "not") << " adjacent!" << std::endl;
+#ifdef TRACE
+    std::cout << "Wires are " << (wires_adjacent ? "" : "not") << " adjacent, "
+              << "strips are " << (strips_adjacent ? "" : "not") << " adjacent!" << std::endl;
+#endif
 
     return adjacent;
 }
@@ -267,17 +278,19 @@ void multiBladeEventBuilder::incrementCounters(std::vector<datapoint> m_wire_clu
             m_2D_wires.at(m_wire_cluster.size() - 1)++;
         } catch (const std::out_of_range &oor) {
             m_2D_wires.at(5)++;
-            if (m_verbose)
-                std::cerr << "<addDataPoint> More datapoints than expected! Number of wire data points = "
-                          << m_wire_cluster.size() << std::endl;
+#ifdef TRACE
+            std::cerr << "<addDataPoint> More datapoints than expected! Number of wire data points = "
+                      << m_wire_cluster.size() << std::endl;
+#endif
         }
         try {
             m_2D_strips.at(m_strip_cluster.size() - 1)++;
         } catch (const std::out_of_range &oor) {
             m_2D_strips.at(5)++;
-            if (m_verbose)
-                std::cerr << "<addDataPoint> More datapoints than expected! Number of strip data points = "
-                          << m_strip_cluster.size() << std::endl;
+#ifdef TRACE
+            std::cerr << "<addDataPoint> More datapoints than expected! Number of strip data points = "
+                      << m_strip_cluster.size() << std::endl;
+#endif
         }
     }
 
@@ -287,9 +300,10 @@ void multiBladeEventBuilder::incrementCounters(std::vector<datapoint> m_wire_clu
             m_1D_wires.at(m_wire_cluster.size() - 1)++;
         } catch (const std::out_of_range &oor) {
             m_1D_wires.at(5)++;
-            if (m_verbose)
-                std::cerr << "<addDataPoint> More datapoints than expected! Number of wire data points = "
-                          << m_wire_cluster.size() << std::endl;
+#ifdef TRACE
+            std::cerr << "<addDataPoint> More datapoints than expected! Number of wire data points = "
+                      << m_wire_cluster.size() << std::endl;
+#endif
         }
     }
 
@@ -299,9 +313,10 @@ void multiBladeEventBuilder::incrementCounters(std::vector<datapoint> m_wire_clu
             m_1D_strips.at(m_strip_cluster.size() - 1)++;
         } catch (const std::out_of_range &oor) {
             m_1D_strips.at(5)++;
-            if (m_verbose)
-                std::cerr << "<addDataPoint> More datapoints than expected! Number of strip data points = "
-                          << m_strip_cluster.size() << std::endl;
+#ifdef TRACE
+            std::cerr << "<addDataPoint> More datapoints than expected! Number of strip data points = "
+                      << m_strip_cluster.size() << std::endl;
+#endif
         }
     }
 }

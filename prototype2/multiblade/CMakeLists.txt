@@ -2,6 +2,12 @@ cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
 include_directories(.. ../..)
 
+option(ENABLE_TRACE "Build packages with trace output" OFF)
+
+if (ENABLE_TRACE)
+    add_definitions(-DTRACE)
+endif ()
+
 # Create an excecutable for the event-builder to process recorded data from a text-file.
 find_package(TCLAP)
 if (TCLAP_FOUND)
@@ -15,6 +21,8 @@ endif ()
 
 # Create the tests
 enable_testing()
+
+remove_definitions(-DTRACE)
 
 # Common include path for both tests
 set(mbtest_INC  mbcaen/multiBladeEventBuilder.h  mbcaen/multiBladeTestData.h)
