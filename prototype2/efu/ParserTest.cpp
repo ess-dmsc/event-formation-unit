@@ -22,7 +22,7 @@ static int dummy_command(std::vector<std::string> UNUSED cmdargs,
 // clang-format off
 std::vector<std::string> commands {
   // doesnt work when tests are called outside prototype2/ dir
-  "CSPEC_LOAD_CALIB data/cal_zero", "<OK>",
+  "CSPEC_LOAD_CALIB calib_data/cal_zero", "<OK>",
   "CSPEC_SHOW_CALIB",               "wire 0 0x0000, grid 0 0x0000",
   "CSPEC_SHOW_CALIB 5",             "wire 5 0x0000, grid 5 0x0000",
   "STAT_GET_COUNT",                 "STAT_GET_COUNT 0",
@@ -33,13 +33,21 @@ std::vector<std::string> commands_badargs {
   "CSPEC_LOAD_CALIB",
   "CSPEC_LOAD_CALIB file1 file2",
   "CSPEC_LOAD_CALIB file_not_exist",
-  "CSPEC_LOAD_CALIB data/cal_badsize",
-  "CSPEC_LOAD_CALIB data/nogcal",
+  "CSPEC_LOAD_CALIB calib_data/cal_badsize",
+  "CSPEC_LOAD_CALIB calib_data/nogcal",
   "CSPEC_SHOW_CALIB 1 2",
   "CSPEC_SHOW_CALIB 16384",
   "STAT_GET_COUNT 1",
   "STAT_GET",
-  "VERSION_GET 1"
+  "VERSION_GET 1",
+  "DETECTOR_INFO_GET 1"
+};
+
+// These commands should 'fail' when the detector is not loaded
+std::vector<std::string> check_detector_loaded {
+  "DETECTOR_INFO_GET",
+  "STAT_GET_COUNT",
+  "STAT_GET 1"
 };
 
 // clang-format on
@@ -179,7 +187,7 @@ TEST_F(ParserTest, DuplicateCommands) {
 }
 
 TEST_F(ParserTest, SysCallFail) {
-  const char *cmd = "CSPEC_LOAD_CALIB data/cal_zero";
+  const char *cmd = "CSPEC_LOAD_CALIB calib_data/cal_zero";
   std::memcpy(input, cmd, strlen(cmd));
   forcefstatfail = 1;
   int res = parser->parse(input, strlen(cmd), output, &obytes);
@@ -191,6 +199,33 @@ TEST_F(ParserTest, SysCallFail) {
   res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(res, -Parser::EBADARGS);
   ASSERT_EQ(0, forcereadfail);
+}
+
+TEST_F(ParserTest, DetInfoGetNoDetectorLoaded) {
+  efu_args->detectorif = 0;
+  const char *cmd = "DETECTOR_INFO_GET";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(res, -Parser::OK);
+}
+
+TEST_F(ParserTest, StatGetCountNoDetectorLoaded) {
+  efu_args->detectorif = 0;
+  for (auto cmdstr : check_detector_loaded) {
+    MESSAGE() << cmdstr << "\n";
+    const char *cmd = cmdstr.c_str();
+    std::memcpy(input, cmd, strlen(cmd));
+    int res = parser->parse(input, strlen(cmd), output, &obytes);
+    ASSERT_EQ(res, -Parser::OK);
+    ASSERT_NE(strstr(output, "error: no detector loaded"), nullptr);
+  }
+}
+
+TEST_F(ParserTest, DetectorInfo) {
+  const char *cmd = "DETECTOR_INFO_GET";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(res, -Parser::OK);
 }
 
 int main(int argc, char **argv) {

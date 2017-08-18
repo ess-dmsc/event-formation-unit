@@ -2,29 +2,29 @@
 
 #include <common/FBSerializer.h>
 #include <common/Producer.h>
-#include <test/TestBase.h>
 #include <cstring>
+#include <test/TestBase.h>
 
 #define GLOBALTIME 0x1000000020000000
 //#define ARRAYLENGTH 125000
 #define ARRAYLENGTH 10
 
 class FBSerializerTest : public TestBase {
-    virtual void SetUp() {
-      for (int i = 0; i < 200000; i++) {
-        tarr[i] = i;
-        parr[i] = 200000 - i;
-      }
+  virtual void SetUp() {
+    for (int i = 0; i < 200000; i++) {
+      tarr[i] = i;
+      parr[i] = 200000 - i;
     }
+  }
 
-    virtual void TearDown() {}
+  virtual void TearDown() {}
 
 protected:
   Producer prod{"nobroker", "notopic"};
-  char flatbuffer[1024*1024];
+  char flatbuffer[1024 * 1024];
   uint32_t tarr[200000];
   uint32_t parr[200000];
-  char * buffer;
+  char *buffer;
   FBSerializer fb{ARRAYLENGTH, prod};
 };
 
@@ -54,7 +54,6 @@ TEST_F(FBSerializerTest, SerDeserialize) {
   ASSERT_EQ(events->message_id(), 1);
   ASSERT_EQ(events->pulse_time(), GLOBALTIME);
 }
-
 
 TEST_F(FBSerializerTest, DeserializeCheckData) {
   for (int i = 0; i < ARRAYLENGTH - 1; i++) {

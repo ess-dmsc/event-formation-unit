@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/Trace.h>
-#include <libs/include/gccintel.h>  // UNUSED macros
+#include <libs/include/gccintel.h> // UNUSED macros
 #include <readout/ReadoutDummy.h>
 
 int ReadoutDummy::parse(const char *buffer, uint32_t size) {
@@ -11,7 +11,8 @@ int ReadoutDummy::parse(const char *buffer, uint32_t size) {
   }
 
   if (type != detectortype) {
-    XTRACE(PROCESS, WAR, "Type idendifier in packet (%d) does not match instrument (%d)\n",
+    XTRACE(PROCESS, WAR,
+           "Type idendifier in packet (%d) does not match instrument (%d)\n",
            type, detectortype);
     return -1;
   }

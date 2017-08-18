@@ -17,7 +17,6 @@
 
 class FBSerializer {
 public:
-
   /** @todo document */
   FBSerializer(size_t maxarraylength, Producer &prod);
 
@@ -38,15 +37,15 @@ private:
   size_t maxlen{0};
   uint8_t *timeptr{nullptr};
   uint8_t *pixelptr{nullptr};
-  
+
   EventMessage *eventMsg;
-  
+
   char *fbBufferPointer = nullptr;
   size_t fbSize = 0;
   flatbuffers::uoffset_t *timeLenPtr;
   flatbuffers::uoffset_t *pixelLenPtr;
-  
-  Producer & producer;
+
+  Producer &producer;
 
   size_t events{0};
   size_t seqno{1};

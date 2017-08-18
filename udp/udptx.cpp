@@ -1,15 +1,14 @@
+/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+#define __STDC_FORMAT_MACROS 1
+
 #include <Args.h>
-#include <libs/include/Socket.h>
-#include <libs/include/Timer.h>
-#include <libs/include/TSCTimer.h>
-#include <inttypes.h>
+#include <cinttypes>
 #include <iostream>
+#include <libs/include/Socket.h>
+#include <libs/include/TSCTimer.h>
+#include <libs/include/Timer.h>
 #include <stdio.h>
 #include <unistd.h>
-
-#ifndef PRIu64
-#define PRIu64 "ull"
-#endif
 
 #define TSC_MHZ 3000
 
@@ -34,19 +33,19 @@ int main(int argc, char *argv[]) {
   TSCTimer pkt_rate_timer;
 
   uint32_t seqno = 1;
-  //Timer pkt_rate;
-  //uint32_t txremain = 0;
-  //printf("TX: %d pps specified\n", opts.txpps);
+  // Timer pkt_rate;
+  // uint32_t txremain = 0;
+  // printf("TX: %d pps specified\n", opts.txpps);
   for (;;) {
     char buffer[10000];
-    *((uint32_t*)buffer) = seqno;
+    *((uint32_t *)buffer) = seqno;
     auto txtmp = udptx.send(buffer, opts.buflen);
     seqno++;
 
     if (txtmp > 0) {
       txp++;
       tx += txtmp;
-      //txremain--;
+      // txremain--;
     }
 
 #if 0
@@ -63,11 +62,8 @@ int main(int argc, char *argv[]) {
       tx_total += tx;
       printf("Tx rate: %.2f Mbps, %.0f pps, tx %" PRIu64 " MB (total: %" PRIu64
              " MB) %" PRIu64 " usecs\n",
-             tx * 8.0 / usecs,
-             txp * 1000000.0 / usecs,
-             tx / B1M,
-             tx_total / B1M,
-             usecs);
+             tx * 8.0 / usecs, txp * 1000000.0 / usecs, tx / B1M,
+             tx_total / B1M, usecs);
       tx = 0;
       txp = 0;
       rate_timer.now();

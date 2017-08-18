@@ -2,14 +2,22 @@
 
 import cmd, sys, os
 from SocketDriver import SimpleSocket
+import argparse
+
+svr_ip_addr = "127.0.0.1"
+svr_tcp_port = 8888
+
+
 
 class EFUShell(cmd.Cmd):
-
    intro = "Event Formation Unit  Shell"
    prompt = '(efushell) '
-   ip = "127.0.0.1"
-   port = 8888
-   driver = SimpleSocket(ip, port)
+
+   def __init__(self, ip, port):
+      cmd.Cmd.__init__(self)
+      self.ip = ip
+      self.port = port
+      self.driver = SimpleSocket(self.ip, self.port)
 
 #
 # EFU Commands
@@ -40,6 +48,11 @@ class EFUShell(cmd.Cmd):
       res = self.driver.Ask('VERSION_GET ' + line)
       print res
 
+   def do_detector_get(self, line):
+      'Get detector information'
+      res = self.driver.Ask('DETECTOR_INFO_GET')
+      print res
+
 #
 # CMD behavior customization
 #
@@ -56,4 +69,15 @@ class EFUShell(cmd.Cmd):
       print self.prompt
 
 if __name__ == '__main__':
-   EFUShell().cmdloop()
+   parser = argparse.ArgumentParser()
+   parser.add_argument("-i", metavar='ipaddr', help = "server ip address (default 127.0.0.1)", type = str)
+   parser.add_argument("-p", metavar='port', help = "server tcp port (default 8888)", type = int)
+   args = parser.parse_args()
+
+   if args.i != None:
+      svr_ip_addr = args.i
+
+   if args.p != None:
+      svr_tcp_port = args.p
+
+   EFUShell(svr_ip_addr, svr_tcp_port).cmdloop()

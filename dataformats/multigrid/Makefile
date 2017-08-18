@@ -23,11 +23,11 @@ cncsread: src/cncsread.cpp
 	@echo building $@
 	$(Q)g++ $(CFLAGS) $< -o $@
 
-genpixids: src/genpixids.cpp ../../prototype2/cspec/CalibrationFile.cpp \
-						../../prototype2/cspec/CSPECChanConv.cpp MapFile.o DataSave.o
+genpixids: src/genpixids.cpp ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp \
+						../../prototype2/multigrid/mgcncs/ChanConv.cpp MapFile.o DataSave.o
 	@echo building $@
-	$(Q)g++ $(CFLAGS) ../../prototype2/cspec/CalibrationFile.cpp \
-						../../prototype2/cspec/CSPECChanConv.cpp MapFile.o DataSave.o $< -o $@
+	$(Q)g++ $(CFLAGS) ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp \
+						../../prototype2/multigrid/mgcncs/ChanConv.cpp MapFile.o DataSave.o $< -o $@
 
 jsoncpp.o: src/jsoncpp.cpp inc/json.h
 	@echo building $@
@@ -62,8 +62,8 @@ batchreader: src/batchreader.cpp Analyse.o Args.o MapFile.o \
 	@echo building $@
 	$(Q)g++ $(CFLAGS) src/batchreader.cpp \
 	    Analyse.o Args.o MapFile.o PeakFinder.o RunSpecParse.o jsoncpp.o  \
-      ../../prototype2/cspec/CSPECData.cpp ../../prototype2/cspec/CalibrationFile.cpp \
-		  ../../prototype2/cspec/CSPECChanConv.cpp -o $@
+      ../../prototype2/multigrid/mgcncs/Data.cpp ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp \
+		  ../../prototype2/multigrid/mgcncs/ChanConv.cpp -o $@
 
 PeakFinderTest: src/test/PeakFinderTest.cpp src/PeakFinder.cpp inc/PeakFinder.h
 	@echo building $@

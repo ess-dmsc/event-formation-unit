@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/Trace.h>
-#include <libs/include/gccintel.h>  // UNUSED macros
+#include <libs/include/gccintel.h> // UNUSED macros
 #include <readout/Readout.h>
 
 #define CKSUMSIZE 4U
@@ -11,8 +11,9 @@
 
 int Readout::validate(const char *buffer, uint32_t size) {
   if (buffer == 0) {
-      XTRACE(PROCESS, WAR, "no buffer specified\n"); /**< @todo increment counter */
-      return -Readout::EBUFFER;
+    XTRACE(PROCESS, WAR,
+           "no buffer specified\n"); /**< @todo increment counter */
+    return -Readout::EBUFFER;
   }
 
   if ((size < 64) || (size > 8960)) {
@@ -21,7 +22,8 @@ int Readout::validate(const char *buffer, uint32_t size) {
   }
 
   if (size % 64 != 0) {
-    XTRACE(PROCESS, WAR, "data size (%d) is not padded to multiple of 64 bytes\n", size);
+    XTRACE(PROCESS, WAR,
+           "data size (%d) is not padded to multiple of 64 bytes\n", size);
     return -Readout::EPAD;
   }
 
@@ -34,7 +36,8 @@ int Readout::validate(const char *buffer, uint32_t size) {
   reserved = hdrp->reserved;
 
   if (size < sizeof(Readout::Payload) + wordcount * 2U + CKSUMSIZE) {
-    XTRACE(PROCESS, WAR, "Data size mismatch: size received %lu, headers and data %d\n",
+    XTRACE(PROCESS, WAR,
+           "Data size mismatch: size received %lu, headers and data %d\n",
            sizeof(Readout::Payload), CKSUMSIZE + wordcount * 2U);
     return -Readout::EHDR;
   }

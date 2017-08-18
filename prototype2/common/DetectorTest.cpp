@@ -80,6 +80,9 @@ TEST_F(DetectorTest, StatAPI) {
 
   auto name = det->statname(1);
   ASSERT_EQ("", name);
+
+  auto detectorname = det->detectorname();
+  ASSERT_EQ("no detector", detectorname);
 }
 
 int main(int argc, char **argv) {
