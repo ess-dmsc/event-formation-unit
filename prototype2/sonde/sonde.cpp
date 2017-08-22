@@ -15,6 +15,7 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
+#include <sonde/ideas/Data.h>
 #include <stdio.h>
 #include <unistd.h>
 
@@ -142,7 +143,7 @@ void SONDEIDEA::input_thread() {
 }
 
 void SONDEIDEA::processing_thread() {
-
+  IDEASData ideasdata;
   Producer eventprod(opts->broker, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
@@ -158,8 +159,8 @@ void SONDEIDEA::processing_thread() {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      auto UNUSED dataptr = eth_ringbuf->getdatabuffer(data_index);
-      auto UNUSED datalen = eth_ringbuf->getdatalength(data_index);
+      ideasdata.receive(eth_ringbuf->getdatabuffer(data_index),
+        eth_ringbuf->getdatalength(data_index));
 
       /** @todo add processing of received UDP data */
 
