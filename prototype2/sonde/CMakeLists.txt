@@ -8,8 +8,8 @@ include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
 #
 
 # IDEA based readout for SoNDe detector
-set(sonde_SRC sonde.cpp)
-set(sonde_INC )
+set(sonde_SRC sonde.cpp ideas/Data.cpp)
+set(sonde_INC ideas/Data.h)
 create_module(sonde "")
 
 
