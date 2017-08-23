@@ -5,7 +5,7 @@ def failure_function(exception_obj, failureMessage) {
     throw exception_obj
 }
 
-node('boost && centos7') {
+node('kafka-client && centos7') {
     dir("code") {
         try {
             stage("Checkout projects") {
@@ -33,10 +33,8 @@ node('boost && centos7') {
         }
 
         try {
-            dir("unit_tests"){
-                stage("Run unit tests") {
-                    sh "make runtest"
-                }
+            stage("Run unit tests") {
+                sh "make runtest"
             }
         } catch (e) {
             failure_function(e, 'Unit tests failed')
