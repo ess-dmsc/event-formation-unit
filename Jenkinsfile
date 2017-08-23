@@ -33,10 +33,8 @@ node('centos7') {
         }
 
         try {
-            dir("build"){
-                stage("Run unit tests") {
-                    sh "make runtest"
-                }
+            stage("Run unit tests") {
+                sh "make runtest"
             }
         } catch (e) {
             failure_function(e, 'Unit tests failed')
