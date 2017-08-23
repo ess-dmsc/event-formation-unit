@@ -21,20 +21,20 @@ private:
      * element 6 corresponds to more than 5 signals for either wire or strip in a cluster.
      */
     //@{
-    std::array<uint64_t, 6> m_2D_wire_counts;
-    std::array<uint64_t, 6> m_2D_strip_counts;
-    std::array<uint64_t, 6> m_1D_wire_counts;
-    std::array<uint64_t, 6> m_1D_strip_counter;
+    //std::array<uint64_t, 6> m_2D_wire_counts;
+    //std::array<uint64_t, 6> m_2D_strip_counts;
+    //std::array<uint64_t, 6> m_1D_wire_counts;
+    //std::array<uint64_t, 6> m_1D_strip_counter;
     //@}
 
     /*! \name Countes for number of clusters/events.
      * 2D and 1D counters. Note the two 2D counters should be identical.
      */
     //@{
-    uint64_t m_2D_wire_events   = 0;
-    uint64_t m_2D_strip_events  = 0;
-    uint64_t m_1D_wire_events  = 0;
-    uint64_t m_1D_strip_events = 0;
+    //uint64_t m_2D_wire_events   = 0;
+    //uint64_t m_2D_strip_events  = 0;
+    //uint64_t m_1D_wire_events  = 0;
+    //uint64_t m_1D_strip_events = 0;
     //@}
 
     /*! Writes overview information */
