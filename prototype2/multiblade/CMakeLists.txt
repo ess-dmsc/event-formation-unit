@@ -1,6 +1,13 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
-include_directories(.. ../..)
+include_directories(.. ../.. ${FLATBUFFERS_INCLUDE_DIR})
+
+#
+# Detector Pipeline Plugins
+#
+set(mbcaen_SRC mbcaen.cpp )
+set(gdgemh5_INC)
+create_module(mbcaen "")
 
 option(ENABLE_TRACE "Build packages with trace output" OFF)
 
