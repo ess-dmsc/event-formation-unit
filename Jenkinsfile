@@ -33,7 +33,7 @@ node('centos7') {
         }
 
         try {
-            dir("unit_tests"){
+            dir("build"){
                 stage("Run unit tests") {
                     sh "make runtest"
                 }
