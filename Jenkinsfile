@@ -5,7 +5,7 @@ def failure_function(exception_obj, failureMessage) {
     throw exception_obj
 }
 
-node('centos7') {
+node('kafka-client && centos7') {
     dir("code") {
         try {
             stage("Checkout projects") {
