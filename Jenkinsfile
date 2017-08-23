@@ -5,7 +5,7 @@ def failure_function(exception_obj, failureMessage) {
     throw exception_obj
 }
 
-node('boost && centos7') {
+node('centos7') {
     dir("code") {
         try {
             stage("Checkout projects") {
