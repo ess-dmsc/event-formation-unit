@@ -6,11 +6,42 @@ find_package(LibRDKafka)
 find_package(GraylogLogger)
 find_package(H5CC)
 find_package(HDF5 1.8.15 COMPONENTS CXX HL)
+find_package(FlatBuffers REQUIRED)
 
-set(PYTHON_EXECUTABLE /usr/bin/python)
+set(coverage_flags "-coverage -fprofile-generate")
+
+enable_testing()
+
+set(DO_COV OFF)
+
+mark_as_advanced(DO_COV)
+
+if (${COV})
+    if (${CMAKE_COMPILER_IS_GNUCXX})
+        message(STATUS "Code coverage enabled.")
+        set(DO_COV ON)
+        set(CMAKE_BUILD_TYPE Debug)
+    else()
+        message(FATAL_ERROR "Unable to enable code coverage as this functionality only works with the g++ compiler.")
+    endif()
+endif()
+
 include(CMakeListsUtils.txt)
+add_subdirectory(gdgem)
+add_subdirectory(multiblade)
+add_subdirectory(multigrid)
+add_subdirectory(udp)
+
 include(CMakeListsUnitTests.txt)
 
+add_library(calibfile OBJECT multigrid/mgcncs/CalibrationFile.cpp)
+
+if(DO_COV)
+  set_target_properties(calibfile PROPERTIES LINK_FLAGS ${coverage_flags})
+  set_target_properties(calibfile PROPERTIES COMPILE_FLAGS "-g -O0 ${coverage_flags}")
+endif()
+
+set(PYTHON_EXECUTABLE /usr/bin/python)
 
 if(NOT LIBRDKAFKA_FOUND)
     message(FATAL_ERROR "Unable to proceed as librdkafka could not be found.")
@@ -31,37 +62,7 @@ set(common_SRC common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp
 set(common_INC common/Detector.h common/NewStats.h common/Producer.h common/FBSerializer.h
     common/Trace.h ../libs/include/gccintel.h common/EFUArgs.h)
 add_library(common STATIC ${common_SRC} ${common_INC})
-
-
-# UDP receiver 'detector'
-set(udp_SRC udp/udp.cpp)
-create_module(udp "")
-SET_TARGET_PROPERTIES(udp PROPERTIES COMPILE_FLAGS "-fno-strict-aliasing" )
-
-
-# Multi Grid demonstrator detector
-set(mgcncs_SRC multigrid/mgcncs.cpp multigrid/mgcncs/Data.cpp multigrid/mgcncs/ChanConv.cpp)
-set(mgcncs_INC multigrid/mgcncs/Data.h multigrid/mgcncs/ChanConv.h multigrid/mgcncs/Geometry.h)
-create_module(mgcncs "")
-
-
-# Two-thread implementation of Multi Grid demonstrator detector
-set(mgcncs2_SRC multigrid/mgcncs2.cpp multigrid/mgcncs/Data.cpp multigrid/mgcncs/ChanConv.cpp)
-set(mgcncs2_INC multigrid/mgcncs/Data.h multigrid/mgcncs/ChanConv.h multigrid/mgcncs/Geometry.h)
-create_module(mgcncs2 "")
-
-
-#
-set(nmx_SRC NMX/nmx.cpp NMX/Clusterer.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp nmxgen/EventletBuilderH5.cpp)
-set(nmx_INC NMX/Clusterer.h NMX/EventNMX.h NMX/Eventlet.h nmxgen/EventletBuilderH5.h)
-create_module(nmx "")
-
-
-# VMM2/SRS based detector (micromegas based CERN prototype)
-set(nmxvmm2srs_SRC nmxvmm2srs/nmxvmm2srs.cpp nmxvmm2srs/NMXVMM2SRSData.cpp NMX/Clusterer.cpp NMX/Geometry.cpp NMX/Time.cpp NMX/EventNMX.cpp NMX/Eventlet.cpp nmxvmm2srs/EventletBuilder.cpp nmxvmm2srs/HistSerializer.cpp nmxvmm2srs/TrackSerializer.cpp)
-set(nmxvmm2srs_INC NMX/Clusterer.h NMX/Geometry.h NMX/Time.h NMX/EventNMX.h NMX/Eventlet.h nmxvmm2srs/EventletBuilder.h nmxvmm2srs/NMXVMM2SRSData.h nmxvmm2srs/HistSerializer.h nmxvmm2srs/TrackSerializer.h)
-create_module(nmxvmm2srs "")
-
+target_include_directories(common INTERFACE ${FLATBUFFERS_INCLUDE_DIR})
 
 #
 # the E F U
@@ -72,51 +73,3 @@ set(efu2_INC common/EFUArgs.h efu/Launcher.h efu/Loader.h efu/Server.h efu/Parse
     multigrid/mgcncs/CalibrationFile.h common/StatPublisher.h common/NewStats.h efu/ExitHandler.h)
 set(efu_LIB ${LibRDKafka_LIBRARIES} ${CMAKE_DL_LIBS})
 create_executable(efu2 "${efu_LIB}")
-
-
-#
-# Tools and Data generators
-#
-
-# Generates dummy 'CSPEC' data matching the Multi Grid demonstrator
-set(mgcncsgen_SRC multigrid/mgcncsgen/mgcncsgen.cpp multigrid/mgcncsgen/DGArgs.cpp multigrid/mgcncs/Data.cpp)
-set(mgcncsgen_INC multigrid/mgcncsgen/DGArgs.h multigrid/mgcncs/Data.h)
-create_executable(mgcncsgen  "")
-
-
-#
-set(mgcncsgenfile_SRC multigrid/mgcncsgen/mgcncsgenfile.cpp multigrid/mgcncsgen/DGArgs.cpp)
-set(mgcncsgenfile_INC multigrid/mgcncsgen/DGArgs.h)
-create_executable(mgcncsgenfile "")
-
-
-#
-if(${H5CC_FOUND} AND ${HDF5_FOUND})
-    include_directories(${H5CC_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
-    message(STATUS "Found H5CC and HDF5 libraries. Will build gennmxfile.")
-    set(gennmxfile_SRC nmxgen/nmxfile.cpp nmxgen/NMXArgs.cpp nmxgen/ReaderVMM.cpp NMX/Eventlet.cpp)
-    set(gennmxfile_INC nmxgen/NMXArgs.h nmxgen/ReaderVMM.h NMX/Eventlet.h)
-    create_executable(gennmxfile "${H5CC_LIBRARY}")
-    target_link_libraries(gennmxfile ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
-else()
-    message(STATUS "Unable to find H5CC and/or HDF5 libraries. Will NOT build gennmxfile.")
-endif()
-
-
-# Data generator for raw cspec data
-set(mgcncsgenjson_SRC multigrid/mgcncsgen/mgcncsgenjson.cpp multigrid/mgcncsgen/JsonArgs.cpp
-    ../dataformats/multigrid/src/RunSpecParse.cpp
-    ../dataformats/multigrid/src/jsoncpp.cpp)
-set(mgcncsgenjson_INC multigrid/mgcncsgen/JsonArgs.h)
-create_executable(mgcncsgenjson "")
-
-
-#
-if (PCAP_FOUND)
-    include_directories(${PCAP_INCLUDE_DIR})
-    set(gennmxpcap_SRC nmxgen/wireshark.cpp nmxgen/ReaderPcap.cpp nmxgen/NMXArgs.cpp)
-    set(gennmxpcap_INC nmxgen/ReaderPcap.h nmxgen/NMXArgs.h)
-    create_executable(gennmxpcap "pcap")
-else()
-    message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
-endif()

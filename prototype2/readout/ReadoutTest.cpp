@@ -7,22 +7,20 @@
 class ReadoutTest : public TestBase {
 protected:
   char buffer[9000];
-  virtual void SetUp() {
-    memset(buffer, 0, sizeof(buffer));
-  }
+  virtual void SetUp() { memset(buffer, 0, sizeof(buffer)); }
   virtual void TearDown() {}
 };
 
 TEST_F(ReadoutTest, InvalidBuffer) {
   Readout readout;
-  ASSERT_EQ(readout.validate(0,0), -Readout::EBUFFER);
+  ASSERT_EQ(readout.validate(0, 0), -Readout::EBUFFER);
 }
 
 TEST_F(ReadoutTest, InvalidDataSize) {
   Readout readout;
-  ASSERT_EQ(readout.validate(buffer,-5), -Readout::ESIZE);
+  ASSERT_EQ(readout.validate(buffer, -5), -Readout::ESIZE);
   for (auto i = 0; i < 64; i++) {
-    ASSERT_EQ(readout.validate(buffer,i), -Readout::ESIZE);
+    ASSERT_EQ(readout.validate(buffer, i), -Readout::ESIZE);
   }
 }
 
@@ -49,6 +47,15 @@ TEST_F(ReadoutTest, BasicParsing) {
   ASSERT_EQ(readout.seqno, 1);
   ASSERT_EQ(readout.wordcount, 6);
   ASSERT_EQ(readout.reserved, 0);
+}
+
+TEST_F(ReadoutTest, PktAndHeaderSizeMismatch) {
+  Readout readout;
+  int size = err_size_mismatch.size();
+  ASSERT_EQ(size, 64);
+
+  auto res = readout.validate((char *)&err_size_mismatch[0], size);
+  ASSERT_EQ(res, -Readout::EHDR);
 }
 
 int main(int argc, char **argv) {

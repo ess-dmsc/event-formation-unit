@@ -39,7 +39,15 @@ std::vector<std::string> commands_badargs {
   "CSPEC_SHOW_CALIB 16384",
   "STAT_GET_COUNT 1",
   "STAT_GET",
-  "VERSION_GET 1"
+  "VERSION_GET 1",
+  "DETECTOR_INFO_GET 1"
+};
+
+// These commands should 'fail' when the detector is not loaded
+std::vector<std::string> check_detector_loaded {
+  "DETECTOR_INFO_GET",
+  "STAT_GET_COUNT",
+  "STAT_GET 1"
 };
 
 // clang-format on
@@ -191,6 +199,33 @@ TEST_F(ParserTest, SysCallFail) {
   res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(res, -Parser::EBADARGS);
   ASSERT_EQ(0, forcereadfail);
+}
+
+TEST_F(ParserTest, DetInfoGetNoDetectorLoaded) {
+  efu_args->detectorif = 0;
+  const char *cmd = "DETECTOR_INFO_GET";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(res, -Parser::OK);
+}
+
+TEST_F(ParserTest, StatGetCountNoDetectorLoaded) {
+  efu_args->detectorif = 0;
+  for (auto cmdstr : check_detector_loaded) {
+    MESSAGE() << cmdstr << "\n";
+    const char *cmd = cmdstr.c_str();
+    std::memcpy(input, cmd, strlen(cmd));
+    int res = parser->parse(input, strlen(cmd), output, &obytes);
+    ASSERT_EQ(res, -Parser::OK);
+    ASSERT_NE(strstr(output, "error: no detector loaded"), nullptr);
+  }
+}
+
+TEST_F(ParserTest, DetectorInfo) {
+  const char *cmd = "DETECTOR_INFO_GET";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(res, -Parser::OK);
 }
 
 int main(int argc, char **argv) {

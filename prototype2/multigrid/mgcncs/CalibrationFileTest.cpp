@@ -1,7 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/CalibrationFile.h>
+#include <multigrid/mgcncs/ChanConv.h>
+#include <stdlib.h>
 #include <string>
 #include <test/TestBase.h>
 
@@ -23,8 +24,8 @@ TEST_F(CalibrationFileTest, LoadZeroAndMax) {
   uint16_t wbuffer[CSPECChanConv::adcsize];
   uint16_t gbuffer[CSPECChanConv::adcsize];
   CalibrationFile calibfile;
-  int res = calibfile.load(std::string("calib_data/cal_zero"), (char *)wbuffer,
-                           (char *)gbuffer);
+  int res =
+      calibfile.load(std::string("cal_zero"), (char *)wbuffer, (char *)gbuffer);
   ASSERT_EQ(res, 0);
 
   for (int i = 0; i < CSPECChanConv::adcsize; i++) {
@@ -32,8 +33,8 @@ TEST_F(CalibrationFileTest, LoadZeroAndMax) {
     ASSERT_EQ(0, gbuffer[i]);
   }
 
-  res = calibfile.load(std::string("calib_data/cal_max"), (char *)wbuffer,
-                       (char *)gbuffer);
+  res =
+      calibfile.load(std::string("cal_max"), (char *)wbuffer, (char *)gbuffer);
   ASSERT_EQ(res, 0);
 
   for (int i = 0; i < CSPECChanConv::adcsize; i++) {
@@ -45,6 +46,8 @@ TEST_F(CalibrationFileTest, LoadZeroAndMax) {
 TEST_F(CalibrationFileTest, SaveUninitialized) {
   uint16_t wbuffer[CSPECChanConv::adcsize];
   uint16_t gbuffer[CSPECChanConv::adcsize];
+  memset(wbuffer, 0, sizeof(wbuffer));
+  memset(gbuffer, 0, sizeof(gbuffer));
   CalibrationFile calibfile;
   int res = calibfile.save(std::string("CalibrationFileTest"), (char *)wbuffer,
                            (char *)gbuffer);
@@ -55,8 +58,8 @@ TEST_F(CalibrationFileTest, LoadNoGcal) {
   uint16_t wbuffer[CSPECChanConv::adcsize];
   uint16_t gbuffer[CSPECChanConv::adcsize];
   CalibrationFile calibfile;
-  int res = calibfile.load(std::string("calib_data/nogcal"), (char *)wbuffer,
-                           (char *)gbuffer);
+  int res =
+      calibfile.load(std::string("nogcal"), (char *)wbuffer, (char *)gbuffer);
   ASSERT_EQ(res, -1);
 }
 
@@ -64,7 +67,7 @@ TEST_F(CalibrationFileTest, LoadBadSize) {
   uint16_t wbuffer[CSPECChanConv::adcsize];
   uint16_t gbuffer[CSPECChanConv::adcsize];
   CalibrationFile calibfile;
-  int res = calibfile.load(std::string("calib_data/cal_badsize"), (char *)wbuffer,
+  int res = calibfile.load(std::string("cal_badsize"), (char *)wbuffer,
                            (char *)gbuffer);
   ASSERT_EQ(res, -1);
 }
@@ -75,8 +78,8 @@ TEST_F(CalibrationFileTest, LoadOpenFail) {
   uint16_t gbuffer[CSPECChanConv::adcsize];
   CalibrationFile calibfile;
   forceopenfail = 1;
-  int res = calibfile.load(std::string("calib_data/cal_zero"), (char *)wbuffer,
-                           (char *)gbuffer);
+  int res =
+      calibfile.load(std::string("cal_zero"), (char *)wbuffer, (char *)gbuffer);
   ASSERT_EQ(res, -1);
   ASSERT_EQ(0, forceopenfail);
 }
@@ -87,8 +90,8 @@ TEST_F(CalibrationFileTest, Load2OpenFail) {
   uint16_t gbuffer[CSPECChanConv::adcsize];
   CalibrationFile calibfile;
   forceopenfail = 2;
-  int res = calibfile.load(std::string("calib_data/cal_zero"), (char *)wbuffer,
-                           (char *)gbuffer);
+  int res =
+      calibfile.load(std::string("cal_zero"), (char *)wbuffer, (char *)gbuffer);
   ASSERT_EQ(res, -1);
   ASSERT_EQ(0, forceopenfail);
 }
@@ -99,8 +102,8 @@ TEST_F(CalibrationFileTest, LoadFstatFail) {
   uint16_t gbuffer[CSPECChanConv::adcsize];
   CalibrationFile calibfile;
   forcefstatfail = 1;
-  int res = calibfile.load(std::string("calib_data/cal_zero"), (char *)wbuffer,
-                           (char *)gbuffer);
+  int res =
+      calibfile.load(std::string("cal_zero"), (char *)wbuffer, (char *)gbuffer);
   ASSERT_EQ(res, -1);
   ASSERT_EQ(0, forcefstatfail);
 }
@@ -111,8 +114,8 @@ TEST_F(CalibrationFileTest, LoadReadFail) {
   uint16_t gbuffer[CSPECChanConv::adcsize];
   CalibrationFile calibfile;
   forcereadfail = 1;
-  int res = calibfile.load(std::string("calib_data/cal_zero"), (char *)wbuffer,
-                           (char *)gbuffer);
+  int res =
+      calibfile.load(std::string("cal_zero"), (char *)wbuffer, (char *)gbuffer);
   ASSERT_EQ(res, -1);
   ASSERT_EQ(0, forcereadfail);
 }
@@ -145,6 +148,8 @@ TEST_F(CalibrationFileTest, Save2OpenFail) {
   ASSERT_EQ(0, forceopenfail);
   uint16_t wbuffer[CSPECChanConv::adcsize];
   uint16_t gbuffer[CSPECChanConv::adcsize];
+  memset(wbuffer, 0, sizeof(wbuffer));
+  memset(gbuffer, 0, sizeof(gbuffer));
   CalibrationFile calibfile;
   forceopenfail = 2;
   int res = calibfile.save(std::string("CalibrationFileTest"), (char *)wbuffer,
@@ -154,7 +159,18 @@ TEST_F(CalibrationFileTest, Save2OpenFail) {
 }
 
 int main(int argc, char **argv) {
-  int __attribute__((unused)) ret = chdir("prototype2");
+  // Assume root is build/ directory - for running manually
+  int ret = chdir("prototype2/calib_data");
+  if (ret != 0) {
+    // Assume we're in prototype2/multigrid
+    ret = chdir("../../prototype2/calib_data");
+    if (ret != 0) {
+      printf("Unable to locate calibration data directory relative to:\n");
+      int ret2 __attribute__((unused)) = system("pwd");
+      return -1;
+    }
+  }
+
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -8,8 +8,9 @@ The repository contains the following directories
 Directory             | Function
 -------------         | -------------
 centos                | scripts to configure link bonding on CentOS
+cmake_modules         | cmake modules from third parties
 dataformats           | sample detector data and data parsers
-dynamic_pipelines     | demonstration of dynamic loading of pipeline code
+dynamic_pipelines     | demonstration of dynamic loading of pipeline code (obsolete)
 jenkins               | Continuous Integration scripts
 libs                  | utility classes and unit tests
 multicore_iperf_tests | testing tcp and udp performance across local cores

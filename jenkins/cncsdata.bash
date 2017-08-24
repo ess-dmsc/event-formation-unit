@@ -7,27 +7,12 @@ errexit()
 }
 
 
-function build_progs()
-{
-  pushd dataformats/multigrid
-  make V=y || errexit "failed to build progs"
-  popd
-}
+rm -fr build
+mkdir build
 
-function build_tests()
-{
-  pushd dataformats/multigrid
-  make V=y test || errexit "failed to build tests"
-  popd
-}
+pushd build
 
-function run_tests()
-{
-  pushd dataformats/multigrid
-  make V=y runtest || errexit "failed to run tests"
-  popd
-}
+cmake ../dataformats  || errexit "cmake failed"
+make runtest          || errexit "make runtest failed"
 
-build_progs
-build_tests
-run_tests
+popd

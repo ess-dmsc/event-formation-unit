@@ -5,12 +5,12 @@
 #include <MapFile.h>
 #include <PeakFinder.h>
 #include <cassert>
-#include <multigrid/mgcncs/Geometry.h>
 #include <common/Trace.h>
-#include <multigrid/mgcncs/ChanConv.h>
-#include <multigrid/mgcncs/CalibrationFile.h>
 #include <errno.h>
 #include <fcntl.h>
+#include <multigrid/mgcncs/CalibrationFile.h>
+#include <multigrid/mgcncs/ChanConv.h>
+#include <multigrid/mgcncs/Geometry.h>
 #include <string>
 #include <sys/types.h>
 #include <unistd.h>

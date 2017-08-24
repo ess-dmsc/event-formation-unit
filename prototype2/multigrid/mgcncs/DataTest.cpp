@@ -1,11 +1,11 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <algorithm>
-#include <multigrid/mgcncs/Geometry.h>
+#include <memory>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/Data.h>
-#include <memory>
-#include <test/CSPECTestData.h>
+#include <multigrid/mgcncs/Geometry.h>
+#include <multigrid/mgcncs/TestData.h>
 #include <test/TestBase.h>
 
 using namespace std;
@@ -105,6 +105,7 @@ TEST_F(CspecDataTest, InputFilterBadNwords) {
 
 TEST_F(CspecDataTest, InputFilterNoEvents) {
   char buffer[200];
+  memset(buffer, 0, sizeof(buffer));
   const int databytes = 40;
   dat->receive(buffer, databytes);
   assertdatanderr(0, databytes);

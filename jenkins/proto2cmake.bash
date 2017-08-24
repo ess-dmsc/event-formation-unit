@@ -18,22 +18,15 @@ function tools()
   gcovr --version || errexit "gcovr program is missing"
 }
 
-function coverage()
-{
-  mkdir -p gcovr
-  gcovr -r .. -x -e '.*Test.cpp' -e '.*gtest.*.h' -o coverage/cov.xml
-  #gcovr -x -r .. -o coverage/cov.xml
-  #gcovr -r . --html --html-details -e '.*Test.cpp' -e '.*gtest.*.h' -o coverage.html
-}
-
 rm -fr build
 mkdir build
 
-#tools
+tools
 cloc --by-file --xml --out=cloc.xml .
 pushd build
-cmake -DCOV=y ..
-make VERBOSE=y runtest
-make coverage
+cmake -DCOV=y ..        || errexit "cmake failed"
+make                    || errexit "make failed"
+make VERBOSE=y runtest  || errexit "make runtest failed"
+make coverage           || errexit "make coverage failed"
 make valgrind
 popd
