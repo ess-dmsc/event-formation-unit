@@ -7,6 +7,7 @@
 
 #pragma once
 
+#include <cinttypes>
 
 class IDEASData {
 public:
