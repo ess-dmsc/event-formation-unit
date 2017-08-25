@@ -1,5 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <arpa/inet.h>
 #include <cassert>
 #include <common/Trace.h>
 #include <cstring>
