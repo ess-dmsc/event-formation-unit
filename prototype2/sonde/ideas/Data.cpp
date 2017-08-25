@@ -1,5 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <arpa/inet.h>
 #include <cassert>
 #include <common/Trace.h>
 #include <cstring>
@@ -45,7 +46,7 @@ int IDEASData::receive(const char *buffer, int size) {
     return 0;
   }
 
-  if (length + sizeof(struct Header) != size) {
+  if (length + (int)sizeof(struct Header) != size) {
     XTRACE(PROCESS, WAR, "Packet length mismatch: udp: %d, parsed: %d\n",
          size, length + (int)sizeof(struct Header));
     return 0;
