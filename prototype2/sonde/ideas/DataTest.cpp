@@ -23,10 +23,11 @@ TEST_F(IDEASDataTest, ErrNoData) {
     ASSERT_EQ(res, 0);
 }
 
-TEST_F(IDEASDataTest, ErrShortHeader) {
-    int size = err_short_header.size();
-    int res = readout->receive((char *)&err_short_header[0], size);
+TEST_F(IDEASDataTest, ErrHeaderFields) {
+  for (auto v : err_hdr) {
+    int res = readout->receive((char *)&v[0], v.size());
     ASSERT_EQ(res, 0);
+  }
 }
 
 TEST_F(IDEASDataTest, OkHeaderOnly) {
