@@ -7,8 +7,8 @@
 
 using namespace std;
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 /** @todo no error checking, assumes valid data and valid buffer */
 int IDEASData::createevent(uint32_t time, uint32_t pixel_id, char *buffer) {
@@ -28,8 +28,26 @@ int IDEASData::createevent(uint32_t time, uint32_t pixel_id, char *buffer) {
 
 int IDEASData::receive(const char *buffer, int size) {
 
-  assert(buffer != nullptr);
-  assert(size > 0);
+  if (buffer == nullptr) {
+    XTRACE(PROCESS, WAR, "Invalid buffer\n");
+    return 0;
+  }
+
+  if (size < 10) {
+    XTRACE(PROCESS, WAR, "IDEAS readout header too short (%d bytes)\n", size);
+    return 0;
+  }
+
+  struct Header * hdr = (struct Header *)buffer;
+
+  int version = (hdr->id & 0xe000) >> 13;
+  int sysno = (hdr->id & 0x1fff) >> 8;
+  int type = (hdr->id & 0x00ff);
+  int seqflag = (hdr->pktseq & 0xc000) >> 14;
+  int count = (hdr->pktseq & 0x3fff);
+  XTRACE(PROCESS, DEB, "version: %d, sysno: %d, type: %d\n", version, sysno, type);
+  XTRACE(PROCESS, DEB, "sequence flag: %d, packet count: %d\n", seqflag, count);
+  XTRACE(PROCESS, DEB, "time: %d, size: %d\n", hdr->timestamp, hdr->length);
 
   return 1; /** @todo implement data parser */
 }
