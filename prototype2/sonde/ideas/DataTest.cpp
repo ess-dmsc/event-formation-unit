@@ -24,13 +24,13 @@ TEST_F(IDEASDataTest, ErrNoData) {
 }
 
 TEST_F(IDEASDataTest, ErrShortHeader) {
-    int size = err_short_header.size() * 4;
+    int size = err_short_header.size();
     int res = readout->receive((char *)&err_short_header[0], size);
     ASSERT_EQ(res, 0);
 }
 
 TEST_F(IDEASDataTest, OkHeaderOnly) {
-    int size = ok_header_only.size() * 4;
+    int size = ok_header_only.size();
     int res = readout->receive((char *)&ok_header_only[0], size);
     ASSERT_EQ(res, 1);
 }
