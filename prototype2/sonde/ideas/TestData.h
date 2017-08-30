@@ -35,6 +35,12 @@ vector<uint8_t> err_length
   0x01, 0xD6, 0x03, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00
 };
 
+vector<uint8_t> err_nb_event_mismatch
+{//                                                        *
+  0x01, 0xD6, 0x03, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x0a,
+  0x02, 0x00, 0x00, 0x00, 0x01, 0xaa, 0x00, 0x00, 0x00, 0x02
+};
+
 //
 // Valid data
 //
@@ -62,4 +68,5 @@ vector<uint8_t> ok_events_3
 
 /** Raw packet data above, now collect into iterable containers */
 
-vector<vector<uint8_t>> err_hdr{err_short_header, err_version, err_datatype, err_length};
+vector<vector<uint8_t>> err_hdr{err_short_header, err_version, err_datatype, err_length,
+   err_nb_event_mismatch};
