@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <memory>
+#include <sonde/Geometry.h>
 #include <sonde/ideas/Data.h>
 #include <sonde/ideas/TestData.h>
 #include <test/TestBase.h>
@@ -10,9 +11,10 @@ using namespace std;
 
 class IDEASDataTest : public TestBase {
 protected:
+  SoNDeGeometry geometry;
   IDEASData * readout;
   virtual void SetUp() {
-     readout = new IDEASData();
+     readout = new IDEASData(&geometry);
   }
   virtual void TearDown() { }
 };
