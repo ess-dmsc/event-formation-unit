@@ -12,6 +12,9 @@ using namespace std;
 
 // clang-format off
 
+//
+// Invalid data
+//
 vector<uint8_t > err_short_header
 {
   0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08
@@ -27,6 +30,14 @@ vector<uint8_t> err_datatype
   0x01, 0xD5, 0x03, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00
 };
 
+vector<uint8_t> err_length
+{//                                                        *
+  0x01, 0xD6, 0x03, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x01
+};
+
+//
+// Valid data
+//
 vector<uint8_t> ok_header_only
 {
   0x01, 0xD6, 0x03, 0x04, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00
@@ -36,4 +47,4 @@ vector<uint8_t> ok_header_only
 
 /** Raw packet data above, now collect into iterable containers */
 
-vector<vector<uint8_t>> err_hdr{err_short_header, err_version, err_datatype};
+vector<vector<uint8_t>> err_hdr{err_short_header, err_version, err_datatype, err_length};
