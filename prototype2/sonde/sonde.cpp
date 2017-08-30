@@ -62,9 +62,6 @@ private:
     int64_t pad[5];
 
     int64_t rx_idle1;
-    int64_t rx_readouts;
-    int64_t rx_errbytes;
-    int64_t rx_discards;
     int64_t rx_events;
     int64_t tx_bytes;
   } ALIGN(64) mystats;
@@ -81,10 +78,7 @@ SONDEIDEA::SONDEIDEA(void *args) {
   ns.create("input.rx_bytes",                  &mystats.rx_bytes);
   ns.create("input.dropped",                   &mystats.fifo1_push_errors);
   ns.create("processing.idle",                 &mystats.rx_idle1);
-  ns.create("processing.rx_readouts",          &mystats.rx_readouts);
-  ns.create("processing.rx_discards",          &mystats.rx_discards);
-  ns.create("processing.rx_errbytes",          &mystats.rx_errbytes);
-  ns.create("output.rx_events",                &mystats.rx_events);
+  ns.create("processing.rx_events",            &mystats.rx_events);
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
 
@@ -143,11 +137,11 @@ void SONDEIDEA::input_thread() {
 }
 
 void SONDEIDEA::processing_thread() {
-  IDEASData ideasdata;
+  SoNDeGeometry geometry;
+
+  IDEASData ideasdata(&geometry);
   Producer eventprod(opts->broker, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
-
-  //SONDEIDEAData data(1125);
 
   Timer stopafter_clock;
   TSCTimer global_time, report_timer;
@@ -159,16 +153,13 @@ void SONDEIDEA::processing_thread() {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      ideasdata.receive(eth_ringbuf->getdatabuffer(data_index),
+      int events = ideasdata.receive(eth_ringbuf->getdatabuffer(data_index),
         eth_ringbuf->getdatalength(data_index));
 
-      /** @todo add processing of received UDP data */
-
-      uint32_t time = 1;     /**< @todo should not be hardcoded */
-      uint32_t pixelid = 42; /**< @todo should not be hardcoded */
-
-      mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
-      mystats.rx_events++;
+      for (int i = 0; i < events; i++) {
+        mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
+        mystats.rx_events++;
+      }
     }
 
     // Checking for exit

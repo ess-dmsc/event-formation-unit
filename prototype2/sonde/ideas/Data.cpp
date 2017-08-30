@@ -18,7 +18,7 @@ int IDEASData::receive(const char *buffer, int size) {
     return 0;
   }
 
-  if (size < 10) {
+  if (size < 11) {
     XTRACE(PROCESS, WAR, "IDEAS readout header too short (%d bytes)\n", size);
     return 0;
   }
@@ -52,5 +52,25 @@ int IDEASData::receive(const char *buffer, int size) {
     return 0;
   }
 
-  return 1; /** @todo implement data parser */
+  uint8_t * datap = (uint8_t *)(buffer + sizeof(struct Header));
+  int nevents = *datap;
+  XTRACE(PROCESS, DEB, "Number of readout events in packet: %d\n", nevents);
+
+  if (nevents * 5 + 1 != length) {
+    XTRACE(PROCESS, WAR, "Data length error: events %d (len %d), got: %d\n",
+         nevents, nevents * 5 + 1, length);
+    return 0;
+  }
+
+  for (int i = 0; i < nevents; i++) {
+    auto timep = (uint32_t *)(datap + i*5 + 1);
+    auto aschp  = (uint8_t *)(datap + i*5 + 5);
+    uint32_t time = ntohl(*timep);
+    uint8_t asch = *aschp; // ASIC (2b) and CHANNEL (6b)
+    data[i].time = time;
+    data[i].pixel_id = sondegeometry->getdetectorpixelid(0, asch);
+    XTRACE(PROCESS, DEB, "event: %d, time: 0x%08x, asch: 0x%02x\n", i, time, asch);
+  }
+
+  return nevents;
 }

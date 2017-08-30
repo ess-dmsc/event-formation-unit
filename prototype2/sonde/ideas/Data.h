@@ -8,9 +8,15 @@
 #pragma once
 
 #include <cinttypes>
+#include <sonde/Geometry.h>
 
 class IDEASData {
 public:
+
+  struct SoNDeData {
+    uint32_t time;
+    uint32_t pixel_id;
+  };
 
   /** from IDEAS Readout and Control Packet Protocol Reference
    * Ref: IDE-REP-Ref-V1.7
@@ -25,11 +31,15 @@ public:
   } __attribute__((packed));
 
   /** Empty constructor */
-  IDEASData() { }
+  IDEASData(SoNDeGeometry * geom) : sondegeometry(geom){ }
 
   ~IDEASData() { }
 
   /** @brief parse a binary payload buffer, return number of data elements
    */
   int receive(const char *buffer, int size);
+
+  struct SoNDeData data[500];
+private:
+  SoNDeGeometry * sondegeometry{nullptr};
 };
