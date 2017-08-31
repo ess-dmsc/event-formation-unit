@@ -23,8 +23,7 @@ multiBladeEventBuilder::multiBladeEventBuilder()
 
 multiBladeEventBuilder::~multiBladeEventBuilder() {}
 
-bool multiBladeEventBuilder::addDataPoint(const uint8_t& channel, const uint64_t& ADC, const uint32_t& clock)
-{
+bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel, const uint64_t &ADC, const uint32_t &clock) {
 
 #ifdef TRACE
     std::cout << "Data-point received (" << int(channel) << ", " << ADC << ", " << clock << ")\n";
@@ -59,7 +58,7 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t& channel, const uint64_t
     // Check if we are within the time-window
     if (clock_diff < m_time_window) {
 
-        // Datapoint is within time-window
+        // point is within time-window
 
 #ifdef TRACE
         std::cout << "Within time-window [" << clock_diff << " < " << m_time_window << "]" << std::endl;
@@ -70,7 +69,7 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t& channel, const uint64_t
         return false;
     }
 
-    // Datapoint is outside time-window - the cluster is complete.
+    // point is outside time-window - the cluster is complete.
 
 #ifdef TRACE
     std::cout << "Outside time-window [" << clock_diff << " > " << m_time_window << "]" << std::endl;
@@ -153,7 +152,7 @@ bool multiBladeEventBuilder::pointsAdjacent() {
     return adjacent;
 }
 
-bool multiBladeEventBuilder::checkAdjacency(std::vector<datapoint> cluster) {
+bool multiBladeEventBuilder::checkAdjacency(std::vector<point> cluster) {
 
     // Check if cluster contains more than 1 signal. If not - then exit, since there will be nothing to do.
     if (cluster.size() <= 1)
@@ -163,11 +162,11 @@ bool multiBladeEventBuilder::checkAdjacency(std::vector<datapoint> cluster) {
     std::sort(cluster.begin(), cluster.end());
 
     // Cluster iterator
-    std::vector<datapoint>::iterator it1 = cluster.begin();
+    std::vector<point>::iterator it1 = cluster.begin();
     // Loop until the second last data-point
     while (it1 != --cluster.end()) {
         // Get the next element relative to the main iterator
-        std::vector<datapoint>::iterator it2 = std::next(it1);
+        std::vector<point>::iterator it2 = std::next(it1);
 
         // Get the channel numbers
         uint8_t channel1 = it1->channel;
@@ -195,7 +194,7 @@ bool multiBladeEventBuilder::checkAdjacency(std::vector<datapoint> cluster) {
     return true;
 }
 
-double multiBladeEventBuilder::calculatePosition(std::vector<datapoint> cluster) {
+double multiBladeEventBuilder::calculatePosition(std::vector<point> cluster) {
 
     double position = -1.;
 
@@ -205,7 +204,7 @@ double multiBladeEventBuilder::calculatePosition(std::vector<datapoint> cluster)
     if (m_use_weighted_average) {
         uint64_t sum_numerator = 0;
         uint64_t sum_denominator = 0;
-        for (std::vector<datapoint>::iterator it = cluster.begin(); it != cluster.end(); ++it) {
+        for (std::vector<point>::iterator it = cluster.begin(); it != cluster.end(); ++it) {
             sum_numerator += it->channel * it->ADC;
             sum_denominator += it->ADC;
         }
@@ -214,7 +213,7 @@ double multiBladeEventBuilder::calculatePosition(std::vector<datapoint> cluster)
     } else {
         uint8_t max_channel = 0;
         uint64_t max_ADC = 0;
-        for (std::vector<datapoint>::iterator it = cluster.begin(); it != cluster.end(); ++it) {
+        for (std::vector<point>::iterator it = cluster.begin(); it != cluster.end(); ++it) {
             if (it->ADC > max_ADC) {
                 max_ADC = it->ADC;
                 max_channel = it->channel;
@@ -252,7 +251,7 @@ std::vector<double> multiBladeEventBuilder::getPosition() {
 
 void multiBladeEventBuilder::addPointToCluster(uint8_t channel, uint64_t ADC) {
 
-    datapoint point = {channel, ADC};
+    point point = {channel, ADC};
     if (channel < m_nwire_channels)
         m_wire_cluster.push_back(point);
     else
@@ -270,7 +269,7 @@ void multiBladeEventBuilder::resetCounters() {
     m_1D_strips = {{0, 0, 0, 0, 0, 0}};
 }
 
-void multiBladeEventBuilder::incrementCounters(std::vector<datapoint> m_wire_cluster, std::vector<datapoint> m_strip_cluster) {
+void multiBladeEventBuilder::incrementCounters(std::vector<point> m_wire_cluster, std::vector<point> m_strip_cluster) {
 
     // Increment counters for wire and strip cluster sizes, for clusters with both wire and strip signals
     if (m_wire_cluster.size() && m_strip_cluster.size()) {
@@ -279,7 +278,7 @@ void multiBladeEventBuilder::incrementCounters(std::vector<datapoint> m_wire_clu
         } else {
             m_2D_wires.at(5)++;
 #ifdef TRACE
-            std::cerr << "<addDataPoint> More datapoints than expected! Number of wire data points = "
+            std::cerr << "<addpoint> More points than expected! Number of wire data points = "
                       << m_wire_cluster.size() << std::endl;
 #endif
         }
@@ -288,7 +287,7 @@ void multiBladeEventBuilder::incrementCounters(std::vector<datapoint> m_wire_clu
         } else {
             m_2D_strips.at(5)++;
 #ifdef TRACE
-            std::cerr << "<addDataPoint> More datapoints than expected! Number of strip data points = "
+            std::cerr << "<addpoint> More points than expected! Number of strip data points = "
                       << m_strip_cluster.size() << std::endl;
 #endif
         }
@@ -301,7 +300,7 @@ void multiBladeEventBuilder::incrementCounters(std::vector<datapoint> m_wire_clu
         } else {
             m_1D_wires.at(5)++;
 #ifdef TRACE
-            std::cerr << "<addDataPoint> More datapoints than expected! Number of wire data points = "
+            std::cerr << "<addpoint> More points than expected! Number of wire data points = "
                       << m_wire_cluster.size() << std::endl;
 #endif
         }
@@ -314,13 +313,13 @@ void multiBladeEventBuilder::incrementCounters(std::vector<datapoint> m_wire_clu
         } else {
         m_1D_strips.at(5)++;
 #ifdef TRACE
-            std::cerr << "<addDataPoint> More datapoints than expected! Number of strip data points = "
+            std::cerr << "<addpoint> More points than expected! Number of strip data points = "
                       << m_strip_cluster.size() << std::endl;
 #endif
         }
     }
 }
 
-bool operator< (const datapoint& a, const datapoint& b) {
+bool operator< (const point& a, const point& b) {
     return (a.channel < b.channel);
 }

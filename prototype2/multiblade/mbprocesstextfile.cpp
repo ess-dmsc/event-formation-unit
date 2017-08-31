@@ -5,9 +5,9 @@
 #include <climits>
 #include <sys/stat.h>
 
-#include "multiblade/mbcaen/multiBladeEventBuilder.h"
-#include "dumpEventBuilderInfo.h"
-#include "TextFile.h"
+#include "mbcommon/multiBladeEventBuilder.h"
+#include "mbcommon/dumpEventBuilderInfo.h"
+#include "mbcommon/TextFile.h"
 
 int main(int argc, const char** argv) {
 

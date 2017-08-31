@@ -2,7 +2,7 @@
  *
  * This class processes data-points from one cassette of the multi-blade detector.
  *
- * The data-points are first formed into clusters within a certain preset time-window. The clusters are then check for
+ * The data-points are first formed into clusters within a certain preset time-window. The clusters are then checked for
  * adjacency and if passed the position of the cluster will be determined. The position can be either determined as the
  * wire/strip with maximum signal of the cluster or be calculated using a weighted average with the signals as the
  * weights.
@@ -31,10 +31,10 @@
 #include <iostream>
 
 /*! Struct containing channel number and ADC-value for a singe strip or wire. */
-struct datapoint
+struct point
 {
     uint8_t  channel; /*!< Number of either wire or strip channel */
-    uint64_t ADC; /*!< Value of the signal form the corresponding channel */
+    uint64_t ADC; /*!< Value of the signal from the corresponding channel */
 };
 
 /*! Overloaded < operator. Required when we need to sort the data points for later neighbour check
@@ -43,7 +43,7 @@ struct datapoint
  * @param b datapoint 2
  * @return bool
  */
-bool operator< (const datapoint& a, const datapoint& b);
+bool operator< (const point& a, const point& b);
 
 class multiBladeEventBuilder {
 
@@ -59,8 +59,8 @@ public:
      * channel and a clock-cycle number. Each data point is added through this function. The first sanity check on the
      * data is done here (See \subpage checks). The algorithm building the clusters/events is described in
      * \subpage clustering.
-     * Once a cluster is completed the position is calculated automatically and the function returns true. Accepting the
-     * true boolean should therefore trigger the readout of the calculated position.
+     * Once a cluster is completed the position is calculated automatically and the function returns true. Reception of
+     * the true boolean should therefore trigger the readout of the calculated position.
      *
      * @param channel Channel number
      * @param ADC Signal value
@@ -87,8 +87,8 @@ public:
      */
     double getStripPosition() {return m_strip_pos;}
 
-    /*! Returns the timestamp of the cluster currently being processed.
-     *
+    /*! Returns the timestamp of the cluster. The value is only updated when a cluster/event is complete.
+     * One should therefore only call this function when addDataPoint() returns true.     *
      *
      * @return The time-stamp in seconds.
      */
@@ -103,16 +103,16 @@ public:
 
     // Functions for configuration
 
-    /*! Set the duration of one clock-cycle in seconds. This value is used to determine the time-stamp of the
-     * event/cluster into seconds.
+    /*! Set the duration of one clock-cycle in seconds. This value is used to calculate the time-stamp of the
+     * event/cluster in seconds.
      *
      * @param clock_d Clock-cycle duration.
      */
     void setClockDuration(double clock_d) {m_clock_d = clock_d;}
 
-    /*! Set the time-window for accepting data-points as belonging to the same cluster. The time-stamps of the
-     * data-points are in number of clock-cycles (since last reset). Therefore the time-window must be specified as
-     * the maximum number of clock-cycles after the first data-point in which a point will be added to the cluster.
+    /*! Set the time-window for accepting data-points as belonging to the same cluster (neutron-event. The time-stamps
+     * of the data-points are in number of clock-cycles (since last reset). Therefore the time-window must be specified
+     * as the maximum number of clock-cycles after the first data-point in which a point will be added to the cluster.
      *
      * @param time_window Cluster time-window.
      */
@@ -126,18 +126,21 @@ public:
 
     /*! Set the number of wire channels in the cassette. Channels with higher numbers than this will be assumed to
      * be strips channels. Channel numbers higher than the sum of wire and strip channels will be considered invalid.
+     *
      * @param nchannels
      */
     void setNumberOfWireChannels(uint8_t nchannels) { m_nwire_channels = nchannels;}
 
     /*! Set the number of strip channels in the cassette. Channel numbers higher than the sum of wire and strip
      * channels will be considered invalid.
+     *
      * @param nchannels
      */
     void setNumberOfStripChannels(uint8_t nchannels) { m_nstrip_channels = nchannels;}
 
     /*! Set the output to be verbose. Use only with limited number of data-points as the output will be quite massive.
      * For debugging purposes only.
+     *
      * @param set
      */
     void setVerbose(bool set = true) {m_verbose = set;}
@@ -195,9 +198,9 @@ private:
 
     // Runtime variables
     /*! Container for one wire cluster */
-    std::vector<datapoint> m_wire_cluster;
+    std::vector<point> m_wire_cluster;
     /*! Container for one strip cluster */
-    std::vector<datapoint> m_strip_cluster;
+    std::vector<point> m_strip_cluster;
     /*! Container for the calculated wire position */
     double m_wire_pos;
     /*! Container for the calculated strip position */
@@ -233,17 +236,23 @@ private:
     /*! This function is called once a cluster is formed */
     bool processClusters();
 
+    /*! This function checks that signals originate from both wires and strips (if present in the cluster) are adjacent.
+     * Calls checkAdjacency() twice - once on the wire points and once on the strip points.
+     * Currently clusters with non-adjacent points are discarded.
+     *
+     * @return True if both wire and strip points are adjacent
+     */
+
     bool pointsAdjacent();
 
-    /*! This function checks that signals originate from either adjacent wires or strips.
-     * Currently non-adjacent points are removed.
+    /*! This function checks whether points from either wires or strips are adjacent.
      * Future implementations could include a mask of dead-channels as well as formation of additional clusters
      * from the discarded points.
      *
-     * @param cluster Cluster of wire and strip signals with the time-window.
+     * @param cluster Cluster of wire or strip signals within the time-window.
      * @return True if points are adjacent, false if not
      */
-    bool checkAdjacency(std::vector<datapoint> cluster);
+    bool checkAdjacency(std::vector<point> cluster);
 
      /*! Function to calculate either wire or strip position.
      * Will use weigthed average or max ADC as selected.
@@ -251,10 +260,10 @@ private:
      * @param cluster
      * @return Position of the cluster (wire or strip)
      */
-    double calculatePosition(std::vector<datapoint> cluster);
+    double calculatePosition(std::vector<point> cluster);
 
     /*! Increments monitoring counters.  */
-    void incrementCounters(std::vector<datapoint> m_wire_cluster, std::vector<datapoint> m_strip_cluster);
+    void incrementCounters(std::vector<point> m_wire_cluster, std::vector<point> m_strip_cluster);
 };
 
 
