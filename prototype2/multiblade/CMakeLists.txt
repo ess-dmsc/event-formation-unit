@@ -1,13 +1,20 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
-include_directories(.. ../.. ${FLATBUFFERS_INCLUDE_DIR})
+include_directories(. .. ../.. ${FLATBUFFERS_INCLUDE_DIR})
 
 #
 # Detector Pipeline Plugins
 #
-set(mbcaen_SRC mbcaen.cpp )
-set(gdgemh5_INC)
+set(mbcaen_SRC mbcaen.cpp mbcaen/MBData.cpp mbcommon/multiBladeEventBuilder.cpp mbcommon/dumpEventBuilderInfo.cpp)
+set(mbcaen_INC mbcaen/MBData.h mbcommon/multiBladeEventBuilder.h mbcommon/dumpEventBuilderInfo.h)
 create_module(mbcaen "")
+
+#
+# Build MB text 2 UDP
+#
+set(mbtext2udp_SRC mbtext2udp.cpp mbgen/MBArgs.cpp mbcommon/TextFile.cpp)
+set(mbtext2udp_INC mbgen/MBArgs.h mbcommon/TextFile.cpp)
+create_executable(mbtext2udp "")
 
 option(ENABLE_TRACE "Build packages with trace output" OFF)
 
@@ -19,8 +26,8 @@ endif ()
 find_package(TCLAP)
 if (TCLAP_FOUND)
     message(STATUS "TCLAP found")
-    set(mbprocesstextfile_INC mbcaen/multiBladeEventBuilder.h mbcaen/TextFile.h mbcaen/dumpEventBuilderInfo.h)
-    set(mbprocesstextfile_SRC mbcaen/mbprocesstextfile.cpp mbcaen/multiBladeEventBuilder.cpp mbcaen/TextFile.cpp mbcaen/dumpEventBuilderInfo.cpp)
+    set(mbprocesstextfile_INC mbcommon/multiBladeEventBuilder.h mbcommon/TextFile.h mbcommon/dumpEventBuilderInfo.h)
+    set(mbprocesstextfile_SRC mbprocesstextfile.cpp mbcommon/multiBladeEventBuilder.cpp mbcommon/TextFile.cpp mbcommon/dumpEventBuilderInfo.cpp)
     create_executable(mbprocesstextfile "")
 else (TCLAP_FOUND)
     message(STATUS "TCLAP not found")
@@ -30,14 +37,14 @@ endif ()
 enable_testing()
 
 # Common include path for both tests
-set(mbtest_INC  mbcaen/multiBladeEventBuilder.h  mbcaen/multiBladeTestData.h)
+set(mbtest_INC mbcommon/multiBladeEventBuilder.h mbtest/multiBladeTestData.h)
 
 # Create excecutable for the test of counters
 set(mbtestcounter_INC ${mbtest_INC})
-set(mbcountertest_SRC mbcaen/multiBladeEventBuilder.cpp mbcaen/multiBladeEventBuilderCounterTest.cpp)
+set(mbcountertest_SRC mbcommon/multiBladeEventBuilder.cpp mbtest/multiBladeEventBuilderCounterTest.cpp)
 create_test_executable(mbcountertest "")
 
 # Create excecutable for the test of clustering
 set(mbclustertest_INC ${MBtest_INC})
-set(mbclustertest_SRC mbcaen/multiBladeEventBuilder.cpp mbcaen/multiBladeEventBuilderClusteringTest.cpp)
+set(mbclustertest_SRC mbcommon/multiBladeEventBuilder.cpp mbtest/multiBladeEventBuilderClusteringTest.cpp)
 create_test_executable(mbclustertest "")

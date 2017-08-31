@@ -3,25 +3,25 @@
 //
 
 #include <cinttypes>
+#include <unistd.h>
+
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/FBSerializer.h>
 #include <common/NewStats.h>
-#include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
-#include <cstring>
-#include <iostream>
+
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
-#include <memory>
-#include <stdio.h>
-#include <unistd.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#include <mbcommon/multiBladeEventBuilder.h>
+#include <mbcaen/MBData.h>
+
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
@@ -52,8 +52,7 @@ private:
     CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
     RingBuffer<eth_buffer_size> *eth_ringbuf;
 
-    NewStats ns{
-            "efu2.mbcaen."};
+    NewStats ns{"efu2.mbcaen."};
 
     struct {
         // Input Counters
@@ -113,7 +112,7 @@ void MBCAEN::input_thread() {
 
         /** this is the processing step */
         if ((rdsize = mbdata.receive(eth_ringbuf->getdatabuffer(eth_index),
-                                      eth_ringbuf->getmaxbufsize())) > 0) {
+                                     eth_ringbuf->getmaxbufsize())) > 0) {
 
             XTRACE(PROCESS, DEB, "Received an udp packet\n");
 
@@ -143,8 +142,20 @@ void MBCAEN::input_thread() {
 
 void MBCAEN::processing_thread() {
 
+    //uint8_t ncassets = UINT8_MAX;
+    uint8_t nwires   = 32;
+    uint8_t nstrips  = 32;
+
     Producer eventprod(opts->broker, "MB_detector");
     FBSerializer flatbuffer(kafka_buffer_size, eventprod);
+
+    multiBladeEventBuilder builder;
+    builder.setNumberOfWireChannels(nwires);
+    builder.setNumberOfStripChannels(nstrips);
+    builder.setClockDuration(1.);
+    builder.setVerbose(true);
+
+    MBData mbdata;
 
     unsigned int data_index;
     Timer stopafter_clock;
@@ -155,15 +166,32 @@ void MBCAEN::processing_thread() {
             usleep(10);
         } else {
             auto UNUSED dataptr = eth_ringbuf->getdatabuffer(data_index);
-            auto UNUSED
-                    datalen = eth_ringbuf->getdatalength(data_index);
+            auto UNUSED datalen = eth_ringbuf->getdatalength(data_index);
 
-            uint32_t time = 999;
-            uint32_t pixel_id = 42;
+            mbdata.recieve(dataptr, datalen);
 
-            mystats.tx_bytes +=
-                    flatbuffer.addevent(time, pixel_id);
-            mystats.rx_events++;
+            auto dat = mbdata.data;
+
+            for (uint i = 0; i < dat.size(); i++) {
+
+                auto dp = dat.at(i);
+
+                if (dp.digi == UINT8_MAX && dp.chan == UINT8_MAX && dp.adc == UINT16_MAX && dp.time == UINT32_MAX)
+                {
+                    builder.lastPoint();
+                    break;
+                }
+
+                if (builder.addDataPoint(dp.chan, dp.adc, dp.time)) {
+
+                    uint32_t pixel_id = (nwires + nstrips) * dp.digi;
+                    pixel_id += (nwires + 1) * (builder.getWirePosition() + 1);
+                    pixel_id += builder.getStripPosition() + 1;
+
+                    mystats.tx_bytes += flatbuffer.addevent(static_cast<uint32_t>(builder.getTimeStamp()), pixel_id);
+                    mystats.rx_events++;
+                }
+            }
         }
 
         // Checking for exit
