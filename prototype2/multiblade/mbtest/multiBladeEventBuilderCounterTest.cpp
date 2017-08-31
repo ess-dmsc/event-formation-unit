@@ -7,7 +7,7 @@
 
 //#include <gtest/gtest.h>
 #include "test/TestBase.h"
-#include "multiblade/mbcaen/multiBladeEventBuilder.h"
+#include "mbcommon/multiBladeEventBuilder.h"
 #include "multiBladeTestData.h"
 
 TEST(MBEventBuilder__Test, DataPointCounter) {
