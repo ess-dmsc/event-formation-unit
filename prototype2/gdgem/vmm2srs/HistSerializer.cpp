@@ -29,7 +29,7 @@ int HistSerializer::serialize(uint32_t *xhist, uint32_t *yhist, size_t entries,
   auto dataoff = CreateGEMHist(builder, xoff, yoff);
 
   auto msg =
-      CreateMonitorMessage(builder, 0, DataField_GEMHist, dataoff.Union());
+      CreateMonitorMessage(builder, 0, DataField::GEMHist, dataoff.Union());
 
   builder.Finish(msg);
   *buffer = (char *)builder.GetBufferPointer();

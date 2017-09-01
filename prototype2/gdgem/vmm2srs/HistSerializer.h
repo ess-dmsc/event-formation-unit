@@ -7,7 +7,13 @@
 
 #pragma once
 
-#include <../monitors/schemas/mon_efu_generated.h>
+#ifdef FLATBUFFERS
+#include <../streaming-data-types/build/schemas/mo01_nmx_generated.h>
+#else
+#pragma message("FLATBUFFERS not defined, using old schemas")
+#include <common/mo01_nmx_generated.h>
+#endif
+
 #include <common/Producer.h>
 #include <libs/include/gccintel.h>
 

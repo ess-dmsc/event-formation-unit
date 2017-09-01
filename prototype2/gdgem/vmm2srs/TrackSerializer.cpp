@@ -47,7 +47,7 @@ int TrackSerializer::serialize(char **buffer) {
   auto yposvec = builder.CreateVector(ypos);
   auto dataoff = CreateGEMTrack(builder, xposvec, yposvec);
   auto msg =
-      CreateMonitorMessage(builder, 0, DataField_GEMTrack, dataoff.Union());
+      CreateMonitorMessage(builder, 0, DataField::GEMTrack, dataoff.Union());
   builder.Finish(msg);
   *buffer = (char *)builder.GetBufferPointer();
   xpos.clear();
