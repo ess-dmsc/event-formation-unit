@@ -8,10 +8,12 @@
 #include "dumpEventBuilderInfo.h"
 
 dumpEventBuilderInfo::dumpEventBuilderInfo()
+#if 0
 : m_2D_wire_events(0),
   m_2D_strip_events(0),
   m_1D_wire_events(0),
   m_1D_strip_events(0)
+  #endif
 {
 
 }
