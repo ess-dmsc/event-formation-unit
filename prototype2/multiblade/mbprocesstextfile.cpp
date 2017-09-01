@@ -67,7 +67,6 @@ int main(int argc, const char** argv) {
     std::cout << "\n";
 
     multiBladeEventBuilder p;
-    p.setVerbose(false);
     p.setUseWeightedAverage(false);
 
     TextFile data(ifile);

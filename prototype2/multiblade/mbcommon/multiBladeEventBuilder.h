@@ -96,7 +96,6 @@ public:
      */
     uint32_t getTimeStamp() { return m_time_stamp; }
 
-
     /*! Returns the cluster position [wire, strip, time-stamp]
      *
      * @return  Cluster position
@@ -132,13 +131,6 @@ public:
      * @param nchannels
      */
     void setNumberOfStripChannels(uint8_t nchannels) { m_nstrip_channels = nchannels;}
-
-    /*! Set the output to be verbose. Use only with limited number of data-points as the output will be quite massive.
-     * For debugging purposes only.
-     *
-     * @param set
-     */
-    void setVerbose(bool set = true) {m_verbose = set;}
 
     // Functions for monitoring and/or debugging
 
@@ -204,8 +196,6 @@ private:
     uint32_t m_cluster_clock;
     /*! True only at the beginning of each cluster */
     bool m_first_signal;
-    /*! Set verbose output */
-    bool m_verbose;
 
     // Monitoring/debugging counters
     uint64_t m_datapoints_received; /*! Number of received data-points */

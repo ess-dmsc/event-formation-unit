@@ -5,8 +5,8 @@
 #include <algorithm>
 #include "multiBladeEventBuilder.h"
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 multiBladeEventBuilder::multiBladeEventBuilder()
 : m_time_window(185),
@@ -17,7 +17,6 @@ multiBladeEventBuilder::multiBladeEventBuilder()
   m_strip_cluster(0),
   m_cluster_clock(0),
   m_first_signal(true),
-  m_verbose(false),
   m_nevents(0)
 {
     resetCounters();
