@@ -62,7 +62,7 @@ int main(int argc, const char** argv) {
     std::cout << "\nMultiblade event builder test program.\n\n";
     std::cout << "File to be read : " << ifile << std::endl;
     std::cout << "Output file : " << opath+"/"+ofile << std::endl;
-    std::cout << "Number of data-points to be processed : " << (nevents == UINT_MAX ? "All" : std::to_string(nevents))
+    std::cout << "Number of events to be processed : " << (nevents == UINT_MAX ? "All" : std::to_string(nevents))
               << std::endl;
     std::cout << "\n";
 
@@ -74,7 +74,7 @@ int main(int argc, const char** argv) {
 
     TextFile::Entry entry = {0,0,0,0};
 
-    uint processed = 0;
+    uint events = 0;
 
     std::ofstream output;
     output.open(opath+"/"+ofile);
@@ -88,7 +88,6 @@ int main(int argc, const char** argv) {
             break;
         }
 
-        processed++;
 
         if (p.addDataPoint(entry.chan, entry.adc, entry.time))
         {
@@ -96,9 +95,11 @@ int main(int argc, const char** argv) {
                    << p.getWirePosition() << " "
                    << p.getStripPosition() << " "
                    << p.getTimeStamp() << "\n";
+
+            events++;
         }
 
-        if ((processed < nevents) && (nevents != UINT_MAX))
+        if ((events+1 >= nevents) && (nevents != UINT_MAX))
             break;
     }
 
