@@ -152,7 +152,6 @@ void MBCAEN::processing_thread() {
     multiBladeEventBuilder builder;
     builder.setNumberOfWireChannels(nwires);
     builder.setNumberOfStripChannels(nstrips);
-    builder.setClockDuration(1.);
     builder.setVerbose(true);
 
     MBData mbdata;

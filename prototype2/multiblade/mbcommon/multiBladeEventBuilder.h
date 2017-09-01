@@ -94,7 +94,7 @@ public:
      *
      * @return The time-stamp in seconds.
      */
-    double getTimeStamp() { return m_time_stamp; }
+    uint32_t getTimeStamp() { return m_time_stamp; }
 
 
     /*! Returns the cluster position [wire, strip, time-stamp]
@@ -104,13 +104,6 @@ public:
     std::vector<double> getPosition();
 
     // Functions for configuration
-
-    /*! Set the duration of one clock-cycle in seconds. This value is used to calculate the time-stamp of the
-     * event/cluster in seconds.
-     *
-     * @param clock_d Clock-cycle duration.
-     */
-    void setClockDuration(double clock_d) {m_clock_d = clock_d;}
 
     /*! Set the time-window for accepting data-points as belonging to the same cluster (neutron-event. The time-stamps
      * of the data-points are in number of clock-cycles (since last reset). Therefore the time-window must be specified
@@ -187,8 +180,6 @@ public:
 private:
 
     // Configuration variables
-    /*! Duration of one clock-cycle in seconds*/
-    double m_clock_d;
     /*! Time window for a single cluster. In number of clock-cycles */
     uint32_t m_time_window;
     /*! Number of wire channels */

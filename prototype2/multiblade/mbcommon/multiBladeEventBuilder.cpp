@@ -5,12 +5,11 @@
 #include <algorithm>
 #include "multiBladeEventBuilder.h"
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 multiBladeEventBuilder::multiBladeEventBuilder()
-: m_clock_d(16e-9),
-  m_time_window(185),
+: m_time_window(185),
   m_nwire_channels(32),
   m_nstrip_channels(32),
   m_use_weighted_average(true),
@@ -40,8 +39,13 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel, const uint64_t
         return false;
     }
 
-    if (m_first_signal)
+    if (m_first_signal) {
+
+        m_cluster_clock = clock;
+        m_first_signal = false;
+
         XTRACE(PROCESS, DEB, "First signal. Setting start clock to : %d\n", clock);
+    }
 
     // Calculate the number of clock-cycles from the timestamp
     uint32_t clock_diff = clock - m_cluster_clock;
@@ -96,7 +100,7 @@ bool multiBladeEventBuilder::processClusters() {
     m_strip_pos = calculatePosition(m_strip_cluster);
 
     // Calculate the time-stamp
-    m_time_stamp = static_cast<double>(m_cluster_clock) * m_clock_d;
+    m_time_stamp = static_cast<double>(m_cluster_clock);
 
     XTRACE(PROCESS, DEB, "Calculated position : Pos(%1.4f, %1.4f)\n", m_wire_pos ,m_strip_pos);
 

@@ -71,9 +71,6 @@ TEST(MBEventBuilder__Test, ClusterTime) {
     // Set the number of clock-cycles for the time-window
     uint64_t window = 10;
     p.setTimeWindow(window);
-    // Set the duration of one clock-cycle in seconds
-    double clock_duration = 0.0001;
-    p.setClockDuration(clock_duration);
 
     // Before any data-points are provided to the event-builder the clock-cycle number must be 0.
     EXPECT_EQ(0, p.getClusterClock());
@@ -90,7 +87,7 @@ TEST(MBEventBuilder__Test, ClusterTime) {
     // the timestamp of the cluster calculated. The provided clock-cycle number will now be stored for the
     // new cluster
     p. addDataPoint(2, 300, 1010);
-    EXPECT_DOUBLE_EQ(1000*clock_duration, p.getTimeStamp());
+    EXPECT_DOUBLE_EQ(1000, p.getTimeStamp());
     EXPECT_EQ(1010, p.getClusterClock());
 }
 
@@ -112,7 +109,6 @@ TEST(MBEventBuilder__Test, Adjacency) {
         multiBladeEventBuilder p;
         // For simplicity, set the time window to one clock-cycle and the clock duration to one second.
         p.setTimeWindow(1);
-        p.setClockDuration(1);
         // For simplicity, set the location algorithm to max ADC.
         p.setUseWeightedAverage(false);
 
@@ -280,11 +276,9 @@ TEST(MBEventBuilder__Test, Clustering) {
     p.setTimeWindow(config[0]);
     p.setNumberOfWireChannels(config[1]);
     p.setNumberOfStripChannels(config[2]);
-    // For simplicity we set the clock-cycle duration to one second.
-    p.setClockDuration(1.);
 
     // We initialize the first expected time-stamp value from the test data.
-    double timestamp = data[3];
+    uint32_t timestamp = data[3];
 
     // First we test the weighted average method
 
@@ -306,7 +300,7 @@ TEST(MBEventBuilder__Test, Clustering) {
         if (datapoint[4]) {
             EXPECT_DOUBLE_EQ(*valw, p.getWirePosition());
             EXPECT_DOUBLE_EQ(*valw + 32., p.getStripPosition());
-            EXPECT_DOUBLE_EQ(timestamp, p.getTimeStamp());
+            EXPECT_EQ(timestamp, p.getTimeStamp());
 
             // Read next cluster timestamp
             timestamp = datapoint[3];
@@ -322,8 +316,8 @@ TEST(MBEventBuilder__Test, Clustering) {
     EXPECT_DOUBLE_EQ(*valw, p.getPosition()[0]);
     EXPECT_DOUBLE_EQ(*valw + 32, p.getStripPosition());
     EXPECT_DOUBLE_EQ(*valw + 32, p.getPosition()[1]);
-    EXPECT_DOUBLE_EQ(timestamp, p.getTimeStamp());
-    EXPECT_DOUBLE_EQ(timestamp, p.getPosition()[2]);
+    EXPECT_EQ(timestamp, p.getTimeStamp());
+    EXPECT_EQ(timestamp, p.getPosition()[2]);
 
     // Maximim ADC-method
 
@@ -349,7 +343,7 @@ TEST(MBEventBuilder__Test, Clustering) {
         if (datapoint[4]) {
             EXPECT_DOUBLE_EQ(*valm, p.getWirePosition());
             EXPECT_DOUBLE_EQ((*valm) + 32., p.getStripPosition());
-            EXPECT_DOUBLE_EQ(timestamp, p.getTimeStamp());
+            EXPECT_EQ(timestamp, p.getTimeStamp());
 
             // Read next cluster timestamp
             timestamp = datapoint[3];
@@ -362,7 +356,7 @@ TEST(MBEventBuilder__Test, Clustering) {
     p.lastPoint();
     EXPECT_DOUBLE_EQ(*valm, p.getWirePosition());
     EXPECT_DOUBLE_EQ(*valm + 32, p.getStripPosition());
-    EXPECT_DOUBLE_EQ(timestamp, p.getTimeStamp());
+    EXPECT_EQ(timestamp, p.getTimeStamp());
 }
 
 int main(int argc, char **argv) {
