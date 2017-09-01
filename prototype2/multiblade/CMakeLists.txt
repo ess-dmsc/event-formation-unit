@@ -16,12 +16,6 @@ set(mbtext2udp_SRC mbtext2udp.cpp mbgen/MBArgs.cpp mbcommon/TextFile.cpp)
 set(mbtext2udp_INC mbgen/MBArgs.h mbcommon/TextFile.cpp)
 create_executable(mbtext2udp "")
 
-option(ENABLE_TRACE "Build packages with trace output" OFF)
-
-if (ENABLE_TRACE)
-    add_definitions(-DTRACE)
-endif ()
-
 # Create an excecutable for the event-builder to process recorded data from a text-file.
 find_package(TCLAP)
 if (TCLAP_FOUND)

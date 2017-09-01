@@ -30,6 +30,8 @@
 #include <cstdint>
 #include <iostream>
 
+#include <common/Trace.h>
+
 /*! Struct containing channel number and ADC-value for a singe strip or wire. */
 struct point
 {

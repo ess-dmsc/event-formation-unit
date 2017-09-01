@@ -5,6 +5,9 @@
 #include <algorithm>
 #include "multiBladeEventBuilder.h"
 
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
+
 multiBladeEventBuilder::multiBladeEventBuilder()
 : m_clock_d(16e-9),
   m_time_window(185),
@@ -25,32 +28,20 @@ multiBladeEventBuilder::~multiBladeEventBuilder() {}
 
 bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel, const uint64_t &ADC, const uint32_t &clock) {
 
-#ifdef TRACE
-    std::cout << "Data-point received (" << int(channel) << ", " << ADC << ", " << clock << ")\n";
-#endif
+    XTRACE(PROCESS, DEB, "Data-point received (%d, %d, %d)\n" ,int(channel), ADC , clock);
 
     // Increment the counter for number of data-points received.
     m_datapoints_received++;
 
     // Sanity check. Recieved channel number must not exceed the sum of wire and strip channels
     if (channel >= m_nwire_channels+m_nstrip_channels){
-        std::cerr << "Recieved channel number : " << static_cast<uint>(channel) << std::endl;
-        std::cerr << "which is larger than the total number of possible channels : "
-                  << static_cast<uint>(m_nwire_channels+m_nstrip_channels) << std::endl;
+        XTRACE(PROCESS, WAR, "Recieved channel number : %d - max channel-number : %d\n", static_cast<uint>(channel),
+               static_cast<uint>(m_nwire_channels+m_nstrip_channels));
         return false;
     }
 
-
     if (m_first_signal)
-    {
-
-#ifdef TRACE
-        std::cout << "First signal. Setting start clock to : " << clock << std::endl;
-#endif
-
-        m_cluster_clock = clock;
-        m_first_signal = false;
-    }
+        XTRACE(PROCESS, DEB, "First signal. Setting start clock to : %d\n", clock);
 
     // Calculate the number of clock-cycles from the timestamp
     uint32_t clock_diff = clock - m_cluster_clock;
@@ -59,21 +50,16 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel, const uint64_t
     if (clock_diff < m_time_window) {
 
         // point is within time-window
+        XTRACE(PROCESS, DEB, "Within time-window [%d < %d]\n", clock_diff, m_time_window);
 
-#ifdef TRACE
-        std::cout << "Within time-window [" << clock_diff << " < " << m_time_window << "]" << std::endl;
-#endif
-
+        // Add point to cluster
         addPointToCluster(channel, ADC);
 
         return false;
     }
 
     // point is outside time-window - the cluster is complete.
-
-#ifdef TRACE
-    std::cout << "Outside time-window [" << clock_diff << " > " << m_time_window << "]" << std::endl;
-#endif
+    XTRACE(PROCESS, DEB, "Outside time-window [%d > %d]\n", clock_diff, m_time_window);
 
     // multiBladeEventBuilder the stored clusters. True is returned if all checks pass.
     bool position_determined = processClusters();
@@ -112,17 +98,13 @@ bool multiBladeEventBuilder::processClusters() {
     // Calculate the time-stamp
     m_time_stamp = static_cast<double>(m_cluster_clock) * m_clock_d;
 
-#ifdef TRACE
-    std::cout << "Calculated position : Pos(" << m_wire_pos << ", " << m_strip_pos << ")\n";
-#endif
+    XTRACE(PROCESS, DEB, "Calculated position : Pos(%1.4f, %1.4f)\n", m_wire_pos ,m_strip_pos);
 
     if ((m_wire_pos < 0) && (m_strip_pos < 0)) {
 
         m_rejected_position++;
 
-#ifdef TRACE
-        std::cout << "Both positions less than 0 - not an event" << std::endl;
-#endif
+        XTRACE(PROCESS, WAR, "Both positions less than 0 - not an event!\n");
 
         return false;
     } else {
@@ -144,10 +126,8 @@ bool multiBladeEventBuilder::pointsAdjacent() {
     // Both sets have to be adjacent for a valid cluster
     bool adjacent = wires_adjacent && strips_adjacent;
 
-#ifdef TRACE
-    std::cout << "Wires are " << (wires_adjacent ? "" : "not") << " adjacent, "
-              << "strips are " << (strips_adjacent ? "" : "not") << " adjacent!" << std::endl;
-#endif
+    XTRACE(PROCESS, DEB, "Wires are%s adjacent, strips are%s adjacent!\n",
+           (wires_adjacent ? "" : "not"), (strips_adjacent ? "" : "not"));
 
     return adjacent;
 }
@@ -183,9 +163,6 @@ bool multiBladeEventBuilder::checkAdjacency(std::vector<point> cluster) {
             // Break the while-loop
             return false;
 
-            // Possible use if non-adjacent points are to be removed and processed separately.
-            // ... erase the non-adjacent element
-            //cluster.erase(it2);
         } else
             // Move iterator to next element
             it1++;
@@ -277,19 +254,16 @@ void multiBladeEventBuilder::incrementCounters(std::vector<point> m_wire_cluster
             m_2D_wires.at(m_wire_cluster.size() - 1)++;
         } else {
             m_2D_wires.at(5)++;
-#ifdef TRACE
-            std::cerr << "<addpoint> More points than expected! Number of wire data points = "
-                      << m_wire_cluster.size() << std::endl;
-#endif
+
+            XTRACE(PROCESS, DEB, "More points than expected! Number of wire data points = %d\n", m_wire_cluster.size());
+
         }
         if (m_strip_cluster.size() <= 5) {
             m_2D_strips.at(m_strip_cluster.size() - 1)++;
         } else {
             m_2D_strips.at(5)++;
-#ifdef TRACE
-            std::cerr << "<addpoint> More points than expected! Number of strip data points = "
-                      << m_strip_cluster.size() << std::endl;
-#endif
+
+            XTRACE(PROCESS, DEB, "More points than expected! Number of strip data points = %d\n", m_strip_cluster.size());
         }
     }
 
@@ -299,10 +273,8 @@ void multiBladeEventBuilder::incrementCounters(std::vector<point> m_wire_cluster
             m_1D_wires.at(m_wire_cluster.size() - 1)++;
         } else {
             m_1D_wires.at(5)++;
-#ifdef TRACE
-            std::cerr << "<addpoint> More points than expected! Number of wire data points = "
-                      << m_wire_cluster.size() << std::endl;
-#endif
+
+            XTRACE(PROCESS, DEB, "More points than expected! Number of wire data points = %d\n", m_wire_cluster.size());
         }
     }
 
@@ -312,10 +284,8 @@ void multiBladeEventBuilder::incrementCounters(std::vector<point> m_wire_cluster
             m_1D_strips.at(m_strip_cluster.size() - 1)++;
         } else {
         m_1D_strips.at(5)++;
-#ifdef TRACE
-            std::cerr << "<addpoint> More points than expected! Number of strip data points = "
-                      << m_strip_cluster.size() << std::endl;
-#endif
+
+            XTRACE(PROCESS, DEB, "More points than expected! Number of strip data points = \n", m_strip_cluster.size());
         }
     }
 }
