@@ -5,8 +5,8 @@
 #include <algorithm>
 #include "multiBladeEventBuilder.h"
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 multiBladeEventBuilder::multiBladeEventBuilder()
 : m_clock_d(16e-9),
