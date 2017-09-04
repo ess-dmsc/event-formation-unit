@@ -191,7 +191,7 @@ private:
     /*! Container for the calculated strip position */
     double m_strip_pos;
     /*! Timestamp of the processed cluster */
-    double m_time_stamp;
+    uint32_t m_time_stamp;
     /*! Timestamp of current cluster. Also the beginning of time-window. */
     uint32_t m_cluster_clock;
     /*! True only at the beginning of each cluster */
@@ -235,7 +235,7 @@ private:
      * @param cluster Cluster of wire or strip signals within the time-window.
      * @return True if points are adjacent, false if not
      */
-    bool checkAdjacency(std::vector<point> cluster);
+    bool checkAdjacency(std::vector<point> &cluster);
 
      /*! Function to calculate either wire or strip position.
      * Will use weigthed average or max ADC as selected.
@@ -243,10 +243,10 @@ private:
      * @param cluster
      * @return Position of the cluster (wire or strip)
      */
-    double calculatePosition(std::vector<point> cluster);
+    double calculatePosition(std::vector<point> &cluster);
 
     /*! Increments monitoring counters.  */
-    void incrementCounters(std::vector<point> m_wire_cluster, std::vector<point> m_strip_cluster);
+    void incrementCounters(const std::vector<point> &m_wire_cluster, const std::vector<point> &m_strip_cluster);
 };
 
 
