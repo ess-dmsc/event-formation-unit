@@ -92,7 +92,6 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
     p.setTimeWindow(config[0]);
     p.setNumberOfWireChannels(config[1]);
     p.setNumberOfStripChannels(config[2]);
-    p.setClockDuration(1.);
 
     // Validation counters (similar to those in the event-builder).
     // Index 0 = 1 datapoint, index 1 = 2 datapoints, etc.
