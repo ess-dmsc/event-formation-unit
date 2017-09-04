@@ -32,12 +32,15 @@ endif()
 message(STATUS "Build str: ${BUILDSTR}")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
 
+option(USE_OLD_ABI "Sets _GLIBCXX_USE_CXX11_ABI=0 for CentOS builds" ON)
 set(EXTRA_CXX_FLAGS -std=c++11 -pthread -fPIC)
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DBUILDSTR=${BUILDSTR}")
-message(WARNING "Setting _GLIBCXX_USE_CXX11_ABI=0 consider changing this when gcc on CentOS is updated")
-set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D_GLIBCXX_USE_CXX11_ABI=0")
+if(${USE_OLD_ABI})
+    message(WARNING "Setting _GLIBCXX_USE_CXX11_ABI=0 consider changing this when gcc on CentOS is updated")
+    set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D_GLIBCXX_USE_CXX11_ABI=0")
+endif()
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     message(STATUS "Detected MacOSX")
