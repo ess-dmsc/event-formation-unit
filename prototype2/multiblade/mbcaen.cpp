@@ -186,7 +186,7 @@ void MBCAEN::processing_thread() {
                     pixel_id += (nwires + 1) * (builder.getWirePosition() + 1);
                     pixel_id += builder.getStripPosition() + 1;
 
-                    mystats.tx_bytes += flatbuffer.addevent(static_cast<uint32_t>(builder.getTimeStamp()), pixel_id);
+                    mystats.tx_bytes += flatbuffer.addevent(builder.getTimeStamp(), pixel_id);
                     mystats.rx_events++;
                 }
             }
