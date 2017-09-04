@@ -1,6 +1,10 @@
 #!/bin/bash
 
-xterm -e /bin/bash -c "cd ~/essproj/event-formation-unit/prototype2/build/prototype2; ./efu2 -d nmxvmm2srs -c 5 -p 6006" &
+#old EFU launch command
+#xterm -e /bin/bash -c "cd ~/essproj/event-formation-unit/prototype2/build/prototype2; ./efu2 -d nmxvmm2srs -c 5 -p 6006" &
+
+#new EFU launch command
+xterm -e /bin/bash -c "cd ~/essproj/event-formation-unit/prototype2/build/prototype2; ./efu2 -d gdgem/gdgemsrs -c 5 -p 6006" &
 
 xterm -e /bin/bash -c "cd ~/essproj/event-formation-unit/monitors; ./nmxhist.py -b localhost:9092" &
 
