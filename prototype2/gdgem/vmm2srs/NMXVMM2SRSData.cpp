@@ -21,6 +21,7 @@ int NMXVMM2SRSData::parse(UNUSED uint32_t data1, UNUSED uint32_t data2,
   vmd->adc = ((data1 >> 24) & 0xff) + (((data1 >> 16) & 0x03) << 8);
   vmd->bcid = gray2bin32(((data1 >> 10) & 0x3f) + (((data1 >> 0) & 0x3f) << 6));
   vmd->chno = (data2 >> 2) & 0x3f;
+  vmd->overThreshold = (data2 >> 1) & 0x01;
   return 0;
 }
 
