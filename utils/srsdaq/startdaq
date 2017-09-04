@@ -1,12 +1,12 @@
 #!/bin/bash
 
-xterm -e /bin/bash -c "cd ~/essproj/event-formation-unit/prototype2/build/prototype2; ./efu2 -d nmxvmm2srs -c 5 -p 6006" &
+xterm -e /bin/bash -c "cd ~/essproj/event-formation-unit/build/prototype2; ./efu2 -d nmxvmm2srs -c 5 -p 6006" &
 
 xterm -e /bin/bash -c "cd ~/essproj/event-formation-unit/monitors; ./nmxhist.py -b localhost:9092" &
 
 xterm -e /bin/bash -c "cd ~/essproj/event-formation-unit/monitors; ./nmxmon.py -b localhost:9092" &
 
-sleep 3
+sleep 16
 
 ~/essproj/event-formation-unit/utils/efushell/efushell.py
 

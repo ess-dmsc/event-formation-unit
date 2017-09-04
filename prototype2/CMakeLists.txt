@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
+#SET(CMAKE_MODULE_PATH /home/daq/essproj/event-formation-unit/cmake_modules)
+
 find_package(Threads REQUIRED)
 find_package(PCAP)
 find_package(LibRDKafka)
@@ -8,6 +10,9 @@ find_package(H5CC)
 find_package(HDF5 1.8.15 COMPONENTS CXX HL)
 
 set(PYTHON_EXECUTABLE /usr/bin/python)
+
+
+
 include(CMakeListsUtils.txt)
 include(CMakeListsUnitTests.txt)
 

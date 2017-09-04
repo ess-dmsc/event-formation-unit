@@ -163,6 +163,7 @@ void NMXVMM2SRS::processing_thread() {
 
   Geometry geometry_intepreter; /**< @todo not hardocde chip mappings */
   geometry_intepreter.define_plane(0, {{1, 0}, {1, 1}});
+  geometry_intepreter.define_plane(0, {{1, 6}, {1, 7}});
   geometry_intepreter.define_plane(1, {{1, 14}, {1, 15}});
 
   EventletBuilder builder(time_interpreter, geometry_intepreter);
