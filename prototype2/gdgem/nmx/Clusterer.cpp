@@ -9,7 +9,13 @@
 Clusterer::Clusterer(uint64_t min_time_span) : min_time_span_(min_time_span) {}
 
 void Clusterer::insert(const Eventlet &eventlet) {
-  backlog_.insert(std::pair<uint64_t, Eventlet>(eventlet.time, eventlet));
+  if ((eventlet.time < latest_time_) &&
+      ((eventlet.time - latest_time_) > 50000))
+  {
+    current_time_offset_ = latest_time_;
+  }
+  backlog_.insert(std::pair<uint64_t, Eventlet>(current_time_offset_ + eventlet.time, eventlet));
+  latest_time_ = std::max(latest_time_, eventlet.time);
 }
 
 bool Clusterer::event_ready() const {

@@ -2,6 +2,7 @@
 
 #include <gdgem/vmm2srs/SRSMappings.h>
 
+// This is done only once, when starting EFU
 void SRSMappings::define_plane(
     uint16_t planeID,
     std::initializer_list<std::pair<uint16_t, uint16_t>> chips) {
@@ -12,6 +13,7 @@ void SRSMappings::define_plane(
   }
 }
 
+// This is done only once, when starting EFU
 void SRSMappings::set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t planeID,
                            uint16_t strip_offset) {
   if (vmmID >= NMX_MAX_CHIPS)
