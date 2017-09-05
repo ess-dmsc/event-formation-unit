@@ -1,36 +1,36 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/Geometry.h>
+#include <gdgem/nmx/SRSMappings.h>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>
 
-class GeometryTest : public TestBase {
+class SRSMappingsTest : public TestBase {
 protected:
-  Geometry *geometry;
-  virtual void SetUp() { geometry = new Geometry(); }
+  SRSMappings *geometry;
+  virtual void SetUp() { geometry = new SRSMappings(); }
   virtual void TearDown() { delete geometry; }
 };
 
-TEST_F(GeometryTest, GoodMapping) {
+TEST_F(SRSMappingsTest, GoodMapping) {
   geometry->set_mapping(0, 0, 0, 0);
   ASSERT_EQ(geometry->get_plane(0, 0), 0);
   ASSERT_EQ(geometry->get_strip(0, 0, 0), 0);
 }
 
-TEST_F(GeometryTest, BadMapping) {
+TEST_F(SRSMappingsTest, BadMapping) {
   geometry->set_mapping(0, 16, 0, 0);
   ASSERT_EQ(geometry->get_plane(0, 0), NMX_INVALID_GEOM_ID);
   ASSERT_EQ(geometry->get_strip(0, 0, 0), NMX_INVALID_GEOM_ID);
 }
 
-TEST_F(GeometryTest, BadFEC) {
+TEST_F(SRSMappingsTest, BadFEC) {
   geometry->set_mapping(0, 0, 0, 0);
   ASSERT_EQ(geometry->get_plane(1, 0), NMX_INVALID_GEOM_ID);
   ASSERT_EQ(geometry->get_strip(1, 0, 0), NMX_INVALID_GEOM_ID);
 }
 
-TEST_F(GeometryTest, BadVMM) {
+TEST_F(SRSMappingsTest, BadVMM) {
   geometry->set_mapping(0, 0, 0, 0);
   ASSERT_EQ(geometry->get_plane(0, 15), NMX_INVALID_GEOM_ID);
   ASSERT_EQ(geometry->get_plane(0, 16), NMX_INVALID_GEOM_ID);
@@ -38,7 +38,7 @@ TEST_F(GeometryTest, BadVMM) {
   ASSERT_EQ(geometry->get_strip(0, 16, 0), NMX_INVALID_GEOM_ID);
 }
 
-TEST_F(GeometryTest, PlaneDefinition) {
+TEST_F(SRSMappingsTest, PlaneDefinition) {
   geometry->define_plane(0, {{0, 0}, {0, 1}});
   ASSERT_EQ(geometry->get_plane(0, 0), 0);
   ASSERT_EQ(geometry->get_strip(0, 0, 0), 0);

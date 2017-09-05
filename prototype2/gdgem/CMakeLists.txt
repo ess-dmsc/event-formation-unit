@@ -11,8 +11,27 @@ set(gdgemh5_INC nmx/Clusterer.h nmx/EventNMX.h nmx/Eventlet.h nmxgen/EventletBui
 create_module(gdgemh5 "")
 
 # VMM2/SRS based detector (micromegas based CERN prototype)
-set(gdgemsrs_SRC gdgemsrs.cpp vmm2srs/NMXVMM2SRSData.cpp nmx/Clusterer.cpp nmx/Geometry.cpp nmx/Time.cpp nmx/EventNMX.cpp nmx/Eventlet.cpp vmm2srs/EventletBuilder.cpp vmm2srs/HistSerializer.cpp vmm2srs/TrackSerializer.cpp)
-set(gdgemsrs_INC nmx/Clusterer.h nmx/Geometry.h nmx/Time.h nmx/EventNMX.h nmx/Eventlet.h vmm2srs/EventletBuilder.h vmm2srs/NMXVMM2SRSData.h vmm2srs/HistSerializer.h vmm2srs/TrackSerializer.h)
+set(gdgemsrs_SRC
+  gdgemsrs.cpp
+  nmx/Clusterer.cpp
+  nmx/SRSMappings.cpp
+  nmx/Time.cpp
+  nmx/EventNMX.cpp
+  nmx/Eventlet.cpp
+  vmm2srs/NMXVMM2SRSData.cpp
+  vmm2srs/EventletBuilder.cpp
+  vmm2srs/HistSerializer.cpp
+  vmm2srs/TrackSerializer.cpp)
+set(gdgemsrs_INC
+  nmx/Clusterer.h
+  nmx/SRSMappings.h
+  nmx/Time.h
+  nmx/EventNMX.h
+  nmx/Eventlet.h
+  vmm2srs/EventletBuilder.h
+  vmm2srs/NMXVMM2SRSData.h
+  vmm2srs/HistSerializer.h
+  vmm2srs/TrackSerializer.h)
 create_module(gdgemsrs "")
 
 
@@ -62,17 +81,30 @@ set(EventletBuilderH5Test_SRC nmxgen/EventletBuilderH5Test.cpp nmxgen/EventletBu
 set(EventletBuilderH5Test_INC nmxgen/EventletBuilderH5.h nmx/Clusterer.h nmx/EventNMX.h)
 create_test_executable(EventletBuilderH5Test "")
 
-set(EventletBuilderTest_SRC vmm2srs/EventletBuilderTest.cpp vmm2srs/EventletBuilder.cpp
-    vmm2srs/NMXVMM2SRSData.cpp nmx/Clusterer.cpp nmx/EventNMX.cpp nmx/Geometry.cpp nmx/Time.cpp)
-set(EventletBuilderTest_INC vmm2srs/NMXVMM2SRSData.h vmm2srs/EventletBuilder.h nmx/Clusterer.h
-    nmx/EventNMX.h nmx/Time.h nmx/Geometry.h)
+set(EventletBuilderTest_SRC
+  vmm2srs/EventletBuilderTest.cpp
+  vmm2srs/EventletBuilder.cpp
+  vmm2srs/NMXVMM2SRSData.cpp
+  nmx/Clusterer.cpp
+  nmx/EventNMX.cpp
+  nmx/SRSMappings.cpp
+  nmx/Time.cpp)
+set(EventletBuilderTest_INC
+  vmm2srs/NMXVMM2SRSData.h
+  vmm2srs/EventletBuilder.h
+  nmx/Clusterer.h
+  nmx/EventNMX.h
+  nmx/Time.h
+  nmx/SRSMappings.h)
 create_test_executable(EventletBuilderTest "")
 
 set(EventletTest_SRC nmx/EventletTest.cpp nmx/Eventlet.cpp nmx/Eventlet.h)
 create_test_executable(EventletTest "")
 
-set(GeometryTest_SRC nmx/GeometryTest.cpp nmx/Geometry.cpp)
-create_test_executable(GeometryTest "")
+set(SRSMappingsTest_SRC
+  nmx/SRSMappingsTest.cpp
+  nmx/SRSMappings.cpp)
+create_test_executable(SRSMappingsTest "")
 
 set(TimeTest_SRC nmx/TimeTest.cpp nmx/Time.cpp nmx/Time.h)
 create_test_executable(TimeTest "")

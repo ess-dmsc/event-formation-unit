@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/Geometry.h>
+#include <gdgem/nmx/SRSMappings.h>
 
-void Geometry::define_plane(
+void SRSMappings::define_plane(
     uint16_t planeID,
     std::initializer_list<std::pair<uint16_t, uint16_t>> chips) {
   int offset = 0;
@@ -12,7 +12,7 @@ void Geometry::define_plane(
   }
 }
 
-void Geometry::set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t planeID,
+void SRSMappings::set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t planeID,
                            uint16_t strip_offset) {
   if (vmmID >= NMX_MAX_CHIPS)
     return;
@@ -29,19 +29,24 @@ void Geometry::set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t planeID,
   planes_[fecID][vmmID] = planeID;
 }
 
-uint16_t Geometry::get_strip(uint16_t fecID, uint16_t vmmID,
+uint16_t SRSMappings::get_strip(uint16_t fecID, uint16_t vmmID,
                              uint32_t channelID) const {
-  if ((fecID < offsets_.size()) && (vmmID < offsets_.at(fecID).size()) &&
-      (offsets_.at(fecID).at(vmmID) != NMX_INVALID_GEOM_ID))
-    return offsets_.at(fecID).at(vmmID) + channelID;
-  else
+  if (fecID >= offsets_.size())
     return NMX_INVALID_GEOM_ID;
+  const auto& fec = offsets_[fecID];
+  if (vmmID >= fec.size())
+    return NMX_INVALID_GEOM_ID;
+  const auto& chip = fec[vmmID];
+  if (chip != NMX_INVALID_GEOM_ID)
+    return chip + channelID;
+  return NMX_INVALID_GEOM_ID;
 }
 
-uint16_t Geometry::get_plane(uint16_t fecID, uint16_t vmmID) const {
-  if ((fecID < planes_.size()) && (vmmID < planes_.at(fecID).size()) &&
-      (planes_.at(fecID).at(vmmID) != NMX_INVALID_GEOM_ID))
-    return planes_.at(fecID).at(vmmID);
-  else
+uint16_t SRSMappings::get_plane(uint16_t fecID, uint16_t vmmID) const {
+  if (fecID >= planes_.size())
     return NMX_INVALID_GEOM_ID;
+  const auto& fec = planes_[fecID];
+  if (vmmID >= fec.size())
+    return NMX_INVALID_GEOM_ID;
+  return fec[vmmID];
 }

@@ -176,11 +176,17 @@ void NMX::processing_thread() {
       while (clusterer.event_ready()) {
         auto event = clusterer.get_event();
         event.analyze(true, 3, 7); /**< @todo not hardocde */
+
+        std::cout << "Event:\n" << event.debug();
         if (event.good()) {
           mystats.rx_events++;
 
-          int time = 42; /**< @todo get time from event.time_start() */
-          int pixelid = (int)event.x.center + (int)event.y.center * 256;
+          int time = static_cast<int>(event.time_start());
+          int pixelid = 1 + event.x.center_rounded()
+              + event.y.center_rounded() * 256;
+
+          std::cout << "  time=" << time << "\n"
+                    << "  pixid=" << pixelid << "\n\n";
 
           std::memcpy(kafkabuffer + evtoff, &time, sizeof(time));
           std::memcpy(kafkabuffer + evtoff + 4, &pixelid, sizeof(pixelid));

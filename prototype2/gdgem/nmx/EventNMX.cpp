@@ -3,11 +3,12 @@
 #include <common/Trace.h>
 #include <gdgem/nmx/EventNMX.h>
 #include <set>
+#include <cmath>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-// #include <iostream>
+#include <sstream>
 
 void PlaneNMX::insert_eventlet(const Eventlet &e) {
   if (!e.adc)
@@ -63,6 +64,22 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
   uncert_upper = uspan_max - uspan_min + 1;
 }
 
+int16_t PlaneNMX::center_rounded() const
+{
+  return static_cast<int16_t>(std::round(center));
+}
+
+std::string PlaneNMX::debug() const {
+  std::stringstream ss;
+  ss << "    C=" << center << " +-" << uncert_lower
+     << " (+-" << uncert_upper << ")\n";
+  ss << "    T=(" << time_start << "-" << time_end << ")"
+     << " integral=" << integral << "\n";
+//  for (const auto& e : entries)
+//    ss << e.debug() << "\n";
+  return ss.str();
+}
+
 void EventNMX::insert_eventlet(const Eventlet &e) {
   if (e.plane_id == 1) { /**< @todo deal with multiple panels */
     y.insert_eventlet(e);
@@ -87,6 +104,18 @@ void EventNMX::analyze(bool weighted, int16_t max_timebins,
   if (good_) {
     time_start_ = std::min(x.time_start, y.time_start);
   }
+}
+
+std::string EventNMX::debug() const {
+  std::stringstream ss;
+  ss << "Tstart=" << time_start_;
+  if (good_)
+    ss << "  GOOD\n";
+  else
+    ss << "  BAD\n";
+  ss << "  X:\n" << x.debug();
+  ss << "  Y:\n" << y.debug();
+  return ss.str();
 }
 
 bool EventNMX::good() const { return good_; }

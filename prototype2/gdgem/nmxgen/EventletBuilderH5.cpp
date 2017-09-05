@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <gdgem/nmxgen/EventletBuilderH5.h>
+#include <iostream>
 
 EventletBuilderH5::EventletBuilderH5() { data.resize(4); }
 
@@ -24,5 +25,7 @@ Eventlet EventletBuilderH5::make_eventlet() {
   ret.flag = (data[3] >> 16) & 0x1;
   ret.over_threshold = (data[3] >> 17) & 0x1;
   ret.adc = data[3] & 0xFFFF;
+
+//  std::cout << "Made eventlet: " << ret.debug() << "\n";
   return ret;
 }

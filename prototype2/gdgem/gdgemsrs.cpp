@@ -163,7 +163,7 @@ void NMXVMM2SRS::processing_thread() {
       3.125); /**< @todo get from slow control? */
   time_interpreter.set_target_resolution(0.5); /**< @todo not hardcode */
 
-  Geometry geometry_intepreter; /**< @todo not hardocde chip mappings */
+  SRSMappings geometry_intepreter; /**< @todo not hardocde chip mappings */
   geometry_intepreter.define_plane(0, {{1, 0}, {1, 1}});
   geometry_intepreter.define_plane(1, {{1, 14}, {1, 15}});
 

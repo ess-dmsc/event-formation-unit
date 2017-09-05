@@ -15,7 +15,7 @@
 #define NMX_CHIP_CHANNELS 64
 #define NMX_INVALID_GEOM_ID ((uint16_t)(int16_t)(-1))
 
-class Geometry {
+class SRSMappings {
 public:
   /** @brief define mappings for sequence of chips in one plane
    * @param planeID ID of plane (edge of panel) being defined

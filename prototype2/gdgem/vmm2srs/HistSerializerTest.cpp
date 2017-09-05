@@ -45,7 +45,7 @@ TEST_F(HistSerializerTest, DeSerialize) {
   memcpy(flatbuffer, buffer, length);
   auto monitor = GetMonitorMessage(flatbuffer);
   auto dtype = monitor->data_type();
-  ASSERT_EQ(dtype, DataField_GEMHist);
+  ASSERT_EQ(dtype, DataField::GEMHist);
 
   auto hist = static_cast<const GEMHist *>(monitor->data());
   auto xdat = hist->xhist();

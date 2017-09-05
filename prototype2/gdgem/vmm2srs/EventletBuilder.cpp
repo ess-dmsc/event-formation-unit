@@ -9,7 +9,7 @@
 #include <sys/types.h>
 
 EventletBuilder::EventletBuilder(Time time_intepreter,
-                                 Geometry geometry_interpreter)
+                                 SRSMappings geometry_interpreter)
     : time_intepreter_(time_intepreter),
       geometry_interpreter_(geometry_interpreter) {
 #ifdef DUMPTOFILE
