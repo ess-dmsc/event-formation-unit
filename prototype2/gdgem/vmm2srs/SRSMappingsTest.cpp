@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/SRSMappings.h>
+#include <gdgem/vmm2srs/SRSMappings.h>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>

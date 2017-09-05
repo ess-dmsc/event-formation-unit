@@ -156,7 +156,7 @@ void NMXVMM2SRS::processing_thread() {
 
   NMXVMM2SRSData data(1125);
 
-  Time time_interpreter;
+  SRSTime time_interpreter;
   time_interpreter.set_tac_slope(125); /**< @todo get from slow control? */
   time_interpreter.set_bc_clock(40);   /**< @todo get from slow control? */
   time_interpreter.set_trigger_resolution(

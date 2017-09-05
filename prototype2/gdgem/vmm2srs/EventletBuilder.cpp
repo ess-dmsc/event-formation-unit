@@ -8,7 +8,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-EventletBuilder::EventletBuilder(Time time_intepreter,
+EventletBuilder::EventletBuilder(SRSTime time_intepreter,
                                  SRSMappings geometry_interpreter)
     : time_intepreter_(time_intepreter),
       geometry_interpreter_(geometry_interpreter) {

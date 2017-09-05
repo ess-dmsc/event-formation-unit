@@ -18,7 +18,6 @@ struct Eventlet {
   bool flag{false};
   bool over_threshold{false};
 
-  /** @brief prints values for debug purposes
-   */
+  // @brief prints values for debug purposes
   std::string debug() const;
 };

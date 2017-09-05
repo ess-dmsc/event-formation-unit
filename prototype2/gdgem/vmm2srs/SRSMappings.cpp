@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/SRSMappings.h>
+#include <gdgem/vmm2srs/SRSMappings.h>
 
 void SRSMappings::define_plane(
     uint16_t planeID,

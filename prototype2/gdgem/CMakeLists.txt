@@ -14,8 +14,8 @@ create_module(gdgemh5 "")
 set(gdgemsrs_SRC
   gdgemsrs.cpp
   nmx/Clusterer.cpp
-  nmx/SRSMappings.cpp
-  nmx/Time.cpp
+  vmm2srs/SRSMappings.cpp
+  vmm2srs/SRSTime.cpp
   nmx/EventNMX.cpp
   nmx/Eventlet.cpp
   vmm2srs/NMXVMM2SRSData.cpp
@@ -24,8 +24,8 @@ set(gdgemsrs_SRC
   vmm2srs/TrackSerializer.cpp)
 set(gdgemsrs_INC
   nmx/Clusterer.h
-  nmx/SRSMappings.h
-  nmx/Time.h
+  vmm2srs/SRSMappings.h
+  vmm2srs/SRSTime.h
   nmx/EventNMX.h
   nmx/Eventlet.h
   vmm2srs/EventletBuilder.h
@@ -87,27 +87,27 @@ set(EventletBuilderTest_SRC
   vmm2srs/NMXVMM2SRSData.cpp
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
-  nmx/SRSMappings.cpp
-  nmx/Time.cpp)
+  vmm2srs/SRSMappings.cpp
+  vmm2srs/SRSTime.cpp)
 set(EventletBuilderTest_INC
   vmm2srs/NMXVMM2SRSData.h
   vmm2srs/EventletBuilder.h
   nmx/Clusterer.h
   nmx/EventNMX.h
-  nmx/Time.h
-  nmx/SRSMappings.h)
+  vmm2srs/SRSTime.h
+  vmm2srs/SRSMappings.h)
 create_test_executable(EventletBuilderTest "")
 
 set(EventletTest_SRC nmx/EventletTest.cpp nmx/Eventlet.cpp nmx/Eventlet.h)
 create_test_executable(EventletTest "")
 
 set(SRSMappingsTest_SRC
-  nmx/SRSMappingsTest.cpp
-  nmx/SRSMappings.cpp)
+  vmm2srs/SRSMappingsTest.cpp
+  vmm2srs/SRSMappings.cpp)
 create_test_executable(SRSMappingsTest "")
 
-set(TimeTest_SRC nmx/TimeTest.cpp nmx/Time.cpp nmx/Time.h)
-create_test_executable(TimeTest "")
+set(SRSTimeTest_SRC vmm2srs/SRSTimeTest.cpp vmm2srs/SRSTime.cpp vmm2srs/SRSTime.h)
+create_test_executable(SRSTimeTest "")
 
 set(ClustererTest_SRC nmx/ClustererTest.cpp nmx/Clusterer.cpp nmx/EventNMX.cpp)
 set(ClustererTest_INC nmx/Clusterer.h nmx/EventNMX.h)
