@@ -7,13 +7,13 @@ include_directories(.. ../..)
 
 # Multi Grid demonstrator detector
 set(mgcncs_SRC mgcncs.cpp mgcncs/Data.cpp mgcncs/ChanConv.cpp)
-set(mgcncs_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/Geometry.h)
+set(mgcncs_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/MultigridGeometry.h)
 create_module(mgcncs "")
 
 
 # Two-thread implementation of Multi Grid demonstrator detector
 set(mgcncs2_SRC mgcncs2.cpp mgcncs/Data.cpp mgcncs/ChanConv.cpp)
-set(mgcncs2_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/Geometry.h)
+set(mgcncs2_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/MultigridGeometry.h)
 create_module(mgcncs2 "")
 
 
@@ -47,7 +47,7 @@ set(MGCNCSChanConvTest_SRC mgcncs/ChanConvTest.cpp mgcncs/ChanConv.cpp)
 create_test_executable(MGCNCSChanConvTest "")
 
 set(MGCNCSDataTest_SRC mgcncs/DataTest.cpp mgcncs/Data.cpp mgcncs/ChanConv.cpp)
-set(MGCNCSDataTest_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/TestData.h mgcncs/Geometry.h)
+set(MGCNCSDataTest_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/TestData.h mgcncs/MultigridGeometry.h)
 create_test_executable(MGCNCSDataTest "")
 
 #set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
