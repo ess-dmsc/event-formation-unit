@@ -9,10 +9,11 @@
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <cstring>
+#include <gdgem/nmx/Geometry.h>
 #include <gdgem/nmx/Clusterer.h>
+#include <gdgem/vmm2srs/NMXVMM2SRSData.h>
 #include <gdgem/vmm2srs/EventletBuilder.h>
 #include <gdgem/vmm2srs/HistSerializer.h>
-#include <gdgem/vmm2srs/NMXVMM2SRSData.h>
 #include <gdgem/vmm2srs/TrackSerializer.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
@@ -148,6 +149,10 @@ void NMXVMM2SRS::input_thread() {
 
 void NMXVMM2SRS::processing_thread() {
 
+  Geometry geometry;
+  geometry.add_dimension(256); /**< @todo not hardocde */
+  geometry.add_dimension(256); /**< @todo not hardocde */
+
   Producer eventprod(opts->broker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
   Producer monitorprod(opts->broker, "NMX_monitor");
@@ -156,24 +161,25 @@ void NMXVMM2SRS::processing_thread() {
 
   NMXVMM2SRSData data(1125);
 
-  SRSTime time_interpreter;
-  time_interpreter.set_tac_slope(125); /**< @todo get from slow control? */
-  time_interpreter.set_bc_clock(40);   /**< @todo get from slow control? */
-  time_interpreter.set_trigger_resolution(
+  SRSTime time_config;
+  time_config.set_tac_slope(125); /**< @todo get from slow control? */
+  time_config.set_bc_clock(40);   /**< @todo get from slow control? */
+  time_config.set_trigger_resolution(
       3.125); /**< @todo get from slow control? */
-  time_interpreter.set_target_resolution(0.5); /**< @todo not hardcode */
+  time_config.set_target_resolution(0.5); /**< @todo not hardcode */
 
-  SRSMappings geometry_intepreter; /**< @todo not hardocde chip mappings */
-  geometry_intepreter.define_plane(0, {{1, 0}, {1, 1}});
-  geometry_intepreter.define_plane(1, {{1, 14}, {1, 15}});
+  SRSMappings srs_config; /**< @todo not hardocde chip mappings */
+  srs_config.define_plane(0, {{1, 0}, {1, 1}});
+  srs_config.define_plane(1, {{1, 14}, {1, 15}});
 
-  EventletBuilder builder(time_interpreter, geometry_intepreter);
+  EventletBuilder builder(time_config, srs_config);
 
   Clusterer clusterer(30); /**< @todo not hardocde */
 
   Timer stopafter_clock;
   TSCTimer global_time, report_timer;
   EventNMX event;
+  std::vector<uint16_t> coords {0,0};
   unsigned int data_index;
   int sample_next_track = 0;
   while (1) {
@@ -201,15 +207,17 @@ void NMXVMM2SRS::processing_thread() {
             }
             mystats.rx_events++;
 
-            XTRACE(PROCESS, DEB, "x.center: %f, y.center %f\n", event.x.center,
-                   event.y.center);
-            int pixelid = (int)event.x.center + (int)event.y.center * 256;
+            XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
+                   event.x.center_rounded(),
+                   event.y.center_rounded());
 
-            assert(pixelid < 65535);
+            coords[0] = event.x.center_rounded();
+            coords[1] = event.y.center_rounded();
+            uint32_t time = static_cast<uint32_t>(event.time_start());
+            uint32_t pixelid = geometry.to_pixid(coords);
 
             // printf("event time: %" PRIu64 "\n", event.time_start());
-            mystats.tx_bytes +=
-                flatbuffer.addevent((uint32_t)event.time_start(), pixelid);
+            mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
             mystats.rx_events++;
           } else {
             mystats.rx_discards +=

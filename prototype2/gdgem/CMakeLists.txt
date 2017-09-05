@@ -13,11 +13,13 @@ set(gdgemh5_SRC
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Eventlet.cpp
+  nmx/Geometry.cpp
   nmxgen/EventletBuilderH5.cpp)
 set(gdgemh5_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
+  nmx/Geometry.h
   nmxgen/EventletBuilderH5.h)
 create_module(gdgemh5 "")
 

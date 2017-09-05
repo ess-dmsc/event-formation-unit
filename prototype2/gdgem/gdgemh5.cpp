@@ -3,11 +3,13 @@
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
+#include <common/FBSerializer.h>
 #include <common/NewStats.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <cstring>
+#include <gdgem/nmx/Geometry.h>
 #include <gdgem/nmx/Clusterer.h>
 #include <gdgem/nmxgen/EventletBuilderH5.h>
 #include <iostream>
@@ -41,7 +43,7 @@ public:
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
   static const int eth_buffer_size = 9000;
-  static const int kafka_buffer_size = 1000000;
+  static const int kafka_buffer_size = 124000;
 
 private:
   /** Shared between input_thread and processing_thread*/
@@ -148,9 +150,13 @@ void NMX::input_thread() {
 
 void NMX::processing_thread() {
 
-#ifndef NOKAFKA
-  Producer producer(opts->broker, "NMX_detector");
-#endif
+  Geometry geometry;
+  geometry.add_dimension(256); /**< @todo not hardocde */
+  geometry.add_dimension(256); /**< @todo not hardocde */
+
+
+  Producer eventprod(opts->broker, "NMX_detector");
+  FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
   EventletBuilderH5 builder;
   Clusterer clusterer(30); /**< @todo not hardocde */
@@ -158,8 +164,8 @@ void NMX::processing_thread() {
   Timer stopafter_clock;
   TSCTimer report_timer;
 
+  std::vector<uint16_t> coords {0,0};
   unsigned int data_index;
-  int evtoff = 0;
   while (1) {
     mystats.fifo1_free = input2proc_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
@@ -181,26 +187,17 @@ void NMX::processing_thread() {
         if (event.good()) {
           mystats.rx_events++;
 
-          int time = static_cast<int>(event.time_start());
-          int pixelid = 1 + event.x.center_rounded()
-              + event.y.center_rounded() * 256;
+          coords[0] = event.x.center_rounded();
+          coords[1] = event.y.center_rounded();
+          uint32_t time = static_cast<uint32_t>(event.time_start());
+          uint32_t pixelid = geometry.to_pixid(coords);
 
           std::cout << "  time=" << time << "\n"
                     << "  pixid=" << pixelid << "\n\n";
 
-          std::memcpy(kafkabuffer + evtoff, &time, sizeof(time));
-          std::memcpy(kafkabuffer + evtoff + 4, &pixelid, sizeof(pixelid));
-          evtoff += 8;
+          mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
+          mystats.rx_events++;
 
-          if (evtoff >= kafka_buffer_size / 10 - 20) {
-            assert(evtoff < kafka_buffer_size);
-
-#ifndef NOKAFKA
-            producer.produce(kafkabuffer, evtoff);
-            mystats.tx_bytes += evtoff;
-#endif
-            evtoff = 0;
-          }
         } else {
           mystats.rx_discards +=
               event.x.entries.size() + event.y.entries.size();
@@ -210,6 +207,8 @@ void NMX::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+
+      flatbuffer.produce();
 
       if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping processing thread, timeus " << std::endl;
