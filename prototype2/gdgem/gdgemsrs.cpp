@@ -62,13 +62,14 @@ private:
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t fifo1_push_errors;
-    int64_t pad[5];
+    int64_t fifo1_free;
+    int64_t pad_a[4]; /**< @todo check alignment*/
 
-    int64_t rx_idle1;
     int64_t rx_readouts;
-    int64_t rx_errbytes;
+    int64_t rx_error_bytes;
     int64_t rx_discards;
-    int64_t rx_events;
+    int64_t rx_idle1;
+    int64_t tx_events;
     int64_t tx_bytes;
   } ALIGN(64) mystats;
 
@@ -82,12 +83,13 @@ NMXVMM2SRS::NMXVMM2SRS(void *args) {
   // clang-format off
   ns.create("input.rx_packets",                &mystats.rx_packets);
   ns.create("input.rx_bytes",                  &mystats.rx_bytes);
-  ns.create("input.dropped",                   &mystats.fifo1_push_errors);
-  ns.create("processing.idle",                 &mystats.rx_idle1);
+  ns.create("input.i2pfifo_dropped",           &mystats.fifo1_push_errors);
+  ns.create("input.i2pfifo_free",              &mystats.fifo1_free);
   ns.create("processing.rx_readouts",          &mystats.rx_readouts);
+  ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
   ns.create("processing.rx_discards",          &mystats.rx_discards);
-  ns.create("processing.rx_errbytes",          &mystats.rx_errbytes);
-  ns.create("output.rx_events",                &mystats.rx_events);
+  ns.create("processing.idle",                 &mystats.rx_idle1);
+  ns.create("output.tx_events",                &mystats.tx_events);
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
 
@@ -121,6 +123,7 @@ void NMXVMM2SRS::input_thread() {
     /** this is the processing step */
     if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                   eth_ringbuf->getmaxbufsize())) > 0) {
+      XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
       eth_ringbuf->setdatalength(eth_index, rdsize);
@@ -190,7 +193,7 @@ void NMXVMM2SRS::processing_thread() {
             clusterer, hists);
 
       mystats.rx_readouts += stats.valid_eventlets;
-      mystats.rx_errbytes += stats.error_bytes;
+      mystats.rx_error_bytes += stats.error_bytes;
 
       while (clusterer.event_ready()) {
         XTRACE(PROCESS, DEB, "event_ready()\n");
@@ -202,7 +205,6 @@ void NMXVMM2SRS::processing_thread() {
           if (sample_next_track) {
             sample_next_track = trackfb.add_track(event, 6);
           }
-          mystats.rx_events++;
 
           XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
                  event.x.center_rounded(),
@@ -215,7 +217,7 @@ void NMXVMM2SRS::processing_thread() {
 
           // printf("event time: %" PRIu64 "\n", event.time_start());
           mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
-          mystats.rx_events++;
+          mystats.tx_events++;
         } else {
           mystats.rx_discards +=
               event.x.entries.size() + event.y.entries.size();

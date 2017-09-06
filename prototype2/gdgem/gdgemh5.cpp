@@ -10,7 +10,6 @@
 #include <common/Trace.h>
 #include <cstring>
 #include <gdgem/nmx/Geometry.h>
-#include <gdgem/nmx/Clusterer.h>
 #include <gdgem/nmx/HistSerializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/nmxgen/EventletBuilderH5.h>
@@ -69,9 +68,8 @@ private:
     int64_t rx_error_bytes;
     int64_t rx_discards;
     int64_t rx_idle1;
-    int64_t rx_events;
+    int64_t tx_events;
     int64_t tx_bytes;
-
   } ALIGN(64) mystats;
 
   EFUArgs *opts;
@@ -90,7 +88,7 @@ NMX::NMX(void *args) {
   ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
   ns.create("processing.rx_discards",          &mystats.rx_discards);
   ns.create("processing.rx_idle",              &mystats.rx_idle1);
-  ns.create("output.rx_events",                &mystats.rx_events);
+  ns.create("output.tx_events",                &mystats.tx_events);
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
 
@@ -198,7 +196,6 @@ void NMX::processing_thread() {
           if (sample_next_track) {
             sample_next_track = trackfb.add_track(event, 6);
           }
-          mystats.rx_events++;
 
           XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
                  event.x.center_rounded(),
@@ -213,7 +210,7 @@ void NMX::processing_thread() {
                     << "  pixid=" << pixelid << "\n\n";
 
           mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
-          mystats.rx_events++;
+          mystats.tx_events++;
 
         } else {
           mystats.rx_discards +=
