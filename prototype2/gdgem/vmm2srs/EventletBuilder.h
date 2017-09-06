@@ -8,6 +8,7 @@
 #pragma once
 
 #include <gdgem/nmx/Clusterer.h>
+#include <gdgem/nmx/Hists.h>
 #include <gdgem/vmm2srs/SRSMappings.h>
 #include <gdgem/vmm2srs/SRSTime.h>
 #include <gdgem/vmm2srs/NMXVMM2SRSData.h>

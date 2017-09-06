@@ -2,7 +2,7 @@
 
 #include <cinttypes>
 #include <common/Trace.h>
-#include <gdgem/vmm2srs/HistSerializer.h>
+#include <gdgem/nmx/HistSerializer.h>
 
 #define ELEMSIZE 4
 

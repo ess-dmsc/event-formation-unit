@@ -11,6 +11,8 @@
 #include <cstring>
 #include <gdgem/nmx/Geometry.h>
 #include <gdgem/nmx/Clusterer.h>
+#include <gdgem/nmx/HistSerializer.h>
+#include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/nmxgen/EventletBuilderH5.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
@@ -157,7 +159,11 @@ void NMX::processing_thread() {
 
   Producer eventprod(opts->broker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
+  Producer monitorprod(opts->broker, "NMX_monitor");
+  HistSerializer histfb(1500);
+  TrackSerializer trackfb(256);
 
+  NMXHists hists;
   EventletBuilderH5 builder;
   Clusterer clusterer(30); /**< @todo not hardocde */
 
@@ -166,6 +172,8 @@ void NMX::processing_thread() {
 
   std::vector<uint16_t> coords {0,0};
   unsigned int data_index;
+  EventNMX event;
+  int sample_next_track {0};
   while (1) {
     mystats.fifo1_free = input2proc_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
@@ -173,19 +181,28 @@ void NMX::processing_thread() {
       usleep(10);
     } else {
       auto readouts = builder.process_readout(
-          eth_ringbuf->getdatabuffer(data_index),
-          eth_ringbuf->getdatalength(data_index), clusterer);
+            eth_ringbuf->getdatabuffer(data_index),
+            eth_ringbuf->getdatalength(data_index),
+            clusterer, hists);
 
       mystats.rx_readouts += readouts;
       mystats.rx_error_bytes += 0;
 
       while (clusterer.event_ready()) {
-        auto event = clusterer.get_event();
+        XTRACE(PROCESS, DEB, "event_ready()\n");
+        event = clusterer.get_event();
         event.analyze(true, 3, 7); /**< @todo not hardocde */
-
-        std::cout << "Event:\n" << event.debug();
         if (event.good()) {
+          XTRACE(PROCESS, DEB, "event.good\n");
+
+          if (sample_next_track) {
+            sample_next_track = trackfb.add_track(event, 6);
+          }
           mystats.rx_events++;
+
+          XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
+                 event.x.center_rounded(),
+                 event.y.center_rounded());
 
           coords[0] = event.x.center_rounded();
           coords[1] = event.y.center_rounded();
@@ -207,8 +224,27 @@ void NMX::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+      // printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
+
+      sample_next_track = 1;
 
       flatbuffer.produce();
+
+      char *txbuffer;
+      auto len = trackfb.serialize(&txbuffer);
+      if (len != 0) {
+        XTRACE(PROCESS, ALW, "Sending tracks with size %d\n", len);
+        monitorprod.produce(txbuffer, len);
+      }
+
+      if (0 != hists.xyhist_elems) {
+        XTRACE(PROCESS, ALW, "Sending histogram with %d readouts\n",
+               hists.xyhist_elems);
+        char *txbuffer;
+        auto len = histfb.serialize(hists, &txbuffer);
+        monitorprod.produce(txbuffer, len);
+        hists.clear();
+      }
 
       if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping processing thread, timeus " << std::endl;

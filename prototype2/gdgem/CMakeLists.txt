@@ -14,12 +14,18 @@ set(gdgemh5_SRC
   nmx/EventNMX.cpp
   nmx/Eventlet.cpp
   nmx/Geometry.cpp
+  nmx/Hists.cpp
+  nmx/HistSerializer.cpp
+  nmx/TrackSerializer.cpp
   nmxgen/EventletBuilderH5.cpp)
 set(gdgemh5_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
   nmx/Geometry.h
+  nmx/Hists.h
+  nmx/HistSerializer.h
+  nmx/TrackSerializer.h
   nmxgen/EventletBuilderH5.h)
 create_module(gdgemh5 "")
 
@@ -29,22 +35,24 @@ set(gdgemsrs_SRC
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Eventlet.cpp
+  nmx/Hists.cpp
+  nmx/HistSerializer.cpp
+  nmx/TrackSerializer.cpp
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp
   vmm2srs/NMXVMM2SRSData.cpp
-  vmm2srs/EventletBuilder.cpp
-  vmm2srs/HistSerializer.cpp
-  vmm2srs/TrackSerializer.cpp)
+  vmm2srs/EventletBuilder.cpp)
 set(gdgemsrs_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
+  nmx/Hists.h
+  nmx/HistSerializer.h
+  nmx/TrackSerializer.h
   vmm2srs/SRSMappings.h
   vmm2srs/SRSTime.h
   vmm2srs/EventletBuilder.h
-  vmm2srs/NMXVMM2SRSData.h
-  vmm2srs/HistSerializer.h
-  vmm2srs/TrackSerializer.h)
+  vmm2srs/NMXVMM2SRSData.h)
 create_module(gdgemsrs "")
 
 
@@ -89,22 +97,22 @@ endif()
 # NMX / VMM Tests
 #
 set(HistSerializerTest_SRC
-  vmm2srs/HistSerializerTest.cpp
-  vmm2srs/HistSerializer.cpp)
+  nmx/HistSerializerTest.cpp
+  nmx/HistSerializer.cpp)
 set(HistSerializerTest_INC
-  vmm2srs/HistSerializer.h
+  nmx/HistSerializer.h
   ../common/Producer.h)
 create_test_executable(HistSerializerTest "")
 
 set(TrackSerializerTest_SRC
   nmx/Eventlet.cpp
   nmx/EventNMX.cpp
-  vmm2srs/TrackSerializerTest.cpp
-  vmm2srs/TrackSerializer.cpp)
+  nmx/TrackSerializerTest.cpp
+  nmx/TrackSerializer.cpp)
 set(TrackSerializerTest_INC
   nmx/EventNMX.h
   nmx/Eventlet.h
-  vmm2srs/TrackSerializer.h)
+  nmx/TrackSerializer.h)
 create_test_executable(TrackSerializerTest "")
 
 set(NMXVMM2SRSDataTest_SRC
@@ -116,17 +124,20 @@ create_test_executable(NMXVMM2SRSDataTest "")
 set(EventletBuilderH5Test_SRC
   nmx/EventNMX.cpp
   nmx/Clusterer.cpp
+  nmx/Hists.cpp
   nmxgen/EventletBuilderH5Test.cpp
   nmxgen/EventletBuilderH5.cpp)
 set(EventletBuilderH5Test_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
+  nmx/Hists.h
   nmxgen/EventletBuilderH5.h)
 create_test_executable(EventletBuilderH5Test "")
 
 set(EventletBuilderTest_SRC
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
+  nmx/Hists.cpp
   vmm2srs/EventletBuilderTest.cpp
   vmm2srs/EventletBuilder.cpp
   vmm2srs/NMXVMM2SRSData.cpp
@@ -135,6 +146,7 @@ set(EventletBuilderTest_SRC
 set(EventletBuilderTest_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
+  nmx/Hists.h
   vmm2srs/NMXVMM2SRSData.h
   vmm2srs/EventletBuilder.h
   vmm2srs/SRSTime.h

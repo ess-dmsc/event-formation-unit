@@ -13,13 +13,14 @@ protected:
 };
 
 TEST_F(EventletBuilderH5Test, Process) {
+  NMXHists hists;
   Clusterer clusterer(30);
   char data[9000];
 
-  auto num1 = builder->process_readout(data, 16, clusterer);
+  auto num1 = builder->process_readout(data, 16, clusterer, hists);
   ASSERT_EQ(num1, 1);
 
-  auto num2 = builder->process_readout(data, 64, clusterer);
+  auto num2 = builder->process_readout(data, 64, clusterer, hists);
   ASSERT_EQ(num2, 4);
 }
 

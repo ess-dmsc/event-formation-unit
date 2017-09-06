@@ -2,7 +2,7 @@
 
 #include <cinttypes>
 #include <common/Trace.h>
-#include <gdgem/vmm2srs/TrackSerializer.h>
+#include <gdgem/nmx/TrackSerializer.h>
 
 #define ELEMSIZE 4
 

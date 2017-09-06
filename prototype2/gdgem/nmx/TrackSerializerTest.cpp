@@ -3,7 +3,7 @@
 #include <cstring>
 #include <gdgem/nmx/EventNMX.h>
 #include <gdgem/nmx/Eventlet.h>
-#include <gdgem/vmm2srs/TrackSerializer.h>
+#include <gdgem/nmx/TrackSerializer.h>
 #include <test/TestBase.h>
 
 #define NB_ENTRIES 256

@@ -8,6 +8,7 @@
 #pragma once
 
 #include <gdgem/nmx/Clusterer.h>
+#include <gdgem/nmx/Hists.h>
 #include <vector>
 
 class EventletBuilderH5 {
@@ -15,7 +16,9 @@ public:
   EventletBuilderH5();
 
   /** @todo Martin document */
-  uint32_t process_readout(char *buf, size_t size, Clusterer &clusterer);
+  uint32_t process_readout(char *buf, size_t size,
+                           Clusterer &clusterer,
+                           NMXHists &hists);
 
 private:
   size_t psize{sizeof(uint32_t) * 4};

@@ -7,11 +7,14 @@
 EventletBuilderH5::EventletBuilderH5() { data.resize(4); }
 
 uint32_t EventletBuilderH5::process_readout(char *buf, size_t size,
-                                            Clusterer &clusterer) {
+                                            Clusterer &clusterer,
+                                            NMXHists &hists) {
   size_t count = std::min(size / psize, size_t(9000 / psize));
   for (size_t i = 0; i < count; ++i) {
     memcpy(data.data(), buf, psize);
-    clusterer.insert(make_eventlet());
+    auto eventlet = make_eventlet();
+    clusterer.insert(eventlet);
+    hists.bin_one(eventlet.plane_id, eventlet.strip);
     buf += psize;
   }
   return count;

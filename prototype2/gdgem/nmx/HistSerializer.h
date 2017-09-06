@@ -16,7 +16,7 @@
 
 #include <common/Producer.h>
 #include <libs/include/gccintel.h>
-#include <gdgem/vmm2srs/NMXVMM2SRSData.h>
+#include <gdgem/nmx/Hists.h>
 
 class HistSerializer {
 public:

@@ -2,7 +2,7 @@
 
 #include <common/Producer.h>
 #include <cstring>
-#include <gdgem/vmm2srs/HistSerializer.h>
+#include <gdgem/nmx/HistSerializer.h>
 #include <test/TestBase.h>
 
 #define HISTSIZE 1500

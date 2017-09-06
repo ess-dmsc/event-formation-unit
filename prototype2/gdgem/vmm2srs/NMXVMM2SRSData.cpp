@@ -6,14 +6,11 @@
 #include <cstdio>
 #include <gdgem/vmm2srs/NMXVMM2SRSData.h>
 #include <string.h>
-#include <assert.h>
-
-#define UNUSED __attribute__((unused))
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-int NMXVMM2SRSData::parse(UNUSED uint32_t data1, UNUSED uint32_t data2,
+int NMXVMM2SRSData::parse(uint32_t data1, uint32_t data2,
                           struct VMM2Data *vmd) {
   data1 = reversebits(data1);
   data2 = reversebits(data2);
@@ -114,21 +111,4 @@ unsigned int NMXVMM2SRSData::reversebits(register unsigned int x) {
   x = (((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4));
   x = (((x & 0xff00ff00) >> 8) | ((x & 0x00ff00ff) << 8));
   return ((x >> 16) | (x << 16));
-}
-
-NMXHists::NMXHists()
-{
-  clear();
-}
-
-void NMXHists::clear() {
-  memset(xyhist, 0, sizeof(xyhist));
-}
-
-void NMXHists::bin_one(uint16_t plane_id, uint16_t strip)
-{
-  assert(plane_id == 0 || plane_id == 1);
-  assert(strip <= 1500);
-  xyhist[plane_id][strip]++;
-  xyhist_elems++;
 }

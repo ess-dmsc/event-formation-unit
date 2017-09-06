@@ -11,10 +11,10 @@
 #include <cstring>
 #include <gdgem/nmx/Geometry.h>
 #include <gdgem/nmx/Clusterer.h>
+#include <gdgem/nmx/HistSerializer.h>
+#include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/vmm2srs/NMXVMM2SRSData.h>
 #include <gdgem/vmm2srs/EventletBuilder.h>
-#include <gdgem/vmm2srs/HistSerializer.h>
-#include <gdgem/vmm2srs/TrackSerializer.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -182,7 +182,7 @@ void NMXVMM2SRS::processing_thread() {
   EventNMX event;
   std::vector<uint16_t> coords {0,0};
   unsigned int data_index;
-  int sample_next_track = 0;
+  int sample_next_track {0};
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
