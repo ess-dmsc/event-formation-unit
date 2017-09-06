@@ -5,23 +5,32 @@
 #include <fcntl.h>
 #include <gdgem/vmm2srs/EventletBuilder.h>
 #include <string.h>
-#include <sys/stat.h>
+#include <time.h>
 #include <sys/types.h>
+#include <sys/stat.h>
 
 EventletBuilder::EventletBuilder(Time time_intepreter,
                                  Geometry geometry_interpreter)
     : time_intepreter_(time_intepreter),
       geometry_interpreter_(geometry_interpreter) {
 #ifdef DUMPTOFILE
-  // std::string fileName = "dumpfile_"
-  fd = open("dumpfile.txt", O_RDWR | O_CREAT, S_IRWXU);
-  assert(fd >= 0);
-  time_t t = time(NULL);
-  struct tm *tm = localtime(&t);
-  char s[128];
-  strftime(s, sizeof(s), "%c", tm);
-  dprintf(fd, "%s\n", s);
-  dprintf(fd, "# fec, chip_id, srs timestamp, channel, bcid, tdc, adc\n");
+	char cStartTime[50];
+ 	time_t rawtime;
+        struct tm * timeinfo;
+        time(&rawtime);
+        timeinfo = localtime(&rawtime);
+	
+        strftime(cStartTime, 50, "%Y-%m-%d-%H-%M-%S", timeinfo);
+	std::string startTime = cStartTime;
+        std::string fileName = "VMM3_" + startTime + ".csv";
+        fd = open(fileName.c_str(), O_RDWR|O_CREAT, S_IRWXU);
+        assert(fd >= 0);
+        time_t t = time(NULL);
+        struct tm * tm = localtime(&t);
+        char s[128];
+        strftime(s, sizeof(s), "%c", tm);
+        dprintf(fd, "%s\n", s);
+        dprintf(fd, "# fec, chip_id, srs timestamp, channel, bcid, tdc, adc, overthreshold\n");
 #endif
 }
 
@@ -45,8 +54,8 @@ uint32_t EventletBuilder::process_readout(NMXVMM2SRSData &data,
 /**< @todo flags? */
 
 #ifdef DUMPTOFILE
-    dprintf(fd, "%2d, %2d, %u, %2d, %d, %d, %d\n", 1, chip_id, data.srshdr.time,
-            d.chno, d.bcid, d.tdc, d.adc);
+    dprintf(fd, "%2d, %2d, %u, %2d, %d, %d, %d, %d\n",
+            fec_id, chip_id, data.srshdr.time, d.chno, d.bcid, d.tdc, d.adc, d.overThreshold);
 #endif
 
     assert(eventlet.plane_id == 0 || eventlet.plane_id == 1);
