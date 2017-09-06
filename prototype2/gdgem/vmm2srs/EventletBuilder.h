@@ -18,9 +18,11 @@ public:
   EventletBuilder(SRSTime time_intepreter, SRSMappings geometry_interpreter);
 
   /** @todo Martin document */
-  uint32_t process_readout(NMXVMM2SRSData &data,
+  uint32_t process_readout(char *buf, size_t size,
                            Clusterer &clusterer,
                            NMXHists &hists);
+
+  NMXVMM2SRSData parser_;
 
 private:
 #ifdef DUMPTOFILE

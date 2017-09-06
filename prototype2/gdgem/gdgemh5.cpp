@@ -26,7 +26,7 @@
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
-const char *classname = "NMX Detector";
+const char *classname = "NMX Detector for emulated data from H5";
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 

@@ -159,8 +159,6 @@ void NMXVMM2SRS::processing_thread() {
   HistSerializer histfb(1500);
   TrackSerializer trackfb(256);
 
-  NMXVMM2SRSData data(1125);
-
   SRSTime time_config;
   time_config.set_tac_slope(125); /**< @todo get from slow control? */
   time_config.set_bc_clock(40);   /**< @todo get from slow control? */
@@ -188,44 +186,43 @@ void NMXVMM2SRS::processing_thread() {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      data.receive(eth_ringbuf->getdatabuffer(data_index),
-                   eth_ringbuf->getdatalength(data_index));
-      if (data.elems > 0) {
-        builder.process_readout(data, clusterer, hists);
+      builder.process_readout(eth_ringbuf->getdatabuffer(data_index),
+                              eth_ringbuf->getdatalength(data_index),
+                              clusterer, hists);
 
-        mystats.rx_readouts += data.elems;
-        mystats.rx_errbytes += data.error;
+      mystats.rx_readouts += builder.parser_.elems;
+      mystats.rx_errbytes += builder.parser_.error;
 
-        while (clusterer.event_ready()) {
-          XTRACE(PROCESS, DEB, "event_ready()\n");
-          event = clusterer.get_event();
-          event.analyze(true, 3, 7); /**< @todo not hardocde */
-          if (event.good()) {
-            XTRACE(PROCESS, DEB, "event.good\n");
+      while (clusterer.event_ready()) {
+        XTRACE(PROCESS, DEB, "event_ready()\n");
+        event = clusterer.get_event();
+        event.analyze(true, 3, 7); /**< @todo not hardocde */
+        if (event.good()) {
+          XTRACE(PROCESS, DEB, "event.good\n");
 
-            if (sample_next_track) {
-              sample_next_track = trackfb.add_track(event, 6);
-            }
-            mystats.rx_events++;
-
-            XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
-                   event.x.center_rounded(),
-                   event.y.center_rounded());
-
-            coords[0] = event.x.center_rounded();
-            coords[1] = event.y.center_rounded();
-            uint32_t time = static_cast<uint32_t>(event.time_start());
-            uint32_t pixelid = geometry.to_pixid(coords);
-
-            // printf("event time: %" PRIu64 "\n", event.time_start());
-            mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
-            mystats.rx_events++;
-          } else {
-            mystats.rx_discards +=
-                event.x.entries.size() + event.y.entries.size();
+          if (sample_next_track) {
+            sample_next_track = trackfb.add_track(event, 6);
           }
+          mystats.rx_events++;
+
+          XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
+                 event.x.center_rounded(),
+                 event.y.center_rounded());
+
+          coords[0] = event.x.center_rounded();
+          coords[1] = event.y.center_rounded();
+          uint32_t time = static_cast<uint32_t>(event.time_start());
+          uint32_t pixelid = geometry.to_pixid(coords);
+
+          // printf("event time: %" PRIu64 "\n", event.time_start());
+          mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
+          mystats.rx_events++;
+        } else {
+          mystats.rx_discards +=
+              event.x.entries.size() + event.y.entries.size();
         }
       }
+
     }
 
     // Checking for exit
