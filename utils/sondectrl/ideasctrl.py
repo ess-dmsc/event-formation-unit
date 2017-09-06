@@ -31,13 +31,31 @@ class IdeasCtrl():
       return self.s.recv(RXBUFFER)
 
    # Assumes address is 16 bit and value is 16 bits
-   def writesystemregister(self, sysno, address, value):
-       s = struct.Struct('!BBHIHHBH')
+   def writesystemregister8(self, sysno, address, value):
+       s = struct.Struct('!BBHIH HBH')
+       pkttype = 0x10
+       pktseq = self.pktno
+       datalen = 4
+       return s.pack((self.version << 5) + sysno, pkttype, (pktseq << 14) + self.pktno, 0,
+                      datalen, address, 2, value)
+
+   # Assumes address is 16 bit and value is 16 bits
+   def writesystemregister16(self, sysno, address, value):
+       s = struct.Struct('!BBHIH HBH')
        pkttype = 0x10
        pktseq = 0
        datalen = 5
        return s.pack((self.version << 5) + sysno, pkttype, (pktseq << 14) + self.pktno, 0,
                       datalen, address, 2, value)
+
+   # Assumes address is 16 bit and value is 16 bits
+   def writesystemregister32(self, sysno, address, value):
+       s = struct.Struct('!BBHIH HBI')
+       pkttype = 0x10
+       pktseq = 0
+       datalen = 7
+       return s.pack((self.version << 5) + sysno, pkttype, (pktseq << 14) + self.pktno, 0,
+                      datalen, address, 4, value)
 
 
 if __name__ == '__main__':
@@ -54,17 +72,19 @@ if __name__ == '__main__':
 
 ctrl = IdeasCtrl(svr_ip_addr, svr_tcp_port)
 
-system = 1
-txdata = ctrl.formatdata(0, system, 0xD1, 0, 0xAAA, 2)
+system = 0
+# txdata = ctrl.formatdata(0, system, 0xD1, 0, 0xAAA, 2)
+# print("Size: %s" % (len(txdata)))
+# print("Sending data:  %s" % (binascii.hexlify(txdata)))
+# ctrl.send(txdata)
+# rxdata = ctrl.recv()
+# print("Received data: %s" % (binascii.hexlify(rxdata)))
+
+txdata = ctrl.writesystemregister8(system, 0xf016, 1)
 print("Size: %s" % (len(txdata)))
 print("Sending data:  %s" % (binascii.hexlify(txdata)))
 ctrl.send(txdata)
 rxdata = ctrl.recv()
 print("Received data: %s" % (binascii.hexlify(rxdata)))
 
-txdata = ctrl.writesystemregister(system, 0xfedc, 0xaabb)
-print("Size: %s" % (len(txdata)))
-print("Sending data:  %s" % (binascii.hexlify(txdata)))
-ctrl.send(txdata)
-rxdata = ctrl.recv()
-print("Received data: %s" % (binascii.hexlify(rxdata)))
+time.sleep(100)

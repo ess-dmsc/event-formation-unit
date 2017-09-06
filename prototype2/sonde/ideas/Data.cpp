@@ -9,7 +9,7 @@
 using namespace std;
 
 #undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#define TRC_LEVEL TRC_L_WAR
 
 int IDEASData::receive(const char *buffer, int size) {
 
