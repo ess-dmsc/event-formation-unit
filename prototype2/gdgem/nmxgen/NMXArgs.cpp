@@ -47,9 +47,6 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
     case 'f':
       filename.assign(optarg);
       break;
-    case 'o':
-      outfile.assign(optarg);
-      break;
     case 'i':
       dest_ip.assign(optarg);
       break;
@@ -62,6 +59,9 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
     case 's':
       txGB = atoi(optarg);
       break;
+    case 't':
+      speed_level = atoi(optarg);
+      break;
     case 'u':
       updint = atoi(optarg);
       break;
@@ -72,7 +72,8 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
     default:
       printf("Usage: bulkdatagen [OPTIONS] \n");
       printf(" --filename -f name     read data from single file \n");
-      printf(" --outfile -o name      write image to file \n");
+      printf(" --throttle -t val      speed throttle (0 fastest, then slower) "
+             "\n");
       printf(" --size -s size         size in GB of transmitted data \n");
       printf(" --packets -a number    number of packets to transmit \n");
       printf(" --ipaddr -i ipaddr     destination ip address \n");
@@ -88,10 +89,9 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
   printf("Generating a bulk data stream\n");
   if (!filename.empty())
     printf("  from file:              %s", filename.c_str());
-  if (!outfile.empty())
-    printf("  to file:                %s", outfile.c_str());
   printf("  number of bytes:        %d GB\n", txGB);
   printf("  number of packets:      %" PRIu64 " packets\n", txPkt);
+  printf("  speed throttle:         %d\n", speed_level);
   printf("Network properties\n");
   printf("  destination ip address: %s\n", dest_ip.c_str());
   printf("  destination udp port:   %d\n", port);
