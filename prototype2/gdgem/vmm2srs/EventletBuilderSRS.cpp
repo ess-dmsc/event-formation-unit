@@ -3,14 +3,15 @@
 #include <cassert>
 #include <common/Trace.h>
 #include <fcntl.h>
-#include <gdgem/vmm2srs/EventletBuilder.h>
+#include <gdgem/vmm2srs/EventletBuilderSRS.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
-EventletBuilder::EventletBuilder(SRSTime time_intepreter,
-                                 SRSMappings geometry_interpreter)
-    : parser_(1125)
+BuilderSRS::BuilderSRS(SRSTime time_intepreter,
+                       SRSMappings geometry_interpreter)
+    : AbstractBuilder()
+    , parser_(1125)
     , time_intepreter_(time_intepreter)
     , geometry_interpreter_(geometry_interpreter)
 {
@@ -27,12 +28,13 @@ EventletBuilder::EventletBuilder(SRSTime time_intepreter,
 #endif
 }
 
-uint32_t EventletBuilder::process_readout(char *buf, size_t size,
-                                          Clusterer &clusterer,
-                                          NMXHists &hists) {
+AbstractBuilder::ResultStats
+BuilderSRS::process_buffer(char *buf, size_t size,
+                           Clusterer &clusterer,
+                           NMXHists &hists) {
   parser_.receive(buf, size);
   if (!parser_.elems)
-    return 0;
+    return AbstractBuilder::ResultStats();
 
   uint16_t fec_id = 1;                            /**< @todo not hardcode */
   uint16_t chip_id = parser_.srshdr.dataid & 0xf; /**< @todo may belong elswhere */
@@ -60,5 +62,5 @@ uint32_t EventletBuilder::process_readout(char *buf, size_t size,
     clusterer.insert(eventlet);
   }
 
-  return parser_.elems;
+  return AbstractBuilder::ResultStats(parser_.elems, parser_.error);
 }

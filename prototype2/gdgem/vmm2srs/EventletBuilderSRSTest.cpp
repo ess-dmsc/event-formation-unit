@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/vmm2srs/EventletBuilder.h>
+#include <gdgem/vmm2srs/EventletBuilderSRS.h>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>
@@ -13,13 +13,13 @@ std::vector<uint8_t> data_3_ch0    { 0x00, 0x33, 0x71, 0x37, 0x56, 0x4d, 0x32, 0
 
 class EventletBuilderTest : public TestBase {
 protected:
-  EventletBuilder *builder;
+  BuilderSRS *builder;
   virtual void SetUp() {
     SRSTime time;
     SRSMappings geometry;
     geometry.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
     geometry.define_plane(1, {{1, 10}, {1, 11}, {1, 14}, {1, 15}});
-    builder = new EventletBuilder(time, geometry);
+    builder = new BuilderSRS(time, geometry);
   }
   virtual void TearDown() { delete builder; }
 };

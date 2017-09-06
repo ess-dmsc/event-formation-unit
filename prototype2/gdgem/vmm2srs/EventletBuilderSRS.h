@@ -7,27 +7,25 @@
 
 #pragma once
 
-#include <gdgem/nmx/Clusterer.h>
-#include <gdgem/nmx/Hists.h>
+#include <gdgem/nmx/AbstractEventletBuilder.h>
 #include <gdgem/vmm2srs/SRSMappings.h>
 #include <gdgem/vmm2srs/SRSTime.h>
-#include <gdgem/vmm2srs/NMXVMM2SRSData.h>
+#include <gdgem/vmm2srs/ParserSRS.h>
 
-class EventletBuilder {
+class BuilderSRS : public AbstractBuilder {
 public:
-  EventletBuilder(SRSTime time_intepreter, SRSMappings geometry_interpreter);
+  BuilderSRS(SRSTime time_intepreter, SRSMappings geometry_interpreter);
 
   /** @todo Martin document */
-  uint32_t process_readout(char *buf, size_t size,
-                           Clusterer &clusterer,
-                           NMXHists &hists);
-
-  NMXVMM2SRSData parser_;
+  ResultStats process_buffer(char *buf, size_t size,
+                             Clusterer &clusterer,
+                             NMXHists &hists) override;
 
 private:
 #ifdef DUMPTOFILE
   int fd;
 #endif
+  NMXVMM2SRSData parser_;
   SRSTime time_intepreter_;
   SRSMappings geometry_interpreter_;
 };

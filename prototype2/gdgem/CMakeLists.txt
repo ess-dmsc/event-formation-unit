@@ -26,6 +26,7 @@ set(gdgemh5_INC
   nmx/Hists.h
   nmx/HistSerializer.h
   nmx/TrackSerializer.h
+  nmx/AbstractEventletBuilder.h
   nmxgen/EventletBuilderH5.h)
 create_module(gdgemh5 "")
 
@@ -40,8 +41,8 @@ set(gdgemsrs_SRC
   nmx/TrackSerializer.cpp
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp
-  vmm2srs/NMXVMM2SRSData.cpp
-  vmm2srs/EventletBuilder.cpp)
+  vmm2srs/ParserSRS.cpp
+  vmm2srs/EventletBuilderSRS.cpp)
 set(gdgemsrs_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
@@ -49,10 +50,11 @@ set(gdgemsrs_INC
   nmx/Hists.h
   nmx/HistSerializer.h
   nmx/TrackSerializer.h
+  nmx/AbstractEventletBuilder.h
   vmm2srs/SRSMappings.h
   vmm2srs/SRSTime.h
-  vmm2srs/EventletBuilder.h
-  vmm2srs/NMXVMM2SRSData.h)
+  vmm2srs/ParserSRS.h
+  vmm2srs/EventletBuilderSRS.h)
 create_module(gdgemsrs "")
 
 
@@ -115,11 +117,11 @@ set(TrackSerializerTest_INC
   nmx/TrackSerializer.h)
 create_test_executable(TrackSerializerTest "")
 
-set(NMXVMM2SRSDataTest_SRC
-  vmm2srs/NMXVMM2SRSDataTest.cpp
-  vmm2srs/NMXVMM2SRSData.cpp
-  vmm2srs/NMXVMM2SRSData.h)
-create_test_executable(NMXVMM2SRSDataTest "")
+set(ParserSRSTest_SRC
+  vmm2srs/ParserSRSTest.cpp
+  vmm2srs/ParserSRS.cpp
+  vmm2srs/ParserSRS.h)
+create_test_executable(ParserSRSTest "")
 
 set(EventletBuilderH5Test_SRC
   nmx/EventNMX.cpp
@@ -138,17 +140,17 @@ set(EventletBuilderTest_SRC
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Hists.cpp
-  vmm2srs/EventletBuilderTest.cpp
-  vmm2srs/EventletBuilder.cpp
-  vmm2srs/NMXVMM2SRSData.cpp
+  vmm2srs/EventletBuilderSRSTest.cpp
+  vmm2srs/EventletBuilderSRS.cpp
+  vmm2srs/ParserSRS.cpp
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp)
 set(EventletBuilderTest_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Hists.h
-  vmm2srs/NMXVMM2SRSData.h
-  vmm2srs/EventletBuilder.h
+  vmm2srs/ParserSRS.h
+  vmm2srs/EventletBuilderSRS.h
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h)
 create_test_executable(EventletBuilderTest "")

@@ -7,18 +7,17 @@
 
 #pragma once
 
-#include <gdgem/nmx/Clusterer.h>
-#include <gdgem/nmx/Hists.h>
+#include <gdgem/nmx/AbstractEventletBuilder.h>
 #include <vector>
 
-class EventletBuilderH5 {
+class BuilderH5 : public AbstractBuilder {
 public:
-  EventletBuilderH5();
+  BuilderH5();
 
   /** @todo Martin document */
-  uint32_t process_readout(char *buf, size_t size,
-                           Clusterer &clusterer,
-                           NMXHists &hists);
+  ResultStats process_buffer(char *buf, size_t size,
+                             Clusterer &clusterer,
+                             NMXHists &hists) override;
 
 private:
   size_t psize{sizeof(uint32_t) * 4};

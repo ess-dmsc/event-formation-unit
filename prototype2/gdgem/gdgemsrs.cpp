@@ -10,11 +10,9 @@
 #include <common/Trace.h>
 #include <cstring>
 #include <gdgem/nmx/Geometry.h>
-#include <gdgem/nmx/Clusterer.h>
 #include <gdgem/nmx/HistSerializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
-#include <gdgem/vmm2srs/NMXVMM2SRSData.h>
-#include <gdgem/vmm2srs/EventletBuilder.h>
+#include <gdgem/vmm2srs/EventletBuilderSRS.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -170,7 +168,7 @@ void NMXVMM2SRS::processing_thread() {
   srs_config.define_plane(0, {{1, 0}, {1, 1}});
   srs_config.define_plane(1, {{1, 14}, {1, 15}});
 
-  EventletBuilder builder(time_config, srs_config);
+  BuilderSRS builder(time_config, srs_config);
   NMXHists hists;
 
   Clusterer clusterer(30); /**< @todo not hardocde */
@@ -186,12 +184,13 @@ void NMXVMM2SRS::processing_thread() {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      builder.process_readout(eth_ringbuf->getdatabuffer(data_index),
-                              eth_ringbuf->getdatalength(data_index),
-                              clusterer, hists);
+      auto stats = builder.process_buffer(
+            eth_ringbuf->getdatabuffer(data_index),
+            eth_ringbuf->getdatalength(data_index),
+            clusterer, hists);
 
-      mystats.rx_readouts += builder.parser_.elems;
-      mystats.rx_errbytes += builder.parser_.error;
+      mystats.rx_readouts += stats.valid_eventlets;
+      mystats.rx_errbytes += stats.error_bytes;
 
       while (clusterer.event_ready()) {
         XTRACE(PROCESS, DEB, "event_ready()\n");

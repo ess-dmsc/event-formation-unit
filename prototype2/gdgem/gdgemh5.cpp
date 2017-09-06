@@ -164,7 +164,7 @@ void NMX::processing_thread() {
   TrackSerializer trackfb(256);
 
   NMXHists hists;
-  EventletBuilderH5 builder;
+  BuilderH5 builder;
   Clusterer clusterer(30); /**< @todo not hardocde */
 
   Timer stopafter_clock;
@@ -180,13 +180,13 @@ void NMX::processing_thread() {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      auto readouts = builder.process_readout(
+      auto stats = builder.process_buffer(
             eth_ringbuf->getdatabuffer(data_index),
             eth_ringbuf->getdatalength(data_index),
             clusterer, hists);
 
-      mystats.rx_readouts += readouts;
-      mystats.rx_error_bytes += 0;
+      mystats.rx_readouts += stats.valid_eventlets;
+      mystats.rx_error_bytes += stats.error_bytes;
 
       while (clusterer.event_ready()) {
         XTRACE(PROCESS, DEB, "event_ready()\n");

@@ -4,7 +4,7 @@
 #include <cinttypes>
 #include <common/Trace.h>
 #include <cstdio>
-#include <gdgem/vmm2srs/NMXVMM2SRSData.h>
+#include <gdgem/vmm2srs/ParserSRS.h>
 #include <string.h>
 
 //#undef TRC_LEVEL
