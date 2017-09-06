@@ -16,6 +16,7 @@
 
 #include <common/Producer.h>
 #include <libs/include/gccintel.h>
+#include <gdgem/vmm2srs/NMXVMM2SRSData.h>
 
 class HistSerializer {
 public:
@@ -26,8 +27,10 @@ public:
   ~HistSerializer();
 
   /** @todo document */
-  int serialize(uint32_t *xhist, uint32_t *yhist, size_t entries,
-                char **buffer);
+  int serialize(const uint32_t *xhist, const uint32_t *yhist,
+                size_t entries, char **buffer);
+
+  int serialize(const NMXHists& hists, char **buffer);
 
 private:
   flatbuffers::FlatBufferBuilder builder;

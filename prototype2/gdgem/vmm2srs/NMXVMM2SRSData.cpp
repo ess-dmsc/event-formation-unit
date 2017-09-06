@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <gdgem/vmm2srs/NMXVMM2SRSData.h>
 #include <string.h>
+#include <assert.h>
 
 #define UNUSED __attribute__((unused))
 
@@ -98,11 +99,6 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
   return elems;
 }
 
-void NMXVMM2SRSData::hist_clear() {
-  memset(xyhist, 0, sizeof(xyhist));
-  xyhist_elems = 0;
-}
-
 unsigned int NMXVMM2SRSData::gray2bin32(unsigned int num) {
   num = num ^ (num >> 16);
   num = num ^ (num >> 8);
@@ -118,4 +114,21 @@ unsigned int NMXVMM2SRSData::reversebits(register unsigned int x) {
   x = (((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4));
   x = (((x & 0xff00ff00) >> 8) | ((x & 0x00ff00ff) << 8));
   return ((x >> 16) | (x << 16));
+}
+
+NMXHists::NMXHists()
+{
+  clear();
+}
+
+void NMXHists::clear() {
+  memset(xyhist, 0, sizeof(xyhist));
+}
+
+void NMXHists::bin_one(uint16_t plane_id, uint16_t strip)
+{
+  assert(plane_id == 0 || plane_id == 1);
+  assert(strip <= 1500);
+  xyhist[plane_id][strip]++;
+  xyhist_elems++;
 }

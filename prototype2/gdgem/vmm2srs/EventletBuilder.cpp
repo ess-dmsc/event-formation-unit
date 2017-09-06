@@ -26,7 +26,8 @@ EventletBuilder::EventletBuilder(SRSTime time_intepreter,
 }
 
 uint32_t EventletBuilder::process_readout(NMXVMM2SRSData &data,
-                                          Clusterer &clusterer) {
+                                          Clusterer &clusterer,
+                                          NMXHists &hists) {
   uint16_t fec_id = 1;                         /**< @todo not hardcode */
   uint16_t chip_id = data.srshdr.dataid & 0xf; /**< @todo may belong elswhere */
 
@@ -49,10 +50,7 @@ uint32_t EventletBuilder::process_readout(NMXVMM2SRSData &data,
             d.chno, d.bcid, d.tdc, d.adc);
 #endif
 
-    assert(eventlet.plane_id == 0 || eventlet.plane_id == 1);
-    assert(eventlet.strip <= 1500);
-    data.xyhist[eventlet.plane_id][eventlet.strip]++;
-    data.xyhist_elems++;
+    hists.bin_one(eventlet.plane_id, eventlet.strip);
     clusterer.insert(eventlet);
   }
 

@@ -14,8 +14,14 @@ HistSerializer::HistSerializer(size_t maxarraylength)
 
 HistSerializer::~HistSerializer() {}
 
-int HistSerializer::serialize(uint32_t *xhist, uint32_t *yhist, size_t entries,
-                              char **buffer) {
+int HistSerializer::serialize(const NMXHists& hists, char **buffer)
+{
+  return serialize(&hists.xyhist[0][0], &hists.xyhist[1][0],
+      1500, buffer);
+}
+
+int HistSerializer::serialize(const uint32_t *xhist, const uint32_t *yhist,
+                              size_t entries, char **buffer) {
   if (entries > maxlen) {
     *buffer = 0;
     return 0;

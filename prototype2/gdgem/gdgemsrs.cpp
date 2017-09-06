@@ -173,6 +173,7 @@ void NMXVMM2SRS::processing_thread() {
   srs_config.define_plane(1, {{1, 14}, {1, 15}});
 
   EventletBuilder builder(time_config, srs_config);
+  NMXHists hists;
 
   Clusterer clusterer(30); /**< @todo not hardocde */
 
@@ -190,7 +191,7 @@ void NMXVMM2SRS::processing_thread() {
       data.receive(eth_ringbuf->getdatabuffer(data_index),
                    eth_ringbuf->getdatalength(data_index));
       if (data.elems > 0) {
-        builder.process_readout(data, clusterer);
+        builder.process_readout(data, clusterer, hists);
 
         mystats.rx_readouts += data.elems;
         mystats.rx_errbytes += data.error;
@@ -242,14 +243,13 @@ void NMXVMM2SRS::processing_thread() {
         monitorprod.produce(txbuffer, len);
       }
 
-      if (data.xyhist_elems != 0) {
+      if (0 != hists.xyhist_elems) {
         XTRACE(PROCESS, ALW, "Sending histogram with %d readouts\n",
-               data.xyhist_elems);
+               hists.xyhist_elems);
         char *txbuffer;
-        auto len = histfb.serialize(&data.xyhist[0][0], &data.xyhist[1][0],
-                                    1500, &txbuffer);
+        auto len = histfb.serialize(hists, &txbuffer);
         monitorprod.produce(txbuffer, len);
-        data.hist_clear();
+        hists.clear();
       }
 
       if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
