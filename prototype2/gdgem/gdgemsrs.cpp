@@ -213,8 +213,8 @@ void NMXVMM2SRS::processing_thread() {
           uint32_t time = static_cast<uint32_t>(event.time_start());
           uint32_t pixelid = geometry.to_pixid(coords);
 
-          std::cout << "  time=" << time << "\n"
-                    << "  pixid=" << pixelid << "\n\n";
+//          std::cout << "  time=" << time << "\n"
+//                    << "  pixid=" << pixelid << "\n\n";
 
           mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
           mystats.tx_events++;
