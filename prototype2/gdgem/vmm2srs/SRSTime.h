@@ -9,7 +9,7 @@
 
 #include <inttypes.h>
 
-class Time {
+class SRSTime {
 public:
   // setters
   void set_bc_clock(double bc_clock);

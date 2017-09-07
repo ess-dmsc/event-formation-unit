@@ -33,13 +33,12 @@ public:
    */
   NMXVMM2SRSData(int maxelements) : max_elements(maxelements) {
     data = new struct VMM2Data[max_elements];
-    hist_clear();
-  };
+  }
 
   ~NMXVMM2SRSData() {
     delete[] data;
     data = 0;
-  };
+  }
 
   /** @brief reveive readouts from a binary payload buffer, return number of
    * data elements
@@ -53,9 +52,6 @@ public:
    */
   int parse(uint32_t data1, uint32_t data2, struct VMM2Data *vmd);
 
-  /** @brief clears histograms for x and y strips */
-  void hist_clear();
-
   struct SRSHdr srshdr; /**< Holds data common to all readouts in a packet */
   struct VMM2Data *data{
       nullptr}; /**< holds all readout data in a packet (up to max_elems) */
@@ -65,8 +61,6 @@ public:
   uint32_t error{0}; // bytes of invalid data
 
   uint32_t max_elements{0}; // Maximum capacity of data array
-  uint32_t xyhist[2][1500];
-  uint32_t xyhist_elems{0};
 
 private:
   uint32_t reversebits(

@@ -3,7 +3,7 @@
 #include <cstring>
 #include <gdgem/nmx/EventNMX.h>
 #include <gdgem/nmx/Eventlet.h>
-#include <gdgem/vmm2srs/TrackSerializer.h>
+#include <gdgem/nmx/TrackSerializer.h>
 #include <test/TestBase.h>
 
 #define NB_ENTRIES 256
@@ -105,7 +105,7 @@ TEST_F(TrackSerializerTest, DeSerialize) {
 
   auto monitor = GetMonitorMessage(flatbuffer);
   auto dtype = monitor->data_type();
-  ASSERT_EQ(dtype, DataField_GEMTrack);
+  ASSERT_EQ(dtype, DataField::GEMTrack);
 
   auto track = static_cast<const GEMTrack *>(monitor->data());
   auto xdat = track->xtrack();
@@ -146,7 +146,7 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
 
     auto monitor = GetMonitorMessage(flatbuffer);
     auto dtype = monitor->data_type();
-    ASSERT_EQ(dtype, DataField_GEMTrack);
+    ASSERT_EQ(dtype, DataField::GEMTrack);
 
     auto track = static_cast<const GEMTrack *>(monitor->data());
     auto xdat = track->xtrack();
@@ -191,7 +191,7 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
 
     auto monitor = GetMonitorMessage(flatbuffer);
     auto dtype = monitor->data_type();
-    ASSERT_EQ(dtype, DataField_GEMTrack);
+    ASSERT_EQ(dtype, DataField::GEMTrack);
 
     auto track = static_cast<const GEMTrack *>(monitor->data());
     auto xdat = track->xtrack();

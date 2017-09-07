@@ -6,19 +6,28 @@
 #include <cstdlib>
 #include <cstring>
 
+#include <libs/include/TSCTimer.h>
+#include <libs/include/Timer.h>
+
 #include <gdgem/nmxgen/NMXArgs.h>
 #include <gdgem/nmxgen/ReaderVMM.h>
 #include <libs/include/Socket.h>
 #include <unistd.h>
 
-// const int TSC_MHZ = 2900;
+using namespace std;
+
+const int TSC_MHZ = 2900;
 
 int main(int argc, char *argv[]) {
   NMXArgs opts(argc, argv);
+  if (opts.filename.empty())
+    return 1;
+
   H5::Exception::dontPrint();
 
   char buffer[9000];
 
+  const int B1M = 1000000;
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
 
@@ -30,26 +39,44 @@ int main(int argc, char *argv[]) {
   ReaderVMM file(opts.filename);
 
   int readsz;
-  uint64_t pkt = 0;
-  uint64_t bytes = 0;
 
-  while ((pkt < opts.txPkt) && ((readsz = file.read(buffer)) > 0)) {
+  uint64_t tx_total = 0;
+  uint64_t txp_total = 0;
+  uint64_t tx = 0;
+  uint64_t txp = 0;
 
-    DataSource.send(buffer, readsz);
+  TSCTimer report_timer;
+  Timer us_clock;
 
-    bytes += readsz;
-    pkt++;
+  for (;;) {
+    usleep(opts.speed_level * 1000);
 
-    // usleep(opts.speed_level * 1000);
+    readsz = file.read(buffer);
+    if (readsz > 0) {
+      DataSource.send(buffer, readsz);
+      tx += readsz;
+      txp++;
+    } else {
+      cout << "Sent " << tx_total + tx << " bytes"
+           << " in " << txp_total + txp << " packets." << endl;
+      cout << "done" << endl;
+      exit(0);
+    }
+
+    if (unlikely((report_timer.timetsc() / TSC_MHZ) >= opts.updint * 1000000)) {
+      auto usecs = us_clock.timeus();
+      tx_total += tx;
+      txp_total += txp;
+      printf("Tx rate: %8.2f Mbps (%.2f pps), tx %5" PRIu64
+             " MB (total: %7" PRIu64 " MB) %" PRIu64 " usecs\n",
+             tx * 8.0 / usecs, txp * 1000000.0 / usecs, tx / B1M,
+             tx_total / B1M, usecs);
+      tx = 0;
+      txp = 0;
+      us_clock.now();
+      report_timer.now();
+    }
   }
-
-  printf("Sent: %" PRIu64 " packets\n", pkt);
-  printf("Sent: %" PRIu64 " bytes\n", bytes);
-
-  if (opts.outfile.empty() || opts.filename.empty())
-    return 0;
-
-  printf("Success creating\n");
 
   return 0;
 }

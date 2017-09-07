@@ -10,6 +10,7 @@
 #include <gdgem/nmx/Eventlet.h>
 #include <limits>
 #include <list>
+#include <string>
 
 struct PlaneNMX {
 
@@ -26,6 +27,12 @@ struct PlaneNMX {
    * uncertainty
    */
   void analyze(bool weighted, uint16_t max_timebins, uint16_t max_timedif);
+
+  // @brief prints values for debug purposes
+  std::string debug() const;
+
+  // @brief returns calculated and rounded entry strip number for pixid
+  int16_t center_rounded() const;
 
   double center{std::numeric_limits<double>::quiet_NaN()}; // entry strip
   int16_t uncert_lower{
@@ -56,13 +63,14 @@ public:
    */
   void analyze(bool weighted, int16_t max_timebins, int16_t max_timedif);
 
-  /** @brief indicates if entry strips were determined in for both planes
-   */
+  // @brief indicates if entry strips were determined in for both planes
   bool good() const;
 
-  /** @brief returns timestamp for start of event (earlier of 2 planes)
-   */
+  // @brief returns timestamp for start of event (earlier of 2 planes)
   uint64_t time_start() const;
+
+  // @brief prints values for debug purposes
+  std::string debug() const;
 
   PlaneNMX x, y; // tracks in x and y planes
 

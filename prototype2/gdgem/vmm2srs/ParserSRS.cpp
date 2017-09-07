@@ -4,15 +4,13 @@
 #include <cinttypes>
 #include <common/Trace.h>
 #include <cstdio>
-#include <gdgem/vmm2srs/NMXVMM2SRSData.h>
+#include <gdgem/vmm2srs/ParserSRS.h>
 #include <string.h>
-
-#define UNUSED __attribute__((unused))
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-int NMXVMM2SRSData::parse(UNUSED uint32_t data1, UNUSED uint32_t data2,
+int NMXVMM2SRSData::parse(uint32_t data1, uint32_t data2,
                           struct VMM2Data *vmd) {
   data1 = reversebits(data1);
   data2 = reversebits(data2);
@@ -97,11 +95,6 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
     }
   }
   return elems;
-}
-
-void NMXVMM2SRSData::hist_clear() {
-  memset(xyhist, 0, sizeof(xyhist));
-  xyhist_elems = 0;
 }
 
 unsigned int NMXVMM2SRSData::gray2bin32(unsigned int num) {

@@ -2,7 +2,7 @@
 
 #include <cinttypes>
 #include <common/Trace.h>
-#include <gdgem/vmm2srs/TrackSerializer.h>
+#include <gdgem/nmx/TrackSerializer.h>
 
 #define ELEMSIZE 4
 
@@ -47,7 +47,7 @@ int TrackSerializer::serialize(char **buffer) {
   auto yposvec = builder.CreateVector(ypos);
   auto dataoff = CreateGEMTrack(builder, xposvec, yposvec);
   auto msg =
-      CreateMonitorMessage(builder, 0, DataField_GEMTrack, dataoff.Union());
+      CreateMonitorMessage(builder, 0, DataField::GEMTrack, dataoff.Union());
   builder.Finish(msg);
   *buffer = (char *)builder.GetBufferPointer();
   xpos.clear();
