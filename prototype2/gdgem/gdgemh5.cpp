@@ -13,6 +13,7 @@
 #include <gdgem/nmx/HistSerializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/nmxgen/EventletBuilderH5.h>
+#include <gdgem/vmm2srs/EventletBuilderSRS.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -21,6 +22,9 @@
 #include <memory>
 #include <stdio.h>
 #include <unistd.h>
+
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
@@ -51,8 +55,7 @@ private:
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
-  char kafkabuffer[kafka_buffer_size];
-
+  // Careful also using this for other NMX pipeline
   NewStats ns{"efu2.nmx."};
 
   struct {
@@ -73,6 +76,9 @@ private:
   } ALIGN(64) mystats;
 
   EFUArgs *opts;
+
+  std::shared_ptr<AbstractBuilder> builder_ {nullptr};
+  void init_builder(std::string btype);
 };
 
 NMX::NMX(void *args) {
@@ -149,11 +155,13 @@ void NMX::input_thread() {
 }
 
 void NMX::processing_thread() {
+  init_builder("H5");
+  if (!builder_)
+    return;
 
   Geometry geometry;
   geometry.add_dimension(256); /**< @todo not hardocde */
   geometry.add_dimension(256); /**< @todo not hardocde */
-
 
   Producer eventprod(opts->broker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
@@ -162,15 +170,14 @@ void NMX::processing_thread() {
   TrackSerializer trackfb(256);
 
   NMXHists hists;
-  BuilderH5 builder;
   Clusterer clusterer(30); /**< @todo not hardocde */
 
   Timer stopafter_clock;
-  TSCTimer report_timer;
+  TSCTimer global_time, report_timer;
 
+  EventNMX event;
   std::vector<uint16_t> coords {0,0};
   unsigned int data_index;
-  EventNMX event;
   int sample_next_track {0};
   while (1) {
     mystats.fifo1_free = input2proc_fifo.free();
@@ -178,7 +185,7 @@ void NMX::processing_thread() {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      auto stats = builder.process_buffer(
+      auto stats = builder_->process_buffer(
             eth_ringbuf->getdatabuffer(data_index),
             eth_ringbuf->getdatalength(data_index),
             clusterer, hists);
@@ -211,7 +218,6 @@ void NMX::processing_thread() {
 
           mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
           mystats.tx_events++;
-
         } else {
           mystats.rx_discards +=
               event.x.entries.size() + event.y.entries.size();
@@ -249,6 +255,28 @@ void NMX::processing_thread() {
       }
       report_timer.now();
     }
+  }
+}
+
+void NMX::init_builder(std::string btype)
+{
+  if (btype == "H5")
+  {
+    builder_ = std::make_shared<BuilderH5>();
+  }
+  else if (btype == "SRS")
+  {
+    SRSTime time_config;  /**< @todo get from slow control? */
+    time_config.set_tac_slope(125);
+    time_config.set_bc_clock(40);
+    time_config.set_trigger_resolution(3.125);
+    time_config.set_target_resolution(0.5);
+
+    SRSMappings srs_config; /**< @todo not hardocde chip mappings */
+    srs_config.define_plane(0, {{1, 0}, {1, 1}});
+    srs_config.define_plane(1, {{1, 14}, {1, 15}});
+
+    builder_ = std::make_shared<BuilderSRS>(time_config, srs_config);
   }
 }
 

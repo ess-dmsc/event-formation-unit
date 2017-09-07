@@ -17,7 +17,11 @@ set(gdgemh5_SRC
   nmx/Hists.cpp
   nmx/HistSerializer.cpp
   nmx/TrackSerializer.cpp
-  nmxgen/EventletBuilderH5.cpp)
+  nmxgen/EventletBuilderH5.cpp
+  vmm2srs/SRSMappings.cpp
+  vmm2srs/SRSTime.cpp
+  vmm2srs/ParserSRS.cpp
+  vmm2srs/EventletBuilderSRS.cpp)
 set(gdgemh5_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
@@ -27,7 +31,11 @@ set(gdgemh5_INC
   nmx/HistSerializer.h
   nmx/TrackSerializer.h
   nmx/AbstractEventletBuilder.h
-  nmxgen/EventletBuilderH5.h)
+  nmxgen/EventletBuilderH5.h
+  vmm2srs/SRSMappings.h
+  vmm2srs/SRSTime.h
+  vmm2srs/ParserSRS.h
+  vmm2srs/EventletBuilderSRS.h)
 create_module(gdgemh5 "")
 
 # VMM2/SRS based detector (micromegas based CERN prototype)
@@ -36,9 +44,11 @@ set(gdgemsrs_SRC
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Eventlet.cpp
+  nmx/Geometry.cpp
   nmx/Hists.cpp
   nmx/HistSerializer.cpp
   nmx/TrackSerializer.cpp
+  nmxgen/EventletBuilderH5.cpp
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp
   vmm2srs/ParserSRS.cpp
@@ -47,10 +57,12 @@ set(gdgemsrs_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
+  nmx/Geometry.h
   nmx/Hists.h
   nmx/HistSerializer.h
   nmx/TrackSerializer.h
   nmx/AbstractEventletBuilder.h
+  nmxgen/EventletBuilderH5.h
   vmm2srs/SRSMappings.h
   vmm2srs/SRSTime.h
   vmm2srs/ParserSRS.h
