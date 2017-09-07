@@ -8,8 +8,8 @@
 
 using namespace std;
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 int IDEASData::receive(const char *buffer, int size) {
 
@@ -53,24 +53,36 @@ int IDEASData::receive(const char *buffer, int size) {
   }
 
   uint8_t * datap = (uint8_t *)(buffer + sizeof(struct Header));
-  int nevents = *datap;
-  XTRACE(PROCESS, DEB, "Number of readout events in packet: %d\n", nevents);
+  int nentries = *datap;
+  XTRACE(PROCESS, DEB, "Number of readout events in packet: %d\n", nentries);
 
-  if (nevents * 5 + 1 != length) {
+  if (nentries * 5 + 1 != length) {
     XTRACE(PROCESS, WAR, "Data length error: events %d (len %d), got: %d\n",
-         nevents, nevents * 5 + 1, length);
+         nentries, nentries * 5 + 1, length);
     return 0;
   }
 
-  for (int i = 0; i < nevents; i++) {
+  events = 0;
+  errors = 0;
+  for (int i = 0; i < nentries; i++) {
+    int index = 0;
     auto timep = (uint32_t *)(datap + i*5 + 1);
     auto aschp  = (uint8_t *)(datap + i*5 + 5);
     uint32_t time = ntohl(*timep);
     uint8_t asch = *aschp; // ASIC (2b) and CHANNEL (6b)
-    data[i].time = time;
-    data[i].pixel_id = sondegeometry->getdetectorpixelid(0, asch);
-    XTRACE(PROCESS, DEB, "event: %d, time: 0x%08x, asch: 0x%02x\n", i, time, asch);
-  }
+    int pixelid = sondegeometry->getdetectorpixelid(0, asch);
+    if (pixelid >= 1) {
+      data[index].time = time;
+      data[index].pixel_id = (uint32_t)pixelid;
+      XTRACE(PROCESS, DEB, "event: %d, time: 0x%08x, pixel: %d\n", i, time, data[index].pixel_id);
+      events++;
+      index++;
+    } else {
+      XTRACE(PROCESS, WAR, "Geometry error in entry %d (asch %d)\n", i, asch);
+      errors++;
+    }
 
-  return nevents;
+  }
+  XTRACE(PROCESS, DEB, "Number of events in buffer: %d\n", events);
+  return events;
 }

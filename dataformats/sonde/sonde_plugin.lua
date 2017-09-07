@@ -12,16 +12,6 @@ function typetostring(type)
    end
 end
 
-function bits(num)
-    local t={}
-    while num>0 do
-        rest=num%2
-        table.insert(t,1,rest)
-        num=(num-rest)/2
-    end
-    return table.concat(t)
-end
-
 
 -- -----------------------------------------------------------------------------------------------
 -- the protocol dissector

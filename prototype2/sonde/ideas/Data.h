@@ -40,6 +40,8 @@ public:
   int receive(const char *buffer, int size);
 
   struct SoNDeData data[500];
+  unsigned int events{0};  /**< number of valid events */
+  unsigned int errors{0};  /**< nuber of geometry errors in readout */
 private:
   SoNDeGeometry * sondegeometry{nullptr};
 };
