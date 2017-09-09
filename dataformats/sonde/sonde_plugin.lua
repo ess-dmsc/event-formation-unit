@@ -12,16 +12,6 @@ function typetostring(type)
    end
 end
 
-function bits(num)
-    local t={}
-    while num>0 do
-        rest=num%2
-        table.insert(t,1,rest)
-        num=(num-rest)/2
-    end
-    return table.concat(t)
-end
-
 
 -- -----------------------------------------------------------------------------------------------
 -- the protocol dissector
@@ -48,8 +38,17 @@ function sonde_proto.dissector(buffer,pinfo,tree)
   local datalen = buffer(8,2):uint()
   header:add(buffer(8,2), string.format("Data length: %d", datalen))
 
+  local hits = ((protolen-10) - 1)/5
   pinfo.cols.info = string.format("Version: %d, system: %d, %s",
           bit.rshift(versys,6), bit.band(versys, 0x3f), typetostring(type))
+
+
+  for i=1,hits do
+    local ts =  buffer(11 + (i-1)*5, 4):uint()
+    local asch = buffer(15 + (i-1)*5, 1):uint()
+    local hit = header:add(buffer(11 + (i-1)*5, 5),
+        string.format("Timestamp %d, ASIC %d, channel %d", ts, bit.rshift(asch, 6), bit.band(asch, 0x3f)))
+  end
 end
 
 -- Register the protocol

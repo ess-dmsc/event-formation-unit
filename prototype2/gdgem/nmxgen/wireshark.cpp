@@ -8,6 +8,7 @@
 #include <libs/include/Socket.h>
 #include <string.h>
 #include <string>
+#include <unistd.h>
 
 int main(int argc, char *argv[]) {
   NMXArgs opts(argc, argv);
@@ -22,24 +23,34 @@ int main(int argc, char *argv[]) {
   DataSource.printbuffers();
 
   std::string pcapfile(opts.filename);
-  ReaderPcap pcap(pcapfile);
 
   int rdsize;
   uint64_t packets = 0;
-  while ((rdsize = pcap.read((char *)&buffer, sizeof(buffer))) != -1) {
-    if (rdsize == 0)
-      continue; // non udp data
+  uint64_t totpackets = 0;
+  do {
+    ReaderPcap pcap(pcapfile);
+    while ((rdsize = pcap.read((char *)&buffer, sizeof(buffer))) != -1) {
+      if (rdsize == 0)
+        continue; // non udp data
 
-    DataSource.send(buffer, rdsize);
-    packets++;
-    if (packets >= opts.txPkt) {
-      printf("Sent %" PRIu64 " packets, exiting...\n", packets);
-      pcap.printstats();
-      exit(0);
+      DataSource.send(buffer, rdsize);
+      packets++;
+      totpackets++;
+      if (packets >= opts.txPkt) {
+        printf("Sent %" PRIu64 " packets\n", totpackets);
+        packets = 0;
+        break;
+        //printf("Sent %" PRIu64 " packets, exiting...\n", packets);
+        //pcap.printstats();
+        //exit(0);
+      }
     }
-  }
-  printf("Sent %" PRIu64 " packets, exiting...\n", packets);
-  // pcap.printstats();
 
+    if (opts.throttle) {
+       usleep(opts.throttle);
+    }
+  } while (opts.loop);
+  // pcap.printstats();
+  printf("Sent %" PRIu64 " packets\n", totpackets);
   return 0;
 }

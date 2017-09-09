@@ -27,7 +27,8 @@ public:
   int buflen{9000};                 /**< Tx buffer size */
   int sndbuf{1000000};              /**< kernel sndbuf size */
 
-  int speed_level{0};
+  int throttle{0}; /**< actually a sleep() counter */
+  int loop{0}; /**< single shot or loop */
 
   unsigned int updint{1}; /**< update interval (seconds) */
 };
