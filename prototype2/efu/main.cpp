@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 
   std::vector<int> cpus = {efu_args->cpustart, efu_args->cpustart + 1,
                            efu_args->cpustart + 2};
-
+  
   Launcher(&loader, cpus);
 
   StatPublisher metrics(efu_args->graphite_ip_addr, efu_args->graphite_port);

@@ -8,7 +8,7 @@
 #pragma once
 
 #include <multigrid/mgcncs/ChanConv.h>
-#include <multigrid/mgcncs/Geometry.h>
+#include <multigrid/mgcncs/MultigridGeometry.h>
 //#include <cspec/CSPECEvent.h>
 
 class CSPECData {

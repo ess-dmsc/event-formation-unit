@@ -35,4 +35,7 @@ private:
   std::multimap<uint64_t, Eventlet>
       backlog_; // stack of chronologically ordered events
   uint64_t min_time_span_{1};
+
+  uint64_t latest_time_ {0};
+  uint64_t current_time_offset_ {0};
 };

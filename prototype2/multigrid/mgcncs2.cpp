@@ -13,7 +13,7 @@
 #include <common/Trace.h>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/Data.h>
-#include <multigrid/mgcncs/Geometry.h>
+#include <multigrid/mgcncs/MultigridGeometry.h>
 //#include <cspec/CSPECEvent.h>
 #include <cstring>
 #include <iostream>

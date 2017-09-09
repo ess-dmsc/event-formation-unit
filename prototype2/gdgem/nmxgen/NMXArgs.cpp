@@ -20,8 +20,10 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
         {"data", required_argument, 0, 'd'},
         {"packets", required_argument, 0, 'a'},
         {"events", required_argument, 0, 'n'},
+        {"loop", no_argument, 0, 'l'},
         {"port", required_argument, 0, 'p'},
         {"size", required_argument, 0, 's'},
+        {"throttle", required_argument, 0, 't'},
         {"update", required_argument, 0, 'u'},
         {"sndbuf", required_argument, 0, 'x'},
         {"help", no_argument, 0, 'h'},
@@ -29,7 +31,7 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:d:f:o:i:n:p:s:t:u:hx", long_options,
+    c = getopt_long(argc, argv, "a:d:f:o:i:ln:p:s:t:u:hx", long_options,
                     &option_index);
 
     if (c == -1)
@@ -47,20 +49,23 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
     case 'f':
       filename.assign(optarg);
       break;
-    case 'o':
-      outfile.assign(optarg);
-      break;
     case 'i':
       dest_ip.assign(optarg);
       break;
     case 'n':
       txEvt = atoi(optarg);
       break;
+    case 'l':
+      loop = 1;
+      break;
     case 'p':
       port = atoi(optarg);
       break;
     case 's':
       txGB = atoi(optarg);
+      break;
+    case 't':
+      throttle = atoi(optarg);
       break;
     case 'u':
       updint = atoi(optarg);
@@ -72,11 +77,14 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
     default:
       printf("Usage: bulkdatagen [OPTIONS] \n");
       printf(" --filename -f name     read data from single file \n");
-      printf(" --outfile -o name      write image to file \n");
+      printf(" --throttle -t val      speed throttle (0 fastest, then slower) "
+             "\n");
       printf(" --size -s size         size in GB of transmitted data \n");
       printf(" --packets -a number    number of packets to transmit \n");
       printf(" --ipaddr -i ipaddr     destination ip address \n");
+      printf(" --loop -l              loop forever\n");
       printf(" --port -p port         UDP destination port \n");
+      printf(" --throttle -t  val     sleep for (val) useconds after tx");
       printf(" --data -d len          size of Tx/Tx buffer in bytes (max 9000) "
              "\n");
       printf(" --update -u interval   update interval (seconds) \n");
@@ -88,10 +96,9 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
   printf("Generating a bulk data stream\n");
   if (!filename.empty())
     printf("  from file:              %s", filename.c_str());
-  if (!outfile.empty())
-    printf("  to file:                %s", outfile.c_str());
   printf("  number of bytes:        %d GB\n", txGB);
   printf("  number of packets:      %" PRIu64 " packets\n", txPkt);
+  printf("  speed throttle:         %d\n", throttle);
   printf("Network properties\n");
   printf("  destination ip address: %s\n", dest_ip.c_str());
   printf("  destination udp port:   %d\n", port);

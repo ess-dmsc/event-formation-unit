@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Command line argument parser for cspecgen
+ *  @brief Command line argument parser for nmxgen
  */
 
 #pragma once
@@ -17,7 +17,6 @@ public:
   NMXArgs(int argc, char *argv[]);
 
   std::string filename{}; /**< for single file streaming */
-  std::string outfile{};  /**< for single file streaming */
 
   unsigned int txGB{10}; /**< total transmit size (GB) */
   uint64_t txPkt{0xffffffffffffffff};
@@ -28,7 +27,8 @@ public:
   int buflen{9000};                 /**< Tx buffer size */
   int sndbuf{1000000};              /**< kernel sndbuf size */
 
-  int speed_level{0};
+  int throttle{0}; /**< actually a sleep() counter */
+  int loop{0}; /**< single shot or loop */
 
   unsigned int updint{1}; /**< update interval (seconds) */
 };

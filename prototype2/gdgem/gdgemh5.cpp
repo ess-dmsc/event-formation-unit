@@ -3,13 +3,17 @@
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
+#include <common/FBSerializer.h>
 #include <common/NewStats.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <cstring>
-#include <gdgem/nmx/Clusterer.h>
+#include <gdgem/nmx/Geometry.h>
+#include <gdgem/nmx/HistSerializer.h>
+#include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/nmxgen/EventletBuilderH5.h>
+#include <gdgem/vmm2srs/EventletBuilderSRS.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -19,10 +23,13 @@
 #include <stdio.h>
 #include <unistd.h>
 
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
+
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
-const char *classname = "NMX Detector";
+const char *classname = "NMX Detector for emulated data from H5";
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
@@ -41,15 +48,14 @@ public:
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
   static const int eth_buffer_size = 9000;
-  static const int kafka_buffer_size = 1000000;
+  static const int kafka_buffer_size = 124000;
 
 private:
   /** Shared between input_thread and processing_thread*/
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
-  char kafkabuffer[kafka_buffer_size];
-
+  // Careful also using this for other NMX pipeline
   NewStats ns{"efu2.nmx."};
 
   struct {
@@ -65,12 +71,14 @@ private:
     int64_t rx_error_bytes;
     int64_t rx_discards;
     int64_t rx_idle1;
-    int64_t rx_events;
+    int64_t tx_events;
     int64_t tx_bytes;
-
   } ALIGN(64) mystats;
 
   EFUArgs *opts;
+
+  std::shared_ptr<AbstractBuilder> builder_ {nullptr};
+  void init_builder(std::string btype);
 };
 
 NMX::NMX(void *args) {
@@ -86,7 +94,7 @@ NMX::NMX(void *args) {
   ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
   ns.create("processing.rx_discards",          &mystats.rx_discards);
   ns.create("processing.rx_idle",              &mystats.rx_idle1);
-  ns.create("output.rx_events",                &mystats.rx_events);
+  ns.create("output.tx_events",                &mystats.tx_events);
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
 
@@ -147,54 +155,69 @@ void NMX::input_thread() {
 }
 
 void NMX::processing_thread() {
+  init_builder("H5");
+  if (!builder_)
+    return;
 
-#ifndef NOKAFKA
-  Producer producer(opts->broker, "NMX_detector");
-#endif
+  Geometry geometry;
+  geometry.add_dimension(256); /**< @todo not hardocde */
+  geometry.add_dimension(256); /**< @todo not hardocde */
 
-  EventletBuilderH5 builder;
+  Producer eventprod(opts->broker, "NMX_detector");
+  FBSerializer flatbuffer(kafka_buffer_size, eventprod);
+  Producer monitorprod(opts->broker, "NMX_monitor");
+  HistSerializer histfb(1500);
+  TrackSerializer trackfb(256);
+
+  NMXHists hists;
   Clusterer clusterer(30); /**< @todo not hardocde */
 
   Timer stopafter_clock;
-  TSCTimer report_timer;
+  TSCTimer global_time, report_timer;
 
+  EventNMX event;
+  std::vector<uint16_t> coords {0,0};
   unsigned int data_index;
-  int evtoff = 0;
+  int sample_next_track {0};
   while (1) {
     mystats.fifo1_free = input2proc_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      auto readouts = builder.process_readout(
-          eth_ringbuf->getdatabuffer(data_index),
-          eth_ringbuf->getdatalength(data_index), clusterer);
+      auto stats = builder_->process_buffer(
+            eth_ringbuf->getdatabuffer(data_index),
+            eth_ringbuf->getdatalength(data_index),
+            clusterer, hists);
 
-      mystats.rx_readouts += readouts;
-      mystats.rx_error_bytes += 0;
+      mystats.rx_readouts += stats.valid_eventlets;
+      mystats.rx_error_bytes += stats.error_bytes;
 
       while (clusterer.event_ready()) {
-        auto event = clusterer.get_event();
+        XTRACE(PROCESS, DEB, "event_ready()\n");
+        event = clusterer.get_event();
         event.analyze(true, 3, 7); /**< @todo not hardocde */
         if (event.good()) {
-          mystats.rx_events++;
+          XTRACE(PROCESS, DEB, "event.good\n");
 
-          int time = 42; /**< @todo get time from event.time_start() */
-          int pixelid = (int)event.x.center + (int)event.y.center * 256;
-
-          std::memcpy(kafkabuffer + evtoff, &time, sizeof(time));
-          std::memcpy(kafkabuffer + evtoff + 4, &pixelid, sizeof(pixelid));
-          evtoff += 8;
-
-          if (evtoff >= kafka_buffer_size / 10 - 20) {
-            assert(evtoff < kafka_buffer_size);
-
-#ifndef NOKAFKA
-            producer.produce(kafkabuffer, evtoff);
-            mystats.tx_bytes += evtoff;
-#endif
-            evtoff = 0;
+          if (sample_next_track) {
+            sample_next_track = trackfb.add_track(event, 6);
           }
+
+          XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
+                 event.x.center_rounded(),
+                 event.y.center_rounded());
+
+          coords[0] = event.x.center_rounded();
+          coords[1] = event.y.center_rounded();
+          uint32_t time = static_cast<uint32_t>(event.time_start());
+          uint32_t pixelid = geometry.to_pixid(coords);
+
+//          std::cout << "  time=" << time << "\n"
+//                    << "  pixid=" << pixelid << "\n\n";
+
+          mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
+          mystats.tx_events++;
         } else {
           mystats.rx_discards +=
               event.x.entries.size() + event.y.entries.size();
@@ -204,6 +227,27 @@ void NMX::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+      // printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
+
+      sample_next_track = 1;
+
+      flatbuffer.produce();
+
+      char *txbuffer;
+      auto len = trackfb.serialize(&txbuffer);
+      if (len != 0) {
+        XTRACE(PROCESS, ALW, "Sending tracks with size %d\n", len);
+        monitorprod.produce(txbuffer, len);
+      }
+
+      if (0 != hists.xyhist_elems) {
+        XTRACE(PROCESS, ALW, "Sending histogram with %d readouts\n",
+               hists.xyhist_elems);
+        char *txbuffer;
+        auto len = histfb.serialize(hists, &txbuffer);
+        monitorprod.produce(txbuffer, len);
+        hists.clear();
+      }
 
       if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping processing thread, timeus " << std::endl;
@@ -211,6 +255,28 @@ void NMX::processing_thread() {
       }
       report_timer.now();
     }
+  }
+}
+
+void NMX::init_builder(std::string btype)
+{
+  if (btype == "H5")
+  {
+    builder_ = std::make_shared<BuilderH5>();
+  }
+  else if (btype == "SRS")
+  {
+    SRSTime time_config;  /**< @todo get from slow control? */
+    time_config.set_tac_slope(125);
+    time_config.set_bc_clock(40);
+    time_config.set_trigger_resolution(3.125);
+    time_config.set_target_resolution(0.5);
+
+    SRSMappings srs_config; /**< @todo not hardocde chip mappings */
+    srs_config.define_plane(0, {{1, 0}, {1, 1}});
+    srs_config.define_plane(1, {{1, 14}, {1, 15}});
+
+    builder_ = std::make_shared<BuilderSRS>(time_config, srs_config);
   }
 }
 
