@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/Detector.h>
+#include <common/Trace.h>
 #include <dlfcn.h>
 #include <efu/Loader.h>
 #include <iostream>
@@ -25,13 +26,13 @@ Loader::Loader(const std::string lib, void *args) {
 
   char **name;
   if ((name = (char **)dlsym(handle, "classname")) == 0) {
-    cout << "Could not find classname in " << libname << endl;
+    XTRACE(INIT, CRI, "Could not find classname in %s\n", libname.c_str());
     return;
   }
 
   DetectorFactory *myFactory;
   if (!(myFactory = (DetectorFactory *)dlsym(handle, "Factory"))) {
-    cout << "Could not find Factory in " << libname << endl;
+    XTRACE(INIT, CRI, "Could not find Factory in %s\n", libname.c_str());
     return;
   }
 
