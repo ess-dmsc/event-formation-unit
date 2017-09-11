@@ -18,7 +18,7 @@ Loader::Loader(const std::string lib, void *args) {
   const char *libstr = strdup(libname.c_str());
 
   if ((handle = dlopen(libstr, RTLD_NOW)) == 0) {
-    cout << "Could not open library " << libname << " : " << dlerror() << endl;
+    XTRACE(INIT, CRI, "Could not open library %s: %s\n", libname.c_str(), dlerror());
     free((void *)libstr);
     return;
   }

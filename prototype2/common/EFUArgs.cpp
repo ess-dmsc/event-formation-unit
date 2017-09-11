@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/EFUArgs.h>
+#include <common/Trace.h>
 #include <cstdio>
 #include <getopt.h>
 #include <iostream>
@@ -95,13 +96,13 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
     }
   }
 
-  cout << "Starting event processing pipeline2" << endl;
-  cout << "  Detector:      " << det << endl;
-  cout << "  CPU Offset:    " << cpustart << endl;
-  cout << "  IP addr:       " << ip_addr << endl;
-  cout << "  UDP Port:      " << port << endl;
-  cout << "  Kafka broker:  " << broker << endl;
-  cout << "  Graphite:      " << graphite_ip_addr << endl;
-  cout << "  Graphite port: " << graphite_port << endl;
-  cout << "  Stopafter:     " << stopafter << " seconds" << endl;
+  XTRACE(INIT, ALW, "Starting event processing pipeline2\n");
+  XTRACE(INIT, ALW, "  Detector:      %s\n", det.c_str());
+  XTRACE(INIT, ALW, "  CPU Offset:    %d\n", cpustart);
+  XTRACE(INIT, ALW, "  IP addr:       %s\n", ip_addr.c_str());
+  XTRACE(INIT, ALW, "  UDP Port:      %d\n", port);
+  XTRACE(INIT, ALW, "  Kafka broker:  %s\n", broker.c_str());
+  XTRACE(INIT, ALW, "  Graphite:      %s\n", graphite_ip_addr.c_str());
+  XTRACE(INIT, ALW, "  Graphite port: %d\n", graphite_port);
+  XTRACE(INIT, ALW, "  Stopafter:     %u\n", stopafter);
 }
