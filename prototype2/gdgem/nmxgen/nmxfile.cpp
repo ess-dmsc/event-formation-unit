@@ -49,8 +49,6 @@ int main(int argc, char *argv[]) {
   Timer us_clock;
 
   for (;;) {
-    usleep(opts.speed_level * 1000);
-
     readsz = file.read(buffer);
     if (readsz > 0) {
       DataSource.send(buffer, readsz);
@@ -76,6 +74,7 @@ int main(int argc, char *argv[]) {
       us_clock.now();
       report_timer.now();
     }
+    usleep(opts.throttle * 1000);
   }
 
   return 0;
