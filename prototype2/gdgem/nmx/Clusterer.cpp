@@ -1,8 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/Trace.h>
 #include <gdgem/nmx/Clusterer.h>
-#include <iostream>
+#include <common/Trace.h>
 #include <limits>
 
 //#undef TRC_LEVEL
@@ -14,10 +13,10 @@ void Clusterer::insert(const Eventlet &eventlet) {
   if ((eventlet.time < latest_time_) &&
       ((latest_time_ - eventlet.time) > (std::numeric_limits<uint64_t>::max() / 2) ))
   {
-    std::cout << "<Clusterer> clock overflow " << latest_time_
-              << "  cf " << eventlet.time << "  "
-              << "  diff=" << (eventlet.time - latest_time_) << " > "
-              << (std::numeric_limits<uint64_t>::max() / 2) << "\n";
+    XTRACE(PROCESS, ALW, "Clock overflow event %lu < %lu && %lu > %lu",
+           eventlet.time, latest_time_,
+           (eventlet.time - latest_time_),
+           (std::numeric_limits<uint64_t>::max() / 2));
     current_time_offset_ = latest_time_;
   }
   backlog_.insert(std::pair<uint64_t, Eventlet>(current_time_offset_ + eventlet.time, eventlet));
@@ -27,6 +26,11 @@ void Clusterer::insert(const Eventlet &eventlet) {
 bool Clusterer::event_ready() const {
   return (!backlog_.empty() && ((backlog_.rbegin()->first -
                                  backlog_.begin()->first) > min_time_span_));
+}
+
+size_t Clusterer::unclustered() const
+{
+  return backlog_.size();
 }
 
 EventNMX Clusterer::get_event() {

@@ -1,14 +1,13 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/Trace.h>
 #include <gdgem/nmx/EventNMX.h>
+#include <common/Trace.h>
 #include <set>
 #include <cmath>
+#include <sstream>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
-
-#include <sstream>
 
 void PlaneNMX::insert_eventlet(const Eventlet &e) {
   if (!e.adc)
@@ -56,8 +55,9 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
     } else
       break;
   }
-  // std::cout << "center_sum=" << center_sum
-  //           << " center_count=" << center_count << "\n";
+
+  XTRACE(PROCESS, DEB, "center_sum=%f center_count=%f\n",
+         center_sum, center_count);
 
   center = center_sum / center_count;
   uncert_lower = lspan_max - lspan_min + 1;

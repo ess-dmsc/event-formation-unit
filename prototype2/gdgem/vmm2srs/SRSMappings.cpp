@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <gdgem/vmm2srs/SRSMappings.h>
+#include <sstream>
 
 // This is done only once, when starting EFU
 void SRSMappings::define_plane(
@@ -51,4 +52,24 @@ uint16_t SRSMappings::get_plane(uint16_t fecID, uint16_t vmmID) const {
   if (vmmID >= fec.size())
     return NMX_INVALID_GEOM_ID;
   return fec[vmmID];
+}
+
+std::string SRSMappings::debug() const
+{
+  std::stringstream ss;
+  for (size_t i=0; i < planes_.size(); ++i)
+  {
+    for (size_t j=0; j < planes_[i].size(); ++j)
+    {
+      if (planes_[i][j] == NMX_INVALID_GEOM_ID)
+        continue;
+      ss << "    (FEC=" << i << ",VMM=" << j << ") --> "
+         << "(plane=" << planes_[i][j] << ","
+         << " strips=["
+         << offsets_[i][j] << "-"
+         << offsets_[i][j] + NMX_CHIP_CHANNELS - 1
+         << "])\n";
+    }
+  }
+  return ss.str();
 }

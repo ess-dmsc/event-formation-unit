@@ -6,8 +6,6 @@
 #include <test/TestBase.h>
 #include <unistd.h>
 
-#include <iostream>
-
 class PlaneTest : public TestBase {
 protected:
   PlaneNMX *plane;

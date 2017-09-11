@@ -4,7 +4,6 @@
 #include <cstdio>
 #include <gdgem/nmxgen/NMXArgs.h>
 #include <getopt.h>
-#include <iostream>
 #include <unistd.h>
 
 NMXArgs::NMXArgs(int argc, char *argv[]) {
