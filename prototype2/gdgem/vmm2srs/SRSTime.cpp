@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+﻿/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <gdgem/vmm2srs/SRSTime.h>
 
@@ -22,7 +22,11 @@ double SRSTime::trigger_resolution() const { return trigger_resolution_; }
 
 double SRSTime::target_resolution() const { return target_resolution_ns_; }
 
-double SRSTime::timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) const {
+double SRSTime::timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) {
+  if (trigger < recent_trigger_)
+      bonus_++;
+  recent_trigger_ = trigger;
+
   // BC time: bcid value * 1/(clock frequency)
   double bcSRSTime = double(bc) / bc_clock_;
   // TDC time: tacSlope * tdc value (8 bit) * ramp length
@@ -31,10 +35,10 @@ double SRSTime::timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) const 
   double chip_time = bcSRSTime * 1000 + tdcSRSTime;
 
   double trigger_timestamp_ns = trigger * trigger_resolution_;
-  return trigger_timestamp_ns + chip_time;
+  return (trigger_timestamp_ns + chip_time) + (bonus_ << 32);
 }
 
-uint64_t SRSTime::timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) const {
+uint64_t SRSTime::timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) {
   return static_cast<uint64_t>(timestamp_ns(trigger, bc, tdc) *
                                target_resolution_ns_);
 }

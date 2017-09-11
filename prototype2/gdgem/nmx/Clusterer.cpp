@@ -2,6 +2,8 @@
 
 #include <common/Trace.h>
 #include <gdgem/nmx/Clusterer.h>
+#include <iostream>
+#include <limits>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -10,8 +12,12 @@ Clusterer::Clusterer(uint64_t min_time_span) : min_time_span_(min_time_span) {}
 
 void Clusterer::insert(const Eventlet &eventlet) {
   if ((eventlet.time < latest_time_) &&
-      ((eventlet.time - latest_time_) > 50000))
+      ((latest_time_ - eventlet.time) > (std::numeric_limits<uint64_t>::max() / 2) ))
   {
+    std::cout << "<Clusterer> clock overflow " << latest_time_
+              << "  cf " << eventlet.time << "  "
+              << "  diff=" << (eventlet.time - latest_time_) << " > "
+              << (std::numeric_limits<uint64_t>::max() / 2) << "\n";
     current_time_offset_ = latest_time_;
   }
   backlog_.insert(std::pair<uint64_t, Eventlet>(current_time_offset_ + eventlet.time, eventlet));

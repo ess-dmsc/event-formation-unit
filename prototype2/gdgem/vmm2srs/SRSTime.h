@@ -28,14 +28,14 @@ public:
    * @param bc bunc crossing ID from VMM
    * @param tdc tdc value from VMM
    */
-  double timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) const;
+  double timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc);
 
   /** @brief generate absolute integer-valued timestamp
    * @param trigger trigger timestamp from SRS header
    * @param bc bunc crossing ID from VMM
    * @param tdc tdc value from VMM
    */
-  uint64_t timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) const;
+  uint64_t timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc);
 
 private:
   double bc_clock_{40};              // bc clock divisor
@@ -44,4 +44,7 @@ private:
 
   double target_resolution_ns_{
       0.5}; // target resolution for integer-valued timestamp
+
+  uint32_t recent_trigger_{0};
+  uint64_t bonus_{0};
 };
