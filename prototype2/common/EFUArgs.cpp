@@ -26,6 +26,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
         {"stopafter", required_argument, 0, 's'},
         {"graphite",  required_argument, 0, 'g'},
         {"gport",     required_argument, 0, 'o'},
+        {"file",      required_argument, 0, 'f'},
         {"logip",     required_argument, 0, 'a'},
         {"cmdport",   required_argument, 0, 'm'},
         {0, 0, 0, 0}
@@ -34,7 +35,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    int c = getopt_long(argc, argv, "a:b:c:d:g:m:o:i:p:r:s:h", long_options,
+    int c = getopt_long(argc, argv, "a:b:c:d:f:g:m:o:i:p:r:s:h", long_options,
                         &option_index);
     if (c == -1)
       break;
@@ -67,6 +68,9 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
     case 'i':
       ip_addr.assign(optarg);
       break;
+    case 'f':
+      config_file.assign(optarg);
+      break;
     case 'p':
       port = atoi(optarg);
       break;
@@ -84,6 +88,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
       printf(" --det, -d name           detector name \n");
       printf(" --dip, -i ipaddr         ip address of receive interface \n");
       printf(" --port, -p port          udp port \n");
+      printf(" --file, -f configfile    pipeline-specific config file \n");
       printf(
           " --graphite, -g ipaddr       ip address of graphite metrics server \n");
       printf(" --gport, -o port         Graphite tcp port \n");

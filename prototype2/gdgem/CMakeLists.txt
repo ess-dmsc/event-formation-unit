@@ -7,9 +7,8 @@ include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
 # Detector Pipeline Plugins
 #
 
-# For unclustered data stramed from H5 file
-set(gdgemh5_SRC
-  gdgemh5.cpp
+set(gdgem_SRC
+  gdgem.cpp
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Eventlet.cpp
@@ -21,8 +20,9 @@ set(gdgemh5_SRC
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp
   vmm2srs/ParserSRS.cpp
+  ../../dataformats/multigrid/src/jsoncpp.cpp
   vmm2srs/EventletBuilderSRS.cpp)
-set(gdgemh5_INC
+set(gdgem_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
@@ -36,38 +36,7 @@ set(gdgemh5_INC
   vmm2srs/SRSTime.h
   vmm2srs/ParserSRS.h
   vmm2srs/EventletBuilderSRS.h)
-create_module(gdgemh5 "")
-
-# VMM2/SRS based detector (micromegas based CERN prototype)
-set(gdgemsrs_SRC
-  gdgemsrs.cpp
-  nmx/Clusterer.cpp
-  nmx/EventNMX.cpp
-  nmx/Eventlet.cpp
-  nmx/Geometry.cpp
-  nmx/Hists.cpp
-  nmx/HistSerializer.cpp
-  nmx/TrackSerializer.cpp
-  nmxgen/EventletBuilderH5.cpp
-  vmm2srs/SRSMappings.cpp
-  vmm2srs/SRSTime.cpp
-  vmm2srs/ParserSRS.cpp
-  vmm2srs/EventletBuilderSRS.cpp)
-set(gdgemsrs_INC
-  nmx/Clusterer.h
-  nmx/EventNMX.h
-  nmx/Eventlet.h
-  nmx/Geometry.h
-  nmx/Hists.h
-  nmx/HistSerializer.h
-  nmx/TrackSerializer.h
-  nmx/AbstractEventletBuilder.h
-  nmxgen/EventletBuilderH5.h
-  vmm2srs/SRSMappings.h
-  vmm2srs/SRSTime.h
-  vmm2srs/ParserSRS.h
-  vmm2srs/EventletBuilderSRS.h)
-create_module(gdgemsrs "")
+create_module(gdgem "")
 
 
 #
