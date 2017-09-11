@@ -53,7 +53,7 @@ set(DetectorTest_SRC common/DetectorTest.cpp common/Detector.h)
 create_test_executable(DetectorTest "")
 
 
-set(MultiGridGeometryTest_SRC multigrid/mgcncs/GeometryTest.cpp multigrid/mgcncs/Geometry.h
+set(MultiGridGeometryTest_SRC multigrid/mgcncs/MultigridGeometryTest.cpp multigrid/mgcncs/MultigridGeometry.h
     ../libs/include/TSCTimer.h)
 create_test_executable(MultiGridGeometryTest "")
 
@@ -62,11 +62,13 @@ set(FBSerializerTest_SRC common/FBSerializerTest.cpp common/FBSerializer.cpp com
 set(FBSerializerTest_INC common/FBSerializer.h common/Producer.h)
 create_test_executable(FBSerializerTest "${LibRDKafka_LIBRARIES}")
 
-set(ProducerTest_SRC common/ProducerTest.cpp common/Producer.cpp)
-set(ProducerTest_INC common/Producer.h)
-create_test_executable(ProducerTest "${LibRDKafka_LIBRARIES}")
-
-
+if(${CMAKE_COMPILER_IS_GNUCXX})
+  set(ProducerTest_SRC common/ProducerTest.cpp common/Producer.cpp)
+  set(ProducerTest_INC common/Producer.h)
+  create_test_executable(ProducerTest "${LibRDKafka_LIBRARIES}")
+else()
+  message(WARNING "Not building ProducerTest - only works on linux")
+endif()
 
 
 

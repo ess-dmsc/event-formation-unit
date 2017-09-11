@@ -55,18 +55,18 @@ TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != nullptr); }
 TEST_F(DetectorTest, DefaultThreads) {
   testing::internal::CaptureStdout();
   det->input_thread();
-  std::string output = testing::internal::GetCapturedStdout();
-  ASSERT_EQ(output, "no input stage\n");
+  auto output = testing::internal::GetCapturedStdout().c_str();
+  ASSERT_TRUE(strstr(output, "no input stage") != NULL);
 
   testing::internal::CaptureStdout();
   det->processing_thread();
-  output = testing::internal::GetCapturedStdout();
-  ASSERT_EQ(output, "no processing stage\n");
+  output = testing::internal::GetCapturedStdout().c_str();
+  ASSERT_TRUE(strstr(output, "no processing stage") != NULL);
 
   testing::internal::CaptureStdout();
   det->output_thread();
-  output = testing::internal::GetCapturedStdout();
-  ASSERT_EQ(output, "no output stage\n");
+  output = testing::internal::GetCapturedStdout().c_str();
+  ASSERT_TRUE(strstr(output, "no output stage") != NULL);
 }
 
 TEST_F(DetectorTest, StatAPI) {

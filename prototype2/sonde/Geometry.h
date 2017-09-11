@@ -21,14 +21,38 @@ public:
 
   /** @brief returns the maximum available pixelid for this geometry
    */
-  int getmaxpixelid() { return 42; }
+  int getmaxpixelid() { return 64; }
 
   /** @brief Return the global detector pixel id from
    */
   inline int getdetectorpixelid(int module, int asch) {
-    XTRACE(PROCESS, DEB, "module %d, asic %d, channel %d\n", module, asch>>6,
-           asch&0x3f);
+    int asic = asch >> 6;
+    if (asic > 3) {
+      XTRACE(PROCESS, WAR, "Invalid asic: %d\n", asic);
+      return -1;
+    }
+    int channel = asch & 0x3f;
+    if (channel > 15) {
+      XTRACE(PROCESS, WAR, "Invalid channel: %d\n", channel);
+      return -1;
+    }
+    XTRACE(PROCESS, DEB, "module %d, asic %d, channel %d\n", module, asic, channel);
 
-    return 42; /** @todo perform real calculation */
+    int x = channel % 4;
+    int y = channel / 4;
+
+    if (asic == 1) {
+      x += 4;
+    }
+    if (asic == 2) {
+      y += 4;
+    }
+    if (asic == 3) {
+      x += 4;
+      y += 4;
+    }
+    int pixelid = x + 8 * y + 1;
+    XTRACE(PROCESS, DEB, "coordinates: x %d, y %d, pixel_id: %d\n", x, y, pixelid);
+    return pixelid;
   }
 };

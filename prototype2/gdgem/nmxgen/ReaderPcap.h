@@ -18,6 +18,8 @@ public:
    */
   ReaderPcap(std::string filename);
 
+  ~ReaderPcap();
+
   /* @brief read data from a packet into user specified buffer
    * @param buffer user allocated buffer, must be at least bufferlen bytes
    * @param bufferlen length in bytes

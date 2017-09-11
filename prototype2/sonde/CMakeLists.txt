@@ -24,3 +24,8 @@ create_module(sonde "")
 set(IDEASDataTest_SRC ideas/DataTest.cpp ideas/Data.cpp)
 set(IDEASDataTest_INC ideas/Data.h ideas/TestData.h)
 create_test_executable(IDEASDataTest "")
+
+
+set(IDEASGeometryTest_SRC ideas/GeometryTest.cpp)
+set(IDEASGeometryTest_INC Geometry.h)
+create_test_executable(IDEASGeometryTest "")

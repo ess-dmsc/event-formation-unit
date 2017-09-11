@@ -4,7 +4,7 @@
 #include <memory>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/Data.h>
-#include <multigrid/mgcncs/Geometry.h>
+#include <multigrid/mgcncs/MultigridGeometry.h>
 #include <multigrid/mgcncs/TestData.h>
 #include <test/TestBase.h>
 

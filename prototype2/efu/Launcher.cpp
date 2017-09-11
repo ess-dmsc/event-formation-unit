@@ -41,11 +41,13 @@ void Launcher::launch(int __attribute__((unused)) lcore, void (*func)(Loader *),
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
   CPU_SET(lcore, &cpuset);
+  if (lcore >= 0) {
 #ifndef NDEBUG
   int s =
 #endif
       pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
   assert(s == 0);
+}
 #else
 #pragma message("setaffinity only implemented for Linux")
 GLOG_WAR("setaffinity only implemented for Linux");

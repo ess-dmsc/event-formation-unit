@@ -61,8 +61,10 @@ private:
     int64_t fifo1_push_errors;
     int64_t pad[5];
 
+    // Processing and Output counters
     int64_t rx_idle1;
     int64_t rx_events;
+    int64_t rx_geometry_errors;
     int64_t tx_bytes;
   } ALIGN(64) mystats;
 
@@ -79,6 +81,7 @@ SONDEIDEA::SONDEIDEA(void *args) {
   ns.create("input.dropped",                   &mystats.fifo1_push_errors);
   ns.create("processing.idle",                 &mystats.rx_idle1);
   ns.create("processing.rx_events",            &mystats.rx_events);
+  ns.create("processing.rx_geometry_errors",   &mystats.rx_geometry_errors);
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
 
@@ -156,9 +159,11 @@ void SONDEIDEA::processing_thread() {
       int events = ideasdata.receive(eth_ringbuf->getdatabuffer(data_index),
         eth_ringbuf->getdatalength(data_index));
 
+      mystats.rx_geometry_errors += ideasdata.errors;
+      mystats.rx_events += ideasdata.events;
+
       for (int i = 0; i < events; i++) {
-        mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
-        mystats.rx_events++;
+          mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
       }
     }
 

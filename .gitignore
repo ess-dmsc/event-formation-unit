@@ -21,3 +21,6 @@ dgmgjson
 
 #directories
 build/
+
+#IDE
+CMakeLists.txt.user

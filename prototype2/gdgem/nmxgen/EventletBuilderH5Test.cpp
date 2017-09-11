@@ -7,20 +7,21 @@
 
 class EventletBuilderH5Test : public TestBase {
 protected:
-  EventletBuilderH5 *builder;
-  virtual void SetUp() { builder = new EventletBuilderH5(); }
+  BuilderH5 *builder;
+  virtual void SetUp() { builder = new BuilderH5(); }
   virtual void TearDown() { delete builder; }
 };
 
 TEST_F(EventletBuilderH5Test, Process) {
+  NMXHists hists;
   Clusterer clusterer(30);
-  char data[9000];
+  //char data[9000];
 
-  auto num1 = builder->process_readout(data, 16, clusterer);
-  ASSERT_EQ(num1, 1);
+  //auto num1 = builder->process_buffer(data, 16, clusterer, hists);
+  //ASSERT_EQ(num1.valid_eventlets, 1);
 
-  auto num2 = builder->process_readout(data, 64, clusterer);
-  ASSERT_EQ(num2, 4);
+  //auto num2 = builder->process_buffer(data, 64, clusterer, hists);
+  //ASSERT_EQ(num2.valid_eventlets, 4);
 }
 
 int main(int argc, char **argv) {

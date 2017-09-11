@@ -20,6 +20,7 @@ ReaderVMM::ReaderVMM(std::string filename) {
     return;
 
   total_ = shape.dim(0);
+//  std::cout << "Found events in file: " << total_ << "\n";
 }
 
 size_t ReaderVMM::read(char *buf) {

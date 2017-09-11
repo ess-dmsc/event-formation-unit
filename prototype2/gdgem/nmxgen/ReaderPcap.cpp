@@ -19,6 +19,10 @@ ReaderPcap::ReaderPcap(std::string filename) {
   }
 }
 
+ReaderPcap::~ReaderPcap() {
+  pcap_close(pcap);
+}
+
 int ReaderPcap::read(char *buffer, size_t bufferlen) {
 #define IPHDROFF 14
 #define UDPHDROFF 34
