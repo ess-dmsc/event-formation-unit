@@ -1,49 +1,78 @@
-#!/usr/local/bin/python
+
 import binascii
 import socket
 import struct
 import argparse
 
 svr_ip_addr = "127.0.0.1"
-svr_tcp_port = 1033
+svr_tcp_port = 50010
 
 RXBUFFER = 4096
 
+registers = {'Serial Number': 0x0000,
+             'Firmware Type': 0x0001,
+             'Firmware Version': 0x0002,
+             'System Number': 0x0010,
+             'Calibration Execute': 0x0c00,
+             'Calibration Pulse Polarity': 0x0c01,
+             'Calibration Num Pulses': 0x0c02,
+             'Calibration Pulse Length': 0x0c03,
+             'Calibration Pulse Interval': 0x0c04,
+             'Cal DAC': 0x0e00,
+             'cfg_phystrig_en': 0xf016,
+             'cfg_forced_en': 0xf017,
+             'cfg_event_num': 0xf018,
+             'cfg_forced_asic': 0xf019,
+             'cfg_forced_channel': 0xf01a,
+             'cfg_timing_readout_en': 0xf020,
+             'cfg_event_num': 0xf021,
+             'cfg_all_ch_en': 0xf030
+            }
+
 class IdeasCtrl():
    # packet types
-   cmd_read_register_request = 0x11
+   class cmd():
+      WriteSystemRegister = 0x10
+      ReadSystemRegister = 0x11
+      SystemRegisterReadBack = 0x12
 
-   #
-   pkt_stand_alone = 0x00
+   class seqflag():
+      StandAlone = 0x00
+      FirstPacket = 0x01
+      ContinuationPacket = 0x02
+      LastPacket = 0x03
 
-   def __init__(self, ip, port):
-      self.ip = ip
-      self.port = port
+   def __init__(self, ip, port, verbose):
       self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
       self.s.connect((ip, port))
       self.pktno = 0
       self.version = 0
       self.system = 0
+      self.verbose = verbose
 
    def send(self, data):
+      if self.verbose:
+         print("send: %s" %(binascii.hexlify(data)))
       self.s.send(data)
       self.pktno += 1
 
    def recv(self):
-      return self.s.recv(RXBUFFER)
+      rx = self.s.recv(RXBUFFER)
+      if self.verbose:
+         print("recv: %s" %(binascii.hexlify(rx)))
+      return rx
 
-   def readsystemregister(self, sysno, address):
+   def readsystemregister(self, address):
        s = struct.Struct('!BBHIH H')
        r4 = struct.Struct('!BBHIH HBI')
        r2 = struct.Struct('!BBHIH HBH')
        r1 = struct.Struct('!BBHIH HBB')
-       pkttype = self.cmd_read_register_request
-       pktseq = self.pkt_stand_alone
+       pkttype = self.cmd.ReadSystemRegister
+       pktseq = self.seqflag.StandAlone
        datalen = 2
-       self.send(s.pack((self.version << 5) + sysno, pkttype, (pktseq << 14) + self.pktno, 0,
+       self.send(s.pack((self.version << 5) + self.system, pkttype, (pktseq << 14) + self.pktno, 0,
                     datalen, address))
        rx = self.recv()
-       #print("Received data: %s (len %d)" % (binascii.hexlify(rx), len(rx)))
        if len(rx) == 17:
           res = r4.unpack(rx)[7]
        elif len(rx) == 15:
@@ -51,73 +80,71 @@ class IdeasCtrl():
        elif len(rx) == 14:
           res = r1.unpack(rx)[7]
        else:
-          res = "unsupported"
+          print("Unsupported length %d" % (len(rx)))
+          res = -1
        return res
 
-   # Assumes address is 16 bit and value is 16 bits
-   def writesystemregister8(self, sysno, address, value):
-       s = struct.Struct('!BBHIH HBH')
-       pkttype = 0x10
-       pktseq = self.pktno
-       datalen = 4
-       return s.pack((self.version << 5) + sysno, pkttype, (pktseq << 14) + self.pktno, 0,
-                      datalen, address, 2, value)
+   def writesystemregister(self, fmt, datalen, name, value):
+       s = struct.Struct('!BBHIH HB' + fmt)
+       pkttype = self.cmd.WriteSystemRegister
+       pktseq = self.seqflag.StandAlone
+       self.send(s.pack((self.version << 5) + self.system, pkttype, (pktseq << 14) + self.pktno, 0,
+                        datalen, registers[name], 1, value))
+       rx = self.recv()
 
-   # Assumes address is 16 bit and value is 16 bits
-   def writesystemregister16(self, sysno, address, value):
-       s = struct.Struct('!BBHIH HBH')
-       pkttype = 0x10
-       pktseq = 0
-       datalen = 5
-       return s.pack((self.version << 5) + sysno, pkttype, (pktseq << 14) + self.pktno, 0,
-                      datalen, address, 2, value)
+   def writesystemregister8(self, address, value):
+       self.writesystemregister('B', 4, address, value)
 
-   # Assumes address is 16 bit and value is 16 bits
-   def writesystemregister32(self, sysno, address, value):
-       s = struct.Struct('!BBHIH HBI')
-       pkttype = 0x10
-       pktseq = 0
-       datalen = 7
-       return s.pack((self.version << 5) + sysno, pkttype, (pktseq << 14) + self.pktno, 0,
-                      datalen, address, 4, value)
+   def writesystemregister16(self, address, value):
+       self.writesystemregister('H', 5, address, value)
+
+   def writesystemregister32(self, address, value):
+       self.writesystemregister('I', 7, address, value)
+
+   def printregister(self, name):
+      res = ctrl.readsystemregister(registers[name])
+      print("%-30s 0x%x  (%d)" % (name, res, res))
 
 #
 # High level user functions
 #
 
-   def printregister(self, name, address):
-      res = ctrl.readsystemregister(self.system, address)
-      print("%-30s 0x%x  (%d)" % (name, res, res))
+   def setcalibrationparms(self, polarity, nb_pulses, pulse_length, pulse_interval):
+      self.writesystemregister8('Calibration Pulse Polarity', polarity)
+      self.writesystemregister16('Calibration Num Pulses', nb_pulses)
+      self.writesystemregister32('Calibration Pulse Length', pulse_length)
+      self.writesystemregister32('Calibration Pulse Interval', pulse_interval)
+
 
    def dumpallregisters(self):
       print("System")
-      self.printregister("Serial Number",               0x0000)
-      self.printregister("Firmware Type",               0x0001)
-      self.printregister("Firmware Version",            0x0002)
-      self.printregister("System Number",               0x0010)
+      self.printregister("Serial Number")
+      self.printregister("Firmware Type")
+      self.printregister("Firmware Version")
+      self.printregister("System Number")
       print("Cal Pulse Gen")
-      self.printregister("Calibration Execute",         0x0c00)
-      self.printregister("Calibration Pulse Polarity",  0x0c01)
-      self.printregister("Calibration Num Pulses",      0x0c02)
-      self.printregister("Calibration Pulse Length",    0x0c03)
-      self.printregister("Calibration Pulse Interval",  0x0c04)
+      self.printregister("Calibration Execute")
+      self.printregister("Calibration Pulse Polarity")
+      self.printregister("Calibration Num Pulses")
+      self.printregister("Calibration Pulse Length")
+      self.printregister("Calibration Pulse Interval")
       print("DACs")
-      self.printregister("Cal DAC",                     0x0e00)
+      self.printregister("Cal DAC")
       print("VATA readout")
-      self.printregister("cfg_phystrig_en",             0xf016)
-      self.printregister("cfg_forced_en",               0xf017)
-      self.printregister("cfg_event_num",               0xf018)
-      self.printregister("cfg_forced_asic",             0xf019)
-      self.printregister("cfg_forced_channel",          0xf01a)
-      self.printregister("cfg_timing_readout_en",       0xf020)
-      self.printregister("cfg_event_num",               0xf021)
-      self.printregister("cfg_all_ch_en",               0xf030)
-
+      self.printregister("cfg_phystrig_en")
+      self.printregister("cfg_forced_en")
+      self.printregister("cfg_event_num")
+      self.printregister("cfg_forced_asic")
+      self.printregister("cfg_forced_channel")
+      self.printregister("cfg_timing_readout_en")
+      self.printregister("cfg_event_num")
+      self.printregister("cfg_all_ch_en")
 
 if __name__ == '__main__':
    parser = argparse.ArgumentParser()
    parser.add_argument("-i", metavar='ipaddr', help = "server ip address (default %s)" % (svr_ip_addr), type = str)
    parser.add_argument("-p", metavar='port', help = "server tcp port (default %d)" % (svr_tcp_port), type = int)
+   parser.add_argument("-v", help = "add debug prints", action='store_true')
    args = parser.parse_args()
 
    if args.i != None:
@@ -126,7 +153,11 @@ if __name__ == '__main__':
    if args.p != None:
       svr_tcp_port = args.p
 
-ctrl = IdeasCtrl(svr_ip_addr, svr_tcp_port)
+ctrl = IdeasCtrl(svr_ip_addr, svr_tcp_port, args.v)
 
 
 ctrl.dumpallregisters()
+ctrl.setcalibrationparms(1,10,11,512)
+
+ctrl.dumpallregisters()
+ctrl.setcalibrationparms(0,1,1,500)
