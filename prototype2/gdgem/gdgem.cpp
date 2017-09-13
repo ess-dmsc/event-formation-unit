@@ -253,7 +253,7 @@ void NMX::processing_thread() {
       }
 
       if (0 != hists.xyhist_elems) {
-        XTRACE(PROCESS, ALW, "Sending histogram with %d readouts\n",
+        XTRACE(PROCESS, ALW, "Sending histogram with %u readouts\n",
                hists.xyhist_elems);
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
