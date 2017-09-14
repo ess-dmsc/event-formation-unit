@@ -9,6 +9,20 @@
 #include "mbcommon/multiBladeEventBuilder.h"
 #include "multiBladeTestData.h"
 
+TEST(MBEventBuilder__Test, Threshold) {
+
+    multiBladeEventBuilder p;
+    p.setThreshold(10);
+    p.setTimeWindow(1);
+
+    // ADC below threshold
+    EXPECT_FALSE(p.addDataPoint(0, 5, 100));
+    EXPECT_EQ(0, p.getClusterClock());
+
+    EXPECT_FALSE(p.addDataPoint(0, 10, 100));
+    EXPECT_EQ(100, p.getClusterClock());
+}
+
 TEST(MBEventBuilder__Test, TimeWindow) {
 
     // Perform 4 tests with different windows and different first clock number

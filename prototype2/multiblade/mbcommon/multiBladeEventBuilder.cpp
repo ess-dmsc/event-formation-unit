@@ -9,7 +9,8 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 multiBladeEventBuilder::multiBladeEventBuilder()
-: m_time_window(185),
+: m_ADC_theshold(0),
+  m_time_window(185),
   m_nwire_channels(32),
   m_nstrip_channels(32),
   m_use_weighted_average(true),
@@ -33,9 +34,15 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel, const uint16_t
     // Increment the counter for number of data-points received.
     m_datapoints_received++;
 
+    if (ADC < m_ADC_theshold) {
+        XTRACE(PROCESS, DEB, "ADC-value below threshold. %d < %d\n",
+               static_cast<uint>(ADC), static_cast<uint>(m_ADC_theshold));
+        return false;
+    }
+
     // Sanity check. Recieved channel number must not exceed the sum of wire and strip channels
-    if (channel >= m_nwire_channels+m_nstrip_channels){
-        XTRACE(PROCESS, WAR, "Recieved channel number : %d - max channel-number : %d\n", static_cast<int>(channel),
+    if (channel >= m_nwire_channels+m_nstrip_channels) {
+        XTRACE(PROCESS, WAR, "Recieved channel number : %d - max channel-number : %d\n", static_cast<uint>(channel),
                static_cast<uint>(m_nwire_channels+m_nstrip_channels));
         return false;
     }

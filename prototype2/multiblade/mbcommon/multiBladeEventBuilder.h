@@ -104,11 +104,19 @@ public:
 
     // Functions for configuration
 
+    /*! Set the ADC-threshold to accept data-points. ADC-values below a certain value are considered to originate
+     * from gammas and not neutrons. Gamma events are suppressed by a threshold in the hardware. To increase this
+     * threshold, set the threshold here.
+     *
+     * @param m_ADC_threshold ADC threshold for accepted data-points.
+     */
+    void setThreshold(uint16_t threshold) {m_ADC_theshold = threshold;}
+
     /*! Set the time-window for accepting data-points as belonging to the same cluster (neutron-event. The time-stamps
      * of the data-points are in number of clock-cycles (since last reset). Therefore the time-window must be specified
      * as the maximum number of clock-cycles after the first data-point in which a point will be added to the cluster.
      *
-     * @param time_window Cluster time-window.
+     * @param m_time_window Cluster time-window.
      */
     void setTimeWindow(uint32_t time_window) {m_time_window = time_window;}
 
@@ -173,6 +181,8 @@ private:
 
     // Configuration variables
 
+    /*! Threshold for ADC-value. Set to discard gamma-events */
+    uint16_t m_ADC_theshold;
     /*! Time window for a single cluster. In number of clock-cycles */
     uint32_t m_time_window;
     /*! Number of wire channels */
