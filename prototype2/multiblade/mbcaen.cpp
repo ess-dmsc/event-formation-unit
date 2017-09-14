@@ -163,8 +163,8 @@ void MBCAEN::processing_thread() {
             mystats.rx_idle1++;
             usleep(10);
         } else {
-            auto UNUSED dataptr = eth_ringbuf->getdatabuffer(data_index);
-            auto UNUSED datalen = eth_ringbuf->getdatalength(data_index);
+            auto dataptr = eth_ringbuf->getdatabuffer(data_index);
+            auto datalen = eth_ringbuf->getdatalength(data_index);
 
             mbdata.recieve(dataptr, datalen);
 
