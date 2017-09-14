@@ -22,9 +22,9 @@ public:
     uint64_t dppkg{0xffffffffffffffff}; /** Max */
 
     std::string dest_ip{"127.0.0.1"}; /**< destination ip address */
-    uint port{9000};                   /**< destination udp port */
-    uint buflen{9000};                 /**< Tx buffer size */
-    uint sndbuf{1000000};              /**< kernel sndbuf size */
+    uint16_t port{9000};                   /**< destination udp port */
+    uint16_t buflen{9000};                 /**< Tx buffer size */
+    unsigned int sndbuf{1000000};              /**< kernel sndbuf size */
 
     int speed_level{0};
 

@@ -27,12 +27,12 @@ public:
 
 private:
 
-    unsigned int datalength;
+    //unsigned int datalength;
 
-    uint64_t digi_mask;
-    uint64_t chan_mask;
-    uint64_t ADC_mask;
-    uint64_t time_mask;
+    //uint64_t digi_mask;
+    //uint64_t chan_mask;
+    //uint64_t ADC_mask;
+    //uint64_t time_mask;
 
 
 };

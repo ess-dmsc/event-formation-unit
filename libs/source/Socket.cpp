@@ -1,5 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
+#include <prototype2/common/Trace.h>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
@@ -10,7 +11,7 @@ Socket::Socket(Socket::type stype) {
   auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
 
   if ((s_ = socket(AF_INET, type, proto)) == -1) {
-    std::cout << "socket() failed" << std::endl;
+    XTRACE(INIT, ALW, "socket() failed\n");
     exit(1);
   }
 }
@@ -25,8 +26,8 @@ int Socket::setbuffers(int sndbuf, int rcvbuf) {
 }
 
 void Socket::printbuffers(void) {
-  std::cout << "Socket rcv buffer size: " << getopt(SO_RCVBUF) << std::endl;
-  std::cout << "Socket snd buffer size: " << getopt(SO_SNDBUF) << std::endl;
+  XTRACE(IPC, ALW, "Socket receive buffer size: %d\n", getopt(SO_RCVBUF));
+  XTRACE(IPC, ALW, "Socket send buffer size: %d\n", getopt(SO_SNDBUF));
 }
 
 int Socket::settimeout(int seconds, int usecs) {
@@ -106,7 +107,7 @@ int Socket::receive() {
   // try to receive some data, this is a blocking call
   if ((recv_len = recvfrom(s_, buffer_, buflen_, 0, (struct sockaddr *)&remote_,
                            &slen)) < 0) {
-    printf("Receive() failed: %d (sockt fd %d)\n", recv_len, s_);
+    XTRACE(IPC, ERR, "Receive() failed: %d (sockt fd %d)\n", recv_len, s_);
     perror("recvfrom: ");
     return 0;
   }
@@ -160,7 +161,7 @@ TCPClient::TCPClient(const char *ipaddr, int port) {
 
   ret = connect(s_, (struct sockaddr *)&remote_, sizeof(remote_));
   if (ret < 0) {
-    std::cout << "connect() failed" << std::endl;
+    XTRACE(IPC, ALW, "connect() to %s:%d failed\n", ipaddr, port);
     s_ = -1;
   }
 }
@@ -171,12 +172,12 @@ int TCPClient::senddata(char *buffer, int len) {
   }
 
   if (len <= 0) {
-    printf("TCPClient::senddata() no data specified\n");
+    XTRACE(IPC, WAR, "TCPClient::senddata() no data specified\n");
     return 0;
   }
   int ret = send(s_, buffer, len, 0);
   if (ret <= 0) {
-    printf("TCPClient::send() returns %d\n", ret);
+    XTRACE(IPC, WAR, "TCPClient::send() returns %d\n", ret);
   }
   return ret;
 }

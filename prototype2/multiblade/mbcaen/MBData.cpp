@@ -11,12 +11,12 @@
 
 
 MBData::MBData()
-        : data(0),
-          datalength(16),
-          digi_mask(0),
-          chan_mask(0),
-          ADC_mask(0),
-          time_mask(0)
+        : data(0)//,
+          //datalength(16),
+          //digi_mask(0),
+          //chan_mask(0),
+          //ADC_mask(0),
+          //time_mask(0)
 {
 }
 

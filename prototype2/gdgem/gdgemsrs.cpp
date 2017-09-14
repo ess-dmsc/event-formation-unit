@@ -9,11 +9,11 @@
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <cstring>
-#include <gdgem/nmx/Clusterer.h>
-#include <gdgem/vmm2srs/EventletBuilder.h>
-#include <gdgem/vmm2srs/HistSerializer.h>
-#include <gdgem/vmm2srs/NMXVMM2SRSData.h>
-#include <gdgem/vmm2srs/TrackSerializer.h>
+#include <gdgem/nmx/Geometry.h>
+#include <gdgem/nmx/HistSerializer.h>
+#include <gdgem/nmx/TrackSerializer.h>
+#include <gdgem/nmxgen/EventletBuilderH5.h>
+#include <gdgem/vmm2srs/EventletBuilderSRS.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -55,25 +55,30 @@ private:
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
-  NewStats ns{
-      "efu2.nmxvmm2srs."}; // Careful also uding this for other NMX pipeline
+  // Careful also using this for other NMX pipeline
+  NewStats ns{"efu2.nmxvmm2srs."};
 
   struct {
     // Input Counters
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t fifo1_push_errors;
-    int64_t pad[5];
+    int64_t fifo1_free;
+    int64_t pad_a[4]; /**< @todo check alignment*/
 
-    int64_t rx_idle1;
+    // Processing Counters
     int64_t rx_readouts;
-    int64_t rx_errbytes;
+    int64_t rx_error_bytes;
     int64_t rx_discards;
-    int64_t rx_events;
+    int64_t rx_idle1;
+    int64_t tx_events;
     int64_t tx_bytes;
   } ALIGN(64) mystats;
 
   EFUArgs *opts;
+
+  std::shared_ptr<AbstractBuilder> builder_ {nullptr};
+  void init_builder(std::string btype);
 };
 
 NMXVMM2SRS::NMXVMM2SRS(void *args) {
@@ -83,12 +88,13 @@ NMXVMM2SRS::NMXVMM2SRS(void *args) {
   // clang-format off
   ns.create("input.rx_packets",                &mystats.rx_packets);
   ns.create("input.rx_bytes",                  &mystats.rx_bytes);
-  ns.create("input.dropped",                   &mystats.fifo1_push_errors);
-  ns.create("processing.idle",                 &mystats.rx_idle1);
+  ns.create("input.i2pfifo_dropped",           &mystats.fifo1_push_errors);
+  ns.create("input.i2pfifo_free",              &mystats.fifo1_free);
   ns.create("processing.rx_readouts",          &mystats.rx_readouts);
+  ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
   ns.create("processing.rx_discards",          &mystats.rx_discards);
-  ns.create("processing.rx_errbytes",          &mystats.rx_errbytes);
-  ns.create("output.rx_events",                &mystats.rx_events);
+  ns.create("processing.idle",                 &mystats.rx_idle1);
+  ns.create("output.tx_events",                &mystats.tx_events);
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
 
@@ -122,10 +128,12 @@ void NMXVMM2SRS::input_thread() {
     /** this is the processing step */
     if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                   eth_ringbuf->getmaxbufsize())) > 0) {
+      XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
       eth_ringbuf->setdatalength(eth_index, rdsize);
 
+      mystats.fifo1_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
         mystats.fifo1_push_errors++;
       } else {
@@ -147,6 +155,13 @@ void NMXVMM2SRS::input_thread() {
 }
 
 void NMXVMM2SRS::processing_thread() {
+  init_builder("SRS");
+  if (!builder_)
+    return;
+
+  Geometry geometry;
+  geometry.add_dimension(256); /**< @todo not hardocde */
+  geometry.add_dimension(256); /**< @todo not hardocde */
 
   Producer eventprod(opts->broker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
@@ -154,67 +169,58 @@ void NMXVMM2SRS::processing_thread() {
   HistSerializer histfb(1500);
   TrackSerializer trackfb(256);
 
-  NMXVMM2SRSData data(1125);
-
-  Time time_interpreter;
-  time_interpreter.set_tac_slope(125); /**< @todo get from slow control? */
-  time_interpreter.set_bc_clock(40);   /**< @todo get from slow control? */
-  time_interpreter.set_trigger_resolution(
-      3.125); /**< @todo get from slow control? */
-  time_interpreter.set_target_resolution(0.5); /**< @todo not hardcode */
-
-  Geometry geometry_intepreter; /**< @todo not hardocde chip mappings */
-  geometry_intepreter.define_plane(0, {{1, 0}, {1, 1}});
-  geometry_intepreter.define_plane(1, {{1, 14}, {1, 15}});
-
-  EventletBuilder builder(time_interpreter, geometry_intepreter);
-
+  NMXHists hists;
   Clusterer clusterer(30); /**< @todo not hardocde */
 
   Timer stopafter_clock;
   TSCTimer global_time, report_timer;
+
   EventNMX event;
+  std::vector<uint16_t> coords {0,0};
   unsigned int data_index;
-  int sample_next_track = 0;
+  int sample_next_track {0};
   while (1) {
+    mystats.fifo1_free = input2proc_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      data.receive(eth_ringbuf->getdatabuffer(data_index),
-                   eth_ringbuf->getdatalength(data_index));
-      if (data.elems > 0) {
-        builder.process_readout(data, clusterer);
+      auto stats = builder_->process_buffer(
+            eth_ringbuf->getdatabuffer(data_index),
+            eth_ringbuf->getdatalength(data_index),
+            clusterer, hists);
 
-        mystats.rx_readouts += data.elems;
-        mystats.rx_errbytes += data.error;
+      mystats.rx_readouts += stats.valid_eventlets;
+      mystats.rx_error_bytes += stats.error_bytes;
 
-        while (clusterer.event_ready()) {
-          XTRACE(PROCESS, DEB, "event_ready()\n");
-          event = clusterer.get_event();
-          event.analyze(true, 3, 7); /**< @todo not hardocde */
-          if (event.good()) {
-            XTRACE(PROCESS, DEB, "event.good\n");
+      while (clusterer.event_ready()) {
+        XTRACE(PROCESS, DEB, "event_ready()\n");
+        event = clusterer.get_event();
+        event.analyze(true, 3, 7); /**< @todo not hardocde */
+        if (event.good()) {
+          XTRACE(PROCESS, DEB, "event.good\n");
 
-            if (sample_next_track) {
-              sample_next_track = trackfb.add_track(event, 6);
-            }
-            mystats.rx_events++;
-
-            XTRACE(PROCESS, DEB, "x.center: %f, y.center %f\n", event.x.center,
-                   event.y.center);
-            int pixelid = (int)event.x.center + (int)event.y.center * 256;
-
-            assert(pixelid < 65535);
-
-            // printf("event time: %" PRIu64 "\n", event.time_start());
-            mystats.tx_bytes +=
-                flatbuffer.addevent((uint32_t)event.time_start(), pixelid);
-            mystats.rx_events++;
-          } else {
-            mystats.rx_discards +=
-                event.x.entries.size() + event.y.entries.size();
+          if (sample_next_track) {
+            sample_next_track = trackfb.add_track(event, 6);
           }
+
+          XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
+                 event.x.center_rounded(),
+                 event.y.center_rounded());
+
+          coords[0] = event.x.center_rounded();
+          coords[1] = event.y.center_rounded();
+          uint32_t time = static_cast<uint32_t>(event.time_start());
+          uint32_t pixelid = geometry.to_pixid(coords);
+
+//          std::cout << "  time=" << time << "\n"
+//                    << "  pixid=" << pixelid << "\n\n";
+
+          mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
+          mystats.tx_events++;
+        } else {
+          mystats.rx_discards +=
+              event.x.entries.size() + event.y.entries.size();
         }
       }
     }
@@ -234,14 +240,13 @@ void NMXVMM2SRS::processing_thread() {
         monitorprod.produce(txbuffer, len);
       }
 
-      if (data.xyhist_elems != 0) {
+      if (0 != hists.xyhist_elems) {
         XTRACE(PROCESS, ALW, "Sending histogram with %d readouts\n",
-               data.xyhist_elems);
+               hists.xyhist_elems);
         char *txbuffer;
-        auto len = histfb.serialize(&data.xyhist[0][0], &data.xyhist[1][0],
-                                    1500, &txbuffer);
+        auto len = histfb.serialize(hists, &txbuffer);
         monitorprod.produce(txbuffer, len);
-        data.hist_clear();
+        hists.clear();
       }
 
       if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
@@ -252,6 +257,29 @@ void NMXVMM2SRS::processing_thread() {
     }
   }
 }
+
+void NMXVMM2SRS::init_builder(std::string btype)
+{
+  if (btype == "H5")
+  {
+    builder_ = std::make_shared<BuilderH5>();
+  }
+  else if (btype == "SRS")
+  {
+    SRSTime time_config;  /**< @todo get from slow control? */
+    time_config.set_tac_slope(125);
+    time_config.set_bc_clock(40);
+    time_config.set_trigger_resolution(3.125);
+    time_config.set_target_resolution(0.5);
+
+    SRSMappings srs_config; /**< @todo not hardocde chip mappings */
+    srs_config.define_plane(0, {{1, 0}, {1, 1}});
+    srs_config.define_plane(1, {{1, 14}, {1, 15}});
+
+    builder_ = std::make_shared<BuilderSRS>(time_config, srs_config);
+  }
+}
+
 
 /** ----------------------------------------------------- */
 

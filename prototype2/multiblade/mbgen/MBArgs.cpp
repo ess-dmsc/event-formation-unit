@@ -4,6 +4,7 @@
 
 #include <getopt.h>
 #include <cinttypes>
+#include <stdlib.h>
 
 #include <mbgen/MBArgs.h>
 

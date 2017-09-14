@@ -290,7 +290,7 @@ void multiBladeEventBuilder::incrementCounters(const std::vector<point> &m_wire_
         } else {
         m_1D_strips.at(5)++;
 
-            XTRACE(PROCESS, DEB, "More points than expected! Number of strip data points = \n", m_strip_cluster.size());
+            XTRACE(PROCESS, DEB, "More points than expected! Number of strip data points = %lu\n", m_strip_cluster.size());
         }
     }
 }

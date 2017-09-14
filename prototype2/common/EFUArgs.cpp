@@ -79,16 +79,17 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
     case 'h':
     default:
       printf("Usage: efu2 [OPTIONS]\n");
-      printf(" --broker, -b broker     Kafka broker string \n");
-      printf(" --cpu, -c lcore         lcore id of first thread \n");
-      printf(" --det -d name           detector name \n");
-      printf(" --dip, -i ipaddr        ip address of receive interface \n");
-      printf(" --port -p port          udp port \n");
+      printf(" --broker, -b broker      Kafka broker string \n");
+      printf(" --cpu, -c lcore          lcore id of first thread \n");
+      printf(" --det, -d name           detector name \n");
+      printf(" --dip, -i ipaddr         ip address of receive interface \n");
+      printf(" --port, -p port          udp port \n");
       printf(
-          " --graphite, -g ipaddr   ip address of graphite metrics server \n");
-      printf(" --gport -o port         Graphite tcp port \n");
-      printf(" --stopafter, -s timeout terminate after timeout seconds \n");
-      printf(" -h                      help - prints this message \n");
+          " --graphite, -g ipaddr       ip address of graphite metrics server \n");
+      printf(" --gport, -o port         Graphite tcp port \n");
+      printf(" --cmdport, -m port       command parser tcp port\n");
+      printf(" --stopafter, -s timeout  terminate after timeout seconds \n");
+      printf(" --help, -h               help - prints this message \n");
       stopafter = 0;
       return;
     }

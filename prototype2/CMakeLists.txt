@@ -30,6 +30,7 @@ include(CMakeListsUtils.txt)
 add_subdirectory(gdgem)
 add_subdirectory(multiblade)
 add_subdirectory(multigrid)
+add_subdirectory(sonde)
 add_subdirectory(udp)
 
 include(CMakeListsUnitTests.txt)

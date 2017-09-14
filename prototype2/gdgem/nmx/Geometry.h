@@ -1,53 +1,41 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2017 European Spallation Source ERIC */
 
 /** @file
  *
- *  @brief Class for NMX plane ID & strip mappings
+ *  @brief Specifies the geometry of an N-dimensional detector array
+ * a calculation of global detector pixel id
  */
 
 #pragma once
 
-#include <initializer_list>
-#include <inttypes.h>
+#include <cinttypes>
 #include <vector>
 
-#define NMX_MAX_CHIPS 16
-#define NMX_CHIP_CHANNELS 64
-#define NMX_INVALID_GEOM_ID ((uint16_t)(int16_t)(-1))
+class Geometry
+{
+  public:
 
-class Geometry {
-public:
-  /** @brief define mappings for sequence of chips in one plane
-   * @param planeID ID of plane (edge of panel) being defined
-   * @param chips list of (FEC, VMM) pairs in the order of increasing strip
-   * number
-   */
-  void define_plane(uint16_t planeID,
-                    std::initializer_list<std::pair<uint16_t, uint16_t>> chips);
+    /** @brief Add dimension to geometry definition.
+     * @param size Number of detector elements (pixels) in added dimension
+     */
+    void add_dimension(uint16_t size);
 
-  /** @brief define channel mappings for one chip
-   * @param fecID ID of FEC
-   * @param vmmID ID of chip
-   * @param planeID ID of plane (edge of panel)
-   * @param strip_offset starting strip for this chip's channels
-   */
-  void set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t planeID,
-                   uint16_t strip_offset);
+    /** @brief Returns the global detector pixel id
+     * @param coords An array of pixel coordinates, must be of the same size
+     * as number of dimensions, each value within defined bounds
+     */
+    uint32_t to_pixid(const std::vector<uint16_t>& coords) const;
 
-  /** @brief get strip number
-   * @param fecID ID of FEC
-   * @param vmmID ID of chip
-   * @param channelID channel number
-   */
-  uint16_t get_strip(uint16_t fecID, uint16_t vmmID, uint32_t channelID) const;
+    /** @brief Extracts individual coordinates from global pixel id,
+     * returns true if pixelid is valid (within defined bounds).
+     * @param pixid global pixel id
+     * @param coords An array of pixel coordinates, must be of the same size
+     * as number of dimensions
+     */
+    bool from_pixid(uint32_t pixid, std::vector<uint16_t>& coords) const;
 
-  /** @brief get plane ID
-   * @param fecID ID of FEC
-   * @param vmmID ID of chip
-   */
-  uint16_t get_plane(uint16_t fecID, uint16_t vmmID) const;
-
-private:
-  std::vector<std::vector<uint16_t>> offsets_; // strip number mappings
-  std::vector<std::vector<uint16_t>> planes_;  // planeID mappings
+  private:
+    std::vector<uint32_t> coefs_;
+    std::vector<uint16_t> limits_;
+    uint32_t maxid_{0};
 };

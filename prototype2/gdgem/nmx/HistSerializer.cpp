@@ -2,7 +2,7 @@
 
 #include <cinttypes>
 #include <common/Trace.h>
-#include <gdgem/vmm2srs/HistSerializer.h>
+#include <gdgem/nmx/HistSerializer.h>
 
 #define ELEMSIZE 4
 
@@ -14,8 +14,14 @@ HistSerializer::HistSerializer(size_t maxarraylength)
 
 HistSerializer::~HistSerializer() {}
 
-int HistSerializer::serialize(uint32_t *xhist, uint32_t *yhist, size_t entries,
-                              char **buffer) {
+int HistSerializer::serialize(const NMXHists& hists, char **buffer)
+{
+  return serialize(&hists.xyhist[0][0], &hists.xyhist[1][0],
+      1500, buffer);
+}
+
+int HistSerializer::serialize(const uint32_t *xhist, const uint32_t *yhist,
+                              size_t entries, char **buffer) {
   if (entries > maxlen) {
     *buffer = 0;
     return 0;
@@ -29,7 +35,7 @@ int HistSerializer::serialize(uint32_t *xhist, uint32_t *yhist, size_t entries,
   auto dataoff = CreateGEMHist(builder, xoff, yoff);
 
   auto msg =
-      CreateMonitorMessage(builder, 0, DataField_GEMHist, dataoff.Union());
+      CreateMonitorMessage(builder, 0, DataField::GEMHist, dataoff.Union());
 
   builder.Finish(msg);
   *buffer = (char *)builder.GetBufferPointer();
