@@ -69,7 +69,7 @@ public:
      * @param clock Clock-cycle number
      * @return True when the cluster/event is complete, false otherwise
      */
-    bool addDataPoint(const uint8_t& channel, const uint64_t& ADC, const uint32_t& clock);
+    bool addDataPoint(const uint8_t& channel, const uint16_t& ADC, const uint32_t& clock);
 
     /*! Call this function when last point of the run has been received and the stored cluster will be processed.
      */
@@ -172,6 +172,7 @@ public:
 private:
 
     // Configuration variables
+
     /*! Time window for a single cluster. In number of clock-cycles */
     uint32_t m_time_window;
     /*! Number of wire channels */
@@ -182,6 +183,7 @@ private:
     bool m_use_weighted_average;
 
     // Runtime variables
+
     /*! Container for one wire cluster */
     std::vector<point> m_wire_cluster;
     /*! Container for one strip cluster */
