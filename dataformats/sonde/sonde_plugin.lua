@@ -53,9 +53,9 @@ end
 -- the protocol dissectors
 -- -----------------------------------------------------------------------------------------------
 
--- --------
--- CONTROL
--- --------
+-- ------------------------------------------------------
+-- CONTROL - TCP port 50010
+-- ------------------------------------------------------
 
 sonde_ctrl = Proto("ideasctrl","IDEAS Control")
 
@@ -69,20 +69,27 @@ function sonde_ctrl.dissector(buffer,pinfo,tree)
   cmds = 0
 
   while remain > 0 do
-    local versys = buffer(0 + datai,1):uint()
-    local type = buffer(1 + datai,1):uint()
-    local len = buffer(8 + datai,2):uint() + 10
-    local addr = buffer(10 + datai,2):uint()
+    local versys = buffer( 0 + datai, 1):uint()
+    local type   = buffer( 1 + datai, 1):uint()
+    local len    = buffer( 8 + datai, 2):uint() + 10
+    -- for read/write register commands
+    local addr   = buffer(10 + datai, 2):uint()
+
+
+
     cmds = cmds + 1
 
     if (type == 0x10 or type == 0x11 or type == 0x12) then
-       header:add(buffer(0 + datai,len), string.format("%s (0x%02x) <%s> (0x%02x) - %d bytes ",
-          cmd2str(type), type, addr2str(addr), addr, len))
+      header:add(buffer(0 + datai,len), string.format("%s (0x%02x) <%s> (0x%02x) - %d bytes ",
+                 cmd2str(type), type, addr2str(addr), addr, len))
+
     elseif (type == 0xc0 or type == 0xc1) then
-       header:add(buffer(0 + datai,len), string.format("%s (0x%02x) - %d bytes ",
-          cmd2str(type), type, len))
+      local asic   = buffer(10 + datai, 1):uint()
+      local cfglen = buffer(11 + datai, 2):uint()
+      header:add(buffer(0 + datai,len), string.format("%s (0x%02x) - ASIC %d, bits %d",
+                 cmd2str(type), type, asic, cfglen))
     else
-       header:add(buffer(0 + datai,len), string.format("Undecoded command"))
+      header:add(buffer(0 + datai,len), string.format("Undecoded command"))
     end
 
     datai = datai + len
@@ -92,9 +99,11 @@ function sonde_ctrl.dissector(buffer,pinfo,tree)
                 -- bit.rshift(versys,6), bit.band(versys, 0x3f))
 end
 
--- --------
--- DATA
--- --------
+
+-- ------------------------------------------------------
+-- DATA - UDP port 50011
+-- ------------------------------------------------------
+
 
 sonde_data = Proto("ideasdata","IDEAS Data")
 
