@@ -75,19 +75,23 @@ function sonde_ctrl.dissector(buffer,pinfo,tree)
     -- for read/write register commands
     local addr   = buffer(10 + datai, 2):uint()
 
-
-
     cmds = cmds + 1
 
-    if (type == 0x10 or type == 0x11 or type == 0x12) then
-      header:add(buffer(0 + datai,len), string.format("%s (0x%02x) <%s> (0x%02x) - %d bytes ",
-                 cmd2str(type), type, addr2str(addr), addr, len))
+    if (type == 0x10 or type == 0x11) then
+      header:add(buffer(0 + datai, len), string.format("(0x%02x) %s <0x%04x %s>",
+                 type, cmd2str(type), addr, addr2str(addr)))
+
+    elseif (type == 0x12) then
+       local regsize =  buffer(12 + datai, 1):uint()
+       local val = buffer(13 + datai, regsize):uint()
+       header:add(buffer(0 + datai,len), string.format("(0x%02x) %s <0x%04x %s> %d (U%d)",
+             type, cmd2str(type), addr, addr2str(addr), val, regsize))
 
     elseif (type == 0xc0 or type == 0xc1) then
       local asic   = buffer(10 + datai, 1):uint()
       local cfglen = buffer(11 + datai, 2):uint()
-      header:add(buffer(0 + datai,len), string.format("%s (0x%02x) - ASIC %d, bits %d",
-                 cmd2str(type), type, asic, cfglen))
+      header:add(buffer(0 + datai,len), string.format("(0x%02x) %s - ASIC %d, bits %d",
+                 type, cmd2str(type), asic, cfglen))
     else
       header:add(buffer(0 + datai,len), string.format("Undecoded command"))
     end
