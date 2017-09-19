@@ -10,7 +10,7 @@
 #include <fcntl.h>
 #include <multigrid/mgcncs/CalibrationFile.h>
 #include <multigrid/mgcncs/ChanConv.h>
-#include <multigrid/mgcncs/Geometry.h>
+#include <multigrid/mgcncs/MultigridGeometry.h>
 #include <string>
 #include <sys/types.h>
 #include <unistd.h>
