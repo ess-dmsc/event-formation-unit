@@ -3,6 +3,7 @@ import binascii
 import socket
 import struct
 import argparse
+import time
 
 svr_ip_addr = "127.0.0.1"
 svr_tcp_port = 50010
@@ -82,6 +83,7 @@ class IdeasCtrl():
        else:
           print("Unsupported length %d" % (len(rx)))
           res = -1
+       time.sleep(0.1)
        return res
 
    def writesystemregister(self, fmt, datalen, name, value):
@@ -89,8 +91,9 @@ class IdeasCtrl():
        pkttype = self.cmd.WriteSystemRegister
        pktseq = self.seqflag.StandAlone
        self.send(s.pack((self.version << 5) + self.system, pkttype, (pktseq << 14) + self.pktno, 0,
-                        datalen, registers[name], 1, value))
+                        datalen, registers[name], datalen - 3, value))
        rx = self.recv()
+       time.sleep(0.1)
 
    def writesystemregister8(self, address, value):
        self.writesystemregister('B', 4, address, value)
@@ -111,7 +114,7 @@ class IdeasCtrl():
 
    def setcalibrationparms(self, polarity, nb_pulses, pulse_length, pulse_interval):
       self.writesystemregister8('Calibration Pulse Polarity', polarity)
-      self.writesystemregister16('Calibration Num Pulses', nb_pulses)
+      #self.writesystemregister16('Calibration Num Pulses', nb_pulses)
       self.writesystemregister32('Calibration Pulse Length', pulse_length)
       self.writesystemregister32('Calibration Pulse Interval', pulse_interval)
 
@@ -158,6 +161,8 @@ ctrl = IdeasCtrl(svr_ip_addr, svr_tcp_port, args.v)
 
 ctrl.dumpallregisters()
 ctrl.setcalibrationparms(1,10,11,512)
+
+print("Doing it all again")
 
 ctrl.dumpallregisters()
 ctrl.setcalibrationparms(0,1,1,500)

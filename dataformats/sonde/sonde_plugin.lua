@@ -17,7 +17,7 @@ addr = { [0x0000] = "Serial Number",
          [0x0002] = "Firmware Version",
          [0x0010] = "System Number",
          [0x0C00] = "Calibration Execute",
-         [0x0C01] = "Calibration Pulse Polatiry",
+         [0x0C01] = "Calibration Pulse Polarity",
          [0x0C02] = "Calibration Num Pulses",
          [0x0C03] = "Calibration Pulse Length",
          [0x0C04] = "Calibration Pulse Interval",
@@ -26,7 +26,11 @@ addr = { [0x0000] = "Serial Number",
          [0xF017] = "cfg_forced_en",
          [0xF018] = "cfg_event_num",
          [0xF019] = "cfg_forced_asic",
-         [0xF01A] = "cfg_forced_channel"
+         [0xF01A] = "cfg_forced_channel",
+         -- not in the documentation
+         [0xF020] = "cfg_timing_readout_en",
+         [0xF021] = "cfg_event_num",
+         [0xF030] = "cfg_all_ch_en"
        }
 
 -- helper variable and functions
