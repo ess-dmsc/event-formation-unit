@@ -22,6 +22,8 @@
 #include <memory>
 #include <stdio.h>
 #include <unistd.h>
+#include <dataformats/multigrid/inc/json.h>
+#include <fstream>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -36,6 +38,21 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 /** ----------------------------------------------------- */
 
 class NMX : public Detector {
+private:
+  struct NMXOpts
+  {
+    //initialization
+    size_t geometry_x {256};
+    size_t geometry_y {256};
+
+    //runtime
+    uint64_t cluster_min_timespan {30};
+    bool analyze_weighted {true};
+    int16_t analyze_max_timebins {3};
+    int16_t analyze_max_timedif {7};
+    size_t track_sample_minhits {6};
+  };
+
 public:
   NMX(void *args);
   void input_thread();
@@ -76,9 +93,10 @@ private:
   } ALIGN(64) mystats;
 
   EFUArgs *opts;
+  NMXOpts nmx_opts;
 
   std::shared_ptr<AbstractBuilder> builder_ {nullptr};
-  void init_builder(std::string btype);
+  void init_builder(std::string file);
 };
 
 NMX::NMX(void *args) {
@@ -155,13 +173,13 @@ void NMX::input_thread() {
 }
 
 void NMX::processing_thread() {
-  init_builder("H5");
+  init_builder(opts->config_file);
   if (!builder_)
     return;
 
   Geometry geometry;
-  geometry.add_dimension(256); /**< @todo not hardocde */
-  geometry.add_dimension(256); /**< @todo not hardocde */
+  geometry.add_dimension(nmx_opts.geometry_x);
+  geometry.add_dimension(nmx_opts.geometry_y);
 
   Producer eventprod(opts->broker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
@@ -170,7 +188,7 @@ void NMX::processing_thread() {
   TrackSerializer trackfb(256);
 
   NMXHists hists;
-  Clusterer clusterer(30); /**< @todo not hardocde */
+  Clusterer clusterer(nmx_opts.cluster_min_timespan);
 
   Timer stopafter_clock;
   TSCTimer global_time, report_timer;
@@ -196,12 +214,15 @@ void NMX::processing_thread() {
       while (clusterer.event_ready()) {
         XTRACE(PROCESS, DEB, "event_ready()\n");
         event = clusterer.get_event();
-        event.analyze(true, 3, 7); /**< @todo not hardocde */
+        event.analyze(nmx_opts.analyze_weighted,
+                      nmx_opts.analyze_max_timebins,
+                      nmx_opts.analyze_max_timedif);
         if (event.good()) {
           XTRACE(PROCESS, DEB, "event.good\n");
 
           if (sample_next_track) {
-            sample_next_track = trackfb.add_track(event, 6);
+            sample_next_track
+                = trackfb.add_track(event, nmx_opts.track_sample_minhits);
           }
 
           XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
@@ -258,24 +279,82 @@ void NMX::processing_thread() {
   }
 }
 
-void NMX::init_builder(std::string btype)
+void NMX::init_builder(string file)
 {
+  Json::Value root{};    /**< for jsoncpp parser */
+  Json::Reader reader{}; /**< for jsoncpp parser */
+  std::ifstream t(file);
+  std::string str((std::istreambuf_iterator<char>(t)),
+                  std::istreambuf_iterator<char>());
+
+  if (!reader.parse(str, root, 0))
+  {
+    std::cout << "error: file " << file
+              << " is not valid json\n";
+    return;
+  }
+
+  std::string btype = root["builder_type"].asString();
+  if (btype != "SRS" && btype != "H5")
+    return;
+
+  nmx_opts.geometry_x = root["geometry_x"].asInt();
+  nmx_opts.geometry_y = root["geometry_y"].asInt();
+
+  nmx_opts.cluster_min_timespan = root["cluster_min_timespan"].asInt();
+  nmx_opts.analyze_weighted = root["analyze_weighted"].asBool();
+  nmx_opts.analyze_max_timebins = root["analyze_max_timebins"].asInt();
+  nmx_opts.analyze_max_timedif = root["analyze_max_timedif"].asInt();
+  nmx_opts.track_sample_minhits = root["track_sample_minhits"].asInt();
+
+  std::cout << "NMX Parameters:\n";
+  std::cout << "  geometry: "
+            << nmx_opts.geometry_x << "x" << nmx_opts.geometry_y << "\n";
+
+  std::cout << "  cluster_min_timespan=" << nmx_opts.cluster_min_timespan << "\n";
+  std::cout << "  analyze_weighted=" << nmx_opts.analyze_weighted << "\n";
+  std::cout << "  analyze_max_timebins=" << nmx_opts.analyze_max_timebins << "\n";
+  std::cout << "  analyze_max_timedif=" << nmx_opts.analyze_max_timedif << "\n";
+  std::cout << "  track_sample_minhits=" << nmx_opts.track_sample_minhits << "\n";
+
   if (btype == "H5")
   {
+    std::cout << "  Eventlet Builder for H5\n";
     builder_ = std::make_shared<BuilderH5>();
   }
   else if (btype == "SRS")
   {
+    std::cout << "  Eventlet Builder for SRS/VMM\n";
+
+    auto tc = root["time_config"];
     SRSTime time_config;  /**< @todo get from slow control? */
-    time_config.set_tac_slope(125);
-    time_config.set_bc_clock(40);
-    time_config.set_trigger_resolution(3.125);
-    time_config.set_target_resolution(0.5);
+    time_config.set_tac_slope(tc["tac_slope"].asInt());
+    time_config.set_bc_clock(tc["bc_clock"].asInt());
+    time_config.set_trigger_resolution(tc["trigger_resolution"].asDouble());
+    time_config.set_target_resolution(tc["target_resolution"].asDouble());
 
+    std::cout << "    SRS time config: "
+              << " tac_slope=" << time_config.tac_slope()
+              << " bc_clock=" << time_config.bc_clock()
+              << " trigger_res=" << time_config.trigger_resolution()
+              << " target_res=" << time_config.target_resolution()
+              << "\n";
+
+    auto sm = root["srs_mappings"];
     SRSMappings srs_config; /**< @todo not hardocde chip mappings */
-    srs_config.define_plane(0, {{1, 0}, {1, 1}});
-    srs_config.define_plane(1, {{1, 14}, {1, 15}});
-
+    for (unsigned int index = 0; index < sm.size(); index++) {
+      auto fecID = sm[index]["fecID"].asInt();
+      auto vmmID = sm[index]["vmmID"].asInt();
+      auto planeID = sm[index]["planeID"].asInt();
+      auto strip_offset = sm[index]["strip_offset"].asInt();
+      std::cout << "    SRS mapping: "
+                << " fecID=" << fecID
+                << " vmmID=" << vmmID
+                << " planeID=" << planeID
+                << " strip_offset=" << strip_offset
+                << "\n";
+      srs_config.set_mapping(fecID, vmmID, planeID, strip_offset);
+    }
     builder_ = std::make_shared<BuilderSRS>(time_config, srs_config);
   }
 }
