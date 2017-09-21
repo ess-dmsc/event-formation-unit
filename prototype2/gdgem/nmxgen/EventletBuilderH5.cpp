@@ -1,8 +1,11 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <cstring>
 #include <gdgem/nmxgen/EventletBuilderH5.h>
-#include <iostream>
+#include <common/Trace.h>
+#include <cstring>
+
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 BuilderH5::BuilderH5()
   : AbstractBuilder()
@@ -32,6 +35,6 @@ Eventlet BuilderH5::make_eventlet() {
   ret.over_threshold = (data[3] >> 17) & 0x1;
   ret.adc = data[3] & 0xFFFF;
 
-//  std::cout << "Made eventlet: " << ret.debug() << "\n";
+  XTRACE(PROCESS, DEB, "Made eventlet: %s\n", ret.debug().c_str());
   return ret;
 }

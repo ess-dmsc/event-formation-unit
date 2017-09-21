@@ -34,6 +34,9 @@ int main(int argc, char *argv[]) {
         continue; // non udp data
 
       DataSource.send(buffer, rdsize);
+      if (opts.throttle) {
+         usleep(opts.throttle);
+      }
       packets++;
       totpackets++;
       if (packets >= opts.txPkt) {
@@ -46,9 +49,6 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    if (opts.throttle) {
-       usleep(opts.throttle);
-    }
   } while (opts.loop);
   // pcap.printstats();
   printf("Sent %" PRIu64 " packets\n", totpackets);

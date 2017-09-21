@@ -9,6 +9,8 @@ include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
 
 set(gdgem_SRC
   gdgem.cpp
+  NMXConfig.cpp
+  ../../dataformats/multigrid/src/jsoncpp.cpp
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Eventlet.cpp
@@ -20,9 +22,9 @@ set(gdgem_SRC
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp
   vmm2srs/ParserSRS.cpp
-  ../../dataformats/multigrid/src/jsoncpp.cpp
   vmm2srs/EventletBuilderSRS.cpp)
 set(gdgem_INC
+  NMXConfig.h
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
