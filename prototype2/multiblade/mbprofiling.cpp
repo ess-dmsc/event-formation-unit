@@ -3,6 +3,7 @@
 #include <fstream>
 #include <tclap/CmdLine.h>
 #include <climits>
+#include <math.h>
 #include <sys/stat.h>
 
 #include <chrono>
@@ -11,11 +12,13 @@
 #include "mbcommon/dumpEventBuilderInfo.h"
 #include "mbcommon/TextFile.h"
 
+#define UNUSED __attribute__((unused))
+
 int main(int argc, const char** argv) {
 
-    double_t accwire = 0;
-    double_t accstrip = 0;
-    double_t acctime = 0;
+    double_t UNUSED accwire = 0;
+    double_t UNUSED accstrip = 0;
+    double_t UNUSED acctime = 0;
 
     std::string ifile = "";
     uint npasses = 1;
