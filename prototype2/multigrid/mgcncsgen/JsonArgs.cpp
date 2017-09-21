@@ -68,7 +68,9 @@ JsonArgs::JsonArgs(int argc, char *argv[]) {
     case 'h':
     default:
       printf("Usage: dgmgjson [OPTIONS] \n");
-      /**< @todo add -r -j */
+      printf(" --basedir -b dir       base directory of data files \n");
+      printf(" --runfile -r jsonfile  json file with run specifications \n");
+      printf(" --runspec -j runspec   specification of files to be run \n");
       printf(" --throttle -t val      speed throttle (0 fastest, then slower) "
              "\n");
       printf(" --ipaddr -i ipaddr     destination ip address \n");

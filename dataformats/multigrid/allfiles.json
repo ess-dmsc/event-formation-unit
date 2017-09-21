@@ -95,6 +95,16 @@
       {"id": 15, "dir": "10_13/",                     "prefix": "2016_11_07_0351_sample_",  "postfix": ".bin", "start":    0, "end":  25476}
     ],
 
+  "ikon1" :
+    [
+      {"id": 15, "dir": "10_13/",                     "prefix": "2016_11_07_0351_sample_",  "postfix": ".bin", "start":    0, "end":  25476}
+    ],
+
+  "ikon2" :
+    [
+      {"id": 10, "dir": "08_16/",                     "prefix": "2016_08_16_0921_sample_",  "postfix": ".bin", "start":   0, "end":  60477}
+    ],
+
   "streamtestmac" :
     [
       {"id": 2,  "dir": "07_13_7p2A/",                "prefix": "2016_07_13_beamOn_7p2A_",  "postfix": ".bin", "start": 0, "end":   285, "thresh": 10}
