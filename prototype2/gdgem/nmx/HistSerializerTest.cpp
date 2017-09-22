@@ -9,36 +9,29 @@
 class HistSerializerTest : public TestBase {
   virtual void SetUp() {
     for (int i = 0; i < NMX_STRIP_HIST_SIZE; i++) {
-      xarr[i] = i;
-      yarr[i] = NMX_STRIP_MAX_VAL - i;
+      hists.x_strips_hist[i] = i;
+      hists.y_strips_hist[i] = NMX_STRIP_MAX_VAL - i;
     }
   }
 
   virtual void TearDown() {}
 
 protected:
-  NMX_HIST_TYPE xarr[NMX_STRIP_HIST_SIZE];
-  NMX_HIST_TYPE yarr[NMX_STRIP_HIST_SIZE];
+  NMXHists hists;
   char *buffer;
-  char flatbuffer[1024 * 1024];
+  char flatbuffer[1024 * 1024 * 5];
 };
 
 TEST_F(HistSerializerTest, Serialize) {
-  for (int i = 0; i < NMX_STRIP_HIST_SIZE; i++) {
-    HistSerializer histfb(i);
-    auto len = histfb.serialize(xarr, yarr, i, &buffer);
-    ASSERT_TRUE(len > i * NMX_HIST_ELEM_SIZE * 2);
-
-    len = histfb.serialize(&xarr[0], &yarr[0], i + 1, &buffer);
-    ASSERT_EQ(len, 0);
-    ASSERT_EQ(buffer, nullptr);
-  }
+  HistSerializer histfb;
+  auto len = histfb.serialize(hists, &buffer);
+  ASSERT_TRUE(len > NMX_HIST_ELEM_SIZE * 2);
 }
 
 TEST_F(HistSerializerTest, DeSerialize) {
-  HistSerializer histfb(NMX_STRIP_HIST_SIZE);
+  HistSerializer histfb;
 
-  auto length = histfb.serialize(&xarr[0], &yarr[0], NMX_STRIP_HIST_SIZE, &buffer);
+  auto length = histfb.serialize(hists, &buffer);
 
   memcpy(flatbuffer, buffer, length);
   auto monitor = GetMonitorMessage(flatbuffer);

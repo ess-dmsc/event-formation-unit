@@ -107,7 +107,7 @@ TEST_F(EventTest, AnalyzeBadY) {
   e1.adc = 1;
   event->insert_eventlet(e1);
   event->analyze(true, 5, 5);
-  ASSERT_FALSE(event->good());
+  ASSERT_FALSE(event->valid());
 }
 
 TEST_F(EventTest, AnalyzeBadX) {
@@ -116,7 +116,7 @@ TEST_F(EventTest, AnalyzeBadX) {
   e1.plane_id = 1;
   event->insert_eventlet(e1);
   event->analyze(true, 5, 5);
-  ASSERT_FALSE(event->good());
+  ASSERT_FALSE(event->valid());
 }
 
 TEST_F(EventTest, AnalyzeGood) {
@@ -126,7 +126,7 @@ TEST_F(EventTest, AnalyzeGood) {
   e1.plane_id = 1;
   event->insert_eventlet(e1);
   event->analyze(true, 5, 5);
-  ASSERT_TRUE(event->good());
+  ASSERT_TRUE(event->valid());
 }
 
 TEST_F(EventTest, InsertInvalid) {

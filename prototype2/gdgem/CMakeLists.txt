@@ -82,9 +82,11 @@ endif()
 # NMX / VMM Tests
 #
 set(HistSerializerTest_SRC
+  nmx/Hists.cpp
   nmx/HistSerializerTest.cpp
   nmx/HistSerializer.cpp)
 set(HistSerializerTest_INC
+  nmx/Hists.h
   nmx/HistSerializer.h
   ../common/Producer.h)
 create_test_executable(HistSerializerTest "")

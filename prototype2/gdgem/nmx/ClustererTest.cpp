@@ -33,13 +33,13 @@ TEST_F(ClustererTest, GetBadEvent) {
   clusterer->insert(e2);
   ASSERT_TRUE(clusterer->event_ready());
   auto event = clusterer->get_event();
-  ASSERT_FALSE(event.good());
+  ASSERT_FALSE(event.valid());
 }
 
 TEST_F(ClustererTest, GetEvent) {
   auto event1 = clusterer->get_event();
   event1.analyze(true, 3, 7);
-  ASSERT_FALSE(event1.good());
+  ASSERT_FALSE(event1.valid());
 
   Eventlet e1, e2;
   e1.adc = e2.adc = 1;
@@ -51,7 +51,7 @@ TEST_F(ClustererTest, GetEvent) {
   clusterer->insert(e2);
   auto event2 = clusterer->get_event();
   event2.analyze(true, 3, 7);
-  ASSERT_TRUE(event2.good());
+  ASSERT_TRUE(event2.valid());
 }
 
 int main(int argc, char **argv) {
