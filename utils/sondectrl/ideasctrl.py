@@ -5,10 +5,28 @@ import struct
 import argparse
 import time
 
+# 0070   00 c0 00 34 00 00 00 00 00 30 02 01 64 00 00 00  ...4.....0..d...
+# 0080   20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20
+# 0090   20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20
+# 00a0   20 20 20 20 00 00 00 00 00 80
+#                                      00 c0 00 35 00 00      .........5..
+# 00b0   00 00 00 30 03 01 64 00 00 00 20 20 20 20 20 20  ...0..d...
+# 00c0   20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20
+# 00d0   20 20 20 20 20 20 20 20 20 20 20 20 20 20 00 00                ..
+# 00e0   00 00 00 80                                      ....
+
 svr_ip_addr = "127.0.0.1"
 svr_tcp_port = 50010
 
 RXBUFFER = 4096
+
+asicscf1_bits = 356
+asiccfg1 = [
+  0x00, 0x00, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80
+]
+
 
 registers = {'Serial Number': 0x0000,
              'Firmware Type': 0x0001,
@@ -36,12 +54,19 @@ class IdeasCtrl():
       WriteSystemRegister = 0x10
       ReadSystemRegister = 0x11
       SystemRegisterReadBack = 0x12
+      ASICConfigRegisterWrite = 0xc0
 
    class seqflag():
       StandAlone = 0x00
       FirstPacket = 0x01
       ContinuationPacket = 0x02
       LastPacket = 0x03
+
+   class asic():
+       id0 = 0
+       id1 = 1
+       id2 = 2
+       id3 = 3
 
    def __init__(self, ip, port, verbose):
       self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -62,6 +87,8 @@ class IdeasCtrl():
       if self.verbose:
          print("recv: %s" %(binascii.hexlify(rx)))
       return rx
+
+
 
    def readsystemregister(self, address):
        s = struct.Struct('!BBHIH H')
@@ -111,12 +138,38 @@ class IdeasCtrl():
 #
 # High level user functions
 #
+   def writeasicconf(self, asicid, data, datalen_bits):
+       datalen = len(data)
+       pkttype = self.cmd.ASICConfigRegisterWrite
+       pktseq = self.seqflag.StandAlone
+
+       s = struct.Struct('!BBHIH BH')
+       tx_hdr = s.pack((self.version << 5) + self.system, pkttype, (pktseq << 14) + self.pktno, 0,
+                    datalen + 3, asicid, datalen_bits)
+
+       tx_data = struct.pack('B' * len(data), *data)
+       self.send(tx_hdr + tx_data)
+
 
    def setcalibrationparms(self, polarity, nb_pulses, pulse_length, pulse_interval):
       self.writesystemregister8('Calibration Pulse Polarity', polarity)
-      #self.writesystemregister16('Calibration Num Pulses', nb_pulses)
+      self.writesystemregister16('Calibration Num Pulses', nb_pulses)
       self.writesystemregister32('Calibration Pulse Length', pulse_length)
       self.writesystemregister32('Calibration Pulse Interval', pulse_interval)
+
+
+   def configandstart(self):
+      self.writesystemregister8('cfg_timing_readout_en', 0)
+      self.writesystemregister8('cfg_phystrig_en', 0)
+      self.writesystemregister8('cfg_all_ch_en', 0)
+      self.writeasicconf(self.asic.id0, asiccfg1, asicscf1_bits)
+      self.writeasicconf(self.asic.id1, asiccfg1, asicscf1_bits)
+      self.writeasicconf(self.asic.id2, asiccfg1, asicscf1_bits)
+      self.writeasicconf(self.asic.id3, asiccfg1, asicscf1_bits)
+      self.writesystemregister16('cfg_event_num', 250)
+      self.writesystemregister8('cfg_timing_readout_en', 1)
+
+
 
 
    def dumpallregisters(self):
@@ -143,6 +196,7 @@ class IdeasCtrl():
       self.printregister("cfg_event_num")
       self.printregister("cfg_all_ch_en")
 
+
 if __name__ == '__main__':
    parser = argparse.ArgumentParser()
    parser.add_argument("-i", metavar='ipaddr', help = "server ip address (default %s)" % (svr_ip_addr), type = str)
@@ -159,10 +213,15 @@ if __name__ == '__main__':
 ctrl = IdeasCtrl(svr_ip_addr, svr_tcp_port, args.v)
 
 
-ctrl.dumpallregisters()
-ctrl.setcalibrationparms(1,10,11,512)
+ctrl.configandstart()
 
-print("Doing it all again")
+#ctrl.writeasicconf(ctrl.asic.id1, asiccfg1, asicscf1_bits)
 
-ctrl.dumpallregisters()
-ctrl.setcalibrationparms(0,1,1,500)
+
+# ctrl.dumpallregisters()
+# ctrl.setcalibrationparms(1,10,11,512)
+#
+# print("Doing it all again")
+#
+# ctrl.dumpallregisters()
+# ctrl.setcalibrationparms(0,1,1,500)
