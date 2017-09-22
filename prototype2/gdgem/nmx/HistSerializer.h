@@ -21,7 +21,7 @@
 class HistSerializer {
 public:
   /** @todo document */
-  HistSerializer(size_t maxarraylength);
+  HistSerializer();
 
   /** @todo document */
   ~HistSerializer();
@@ -29,14 +29,12 @@ public:
   /** @todo document */
   size_t serialize(const NMXHists& hists, char **buffer);
 
-  /** @todo document */
-  size_t serialize(const NMX_HIST_TYPE *x_strips_hist,
-                   const NMX_HIST_TYPE *y_strips_hist,
-                   size_t entries, char **buffer);
-
 private:
   flatbuffers::FlatBufferBuilder builder;
-  size_t maxlen{0};
-  uint8_t *xarrptr{nullptr};
-  uint8_t *yarrptr{nullptr};
+  uint8_t *xtrackptr{nullptr};
+  uint8_t *ytrackptr{nullptr};
+
+  uint8_t *xadcptr{nullptr};
+  uint8_t *yadcptr{nullptr};
+  uint8_t *clus_adc_ptr{nullptr};
 };

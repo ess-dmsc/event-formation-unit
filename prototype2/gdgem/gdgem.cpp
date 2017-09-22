@@ -174,7 +174,7 @@ void NMX::processing_thread() {
   Producer eventprod(opts->broker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
   Producer monitorprod(opts->broker, "NMX_monitor");
-  HistSerializer histfb(NMX_STRIP_HIST_SIZE);
+  HistSerializer histfb;
   TrackSerializer trackfb(256, nmx_opts.track_sample_minhits);
 
   NMXHists hists;
@@ -205,6 +205,7 @@ void NMX::processing_thread() {
         XTRACE(PROCESS, DEB, "event_ready()\n");
         event = clusterer.get_event();
         mystats.unclustered = clusterer.unclustered();
+        hists.bin(event);
         event.analyze(nmx_opts.analyze_weighted,
                       nmx_opts.analyze_max_timebins,
                       nmx_opts.analyze_max_timedif);
