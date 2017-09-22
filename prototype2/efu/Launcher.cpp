@@ -31,26 +31,28 @@ void Launcher::output_thread(Loader *load) {
 /** Create a thread 'func()', set its cpu affinity and calls join() */
 void Launcher::launch(int __attribute__((unused)) lcore, void (*func)(Loader *),
                       Loader *ld) {
-  GLOG_INF("Setting thread affinity to core " + std::to_string(lcore));
+
+XTRACE(MAIN, ALW, "Creating new thread (lcore %d)\n", lcore);
 #ifdef __linux__
-  std::thread *t =
+  std::thread *t = new std::thread(func, ld);
+#else
+  new std::thread(func, ld);
 #endif
-      new std::thread(func, ld);
 
 #ifdef __linux__
   cpu_set_t cpuset;
   CPU_ZERO(&cpuset);
   CPU_SET(lcore, &cpuset);
   if (lcore >= 0) {
-#ifndef NDEBUG
-  int s =
-#endif
-      pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
-  assert(s == 0);
-}
+    XTRACE(MAIN, ALW, "Setting thread affinity to core %d", lcore);
+    GLOG_INF("Setting thread affinity to core " + std::to_string(lcore));
+
+    int UNUSED s = pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
+    assert(s == 0);
+  }
 #else
 #pragma message("setaffinity only implemented for Linux")
-GLOG_WAR("setaffinity only implemented for Linux");
+  GLOG_WAR("setaffinity only implemented for Linux");
 #endif
 }
 
