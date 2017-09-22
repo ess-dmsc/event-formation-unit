@@ -44,10 +44,10 @@ XTRACE(MAIN, ALW, "Creating new thread (lcore %d)\n", lcore);
   CPU_ZERO(&cpuset);
   CPU_SET(lcore, &cpuset);
   if (lcore >= 0) {
-    XTRACE(MAIN, ALW, "Setting thread affinity to core %d", lcore);
+    XTRACE(MAIN, ALW, "Setting thread affinity to core %d\n", lcore);
     GLOG_INF("Setting thread affinity to core " + std::to_string(lcore));
 
-    int UNUSED s = pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
+    int __attribute__((unused))s = pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
     assert(s == 0);
   }
 #else
