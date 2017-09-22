@@ -173,11 +173,12 @@ void NMX::processing_thread() {
 
   Producer eventprod(opts->broker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
-  Producer monitorprod(opts->broker, "NMX_monitor");
-  HistSerializer histfb;
-  TrackSerializer trackfb(256, nmx_opts.track_sample_minhits);
 
+  Producer monitorprod(opts->broker, "NMX_monitor");
+  TrackSerializer trackfb(256, nmx_opts.track_sample_minhits);
+  HistSerializer histfb;
   NMXHists hists;
+  hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
   Clusterer clusterer(nmx_opts.cluster_min_timespan);
 
   Timer stopafter_clock;
@@ -185,6 +186,9 @@ void NMX::processing_thread() {
 
   EventNMX event;
   std::vector<uint16_t> coords {0,0};
+  uint32_t time;
+  uint32_t pixelid;
+
   unsigned int data_index;
   int sample_next_track {0};
   while (1) {
@@ -209,7 +213,8 @@ void NMX::processing_thread() {
         event.analyze(nmx_opts.analyze_weighted,
                       nmx_opts.analyze_max_timebins,
                       nmx_opts.analyze_max_timedif);
-        if (event.good()) {
+
+        if (event.valid()) {
           XTRACE(PROCESS, DEB, "event.good\n");
 
           if (sample_next_track) {
@@ -220,16 +225,26 @@ void NMX::processing_thread() {
                  event.x.center_rounded(),
                  event.y.center_rounded());
 
-          coords[0] = event.x.center_rounded();
-          coords[1] = event.y.center_rounded();
-          uint32_t time = static_cast<uint32_t>(event.time_start());
-          uint32_t pixelid = geometry.to_pixid(coords);
+          if (
+              (!nmx_opts.enforce_lower_uncertainty_limit ||
+               event.meets_lower_cirterion(nmx_opts.lower_uncertainty_limit))
+              &&
+              (!nmx_opts.enforce_minimum_eventlets ||
+               (event.x.entries.size() >= nmx_opts.minimum_eventlets &&
+                event.y.entries.size() >= nmx_opts.minimum_eventlets))
+              )
+          {
+            coords[0] = event.x.center_rounded();
+            coords[1] = event.y.center_rounded();
+            pixelid = geometry.to_pixid(coords);
+            time = static_cast<uint32_t>(event.time_start());
 
-          XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n",
-                 time, pixelid);
+            XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n",
+                   time, pixelid);
 
-          mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
-          mystats.tx_events++;
+            mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
+            mystats.tx_events++;
+          }
         } else {
           mystats.rx_discards +=
               event.x.entries.size() + event.y.entries.size();
@@ -252,9 +267,9 @@ void NMX::processing_thread() {
         monitorprod.produce(txbuffer, len);
       }
 
-      if (0 != hists.xyhist_elems) {
-        XTRACE(PROCESS, ALW, "Sending histogram with %u readouts\n",
-               hists.xyhist_elems);
+      if (hists.empty()) {
+        XTRACE(PROCESS, ALW, "Sending histogram for %u eventlets and %u clusters \n",
+               hists.eventlet_count(), hists.cluster_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
         monitorprod.produce(txbuffer, len);

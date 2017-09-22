@@ -64,7 +64,10 @@ public:
   void analyze(bool weighted, int16_t max_timebins, int16_t max_timedif);
 
   // @brief indicates if entry strips were determined in for both planes
-  bool good() const;
+  bool valid() const;
+
+  // @brief indicates if both dimensions meet lower uncertainty criterion
+  bool meets_lower_cirterion(int16_t max_lu) const;
 
   // @brief returns timestamp for start of event (earlier of 2 planes)
   uint64_t time_start() const;
@@ -75,6 +78,6 @@ public:
   PlaneNMX x, y; // tracks in x and y planes
 
 private:
-  bool good_{false};       // event has valid entry strips in both planes
+  bool valid_{false};       // event has valid entry strips in both planes
   uint64_t time_start_{0}; // start of event timestamp (earlier of 2 planes)
 };
