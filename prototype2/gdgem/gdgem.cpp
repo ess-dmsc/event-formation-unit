@@ -243,7 +243,7 @@ void NMX::processing_thread() {
 
       sample_next_track = 1;
 
-      flatbuffer.produce();
+      mystats.tx_bytes += flatbuffer.produce();
 
       char *txbuffer;
       auto len = trackfb.serialize(&txbuffer);
