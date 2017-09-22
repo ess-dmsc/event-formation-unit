@@ -169,6 +169,11 @@ class IdeasCtrl():
       self.writesystemregister16('cfg_event_num', 250)
       self.writesystemregister8('cfg_timing_readout_en', 1)
 
+   def stopreadout(self):
+      self.writesystemregister8('cfg_timing_readout_en', 0)
+      self.writesystemregister8('cfg_phystrig_en', 0)
+      self.writesystemregister8('cfg_all_ch_en', 0)
+
 
 
 
