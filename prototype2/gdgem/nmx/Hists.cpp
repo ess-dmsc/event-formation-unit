@@ -1,7 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <gdgem/nmx/Hists.h>
-#include <assert.h>
 #include <string.h>
 
 NMXHists::NMXHists()
@@ -10,14 +9,18 @@ NMXHists::NMXHists()
 }
 
 void NMXHists::clear() {
-  memset(xyhist, 0, sizeof(xyhist));
+  memset(x_strips_hist, 0, sizeof(x_strips_hist));
+  memset(y_strips_hist, 0, sizeof(y_strips_hist));
   xyhist_elems = 0;
 }
 
-void NMXHists::bin_one(uint16_t plane_id, uint16_t strip)
+void NMXHists::bin(const Eventlet& e)
 {
-  assert(plane_id == 0 || plane_id == 1);
-  assert(strip <= 1500);
-  xyhist[plane_id][strip]++;
+  if (e.plane_id == 0)
+    x_strips_hist[e.strip]++;
+  else if (e.plane_id == 1)
+    y_strips_hist[e.strip]++;
+  else
+    return;
   xyhist_elems++;
 }

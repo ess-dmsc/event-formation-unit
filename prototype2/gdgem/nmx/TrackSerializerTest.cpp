@@ -27,8 +27,8 @@ protected:
   char *buffer;
   char flatbuffer[100000];
 
-  void addxandy(uint16_t xs, uint16_t xt, uint16_t xa, uint16_t ys, uint16_t yt,
-                uint16_t ya) {
+  void addxandy(uint16_t xs, uint16_t xt, uint16_t xa,
+                uint16_t ys, uint16_t yt, uint16_t ya) {
     e->strip = xs;
     e->time = xt;
     e->adc = xa;
@@ -51,8 +51,8 @@ TEST_F(TrackSerializerTest, Constructor) {
 
 TEST_F(TrackSerializerTest, AddTrackTooFewHits) {
   int entries = NB_ENTRIES;
-  TrackSerializer tser(entries);
-  auto tres = tser.add_track(*event, 1);
+  TrackSerializer tser(entries, 1);
+  auto tres = tser.add_track(*event);
   ASSERT_EQ(tres, 1);
 }
 
@@ -62,7 +62,7 @@ TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
   for (int i = 0; i < entries + 1; i++) {
     addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
-  auto tres = tser.add_track(*event, 1);
+  auto tres = tser.add_track(*event);
   ASSERT_EQ(tres, 1);
 }
 
@@ -72,7 +72,7 @@ TEST_F(TrackSerializerTest, Serialize) {
   for (int i = 0; i < entries; i++) {
     addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
-  auto tres = tser.add_track(*event, 1);
+  auto tres = tser.add_track(*event);
   ASSERT_EQ(tres, 0);
   auto len = tser.serialize(&buffer);
   ASSERT_TRUE(len > entries * 2 * 12);
@@ -89,7 +89,7 @@ TEST_F(TrackSerializerTest, DeSerialize) {
   for (int i = 0; i < entries; i++) {
     addxandy(i, 0x1111, 0x2222, 100 + i, 0x3333, 0x4444);
   }
-  auto tres = tser.add_track(*event, 1);
+  auto tres = tser.add_track(*event);
   ASSERT_EQ(tres, 0);
   ASSERT_EQ(event->x.entries.size(), entries);
   ASSERT_EQ(event->y.entries.size(), entries);
@@ -130,7 +130,7 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
       addxandy(i, i * 2, i * 3 + 1, entries - i, i * 2 + 0x1000,
                i * 3 + 0x2000);
     }
-    auto tres = tser.add_track(*event, 1);
+    auto tres = tser.add_track(*event);
     ASSERT_EQ(event->x.entries.size(), entries);
     ASSERT_EQ(event->y.entries.size(), entries);
     ASSERT_EQ(tres, 0);
@@ -177,7 +177,7 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
       addxandy(i, i * 2, i * 3 + 1, entries - i, i * 2 + 0x1000,
                i * 3 + 0x2000);
     }
-    auto tres = tser.add_track(*event, 1);
+    auto tres = tser.add_track(*event);
     ASSERT_EQ(tres, 0);
     auto len = tser.serialize(&buffer);
     // MESSAGE() << "entries: " << entries << ", buffer size: " << len << ",

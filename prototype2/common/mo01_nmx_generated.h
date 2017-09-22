@@ -57,33 +57,33 @@ struct pos FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return "pos";
   }
   enum {
-    VT_STRIP = 4,
-    VT_TIME = 6,
+    VT_TIME = 4,
+    VT_STRIP = 6,
     VT_ADC = 8
   };
-  uint32_t strip() const {
-    return GetField<uint32_t>(VT_STRIP, 0);
+  uint16_t time() const {
+    return GetField<uint16_t>(VT_TIME, 0);
   }
-  bool mutate_strip(uint32_t _strip) {
-    return SetField(VT_STRIP, _strip);
-  }
-  uint32_t time() const {
-    return GetField<uint32_t>(VT_TIME, 0);
-  }
-  bool mutate_time(uint32_t _time) {
+  bool mutate_time(uint16_t _time) {
     return SetField(VT_TIME, _time);
   }
-  uint32_t adc() const {
-    return GetField<uint32_t>(VT_ADC, 0);
+  uint16_t strip() const {
+    return GetField<uint16_t>(VT_STRIP, 0);
   }
-  bool mutate_adc(uint32_t _adc) {
+  bool mutate_strip(uint16_t _strip) {
+    return SetField(VT_STRIP, _strip);
+  }
+  uint16_t adc() const {
+    return GetField<uint16_t>(VT_ADC, 0);
+  }
+  bool mutate_adc(uint16_t _adc) {
     return SetField(VT_ADC, _adc);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<uint32_t>(verifier, VT_STRIP) &&
-           VerifyField<uint32_t>(verifier, VT_TIME) &&
-           VerifyField<uint32_t>(verifier, VT_ADC) &&
+           VerifyField<uint16_t>(verifier, VT_TIME) &&
+           VerifyField<uint16_t>(verifier, VT_STRIP) &&
+           VerifyField<uint16_t>(verifier, VT_ADC) &&
            verifier.EndTable();
   }
 };
@@ -91,14 +91,14 @@ struct pos FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct posBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_strip(uint32_t strip) {
-    fbb_.AddElement<uint32_t>(pos::VT_STRIP, strip, 0);
+  void add_time(uint16_t time) {
+    fbb_.AddElement<uint16_t>(pos::VT_TIME, time, 0);
   }
-  void add_time(uint32_t time) {
-    fbb_.AddElement<uint32_t>(pos::VT_TIME, time, 0);
+  void add_strip(uint16_t strip) {
+    fbb_.AddElement<uint16_t>(pos::VT_STRIP, strip, 0);
   }
-  void add_adc(uint32_t adc) {
-    fbb_.AddElement<uint32_t>(pos::VT_ADC, adc, 0);
+  void add_adc(uint16_t adc) {
+    fbb_.AddElement<uint16_t>(pos::VT_ADC, adc, 0);
   }
   posBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -114,13 +114,13 @@ struct posBuilder {
 
 inline flatbuffers::Offset<pos> Createpos(
     flatbuffers::FlatBufferBuilder &_fbb,
-    uint32_t strip = 0,
-    uint32_t time = 0,
-    uint32_t adc = 0) {
+    uint16_t time = 0,
+    uint16_t strip = 0,
+    uint16_t adc = 0) {
   posBuilder builder_(_fbb);
   builder_.add_adc(adc);
-  builder_.add_time(time);
   builder_.add_strip(strip);
+  builder_.add_time(time);
   return builder_.Finish();
 }
 
@@ -129,9 +129,18 @@ struct GEMTrack FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return "GEMTrack";
   }
   enum {
-    VT_XTRACK = 4,
-    VT_YTRACK = 6
+    VT_TIME_OFFSET = 4,
+    VT_XTRACK = 6,
+    VT_YTRACK = 8,
+    VT_XPOS = 10,
+    VT_YPOS = 12
   };
+  uint64_t time_offset() const {
+    return GetField<uint64_t>(VT_TIME_OFFSET, 0);
+  }
+  bool mutate_time_offset(uint64_t _time_offset) {
+    return SetField(VT_TIME_OFFSET, _time_offset);
+  }
   const flatbuffers::Vector<flatbuffers::Offset<pos>> *xtrack() const {
     return GetPointer<const flatbuffers::Vector<flatbuffers::Offset<pos>> *>(VT_XTRACK);
   }
@@ -144,14 +153,29 @@ struct GEMTrack FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   flatbuffers::Vector<flatbuffers::Offset<pos>> *mutable_ytrack() {
     return GetPointer<flatbuffers::Vector<flatbuffers::Offset<pos>> *>(VT_YTRACK);
   }
+  double xpos() const {
+    return GetField<double>(VT_XPOS, 0.0);
+  }
+  bool mutate_xpos(double _xpos) {
+    return SetField(VT_XPOS, _xpos);
+  }
+  double ypos() const {
+    return GetField<double>(VT_YPOS, 0.0);
+  }
+  bool mutate_ypos(double _ypos) {
+    return SetField(VT_YPOS, _ypos);
+  }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
+           VerifyField<uint64_t>(verifier, VT_TIME_OFFSET) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_XTRACK) &&
            verifier.Verify(xtrack()) &&
            verifier.VerifyVectorOfTables(xtrack()) &&
            VerifyField<flatbuffers::uoffset_t>(verifier, VT_YTRACK) &&
            verifier.Verify(ytrack()) &&
            verifier.VerifyVectorOfTables(ytrack()) &&
+           VerifyField<double>(verifier, VT_XPOS) &&
+           VerifyField<double>(verifier, VT_YPOS) &&
            verifier.EndTable();
   }
 };
@@ -159,11 +183,20 @@ struct GEMTrack FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct GEMTrackBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
+  void add_time_offset(uint64_t time_offset) {
+    fbb_.AddElement<uint64_t>(GEMTrack::VT_TIME_OFFSET, time_offset, 0);
+  }
   void add_xtrack(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<pos>>> xtrack) {
     fbb_.AddOffset(GEMTrack::VT_XTRACK, xtrack);
   }
   void add_ytrack(flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<pos>>> ytrack) {
     fbb_.AddOffset(GEMTrack::VT_YTRACK, ytrack);
+  }
+  void add_xpos(double xpos) {
+    fbb_.AddElement<double>(GEMTrack::VT_XPOS, xpos, 0.0);
+  }
+  void add_ypos(double ypos) {
+    fbb_.AddElement<double>(GEMTrack::VT_YPOS, ypos, 0.0);
   }
   GEMTrackBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -171,7 +204,7 @@ struct GEMTrackBuilder {
   }
   GEMTrackBuilder &operator=(const GEMTrackBuilder &);
   flatbuffers::Offset<GEMTrack> Finish() {
-    const auto end = fbb_.EndTable(start_, 2);
+    const auto end = fbb_.EndTable(start_, 5);
     auto o = flatbuffers::Offset<GEMTrack>(end);
     return o;
   }
@@ -179,9 +212,15 @@ struct GEMTrackBuilder {
 
 inline flatbuffers::Offset<GEMTrack> CreateGEMTrack(
     flatbuffers::FlatBufferBuilder &_fbb,
+    uint64_t time_offset = 0,
     flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<pos>>> xtrack = 0,
-    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<pos>>> ytrack = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<flatbuffers::Offset<pos>>> ytrack = 0,
+    double xpos = 0.0,
+    double ypos = 0.0) {
   GEMTrackBuilder builder_(_fbb);
+  builder_.add_ypos(ypos);
+  builder_.add_xpos(xpos);
+  builder_.add_time_offset(time_offset);
   builder_.add_ytrack(ytrack);
   builder_.add_xtrack(xtrack);
   return builder_.Finish();
@@ -189,12 +228,18 @@ inline flatbuffers::Offset<GEMTrack> CreateGEMTrack(
 
 inline flatbuffers::Offset<GEMTrack> CreateGEMTrackDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
+    uint64_t time_offset = 0,
     const std::vector<flatbuffers::Offset<pos>> *xtrack = nullptr,
-    const std::vector<flatbuffers::Offset<pos>> *ytrack = nullptr) {
+    const std::vector<flatbuffers::Offset<pos>> *ytrack = nullptr,
+    double xpos = 0.0,
+    double ypos = 0.0) {
   return CreateGEMTrack(
       _fbb,
+      time_offset,
       xtrack ? _fbb.CreateVector<flatbuffers::Offset<pos>>(*xtrack) : 0,
-      ytrack ? _fbb.CreateVector<flatbuffers::Offset<pos>>(*ytrack) : 0);
+      ytrack ? _fbb.CreateVector<flatbuffers::Offset<pos>>(*ytrack) : 0,
+      xpos,
+      ypos);
 }
 
 struct GEMHist FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
@@ -202,27 +247,62 @@ struct GEMHist FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
     return "GEMHist";
   }
   enum {
-    VT_XHIST = 4,
-    VT_YHIST = 6
+    VT_XSTRIPS = 4,
+    VT_YSTRIPS = 6,
+    VT_XSPECTRUM = 8,
+    VT_YSPECTRUM = 10,
+    VT_CLUSTER_SPECTRUM = 12,
+    VT_BIN_WIDTH = 14
   };
-  const flatbuffers::Vector<uint32_t> *xhist() const {
-    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_XHIST);
+  const flatbuffers::Vector<uint32_t> *xstrips() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_XSTRIPS);
   }
-  flatbuffers::Vector<uint32_t> *mutable_xhist() {
-    return GetPointer<flatbuffers::Vector<uint32_t> *>(VT_XHIST);
+  flatbuffers::Vector<uint32_t> *mutable_xstrips() {
+    return GetPointer<flatbuffers::Vector<uint32_t> *>(VT_XSTRIPS);
   }
-  const flatbuffers::Vector<uint32_t> *yhist() const {
-    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_YHIST);
+  const flatbuffers::Vector<uint32_t> *ystrips() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_YSTRIPS);
   }
-  flatbuffers::Vector<uint32_t> *mutable_yhist() {
-    return GetPointer<flatbuffers::Vector<uint32_t> *>(VT_YHIST);
+  flatbuffers::Vector<uint32_t> *mutable_ystrips() {
+    return GetPointer<flatbuffers::Vector<uint32_t> *>(VT_YSTRIPS);
+  }
+  const flatbuffers::Vector<uint32_t> *xspectrum() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_XSPECTRUM);
+  }
+  flatbuffers::Vector<uint32_t> *mutable_xspectrum() {
+    return GetPointer<flatbuffers::Vector<uint32_t> *>(VT_XSPECTRUM);
+  }
+  const flatbuffers::Vector<uint32_t> *yspectrum() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_YSPECTRUM);
+  }
+  flatbuffers::Vector<uint32_t> *mutable_yspectrum() {
+    return GetPointer<flatbuffers::Vector<uint32_t> *>(VT_YSPECTRUM);
+  }
+  const flatbuffers::Vector<uint32_t> *cluster_spectrum() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_CLUSTER_SPECTRUM);
+  }
+  flatbuffers::Vector<uint32_t> *mutable_cluster_spectrum() {
+    return GetPointer<flatbuffers::Vector<uint32_t> *>(VT_CLUSTER_SPECTRUM);
+  }
+  uint32_t bin_width() const {
+    return GetField<uint32_t>(VT_BIN_WIDTH, 0);
+  }
+  bool mutate_bin_width(uint32_t _bin_width) {
+    return SetField(VT_BIN_WIDTH, _bin_width);
   }
   bool Verify(flatbuffers::Verifier &verifier) const {
     return VerifyTableStart(verifier) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_XHIST) &&
-           verifier.Verify(xhist()) &&
-           VerifyField<flatbuffers::uoffset_t>(verifier, VT_YHIST) &&
-           verifier.Verify(yhist()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_XSTRIPS) &&
+           verifier.Verify(xstrips()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_YSTRIPS) &&
+           verifier.Verify(ystrips()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_XSPECTRUM) &&
+           verifier.Verify(xspectrum()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_YSPECTRUM) &&
+           verifier.Verify(yspectrum()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_CLUSTER_SPECTRUM) &&
+           verifier.Verify(cluster_spectrum()) &&
+           VerifyField<uint32_t>(verifier, VT_BIN_WIDTH) &&
            verifier.EndTable();
   }
 };
@@ -230,11 +310,23 @@ struct GEMHist FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
 struct GEMHistBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
   flatbuffers::uoffset_t start_;
-  void add_xhist(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> xhist) {
-    fbb_.AddOffset(GEMHist::VT_XHIST, xhist);
+  void add_xstrips(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> xstrips) {
+    fbb_.AddOffset(GEMHist::VT_XSTRIPS, xstrips);
   }
-  void add_yhist(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> yhist) {
-    fbb_.AddOffset(GEMHist::VT_YHIST, yhist);
+  void add_ystrips(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> ystrips) {
+    fbb_.AddOffset(GEMHist::VT_YSTRIPS, ystrips);
+  }
+  void add_xspectrum(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> xspectrum) {
+    fbb_.AddOffset(GEMHist::VT_XSPECTRUM, xspectrum);
+  }
+  void add_yspectrum(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> yspectrum) {
+    fbb_.AddOffset(GEMHist::VT_YSPECTRUM, yspectrum);
+  }
+  void add_cluster_spectrum(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> cluster_spectrum) {
+    fbb_.AddOffset(GEMHist::VT_CLUSTER_SPECTRUM, cluster_spectrum);
+  }
+  void add_bin_width(uint32_t bin_width) {
+    fbb_.AddElement<uint32_t>(GEMHist::VT_BIN_WIDTH, bin_width, 0);
   }
   GEMHistBuilder(flatbuffers::FlatBufferBuilder &_fbb)
         : fbb_(_fbb) {
@@ -242,7 +334,7 @@ struct GEMHistBuilder {
   }
   GEMHistBuilder &operator=(const GEMHistBuilder &);
   flatbuffers::Offset<GEMHist> Finish() {
-    const auto end = fbb_.EndTable(start_, 2);
+    const auto end = fbb_.EndTable(start_, 6);
     auto o = flatbuffers::Offset<GEMHist>(end);
     return o;
   }
@@ -250,22 +342,38 @@ struct GEMHistBuilder {
 
 inline flatbuffers::Offset<GEMHist> CreateGEMHist(
     flatbuffers::FlatBufferBuilder &_fbb,
-    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> xhist = 0,
-    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> yhist = 0) {
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> xstrips = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> ystrips = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> xspectrum = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> yspectrum = 0,
+    flatbuffers::Offset<flatbuffers::Vector<uint32_t>> cluster_spectrum = 0,
+    uint32_t bin_width = 0) {
   GEMHistBuilder builder_(_fbb);
-  builder_.add_yhist(yhist);
-  builder_.add_xhist(xhist);
+  builder_.add_bin_width(bin_width);
+  builder_.add_cluster_spectrum(cluster_spectrum);
+  builder_.add_yspectrum(yspectrum);
+  builder_.add_xspectrum(xspectrum);
+  builder_.add_ystrips(ystrips);
+  builder_.add_xstrips(xstrips);
   return builder_.Finish();
 }
 
 inline flatbuffers::Offset<GEMHist> CreateGEMHistDirect(
     flatbuffers::FlatBufferBuilder &_fbb,
-    const std::vector<uint32_t> *xhist = nullptr,
-    const std::vector<uint32_t> *yhist = nullptr) {
+    const std::vector<uint32_t> *xstrips = nullptr,
+    const std::vector<uint32_t> *ystrips = nullptr,
+    const std::vector<uint32_t> *xspectrum = nullptr,
+    const std::vector<uint32_t> *yspectrum = nullptr,
+    const std::vector<uint32_t> *cluster_spectrum = nullptr,
+    uint32_t bin_width = 0) {
   return CreateGEMHist(
       _fbb,
-      xhist ? _fbb.CreateVector<uint32_t>(*xhist) : 0,
-      yhist ? _fbb.CreateVector<uint32_t>(*yhist) : 0);
+      xstrips ? _fbb.CreateVector<uint32_t>(*xstrips) : 0,
+      ystrips ? _fbb.CreateVector<uint32_t>(*ystrips) : 0,
+      xspectrum ? _fbb.CreateVector<uint32_t>(*xspectrum) : 0,
+      yspectrum ? _fbb.CreateVector<uint32_t>(*yspectrum) : 0,
+      cluster_spectrum ? _fbb.CreateVector<uint32_t>(*cluster_spectrum) : 0,
+      bin_width);
 }
 
 struct MonitorMessage FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {

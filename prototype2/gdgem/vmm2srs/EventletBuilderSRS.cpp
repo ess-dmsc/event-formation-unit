@@ -67,7 +67,7 @@ BuilderSRS::process_buffer(char *buf, size_t size,
             d.chno, d.bcid, d.tdc, d.adc);
 #endif
 
-    hists.bin_one(eventlet.plane_id, eventlet.strip);
+    hists.bin(eventlet);
     clusterer.insert(eventlet);
   }
 

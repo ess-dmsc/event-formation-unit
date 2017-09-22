@@ -5,42 +5,40 @@
 #include <gdgem/nmx/HistSerializer.h>
 #include <test/TestBase.h>
 
-#define HISTSIZE 1500
-#define ELEMSIZE 4
 
 class HistSerializerTest : public TestBase {
   virtual void SetUp() {
-    for (int i = 0; i < HISTSIZE; i++) {
+    for (int i = 0; i < NMX_STRIP_HIST_SIZE; i++) {
       xarr[i] = i;
-      yarr[i] = 200000 - i;
+      yarr[i] = NMX_STRIP_MAX_VAL - i;
     }
   }
 
   virtual void TearDown() {}
 
 protected:
-  uint32_t xarr[HISTSIZE];
-  uint32_t yarr[HISTSIZE];
+  NMX_HIST_TYPE xarr[NMX_STRIP_HIST_SIZE];
+  NMX_HIST_TYPE yarr[NMX_STRIP_HIST_SIZE];
   char *buffer;
   char flatbuffer[1024 * 1024];
 };
 
 TEST_F(HistSerializerTest, Serialize) {
-  for (int i = 0; i <= HISTSIZE; i++) {
+  for (int i = 0; i < NMX_STRIP_HIST_SIZE; i++) {
     HistSerializer histfb(i);
     auto len = histfb.serialize(xarr, yarr, i, &buffer);
-    ASSERT_TRUE(len > i * ELEMSIZE * 2);
+    ASSERT_TRUE(len > i * NMX_HIST_ELEM_SIZE * 2);
 
-    len = histfb.serialize(xarr, yarr, i + 1, &buffer);
+    len = histfb.serialize(&xarr[0], &yarr[0], i + 1, &buffer);
     ASSERT_EQ(len, 0);
     ASSERT_EQ(buffer, nullptr);
   }
 }
 
 TEST_F(HistSerializerTest, DeSerialize) {
-  HistSerializer histfb(HISTSIZE);
+  HistSerializer histfb(NMX_STRIP_HIST_SIZE);
 
-  auto length = histfb.serialize(xarr, yarr, HISTSIZE, &buffer);
+  auto length = histfb.serialize(&xarr[0], &yarr[0], NMX_STRIP_HIST_SIZE, &buffer);
 
   memcpy(flatbuffer, buffer, length);
   auto monitor = GetMonitorMessage(flatbuffer);
@@ -48,14 +46,14 @@ TEST_F(HistSerializerTest, DeSerialize) {
   ASSERT_EQ(dtype, DataField::GEMHist);
 
   auto hist = static_cast<const GEMHist *>(monitor->data());
-  auto xdat = hist->xhist();
-  auto ydat = hist->yhist();
-  ASSERT_EQ(xdat->size(), HISTSIZE);
-  ASSERT_EQ(ydat->size(), HISTSIZE);
+  auto xdat = hist->xstrips();
+  auto ydat = hist->ystrips();
+  ASSERT_EQ(xdat->size(), NMX_STRIP_HIST_SIZE);
+  ASSERT_EQ(ydat->size(), NMX_STRIP_HIST_SIZE);
 
-  for (int i = 0; i < HISTSIZE; i++) {
+  for (int i = 0; i < NMX_STRIP_HIST_SIZE; i++) {
     ASSERT_EQ((*xdat)[i], i);
-    ASSERT_EQ((*ydat)[i], 200000 - i);
+    EXPECT_EQ((*ydat)[i], NMX_STRIP_MAX_VAL - i);
   }
 }
 

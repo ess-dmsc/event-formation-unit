@@ -19,8 +19,8 @@ BuilderH5::process_buffer(char *buf, size_t size,
   for (size_t i = 0; i < count; ++i) {
     memcpy(data.data(), buf, psize);
     auto eventlet = make_eventlet();
+    hists.bin(eventlet);
     clusterer.insert(eventlet);
-    hists.bin_one(eventlet.plane_id, eventlet.strip);
     buf += psize;
   }
   return AbstractBuilder::ResultStats(count, 0);

@@ -174,8 +174,8 @@ void NMX::processing_thread() {
   Producer eventprod(opts->broker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
   Producer monitorprod(opts->broker, "NMX_monitor");
-  HistSerializer histfb(1500);
-  TrackSerializer trackfb(256);
+  HistSerializer histfb(NMX_STRIP_HIST_SIZE);
+  TrackSerializer trackfb(256, nmx_opts.track_sample_minhits);
 
   NMXHists hists;
   Clusterer clusterer(nmx_opts.cluster_min_timespan);
@@ -212,8 +212,7 @@ void NMX::processing_thread() {
           XTRACE(PROCESS, DEB, "event.good\n");
 
           if (sample_next_track) {
-            sample_next_track
-                = trackfb.add_track(event, nmx_opts.track_sample_minhits);
+            sample_next_track = trackfb.add_track(event);
           }
 
           XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",

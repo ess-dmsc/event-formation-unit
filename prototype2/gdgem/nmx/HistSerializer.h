@@ -27,10 +27,12 @@ public:
   ~HistSerializer();
 
   /** @todo document */
-  int serialize(const uint32_t *xhist, const uint32_t *yhist,
-                size_t entries, char **buffer);
+  size_t serialize(const NMXHists& hists, char **buffer);
 
-  int serialize(const NMXHists& hists, char **buffer);
+  /** @todo document */
+  size_t serialize(const NMX_HIST_TYPE *x_strips_hist,
+                   const NMX_HIST_TYPE *y_strips_hist,
+                   size_t entries, char **buffer);
 
 private:
   flatbuffers::FlatBufferBuilder builder;
