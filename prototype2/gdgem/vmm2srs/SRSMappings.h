@@ -8,8 +8,9 @@
 #pragma once
 
 #include <initializer_list>
-#include <inttypes.h>
+#include <cinttypes>
 #include <vector>
+#include <string>
 
 #define NMX_MAX_CHIPS 16
 #define NMX_CHIP_CHANNELS 64
@@ -46,6 +47,9 @@ public:
    * @param vmmID ID of chip
    */
   uint16_t get_plane(uint16_t fecID, uint16_t vmmID) const;
+
+  // @brief prints out configuration
+  std::string debug() const;
 
 private:
   std::vector<std::vector<uint16_t>> offsets_; // strip number mappings

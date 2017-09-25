@@ -2,9 +2,9 @@
 
 #include <cinttypes>
 #include <cstdio>
+#include <cstdlib>
 #include <gdgem/nmxgen/NMXArgs.h>
 #include <getopt.h>
-#include <iostream>
 #include <unistd.h>
 
 NMXArgs::NMXArgs(int argc, char *argv[]) {

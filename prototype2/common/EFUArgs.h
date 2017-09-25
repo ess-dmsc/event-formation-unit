@@ -41,12 +41,12 @@ public:
   std::string graylog_ip{"127.0.0.1"};
   int graylog_port{12201};
 
-  // NMX OPTIONS
-  int reduction{80}; /**< data tuples in a cluster */
-
   // Runtime Stats
   // EFUStats stat;
   unsigned int reportmask{0x2};
+
+  // Pipeline-specific configuration
+  std::string config_file;
 
   // IPC data for communicating between main and threads
   uint16_t wirecal[CSPECChanConv::adcsize];

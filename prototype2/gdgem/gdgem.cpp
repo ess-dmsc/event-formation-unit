@@ -22,6 +22,11 @@
 #include <memory>
 #include <stdio.h>
 #include <unistd.h>
+#include <dataformats/multigrid/inc/json.h>
+#include <fstream>
+#include <sstream>
+
+#include <gdgem/NMXConfig.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -29,7 +34,7 @@
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
-const char *classname = "NMX Detector for emulated data from H5";
+const char *classname = "NMX Detector";
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
@@ -64,21 +69,23 @@ private:
     int64_t rx_bytes;
     int64_t fifo1_push_errors;
     int64_t fifo1_free;
-    int64_t pad_a[4]; /**< @todo check alignment*/
+    int64_t pad_a[3]; /**< @todo check alignment*/
 
     // Processing Counters
     int64_t rx_readouts;
     int64_t rx_error_bytes;
     int64_t rx_discards;
     int64_t rx_idle1;
+    int64_t unclustered;
     int64_t tx_events;
     int64_t tx_bytes;
   } ALIGN(64) mystats;
 
   EFUArgs *opts;
+  NMXConfig nmx_opts;
 
   std::shared_ptr<AbstractBuilder> builder_ {nullptr};
-  void init_builder(std::string btype);
+  void init_builder(std::string jsonfile);
 };
 
 NMX::NMX(void *args) {
@@ -94,6 +101,7 @@ NMX::NMX(void *args) {
   ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
   ns.create("processing.rx_discards",          &mystats.rx_discards);
   ns.create("processing.rx_idle",              &mystats.rx_idle1);
+  ns.create("processing.unclustered",          &mystats.unclustered);
   ns.create("output.tx_events",                &mystats.tx_events);
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
@@ -155,13 +163,13 @@ void NMX::input_thread() {
 }
 
 void NMX::processing_thread() {
-  init_builder("H5");
+  init_builder(opts->config_file);
   if (!builder_)
     return;
 
   Geometry geometry;
-  geometry.add_dimension(256); /**< @todo not hardocde */
-  geometry.add_dimension(256); /**< @todo not hardocde */
+  geometry.add_dimension(nmx_opts.geometry_x);
+  geometry.add_dimension(nmx_opts.geometry_y);
 
   Producer eventprod(opts->broker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
@@ -170,7 +178,7 @@ void NMX::processing_thread() {
   TrackSerializer trackfb(256);
 
   NMXHists hists;
-  Clusterer clusterer(30); /**< @todo not hardocde */
+  Clusterer clusterer(nmx_opts.cluster_min_timespan);
 
   Timer stopafter_clock;
   TSCTimer global_time, report_timer;
@@ -196,12 +204,16 @@ void NMX::processing_thread() {
       while (clusterer.event_ready()) {
         XTRACE(PROCESS, DEB, "event_ready()\n");
         event = clusterer.get_event();
-        event.analyze(true, 3, 7); /**< @todo not hardocde */
+        mystats.unclustered = clusterer.unclustered();
+        event.analyze(nmx_opts.analyze_weighted,
+                      nmx_opts.analyze_max_timebins,
+                      nmx_opts.analyze_max_timedif);
         if (event.good()) {
           XTRACE(PROCESS, DEB, "event.good\n");
 
           if (sample_next_track) {
-            sample_next_track = trackfb.add_track(event, 6);
+            sample_next_track
+                = trackfb.add_track(event, nmx_opts.track_sample_minhits);
           }
 
           XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
@@ -213,8 +225,8 @@ void NMX::processing_thread() {
           uint32_t time = static_cast<uint32_t>(event.time_start());
           uint32_t pixelid = geometry.to_pixid(coords);
 
-//          std::cout << "  time=" << time << "\n"
-//                    << "  pixid=" << pixelid << "\n\n";
+          XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n",
+                 time, pixelid);
 
           mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
           mystats.tx_events++;
@@ -231,7 +243,7 @@ void NMX::processing_thread() {
 
       sample_next_track = 1;
 
-      flatbuffer.produce();
+      mystats.tx_bytes += flatbuffer.produce();
 
       char *txbuffer;
       auto len = trackfb.serialize(&txbuffer);
@@ -241,7 +253,7 @@ void NMX::processing_thread() {
       }
 
       if (0 != hists.xyhist_elems) {
-        XTRACE(PROCESS, ALW, "Sending histogram with %d readouts\n",
+        XTRACE(PROCESS, ALW, "Sending histogram with %u readouts\n",
                hists.xyhist_elems);
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
@@ -258,26 +270,18 @@ void NMX::processing_thread() {
   }
 }
 
-void NMX::init_builder(std::string btype)
+void NMX::init_builder(string jsonfile)
 {
-  if (btype == "H5")
-  {
+  nmx_opts = NMXConfig(jsonfile);
+  XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
+
+  if (nmx_opts.builder_type == "H5")
     builder_ = std::make_shared<BuilderH5>();
-  }
-  else if (btype == "SRS")
-  {
-    SRSTime time_config;  /**< @todo get from slow control? */
-    time_config.set_tac_slope(125);
-    time_config.set_bc_clock(40);
-    time_config.set_trigger_resolution(3.125);
-    time_config.set_target_resolution(0.5);
-
-    SRSMappings srs_config; /**< @todo not hardocde chip mappings */
-    srs_config.define_plane(0, {{1, 0}, {1, 1}});
-    srs_config.define_plane(1, {{1, 14}, {1, 15}});
-
-    builder_ = std::make_shared<BuilderSRS>(time_config, srs_config);
-  }
+  else if (nmx_opts.builder_type == "SRS")
+    builder_ = std::make_shared<BuilderSRS>
+        (nmx_opts.time_config, nmx_opts.srs_mappings);
+  else
+    XTRACE(INIT, ALW, "Unrecognized builder type in config\n");
 }
 
 /** ----------------------------------------------------- */

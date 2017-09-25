@@ -23,13 +23,14 @@ public:
    */
   void insert(const Eventlet &eventlet);
 
-  /** @brief indicates if there is an event ready for clustering
-   */
+  // @brief indicates if there is an event ready for clustering
   bool event_ready() const;
 
-  /** @brief returns a clustered event (if one is ready, else empty event)
-   */
+  // @brief returns a clustered event (if one is ready, else empty event)
   EventNMX get_event();
+
+  // @brief returns number of unclustered eventlets in backlog
+  size_t unclustered() const;
 
 private:
   std::multimap<uint64_t, Eventlet>

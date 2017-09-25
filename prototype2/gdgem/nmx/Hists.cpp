@@ -11,6 +11,7 @@ NMXHists::NMXHists()
 
 void NMXHists::clear() {
   memset(xyhist, 0, sizeof(xyhist));
+  xyhist_elems = 0;
 }
 
 void NMXHists::bin_one(uint16_t plane_id, uint16_t strip)

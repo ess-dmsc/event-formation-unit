@@ -56,16 +56,19 @@ TEST_F(DetectorTest, DefaultThreads) {
   testing::internal::CaptureStdout();
   det->input_thread();
   auto output = testing::internal::GetCapturedStdout().c_str();
+  printf("DEBUG: %s\n", output);
   ASSERT_TRUE(strstr(output, "no input stage") != NULL);
 
   testing::internal::CaptureStdout();
   det->processing_thread();
   output = testing::internal::GetCapturedStdout().c_str();
+  printf("DEBUG: %s\n", output);
   ASSERT_TRUE(strstr(output, "no processing stage") != NULL);
 
   testing::internal::CaptureStdout();
   det->output_thread();
   output = testing::internal::GetCapturedStdout().c_str();
+  printf("DEBUG: %s\n", output);
   ASSERT_TRUE(strstr(output, "no output stage") != NULL);
 }
 
