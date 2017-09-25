@@ -10,6 +10,11 @@ svr_tcp_port = 50010
 
 RXBUFFER = 4096
 
+asicscf1_bits = 356
+asiccfg1 = [ 0x00, 0x00, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+             0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+             0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80                    ]
+
 registers = {'Serial Number': 0x0000,
              'Firmware Type': 0x0001,
              'Firmware Version': 0x0002,
@@ -36,12 +41,19 @@ class IdeasCtrl():
       WriteSystemRegister = 0x10
       ReadSystemRegister = 0x11
       SystemRegisterReadBack = 0x12
+      ASICConfigRegisterWrite = 0xc0
 
    class seqflag():
       StandAlone = 0x00
       FirstPacket = 0x01
       ContinuationPacket = 0x02
       LastPacket = 0x03
+
+   class asic():
+       id0 = 0
+       id1 = 1
+       id2 = 2
+       id3 = 3
 
    def __init__(self, ip, port, verbose):
       self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -56,12 +68,15 @@ class IdeasCtrl():
          print("send: %s" %(binascii.hexlify(data)))
       self.s.send(data)
       self.pktno += 1
+      time.sleep(0.1)
 
    def recv(self):
       rx = self.s.recv(RXBUFFER)
       if self.verbose:
          print("recv: %s" %(binascii.hexlify(rx)))
       return rx
+
+
 
    def readsystemregister(self, address):
        s = struct.Struct('!BBHIH H')
@@ -111,12 +126,45 @@ class IdeasCtrl():
 #
 # High level user functions
 #
+   def writeasicconf(self, asicid, data, datalen_bits):
+       datalen = len(data)
+       pkttype = self.cmd.ASICConfigRegisterWrite
+       pktseq = self.seqflag.StandAlone
+
+       s = struct.Struct('!BBHIH BH')
+       tx_hdr = s.pack((self.version << 5) + self.system, pkttype, (pktseq << 14) + self.pktno, 0,
+                    datalen + 3, asicid, datalen_bits)
+
+       tx_data = struct.pack('B' * len(data), *data)
+       self.send(tx_hdr + tx_data)
+       time.sleep(0.1)
+
 
    def setcalibrationparms(self, polarity, nb_pulses, pulse_length, pulse_interval):
       self.writesystemregister8('Calibration Pulse Polarity', polarity)
-      #self.writesystemregister16('Calibration Num Pulses', nb_pulses)
+      self.writesystemregister16('Calibration Num Pulses', nb_pulses)
       self.writesystemregister32('Calibration Pulse Length', pulse_length)
       self.writesystemregister32('Calibration Pulse Interval', pulse_interval)
+
+
+   def configandstart(self):
+      self.writesystemregister8('cfg_timing_readout_en', 0)
+      self.writesystemregister8('cfg_phystrig_en', 0)
+      self.writesystemregister8('cfg_all_ch_en', 0)
+      self.writeasicconf(self.asic.id0, asiccfg1, asicscf1_bits)
+      self.writeasicconf(self.asic.id1, asiccfg1, asicscf1_bits)
+      self.writeasicconf(self.asic.id2, asiccfg1, asicscf1_bits)
+      self.writeasicconf(self.asic.id3, asiccfg1, asicscf1_bits)
+      self.writesystemregister16('cfg_event_num', 250)
+      self.writesystemregister8('cfg_timing_readout_en', 1)
+
+   def stopreadout(self):
+      self.writesystemregister8('cfg_timing_readout_en', 0)
+      self.writesystemregister8('cfg_phystrig_en', 0)
+      self.writesystemregister8('cfg_all_ch_en', 0)
+
+   def startreadout(self):
+      self.writesystemregister8('cfg_timing_readout_en', 1)
 
 
    def dumpallregisters(self):
@@ -143,10 +191,12 @@ class IdeasCtrl():
       self.printregister("cfg_event_num")
       self.printregister("cfg_all_ch_en")
 
+
 if __name__ == '__main__':
    parser = argparse.ArgumentParser()
    parser.add_argument("-i", metavar='ipaddr', help = "server ip address (default %s)" % (svr_ip_addr), type = str)
    parser.add_argument("-p", metavar='port', help = "server tcp port (default %d)" % (svr_tcp_port), type = int)
+   parser.add_argument("-c", metavar='cmd', help = "command (config, start, stop)", type = str)
    parser.add_argument("-v", help = "add debug prints", action='store_true')
    args = parser.parse_args()
 
@@ -156,13 +206,18 @@ if __name__ == '__main__':
    if args.p != None:
       svr_tcp_port = args.p
 
-ctrl = IdeasCtrl(svr_ip_addr, svr_tcp_port, args.v)
+   if args.c != None:
 
+      ctrl = IdeasCtrl(svr_ip_addr, svr_tcp_port, args.v)
 
-ctrl.dumpallregisters()
-ctrl.setcalibrationparms(1,10,11,512)
-
-print("Doing it all again")
-
-ctrl.dumpallregisters()
-ctrl.setcalibrationparms(0,1,1,500)
+      if args.c == "stop":
+         print("Stopping Readout")
+         ctrl.stopreadout()
+      elif args.c == "start":
+         print("Starting Readout")
+         ctrl.startreadout()
+      elif args.c == "config":
+         print("Configure System for Time Triggered Readout")
+         ctrl.configandstart()
+      elif ags.c == "dumpreg":
+         ctrl.dumpallregisters()
