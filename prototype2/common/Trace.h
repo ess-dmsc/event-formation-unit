@@ -61,7 +61,7 @@
 #define TRC_LEVEL TRC_L_ERR
 #endif
 
-#if 0
+#if 1
 #define XTRACE(group, level, fmt, ...)                                         \
   (void)(((TRC_L_##level >= TRC_LEVEL) && (TRC_MASK & TRC_G_##group))          \
              ? printf("%-3s %80s %5d %-s - " fmt, #level, __FILE__, __LINE__,  \
@@ -69,9 +69,8 @@
              : 0)
 #endif
 
-#define XTRACE(group, level, fmt, ...)                                         \
-  (void)(((TRC_L_##level >= TRC_LEVEL) && (TRC_MASK & TRC_G_##group))          \
-             ? printf("%-3s %-8s" fmt, #level,\
-                      #group, ##__VA_ARGS__)                                   \
-             : 0)
-
+// #define XTRACE(group, level, fmt, ...)                                         \
+//   (void)(((TRC_L_##level >= TRC_LEVEL) && (TRC_MASK & TRC_G_##group))          \
+//              ? printf("%-3s %-8s" fmt, #level,\
+//                       #group, ##__VA_ARGS__)                                   \
+//              : 0)
