@@ -33,35 +33,40 @@ int main(int argc, char *argv[]) {
     uint linesize = sizeof(TextFile::Entry::digi) + sizeof(TextFile::Entry::chan) + sizeof(TextFile::Entry::adc) +
                     sizeof(TextFile::Entry::time);
 
-    TextFile::Entry entry = {0, 0, 0, 0};
+    //TextFile::Entry entry = {0, 0, 0, 0};
     TextFile::Entry end   = {UINT8_MAX, UINT8_MAX, UINT16_MAX, UINT32_MAX};
 
     uint dppkg = 0;
 
     int pkgsize = 0;
 
+    std::vector<TextFile::Entry> entries;
+    try {
+        entries = file.rest();
+    } catch (TextFile::eof e) {
+        std::cout << "End of file reached." << std::endl;
+        return 0;
+    }
+
+    uint ievent = 0;
+
     do {
 
-        try {
-            entry = file.nextEntry();
-        } catch (TextFile::eof e) {
-
-            std::cout << "End of file reached." << std::endl;
-
-            break;
-        }
-
-        std::memcpy(bufptr, &entry.digi, sizeof(TextFile::Entry::digi));
+        std::memcpy(bufptr, &entries[ievent].digi, sizeof(TextFile::Entry::digi));
         bufptr += sizeof(TextFile::Entry::digi);
 
-        std::memcpy(bufptr, &entry.chan, sizeof(TextFile::Entry::chan));
+        std::memcpy(bufptr, &entries[ievent].chan, sizeof(TextFile::Entry::chan));
         bufptr += sizeof(TextFile::Entry::chan);
 
-        std::memcpy(bufptr, &entry.adc, sizeof(TextFile::Entry::adc));
+        std::memcpy(bufptr, &entries[ievent].adc, sizeof(TextFile::Entry::adc));
         bufptr += sizeof(TextFile::Entry::adc);
 
-        std::memcpy(bufptr, &entry.time, sizeof(TextFile::Entry::time));
+        std::memcpy(bufptr, &entries[ievent].time, sizeof(TextFile::Entry::time));
         bufptr += sizeof(TextFile::Entry::time);
+
+        ievent++;
+        if (ievent == entries.size())
+            ievent = 0;
 
         pkgsize += linesize;
 
