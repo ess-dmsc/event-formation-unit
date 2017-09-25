@@ -186,9 +186,14 @@ void MBCAEN::processing_thread() {
 
                 if (builder.addDataPoint(dp.chan, dp.adc, dp.time)) {
 
-                    uint32_t pixel_id = (nwires + nstrips) * dp.digi;
-                    pixel_id += (nwires + 1) * (builder.getWirePosition() + 1);
-                    pixel_id += builder.getStripPosition() + 1;
+                    // Calculate pixel ID:
+                    // The pixel ID format will be ddwwss where
+                    // dd = digitizer number
+                    // ww = wire channel (1-32) [0 = no wire channel fired]
+                    // ss = strip channel (1-32) [0 = no strip channel fired]
+                    uint32_t pixel_id = 10000 * dp.digi;
+                    pixel_id +=           100 * (builder.getWirePosition() + 1);
+                    pixel_id +=             1 * (builder.getStripPosition() + 1);
 
                     XTRACE(PROCESS, DEB, "wire pos: %d, strip pos: %d, pixel_id: %d\n",
                              (int)(builder.getWirePosition()  + 1),
