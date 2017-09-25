@@ -191,7 +191,7 @@ void MBCAEN::processing_thread() {
                     // The pixel ID format will be ddwwss where
                     // dd = digitizer number
                     // ww = wire channel (1-32) [0 = no wire channel fired]
-                    // ss = strip channel (1-32) [0 = no strip channel fired]
+                    // ss = strip channel (33-64) [0 = no strip channel fired]
                     uint32_t pixel_id = 10000 * dp.digi;
                     pixel_id +=           100 * (builder.getWirePosition() + 1);
                     pixel_id +=             1 * (builder.getStripPosition() + 1);
