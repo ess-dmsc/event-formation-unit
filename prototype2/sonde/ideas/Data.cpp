@@ -8,8 +8,8 @@
 
 using namespace std;
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 int IDEASData::receive(const char *buffer, int size) {
 
