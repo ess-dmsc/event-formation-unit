@@ -270,6 +270,8 @@ void CSPEC::output_thread() {
     /** Cheking for exit*/
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
+      mystats.tx_bytes += flatbuffer.produce();
+
       if (stop.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping output thread, timeus " << stop.timeus()
                   << std::endl;

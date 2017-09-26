@@ -164,6 +164,9 @@ void SONDEIDEA::processing_thread() {
       mystats.rx_events += ideasdata.events;
 
       for (int i = 0; i < events; i++) {
+          XTRACE(PROCESS, DEB, "flatbuffer.addevent(t: %d, pix: %d)\n",
+                  ideasdata.data[i].time,
+                  ideasdata.data[i].pixel_id);
           mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
       }
     }
@@ -172,7 +175,7 @@ void SONDEIDEA::processing_thread() {
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
       // printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
 
-      flatbuffer.produce();
+      mystats.tx_bytes += flatbuffer.produce();
 
       if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping processing thread, timeus " << std::endl;
