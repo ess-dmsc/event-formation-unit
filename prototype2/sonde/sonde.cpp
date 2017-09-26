@@ -163,11 +163,13 @@ void SONDEIDEA::processing_thread() {
       mystats.rx_geometry_errors += ideasdata.errors;
       mystats.rx_events += ideasdata.events;
 
-      for (int i = 0; i < events; i++) {
-          XTRACE(PROCESS, DEB, "flatbuffer.addevent(t: %d, pix: %d)\n",
-                  ideasdata.data[i].time,
-                  ideasdata.data[i].pixel_id);
-          mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
+      if (events > 0) {
+        for (int i = 0; i < events; i++) {
+            XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)\n", i
+                    ideasdata.data[i].time,
+                    ideasdata.data[i].pixel_id);
+            mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
+        }
       }
     }
 

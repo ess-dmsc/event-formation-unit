@@ -65,18 +65,16 @@ int IDEASData::receive(const char *buffer, int size) {
   events = 0;
   errors = 0;
   for (int i = 0; i < nentries; i++) {
-    int index = 0;
     auto timep = (uint32_t *)(datap + i*5 + 1);
     auto aschp  = (uint8_t *)(datap + i*5 + 5);
     uint32_t time = ntohl(*timep);
     uint8_t asch = *aschp; // ASIC (2b) and CHANNEL (6b)
     int pixelid = sondegeometry->getdetectorpixelid(0, asch);
     if (pixelid >= 1) {
-      data[index].time = time;
-      data[index].pixel_id = static_cast<uint32_t>(pixelid);
-      XTRACE(PROCESS, DEB, "event: %d, time: 0x%08x, pixel: %d\n", i, time, data[index].pixel_id);
+      data[events].time = time;
+      data[events].pixel_id = static_cast<uint32_t>(pixelid);
+      XTRACE(PROCESS, DEB, "event: %d, time: 0x%08x, pixel: %d\n", i, time, data[events].pixel_id);
       events++;
-      index++;
     } else {
       XTRACE(PROCESS, WAR, "Geometry error in entry %d (asch %d)\n", i, asch);
       errors++;
