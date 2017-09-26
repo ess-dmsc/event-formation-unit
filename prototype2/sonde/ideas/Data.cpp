@@ -8,8 +8,8 @@
 
 using namespace std;
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 int IDEASData::receive(const char *buffer, int size) {
 
@@ -73,7 +73,7 @@ int IDEASData::receive(const char *buffer, int size) {
     int pixelid = sondegeometry->getdetectorpixelid(0, asch);
     if (pixelid >= 1) {
       data[index].time = time;
-      data[index].pixel_id = (uint32_t)pixelid;
+      data[index].pixel_id = static_cast<uint32_t>(pixelid);
       XTRACE(PROCESS, DEB, "event: %d, time: 0x%08x, pixel: %d\n", i, time, data[index].pixel_id);
       events++;
       index++;

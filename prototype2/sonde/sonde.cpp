@@ -1,3 +1,4 @@
+
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <cinttypes>
@@ -19,8 +20,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
