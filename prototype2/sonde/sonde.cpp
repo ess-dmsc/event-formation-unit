@@ -165,7 +165,7 @@ void SONDEIDEA::processing_thread() {
 
       if (events > 0) {
         for (int i = 0; i < events; i++) {
-            XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)\n", i
+            XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)\n", i,
                     ideasdata.data[i].time,
                     ideasdata.data[i].pixel_id);
             mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
