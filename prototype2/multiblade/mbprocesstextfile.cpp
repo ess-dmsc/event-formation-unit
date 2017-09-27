@@ -11,15 +11,16 @@
 
 int main(int argc, const char** argv) {
 
-    std::string ifile = "";
-    std::string ofile = "";
-    std::string opath = "";
+    std::string ifile;
+    std::string ofile;
+    std::string opath;
     uint nevents = UINT_MAX;
+    bool weighted = false;
 
     try {
         TCLAP::CmdLine cmd("Test program for the Multiblade event-builder.", ' ', "0.1");
 
-        TCLAP::ValueArg<std::string> ifileArg("f", "ifile", "File to analyze", true, "homer", "string");
+        TCLAP::ValueArg<std::string> ifileArg("f", "ifile", "File to analyze", true, "data.txt", "string");
         cmd.add(ifileArg);
         TCLAP::ValueArg<std::string> ofileArg("o", "ofile", "Output file", false, "", "string");
         cmd.add(ofileArg);
@@ -27,6 +28,8 @@ int main(int argc, const char** argv) {
         cmd.add(opathArg);
         TCLAP::ValueArg<uint> nArg("n", "nevents", "Number of events to analyze", false, UINT_MAX, "integer");
         cmd.add(nArg);
+        TCLAP::ValueArg<bool> weightArg("w", "weighted", "Use weighted average to find position", false, false, "boolean");
+        cmd.add(weightArg);
 
         cmd.parse(argc, argv);
 
@@ -38,19 +41,21 @@ int main(int argc, const char** argv) {
         opath = opathArg.getValue();
         // Get number of events to process
         nevents = nArg.getValue();
+        // Use max ADC or weighted average
+        weighted = weightArg.getValue();
 
     } catch (TCLAP::ArgException &e) {
         std::cerr << "error: " << e.error() << " for arg " << e.argId() << std::endl;
     }
 
-    if (opath.size() == 0) {
-        std::size_t path_pos = ifile.find_last_of("/");
+    if (opath.empty()) {
+        std::size_t path_pos = ifile.find_last_of('/');
         opath = ifile.substr(0, path_pos);
     }
-    if (ofile.size() == 0) {
-        std::size_t path_pos = ifile.find_last_of("/");
+    if (ofile.empty()) {
+        std::size_t path_pos = ifile.find_last_of('/');
         ofile = ifile.substr(path_pos + 1);
-        ofile.erase(ofile.find("."), ofile.npos);
+        ofile.erase(ofile.find('.'), ofile.npos);
         ofile.append("_processed.txt");
     }
     struct stat statbuf;
@@ -67,7 +72,7 @@ int main(int argc, const char** argv) {
     std::cout << "\n";
 
     multiBladeEventBuilder p;
-    p.setUseWeightedAverage(false);
+    p.setUseWeightedAverage(weighted);
 
     TextFile data(ifile);
 
@@ -82,7 +87,7 @@ int main(int argc, const char** argv) {
     {
         try {
             entry = data.nextEntry();
-        } catch (TextFile::eof e) {
+        } catch (TextFile::eof &e) {
             std::cout << "End of file reached." << std::endl;
             break;
         }

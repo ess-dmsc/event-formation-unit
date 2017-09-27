@@ -9,7 +9,8 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 multiBladeEventBuilder::multiBladeEventBuilder()
-: m_time_window(185),
+: m_ADC_theshold(0),
+  m_time_window(185),
   m_nwire_channels(32),
   m_nstrip_channels(32),
   m_use_weighted_average(true),
@@ -25,17 +26,23 @@ multiBladeEventBuilder::multiBladeEventBuilder()
 
 multiBladeEventBuilder::~multiBladeEventBuilder() = default;
 
-bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel, const uint64_t &ADC, const uint32_t &clock) {
+bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel, const uint16_t &ADC, const uint32_t &clock) {
 
     XTRACE(PROCESS, DEB, "Data-point received (%d, %d, %d)\n" ,
-           static_cast<int>(channel), static_cast<int>(ADC) , clock);
+           static_cast<uint>(channel), static_cast<uint>(ADC) , static_cast<uint>(clock));
 
     // Increment the counter for number of data-points received.
     m_datapoints_received++;
 
+    if (ADC < m_ADC_theshold) {
+        XTRACE(PROCESS, DEB, "ADC-value below threshold. %d < %d\n",
+               static_cast<uint>(ADC), static_cast<uint>(m_ADC_theshold));
+        return false;
+    }
+
     // Sanity check. Recieved channel number must not exceed the sum of wire and strip channels
-    if (channel >= m_nwire_channels+m_nstrip_channels){
-        XTRACE(PROCESS, WAR, "Recieved channel number : %d - max channel-number : %d\n", static_cast<int>(channel),
+    if (channel >= m_nwire_channels+m_nstrip_channels) {
+        XTRACE(PROCESS, WAR, "Recieved channel number : %d - max channel-number : %d\n", static_cast<uint>(channel),
                static_cast<uint>(m_nwire_channels+m_nstrip_channels));
         return false;
     }
@@ -139,7 +146,6 @@ bool multiBladeEventBuilder::pointsAdjacent() {
 
 bool multiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
 
-    // Check if cluster contains more than 1 signal. If not - then exit, since there will be nothing to do.
     if (cluster.size() <= 1)
         return true;
 
@@ -148,17 +154,19 @@ bool multiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
 
     // Cluster iterator
     auto it1 = cluster.begin();
+
     // Loop until the second last data-point
     while (it1 != --cluster.end()) {
+
         // Get the next element relative to the main iterator
         auto it2 = std::next(it1);
 
         // Get the channel numbers
-        uint8_t channel1 = it1->channel;
-        uint8_t channel2 = it2->channel;
+        auto channel1 = it1->channel;
+        auto channel2 = it2->channel;
 
         // Calculate the difference in channel number
-        int16_t diff = channel2 - channel1;
+        auto diff = channel2 - channel1;
 
         // Check if the difference is larger than 1. If so, they are not adjacent ...
         if (diff > 1) {
@@ -168,20 +176,16 @@ bool multiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
             // Break the while-loop
             return false;
 
-        } else
+        } else {
             // Move iterator to next element
             it1++;
+        }
     }
 
     return true;
 }
 
 double multiBladeEventBuilder::calculatePosition(std::vector<point> &cluster) {
-
-    double position = -1.;
-
-    if (cluster.empty())
-        return position;
 
     if (m_use_weighted_average) {
         uint64_t sum_numerator = 0;
@@ -191,7 +195,8 @@ double multiBladeEventBuilder::calculatePosition(std::vector<point> &cluster) {
             sum_denominator += it.ADC;
         }
 
-        position = static_cast<double>(sum_numerator) / static_cast<double>(sum_denominator);
+        return (sum_denominator == 0 ? -1 :
+                    static_cast<double>(sum_numerator) / static_cast<double>(sum_denominator));
     } else {
         uint8_t max_channel = 0;
         uint64_t max_ADC = 0;
@@ -202,10 +207,8 @@ double multiBladeEventBuilder::calculatePosition(std::vector<point> &cluster) {
             }
         }
 
-        position = static_cast<double>(max_channel);
+        return (max_ADC == 0 ? -1. : static_cast<double>(max_channel));
     }
-
-    return position;
 }
 
 void multiBladeEventBuilder::lastPoint() {
@@ -241,6 +244,7 @@ void multiBladeEventBuilder::addPointToCluster(uint8_t channel, uint64_t ADC) {
 }
 
 void multiBladeEventBuilder::resetCounters() {
+
     m_datapoints_received = 0;
     m_nevents = 0;
     m_rejected_adjacency = 0;

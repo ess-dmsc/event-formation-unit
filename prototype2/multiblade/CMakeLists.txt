@@ -16,13 +16,22 @@ set(mbtext2udp_SRC mbtext2udp.cpp mbgen/MBArgs.cpp mbcommon/TextFile.cpp)
 set(mbtext2udp_INC mbgen/MBArgs.h mbcommon/TextFile.cpp)
 create_executable(mbtext2udp "")
 
-# Create an excecutable for the event-builder to process recorded data from a text-file.
+# Excecutables to build if TCLAP is installed
 find_package(TCLAP)
 if (TCLAP_FOUND)
     message(STATUS "TCLAP found")
+
+    # Create an excecutable for the event-builder to process recorded data from a text-file.
     set(mbprocesstextfile_INC mbcommon/multiBladeEventBuilder.h mbcommon/TextFile.h mbcommon/dumpEventBuilderInfo.h)
     set(mbprocesstextfile_SRC mbprocesstextfile.cpp mbcommon/multiBladeEventBuilder.cpp mbcommon/TextFile.cpp mbcommon/dumpEventBuilderInfo.cpp)
     create_executable(mbprocesstextfile "")
+
+    # Create an excecutable to pass data several times for profiling
+    # Not really usefull unless built with -gp
+    set(mbprofiling_INC mbcommon/multiBladeEventBuilder.h mbcommon/TextFile.h mbcommon/dumpEventBuilderInfo.h)
+    set(mbprofiling_SRC mbprofiling.cpp mbcommon/multiBladeEventBuilder.cpp mbcommon/TextFile.cpp mbcommon/dumpEventBuilderInfo.cpp)
+    create_executable(mbprofiling "")
+
 else (TCLAP_FOUND)
     message(STATUS "TCLAP not found")
 endif ()

@@ -63,6 +63,7 @@ private:
 
         // Processing Counters
         int64_t rx_idle1;
+        int64_t rx_readouts;
         int64_t tx_bytes;
         int64_t rx_events;
     } ALIGN(64) mystats;
@@ -78,6 +79,7 @@ MBCAEN::MBCAEN(void *args) {
     ns.create("input.rx_packets",                &mystats.rx_packets);
     ns.create("input.rx_bytes",                  &mystats.rx_bytes);
     ns.create("input.fifo1_push_errors",         &mystats.fifo1_push_errors);
+    ns.create("processing.rx_readouts",          &mystats.rx_readouts);
     ns.create("processing.rx_idle1",             &mystats.rx_idle1);
     ns.create("processing.tx_bytes",             &mystats.tx_bytes);
     ns.create("processing.rx_events",            &mystats.rx_events);
@@ -163,12 +165,13 @@ void MBCAEN::processing_thread() {
             mystats.rx_idle1++;
             usleep(10);
         } else {
-            auto UNUSED dataptr = eth_ringbuf->getdatabuffer(data_index);
-            auto UNUSED datalen = eth_ringbuf->getdatalength(data_index);
+            auto dataptr = eth_ringbuf->getdatabuffer(data_index);
+            auto datalen = eth_ringbuf->getdatalength(data_index);
 
             mbdata.recieve(dataptr, datalen);
 
             auto dat = mbdata.data;
+            mystats.rx_readouts += dat.size();
 
             for (uint i = 0; i < dat.size(); i++) {
 
@@ -176,6 +179,7 @@ void MBCAEN::processing_thread() {
 
                 if (dp.digi == UINT8_MAX && dp.chan == UINT8_MAX && dp.adc == UINT16_MAX && dp.time == UINT32_MAX)
                 {
+                    XTRACE(PROCESS, DEB, "Last point\n");
                     builder.lastPoint();
                     break;
                 }
@@ -186,6 +190,11 @@ void MBCAEN::processing_thread() {
                     pixel_id += (nwires + 1) * (builder.getWirePosition() + 1);
                     pixel_id += builder.getStripPosition() + 1;
 
+                    XTRACE(PROCESS, DEB, "wire pos: %d, strip pos: %d, pixel_id: %d\n",
+                             (int)(builder.getWirePosition()  + 1),
+                             (int)(builder.getStripPosition() + 1),
+                             pixel_id);
+
                     mystats.tx_bytes += flatbuffer.addevent(builder.getTimeStamp(), pixel_id);
                     mystats.rx_events++;
                 }
@@ -195,7 +204,7 @@ void MBCAEN::processing_thread() {
         // Checking for exit
         if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-            flatbuffer.produce();
+            mystats.tx_bytes += flatbuffer.produce();
 
             if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
                 std::cout << "stopping processing thread, timeus " << std::endl;

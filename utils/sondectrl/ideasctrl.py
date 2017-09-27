@@ -5,28 +5,15 @@ import struct
 import argparse
 import time
 
-# 0070   00 c0 00 34 00 00 00 00 00 30 02 01 64 00 00 00  ...4.....0..d...
-# 0080   20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20
-# 0090   20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20
-# 00a0   20 20 20 20 00 00 00 00 00 80
-#                                      00 c0 00 35 00 00      .........5..
-# 00b0   00 00 00 30 03 01 64 00 00 00 20 20 20 20 20 20  ...0..d...
-# 00c0   20 20 20 20 20 20 20 20 20 20 20 20 20 20 20 20
-# 00d0   20 20 20 20 20 20 20 20 20 20 20 20 20 20 00 00                ..
-# 00e0   00 00 00 80                                      ....
-
 svr_ip_addr = "127.0.0.1"
 svr_tcp_port = 50010
 
 RXBUFFER = 4096
 
 asicscf1_bits = 356
-asiccfg1 = [
-  0x00, 0x00, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-  0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80
-]
-
+asiccfg1 = [ 0x00, 0x00, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+             0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+             0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80                    ]
 
 registers = {'Serial Number': 0x0000,
              'Firmware Type': 0x0001,
@@ -81,6 +68,7 @@ class IdeasCtrl():
          print("send: %s" %(binascii.hexlify(data)))
       self.s.send(data)
       self.pktno += 1
+      time.sleep(0.1)
 
    def recv(self):
       rx = self.s.recv(RXBUFFER)
@@ -149,6 +137,7 @@ class IdeasCtrl():
 
        tx_data = struct.pack('B' * len(data), *data)
        self.send(tx_hdr + tx_data)
+       time.sleep(0.1)
 
 
    def setcalibrationparms(self, polarity, nb_pulses, pulse_length, pulse_interval):
@@ -174,7 +163,8 @@ class IdeasCtrl():
       self.writesystemregister8('cfg_phystrig_en', 0)
       self.writesystemregister8('cfg_all_ch_en', 0)
 
-
+   def startreadout(self):
+      self.writesystemregister8('cfg_timing_readout_en', 1)
 
 
    def dumpallregisters(self):
@@ -206,6 +196,7 @@ if __name__ == '__main__':
    parser = argparse.ArgumentParser()
    parser.add_argument("-i", metavar='ipaddr', help = "server ip address (default %s)" % (svr_ip_addr), type = str)
    parser.add_argument("-p", metavar='port', help = "server tcp port (default %d)" % (svr_tcp_port), type = int)
+   parser.add_argument("-c", metavar='cmd', help = "command (config, start, stop)", type = str)
    parser.add_argument("-v", help = "add debug prints", action='store_true')
    args = parser.parse_args()
 
@@ -215,18 +206,18 @@ if __name__ == '__main__':
    if args.p != None:
       svr_tcp_port = args.p
 
-ctrl = IdeasCtrl(svr_ip_addr, svr_tcp_port, args.v)
+   if args.c != None:
 
+      ctrl = IdeasCtrl(svr_ip_addr, svr_tcp_port, args.v)
 
-ctrl.configandstart()
-
-#ctrl.writeasicconf(ctrl.asic.id1, asiccfg1, asicscf1_bits)
-
-
-# ctrl.dumpallregisters()
-# ctrl.setcalibrationparms(1,10,11,512)
-#
-# print("Doing it all again")
-#
-# ctrl.dumpallregisters()
-# ctrl.setcalibrationparms(0,1,1,500)
+      if args.c == "stop":
+         print("Stopping Readout")
+         ctrl.stopreadout()
+      elif args.c == "start":
+         print("Starting Readout")
+         ctrl.startreadout()
+      elif args.c == "config":
+         print("Configure System for Time Triggered Readout")
+         ctrl.configandstart()
+      elif ags.c == "dumpreg":
+         ctrl.dumpallregisters()

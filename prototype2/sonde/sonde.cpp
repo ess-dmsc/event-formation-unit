@@ -1,3 +1,4 @@
+
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <cinttypes>
@@ -162,8 +163,13 @@ void SONDEIDEA::processing_thread() {
       mystats.rx_geometry_errors += ideasdata.errors;
       mystats.rx_events += ideasdata.events;
 
-      for (int i = 0; i < events; i++) {
-          mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
+      if (events > 0) {
+        for (int i = 0; i < events; i++) {
+            XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)\n", i,
+                    ideasdata.data[i].time,
+                    ideasdata.data[i].pixel_id);
+            mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
+        }
       }
     }
 
@@ -171,7 +177,7 @@ void SONDEIDEA::processing_thread() {
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
       // printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
 
-      flatbuffer.produce();
+      mystats.tx_bytes += flatbuffer.produce();
 
       if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping processing thread, timeus " << std::endl;

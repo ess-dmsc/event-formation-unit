@@ -13,7 +13,7 @@ void Clusterer::insert(const Eventlet &eventlet) {
   if ((eventlet.time < latest_time_) &&
       ((latest_time_ - eventlet.time) > (std::numeric_limits<uint64_t>::max() / 2) ))
   {
-    XTRACE(PROCESS, ALW, "Clock overflow event %lu < %lu && %lu > %lu",
+    XTRACE(PROCESS, ALW, "Clock overflow event %" PRIu64 " < %" PRIu64 " && %" PRIu64 " > %" PRIu64,
            eventlet.time, latest_time_,
            (eventlet.time - latest_time_),
            (std::numeric_limits<uint64_t>::max() / 2));
