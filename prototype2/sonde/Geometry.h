@@ -10,8 +10,8 @@
 #include <cinttypes>
 #include <common/Trace.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 class SoNDeGeometry {
 public:
