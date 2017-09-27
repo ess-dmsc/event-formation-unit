@@ -15,6 +15,12 @@ asiccfg1 = [ 0x00, 0x00, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0
              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80                    ]
 
+asicscf2_bits = 356
+asiccfg2 = [ 0x00, 0x00, 0x00, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0,
+             0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0,
+             0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80                    ]
+
+
 registers = {'Serial Number': 0x0000,
              'Firmware Type': 0x0001,
              'Firmware Version': 0x0002,
@@ -158,6 +164,17 @@ class IdeasCtrl():
       self.writesystemregister16('cfg_event_num', 250)
       self.writesystemregister8('cfg_timing_readout_en', 1)
 
+   def configandstart2(self):
+      self.writesystemregister8('cfg_timing_readout_en', 0)
+      self.writesystemregister8('cfg_phystrig_en', 0)
+      self.writesystemregister8('cfg_all_ch_en', 0)
+      self.writeasicconf(self.asic.id0, asiccfg2, asicscf2_bits)
+      self.writeasicconf(self.asic.id1, asiccfg2, asicscf2_bits)
+      self.writeasicconf(self.asic.id2, asiccfg2, asicscf2_bits)
+      self.writeasicconf(self.asic.id3, asiccfg2, asicscf2_bits)
+      self.writesystemregister16('cfg_event_num', 250)
+      self.writesystemregister8('cfg_timing_readout_en', 1)
+
    def stopreadout(self):
       self.writesystemregister8('cfg_timing_readout_en', 0)
       self.writesystemregister8('cfg_phystrig_en', 0)
@@ -219,5 +236,8 @@ if __name__ == '__main__':
       elif args.c == "config":
          print("Configure System for Time Triggered Readout")
          ctrl.configandstart()
+     elif args.c == "config2":
+         print("Configure System for Time Triggered Readout")
+         ctrl.configandstart2()
       elif ags.c == "dumpreg":
          ctrl.dumpallregisters()
