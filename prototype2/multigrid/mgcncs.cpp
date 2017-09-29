@@ -41,6 +41,7 @@ const char *classname = "CSPEC Detector";
 class CSPEC : public Detector {
 public:
   CSPEC(void *args);
+  ~CSPEC();
   void input_thread();
   void processing_thread();
   void output_thread();
@@ -94,6 +95,11 @@ private:
 
   EFUArgs *opts;
 };
+
+CSPEC::~CSPEC() {
+   delete event_ringbuf;
+   delete eth_ringbuf;
+}
 
 CSPEC::CSPEC(void *args) {
   opts = (EFUArgs *)args;
