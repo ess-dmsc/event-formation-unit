@@ -6,10 +6,10 @@
 //static
 size_t NMXHists::needed_buffer_size()
 {
-  return
-      NMX_HIST_ELEM_SIZE * NMX_STRIP_HIST_SIZE * 2 +
-      NMX_HIST_ELEM_SIZE * NMX_ADC_HIST_SIZE * 3 +
-      sizeof(uint32_t); //bin_width
+  return NMX_HIST_ELEM_SIZE *
+      (NMX_STRIP_HIST_SIZE * 2 +
+       NMX_ADC_HIST_SIZE * 3 +
+       1 /*bin_width*/ );
 }
 
 NMXHists::NMXHists()

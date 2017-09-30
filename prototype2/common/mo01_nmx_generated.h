@@ -400,13 +400,6 @@ struct MonitorMessage FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
   const void *data() const {
     return GetPointer<const void *>(VT_DATA);
   }
-  template<typename T> const T *data_as() const;
-  const GEMHist *data_as_GEMHist() const {
-    return (data_type() == DataField::GEMHist)? static_cast<const GEMHist *>(data()) : nullptr;
-  }
-  const GEMTrack *data_as_GEMTrack() const {
-    return (data_type() == DataField::GEMTrack)? static_cast<const GEMTrack *>(data()) : nullptr;
-  }
   void *mutable_data() {
     return GetPointer<void *>(VT_DATA);
   }
@@ -420,14 +413,6 @@ struct MonitorMessage FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
            verifier.EndTable();
   }
 };
-
-template<> inline const GEMHist *MonitorMessage::data_as<GEMHist>() const {
-  return data_as_GEMHist();
-}
-
-template<> inline const GEMTrack *MonitorMessage::data_as<GEMTrack>() const {
-  return data_as_GEMTrack();
-}
 
 struct MonitorMessageBuilder {
   flatbuffers::FlatBufferBuilder &fbb_;
