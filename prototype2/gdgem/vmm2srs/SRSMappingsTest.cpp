@@ -20,20 +20,20 @@ TEST_F(SRSMappingsTest, GoodMapping) {
 
 TEST_F(SRSMappingsTest, BadMapping) {
   geometry->set_mapping(0, 16, 0, 0);
-  ASSERT_EQ(geometry->get_plane(0, 0), NMX_INVALID_GEOM_ID);
+  ASSERT_EQ(geometry->get_plane(0, 0), NMX_INVALID_PLANE_ID);
   ASSERT_EQ(geometry->get_strip(0, 0, 0), NMX_INVALID_GEOM_ID);
 }
 
 TEST_F(SRSMappingsTest, BadFEC) {
   geometry->set_mapping(0, 0, 0, 0);
-  ASSERT_EQ(geometry->get_plane(1, 0), NMX_INVALID_GEOM_ID);
+  ASSERT_EQ(geometry->get_plane(1, 0), NMX_INVALID_PLANE_ID);
   ASSERT_EQ(geometry->get_strip(1, 0, 0), NMX_INVALID_GEOM_ID);
 }
 
 TEST_F(SRSMappingsTest, BadVMM) {
   geometry->set_mapping(0, 0, 0, 0);
-  ASSERT_EQ(geometry->get_plane(0, 15), NMX_INVALID_GEOM_ID);
-  ASSERT_EQ(geometry->get_plane(0, 16), NMX_INVALID_GEOM_ID);
+  ASSERT_EQ(geometry->get_plane(0, 15), NMX_INVALID_PLANE_ID);
+  ASSERT_EQ(geometry->get_plane(0, 16), NMX_INVALID_PLANE_ID);
   ASSERT_EQ(geometry->get_strip(0, 15, 0), NMX_INVALID_GEOM_ID);
   ASSERT_EQ(geometry->get_strip(0, 16, 0), NMX_INVALID_GEOM_ID);
 }

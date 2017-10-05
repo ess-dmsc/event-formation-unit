@@ -116,7 +116,7 @@ TEST_F(TrackSerializerTest, DeSerialize) {
 
 TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
   MESSAGE() << "Allocating a TrackSerializer object on every iteration\n";
-  for (int j = 1; j <= 1000; j *= 2) {
+  for (int j = 2; j <= 1000; j *= 2) {
     event->x.entries.clear();
     event->y.entries.clear();
     int entries = j;
