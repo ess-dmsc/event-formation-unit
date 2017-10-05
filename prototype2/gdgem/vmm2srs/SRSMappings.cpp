@@ -4,8 +4,7 @@
 #include <sstream>
 
 // This is done only once, when starting EFU
-void SRSMappings::define_plane(
-    uint16_t planeID,
+void SRSMappings::define_plane(uint8_t planeID,
     std::initializer_list<std::pair<uint16_t, uint16_t>> chips) {
   int offset = 0;
   for (auto c : chips) {
@@ -15,7 +14,7 @@ void SRSMappings::define_plane(
 }
 
 // This is done only once, when starting EFU
-void SRSMappings::set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t planeID,
+void SRSMappings::set_mapping(uint16_t fecID, uint16_t vmmID, uint8_t planeID,
                            uint16_t strip_offset) {
   if (vmmID >= NMX_MAX_CHIPS)
     return;
@@ -25,7 +24,7 @@ void SRSMappings::set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t planeID,
       offsets_.resize(i + 1);
       offsets_[i] = std::vector<uint16_t>(NMX_MAX_CHIPS, NMX_INVALID_GEOM_ID);
       planes_.resize(i + 1);
-      planes_[i] = std::vector<uint16_t>(NMX_MAX_CHIPS, NMX_INVALID_GEOM_ID);
+      planes_[i] = std::vector<uint8_t>(NMX_MAX_CHIPS, NMX_INVALID_PLANE_ID);
     }
   }
   offsets_[fecID][vmmID] = strip_offset;
@@ -45,12 +44,12 @@ uint16_t SRSMappings::get_strip(uint16_t fecID, uint16_t vmmID,
   return NMX_INVALID_GEOM_ID;
 }
 
-uint16_t SRSMappings::get_plane(uint16_t fecID, uint16_t vmmID) const {
+uint8_t SRSMappings::get_plane(uint16_t fecID, uint16_t vmmID) const {
   if (fecID >= planes_.size())
-    return NMX_INVALID_GEOM_ID;
+    return NMX_INVALID_PLANE_ID;
   const auto& fec = planes_[fecID];
   if (vmmID >= fec.size())
-    return NMX_INVALID_GEOM_ID;
+    return NMX_INVALID_PLANE_ID;
   return fec[vmmID];
 }
 
@@ -61,7 +60,7 @@ std::string SRSMappings::debug() const
   {
     for (size_t j=0; j < planes_[i].size(); ++j)
     {
-      if (planes_[i][j] == NMX_INVALID_GEOM_ID)
+      if (planes_[i][j] == NMX_INVALID_PLANE_ID)
         continue;
       ss << "    (FEC=" << i << ",VMM=" << j << ") --> "
          << "(plane=" << planes_[i][j] << ","

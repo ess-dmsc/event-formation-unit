@@ -85,8 +85,6 @@ void EventNMX::insert_eventlet(const Eventlet &e) {
     y.insert_eventlet(e);
   } else if (e.plane_id == 0) {
     x.insert_eventlet(e);
-  } else {
-    printf("Invalid plane id\n");
   }
 }
 

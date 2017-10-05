@@ -51,16 +51,23 @@ BuilderSRS::process_buffer(char *buf, size_t size,
   Eventlet eventlet;
   for (unsigned int i = 0; i < parser_.elems; i++) {
     auto &d = parser_.data[i];
-    XTRACE(PROCESS, DEB, "eventlet timestamp: hi 0x%08x, lo: 0x%08x\n",
-           parser_.srshdr.time, (d.bcid << 16) + d.tdc);
-    XTRACE(PROCESS, DEB, "eventlet  chip: %d, channel: %d\n", chip_id, d.chno);
+    XTRACE(PROCESS, DEB, "eventlet timestamp: srs: 0x%08x, bc: 0x%08x, tdc: 0x%08x\n",
+           parser_.srshdr.time, d.bcid, d.tdc);
+    XTRACE(PROCESS, DEB, "eventlet chip: %d, channel: %d\n", chip_id, d.chno);
     eventlet.time = time_intepreter_.timestamp(parser_.srshdr.time, d.bcid, d.tdc);
     eventlet.plane_id = geometry_interpreter_.get_plane(fec_id, chip_id);
     eventlet.strip = geometry_interpreter_.get_strip(fec_id, chip_id, d.chno);
     eventlet.adc = d.adc;
+    eventlet.over_threshold = (d.overThreshold != 0);
     XTRACE(PROCESS, DEB, "eventlet  plane_id: %d, strip: %d\n",
            eventlet.plane_id, eventlet.strip);
 /**< @todo flags? */
+
+    if (eventlet.plane_id != NMX_INVALID_PLANE_ID)
+    {
+      XTRACE(PROCESS, ERR, "Bad plane_id --  fec: %d, chip: %d\n",
+             fec_id, chip_id);
+    }
 
 #ifdef DUMPTOFILE
     dprintf(fd, "%2d, %2d, %u, %2d, %d, %d, %d\n", 1, chip_id, parser_.srshdr.time,
