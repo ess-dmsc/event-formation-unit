@@ -16,13 +16,15 @@ class AbstractBuilder {
     struct ResultStats
     {
         ResultStats() {}
-        ResultStats(uint32_t ev, uint32_t err)
+        ResultStats(uint32_t ev, uint32_t err, uint32_t geom_err)
           : valid_eventlets(ev)
           , error_bytes(err)
+          , geom_errors(geom_err)
         {}
 
         uint32_t valid_eventlets {0};
         uint32_t error_bytes {0};
+        uint32_t geom_errors {0};
     };
 
     AbstractBuilder() {}

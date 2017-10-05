@@ -69,7 +69,7 @@ private:
     int64_t rx_bytes;
     int64_t fifo1_push_errors;
     int64_t fifo1_free;
-    int64_t pad_a[3]; /**< @todo check alignment*/
+    int64_t pad_a[2]; /**< @todo check alignment*/
 
     // Processing Counters
     int64_t rx_readouts;
@@ -77,6 +77,7 @@ private:
     int64_t rx_discards;
     int64_t rx_idle1;
     int64_t unclustered;
+    int64_t geom_errors;
     int64_t tx_events;
     int64_t tx_bytes;
   } ALIGN(64) mystats;
@@ -102,6 +103,7 @@ NMX::NMX(void *args) {
   ns.create("processing.rx_discards",          &mystats.rx_discards);
   ns.create("processing.rx_idle",              &mystats.rx_idle1);
   ns.create("processing.unclustered",          &mystats.unclustered);
+  ns.create("processing.geom_errors",          &mystats.geom_errors);
   ns.create("output.tx_events",                &mystats.tx_events);
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
@@ -204,6 +206,7 @@ void NMX::processing_thread() {
 
       mystats.rx_readouts += stats.valid_eventlets;
       mystats.rx_error_bytes += stats.error_bytes;
+      mystats.geom_errors += stats.geom_errors;
 
       while (clusterer.event_ready()) {
         XTRACE(PROCESS, DEB, "event_ready()\n");

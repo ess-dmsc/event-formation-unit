@@ -47,6 +47,7 @@ BuilderSRS::process_buffer(char *buf, size_t size,
 
   uint16_t fec_id = 1;                            /**< @todo not hardcode */
   uint16_t chip_id = parser_.srshdr.dataid & 0xf; /**< @todo may belong elswhere */
+  uint32_t geom_errors {0};
 
   Eventlet eventlet;
   for (unsigned int i = 0; i < parser_.elems; i++) {
@@ -65,7 +66,8 @@ BuilderSRS::process_buffer(char *buf, size_t size,
 
     if (eventlet.plane_id == NMX_INVALID_PLANE_ID)
     {
-      XTRACE(PROCESS, ERR, "Bad SRS mapping --  fec: %d, chip: %d\n",
+      geom_errors++;
+      XTRACE(PROCESS, DEB, "Bad SRS mapping --  fec: %d, chip: %d\n",
              fec_id, chip_id);
     }
     else
@@ -75,11 +77,11 @@ BuilderSRS::process_buffer(char *buf, size_t size,
     }
 
 #ifdef DUMPTOFILE
-    dprintf(fd, "%2d, %2d, %u, %2d, %d, %d, %d\n", 1, chip_id, parser_.srshdr.time,
+    dprintf(fd, "%2d, %2d, %u, %2d, %d, %d, %d\n", fec_id, chip_id, parser_.srshdr.time,
             d.chno, d.bcid, d.tdc, d.adc);
 #endif
 
   }
 
-  return AbstractBuilder::ResultStats(parser_.elems, parser_.error);
+  return AbstractBuilder::ResultStats(parser_.elems, parser_.error, geom_errors);
 }

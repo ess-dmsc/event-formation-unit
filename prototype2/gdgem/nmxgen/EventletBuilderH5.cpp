@@ -23,7 +23,7 @@ BuilderH5::process_buffer(char *buf, size_t size,
     clusterer.insert(eventlet);
     buf += psize;
   }
-  return AbstractBuilder::ResultStats(count, 0);
+  return AbstractBuilder::ResultStats(count, 0, 0);
 }
 
 Eventlet BuilderH5::make_eventlet() {
