@@ -63,10 +63,15 @@ BuilderSRS::process_buffer(char *buf, size_t size,
            eventlet.plane_id, eventlet.strip);
 /**< @todo flags? */
 
-    if (eventlet.plane_id != NMX_INVALID_PLANE_ID)
+    if (eventlet.plane_id == NMX_INVALID_PLANE_ID)
     {
-      XTRACE(PROCESS, ERR, "Bad plane_id --  fec: %d, chip: %d\n",
+      XTRACE(PROCESS, ERR, "Bad SRS mapping --  fec: %d, chip: %d\n",
              fec_id, chip_id);
+    }
+    else
+    {
+      hists.bin(eventlet);
+      clusterer.insert(eventlet);
     }
 
 #ifdef DUMPTOFILE
@@ -74,8 +79,6 @@ BuilderSRS::process_buffer(char *buf, size_t size,
             d.chno, d.bcid, d.tdc, d.adc);
 #endif
 
-    hists.bin(eventlet);
-    clusterer.insert(eventlet);
   }
 
   return AbstractBuilder::ResultStats(parser_.elems, parser_.error);
