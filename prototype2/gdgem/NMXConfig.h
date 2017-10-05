@@ -41,4 +41,8 @@ struct NMXConfig
     size_t geometry_y {256};
 
     std::string debug() const;
+
+    bool dump_csv {false};
+    bool dump_h5 {false};
+    std::string dump_directory {};
 };

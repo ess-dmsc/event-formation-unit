@@ -294,10 +294,12 @@ void NMX::init_builder(string jsonfile)
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
   if (nmx_opts.builder_type == "H5")
-    builder_ = std::make_shared<BuilderH5>();
+    builder_ = std::make_shared<BuilderH5>
+        (nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
   else if (nmx_opts.builder_type == "SRS")
     builder_ = std::make_shared<BuilderSRS>
-        (nmx_opts.time_config, nmx_opts.srs_mappings);
+        (nmx_opts.time_config, nmx_opts.srs_mappings, nmx_opts.dump_directory,
+         nmx_opts.dump_csv, nmx_opts.dump_h5);
   else
     XTRACE(INIT, ALW, "Unrecognized builder type in config\n");
 }

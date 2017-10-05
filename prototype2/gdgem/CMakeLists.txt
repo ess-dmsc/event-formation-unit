@@ -4,62 +4,26 @@ include_directories(..)
 include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
 
 #
-# Detector Pipeline Plugins
-#
-
-set(gdgem_SRC
-  gdgem.cpp
-  NMXConfig.cpp
-  ../../dataformats/multigrid/src/jsoncpp.cpp
-  nmx/Clusterer.cpp
-  nmx/EventNMX.cpp
-  nmx/Eventlet.cpp
-  nmx/Geometry.cpp
-  nmx/Hists.cpp
-  nmx/HistSerializer.cpp
-  nmx/TrackSerializer.cpp
-  nmxgen/EventletBuilderH5.cpp
-  vmm2srs/SRSMappings.cpp
-  vmm2srs/SRSTime.cpp
-  vmm2srs/ParserSRS.cpp
-  vmm2srs/EventletBuilderSRS.cpp)
-set(gdgem_INC
-  NMXConfig.h
-  nmx/Clusterer.h
-  nmx/EventNMX.h
-  nmx/Eventlet.h
-  nmx/Geometry.h
-  nmx/Hists.h
-  nmx/HistSerializer.h
-  nmx/TrackSerializer.h
-  nmx/AbstractEventletBuilder.h
-  nmxgen/EventletBuilderH5.h
-  vmm2srs/SRSMappings.h
-  vmm2srs/SRSTime.h
-  vmm2srs/ParserSRS.h
-  vmm2srs/EventletBuilderSRS.h)
-create_module(gdgem "")
-
-
-#
 # Tools and Data generators
 #
 if(${H5CC_FOUND} AND ${HDF5_FOUND})
-    include_directories(${H5CC_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
-    message(STATUS "Found H5CC and HDF5 libraries. Will build gennmxfile.")
-    set(gennmxfile_SRC
-      nmx/Eventlet.cpp
-      nmxgen/nmxfile.cpp
-      nmxgen/NMXArgs.cpp
-      nmxgen/ReaderVMM.cpp)
-    set(gennmxfile_INC
-      nmx/Eventlet.h
-      nmxgen/NMXArgs.h
-      nmxgen/ReaderVMM.h)
-    create_executable(gennmxfile "${H5CC_LIBRARY}")
-    target_link_libraries(gennmxfile ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+  message(STATUS "Found H5CC and HDF5 libraries. Will build gennmxfile.")
+  include_directories(${H5CC_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
+  set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DUSE_H5")
+
+  set(gennmxfile_SRC
+    nmx/Eventlet.cpp
+    nmxgen/nmxfile.cpp
+    nmxgen/NMXArgs.cpp
+    nmxgen/ReaderVMM.cpp)
+  set(gennmxfile_INC
+    nmx/Eventlet.h
+    nmxgen/NMXArgs.h
+    nmxgen/ReaderVMM.h)
+  create_executable(gennmxfile "${H5CC_LIBRARY}")
+  target_link_libraries(gennmxfile ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 else()
-    message(STATUS "Unable to find H5CC and/or HDF5 libraries. Will NOT build gennmxfile.")
+  message(STATUS "Unable to find H5CC and/or HDF5 libraries. Will NOT build gennmxfile.")
 endif()
 
 #
@@ -77,6 +41,46 @@ else()
     message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
 endif()
 
+
+#
+# Detector Pipeline Plugins
+#
+
+set(gdgem_SRC
+  gdgem.cpp
+  NMXConfig.cpp
+  ../../dataformats/multigrid/src/jsoncpp.cpp
+  nmx/Clusterer.cpp
+  nmx/EventNMX.cpp
+  nmx/Eventlet.cpp
+  nmx/Geometry.cpp
+  nmx/Hists.cpp
+  nmx/HistSerializer.cpp
+  nmx/TrackSerializer.cpp
+  nmx/AbstractEventletBuilder.cpp
+  nmxgen/EventletBuilderH5.cpp
+  vmm2srs/SRSMappings.cpp
+  vmm2srs/SRSTime.cpp
+  vmm2srs/ParserSRS.cpp
+  vmm2srs/EventletBuilderSRS.cpp
+  "${H5CC_LIBRARY}")
+set(gdgem_INC
+  NMXConfig.h
+  nmx/Clusterer.h
+  nmx/EventNMX.h
+  nmx/Eventlet.h
+  nmx/Geometry.h
+  nmx/Hists.h
+  nmx/HistSerializer.h
+  nmx/TrackSerializer.h
+  nmx/AbstractEventletBuilder.h
+  nmxgen/EventletBuilderH5.h
+  vmm2srs/SRSMappings.h
+  vmm2srs/SRSTime.h
+  vmm2srs/ParserSRS.h
+  vmm2srs/EventletBuilderSRS.h)
+#create_module(gdgem "")
+create_module(gdgem "${H5CC_LIBRARY}")
 
 #
 # NMX / VMM Tests
@@ -112,6 +116,7 @@ set(EventletBuilderH5Test_SRC
   nmx/EventNMX.cpp
   nmx/Clusterer.cpp
   nmx/Hists.cpp
+  nmx/AbstractEventletBuilder.cpp
   nmxgen/EventletBuilderH5Test.cpp
   nmxgen/EventletBuilderH5.cpp)
 set(EventletBuilderH5Test_INC
@@ -119,12 +124,13 @@ set(EventletBuilderH5Test_INC
   nmx/EventNMX.h
   nmx/Hists.h
   nmxgen/EventletBuilderH5.h)
-create_test_executable(EventletBuilderH5Test "")
+create_test_executable(EventletBuilderH5Test "${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${H5CC_LIBRARY}")
 
 set(EventletBuilderTest_SRC
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Hists.cpp
+  nmx/AbstractEventletBuilder.cpp
   vmm2srs/EventletBuilderSRSTest.cpp
   vmm2srs/EventletBuilderSRS.cpp
   vmm2srs/ParserSRS.cpp
@@ -138,7 +144,7 @@ set(EventletBuilderTest_INC
   vmm2srs/EventletBuilderSRS.h
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h)
-create_test_executable(EventletBuilderTest "")
+create_test_executable(EventletBuilderTest "${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${H5CC_LIBRARY}")
 
 set(EventletTest_SRC
   nmx/EventletTest.cpp
