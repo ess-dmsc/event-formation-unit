@@ -41,6 +41,7 @@ public:
   int statsize();
   int64_t statvalue(size_t index);
   std::string &statname(size_t index);
+  const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
@@ -97,6 +98,8 @@ int SONDEIDEA::statsize() { return ns.size(); }
 int64_t SONDEIDEA::statvalue(size_t index) { return ns.value(index); }
 
 std::string &SONDEIDEA::statname(size_t index) { return ns.name(index); }
+
+const char *SONDEIDEA::detectorname() { return classname; }
 
 void SONDEIDEA::input_thread() {
   /** Connection setup */
