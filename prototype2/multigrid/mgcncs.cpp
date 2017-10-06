@@ -15,7 +15,6 @@
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/Data.h>
 #include <multigrid/mgcncs/MultigridGeometry.h>
-//#include <cspec/CSPECEvent.h>
 #include <cstring>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>

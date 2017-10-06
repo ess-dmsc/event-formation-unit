@@ -26,10 +26,13 @@ public:
   ~UDPRaw() { cout << "    UDPRaw destroyed" << endl; }
 
   void input_thread();
+  const char *detectorname();
 
 private:
   EFUArgs *opts;
 };
+
+const char *UDPRaw::detectorname() { return classname; }
 
 UDPRaw::UDPRaw(void *args) {
   opts = (EFUArgs *)args;

@@ -49,6 +49,7 @@ public:
   int statsize();
   int64_t statvalue(size_t index);
   std::string &statname(size_t index);
+  const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
@@ -117,6 +118,8 @@ int NMX::statsize() { return ns.size(); }
 int64_t NMX::statvalue(size_t index) { return ns.value(index); }
 
 std::string &NMX::statname(size_t index) { return ns.name(index); }
+
+const char *NMX::detectorname() { return classname; }
 
 void NMX::input_thread() {
   /** Connection setup */
