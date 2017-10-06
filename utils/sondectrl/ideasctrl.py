@@ -172,7 +172,7 @@ class IdeasCtrl():
       self.writeasicconf(self.asic.id1, asiccfg2, asicscf2_bits)
       self.writeasicconf(self.asic.id2, asiccfg2, asicscf2_bits)
       self.writeasicconf(self.asic.id3, asiccfg2, asicscf2_bits)
-      self.writesystemregister16('cfg_event_num', 250)
+      self.writesystemregister16('cfg_event_num', 10)
       self.writesystemregister8('cfg_timing_readout_en', 1)
 
    def stopreadout(self):
@@ -236,7 +236,7 @@ if __name__ == '__main__':
       elif args.c == "config":
          print("Configure System for Time Triggered Readout")
          ctrl.configandstart()
-     elif args.c == "config2":
+      elif args.c == "config2":
          print("Configure System for Time Triggered Readout")
          ctrl.configandstart2()
       elif ags.c == "dumpreg":
