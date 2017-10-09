@@ -14,7 +14,8 @@
 
 class BuilderSRS : public AbstractBuilder {
 public:
-  BuilderSRS(SRSTime time_intepreter, SRSMappings geometry_interpreter);
+  BuilderSRS(SRSTime time_intepreter, SRSMappings geometry_interpreter,
+             std::string dump_dir, bool dump_csv, bool dump_h5);
 
   /** @todo Martin document */
   ResultStats process_buffer(char *buf, size_t size,
@@ -22,9 +23,6 @@ public:
                              NMXHists &hists) override;
 
 private:
-#ifdef DUMPTOFILE
-  int fd;
-#endif
   NMXVMM2SRSData parser_;
   SRSTime time_intepreter_;
   SRSMappings geometry_interpreter_;
