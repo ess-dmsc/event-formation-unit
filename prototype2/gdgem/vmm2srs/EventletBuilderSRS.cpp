@@ -77,8 +77,8 @@ BuilderSRS::process_buffer(char *buf, size_t size,
     }
 
 #ifdef DUMPTOFILE
-    dprintf(fd, "%2d, %2d, %u, %2d, %d, %d, %d\n", fec_id, chip_id, parser_.srshdr.time,
-            d.chno, d.bcid, d.tdc, d.adc);
+    dprintf(fd, "%2d, %2d, %u,%u, %2d, %d, %d, %d, %d\n", fec_id, chip_id, parser_.srshdr.fc, parser_.srshdr.time,
+            d.chno, d.bcid, d.tdc, d.adc, d.overThreshold);
 #endif
 
   }

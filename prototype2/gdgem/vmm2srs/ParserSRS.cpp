@@ -74,7 +74,7 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
   }
 
   int vmmid = srshdr.dataid & 0xff;
-  XTRACE(PROCESS, DEB, "VMM2 Data, VMM Id %d\n", vmmid);
+  XTRACE(PROCESS, DEB, "VMM3s Data, VMM Id %d\n", vmmid);
 
   int index = 0;
   while (datalen >= 8) {
