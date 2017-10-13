@@ -41,15 +41,16 @@ public:
     int x = channel % 4;
     int y = channel / 4;
 
-    if (asic == 1) {
-      x += 4;
-    }
-    if (asic == 2) {
-      y += 4;
-    }
-    if (asic == 3) {
-      x += 4;
-      y += 4;
+    XTRACE(PROCESS, DEB, "initial coords x: %d, y %d \n", x,y);
+
+    if (asic == 0) {
+        x = 7 - x;
+        y = 3 - y;
+    } else if (asic == 3) {
+        y = y + 4;
+    } else if (asic == 2) {
+        x = 7 - x;
+        y = 7 - y;
     }
     int pixelid = x + 8 * y + 1;
     XTRACE(PROCESS, DEB, "coordinates: x %d, y %d, pixel_id: %d\n", x, y, pixelid);
