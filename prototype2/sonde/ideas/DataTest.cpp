@@ -15,6 +15,7 @@ protected:
   IDEASData * readout;
   virtual void SetUp() {
      readout = new IDEASData(&geometry);
+     memset(readout->data, 0, sizeof(readout->data));
   }
   virtual void TearDown() { }
 };
@@ -50,6 +51,11 @@ TEST_F(IDEASDataTest, OkThreeEvents) {
     int size = ok_events_3.size();
     int res = readout->receive((char *)&ok_events_3[0], size);
     ASSERT_EQ(res, 3);
+
+    for (int i = 0; i < res; i++) {
+      ASSERT_NE(0, readout->data[i].time);
+      ASSERT_NE(0, readout->data[i].pixel_id);
+    }
 }
 
 
