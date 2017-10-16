@@ -146,9 +146,8 @@ void SONDEIDEA::input_thread() {
 
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
-
+  int fd; // File descriptor for dumping to file
   #ifdef DUMPTOFILE
-    int fd;
     char cStartTime[50];
     time_t rawtime;
     struct tm * timeinfo;
@@ -176,8 +175,6 @@ void SONDEIDEA::processing_thread() {
   TSCTimer global_time, report_timer;
 
   unsigned int data_index;
-
-
 
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
