@@ -146,7 +146,7 @@ void SONDEIDEA::input_thread() {
 
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
-  int fd; // File descriptor for dumping to file
+  int fd=-1; // File descriptor for dumping to file
   #ifdef DUMPTOFILE
     char cStartTime[50];
     time_t rawtime;
