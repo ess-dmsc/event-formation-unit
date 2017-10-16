@@ -34,12 +34,12 @@ int IDEASData::receive(const char *buffer, int size) {
   int type = (htons(hdr->id) & 0x00ff);
   int seqflag = (htons(hdr->pktseq) & 0xc000) >> 14;
   int count = (htons(hdr->pktseq) & 0x3fff);
-  int time = htonl(hdr->timestamp);
+  int hdrtime = htonl(hdr->timestamp);
   int length = htons(hdr->length);
 
   XTRACE(PROCESS, DEB, "version: %d, sysno: %d, type: %d\n", version, sysno, type);
   XTRACE(PROCESS, DEB, "sequence flag: %d, packet count: %d\n", seqflag, count);
-  XTRACE(PROCESS, DEB, "time: 0x%08x, size: 0x%04x\n", time, length);
+  XTRACE(PROCESS, DEB, "time: 0x%08x, size: 0x%04x\n", hdrtime, length);
 
   if (type != 0xD6) {
     XTRACE(PROCESS, WAR, "Unsupported readout format: Expected 0xD6, got 0x%02x\n", type);
@@ -69,10 +69,14 @@ int IDEASData::receive(const char *buffer, int size) {
     auto aschp  = (uint8_t *)(datap + i*5 + 5);
     uint32_t time = ntohl(*timep);
     uint8_t asch = *aschp; // ASIC (2b) and CHANNEL (6b)
+
     int pixelid = sondegeometry->getdetectorpixelid(0, asch);
     if (pixelid >= 1) {
       data[events].time = time;
       data[events].pixel_id = static_cast<uint32_t>(pixelid);
+      #ifdef DUMPTOFILE
+          dprintf(fd, "%d, %d, %d, %d, %d, %d\n", count, hdrtime, sysno, asch>>6, asch & 0x3f, pixelid);
+      #endif
       XTRACE(PROCESS, DEB, "event: %d, time: 0x%08x, pixel: %d\n", i, time, data[events].pixel_id);
       events++;
     } else {

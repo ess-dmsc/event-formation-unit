@@ -10,6 +10,7 @@
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <cstring>
+#include <fcntl.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -146,7 +147,28 @@ void SONDEIDEA::input_thread() {
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
 
-  IDEASData ideasdata(&geometry);
+  #ifdef DUMPTOFILE
+    int fd;
+    char cStartTime[50];
+    time_t rawtime;
+    struct tm * timeinfo;
+    time(&rawtime);
+    timeinfo = localtime(&rawtime);
+
+    strftime(cStartTime, 50, "%Y-%m-%d-%H-%M-%S", timeinfo);
+    std::string startTime = cStartTime;
+    std::string fileName = "sonde_" + startTime + ".csv";
+    fd = open(fileName.c_str(), O_RDWR|O_CREAT, S_IRWXU);
+    assert(fd >= 0);
+    time_t t = time(NULL);
+    struct tm * tm = localtime(&t);
+    char s[128];
+    strftime(s, sizeof(s), "%c", tm);
+    dprintf(fd, "%s\n", s);
+    dprintf(fd, "# Add header\n");
+  #endif
+
+  IDEASData ideasdata(&geometry, fd);
   Producer eventprod(opts->broker, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
@@ -154,6 +176,8 @@ void SONDEIDEA::processing_thread() {
   TSCTimer global_time, report_timer;
 
   unsigned int data_index;
+
+
 
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {

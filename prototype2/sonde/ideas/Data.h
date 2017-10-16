@@ -31,7 +31,7 @@ public:
   } __attribute__((packed));
 
   /** Empty constructor */
-  IDEASData(SoNDeGeometry * geom) : sondegeometry(geom){ }
+  IDEASData(SoNDeGeometry * geom, int filedescriptor) : sondegeometry(geom), fd(filedescriptor){ }
 
   ~IDEASData() { }
 
@@ -44,4 +44,5 @@ public:
   unsigned int errors{0};  /**< nuber of geometry errors in readout */
 private:
   SoNDeGeometry * sondegeometry{nullptr};
+  int fd;
 };
