@@ -14,7 +14,7 @@ protected:
   SoNDeGeometry geometry;
   IDEASData * readout;
   virtual void SetUp() {
-     readout = new IDEASData(&geometry);
+     readout = new IDEASData(&geometry, -1);
      memset(readout->data, 0, sizeof(readout->data));
   }
   virtual void TearDown() { }
