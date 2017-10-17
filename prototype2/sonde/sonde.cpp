@@ -163,7 +163,7 @@ void SONDEIDEA::processing_thread() {
       mystats.rx_idle1++;
       usleep(10);
     } else {
-      int events = ideasdata.receive(eth_ringbuf->getdatabuffer(data_index),
+      int events = ideasdata.parse_buffer(eth_ringbuf->getdatabuffer(data_index),
         eth_ringbuf->getdatalength(data_index));
 
       mystats.rx_geometry_errors += ideasdata.errors;

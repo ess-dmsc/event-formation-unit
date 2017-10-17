@@ -42,7 +42,7 @@ public:
 
   /** @brief parse a binary payload buffer, return number of data elements
    */
-  int receive(const char *buffer, int size);
+  int parse_buffer(const char *buffer, int size);
 
  /** @brief Section 2.4.5 page 15 */
   int parse_trigger_time_data_packet(const char *buffer);

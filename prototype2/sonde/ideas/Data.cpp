@@ -11,7 +11,7 @@ using namespace std;
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_INF
 
-int IDEASData::receive(const char *buffer, int size) {
+int IDEASData::parse_buffer(const char *buffer, int size) {
   samples = 0;
   events = 0;
   errors = 0;
