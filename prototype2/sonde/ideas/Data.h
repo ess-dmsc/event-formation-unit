@@ -2,7 +2,10 @@
 
 /** @file
  *
- *  @brief Class to receive SoNDe data from IDEAS readoout
+ *  @brief Class to receive SoNDe data from IDEAS readout
+ *
+ *  Data formats based on IDEAS Readout and Control Packet Protocol Reference DRAFT
+ *  Reference : IDE-REP-Ref-V1.7 Date : 2017-05-23
  */
 
 #pragma once
@@ -19,9 +22,8 @@ public:
   };
 
   /** from IDEAS Readout and Control Packet Protocol Reference
-   * Ref: IDE-REP-Ref-V1.7
-   * Date: 2017-05-23
-   * Direction: System -> PC
+   *  Ref: IDE-REP-Ref-V1.7 Date: 2017-05-23
+   *  Direction: System -> PC
    */
   struct Header {
     uint16_t id;
@@ -39,10 +41,28 @@ public:
    */
   int receive(const char *buffer, int size);
 
+ /** @brief Section 2.4.5 page 15 */
+  int parse_trigger_time_data_packet(const char *buffer);
+
+ /** @brief Section 2.4.3 page 12 */
+  int parse_single_event_pulse_height_data_packet(const char *buffer);
+
+ /** @brief Section 2.4.3 page 12 */
+  int parse_multi_event_pulse_height_data_packet(const char *buffer);
+
   struct SoNDeData data[500];
   unsigned int events{0};  /**< number of valid events */
-  unsigned int errors{0};  /**< nuber of geometry errors in readout */
+  unsigned int errors{0};  /**< number of geometry errors in readout */
+  unsigned int samples{0}; /**< number of samples in readout */
 private:
   SoNDeGeometry * sondegeometry{nullptr};
   int fd;
+
+  // Protocol header fields
+  int hdr_sysno{0};
+  int hdr_type{0};
+  int hdr_seqflag{0};
+  int hdr_count{0};
+  int hdr_hdrtime{0};
+  int hdr_length{0};
 };
