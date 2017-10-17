@@ -24,6 +24,23 @@ DataSave::DataSave(std::string filename) {
   }
 }
 
+DataSave::DataSave(std::string filename_prefix, int __attribute__((unused)) unixtime) {
+  char cStartTime[50];
+  time_t rawtime;
+  struct tm * timeinfo;
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+
+  strftime(cStartTime, 50, "%Y-%m-%d-%H-%M-%S", timeinfo);
+  std::string startTime = cStartTime;
+  std::string fileName = filename_prefix + startTime + ".csv";
+
+  if ((fd = open(fileName.c_str(), flags, mode)) < 0) {
+    std::string msg = "DataSave: open(" + fileName + ") failed";
+    perror(msg.c_str());
+  }
+}
+
 int DataSave::tofile(std::string text) {
   if (fd < 0)
     return -1;
@@ -36,6 +53,19 @@ int DataSave::tofile(char *buffer, size_t len) {
     return -1;
 
   return write(fd, buffer, len);
+}
+
+int DataSave::tofile(const char * fmt,...) {
+  char buffer[200];
+  if (fd < 0)
+    return -1;
+  va_list args;
+  va_start(args, fmt);
+  vsprintf(buffer, fmt, args);
+  va_end(args);
+  buffer[199] = 0;
+  return dprintf(fd, "%s", buffer);
+
 }
 
 DataSave::~DataSave() { close(fd); }

@@ -146,28 +146,10 @@ void SONDEIDEA::input_thread() {
 
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
-  int fd=-1; // File descriptor for dumping to file
-  #ifdef DUMPTOFILE
-    char cStartTime[50];
-    time_t rawtime;
-    struct tm * timeinfo;
-    time(&rawtime);
-    timeinfo = localtime(&rawtime);
 
-    strftime(cStartTime, 50, "%Y-%m-%d-%H-%M-%S", timeinfo);
-    std::string startTime = cStartTime;
-    std::string fileName = "sonde_" + startTime + ".csv";
-    fd = open(fileName.c_str(), O_RDWR|O_CREAT, S_IRWXU);
-    assert(fd >= 0);
-    time_t t = time(NULL);
-    struct tm * tm = localtime(&t);
-    char s[128];
-    strftime(s, sizeof(s), "%c", tm);
-    dprintf(fd, "%s\n", s);
-    dprintf(fd, "# Add header\n");
-  #endif
+// dumptofile
 
-  IDEASData ideasdata(&geometry, fd);
+  IDEASData ideasdata(&geometry);
   Producer eventprod(opts->broker, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 

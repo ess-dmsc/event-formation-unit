@@ -101,5 +101,5 @@ vector<uint8_t> type_0xd4_meph_ok_n3m1  //(n=3, m=1)
 
 /** Raw packet data above, now collect into iterable containers */
 
-vector<vector<uint8_t>> err_hdr{err_short_header, err_version, err_datatype, err_length,
+vector<vector<uint8_t>> err_hdr{err_version, err_datatype, err_length,
    err_nb_event_mismatch};

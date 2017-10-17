@@ -11,10 +11,13 @@
 #pragma once
 
 #include <cinttypes>
+#include <dataformats/multigrid/inc/DataSave.h>
 #include <sonde/Geometry.h>
 
 class IDEASData {
 public:
+  // Error codes, returned as negative numbers
+  enum error { OK = 0, EBUFFER, EBADSIZE, EHEADER, EUNSUPP};
 
   struct SoNDeData {
     uint32_t time;
@@ -33,7 +36,7 @@ public:
   } __attribute__((packed));
 
   /** Empty constructor */
-  IDEASData(SoNDeGeometry * geom, int filedescriptor) : sondegeometry(geom), fd(filedescriptor){ }
+  IDEASData(SoNDeGeometry * geom) : sondegeometry(geom) {}
 
   ~IDEASData() { }
 
@@ -56,7 +59,6 @@ public:
   unsigned int samples{0}; /**< number of samples in readout */
 private:
   SoNDeGeometry * sondegeometry{nullptr};
-  int fd;
 
   // Protocol header fields
   int hdr_sysno{0};
@@ -65,4 +67,9 @@ private:
   int hdr_count{0};
   int hdr_hdrtime{0};
   int hdr_length{0};
+
+#ifdef DUMPTOFILE
+  DataSave mephdata{"sonde_spectrum_", 1};
+  DataSave eventdata{"sonde_events_", 1};
+#endif
 };

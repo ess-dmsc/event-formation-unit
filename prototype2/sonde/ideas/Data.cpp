@@ -8,19 +8,22 @@
 
 using namespace std;
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_INF
 
 int IDEASData::receive(const char *buffer, int size) {
+  samples = 0;
+  events = 0;
+  errors = 0;
 
   if (buffer == nullptr) {
     XTRACE(PROCESS, WAR, "Invalid buffer\n");
-    return 0;
+    return -IDEASData::EBUFFER;
   }
 
   if (size < 11) {
     XTRACE(PROCESS, WAR, "IDEAS readout header too short (%d bytes)\n", size);
-    return 0;
+    return -IDEASData::EBADSIZE;
   }
 
   struct Header * hdr = (struct Header *)buffer;
@@ -28,7 +31,7 @@ int IDEASData::receive(const char *buffer, int size) {
   int version = (ntohs(hdr->id) & 0xe000) >> 13;
   if (version != 0) {
     XTRACE(PROCESS, WAR, "Illegal version number (%d)\n", version);
-    return 0;
+    return -IDEASData::EHEADER;
   }
   hdr_sysno = (ntohs(hdr->id) & 0x1fff) >> 8;
   hdr_type = (ntohs(hdr->id) & 0x00ff);
@@ -44,41 +47,44 @@ int IDEASData::receive(const char *buffer, int size) {
   if (hdr_length + (int)sizeof(struct Header) != size) {
     XTRACE(PROCESS, WAR, "Packet length mismatch: udp: %d, parsed: %d\n",
          size, hdr_length + (int)sizeof(struct Header));
-    return 0;
+    return -IDEASData::EHEADER;
   }
 
+  auto pktdata = buffer + sizeof(struct Header);
+  //auto pktdatasize = size - sizeof(struct Header);
   if (hdr_type == 0xD6) {
-    return parse_trigger_time_data_packet(buffer + sizeof(struct Header));
+    XTRACE(PROCESS, DEB, "Trigger Time Data Packet\n");
+    return parse_trigger_time_data_packet(pktdata);
   } else if (hdr_type == 0xD5) {
-    return parse_single_event_pulse_height_data_packet(buffer + sizeof(struct Header));
-    return 0;
+    XTRACE(PROCESS, DEB, "Single Event Pulse Height Data Packet\n");
+    return parse_single_event_pulse_height_data_packet(pktdata);
   } else if (hdr_type == 0xD4) {
-    return parse_multi_event_pulse_height_data_packet(buffer + sizeof(struct Header));
-    return 0;
+    XTRACE(PROCESS, DEB, "Multi Event Pulse Height Data Packet\n");
+    return parse_multi_event_pulse_height_data_packet(pktdata);
   } else {
     XTRACE(PROCESS, WAR, "Unsupported readout format: 0x%02x\n", hdr_type);
-    return 0;
+    return -IDEASData::EUNSUPP;
   }
 }
 
 
 /** Parse data according to IDEAS documentation */
 int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
+  static const int BYTES_PER_ENTRY=5;
+  /**< @todo add check for minimum size */
   uint8_t * datap = (uint8_t *)(buffer);
   int nentries = *datap;
   XTRACE(PROCESS, DEB, "Number of readout events in packet: %d\n", nentries);
 
-  if (nentries * 5 + 1 != hdr_length) {
+  if (nentries * BYTES_PER_ENTRY + 1 != hdr_length) { /** magic packet numbers, check documentation */
     XTRACE(PROCESS, WAR, "Data length error: events %d (len %d), got: %d\n",
-         nentries, nentries * 5 + 1, hdr_length);
-    return 0;
+         nentries, nentries * BYTES_PER_ENTRY + 1, hdr_length);
+    return -IDEASData::EHEADER;
   }
 
-  events = 0;
-  errors = 0;
   for (int i = 0; i < nentries; i++) {
-    auto timep = (uint32_t *)(datap + i*5 + 1);
-    auto aschp  = (uint8_t *)(datap + i*5 + 5);
+    auto timep = (uint32_t *)(datap + i * BYTES_PER_ENTRY + 1);
+    auto aschp = (uint8_t  *)(datap + i * BYTES_PER_ENTRY + 5);
     uint32_t time = ntohl(*timep);
     uint8_t asch = *aschp; // ASIC (2b) and CHANNEL (6b)
 
@@ -87,9 +93,9 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
       data[events].time = time;
       data[events].pixel_id = static_cast<uint32_t>(pixelid);
       #ifdef DUMPTOFILE
-          dprintf(fd, "%d, %d, %d, %d, %d, %d\n", hdr_count, hdr_hdrtime, hdr_sysno, asch>>6, asch & 0x3f, pixelid);
+          eventdata.tofile("%d, %u, %d, %d, %d, %d\n", hdr_count, hdr_hdrtime, hdr_sysno, asch>>6, asch & 0x3f, pixelid);
       #endif
-      XTRACE(PROCESS, DEB, "event: %d, time: 0x%08x, pixel: %d\n", i, time, data[events].pixel_id);
+      XTRACE(PROCESS, INF, "event: %d, time: 0x%08x, pixel: %d\n", i, time, data[events].pixel_id);
       events++;
     } else {
       XTRACE(PROCESS, WAR, "Geometry error in entry %d (asch %d)\n", i, asch);
@@ -102,19 +108,18 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
 }
 
 /** Parse data according to IDEAS documentation
- * does not generate events, always return 0 @todo
+ * does not generate events
  */
 int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer){
-    samples = 0;
-    events = 0;
-    errors = 0;
+    static const int BYTES_PER_ENTRY=2;
+    /** @todo check minimum header length */
     int nentries = ntohs(*(uint16_t*)(buffer + 5));
     XTRACE(PROCESS, DEB, "Number of readout events in packet: %d\n", nentries);
 
-    if (nentries * 2 + 7 != hdr_length) {
+    if (nentries * BYTES_PER_ENTRY + 7 != hdr_length) {
       XTRACE(PROCESS, WAR, "Data length error: events %d (len %d), got: %d\n",
-           nentries, nentries * 2 + 5, hdr_length);
-      return 0;
+           nentries, nentries * BYTES_PER_ENTRY + 5, hdr_length);
+      return -IDEASData::EHEADER;
     }
     int asic = *(uint8_t*)(buffer);
     int trigger_type = *(uint8_t*)(buffer + 1);
@@ -126,47 +131,49 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer){
     for (int i = 0; i < nentries; i++) {
       samples++;
       uint16_t sample = ntohs(*(uint16_t *)(buffer + i*2 + 7));
-      XTRACE(PROCESS, DEB, "sample %3d: 0x%x (%d)\n", i, sample, sample);
+      XTRACE(PROCESS, INF, "sample %3d: 0x%x (%d)\n", i, sample, sample);
     }
 
-  return 0;
+  return IDEASData::OK;
 }
 
 /** Parse data according to IDEAS documentation
  * does not generate events, always return 0 @todo
  */
 int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer){
-    samples = 0;
-    events = 0;
-    errors = 0;
+    static const int BYTES_PER_SAMPLE=5;
     if (hdr_length < 12) {
-      XTRACE(PROCESS, DEB, "data packet too short for mpeh data\n");
-      return 0;
+      XTRACE(PROCESS, WAR, "data packet too short for mpeh data\n");
+      return -IDEASData::EBADSIZE;
     }
-    int nentries = *(uint8_t*)buffer;
-    int msamples = ntohs(*(uint16_t *)(buffer + 1));
-    XTRACE(PROCESS, DEB, "Readout events: %d, samples per event %d\n", nentries, msamples);
 
-    int expect_len = (4 + 5 * msamples)*nentries + 3;
-    if ( expect_len != hdr_length) {
+    int N = *(uint8_t*)buffer;                /**< number of events            */
+    int M = ntohs(*(uint16_t *)(buffer + 1)); /**< number of samples per event */
+    XTRACE(PROCESS, DEB, "Readout events: %d, samples per event %d\n", N, M);
+
+    int expect_len = (4 + BYTES_PER_SAMPLE * M) * N + 3;
+    if ( expect_len > hdr_length) {
       XTRACE(PROCESS, WAR, "Data length error: expected len %d, got: %d\n",
            expect_len, hdr_length);
-      return 0;
+      return -IDEASData::EHEADER;
     }
 
-  for (int n = 0; n < nentries; n++) {
-    auto evoff = buffer + 3 + (4+5*msamples)*n; // Event offset
+  for (int n = 0; n < N; n++) {
+    auto evoff = buffer + 3 + (4 + BYTES_PER_SAMPLE * M) * n; // Event offset
     uint32_t evtime = ntohl(*(uint32_t*)(evoff));
-    XTRACE(PROCESS, DEB, "event %d time %0x\n", n, evtime);
-    for (int m = 0; m < msamples; m++) {
+    for (int m = 0; m < M; m++) {
        samples++;
-       int trigger_type = *(uint8_t*)(evoff + 4 + 5*m);
-       int asic = *(uint8_t*)(evoff + 5 + 5*m);
-       int channel = *(uint8_t*)(evoff + 6 + 5*m);
-       int sample = ntohs(*(uint16_t*)(evoff + 7 + 5*m));
-       XTRACE(PROCESS, DEB, "time %x, tt %d, as %d, ch %d, sampl %x\n", evtime, trigger_type, asic, channel, sample);
+       int sampleoffset = BYTES_PER_SAMPLE * m;
+       int trigger_type = *(uint8_t*)(evoff + sampleoffset + 4);
+       int asic = *(uint8_t*)(evoff + sampleoffset + 5);
+       int channel = *(uint8_t*)(evoff + sampleoffset + 6 );
+       int sample = ntohs(*(uint16_t*)(evoff + sampleoffset + 7));
+       XTRACE(PROCESS, INF, "time %x, tt %d, as %d, ch %d, sampl %x\n", evtime, trigger_type, asic, channel, sample);
+       #ifdef DUMPTOFILE
+       mephdata.tofile("%u, %d, %d, %d, %d\n", evtime, trigger_type, asic, channel, sample);
+       #endif
     }
   }
 
-  return 0;
+  return IDEASData::OK;
 }
