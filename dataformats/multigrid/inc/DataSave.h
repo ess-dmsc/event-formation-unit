@@ -23,20 +23,30 @@ public:
   /** @todo document */
   DataSave(std::string filename_prefix, int addunixtime);
 
-  /** @todo document */
+  /** @brief write string to file */
   int tofile(std::string);
 
+  /** @brief write buffer of size len to file */
   int tofile(char *buffer, size_t len);
 
-  /** printf-like formatting */
+  /** @brief printf-like formatting */
   int tofile(const char * fmt,...);
 
-  /** @todo document */
+  /** @brief closes file descriptor */
   ~DataSave();
 
 private:
-  int fd{-1};
+  int fd{-1};                      /**< unix file descriptor for savefile */
+  int sequence_number{1};          /**< filename sequence number */
+  std::string filename_prefix{""}; /**< base filename */
+  uint32_t curfilesize{0};         /**< bytes written to file */
+  uint32_t maxfilesize{50000000};   /**< create new sequence number after maxfilesize bytes */
 
   const int flags = O_TRUNC | O_CREAT | O_WRONLY;
   const int mode = S_IRUSR | S_IWUSR;
+
+  /** @brief figure out if a new file needs to be created */
+  int adjustfilesize(int bytes);
+  /** @brief close old file, create new (with new sequence number) */
+  void createfile();
 };

@@ -9,7 +9,7 @@
 using namespace std;
 
 //#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_INF
+//#define TRC_LEVEL TRC_L_DEB
 
 int IDEASData::parse_buffer(const char *buffer, int size) {
   samples = 0;

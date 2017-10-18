@@ -33,11 +33,11 @@ registers = {'Serial Number': 0x0000,
              'Cal DAC': 0x0e00,
              'cfg_phystrig_en': 0xf016,
              'cfg_forced_en': 0xf017,
-             'cfg_event_num': 0xf018,
+             'cfg_event_num_vata': 0xf018,
              'cfg_forced_asic': 0xf019,
              'cfg_forced_channel': 0xf01a,
              'cfg_timing_readout_en': 0xf020,
-             'cfg_event_num': 0xf021,
+             'cfg_event_num_timing': 0xf021,
              'cfg_all_ch_en': 0xf030
             }
 
@@ -161,7 +161,7 @@ class IdeasCtrl():
       self.writeasicconf(self.asic.id1, asiccfg1, asicscf1_bits)
       self.writeasicconf(self.asic.id2, asiccfg1, asicscf1_bits)
       self.writeasicconf(self.asic.id3, asiccfg1, asicscf1_bits)
-      self.writesystemregister16('cfg_event_num', 250)
+      self.writesystemregister16('cfg_event_num_timing', 250)
       self.writesystemregister8('cfg_timing_readout_en', 1)
 
    def configandstart2(self):
@@ -172,7 +172,7 @@ class IdeasCtrl():
       self.writeasicconf(self.asic.id1, asiccfg2, asicscf2_bits)
       self.writeasicconf(self.asic.id2, asiccfg2, asicscf2_bits)
       self.writeasicconf(self.asic.id3, asiccfg2, asicscf2_bits)
-      self.writesystemregister16('cfg_event_num', 10)
+      self.writesystemregister16('cfg_event_num_timing', 10)
       self.writesystemregister8('cfg_timing_readout_en', 1)
 
    def stopreadout(self):
@@ -201,11 +201,11 @@ class IdeasCtrl():
       print("VATA readout")
       self.printregister("cfg_phystrig_en")
       self.printregister("cfg_forced_en")
-      self.printregister("cfg_event_num")
+      self.printregister("cfg_event_num_vata")
       self.printregister("cfg_forced_asic")
       self.printregister("cfg_forced_channel")
       self.printregister("cfg_timing_readout_en")
-      self.printregister("cfg_event_num")
+      self.printregister("cfg_event_num_timing")
       self.printregister("cfg_all_ch_en")
 
 
