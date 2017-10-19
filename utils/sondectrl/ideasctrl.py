@@ -4,22 +4,30 @@ import socket
 import struct
 import argparse
 import time
+import sys
 
-svr_ip_addr = "127.0.0.1"
-svr_tcp_port = 50010
+svr_ip_addr = "127.0.0.1" # change with -i option
+svr_tcp_port = 50010      # change with -p option
+threshold = 30            # change with -t option
+eventsperpacket = 250     # change with -e option
 
 RXBUFFER = 4096
 
-asicscf1_bits = 356
-asiccfg1 = [ 0x00, 0x00, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-             0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
-             0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80                    ]
+# asicscf1_bits = 356
+# asiccfg1 = [ 0x00, 0x00, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+#              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
+#              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80                    ]
+#
+# asicscf2_bits = 356
+# asiccfg2 = [ 0x00, 0x00, 0x00, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0,
+#              0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0,
+#              0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80                    ]
 
-asicscf2_bits = 356
-asiccfg2 = [ 0x00, 0x00, 0x00, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0,
-             0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0,
-             0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80                    ]
 
+def makeasiccfg(threshold):
+    res = [0x00, 0x00, 0x00] + [threshold]*36 + [0x00, 0x00, 0x00, 0x00, 0x00, 0x80]
+    #print("len(bits): %d\n" %(len(res)*8))
+    return res
 
 registers = {'Serial Number': 0x0000,
              'Firmware Type': 0x0001,
@@ -153,26 +161,19 @@ class IdeasCtrl():
       self.writesystemregister32('Calibration Pulse Interval', pulse_interval)
 
 
-   def configandstart(self):
-      self.writesystemregister8('cfg_timing_readout_en', 0)
-      self.writesystemregister8('cfg_phystrig_en', 0)
-      self.writesystemregister8('cfg_all_ch_en', 0)
-      self.writeasicconf(self.asic.id0, asiccfg1, asicscf1_bits)
-      self.writeasicconf(self.asic.id1, asiccfg1, asicscf1_bits)
-      self.writeasicconf(self.asic.id2, asiccfg1, asicscf1_bits)
-      self.writeasicconf(self.asic.id3, asiccfg1, asicscf1_bits)
-      self.writesystemregister16('cfg_event_num_timing', 250)
-      self.writesystemregister8('cfg_timing_readout_en', 1)
 
-   def configandstart2(self):
+
+   def configandstart(self, threshold, numevents):
       self.writesystemregister8('cfg_timing_readout_en', 0)
       self.writesystemregister8('cfg_phystrig_en', 0)
       self.writesystemregister8('cfg_all_ch_en', 0)
-      self.writeasicconf(self.asic.id0, asiccfg2, asicscf2_bits)
-      self.writeasicconf(self.asic.id1, asiccfg2, asicscf2_bits)
-      self.writeasicconf(self.asic.id2, asiccfg2, asicscf2_bits)
-      self.writeasicconf(self.asic.id3, asiccfg2, asicscf2_bits)
-      self.writesystemregister16('cfg_event_num_timing', 10)
+      asiccfg = makeasiccfg(threshold)
+      asiccfgbits=356
+      self.writeasicconf(self.asic.id0, asiccfg, asiccfg_bits)
+      self.writeasicconf(self.asic.id1, asiccfg, asiccfg_bits)
+      self.writeasicconf(self.asic.id2, asiccfg, asiccfg_bits)
+      self.writeasicconf(self.asic.id3, asiccfg, asiccfg_bits)
+      self.writesystemregister16('cfg_event_num_timing', numevents)
       self.writesystemregister8('cfg_timing_readout_en', 1)
 
    def stopreadout(self):
@@ -214,6 +215,8 @@ if __name__ == '__main__':
    parser.add_argument("-i", metavar='ipaddr', help = "server ip address (default %s)" % (svr_ip_addr), type = str)
    parser.add_argument("-p", metavar='port', help = "server tcp port (default %d)" % (svr_tcp_port), type = int)
    parser.add_argument("-c", metavar='cmd', help = "command (config, start, stop)", type = str)
+   parser.add_argument("-t", metavar='thresh', help = "asic threshold", type = int)
+   parser.add_argument("-e", metavar='pkts', help = "events in packet", type = int)
    parser.add_argument("-v", help = "add debug prints", action='store_true')
    args = parser.parse_args()
 
@@ -223,8 +226,13 @@ if __name__ == '__main__':
    if args.p != None:
       svr_tcp_port = args.p
 
-   if args.c != None:
+   if args.t != None:
+       threshold = args.t
 
+   if args.e != None:
+       eventsperpacket = args.e
+
+   if args.c != None:
       ctrl = IdeasCtrl(svr_ip_addr, svr_tcp_port, args.v)
 
       if args.c == "stop":
@@ -235,9 +243,8 @@ if __name__ == '__main__':
          ctrl.startreadout()
       elif args.c == "config":
          print("Configure System for Time Triggered Readout")
-         ctrl.configandstart()
-      elif args.c == "config2":
-         print("Configure System for Time Triggered Readout")
-         ctrl.configandstart2()
+         ctrl.configandstart(threshold, eventsperpacket)
       elif ags.c == "dumpreg":
          ctrl.dumpallregisters()
+   else:
+      print("No command specified")

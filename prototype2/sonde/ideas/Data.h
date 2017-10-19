@@ -75,8 +75,8 @@ private:
   int hdr_length{0};
 
 #ifdef DUMPTOFILE
-  DataSave mephdata{"sonde_me_spectrum_", 1};
-  DataSave sephdata{"sonde_se_spectrum_", 1};
-  DataSave eventdata{"sonde_events_", 1};
+  DataSave mephdata{"single_ch_spec_", 1};
+  DataSave sephdata{"all_ch_spec_", 1};
+  DataSave eventdata{"TOF_", 1};
 #endif
 };
