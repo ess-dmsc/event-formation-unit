@@ -70,28 +70,28 @@ TEST_F(IDEASDataTest, OkThreeEvents) {
 TEST_F(IDEASDataTest, SEPHOkOneSample) {
     int size = type_0xd5_seph_ok_1.size();
     int res = readout->parse_buffer((char *)&type_0xd5_seph_ok_1[0], size);
-    ASSERT_EQ(res, IDEASData::OK); // Should always return 0 events
+    ASSERT_EQ(res, 1);
     ASSERT_EQ(readout->samples, 1);
 }
 
 TEST_F(IDEASDataTest, SEPHOkThreeSamples) {
     int size = type_0xd5_seph_ok_3.size();
     int res = readout->parse_buffer((char *)&type_0xd5_seph_ok_3[0], size);
-    ASSERT_EQ(res, IDEASData::OK); // Should always return 0 events
+    ASSERT_EQ(res, 1); // Should always return 0 events
     ASSERT_EQ(readout->samples, 3);
 }
 
 TEST_F(IDEASDataTest, MEPHOkOneSample) {
     int size = type_0xd4_meph_ok_1.size();
     int res = readout->parse_buffer((char *)&type_0xd4_meph_ok_1[0], size);
-    ASSERT_EQ(res, IDEASData::OK); // Should always return 0 events
+    ASSERT_EQ(res, 1); // Should always return 0 events
     ASSERT_EQ(readout->samples, 1);
 }
 
 TEST_F(IDEASDataTest, MEPHOkN3M1) {
     int size = type_0xd4_meph_ok_n3m1.size();
     int res = readout->parse_buffer((char *)&type_0xd4_meph_ok_n3m1[0], size);
-    ASSERT_EQ(res, IDEASData::OK); // Should always return 0 events
+    ASSERT_EQ(res, 3); // Should always return 0 events
     ASSERT_EQ(readout->samples, 3);
 }
 
