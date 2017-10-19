@@ -39,10 +39,11 @@ private:
   int fd{-1};                      /**< unix file descriptor for savefile */
   int sequence_number{1};          /**< filename sequence number */
   std::string filename_prefix{""}; /**< base filename */
+  std::string startTime{""};       /**< start time common to all files */
   uint32_t curfilesize{0};         /**< bytes written to file */
   uint32_t maxfilesize{50000000};   /**< create new sequence number after maxfilesize bytes */
 
-  const int flags = O_TRUNC | O_CREAT | O_WRONLY;
+  const int flags = O_TRUNC | O_CREAT | O_RDWR;
   const int mode = S_IRUSR | S_IWUSR;
 
   /** @brief figure out if a new file needs to be created */

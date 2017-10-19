@@ -27,7 +27,15 @@ DataSave::DataSave(std::string filename) {
 DataSave::DataSave(std::string filename, int __attribute__((unused)) unixtime) :
     filename_prefix(filename)
 {
-   createfile();
+  char cStartTime[50];
+  time_t rawtime;
+  struct tm * timeinfo;
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+
+  strftime(cStartTime, 50, "%Y%m%d-%H%M%S", timeinfo);
+  startTime = cStartTime;
+  createfile();
 }
 
 
@@ -62,14 +70,7 @@ void DataSave::createfile() {
   curfilesize=0;
 
   close(fd);
-  char cStartTime[50];
-  time_t rawtime;
-  struct tm * timeinfo;
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
 
-  strftime(cStartTime, 50, "%Y%m%d-%H%M%S", timeinfo);
-  std::string startTime = cStartTime;
   std::string fileName = filename_prefix + startTime + "_" + std::to_string(sequence_number) + ".csv";
 
   if ((fd = open(fileName.c_str(), flags, mode)) < 0) {
