@@ -88,7 +88,7 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
     uint32_t time = ntohl(*timep);
     uint8_t asch = *aschp; // ASIC (2b) and CHANNEL (6b)
 
-    int pixelid = sondegeometry->getdetectorpixelid(0, asch);
+    int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asch);
     if (pixelid >= 1) {
       data[events].time = time;
       data[events].pixel_id = static_cast<uint32_t>(pixelid);
@@ -131,6 +131,17 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer){
     for (int i = 0; i < nentries; i++) {
       samples++;
       uint16_t sample = ntohs(*(uint16_t *)(buffer + i*2 + 7));
+
+      int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asic, channel);
+      if (pixelid >= 1) {
+        data[events].time = hdr_hdrtime;
+        data[events].pixel_id = static_cast<uint32_t>(pixelid);
+        events++;
+      }
+      #ifdef DUMPTOFILE
+      sephdata.tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, trigger_type, hold_delay, asic, channel, sample);
+      #endif
+
       XTRACE(PROCESS, INF, "sample %3d: 0x%x (%d)\n", i, sample, sample);
     }
 
@@ -163,11 +174,19 @@ int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer){
     uint32_t evtime = ntohl(*(uint32_t*)(evoff));
     for (int m = 0; m < M; m++) {
        samples++;
+       //events++; //Careful, data array will be parsed
        int sampleoffset = BYTES_PER_SAMPLE * m;
        int trigger_type = *(uint8_t*)(evoff + sampleoffset + 4);
        int asic = *(uint8_t*)(evoff + sampleoffset + 5);
        int channel = *(uint8_t*)(evoff + sampleoffset + 6 );
        int sample = ntohs(*(uint16_t*)(evoff + sampleoffset + 7));
+
+       int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asic, channel);
+       if (pixelid >= 1) {
+         data[events].time = evtime;
+         data[events].pixel_id = static_cast<uint32_t>(pixelid);
+         events++;
+       }
        XTRACE(PROCESS, INF, "time %x, tt %d, as %d, ch %d, sampl %x\n", evtime, trigger_type, asic, channel, sample);
        #ifdef DUMPTOFILE
        mephdata.tofile("%u, %d, %d, %d, %d\n", evtime, trigger_type, asic, channel, sample);

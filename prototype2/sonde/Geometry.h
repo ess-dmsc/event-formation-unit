@@ -23,6 +23,12 @@ public:
    */
   int getmaxpixelid() { return 64; }
 
+
+  // Sometimes asic and channel are separate @todo make this one the default
+  int getdetectorpixelid(int module, int asic, int channel) {
+    return getdetectorpixelid(module, (asic<<6)+(channel&0x3f));
+  }
+
   /** @brief Return the global detector pixel id from
    */
   inline int getdetectorpixelid(int module, int asch) {

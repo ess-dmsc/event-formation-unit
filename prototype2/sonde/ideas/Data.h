@@ -36,7 +36,13 @@ public:
   } __attribute__((packed));
 
   /** Empty constructor */
-  IDEASData(SoNDeGeometry * geom) : sondegeometry(geom) {}
+  IDEASData(SoNDeGeometry * geom) : sondegeometry(geom) {
+    #ifdef DUMPTOFILE
+      mephdata.tofile("# evtime, trigger_type, asic, channel, sample\n");
+      sephdata.tofile("# hdr_hdrtime, trigger_type, hold_delay, asic, channel, sample\n");
+      eventdata.tofile("# hdr_count, hdr_hdrtime, hdr_sysno, asch>>6, asch & 0x3f, pixelid\n");
+    #endif
+  }
 
   ~IDEASData() { }
 
@@ -69,7 +75,8 @@ private:
   int hdr_length{0};
 
 #ifdef DUMPTOFILE
-  DataSave mephdata{"sonde_spectrum_", 1};
+  DataSave mephdata{"sonde_me_spectrum_", 1};
+  DataSave sephdata{"sonde_se_spectrum_", 1};
   DataSave eventdata{"sonde_events_", 1};
 #endif
 };
