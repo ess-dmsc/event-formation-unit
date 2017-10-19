@@ -38,9 +38,9 @@ public:
   /** Empty constructor */
   IDEASData(SoNDeGeometry * geom) : sondegeometry(geom) {
     #ifdef DUMPTOFILE
-      mephdata.tofile("# evtime, trigger_type, asic, channel, sample\n");
+      mephdata.tofile("# hdr_count, evtime, trigger_type, asic, channel, sample\n");
       sephdata.tofile("# hdr_hdrtime, trigger_type, hold_delay, asic, channel, sample\n");
-      eventdata.tofile("# hdr_count, hdr_hdrtime, hdr_sysno, asch>>6, asch & 0x3f, pixelid\n");
+      eventdata.tofile("# hdr_count, hdr_hdrtime, hdr_sysno, asic, channel\n");
     #endif
   }
 
