@@ -128,16 +128,17 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer){
     XTRACE(PROCESS, DEB, "asic: %d, channel: %d, trigger type: %d, hold delay: %d\n",
             asic, channel, trigger_type, hold_delay);
 
+    int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asic, channel);
+    if (pixelid >= 1) {
+      data[events].time = hdr_hdrtime;
+      data[events].pixel_id = static_cast<uint32_t>(pixelid);
+      events++;
+    }
+
     for (int i = 0; i < nentries; i++) {
       samples++;
       uint16_t sample = ntohs(*(uint16_t *)(buffer + i*2 + 7));
 
-      int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asic, channel);
-      if (pixelid >= 1) {
-        data[events].time = hdr_hdrtime;
-        data[events].pixel_id = static_cast<uint32_t>(pixelid);
-        events++;
-      }
       #ifdef DUMPTOFILE
       sephdata.tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, trigger_type, hold_delay, asic, channel, sample);
       #endif
