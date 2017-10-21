@@ -1,5 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <cassert>
+#include <prototype2/common/Trace.h>
 #include <dataformats/multigrid/inc/DataSave.h>
 
 DataSave::DataSave(std::string filename, void *buffer, size_t datasize) {
@@ -24,9 +26,9 @@ DataSave::DataSave(std::string filename) {
   }
 }
 
-DataSave::DataSave(std::string filename, int __attribute__((unused)) unixtime) :
-    filename_prefix(filename)
-{
+DataSave::DataSave(std::string name, int maxlen) :
+  filename_prefix(name), maxfilesize(maxlen) {
+
   char cStartTime[50];
   time_t rawtime;
   struct tm * timeinfo;
@@ -50,16 +52,28 @@ int DataSave::tofile(std::string text) {
   return tofile(text.c_str(), text.size());
 }
 
+
 int DataSave::tofile(const char * fmt,...) {
-  char buffer[2000];
   if (fd < 0)
     return -1;
+
+  int retlen = 0;
   va_list args;
   va_start(args, fmt);
-  vsprintf(buffer, fmt, args);
+  int ret = vsprintf(buffer + bufferlen, fmt, args);
   va_end(args);
-  buffer[1999] = 0;
-  return adjustfilesize(dprintf(fd, "%s", buffer));
+  if (ret < 0)
+    return ret;
+
+  bufferlen += ret;
+  assert(bufferlen < BUFFERSIZE + MARGIN);
+  if (bufferlen >= BUFFERSIZE) {
+    XTRACE(PROCESS, DEB, "Writing chunk of size %d\n", bufferlen);
+    write(fd, buffer, bufferlen);
+    retlen  = bufferlen;
+    bufferlen = 0;
+  }
+  return adjustfilesize(retlen);
 }
 
 DataSave::~DataSave() { close(fd); }

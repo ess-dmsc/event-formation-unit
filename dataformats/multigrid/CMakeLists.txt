@@ -45,6 +45,11 @@ if(BUILD_TESTS)
     ${mgtools_SOURCE_DIR}/../../prototype2/test
     )
 
+  add_executable(DataSaveTest src/test/DataSaveTest.cpp src/DataSave.cpp)
+  target_link_libraries(DataSaveTest ${GTEST_BOTH_LIBRARIES} pthread)
+  set(unit_test_targets DataSaveTest ${unit_test_targets})
+  add_test(NAME regular_DataSaveTest COMMAND DataSaveTest "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/PeakFinderTesttest.xml")
+
   add_executable(PeakFinderTest src/test/PeakFinderTest.cpp src/PeakFinder.cpp)
   target_link_libraries(PeakFinderTest ${GTEST_BOTH_LIBRARIES} pthread)
   set(unit_test_targets PeakFinderTest ${unit_test_targets})

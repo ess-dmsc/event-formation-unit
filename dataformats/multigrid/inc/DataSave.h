@@ -21,7 +21,7 @@ public:
   DataSave(std::string filename);
 
   /** @todo document */
-  DataSave(std::string filename_prefix, int addunixtime);
+  DataSave(std::string fileprefix, int maxfilesize);
 
   /** @brief write string to file */
   int tofile(std::string);
@@ -36,6 +36,11 @@ public:
   ~DataSave();
 
 private:
+  #define BUFFERSIZE 20000
+  #define MARGIN 2000
+  char buffer[BUFFERSIZE + MARGIN];
+  int bufferlen{0};
+
   int fd{-1};                      /**< unix file descriptor for savefile */
   int sequence_number{1};          /**< filename sequence number */
   std::string filename_prefix{""}; /**< base filename */

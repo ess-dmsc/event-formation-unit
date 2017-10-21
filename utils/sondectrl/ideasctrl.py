@@ -17,16 +17,11 @@ RXBUFFER = 4096
 # asiccfg1 = [ 0x00, 0x00, 0x00, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
 #              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20,
 #              0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80                    ]
-#
-# asicscf2_bits = 356
-# asiccfg2 = [ 0x00, 0x00, 0x00, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0,
-#              0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0,
-#              0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0xA0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x80                    ]
 
-
+# @todo - this is almost certainly not correct, need the latest documentation of the asic
+# registers to ensure that we set the registers correct
 def makeasiccfg(threshold):
     res = [0x00, 0x00, 0x00] + [threshold]*36 + [0x00, 0x00, 0x00, 0x00, 0x00, 0x80]
-    #print("len(bits): %d\n" %(len(res)*8))
     return res
 
 registers = {'Serial Number': 0x0000,
@@ -153,22 +148,17 @@ class IdeasCtrl():
        self.send(tx_hdr + tx_data)
        time.sleep(0.1)
 
-
-   def setcalibrationparms(self, polarity, nb_pulses, pulse_length, pulse_interval):
-      self.writesystemregister8('Calibration Pulse Polarity', polarity)
-      self.writesystemregister16('Calibration Num Pulses', nb_pulses)
-      self.writesystemregister32('Calibration Pulse Length', pulse_length)
-      self.writesystemregister32('Calibration Pulse Interval', pulse_interval)
-
-
-
+   # def setcalibrationparms(self, polarity, nb_pulses, pulse_length, pulse_interval):
+   #    self.writesystemregister8('Calibration Pulse Polarity', polarity)
+   #    self.writesystemregister16('Calibration Num Pulses', nb_pulses)
+   #    self.writesystemregister32('Calibration Pulse Length', pulse_length)
+   #    self.writesystemregister32('Calibration Pulse Interval', pulse_interval)
 
    def configandstart(self, threshold, numevents):
-      self.writesystemregister8('cfg_timing_readout_en', 0)
-      self.writesystemregister8('cfg_phystrig_en', 0)
-      self.writesystemregister8('cfg_all_ch_en', 0)
       asiccfg = makeasiccfg(threshold)
       asiccfgbits=356
+      self.stopreadout()
+
       self.writeasicconf(self.asic.id0, asiccfg, asiccfg_bits)
       self.writeasicconf(self.asic.id1, asiccfg, asiccfg_bits)
       self.writeasicconf(self.asic.id2, asiccfg, asiccfg_bits)
@@ -181,8 +171,17 @@ class IdeasCtrl():
       self.writesystemregister8('cfg_phystrig_en', 0)
       self.writesystemregister8('cfg_all_ch_en', 0)
 
-   def startreadout(self):
+   def start_TOF_readout(self):
+      self.stopreadout()
       self.writesystemregister8('cfg_timing_readout_en', 1)
+
+   def start_all_ch_spec_readout(self):
+      self.stopreadout()
+      self.writesystemregister8('cfg_all_ch_en', 1)
+
+   def start_single_ch_spec_readout(self):
+      self.stopreadout()
+      self.writesystemregister8('cfg_phystrig_en', 1)  # guessing
 
 
    def dumpallregisters(self):
@@ -214,7 +213,7 @@ if __name__ == '__main__':
    parser = argparse.ArgumentParser()
    parser.add_argument("-i", metavar='ipaddr', help = "server ip address (default %s)" % (svr_ip_addr), type = str)
    parser.add_argument("-p", metavar='port', help = "server tcp port (default %d)" % (svr_tcp_port), type = int)
-   parser.add_argument("-c", metavar='cmd', help = "command (config, start, stop)", type = str)
+   parser.add_argument("-c", metavar='cmd', help = "command (config, start_TOF, start_single_ch, start_all_ch, stop)", type = str)
    parser.add_argument("-t", metavar='thresh', help = "asic threshold", type = int)
    parser.add_argument("-e", metavar='pkts', help = "events in packet", type = int)
    parser.add_argument("-v", help = "add debug prints", action='store_true')
@@ -238,13 +237,24 @@ if __name__ == '__main__':
       if args.c == "stop":
          print("Stopping Readout")
          ctrl.stopreadout()
-      elif args.c == "start":
-         print("Starting Readout")
-         ctrl.startreadout()
+
+      elif args.c == "start_TOF":
+         print("Starting TOF Readout")
+         ctrl.start_TOF_readout()
+
+      elif args.c == "start_single_ch":
+         print("Starting single ch spec Readout")
+         ctrl.start_single_ch_spec_readout()
+
+      elif args.c == "start_all_ch":
+         print("Starting all ch spec Readout")
+         ctrl.start_all_ch_spec_readout()
+
       elif args.c == "config":
          print("Configure System for Time Triggered Readout")
          ctrl.configandstart(threshold, eventsperpacket)
-      elif ags.c == "dumpreg":
+
+      elif args.c == "dumpreg":
          ctrl.dumpallregisters()
    else:
       print("No command specified")
