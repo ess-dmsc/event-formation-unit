@@ -32,10 +32,6 @@ runtest               | run test executables, generate xml reports
 coverage              | generate test coverage report in html/index.html
 valgrind              | run valgrind on tests, generate reports
 
-Option         | Description
--------------  | -------------
-NOKAFKA        | removes Kafka dependencies
-
 
 ### Execution
 
