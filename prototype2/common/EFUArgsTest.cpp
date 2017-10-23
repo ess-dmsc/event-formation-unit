@@ -3,8 +3,6 @@
 #include <common/EFUArgs.h>
 #include <test/TestBase.h>
 
-using namespace std;
-
 class EFUArgsTest : public TestBase {};
 
 TEST_F(EFUArgsTest, Constructor) {

@@ -14,8 +14,6 @@
 #include <libs/include/Socket.h>
 #include <unistd.h>
 
-using namespace std;
-
 const int TSC_MHZ = 2900;
 
 int main(int argc, char *argv[]) {

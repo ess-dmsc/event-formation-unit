@@ -4,8 +4,8 @@
 #include <prototype2/common/Trace.h>
 #include <dataformats/multigrid/inc/DataSave.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 DataSave::DataSave(std::string filename, void *buffer, size_t datasize):
    filename_prefix(filename) {

@@ -7,8 +7,6 @@
 #include <sonde/ideas/TestData.h>
 #include <test/TestBase.h>
 
-using namespace std;
-
 class IDEASDataTest : public TestBase {
 protected:
   SoNDeGeometry geometry;

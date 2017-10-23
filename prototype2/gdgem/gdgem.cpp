@@ -31,7 +31,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
 const char *classname = "NMX Detector";
@@ -288,7 +287,7 @@ void NMX::processing_thread() {
   }
 }
 
-void NMX::init_builder(string jsonfile)
+void NMX::init_builder(std::string jsonfile)
 {
   nmx_opts = NMXConfig(jsonfile);
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());

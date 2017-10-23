@@ -29,7 +29,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
 const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this for time

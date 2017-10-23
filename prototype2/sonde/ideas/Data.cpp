@@ -6,8 +6,6 @@
 #include <cstring>
 #include <sonde/ideas/Data.h>
 
-using namespace std;
-
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 

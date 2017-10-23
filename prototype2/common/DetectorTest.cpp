@@ -6,18 +6,16 @@
 
 #define UNUSED __attribute__((unused))
 
-using namespace std;
-
 class TestDetector : public Detector {
 public:
-  TestDetector(UNUSED void *args) { cout << "TestDetector" << endl; };
-  ~TestDetector() { cout << "~TestDetector" << endl; };
+  TestDetector(UNUSED void *args) { std::cout << "TestDetector" << std::endl; };
+  ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
 
 class TestDetectorFactory : public DetectorFactory {
 public:
   std::shared_ptr<Detector> create(void *args) {
-    cout << "TestDetectorFactory" << endl;
+    std::cout << "TestDetectorFactory" << std::endl;
     return std::shared_ptr<Detector>(new TestDetector(args));
   }
 };

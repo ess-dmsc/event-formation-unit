@@ -9,11 +9,9 @@
 #include <cinttypes>
 #include <vector>
 
-using namespace std;
-
 // clang-format off
 
-vector<uint8_t> ok_one_hit
+std::vector<uint8_t> ok_one_hit
 {
 // type        word cnt    seqno       reserved
    0x01, 0x00, 0x06, 0x00, 0x01, 0x00, 0x00, 0x00,
@@ -29,7 +27,7 @@ vector<uint8_t> ok_one_hit
    0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff
 };
 
-vector<uint8_t> err_size_mismatch
+std::vector<uint8_t> err_size_mismatch
 {
 // type        word cnt    seqno       reserved
    0x01, 0x00, 0x26, 0x00, 0x01, 0x00, 0x00, 0x00,

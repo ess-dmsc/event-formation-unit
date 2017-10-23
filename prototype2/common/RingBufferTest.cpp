@@ -3,8 +3,6 @@
 #include <common/RingBuffer.h>
 #include <test/TestBase.h>
 
-using namespace std;
-
 class RingBufferTest : public TestBase {
 protected:
   virtual void SetUp() {}
