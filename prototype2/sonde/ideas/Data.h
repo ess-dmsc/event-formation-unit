@@ -63,8 +63,11 @@ public:
   unsigned int events{0};  /**< number of valid events */
   unsigned int errors{0};  /**< number of geometry errors in readout */
   unsigned int samples{0}; /**< number of samples in readout */
+
+  uint64_t ctr_outof_sequence{0};
 private:
   SoNDeGeometry * sondegeometry{nullptr};
+  int next_seq_no{0}; // Used to count lost packets, assumes we start at 0
 
   // Protocol header fields
   int hdr_sysno{0};

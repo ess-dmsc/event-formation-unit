@@ -35,8 +35,15 @@ int IDEASData::parse_buffer(const char *buffer, int size) {
   hdr_type = (ntohs(hdr->id) & 0x00ff);
   hdr_seqflag = (ntohs(hdr->pktseq) & 0xc000) >> 14;
   hdr_count = (ntohs(hdr->pktseq) & 0x3fff);
+
   hdr_hdrtime = ntohl(hdr->timestamp);
   hdr_length = ntohs(hdr->length);
+
+  if (next_seq_no != hdr_count) {
+      ctr_outof_sequence++;
+  }
+
+  next_seq_no= (hdr_count + 1) & 0x3fff;
 
   XTRACE(PROCESS, DEB, "version: %d, sysno: %d, type: 0x%02x\n", version, hdr_sysno, hdr_type);
   XTRACE(PROCESS, DEB, "sequence flag: %d, packet count: %d\n", hdr_seqflag, hdr_count);

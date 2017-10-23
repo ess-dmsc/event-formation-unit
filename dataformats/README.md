@@ -2,7 +2,7 @@
 
 To build:
 
-    > cd event-formation-unit/datatypes
+    > cd event-formation-unit/dataformats
     > mkdir build
     > cd build
     > cmake ..

@@ -68,6 +68,7 @@ private:
     int64_t rx_events;
     int64_t rx_geometry_errors;
     int64_t tx_bytes;
+    int64_t rx_seq_errors;
   } ALIGN(64) mystats;
 
   EFUArgs *opts;
@@ -81,6 +82,7 @@ SONDEIDEA::SONDEIDEA(void *args) {
   ns.create("input.rx_packets",                &mystats.rx_packets);
   ns.create("input.rx_bytes",                  &mystats.rx_bytes);
   ns.create("input.dropped",                   &mystats.fifo1_push_errors);
+  ns.create("input.rx_seq_errors",             &mystats.rx_seq_errors);
   ns.create("processing.idle",                 &mystats.rx_idle1);
   ns.create("processing.rx_events",            &mystats.rx_events);
   ns.create("processing.rx_geometry_errors",   &mystats.rx_geometry_errors);
@@ -104,11 +106,11 @@ const char *SONDEIDEA::detectorname() { return classname; }
 void SONDEIDEA::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
-  UDPServer nmxdata(local);
-  nmxdata.buflen(opts->buflen);
-  nmxdata.setbuffers(0, opts->rcvbuf);
-  nmxdata.printbuffers();
-  nmxdata.settimeout(0, 100000); // One tenth of a second
+  UDPServer sondedata(local);
+  sondedata.buflen(opts->buflen);
+  sondedata.setbuffers(0, opts->rcvbuf);
+  sondedata.printbuffers();
+  sondedata.settimeout(0, 100000); // One tenth of a second
 
   int rdsize;
   Timer stop_timer;
@@ -117,7 +119,7 @@ void SONDEIDEA::input_thread() {
     unsigned int eth_index = eth_ringbuf->getindex();
 
     /** this is the processing step */
-    if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
+    if ((rdsize = sondedata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                   eth_ringbuf->getmaxbufsize())) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
@@ -167,6 +169,7 @@ void SONDEIDEA::processing_thread() {
 
       mystats.rx_geometry_errors += ideasdata.errors;
       mystats.rx_events += ideasdata.events;
+      mystats.rx_seq_errors = ideasdata.ctr_outof_sequence;
 
       if (events > 0) {
         for (int i = 0; i < events; i++) {
