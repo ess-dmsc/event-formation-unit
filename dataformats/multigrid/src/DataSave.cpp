@@ -4,9 +4,13 @@
 #include <prototype2/common/Trace.h>
 #include <dataformats/multigrid/inc/DataSave.h>
 
-DataSave::DataSave(std::string filename, void *buffer, size_t datasize) {
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
-  if ((fd = open(filename.c_str(), flags, mode)) < 0) {
+DataSave::DataSave(std::string filename, void *buffer, size_t datasize):
+   filename_prefix(filename) {
+
+  if ((fd = open(filename_prefix.c_str(), flags, mode)) < 0) {
     std::string msg = "DataSave: open(" + filename + ") failed";
     perror(msg.c_str());
   }
@@ -18,9 +22,9 @@ DataSave::DataSave(std::string filename, void *buffer, size_t datasize) {
   }
 }
 
-DataSave::DataSave(std::string filename) {
+DataSave::DataSave(std::string filename): filename_prefix(filename) {
 
-  if ((fd = open(filename.c_str(), flags, mode)) < 0) {
+  if ((fd = open(filename_prefix.c_str(), flags, mode)) < 0) {
     std::string msg = "DataSave: open(" + filename + ") failed";
     perror(msg.c_str());
   }
@@ -60,13 +64,21 @@ int DataSave::tofile(const char * fmt,...) {
   int retlen = 0;
   va_list args;
   va_start(args, fmt);
-  int ret = vsprintf(buffer + bufferlen, fmt, args);
-  va_end(args);
-  if (ret < 0)
+  /** @brief prevent buffer overrun, but data could be truncated */
+  auto maxwritelen = BUFFERSIZE + MARGIN - bufferlen;
+  int ret = vsnprintf(buffer + bufferlen, maxwritelen, fmt, args);
+  if (ret < 0) {
+    XTRACE(PROCESS, ERR, "vsnprintf failed\n");
     return ret;
+  }
+  va_end(args);
+
+  if (ret > maxwritelen) {
+    XTRACE(PROCESS, WAR, "datasave has been truncated\n");
+    ret = maxwritelen;
+  }
 
   bufferlen += ret;
-  assert(bufferlen < BUFFERSIZE + MARGIN);
   if (bufferlen >= BUFFERSIZE) {
     XTRACE(PROCESS, DEB, "Writing chunk of size %d\n", bufferlen);
     write(fd, buffer, bufferlen);
@@ -76,9 +88,20 @@ int DataSave::tofile(const char * fmt,...) {
   return adjustfilesize(retlen);
 }
 
-DataSave::~DataSave() { close(fd); }
+DataSave::~DataSave() {
+  XTRACE(PROCESS, ALW, "~DataSave bufferlen %d\n", bufferlen);
+  if (bufferlen > 0) {
+    XTRACE(PROCESS, ALW, "Flushing DataSave buffer\n");
+    write(fd, buffer, bufferlen);
+  }
+  close(fd);
+}
 
 /** Private functions below, API functions above */
+
+std::string DataSave::getfilename() {
+  return filename_prefix + startTime + "_" + std::to_string(sequence_number - 1) + ".csv";
+}
 
 void DataSave::createfile() {
   curfilesize=0;

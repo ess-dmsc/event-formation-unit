@@ -23,14 +23,19 @@ public:
   /** @todo document */
   DataSave(std::string fileprefix, int maxfilesize);
 
-  /** @brief write string to file */
+  /** @brief write string to file, not buffered, slow */
   int tofile(std::string);
 
   /** @brief write buffer of size len to file */
   int tofile(char *buffer, size_t len);
 
-  /** @brief printf-like formatting */
+  /** @brief printf-like formatting using buffered writes
+   * for better performance
+   */
   int tofile(const char * fmt,...);
+
+  /** @brief return the filename of the current file (buffered write only) */
+  std::string getfilename();
 
   /** @brief closes file descriptor */
   ~DataSave();
