@@ -101,7 +101,7 @@ int RingBuffer<N>::getdatalength(unsigned int index) {
 template <const unsigned int N>
 void RingBuffer<N>::setdatalength(unsigned int index, unsigned int length) {
   assert(length <= N);
-  assert(length > 0);
+  //assert(length > 0);
   assert(index < max_entries_);
   data[index].length = length;
 }
