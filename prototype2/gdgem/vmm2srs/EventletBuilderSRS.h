@@ -11,6 +11,7 @@
 #include <gdgem/vmm2srs/SRSMappings.h>
 #include <gdgem/vmm2srs/SRSTime.h>
 #include <gdgem/vmm2srs/ParserSRS.h>
+#include <dataformats/multigrid/inc/DataSave.h>
 
 class BuilderSRS : public AbstractBuilder {
 public:
@@ -22,9 +23,9 @@ public:
                              NMXHists &hists) override;
 
 private:
-#ifdef DUMPTOFILE
-  int fd;
-#endif
+  #ifdef DUMPTOFILE
+    DataSave vmmsave{"VMM_", 100000000};
+  #endif
   NMXVMM2SRSData parser_;
   SRSTime time_intepreter_;
   SRSMappings geometry_interpreter_;
