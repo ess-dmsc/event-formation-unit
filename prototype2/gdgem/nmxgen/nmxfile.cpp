@@ -53,9 +53,9 @@ int main(int argc, char *argv[]) {
       tx += readsz;
       txp++;
     } else {
-      cout << "Sent " << tx_total + tx << " bytes"
-           << " in " << txp_total + txp << " packets." << endl;
-      cout << "done" << endl;
+      std::cout << "Sent " << tx_total + tx << " bytes"
+           << " in " << txp_total + txp << " packets." << std::endl;
+      std::cout << "done" << std::endl;
       exit(0);
     }
 
