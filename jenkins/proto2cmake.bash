@@ -37,7 +37,7 @@ pushd build
 cmake -DCOV=y ..        || errexit "cmake failed"
 make                    || errexit "make failed"
 make VERBOSE=y runtest  || errexit "make runtest failed"
-executecode
+#executecode
 make coverage           || errexit "make coverage failed"
 make valgrind
 popd
