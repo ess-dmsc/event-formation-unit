@@ -18,6 +18,16 @@ function tools()
   gcovr --version || errexit "gcovr program is missing"
 }
 
+function executecode()
+{
+  detectors=$(find . -name "*.so" | sed -e 's/\.so//')
+  for detector in $detectors
+  do
+    echo "Starting detector "$detector
+    ./prototype2/efu2 -d $detector -s 5
+  done
+}
+
 rm -fr build
 mkdir build
 
@@ -27,6 +37,7 @@ pushd build
 cmake -DCOV=y ..        || errexit "cmake failed"
 make                    || errexit "make failed"
 make VERBOSE=y runtest  || errexit "make runtest failed"
+executecode
 make coverage           || errexit "make coverage failed"
 make valgrind
 popd
