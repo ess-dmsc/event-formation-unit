@@ -6,8 +6,6 @@
 #include <string>
 #include <test/TestBase.h>
 
-using namespace std;
-
 extern int forcefstatfail;
 extern int forcereadfail;
 extern int forcewritefail;

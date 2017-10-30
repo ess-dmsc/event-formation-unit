@@ -21,7 +21,7 @@ create_module(sonde "")
 #
 # SoNDe Tests
 #
-set(IDEASDataTest_SRC ideas/DataTest.cpp ideas/Data.cpp)
+set(IDEASDataTest_SRC ideas/DataTest.cpp ideas/Data.cpp ../../dataformats/multigrid/src/DataSave.cpp )
 set(IDEASDataTest_INC ideas/Data.h ideas/TestData.h)
 create_test_executable(IDEASDataTest "")
 

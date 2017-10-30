@@ -11,8 +11,10 @@ BuilderH5::BuilderH5(std::string dump_dir, bool dump_csv, bool dump_h5)
   : AbstractBuilder(dump_dir, dump_csv, dump_h5)
 {
   data.resize(4);
+  #ifdef DUMPTOFILE
   if (dump_csv_)
-    dprintf(file_descriptor_, "# time, plane, strip, adc, overthreshold\n");
+    vmmsave.tofile("# time, plane, strip, adc, overthreshold\n");
+  #endif
 }
 
 AbstractBuilder::ResultStats
@@ -41,9 +43,11 @@ Eventlet BuilderH5::make_eventlet() {
 
   XTRACE(PROCESS, DEB, "Made eventlet: %s\n", ret.debug().c_str());
 
+  #ifdef DUMPTOFILE
   if (dump_csv_)
-    dprintf(file_descriptor_, "%" PRIu64 ", %u, %u, %u, %u\n",
+    vmmsave.tofile("%" PRIu64 ", %u, %u, %u, %u\n",
             ret.time, ret.plane_id, ret.strip, ret.adc, ret.over_threshold);
+  #endif
 
   if (dump_h5_)
   {

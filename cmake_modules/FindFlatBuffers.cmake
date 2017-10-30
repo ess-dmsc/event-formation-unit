@@ -26,8 +26,8 @@
 
 set(FLATBUFFERS_CMAKE_DIR ${CMAKE_CURRENT_LIST_DIR})
 
-find_program(FLATBUFFERS_FLATC_EXECUTABLE NAMES flatc PATHS /opt/dm_group/usr)
-find_path(FLATBUFFERS_INCLUDE_DIR NAMES flatbuffers/flatbuffers.h PATHS /opt/dm_group/usr)
+find_program(FLATBUFFERS_FLATC_EXECUTABLE NAMES flatc PATHS /opt/dm_group/usr/bin)
+find_path(FLATBUFFERS_INCLUDE_DIR NAMES flatbuffers/flatbuffers.h PATHS /opt/dm_group/usr/include)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(flatbuffers

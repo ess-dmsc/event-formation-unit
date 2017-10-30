@@ -8,17 +8,15 @@
 
 #include <vector>
 
-using namespace std;
-
 // clang-format off
 
-vector<unsigned int> ok_one
+std::vector<unsigned int> ok_one
 {
   0x40000009, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b,
   0x040402d3, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd
 };
 
-vector<unsigned int> ok_two
+std::vector<unsigned int> ok_two
 {
   0x40000009, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b,
   0x040402d3, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd,
@@ -26,7 +24,7 @@ vector<unsigned int> ok_two
   0x040402d3, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd
 };
 
-vector<unsigned int> ok_16
+std::vector<unsigned int> ok_16
 {
   0x40000009, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b,
   0x040402d3, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd,
@@ -62,37 +60,37 @@ vector<unsigned int> ok_16
   0x040402d3, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd
 };
 
-vector<unsigned int> err_hdr
+std::vector<unsigned int> err_hdr
 {
   0x30010009, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b,
   0x040402d3, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd
 };
 
-vector<unsigned int> err_hdr2
+std::vector<unsigned int> err_hdr2
 {
   0x40010008, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b,
   0x040402d3, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd
 };
 
-vector<unsigned int> err_dat
+std::vector<unsigned int> err_dat
 {
   0x40010009, 0x0400020f, 0x8401002f, 0x0402028f, 0x0403002b,
   0x040402d3, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd
 };
 
-vector<unsigned int> err_ftr
+std::vector<unsigned int> err_ftr
 {
   0x40010009, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b,
   0x040402d3, 0x04050035, 0x04060385, 0x0407002c, 0x400211dd
 };
 
-vector<unsigned int> err_short
+std::vector<unsigned int> err_short
 {
   0x40010009, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b,
   0x040402d3, 0x04050035, 0x04060385, 0x0407002c
 };
 
-vector<unsigned int> err_long
+std::vector<unsigned int> err_long
 {
   0x40010009, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b, 0x040402d3,
   0x04050035, 0x04060385, 0x0407002c, 0xc00211dd, 0x40010009, 0x0400020f,
@@ -100,7 +98,7 @@ vector<unsigned int> err_long
   0x0407002c, 0xc00211dd, 0x40010009
 };
 
-vector<unsigned int> err_below_thresh
+std::vector<unsigned int> err_below_thresh
 { //                   *                          w0 bad g0 ok w1 bad == bad
   0x40000009, 0x0400000f, 0x0401020f, 0x0402028f, 0x0403002b,
   0x040402d3, 0x04050035, 0x04060385, 0x0407002c, 0xc00211dd,
@@ -118,14 +116,14 @@ vector<unsigned int> err_below_thresh
 
 };
 
-vector<unsigned int> err_misorder
+std::vector<unsigned int> err_misorder
 {
   0x40000009, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b,
   0x040402d3, 0x04060035, 0x04050385, 0x0407002c, 0xc00211dd
   //               ^--swapped--^
 };
 
-vector<unsigned int> err_nwords
+std::vector<unsigned int> err_nwords
 {
   0x40000008, 0x0400020f, 0x0401002f, 0x0402028f, 0x0403002b,
   //       ^ should be 9
@@ -136,6 +134,6 @@ vector<unsigned int> err_nwords
 
 /** Raw packet data above, now collect into iterable containers */
 
-vector<vector<unsigned int>> ok{ok_one, ok_two, ok_16};
-vector<vector<unsigned int>> err_pkt{err_hdr, err_hdr2, err_dat, err_ftr};
-vector<vector<unsigned int>> err_size{err_short, err_long};
+std::vector<std::vector<unsigned int>> ok{ok_one, ok_two, ok_16};
+std::vector<std::vector<unsigned int>> err_pkt{err_hdr, err_hdr2, err_dat, err_ftr};
+std::vector<std::vector<unsigned int>> err_size{err_short, err_long};

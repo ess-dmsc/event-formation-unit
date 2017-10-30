@@ -31,7 +31,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
 const char *classname = "NMX Detector";
@@ -49,6 +48,7 @@ public:
   int statsize();
   int64_t statvalue(size_t index);
   std::string &statname(size_t index);
+  const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
@@ -69,7 +69,7 @@ private:
     int64_t rx_bytes;
     int64_t fifo1_push_errors;
     int64_t fifo1_free;
-    int64_t pad_a[2]; /**< @todo check alignment*/
+    int64_t pad_a[4]; /**< @todo check alignment*/
 
     // Processing Counters
     int64_t rx_readouts;
@@ -80,6 +80,7 @@ private:
     int64_t geom_errors;
     int64_t tx_events;
     int64_t tx_bytes;
+    int64_t fifo_seq_errors;
   } ALIGN(64) mystats;
 
   EFUArgs *opts;
@@ -102,6 +103,7 @@ NMX::NMX(void *args) {
   ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
   ns.create("processing.rx_discards",          &mystats.rx_discards);
   ns.create("processing.rx_idle",              &mystats.rx_idle1);
+  ns.create("processing.fifo_seq_errors",      &mystats.fifo_seq_errors);
   ns.create("processing.unclustered",          &mystats.unclustered);
   ns.create("processing.geom_errors",          &mystats.geom_errors);
   ns.create("output.tx_events",                &mystats.tx_events);
@@ -110,7 +112,7 @@ NMX::NMX(void *args) {
 
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
+  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 1); /**< @todo testing workaround */
   assert(eth_ringbuf != 0);
 }
 
@@ -119,6 +121,8 @@ int NMX::statsize() { return ns.size(); }
 int64_t NMX::statvalue(size_t index) { return ns.value(index); }
 
 std::string &NMX::statname(size_t index) { return ns.name(index); }
+
+const char *NMX::detectorname() { return classname; }
 
 void NMX::input_thread() {
   /** Connection setup */
@@ -136,12 +140,13 @@ void NMX::input_thread() {
     unsigned int eth_index = eth_ringbuf->getindex();
 
     /** this is the processing step */
+    eth_ringbuf->setdatalength(eth_index, 0); /**@todo @fixme buffer corruption can occur */
     if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                   eth_ringbuf->getmaxbufsize())) > 0) {
+      eth_ringbuf->setdatalength(eth_index, rdsize);
       XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
-      eth_ringbuf->setdatalength(eth_index, rdsize);
 
       mystats.fifo1_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
@@ -166,8 +171,10 @@ void NMX::input_thread() {
 
 void NMX::processing_thread() {
   init_builder(opts->config_file);
-  if (!builder_)
+  if (!builder_) {
+    XTRACE(PROCESS, WAR, "No builder specified, exiting thread\n");
     return;
+  }
 
   Geometry geometry;
   geometry.add_dimension(nmx_opts.geometry_x);
@@ -197,60 +204,61 @@ void NMX::processing_thread() {
     mystats.fifo1_free = input2proc_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
-      usleep(10);
+      usleep(1);
     } else {
-      auto stats = builder_->process_buffer(
-            eth_ringbuf->getdatabuffer(data_index),
-            eth_ringbuf->getdatalength(data_index),
-            clusterer, hists);
+      auto len = eth_ringbuf->getdatalength(data_index);
+      if (len == 0) {
+        mystats.fifo_seq_errors++;
+      } else {
+        auto stats = builder_->process_buffer(eth_ringbuf->getdatabuffer(data_index), len, clusterer, hists);
 
-      mystats.rx_readouts += stats.valid_eventlets;
-      mystats.rx_error_bytes += stats.error_bytes;
-      mystats.geom_errors += stats.geom_errors;
+        mystats.rx_readouts += stats.valid_eventlets;
+        mystats.rx_error_bytes += stats.error_bytes;
 
-      while (clusterer.event_ready()) {
-        XTRACE(PROCESS, DEB, "event_ready()\n");
-        event = clusterer.get_event();
-        mystats.unclustered = clusterer.unclustered();
-        hists.bin(event);
-        event.analyze(nmx_opts.analyze_weighted,
-                      nmx_opts.analyze_max_timebins,
-                      nmx_opts.analyze_max_timedif);
+        while (clusterer.event_ready()) {
+          XTRACE(PROCESS, DEB, "event_ready()\n");
+          event = clusterer.get_event();
+          mystats.unclustered = clusterer.unclustered();
+          hists.bin(event);
+          event.analyze(nmx_opts.analyze_weighted,
+                        nmx_opts.analyze_max_timebins,
+                        nmx_opts.analyze_max_timedif);
 
-        if (event.valid()) {
-          XTRACE(PROCESS, DEB, "event.good\n");
+          if (event.valid()) {
+            XTRACE(PROCESS, DEB, "event.good\n");
 
-          if (sample_next_track) {
-            sample_next_track = trackfb.add_track(event);
+            if (sample_next_track) {
+              sample_next_track = trackfb.add_track(event);
+            }
+
+            XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
+                   event.x.center_rounded(),
+                   event.y.center_rounded());
+
+            if (
+                (!nmx_opts.enforce_lower_uncertainty_limit ||
+                 event.meets_lower_cirterion(nmx_opts.lower_uncertainty_limit))
+                &&
+                (!nmx_opts.enforce_minimum_eventlets ||
+                 (event.x.entries.size() >= nmx_opts.minimum_eventlets &&
+                  event.y.entries.size() >= nmx_opts.minimum_eventlets))
+                )
+            {
+              coords[0] = event.x.center_rounded();
+              coords[1] = event.y.center_rounded();
+              pixelid = geometry.to_pixid(coords);
+              time = static_cast<uint32_t>(event.time_start());
+
+              XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n",
+                     time, pixelid);
+
+              mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
+              mystats.tx_events++;
+            }
+          } else {
+            mystats.rx_discards +=
+                event.x.entries.size() + event.y.entries.size();
           }
-
-          XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
-                 event.x.center_rounded(),
-                 event.y.center_rounded());
-
-          if (
-              (!nmx_opts.enforce_lower_uncertainty_limit ||
-               event.meets_lower_cirterion(nmx_opts.lower_uncertainty_limit))
-              &&
-              (!nmx_opts.enforce_minimum_eventlets ||
-               (event.x.entries.size() >= nmx_opts.minimum_eventlets &&
-                event.y.entries.size() >= nmx_opts.minimum_eventlets))
-              )
-          {
-            coords[0] = event.x.center_rounded();
-            coords[1] = event.y.center_rounded();
-            pixelid = geometry.to_pixid(coords);
-            time = static_cast<uint32_t>(event.time_start());
-
-            XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n",
-                   time, pixelid);
-
-            mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
-            mystats.tx_events++;
-          }
-        } else {
-          mystats.rx_discards +=
-              event.x.entries.size() + event.y.entries.size();
         }
       }
     }
@@ -288,20 +296,22 @@ void NMX::processing_thread() {
   }
 }
 
-void NMX::init_builder(string jsonfile)
+void NMX::init_builder(std::string jsonfile)
 {
   nmx_opts = NMXConfig(jsonfile);
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
-  if (nmx_opts.builder_type == "H5")
+  if (nmx_opts.builder_type == "H5") {
     builder_ = std::make_shared<BuilderH5>
         (nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
-  else if (nmx_opts.builder_type == "SRS")
+  }
+  else if (nmx_opts.builder_type == "SRS") {
     builder_ = std::make_shared<BuilderSRS>
         (nmx_opts.time_config, nmx_opts.srs_mappings, nmx_opts.dump_directory,
          nmx_opts.dump_csv, nmx_opts.dump_h5);
-  else
+  } else {
     XTRACE(INIT, ALW, "Unrecognized builder type in config\n");
+  }
 }
 
 /** ----------------------------------------------------- */

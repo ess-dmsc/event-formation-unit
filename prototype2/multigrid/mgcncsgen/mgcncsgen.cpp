@@ -10,8 +10,6 @@
 #include <multigrid/mgcncsgen/DGArgs.h>
 #include <unistd.h>
 
-using namespace std;
-
 const int TSC_MHZ = 2900;
 
 int main(int argc, char *argv[]) {
@@ -45,8 +43,8 @@ int main(int argc, char *argv[]) {
     if (unlikely((tx_total + tx) >=
                  (long unsigned int)opts.txGB * 1000000000) ||
         txp_total >= opts.txPkt) {
-      cout << "Sent " << tx_total + tx << " bytes." << endl;
-      cout << "done" << endl;
+      std::cout << "Sent " << tx_total + tx << " bytes." << std::endl;
+      std::cout << "done" << std::endl;
       exit(0);
     }
 
@@ -63,7 +61,7 @@ int main(int argc, char *argv[]) {
       txp++;
       seqno++;
     } else {
-      cout << "unable to send" << endl;
+      std::cout << "unable to send" << std::endl;
     }
 
     if (unlikely((report_timer.timetsc() / TSC_MHZ) >= opts.updint * 1000000)) {

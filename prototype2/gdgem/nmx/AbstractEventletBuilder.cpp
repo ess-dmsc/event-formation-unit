@@ -20,22 +20,10 @@ AbstractBuilder::AbstractBuilder(std::string dump_dir,
                                  bool dump_csv, bool dump_h5)
   : dump_csv_(dump_csv)
   , dump_h5_(dump_h5)
+      #ifdef DUMPTOFILE
+        , vmmsave{dump_dir + "VMM_", 100000000}
+      #endif
 {
-  if (dump_csv_)
-  {
-    std::string fileName = dump_dir + "VMM3_" + time_str() + ".csv";
-
-    file_descriptor_ = open(fileName.c_str(), O_RDWR|O_CREAT, S_IRWXU);
-    if (file_descriptor_ >= 0)
-    {
-      XTRACE(PROCESS, ALW, "Dumping data to CSV file: %s\n",
-             fileName.c_str());
-      dprintf(file_descriptor_, "%s\n", time_str().c_str());
-    }
-    else
-      dump_csv_ = false;
-  }
-
   if (dump_h5_)
   {
     size_t chunksize = 9000;
@@ -73,4 +61,3 @@ std::string AbstractBuilder::time_str()
   std::string startTime = cStartTime;
   return startTime;
 }
-

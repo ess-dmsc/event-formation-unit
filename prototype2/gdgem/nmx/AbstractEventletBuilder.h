@@ -9,6 +9,7 @@
 
 #include <gdgem/nmx/Clusterer.h>
 #include <gdgem/nmx/Hists.h>
+#include <dataformats/multigrid/inc/DataSave.h>
 
 //#ifdef USE_H5
 #include <H5CC_DataSet.h>
@@ -45,9 +46,11 @@ class AbstractBuilder {
   protected:
 
     bool dump_csv_ {false};
-    int file_descriptor_ {-1};
-
     bool dump_h5_ {false};
+    #ifdef DUMPTOFILE
+      DataSave vmmsave;
+    #endif
+
     H5CC::File file_;
     H5CC::DataSet srstime_;
     H5CC::DataSet bc_tdc_adc_;

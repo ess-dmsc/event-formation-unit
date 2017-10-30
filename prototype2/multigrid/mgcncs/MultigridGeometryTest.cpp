@@ -4,8 +4,6 @@
 #include <multigrid/mgcncs/MultigridGeometry.h>
 #include <test/TestBase.h>
 
-using namespace std;
-
 class MultiGridGeometryTest : public TestBase {};
 
 /** Test cases below */

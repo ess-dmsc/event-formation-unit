@@ -4,7 +4,6 @@
 #include <unistd.h>
 
 Args::Args(int argc, char *argv[]) {
-  using namespace std;
   int c;
   while ((c = getopt(argc, argv, "hi:p:b:t:")) != -1)
     switch (c) {
@@ -26,16 +25,16 @@ Args::Args(int argc, char *argv[]) {
 
     case 'h':
     default:
-      cout << "Usage: udptx [OPTIONS]" << endl;
-      cout << " -i ipaddr      destination ip address" << endl;
-      cout << " -p port        UDP destination port" << endl;
-      cout << " -b buflen      size of Tx/Tx buffer in bytes (max 9000)"
-           << endl;
-      cout << " -h             help - prints this message" << endl;
+      std::cout << "Usage: udptx [OPTIONS]" << std::endl;
+      std::cout << " -i ipaddr      destination ip address" << std::endl;
+      std::cout << " -p port        UDP destination port" << std::endl;
+      std::cout << " -b buflen      size of Tx/Tx buffer in bytes (max 9000)"
+           << std::endl;
+      std::cout << " -h             help - prints this message" << std::endl;
       exit(1);
     }
 
-  cout << "ipaddr:   " << dest_ip << endl;
-  cout << "udp port: " << port << endl;
-  cout << "txbuffer: " << buflen << endl;
+  std::cout << "ipaddr:   " << dest_ip << std::endl;
+  std::cout << "udp port: " << port << std::endl;
+  std::cout << "txbuffer: " << buflen << std::endl;
 }

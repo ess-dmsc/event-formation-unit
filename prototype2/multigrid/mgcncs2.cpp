@@ -30,7 +30,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_CRI
 
-using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
 const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
@@ -47,6 +46,7 @@ public:
   int statsize();
   int64_t statvalue(size_t index);
   std::string &statname(size_t index);
+  const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
@@ -115,6 +115,8 @@ int64_t CSPEC::statvalue(size_t index) { return ns.value(index); }
 
 std::string &CSPEC::statname(size_t index) { return ns.name(index); }
 
+const char *CSPEC::detectorname() { return classname; }
+
 void CSPEC::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
@@ -162,12 +164,9 @@ void CSPEC::input_thread() {
 }
 
 void CSPEC::processing_thread() {
-
   CSPECChanConv conv;
-
-#ifndef NOKAFKA
   Producer producer(opts->broker, "C-SPEC_detector");
-#endif
+  //FBSerializer flatbuffer(kafka_buffer_size, producer);
 
   MultiGridGeometry geom(1, 2, 48, 4, 16);
 
@@ -213,10 +212,10 @@ void CSPEC::processing_thread() {
             /** Produce when enough data has been accumulated */
             if (produce >= kafka_buffer_size - 20) {
               assert(produce < kafka_buffer_size);
-#ifndef NOKAFKA
+
               producer.produce(kafkabuffer, kafka_buffer_size);
               mystats.tx_bytes += produce;
-#endif
+
               uint64_t ts = timestamp.timetsc();
               std::memcpy(kafkabuffer, &ts, sizeof(ts));
               produce = 8;

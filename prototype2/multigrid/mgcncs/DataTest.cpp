@@ -8,8 +8,6 @@
 #include <multigrid/mgcncs/TestData.h>
 #include <test/TestBase.h>
 
-using namespace std;
-
 class CspecDataTest : public TestBase {
 protected:
   CSPECChanConv conv{};

@@ -13,8 +13,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-using namespace std;
-
 class MultiGridGeometry {
 public:
   /** @brief Create a MG Geometry based on number of columns, grids and

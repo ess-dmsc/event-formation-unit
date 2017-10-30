@@ -3,8 +3,6 @@
 #include <multigrid/mgcncs/ChanConv.h>
 #include <test/TestBase.h>
 
-using namespace std;
-
 class CspecChanConvTest : public TestBase {
 protected:
   CSPECChanConv conv;
@@ -16,9 +14,9 @@ protected:
 TEST_F(CspecChanConvTest, ConstructorDefault) {
   for (int i = 0; i < CSPECChanConv::adcsize; i++) {
     ASSERT_EQ(conv.getwireid(i), i) << "wrong wire id conversion at adc value "
-                                    << i << endl;
+                                    << i << std::endl;
     ASSERT_EQ(conv.getgridid(i), i) << "wrong grid id conversion at adc value "
-                                    << i << endl;
+                                    << i << std::endl;
   }
 }
 
@@ -26,9 +24,9 @@ TEST_F(CspecChanConvTest, ConstructorParametrized) {
   CSPECChanConv conv(7);
   for (int i = 0; i < CSPECChanConv::adcsize; i++) {
     ASSERT_EQ(conv.getwireid(i), 7) << "wrong wire id conversion at adc value "
-                                    << i << endl;
+                                    << i << std::endl;
     ASSERT_EQ(conv.getgridid(i), 7) << "wrong grid id conversion at adc value "
-                                    << i << endl;
+                                    << i << std::endl;
   }
 }
 

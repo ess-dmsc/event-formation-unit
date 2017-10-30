@@ -6,7 +6,6 @@
 #include <libs/include/gccintel.h>
 
 Producer::Producer(std::string broker, std::string topicstr) {
-  using namespace std;
 
   conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
   tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);

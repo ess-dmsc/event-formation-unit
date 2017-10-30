@@ -8,8 +8,6 @@
 #include <iostream>
 #include <thread>
 
-using namespace std;
-
 /** Can't call detector threads directly from std:thread as
  *  they are virtual functions, so need to add one step.
  */

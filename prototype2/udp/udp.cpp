@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <unistd.h>
 
-using namespace std;
 const char *classname = "UDPRaw Detector";
 
 #define TSC_MHZ 3000
@@ -23,17 +22,20 @@ class UDPRaw : public Detector {
 public:
   UDPRaw(void *args);
 
-  ~UDPRaw() { cout << "    UDPRaw destroyed" << endl; }
+  ~UDPRaw() { std::cout << "    UDPRaw destroyed" << std::endl; }
 
   void input_thread();
+  const char *detectorname();
 
 private:
   EFUArgs *opts;
 };
 
+const char *UDPRaw::detectorname() { return classname; }
+
 UDPRaw::UDPRaw(void *args) {
   opts = (EFUArgs *)args;
-  cout << "    UDPRaw created" << endl;
+  std::cout << "    UDPRaw created" << std::endl;
 }
 
 void UDPRaw::input_thread() {

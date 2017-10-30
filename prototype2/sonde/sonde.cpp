@@ -10,6 +10,7 @@
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <cstring>
+#include <fcntl.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -23,7 +24,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
 const char *classname = "SoNDe detector using IDEA readout";
@@ -41,6 +41,7 @@ public:
   int statsize();
   int64_t statvalue(size_t index);
   std::string &statname(size_t index);
+  const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
@@ -67,6 +68,8 @@ private:
     int64_t rx_events;
     int64_t rx_geometry_errors;
     int64_t tx_bytes;
+    int64_t rx_seq_errors;
+    int64_t fifo_seq_errors;
   } ALIGN(64) mystats;
 
   EFUArgs *opts;
@@ -80,15 +83,17 @@ SONDEIDEA::SONDEIDEA(void *args) {
   ns.create("input.rx_packets",                &mystats.rx_packets);
   ns.create("input.rx_bytes",                  &mystats.rx_bytes);
   ns.create("input.dropped",                   &mystats.fifo1_push_errors);
+  ns.create("input.rx_seq_errors",             &mystats.rx_seq_errors);
   ns.create("processing.idle",                 &mystats.rx_idle1);
   ns.create("processing.rx_events",            &mystats.rx_events);
   ns.create("processing.rx_geometry_errors",   &mystats.rx_geometry_errors);
+  ns.create("processing.fifo_seq_errors",      &mystats.fifo_seq_errors);
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
 
   XTRACE(INIT, ALW, "Creating %d SONDE Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
+  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 1); /** @todo testing workaround */
   assert(eth_ringbuf != 0);
 }
 
@@ -98,14 +103,16 @@ int64_t SONDEIDEA::statvalue(size_t index) { return ns.value(index); }
 
 std::string &SONDEIDEA::statname(size_t index) { return ns.name(index); }
 
+const char *SONDEIDEA::detectorname() { return classname; }
+
 void SONDEIDEA::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
-  UDPServer nmxdata(local);
-  nmxdata.buflen(opts->buflen);
-  nmxdata.setbuffers(0, opts->rcvbuf);
-  nmxdata.printbuffers();
-  nmxdata.settimeout(0, 100000); // One tenth of a second
+  UDPServer sondedata(local);
+  sondedata.buflen(opts->buflen);
+  sondedata.setbuffers(0, opts->rcvbuf);
+  sondedata.printbuffers();
+  sondedata.settimeout(0, 100000); // One tenth of a second
 
   int rdsize;
   Timer stop_timer;
@@ -114,7 +121,8 @@ void SONDEIDEA::input_thread() {
     unsigned int eth_index = eth_ringbuf->getindex();
 
     /** this is the processing step */
-    if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
+    eth_ringbuf->setdatalength(eth_index, 0);
+    if ((rdsize = sondedata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                   eth_ringbuf->getmaxbufsize())) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
@@ -143,6 +151,8 @@ void SONDEIDEA::input_thread() {
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
 
+// dumptofile
+
   IDEASData ideasdata(&geometry);
   Producer eventprod(opts->broker, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
@@ -155,20 +165,25 @@ void SONDEIDEA::processing_thread() {
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
-      usleep(10);
+      usleep(1);
     } else {
-      int events = ideasdata.receive(eth_ringbuf->getdatabuffer(data_index),
-        eth_ringbuf->getdatalength(data_index));
+      auto len = eth_ringbuf->getdatalength(data_index);
+      if (len == 0) {
+        mystats.fifo_seq_errors++;
+      } else {
+        int events = ideasdata.parse_buffer(eth_ringbuf->getdatabuffer(data_index), len);
 
-      mystats.rx_geometry_errors += ideasdata.errors;
-      mystats.rx_events += ideasdata.events;
+        mystats.rx_geometry_errors += ideasdata.errors;
+        mystats.rx_events += ideasdata.events;
+        mystats.rx_seq_errors = ideasdata.ctr_outof_sequence;
 
-      if (events > 0) {
-        for (int i = 0; i < events; i++) {
-            XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)\n", i,
-                    ideasdata.data[i].time,
-                    ideasdata.data[i].pixel_id);
-            mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
+        if (events > 0) {
+          for (int i = 0; i < events; i++) {
+              XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)\n", i,
+                      ideasdata.data[i].time,
+                      ideasdata.data[i].pixel_id);
+              mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
+          }
         }
       }
     }
