@@ -62,8 +62,7 @@ set(gdgem_SRC
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp
   vmm2srs/ParserSRS.cpp
-  vmm2srs/EventletBuilderSRS.cpp
-  "${H5CC_LIBRARY}")
+  vmm2srs/EventletBuilderSRS.cpp)
 set(gdgem_INC
   NMXConfig.h
   nmx/Clusterer.h
@@ -81,6 +80,7 @@ set(gdgem_INC
   vmm2srs/EventletBuilderSRS.h)
 #create_module(gdgem "")
 create_module(gdgem "${H5CC_LIBRARY}")
+target_link_libraries(gdgem ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 
 #
 # NMX / VMM Tests
@@ -124,7 +124,9 @@ set(EventletBuilderH5Test_INC
   nmx/EventNMX.h
   nmx/Hists.h
   nmxgen/EventletBuilderH5.h)
-create_test_executable(EventletBuilderH5Test "${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${H5CC_LIBRARY}")
+create_test_executable(EventletBuilderH5Test "${H5CC_LIBRARY}")
+target_link_libraries(EventletBuilderH5Test ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+
 
 set(EventletBuilderTest_SRC
   nmx/Clusterer.cpp
@@ -144,7 +146,8 @@ set(EventletBuilderTest_INC
   vmm2srs/EventletBuilderSRS.h
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h)
-create_test_executable(EventletBuilderTest "${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES} ${H5CC_LIBRARY}")
+create_test_executable(EventletBuilderTest "${H5CC_LIBRARY}")
+target_link_libraries(EventletBuilderTest ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
 
 set(EventletTest_SRC
   nmx/EventletTest.cpp

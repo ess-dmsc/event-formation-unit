@@ -271,7 +271,7 @@ void NMX::processing_thread() {
       }
 
       if (hists.empty()) {
-        XTRACE(PROCESS, ALW, "Sending histogram for %u eventlets and %u clusters \n",
+        XTRACE(PROCESS, ALW, "Sending histogram for %zu eventlets and %zu clusters \n",
                hists.eventlet_count(), hists.cluster_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
