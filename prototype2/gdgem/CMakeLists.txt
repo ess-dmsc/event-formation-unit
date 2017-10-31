@@ -90,6 +90,7 @@ set(HistSerializerTest_SRC
   nmx/HistSerializerTest.cpp
   nmx/HistSerializer.cpp)
 set(HistSerializerTest_INC
+  nmx/Eventlet.h
   nmx/Hists.h
   nmx/HistSerializer.h
   ../common/Producer.h)
@@ -123,6 +124,7 @@ set(EventletBuilderH5Test_SRC
 set(EventletBuilderH5Test_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
+  nmx/Eventlet.h
   nmx/Hists.h
   nmxgen/EventletBuilderH5.h)
 create_test_executable(EventletBuilderH5Test "${H5CC_LIBRARY}")
@@ -144,6 +146,7 @@ set(EventletBuilderTest_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Hists.h
+  nmx/Eventlet.h
   vmm2srs/ParserSRS.h
   vmm2srs/EventletBuilderSRS.h
   vmm2srs/SRSTime.h

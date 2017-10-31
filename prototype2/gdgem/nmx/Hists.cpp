@@ -3,18 +3,34 @@
 #include <gdgem/nmx/Hists.h>
 #include <string.h>
 
+
 //static
+
+size_t NMXHists::strip_hist_size()
+{
+  return Eventlet::strip_max_val + 1;
+}
+
+size_t NMXHists::adc_hist_size()
+{
+  return Eventlet::adc_max_val + 1;
+}
+
 size_t NMXHists::needed_buffer_size()
 {
-  return NMX_HIST_ELEM_SIZE *
-      (NMX_STRIP_HIST_SIZE * 2 +
-       NMX_ADC_HIST_SIZE * 3 +
+  return elem_size *
+      (strip_hist_size() * 2 +
+       adc_hist_size() * 3 +
        1 /*bin_width*/ );
 }
 
 NMXHists::NMXHists()
 {
-  clear();
+  x_strips_hist.resize(strip_hist_size(), 0);
+  y_strips_hist.resize(strip_hist_size(), 0);
+  x_adc_hist.resize(adc_hist_size(), 0);
+  y_adc_hist.resize(adc_hist_size(), 0);
+  cluster_adc_hist.resize(adc_hist_size(), 0);
 }
 
 void NMXHists::set_cluster_adc_downshift(uint32_t bits)
@@ -45,11 +61,11 @@ uint32_t NMXHists::bin_width() const
 }
 
 void NMXHists::clear() {
-  memset(x_strips_hist, 0, sizeof(x_strips_hist));
-  memset(y_strips_hist, 0, sizeof(y_strips_hist));
-  memset(x_adc_hist, 0, sizeof(x_adc_hist));
-  memset(y_adc_hist, 0, sizeof(y_adc_hist));
-  memset(cluster_adc_hist, 0, sizeof(cluster_adc_hist));
+  std::fill(x_strips_hist.begin(), x_strips_hist.end(), 0);
+  std::fill(y_strips_hist.begin(), y_strips_hist.end(), 0);
+  std::fill(x_adc_hist.begin(), x_adc_hist.end(), 0);
+  std::fill(y_adc_hist.begin(), y_adc_hist.end(), 0);
+  std::fill(cluster_adc_hist.begin(), cluster_adc_hist.end(), 0);
   eventlet_count_ = 0;
   cluster_count_ = 0;
 }
