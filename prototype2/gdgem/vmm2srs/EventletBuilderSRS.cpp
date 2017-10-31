@@ -14,7 +14,7 @@ BuilderSRS::BuilderSRS(SRSTime time_intepreter,
 {
 #ifdef DUMPTOFILE
   if (dump_csv_) {
-    vmmsave.tofile("# fec, chip_id, srs timestamp, channel, bcid, tdc, adc, overthreshold\n");
+    vmmsave.tofile("# fec, chip_id, frame counter, srs timestamp, channel, bcid, tdc, adc, overthreshold\n");
   }
 #endif
 }
@@ -47,21 +47,18 @@ BuilderSRS::process_buffer(char *buf, size_t size,
            eventlet.plane_id, eventlet.strip, eventlet.time);
 /**< @todo flags? */
 
-    if (eventlet.plane_id == NMX_INVALID_PLANE_ID)
-    {
+    if (eventlet.plane_id == NMX_INVALID_PLANE_ID) {
       geom_errors++;
       XTRACE(PROCESS, DEB, "Bad SRS mapping --  fec: %d, chip: %d\n",
              fec_id, chip_id);
-    }
-    else
-    {
+    } else {
       hists.bin(eventlet);
       clusterer.insert(eventlet);
     }
 #ifdef DUMPTOFILE
     if (dump_csv_) {
-      vmmsave.tofile("%2d, %2d, %u, %2d, %d, %d, %d, %d\n",
-              fec_id, chip_id, parser_.srshdr.time,
+      vmmsave.tofile("%2d, %2d, %u, %u, %2d, %d, %d, %d, %d\n",
+              fec_id, chip_id, parser_.srshdr.fc, parser_.srshdr.time,
               d.chno, d.bcid, d.tdc, d.adc, d.overThreshold);
     }
 #endif

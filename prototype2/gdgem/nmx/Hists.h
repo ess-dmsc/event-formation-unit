@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "EventNMX.h"
+#include <gdgem/nmx/EventNMX.h>
 #include <math.h>
 
 #define NMX_STRIP_HIST_SIZE ( NMX_STRIP_MAX_VAL + 1 )
