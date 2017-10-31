@@ -1,6 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <gdgem/NMXConfig.h>
+#include <common/Trace.h>
 
 #include <dataformats/multigrid/inc/json.h>
 #include <fstream>
@@ -16,21 +17,11 @@ NMXConfig::NMXConfig(std::string jsonfile)
 
   if (!reader.parse(str, root, 0))
   {
-//    ss << "error: file " << jsonfile
-//              << " is not valid json\n";
+    XTRACE(INIT, WAR, "Invalid Json file: %s\n", jsonfile.c_str());
     return;
   }
 
   builder_type = root["builder_type"].asString();
-
-  geometry_x = root["geometry_x"].asInt();
-  geometry_y = root["geometry_y"].asInt();
-
-  cluster_min_timespan = root["cluster_min_timespan"].asInt();
-  analyze_weighted = root["analyze_weighted"].asBool();
-  analyze_max_timebins = root["analyze_max_timebins"].asInt();
-  analyze_max_timedif = root["analyze_max_timedif"].asInt();
-  track_sample_minhits = root["track_sample_minhits"].asInt();
 
   if (builder_type == "SRS")
   {
@@ -50,14 +41,28 @@ NMXConfig::NMXConfig(std::string jsonfile)
       srs_mappings.set_mapping(fecID, vmmID, planeID, strip_offset);
     }
   }
+
+  cluster_min_timespan = root["cluster_min_timespan"].asInt();
+  analyze_weighted = root["analyze_weighted"].asBool();
+  analyze_max_timebins = root["analyze_max_timebins"].asInt();
+  analyze_max_timedif = root["analyze_max_timedif"].asInt();
+
+  enforce_lower_uncertainty_limit = root["enforce_lower_uncertainty_limit"].asBool();
+  lower_uncertainty_limit = root["lower_uncertainty_limit"].asInt();
+  enforce_minimum_eventlets = root["enforce_minimum_eventlets"].asBool();
+  minimum_eventlets = root["minimum_eventlets"].asInt();
+
+  track_sample_minhits = root["track_sample_minhits"].asInt();
+  cluster_adc_downshift = root["cluster_adc_downshift"].asInt();
+
+  geometry_x = root["geometry_x"].asInt();
+  geometry_y = root["geometry_y"].asInt();
 }
 
 std::string NMXConfig::debug() const
 {
   std::stringstream ss;
   ss << "  builder_type = " << builder_type << "\n";
-  ss << "  geometry_x = " << geometry_x << "\n";
-  ss << "  geometry_y = " << geometry_y << "\n";
   if (builder_type == "SRS")
   {
     ss << "  time = " << time_config.debug() << "\n";
@@ -68,6 +73,18 @@ std::string NMXConfig::debug() const
      << (analyze_weighted ? "true" : "false") << "\n";
   ss << "  analyze_max_timebins = " << analyze_max_timebins << "\n";
   ss << "  analyze_max_timedif = " << analyze_max_timedif << "\n";
+
+  ss << "  enforce_lower_uncertainty_limit = "
+     << (enforce_lower_uncertainty_limit ? "true" : "false") << "\n";
+  ss << "  lower_uncertainty_limit = " << lower_uncertainty_limit << "\n";
+  ss << "  enforce_minimum_eventlets = "
+     << (enforce_minimum_eventlets ? "true" : "false") << "\n";
+  ss << "  minimum_eventlets = " << minimum_eventlets << "\n";
+
   ss << "  track_sample_minhits = " << track_sample_minhits << "\n";
+  ss << "  cluster_adc_downshift = " << cluster_adc_downshift << "\n";
+
+  ss << "  geometry_x = " << geometry_x << "\n";
+  ss << "  geometry_y = " << geometry_y << "\n";
   return ss.str();
 }

@@ -10,7 +10,6 @@
 EFUArgs *efu_args; /** global var */
 
 EFUArgs::EFUArgs(int argc, char *argv[]) {
-  using namespace std;
 
   optind = 1; // global variable used by getopt
 

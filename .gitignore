@@ -6,7 +6,6 @@
 *.pyc
 *.gcda
 *.gcno
-*Test
 
 # Misc programs
 cncsread
@@ -18,6 +17,7 @@ gencspecfile
 gennmxfile
 gennmxpcap
 dgmgjson
+*Test$
 
 #directories
 build/

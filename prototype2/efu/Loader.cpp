@@ -8,8 +8,6 @@
 #include <string.h>
 #include <string>
 
-using namespace std;
-
 Loader::~Loader() { dlclose(handle); }
 
 Loader::Loader(const std::string lib, void *args) {

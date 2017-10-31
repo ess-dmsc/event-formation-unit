@@ -5,8 +5,6 @@
 #include <cstring>
 #include <multigrid/mgcncs/Data.h>
 
-using namespace std;
-
 struct multi_grid {
   uint32_t header;
   uint32_t data[8];

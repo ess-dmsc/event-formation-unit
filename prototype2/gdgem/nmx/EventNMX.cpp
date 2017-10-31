@@ -85,8 +85,6 @@ void EventNMX::insert_eventlet(const Eventlet &e) {
     y.insert_eventlet(e);
   } else if (e.plane_id == 0) {
     x.insert_eventlet(e);
-  } else {
-    printf("Invalid plane id\n");
   }
 }
 
@@ -100,8 +98,8 @@ void EventNMX::analyze(bool weighted, int16_t max_timebins,
   if (y.entries.size()) {
     y.analyze(weighted, max_timebins, max_timedif);
   }
-  good_ = x.entries.size() && y.entries.size();
-  if (good_) {
+  valid_ = x.entries.size() && y.entries.size();
+  if (valid_) {
     time_start_ = std::min(x.time_start, y.time_start);
   }
 }
@@ -109,7 +107,7 @@ void EventNMX::analyze(bool weighted, int16_t max_timebins,
 std::string EventNMX::debug() const {
   std::stringstream ss;
   ss << "Tstart=" << time_start_;
-  if (good_)
+  if (valid_)
     ss << "  GOOD\n";
   else
     ss << "  BAD\n";
@@ -118,6 +116,11 @@ std::string EventNMX::debug() const {
   return ss.str();
 }
 
-bool EventNMX::good() const { return good_; }
+bool EventNMX::valid() const { return valid_; }
+
+bool EventNMX::meets_lower_cirterion(int16_t max_lu) const
+{
+  return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
+}
 
 uint64_t EventNMX::time_start() const { return time_start_; }

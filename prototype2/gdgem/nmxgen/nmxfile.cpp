@@ -14,8 +14,6 @@
 #include <libs/include/Socket.h>
 #include <unistd.h>
 
-using namespace std;
-
 const int TSC_MHZ = 2900;
 
 int main(int argc, char *argv[]) {
@@ -55,9 +53,9 @@ int main(int argc, char *argv[]) {
       tx += readsz;
       txp++;
     } else {
-      cout << "Sent " << tx_total + tx << " bytes"
-           << " in " << txp_total + txp << " packets." << endl;
-      cout << "done" << endl;
+      std::cout << "Sent " << tx_total + tx << " bytes"
+           << " in " << txp_total + txp << " packets." << std::endl;
+      std::cout << "done" << std::endl;
       exit(0);
     }
 

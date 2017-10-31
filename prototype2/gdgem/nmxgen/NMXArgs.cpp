@@ -9,8 +9,6 @@
 
 NMXArgs::NMXArgs(int argc, char *argv[]) {
 
-  using namespace std;
-
   int c;
   while (1) {
     static struct option long_options[] = {

@@ -4,35 +4,37 @@
 #include <common/Trace.h>
 #include <gdgem/nmx/HistSerializer.h>
 
-#define ELEMSIZE 4
-
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-HistSerializer::HistSerializer(size_t maxarraylength)
-    : builder(maxarraylength * ELEMSIZE * 2 + 256), maxlen(maxarraylength) {}
+HistSerializer::HistSerializer()
+    : builder(2 * NMXHists::needed_buffer_size() + 256)
+{}
 
 HistSerializer::~HistSerializer() {}
 
-int HistSerializer::serialize(const NMXHists& hists, char **buffer)
+size_t HistSerializer::serialize(const NMXHists& hists, char **buffer)
 {
-  return serialize(&hists.xyhist[0][0], &hists.xyhist[1][0],
-      1500, buffer);
-}
-
-int HistSerializer::serialize(const uint32_t *xhist, const uint32_t *yhist,
-                              size_t entries, char **buffer) {
-  if (entries > maxlen) {
-    *buffer = 0;
-    return 0;
-  }
-
+//  return 0;
   builder.Clear();
-  auto xoff = builder.CreateUninitializedVector(entries, ELEMSIZE, &xarrptr);
-  auto yoff = builder.CreateUninitializedVector(entries, ELEMSIZE, &yarrptr);
-  memcpy(xarrptr, xhist, entries * ELEMSIZE);
-  memcpy(yarrptr, yhist, entries * ELEMSIZE);
-  auto dataoff = CreateGEMHist(builder, xoff, yoff);
+  auto x_strip_off = builder.CreateUninitializedVector(NMX_STRIP_HIST_SIZE, NMX_HIST_ELEM_SIZE, &xtrackptr);
+  auto y_strip_off = builder.CreateUninitializedVector(NMX_STRIP_HIST_SIZE, NMX_HIST_ELEM_SIZE, &ytrackptr);
+
+  auto x_adc_off = builder.CreateUninitializedVector(NMX_ADC_HIST_SIZE, NMX_HIST_ELEM_SIZE, &xadcptr);
+  auto y_adc_off = builder.CreateUninitializedVector(NMX_ADC_HIST_SIZE, NMX_HIST_ELEM_SIZE, &yadcptr);
+  auto clus_adc_off = builder.CreateUninitializedVector(NMX_ADC_HIST_SIZE, NMX_HIST_ELEM_SIZE, &clus_adc_ptr);
+
+  memcpy(xtrackptr, &hists.x_strips_hist[0], NMX_STRIP_HIST_SIZE * NMX_HIST_ELEM_SIZE);
+  memcpy(ytrackptr, &hists.y_strips_hist[0], NMX_STRIP_HIST_SIZE * NMX_HIST_ELEM_SIZE);
+  memcpy(xadcptr, &hists.x_adc_hist[0], NMX_ADC_HIST_SIZE * NMX_HIST_ELEM_SIZE);
+  memcpy(yadcptr, &hists.y_adc_hist[0], NMX_ADC_HIST_SIZE * NMX_HIST_ELEM_SIZE);
+  memcpy(clus_adc_ptr, &hists.cluster_adc_hist[0], NMX_ADC_HIST_SIZE * NMX_HIST_ELEM_SIZE);
+
+  auto dataoff = CreateGEMHist(builder,
+                               x_strip_off, y_strip_off
+                               , x_adc_off, y_adc_off
+                               , clus_adc_off
+                               , hists.bin_width());
 
   auto msg =
       CreateMonitorMessage(builder, 0, DataField::GEMHist, dataoff.Union());

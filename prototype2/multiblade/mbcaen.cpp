@@ -23,7 +23,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
 const char *classname = "Multiblade detector with CAEN readout";
@@ -41,6 +40,7 @@ public:
     int statsize();
     int64_t statvalue(size_t index);
     std::string &statname(size_t index);
+    const char *detectorname();
 
     /** @todo figure out the right size  of the .._max_entries  */
     static const int eth_buffer_max_entries = 20000;
@@ -96,6 +96,8 @@ int MBCAEN::statsize() { return ns.size(); }
 int64_t MBCAEN::statvalue(size_t index) { return ns.value(index); }
 
 std::string &MBCAEN::statname(size_t index) { return ns.name(index); }
+
+const char *MBCAEN::detectorname() { return classname; }
 
 void MBCAEN::input_thread() {
     /** Connection setup */

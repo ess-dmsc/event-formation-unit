@@ -135,22 +135,37 @@ function sonde_data.dissector(buffer,pinfo,tree)
   local datalen = buffer(8,2):uint()
   header:add(buffer(8,2), string.format("Data length: %d", datalen))
 
-  local hits = ((protolen-10) - 1)/5
-  pinfo.cols.info = string.format("Version: %d, system: %d, %s",
-          bit.rshift(versys,6), bit.band(versys, 0x3f), cmd[type])
+  if type == 0xd6 then
+    local hits = ((protolen-10) - 1)/5
+    pinfo.cols.info = string.format("Version: %d, system: %d, %s",
+            bit.rshift(versys,6), bit.band(versys, 0x3f), cmd[type])
 
-
-  for i=1,hits do
-    local ts =  buffer(11 + (i-1)*5, 4):uint()
-    local asch = buffer(15 + (i-1)*5, 1):uint()
-    local hit = header:add(buffer(11 + (i-1)*5, 5),
-        string.format("Timestamp %d, ASIC %d, channel %d", ts, bit.rshift(asch, 6), bit.band(asch, 0x3f)))
+    for i=1,hits do
+      local ts =  buffer(11 + (i-1)*5, 4):uint()
+      local asch = buffer(15 + (i-1)*5, 1):uint()
+      local hit = header:add(buffer(11 + (i-1)*5, 5),
+          string.format("Timestamp %d, ASIC %d, channel %d", ts, bit.rshift(asch, 6), bit.band(asch, 0x3f)))
+    end
+  elseif type == 0xd5 then
+    local source = buffer(10,1):uint()
+    header:add(buffer(10,1), string.format("source: %d", source))
+    local trigger = buffer(11,1):uint()
+    header:add(buffer(11,1), string.format("trigger: %d", trigger))
+    local channel = buffer(12,1):uint()
+    header:add(buffer(12,1), string.format("channel: %d", channel))
+    local hold_delay = buffer(13,2):uint()
+    header:add(buffer(13,2), string.format("hold delay: %d", hold_delay))
+    local nsamples = buffer(15,2):uint()
+    header:add(buffer(15,2), string.format("samples: %d", nsamples))
+    pinfo.cols.info = string.format("Single EV pulse height")
   end
 end
 
 -- Register the protocol
 udp_table = DissectorTable.get("udp.port")
 udp_table:add(50011, sonde_data)
+udp_table:add(50021, sonde_data)
 
 tcp_table = DissectorTable.get("tcp.port")
 tcp_table:add(50010, sonde_ctrl)
+tcp_table:add(50020, sonde_ctrl)

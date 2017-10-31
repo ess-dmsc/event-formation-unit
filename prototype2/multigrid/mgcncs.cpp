@@ -15,7 +15,6 @@
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/Data.h>
 #include <multigrid/mgcncs/MultigridGeometry.h>
-//#include <cspec/CSPECEvent.h>
 #include <cstring>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
@@ -30,7 +29,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-using namespace std;
 using namespace memory_sequential_consistent; // Lock free fifo
 
 const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this for time
@@ -41,6 +39,7 @@ const char *classname = "CSPEC Detector";
 class CSPEC : public Detector {
 public:
   CSPEC(void *args);
+  ~CSPEC();
   void input_thread();
   void processing_thread();
   void output_thread();
@@ -94,6 +93,11 @@ private:
 
   EFUArgs *opts;
 };
+
+CSPEC::~CSPEC() {
+   delete event_ringbuf;
+   delete eth_ringbuf;
+}
 
 CSPEC::CSPEC(void *args) {
   opts = (EFUArgs *)args;
@@ -269,6 +273,8 @@ void CSPEC::output_thread() {
 
     /** Cheking for exit*/
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+
+      mystats.tx_bytes += flatbuffer.produce();
 
       if (stop.timeus() >= opts->stopafter * 1000000LU) {
         std::cout << "stopping output thread, timeus " << stop.timeus()

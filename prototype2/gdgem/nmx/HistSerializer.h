@@ -21,20 +21,20 @@
 class HistSerializer {
 public:
   /** @todo document */
-  HistSerializer(size_t maxarraylength);
+  HistSerializer();
 
   /** @todo document */
   ~HistSerializer();
 
   /** @todo document */
-  int serialize(const uint32_t *xhist, const uint32_t *yhist,
-                size_t entries, char **buffer);
-
-  int serialize(const NMXHists& hists, char **buffer);
+  size_t serialize(const NMXHists& hists, char **buffer);
 
 private:
   flatbuffers::FlatBufferBuilder builder;
-  size_t maxlen{0};
-  uint8_t *xarrptr{nullptr};
-  uint8_t *yarrptr{nullptr};
+  uint8_t *xtrackptr{nullptr};
+  uint8_t *ytrackptr{nullptr};
+
+  uint8_t *xadcptr{nullptr};
+  uint8_t *yadcptr{nullptr};
+  uint8_t *clus_adc_ptr{nullptr};
 };
