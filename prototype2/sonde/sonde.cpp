@@ -95,7 +95,7 @@ SONDEIDEA::SONDEIDEA(void *args) {
 
   XTRACE(INIT, ALW, "Creating %d SONDE Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 10);
+  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 1); /** @todo testing workaround */
   assert(eth_ringbuf != 0);
 }
 

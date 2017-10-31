@@ -17,23 +17,7 @@ BuilderSRS::BuilderSRS(SRSTime time_intepreter,
     , geometry_interpreter_(geometry_interpreter)
 {
 #ifdef DUMPTOFILE
-  char cStartTime[50];
-  time_t rawtime;
-        struct tm * timeinfo;
-        time(&rawtime);
-        timeinfo = localtime(&rawtime);
-
-        strftime(cStartTime, 50, "%Y-%m-%d-%H-%M-%S", timeinfo);
-  std::string startTime = cStartTime;
-        std::string fileName = "VMM3_" + startTime + ".csv";
-        fd = open(fileName.c_str(), O_RDWR|O_CREAT, S_IRWXU);
-        assert(fd >= 0);
-        time_t t = time(NULL);
-        struct tm * tm = localtime(&t);
-        char s[128];
-        strftime(s, sizeof(s), "%c", tm);
-        dprintf(fd, "%s\n", s);
-        dprintf(fd, "# fec, chip_id, srs timestamp, channel, bcid, tdc, adc, overthreshold\n");
+        vmmsave.tofile("# fec, chip_id, srs timestamp, channel, bcid, tdc, adc, overthreshold\n");
 #endif
 }
 
@@ -75,7 +59,7 @@ BuilderSRS::process_buffer(char *buf, size_t size,
     }
 
 #ifdef DUMPTOFILE
-    dprintf(fd, "%2d, %2d, %u, %2d, %d, %d, %d\n", 1, chip_id, parser_.srshdr.time,
+    vmmsave.tofile("%2d, %2d, %u, %2d, %d, %d, %d\n", 1, chip_id, parser_.srshdr.time,
             d.chno, d.bcid, d.tdc, d.adc);
 #endif
 

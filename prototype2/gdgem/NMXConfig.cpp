@@ -1,6 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <gdgem/NMXConfig.h>
+#include <common/Trace.h>
 
 #include <dataformats/multigrid/inc/json.h>
 #include <fstream>
@@ -16,8 +17,7 @@ NMXConfig::NMXConfig(std::string jsonfile)
 
   if (!reader.parse(str, root, 0))
   {
-//    ss << "error: file " << jsonfile
-//              << " is not valid json\n";
+    XTRACE(INIT, WAR, "Invalid Json file: %s\n", jsonfile.c_str());
     return;
   }
 
