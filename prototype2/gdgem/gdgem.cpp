@@ -42,6 +42,7 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 class NMX : public Detector {
 public:
   NMX(void *args);
+  ~NMX();
   void input_thread();
   void processing_thread();
 
@@ -88,6 +89,10 @@ private:
   std::shared_ptr<AbstractBuilder> builder_ {nullptr};
   void init_builder(std::string jsonfile);
 };
+
+NMX::~NMX() {
+  printf("NMX detector destructor called\n");
+}
 
 NMX::NMX(void *args) {
   opts = (EFUArgs *)args;
@@ -157,9 +162,10 @@ void NMX::input_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-      if (stop_timer.timeus() >= opts->stopafter * 1000000LU) {
-        std::cout << "stopping input thread, timeus " << stop_timer.timeus()
-                  << std::endl;
+      if ( (stop_timer.timeus() >= opts->stopafter * 1000000LU) ||
+           (opts->proc_cmd == opts->thread_cmd::TERMINATE)          ) {
+        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d, timeus: %" PRIu64 "\n",
+               opts->proc_cmd, stop_timer.timeus());
         return;
       }
       report_timer.now();
@@ -188,7 +194,7 @@ void NMX::processing_thread() {
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
   Clusterer clusterer(nmx_opts.cluster_min_timespan);
 
-  Timer stopafter_clock;
+  Timer stop_timer;
   TSCTimer global_time, report_timer;
 
   EventNMX event;
@@ -263,7 +269,7 @@ void NMX::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-      // printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
+
 
       sample_next_track = 1;
 
@@ -285,8 +291,12 @@ void NMX::processing_thread() {
         hists.clear();
       }
 
-      if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
-        std::cout << "stopping processing thread, timeus " << std::endl;
+      if ( (stop_timer.timeus() >= opts->stopafter * 1000000LU) ||
+           (opts->proc_cmd == opts->thread_cmd::TERMINATE)              ) {
+        XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d, timeus: %" PRIu64 "\n",
+               opts->proc_cmd, stop_timer.timeus());
+        builder_.reset();      /**< @fixme this is a hack to force ~BuilderSRS() call */
+        delete builder_.get(); /**< @fixme see above */
         return;
       }
       report_timer.now();
@@ -300,16 +310,15 @@ void NMX::init_builder(std::string jsonfile)
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
   if (nmx_opts.builder_type == "H5") {
-    XTRACE(INIT, ALW, "Make BuilderH5\n");
+    XTRACE(INIT, DEB, "Make BuilderH5\n");
     builder_ = std::make_shared<BuilderH5>();
   }
   else if (nmx_opts.builder_type == "SRS") {
-    XTRACE(INIT, ALW, "Make BuilderSRS\n");
+    XTRACE(INIT, DEB, "Make BuilderSRS\n");
     builder_ = std::make_shared<BuilderSRS>
         (nmx_opts.time_config, nmx_opts.srs_mappings);
-  }
-  else {
-    XTRACE(INIT, ALW, "Unrecognized builder type in config\n");
+  } else {
+    XTRACE(INIT, WAR, "Unrecognized builder type in config\n");
   }
 }
 

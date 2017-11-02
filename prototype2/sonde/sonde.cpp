@@ -35,6 +35,10 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 class SONDEIDEA : public Detector {
 public:
   SONDEIDEA(void *args);
+  ~SONDEIDEA() {
+    printf("sonde destructor called\n");
+  }
+
   void input_thread();
   void processing_thread();
 

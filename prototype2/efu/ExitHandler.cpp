@@ -6,6 +6,8 @@
 #include <stdlib.h>
 #include <string>
 
+extern int keep_running; /** @todo ugly global variable declared in main() */
+
 ExitHandler::ExitHandler() {
   signal(SIGINT, &ExitHandler::signalhandler);
   signal(SIGSEGV, &ExitHandler::signalhandler);
@@ -15,13 +17,7 @@ ExitHandler::ExitHandler() {
 
 void ExitHandler::signalhandler(int sig) {
   XTRACE(MAIN, ALW, "efu2 terminated with signal %d\n", sig);
-  std::string message =
-      "efu2 terminated with signal " + std::to_string(sig) + "\n";
+  std::string message = "efu2 terminated with signal " + std::to_string(sig) + "\n";
   GLOG_CRI(message);
-  exit(1);
-}
-
-void ExitHandler::Exit() {
-  GLOG_INF("efu2 terminated normally");
-  exit(0);
+  keep_running = 0;
 }

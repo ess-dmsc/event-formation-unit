@@ -14,9 +14,6 @@ public:
   /** @brief constructor does nothing */
   ExitHandler();
 
-  /** @brief called to terminate the application, wrapper for exit() */
-  void Exit();
-
 private:
   /** Traces an exit message, also sends to Graylog server */
   static void signalhandler(int a);
