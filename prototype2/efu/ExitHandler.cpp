@@ -9,13 +9,20 @@
 extern int keep_running; /** @todo ugly global variable declared in main() */
 
 ExitHandler::ExitHandler() {
-  signal(SIGINT, &ExitHandler::signalhandler);
-  signal(SIGSEGV, &ExitHandler::signalhandler);
-  signal(SIGTERM, &ExitHandler::signalhandler);
-  signal(SIGBUS, &ExitHandler::signalhandler);
+  signal(SIGINT, &ExitHandler::noncritical);
+  signal(SIGSEGV, &ExitHandler::critical);
+  signal(SIGTERM, &ExitHandler::critical);
+  signal(SIGBUS, &ExitHandler::critical);
 }
 
-void ExitHandler::signalhandler(int sig) {
+void ExitHandler::critical(int sig) {
+  XTRACE(MAIN, ALW, "efu2 terminated with critical signal %d\n", sig);
+  std::string message = "efu2 terminated with critical signal " + std::to_string(sig) + "\n";
+  GLOG_CRI(message);
+  exit(1);
+}
+
+void ExitHandler::noncritical(int sig) {
   XTRACE(MAIN, ALW, "efu2 terminated with signal %d\n", sig);
   std::string message = "efu2 terminated with signal " + std::to_string(sig) + "\n";
   GLOG_CRI(message);

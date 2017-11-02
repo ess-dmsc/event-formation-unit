@@ -15,6 +15,9 @@ public:
   ExitHandler();
 
 private:
-  /** Traces an exit message, also sends to Graylog server */
-  static void signalhandler(int a);
+  /** noncritical signals (Ctrl-C), stop threads nicely */
+  static void noncritical(int a);
+
+  /** Critical signals, immediate exit */
+  static void critical(int a);
 };
