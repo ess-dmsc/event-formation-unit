@@ -45,7 +45,7 @@ TEST_F(DetectorTest, Destructor) {
 
   // delete tmp;
   output = testing::internal::GetCapturedStdout();
-  ASSERT_EQ(output, "~TestDetector\n");
+  ASSERT_EQ(output, "~TestDetector\nVirtual detector destructor called\n");
 }
 
 TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != nullptr); }
