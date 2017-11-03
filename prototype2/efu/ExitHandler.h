@@ -20,4 +20,7 @@ private:
 
   /** Critical signals, immediate exit */
   static void critical(int a);
+
+  /** print a stack trace */
+  static void print_trace(void);
 };

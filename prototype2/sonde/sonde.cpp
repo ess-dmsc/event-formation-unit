@@ -119,7 +119,6 @@ void SONDEIDEA::input_thread() {
   sondedata.settimeout(0, 100000); // One tenth of a second
 
   int rdsize;
-  Timer stop_timer;
   TSCTimer report_timer;
   for (;;) {
     unsigned int eth_index = eth_ringbuf->getindex();
@@ -142,9 +141,8 @@ void SONDEIDEA::input_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-      if (stop_timer.timeus() >= opts->stopafter * 1000000LU) {
-        std::cout << "stopping input thread, timeus " << stop_timer.timeus()
-                  << std::endl;
+      if (opts->proc_cmd == opts->thread_cmd::TERMINATE) {
+        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
         return;
       }
       report_timer.now();
@@ -161,7 +159,6 @@ void SONDEIDEA::processing_thread() {
   Producer eventprod(opts->broker, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
-  Timer stopafter_clock;
   TSCTimer global_time, report_timer;
 
   unsigned int data_index;
@@ -194,12 +191,11 @@ void SONDEIDEA::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-      // printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
 
       mystats.tx_bytes += flatbuffer.produce();
 
-      if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
-        std::cout << "stopping processing thread, timeus " << std::endl;
+      if (opts->proc_cmd == opts->thread_cmd::TERMINATE) {
+        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
         return;
       }
       report_timer.now();

@@ -137,7 +137,6 @@ void NMX::input_thread() {
   nmxdata.settimeout(0, 100000); // One tenth of a second
 
   int rdsize;
-  Timer stop_timer;
   TSCTimer report_timer;
   for (;;) {
     unsigned int eth_index = eth_ringbuf->getindex();
@@ -162,12 +161,11 @@ void NMX::input_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-      if ( (stop_timer.timeus() >= opts->stopafter * 1000000LU) ||
-           (opts->proc_cmd == opts->thread_cmd::TERMINATE)          ) {
-        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d, timeus: %" PRIu64 "\n",
-               opts->proc_cmd, stop_timer.timeus());
+      if (opts->proc_cmd == opts->thread_cmd::TERMINATE) {
+        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
         return;
       }
+
       report_timer.now();
     }
   }
@@ -194,7 +192,6 @@ void NMX::processing_thread() {
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
   Clusterer clusterer(nmx_opts.cluster_min_timespan);
 
-  Timer stop_timer;
   TSCTimer global_time, report_timer;
 
   EventNMX event;
@@ -270,7 +267,6 @@ void NMX::processing_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-
       sample_next_track = 1;
 
       mystats.tx_bytes += flatbuffer.produce();
@@ -291,14 +287,13 @@ void NMX::processing_thread() {
         hists.clear();
       }
 
-      if ( (stop_timer.timeus() >= opts->stopafter * 1000000LU) ||
-           (opts->proc_cmd == opts->thread_cmd::TERMINATE)              ) {
-        XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d, timeus: %" PRIu64 "\n",
-               opts->proc_cmd, stop_timer.timeus());
+      if (opts->proc_cmd == opts->thread_cmd::TERMINATE) {
+        XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n", opts->proc_cmd);
         builder_.reset();      /**< @fixme this is a hack to force ~BuilderSRS() call */
         delete builder_.get(); /**< @fixme see above */
         return;
       }
+
       report_timer.now();
     }
   }

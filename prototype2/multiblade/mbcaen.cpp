@@ -109,7 +109,6 @@ void MBCAEN::input_thread() {
     mbdata.settimeout(0, 100000); // One tenth of a second
 
     int rdsize;
-    Timer stop_timer;
     TSCTimer report_timer;
     for (;;) {
         unsigned int eth_index = eth_ringbuf->getindex();
@@ -134,11 +133,11 @@ void MBCAEN::input_thread() {
         // Checking for exit
         if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-            if (stop_timer.timeus() >= opts->stopafter * 1000000LU) {
-                std::cout << "stopping input thread, timeus " << stop_timer.timeus()
-                          << std::endl;
-                return;
+            if (opts->proc_cmd == opts->thread_cmd::TERMINATE) {
+              XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
+              return;
             }
+
             report_timer.now();
         }
     }
@@ -160,7 +159,6 @@ void MBCAEN::processing_thread() {
     MBData mbdata;
 
     unsigned int data_index;
-    Timer stopafter_clock;
     TSCTimer global_time, report_timer;
     while (1) {
         if ((input2proc_fifo.pop(data_index)) == false) {
@@ -208,10 +206,11 @@ void MBCAEN::processing_thread() {
 
             mystats.tx_bytes += flatbuffer.produce();
 
-            if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
-                std::cout << "stopping processing thread, timeus " << std::endl;
-                return;
+            if (opts->proc_cmd == opts->thread_cmd::TERMINATE) {
+              XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n", opts->proc_cmd);
+              return;
             }
+
             report_timer.now();
         }
     }
