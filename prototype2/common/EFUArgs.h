@@ -13,7 +13,7 @@
 class EFUArgs {
 public:
 
-  enum thread_cmd { LOADCAL = 1, TERMINATE};
+  enum thread_cmd { LOADCAL = 1, EXIT, THREAD_TERMINATE};
 
   /** @brief constructor for program arguments parsed via getopt_long()
    * @param argc Argument count - typically taken from main()

@@ -172,7 +172,7 @@ void CSPEC::input_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-      if (opts->proc_cmd == opts->thread_cmd::TERMINATE) {
+      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
         XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
         return;
       }
@@ -239,7 +239,7 @@ void CSPEC::processing_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-      if (opts->proc_cmd == opts->thread_cmd::TERMINATE) {
+      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
         XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n", opts->proc_cmd);
         return;
       }
@@ -273,7 +273,7 @@ void CSPEC::output_thread() {
 
       mystats.tx_bytes += flatbuffer.produce();
 
-      if (opts->proc_cmd == opts->thread_cmd::TERMINATE) {
+      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
         XTRACE(INPUT, ALW, "Stopping output thread - stopcmd: %d\n", opts->proc_cmd);
         return;
       }

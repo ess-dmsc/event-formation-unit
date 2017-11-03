@@ -161,7 +161,7 @@ void NMX::input_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-      if (opts->proc_cmd == opts->thread_cmd::TERMINATE) {
+      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
         XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
         return;
       }
@@ -287,7 +287,7 @@ void NMX::processing_thread() {
         hists.clear();
       }
 
-      if (opts->proc_cmd == opts->thread_cmd::TERMINATE) {
+      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
         XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n", opts->proc_cmd);
         builder_.reset();      /**< @fixme this is a hack to force ~BuilderSRS() call */
         delete builder_.get(); /**< @fixme see above */

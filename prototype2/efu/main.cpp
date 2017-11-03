@@ -61,9 +61,9 @@ int main(int argc, char *argv[]) {
 
   while (1) {
     if (stop_cmd.timeus() >= (uint64_t)ONE_SECOND_US/10) {
-      if (keep_running == 0) {
+      if (keep_running == 0 || efu_args->proc_cmd == efu_args->thread_cmd::EXIT) {
         XTRACE(INIT, ALW, "Application stop, Exiting...\n");
-        efu_args->proc_cmd = efu_args->thread_cmd::TERMINATE;
+        efu_args->proc_cmd = efu_args->thread_cmd::THREAD_TERMINATE;
         sleep(2);
         return 1;
       }
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
     if (stop_timer.timeus() >= (uint64_t)efu_args->stopafter * (uint64_t)ONE_SECOND_US) {
       XTRACE(MAIN, ALW, "Application timeout, Exiting...\n");
       GLOG_INF("Event Formation Unit Exiting (User timeout)");
-      efu_args->proc_cmd = efu_args->thread_cmd::TERMINATE;
+      efu_args->proc_cmd = efu_args->thread_cmd::THREAD_TERMINATE;
       sleep(2);
       return 0;
     }
