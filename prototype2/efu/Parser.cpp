@@ -80,7 +80,7 @@ static int cspec_load_calib(std::vector<std::string> cmdargs,
   }
 
   /** @todo some other ipc between main and threads ? */
-  efu_args->proc_cmd = 1; // send load command to processing thread
+  efu_args->proc_cmd = efu_args->thread_cmd::THREAD_LOADCAL; // send load command to processing thread
 
   return Parser::OK;
 }

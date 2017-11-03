@@ -13,7 +13,7 @@
 class EFUArgs {
 public:
 
-  enum thread_cmd { LOADCAL = 1, EXIT, THREAD_TERMINATE};
+  enum thread_cmd { NOCMD =0, EXIT, THREAD_LOADCAL, THREAD_TERMINATE};
 
   /** @brief constructor for program arguments parsed via getopt_long()
    * @param argc Argument count - typically taken from main()
@@ -54,7 +54,7 @@ public:
   // IPC data for communicating between main and threads
   uint16_t wirecal[CSPECChanConv::adcsize];
   uint16_t gridcal[CSPECChanConv::adcsize];
-  uint32_t proc_cmd{0};
+  thread_cmd proc_cmd{NOCMD};
 
   std::shared_ptr<Detector> detectorif; /**< @todo is this the place? */
 };

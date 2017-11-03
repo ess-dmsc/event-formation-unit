@@ -180,8 +180,8 @@ void CSPEC::processing_thread() {
   while (1) {
 
     // Check for control from mothership (main)
-    if (opts->proc_cmd) {
-      opts->proc_cmd = 0; /** @todo other means of ipc? */
+    if (opts->proc_cmd == opts->thread_cmd::THREAD_LOADCAL) {
+      opts->proc_cmd = opts->thread_cmd::NOCMD; /** @todo other means of ipc? */
       XTRACE(PROCESS, INF, "processing_thread loading new calibrations\n");
       conv.load_calibration(opts->wirecal, opts->gridcal);
     }
