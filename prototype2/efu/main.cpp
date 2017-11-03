@@ -16,13 +16,12 @@
 
 #define ONE_SECOND_US 1000000U
 
-int keep_running = 1; /** uglu global variable used in ExitHandler */
-
 /** Load detector, launch pipeline threads, then sleep until timeout or break */
 int main(int argc, char *argv[]) {
+  int keep_running = 1;
   efu_args = new EFUArgs(argc, argv);
 
-  ExitHandler exithandler;
+  ExitHandler::InitExitHandler(&keep_running);
 
 #ifdef GRAYLOG
   Log::AddLogHandler(

@@ -10,9 +10,10 @@
 #include <stdlib.h>
 
 class ExitHandler {
+
 public:
   /** @brief constructor does nothing */
-  ExitHandler();
+  static void InitExitHandler(int * runflag);
 
 private:
   /** noncritical signals (Ctrl-C), stop threads nicely */
@@ -23,4 +24,6 @@ private:
 
   /** print a stack trace */
   static void print_trace(void);
+
+  static int * keep_running;
 };

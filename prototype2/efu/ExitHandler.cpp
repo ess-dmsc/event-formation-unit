@@ -7,9 +7,10 @@
 #include <stdlib.h>
 #include <string>
 
-extern int keep_running; /** @todo ugly global variable declared in main() */
+int * ExitHandler::keep_running = nullptr;
 
-ExitHandler::ExitHandler() {
+void ExitHandler::InitExitHandler(int * runflag) {
+  ExitHandler::keep_running = runflag;
   signal(SIGINT, &ExitHandler::noncritical);
   signal(SIGSEGV, &ExitHandler::critical);
   signal(SIGTERM, &ExitHandler::critical);
@@ -28,7 +29,7 @@ void ExitHandler::noncritical(int sig) {
   XTRACE(MAIN, ALW, "efu2 terminated with signal %d\n", sig);
   std::string message = "efu2 terminated with signal " + std::to_string(sig) + "\n";
   GLOG_CRI(message);
-  keep_running = 0;
+  *ExitHandler::keep_running = 0;
 }
 
 /* Obtain a backtrace and print it to stdout. */
