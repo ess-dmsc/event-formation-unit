@@ -70,7 +70,7 @@ public:
    *  @param buffer User specified buffer (must be large enough to hold event
    *  @todo document return value
    */
-  int createevent(const MultiGridData &data, char *buffer);
+  int createevent(const MultiGridData &data, uint32_t * time, uint32_t * pixel);
 
   // This data is overwritten on receive()
   // struct MultiGridData data[250];

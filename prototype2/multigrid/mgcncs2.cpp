@@ -7,6 +7,7 @@
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
+#include <common/FBSerializer.h>
 #include <common/NewStats.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
@@ -59,8 +60,6 @@ private:
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
   std::mutex eventq_mutex, cout_mutex;
-
-  char kafkabuffer[kafka_buffer_size];
 
   NewStats ns{"efu2.cspec2."};
 
@@ -129,8 +128,6 @@ void CSPEC::input_thread() {
   int rdsize;
   TSCTimer report_timer;
   for (;;) {
-    // assert(opts->guard1 == 0xdeadbeef);
-    // assert(opts->guard2 == 0xdeadbabe);
     unsigned int eth_index = eth_ringbuf->getindex();
 
     /** this is the processing step */
@@ -165,20 +162,17 @@ void CSPEC::input_thread() {
 void CSPEC::processing_thread() {
   CSPECChanConv conv;
   Producer producer(opts->broker, "C-SPEC_detector");
-  //FBSerializer flatbuffer(kafka_buffer_size, producer);
+  FBSerializer flatbuffer(kafka_buffer_size, producer);
 
   MultiGridGeometry geom(1, 2, 48, 4, 16);
 
-  // CSPECData dat(0, 0, &conv, &CSPEC); // Custom signal thresholds
   CSPECData dat(250, &conv, &geom); // Default signal thresholds
 
   TSCTimer report_timer;
   TSCTimer timestamp;
 
   unsigned int data_index;
-  unsigned int produce = 0;
   while (1) {
-
     // Check for control from mothership (main)
     if (opts->proc_cmd == opts->thread_cmd::THREAD_LOADCAL) {
       opts->proc_cmd = opts->thread_cmd::NOCMD; /** @todo other means of ipc? */
@@ -200,24 +194,14 @@ void CSPEC::processing_thread() {
       for (unsigned int id = 0; id < dat.elems; id++) {
         auto d = dat.data[id];
         if (d.valid) {
-          if (dat.createevent(d, kafkabuffer + produce) < 0) {
+          uint32_t tmptime;
+          uint32_t tmppixel;
+          if (dat.createevent(d, &tmptime, &tmppixel) < 0) {
             mystats.geometry_errors++;
             assert(mystats.geometry_errors <= mystats.rx_readouts);
           } else {
+            mystats.tx_bytes += flatbuffer.addevent(tmptime, tmppixel);
             mystats.rx_events++;
-            produce += 8; /**< @todo should use sizeof () */
-
-            /** Produce when enough data has been accumulated */
-            if (produce >= kafka_buffer_size - 20) {
-              assert(produce < kafka_buffer_size);
-
-              producer.produce(kafkabuffer, kafka_buffer_size);
-              mystats.tx_bytes += produce;
-
-              uint64_t ts = timestamp.timetsc();
-              std::memcpy(kafkabuffer, &ts, sizeof(ts));
-              produce = 8;
-            }
           }
         }
       }
@@ -225,6 +209,8 @@ void CSPEC::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+
+      mystats.tx_bytes += flatbuffer.produce();
 
       if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
         XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n", opts->proc_cmd);

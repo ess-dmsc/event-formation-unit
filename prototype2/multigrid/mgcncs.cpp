@@ -198,7 +198,7 @@ void CSPEC::processing_thread() {
 
     // Check for control from mothership (main)
     if (opts->proc_cmd == opts->thread_cmd::THREAD_LOADCAL) {
-      opts->proc_cmd = opts->thread_cmd::NOCMD; /** @todo other means of ipc? */
+      opts->proc_cmd = opts->thread_cmd::NOCMD;
       XTRACE(PROCESS, INF, "processing_thread loading new calibrations\n");
       conv.load_calibration(opts->wirecal, opts->gridcal);
     }
@@ -219,8 +219,8 @@ void CSPEC::processing_thread() {
         auto d = dat.data[id];
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();
-          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) <
-              0) {
+          auto buffer = event_ringbuf->getdatabuffer(event_index);
+          if (dat.createevent(d, (uint32_t*)buffer, (uint32_t*)(buffer + 4)) < 0) {
             mystats.geometry_errors++;
             assert(mystats.geometry_errors <= mystats.rx_readouts);
           } else {
