@@ -9,7 +9,7 @@
 #include <multigrid/mgcncsgen/DGArgs.h>
 #include <unistd.h>
 
-// const int TSC_MHZ = 2900;
+const int TSC_MHZ = 2900; // Not accurate
 
 int main(int argc, char *argv[]) {
   DGArgs opts(argc, argv);
@@ -37,18 +37,25 @@ int main(int argc, char *argv[]) {
 
   uint64_t pkt = 0;
   uint64_t bytes = 0;
-  TSCTimer throttle_timer;
 
+  TSCTimer report_timer;
   while ((pkt < opts.txPkt) && ((readsz = fread(buffer, 1, readsize, f)) > 0)) {
-    DataSource.send(buffer, readsz);
-    bytes += readsz;
-    pkt++;
+    for (int i = 0; i < opts.repeat; i++) {
+      DataSource.send(buffer, readsz);
+      bytes += readsz;
+      pkt++;
+      usleep(opts.speed_level);
+    }
 
-    usleep(opts.speed_level * 1000);
+    if (unlikely((report_timer.timetsc() / TSC_MHZ) >= opts.updint * 1000000)) {
+      printf("Sent: %" PRIu64 " packets\n", pkt);
+      printf("Sent: %" PRIu64 " bytes\n", bytes);
+      report_timer.now();
+    }
   }
 
-  printf("Sent: %" PRIu64 " packets\n", pkt);
-  printf("Sent: %" PRIu64 " bytes\n", bytes);
+  printf("Total sent: %" PRIu64 " packets\n", pkt);
+  printf("Total sent: %" PRIu64 " bytes\n", bytes);
 
   return 0;
 }

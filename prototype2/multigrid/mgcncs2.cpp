@@ -50,7 +50,7 @@ public:
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 20000;
+  static const int eth_buffer_max_entries = 1000;
   static const int eth_buffer_size = 9000;
   static const int kafka_buffer_size = 1000000;
 
@@ -67,8 +67,8 @@ private:
     // Input Counters
     int64_t rx_packets;
     int64_t rx_bytes;
-    int64_t fifo1_push_errors;
-    int64_t fifo1_free;
+    int64_t fifo_push_errors;
+    int64_t fifo_free;
     int64_t pad_a[4]; /**< @todo check alignment*/
 
     // Processing Counters
@@ -77,6 +77,7 @@ private:
     int64_t rx_discards;
     int64_t rx_idle1;
     int64_t geometry_errors;
+    int64_t fifo_seq_errors;
     // Output Counters
     int64_t rx_events;
     int64_t tx_bytes;
@@ -92,20 +93,21 @@ CSPEC::CSPEC(void *args) {
   // clang-format off
   ns.create("input.rx_packets",                &mystats.rx_packets);
   ns.create("input.rx_bytes",                  &mystats.rx_bytes);
-  ns.create("input.i2pfifo_dropped",           &mystats.fifo1_push_errors);
-  ns.create("input.i2pfifo_free",              &mystats.fifo1_free);
+  ns.create("input.i2pfifo_dropped",           &mystats.fifo_push_errors);
+  ns.create("input.i2pfifo_free",              &mystats.fifo_free);
   ns.create("processing.rx_readouts",          &mystats.rx_readouts);
   ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
   ns.create("processing.rx_discards",          &mystats.rx_discards);
   ns.create("processing.rx_idle",              &mystats.rx_idle1);
   ns.create("processing.rx_geometry_errors",   &mystats.geometry_errors);
+  ns.create("processing.fifo_seq_errors",      &mystats.fifo_seq_errors);
   ns.create("output.rx_events",                &mystats.rx_events);
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
 
-  XTRACE(INIT, INF, "Creating CSPEC ringbuffers %d\n",
-         5); /** @todo make this work */
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
+  XTRACE(INIT, ALW, "Creating %d Ethernet ringbuffers of size %d\n",
+         eth_buffer_max_entries, eth_buffer_size);
+  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
 }
 
 int CSPEC::statsize() { return ns.size(); }
@@ -131,16 +133,17 @@ void CSPEC::input_thread() {
     unsigned int eth_index = eth_ringbuf->getindex();
 
     /** this is the processing step */
+    eth_ringbuf->setdatalength(eth_index, 0);
     if ((rdsize = cspecdata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                     eth_ringbuf->getmaxbufsize())) > 0) {
-      XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
+      eth_ringbuf->setdatalength(eth_index, rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
-      eth_ringbuf->setdatalength(eth_index, rdsize);
+      XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
 
-      mystats.fifo1_free = input2proc_fifo.free();
+      mystats.fifo_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
-        mystats.fifo1_push_errors++;
+        mystats.fifo_push_errors++;
       } else {
         eth_ringbuf->nextbuffer();
       }
@@ -182,26 +185,31 @@ void CSPEC::processing_thread() {
 
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
-      mystats.fifo1_free = input2proc_fifo.free();
-      usleep(10);
+      mystats.fifo_free = input2proc_fifo.free();
+      usleep(1);
     } else {
-      dat.receive(eth_ringbuf->getdatabuffer(data_index),
-                  eth_ringbuf->getdatalength(data_index));
-      mystats.rx_readouts += dat.elems;
-      mystats.rx_error_bytes += dat.error;
-      mystats.rx_discards += dat.input_filter();
+      auto len = eth_ringbuf->getdatalength(data_index);
+      if (len == 0) {
+        mystats.fifo_seq_errors++;
+      } else {
+        dat.receive(eth_ringbuf->getdatabuffer(data_index),
+                    eth_ringbuf->getdatalength(data_index));
+        mystats.rx_readouts += dat.elems;
+        mystats.rx_error_bytes += dat.error;
+        mystats.rx_discards += dat.input_filter();
 
-      for (unsigned int id = 0; id < dat.elems; id++) {
-        auto d = dat.data[id];
-        if (d.valid) {
-          uint32_t tmptime;
-          uint32_t tmppixel;
-          if (dat.createevent(d, &tmptime, &tmppixel) < 0) {
-            mystats.geometry_errors++;
-            assert(mystats.geometry_errors <= mystats.rx_readouts);
-          } else {
-            mystats.tx_bytes += flatbuffer.addevent(tmptime, tmppixel);
-            mystats.rx_events++;
+        for (unsigned int id = 0; id < dat.elems; id++) {
+          auto d = dat.data[id];
+          if (d.valid) {
+            uint32_t tmptime;
+            uint32_t tmppixel;
+            if (dat.createevent(d, &tmptime, &tmppixel) < 0) {
+              mystats.geometry_errors++;
+              assert(mystats.geometry_errors <= mystats.rx_readouts);
+            } else {
+              mystats.tx_bytes += flatbuffer.addevent(tmptime, tmppixel);
+              mystats.rx_events++;
+            }
           }
         }
       }
