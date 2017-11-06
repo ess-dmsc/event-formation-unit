@@ -23,6 +23,7 @@ To build:
 __Makefile targets and options__
 
 See options and targets by
+
     > make hints
 
 Two important options, however, are
@@ -30,7 +31,7 @@ Two important options, however, are
 Option                | Description
 -------------         | -------------
 -DDUMPTOILE           | Activates code for writing readout to disk (default OFF)
--DUSE_OLD_ABI         | On CentOS we currently use the old ABI which can conflict on newer distrubutions (default OFF)
+-DUSE_OLD_ABI         | On CentOS we currently use the old ABI which can conflict on <br> newer distributions (default OFF)
 
 
 Target                | Description
