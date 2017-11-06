@@ -30,7 +30,7 @@ Two important options, however, are
 
 Option                | Description
 -------------         | -------------
--DDUMPTOILE           | Activates code for writing readout to disk (default OFF)
+-DDUMPTOFILE          | Activates code for writing readout to disk (default OFF)
 -DUSE_OLD_ABI         | On CentOS we currently use the old ABI which can conflict on <br> newer distributions (default OFF)
 
 
@@ -47,16 +47,14 @@ valgrind              | run valgrind on tests, generate reports
 
 __Run in terminal window__
 
-To run the EFU with the mgcncs2 pipeline
-
-From build directory
+To start the EFU with the __mgcncs2__ pipeline from the __build__ directory:
 
 `> ./prototype2/efu2 -d prototype2/multigrid/mgcncs2`
 
-If the efu and detector plugins (.so files) are located in the same directory
+If the efu and detector plugins (.so files) are located in the __same__ directory:
 
-`> .efu2 -d mgcncs2`
+`> ./efu2 -d mgcncs2`
 
 There are quite a few command line options, to get help
 
-`> .efu2 -h`
+`> ./efu2 -h`
