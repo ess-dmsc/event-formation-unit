@@ -27,7 +27,14 @@ TestDetectorFactory Factory;
 class DetectorTest : public TestBase {
 protected:
   virtual void SetUp() { det = Factory.create(0); }
+
   virtual void TearDown() {}
+
+  void assertcapture(const char * expected_output) {
+    std::string captured_output = testing::internal::GetCapturedStdout();
+    ASSERT_TRUE(captured_output.find(expected_output) !=  std::string::npos);
+  };
+
   std::shared_ptr<Detector> det;
   void *dummyargs; // Used for calling thread functions
 };
@@ -37,15 +44,13 @@ TEST_F(DetectorTest, Destructor) {
   testing::internal::CaptureStdout();
   {
     std::shared_ptr<Detector> tmp = Factory.create(0);
-    output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ(output, "TestDetectorFactory\nTestDetector\n");
+    assertcapture("TestDetectorFactory\nTestDetector\n");
 
     testing::internal::CaptureStdout();
   }
 
   // delete tmp;
-  output = testing::internal::GetCapturedStdout();
-  ASSERT_EQ(output, "~TestDetector\nVirtual detector destructor called\n");
+  assertcapture("~TestDetector\nVirtual detector destructor called\n");
 }
 
 TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != nullptr); }
@@ -53,21 +58,15 @@ TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != nullptr); }
 TEST_F(DetectorTest, DefaultThreads) {
   testing::internal::CaptureStdout();
   det->input_thread();
-  auto output = testing::internal::GetCapturedStdout().c_str();
-  printf("DEBUG: %s\n", output);
-  ASSERT_TRUE(strstr(output, "no input stage") != NULL);
+  assertcapture("no input stage");
 
   testing::internal::CaptureStdout();
   det->processing_thread();
-  output = testing::internal::GetCapturedStdout().c_str();
-  printf("DEBUG: %s\n", output);
-  ASSERT_TRUE(strstr(output, "no processing stage") != NULL);
+  assertcapture("no processing stage");
 
   testing::internal::CaptureStdout();
   det->output_thread();
-  output = testing::internal::GetCapturedStdout().c_str();
-  printf("DEBUG: %s\n", output);
-  ASSERT_TRUE(strstr(output, "no output stage") != NULL);
+  assertcapture("no output stage");
 }
 
 TEST_F(DetectorTest, StatAPI) {
