@@ -45,8 +45,6 @@ valgrind              | run valgrind on tests, generate reports
 
 ### Starting the EFU
 
-__Run in terminal window__
-
 To start the EFU with the __mgcncs2__ pipeline from the __build__ directory:
 
 `> ./prototype2/efu2 -d prototype2/multigrid/mgcncs2`
@@ -55,6 +53,16 @@ If the efu and detector plugins (.so files) are located in the __same__ director
 
 `> ./efu2 -d mgcncs2`
 
-There are quite a few command line options, to get help
+There are quite a few additional command line options, but these ones are
+the most used
+
+Cmd option          | Description
+-------------       | -------------
+-p                  | UDP port for detector data
+-g                  | IP address for Graphite (metrics) server
+-b                  | Kafka broker "ipaddress:port"
+-c                  | CPU core id for the first processing thread (-5 == ignore)
+
+To get further help
 
 `> ./efu2 -h`
