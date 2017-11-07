@@ -51,6 +51,9 @@ int main(int argc, char *argv[]) {
             break;
         }
 
+        // printf("time: %d, digi: %d, chan: %d, adc: %d\n",
+        //        entry.time, entry.digi, entry.chan, entry.adc);
+
         std::memcpy(bufptr, &entry.digi, sizeof(TextFile::Entry::digi));
         bufptr += sizeof(TextFile::Entry::digi);
 

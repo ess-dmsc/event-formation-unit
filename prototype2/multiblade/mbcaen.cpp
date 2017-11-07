@@ -19,6 +19,7 @@
 
 #include <mbcommon/multiBladeEventBuilder.h>
 #include <mbcaen/MBData.h>
+#include <mbcaen/MultiBladeGeometry.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -43,9 +44,9 @@ public:
     const char *detectorname();
 
     /** @todo figure out the right size  of the .._max_entries  */
-    static const int eth_buffer_max_entries = 20000;
+    static const int eth_buffer_max_entries = 2000;
     static const int eth_buffer_size = 9000;
-    static const int kafka_buffer_size = 124000; /**< events */
+    static const int kafka_buffer_size = 1000000;
 
 private:
     /** Shared between input_thread and processing_thread*/
@@ -66,6 +67,7 @@ private:
         int64_t rx_readouts;
         int64_t tx_bytes;
         int64_t rx_events;
+        int64_t geometry_errors;
     } ALIGN(64) mystats;
 
     EFUArgs *opts;
@@ -83,11 +85,12 @@ MBCAEN::MBCAEN(void *args) {
     ns.create("processing.rx_idle1",             &mystats.rx_idle1);
     ns.create("processing.tx_bytes",             &mystats.tx_bytes);
     ns.create("processing.rx_events",            &mystats.rx_events);
+    ns.create("processing.rx_geometry_errors",   &mystats.geometry_errors);
     // clang-format on
 
     XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d\n",
            eth_buffer_max_entries, eth_buffer_size);
-    eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries);
+    eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11); // @todo workaround
     assert(eth_ringbuf != 0);
 }
 
@@ -114,14 +117,15 @@ void MBCAEN::input_thread() {
         unsigned int eth_index = eth_ringbuf->getindex();
 
         /** this is the processing step */
+        eth_ringbuf->setdatalength(eth_index, 0);
         if ((rdsize = mbdata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                      eth_ringbuf->getmaxbufsize())) > 0) {
-
+            eth_ringbuf->setdatalength(eth_index, rdsize);
             XTRACE(PROCESS, DEB, "Received an udp packet\n");
 
             mystats.rx_packets++;
             mystats.rx_bytes += rdsize;
-            eth_ringbuf->setdatalength(eth_index, rdsize);
+
 
             if (input2proc_fifo.push(eth_index) == false) {
                 mystats.fifo1_push_errors++;
@@ -148,6 +152,7 @@ void MBCAEN::processing_thread() {
     //uint8_t ncassets = UINT8_MAX;
     uint8_t nwires   = 32;
     uint8_t nstrips  = 32;
+    MultiBladeGeometry geom;
 
     Producer eventprod(opts->broker, "MB_detector");
     FBSerializer flatbuffer(kafka_buffer_size, eventprod);
@@ -186,17 +191,20 @@ void MBCAEN::processing_thread() {
 
                 if (builder.addDataPoint(dp.chan, dp.adc, dp.time)) {
 
-                    uint32_t pixel_id = (nwires + nstrips) * dp.digi;
-                    pixel_id += (nwires + 1) * (builder.getWirePosition() + 1);
-                    pixel_id += builder.getStripPosition() + 1;
+                    uint32_t pixel_id = geom.pixelid(dp.digi, builder.getStripPosition()+1 - 32, builder.getWirePosition()+1);
 
-                    XTRACE(PROCESS, DEB, "wire pos: %d, strip pos: %d, pixel_id: %d\n",
+                    XTRACE(PROCESS, DEB, "digi: %d, wire pos: %d, strip pos: %d, pixel_id: %d\n",
+                             dp.digi,
                              (int)(builder.getWirePosition()  + 1),
-                             (int)(builder.getStripPosition() + 1),
+                             (int)(builder.getStripPosition() + 1 - 32),
                              pixel_id);
 
-                    mystats.tx_bytes += flatbuffer.addevent(builder.getTimeStamp(), pixel_id);
-                    mystats.rx_events++;
+                    if (pixel_id == 0) {
+                      mystats.geometry_errors++;
+                    } else {
+                      mystats.tx_bytes += flatbuffer.addevent(builder.getTimeStamp(), pixel_id);
+                      mystats.rx_events++;
+                    }
                 }
             }
         }
