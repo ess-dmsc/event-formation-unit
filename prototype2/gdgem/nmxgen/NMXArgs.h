@@ -29,6 +29,7 @@ public:
 
   int throttle{0}; /**< actually a sleep() counter */
   int loop{0}; /**< single shot or loop */
+  int pcapoffset{0}; /**< for pcap: start after offset */
 
   unsigned int updint{1}; /**< update interval (seconds) */
 };
