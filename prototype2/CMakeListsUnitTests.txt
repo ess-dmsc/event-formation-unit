@@ -46,6 +46,9 @@ endif()
 set(VersionTest_SRC common/VersionTest.cpp common/Version.h)
 create_test_executable(VersionTest "")
 
+set(ESSGeometryTest_SRC common/ESSGeometryTest.cpp common/ESSGeometry.h)
+create_test_executable(ESSGeometryTest "")
+
 
 set(RingBufferTest_SRC common/RingBufferTest.cpp common/RingBuffer.h)
 create_test_executable(RingBufferTest "")
