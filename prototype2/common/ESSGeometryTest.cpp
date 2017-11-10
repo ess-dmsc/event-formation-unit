@@ -84,6 +84,91 @@ TEST_F(ESSGeometryTest, MultiPanel3D) {
         }
 }
 
+
+TEST_F(ESSGeometryTest, GetCoordinates2x2x2x2) {
+  ESSGeometry geom(2, 2, 2, 2);
+  ASSERT_EQ(geom.xcoord(1), 0);
+  ASSERT_EQ(geom.ycoord(1), 0);
+  ASSERT_EQ(geom.zcoord(1), 0);
+  ASSERT_EQ(geom.pcoord(1), 0);
+
+  ASSERT_EQ(geom.xcoord(2), 1);
+  ASSERT_EQ(geom.ycoord(2), 0);
+  ASSERT_EQ(geom.zcoord(2), 0);
+  ASSERT_EQ(geom.pcoord(2), 0);
+
+  ASSERT_EQ(geom.xcoord(3), 0);
+  ASSERT_EQ(geom.ycoord(3), 1);
+  ASSERT_EQ(geom.zcoord(3), 0);
+  ASSERT_EQ(geom.pcoord(3), 0);
+
+  ASSERT_EQ(geom.xcoord(4), 1);
+  ASSERT_EQ(geom.ycoord(4), 1);
+  ASSERT_EQ(geom.zcoord(4), 0);
+  ASSERT_EQ(geom.pcoord(4), 0);
+
+  ASSERT_EQ(geom.xcoord(5), 0);
+  ASSERT_EQ(geom.ycoord(5), 0);
+  ASSERT_EQ(geom.zcoord(5), 1);
+  ASSERT_EQ(geom.pcoord(5), 0);
+
+  ASSERT_EQ(geom.xcoord(6), 1);
+  ASSERT_EQ(geom.ycoord(6), 0);
+  ASSERT_EQ(geom.zcoord(6), 1);
+  ASSERT_EQ(geom.pcoord(6), 0);
+
+  ASSERT_EQ(geom.xcoord(7), 0);
+  ASSERT_EQ(geom.ycoord(7), 1);
+  ASSERT_EQ(geom.zcoord(7), 1);
+  ASSERT_EQ(geom.pcoord(7), 0);
+
+  ASSERT_EQ(geom.xcoord(8), 1);
+  ASSERT_EQ(geom.ycoord(8), 1);
+  ASSERT_EQ(geom.zcoord(8), 1);
+  ASSERT_EQ(geom.pcoord(8), 0);
+
+  ASSERT_EQ(geom.xcoord(9), 0);
+  ASSERT_EQ(geom.ycoord(9), 0);
+  ASSERT_EQ(geom.zcoord(9), 0);
+  ASSERT_EQ(geom.pcoord(9), 1);
+
+  ASSERT_EQ(geom.xcoord(10), 1);
+  ASSERT_EQ(geom.ycoord(10), 0);
+  ASSERT_EQ(geom.zcoord(10), 0);
+  ASSERT_EQ(geom.pcoord(10), 1);
+
+  ASSERT_EQ(geom.xcoord(11), 0);
+  ASSERT_EQ(geom.ycoord(11), 1);
+  ASSERT_EQ(geom.zcoord(11), 0);
+  ASSERT_EQ(geom.pcoord(11), 1);
+
+  ASSERT_EQ(geom.xcoord(12), 1);
+  ASSERT_EQ(geom.ycoord(12), 1);
+  ASSERT_EQ(geom.zcoord(12), 0);
+  ASSERT_EQ(geom.pcoord(12), 1);
+
+  ASSERT_EQ(geom.xcoord(13), 0);
+  ASSERT_EQ(geom.ycoord(13), 0);
+  ASSERT_EQ(geom.zcoord(13), 1);
+  ASSERT_EQ(geom.pcoord(13), 1);
+
+  ASSERT_EQ(geom.xcoord(14), 1);
+  ASSERT_EQ(geom.ycoord(14), 0);
+  ASSERT_EQ(geom.zcoord(14), 1);
+  ASSERT_EQ(geom.pcoord(14), 1);
+
+  ASSERT_EQ(geom.xcoord(15), 0);
+  ASSERT_EQ(geom.ycoord(15), 1);
+  ASSERT_EQ(geom.zcoord(15), 1);
+  ASSERT_EQ(geom.pcoord(15), 1);
+
+  ASSERT_EQ(geom.xcoord(16), 1);
+  ASSERT_EQ(geom.ycoord(16), 1);
+  ASSERT_EQ(geom.zcoord(16), 1);
+  ASSERT_EQ(geom.pcoord(16), 1);
+}
+
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
