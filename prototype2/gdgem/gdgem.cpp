@@ -51,9 +51,9 @@ public:
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 20000;
+  static const int eth_buffer_max_entries = 2000;
   static const int eth_buffer_size = 9000;
-  static const int kafka_buffer_size = 124000;
+  static const int kafka_buffer_size = 12400;
 
 private:
   /** Shared between input_thread and processing_thread*/
@@ -112,7 +112,7 @@ NMX::NMX(void *args) {
 
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 1); /**< @todo testing workaround */
+  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11); /**< @todo testing workaround */
   assert(eth_ringbuf != 0);
 }
 
@@ -247,17 +247,20 @@ void NMX::processing_thread() {
               coords[0] = event.x.center_rounded();
               coords[1] = event.y.center_rounded();
               pixelid = geometry.to_pixid(coords);
-              time = static_cast<uint32_t>(event.time_start());
+              if (pixelid == 0) {
+                mystats.geom_errors++;
+              } else {
+                time = static_cast<uint32_t>(event.time_start());
 
-              XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n",
-                     time, pixelid);
+                XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n",
+                       time, pixelid);
 
-              mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
-              mystats.tx_events++;
+                mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
+                mystats.tx_events++;
+              }
             }
           } else {
-            mystats.rx_discards +=
-                event.x.entries.size() + event.y.entries.size();
+            mystats.rx_discards += event.x.entries.size() + event.y.entries.size();
           }
         }
       }
@@ -274,12 +277,12 @@ void NMX::processing_thread() {
       char *txbuffer;
       auto len = trackfb.serialize(&txbuffer);
       if (len != 0) {
-        XTRACE(PROCESS, ALW, "Sending tracks with size %d\n", len);
+        XTRACE(PROCESS, DEB, "Sending tracks with size %d\n", len);
         monitorprod.produce(txbuffer, len);
       }
 
       if (hists.empty()) {
-        XTRACE(PROCESS, ALW, "Sending histogram for %zu eventlets and %zu clusters \n",
+        XTRACE(PROCESS, DEB, "Sending histogram for %zu eventlets and %zu clusters \n",
                hists.eventlet_count(), hists.cluster_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
