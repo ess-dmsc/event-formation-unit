@@ -7,6 +7,7 @@
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
+#include <common/ESSGeometry.h>
 #include <common/FBSerializer.h>
 #include <common/NewStats.h>
 #include <common/RingBuffer.h>
@@ -18,7 +19,7 @@
 #include <libs/include/Timer.h>
 
 #include <mbcaen/MBData.h>
-#include <mbcaen/MultiBladeGeometry.h>
+#include <mbcaen/MB16Detector.h>
 #include <mbcommon/multiBladeEventBuilder.h>
 
 //#undef TRC_LEVEL
@@ -44,8 +45,8 @@ public:
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 2000;
-  static const int eth_buffer_size = 9000;
+  static const int eth_buffer_max_entries = 1000;
+  static const int eth_buffer_size = 1600;
   static const int kafka_buffer_size = 1000000;
 
 private:
@@ -149,28 +150,43 @@ void MBCAEN::input_thread() {
 }
 
 void MBCAEN::processing_thread() {
-
-  // uint8_t ncassets = UINT8_MAX;
+  const uint32_t ncass = 6;
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
-  MultiBladeGeometry geom;
-
+  ESSGeometry essgeom(nstrips, ncass*nwires, 1, 1);
+  MB16Detector mb16;
   Producer eventprod(opts->broker, "MB_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
-  multiBladeEventBuilder builder;
-  builder.setNumberOfWireChannels(nwires);
-  builder.setNumberOfStripChannels(nstrips);
+  multiBladeEventBuilder builder[ncass];
+  for (uint32_t i = 0; i < ncass; i++) {
+    builder[i].setNumberOfWireChannels(nwires);
+    builder[i].setNumberOfStripChannels(nstrips);
+  }
 
   MBData mbdata;
 
   unsigned int data_index;
-  TSCTimer global_time, report_timer;
+  TSCTimer report_timer;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
+      // There is NO data in the FIFO - do stop checks and sleep a little
       mystats.rx_idle1++;
+      // Checking for exit
+      if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+
+        mystats.tx_bytes += flatbuffer.produce();
+
+        if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
+          XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n",
+                 opts->proc_cmd);
+          return;
+        }
+        report_timer.now();
+      }
       usleep(10);
-    } else {
+
+    } else { // There is data in the FIFO - do processing
       auto datalen = eth_ringbuf->getdatalength(data_index);
       if (datalen == 0) {
         mystats.fifo_seq_errors++;
@@ -185,45 +201,39 @@ void MBCAEN::processing_thread() {
 
           auto dp = dat.at(i);
 
+          // @todo fixme remove - is an artifact of mbtext2udp
           if (dp.digi == UINT8_MAX && dp.chan == UINT8_MAX &&
               dp.adc == UINT16_MAX && dp.time == UINT32_MAX) {
             XTRACE(PROCESS, DEB, "Last point\n");
-            builder.lastPoint();
+            builder[0].lastPoint();
             break;
           }
 
-          if (builder.addDataPoint(dp.chan, dp.adc, dp.time)) {
+          auto cassette = mb16.cassette(dp.digi);
+          if (cassette < 0) {
+            break;
+          }
 
-            uint32_t pixel_id = geom.pixelid(dp.digi, builder.getStripPosition() + 1 - 32,
-                             builder.getWirePosition() + 1);
+          if (builder[cassette].addDataPoint(dp.chan, dp.adc, dp.time)) {
+            auto xcoord = builder[cassette].getStripPosition() - 32; // pos 32 - 63
+            auto ycoord = cassette * nwires + builder[cassette].getWirePosition(); // pos 0 - 31
 
-            XTRACE(PROCESS, DEB, "digi: %d, wire pos: %d, strip pos: %d, pixel_id: %d\n",
-                   dp.digi, (int)(builder.getWirePosition() + 1),
-                   (int)(builder.getStripPosition() + 1 - 32), pixel_id);
+            uint32_t pixel_id = essgeom.pixelSP2D(xcoord, ycoord);
+
+            XTRACE(PROCESS, DEB, "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d\n",
+                   dp.digi, (int)xcoord, (int)ycoord,
+                   (int)builder[cassette].getWirePosition(),
+                   (int)builder[cassette].getStripPosition(), pixel_id);
 
             if (pixel_id == 0) {
               mystats.geometry_errors++;
             } else {
-              mystats.tx_bytes += flatbuffer.addevent(builder.getTimeStamp(), pixel_id);
+              mystats.tx_bytes += flatbuffer.addevent(builder[cassette].getTimeStamp(), pixel_id);
               mystats.rx_events++;
             }
           }
         }
       }
-    }
-
-    // Checking for exit
-    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-
-      mystats.tx_bytes += flatbuffer.produce();
-
-      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-        XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n",
-               opts->proc_cmd);
-        return;
-      }
-
-      report_timer.now();
     }
   }
 }

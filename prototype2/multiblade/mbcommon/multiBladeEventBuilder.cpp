@@ -153,8 +153,15 @@ bool multiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
     std::sort(cluster.begin(), cluster.end());
 
     // Cluster iterator
-    auto it1 = cluster.begin();
 
+
+#if 1
+    if ( (cluster.back().channel - cluster.front().channel) > (cluster.size() -1) ){
+      cluster.clear();
+      return false;
+    }
+#else
+    auto it1 = cluster.begin();
     // Loop until the second last data-point
     while (it1 != --cluster.end()) {
 
@@ -170,7 +177,6 @@ bool multiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
 
         // Check if the difference is larger than 1. If so, they are not adjacent ...
         if (diff > 1) {
-
             // Clear the cluster -- ie. remove it from the analysis.
             cluster.clear();
             // Break the while-loop
@@ -181,34 +187,36 @@ bool multiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
             it1++;
         }
     }
+#endif
 
     return true;
 }
 
 double multiBladeEventBuilder::calculatePosition(std::vector<point> &cluster) {
 
-    if (m_use_weighted_average) {
-        uint64_t sum_numerator = 0;
-        uint64_t sum_denominator = 0;
-        for (auto &it : cluster) {
-            sum_numerator += it.channel * it.ADC;
-            sum_denominator += it.ADC;
-        }
-
-        return (sum_denominator == 0 ? -1 :
-                    static_cast<double>(sum_numerator) / static_cast<double>(sum_denominator));
-    } else {
-        uint8_t max_channel = 0;
-        uint64_t max_ADC = 0;
-        for (auto &it : cluster) {
-            if (it.ADC > max_ADC) {
-                max_ADC = it.ADC;
-                max_channel = it.channel;
-            }
-        }
-
-        return (max_ADC == 0 ? -1. : static_cast<double>(max_channel));
+  if (m_use_weighted_average) {
+    uint64_t sum_numerator = 0;
+    uint64_t sum_denominator = 0;
+    for (auto &it : cluster) {
+      //printf("channel %d, adc: %d\n", it.channel, it.ADC);
+      sum_numerator += it.channel * it.ADC;
+      sum_denominator += it.ADC;
     }
+    return (sum_denominator == 0 ? -1 :
+                  static_cast<double>(sum_numerator) / static_cast<double>(sum_denominator));
+  } else {
+    uint8_t max_channel = 0;
+    uint64_t max_ADC = 0;
+    for (auto &it : cluster) {
+      //printf("channel %d, adc: %d\n", it.channel, it.ADC);
+      if (it.ADC > max_ADC) {
+          max_ADC = it.ADC;
+          max_channel = it.channel;
+      }
+    }
+
+    return (max_ADC == 0 ? -1. : static_cast<double>(max_channel));
+  }
 }
 
 void multiBladeEventBuilder::lastPoint() {
@@ -234,7 +242,7 @@ std::vector<double> multiBladeEventBuilder::getPosition() {
     return coordinates;
 }
 
-void multiBladeEventBuilder::addPointToCluster(uint8_t channel, uint64_t ADC) {
+void multiBladeEventBuilder::addPointToCluster(uint32_t channel, uint32_t ADC) {
 
     point point = {channel, ADC};
     if (channel < m_nwire_channels)
