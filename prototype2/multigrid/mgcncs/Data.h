@@ -86,7 +86,7 @@ public:
   MultiGridGeometry *multigridgeom{nullptr};
 
 private:
-  //#ifdef DUMPTOFILE
+  #ifdef DUMPTOFILE
   DataSave mgdata{std::string("multigrid_"), 100000000};
-  //#endif
+  #endif
 };
