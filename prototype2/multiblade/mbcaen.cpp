@@ -4,7 +4,7 @@
 
 #include <cinttypes>
 #include <unistd.h>
-
+#include <dataformats/multigrid/inc/DataSave.h>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/ESSGeometry.h>
@@ -153,6 +153,12 @@ void MBCAEN::processing_thread() {
   const uint32_t ncass = 6;
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
+
+  #ifdef DUMPTOFILE // only active if cmake -DDUMPTOFILE=ON
+  DataSave mbdatasave{"multiblade_", 100000000};
+  mbdatasave.tofile("# time, digitizer, channel, adc\n");
+  #endif
+
   ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
   MB16Detector mb16;
   Producer eventprod(opts->broker, "MB_detector");
@@ -213,6 +219,10 @@ void MBCAEN::processing_thread() {
           if (cassette < 0) {
             break;
           }
+
+          #ifdef DUMPTOFILE
+          mbdatasave.tofile("%d,%d,%d,%d\n", dp.time, dp.digi, dp.chan, dp.adc);
+          #endif
 
           if (builder[cassette].addDataPoint(dp.chan, dp.adc, dp.time)) {
             auto xcoord = builder[cassette].getStripPosition() - 32; // pos 32 - 63

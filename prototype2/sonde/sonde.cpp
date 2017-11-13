@@ -166,7 +166,18 @@ void SONDEIDEA::processing_thread() {
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
-      usleep(1);
+      // Checking for exit
+      if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+
+        mystats.tx_bytes += flatbuffer.produce();
+
+        if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
+          XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
+          return;
+        }
+        report_timer.now();
+      }
+      usleep(10);
     } else {
       auto len = eth_ringbuf->getdatalength(data_index);
       if (len == 0) {
@@ -187,18 +198,6 @@ void SONDEIDEA::processing_thread() {
           }
         }
       }
-    }
-
-    // Checking for exit
-    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-
-      mystats.tx_bytes += flatbuffer.produce();
-
-      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
-        return;
-      }
-      report_timer.now();
     }
   }
 }
