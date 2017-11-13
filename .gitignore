@@ -24,3 +24,5 @@ build/
 
 #IDE
 CMakeLists.txt.user
+.idea/
+cmake-build-*/
