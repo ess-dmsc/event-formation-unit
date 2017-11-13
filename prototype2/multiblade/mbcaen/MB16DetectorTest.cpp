@@ -9,12 +9,12 @@ class MB16DetectorTest : public TestBase {};
 TEST_F(MB16DetectorTest, CassetteValid) {
   MB16Detector mbg;
 
-  ASSERT_EQ( 0, mbg.cassette(137));
-  ASSERT_EQ( 1, mbg.cassette(143));
-  ASSERT_EQ( 2, mbg.cassette(142));
-  ASSERT_EQ( 3, mbg.cassette(31));
-  ASSERT_EQ( 4, mbg.cassette(34));
-  ASSERT_EQ( 5, mbg.cassette(33));
+  ASSERT_EQ(0, mbg.cassette(137));
+  ASSERT_EQ(1, mbg.cassette(143));
+  ASSERT_EQ(2, mbg.cassette(142));
+  ASSERT_EQ(3, mbg.cassette(31));
+  ASSERT_EQ(4, mbg.cassette(34));
+  ASSERT_EQ(5, mbg.cassette(33));
 }
 
 TEST_F(MB16DetectorTest, CassetteInValid) {

@@ -3,23 +3,23 @@
 //
 
 #pragma once
-#include <vector>
 #include <cstdint>
+#include <vector>
 
 struct datapoint {
-    uint8_t digi;
-    uint8_t chan;
-    uint16_t adc;
-    uint32_t time;
+  uint8_t digi;
+  uint8_t chan;
+  uint16_t adc;
+  uint32_t time;
 };
 
 class MBData {
 public:
-    MBData();
+  MBData();
 
-    unsigned int recieve(const char* /*void **/ buffer, unsigned int size);
+  unsigned int recieve(const char * /*void **/ buffer, unsigned int size);
 
-    std::vector<datapoint> data;
+  std::vector<datapoint> data;
 
 private:
 };

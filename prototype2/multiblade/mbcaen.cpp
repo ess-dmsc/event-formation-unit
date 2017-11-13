@@ -18,8 +18,8 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 
-#include <mbcaen/MBData.h>
 #include <mbcaen/MB16Detector.h>
+#include <mbcaen/MBData.h>
 #include <mbcommon/multiBladeEventBuilder.h>
 
 //#undef TRC_LEVEL
@@ -153,7 +153,7 @@ void MBCAEN::processing_thread() {
   const uint32_t ncass = 6;
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
-  ESSGeometry essgeom(nstrips, ncass*nwires, 1, 1);
+  ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
   MB16Detector mb16;
   Producer eventprod(opts->broker, "MB_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
@@ -220,7 +220,8 @@ void MBCAEN::processing_thread() {
 
             uint32_t pixel_id = essgeom.pixelSP2D(xcoord, ycoord);
 
-            XTRACE(PROCESS, DEB, "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d\n",
+            XTRACE(PROCESS, DEB,
+                   "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d\n",
                    dp.digi, (int)xcoord, (int)ycoord,
                    (int)builder[cassette].getWirePosition(),
                    (int)builder[cassette].getStripPosition(), pixel_id);
