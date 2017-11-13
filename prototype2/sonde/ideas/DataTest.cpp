@@ -45,6 +45,13 @@ TEST_F(IDEASDataTest, ErrUnknownDataFormat) {
     ASSERT_EQ(res, -IDEASData::EUNSUPP);
 }
 
+TEST_F(IDEASDataTest, ErrInvalidGeometry) {
+    int size = err_invalid_geometry.size();
+    int res = readout->parse_buffer((char *)&err_invalid_geometry[0], size);
+    ASSERT_EQ(res, 0);
+    ASSERT_EQ(readout->errors, 1);
+}
+
 TEST_F(IDEASDataTest, OkHeaderOnly) {
     int size = ok_header_only.size();
     int res = readout->parse_buffer((char *)&ok_header_only[0], size);
