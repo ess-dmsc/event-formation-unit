@@ -39,6 +39,12 @@ TEST_F(IDEASDataTest, ErrShortHeader) {
     ASSERT_EQ(res, -IDEASData::EBADSIZE);
 }
 
+TEST_F(IDEASDataTest, ErrUnknownDataFormat) {
+    int size = err_unknown_data_format.size();
+    int res = readout->parse_buffer((char *)&err_unknown_data_format[0], size);
+    ASSERT_EQ(res, -IDEASData::EUNSUPP);
+}
+
 TEST_F(IDEASDataTest, OkHeaderOnly) {
     int size = ok_header_only.size();
     int res = readout->parse_buffer((char *)&ok_header_only[0], size);
