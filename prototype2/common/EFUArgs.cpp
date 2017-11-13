@@ -22,7 +22,6 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
         {"det",       required_argument, 0, 'd'},
         {"dip",       required_argument, 0, 'i'},
         {"dport",     required_argument, 0, 'p'},
-        {"reports",   required_argument, 0, 'r'},
         {"stopafter", required_argument, 0, 's'},
         {"graphite",  required_argument, 0, 'g'},
         {"gport",     required_argument, 0, 'o'},
@@ -35,8 +34,7 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    int c = getopt_long(argc, argv, "a:b:c:d:f:g:m:o:i:p:r:s:h", long_options,
-                        &option_index);
+    int c = getopt_long(argc, argv, "a:b:c:d:f:g:hi:m:o:p:s:", long_options, &option_index);
     if (c == -1)
       break;
 
@@ -56,26 +54,23 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
     case 'd':
       det.assign(optarg);
       break;
+    case 'f':
+      config_file.assign(optarg);
+      break;
     case 'g':
       graphite_ip_addr.assign(optarg);
-      break;
-    case 'o':
-      graphite_port = atoi(optarg);
-      break;
-    case 'm':
-      cmdserver_port = atoi(optarg);
       break;
     case 'i':
       ip_addr.assign(optarg);
       break;
-    case 'f':
-      config_file.assign(optarg);
+    case 'm':
+      cmdserver_port = atoi(optarg);
+      break;
+    case 'o':
+      graphite_port = atoi(optarg);
       break;
     case 'p':
       port = atoi(optarg);
-      break;
-    case 'r':
-      reportmask = (unsigned int)strtoul(optarg, 0, 0);
       break;
     case 's':
       stopafter = atoi(optarg);
@@ -83,30 +78,34 @@ EFUArgs::EFUArgs(int argc, char *argv[]) {
     case 'h':
     default:
       printf("Usage: efu2 [OPTIONS]\n");
+      printf(" --logip, -a logip        Graylog server ip address \n");
       printf(" --broker, -b broker      Kafka broker string \n");
       printf(" --cpu, -c lcore          lcore id of first thread \n");
       printf(" --det, -d name           detector name \n");
-      printf(" --dip, -i ipaddr         ip address of receive interface \n");
-      printf(" --port, -p port          udp port \n");
       printf(" --file, -f configfile    pipeline-specific config file \n");
-      printf(
-          " --graphite, -g ipaddr       ip address of graphite metrics server \n");
-      printf(" --gport, -o port         Graphite tcp port \n");
-      printf(" --cmdport, -m port       command parser tcp port\n");
-      printf(" --stopafter, -s timeout  terminate after timeout seconds \n");
+      printf(" --graphite, -g ipaddr       ip address of graphite metrics server \n");
       printf(" --help, -h               help - prints this message \n");
+      printf(" --dip, -i ipaddr         ip address of receive interface \n");
+      printf(" --cmdport, -m port       command parser tcp port\n");
+      printf(" --gport, -o port         Graphite tcp port \n");
+      printf(" --port, -p port          udp port \n");
+      printf(" --stopafter, -s timeout  terminate after timeout seconds \n");
+
       stopafter = 0;
       return;
     }
   }
 
   XTRACE(INIT, ALW, "Starting event processing pipeline2\n");
+  XTRACE(INIT, ALW, "  Log IP:        %s\n", graylog_ip.c_str());
   XTRACE(INIT, ALW, "  Detector:      %s\n", det.c_str());
   XTRACE(INIT, ALW, "  CPU Offset:    %d\n", cpustart);
+  XTRACE(INIT, ALW, "  Config file:   %s\n", config_file.c_str());
   XTRACE(INIT, ALW, "  IP addr:       %s\n", ip_addr.c_str());
   XTRACE(INIT, ALW, "  UDP Port:      %d\n", port);
   XTRACE(INIT, ALW, "  Kafka broker:  %s\n", broker.c_str());
   XTRACE(INIT, ALW, "  Graphite:      %s\n", graphite_ip_addr.c_str());
   XTRACE(INIT, ALW, "  Graphite port: %d\n", graphite_port);
+  XTRACE(INIT, ALW, "  Command port:  %d\n", cmdserver_port);
   XTRACE(INIT, ALW, "  Stopafter:     %u\n", stopafter);
 }
