@@ -35,8 +35,8 @@
 /*! Struct containing channel number and ADC-value for a singe strip or wire. */
 struct point
 {
-    uint8_t  channel; /*!< Number of either wire or strip channel */
-    uint64_t ADC; /*!< Value of the signal from the corresponding channel */
+    uint32_t  channel; /*!< Number of either wire or strip channel */
+    uint32_t ADC; /*!< Value of the signal from the corresponding channel */
 };
 
 /*! Overloaded < operator. Required when we need to sort the data points for later neighbour check
@@ -226,7 +226,7 @@ private:
      * @param channel Channel number
      * @param ADC Signal value
      */
-    void addPointToCluster(uint8_t channel, uint64_t ADC);
+    void addPointToCluster(uint32_t channel, uint32_t ADC);
 
     /*! This function is called once a cluster is formed */
     bool processClusters();

@@ -27,7 +27,8 @@ public:
   int buflen{9000};                 /**< Tx buffer size */
   int sndbuf{1000000};              /**< kernel sndbuf size */
 
-  int speed_level{0};
+  int speed_level{0}; /** for arbitrary use in sleep() or usleep() */
+  int repeat{1};  /** repetition count for arbitrary use */
 
   unsigned int updint{1}; /**< update interval (seconds) */
 };

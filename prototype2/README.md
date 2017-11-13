@@ -2,16 +2,14 @@
 The following libraries and utilities must be installed for full functionality.
 However most are optional.
 
-* Zookeeper
-* Apache Kafka
 * librdkafka - needed for output_thread (can be disabled by NOKAFKA=y)
 * Googletest - needed for 'make test, make runtest' targets
-* HDF5
+* HDF5 / H5CC
 * lcov/gcov/gcovr - needed for 'make coverage' target
 * valgrind - needed for 'make valgrind' target
 
 
-## Build and Run
+## Building the EFU
 
 To build:
 
@@ -24,6 +22,18 @@ To build:
 
 __Makefile targets and options__
 
+See options and targets by
+
+    > make hints
+
+Two important options, however, are
+
+Option                | Description
+-------------         | -------------
+-DDUMPTOFILE          | Activates code for writing readout to disk (default OFF)
+-DUSE_OLD_ABI         | On CentOS we currently use the old ABI which can conflict on <br> newer distributions (default OFF)
+
+
 Target                | Description
 -------------         | -------------
 hints                 | DEFAULT and NORMATIVE target and option guide
@@ -33,36 +43,26 @@ coverage              | generate test coverage report in html/index.html
 valgrind              | run valgrind on tests, generate reports
 
 
-### Execution
+### Starting the EFU
 
-__Run in terminal window__
+To start the EFU with the __mgcncs2__ pipeline from the __build__ directory:
 
-`> ./efu2 -d detector`
+`> ./prototype2/efu2 -d prototype2/multigrid/mgcncs2`
 
+If the efu and detector plugins (.so files) are located in the __same__ directory:
 
-__Run in another terminal window__
+`> ./efu2 -d mgcncs2`
 
-`> taskset -c 16 ./cspecgen`
+There are quite a few additional command line options, but these ones are
+the most used
 
-Both programs shows help with -h option.
+Cmd option          | Description
+-------------       | -------------
+-p                  | UDP port for detector data
+-g                  | IP address for Graphite (metrics) server
+-b                  | Kafka broker "ipaddress:port"
+-c                  | CPU core id for the first processing thread (-5 == ignore)
 
+To get further help
 
-##Zookeeper
-Starting zookeeper is only necessary once
-
-`> ./bin/zookeeper-server-start.sh config/zookeeper.properties`
-
-
-##Kafka broker
-Starting Kafka broker is only necessary once
-
-`> ./bin/kafka-server-start.sh config/server.properties`
-
-
-Both commands are relative to the kafka installation directory.
-
-You can also use the bash script kafkaservice from utils/
-
-`> ./kafkaservice start`
-
-`> ./kafkaservice stop`
+`> ./efu2 -h`

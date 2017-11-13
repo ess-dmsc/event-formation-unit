@@ -6,7 +6,7 @@
  */
 
 #pragma once
-
+#include <common/Trace.h>
 #include <gdgem/nmx/AbstractEventletBuilder.h>
 #include <gdgem/vmm2srs/SRSMappings.h>
 #include <gdgem/vmm2srs/SRSTime.h>
@@ -16,6 +16,10 @@
 class BuilderSRS : public AbstractBuilder {
 public:
   BuilderSRS(SRSTime time_intepreter, SRSMappings geometry_interpreter);
+
+  ~BuilderSRS(){
+    XTRACE(INIT, DEB, "BuilderSRS destructor called\n");
+  }
 
   /** @todo Martin document */
   ResultStats process_buffer(char *buf, size_t size,

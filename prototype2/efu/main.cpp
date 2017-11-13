@@ -16,13 +16,12 @@
 
 #define ONE_SECOND_US 1000000U
 
-/**
- * Load detector, launch pipeline threads, then sleep forever
- */
+/** Load detector, launch pipeline threads, then sleep until timeout or break */
 int main(int argc, char *argv[]) {
+  int keep_running = 1;
   efu_args = new EFUArgs(argc, argv);
 
-  ExitHandler exithandler; // Register signal handlers for program termination
+  ExitHandler::InitExitHandler(&keep_running);
 
 #ifdef GRAYLOG
   Log::AddLogHandler(
@@ -34,12 +33,12 @@ int main(int argc, char *argv[]) {
   GLOG_INF("Event Formation Unit version: " + efu_version());
   GLOG_INF("Event Formation Unit build: " + efu_buildstr());
   XTRACE(MAIN, ALW, "Starting Event Formation unit\n");
-  XTRACE(MAIN, ALW, "Event Formation Software Version: %s\n",
-         efu_version().c_str());
+  XTRACE(MAIN, ALW, "Event Formation Software Version: %s\n", efu_version().c_str());
   XTRACE(MAIN, ALW, "Event Formation Unit build: %s\n", EFU_STR(BUILDSTR));
 
   if (efu_args->stopafter == 0) {
     XTRACE(MAIN, ALW, "Event Formation Unit Exit (Immediate)\n");
+    GLOG_INF("Event Formation Unit Exit (Immediate)");
     return 0;
   }
 
@@ -50,7 +49,7 @@ int main(int argc, char *argv[]) {
 
   std::vector<int> cpus = {efu_args->cpustart, efu_args->cpustart + 1,
                            efu_args->cpustart + 2};
-  
+
   Launcher(&loader, cpus);
 
   StatPublisher metrics(efu_args->graphite_ip_addr, efu_args->graphite_port);
@@ -58,14 +57,24 @@ int main(int argc, char *argv[]) {
   Parser cmdParser;
   Server cmdAPI(efu_args->cmdserver_port, cmdParser);
 
-  Timer stop, livestats;
+  Timer stop_timer, stop_cmd, livestats;
+
   while (1) {
-    if (stop.timeus() >=
-        (uint64_t)efu_args->stopafter * (uint64_t)ONE_SECOND_US) {
-      sleep(2);
+    if (stop_cmd.timeus() >= (uint64_t)ONE_SECOND_US/10) {
+      if (keep_running == 0 || efu_args->proc_cmd == efu_args->thread_cmd::EXIT) {
+        XTRACE(INIT, ALW, "Application stop, Exiting...\n");
+        efu_args->proc_cmd = efu_args->thread_cmd::THREAD_TERMINATE;
+        sleep(2);
+        return 1;
+      }
+    }
+
+    if (stop_timer.timeus() >= (uint64_t)efu_args->stopafter * (uint64_t)ONE_SECOND_US) {
       XTRACE(MAIN, ALW, "Application timeout, Exiting...\n");
       GLOG_INF("Event Formation Unit Exiting (User timeout)");
-      exithandler.Exit();
+      efu_args->proc_cmd = efu_args->thread_cmd::THREAD_TERMINATE;
+      sleep(2);
+      return 0;
     }
 
     if (livestats.timeus() >= ONE_SECOND_US && loader.detector != nullptr) {

@@ -10,14 +10,20 @@
 #include <stdlib.h>
 
 class ExitHandler {
+
 public:
   /** @brief constructor does nothing */
-  ExitHandler();
-
-  /** @brief called to terminate the application, wrapper for exit() */
-  void Exit();
+  static void InitExitHandler(int * runflag);
 
 private:
-  /** Traces an exit message, also sends to Graylog server */
-  static void signalhandler(int a);
+  /** noncritical signals (Ctrl-C), stop threads nicely */
+  static void noncritical(int a);
+
+  /** Critical signals, immediate exit */
+  static void critical(int a);
+
+  /** print a stack trace */
+  static void print_trace(void);
+
+  static int * keep_running;
 };

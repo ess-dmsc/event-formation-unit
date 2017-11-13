@@ -51,7 +51,6 @@ int main(int argc, char *argv[]) {
     uint ievent = 0;
 
     do {
-
         std::memcpy(bufptr, &entries[ievent].digi, sizeof(TextFile::Entry::digi));
         bufptr += sizeof(TextFile::Entry::digi);
 
@@ -72,7 +71,7 @@ int main(int argc, char *argv[]) {
 
         dppkg++;
 
-        if (!(dppkg < opts.dppkg) || !((pkgsize + linesize) < opts.buflen)) {
+        if ( (dppkg >= opts.dppkg) || (pkgsize >= opts.buflen) ) {
 
             DataSource.send(buffer, pkgsize);
 

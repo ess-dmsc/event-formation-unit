@@ -13,12 +13,12 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
   while (1) {
     static struct option long_options[] = {
         {"filename", required_argument, 0, 'f'},
-        {"outfile", required_argument, 0, 'o'},
         {"ipaddr", required_argument, 0, 'i'},
         {"data", required_argument, 0, 'd'},
         {"packets", required_argument, 0, 'a'},
         {"events", required_argument, 0, 'n'},
         {"loop", no_argument, 0, 'l'},
+        {"pcapoffset", no_argument, 0, 'o'},
         {"port", required_argument, 0, 'p'},
         {"size", required_argument, 0, 's'},
         {"throttle", required_argument, 0, 't'},
@@ -52,6 +52,9 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
       break;
     case 'n':
       txEvt = atoi(optarg);
+      break;
+    case 'o':
+      pcapoffset = atoi(optarg);
       break;
     case 'l':
       loop = 1;
