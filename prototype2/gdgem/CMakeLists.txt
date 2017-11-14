@@ -9,31 +9,31 @@ include_directories(${h5cpp_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
 #
 
 set(gennmxfile_SRC
-    nmx/Eventlet.cpp
-    nmxgen/nmxfile.cpp
-    nmxgen/NMXArgs.cpp
-    nmxgen/ReaderVMM.cpp)
+  nmx/Eventlet.cpp
+  nmxgen/nmxfile.cpp
+  nmxgen/NMXArgs.cpp
+  nmxgen/ReaderVMM.cpp)
 set(gennmxfile_INC
-    nmx/Eventlet.h
-    nmxgen/NMXArgs.h
-    nmxgen/ReaderVMM.h)
+  nmx/Eventlet.h
+  nmxgen/NMXArgs.h
+  nmxgen/ReaderVMM.h)
 create_executable(gennmxfile "h5cpp_shared")
 target_link_libraries(gennmxfile h5cpp_shared ${HDF5_LIBRARIES})
 
 #
 if (PCAP_FOUND)
-    include_directories(${PCAP_INCLUDE_DIR})
-    set(gennmxpcap_SRC
-      nmxgen/wireshark.cpp
-      nmxgen/ReaderPcap.cpp
-      nmxgen/NMXArgs.cpp)
-    set(gennmxpcap_INC
-      nmxgen/ReaderPcap.h
-      nmxgen/NMXArgs.h)
-    create_executable(gennmxpcap "pcap")
-else()
-    message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
-endif()
+  include_directories(${PCAP_INCLUDE_DIR})
+  set(gennmxpcap_SRC
+    nmxgen/wireshark.cpp
+    nmxgen/ReaderPcap.cpp
+    nmxgen/NMXArgs.cpp)
+  set(gennmxpcap_INC
+    nmxgen/ReaderPcap.h
+    nmxgen/NMXArgs.h)
+  create_executable(gennmxpcap "pcap")
+else ()
+  message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
+endif ()
 
 
 #

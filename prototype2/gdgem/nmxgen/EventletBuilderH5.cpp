@@ -47,7 +47,6 @@ Eventlet BuilderH5::make_eventlet() {
   if (dump_csv_)
     vmmsave.tofile("%" PRIu64 ", %u, %u, %u, %u\n",
             ret.time, ret.plane_id, ret.strip, ret.adc, ret.over_threshold);
-  #endif
 
   if (dump_h5_)
   {
@@ -61,7 +60,7 @@ Eventlet BuilderH5::make_eventlet() {
 //    fec_chip_chan_thresh_.write(uint8_t(0), {event_num_, 3});
     event_num_++;
   }
-
+  #endif
 
   return ret;
 }
