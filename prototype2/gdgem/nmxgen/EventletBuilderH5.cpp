@@ -51,14 +51,14 @@ Eventlet BuilderH5::make_eventlet() {
 
   if (dump_h5_)
   {
-    srstime_.write(data[0], {event_num_});
-    bc_tdc_adc_.write(static_cast<uint16_t>(data[1] >> 16), {event_num_, 0});
-    bc_tdc_adc_.write(static_cast<uint16_t>(data[1] & 0xFF), {event_num_, 1});
-    bc_tdc_adc_.write(ret.adc, {event_num_, 2});
-    fec_chip_chan_thresh_.write(uint8_t(0), {event_num_, 0});
-    fec_chip_chan_thresh_.write(ret.plane_id, {event_num_, 1});
-    fec_chip_chan_thresh_.write(static_cast<uint8_t>(ret.strip), {event_num_, 2});
-    fec_chip_chan_thresh_.write(uint8_t(0), {event_num_, 3});
+//    srstime_.write(data[0], {event_num_});
+//    bc_tdc_adc_.write(static_cast<uint16_t>(data[1] >> 16), {event_num_, 0});
+//    bc_tdc_adc_.write(static_cast<uint16_t>(data[1] & 0xFF), {event_num_, 1});
+//    bc_tdc_adc_.write(ret.adc, {event_num_, 2});
+//    fec_chip_chan_thresh_.write(uint8_t(0), {event_num_, 0});
+//    fec_chip_chan_thresh_.write(ret.plane_id, {event_num_, 1});
+//    fec_chip_chan_thresh_.write(static_cast<uint8_t>(ret.strip), {event_num_, 2});
+//    fec_chip_chan_thresh_.write(uint8_t(0), {event_num_, 3});
     event_num_++;
   }
 

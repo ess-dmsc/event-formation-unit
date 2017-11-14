@@ -11,10 +11,9 @@
 #include <gdgem/nmx/Hists.h>
 #include <dataformats/multigrid/inc/DataSave.h>
 
-//#ifdef USE_H5
-#include <H5CC_DataSet.h>
-#include <H5CC_File.h>
-//#endif
+//#include <H5CC_DataSet.h>
+//#include <H5CC_File.h>
+#include <h5cpp/hdf5.hpp>
 
 
 class AbstractBuilder {
@@ -51,11 +50,17 @@ class AbstractBuilder {
       DataSave vmmsave;
     #endif
 
-    H5CC::File file_;
-    H5CC::DataSet srstime_;
-    H5CC::DataSet bc_tdc_adc_;
-    H5CC::DataSet fec_chip_chan_thresh_;
+    hdf5::file::File file_;
+    hdf5::node::Dataset srstime_;
+    hdf5::node::Dataset bc_tdc_adc_;
+    hdf5::node::Dataset fec_chip_chan_thresh_;
     hsize_t event_num_ {0};
+
+//    H5CC::File file_;
+//    H5CC::DataSet srstime_;
+//    H5CC::DataSet bc_tdc_adc_;
+//    H5CC::DataSet fec_chip_chan_thresh_;
+//    hsize_t event_num_ {0};
 
     static std::string time_str();
 

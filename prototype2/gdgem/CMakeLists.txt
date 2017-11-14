@@ -2,29 +2,23 @@ cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 enable_testing()
 include_directories(..)
 include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
+include_directories(${h5cpp_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
 
 #
 # Tools and Data generators
 #
-if(${H5CC_FOUND} AND ${HDF5_FOUND})
-  message(STATUS "Found H5CC and HDF5 libraries. Will build gennmxfile.")
-  include_directories(${H5CC_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
-  set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DUSE_H5")
 
-  set(gennmxfile_SRC
+set(gennmxfile_SRC
     nmx/Eventlet.cpp
     nmxgen/nmxfile.cpp
     nmxgen/NMXArgs.cpp
     nmxgen/ReaderVMM.cpp)
-  set(gennmxfile_INC
+set(gennmxfile_INC
     nmx/Eventlet.h
     nmxgen/NMXArgs.h
     nmxgen/ReaderVMM.h)
-  create_executable(gennmxfile "${H5CC_LIBRARY}")
-  target_link_libraries(gennmxfile ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
-else()
-  message(STATUS "Unable to find H5CC and/or HDF5 libraries. Will NOT build gennmxfile.")
-endif()
+create_executable(gennmxfile "h5cpp_shared")
+target_link_libraries(gennmxfile h5cpp_shared ${HDF5_LIBRARIES})
 
 #
 if (PCAP_FOUND)
@@ -78,9 +72,8 @@ set(gdgem_INC
   vmm2srs/SRSTime.h
   vmm2srs/ParserSRS.h
   vmm2srs/EventletBuilderSRS.h)
-#create_module(gdgem "")
-create_module(gdgem "${H5CC_LIBRARY}")
-target_link_libraries(gdgem ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+create_module(gdgem "h5cpp_shared")
+target_link_libraries(gdgem ${HDF5_LIBRARIES} h5cpp_shared)
 
 #
 # NMX / VMM Tests
@@ -127,9 +120,8 @@ set(EventletBuilderH5Test_INC
   nmx/Eventlet.h
   nmx/Hists.h
   nmxgen/EventletBuilderH5.h)
-create_test_executable(EventletBuilderH5Test "${H5CC_LIBRARY}")
-target_link_libraries(EventletBuilderH5Test ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
-
+create_test_executable(EventletBuilderH5Test "h5cpp_shared")
+target_link_libraries(EventletBuilderH5Test ${HDF5_LIBRARIES} h5cpp_shared)
 
 set(EventletBuilderTest_SRC
   ../../dataformats/multigrid/src/DataSave.cpp
@@ -151,8 +143,8 @@ set(EventletBuilderTest_INC
   vmm2srs/EventletBuilderSRS.h
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h)
-create_test_executable(EventletBuilderTest "${H5CC_LIBRARY}")
-target_link_libraries(EventletBuilderTest ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
+create_test_executable(EventletBuilderTest "h5cpp_shared")
+target_link_libraries(EventletBuilderTest ${HDF5_LIBRARIES} h5cpp_shared)
 
 set(EventletTest_SRC
   nmx/EventletTest.cpp
