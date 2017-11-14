@@ -31,7 +31,7 @@ public:
    }
 
   /** @brief optional destructor */
-  virtual ~Detector() {}
+  virtual ~Detector() { printf("Virtual detector destructor called\n");}
 
   /** @brief document */
   virtual int statsize() { return 0; }

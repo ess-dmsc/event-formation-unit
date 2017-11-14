@@ -80,7 +80,7 @@ static int cspec_load_calib(std::vector<std::string> cmdargs,
   }
 
   /** @todo some other ipc between main and threads ? */
-  efu_args->proc_cmd = 1; // send load command to processing thread
+  efu_args->proc_cmd = efu_args->thread_cmd::THREAD_LOADCAL; // send load command to processing thread
 
   return Parser::OK;
 }
@@ -152,6 +152,23 @@ static int detector_info_get(std::vector<std::string> cmdargs, char *output,
   return Parser::OK;
 }
 
+//=============================================================================
+static int efu_exit(std::vector<std::string> cmdargs, UNUSED char *output,
+                             UNUSED unsigned int *obytes) {
+  auto nargs = cmdargs.size();
+  XTRACE(CMD, INF, "EXIT\n");
+  GLOG_INF("EXIT");
+  if (nargs != 1) {
+    XTRACE(CMD, WAR, "EXIT: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+
+  XTRACE(CMD, INF, "Sending TERMINATE command to EFU\n");
+  efu_args->proc_cmd = EFUArgs::EXIT;
+
+  return Parser::OK;
+}
+
 /******************************************************************************/
 /******************************************************************************/
 Parser::Parser() {
@@ -161,6 +178,7 @@ Parser::Parser() {
   registercmd(std::string("CSPEC_SHOW_CALIB"), cspec_show_calib);
   registercmd(std::string("VERSION_GET"), version_get);
   registercmd(std::string("DETECTOR_INFO_GET"), detector_info_get);
+  registercmd(std::string("EXIT"), efu_exit);
 }
 
 int Parser::registercmd(std::string cmd_name, function_ptr cmd_fn) {

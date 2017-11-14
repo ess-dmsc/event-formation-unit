@@ -5,10 +5,10 @@ include_directories(.. ../..)
 # Detector Pipeline Plugins
 #
 
-# Multi Grid demonstrator detector
-set(mgcncs_SRC mgcncs.cpp mgcncs/Data.cpp mgcncs/ChanConv.cpp)
-set(mgcncs_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/MultigridGeometry.h)
-create_module(mgcncs "")
+# Multi Grid demonstrator detector - obsolete
+#set(mgcncs_SRC mgcncs.cpp mgcncs/Data.cpp mgcncs/ChanConv.cpp)
+#set(mgcncs_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/MultigridGeometry.h)
+#create_module(mgcncs "")
 
 
 # Two-thread implementation of Multi Grid demonstrator detector

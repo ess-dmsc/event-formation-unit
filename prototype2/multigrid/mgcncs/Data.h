@@ -6,10 +6,9 @@
  */
 
 #pragma once
-
 #include <multigrid/mgcncs/ChanConv.h>
+#include <dataformats/multigrid/inc/DataSave.h>
 #include <multigrid/mgcncs/MultigridGeometry.h>
-//#include <cspec/CSPECEvent.h>
 
 class CSPECData {
 public:
@@ -40,6 +39,10 @@ public:
       : datalen(maxevents), chanconv(calibration), multigridgeom(geometry) {
 
     data = new struct MultiGridData[maxevents];
+
+    #ifdef DUMPTOFILE
+    mgdata.tofile("#module, time, d0, d1, d2, d3, d4, d5, d6, d7\n");
+    #endif
   };
 
   CSPECData(unsigned int maxevents, unsigned int wthresh, unsigned int gthresh,
@@ -70,7 +73,7 @@ public:
    *  @param buffer User specified buffer (must be large enough to hold event
    *  @todo document return value
    */
-  int createevent(const MultiGridData &data, char *buffer);
+  int createevent(const MultiGridData &data, uint32_t * time, uint32_t * pixel);
 
   // This data is overwritten on receive()
   // struct MultiGridData data[250];
@@ -81,4 +84,9 @@ public:
 
   CSPECChanConv *chanconv{nullptr};
   MultiGridGeometry *multigridgeom{nullptr};
+
+private:
+  #ifdef DUMPTOFILE
+  DataSave mgdata{std::string("multigrid_"), 100000000};
+  #endif
 };

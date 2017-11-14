@@ -39,6 +39,19 @@ TEST_F(IDEASDataTest, ErrShortHeader) {
     ASSERT_EQ(res, -IDEASData::EBADSIZE);
 }
 
+TEST_F(IDEASDataTest, ErrUnknownDataFormat) {
+    int size = err_unknown_data_format.size();
+    int res = readout->parse_buffer((char *)&err_unknown_data_format[0], size);
+    ASSERT_EQ(res, -IDEASData::EUNSUPP);
+}
+
+TEST_F(IDEASDataTest, ErrInvalidGeometry) {
+    int size = err_invalid_geometry.size();
+    int res = readout->parse_buffer((char *)&err_invalid_geometry[0], size);
+    ASSERT_EQ(res, 0);
+    ASSERT_EQ(readout->errors, 1);
+}
+
 TEST_F(IDEASDataTest, OkHeaderOnly) {
     int size = ok_header_only.size();
     int res = readout->parse_buffer((char *)&ok_header_only[0], size);
@@ -79,10 +92,28 @@ TEST_F(IDEASDataTest, SEPHOkThreeSamples) {
     ASSERT_EQ(readout->samples, 3);
 }
 
+TEST_F(IDEASDataTest, SEPHErrHdrLenMismatch) {
+    int size = type_0xd5_seph_err_hdr_len_mismatch.size();
+    int res = readout->parse_buffer((char *)&type_0xd5_seph_err_hdr_len_mismatch[0], size);
+    ASSERT_EQ(res, -IDEASData::EHEADER);
+}
+
+TEST_F(IDEASDataTest, MEPHErrHdrLen) {
+    int size = type_0xd4_meph_err_hdr_len.size();
+    int res = readout->parse_buffer((char *)&type_0xd4_meph_err_hdr_len[0], size);
+    ASSERT_EQ(res, -IDEASData::EBADSIZE);
+}
+
+TEST_F(IDEASDataTest, MEPHErrHdrLenMismatch) {
+    int size = type_0xd4_meph_err_hdr_len_mismatch.size();
+    int res = readout->parse_buffer((char *)&type_0xd4_meph_err_hdr_len_mismatch[0], size);
+    ASSERT_EQ(res, -IDEASData::EHEADER);
+}
+
 TEST_F(IDEASDataTest, MEPHOkOneSample) {
     int size = type_0xd4_meph_ok_1.size();
     int res = readout->parse_buffer((char *)&type_0xd4_meph_ok_1[0], size);
-    ASSERT_EQ(res, 1); // Should always return 0 events
+    ASSERT_EQ(res, 1);
     ASSERT_EQ(readout->samples, 1);
 }
 

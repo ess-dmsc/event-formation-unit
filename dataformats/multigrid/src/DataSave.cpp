@@ -89,9 +89,9 @@ int DataSave::tofile(const char * fmt,...) {
 }
 
 DataSave::~DataSave() {
-  XTRACE(PROCESS, ALW, "~DataSave bufferlen %d\n", bufferlen);
+  XTRACE(PROCESS, DEB, "~DataSave bufferlen %d\n", bufferlen);
   if (bufferlen > 0) {
-    XTRACE(PROCESS, ALW, "Flushing DataSave buffer\n");
+    XTRACE(PROCESS, INF, "Flushing DataSave buffer\n");
     write(fd, buffer, bufferlen);
   }
   close(fd);

@@ -3,6 +3,7 @@
 /** @file
  *
  *  @brief CSPEC Detector implementation
+ *  @todo DEPRECATED will be deleted soon
  */
 
 #include <common/Detector.h>
@@ -148,7 +149,6 @@ void CSPEC::input_thread() {
   cspecdata.settimeout(0, 100000); // One tenth of a second
 
   int rdsize;
-  Timer stop_timer;
   TSCTimer report_timer;
   for (;;) {
     unsigned int eth_index = eth_ringbuf->getindex();
@@ -172,11 +172,11 @@ void CSPEC::input_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-      if (stop_timer.timeus() >= opts->stopafter * 1000000LU) {
-        std::cout << "stopping input thread, timeus " << stop_timer.timeus()
-                  << std::endl;
+      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
+        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
         return;
       }
+
       report_timer.now();
     }
   }
@@ -192,15 +192,13 @@ void CSPEC::processing_thread() {
 
   CSPECData dat(250, &conv, &geom); // Default signal thresholds
 
-  Timer stopafter_clock;
   TSCTimer report_timer;
-
   unsigned int data_index;
   while (1) {
 
     // Check for control from mothership (main)
-    if (opts->proc_cmd) {
-      opts->proc_cmd = 0; /** @todo other means of ipc? */
+    if (opts->proc_cmd == opts->thread_cmd::THREAD_LOADCAL) {
+      opts->proc_cmd = opts->thread_cmd::NOCMD;
       XTRACE(PROCESS, INF, "processing_thread loading new calibrations\n");
       conv.load_calibration(opts->wirecal, opts->gridcal);
     }
@@ -221,8 +219,8 @@ void CSPEC::processing_thread() {
         auto d = dat.data[id];
         if (d.valid) {
           unsigned int event_index = event_ringbuf->getindex();
-          if (dat.createevent(d, event_ringbuf->getdatabuffer(event_index)) <
-              0) {
+          auto buffer = event_ringbuf->getdatabuffer(event_index);
+          if (dat.createevent(d, (uint32_t*)buffer, (uint32_t*)(buffer + 4)) < 0) {
             mystats.geometry_errors++;
             assert(mystats.geometry_errors <= mystats.rx_readouts);
           } else {
@@ -241,8 +239,8 @@ void CSPEC::processing_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-      if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
-        std::cout << "stopping processing thread, timeus " << std::endl;
+      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
+        XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n", opts->proc_cmd);
         return;
       }
       report_timer.now();
@@ -255,7 +253,6 @@ void CSPEC::output_thread() {
   FBSerializer flatbuffer(kafka_buffer_size, producer);
 
   unsigned int event_index;
-  Timer stop;
   TSCTimer report_timer;
 
   while (1) {
@@ -276,11 +273,11 @@ void CSPEC::output_thread() {
 
       mystats.tx_bytes += flatbuffer.produce();
 
-      if (stop.timeus() >= opts->stopafter * 1000000LU) {
-        std::cout << "stopping output thread, timeus " << stop.timeus()
-                  << std::endl;
+      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
+        XTRACE(INPUT, ALW, "Stopping output thread - stopcmd: %d\n", opts->proc_cmd);
         return;
       }
+
       report_timer.now();
     }
   }

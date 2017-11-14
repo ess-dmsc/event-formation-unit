@@ -24,7 +24,8 @@ std::vector<std::string> commands {
   "CSPEC_SHOW_CALIB",               "wire 0 0x0000, grid 0 0x0000",
   "CSPEC_SHOW_CALIB 5",             "wire 5 0x0000, grid 5 0x0000",
   "STAT_GET_COUNT",                 "STAT_GET_COUNT 0",
-  "STAT_GET 1",                     "STAT_GET  -1"
+  "STAT_GET 1",                     "STAT_GET  -1",
+  "EXIT",                           "<OK>"
 };
 
 std::vector<std::string> commands_badargs {
@@ -38,7 +39,8 @@ std::vector<std::string> commands_badargs {
   "STAT_GET_COUNT 1",
   "STAT_GET",
   "VERSION_GET 1",
-  "DETECTOR_INFO_GET 1"
+  "DETECTOR_INFO_GET 1",
+  "EXIT 1"
 };
 
 // These commands should 'fail' when the detector is not loaded
@@ -224,6 +226,15 @@ TEST_F(ParserTest, DetectorInfo) {
   std::memcpy(input, cmd, strlen(cmd));
   int res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(res, -Parser::OK);
+}
+
+
+TEST_F(ParserTest, ExitCommand) {
+  const char *cmd = "EXIT";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(res, -Parser::OK);
+  ASSERT_EQ(efu_args->proc_cmd, efu_args->thread_cmd::EXIT);
 }
 
 int main(int argc, char **argv) {

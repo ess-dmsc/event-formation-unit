@@ -8,7 +8,10 @@
 #include <string.h>
 #include <string>
 
-Loader::~Loader() { dlclose(handle); }
+Loader::~Loader() {
+  XTRACE(INIT, ALW, "Loader destructor called\n");
+  dlclose(handle);
+}
 
 Loader::Loader(const std::string lib, void *args) {
 

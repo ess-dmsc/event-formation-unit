@@ -113,7 +113,6 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
 }
 
 /** Parse data according to IDEAS documentation
- * does not generate events
  */
 int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer){
     static const int BYTES_PER_ENTRY=2;
@@ -143,12 +142,11 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer){
     for (int i = 0; i < nentries; i++) {
       samples++;
       uint16_t sample = ntohs(*(uint16_t *)(buffer + i*2 + 7));
+      XTRACE(PROCESS, INF, "sample %3d: 0x%x (%d)\n", i, sample, sample);
 
       #ifdef DUMPTOFILE
       sephdata.tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, trigger_type, hold_delay, asic, channel, sample);
       #endif
-
-      XTRACE(PROCESS, INF, "sample %3d: 0x%x (%d)\n", i, sample, sample);
     }
 
   return events;

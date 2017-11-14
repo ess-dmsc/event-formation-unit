@@ -48,6 +48,11 @@ set(mbcountertest_SRC mbcommon/multiBladeEventBuilder.cpp mbtest/multiBladeEvent
 create_test_executable(mbcountertest "")
 
 # Create excecutable for the test of clustering
-set(mbclustertest_INC ${MBtest_INC})
+set(mbclustertest_INC ${mbtest_INC})
 set(mbclustertest_SRC mbcommon/multiBladeEventBuilder.cpp mbtest/multiBladeEventBuilderClusteringTest.cpp)
 create_test_executable(mbclustertest "")
+
+# Create excecutable for the test of geometry
+set(MB16DetectorTest_INC mbcaen/MB16Detector.h)
+set(MB16DetectorTest_SRC mbcaen/MB16DetectorTest.cpp)
+create_test_executable(MB16DetectorTest "")

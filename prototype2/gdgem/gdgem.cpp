@@ -42,6 +42,7 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 class NMX : public Detector {
 public:
   NMX(void *args);
+  ~NMX();
   void input_thread();
   void processing_thread();
 
@@ -90,6 +91,10 @@ private:
   void init_builder(std::string jsonfile);
 };
 
+NMX::~NMX() {
+  printf("NMX detector destructor called\n");
+}
+
 NMX::NMX(void *args) {
   opts = (EFUArgs *)args;
 
@@ -134,7 +139,6 @@ void NMX::input_thread() {
   nmxdata.settimeout(0, 100000); // One tenth of a second
 
   int rdsize;
-  Timer stop_timer;
   TSCTimer report_timer;
   for (;;) {
     unsigned int eth_index = eth_ringbuf->getindex();
@@ -159,11 +163,11 @@ void NMX::input_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
 
-      if (stop_timer.timeus() >= opts->stopafter * 1000000LU) {
-        std::cout << "stopping input thread, timeus " << stop_timer.timeus()
-                  << std::endl;
+      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
+        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
         return;
       }
+
       report_timer.now();
     }
   }
@@ -190,7 +194,6 @@ void NMX::processing_thread() {
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
   Clusterer clusterer(nmx_opts.cluster_min_timespan);
 
-  Timer stopafter_clock;
   TSCTimer global_time, report_timer;
 
   EventNMX event;
@@ -268,7 +271,6 @@ void NMX::processing_thread() {
 
     // Checking for exit
     if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-      // printf("timetsc: %" PRIu64 "\n", global_time.timetsc());
 
       sample_next_track = 1;
 
@@ -290,10 +292,13 @@ void NMX::processing_thread() {
         hists.clear();
       }
 
-      if (stopafter_clock.timeus() >= opts->stopafter * 1000000LU) {
-        std::cout << "stopping processing thread, timeus " << std::endl;
+      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
+        XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n", opts->proc_cmd);
+        builder_.reset();      /**< @fixme this is a hack to force ~BuilderSRS() call */
+        delete builder_.get(); /**< @fixme see above */
         return;
       }
+
       report_timer.now();
     }
   }
@@ -305,10 +310,12 @@ void NMX::init_builder(std::string jsonfile)
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
   if (nmx_opts.builder_type == "H5") {
+    XTRACE(INIT, DEB, "Make BuilderH5\n");
     builder_ = std::make_shared<BuilderH5>
         (nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
   }
   else if (nmx_opts.builder_type == "SRS") {
+    XTRACE(INIT, DEB, "Make BuilderSRS\n");
     builder_ = std::make_shared<BuilderSRS>
         (nmx_opts.time_config, nmx_opts.srs_mappings, nmx_opts.dump_directory,
          nmx_opts.dump_csv, nmx_opts.dump_h5);
