@@ -49,7 +49,7 @@ class AbstractBuilder {
     #ifdef DUMPTOFILE
 
     //CSV
-    DataSave vmmsave;
+    std::shared_ptr<DataSave> vmmsave;
 
     //H5
     hdf5::file::File file_;

@@ -9,17 +9,18 @@
 
 #include <common/Trace.h>
 
-AbstractBuilder::AbstractBuilder(std::string dump_dir,
+AbstractBuilder::AbstractBuilder(std::string __attribute__((unused)) dump_dir,
                                  bool dump_csv, bool dump_h5)
   : dump_csv_(dump_csv)
   , dump_h5_(dump_h5)
-      #ifdef DUMPTOFILE
-        , vmmsave{dump_dir + "VMM_", 100000000}
-      #endif
 {
 #ifdef DUMPTOFILE
-  if (dump_h5_)
+  if (dump_h5_) {
     setup_h5(dump_dir);
+  }
+  if (dump_csv_) {
+    vmmsave = std::make_shared<DataSave>(dump_dir + "VMM_", 100000000);
+  }
 #endif
 }
 

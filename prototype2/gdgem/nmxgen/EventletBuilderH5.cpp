@@ -13,7 +13,7 @@ BuilderH5::BuilderH5(std::string dump_dir, bool dump_csv, bool dump_h5)
   data.resize(4);
   #ifdef DUMPTOFILE
   if (dump_csv_)
-    vmmsave.tofile("# time, plane, strip, adc, overthreshold\n");
+    vmmsave->tofile("# time, plane, strip, adc, overthreshold\n");
   #endif
 }
 
@@ -45,7 +45,7 @@ Eventlet BuilderH5::make_eventlet() {
 
   #ifdef DUMPTOFILE
   if (dump_csv_)
-    vmmsave.tofile("%" PRIu64 ", %u, %u, %u, %u\n",
+    vmmsave->tofile("%" PRIu64 ", %u, %u, %u, %u\n",
             ret.time, ret.plane_id, ret.strip, ret.adc, ret.over_threshold);
 
   if (dump_h5_)

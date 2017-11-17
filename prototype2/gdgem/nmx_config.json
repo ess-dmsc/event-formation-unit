@@ -33,5 +33,7 @@
   "geometry_x" : 256,
   "geometry_y" : 256,
 
-  "dump_csv" : 1
+  "dump_directory" : "",
+  "dump_csv" : 1,
+  "dump_h5" : 0
 }
