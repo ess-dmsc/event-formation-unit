@@ -8,7 +8,7 @@
 class EventletBuilderH5Test : public TestBase {
 protected:
   BuilderH5 *builder;
-  virtual void SetUp() { builder = new BuilderH5(); }
+  virtual void SetUp() { builder = new BuilderH5("", false, false); }
   virtual void TearDown() { delete builder; }
 };
 

@@ -14,6 +14,8 @@
 #include <libs/include/Socket.h>
 #include <unistd.h>
 
+#include <h5cpp/error/error.hpp>
+
 const int TSC_MHZ = 2900;
 
 int main(int argc, char *argv[]) {
@@ -21,7 +23,8 @@ int main(int argc, char *argv[]) {
   if (opts.filename.empty())
     return 1;
 
-  H5::Exception::dontPrint();
+  hdf5::error::auto_print(false);
+//  H5::Exception::dontPrint();
 
   char buffer[9000];
 

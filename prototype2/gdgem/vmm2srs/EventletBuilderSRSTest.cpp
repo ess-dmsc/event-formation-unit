@@ -13,7 +13,7 @@ protected:
     SRSMappings geometry;
     geometry.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
     geometry.define_plane(1, {{1, 10}, {1, 11}, {1, 14}, {1, 15}});
-    builder = new BuilderSRS(time, geometry);
+    builder = new BuilderSRS(time, geometry, "", false, false);
   }
   virtual void TearDown() { delete builder; }
 };

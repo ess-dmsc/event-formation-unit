@@ -57,6 +57,10 @@ NMXConfig::NMXConfig(std::string jsonfile)
 
   geometry_x = root["geometry_x"].asInt();
   geometry_y = root["geometry_y"].asInt();
+
+  dump_csv = root["dump_csv"].asBool();
+  dump_h5 = root["dump_h5"].asBool();
+  dump_directory = root["dump_directory"].asString();
 }
 
 std::string NMXConfig::debug() const
@@ -86,5 +90,9 @@ std::string NMXConfig::debug() const
 
   ss << "  geometry_x = " << geometry_x << "\n";
   ss << "  geometry_y = " << geometry_y << "\n";
+
+  ss << "  dump_csv = " << dump_csv << "\n";
+  ss << "  dump_h5 = " << dump_h5 << "\n";
+  ss << "  dump_directory = " << dump_directory << "\n";
   return ss.str();
 }

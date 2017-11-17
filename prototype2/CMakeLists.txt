@@ -4,8 +4,6 @@ find_package(Threads REQUIRED)
 find_package(PCAP)
 find_package(LibRDKafka)
 find_package(GraylogLogger)
-find_package(H5CC)
-find_package(HDF5 1.8.15 COMPONENTS CXX HL)
 find_package(FlatBuffers REQUIRED)
 
 set(coverage_flags "-coverage -fprofile-generate")

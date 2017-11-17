@@ -11,11 +11,11 @@
 #include <gdgem/vmm2srs/SRSMappings.h>
 #include <gdgem/vmm2srs/SRSTime.h>
 #include <gdgem/vmm2srs/ParserSRS.h>
-#include <dataformats/multigrid/inc/DataSave.h>
 
 class BuilderSRS : public AbstractBuilder {
 public:
-  BuilderSRS(SRSTime time_intepreter, SRSMappings geometry_interpreter);
+  BuilderSRS(SRSTime time_intepreter, SRSMappings geometry_interpreter,
+             std::string dump_dir, bool dump_csv, bool dump_h5);
 
   ~BuilderSRS(){
     XTRACE(INIT, DEB, "BuilderSRS destructor called\n");
@@ -27,9 +27,6 @@ public:
                              NMXHists &hists) override;
 
 private:
-  #ifdef DUMPTOFILE
-    DataSave vmmsave{"VMM_", 100000000};
-  #endif
   NMXVMM2SRSData parser_;
   SRSTime time_intepreter_;
   SRSMappings geometry_interpreter_;

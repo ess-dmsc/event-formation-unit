@@ -8,8 +8,9 @@
 #ifndef READER_VMM_H
 #define READER_VMM_H
 
-#include <H5CC_DataSet.h>
-#include <H5CC_File.h>
+#include <h5cpp/hdf5.hpp>
+//#include <H5CC_DataSet.h>
+//#include <H5CC_File.h>
 #include <map>
 #include <vector>
 
@@ -22,16 +23,22 @@ public:
   size_t read(char *buf);
 
 private:
-  H5CC::File file_;
-  H5CC::DataSet dataset_;
+  hdf5::file::File file_;
+  hdf5::node::Dataset dataset_;
+//  H5CC::File file_;
+//  H5CC::DataSet dataset_;
 
   size_t total_{0};
   size_t current_{0};
   size_t psize_{sizeof(uint32_t) * 4};
   size_t max_in_buf_{9000 / (sizeof(uint32_t) * 4)};
 
-  std::vector<hsize_t> slabsize{1, H5CC::kMax};
-  std::vector<hsize_t> index{0, 0};
+  hdf5::dataspace::Hyperslab slab_{{0,0},
+                                   {1, hdf5::dataspace::Simple::UNLIMITED}};
+
+//  std::vector<hsize_t> slabsize{1, H5CC::kMax};
+//  std::vector<hsize_t> index{0, 0};
+
   std::vector<uint32_t> data;
 };
 
