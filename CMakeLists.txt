@@ -31,6 +31,7 @@ endif ()
 
 message(STATUS "Build str: ${BUILDSTR}")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
+#set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -ggdb -flto -fno-omit-frame-pointer -O3 -DRELEASE -DNDEBUG")
 
 option(USE_OLD_ABI "Sets _GLIBCXX_USE_CXX11_ABI=0 for CentOS builds" ON)
 set(EXTRA_CXX_FLAGS -std=c++11 -pthread -fPIC)
