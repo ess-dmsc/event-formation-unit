@@ -2,23 +2,30 @@ cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 enable_testing()
 include_directories(..)
 include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
-include_directories(${h5cpp_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
+
+find_package(h5cpp)
+set(h5_optional)
 
 #
 # Tools and Data generators
 #
 
-set(gennmxfile_SRC
-  nmx/Eventlet.cpp
-  nmxgen/nmxfile.cpp
-  nmxgen/NMXArgs.cpp
-  nmxgen/ReaderVMM.cpp)
-set(gennmxfile_INC
-  nmx/Eventlet.h
-  nmxgen/NMXArgs.h
-  nmxgen/ReaderVMM.h)
-create_executable(gennmxfile "h5cpp_shared")
-target_link_libraries(gennmxfile h5cpp_shared ${HDF5_LIBRARIES})
+if (h5cpp_FOUND)
+  set(gennmxfile_SRC
+    nmx/Eventlet.cpp
+    nmxgen/nmxfile.cpp
+    nmxgen/NMXArgs.cpp
+    nmxgen/ReaderVMM.cpp)
+  set(gennmxfile_INC
+    nmx/Eventlet.h
+    nmxgen/NMXArgs.h
+    nmxgen/ReaderVMM.h)
+  create_executable(gennmxfile "")
+  target_link_libraries(gennmxfile h5cpp_shared)
+  set(h5_optional h5cpp_shared)
+else ()
+  message(STATUS "Unable to compile gennmxfile as h5cpp was not found.")
+endif ()
 
 #
 if (PCAP_FOUND)
@@ -72,8 +79,8 @@ set(gdgem_INC
   vmm2srs/SRSTime.h
   vmm2srs/ParserSRS.h
   vmm2srs/EventletBuilderSRS.h)
-create_module(gdgem "h5cpp_shared")
-target_link_libraries(gdgem ${HDF5_LIBRARIES} h5cpp_shared)
+create_module(gdgem "")
+target_link_libraries(gdgem ${h5_optional})
 
 #
 # NMX / VMM Tests
@@ -120,8 +127,8 @@ set(EventletBuilderH5Test_INC
   nmx/Eventlet.h
   nmx/Hists.h
   nmxgen/EventletBuilderH5.h)
-create_test_executable(EventletBuilderH5Test "h5cpp_shared")
-target_link_libraries(EventletBuilderH5Test ${HDF5_LIBRARIES} h5cpp_shared)
+create_test_executable(EventletBuilderH5Test "")
+target_link_libraries(EventletBuilderH5Test ${h5_optional})
 
 set(EventletBuilderTest_SRC
   ../../dataformats/multigrid/src/DataSave.cpp
@@ -143,8 +150,8 @@ set(EventletBuilderTest_INC
   vmm2srs/EventletBuilderSRS.h
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h)
-create_test_executable(EventletBuilderTest "h5cpp_shared")
-target_link_libraries(EventletBuilderTest ${HDF5_LIBRARIES} h5cpp_shared)
+create_test_executable(EventletBuilderTest "")
+target_link_libraries(EventletBuilderTest ${h5_optional})
 
 set(EventletTest_SRC
   nmx/EventletTest.cpp
