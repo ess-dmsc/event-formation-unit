@@ -38,7 +38,7 @@ set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DBUILDSTR=${BUILDSTR}")
 
-if (CMAKE_COMPILER_IS_GNUCXXC AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
+if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
   # Hackity-hack...
   message(STATUS "Disabling some of the newer compiler features... Hackity-hack...")
   set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-Wno-implicit-fallthrough -Wno-aligned-new")
