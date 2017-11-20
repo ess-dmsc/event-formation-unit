@@ -81,7 +81,10 @@ int DataSave::tofile(const char * fmt,...) {
   bufferlen += ret;
   if (bufferlen >= BUFFERSIZE) {
     XTRACE(PROCESS, DEB, "Writing chunk of size %d\n", bufferlen);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
     write(fd, buffer, bufferlen);
+#pragma GCC diagnostic pop
     retlen  = bufferlen;
     bufferlen = 0;
   }
@@ -92,7 +95,10 @@ DataSave::~DataSave() {
   XTRACE(PROCESS, DEB, "~DataSave bufferlen %d\n", bufferlen);
   if (bufferlen > 0) {
     XTRACE(PROCESS, INF, "Flushing DataSave buffer\n");
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
     write(fd, buffer, bufferlen);
+#pragma GCC diagnostic pop
   }
   close(fd);
 }

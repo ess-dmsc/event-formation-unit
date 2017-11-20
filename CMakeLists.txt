@@ -31,6 +31,7 @@ endif ()
 
 message(STATUS "Build str: ${BUILDSTR}")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
+#set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -ggdb -flto -fno-omit-frame-pointer -O3 -DRELEASE -DNDEBUG")
 
 option(GOOGLE_BENCHMARK, "Enable google benchmark for unit tests" OFF)
 
