@@ -85,6 +85,19 @@ target_link_libraries(gdgem ${h5_optional})
 #
 # NMX / VMM Tests
 #
+if (GOOGLE_BENCHMARK)
+set(EventletBuilderBenchmarkTest_SRC nmx/Clusterer.cpp nmx/EventNMX.cpp nmx/Hists.cpp
+  nmx/AbstractEventletBuilder.cpp vmm2srs/EventletBuilderSRSBenchmarkTest.cpp vmm2srs/EventletBuilderSRS.cpp
+  vmm2srs/ParserSRS.cpp vmm2srs/SRSMappings.cpp vmm2srs/SRSTime.cpp)
+set(EventletBuilderBenchmarkTest_INC nmx/Clusterer.h nmx/EventNMX.h nmx/Hists.h
+  nmx/Eventlet.h vmm2srs/ParserSRS.h vmm2srs/EventletBuilderSRS.h vmm2srs/SRSTime.h
+  vmm2srs/SRSMappings.h)
+create_test_executable(EventletBuilderBenchmarkTest "")
+else ()
+  message(STATUS "Skipping benchmark for EventletBuilder (enable with cmake -DGOOGLE_BENCHMARK)")
+endif ()
+
+
 set(HistSerializerTest_SRC
   nmx/Hists.cpp
   nmx/HistSerializerTest.cpp
