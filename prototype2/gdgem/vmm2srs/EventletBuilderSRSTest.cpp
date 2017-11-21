@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <gdgem/vmm2srs/EventletBuilderSRS.h>
+#include <gdgem/vmm2srs/SRSTestData.h>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>
@@ -20,12 +21,11 @@ protected:
 
 TEST_F(EventletBuilderTest, Process) {
   Clusterer clusterer(30);
-  NMXVMM2SRSData data(1125);
+  NMXHists hists;
 
-  //data.elems = 4;
-  //auto num2 = builder->process_readout(data, clusterer);
-  //ASSERT_EQ(num2, 4);
-  MESSAGE() << "Bad test, working on uninitialized data\n";
+  auto stats = builder->process_buffer((char*)data1, sizeof(data1), clusterer, hists);
+  ASSERT_EQ(stats.valid_eventlets, 22);
+  ASSERT_EQ(stats.geom_errors, 0);
 }
 
 int main(int argc, char **argv) {
