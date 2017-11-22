@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <benchmark/benchmark.h>
 #include <gdgem/vmm2srs/EventletBuilderSRS.h>
@@ -24,10 +24,10 @@ static void ParseData(benchmark::State& state) {
   Setup(state);
 
   for (auto _ : state) {
-    auto stats = builder->process_buffer((char*)data1, sizeof(data1), clusterer, hists);
+    auto stats = builder->process_buffer((char*)srsdata_22_eventlets, sizeof(srsdata_22_eventlets), clusterer, hists);
     eventlets += stats.valid_eventlets;
   }
-  state.SetBytesProcessed(state.iterations() * sizeof(data1));
+  state.SetBytesProcessed(state.iterations() * sizeof(srsdata_22_eventlets));
   state.SetItemsProcessed(eventlets);
 };
 BENCHMARK(ParseData);

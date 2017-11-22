@@ -17,7 +17,7 @@ class MBData {
 public:
   MBData();
 
-  unsigned int recieve(const char * /*void **/ buffer, unsigned int size);
+  unsigned int receive(const char * /*void **/ buffer, unsigned int size);
 
   std::vector<datapoint> data;
 

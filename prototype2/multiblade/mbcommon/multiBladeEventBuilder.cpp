@@ -2,7 +2,7 @@
 // Created by soegaard on 6/2/17.
 //
 
-#include "multiBladeEventBuilder.h"
+#include <multiblade/mbcommon/multiBladeEventBuilder.h>
 #include <algorithm>
 
 //#undef TRC_LEVEL
