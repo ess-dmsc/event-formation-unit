@@ -27,6 +27,7 @@ static void ReceiveData(benchmark::State& state) {
     auto ret = mbdata.receive((char *)databuffer, state.range(0));
     items += ret;
   }
+  state.SetComplexityN(state.range(0));
   state.SetBytesProcessed(state.iterations() * state.range(0));
   state.SetItemsProcessed(items);
 };

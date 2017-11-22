@@ -198,7 +198,7 @@ void MBCAEN::processing_thread() {
         mystats.fifo_seq_errors++;
       } else {
         auto dataptr = eth_ringbuf->getdatabuffer(data_index);
-        mbdata.recieve(dataptr, datalen);
+        mbdata.receive(dataptr, datalen);
 
         auto dat = mbdata.data;
         mystats.rx_readouts += dat.size();

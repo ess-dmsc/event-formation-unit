@@ -30,6 +30,7 @@ static void AddDataPoint(benchmark::State& state) {
      mbevb.addDataPoint(1, 777, 2000); // outside time window
      items += state.range(0); // number of data points
   }
+  state.SetComplexityN(state.range(0));
   state.SetBytesProcessed(state.iterations() * state.range(0));
   state.SetItemsProcessed(items);
 };
