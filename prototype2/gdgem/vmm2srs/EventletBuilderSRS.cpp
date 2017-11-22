@@ -3,6 +3,9 @@
 #include <common/Trace.h>
 #include <gdgem/vmm2srs/EventletBuilderSRS.h>
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
+
 BuilderSRS::BuilderSRS(SRSTime time_intepreter,
                        SRSMappings geometry_interpreter,
                        std::string dump_dir,

@@ -9,6 +9,9 @@
 class EventletBuilderTest : public TestBase {
 protected:
   BuilderSRS *builder;
+  Clusterer clusterer{30};
+  NMXHists hists;
+
   virtual void SetUp() {
     SRSTime time;
     SRSMappings geometry;
@@ -19,11 +22,21 @@ protected:
   virtual void TearDown() { delete builder; }
 };
 
-TEST_F(EventletBuilderTest, Process) {
-  Clusterer clusterer(30);
-  NMXHists hists;
 
-  auto stats = builder->process_buffer((char*)data1, sizeof(data1), clusterer, hists);
+TEST_F(EventletBuilderTest, DataTooShortForEventlets) {
+  auto stats = builder->process_buffer((char*)srsdata_0_eventlets, sizeof(srsdata_0_eventlets), clusterer, hists);
+  ASSERT_EQ(stats.valid_eventlets, 0);
+  ASSERT_EQ(stats.geom_errors, 0);
+}
+
+TEST_F(EventletBuilderTest, InvalidGeometry) {
+  auto stats = builder->process_buffer((char*)srsdata_invalid_geometry, sizeof(srsdata_invalid_geometry), clusterer, hists);
+  ASSERT_EQ(stats.valid_eventlets, 1);
+  ASSERT_EQ(stats.geom_errors, 1);
+}
+
+TEST_F(EventletBuilderTest, Process22Eventlets) {
+  auto stats = builder->process_buffer((char*)srsdata_22_eventlets, sizeof(srsdata_22_eventlets), clusterer, hists);
   ASSERT_EQ(stats.valid_eventlets, 22);
   ASSERT_EQ(stats.geom_errors, 0);
 }
