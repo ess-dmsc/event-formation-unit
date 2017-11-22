@@ -127,7 +127,6 @@ set(ParserSRSTest_SRC
 create_test_executable(ParserSRSTest "")
 
 set(EventletBuilderH5Test_SRC
-  ../../dataformats/multigrid/src/DataSave.cpp
   nmx/EventNMX.cpp
   nmx/Clusterer.cpp
   nmx/Hists.cpp
@@ -144,7 +143,6 @@ create_test_executable(EventletBuilderH5Test "")
 target_link_libraries(EventletBuilderH5Test ${h5_optional})
 
 set(EventletBuilderTest_SRC
-  ../../dataformats/multigrid/src/DataSave.cpp
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Hists.cpp
