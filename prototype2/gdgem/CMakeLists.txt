@@ -196,8 +196,8 @@ set(ClustererTest_INC
   nmx/EventNMX.h)
 create_test_executable(ClustererTest "")
 
-set(EventTest_SRC
-  nmx/EventTest.cpp
+set(EventNMXTest_SRC
+  nmx/EventNMXTest.cpp
   nmx/EventNMX.cpp
   nmx/EventNMX.h)
-create_test_executable(EventTest "")
+create_test_executable(EventNMXTest "")
