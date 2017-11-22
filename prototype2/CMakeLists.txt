@@ -56,11 +56,16 @@ include_directories(. .. ${LibRDKafka_INCLUDE_DIR})
 
 #
 # Common functionality for all detector plugins
-set(common_SRC common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp
-    ../dataformats/multigrid/src/DataSave.cpp)
+set(common_SRC common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp)
+
 set(common_INC common/Detector.h common/NewStats.h common/Producer.h common/FBSerializer.h
-    common/Trace.h ../libs/include/gccintel.h common/EFUArgs.h
-  ../dataformats/multigrid/inc/DataSave.h)
+    common/Trace.h ../libs/include/gccintel.h common/EFUArgs.h)
+
+if (DUMPTOFILE)
+set(common_SRC ${common_SRC} ../dataformats/multigrid/src/DataSave.cpp)
+set(common_INC ${common_INC} ../dataformats/multigrid/inc/DataSave.h)
+endif ()
+
 add_library(common STATIC ${common_SRC} ${common_INC})
 target_include_directories(common INTERFACE ${FLATBUFFERS_INCLUDE_DIR})
 

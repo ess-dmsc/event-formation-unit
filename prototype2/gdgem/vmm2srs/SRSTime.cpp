@@ -38,13 +38,13 @@ uint64_t SRSTime::timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) {
                                target_resolution_ns_);
 }
 
-// std::string SRSTime::debug() const
-// {
-//   std::stringstream ss;
-//   ss << "("
-//      << "trigger*" << trigger_resolution_
-//      << " + bc*1000/" << bc_clock_
-//      << " + tdc*" << tac_slope_ << "/256"
-//      << ")ns * " << target_resolution_ns_;
-//   return ss.str();
-// }
+std::string SRSTime::debug() const
+{
+  std::stringstream ss;
+  ss << "("
+     << "trigger*" << trigger_resolution_
+     << " + bc*1000/" << bc_clock_
+     << " + tdc*" << tac_slope_ << "/256"
+     << ")ns * " << target_resolution_ns_;
+  return ss.str();
+}
