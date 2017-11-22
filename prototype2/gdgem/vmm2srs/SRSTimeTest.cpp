@@ -28,12 +28,6 @@ TEST_F(SRSTimeTest, Eval) {
   ASSERT_EQ(time->timestamp(0, 0, 0), 0);
 }
 
-TEST_F(SRSTimeTest, DebugPrint) {
-  MESSAGE() << "Not a test, just checks that a debug string is returned\n";
-  auto output = time->debug();
-  MESSAGE() << output << "\n";
-}
-
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
