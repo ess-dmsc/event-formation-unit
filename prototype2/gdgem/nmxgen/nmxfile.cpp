@@ -23,7 +23,8 @@ int main(int argc, char *argv[]) {
   if (opts.filename.empty())
     return 1;
 
-  hdf5::error::auto_print(false);
+  hdf5::error::Singleton::instance().auto_print(false);
+//  hdf5::error::auto_print(false);
 //  H5::Exception::dontPrint();
 
   char buffer[9000];
