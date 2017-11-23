@@ -123,6 +123,7 @@ set(ParserSRSTest_SRC
 create_test_executable(ParserSRSTest "")
 
 set(EventletBuilderH5Test_SRC
+  ../../dataformats/multigrid/src/DataSave.cpp
   nmx/EventNMX.cpp
   nmx/Clusterer.cpp
   nmx/Hists.cpp
@@ -130,6 +131,7 @@ set(EventletBuilderH5Test_SRC
   nmxgen/EventletBuilderH5Test.cpp
   nmxgen/EventletBuilderH5.cpp)
 set(EventletBuilderH5Test_INC
+  ../../dataformats/multigrid/inc/DataSave.h
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
@@ -139,6 +141,7 @@ create_test_executable(EventletBuilderH5Test "")
 target_link_libraries(EventletBuilderH5Test ${h5_optional})
 
 set(EventletBuilderTest_SRC
+  ../../dataformats/multigrid/src/DataSave.cpp
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Hists.cpp
@@ -149,6 +152,7 @@ set(EventletBuilderTest_SRC
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp)
 set(EventletBuilderTest_INC
+  ../../dataformats/multigrid/inc/DataSave.h
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Hists.h

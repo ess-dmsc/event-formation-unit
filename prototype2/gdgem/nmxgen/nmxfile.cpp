@@ -14,8 +14,6 @@
 #include <libs/include/Socket.h>
 #include <unistd.h>
 
-#include <h5cpp/error/error.hpp>
-
 const int TSC_MHZ = 2900;
 
 int main(int argc, char *argv[]) {
@@ -25,7 +23,6 @@ int main(int argc, char *argv[]) {
 
   hdf5::error::Singleton::instance().auto_print(false);
 //  hdf5::error::auto_print(false);
-//  H5::Exception::dontPrint();
 
   char buffer[9000];
 

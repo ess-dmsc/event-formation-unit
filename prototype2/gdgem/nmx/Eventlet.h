@@ -23,7 +23,6 @@ struct Eventlet {
     uint8_t  plane_id{0};
     strip_type strip{0};
     adc_type   adc{0};
-    bool flag{false};
     bool over_threshold{false};
 
     // @brief prints values for debug purposes

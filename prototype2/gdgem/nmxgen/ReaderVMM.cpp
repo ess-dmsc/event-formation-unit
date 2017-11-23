@@ -13,33 +13,14 @@ ReaderVMM::ReaderVMM(std::string filename) {
     file_ = hdf5::file::open(filename);
     hdf5::node::Group root = file_.root();
 
-    dataset_ = hdf5::node::Dataset(hdf5::node::Group(root["RawVMM"])["points"]);
-
-//    if (!root.exists("RawVMM") ||
-//        !hdf5::node::Group(root["RawVMM"]).exists("points"))
-//      return;
-
-//  file_ = H5CC::File(filename, H5CC::Access::r_existing);
-//  if (!file_.has_group("RawVMM") ||
-//      !file_.open_group("RawVMM").has_dataset("points"))
-//    return;
-
-//    dataset_ = hdf5::node::Dataset(root["RawVMM/points"]);
-
-//  dataset_ = file_.open_group("RawVMM").open_dataset("points");
+    dataset_ = hdf5::node::get_dataset(root, "RawVMM/points");
 
     auto shape = hdf5::dataspace::Simple(dataset_.dataspace()).current_dimensions();
 
     if ((shape.size() != 2) || (shape[1] != 4))
       return;
 
-//  auto shape = dataset_.shape();
-//  if ((shape.rank() != 2) || (shape.dim(1) != 4))
-//    return;
-
     total_ = shape[0];
-//  total_ = shape.dim(0);
-
   }
   catch (std::exception& e)
   {
@@ -53,11 +34,7 @@ size_t ReaderVMM::read(char *buf) {
   slab_.block(0, limit - current_);
   slab_.offset(0, current_);
 
-//  slabsize[0] = (limit - current_);
-//  index[0] = current_;
-
-  if (slab_.block()[0] > 0)
-//  if (slabsize[0] > 0)
+   if (slab_.block()[0] > 0)
   {
     try {
       dataset_.read(data, slab_);
@@ -68,11 +45,8 @@ size_t ReaderVMM::read(char *buf) {
                 << hdf5::error::print_nested(e) << std::endl;
     }
     memcpy(buf, data.data(), psize_ * slab_.block()[0]);
-//    dataset_.read(data, slabsize, index);
-//    memcpy(buf, data.data(), psize_ * slabsize[0]);
   }
 
   current_ = limit;
   return psize_ * slab_.block()[0];
-//  return psize_ * slabsize[0];
 }

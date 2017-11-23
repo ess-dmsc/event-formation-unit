@@ -37,8 +37,7 @@ Eventlet BuilderH5::make_eventlet() {
   ret.time = (uint64_t(data[0]) << 32) | uint64_t(data[1]);
   ret.plane_id = data[2] >> 16;
   ret.strip = data[2] & 0xFFFF;
-  ret.flag = (data[3] >> 16) & 0x1;
-  ret.over_threshold = (data[3] >> 17) & 0x1;
+  ret.over_threshold = (data[3] >> 16) & 0x1;
   ret.adc = data[3] & 0xFFFF;
 
   XTRACE(PROCESS, DEB, "Made eventlet: %s\n", ret.debug().c_str());
