@@ -3,109 +3,137 @@
 #include <common/EFUArgs.h>
 #include <common/Trace.h>
 #include <cstdio>
-#include <getopt.h>
 #include <iostream>
 #include <string>
 
-EFUArgs *efu_args; /** global var */
+EFUArgs::EFUArgs() {
+  CLIParser.add_option("-a,--logip", graylog_ip, "Graylog server IP address");
+  CLIParser.add_option("-b,--broker", broker, "Kafka broker string");
+  CLIParser.add_option("-c,--cpu", cpustart, "lcore id of first thread");
+  CLIParser.add_option("-d,--det", det, "Detector name")->required();
+  CLIParser.add_option("-f,--file", config_file, "Pipeline-specific config file");
+  CLIParser.add_option("-g,--graphite", graphite_ip_addr, "IP address of graphite metrics server");
+  CLIParser.add_option("-i,--dip", ip_addr, "IP address of receive interface");
+  CLIParser.add_option("-m,--cmdport", cmdserver_port, "Command parser tcp port");
+  CLIParser.add_option("-o,--gport", graphite_port, "Graphite tcp port");
+  CLIParser.add_option("-p,--port", port, "UDP port");
+  CLIParser.add_option("-s,--stopafter", stopafter, "Terminate after timeout seconds");
+//  optind = 1; // global variable used by getopt
+//
+//  while (1) {
+//    static struct option long_options[] = {
+//        // clang-format off
+//        {"help",      no_argument,       0, 'h'},
+//        {"broker",    required_argument, 0, 'b'},
+//        {"cpu",       required_argument, 0, 'c'},
+//        {"det",       required_argument, 0, 'd'},
+//        {"dip",       required_argument, 0, 'i'},
+//        {"dport",     required_argument, 0, 'p'},
+//        {"stopafter", required_argument, 0, 's'},
+//        {"graphite",  required_argument, 0, 'g'},
+//        {"gport",     required_argument, 0, 'o'},
+//        {"file",      required_argument, 0, 'f'},
+//        {"logip",     required_argument, 0, 'a'},
+//        {"cmdport",   required_argument, 0, 'm'},
+//        {0, 0, 0, 0}
+//      };
+//    // clang-format on
+//
+//    int option_index = 0;
+//
+//    int c = getopt_long(argc, argv, "a:b:c:d:f:g:hi:m:o:p:s:", long_options, &option_index);
+//    if (c == -1)
+//      break;
+//
+//    switch (c) {
+//    // case 0: // currently not using flags
+//    //  if (long_options[option_index].flag != 0)
+//    //    break;
+//    case 'a':
+//      graylog_ip.assign(optarg);
+//      break;
+//    case 'b':
+//      broker.assign(optarg);
+//      break;
+//    case 'c':
+//      cpustart = atoi(optarg);
+//      break;
+//    case 'd':
+//      det.assign(optarg);
+//      break;
+//    case 'f':
+//      config_file.assign(optarg);
+//      break;
+//    case 'g':
+//      graphite_ip_addr.assign(optarg);
+//      break;
+//    case 'i':
+//      ip_addr.assign(optarg);
+//      break;
+//    case 'm':
+//      cmdserver_port = atoi(optarg);
+//      break;
+//    case 'o':
+//      graphite_port = atoi(optarg);
+//      break;
+//    case 'p':
+//      port = atoi(optarg);
+//      break;
+//    case 's':
+//      stopafter = atoi(optarg);
+//      break;
+//    case 'h':
+//    default:
+//      printf("Usage: efu2 [OPTIONS]\n");
+//      printf(" --logip, -a logip        Graylog server ip address \n");
+//      printf(" --broker, -b broker      Kafka broker string \n");
+//      printf(" --cpu, -c lcore          lcore id of first thread \n");
+//      printf(" --det, -d name           detector name \n");
+//      printf(" --file, -f configfile    pipeline-specific config file \n");
+//      printf(" --graphite, -g ipaddr       ip address of graphite metrics server \n");
+//      printf(" --help, -h               help - prints this message \n");
+//      printf(" --dip, -i ipaddr         ip address of receive interface \n");
+//      printf(" --cmdport, -m port       command parser tcp port\n");
+//      printf(" --gport, -o port         Graphite tcp port \n");
+//      printf(" --port, -p port          udp port \n");
+//      printf(" --stopafter, -s timeout  terminate after timeout seconds \n");
+//
+//      stopafter = 0;
+//      return;
+//    }
+//  }
 
-EFUArgs::EFUArgs(int argc, char *argv[]) {
 
-  optind = 1; // global variable used by getopt
+}
 
-  while (1) {
-    static struct option long_options[] = {
-        // clang-format off
-        {"help",      no_argument,       0, 'h'},
-        {"broker",    required_argument, 0, 'b'},
-        {"cpu",       required_argument, 0, 'c'},
-        {"det",       required_argument, 0, 'd'},
-        {"dip",       required_argument, 0, 'i'},
-        {"dport",     required_argument, 0, 'p'},
-        {"stopafter", required_argument, 0, 's'},
-        {"graphite",  required_argument, 0, 'g'},
-        {"gport",     required_argument, 0, 'o'},
-        {"file",      required_argument, 0, 'f'},
-        {"logip",     required_argument, 0, 'a'},
-        {"cmdport",   required_argument, 0, 'm'},
-        {0, 0, 0, 0}
-      };
-    // clang-format on
+void EFUArgs::printSettings() {
+    XTRACE(INIT, ALW, "Starting event processing pipeline2\n");
+    XTRACE(INIT, ALW, "  Log IP:        %s\n", graylog_ip.c_str());
+    XTRACE(INIT, ALW, "  Detector:      %s\n", det.c_str());
+    XTRACE(INIT, ALW, "  CPU Offset:    %d\n", cpustart);
+    XTRACE(INIT, ALW, "  Config file:   %s\n", config_file.c_str());
+    XTRACE(INIT, ALW, "  IP addr:       %s\n", ip_addr.c_str());
+    XTRACE(INIT, ALW, "  UDP Port:      %d\n", port);
+    XTRACE(INIT, ALW, "  Kafka broker:  %s\n", broker.c_str());
+    XTRACE(INIT, ALW, "  Graphite:      %s\n", graphite_ip_addr.c_str());
+    XTRACE(INIT, ALW, "  Graphite port: %d\n", graphite_port);
+    XTRACE(INIT, ALW, "  Command port:  %d\n", cmdserver_port);
+    XTRACE(INIT, ALW, "  Stopafter:     %u\n", stopafter);
+}
 
-    int option_index = 0;
+void EFUArgs::printHelp() {
+  std::cout << CLIParser.help();
+}
 
-    int c = getopt_long(argc, argv, "a:b:c:d:f:g:hi:m:o:p:s:", long_options, &option_index);
-    if (c == -1)
-      break;
-
-    switch (c) {
-    // case 0: // currently not using flags
-    //  if (long_options[option_index].flag != 0)
-    //    break;
-    case 'a':
-      graylog_ip.assign(optarg);
-      break;
-    case 'b':
-      broker.assign(optarg);
-      break;
-    case 'c':
-      cpustart = atoi(optarg);
-      break;
-    case 'd':
-      det.assign(optarg);
-      break;
-    case 'f':
-      config_file.assign(optarg);
-      break;
-    case 'g':
-      graphite_ip_addr.assign(optarg);
-      break;
-    case 'i':
-      ip_addr.assign(optarg);
-      break;
-    case 'm':
-      cmdserver_port = atoi(optarg);
-      break;
-    case 'o':
-      graphite_port = atoi(optarg);
-      break;
-    case 'p':
-      port = atoi(optarg);
-      break;
-    case 's':
-      stopafter = atoi(optarg);
-      break;
-    case 'h':
-    default:
-      printf("Usage: efu2 [OPTIONS]\n");
-      printf(" --logip, -a logip        Graylog server ip address \n");
-      printf(" --broker, -b broker      Kafka broker string \n");
-      printf(" --cpu, -c lcore          lcore id of first thread \n");
-      printf(" --det, -d name           detector name \n");
-      printf(" --file, -f configfile    pipeline-specific config file \n");
-      printf(" --graphite, -g ipaddr       ip address of graphite metrics server \n");
-      printf(" --help, -h               help - prints this message \n");
-      printf(" --dip, -i ipaddr         ip address of receive interface \n");
-      printf(" --cmdport, -m port       command parser tcp port\n");
-      printf(" --gport, -o port         Graphite tcp port \n");
-      printf(" --port, -p port          udp port \n");
-      printf(" --stopafter, -s timeout  terminate after timeout seconds \n");
-
-      stopafter = 0;
-      return;
+bool EFUArgs::parseAndProceed(const int argc, char *argv[]) {
+  try {
+    CLIParser.parse(argc, argv);
+  } catch (const CLI::ParseError &e) {
+    if (0 == det.size()) {
+      CLIParser.exit(e);
+      return false;
     }
   }
-
-  XTRACE(INIT, ALW, "Starting event processing pipeline2\n");
-  XTRACE(INIT, ALW, "  Log IP:        %s\n", graylog_ip.c_str());
-  XTRACE(INIT, ALW, "  Detector:      %s\n", det.c_str());
-  XTRACE(INIT, ALW, "  CPU Offset:    %d\n", cpustart);
-  XTRACE(INIT, ALW, "  Config file:   %s\n", config_file.c_str());
-  XTRACE(INIT, ALW, "  IP addr:       %s\n", ip_addr.c_str());
-  XTRACE(INIT, ALW, "  UDP Port:      %d\n", port);
-  XTRACE(INIT, ALW, "  Kafka broker:  %s\n", broker.c_str());
-  XTRACE(INIT, ALW, "  Graphite:      %s\n", graphite_ip_addr.c_str());
-  XTRACE(INIT, ALW, "  Graphite port: %d\n", graphite_port);
-  XTRACE(INIT, ALW, "  Command port:  %d\n", cmdserver_port);
-  XTRACE(INIT, ALW, "  Stopafter:     %u\n", stopafter);
+  CLIParser.reset();
+  return true;
 }

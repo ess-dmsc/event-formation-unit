@@ -9,17 +9,22 @@
 #include <common/Detector.h>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <string>
+#include <CLI/CLI11.hpp>
 
 class EFUArgs {
 public:
-
+  EFUArgs();
+  bool parseAndProceed(const int argc, char *argv[]);
+  
+  void printHelp();
+  
+  void printSettings();
+  
+  std::string getDetectorName() {return det;};
+  
+  CLI::App CLIParser{"Event formation unit (efu)"};
+  
   enum thread_cmd { NOCMD =0, EXIT, THREAD_LOADCAL, THREAD_TERMINATE};
-
-  /** @brief constructor for program arguments parsed via getopt_long()
-   * @param argc Argument count - typically taken from main()
-   * @param argv Argument array - typically taken from main()
-   */
-  EFUArgs(int argc, char *argv[]);
 
   int cpustart{12}; /**< lcore id for input processing thread */
 
@@ -32,7 +37,7 @@ public:
   unsigned int updint{1};             /**< update interval (s) */
   unsigned int stopafter{0xffffffff}; /**< 'never' stop */
 
-  std::string det{"cspec"};             /**< detector name */
+  std::string det;             /**< detector name */
   std::string broker{"localhost:9092"}; /**< Kafka broker */
   bool kafka{true};                     /**< whether to use Kafka or not */
 
@@ -58,6 +63,3 @@ public:
 
   std::shared_ptr<Detector> detectorif; /**< @todo is this the place? */
 };
-
-// Used all the time and is not global variable
-extern EFUArgs *efu_args;

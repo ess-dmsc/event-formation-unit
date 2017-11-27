@@ -1,6 +1,5 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/Detector.h>
 #include <common/Trace.h>
 #include <dlfcn.h>
 #include <efu/Loader.h>
@@ -13,7 +12,7 @@ Loader::~Loader() {
   dlclose(handle);
 }
 
-Loader::Loader(const std::string lib, void *args) {
+Loader::Loader(const std::string lib) {
 
   std::string libname = "./" + lib + ".so";
   const char *libstr = strdup(libname.c_str());
@@ -37,5 +36,9 @@ Loader::Loader(const std::string lib, void *args) {
     return;
   }
 
-  detector = myFactory->create(args);
+//  detector = myFactory->create(args);
+}
+
+std::shared_ptr<Detector> Loader::createDetector() {
+  return myFactory->create(nullptr);
 }

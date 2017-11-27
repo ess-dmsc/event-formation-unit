@@ -25,14 +25,14 @@ static int stat_get_count(std::vector<std::string> cmdargs, char *output,
     return -Parser::EBADARGS;
   }
 
-  if (efu_args->detectorif == nullptr) {
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE,
-                       "STAT_GET_COUNT error: no detector loaded");
-    return Parser::OK;
-  }
+//  if (efu_args->detectorif == nullptr) {
+//    *obytes = snprintf(output, SERVER_BUFFER_SIZE,
+//                       "STAT_GET_COUNT error: no detector loaded");
+//    return Parser::OK;
+//  }
 
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET_COUNT %d",
-                     efu_args->detectorif->statsize());
+//  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET_COUNT %d",
+//                     efu_args->detectorif->statsize());
 
   return Parser::OK;
 }
@@ -49,16 +49,16 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
   }
   auto index = atoi(cmdargs.at(1).c_str());
 
-  if (efu_args->detectorif == nullptr) {
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE,
-                       "STAT_GET error: no detector loaded");
-    return Parser::OK;
-  }
+//  if (efu_args->detectorif == nullptr) {
+//    *obytes = snprintf(output, SERVER_BUFFER_SIZE,
+//                       "STAT_GET error: no detector loaded");
+//    return Parser::OK;
+//  }
 
-  std::string name = efu_args->detectorif->statname(index);
-  int64_t value = efu_args->detectorif->statvalue(index);
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET %s %" PRIi64,
-                     name.c_str(), value);
+//  std::string name = efu_args->detectorif->statname(index);
+//  int64_t value = efu_args->detectorif->statvalue(index);
+//  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET %s %" PRIi64,
+//                     name.c_str(), value);
 
   return Parser::OK;
 }
@@ -73,14 +73,14 @@ static int cspec_load_calib(std::vector<std::string> cmdargs,
     return -Parser::EBADARGS;
   }
   CalibrationFile calibfile;
-  auto ret = calibfile.load(cmdargs.at(1), (char *)efu_args->wirecal,
-                            (char *)efu_args->gridcal);
-  if (ret < 0) {
-    return -Parser::EBADARGS;
-  }
+//  auto ret = calibfile.load(cmdargs.at(1), (char *)efu_args->wirecal,
+//                            (char *)efu_args->gridcal);
+//  if (ret < 0) {
+//    return -Parser::EBADARGS;
+//  }
 
   /** @todo some other ipc between main and threads ? */
-  efu_args->proc_cmd = efu_args->thread_cmd::THREAD_LOADCAL; // send load command to processing thread
+//  efu_args->proc_cmd = efu_args->thread_cmd::THREAD_LOADCAL; // send load command to processing thread
 
   return Parser::OK;
 }
@@ -105,9 +105,9 @@ static int cspec_show_calib(std::vector<std::string> cmdargs, char *output,
     return -Parser::EBADARGS;
   }
 
-  *obytes = snprintf(
-      output, SERVER_BUFFER_SIZE, "wire %d 0x%04x, grid %d 0x%04x", offset,
-      efu_args->wirecal[offset], offset, efu_args->gridcal[offset]);
+//  *obytes = snprintf(
+//      output, SERVER_BUFFER_SIZE, "wire %d 0x%04x, grid %d 0x%04x", offset,
+//      efu_args->wirecal[offset], offset, efu_args->gridcal[offset]);
 
   return Parser::OK;
 }
@@ -140,14 +140,14 @@ static int detector_info_get(std::vector<std::string> cmdargs, char *output,
     return -Parser::EBADARGS;
   }
 
-  if (efu_args->detectorif == nullptr) {
-    *obytes = snprintf(output, SERVER_BUFFER_SIZE,
-                       "DETECTOR_INFO_GET error: no detector loaded");
-    return Parser::OK;
-  }
+//  if (efu_args->detectorif == nullptr) {
+//    *obytes = snprintf(output, SERVER_BUFFER_SIZE,
+//                       "DETECTOR_INFO_GET error: no detector loaded");
+//    return Parser::OK;
+//  }
 
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "DETECTOR_INFO_GET %s",
-                     efu_args->detectorif->detectorname());
+//  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "DETECTOR_INFO_GET %s",
+//                     efu_args->detectorif->detectorname());
 
   return Parser::OK;
 }
@@ -164,7 +164,7 @@ static int efu_exit(std::vector<std::string> cmdargs, UNUSED char *output,
   }
 
   XTRACE(CMD, INF, "Sending TERMINATE command to EFU\n");
-  efu_args->proc_cmd = EFUArgs::EXIT;
+//  efu_args->proc_cmd = EFUArgs::EXIT;
 
   return Parser::OK;
 }

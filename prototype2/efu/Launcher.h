@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include <efu/Loader.h>
+#include <common/Detector.h>
 #include <vector>
 
 class EFUArgs;
@@ -19,12 +19,12 @@ public:
    *  @param cpus vector of three cpuids for launching input, processing and
    *  output threads.
    */
-  Launcher(Loader *ld, std::vector<int> &cpus);
+  Launcher(Detector *detector, std::vector<int> &cpus);
 
 private:
-  static void input_thread(Loader *load);
-  static void processing_thread(Loader *load);
-  static void output_thread(Loader *load);
+  static void input_thread(Detector *detector);
+  static void processing_thread(Detector *detector);
+  static void output_thread(Detector *detector);
 
-  void launch(int lcore, void (*func)(Loader *), Loader *ld);
+  void launch(int lcore, void (*func)(Detector *), Detector *detector);
 };

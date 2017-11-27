@@ -74,7 +74,7 @@ target_include_directories(common INTERFACE ${FLATBUFFERS_INCLUDE_DIR})
 #
 set(efu2_SRC common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/main.cpp common/StatPublisher.cpp
 efu/ExitHandler.cpp efu/Server.cpp efu/Parser.cpp multigrid/mgcncs/CalibrationFile.cpp)
-set(efu2_INC common/EFUArgs.h efu/Launcher.h efu/Loader.h efu/Server.h efu/Parser.h common/Trace.h
+set(efu2_INC CLI/CLI11.hpp common/EFUArgs.h efu/Launcher.h efu/Loader.h efu/Server.h efu/Parser.h common/Trace.h
     multigrid/mgcncs/CalibrationFile.h common/StatPublisher.h common/NewStats.h efu/ExitHandler.h)
 set(efu_LIB ${LibRDKafka_LIBRARIES} ${CMAKE_DL_LIBS})
 create_executable(efu2 "${efu_LIB}")

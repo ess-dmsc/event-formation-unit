@@ -11,30 +11,30 @@
 /** Can't call detector threads directly from std:thread as
  *  they are virtual functions, so need to add one step.
  */
-void Launcher::input_thread(Loader *load) {
+void Launcher::input_thread(Detector *detector) {
   GLOG_INF("Launching input thread");
-  load->detector->input_thread();
+  detector->input_thread();
 }
 
-void Launcher::processing_thread(Loader *load) {
+void Launcher::processing_thread(Detector *detector) {
   GLOG_INF("Launching processing thread");
-  load->detector->processing_thread();
+  detector->processing_thread();
 }
 
-void Launcher::output_thread(Loader *load) {
+void Launcher::output_thread(Detector *detector) {
   GLOG_INF("Launching output thread");
-  load->detector->output_thread();
+  detector->output_thread();
 }
 
 /** Create a thread 'func()', set its cpu affinity and calls join() */
-void Launcher::launch(int __attribute__((unused)) lcore, void (*func)(Loader *),
-                      Loader *ld) {
+void Launcher::launch(int __attribute__((unused)) lcore, void (*func)(Detector *),
+                      Detector *detector) {
 
 XTRACE(MAIN, ALW, "Creating new thread (lcore %d)\n", lcore);
 #ifdef __linux__
-  std::thread *t = new std::thread(func, ld);
+  std::thread *t = new std::thread(func, detector);
 #else
-  new std::thread(func, ld);
+  new std::thread(func, detector);
 #endif
 
 #ifdef __linux__
@@ -54,14 +54,14 @@ XTRACE(MAIN, ALW, "Creating new thread (lcore %d)\n", lcore);
 #endif
 }
 
-Launcher::Launcher(Loader *dynamic, std::vector<int> &cpus) {
-  if (dynamic->detector == nullptr) {
+Launcher::Launcher(Detector *detector, std::vector<int> &cpus) {
+  if (detector == nullptr) {
     GLOG_CRI("Detector not loadable, no processing ...");
     XTRACE(MAIN, CRI, "Detector not loadable, no processing ...\n");
     return;
   }
 
-  launch(cpus[0], input_thread, dynamic);
-  launch(cpus[2], output_thread, dynamic);
-  launch(cpus[1], processing_thread, dynamic);
+  launch(cpus[0], input_thread, detector);
+  launch(cpus[2], output_thread, detector);
+  launch(cpus[1], processing_thread, detector);
 }
