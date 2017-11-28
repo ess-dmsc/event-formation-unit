@@ -9,6 +9,8 @@
 #include <common/Detector.h>
 #include <memory>
 #include <string>
+#include <functional>
+#include <CLI/CLI11.hpp>
 
 class Loader {
 private:
@@ -16,6 +18,7 @@ private:
   
   DetectorFactory *myFactory{nullptr};
   
+  std::function<void(CLI::App &CLIParser)> ParserPopulator;
 public:
 //  std::shared_ptr<Detector> detector{nullptr};
 
@@ -36,5 +39,7 @@ public:
     return true;
   }
   
-  std::shared_ptr<Detector> createDetector();
+  std::shared_ptr<Detector> createDetector(StdSettings settings);
+  
+  std::function<void(CLI::App &CLIParser)> GetCLIParserPopulator() {return ParserPopulator;};
 };

@@ -9,6 +9,8 @@
 
 Loader::~Loader() {
   XTRACE(INIT, ALW, "Loader destructor called\n");
+  //Remove pointer before closing the handle to prevent accessing freed memory
+  ParserPopulator = nullptr;
   dlclose(handle);
 }
 
@@ -30,15 +32,23 @@ Loader::Loader(const std::string lib) {
     return;
   }
 
-  DetectorFactory *myFactory;
   if (!(myFactory = (DetectorFactory *)dlsym(handle, "Factory"))) {
     XTRACE(INIT, CRI, "Could not find Factory in %s\n", libname.c_str());
     return;
   }
-
-//  detector = myFactory->create(args);
+  
+  PopulateCLIParser *tempParserPopulator = (PopulateCLIParser*)dlsym(handle, "PopulateParser");
+  if (nullptr == tempParserPopulator) {
+    XTRACE(INIT, WAR, "Unable to find function to populate CLI parser in %s\n", libname.c_str());
+  } else {
+    if (nullptr == tempParserPopulator->Function) {
+      XTRACE(INIT, WAR, "Function to populate CLI parser not set");
+    } else {
+      ParserPopulator = tempParserPopulator->Function;
+    }
+  }
 }
 
-std::shared_ptr<Detector> Loader::createDetector() {
-  return myFactory->create(nullptr);
+std::shared_ptr<Detector> Loader::createDetector(StdSettings settings) {
+  return myFactory->create(settings);
 }

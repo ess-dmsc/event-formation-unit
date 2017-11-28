@@ -24,6 +24,12 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+struct SondeSettings {
+  int ReceiveTimeOut;
+};
+
+static SondeSettings settings;
+
 using namespace memory_sequential_consistent; // Lock free fifo
 
 const char *classname = "SoNDe detector using IDEA readout";
@@ -34,7 +40,7 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 class SONDEIDEA : public Detector {
 public:
-  SONDEIDEA(void *args);
+  SONDEIDEA(StdSettings settings);
   ~SONDEIDEA() {
     printf("sonde destructor called\n");
   }
@@ -75,12 +81,15 @@ private:
     int64_t rx_seq_errors;
     int64_t fifo_seq_errors;
   } ALIGN(64) mystats;
-
-  EFUArgs *opts;
 };
 
-SONDEIDEA::SONDEIDEA(void *args) {
-  opts = (EFUArgs *)args;
+void SetCLIArguments(CLI::App &parser) {
+    parser.add_option("--recv_timeout", settings.ReceiveTimeOut, "SONDE receive data time out")->group("SONDE");
+}
+
+PopulateCLIParser PopulateParser{SetCLIArguments};
+
+SONDEIDEA::SONDEIDEA(StdSettings settings) : Detector(settings) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
@@ -111,15 +120,14 @@ const char *SONDEIDEA::detectorname() { return classname; }
 
 void SONDEIDEA::input_thread() {
   /** Connection setup */
-  Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
   UDPServer sondedata(local);
-  sondedata.buflen(opts->buflen);
-  sondedata.setbuffers(0, opts->rcvbuf);
+//  sondedata.buflen(opts->buflen);
+  sondedata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   sondedata.printbuffers();
-  sondedata.settimeout(0, 100000); // One tenth of a second
+  sondedata.settimeout(0, settings.ReceiveTimeOut); // One tenth of a second
 
   int rdsize;
-  TSCTimer report_timer;
   for (;;) {
     unsigned int eth_index = eth_ringbuf->getindex();
 
@@ -139,13 +147,9 @@ void SONDEIDEA::input_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-
-      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
-        return;
-      }
-      report_timer.now();
+    if (not runThreads) {
+      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      return;
     }
   }
 }
@@ -156,23 +160,24 @@ void SONDEIDEA::processing_thread() {
 // dumptofile
 
   IDEASData ideasdata(&geometry);
-  Producer eventprod(opts->broker, "SKADI_detector");
+  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" + std::to_string(EFUSettings.KafkaBrokerPort);
+  Producer eventprod(BrokerString, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
-  TSCTimer global_time, report_timer;
+  TSCTimer report_timer;
 
   unsigned int data_index;
 
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
-      // Checking for exit
-      if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+      // Checking for exit approximately once every second
+      if (report_timer.timetsc() >= static_cast<std::uint64_t>(1000000) * TSC_MHZ) {
 
         mystats.tx_bytes += flatbuffer.produce();
 
-        if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-          XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
+        if (not runThreads) {
+          XTRACE(INPUT, ALW, "Stopping input thread.\n");
           return;
         }
         report_timer.now();
@@ -206,8 +211,8 @@ void SONDEIDEA::processing_thread() {
 
 class SONDEIDEAFactory : DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(void *args) {
-    return std::shared_ptr<Detector>(new SONDEIDEA(args));
+  std::shared_ptr<Detector> create(StdSettings settings) {
+    return std::shared_ptr<Detector>(new SONDEIDEA(settings));
   }
 };
 

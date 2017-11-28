@@ -10,6 +10,12 @@
 #include <multigrid/mgcncs/ChanConv.h>
 #include <string>
 #include <CLI/CLI11.hpp>
+#include <cstdint>
+
+struct GraylogSettings {
+  std::string address;
+  std::uint16_t port;
+};
 
 class EFUArgs {
 public:
@@ -21,33 +27,32 @@ public:
   void printSettings();
   
   std::string getDetectorName() {return det;};
+  GraylogSettings getGraylogSettings() {return GraylogConfig;};
+  
+  bool parseAgain(const int argc, char *argv[]);
+  
+  StdSettings GetDefaultSettings() {return EFUSettings;};
   
   CLI::App CLIParser{"Event formation unit (efu)"};
   
-  enum thread_cmd { NOCMD =0, EXIT, THREAD_LOADCAL, THREAD_TERMINATE};
+//  enum thread_cmd { NOCMD =0, EXIT, THREAD_LOADCAL, THREAD_TERMINATE};
 
   int cpustart{12}; /**< lcore id for input processing thread */
 
-  std::string ip_addr{"0.0.0.0"}; /**< used for data generators */
-  int port{9000};                 /**< udp receive port */
+//  std::string ip_addr{"0.0.0.0"}; /**< used for data generators */
   int buflen{9000};               /**< rx buffer length (B) */
-  int rcvbuf{2000000};            /**< socket rx buffer size (rmem_max) */
-  int sndbuf{2000000};            /**< soxket tx buffer size (wmem_max) */
 
   unsigned int updint{1};             /**< update interval (s) */
   unsigned int stopafter{0xffffffff}; /**< 'never' stop */
 
   std::string det;             /**< detector name */
-  std::string broker{"localhost:9092"}; /**< Kafka broker */
+//  std::string broker{"localhost:9092"}; /**< Kafka broker */
   bool kafka{true};                     /**< whether to use Kafka or not */
 
   std::string graphite_ip_addr{"127.0.0.1"}; /**< graphite time series db */
   int graphite_port{2003};                   /**< graphite time series db */
 
   int cmdserver_port{8888}; /**< for command line API */
-
-  std::string graylog_ip{"127.0.0.1"};
-  int graylog_port{12201};
 
   // Runtime Stats
   // EFUStats stat;
@@ -57,9 +62,12 @@ public:
   std::string config_file;
 
   // IPC data for communicating between main and threads
-  uint16_t wirecal[CSPECChanConv::adcsize];
-  uint16_t gridcal[CSPECChanConv::adcsize];
-  thread_cmd proc_cmd{NOCMD};
-
-  std::shared_ptr<Detector> detectorif; /**< @todo is this the place? */
+//  uint16_t wirecal[CSPECChanConv::adcsize];
+//  uint16_t gridcal[CSPECChanConv::adcsize];
+//  thread_cmd proc_cmd{NOCMD};
+private:
+  CLI::Option *detectorOption;
+  
+  GraylogSettings GraylogConfig{"127.0.0.1", 12201};
+  StdSettings EFUSettings{"0.0.0.0", 9000, 2000000, 2000000, "localhost", 9092, "Detector_data"};
 };

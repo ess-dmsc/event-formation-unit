@@ -10,10 +10,24 @@
 #include <memory>
 #include <stdio.h>
 #include <string>
+#include <functional>
+#include <CLI/CLI11.hpp>
+#include <atomic>
+
+struct StdSettings {
+  std::string DetectorAddress;
+  std::uint16_t DetectorPort;
+  std::int32_t DetectorRxBufferSize;
+  std::int32_t DetectorTxBufferSize;
+  std::string KafkaBrokerAddress;
+  std::uint16_t KafkaBrokerPort;
+  std::string KafkaTopic;
+};
 
 class Detector {
 
 public:
+  Detector(StdSettings settings) : EFUSettings(settings) {};
   // default constructor, all instruments must implement these methods
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
@@ -47,14 +61,25 @@ public:
   }
 
   virtual const char *detectorname() { return "no detector"; }
+  
+  void stop_threads() {
+    runThreads.store(false);
+  };
 
+protected:
+  std::atomic_bool runThreads{true};
+  StdSettings EFUSettings;
 private:
   std::string noname{""};
+};
+
+struct PopulateCLIParser {
+  std::function<void(CLI::App&)> Function;
 };
 
 class DetectorFactory {
 public:
   /** @brief creates the detector object. All instruments must implement this
   */
-  virtual std::shared_ptr<Detector> create(void *opts) = 0;
+  virtual std::shared_ptr<Detector> create(StdSettings settings) = 0;
 };
