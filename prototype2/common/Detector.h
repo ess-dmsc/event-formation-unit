@@ -13,6 +13,7 @@
 #include <functional>
 #include <CLI/CLI11.hpp>
 #include <atomic>
+#include <thread>
 
 struct StdSettings {
   std::string DetectorAddress;
@@ -24,9 +25,15 @@ struct StdSettings {
   std::string KafkaTopic;
 };
 
-class Detector {
+struct ThreadInfo {
+  std::function<void(void)> func;
+  std::string name;
+  std::thread thread;
+};
 
+class Detector {
 public:
+  using ThreadList = std::vector<ThreadInfo>;
   Detector(StdSettings settings) : EFUSettings(settings) {};
   // default constructor, all instruments must implement these methods
   /** @brief generic pthread argument
@@ -62,11 +69,24 @@ public:
 
   virtual const char *detectorname() { return "no detector"; }
   
-  void stop_threads() {
+  virtual ThreadList& GetThreadInfo() {
+    return Threads;
+  };
+  
+  virtual void stopThreads() {
     runThreads.store(false);
+    for (auto &tInfo : Threads) {
+      if (tInfo.thread.joinable()) {
+        tInfo.thread.join();
+      }
+    }
   };
 
 protected:
+  void AddThreadFunction(std::function<void(void)> &func, std::string funcName) {
+    Threads.emplace_back(ThreadInfo{func, std::move(funcName)});
+  };
+  ThreadList Threads;
   std::atomic_bool runThreads{true};
   StdSettings EFUSettings;
 private:

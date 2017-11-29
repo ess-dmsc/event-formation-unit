@@ -7,61 +7,56 @@
 #include <efu/Launcher.h>
 #include <iostream>
 #include <thread>
+#include <map>
 
-/** Can't call detector threads directly from std:thread as
- *  they are virtual functions, so need to add one step.
- */
-void Launcher::input_thread(Detector *detector) {
-  GLOG_INF("Launching input thread");
-  detector->input_thread();
-}
-
-void Launcher::processing_thread(Detector *detector) {
-  GLOG_INF("Launching processing thread");
-  detector->processing_thread();
-}
-
-void Launcher::output_thread(Detector *detector) {
-  GLOG_INF("Launching output thread");
-  detector->output_thread();
-}
-
-/** Create a thread 'func()', set its cpu affinity and calls join() */
-void Launcher::launch(int __attribute__((unused)) lcore, void (*func)(Detector *),
-                      Detector *detector) {
-
-XTRACE(MAIN, ALW, "Creating new thread (lcore %d)\n", lcore);
+void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
+  auto startThreadsWithoutAffinity = [&detector]() {
+    XTRACE(MAIN, ALW, "Launching threads without core affinity.\n");
+    for (auto &ThreadInfo : detector->GetThreadInfo()) {
+      XTRACE(MAIN, ALW, "Creating new thread (id: %s)\n", ThreadInfo.name.c_str());
+      ThreadInfo.thread = std::thread(ThreadInfo.func);
+    }
+  };
+  
+  auto setThreadCoreAffinity = [](std::thread &thread, std::uint16_t core) {
 #ifdef __linux__
-  std::thread *t = new std::thread(func, detector);
-#else
-  new std::thread(func, detector);
-#endif
-
-#ifdef __linux__
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  CPU_SET(lcore, &cpuset);
-  if (lcore >= 0) {
-    XTRACE(MAIN, ALW, "Setting thread affinity to core %d\n", lcore);
-    GLOG_INF("Setting thread affinity to core " + std::to_string(lcore));
-
-    int __attribute__((unused))s = pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
-    assert(s == 0);
-  }
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(core, &cpuset);
+    XTRACE(MAIN, ALW, "Setting thread affinity to core %d\n", core);
+    GLOG_INF("Setting thread affinity to core " + std::to_string(core));
+      
+      int __attribute__((unused))s = pthread_setaffinity_np(thread.native_handle(), sizeof(cpu_set_t), &cpuset);
+      assert(s == 0);
+    }
 #else
 #pragma message("setaffinity only implemented for Linux")
-  GLOG_WAR("setaffinity only implemented for Linux");
+    GLOG_WAR("setaffinity only implemented for Linux");
 #endif
-}
+  };
 
-Launcher::Launcher(Detector *detector, std::vector<int> &cpus) {
-  if (detector == nullptr) {
-    GLOG_CRI("Detector not loadable, no processing ...");
-    XTRACE(MAIN, CRI, "Detector not loadable, no processing ...\n");
-    return;
+  std::map<std::string,std::uint16_t> AffinityMap;
+  for (auto &Affinity : ThreadCoreAffinity) {
+    AffinityMap[Affinity.Name] = Affinity.Core;
   }
-
-  launch(cpus[0], input_thread, detector);
-  launch(cpus[2], output_thread, detector);
-  launch(cpus[1], processing_thread, detector);
+  if (0 == ThreadCoreAffinity.size()) {
+    startThreadsWithoutAffinity();
+  } else if (1 == ThreadCoreAffinity.size() and ThreadCoreAffinity[0].Name == "implicit_affinity") {
+    XTRACE(MAIN, ALW, "Launching threads with implicit core affinity.\n");
+    int CoreCounter = ThreadCoreAffinity[0].Core;
+    for (auto &ThreadInfo : detector->GetThreadInfo()) {
+      XTRACE(MAIN, ALW, "Creating new thread (id: %s)\n", ThreadInfo.name.c_str());
+      ThreadInfo.thread = std::thread(ThreadInfo.func);
+      setThreadCoreAffinity(ThreadInfo.thread, CoreCounter++);
+    }
+  } else {
+    XTRACE(MAIN, ALW, "Launching threads with explicit core affinity.\n");
+    for (auto &ThreadInfo : detector->GetThreadInfo()) {
+      XTRACE(MAIN, ALW, "Creating new thread (id: %s)\n", ThreadInfo.name.c_str());
+      ThreadInfo.thread = std::thread(ThreadInfo.func);
+      if (1 == AffinityMap.count(ThreadInfo.name)) {
+        setThreadCoreAffinity(ThreadInfo.thread, AffinityMap[ThreadInfo.name]);
+      }
+    }
+  }
 }

@@ -17,6 +17,11 @@ struct GraylogSettings {
   std::uint16_t port;
 };
 
+struct ThreadCoreAffinity {
+  std::string Name;
+  std::uint16_t Core;
+};
+
 class EFUArgs {
 public:
   EFUArgs();
@@ -29,15 +34,13 @@ public:
   std::string getDetectorName() {return det;};
   GraylogSettings getGraylogSettings() {return GraylogConfig;};
   
+  std::vector<ThreadCoreAffinity> getThreadCoreAffinity() {return ThreadAffinity;};
+  
   bool parseAgain(const int argc, char *argv[]);
   
   StdSettings GetDefaultSettings() {return EFUSettings;};
   
   CLI::App CLIParser{"Event formation unit (efu)"};
-  
-//  enum thread_cmd { NOCMD =0, EXIT, THREAD_LOADCAL, THREAD_TERMINATE};
-
-  int cpustart{12}; /**< lcore id for input processing thread */
 
 //  std::string ip_addr{"0.0.0.0"}; /**< used for data generators */
   int buflen{9000};               /**< rx buffer length (B) */
@@ -64,8 +67,10 @@ public:
   // IPC data for communicating between main and threads
 //  uint16_t wirecal[CSPECChanConv::adcsize];
 //  uint16_t gridcal[CSPECChanConv::adcsize];
-//  thread_cmd proc_cmd{NOCMD};
 private:
+  bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
+  
+  std::vector<ThreadCoreAffinity> ThreadAffinity;
   CLI::Option *detectorOption;
   
   GraylogSettings GraylogConfig{"127.0.0.1", 12201};

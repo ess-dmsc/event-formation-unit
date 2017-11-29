@@ -8,8 +8,7 @@
 #pragma once
 #include <common/Detector.h>
 #include <vector>
-
-class EFUArgs;
+#include <common/EFUArgs.h>
 
 class Launcher {
 public:
@@ -19,12 +18,10 @@ public:
    *  @param cpus vector of three cpuids for launching input, processing and
    *  output threads.
    */
-  Launcher(Detector *detector, std::vector<int> &cpus);
+  Launcher(std::vector<ThreadCoreAffinity> ThreadAffinity) : ThreadCoreAffinity(ThreadAffinity) {};
+  
+  void launchThreads(std::shared_ptr<Detector> &detector);
 
 private:
-  static void input_thread(Detector *detector);
-  static void processing_thread(Detector *detector);
-  static void output_thread(Detector *detector);
-
-  void launch(int lcore, void (*func)(Detector *), Detector *detector);
+  std::vector<ThreadCoreAffinity> ThreadCoreAffinity;
 };

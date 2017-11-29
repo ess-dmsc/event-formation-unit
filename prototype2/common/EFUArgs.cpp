@@ -5,13 +5,14 @@
 #include <cstdio>
 #include <iostream>
 #include <string>
+#include <regex>
 
 EFUArgs::EFUArgs() {
   CLIParser.add_option("-a,--logip", GraylogConfig.address, "Graylog server IP address");
   CLIParser.add_option("-b,--broker_addr", EFUSettings.KafkaBrokerAddress, "Kafka broker address");
   CLIParser.add_option("-k,--broker_port", EFUSettings.KafkaBrokerPort, "Kafka broker port");
   CLIParser.add_option("-t,--broker_topic", EFUSettings.KafkaTopic, "Kafka broker topic");
-  CLIParser.add_option("-c,--cpu", cpustart, "lcore id of first thread");
+  CLIParser.add_option("-c,--core_affinity", [this](std::vector<std::string> Input){return parseAffinityStrings(Input);}, "Thread to core affinity. Ex: \"-c input_t:4\"");
   detectorOption = CLIParser.add_option("-d,--det", det, "Detector name")->required();
   CLIParser.add_option("-f,--file", config_file, "Pipeline-specific config file");
   CLIParser.add_option("-g,--graphite", graphite_ip_addr, "IP address of graphite metrics server");
@@ -20,99 +21,38 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-m,--cmdport", cmdserver_port, "Command parser tcp port");
   CLIParser.add_option("-o,--gport", graphite_port, "Graphite tcp port");
   CLIParser.add_option("-s,--stopafter", stopafter, "Terminate after timeout seconds");
-//  optind = 1; // global variable used by getopt
-//
-//  while (1) {
-//    static struct option long_options[] = {
-//        // clang-format off
-//        {"help",      no_argument,       0, 'h'},
-//        {"broker",    required_argument, 0, 'b'},
-//        {"cpu",       required_argument, 0, 'c'},
-//        {"det",       required_argument, 0, 'd'},
-//        {"dip",       required_argument, 0, 'i'},
-//        {"dport",     required_argument, 0, 'p'},
-//        {"stopafter", required_argument, 0, 's'},
-//        {"graphite",  required_argument, 0, 'g'},
-//        {"gport",     required_argument, 0, 'o'},
-//        {"file",      required_argument, 0, 'f'},
-//        {"logip",     required_argument, 0, 'a'},
-//        {"cmdport",   required_argument, 0, 'm'},
-//        {0, 0, 0, 0}
-//      };
-//    // clang-format on
-//
-//    int option_index = 0;
-//
-//    int c = getopt_long(argc, argv, "a:b:c:d:f:g:hi:m:o:p:s:", long_options, &option_index);
-//    if (c == -1)
-//      break;
-//
-//    switch (c) {
-//    // case 0: // currently not using flags
-//    //  if (long_options[option_index].flag != 0)
-//    //    break;
-//    case 'a':
-//      graylog_ip.assign(optarg);
-//      break;
-//    case 'b':
-//      broker.assign(optarg);
-//      break;
-//    case 'c':
-//      cpustart = atoi(optarg);
-//      break;
-//    case 'd':
-//      det.assign(optarg);
-//      break;
-//    case 'f':
-//      config_file.assign(optarg);
-//      break;
-//    case 'g':
-//      graphite_ip_addr.assign(optarg);
-//      break;
-//    case 'i':
-//      ip_addr.assign(optarg);
-//      break;
-//    case 'm':
-//      cmdserver_port = atoi(optarg);
-//      break;
-//    case 'o':
-//      graphite_port = atoi(optarg);
-//      break;
-//    case 'p':
-//      port = atoi(optarg);
-//      break;
-//    case 's':
-//      stopafter = atoi(optarg);
-//      break;
-//    case 'h':
-//    default:
-//      printf("Usage: efu2 [OPTIONS]\n");
-//      printf(" --logip, -a logip        Graylog server ip address \n");
-//      printf(" --broker, -b broker      Kafka broker string \n");
-//      printf(" --cpu, -c lcore          lcore id of first thread \n");
-//      printf(" --det, -d name           detector name \n");
-//      printf(" --file, -f configfile    pipeline-specific config file \n");
-//      printf(" --graphite, -g ipaddr       ip address of graphite metrics server \n");
-//      printf(" --help, -h               help - prints this message \n");
-//      printf(" --dip, -i ipaddr         ip address of receive interface \n");
-//      printf(" --cmdport, -m port       command parser tcp port\n");
-//      printf(" --gport, -o port         Graphite tcp port \n");
-//      printf(" --port, -p port          udp port \n");
-//      printf(" --stopafter, -s timeout  terminate after timeout seconds \n");
-//
-//      stopafter = 0;
-//      return;
-//    }
-//  }
+}
 
-
+bool EFUArgs::parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings) {
+  bool CoreIntegerCorrect = false;
+  int CoreNumber = 0;
+  try {
+    CoreNumber = std::stoi(ThreadAffinityStrings.at(0));
+    CoreIntegerCorrect = true;
+  } catch (std::invalid_argument &e) {
+    //No nothing
+  }
+  if (ThreadAffinityStrings.size() == 1 and CoreIntegerCorrect) {
+    ThreadAffinity.emplace_back(ThreadCoreAffinity{"implicit_affinity", static_cast<std::uint16_t>(CoreNumber)});
+  } else {
+    std::string REPattern = "([^:]+):(\\d{1,2})";
+    std::regex AffinityRE(REPattern);
+    std::smatch AffinityRERes;
+    for (auto &AffinityStr : ThreadAffinityStrings) {
+      if (not std::regex_match(AffinityStr, AffinityRERes, AffinityRE)) {
+        return false;
+      }
+      ThreadAffinity.emplace_back(ThreadCoreAffinity{AffinityRERes[0], static_cast<std::uint16_t>(std::stoi(AffinityRERes[1]))});
+    }
+  }
+  return true;
 }
 
 void EFUArgs::printSettings() {
     XTRACE(INIT, ALW, "Starting event processing pipeline2\n");
     XTRACE(INIT, ALW, "  Log IP:        %s\n", GraylogConfig.address.c_str());
     XTRACE(INIT, ALW, "  Detector:      %s\n", det.c_str());
-    XTRACE(INIT, ALW, "  CPU Offset:    %d\n", cpustart);
+//    XTRACE(INIT, ALW, "  CPU Offset:    %d\n", cpustart);
     XTRACE(INIT, ALW, "  Config file:   %s\n", config_file.c_str());
     XTRACE(INIT, ALW, "  IP addr:       %s\n", EFUSettings.DetectorAddress.c_str());
     XTRACE(INIT, ALW, "  UDP Port:      %d\n", EFUSettings.DetectorPort);

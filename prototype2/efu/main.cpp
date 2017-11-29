@@ -52,7 +52,6 @@ int main(int argc, char *argv[]) {
   Log::SetMinimumSeverity(Severity::Debug);
 #endif
   
-  efu_args.printSettings();
   GLOG_INF("Starting Event Formation Unit");
   GLOG_INF("Event Formation Unit version: " + efu_version());
   GLOG_INF("Event Formation Unit build: " + efu_buildstr());
@@ -69,11 +68,11 @@ int main(int argc, char *argv[]) {
   
 
   XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", efu_args.det.c_str());
-
-  std::vector<int> cpus = {efu_args.cpustart, efu_args.cpustart + 1,
-                           efu_args.cpustart + 2};
-
-  Launcher(detector.get(), cpus);
+  
+  auto ThreadAffinity = efu_args.getThreadCoreAffinity();
+  Launcher launcher(ThreadAffinity);
+  
+  launcher.launchThreads(detector);
 
   StatPublisher metrics(efu_args.graphite_ip_addr, efu_args.graphite_port);
 
@@ -86,7 +85,7 @@ int main(int argc, char *argv[]) {
     if (stop_cmd.timeus() >= (uint64_t)ONE_SECOND_US/10) {
       if (keep_running == 0) {
         XTRACE(INIT, ALW, "Application stop, Exiting...\n");
-        detector->stop_threads();
+        detector->stopThreads();
         sleep(2);
         return 1;
       }
@@ -95,7 +94,7 @@ int main(int argc, char *argv[]) {
     if (stop_timer.timeus() >= (uint64_t)efu_args.stopafter * (uint64_t)ONE_SECOND_US) {
       XTRACE(MAIN, ALW, "Application timeout, Exiting...\n");
       GLOG_INF("Event Formation Unit Exiting (User timeout)");
-      detector->stop_threads();
+      detector->stopThreads();
       sleep(2);
       return 0;
     }
