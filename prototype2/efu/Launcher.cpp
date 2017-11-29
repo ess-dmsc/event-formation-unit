@@ -56,6 +56,8 @@ void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
       ThreadInfo.thread = std::thread(ThreadInfo.func);
       if (1 == AffinityMap.count(ThreadInfo.name)) {
         setThreadCoreAffinity(ThreadInfo.thread, AffinityMap[ThreadInfo.name]);
+      } else {
+        XTRACE(MAIN, ALW, "No thread core affinity information available for thread with id: %s\n", ThreadInfo.name.c_str());
       }
     }
   }
