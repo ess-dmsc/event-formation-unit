@@ -39,6 +39,17 @@ endif ()
 # Create the tests
 enable_testing()
 
+# GOOGLE BENCHMARK
+set(MBDataBenchmarkTest_INC ${mbtest_INC})
+set(MBDataBenchmarkTest_SRC mbcaen/MBData.cpp mbcaen/MBDataBenchmarkTest.cpp)
+create_benchmark_executable(MBDataBenchmarkTest "")
+
+# GOOGLE BENCHMARK
+set(multiBladeEventBuilderBenchmarkTest_INC ${mbtest_INC})
+set(multiBladeEventBuilderBenchmarkTest_SRC mbcommon/multiBladeEventBuilder.cpp mbcommon/multiBladeEventBuilderBenchmarkTest.cpp)
+create_benchmark_executable(multiBladeEventBuilderBenchmarkTest "")
+
+
 # Common include path for both tests
 set(mbtest_INC mbcommon/multiBladeEventBuilder.h mbtest/multiBladeTestData.h)
 

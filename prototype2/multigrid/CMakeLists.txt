@@ -67,7 +67,6 @@ set(MGCNCSDataTest_SRC
   mgcncs/DataTest.cpp
   mgcncs/Data.cpp
   mgcncs/ChanConv.cpp
-  ../../dataformats/multigrid/src/DataSave.cpp
   )
 set(MGCNCSDataTest_INC
   mgcncs/Data.h

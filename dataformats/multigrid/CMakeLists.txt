@@ -37,6 +37,7 @@ install(TARGETS cncsread genpixids batchreader DESTINATION tools)
 # Unit tests
 #
 set(unit_test_targets "")
+set(benchmark_targets "")
 if(BUILD_TESTS)
   enable_testing()
   find_package(GTest REQUIRED)

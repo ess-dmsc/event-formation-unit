@@ -1,4 +1,4 @@
-﻿/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <gdgem/vmm2srs/SRSTime.h>
 #include <sstream>
@@ -48,4 +48,3 @@ std::string SRSTime::debug() const
      << ")ns * " << target_resolution_ns_;
   return ss.str();
 }
-

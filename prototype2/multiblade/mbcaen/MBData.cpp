@@ -11,7 +11,7 @@
 
 MBData::MBData() : data(0) {}
 
-unsigned int MBData::recieve(const char *buffer, unsigned int size) {
+unsigned int MBData::receive(const char *buffer, unsigned int size) {
 
   data.clear();
 

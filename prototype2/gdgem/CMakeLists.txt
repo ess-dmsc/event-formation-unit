@@ -85,17 +85,13 @@ target_link_libraries(gdgem ${h5_optional})
 #
 # NMX / VMM Tests
 #
-if (GOOGLE_BENCHMARK)
 set(EventletBuilderBenchmarkTest_SRC nmx/Clusterer.cpp nmx/EventNMX.cpp nmx/Hists.cpp
   nmx/AbstractEventletBuilder.cpp vmm2srs/EventletBuilderSRSBenchmarkTest.cpp vmm2srs/EventletBuilderSRS.cpp
   vmm2srs/ParserSRS.cpp vmm2srs/SRSMappings.cpp vmm2srs/SRSTime.cpp)
 set(EventletBuilderBenchmarkTest_INC nmx/Clusterer.h nmx/EventNMX.h nmx/Hists.h
   nmx/Eventlet.h vmm2srs/ParserSRS.h vmm2srs/EventletBuilderSRS.h vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h)
-create_test_executable(EventletBuilderBenchmarkTest "")
-else ()
-  message(STATUS "Skipping benchmark for EventletBuilder (enable with cmake -DGOOGLE_BENCHMARK)")
-endif ()
+create_benchmark_executable(EventletBuilderBenchmarkTest "")
 
 
 set(HistSerializerTest_SRC
@@ -127,7 +123,6 @@ set(ParserSRSTest_SRC
 create_test_executable(ParserSRSTest "")
 
 set(EventletBuilderH5Test_SRC
-  ../../dataformats/multigrid/src/DataSave.cpp
   nmx/EventNMX.cpp
   nmx/Clusterer.cpp
   nmx/Hists.cpp
@@ -144,7 +139,6 @@ create_test_executable(EventletBuilderH5Test "")
 target_link_libraries(EventletBuilderH5Test ${h5_optional})
 
 set(EventletBuilderTest_SRC
-  ../../dataformats/multigrid/src/DataSave.cpp
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Hists.cpp
@@ -198,8 +192,8 @@ set(ClustererTest_INC
   nmx/EventNMX.h)
 create_test_executable(ClustererTest "")
 
-set(EventTest_SRC
-  nmx/EventTest.cpp
+set(EventNMXTest_SRC
+  nmx/EventNMXTest.cpp
   nmx/EventNMX.cpp
   nmx/EventNMX.h)
-create_test_executable(EventTest "")
+create_test_executable(EventNMXTest "")
