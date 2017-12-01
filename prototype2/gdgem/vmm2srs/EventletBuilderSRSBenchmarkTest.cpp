@@ -42,7 +42,7 @@ static void ParseData(benchmark::State& state) {
     bytes += sizeof(data1);
   }
   state.SetBytesProcessed(bytes);
-};
+}
 BENCHMARK(ParseData);
 
-BENCHMARK_MAIN();
+BENCHMARK_MAIN()
