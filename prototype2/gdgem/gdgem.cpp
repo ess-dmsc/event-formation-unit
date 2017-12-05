@@ -68,18 +68,19 @@ private:
     // Input Counters
     int64_t rx_packets;
     int64_t rx_bytes;
-    int64_t fifo1_push_errors;
-    int64_t fifo1_free;
-    int64_t pad_a[4]; /**< @todo check alignment*/
+    int64_t fifo_push_errors;
+    //int64_t fifo_free;
+    int64_t pad_a[5]; /**< @todo check alignment*/
 
     // Processing Counters
-    int64_t rx_readouts;
-    int64_t rx_error_bytes;
-    int64_t rx_discards;
-    int64_t rx_idle1;
+    int64_t readouts;
+    int64_t readouts_discarded;
+    int64_t readouts_error_bytes;
+    int64_t processing_idle;
     int64_t unclustered;
     int64_t geom_errors;
-    int64_t tx_events;
+    int64_t clusters_events;
+    int64_t clusters_discarded;
     int64_t tx_bytes;
     int64_t fifo_seq_errors;
   } ALIGN(64) mystats;
@@ -100,19 +101,19 @@ NMX::NMX(void *args) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  ns.create("input.rx_packets",                &mystats.rx_packets);
-  ns.create("input.rx_bytes",                  &mystats.rx_bytes);
-  ns.create("input.i2pfifo_dropped",           &mystats.fifo1_push_errors);
-  ns.create("input.i2pfifo_free",              &mystats.fifo1_free);
-  ns.create("processing.rx_readouts",          &mystats.rx_readouts);
-  ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
-  ns.create("processing.rx_discards",          &mystats.rx_discards);
-  ns.create("processing.rx_idle",              &mystats.rx_idle1);
-  ns.create("processing.fifo_seq_errors",      &mystats.fifo_seq_errors);
-  ns.create("processing.unclustered",          &mystats.unclustered);
-  ns.create("processing.geom_errors",          &mystats.geom_errors);
-  ns.create("output.tx_events",                &mystats.tx_events);
-  ns.create("output.tx_bytes",                 &mystats.tx_bytes);
+  ns.create("rx_packets",                &mystats.rx_packets);
+  ns.create("rx_bytes",                  &mystats.rx_bytes);
+  ns.create("i2pfifo_dropped",           &mystats.fifo_push_errors);
+  ns.create("readouts",                  &mystats.readouts);
+  ns.create("readouts_discarded",        &mystats.readouts_discarded);
+  ns.create("readouts_error_bytes",      &mystats.readouts_error_bytes);
+  ns.create("processing_idle",           &mystats.processing_idle);
+  ns.create("fifo_seq_errors",           &mystats.fifo_seq_errors);
+  ns.create("unclustered",               &mystats.unclustered);
+  ns.create("geom_errors",               &mystats.geom_errors);
+  ns.create("events",                    &mystats.clusters_events);
+  ns.create("clusters_discarded",        &mystats.clusters_discarded);
+  ns.create("tx_bytes",                  &mystats.tx_bytes);
   // clang-format on
 
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
@@ -152,9 +153,9 @@ void NMX::input_thread() {
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
-      mystats.fifo1_free = input2proc_fifo.free();
+      //mystats.fifo_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
-        mystats.fifo1_push_errors++;
+        mystats.fifo_push_errors++;
       } else {
         eth_ringbuf->nextbuffer();
       }
@@ -204,9 +205,9 @@ void NMX::processing_thread() {
   unsigned int data_index;
   int sample_next_track {0};
   while (1) {
-    mystats.fifo1_free = input2proc_fifo.free();
+    //mystats.fifo_free = input2proc_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
-      mystats.rx_idle1++;
+      mystats.processing_idle++;
       usleep(1);
     } else {
       auto len = eth_ringbuf->getdatalength(data_index);
@@ -215,8 +216,8 @@ void NMX::processing_thread() {
       } else {
         auto stats = builder_->process_buffer(eth_ringbuf->getdatabuffer(data_index), len, clusterer, hists);
 
-        mystats.rx_readouts += stats.valid_eventlets;
-        mystats.rx_error_bytes += stats.error_bytes;
+        mystats.readouts += stats.valid_eventlets;
+        mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
 
         while (clusterer.event_ready()) {
           XTRACE(PROCESS, DEB, "event_ready()\n");
@@ -259,11 +260,12 @@ void NMX::processing_thread() {
                        time, pixelid);
 
                 mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
-                mystats.tx_events++;
+                mystats.clusters_events++;
               }
             }
           } else {
-            mystats.rx_discards += event.x.entries.size() + event.y.entries.size();
+            mystats.readouts_discarded += event.x.entries.size() + event.y.entries.size();
+            mystats.clusters_discarded++;
           }
         }
       }
