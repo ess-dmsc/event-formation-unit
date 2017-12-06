@@ -103,6 +103,11 @@ SONDEIDEA::SONDEIDEA(StdSettings settings) : Detector(settings) {
   ns.create("processing.fifo_seq_errors",      &mystats.fifo_seq_errors);
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
+  std::function<void()> inputFunc = [this](){SONDEIDEA::input_thread();};
+  Detector::AddThreadFunction(inputFunc, "input");
+  
+  std::function<void()> processingFunc = [this](){SONDEIDEA::processing_thread();};
+  Detector::AddThreadFunction(processingFunc, "processing");
 
   XTRACE(INIT, ALW, "Creating %d SONDE Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);

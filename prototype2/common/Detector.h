@@ -39,17 +39,6 @@ public:
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
    */
-   virtual void input_thread() {
-      XTRACE(INIT, ALW, "loaded detector has no input stage\n");
-    }
-
-   virtual void processing_thread() {
-     XTRACE(INIT, ALW, "loaded detector has no processing stage\n");
-   }
-
-   virtual void output_thread() {
-     XTRACE(INIT, ALW, "loaded detector has no output stage\n");
-   }
 
   /** @brief optional destructor */
   virtual ~Detector() { printf("Virtual detector destructor called\n");}
@@ -84,7 +73,7 @@ public:
 
 protected:
   void AddThreadFunction(std::function<void(void)> &func, std::string funcName) {
-    Threads.emplace_back(ThreadInfo{func, std::move(funcName)});
+    Threads.emplace_back(ThreadInfo{func, std::move(funcName), std::thread()});
   };
   ThreadList Threads;
   std::atomic_bool runThreads{true};
