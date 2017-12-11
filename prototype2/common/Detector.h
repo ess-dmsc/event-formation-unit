@@ -15,7 +15,7 @@
 #include <atomic>
 #include <thread>
 
-struct StdSettings {
+struct BaseSettings {
   std::string DetectorAddress;
   std::uint16_t DetectorPort;
   std::int32_t DetectorRxBufferSize;
@@ -34,7 +34,7 @@ struct ThreadInfo {
 class Detector {
 public:
   using ThreadList = std::vector<ThreadInfo>;
-  Detector(StdSettings settings) : EFUSettings(settings) {};
+  Detector(BaseSettings settings) : EFUSettings(settings) {};
   // default constructor, all instruments must implement these methods
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
@@ -77,7 +77,7 @@ protected:
   };
   ThreadList Threads;
   std::atomic_bool runThreads{true};
-  StdSettings EFUSettings;
+  BaseSettings EFUSettings;
 private:
   std::string noname{""};
 };
@@ -90,5 +90,5 @@ class DetectorFactory {
 public:
   /** @brief creates the detector object. All instruments must implement this
   */
-  virtual std::shared_ptr<Detector> create(StdSettings settings) = 0;
+  virtual std::shared_ptr<Detector> create(BaseSettings settings) = 0;
 };

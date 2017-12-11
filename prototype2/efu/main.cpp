@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
     return 0;
   }
   efu_args.printSettings();
-  std::shared_ptr<Detector> detector = loader.createDetector(efu_args.GetDefaultSettings());
+  std::shared_ptr<Detector> detector = loader.createDetector(efu_args.GetBaseSettings());
   
   int keep_running = 1;
 

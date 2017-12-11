@@ -39,7 +39,7 @@ public:
     return true;
   }
   
-  std::shared_ptr<Detector> createDetector(StdSettings settings);
+  std::shared_ptr<Detector> createDetector(BaseSettings settings);
   
   std::function<void(CLI::App &CLIParser)> GetCLIParserPopulator() {return ParserPopulator;};
 };

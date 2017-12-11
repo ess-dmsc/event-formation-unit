@@ -40,7 +40,7 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 class SONDEIDEA : public Detector {
 public:
-  SONDEIDEA(StdSettings settings);
+  SONDEIDEA(BaseSettings settings);
   ~SONDEIDEA() {
     printf("sonde destructor called\n");
   }
@@ -89,7 +89,7 @@ void SetCLIArguments(CLI::App &parser) {
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
-SONDEIDEA::SONDEIDEA(StdSettings settings) : Detector(settings) {
+SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector(settings) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
@@ -216,7 +216,7 @@ void SONDEIDEA::processing_thread() {
 
 class SONDEIDEAFactory : DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(StdSettings settings) {
+  std::shared_ptr<Detector> create(BaseSettings settings) {
     return std::shared_ptr<Detector>(new SONDEIDEA(settings));
   }
 };

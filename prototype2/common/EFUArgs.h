@@ -38,7 +38,7 @@ public:
   
   bool parseAgain(const int argc, char *argv[]);
   
-  StdSettings GetDefaultSettings() {return EFUSettings;};
+  BaseSettings GetBaseSettings() {return EFUSettings;};
   
   CLI::App CLIParser{"Event formation unit (efu)"};
 
@@ -74,5 +74,5 @@ private:
   CLI::Option *detectorOption;
   
   GraylogSettings GraylogConfig{"127.0.0.1", 12201};
-  StdSettings EFUSettings{"0.0.0.0", 9000, 2000000, 2000000, "localhost", 9092, "Detector_data"};
+  BaseSettings EFUSettings{"0.0.0.0", 9000, 2000000, 2000000, "localhost", 9092, "Detector_data"};
 };

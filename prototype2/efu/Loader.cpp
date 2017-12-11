@@ -49,6 +49,6 @@ Loader::Loader(const std::string lib) {
   }
 }
 
-std::shared_ptr<Detector> Loader::createDetector(StdSettings settings) {
+std::shared_ptr<Detector> Loader::createDetector(BaseSettings settings) {
   return myFactory->create(settings);
 }

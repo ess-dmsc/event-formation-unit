@@ -18,7 +18,7 @@ void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
     }
   };
   
-  auto setThreadCoreAffinity = [](std::thread &thread, std::uint16_t core) {
+  auto setThreadCoreAffinity = [](std::thread __attribute__((unused)) &thread, std::uint16_t __attribute__((unused)) core) {
 #ifdef __linux__
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
