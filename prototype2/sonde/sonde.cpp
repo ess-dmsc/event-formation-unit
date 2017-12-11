@@ -24,12 +24,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-struct SondeSettings {
-  int ReceiveTimeOut;
-};
-
-static SondeSettings settings;
-
 using namespace memory_sequential_consistent; // Lock free fifo
 
 const char *classname = "SoNDe detector using IDEA readout";
@@ -83,9 +77,7 @@ private:
   } ALIGN(64) mystats;
 };
 
-void SetCLIArguments(CLI::App &parser) {
-    parser.add_option("--recv_timeout", settings.ReceiveTimeOut, "SONDE receive data time out")->group("SONDE");
-}
+void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
@@ -105,7 +97,7 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector(settings) {
   // clang-format on
   std::function<void()> inputFunc = [this](){SONDEIDEA::input_thread();};
   Detector::AddThreadFunction(inputFunc, "input");
-  
+
   std::function<void()> processingFunc = [this](){SONDEIDEA::processing_thread();};
   Detector::AddThreadFunction(processingFunc, "processing");
 
@@ -130,7 +122,7 @@ void SONDEIDEA::input_thread() {
 //  sondedata.buflen(opts->buflen);
   sondedata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   sondedata.printbuffers();
-  sondedata.settimeout(0, settings.ReceiveTimeOut); // One tenth of a second
+  sondedata.settimeout(0, 100000); // 1/10 second
 
   int rdsize;
   for (;;) {
@@ -161,34 +153,21 @@ void SONDEIDEA::input_thread() {
 
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
-
-// dumptofile
-
   IDEASData ideasdata(&geometry);
   std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" + std::to_string(EFUSettings.KafkaBrokerPort);
   Producer eventprod(BrokerString, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
-  TSCTimer report_timer;
-
   unsigned int data_index;
 
+  TSCTimer produce_timer;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
-      // Checking for exit approximately once every second
-      if (report_timer.timetsc() >= static_cast<std::uint64_t>(1000000) * TSC_MHZ) {
-
-        mystats.tx_bytes += flatbuffer.produce();
-
-        if (not runThreads) {
-          XTRACE(INPUT, ALW, "Stopping input thread.\n");
-          return;
-        }
-        report_timer.now();
-      }
       usleep(10);
+
     } else {
+
       auto len = eth_ringbuf->getdatalength(data_index);
       if (len == 0) {
         mystats.fifo_seq_errors++;
@@ -206,6 +185,16 @@ void SONDEIDEA::processing_thread() {
                       ideasdata.data[i].pixel_id);
               mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
           }
+        }
+
+        if (produce_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+          mystats.tx_bytes += flatbuffer.produce();
+          produce_timer.now();
+        }
+
+        if (not runThreads) {
+          XTRACE(INPUT, ALW, "Stopping input thread.\n");
+          return;
         }
       }
     }

@@ -20,7 +20,7 @@ const char *classname = "UDPRaw Detector";
 
 class UDPRaw : public Detector {
 public:
-  UDPRaw(void *args);
+  UDPRaw(StdSettings settings);
 
   ~UDPRaw() { std::cout << "    UDPRaw destroyed" << std::endl; }
 
@@ -33,8 +33,7 @@ private:
 
 const char *UDPRaw::detectorname() { return classname; }
 
-UDPRaw::UDPRaw(void *args) {
-  opts = (EFUArgs *)args;
+UDPRaw::UDPRaw(StdSettings settings) : Detector(settings) {
   std::cout << "    UDPRaw created" << std::endl;
 }
 
@@ -44,7 +43,7 @@ void UDPRaw::input_thread() {
   uint64_t rxp = 0;
   const int B1M = 1000000;
 
-  Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
   UDPServer raw(local);
   raw.setbuffers(4000000, 4000000);
   // raw.settimeout(0, 100000);
@@ -75,7 +74,7 @@ void UDPRaw::input_thread() {
       rxp++;
     }
 
-    if (report_timer.timetsc() >= opts->updint * 1000000UL * TSC_MHZ) {
+    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000UL * TSC_MHZ) {
       timeseq++;
       auto usecs = rate_timer.timeus();
       if (timeseq == 2) {
@@ -100,8 +99,8 @@ void UDPRaw::input_thread() {
 
 class UDPRawFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(void *args) {
-    return std::shared_ptr<Detector>(new UDPRaw(args));
+  std::shared_ptr<Detector> create(StdSettings settings) {
+    return std::shared_ptr<Detector>(new UDPRaw(settings));
   }
 };
 

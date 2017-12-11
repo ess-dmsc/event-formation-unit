@@ -26,31 +26,27 @@ class EFUArgs {
 public:
   EFUArgs();
   bool parseAndProceed(const int argc, char *argv[]);
-  
+
   void printHelp();
-  
+
   void printSettings();
-  
+
   std::string getDetectorName() {return det;};
   GraylogSettings getGraylogSettings() {return GraylogConfig;};
-  
+
   std::vector<ThreadCoreAffinity> getThreadCoreAffinity() {return ThreadAffinity;};
-  
+
   bool parseAgain(const int argc, char *argv[]);
   
   BaseSettings GetBaseSettings() {return EFUSettings;};
-  
+
   CLI::App CLIParser{"Event formation unit (efu)"};
 
-//  std::string ip_addr{"0.0.0.0"}; /**< used for data generators */
   int buflen{9000};               /**< rx buffer length (B) */
 
-  unsigned int updint{1};             /**< update interval (s) */
   unsigned int stopafter{0xffffffff}; /**< 'never' stop */
 
   std::string det;             /**< detector name */
-//  std::string broker{"localhost:9092"}; /**< Kafka broker */
-  bool kafka{true};                     /**< whether to use Kafka or not */
 
   std::string graphite_ip_addr{"127.0.0.1"}; /**< graphite time series db */
   int graphite_port{2003};                   /**< graphite time series db */
@@ -59,20 +55,18 @@ public:
 
   // Runtime Stats
   // EFUStats stat;
-  unsigned int reportmask{0x2};
 
   // Pipeline-specific configuration
-  std::string config_file;
 
   // IPC data for communicating between main and threads
 //  uint16_t wirecal[CSPECChanConv::adcsize];
 //  uint16_t gridcal[CSPECChanConv::adcsize];
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
-  
+
   std::vector<ThreadCoreAffinity> ThreadAffinity;
   CLI::Option *detectorOption;
-  
+
   GraylogSettings GraylogConfig{"127.0.0.1", 12201};
-  BaseSettings EFUSettings{"0.0.0.0", 9000, 2000000, 2000000, "localhost", 9092, "Detector_data"};
+  BaseSettings EFUSettings{"0.0.0.0", 9000, 2000000, 2000000, "localhost", 9092, "Detector_data", "", 1};
 };

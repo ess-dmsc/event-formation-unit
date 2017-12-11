@@ -41,7 +41,7 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 class NMX : public Detector {
 public:
-  NMX(void *args);
+  NMX(StdSettings settings);
   ~NMX();
   void input_thread();
   void processing_thread();
@@ -84,19 +84,21 @@ private:
     int64_t fifo_seq_errors;
   } ALIGN(64) mystats;
 
-  EFUArgs *opts;
   NMXConfig nmx_opts;
 
   std::shared_ptr<AbstractBuilder> builder_ {nullptr};
   void init_builder(std::string jsonfile);
 };
 
+void SetCLIArguments(CLI::App __attribute__((unused)) &parser) { }
+
+PopulateCLIParser PopulateParser{SetCLIArguments};
+
 NMX::~NMX() {
   printf("NMX detector destructor called\n");
 }
 
-NMX::NMX(void *args) {
-  opts = (EFUArgs *)args;
+NMX::NMX(StdSettings settings) : Detector(settings) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
@@ -115,6 +117,12 @@ NMX::NMX(void *args) {
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
 
+  std::function<void()> inputFunc = [this](){NMX::input_thread();};
+    Detector::AddThreadFunction(inputFunc, "input");
+
+  std::function<void()> processingFunc = [this](){NMX::processing_thread();};
+    Detector::AddThreadFunction(processingFunc, "processing");
+
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11); /**< @todo testing workaround */
@@ -131,12 +139,13 @@ const char *NMX::detectorname() { return classname; }
 
 void NMX::input_thread() {
   /** Connection setup */
-  Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
+  //Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
   UDPServer nmxdata(local);
-  nmxdata.buflen(opts->buflen);
-  nmxdata.setbuffers(0, opts->rcvbuf);
+  //nmxdata.buflen(opts->buflen);
+  nmxdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   nmxdata.printbuffers();
-  nmxdata.settimeout(0, 100000); // One tenth of a second
+  nmxdata.settimeout(0, 100000); // 1/10 second
 
   int rdsize;
   TSCTimer report_timer;
@@ -161,20 +170,15 @@ void NMX::input_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-
-      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
-        return;
-      }
-
-      report_timer.now();
+    if (not runThreads) {
+      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      return;
     }
   }
 }
 
 void NMX::processing_thread() {
-  init_builder(opts->config_file);
+  init_builder(EFUSettings.ConfigFile);
   if (!builder_) {
     XTRACE(PROCESS, WAR, "No builder specified, exiting thread\n");
     return;
@@ -184,10 +188,11 @@ void NMX::processing_thread() {
   geometry.add_dimension(nmx_opts.geometry_x);
   geometry.add_dimension(nmx_opts.geometry_y);
 
-  Producer eventprod(opts->broker, "NMX_detector");
+  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" + std::to_string(EFUSettings.KafkaBrokerPort);
+  Producer eventprod(BrokerString, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
-  Producer monitorprod(opts->broker, "NMX_monitor");
+  Producer monitorprod(BrokerString, "NMX_monitor");
   TrackSerializer trackfb(256, nmx_opts.track_sample_minhits);
   HistSerializer histfb;
   NMXHists hists;
@@ -270,7 +275,7 @@ void NMX::processing_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
       sample_next_track = 1;
 
@@ -292,8 +297,8 @@ void NMX::processing_thread() {
         hists.clear();
       }
 
-      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-        XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n", opts->proc_cmd);
+      if (not runThreads) {
+        XTRACE(INPUT, ALW, "Stopping input thread.\n");
         builder_.reset();      /**< @fixme this is a hack to force ~BuilderSRS() call */
         delete builder_.get(); /**< @fixme see above */
         return;
@@ -328,8 +333,8 @@ void NMX::init_builder(std::string jsonfile)
 
 class NMXFactory : DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(void *args) {
-    return std::shared_ptr<Detector>(new NMX(args));
+  std::shared_ptr<Detector> create(StdSettings settings) {
+    return std::shared_ptr<Detector>(new NMX(settings));
   }
 };
 

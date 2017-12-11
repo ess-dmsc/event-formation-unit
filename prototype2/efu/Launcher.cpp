@@ -25,7 +25,7 @@ void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
     CPU_SET(core, &cpuset);
     XTRACE(MAIN, ALW, "Setting thread affinity to core %d\n", core);
     GLOG_INF("Setting thread affinity to core " + std::to_string(core));
-      
+
       int __attribute__((unused))s = pthread_setaffinity_np(thread.native_handle(), sizeof(cpu_set_t), &cpuset);
       assert(s == 0);
     }

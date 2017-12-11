@@ -23,6 +23,8 @@ struct BaseSettings {
   std::string KafkaBrokerAddress;
   std::uint16_t KafkaBrokerPort;
   std::string KafkaTopic;
+  std::string ConfigFile;
+  std::uint64_t UpdateIntervalSec;
 };
 
 struct ThreadInfo {
@@ -57,11 +59,11 @@ public:
   }
 
   virtual const char *detectorname() { return "no detector"; }
-  
+
   virtual ThreadList& GetThreadInfo() {
     return Threads;
   };
-  
+
   virtual void stopThreads() {
     runThreads.store(false);
     for (auto &tInfo : Threads) {
