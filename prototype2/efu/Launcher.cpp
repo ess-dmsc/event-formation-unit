@@ -17,15 +17,15 @@ void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
       ThreadInfo.thread = std::thread(ThreadInfo.func);
     }
   };
-  
-  auto setThreadCoreAffinity = [](std::thread &thread, std::uint16_t core) {
+
+  auto setThreadCoreAffinity = [](std::thread __attribute__((unused)) &thread, std::uint16_t __attribute__((unused)) core) {
 #ifdef __linux__
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     CPU_SET(core, &cpuset);
     XTRACE(MAIN, ALW, "Setting thread affinity to core %d\n", core);
     GLOG_INF("Setting thread affinity to core " + std::to_string(core));
-      
+
       int __attribute__((unused))s = pthread_setaffinity_np(thread.native_handle(), sizeof(cpu_set_t), &cpuset);
       assert(s == 0);
     }
