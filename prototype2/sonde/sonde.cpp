@@ -85,15 +85,15 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector(settings) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  ns.create("input.rx_packets",                &mystats.rx_packets);
-  ns.create("input.rx_bytes",                  &mystats.rx_bytes);
-  ns.create("input.dropped",                   &mystats.fifo1_push_errors);
-  ns.create("input.rx_seq_errors",             &mystats.rx_seq_errors);
-  ns.create("processing.idle",                 &mystats.rx_idle1);
-  ns.create("processing.rx_events",            &mystats.rx_events);
-  ns.create("processing.rx_geometry_errors",   &mystats.rx_geometry_errors);
-  ns.create("processing.fifo_seq_errors",      &mystats.fifo_seq_errors);
-  ns.create("output.tx_bytes",                 &mystats.tx_bytes);
+  ns.create("input.rx_packets",                mystats.rx_packets);
+  ns.create("input.rx_bytes",                  mystats.rx_bytes);
+  ns.create("input.dropped",                   mystats.fifo1_push_errors);
+  ns.create("input.rx_seq_errors",             mystats.rx_seq_errors);
+  ns.create("processing.idle",                 mystats.rx_idle1);
+  ns.create("processing.rx_events",            mystats.rx_events);
+  ns.create("processing.rx_geometry_errors",   mystats.rx_geometry_errors);
+  ns.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  ns.create("output.tx_bytes",                 mystats.tx_bytes);
   // clang-format on
   std::function<void()> inputFunc = [this](){SONDEIDEA::input_thread();};
   Detector::AddThreadFunction(inputFunc, "input");

@@ -7,6 +7,7 @@
 
 #pragma once
 #include <common/Trace.h>
+#include <common/NewStats.h>
 #include <memory>
 #include <stdio.h>
 #include <string>
@@ -36,26 +37,27 @@ struct ThreadInfo {
 class Detector {
 public:
   using ThreadList = std::vector<ThreadInfo>;
-  Detector(BaseSettings settings) : EFUSettings(settings) {};
+  Detector(BaseSettings settings) : EFUSettings(settings), StatsTracker("") {};
   // default constructor, all instruments must implement these methods
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
    */
 
-  /** @brief optional destructor */
-  virtual ~Detector() { printf("Virtual detector destructor called\n");}
-
   /** @brief document */
-  virtual int statsize() { return 0; }
-
+  virtual int statsize() { return StatsTracker.size(); }
+  
   /** @brief document */
-  virtual int64_t statvalue(size_t __attribute__((unused)) index) {
-    return (int64_t)-1;
+  virtual int64_t statvalue(size_t index) {
+    return StatsTracker.value(index);
   }
-
+  
   /** @brief document */
-  virtual std::string &statname(size_t __attribute__((unused)) index) {
-    return noname;
+  virtual std::string &statname(size_t index) {
+    return StatsTracker.name(index);
+  }
+  
+  void setStatsPrefix(std::string NewStatsPrefix) {
+    StatsTracker.setPrefix(NewStatsPrefix);
   }
 
   virtual const char *detectorname() { return "no detector"; }
@@ -81,6 +83,7 @@ protected:
   std::atomic_bool runThreads{true};
   BaseSettings EFUSettings;
 private:
+  NewStats StatsTracker;
   std::string noname{""};
 };
 
