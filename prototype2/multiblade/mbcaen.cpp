@@ -35,7 +35,7 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 class MBCAEN : public Detector {
 public:
-  MBCAEN(void *args);
+  MBCAEN(StdSettings settings);
   void input_thread();
   void processing_thread();
 
@@ -71,12 +71,13 @@ private:
     int64_t geometry_errors;
     int64_t fifo_seq_errors;
   } ALIGN(64) mystats;
-
-  EFUArgs *opts;
 };
 
-MBCAEN::MBCAEN(void *args) {
-  opts = (EFUArgs *)args;
+void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {}
+
+PopulateCLIParser PopulateParser{SetCLIArguments};
+
+MBCAEN::MBCAEN(StdSettings settings) : Detector(settings) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
@@ -90,6 +91,12 @@ MBCAEN::MBCAEN(void *args) {
     ns.create("processing.rx_geometry_errors",   &mystats.geometry_errors);
     ns.create("processing.fifo_seq_errors",      &mystats.fifo_seq_errors);
   // clang-format on
+
+    std::function<void()> inputFunc = [this](){MBCAEN::input_thread();};
+    Detector::AddThreadFunction(inputFunc, "input");
+
+    std::function<void()> processingFunc = [this](){MBCAEN::processing_thread();};
+    Detector::AddThreadFunction(processingFunc, "processing");
 
   XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
@@ -107,15 +114,14 @@ const char *MBCAEN::detectorname() { return classname; }
 
 void MBCAEN::input_thread() {
   /** Connection setup */
-  Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
   UDPServer mbdata(local);
-  mbdata.buflen(opts->buflen);
-  mbdata.setbuffers(0, opts->rcvbuf);
+  //mbdata.buflen(opts->buflen);
+  mbdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   mbdata.printbuffers();
   mbdata.settimeout(0, 100000); // One tenth of a second
 
   int rdsize;
-  TSCTimer report_timer;
   for (;;) {
     unsigned int eth_index = eth_ringbuf->getindex();
 
@@ -136,15 +142,9 @@ void MBCAEN::input_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-
-      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n",
-               opts->proc_cmd);
-        return;
-      }
-
-      report_timer.now();
+    if (not runThreads) {
+      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      return;
     }
   }
 }
@@ -161,7 +161,8 @@ void MBCAEN::processing_thread() {
 
   ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
   MB16Detector mb16;
-  Producer eventprod(opts->broker, "MB_detector");
+  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" + std::to_string(EFUSettings.KafkaBrokerPort);
+  Producer eventprod(BrokerString, "MB_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
   multiBladeEventBuilder builder[ncass];
@@ -173,22 +174,22 @@ void MBCAEN::processing_thread() {
   MBData mbdata;
 
   unsigned int data_index;
-  TSCTimer report_timer;
+  TSCTimer produce_timer;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       // There is NO data in the FIFO - do stop checks and sleep a little
       mystats.rx_idle1++;
       // Checking for exit
-      if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+      if (produce_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
         mystats.tx_bytes += flatbuffer.produce();
 
-        if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-          XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n",
-                 opts->proc_cmd);
+        if (not runThreads) {
+          XTRACE(INPUT, ALW, "Stopping processing thread.\n");
           return;
         }
-        report_timer.now();
+
+        produce_timer.now();
       }
       usleep(10);
 
@@ -253,8 +254,8 @@ void MBCAEN::processing_thread() {
 
 class MBCAENFactory : DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(void *args) {
-    return std::shared_ptr<Detector>(new MBCAEN(args));
+  std::shared_ptr<Detector> create(StdSettings settings) {
+    return std::shared_ptr<Detector>(new MBCAEN(settings));
   }
 };
 

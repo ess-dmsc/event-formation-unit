@@ -31,12 +31,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-struct NMXSettings {
-  int ReceiveTimeOut;
-};
-
-static NMXSettings settings;
-
 using namespace memory_sequential_consistent; // Lock free fifo
 
 const char *classname = "NMX Detector";
@@ -90,16 +84,13 @@ private:
     int64_t fifo_seq_errors;
   } ALIGN(64) mystats;
 
-  EFUArgs *opts;
   NMXConfig nmx_opts;
 
   std::shared_ptr<AbstractBuilder> builder_ {nullptr};
   void init_builder(std::string jsonfile);
 };
 
-void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {
-    parser.add_option("--recv_timeout", settings.ReceiveTimeOut, "NMX receive data time out")->group("NMX");
-}
+void SetCLIArguments(CLI::App __attribute__((unused)) &parser) { }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
@@ -154,7 +145,7 @@ void NMX::input_thread() {
   //nmxdata.buflen(opts->buflen);
   nmxdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   nmxdata.printbuffers();
-  nmxdata.settimeout(0, settings.ReceiveTimeOut);
+  nmxdata.settimeout(0, 100000); // 1/10 second
 
   int rdsize;
   TSCTimer report_timer;
@@ -187,7 +178,7 @@ void NMX::input_thread() {
 }
 
 void NMX::processing_thread() {
-  init_builder(opts->config_file);
+  init_builder(EFUSettings.ConfigFile);
   if (!builder_) {
     XTRACE(PROCESS, WAR, "No builder specified, exiting thread\n");
     return;
@@ -284,7 +275,7 @@ void NMX::processing_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
+    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
       sample_next_track = 1;
 

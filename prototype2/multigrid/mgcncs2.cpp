@@ -40,7 +40,7 @@ const char *classname = "CSPEC Detector (2 thread pipeline)";
 
 class CSPEC : public Detector {
 public:
-  CSPEC(void *args);
+  CSPEC(StdSettings settings);
   void input_thread();
   void processing_thread();
 
@@ -82,12 +82,13 @@ private:
     int64_t rx_events;
     int64_t tx_bytes;
   } ALIGN(64) mystats;
-
-  EFUArgs *opts;
 };
 
-CSPEC::CSPEC(void *args) {
-  opts = (EFUArgs *)args;
+void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {}
+
+PopulateCLIParser PopulateParser{SetCLIArguments};
+
+CSPEC::CSPEC(StdSettings settings) : Detector(settings) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
@@ -105,6 +106,12 @@ CSPEC::CSPEC(void *args) {
   ns.create("output.tx_bytes",                 &mystats.tx_bytes);
   // clang-format on
 
+  std::function<void()> inputFunc = [this](){CSPEC::input_thread();};
+  Detector::AddThreadFunction(inputFunc, "input");
+
+  std::function<void()> processingFunc = [this](){CSPEC::processing_thread();};
+  Detector::AddThreadFunction(processingFunc, "processing");
+
   XTRACE(INIT, ALW, "Creating %d Ethernet ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
@@ -120,15 +127,14 @@ const char *CSPEC::detectorname() { return classname; }
 
 void CSPEC::input_thread() {
   /** Connection setup */
-  Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
   UDPServer cspecdata(local);
-  cspecdata.buflen(opts->buflen);
-  cspecdata.setbuffers(0, opts->rcvbuf);
+  //cspecdata.buflen(opts->buflen);
+  cspecdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   cspecdata.printbuffers();
   cspecdata.settimeout(0, 100000); // One tenth of a second
 
   int rdsize;
-  TSCTimer report_timer;
   for (;;) {
     unsigned int eth_index = eth_ringbuf->getindex();
 
@@ -150,21 +156,17 @@ void CSPEC::input_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-
-      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
-        return;
-      }
-
-      report_timer.now();
+    if (not runThreads) {
+      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      return;
     }
   }
 }
 
 void CSPEC::processing_thread() {
   CSPECChanConv conv;
-  Producer producer(opts->broker, "C-SPEC_detector");
+  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" + std::to_string(EFUSettings.KafkaBrokerPort);
+  Producer producer(BrokerString, "C-SPEC_detector");
   FBSerializer flatbuffer(kafka_buffer_size, producer);
 
   MultiGridGeometry geom(1, 2, 48, 4, 16);
@@ -177,11 +179,15 @@ void CSPEC::processing_thread() {
   unsigned int data_index;
   while (1) {
     // Check for control from mothership (main)
+    #if 0
     if (opts->proc_cmd == opts->thread_cmd::THREAD_LOADCAL) {
       opts->proc_cmd = opts->thread_cmd::NOCMD; /** @todo other means of ipc? */
       XTRACE(PROCESS, INF, "processing_thread loading new calibrations\n");
       conv.load_calibration(opts->wirecal, opts->gridcal);
     }
+    #else
+    #pragma message("SOLVE thr LOADCAL problem!")
+    #endif
 
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
@@ -216,16 +222,15 @@ void CSPEC::processing_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-
+    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       mystats.tx_bytes += flatbuffer.produce();
-
-      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-        XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n", opts->proc_cmd);
-        return;
-      }
-
       report_timer.now();
+    }
+
+    // Checking for exit
+    if (not runThreads) {
+      XTRACE(INPUT, ALW, "Stopping processing thread.\n");
+      return;
     }
   }
 }
@@ -234,8 +239,8 @@ void CSPEC::processing_thread() {
 
 class CSPECFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(void *args) {
-    return std::shared_ptr<Detector>(new CSPEC(args));
+  std::shared_ptr<Detector> create(StdSettings settings) {
+    return std::shared_ptr<Detector>(new CSPEC(settings));
   }
 };
 

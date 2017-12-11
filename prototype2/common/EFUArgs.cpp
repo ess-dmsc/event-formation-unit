@@ -14,7 +14,7 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-t,--broker_topic", EFUSettings.KafkaTopic, "Kafka broker topic");
   CLIParser.add_option("-c,--core_affinity", [this](std::vector<std::string> Input){return parseAffinityStrings(Input);}, "Thread to core affinity. Ex: \"-c input_t:4\"");
   detectorOption = CLIParser.add_option("-d,--det", det, "Detector name")->required();
-  CLIParser.add_option("-f,--file", config_file, "Pipeline-specific config file");
+  CLIParser.add_option("-f,--file", EFUSettings.ConfigFile, "Pipeline-specific config file");
   CLIParser.add_option("-g,--graphite", graphite_ip_addr, "IP address of graphite metrics server");
   CLIParser.add_option("-i,--dip", EFUSettings.DetectorAddress, "IP address of receive interface");
   CLIParser.add_option("-p,--port", EFUSettings.DetectorPort, "TCP/UDP receive port");
@@ -53,7 +53,7 @@ void EFUArgs::printSettings() {
     XTRACE(INIT, ALW, "  Log IP:        %s\n", GraylogConfig.address.c_str());
     XTRACE(INIT, ALW, "  Detector:      %s\n", det.c_str());
 //    XTRACE(INIT, ALW, "  CPU Offset:    %d\n", cpustart);
-    XTRACE(INIT, ALW, "  Config file:   %s\n", config_file.c_str());
+    XTRACE(INIT, ALW, "  Config file:   %s\n", EFUSettings.ConfigFile.c_str());
     XTRACE(INIT, ALW, "  IP addr:       %s\n", EFUSettings.DetectorAddress.c_str());
     XTRACE(INIT, ALW, "  UDP Port:      %d\n", EFUSettings.DetectorPort);
     XTRACE(INIT, ALW, "  Kafka broker:  %s\n", EFUSettings.KafkaBrokerAddress.c_str());
