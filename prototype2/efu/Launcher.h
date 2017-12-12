@@ -18,10 +18,10 @@ public:
    *  @param cpus vector of three cpuids for launching input, processing and
    *  output threads.
    */
-  Launcher(std::vector<ThreadCoreAffinity> ThreadAffinity) : ThreadCoreAffinity(ThreadAffinity) {};
+  Launcher(std::vector<ThreadCoreAffinitySetting> ThreadAffinity) : ThreadCoreAffinity(ThreadAffinity) {};
   
   void launchThreads(std::shared_ptr<Detector> &detector);
 
 private:
-  std::vector<ThreadCoreAffinity> ThreadCoreAffinity;
+  std::vector<ThreadCoreAffinitySetting> ThreadCoreAffinity;
 };

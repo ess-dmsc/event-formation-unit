@@ -32,7 +32,7 @@ bool EFUArgs::parseAffinityStrings(std::vector<std::string> ThreadAffinityString
     //No nothing
   }
   if (ThreadAffinityStrings.size() == 1 and CoreIntegerCorrect) {
-    ThreadAffinity.emplace_back(ThreadCoreAffinity{"implicit_affinity", static_cast<std::uint16_t>(CoreNumber)});
+    ThreadAffinity.emplace_back(ThreadCoreAffinitySetting{"implicit_affinity", static_cast<std::uint16_t>(CoreNumber)});
   } else {
     std::string REPattern = "([^:]+):(\\d{1,2})";
     std::regex AffinityRE(REPattern);
@@ -41,7 +41,7 @@ bool EFUArgs::parseAffinityStrings(std::vector<std::string> ThreadAffinityString
       if (not std::regex_match(AffinityStr, AffinityRERes, AffinityRE)) {
         return false;
       }
-      ThreadAffinity.emplace_back(ThreadCoreAffinity{AffinityRERes[0], static_cast<std::uint16_t>(std::stoi(AffinityRERes[1]))});
+      ThreadAffinity.emplace_back(ThreadCoreAffinitySetting{AffinityRERes[0], static_cast<std::uint16_t>(std::stoi(AffinityRERes[1]))});
     }
   }
   return true;

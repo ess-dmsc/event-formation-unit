@@ -17,7 +17,7 @@ struct GraylogSettings {
   std::uint16_t port;
 };
 
-struct ThreadCoreAffinity {
+struct ThreadCoreAffinitySetting {
   std::string Name;
   std::uint16_t Core;
 };
@@ -34,7 +34,7 @@ public:
   std::string getDetectorName() {return det;};
   GraylogSettings getGraylogSettings() {return GraylogConfig;};
 
-  std::vector<ThreadCoreAffinity> getThreadCoreAffinity() {return ThreadAffinity;};
+  std::vector<ThreadCoreAffinitySetting> getThreadCoreAffinity() {return ThreadAffinity;};
 
   bool parseAgain(const int argc, char *argv[]);
 
@@ -58,7 +58,7 @@ public:
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
 
-  std::vector<ThreadCoreAffinity> ThreadAffinity;
+  std::vector<ThreadCoreAffinitySetting> ThreadAffinity;
   CLI::Option *detectorOption;
 
   GraylogSettings GraylogConfig{"127.0.0.1", 12201};
