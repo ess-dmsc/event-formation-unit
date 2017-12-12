@@ -24,7 +24,7 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/coverage/)
 # EFU Tests
 #
 if(${CMAKE_COMPILER_IS_GNUCXX})
-    set(ParserTest_LIB_SRC efu/ParserTest.cpp test/SyscallWrappers.cpp)
+    set(ParserTest_LIB_SRC efu/ParserTest.cpp test/SyscallWrappers.cpp common/NewStats.cpp common/NewStats.h)
     add_library(ParserTest_LIB STATIC ${ParserTest_LIB_SRC})
     set_target_properties(ParserTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 
