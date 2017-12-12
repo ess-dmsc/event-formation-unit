@@ -54,7 +54,7 @@ set(RingBufferTest_SRC common/RingBufferTest.cpp common/RingBuffer.h)
 create_test_executable(RingBufferTest "")
 
 
-set(DetectorTest_SRC common/DetectorTest.cpp common/Detector.h)
+set(DetectorTest_SRC common/DetectorTest.cpp common/NewStats.cpp common/NewStats.h common/Detector.h)
 create_test_executable(DetectorTest "")
 
 
