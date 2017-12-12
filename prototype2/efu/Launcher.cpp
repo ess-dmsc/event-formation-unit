@@ -28,7 +28,6 @@ void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
 
       int __attribute__((unused))s = pthread_setaffinity_np(thread.native_handle(), sizeof(cpu_set_t), &cpuset);
       assert(s == 0);
-    }
 #else
 #pragma message("setaffinity only implemented for Linux")
     GLOG_WAR("setaffinity only implemented for Linux");
