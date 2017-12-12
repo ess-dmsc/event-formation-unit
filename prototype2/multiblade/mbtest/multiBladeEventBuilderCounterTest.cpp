@@ -16,7 +16,7 @@ TEST(MBEventBuilder__Test, DataPointCounter) {
   multiBladeEventBuilder p;
 
   // Test proper initialization.
-  EXPECT_EQ(0, p.getNumberOfEvents());
+  EXPECT_EQ(0U, p.getNumberOfEvents());
 
   // In the following: test proper incrementing.
   p.addDataPoint(0, 300, 0);

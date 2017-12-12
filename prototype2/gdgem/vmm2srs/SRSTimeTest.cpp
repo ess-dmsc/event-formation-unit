@@ -24,8 +24,8 @@ TEST_F(SRSTimeTest, SettersGetters) {
 }
 
 TEST_F(SRSTimeTest, Eval) {
-  ASSERT_EQ(time->timestamp_ns(0, 0, 0), 0);
-  ASSERT_EQ(time->timestamp(0, 0, 0), 0);
+  ASSERT_EQ(time->timestamp_ns(0, 0, 0), 0U);
+  ASSERT_EQ(time->timestamp(0, 0, 0), 0U);
 }
 
 TEST_F(SRSTimeTest, DebugString) {

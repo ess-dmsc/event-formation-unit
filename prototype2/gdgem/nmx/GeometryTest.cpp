@@ -13,8 +13,8 @@ protected:
 };
 
 TEST_F(GeometryTest, NoDimensions) {
-  ASSERT_EQ(geometry->to_pixid({42}), 0);
-  ASSERT_EQ(geometry->to_pixid({42, 24}), 0);
+  ASSERT_EQ(geometry->to_pixid({42}), 0U);
+  ASSERT_EQ(geometry->to_pixid({42, 24}), 0U);
 }
 
 TEST_F(GeometryTest, OneDimension) {
