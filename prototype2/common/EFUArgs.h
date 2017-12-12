@@ -68,5 +68,5 @@ private:
   CLI::Option *detectorOption;
 
   GraylogSettings GraylogConfig{"127.0.0.1", 12201};
-  BaseSettings EFUSettings{"0.0.0.0", 9000, 2000000, 2000000, "localhost", 9092, "Detector_data", "", 1};
+  BaseSettings EFUSettings{"0.0.0.0", 9000, 2000000, 2000000, "localhost", 9092, "Detector_data", 1};
 };

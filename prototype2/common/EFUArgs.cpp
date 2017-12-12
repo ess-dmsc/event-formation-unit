@@ -14,7 +14,6 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-t,--broker_topic", EFUSettings.KafkaTopic, "Kafka broker topic")->set_default_val("Detector_data");
   CLIParser.add_option("-c,--core_affinity", [this](std::vector<std::string> Input){return parseAffinityStrings(Input);}, "Thread to core affinity. Ex: \"-c input_t:4\"");
   detectorOption = CLIParser.add_option("-d,--det", det, "Detector name")->required();
-  CLIParser.add_option("-f,--file", EFUSettings.ConfigFile, "Pipeline-specific config file");
   CLIParser.add_option("-i,--dip", EFUSettings.DetectorAddress, "IP address of receive interface")->set_default_val("0.0.0.0");
   CLIParser.add_option("-p,--port", EFUSettings.DetectorPort, "TCP/UDP receive port")->set_default_val("9000");
   CLIParser.add_option("-m,--cmdport", cmdserver_port, "Command parser tcp port")->set_default_val("8888");

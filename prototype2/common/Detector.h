@@ -24,7 +24,6 @@ struct BaseSettings {
   std::string KafkaBrokerAddress;
   std::uint16_t KafkaBrokerPort;
   std::string KafkaTopic;
-  std::string ConfigFile;
   std::uint64_t UpdateIntervalSec;
 };
 

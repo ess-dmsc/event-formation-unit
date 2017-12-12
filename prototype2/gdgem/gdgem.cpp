@@ -39,6 +39,14 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 /** ----------------------------------------------------- */
 
+struct NMXSettingsStruct {
+  std::string ConfigFile;
+} NMXSettings;
+
+void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {
+  parser.add_option("-f,--file", NMXSettings.ConfigFile, "NMX (gdgem) specific config file")->group("NMX")->required();
+}
+
 class NMX : public Detector {
 public:
   NMX(BaseSettings settings);
@@ -89,8 +97,6 @@ private:
   std::shared_ptr<AbstractBuilder> builder_ {nullptr};
   void init_builder(std::string jsonfile);
 };
-
-void SetCLIArguments(CLI::App __attribute__((unused)) &parser) { }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
@@ -178,7 +184,7 @@ void NMX::input_thread() {
 }
 
 void NMX::processing_thread() {
-  init_builder(EFUSettings.ConfigFile);
+  init_builder(NMXSettings.ConfigFile);
   if (!builder_) {
     XTRACE(PROCESS, WAR, "No builder specified, exiting thread\n");
     return;
