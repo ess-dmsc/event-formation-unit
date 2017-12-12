@@ -6,23 +6,26 @@
 class EFUArgsTest : public TestBase {};
 
 TEST_F(EFUArgsTest, Constructor) {
-  EFUArgs opts(0, NULL);
+  EFUArgs efu_args;
+  auto settings = efu_args.GetBaseSettings();
 
-  ASSERT_STREQ("localhost:9092", opts.broker.c_str());
-  ASSERT_EQ(12, opts.cpustart);
-  ASSERT_STREQ("cspec", opts.det.c_str());
-  ASSERT_STREQ("0.0.0.0", opts.ip_addr.c_str());
-  ASSERT_EQ(9000, opts.port);
-  ASSERT_STREQ("127.0.0.1", opts.graphite_ip_addr.c_str());
-  ASSERT_EQ(2003, opts.graphite_port);
-  ASSERT_EQ(0xffffffffU, opts.stopafter);
+  //ASSERT_EQ(12, settings.cpustart); /**< todo fixme */
+  ASSERT_EQ("0.0.0.0", settings.DetectorAddress);
+  ASSERT_EQ(9000, settings.DetectorPort);
+  ASSERT_EQ("localhost", settings.KafkaBrokerAddress);
+  ASSERT_EQ(9092, settings.KafkaBrokerPort);
+  ASSERT_EQ("127.0.0.1", settings.GraphiteAddress);
+  ASSERT_EQ(2003, settings.GraphitePort);
+  ASSERT_EQ(0xffffffffU, settings.StopAfterSec);
 }
+
+
 
 TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
 
   // clang-format off
   const char *myargv[] = {"progname",
-                        "-b", "mybroker:myport",
+                        "-b", "mybroker",
                         "-c" , "99",
                         "-d", "myinst",
                         "-i", "1.2.3.4",
@@ -35,26 +38,35 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
                         "-f", "configfile.json" };
   // clang-format on
   int myargc = 23;
-  EFUArgs opts(myargc, (char **)myargv);
+  EFUArgs efu_args;
+  auto ret = efu_args.parseAndProceed(myargc, (char **)myargv);
+  ASSERT_EQ(ret, true); // has detector
+  auto settings = efu_args.GetBaseSettings();
+  auto glsettings = efu_args.getGraylogSettings();
 
-  ASSERT_STREQ("mybroker:myport", opts.broker.c_str());
-  ASSERT_EQ(99, opts.cpustart);
-  ASSERT_STREQ("myinst", opts.det.c_str());
-  ASSERT_STREQ("1.2.3.4", opts.ip_addr.c_str());
-  ASSERT_EQ(9876, opts.port);
-  ASSERT_STREQ("4.3.2.1", opts.graphite_ip_addr.c_str());
-  ASSERT_EQ(2323, opts.graphite_port);
-  ASSERT_EQ(5, opts.stopafter);
-  ASSERT_STREQ("10.0.0.1", opts.graylog_ip.c_str());
-  ASSERT_EQ(8989, opts.cmdserver_port);
-  ASSERT_STREQ("configfile.json", opts.config_file.c_str());
+
+  ASSERT_EQ("mybroker", settings.KafkaBrokerAddress);
+  // ASSERT_EQ(99, opts.cpustart); /**< todo fixme */
+  ASSERT_EQ("myinst", efu_args.det);
+  ASSERT_EQ("1.2.3.4", settings.DetectorAddress);
+  ASSERT_EQ(9876, settings.DetectorPort);
+  ASSERT_EQ("4.3.2.1", settings.GraphiteAddress);
+  ASSERT_EQ(2323, settings.GraphitePort);
+  ASSERT_EQ(5, settings.StopAfterSec);
+  ASSERT_EQ("10.0.0.1", glsettings.address);
+  ASSERT_EQ(8989, settings.CommandServerPort);
+  ASSERT_EQ("configfile.json", settings.ConfigFile);
 }
+
 
 TEST_F(EFUArgsTest, HelpText) {
   int myargc = 2;
   const char *myargv[] = {"progname", "-h"};
 
-  EFUArgs opts2(myargc, (char **)myargv);
+  EFUArgs efu_args;
+  auto ret = efu_args.parseAndProceed(myargc, (char **)myargv);
+  ASSERT_EQ(ret, false); // has detector
+
   ASSERT_EQ(myargc, 2);
   ASSERT_TRUE(myargv != NULL);
 }

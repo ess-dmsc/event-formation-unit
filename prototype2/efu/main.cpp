@@ -23,14 +23,14 @@ int main(int argc, char *argv[]) {
   if (not efu_args.parseAndProceed(argc, argv)) {
     return 0;
   }
-  
+
   Loader loader(efu_args.getDetectorName());
-  
+
   if (not loader.IsOk()) {
     efu_args.printHelp();
     return -1;
   }
-  
+
   {//This is to prevent accessing unloaded memory in a (potentially) unloaded plugin.
     auto CLIArgPopulator = loader.GetCLIParserPopulator();
     CLIArgPopulator(efu_args.CLIParser);
@@ -40,7 +40,9 @@ int main(int argc, char *argv[]) {
   }
   efu_args.printSettings();
   std::shared_ptr<Detector> detector = loader.createDetector(efu_args.GetBaseSettings());
-  
+
+  auto EFUSettings = efu_args.GetBaseSettings();
+
   int keep_running = 1;
 
   ExitHandler::InitExitHandler(&keep_running);
@@ -51,7 +53,7 @@ int main(int argc, char *argv[]) {
       new GraylogInterface(GLConfig.address, GLConfig.port));
   Log::SetMinimumSeverity(Severity::Debug);
 #endif
-  
+
   GLOG_INF("Starting Event Formation Unit");
   GLOG_INF("Event Formation Unit version: " + efu_version());
   GLOG_INF("Event Formation Unit build: " + efu_buildstr());
@@ -59,25 +61,25 @@ int main(int argc, char *argv[]) {
   XTRACE(MAIN, ALW, "Event Formation Software Version: %s\n", efu_version().c_str());
   XTRACE(MAIN, ALW, "Event Formation Unit build: %s\n", EFU_STR(BUILDSTR));
 
-  if (efu_args.stopafter == 0) {
+  if (EFUSettings.StopAfterSec == 0) {
     XTRACE(MAIN, ALW, "Event Formation Unit Exit (Immediate)\n");
     GLOG_INF("Event Formation Unit Exit (Immediate)");
     return 0;
   }
-  
-  
+
+
 
   XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", efu_args.det.c_str());
-  
+
   auto ThreadAffinity = efu_args.getThreadCoreAffinity();
   Launcher launcher(ThreadAffinity);
-  
+
   launcher.launchThreads(detector);
 
-  StatPublisher metrics(efu_args.graphite_ip_addr, efu_args.graphite_port);
+  StatPublisher metrics(EFUSettings.GraphiteAddress, EFUSettings.GraphitePort);
 
   Parser cmdParser(detector, keep_running);
-  Server cmdAPI(efu_args.cmdserver_port, cmdParser);
+  Server cmdAPI(EFUSettings.CommandServerPort, cmdParser);
 
   Timer stop_timer, stop_cmd, livestats;
 
@@ -91,7 +93,7 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    if (stop_timer.timeus() >= (uint64_t)efu_args.stopafter * (uint64_t)ONE_SECOND_US) {
+    if (stop_timer.timeus() >= EFUSettings.StopAfterSec * (uint64_t)ONE_SECOND_US) {
       XTRACE(MAIN, ALW, "Application timeout, Exiting...\n");
       GLOG_INF("Event Formation Unit Exiting (User timeout)");
       detector->stopThreads();
@@ -108,11 +110,11 @@ int main(int argc, char *argv[]) {
 
     usleep(1000);
   }
-  
+
   if (detector.use_count() > 1) {
     XTRACE(MAIN, WAR, "There are more than 1 strong pointers to the detector. This application may crash on exit.\n");
   }
-  
+
   detector.reset();
 
   return 0;

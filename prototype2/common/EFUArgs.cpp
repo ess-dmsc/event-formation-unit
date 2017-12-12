@@ -17,10 +17,10 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-f,--file", EFUSettings.ConfigFile, "Pipeline-specific config file");
   CLIParser.add_option("-i,--dip", EFUSettings.DetectorAddress, "IP address of receive interface")->set_default_val("0.0.0.0");
   CLIParser.add_option("-p,--port", EFUSettings.DetectorPort, "TCP/UDP receive port")->set_default_val("9000");
-  CLIParser.add_option("-m,--cmdport", cmdserver_port, "Command parser tcp port")->set_default_val("8888");
-  CLIParser.add_option("-g,--graphite", graphite_ip_addr, "IP address of graphite metrics server")->set_default_val("127.0.0.1");
-  CLIParser.add_option("-o,--gport", graphite_port, "Graphite tcp port")->set_default_val("2003");
-  CLIParser.add_option("-s,--stopafter", stopafter, "Terminate after timeout seconds");
+  CLIParser.add_option("-m,--cmdport", EFUSettings.CommandServerPort, "Command parser tcp port")->set_default_val("8888");
+  CLIParser.add_option("-g,--graphite", EFUSettings.GraphiteAddress, "IP address of graphite metrics server")->set_default_val("127.0.0.1");
+  CLIParser.add_option("-o,--gport", EFUSettings.GraphitePort, "Graphite tcp port")->set_default_val("2003");
+  CLIParser.add_option("-s,--stopafter", EFUSettings.StopAfterSec, "Terminate after timeout seconds")->set_default_val("4294967295"); //0xffffffffU
 }
 
 bool EFUArgs::parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings) {
@@ -57,10 +57,10 @@ void EFUArgs::printSettings() {
     XTRACE(INIT, ALW, "  IP addr:       %s\n", EFUSettings.DetectorAddress.c_str());
     XTRACE(INIT, ALW, "  UDP Port:      %d\n", EFUSettings.DetectorPort);
     XTRACE(INIT, ALW, "  Kafka broker:  %s\n", EFUSettings.KafkaBrokerAddress.c_str());
-    XTRACE(INIT, ALW, "  Graphite:      %s\n", graphite_ip_addr.c_str());
-    XTRACE(INIT, ALW, "  Graphite port: %d\n", graphite_port);
-    XTRACE(INIT, ALW, "  Command port:  %d\n", cmdserver_port);
-    XTRACE(INIT, ALW, "  Stopafter:     %u\n", stopafter);
+    XTRACE(INIT, ALW, "  Graphite:      %s\n", EFUSettings.GraphiteAddress.c_str());
+    XTRACE(INIT, ALW, "  Graphite port: %d\n", EFUSettings.GraphitePort);
+    XTRACE(INIT, ALW, "  Command port:  %d\n", EFUSettings.CommandServerPort);
+    XTRACE(INIT, ALW, "  Stopafter:     %u\n", EFUSettings.StopAfterSec);
 }
 
 void EFUArgs::printHelp() {

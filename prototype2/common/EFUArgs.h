@@ -37,21 +37,15 @@ public:
   std::vector<ThreadCoreAffinity> getThreadCoreAffinity() {return ThreadAffinity;};
 
   bool parseAgain(const int argc, char *argv[]);
-  
+
   BaseSettings GetBaseSettings() {return EFUSettings;};
 
   CLI::App CLIParser{"Event formation unit (efu)"};
 
   int buflen{9000};               /**< rx buffer length (B) */
 
-  unsigned int stopafter{0xffffffff}; /**< 'never' stop */
 
   std::string det;             /**< detector name */
-
-  std::string graphite_ip_addr{"127.0.0.1"}; /**< graphite time series db */
-  int graphite_port{2003};                   /**< graphite time series db */
-
-  int cmdserver_port{8888}; /**< for command line API */
 
   // Runtime Stats
   // EFUStats stat;
@@ -59,8 +53,8 @@ public:
   // Pipeline-specific configuration
 
   // IPC data for communicating between main and threads
-//  uint16_t wirecal[CSPECChanConv::adcsize];
-//  uint16_t gridcal[CSPECChanConv::adcsize];
+  //  uint16_t wirecal[CSPECChanConv::adcsize]; /**< todo fixme */
+  //  uint16_t gridcal[CSPECChanConv::adcsize];
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
 
@@ -68,5 +62,6 @@ private:
   CLI::Option *detectorOption;
 
   GraylogSettings GraylogConfig{"127.0.0.1", 12201};
-  BaseSettings EFUSettings{"0.0.0.0", 9000, 2000000, 2000000, "localhost", 9092, "Detector_data", "", 1};
+  BaseSettings EFUSettings{"0.0.0.0", 9000, 8888, 2000000, 2000000, "localhost", 9092,
+                           "127,0,0,1", 2003, "Detector_data", "", 1, 0xffffffff};
 };

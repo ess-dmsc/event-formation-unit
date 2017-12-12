@@ -19,13 +19,17 @@
 struct BaseSettings {
   std::string DetectorAddress;
   std::uint16_t DetectorPort;
+  std::uint16_t CommandServerPort;
   std::int32_t DetectorRxBufferSize;
   std::int32_t DetectorTxBufferSize;
   std::string KafkaBrokerAddress;
   std::uint16_t KafkaBrokerPort;
+  std::string GraphiteAddress;
+  std::uint16_t GraphitePort;
   std::string KafkaTopic;
   std::string ConfigFile;
   std::uint64_t UpdateIntervalSec;
+  std::uint32_t StopAfterSec;
 };
 
 struct ThreadInfo {
@@ -45,17 +49,17 @@ public:
 
   /** @brief document */
   virtual int statsize() { return StatsTracker.size(); }
-  
+
   /** @brief document */
   virtual int64_t statvalue(size_t index) {
     return StatsTracker.value(index);
   }
-  
+
   /** @brief document */
   virtual std::string &statname(size_t index) {
     return StatsTracker.name(index);
   }
-  
+
   void setStatsPrefix(std::string NewStatsPrefix) {
     StatsTracker.setPrefix(NewStatsPrefix);
   }
