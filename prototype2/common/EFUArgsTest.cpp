@@ -34,10 +34,9 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
                         "-o", "2323",
                         "-s", "5",
                         "-a", "10.0.0.1",
-                        "-m", "8989",
-                        "-f", "configfile.json" };
+                        "-m", "8989" };
   // clang-format on
-  int myargc = 23;
+  int myargc = 21;
   EFUArgs efu_args;
   auto ret = efu_args.parseAndProceed(myargc, (char **)myargv);
   ASSERT_EQ(ret, true); // has detector
@@ -55,7 +54,6 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   ASSERT_EQ(5, settings.StopAfterSec);
   ASSERT_EQ("10.0.0.1", glsettings.address);
   ASSERT_EQ(8989, settings.CommandServerPort);
-  ASSERT_EQ("configfile.json", settings.ConfigFile);
 }
 
 
