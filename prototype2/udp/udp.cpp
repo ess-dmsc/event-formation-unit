@@ -20,7 +20,7 @@ const char *classname = "UDPRaw Detector";
 
 class UDPRaw : public Detector {
 public:
-  UDPRaw(StdSettings settings);
+  UDPRaw(BaseSettings settings);
 
   ~UDPRaw() { std::cout << "    UDPRaw destroyed" << std::endl; }
 
@@ -33,7 +33,7 @@ private:
 
 const char *UDPRaw::detectorname() { return classname; }
 
-UDPRaw::UDPRaw(StdSettings settings) : Detector(settings) {
+UDPRaw::UDPRaw(BaseSettings settings) : Detector(settings) {
   std::cout << "    UDPRaw created" << std::endl;
 }
 
@@ -99,7 +99,7 @@ void UDPRaw::input_thread() {
 
 class UDPRawFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(StdSettings settings) {
+  std::shared_ptr<Detector> create(BaseSettings settings) {
     return std::shared_ptr<Detector>(new UDPRaw(settings));
   }
 };

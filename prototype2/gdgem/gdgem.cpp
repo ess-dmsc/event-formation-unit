@@ -41,7 +41,7 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 class NMX : public Detector {
 public:
-  NMX(StdSettings settings);
+  NMX(BaseSettings settings);
   ~NMX();
   void input_thread();
   void processing_thread();
@@ -98,23 +98,23 @@ NMX::~NMX() {
   printf("NMX detector destructor called\n");
 }
 
-NMX::NMX(StdSettings settings) : Detector(settings) {
+NMX::NMX(BaseSettings settings) : Detector(settings) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  ns.create("input.rx_packets",                &mystats.rx_packets);
-  ns.create("input.rx_bytes",                  &mystats.rx_bytes);
-  ns.create("input.i2pfifo_dropped",           &mystats.fifo1_push_errors);
-  ns.create("input.i2pfifo_free",              &mystats.fifo1_free);
-  ns.create("processing.rx_readouts",          &mystats.rx_readouts);
-  ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
-  ns.create("processing.rx_discards",          &mystats.rx_discards);
-  ns.create("processing.rx_idle",              &mystats.rx_idle1);
-  ns.create("processing.fifo_seq_errors",      &mystats.fifo_seq_errors);
-  ns.create("processing.unclustered",          &mystats.unclustered);
-  ns.create("processing.geom_errors",          &mystats.geom_errors);
-  ns.create("output.tx_events",                &mystats.tx_events);
-  ns.create("output.tx_bytes",                 &mystats.tx_bytes);
+  ns.create("input.rx_packets",                mystats.rx_packets);
+  ns.create("input.rx_bytes",                  mystats.rx_bytes);
+  ns.create("input.i2pfifo_dropped",           mystats.fifo1_push_errors);
+  ns.create("input.i2pfifo_free",              mystats.fifo1_free);
+  ns.create("processing.rx_readouts",          mystats.rx_readouts);
+  ns.create("processing.rx_error_bytes",       mystats.rx_error_bytes);
+  ns.create("processing.rx_discards",          mystats.rx_discards);
+  ns.create("processing.rx_idle",              mystats.rx_idle1);
+  ns.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  ns.create("processing.unclustered",          mystats.unclustered);
+  ns.create("processing.geom_errors",          mystats.geom_errors);
+  ns.create("output.tx_events",                mystats.tx_events);
+  ns.create("output.tx_bytes",                 mystats.tx_bytes);
   // clang-format on
 
   std::function<void()> inputFunc = [this](){NMX::input_thread();};
@@ -333,7 +333,7 @@ void NMX::init_builder(std::string jsonfile)
 
 class NMXFactory : DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(StdSettings settings) {
+  std::shared_ptr<Detector> create(BaseSettings settings) {
     return std::shared_ptr<Detector>(new NMX(settings));
   }
 };

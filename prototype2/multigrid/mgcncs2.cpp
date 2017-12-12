@@ -40,7 +40,7 @@ const char *classname = "CSPEC Detector (2 thread pipeline)";
 
 class CSPEC : public Detector {
 public:
-  CSPEC(StdSettings settings);
+  CSPEC(BaseSettings settings);
   void input_thread();
   void processing_thread();
 
@@ -88,22 +88,22 @@ void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
-CSPEC::CSPEC(StdSettings settings) : Detector(settings) {
+CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  ns.create("input.rx_packets",                &mystats.rx_packets);
-  ns.create("input.rx_bytes",                  &mystats.rx_bytes);
-  ns.create("input.i2pfifo_dropped",           &mystats.fifo_push_errors);
-  ns.create("input.i2pfifo_free",              &mystats.fifo_free);
-  ns.create("processing.rx_readouts",          &mystats.rx_readouts);
-  ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
-  ns.create("processing.rx_discards",          &mystats.rx_discards);
-  ns.create("processing.rx_idle",              &mystats.rx_idle1);
-  ns.create("processing.rx_geometry_errors",   &mystats.geometry_errors);
-  ns.create("processing.fifo_seq_errors",      &mystats.fifo_seq_errors);
-  ns.create("output.rx_events",                &mystats.rx_events);
-  ns.create("output.tx_bytes",                 &mystats.tx_bytes);
+  ns.create("input.rx_packets",                mystats.rx_packets);
+  ns.create("input.rx_bytes",                  mystats.rx_bytes);
+  ns.create("input.i2pfifo_dropped",           mystats.fifo_push_errors);
+  ns.create("input.i2pfifo_free",              mystats.fifo_free);
+  ns.create("processing.rx_readouts",          mystats.rx_readouts);
+  ns.create("processing.rx_error_bytes",       mystats.rx_error_bytes);
+  ns.create("processing.rx_discards",          mystats.rx_discards);
+  ns.create("processing.rx_idle",              mystats.rx_idle1);
+  ns.create("processing.rx_geometry_errors",   mystats.geometry_errors);
+  ns.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  ns.create("output.rx_events",                mystats.rx_events);
+  ns.create("output.tx_bytes",                 mystats.tx_bytes);
   // clang-format on
 
   std::function<void()> inputFunc = [this](){CSPEC::input_thread();};
@@ -239,7 +239,7 @@ void CSPEC::processing_thread() {
 
 class CSPECFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(StdSettings settings) {
+  std::shared_ptr<Detector> create(BaseSettings settings) {
     return std::shared_ptr<Detector>(new CSPEC(settings));
   }
 };

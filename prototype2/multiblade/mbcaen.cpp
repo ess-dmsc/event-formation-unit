@@ -35,7 +35,7 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 class MBCAEN : public Detector {
 public:
-  MBCAEN(StdSettings settings);
+  MBCAEN(BaseSettings settings);
   void input_thread();
   void processing_thread();
 
@@ -77,19 +77,19 @@ void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
-MBCAEN::MBCAEN(StdSettings settings) : Detector(settings) {
+MBCAEN::MBCAEN(BaseSettings settings) : Detector(settings) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-    ns.create("input.rx_packets",                &mystats.rx_packets);
-    ns.create("input.rx_bytes",                  &mystats.rx_bytes);
-    ns.create("input.fifo1_push_errors",         &mystats.fifo1_push_errors);
-    ns.create("processing.rx_readouts",          &mystats.rx_readouts);
-    ns.create("processing.rx_idle1",             &mystats.rx_idle1);
-    ns.create("processing.tx_bytes",             &mystats.tx_bytes);
-    ns.create("processing.rx_events",            &mystats.rx_events);
-    ns.create("processing.rx_geometry_errors",   &mystats.geometry_errors);
-    ns.create("processing.fifo_seq_errors",      &mystats.fifo_seq_errors);
+    ns.create("input.rx_packets",                mystats.rx_packets);
+    ns.create("input.rx_bytes",                  mystats.rx_bytes);
+    ns.create("input.fifo1_push_errors",         mystats.fifo1_push_errors);
+    ns.create("processing.rx_readouts",          mystats.rx_readouts);
+    ns.create("processing.rx_idle1",             mystats.rx_idle1);
+    ns.create("processing.tx_bytes",             mystats.tx_bytes);
+    ns.create("processing.rx_events",            mystats.rx_events);
+    ns.create("processing.rx_geometry_errors",   mystats.geometry_errors);
+    ns.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
   // clang-format on
 
     std::function<void()> inputFunc = [this](){MBCAEN::input_thread();};
@@ -254,7 +254,7 @@ void MBCAEN::processing_thread() {
 
 class MBCAENFactory : DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(StdSettings settings) {
+  std::shared_ptr<Detector> create(BaseSettings settings) {
     return std::shared_ptr<Detector>(new MBCAEN(settings));
   }
 };
