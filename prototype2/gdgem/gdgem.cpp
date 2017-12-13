@@ -4,7 +4,6 @@
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/FBSerializer.h>
-#include <common/NewStats.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
@@ -53,10 +52,7 @@ public:
   ~NMX();
   void input_thread();
   void processing_thread();
-
-  int statsize();
-  int64_t statvalue(size_t index);
-  std::string &statname(size_t index);
+  
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
@@ -70,7 +66,6 @@ private:
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
   // Careful also using this for other NMX pipeline
-  NewStats ns{"efu2.nmx."};
 
   struct {
     // Input Counters
@@ -105,22 +100,23 @@ NMX::~NMX() {
 }
 
 NMX::NMX(BaseSettings settings) : Detector(settings) {
+  Stats.setPrefix("efu2.nmx");
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  ns.create("input.rx_packets",                mystats.rx_packets);
-  ns.create("input.rx_bytes",                  mystats.rx_bytes);
-  ns.create("input.i2pfifo_dropped",           mystats.fifo1_push_errors);
-  ns.create("input.i2pfifo_free",              mystats.fifo1_free);
-  ns.create("processing.rx_readouts",          mystats.rx_readouts);
-  ns.create("processing.rx_error_bytes",       mystats.rx_error_bytes);
-  ns.create("processing.rx_discards",          mystats.rx_discards);
-  ns.create("processing.rx_idle",              mystats.rx_idle1);
-  ns.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
-  ns.create("processing.unclustered",          mystats.unclustered);
-  ns.create("processing.geom_errors",          mystats.geom_errors);
-  ns.create("output.tx_events",                mystats.tx_events);
-  ns.create("output.tx_bytes",                 mystats.tx_bytes);
+  Stats.create("input.rx_packets",                mystats.rx_packets);
+  Stats.create("input.rx_bytes",                  mystats.rx_bytes);
+  Stats.create("input.i2pfifo_dropped",           mystats.fifo1_push_errors);
+  Stats.create("input.i2pfifo_free",              mystats.fifo1_free);
+  Stats.create("processing.rx_readouts",          mystats.rx_readouts);
+  Stats.create("processing.rx_error_bytes",       mystats.rx_error_bytes);
+  Stats.create("processing.rx_discards",          mystats.rx_discards);
+  Stats.create("processing.rx_idle",              mystats.rx_idle1);
+  Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  Stats.create("processing.unclustered",          mystats.unclustered);
+  Stats.create("processing.geom_errors",          mystats.geom_errors);
+  Stats.create("output.tx_events",                mystats.tx_events);
+  Stats.create("output.tx_bytes",                 mystats.tx_bytes);
   // clang-format on
 
   std::function<void()> inputFunc = [this](){NMX::input_thread();};
@@ -134,12 +130,6 @@ NMX::NMX(BaseSettings settings) : Detector(settings) {
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11); /**< @todo testing workaround */
   assert(eth_ringbuf != 0);
 }
-
-int NMX::statsize() { return ns.size(); }
-
-int64_t NMX::statvalue(size_t index) { return ns.value(index); }
-
-std::string &NMX::statname(size_t index) { return ns.name(index); }
 
 const char *NMX::detectorname() { return classname; }
 

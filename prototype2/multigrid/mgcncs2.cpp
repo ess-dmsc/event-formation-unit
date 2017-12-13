@@ -8,7 +8,6 @@
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/FBSerializer.h>
-#include <common/NewStats.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
@@ -43,10 +42,7 @@ public:
   CSPEC(BaseSettings settings);
   void input_thread();
   void processing_thread();
-
-  int statsize();
-  int64_t statvalue(size_t index);
-  std::string &statname(size_t index);
+  
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
@@ -60,8 +56,6 @@ private:
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
   std::mutex eventq_mutex, cout_mutex;
-
-  NewStats ns{"efu2.cspec2."};
 
   struct {
     // Input Counters
@@ -89,21 +83,22 @@ void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {}
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
 CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
-
+  Stats.setPrefix("efu2.cspec2");
+  
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  ns.create("input.rx_packets",                mystats.rx_packets);
-  ns.create("input.rx_bytes",                  mystats.rx_bytes);
-  ns.create("input.i2pfifo_dropped",           mystats.fifo_push_errors);
-  ns.create("input.i2pfifo_free",              mystats.fifo_free);
-  ns.create("processing.rx_readouts",          mystats.rx_readouts);
-  ns.create("processing.rx_error_bytes",       mystats.rx_error_bytes);
-  ns.create("processing.rx_discards",          mystats.rx_discards);
-  ns.create("processing.rx_idle",              mystats.rx_idle1);
-  ns.create("processing.rx_geometry_errors",   mystats.geometry_errors);
-  ns.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
-  ns.create("output.rx_events",                mystats.rx_events);
-  ns.create("output.tx_bytes",                 mystats.tx_bytes);
+  Stats.create("input.rx_packets",                mystats.rx_packets);
+  Stats.create("input.rx_bytes",                  mystats.rx_bytes);
+  Stats.create("input.i2pfifo_dropped",           mystats.fifo_push_errors);
+  Stats.create("input.i2pfifo_free",              mystats.fifo_free);
+  Stats.create("processing.rx_readouts",          mystats.rx_readouts);
+  Stats.create("processing.rx_error_bytes",       mystats.rx_error_bytes);
+  Stats.create("processing.rx_discards",          mystats.rx_discards);
+  Stats.create("processing.rx_idle",              mystats.rx_idle1);
+  Stats.create("processing.rx_geometry_errors",   mystats.geometry_errors);
+  Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  Stats.create("output.rx_events",                mystats.rx_events);
+  Stats.create("output.tx_bytes",                 mystats.tx_bytes);
   // clang-format on
 
   std::function<void()> inputFunc = [this](){CSPEC::input_thread();};
@@ -116,12 +111,6 @@ CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
 }
-
-int CSPEC::statsize() { return ns.size(); }
-
-int64_t CSPEC::statvalue(size_t index) { return ns.value(index); }
-
-std::string &CSPEC::statname(size_t index) { return ns.name(index); }
 
 const char *CSPEC::detectorname() { return classname; }
 

@@ -5,7 +5,6 @@
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/FBSerializer.h>
-#include <common/NewStats.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
@@ -41,10 +40,7 @@ public:
 
   void input_thread();
   void processing_thread();
-
-  int statsize();
-  int64_t statvalue(size_t index);
-  std::string &statname(size_t index);
+  
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
@@ -82,18 +78,19 @@ void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {}
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
 SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector(settings) {
-
+  Stats.setPrefix("efu2.sonde");
+  
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  ns.create("input.rx_packets",                mystats.rx_packets);
-  ns.create("input.rx_bytes",                  mystats.rx_bytes);
-  ns.create("input.dropped",                   mystats.fifo1_push_errors);
-  ns.create("input.rx_seq_errors",             mystats.rx_seq_errors);
-  ns.create("processing.idle",                 mystats.rx_idle1);
-  ns.create("processing.rx_events",            mystats.rx_events);
-  ns.create("processing.rx_geometry_errors",   mystats.rx_geometry_errors);
-  ns.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
-  ns.create("output.tx_bytes",                 mystats.tx_bytes);
+  Stats.create("input.rx_packets",                mystats.rx_packets);
+  Stats.create("input.rx_bytes",                  mystats.rx_bytes);
+  Stats.create("input.dropped",                   mystats.fifo1_push_errors);
+  Stats.create("input.rx_seq_errors",             mystats.rx_seq_errors);
+  Stats.create("processing.idle",                 mystats.rx_idle1);
+  Stats.create("processing.rx_events",            mystats.rx_events);
+  Stats.create("processing.rx_geometry_errors",   mystats.rx_geometry_errors);
+  Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  Stats.create("output.tx_bytes",                 mystats.tx_bytes);
   // clang-format on
   std::function<void()> inputFunc = [this](){SONDEIDEA::input_thread();};
   Detector::AddThreadFunction(inputFunc, "input");
@@ -106,12 +103,6 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector(settings) {
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 1); /** @todo testing workaround */
   assert(eth_ringbuf != 0);
 }
-
-int SONDEIDEA::statsize() { return ns.size(); }
-
-int64_t SONDEIDEA::statvalue(size_t index) { return ns.value(index); }
-
-std::string &SONDEIDEA::statname(size_t index) { return ns.name(index); }
 
 const char *SONDEIDEA::detectorname() { return classname; }
 

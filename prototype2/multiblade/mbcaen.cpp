@@ -9,7 +9,6 @@
 #include <common/EFUArgs.h>
 #include <common/ESSGeometry.h>
 #include <common/FBSerializer.h>
-#include <common/NewStats.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 
@@ -38,10 +37,7 @@ public:
   MBCAEN(BaseSettings settings);
   void input_thread();
   void processing_thread();
-
-  int statsize();
-  int64_t statvalue(size_t index);
-  std::string &statname(size_t index);
+  
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
@@ -53,8 +49,6 @@ private:
   /** Shared between input_thread and processing_thread*/
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
-
-  NewStats ns{"efu2.mbcaen."};
 
   struct {
     // Input Counters
@@ -78,18 +72,19 @@ void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {}
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
 MBCAEN::MBCAEN(BaseSettings settings) : Detector(settings) {
-
+  Stats.setPrefix("efu2.mbcaen");
+  
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-    ns.create("input.rx_packets",                mystats.rx_packets);
-    ns.create("input.rx_bytes",                  mystats.rx_bytes);
-    ns.create("input.fifo1_push_errors",         mystats.fifo1_push_errors);
-    ns.create("processing.rx_readouts",          mystats.rx_readouts);
-    ns.create("processing.rx_idle1",             mystats.rx_idle1);
-    ns.create("processing.tx_bytes",             mystats.tx_bytes);
-    ns.create("processing.rx_events",            mystats.rx_events);
-    ns.create("processing.rx_geometry_errors",   mystats.geometry_errors);
-    ns.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+    Stats.create("input.rx_packets",                mystats.rx_packets);
+    Stats.create("input.rx_bytes",                  mystats.rx_bytes);
+    Stats.create("input.fifo1_push_errors",         mystats.fifo1_push_errors);
+    Stats.create("processing.rx_readouts",          mystats.rx_readouts);
+    Stats.create("processing.rx_idle1",             mystats.rx_idle1);
+    Stats.create("processing.tx_bytes",             mystats.tx_bytes);
+    Stats.create("processing.rx_events",            mystats.rx_events);
+    Stats.create("processing.rx_geometry_errors",   mystats.geometry_errors);
+    Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
   // clang-format on
 
     std::function<void()> inputFunc = [this](){MBCAEN::input_thread();};
@@ -103,12 +98,6 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector(settings) {
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11); // @todo workaround
   assert(eth_ringbuf != 0);
 }
-
-int MBCAEN::statsize() { return ns.size(); }
-
-int64_t MBCAEN::statvalue(size_t index) { return ns.value(index); }
-
-std::string &MBCAEN::statname(size_t index) { return ns.name(index); }
 
 const char *MBCAEN::detectorname() { return classname; }
 
