@@ -84,7 +84,7 @@ private:
   } ALIGN(64) mystats;
   
   std::atomic_bool NewCalibrationData{false};
-  uint16_t wirecal[CSPECChanConv::adcsize]; /**< todo fixme */
+  uint16_t wirecal[CSPECChanConv::adcsize];
   uint16_t gridcal[CSPECChanConv::adcsize];
 };
 
