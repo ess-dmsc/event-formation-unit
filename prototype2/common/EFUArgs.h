@@ -51,10 +51,6 @@ public:
   // EFUStats stat;
 
   // Pipeline-specific configuration
-
-  // IPC data for communicating between main and threads
-  //  uint16_t wirecal[CSPECChanConv::adcsize]; /**< todo fixme */
-  //  uint16_t gridcal[CSPECChanConv::adcsize];
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
 

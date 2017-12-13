@@ -7,7 +7,6 @@
 #include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <multigrid/mgcncs/CalibrationFile.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -62,55 +61,6 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
 
   return Parser::OK;
 }
-
-//=============================================================================
-//static int cspec_load_calib(std::vector<std::string> cmdargs,
-//                            UNUSED char *output, UNUSED unsigned int *obytes) {
-//  XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
-//  GLOG_INF("CSPEC_LOAD_CALIB");
-//  if (cmdargs.size() != 2) {
-//    XTRACE(CMD, WAR, "CSPEC_LOAD_CALIB: wrong number of arguments\n");
-//    return -Parser::EBADARGS;
-//  }
-//  CalibrationFile calibfile;
-//  auto ret = calibfile.load(cmdargs.at(1), (char *)efu_args->wirecal,
-//                            (char *)efu_args->gridcal);
-//  if (ret < 0) {
-//    return -Parser::EBADARGS;
-//  }
-//
-  /** @todo some other ipc between main and threads ? */
-//  efu_args->proc_cmd = efu_args->thread_cmd::THREAD_LOADCAL; // send load command to processing thread
-//
-//  return Parser::OK;
-//}
-
-//=============================================================================
-//static int cspec_show_calib(std::vector<std::string> cmdargs, char *output,
-//                            unsigned int *obytes) {
-//  auto nargs = cmdargs.size();
-//  unsigned int offset = 0;
-//  XTRACE(CMD, INF, "CSPEC_SHOW_CALIB\n");
-//  GLOG_INF("CSPEC_SHOW_CALIB");
-//  if (nargs == 1) {
-//    offset = 0;
-//  } else if (nargs == 2) {
-//    offset = atoi(cmdargs.at(1).c_str());
-//  } else {
-//    XTRACE(CMD, WAR, "CSPEC_SHOW_CALIB: wrong number of arguments\n");
-//    return -Parser::EBADARGS;
-//  }
-//
-//  if (offset > CSPECChanConv::adcsize - 1) {
-//    return -Parser::EBADARGS;
-//  }
-//
-//  *obytes = snprintf(
-//      output, SERVER_BUFFER_SIZE, "wire %d 0x%04x, grid %d 0x%04x", offset,
-//      efu_args->wirecal[offset], offset, efu_args->gridcal[offset]);
-//
-//  return Parser::OK;
-//}
 
 //=============================================================================
 static int version_get(std::vector<std::string> cmdargs, char *output,
@@ -176,13 +126,15 @@ Parser::Parser(std::shared_ptr<Detector> detector, int &keep_running) {
     return stat_get(cmd, resp, nrChars, detector);});
   registercmd("STAT_GET_COUNT", [detector](std::vector<std::string> cmd, char* resp, unsigned int *nrChars){
     return stat_get_count(cmd, resp, nrChars, detector);});
-//  registercmd(std::string("CSPEC_LOAD_CALIB"), cspec_load_calib);
-//  registercmd(std::string("CSPEC_SHOW_CALIB"), cspec_show_calib);
   registercmd("VERSION_GET", version_get);
   registercmd("DETECTOR_INFO_GET", [detector](std::vector<std::string> cmd, char* resp, unsigned int *nrChars){
     return detector_info_get(cmd, resp, nrChars, detector);});
   registercmd("EXIT", [&keep_running](std::vector<std::string> cmd, char* resp, unsigned int *nrChars){
     return efu_exit(cmd, resp, nrChars, keep_running);});
+  auto DetCmdFuncsMap = detector->GetDetectorCommandFunctions();
+  for (auto &FuncObj : DetCmdFuncsMap) {
+    registercmd(FuncObj.first, FuncObj.second);
+  }
 }
 
 int Parser::registercmd(std::string cmd_name, cmdFunction cmd_fn) {

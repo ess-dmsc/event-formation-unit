@@ -26,9 +26,6 @@ public:
 
   void input_thread();
   const char *detectorname();
-
-private:
-  EFUArgs *opts;
 };
 
 const char *UDPRaw::detectorname() { return classname; }
@@ -60,7 +57,7 @@ void UDPRaw::input_thread() {
   uint32_t first_dropped = 0;
   for (;;) {
     char buffer[10000];
-    auto tmprx = raw.receive(buffer, opts->buflen);
+    auto tmprx = raw.receive(buffer, EFUSettings.DetectorRxBufferSize);
     auto tmpseq = *((uint32_t *)buffer);
 
     if (seqno == tmpseq) {

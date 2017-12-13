@@ -14,6 +14,9 @@
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/Data.h>
 #include <multigrid/mgcncs/MultigridGeometry.h>
+#include <efu/Parser.h>
+#include <efu/Server.h>
+#include <multigrid/mgcncs/CalibrationFile.h>
 //#include <cspec/CSPECEvent.h>
 #include <cstring>
 #include <iostream>
@@ -49,6 +52,9 @@ public:
   static const int eth_buffer_max_entries = 1000;
   static const int eth_buffer_size = 9000;
   static const int kafka_buffer_size = 1000000;
+  
+  int LoadCalib(std::vector<std::string> cmdargs, UNUSED char *output, UNUSED unsigned int *obytes);
+  int ShowCalib(std::vector<std::string> cmdargs, UNUSED char *output, UNUSED unsigned int *obytes);
 
 private:
   /** Shared between input_thread and processing_thread*/
@@ -76,11 +82,62 @@ private:
     int64_t rx_events;
     int64_t tx_bytes;
   } ALIGN(64) mystats;
+  
+  std::atomic_bool NewCalibrationData{false};
+  uint16_t wirecal[CSPECChanConv::adcsize]; /**< todo fixme */
+  uint16_t gridcal[CSPECChanConv::adcsize];
 };
 
 void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
+
+//=============================================================================
+int CSPEC::LoadCalib(std::vector<std::string> cmdargs,
+                            UNUSED char *output, UNUSED unsigned int *obytes) {
+  XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
+  GLOG_INF("CSPEC_LOAD_CALIB");
+  if (cmdargs.size() != 2) {
+    XTRACE(CMD, WAR, "CSPEC_LOAD_CALIB: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+  CalibrationFile calibfile;
+  auto ret = calibfile.load(cmdargs.at(1), (char *)wirecal,
+                            (char *)gridcal);
+  if (ret < 0) {
+    return -Parser::EBADARGS;
+  }
+  NewCalibrationData = true;
+
+  return Parser::OK;
+}
+
+//=============================================================================
+int CSPEC::ShowCalib(std::vector<std::string> cmdargs, char *output,
+                            unsigned int *obytes) {
+  auto nargs = cmdargs.size();
+  unsigned int offset = 0;
+  XTRACE(CMD, INF, "CSPEC_SHOW_CALIB\n");
+  GLOG_INF("CSPEC_SHOW_CALIB");
+  if (nargs == 1) {
+    offset = 0;
+  } else if (nargs == 2) {
+    offset = atoi(cmdargs.at(1).c_str());
+  } else {
+    XTRACE(CMD, WAR, "CSPEC_SHOW_CALIB: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+
+  if (offset > CSPECChanConv::adcsize - 1) {
+    return -Parser::EBADARGS;
+  }
+
+  *obytes = snprintf(
+      output, SERVER_BUFFER_SIZE, "wire %d 0x%04x, grid %d 0x%04x", offset,
+      wirecal[offset], offset, gridcal[offset]);
+
+  return Parser::OK;
+}
 
 CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
   Stats.setPrefix("efu2.cspec2");
@@ -106,6 +163,9 @@ CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
 
   std::function<void()> processingFunc = [this](){CSPEC::processing_thread();};
   Detector::AddThreadFunction(processingFunc, "processing");
+  
+  AddCommandFunction("CSPEC_LOAD_CALIB", [this](std::vector<std::string> cmdargs, char *output, unsigned int *obytes){return CSPEC::LoadCalib(cmdargs, output, obytes);});
+  AddCommandFunction("CSPEC_SHOW_CALIB", [this](std::vector<std::string> cmdargs, char *output, unsigned int *obytes){return CSPEC::ShowCalib(cmdargs, output, obytes);});
 
   XTRACE(INIT, ALW, "Creating %d Ethernet ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
@@ -118,7 +178,6 @@ void CSPEC::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
   UDPServer cspecdata(local);
-  //cspecdata.buflen(opts->buflen);
   cspecdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   cspecdata.printbuffers();
   cspecdata.settimeout(0, 100000); // One tenth of a second
@@ -168,15 +227,11 @@ void CSPEC::processing_thread() {
   unsigned int data_index;
   while (1) {
     // Check for control from mothership (main)
-    #if 0
-    if (opts->proc_cmd == opts->thread_cmd::THREAD_LOADCAL) {
-      opts->proc_cmd = opts->thread_cmd::NOCMD; /** @todo other means of ipc? */
+    if (NewCalibrationData) {
       XTRACE(PROCESS, INF, "processing_thread loading new calibrations\n");
-      conv.load_calibration(opts->wirecal, opts->gridcal);
+      conv.load_calibration(wirecal, gridcal);
+      NewCalibrationData = false;
     }
-    #else
-    #pragma message("SOLVE thr LOADCAL problem!")
-    #endif
 
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;

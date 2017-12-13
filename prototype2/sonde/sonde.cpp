@@ -110,7 +110,6 @@ void SONDEIDEA::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
   UDPServer sondedata(local);
-//  sondedata.buflen(opts->buflen);
   sondedata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   sondedata.printbuffers();
   sondedata.settimeout(0, 100000); // 1/10 second

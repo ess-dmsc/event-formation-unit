@@ -15,6 +15,7 @@
 #include <CLI/CLI11.hpp>
 #include <atomic>
 #include <thread>
+#include <map>
 
 struct BaseSettings {
   std::string DetectorAddress;
@@ -40,6 +41,7 @@ struct ThreadInfo {
 
 class Detector {
 public:
+  using CommandFunction = std::function<int(std::vector<std::string>, char*, unsigned int*)>;
   using ThreadList = std::vector<ThreadInfo>;
   Detector(BaseSettings settings) : EFUSettings(settings), Stats("") {};
   // default constructor, all instruments must implement these methods
@@ -69,6 +71,8 @@ public:
   virtual ThreadList& GetThreadInfo() {
     return Threads;
   };
+  
+  virtual std::map<std::string, CommandFunction> GetDetectorCommandFunctions() {return DetectorCommands;}
 
   virtual void stopThreads() {
     runThreads.store(false);
@@ -83,7 +87,11 @@ protected:
   void AddThreadFunction(std::function<void(void)> &func, std::string funcName) {
     Threads.emplace_back(ThreadInfo{func, std::move(funcName), std::thread()});
   };
+  void AddCommandFunction(std::string Name, CommandFunction FunctionObj) {
+    DetectorCommands[Name] = FunctionObj;
+  };
   ThreadList Threads;
+  std::map<std::string, CommandFunction> DetectorCommands;
   std::atomic_bool runThreads{true};
   BaseSettings EFUSettings;
   NewStats Stats;
