@@ -30,6 +30,7 @@ add_subdirectory(multiblade)
 add_subdirectory(multigrid)
 add_subdirectory(sonde)
 add_subdirectory(udp)
+add_subdirectory(adc_readout)
 
 include(CMakeListsUnitTests.txt)
 
