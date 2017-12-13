@@ -41,27 +41,27 @@ struct ThreadInfo {
 class Detector {
 public:
   using ThreadList = std::vector<ThreadInfo>;
-  Detector(BaseSettings settings) : EFUSettings(settings), StatsTracker("") {};
+  Detector(BaseSettings settings) : EFUSettings(settings), Stats("") {};
   // default constructor, all instruments must implement these methods
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
    */
 
   /** @brief document */
-  virtual int statsize() { return StatsTracker.size(); }
+  virtual int statsize() { return Stats.size(); }
 
   /** @brief document */
   virtual int64_t statvalue(size_t index) {
-    return StatsTracker.value(index);
+    return Stats.value(index);
   }
 
   /** @brief document */
   virtual std::string &statname(size_t index) {
-    return StatsTracker.name(index);
+    return Stats.name(index);
   }
 
   void setStatsPrefix(std::string NewStatsPrefix) {
-    StatsTracker.setPrefix(NewStatsPrefix);
+    Stats.setPrefix(NewStatsPrefix);
   }
 
   virtual const char *detectorname() { return "no detector"; }
@@ -86,8 +86,8 @@ protected:
   ThreadList Threads;
   std::atomic_bool runThreads{true};
   BaseSettings EFUSettings;
+  NewStats Stats;
 private:
-  NewStats StatsTracker;
   std::string noname{""};
 };
 

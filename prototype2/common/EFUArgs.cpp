@@ -8,18 +8,18 @@
 #include <regex>
 
 EFUArgs::EFUArgs() {
-  CLIParser.add_option("-a,--logip", GraylogConfig.address, "Graylog server IP address")->set_default_val("127.0.0.1");
-  CLIParser.add_option("-b,--broker_addr", EFUSettings.KafkaBrokerAddress, "Kafka broker address")->set_default_val("localhost");
-  CLIParser.add_option("-k,--broker_port", EFUSettings.KafkaBrokerPort, "Kafka broker port")->set_default_val("9092");
-  CLIParser.add_option("-t,--broker_topic", EFUSettings.KafkaTopic, "Kafka broker topic")->set_default_val("Detector_data");
-  CLIParser.add_option("-c,--core_affinity", [this](std::vector<std::string> Input){return parseAffinityStrings(Input);}, "Thread to core affinity. Ex: \"-c input_t:4\"");
-  detectorOption = CLIParser.add_option("-d,--det", det, "Detector name")->required();
-  CLIParser.add_option("-i,--dip", EFUSettings.DetectorAddress, "IP address of receive interface")->set_default_val("0.0.0.0");
-  CLIParser.add_option("-p,--port", EFUSettings.DetectorPort, "TCP/UDP receive port")->set_default_val("9000");
-  CLIParser.add_option("-m,--cmdport", EFUSettings.CommandServerPort, "Command parser tcp port")->set_default_val("8888");
-  CLIParser.add_option("-g,--graphite", EFUSettings.GraphiteAddress, "IP address of graphite metrics server")->set_default_val("127.0.0.1");
-  CLIParser.add_option("-o,--gport", EFUSettings.GraphitePort, "Graphite tcp port")->set_default_val("2003");
-  CLIParser.add_option("-s,--stopafter", EFUSettings.StopAfterSec, "Terminate after timeout seconds")->set_default_val("4294967295"); //0xffffffffU
+  CLIParser.add_option("-a,--logip", GraylogConfig.address, "Graylog server IP address")->group("EFU Options")->set_default_val("127.0.0.1");
+  CLIParser.add_option("-b,--broker_addr", EFUSettings.KafkaBrokerAddress, "Kafka broker address")->group("EFU Options")->set_default_val("localhost");
+  CLIParser.add_option("-k,--broker_port", EFUSettings.KafkaBrokerPort, "Kafka broker port")->group("EFU Options")->set_default_val("9092");
+  CLIParser.add_option("-t,--broker_topic", EFUSettings.KafkaTopic, "Kafka broker topic")->group("EFU Options")->set_default_val("Detector_data");
+  CLIParser.add_option("-c,--core_affinity", [this](std::vector<std::string> Input){return parseAffinityStrings(Input);}, "Thread to core affinity. Ex: \"-c input_t:4\"")->group("EFU Options");
+  detectorOption = CLIParser.add_option("-d,--det", det, "Detector name")->group("EFU Options")->required();
+  CLIParser.add_option("-i,--dip", EFUSettings.DetectorAddress, "IP address of receive interface")->group("EFU Options")->set_default_val("0.0.0.0");
+  CLIParser.add_option("-p,--port", EFUSettings.DetectorPort, "TCP/UDP receive port")->group("EFU Options")->set_default_val("9000");
+  CLIParser.add_option("-m,--cmdport", EFUSettings.CommandServerPort, "Command parser tcp port")->group("EFU Options")->set_default_val("8888");
+  CLIParser.add_option("-g,--graphite", EFUSettings.GraphiteAddress, "IP address of graphite metrics server")->group("EFU Options")->set_default_val("127.0.0.1");
+  CLIParser.add_option("-o,--gport", EFUSettings.GraphitePort, "Graphite tcp port")->group("EFU Options")->set_default_val("2003");
+  CLIParser.add_option("-s,--stopafter", EFUSettings.StopAfterSec, "Terminate after timeout seconds")->group("EFU Options")->set_default_val("4294967295"); //0xffffffffU
 }
 
 bool EFUArgs::parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings) {
