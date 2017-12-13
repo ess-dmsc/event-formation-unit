@@ -27,8 +27,8 @@ protected:
   char *buffer;
   char flatbuffer[100000];
 
-  void addxandy(uint16_t xs, uint16_t xt, uint16_t xa,
-                uint16_t ys, uint16_t yt, uint16_t ya) {
+  void addxandy(uint16_t xs, uint16_t xt, uint16_t xa, uint16_t ys, uint16_t yt,
+                uint16_t ya) {
     e->strip = xs;
     e->time = xt;
     e->adc = xa;

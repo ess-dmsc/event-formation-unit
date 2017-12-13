@@ -4,13 +4,9 @@
 
 NewStats::NewStats() {}
 
-NewStats::~NewStats() {
-  
-}
+NewStats::~NewStats() {}
 
-NewStats::NewStats(std::string pre) {
-  setPrefix(pre);
-}
+NewStats::NewStats(std::string pre) { setPrefix(pre); }
 
 int NewStats::create(std::string statname, const int64_t &counter) {
   auto pfname = prefix + statname;
@@ -50,4 +46,3 @@ void NewStats::setPrefix(std::string StatsPrefix) {
   }
   prefix = StatsPrefix;
 }
-

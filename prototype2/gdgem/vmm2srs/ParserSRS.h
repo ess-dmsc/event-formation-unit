@@ -20,10 +20,10 @@ public:
   };
 
   struct VMM2Data {
-    uint16_t bcid; /**< bcid after graydecode */
-    uint16_t tdc;  /**< tdc value from vmm readout */
-    uint16_t adc;  /**< adc value from vmm readout */
-    uint16_t chno; /**< channel number from readout */
+    uint16_t bcid;          /**< bcid after graydecode */
+    uint16_t tdc;           /**< tdc value from vmm readout */
+    uint16_t adc;           /**< adc value from vmm readout */
+    uint16_t chno;          /**< channel number from readout */
     uint16_t overThreshold; /**< over threshold flag for channel from readout */
     /**< @todo flags? */
   };

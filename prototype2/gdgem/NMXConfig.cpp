@@ -1,30 +1,27 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <gdgem/NMXConfig.h>
 #include <common/Trace.h>
+#include <gdgem/NMXConfig.h>
 
 #include <dataformats/multigrid/inc/json.h>
 #include <fstream>
 #include <sstream>
 
-NMXConfig::NMXConfig(std::string jsonfile)
-{
+NMXConfig::NMXConfig(std::string jsonfile) {
   Json::Value root{};
   Json::Reader reader{};
   std::ifstream t(jsonfile);
   std::string str((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
 
-  if (!reader.parse(str, root, 0))
-  {
+  if (!reader.parse(str, root, 0)) {
     XTRACE(INIT, WAR, "Invalid Json file: %s\n", jsonfile.c_str());
     return;
   }
 
   builder_type = root["builder_type"].asString();
 
-  if (builder_type == "SRS")
-  {
+  if (builder_type == "SRS") {
     /**< @todo get from slow control? */
     auto tc = root["time_config"];
     time_config.set_tac_slope(tc["tac_slope"].asInt());
@@ -47,7 +44,8 @@ NMXConfig::NMXConfig(std::string jsonfile)
   analyze_max_timebins = root["analyze_max_timebins"].asInt();
   analyze_max_timedif = root["analyze_max_timedif"].asInt();
 
-  enforce_lower_uncertainty_limit = root["enforce_lower_uncertainty_limit"].asBool();
+  enforce_lower_uncertainty_limit =
+      root["enforce_lower_uncertainty_limit"].asBool();
   lower_uncertainty_limit = root["lower_uncertainty_limit"].asInt();
   enforce_minimum_eventlets = root["enforce_minimum_eventlets"].asBool();
   minimum_eventlets = root["minimum_eventlets"].asInt();
@@ -63,18 +61,16 @@ NMXConfig::NMXConfig(std::string jsonfile)
   dump_directory = root["dump_directory"].asString();
 }
 
-std::string NMXConfig::debug() const
-{
+std::string NMXConfig::debug() const {
   std::stringstream ss;
   ss << "  builder_type = " << builder_type << "\n";
-  if (builder_type == "SRS")
-  {
+  if (builder_type == "SRS") {
     ss << "  time = " << time_config.debug() << "\n";
     ss << "  mappings:\n" << srs_mappings.debug();
   }
   ss << "  cluster_min_timespan = " << cluster_min_timespan << "\n";
-  ss << "  analyze_weighted = "
-     << (analyze_weighted ? "true" : "false") << "\n";
+  ss << "  analyze_weighted = " << (analyze_weighted ? "true" : "false")
+     << "\n";
   ss << "  analyze_max_timebins = " << analyze_max_timebins << "\n";
   ss << "  analyze_max_timedif = " << analyze_max_timedif << "\n";
 

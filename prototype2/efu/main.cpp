@@ -6,6 +6,7 @@
 #include <common/Version.h>
 #include <efu/ExitHandler.h>
 #include <efu/Launcher.h>
+#include <efu/Loader.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
 #include <iostream>
@@ -13,7 +14,6 @@
 #include <libs/include/gccintel.h>
 #include <unistd.h> // sleep()
 #include <vector>
-#include <efu/Loader.h>
 
 #define ONE_SECOND_US 1000000U
 
@@ -31,7 +31,8 @@ int main(int argc, char *argv[]) {
     return -1;
   }
 
-  {//This is to prevent accessing unloaded memory in a (potentially) unloaded plugin.
+  { // This is to prevent accessing unloaded memory in a (potentially) unloaded
+    // plugin.
     auto CLIArgPopulator = loader.GetCLIParserPopulator();
     CLIArgPopulator(efu_args.CLIParser);
   }
@@ -39,7 +40,8 @@ int main(int argc, char *argv[]) {
     return 0;
   }
   efu_args.printSettings();
-  std::shared_ptr<Detector> detector = loader.createDetector(efu_args.GetBaseSettings());
+  std::shared_ptr<Detector> detector =
+      loader.createDetector(efu_args.GetBaseSettings());
 
   auto EFUSettings = efu_args.GetBaseSettings();
 
@@ -49,8 +51,7 @@ int main(int argc, char *argv[]) {
 
 #ifdef GRAYLOG
   GraylogSettings GLConfig = efu_args.getGraylogSettings();
-  Log::AddLogHandler(
-      new GraylogInterface(GLConfig.address, GLConfig.port));
+  Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
   Log::SetMinimumSeverity(Severity::Debug);
 #endif
 
@@ -58,7 +59,8 @@ int main(int argc, char *argv[]) {
   GLOG_INF("Event Formation Unit version: " + efu_version());
   GLOG_INF("Event Formation Unit build: " + efu_buildstr());
   XTRACE(MAIN, ALW, "Starting Event Formation unit\n");
-  XTRACE(MAIN, ALW, "Event Formation Software Version: %s\n", efu_version().c_str());
+  XTRACE(MAIN, ALW, "Event Formation Software Version: %s\n",
+         efu_version().c_str());
   XTRACE(MAIN, ALW, "Event Formation Unit build: %s\n", EFU_STR(BUILDSTR));
 
   if (EFUSettings.StopAfterSec == 0) {
@@ -66,8 +68,6 @@ int main(int argc, char *argv[]) {
     GLOG_INF("Event Formation Unit Exit (Immediate)");
     return 0;
   }
-
-
 
   XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", efu_args.det.c_str());
 
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
   Timer stop_timer, stop_cmd, livestats;
 
   while (1) {
-    if (stop_cmd.timeus() >= (uint64_t)ONE_SECOND_US/10) {
+    if (stop_cmd.timeus() >= (uint64_t)ONE_SECOND_US / 10) {
       if (keep_running == 0) {
         XTRACE(INIT, ALW, "Application stop, Exiting...\n");
         detector->stopThreads();
@@ -93,7 +93,8 @@ int main(int argc, char *argv[]) {
       }
     }
 
-    if (stop_timer.timeus() >= EFUSettings.StopAfterSec * (uint64_t)ONE_SECOND_US) {
+    if (stop_timer.timeus() >=
+        EFUSettings.StopAfterSec * (uint64_t)ONE_SECOND_US) {
       XTRACE(MAIN, ALW, "Application timeout, Exiting...\n");
       GLOG_INF("Event Formation Unit Exiting (User timeout)");
       detector->stopThreads();
@@ -112,7 +113,9 @@ int main(int argc, char *argv[]) {
   }
 
   if (detector.use_count() > 1) {
-    XTRACE(MAIN, WAR, "There are more than 1 strong pointers to the detector. This application may crash on exit.\n");
+    XTRACE(MAIN, WAR,
+           "There are more than 1 strong pointers to the detector. This "
+           "application may crash on exit.\n");
   }
 
   detector.reset();

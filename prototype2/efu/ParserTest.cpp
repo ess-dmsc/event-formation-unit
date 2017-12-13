@@ -54,7 +54,9 @@ std::vector<std::string> check_detector_loaded {
 
 class TestDetector : public Detector {
 public:
-  TestDetector(UNUSED BaseSettings settings) : Detector(settings) { std::cout << "TestDetector" << std::endl; };
+  TestDetector(UNUSED BaseSettings settings) : Detector(settings) {
+    std::cout << "TestDetector" << std::endl;
+  };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
 
@@ -80,9 +82,7 @@ protected:
     parser = new Parser(detectorif, keeprunning);
   }
 
-  virtual void TearDown() {
-    delete parser;
-  }
+  virtual void TearDown() { delete parser; }
 
   static const unsigned int buffer_size = 9000;
 
@@ -187,7 +187,6 @@ TEST_F(ParserTest, DuplicateCommands) {
   ASSERT_EQ(res, -1);
 }
 
-
 #if 0
 TEST_F(ParserTest, SysCallFail) {
   const char *cmd = "CSPEC_LOAD_CALIB calib_data/cal_zero";
@@ -231,7 +230,6 @@ TEST_F(ParserTest, DetectorInfo) {
   int res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(res, -Parser::OK);
 }
-
 
 // TEST_F(ParserTest, ExitCommand) {
 //   const char *cmd = "EXIT";

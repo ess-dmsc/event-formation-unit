@@ -76,8 +76,9 @@ TEST_F(NMXVMM2SRSDataTest, EndOfFrame) {
 }
 
 TEST_F(NMXVMM2SRSDataTest, DataSizeError) {
-  std::vector<unsigned int> badsizes = {13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24,
-                               25, 26, 27, 29, 30, 31, 32, 33, 34, 35};
+  std::vector<unsigned int> badsizes = {13, 14, 15, 16, 17, 18, 19,
+                                        21, 22, 23, 24, 25, 26, 27,
+                                        29, 30, 31, 32, 33, 34, 35};
   std::vector<unsigned int> goodsizes = {20, 28, 36};
   for (auto datasize : badsizes) {
     unsigned int res = data->receive((char *)&data_3_ch0[0], datasize);

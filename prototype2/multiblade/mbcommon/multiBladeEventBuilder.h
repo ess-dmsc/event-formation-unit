@@ -290,11 +290,11 @@ private:
   bool checkAdjacency(std::vector<point> &cluster);
 
   /*! Function to calculate either wire or strip position.
-  * Will use weigthed average or max ADC as selected.
-  * Returns -1 if position cannot be determined
-  * @param cluster
-  * @return Position of the cluster (wire or strip)
-  */
+   * Will use weigthed average or max ADC as selected.
+   * Returns -1 if position cannot be determined
+   * @param cluster
+   * @return Position of the cluster (wire or strip)
+   */
   double calculatePosition(std::vector<point> &cluster);
 
   /*! Increments monitoring counters.  */

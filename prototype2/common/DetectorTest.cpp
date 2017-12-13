@@ -8,7 +8,9 @@
 
 class TestDetector : public Detector {
 public:
-  TestDetector(UNUSED BaseSettings settings) : Detector(settings) { std::cout << "TestDetector" << std::endl; };
+  TestDetector(UNUSED BaseSettings settings) : Detector(settings) {
+    std::cout << "TestDetector" << std::endl;
+  };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
 
@@ -27,24 +29,20 @@ TestDetectorFactory Factory;
 class DetectorTest : public TestBase {
 protected:
   BaseSettings settings;
-  virtual void SetUp() {
-    det = Factory.create(settings);
-  }
+  virtual void SetUp() { det = Factory.create(settings); }
 
   virtual void TearDown() {}
 
-  void assertcapture(const char * expected_output) {
+  void assertcapture(const char *expected_output) {
     std::string captured_output = testing::internal::GetCapturedStdout();
-    ASSERT_TRUE(captured_output.find(expected_output) !=  std::string::npos);
+    ASSERT_TRUE(captured_output.find(expected_output) != std::string::npos);
   };
 
   std::shared_ptr<Detector> det;
   void *dummyargs; // Used for calling thread functions
 };
 
-
 TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != nullptr); }
-
 
 TEST_F(DetectorTest, StatAPI) {
   int res = det->statsize();

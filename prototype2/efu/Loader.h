@@ -6,21 +6,22 @@
  */
 
 #pragma once
+#include <CLI/CLI11.hpp>
 #include <common/Detector.h>
+#include <functional>
 #include <memory>
 #include <string>
-#include <functional>
-#include <CLI/CLI11.hpp>
 
 class Loader {
 private:
   void *handle{nullptr};
-  
+
   DetectorFactory *myFactory{nullptr};
-  
+
   std::function<void(CLI::App &CLIParser)> ParserPopulator;
+
 public:
-//  std::shared_ptr<Detector> detector{nullptr};
+  //  std::shared_ptr<Detector> detector{nullptr};
 
   /** @brief Load instrument plugin from detector name
    *  @param name Instrument name - .so suffix will be added
@@ -31,15 +32,17 @@ public:
 
   /** @brief minimal destructor */
   ~Loader();
-  
+
   bool IsOk() {
     if (nullptr == myFactory) {
       return false;
     }
     return true;
   }
-  
+
   std::shared_ptr<Detector> createDetector(BaseSettings settings);
-  
-  std::function<void(CLI::App &CLIParser)> GetCLIParserPopulator() {return ParserPopulator;};
+
+  std::function<void(CLI::App &CLIParser)> GetCLIParserPopulator() {
+    return ParserPopulator;
+  };
 };

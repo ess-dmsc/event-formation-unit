@@ -31,7 +31,7 @@ public:
 const char *UDPRaw::detectorname() { return classname; }
 
 UDPRaw::UDPRaw(BaseSettings settings) : Detector(settings) {
-  std::function<void()> inputFunc = [this](){UDPRaw::input_thread();};
+  std::function<void()> inputFunc = [this]() { UDPRaw::input_thread(); };
   AddThreadFunction(inputFunc, "input");
   std::cout << "    UDPRaw created" << std::endl;
 }
@@ -42,7 +42,8 @@ void UDPRaw::input_thread() {
   uint64_t rxp = 0;
   const int B1M = 1000000;
 
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+                         EFUSettings.DetectorPort);
   UDPServer raw(local);
   raw.setbuffers(4000000, 4000000);
   // raw.settimeout(0, 100000);
@@ -73,7 +74,8 @@ void UDPRaw::input_thread() {
       rxp++;
     }
 
-    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000UL * TSC_MHZ) {
+    if (report_timer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000UL * TSC_MHZ) {
       timeseq++;
       auto usecs = rate_timer.timeus();
       if (timeseq == 2) {

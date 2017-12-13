@@ -9,7 +9,7 @@ TEST_F(EFUArgsTest, Constructor) {
   EFUArgs efu_args;
   auto settings = efu_args.GetBaseSettings();
 
-  //ASSERT_EQ(12, settings.cpustart); /**< todo fixme */
+  // ASSERT_EQ(12, settings.cpustart); /**< todo fixme */
   ASSERT_EQ("0.0.0.0", settings.DetectorAddress);
   ASSERT_EQ(9000, settings.DetectorPort);
   ASSERT_EQ("localhost", settings.KafkaBrokerAddress);
@@ -18,8 +18,6 @@ TEST_F(EFUArgsTest, Constructor) {
   ASSERT_EQ(2003, settings.GraphitePort);
   ASSERT_EQ(0xffffffffU, settings.StopAfterSec);
 }
-
-
 
 TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
 
@@ -43,7 +41,6 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   auto settings = efu_args.GetBaseSettings();
   auto glsettings = efu_args.getGraylogSettings();
 
-
   ASSERT_EQ("mybroker", settings.KafkaBrokerAddress);
   // ASSERT_EQ(99, opts.cpustart); /**< todo fixme */
   ASSERT_EQ("myinst", efu_args.det);
@@ -55,7 +52,6 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   ASSERT_EQ("10.0.0.1", glsettings.address);
   ASSERT_EQ(8989, settings.CommandServerPort);
 }
-
 
 TEST_F(EFUArgsTest, HelpText) {
   int myargc = 2;

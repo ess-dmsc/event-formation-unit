@@ -14,12 +14,12 @@
 MBData mbdata;
 unsigned char databuffer[100000];
 
-static void Setup(__attribute__((unused)) benchmark::State& state) {
+static void Setup(__attribute__((unused)) benchmark::State &state) {
   memset(databuffer, 0, sizeof(databuffer));
 }
 BENCHMARK(Setup);
 
-static void ReceiveData(benchmark::State& state) {
+static void ReceiveData(benchmark::State &state) {
   Setup(state);
   uint32_t items = 0;
 
@@ -31,6 +31,6 @@ static void ReceiveData(benchmark::State& state) {
   state.SetBytesProcessed(state.iterations() * state.range(0));
   state.SetItemsProcessed(items);
 };
-BENCHMARK(ReceiveData)->RangeMultiplier(2)->Range(8, 80<<10)->Complexity();
+BENCHMARK(ReceiveData)->RangeMultiplier(2)->Range(8, 80 << 10)->Complexity();
 
 BENCHMARK_MAIN();

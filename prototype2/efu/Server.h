@@ -24,9 +24,9 @@ static_assert(SERVER_MAX_CLIENTS <= FD_SETSIZE, "Too many clients");
 class Server {
 public:
   /** @brief Server for program control and stats
- *  @param port tcp port
- *  @param args - needed to access Stat.h counters
- */
+   *  @param port tcp port
+   *  @param args - needed to access Stat.h counters
+   */
   Server(int port, Parser &parse);
 
   /** @brief Setup socket parameters

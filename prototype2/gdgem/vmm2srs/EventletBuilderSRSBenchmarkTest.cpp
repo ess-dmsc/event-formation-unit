@@ -6,11 +6,11 @@
 #include <string>
 #include <unistd.h>
 
-BuilderSRS * builder;
+BuilderSRS *builder;
 Clusterer clusterer(30);
 NMXHists hists;
 
-static void Setup(__attribute__((unused)) benchmark::State& state) {
+static void Setup(__attribute__((unused)) benchmark::State &state) {
   SRSMappings geometry;
   SRSTime time;
   geometry.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
@@ -19,12 +19,14 @@ static void Setup(__attribute__((unused)) benchmark::State& state) {
 }
 BENCHMARK(Setup);
 
-static void ParseData(benchmark::State& state) {
+static void ParseData(benchmark::State &state) {
   uint64_t eventlets = 0;
   Setup(state);
 
   for (auto _ : state) {
-    auto stats = builder->process_buffer((char*)srsdata_22_eventlets, sizeof(srsdata_22_eventlets), clusterer, hists);
+    auto stats =
+        builder->process_buffer((char *)srsdata_22_eventlets,
+                                sizeof(srsdata_22_eventlets), clusterer, hists);
     eventlets += stats.valid_eventlets;
   }
   state.SetBytesProcessed(state.iterations() * sizeof(srsdata_22_eventlets));

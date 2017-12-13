@@ -10,9 +10,10 @@
 #include <string>
 #include <vector>
 
-//typedef int (*function_ptr)(std::vector<std::string> cmdargs, char *output,
+// typedef int (*function_ptr)(std::vector<std::string> cmdargs, char *output,
 //                            unsigned int *osize);
-using cmdFunction = std::function<int(std::vector<std::string>,char*, unsigned int*)>;
+using cmdFunction =
+    std::function<int(std::vector<std::string>, char *, unsigned int *)>;
 
 class Parser {
 public:

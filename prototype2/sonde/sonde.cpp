@@ -34,13 +34,11 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 class SONDEIDEA : public Detector {
 public:
   SONDEIDEA(BaseSettings settings);
-  ~SONDEIDEA() {
-    printf("sonde destructor called\n");
-  }
+  ~SONDEIDEA() { printf("sonde destructor called\n"); }
 
   void input_thread();
   void processing_thread();
-  
+
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
@@ -53,8 +51,7 @@ private:
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
-  NewStats ns{
-      "efu2.sonde."}; //
+  NewStats ns{"efu2.sonde."}; //
 
   struct {
     // Input Counters
@@ -73,13 +70,13 @@ private:
   } ALIGN(64) mystats;
 };
 
-void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {}
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
 SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector(settings) {
   Stats.setPrefix("efu2.sonde");
-  
+
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
   Stats.create("input.rx_packets",                mystats.rx_packets);
@@ -92,15 +89,18 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector(settings) {
   Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
   Stats.create("output.tx_bytes",                 mystats.tx_bytes);
   // clang-format on
-  std::function<void()> inputFunc = [this](){SONDEIDEA::input_thread();};
+  std::function<void()> inputFunc = [this]() { SONDEIDEA::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
-  std::function<void()> processingFunc = [this](){SONDEIDEA::processing_thread();};
+  std::function<void()> processingFunc = [this]() {
+    SONDEIDEA::processing_thread();
+  };
   Detector::AddThreadFunction(processingFunc, "processing");
 
   XTRACE(INIT, ALW, "Creating %d SONDE Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 1); /** @todo testing workaround */
+  eth_ringbuf = new RingBuffer<eth_buffer_size>(
+      eth_buffer_max_entries + 1); /** @todo testing workaround */
   assert(eth_ringbuf != 0);
 }
 
@@ -108,7 +108,8 @@ const char *SONDEIDEA::detectorname() { return classname; }
 
 void SONDEIDEA::input_thread() {
   /** Connection setup */
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+                         EFUSettings.DetectorPort);
   UDPServer sondedata(local);
   sondedata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   sondedata.printbuffers();
@@ -121,7 +122,7 @@ void SONDEIDEA::input_thread() {
     /** this is the processing step */
     eth_ringbuf->setdatalength(eth_index, 0);
     if ((rdsize = sondedata.receive(eth_ringbuf->getdatabuffer(eth_index),
-                                  eth_ringbuf->getmaxbufsize())) > 0) {
+                                    eth_ringbuf->getmaxbufsize())) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
       eth_ringbuf->setdatalength(eth_index, rdsize);
@@ -144,7 +145,8 @@ void SONDEIDEA::input_thread() {
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
   IDEASData ideasdata(&geometry);
-  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" + std::to_string(EFUSettings.KafkaBrokerPort);
+  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" +
+                             std::to_string(EFUSettings.KafkaBrokerPort);
   Producer eventprod(BrokerString, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
@@ -162,7 +164,8 @@ void SONDEIDEA::processing_thread() {
       if (len == 0) {
         mystats.fifo_seq_errors++;
       } else {
-        int events = ideasdata.parse_buffer(eth_ringbuf->getdatabuffer(data_index), len);
+        int events =
+            ideasdata.parse_buffer(eth_ringbuf->getdatabuffer(data_index), len);
 
         mystats.rx_geometry_errors += ideasdata.errors;
         mystats.rx_events += ideasdata.events;
@@ -170,14 +173,15 @@ void SONDEIDEA::processing_thread() {
 
         if (events > 0) {
           for (int i = 0; i < events; i++) {
-              XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)\n", i,
-                      ideasdata.data[i].time,
-                      ideasdata.data[i].pixel_id);
-              mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
+            XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)\n",
+                   i, ideasdata.data[i].time, ideasdata.data[i].pixel_id);
+            mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time,
+                                                    ideasdata.data[i].pixel_id);
           }
         }
 
-        if (produce_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+        if (produce_timer.timetsc() >=
+            EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
           mystats.tx_bytes += flatbuffer.produce();
           produce_timer.now();
         }

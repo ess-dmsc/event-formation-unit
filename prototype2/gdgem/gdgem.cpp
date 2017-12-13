@@ -8,6 +8,8 @@
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <cstring>
+#include <dataformats/multigrid/inc/json.h>
+#include <fstream>
 #include <gdgem/nmx/Geometry.h>
 #include <gdgem/nmx/HistSerializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
@@ -19,11 +21,9 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
+#include <sstream>
 #include <stdio.h>
 #include <unistd.h>
-#include <dataformats/multigrid/inc/json.h>
-#include <fstream>
-#include <sstream>
 
 #include <gdgem/NMXConfig.h>
 
@@ -42,8 +42,12 @@ struct NMXSettingsStruct {
   std::string ConfigFile;
 } NMXSettings;
 
-void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {
-  parser.add_option("-f,--file", NMXSettings.ConfigFile, "NMX (gdgem) specific config file")->group("NMX")->required();
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+  parser
+      .add_option("-f,--file", NMXSettings.ConfigFile,
+                  "NMX (gdgem) specific config file")
+      ->group("NMX")
+      ->required();
 }
 
 class NMX : public Detector {
@@ -52,7 +56,7 @@ public:
   ~NMX();
   void input_thread();
   void processing_thread();
-  
+
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
@@ -89,15 +93,13 @@ private:
 
   NMXConfig nmx_opts;
 
-  std::shared_ptr<AbstractBuilder> builder_ {nullptr};
+  std::shared_ptr<AbstractBuilder> builder_{nullptr};
   void init_builder(std::string jsonfile);
 };
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
-NMX::~NMX() {
-  printf("NMX detector destructor called\n");
-}
+NMX::~NMX() { printf("NMX detector destructor called\n"); }
 
 NMX::NMX(BaseSettings settings) : Detector(settings) {
   Stats.setPrefix("efu2.nmx");
@@ -119,15 +121,16 @@ NMX::NMX(BaseSettings settings) : Detector(settings) {
   Stats.create("output.tx_bytes",                 mystats.tx_bytes);
   // clang-format on
 
-  std::function<void()> inputFunc = [this](){NMX::input_thread();};
-    Detector::AddThreadFunction(inputFunc, "input");
+  std::function<void()> inputFunc = [this]() { NMX::input_thread(); };
+  Detector::AddThreadFunction(inputFunc, "input");
 
-  std::function<void()> processingFunc = [this](){NMX::processing_thread();};
-    Detector::AddThreadFunction(processingFunc, "processing");
+  std::function<void()> processingFunc = [this]() { NMX::processing_thread(); };
+  Detector::AddThreadFunction(processingFunc, "processing");
 
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11); /**< @todo testing workaround */
+  eth_ringbuf = new RingBuffer<eth_buffer_size>(
+      eth_buffer_max_entries + 11); /**< @todo testing workaround */
   assert(eth_ringbuf != 0);
 }
 
@@ -135,10 +138,11 @@ const char *NMX::detectorname() { return classname; }
 
 void NMX::input_thread() {
   /** Connection setup */
-  //Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
+  // Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+                         EFUSettings.DetectorPort);
   UDPServer nmxdata(local);
-  //nmxdata.buflen(opts->buflen);
+  // nmxdata.buflen(opts->buflen);
   nmxdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   nmxdata.printbuffers();
   nmxdata.settimeout(0, 100000); // 1/10 second
@@ -149,7 +153,8 @@ void NMX::input_thread() {
     unsigned int eth_index = eth_ringbuf->getindex();
 
     /** this is the processing step */
-    eth_ringbuf->setdatalength(eth_index, 0); /**@todo @fixme buffer corruption can occur */
+    eth_ringbuf->setdatalength(
+        eth_index, 0); /**@todo @fixme buffer corruption can occur */
     if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                   eth_ringbuf->getmaxbufsize())) > 0) {
       eth_ringbuf->setdatalength(eth_index, rdsize);
@@ -184,7 +189,8 @@ void NMX::processing_thread() {
   geometry.add_dimension(nmx_opts.geometry_x);
   geometry.add_dimension(nmx_opts.geometry_y);
 
-  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" + std::to_string(EFUSettings.KafkaBrokerPort);
+  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" +
+                             std::to_string(EFUSettings.KafkaBrokerPort);
   Producer eventprod(BrokerString, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
@@ -198,12 +204,12 @@ void NMX::processing_thread() {
   TSCTimer global_time, report_timer;
 
   EventNMX event;
-  std::vector<uint16_t> coords {0,0};
+  std::vector<uint16_t> coords{0, 0};
   uint32_t time;
   uint32_t pixelid;
 
   unsigned int data_index;
-  int sample_next_track {0};
+  int sample_next_track{0};
   while (1) {
     mystats.fifo1_free = input2proc_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
@@ -214,7 +220,8 @@ void NMX::processing_thread() {
       if (len == 0) {
         mystats.fifo_seq_errors++;
       } else {
-        auto stats = builder_->process_buffer(eth_ringbuf->getdatabuffer(data_index), len, clusterer, hists);
+        auto stats = builder_->process_buffer(
+            eth_ringbuf->getdatabuffer(data_index), len, clusterer, hists);
 
         mystats.rx_readouts += stats.valid_eventlets;
         mystats.rx_error_bytes += stats.error_bytes;
@@ -236,18 +243,14 @@ void NMX::processing_thread() {
             }
 
             XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
-                   event.x.center_rounded(),
-                   event.y.center_rounded());
+                   event.x.center_rounded(), event.y.center_rounded());
 
-            if (
-                (!nmx_opts.enforce_lower_uncertainty_limit ||
-                 event.meets_lower_cirterion(nmx_opts.lower_uncertainty_limit))
-                &&
+            if ((!nmx_opts.enforce_lower_uncertainty_limit ||
+                 event.meets_lower_cirterion(
+                     nmx_opts.lower_uncertainty_limit)) &&
                 (!nmx_opts.enforce_minimum_eventlets ||
                  (event.x.entries.size() >= nmx_opts.minimum_eventlets &&
-                  event.y.entries.size() >= nmx_opts.minimum_eventlets))
-                )
-            {
+                  event.y.entries.size() >= nmx_opts.minimum_eventlets))) {
               coords[0] = event.x.center_rounded();
               coords[1] = event.y.center_rounded();
               pixelid = geometry.to_pixid(coords);
@@ -256,22 +259,23 @@ void NMX::processing_thread() {
               } else {
                 time = static_cast<uint32_t>(event.time_start());
 
-                XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n",
-                       time, pixelid);
+                XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n", time, pixelid);
 
                 mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
                 mystats.tx_events++;
               }
             }
           } else {
-            mystats.rx_discards += event.x.entries.size() + event.y.entries.size();
+            mystats.rx_discards +=
+                event.x.entries.size() + event.y.entries.size();
           }
         }
       }
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (report_timer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
       sample_next_track = 1;
 
@@ -285,7 +289,8 @@ void NMX::processing_thread() {
       }
 
       if (hists.empty()) {
-        XTRACE(PROCESS, DEB, "Sending histogram for %zu eventlets and %zu clusters \n",
+        XTRACE(PROCESS, DEB,
+               "Sending histogram for %zu eventlets and %zu clusters \n",
                hists.eventlet_count(), hists.cluster_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
@@ -295,7 +300,8 @@ void NMX::processing_thread() {
 
       if (not runThreads) {
         XTRACE(INPUT, ALW, "Stopping input thread.\n");
-        builder_.reset();      /**< @fixme this is a hack to force ~BuilderSRS() call */
+        builder_
+            .reset(); /**< @fixme this is a hack to force ~BuilderSRS() call */
         delete builder_.get(); /**< @fixme see above */
         return;
       }
@@ -305,21 +311,19 @@ void NMX::processing_thread() {
   }
 }
 
-void NMX::init_builder(std::string jsonfile)
-{
+void NMX::init_builder(std::string jsonfile) {
   nmx_opts = NMXConfig(jsonfile);
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
   if (nmx_opts.builder_type == "H5") {
     XTRACE(INIT, DEB, "Make BuilderH5\n");
-    builder_ = std::make_shared<BuilderH5>
-        (nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
-  }
-  else if (nmx_opts.builder_type == "SRS") {
+    builder_ = std::make_shared<BuilderH5>(nmx_opts.dump_directory,
+                                           nmx_opts.dump_csv, nmx_opts.dump_h5);
+  } else if (nmx_opts.builder_type == "SRS") {
     XTRACE(INIT, DEB, "Make BuilderSRS\n");
-    builder_ = std::make_shared<BuilderSRS>
-        (nmx_opts.time_config, nmx_opts.srs_mappings, nmx_opts.dump_directory,
-         nmx_opts.dump_csv, nmx_opts.dump_h5);
+    builder_ = std::make_shared<BuilderSRS>(
+        nmx_opts.time_config, nmx_opts.srs_mappings, nmx_opts.dump_directory,
+        nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else {
     XTRACE(INIT, ALW, "Unrecognized builder type in config\n");
   }

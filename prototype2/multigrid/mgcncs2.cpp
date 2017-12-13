@@ -11,12 +11,12 @@
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
-#include <multigrid/mgcncs/ChanConv.h>
-#include <multigrid/mgcncs/Data.h>
-#include <multigrid/mgcncs/MultigridGeometry.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
 #include <multigrid/mgcncs/CalibrationFile.h>
+#include <multigrid/mgcncs/ChanConv.h>
+#include <multigrid/mgcncs/Data.h>
+#include <multigrid/mgcncs/MultigridGeometry.h>
 //#include <cspec/CSPECEvent.h>
 #include <cstring>
 #include <iostream>
@@ -45,16 +45,18 @@ public:
   CSPEC(BaseSettings settings);
   void input_thread();
   void processing_thread();
-  
+
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 1000;
   static const int eth_buffer_size = 9000;
   static const int kafka_buffer_size = 1000000;
-  
-  int LoadCalib(std::vector<std::string> cmdargs, UNUSED char *output, UNUSED unsigned int *obytes);
-  int ShowCalib(std::vector<std::string> cmdargs, UNUSED char *output, UNUSED unsigned int *obytes);
+
+  int LoadCalib(std::vector<std::string> cmdargs, UNUSED char *output,
+                UNUSED unsigned int *obytes);
+  int ShowCalib(std::vector<std::string> cmdargs, UNUSED char *output,
+                UNUSED unsigned int *obytes);
 
 private:
   /** Shared between input_thread and processing_thread*/
@@ -82,19 +84,19 @@ private:
     int64_t rx_events;
     int64_t tx_bytes;
   } ALIGN(64) mystats;
-  
+
   std::atomic_bool NewCalibrationData{false};
   uint16_t wirecal[CSPECChanConv::adcsize];
   uint16_t gridcal[CSPECChanConv::adcsize];
 };
 
-void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {}
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
 //=============================================================================
-int CSPEC::LoadCalib(std::vector<std::string> cmdargs,
-                            UNUSED char *output, UNUSED unsigned int *obytes) {
+int CSPEC::LoadCalib(std::vector<std::string> cmdargs, UNUSED char *output,
+                     UNUSED unsigned int *obytes) {
   XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
   GLOG_INF("CSPEC_LOAD_CALIB");
   if (cmdargs.size() != 2) {
@@ -102,8 +104,7 @@ int CSPEC::LoadCalib(std::vector<std::string> cmdargs,
     return -Parser::EBADARGS;
   }
   CalibrationFile calibfile;
-  auto ret = calibfile.load(cmdargs.at(1), (char *)wirecal,
-                            (char *)gridcal);
+  auto ret = calibfile.load(cmdargs.at(1), (char *)wirecal, (char *)gridcal);
   if (ret < 0) {
     return -Parser::EBADARGS;
   }
@@ -114,7 +115,7 @@ int CSPEC::LoadCalib(std::vector<std::string> cmdargs,
 
 //=============================================================================
 int CSPEC::ShowCalib(std::vector<std::string> cmdargs, char *output,
-                            unsigned int *obytes) {
+                     unsigned int *obytes) {
   auto nargs = cmdargs.size();
   unsigned int offset = 0;
   XTRACE(CMD, INF, "CSPEC_SHOW_CALIB\n");
@@ -132,16 +133,16 @@ int CSPEC::ShowCalib(std::vector<std::string> cmdargs, char *output,
     return -Parser::EBADARGS;
   }
 
-  *obytes = snprintf(
-      output, SERVER_BUFFER_SIZE, "wire %d 0x%04x, grid %d 0x%04x", offset,
-      wirecal[offset], offset, gridcal[offset]);
+  *obytes =
+      snprintf(output, SERVER_BUFFER_SIZE, "wire %d 0x%04x, grid %d 0x%04x",
+               offset, wirecal[offset], offset, gridcal[offset]);
 
   return Parser::OK;
 }
 
 CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
   Stats.setPrefix("efu2.cspec2");
-  
+
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
   Stats.create("input.rx_packets",                mystats.rx_packets);
@@ -158,14 +159,24 @@ CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
   Stats.create("output.tx_bytes",                 mystats.tx_bytes);
   // clang-format on
 
-  std::function<void()> inputFunc = [this](){CSPEC::input_thread();};
+  std::function<void()> inputFunc = [this]() { CSPEC::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
-  std::function<void()> processingFunc = [this](){CSPEC::processing_thread();};
+  std::function<void()> processingFunc = [this]() {
+    CSPEC::processing_thread();
+  };
   Detector::AddThreadFunction(processingFunc, "processing");
-  
-  AddCommandFunction("CSPEC_LOAD_CALIB", [this](std::vector<std::string> cmdargs, char *output, unsigned int *obytes){return CSPEC::LoadCalib(cmdargs, output, obytes);});
-  AddCommandFunction("CSPEC_SHOW_CALIB", [this](std::vector<std::string> cmdargs, char *output, unsigned int *obytes){return CSPEC::ShowCalib(cmdargs, output, obytes);});
+
+  AddCommandFunction("CSPEC_LOAD_CALIB",
+                     [this](std::vector<std::string> cmdargs, char *output,
+                            unsigned int *obytes) {
+                       return CSPEC::LoadCalib(cmdargs, output, obytes);
+                     });
+  AddCommandFunction("CSPEC_SHOW_CALIB",
+                     [this](std::vector<std::string> cmdargs, char *output,
+                            unsigned int *obytes) {
+                       return CSPEC::ShowCalib(cmdargs, output, obytes);
+                     });
 
   XTRACE(INIT, ALW, "Creating %d Ethernet ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
@@ -176,7 +187,8 @@ const char *CSPEC::detectorname() { return classname; }
 
 void CSPEC::input_thread() {
   /** Connection setup */
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+                         EFUSettings.DetectorPort);
   UDPServer cspecdata(local);
   cspecdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   cspecdata.printbuffers();
@@ -213,7 +225,8 @@ void CSPEC::input_thread() {
 
 void CSPEC::processing_thread() {
   CSPECChanConv conv;
-  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" + std::to_string(EFUSettings.KafkaBrokerPort);
+  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" +
+                             std::to_string(EFUSettings.KafkaBrokerPort);
   Producer producer(BrokerString, "C-SPEC_detector");
   FBSerializer flatbuffer(kafka_buffer_size, producer);
 
@@ -266,7 +279,8 @@ void CSPEC::processing_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (report_timer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       mystats.tx_bytes += flatbuffer.produce();
       report_timer.now();
     }

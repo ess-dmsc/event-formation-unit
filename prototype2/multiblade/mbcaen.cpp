@@ -3,14 +3,14 @@
 //
 
 #include <cinttypes>
-#include <unistd.h>
-#include <dataformats/multigrid/inc/DataSave.h>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/ESSGeometry.h>
 #include <common/FBSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
+#include <dataformats/multigrid/inc/DataSave.h>
+#include <unistd.h>
 
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -37,7 +37,7 @@ public:
   MBCAEN(BaseSettings settings);
   void input_thread();
   void processing_thread();
-  
+
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
@@ -67,13 +67,13 @@ private:
   } ALIGN(64) mystats;
 };
 
-void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {}
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
 MBCAEN::MBCAEN(BaseSettings settings) : Detector(settings) {
   Stats.setPrefix("efu2.mbcaen");
-  
+
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
     Stats.create("input.rx_packets",                mystats.rx_packets);
@@ -87,15 +87,18 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector(settings) {
     Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
   // clang-format on
 
-    std::function<void()> inputFunc = [this](){MBCAEN::input_thread();};
-    Detector::AddThreadFunction(inputFunc, "input");
+  std::function<void()> inputFunc = [this]() { MBCAEN::input_thread(); };
+  Detector::AddThreadFunction(inputFunc, "input");
 
-    std::function<void()> processingFunc = [this](){MBCAEN::processing_thread();};
-    Detector::AddThreadFunction(processingFunc, "processing");
+  std::function<void()> processingFunc = [this]() {
+    MBCAEN::processing_thread();
+  };
+  Detector::AddThreadFunction(processingFunc, "processing");
 
   XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11); // @todo workaround
+  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries +
+                                                11); // @todo workaround
   assert(eth_ringbuf != 0);
 }
 
@@ -103,9 +106,10 @@ const char *MBCAEN::detectorname() { return classname; }
 
 void MBCAEN::input_thread() {
   /** Connection setup */
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+                         EFUSettings.DetectorPort);
   UDPServer mbdata(local);
-  //mbdata.buflen(opts->buflen);
+  // mbdata.buflen(opts->buflen);
   mbdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   mbdata.printbuffers();
   mbdata.settimeout(0, 100000); // One tenth of a second
@@ -119,7 +123,8 @@ void MBCAEN::input_thread() {
     if ((rdsize = mbdata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                  eth_ringbuf->getmaxbufsize())) > 0) {
       eth_ringbuf->setdatalength(eth_index, rdsize);
-      XTRACE(PROCESS, DEB, "Received an udp packet of length %d bytes\n", rdsize);
+      XTRACE(PROCESS, DEB, "Received an udp packet of length %d bytes\n",
+             rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
@@ -143,14 +148,15 @@ void MBCAEN::processing_thread() {
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
 
-  #ifdef DUMPTOFILE // only active if cmake -DDUMPTOFILE=ON
+#ifdef DUMPTOFILE // only active if cmake -DDUMPTOFILE=ON
   DataSave mbdatasave{"multiblade_", 100000000};
   mbdatasave.tofile("# time, digitizer, channel, adc\n");
-  #endif
+#endif
 
   ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
   MB16Detector mb16;
-  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" + std::to_string(EFUSettings.KafkaBrokerPort);
+  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" +
+                             std::to_string(EFUSettings.KafkaBrokerPort);
   Producer eventprod(BrokerString, "MB_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
@@ -169,7 +175,8 @@ void MBCAEN::processing_thread() {
       // There is NO data in the FIFO - do stop checks and sleep a little
       mystats.rx_idle1++;
       // Checking for exit
-      if (produce_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+      if (produce_timer.timetsc() >=
+          EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
         mystats.tx_bytes += flatbuffer.produce();
 
@@ -210,13 +217,15 @@ void MBCAEN::processing_thread() {
             break;
           }
 
-          #ifdef DUMPTOFILE
+#ifdef DUMPTOFILE
           mbdatasave.tofile("%d,%d,%d,%d\n", dp.time, dp.digi, dp.chan, dp.adc);
-          #endif
+#endif
 
           if (builder[cassette].addDataPoint(dp.chan, dp.adc, dp.time)) {
-            auto xcoord = builder[cassette].getStripPosition() - 32; // pos 32 - 63
-            auto ycoord = cassette * nwires + builder[cassette].getWirePosition(); // pos 0 - 31
+            auto xcoord =
+                builder[cassette].getStripPosition() - 32; // pos 32 - 63
+            auto ycoord = cassette * nwires +
+                          builder[cassette].getWirePosition(); // pos 0 - 31
 
             uint32_t pixel_id = essgeom.pixelSP2D(xcoord, ycoord);
 
@@ -229,7 +238,8 @@ void MBCAEN::processing_thread() {
             if (pixel_id == 0) {
               mystats.geometry_errors++;
             } else {
-              mystats.tx_bytes += flatbuffer.addevent(builder[cassette].getTimeStamp(), pixel_id);
+              mystats.tx_bytes += flatbuffer.addevent(
+                  builder[cassette].getTimeStamp(), pixel_id);
               mystats.rx_events++;
             }
           }

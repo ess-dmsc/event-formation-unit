@@ -6,11 +6,11 @@
  */
 
 #pragma once
+#include <CLI/CLI11.hpp>
 #include <common/Detector.h>
+#include <cstdint>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <string>
-#include <CLI/CLI11.hpp>
-#include <cstdint>
 
 struct GraylogSettings {
   std::string address;
@@ -31,21 +31,22 @@ public:
 
   void printSettings();
 
-  std::string getDetectorName() {return det;};
-  GraylogSettings getGraylogSettings() {return GraylogConfig;};
+  std::string getDetectorName() { return det; };
+  GraylogSettings getGraylogSettings() { return GraylogConfig; };
 
-  std::vector<ThreadCoreAffinitySetting> getThreadCoreAffinity() {return ThreadAffinity;};
+  std::vector<ThreadCoreAffinitySetting> getThreadCoreAffinity() {
+    return ThreadAffinity;
+  };
 
   bool parseAgain(const int argc, char *argv[]);
 
-  BaseSettings GetBaseSettings() {return EFUSettings;};
+  BaseSettings GetBaseSettings() { return EFUSettings; };
 
   CLI::App CLIParser{"Event formation unit (efu)"};
 
-  int buflen{9000};               /**< rx buffer length (B) */
+  int buflen{9000}; /**< rx buffer length (B) */
 
-
-  std::string det;             /**< detector name */
+  std::string det; /**< detector name */
 
   // Runtime Stats
   // EFUStats stat;
