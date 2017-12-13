@@ -1,10 +1,10 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <prototype2/common/Trace.h>
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
 #include <libs/include/Socket.h>
+#include <prototype2/common/Trace.h>
 
 Socket::Socket(Socket::type stype) {
   auto type = (stype == Socket::type::UDP) ? SOCK_DGRAM : SOCK_STREAM;

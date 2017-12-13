@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
       if (pcappackets >= opts.pcapoffset) {
         DataSource.send(buffer, rdsize);
         if (opts.throttle) {
-           usleep(opts.throttle);
+          usleep(opts.throttle);
         }
         packets++;
         totpackets++;
@@ -48,9 +48,9 @@ int main(int argc, char *argv[]) {
           printf("Sent %" PRIu64 " packets\n", totpackets);
           packets = 0;
           break;
-          //printf("Sent %" PRIu64 " packets, exiting...\n", packets);
-          //pcap.printstats();
-          //exit(0);
+          // printf("Sent %" PRIu64 " packets, exiting...\n", packets);
+          // pcap.printstats();
+          // exit(0);
         }
       }
     }

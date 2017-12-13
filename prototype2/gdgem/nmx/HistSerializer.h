@@ -15,8 +15,8 @@
 #endif
 
 #include <common/Producer.h>
-#include <libs/include/gccintel.h>
 #include <gdgem/nmx/Hists.h>
+#include <libs/include/gccintel.h>
 
 class HistSerializer {
 public:
@@ -27,7 +27,7 @@ public:
   ~HistSerializer();
 
   /** @todo document */
-  size_t serialize(const NMXHists& hists, char **buffer);
+  size_t serialize(const NMXHists &hists, char **buffer);
 
 private:
   flatbuffers::FlatBufferBuilder builder;

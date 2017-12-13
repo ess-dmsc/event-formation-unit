@@ -6,58 +6,58 @@
  */
 
 #pragma once
+#include <CLI/CLI11.hpp>
 #include <common/Detector.h>
+#include <cstdint>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <string>
 
+struct GraylogSettings {
+  std::string address;
+  std::uint16_t port;
+};
+
+struct ThreadCoreAffinitySetting {
+  std::string Name;
+  std::uint16_t Core;
+};
+
 class EFUArgs {
 public:
+  EFUArgs();
+  bool parseAndProceed(const int argc, char *argv[]);
 
-  enum thread_cmd { NOCMD =0, EXIT, THREAD_LOADCAL, THREAD_TERMINATE};
+  void printHelp();
 
-  /** @brief constructor for program arguments parsed via getopt_long()
-   * @param argc Argument count - typically taken from main()
-   * @param argv Argument array - typically taken from main()
-   */
-  EFUArgs(int argc, char *argv[]);
+  void printSettings();
 
-  int cpustart{12}; /**< lcore id for input processing thread */
+  std::string getDetectorName() { return det; };
+  GraylogSettings getGraylogSettings() { return GraylogConfig; };
 
-  std::string ip_addr{"0.0.0.0"}; /**< used for data generators */
-  int port{9000};                 /**< udp receive port */
-  int buflen{9000};               /**< rx buffer length (B) */
-  int rcvbuf{2000000};            /**< socket rx buffer size (rmem_max) */
-  int sndbuf{2000000};            /**< soxket tx buffer size (wmem_max) */
+  std::vector<ThreadCoreAffinitySetting> getThreadCoreAffinity() {
+    return ThreadAffinity;
+  };
 
-  unsigned int updint{1};             /**< update interval (s) */
-  unsigned int stopafter{0xffffffff}; /**< 'never' stop */
+  bool parseAgain(const int argc, char *argv[]);
 
-  std::string det{"cspec"};             /**< detector name */
-  std::string broker{"localhost:9092"}; /**< Kafka broker */
-  bool kafka{true};                     /**< whether to use Kafka or not */
+  BaseSettings GetBaseSettings() { return EFUSettings; };
 
-  std::string graphite_ip_addr{"127.0.0.1"}; /**< graphite time series db */
-  int graphite_port{2003};                   /**< graphite time series db */
+  CLI::App CLIParser{"Event formation unit (efu)"};
 
-  int cmdserver_port{8888}; /**< for command line API */
+  int buflen{9000}; /**< rx buffer length (B) */
 
-  std::string graylog_ip{"127.0.0.1"};
-  int graylog_port{12201};
+  std::string det; /**< detector name */
 
   // Runtime Stats
   // EFUStats stat;
-  unsigned int reportmask{0x2};
 
   // Pipeline-specific configuration
-  std::string config_file;
+private:
+  bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
 
-  // IPC data for communicating between main and threads
-  uint16_t wirecal[CSPECChanConv::adcsize];
-  uint16_t gridcal[CSPECChanConv::adcsize];
-  thread_cmd proc_cmd{NOCMD};
+  std::vector<ThreadCoreAffinitySetting> ThreadAffinity;
+  CLI::Option *detectorOption;
 
-  std::shared_ptr<Detector> detectorif; /**< @todo is this the place? */
+  GraylogSettings GraylogConfig{"127.0.0.1", 12201};
+  BaseSettings EFUSettings;
 };
-
-// Used all the time and is not global variable
-extern EFUArgs *efu_args;

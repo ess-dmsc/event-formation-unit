@@ -1,9 +1,9 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/EventNMX.h>
-#include <common/Trace.h>
-#include <set>
 #include <cmath>
+#include <common/Trace.h>
+#include <gdgem/nmx/EventNMX.h>
+#include <set>
 #include <sstream>
 
 //#undef TRC_LEVEL
@@ -56,27 +56,26 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
       break;
   }
 
-  XTRACE(PROCESS, DEB, "center_sum=%f center_count=%f\n",
-         center_sum, center_count);
+  XTRACE(PROCESS, DEB, "center_sum=%f center_count=%f\n", center_sum,
+         center_count);
 
   center = center_sum / center_count;
   uncert_lower = lspan_max - lspan_min + 1;
   uncert_upper = uspan_max - uspan_min + 1;
 }
 
-int16_t PlaneNMX::center_rounded() const
-{
+int16_t PlaneNMX::center_rounded() const {
   return static_cast<int16_t>(std::round(center));
 }
 
 std::string PlaneNMX::debug() const {
   std::stringstream ss;
-  ss << "    C=" << center << " +-" << uncert_lower
-     << " (+-" << uncert_upper << ")\n";
+  ss << "    C=" << center << " +-" << uncert_lower << " (+-" << uncert_upper
+     << ")\n";
   ss << "    T=(" << time_start << "-" << time_end << ")"
      << " integral=" << integral << "\n";
-//  for (const auto& e : entries)
-//    ss << e.debug() << "\n";
+  //  for (const auto& e : entries)
+  //    ss << e.debug() << "\n";
   return ss.str();
 }
 
@@ -118,8 +117,7 @@ std::string EventNMX::debug() const {
 
 bool EventNMX::valid() const { return valid_; }
 
-bool EventNMX::meets_lower_cirterion(int16_t max_lu) const
-{
+bool EventNMX::meets_lower_cirterion(int16_t max_lu) const {
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }
 

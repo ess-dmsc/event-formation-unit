@@ -7,10 +7,10 @@
 
 #pragma once
 
-#include <initializer_list>
 #include <cinttypes>
-#include <vector>
+#include <initializer_list>
 #include <string>
+#include <vector>
 
 #define NMX_MAX_CHIPS 16
 #define NMX_CHIP_CHANNELS 64
@@ -54,5 +54,5 @@ public:
 
 private:
   std::vector<std::vector<uint16_t>> offsets_; // strip number mappings
-  std::vector<std::vector<uint8_t>> planes_;  // planeID mappings
+  std::vector<std::vector<uint8_t>> planes_;   // planeID mappings
 };

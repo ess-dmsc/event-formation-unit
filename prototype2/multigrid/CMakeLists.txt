@@ -15,11 +15,13 @@ include_directories(.. ../..)
 set(mgcncs2_SRC
   mgcncs2.cpp
   mgcncs/Data.cpp
-  mgcncs/ChanConv.cpp)
+  mgcncs/ChanConv.cpp
+  mgcncs/CalibrationFile.cpp)
 set(mgcncs2_INC
   mgcncs/Data.h
   mgcncs/ChanConv.h
-  mgcncs/MultigridGeometry.h)
+  mgcncs/MultigridGeometry.h
+  mgcncs/CalibrationFile.h)
 create_module(mgcncs2 "")
 
 

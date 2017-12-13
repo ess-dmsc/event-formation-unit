@@ -8,7 +8,6 @@ class DataSaveTest : public TestBase {
 protected:
 };
 
-
 int getfilesize(std::string filename) {
   struct stat st;
   int ret = stat(filename.c_str(), &st);
@@ -35,7 +34,7 @@ TEST_F(DataSaveTest, BufferedWrite) {
     ASSERT_EQ(ret, 0);
   }
   int ret = data.tofile("%s", buffer);
-  ASSERT_EQ(ret, 11*1999);
+  ASSERT_EQ(ret, 11 * 1999);
 }
 
 // Test that buffer overrun cannot happen
@@ -61,7 +60,7 @@ TEST_F(DataSaveTest, BufferedSaveOverrun) {
 // Test that unwritten buffer is written on exit
 // Checking file sizes
 TEST_F(DataSaveTest, FlushBuffer) {
-  DataSave * data = new DataSave("FlushBuffer", 50000000);
+  DataSave *data = new DataSave("FlushBuffer", 50000000);
 
   std::string name = data->getfilename();
   MESSAGE() << "Filename: " << name << std::endl;
@@ -77,8 +76,8 @@ TEST_F(DataSaveTest, FlushBuffer) {
 
   MESSAGE() << "Checking filesized before and after destructor" << std::endl;
   ASSERT_EQ(0, getfilesize(name));
-  delete(data);
-  ASSERT_EQ(10*1999, getfilesize(name));
+  delete (data);
+  ASSERT_EQ(10 * 1999, getfilesize(name));
 }
 
 int main(int argc, char **argv) {

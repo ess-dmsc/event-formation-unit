@@ -135,12 +135,9 @@ std::vector<uint8_t> type_0xd4_meph_err_hdr_len
   0x00, 0x00, 0x00, 0x01, 0x02, 0x00, 0x00, 0xaa  // truncated
 };
 
-
-
-
 // clang-format on
 
 /** Raw packet data above, now collect into iterable containers */
 
 std::vector<std::vector<uint8_t>> err_hdr{err_version, err_datatype, err_length,
-   err_nb_event_mismatch};
+                                          err_nb_event_mismatch};

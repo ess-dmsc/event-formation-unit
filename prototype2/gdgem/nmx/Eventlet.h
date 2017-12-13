@@ -8,24 +8,25 @@
 #pragma once
 
 #include <cinttypes>
-#include <string>
 #include <limits>
+#include <string>
 
 struct Eventlet {
-  public:
-    using strip_type = uint16_t;
-    using adc_type = uint16_t;
-    static constexpr strip_type strip_max_val {std::numeric_limits<strip_type>::max()};
-    static constexpr adc_type adc_max_val {std::numeric_limits<adc_type>::max()};
+public:
+  using strip_type = uint16_t;
+  using adc_type = uint16_t;
+  static constexpr strip_type strip_max_val{
+      std::numeric_limits<strip_type>::max()};
+  static constexpr adc_type adc_max_val{std::numeric_limits<adc_type>::max()};
 
-  public:
-    uint64_t time{0};
-    uint8_t  plane_id{0};
-    strip_type strip{0};
-    adc_type   adc{0};
-    bool flag{false};
-    bool over_threshold{false};
+public:
+  uint64_t time{0};
+  uint8_t plane_id{0};
+  strip_type strip{0};
+  adc_type adc{0};
+  bool flag{false};
+  bool over_threshold{false};
 
-    // @brief prints values for debug purposes
-    std::string debug() const;
+  // @brief prints values for debug purposes
+  std::string debug() const;
 };

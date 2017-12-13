@@ -5,7 +5,6 @@
 
 class ESSGeometryTest : public TestBase {};
 
-
 TEST_F(ESSGeometryTest, ConstructorValidParms) {
   ESSGeometry geom(5, 7, 11, 3);
   uint32_t max = 5 * 7 * 11 * 3;
@@ -21,7 +20,7 @@ TEST_F(ESSGeometryTest, ConstructorValidParms) {
 }
 
 TEST_F(ESSGeometryTest, ConstructorInvalidParms) {
-  ESSGeometry sp_2d(5,7, 0, 0);
+  ESSGeometry sp_2d(5, 7, 0, 0);
   ASSERT_EQ(0, sp_2d.getmaxpixel());
   ASSERT_EQ(0, sp_2d.pixelSP2D(0, 0));
   ASSERT_EQ(0, sp_2d.pixelMP2D(0, 0, 0));
@@ -31,12 +30,11 @@ TEST_F(ESSGeometryTest, ConstructorInvalidParms) {
   ASSERT_EQ(0, sp_2d.isvalidpixel(1));
 }
 
-
 TEST_F(ESSGeometryTest, SinglePanel2D) {
   uint32_t nx = 997;
   uint32_t ny = 991;
   ESSGeometry geom(nx, ny, 1, 1);
-  ASSERT_EQ(nx*ny, geom.getmaxpixel());
+  ASSERT_EQ(nx * ny, geom.getmaxpixel());
   for (uint32_t y = 0; y < ny; y++)
     for (uint32_t x = 0; x < nx; x++) {
       ASSERT_EQ(y * nx + x + 1, geom.pixelSP2D(x, y));
@@ -48,11 +46,11 @@ TEST_F(ESSGeometryTest, MultiPanel2D) {
   uint32_t ny = 991;
   uint32_t np = 3;
   ESSGeometry geom(nx, ny, 1, np);
-  ASSERT_EQ(nx*ny*np, geom.getmaxpixel());
+  ASSERT_EQ(nx * ny * np, geom.getmaxpixel());
   for (uint32_t p = 0; p < np; p++)
     for (uint32_t y = 0; y < ny; y++)
       for (uint32_t x = 0; x < nx; x++) {
-        ASSERT_EQ(p* nx*ny + y * nx + x + 1, geom.pixelMP2D(x, y, p));
+        ASSERT_EQ(p * nx * ny + y * nx + x + 1, geom.pixelMP2D(x, y, p));
       }
 }
 
@@ -61,7 +59,7 @@ TEST_F(ESSGeometryTest, SinglePanel3D) {
   uint32_t ny = 991;
   uint32_t nz = 16;
   ESSGeometry geom(nx, ny, nz, 1);
-  ASSERT_EQ(nx*ny*nz, geom.getmaxpixel());
+  ASSERT_EQ(nx * ny * nz, geom.getmaxpixel());
   for (uint32_t z = 0; z < nz; z++)
     for (uint32_t y = 0; y < ny; y++)
       for (uint32_t x = 0; x < nx; x++) {
@@ -75,15 +73,15 @@ TEST_F(ESSGeometryTest, MultiPanel3D) {
   uint32_t nz = 16;
   uint32_t np = 3;
   ESSGeometry geom(nx, ny, nz, np);
-  ASSERT_EQ(nx*ny*nz*np, geom.getmaxpixel());
+  ASSERT_EQ(nx * ny * nz * np, geom.getmaxpixel());
   for (uint32_t p = 0; p < np; p++)
     for (uint32_t z = 0; z < nz; z++)
       for (uint32_t y = 0; y < ny; y++)
         for (uint32_t x = 0; x < nx; x++) {
-          ASSERT_EQ(p * nx * ny * nz + z * nx * ny + y * nx + x + 1, geom.pixelMP3D(x, y, z, p));
+          ASSERT_EQ(p * nx * ny * nz + z * nx * ny + y * nx + x + 1,
+                    geom.pixelMP3D(x, y, z, p));
         }
 }
-
 
 TEST_F(ESSGeometryTest, GetCoordinates2x2x2x2) {
   ESSGeometry geom(2, 2, 2, 2);
@@ -167,7 +165,6 @@ TEST_F(ESSGeometryTest, GetCoordinates2x2x2x2) {
   ASSERT_EQ(geom.zcoord(16), 1);
   ASSERT_EQ(geom.pcoord(16), 1);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
