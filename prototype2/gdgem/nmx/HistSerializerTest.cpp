@@ -5,10 +5,9 @@
 #include <gdgem/nmx/HistSerializer.h>
 #include <test/TestBase.h>
 
-
 class HistSerializerTest : public TestBase {
   virtual void SetUp() {
-    for (size_t i = 0; i <  hists.x_strips_hist.size(); i++) {
+    for (size_t i = 0; i < hists.x_strips_hist.size(); i++) {
       hists.x_strips_hist[i] = i;
       hists.y_strips_hist[i] = Eventlet::strip_max_val - i;
     }

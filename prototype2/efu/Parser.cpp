@@ -7,7 +7,6 @@
 #include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <multigrid/mgcncs/CalibrationFile.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -16,7 +15,8 @@
 
 //=============================================================================
 static int stat_get_count(std::vector<std::string> cmdargs, char *output,
-                          unsigned int *obytes) {
+                          unsigned int *obytes,
+                          std::shared_ptr<Detector> detector) {
   auto nargs = cmdargs.size();
   XTRACE(CMD, INF, "STAT_GET_COUNT\n");
   GLOG_INF("STAT_GET_COUNT");
@@ -25,21 +25,21 @@ static int stat_get_count(std::vector<std::string> cmdargs, char *output,
     return -Parser::EBADARGS;
   }
 
-  if (efu_args->detectorif == nullptr) {
+  if (detector == nullptr) {
     *obytes = snprintf(output, SERVER_BUFFER_SIZE,
                        "STAT_GET_COUNT error: no detector loaded");
     return Parser::OK;
   }
 
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET_COUNT %d",
-                     efu_args->detectorif->statsize());
+                     detector->statsize());
 
   return Parser::OK;
 }
 
 //=============================================================================
 static int stat_get(std::vector<std::string> cmdargs, char *output,
-                    unsigned int *obytes) {
+                    unsigned int *obytes, std::shared_ptr<Detector> detector) {
   auto nargs = cmdargs.size();
   XTRACE(CMD, INF, "STAT_GET\n");
   GLOG_INF("STAT_GET");
@@ -49,65 +49,16 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
   }
   auto index = atoi(cmdargs.at(1).c_str());
 
-  if (efu_args->detectorif == nullptr) {
+  if (detector == nullptr) {
     *obytes = snprintf(output, SERVER_BUFFER_SIZE,
                        "STAT_GET error: no detector loaded");
     return Parser::OK;
   }
 
-  std::string name = efu_args->detectorif->statname(index);
-  int64_t value = efu_args->detectorif->statvalue(index);
+  std::string name = detector->statname(index);
+  int64_t value = detector->statvalue(index);
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET %s %" PRIi64,
                      name.c_str(), value);
-
-  return Parser::OK;
-}
-
-//=============================================================================
-static int cspec_load_calib(std::vector<std::string> cmdargs,
-                            UNUSED char *output, UNUSED unsigned int *obytes) {
-  XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
-  GLOG_INF("CSPEC_LOAD_CALIB");
-  if (cmdargs.size() != 2) {
-    XTRACE(CMD, WAR, "CSPEC_LOAD_CALIB: wrong number of arguments\n");
-    return -Parser::EBADARGS;
-  }
-  CalibrationFile calibfile;
-  auto ret = calibfile.load(cmdargs.at(1), (char *)efu_args->wirecal,
-                            (char *)efu_args->gridcal);
-  if (ret < 0) {
-    return -Parser::EBADARGS;
-  }
-
-  /** @todo some other ipc between main and threads ? */
-  efu_args->proc_cmd = efu_args->thread_cmd::THREAD_LOADCAL; // send load command to processing thread
-
-  return Parser::OK;
-}
-
-//=============================================================================
-static int cspec_show_calib(std::vector<std::string> cmdargs, char *output,
-                            unsigned int *obytes) {
-  auto nargs = cmdargs.size();
-  unsigned int offset = 0;
-  XTRACE(CMD, INF, "CSPEC_SHOW_CALIB\n");
-  GLOG_INF("CSPEC_SHOW_CALIB");
-  if (nargs == 1) {
-    offset = 0;
-  } else if (nargs == 2) {
-    offset = atoi(cmdargs.at(1).c_str());
-  } else {
-    XTRACE(CMD, WAR, "CSPEC_SHOW_CALIB: wrong number of arguments\n");
-    return -Parser::EBADARGS;
-  }
-
-  if (offset > CSPECChanConv::adcsize - 1) {
-    return -Parser::EBADARGS;
-  }
-
-  *obytes = snprintf(
-      output, SERVER_BUFFER_SIZE, "wire %d 0x%04x, grid %d 0x%04x", offset,
-      efu_args->wirecal[offset], offset, efu_args->gridcal[offset]);
 
   return Parser::OK;
 }
@@ -131,7 +82,8 @@ static int version_get(std::vector<std::string> cmdargs, char *output,
 
 //=============================================================================
 static int detector_info_get(std::vector<std::string> cmdargs, char *output,
-                             unsigned int *obytes) {
+                             unsigned int *obytes,
+                             std::shared_ptr<Detector> detector) {
   auto nargs = cmdargs.size();
   XTRACE(CMD, INF, "DETECTOR_INFO_GET\n");
   GLOG_INF("DETECTOR_INFO_GET");
@@ -140,21 +92,21 @@ static int detector_info_get(std::vector<std::string> cmdargs, char *output,
     return -Parser::EBADARGS;
   }
 
-  if (efu_args->detectorif == nullptr) {
+  if (detector == nullptr) {
     *obytes = snprintf(output, SERVER_BUFFER_SIZE,
                        "DETECTOR_INFO_GET error: no detector loaded");
     return Parser::OK;
   }
 
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "DETECTOR_INFO_GET %s",
-                     efu_args->detectorif->detectorname());
+                     detector->detectorname());
 
   return Parser::OK;
 }
 
 //=============================================================================
 static int efu_exit(std::vector<std::string> cmdargs, UNUSED char *output,
-                             UNUSED unsigned int *obytes) {
+                    UNUSED unsigned int *obytes, int &keep_running) {
   auto nargs = cmdargs.size();
   XTRACE(CMD, INF, "EXIT\n");
   GLOG_INF("EXIT");
@@ -164,24 +116,39 @@ static int efu_exit(std::vector<std::string> cmdargs, UNUSED char *output,
   }
 
   XTRACE(CMD, INF, "Sending TERMINATE command to EFU\n");
-  efu_args->proc_cmd = EFUArgs::EXIT;
+  keep_running = 0;
 
   return Parser::OK;
 }
 
 /******************************************************************************/
 /******************************************************************************/
-Parser::Parser() {
-  registercmd(std::string("STAT_GET"), stat_get);
-  registercmd(std::string("STAT_GET_COUNT"), stat_get_count);
-  registercmd(std::string("CSPEC_LOAD_CALIB"), cspec_load_calib);
-  registercmd(std::string("CSPEC_SHOW_CALIB"), cspec_show_calib);
-  registercmd(std::string("VERSION_GET"), version_get);
-  registercmd(std::string("DETECTOR_INFO_GET"), detector_info_get);
-  registercmd(std::string("EXIT"), efu_exit);
+Parser::Parser(std::shared_ptr<Detector> detector, int &keep_running) {
+  registercmd("STAT_GET", [detector](std::vector<std::string> cmd, char *resp,
+                                     unsigned int *nrChars) {
+    return stat_get(cmd, resp, nrChars, detector);
+  });
+  registercmd("STAT_GET_COUNT", [detector](std::vector<std::string> cmd,
+                                           char *resp, unsigned int *nrChars) {
+    return stat_get_count(cmd, resp, nrChars, detector);
+  });
+  registercmd("VERSION_GET", version_get);
+  registercmd("DETECTOR_INFO_GET",
+              [detector](std::vector<std::string> cmd, char *resp,
+                         unsigned int *nrChars) {
+                return detector_info_get(cmd, resp, nrChars, detector);
+              });
+  registercmd("EXIT", [&keep_running](std::vector<std::string> cmd, char *resp,
+                                      unsigned int *nrChars) {
+    return efu_exit(cmd, resp, nrChars, keep_running);
+  });
+  auto DetCmdFuncsMap = detector->GetDetectorCommandFunctions();
+  for (auto &FuncObj : DetCmdFuncsMap) {
+    registercmd(FuncObj.first, FuncObj.second);
+  }
 }
 
-int Parser::registercmd(std::string cmd_name, function_ptr cmd_fn) {
+int Parser::registercmd(std::string cmd_name, cmdFunction cmd_fn) {
   XTRACE(CMD, INF, "Registering command: %s\n", cmd_name.c_str());
   GLOG_INF("Registering command: " + cmd_name);
   if (commands[cmd_name] != 0) {

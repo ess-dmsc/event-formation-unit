@@ -6,62 +6,67 @@
 #include <common/Trace.h>
 #include <efu/Launcher.h>
 #include <iostream>
+#include <map>
 #include <thread>
 
-/** Can't call detector threads directly from std:thread as
- *  they are virtual functions, so need to add one step.
- */
-void Launcher::input_thread(Loader *load) {
-  GLOG_INF("Launching input thread");
-  load->detector->input_thread();
-}
+void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
+  auto startThreadsWithoutAffinity = [&detector]() {
+    XTRACE(MAIN, ALW, "Launching threads without core affinity.\n");
+    for (auto &ThreadInfo : detector->GetThreadInfo()) {
+      XTRACE(MAIN, ALW, "Creating new thread (id: %s)\n",
+             ThreadInfo.name.c_str());
+      ThreadInfo.thread = std::thread(ThreadInfo.func);
+    }
+  };
 
-void Launcher::processing_thread(Loader *load) {
-  GLOG_INF("Launching processing thread");
-  load->detector->processing_thread();
-}
-
-void Launcher::output_thread(Loader *load) {
-  GLOG_INF("Launching output thread");
-  load->detector->output_thread();
-}
-
-/** Create a thread 'func()', set its cpu affinity and calls join() */
-void Launcher::launch(int __attribute__((unused)) lcore, void (*func)(Loader *),
-                      Loader *ld) {
-
-XTRACE(MAIN, ALW, "Creating new thread (lcore %d)\n", lcore);
+  auto setThreadCoreAffinity = [](std::thread __attribute__((unused)) & thread,
+                                  std::uint16_t __attribute__((unused)) core) {
 #ifdef __linux__
-  std::thread *t = new std::thread(func, ld);
-#else
-  new std::thread(func, ld);
-#endif
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(core, &cpuset);
+    XTRACE(MAIN, ALW, "Setting thread affinity to core %d\n", core);
+    GLOG_INF("Setting thread affinity to core " + std::to_string(core));
 
-#ifdef __linux__
-  cpu_set_t cpuset;
-  CPU_ZERO(&cpuset);
-  CPU_SET(lcore, &cpuset);
-  if (lcore >= 0) {
-    XTRACE(MAIN, ALW, "Setting thread affinity to core %d\n", lcore);
-    GLOG_INF("Setting thread affinity to core " + std::to_string(lcore));
-
-    int __attribute__((unused))s = pthread_setaffinity_np(t->native_handle(), sizeof(cpu_set_t), &cpuset);
+    int __attribute__((unused)) s = pthread_setaffinity_np(
+        thread.native_handle(), sizeof(cpu_set_t), &cpuset);
     assert(s == 0);
-  }
 #else
 #pragma message("setaffinity only implemented for Linux")
-  GLOG_WAR("setaffinity only implemented for Linux");
+    GLOG_WAR("setaffinity only implemented for Linux");
 #endif
-}
+  };
 
-Launcher::Launcher(Loader *dynamic, std::vector<int> &cpus) {
-  if (dynamic->detector == nullptr) {
-    GLOG_CRI("Detector not loadable, no processing ...");
-    XTRACE(MAIN, CRI, "Detector not loadable, no processing ...\n");
-    return;
+  std::map<std::string, std::uint16_t> AffinityMap;
+  for (auto &Affinity : ThreadCoreAffinity) {
+    AffinityMap[Affinity.Name] = Affinity.Core;
   }
-
-  launch(cpus[0], input_thread, dynamic);
-  launch(cpus[2], output_thread, dynamic);
-  launch(cpus[1], processing_thread, dynamic);
+  if (0 == ThreadCoreAffinity.size()) {
+    startThreadsWithoutAffinity();
+  } else if (1 == ThreadCoreAffinity.size() and
+             ThreadCoreAffinity[0].Name == "implicit_affinity") {
+    XTRACE(MAIN, ALW, "Launching threads with implicit core affinity.\n");
+    int CoreCounter = ThreadCoreAffinity[0].Core;
+    for (auto &ThreadInfo : detector->GetThreadInfo()) {
+      XTRACE(MAIN, ALW, "Creating new thread (id: %s)\n",
+             ThreadInfo.name.c_str());
+      ThreadInfo.thread = std::thread(ThreadInfo.func);
+      setThreadCoreAffinity(ThreadInfo.thread, CoreCounter++);
+    }
+  } else {
+    XTRACE(MAIN, ALW, "Launching threads with explicit core affinity.\n");
+    for (auto &ThreadInfo : detector->GetThreadInfo()) {
+      XTRACE(MAIN, ALW, "Creating new thread (id: %s)\n",
+             ThreadInfo.name.c_str());
+      ThreadInfo.thread = std::thread(ThreadInfo.func);
+      if (1 == AffinityMap.count(ThreadInfo.name)) {
+        setThreadCoreAffinity(ThreadInfo.thread, AffinityMap[ThreadInfo.name]);
+      } else {
+        XTRACE(MAIN, ALW,
+               "No thread core affinity information available for thread with "
+               "id: %s\n",
+               ThreadInfo.name.c_str());
+      }
+    }
+  }
 }

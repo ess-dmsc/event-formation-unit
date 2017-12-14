@@ -17,7 +17,7 @@ TEST(MBEventBuilder__Test, Threshold) {
 
   // ADC below threshold
   EXPECT_FALSE(p.addDataPoint(0, 5, 100));
-  EXPECT_EQ(0, p.getClusterClock());
+  EXPECT_EQ(0U, p.getClusterClock());
 
   EXPECT_FALSE(p.addDataPoint(0, 10, 100));
   EXPECT_EQ(100, p.getClusterClock());
@@ -260,8 +260,8 @@ TEST(MBEventBuilder__Test, WireStripPoints) {
     p.setNumberOfStripChannels(npoints[i]);
     p.setTimeWindow(1000);
 
-    EXPECT_EQ(0, p.getWireClusterSize());
-    EXPECT_EQ(0, p.getWireClusterSize());
+    EXPECT_EQ(0U, p.getWireClusterSize());
+    EXPECT_EQ(0U, p.getWireClusterSize());
 
     for (uint8_t ii = 0; ii < npoints[i]; ii++) {
 

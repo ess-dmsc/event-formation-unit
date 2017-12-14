@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <cstring>
-#include <iostream>
 #include <gdgem/nmxgen/ReaderVMM.h>
+#include <iostream>
 
 ReaderVMM::ReaderVMM(std::string filename) {
   data.resize(max_in_buf_ * 4, 0);

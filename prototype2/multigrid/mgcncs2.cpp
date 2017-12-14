@@ -8,10 +8,12 @@
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/FBSerializer.h>
-#include <common/NewStats.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
+#include <efu/Parser.h>
+#include <efu/Server.h>
+#include <multigrid/mgcncs/CalibrationFile.h>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/Data.h>
 #include <multigrid/mgcncs/MultigridGeometry.h>
@@ -40,13 +42,10 @@ const char *classname = "CSPEC Detector (2 thread pipeline)";
 
 class CSPEC : public Detector {
 public:
-  CSPEC(void *args);
+  CSPEC(BaseSettings settings);
   void input_thread();
   void processing_thread();
 
-  int statsize();
-  int64_t statvalue(size_t index);
-  std::string &statname(size_t index);
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
@@ -54,14 +53,17 @@ public:
   static const int eth_buffer_size = 9000;
   static const int kafka_buffer_size = 1000000;
 
+  int LoadCalib(std::vector<std::string> cmdargs, UNUSED char *output,
+                UNUSED unsigned int *obytes);
+  int ShowCalib(std::vector<std::string> cmdargs, UNUSED char *output,
+                UNUSED unsigned int *obytes);
+
 private:
   /** Shared between input_thread and processing_thread*/
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
   std::mutex eventq_mutex, cout_mutex;
-
-  NewStats ns{"efu2.cspec2."};
 
   struct {
     // Input Counters
@@ -83,52 +85,116 @@ private:
     int64_t tx_bytes;
   } ALIGN(64) mystats;
 
-  EFUArgs *opts;
+  std::atomic_bool NewCalibrationData{false};
+  uint16_t wirecal[CSPECChanConv::adcsize];
+  uint16_t gridcal[CSPECChanConv::adcsize];
 };
 
-CSPEC::CSPEC(void *args) {
-  opts = (EFUArgs *)args;
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
+
+PopulateCLIParser PopulateParser{SetCLIArguments};
+
+//=============================================================================
+int CSPEC::LoadCalib(std::vector<std::string> cmdargs, __attribute__((unused)) char *output,
+                     __attribute__((unused)) unsigned int *obytes) {
+  XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
+  GLOG_INF("CSPEC_LOAD_CALIB");
+  if (cmdargs.size() != 2) {
+    XTRACE(CMD, WAR, "CSPEC_LOAD_CALIB: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+  CalibrationFile calibfile;
+  auto ret = calibfile.load(cmdargs.at(1), (char *)wirecal, (char *)gridcal);
+  if (ret < 0) {
+    return -Parser::EBADARGS;
+  }
+  NewCalibrationData = true;
+
+  return Parser::OK;
+}
+
+//=============================================================================
+int CSPEC::ShowCalib(std::vector<std::string> cmdargs, char *output,
+                     unsigned int *obytes) {
+  auto nargs = cmdargs.size();
+  unsigned int offset = 0;
+  XTRACE(CMD, INF, "CSPEC_SHOW_CALIB\n");
+  GLOG_INF("CSPEC_SHOW_CALIB");
+  if (nargs == 1) {
+    offset = 0;
+  } else if (nargs == 2) {
+    offset = atoi(cmdargs.at(1).c_str());
+  } else {
+    XTRACE(CMD, WAR, "CSPEC_SHOW_CALIB: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+
+  if (offset > CSPECChanConv::adcsize - 1) {
+    return -Parser::EBADARGS;
+  }
+
+  *obytes =
+      snprintf(output, SERVER_BUFFER_SIZE, "wire %d 0x%04x, grid %d 0x%04x",
+               offset, wirecal[offset], offset, gridcal[offset]);
+
+  return Parser::OK;
+}
+
+CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
+  Stats.setPrefix("efu2.cspec2");
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  ns.create("input.rx_packets",                &mystats.rx_packets);
-  ns.create("input.rx_bytes",                  &mystats.rx_bytes);
-  ns.create("input.i2pfifo_dropped",           &mystats.fifo_push_errors);
-  ns.create("input.i2pfifo_free",              &mystats.fifo_free);
-  ns.create("processing.rx_readouts",          &mystats.rx_readouts);
-  ns.create("processing.rx_error_bytes",       &mystats.rx_error_bytes);
-  ns.create("processing.rx_discards",          &mystats.rx_discards);
-  ns.create("processing.rx_idle",              &mystats.rx_idle1);
-  ns.create("processing.rx_geometry_errors",   &mystats.geometry_errors);
-  ns.create("processing.fifo_seq_errors",      &mystats.fifo_seq_errors);
-  ns.create("output.rx_events",                &mystats.rx_events);
-  ns.create("output.tx_bytes",                 &mystats.tx_bytes);
+  Stats.create("input.rx_packets",                mystats.rx_packets);
+  Stats.create("input.rx_bytes",                  mystats.rx_bytes);
+  Stats.create("input.i2pfifo_dropped",           mystats.fifo_push_errors);
+  Stats.create("input.i2pfifo_free",              mystats.fifo_free);
+  Stats.create("processing.rx_readouts",          mystats.rx_readouts);
+  Stats.create("processing.rx_error_bytes",       mystats.rx_error_bytes);
+  Stats.create("processing.rx_discards",          mystats.rx_discards);
+  Stats.create("processing.rx_idle",              mystats.rx_idle1);
+  Stats.create("processing.rx_geometry_errors",   mystats.geometry_errors);
+  Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  Stats.create("output.rx_events",                mystats.rx_events);
+  Stats.create("output.tx_bytes",                 mystats.tx_bytes);
   // clang-format on
+
+  std::function<void()> inputFunc = [this]() { CSPEC::input_thread(); };
+  Detector::AddThreadFunction(inputFunc, "input");
+
+  std::function<void()> processingFunc = [this]() {
+    CSPEC::processing_thread();
+  };
+  Detector::AddThreadFunction(processingFunc, "processing");
+
+  AddCommandFunction("CSPEC_LOAD_CALIB",
+                     [this](std::vector<std::string> cmdargs, char *output,
+                            unsigned int *obytes) {
+                       return CSPEC::LoadCalib(cmdargs, output, obytes);
+                     });
+  AddCommandFunction("CSPEC_SHOW_CALIB",
+                     [this](std::vector<std::string> cmdargs, char *output,
+                            unsigned int *obytes) {
+                       return CSPEC::ShowCalib(cmdargs, output, obytes);
+                     });
 
   XTRACE(INIT, ALW, "Creating %d Ethernet ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
 }
 
-int CSPEC::statsize() { return ns.size(); }
-
-int64_t CSPEC::statvalue(size_t index) { return ns.value(index); }
-
-std::string &CSPEC::statname(size_t index) { return ns.name(index); }
-
 const char *CSPEC::detectorname() { return classname; }
 
 void CSPEC::input_thread() {
   /** Connection setup */
-  Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+                         EFUSettings.DetectorPort);
   UDPServer cspecdata(local);
-  cspecdata.buflen(opts->buflen);
-  cspecdata.setbuffers(0, opts->rcvbuf);
+  cspecdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   cspecdata.printbuffers();
   cspecdata.settimeout(0, 100000); // One tenth of a second
 
   int rdsize;
-  TSCTimer report_timer;
   for (;;) {
     unsigned int eth_index = eth_ringbuf->getindex();
 
@@ -150,21 +216,18 @@ void CSPEC::input_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-
-      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
-        return;
-      }
-
-      report_timer.now();
+    if (not runThreads) {
+      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      return;
     }
   }
 }
 
 void CSPEC::processing_thread() {
   CSPECChanConv conv;
-  Producer producer(opts->broker, "C-SPEC_detector");
+  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" +
+                             std::to_string(EFUSettings.KafkaBrokerPort);
+  Producer producer(BrokerString, "C-SPEC_detector");
   FBSerializer flatbuffer(kafka_buffer_size, producer);
 
   MultiGridGeometry geom(1, 2, 48, 4, 16);
@@ -177,10 +240,10 @@ void CSPEC::processing_thread() {
   unsigned int data_index;
   while (1) {
     // Check for control from mothership (main)
-    if (opts->proc_cmd == opts->thread_cmd::THREAD_LOADCAL) {
-      opts->proc_cmd = opts->thread_cmd::NOCMD; /** @todo other means of ipc? */
+    if (NewCalibrationData) {
       XTRACE(PROCESS, INF, "processing_thread loading new calibrations\n");
-      conv.load_calibration(opts->wirecal, opts->gridcal);
+      conv.load_calibration(wirecal, gridcal);
+      NewCalibrationData = false;
     }
 
     if ((input2proc_fifo.pop(data_index)) == false) {
@@ -216,16 +279,16 @@ void CSPEC::processing_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-
+    if (report_timer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       mystats.tx_bytes += flatbuffer.produce();
-
-      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-        XTRACE(INPUT, ALW, "Stopping processing thread - stopcmd: %d\n", opts->proc_cmd);
-        return;
-      }
-
       report_timer.now();
+    }
+
+    // Checking for exit
+    if (not runThreads) {
+      XTRACE(INPUT, ALW, "Stopping processing thread.\n");
+      return;
     }
   }
 }
@@ -234,8 +297,8 @@ void CSPEC::processing_thread() {
 
 class CSPECFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(void *args) {
-    return std::shared_ptr<Detector>(new CSPEC(args));
+  std::shared_ptr<Detector> create(BaseSettings settings) {
+    return std::shared_ptr<Detector>(new CSPEC(settings));
   }
 };
 

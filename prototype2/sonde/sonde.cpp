@@ -5,7 +5,6 @@
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/FBSerializer.h>
-#include <common/NewStats.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
@@ -34,17 +33,12 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 class SONDEIDEA : public Detector {
 public:
-  SONDEIDEA(void *args);
-  ~SONDEIDEA() {
-    printf("sonde destructor called\n");
-  }
+  SONDEIDEA(BaseSettings settings);
+  ~SONDEIDEA() { printf("sonde destructor called\n"); }
 
   void input_thread();
   void processing_thread();
 
-  int statsize();
-  int64_t statvalue(size_t index);
-  std::string &statname(size_t index);
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
@@ -57,8 +51,7 @@ private:
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
-  NewStats ns{
-      "efu2.sonde."}; //
+  NewStats ns{"efu2.sonde."}; //
 
   struct {
     // Input Counters
@@ -75,58 +68,61 @@ private:
     int64_t rx_seq_errors;
     int64_t fifo_seq_errors;
   } ALIGN(64) mystats;
-
-  EFUArgs *opts;
 };
 
-SONDEIDEA::SONDEIDEA(void *args) {
-  opts = (EFUArgs *)args;
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
+
+PopulateCLIParser PopulateParser{SetCLIArguments};
+
+SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector(settings) {
+  Stats.setPrefix("efu2.sonde");
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  ns.create("input.rx_packets",                &mystats.rx_packets);
-  ns.create("input.rx_bytes",                  &mystats.rx_bytes);
-  ns.create("input.dropped",                   &mystats.fifo1_push_errors);
-  ns.create("input.rx_seq_errors",             &mystats.rx_seq_errors);
-  ns.create("processing.idle",                 &mystats.rx_idle1);
-  ns.create("processing.rx_events",            &mystats.rx_events);
-  ns.create("processing.rx_geometry_errors",   &mystats.rx_geometry_errors);
-  ns.create("processing.fifo_seq_errors",      &mystats.fifo_seq_errors);
-  ns.create("output.tx_bytes",                 &mystats.tx_bytes);
+  Stats.create("input.rx_packets",                mystats.rx_packets);
+  Stats.create("input.rx_bytes",                  mystats.rx_bytes);
+  Stats.create("input.dropped",                   mystats.fifo1_push_errors);
+  Stats.create("input.rx_seq_errors",             mystats.rx_seq_errors);
+  Stats.create("processing.idle",                 mystats.rx_idle1);
+  Stats.create("processing.rx_events",            mystats.rx_events);
+  Stats.create("processing.rx_geometry_errors",   mystats.rx_geometry_errors);
+  Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  Stats.create("output.tx_bytes",                 mystats.tx_bytes);
   // clang-format on
+  std::function<void()> inputFunc = [this]() { SONDEIDEA::input_thread(); };
+  Detector::AddThreadFunction(inputFunc, "input");
+
+  std::function<void()> processingFunc = [this]() {
+    SONDEIDEA::processing_thread();
+  };
+  Detector::AddThreadFunction(processingFunc, "processing");
 
   XTRACE(INIT, ALW, "Creating %d SONDE Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 1); /** @todo testing workaround */
+  eth_ringbuf = new RingBuffer<eth_buffer_size>(
+      eth_buffer_max_entries + 1); /** @todo testing workaround */
   assert(eth_ringbuf != 0);
 }
-
-int SONDEIDEA::statsize() { return ns.size(); }
-
-int64_t SONDEIDEA::statvalue(size_t index) { return ns.value(index); }
-
-std::string &SONDEIDEA::statname(size_t index) { return ns.name(index); }
 
 const char *SONDEIDEA::detectorname() { return classname; }
 
 void SONDEIDEA::input_thread() {
   /** Connection setup */
-  Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+                         EFUSettings.DetectorPort);
   UDPServer sondedata(local);
-  sondedata.buflen(opts->buflen);
-  sondedata.setbuffers(0, opts->rcvbuf);
+  sondedata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
   sondedata.printbuffers();
-  sondedata.settimeout(0, 100000); // One tenth of a second
+  sondedata.settimeout(0, 100000); // 1/10 second
 
   int rdsize;
-  TSCTimer report_timer;
   for (;;) {
     unsigned int eth_index = eth_ringbuf->getindex();
 
     /** this is the processing step */
     eth_ringbuf->setdatalength(eth_index, 0);
     if ((rdsize = sondedata.receive(eth_ringbuf->getdatabuffer(eth_index),
-                                  eth_ringbuf->getmaxbufsize())) > 0) {
+                                    eth_ringbuf->getmaxbufsize())) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
       eth_ringbuf->setdatalength(eth_index, rdsize);
@@ -139,51 +135,37 @@ void SONDEIDEA::input_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-
-      if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-        XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
-        return;
-      }
-      report_timer.now();
+    if (not runThreads) {
+      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      return;
     }
   }
 }
 
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
-
-// dumptofile
-
   IDEASData ideasdata(&geometry);
-  Producer eventprod(opts->broker, "SKADI_detector");
+  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" +
+                             std::to_string(EFUSettings.KafkaBrokerPort);
+  Producer eventprod(BrokerString, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
-
-  TSCTimer global_time, report_timer;
 
   unsigned int data_index;
 
+  TSCTimer produce_timer;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
-      // Checking for exit
-      if (report_timer.timetsc() >= opts->updint * 1000000 * TSC_MHZ) {
-
-        mystats.tx_bytes += flatbuffer.produce();
-
-        if (opts->proc_cmd == opts->thread_cmd::THREAD_TERMINATE) {
-          XTRACE(INPUT, ALW, "Stopping input thread - stopcmd: %d\n", opts->proc_cmd);
-          return;
-        }
-        report_timer.now();
-      }
       usleep(10);
+
     } else {
+
       auto len = eth_ringbuf->getdatalength(data_index);
       if (len == 0) {
         mystats.fifo_seq_errors++;
       } else {
-        int events = ideasdata.parse_buffer(eth_ringbuf->getdatabuffer(data_index), len);
+        int events =
+            ideasdata.parse_buffer(eth_ringbuf->getdatabuffer(data_index), len);
 
         mystats.rx_geometry_errors += ideasdata.errors;
         mystats.rx_events += ideasdata.events;
@@ -191,11 +173,22 @@ void SONDEIDEA::processing_thread() {
 
         if (events > 0) {
           for (int i = 0; i < events; i++) {
-              XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)\n", i,
-                      ideasdata.data[i].time,
-                      ideasdata.data[i].pixel_id);
-              mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time, ideasdata.data[i].pixel_id);
+            XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)\n",
+                   i, ideasdata.data[i].time, ideasdata.data[i].pixel_id);
+            mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time,
+                                                    ideasdata.data[i].pixel_id);
           }
+        }
+
+        if (produce_timer.timetsc() >=
+            EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+          mystats.tx_bytes += flatbuffer.produce();
+          produce_timer.now();
+        }
+
+        if (not runThreads) {
+          XTRACE(INPUT, ALW, "Stopping input thread.\n");
+          return;
         }
       }
     }
@@ -206,8 +199,8 @@ void SONDEIDEA::processing_thread() {
 
 class SONDEIDEAFactory : DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(void *args) {
-    return std::shared_ptr<Detector>(new SONDEIDEA(args));
+  std::shared_ptr<Detector> create(BaseSettings settings) {
+    return std::shared_ptr<Detector>(new SONDEIDEA(settings));
   }
 };
 

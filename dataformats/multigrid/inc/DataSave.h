@@ -32,7 +32,7 @@ public:
   /** @brief printf-like formatting using buffered writes
    * for better performance
    */
-  int tofile(const char * fmt,...);
+  int tofile(const char *fmt, ...);
 
   /** @brief return the filename of the current file (buffered write only) */
   std::string getfilename();
@@ -41,8 +41,8 @@ public:
   ~DataSave();
 
 private:
-  #define BUFFERSIZE 20000
-  #define MARGIN 2000
+#define BUFFERSIZE 20000
+#define MARGIN 2000
   char buffer[BUFFERSIZE + MARGIN];
   int bufferlen{0};
 
@@ -51,7 +51,8 @@ private:
   std::string filename_prefix{""}; /**< base filename */
   std::string startTime{""};       /**< start time common to all files */
   uint32_t curfilesize{0};         /**< bytes written to file */
-  uint32_t maxfilesize{50000000};   /**< create new sequence number after maxfilesize bytes */
+  uint32_t maxfilesize{
+      50000000}; /**< create new sequence number after maxfilesize bytes */
 
   const int flags = O_TRUNC | O_CREAT | O_RDWR;
   const int mode = S_IRUSR | S_IWUSR;

@@ -6,6 +6,7 @@
 #include <common/Version.h>
 #include <efu/ExitHandler.h>
 #include <efu/Launcher.h>
+#include <efu/Loader.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
 #include <iostream>
@@ -18,14 +19,39 @@
 
 /** Load detector, launch pipeline threads, then sleep until timeout or break */
 int main(int argc, char *argv[]) {
+  EFUArgs efu_args;
+  if (not efu_args.parseAndProceed(argc, argv)) {
+    return 0;
+  }
+
+  Loader loader(efu_args.getDetectorName());
+
+  if (not loader.IsOk()) {
+    efu_args.printHelp();
+    return -1;
+  }
+
+  { // This is to prevent accessing unloaded memory in a (potentially) unloaded
+    // plugin.
+    auto CLIArgPopulator = loader.GetCLIParserPopulator();
+    CLIArgPopulator(efu_args.CLIParser);
+  }
+  if (not efu_args.parseAgain(argc, argv)) {
+    return 0;
+  }
+  efu_args.printSettings();
+  std::shared_ptr<Detector> detector =
+      loader.createDetector(efu_args.GetBaseSettings());
+
+  auto EFUSettings = efu_args.GetBaseSettings();
+
   int keep_running = 1;
-  efu_args = new EFUArgs(argc, argv);
 
   ExitHandler::InitExitHandler(&keep_running);
 
 #ifdef GRAYLOG
-  Log::AddLogHandler(
-      new GraylogInterface(efu_args->graylog_ip, efu_args->graylog_port));
+  GraylogSettings GLConfig = efu_args.getGraylogSettings();
+  Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
   Log::SetMinimumSeverity(Severity::Debug);
 #endif
 
@@ -33,52 +59,51 @@ int main(int argc, char *argv[]) {
   GLOG_INF("Event Formation Unit version: " + efu_version());
   GLOG_INF("Event Formation Unit build: " + efu_buildstr());
   XTRACE(MAIN, ALW, "Starting Event Formation unit\n");
-  XTRACE(MAIN, ALW, "Event Formation Software Version: %s\n", efu_version().c_str());
+  XTRACE(MAIN, ALW, "Event Formation Software Version: %s\n",
+         efu_version().c_str());
   XTRACE(MAIN, ALW, "Event Formation Unit build: %s\n", EFU_STR(BUILDSTR));
 
-  if (efu_args->stopafter == 0) {
+  if (EFUSettings.StopAfterSec == 0) {
     XTRACE(MAIN, ALW, "Event Formation Unit Exit (Immediate)\n");
     GLOG_INF("Event Formation Unit Exit (Immediate)");
     return 0;
   }
 
-  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", efu_args->det.c_str());
+  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", efu_args.det.c_str());
 
-  Loader loader(efu_args->det, (void *)efu_args);
-  efu_args->detectorif = loader.detector;
+  auto ThreadAffinity = efu_args.getThreadCoreAffinity();
+  Launcher launcher(ThreadAffinity);
 
-  std::vector<int> cpus = {efu_args->cpustart, efu_args->cpustart + 1,
-                           efu_args->cpustart + 2};
+  launcher.launchThreads(detector);
 
-  Launcher(&loader, cpus);
+  StatPublisher metrics(EFUSettings.GraphiteAddress, EFUSettings.GraphitePort);
 
-  StatPublisher metrics(efu_args->graphite_ip_addr, efu_args->graphite_port);
-
-  Parser cmdParser;
-  Server cmdAPI(efu_args->cmdserver_port, cmdParser);
+  Parser cmdParser(detector, keep_running);
+  Server cmdAPI(EFUSettings.CommandServerPort, cmdParser);
 
   Timer stop_timer, stop_cmd, livestats;
 
   while (1) {
-    if (stop_cmd.timeus() >= (uint64_t)ONE_SECOND_US/10) {
-      if (keep_running == 0 || efu_args->proc_cmd == efu_args->thread_cmd::EXIT) {
+    if (stop_cmd.timeus() >= (uint64_t)ONE_SECOND_US / 10) {
+      if (keep_running == 0) {
         XTRACE(INIT, ALW, "Application stop, Exiting...\n");
-        efu_args->proc_cmd = efu_args->thread_cmd::THREAD_TERMINATE;
+        detector->stopThreads();
         sleep(2);
         return 1;
       }
     }
 
-    if (stop_timer.timeus() >= (uint64_t)efu_args->stopafter * (uint64_t)ONE_SECOND_US) {
+    if (stop_timer.timeus() >=
+        EFUSettings.StopAfterSec * (uint64_t)ONE_SECOND_US) {
       XTRACE(MAIN, ALW, "Application timeout, Exiting...\n");
       GLOG_INF("Event Formation Unit Exiting (User timeout)");
-      efu_args->proc_cmd = efu_args->thread_cmd::THREAD_TERMINATE;
+      detector->stopThreads();
       sleep(2);
       return 0;
     }
 
-    if (livestats.timeus() >= ONE_SECOND_US && loader.detector != nullptr) {
-      metrics.publish(loader.detector);
+    if (livestats.timeus() >= ONE_SECOND_US && detector != nullptr) {
+      metrics.publish(detector);
       livestats.now();
     }
 
@@ -86,6 +111,14 @@ int main(int argc, char *argv[]) {
 
     usleep(1000);
   }
+
+  if (detector.use_count() > 1) {
+    XTRACE(MAIN, WAR,
+           "There are more than 1 strong pointers to the detector. This "
+           "application may crash on exit.\n");
+  }
+
+  detector.reset();
 
   return 0;
 }

@@ -15,9 +15,9 @@
 class StatTuple {
 public:
   /** @brief holds a name, value pair defining a 'stat' */
-  StatTuple(std::string n, int64_t *ctr) : name(n), counter(ctr){};
+  StatTuple(std::string n, const int64_t &ctr) : name(n), counter(ctr){};
   std::string name;
-  int64_t *counter;
+  const int64_t &counter;
 };
 
 class NewStats {
@@ -34,7 +34,7 @@ public:
   /** @brief creates a 'stat' entry with name and addres for counter
    * duplicates are not allowed.
    */
-  int create(std::string statname, int64_t *counter);
+  int create(std::string statname, const int64_t &counter);
 
   /** @brief returns the number of registered stats */
   size_t size();
@@ -45,8 +45,10 @@ public:
   /** @brief return value of stat based on index */
   int64_t value(size_t index);
 
+  void setPrefix(std::string StatsPrefix);
+
 private:
-  std::string prefix{""};         /**< prepend to all stat names */
-  std::vector<StatTuple *> stats; /**< holds all registered stats */
+  std::string prefix{""};       /**< prepend to all stat names */
+  std::vector<StatTuple> stats; /**< holds all registered stats */
   std::string nostat{""}; /**< used to return when stats are not available */
 };

@@ -13,7 +13,7 @@ class ExitHandler {
 
 public:
   /** @brief constructor does nothing */
-  static void InitExitHandler(int * runflag);
+  static void InitExitHandler(int *runflag);
 
 private:
   /** noncritical signals (Ctrl-C), stop threads nicely */
@@ -25,5 +25,5 @@ private:
   /** print a stack trace */
   static void print_trace(void);
 
-  static int * keep_running;
+  static int *keep_running;
 };

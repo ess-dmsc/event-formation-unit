@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
       txp++;
     } else {
       std::cout << "Sent " << tx_total + tx << " bytes"
-           << " in " << txp_total + txp << " packets." << std::endl;
+                << " in " << txp_total + txp << " packets." << std::endl;
       std::cout << "done" << std::endl;
       exit(0);
     }

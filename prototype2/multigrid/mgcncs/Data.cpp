@@ -15,7 +15,8 @@ struct multi_grid {
 //#define TRC_LEVEL TRC_L_DEB
 
 /** @todo no error checking, assumes valid data and valid buffer */
-int CSPECData::createevent(const MultiGridData &data, uint32_t * time, uint32_t * pixel) {
+int CSPECData::createevent(const MultiGridData &data, uint32_t *time,
+                           uint32_t *pixel) {
   auto panel = data.module;
   auto grid = chanconv->getgridid(data.d[6]);
   auto wire = chanconv->getwireid(data.d[2]);
@@ -129,11 +130,12 @@ int CSPECData::receive(const char *buffer, int size) {
       elems++;
       state = State::hdr;
 
-      #ifdef DUMPTOFILE
+#ifdef DUMPTOFILE
       auto dp = data[elems];
       mgdata.tofile("%d,%d,%d,%d,%d,%d,%d,%d,%d,%d,\n", dp.module, dp.time,
-         dp.d[0], dp.d[1], dp.d[2], dp.d[3], dp.d[4], dp.d[5], dp.d[6], dp.d[7]);
-      #endif
+                    dp.d[0], dp.d[1], dp.d[2], dp.d[3], dp.d[4], dp.d[5],
+                    dp.d[6], dp.d[7]);
+#endif
 
       break;
     }

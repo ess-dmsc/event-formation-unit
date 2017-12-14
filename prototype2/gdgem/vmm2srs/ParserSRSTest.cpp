@@ -41,8 +41,8 @@ protected:
 /** Test cases below */
 TEST_F(NMXVMM2SRSDataTest, Constructor) {
   ASSERT_TRUE(data->data != nullptr);
-  ASSERT_EQ(data->elems, 0);
-  ASSERT_EQ(data->error, 0);
+  ASSERT_EQ(data->elems, 0U);
+  ASSERT_EQ(data->error, 0U);
 }
 
 TEST_F(NMXVMM2SRSDataTest, UndersizeData) {
@@ -50,7 +50,7 @@ TEST_F(NMXVMM2SRSDataTest, UndersizeData) {
   for (auto v : err_usize) {
     int res = data->receive((char *)&v[0], v.size());
     ASSERT_EQ(res, 0);
-    ASSERT_EQ(data->elems, 0);
+    ASSERT_EQ(data->elems, 0U);
     ASSERT_EQ(data->error, v.size());
   }
 }
@@ -58,8 +58,8 @@ TEST_F(NMXVMM2SRSDataTest, UndersizeData) {
 TEST_F(NMXVMM2SRSDataTest, NoData) {
   int res = data->receive((char *)&no_data[0], no_data.size());
   ASSERT_EQ(res, 0);
-  ASSERT_EQ(data->error, 0);
-  ASSERT_EQ(data->elems, 0);
+  ASSERT_EQ(data->error, 0U);
+  ASSERT_EQ(data->elems, 0U);
 }
 
 TEST_F(NMXVMM2SRSDataTest, UnknownData) {
@@ -71,24 +71,25 @@ TEST_F(NMXVMM2SRSDataTest, UnknownData) {
 TEST_F(NMXVMM2SRSDataTest, EndOfFrame) {
   int res = data->receive((char *)&end_of_frame[0], end_of_frame.size());
   ASSERT_EQ(res, -1);
-  ASSERT_EQ(data->error, 0);
-  ASSERT_EQ(data->elems, 0);
+  ASSERT_EQ(data->error, 0U);
+  ASSERT_EQ(data->elems, 0U);
 }
 
 TEST_F(NMXVMM2SRSDataTest, DataSizeError) {
-  std::vector<int> badsizes = {13, 14, 15, 16, 17, 18, 19, 21, 22, 23, 24,
-                               25, 26, 27, 29, 30, 31, 32, 33, 34, 35};
-  std::vector<int> goodsizes = {20, 28, 36};
+  std::vector<unsigned int> badsizes = {13, 14, 15, 16, 17, 18, 19,
+                                        21, 22, 23, 24, 25, 26, 27,
+                                        29, 30, 31, 32, 33, 34, 35};
+  std::vector<unsigned int> goodsizes = {20, 28, 36};
   for (auto datasize : badsizes) {
-    int res = data->receive((char *)&data_3_ch0[0], datasize);
-    ASSERT_EQ(res, 0);
+    unsigned int res = data->receive((char *)&data_3_ch0[0], datasize);
+    ASSERT_EQ(res, 0U);
     ASSERT_EQ(data->error, datasize);
-    ASSERT_EQ(data->elems, 0);
+    ASSERT_EQ(data->elems, 0U);
   }
   for (auto datasize : goodsizes) {
-    int res = data->receive((char *)&data_3_ch0[0], datasize);
+    unsigned int res = data->receive((char *)&data_3_ch0[0], datasize);
     ASSERT_EQ(res, (datasize - 12) / 8);
-    ASSERT_EQ(data->error, 0);
+    ASSERT_EQ(data->error, 0U);
     ASSERT_EQ(data->elems, (datasize - 12) / 8);
   }
 }
@@ -96,21 +97,21 @@ TEST_F(NMXVMM2SRSDataTest, DataSizeError) {
 TEST_F(NMXVMM2SRSDataTest, GoodHits3) {
   int res = data->receive((char *)&data_3_ch0[0], data_3_ch0.size());
   ASSERT_EQ(res, 3);
-  ASSERT_EQ(data->srshdr.fc, 0x00337137);
-  ASSERT_EQ(data->error, 0);
-  ASSERT_EQ(data->elems, 3);
-  ASSERT_EQ(data->data[0].adc, 64);
-  ASSERT_EQ(data->data[0].tdc, 73);
-  ASSERT_EQ(data->data[0].chno, 15);
-  ASSERT_EQ(data->data[0].bcid, 355);
+  ASSERT_EQ(data->srshdr.fc, 0x00337137U);
+  ASSERT_EQ(data->error, 0U);
+  ASSERT_EQ(data->elems, 3U);
+  ASSERT_EQ(data->data[0].adc, 64U);
+  ASSERT_EQ(data->data[0].tdc, 73U);
+  ASSERT_EQ(data->data[0].chno, 15U);
+  ASSERT_EQ(data->data[0].bcid, 355U);
 }
 
 TEST_F(NMXVMM2SRSDataTest, DataOverflow) {
   auto data2 = new NMXVMM2SRSData(2);
   int res = data2->receive((char *)&data_3_ch0[0], data_3_ch0.size());
   ASSERT_EQ(res, 2);
-  ASSERT_EQ(data2->error, 0);
-  ASSERT_EQ(data2->elems, 2);
+  ASSERT_EQ(data2->error, 0U);
+  ASSERT_EQ(data2->elems, 2U);
   delete data2;
 }
 
