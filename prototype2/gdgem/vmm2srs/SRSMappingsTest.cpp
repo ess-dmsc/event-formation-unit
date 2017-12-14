@@ -45,6 +45,13 @@ TEST_F(SRSMappingsTest, PlaneDefinition) {
   ASSERT_EQ(geometry->get_strip(0, 1, 0), NMX_CHIP_CHANNELS);
 }
 
+TEST_F(SRSMappingsTest, DebugString) {
+  MESSAGE() << "This is not a test, just calling the debug function\n";
+  geometry->define_plane(0, {{0, 0}, {0, 1}});
+  auto debugstr = geometry->debug();
+  MESSAGE() << debugstr << "\n";
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

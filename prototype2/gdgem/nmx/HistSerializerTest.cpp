@@ -5,12 +5,11 @@
 #include <gdgem/nmx/HistSerializer.h>
 #include <test/TestBase.h>
 
-
 class HistSerializerTest : public TestBase {
   virtual void SetUp() {
-    for (int i = 0; i < NMX_STRIP_HIST_SIZE; i++) {
+    for (size_t i = 0; i < hists.x_strips_hist.size(); i++) {
       hists.x_strips_hist[i] = i;
-      hists.y_strips_hist[i] = NMX_STRIP_MAX_VAL - i;
+      hists.y_strips_hist[i] = Eventlet::strip_max_val - i;
     }
   }
 
@@ -25,7 +24,7 @@ protected:
 TEST_F(HistSerializerTest, Serialize) {
   HistSerializer histfb;
   auto len = histfb.serialize(hists, &buffer);
-  ASSERT_TRUE(len > NMX_HIST_ELEM_SIZE * 2);
+  ASSERT_TRUE(len >= hists.needed_buffer_size());
 }
 
 TEST_F(HistSerializerTest, DeSerialize) {
@@ -41,12 +40,12 @@ TEST_F(HistSerializerTest, DeSerialize) {
   auto hist = static_cast<const GEMHist *>(monitor->data());
   auto xdat = hist->xstrips();
   auto ydat = hist->ystrips();
-  ASSERT_EQ(xdat->size(), NMX_STRIP_HIST_SIZE);
-  ASSERT_EQ(ydat->size(), NMX_STRIP_HIST_SIZE);
+  ASSERT_EQ(xdat->size(), hists.x_strips_hist.size());
+  ASSERT_EQ(ydat->size(), hists.y_strips_hist.size());
 
-  for (int i = 0; i < NMX_STRIP_HIST_SIZE; i++) {
+  for (size_t i = 0; i < hists.x_strips_hist.size(); i++) {
     ASSERT_EQ((*xdat)[i], i);
-    EXPECT_EQ((*ydat)[i], NMX_STRIP_MAX_VAL - i);
+    EXPECT_EQ((*ydat)[i], Eventlet::strip_max_val - i);
   }
 }
 

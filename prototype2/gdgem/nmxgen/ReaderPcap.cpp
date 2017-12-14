@@ -19,9 +19,7 @@ ReaderPcap::ReaderPcap(std::string filename) {
   }
 }
 
-ReaderPcap::~ReaderPcap() {
-  pcap_close(pcap);
-}
+ReaderPcap::~ReaderPcap() { pcap_close(pcap); }
 
 int ReaderPcap::read(char *buffer, size_t bufferlen) {
 #define IPHDROFF 14
@@ -47,6 +45,8 @@ int ReaderPcap::read(char *buffer, size_t bufferlen) {
   }
 
   uint16_t type = ntohs(*(uint16_t *)&data[12]);
+
+  // printf("packet header len %d, type %x\n", header->len, type);
 
   if (type == 0x0806)
     stats.eth_arp++;

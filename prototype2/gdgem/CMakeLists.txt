@@ -3,6 +3,46 @@ enable_testing()
 include_directories(..)
 include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
 
+find_package(h5cpp)
+set(h5_optional)
+
+#
+# Tools and Data generators
+#
+
+if (h5cpp_FOUND)
+  set(gennmxfile_SRC
+    nmx/Eventlet.cpp
+    nmxgen/nmxfile.cpp
+    nmxgen/NMXArgs.cpp
+    nmxgen/ReaderVMM.cpp)
+  set(gennmxfile_INC
+    nmx/Eventlet.h
+    nmxgen/NMXArgs.h
+    nmxgen/ReaderVMM.h)
+  create_executable(gennmxfile "")
+  target_link_libraries(gennmxfile h5cpp_shared)
+  set(h5_optional h5cpp_shared)
+else ()
+  message(STATUS "Unable to compile gennmxfile as h5cpp was not found.")
+endif ()
+
+#
+if (PCAP_FOUND)
+  include_directories(${PCAP_INCLUDE_DIR})
+  set(gennmxpcap_SRC
+    nmxgen/wireshark.cpp
+    nmxgen/ReaderPcap.cpp
+    nmxgen/NMXArgs.cpp)
+  set(gennmxpcap_INC
+    nmxgen/ReaderPcap.h
+    nmxgen/NMXArgs.h)
+  create_executable(gennmxpcap "pcap")
+else ()
+  message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
+endif ()
+
+
 #
 # Detector Pipeline Plugins
 #
@@ -18,6 +58,7 @@ set(gdgem_SRC
   nmx/Hists.cpp
   nmx/HistSerializer.cpp
   nmx/TrackSerializer.cpp
+  nmx/AbstractEventletBuilder.cpp
   nmxgen/EventletBuilderH5.cpp
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp
@@ -39,53 +80,26 @@ set(gdgem_INC
   vmm2srs/ParserSRS.h
   vmm2srs/EventletBuilderSRS.h)
 create_module(gdgem "")
-
-
-#
-# Tools and Data generators
-#
-if(${H5CC_FOUND} AND ${HDF5_FOUND})
-    include_directories(${H5CC_INCLUDE_DIR} ${HDF5_INCLUDE_DIRS})
-    message(STATUS "Found H5CC and HDF5 libraries. Will build gennmxfile.")
-    set(gennmxfile_SRC
-      nmx/Eventlet.cpp
-      nmxgen/nmxfile.cpp
-      nmxgen/NMXArgs.cpp
-      nmxgen/ReaderVMM.cpp)
-    set(gennmxfile_INC
-      nmx/Eventlet.h
-      nmxgen/NMXArgs.h
-      nmxgen/ReaderVMM.h)
-    create_executable(gennmxfile "${H5CC_LIBRARY}")
-    target_link_libraries(gennmxfile ${HDF5_LIBRARIES} ${HDF5_HL_LIBRARIES})
-else()
-    message(STATUS "Unable to find H5CC and/or HDF5 libraries. Will NOT build gennmxfile.")
-endif()
-
-#
-if (PCAP_FOUND)
-    include_directories(${PCAP_INCLUDE_DIR})
-    set(gennmxpcap_SRC
-      nmxgen/wireshark.cpp
-      nmxgen/ReaderPcap.cpp
-      nmxgen/NMXArgs.cpp)
-    set(gennmxpcap_INC
-      nmxgen/ReaderPcap.h
-      nmxgen/NMXArgs.h)
-    create_executable(gennmxpcap "pcap")
-else()
-    message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
-endif()
-
+target_link_libraries(gdgem ${h5_optional})
 
 #
 # NMX / VMM Tests
 #
+set(EventletBuilderBenchmarkTest_SRC nmx/Clusterer.cpp nmx/EventNMX.cpp nmx/Hists.cpp
+  nmx/AbstractEventletBuilder.cpp vmm2srs/EventletBuilderSRSBenchmarkTest.cpp vmm2srs/EventletBuilderSRS.cpp
+  vmm2srs/ParserSRS.cpp vmm2srs/SRSMappings.cpp vmm2srs/SRSTime.cpp)
+set(EventletBuilderBenchmarkTest_INC nmx/Clusterer.h nmx/EventNMX.h nmx/Hists.h
+  nmx/Eventlet.h vmm2srs/ParserSRS.h vmm2srs/EventletBuilderSRS.h vmm2srs/SRSTime.h
+  vmm2srs/SRSMappings.h)
+create_benchmark_executable(EventletBuilderBenchmarkTest "")
+
+
 set(HistSerializerTest_SRC
   nmx/Hists.cpp
   nmx/HistSerializerTest.cpp
   nmx/HistSerializer.cpp)
 set(HistSerializerTest_INC
+  nmx/Eventlet.h
   nmx/Hists.h
   nmx/HistSerializer.h
   ../common/Producer.h)
@@ -109,36 +123,46 @@ set(ParserSRSTest_SRC
 create_test_executable(ParserSRSTest "")
 
 set(EventletBuilderH5Test_SRC
+  ../../dataformats/multigrid/src/DataSave.cpp
   nmx/EventNMX.cpp
   nmx/Clusterer.cpp
   nmx/Hists.cpp
+  nmx/AbstractEventletBuilder.cpp
   nmxgen/EventletBuilderH5Test.cpp
   nmxgen/EventletBuilderH5.cpp)
 set(EventletBuilderH5Test_INC
+  ../../dataformats/multigrid/inc/DataSave.h
   nmx/Clusterer.h
   nmx/EventNMX.h
+  nmx/Eventlet.h
   nmx/Hists.h
   nmxgen/EventletBuilderH5.h)
 create_test_executable(EventletBuilderH5Test "")
+target_link_libraries(EventletBuilderH5Test ${h5_optional})
 
 set(EventletBuilderTest_SRC
+  ../../dataformats/multigrid/src/DataSave.cpp
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Hists.cpp
+  nmx/AbstractEventletBuilder.cpp
   vmm2srs/EventletBuilderSRSTest.cpp
   vmm2srs/EventletBuilderSRS.cpp
   vmm2srs/ParserSRS.cpp
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp)
 set(EventletBuilderTest_INC
+  ../../dataformats/multigrid/inc/DataSave.h
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Hists.h
+  nmx/Eventlet.h
   vmm2srs/ParserSRS.h
   vmm2srs/EventletBuilderSRS.h
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h)
 create_test_executable(EventletBuilderTest "")
+target_link_libraries(EventletBuilderTest ${h5_optional})
 
 set(EventletTest_SRC
   nmx/EventletTest.cpp
@@ -172,8 +196,8 @@ set(ClustererTest_INC
   nmx/EventNMX.h)
 create_test_executable(ClustererTest "")
 
-set(EventTest_SRC
-  nmx/EventTest.cpp
+set(EventNMXTest_SRC
+  nmx/EventNMXTest.cpp
   nmx/EventNMX.cpp
   nmx/EventNMX.h)
-create_test_executable(EventTest "")
+create_test_executable(EventNMXTest "")

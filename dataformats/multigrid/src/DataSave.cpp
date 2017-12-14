@@ -1,14 +1,14 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <cassert>
-#include <prototype2/common/Trace.h>
 #include <dataformats/multigrid/inc/DataSave.h>
+#include <prototype2/common/Trace.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-DataSave::DataSave(std::string filename, void *buffer, size_t datasize):
-   filename_prefix(filename) {
+DataSave::DataSave(std::string filename, void *buffer, size_t datasize)
+    : filename_prefix(filename) {
 
   if ((fd = open(filename_prefix.c_str(), flags, mode)) < 0) {
     std::string msg = "DataSave: open(" + filename + ") failed";
@@ -22,7 +22,7 @@ DataSave::DataSave(std::string filename, void *buffer, size_t datasize):
   }
 }
 
-DataSave::DataSave(std::string filename): filename_prefix(filename) {
+DataSave::DataSave(std::string filename) : filename_prefix(filename) {
 
   if ((fd = open(filename_prefix.c_str(), flags, mode)) < 0) {
     std::string msg = "DataSave: open(" + filename + ") failed";
@@ -30,12 +30,12 @@ DataSave::DataSave(std::string filename): filename_prefix(filename) {
   }
 }
 
-DataSave::DataSave(std::string name, int maxlen) :
-  filename_prefix(name), maxfilesize(maxlen) {
+DataSave::DataSave(std::string name, int maxlen)
+    : filename_prefix(name), maxfilesize(maxlen) {
 
   char cStartTime[50];
   time_t rawtime;
-  struct tm * timeinfo;
+  struct tm *timeinfo;
   time(&rawtime);
   timeinfo = localtime(&rawtime);
 
@@ -43,7 +43,6 @@ DataSave::DataSave(std::string name, int maxlen) :
   startTime = cStartTime;
   createfile();
 }
-
 
 int DataSave::tofile(char *buffer, size_t len) {
   if (fd < 0)
@@ -56,8 +55,7 @@ int DataSave::tofile(std::string text) {
   return tofile(text.c_str(), text.size());
 }
 
-
-int DataSave::tofile(const char * fmt,...) {
+int DataSave::tofile(const char *fmt, ...) {
   if (fd < 0)
     return -1;
 
@@ -81,18 +79,24 @@ int DataSave::tofile(const char * fmt,...) {
   bufferlen += ret;
   if (bufferlen >= BUFFERSIZE) {
     XTRACE(PROCESS, DEB, "Writing chunk of size %d\n", bufferlen);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
     write(fd, buffer, bufferlen);
-    retlen  = bufferlen;
+#pragma GCC diagnostic pop
+    retlen = bufferlen;
     bufferlen = 0;
   }
   return adjustfilesize(retlen);
 }
 
 DataSave::~DataSave() {
-  XTRACE(PROCESS, ALW, "~DataSave bufferlen %d\n", bufferlen);
+  XTRACE(PROCESS, DEB, "~DataSave bufferlen %d\n", bufferlen);
   if (bufferlen > 0) {
-    XTRACE(PROCESS, ALW, "Flushing DataSave buffer\n");
+    XTRACE(PROCESS, INF, "Flushing DataSave buffer\n");
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-result"
     write(fd, buffer, bufferlen);
+#pragma GCC diagnostic pop
   }
   close(fd);
 }
@@ -100,15 +104,17 @@ DataSave::~DataSave() {
 /** Private functions below, API functions above */
 
 std::string DataSave::getfilename() {
-  return filename_prefix + startTime + "_" + std::to_string(sequence_number - 1) + ".csv";
+  return filename_prefix + startTime + "_" +
+         std::to_string(sequence_number - 1) + ".csv";
 }
 
 void DataSave::createfile() {
-  curfilesize=0;
+  curfilesize = 0;
 
   close(fd);
 
-  std::string fileName = filename_prefix + startTime + "_" + std::to_string(sequence_number) + ".csv";
+  std::string fileName = filename_prefix + startTime + "_" +
+                         std::to_string(sequence_number) + ".csv";
 
   if ((fd = open(fileName.c_str(), flags, mode)) < 0) {
     std::string msg = "DataSave: open(" + fileName + ") failed";
@@ -120,11 +126,11 @@ void DataSave::createfile() {
 
 // Helper function
 int DataSave::adjustfilesize(int returnval) {
-    if (returnval > 0) {
-       curfilesize+=returnval;
-    }
-    if (curfilesize >= maxfilesize) {
-      createfile();
-    }
-    return returnval;
+  if (returnval > 0) {
+    curfilesize += returnval;
+  }
+  if (curfilesize >= maxfilesize) {
+    createfile();
+  }
+  return returnval;
 }

@@ -15,7 +15,7 @@ public:
    * @param broker 'URL' specifying host and port, example "127.0.0.1:9009"
    * @param topicstr Name of Kafka topic according to agreement, example
    * "T-REX_detectors"
-  */
+   */
   Producer(std::string broker, std::string topicstr);
 
   ~Producer();

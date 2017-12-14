@@ -135,5 +135,6 @@ std::vector<unsigned int> err_nwords
 /** Raw packet data above, now collect into iterable containers */
 
 std::vector<std::vector<unsigned int>> ok{ok_one, ok_two, ok_16};
-std::vector<std::vector<unsigned int>> err_pkt{err_hdr, err_hdr2, err_dat, err_ftr};
+std::vector<std::vector<unsigned int>> err_pkt{err_hdr, err_hdr2, err_dat,
+                                               err_ftr};
 std::vector<std::vector<unsigned int>> err_size{err_short, err_long};

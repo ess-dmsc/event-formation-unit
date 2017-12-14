@@ -20,6 +20,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
         {"port", required_argument, 0, 'p'},
         {"size", required_argument, 0, 's'},
         {"throttle", required_argument, 0, 't'},
+        {"repeat", required_argument, 0, 'r'},
         {"update", required_argument, 0, 'u'},
         {"sndbuf", required_argument, 0, 'x'},
         {"help", no_argument, 0, 'h'},
@@ -27,7 +28,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:d:f:i:n:p:s:t:u:hx", long_options,
+    c = getopt_long(argc, argv, "a:d:f:i:n:p:r:s:t:u:hx", long_options,
                     &option_index);
 
     if (c == -1)
@@ -53,6 +54,9 @@ DGArgs::DGArgs(int argc, char *argv[]) {
       break;
     case 'p':
       port = atoi(optarg);
+      break;
+    case 'r':
+      repeat = atoi(optarg);
       break;
     case 's':
       txGB = atoi(optarg);

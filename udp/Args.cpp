@@ -29,7 +29,7 @@ Args::Args(int argc, char *argv[]) {
       std::cout << " -i ipaddr      destination ip address" << std::endl;
       std::cout << " -p port        UDP destination port" << std::endl;
       std::cout << " -b buflen      size of Tx/Tx buffer in bytes (max 9000)"
-           << std::endl;
+                << std::endl;
       std::cout << " -h             help - prints this message" << std::endl;
       exit(1);
     }

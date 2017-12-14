@@ -8,15 +8,17 @@
 
 class TestDetector : public Detector {
 public:
-  TestDetector(UNUSED void *args) { std::cout << "TestDetector" << std::endl; };
+  TestDetector(UNUSED BaseSettings settings) : Detector(settings) {
+    std::cout << "TestDetector" << std::endl;
+  };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
 
 class TestDetectorFactory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(void *args) {
+  std::shared_ptr<Detector> create(BaseSettings settings) {
     std::cout << "TestDetectorFactory" << std::endl;
-    return std::shared_ptr<Detector>(new TestDetector(args));
+    return std::shared_ptr<Detector>(new TestDetector(settings));
   }
 };
 
@@ -26,49 +28,21 @@ TestDetectorFactory Factory;
 
 class DetectorTest : public TestBase {
 protected:
-  virtual void SetUp() { det = Factory.create(0); }
+  BaseSettings settings;
+  virtual void SetUp() { det = Factory.create(settings); }
+
   virtual void TearDown() {}
+
+  void assertcapture(const char *expected_output) {
+    std::string captured_output = testing::internal::GetCapturedStdout();
+    ASSERT_TRUE(captured_output.find(expected_output) != std::string::npos);
+  };
+
   std::shared_ptr<Detector> det;
   void *dummyargs; // Used for calling thread functions
 };
 
-TEST_F(DetectorTest, Destructor) {
-  std::string output;
-  testing::internal::CaptureStdout();
-  {
-    std::shared_ptr<Detector> tmp = Factory.create(0);
-    output = testing::internal::GetCapturedStdout();
-    ASSERT_EQ(output, "TestDetectorFactory\nTestDetector\n");
-
-    testing::internal::CaptureStdout();
-  }
-
-  // delete tmp;
-  output = testing::internal::GetCapturedStdout();
-  ASSERT_EQ(output, "~TestDetector\n");
-}
-
 TEST_F(DetectorTest, Factory) { ASSERT_TRUE(det != nullptr); }
-
-TEST_F(DetectorTest, DefaultThreads) {
-  testing::internal::CaptureStdout();
-  det->input_thread();
-  auto output = testing::internal::GetCapturedStdout().c_str();
-  printf("DEBUG: %s\n", output);
-  ASSERT_TRUE(strstr(output, "no input stage") != NULL);
-
-  testing::internal::CaptureStdout();
-  det->processing_thread();
-  output = testing::internal::GetCapturedStdout().c_str();
-  printf("DEBUG: %s\n", output);
-  ASSERT_TRUE(strstr(output, "no processing stage") != NULL);
-
-  testing::internal::CaptureStdout();
-  det->output_thread();
-  output = testing::internal::GetCapturedStdout().c_str();
-  printf("DEBUG: %s\n", output);
-  ASSERT_TRUE(strstr(output, "no output stage") != NULL);
-}
 
 TEST_F(DetectorTest, StatAPI) {
   int res = det->statsize();

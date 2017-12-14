@@ -53,6 +53,10 @@ class EFUShell(cmd.Cmd):
       res = self.driver.Ask('DETECTOR_INFO_GET')
       print res
 
+   def do_stop_efu(self, line):
+      'Instruct the EFU to exit'
+      res = self.driver.Ask('EXIT')
+
 #
 # CMD behavior customization
 #

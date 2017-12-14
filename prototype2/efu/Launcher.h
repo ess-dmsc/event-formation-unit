@@ -6,10 +6,9 @@
  */
 
 #pragma once
-#include <efu/Loader.h>
+#include <common/Detector.h>
+#include <common/EFUArgs.h>
 #include <vector>
-
-class EFUArgs;
 
 class Launcher {
 public:
@@ -19,12 +18,11 @@ public:
    *  @param cpus vector of three cpuids for launching input, processing and
    *  output threads.
    */
-  Launcher(Loader *ld, std::vector<int> &cpus);
+  Launcher(std::vector<ThreadCoreAffinitySetting> ThreadAffinity)
+      : ThreadCoreAffinity(ThreadAffinity){};
+
+  void launchThreads(std::shared_ptr<Detector> &detector);
 
 private:
-  static void input_thread(Loader *load);
-  static void processing_thread(Loader *load);
-  static void output_thread(Loader *load);
-
-  void launch(int lcore, void (*func)(Loader *), Loader *ld);
+  std::vector<ThreadCoreAffinitySetting> ThreadCoreAffinity;
 };

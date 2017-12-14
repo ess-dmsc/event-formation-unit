@@ -5,91 +5,101 @@ set(event-formation-unit_VERSION_MINOR 0)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    message(STATUS "Setting build type to 'Debug' as none was specified.")
-    set(CMAKE_BUILD_TYPE Debug)
-endif()
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  message(STATUS "Setting build type to 'Debug' as none was specified.")
+  set(CMAKE_BUILD_TYPE Debug)
+endif ()
 
-function(MakeBuildStr)
-    execute_process(COMMAND "whoami" OUTPUT_VARIABLE user_name OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND "date" "+%F %H:%M:%S" OUTPUT_VARIABLE date OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND "uname" "-n" OUTPUT_VARIABLE m_name OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND "uname" "-r" OUTPUT_VARIABLE m_version OUTPUT_STRIP_TRAILING_WHITESPACE)
-    execute_process(COMMAND "git" "rev-parse" "--short" "HEAD" OUTPUT_VARIABLE hash OUTPUT_STRIP_TRAILING_WHITESPACE)
-    set(BUILDSTR "${date} [${m_name}:${user_name}] [${m_version}] ${hash}" PARENT_SCOPE)
+function(makebuildstr)
+  execute_process(COMMAND "whoami" OUTPUT_VARIABLE user_name OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND "date" "+%F %H:%M:%S" OUTPUT_VARIABLE date OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND "uname" "-n" OUTPUT_VARIABLE m_name OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND "uname" "-r" OUTPUT_VARIABLE m_version OUTPUT_STRIP_TRAILING_WHITESPACE)
+  execute_process(COMMAND "git" "rev-parse" "--short" "HEAD" OUTPUT_VARIABLE hash OUTPUT_STRIP_TRAILING_WHITESPACE)
+  set(BUILDSTR "${date} [${m_name}:${user_name}] [${m_version}] ${hash}" PARENT_SCOPE)
 endfunction()
 
-if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
-    if (NOT DEFINED BUILDSTR)
-        message(FATAL_ERROR "Build string must be set manually when compiling using release mode e.g. \"-DBUILDSTR=v1.2.3\".")
-    endif()
-else()
-    set(BUILDSTR "")
-    MakeBuildStr()
-endif()
+if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+  if (NOT DEFINED BUILDSTR)
+    message(FATAL_ERROR "Build string must be set manually when compiling using release mode e.g. \"-DBUILDSTR=v1.2.3\".")
+  endif ()
+else ()
+  set(BUILDSTR "")
+  makebuildstr()
+endif ()
 
 
 message(STATUS "Build str: ${BUILDSTR}")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
+#set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -ggdb -flto -fno-omit-frame-pointer -O3 -DRELEASE -DNDEBUG")
+
+option(GOOGLE_BENCHMARK, "Enable google benchmark for unit tests" OFF)
 
 option(USE_OLD_ABI "Sets _GLIBCXX_USE_CXX11_ABI=0 for CentOS builds" ON)
 set(EXTRA_CXX_FLAGS -std=c++11 -pthread -fPIC)
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DBUILDSTR=${BUILDSTR}")
-if(${USE_OLD_ABI})
-    message(WARNING "Setting _GLIBCXX_USE_CXX11_ABI=0 consider changing this when gcc on CentOS is updated")
-    set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D_GLIBCXX_USE_CXX11_ABI=0")
-endif()
 
-if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-    message(STATUS "Detected MacOSX")
+if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
+  # Hackity-hack...
+  message(STATUS "Disabling some of the newer compiler features... Hackity-hack...")
+  set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-Wno-implicit-fallthrough -Wno-aligned-new")
+endif ()
 
-elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-    message(STATUS "Detected Linux")
-    find_library(DL_LIB dl REQUIRED)
-else()
-    message(FATAL_ERROR "Unknown system")
-endif()
+if (${USE_OLD_ABI})
+  message(WARNING "Setting _GLIBCXX_USE_CXX11_ABI=0 consider changing this when gcc on CentOS is updated")
+  set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D_GLIBCXX_USE_CXX11_ABI=0")
+endif ()
+
+if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
+  message(STATUS "Detected MacOSX")
+
+elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
+  message(STATUS "Detected Linux")
+  find_library(DL_LIB dl REQUIRED)
+else ()
+  message(FATAL_ERROR "Unknown system")
+endif ()
 
 option(CMAKE_BUILD_TYPE "Build type; \"Release\" or \"Debug\"." Debug)
 
 option(COV "Enable code coverage test for unit tests (if possible)." OFF)
 
 option(EXTSCHEMAS "Use flatbuffer headers defined in external \"streaming-data-types\" repository. That repository must be located in the root of this repository." OFF)
-if(${EXTSCHEMAS})
-    set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DFLATBUFFERS")
-    message(STATUS "Using external FB schema header files.")
-else()
-    message(STATUS "Using internal FB schema header files.")
-endif()
+if (${EXTSCHEMAS})
+  set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DFLATBUFFERS")
+  message(STATUS "Using external FB schema header files.")
+else ()
+  message(STATUS "Using internal FB schema header files.")
+endif ()
 
 option(DUMPTOFILE "Dump vmm2srsdaq data to file (Doro option)" OFF)
-if(${DUMPTOFILE})
-    set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DDUMPTOFILE")
-    message(STATUS "Dumping to file.")
-else()
-    message(STATUS "Not dumping to file.")
-endif()
+if (${DUMPTOFILE})
+  set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DDUMPTOFILE")
+  message(STATUS "Dumping to file.")
+else ()
+  message(STATUS "Not dumping to file.")
+endif ()
 
 option(PROF "Enable profiling." OFF)
-if(${PROF})
-    set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -pg)
-    set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -pg)
-    set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -pg)
-    message(STATUS "Profiling enabled.")
-else()
-    message(STATUS "Profiling disabled.")
-endif()
+if (${PROF})
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -pg)
+  set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -pg)
+  set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -pg)
+  message(STATUS "Profiling enabled.")
+else ()
+  message(STATUS "Profiling disabled.")
+endif ()
 
 add_definitions(${EXTRA_CXX_FLAGS})
 
 find_package(GTest)
 if (${CMAKE_COMPILER_IS_GNUCXX})
-    set(CMAKE_AR  "gcc-ar")
-    set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
-    set(CMAKE_CXX_ARCHIVE_FINISH   true)
-endif()
+  set(CMAKE_AR "gcc-ar")
+  set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
+  set(CMAKE_CXX_ARCHIVE_FINISH true)
+endif ()
 
 
 add_subdirectory(libs)
@@ -98,31 +108,31 @@ add_subdirectory(udp)
 #add_subdirectory(dataformats) # built separately for now
 
 add_custom_target(hints
-    COMMAND echo ""
-    COMMAND echo "GNU Make hints for accessing basic functionality."
-    COMMAND echo "Most of these commands must be preceeded by a \\\"make all\\\""
-    COMMAND echo "command."
-    COMMAND echo "--------------------------------------------------------------------------------"
-    COMMAND echo "Run unit tests:                         make runtest"
-    COMMAND echo "Run memcheck  tests:                    make valgrind"
-    COMMAND echo "Run coverage tests:                     make coverage"
-    COMMAND echo "Verbose output:                         make VERBOSE=1"
-    COMMAND echo ""
-    COMMAND echo "CMake hints"
-    COMMAND echo "--------------------------------------------------------------------------------"
-    COMMAND echo "Enable code coverage:                   cmake -DCOV=ON .."
-    COMMAND echo "Use external flatbuffer headers:        cmake -DEXTSCHEMAS=ON .."
-    COMMAND echo "Specify a build string:                 cmake -DBUILDSTR=v1.2.3 .."
-    COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug .."
-    COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release .."
-    COMMAND echo "    NOTE: Relase mode requires a build string"
-    COMMAND echo ""
-    COMMAND echo "CMake hints advanced/not generally used"
-    COMMAND echo "--------------------------------------------------------------------------------"
-    COMMAND echo "Suggest PCAP root:                      cmake -DPCAP_ROOT_DIR=/opt/dmg_grp .."
-    COMMAND echo "Suggest GraylogLogger root:             cmake -DGraylogLogger_ROOT_DIR=/opt/dmg_grp .."
-    COMMAND echo "Suggest LibRDKafka root:                cmake -DLibRDKafka_ROOT_DIR=/opt/dmg_grp .."
-    COMMAND echo "Dump vmm readout to file - det. group:  cmake -DDUMPTOFILE=ON .."
-    COMMAND echo "List cmake variables:                   cmake .. -LH     "
-    COMMAND echo ""
-)
+                  COMMAND echo ""
+                  COMMAND echo "GNU Make hints for accessing basic functionality."
+                  COMMAND echo "Most of these commands must be preceeded by a \\\"make all\\\""
+                  COMMAND echo "command."
+                  COMMAND echo "--------------------------------------------------------------------------------"
+                  COMMAND echo "Run unit tests:                         make runtest"
+                  COMMAND echo "Run memcheck  tests:                    make valgrind"
+                  COMMAND echo "Run coverage tests:                     make coverage"
+                  COMMAND echo "Verbose output:                         make VERBOSE=1"
+                  COMMAND echo ""
+                  COMMAND echo "CMake hints"
+                  COMMAND echo "--------------------------------------------------------------------------------"
+                  COMMAND echo "Enable code coverage:                   cmake -DCOV=ON .."
+                  COMMAND echo "Use external flatbuffer headers:        cmake -DEXTSCHEMAS=ON .."
+                  COMMAND echo "Specify a build string:                 cmake -DBUILDSTR=v1.2.3 .."
+                  COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug .."
+                  COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release .."
+                  COMMAND echo "    NOTE: Relase mode requires a build string"
+                  COMMAND echo ""
+                  COMMAND echo "CMake hints advanced/not generally used"
+                  COMMAND echo "--------------------------------------------------------------------------------"
+                  COMMAND echo "Suggest PCAP root:                      cmake -DPCAP_ROOT_DIR=/opt/dmg_grp .."
+                  COMMAND echo "Suggest GraylogLogger root:             cmake -DGraylogLogger_ROOT_DIR=/opt/dmg_grp .."
+                  COMMAND echo "Suggest LibRDKafka root:                cmake -DLibRDKafka_ROOT_DIR=/opt/dmg_grp .."
+                  COMMAND echo "Dump vmm readout to file - det. group:  cmake -DDUMPTOFILE=ON .."
+                  COMMAND echo "List cmake variables:                   cmake .. -LH     "
+                  COMMAND echo ""
+                  )

@@ -4,8 +4,6 @@ find_package(Threads REQUIRED)
 find_package(PCAP)
 find_package(LibRDKafka)
 find_package(GraylogLogger)
-find_package(H5CC)
-find_package(HDF5 1.8.15 COMPONENTS CXX HL)
 find_package(FlatBuffers REQUIRED)
 
 set(coverage_flags "-coverage -fprofile-generate")
@@ -58,10 +56,16 @@ include_directories(. .. ${LibRDKafka_INCLUDE_DIR})
 
 #
 # Common functionality for all detector plugins
-set(common_SRC common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp
-    ../dataformats/multigrid/src/DataSave.cpp)
+set(common_SRC common/NewStats.cpp common/Producer.cpp common/FBSerializer.cpp)
+
 set(common_INC common/Detector.h common/NewStats.h common/Producer.h common/FBSerializer.h
     common/Trace.h ../libs/include/gccintel.h common/EFUArgs.h)
+
+if (DUMPTOFILE)
+set(common_SRC ${common_SRC} ../dataformats/multigrid/src/DataSave.cpp)
+set(common_INC ${common_INC} ../dataformats/multigrid/inc/DataSave.h)
+endif ()
+
 add_library(common STATIC ${common_SRC} ${common_INC})
 target_include_directories(common INTERFACE ${FLATBUFFERS_INCLUDE_DIR})
 
@@ -69,8 +73,7 @@ target_include_directories(common INTERFACE ${FLATBUFFERS_INCLUDE_DIR})
 # the E F U
 #
 set(efu2_SRC common/EFUArgs.cpp efu/Loader.cpp efu/Launcher.cpp efu/main.cpp common/StatPublisher.cpp
-efu/ExitHandler.cpp efu/Server.cpp efu/Parser.cpp multigrid/mgcncs/CalibrationFile.cpp)
-set(efu2_INC common/EFUArgs.h efu/Launcher.h efu/Loader.h efu/Server.h efu/Parser.h common/Trace.h
-    multigrid/mgcncs/CalibrationFile.h common/StatPublisher.h common/NewStats.h efu/ExitHandler.h)
+efu/ExitHandler.cpp efu/Server.cpp efu/Parser.cpp)
+set(efu2_INC CLI/CLI11.hpp common/EFUArgs.h efu/Launcher.h efu/Loader.h efu/Server.h efu/Parser.h common/Trace.h common/StatPublisher.h common/NewStats.h efu/ExitHandler.h)
 set(efu_LIB ${LibRDKafka_LIBRARIES} ${CMAKE_DL_LIBS})
 create_executable(efu2 "${efu_LIB}")

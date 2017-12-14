@@ -23,10 +23,9 @@ public:
    */
   int getmaxpixelid() { return 64; }
 
-
   // Sometimes asic and channel are separate @todo make this one the default
   int getdetectorpixelid(int module, int asic, int channel) {
-    return getdetectorpixelid(module, (asic<<6)+(channel&0x3f));
+    return getdetectorpixelid(module, (asic << 6) + (channel & 0x3f));
   }
 
   /** @brief Return the global detector pixel id from
@@ -42,24 +41,26 @@ public:
       XTRACE(PROCESS, WAR, "Invalid channel: %d\n", channel);
       return -1;
     }
-    XTRACE(PROCESS, DEB, "module %d, asic %d, channel %d\n", module, asic, channel);
+    XTRACE(PROCESS, DEB, "module %d, asic %d, channel %d\n", module, asic,
+           channel);
 
     int x = channel % 4;
     int y = channel / 4;
 
-    XTRACE(PROCESS, DEB, "initial coords x: %d, y %d \n", x,y);
+    XTRACE(PROCESS, DEB, "initial coords x: %d, y %d \n", x, y);
 
     if (asic == 0) {
-        x = 7 - x;
-        y = 3 - y;
+      x = 7 - x;
+      y = 3 - y;
     } else if (asic == 3) {
-        y = y + 4;
+      y = y + 4;
     } else if (asic == 2) {
-        x = 7 - x;
-        y = 7 - y;
+      x = 7 - x;
+      y = 7 - y;
     }
     int pixelid = x + 8 * y + 1;
-    XTRACE(PROCESS, DEB, "coordinates: x %d, y %d, pixel_id: %d\n", x, y, pixelid);
+    XTRACE(PROCESS, DEB, "coordinates: x %d, y %d, pixel_id: %d\n", x, y,
+           pixelid);
     return pixelid;
   }
 };

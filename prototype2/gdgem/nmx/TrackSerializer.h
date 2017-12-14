@@ -36,9 +36,9 @@ private:
   size_t maxlen{0};
   size_t minhits_{0};
 
-  uint64_t time_offset {0};
+  uint64_t time_offset{0};
   std::vector<flatbuffers::Offset<pos>> xtrack;
   std::vector<flatbuffers::Offset<pos>> ytrack;
-  double xpos {-1};
-  double ypos {-1};
+  double xpos{-1};
+  double ypos{-1};
 };

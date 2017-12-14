@@ -123,54 +123,36 @@ TEST_F(CspecDataTest, CreateEventInvalidPixel) {
 
   conv.makewirecal(0, 16383, 1);
   conv.makegridcal(0, 16383, 1);
-  auto ret = dat->createevent(data, buffer);
+  uint32_t time;
+  uint32_t pixel;
+  auto ret = dat->createevent(data, &time, &pixel);
 
   ASSERT_EQ(ret, -1);
 }
 
 TEST_F(CspecDataTest, CreateEventValidPixel) {
-  char buffer[32];
   struct CSPECData::MultiGridData data;
-
-  std::fill_n(buffer, sizeof(buffer), 0x00);
   data.module = 1;
   data.time = 0xaabbccdd;
   data.d[2] = 5106;
   data.d[6] = 1;
 
-  auto ret = dat->createevent(data, buffer);
-
+  uint32_t time;
+  uint32_t pixel;
+  auto ret = dat->createevent(data, &time, &pixel);
   ASSERT_EQ(ret, 0);
+  ASSERT_EQ(time, 0xaabbccdd);
+  EXPECT_EQ(pixel, 1);
 
-  ASSERT_EQ(buffer[0], (char)0xdd);
-  ASSERT_EQ(buffer[1], (char)0xcc);
-  ASSERT_EQ(buffer[2], (char)0xbb);
-  ASSERT_EQ(buffer[3], (char)0xaa);
-
-  EXPECT_EQ(buffer[4], (char)0x1); // pixelid 1
-  EXPECT_EQ(buffer[5], (char)0x0);
-  EXPECT_EQ(buffer[6], (char)0x00);
-  EXPECT_EQ(buffer[7], (char)0x00);
-
-  std::fill_n(buffer, sizeof(buffer), 0x00);
   data.module = 1;
-  data.time = 0xaabbccdd;
+  data.time = 0xaabbaadd;
   data.d[2] = 5105;
   data.d[6] = 1;
 
-  ret = dat->createevent(data, buffer);
-
+  ret = dat->createevent(data, &time, &pixel);
   ASSERT_EQ(ret, 0);
-
-  ASSERT_EQ(buffer[0], (char)0xdd);
-  ASSERT_EQ(buffer[1], (char)0xcc);
-  ASSERT_EQ(buffer[2], (char)0xbb);
-  ASSERT_EQ(buffer[3], (char)0xaa);
-
-  EXPECT_EQ(buffer[4], (char)0x2); // pixelid 2
-  EXPECT_EQ(buffer[5], (char)0x0);
-  EXPECT_EQ(buffer[6], (char)0x00);
-  EXPECT_EQ(buffer[7], (char)0x00);
+  ASSERT_EQ(time, 0xaabbaadd);
+  EXPECT_EQ(pixel, 2);
 }
 
 int main(int argc, char **argv) {

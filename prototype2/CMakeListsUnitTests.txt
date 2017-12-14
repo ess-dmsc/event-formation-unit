@@ -1,5 +1,5 @@
 if(NOT ${GTEST_FOUND})
-    message(WARNING "Unable to build unit tests as GTest was not found.")
+    message(WARNING "unable to build unit tests as GTest was not found.")
     return()
 endif()
 
@@ -7,9 +7,9 @@ enable_testing()
 
 find_program(VALGRIND_CMD valgrind)
 if(EXISTS ${VALGRIND_CMD})
-    message(STATUS "Valgrind found.")
+    message(STATUS "valgrind found.")
 else()
-    message(STATUS "Valgrind not found. Unable to run memory check.")
+    message(STATUS "valgrind not found. Unable to run memory check.")
 endif()
 
 mark_as_advanced(VALGRIND_CMD)
@@ -24,7 +24,7 @@ file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/coverage/)
 # EFU Tests
 #
 if(${CMAKE_COMPILER_IS_GNUCXX})
-    set(ParserTest_LIB_SRC efu/ParserTest.cpp test/SyscallWrappers.cpp)
+    set(ParserTest_LIB_SRC efu/ParserTest.cpp test/SyscallWrappers.cpp common/NewStats.cpp common/NewStats.h)
     add_library(ParserTest_LIB STATIC ${ParserTest_LIB_SRC})
     set_target_properties(ParserTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 
@@ -34,6 +34,8 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
     create_test_executable(ParserTest "${ParserTest_LINK}")
     add_compile_flags(ParserTest "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
     add_linker_flags(ParserTest "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
+  else()
+    message(STATUS "skipping ParserTest - requires gcc/linux")
 endif()
 
 
@@ -44,12 +46,15 @@ endif()
 set(VersionTest_SRC common/VersionTest.cpp common/Version.h)
 create_test_executable(VersionTest "")
 
+set(ESSGeometryTest_SRC common/ESSGeometryTest.cpp common/ESSGeometry.h)
+create_test_executable(ESSGeometryTest "")
+
 
 set(RingBufferTest_SRC common/RingBufferTest.cpp common/RingBuffer.h)
 create_test_executable(RingBufferTest "")
 
 
-set(DetectorTest_SRC common/DetectorTest.cpp common/Detector.h)
+set(DetectorTest_SRC common/DetectorTest.cpp common/NewStats.cpp common/NewStats.h common/Detector.h)
 create_test_executable(DetectorTest "")
 
 
@@ -67,7 +72,7 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   set(ProducerTest_INC common/Producer.h)
   create_test_executable(ProducerTest "${LibRDKafka_LIBRARIES}")
 else()
-  message(WARNING "Not building ProducerTest - only works on linux")
+  message(WARNING "skipping ProducerTest - requires gcc/linux")
 endif()
 
 
@@ -117,6 +122,8 @@ set(gcovr_excl_opts "-e .*Test.cpp -e .*gtest.*.h -e .*_generated.h" )
 separate_arguments(gcovr_excl_opts)
 add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_* DEPENDS ${unit_test_targets})
 add_custom_target(valgrind COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*  DEPENDS ${unit_test_targets})
+add_custom_target(benchmark DEPENDS ${benchmark_targets})
+
 if (DO_COV)
     find_program(GCOV_PATH gcov)
     find_program(GCOVR_PATH gcovr PATHS ${CMAKE_SOURCE_DIR}/tests)

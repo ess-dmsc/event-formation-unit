@@ -1,5 +1,5 @@
 {
-  "builder_type" : "H5",
+  "builder_type" : "SRS",
 
   "time_config" :
   {
@@ -31,5 +31,9 @@
   "cluster_adc_downshift" : 6,
 
   "geometry_x" : 256,
-  "geometry_y" : 256
+  "geometry_y" : 256,
+
+  "dump_directory" : "",
+  "dump_csv" : 0,
+  "dump_h5" : 0
 }

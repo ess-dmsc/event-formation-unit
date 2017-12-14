@@ -21,7 +21,8 @@ int main(int argc, char *argv[]) {
   if (opts.filename.empty())
     return 1;
 
-  H5::Exception::dontPrint();
+  hdf5::error::Singleton::instance().auto_print(false);
+//  hdf5::error::auto_print(false);
 
   char buffer[9000];
 
@@ -54,7 +55,7 @@ int main(int argc, char *argv[]) {
       txp++;
     } else {
       std::cout << "Sent " << tx_total + tx << " bytes"
-           << " in " << txp_total + txp << " packets." << std::endl;
+                << " in " << txp_total + txp << " packets." << std::endl;
       std::cout << "done" << std::endl;
       exit(0);
     }

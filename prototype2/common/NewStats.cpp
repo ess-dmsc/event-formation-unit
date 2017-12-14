@@ -4,23 +4,18 @@
 
 NewStats::NewStats() {}
 
-NewStats::~NewStats() {
-  for (auto s : stats) {
-    delete s;
-  }
-  stats.clear();
-}
+NewStats::~NewStats() {}
 
-NewStats::NewStats(std::string pre) : prefix(pre) {}
+NewStats::NewStats(std::string pre) { setPrefix(pre); }
 
-int NewStats::create(std::string statname, int64_t *counter) {
+int NewStats::create(std::string statname, const int64_t &counter) {
   auto pfname = prefix + statname;
   for (auto s : stats) {
-    if (s->name == pfname || s->counter == counter) {
+    if (s.name == pfname or &counter == &s.counter) {
       return -1;
     }
   }
-  stats.push_back(new StatTuple(pfname, counter));
+  stats.push_back(StatTuple(pfname, counter));
   return 0;
 }
 
@@ -30,12 +25,24 @@ std::string &NewStats::name(size_t index) {
   if (index > stats.size() || index < 1) {
     return nostat;
   }
-  return stats[index - 1]->name;
+  return stats.at(index - 1).name;
 }
 
 int64_t NewStats::value(size_t index) {
   if (index > stats.size() || index < 1) {
     return -1;
   }
-  return *stats[index - 1]->counter;
+  return stats.at(index - 1).counter;
+}
+
+void NewStats::setPrefix(std::string StatsPrefix) {
+  if (StatsPrefix.size() > 0) {
+    const char LastChar = StatsPrefix.back();
+    const char PointChar = '.';
+    if (LastChar != PointChar) {
+      prefix = StatsPrefix + PointChar;
+      return;
+    }
+  }
+  prefix = StatsPrefix;
 }

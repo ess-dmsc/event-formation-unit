@@ -1,4 +1,4 @@
-﻿/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <gdgem/vmm2srs/SRSTime.h>
 #include <sstream>
@@ -25,12 +25,13 @@ double SRSTime::target_resolution() const { return target_resolution_ns_; }
 
 double SRSTime::timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) {
   if (trigger < recent_trigger_)
-      bonus_++;
+    bonus_++;
   recent_trigger_ = trigger;
 
-  return (bonus_ << 32) + (trigger * trigger_resolution_)
-      + 1000 * double(bc) / bc_clock_     // bcid value * 1/(clock frequency)
-      + double(tdc) * tac_slope_ / 256.0; // tacSlope * tdc value (8 bit) * ramp length
+  return (bonus_ << 32) + (trigger * trigger_resolution_) +
+         1000 * double(bc) / bc_clock_ // bcid value * 1/(clock frequency)
+         + double(tdc) * tac_slope_ /
+               256.0; // tacSlope * tdc value (8 bit) * ramp length
 }
 
 uint64_t SRSTime::timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) {
@@ -38,14 +39,11 @@ uint64_t SRSTime::timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) {
                                target_resolution_ns_);
 }
 
-std::string SRSTime::debug() const
-{
+std::string SRSTime::debug() const {
   std::stringstream ss;
   ss << "("
-     << "trigger*" << trigger_resolution_
-     << " + bc*1000/" << bc_clock_
+     << "trigger*" << trigger_resolution_ << " + bc*1000/" << bc_clock_
      << " + tdc*" << tac_slope_ << "/256"
      << ")ns * " << target_resolution_ns_;
   return ss.str();
 }
-

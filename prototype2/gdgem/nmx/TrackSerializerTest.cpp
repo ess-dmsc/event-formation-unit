@@ -6,9 +6,9 @@
 #include <gdgem/nmx/TrackSerializer.h>
 #include <test/TestBase.h>
 
-#define NB_ENTRIES 256
-#define BASE_OVERHEAD 128
-#define ENTRY_OVERHEAD 16
+const unsigned int NB_ENTRIES = 256;
+const unsigned int BASE_OVERHEAD = 128;
+const unsigned int ENTRY_OVERHEAD = 16;
 
 class TrackSerializerTest : public TestBase {
   virtual void SetUp() {
@@ -27,8 +27,8 @@ protected:
   char *buffer;
   char flatbuffer[100000];
 
-  void addxandy(uint16_t xs, uint16_t xt, uint16_t xa,
-                uint16_t ys, uint16_t yt, uint16_t ya) {
+  void addxandy(uint16_t xs, uint16_t xt, uint16_t xa, uint16_t ys, uint16_t yt,
+                uint16_t ya) {
     e->strip = xs;
     e->time = xt;
     e->adc = xa;
@@ -67,14 +67,14 @@ TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
 }
 
 TEST_F(TrackSerializerTest, Serialize) {
-  int entries = NB_ENTRIES;
+  unsigned int entries = NB_ENTRIES;
   TrackSerializer tser(entries);
-  for (int i = 0; i < entries; i++) {
+  for (unsigned int i = 0; i < entries; i++) {
     addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
   auto tres = tser.add_track(*event);
   ASSERT_EQ(tres, 0);
-  auto len = tser.serialize(&buffer);
+  unsigned int len = tser.serialize(&buffer);
   ASSERT_TRUE(len > entries * 2 * 12);
   ASSERT_TRUE(len <
               entries * 2 * 12 + BASE_OVERHEAD + entries * ENTRY_OVERHEAD);
@@ -82,11 +82,11 @@ TEST_F(TrackSerializerTest, Serialize) {
 }
 
 TEST_F(TrackSerializerTest, DeSerialize) {
-  int entries = NB_ENTRIES;
-  int entry_size = 4 * 3; // Three uint32_t's
+  unsigned int entries = NB_ENTRIES;
+  unsigned int entry_size = 4 * 3; // Three uint32_t's
 
   TrackSerializer tser(entries);
-  for (int i = 0; i < entries; i++) {
+  for (unsigned int i = 0; i < entries; i++) {
     addxandy(i, 0x1111, 0x2222, 100 + i, 0x3333, 0x4444);
   }
   auto tres = tser.add_track(*event);
@@ -94,7 +94,7 @@ TEST_F(TrackSerializerTest, DeSerialize) {
   ASSERT_EQ(event->x.entries.size(), entries);
   ASSERT_EQ(event->y.entries.size(), entries);
 
-  auto len = tser.serialize(&buffer);
+  unsigned int len = tser.serialize(&buffer);
   ASSERT_TRUE(len > entries * entry_size * 2); //  x and y
   ASSERT_TRUE(len < entries * entry_size * 2 + BASE_OVERHEAD +
                         entries * ENTRY_OVERHEAD);
@@ -116,17 +116,17 @@ TEST_F(TrackSerializerTest, DeSerialize) {
 
 TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
   MESSAGE() << "Allocating a TrackSerializer object on every iteration\n";
-  for (int j = 2; j <= 1000; j *= 2) {
+  for (unsigned int j = 2; j <= 1000; j *= 2) {
     event->x.entries.clear();
     event->y.entries.clear();
-    int entries = j;
-    int entry_size = 4 * 3; // Three uint32_t's
+    unsigned int entries = j;
+    unsigned int entry_size = 4 * 3; // Three uint32_t's
 
-    ASSERT_EQ(event->x.entries.size(), 0);
-    ASSERT_EQ(event->y.entries.size(), 0);
+    ASSERT_FALSE(event->x.entries.size());
+    ASSERT_FALSE(event->y.entries.size());
 
     TrackSerializer tser(entries);
-    for (int i = 0; i < entries; i++) {
+    for (unsigned int i = 0; i < entries; i++) {
       addxandy(i, i * 2, i * 3 + 1, entries - i, i * 2 + 0x1000,
                i * 3 + 0x2000);
     }
@@ -134,7 +134,7 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
     ASSERT_EQ(event->x.entries.size(), entries);
     ASSERT_EQ(event->y.entries.size(), entries);
     ASSERT_EQ(tres, 0);
-    auto len = tser.serialize(&buffer);
+    unsigned int len = tser.serialize(&buffer);
     // MESSAGE() << "entries: " << entries << ", buffer size: " << len << ",
     // overhead: " << len - entries * entry_size * 2 << "\n";
     ASSERT_TRUE(len > entries * entry_size * 2); //  x and y
@@ -154,7 +154,7 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
     ASSERT_EQ(xdat->size(), entries);
     ASSERT_EQ(ydat->size(), entries);
 
-    for (int i = 0; i < entries; i++) {
+    for (unsigned int i = 0; i < entries; i++) {
       ASSERT_EQ((*xdat)[i]->strip(), i);
       ASSERT_EQ((*xdat)[i]->time(), i * 2);
       ASSERT_EQ((*xdat)[i]->adc(), i * 3 + 1);
@@ -166,20 +166,20 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
 }
 
 TEST_F(TrackSerializerTest, Validate1000SameSize) {
-  int entries = 256;
-  int entry_size = 4 * 3; // Three uint32_t's
+  unsigned int entries = 256;
+  unsigned int entry_size = 4 * 3; // Three uint32_t's
   MESSAGE() << "Reusing the same TrackSerializer object\n";
   TrackSerializer tser(entries);
-  for (int i = 1; i <= 1000; i *= 2) {
+  for (unsigned int i = 1; i <= 1000; i *= 2) {
     event->x.entries.clear();
     event->y.entries.clear();
-    for (int i = 0; i < entries; i++) {
+    for (unsigned int i = 0; i < entries; i++) {
       addxandy(i, i * 2, i * 3 + 1, entries - i, i * 2 + 0x1000,
                i * 3 + 0x2000);
     }
     auto tres = tser.add_track(*event);
     ASSERT_EQ(tres, 0);
-    auto len = tser.serialize(&buffer);
+    unsigned int len = tser.serialize(&buffer);
     // MESSAGE() << "entries: " << entries << ", buffer size: " << len << ",
     // overhead: " << len - entries * entry_size * 2 << "\n";
     ASSERT_TRUE(len > entries * entry_size * 2); //  x and y
@@ -199,7 +199,7 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
     ASSERT_EQ(xdat->size(), entries);
     ASSERT_EQ(ydat->size(), entries);
 
-    for (int i = 0; i < entries; i++) {
+    for (unsigned int i = 0; i < entries; i++) {
       ASSERT_EQ((*xdat)[i]->strip(), i);
       ASSERT_EQ((*xdat)[i]->time(), i * 2);
       ASSERT_EQ((*xdat)[i]->adc(), i * 3 + 1);

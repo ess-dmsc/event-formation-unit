@@ -27,8 +27,9 @@ public:
   int buflen{9000};                 /**< Tx buffer size */
   int sndbuf{1000000};              /**< kernel sndbuf size */
 
-  int throttle{0}; /**< actually a sleep() counter */
-  int loop{0}; /**< single shot or loop */
+  int throttle{0};   /**< actually a sleep() counter */
+  int loop{0};       /**< single shot or loop */
+  int pcapoffset{0}; /**< for pcap: start after offset */
 
   unsigned int updint{1}; /**< update interval (seconds) */
 };

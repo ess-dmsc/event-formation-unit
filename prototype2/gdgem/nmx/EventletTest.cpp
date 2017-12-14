@@ -14,8 +14,6 @@ protected:
 
 TEST_F(EventletTest, Debug) {
   ASSERT_FALSE(eventlet->debug().empty());
-  eventlet->flag = true;
-  ASSERT_FALSE(eventlet->debug().empty());
   eventlet->over_threshold = true;
   ASSERT_FALSE(eventlet->debug().empty());
 }

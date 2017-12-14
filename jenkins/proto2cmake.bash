@@ -35,8 +35,8 @@ tools
 cloc --by-file --xml --out=cloc.xml .
 pushd build
 cmake -DCOV=y ..        || errexit "cmake failed"
-make                    || errexit "make failed"
-make VERBOSE=y runtest  || errexit "make runtest failed"
+make -j 5               || errexit "make failed"
+make -j 5 runtest       || errexit "make runtest failed"
 #executecode
 make coverage           || errexit "make coverage failed"
 make valgrind
