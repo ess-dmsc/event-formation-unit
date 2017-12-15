@@ -1,3 +1,4 @@
+//clang-format off
 #pragma once
 
 // Distributed under the 3-Clause BSD License.  See accompanying
@@ -2915,3 +2916,5 @@ struct AppFriend {
 } // namespace detail
 
 } // namespace CLI
+//clang-format on
+
