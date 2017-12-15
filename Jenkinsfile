@@ -12,9 +12,6 @@ node('kafka-client && centos7') {
         stage("Checkout") {
             try {
                 checkout scm
-                cloc --by-file --xml --out=cloc.xml .
-                xsltproc PATH/TO/cloc2sloccount.xsl cloc.xml > sloccount.sc
-                sloccountPublish encoding: '', pattern: ''
             } catch (e) {
                 failure_function(e, 'Checkout failed')
             }
@@ -22,9 +19,8 @@ node('kafka-client && centos7') {
 
         stage("Analyse") {
             try {
-                checkout scm
-                cloc --by-file --xml --out=cloc.xml .
-                xsltproc jenkins/cloc2sloccount.xsl cloc.xml > sloccount.sc
+                sh "cloc --by-file --xml --out=cloc.xml ."
+                sh "xsltproc jenkins/cloc2sloccount.xsl cloc.xml > sloccount.sc"
                 sloccountPublish encoding: '', pattern: ''
             } catch (e) {
                 failure_function(e, 'Static analysis failed')
