@@ -4,6 +4,7 @@ set(event-formation-unit_VERSION_MAJOR 1)
 set(event-formation-unit_VERSION_MINOR 0)
 
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
+include(cmake_modules/CoverageReports.cmake)
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Debug' as none was specified.")
@@ -64,8 +65,6 @@ endif ()
 
 option(CMAKE_BUILD_TYPE "Build type; \"Release\" or \"Debug\"." Debug)
 
-option(COV "Enable code coverage test for unit tests (if possible)." OFF)
-
 option(EXTSCHEMAS "Use flatbuffer headers defined in external \"streaming-data-types\" repository. That repository must be located in the root of this repository." OFF)
 if (${EXTSCHEMAS})
   set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DFLATBUFFERS")
@@ -106,6 +105,15 @@ add_subdirectory(libs)
 add_subdirectory(prototype2)
 add_subdirectory(udp)
 #add_subdirectory(dataformats) # built separately for now
+
+set(gcovr_excl_opts "-e .*Test.cpp -e .*gtest.*.h -e .*_generated.h" )
+create_coverage_targets(
+        coverage
+        runtest
+        ${PROJECT_BINARY_DIR}
+        ${CMAKE_SOURCE_DIR}/
+        ${PROJECT_BINARY_DIR}/coverage
+        ${gcovr_excl_opts})
 
 add_custom_target(hints
                   COMMAND echo ""

@@ -1,14 +1,13 @@
-#=============================================================================
+#=========================================================================================
 # Enabling code coverage
-#=============================================================================
+#=========================================================================================
 #
-#   1. For each target that you want to enable coverage reporting for:
-#     a. invoke enable_coverage(target_name)
-#     b. include ${COVERAGE_LIBRARIES} in target_link_libraries()
-#   note: this must be done for both, unit tests and tested code
+#   1. For each target that you want to enable coverage reporting for
+#      invoke enable_coverage(target_name)
 #
 #   2. Automatically create coverage generation targets with:
-#     create_coverage_targets(target_base_name run_target bin_dir source_dir output_path), where
+#     create_coverage_targets(target_base_name run_target bin_dir source_dir output_path)
+#     where:
 #       targer_base_name -- will create *_html *_xml and * which makes both
 #       run_target -- name of target that runs the tests
 #       bin_dir -- root directory of unit test binaries
@@ -21,9 +20,9 @@
 option(COV "Enable code coverage reporting for unit tests (if possible)." OFF)
 
 function(configure_coverage_gcc)
-  set(COVERAGE_COMPILE_FLAGS "-coverage -fprofile-generate -ftest-coverage" PARENT_SCOPE)
-  set(COVERAGE_LINK_FLAGS "-g -O0 -coverage -fprofile-generate -ftest-coverage" PARENT_SCOPE)
-  find_program(COVERAGE_GCOV_PATH gcov) # IS NEVER USED!!!!
+  set(COVERAGE_COMPILE_FLAGS "-g -O0 -coverage -fprofile-generate -ftest-coverage" PARENT_SCOPE)
+  set(COVERAGE_LINK_FLAGS "-coverage -fprofile-generate -ftest-coverage" PARENT_SCOPE)
+  find_program(COVERAGE_GCOV_PATH gcov)
   find_program(COVERAGE_GCOVR_PATH gcovr PATHS ${CMAKE_CURRENT_LIST_DIR})
   if (NOT COVERAGE_GCOV_PATH)
     message(WARNING "Cannot enable coverage reporting; gcov not found.")
@@ -74,20 +73,33 @@ if (${COV})
 
 endif ()
 
+function(enable_coverage_flags coverage_target)
+  if (${COVERAGE_ENABLED})
+    set_target_properties(${coverage_target} PROPERTIES
+            COMPILE_FLAGS ${COVERAGE_COMPILE_FLAGS})
+    set_target_properties(${coverage_target} PROPERTIES
+            LINK_FLAGS ${COVERAGE_LINK_FLAGS})
+  else ()
+    message(STATUS "Cannot enable coverage flags for target: ${coverage_target}. Code coverage feature not available.")
+  endif ()
+endfunction()
+
 function(enable_coverage coverage_target)
   if (${COVERAGE_ENABLED})
     set_target_properties(${coverage_target} PROPERTIES
       COMPILE_FLAGS ${COVERAGE_COMPILE_FLAGS})
     set_target_properties(${coverage_target} PROPERTIES
       LINK_FLAGS ${COVERAGE_LINK_FLAGS})
+    target_link_libraries(${coverage_target} ${COVERAGE_LIBRARIES})
   else ()
     message(STATUS "Cannot enable coverage for target: ${coverage_target}. Code coverage feature not available.")
   endif ()
 endfunction()
 
-function(create_coverage_targets target_base_name run_target bin_dir source_dir output_path)
+function(create_coverage_targets target_base_name run_target bin_dir source_dir output_path excl)
   if (${COVERAGE_ENABLED})
     file(MAKE_DIRECTORY ${output_path})
+    separate_arguments(excl)
     if (${CMAKE_CXX_COMPILER_ID} STREQUAL Clang OR ${CMAKE_CXX_COMPILER_ID} STREQUAL AppleClang)
       add_custom_target(${target_base_name}_html
         COMMAND ${COVERAGE_LLVM_PROF_PATH}
@@ -98,16 +110,18 @@ function(create_coverage_targets target_base_name run_target bin_dir source_dir 
       add_custom_target(${target_base_name} DEPENDS ${target_base_name}_html)
     elseif (${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
       add_custom_target(${target_base_name}_xml
-        COMMAND ${COVERAGE_GCOVR_PATH}
+        COMMAND ${COVERAGE_GCOVR_PATH} "--xml"
+        ${excl}
         "-r" "${source_dir}"
-        "-x" "${bin_dir}"
-        "-o" "${output_path}/coverage.xml" "${bin_dir}"
+        "-o" "${output_path}/coverage.xml"
+        "${bin_dir}"
         DEPENDS ${run_target})
       add_custom_target(${target_base_name}_html
-        COMMAND ${COVERAGE_GCOVR_PATH}
+        COMMAND ${COVERAGE_GCOVR_PATH} "--html" "--html-details"
+        ${excl}
         "-r" "${source_dir}"
-        "--html" "--html-details"
-        "-o" "${output_path}/index.html" "${bin_dir}"
+        "-o" "${output_path}/index.html"
+        "${bin_dir}"
         DEPENDS ${run_target})
       add_custom_target(${target_base_name}
         DEPENDS ${target_base_name}_xml ${target_base_name}_html)
