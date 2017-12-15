@@ -20,7 +20,7 @@ node('kafka-client && centos7') {
     dir("build") {
         try {
             stage("Run CMake") {
-                sh "cmake ../code"
+                sh "cmake -DCOV=1 ../code"
             }
         } catch (e) {
             failure_function(e, 'CMake failed')
@@ -37,6 +37,19 @@ node('kafka-client && centos7') {
         try {
             stage("Run unit tests") {
                 sh "make runtest"
+                sh "make coverage"
+                step([
+                    $class: 'CoberturaPublisher',
+                    autoUpdateHealth: true,
+                    autoUpdateStability: true,
+                    coberturaReportFile: 'coverage/cov.xml',
+                    failUnhealthy: false,
+                    failUnstable: false,
+                    maxNumberOfBuilds: 0,
+                    onlyStable: false,
+                    sourceEncoding: 'ASCII',
+                    zoomCoverageChart: false
+                ])
             }
         } catch (e) {
             failure_function(e, 'Unit tests failed')
