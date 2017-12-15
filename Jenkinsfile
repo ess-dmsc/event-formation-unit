@@ -37,12 +37,12 @@ node('kafka-client && centos7') {
         try {
             stage("Run unit tests") {
                 sh "make runtest"
-                sh "make coverage"
+                sh "make coverage_xml"
                 step([
                     $class: 'CoberturaPublisher',
                     autoUpdateHealth: true,
                     autoUpdateStability: true,
-                    coberturaReportFile: 'coverage/cov.xml',
+                    coberturaReportFile: 'coverage/coverage.xml',
                     failUnhealthy: false,
                     failUnstable: false,
                     maxNumberOfBuilds: 0,
