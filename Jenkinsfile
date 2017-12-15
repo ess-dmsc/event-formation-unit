@@ -50,6 +50,7 @@ node('kafka-client && centos7') {
                     sourceEncoding: 'ASCII',
                     zoomCoverageChart: false
                 ])
+                make valgrind
             }
         } catch (e) {
             failure_function(e, 'Unit tests failed')
