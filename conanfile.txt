@@ -1,0 +1,14 @@
+[requires]
+gtest/3121b20-dm1@ess-dmsc/testing
+librdkafka/0.11.1-dm1@ess-dmsc/stable
+graylog-logger/1.0.3@ess-dmsc/stable
+cmake_installer/1.0@conan/stable
+#h5cpp/0.0.3-dm1@ess-dmsc/stable
+
+[generators]
+cmake
+
+[options]
+gtest:shared=True
+librdkafka:shared=True
+#h5cpp:shared=True
