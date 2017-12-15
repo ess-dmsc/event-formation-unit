@@ -9,34 +9,36 @@ node('kafka-client && centos7') {
     cleanWs()
     
     dir("code") {
-        try {
-            stage("Checkout projects") {
+        stage("Checkout") {
+            try {
                 checkout scm
+            } catch (e) {
+                failure_function(e, 'Checkout failed')
             }
-        } catch (e) {
-            failure_function(e, 'Checkout failed')
         }
     }
+
     dir("build") {
-        try {
-            stage("Run CMake") {
+        stage("CMake") {
+            try {
                 sh "cmake -DCOV=1 ../code"
+            } catch (e) {
+                failure_function(e, 'CMake failed')
             }
-        } catch (e) {
-            failure_function(e, 'CMake failed')
         }
 
-        try {
-            stage("Build everything") {
-                sh "make"
+        stage("Build") {
+            try {
+                sh "make -j 5"
+            } catch (e) {
+                failure_function(e, 'Failed to compile')
             }
-        } catch (e) {
-            failure_function(e, 'Failed to compile')
         }
 
-        try {
-            stage("Run unit tests") {
-                sh "make runtest"
+        stage("Run tests") {
+            try {
+                sh "make -j 5 runtest"
+                junit 'test_results/*.xml'
                 sh "make coverage_xml"
                 step([
                     $class: 'CoberturaPublisher',
@@ -50,10 +52,10 @@ node('kafka-client && centos7') {
                     sourceEncoding: 'ASCII',
                     zoomCoverageChart: false
                 ])
-                make valgrind
+            } catch (e) {
+                junit 'test_results/*.xml'
+                failure_function(e, 'Unit tests failed')
             }
-        } catch (e) {
-            failure_function(e, 'Unit tests failed')
         }
     }
 }
