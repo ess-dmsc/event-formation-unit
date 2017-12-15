@@ -1,11 +1,10 @@
-//clang-format off
 #pragma once
 
 // Distributed under the 3-Clause BSD License.  See accompanying
 // file LICENSE or https://github.com/CLIUtils/CLI11 for details.
 
 // This file was generated using MakeSingleHeader.py in CLI11/scripts
-// from: v1.2.0-90-gfc69345
+// from: v1.3.0-8-g67cd2e6
 
 // This has the complete CLI library in one file.
 
@@ -30,6 +29,19 @@
 #include <vector>
 #include <type_traits>
 #include <memory>
+
+// From CLI/Version.hpp
+
+namespace CLI {
+
+// Note that all code in CLI11 must be in a namespace, even if it just a define.
+
+#define CLI11_VERSION_MAJOR 1
+#define CLI11_VERSION_MINOR 3
+#define CLI11_VERSION_PATCH 0
+#define CLI11_VERSION "1.3.0"
+
+} // namespace CLI
 
 // From CLI/StringTools.hpp
 
@@ -238,14 +250,14 @@ enum class ExitCodes {
     IncorrectConstruction = 100,
     BadNameString,
     OptionAlreadyAdded,
-    File,
+    FileError,
     ConversionError,
     ValidationError,
     RequiredError,
     RequiresError,
     ExcludesError,
     ExtrasError,
-    ExtrasINIError,
+    INIError,
     InvalidError,
     HorribleError,
     OptionNotFound,
@@ -288,18 +300,52 @@ class ConstructionError : public Error {
 class IncorrectConstruction : public ConstructionError {
     CLI11_ERROR_DEF(ConstructionError, IncorrectConstruction)
     CLI11_ERROR_SIMPLE(IncorrectConstruction)
+    static IncorrectConstruction PositionalFlag(std::string name) {
+        return IncorrectConstruction(name + ": Flags cannot be positional");
+    }
+    static IncorrectConstruction Set0Opt(std::string name) {
+        return IncorrectConstruction(name + ": Cannot set 0 expected, use a flag instead");
+    }
+    static IncorrectConstruction ChangeNotVector(std::string name) {
+        return IncorrectConstruction(name + ": You can only change the expected arguments for vectors");
+    }
+    static IncorrectConstruction AfterMultiOpt(std::string name) {
+        return IncorrectConstruction(
+            name + ": You can't change expected arguments after you've changed the multi option policy!");
+    }
+    static IncorrectConstruction MissingOption(std::string name) {
+        return IncorrectConstruction("Option " + name + " is not defined");
+    }
+    static IncorrectConstruction MultiOptionPolicy(std::string name) {
+        return IncorrectConstruction(name + ": multi_option_policy only works for flags and single value options");
+    }
 };
 
 /// Thrown on construction of a bad name
 class BadNameString : public ConstructionError {
     CLI11_ERROR_DEF(ConstructionError, BadNameString)
     CLI11_ERROR_SIMPLE(BadNameString)
+    static BadNameString OneCharName(std::string name) { return BadNameString("Invalid one char name: " + name); }
+    static BadNameString BadLongName(std::string name) { return BadNameString("Bad long name: " + name); }
+    static BadNameString DashesOnly(std::string name) {
+        return BadNameString("Must have a name, not just dashes: " + name);
+    }
+    static BadNameString MultiPositionalNames(std::string name) {
+        return BadNameString("Only one positional name allowed, remove: " + name);
+    }
 };
 
 /// Thrown when an option already exists
 class OptionAlreadyAdded : public ConstructionError {
     CLI11_ERROR_DEF(ConstructionError, OptionAlreadyAdded)
-    CLI11_ERROR_SIMPLE(OptionAlreadyAdded)
+    OptionAlreadyAdded(std::string name)
+        : OptionAlreadyAdded(name + " is already added", ExitCodes::OptionAlreadyAdded) {}
+    static OptionAlreadyAdded Requires(std::string name, std::string other) {
+        return OptionAlreadyAdded(name + " requires " + other, ExitCodes::OptionAlreadyAdded);
+    }
+    static OptionAlreadyAdded Excludes(std::string name, std::string other) {
+        return OptionAlreadyAdded(name + " excludes " + other, ExitCodes::OptionAlreadyAdded);
+    }
 };
 
 // Parsing errors
@@ -332,7 +378,8 @@ class RuntimeError : public ParseError {
 /// Thrown when parsing an INI file and it is missing
 class FileError : public ParseError {
     CLI11_ERROR_DEF(ParseError, FileError)
-    FileError(std::string name) : FileError(name + " was not readable (missing?)", ExitCodes::File) {}
+    CLI11_ERROR_SIMPLE(FileError)
+    static FileError Missing(std::string name) { return FileError(name + " was not readable (missing?)"); }
 };
 
 /// Thrown when conversion call back fails, such as when an int fails to coerce to a string
@@ -341,6 +388,14 @@ class ConversionError : public ParseError {
     CLI11_ERROR_SIMPLE(ConversionError)
     ConversionError(std::string member, std::string name)
         : ConversionError("The value " + member + "is not an allowed value for " + name) {}
+    ConversionError(std::string name, std::vector<std::string> results)
+        : ConversionError("Could not convert: " + name + " = " + detail::join(results)) {}
+    static ConversionError TooManyInputsFlag(std::string name) {
+        return ConversionError(name + ": too many inputs for a flag");
+    }
+    static ConversionError TrueFalse(std::string name) {
+        return ConversionError(name + ": Should be true/false or a number");
+    }
 };
 
 /// Thrown when validation of results fails
@@ -353,11 +408,18 @@ class ValidationError : public ParseError {
 /// Thrown when a required option is missing
 class RequiredError : public ParseError {
     CLI11_ERROR_DEF(ParseError, RequiredError)
-    CLI11_ERROR_SIMPLE(RequiredError)
+    RequiredError(std::string name) : RequiredError(name + " is required", ExitCodes::RequiredError) {}
+    static RequiredError Subcommand(size_t min_subcom) {
+        if(min_subcom == 1)
+            return RequiredError("A subcommand");
+        else
+            return RequiredError("Requires at least " + std::to_string(min_subcom) + " subcommands",
+                                 ExitCodes::RequiredError);
+    }
 };
 
-/// Thrown when the wrong number of arguments has been recieved
-class ArgumentMismatch : ParseError {
+/// Thrown when the wrong number of arguments has been received
+class ArgumentMismatch : public ParseError {
     CLI11_ERROR_DEF(ParseError, ArgumentMismatch)
     CLI11_ERROR_SIMPLE(ArgumentMismatch)
     ArgumentMismatch(std::string name, int expected, size_t recieved)
@@ -366,6 +428,13 @@ class ArgumentMismatch : ParseError {
                                         : ("Expected at least " + std::to_string(-expected) + " arguments to " + name +
                                            ", got " + std::to_string(recieved)),
                            ExitCodes::ArgumentMismatch) {}
+
+    static ArgumentMismatch AtLeast(std::string name, int num) {
+        return ArgumentMismatch(name + ": At least " + std::to_string(num) + " required");
+    }
+    static ArgumentMismatch TypedAtLeast(std::string name, int num, std::string type) {
+        return ArgumentMismatch(name + ": " + std::to_string(num) + " required " + type + " missing");
+    }
 };
 
 /// Thrown when a requires option is missing
@@ -393,9 +462,13 @@ class ExtrasError : public ParseError {
 };
 
 /// Thrown when extra values are found in an INI file
-class ExtrasINIError : public ParseError {
-    CLI11_ERROR_DEF(ParseError, ExtrasINIError)
-    ExtrasINIError(std::string item) : ExtrasINIError("INI was not able to parse " + item, ExitCodes::ExtrasINIError) {}
+class INIError : public ParseError {
+    CLI11_ERROR_DEF(ParseError, INIError)
+    CLI11_ERROR_SIMPLE(INIError)
+    static INIError Extras(std::string item) { return INIError("INI was not able to parse " + item); }
+    static INIError NotConfigurable(std::string item) {
+        return INIError(item + ": This option is not allowed in a configuration file");
+    }
 };
 
 /// Thrown when validation fails before parsing
@@ -407,6 +480,7 @@ class InvalidError : public ParseError {
 };
 
 /// This is just a safety check to verify selection and parsing match - you should not ever see it
+/// Strings are directly added to this error, but again, it should never be seen.
 class HorribleError : public ParseError {
     CLI11_ERROR_DEF(ParseError, HorribleError)
     CLI11_ERROR_SIMPLE(HorribleError)
@@ -430,13 +504,11 @@ namespace CLI {
 
 // Type tools
 
-// Copied from C++14
-#if __cplusplus < 201402L
+// We could check to see if C++14 is being used, but it does not hurt to redefine this
+// (even Google does this: https://github.com/google/skia/blob/master/include/private/SkTLogic.h)
+// It is not in the std namespace anyway, so no harm done.
+
 template <bool B, class T = void> using enable_if_t = typename std::enable_if<B, T>::type;
-#else
-// If your compiler supports C++14, you can use that definition instead
-using std::enable_if_t;
-#endif
 
 template <typename T> struct is_vector { static const bool value = false; };
 
@@ -589,18 +661,18 @@ get_names(const std::vector<std::string> &input) {
             if(name.length() == 2 && valid_first_char(name[1]))
                 short_names.emplace_back(1, name[1]);
             else
-                throw BadNameString("Invalid one char name: " + name);
+                throw BadNameString::OneCharName(name);
         } else if(name.length() > 2 && name.substr(0, 2) == "--") {
             name = name.substr(2);
             if(valid_name_string(name))
                 long_names.push_back(name);
             else
-                throw BadNameString("Bad long name: " + name);
+                throw BadNameString::BadLongName(name);
         } else if(name == "-" || name == "--") {
-            throw BadNameString("Must have a name, not just dashes");
+            throw BadNameString::DashesOnly(name);
         } else {
             if(pos_name.length() > 0)
-                throw BadNameString("Only one positional name allowed, remove: " + name);
+                throw BadNameString::MultiPositionalNames(name);
             pos_name = name;
         }
     }
@@ -710,7 +782,7 @@ inline std::vector<ini_ret_t> parse_ini(const std::string &name) {
 
     std::ifstream input{name};
     if(!input.good())
-        throw FileError(name);
+        throw FileError::Missing(name);
 
     return parse_ini(input);
 }
@@ -798,6 +870,8 @@ class App;
 
 using Option_p = std::unique_ptr<Option>;
 
+enum class MultiOptionPolicy { Throw, TakeLast, TakeFirst, Join };
+
 template <typename CRTP> class OptionBase {
     friend App;
 
@@ -811,14 +885,18 @@ template <typename CRTP> class OptionBase {
     /// Ignore the case when matching (option, not value)
     bool ignore_case_{false};
 
-    /// Only take the last argument (requires `expected_ == 1`)
-    bool last_{false};
+    /// Allow this option to be given in a configuration file
+    bool configurable_{true};
+
+    /// Policy for multiple arguments when `expected_ == 1`  (can be set on bool flags, too)
+    MultiOptionPolicy multi_option_policy_{MultiOptionPolicy::Throw};
 
     template <typename T> void copy_to(T *other) const {
         other->group(group_);
         other->required(required_);
         other->ignore_case(ignore_case_);
-        other->take_last(last_);
+        other->configurable(configurable_);
+        other->multi_option_policy(multi_option_policy_);
     }
 
   public:
@@ -851,8 +929,40 @@ template <typename CRTP> class OptionBase {
     /// The status of ignore case
     bool get_ignore_case() const { return ignore_case_; }
 
-    /// The status of the take last flag
-    bool get_take_last() const { return last_; }
+    /// The status of configurable
+    bool get_configurable() const { return configurable_; }
+
+    /// The status of the multi option policy
+    MultiOptionPolicy get_multi_option_policy() const { return multi_option_policy_; }
+
+    // Shortcuts for multi option policy
+
+    /// Set the multi option policy to take last
+    CRTP *take_last() {
+        CRTP *self = static_cast<CRTP *>(this);
+        self->multi_option_policy(MultiOptionPolicy::TakeLast);
+        return self;
+    }
+
+    /// Set the multi option policy to take last
+    CRTP *take_first() {
+        CRTP *self = static_cast<CRTP *>(this);
+        self->multi_option_policy(MultiOptionPolicy::TakeFirst);
+        return self;
+    }
+
+    /// Set the multi option policy to take last
+    CRTP *join() {
+        CRTP *self = static_cast<CRTP *>(this);
+        self->multi_option_policy(MultiOptionPolicy::Join);
+        return self;
+    }
+
+    /// Allow in a configuration file
+    CRTP *configurable(bool value = true) {
+        configurable_ = value;
+        return static_cast<CRTP *>(this);
+    }
 };
 
 class OptionDefaults : public OptionBase<OptionDefaults> {
@@ -862,8 +972,8 @@ class OptionDefaults : public OptionBase<OptionDefaults> {
     // Methods here need a different implementation if they are Option vs. OptionDefault
 
     /// Take the last argument if given multiple times
-    OptionDefaults *take_last(bool value = true) {
-        last_ = value;
+    OptionDefaults *multi_option_policy(MultiOptionPolicy value = MultiOptionPolicy::Throw) {
+        multi_option_policy_ = value;
         return this;
     }
 
@@ -982,11 +1092,11 @@ class Option : public OptionBase<Option> {
         if(expected_ == value)
             return this;
         else if(value == 0)
-            throw IncorrectConstruction("Cannot set 0 expected, use a flag instead");
+            throw IncorrectConstruction::Set0Opt(single_name());
         else if(!changeable_)
-            throw IncorrectConstruction("You can only change the expected arguments for vectors");
-        else if(last_)
-            throw IncorrectConstruction("You can't change expected arguments after you've set take_last!");
+            throw IncorrectConstruction::ChangeNotVector(single_name());
+        else if(value != 1 && multi_option_policy_ != MultiOptionPolicy::Throw)
+            throw IncorrectConstruction::AfterMultiOpt(single_name());
 
         expected_ = value;
         return this;
@@ -1015,7 +1125,7 @@ class Option : public OptionBase<Option> {
     Option *requires(Option *opt) {
         auto tup = requires_.insert(opt);
         if(!tup.second)
-            throw OptionAlreadyAdded(get_name() + " requires " + opt->get_name());
+            throw OptionAlreadyAdded::Requires(get_name(), opt->get_name());
         return this;
     }
 
@@ -1024,7 +1134,7 @@ class Option : public OptionBase<Option> {
         for(const Option_p &opt : dynamic_cast<T *>(parent_)->options_)
             if(opt.get() != this && opt->check_name(opt_name))
                 return requires(opt.get());
-        throw IncorrectConstruction("Option " + opt_name + " is not defined");
+        throw IncorrectConstruction::MissingOption(opt_name);
     }
 
     /// Any number supported, any mix of string and Opt
@@ -1037,7 +1147,7 @@ class Option : public OptionBase<Option> {
     Option *excludes(Option *opt) {
         auto tup = excludes_.insert(opt);
         if(!tup.second)
-            throw OptionAlreadyAdded(get_name() + " excludes " + opt->get_name());
+            throw OptionAlreadyAdded::Excludes(get_name(), opt->get_name());
         return this;
     }
 
@@ -1046,7 +1156,7 @@ class Option : public OptionBase<Option> {
         for(const Option_p &opt : dynamic_cast<T *>(parent_)->options_)
             if(opt.get() != this && opt->check_name(opt_name))
                 return excludes(opt.get());
-        throw IncorrectConstruction("Option " + opt_name + " is not defined");
+        throw IncorrectConstruction::MissingOption(opt_name);
     }
     /// Any number supported, any mix of string and Opt
     template <typename A, typename B, typename... ARG> Option *excludes(A opt, B opt1, ARG... args) {
@@ -1070,16 +1180,16 @@ class Option : public OptionBase<Option> {
 
         for(const Option_p &opt : parent->options_)
             if(opt.get() != this && *opt == *this)
-                throw OptionAlreadyAdded(opt->get_name() + " is already added");
+                throw OptionAlreadyAdded(opt->get_name());
 
         return this;
     }
 
     /// Take the last argument if given multiple times
-    Option *take_last(bool value = true) {
+    Option *multi_option_policy(MultiOptionPolicy value = MultiOptionPolicy::Throw) {
         if(get_expected() != 0 && get_expected() != 1)
-            throw IncorrectConstruction("take_last only works for flags and single value options!");
-        last_ = value;
+            throw IncorrectConstruction::MultiOptionPolicy(single_name());
+        multi_option_policy_ = value;
         return this;
     }
 
@@ -1087,14 +1197,8 @@ class Option : public OptionBase<Option> {
     /// @name Accessors
     ///@{
 
-    /// True if this is a required option
-    bool get_required() const { return required_; }
-
     /// The number of arguments the option expects
     int get_expected() const { return expected_; }
-
-    /// The status of the take last flag
-    bool get_take_last() const { return last_; }
 
     /// True if this has a default value
     int get_default() const { return default_; }
@@ -1107,9 +1211,6 @@ class Option : public OptionBase<Option> {
 
     /// True if option has description
     bool has_description() const { return description_.length() > 0; }
-
-    /// Get the group of this option
-    const std::string &get_group() const { return group_; }
 
     /// Get the description
     const std::string &get_description() const { return description_; }
@@ -1215,9 +1316,16 @@ class Option : public OptionBase<Option> {
         }
 
         bool local_result;
-        // If take_last, only operate on the final item
-        if(last_) {
+
+        // Operation depends on the policy setting
+        if(multi_option_policy_ == MultiOptionPolicy::TakeLast) {
             results_t partial_result = {results_.back()};
+            local_result = !callback_(partial_result);
+        } else if(multi_option_policy_ == MultiOptionPolicy::TakeFirst) {
+            results_t partial_result = {results_.at(0)};
+            local_result = !callback_(partial_result);
+        } else if(multi_option_policy_ == MultiOptionPolicy::Join) {
+            results_t partial_result = {detail::join(results_, "\n")};
             local_result = !callback_(partial_result);
         } else {
             if((expected_ > 0 && results_.size() != static_cast<size_t>(expected_)) ||
@@ -1228,7 +1336,7 @@ class Option : public OptionBase<Option> {
         }
 
         if(local_result)
-            throw ConversionError("Could not convert: " + get_name() + "=" + detail::join(results_));
+            throw ConversionError(get_name(), results_);
     }
 
     /// If options share any of the same names, they are equal (not counting positional)
@@ -1680,8 +1788,10 @@ class App {
         }
 
         // Empty name will simply remove the help flag
-        if(!name.empty())
+        if(!name.empty()) {
             help_ptr_ = add_flag(name, description);
+            help_ptr_->configurable(false);
+        }
 
         return help_ptr_;
     }
@@ -1692,7 +1802,7 @@ class App {
 
         Option *opt = add_option(name, fun, description, false);
         if(opt->get_positional())
-            throw IncorrectConstruction("Flags cannot be positional");
+            throw IncorrectConstruction::PositionalFlag(name);
         opt->set_custom_option("", 0);
         return opt;
     }
@@ -1712,12 +1822,13 @@ class App {
 
         Option *opt = add_option(name, fun, description, false);
         if(opt->get_positional())
-            throw IncorrectConstruction("Flags cannot be positional");
+            throw IncorrectConstruction::PositionalFlag(name);
         opt->set_custom_option("", 0);
         return opt;
     }
 
-    /// Bool version - defaults to allowing multiple passings, but can be forced to one if `take_last(false)` is used.
+    /// Bool version - defaults to allowing multiple passings, but can be forced to one if
+    /// `multi_option_policy(CLI::MultiOptionPolicy::Throw)` is used.
     template <typename T, enable_if_t<is_bool<T>::value, detail::enabler> = detail::dummy>
     Option *add_flag(std::string name,
                      T &count, ///< A variable holding true if passed
@@ -1731,9 +1842,9 @@ class App {
 
         Option *opt = add_option(name, fun, description, false);
         if(opt->get_positional())
-            throw IncorrectConstruction("Flags cannot be positional");
+            throw IncorrectConstruction::PositionalFlag(name);
         opt->set_custom_option("", 0);
-        opt->take_last();
+        opt->multi_option_policy(CLI::MultiOptionPolicy::TakeLast);
         return opt;
     }
 
@@ -1750,7 +1861,7 @@ class App {
 
         Option *opt = add_option(name, fun, description, false);
         if(opt->get_positional())
-            throw IncorrectConstruction("Flags cannot be positional");
+            throw IncorrectConstruction::PositionalFlag(name);
         opt->set_custom_option("", 0);
         return opt;
     }
@@ -1900,8 +2011,8 @@ class App {
         return opt;
     }
 
-    /// Add a configuration ini file option
-    Option *add_config(std::string name = "--config",
+    /// Set a configuration ini file option, or clear it if no name passed
+    Option *set_config(std::string name = "",
                        std::string default_filename = "",
                        std::string help = "Read an ini file",
                        bool required = false) {
@@ -1909,9 +2020,15 @@ class App {
         // Remove existing config if present
         if(config_ptr_ != nullptr)
             remove_option(config_ptr_);
-        config_name_ = default_filename;
-        config_required_ = required;
-        config_ptr_ = add_option(name, config_name_, help, !default_filename.empty());
+
+        // Only add config if option passed
+        if(!name.empty()) {
+            config_name_ = default_filename;
+            config_required_ = required;
+            config_ptr_ = add_option(name, config_name_, help, !default_filename.empty());
+            config_ptr_->configurable(false);
+        }
+
         return config_ptr_;
     }
 
@@ -2127,8 +2244,8 @@ class App {
         std::stringstream out;
         for(const Option_p &opt : options_) {
 
-            // Only process option with a long-name
-            if(!opt->lnames_.empty()) {
+            // Only process option with a long-name and configurable
+            if(!opt->lnames_.empty() && opt->get_configurable()) {
                 std::string name = prefix + opt->lnames_[0];
 
                 // Non-flags
@@ -2150,7 +2267,7 @@ class App {
                     out << name << "=" << opt->count() << std::endl;
 
                     // Flag, not present
-                } else if(opt->count() == 0 && default_also && opt.get() != get_help_ptr()) {
+                } else if(opt->count() == 0 && default_also) {
                     out << name << "=false" << std::endl;
                 }
             }
@@ -2294,6 +2411,9 @@ class App {
     /// Get a pointer to the config option.
     Option *get_config_ptr() { return config_ptr_; }
 
+    /// Get the parent of this subcommand (or nullptr if master app)
+    App *get_parent() { return parent_; }
+
     /// Get a pointer to the config option. (const)
     const Option *get_config_ptr() const { return config_ptr_; }
     /// Get the name of the current app
@@ -2422,7 +2542,7 @@ class App {
                     std::vector<detail::ini_ret_t> values = detail::parse_ini(config_name_);
                     while(!values.empty()) {
                         if(!_parse_ini(values)) {
-                            throw ExtrasINIError(values.back().fullname);
+                            throw INIError::Extras(values.back().fullname);
                         }
                     }
                 } catch(const FileError &) {
@@ -2471,8 +2591,7 @@ class App {
             if(opt->get_required() || opt->count() != 0) {
                 // Make sure enough -N arguments parsed (+N is already handled in parsing function)
                 if(opt->get_expected() < 0 && opt->count() < static_cast<size_t>(-opt->get_expected()))
-                    throw ArgumentMismatch(opt->single_name() + ": At least " + std::to_string(-opt->get_expected()) +
-                                           " required");
+                    throw ArgumentMismatch::AtLeast(opt->single_name(), -opt->get_expected());
 
                 // Required but empty
                 if(opt->get_required() && opt->count() == 0)
@@ -2489,10 +2608,8 @@ class App {
         }
 
         auto selected_subcommands = get_subcommands();
-        if(require_subcommand_min_ > 0 && selected_subcommands.empty())
-            throw RequiredError("Subcommand required");
-        else if(require_subcommand_min_ > selected_subcommands.size())
-            throw RequiredError("Requires at least " + std::to_string(require_subcommand_min_) + " subcommands");
+        if(require_subcommand_min_ > selected_subcommands.size())
+            throw RequiredError::Subcommand(require_subcommand_min_);
 
         // Convert missing (pairs) to extras (string only)
         if(!(allow_extras_ || prefix_command_)) {
@@ -2532,6 +2649,9 @@ class App {
         // Let's not go crazy with pointer syntax
         Option_p &op = *op_ptr;
 
+        if(!op->get_configurable())
+            throw INIError::NotConfigurable(current.fullname);
+
         if(op->results_.empty()) {
             // Flag parsing
             if(op->get_expected() == 0) {
@@ -2548,10 +2668,10 @@ class App {
                             for(size_t i = 0; i < ui; i++)
                                 op->results_.emplace_back("");
                         } catch(const std::invalid_argument &) {
-                            throw ConversionError(current.fullname + ": Should be true/false or a number");
+                            throw ConversionError::TrueFalse(current.fullname);
                         }
                 } else
-                    throw ConversionError(current.fullname + ": too many inputs for a flag");
+                    throw ConversionError::TooManyInputsFlag(current.fullname);
             } else {
                 op->results_ = current.inputs;
                 op->run_callback();
@@ -2746,8 +2866,7 @@ class App {
             }
 
             if(num > 0) {
-                throw ArgumentMismatch(op->single_name() + ": " + std::to_string(num) + " required " +
-                                       op->get_type_name() + " missing");
+                throw ArgumentMismatch::TypedAtLeast(op->single_name(), num, op->get_type_name());
             }
         }
 
@@ -2796,4 +2915,3 @@ struct AppFriend {
 } // namespace detail
 
 } // namespace CLI
-//clang-format on

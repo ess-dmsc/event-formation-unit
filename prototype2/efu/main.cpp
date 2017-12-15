@@ -20,7 +20,7 @@
 /** Load detector, launch pipeline threads, then sleep until timeout or break */
 int main(int argc, char *argv[]) {
   EFUArgs efu_args;
-  if (not efu_args.parseAndProceed(argc, argv)) {
+  if (EFUArgs::Status::EXIT == efu_args.parseFirstPass(argc, argv)) {
     return 0;
   }
 
@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
     auto CLIArgPopulator = loader.GetCLIParserPopulator();
     CLIArgPopulator(efu_args.CLIParser);
   }
-  if (not efu_args.parseAgain(argc, argv)) {
+  if (EFUArgs::Status::EXIT == efu_args.parseSecondPass(argc, argv)) {
     return 0;
   }
   efu_args.printSettings();

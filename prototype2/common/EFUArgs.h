@@ -24,8 +24,11 @@ struct ThreadCoreAffinitySetting {
 
 class EFUArgs {
 public:
+  enum class Status {EXIT, CONTINUE};
   EFUArgs();
-  bool parseAndProceed(const int argc, char *argv[]);
+  Status parseFirstPass(const int argc, char *argv[]);
+  
+  Status parseSecondPass(const int argc, char *argv[]);
 
   void printHelp();
 
@@ -38,8 +41,6 @@ public:
     return ThreadAffinity;
   };
 
-  bool parseAgain(const int argc, char *argv[]);
-
   BaseSettings GetBaseSettings() { return EFUSettings; };
 
   CLI::App CLIParser{"Event formation unit (efu)"};
@@ -47,16 +48,15 @@ public:
   int buflen{9000}; /**< rx buffer length (B) */
 
   std::string det; /**< detector name */
-
-  // Runtime Stats
-  // EFUStats stat;
-
-  // Pipeline-specific configuration
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
 
   std::vector<ThreadCoreAffinitySetting> ThreadAffinity;
-  CLI::Option *detectorOption;
+  CLI::Option *DetectorOption;
+  CLI::Option *HelpOption;
+  CLI::Option *WriteConfigOption;
+  std::string ConfigFileName;
+  CLI::Option *ReadConfigOption;
 
   GraylogSettings GraylogConfig{"127.0.0.1", 12201};
   BaseSettings EFUSettings;

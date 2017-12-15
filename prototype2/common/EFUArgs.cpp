@@ -6,8 +6,11 @@
 #include <iostream>
 #include <regex>
 #include <string>
+#include <fstream>
 
 EFUArgs::EFUArgs() {
+  CLIParser.set_help_flag(); //Removes the default help flag
+  HelpOption = CLIParser.add_flag("-h,--help", "Print this help message and exit")->group("EFU Options")->configurable(false);
   CLIParser
       .add_option("-a,--logip", GraylogConfig.address,
                   "Graylog server IP address")
@@ -35,7 +38,7 @@ EFUArgs::EFUArgs() {
                   },
                   "Thread to core affinity. Ex: \"-c input_t:4\"")
       ->group("EFU Options");
-  detectorOption = CLIParser.add_option("-d,--det", det, "Detector name")
+  DetectorOption = CLIParser.add_option("-d,--det", det, "Detector name")
                        ->group("EFU Options")
                        ->required();
   CLIParser
@@ -66,6 +69,8 @@ EFUArgs::EFUArgs() {
                   "Terminate after timeout seconds")
       ->group("EFU Options")
       ->set_default_val("4294967295"); // 0xffffffffU
+  WriteConfigOption = CLIParser.add_option("--write_config", ConfigFileName, "Write CLI options with default values to config file.")->group("EFU Options")->configurable(false);
+  ReadConfigOption = CLIParser.set_config("--read_config", "", "Read CLI options from config file.", false)->group("EFU Options")->excludes(WriteConfigOption);
 }
 
 bool EFUArgs::parseAffinityStrings(
@@ -117,27 +122,38 @@ void EFUArgs::printSettings() {
 
 void EFUArgs::printHelp() { std::cout << CLIParser.help(); }
 
-bool EFUArgs::parseAndProceed(const int argc, char *argv[]) {
+EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
   try {
     CLIParser.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
-    if (0 == detectorOption->count()) {
-      CLIParser.exit(e);
-      return false;
-    } else {
-      det = detectorOption->results()[0];
-    }
+  }
+  if ((*HelpOption and not *DetectorOption) or (not *HelpOption and not *DetectorOption)) {
+    printHelp();
+    return Status::EXIT;
   }
   CLIParser.reset();
-  return true;
+  return Status::CONTINUE;
 }
 
-bool EFUArgs::parseAgain(const int argc, char *argv[]) {
+EFUArgs::Status EFUArgs::parseSecondPass(const int argc, char *argv[]) {
   try {
     CLIParser.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
     CLIParser.exit(e);
-    return false;
+    return Status::EXIT;
   }
-  return true;
+  if (*HelpOption and *DetectorOption) {
+    printHelp();
+    return Status::EXIT;
+  }
+  if (*WriteConfigOption) {
+    std::ofstream ConfigFile(ConfigFileName, std::ios::binary);
+    if (not ConfigFile.is_open()) {
+      std::cout << "Failed to open config file for writing." << std::endl;
+      return Status::EXIT;
+    }
+    ConfigFile << CLIParser.config_to_str(true);
+    ConfigFile.close();
+  }
+  return Status::CONTINUE;
 }
