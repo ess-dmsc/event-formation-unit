@@ -4,13 +4,10 @@
 
 #pragma once
 
-#include <boost/asio.hpp>
-#include <boost/asio/steady_timer.hpp>
+#include <asio.hpp>
+#include <asio/steady_timer.hpp>
 #include <thread>
 #include <atomic>
-
-namespace asio = boost::asio;
-namespace errc = boost::system::errc;
 
 typedef std::shared_ptr<asio::ip::udp::socket> SocketPtr;
 
@@ -28,10 +25,10 @@ private:
 
   static const int BufferSize = 100;
   char SendBuffer[BufferSize];
-  void handleWrite(const boost::system::error_code &err, std::size_t BytesSent);
-  void handleResolve(const boost::system::error_code &Err, asio::ip::udp::resolver::iterator EndpointIter);
-  void handleConnect(const boost::system::error_code &Err, asio::ip::udp::resolver::iterator EndpointIter);
-  void handleNewPacket(const boost::system::error_code &Err);
+  void handleWrite(const asio::error_code &err, std::size_t BytesSent);
+  void handleResolve(const asio::error_code &Err, asio::ip::udp::resolver::iterator EndpointIter);
+  void handleConnect(const asio::error_code &Err, asio::ip::udp::resolver::iterator EndpointIter);
+  void handleNewPacket(const asio::error_code &Err);
 
   std::uint32_t NrOfPackets;
   std::uint32_t WaitTimeNSec;

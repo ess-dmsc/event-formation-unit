@@ -70,6 +70,12 @@ public:
   virtual std::map<std::string, CommandFunction> GetDetectorCommandFunctions() {
     return DetectorCommands;
   }
+  
+  virtual void startThreads() {
+    for (auto &tInfo : Threads) {
+      tInfo.thread = std::thread(tInfo.func);
+    }
+  }
 
   virtual void stopThreads() {
     runThreads.store(false);
