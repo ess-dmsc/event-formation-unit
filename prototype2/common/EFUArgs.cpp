@@ -120,7 +120,7 @@ void EFUArgs::printSettings() {
   XTRACE(INIT, ALW, "  Stopafter:     %u\n", EFUSettings.StopAfterSec);
 }
 
-void EFUArgs::printHelp() { std::cout << CLIParser.help(); }
+void EFUArgs::printHelp() { std::cout << CLIParser.help(30); }
 
 EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
   try {
@@ -152,7 +152,7 @@ EFUArgs::Status EFUArgs::parseSecondPass(const int argc, char *argv[]) {
       std::cout << "Failed to open config file for writing." << std::endl;
       return Status::EXIT;
     }
-    ConfigFile << CLIParser.config_to_str(true);
+    ConfigFile << CLIParser.config_to_str(true, "", true);
     ConfigFile.close();
   }
   return Status::CONTINUE;
