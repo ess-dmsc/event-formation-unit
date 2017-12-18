@@ -31,6 +31,10 @@ function(create_module module_name link_libraries)
         set(module_LIB ${GraylogLogger_LIBRARIES} ${module_LIB})
     endif()
     target_link_libraries(${module_name} ${module_LIB})
+    set_target_properties(${module_name} PROPERTIES
+        LIBRARY_OUTPUT_DIRECTORY "$<TARGET_FILE_DIR:efu2>/"
+        RUNTIME_OUTPUT_DIRECTORY "$<TARGET_FILE_DIR:efu2>/"
+    )
     install(TARGETS ${module_name} DESTINATION bin)
 endfunction(create_module)
 

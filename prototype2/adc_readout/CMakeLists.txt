@@ -32,6 +32,15 @@ set(AdcReadoutTest_SRC
 
 set(AdcReadoutTest_INC
   test/TestUDPServer.h
-  ${AdcReadout_INC})
+  ${AdcReadout_INC}
+)
   
 create_test_executable(AdcReadoutTest "")
+get_filename_component(TEST_PACKET_FILE "test/test_packet_1.dat" ABSOLUTE)
+add_custom_command(
+        TARGET AdcReadoutTest POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy
+                ${TEST_PACKET_FILE}
+                "$<TARGET_FILE_DIR:AdcReadoutTest>/")
+add_dependencies(AdcReadoutTest common eventlib)
+target_link_libraries(AdcReadoutTest common eventlib)
