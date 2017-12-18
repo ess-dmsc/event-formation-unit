@@ -12,6 +12,7 @@ include_directories(.. ../..)
 
 
 # Two-thread implementation of Multi Grid demonstrator detector
+# For the old readout system
 set(mgcncs2_SRC
   mgcncs2.cpp
   mgcncs/Data.cpp
@@ -23,6 +24,15 @@ set(mgcncs2_INC
   mgcncs/MultigridGeometry.h
   mgcncs/CalibrationFile.h)
 create_module(mgcncs2 "")
+
+# Two-thread implementation of Multi Grid demonstrator detector
+# for Mesytec Readout
+set(mgmesytec_SRC
+  mgmesytec.cpp
+  mgmesytec/Data.cpp)
+set(mgmesytec_INC
+  mgmesytec/Data.h)
+create_module(mgmesytec "")
 
 
 #
@@ -78,6 +88,15 @@ set(MGCNCSDataTest_INC
   mgcncs/TestData.h
   mgcncs/MultigridGeometry.h)
 create_test_executable(MGCNCSDataTest "")
+
+
+set(MGMesytecDataTest_SRC
+  ../../dataformats/multigrid/src/DataSave.cpp
+  mgmesytec/DataTest.cpp mgmesytec/Data.cpp)
+set(MGMesytecDataTest_INC
+  ../../dataformats/multigrid/inc/DataSave.h
+  mgmesytec/Data.h mgmesytec/TestData.h)
+create_test_executable(MGMesytecDataTest "")
 
 #set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
 #set(CSPECEventTest_INC cspec/CSPECEvent.h)
