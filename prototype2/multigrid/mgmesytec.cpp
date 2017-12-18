@@ -159,12 +159,12 @@ void CSPEC::input_thread() {
 }
 
 void CSPEC::processing_thread() {
-  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" +
-                             std::to_string(EFUSettings.KafkaBrokerPort);
-  Producer producer(BrokerString, "C-SPEC_detector");
+  Producer producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
   FBSerializer flatbuffer(kafka_buffer_size, producer);
 
   MesytecData dat;
+  dat.setWireThreshold(0);
+  dat.setGridThreshold(0);
 
   TSCTimer report_timer;
   TSCTimer timestamp;

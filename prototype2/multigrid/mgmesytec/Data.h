@@ -7,6 +7,7 @@
 
 #pragma once
 #include <dataformats/multigrid/inc/DataSave.h>
+#include <multigrid/mgmesytec/MGSEQDetector.h>
 
 class MesytecData {
 public:
@@ -28,13 +29,15 @@ public:
   // clang-fomat on
 
   MesytecData() {
-
 #ifdef DUMPTOFILE
     mgdata.tofile("#Time, Bus, Address, ADC\n");
 #endif
   };
 
   ~MesytecData() {};
+
+  void setWireThreshold(int threshold) {wireThreshold = threshold;}
+  void setGridThreshold(int threshold) {gridThreshold = threshold;}
 
   /** @brief parse a binary payload buffer, return number of data element */
   int parse(const char *buffer, int size);
@@ -45,6 +48,10 @@ public:
   int readouts{0};  /**< number of channels read out */
 
 private:
+  int wireThreshold {0};
+  int gridThreshold{0};
+  MGSEQDetector mgseq;
+
 #ifdef DUMPTOFILE
   DataSave mgdata{std::string("multigrid_mesytec_"), 100000000};
 #endif

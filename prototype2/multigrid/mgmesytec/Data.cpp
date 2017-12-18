@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <arpa/inet.h>
 #include <cassert>
@@ -6,55 +6,62 @@
 #include <cstring>
 #include <multigrid/mgmesytec/Data.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_INF
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_INF
 
 void MesytecData::mesytec_parse_n_words(uint32_t * buffer, int nWords) {
   uint32_t *datap = buffer;
   int wordsleft = nWords;
 
-  // Sneak peek on time although it is last in packet
   int time = -1;
+  int module = -1;
+  int bus = -1;
+  int addr = -1;
+  int adc = -1;
+  int dataWords = -1;
+
+  // Sneak peek on time although it is actually last in packet
   uint32_t * tptr = (buffer + nWords - 1);
   if ((*tptr & 0xc0000000) == 0xc0000000) {
     time = *tptr & 0x3fffffff;
   }
 
-  int module = -1;
-  int readdata = -1;
-  int bus = -1;
-  int addr = -1;
-  int adc = -1;
-
   while (wordsleft > 0) {
     auto datatype = *datap & 0xff000000;
 
     switch (datatype) {
-      case MesytecData::mesytecHeader:
-        readdata = *datap & 0x000003ff;
-        assert(nWords > readdata);
+      case mesytecHeader:
+        dataWords = *datap & 0x000003ff;
+        assert(nWords > dataWords);
         module = (*datap & 0x00ff0000) >> 16;
-        DTRACE(INF, "Data len %d (words), module %d\n", readdata, module);
+        DTRACE(INF, "Data len %d (words), module %d\n", dataWords, module);
       break;
 
-      case MesytecData::mesytecData:
-        readouts++;
+      case mesytecData:
         bus = (*datap & 0x0f000000) >> 24;
-        addr = (*datap & 0x00fff000) >> 12;
+        addr = (*datap & 0x00fff000) >> 12; /**< channel */
         adc = (*datap & 0x00000fff);
-        #ifdef DUMPTOFILE
-        mgdata.tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
-        #endif
-        DTRACE(DEB, "%d, %d, %d, %d\n", time, bus, addr, adc);
+
+        if ( (mgseq.isWire(addr) && adc >= wireThreshold) ||
+             (mgseq.isGrid(addr) && adc >= gridThreshold)    )  {
+
+          readouts++;
+          #ifdef DUMPTOFILE
+          mgdata.tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
+          #endif
+          DTRACE(DEB, "%d,%d,%d,%d\n", time, bus, addr, adc);
+        } else {
+          DTRACE(DEB, "discarding %d,%d,%d,%d\n", time, bus, addr, adc);
+        }
       break;
 
-      case MesytecData::mesytecTimeOffset:
+      case mesytecTimeOffset:
         bus = (*datap & 0x0f000000) >> 24;
         DTRACE(INF, "Timeoffset (bus %d) %d\n", bus, (*datap & 0x0000ffff));
       break;
 
       default:
-        if ((*datap & 0xc0000000) == 0xc0000000) {
+        if ((*datap & mesytecTimeStamp) == mesytecTimeStamp) {
             DTRACE(INF, "Timestamp: %d\n", *datap & 0x3fffffff);
           break;
         }
@@ -70,13 +77,17 @@ void MesytecData::mesytec_parse_n_words(uint32_t * buffer, int nWords) {
     wordsleft--;
     datap++;
   }
+
+  if (time == -1 || module == -1) {
+    XTRACE(PROCESS, WAR, "time or module not set\n");
+    readouts = 0;
+  }
 }
 
 
 int MesytecData::parse(const char *buffer, int size) {
-  readouts = 0;
-
   int bytesleft = size;
+  readouts = 0;
 
   if (buffer[0] != 0x60) {
     return -error::EUNSUPP;
@@ -93,8 +104,9 @@ int MesytecData::parse(const char *buffer, int size) {
     if ((*datap & 0x000000ff) != 0x58) {
       return -error::EUNSUPP;
     }
+
     auto len = ntohs((*datap & 0x00ffff00) >> 8);
-    DTRACE(INF, "SIS 0x%08x,  Datalen %d\n", *datap, len);
+    DTRACE(INF, "sis3153 datawords %d\n", len);
     datap++;
     bytesleft -= 4;
 
@@ -102,10 +114,11 @@ int MesytecData::parse(const char *buffer, int size) {
       return -error::EHEADER;
     }
     datap++;
+    bytesleft -= 4;
     mesytec_parse_n_words(datap, len - 3);
 
     datap += (len - 3);
-    bytesleft -= (len -3)*4;
+    bytesleft -= (len - 3)*4;
 
     if (*datap != 0x87654321) {
       XTRACE(PROCESS, WAR, "Protocol mismatch, expected 0x87654321\n");
@@ -120,5 +133,6 @@ int MesytecData::parse(const char *buffer, int size) {
     datap++;
     bytesleft -= 4;
   }
+  //printf("bytesleft %d\n", bytesleft);
   return error::OK;
 }
