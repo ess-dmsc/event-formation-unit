@@ -155,9 +155,8 @@ void MBCAEN::processing_thread() {
 
   ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
   MB16Detector mb16;
-  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" +
-                             std::to_string(EFUSettings.KafkaBrokerPort);
-  Producer eventprod(BrokerString, "MB_detector");
+
+  Producer eventprod(EFUSettings.KafkaBroker, "MB_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
   multiBladeEventBuilder builder[ncass];

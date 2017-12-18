@@ -14,15 +14,10 @@ EFUArgs::EFUArgs() {
       ->group("EFU Options")
       ->set_default_val("127.0.0.1");
   CLIParser
-      .add_option("-b,--broker_addr", EFUSettings.KafkaBrokerAddress,
+      .add_option("-b,--broker", EFUSettings.KafkaBroker,
                   "Kafka broker address")
       ->group("EFU Options")
-      ->set_default_val("localhost");
-  CLIParser
-      .add_option("-k,--broker_port", EFUSettings.KafkaBrokerPort,
-                  "Kafka broker port")
-      ->group("EFU Options")
-      ->set_default_val("9092");
+      ->set_default_val("localhost:9092");
   CLIParser
       .add_option("-t,--broker_topic", EFUSettings.KafkaTopic,
                   "Kafka broker topic")
@@ -107,7 +102,7 @@ void EFUArgs::printSettings() {
          EFUSettings.DetectorAddress.c_str());
   XTRACE(INIT, ALW, "  UDP Port:      %d\n", EFUSettings.DetectorPort);
   XTRACE(INIT, ALW, "  Kafka broker:  %s\n",
-         EFUSettings.KafkaBrokerAddress.c_str());
+         EFUSettings.KafkaBroker.c_str());
   XTRACE(INIT, ALW, "  Graphite:      %s\n",
          EFUSettings.GraphiteAddress.c_str());
   XTRACE(INIT, ALW, "  Graphite port: %d\n", EFUSettings.GraphitePort);

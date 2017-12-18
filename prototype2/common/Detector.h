@@ -23,8 +23,7 @@ struct BaseSettings {
   std::uint16_t CommandServerPort;
   std::int32_t DetectorRxBufferSize;
   std::int32_t DetectorTxBufferSize;
-  std::string KafkaBrokerAddress;
-  std::uint16_t KafkaBrokerPort;
+  std::string KafkaBroker;
   std::string GraphiteAddress;
   std::uint16_t GraphitePort;
   std::string KafkaTopic;

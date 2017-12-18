@@ -225,9 +225,8 @@ void CSPEC::input_thread() {
 
 void CSPEC::processing_thread() {
   CSPECChanConv conv;
-  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" +
-                             std::to_string(EFUSettings.KafkaBrokerPort);
-  Producer producer(BrokerString, "C-SPEC_detector");
+
+  Producer producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
   FBSerializer flatbuffer(kafka_buffer_size, producer);
 
   MultiGridGeometry geom(1, 2, 48, 4, 16);

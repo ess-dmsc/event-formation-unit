@@ -191,12 +191,10 @@ void NMX::processing_thread() {
   geometry.add_dimension(nmx_opts.geometry_x);
   geometry.add_dimension(nmx_opts.geometry_y);
 
-  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" +
-                             std::to_string(EFUSettings.KafkaBrokerPort);
-  Producer eventprod(BrokerString, "NMX_detector");
+  Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
-  Producer monitorprod(BrokerString, "NMX_monitor");
+  Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
   TrackSerializer trackfb(256, nmx_opts.track_sample_minhits);
   HistSerializer histfb;
   NMXHists hists;
