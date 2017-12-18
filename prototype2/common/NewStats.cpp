@@ -8,7 +8,7 @@ NewStats::~NewStats() {}
 
 NewStats::NewStats(std::string pre) { setPrefix(pre); }
 
-int NewStats::create(std::string statname, uint64_t &counter) {
+int NewStats::create(std::string statname, int64_t &counter) {
   counter = 0;
   auto pfname = prefix + statname;
   for (auto s : stats) {
