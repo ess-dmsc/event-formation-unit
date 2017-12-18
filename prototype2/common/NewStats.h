@@ -15,9 +15,9 @@
 class StatTuple {
 public:
   /** @brief holds a name, value pair defining a 'stat' */
-  StatTuple(std::string n, const int64_t &ctr) : name(n), counter(ctr){};
+  StatTuple(std::string n, const uint64_t &ctr) : name(n), counter(ctr){};
   std::string name;
-  const int64_t &counter;
+  const uint64_t &counter;
 };
 
 class NewStats {
@@ -34,7 +34,7 @@ public:
   /** @brief creates a 'stat' entry with name and addres for counter
    * duplicates are not allowed.
    */
-  int create(std::string statname, const int64_t &counter);
+  int create(std::string statname, uint64_t &counter);
 
   /** @brief returns the number of registered stats */
   size_t size();
