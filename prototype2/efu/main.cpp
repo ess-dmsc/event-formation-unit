@@ -19,31 +19,36 @@
 
 /** Load detector, launch pipeline threads, then sleep until timeout or break */
 int main(int argc, char *argv[]) {
-  EFUArgs efu_args;
-  if (EFUArgs::Status::EXIT == efu_args.parseFirstPass(argc, argv)) {
-    return 0;
+  BaseSettings DetectorSettings;
+  std::vector<ThreadCoreAffinitySetting> AffinitySettings;
+  std::shared_ptr<Detector> detector;
+  std::string DetectorName;
+  Loader loader;
+  { //Make sure that the EFUArgs instance is deallocated before the detector plugin is
+    EFUArgs efu_args;
+    if (EFUArgs::Status::EXIT == efu_args.parseFirstPass(argc, argv)) {
+      return 0;
+    }
+    loader.loadPlugin(efu_args.getDetectorName());
+    if (not loader.IsOk()) {
+      efu_args.printHelp();
+      return -1;
+    }
+    
+    { // This is to prevent accessing unloaded memory in a (potentially) unloaded
+      // plugin.
+      auto CLIArgPopulator = loader.GetCLIParserPopulator();
+      CLIArgPopulator(efu_args.CLIParser);
+    }
+    if (EFUArgs::Status::EXIT == efu_args.parseSecondPass(argc, argv)) {
+      return 0;
+    }
+    efu_args.printSettings();
+    DetectorSettings = efu_args.getBaseSettings();
+    detector = loader.createDetector(DetectorSettings);
+    AffinitySettings = efu_args.getThreadCoreAffinity();
+    DetectorName = efu_args.getDetectorName();
   }
-
-  Loader loader(efu_args.getDetectorName());
-
-  if (not loader.IsOk()) {
-    efu_args.printHelp();
-    return -1;
-  }
-
-  { // This is to prevent accessing unloaded memory in a (potentially) unloaded
-    // plugin.
-    auto CLIArgPopulator = loader.GetCLIParserPopulator();
-    CLIArgPopulator(efu_args.CLIParser);
-  }
-  if (EFUArgs::Status::EXIT == efu_args.parseSecondPass(argc, argv)) {
-    return 0;
-  }
-  efu_args.printSettings();
-  std::shared_ptr<Detector> detector =
-      loader.createDetector(efu_args.GetBaseSettings());
-
-  auto EFUSettings = efu_args.GetBaseSettings();
 
   int keep_running = 1;
 
@@ -63,23 +68,22 @@ int main(int argc, char *argv[]) {
          efu_version().c_str());
   XTRACE(MAIN, ALW, "Event Formation Unit build: %s\n", EFU_STR(BUILDSTR));
 
-  if (EFUSettings.StopAfterSec == 0) {
+  if (DetectorSettings.StopAfterSec == 0) {
     XTRACE(MAIN, ALW, "Event Formation Unit Exit (Immediate)\n");
     GLOG_INF("Event Formation Unit Exit (Immediate)");
     return 0;
   }
 
-  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", efu_args.det.c_str());
+  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", DetectorName.c_str());
 
-  auto ThreadAffinity = efu_args.getThreadCoreAffinity();
-  Launcher launcher(ThreadAffinity);
+  Launcher launcher(AffinitySettings);
 
   launcher.launchThreads(detector);
 
-  StatPublisher metrics(EFUSettings.GraphiteAddress, EFUSettings.GraphitePort);
+  StatPublisher metrics(DetectorSettings.GraphiteAddress, DetectorSettings.GraphitePort);
 
   Parser cmdParser(detector, keep_running);
-  Server cmdAPI(EFUSettings.CommandServerPort, cmdParser);
+  Server cmdAPI(DetectorSettings.CommandServerPort, cmdParser);
 
   Timer stop_timer, stop_cmd, livestats;
 
@@ -94,7 +98,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (stop_timer.timeus() >=
-        EFUSettings.StopAfterSec * (uint64_t)ONE_SECOND_US) {
+        DetectorSettings.StopAfterSec * (uint64_t)ONE_SECOND_US) {
       XTRACE(MAIN, ALW, "Application timeout, Exiting...\n");
       GLOG_INF("Event Formation Unit Exiting (User timeout)");
       detector->stopThreads();
