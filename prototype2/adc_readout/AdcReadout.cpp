@@ -11,16 +11,21 @@
 #include "libs/include/Socket.h"
 
 static struct AdcSettingsStruct {
-  enum class PipelineType {RawData = 0, PeakFinder = 1, Concatenate = 2};
+  enum class PipelineType {RawData = 0, PeakFinder = 1};
   PipelineType Pipeline{PipelineType::RawData};
-  std::int32_t ConcatenateSamples = 1000;
+  std::uint16_t PeakDiscLow;
+  std::uint16_t PeakDiscHigh;
 } AdcSettings;
 
 void SetCLIArguments(CLI::App &parser) {
-  parser.add_option("--pipeline", AdcSettings.Pipeline, "Select data processong pipeline (StoreData = 2, PeakFinder = 1).")->group("ADC Readout Options")->set_default_val("0");
+  parser.add_option("--pipeline", AdcSettings.Pipeline, "Select data processong pipeline (StoreData = 0, PeakFinder = 1).")->group("ADC Readout Options")->set_default_val("0");
+  parser.add_option("--peak_low_discriminator", AdcSettings.PeakDiscLow, "When using peak finding, ignores peaks that are smaller than this value above baseline.")->group("ADC Readout Options")->set_default_val("0");
+  parser.add_option("--peak_high_discriminator", AdcSettings.PeakDiscHigh, "When using peak finding, ignores peaks that are bigger than this value above baseline.")->group("ADC Readout Options")->set_default_val("65536");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
+
+ADC_Readout_Factory Factory;
 
 AdcReadout::AdcReadout(BaseSettings Settings) : Detector("AdcReadout", Settings), toParsingQueue(100) {
   std::function<void()> inputFunc = [this](){AdcReadout::inputThread();};
@@ -51,8 +56,6 @@ AdcReadout::AdcReadout(BaseSettings Settings) : Detector("AdcReadout", Settings)
     case AdcSettingsStruct::PipelineType::PeakFinder:
       ProcessingFunction = {[this](PacketData &Data){peakFind(Data);}};
       break;
-    case AdcSettingsStruct::PipelineType::Concatenate:
-      ProcessingFunction = {[this](PacketData &Data){concatenateData(Data);}};
     default:
       break;
   }

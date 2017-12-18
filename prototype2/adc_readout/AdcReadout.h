@@ -58,4 +58,3 @@ public:
     return std::shared_ptr<Detector>(new AdcReadout(Settings));
   }
 };
-

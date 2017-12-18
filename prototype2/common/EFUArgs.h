@@ -41,15 +41,16 @@ public:
     return ThreadAffinity;
   };
 
-  BaseSettings GetBaseSettings() { return EFUSettings; };
+  BaseSettings getBaseSettings() { return EFUSettings; };
 
   CLI::App CLIParser{"Event formation unit (efu)"};
 
   int buflen{9000}; /**< rx buffer length (B) */
 
-  std::string det; /**< detector name */
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
+  
+  std::string det;
 
   std::vector<ThreadCoreAffinitySetting> ThreadAffinity;
   CLI::Option *DetectorOption;

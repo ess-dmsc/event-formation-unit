@@ -74,7 +74,7 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
-SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector(settings) {
+SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDEA readout", settings) {
   Stats.setPrefix("efu2.sonde");
 
   XTRACE(INIT, ALW, "Adding stats\n");
