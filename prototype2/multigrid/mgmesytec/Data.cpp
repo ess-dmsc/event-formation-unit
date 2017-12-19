@@ -6,8 +6,8 @@
 #include <cstring>
 #include <multigrid/mgmesytec/Data.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_INF
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 void MesytecData::mesytec_parse_n_words(uint32_t * buffer, int nWords) {
   uint32_t *datap = buffer;

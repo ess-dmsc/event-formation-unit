@@ -31,19 +31,19 @@ TEST_F(MesytecDataTest, ErrPktShort) {
 TEST_F(MesytecDataTest, ParseRecordedWSData) {
   auto res = mesytec.parse((char *)&ws1[0], ws1.size());
   ASSERT_EQ(res, -MesytecData::error::OK);
-  ASSERT_EQ(mesytec.readouts, 128);
+  ASSERT_EQ(mesytec.readouts, 128 - (128-92)); // Readout provides more than 92 channels
 }
 
 TEST_F(MesytecDataTest, ParseRecordedWSDataII) {
   auto res = mesytec.parse((char *)&ws2[0], ws2.size());
   ASSERT_EQ(res, -MesytecData::error::OK);
-  ASSERT_EQ(mesytec.readouts, 256);
+  ASSERT_EQ(mesytec.readouts, 256 - 2*(128-92)); // Readout provides more than 92 channels
 }
 
 TEST_F(MesytecDataTest, ParseRecordedWSDataIII) {
   auto res = mesytec.parse((char *)&ws3[0], ws3.size());
   ASSERT_EQ(res, -MesytecData::error::OK);
-  ASSERT_EQ(mesytec.readouts, 256);
+  ASSERT_EQ(mesytec.readouts, 256 - 2*(128-92)); // Readout provides more than 92 channels
 }
 
 
