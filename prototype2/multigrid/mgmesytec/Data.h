@@ -50,7 +50,7 @@ public:
 private:
   int wireThreshold {0};
   int gridThreshold{0};
-  MGSEQDetector __attribute__((unused)) mgseq;
+  //MGSEQDetector mgseq;
 
 #ifdef DUMPTOFILE
   DataSave mgdata{std::string("multigrid_mesytec_"), 100000000};
