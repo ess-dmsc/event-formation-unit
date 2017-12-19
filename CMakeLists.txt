@@ -113,7 +113,11 @@ endif ()
 
 add_definitions(${EXTRA_CXX_FLAGS})
 
-find_package(GTest)
+# Yes, there exists also FindGTest.
+# Yes, we do want to use this one instead:
+find_package(Googletest)
+
+#find_package(GTest)
 if (${CMAKE_COMPILER_IS_GNUCXX})
   set(CMAKE_AR "gcc-ar")
   set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
