@@ -3,8 +3,9 @@ project("event-formation-unit")
 set(event-formation-unit_VERSION_MAJOR 1)
 set(event-formation-unit_VERSION_MINOR 0)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
-include(cmake_modules/CoverageReports.cmake)
+set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules)
+set(CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR})
+include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 
 #=============================================================================
 # setting up conan for use from within cmake
@@ -13,7 +14,7 @@ set(WITH_CONAN OFF CACHE BOOL "Enable dependency build with conan")
 set(CONAN_FILE "conanfile.txt" CACHE STRING "The conanfile to use for the build")
 
 if (WITH_CONAN)
-  include(${CMAKE_MODULE_PATH}/ConanSetup.cmake)
+  include(${EXTRA_MODULES_DIR}/ConanSetup.cmake)
   conan_cmake_run(CONANFILE ${CONAN_FILE}
           BASIC_SETUP
           BUILD missing)
@@ -113,7 +114,7 @@ endif ()
 
 add_definitions(${EXTRA_CXX_FLAGS})
 
-include(${CMAKE_MODULE_PATH}/FindGTestFix.cmake)
+include(${EXTRA_MODULES_DIR}/FindGTestFix.cmake)
 
 if (${CMAKE_COMPILER_IS_GNUCXX})
   set(CMAKE_AR "gcc-ar")
