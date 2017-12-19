@@ -70,7 +70,6 @@ if (${COV})
       set(COVERAGE_ENABLED OFF)
     endif ()
   endif ()
-
 endif ()
 
 function(enable_coverage_flags coverage_target)
@@ -79,8 +78,6 @@ function(enable_coverage_flags coverage_target)
             COMPILE_FLAGS ${COVERAGE_COMPILE_FLAGS})
     set_target_properties(${coverage_target} PROPERTIES
             LINK_FLAGS ${COVERAGE_LINK_FLAGS})
-  else ()
-    message(STATUS "Cannot enable coverage flags for target: ${coverage_target}. Code coverage feature not available.")
   endif ()
 endfunction()
 
@@ -91,8 +88,6 @@ function(enable_coverage coverage_target)
     set_target_properties(${coverage_target} PROPERTIES
       LINK_FLAGS ${COVERAGE_LINK_FLAGS})
     target_link_libraries(${coverage_target} ${COVERAGE_LIBRARIES})
-  else ()
-    message(STATUS "Cannot enable coverage for target: ${coverage_target}. Code coverage feature not available.")
   endif ()
 endfunction()
 
