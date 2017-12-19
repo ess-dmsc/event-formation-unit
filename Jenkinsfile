@@ -57,7 +57,7 @@ def docker_cmake(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd build
         ${cmake_exec} --version
-        ${cmake_exec} -DCONAN_FILE=conanfile.txt ../${project}
+        ${cmake_exec} -DWITH_CONAN=1 ../${project}
     \""""
 }
 

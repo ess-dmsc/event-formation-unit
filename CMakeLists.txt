@@ -6,6 +6,26 @@ set(event-formation-unit_VERSION_MINOR 0)
 set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 include(cmake_modules/CoverageReports.cmake)
 
+#=============================================================================
+# setting up conan for use from within cmake
+#=============================================================================
+set(WITH_CONAN OFF CACHE BOOL "Enable dependency build with conan")
+set(CONAN_FILE "conanfile.txt" CACHE STRING "The conanfile to use for the build")
+
+if (WITH_CONAN)
+  include(${CMAKE_MODULE_PATH}/ConanSetup.cmake)
+  conan_cmake_run(CONANFILE ${CONAN_FILE}
+          BASIC_SETUP
+          BUILD missing)
+endif ()
+
+if (EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
+  message(STATUS "Using existing conanbuildinfo.cmake file")
+  include(${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
+  conan_basic_setup()
+endif ()
+
+
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Debug' as none was specified.")
   set(CMAKE_BUILD_TYPE Debug)
