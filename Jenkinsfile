@@ -45,6 +45,8 @@ def docker_dependencies(image_key) {
         conan --version
         set +x
         conan remote add \
+        desy-packages https://api.bintray.com/conan/eugenwintersberger/desy-packages
+        conan remote add \
             --insert 0 \
             ${conan_remote} ${local_conan_server}
         conan install --file=../${project}/conanfile.txt --build=missing
