@@ -25,7 +25,7 @@ def get_osx_pipeline()
 
                 dir("${project}/build") {
                     try {
-                        conan install --file=../code/conanfile.txt --build=missing
+                        sh "conan install --file=../code/conanfile.txt --build=missing"
                         sh "cmake ../code"
                     } catch (e) {
                         failure_function(e, 'MacOSX / CMake failed')
