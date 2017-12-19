@@ -98,6 +98,12 @@ set(MGMesytecDataTest_INC
   mgmesytec/Data.h mgmesytec/TestData.h)
 create_test_executable(MGMesytecDataTest "")
 
+set(MGSEQDetectorTest_SRC
+mgmesytec/MGSEQDetectorTest.cpp)
+set(MGSEQDetectorTest_INC
+mgmesytec/MGSEQDetector.h)
+create_test_executable(MGSEQDetectorTest "")
+
 #set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
 #set(CSPECEventTest_INC cspec/CSPECEvent.h)
 #create_test_executable(CSPECEventTest "")
