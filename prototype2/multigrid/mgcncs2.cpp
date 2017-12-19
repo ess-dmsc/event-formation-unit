@@ -70,8 +70,7 @@ private:
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t fifo_push_errors;
-    int64_t fifo_free;
-    int64_t pad_a[4]; /**< @todo check alignment*/
+    int64_t pad_a[5]; /**< @todo check alignment*/
 
     // Processing Counters
     int64_t rx_readouts;
@@ -148,7 +147,6 @@ CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
   Stats.create("input.rx_packets",                mystats.rx_packets);
   Stats.create("input.rx_bytes",                  mystats.rx_bytes);
   Stats.create("input.i2pfifo_dropped",           mystats.fifo_push_errors);
-  Stats.create("input.i2pfifo_free",              mystats.fifo_free);
   Stats.create("processing.rx_readouts",          mystats.rx_readouts);
   Stats.create("processing.rx_error_bytes",       mystats.rx_error_bytes);
   Stats.create("processing.rx_discards",          mystats.rx_discards);
@@ -207,7 +205,6 @@ void CSPEC::input_thread() {
       mystats.rx_bytes += rdsize;
       XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
 
-      mystats.fifo_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
         mystats.fifo_push_errors++;
       } else {
@@ -247,7 +244,6 @@ void CSPEC::processing_thread() {
 
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
-      mystats.fifo_free = input2proc_fifo.free();
       usleep(1);
     } else {
       auto len = eth_ringbuf->getdatalength(data_index);

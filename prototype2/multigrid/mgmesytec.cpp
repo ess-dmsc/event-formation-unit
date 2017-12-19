@@ -13,7 +13,6 @@
 #include <common/Trace.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <gdgem/nmx/HistSerializer.h>
 #include <multigrid/mgmesytec/Data.h>
 #include <cstring>
 #include <iostream>
@@ -22,7 +21,6 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
-#include <mutex>
 #include <queue>
 #include <stdio.h>
 #include <unistd.h>
@@ -35,7 +33,7 @@ using namespace memory_sequential_consistent; // Lock free fifo
 const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
 
 /** ----------------------------------------------------- */
-const char *classname = "CSPEC Detector (2 thread pipeline)";
+const char *classname = "CSPEC Detector Mesytec readout";
 
 class CSPEC : public Detector {
 public:
@@ -50,25 +48,17 @@ public:
   static const int eth_buffer_size = 9000;
   static const int kafka_buffer_size = 1000000;
 
-  int LoadCalib(std::vector<std::string> cmdargs, UNUSED char *output,
-                UNUSED unsigned int *obytes);
-  int ShowCalib(std::vector<std::string> cmdargs, UNUSED char *output,
-                UNUSED unsigned int *obytes);
-
 private:
   /** Shared between input_thread and processing_thread*/
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
-
-  std::mutex eventq_mutex, cout_mutex;
 
   struct {
     // Input Counters
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t fifo_push_errors;
-    int64_t fifo_free;
-    int64_t pad_a[4]; /**< @todo check alignment*/
+    int64_t pad_a[5]; /**< @todo check alignment*/
 
     // Processing Counters
     int64_t rx_readouts;
@@ -95,7 +85,6 @@ CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
   Stats.create("input.rx_packets",                mystats.rx_packets);
   Stats.create("input.rx_bytes",                  mystats.rx_bytes);
   Stats.create("input.i2pfifo_dropped",           mystats.fifo_push_errors);
-  Stats.create("input.i2pfifo_free",              mystats.fifo_free);
   Stats.create("processing.rx_readouts",          mystats.rx_readouts);
   Stats.create("processing.rx_error_bytes",       mystats.rx_error_bytes);
   Stats.create("processing.rx_discards",          mystats.rx_discards);
@@ -126,7 +115,7 @@ void CSPEC::input_thread() {
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPServer cspecdata(local);
-  cspecdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
+  cspecdata.setbuffers(EFUSettings.DetectorTxBufferSize, EFUSettings.DetectorRxBufferSize);
   cspecdata.printbuffers();
   cspecdata.settimeout(0, 100000); // One tenth of a second
 
@@ -143,7 +132,6 @@ void CSPEC::input_thread() {
       mystats.rx_bytes += rdsize;
       XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
 
-      mystats.fifo_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
         mystats.fifo_push_errors++;
       } else {
@@ -176,7 +164,6 @@ void CSPEC::processing_thread() {
 
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
-      mystats.fifo_free = input2proc_fifo.free();
       usleep(1);
     } else {
       auto len = eth_ringbuf->getdatalength(data_index);
@@ -187,6 +174,7 @@ void CSPEC::processing_thread() {
                     eth_ringbuf->getdatalength(data_index));
 
         mystats.tx_bytes += flatbuffer.addevent(42, 1);
+        mystats.rx_events++;
         mystats.rx_readouts += dat.readouts;
       }
     }
