@@ -34,7 +34,7 @@ public:
   /** @brief creates a 'stat' entry with name and addres for counter
    * duplicates are not allowed.
    */
-  int create(std::string statname, const int64_t &counter);
+  int create(std::string statname, int64_t &counter);
 
   /** @brief returns the number of registered stats */
   size_t size();
