@@ -9,7 +9,6 @@ cmake_installer/1.0@conan/stable
 
 [generators]
 cmake
-virtualbuildenv
 
 [options]
 FlatBuffers:shared=True
