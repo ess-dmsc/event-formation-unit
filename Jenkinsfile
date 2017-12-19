@@ -57,7 +57,7 @@ def docker_cmake(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd build
         ${cmake_exec} --version
-        ${cmake_exec} -DWITH_CONAN=1 ../${project}
+        ${cmake_exec} -DWITH_CONAN=1 -DCMAKE_BUILD_TYPE=Debug ../${project}
     \""""
 }
 
