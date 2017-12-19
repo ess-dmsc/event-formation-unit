@@ -52,12 +52,12 @@ def docker_dependencies(image_key) {
 }
 
 def docker_cmake(image_key) {
-    cmake_exec = "/home/jenkins/build/bin/cmake"
+    cmake_exec = "cmake"
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd build
-        cmake --version
-        cmake -DCONAN_FILE=conanfile.txt -DCMAKE_BUILD_TYPE=Release ../${project}
+        ${cmake_exec} --version
+        ${cmake_exec} -DCONAN_FILE=conanfile.txt ../${project}
     \""""
 }
 
