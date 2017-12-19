@@ -42,17 +42,17 @@ void MesytecData::mesytec_parse_n_words(uint32_t * buffer, int nWords) {
         addr = (*datap & 0x00fff000) >> 12; /**< channel */
         adc = (*datap & 0x00000fff);
 
-        if ( (mgseq.isWire(addr) && adc >= wireThreshold) ||
-             (mgseq.isGrid(addr) && adc >= gridThreshold)    )  {
+        // if ( (mgseq.isWire(addr) && adc >= wireThreshold) ||
+        //      (mgseq.isGrid(addr) && adc >= gridThreshold)    )  {
 
           readouts++;
           #ifdef DUMPTOFILE
           mgdata.tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
           #endif
           DTRACE(DEB, "%d,%d,%d,%d\n", time, bus, addr, adc);
-        } else {
-          DTRACE(DEB, "discarding %d,%d,%d,%d\n", time, bus, addr, adc);
-        }
+        // } else {
+        //   DTRACE(DEB, "discarding %d,%d,%d,%d\n", time, bus, addr, adc);
+        // }
       break;
 
       case mesytecTimeOffset:

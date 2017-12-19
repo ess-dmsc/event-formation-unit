@@ -8,6 +8,8 @@
 #include <string>
 
 EFUArgs::EFUArgs() {
+  EFUSettings.DetectorRxBufferSize = 4000000;
+  EFUSettings.DetectorTxBufferSize = 4000000;
   CLIParser
       .add_option("-a,--logip", GraylogConfig.address,
                   "Graylog server IP address")

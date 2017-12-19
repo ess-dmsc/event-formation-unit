@@ -13,6 +13,7 @@
 #include <common/Trace.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
+#include <gdgem/nmx/HistSerializer.h>
 #include <multigrid/mgmesytec/Data.h>
 #include <cstring>
 #include <iostream>
@@ -163,8 +164,9 @@ void CSPEC::processing_thread() {
   FBSerializer flatbuffer(kafka_buffer_size, producer);
 
   MesytecData dat;
-  dat.setWireThreshold(0);
-  dat.setGridThreshold(0);
+
+  dat.setWireThreshold(0); // accept all
+  dat.setGridThreshold(0); // accept all
 
   TSCTimer report_timer;
   TSCTimer timestamp;
@@ -183,6 +185,8 @@ void CSPEC::processing_thread() {
       } else {
         dat.parse(eth_ringbuf->getdatabuffer(data_index),
                     eth_ringbuf->getdatalength(data_index));
+
+        mystats.tx_bytes += flatbuffer.addevent(42, 1);
         mystats.rx_readouts += dat.readouts;
       }
     }
