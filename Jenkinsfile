@@ -59,7 +59,7 @@ def docker_cmake(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd build
         ${cmake_exec} --version
-        ${cmake_exec} -DREQUIRE_GTEST=ON -DWITH_CONAN=ON -DCMAKE_BUILD_TYPE=Debug ../${project}
+        ${cmake_exec} -DCONAN_FILE=conanfile.txt -DCMAKE_BUILD_TYPE=Debug ../${project}
     \""""
 }
 
