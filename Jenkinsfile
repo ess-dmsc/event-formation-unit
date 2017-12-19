@@ -56,8 +56,8 @@ def docker_cmake(image_key) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd build
-        $cmake --version
-        $cmake -DCONAN_FILE=conanfile.txt -DCMAKE_BUILD_TYPE=Release ../${project}
+        cmake --version
+        cmake -DCONAN_FILE=conanfile.txt -DCMAKE_BUILD_TYPE=Release ../${project}
     \""""
 }
 
