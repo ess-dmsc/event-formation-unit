@@ -7,7 +7,7 @@ def failure_function(exception_obj, failureMessage) {
 
 node('kafka-client && centos7') {
     cleanWs()
-    
+
     dir("code") {
         try {
             stage("Checkout projects") {
@@ -40,6 +40,38 @@ node('kafka-client && centos7') {
             }
         } catch (e) {
             failure_function(e, 'Unit tests failed')
+        }
+    }
+
+    stage("Coverage") {
+
+        dir("build") {
+            try {
+                sh "cmake -DCOV=1 ../code"
+            } catch (e) {
+                failure_function(e, 'cmake COV failed')
+            }
+
+            try {
+                sh "make runtest"
+                junit 'test_results/*test.xml'
+                sh "make coverage"
+                step([
+                    $class: 'CoberturaPublisher',
+                    autoUpdateHealth: true,
+                    autoUpdateStability: true,
+                    coberturaReportFile: 'coverage/coverage.xml',
+                    failUnhealthy: false,
+                    failUnstable: false,
+                    maxNumberOfBuilds: 0,
+                    onlyStable: false,
+                    sourceEncoding: 'ASCII',
+                    zoomCoverageChart: false
+                ])
+            } catch (e) {
+                failure_function(e, 'generate coverage failed')
+                junit 'test/unit_tests_run.xml'
+            }
         }
     }
 }
