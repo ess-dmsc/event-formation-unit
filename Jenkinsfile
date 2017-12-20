@@ -60,7 +60,7 @@ node('kafka-client && centos7') {
                     $class: 'CoberturaPublisher',
                     autoUpdateHealth: true,
                     autoUpdateStability: true,
-                    coberturaReportFile: 'coverage/coverage.xml',
+                    coberturaReportFile: 'coverage/cov.xml',
                     failUnhealthy: false,
                     failUnstable: false,
                     maxNumberOfBuilds: 0,
@@ -70,7 +70,7 @@ node('kafka-client && centos7') {
                 ])
             } catch (e) {
                 failure_function(e, 'generate coverage failed')
-                junit 'test/unit_tests_run.xml'
+                junit 'test_results/*test.xml'
             }
         }
     }
