@@ -9,7 +9,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void MesytecData::mesytec_parse_n_words(uint32_t * buffer, int nWords) {
+void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords) {
   uint32_t *datap = buffer;
   int wordsleft = nWords;
 
@@ -21,7 +21,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t * buffer, int nWords) {
   int dataWords = -1;
 
   // Sneak peek on time although it is actually last in packet
-  uint32_t * tptr = (buffer + nWords - 1);
+  uint32_t *tptr = (buffer + nWords - 1);
   if ((*tptr & 0xc0000000) == 0xc0000000) {
     time = *tptr & 0x3fffffff;
   }
@@ -30,48 +30,48 @@ void MesytecData::mesytec_parse_n_words(uint32_t * buffer, int nWords) {
     auto datatype = *datap & 0xff000000;
 
     switch (datatype) {
-      case mesytecHeader:
-        dataWords = *datap & 0x000003ff;
-        assert(nWords > dataWords);
-        module = (*datap & 0x00ff0000) >> 16;
-        DTRACE(INF, "Data len %d (words), module %d\n", dataWords, module);
+    case mesytecHeader:
+      dataWords = *datap & 0x000003ff;
+      assert(nWords > dataWords);
+      module = (*datap & 0x00ff0000) >> 16;
+      DTRACE(INF, "Data len %d (words), module %d\n", dataWords, module);
       break;
 
-      case mesytecData:
-        bus = (*datap & 0x0f000000) >> 24;
-        addr = (*datap & 0x00fff000) >> 12; /**< channel */
-        adc = (*datap & 0x00000fff);
+    case mesytecData:
+      bus = (*datap & 0x0f000000) >> 24;
+      addr = (*datap & 0x00fff000) >> 12; /**< channel */
+      adc = (*datap & 0x00000fff);
 
-        // if ( (mgseq.isWire(addr) && adc >= wireThreshold) ||
-        //      (mgseq.isGrid(addr) && adc >= gridThreshold)    )  {
+      // if ( (mgseq.isWire(addr) && adc >= wireThreshold) ||
+      //      (mgseq.isGrid(addr) && adc >= gridThreshold)    )  {
 
-          readouts++;
-          #ifdef DUMPTOFILE
-          mgdata.tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
-          #endif
-          DTRACE(DEB, "%d,%d,%d,%d\n", time, bus, addr, adc);
-        // } else {
-        //   DTRACE(DEB, "discarding %d,%d,%d,%d\n", time, bus, addr, adc);
-        // }
+      readouts++;
+#ifdef DUMPTOFILE
+      mgdata.tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
+#endif
+      DTRACE(DEB, "%d,%d,%d,%d\n", time, bus, addr, adc);
+      // } else {
+      //   DTRACE(DEB, "discarding %d,%d,%d,%d\n", time, bus, addr, adc);
+      // }
       break;
 
-      case mesytecTimeOffset:
-        bus = (*datap & 0x0f000000) >> 24;
-        DTRACE(INF, "Timeoffset (bus %d) %d\n", bus, (*datap & 0x0000ffff));
+    case mesytecTimeOffset:
+      bus = (*datap & 0x0f000000) >> 24;
+      DTRACE(INF, "Timeoffset (bus %d) %d\n", bus, (*datap & 0x0000ffff));
       break;
 
-      default:
-        if ((*datap & mesytecTimeStamp) == mesytecTimeStamp) {
-            DTRACE(INF, "Timestamp: %d\n", *datap & 0x3fffffff);
-          break;
-        }
+    default:
+      if ((*datap & mesytecTimeStamp) == mesytecTimeStamp) {
+        DTRACE(INF, "Timestamp: %d\n", *datap & 0x3fffffff);
+        break;
+      }
 
-        if (*datap == 0x00000000) {
-          //DTRACE(INF, "End of Data\n");
-          break;
-        }
+      if (*datap == 0x00000000) {
+        // DTRACE(INF, "End of Data\n");
+        break;
+      }
 
-        DTRACE(WAR, "Unknown: 0x%08x\n", *datap);
+      DTRACE(WAR, "Unknown: 0x%08x\n", *datap);
       break;
     }
     wordsleft--;
@@ -83,7 +83,6 @@ void MesytecData::mesytec_parse_n_words(uint32_t * buffer, int nWords) {
     readouts = 0;
   }
 }
-
 
 int MesytecData::parse(const char *buffer, int size) {
   int bytesleft = size;
@@ -97,7 +96,7 @@ int MesytecData::parse(const char *buffer, int size) {
     return -error::ESIZE;
   }
 
-  uint32_t *datap = (uint32_t*)(buffer + 3);
+  uint32_t *datap = (uint32_t *)(buffer + 3);
   bytesleft -= 3;
 
   while (bytesleft > 16) {
@@ -118,7 +117,7 @@ int MesytecData::parse(const char *buffer, int size) {
     mesytec_parse_n_words(datap, len - 3);
 
     datap += (len - 3);
-    bytesleft -= (len - 3)*4;
+    bytesleft -= (len - 3) * 4;
 
     if (*datap != 0x87654321) {
       XTRACE(PROCESS, WAR, "Protocol mismatch, expected 0x87654321\n");
@@ -133,6 +132,6 @@ int MesytecData::parse(const char *buffer, int size) {
     datap++;
     bytesleft -= 4;
   }
-  //printf("bytesleft %d\n", bytesleft);
+  // printf("bytesleft %d\n", bytesleft);
   return error::OK;
 }

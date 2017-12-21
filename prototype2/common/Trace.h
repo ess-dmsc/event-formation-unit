@@ -71,9 +71,7 @@
 
 // Raw trace
 #define DTRACE(level, fmt, ...)                                                \
-  (void)((TRC_L_##level >= TRC_LEVEL)                                          \
-             ? printf(fmt, ##__VA_ARGS__)                                      \
-             : 0)
+  (void)((TRC_L_##level >= TRC_LEVEL) ? printf(fmt, ##__VA_ARGS__) : 0)
 #endif
 
 // #define XTRACE(group, level, fmt, ...)                                         \

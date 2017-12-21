@@ -76,7 +76,7 @@ private:
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t fifo_push_errors;
-    //int64_t fifo_free;
+    // int64_t fifo_free;
     int64_t pad_a[5]; /**< @todo check alignment*/
 
     // Processing Counters
@@ -164,7 +164,7 @@ void NMX::input_thread() {
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
-      //mystats.fifo_free = input2proc_fifo.free();
+      // mystats.fifo_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
         mystats.fifo_push_errors++;
       } else {
@@ -211,7 +211,7 @@ void NMX::processing_thread() {
   unsigned int data_index;
   int sample_next_track{0};
   while (1) {
-    //mystats.fifo_free = input2proc_fifo.free();
+    // mystats.fifo_free = input2proc_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.processing_idle++;
       usleep(1);
@@ -224,7 +224,8 @@ void NMX::processing_thread() {
             eth_ringbuf->getdatabuffer(data_index), len, clusterer, hists);
 
         mystats.readouts += stats.valid_eventlets;
-        mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
+        mystats.readouts_error_bytes +=
+            stats.error_bytes; // From srs data parser
 
         while (clusterer.event_ready()) {
           XTRACE(PROCESS, DEB, "event_ready()\n");
@@ -266,7 +267,8 @@ void NMX::processing_thread() {
               }
             }
           } else {
-            mystats.readouts_discarded += event.x.entries.size() + event.y.entries.size();
+            mystats.readouts_discarded +=
+                event.x.entries.size() + event.y.entries.size();
             mystats.clusters_discarded++;
           }
         }

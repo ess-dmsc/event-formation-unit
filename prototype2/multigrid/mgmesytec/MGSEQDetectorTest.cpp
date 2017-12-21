@@ -27,7 +27,6 @@ TEST_F(MGSEQDetectorTest, IsWireIsGrid) {
   ASSERT_FALSE(mgdet.isGrid(93));
 }
 
-
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

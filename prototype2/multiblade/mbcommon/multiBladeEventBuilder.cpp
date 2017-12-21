@@ -156,7 +156,7 @@ bool multiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
   // Sort the signals by channel number.
   std::sort(cluster.begin(), cluster.end());
 
-  // Cluster iterator
+// Cluster iterator
 
 #if 1
   if ((cluster.back().channel - cluster.front().channel) >

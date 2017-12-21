@@ -94,7 +94,8 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
 //=============================================================================
-int CSPEC::LoadCalib(std::vector<std::string> cmdargs, __attribute__((unused)) char *output,
+int CSPEC::LoadCalib(std::vector<std::string> cmdargs,
+                     __attribute__((unused)) char *output,
                      __attribute__((unused)) unsigned int *obytes) {
   XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
   GLOG_INF("CSPEC_LOAD_CALIB");

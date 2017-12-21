@@ -11,16 +11,16 @@
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
+#include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <multigrid/mgmesytec/Data.h>
-#include <cstring>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
+#include <multigrid/mgmesytec/Data.h>
 #include <queue>
 #include <stdio.h>
 #include <unistd.h>
@@ -115,7 +115,8 @@ void CSPEC::input_thread() {
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPServer cspecdata(local);
-  cspecdata.setbuffers(EFUSettings.DetectorTxBufferSize, EFUSettings.DetectorRxBufferSize);
+  cspecdata.setbuffers(EFUSettings.DetectorTxBufferSize,
+                       EFUSettings.DetectorRxBufferSize);
   cspecdata.printbuffers();
   cspecdata.settimeout(0, 100000); // One tenth of a second
 
@@ -171,7 +172,7 @@ void CSPEC::processing_thread() {
         mystats.fifo_seq_errors++;
       } else {
         dat.parse(eth_ringbuf->getdatabuffer(data_index),
-                    eth_ringbuf->getdatalength(data_index));
+                  eth_ringbuf->getdatalength(data_index));
 
         mystats.tx_bytes += flatbuffer.addevent(42, 1);
         mystats.rx_events++;

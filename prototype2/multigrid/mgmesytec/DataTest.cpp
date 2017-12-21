@@ -9,24 +9,25 @@
 class MesytecDataTest : public TestBase {
 protected:
   MesytecData mesytec;
-  virtual void SetUp() { }
-  virtual void TearDown() { }
+  virtual void SetUp() {}
+  virtual void TearDown() {}
 };
 
 /** Test cases below */
 
 TEST_F(MesytecDataTest, ErrUnsupportedCommand) {
-  auto res = mesytec.parse((char *)&err_unsupported_cmd[0], err_unsupported_cmd.size());
+  auto res = mesytec.parse((char *)&err_unsupported_cmd[0],
+                           err_unsupported_cmd.size());
 
   ASSERT_EQ(res, -MesytecData::error::EUNSUPP);
 }
 
 TEST_F(MesytecDataTest, ErrPktShort) {
-  auto res = mesytec.parse((char *)&err_pkt_too_short[0], err_pkt_too_short.size());
+  auto res =
+      mesytec.parse((char *)&err_pkt_too_short[0], err_pkt_too_short.size());
 
   ASSERT_EQ(res, -MesytecData::error::ESIZE);
 }
-
 
 TEST_F(MesytecDataTest, ParseRecordedWSData) {
   auto res = mesytec.parse((char *)&ws1[0], ws1.size());
@@ -45,7 +46,6 @@ TEST_F(MesytecDataTest, ParseRecordedWSDataIII) {
   ASSERT_EQ(res, -MesytecData::error::OK);
   ASSERT_EQ(mesytec.readouts, 256); // Readout provides more than 92 channels
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

@@ -103,8 +103,7 @@ void EFUArgs::printSettings() {
   XTRACE(INIT, ALW, "  IP addr:       %s\n",
          EFUSettings.DetectorAddress.c_str());
   XTRACE(INIT, ALW, "  UDP Port:      %d\n", EFUSettings.DetectorPort);
-  XTRACE(INIT, ALW, "  Kafka broker:  %s\n",
-         EFUSettings.KafkaBroker.c_str());
+  XTRACE(INIT, ALW, "  Kafka broker:  %s\n", EFUSettings.KafkaBroker.c_str());
   XTRACE(INIT, ALW, "  Graphite:      %s\n",
          EFUSettings.GraphiteAddress.c_str());
   XTRACE(INIT, ALW, "  Graphite port: %d\n", EFUSettings.GraphitePort);

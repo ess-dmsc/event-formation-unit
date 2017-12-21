@@ -31,11 +31,10 @@ private:
   size_t psize_{sizeof(uint32_t) * 4};
   size_t max_in_buf_{9000 / (sizeof(uint32_t) * 4)};
 
-  hdf5::dataspace::Hyperslab slab_{{0,0},
-                                   {1, 4}};
+  hdf5::dataspace::Hyperslab slab_{{0, 0}, {1, 4}};
 
-//  std::vector<hsize_t> index{0, 0};
-//  std::vector<hsize_t> slabsize{1, H5CC::kMax};
+  //  std::vector<hsize_t> index{0, 0};
+  //  std::vector<hsize_t> slabsize{1, H5CC::kMax};
 
   std::vector<uint32_t> data;
 };

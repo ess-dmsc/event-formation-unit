@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
     return 1;
 
   hdf5::error::Singleton::instance().auto_print(false);
-//  hdf5::error::auto_print(false);
+  //  hdf5::error::auto_print(false);
 
   char buffer[9000];
 
