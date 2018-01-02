@@ -66,6 +66,21 @@ EFUArgs::EFUArgs() {
                   "Terminate after timeout seconds")
       ->group("EFU Options")
       ->set_default_val("4294967295"); // 0xffffffffU
+  CLIParser
+  .add_option("--updateinterval", EFUSettings.UpdateIntervalSec,
+              "Stats and event data update interval (seconds).")
+  ->group("EFU Options")
+  ->set_default_val("1");
+  CLIParser
+  .add_option("--rxbuffer", EFUSettings.DetectorRxBufferSize,
+              "Receive from detector buffer size.")
+  ->group("EFU Options")
+  ->set_default_val("2000000");
+  CLIParser
+  .add_option("--txbuffer", EFUSettings.DetectorTxBufferSize,
+              "Transmit to detector buffer size.")
+  ->group("EFU Options")
+  ->set_default_val("9216");
 }
 
 bool EFUArgs::parseAffinityStrings(
