@@ -66,11 +66,13 @@ set(MGCNCSChanConvTest_SRC
 create_test_executable(MGCNCSChanConvTest "")
 
 set(MGCNCSDataTest_SRC
+  ../../dataformats/multigrid/src/DataSave.cpp
   mgcncs/DataTest.cpp
   mgcncs/Data.cpp
   mgcncs/ChanConv.cpp
   )
 set(MGCNCSDataTest_INC
+  ../../dataformats/multigrid/inc/DataSave.h
   mgcncs/Data.h
   mgcncs/ChanConv.h
   mgcncs/TestData.h

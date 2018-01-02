@@ -57,8 +57,9 @@ private:
     // Input Counters
     int64_t rx_packets;
     int64_t rx_bytes;
-    int64_t fifo1_push_errors;
-    int64_t pad[5];
+    int64_t fifo_push_errors;
+    int64_t rx_pktlen_0;
+    int64_t pad[4];
 
     // Processing and Output counters
     int64_t rx_idle1;
@@ -66,7 +67,7 @@ private:
     int64_t rx_geometry_errors;
     int64_t tx_bytes;
     int64_t rx_seq_errors;
-    int64_t fifo_seq_errors;
+    int64_t fifo_synch_errors;
   } ALIGN(64) mystats;
 };
 
@@ -81,12 +82,12 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDE
   // clang-format off
   Stats.create("input.rx_packets",                mystats.rx_packets);
   Stats.create("input.rx_bytes",                  mystats.rx_bytes);
-  Stats.create("input.dropped",                   mystats.fifo1_push_errors);
+  Stats.create("input.dropped",                   mystats.fifo_push_errors);
   Stats.create("input.rx_seq_errors",             mystats.rx_seq_errors);
   Stats.create("processing.idle",                 mystats.rx_idle1);
   Stats.create("processing.rx_events",            mystats.rx_events);
   Stats.create("processing.rx_geometry_errors",   mystats.rx_geometry_errors);
-  Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  Stats.create("processing.rx_seq_errors",        mystats.rx_seq_errors);
   Stats.create("output.tx_bytes",                 mystats.tx_bytes);
   // clang-format on
   std::function<void()> inputFunc = [this]() { SONDEIDEA::input_thread(); };
@@ -128,7 +129,7 @@ void SONDEIDEA::input_thread() {
       eth_ringbuf->setdatalength(eth_index, rdsize);
 
       if (input2proc_fifo.push(eth_index) == false) {
-        mystats.fifo1_push_errors++;
+        mystats.fifo_push_errors++;
       } else {
         eth_ringbuf->nextbuffer();
       }
@@ -162,7 +163,7 @@ void SONDEIDEA::processing_thread() {
 
       auto len = eth_ringbuf->getdatalength(data_index);
       if (len == 0) {
-        mystats.fifo_seq_errors++;
+        mystats.fifo_synch_errors++;
       } else {
         int events =
             ideasdata.parse_buffer(eth_ringbuf->getdatabuffer(data_index), len);
