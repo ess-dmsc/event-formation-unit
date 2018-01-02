@@ -10,6 +10,7 @@
 
 EFUArgs::EFUArgs() {
   CLIParser.set_help_flag(); //Removes the default help flag
+  CLIParser.allow_extras(true);
   HelpOption = CLIParser.add_flag("-h,--help", "Print this help message and exit")->group("EFU Options")->configurable(false);
   CLIParser
       .add_option("-a,--logip", GraylogConfig.address,
@@ -141,12 +142,14 @@ EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
   try {
     CLIParser.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
+    CLIParser.exit(e);
   }
   if ((*HelpOption and not *DetectorOption) or (not *HelpOption and not *DetectorOption)) {
     printHelp();
     return Status::EXIT;
   }
   CLIParser.reset();
+  CLIParser.allow_extras(false);
   return Status::CONTINUE;
 }
 
@@ -169,6 +172,8 @@ EFUArgs::Status EFUArgs::parseSecondPass(const int argc, char *argv[]) {
     }
     ConfigFile << CLIParser.config_to_str(true, "", true);
     ConfigFile.close();
+    std::cout << "Config file created, now exiting." << std::endl;
+    return Status::EXIT;
   }
   return Status::CONTINUE;
 }
