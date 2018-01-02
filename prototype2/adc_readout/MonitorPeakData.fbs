@@ -1,0 +1,12 @@
+//This is (for now) a throw away flatbuffer schema. Do not base any project on this schema without taking this into account
+
+file_identifier "Peak";
+
+table MonitorPeakData {
+  TimeStamp:ulong;
+  Amplitude:ushort;
+  Channel:ushort;
+  Name:string (required);
+}
+
+root_type MonitorPeakData;

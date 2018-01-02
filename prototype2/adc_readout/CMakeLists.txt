@@ -6,7 +6,10 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 set(AdcReadout_SRC
   AdcReadout.cpp
-  AdcParse.cpp)
+  AdcParse.cpp
+  PeakFinder.cpp
+  AdcDataProcessor.cpp
+)
 
 set(AdcReadout_INC
   AdcReadout.h
@@ -14,7 +17,10 @@ set(AdcReadout_INC
   AdcBufferElements.h
   atomicops.h
   CircularBuffer.h
-  readerwriterqueue.h)
+  readerwriterqueue.h
+  PeakFinder.h
+  AdcDataProcessor.h
+)
 
 create_module(AdcReadout "")
 
@@ -28,6 +34,8 @@ set(AdcReadoutTest_SRC
   test/AdcReadoutTest.cpp
   test/AdcParseTest.cpp
   test/TestUDPServer.cpp
+  test/PeakFinderTest.cpp
+  test/AdcDataProcessorTest.cpp
   ${AdcReadout_SRC})
 
 set(AdcReadoutTest_INC
@@ -35,7 +43,7 @@ set(AdcReadoutTest_INC
   ${AdcReadout_INC}
 )
   
-create_test_executable(AdcReadoutTest "")
+create_test_executable(AdcReadoutTest ${LibRDKafka_LIBRARIES})
 get_filename_component(TEST_PACKET_FILE "test/test_packet_1.dat" ABSOLUTE)
 add_custom_command(
         TARGET AdcReadoutTest POST_BUILD

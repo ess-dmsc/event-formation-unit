@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
-project("event-formation-unit")
+project("event-formation-unit" LANGUAGES CXX C)
 set(event-formation-unit_VERSION_MAJOR 1)
 set(event-formation-unit_VERSION_MINOR 0)
 
@@ -38,7 +38,7 @@ option(GOOGLE_BENCHMARK, "Enable google benchmark for unit tests" OFF)
 option(USE_OLD_ABI "Sets _GLIBCXX_USE_CXX11_ABI=0 for CentOS builds" ON)
 set(EXTRA_CXX_FLAGS -std=c++11 -pthread -fPIC)
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
-set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-Werror -Wall -Wpedantic -Wextra -Wmissing-include-dirs")
+set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-Wall -Wpedantic -Wextra -Wmissing-include-dirs")
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DBUILDSTR=${BUILDSTR}")
 
 if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
