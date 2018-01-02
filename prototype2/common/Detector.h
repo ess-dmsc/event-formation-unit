@@ -18,18 +18,18 @@
 #include <thread>
 
 struct BaseSettings {
-  std::string DetectorAddress;
-  std::uint16_t DetectorPort;
+  std::string DetectorAddress = {""};
+  std::uint16_t DetectorPort = {9000};
   std::uint16_t CommandServerPort;
-  std::int32_t DetectorRxBufferSize;
-  std::int32_t DetectorTxBufferSize;
+  std::int32_t DetectorRxBufferSize = {2000000};
+  std::int32_t DetectorTxBufferSize = {2000000};
   std::string KafkaBroker;
   std::string GraphiteAddress;
   std::uint16_t GraphitePort;
   std::string KafkaTopic;
   std::string ConfigFile;
-  std::uint64_t UpdateIntervalSec;
-  std::uint32_t StopAfterSec;
+  std::uint64_t UpdateIntervalSec = {1};
+  std::uint32_t StopAfterSec = {0xffffffffU};
 };
 
 struct ThreadInfo {
