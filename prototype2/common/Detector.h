@@ -17,20 +17,25 @@
 #include <string>
 #include <thread>
 
+// All settings should be initialized.
+// clang-format off
 struct BaseSettings {
-  std::string DetectorAddress = {""};
-  std::uint16_t DetectorPort = {9000};
-  std::uint16_t CommandServerPort;
-  std::int32_t DetectorRxBufferSize = {2000000};
-  std::int32_t DetectorTxBufferSize = {2000000};
-  std::string KafkaBroker;
-  std::string GraphiteAddress;
-  std::uint16_t GraphitePort;
-  std::string KafkaTopic;
-  std::string ConfigFile;
-  std::uint64_t UpdateIntervalSec = {1};
-  std::uint32_t StopAfterSec = {0xffffffffU};
+  std::string   DetectorPluginName   = {""};
+  std::string   DetectorAddress      = {""};
+  std::uint16_t DetectorPort         = {9000};
+  std::uint16_t CommandServerPort    = {8888};
+  std::int32_t  ReceiveMaxBytes      = {9000}; // Jumbo frame support
+  std::int32_t  DetectorRxBufferSize = {2000000};
+  std::int32_t  DetectorTxBufferSize = {200000};
+  std::string   KafkaBroker          = {"localhost:9092"};
+  std::string   GraphiteAddress      = {"127.0.0.1"};
+  std::uint16_t GraphitePort         = {2003};
+  //std::string KafkaTopic = {""};
+  std::string   ConfigFile           = {""};
+  std::uint64_t UpdateIntervalSec    = {1};
+  std::uint32_t StopAfterSec         = {0xffffffffU};
 };
+// clang-format on
 
 struct ThreadInfo {
   std::function<void(void)> func;
