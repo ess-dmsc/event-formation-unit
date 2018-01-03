@@ -64,6 +64,12 @@ TEST_F(EFUArgsTest, HelpText) {
   ASSERT_TRUE(myargv != NULL);
 }
 
+TEST_F(EFUArgsTest, XTRACE_Text) {
+  EFUArgs efu_args;
+  MESSAGE() << "This is not a test, just ensuring printout is done once\n" ;
+  efu_args.printSettings();
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
