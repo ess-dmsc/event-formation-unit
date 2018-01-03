@@ -37,17 +37,6 @@ int Socket::settimeout(int seconds, int usecs) {
   return setopt(SO_RCVTIMEO, &timeout, sizeof(timeout));
 }
 
-int Socket::buflen(uint16_t buflen) {
-  if (buflen > buflen_max) {
-    std::cout << "Specified buffer length " << buflen
-              << " too large, adjusted to " << buflen_max << std::endl;
-    buflen_ = buflen_max;
-  } else {
-    buflen_ = buflen;
-  }
-  return buflen_;
-}
-
 void Socket::local(const char *ipaddr, int port) {
   // zero out the structures
   std::memset((char *)&local_, 0, sizeof(local_));
@@ -76,18 +65,6 @@ void Socket::remote(const char *ipaddr, int port) {
   assert(ret != 0);
 }
 
-int Socket::send() {
-  int ret = sendto(s_, buffer_, buflen_, 0, (struct sockaddr *)&remote_,
-                   sizeof(remote_));
-  if (ret < 0) {
-    std::cout << "unable to send on socket" << std::endl;
-    perror("sendto");
-    exit(1);
-  }
-
-  return ret;
-}
-
 int Socket::send(void *buffer, int len) {
   int ret =
       sendto(s_, buffer, len, 0, (struct sockaddr *)&remote_, sizeof(remote_));
@@ -98,20 +75,6 @@ int Socket::send(void *buffer, int len) {
   }
 
   return ret;
-}
-
-/** */
-int Socket::receive() {
-  int recv_len;
-  socklen_t slen = 0;
-  // try to receive some data, this is a blocking call
-  if ((recv_len = recvfrom(s_, buffer_, buflen_, 0, (struct sockaddr *)&remote_,
-                           &slen)) < 0) {
-    XTRACE(IPC, ERR, "Receive() failed: %d (sockt fd %d)\n", recv_len, s_);
-    perror("recvfrom: ");
-    return 0;
-  }
-  return recv_len;
 }
 
 /** */

@@ -24,7 +24,6 @@ int main(int argc, char *argv[]) {
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
   UDPClient udptx(local, remote);
-  udptx.buflen(opts.buflen);
   udptx.setbuffers(4000000, 4000000);
   udptx.printbuffers();
 

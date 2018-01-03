@@ -15,6 +15,8 @@ typedef std::chrono::high_resolution_clock Clock;
 int main(int argc, char *argv[]) {
   Args opts(argc, argv);
 
+  static const int BUFFERSIZE = 9000;
+  char buffer[BUFFERSIZE];
   uint64_t rx_total = 0;
   uint64_t rx = 0;
   uint64_t rxp = 0;
@@ -30,7 +32,7 @@ int main(int argc, char *argv[]) {
   auto usecs = upd.timeus();
 
   for (;;) {
-    int rdsize = NMX.receive();
+    int rdsize = NMX.receive(buffer, BUFFERSIZE);
     assert(rdsize > 0);
     assert(rdsize == opts.buflen);
 
