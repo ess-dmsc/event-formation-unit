@@ -75,8 +75,8 @@ bool EFUArgs::parseAffinityStrings(
         return false;
       }
       ThreadAffinity.emplace_back(ThreadCoreAffinitySetting{
-          AffinityRERes[0],
-          static_cast<std::uint16_t>(std::stoi(AffinityRERes[1]))});
+          AffinityRERes[1],
+          static_cast<std::uint16_t>(std::stoi(AffinityRERes[2]))});
     }
   }
   return true;
