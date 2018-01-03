@@ -64,6 +64,24 @@ TEST_F(EFUArgsTest, HelpText) {
   ASSERT_TRUE(myargv != NULL);
 }
 
+TEST_F(EFUArgsTest, CoreAffinityOption) {
+  int myargc = 5;
+  const char *myargv[] = {"progname", "-d", "dummydetector", "-c", "thread1:5"};
+
+  EFUArgs efu_args;
+  auto ret = efu_args.parseAndProceed(myargc, (char **)myargv);
+  ASSERT_EQ(ret, false); // has detector
+
+  ASSERT_EQ(myargc, 5);
+  ASSERT_TRUE(myargv != NULL);
+}
+
+TEST_F(EFUArgsTest, PrintHelpText) {
+  EFUArgs efu_args;
+  MESSAGE() << "This is not a test, just ensuring printout is done once\n" ;
+  efu_args.printHelp();
+}
+
 TEST_F(EFUArgsTest, XTRACE_Text) {
   EFUArgs efu_args;
   MESSAGE() << "This is not a test, just ensuring printout is done once\n" ;
