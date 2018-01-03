@@ -42,7 +42,7 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
 
   ASSERT_EQ("mybroker:9091", settings.KafkaBroker);
   // ASSERT_EQ(99, opts.cpustart); /**< todo fixme */
-  ASSERT_EQ("myinst", efu_args.det);
+  ASSERT_EQ("myinst", settings.DetectorPluginName);
   ASSERT_EQ("1.2.3.4", settings.DetectorAddress);
   ASSERT_EQ(9876, settings.DetectorPort);
   ASSERT_EQ("4.3.2.1", settings.GraphiteAddress);
