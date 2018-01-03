@@ -205,24 +205,13 @@ TEST_F(ParserTest, SysCallFail) {
 #endif
 
 TEST_F(ParserTest, DetInfoGetNoDetectorLoaded) {
+  auto parser = new Parser(0, keeprunning);
   const char *cmd = "DETECTOR_INFO_GET";
   std::memcpy(input, cmd, strlen(cmd));
   int res = parser->parse(input, strlen(cmd), output, &obytes);
-  ASSERT_EQ(res, -Parser::OK);
+  ASSERT_EQ(res, -Parser::EBADCMD);
+  delete parser;
 }
-
-#if 0
-TEST_F(ParserTest, StatGetCountNoDetectorLoaded) {
-  for (auto cmdstr : check_detector_loaded) {
-    MESSAGE() << cmdstr << "\n";
-    const char *cmd = cmdstr.c_str();
-    std::memcpy(input, cmd, strlen(cmd));
-    int res = parser->parse(input, strlen(cmd), output, &obytes);
-    ASSERT_EQ(res, -Parser::OK);
-    ASSERT_NE(strstr(output, "error: no detector loaded"), nullptr);
-  }
-}
-#endif
 
 TEST_F(ParserTest, DetectorInfo) {
   const char *cmd = "DETECTOR_INFO_GET";
@@ -231,24 +220,17 @@ TEST_F(ParserTest, DetectorInfo) {
   ASSERT_EQ(res, -Parser::OK);
 }
 
-TEST_F(ParserTest, NoDetector) {
-  auto __attribute__((unused)) parser = new Parser(0, keeprunning);
-  const char *cmd = "DETECTOR_INFO_GET";
+TEST_F(ParserTest, ExitCommand) {
+  ASSERT_EQ(keeprunning, 1);
+  const char *cmd = "EXIT";
   std::memcpy(input, cmd, strlen(cmd));
   int res = parser->parse(input, strlen(cmd), output, &obytes);
-  ASSERT_EQ(res, -Parser::EBADCMD);
+  ASSERT_EQ(res, -Parser::OK);
+  ASSERT_EQ(keeprunning, 0);
 }
 
-// TEST_F(ParserTest, ExitCommand) {
-//   const char *cmd = "EXIT";
-//   std::memcpy(input, cmd, strlen(cmd));
-//   int res = parser->parse(input, strlen(cmd), output, &obytes);
-//   ASSERT_EQ(res, -Parser::OK);
-//   ASSERT_EQ(efu_args->proc_cmd, efu_args->thread_cmd::EXIT);
-// }
-
 int main(int argc, char **argv) {
-  int __attribute__((unused)) ret = chdir("prototype2");
+  int UNUSED ret = chdir("prototype2");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
