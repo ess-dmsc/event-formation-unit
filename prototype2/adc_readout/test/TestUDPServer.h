@@ -4,6 +4,8 @@
 
 #pragma once
 
+#define ASIO_STANDALONE
+
 #include <asio.hpp>
 #include <asio/steady_timer.hpp>
 #include <thread>
