@@ -6,6 +6,11 @@ include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
 find_package(h5cpp)
 set(h5_optional)
 
+if (DUMPTOFILE)
+set(datasave_SRC ../../dataformats/multigrid/src/DataSave.cpp)
+set(datasave_INC ../../dataformats/multigrid/inc/DataSave.h)
+endif ()
+
 #
 # Tools and Data generators
 #
@@ -123,7 +128,7 @@ set(ParserSRSTest_SRC
 create_test_executable(ParserSRSTest "")
 
 set(EventletBuilderH5Test_SRC
-  ../../dataformats/multigrid/src/DataSave.cpp
+  ${datasave_SRC}
   nmx/EventNMX.cpp
   nmx/Clusterer.cpp
   nmx/Hists.cpp
@@ -131,7 +136,7 @@ set(EventletBuilderH5Test_SRC
   nmxgen/EventletBuilderH5Test.cpp
   nmxgen/EventletBuilderH5.cpp)
 set(EventletBuilderH5Test_INC
-  ../../dataformats/multigrid/inc/DataSave.h
+  ${datasave_INC}
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
@@ -141,7 +146,7 @@ create_test_executable(EventletBuilderH5Test "")
 target_link_libraries(EventletBuilderH5Test ${h5_optional})
 
 set(EventletBuilderTest_SRC
-  ../../dataformats/multigrid/src/DataSave.cpp
+  ${datasave_SRC}
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Hists.cpp
@@ -152,7 +157,7 @@ set(EventletBuilderTest_SRC
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp)
 set(EventletBuilderTest_INC
-  ../../dataformats/multigrid/inc/DataSave.h
+  ${datasave_INC}
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Hists.h

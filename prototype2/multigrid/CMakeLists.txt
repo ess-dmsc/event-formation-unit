@@ -10,6 +10,11 @@ include_directories(.. ../..)
 #set(mgcncs_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/MultigridGeometry.h)
 #create_module(mgcncs "")
 
+if (DUMPTOFILE)
+set(datasave_SRC ../../dataformats/multigrid/src/DataSave.cpp)
+set(datasave_INC ../../dataformats/multigrid/inc/DataSave.h)
+endif ()
+
 
 # Two-thread implementation of Multi Grid demonstrator detector
 # For the old readout system
@@ -76,13 +81,13 @@ set(MGCNCSChanConvTest_SRC
 create_test_executable(MGCNCSChanConvTest "")
 
 set(MGCNCSDataTest_SRC
-  ../../dataformats/multigrid/src/DataSave.cpp
+  ${datasave_SRC}
   mgcncs/DataTest.cpp
   mgcncs/Data.cpp
   mgcncs/ChanConv.cpp
   )
 set(MGCNCSDataTest_INC
-  ../../dataformats/multigrid/inc/DataSave.h
+  ${datasave_INC}
   mgcncs/Data.h
   mgcncs/ChanConv.h
   mgcncs/TestData.h
@@ -91,10 +96,10 @@ create_test_executable(MGCNCSDataTest "")
 
 
 set(MGMesytecDataTest_SRC
-  ../../dataformats/multigrid/src/DataSave.cpp
+  ${datasave_SRC}
   mgmesytec/DataTest.cpp mgmesytec/Data.cpp)
 set(MGMesytecDataTest_INC
-  ../../dataformats/multigrid/inc/DataSave.h
+  ${datasave_INC}
   mgmesytec/Data.h mgmesytec/TestData.h)
 create_test_executable(MGMesytecDataTest "")
 
