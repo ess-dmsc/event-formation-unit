@@ -52,6 +52,30 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   ASSERT_EQ(8989, settings.CommandServerPort);
 }
 
+TEST_F(EFUArgsTest, CoreAffinityOption) {
+  int myargc = 5;
+  const char *myargv[] = {"progname", "-d", "dummydetector", "-c", "thread1:5"};
+  
+  EFUArgs efu_args;
+  auto ret = efu_args.parseFirstPass(myargc, (char **)myargv);
+  ASSERT_EQ(ret, EFUArgs::Status::CONTINUE); // has detector
+  
+  ASSERT_EQ(myargc, 5);
+  ASSERT_TRUE(myargv != NULL);
+}
+
+TEST_F(EFUArgsTest, CoreAffinityOptionFailure) {
+  int myargc = 5;
+  const char *myargv[] = {"progname", "-d", "dummydetector", "-c", "thread1:h"};
+  
+  EFUArgs efu_args;
+  auto ret = efu_args.parseSecondPass(myargc, (char **)myargv);
+  ASSERT_EQ(ret, EFUArgs::Status::EXIT); // has detector
+  
+  ASSERT_EQ(myargc, 5);
+  ASSERT_TRUE(myargv != NULL);
+}
+
 TEST_F(EFUArgsTest, HelpText) {
   int myargc = 2;
   const char *myargv[] = {"progname", "-h"};
