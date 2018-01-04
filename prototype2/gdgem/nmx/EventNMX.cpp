@@ -115,12 +115,12 @@ std::string EventNMX::debug() const {
 
 void EventNMX::debug2() {
   printf("x strips: ");
-  for (auto x : x.entries) {
-    printf("%d ", x.strip);
+  for (auto xstrips : x.entries) {
+    printf("%d ", xstrips.strip);
   }
   printf("\ny strips: ");
-  for (auto y : y.entries) {
-    printf("%d ", y.strip);
+  for (auto ystrips : y.entries) {
+    printf("%d ", ystrips.strip);
   }
   printf("\n");
 }
