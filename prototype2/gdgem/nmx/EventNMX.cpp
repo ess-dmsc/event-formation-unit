@@ -31,8 +31,7 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
   int16_t lspan_max = std::numeric_limits<int16_t>::min();
   int16_t uspan_min = std::numeric_limits<int16_t>::max();
   int16_t uspan_max = std::numeric_limits<int16_t>::min();
-  uint64_t earliest =
-      std::min(time_start, time_end - static_cast<uint64_t>(max_timedif));
+  uint64_t earliest = std::min(time_start, time_end - static_cast<uint64_t>(max_timedif));
   std::set<uint64_t> timebins;
   for (auto it = entries.rbegin(); it != entries.rend(); ++it) {
     auto e = *it;
@@ -47,8 +46,7 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
       lspan_min = std::min(lspan_min, static_cast<int16_t>(e.strip));
       lspan_max = std::max(lspan_max, static_cast<int16_t>(e.strip));
     }
-    if ((e.time >= earliest) &&
-        ((max_timebins > timebins.size()) || (timebins.count(e.time)))) {
+    if ((e.time >= earliest) && ((max_timebins > timebins.size()) || (timebins.count(e.time)))) {
       timebins.insert(e.time);
       uspan_min = std::min(uspan_min, static_cast<int16_t>(e.strip));
       uspan_max = std::max(uspan_max, static_cast<int16_t>(e.strip));
@@ -113,6 +111,18 @@ std::string EventNMX::debug() const {
   ss << "  X:\n" << x.debug();
   ss << "  Y:\n" << y.debug();
   return ss.str();
+}
+
+void EventNMX::debug2() {
+  printf("x strips: ");
+  for (auto x : x.entries) {
+    printf("%d ", x.strip);
+  }
+  printf("\ny strips: ");
+  for (auto y : y.entries) {
+    printf("%d ", y.strip);
+  }
+  printf("\n");
 }
 
 bool EventNMX::valid() const { return valid_; }
