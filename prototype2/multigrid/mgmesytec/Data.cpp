@@ -4,12 +4,13 @@
 #include <cassert>
 #include <common/Trace.h>
 #include <cstring>
+#include <gdgem/nmx/Hists.h>
 #include <multigrid/mgmesytec/Data.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords) {
+void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &hists) {
   uint32_t *datap = buffer;
   int wordsleft = nWords;
 
@@ -46,6 +47,10 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords) {
       //      (mgseq.isGrid(addr) && adc >= gridThreshold)    )  {
 
       readouts++;
+
+      XTRACE(PROCESS, DEB, "Adding histogram for strip %d, adc %d\n", addr, adc);
+      hists.binstrips(addr, adc, 0, 0); // @todo @fixmo only one strip at a time
+
 #ifdef DUMPTOFILE
       mgdata.tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
 #endif
@@ -84,7 +89,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords) {
   }
 }
 
-int MesytecData::parse(const char *buffer, int size) {
+int MesytecData::parse(const char *buffer, int size, NMXHists &hists) {
   int bytesleft = size;
   readouts = 0;
 
@@ -114,7 +119,7 @@ int MesytecData::parse(const char *buffer, int size) {
     }
     datap++;
     bytesleft -= 4;
-    mesytec_parse_n_words(datap, len - 3);
+    mesytec_parse_n_words(datap, len - 3, hists);
 
     datap += (len - 3);
     bytesleft -= (len - 3) * 4;

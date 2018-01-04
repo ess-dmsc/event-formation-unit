@@ -33,9 +33,13 @@ create_module(mgcncs2 "")
 # Two-thread implementation of Multi Grid demonstrator detector
 # for Mesytec Readout
 set(mgmesytec_SRC
+  ../gdgem/nmx/Hists.cpp
+  ../gdgem/nmx/HistSerializer.cpp
   mgmesytec.cpp
   mgmesytec/Data.cpp)
 set(mgmesytec_INC
+  ../gdgem/nmx/Hists.h
+  ../gdgem/nmx/HistSerializer.h
   mgmesytec/Data.h)
 create_module(mgmesytec "")
 

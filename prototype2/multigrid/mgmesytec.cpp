@@ -14,6 +14,7 @@
 #include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
+#include <gdgem/nmx/HistSerializer.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -25,8 +26,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_CRI
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_INF
 
 using namespace memory_sequential_consistent; // Lock free fifo
 
@@ -150,7 +151,10 @@ void CSPEC::input_thread() {
 
 void CSPEC::processing_thread() {
   Producer producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
+  Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
   FBSerializer flatbuffer(kafka_buffer_size, producer);
+  HistSerializer histfb;
+  NMXHists hists;
 
   MesytecData dat;
 
@@ -172,7 +176,7 @@ void CSPEC::processing_thread() {
         mystats.fifo_seq_errors++;
       } else {
         dat.parse(eth_ringbuf->getdatabuffer(data_index),
-                  eth_ringbuf->getdatalength(data_index));
+                  eth_ringbuf->getdatalength(data_index), hists);
 
         mystats.tx_bytes += flatbuffer.addevent(42, 1);
         mystats.rx_events++;
@@ -184,6 +188,15 @@ void CSPEC::processing_thread() {
     if (report_timer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       mystats.tx_bytes += flatbuffer.produce();
+
+      if (hists.empty()) { /**< @todo wrong logic ? */
+        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.eventlet_count());
+        char *txbuffer;
+        auto len = histfb.serialize(hists, &txbuffer);
+        monitorprod.produce(txbuffer, len);
+        hists.clear();
+      }
+
       report_timer.now();
     }
 

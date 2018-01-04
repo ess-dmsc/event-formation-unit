@@ -2,7 +2,8 @@
 
 /** @file
  *
- *  @brief Class to receive and generate CSPEC detector readout
+ *  @brief Class to parse detector readout for multigrid via
+ * sis3153 / Mesytec digitizer
  */
 
 #pragma once
@@ -39,11 +40,13 @@ public:
   void setWireThreshold(int threshold) { wireThreshold = threshold; }
   void setGridThreshold(int threshold) { gridThreshold = threshold; }
 
-  /** @brief parse a binary payload buffer, return number of data element */
-  int parse(const char *buffer, int size);
+  /** @brief parse a binary payload buffer, return number of data element
+   * @todo Uses NMXHists  - refactor and move ?
+   */
+  int parse(const char *buffer, int size, NMXHists &hists);
 
   /** @brief parse n 32 bit words from mesytec VMMR-8/16 card */
-  void mesytec_parse_n_words(uint32_t *buffer, int nWords);
+  void mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &hists);
 
   int readouts{0}; /**< number of channels read out */
 
