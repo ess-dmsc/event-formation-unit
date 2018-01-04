@@ -77,9 +77,12 @@ AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
     DataHeader Header(*HeaderRaw);
     Header.fixEndian();
     if (0xABCD != Header.MagicValue) {
+      if (0x5555 == Header.MagicValue) {
+        break;
+      }
       throw ParserException(ParserException::Type::D_ABCD);
     }
-    std::uint16_t NrOfSamples = (Header.Length - 4) * 2;
+    std::uint16_t NrOfSamples = (Header.Length - 20) / 2;
     if (StartByte + sizeof(DataHeader) + NrOfSamples * sizeof(std::uint16_t) + 4> Packet.Length) {
       throw ParserException(ParserException::Type::D_LENGTH);
     }

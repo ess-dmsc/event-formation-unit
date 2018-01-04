@@ -143,7 +143,7 @@ public:
     Packet.Length = sizeof(FakeDataStruct) * 2;
     DataPointer = reinterpret_cast<FakeDataStruct*>(Packet.Data);
     DataPointer[0].Data.MagicValue = htons(0xABCD);
-    DataPointer[0].Data.Length = htons(5);
+    DataPointer[0].Data.Length = htons(24);
     DataPointer[0].Trailer = htonl(0xBEEFCAFE);
     DataPointer[0].Data.TimeStampSecondsFrac = htonl(0x0000FFFF);
     DataPointer[0].Data.TimeStampSeconds = htonl(0xAAAA0000);
@@ -153,7 +153,7 @@ public:
     
     DataPointer[1].Data.MagicValue = htons(0xABCD);
     DataPointer[1].Trailer = htonl(0xBEEFCAFE);
-    DataPointer[1].Data.Length = htons(5);
+    DataPointer[1].Data.Length = htons(24);
   }
   InData Packet;
   FakeDataStruct *DataPointer;
