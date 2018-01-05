@@ -58,6 +58,15 @@ void NMXHists::bin(const Eventlet &e) {
   eventlet_count_++;
 }
 
+// To be used for multigrid also - consider refactoring and moving elsewhere
+void NMXHists::binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16_t yadc) {
+    x_strips_hist[xstrip]++;
+    x_adc_hist[xadc]++;
+    y_strips_hist[ystrip]++;
+    y_adc_hist[yadc]++;
+    eventlet_count_++;
+}
+
 void NMXHists::bin(const EventNMX &e) {
   uint32_t sum = e.x.integral + e.y.integral;
   if (!sum)

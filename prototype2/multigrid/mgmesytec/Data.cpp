@@ -4,12 +4,13 @@
 #include <cassert>
 #include <common/Trace.h>
 #include <cstring>
+#include <gdgem/nmx/Hists.h>
 #include <multigrid/mgmesytec/Data.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords) {
+void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &hists) {
   uint32_t *datap = buffer;
   int wordsleft = nWords;
 
@@ -41,18 +42,21 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords) {
       bus = (*datap & 0x0f000000) >> 24;
       addr = (*datap & 0x00fff000) >> 12; /**< channel */
       adc = (*datap & 0x00000fff);
+      readouts++;
 
       // if ( (mgseq.isWire(addr) && adc >= wireThreshold) ||
       //      (mgseq.isGrid(addr) && adc >= gridThreshold)    )  {
+      if (adc >= adcThreshold) { // @todo add other logic
+        DTRACE(DEB, "accepting %d,%d,%d,%d\n", time, bus, addr, adc);
+        hists.binstrips(addr, adc, 0, 0); // @todo @fixme only one strip at a time
 
-      readouts++;
-#ifdef DUMPTOFILE
-      mgdata.tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
-#endif
-      DTRACE(DEB, "%d,%d,%d,%d\n", time, bus, addr, adc);
-      // } else {
-      //   DTRACE(DEB, "discarding %d,%d,%d,%d\n", time, bus, addr, adc);
-      // }
+        #ifdef DUMPTOFILE
+              mgdata.tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
+        #endif
+      } else {
+        DTRACE(DEB, "discarding %d,%d,%d,%d\n", time, bus, addr, adc);
+        discards++;
+      }
       break;
 
     case mesytecTimeOffset:
@@ -84,9 +88,10 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords) {
   }
 }
 
-int MesytecData::parse(const char *buffer, int size) {
+int MesytecData::parse(const char *buffer, int size, NMXHists &hists) {
   int bytesleft = size;
   readouts = 0;
+  discards = 0;
 
   if (buffer[0] != 0x60) {
     return -error::EUNSUPP;
@@ -114,7 +119,7 @@ int MesytecData::parse(const char *buffer, int size) {
     }
     datap++;
     bytesleft -= 4;
-    mesytec_parse_n_words(datap, len - 3);
+    mesytec_parse_n_words(datap, len - 3, hists);
 
     datap += (len - 3);
     bytesleft -= (len - 3) * 4;

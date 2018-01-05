@@ -2,12 +2,14 @@
 
 //#include <algorithm>
 //#include <memory>
+#include <gdgem/nmx/Hists.h> // @fixme
 #include <multigrid/mgmesytec/Data.h>
 #include <multigrid/mgmesytec/TestData.h>
 #include <test/TestBase.h>
 
 class MesytecDataTest : public TestBase {
 protected:
+  NMXHists hists;
   MesytecData mesytec;
   virtual void SetUp() {}
   virtual void TearDown() {}
@@ -17,32 +19,32 @@ protected:
 
 TEST_F(MesytecDataTest, ErrUnsupportedCommand) {
   auto res = mesytec.parse((char *)&err_unsupported_cmd[0],
-                           err_unsupported_cmd.size());
+                           err_unsupported_cmd.size(), hists);
 
   ASSERT_EQ(res, -MesytecData::error::EUNSUPP);
 }
 
 TEST_F(MesytecDataTest, ErrPktShort) {
   auto res =
-      mesytec.parse((char *)&err_pkt_too_short[0], err_pkt_too_short.size());
+      mesytec.parse((char *)&err_pkt_too_short[0], err_pkt_too_short.size(), hists);
 
   ASSERT_EQ(res, -MesytecData::error::ESIZE);
 }
 
 TEST_F(MesytecDataTest, ParseRecordedWSData) {
-  auto res = mesytec.parse((char *)&ws1[0], ws1.size());
+  auto res = mesytec.parse((char *)&ws1[0], ws1.size(), hists);
   ASSERT_EQ(res, -MesytecData::error::OK);
   ASSERT_EQ(mesytec.readouts, 128);
 }
 
 TEST_F(MesytecDataTest, ParseRecordedWSDataII) {
-  auto res = mesytec.parse((char *)&ws2[0], ws2.size());
+  auto res = mesytec.parse((char *)&ws2[0], ws2.size(), hists);
   ASSERT_EQ(res, -MesytecData::error::OK);
   ASSERT_EQ(mesytec.readouts, 256);
 }
 
 TEST_F(MesytecDataTest, ParseRecordedWSDataIII) {
-  auto res = mesytec.parse((char *)&ws3[0], ws3.size());
+  auto res = mesytec.parse((char *)&ws3[0], ws3.size(), hists);
   ASSERT_EQ(res, -MesytecData::error::OK);
   ASSERT_EQ(mesytec.readouts, 256); // Readout provides more than 92 channels
 }
