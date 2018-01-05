@@ -37,6 +37,7 @@ public:
 
   ~MesytecData(){};
 
+  void setAdcThreshold(int threshold) { adcThreshold = threshold; }
   void setWireThreshold(int threshold) { wireThreshold = threshold; }
   void setGridThreshold(int threshold) { gridThreshold = threshold; }
 
@@ -49,11 +50,13 @@ public:
   void mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &hists);
 
   int readouts{0}; /**< number of channels read out */
+  int discards{0};
 
 private:
+  int adcThreshold{0};
   int wireThreshold{0};
   int gridThreshold{0};
-// MGSEQDetector mgseq;
+  // MGSEQDetector mgseq;
 
 #ifdef DUMPTOFILE
   DataSave mgdata{std::string("multigrid_mesytec_"), 100000000};

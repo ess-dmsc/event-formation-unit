@@ -34,6 +34,24 @@ using namespace memory_sequential_consistent; // Lock free fifo
 const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
 
 /** ----------------------------------------------------- */
+struct DetectorSettingsStruct {
+  uint32_t adcThreshold = {75}; // arbitrary chosen from capture
+  uint32_t wireThreshold = {0}; // accept all - @todo unused
+  uint32_t gridThreshold = {0}; // accept all - @todo unused
+} DetectorSettings;
+
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+  parser.add_option("--adc", DetectorSettings.adcThreshold,
+         "minimum adc value for accept")->group("MGMesytec");
+  parser.add_option("--wire", DetectorSettings.wireThreshold,
+         "minimum wire adc value for accept")->group("MGMesytec");
+  parser.add_option("--grid", DetectorSettings.gridThreshold,
+         "minimum grid adc value for accept")->group("MGMesytec");
+}
+
+PopulateCLIParser PopulateParser{SetCLIArguments};
+
+/** ----------------------------------------------------- */
 const char *classname = "CSPEC Detector Mesytec readout";
 
 class CSPEC : public Detector {
@@ -74,26 +92,22 @@ private:
   } ALIGN(64) mystats;
 };
 
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
-
-PopulateCLIParser PopulateParser{SetCLIArguments};
-
 CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
   Stats.setPrefix("efu2.mgmesytec");
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  Stats.create("input.rx_packets",                mystats.rx_packets);
-  Stats.create("input.rx_bytes",                  mystats.rx_bytes);
-  Stats.create("input.i2pfifo_dropped",           mystats.fifo_push_errors);
-  Stats.create("processing.rx_readouts",          mystats.rx_readouts);
-  Stats.create("processing.rx_error_bytes",       mystats.rx_error_bytes);
-  Stats.create("processing.rx_discards",          mystats.rx_discards);
-  Stats.create("processing.rx_idle",              mystats.rx_idle1);
-  Stats.create("processing.rx_geometry_errors",   mystats.geometry_errors);
-  Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
-  Stats.create("output.rx_events",                mystats.rx_events);
-  Stats.create("output.tx_bytes",                 mystats.tx_bytes);
+  Stats.create("rx_packets",           mystats.rx_packets);
+  Stats.create("rx_bytes",             mystats.rx_bytes);
+  Stats.create("i2pfifo_dropped",      mystats.fifo_push_errors);
+  Stats.create("readouts",             mystats.rx_readouts);
+  Stats.create("readouts_error_bytes", mystats.rx_error_bytes);
+  Stats.create("readouts_discarded",   mystats.rx_discards);
+  Stats.create("processing_idle",      mystats.rx_idle1);
+  Stats.create("geometry_errors",      mystats.geometry_errors);
+  Stats.create("fifo_seq_errors",      mystats.fifo_seq_errors);
+  Stats.create("events",               mystats.rx_events);
+  Stats.create("tx_bytes",             mystats.tx_bytes);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { CSPEC::input_thread(); };
@@ -113,11 +127,9 @@ const char *CSPEC::detectorname() { return classname; }
 
 void CSPEC::input_thread() {
   /** Connection setup */
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
-                         EFUSettings.DetectorPort);
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
   UDPServer cspecdata(local);
-  cspecdata.setbuffers(EFUSettings.DetectorTxBufferSize,
-                       EFUSettings.DetectorRxBufferSize);
+  cspecdata.setbuffers(EFUSettings.DetectorTxBufferSize, EFUSettings.DetectorRxBufferSize);
   cspecdata.printbuffers();
   cspecdata.settimeout(0, 100000); // One tenth of a second
 
@@ -151,15 +163,16 @@ void CSPEC::input_thread() {
 
 void CSPEC::processing_thread() {
   Producer producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
+  Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
   FBSerializer flatbuffer(kafka_buffer_size, producer);
   HistSerializer histfb;
   NMXHists hists;
 
   MesytecData dat;
 
-  dat.setWireThreshold(0); // accept all
-  dat.setGridThreshold(0); // accept all
+  dat.setAdcThreshold(DetectorSettings.adcThreshold);
+  dat.setWireThreshold(DetectorSettings.adcThreshold);
+  dat.setGridThreshold(DetectorSettings.adcThreshold);
 
   TSCTimer report_timer;
   TSCTimer timestamp;
@@ -181,6 +194,7 @@ void CSPEC::processing_thread() {
         mystats.tx_bytes += flatbuffer.addevent(42, 1);
         mystats.rx_events++;
         mystats.rx_readouts += dat.readouts;
+        mystats.rx_discards += dat.discards;
       }
     }
 
@@ -190,7 +204,7 @@ void CSPEC::processing_thread() {
       mystats.tx_bytes += flatbuffer.produce();
 
       if (hists.empty()) { /**< @todo wrong logic ? */
-        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.eventlet_count());
+        XTRACE(PROCESS, DEB, "Sending histogram for %zu readouts\n", hists.eventlet_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
         monitorprod.produce(txbuffer, len);
