@@ -1,15 +1,25 @@
 set(AdcChopperInt_SRC
   AdcChopperIntegrationTest.cpp
   UDPServer.cpp
+  PacketGenerator.cpp
+  TDCGenerator.cpp
+  ../../common/Producer.cpp
 )
 
 set(AdcChopperInt_INC
   UDPServer.h
+  PacketGenerator.h
+  TDCGenerator.h
+  f142_logdata_generated.h
+  fwdi_forwarder_internal_generated.h
+  ../../common/Producer.h
 )
 
 add_executable(AdcChopperIntgerationTest ${AdcChopperInt_SRC} ${AdcChopperInt_INC})
 
-target_include_directories(AdcChopperIntgerationTest PRIVATE ${ASIO_INCLUDE_DIR})
+target_include_directories(AdcChopperIntgerationTest PRIVATE ${ASIO_INCLUDE_DIR} "../" "../../common/")
+
+target_link_libraries(AdcChopperIntgerationTest ${LibRDKafka_LIBRARIES})
 
 get_filename_component(ADC_CONFIG_FILE "AdcChopperIntegrationTestConfig.ini" ABSOLUTE)
 add_custom_command(
