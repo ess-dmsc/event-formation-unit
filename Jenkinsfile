@@ -238,6 +238,18 @@ node('kafka-client && centos7') {
 
 
     dir("build") {
+      stage('Get Dependencies') {
+        def conan_remote = "ess-dmsc-local"
+        sh """docker exec ${container_name} sh -c \"
+        mkdir build
+        cd build
+        conan --version
+        conan remote add \
+        --insert 0 \
+        ${conan_remote} ${local_conan_server}
+        conan install ../${project} --build=missing
+        \""""
+      }
         stage("Build") {
             try {
                 sh "cmake -DCOV=1 ../code"
