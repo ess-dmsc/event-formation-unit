@@ -3,7 +3,29 @@ project("event-formation-unit" LANGUAGES CXX C)
 set(event-formation-unit_VERSION_MAJOR 1)
 set(event-formation-unit_VERSION_MINOR 0)
 
-set(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
+set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules)
+set(CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR})
+include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
+
+#=============================================================================
+# setting up conan for use from within cmake
+#=============================================================================
+set(WITH_CONAN OFF CACHE BOOL "Enable dependency build with conan")
+set(CONAN_FILE "conanfile.txt" CACHE STRING "The conanfile to use for the build")
+
+if (WITH_CONAN)
+  include(${EXTRA_MODULES_DIR}/ConanSetup.cmake)
+  conan_cmake_run(CONANFILE ${CONAN_FILE} 
+          BASIC_SETUP
+          BUILD missing)
+endif ()
+
+if (EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
+  message(STATUS "Using existing conanbuildinfo.cmake file")
+  include(${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
+  conan_basic_setup(SKIP_RPATH)
+endif ()
+
 
 if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
   message(STATUS "Setting build type to 'Debug' as none was specified.")
@@ -64,8 +86,6 @@ endif ()
 
 option(CMAKE_BUILD_TYPE "Build type; \"Release\" or \"Debug\"." Debug)
 
-option(COV "Enable code coverage test for unit tests (if possible)." OFF)
-
 option(EXTSCHEMAS "Use flatbuffer headers defined in external \"streaming-data-types\" repository. That repository must be located in the root of this repository." OFF)
 if (${EXTSCHEMAS})
   set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DFLATBUFFERS")
@@ -94,7 +114,8 @@ endif ()
 
 add_definitions(${EXTRA_CXX_FLAGS})
 
-find_package(GTest)
+include(${EXTRA_MODULES_DIR}/FindGTestFix.cmake)
+
 if (${CMAKE_COMPILER_IS_GNUCXX})
   set(CMAKE_AR "gcc-ar")
   set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
@@ -106,6 +127,15 @@ add_subdirectory(libs)
 add_subdirectory(prototype2)
 add_subdirectory(udp)
 #add_subdirectory(dataformats) # built separately for now
+
+set(gcovr_excl_opts "-e .*Test.cpp -e .*gtest.*.h -e .*_generated.h" )
+create_coverage_targets(
+        coverage
+        runtest
+        ${PROJECT_BINARY_DIR}
+        ${CMAKE_SOURCE_DIR}/
+        ${PROJECT_BINARY_DIR}/coverage
+        ${gcovr_excl_opts})
 
 add_custom_target(hints
                   COMMAND echo ""
