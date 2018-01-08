@@ -226,6 +226,7 @@ void NMX::processing_thread() {
       if (len == 0) {
         mystats.fifo_seq_errors++;
       } else {
+        // printf("received packet with length %d\n", len);
         auto stats = builder_->process_buffer(eth_ringbuf->getdatabuffer(data_index), len, clusterer, hists);
 
         mystats.readouts += stats.valid_eventlets;
