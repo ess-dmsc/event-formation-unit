@@ -30,7 +30,7 @@ public:
 
 const char *UDPRaw::detectorname() { return classname; }
 
-UDPRaw::UDPRaw(BaseSettings settings) : Detector(settings) {
+UDPRaw::UDPRaw(BaseSettings settings) : Detector("UDPRaw", settings) {
   std::function<void()> inputFunc = [this]() { UDPRaw::input_thread(); };
   AddThreadFunction(inputFunc, "input");
   std::cout << "    UDPRaw created" << std::endl;

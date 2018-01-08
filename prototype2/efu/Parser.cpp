@@ -231,4 +231,8 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
   XTRACE(CMD, DEB, "parse2 res: %d, obytes: %d\n", res, *obytes);
   return res;
 }
+
+void Parser::clearCommands() {
+  commands.clear();
+}
 /******************************************************************************/

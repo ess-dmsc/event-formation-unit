@@ -23,6 +23,7 @@ int main(int argc, char *argv[]) {
   std::vector<ThreadCoreAffinitySetting> AffinitySettings;
   std::shared_ptr<Detector> detector;
   std::string DetectorName;
+  GraylogSettings GLConfig;
   Loader loader;
   { //Make sure that the EFUArgs instance is deallocated before the detector plugin is
     EFUArgs efu_args;
@@ -48,6 +49,7 @@ int main(int argc, char *argv[]) {
     detector = loader.createDetector(DetectorSettings);
     AffinitySettings = efu_args.getThreadCoreAffinity();
     DetectorName = efu_args.getDetectorName();
+    GLConfig = efu_args.getGraylogSettings();
   }
 
   int keep_running = 1;
@@ -55,7 +57,6 @@ int main(int argc, char *argv[]) {
   ExitHandler::InitExitHandler(&keep_running);
 
 #ifdef GRAYLOG
-  GraylogSettings GLConfig = efu_args.getGraylogSettings();
   Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
   Log::SetMinimumSeverity(Severity::Debug);
 #endif
@@ -93,7 +94,7 @@ int main(int argc, char *argv[]) {
         XTRACE(INIT, ALW, "Application stop, Exiting...\n");
         detector->stopThreads();
         sleep(2);
-        return 1;
+        break;
       }
     }
 
@@ -103,7 +104,7 @@ int main(int argc, char *argv[]) {
       GLOG_INF("Event Formation Unit Exiting (User timeout)");
       detector->stopThreads();
       sleep(2);
-      return 0;
+      break;
     }
 
     if (livestats.timeus() >= ONE_SECOND_US && detector != nullptr) {
@@ -121,7 +122,6 @@ int main(int argc, char *argv[]) {
            "There are more than 1 strong pointers to the detector. This "
            "application may crash on exit.\n");
   }
-
   detector.reset();
 
   return 0;

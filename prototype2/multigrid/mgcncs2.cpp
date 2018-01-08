@@ -140,7 +140,7 @@ int CSPEC::ShowCalib(std::vector<std::string> cmdargs, char *output,
   return Parser::OK;
 }
 
-CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
+CSPEC::CSPEC(BaseSettings settings) : Detector(classname, settings) {
   Stats.setPrefix("efu2.cspec2");
 
   XTRACE(INIT, ALW, "Adding stats\n");
