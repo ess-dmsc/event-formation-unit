@@ -7,6 +7,7 @@
 #include <gdgem/vmm2srs/EventletBuilderSRS.h>
 #include <gdgem/vmm2srs/SRSMappings.h>
 #include <gdgem/vmm2srs/SRSTime.h>
+#include <memory>
 #include <test/TestBase.h>
 
 class EventFormationTest : public TestBase {
