@@ -18,6 +18,33 @@ prototype2 *          | the detector event processing pipeline (and unit tests)
 udp *                 | udp receive tests (bsd socket, probably obsolete)
 utils                 | misc helper scripts and programs
 
+## Build using Conan to supply dependencies
+
+### Required conan repositories
+
+This project uses the following conan repositories to download the required dependencies:
+
+* https://api.bintray.com/conan/ess-dmsc/conan
+* https://api.bintray.com/conan/conan-community/conan
+* https://api.bintray.com/conan/bincrafters/public-conan
+
+To add a conan repository, use the following command:
+
+```
+conan remote add <local-name> <remote-url>
+```
+
+### Download dependencies and build project
+
+```
+cd event-formation-unit
+mkdir build
+cd build
+conan install ../ --build-missing
+cmake ..
+make
+````
+
 
 # Details
 

@@ -3,6 +3,9 @@ gtest/3121b20-dm1@ess-dmsc/testing
 librdkafka/0.11.1-dm1@ess-dmsc/stable
 graylog-logger/1.0.3@ess-dmsc/stable
 cmake_installer/1.0@conan/stable
+FlatBuffers/1.5.0-dm1@ess-dmsc/stable
+#libpcap/1.8.1@uilianries/stable
+asio/1.11.0@bincrafters/stable
 #h5cpp/0.0.3-dm1@ess-dmsc/stable
 
 [generators]
@@ -11,4 +14,5 @@ cmake
 [options]
 gtest:shared=True
 librdkafka:shared=True
+#libpcap:shared=True # False
 #h5cpp:shared=True
