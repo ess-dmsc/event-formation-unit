@@ -90,6 +90,28 @@ target_link_libraries(gdgem ${h5_optional})
 #
 # NMX / VMM Tests
 #
+set(EventFormationTest_SRC
+  nmx/AbstractEventletBuilder.cpp
+  nmx/Clusterer.cpp
+  nmx/EventNMX.cpp
+  nmx/Hists.cpp
+  vmm2srs/EventletBuilderSRS.cpp
+  vmm2srs/EventFormationTest.cpp
+  vmm2srs/ParserSRS.cpp
+  vmm2srs/SRSTime.cpp
+  vmm2srs/SRSMappings.cpp)
+set(EventFormationTest_INC
+  nmx/AbstractEventletBuilder.h
+  nmx/Clusterer.h
+  nmx/EventNMX.h
+  nmx/Hists.h
+  vmm2srs/EventletBuilderSRS.h
+  vmm2srs/ParserSRS.h
+  vmm2srs/SRSTime.h
+  vmm2srs/SRSMappings.h)
+create_test_executable(EventFormationTest "")
+
+
 set(EventletBuilderBenchmarkTest_SRC nmx/Clusterer.cpp nmx/EventNMX.cpp nmx/Hists.cpp
   nmx/AbstractEventletBuilder.cpp vmm2srs/EventletBuilderSRSBenchmarkTest.cpp vmm2srs/EventletBuilderSRS.cpp
   vmm2srs/ParserSRS.cpp vmm2srs/SRSMappings.cpp vmm2srs/SRSTime.cpp)
