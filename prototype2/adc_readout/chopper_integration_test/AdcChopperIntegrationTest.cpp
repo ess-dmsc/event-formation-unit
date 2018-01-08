@@ -61,8 +61,8 @@ int main() {
     std::this_thread::sleep_until(PulseTime);
     long double FloatTime = std::chrono::duration_cast<std::chrono::duration<long double>>(PulseTime.time_since_epoch()).count();
     
-    //auto TdcPacket = TdcGenerator.GetTDCPacket(double(FloatTime));
-    //KafkaProducer.produce((char*)TdcPacket.Pointer, TdcPacket.Size);
+    auto TdcPacket = TdcGenerator.GetTDCPacket(double(FloatTime));
+    KafkaProducer.produce((char*)TdcPacket.Pointer, TdcPacket.Size);
     
     std::vector<MonitorPulseInfo> AllPulses;
     for (auto &Monitor: Monitors) {
