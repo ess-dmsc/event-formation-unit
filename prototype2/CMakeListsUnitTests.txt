@@ -118,7 +118,7 @@ create_test_executable(StatCounterTest "")
 #
 #  These commands must be at the end of this file
 #
-set(gcovr_excl_opts "-e .*Test.cpp -e .*gtest.*.h -e .*_generated.h -e CLI11.hpp" )
+set(gcovr_excl_opts "-e .*Test.cpp -e .*gtest.*.h -e .*_generated.h -e .*CLI11.hpp" )
 separate_arguments(gcovr_excl_opts)
 add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_* DEPENDS ${unit_test_targets})
 add_custom_target(valgrind COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*  DEPENDS ${unit_test_targets})
