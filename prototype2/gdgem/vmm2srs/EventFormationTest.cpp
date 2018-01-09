@@ -18,10 +18,11 @@ protected:
   SRSMappings geometry_interpreter;
 
   virtual void SetUp() {
-    time_intepreter.set_bc_clock(40.0);
-    time_intepreter.set_tac_slope(125.0);
+    time_intepreter.set_bc_clock(20.0);
+    time_intepreter.set_tac_slope(60.0);
     time_intepreter.set_trigger_resolution(3.125);
     time_intepreter.set_target_resolution(0.5);
+    // acquisition window parameter?
 
     geometry_interpreter.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
     geometry_interpreter.define_plane(1, {{1, 10}, {1, 11}, {1, 14}, {1, 15}});
@@ -30,7 +31,7 @@ protected:
 };
 
 TEST_F(EventFormationTest, Initial) {
-  Clusterer clusterer(30); // cluster_min_timespan
+  Clusterer clusterer(20000); // cluster_min_timespan
 
   auto builder = std::make_shared<BuilderSRS>(time_intepreter, geometry_interpreter, "", 0, 0);
 
@@ -53,9 +54,12 @@ TEST_F(EventFormationTest, Initial) {
       hists.bin(event);
       event.analyze(true /*analyze_weighted*/, 3 /*analyze_max_timebins */, 7 /*analyze_max_timedif*/);
       if (event.valid()) {
-        //XTRACE(PROCESS, DEB, "event.good\n");
+        printf("\nHave a cluster:\n");
+        event.debug2();
         clusters_xy++;
       } else {
+        printf("No valid cluster:\n");
+        event.debug2();
         if (event.x.entries.size() != 0) {
           clusters_x++;
         } else {

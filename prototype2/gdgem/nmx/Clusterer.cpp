@@ -25,6 +25,13 @@ void Clusterer::insert(const Eventlet &eventlet) {
 }
 
 bool Clusterer::event_ready() const {
+  // if (backlog_.empty()) {
+  //   XTRACE(PROCESS, DEB, "backlog is empty\n");
+  // } else {
+  //   XTRACE(PROCESS, DEB, "backlog span %llu - %llu (%llu)\n", backlog_.begin()->first,
+  //     backlog_.rbegin()->first, backlog_.rbegin()->first - backlog_.begin()->first);
+  // }
+
   return (!backlog_.empty() && ((backlog_.rbegin()->first -
                                  backlog_.begin()->first) > min_time_span_));
 }
