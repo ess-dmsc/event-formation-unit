@@ -21,7 +21,6 @@ public:
   };
 
   Socket(Socket::type type);
-  int buflen(uint16_t buflen);
 
   int setbuffers(int sndbuf, int rcvbuf);
   void printbuffers(void);
@@ -30,18 +29,14 @@ public:
   void local(const char *ipaddr, int port);
   void remote(const char *ipaddr, int port);
 
-  int receive();
   int receive(void *buffer, int rcvlen);
 
-  int send();                      /* send uninitialized data  (dummy)*/
   int send(void *buffer, int len); /**< send user specified data */
 
 private:
   int s_{-1};
-  uint16_t buflen_{buflen_max};
   struct sockaddr_in local_;
   struct sockaddr_in remote_;
-  char buffer_[buflen_max];
 
   int getopt(int option);
   int setopt(int option, void *value, int size);

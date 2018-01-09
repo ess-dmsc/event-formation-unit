@@ -14,13 +14,24 @@
 
 class DataSave {
 public:
-  /** @todo document */
+  /** @brief write buffer to file
+   * @param filename filename which can include path
+   * @param data pointer to data buffere
+   * @param datasize number of bytes to write
+   */
   DataSave(std::string filename, void *data, size_t datasize);
 
-  /** @todo document */
+  /** @brief create file for later writing
+   * @param filename filename which can include path
+   */
   DataSave(std::string filename);
 
-  /** @todo document */
+  /** @brief create file for later writing, specify max file size before
+   * splitting
+   * @param fileprefix can include path, filename will be generated
+   * @param maxfilesize split file into chunks of this size, adds sequence
+   * number
+   */
   DataSave(std::string fileprefix, int maxfilesize);
 
   /** @brief write string to file, not buffered, slow */

@@ -33,6 +33,7 @@ public:
 
   void bin(const Eventlet &e);
   void bin(const EventNMX &e);
+  void binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16_t yadc);
 
   bool empty() const;
   size_t eventlet_count() const;

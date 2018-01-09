@@ -10,8 +10,14 @@ include_directories(.. ../..)
 #set(mgcncs_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/MultigridGeometry.h)
 #create_module(mgcncs "")
 
+if (DUMPTOFILE)
+set(datasave_SRC ../../dataformats/multigrid/src/DataSave.cpp)
+set(datasave_INC ../../dataformats/multigrid/inc/DataSave.h)
+endif ()
+
 
 # Two-thread implementation of Multi Grid demonstrator detector
+# For the old readout system
 set(mgcncs2_SRC
   mgcncs2.cpp
   mgcncs/Data.cpp
@@ -23,6 +29,19 @@ set(mgcncs2_INC
   mgcncs/MultigridGeometry.h
   mgcncs/CalibrationFile.h)
 create_module(mgcncs2 "")
+
+# Two-thread implementation of Multi Grid demonstrator detector
+# for Mesytec Readout
+set(mgmesytec_SRC
+  ../gdgem/nmx/Hists.cpp
+  ../gdgem/nmx/HistSerializer.cpp
+  mgmesytec.cpp
+  mgmesytec/Data.cpp)
+set(mgmesytec_INC
+  ../gdgem/nmx/Hists.h
+  ../gdgem/nmx/HistSerializer.h
+  mgmesytec/Data.h)
+create_module(mgmesytec "")
 
 
 #
@@ -66,18 +85,35 @@ set(MGCNCSChanConvTest_SRC
 create_test_executable(MGCNCSChanConvTest "")
 
 set(MGCNCSDataTest_SRC
-  ../../dataformats/multigrid/src/DataSave.cpp
+  ${datasave_SRC}
   mgcncs/DataTest.cpp
   mgcncs/Data.cpp
   mgcncs/ChanConv.cpp
   )
 set(MGCNCSDataTest_INC
-  ../../dataformats/multigrid/inc/DataSave.h
+  ${datasave_INC}
   mgcncs/Data.h
   mgcncs/ChanConv.h
   mgcncs/TestData.h
   mgcncs/MultigridGeometry.h)
 create_test_executable(MGCNCSDataTest "")
+
+
+set(MGMesytecDataTest_SRC
+  ${datasave_SRC}
+  ../gdgem/nmx/Hists.cpp
+  mgmesytec/DataTest.cpp mgmesytec/Data.cpp)
+set(MGMesytecDataTest_INC
+  ${datasave_INC}
+  ../gdgem/nmx/Hists.h
+  mgmesytec/Data.h mgmesytec/TestData.h)
+create_test_executable(MGMesytecDataTest "")
+
+set(MGSEQDetectorTest_SRC
+mgmesytec/MGSEQDetectorTest.cpp)
+set(MGSEQDetectorTest_INC
+mgmesytec/MGSEQDetector.h)
+create_test_executable(MGSEQDetectorTest "")
 
 #set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
 #set(CSPECEventTest_INC cspec/CSPECEvent.h)

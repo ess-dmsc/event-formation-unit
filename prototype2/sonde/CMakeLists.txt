@@ -3,6 +3,11 @@ enable_testing()
 include_directories(..)
 include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
 
+if (DUMPTOFILE)
+set(datasave_SRC ../../dataformats/multigrid/src/DataSave.cpp)
+set(datasave_INC ../../dataformats/multigrid/inc/DataSave.h)
+endif ()
+
 #
 # Detector Pipeline Plugins
 #
@@ -21,12 +26,15 @@ create_module(sonde "")
 #
 # SoNDe Tests
 #
+
+
+
 set(IDEASDataTest_SRC
-  ../../dataformats/multigrid/src/DataSave.cpp
+  ${datasave_SRC}
   ideas/DataTest.cpp
   ideas/Data.cpp)
 set(IDEASDataTest_INC
-  ../../dataformats/multigrid/inc/DataSave.h
+  ${datasave_INC}
   ideas/Data.h
   ideas/TestData.h)
 create_test_executable(IDEASDataTest "")

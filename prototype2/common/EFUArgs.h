@@ -31,7 +31,7 @@ public:
 
   void printSettings();
 
-  std::string getDetectorName() { return det; };
+  std::string getDetectorName() { return EFUSettings.DetectorPluginName; };
   GraylogSettings getGraylogSettings() { return GraylogConfig; };
 
   std::vector<ThreadCoreAffinitySetting> getThreadCoreAffinity() {
@@ -44,14 +44,6 @@ public:
 
   CLI::App CLIParser{"Event formation unit (efu)"};
 
-  int buflen{9000}; /**< rx buffer length (B) */
-
-  std::string det; /**< detector name */
-
-  // Runtime Stats
-  // EFUStats stat;
-
-  // Pipeline-specific configuration
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
 

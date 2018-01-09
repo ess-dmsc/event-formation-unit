@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
-  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", efu_args.det.c_str());
+  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", EFUSettings.DetectorPluginName.c_str());
 
   auto ThreadAffinity = efu_args.getThreadCoreAffinity();
   Launcher launcher(ThreadAffinity);

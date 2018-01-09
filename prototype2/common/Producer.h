@@ -26,9 +26,6 @@ public:
    */
   int produce(char *buffer, int length);
 
-  /** preparing for flatbuffers @todo unused? to be removed*/
-  // int produce(uint64_t time, char *buffer, size_t length, size_t entries);
-
 private:
   std::string errstr;
   RdKafka::Conf *conf{0};

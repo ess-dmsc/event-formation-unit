@@ -76,7 +76,7 @@ private:
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t fifo_push_errors;
-    //int64_t fifo_free;
+    // int64_t fifo_free;
     int64_t pad_a[5]; /**< @todo check alignment*/
 
     // Processing Counters
@@ -86,6 +86,9 @@ private:
     int64_t processing_idle;
     int64_t unclustered;
     int64_t geom_errors;
+    int64_t clusters_x;
+    int64_t clusters_y;
+    int64_t clusters_xy;
     int64_t clusters_events;
     int64_t clusters_discarded;
     int64_t tx_bytes;
@@ -115,6 +118,9 @@ NMX::NMX(BaseSettings settings) : Detector(settings) {
   Stats.create("readouts_discarded",   mystats.readouts_discarded);
   Stats.create("clusters_discarded",   mystats.clusters_discarded);
   Stats.create("clusters_events",      mystats.clusters_events);
+  Stats.create("clusters_x",           mystats.clusters_x);
+  Stats.create("clusters_y",           mystats.clusters_y);
+  Stats.create("clusters_xy",          mystats.clusters_xy);
   Stats.create("processing_idle",      mystats.processing_idle);
   Stats.create("fifo_seq_errors",      mystats.fifo_seq_errors);
   Stats.create("unclustered",          mystats.unclustered);
@@ -164,7 +170,7 @@ void NMX::input_thread() {
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
-      //mystats.fifo_free = input2proc_fifo.free();
+      // mystats.fifo_free = input2proc_fifo.free();
       if (input2proc_fifo.push(eth_index) == false) {
         mystats.fifo_push_errors++;
       } else {
@@ -191,12 +197,10 @@ void NMX::processing_thread() {
   geometry.add_dimension(nmx_opts.geometry_x);
   geometry.add_dimension(nmx_opts.geometry_y);
 
-  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" +
-                             std::to_string(EFUSettings.KafkaBrokerPort);
-  Producer eventprod(BrokerString, "NMX_detector");
+  Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
-  Producer monitorprod(BrokerString, "NMX_monitor");
+  Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
   TrackSerializer trackfb(256, nmx_opts.track_sample_minhits);
   HistSerializer histfb;
   NMXHists hists;
@@ -213,7 +217,7 @@ void NMX::processing_thread() {
   unsigned int data_index;
   int sample_next_track{0};
   while (1) {
-    //mystats.fifo_free = input2proc_fifo.free();
+    // mystats.fifo_free = input2proc_fifo.free();
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.processing_idle++;
       usleep(1);
@@ -222,8 +226,8 @@ void NMX::processing_thread() {
       if (len == 0) {
         mystats.fifo_seq_errors++;
       } else {
-        auto stats = builder_->process_buffer(
-            eth_ringbuf->getdatabuffer(data_index), len, clusterer, hists);
+        // printf("received packet with length %d\n", len);
+        auto stats = builder_->process_buffer(eth_ringbuf->getdatabuffer(data_index), len, clusterer, hists);
 
         mystats.readouts += stats.valid_eventlets;
         mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
@@ -240,6 +244,8 @@ void NMX::processing_thread() {
           if (event.valid()) {
             XTRACE(PROCESS, DEB, "event.good\n");
 
+            mystats.clusters_xy++;
+
             if (sample_next_track) {
               sample_next_track = trackfb.add_track(event);
             }
@@ -247,12 +253,15 @@ void NMX::processing_thread() {
             XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
                    event.x.center_rounded(), event.y.center_rounded());
 
-            if ((!nmx_opts.enforce_lower_uncertainty_limit ||
-                 event.meets_lower_cirterion(
-                     nmx_opts.lower_uncertainty_limit)) &&
-                (!nmx_opts.enforce_minimum_eventlets ||
+            if ( (!nmx_opts.enforce_lower_uncertainty_limit ||
+                   event.meets_lower_cirterion(nmx_opts.lower_uncertainty_limit)) &&
+                 (!nmx_opts.enforce_minimum_eventlets ||
                  (event.x.entries.size() >= nmx_opts.minimum_eventlets &&
                   event.y.entries.size() >= nmx_opts.minimum_eventlets))) {
+
+              // printf("\nHave a cluster:\n");
+              // event.debug2();
+
               coords[0] = event.x.center_rounded();
               coords[1] = event.y.center_rounded();
               pixelid = geometry.to_pixid(coords);
@@ -266,8 +275,19 @@ void NMX::processing_thread() {
                 mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
                 mystats.clusters_events++;
               }
+            } else { // Does not meet criteria
+              /** @todo increments counters when failing this */
+              // printf("\nInvalid cluster:\n");
+              // event.debug2();
             }
           } else {
+            //printf("No valid cluster:\n");
+            //event.debug2();
+            if (event.x.entries.size() != 0) {
+              mystats.clusters_x++;
+            } else {
+              mystats.clusters_y++;
+            }
             mystats.readouts_discarded += event.x.entries.size() + event.y.entries.size();
             mystats.clusters_discarded++;
           }
@@ -276,8 +296,7 @@ void NMX::processing_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
       sample_next_track = 1;
 
@@ -290,9 +309,8 @@ void NMX::processing_thread() {
         monitorprod.produce(txbuffer, len);
       }
 
-      if (hists.empty()) {
-        XTRACE(PROCESS, DEB,
-               "Sending histogram for %zu eventlets and %zu clusters \n",
+      if (hists.empty()) { /**< @todo wrong logic ? */
+        XTRACE(PROCESS, DEB, "Sending histogram for %zu eventlets and %zu clusters \n",
                hists.eventlet_count(), hists.cluster_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
@@ -302,8 +320,7 @@ void NMX::processing_thread() {
 
       if (not runThreads) {
         XTRACE(INPUT, ALW, "Stopping input thread.\n");
-        builder_
-            .reset(); /**< @fixme this is a hack to force ~BuilderSRS() call */
+        builder_.reset(); /**< @fixme this is a hack to force ~BuilderSRS() call */
         delete builder_.get(); /**< @fixme see above */
         return;
       }

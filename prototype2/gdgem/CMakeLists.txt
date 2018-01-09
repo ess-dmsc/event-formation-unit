@@ -6,6 +6,11 @@ include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
 find_package(h5cpp)
 set(h5_optional)
 
+if (DUMPTOFILE)
+set(datasave_SRC ../../dataformats/multigrid/src/DataSave.cpp)
+set(datasave_INC ../../dataformats/multigrid/inc/DataSave.h)
+endif ()
+
 #
 # Tools and Data generators
 #
@@ -85,6 +90,28 @@ target_link_libraries(gdgem ${h5_optional})
 #
 # NMX / VMM Tests
 #
+set(EventFormationTest_SRC
+  nmx/AbstractEventletBuilder.cpp
+  nmx/Clusterer.cpp
+  nmx/EventNMX.cpp
+  nmx/Hists.cpp
+  vmm2srs/EventletBuilderSRS.cpp
+  vmm2srs/EventFormationTest.cpp
+  vmm2srs/ParserSRS.cpp
+  vmm2srs/SRSTime.cpp
+  vmm2srs/SRSMappings.cpp)
+set(EventFormationTest_INC
+  nmx/AbstractEventletBuilder.h
+  nmx/Clusterer.h
+  nmx/EventNMX.h
+  nmx/Hists.h
+  vmm2srs/EventletBuilderSRS.h
+  vmm2srs/ParserSRS.h
+  vmm2srs/SRSTime.h
+  vmm2srs/SRSMappings.h)
+create_test_executable(EventFormationTest "")
+
+
 set(EventletBuilderBenchmarkTest_SRC nmx/Clusterer.cpp nmx/EventNMX.cpp nmx/Hists.cpp
   nmx/AbstractEventletBuilder.cpp vmm2srs/EventletBuilderSRSBenchmarkTest.cpp vmm2srs/EventletBuilderSRS.cpp
   vmm2srs/ParserSRS.cpp vmm2srs/SRSMappings.cpp vmm2srs/SRSTime.cpp)
@@ -123,7 +150,7 @@ set(ParserSRSTest_SRC
 create_test_executable(ParserSRSTest "")
 
 set(EventletBuilderH5Test_SRC
-  ../../dataformats/multigrid/src/DataSave.cpp
+  ${datasave_SRC}
   nmx/EventNMX.cpp
   nmx/Clusterer.cpp
   nmx/Hists.cpp
@@ -131,7 +158,7 @@ set(EventletBuilderH5Test_SRC
   nmxgen/EventletBuilderH5Test.cpp
   nmxgen/EventletBuilderH5.cpp)
 set(EventletBuilderH5Test_INC
-  ../../dataformats/multigrid/inc/DataSave.h
+  ${datasave_INC}
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
@@ -141,7 +168,7 @@ create_test_executable(EventletBuilderH5Test "")
 target_link_libraries(EventletBuilderH5Test ${h5_optional})
 
 set(EventletBuilderTest_SRC
-  ../../dataformats/multigrid/src/DataSave.cpp
+  ${datasave_SRC}
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Hists.cpp
@@ -152,7 +179,7 @@ set(EventletBuilderTest_SRC
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp)
 set(EventletBuilderTest_INC
-  ../../dataformats/multigrid/inc/DataSave.h
+  ${datasave_INC}
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Hists.h

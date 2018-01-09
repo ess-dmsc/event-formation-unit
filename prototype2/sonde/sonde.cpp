@@ -146,9 +146,7 @@ void SONDEIDEA::input_thread() {
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
   IDEASData ideasdata(&geometry);
-  std::string BrokerString = EFUSettings.KafkaBrokerAddress + ":" +
-                             std::to_string(EFUSettings.KafkaBrokerPort);
-  Producer eventprod(BrokerString, "SKADI_detector");
+  Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
   unsigned int data_index;

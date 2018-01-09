@@ -30,8 +30,9 @@ double SRSTime::timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) {
 
   return (bonus_ << 32) + (trigger * trigger_resolution_) +
          1000 * double(bc) / bc_clock_ // bcid value * 1/(clock frequency)
-         + double(tdc) * tac_slope_ /
-               256.0; // tacSlope * tdc value (8 bit) * ramp length
+         +
+         double(tdc) * tac_slope_ /
+             256.0; // tacSlope * tdc value (8 bit) * ramp length
 }
 
 uint64_t SRSTime::timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) {

@@ -18,7 +18,6 @@ int main(int argc, char *argv[]) {
   Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
 
   UDPClient DataSource(local, remote);
-  DataSource.buflen(9000);
   DataSource.setbuffers(1000000, 0);
   DataSource.printbuffers();
 

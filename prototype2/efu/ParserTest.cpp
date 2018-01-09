@@ -7,12 +7,12 @@
 #include <memory>
 #include <test/TestBase.h>
 
-extern int forcefstatfail;
-extern int forcereadfail;
+//extern int forcefstatfail;
+//extern int forcereadfail;
 
 #define UNUSED __attribute__((unused))
 
-static int dummy_command(std::vector<std::string> UNUSED cmdargs,
+static int duplicate_command(std::vector<std::string> UNUSED cmdargs,
                          char UNUSED *output, unsigned int UNUSED *obytes) {
   return 0;
 }
@@ -20,22 +20,13 @@ static int dummy_command(std::vector<std::string> UNUSED cmdargs,
 // clang-format off
 std::vector<std::string> commands {
   // doesnt work when tests are called outside prototype2/ dir
-//  "CSPEC_LOAD_CALIB calib_data/cal_zero", "<OK>",
-//  "CSPEC_SHOW_CALIB",               "wire 0 0x0000, grid 0 0x0000",
-//  "CSPEC_SHOW_CALIB 5",             "wire 5 0x0000, grid 5 0x0000",
+  "DUMMY_COMMAND",                  "<OK>",
   "STAT_GET_COUNT",                 "STAT_GET_COUNT 0",
   "STAT_GET 1",                     "STAT_GET  -1",
   "EXIT",                           "<OK>"
 };
 
 std::vector<std::string> commands_badargs {
-//  "CSPEC_LOAD_CALIB",
-//  "CSPEC_LOAD_CALIB file1 file2",
-//  "CSPEC_LOAD_CALIB file_not_exist",
-//  "CSPEC_LOAD_CALIB calib_data/cal_badsize",
-//  "CSPEC_LOAD_CALIB calib_data/nogcal",
-//  "CSPEC_SHOW_CALIB 1 2",
-//  "CSPEC_SHOW_CALIB 16384",
   "STAT_GET_COUNT 1",
   "STAT_GET",
   "VERSION_GET 1",
@@ -54,7 +45,16 @@ std::vector<std::string> check_detector_loaded {
 
 class TestDetector : public Detector {
 public:
+  int dummy_cmd(std::vector<std::string> UNUSED cmdargs, char UNUSED *output,
+                       unsigned int UNUSED *obytes) {
+      return Parser::OK;
+  }
   TestDetector(UNUSED BaseSettings settings) : Detector(settings) {
+    AddCommandFunction("DUMMY_COMMAND",
+                       [this](std::vector<std::string> cmdargs, char *output,
+                              unsigned int *obytes) {
+                         return TestDetector::dummy_cmd(cmdargs, output, obytes);
+                       });
     std::cout << "TestDetector" << std::endl;
   };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
@@ -181,9 +181,9 @@ TEST_F(ParserTest, VersionGet) {
 }
 
 TEST_F(ParserTest, DuplicateCommands) {
-  int res = parser->registercmd("DUMMY_COMMAND", dummy_command);
+  int res = parser->registercmd("DUPLICATE_COMMAND", duplicate_command);
   ASSERT_EQ(res, 0);
-  res = parser->registercmd("DUMMY_COMMAND", dummy_command);
+  res = parser->registercmd("DUPLICATE_COMMAND", duplicate_command);
   ASSERT_EQ(res, -1);
 }
 
@@ -205,24 +205,13 @@ TEST_F(ParserTest, SysCallFail) {
 #endif
 
 TEST_F(ParserTest, DetInfoGetNoDetectorLoaded) {
+  auto parser = new Parser(0, keeprunning);
   const char *cmd = "DETECTOR_INFO_GET";
   std::memcpy(input, cmd, strlen(cmd));
   int res = parser->parse(input, strlen(cmd), output, &obytes);
-  ASSERT_EQ(res, -Parser::OK);
+  ASSERT_EQ(res, -Parser::EBADCMD);
+  delete parser;
 }
-
-#if 0
-TEST_F(ParserTest, StatGetCountNoDetectorLoaded) {
-  for (auto cmdstr : check_detector_loaded) {
-    MESSAGE() << cmdstr << "\n";
-    const char *cmd = cmdstr.c_str();
-    std::memcpy(input, cmd, strlen(cmd));
-    int res = parser->parse(input, strlen(cmd), output, &obytes);
-    ASSERT_EQ(res, -Parser::OK);
-    ASSERT_NE(strstr(output, "error: no detector loaded"), nullptr);
-  }
-}
-#endif
 
 TEST_F(ParserTest, DetectorInfo) {
   const char *cmd = "DETECTOR_INFO_GET";
@@ -231,16 +220,17 @@ TEST_F(ParserTest, DetectorInfo) {
   ASSERT_EQ(res, -Parser::OK);
 }
 
-// TEST_F(ParserTest, ExitCommand) {
-//   const char *cmd = "EXIT";
-//   std::memcpy(input, cmd, strlen(cmd));
-//   int res = parser->parse(input, strlen(cmd), output, &obytes);
-//   ASSERT_EQ(res, -Parser::OK);
-//   ASSERT_EQ(efu_args->proc_cmd, efu_args->thread_cmd::EXIT);
-// }
+TEST_F(ParserTest, ExitCommand) {
+  ASSERT_EQ(keeprunning, 1);
+  const char *cmd = "EXIT";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(res, -Parser::OK);
+  ASSERT_EQ(keeprunning, 0);
+}
 
 int main(int argc, char **argv) {
-  int __attribute__((unused)) ret = chdir("prototype2");
+  int UNUSED ret = chdir("prototype2");
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

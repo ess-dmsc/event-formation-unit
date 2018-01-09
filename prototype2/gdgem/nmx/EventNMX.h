@@ -75,6 +75,8 @@ public:
   // @brief prints values for debug purposes
   std::string debug() const;
 
+  void debug2();
+
   PlaneNMX x, y; // tracks in x and y planes
 
 private:

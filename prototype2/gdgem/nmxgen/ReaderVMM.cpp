@@ -15,15 +15,14 @@ ReaderVMM::ReaderVMM(std::string filename) {
 
     dataset_ = hdf5::node::get_dataset(root, "RawVMM/points");
 
-    auto shape = hdf5::dataspace::Simple(dataset_.dataspace()).current_dimensions();
+    auto shape =
+        hdf5::dataspace::Simple(dataset_.dataspace()).current_dimensions();
 
     if ((shape.size() != 2) || (shape[1] != 4))
       return;
 
     total_ = shape[0];
-  }
-  catch (std::exception& e)
-  {
+  } catch (std::exception &e) {
     std::cout << "Failed to open " << filename << " because:\n"
               << hdf5::error::print_nested(e) << std::endl;
   }
@@ -34,13 +33,10 @@ size_t ReaderVMM::read(char *buf) {
   slab_.block(0, limit - current_);
   slab_.offset(0, current_);
 
-   if (slab_.block()[0] > 0)
-  {
+  if (slab_.block()[0] > 0) {
     try {
       dataset_.read(data, slab_);
-    }
-    catch (std::exception& e)
-    {
+    } catch (std::exception &e) {
       std::cout << "Failed to read VMM slab because:\n"
                 << hdf5::error::print_nested(e) << std::endl;
     }

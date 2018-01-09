@@ -12,10 +12,10 @@
 
 class RunSpecParse {
 public:
-  /** @todo document */
+  /** brief specify a json file containing run specifications (for Multigrid) */
   RunSpecParse(std::string jsonfile);
 
-  /** @todo document */
+  /** @brief create a list of runs from a given run specification */
   std::vector<RunSpec *> &getruns(std::string runspec, std::string basedir,
                                   std::string outputdir, int start, int end);
 
