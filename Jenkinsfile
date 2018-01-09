@@ -270,36 +270,4 @@ node('kafka-client && centos7') {
             }
         }
     }
-
-    stage("Coverage") {
-
-        dir("build") {
-            try {
-                sh "cmake -DCOV=1 ../code"
-            } catch (e) {
-                failure_function(e, 'cmake COV failed')
-            }
-
-            try {
-                sh "make runtest"
-                junit 'test_results/*test.xml'
-                sh "make coverage"
-                step([
-                    $class: 'CoberturaPublisher',
-                    autoUpdateHealth: true,
-                    autoUpdateStability: true,
-                    coberturaReportFile: 'coverage/cov.xml',
-                    failUnhealthy: false,
-                    failUnstable: false,
-                    maxNumberOfBuilds: 0,
-                    onlyStable: false,
-                    sourceEncoding: 'ASCII',
-                    zoomCoverageChart: false
-                ])
-            } catch (e) {
-                failure_function(e, 'generate coverage failed')
-                junit 'test_results/*test.xml'
-            }
-        }
-    }
 }
