@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 struct InData {
   static const int MaxLength = 2048;
   std::uint8_t Data[MaxLength] = {};
