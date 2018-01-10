@@ -74,7 +74,7 @@ class ParserTest : public TestBase {
 protected:
   Parser *parser;
   EFUArgs efu_args;
-  BaseSettings settings = efu_args.GetBaseSettings();
+  BaseSettings settings = efu_args.getBaseSettings();
   int keeprunning{1};
 
   virtual void SetUp() {
