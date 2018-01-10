@@ -15,11 +15,13 @@ set(AdcChopperInt_INC
   ../../common/Producer.h
 )
 
+find_package(Threads REQUIRED)
+
 add_executable(AdcChopperIntgerationTest ${AdcChopperInt_SRC} ${AdcChopperInt_INC})
 
 target_include_directories(AdcChopperIntgerationTest PRIVATE ${ASIO_INCLUDE_DIR} "../" "../../common/")
 
-target_link_libraries(AdcChopperIntgerationTest ${LibRDKafka_LIBRARIES})
+target_link_libraries(AdcChopperIntgerationTest ${LibRDKafka_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 get_filename_component(ADC_CONFIG_FILE "AdcChopperIntegrationTestConfig.ini" ABSOLUTE)
 add_custom_command(
