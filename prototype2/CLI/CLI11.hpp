@@ -5,7 +5,7 @@
 // file LICENSE or https://github.com/CLIUtils/CLI11 for details.
 
 // This file was generated using MakeSingleHeader.py in CLI11/scripts
-// from: v1.3.0-8-g67cd2e6
+// from: v1.3.0-16-g0243fda
 
 // This has the complete CLI library in one file.
 
@@ -220,6 +220,22 @@ inline std::vector<std::string> split_up(std::string str) {
     }
 
     return output;
+}
+
+/// Add a leader to the beginning of all new lines (nothing is added
+/// at the start of the first line). `"; "` would be for ini files
+///
+/// Can't use Regex, or this would be a subs.
+inline std::string fix_newlines(std::string leader, std::string input) {
+    std::string::size_type n = 0;
+    while(n != std::string::npos && n < input.size()) {
+        n = input.find('\n', n);
+        if(n != std::string::npos) {
+            input = input.substr(0, n + 1) + leader + input.substr(n + 1);
+            n += leader.size();
+        }
+    }
+    return input;
 }
 
 } // namespace detail
@@ -1503,6 +1519,9 @@ class App {
 
     /// If true, allow extra arguments (ie, don't throw an error). INHERITABLE
     bool allow_extras_{false};
+  
+    /// If true, allow extra arguments in the ini file (ie, don't throw an error). INHERITABLE
+    bool allow_ini_extras_{false};
 
     ///  If true, return immediately on an unrecognised option (implies allow_extras) INHERITABLE
     bool prefix_command_{false};
@@ -1638,6 +1657,12 @@ class App {
     /// Remove the error when extras are left over on the command line.
     App *allow_extras(bool allow = true) {
         allow_extras_ = allow;
+        return this;
+    }
+  
+    /// Remove the error when extras are left over on the command line.
+    App *allow_ini_extras(bool allow = true) {
+        allow_ini_extras_ = allow;
         return this;
     }
 
@@ -2241,44 +2266,45 @@ class App {
 
     /// Produce a string that could be read in as a config of the current values of the App. Set default_also to include
     /// default arguments. Prefix will add a string to the beginning of each option.
-    std::string config_to_str(bool default_also = false, std::string prefix = "", bool write_description = false) const {
+    std::string
+    config_to_str(bool default_also = false, std::string prefix = "", bool write_description = false) const {
         std::stringstream out;
         for(const Option_p &opt : options_) {
-            
+
             // Only process option with a long-name and configurable
             if(!opt->lnames_.empty() && opt->get_configurable()) {
                 std::string name = prefix + opt->lnames_[0];
                 std::string value;
-                
+
                 // Non-flags
                 if(opt->get_expected() != 0) {
-                    
+
                     // If the option was found on command line
                     if(opt->count() > 0)
                         value = detail::inijoin(opt->results());
-                    
+
                     // If the option has a default and is requested by optional argument
                     else if(default_also && !opt->defaultval_.empty())
                         value = opt->defaultval_;
                     // Flag, one passed
                 } else if(opt->count() == 1) {
                     value = "true";
-                    
+
                     // Flag, multiple passed
                 } else if(opt->count() > 1) {
                     value = std::to_string(opt->count());
-                    
+
                     // Flag, not present
                 } else if(opt->count() == 0 && default_also) {
                     value = "false";
                 }
-                
-                if (value.size() != 0) {
-                    if (write_description and opt->description_.size() != 0) {
-                        if (out.tellp() != 0) {
+
+                if(!value.empty()) {
+                    if(write_description && opt->has_description()) {
+                        if(static_cast<int>(out.tellp()) != 0) {
                             out << std::endl;
                         }
-                        out << "; " << opt->description_ << std::endl;
+                        out << "; " << detail::fix_newlines("; ", opt->get_description()) << std::endl;
                     }
                     out << name << "=" << value << std::endl;
                 }
@@ -2651,12 +2677,17 @@ class App {
                     return com->_parse_ini(args);
             return false;
         }
-
+  
         auto op_ptr = std::find_if(
             std::begin(options_), std::end(options_), [name](const Option_p &v) { return v->check_lname(name); });
 
-        if(op_ptr == std::end(options_))
-            return false;
+        if(op_ptr == std::end(options_)) {
+          if (allow_ini_extras_) {
+            args.pop_back();
+            return true;
+          }
+          return false;
+        }
 
         // Let's not go crazy with pointer syntax
         Option_p &op = *op_ptr;
@@ -2928,4 +2959,3 @@ struct AppFriend {
 
 } // namespace CLI
 //clang-format on
-

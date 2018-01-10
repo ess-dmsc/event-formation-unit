@@ -11,6 +11,7 @@
 EFUArgs::EFUArgs() {
   CLIParser.set_help_flag(); //Removes the default help flag
   CLIParser.allow_extras(true);
+  CLIParser.allow_ini_extras(true);
   HelpOption = CLIParser.add_flag("-h,--help", "Print this help message and exit")->group("EFU Options")->configurable(false);
   CLIParser
       .add_option("-a,--logip", GraylogConfig.address,
@@ -150,6 +151,7 @@ EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
   }
   CLIParser.reset();
   CLIParser.allow_extras(false);
+  CLIParser.allow_ini_extras(false);
   return Status::CONTINUE;
 }
 
