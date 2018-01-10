@@ -5,6 +5,7 @@
 #pragma once
 
 #include <string>
+#include <memory>
 #include "f142_logdata_generated.h"
 namespace TDC {
 

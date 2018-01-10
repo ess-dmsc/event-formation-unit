@@ -9,6 +9,7 @@
 #pragma once
 
 #include <common/Producer.h>
+#include <memory>
 #include "AdcParse.h"
 
 class AdcDataProcessor {
