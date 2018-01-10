@@ -90,6 +90,16 @@ target_link_libraries(gdgem ${h5_optional})
 #
 # NMX / VMM Tests
 #
+
+# Doros gdgem event algorithm
+set(RootFileTest_SRC
+  dg_impl/RootFile.cpp
+  dg_impl/RootFileTest.cpp)
+set(RootFileTest_INC
+  dg_impl/RootFile.h
+  dg_impl/TestData.h)
+create_test_executable(RootFileTest "")
+
 set(EventFormationTest_SRC
   nmx/AbstractEventletBuilder.cpp
   nmx/Clusterer.cpp
