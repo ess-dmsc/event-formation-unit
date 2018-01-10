@@ -63,7 +63,7 @@ TEST_F(EFUArgsTest, SecondPassContinue) {
 
 TEST_F(EFUArgsTest, Constructor) {
   EFUArgs efu_args;
-  auto settings = efu_args.GetBaseSettings();
+  auto settings = efu_args.getBaseSettings();
 
   // ASSERT_EQ(12, settings.cpustart); /**< todo fixme */
   ASSERT_EQ("0.0.0.0", settings.DetectorAddress);
@@ -94,7 +94,7 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   EFUArgs efu_args;
   auto ret = efu_args.parseSecondPass(myargc, (char **)myargv);
   ASSERT_EQ(ret, EFUArgs::Status::CONTINUE); // has detector
-  auto settings = efu_args.GetBaseSettings();
+  auto settings = efu_args.getBaseSettings();
   auto glsettings = efu_args.getGraylogSettings();
 
   ASSERT_EQ("mybroker", settings.KafkaBrokerAddress);

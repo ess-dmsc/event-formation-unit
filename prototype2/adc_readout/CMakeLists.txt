@@ -12,6 +12,7 @@ set(AdcReadout_SRC
 )
 
 set(AdcReadout_INC
+  MonitorPeakData_generated.h
   AdcReadout.h
   AdcParse.h
   AdcBufferElements.h
