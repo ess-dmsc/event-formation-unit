@@ -13,6 +13,7 @@
 #include "AdcBufferElements.h"
 #include <exception>
 #include <string>
+#include <stdexcept>
 
 class ParserException : public std::runtime_error {
 public:
