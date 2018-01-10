@@ -1,7 +1,8 @@
-#include <time.h>
-#include <cstdlib>
+#include <algorithm>
+//#include <time.h>
+//#include <cstdlib>
 #include <cmath>
-#include "RootFile.h"
+#include <gdgem/dg_impl/RootFile.h>
 
 RootFile::RootFile(int bc, int tac, int acqWin,
 		std::vector<int> xChips, std::vector<int> yChips, std::string readout,
@@ -433,7 +434,6 @@ void RootFile::MatchClustersXY(int dT, int dS)
 			double posx = itClusterX->second;
 
 			int ny = 0;
-			double oldDeltaT = 999999999999;
 			double deltaT = 0;
 			std::multimap<double, float>::iterator itClusterY = clustersY.begin();
 			for (; itClusterY != clustersY.end(); itClusterY++) {
@@ -469,7 +469,6 @@ void RootFile::MatchClustersXY(int dT, int dS)
 					}
 					break;
 				}
-				oldDeltaT = deltaT;
 				ny++;
 
 			}
@@ -493,8 +492,8 @@ void RootFile::FillClusters()
 
 		for (int a = 0; a < MAX_TIME_PARAMS; a++) {
 			for (int b = 0; b < MAX_STRIP_PARAMS; b++) {
-				int clusterCount = ClusterByTime(/* hitsX_corrected, */ hitsOldX, a, b, "x");
-				clusterCount = ClusterByTime(/* hitsY_corrected, */ hitsOldY, a, b, "y");
+				ClusterByTime(/* hitsX_corrected, */ hitsOldX, a, b, "x");
+				ClusterByTime(/* hitsY_corrected, */ hitsOldY, a, b, "y");
 				MatchClustersXY(a, b);
 			}
 		}
