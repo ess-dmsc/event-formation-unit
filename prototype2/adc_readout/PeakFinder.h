@@ -17,6 +17,7 @@ public:
 private:
   void SendData(const std::uint64_t &TimeStamp, const std::uint16_t &Amplitude, const std::uint16_t &Channel);
   bool PositivePulse;
+  std::uint64_t EventCounter{0};
 };
 
 struct ModuleAnalysisResult {

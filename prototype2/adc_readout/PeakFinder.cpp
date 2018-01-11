@@ -9,7 +9,7 @@
 #include "PeakFinder.h"
 #include <cmath>
 #include <limits>
-#include "MonitorPeakData_generated.h"
+#include <common/ev42_events_generated.h>
 
 PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod, bool PositivePolarity) : AdcDataProcessor(Prod), PositivePulse(PositivePolarity) {
   
@@ -38,13 +38,16 @@ void PeakFinder::operator()(const PacketData &Data) {
 
 void PeakFinder::SendData(const std::uint64_t &TimeStamp, const std::uint16_t &Amplitude, const std::uint16_t &Channel) {
   flatbuffers::FlatBufferBuilder builder;
-  auto NameStrPtr = builder.CreateString("AdcReadout");
-  MonitorPeakDataBuilder MonBuilder(builder);
-  MonBuilder.add_Channel(Channel);
-  MonBuilder.add_Name(NameStrPtr);
-  MonBuilder.add_TimeStamp(TimeStamp);
-  MonBuilder.add_Amplitude(Amplitude);
-  builder.Finish(MonBuilder.Finish(), MonitorPeakDataIdentifier());
+  auto SourceName = builder.CreateString("adc_channel_" + std::to_string(Channel));
+  auto ToF_Vector = builder.CreateVector(std::vector<std::uint32_t>{0});
+  auto AmplitudeVector = builder.CreateVector(std::vector<std::uint32_t>{Amplitude});
+  EventMessageBuilder EvBuilder(builder);
+  EvBuilder.add_source_name(SourceName);
+  EvBuilder.add_message_id(EventCounter++);
+  EvBuilder.add_pulse_time(TimeStamp);
+  EvBuilder.add_time_of_flight(ToF_Vector);
+  EvBuilder.add_detector_id(AmplitudeVector);
+  builder.Finish(EvBuilder.Finish(), EventMessageIdentifier());
   ProducerPtr->produce(reinterpret_cast<char*>(builder.GetBufferPointer()), builder.GetSize());
 }
 
