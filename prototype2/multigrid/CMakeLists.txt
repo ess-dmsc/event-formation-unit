@@ -35,11 +35,13 @@ create_module(mgcncs2 "")
 set(mgmesytec_SRC
   ../gdgem/nmx/Hists.cpp
   ../gdgem/nmx/HistSerializer.cpp
+  ../common/ReadoutSerializer.cpp
   mgmesytec.cpp
   mgmesytec/Data.cpp)
 set(mgmesytec_INC
   ../gdgem/nmx/Hists.h
   ../gdgem/nmx/HistSerializer.h
+  ../common/ReadoutSerializer.h
   mgmesytec/Data.h)
 create_module(mgmesytec "")
 

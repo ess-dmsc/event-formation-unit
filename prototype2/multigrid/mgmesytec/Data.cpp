@@ -10,7 +10,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &hists) {
+void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &hists, ReadoutSerializer &serializer) {
   uint32_t *datap = buffer;
   int wordsleft = nWords;
 
@@ -49,6 +49,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
       if (adc >= adcThreshold) { // @todo add other logic
         DTRACE(DEB, "accepting %d,%d,%d,%d\n", time, bus, addr, adc);
         hists.binstrips(addr, adc, 0, 0); // @todo @fixme only one strip at a time
+        serializer.addEntry(0, addr, time, adc);
 
         #ifdef DUMPTOFILE
               mgdata.tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
@@ -88,7 +89,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
   }
 }
 
-int MesytecData::parse(const char *buffer, int size, NMXHists &hists) {
+int MesytecData::parse(const char *buffer, int size, NMXHists &hists, ReadoutSerializer &serializer) {
   int bytesleft = size;
   readouts = 0;
   discards = 0;
@@ -119,7 +120,7 @@ int MesytecData::parse(const char *buffer, int size, NMXHists &hists) {
     }
     datap++;
     bytesleft -= 4;
-    mesytec_parse_n_words(datap, len - 3, hists);
+    mesytec_parse_n_words(datap, len - 3, hists, serializer);
 
     datap += (len - 3);
     bytesleft -= (len - 3) * 4;
