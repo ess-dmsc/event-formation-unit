@@ -19,6 +19,9 @@ ReadoutSerializer::ReadoutSerializer(size_t maxarraylength, Producer &prod)
 ReadoutSerializer::~ReadoutSerializer() {}
 
 int ReadoutSerializer::produce() {
+  if (entries == 0) {
+    return 0;
+  }
   auto planevec = builder.CreateVector(planes);
   auto timevec = builder.CreateVector(times);
   auto channelvec = builder.CreateVector(channels);
