@@ -241,7 +241,7 @@ node('kafka-client && centos7') {
         stage("Build") {
             try {
                 sh "cmake -DCOV=1 ../code"
-                sh "make -j 5"
+                sh "make -j 5 VERBOSE=ON"
             } catch (e) {
                 failure_function(e, 'Failed to compile')
             }
