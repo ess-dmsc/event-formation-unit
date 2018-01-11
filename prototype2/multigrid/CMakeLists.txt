@@ -104,12 +104,18 @@ create_test_executable(MGCNCSDataTest "")
 set(MGMesytecDataTest_SRC
   ${datasave_SRC}
   ../gdgem/nmx/Hists.cpp
-  mgmesytec/DataTest.cpp mgmesytec/Data.cpp)
+  ../common/ReadoutSerializer.cpp
+  ../common/Producer.cpp
+  mgmesytec/DataTest.cpp
+  mgmesytec/Data.cpp)
 set(MGMesytecDataTest_INC
   ${datasave_INC}
   ../gdgem/nmx/Hists.h
-  mgmesytec/Data.h mgmesytec/TestData.h)
-create_test_executable(MGMesytecDataTest "")
+  ../common/ReadoutSerializer.h
+  ../common/Producer.h
+  mgmesytec/Data.h
+  mgmesytec/TestData.h)
+create_test_executable(MGMesytecDataTest "${LibRDKafka_LIBRARIES}")
 
 set(MGSEQDetectorTest_SRC
 mgmesytec/MGSEQDetectorTest.cpp)

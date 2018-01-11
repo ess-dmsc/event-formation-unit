@@ -6,6 +6,7 @@
 #include <cstring>
 #include <gdgem/nmx/Hists.h>
 #include <multigrid/mgmesytec/Data.h>
+#include <common/ReadoutSerializer.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
