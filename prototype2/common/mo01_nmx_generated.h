@@ -7,6 +7,8 @@
 
 struct pos;
 
+struct MONHit;
+
 struct GEMTrack;
 
 struct GEMHist;
@@ -17,12 +19,14 @@ enum class DataField : uint8_t {
   NONE = 0,
   GEMHist = 1,
   GEMTrack = 2,
+  MONHit = 3,
   MIN = NONE,
-  MAX = GEMTrack
+  MAX = MONHit
 };
 
 inline const char **EnumNamesDataField() {
-  static const char *names[] = {"NONE", "GEMHist", "GEMTrack", nullptr};
+  static const char *names[] = {"NONE", "GEMHist", "GEMTrack", "MONHit",
+                                nullptr};
   return names;
 }
 
@@ -41,6 +45,10 @@ template <> struct DataFieldTraits<GEMHist> {
 
 template <> struct DataFieldTraits<GEMTrack> {
   static const DataField enum_value = DataField::GEMTrack;
+};
+
+template <> struct DataFieldTraits<MONHit> {
+  static const DataField enum_value = DataField::MONHit;
 };
 
 bool VerifyDataField(flatbuffers::Verifier &verifier, const void *obj,
@@ -98,6 +106,100 @@ inline flatbuffers::Offset<pos> Createpos(flatbuffers::FlatBufferBuilder &_fbb,
   builder_.add_strip(strip);
   builder_.add_time(time);
   return builder_.Finish();
+}
+
+struct MONHit FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
+  static FLATBUFFERS_CONSTEXPR const char *GetFullyQualifiedName() {
+    return "MONHit";
+  }
+  enum { VT_PLANE = 4, VT_TIME = 6, VT_CHANNEL = 8, VT_ADC = 10 };
+  const flatbuffers::Vector<uint16_t> *plane() const {
+    return GetPointer<const flatbuffers::Vector<uint16_t> *>(VT_PLANE);
+  }
+  flatbuffers::Vector<uint16_t> *mutable_plane() {
+    return GetPointer<flatbuffers::Vector<uint16_t> *>(VT_PLANE);
+  }
+  const flatbuffers::Vector<uint32_t> *time() const {
+    return GetPointer<const flatbuffers::Vector<uint32_t> *>(VT_TIME);
+  }
+  flatbuffers::Vector<uint32_t> *mutable_time() {
+    return GetPointer<flatbuffers::Vector<uint32_t> *>(VT_TIME);
+  }
+  const flatbuffers::Vector<uint16_t> *channel() const {
+    return GetPointer<const flatbuffers::Vector<uint16_t> *>(VT_CHANNEL);
+  }
+  flatbuffers::Vector<uint16_t> *mutable_channel() {
+    return GetPointer<flatbuffers::Vector<uint16_t> *>(VT_CHANNEL);
+  }
+  const flatbuffers::Vector<uint16_t> *adc() const {
+    return GetPointer<const flatbuffers::Vector<uint16_t> *>(VT_ADC);
+  }
+  flatbuffers::Vector<uint16_t> *mutable_adc() {
+    return GetPointer<flatbuffers::Vector<uint16_t> *>(VT_ADC);
+  }
+  bool Verify(flatbuffers::Verifier &verifier) const {
+    return VerifyTableStart(verifier) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_PLANE) &&
+           verifier.Verify(plane()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_TIME) &&
+           verifier.Verify(time()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_CHANNEL) &&
+           verifier.Verify(channel()) &&
+           VerifyField<flatbuffers::uoffset_t>(verifier, VT_ADC) &&
+           verifier.Verify(adc()) && verifier.EndTable();
+  }
+};
+
+struct MONHitBuilder {
+  flatbuffers::FlatBufferBuilder &fbb_;
+  flatbuffers::uoffset_t start_;
+  void add_plane(flatbuffers::Offset<flatbuffers::Vector<uint16_t>> plane) {
+    fbb_.AddOffset(MONHit::VT_PLANE, plane);
+  }
+  void add_time(flatbuffers::Offset<flatbuffers::Vector<uint32_t>> time) {
+    fbb_.AddOffset(MONHit::VT_TIME, time);
+  }
+  void add_channel(flatbuffers::Offset<flatbuffers::Vector<uint16_t>> channel) {
+    fbb_.AddOffset(MONHit::VT_CHANNEL, channel);
+  }
+  void add_adc(flatbuffers::Offset<flatbuffers::Vector<uint16_t>> adc) {
+    fbb_.AddOffset(MONHit::VT_ADC, adc);
+  }
+  MONHitBuilder(flatbuffers::FlatBufferBuilder &_fbb) : fbb_(_fbb) {
+    start_ = fbb_.StartTable();
+  }
+  MONHitBuilder &operator=(const MONHitBuilder &);
+  flatbuffers::Offset<MONHit> Finish() {
+    const auto end = fbb_.EndTable(start_, 4);
+    auto o = flatbuffers::Offset<MONHit>(end);
+    return o;
+  }
+};
+
+inline flatbuffers::Offset<MONHit>
+CreateMONHit(flatbuffers::FlatBufferBuilder &_fbb,
+             flatbuffers::Offset<flatbuffers::Vector<uint16_t>> plane = 0,
+             flatbuffers::Offset<flatbuffers::Vector<uint32_t>> time = 0,
+             flatbuffers::Offset<flatbuffers::Vector<uint16_t>> channel = 0,
+             flatbuffers::Offset<flatbuffers::Vector<uint16_t>> adc = 0) {
+  MONHitBuilder builder_(_fbb);
+  builder_.add_adc(adc);
+  builder_.add_channel(channel);
+  builder_.add_time(time);
+  builder_.add_plane(plane);
+  return builder_.Finish();
+}
+
+inline flatbuffers::Offset<MONHit>
+CreateMONHitDirect(flatbuffers::FlatBufferBuilder &_fbb,
+                   const std::vector<uint16_t> *plane = nullptr,
+                   const std::vector<uint32_t> *time = nullptr,
+                   const std::vector<uint16_t> *channel = nullptr,
+                   const std::vector<uint16_t> *adc = nullptr) {
+  return CreateMONHit(_fbb, plane ? _fbb.CreateVector<uint16_t>(*plane) : 0,
+                      time ? _fbb.CreateVector<uint32_t>(*time) : 0,
+                      channel ? _fbb.CreateVector<uint16_t>(*channel) : 0,
+                      adc ? _fbb.CreateVector<uint16_t>(*adc) : 0);
 }
 
 struct GEMTrack FLATBUFFERS_FINAL_CLASS : private flatbuffers::Table {
@@ -428,6 +530,10 @@ inline bool VerifyDataField(flatbuffers::Verifier &verifier, const void *obj,
   }
   case DataField::GEMTrack: {
     auto ptr = reinterpret_cast<const GEMTrack *>(obj);
+    return verifier.VerifyTable(ptr);
+  }
+  case DataField::MONHit: {
+    auto ptr = reinterpret_cast<const MONHit *>(obj);
     return verifier.VerifyTable(ptr);
   }
   default:
