@@ -8,16 +8,11 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-#define ELEMENTSIZE 10
-
-#define ROUNDTO4(x) ((x + 3) & ~0x03) // size should be multiple of 4
-
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
 ReadoutSerializer::ReadoutSerializer(size_t maxarraylength, Producer &prod)
-    : maxlen(maxarraylength), builder(ROUNDTO4(maxarraylength * ELEMENTSIZE + 256)),
-      producer(prod) {
+    : maxlen(maxarraylength), producer(prod) {
       builder.Clear();
 }
 
