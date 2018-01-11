@@ -13,21 +13,13 @@
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-
 ReadoutSerializer::ReadoutSerializer(size_t maxarraylength, Producer &prod)
     : maxlen(maxarraylength), builder(maxarraylength * ELEMENTSIZE + 256),
-      producer(prod) {
-
-
-}
+      producer(prod) { }
 
 ReadoutSerializer::~ReadoutSerializer() {}
 
-
-
 int ReadoutSerializer::produce() {
-  char * buffer;
-  //hits.push_back(CreateMONHit(builder, 0, time, channel, adc));
   auto planevec = builder.CreateVector(planes);
   auto timevec = builder.CreateVector(times);
   auto channelvec = builder.CreateVector(channels);
@@ -37,7 +29,7 @@ int ReadoutSerializer::produce() {
   auto msg = CreateMonitorMessage(builder, 0, DataField::MONHit, dataoff.Union());
   builder.Finish(msg);
 
-  buffer = (char *)builder.GetBufferPointer();
+  char * buffer = (char *)builder.GetBufferPointer();
   auto buffersize = builder.GetSize();
   producer.produce(buffer, buffersize);
 
@@ -51,7 +43,7 @@ int ReadoutSerializer::produce() {
   return buffersize;
 }
 
-int ReadoutSerializer::addevent(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc) {
+int ReadoutSerializer::addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc) {
   int ret = 0;
 
   planes.push_back(plane);

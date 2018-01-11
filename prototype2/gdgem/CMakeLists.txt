@@ -131,15 +131,7 @@ set(EventletBuilderBenchmarkTest_INC nmx/Clusterer.h nmx/EventNMX.h nmx/Hists.h
 create_benchmark_executable(EventletBuilderBenchmarkTest "")
 
 
-# @todo move to common
-set(ReadoutSerializerTest_SRC
-  ../common/ReadoutSerializerTest.cpp
-  ../common/ReadoutSerializer.cpp
-  ../common/Producer.cpp)
-set(ReadoutSerializerTest_INC
-  ../common/ReadoutSerializer.h
-  ../common/Producer.cpp)
-create_test_executable(ReadoutSerializerTest "")
+
 
 set(HistSerializerTest_SRC
   nmx/Hists.cpp

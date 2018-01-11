@@ -24,12 +24,12 @@ public:
   ~ReadoutSerializer();
 
   /** @todo document */
-  int addevent(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc);
+  int addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc);
 
   /** @todo document */
   int produce();
 
-  size_t getEntries(){return entries;};
+  size_t getNumEntries(){return entries;};
 
 private:
   size_t maxlen{0};
