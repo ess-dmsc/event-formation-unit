@@ -15,7 +15,9 @@ static_assert(FLATBUFFERS_LITTLEENDIAN,
 
 ReadoutSerializer::ReadoutSerializer(size_t maxarraylength, Producer &prod)
     : maxlen(maxarraylength), builder(maxarraylength * ELEMENTSIZE + 256),
-      producer(prod) { }
+      producer(prod) {
+      builder.Clear();
+}
 
 ReadoutSerializer::~ReadoutSerializer() {}
 
