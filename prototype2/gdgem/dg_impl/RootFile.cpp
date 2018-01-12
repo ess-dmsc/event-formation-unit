@@ -445,7 +445,6 @@ void RootFile::MatchClustersXY(int UNUSED a, int UNUSED b, int UNUSED c, int d) 
     double tx = m_clusterTimeX[nx];
     double posx = m_clusterX[nx];
 
-    double oldDeltaT = 999999999999;
     double deltaT = 0;
 
     for (unsigned int ny = 0; ny < m_nclY; ny++) {
@@ -489,7 +488,6 @@ void RootFile::MatchClustersXY(int UNUSED a, int UNUSED b, int UNUSED c, int d) 
 
         break;
       }
-      oldDeltaT = deltaT;
     }
   }
 
@@ -497,7 +495,6 @@ void RootFile::MatchClustersXY(int UNUSED a, int UNUSED b, int UNUSED c, int d) 
     double tx = m_clusterTimeUTPCX[nx];
     double posx = m_clusterUTPCX[nx];
 
-    double oldDeltaT = 999999999999;
     double deltaT = 0;
 
     for (unsigned int ny = 0; ny < m_nclY; ny++) {
@@ -543,7 +540,6 @@ void RootFile::MatchClustersXY(int UNUSED a, int UNUSED b, int UNUSED c, int d) 
 
         break;
       }
-      oldDeltaT = deltaT;
     }
   }
 }
