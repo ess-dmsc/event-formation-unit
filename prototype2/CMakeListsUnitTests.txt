@@ -1,3 +1,5 @@
+include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
+
 if(NOT ${GTEST_FOUND})
     message(WARNING "unable to build unit tests as GTest was not found.")
     return()
@@ -75,14 +77,9 @@ else()
   create_test_executable(ProducerTest "${LibRDKafka_LIBRARIES}")
 endif()
 
-# @todo move to common
-set(ReadoutSerializerTest_SRC
-  common/ReadoutSerializerTest.cpp
-  common/ReadoutSerializer.cpp
-  common/Producer.cpp)
-set(ReadoutSerializerTest_INC
-  common/ReadoutSerializer.h
-  common/Producer.cpp)
+
+set(ReadoutSerializerTest_SRC common/ReadoutSerializerTest.cpp common/ReadoutSerializer.cpp common/Producer.cpp)
+set(ReadoutSerializerTest_INC common/ReadoutSerializer.h common/Producer.cpp)
 create_test_executable(ReadoutSerializerTest "${LibRDKafka_LIBRARIES}")
 
 
