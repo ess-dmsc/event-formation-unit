@@ -17,7 +17,7 @@ RootFile::RootFile(int bc, int tac, int acqWin,
   InitRootFile();
 }
 
-RootFile::~RootFile() {};
+RootFile::~RootFile() {}
 
 //====================================================================================================================
 void RootFile::InitRootFile() {
