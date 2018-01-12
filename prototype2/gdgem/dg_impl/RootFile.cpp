@@ -513,6 +513,8 @@ void RootFile::MatchClustersXY(int UNUSED a, int UNUSED b, int UNUSED c, int d) 
         m_clusterNumberUTPCY[ny] = 1;
         m_clusterNumberUTPCX[nx] = 1;
 
+				m_clusterCountXY++; // MJC added
+
         m_commonX = posx;
         m_commonY = posy;
         m_commonSizeX = m_clusterSizeX[nx];
@@ -577,10 +579,10 @@ void RootFile::FillClusters() {
                        "**"
                     << std::endl;
 
-          int clusterCount =
+          m_clusterCountX +=
               ClusterByTime(hitsOldX, deltaTimeHits[a], deltaStripHits[b],
                             deltaTimeSpan[c], "x");
-          clusterCount =
+          m_clusterCountY +=
               ClusterByTime(hitsOldY, deltaTimeHits[a], deltaStripHits[b],
                             deltaTimeSpan[c], "y");
 

@@ -86,13 +86,16 @@ public:
 	unsigned int GetChannelY(unsigned int chipID, unsigned int channelID,
 			std::string readout);
 
-
-	int getNumClustersX() {return m_nclX;};
-	int getNumClustersY() {return m_nclY;};
-	int getNumClustersXY() {return -1;};
+  // MJC addedd
+	int getNumClustersX() {return m_clusterCountX;};
+	int getNumClustersY() {return m_clusterCountY;};
+	int getNumClustersXY() {return m_clusterCountXY;};
 
 private:
-
+	// MJC added
+  unsigned int m_clusterCountX = 0;
+	unsigned int m_clusterCountY = 0;
+	unsigned int m_clusterCountXY = 0;
 
 
 	unsigned int firstFrameCounter = 0;

@@ -43,9 +43,9 @@ TEST_F(RootFileTest, Run16_1_to_16)
 		}
 	}
 
-  ASSERT_EQ(nmxdata.getNumClustersX(), 8);
-  ASSERT_EQ(nmxdata.getNumClustersY(), 5);
-  ASSERT_EQ(nmxdata.getNumClustersXY(), 4);
+  ASSERT_EQ(nmxdata.getNumClustersX(), 3);
+  ASSERT_EQ(nmxdata.getNumClustersY(), 3);
+  ASSERT_EQ(nmxdata.getNumClustersXY(), 3);
 }
 
 int main(int argc, char **argv) {
