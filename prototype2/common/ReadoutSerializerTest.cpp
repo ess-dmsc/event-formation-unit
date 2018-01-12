@@ -21,6 +21,13 @@ TEST_F(ReadoutSerializerTest, Constructor) {
   ASSERT_EQ(0, serializer.getNumEntries());
 }
 
+TEST_F(ReadoutSerializerTest, ProduceEmpty) {
+  ReadoutSerializer serializer(arraysize, producer);
+  ASSERT_EQ(0, serializer.getNumEntries());
+  auto res = serializer.produce();
+  ASSERT_EQ(res, 0);
+}
+
 TEST_F(ReadoutSerializerTest, AddEntries) {
   ReadoutSerializer serializer(arraysize, producer);
   ASSERT_EQ(0, serializer.getNumEntries());
