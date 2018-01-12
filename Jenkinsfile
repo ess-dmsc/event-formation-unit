@@ -241,7 +241,7 @@ node('kafka-client && centos7') {
         stage("Build") {
             try {
                 sh "cmake -DCOV=1 ../code"
-                sh "make -j 5 VERBOSE=ON "
+                sh "make -j 5 VERBOSE=ON"
             } catch (e) {
                 failure_function(e, 'Failed to compile')
             }
@@ -249,7 +249,7 @@ node('kafka-client && centos7') {
 
         stage("Run tests") {
             try {
-                sh "make -j 5 runtest"
+                sh "make -j 5 runtest VERBOSE=ON"
                 junit 'test_results/*.xml'
                 sh "make coverage_xml"
                 step([
