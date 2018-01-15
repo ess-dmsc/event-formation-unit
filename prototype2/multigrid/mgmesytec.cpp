@@ -201,14 +201,17 @@ void CSPEC::processing_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       mystats.tx_bytes += flatbuffer.produce();
 
-      readouts.produce();
+      auto entries = readouts.getNumEntries();
+      if (entries) {
+        XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", entries);
+        readouts.produce(); // Periodically produce of readouts
+      }
 
       if (hists.empty()) { /**< @todo wrong logic ? */
-        XTRACE(PROCESS, DEB, "Sending histogram for %zu readouts\n", hists.eventlet_count());
+        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.eventlet_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
         monitorprod.produce(txbuffer, len);
