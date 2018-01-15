@@ -210,7 +210,7 @@ void CSPEC::processing_thread() {
         readouts.produce(); // Periodically produce of readouts
       }
 
-      if (hists.empty()) { /**< @todo wrong logic ? */
+      if (!hists.isEmpty()) {
         XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.eventlet_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);

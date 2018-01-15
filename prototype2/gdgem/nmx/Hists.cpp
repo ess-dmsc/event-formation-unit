@@ -28,7 +28,7 @@ void NMXHists::set_cluster_adc_downshift(uint32_t bits) {
   downshift_ = bits;
 }
 
-bool NMXHists::empty() const { return eventlet_count_ || cluster_count_; }
+bool NMXHists::isEmpty() const { return !(eventlet_count_ || cluster_count_); }
 
 size_t NMXHists::eventlet_count() const { return eventlet_count_; }
 

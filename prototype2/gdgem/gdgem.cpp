@@ -309,7 +309,7 @@ void NMX::processing_thread() {
         monitorprod.produce(txbuffer, len);
       }
 
-      if (hists.empty()) { /**< @todo wrong logic ? */
+      if (!hists.isEmpty()) {
         XTRACE(PROCESS, DEB, "Sending histogram for %zu eventlets and %zu clusters \n",
                hists.eventlet_count(), hists.cluster_count());
         char *txbuffer;
