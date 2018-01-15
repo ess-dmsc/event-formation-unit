@@ -46,8 +46,8 @@ int main() {
   std::mt19937 gen(rd());
   
   std::vector<MonitorSimParams> Monitors;
-  Monitors.emplace_back(MonitorSimParams{0, 10, -50e-6, 10e-6}); //Pulses, offset, width
-  Monitors.emplace_back(MonitorSimParams{1, 10, 150e-6, 10e-6}); //Pulses, offset, width
+  Monitors.emplace_back(MonitorSimParams{0, 100, 6.7e-3, 6.7e-4}); //Pulses, offset, width
+  Monitors.emplace_back(MonitorSimParams{0, 100, 67e-3, 6.7e-4}); //Pulses, offset, width
   
   ADC::PacketGenerator AdcGenerator;
   TDC::TDCGenerator TdcGenerator("mini_chopper");
@@ -55,7 +55,9 @@ int main() {
   UDPServer server(2048, 65535);
   while (not server.IsOk()) {
   }
-  
+  std::uint32_t EventCounter = 0;
+  std::uint32_t TDCCounter = 0;
+  int PrintStatsCounter = 0;
   while (RunLoop) {
     PulseTime += ChopperPeriod;
     std::this_thread::sleep_until(PulseTime);
@@ -63,6 +65,7 @@ int main() {
     
     auto TdcPacket = TdcGenerator.GetTDCPacket(double(FloatTime));
     KafkaProducer.produce((char*)TdcPacket.Pointer, TdcPacket.Size);
+    TDCCounter++;
     
     std::vector<MonitorPulseInfo> AllPulses;
     for (auto &Monitor: Monitors) {
@@ -73,6 +76,7 @@ int main() {
         double CurrentTimeOffset = TimeOffsetGen(gen);
         double CurrentTimeStamp = FloatTime + CurrentTimeOffset;
         AllPulses.emplace_back(MonitorPulseInfo{Monitor.ChannelNr, CurrentTimeStamp, 1.0});
+        EventCounter++;
       }
     }
     std::sort(AllPulses.begin(), AllPulses.end(), PulseSortingFunction);
@@ -82,6 +86,11 @@ int main() {
       
       server.TransmitPacket(AdcPacket.Pointer, AdcPacket.Size);
     }
+    if (14 == PrintStatsCounter) {
+      std::cout << "Events: " << EventCounter << ", TDCs: " << TDCCounter << std::endl;
+      PrintStatsCounter = 0;
+    }
+    ++PrintStatsCounter;
   }
   std::cout << "Waiting for transmit thread to exit!" << std::endl;
   return 0;
