@@ -15,7 +15,7 @@ public:
   inline bool isWire(int channel) { return (channel <= 79) && (channel >= 0); }
 
   /** @brief identifies which channels are grids, from drawing by Anton */
-  inline bool isGrid(int channel) { return (channel >= 80) && (channel <= 128); }
+  inline bool isGrid(int channel) { return (channel >= 80) && (channel < 128); }
 
   /** @brief return the x coordinate of the detector */
   inline int xcoord(int digno, int channel) {
