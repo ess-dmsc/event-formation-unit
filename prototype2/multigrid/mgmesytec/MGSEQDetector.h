@@ -12,10 +12,10 @@
 class MGSEQDetector {
 public:
   /** @brief identifies which channels are wires, from drawing by Anton */
-  inline bool isWire(int channel) { return (channel < 81) && (channel > 0); }
+  inline bool isWire(int channel) { return (channel <= 79) && (channel >= 0); }
 
   /** @brief identifies which channels are grids, from drawing by Anton */
-  inline bool isGrid(int channel) { return (channel >= 81) && (channel < 93); }
+  inline bool isGrid(int channel) { return (channel >= 80) && (channel <= 128); }
 
   /** @brief return the x coordinate of the detector */
   inline int xcoord(int digno, int channel) {

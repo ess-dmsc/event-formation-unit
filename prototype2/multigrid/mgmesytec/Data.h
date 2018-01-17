@@ -7,6 +7,7 @@
  */
 
 #pragma once
+#include <common/ESSGeometry.h>
 #include <common/ReadoutSerializer.h>
 #include <dataformats/multigrid/inc/DataSave.h>
 #include <multigrid/mgmesytec/MGSEQDetector.h>
@@ -38,10 +39,18 @@ public:
 
   ~MesytecData(){};
 
-  void setAdcThreshold(int threshold) { adcThreshold = threshold; }
-  void setWireThreshold(int threshold) { wireThreshold = threshold; }
-  void setGridThreshold(int threshold) { gridThreshold = threshold; }
+  int getPixel(); // @todo (too) simple implm. but agreed for now
+  int getTime();  // @todo (too) simple implm. but agreed for now
 
+  void setWireThreshold(int low, int high) {
+     wireThresholdLo = low;
+     wireThresholdHi = high;
+   };
+
+  void setGridThreshold(int low, int high) {
+     gridThresholdLo = low;
+     gridThresholdHi = high;
+   };
   /** @brief parse a binary payload buffer, return number of data element
    * @todo Uses NMXHists  - refactor and move ?
    */
@@ -53,11 +62,17 @@ public:
   int readouts{0}; /**< number of channels read out */
   int discards{0};
 
+  int wiremax{-1}; // initial alg.: wire with max adc
+  int gridmax{-1}; // initial alg.: grid with max adc
+  int time{-1};
+
 private:
-  int adcThreshold{0};
-  int wireThreshold{0};
-  int gridThreshold{0};
-  // MGSEQDetector mgseq;
+  int wireThresholdLo{0};
+  int wireThresholdHi{65535};
+  int gridThresholdLo{0};
+  int gridThresholdHi{65535};
+  MGSEQDetector mgseq;
+  ESSGeometry mg{4, 12, 20, 1};
 
 #ifdef DUMPTOFILE
   DataSave mgdata{std::string("multigrid_mesytec_"), 100000000};

@@ -58,6 +58,7 @@ TEST_F(MesytecDataTest, ErrPktShort) {
   ASSERT_EQ(res, -MesytecData::error::ESIZE);
 }
 
+
 TEST_F(MesytecDataTest, ParseRecordedWSData) {
   auto res = mesytec.parse((char *)&ws1[0], ws1.size(), hists, *serializer);
   ASSERT_EQ(res, -MesytecData::error::OK);
@@ -66,7 +67,8 @@ TEST_F(MesytecDataTest, ParseRecordedWSData) {
 }
 
 TEST_F(MesytecDataTest, ParseRecordedWSDataDiscardAll) {
-  mesytec.setAdcThreshold(60000); // Above all readouts
+  mesytec.setWireThreshold(60000, 65535);
+  mesytec.setGridThreshold(60000, 65535);
   auto res = mesytec.parse((char *)&ws1[0], ws1.size(), hists, *serializer);
   ASSERT_EQ(res, -MesytecData::error::OK);
   ASSERT_EQ(mesytec.readouts, 128);
