@@ -13,7 +13,8 @@ AdcDataProcessor::AdcDataProcessor(std::shared_ptr<Producer> Prod) : ProducerPtr
 }
 
 namespace TimeStamp {
-  static const std::uint32_t TimerCounterMax = 88052500/2;
+  //static const std::uint32_t TimerCounterMax = 88052500/2;
+  static const std::uint32_t TimerCounterMax = 43478000;
   
   std::uint64_t Calc(const std::uint32_t &Seconds, const std::uint32_t &SecondsFrac) {
     std::uint64_t NanoSec = static_cast<std::uint64_t>((static_cast<double>(SecondsFrac) / static_cast<double>(TimerCounterMax)) * 1e9 + 0.5);
