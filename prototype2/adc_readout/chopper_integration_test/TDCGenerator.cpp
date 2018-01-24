@@ -19,6 +19,7 @@ PacketInfo TDCGenerator::GetTDCPacket(double TimeStamp) {
   LogDataBuilder StructureBuilder(*Builder.get());
   StructureBuilder.add_source_name(PVNameString);
   StructureBuilder.add_value(ValueOffset.Union());
+  StructureBuilder.add_value_type(Value::Value_Double);
   StructureBuilder.add_timestamp(TimeStamp * 1e9 + 0.5);
   Builder->Finish(StructureBuilder.Finish(), LogDataIdentifier());
   return PacketInfo{Builder->GetBufferPointer(), Builder->GetSize()};
