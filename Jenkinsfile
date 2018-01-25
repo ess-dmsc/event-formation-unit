@@ -64,6 +64,7 @@ def docker_build(image_key) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd build
+        . ./activate_run.sh
         make --version
         make VERBOSE=ON
     \""""
@@ -75,6 +76,7 @@ def docker_tests(image_key) {
         try {
             sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd build
+                . ./activate_run.sh
                 make runtest VERBOSE=ON
                 make coverage_xml
             \""""
