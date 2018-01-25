@@ -2,23 +2,23 @@ project = "efu"
 
 images = [
     'centos': [
-        'name': 'essdmscdm/centos-build-node:0.9.0',
+        'name': 'essdmscdm/centos-build-node:1.0.1',
         'sh': 'sh'
     ],
     'centos-gcc6': [
-        'name': 'essdmscdm/centos-gcc6-build-node:0.3.0',
+        'name': 'essdmscdm/centos-gcc6-build-node:1.0.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
     ],
     'fedora': [
-        'name': 'essdmscdm/fedora-build-node:0.4.1',
+        'name': 'essdmscdm/fedora-build-node:1.0.0',
         'sh': 'sh'
     ],
     'ubuntu1604': [
-        'name': 'essdmscdm/ubuntu16.04-build-node:0.0.1',
+        'name': 'essdmscdm/ubuntu16.04-build-node:2.0.0',
         'sh': 'sh'
     ],
     'ubuntu1710': [
-        'name': 'essdmscdm/ubuntu17.10-build-node:0.0.2',
+        'name': 'essdmscdm/ubuntu17.10-build-node:1.0.0',
         'sh': 'sh'
     ]
 ]
@@ -42,14 +42,10 @@ def docker_dependencies(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         mkdir build
         cd build
-        conan --version
-        set +x
-        conan remote add \
-        desy-packages https://api.bintray.com/conan/eugenwintersberger/desy-packages
         conan remote add \
             --insert 0 \
             ${conan_remote} ${local_conan_server}
-        conan install --file=../${project}/conanfile.txt --build=missing
+        conan install --build=outdated ../${project}/conanfile.txt
     \""""
 }
 
@@ -58,8 +54,9 @@ def docker_cmake(image_key) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd build
+        . ./activate_run.sh
         ${cmake_exec} --version
-        ${cmake_exec} -DCONAN_FILE=conanfile.txt -DCMAKE_BUILD_TYPE=Debug ../${project}
+        ${cmake_exec} -DCOV=1 ../${project}
     \""""
 }
 
@@ -68,7 +65,7 @@ def docker_build(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd build
         make --version
-        make
+        make VERBOSE=ON
     \""""
 }
 
@@ -78,10 +75,11 @@ def docker_tests(image_key) {
         try {
             sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd build
-                make runtest
+                make runtest VERBOSE=ON
+                make coverage_xml
             \""""
         } catch(e) {
-            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test/*.xml ."
+            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test_results/*.xml ."
             junit '*.xml'
             failure_function(e, 'Run tests (${container_name(image_key)}) failed')
         }
@@ -164,7 +162,12 @@ def get_osx_pipeline()
 
                 dir("${project}/build") {
                     try {
-                        sh "conan install --file=../code/conanfile.txt --build=missing"
+                        sh "conan install --build=outdated ../code/conanfile.txt "
+                    } catch (e) {
+                        failure_function(e, 'MacOSX / getting dependencies failed')
+                    }
+
+                    try {
                         sh "cmake ../code"
                     } catch (e) {
                         failure_function(e, 'MacOSX / CMake failed')
@@ -198,8 +201,8 @@ node('docker && dmbuild03.dm.esss.dk') {
     }
 
     def builders = [:]
-    //builders['centos'] = get_pipeline('centos')
-    //builders['centos-gcc6'] = get_pipeline('centos-gcc6')
+    builders['centos'] = get_pipeline('centos')
+    builders['centos-gcc6'] = get_pipeline('centos-gcc6')
     //builders['fedora'] = get_pipeline('fedora')
     //builders['ubuntu1604'] = get_pipeline('ubuntu1604')
     //builders['MocOSX'] = get_osx_pipeline()

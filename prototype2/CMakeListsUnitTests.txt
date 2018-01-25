@@ -30,6 +30,8 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
     add_library(ParserTest_LIB STATIC ${ParserTest_LIB_SRC})
     set_target_properties(ParserTest_LIB PROPERTIES COMPILE_FLAGS "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 
+    set_target_properties(ParserTest_LIB PROPERTIES COMPILE_FLAGS "-Wno-error")
+
     set(ParserTest_SRC efu/Parser.cpp common/EFUArgs.cpp $<TARGET_OBJECTS:calibfile>)
     set(ParserTest_INC efu/Parser.h common/EFUArgs.h)
     set(ParserTest_LINK ParserTest_LIB)
