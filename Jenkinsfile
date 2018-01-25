@@ -75,8 +75,38 @@ def docker_tests(image_key) {
             sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd build
                 make runtest VERBOSE=ON
+            \""""
+        } catch(e) {
+            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test_results/*.xml ."
+            junit '*.xml'
+            failure_function(e, 'Run tests (${container_name(image_key)}) failed')
+        }
+    }
+}
+
+def docker_tests_coverage(image_key) {
+    def custom_sh = images[image_key]['sh']
+    dir("${project}/tests") {
+        try {
+            sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+                cd build
                 make coverage_xml
             \""""
+            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test_results/*.xml ."
+            junit '*.xml'
+            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/coverage/coverage.xml coverage.xml"
+            step([
+                $class: 'CoberturaPublisher',
+                autoUpdateHealth: true,
+                autoUpdateStability: true,
+                coberturaReportFile: 'coverage.xml',
+                failUnhealthy: false,
+                failUnstable: false,
+                maxNumberOfBuilds: 0,
+                onlyStable: false,
+                sourceEncoding: 'ASCII',
+                zoomCoverageChart: false
+            ])
         } catch(e) {
             sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test_results/*.xml ."
             junit '*.xml'
@@ -130,6 +160,12 @@ def get_pipeline(image_key)
                     docker_build(image_key)
                 } catch (e) {
                     failure_function(e, "Build for ${image_key} failed")
+                }
+
+                if (image_key == "fedora") {
+                    docker_tests_coverage(image_key)
+                } else {
+                    docker_tests(image_key)
                 }
 
                 //docker_tests(image_key)
@@ -195,40 +231,11 @@ node('docker && dmbuild03.dm.esss.dk') {
     // Delete workspace when build is done
     cleanWs()
 
-    stage('Checkout') {
-        dir("${project}/code") {
+    dir("${project}/code") {
+
+        stage('Checkout') {
             try {
                 scm_vars = checkout scm
-            } catch (e) {
-                failure_function(e, 'Checkout failed')
-            }
-        }
-    }
-
-    def builders = [:]
-    builders['centos7'] = get_pipeline('centos7')
-    builders['centos7-gcc6'] = get_pipeline('centos7-gcc6')
-    builders['fedora25'] = get_pipeline('fedora25')
-    builders['ubuntu1604'] = get_pipeline('ubuntu1604')
-    builders['ubuntu1710'] = get_pipeline('ubuntu1710')
-    builders['MocOSX'] = get_osx_pipeline()
-
-    /*
-    for (x in images.keySet()) {
-        def image_key = x
-        builders[image_key] = get_pipeline(image_key)
-    }
-    */
-    parallel builders
-}
-
-node('kafka-client && centos7') {
-    cleanWs()
-
-    dir("code") {
-        stage("Checkout-2") {
-            try {
-                checkout scm
             } catch (e) {
                 failure_function(e, 'Checkout failed')
             }
@@ -245,38 +252,13 @@ node('kafka-client && centos7') {
         }
     }
 
+    def builders = [:]
 
-    dir("build") {
-        stage("Build") {
-            try {
-                sh "cmake -DCOV=1 ../code"
-                sh "make -j 5 VERBOSE=ON"
-            } catch (e) {
-                failure_function(e, 'Failed to compile')
-            }
-        }
-
-        stage("Run tests") {
-            try {
-                sh "make -j 5 runtest VERBOSE=ON"
-                junit 'test_results/*.xml'
-                sh "make coverage_xml"
-                step([
-                    $class: 'CoberturaPublisher',
-                    autoUpdateHealth: true,
-                    autoUpdateStability: true,
-                    coberturaReportFile: 'coverage/coverage.xml',
-                    failUnhealthy: false,
-                    failUnstable: false,
-                    maxNumberOfBuilds: 0,
-                    onlyStable: false,
-                    sourceEncoding: 'ASCII',
-                    zoomCoverageChart: false
-                ])
-            } catch (e) {
-                junit 'test_results/*.xml'
-                failure_function(e, 'Unit tests failed')
-            }
-        }
+    for (x in images.keySet()) {
+        def image_key = x
+        builders[image_key] = get_pipeline(image_key)
     }
+    builders['MocOSX'] = get_osx_pipeline()
+
+    parallel builders
 }
