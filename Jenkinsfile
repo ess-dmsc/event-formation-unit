@@ -214,22 +214,22 @@ def get_osx_pipeline()
                     }
 
                     try {
-                        sh "cmake ../code"
+                        sh "source ./actvate_run.sh && cmake ../code"
                     } catch (e) {
                         failure_function(e, 'MacOSX / CMake failed')
                     }
 
                     try {
-                        sh "make"
+                        sh "source ./actvate_run.sh && make"
                     } catch (e) {
                         failure_function(e, 'MacOSX / make failed')
                     }
 
-                    /*try {
-                        sh "make runtest"
+                    try {
+                        sh "source ./actvate_run.sh && make runtest"
                     } catch (e) {
                         failure_function(e, 'MacOSX / tests failed')
-                    }*/
+                    }
                 }
 
             }
