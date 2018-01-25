@@ -201,9 +201,9 @@ node('docker && dmbuild03.dm.esss.dk') {
     }
 
     def builders = [:]
-    builders['centos'] = get_pipeline('centos')
-    builders['centos-gcc6'] = get_pipeline('centos-gcc6')
-    //builders['fedora'] = get_pipeline('fedora')
+    builders['centos7'] = get_pipeline('centos7')
+    builders['centos7-gcc6'] = get_pipeline('centos7-gcc6')
+    //builders['fedora25'] = get_pipeline('fedora25')
     //builders['ubuntu1604'] = get_pipeline('ubuntu1604')
     //builders['MocOSX'] = get_osx_pipeline()
 
