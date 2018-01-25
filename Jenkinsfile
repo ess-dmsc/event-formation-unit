@@ -56,7 +56,7 @@ def docker_cmake(image_key) {
         cd build
         . ./activate_run.sh
         ${cmake_exec} --version
-        ${cmake_exec} -DCOV=1 ../${project}
+        ${cmake_exec} -DCOV=1 -DUSE_OLD_ABI=0 ../${project}
     \""""
 }
 
@@ -205,9 +205,10 @@ node('docker && dmbuild03.dm.esss.dk') {
     def builders = [:]
     builders['centos7'] = get_pipeline('centos7')
     builders['centos7-gcc6'] = get_pipeline('centos7-gcc6')
-    //builders['fedora25'] = get_pipeline('fedora25')
-    //builders['ubuntu1604'] = get_pipeline('ubuntu1604')
-    //builders['MocOSX'] = get_osx_pipeline()
+    builders['fedora25'] = get_pipeline('fedora25')
+    builders['ubuntu1604'] = get_pipeline('ubuntu1604')
+    builders['ubuntu1710'] = get_pipeline('ubuntu1710')
+    builders['MocOSX'] = get_osx_pipeline()
 
     /*
     for (x in images.keySet()) {
