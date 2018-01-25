@@ -7,6 +7,10 @@
 
 #pragma once
 #include <cinttypes>
+#include <common/Trace.h>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 class ESSGeometry {
 public:
@@ -50,6 +54,7 @@ public:
   /** @brief calculate pixelid for a multi-panel 3D detector */
   inline uint32_t pixelMP3D(uint32_t x, uint32_t y, uint32_t z, uint32_t p) {
     if ((x >= nx_) || (y >= ny_) || (z >= nz_) || (p >= np_)) {
+      XTRACE(PROCESS, ALW, "invalid geometry: x,y,z,p: %u,%u,%u,%u\n", x,y,z,p);
       return 0; /** 0 is invalid as pixel */
     }
     // Valid values for all coordinates

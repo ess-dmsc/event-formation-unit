@@ -28,7 +28,7 @@
 #include <unistd.h>
 
 // #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_INF
+// #define TRC_LEVEL TRC_L_DEB
 
 using namespace memory_sequential_consistent; // Lock free fifo
 
@@ -179,7 +179,6 @@ void CSPEC::processing_thread() {
   dat.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
 
   TSCTimer report_timer;
-  TSCTimer timestamp;
 
   unsigned int data_index;
   while (1) {
@@ -192,17 +191,23 @@ void CSPEC::processing_thread() {
       if (len == 0) {
         mystats.fifo_seq_errors++;
       } else {
-        dat.parse(eth_ringbuf->getdatabuffer(data_index),
+        auto res = dat.parse(eth_ringbuf->getdatabuffer(data_index),
                   eth_ringbuf->getdatalength(data_index), hists, readouts);
+
+        if (res < 0) {
+          continue;
+        }
 
         int pixel = dat.getPixel();
         int time  = dat.getTime();
+        XTRACE(PROCESS, DEB, "Time %d, pixel: %d\n", time, pixel);
         if (pixel != 0) {
-          XTRACE(PROCESS, DEB, "Time %d, pixel: %d\n", time, pixel);
           mystats.tx_bytes += flatbuffer.addevent(time, pixel);
           mystats.rx_events++;
           mystats.rx_readouts += dat.readouts;
           mystats.rx_discards += dat.discards;
+        } else {
+          mystats.geometry_errors++;
         }
       }
     }
