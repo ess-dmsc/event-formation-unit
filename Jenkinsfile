@@ -1,16 +1,16 @@
 project = "efu"
 
 images = [
-    'centos': [
-        'name': 'essdmscdm/centos-build-node:1.0.1',
+    'centos7': [
+        'name': 'essdmscdm/centos7-build-node:1.0.1',
         'sh': 'sh'
     ],
-    'centos-gcc6': [
-        'name': 'essdmscdm/centos-gcc6-build-node:1.0.0',
+    'centos7-gcc6': [
+        'name': 'essdmscdm/centos7-gcc6-build-node:1.0.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
     ],
-    'fedora': [
-        'name': 'essdmscdm/fedora-build-node:1.0.0',
+    'fedora25': [
+        'name': 'essdmscdm/fedora25-build-node:1.0.0',
         'sh': 'sh'
     ],
     'ubuntu1604': [
