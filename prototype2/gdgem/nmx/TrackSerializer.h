@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <mo01_nmx_generated.h>
+#include "mo01_nmx_generated.h"
 
 #include <gdgem/nmx/EventNMX.h>
 

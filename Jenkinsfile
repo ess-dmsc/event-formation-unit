@@ -45,7 +45,7 @@ def docker_dependencies(image_key) {
         conan remote add \
             --insert 0 \
             ${conan_remote} ${local_conan_server}
-        conan install --build=outdated ../${project}/conanfile.txt
+        conan install --build=outdated ../${project}
     \""""
 }
 
@@ -55,7 +55,7 @@ def docker_cmake(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd build
         ${cmake_exec} --version
-        ${cmake_exec} -DCOV=1 -DUSE_OLD_ABI=0 ../${project}
+        ${cmake_exec} -DCOV=1 ../${project}
     \""""
 }
 
@@ -132,7 +132,7 @@ def get_pipeline(image_key)
                     failure_function(e, "Build for ${image_key} failed")
                 }
 
-                docker_tests(image_key)
+                //docker_tests(image_key)
             } catch(e) {
                 failure_function(e, "Unknown build failure for ${image_key}")
             } finally {
@@ -161,7 +161,7 @@ def get_osx_pipeline()
 
                 dir("${project}/build") {
                     try {
-                        sh "conan install --build=outdated ../code/conanfile.txt "
+                        sh "conan install --build=outdated ../code"
                     } catch (e) {
                         failure_function(e, 'MacOSX / getting dependencies failed')
                     }
@@ -173,10 +173,16 @@ def get_osx_pipeline()
                     }
 
                     try {
+                        sh "make"
+                    } catch (e) {
+                        failure_function(e, 'MacOSX / make failed')
+                    }
+
+                    /*try {
                         sh "make runtest"
                     } catch (e) {
-                        failure_function(e, 'MacOSX / build failed')
-                    }
+                        failure_function(e, 'MacOSX / tests failed')
+                    }*/
                 }
 
             }

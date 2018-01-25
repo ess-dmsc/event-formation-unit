@@ -226,7 +226,7 @@ void MBCAEN::processing_thread() {
             auto ycoord = cassette * nwires +
                           builder[cassette].getWirePosition(); // pos 0 - 31
 
-            uint32_t pixel_id = essgeom.pixelSP2D(xcoord, ycoord);
+            uint32_t pixel_id = essgeom.pixel2D(xcoord, ycoord);
 
             XTRACE(PROCESS, DEB,
                    "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d\n",

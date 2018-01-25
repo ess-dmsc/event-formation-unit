@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <ev42_events_generated.h>
+#include "ev42_events_generated.h"
 #include <common/Producer.h>
 
 class FBSerializer {

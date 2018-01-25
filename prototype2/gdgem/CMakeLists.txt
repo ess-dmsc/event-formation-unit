@@ -84,8 +84,7 @@ set(gdgem_INC
   vmm2srs/SRSTime.h
   vmm2srs/ParserSRS.h
   vmm2srs/EventletBuilderSRS.h)
-create_module(gdgem "")
-target_link_libraries(gdgem ${h5_optional})
+create_module(gdgem "${h5_optional}")
 
 #
 # NMX / VMM Tests
@@ -176,8 +175,7 @@ set(EventletBuilderH5Test_INC
   nmx/Eventlet.h
   nmx/Hists.h
   nmxgen/EventletBuilderH5.h)
-create_test_executable(EventletBuilderH5Test "")
-target_link_libraries(EventletBuilderH5Test ${h5_optional})
+create_test_executable(EventletBuilderH5Test "${h5_optional}")
 
 set(EventletBuilderTest_SRC
   ${datasave_SRC}
@@ -200,8 +198,7 @@ set(EventletBuilderTest_INC
   vmm2srs/EventletBuilderSRS.h
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h)
-create_test_executable(EventletBuilderTest "")
-target_link_libraries(EventletBuilderTest ${h5_optional})
+create_test_executable(EventletBuilderTest "${h5_optional}")
 
 set(EventletTest_SRC
   nmx/EventletTest.cpp
