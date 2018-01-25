@@ -214,19 +214,19 @@ def get_osx_pipeline()
                     }
 
                     try {
-                        sh "source ./activate_run.sh && cmake -DCMAKE_MACOSX_RPATH=ON ../code"
+                        sh "cmake -DCMAKE_MACOSX_RPATH=ON ../code"
                     } catch (e) {
                         failure_function(e, 'MacOSX / CMake failed')
                     }
 
                     try {
-                        sh "source ./activate_run.sh && make"
+                        sh "make"
                     } catch (e) {
                         failure_function(e, 'MacOSX / make failed')
                     }
 
                     try {
-                        sh "source ./activate_run.sh && make runtest"
+                        sh "make runtest"
                     } catch (e) {
                         failure_function(e, 'MacOSX / tests failed')
                     }
