@@ -98,10 +98,11 @@ def docker_tests_coverage(image_key) {
         try {
             sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd build
+                make runtest VERBOSE=ON
                 make coverage_xml
             \""""
-            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test_results/*.xml ."
-            junit '*.xml'
+            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test_results ./"
+            junit 'test_results/*.xml'
             sh "docker cp ${container_name(image_key)}:/home/jenkins/build/coverage/coverage.xml coverage.xml"
             step([
                 $class: 'CoberturaPublisher',
