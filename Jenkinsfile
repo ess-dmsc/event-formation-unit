@@ -85,6 +85,7 @@ def docker_tests(image_key) {
         try {
             sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd build
+                . ./activate_run.sh
                 make runtest VERBOSE=ON
             \""""
         } catch(e) {
