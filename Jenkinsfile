@@ -1,4 +1,5 @@
 project = "efu"
+coverage_on = "centos7"
 
 images = [
     'centos7': [
@@ -52,11 +53,20 @@ def docker_dependencies(image_key) {
 def docker_cmake(image_key) {
     cmake_exec = "cmake"
     def custom_sh = images[image_key]['sh']
-    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        cd build
-        ${cmake_exec} --version
-        ${cmake_exec} -DCOV=1 ../${project}
-    \""""
+    if (image_key == "centos7")
+    {
+        sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+            cd build
+            ${cmake_exec} --version
+            ${cmake_exec} -DCOV=1 ../${project}
+        \""""
+    } else {
+        sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+            cd build
+            ${cmake_exec} --version
+            ${cmake_exec} -DUSE_OLD_ABI=0 ../${project}
+        \""""
+    }
 }
 
 def docker_build(image_key) {
@@ -77,8 +87,6 @@ def docker_tests(image_key) {
                 make runtest VERBOSE=ON
             \""""
         } catch(e) {
-            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test_results/*.xml ."
-            junit '*.xml'
             failure_function(e, 'Run tests (${container_name(image_key)}) failed')
         }
     }
@@ -162,7 +170,7 @@ def get_pipeline(image_key)
                     failure_function(e, "Build for ${image_key} failed")
                 }
 
-                if (image_key == "fedora") {
+                if (image_key == coverage_on) {
                     docker_tests_coverage(image_key)
                 } else {
                     docker_tests(image_key)
