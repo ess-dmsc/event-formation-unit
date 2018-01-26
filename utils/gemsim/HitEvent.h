@@ -12,6 +12,8 @@
 
 class HitEvent : public Event {
 public:
+  static bool debug;
+
   HitEvent(int strip, int adc, double t)
      : Event(t), strip_(strip), adc_(adc)  { }
 
@@ -27,7 +29,7 @@ public:
     assert((fec >= 0) && (fec <= 19));
     assert((channel >=0) && (channel <= 63));
     assert((asic == 0) || (asic == 1));
-    
+
     sim->addEvent(new ReadoutEvent(fec, asic, channel, adc_, time + readoutlatency)); // fixme
   }
 private:
@@ -35,3 +37,5 @@ private:
    int adc_{0};
    double readoutlatency = 0.000000200; // 200ns
 };
+
+bool HitEvent::debug = false;

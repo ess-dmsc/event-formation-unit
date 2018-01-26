@@ -30,7 +30,7 @@ public:
     eventQueue.push(e);
   }
 
-  void doAllEvents() {
+  void run() {
     while ( !eventQueue.empty() ) {
       auto e = eventQueue.top();
       eventQueue.pop();

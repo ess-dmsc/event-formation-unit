@@ -10,6 +10,8 @@
 
 class ReadoutEvent : public Event {
 public:
+  static bool debug;
+
   ReadoutEvent(int fec, int asic, int channel, int adc, double t)
      : Event(t), fec_(fec), asic_(asic), channel_(channel), adc_(adc)  { }
 
@@ -23,3 +25,5 @@ private:
   int channel_{0};
   int adc_{0};
 };
+
+bool ReadoutEvent::debug = false;

@@ -2,7 +2,7 @@
 
 PROG=gemsim
 
-all: $(PROG) 
+all: $(PROG)
 	@echo done
 
 $(PROG): Event.h HitEvent.h NeutronEvent.h ReadoutEvent.h Simulator.h Geometry.h main.cpp

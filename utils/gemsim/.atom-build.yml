@@ -1,0 +1,6 @@
+cmd: make
+name: build
+sh: true
+targets:
+  extraTargetName:
+    cmd: ./gemsim
