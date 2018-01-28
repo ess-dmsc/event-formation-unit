@@ -41,9 +41,7 @@ public:
 			float deltaTimePlanes);
 
 	~RootFile();
-	void InitRootFile();
 
-	void DeleteHitTree();
 
 // Filling the hits
 	int AnalyzeHitData(int triggerTimestamp, int frameCounter, int fecID,
