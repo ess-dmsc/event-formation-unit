@@ -352,12 +352,10 @@ void RootFile::AddClusters(float clusterPosition, float clusterPositionUTPC,
 
 	if (coordinate == "x" && clusterPosition > -1.0)
 	{
-		m_clusterX.push_back(theCluster);
 		m_tempClusterX.push_back(theCluster);
 	}
 	if (coordinate == "y" && clusterPosition > -1.0)
 	{
-		m_clusterY.push_back(theCluster);
 		m_tempClusterY.push_back(theCluster);
 	}
 }
@@ -482,6 +480,8 @@ void RootFile::FillClusters()
 		m_hitsOldY = m_hitsY;
 	m_hitsX.clear();
 	m_hitsY.clear();
+	m_clusterX.insert(m_clusterX.end(), m_tempClusterX.begin(), m_tempClusterX.end());
+	m_clusterY.insert(m_clusterY.end(), m_tempClusterY.begin(), m_tempClusterY.end());
 	m_tempClusterX.clear();
 	m_tempClusterY.clear();
 
