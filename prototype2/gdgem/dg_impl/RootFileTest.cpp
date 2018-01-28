@@ -15,27 +15,27 @@ protected:
 
 TEST_F(RootFileTest, Run16_1_to_16)
 {
-	std::vector<int> xchips {0, 1, 6, 7};
-	std::vector<int> ychips {10, 11, 14, 15};
-	int tac = 125;
-	int bc = 20;
-	int acqWin = 7800;
-	std::vector<int> xChips, yChips;
-	for (auto chip : xchips)
-	  xChips.push_back(chip);
-	for (auto chip : ychips)
-	  yChips.push_back(chip);
+	std::vector<int> pXChips {0, 1, 6, 7};
+	std::vector<int> pYChips {10, 11, 14, 15};
+	int pTAC = 60;
+	int pBC = 20;
+	int pAcqWin = 4000;
+	int pADCThreshold=0;
+  	int pMinClusterSize = 3;
+	//Maximum time difference between strips in time sorted cluster (x or y)	
+  	float pDeltaTimeHits = 200;
+	//Number of missing strips in strip sorted cluster (x or y)
+	int pDeltaStripHits = 2;
+	//Maximum time span for total cluster (x or y)
+	float pDeltaTimeSpan = 500;
+	//Maximum cluster time difference between matching clusters in x and y
+	//Cluster time is either calculated with center-of-mass or uTPC method
+	float pDeltaTimePlanes = 200;
+	
+	
+	RootFile nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
 
-	std::string readout = "GEM";
-  int threshold=0;
-  int clusterSize = 3;
-	bool vFound=true;
-	unsigned int vStart = 0;
-	unsigned int vEnd = 300;
-
-	RootFile nmxdata(bc, tac, acqWin, xChips, yChips, readout, vFound, vStart, vEnd, threshold, clusterSize);
-
-  for (auto hit : Run16_1_to_16) { // replace with UDP receive()
+  	for (auto hit : Run16_1_to_16) { // replace with UDP receive()
 		int result = nmxdata.AnalyzeHitData(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
 		if (result == -1) {
 			printf("result == -1\n");
@@ -43,12 +43,13 @@ TEST_F(RootFileTest, Run16_1_to_16)
 		}
 	}
 
-  ASSERT_EQ(nmxdata.getnCLinX(), 8);
-  ASSERT_EQ(nmxdata.getnCLinY(), 5);
-  ASSERT_EQ(nmxdata.getnCLinXY(), 4);
+  	ASSERT_EQ(nmxdata.getNumClustersX(), 3);
+  	ASSERT_EQ(nmxdata.getNumClustersY(), 3);
+  	ASSERT_EQ(nmxdata.getNumClustersXY(), 3);
+  	ASSERT_EQ(nmxdata.getNumClustersXY_uTPC(), 3);
 }
 
 int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
+  	testing::InitGoogleTest(&argc, argv);
+  	return RUN_ALL_TESTS();
 }
