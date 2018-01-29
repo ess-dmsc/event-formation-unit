@@ -76,7 +76,6 @@ endif ()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
   message(STATUS "Detected MacOSX")
-
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   message(STATUS "Detected Linux")
   find_library(DL_LIB dl REQUIRED)
