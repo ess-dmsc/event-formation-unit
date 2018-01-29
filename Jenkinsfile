@@ -190,7 +190,7 @@ def get_pipeline(image_key)
     }
 }
 
-def get_osx_pipeline()
+def get_macos_pipeline()
 {
     return {
         stage("MacOSX") {
@@ -269,7 +269,7 @@ node('docker && dmbuild03.dm.esss.dk') {
         def image_key = x
         builders[image_key] = get_pipeline(image_key)
     }
-    builders['MocOSX'] = get_osx_pipeline()
+    builders['MocOS'] = get_macos_pipeline()
 
     parallel builders
 }
