@@ -17,9 +17,9 @@ TEST_F(RootFileTest, Run16_1_to_16)
 {
 	std::vector<int> xchips {0, 1, 6, 7};
 	std::vector<int> ychips {10, 11, 14, 15};
-	int tac = 125;
+	int tac = 60;
 	int bc = 20;
-	int acqWin = 7800;
+	int acqWin = 4000;
 	std::vector<int> xChips, yChips;
 	for (auto chip : xchips)
 	  xChips.push_back(chip);
@@ -43,9 +43,9 @@ TEST_F(RootFileTest, Run16_1_to_16)
 		}
 	}
 
-  ASSERT_EQ(nmxdata.getnCLinX(), 8);
-  ASSERT_EQ(nmxdata.getnCLinY(), 5);
-  ASSERT_EQ(nmxdata.getnCLinXY(), 4);
+  ASSERT_EQ(nmxdata.getNumClustersX(), 3);
+  ASSERT_EQ(nmxdata.getNumClustersY(), 3);
+  ASSERT_EQ(nmxdata.getNumClustersXY(), 3);
 }
 
 int main(int argc, char **argv) {
