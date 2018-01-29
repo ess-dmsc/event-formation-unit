@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 enable_testing()
-include_directories(..)
-include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
+include_directories(. .. ../.. ${FLATBUFFERS_INCLUDE_DIR})
 
 find_package(h5cpp)
 set(h5_optional)
@@ -98,6 +97,11 @@ set(RootFileTest_INC
   dg_impl/RootFile.h
   dg_impl/TestData.h)
 create_test_executable(RootFileTest "")
+
+# GOOGLE BENCHMARK
+set(RootFileBenchmarkTest_INC dg_impl/RootFile.h dg_impl/TestData.h)
+set(RootFileBenchmarkTest_SRC dg_impl/RootFile.cpp dg_impl/RootFileBenchmarkTest.cpp)
+create_benchmark_executable(RootFileBenchmarkTest "")
 
 set(EventFormationTest_SRC
   nmx/AbstractEventletBuilder.cpp
