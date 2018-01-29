@@ -8,12 +8,20 @@
 
 int fail = -1; // Dont fail
 
+// Create pointers to the retuned objects
 typedef RdKafka::Conf *(*pcreate)(RdKafka::Conf::ConfType);
+typedef RdKafka::Producer *(*pcreateprod)(RdKafka::Conf *, std::string &);
+typedef RdKafka::Topic *(*pcreatetopic)(RdKafka::Handle *, std::string const &,
+                                        RdKafka::Conf *, std::string &);
 
-void * loadsyms(char * primary, char * secondary) {
+/**Attmpt to load primary and alternatively secondary symbols using dlsym()
+ * Created to cover different compilations of librdkafka (old and new abis)
+ * Used for forcing external functions to fail for unit testing purposes
+ * exit if none of the symbols can be loaded.
+**/
+void * loadsyms(const char * primary, const char * secondary) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
-
   void * vpsym = dlsym(RTLD_NEXT, primary);
 
   if (vpsym == NULL) {
@@ -21,7 +29,7 @@ void * loadsyms(char * primary, char * secondary) {
     printf("Trying secondary...\n");
 
     dlerror();
-    vpsym = (pcreateprod)dlsym(RTLD_NEXT, secondary);
+    vpsym = dlsym(RTLD_NEXT, secondary);
     if (vpsym == NULL) {
       printf("Could not load secondary symbol: %s\n", secondary);
       printf("Error stubbing kafka functions\n");
@@ -29,14 +37,17 @@ void * loadsyms(char * primary, char * secondary) {
     }
   }
 #pragma GCC diagnostic pop
+  return vpsym;
 }
 
-RdKafka::Conf *RdKafka::Conf::create(ConfType type) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-  pcreate real_create = (pcreate)dlsym(
-      RTLD_NEXT, "_ZN7RdKafka4Conf6createENS0_8ConfTypeE"); // nm -C
-#pragma GCC diagnostic pop
+
+/** Intercept RdKafka::Conf::create() */
+RdKafka::Conf *RdKafka::Conf::create(ConfType type)
+{
+  pcreate real_create = (pcreate)loadsyms(
+      "_ZN7RdKafka4Conf6createENS0_8ConfTypeE",
+      "_ZN7RdKafka4Conf6createENS0_8ConfTypeE"); // nm -C
+
   if (fail != -1 && type == fail) {
     printf("Forcing RdKafka::Conf::create() to fail\n");
     return nullptr;
@@ -45,29 +56,14 @@ RdKafka::Conf *RdKafka::Conf::create(ConfType type) {
   }
 }
 
-typedef RdKafka::Producer *(*pcreateprod)(RdKafka::Conf *, std::string &);
+
+/** Intercept RdKafka::Producer::create() */
 RdKafka::Producer *RdKafka::Producer::create(RdKafka::Conf *type,
                                              std::string &str) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-  pcreateprod real_create = (pcreateprod)dlsym(
-      RTLD_NEXT,
-      "_ZN7RdKafka8Producer6createEPNS_4ConfERSs"); // nm -C librdkafka.a
+  pcreateprod real_create = (pcreateprod)loadsyms(
+      "_ZN7RdKafka8Producer6createEPNS_4ConfERSs",
+      "_ZN7RdKafka8Producer6createEPNS_4ConfERNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE"); // nm -C librdkafka.a
 
-  printf("real_create OLD ABI: %p\n", (void*)real_create);
-
-  if (real_create == NULL) {
-    dlerror();
-    real_create = (pcreateprod)dlsym(
-        RTLD_NEXT,
-      "_ZN7RdKafka8Producer6createEPNS_4ConfERNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
-    }
-
-  if (real_create == NULL) {
-    printf("Error stubbing kafka functions\n");
-    exit(1);
-  }
-#pragma GCC diagnostic pop
   if (fail == 777) {
     printf("Forcing RdKafka::Producer::create() to fail\n");
     return nullptr;
@@ -76,24 +72,16 @@ RdKafka::Producer *RdKafka::Producer::create(RdKafka::Conf *type,
   }
 }
 
-typedef RdKafka::Topic *(*pcreatetopic)(RdKafka::Handle *, std::string const &,
-                                        RdKafka::Conf *, std::string &);
+
+/** Intercept RdKafka::Topic::create() */
 RdKafka::Topic *RdKafka::Topic::create(RdKafka::Handle *handle,
                                        std::string const &topic,
                                        RdKafka::Conf *conf, std::string &str) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-  pcreatetopic real_create = (pcreatetopic)dlsym(
-      RTLD_NEXT,
-      "_ZN7RdKafka5Topic6createEPNS_6HandleERKSsPNS_4ConfERSs"); // nm -C
 
-  if (real_create == NULL) {                                                                // librdkafka.a
-    real_create = (pcreatetopic)dlsym(
-      RTLD_NEXT,
+  pcreatetopic real_create = (pcreatetopic)loadsyms(
+      "_ZN7RdKafka5Topic6createEPNS_6HandleERKSsPNS_4ConfERSs",
       "_ZN7RdKafka5Topic6createEPNS_6HandleERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPNS_4ConfERS8_");
-  }
 
-#pragma GCC diagnostic pop
   if (fail == 888) {
     printf("Forcing RdKafka::Topic::create() to fail\n");
     return nullptr;
