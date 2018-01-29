@@ -10,6 +10,27 @@ int fail = -1; // Dont fail
 
 typedef RdKafka::Conf *(*pcreate)(RdKafka::Conf::ConfType);
 
+void * loadsyms(char * primary, char * secondary) {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
+  void * vpsym = dlsym(RTLD_NEXT, primary);
+
+  if (vpsym == NULL) {
+    printf("Could not load primary symbol: %s\n", primary);
+    printf("Trying secondary...\n");
+
+    dlerror();
+    vpsym = (pcreateprod)dlsym(RTLD_NEXT, secondary);
+    if (vpsym == NULL) {
+      printf("Could not load secondary symbol: %s\n", secondary);
+      printf("Error stubbing kafka functions\n");
+      exit(1);
+    }
+  }
+#pragma GCC diagnostic pop
+}
+
 RdKafka::Conf *RdKafka::Conf::create(ConfType type) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
