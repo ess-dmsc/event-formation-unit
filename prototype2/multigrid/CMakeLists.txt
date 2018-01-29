@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
-include_directories(.. ../..)
+include_directories(.. ../.. ${FLATBUFFERS_INCLUDE_DIR})
 #
 # Detector Pipeline Plugins
 #
@@ -35,11 +35,13 @@ create_module(mgcncs2 "")
 set(mgmesytec_SRC
   ../gdgem/nmx/Hists.cpp
   ../gdgem/nmx/HistSerializer.cpp
+  ../common/ReadoutSerializer.cpp
   mgmesytec.cpp
   mgmesytec/Data.cpp)
 set(mgmesytec_INC
   ../gdgem/nmx/Hists.h
   ../gdgem/nmx/HistSerializer.h
+  ../common/ReadoutSerializer.h
   mgmesytec/Data.h)
 create_module(mgmesytec "")
 
@@ -102,12 +104,18 @@ create_test_executable(MGCNCSDataTest "")
 set(MGMesytecDataTest_SRC
   ${datasave_SRC}
   ../gdgem/nmx/Hists.cpp
-  mgmesytec/DataTest.cpp mgmesytec/Data.cpp)
+  ../common/ReadoutSerializer.cpp
+  ../common/Producer.cpp
+  mgmesytec/DataTest.cpp
+  mgmesytec/Data.cpp)
 set(MGMesytecDataTest_INC
   ${datasave_INC}
   ../gdgem/nmx/Hists.h
-  mgmesytec/Data.h mgmesytec/TestData.h)
-create_test_executable(MGMesytecDataTest "")
+  ../common/ReadoutSerializer.h
+  ../common/Producer.h
+  mgmesytec/Data.h
+  mgmesytec/TestData.h)
+create_test_executable(MGMesytecDataTest "${LibRDKafka_LIBRARIES}")
 
 set(MGSEQDetectorTest_SRC
 mgmesytec/MGSEQDetectorTest.cpp)

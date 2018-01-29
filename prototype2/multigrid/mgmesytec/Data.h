@@ -7,6 +7,7 @@
  */
 
 #pragma once
+#include <common/ReadoutSerializer.h>
 #include <dataformats/multigrid/inc/DataSave.h>
 #include <multigrid/mgmesytec/MGSEQDetector.h>
 
@@ -44,10 +45,10 @@ public:
   /** @brief parse a binary payload buffer, return number of data element
    * @todo Uses NMXHists  - refactor and move ?
    */
-  int parse(const char *buffer, int size, NMXHists &hists);
+  int parse(const char *buffer, int size, NMXHists &hists, ReadoutSerializer &serializer);
 
   /** @brief parse n 32 bit words from mesytec VMMR-8/16 card */
-  void mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &hists);
+  void mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &hists, ReadoutSerializer &serializer);
 
   int readouts{0}; /**< number of channels read out */
   int discards{0};

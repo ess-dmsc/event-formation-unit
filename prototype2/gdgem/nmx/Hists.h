@@ -35,7 +35,7 @@ public:
   void bin(const EventNMX &e);
   void binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16_t yadc);
 
-  bool empty() const;
+  bool isEmpty() const;
   size_t eventlet_count() const;
   size_t cluster_count() const;
 

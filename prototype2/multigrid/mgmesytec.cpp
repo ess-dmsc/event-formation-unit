@@ -15,6 +15,7 @@
 #include <efu/Parser.h>
 #include <efu/Server.h>
 #include <gdgem/nmx/HistSerializer.h>
+#include <common/ReadoutSerializer.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -35,7 +36,7 @@ const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
 
 /** ----------------------------------------------------- */
 struct DetectorSettingsStruct {
-  uint32_t adcThreshold = {75}; // arbitrary chosen from capture
+  uint32_t adcThreshold = {0}; // accept all, change to discard
   uint32_t wireThreshold = {0}; // accept all - @todo unused
   uint32_t gridThreshold = {0}; // accept all - @todo unused
 } DetectorSettings;
@@ -165,6 +166,7 @@ void CSPEC::processing_thread() {
   Producer producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
   Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
   FBSerializer flatbuffer(kafka_buffer_size, producer);
+  ReadoutSerializer readouts(100000, monitorprod);
   HistSerializer histfb;
   NMXHists hists;
 
@@ -189,7 +191,7 @@ void CSPEC::processing_thread() {
         mystats.fifo_seq_errors++;
       } else {
         dat.parse(eth_ringbuf->getdatabuffer(data_index),
-                  eth_ringbuf->getdatalength(data_index), hists);
+                  eth_ringbuf->getdatalength(data_index), hists, readouts);
 
         mystats.tx_bytes += flatbuffer.addevent(42, 1);
         mystats.rx_events++;
@@ -199,12 +201,17 @@ void CSPEC::processing_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       mystats.tx_bytes += flatbuffer.produce();
 
-      if (hists.empty()) { /**< @todo wrong logic ? */
-        XTRACE(PROCESS, DEB, "Sending histogram for %zu readouts\n", hists.eventlet_count());
+      auto entries = readouts.getNumEntries();
+      if (entries) {
+        XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", entries);
+        readouts.produce(); // Periodically produce of readouts
+      }
+
+      if (!hists.isEmpty()) {
+        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.eventlet_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
         monitorprod.produce(txbuffer, len);
