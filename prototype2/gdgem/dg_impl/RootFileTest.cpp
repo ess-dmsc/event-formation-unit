@@ -22,7 +22,7 @@ TEST_F(RootFileTest, Run16_1_to_16)
 	int pAcqWin = 4000;
 	int pADCThreshold=0;
   	int pMinClusterSize = 3;
-	//Maximum time difference between strips in time sorted cluster (x or y)	
+	//Maximum time difference between strips in time sorted cluster (x or y)
   	float pDeltaTimeHits = 200;
 	//Number of missing strips in strip sorted cluster (x or y)
 	int pDeltaStripHits = 2;
@@ -31,8 +31,8 @@ TEST_F(RootFileTest, Run16_1_to_16)
 	//Maximum cluster time difference between matching clusters in x and y
 	//Cluster time is either calculated with center-of-mass or uTPC method
 	float pDeltaTimePlanes = 200;
-	
-	
+
+
 	RootFile nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
 
   	for (auto hit : Run16_1_to_16) { // replace with UDP receive()

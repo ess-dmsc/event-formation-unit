@@ -5,6 +5,9 @@
 
 #define UNUSED __attribute__((unused))
 
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
+
 RootFile::RootFile(int bc, int tac, int acqWin, std::vector<int> xChips,
 		std::vector<int> yChips, int adcThreshold, int minClusterSize,
 		float deltaTimeHits, int deltaStripHits, float deltaTimeSpan,
@@ -43,7 +46,7 @@ int RootFile::AnalyzeHitData(int triggerTimestamp, int frameCounter, int fecID,
 	if ((frameCounter < m_oldFrameCounter)
 			&& !(m_oldFrameCounter > frameCounter + 1000000000))
 	{
-		XTRACE(PROCESS, DEB,
+		DTRACE(DEB,
 				"\n*********************************** SCRAMBLED eventNr  %d, old framecounter %d, new framecounter %d\n",
 				m_eventNr, m_oldFrameCounter, frameCounter);
 	}
@@ -124,45 +127,45 @@ int RootFile::AnalyzeHitData(int triggerTimestamp, int frameCounter, int fecID,
 
 	if (newEvent)
 	{
-		XTRACE(PROCESS, DEB, "\neventNr  %d\n", m_eventNr);
-		XTRACE(PROCESS, DEB, "fecID  %d\n", fecID);
+		DTRACE(DEB, "\neventNr  %d\n", m_eventNr);
+		DTRACE(DEB, "fecID  %d\n", fecID);
 	}
 
 	if (deltaTriggerTimestamp_ns > 0)
 	{
-		XTRACE(PROCESS, DEB, "\tTimestamp %.2f [ms]\n", m_timeStamp_ms);
-		XTRACE(PROCESS, DEB, "\tTime since last trigger %.4f us (%.4f kHz)\n",
+		DTRACE(DEB, "\tTimestamp %.2f [ms]\n", m_timeStamp_ms);
+		DTRACE(DEB, "\tTime since last trigger %.4f us (%.4f kHz)\n",
 				deltaTriggerTimestamp_ns * 0.001,
 				1000000 / deltaTriggerTimestamp_ns);
-		XTRACE(PROCESS, DEB, "\tTriggerTimestamp %.2f [ns]\n",
+		DTRACE(DEB, "\tTriggerTimestamp %.2f [ns]\n",
 				triggerTimestamp_ns);
 	}
 	if (m_oldFrameCounter != frameCounter || newEvent)
 	{
-		XTRACE(PROCESS, DEB, "\n\tFrameCounter %u\n", frameCounter);
+		DTRACE(DEB, "\n\tFrameCounter %u\n", frameCounter);
 	}
 	if (m_oldVmmID != vmmID || newEvent)
 	{
-		XTRACE(PROCESS, DEB, "\tvmmID  %d\n", vmmID);
+		DTRACE(DEB, "\tvmmID  %d\n", vmmID);
 	}
 	if (planeID == 0)
 	{
-		XTRACE(PROCESS, DEB,
+		DTRACE(DEB,
 				"\t\tx-channel %d (chNo  %d) - overThresholdFlag %d\n", x, chNo,
 				overThresholdFlag);
 	}
 	else if (planeID == 1)
 	{
-		XTRACE(PROCESS, DEB,
+		DTRACE(DEB,
 				"\t\ty-channel %d (chNo  %d) - overThresholdFlag %d\n", y, chNo,
 				overThresholdFlag);
 	}
 	else
 	{
-		XTRACE(PROCESS, DEB, "\t\tPlane for vmmID %d not defined!\n", vmmID);
+		DTRACE(DEB, "\t\tPlane for vmmID %d not defined!\n", vmmID);
 	}
-	XTRACE(PROCESS, DEB, "\t\t\tbcid %d, tdc %d, adc %d\n", bcid, tdc, adc);
-	XTRACE(PROCESS, DEB,
+	DTRACE(DEB, "\t\t\tbcid %d, tdc %d, adc %d\n", bcid, tdc, adc);
+	DTRACE(DEB,
 			"\t\t\tbcTime %.2f us, tdcTime %.2f ns, time %.2f us\n", bcTime,
 			tdcTime, chipTime * 0.001);
 
@@ -268,7 +271,7 @@ int RootFile::ClusterByStrip(
 		if (stripCount == 0)
 		{
 			startTime = time1;
-			XTRACE(PROCESS, DEB, "\n%s cluster:\n", coordinate.c_str());
+			DTRACE(DEB, "\n%s cluster:\n", coordinate.c_str());
 		}
 
 		// Add members of a cluster, if it is either the beginning of a cluster,
@@ -278,7 +281,7 @@ int RootFile::ClusterByStrip(
 						&& abs(strip1 - strip2) <= (dStrip + 1)
 						&& time1 - startTime <= dSpan))
 		{
-			XTRACE(PROCESS, DEB, "\tstrip %d, time %f, adc %d:\n", strip1,
+			DTRACE(DEB, "\tstrip %d, time %f, adc %d:\n", strip1,
 					time1, adc1);
 			if (time1 > largestTime)
 			{
@@ -306,7 +309,7 @@ int RootFile::ClusterByStrip(
 				AddClusters(centerOfGravity, clusterPositionUTPC, stripCount,
 						totalADC, centerOfTime, largestTime, coordinate);
 				clusterCount++;
-				XTRACE(PROCESS, DEB, "******** VALID ********\n");
+				DTRACE(DEB, "******** VALID ********\n");
 
 			}
 
@@ -329,7 +332,7 @@ int RootFile::ClusterByStrip(
 		AddClusters(centerOfGravity, clusterPositionUTPC, stripCount, totalADC,
 				centerOfTime, largestTime, coordinate);
 		clusterCount++;
-		XTRACE(PROCESS, DEB, "******** VALID ********\n");
+		DTRACE(DEB, "******** VALID ********\n");
 	}
 	return clusterCount;
 }
@@ -396,12 +399,12 @@ void RootFile::MatchClustersXY(float dPlane)
 				theCommonCluster.timeY = m_tempClusterY[ny].time;
 				m_clusterXY.push_back(theCommonCluster);
 
-				XTRACE(PROCESS, DEB, "\ncommon cluster x/y (center of mass):");
-				XTRACE(PROCESS, DEB, "\tpos x/pos y: %f/%f", posx, posy);
-				XTRACE(PROCESS, DEB, "\ttime x/time y: : %f/%f", tx, ty);
-				XTRACE(PROCESS, DEB, "\tadc x/adc y: %f/%f",
+				DTRACE(DEB, "\ncommon cluster x/y (center of mass):");
+				DTRACE(DEB, "\tpos x/pos y: %f/%f", posx, posy);
+				DTRACE(DEB, "\ttime x/time y: : %f/%f", tx, ty);
+				DTRACE(DEB, "\tadc x/adc y: %u/%u",
 						theCommonCluster.adcX, theCommonCluster.adcY);
-				XTRACE(PROCESS, DEB, "\tsize x/size y: %f/%f",
+				DTRACE(DEB, "\tsize x/size y: %u/%u",
 						theCommonCluster.sizeX, theCommonCluster.sizeY);
 
 				break;
@@ -442,12 +445,12 @@ void RootFile::MatchClustersXY(float dPlane)
 				theCommonCluster_uTPC.timeY = m_tempClusterY[ny].time;
 				m_clusterXY_uTPC.push_back(theCommonCluster_uTPC);
 
-				XTRACE(PROCESS, DEB, "\ncommon cluster x/y (center of mass):");
-				XTRACE(PROCESS, DEB, "\tpos x/pos y: %f/%f", posx, posy);
-				XTRACE(PROCESS, DEB, "\ttime x/time y: : %f/%f", tx, ty);
-				XTRACE(PROCESS, DEB, "\tadc x/adc y: %f/%f",
+				DTRACE(DEB, "\ncommon cluster x/y (center of mass):");
+				DTRACE(DEB, "\tpos x/pos y: %f/%f", posx, posy);
+				DTRACE(DEB, "\ttime x/time y: : %f/%f", tx, ty);
+				DTRACE(DEB, "\tadc x/adc y: %u/%u",
 						theCommonCluster_uTPC.adcX, theCommonCluster_uTPC.adcY);
-				XTRACE(PROCESS, DEB, "\tsize x/size y: %f/%f",
+				DTRACE(DEB, "\tsize x/size y: %u/%u",
 						theCommonCluster_uTPC.sizeX,
 						theCommonCluster_uTPC.sizeY);
 
@@ -467,8 +470,8 @@ void RootFile::FillClusters()
 	int cntY = ClusterByTime(m_hitsOldY, pDeltaTimeHits,
 			pDeltaStripHits, pDeltaTimeSpan, "y");
 
-	XTRACE(PROCESS, DEB, "%d cluster in x\n", cntX);
-	XTRACE(PROCESS, DEB, "%d cluster in y\n", cntY);
+	DTRACE(DEB, "%d cluster in x\n", cntX);
+	DTRACE(DEB, "%d cluster in y\n", cntY);
 
 	MatchClustersXY(pDeltaTimePlanes);
 
@@ -578,4 +581,3 @@ int RootFile::GetChannel(std::vector<int>& chipIDs, int chipID,
 		return -1;
 	}
 }
-
