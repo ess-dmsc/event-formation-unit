@@ -32,6 +32,20 @@ RdKafka::Producer *RdKafka::Producer::create(RdKafka::Conf *type,
   pcreateprod real_create = (pcreateprod)dlsym(
       RTLD_NEXT,
       "_ZN7RdKafka8Producer6createEPNS_4ConfERSs"); // nm -C librdkafka.a
+
+  printf("real_create OLD ABI: %p\n", (void*)real_create);
+
+  if (real_create == NULL) {
+    dlerror();
+    real_create = (pcreateprod)dlsym(
+        RTLD_NEXT,
+      "_ZN7RdKafka8Producer6createEPNS_4ConfERNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE");
+    }
+
+  if (real_create == NULL) {
+    printf("Error stubbing kafka functions\n");
+    exit(1);
+  }
 #pragma GCC diagnostic pop
   if (fail == 777) {
     printf("Forcing RdKafka::Producer::create() to fail\n");
@@ -51,7 +65,13 @@ RdKafka::Topic *RdKafka::Topic::create(RdKafka::Handle *handle,
   pcreatetopic real_create = (pcreatetopic)dlsym(
       RTLD_NEXT,
       "_ZN7RdKafka5Topic6createEPNS_6HandleERKSsPNS_4ConfERSs"); // nm -C
-                                                                 // librdkafka.a
+
+  if (real_create == NULL) {                                                                // librdkafka.a
+    real_create = (pcreatetopic)dlsym(
+      RTLD_NEXT,
+      "_ZN7RdKafka5Topic6createEPNS_6HandleERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPNS_4ConfERS8_");
+  }
+
 #pragma GCC diagnostic pop
   if (fail == 888) {
     printf("Forcing RdKafka::Topic::create() to fail\n");
