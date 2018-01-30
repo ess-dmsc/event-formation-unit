@@ -31,20 +31,20 @@ else ()
   message(STATUS "Unable to compile gennmxfile as h5cpp was not found.")
 endif ()
 
-#
-#if (PCAP_FOUND)
-#  include_directories(${PCAP_INCLUDE_DIR})
-#  set(gennmxpcap_SRC
-#    nmxgen/wireshark.cpp
-#    nmxgen/ReaderPcap.cpp
-#    nmxgen/NMXArgs.cpp)
-#  set(gennmxpcap_INC
-#    nmxgen/ReaderPcap.h
-#    nmxgen/NMXArgs.h)
-#  create_executable(gennmxpcap "pcap")
-#else ()
-#  message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
-#endif ()
+
+if (PCAP_FOUND)
+  include_directories(${PCAP_INCLUDE_DIR})
+  set(gennmxpcap_SRC
+    nmxgen/wireshark.cpp
+    nmxgen/ReaderPcap.cpp
+    nmxgen/NMXArgs.cpp)
+  set(gennmxpcap_INC
+    nmxgen/ReaderPcap.h
+    nmxgen/NMXArgs.h)
+  create_executable(gennmxpcap "pcap")
+else ()
+  message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
+endif ()
 
 
 #
@@ -104,6 +104,7 @@ set(RootFileBenchmarkTest_SRC dg_impl/RootFile.cpp dg_impl/RootFileBenchmarkTest
 create_benchmark_executable(RootFileBenchmarkTest "")
 
 set(EventFormationTest_SRC
+  ${datasave_SRC}
   nmx/AbstractEventletBuilder.cpp
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
@@ -114,6 +115,7 @@ set(EventFormationTest_SRC
   vmm2srs/SRSTime.cpp
   vmm2srs/SRSMappings.cpp)
 set(EventFormationTest_INC
+  ${datasave_INC}
   nmx/AbstractEventletBuilder.h
   nmx/Clusterer.h
   nmx/EventNMX.h
@@ -122,7 +124,7 @@ set(EventFormationTest_INC
   vmm2srs/ParserSRS.h
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h)
-create_test_executable(EventFormationTest "")
+create_test_executable(EventFormationTest "${h5_optional}")
 
 
 set(EventletBuilderBenchmarkTest_SRC nmx/Clusterer.cpp nmx/EventNMX.cpp nmx/Hists.cpp
