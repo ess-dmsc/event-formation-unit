@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 enable_testing()
-include_directories(..)
-include_directories(../.. )
+include_directories(.. ../..)
 
 
 #
@@ -24,16 +23,19 @@ create_module(sonde "")
 #
 
 
-
 set(IDEASDataTest_SRC
   ideas/DataTest.cpp
-  ideas/Data.cpp)
+  ideas/Data.cpp
+  )
 set(IDEASDataTest_INC
   ideas/Data.h
-  ideas/TestData.h)
+  ideas/TestData.h
+  )
 create_test_executable(IDEASDataTest "")
 
 
-set(IDEASGeometryTest_SRC ideas/GeometryTest.cpp)
-set(IDEASGeometryTest_INC Geometry.h)
+set(IDEASGeometryTest_SRC
+  ideas/GeometryTest.cpp)
+set(IDEASGeometryTest_INC
+  Geometry.h)
 create_test_executable(IDEASGeometryTest "")

@@ -8,10 +8,10 @@ include(${EXTRA_MODULES_DIR}/CompilerConfig.cmake)
 #=============================================================================
 # setting up conan for use from within cmake
 #=============================================================================
-if (EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
+if(EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
   message(STATUS "Using existing conanbuildinfo.cmake file")
   include(${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
   conan_basic_setup(KEEP_RPATHS)
-endif ()
+endif()
 
 add_subdirectory(multigrid)

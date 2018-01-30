@@ -12,11 +12,11 @@ list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR})
 #=============================================================================
 # In case conan has generated info, use it now
 #=============================================================================
-if (EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
+if(EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
   message(STATUS "Using existing conanbuildinfo.cmake file")
   include(${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
   conan_basic_setup(KEEP_RPATHS)
-endif ()
+endif()
 
 include(${EXTRA_MODULES_DIR}/EnsureBuildType.cmake)
 include(${EXTRA_MODULES_DIR}/CompilerConfig.cmake)
@@ -27,54 +27,54 @@ include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 option(GOOGLE_BENCHMARK "Enable google benchmark for unit tests" OFF)
 
 option(PROF "Enable profiling." OFF)
-if (${PROF})
+if(${PROF})
   set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -pg)
   set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -pg)
   set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -pg)
   message(STATUS "Profiling enabled.")
-else ()
+else()
   message(STATUS "Profiling disabled.")
-endif ()
+endif()
 
 add_subdirectory(libs)
 add_subdirectory(prototype2)
 add_subdirectory(udp)
 #add_subdirectory(dataformats) # built separately for now
 
-set(gcovr_excl_opts "-e .*Test.cpp -e .*gtest.*.h -e .*_generated.h -e .*CLI11.hpp" )
+set(gcovr_excl_opts "-e .*Test.cpp -e .*gtest.*.h -e .*_generated.h -e .*CLI11.hpp")
 create_coverage_targets(
-    coverage
-    runtest
-    ${PROJECT_BINARY_DIR}
-    ${CMAKE_SOURCE_DIR}
-    ${PROJECT_BINARY_DIR}/coverage
-    ${gcovr_excl_opts})
+  coverage
+  runtest
+  ${PROJECT_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}
+  ${PROJECT_BINARY_DIR}/coverage
+  ${gcovr_excl_opts})
 
 add_custom_target(hints
-    COMMAND echo ""
-    COMMAND echo "GNU Make hints for accessing basic functionality."
-    COMMAND echo "Most of these commands must be preceeded by a \\\"make all\\\""
-    COMMAND echo "command."
-    COMMAND echo "--------------------------------------------------------------------------------"
-    COMMAND echo "Run unit tests:                         make runtest"
-    COMMAND echo "Run memcheck  tests:                    make valgrind"
-    COMMAND echo "Run coverage tests:                     make coverage"
-    COMMAND echo "Verbose output:                         make VERBOSE=1"
-    COMMAND echo ""
-    COMMAND echo "CMake hints"
-    COMMAND echo "--------------------------------------------------------------------------------"
-    COMMAND echo "Enable code coverage:                   cmake -DCOV=ON .."
-    COMMAND echo "Specify a build string:                 cmake -DBUILDSTR=v1.2.3 .."
-    COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug .."
-    COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release .."
-    COMMAND echo "    NOTE: Relase mode requires a build string"
-    COMMAND echo ""
-    COMMAND echo "CMake hints advanced/not generally used"
-    COMMAND echo "--------------------------------------------------------------------------------"
-    COMMAND echo "Suggest PCAP root:                      cmake -DPCAP_ROOT_DIR=/opt/dmg_grp .."
-    COMMAND echo "Suggest GraylogLogger root:             cmake -DGraylogLogger_ROOT_DIR=/opt/dmg_grp .."
-    COMMAND echo "Suggest LibRDKafka root:                cmake -DLibRDKafka_ROOT_DIR=/opt/dmg_grp .."
-    COMMAND echo "Dump vmm readout to file - det. group:  cmake -DDUMPTOFILE=ON .."
-    COMMAND echo "List cmake variables:                   cmake .. -LH     "
-    COMMAND echo ""
-    )
+  COMMAND echo ""
+  COMMAND echo "GNU Make hints for accessing basic functionality."
+  COMMAND echo "Most of these commands must be preceeded by a \\\"make all\\\""
+  COMMAND echo "command."
+  COMMAND echo "--------------------------------------------------------------------------------"
+  COMMAND echo "Run unit tests:                         make runtest"
+  COMMAND echo "Run memcheck  tests:                    make valgrind"
+  COMMAND echo "Run coverage tests:                     make coverage"
+  COMMAND echo "Verbose output:                         make VERBOSE=1"
+  COMMAND echo ""
+  COMMAND echo "CMake hints"
+  COMMAND echo "--------------------------------------------------------------------------------"
+  COMMAND echo "Enable code coverage:                   cmake -DCOV=ON .."
+  COMMAND echo "Specify a build string:                 cmake -DBUILDSTR=v1.2.3 .."
+  COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug .."
+  COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release .."
+  COMMAND echo "    NOTE: Relase mode requires a build string"
+  COMMAND echo ""
+  COMMAND echo "CMake hints advanced/not generally used"
+  COMMAND echo "--------------------------------------------------------------------------------"
+  COMMAND echo "Suggest PCAP root:                      cmake -DPCAP_ROOT_DIR=/opt/dmg_grp .."
+  COMMAND echo "Suggest GraylogLogger root:             cmake -DGraylogLogger_ROOT_DIR=/opt/dmg_grp .."
+  COMMAND echo "Suggest LibRDKafka root:                cmake -DLibRDKafka_ROOT_DIR=/opt/dmg_grp .."
+  COMMAND echo "Dump vmm readout to file - det. group:  cmake -DDUMPTOFILE=ON .."
+  COMMAND echo "List cmake variables:                   cmake .. -LH     "
+  COMMAND echo ""
+  )
