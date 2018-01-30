@@ -1,0 +1,19 @@
+cmd: cd build && make
+name: "make"
+errorMatch:
+  - "style"
+targets:
+  runtest:
+    cmd: 'cd build && make runtest'
+  gemsim:
+    cmd: 'cd utils/gemsim && make'
+  gemsim_run:
+    cmd: 'cd utils/gemsim && ./gemsim'
+  rootfiletest:
+    cmd: 'cd build && make RootFileTest'
+  rootfiletest_run:
+    cmd: 'cd build && ./unit_tests/RootFileTest'
+  cppcheck_init:
+    cmd: 'cd build && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..'
+  cppcheck:
+    cmd: 'cd build && rm -f cppcheckerr.txt ; cppcheck --enable=warning -j 5 --project=compile_commands.json 2> cppcheckerr.txt'

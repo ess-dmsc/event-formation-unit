@@ -56,5 +56,6 @@ int main(int argc, char *argv[]) {
   printf("Total sent: %" PRIu64 " packets\n", pkt);
   printf("Total sent: %" PRIu64 " bytes\n", bytes);
 
+  fclose(f);
   return 0;
 }

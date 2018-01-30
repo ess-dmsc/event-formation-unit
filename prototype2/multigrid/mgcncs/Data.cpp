@@ -21,7 +21,7 @@ int CSPECData::createevent(const MultiGridData &data, uint32_t *time,
   auto grid = chanconv->getgridid(data.d[6]);
   auto wire = chanconv->getwireid(data.d[2]);
 
-  XTRACE(PROCESS, DEB, "panel %d, grid %d, wire %d\n", panel, grid, wire);
+  XTRACE(PROCESS, DEB, "panel %u, grid %d, wire %d\n", panel, grid, wire);
 
   /** @todo eventually get rid of this, but electronics is wrongly wired
    * on the prototype detector currently being tested
@@ -43,12 +43,12 @@ int CSPECData::createevent(const MultiGridData &data, uint32_t *time,
 
   auto pixid = multigridgeom->getdetectorpixelid(panel, grid, wire);
   if (pixid < 1) {
-    XTRACE(PROCESS, WAR, "panel %d, grid %d, wire %d, pixel %d\n", panel, grid,
+    XTRACE(PROCESS, WAR, "panel %u, grid %d, wire %d, pixel %d\n", panel, grid,
            wire, pixid);
     return -1;
   }
 
-  XTRACE(PROCESS, INF, "panel %d, grid %d, wire %d, pixel %d\n", panel, grid,
+  XTRACE(PROCESS, INF, "panel %u, grid %d, wire %d, pixel %d\n", panel, grid,
          wire, pixid);
 
   static_assert(sizeof(data.time) == 4, "time should be 32 bit");
@@ -106,7 +106,7 @@ int CSPECData::receive(const char *buffer, int size) {
       }
 
       data[elems].d[datctr] = (*datap) & 0x3fff;
-      XTRACE(PROCESS, DEB, "data[%d].d[%d]: %d\n", elems, datctr,
+      XTRACE(PROCESS, DEB, "data[%u].d[%u]: %u\n", elems, datctr,
              data[elems].d[datctr]);
       datctr++;
       if (datctr == 8) {
@@ -126,7 +126,7 @@ int CSPECData::receive(const char *buffer, int size) {
       //       "State::ftr valid data, next state State:hdr, events %u\n",
       //       elems);
       data[elems].time = (*datap) & 0x3fffffff;
-      XTRACE(PROCESS, DEB, "time: %d\n", data[elems].time);
+      XTRACE(PROCESS, DEB, "time: %u\n", data[elems].time);
       elems++;
       state = State::hdr;
 
@@ -155,7 +155,7 @@ int CSPECData::input_filter() {
   for (unsigned int i = 0; i < elems; i++) {
     data[i].valid = 0;
     if ((data[i].d[0] < wire_thresh) || (data[i].d[4] < grid_thresh)) {
-      XTRACE(PROCESS, INF, "data 0 or 4 failed, thresholds: %d, %d\n",
+      XTRACE(PROCESS, INF, "data 0 or 4 failed, thresholds: %u, %u\n",
              wire_thresh, grid_thresh);
       discarded++; // due to low signal
       continue;
@@ -163,7 +163,7 @@ int CSPECData::input_filter() {
     data[i].valid = 1;
 
     if (data[i].d[1] >= wire_thresh) {
-      XTRACE(PROCESS, INF, "data 1 or 5 failed, thresholds: %d, %d\n",
+      XTRACE(PROCESS, INF, "data 1 or 5 failed, thresholds: %u, %u\n",
              wire_thresh, grid_thresh);
       discarded++;       // due to duplicate neutron event
       data[i].valid = 0; // invalidate
