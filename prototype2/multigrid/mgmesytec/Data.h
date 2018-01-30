@@ -8,7 +8,7 @@
 
 #pragma once
 #include <common/ReadoutSerializer.h>
-#include <dataformats/multigrid/inc/DataSave.h>
+#include <common/DataSave.h>
 #include <multigrid/mgmesytec/MGSEQDetector.h>
 
 class MesytecData {

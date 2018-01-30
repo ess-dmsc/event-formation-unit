@@ -8,7 +8,7 @@
 #include <common/FBSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
-#include <dataformats/multigrid/inc/DataSave.h>
+#include <common/DataSave.h>
 #include <unistd.h>
 
 #include <libs/include/SPSCFifo.h>

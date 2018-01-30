@@ -125,6 +125,13 @@ set(NewStatsTest_SRC
   common/NewStats.h)
 create_test_executable(NewStatsTest "")
 
+set(DataSaveTest_SRC
+  common/DataSaveTest.cpp
+  common/DataSave.cpp)
+set(DataSaveTest_INC
+  common/DataSave.h)
+create_test_executable(DataSaveTest "")
+
 
 #
 # ESS Readout System Tests

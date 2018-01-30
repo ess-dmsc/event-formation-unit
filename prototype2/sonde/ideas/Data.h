@@ -11,7 +11,7 @@
 #pragma once
 
 #include <cinttypes>
-#include <dataformats/multigrid/inc/DataSave.h>
+#include <common/DataSave.h>
 #include <sonde/Geometry.h>
 
 class IDEASData {

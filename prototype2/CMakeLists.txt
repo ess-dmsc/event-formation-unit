@@ -5,76 +5,21 @@ enable_testing()
 include_directories(. ..)
 
 #
-# These libraries are required
+# Dependencies common to EFU and plugins
 #
-find_package(Threads REQUIRED)
-set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
-  ${CMAKE_THREAD_LIBS_INIT}
-  )
-
-find_package(LibRDKafka REQUIRED)
-set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
-  ${LibRDKafka_LIBRARIES}
-  ${LibRDKafka_C_LIBRARIES}
-  )
-
-#
-# These libraries are optional
-#
-find_package(GraylogLogger REQUIRED)
-if(GraylogLogger_FOUND)
-  set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} ${GraylogLogger_LIBRARIES})
-  add_definitions("-DGRAYLOG")
-endif()
-
-find_package(h5cpp)
-if(h5cpp_FOUND)
-  set(H5_LIBS h5cpp)
-endif()
-
-
-#
-# Common functionality for all detector plugins
-#
-set(common_SRC
-  common/NewStats.cpp
-  common/Producer.cpp
-  common/FBSerializer.cpp
-  )
-set(common_INC
-  common/Detector.h
-  common/NewStats.h
-  common/Producer.h
-  common/FBSerializer.h
-  common/Trace.h
-  common/EFUArgs.h
-  ../libs/include/gccintel.h
-  )
-
-option(DUMPTOFILE "Dump vmm2srsdaq data to file (Doro option)" OFF)
-if(${DUMPTOFILE})
-  message(STATUS "Dumping to file enabled.")
-  add_definitions("-DDUMPTOFILE")
-  set(common_SRC ${common_SRC} ../dataformats/multigrid/src/DataSave.cpp)
-  set(common_INC ${common_INC} ../dataformats/multigrid/inc/DataSave.h)
-else()
-  message(STATUS "Not dumping to file.")
-endif()
-
-add_library(common STATIC
-  ${common_SRC}
-  ${common_INC})
-set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} common)
-
+add_subdirectory(common)
 
 include(Utilities.cmake)
+include(UnitTests.cmake)
+
+#
+# Plugins
+#
 add_subdirectory(gdgem)
 add_subdirectory(multiblade)
 add_subdirectory(multigrid)
 add_subdirectory(sonde)
 add_subdirectory(udp)
-
-include(UnitTests.cmake)
 
 
 #

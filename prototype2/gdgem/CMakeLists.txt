@@ -18,7 +18,7 @@ if(h5cpp_FOUND)
     nmxgen/NMXArgs.h
     nmxgen/ReaderVMM.h
     )
-  create_executable(gennmxfile "${H5_LIBS}")
+  create_executable(gennmxfile "")
 else()
   message(STATUS "Unable to compile gennmxfile as h5cpp was not found.")
 endif()
@@ -79,7 +79,7 @@ set(gdgem_INC
   vmm2srs/ParserSRS.h
   vmm2srs/EventletBuilderSRS.h
   )
-create_module(gdgem "${H5_LIBS}")
+create_module(gdgem "")
 
 #
 # NMX / VMM Tests
@@ -128,7 +128,7 @@ set(EventFormationTest_INC
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h
   )
-create_test_executable(EventFormationTest "${H5_LIBS}")
+create_test_executable(EventFormationTest "")
 
 
 set(EventletBuilderBenchmarkTest_SRC
@@ -204,7 +204,7 @@ set(EventletBuilderH5Test_INC
   nmx/Hists.h
   nmxgen/EventletBuilderH5.h
   )
-create_test_executable(EventletBuilderH5Test "${H5_LIBS}")
+create_test_executable(EventletBuilderH5Test "")
 
 set(EventletBuilderTest_SRC
   nmx/Clusterer.cpp
@@ -227,7 +227,7 @@ set(EventletBuilderTest_INC
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h
   )
-create_test_executable(EventletBuilderTest "${H5_LIBS}")
+create_test_executable(EventletBuilderTest "")
 
 set(EventletTest_SRC
   nmx/EventletTest.cpp

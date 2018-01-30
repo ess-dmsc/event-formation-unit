@@ -11,7 +11,7 @@
 #include <gdgem/nmx/Hists.h>
 
 #ifdef DUMPTOFILE
-#include <dataformats/multigrid/inc/DataSave.h>
+#include <common/DataSave.h>
 #include <h5cpp/hdf5.hpp>
 #endif
 

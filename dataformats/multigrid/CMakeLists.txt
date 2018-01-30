@@ -8,22 +8,31 @@ project(mgtools)
 include_directories(
   ${mgtools_SOURCE_DIR}/inc
   ${mgtools_SOURCE_DIR}/../../prototype2
-  ${mgtools_SOURCE_DIR}/../..)
+  ${mgtools_SOURCE_DIR}/../..
+)
 
 
 add_executable(batchreader
-  src/batchreader.cpp src/Analyse.cpp src/Args.cpp
-  src/MapFile.cpp src/PeakFinder.cpp src/RunSpecParse.cpp src/jsoncpp.cpp
+  src/batchreader.cpp
+  src/Analyse.cpp
+  src/Args.cpp
+  src/MapFile.cpp
+  src/PeakFinder.cpp
+  src/RunSpecParse.cpp
+  src/jsoncpp.cpp
   ../../prototype2/multigrid/mgcncs/ChanConv.cpp
   ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp
-  ../../prototype2/multigrid/mgcncs/Data.cpp)
+  ../../prototype2/multigrid/mgcncs/Data.cpp
+  )
 
 add_executable(cncsread src/cncsread.cpp)
 
-add_executable(genpixids src/genpixids.cpp
-  src/DataSave.cpp
+add_executable(genpixids
+  src/genpixids.cpp
+  ../../prototype2/common/DataSave.cpp
   ../../prototype2/multigrid/mgcncs/ChanConv.cpp
-  ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp)
+  ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp
+  )
 
 #
 # Install Files
@@ -45,11 +54,6 @@ if(BUILD_TESTS)
     ${GTEST_INCLUDE_DIRS}
     ${mgtools_SOURCE_DIR}/../../prototype2/test
   )
-
-  add_executable(DataSaveTest src/test/DataSaveTest.cpp src/DataSave.cpp)
-  target_link_libraries(DataSaveTest ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-  set(unit_test_targets DataSaveTest ${unit_test_targets})
-  add_test(NAME regular_DataSaveTest COMMAND DataSaveTest "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/PeakFinderTesttest.xml")
 
   add_executable(PeakFinderTest src/test/PeakFinderTest.cpp src/PeakFinder.cpp)
   target_link_libraries(PeakFinderTest ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})

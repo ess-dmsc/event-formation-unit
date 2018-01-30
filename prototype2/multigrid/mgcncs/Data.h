@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include <dataformats/multigrid/inc/DataSave.h>
+#include <common/DataSave.h>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/MultigridGeometry.h>
 
