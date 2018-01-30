@@ -1,5 +1,13 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
+option(DUMPTOFILE "Dump vmm2srsdaq data to file (Doro option)" OFF)
+if (${DUMPTOFILE})
+  add_definitions("-DDUMPTOFILE")
+  message(STATUS "Dumping to file.")
+else ()
+  message(STATUS "Not dumping to file.")
+endif ()
+
 enable_testing()
 
 include_directories(. ..)

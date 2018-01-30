@@ -3,12 +3,14 @@ project("event-formation-unit")
 set(event-formation-unit_VERSION_MAJOR 1)
 set(event-formation-unit_VERSION_MINOR 0)
 
+#=============================================================================
+# Augment CMake with our custom scripts
+#=============================================================================
 set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake_modules)
 list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR})
-include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 
 #=============================================================================
-# setting up conan for use from within cmake
+# In case conan has generated info, use it now
 #=============================================================================
 if (EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
   message(STATUS "Using existing conanbuildinfo.cmake file")
@@ -16,72 +18,13 @@ if (EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
   conan_basic_setup(KEEP_RPATHS)
 endif ()
 
-
-if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-  message(STATUS "Setting build type to 'Debug' as none was specified.")
-  set(CMAKE_BUILD_TYPE Debug)
-endif ()
-
-function(makebuildstr)
-  execute_process(COMMAND "whoami" OUTPUT_VARIABLE user_name OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process(COMMAND "date" "+%F %H:%M:%S" OUTPUT_VARIABLE date OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process(COMMAND "uname" "-n" OUTPUT_VARIABLE m_name OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process(COMMAND "uname" "-r" OUTPUT_VARIABLE m_version OUTPUT_STRIP_TRAILING_WHITESPACE)
-  execute_process(COMMAND "git" "rev-parse" "--short" "HEAD" OUTPUT_VARIABLE hash OUTPUT_STRIP_TRAILING_WHITESPACE)
-  set(BUILDSTR "${date} [${m_name}:${user_name}] [${m_version}] ${hash}" PARENT_SCOPE)
-endfunction()
-
-if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
-  if (NOT DEFINED BUILDSTR)
-    message(FATAL_ERROR "Build string must be set manually when compiling using release mode e.g. \"-DBUILDSTR=v1.2.3\".")
-  endif ()
-else ()
-  set(BUILDSTR "")
-  makebuildstr()
-endif ()
-
-
-message(STATUS "Build str: ${BUILDSTR}")
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
-#set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -ggdb -flto -fno-omit-frame-pointer -O3 -DRELEASE -DNDEBUG")
+include(${EXTRA_MODULES_DIR}/EnsureBuildType.cmake)
+include(${EXTRA_MODULES_DIR}/CompilerConfig.cmake)
+include(${EXTRA_MODULES_DIR}/BuildString.cmake)
+include(${EXTRA_MODULES_DIR}/FindGTestFix.cmake)
+include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 
 option(GOOGLE_BENCHMARK, "Enable google benchmark for unit tests" OFF)
-
-option(USE_OLD_ABI "Sets _GLIBCXX_USE_CXX11_ABI=0 for CentOS builds" ON)
-set(EXTRA_CXX_FLAGS -std=c++11 -fPIC)
-set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
-set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-Werror -Wall -Wpedantic -Wextra -Wno-missing-include-dirs")
-set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DBUILDSTR=${BUILDSTR}")
-
-if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
-  # Hackity-hack...
-  message(STATUS "Disabling some of the newer compiler features... Hackity-hack...")
-  set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-Wno-implicit-fallthrough -Wno-aligned-new")
-endif ()
-
-if (${USE_OLD_ABI})
-  message(WARNING "Setting _GLIBCXX_USE_CXX11_ABI=0 consider changing this when gcc on CentOS is updated")
-  set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D_GLIBCXX_USE_CXX11_ABI=0")
-endif ()
-
-if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
-  message(STATUS "Detected MacOSX")
-elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
-  message(STATUS "Detected Linux")
-  find_library(DL_LIB dl REQUIRED)
-else ()
-  message(FATAL_ERROR "Unknown system")
-endif ()
-
-option(CMAKE_BUILD_TYPE "Build type; \"Release\" or \"Debug\"." Debug)
-
-option(DUMPTOFILE "Dump vmm2srsdaq data to file (Doro option)" OFF)
-if (${DUMPTOFILE})
-  set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DDUMPTOFILE")
-  message(STATUS "Dumping to file.")
-else ()
-  message(STATUS "Not dumping to file.")
-endif ()
 
 option(PROF "Enable profiling." OFF)
 if (${PROF})
@@ -92,17 +35,6 @@ if (${PROF})
 else ()
   message(STATUS "Profiling disabled.")
 endif ()
-
-add_definitions(${EXTRA_CXX_FLAGS})
-
-include(${EXTRA_MODULES_DIR}/FindGTestFix.cmake)
-
-if (${CMAKE_COMPILER_IS_GNUCXX})
-  set(CMAKE_AR "gcc-ar")
-  set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
-  set(CMAKE_CXX_ARCHIVE_FINISH true)
-endif ()
-
 
 add_subdirectory(libs)
 add_subdirectory(prototype2)

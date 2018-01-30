@@ -20,7 +20,7 @@ dgmgjson
 *Test$
 
 #directories
-build/
+build*/
 
 #IDE
 CMakeLists.txt.user
