@@ -69,14 +69,13 @@ set(FBSerializerTest_SRC common/FBSerializerTest.cpp common/FBSerializer.cpp com
 set(FBSerializerTest_INC common/FBSerializer.h common/Producer.h)
 create_test_executable(FBSerializerTest "${LibRDKafka_LIBRARIES}")
 
-if((NOT ${CMAKE_COMPILER_IS_GNUCXX}) OR (${SKIP_PRODUCER_TEST}))
-  message(WARNING "skipping ProducerTest - requires gcc/linux")
-else()
+if(${CMAKE_COMPILER_IS_GNUCXX})
   set(ProducerTest_SRC common/ProducerTest.cpp common/Producer.cpp)
   set(ProducerTest_INC common/Producer.h)
   create_test_executable(ProducerTest "${LibRDKafka_LIBRARIES}")
+else()
+  message(WARNING "skipping ProducerTest - requires gcc/linux")
 endif()
-
 
 set(ReadoutSerializerTest_SRC common/ReadoutSerializerTest.cpp common/ReadoutSerializer.cpp common/Producer.cpp)
 set(ReadoutSerializerTest_INC common/ReadoutSerializer.h common/Producer.cpp)
