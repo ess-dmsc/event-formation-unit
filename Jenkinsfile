@@ -98,7 +98,8 @@ def docker_tests_coverage(image_key) {
         try {
             sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd build
-                make coverage_xml VERBOSE=ON
+                make VERBOSE=ON
+                make coverage VERBOSE=ON
             \""""
             sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
             junit 'build/test_results/*.xml'
