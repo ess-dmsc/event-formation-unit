@@ -6,11 +6,7 @@ if(NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD LESS 11)
 endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
 set(EXTRA_CXX_FLAGS "-Werror -Wall -Wpedantic -Wextra")
-
-set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
-
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
 #set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -ggdb -flto -fno-omit-frame-pointer -O3 -DRELEASE -DNDEBUG")
 
@@ -29,10 +25,10 @@ endif ()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     message(STATUS "Detected MacOSX")
-    set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} -std=c++11)
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     message(STATUS "Detected Linux")
     find_library(DL_LIB dl REQUIRED)
+    set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
 else ()
     message(FATAL_ERROR "Unknown system")
 endif ()
