@@ -3,21 +3,20 @@ project("event-formation-unit")
 set(event-formation-unit_VERSION_MAJOR 1)
 set(event-formation-unit_VERSION_MINOR 0)
 
-set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules)
-set(CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR})
+set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake_modules)
+list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR})
 include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 
 #=============================================================================
 # setting up conan for use from within cmake
 #=============================================================================
-set(WITH_CONAN OFF CACHE BOOL "Enable dependency build with conan")
-set(CONAN_FILE "conanfile.txt" CACHE STRING "The conanfile to use for the build")
+option(WITH_CONAN "Enable dependency build with conan" OFF)
 
 if (WITH_CONAN)
   include(${EXTRA_MODULES_DIR}/ConanSetup.cmake)
-  conan_cmake_run(CONANFILE ${CONAN_FILE}
-          BASIC_SETUP
-          BUILD missing)
+  conan_cmake_run(CONANFILE "conanfile.txt"
+      BASIC_SETUP UPDATE
+      BUILD outdated)
 endif ()
 
 if (EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
@@ -132,7 +131,7 @@ create_coverage_targets(
         coverage
         runtest
         ${PROJECT_BINARY_DIR}
-        ${CMAKE_SOURCE_DIR}/
+        ${CMAKE_SOURCE_DIR}
         ${PROJECT_BINARY_DIR}/coverage
         ${gcovr_excl_opts})
 

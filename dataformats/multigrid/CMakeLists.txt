@@ -62,4 +62,4 @@ if(BUILD_TESTS)
   add_test(NAME regular_HistogramTest COMMAND HistogramTest "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/HistogramTesttest.xml")
 endif(BUILD_TESTS)
 
-add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_* DEPENDS ${unit_test_targets})
+#add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_* DEPENDS ${unit_test_targets})
