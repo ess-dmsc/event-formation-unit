@@ -81,11 +81,11 @@ function(create_test_executable exec_name link_libraries)
     set_target_properties(${exec_name} PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
     enable_coverage(${exec_name})
-    set(link_libraries ${link_libraries} dl)
 
     target_link_libraries(${exec_name}
         ${link_libraries}
         ${EFU_COMMON_LIBS}
+        ${CMAKE_DL_LIBS}
         ${GTEST_LIBRARIES}
         ${CMAKE_THREAD_LIBS_INIT}
         )

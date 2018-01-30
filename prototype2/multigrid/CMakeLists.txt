@@ -115,7 +115,7 @@ set(MGMesytecDataTest_INC
   ../common/Producer.h
   mgmesytec/Data.h
   mgmesytec/TestData.h)
-create_test_executable(MGMesytecDataTest "${EFU_COMMON_LIBS}")
+create_test_executable(MGMesytecDataTest "")
 
 set(MGSEQDetectorTest_SRC
 mgmesytec/MGSEQDetectorTest.cpp)

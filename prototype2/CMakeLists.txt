@@ -16,6 +16,7 @@ set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
 find_package(GraylogLogger REQUIRED)
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
     ${GraylogLogger_LIBRARIES})
+add_definitions("-DGRAYLOG")
 
 find_package(PCAP)
 

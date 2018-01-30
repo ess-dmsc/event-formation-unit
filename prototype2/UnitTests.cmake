@@ -14,8 +14,6 @@ endif()
 
 mark_as_advanced(VALGRIND_CMD)
 
-add_definitions(-std=c++11)
-
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/multigrid/calib_data DESTINATION ${CMAKE_BINARY_DIR}/prototype2)
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/memcheck_res/)
 
@@ -93,7 +91,7 @@ set(FBSerializerTest_SRC
 set(FBSerializerTest_INC
     common/FBSerializer.h
     common/Producer.h)
-create_test_executable(FBSerializerTest "${EFU_COMMON_LIBS}")
+create_test_executable(FBSerializerTest "")
 
 if(${CMAKE_COMPILER_IS_GNUCXX})
  #AND (NOT ${SKIP_PRODUCER_TEST}))
@@ -102,7 +100,7 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
       common/Producer.cpp)
   set(ProducerTest_INC
       common/Producer.h)
-  create_test_executable(ProducerTest "${EFU_COMMON_LIBS}")
+  create_test_executable(ProducerTest "")
 else()
   message(WARNING "skipping ProducerTest - requires gcc/linux")
 endif()
@@ -114,7 +112,7 @@ set(ReadoutSerializerTest_SRC
 set(ReadoutSerializerTest_INC
     common/ReadoutSerializer.h
     common/Producer.cpp)
-create_test_executable(ReadoutSerializerTest "${EFU_COMMON_LIBS}")
+create_test_executable(ReadoutSerializerTest "")
 
 
 set(EFUArgsTest_SRC
