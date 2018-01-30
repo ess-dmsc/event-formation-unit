@@ -14,7 +14,11 @@ endif()
 
 mark_as_advanced(VALGRIND_CMD)
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/multigrid/calib_data DESTINATION ${CMAKE_BINARY_DIR}/prototype2)
+# Why is this here sandwiched between valgrind stuff?
+# Should this not be with the multigrid stuff?
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/multigrid/calib_data
+    DESTINATION ${CMAKE_BINARY_DIR}/prototype2)
+
 file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/memcheck_res/)
 
 #
@@ -56,11 +60,6 @@ set(VersionTest_SRC
     common/VersionTest.cpp
     common/Version.h)
 create_test_executable(VersionTest "")
-
-set(ESSGeometryTest_SRC
-    common/ESSGeometryTest.cpp
-    common/ESSGeometry.h)
-create_test_executable(ESSGeometryTest "")
 
 
 set(RingBufferTest_SRC

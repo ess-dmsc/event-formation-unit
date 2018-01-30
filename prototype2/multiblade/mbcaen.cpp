@@ -5,7 +5,6 @@
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
-#include <common/ESSGeometry.h>
 #include <common/FBSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
@@ -20,6 +19,8 @@
 #include <mbcaen/MB16Detector.h>
 #include <mbcaen/MBData.h>
 #include <mbcommon/multiBladeEventBuilder.h>
+
+#include <logical_geometry/ESSGeometry.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB

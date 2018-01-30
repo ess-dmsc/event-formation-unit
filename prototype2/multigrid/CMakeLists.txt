@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
-include_directories(.. ../.. ${FLATBUFFERS_INCLUDE_DIR})
+include_directories(.. ../.. )
 #
 # Detector Pipeline Plugins
 #
@@ -9,11 +9,6 @@ include_directories(.. ../.. ${FLATBUFFERS_INCLUDE_DIR})
 #set(mgcncs_SRC mgcncs.cpp mgcncs/Data.cpp mgcncs/ChanConv.cpp)
 #set(mgcncs_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/MultigridGeometry.h)
 #create_module(mgcncs "")
-
-if (DUMPTOFILE)
-set(datasave_SRC ../../dataformats/multigrid/src/DataSave.cpp)
-set(datasave_INC ../../dataformats/multigrid/inc/DataSave.h)
-endif ()
 
 
 # Two-thread implementation of Multi Grid demonstrator detector
@@ -87,13 +82,11 @@ set(MGCNCSChanConvTest_SRC
 create_test_executable(MGCNCSChanConvTest "")
 
 set(MGCNCSDataTest_SRC
-  ${datasave_SRC}
   mgcncs/DataTest.cpp
   mgcncs/Data.cpp
   mgcncs/ChanConv.cpp
   )
 set(MGCNCSDataTest_INC
-  ${datasave_INC}
   mgcncs/Data.h
   mgcncs/ChanConv.h
   mgcncs/TestData.h
@@ -102,14 +95,12 @@ create_test_executable(MGCNCSDataTest "")
 
 
 set(MGMesytecDataTest_SRC
-  ${datasave_SRC}
   ../gdgem/nmx/Hists.cpp
   ../common/ReadoutSerializer.cpp
   ../common/Producer.cpp
   mgmesytec/DataTest.cpp
   mgmesytec/Data.cpp)
 set(MGMesytecDataTest_INC
-  ${datasave_INC}
   ../gdgem/nmx/Hists.h
   ../common/ReadoutSerializer.h
   ../common/Producer.h
@@ -126,6 +117,16 @@ create_test_executable(MGSEQDetectorTest "")
 #set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
 #set(CSPECEventTest_INC cspec/CSPECEvent.h)
 #create_test_executable(CSPECEventTest "")
+
+# Is this ever used?
+set(PYTHON_EXECUTABLE /usr/bin/python)
+
+
+# This possibly only gets used by the thing below
+# Is this really the best way to do this?
+add_library(calibfile OBJECT mgcncs/CalibrationFile.cpp)
+enable_coverage_flags(calibfile)
+
 
 if (${CMAKE_COMPILER_IS_GNUCXX})
   set(CalibrationFileTest_LIB_SRC

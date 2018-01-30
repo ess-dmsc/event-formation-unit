@@ -32,13 +32,12 @@ function(create_module module_name link_libraries)
 
     add_dependencies(${module_name}
         eventlib
-        common)
+        )
     target_link_libraries(${module_name}
-        ${CMAKE_THREAD_LIBS_INIT}
         ${EFU_COMMON_LIBS}
         ${link_libraries}
         eventlib
-        common)
+        )
 endfunction(create_module)
 
 #
@@ -52,14 +51,12 @@ function(create_executable exec_name link_libraries)
     enable_coverage(${exec_name})
 
     add_dependencies(${exec_name}
-        eventlib
-        common)
+        eventlib)
     target_link_libraries(${exec_name}
-        ${CMAKE_THREAD_LIBS_INIT}
         ${EFU_COMMON_LIBS}
         ${link_libraries}
         eventlib
-        common)
+        )
 endfunction(create_executable)
 
 
@@ -87,7 +84,6 @@ function(create_test_executable exec_name link_libraries)
         ${EFU_COMMON_LIBS}
         ${CMAKE_DL_LIBS}
         ${GTEST_LIBRARIES}
-        ${CMAKE_THREAD_LIBS_INIT}
         )
 
 #    set_target_properties(${exec_name} PROPERTIES
@@ -117,8 +113,15 @@ function(create_benchmark_executable exec_name link_libraries)
     target_include_directories(${exec_name} PRIVATE ${GTEST_INCLUDE_DIRS})
     set_target_properties(${exec_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/benchmarks")
 
-    target_link_libraries(${exec_name} ${link_libraries} ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT} -lbenchmark)
-    set(benchmark_targets ${exec_name} ${benchmark_targets} CACHE INTERNAL "All targets")
+    target_link_libraries(${exec_name}
+        ${link_libraries}
+        ${GTEST_LIBRARIES}
+        ${CMAKE_THREAD_LIBS_INIT}
+        -lbenchmark)
+    set(benchmark_targets
+        ${exec_name}
+        ${benchmark_targets}
+        CACHE INTERNAL "All targets")
   else ()
     message(STATUS "skipping benchmark for ${exec_name} (can be enabled by cmake -DGOOGLE_BENCHMARK=YES)")
   endif()

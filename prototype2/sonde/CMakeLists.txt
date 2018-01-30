@@ -1,12 +1,8 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 enable_testing()
 include_directories(..)
-include_directories(../.. ${FLATBUFFERS_INCLUDE_DIR})
+include_directories(../.. )
 
-if (DUMPTOFILE)
-set(datasave_SRC ../../dataformats/multigrid/src/DataSave.cpp)
-set(datasave_INC ../../dataformats/multigrid/inc/DataSave.h)
-endif ()
 
 #
 # Detector Pipeline Plugins
@@ -30,11 +26,9 @@ create_module(sonde "")
 
 
 set(IDEASDataTest_SRC
-  ${datasave_SRC}
   ideas/DataTest.cpp
   ideas/Data.cpp)
 set(IDEASDataTest_INC
-  ${datasave_INC}
   ideas/Data.h
   ideas/TestData.h)
 create_test_executable(IDEASDataTest "")

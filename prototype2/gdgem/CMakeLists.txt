@@ -1,14 +1,10 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 enable_testing()
-include_directories(. .. ../.. ${FLATBUFFERS_INCLUDE_DIR})
+include_directories(. .. ../.. )
 
 find_package(h5cpp)
 set(h5_optional)
 
-if (DUMPTOFILE)
-set(datasave_SRC ../../dataformats/multigrid/src/DataSave.cpp)
-set(datasave_INC ../../dataformats/multigrid/inc/DataSave.h)
-endif ()
 
 #
 # Tools and Data generators
@@ -32,8 +28,9 @@ else ()
 endif ()
 
 
+find_package(PCAP)
 if (PCAP_FOUND)
-  include_directories(${PCAP_INCLUDE_DIR})
+#  include_directories(${PCAP_INCLUDE_DIR})
   set(gennmxpcap_SRC
     nmxgen/wireshark.cpp
     nmxgen/ReaderPcap.cpp
@@ -104,7 +101,6 @@ set(RootFileBenchmarkTest_SRC dg_impl/RootFile.cpp dg_impl/RootFileBenchmarkTest
 create_benchmark_executable(RootFileBenchmarkTest "")
 
 set(EventFormationTest_SRC
-  ${datasave_SRC}
   nmx/AbstractEventletBuilder.cpp
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
@@ -115,7 +111,6 @@ set(EventFormationTest_SRC
   vmm2srs/SRSTime.cpp
   vmm2srs/SRSMappings.cpp)
 set(EventFormationTest_INC
-  ${datasave_INC}
   nmx/AbstractEventletBuilder.h
   nmx/Clusterer.h
   nmx/EventNMX.h
@@ -167,7 +162,6 @@ set(ParserSRSTest_SRC
 create_test_executable(ParserSRSTest "")
 
 set(EventletBuilderH5Test_SRC
-  ${datasave_SRC}
   nmx/EventNMX.cpp
   nmx/Clusterer.cpp
   nmx/Hists.cpp
@@ -175,7 +169,6 @@ set(EventletBuilderH5Test_SRC
   nmxgen/EventletBuilderH5Test.cpp
   nmxgen/EventletBuilderH5.cpp)
 set(EventletBuilderH5Test_INC
-  ${datasave_INC}
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
@@ -184,7 +177,6 @@ set(EventletBuilderH5Test_INC
 create_test_executable(EventletBuilderH5Test "${h5_optional}")
 
 set(EventletBuilderTest_SRC
-  ${datasave_SRC}
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Hists.cpp
@@ -195,7 +187,6 @@ set(EventletBuilderTest_SRC
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp)
 set(EventletBuilderTest_INC
-  ${datasave_INC}
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Hists.h

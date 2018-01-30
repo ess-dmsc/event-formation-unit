@@ -1,13 +1,5 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
-option(DUMPTOFILE "Dump vmm2srsdaq data to file (Doro option)" OFF)
-if (${DUMPTOFILE})
-  add_definitions("-DDUMPTOFILE")
-  message(STATUS "Dumping to file.")
-else ()
-  message(STATUS "Not dumping to file.")
-endif ()
-
 enable_testing()
 
 include_directories(. ..)
@@ -15,33 +7,23 @@ include_directories(. ..)
 set(EFU_COMMON_LIBS)
 
 find_package(Threads REQUIRED)
+set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
+    ${CMAKE_THREAD_LIBS_INIT}
+    )
 
 find_package(LibRDKafka REQUIRED)
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
     ${LibRDKafka_LIBRARIES}
-    ${LibRDKafka_C_LIBRARIES})
+    ${LibRDKafka_C_LIBRARIES}
+    )
 
 find_package(GraylogLogger REQUIRED)
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
-    ${GraylogLogger_LIBRARIES})
+    ${GraylogLogger_LIBRARIES}
+    )
 add_definitions("-DGRAYLOG")
 
-find_package(PCAP)
 
-
-include(Utilities.cmake)
-add_subdirectory(gdgem)
-add_subdirectory(multiblade)
-add_subdirectory(multigrid)
-add_subdirectory(sonde)
-add_subdirectory(udp)
-
-include(UnitTests.cmake)
-
-add_library(calibfile OBJECT multigrid/mgcncs/CalibrationFile.cpp)
-enable_coverage_flags(calibfile)
-
-set(PYTHON_EXECUTABLE /usr/bin/python)
 
 #
 # Common functionality for all detector plugins
@@ -61,14 +43,31 @@ set(common_INC
     ../libs/include/gccintel.h
     )
 
-if (DUMPTOFILE)
+option(DUMPTOFILE "Dump vmm2srsdaq data to file (Doro option)" OFF)
+if (${DUMPTOFILE})
+  message(STATUS "Dumping to file.")
+  add_definitions("-DDUMPTOFILE")
   set(common_SRC ${common_SRC} ../dataformats/multigrid/src/DataSave.cpp)
   set(common_INC ${common_INC} ../dataformats/multigrid/inc/DataSave.h)
+else ()
+  message(STATUS "Not dumping to file.")
 endif ()
 
 add_library(common STATIC
     ${common_SRC}
     ${common_INC})
+set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} common)
+
+
+include(Utilities.cmake)
+add_subdirectory(gdgem)
+add_subdirectory(multiblade)
+add_subdirectory(multigrid)
+add_subdirectory(sonde)
+add_subdirectory(udp)
+
+include(UnitTests.cmake)
+
 
 #
 # the E F U
@@ -95,7 +94,4 @@ set(efu2_INC
     efu/Parser.h
     efu/ExitHandler.h
     )
-set(efu_LIB
-    ${EFU_COMMON_LIBS}
-    ${CMAKE_DL_LIBS})
-create_executable(efu2 "${efu_LIB}")
+create_executable(efu2 "${CMAKE_DL_LIBS}")
