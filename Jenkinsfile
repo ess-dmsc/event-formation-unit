@@ -81,7 +81,6 @@ def docker_build(image_key) {
 
 def docker_tests(image_key) {
     def custom_sh = images[image_key]['sh']
-    dir("${project}/tests") {
         try {
             sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd build
@@ -91,26 +90,23 @@ def docker_tests(image_key) {
         } catch(e) {
             failure_function(e, 'Run tests (${container_name(image_key)}) failed')
         }
-    }
 }
 
 def docker_tests_coverage(image_key) {
     def custom_sh = images[image_key]['sh']
-    dir("${project}/tests") {
+    dir("${project}/build") {
         try {
             sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd build
-                make runtest VERBOSE=ON
-                make coverage_xml
+                make coverage_xml VERBOSE=ON
             \""""
-            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test_results ./"
-            junit 'test_results/*.xml'
-            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/coverage/coverage.xml coverage.xml"
+            sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
+            junit 'build/test_results/*.xml'
             step([
                 $class: 'CoberturaPublisher',
                 autoUpdateHealth: true,
                 autoUpdateStability: true,
-                coberturaReportFile: 'coverage.xml',
+                coberturaReportFile: 'build/coverage/coverage.xml',
                 failUnhealthy: false,
                 failUnstable: false,
                 maxNumberOfBuilds: 0,
@@ -119,8 +115,8 @@ def docker_tests_coverage(image_key) {
                 zoomCoverageChart: false
             ])
         } catch(e) {
-            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test_results/*.xml ."
-            junit '*.xml'
+            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test_results ./"
+            junit 'test_results/*.xml'
             failure_function(e, 'Run tests (${container_name(image_key)}) failed')
         }
     }
@@ -193,7 +189,7 @@ def get_pipeline(image_key)
 def get_macos_pipeline()
 {
     return {
-        stage("MacOSX") {
+        stage("macOS") {
             node ("macos") {
             // Delete workspace when build is done
                 cleanWs()
@@ -269,7 +265,7 @@ node('docker && dmbuild03.dm.esss.dk') {
         def image_key = x
         builders[image_key] = get_pipeline(image_key)
     }
-    builders['MocOS'] = get_macos_pipeline()
+    builders['macOS'] = get_macos_pipeline()
 
     parallel builders
 }
