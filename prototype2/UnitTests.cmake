@@ -178,14 +178,3 @@ set(StatCounterTest_INC
 create_test_executable(StatCounterTest "")
 
 
-#
-#  These commands must be at the end of this file
-#
-add_custom_target(runtest
-  COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
-  DEPENDS ${unit_test_targets})
-add_custom_target(valgrind
-  COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*
-  DEPENDS ${unit_test_targets})
-add_custom_target(benchmark
-  DEPENDS ${benchmark_targets})

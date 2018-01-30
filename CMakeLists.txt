@@ -46,7 +46,7 @@ create_coverage_targets(
   coverage
   runtest
   ${PROJECT_BINARY_DIR}
-  ${CMAKE_SOURCE_DIR}
+  ${CMAKE_SOURCE_DIR}/
   ${PROJECT_BINARY_DIR}/coverage
   ${gcovr_excl_opts})
 

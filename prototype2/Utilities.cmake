@@ -27,17 +27,12 @@ function(create_module module_name link_libraries)
     ${${module_name}_INC})
   set_target_properties(${module_name} PROPERTIES PREFIX "")
   set_target_properties(${module_name} PROPERTIES SUFFIX ".so")
-  install(TARGETS ${module_name} DESTINATION bin)
-  enable_coverage(${module_name})
-
-  add_dependencies(${module_name}
-    eventlib
-    )
   target_link_libraries(${module_name}
     ${EFU_COMMON_LIBS}
     ${link_libraries}
-    eventlib
-    )
+    eventlib)
+  enable_coverage(${module_name})
+  install(TARGETS ${module_name} DESTINATION bin)
 endfunction(create_module)
 
 #
@@ -47,16 +42,13 @@ function(create_executable exec_name link_libraries)
   add_executable(${exec_name}
     ${${exec_name}_SRC}
     ${${exec_name}_INC})
-  install(TARGETS ${exec_name} DESTINATION bin)
-  enable_coverage(${exec_name})
 
-  add_dependencies(${exec_name}
-    eventlib)
   target_link_libraries(${exec_name}
     ${EFU_COMMON_LIBS}
     ${link_libraries}
-    eventlib
-    )
+    eventlib)
+  enable_coverage(${exec_name})
+  install(TARGETS ${exec_name} DESTINATION bin)
 endfunction(create_executable)
 
 
@@ -76,7 +68,6 @@ function(create_test_executable exec_name link_libraries)
     PRIVATE ${GTEST_INCLUDE_DIRS})
   set_target_properties(${exec_name} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
-  enable_coverage(${exec_name})
 
   target_link_libraries(${exec_name}
     ${link_libraries}
@@ -95,6 +86,8 @@ function(create_test_executable exec_name link_libraries)
   set(unit_test_targets
     ${unit_test_targets} ${exec_name}
     CACHE INTERNAL "All targets")
+
+  enable_coverage(${exec_name})
 
   if(EXISTS ${VALGRIND_CMD})
     add_test(NAME memcheck_${exec_name} COMMAND ${VALGRIND_CMD} --tool=memcheck --leak-check=full --verbose --xml=yes --xml-file=${CMAKE_BINARY_DIR}/memcheck_res/${exec_name}test.valgrind ${CMAKE_BINARY_DIR}/unit_tests/${exec_name})

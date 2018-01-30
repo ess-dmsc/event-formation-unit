@@ -23,3 +23,5 @@ add_library(eventlib
   ${library_SRC}
   ${library_INC}
   )
+
+enable_coverage(eventlib)

@@ -48,3 +48,18 @@ set(efu2_INC
   efu/ExitHandler.h
   )
 create_executable(efu2 "${CMAKE_DL_LIBS}")
+
+enable_coverage(efu2)
+
+#
+#  These commands must be at the end of this file
+#
+add_custom_target(runtest
+  COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
+  DEPENDS ${unit_test_targets})
+add_custom_target(valgrind
+  COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*
+  DEPENDS ${unit_test_targets})
+add_custom_target(benchmark
+  DEPENDS ${benchmark_targets})
+
