@@ -90,8 +90,8 @@ function(create_test_executable exec_name link_libraries)
         ${CMAKE_THREAD_LIBS_INIT}
         )
 
-    set_target_properties(${exec_name} PROPERTIES
-        COMPILE_FLAGS "-Wno-error")
+#    set_target_properties(${exec_name} PROPERTIES
+#        COMPILE_FLAGS "-Wno-error")
 
     add_test(NAME regular_${exec_name}
         COMMAND ${exec_name} "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")

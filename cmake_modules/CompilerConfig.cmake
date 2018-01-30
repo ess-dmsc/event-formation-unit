@@ -7,8 +7,7 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS}
-    "-Werror -Wall -Wpedantic -Wextra")
+set(EXTRA_CXX_FLAGS "-Werror -Wall -Wpedantic -Wextra")
 
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
 
@@ -30,6 +29,7 @@ endif ()
 
 if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
     message(STATUS "Detected MacOSX")
+    set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} -std=c++11)
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     message(STATUS "Detected Linux")
     find_library(DL_LIB dl REQUIRED)
