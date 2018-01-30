@@ -57,7 +57,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
 option(GOOGLE_BENCHMARK, "Enable google benchmark for unit tests" OFF)
 
 option(USE_OLD_ABI "Sets _GLIBCXX_USE_CXX11_ABI=0 for CentOS builds" ON)
-set(EXTRA_CXX_FLAGS -std=c++11 -pthread -fPIC)
+set(EXTRA_CXX_FLAGS -std=c++11 -fPIC)
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-Werror -Wall -Wpedantic -Wextra -Wno-missing-include-dirs")
 set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DBUILDSTR=${BUILDSTR}")

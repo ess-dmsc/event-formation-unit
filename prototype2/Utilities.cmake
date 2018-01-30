@@ -19,64 +19,98 @@ function(add_compile_flags target flags)
 endfunction(add_compile_flags)
 
 #
-# Function to generate a loadable detector module
+# Generate a loadable detector module
 #
 function(create_module module_name link_libraries)
-    add_library(${module_name} MODULE ${${module_name}_SRC} ${${module_name}_INC})
+    add_library(${module_name} MODULE
+        ${${module_name}_SRC}
+        ${${module_name}_INC})
     set_target_properties(${module_name} PROPERTIES PREFIX "")
     set_target_properties(${module_name} PROPERTIES SUFFIX ".so")
-    add_dependencies(${module_name} eventlib common)
-    enable_coverage(${module_name})
-    set(module_LIB ${CMAKE_THREAD_LIBS_INIT} eventlib common ${LibRDKafka_LIBRARIES} ${LibRDKafka_C_LIBRARIES} ${link_libraries})
-    if(${GraylogLogger_FOUND})
-        set(module_LIB ${GraylogLogger_LIBRARIES} ${module_LIB})
-    endif()
-    target_link_libraries(${module_name} ${module_LIB})
     install(TARGETS ${module_name} DESTINATION bin)
+    enable_coverage(${module_name})
+
+    add_dependencies(${module_name}
+        eventlib
+        common)
+    target_link_libraries(${module_name}
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${EFU_COMMON_LIBS}
+        ${link_libraries}
+        eventlib
+        common)
 endfunction(create_module)
 
 #
-# Function to generate an executable program
+# Generate an executable program
 #
 function(create_executable exec_name link_libraries)
-    add_executable(${exec_name}  ${${exec_name}_SRC} ${${exec_name}_INC} )
-    add_dependencies(${exec_name} eventlib common)
-    enable_coverage(${exec_name})
-    set(exe_LIB ${CMAKE_THREAD_LIBS_INIT} eventlib common ${LibRDKafka_LIBRARIES} ${LibRDKafka_C_LIBRARIES} ${link_libraries})
-    if(${GraylogLogger_FOUND})
-        set(exe_LIB ${GraylogLogger_LIBRARIES} ${exe_LIB})
-    endif()
+    add_executable(${exec_name}
+        ${${exec_name}_SRC}
+        ${${exec_name}_INC})
     install(TARGETS ${exec_name} DESTINATION bin)
-    target_link_libraries(${exec_name} ${exe_LIB})
+    enable_coverage(${exec_name})
+
+    add_dependencies(${exec_name}
+        eventlib
+        common)
+    target_link_libraries(${exec_name}
+        ${CMAKE_THREAD_LIBS_INIT}
+        ${EFU_COMMON_LIBS}
+        ${link_libraries}
+        eventlib
+        common)
 endfunction(create_executable)
 
 
+
+#
+# To generate unit test targets
+#
+
 set(unit_test_targets "" CACHE INTERNAL "All targets")
+
 function(create_test_executable exec_name link_libraries)
     # message(STATUS ${exec_name})
     # message(STATUS ${unit_test_targets})
-    add_executable(${exec_name} EXCLUDE_FROM_ALL ${${exec_name}_SRC} ${${exec_name}_INC} )
-    target_include_directories(${exec_name} PRIVATE ${GTEST_INCLUDE_DIRS})
-    set_target_properties(${exec_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
+    add_executable(${exec_name} EXCLUDE_FROM_ALL
+        ${${exec_name}_SRC}
+        ${${exec_name}_INC} )
+    target_include_directories(${exec_name}
+        PRIVATE ${GTEST_INCLUDE_DIRS})
+    set_target_properties(${exec_name} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
     enable_coverage(${exec_name})
     set(link_libraries ${link_libraries} dl)
 
-    target_link_libraries(${exec_name} ${link_libraries} ${GTEST_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
-    if(${GraylogLogger_FOUND})
-        target_link_libraries(${exec_name}  ${GraylogLogger_LIBRARIES})
-    endif()
+    target_link_libraries(${exec_name}
+        ${link_libraries}
+        ${EFU_COMMON_LIBS}
+        ${GTEST_LIBRARIES}
+        ${CMAKE_THREAD_LIBS_INIT}
+        )
 
-    set_target_properties(${exec_name} PROPERTIES COMPILE_FLAGS "-Wno-error")
+    set_target_properties(${exec_name} PROPERTIES
+        COMPILE_FLAGS "-Wno-error")
 
-    add_test(NAME regular_${exec_name} COMMAND ${exec_name} "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
-    set(unit_test_targets ${exec_name} ${unit_test_targets} CACHE INTERNAL "All targets")
+    add_test(NAME regular_${exec_name}
+        COMMAND ${exec_name} "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
+
+    set(unit_test_targets ${unit_test_targets} ${exec_name} CACHE INTERNAL "All targets")
+
     if (EXISTS ${VALGRIND_CMD})
         add_test(NAME memcheck_${exec_name} COMMAND ${VALGRIND_CMD} --tool=memcheck --leak-check=full --verbose --xml=yes --xml-file=${CMAKE_BINARY_DIR}/memcheck_res/${exec_name}test.valgrind ${CMAKE_BINARY_DIR}/unit_tests/${exec_name})
     endif()
 endfunction(create_test_executable)
 
 
+
+#
+# To generate benchmark targets
+#
+
 set(benchmark_targets "" CACHE INTERNAL "All targets")
+
 function(create_benchmark_executable exec_name link_libraries)
   if (GOOGLE_BENCHMARK)
     add_executable(${exec_name} EXCLUDE_FROM_ALL ${${exec_name}_SRC} ${${exec_name}_INC} )

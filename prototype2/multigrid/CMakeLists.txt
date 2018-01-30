@@ -115,7 +115,7 @@ set(MGMesytecDataTest_INC
   ../common/Producer.h
   mgmesytec/Data.h
   mgmesytec/TestData.h)
-create_test_executable(MGMesytecDataTest "${LibRDKafka_LIBRARIES}")
+create_test_executable(MGMesytecDataTest "${EFU_COMMON_LIBS}")
 
 set(MGSEQDetectorTest_SRC
 mgmesytec/MGSEQDetectorTest.cpp)
