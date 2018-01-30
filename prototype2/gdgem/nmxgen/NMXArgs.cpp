@@ -97,7 +97,7 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
   printf("Generating a bulk data stream\n");
   if (!filename.empty())
     printf("  from file:              %s", filename.c_str());
-  printf("  number of bytes:        %d GB\n", txGB);
+  printf("  number of bytes:        %u GB\n", txGB);
   printf("  number of packets:      %" PRIu64 " packets\n", txPkt);
   printf("  speed throttle:         %d\n", throttle);
   printf("Network properties\n");
@@ -106,5 +106,5 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
   printf("  tx buffer size:         %dB\n", buflen);
   printf("  sndbuf:                 %dB\n", sndbuf);
   printf("Other properties\n");
-  printf("  update interval:        %ds\n", updint);
+  printf("  update interval:        %us\n", updint);
 }

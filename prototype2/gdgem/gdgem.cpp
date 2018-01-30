@@ -166,7 +166,7 @@ void NMX::input_thread() {
     if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                   eth_ringbuf->getmaxbufsize())) > 0) {
       eth_ringbuf->setdatalength(eth_index, rdsize);
-      XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
+      XTRACE(INPUT, DEB, "rdsize: %d\n", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
