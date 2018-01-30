@@ -94,7 +94,7 @@ def docker_tests(image_key) {
 
 def docker_tests_coverage(image_key) {
     def custom_sh = images[image_key]['sh']
-    dir("${project}/build") {
+    dir("${project}") {
         try {
             sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd build
@@ -115,8 +115,8 @@ def docker_tests_coverage(image_key) {
                 zoomCoverageChart: false
             ])
         } catch(e) {
-            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test_results ./"
-            junit 'test_results/*.xml'
+            sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
+            junit 'build/test_results/*.xml'
             failure_function(e, 'Run tests (${container_name(image_key)}) failed')
         }
     }
