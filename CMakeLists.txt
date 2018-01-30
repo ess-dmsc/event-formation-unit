@@ -24,7 +24,7 @@ include(${EXTRA_MODULES_DIR}/BuildString.cmake)
 include(${EXTRA_MODULES_DIR}/FindGTestFix.cmake)
 include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 
-option(GOOGLE_BENCHMARK, "Enable google benchmark for unit tests" OFF)
+option(GOOGLE_BENCHMARK "Enable google benchmark for unit tests" OFF)
 
 option(PROF "Enable profiling." OFF)
 if (${PROF})

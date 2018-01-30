@@ -96,8 +96,12 @@ set(RootFileTest_INC
 create_test_executable(RootFileTest "")
 
 # GOOGLE BENCHMARK
-set(RootFileBenchmarkTest_INC dg_impl/RootFile.h dg_impl/TestData.h)
-set(RootFileBenchmarkTest_SRC dg_impl/RootFile.cpp dg_impl/RootFileBenchmarkTest.cpp)
+set(RootFileBenchmarkTest_INC
+    dg_impl/RootFile.h
+    dg_impl/TestData.h)
+set(RootFileBenchmarkTest_SRC
+    dg_impl/RootFile.cpp
+    dg_impl/RootFileBenchmarkTest.cpp)
 create_benchmark_executable(RootFileBenchmarkTest "")
 
 set(EventFormationTest_SRC
@@ -122,12 +126,24 @@ set(EventFormationTest_INC
 create_test_executable(EventFormationTest "${h5_optional}")
 
 
-set(EventletBuilderBenchmarkTest_SRC nmx/Clusterer.cpp nmx/EventNMX.cpp nmx/Hists.cpp
-  nmx/AbstractEventletBuilder.cpp vmm2srs/EventletBuilderSRSBenchmarkTest.cpp vmm2srs/EventletBuilderSRS.cpp
-  vmm2srs/ParserSRS.cpp vmm2srs/SRSMappings.cpp vmm2srs/SRSTime.cpp)
-set(EventletBuilderBenchmarkTest_INC nmx/Clusterer.h nmx/EventNMX.h nmx/Hists.h
-  nmx/Eventlet.h vmm2srs/ParserSRS.h vmm2srs/EventletBuilderSRS.h vmm2srs/SRSTime.h
-  vmm2srs/SRSMappings.h)
+set(EventletBuilderBenchmarkTest_SRC
+    nmx/Clusterer.cpp
+    nmx/EventNMX.cpp nmx/Hists.cpp
+    nmx/AbstractEventletBuilder.cpp
+    vmm2srs/EventletBuilderSRSBenchmarkTest.cpp
+    vmm2srs/EventletBuilderSRS.cpp
+    vmm2srs/ParserSRS.cpp
+    vmm2srs/SRSMappings.cpp
+    vmm2srs/SRSTime.cpp)
+set(EventletBuilderBenchmarkTest_INC
+    nmx/Clusterer.h
+    nmx/EventNMX.h
+    nmx/Hists.h
+    nmx/Eventlet.h
+    vmm2srs/ParserSRS.h
+    vmm2srs/EventletBuilderSRS.h
+    vmm2srs/SRSTime.h
+    vmm2srs/SRSMappings.h)
 create_benchmark_executable(EventletBuilderBenchmarkTest "")
 
 

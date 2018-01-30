@@ -90,9 +90,12 @@ function(create_test_executable exec_name link_libraries)
 #        COMPILE_FLAGS "-Wno-error")
 
     add_test(NAME regular_${exec_name}
-        COMMAND ${exec_name} "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
+        COMMAND ${exec_name}
+        "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
 
-    set(unit_test_targets ${unit_test_targets} ${exec_name} CACHE INTERNAL "All targets")
+    set(unit_test_targets
+        ${unit_test_targets} ${exec_name}
+        CACHE INTERNAL "All targets")
 
     if (EXISTS ${VALGRIND_CMD})
         add_test(NAME memcheck_${exec_name} COMMAND ${VALGRIND_CMD} --tool=memcheck --leak-check=full --verbose --xml=yes --xml-file=${CMAKE_BINARY_DIR}/memcheck_res/${exec_name}test.valgrind ${CMAKE_BINARY_DIR}/unit_tests/${exec_name})
@@ -109,9 +112,13 @@ set(benchmark_targets "" CACHE INTERNAL "All targets")
 
 function(create_benchmark_executable exec_name link_libraries)
   if (GOOGLE_BENCHMARK)
-    add_executable(${exec_name} EXCLUDE_FROM_ALL ${${exec_name}_SRC} ${${exec_name}_INC} )
-    target_include_directories(${exec_name} PRIVATE ${GTEST_INCLUDE_DIRS})
-    set_target_properties(${exec_name} PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/benchmarks")
+    add_executable(${exec_name} EXCLUDE_FROM_ALL
+        ${${exec_name}_SRC}
+        ${${exec_name}_INC} )
+    target_include_directories(${exec_name}
+        PRIVATE ${GTEST_INCLUDE_DIRS})
+    set_target_properties(${exec_name} PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/benchmarks")
 
     target_link_libraries(${exec_name}
         ${link_libraries}

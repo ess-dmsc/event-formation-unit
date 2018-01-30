@@ -59,14 +59,14 @@ def docker_cmake(image_key) {
             cd build
             . ./activate_run.sh
             ${cmake_exec} --version
-            ${cmake_exec} -DDUMPTOFILE=1 -DCOV=1 ../${project}
+            ${cmake_exec} -DDUMPTOFILE=ON -DCOV=ON ../${project}
         \""""
     } else {
         sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
             cd build
             . ./activate_run.sh
             ${cmake_exec} --version
-            ${cmake_exec} -DDUMPTOFILE=1 -DUSE_OLD_ABI=0 ../${project}
+            ${cmake_exec} -DDUMPTOFILE=ON -DUSE_OLD_ABI=OFF ../${project}
         \""""
     }
 }
@@ -214,7 +214,7 @@ def get_macos_pipeline()
                     }
 
                     try {
-                        sh "cmake -DCMAKE_MACOSX_RPATH=ON ../code"
+                        sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
                     } catch (e) {
                         failure_function(e, 'MacOSX / CMake failed')
                     }
