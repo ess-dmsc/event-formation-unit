@@ -84,14 +84,6 @@ endif ()
 
 option(CMAKE_BUILD_TYPE "Build type; \"Release\" or \"Debug\"." Debug)
 
-option(EXTSCHEMAS "Use flatbuffer headers defined in external \"streaming-data-types\" repository. That repository must be located in the root of this repository." OFF)
-if (${EXTSCHEMAS})
-  set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DFLATBUFFERS")
-  message(STATUS "Using external FB schema header files.")
-else ()
-  message(STATUS "Using internal FB schema header files.")
-endif ()
-
 option(DUMPTOFILE "Dump vmm2srsdaq data to file (Doro option)" OFF)
 if (${DUMPTOFILE})
   set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-DDUMPTOFILE")
@@ -149,7 +141,6 @@ add_custom_target(hints
                   COMMAND echo "CMake hints"
                   COMMAND echo "--------------------------------------------------------------------------------"
                   COMMAND echo "Enable code coverage:                   cmake -DCOV=ON .."
-                  COMMAND echo "Use external flatbuffer headers:        cmake -DEXTSCHEMAS=ON .."
                   COMMAND echo "Specify a build string:                 cmake -DBUILDSTR=v1.2.3 .."
                   COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug .."
                   COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release .."

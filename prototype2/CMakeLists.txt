@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 
 find_package(Threads REQUIRED)
+find_package(LibRDKafka REQUIRED)
+find_package(GraylogLogger REQUIRED)
 find_package(PCAP)
-find_package(LibRDKafka)
-find_package(GraylogLogger)
 
 enable_testing()
 
