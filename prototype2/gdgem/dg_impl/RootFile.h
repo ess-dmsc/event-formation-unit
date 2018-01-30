@@ -109,7 +109,7 @@ private:
 	double m_oldTriggerTimestamp_ns = 0;
 	bool m_subsequentTrigger = false;
 	int m_oldVmmID = 0;
-	int m_oldFrameCounter = 0;
+	unsigned int m_oldFrameCounter = 0;
 	double m_timeStamp_ms = 0;
 	int m_oldBcidX = 0;
 	int m_oldTdcX = 0;
