@@ -57,6 +57,7 @@ def docker_cmake(image_key) {
     {
         sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
             cd build
+            . ./activate_run.sh
             ${cmake_exec} --version
             ${cmake_exec} -DCOV=1 ../${project}
         \""""
@@ -98,6 +99,7 @@ def docker_tests_coverage(image_key) {
         try {
             sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd build
+                . ./activate_run.sh
                 make VERBOSE=ON
                 make coverage VERBOSE=ON
             \""""
