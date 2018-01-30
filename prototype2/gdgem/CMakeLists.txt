@@ -32,19 +32,19 @@ else ()
 endif ()
 
 #
-if (PCAP_FOUND)
-  include_directories(${PCAP_INCLUDE_DIR})
-  set(gennmxpcap_SRC
-    nmxgen/wireshark.cpp
-    nmxgen/ReaderPcap.cpp
-    nmxgen/NMXArgs.cpp)
-  set(gennmxpcap_INC
-    nmxgen/ReaderPcap.h
-    nmxgen/NMXArgs.h)
-  create_executable(gennmxpcap "pcap")
-else ()
-  message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
-endif ()
+#if (PCAP_FOUND)
+#  include_directories(${PCAP_INCLUDE_DIR})
+#  set(gennmxpcap_SRC
+#    nmxgen/wireshark.cpp
+#    nmxgen/ReaderPcap.cpp
+#    nmxgen/NMXArgs.cpp)
+#  set(gennmxpcap_INC
+#    nmxgen/ReaderPcap.h
+#    nmxgen/NMXArgs.h)
+#  create_executable(gennmxpcap "pcap")
+#else ()
+#  message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
+#endif ()
 
 
 #
