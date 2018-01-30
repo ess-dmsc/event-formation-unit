@@ -10,6 +10,10 @@ set(EXTRA_CXX_FLAGS "-Werror -Wall -Wpedantic -Wextra")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
 #set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -ggdb -flto -fno-omit-frame-pointer -O3 -DRELEASE -DNDEBUG")
 
+add_definitions("-D__FAVOR_BSD")
+
+#set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
+
 if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
     message(STATUS "*** GCC>7 Compiler is too awesome. The following warnings are disabled:")
     message(STATUS "       no-implicit-fallthrough")
@@ -28,7 +32,6 @@ if (${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
 elseif (${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
     message(STATUS "Detected Linux")
     find_library(DL_LIB dl REQUIRED)
-    set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
 else ()
     message(FATAL_ERROR "Unknown system")
 endif ()
