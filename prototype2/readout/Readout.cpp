@@ -17,13 +17,13 @@ int Readout::validate(const char *buffer, uint32_t size) {
   }
 
   if ((size < 64) || (size > 8960)) {
-    XTRACE(PROCESS, WAR, "Invalid data size (%d)\n", size);
+    XTRACE(PROCESS, WAR, "Invalid data size (%u)\n", size);
     return -Readout::ESIZE;
   }
 
   if (size % 64 != 0) {
     XTRACE(PROCESS, WAR,
-           "data size (%d) is not padded to multiple of 64 bytes\n", size);
+           "data size (%u) is not padded to multiple of 64 bytes\n", size);
     return -Readout::EPAD;
   }
 

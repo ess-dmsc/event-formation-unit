@@ -27,7 +27,7 @@ RootFile::~RootFile()
 }
 
 //====================================================================================================================
-int RootFile::AnalyzeHitData(int triggerTimestamp, int frameCounter, int fecID,
+int RootFile::AnalyzeHitData(int triggerTimestamp, unsigned int frameCounter, int fecID,
 		int vmmID, int chNo, int bcid, int tdc, int adc, int overThresholdFlag)
 {
 
@@ -47,7 +47,7 @@ int RootFile::AnalyzeHitData(int triggerTimestamp, int frameCounter, int fecID,
 			&& !(m_oldFrameCounter > frameCounter + 1000000000))
 	{
 		DTRACE(DEB,
-				"\n*********************************** SCRAMBLED eventNr  %d, old framecounter %d, new framecounter %d\n",
+				"\n*********************************** SCRAMBLED eventNr  %d, old framecounter %d, new framecounter %u\n",
 				m_eventNr, m_oldFrameCounter, frameCounter);
 	}
 

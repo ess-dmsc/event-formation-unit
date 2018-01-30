@@ -111,7 +111,7 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
       errors++;
     }
   }
-  XTRACE(PROCESS, DEB, "Number of events in buffer: %d\n", events);
+  XTRACE(PROCESS, DEB, "Number of events in buffer: %u\n", events);
   return events;
 }
 

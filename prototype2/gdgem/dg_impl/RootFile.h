@@ -44,7 +44,7 @@ public:
 
 
 // Filling the hits
-	int AnalyzeHitData(int triggerTimestamp, int frameCounter, int fecID,
+	int AnalyzeHitData(int triggerTimestamp, unsigned int frameCounter, int fecID,
 			int vmmID, int chNo, int bcid, int tdc, int adc,
 			int overThresholdFlag);
 	void AddHits(short x, short y, short adc, short bcid, float chipTime, bool overThresholdFlag);

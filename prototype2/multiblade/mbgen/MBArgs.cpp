@@ -91,13 +91,13 @@ MBArgs::MBArgs(int argc, char *argv[]) {
     printf("  from file:              %s", filename.c_str());
   if (!outfile.empty())
     printf("  to file:                %s", outfile.c_str());
-  printf("  number of bytes:        %d GB\n", txGB);
+  printf("  number of bytes:        %u GB\n", txGB);
   printf("  number of packets:      %" PRIu64 " packets\n", txPkt);
   printf("Network properties\n");
   printf("  destination ip address: %s\n", dest_ip.c_str());
   printf("  destination udp port:   %d\n", port);
   printf("  tx buffer size:         %dB\n", buflen);
-  printf("  sndbuf:                 %dB\n", sndbuf);
+  printf("  sndbuf:                 %uB\n", sndbuf);
   printf("Other properties\n");
-  printf("  update interval:        %ds\n", updint);
+  printf("  update interval:        %us\n", updint);
 }

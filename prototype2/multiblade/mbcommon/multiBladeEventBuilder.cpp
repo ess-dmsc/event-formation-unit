@@ -50,7 +50,7 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel,
     m_cluster_clock = clock;
     m_first_signal = false;
 
-    XTRACE(PROCESS, DEB, "First signal. Setting start clock to : %d\n", clock);
+    XTRACE(PROCESS, DEB, "First signal. Setting start clock to : %u\n", clock);
   }
 
   // Calculate the number of clock-cycles from the timestamp
@@ -60,7 +60,7 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel,
   if (clock_diff < m_time_window) {
 
     // point is within time-window
-    XTRACE(PROCESS, DEB, "Within time-window [%d < %d]\n", clock_diff,
+    XTRACE(PROCESS, DEB, "Within time-window [%u < %u]\n", clock_diff,
            m_time_window);
 
     // Add point to cluster
@@ -70,7 +70,7 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel,
   }
 
   // point is outside time-window - the cluster is complete.
-  XTRACE(PROCESS, DEB, "Outside time-window [%d > %d]\n", clock_diff,
+  XTRACE(PROCESS, DEB, "Outside time-window [%u > %u]\n", clock_diff,
          m_time_window);
 
   // multiBladeEventBuilder the stored clusters. True is returned if all checks
