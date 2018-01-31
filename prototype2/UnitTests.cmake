@@ -1,24 +1,3 @@
-if(NOT ${GTEST_FOUND})
-  message(WARNING "unable to build unit tests as GTest was not found.")
-  return()
-endif()
-
-find_program(VALGRIND_CMD valgrind)
-if(EXISTS ${VALGRIND_CMD})
-  message(STATUS "valgrind found.")
-else()
-  message(STATUS "valgrind not found. Unable to run memory check.")
-endif()
-
-mark_as_advanced(VALGRIND_CMD)
-
-# Why is this here sandwiched between valgrind stuff?
-# Should this not be with the multigrid stuff?
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/multigrid/calib_data
-  DESTINATION ${CMAKE_BINARY_DIR}/prototype2)
-
-file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/memcheck_res/)
-
 #
 # EFU Tests
 #
@@ -54,19 +33,15 @@ endif()
 #
 # common/ Tests
 #
-set(VersionTest_SRC
-  common/VersionTest.cpp)
-set(VersionTest_INC
-  common/Version.h)
-create_test_executable(VersionTest "")
 
-
-set(RingBufferTest_SRC
-  common/RingBufferTest.cpp)
-set(RingBufferTest_INC
-  common/RingBuffer.h)
-create_test_executable(RingBufferTest "")
-
+if(${DUMPTOFILE})
+  set(DataSaveTest_SRC
+    common/DataSaveTest.cpp
+    common/DataSave.cpp)
+  set(DataSaveTest_INC
+    common/DataSave.h)
+  create_test_executable(DataSaveTest "")
+endif()
 
 set(DetectorTest_SRC
   common/DetectorTest.cpp
@@ -76,14 +51,12 @@ set(DetectorTest_INC
   common/Detector.h)
 create_test_executable(DetectorTest "")
 
-
-set(MultiGridGeometryTest_SRC
-  multigrid/mgcncs/MultigridGeometryTest.cpp)
-set(MultiGridGeometryTest_INC
-  multigrid/mgcncs/MultigridGeometry.h
-  ../libs/include/TSCTimer.h)
-create_test_executable(MultiGridGeometryTest "")
-
+set(EFUArgsTest_SRC
+  common/EFUArgsTest.cpp
+  common/EFUArgs.cpp)
+set(EFUArgsTest_INC
+  common/EFUArgs.h)
+create_test_executable(EFUArgsTest "")
 
 set(FBSerializerTest_SRC
   common/FBSerializerTest.cpp
@@ -93,6 +66,13 @@ set(FBSerializerTest_INC
   common/FBSerializer.h
   common/Producer.h)
 create_test_executable(FBSerializerTest "")
+
+set(NewStatsTest_SRC
+  common/NewStatsTest.cpp
+  common/NewStats.cpp)
+set(NewStatsTest_INC
+  common/NewStats.h)
+create_test_executable(NewStatsTest "")
 
 if(${CMAKE_COMPILER_IS_GNUCXX})
   set(ProducerTest_SRC
@@ -114,27 +94,18 @@ set(ReadoutSerializerTest_INC
   common/Producer.cpp)
 create_test_executable(ReadoutSerializerTest "")
 
+set(RingBufferTest_SRC
+  common/RingBufferTest.cpp)
+set(RingBufferTest_INC
+  common/RingBuffer.h)
+create_test_executable(RingBufferTest "")
 
-set(EFUArgsTest_SRC
-  common/EFUArgsTest.cpp
-  common/EFUArgs.cpp)
-set(EFUArgsTest_INC
-  common/EFUArgs.h)
-create_test_executable(EFUArgsTest "")
+set(VersionTest_SRC
+  common/VersionTest.cpp)
+set(VersionTest_INC
+  common/Version.h)
+create_test_executable(VersionTest "")
 
-set(NewStatsTest_SRC
-  common/NewStatsTest.cpp
-  common/NewStats.cpp)
-set(NewStatsTest_INC
-  common/NewStats.h)
-create_test_executable(NewStatsTest "")
-
-set(DataSaveTest_SRC
-  common/DataSaveTest.cpp
-  common/DataSave.cpp)
-set(DataSaveTest_INC
-  common/DataSave.h)
-create_test_executable(DataSaveTest "")
 
 
 #

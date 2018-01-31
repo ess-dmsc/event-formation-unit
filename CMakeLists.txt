@@ -28,6 +28,12 @@ include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 include(${EXTRA_MODULES_DIR}/Benchmarks.cmake)
 include(${EXTRA_MODULES_DIR}/Profiling.cmake)
 
+if(NOT ${GTEST_FOUND})
+  # Do something more clever in this case?
+  message(WARNING "unable to build unit tests as GTest was not found.")
+  return()
+endif()
+
 add_subdirectory(libs)
 add_subdirectory(prototype2)
 add_subdirectory(udp)

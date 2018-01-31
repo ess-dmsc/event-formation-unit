@@ -3,9 +3,11 @@ include_directories(. ..)
 #
 # Dependencies common to EFU and plugins
 #
-add_subdirectory(common)
 
 include(Utilities.cmake)
+
+add_subdirectory(common)
+
 include(UnitTests.cmake)
 
 #
@@ -16,7 +18,6 @@ add_subdirectory(multiblade)
 add_subdirectory(multigrid)
 add_subdirectory(sonde)
 add_subdirectory(udp)
-
 
 #
 # the E F U
@@ -43,9 +44,7 @@ set(efu2_INC
   efu/Parser.h
   efu/ExitHandler.h
   )
-create_executable(efu2 "${CMAKE_DL_LIBS}")
-
-enable_coverage(efu2)
+create_executable(efu2 "")
 
 #
 #  These commands must be at the end of this file

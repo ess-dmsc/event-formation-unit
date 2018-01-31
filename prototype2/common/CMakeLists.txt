@@ -1,6 +1,8 @@
 #
 # These libraries are required
 #
+set(EFU_EXTERNAL_LIBS ${CMAKE_DL_LIBS})
+
 find_package(Threads REQUIRED)
 set(EFU_EXTERNAL_LIBS ${EFU_EXTERNAL_LIBS}
   ${CMAKE_THREAD_LIBS_INIT}
@@ -31,20 +33,23 @@ endif()
 # Common functionality for all detector plugins
 #
 set(common_SRC
+  FBSerializer.cpp
   NewStats.cpp
   Producer.cpp
-  FBSerializer.cpp
   )
 set(common_INC
+  ../../libs/include/gccintel.h
   Detector.h
+  EFUArgs.h
+  FBSerializer.h
   NewStats.h
   Producer.h
-  FBSerializer.h
   Trace.h
-  EFUArgs.h
-  ../../libs/include/gccintel.h
   )
 
+#
+# Optionally dump to file
+#
 option(DUMPTOFILE "Dump raw readout data to file " OFF)
 if(${DUMPTOFILE})
   message(STATUS "Dumping to file enabled.")
@@ -62,3 +67,4 @@ add_library(common STATIC
 enable_coverage(common)
 
 set(EFU_COMMON_LIBS ${EFU_EXTERNAL_LIBS} common PARENT_SCOPE)
+

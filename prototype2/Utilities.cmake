@@ -1,4 +1,13 @@
 
+find_program(VALGRIND_CMD valgrind)
+if(EXISTS ${VALGRIND_CMD})
+  message(STATUS "valgrind found.")
+  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/memcheck_res/)
+else()
+  message(STATUS "valgrind not found. Unable to run memory check.")
+endif()
+mark_as_advanced(VALGRIND_CMD)
+
 #
 # Add linker flags
 #

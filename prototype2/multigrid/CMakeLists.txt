@@ -3,6 +3,12 @@ include_directories(.. ../..)
 # Detector Pipeline Plugins
 #
 
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Where does this really need to go?
+# ??????????????????????????????????
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/calib_data
+  DESTINATION ${CMAKE_BINARY_DIR}/prototype2)
+
 # Multi Grid demonstrator detector - obsolete
 #set(mgcncs_SRC mgcncs.cpp mgcncs/Data.cpp mgcncs/ChanConv.cpp)
 #set(mgcncs_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/MultigridGeometry.h)
@@ -161,3 +167,10 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(CalibrationFileTest
     "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 endif()
+
+set(MultiGridGeometryTest_SRC
+  mgcncs/MultigridGeometryTest.cpp)
+set(MultiGridGeometryTest_INC
+  mgcncs/MultigridGeometry.h
+  ../../libs/include/TSCTimer.h)
+create_test_executable(MultiGridGeometryTest "")
