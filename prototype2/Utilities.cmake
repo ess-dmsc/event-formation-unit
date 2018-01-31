@@ -1,5 +1,7 @@
 
-
+#
+# Add linker flags
+#
 function(add_linker_flags target flags)
   get_target_property(cur_link_flags ${target} LINK_FLAGS)
   if(NOT cur_link_flags)
@@ -9,6 +11,9 @@ function(add_linker_flags target flags)
   set_target_properties(${target} PROPERTIES LINK_FLAGS "${new_link_flags}")
 endfunction(add_linker_flags)
 
+#
+# Add compiler flags
+#
 function(add_compile_flags target flags)
   get_target_property(cur_compile_flags ${target} COMPILE_FLAGS)
   if(NOT cur_compile_flags)
@@ -55,12 +60,9 @@ endfunction(create_executable)
 #
 # Generate unit test targets
 #
-
 set(unit_test_targets "" CACHE INTERNAL "All targets")
 
 function(create_test_executable exec_name link_libraries)
-  # message(STATUS ${exec_name})
-  # message(STATUS ${unit_test_targets})
   add_executable(${exec_name} EXCLUDE_FROM_ALL
     ${${exec_name}_SRC}
     ${${exec_name}_INC})
@@ -75,9 +77,6 @@ function(create_test_executable exec_name link_libraries)
     ${CMAKE_DL_LIBS}
     ${GTEST_LIBRARIES}
     )
-
-  #    set_target_properties(${exec_name} PROPERTIES
-  #        COMPILE_FLAGS "-Wno-error")
 
   add_test(NAME regular_${exec_name}
     COMMAND ${exec_name}
@@ -94,33 +93,3 @@ function(create_test_executable exec_name link_libraries)
   endif()
 endfunction(create_test_executable)
 
-
-#
-# Generate benchmark targets
-#
-
-set(benchmark_targets "" CACHE INTERNAL "All targets")
-
-function(create_benchmark_executable exec_name link_libraries)
-  if(GOOGLE_BENCHMARK)
-    add_executable(${exec_name} EXCLUDE_FROM_ALL
-      ${${exec_name}_SRC}
-      ${${exec_name}_INC})
-    target_include_directories(${exec_name}
-      PRIVATE ${GTEST_INCLUDE_DIRS})
-    set_target_properties(${exec_name} PROPERTIES
-      RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/benchmarks")
-
-    target_link_libraries(${exec_name}
-      ${link_libraries}
-      ${GTEST_LIBRARIES}
-      ${CMAKE_THREAD_LIBS_INIT}
-      -lbenchmark)
-    set(benchmark_targets
-      ${exec_name}
-      ${benchmark_targets}
-      CACHE INTERNAL "All targets")
-  else()
-    message(STATUS "skipping benchmark for ${exec_name} (can be enabled by cmake -DGOOGLE_BENCHMARK=YES)")
-  endif()
-endfunction(create_benchmark_executable)

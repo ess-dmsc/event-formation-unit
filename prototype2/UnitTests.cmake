@@ -28,7 +28,8 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   set(ParserTest_LIB_SRC
     efu/ParserTest.cpp
     test/SyscallWrappers.cpp
-    common/NewStats.cpp
+    common/NewStats.cpp)
+  set(ParserTest_LIB_INC
     common/NewStats.h)
   add_library(ParserTest_LIB STATIC
     ${ParserTest_LIB_SRC})
@@ -56,27 +57,31 @@ endif()
 # common/ Tests
 #
 set(VersionTest_SRC
-  common/VersionTest.cpp
+  common/VersionTest.cpp)
+set(VersionTest_INC
   common/Version.h)
 create_test_executable(VersionTest "")
 
 
 set(RingBufferTest_SRC
-  common/RingBufferTest.cpp
+  common/RingBufferTest.cpp)
+set(RingBufferTest_INC
   common/RingBuffer.h)
 create_test_executable(RingBufferTest "")
 
 
 set(DetectorTest_SRC
   common/DetectorTest.cpp
-  common/NewStats.cpp
+  common/NewStats.cpp)
+set(DetectorTest_INC
   common/NewStats.h
   common/Detector.h)
 create_test_executable(DetectorTest "")
 
 
 set(MultiGridGeometryTest_SRC
-  multigrid/mgcncs/MultigridGeometryTest.cpp
+  multigrid/mgcncs/MultigridGeometryTest.cpp)
+set(MultiGridGeometryTest_INC
   multigrid/mgcncs/MultigridGeometry.h
   ../libs/include/TSCTimer.h)
 create_test_executable(MultiGridGeometryTest "")
@@ -92,7 +97,6 @@ set(FBSerializerTest_INC
 create_test_executable(FBSerializerTest "")
 
 if(${CMAKE_COMPILER_IS_GNUCXX})
-  #AND (NOT ${SKIP_PRODUCER_TEST}))
   set(ProducerTest_SRC
     common/ProducerTest.cpp
     common/Producer.cpp)
@@ -115,13 +119,15 @@ create_test_executable(ReadoutSerializerTest "")
 
 set(EFUArgsTest_SRC
   common/EFUArgsTest.cpp
-  common/EFUArgs.cpp
+  common/EFUArgs.cpp)
+set(EFUArgsTest_INC
   common/EFUArgs.h)
 create_test_executable(EFUArgsTest "")
 
 set(NewStatsTest_SRC
   common/NewStatsTest.cpp
-  common/NewStats.cpp
+  common/NewStats.cpp)
+set(NewStatsTest_INC
   common/NewStats.h)
 create_test_executable(NewStatsTest "")
 
