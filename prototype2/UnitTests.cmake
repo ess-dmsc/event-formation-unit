@@ -3,8 +3,6 @@ if(NOT ${GTEST_FOUND})
   return()
 endif()
 
-enable_testing()
-
 find_program(VALGRIND_CMD valgrind)
 if(EXISTS ${VALGRIND_CMD})
   message(STATUS "valgrind found.")

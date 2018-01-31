@@ -1,6 +1,4 @@
-enable_testing()
 include_directories(.. ../..)
-
 
 #
 # Detector Pipeline Plugins

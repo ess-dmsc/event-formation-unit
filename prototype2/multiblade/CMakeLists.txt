@@ -66,9 +66,6 @@ else(TCLAP_FOUND)
   message(STATUS "TCLAP not found")
 endif()
 
-# Create the tests
-enable_testing()
-
 # GOOGLE BENCHMARK
 set(MBDataBenchmarkTest_INC
   ${mbtest_INC}

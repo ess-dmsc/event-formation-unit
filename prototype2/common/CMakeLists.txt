@@ -1,5 +1,3 @@
-enable_testing()
-
 #
 # These libraries are required
 #

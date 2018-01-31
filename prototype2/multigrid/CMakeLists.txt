@@ -80,7 +80,6 @@ set(mgcncsgenjson_INC mgcncsgen/JsonArgs.h
   )
 create_executable(mgcncsgenjson "")
 
-enable_testing()
 #
 # Multi Grid Tests
 #
