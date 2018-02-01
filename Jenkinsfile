@@ -102,6 +102,7 @@ def docker_tests_coverage(image_key) {
                 . ./activate_run.sh
                 make VERBOSE=ON
                 make coverage VERBOSE=ON
+                make valgrind VERBOSE=ON
             \""""
             sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
             junit 'build/test_results/*.xml'

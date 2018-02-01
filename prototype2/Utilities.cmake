@@ -1,12 +1,4 @@
-
-find_program(VALGRIND_CMD valgrind)
-if(EXISTS ${VALGRIND_CMD})
-  message(STATUS "valgrind found.")
-  file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/memcheck_res/)
-else()
-  message(STATUS "valgrind not found. Unable to run memory check.")
-endif()
-mark_as_advanced(VALGRIND_CMD)
+setup_memcheck(${CMAKE_BINARY_DIR}/memcheck_res)
 
 #
 # Add linker flags
@@ -77,8 +69,10 @@ function(create_test_executable exec_name link_libraries)
     ${${exec_name}_INC})
   target_include_directories(${exec_name}
     PRIVATE ${GTEST_INCLUDE_DIRS})
-  set_target_properties(${exec_name} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
+
+  # This does not seem to work right now. Conan to blame?
+  #  set_target_properties(${exec_name} PROPERTIES
+  #    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
 
   target_link_libraries(${exec_name}
     ${link_libraries}
@@ -96,9 +90,7 @@ function(create_test_executable exec_name link_libraries)
     CACHE INTERNAL "All targets")
 
   enable_coverage(${exec_name})
+  memcheck_test(${exec_name} ${CMAKE_BINARY_DIR}/bin)
 
-  if(EXISTS ${VALGRIND_CMD})
-    add_test(NAME memcheck_${exec_name} COMMAND ${VALGRIND_CMD} --tool=memcheck --leak-check=full --verbose --xml=yes --xml-file=${CMAKE_BINARY_DIR}/memcheck_res/${exec_name}test.valgrind ${CMAKE_BINARY_DIR}/unit_tests/${exec_name})
-  endif()
 endfunction(create_test_executable)
 

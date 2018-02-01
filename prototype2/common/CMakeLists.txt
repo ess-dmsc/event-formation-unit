@@ -23,10 +23,11 @@ if(GraylogLogger_FOUND)
   add_definitions("-DGRAYLOG")
 endif()
 
-find_package(h5cpp)
-if(h5cpp_FOUND)
-  set(EFU_EXTERNAL_LIBS ${EFU_EXTERNAL_LIBS} h5cpp)
-endif()
+find_package(h5cpp REQUIRED)
+#if(h5cpp_FOUND)
+set(EFU_EXTERNAL_LIBS ${EFU_EXTERNAL_LIBS} h5cpp)
+set (h5cpp_FOUND ON) # PARENTSCOPE?
+#endif()
 
 
 #
@@ -53,7 +54,7 @@ set(common_INC
 option(DUMPTOFILE "Dump raw readout data to file " OFF)
 if(${DUMPTOFILE})
   message(STATUS "Dumping to file enabled.")
-  add_definitions("-DDUMPTOFILE")
+  add_definitions("-DDUMPTOFILE")  # PARENTSCOPE?
   set(common_SRC ${common_SRC} DataSave.cpp)
   set(common_INC ${common_INC} DataSave.h)
 else()

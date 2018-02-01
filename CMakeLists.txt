@@ -27,6 +27,7 @@ include(${EXTRA_MODULES_DIR}/FindGTestFix.cmake)
 include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 include(${EXTRA_MODULES_DIR}/Benchmarks.cmake)
 include(${EXTRA_MODULES_DIR}/Profiling.cmake)
+include(${EXTRA_MODULES_DIR}/Memcheck.cmake)
 
 if(NOT ${GTEST_FOUND})
   # Do something more clever in this case?
