@@ -1,8 +1,8 @@
 setup_memcheck(${CMAKE_BINARY_DIR}/memcheck_res)
 
-#
+#=============================================================================
 # Add linker flags
-#
+#=============================================================================
 function(add_linker_flags target flags)
   get_target_property(cur_link_flags ${target} LINK_FLAGS)
   if(NOT cur_link_flags)
@@ -12,9 +12,9 @@ function(add_linker_flags target flags)
   set_target_properties(${target} PROPERTIES LINK_FLAGS "${new_link_flags}")
 endfunction(add_linker_flags)
 
-#
+#=============================================================================
 # Add compiler flags
-#
+#=============================================================================
 function(add_compile_flags target flags)
   get_target_property(cur_compile_flags ${target} COMPILE_FLAGS)
   if(NOT cur_compile_flags)
@@ -24,9 +24,9 @@ function(add_compile_flags target flags)
   set_target_properties(${target} PROPERTIES COMPILE_FLAGS "${new_compile_flags}")
 endfunction(add_compile_flags)
 
-#
+#=============================================================================
 # Generate a loadable detector module
-#
+#=============================================================================
 function(create_module module_name link_libraries)
   add_library(${module_name} MODULE
     ${${module_name}_SRC}
@@ -41,9 +41,9 @@ function(create_module module_name link_libraries)
   install(TARGETS ${module_name} DESTINATION bin)
 endfunction(create_module)
 
-#
+#=============================================================================
 # Generate an executable program
-#
+#=============================================================================
 function(create_executable exec_name link_libraries)
   add_executable(${exec_name}
     ${${exec_name}_SRC}
@@ -58,9 +58,9 @@ function(create_executable exec_name link_libraries)
 endfunction(create_executable)
 
 
-#
+#=============================================================================
 # Generate unit test targets
-#
+#=============================================================================
 set(unit_test_targets "" CACHE INTERNAL "All targets")
 
 function(create_test_executable exec_name link_libraries)

@@ -8,11 +8,9 @@ endif()
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(EXTRA_CXX_FLAGS "-Werror -Wall -Wpedantic -Wextra")
 set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -flto -O3 -DRELEASE -DNDEBUG")
-#set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -ggdb -flto -fno-omit-frame-pointer -O3 -DRELEASE -DNDEBUG")
+#set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "-ggdb -fno-omit-frame-pointer")
 
-add_definitions("-D__FAVOR_BSD")
-
-#set(EXTRA_CXX_FLAGS ${EXTRA_CXX_FLAGS} "-D__FAVOR_BSD") #Not working correctly
+add_definitions("-D__FAVOR_BSD") #Not working correctly
 
 if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
     message(STATUS "*** GCC>7 Compiler is too awesome. The following warnings are disabled:")

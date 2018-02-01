@@ -18,29 +18,36 @@ if(EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
   conan_basic_setup(KEEP_RPATHS)
 endif()
 
-enable_testing()
-find_package(GTestFix REQUIRED)
-
+#=============================================================================
+# General configuration
+#=============================================================================
 include(${EXTRA_MODULES_DIR}/EnsureBuildType.cmake)
 include(${EXTRA_MODULES_DIR}/CompilerConfig.cmake)
 include(${EXTRA_MODULES_DIR}/BuildString.cmake)
+
+#=============================================================================
+# Testing-related stuff
+#=============================================================================
+enable_testing()
+find_package(GTestFix REQUIRED)
 include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 include(${EXTRA_MODULES_DIR}/Benchmarks.cmake)
 include(${EXTRA_MODULES_DIR}/Profiling.cmake)
 include(${EXTRA_MODULES_DIR}/Memcheck.cmake)
 
-if(NOT ${GTEST_FOUND})
-  # Do something more clever in this case?
-  message(WARNING "unable to build unit tests as GTest was not found.")
-  return()
-endif()
-
+#=============================================================================
+# The code
+#=============================================================================
 add_subdirectory(libs)
 add_subdirectory(prototype2)
 add_subdirectory(udp)
 #add_subdirectory(dataformats) # built separately for now
 
-set(gcovr_excl_opts "-e .*Test.cpp -e .*gtest.*.h -e .*_generated.h -e .*CLI11.hpp")
+#=============================================================================
+# Finalize coverage
+#=============================================================================
+set(gcovr_excl_opts
+  "-e .*Test.cpp -e .*gtest.*.h -e .*_generated.h -e .*CLI11.hpp")
 create_coverage_targets(
   coverage
   runtest

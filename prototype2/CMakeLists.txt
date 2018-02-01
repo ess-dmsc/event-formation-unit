@@ -1,8 +1,17 @@
 include_directories(. ..)
 
-#
+option(DUMPTOFILE "Dump raw readout data to file " OFF)
+if(${DUMPTOFILE})
+#  message(STATUS "Dumping to file enabled.")
+#  add_definitions("-DDUMPTOFILE")  # PARENTSCOPE?
+else()
+  message(STATUS "Not dumping to file.")
+endif()
+
+
+#=============================================================================
 # Dependencies common to EFU and plugins
-#
+#=============================================================================
 
 include(Utilities.cmake)
 
@@ -10,18 +19,20 @@ add_subdirectory(common)
 
 include(UnitTests.cmake)
 
-#
+message(STATUS "*** EFU_COMMON_LIBS = ${EFU_COMMON_LIBS}")
+
+#=============================================================================
 # Plugins
-#
+#=============================================================================
 add_subdirectory(gdgem)
 add_subdirectory(multiblade)
 add_subdirectory(multigrid)
 add_subdirectory(sonde)
 add_subdirectory(udp)
 
-#
-# the E F U
-#
+#=============================================================================
+# Event Formation Unit
+#=============================================================================
 set(efu2_SRC
   common/EFUArgs.cpp
   common/StatPublisher.cpp
@@ -46,9 +57,12 @@ set(efu2_INC
   )
 create_executable(efu2 "")
 
-#
+#=============================================================================
 #  These commands must be at the end of this file
-#
+#=============================================================================
+
+# Should unit_test_targets depend on default targets?
+
 add_custom_target(runtest
   COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
   DEPENDS ${unit_test_targets})

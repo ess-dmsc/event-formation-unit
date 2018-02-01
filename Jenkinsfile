@@ -118,7 +118,7 @@ def docker_tests_coverage(image_key) {
                 sourceEncoding: 'ASCII',
                 zoomCoverageChart: false
             ])
-            archiveArtifacts artifacts: 'build/'
+            //archiveArtifacts artifacts: 'build/'
         } catch(e) {
             sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
             junit 'build/test_results/*.xml'
