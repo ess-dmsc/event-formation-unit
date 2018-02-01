@@ -42,17 +42,17 @@ install(TARGETS cncsread genpixids batchreader DESTINATION tools)
 #
 # Unit tests
 #
-set(unit_test_targets "")
-set(benchmark_targets "")
 if(BUILD_TESTS)
   enable_testing()
-  include(${EXTRA_MODULES_DIR}/FindGTestFix.cmake)
-  find_package(GTest REQUIRED)
-  find_package(Threads REQUIRED)
+  find_package(GTestFix REQUIRED)
+
   include_directories(
     ${GTEST_INCLUDE_DIRS}
     ${mgtools_SOURCE_DIR}/../../prototype2/test
   )
+
+  set(unit_test_targets "")
+  # set(benchmark_targets "")
 
   add_executable(PeakFinderTest src/test/PeakFinderTest.cpp src/PeakFinder.cpp)
   target_link_libraries(PeakFinderTest ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
@@ -63,6 +63,9 @@ if(BUILD_TESTS)
   target_link_libraries(HistogramTest ${GTEST_BOTH_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
   set(unit_test_targets HistogramTest ${unit_test_targets})
   add_test(NAME regular_HistogramTest COMMAND HistogramTest "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/HistogramTesttest.xml")
-endif(BUILD_TESTS)
 
-#add_custom_target(runtest COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_* DEPENDS ${unit_test_targets})
+  add_custom_target(runtest COMMAND
+    ${CMAKE_CTEST_COMMAND} -V -R regular_*
+    DEPENDS ${unit_test_targets})
+
+endif(BUILD_TESTS)

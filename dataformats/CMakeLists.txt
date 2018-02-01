@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 #=============================================================================
 # Augment CMake with our custom scripts
 #=============================================================================
-set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/../cmake_modules)
-list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR})
+set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/../cmake)
+list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR}/modules)
 
 #=============================================================================
 # In case conan has generated info, use it now

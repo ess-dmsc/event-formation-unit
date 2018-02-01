@@ -6,8 +6,8 @@ set(event-formation-unit_VERSION_MINOR 0)
 #=============================================================================
 # Augment CMake with our custom scripts
 #=============================================================================
-set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake_modules)
-list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR})
+set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR}/modules)
 
 #=============================================================================
 # In case conan has generated info, use it now
@@ -19,11 +19,11 @@ if(EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
 endif()
 
 enable_testing()
+find_package(GTestFix REQUIRED)
 
 include(${EXTRA_MODULES_DIR}/EnsureBuildType.cmake)
 include(${EXTRA_MODULES_DIR}/CompilerConfig.cmake)
 include(${EXTRA_MODULES_DIR}/BuildString.cmake)
-include(${EXTRA_MODULES_DIR}/FindGTestFix.cmake)
 include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 include(${EXTRA_MODULES_DIR}/Benchmarks.cmake)
 include(${EXTRA_MODULES_DIR}/Profiling.cmake)
