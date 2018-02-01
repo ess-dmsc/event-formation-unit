@@ -7,7 +7,7 @@
 
 #include "mbcommon/multiBladeEventBuilder.h"
 #include "multiBladeTestData.h"
-#include <gtest/gtest.h>
+#include "test/TestBase.h"
 
 TEST(MBEventBuilder__Test, Threshold) {
 

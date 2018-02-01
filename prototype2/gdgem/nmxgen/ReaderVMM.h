@@ -9,8 +9,6 @@
 #define READER_VMM_H
 
 #include <h5cpp/hdf5.hpp>
-//#include <H5CC_DataSet.h>
-//#include <H5CC_File.h>
 #include <map>
 #include <vector>
 
@@ -32,9 +30,6 @@ private:
   size_t max_in_buf_{9000 / (sizeof(uint32_t) * 4)};
 
   hdf5::dataspace::Hyperslab slab_{{0, 0}, {1, 4}};
-
-  //  std::vector<hsize_t> index{0, 0};
-  //  std::vector<hsize_t> slabsize{1, H5CC::kMax};
 
   std::vector<uint32_t> data;
 };

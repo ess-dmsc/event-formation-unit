@@ -81,8 +81,6 @@ function(create_test_executable exec_name link_libraries)
     ${GTEST_LIBRARIES}
     )
 
-  add_compile_flags(${exec_name} "-Wno-error")
-
   add_test(NAME regular_${exec_name}
     COMMAND ${exec_name}
     "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")

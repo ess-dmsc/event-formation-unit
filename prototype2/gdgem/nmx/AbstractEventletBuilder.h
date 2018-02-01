@@ -12,7 +12,10 @@
 
 #ifdef DUMPTOFILE
 #include <common/DataSave.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
 #include <h5cpp/hdf5.hpp>
+#pragma GCC diagnostic pop
 #endif
 
 class AbstractBuilder {
