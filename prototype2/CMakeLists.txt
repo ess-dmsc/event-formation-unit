@@ -19,7 +19,7 @@ add_subdirectory(common)
 
 include(UnitTests.cmake)
 
-message(STATUS "*** EFU_COMMON_LIBS = ${EFU_COMMON_LIBS}")
+#message(STATUS "*** EFU_COMMON_LIBS = ${EFU_COMMON_LIBS}")
 
 #=============================================================================
 # Plugins

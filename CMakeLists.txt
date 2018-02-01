@@ -25,6 +25,8 @@ include(${EXTRA_MODULES_DIR}/EnsureBuildType.cmake)
 include(${EXTRA_MODULES_DIR}/CompilerConfig.cmake)
 include(${EXTRA_MODULES_DIR}/BuildString.cmake)
 
+message(STATUS EXTRA_CXX_FLAGS = ${EXTRA_CXX_FLAGS})
+
 #=============================================================================
 # Testing-related stuff
 #=============================================================================
