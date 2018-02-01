@@ -25,9 +25,9 @@ endif()
 
 find_package(h5cpp REQUIRED)
 #if(h5cpp_FOUND)
-set(EFU_EXTERNAL_LIBS ${EFU_EXTERNAL_LIBS} h5cpp)
-#set (h5cpp_FOUND ON PARENT_SCOPE)
-set (h5cpp_FOUND ON)
+set(EFU_EXTERNAL_LIBS ${EFU_EXTERNAL_LIBS} h5cpp ${HDF5_C_LIBRARIES} ${Boost_LIBRARIES})
+set (h5cpp_FOUND ON PARENT_SCOPE)
+#set (h5cpp_FOUND ON)
 #endif()
 
 

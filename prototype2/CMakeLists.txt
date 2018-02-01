@@ -2,8 +2,8 @@ include_directories(. ..)
 
 option(DUMPTOFILE "Dump raw readout data to file " OFF)
 if(${DUMPTOFILE})
-#  message(STATUS "Dumping to file enabled.")
-#  add_definitions("-DDUMPTOFILE")  # PARENTSCOPE?
+  message(STATUS "Dumping to file enabled.")
+  add_definitions("-DDUMPTOFILE")  # PARENTSCOPE?
 else()
   message(STATUS "Not dumping to file.")
 endif()
