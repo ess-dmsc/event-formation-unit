@@ -11,7 +11,7 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   add_library(ParserTest_LIB STATIC
     ${ParserTest_LIB_SRC})
   add_compile_flags(ParserTest_LIB
-    "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
+    "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open -Wno-error")
 
   set(ParserTest_SRC
     efu/Parser.cpp
