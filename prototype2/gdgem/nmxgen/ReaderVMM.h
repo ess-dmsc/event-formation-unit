@@ -8,7 +8,14 @@
 #ifndef READER_VMM_H
 #define READER_VMM_H
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <h5cpp/hdf5.hpp>
+#pragma GCC diagnostic pop
+
 #include <map>
 #include <vector>
 
