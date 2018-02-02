@@ -1,5 +1,3 @@
-setup_memcheck(${CMAKE_BINARY_DIR}/memcheck_res)
-
 #=============================================================================
 # Add linker flags
 #=============================================================================
@@ -61,6 +59,7 @@ endfunction(create_executable)
 #=============================================================================
 # Generate unit test targets
 #=============================================================================
+setup_memcheck(${CMAKE_BINARY_DIR}/memcheck_res)
 set(unit_test_targets "" CACHE INTERNAL "All targets")
 
 function(create_test_executable exec_name)
@@ -77,8 +76,7 @@ function(create_test_executable exec_name)
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    ${GTEST_LIBRARIES}
-    )
+    ${GTEST_LIBRARIES})
 
   add_test(NAME regular_${exec_name}
     COMMAND ${exec_name}

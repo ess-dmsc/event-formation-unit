@@ -2,15 +2,15 @@
 # EFU Tests
 #
 if(${CMAKE_COMPILER_IS_GNUCXX})
-  set(ParserTest_LIB_SRC
+  set(ParserTestLibrary_SRC
     efu/ParserTest.cpp
     test/SyscallWrappers.cpp
     common/NewStats.cpp)
-  set(ParserTest_LIB_INC
+  set(ParserTestLibrary_INC
     common/NewStats.h)
-  add_library(ParserTest_LIB STATIC
-    ${ParserTest_LIB_SRC})
-  add_compile_flags(ParserTest_LIB
+  add_library(ParserTestLibrary STATIC
+    ${ParserTestLibrary_SRC})
+  add_compile_flags(ParserTestLibrary
     "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 
   set(ParserTest_SRC
@@ -20,7 +20,9 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   set(ParserTest_INC
     efu/Parser.h
     common/EFUArgs.h)
-  create_test_executable(ParserTest "ParserTest_LIB")
+  set(ParserTest_LIB
+    ParserTestLibrary)
+  create_test_executable(ParserTest)
   add_compile_flags(ParserTest
     "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
   add_linker_flags(ParserTest
