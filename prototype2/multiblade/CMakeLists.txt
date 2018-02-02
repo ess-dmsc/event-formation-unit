@@ -14,7 +14,7 @@ set(mbcaen_INC
   mbcommon/multiBladeEventBuilder.h
   mbcommon/dumpEventBuilderInfo.h
   )
-create_module(mbcaen "")
+create_module(mbcaen)
 
 #=============================================================================
 # Build MB text 2 UDP
@@ -27,7 +27,7 @@ set(mbtext2udp_SRC
 set(mbtext2udp_INC
   mbgen/MBArgs.h
   )
-create_executable(mbtext2udp "")
+create_executable(mbtext2udp)
 
 # Excecutables to build if TCLAP is installed
 find_package(TCLAP)
@@ -44,7 +44,7 @@ if(TCLAP_FOUND)
     mbcommon/TextFile.h
     mbcommon/dumpEventBuilderInfo.h
     )
-  create_executable(mbprocesstextfile "")
+  create_executable(mbprocesstextfile)
 
   # Create an excecutable to pass data several times for profiling
   # Not really usefull unless built with -gp
@@ -58,7 +58,7 @@ if(TCLAP_FOUND)
     mbcommon/TextFile.h
     mbcommon/dumpEventBuilderInfo.h
     )
-  create_executable(mbprofiling "")
+  create_executable(mbprofiling)
 else()
   message(STATUS "*** Unable to compile mbprocesstextfile as TCLAP was not found.")
   message(STATUS "*** Unable to compile mbprofiling as TCLAP was not found.")
@@ -72,7 +72,7 @@ set(MBDataBenchmarkTest_SRC
   mbcaen/MBData.cpp
   mbcaen/MBDataBenchmarkTest.cpp
   )
-create_benchmark_executable(MBDataBenchmarkTest "")
+create_benchmark_executable(MBDataBenchmarkTest)
 
 # GOOGLE BENCHMARK
 set(multiBladeEventBuilderBenchmarkTest_INC
@@ -82,7 +82,7 @@ set(multiBladeEventBuilderBenchmarkTest_SRC
   mbcommon/multiBladeEventBuilder.cpp
   mbcommon/multiBladeEventBuilderBenchmarkTest.cpp
   )
-create_benchmark_executable(multiBladeEventBuilderBenchmarkTest "")
+create_benchmark_executable(multiBladeEventBuilderBenchmarkTest)
 
 
 # Common include path for both tests
@@ -99,7 +99,7 @@ set(mbcountertest_SRC
   mbcommon/multiBladeEventBuilder.cpp
   mbtest/multiBladeEventBuilderCounterTest.cpp
   )
-create_test_executable(mbcountertest "")
+create_test_executable(mbcountertest)
 
 # Create excecutable for the test of clustering
 set(mbclustertest_SRC
@@ -109,7 +109,7 @@ set(mbclustertest_SRC
 set(mbclustertest_INC
   ${mbtest_INC}
 )
-create_test_executable(mbclustertest "")
+create_test_executable(mbclustertest)
 
 # Create excecutable for the test of geometry
 set(MB16DetectorTest_SRC
@@ -118,4 +118,4 @@ set(MB16DetectorTest_SRC
 set(MB16DetectorTest_INC
   mbcaen/MB16Detector.h
   )
-create_test_executable(MB16DetectorTest "")
+create_test_executable(MB16DetectorTest)

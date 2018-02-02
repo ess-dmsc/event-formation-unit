@@ -6,7 +6,7 @@ set(benchmark_targets "" CACHE INTERNAL "All targets")
 #
 # Generate benchmark targets
 #
-function(create_benchmark_executable exec_name link_libraries)
+function(create_benchmark_executable exec_name)
   if(GOOGLE_BENCHMARK)
     add_executable(${exec_name} EXCLUDE_FROM_ALL
       ${${exec_name}_SRC}
@@ -17,6 +17,7 @@ function(create_benchmark_executable exec_name link_libraries)
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/benchmarks")
 
     target_link_libraries(${exec_name}
+      ${${exec_name}_LIB}
       ${link_libraries}
       ${GTEST_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}

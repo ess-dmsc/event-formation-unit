@@ -16,7 +16,7 @@ if(h5cpp_FOUND)
     nmxgen/NMXArgs.h
     nmxgen/ReaderVMM.h
     )
-  create_executable(gennmxfile "")
+  create_executable(gennmxfile)
 else()
   message(STATUS "*** Unable to compile gennmxfile as h5cpp was not found.")
 endif()
@@ -32,7 +32,8 @@ if(PCAP_FOUND)
     nmxgen/ReaderPcap.h
     nmxgen/NMXArgs.h
     )
-  create_executable(gennmxpcap "pcap")
+  set(gennmxpcap_LIB pcap)
+  create_executable(gennmxpcap)
 else()
   message(STATUS "*** Unable to compile gennmxpcap as libpcap was not found.")
 endif()
@@ -76,7 +77,7 @@ set(gdgem_INC
   vmm2srs/ParserSRS.h
   vmm2srs/EventletBuilderSRS.h
   )
-create_module(gdgem "")
+create_module(gdgem)
 
 
 #=============================================================================
@@ -92,7 +93,7 @@ set(RootFileTest_INC
   dg_impl/RootFile.h
   dg_impl/TestData.h
   )
-create_test_executable(RootFileTest "")
+create_test_executable(RootFileTest)
 
 # GOOGLE BENCHMARK
 set(RootFileBenchmarkTest_INC
@@ -103,7 +104,7 @@ set(RootFileBenchmarkTest_SRC
   dg_impl/RootFile.cpp
   dg_impl/RootFileBenchmarkTest.cpp
   )
-create_benchmark_executable(RootFileBenchmarkTest "")
+create_benchmark_executable(RootFileBenchmarkTest)
 
 set(EventFormationTest_SRC
   nmx/AbstractEventletBuilder.cpp
@@ -126,7 +127,7 @@ set(EventFormationTest_INC
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h
   )
-create_test_executable(EventFormationTest "")
+create_test_executable(EventFormationTest)
 
 
 set(EventletBuilderBenchmarkTest_SRC
@@ -149,7 +150,7 @@ set(EventletBuilderBenchmarkTest_INC
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h
   )
-create_benchmark_executable(EventletBuilderBenchmarkTest "")
+create_benchmark_executable(EventletBuilderBenchmarkTest)
 
 
 set(HistSerializerTest_SRC
@@ -163,7 +164,7 @@ set(HistSerializerTest_INC
   nmx/HistSerializer.h
   ../common/Producer.h
   )
-create_test_executable(HistSerializerTest "")
+create_test_executable(HistSerializerTest)
 
 set(TrackSerializerTest_SRC
   nmx/Eventlet.cpp
@@ -176,7 +177,7 @@ set(TrackSerializerTest_INC
   nmx/Eventlet.h
   nmx/TrackSerializer.h
   )
-create_test_executable(TrackSerializerTest "")
+create_test_executable(TrackSerializerTest)
 
 set(ParserSRSTest_SRC
   vmm2srs/ParserSRSTest.cpp
@@ -185,7 +186,7 @@ set(ParserSRSTest_SRC
 set(ParserSRSTest_INC
   vmm2srs/ParserSRS.h
   )
-create_test_executable(ParserSRSTest "")
+create_test_executable(ParserSRSTest)
 
 set(EventletBuilderH5Test_SRC
   nmx/EventNMX.cpp
@@ -202,7 +203,7 @@ set(EventletBuilderH5Test_INC
   nmx/Hists.h
   nmxgen/EventletBuilderH5.h
   )
-create_test_executable(EventletBuilderH5Test "")
+create_test_executable(EventletBuilderH5Test)
 
 set(EventletBuilderTest_SRC
   nmx/Clusterer.cpp
@@ -225,7 +226,7 @@ set(EventletBuilderTest_INC
   vmm2srs/SRSTime.h
   vmm2srs/SRSMappings.h
   )
-create_test_executable(EventletBuilderTest "")
+create_test_executable(EventletBuilderTest)
 
 set(EventletTest_SRC
   nmx/EventletTest.cpp
@@ -234,20 +235,20 @@ set(EventletTest_SRC
 set(EventletTest_INC
   nmx/Eventlet.h
   )
-create_test_executable(EventletTest "")
+create_test_executable(EventletTest)
 
 set(SRSMappingsTest_SRC
   vmm2srs/SRSMappingsTest.cpp
   vmm2srs/SRSMappings.cpp
   )
-create_test_executable(SRSMappingsTest "")
+create_test_executable(SRSMappingsTest)
 
 set(SRSTimeTest_SRC
   vmm2srs/SRSTimeTest.cpp
   vmm2srs/SRSTime.cpp
   vmm2srs/SRSTime.h
   )
-create_test_executable(SRSTimeTest "")
+create_test_executable(SRSTimeTest)
 
 set(GeometryTest_SRC
   nmx/GeometryTest.cpp
@@ -256,7 +257,7 @@ set(GeometryTest_SRC
 set(GeometryTest_INC
   nmx/Geometry.h
   )
-create_test_executable(GeometryTest "")
+create_test_executable(GeometryTest)
 
 set(ClustererTest_SRC
   nmx/ClustererTest.cpp
@@ -267,7 +268,7 @@ set(ClustererTest_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
   )
-create_test_executable(ClustererTest "")
+create_test_executable(ClustererTest)
 
 set(EventNMXTest_SRC
   nmx/EventNMXTest.cpp
@@ -276,4 +277,4 @@ set(EventNMXTest_SRC
 set(EventNMXTest_INC
   nmx/EventNMX.h
   )
-create_test_executable(EventNMXTest "")
+create_test_executable(EventNMXTest)
