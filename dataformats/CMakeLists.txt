@@ -7,7 +7,7 @@ set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/../cmake)
 list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR}/modules)
 
 #=============================================================================
-# In case conan has generated info, use it now
+# If conan has generated info, use it now
 #=============================================================================
 if(EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
   message(STATUS "Using existing conanbuildinfo.cmake file")

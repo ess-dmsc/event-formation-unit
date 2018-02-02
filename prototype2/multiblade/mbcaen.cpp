@@ -73,7 +73,7 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
 MBCAEN::MBCAEN(BaseSettings settings) : Detector(settings) {
-  Stats.setPrefix("efu2.mbcaen");
+  Stats.setPrefix("efu.mbcaen");
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off

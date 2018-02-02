@@ -1,45 +1,4 @@
 #=============================================================================
-# Data generators
-#=============================================================================
-
-if(h5cpp_FOUND)
-  set(gennmxfile_SRC
-    nmx/Eventlet.cpp
-    nmxgen/nmxfile.cpp
-    nmxgen/NMXArgs.cpp
-    nmxgen/ReaderVMM.cpp
-    )
-  set(gennmxfile_INC
-    nmx/Eventlet.h
-    nmxgen/NMXArgs.h
-    nmxgen/ReaderVMM.h
-    )
-  create_executable(gennmxfile)
-else()
-  message(STATUS "*** Unable to compile gennmxfile as h5cpp was not found.")
-endif()
-
-find_package(PCAP)
-if(PCAP_FOUND)
-  set(gennmxpcap_SRC
-    nmxgen/wireshark.cpp
-    nmxgen/ReaderPcap.cpp
-    nmxgen/NMXArgs.cpp
-    )
-  set(gennmxpcap_INC
-    nmxgen/ReaderPcap.h
-    nmxgen/NMXArgs.h
-    )
-  set(gennmxpcap_LIB
-    ${PCAP_LIBRARY}
-    )
-  create_executable(gennmxpcap)
-else()
-  message(STATUS "*** Unable to compile gennmxpcap as libpcap was not found.")
-endif()
-
-
-#=============================================================================
 # Detector Pipeline Plugins
 #=============================================================================
 
@@ -78,6 +37,47 @@ set(gdgem_INC
   vmm2srs/EventletBuilderSRS.h
   )
 create_module(gdgem)
+
+
+#=============================================================================
+# Data generators
+#=============================================================================
+
+if(h5cpp_FOUND)
+  set(gennmxfile_SRC
+    nmx/Eventlet.cpp
+    nmxgen/nmxfile.cpp
+    nmxgen/NMXArgs.cpp
+    nmxgen/ReaderVMM.cpp
+    )
+  set(gennmxfile_INC
+    nmx/Eventlet.h
+    nmxgen/NMXArgs.h
+    nmxgen/ReaderVMM.h
+    )
+  create_executable(gennmxfile)
+else()
+  message(STATUS "*** Unable to compile gennmxfile as h5cpp was not found.")
+endif()
+
+find_package(PCAP)
+if(PCAP_FOUND)
+  set(gennmxpcap_SRC
+    nmxgen/wireshark.cpp
+    nmxgen/ReaderPcap.cpp
+    nmxgen/NMXArgs.cpp
+    )
+  set(gennmxpcap_INC
+    nmxgen/ReaderPcap.h
+    nmxgen/NMXArgs.h
+    )
+  set(gennmxpcap_LIB
+    ${PCAP_LIBRARY}
+    )
+  create_executable(gennmxpcap)
+else()
+  message(STATUS "*** Unable to compile gennmxpcap as libpcap was not found.")
+endif()
 
 
 #=============================================================================

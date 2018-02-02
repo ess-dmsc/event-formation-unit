@@ -94,7 +94,7 @@ private:
 };
 
 CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
-  Stats.setPrefix("efu2.mgmesytec");
+  Stats.setPrefix("efu.mgmesytec");
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off

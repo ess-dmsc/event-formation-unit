@@ -18,18 +18,18 @@ void ExitHandler::InitExitHandler(int *runflag) {
 }
 
 void ExitHandler::critical(int sig) {
-  XTRACE(MAIN, ALW, "efu2 terminated with critical signal %d\n", sig);
+  XTRACE(MAIN, ALW, "efu terminated with critical signal %d\n", sig);
   std::string message =
-      "efu2 terminated with critical signal " + std::to_string(sig) + "\n";
+      "efu terminated with critical signal " + std::to_string(sig) + "\n";
   GLOG_CRI(message);
   print_trace();
   exit(1);
 }
 
 void ExitHandler::noncritical(int sig) {
-  XTRACE(MAIN, ALW, "efu2 terminated with signal %d\n", sig);
+  XTRACE(MAIN, ALW, "efu terminated with signal %d\n", sig);
   std::string message =
-      "efu2 terminated with signal " + std::to_string(sig) + "\n";
+      "efu terminated with signal " + std::to_string(sig) + "\n";
   GLOG_CRI(message);
   *ExitHandler::keep_running = 0;
 }

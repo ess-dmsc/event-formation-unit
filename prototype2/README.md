@@ -4,7 +4,7 @@ However most are optional.
 
 * librdkafka - needed for output_thread (can be disabled by NOKAFKA=y)
 * Googletest - needed for 'make test, make runtest' targets
-* HDF5 / H5CC
+* h5cpp - for dumping of raw readout data to file
 * lcov/gcov/gcovr - needed for 'make coverage' target
 * valgrind - needed for 'make valgrind' target
 
@@ -47,11 +47,11 @@ valgrind              | run valgrind on tests, generate reports
 
 To start the EFU with the __mgcncs2__ pipeline from the __build__ directory:
 
-`> ./prototype2/efu2 -d prototype2/multigrid/mgcncs2`
+`> ./bin/efu -d ./lib/mgcncs2`
 
 If the efu and detector plugins (.so files) are located in the __same__ directory:
 
-`> ./efu2 -d mgcncs2`
+`> ./efu -d mgcncs2`
 
 There are quite a few additional command line options, but these ones are
 the most used
@@ -65,4 +65,4 @@ Cmd option          | Description
 
 To get further help
 
-`> ./efu2 -h`
+`> ./efu -h`

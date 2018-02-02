@@ -34,6 +34,17 @@ set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} efu_common PARENT_SCOPE)
 # Tests
 #=============================================================================
 
+if(${CMAKE_COMPILER_IS_GNUCXX})
+  set(ProducerTest_SRC
+    ProducerTest.cpp
+    Producer.cpp)
+  set(ProducerTest_INC
+    Producer.h)
+  create_test_executable(ProducerTest)
+else()
+  message(STATUS "*** Skipping ProducerTest - requires gcc/linux")
+endif()
+
 if(${DUMPTOFILE})
   set(DataSaveTest_SRC
     DataSaveTest.cpp
@@ -73,17 +84,6 @@ set(NewStatsTest_SRC
 set(NewStatsTest_INC
   NewStats.h)
 create_test_executable(NewStatsTest)
-
-if(${CMAKE_COMPILER_IS_GNUCXX})
-  set(ProducerTest_SRC
-    ProducerTest.cpp
-    Producer.cpp)
-  set(ProducerTest_INC
-    Producer.h)
-  create_test_executable(ProducerTest)
-else()
-  message(STATUS "*** Skipping ProducerTest - requires gcc/linux")
-endif()
 
 set(ReadoutSerializerTest_SRC
   ReadoutSerializerTest.cpp
