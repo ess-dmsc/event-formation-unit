@@ -28,7 +28,7 @@
 #include <unistd.h>
 
 // #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_INF
+// #define TRC_LEVEL TRC_L_DEB
 
 using namespace memory_sequential_consistent; // Lock free fifo
 
@@ -36,18 +36,21 @@ const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
 
 /** ----------------------------------------------------- */
 struct DetectorSettingsStruct {
-  uint32_t adcThreshold = {0}; // accept all, change to discard
-  uint32_t wireThreshold = {0}; // accept all - @todo unused
-  uint32_t gridThreshold = {0}; // accept all - @todo unused
+  uint32_t wireThresholdLo = {0};     // accept all
+  uint32_t wireThresholdHi = {65535}; // accept all
+  uint32_t gridThresholdLo = {0};     // accept all
+  uint32_t gridThresholdHi = {65535}; // accept all
 } DetectorSettings;
 
 void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
-  parser.add_option("--adc", DetectorSettings.adcThreshold,
-         "minimum adc value for accept")->group("MGMesytec");
-  parser.add_option("--wire", DetectorSettings.wireThreshold,
+  parser.add_option("--wlo", DetectorSettings.wireThresholdLo,
          "minimum wire adc value for accept")->group("MGMesytec");
-  parser.add_option("--grid", DetectorSettings.gridThreshold,
+  parser.add_option("--whi", DetectorSettings.wireThresholdHi,
+         "maximum wire adc value for accept")->group("MGMesytec");
+  parser.add_option("--glo", DetectorSettings.gridThresholdLo,
          "minimum grid adc value for accept")->group("MGMesytec");
+  parser.add_option("--ghi", DetectorSettings.gridThresholdHi,
+         "maximum grid adc value for accept")->group("MGMesytec");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
@@ -172,12 +175,10 @@ void CSPEC::processing_thread() {
 
   MesytecData dat;
 
-  dat.setAdcThreshold(DetectorSettings.adcThreshold);
-  dat.setWireThreshold(DetectorSettings.adcThreshold);
-  dat.setGridThreshold(DetectorSettings.adcThreshold);
+  dat.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
+  dat.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
 
   TSCTimer report_timer;
-  TSCTimer timestamp;
 
   unsigned int data_index;
   while (1) {
@@ -190,13 +191,24 @@ void CSPEC::processing_thread() {
       if (len == 0) {
         mystats.fifo_seq_errors++;
       } else {
-        dat.parse(eth_ringbuf->getdatabuffer(data_index),
+        auto res = dat.parse(eth_ringbuf->getdatabuffer(data_index),
                   eth_ringbuf->getdatalength(data_index), hists, readouts);
 
-        mystats.tx_bytes += flatbuffer.addevent(42, 1);
-        mystats.rx_events++;
-        mystats.rx_readouts += dat.readouts;
-        mystats.rx_discards += dat.discards;
+        if (res < 0) {
+          continue;
+        }
+
+        int pixel = dat.getPixel();
+        int time  = dat.getTime();
+        XTRACE(PROCESS, DEB, "Time %d, pixel: %d\n", time, pixel);
+        if (pixel != 0) {
+          mystats.tx_bytes += flatbuffer.addevent(time, pixel);
+          mystats.rx_events++;
+          mystats.rx_readouts += dat.readouts;
+          mystats.rx_discards += dat.discards;
+        } else {
+          mystats.geometry_errors++;
+        }
       }
     }
 

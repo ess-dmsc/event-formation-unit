@@ -44,7 +44,7 @@ public:
 
 
 // Filling the hits
-	int AnalyzeHitData(int triggerTimestamp, int frameCounter, int fecID,
+	int AnalyzeHitData(int triggerTimestamp, unsigned int frameCounter, int fecID,
 			int vmmID, int chNo, int bcid, int tdc, int adc,
 			int overThresholdFlag);
 	void AddHits(short x, short y, short adc, short bcid, float chipTime, bool overThresholdFlag);
@@ -109,7 +109,7 @@ private:
 	double m_oldTriggerTimestamp_ns = 0;
 	bool m_subsequentTrigger = false;
 	int m_oldVmmID = 0;
-	int m_oldFrameCounter = 0;
+	unsigned int m_oldFrameCounter = 0;
 	double m_timeStamp_ms = 0;
 	int m_oldBcidX = 0;
 	int m_oldTdcX = 0;

@@ -10,21 +10,18 @@ class MGSEQDetectorTest : public TestBase {};
 TEST_F(MGSEQDetectorTest, IsWireIsGrid) {
   MGSEQDetector mgdet;
 
-  ASSERT_FALSE(mgdet.isWire(0));
-  ASSERT_FALSE(mgdet.isGrid(0));
-
-  for (int i = 1; i < 81; i++) {
+  for (int i = 0; i < 79; i++) {
     ASSERT_TRUE(mgdet.isWire(i));
     ASSERT_FALSE(mgdet.isGrid(i));
   }
 
-  for (int i = 81; i < 93; i++) {
+  for (int i = 80; i <= 127; i++) {
     ASSERT_FALSE(mgdet.isWire(i));
     ASSERT_TRUE(mgdet.isGrid(i));
   }
 
-  ASSERT_FALSE(mgdet.isWire(93));
-  ASSERT_FALSE(mgdet.isGrid(93));
+  ASSERT_FALSE(mgdet.isWire(128));
+  ASSERT_FALSE(mgdet.isGrid(128));
 }
 
 int main(int argc, char **argv) {

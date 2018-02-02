@@ -32,6 +32,7 @@
 #define TRC_G_INIT    0x00000010U
 #define TRC_G_IPC     0x00000020U
 #define TRC_G_CMD     0x00000040U
+#define TRC_G_DATA    0x00000080U
 
 /** Add trace masks below, bitwise or of grouops */
 #define TRC_M_ALL                                                              \

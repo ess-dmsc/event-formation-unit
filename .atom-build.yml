@@ -1,8 +1,7 @@
 cmd: cd build && make
 name: "make"
-sh: true,
 errorMatch:
-  - (?<file>[\\/0-9a-zA-Z\\._]+):(?<line>\\d+):(?<col>\\d+):\\s+(?<message>.+)
+  - "style"
 targets:
   runtest:
     cmd: 'cd build && make runtest'
@@ -14,3 +13,7 @@ targets:
     cmd: 'cd build && make RootFileTest'
   rootfiletest_run:
     cmd: 'cd build && ./unit_tests/RootFileTest'
+  cppcheck_init:
+    cmd: 'cd build && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..'
+  cppcheck:
+    cmd: 'cd build && rm -f cppcheckerr.txt ; cppcheck --enable=warning -j 5 --project=compile_commands.json 2> cppcheckerr.txt'

@@ -6,6 +6,9 @@
 #include <librdkafka/rdkafkacpp.h>
 #include <test/TestBase.h>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
+
 int fail = -1; // Dont fail
 
 // Create pointers to the retuned objects
@@ -22,6 +25,7 @@ typedef RdKafka::Topic *(*pcreatetopic)(RdKafka::Handle *, std::string const &,
 void * loadsyms(const char * primary, const char * secondary) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wpedantic"
+
   void * vpsym = dlsym(RTLD_NEXT, primary);
 
   if (vpsym == NULL) {
@@ -150,3 +154,5 @@ int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+
+#pragma GCC diagnostic pop

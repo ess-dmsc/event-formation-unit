@@ -78,7 +78,7 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
 
   int index = 0;
   while (datalen >= 8) {
-    XTRACE(PROCESS, DEB, "index: %d, datalen %d, elems: %d\n", index, datalen,
+    XTRACE(PROCESS, DEB, "index: %d, datalen %d, elems: %u\n", index, datalen,
            elems);
     uint32_t data1 = htonl(*(uint32_t *)&buffer[12 + 8 * index]);
     uint32_t data2 = htonl(*(uint32_t *)&buffer[16 + 8 * index]);

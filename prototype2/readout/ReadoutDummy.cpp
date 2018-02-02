@@ -12,7 +12,7 @@ int ReadoutDummy::parse(const char *buffer, uint32_t size) {
 
   if (type != detectortype) {
     XTRACE(PROCESS, WAR,
-           "Type idendifier in packet (%d) does not match instrument (%d)\n",
+           "Type idendifier in packet (%u) does not match instrument (%u)\n",
            type, detectortype);
     return -1;
   }
