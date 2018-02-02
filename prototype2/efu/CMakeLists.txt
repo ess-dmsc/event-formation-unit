@@ -29,23 +29,23 @@ create_executable(efu)
 #=============================================================================
 if(${CMAKE_COMPILER_IS_GNUCXX})
   set(ParserTestLibrary_SRC
-    efu/ParserTest.cpp
-    test/SyscallWrappers.cpp
-    common/NewStats.cpp)
+    ParserTest.cpp
+    ../test/SyscallWrappers.cpp
+    ../common/NewStats.cpp)
   set(ParserTestLibrary_INC
-    common/NewStats.h)
+    ../common/NewStats.h)
   add_library(ParserTestLibrary STATIC
     ${ParserTestLibrary_SRC})
   add_compile_flags(ParserTestLibrary
     "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 
   set(ParserTest_SRC
-    efu/Parser.cpp
-    common/EFUArgs.cpp
+    Parser.cpp
+    ../common/EFUArgs.cpp
     $<TARGET_OBJECTS:calibfile>)
   set(ParserTest_INC
-    efu/Parser.h
-    common/EFUArgs.h)
+    Parser.h
+    ../common/EFUArgs.h)
   set(ParserTest_LIB
     ParserTestLibrary)
   create_test_executable(ParserTest)
