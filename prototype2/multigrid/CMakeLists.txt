@@ -166,6 +166,8 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
     "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
   add_linker_flags(CalibrationFileTest
     "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
+else()
+  message(STATUS "*** Skipping CalibrationFileTest - requires gcc/linux")
 endif()
 
 set(MultiGridGeometryTest_SRC

@@ -26,7 +26,7 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(ParserTest
     "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 else()
-  message(STATUS "skipping ParserTest - requires gcc/linux")
+  message(STATUS "*** Skipping ParserTest - requires gcc/linux")
 endif()
 
 
@@ -82,7 +82,7 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
     common/Producer.h)
   create_test_executable(ProducerTest "")
 else()
-  message(WARNING "skipping ProducerTest - requires gcc/linux")
+  message(STATUS "*** Skipping ProducerTest - requires gcc/linux")
 endif()
 
 set(ReadoutSerializerTest_SRC

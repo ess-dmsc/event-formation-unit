@@ -1,8 +1,8 @@
 include_directories(. .. ../..)
 
-#
-# Tools and Data generators
-#
+#=============================================================================
+# Data generators
+#=============================================================================
 
 if(h5cpp_FOUND)
   set(gennmxfile_SRC
@@ -18,9 +18,8 @@ if(h5cpp_FOUND)
     )
   create_executable(gennmxfile "")
 else()
-  message(STATUS "Unable to compile gennmxfile as h5cpp was not found.")
+  message(STATUS "*** Unable to compile gennmxfile as h5cpp was not found.")
 endif()
-
 
 find_package(PCAP)
 if(PCAP_FOUND)
@@ -35,13 +34,13 @@ if(PCAP_FOUND)
     )
   create_executable(gennmxpcap "pcap")
 else()
-  message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
+  message(STATUS "*** Unable to compile gennmxpcap as libpcap was not found.")
 endif()
 
 
-#
+#=============================================================================
 # Detector Pipeline Plugins
-#
+#=============================================================================
 
 set(gdgem_SRC
   ../../dataformats/multigrid/src/jsoncpp.cpp
@@ -79,9 +78,10 @@ set(gdgem_INC
   )
 create_module(gdgem "")
 
-#
-# NMX / VMM Tests
-#
+
+#=============================================================================
+# Tests
+#=============================================================================
 
 # Doros gdgem event algorithm
 set(RootFileTest_SRC

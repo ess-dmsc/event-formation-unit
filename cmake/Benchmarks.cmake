@@ -26,6 +26,6 @@ function(create_benchmark_executable exec_name link_libraries)
       ${benchmark_targets}
       CACHE INTERNAL "All targets")
   else()
-    message(STATUS "skipping benchmark for ${exec_name} (can be enabled by cmake -DGOOGLE_BENCHMARK=YES)")
+    message(STATUS "*** Skipping benchmark for ${exec_name} (can be enabled by cmake -DGOOGLE_BENCHMARK=YES)")
   endif()
 endfunction(create_benchmark_executable)

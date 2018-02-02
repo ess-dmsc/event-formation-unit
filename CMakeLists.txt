@@ -10,13 +10,6 @@ set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR}/modules)
 
 #=============================================================================
-# General configuration
-#=============================================================================
-include(${EXTRA_MODULES_DIR}/EnsureBuildType.cmake)
-include(${EXTRA_MODULES_DIR}/CompilerConfig.cmake)
-include(${EXTRA_MODULES_DIR}/BuildString.cmake)
-
-#=============================================================================
 # In case conan has generated info, use it now
 #=============================================================================
 if(EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
@@ -24,6 +17,13 @@ if(EXISTS ${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
   include(${PROJECT_BINARY_DIR}/conanbuildinfo.cmake)
   conan_basic_setup(KEEP_RPATHS)
 endif()
+
+#=============================================================================
+# General configuration
+#=============================================================================
+include(${EXTRA_MODULES_DIR}/EnsureBuildType.cmake)
+include(${EXTRA_MODULES_DIR}/CompilerConfig.cmake)
+include(${EXTRA_MODULES_DIR}/BuildString.cmake)
 
 #=============================================================================
 # Testing-related stuff

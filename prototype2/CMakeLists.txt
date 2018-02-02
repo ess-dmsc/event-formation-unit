@@ -1,11 +1,49 @@
 include_directories(. ..)
+include(Utilities.cmake)
 
+#=============================================================================
+# Optionally dump raw data to file
+#=============================================================================
 option(DUMPTOFILE "Dump raw readout data to file " OFF)
 if(${DUMPTOFILE})
-  message(STATUS "Dumping to file enabled.")
-  add_definitions("-DDUMPTOFILE")  # PARENTSCOPE?
+  message(STATUS "Dumping of raw readout data to file enabled.")
+  add_definitions("-DDUMPTOFILE")
 else()
-  message(STATUS "Not dumping to file.")
+  message(STATUS "Dumping of raw readout data to file disabled (-DUMPTOFILE=NO)")
+endif()
+
+#=============================================================================
+# Required external libraries
+#=============================================================================
+set(EFU_COMMON_LIBS ${CMAKE_DL_LIBS})
+
+find_package(Threads REQUIRED)
+set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
+  ${CMAKE_THREAD_LIBS_INIT}
+  )
+
+find_package(LibRDKafka REQUIRED)
+set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
+  ${LibRDKafka_LIBRARIES}
+  ${LibRDKafka_C_LIBRARIES}
+  )
+
+#=============================================================================
+# Optional external libraries
+#=============================================================================
+find_package(GraylogLogger)
+if(GraylogLogger_FOUND)
+  set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} ${GraylogLogger_LIBRARIES})
+  add_definitions("-DGRAYLOG")
+else()
+  message(WARNING "GraylogLogger not found.")
+endif()
+
+find_package(h5cpp)
+if(h5cpp_FOUND)
+  set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} h5cpp ${HDF5_C_LIBRARIES} ${Boost_LIBRARIES})
+else()
+  message(WARNING "h5cpp not found.")
 endif()
 
 
@@ -13,13 +51,9 @@ endif()
 # Dependencies common to EFU and plugins
 #=============================================================================
 
-include(Utilities.cmake)
-
 add_subdirectory(common)
 
 include(UnitTests.cmake)
-
-#message(STATUS "*** EFU_COMMON_LIBS = ${EFU_COMMON_LIBS}")
 
 #=============================================================================
 # Plugins
@@ -61,7 +95,7 @@ create_executable(efu2 "")
 #  These commands must be at the end of this file
 #=============================================================================
 
-# Should unit_test_targets depend on default targets?
+# Should unit_test_targets depend on default targets ???
 
 add_custom_target(runtest
   COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*

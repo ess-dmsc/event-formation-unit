@@ -77,7 +77,6 @@ function(create_test_executable exec_name link_libraries)
   target_link_libraries(${exec_name}
     ${link_libraries}
     ${EFU_COMMON_LIBS}
-    ${CMAKE_DL_LIBS}
     ${GTEST_LIBRARIES}
     )
 

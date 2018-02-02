@@ -1,8 +1,8 @@
 include_directories(. .. ../..)
 
-#
+#=============================================================================
 # Detector Pipeline Plugins
-#
+#=============================================================================
 set(mbcaen_SRC
   mbcaen.cpp
   mbcaen/MBData.cpp
@@ -16,9 +16,9 @@ set(mbcaen_INC
   )
 create_module(mbcaen "")
 
-#
+#=============================================================================
 # Build MB text 2 UDP
-#
+#=============================================================================
 set(mbtext2udp_SRC
   mbtext2udp.cpp
   mbgen/MBArgs.cpp
@@ -32,8 +32,6 @@ create_executable(mbtext2udp "")
 # Excecutables to build if TCLAP is installed
 find_package(TCLAP)
 if(TCLAP_FOUND)
-  message(STATUS "TCLAP found")
-
   # Create an excecutable for the event-builder to process recorded data from a text-file.
   set(mbprocesstextfile_SRC
     mbprocesstextfile.cpp
@@ -61,9 +59,9 @@ if(TCLAP_FOUND)
     mbcommon/dumpEventBuilderInfo.h
     )
   create_executable(mbprofiling "")
-
-else(TCLAP_FOUND)
-  message(STATUS "TCLAP not found")
+else()
+  message(STATUS "*** Unable to compile mbprocesstextfile as TCLAP was not found.")
+  message(STATUS "*** Unable to compile mbprofiling as TCLAP was not found.")
 endif()
 
 # GOOGLE BENCHMARK

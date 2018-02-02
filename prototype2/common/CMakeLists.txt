@@ -1,45 +1,12 @@
-#
-# These libraries are required
-#
-set(EFU_EXTERNAL_LIBS ${CMAKE_DL_LIBS})
-
-find_package(Threads REQUIRED)
-set(EFU_EXTERNAL_LIBS ${EFU_EXTERNAL_LIBS}
-  ${CMAKE_THREAD_LIBS_INIT}
-  )
-
-find_package(LibRDKafka REQUIRED)
-set(EFU_EXTERNAL_LIBS ${EFU_EXTERNAL_LIBS}
-  ${LibRDKafka_LIBRARIES}
-  ${LibRDKafka_C_LIBRARIES}
-  )
-
-#
-# These libraries are optional
-#
-find_package(GraylogLogger)
-if(GraylogLogger_FOUND)
-  set(EFU_EXTERNAL_LIBS ${EFU_EXTERNAL_LIBS} ${GraylogLogger_LIBRARIES})
-  add_definitions("-DGRAYLOG")
-endif()
-
-find_package(h5cpp REQUIRED)
-#if(h5cpp_FOUND)
-set(EFU_EXTERNAL_LIBS ${EFU_EXTERNAL_LIBS} h5cpp ${HDF5_C_LIBRARIES} ${Boost_LIBRARIES})
-set (h5cpp_FOUND ON PARENT_SCOPE)
-#set (h5cpp_FOUND ON)
-#endif()
-
-
-#
+#=============================================================================
 # Common functionality for all detector plugins
-#
-set(common_SRC
+#=============================================================================
+set(efu_common_SRC
   FBSerializer.cpp
   NewStats.cpp
   Producer.cpp
   )
-set(common_INC
+set(efu_common_INC
   ../../libs/include/gccintel.h
   Detector.h
   EFUArgs.h
@@ -49,19 +16,16 @@ set(common_INC
   Trace.h
   )
 
-#
-# Optionally dump to file
-#
 if(${DUMPTOFILE})
-  set(common_SRC ${common_SRC} DataSave.cpp)
-  set(common_INC ${common_INC} DataSave.h)
+  set(efu_common_SRC ${efu_common_SRC} DataSave.cpp)
+  set(efu_common_INC ${efu_common_INC} DataSave.h)
 endif()
 
-add_library(common STATIC
-  ${common_SRC}
-  ${common_INC})
+add_library(efu_common STATIC
+  ${efu_common_SRC}
+  ${efu_common_INC})
 
-enable_coverage(common)
+enable_coverage(efu_common)
 
-set(EFU_COMMON_LIBS ${EFU_EXTERNAL_LIBS} common PARENT_SCOPE)
+set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} efu_common PARENT_SCOPE)
 
