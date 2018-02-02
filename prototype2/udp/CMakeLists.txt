@@ -5,4 +5,4 @@
 # UDP receiver 'detector'
 set(udp_SRC udp.cpp)
 create_module(udp)
-set_target_properties(udp PROPERTIES COMPILE_FLAGS "-fno-strict-aliasing")
+add_compile_flags(udp "-fno-strict-aliasing")

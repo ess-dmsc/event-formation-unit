@@ -53,7 +53,9 @@ endif()
 
 add_subdirectory(common)
 
-include(UnitTests.cmake)
+add_subdirectory(readout)
+
+include(UnitTests.cmake) # This has only libs unit tests now?
 
 #=============================================================================
 # Plugins
@@ -64,32 +66,12 @@ add_subdirectory(multigrid)
 add_subdirectory(sonde)
 add_subdirectory(udp)
 
+
 #=============================================================================
 # Event Formation Unit
 #=============================================================================
-set(efu2_SRC
-  common/EFUArgs.cpp
-  common/StatPublisher.cpp
-  efu/Loader.cpp
-  efu/Launcher.cpp
-  efu/main.cpp
-  efu/ExitHandler.cpp
-  efu/Server.cpp
-  efu/Parser.cpp
-  )
-set(efu2_INC
-  CLI/CLI11.hpp
-  common/Trace.h
-  common/StatPublisher.h
-  common/NewStats.h
-  common/EFUArgs.h
-  efu/Launcher.h
-  efu/Loader.h
-  efu/Server.h
-  efu/Parser.h
-  efu/ExitHandler.h
-  )
-create_executable(efu2 "")
+add_subdirectory(efu)
+
 
 #=============================================================================
 #  These commands must be at the end of this file
