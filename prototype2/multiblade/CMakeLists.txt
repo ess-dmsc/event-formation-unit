@@ -1,4 +1,4 @@
-include_directories(. .. ../..)
+include_directories(.)
 
 #=============================================================================
 # Detector Pipeline Plugins

@@ -1,5 +1,3 @@
-include_directories(. .. ../..)
-
 #=============================================================================
 # Data generators
 #=============================================================================
@@ -32,7 +30,9 @@ if(PCAP_FOUND)
     nmxgen/ReaderPcap.h
     nmxgen/NMXArgs.h
     )
-  set(gennmxpcap_LIB pcap)
+  set(gennmxpcap_LIB
+    ${PCAP_LIBRARY}
+    )
   create_executable(gennmxpcap)
 else()
   message(STATUS "*** Unable to compile gennmxpcap as libpcap was not found.")

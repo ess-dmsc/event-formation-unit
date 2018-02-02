@@ -30,6 +30,7 @@ include(${EXTRA_MODULES_DIR}/BuildString.cmake)
 #=============================================================================
 enable_testing()
 find_package(GTestFix REQUIRED)
+include(${EXTRA_MODULES_DIR}/AddTargetFlags.cmake)
 include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 include(${EXTRA_MODULES_DIR}/Benchmarks.cmake)
 include(${EXTRA_MODULES_DIR}/Profiling.cmake)

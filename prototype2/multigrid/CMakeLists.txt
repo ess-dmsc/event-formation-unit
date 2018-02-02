@@ -1,4 +1,3 @@
-include_directories(.. ../..)
 
 # Where does this really need to go ???
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/calib_data
