@@ -6,9 +6,12 @@
 #include <unistd.h>
 #include <gdgem/dg_impl/RootFile.h>
 #include <gdgem/dg_impl/TestData.h>
+//#include <gdgem/dg_impl/TestDataLong.h>
 #include <test/TestBase.h>
 
-static void Doit(__attribute__((unused)) benchmark::State &state)
+
+
+static void Doit(benchmark::State &state)
 {
 	std::vector<int> pXChips {0, 1, 6, 7};
 	std::vector<int> pYChips {10, 11, 14, 15};
@@ -40,6 +43,7 @@ static void Doit(__attribute__((unused)) benchmark::State &state)
 		  }
     }
     items += 204; // 204 hits in the 1_16 dataset
+    //items += 1415680; // 1415680 hits in the complete Run16 dataset
   }
   // state.SetComplexityN(state.range(0));
   //state.SetBytesProcessed(state.iterations() * state.range(0));
@@ -48,4 +52,6 @@ static void Doit(__attribute__((unused)) benchmark::State &state)
 
 BENCHMARK(Doit);
 
-BENCHMARK_MAIN()
+BENCHMARK_MAIN();
+
+

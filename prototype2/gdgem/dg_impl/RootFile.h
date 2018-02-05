@@ -8,7 +8,7 @@
 
 using namespace std;
 
-struct cluster
+struct Cluster
 {
 	unsigned int size;
 	unsigned int adc;
@@ -20,7 +20,7 @@ struct cluster
 	bool clusterXAndY_uTPC;
 };
 
-struct commonCluster
+struct CommonCluster
 {
 	unsigned int sizeX;
 	unsigned int sizeY;
@@ -122,11 +122,11 @@ private:
 	std::multimap<float, std::pair<int, int> > m_hitsX;
 	std::multimap<float, std::pair<int, int> > m_hitsY;
 
-	std::vector<commonCluster> m_clusterXY;
-	std::vector<commonCluster> m_clusterXY_uTPC;
-	std::vector<cluster> m_tempClusterX;
-	std::vector<cluster> m_tempClusterY;
-	std::vector<cluster> m_clusterX;
-	std::vector<cluster> m_clusterY;
+	std::vector<CommonCluster> m_clusterXY;
+	std::vector<CommonCluster> m_clusterXY_uTPC;
+	std::vector<Cluster> m_tempClusterX;
+	std::vector<Cluster> m_tempClusterY;
+	std::vector<Cluster> m_clusterX;
+	std::vector<Cluster> m_clusterY;
 
 };

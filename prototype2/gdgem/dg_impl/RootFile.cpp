@@ -5,8 +5,8 @@
 
 #define UNUSED __attribute__((unused))
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 RootFile::RootFile(int bc, int tac, int acqWin, std::vector<int> xChips,
 		std::vector<int> yChips, int adcThreshold, int minClusterSize,
@@ -16,10 +16,8 @@ RootFile::RootFile(int bc, int tac, int acqWin, std::vector<int> xChips,
 				yChips), pADCThreshold(adcThreshold), pMinClusterSize(
 				minClusterSize), pDeltaTimeHits(deltaTimeHits), pDeltaStripHits(
 				deltaStripHits), pDeltaTimeSpan(deltaTimeSpan), pDeltaTimePlanes(
-				deltaTimePlanes)
+				deltaTimePlanes), m_eventNr(0)
 {
-
-	m_eventNr = 0;
 }
 
 RootFile::~RootFile()
@@ -165,8 +163,7 @@ int RootFile::AnalyzeHitData(int triggerTimestamp, unsigned int frameCounter, in
 		DTRACE(DEB, "\t\tPlane for vmmID %d not defined!\n", vmmID);
 	}
 	DTRACE(DEB, "\t\t\tbcid %d, tdc %d, adc %d\n", bcid, tdc, adc);
-	DTRACE(DEB,
-			"\t\t\tbcTime %.2f us, tdcTime %.2f ns, time %.2f us\n", bcTime,
+	DTRACE(DEB, "\t\t\tbcTime %.2f us, tdcTime %.2f ns, time %.2f us\n", bcTime,
 			tdcTime, chipTime * 0.001);
 
 	m_oldTriggerTimestamp_ns = triggerTimestamp_ns;
@@ -184,24 +181,24 @@ void RootFile::AddHits(short x, short y, short adc, short bcid, float chipTime, 
 
 		if (bcid < pAcqWin * pBC / 40)
 		{
-			m_hitsX.insert(std::make_pair(chipTime, std::make_pair(x, adc)));
+			m_hitsX.emplace(std::make_pair(chipTime, std::make_pair(x, adc)));
 
 		}
 		else
 		{
-			m_hitsOldX.insert(std::make_pair(chipTime, std::make_pair(x, adc)));
+			m_hitsOldX.emplace(std::make_pair(chipTime, std::make_pair(x, adc)));
 		}
 	}
 	if (y > -1 && (adc >= pADCThreshold || overThresholdFlag))
 	{
 		if (bcid < pAcqWin * pBC / 40)
 		{
-			m_hitsY.insert(std::make_pair(chipTime, std::make_pair(y, adc)));
+			m_hitsY.emplace(std::make_pair(chipTime, std::make_pair(y, adc)));
 
 		}
 		else
 		{
-			m_hitsOldY.insert(std::make_pair(chipTime, std::make_pair(y, adc)));
+			m_hitsOldY.emplace(std::make_pair(chipTime, std::make_pair(y, adc)));
 		}
 	}
 }
@@ -212,28 +209,29 @@ int RootFile::ClusterByTime(std::multimap<float, std::pair<int, int>> &oldHits,
 {
 
 	std::multimap<int, std::pair<float, int>> cluster;
-	std::multimap<float, std::pair<int, int>>::iterator itOldHits =
-			oldHits.begin();
+	
 	int clusterCount = 0;
 	int stripCount = 0;
 	double time1 = 0, time2 = 0;
 	int adc1 = 0;
 	int strip1 = 0;
-	cluster.clear();
-	for (; itOldHits != oldHits.end(); itOldHits++)
+	
+	for(auto& itOldHits :oldHits)
 	{
 		time2 = time1;
-		time1 = itOldHits->first;
-		strip1 = itOldHits->second.first;
-		adc1 = itOldHits->second.second;
+		time1 = itOldHits.first;
+		strip1 = itOldHits.second.first;
+		adc1 = itOldHits.second.second;
 		if (time1 - time2 > dTime && stripCount > 0)
 		{
 			clusterCount += ClusterByStrip(cluster, dStrip, dSpan, coordinate);
 			cluster.clear();
 		}
-		cluster.insert(std::make_pair(strip1, std::make_pair(time1, adc1)));
+		cluster.emplace(std::make_pair(strip1, std::make_pair(time1, adc1)));
 		stripCount++;
-	}
+	} 
+	
+
 	if (stripCount > 0)
 	{
 		clusterCount += ClusterByStrip(cluster, dStrip, dSpan, coordinate);
@@ -259,14 +257,14 @@ int RootFile::ClusterByStrip(
 	int stripCount = 0;
 	int clusterCount = 0;
 
-	std::multimap<int, std::pair<float, int>>::iterator itCluster =
-			cluster.begin();
-	for (; itCluster != cluster.end(); itCluster++)
+
+	
+	for(auto& itCluster :cluster)
 	{
 		strip2 = strip1;
-		strip1 = itCluster->first;
-		time1 = itCluster->second.first;
-		adc1 = itCluster->second.second;
+		strip1 = itCluster.first;
+		time1 = itCluster.second.first;
+		adc1 = itCluster.second.second;
 		// At beginning of cluster, set start time of cluster
 		if (stripCount == 0)
 		{
@@ -343,7 +341,7 @@ void RootFile::AddClusters(float clusterPosition, float clusterPositionUTPC,
 		float clusterTimeUTPC, string coordinate)
 {
 
-	cluster theCluster;
+	Cluster theCluster;
 	theCluster.size = clusterSize;
 	theCluster.adc = clusterADC;
 	theCluster.time = clusterTime;
@@ -355,11 +353,11 @@ void RootFile::AddClusters(float clusterPosition, float clusterPositionUTPC,
 
 	if (coordinate == "x" && clusterPosition > -1.0)
 	{
-		m_tempClusterX.push_back(theCluster);
+		m_tempClusterX.emplace_back(std::move(theCluster));
 	}
 	if (coordinate == "y" && clusterPosition > -1.0)
 	{
-		m_tempClusterY.push_back(theCluster);
+		m_tempClusterY.emplace_back(std::move(theCluster));
 	}
 }
 
@@ -388,7 +386,7 @@ void RootFile::MatchClustersXY(float dPlane)
 				m_tempClusterX[nx].clusterXAndY = true;
 				m_tempClusterY[ny].clusterXAndY = true;
 
-				commonCluster theCommonCluster;
+				CommonCluster theCommonCluster;
 				theCommonCluster.sizeX = m_tempClusterX[nx].size;
 				theCommonCluster.sizeY = m_tempClusterY[ny].size;
 				theCommonCluster.adcX = m_tempClusterX[nx].adc;
@@ -397,7 +395,7 @@ void RootFile::MatchClustersXY(float dPlane)
 				theCommonCluster.positionY = m_tempClusterY[ny].position;
 				theCommonCluster.timeX = m_tempClusterX[nx].time;
 				theCommonCluster.timeY = m_tempClusterY[ny].time;
-				m_clusterXY.push_back(theCommonCluster);
+				
 
 				DTRACE(DEB, "\ncommon cluster x/y (center of mass):");
 				DTRACE(DEB, "\tpos x/pos y: %f/%f", posx, posy);
@@ -405,8 +403,8 @@ void RootFile::MatchClustersXY(float dPlane)
 				DTRACE(DEB, "\tadc x/adc y: %u/%u",
 						theCommonCluster.adcX, theCommonCluster.adcY);
 				DTRACE(DEB, "\tsize x/size y: %u/%u",
-						theCommonCluster.sizeX, theCommonCluster.sizeY);
-
+						theCommonCluster.sizeX, theCommonCluster.sizeY)	;
+				m_clusterXY.emplace_back(std::move(theCommonCluster));
 				break;
 			}
 		}
@@ -434,7 +432,7 @@ void RootFile::MatchClustersXY(float dPlane)
 				m_tempClusterX[nx].clusterXAndY_uTPC = true;
 				m_tempClusterY[ny].clusterXAndY_uTPC = true;
 
-				commonCluster theCommonCluster_uTPC;
+				CommonCluster theCommonCluster_uTPC;
 				theCommonCluster_uTPC.sizeX = m_tempClusterX[nx].size;
 				theCommonCluster_uTPC.sizeY = m_tempClusterY[ny].size;
 				theCommonCluster_uTPC.adcX = m_tempClusterX[nx].adc;
@@ -443,9 +441,9 @@ void RootFile::MatchClustersXY(float dPlane)
 				theCommonCluster_uTPC.positionY = m_tempClusterY[ny].position;
 				theCommonCluster_uTPC.timeX = m_tempClusterX[nx].time;
 				theCommonCluster_uTPC.timeY = m_tempClusterY[ny].time;
-				m_clusterXY_uTPC.push_back(theCommonCluster_uTPC);
+				
 
-				DTRACE(DEB, "\ncommon cluster x/y (center of mass):");
+				DTRACE(DEB, "\ncommon cluster x/y (uTPC):");
 				DTRACE(DEB, "\tpos x/pos y: %f/%f", posx, posy);
 				DTRACE(DEB, "\ttime x/time y: : %f/%f", tx, ty);
 				DTRACE(DEB, "\tadc x/adc y: %u/%u",
@@ -453,6 +451,7 @@ void RootFile::MatchClustersXY(float dPlane)
 				DTRACE(DEB, "\tsize x/size y: %u/%u",
 						theCommonCluster_uTPC.sizeX,
 						theCommonCluster_uTPC.sizeY);
+				m_clusterXY_uTPC.emplace_back(std::move(theCommonCluster_uTPC));
 
 				break;
 			}
@@ -475,18 +474,24 @@ void RootFile::FillClusters()
 
 	MatchClustersXY(pDeltaTimePlanes);
 
-	m_hitsOldX.clear();
-	m_hitsOldY.clear();
-	if (!m_hitsX.empty())
-		m_hitsOldX = m_hitsX;
-	if (!m_hitsY.empty())
-		m_hitsOldY = m_hitsY;
-	m_hitsX.clear();
-	m_hitsY.clear();
-	m_clusterX.insert(m_clusterX.end(), m_tempClusterX.begin(), m_tempClusterX.end());
-	m_clusterY.insert(m_clusterY.end(), m_tempClusterY.begin(), m_tempClusterY.end());
+
+	m_hitsOldX = std::move(m_hitsX);
+	m_hitsOldY = std::move(m_hitsY);
+	if(!m_hitsX.empty())
+	{
+		m_hitsX.clear();
+	}
+	if(!m_hitsY.empty())
+	{
+		m_hitsY.clear();
+	}
+	
+	
+	m_clusterX.insert(m_clusterX.end(), std::make_move_iterator(m_tempClusterX.begin()), std::make_move_iterator(m_tempClusterX.end()));
+	m_clusterY.insert(m_clusterY.end(), std::make_move_iterator(m_tempClusterY.begin()), std::make_move_iterator(m_tempClusterY.end()));
 	m_tempClusterX.clear();
 	m_tempClusterY.clear();
+	
 
 }
 
@@ -496,64 +501,62 @@ void RootFile::CorrectTriggerData(
 		std::multimap<float, std::pair<int, int>> &oldHits,
 		float correctionTime)
 {
-	if (oldHits.size() > 0 && hits.size() > 0)
+	if (m_subsequentTrigger )
 	{
-		if (m_subsequentTrigger)
+			
+		auto itHitsBegin = begin(hits);
+		auto itHitsEnd = end(hits);
+		auto itOldHitsBegin = oldHits.rend();
+		auto itOldHitsEnd = oldHits.rbegin();
+		if(itHitsBegin!= itHitsEnd && itOldHitsBegin != itOldHitsEnd)
 		{
-			std::multimap<float, std::pair<int, int>>::iterator itBegin =
-					hits.begin();
-			std::multimap<float, std::pair<int, int>>::iterator itEnd =
-					hits.end();
-			std::multimap<float, std::pair<int, int>>::reverse_iterator itReverseEnd =
-					oldHits.rbegin();
 			float bcPeriod = 1000 * 4096 * (1 / (float) pBC);
-			float timePrevious = itReverseEnd->first;
-			float timeNext = itBegin->first + bcPeriod;
+			float timePrevious = (*itOldHitsEnd).first;
+			float timeNext = (*itHitsBegin).first + bcPeriod;
 			float deltaTime = timeNext - timePrevious;
-
+			//Code only executed if the first hit in hits is close enough in time to the last hit in oldHits
 			if (deltaTime <= correctionTime)
 			{
-				std::multimap<float, std::pair<int, int>>::iterator it;
 				std::multimap<float, std::pair<int, int>>::iterator itFind;
-
-				for (it = itBegin; it != itEnd; ++it)
+				//Loop through all hits in hits	
+				for (itFind = itHitsBegin; itFind != itHitsEnd; ++itFind)
 				{
+					//At the first iteration, timePrevious is sett to the time of the first hit in hits	
 					timePrevious = timeNext;
-					timeNext = (*it).first + bcPeriod;
+					//At the first iteration, timeNext is again set to the time of the first hit in hits					
+					timeNext = (*itFind).first + bcPeriod;
+					//At the first iteration, delta time is 0
 					deltaTime = timeNext - timePrevious;
-					itFind = it;
 					if (deltaTime > correctionTime)
 					{
 						break;
 					}
 					else
 					{
-						oldHits.insert(
-								std::make_pair(timeNext,
-										std::make_pair(it->second.first,
-												it->second.second)));
+						oldHits.emplace(std::make_pair(timeNext, std::make_pair((*itFind).second.first, (*itFind).second.second)));
 					}
 				}
-				hits.erase(hits.begin(), itFind);
+				//Deleting all hits that have been inserted into oldHits (up to itFind, but not including itFind)
+				hits.erase(itHitsBegin, itFind);
+		
 			}
 		}
 	}
 }
 
+
 //====================================================================================================================
 int RootFile::GetPlaneID(int chipID)
 {
-	std::vector<int>::iterator it;
-
-	it = find(pXChipIDs.begin(), pXChipIDs.end(), chipID);
-	if (it != pXChipIDs.end())
+	auto chip = std::find(begin(pXChipIDs), end(pXChipIDs), chipID);
+	if (chip != end(pXChipIDs))
 	{
 		return 0;
 	}
 	else
 	{
-		it = find(pYChipIDs.begin(), pYChipIDs.end(), chipID);
-		if (it != pYChipIDs.end())
+		auto chip = std::find(begin(pYChipIDs), end(pYChipIDs), chipID);
+		if (chip != end(pYChipIDs))
 		{
 			return 1;
 		}
@@ -568,13 +571,10 @@ int RootFile::GetPlaneID(int chipID)
 int RootFile::GetChannel(std::vector<int>& chipIDs, int chipID,
 		int channelID)
 {
-	std::vector<int>::iterator it;
-
-	it = find(chipIDs.begin(), chipIDs.end(), chipID);
-	if (it != chipIDs.end())
+	auto chip = std::find(begin(chipIDs), end(chipIDs), chipID);
+	if (chip != end(chipIDs))
 	{
-		int pos = it - chipIDs.begin();
-		return channelID + pos * 64;
+		return channelID + (chip - begin(chipIDs)) * 64;
 	}
 	else
 	{

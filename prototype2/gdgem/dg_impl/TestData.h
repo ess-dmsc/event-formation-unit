@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 
-struct hit
+struct Hit
 {
 	unsigned int fec;
 	unsigned int chip_id;
@@ -16,7 +16,7 @@ struct hit
 
 
 
-std::vector<hit> Run16_1_to_16
+std::vector<Hit> Run16_1_to_16
 {
 { 1, 1, 255776505, 181469184, 58, 3543, 183, 170, 1 },
 { 1, 1, 255776505, 181469184, 59, 3543, 137, 498, 1 },
