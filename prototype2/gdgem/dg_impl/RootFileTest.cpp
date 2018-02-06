@@ -35,7 +35,7 @@ TEST_F(RootFileTest, Run16_1_to_16)
 
 	RootFile nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
 
-  	for (auto hit : Run16_1_to_16) { // replace with UDP receive()
+  	for (auto hit : Run16_line_110168_110323) { // replace with UDP receive()
 		int result = nmxdata.AnalyzeHitData(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
 		if (result == -1) {
 			printf("result == -1\n");
