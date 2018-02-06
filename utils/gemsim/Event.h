@@ -9,6 +9,9 @@
 
 #include <string>
 
+const double ns = 0.000000001;
+const double us = 1000 * ns;
+
 class Simulator;
 
 class Event {
