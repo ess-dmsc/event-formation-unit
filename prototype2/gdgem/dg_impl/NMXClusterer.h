@@ -32,35 +32,36 @@ struct CommonCluster
 	float timeY;
 };
 
-class RootFile
+class NMXClusterer
 {
 public:
-	RootFile(int bc, int tac, int acqWin, std::vector<int> xChips,
+	NMXClusterer(int bc, int tac, int acqWin, std::vector<int> xChips,
 			std::vector<int> yChips, int adcThreshold, int minClusterSize,
 			float deltaTimeHits, int deltaStripHits, float deltaTimeSpan,
 			float deltaTimePlanes);
 
-	~RootFile();
+	~NMXClusterer();
 
 
-// Filling the hits
-	int AnalyzeHitData(int triggerTimestamp, unsigned int frameCounter, int fecID,
+// Analyzing and storing the hits
+	int AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
 			int vmmID, int chNo, int bcid, int tdc, int adc,
 			int overThresholdFlag);
-	void AddHits(short x, short y, short adc, short bcid, float chipTime, bool overThresholdFlag);
+	void StoreHits(short x, short y, short adc, short bcid, float chipTime, bool overThresholdFlag);
 
-// Filling the clusters
+// Analyzing and storing the clusters
+	void AnalyzeClusters();
 	int ClusterByTime(std::multimap<float, std::pair<int, int>>&oldHits,
 			float dTime, int dStrip, float dSpan, string coordinate);
 	int ClusterByStrip(std::multimap<int, std::pair<float, int>> &cluster,
 			int dStrip, float dSpan, string coordinate);
 
-	void AddClusters(float clusterPosition, float clusterPositionUTPC,
+	void StoreClusters(float clusterPosition, float clusterPositionUTPC,
 			short clusterSize, int clusterADC, float clusterTime,
 			float clusterTimeUTPC, string coordinate);
 
 	void MatchClustersXY(float dPlane);
-	void FillClusters();
+	
 	void CorrectTriggerData(std::multimap<float, std::pair<int, int>>&hits,
 			std::multimap<float, std::pair<int, int>>&oldHits,
 			float correctionTime);

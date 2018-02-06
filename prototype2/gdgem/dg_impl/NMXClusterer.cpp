@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <cmath>
-#include <gdgem/dg_impl/RootFile.h>
+#include <gdgem/dg_impl/NMXClusterer.h>
 #include <common/Trace.h>
 
 #define UNUSED __attribute__((unused))
@@ -8,7 +8,7 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-RootFile::RootFile(int bc, int tac, int acqWin, std::vector<int> xChips,
+NMXClusterer::NMXClusterer(int bc, int tac, int acqWin, std::vector<int> xChips,
 		std::vector<int> yChips, int adcThreshold, int minClusterSize,
 		float deltaTimeHits, int deltaStripHits, float deltaTimeSpan,
 		float deltaTimePlanes) :
@@ -20,12 +20,12 @@ RootFile::RootFile(int bc, int tac, int acqWin, std::vector<int> xChips,
 {
 }
 
-RootFile::~RootFile()
+NMXClusterer::~NMXClusterer()
 {
 }
 
 //====================================================================================================================
-int RootFile::AnalyzeHitData(int triggerTimestamp, unsigned int frameCounter, int fecID,
+int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
 		int vmmID, int chNo, int bcid, int tdc, int adc, int overThresholdFlag)
 {
 
@@ -35,7 +35,7 @@ int RootFile::AnalyzeHitData(int triggerTimestamp, unsigned int frameCounter, in
 
 	if (m_oldTriggerTimestamp_ns != triggerTimestamp_ns)
 	{
-		FillClusters();
+		AnalyzeClusters();
 		newEvent = true;
 		m_subsequentTrigger = false;
 		m_eventNr++;
@@ -113,15 +113,15 @@ int RootFile::AnalyzeHitData(int triggerTimestamp, unsigned int frameCounter, in
 
 	// TDC has reduced resolution due to most significant bit problem of current
 	// sources (like ADC)
-	int tdcRebinned = (int) tdc / 8;
-	tdc = tdcRebinned * 8;
+	//int tdcRebinned = (int) tdc / 8;
+	//tdc = tdcRebinned * 8;
 	double tdcTime = pTAC * (double) tdc / 255;
 
 	// Chip time: bcid plus tdc value
 	// Talk Vinnie: HIT time  = BCIDx25 + ADC*125/255 [ns]
 	double chipTime = bcTime * 1000 + tdcTime;
 
-	AddHits(x, y, adc, bcid, chipTime, overThresholdFlag);
+	StoreHits(x, y, adc, bcid, chipTime, overThresholdFlag);
 
 	if (newEvent)
 	{
@@ -173,7 +173,7 @@ int RootFile::AnalyzeHitData(int triggerTimestamp, unsigned int frameCounter, in
 }
 
 //====================================================================================================================
-void RootFile::AddHits(short x, short y, short adc, short bcid, float chipTime, bool overThresholdFlag)
+void NMXClusterer::StoreHits(short x, short y, short adc, short bcid, float chipTime, bool overThresholdFlag)
 {
 
 	if (x > -1 && (adc >= pADCThreshold || overThresholdFlag))
@@ -204,7 +204,7 @@ void RootFile::AddHits(short x, short y, short adc, short bcid, float chipTime, 
 }
 
 //====================================================================================================================
-int RootFile::ClusterByTime(std::multimap<float, std::pair<int, int>> &oldHits,
+int NMXClusterer::ClusterByTime(std::multimap<float, std::pair<int, int>> &oldHits,
 		float dTime, int dStrip, float dSpan, string coordinate)
 {
 
@@ -240,7 +240,7 @@ int RootFile::ClusterByTime(std::multimap<float, std::pair<int, int>> &oldHits,
 }
 
 //====================================================================================================================
-int RootFile::ClusterByStrip(
+int NMXClusterer::ClusterByStrip(
 		std::multimap<int, std::pair<float, int>> &cluster, int dStrip,
 		float dSpan, string coordinate)
 {
@@ -304,7 +304,7 @@ int RootFile::ClusterByStrip(
 			{
 				centerOfGravity = (centerOfGravity / (float) totalADC);
 				centerOfTime = (centerOfTime / (float) totalADC);
-				AddClusters(centerOfGravity, clusterPositionUTPC, stripCount,
+				StoreClusters(centerOfGravity, clusterPositionUTPC, stripCount,
 						totalADC, centerOfTime, largestTime, coordinate);
 				clusterCount++;
 				DTRACE(DEB, "******** VALID ********\n");
@@ -327,7 +327,7 @@ int RootFile::ClusterByStrip(
 	{
 		centerOfGravity = (centerOfGravity / (float) totalADC);
 		centerOfTime = (centerOfTime / totalADC);
-		AddClusters(centerOfGravity, clusterPositionUTPC, stripCount, totalADC,
+		StoreClusters(centerOfGravity, clusterPositionUTPC, stripCount, totalADC,
 				centerOfTime, largestTime, coordinate);
 		clusterCount++;
 		DTRACE(DEB, "******** VALID ********\n");
@@ -336,7 +336,7 @@ int RootFile::ClusterByStrip(
 }
 
 //====================================================================================================================
-void RootFile::AddClusters(float clusterPosition, float clusterPositionUTPC,
+void NMXClusterer::StoreClusters(float clusterPosition, float clusterPositionUTPC,
 		short clusterSize, int clusterADC, float clusterTime,
 		float clusterTimeUTPC, string coordinate)
 {
@@ -362,7 +362,7 @@ void RootFile::AddClusters(float clusterPosition, float clusterPositionUTPC,
 }
 
 //====================================================================================================================
-void RootFile::MatchClustersXY(float dPlane)
+void NMXClusterer::MatchClustersXY(float dPlane)
 {
 
 	for (unsigned int nx = 0; nx < m_tempClusterX.size(); nx++)
@@ -460,7 +460,7 @@ void RootFile::MatchClustersXY(float dPlane)
 }
 
 //====================================================================================================================
-void RootFile::FillClusters()
+void NMXClusterer::AnalyzeClusters()
 {
 	CorrectTriggerData(m_hitsX, m_hitsOldX, pDeltaTimeHits);
 	CorrectTriggerData(m_hitsY, m_hitsOldY, pDeltaTimeHits);
@@ -496,7 +496,7 @@ void RootFile::FillClusters()
 }
 
 //====================================================================================================================
-void RootFile::CorrectTriggerData(
+void NMXClusterer::CorrectTriggerData(
 		std::multimap<float, std::pair<int, int>> &hits,
 		std::multimap<float, std::pair<int, int>> &oldHits,
 		float correctionTime)
@@ -527,6 +527,7 @@ void RootFile::CorrectTriggerData(
 					timeNext = (*itFind).first + bcPeriod;
 					//At the first iteration, delta time is 0
 					deltaTime = timeNext - timePrevious;
+
 					if (deltaTime > correctionTime)
 					{
 						break;
@@ -546,7 +547,7 @@ void RootFile::CorrectTriggerData(
 
 
 //====================================================================================================================
-int RootFile::GetPlaneID(int chipID)
+int NMXClusterer::GetPlaneID(int chipID)
 {
 	auto chip = std::find(begin(pXChipIDs), end(pXChipIDs), chipID);
 	if (chip != end(pXChipIDs))
@@ -568,7 +569,7 @@ int RootFile::GetPlaneID(int chipID)
 }
 
 //====================================================================================================================
-int RootFile::GetChannel(std::vector<int>& chipIDs, int chipID,
+int NMXClusterer::GetChannel(std::vector<int>& chipIDs, int chipID,
 		int channelID)
 {
 	auto chip = std::find(begin(chipIDs), end(chipIDs), chipID);

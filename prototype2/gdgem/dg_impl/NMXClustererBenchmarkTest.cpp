@@ -4,9 +4,8 @@
 #include <vector>
 #include <stdio.h>
 #include <unistd.h>
-#include <gdgem/dg_impl/RootFile.h>
+#include <gdgem/dg_impl/NMXClusterer.h>
 #include <gdgem/dg_impl/TestData.h>
-//#include <gdgem/dg_impl/TestDataLong.h>
 #include <test/TestBase.h>
 
 
@@ -32,18 +31,19 @@ static void Doit(benchmark::State &state)
 
   uint32_t items = 0;
 
-	RootFile nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
 
+
+ NMXClusterer nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
   for (auto _ : state) {
-  	for (auto hit : Run16_1_to_16) { // replace with UDP receive()
-		  int result = nmxdata.AnalyzeHitData(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
+  	for (auto hit : Run16_line_110168_110323) { // replace with UDP receive()
+		  int result = nmxdata.AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
+
 		  if (result == -1) {
 			  printf("result == -1\n");
 			  break;
 		  }
     }
-    items += 204; // 204 hits in the 1_16 dataset
-    //items += 1415680; // 1415680 hits in the complete Run16 dataset
+    items += 156; // 156 hits in the Run16_line_110168_110323 dataset
   }
   // state.SetComplexityN(state.range(0));
   //state.SetBytesProcessed(state.iterations() * state.range(0));
