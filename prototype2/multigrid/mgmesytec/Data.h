@@ -10,7 +10,7 @@
 #include <common/ESSGeometry.h>
 #include <common/ReadoutSerializer.h>
 #include <dataformats/multigrid/inc/DataSave.h>
-#include <multigrid/mgmesytec/MGSEQDetector.h>
+#include <multigrid/mgmesytec/MG24Detector.h>
 
 class MesytecData {
 public:
@@ -71,7 +71,7 @@ private:
   int wireThresholdHi{65535};
   int gridThresholdLo{0};
   int gridThresholdHi{65535};
-  MGSEQDetector mgseq;
+  MG24Detector mgseq;
   ESSGeometry mg{4, 48, 20, 1};
 
 #ifdef DUMPTOFILE
