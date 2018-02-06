@@ -10,7 +10,7 @@ class MGSEQDetectorTest : public TestBase {};
 TEST_F(MGSEQDetectorTest, IsWireIsGrid) {
   MGSEQDetector mgdet;
 
-  for (int i = 0; i < 79; i++) {
+  for (int i = 0; i <= 79; i++) {
     ASSERT_TRUE(mgdet.isWire(i));
     ASSERT_FALSE(mgdet.isGrid(i));
   }

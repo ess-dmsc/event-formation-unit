@@ -72,7 +72,7 @@ private:
   int gridThresholdLo{0};
   int gridThresholdHi{65535};
   MGSEQDetector mgseq;
-  ESSGeometry mg{8, 48, 20, 1};
+  ESSGeometry mg{4, 48, 20, 1};
 
 #ifdef DUMPTOFILE
   DataSave mgdata{std::string("multigrid_mesytec_"), 100000000};
