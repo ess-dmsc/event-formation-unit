@@ -16,7 +16,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-class MGSEQDetector {
+class MG24Detector {
 public:
   /** @brief identifies which channels are wires, from drawing by Anton */
   inline bool isWire(int channel) { return (channel <= 79) && (channel >= 0); }
@@ -45,7 +45,7 @@ public:
       return -1;
     }
 
-    return channel - 79; // grids range from 1 to 48
+    return channel - 80; // ycoords range from 0 to 47
   }
 
   /** @brief return the z coordinate of the detector */
@@ -56,9 +56,9 @@ public:
     }
 
     if (channel < 64) {
-      return 16 - ((channel) % 16);
+      return (channel) % 16;
     } else {
-      return (4-(channel - 64) % 4) + 16;
+      return ((channel - 64) % 4) + 16;
     }
   }
 };

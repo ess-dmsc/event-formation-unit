@@ -117,11 +117,11 @@ set(MGMesytecDataTest_INC
   mgmesytec/TestData.h)
 create_test_executable(MGMesytecDataTest "${LibRDKafka_LIBRARIES}")
 
-set(MGSEQDetectorTest_SRC
-mgmesytec/MGSEQDetectorTest.cpp)
-set(MGSEQDetectorTest_INC
-mgmesytec/MGSEQDetector.h)
-create_test_executable(MGSEQDetectorTest "")
+set(MG24DetectorTest_SRC
+mgmesytec/MG24DetectorTest.cpp)
+set(MG24DetectorTest_INC
+mgmesytec/MG24Detector.h)
+create_test_executable(MG24DetectorTest "")
 
 #set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
 #set(CSPECEventTest_INC cspec/CSPECEvent.h)
