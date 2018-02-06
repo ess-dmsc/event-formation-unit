@@ -6,12 +6,19 @@
 #include <map>
 #include <sstream>
 
-using namespace std;
 
-struct Cluster
+using std::string;
+
+
+using HitContainer = std::vector<std::tuple<float, int, int>>;
+using ClusterContainer = std::vector<std::tuple<int, float, int>>;
+	
+	
+
+struct ClusterNMX
 {
-	unsigned int size;
-	unsigned int adc;
+	int size;
+	int adc;
 	float position;
 	float position_uTPC;
 	float time;
@@ -20,12 +27,12 @@ struct Cluster
 	bool clusterXAndY_uTPC;
 };
 
-struct CommonCluster
+struct CommonClusterNMX
 {
-	unsigned int sizeX;
-	unsigned int sizeY;
-	unsigned int adcX;
-	unsigned int adcY;
+	int sizeX;
+	int sizeY;
+	int adcX;
+	int adcY;
 	float positionX;
 	float positionY;
 	float timeX;
@@ -51,9 +58,9 @@ public:
 
 // Analyzing and storing the clusters
 	void AnalyzeClusters();
-	int ClusterByTime(std::multimap<float, std::pair<int, int>>&oldHits,
+	int ClusterByTime(HitContainer& oldHits,
 			float dTime, int dStrip, float dSpan, string coordinate);
-	int ClusterByStrip(std::multimap<int, std::pair<float, int>> &cluster,
+	int ClusterByStrip(ClusterContainer &cluster,
 			int dStrip, float dSpan, string coordinate);
 
 	void StoreClusters(float clusterPosition, float clusterPositionUTPC,
@@ -62,9 +69,7 @@ public:
 
 	void MatchClustersXY(float dPlane);
 	
-	void CorrectTriggerData(std::multimap<float, std::pair<int, int>>&hits,
-			std::multimap<float, std::pair<int, int>>&oldHits,
-			float correctionTime);
+	void CorrectTriggerData(HitContainer& hits, HitContainer& oldHits, float correctionTime);
 
 // Helper methods that map channels to strips
 	int GetPlaneID(int chipID);
@@ -117,17 +122,18 @@ private:
 	int m_oldBcidY = 0;
 	int m_oldTdcY = 0;
 
-	std::multimap<float, std::pair<int, int> > m_hitsOldX;
-	std::multimap<float, std::pair<int, int> > m_hitsOldY;
+	HitContainer m_hitsOldX;
+	HitContainer m_hitsOldY;
+	HitContainer m_hitsX;
+	HitContainer m_hitsY;
+	
 
-	std::multimap<float, std::pair<int, int> > m_hitsX;
-	std::multimap<float, std::pair<int, int> > m_hitsY;
-
-	std::vector<CommonCluster> m_clusterXY;
-	std::vector<CommonCluster> m_clusterXY_uTPC;
-	std::vector<Cluster> m_tempClusterX;
-	std::vector<Cluster> m_tempClusterY;
-	std::vector<Cluster> m_clusterX;
-	std::vector<Cluster> m_clusterY;
+	std::vector<CommonClusterNMX> m_clusterXY;
+	std::vector<CommonClusterNMX> m_clusterXY_uTPC;
+	std::vector<ClusterNMX> m_tempClusterX;
+	std::vector<ClusterNMX> m_tempClusterY;
+	std::vector<ClusterNMX> m_clusterX;
+	std::vector<ClusterNMX> m_clusterY;
 
 };
+
