@@ -116,8 +116,8 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, i
 
 	// TDC has reduced resolution due to most significant bit problem of current
 	// sources (like ADC)
-	//int tdcRebinned = (int) tdc / 8;
-	//tdc = tdcRebinned * 8;
+	int tdcRebinned = (int) tdc / 8;
+	tdc = tdcRebinned * 8;
 	double tdcTime = pTAC * (double) tdc / 255;
 
 	// Chip time: bcid plus tdc value
@@ -269,7 +269,7 @@ int NMXClusterer::ClusterByStrip(
 	int stripCount = 0;
 	int clusterCount = 0;
 	
-	std::sort(begin(cluster), end(cluster), [](auto const &t1, auto const &t2) {
+	std::sort(begin(cluster), end(cluster), [](const ClusterTuple &t1, const ClusterTuple &t2) {
         	return std::get<0>(t1) < std::get<0>(t2); 
 	});
 	
@@ -477,18 +477,18 @@ void NMXClusterer::MatchClustersXY(float dPlane)
 //====================================================================================================================
 void NMXClusterer::AnalyzeClusters()
 {
-	std::sort(begin(m_hitsOldX), end(m_hitsOldX), [](auto const &t1, auto const &t2) {
+	std::sort(begin(m_hitsOldX), end(m_hitsOldX), [](const HitTuple &t1, const HitTuple &t2) {
         	return std::get<0>(t1) < std::get<0>(t2); 
 	});
 
- 	std::sort(begin(m_hitsOldY), end(m_hitsOldY), [](auto const &t1, auto const &t2) {
+ 	std::sort(begin(m_hitsOldY), end(m_hitsOldY), [](const HitTuple &t1, const HitTuple &t2) {
         	return std::get<0>(t1) < std::get<0>(t2); 
 	});
-	std::sort(begin(m_hitsX), end(m_hitsX), [](auto const &t1, auto const &t2) {
+	std::sort(begin(m_hitsX), end(m_hitsX), [](const HitTuple &t1, const HitTuple &t2) {
         	return std::get<0>(t1) < std::get<0>(t2); 
 	});
 
- 	std::sort(begin(m_hitsY), end(m_hitsY), [](auto const &t1, auto const &t2) {
+ 	std::sort(begin(m_hitsY), end(m_hitsY), [](const HitTuple &t1, const HitTuple &t2) {
         	return std::get<0>(t1) < std::get<0>(t2); 
 	});
 

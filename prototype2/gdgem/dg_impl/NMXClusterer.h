@@ -9,9 +9,10 @@
 
 using std::string;
 
-
-using HitContainer = std::vector<std::tuple<float, int, int>>;
-using ClusterContainer = std::vector<std::tuple<int, float, int>>;
+using HitTuple = std::tuple<float, int, int>;
+using ClusterTuple = std::tuple<int, float, int>;
+using HitContainer = std::vector<HitTuple>;
+using ClusterContainer = std::vector<ClusterTuple>;
 	
 	
 
