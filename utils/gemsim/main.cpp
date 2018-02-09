@@ -24,8 +24,7 @@ int main(int argc, char * argv[])
     auto x = gemsim.geom.getRandomX();
     auto y = gemsim.geom.getRandomY();
     gemsim.addEvent(new NeutronEvent(strips_per_neutron, x, y, t));
-    //t += 0.000001; // 1us
-    t += 0.00001; // 10s
+      t += 10 * us; // 10us
   }
 
   // sim.addEvent(new NeutronEvent(0.0, 0.0, 0.7));
