@@ -380,99 +380,104 @@ void NMXClusterer::StoreClusters(float clusterPosition, float clusterPositionUTP
 void NMXClusterer::MatchClustersXY(float dPlane)
 {
 
-	for (unsigned int nx = 0; nx < m_tempClusterX.size(); nx++)
+	for (auto & nx : m_tempClusterX)
 	{
-		float tx = m_tempClusterX[nx].time;
-		float posx = m_tempClusterX[nx].position;
+		float tx = nx.time;
+		float posx = nx.position;
+		float tx_uTPC = nx.time_uTPC;
+		float posx_uTPC = nx.position_uTPC;
 
+		float minDelta = 99999999;
 		float deltaT = 0;
+		ClusterVector::iterator it = end(m_tempClusterY);
+		
+		float ty = 0;
+		float posy = 0;
 
-		for (unsigned int ny = 0; ny < m_tempClusterY.size(); ny++)
+		float minDelta_uTPC = 99999999;
+		float deltaT_uTPC = 0;
+		ClusterVector::iterator it_uTPC = end(m_tempClusterY);
+		float ty_uTPC = 0;
+		float posy_uTPC = 0;
+
+
+		for (ClusterVector::iterator ny = begin(m_tempClusterY); ny != end(m_tempClusterY); ++ny)
 		{
-			float ty = m_tempClusterY[ny].time;
-			float posy = m_tempClusterY[ny].position;
-
-			deltaT = abs(ty - tx);
-
-			if (deltaT <= dPlane && m_tempClusterY[ny].clusterXAndY == false
-			&& m_tempClusterX[nx].clusterXAndY == false)
+			if ((*ny).clusterXAndY == false)
 			{
-
-				m_tempClusterX[nx].clusterXAndY = true;
-				m_tempClusterY[ny].clusterXAndY = true;
-
-				CommonClusterNMX theCommonCluster;
-				theCommonCluster.sizeX = m_tempClusterX[nx].size;
-				theCommonCluster.sizeY = m_tempClusterY[ny].size;
-				theCommonCluster.adcX = m_tempClusterX[nx].adc;
-				theCommonCluster.adcY = m_tempClusterY[ny].adc;
-				theCommonCluster.positionX = m_tempClusterX[nx].position;
-				theCommonCluster.positionY = m_tempClusterY[ny].position;
-				theCommonCluster.timeX = m_tempClusterX[nx].time;
-				theCommonCluster.timeY = m_tempClusterY[ny].time;
-				
-
-				DTRACE(DEB, "\ncommon cluster x/y (center of mass):");
-				DTRACE(DEB, "\tpos x/pos y: %f/%f", posx, posy);
-				DTRACE(DEB, "\ttime x/time y: : %f/%f", tx, ty);
-				DTRACE(DEB, "\tadc x/adc y: %u/%u",
-						theCommonCluster.adcX, theCommonCluster.adcY);
-				DTRACE(DEB, "\tsize x/size y: %u/%u",
-						theCommonCluster.sizeX, theCommonCluster.sizeY)	;
-				m_clusterXY.emplace_back(std::move(theCommonCluster));
-				break;
+				ty = (*ny).time;
+				deltaT = std::abs(ty - tx);
+				if (deltaT < minDelta && deltaT <= dPlane)
+				{
+					minDelta = deltaT;
+					it = ny;
+				}
 			}
+			if ((*ny).clusterXAndY_uTPC == false)
+			{
+				ty_uTPC = (*ny).time_uTPC;
+				deltaT_uTPC = std::abs(ty_uTPC - tx_uTPC);
+				if (deltaT_uTPC < minDelta_uTPC && deltaT_uTPC <= dPlane)
+				{
+					minDelta_uTPC = deltaT_uTPC;
+					it_uTPC = ny;
+				}
+			}
+		}
+		if (it != end(m_tempClusterY))
+		{
+			nx.clusterXAndY = true;
+			(*it).clusterXAndY = true;
+
+			CommonClusterNMX theCommonCluster;
+			theCommonCluster.sizeX = nx.size;
+			theCommonCluster.sizeY = (*it).size;
+			theCommonCluster.adcX = nx.adc;
+			theCommonCluster.adcY = (*it).adc;
+			theCommonCluster.positionX = nx.position;
+			theCommonCluster.positionY = (*it).position;
+			theCommonCluster.timeX = nx.time;
+			theCommonCluster.timeY = (*it).time;
+
+			DTRACE(DEB, "\ncommon cluster x/y (center of mass):");
+			DTRACE(DEB, "\tpos x/pos y: %f/%f", posx, posy);
+			DTRACE(DEB, "\ttime x/time y: : %f/%f", tx, ty);
+			DTRACE(DEB, "\tadc x/adc y: %u/%u", theCommonCluster.adcX,
+					theCommonCluster.adcY);
+			DTRACE(DEB, "\tsize x/size y: %u/%u", theCommonCluster.sizeX,
+					theCommonCluster.sizeY);
+			m_clusterXY.emplace_back(std::move(theCommonCluster));
+
+		}
+		if (it_uTPC != end(m_tempClusterY))
+		{
+			nx.clusterXAndY_uTPC = true;
+			(*it_uTPC).clusterXAndY_uTPC = true;
+
+			CommonClusterNMX theCommonCluster_uTPC;
+			theCommonCluster_uTPC.sizeX = nx.size;
+			theCommonCluster_uTPC.sizeY = (*it_uTPC).size;
+			theCommonCluster_uTPC.adcX = nx.adc;
+			theCommonCluster_uTPC.adcY = (*it_uTPC).adc;
+			theCommonCluster_uTPC.positionX = nx.position_uTPC;
+			theCommonCluster_uTPC.positionY = (*it_uTPC).position_uTPC;
+			theCommonCluster_uTPC.timeX = nx.time_uTPC;
+			theCommonCluster_uTPC.timeY = (*it_uTPC).time_uTPC;
+
+			DTRACE(DEB, "\ncommon cluster x/y (uTPC):");
+			DTRACE(DEB, "\tpos x/pos y: %f/%f", posx_uTPC, posy_uTPC);
+			DTRACE(DEB, "\ttime x/time y: : %f/%f", tx_uTPC, ty_uTPC);
+			DTRACE(DEB, "\tadc x/adc y: %u/%u", theCommonCluster_uTPC.adcX,
+					theCommonCluster_uTPC.adcY);
+			DTRACE(DEB, "\tsize x/size y: %u/%u", theCommonCluster_uTPC.sizeX,
+					theCommonCluster_uTPC.sizeY);
+			m_clusterXY_uTPC.emplace_back(std::move(theCommonCluster_uTPC));
+
 		}
 	}
 
-	for (unsigned int nx = 0; nx < m_tempClusterX.size(); nx++)
-	{
-		float tx = m_tempClusterX[nx].time_uTPC;
-		float posx = m_tempClusterX[nx].position_uTPC;
-
-		float deltaT = 0;
-
-		for (unsigned int ny = 0; ny < m_tempClusterY.size(); ny++)
-		{
-			float ty = m_tempClusterY[ny].time_uTPC;
-			float posy = m_tempClusterY[ny].position_uTPC;
-
-			deltaT = abs(ty - tx);
-
-			if (deltaT <= dPlane
-					&& m_tempClusterY[ny].clusterXAndY_uTPC == false
-					&& m_tempClusterX[nx].clusterXAndY_uTPC == false)
-			{
-
-				m_tempClusterX[nx].clusterXAndY_uTPC = true;
-				m_tempClusterY[ny].clusterXAndY_uTPC = true;
-
-				CommonClusterNMX theCommonCluster_uTPC;
-				theCommonCluster_uTPC.sizeX = m_tempClusterX[nx].size;
-				theCommonCluster_uTPC.sizeY = m_tempClusterY[ny].size;
-				theCommonCluster_uTPC.adcX = m_tempClusterX[nx].adc;
-				theCommonCluster_uTPC.adcY = m_tempClusterY[ny].adc;
-				theCommonCluster_uTPC.positionX = m_tempClusterX[nx].position;
-				theCommonCluster_uTPC.positionY = m_tempClusterY[ny].position;
-				theCommonCluster_uTPC.timeX = m_tempClusterX[nx].time;
-				theCommonCluster_uTPC.timeY = m_tempClusterY[ny].time;
-				
-
-				DTRACE(DEB, "\ncommon cluster x/y (uTPC):");
-				DTRACE(DEB, "\tpos x/pos y: %f/%f", posx, posy);
-				DTRACE(DEB, "\ttime x/time y: : %f/%f", tx, ty);
-				DTRACE(DEB, "\tadc x/adc y: %u/%u",
-						theCommonCluster_uTPC.adcX, theCommonCluster_uTPC.adcY);
-				DTRACE(DEB, "\tsize x/size y: %u/%u",
-						theCommonCluster_uTPC.sizeX,
-						theCommonCluster_uTPC.sizeY);
-				m_clusterXY_uTPC.emplace_back(std::move(theCommonCluster_uTPC));
-
-				break;
-			}
-		}
-	}
 }
+
 
 //====================================================================================================================
 void NMXClusterer::AnalyzeClusters()
