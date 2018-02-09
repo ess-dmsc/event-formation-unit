@@ -58,6 +58,11 @@ add_subdirectory(readout)
 include(UnitTests.cmake) # This has only libs unit tests now ???
 
 #=============================================================================
+# Event Formation Unit
+#=============================================================================
+add_subdirectory(efu)
+
+#=============================================================================
 # Plugins
 #=============================================================================
 add_subdirectory(gdgem)
@@ -65,12 +70,6 @@ add_subdirectory(multiblade)
 add_subdirectory(multigrid)
 add_subdirectory(sonde)
 add_subdirectory(udp)
-
-
-#=============================================================================
-# Event Formation Unit
-#=============================================================================
-add_subdirectory(efu)
 
 
 #=============================================================================
@@ -88,9 +87,8 @@ add_custom_target(valgrind
 add_custom_target(benchmark
   DEPENDS ${benchmark_targets})
 
-string(RANDOM LENGTH 4 ALPHABET 123456789 PORT_NUM)
 add_custom_target(runefu
-  COMMAND efu "-d" "../lib/mgmesytec" "-s" "1" "-m" "${PORT_NUM}"
+  COMMAND efu "-d" "../lib/mgmesytec" "-s" "1"
   DEPENDS efu mgmesytec
   )
 
