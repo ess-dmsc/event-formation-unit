@@ -3,17 +3,17 @@
 #include <vector>
 #include <stdio.h>
 #include <unistd.h>
-#include <gdgem/dg_impl/RootFile.h>
+#include <gdgem/dg_impl/NMXClusterer.h>
 #include <gdgem/dg_impl/TestData.h>
 #include <test/TestBase.h>
 
-class RootFileTest : public TestBase {
+class NMXClustererTest : public TestBase {
 protected:
   virtual void SetUp() {  }
   virtual void TearDown() { }
 };
 
-TEST_F(RootFileTest, Run16_1_to_16)
+TEST_F(NMXClustererTest, Run16_line_110168_110323)
 {
 	std::vector<int> pXChips {0, 1, 6, 7};
 	std::vector<int> pYChips {10, 11, 14, 15};
@@ -33,10 +33,10 @@ TEST_F(RootFileTest, Run16_1_to_16)
 	float pDeltaTimePlanes = 200;
 
 
-	RootFile nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
+	NMXClusterer nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
 
-  	for (auto hit : Run16_1_to_16) { // replace with UDP receive()
-		int result = nmxdata.AnalyzeHitData(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
+  	for (auto hit : Run16_line_110168_110323) { // replace with UDP receive()
+		int result = nmxdata.AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
 		if (result == -1) {
 			printf("result == -1\n");
 			break;
@@ -44,9 +44,9 @@ TEST_F(RootFileTest, Run16_1_to_16)
 	}
 
   	ASSERT_EQ(nmxdata.getNumClustersX(), 3);
-  	ASSERT_EQ(nmxdata.getNumClustersY(), 3);
-  	ASSERT_EQ(nmxdata.getNumClustersXY(), 3);
-  	ASSERT_EQ(nmxdata.getNumClustersXY_uTPC(), 3);
+  	ASSERT_EQ(nmxdata.getNumClustersY(), 4);
+  	ASSERT_EQ(nmxdata.getNumClustersXY(), 2);
+  	ASSERT_EQ(nmxdata.getNumClustersXY_uTPC(), 2);
 }
 
 int main(int argc, char **argv) {

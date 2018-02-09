@@ -85,26 +85,20 @@ endif()
 #=============================================================================
 
 # Doros gdgem event algorithm
-set(RootFileTest_SRC
-  dg_impl/RootFile.cpp
-  dg_impl/RootFileTest.cpp
-  )
-set(RootFileTest_INC
-  dg_impl/RootFile.h
-  dg_impl/TestData.h
-  )
-create_test_executable(RootFileTest)
+
+set(NMXClustererTest_SRC
+  dg_impl/NMXClusterer.cpp
+  dg_impl/NMXClustererTest.cpp)
+set(NMXClustererTest_INC
+  dg_impl/NMXClusterer.h
+  dg_impl/TestData.h)
+create_test_executable(NMXClustererTest "")
 
 # GOOGLE BENCHMARK
-set(RootFileBenchmarkTest_INC
-  dg_impl/RootFile.h
-  dg_impl/TestData.h
-  )
-set(RootFileBenchmarkTest_SRC
-  dg_impl/RootFile.cpp
-  dg_impl/RootFileBenchmarkTest.cpp
-  )
-create_benchmark_executable(RootFileBenchmarkTest)
+set(NMXClustererBenchmarkTest_INC dg_impl/NMXClusterer.h dg_impl/TestData.h)
+set(NMXClustererBenchmarkTest_SRC dg_impl/NMXClusterer.cpp dg_impl/NMXClustererBenchmarkTest.cpp)
+create_benchmark_executable(NMXClustererBenchmarkTest "")
+
 
 set(EventFormationTest_SRC
   nmx/AbstractEventletBuilder.cpp

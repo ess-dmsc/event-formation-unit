@@ -10,7 +10,7 @@
 #include <logical_geometry/ESSGeometry.h>
 #include <common/ReadoutSerializer.h>
 #include <common/DataSave.h>
-#include <multigrid/mgmesytec/MGSEQDetector.h>
+#include <multigrid/mgmesytec/MG24Detector.h>
 
 class MesytecData {
 public:
@@ -22,12 +22,12 @@ public:
   // Struck: Ethernet UDP Addendum revision 107
   // Mesytec Datasheet: VMMR-8/16 v00.01
   enum DataType {
-    mesytecData = 0x10000000,
+    mesytecData       = 0x10000000,
     mesytecTimeOffset = 0x20000000,
-    mesytecHeader = 0x40000000,
-    mesytecTimeStamp = 0xc0000000,
-    sisBeginReadout = 0xbb000000,
-    sisEndReadout = 0xee000000
+    mesytecHeader     = 0x40000000,
+    mesytecTimeStamp  = 0xc0000000,
+    sisBeginReadout   = 0xbb000000,
+    sisEndReadout     = 0xee000000
   };
   // clang-fomat on
 
@@ -71,8 +71,8 @@ private:
   int wireThresholdHi{65535};
   int gridThresholdLo{0};
   int gridThresholdHi{65535};
-  MGSEQDetector mgseq;
-  ESSGeometry mg{8, 48, 20, 1};
+  MG24Detector mgseq;
+  ESSGeometry mg{4, 48, 20, 1};
 
 #ifdef DUMPTOFILE
   DataSave mgdata{std::string("multigrid_mesytec_"), 100000000};

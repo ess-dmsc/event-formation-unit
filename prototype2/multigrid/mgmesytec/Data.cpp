@@ -12,8 +12,8 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 
+// @todo can only create a single event per UDP buffer
 int MesytecData::getPixel() {
-
   if (gridmax < 0 || wiremax < 0) {
     return 0;
   }
