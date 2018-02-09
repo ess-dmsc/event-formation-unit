@@ -42,7 +42,7 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
     message(STATUS "       no-implicit-fallthrough")
     message(STATUS "       no-aligned-new")
 #    add_linker_flags(${module_name} "--no-as-needed")
-    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wno-implicit-fallthrough -Wno-aligned-new --no-as-needed")
+    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -Wno-implicit-fallthrough -Wno-aligned-new")
   endif()
 endif()
 
