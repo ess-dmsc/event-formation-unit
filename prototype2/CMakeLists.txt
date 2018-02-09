@@ -88,8 +88,9 @@ add_custom_target(valgrind
 add_custom_target(benchmark
   DEPENDS ${benchmark_targets})
 
+string(RANDOM LENGTH 4 ALPHABET 123456789 PORT_NUM)
 add_custom_target(runefu
-  COMMAND efu "-d" "../lib/mgmesytec" "-s" "1" "-m" "7856"
+  COMMAND efu "-d" "../lib/mgmesytec" "-s" "1" "-m" "${PORT_NUM}"
   DEPENDS efu mgmesytec
   )
 
