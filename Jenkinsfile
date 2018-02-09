@@ -87,6 +87,7 @@ def docker_tests(image_key) {
                 cd build
                 . ./activate_run.sh
                 make runtest VERBOSE=ON
+                make runefu VERBOSE=ON
             \""""
         } catch(e) {
             failure_function(e, 'Run tests (${container_name(image_key)}) failed')
@@ -101,6 +102,7 @@ def docker_tests_coverage(image_key) {
                 cd build
                 . ./activate_run.sh
                 make VERBOSE=ON
+                make runefu VERBOSE=ON
                 make coverage VERBOSE=ON
                 make valgrind VERBOSE=ON
             \""""

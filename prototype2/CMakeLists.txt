@@ -88,3 +88,8 @@ add_custom_target(valgrind
 add_custom_target(benchmark
   DEPENDS ${benchmark_targets})
 
+add_custom_target(runefu
+  COMMAND efu "-d" "../lib/mgmesytec" "-s" "1"
+  DEPENDS efu mgmesytec
+  )
+
