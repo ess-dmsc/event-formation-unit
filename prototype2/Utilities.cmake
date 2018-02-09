@@ -12,7 +12,7 @@ function(create_module module_name)
     ${EFU_COMMON_LIBS}
     eventlib)
   if(${CMAKE_COMPILER_IS_GNUCXX})
-    add_linker_flags(${module_name} "--no-as-needed")
+    add_linker_flags(${module_name} "-Wl,--no-as-needed")
   endif()
   enable_coverage(${module_name})
   install(TARGETS ${module_name} DESTINATION bin)
