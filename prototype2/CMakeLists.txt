@@ -89,7 +89,7 @@ add_custom_target(benchmark
   DEPENDS ${benchmark_targets})
 
 add_custom_target(runefu
-  COMMAND efu "-d" "../lib/mgmesytec" "-s" "1"
+  COMMAND efu "-d" "../lib/mgmesytec" "-s" "1" "-m" "7856"
   DEPENDS efu mgmesytec
   )
 
