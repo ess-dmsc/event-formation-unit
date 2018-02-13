@@ -21,7 +21,8 @@ set(efu_INC
   Parser.h
   Server.h
   )
-
+  
+add_definitions(-std=c++11)
 create_executable(efu)
 
 #=============================================================================
