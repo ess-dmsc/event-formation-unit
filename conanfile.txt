@@ -6,6 +6,9 @@ graylog-logger/1.0.3-dm1@ess-dmsc/stable
 h5cpp/0.0.4-dm1@ess-dmsc/stable
 logical-geometry/09097f2@ess-dmsc/stable
 
+[build_requires]
+cmake_installer/3.10.0@conan/stable
+
 [generators]
 cmake
 virtualbuildenv
