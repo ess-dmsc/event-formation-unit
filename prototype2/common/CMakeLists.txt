@@ -21,6 +21,8 @@ if(${DUMPTOFILE})
   set(efu_common_INC ${efu_common_INC} DataSave.h)
 endif()
 
+add_definitions(-std=c++11)
+
 add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC})
