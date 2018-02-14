@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <cassert>
 #include <common/Trace.h>
 #include <gdgem/dg_impl/NMXClusterer.h>
 
@@ -434,12 +435,8 @@ void NMXClusterer::AnalyzeClusters() {
 
   m_hitsOldX = std::move(m_hitsX);
   m_hitsOldY = std::move(m_hitsY);
-  if (!m_hitsX.empty()) {
-    m_hitsX.clear();
-  }
-  if (!m_hitsY.empty()) {
-    m_hitsY.clear();
-  }
+  assert(m_hitsX.empty());
+  assert(m_hitsY.empty());
 
   m_clusterX.insert(m_clusterX.end(),
                     std::make_move_iterator(m_tempClusterX.begin()),
