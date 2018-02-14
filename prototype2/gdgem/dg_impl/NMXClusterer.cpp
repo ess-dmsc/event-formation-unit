@@ -3,12 +3,8 @@
 #include <gdgem/dg_impl/NMXClusterer.h>
 #include <common/Trace.h>
 
-#define UNUSED __attribute__((unused))
-
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
-
-
 
 NMXClusterer::NMXClusterer(int bc, int tac, int acqWin, std::vector<int> xChips,
 		std::vector<int> yChips, int adcThreshold, int minClusterSize,
@@ -19,13 +15,10 @@ NMXClusterer::NMXClusterer(int bc, int tac, int acqWin, std::vector<int> xChips,
 				minClusterSize), pDeltaTimeHits(deltaTimeHits), pDeltaStripHits(
 				deltaStripHits), pDeltaTimeSpan(deltaTimeSpan), pDeltaTimePlanes(
 				deltaTimePlanes), m_eventNr(0)
-{
-
-}
+{}
 
 NMXClusterer::~NMXClusterer()
-{
-}
+{}
 
 //====================================================================================================================
 int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
@@ -177,7 +170,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, i
 
 
 
-	
+
 //====================================================================================================================
 void NMXClusterer::StoreHits(short x, short y, short adc, short bcid, float chipTime, bool overThresholdFlag)
 {
@@ -189,11 +182,11 @@ void NMXClusterer::StoreHits(short x, short y, short adc, short bcid, float chip
 		{
 			if (bcid < pAcqWin * pBC / 40)
 			{
-				m_hitsX.emplace_back(chipTime, x, adc);				
+				m_hitsX.emplace_back(chipTime, x, adc);
 			}
 			else
 			{
-				m_hitsOldX.emplace_back(chipTime, x, adc);				
+				m_hitsOldX.emplace_back(chipTime, x, adc);
 			}
 		}
 		else if(y > -1)
@@ -207,8 +200,8 @@ void NMXClusterer::StoreHits(short x, short y, short adc, short bcid, float chip
 			{
 				m_hitsOldY.emplace_back(chipTime, y, adc);
 			}
-		}  
-		
+		}
+
 	}
 }
 
@@ -225,15 +218,15 @@ int NMXClusterer::ClusterByTime(HitContainer &oldHits, float dTime, int dStrip, 
 	double time1 = 0, time2 = 0;
 	int adc1 = 0;
 	int strip1 = 0;
-	
+
 	for(auto& itOldHits :oldHits)
 	{
 		time2 = time1;
-	
+
 		time1= std::get<0>(itOldHits);
 		strip1= std::get<1>(itOldHits);
 		adc1= std::get<2>(itOldHits);
-		
+
 		if (time1 - time2 > dTime && stripCount > 0)
 		{
 			clusterCount += ClusterByStrip(cluster, dStrip, dSpan, coordinate);
@@ -241,8 +234,8 @@ int NMXClusterer::ClusterByTime(HitContainer &oldHits, float dTime, int dStrip, 
 		}
 		cluster.emplace_back(strip1, time1, adc1);
 		stripCount++;
-	} 
-	
+	}
+
 
 	if (stripCount > 0)
 	{
@@ -268,11 +261,11 @@ int NMXClusterer::ClusterByStrip(
 	int strip1 = 0, strip2 = 0;
 	int stripCount = 0;
 	int clusterCount = 0;
-	
+
 	std::sort(begin(cluster), end(cluster), [](const ClusterTuple &t1, const ClusterTuple &t2) {
-        	return std::get<0>(t1) < std::get<0>(t2); 
+        	return std::get<0>(t1) < std::get<0>(t2);
 	});
-	
+
 	for(auto& itCluster :cluster)
 	{
 		strip2 = strip1;
@@ -390,7 +383,7 @@ void NMXClusterer::MatchClustersXY(float dPlane)
 		float minDelta = 99999999;
 		float deltaT = 0;
 		ClusterVector::iterator it = end(m_tempClusterY);
-		
+
 		float ty = 0;
 		float posy = 0;
 
@@ -483,18 +476,18 @@ void NMXClusterer::MatchClustersXY(float dPlane)
 void NMXClusterer::AnalyzeClusters()
 {
 	std::sort(begin(m_hitsOldX), end(m_hitsOldX), [](const HitTuple &t1, const HitTuple &t2) {
-        	return std::get<0>(t1) < std::get<0>(t2); 
+        	return std::get<0>(t1) < std::get<0>(t2);
 	});
 
  	std::sort(begin(m_hitsOldY), end(m_hitsOldY), [](const HitTuple &t1, const HitTuple &t2) {
-        	return std::get<0>(t1) < std::get<0>(t2); 
+        	return std::get<0>(t1) < std::get<0>(t2);
 	});
 	std::sort(begin(m_hitsX), end(m_hitsX), [](const HitTuple &t1, const HitTuple &t2) {
-        	return std::get<0>(t1) < std::get<0>(t2); 
+        	return std::get<0>(t1) < std::get<0>(t2);
 	});
 
  	std::sort(begin(m_hitsY), end(m_hitsY), [](const HitTuple &t1, const HitTuple &t2) {
-        	return std::get<0>(t1) < std::get<0>(t2); 
+        	return std::get<0>(t1) < std::get<0>(t2);
 	});
 
 	CorrectTriggerData(m_hitsX, m_hitsOldX, pDeltaTimeHits);
@@ -520,13 +513,13 @@ void NMXClusterer::AnalyzeClusters()
 	{
 		m_hitsY.clear();
 	}
-	
-	
+
+
 	m_clusterX.insert(m_clusterX.end(), std::make_move_iterator(m_tempClusterX.begin()), std::make_move_iterator(m_tempClusterX.end()));
 	m_clusterY.insert(m_clusterY.end(), std::make_move_iterator(m_tempClusterY.begin()), std::make_move_iterator(m_tempClusterY.end()));
 	m_tempClusterX.clear();
 	m_tempClusterY.clear();
-	
+
 
 }
 
@@ -538,7 +531,7 @@ void NMXClusterer::CorrectTriggerData(
 {
 	if (m_subsequentTrigger )
 	{
-			
+
 		const auto& itHitsBegin = begin(hits);
 		const auto& itHitsEnd = end(hits);
 		const auto& itOldHitsBegin = oldHits.rend();
@@ -546,24 +539,24 @@ void NMXClusterer::CorrectTriggerData(
 		if(itHitsBegin!= itHitsEnd && itOldHitsBegin != itOldHitsEnd)
 		{
 			float bcPeriod = 1000 * 4096 * (1 / (float) pBC);
-			float timePrevious = std::get<0>(*itOldHitsEnd); 
+			float timePrevious = std::get<0>(*itOldHitsEnd);
 			float timeNext = std::get<0>(*itHitsBegin) + bcPeriod;
 			float deltaTime = timeNext - timePrevious;
 			//Code only executed if the first hit in hits is close enough in time to the last hit in oldHits
 			if (deltaTime <= correctionTime)
 			{
 				HitContainer::iterator itFind;
-				//Loop through all hits in hits	
+				//Loop through all hits in hits
 				for (itFind = itHitsBegin; itFind != itHitsEnd; ++itFind)
 				{
-					//At the first iteration, timePrevious is sett to the time of the first hit in hits	
+					//At the first iteration, timePrevious is sett to the time of the first hit in hits
 					timePrevious = timeNext;
-					//At the first iteration, timeNext is again set to the time of the first hit in hits					
+					//At the first iteration, timeNext is again set to the time of the first hit in hits
 					timeNext = std::get<0>(*itFind) + bcPeriod;
-					
+
 					//At the first iteration, delta time is 0
 					deltaTime = timeNext - timePrevious;
-					
+
 					if (deltaTime > correctionTime)
 					{
 						break;
@@ -575,7 +568,7 @@ void NMXClusterer::CorrectTriggerData(
 				}
 				//Deleting all hits that have been inserted into oldHits (up to itFind, but not including itFind)
 				hits.erase(itHitsBegin, itFind);
-		
+
 			}
 		}
 	}
@@ -618,4 +611,3 @@ int NMXClusterer::GetChannel(std::vector<int>& chipIDs, int chipID,
 		return -1;
 	}
 }
-
