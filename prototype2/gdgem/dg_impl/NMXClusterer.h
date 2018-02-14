@@ -78,7 +78,9 @@ public:
 
   int getNumClustersXY_uTPC() { return m_clusterXY_uTPC.size(); };
 
+  // Statistics counters
 	uint64_t stats_fc_error {0};
+	uint64_t stats_bcid_tdc_error{0};
 
 private:
   int pBC;

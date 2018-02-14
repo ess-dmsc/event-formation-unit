@@ -84,7 +84,7 @@ TEST_F(NMXClustererTest, GetChannel)
   ASSERT_EQ(-1, nmxdata.GetChannel(pXChips, 42, 0));
 }
 
-TEST_F(NMXClustererTest, FrameCounterScramble)
+TEST_F(NMXClustererTest, FrameCounterError)
 {
 	NMXClusterer nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
   ASSERT_EQ(0, nmxdata.stats_fc_error);
@@ -93,6 +93,17 @@ TEST_F(NMXClustererTest, FrameCounterScramble)
     nmxdata.AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
   }
   ASSERT_EQ(1, nmxdata.stats_fc_error);
+}
+
+TEST_F(NMXClustererTest, BcidTdcError)
+{
+	NMXClusterer nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
+  ASSERT_EQ(0, nmxdata.stats_bcid_tdc_error);
+
+  for (auto hit : err_bcid_tdc_error) {
+    nmxdata.AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
+  }
+  ASSERT_EQ(4, nmxdata.stats_bcid_tdc_error); // Two in X and Two in Y
 }
 
 #if 0

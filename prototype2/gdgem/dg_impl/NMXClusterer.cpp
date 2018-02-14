@@ -72,6 +72,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     if (bcid == 0 && tdc == 0 && overThresholdFlag) {
       bcid = m_oldBcidX;
       tdc = m_oldTdcX;
+      stats_bcid_tdc_error++;
     }
     m_oldBcidX = bcid;
     m_oldTdcX = tdc;
@@ -81,6 +82,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     if (bcid == 0 && tdc == 0 && overThresholdFlag) {
       bcid = m_oldBcidY;
       tdc = m_oldTdcY;
+      stats_bcid_tdc_error++;
     }
     m_oldBcidY = bcid;
     m_oldTdcY = tdc;
