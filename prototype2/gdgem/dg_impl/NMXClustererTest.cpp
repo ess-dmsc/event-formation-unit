@@ -56,7 +56,9 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323)
 			break;
 		}
 	}
-
+  ASSERT_EQ(0, nmxdata->stats_triggertime_wraps);
+  ASSERT_EQ(0, nmxdata->stats_fc_error);
+  ASSERT_EQ(0, nmxdata->stats_bcid_tdc_error);
 	ASSERT_EQ(nmxdata->getNumClustersX(), 3);
 	ASSERT_EQ(nmxdata->getNumClustersY(), 4);
 	ASSERT_EQ(nmxdata->getNumClustersXY(), 2);
@@ -105,6 +107,17 @@ TEST_F(NMXClustererTest, BcidTdcError)
     nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
   }
   ASSERT_EQ(4, nmxdata->stats_bcid_tdc_error); // Two in X and Two in Y
+}
+
+
+TEST_F(NMXClustererTest, TriggerTimeWraps)
+{
+  ASSERT_EQ(0, nmxdata->stats_triggertime_wraps);
+
+  for (auto hit : err_triggertime_error) {
+    nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
+  }
+  ASSERT_EQ(1, nmxdata->stats_triggertime_wraps);
 }
 
 #if 0

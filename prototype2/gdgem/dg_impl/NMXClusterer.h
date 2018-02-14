@@ -81,6 +81,7 @@ public:
   // Statistics counters
 	uint64_t stats_fc_error {0};
 	uint64_t stats_bcid_tdc_error{0};
+	uint64_t stats_triggertime_wraps{0};
 
 private:
   int pBC;

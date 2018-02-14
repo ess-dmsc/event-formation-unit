@@ -45,9 +45,8 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
   if (m_oldTriggerTimestamp_ns > triggerTimestamp_ns &&
       (m_oldFrameCounter <= frameCounter ||
        m_oldFrameCounter > frameCounter + 1000000000)) {
-    deltaTriggerTimestamp_ns =
-        (13421772800 + triggerTimestamp_ns - m_oldTriggerTimestamp_ns);
-
+    deltaTriggerTimestamp_ns = (13421772800 + triggerTimestamp_ns - m_oldTriggerTimestamp_ns);
+    stats_triggertime_wraps++;
   } else {
     deltaTriggerTimestamp_ns = (triggerTimestamp_ns - m_oldTriggerTimestamp_ns);
   }
