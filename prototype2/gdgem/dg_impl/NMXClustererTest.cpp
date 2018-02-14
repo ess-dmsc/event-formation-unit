@@ -84,6 +84,17 @@ TEST_F(NMXClustererTest, GetChannel)
   ASSERT_EQ(-1, nmxdata.GetChannel(pXChips, 42, 0));
 }
 
+TEST_F(NMXClustererTest, FrameCounterScramble)
+{
+	NMXClusterer nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
+  ASSERT_EQ(0, nmxdata.stats_fc_error);
+
+  for (auto hit : err_fc_error) {
+    nmxdata.AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
+  }
+  ASSERT_EQ(1, nmxdata.stats_fc_error);
+}
+
 #if 0
 TEST_F(NMXClustererTest, TestLoadDistribution)
 {

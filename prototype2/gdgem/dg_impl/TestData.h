@@ -14,6 +14,14 @@ struct Hit
 	unsigned int overthreshold;
 };
 
+
+// Scrambled FrameCounter
+std::vector<Hit> err_fc_error
+{//              *
+{ 1,  7, 255783212, 236388352,  7, 4094, 202, 109, 1},
+{ 1, 10, 255783211, 236388352, 34, 839, 96, 93, 1},
+};
+
 std::vector<Hit> Run16_line_110168_110323
 {
 { 1,  0, 255783208, 236388352,  7, 839, 178, 176, 1},
