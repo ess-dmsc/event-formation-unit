@@ -11,8 +11,12 @@
 
 class NMXClustererTest : public TestBase {
 protected:
-  virtual void SetUp() {  }
-  virtual void TearDown() { }
+  virtual void SetUp() {
+    nmxdata = new NMXClusterer(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
+  }
+  virtual void TearDown() {
+    delete nmxdata;
+  }
 
 	std::vector<int> pXChips {0, 1, 6, 7};
 	std::vector<int> pYChips {10, 11, 14, 15};
@@ -30,6 +34,8 @@ protected:
 	//Maximum cluster time difference between matching clusters in x and y
 	//Cluster time is either calculated with center-of-mass or uTPC method
 	float pDeltaTimePlanes = 200;
+
+  NMXClusterer * nmxdata;
 };
 
 int distributeto(UNUSED int fec, int asic, int channel, int width) {
@@ -43,67 +49,62 @@ int distributeto(UNUSED int fec, int asic, int channel, int width) {
 
 TEST_F(NMXClustererTest, Run16_line_110168_110323)
 {
-	NMXClusterer nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
-
   for (auto hit : Run16_line_110168_110323) { // replace with UDP receive()
-		int result = nmxdata.AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
+		int result = nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
 		if (result == -1) {
 			printf("result == -1\n");
 			break;
 		}
 	}
 
-	ASSERT_EQ(nmxdata.getNumClustersX(), 3);
-	ASSERT_EQ(nmxdata.getNumClustersY(), 4);
-	ASSERT_EQ(nmxdata.getNumClustersXY(), 2);
-	ASSERT_EQ(nmxdata.getNumClustersXY_uTPC(), 2);
+	ASSERT_EQ(nmxdata->getNumClustersX(), 3);
+	ASSERT_EQ(nmxdata->getNumClustersY(), 4);
+	ASSERT_EQ(nmxdata->getNumClustersXY(), 2);
+	ASSERT_EQ(nmxdata->getNumClustersXY_uTPC(), 2);
 }
 
 TEST_F(NMXClustererTest, GetPlaneID)
 {
-	NMXClusterer nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
+  ASSERT_EQ(0, nmxdata->GetPlaneID(0));
+  ASSERT_EQ(0, nmxdata->GetPlaneID(1));
+  ASSERT_EQ(0, nmxdata->GetPlaneID(6));
+  ASSERT_EQ(0, nmxdata->GetPlaneID(7));
 
-  ASSERT_EQ(0, nmxdata.GetPlaneID(0));
-  ASSERT_EQ(0, nmxdata.GetPlaneID(1));
-  ASSERT_EQ(0, nmxdata.GetPlaneID(6));
-  ASSERT_EQ(0, nmxdata.GetPlaneID(7));
+  ASSERT_EQ(1, nmxdata->GetPlaneID(10));
+  ASSERT_EQ(1, nmxdata->GetPlaneID(11));
+  ASSERT_EQ(1, nmxdata->GetPlaneID(14));
+  ASSERT_EQ(1, nmxdata->GetPlaneID(15));
 
-  ASSERT_EQ(1, nmxdata.GetPlaneID(10));
-  ASSERT_EQ(1, nmxdata.GetPlaneID(11));
-  ASSERT_EQ(1, nmxdata.GetPlaneID(14));
-  ASSERT_EQ(1, nmxdata.GetPlaneID(15));
-
-  ASSERT_EQ(-1, nmxdata.GetPlaneID(42));
+  ASSERT_EQ(-1, nmxdata->GetPlaneID(42));
 }
+
 
 TEST_F(NMXClustererTest, GetChannel)
 {
-	NMXClusterer nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
-
-  ASSERT_EQ(0, nmxdata.GetChannel(pXChips, 0, 0));
-  ASSERT_EQ(-1, nmxdata.GetChannel(pXChips, 42, 0));
+  ASSERT_EQ(0, nmxdata->GetChannel(pXChips, 0, 0));
+  ASSERT_EQ(-1, nmxdata->GetChannel(pXChips, 42, 0));
 }
+
 
 TEST_F(NMXClustererTest, FrameCounterError)
 {
-	NMXClusterer nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
-  ASSERT_EQ(0, nmxdata.stats_fc_error);
+  ASSERT_EQ(0, nmxdata->stats_fc_error);
 
   for (auto hit : err_fc_error) {
-    nmxdata.AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
+    nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
   }
-  ASSERT_EQ(1, nmxdata.stats_fc_error);
+  ASSERT_EQ(1, nmxdata->stats_fc_error);
 }
+
 
 TEST_F(NMXClustererTest, BcidTdcError)
 {
-	NMXClusterer nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
-  ASSERT_EQ(0, nmxdata.stats_bcid_tdc_error);
+  ASSERT_EQ(0, nmxdata->stats_bcid_tdc_error);
 
   for (auto hit : err_bcid_tdc_error) {
-    nmxdata.AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
+    nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
   }
-  ASSERT_EQ(4, nmxdata.stats_bcid_tdc_error); // Two in X and Two in Y
+  ASSERT_EQ(4, nmxdata->stats_bcid_tdc_error); // Two in X and Two in Y
 }
 
 #if 0
