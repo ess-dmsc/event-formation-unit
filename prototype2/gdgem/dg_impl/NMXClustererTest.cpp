@@ -14,6 +14,7 @@ protected:
   virtual void SetUp() {
     nmxdata = new NMXClusterer(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
   }
+
   virtual void TearDown() {
     delete nmxdata;
   }
@@ -38,14 +39,6 @@ protected:
   NMXClusterer * nmxdata;
 };
 
-int distributeto(UNUSED int fec, int asic, int channel, int width) {
-  int cutoff = 63 - width;
-  if ((asic == 10) || (asic == 11 && (channel < cutoff)) )
-    return 1;
-  if ((asic == 15) || (asic == 14 && (channel >= width)) )
-    return 2;
-  return 3;
-}
 
 TEST_F(NMXClustererTest, Run16_line_110168_110323)
 {
@@ -121,6 +114,15 @@ TEST_F(NMXClustererTest, TriggerTimeWraps)
 }
 
 #if 0
+int distributeto(UNUSED int fec, int asic, int channel, int width) {
+  int cutoff = 63 - width;
+  if ((asic == 10) || (asic == 11 && (channel < cutoff)) )
+    return 1;
+  if ((asic == 15) || (asic == 14 && (channel >= width)) )
+    return 2;
+  return 3;
+}
+
 TEST_F(NMXClustererTest, TestLoadDistribution)
 {
 	NMXClusterer nmxdata1(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);

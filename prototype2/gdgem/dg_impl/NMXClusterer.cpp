@@ -63,11 +63,9 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
 
   int planeID = GetPlaneID(vmmID);
 
-  // Plane 0: x
-  // plane 1: y
   int x = -1;
   int y = -1;
-  if (planeID == 0) {
+  if (planeID == planeID_X) {
     // Fix for entries with all zeros
     if (bcid == 0 && tdc == 0 && overThresholdFlag) {
       bcid = m_oldBcidX;
@@ -77,7 +75,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     m_oldBcidX = bcid;
     m_oldTdcX = tdc;
     x = GetChannel(pXChipIDs, vmmID, chNo);
-  } else if (planeID == 1) {
+  } else if (planeID == planeID_Y) {
     // Fix for entries with all zeros
     if (bcid == 0 && tdc == 0 && overThresholdFlag) {
       bcid = m_oldBcidY;
@@ -125,10 +123,10 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
   if (m_oldVmmID != vmmID || newEvent) {
     DTRACE(DEB, "\tvmmID  %d\n", vmmID);
   }
-  if (planeID == 0) {
+  if (planeID == planeID_X) {
     DTRACE(DEB, "\t\tx-channel %d (chNo  %d) - overThresholdFlag %d\n", x, chNo,
            overThresholdFlag);
-  } else if (planeID == 1) {
+  } else if (planeID == planeID_Y) {
     DTRACE(DEB, "\t\ty-channel %d (chNo  %d) - overThresholdFlag %d\n", y, chNo,
            overThresholdFlag);
   } else {
@@ -497,11 +495,11 @@ void NMXClusterer::CorrectTriggerData(HitContainer &hits, HitContainer &oldHits,
 int NMXClusterer::GetPlaneID(int chipID) {
   auto chip = std::find(begin(pXChipIDs), end(pXChipIDs), chipID);
   if (chip != end(pXChipIDs)) {
-    return 0;
+    return planeID_X;
   } else {
     auto chip = std::find(begin(pYChipIDs), end(pYChipIDs), chipID);
     if (chip != end(pYChipIDs)) {
-      return 1;
+      return planeID_Y;
     } else {
       return -1;
     }

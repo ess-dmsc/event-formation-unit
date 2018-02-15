@@ -83,6 +83,9 @@ public:
 	uint64_t stats_bcid_tdc_error{0};
 	uint64_t stats_triggertime_wraps{0};
 
+	const int planeID_X{0};
+	const int planeID_Y{1};
+
 private:
   int pBC;
   int pTAC;
