@@ -523,7 +523,7 @@ void NMXClusterer::CorrectTriggerData(HitContainer &hits, HitContainer &oldHits,
 }
 
 //====================================================================================================================
-bool NMXClusterer::AsyncClustererY() {
+void NMXClusterer::AsyncClustererY() {
 
 	std::sort(begin(m_hitsOldY), end(m_hitsOldY),
 			[](const ClusterTuple &t1, const ClusterTuple &t2)
@@ -546,7 +546,7 @@ bool NMXClusterer::AsyncClustererY() {
 }
 
 //====================================================================================================================
-bool NMXClusterer::AsyncClustererX() {
+void NMXClusterer::AsyncClustererX() {
 
 	std::sort(begin(m_hitsOldX), end(m_hitsOldX),
 			[](const ClusterTuple &t1, const ClusterTuple &t2)
