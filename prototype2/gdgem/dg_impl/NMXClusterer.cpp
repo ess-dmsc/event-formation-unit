@@ -542,7 +542,7 @@ void NMXClusterer::AsyncClustererY() {
 			pDeltaTimeSpan, "y");
 
 	DTRACE(DEB, "%d cluster in y\n", cntY);
-	return true;
+
 }
 
 //====================================================================================================================
@@ -565,7 +565,7 @@ void NMXClusterer::AsyncClustererX() {
 			pDeltaTimeSpan, "x");
 
 	DTRACE(DEB, "%d cluster in x\n", cntX);
-	return true;
+
 }
 
 
