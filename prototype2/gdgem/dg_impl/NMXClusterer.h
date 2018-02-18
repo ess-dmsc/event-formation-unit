@@ -5,6 +5,7 @@
 #include <map>
 #include <sstream>
 #include <vector>
+#include <future>   // async
 
 using std::string;
 
@@ -65,10 +66,13 @@ public:
 	void AnalyzeClusters();
 	bool AsyncClustererX();
 	bool AsyncClustererY();
-	int ClusterByTime(HitContainer &oldHits, float dTime, int dStrip,
-			float dSpan, string coordinate);
+
+
+	int ClusterByTime(HitContainer& oldHits, float dTime, int dStrip,
+				float dSpan, string coordinate);
 	int ClusterByStrip(ClusterContainer &cluster, int dStrip, float dSpan,
-			string coordinate);
+				string coordinate, float maxDeltaTime);
+
 	void StoreClusters(float clusterPosition, float clusterPositionUTPC,
 				short clusterSize, int clusterADC, float clusterTime,
 				float clusterTimeUTPC, string coordinate, float maxDeltaTime, int maxDeltaStrip, float deltaSpan);
