@@ -451,8 +451,8 @@ void NMXClusterer::AnalyzeClusters() {
 	auto fX = async(std::launch::async, &NMXClusterer::AsyncClustererX, this);
 	auto fY = async(std::launch::async, &NMXClusterer::AsyncClustererY, this);
 
-	bool finishedX = fX.get();
-	bool finishedY = fY.get();
+	fX.get();
+	fY.get();
 
 
 	MatchClustersXY(pDeltaTimePlanes);

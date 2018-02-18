@@ -64,8 +64,8 @@ public:
 
 	// Analyzing and storing the clusters
 	void AnalyzeClusters();
-	bool AsyncClustererX();
-	bool AsyncClustererY();
+	void AsyncClustererX();
+	void AsyncClustererY();
 
 
 	int ClusterByTime(HitContainer& oldHits, float dTime, int dStrip,
