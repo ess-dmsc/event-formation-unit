@@ -136,7 +136,7 @@ TEST_F(EFUArgsTest, StoreConfigFile) {
 TEST_F(EFUArgsTest, LoadConfigFile) {
   const char* Args1[] = {"progname", "-d", "no_real_detector_name", "--write_config", "ConfigB.ini"};
   EFUArgs efu_args;
-  EXPECT_EQ(efu_args.parseSecondPass(5, (char**)Args1), EFUArgs::Status::CONTINUE);
+  EXPECT_EQ(efu_args.parseSecondPass(5, (char**)Args1), EFUArgs::Status::EXIT);
   
   const char* Args2[] = {"progname", "--read_config", "ConfigB.ini"};
   EFUArgs efu_args2;
