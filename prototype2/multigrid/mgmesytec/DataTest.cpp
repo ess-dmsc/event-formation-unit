@@ -7,12 +7,13 @@
 #include <multigrid/mgmesytec/TestData.h>
 #include <test/TestBase.h>
 
+static Producer producer {"noserver", "nostream"};
+
 class MesytecDataTest : public TestBase {
 protected:
   NMXHists hists;
   MesytecData mesytec;
   ReadoutSerializer * serializer;
-  Producer producer{"noserver", "nostream"};
   virtual void SetUp() {
     serializer = new ReadoutSerializer(10000, producer);
   }
@@ -89,5 +90,6 @@ TEST_F(MesytecDataTest, ParseRecordedWSDataIII) {
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
+
   return RUN_ALL_TESTS();
 }

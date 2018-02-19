@@ -5,11 +5,10 @@
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
-#include <common/ESSGeometry.h>
 #include <common/FBSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
-#include <dataformats/multigrid/inc/DataSave.h>
+#include <common/DataSave.h>
 #include <unistd.h>
 
 #include <libs/include/SPSCFifo.h>
@@ -20,6 +19,8 @@
 #include <mbcaen/MB16Detector.h>
 #include <mbcaen/MBData.h>
 #include <mbcommon/multiBladeEventBuilder.h>
+
+#include <logical_geometry/ESSGeometry.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -72,7 +73,7 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
 MBCAEN::MBCAEN(BaseSettings settings) : Detector(settings) {
-  Stats.setPrefix("efu2.mbcaen");
+  Stats.setPrefix("efu.mbcaen");
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
@@ -226,7 +227,7 @@ void MBCAEN::processing_thread() {
             auto ycoord = cassette * nwires +
                           builder[cassette].getWirePosition(); // pos 0 - 31
 
-            uint32_t pixel_id = essgeom.pixelSP2D(xcoord, ycoord);
+            uint32_t pixel_id = essgeom.pixel2D(xcoord, ycoord);
 
             XTRACE(PROCESS, DEB,
                    "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d\n",

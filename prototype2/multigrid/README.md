@@ -20,7 +20,7 @@ care use -c -5.
 
 ### Starting the plugin
 
-`> ./efu2 -d mgcncs2 -c -5`
+`> ./efu -d mgcncs2 -c -5`
 
 ### Load a calibration file
 Calibration files comes in pairs, one for the grids and one for the wires. These

@@ -1,0 +1,10 @@
+
+option(PROF "Enable profiling." OFF)
+if(${PROF})
+  set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} -pg)
+  set(CMAKE_EXE_LINKER_FLAGS ${CMAKE_EXE_LINKER_FLAGS} -pg)
+  set(CMAKE_SHARED_LINKER_FLAGS ${CMAKE_SHARED_LINKER_FLAGS} -pg)
+  message(STATUS "Profiling enabled.")
+else()
+  message(STATUS "Profiling disabled.")
+endif()

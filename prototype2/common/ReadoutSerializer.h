@@ -7,12 +7,7 @@
 
 #pragma once
 
-#ifdef FLATBUFFERS
-#include <../streaming-data-types/build/schemas/mo01_nmx_generated.h>
-#else
-#pragma message("FLATBUFFERS not defined, using old schemas")
-#include <common/mo01_nmx_generated.h>
-#endif
+#include "mo01_nmx_generated.h"
 #include <common/Producer.h>
 
 class ReadoutSerializer {

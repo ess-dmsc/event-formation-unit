@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <cassert>
-#include <dataformats/multigrid/inc/DataSave.h>
+#include <common/DataSave.h>
 #include <prototype2/common/Trace.h>
 
 //#undef TRC_LEVEL

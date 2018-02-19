@@ -24,7 +24,7 @@ function executecode()
   for detector in $detectors
   do
     echo "Starting detector "$detector
-    ./prototype2/efu2 -d $detector -s 5 || errexit "detector plugin failed"
+    ./prototype2/efu -d $detector -s 5 || errexit "detector plugin failed"
   done
 }
 

@@ -7,9 +7,9 @@
  */
 
 #pragma once
-#include <common/ESSGeometry.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <common/ReadoutSerializer.h>
-#include <dataformats/multigrid/inc/DataSave.h>
+#include <common/DataSave.h>
 #include <multigrid/mgmesytec/MG24Detector.h>
 
 class MesytecData {

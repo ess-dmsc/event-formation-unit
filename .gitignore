@@ -11,7 +11,7 @@
 cncsread
 batchreader
 genpixids
-efu2
+efu
 gencspec
 gencspecfile
 gennmxfile
@@ -21,7 +21,7 @@ gemsim
 *Test$
 
 #directories
-build/
+build*/
 
 #IDE
 CMakeLists.txt.user

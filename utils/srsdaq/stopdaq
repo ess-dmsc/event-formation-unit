@@ -2,5 +2,5 @@
 
 killall nmxmon.py
 killall nmxhist.py
-killall efu2
+killall efu
 killall efushell.py

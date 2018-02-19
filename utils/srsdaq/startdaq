@@ -1,4 +1,4 @@
 pushd $HOME/essproj/event-formation-unit/build/prototype2
-./efu2 -d gdgem/gdgem -c 5 -p 6006 -f $HOME/essproj/nmx_config.json
+./efu -d gdgem/gdgem -c 5 -p 6006 -f $HOME/essproj/nmx_config.json
 popd
 

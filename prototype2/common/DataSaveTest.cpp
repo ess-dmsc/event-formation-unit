@@ -1,7 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
-#include <DataSave.h>
-#include <TestBase.h>
+#include <common/DataSave.h>
+#include <test/TestBase.h>
 #include <sys/stat.h>
 
 class DataSaveTest : public TestBase {

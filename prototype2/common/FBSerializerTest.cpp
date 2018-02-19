@@ -9,6 +9,8 @@
 //#define ARRAYLENGTH 125000
 #define ARRAYLENGTH 10
 
+static Producer prod{"nobroker", "notopic"};
+
 class FBSerializerTest : public TestBase {
   virtual void SetUp() {
     for (int i = 0; i < 200000; i++) {
@@ -20,7 +22,6 @@ class FBSerializerTest : public TestBase {
   virtual void TearDown() {}
 
 protected:
-  Producer prod{"nobroker", "notopic"};
   char flatbuffer[1024 * 1024];
   uint32_t tarr[200000];
   uint32_t parr[200000];
