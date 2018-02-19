@@ -19,15 +19,10 @@ EFUArgs::EFUArgs() {
       ->group("EFU Options")
       ->set_default_val("127.0.0.1");
   CLIParser
-      .add_option("-b,--broker_addr", EFUSettings.KafkaBrokerAddress,
+      .add_option("-b,--broker_addr", EFUSettings.KafkaBroker,
                   "Kafka broker address")
       ->group("EFU Options")
       ->set_default_val("localhost");
-  CLIParser
-      .add_option("-k,--broker_port", EFUSettings.KafkaBrokerPort,
-                  "Kafka broker port")
-      ->group("EFU Options")
-      ->set_default_val("9092");
   CLIParser
       .add_option("-t,--broker_topic", EFUSettings.KafkaTopic,
                   "Kafka broker topic")
@@ -40,7 +35,7 @@ EFUArgs::EFUArgs() {
                   },
                   "Thread to core affinity. Ex: \"-c input_t:4\"")
       ->group("EFU Options");
-  DetectorOption = CLIParser.add_option("-d,--det", det, "Detector name")
+  DetectorOption = CLIParser.add_option("-d,--det", DetectorName, "Detector name")
                        ->group("EFU Options")
                        ->required();
   CLIParser
@@ -122,14 +117,14 @@ bool EFUArgs::parseAffinityStrings(
 void EFUArgs::printSettings() {
   XTRACE(INIT, ALW, "Starting event processing pipeline2\n");
   XTRACE(INIT, ALW, "  Log IP:        %s\n", GraylogConfig.address.c_str());
-  XTRACE(INIT, ALW, "  Detector:      %s\n", det.c_str());
+  XTRACE(INIT, ALW, "  Detector:      %s\n", DetectorName.c_str());
   //    XTRACE(INIT, ALW, "  CPU Offset:    %d\n", cpustart);
   XTRACE(INIT, ALW, "  Config file:   %s\n", EFUSettings.ConfigFile.c_str());
   XTRACE(INIT, ALW, "  IP addr:       %s\n",
          EFUSettings.DetectorAddress.c_str());
   XTRACE(INIT, ALW, "  UDP Port:      %d\n", EFUSettings.DetectorPort);
   XTRACE(INIT, ALW, "  Kafka broker:  %s\n",
-         EFUSettings.KafkaBrokerAddress.c_str());
+         EFUSettings.KafkaBroker.c_str());
   XTRACE(INIT, ALW, "  Graphite:      %s\n",
          EFUSettings.GraphiteAddress.c_str());
   XTRACE(INIT, ALW, "  Graphite port: %d\n", EFUSettings.GraphitePort);

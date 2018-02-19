@@ -4,9 +4,12 @@
 
 #pragma once
 
-#define ASIO_STANDALONE
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated"
+#pragma GCC diagnostic ignored "-Wall"
 #include <asio.hpp>
+#pragma GCC diagnostic pop
+
 #include <asio/steady_timer.hpp>
 #include <thread>
 #include <atomic>

@@ -9,7 +9,7 @@
 
 
 UDPServer::UDPServer(std::uint16_t SrcPort, std::uint16_t DstPort)
-    : Service(), Socket(Service, asio::ip::udp::endpoint(asio::ip::udp::v4(), SrcPort)), Resolver(Service), Work(new asio::io_service::work(Service)) {
+    : Service(), Work(new asio::io_service::work(Service)), Socket(Service, asio::ip::udp::endpoint(asio::ip::udp::v4(), SrcPort)), Resolver(Service) {
 
       asio::ip::udp::resolver::query Query(asio::ip::udp::v4(), "localhost", std::to_string(DstPort));
   Resolver.async_resolve(Query, std::bind(&UDPServer::handleResolve, this, std::placeholders::_1, std::placeholders::_2));

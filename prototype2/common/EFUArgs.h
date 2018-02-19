@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include <CLI/CLI11.hpp>
+#include <CLI11.hpp>
 #include <common/Detector.h>
 #include <cstdint>
 #include <multigrid/mgcncs/ChanConv.h>
@@ -34,7 +34,7 @@ public:
 
   void printSettings();
 
-  std::string getDetectorName() { return det; };
+  std::string getDetectorName() { return DetectorName; };
   GraylogSettings getGraylogSettings() { return GraylogConfig; };
 
   std::vector<ThreadCoreAffinitySetting> getThreadCoreAffinity() {
@@ -50,7 +50,7 @@ public:
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
   
-  std::string det;
+  std::string DetectorName;
 
   std::vector<ThreadCoreAffinitySetting> ThreadAffinity;
   CLI::Option *DetectorOption;

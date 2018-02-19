@@ -13,7 +13,6 @@ set(efu_SRC
   )
 
 set(efu_INC
-  ../CLI/CLI11.hpp
   ../common/StatPublisher.h
   ExitHandler.h
   Launcher.h

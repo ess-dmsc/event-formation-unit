@@ -30,7 +30,7 @@ PopulateCLIParser PopulateParser{SetCLIArguments};
 
 ADC_Readout_Factory Factory;
 
-AdcReadout::AdcReadout(BaseSettings Settings) : Detector("AdcReadout", Settings), toParsingQueue(100), ProducerPtr(new Producer(Settings.KafkaBrokerAddress, Settings.KafkaTopic)) {
+AdcReadout::AdcReadout(BaseSettings Settings) : Detector("AdcReadout", Settings), toParsingQueue(100), ProducerPtr(new Producer(Settings.KafkaBroker, Settings.KafkaTopic)) {
   std::function<void()> inputFunc = [this](){AdcReadout::inputThread();};
   Detector::AddThreadFunction(inputFunc, "input");
 
@@ -72,7 +72,6 @@ void AdcReadout::inputThread() {
   std::uint64_t BytesReceived = 0;
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
   UDPServer mbdata(local);
-  mbdata.buflen(9000);
   mbdata.setbuffers(0, 2000000);
   mbdata.printbuffers();
   mbdata.settimeout(0, 100000); // One tenth of a second

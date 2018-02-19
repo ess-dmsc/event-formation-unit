@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include <CLI/CLI11.hpp>
+#include <CLI11.hpp>
 #include <common/Detector.h>
 #include <functional>
 #include <memory>

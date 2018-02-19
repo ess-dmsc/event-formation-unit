@@ -68,8 +68,7 @@ TEST_F(EFUArgsTest, Constructor) {
   // ASSERT_EQ(12, settings.cpustart); /**< todo fixme */
   ASSERT_EQ("0.0.0.0", settings.DetectorAddress);
   ASSERT_EQ(9000, settings.DetectorPort);
-  ASSERT_EQ("localhost", settings.KafkaBrokerAddress);
-  ASSERT_EQ(9092, settings.KafkaBrokerPort);
+  ASSERT_EQ("localhost", settings.KafkaBroker);
   ASSERT_EQ("127.0.0.1", settings.GraphiteAddress);
   ASSERT_EQ(2003, settings.GraphitePort);
   ASSERT_EQ(0xffffffffU, settings.StopAfterSec);
@@ -97,9 +96,9 @@ TEST_F(EFUArgsTest, VerifyCommandLineOptions) {
   auto settings = efu_args.getBaseSettings();
   auto glsettings = efu_args.getGraylogSettings();
 
-  ASSERT_EQ("mybroker", settings.KafkaBrokerAddress);
+  ASSERT_EQ("mybroker", settings.KafkaBroker);
   // ASSERT_EQ(99, opts.cpustart); /**< todo fixme */
-  ASSERT_EQ("myinst", efu_args.det);
+  ASSERT_EQ("myinst", efu_args.getDetectorName());
   ASSERT_EQ("1.2.3.4", settings.DetectorAddress);
   ASSERT_EQ(9876, settings.DetectorPort);
   ASSERT_EQ("4.3.2.1", settings.GraphiteAddress);

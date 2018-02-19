@@ -9,7 +9,7 @@
 #include "PeakFinder.h"
 #include <cmath>
 #include <limits>
-#include <common/ev42_events_generated.h>
+#include "ev42_events_generated.h"
 
 PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod, bool PositivePolarity) : AdcDataProcessor(Prod), PositivePulse(PositivePolarity) {
   

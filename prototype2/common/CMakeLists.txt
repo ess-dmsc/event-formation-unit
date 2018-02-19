@@ -23,9 +23,13 @@ endif()
 
 add_definitions(-std=c++11)
 
+find_package(CLI11 REQUIRED)
+
 add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC})
+  
+target_include_directories(efu_common PUBLIC ${CLI11_INCLUDE_DIR})
 
 enable_coverage(efu_common)
 

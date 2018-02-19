@@ -5,7 +5,7 @@ find_path(ASIO_ROOT_DIR
 
 find_path(ASIO_INCLUDE_DIR
   NAMES asio.hpp
-  HINTS ASIO_ROOT_DIR}/include
+  HINTS ${ASIO_ROOT_DIR}/include
 )
 
 include(FindPackageHandleStandardArgs)

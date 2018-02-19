@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include <CLI/CLI11.hpp>
+#include <CLI11.hpp>
 #include <atomic>
 #include <common/NewStats.h>
 #include <common/Trace.h>
@@ -30,7 +30,7 @@ struct BaseSettings {
   std::string   KafkaBroker          = {"localhost:9092"};
   std::string   GraphiteAddress      = {"127.0.0.1"};
   std::uint16_t GraphitePort         = {2003};
-  //std::string KafkaTopic = {""};
+  std::string   KafkaTopic           = {""};
   std::string   ConfigFile           = {""};
   std::uint64_t UpdateIntervalSec    = {1};
   std::uint32_t StopAfterSec         = {0xffffffffU};
