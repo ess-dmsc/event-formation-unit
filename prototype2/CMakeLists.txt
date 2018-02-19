@@ -33,7 +33,7 @@ set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
 #=============================================================================
 find_package(GraylogLogger)
 if(GraylogLogger_FOUND)
-  set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} ${GraylogLogger_LIBRARIES})
+  set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} ${GraylogLogger_STATIC_LIBRARIES})
   add_definitions("-DGRAYLOG")
 else()
   message(WARNING "GraylogLogger not found.")

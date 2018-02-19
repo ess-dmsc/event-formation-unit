@@ -34,6 +34,8 @@ mkdir build
 tools
 cloc --by-file --xml --out=cloc.xml .
 pushd build
+/opt/dm_group/virtualenv/conan/bin/conan install --build=outdated ..
+source activate_run.sh
 cmake -DCOV=y ..        || errexit "cmake failed"
 make -j 5               || errexit "make failed"
 make -j 5 runtest       || errexit "make runtest failed"
