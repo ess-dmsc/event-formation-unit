@@ -66,7 +66,7 @@ def docker_cmake(image_key) {
             cd build
             . ./activate_run.sh
             ${cmake_exec} --version
-            ${cmake_exec} -DDUMPTOFILE=ON -DUSE_OLD_ABI=OFF ../${project}
+            ${cmake_exec} -DDUMPTOFILE=ON ../${project}
         \""""
     }
 }
