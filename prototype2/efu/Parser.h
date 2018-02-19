@@ -29,6 +29,8 @@ public:
    *  @param function pointer to command implementation
    */
   int registercmd(std::string cmd_name, cmdFunction cmd_fn);
+  
+  void clearCommands();
 
   /** @brief parse a command
    *  @param[in] input char array holding command and its arguments

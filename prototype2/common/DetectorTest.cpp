@@ -8,7 +8,7 @@
 
 class TestDetector : public Detector {
 public:
-  TestDetector(UNUSED BaseSettings settings) : Detector(settings) {
+  TestDetector(UNUSED BaseSettings settings) : Detector("Some name", settings) {
     std::cout << "TestDetector" << std::endl;
   };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };

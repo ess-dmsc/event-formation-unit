@@ -24,31 +24,40 @@ struct ThreadCoreAffinitySetting {
 
 class EFUArgs {
 public:
+  enum class Status {EXIT, CONTINUE};
   EFUArgs();
-  bool parseAndProceed(const int argc, char *argv[]);
+  Status parseFirstPass(const int argc, char *argv[]);
+  
+  Status parseSecondPass(const int argc, char *argv[]);
 
   void printHelp();
 
   void printSettings();
 
-  std::string getDetectorName() { return EFUSettings.DetectorPluginName; };
+  std::string getDetectorName() { return det; };
   GraylogSettings getGraylogSettings() { return GraylogConfig; };
 
   std::vector<ThreadCoreAffinitySetting> getThreadCoreAffinity() {
     return ThreadAffinity;
   };
 
-  bool parseAgain(const int argc, char *argv[]);
-
-  BaseSettings GetBaseSettings() { return EFUSettings; };
+  BaseSettings getBaseSettings() { return EFUSettings; };
 
   CLI::App CLIParser{"Event formation unit (efu)"};
 
+  int buflen{9000}; /**< rx buffer length (B) */
+
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
+  
+  std::string det;
 
   std::vector<ThreadCoreAffinitySetting> ThreadAffinity;
-  CLI::Option *detectorOption;
+  CLI::Option *DetectorOption;
+  CLI::Option *HelpOption;
+  CLI::Option *WriteConfigOption;
+  std::string ConfigFileName;
+  CLI::Option *ReadConfigOption;
 
   GraylogSettings GraylogConfig{"127.0.0.1", 12201};
   BaseSettings EFUSettings;

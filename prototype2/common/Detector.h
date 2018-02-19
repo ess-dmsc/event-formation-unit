@@ -48,7 +48,7 @@ public:
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
-  Detector(BaseSettings settings) : EFUSettings(settings), Stats(""){};
+  Detector(std::string Name, BaseSettings settings) : EFUSettings(settings), Stats(Name), DetectorName(Name) {};
   // default constructor, all instruments must implement these methods
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
@@ -73,6 +73,12 @@ public:
 
   virtual std::map<std::string, CommandFunction> GetDetectorCommandFunctions() {
     return DetectorCommands;
+  }
+  
+  virtual void startThreads() {
+    for (auto &tInfo : Threads) {
+      tInfo.thread = std::thread(tInfo.func);
+    }
   }
 
   virtual void stopThreads() {
@@ -99,7 +105,7 @@ protected:
   NewStats Stats;
 
 private:
-  std::string noname{""};
+  std::string DetectorName;
 };
 
 struct PopulateCLIParser {
