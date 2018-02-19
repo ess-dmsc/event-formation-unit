@@ -34,6 +34,8 @@ mkdir build
 tools
 cloc --by-file --xml --out=cloc.xml .
 pushd build
+conan install --build=outdated ..
+source activate_build.sh
 cmake -DCOV=y ..        || errexit "cmake failed"
 make -j 5               || errexit "make failed"
 make -j 5 runtest       || errexit "make runtest failed"
