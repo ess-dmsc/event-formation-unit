@@ -10,8 +10,6 @@ set(AdcChopperInt_INC
   UDPServer.h
   PacketGenerator.h
   TDCGenerator.h
-  f142_logdata_generated.h
-  fwdi_forwarder_internal_generated.h
   ../../common/Producer.h
 )
 
@@ -28,7 +26,7 @@ add_custom_command(
         TARGET AdcChopperIntgerationTest POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
                 ${ADC_CONFIG_FILE}
-                "$<TARGET_FILE_DIR:efu2>/")
+                "$<TARGET_FILE_DIR:efu>/")
 
 get_filename_component(DATA_TEMPLATE "DataPacketTemplate.dat" ABSOLUTE)
 add_custom_command(

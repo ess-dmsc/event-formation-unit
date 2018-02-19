@@ -55,8 +55,8 @@ if(${ASIO_FOUND})
                   ${TEST_PACKET_FILE}
                   "$<TARGET_FILE_DIR:AdcReadoutTest>/")
 
-  add_dependencies(AdcReadoutTest common eventlib)
-  target_link_libraries(AdcReadoutTest common eventlib)
+  add_dependencies(AdcReadoutTest efu_common eventlib)
+  target_link_libraries(AdcReadoutTest efu_common eventlib)
   target_include_directories(AdcReadoutTest PRIVATE ${ASIO_INCLUDE_DIR})
   add_subdirectory("chopper_integration_test")
 endif()
