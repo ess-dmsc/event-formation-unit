@@ -34,12 +34,12 @@ mkdir build
 tools
 cloc --by-file --xml --out=cloc.xml .
 pushd build
-conan install --build=outdated ..
-source activate_build.sh
-cmake -DCOV=y ..        || errexit "cmake failed"
-make -j 5               || errexit "make failed"
-make -j 5 runtest       || errexit "make runtest failed"
+conan install --build=outdated .. || errexit "conan command failed"
+source activate_build.sh          || errexit "conan activate_build failed"
+cmake -DCOV=y ..                  || errexit "cmake failed"
+make -j 5                         || errexit "make failed"
+make -j 5 runtest                 || errexit "make runtest failed"
 #executecode
-make coverage           || errexit "make coverage failed"
+make coverage                     || errexit "make coverage failed"
 make valgrind
 popd
