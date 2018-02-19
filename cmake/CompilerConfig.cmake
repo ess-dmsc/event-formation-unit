@@ -31,12 +31,6 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   set(CMAKE_CXX_ARCHIVE_CREATE "<CMAKE_AR> qcs <TARGET> <LINK_FLAGS> <OBJECTS>")
   set(CMAKE_CXX_ARCHIVE_FINISH true)
 
-#  option(USE_OLD_ABI "Sets _GLIBCXX_USE_CXX11_ABI=0 for CentOS builds" ON)
-#  if(${USE_OLD_ABI})
-#    message(WARNING "*** Setting _GLIBCXX_USE_CXX11_ABI=0 consider changing this when gcc on CentOS is updated")
-#    set(EXTRA_CXX_FLAGS "${EXTRA_CXX_FLAGS} -D_GLIBCXX_USE_CXX11_ABI=0")
-#  endif()
-
   if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 7.0)
     message(STATUS "*** GCC>7 Compiler is too awesome. The following warnings are disabled:")
     message(STATUS "       no-implicit-fallthrough")
