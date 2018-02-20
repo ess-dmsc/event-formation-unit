@@ -12,7 +12,8 @@ public:
     
   }
   virtual void SetUp() {
-    std::ifstream PacketFile("test_packet_1.dat", std::ios::binary);
+    std::string PacketPath = TEST_PACKET_PATH;
+    std::ifstream PacketFile(PacketPath, std::ios::binary);
     ASSERT_TRUE(PacketFile.good());
     PacketFile.read(reinterpret_cast<char*>(&Packet.Data), 1470);
     ASSERT_TRUE(PacketFile.good());
