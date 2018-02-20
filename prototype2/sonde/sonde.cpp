@@ -184,12 +184,11 @@ void SONDEIDEA::processing_thread() {
           mystats.tx_bytes += flatbuffer.produce();
           produce_timer.now();
         }
-
-        if (not runThreads) {
-          XTRACE(INPUT, ALW, "Stopping input thread.\n");
-          return;
-        }
       }
+    }
+    if (not runThreads) {
+      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      return;
     }
   }
 }
