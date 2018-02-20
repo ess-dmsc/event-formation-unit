@@ -7,6 +7,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated"
 #pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 #include <asio.hpp>
 #pragma GCC diagnostic pop
 

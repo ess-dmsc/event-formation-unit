@@ -50,11 +50,6 @@ if(${ASIO_FOUND})
   create_test_executable(AdcReadoutTest ${LibRDKafka_LIBRARIES})
   get_filename_component(TEST_PACKET_PATH "test/test_packet_1.dat" ABSOLUTE)
   target_compile_definitions(AdcReadoutTest PRIVATE TEST_PACKET_PATH="${TEST_PACKET_PATH}")
-  # add_custom_command(
-  #         TARGET AdcReadoutTest POST_BUILD
-  #         COMMAND ${CMAKE_COMMAND} -E copy
-  #                 ${TEST_PACKET_FILE}
-  #                 "$<TARGET_FILE_DIR:AdcReadoutTest>/")
 
   add_dependencies(AdcReadoutTest efu_common eventlib)
   target_link_libraries(AdcReadoutTest efu_common eventlib)

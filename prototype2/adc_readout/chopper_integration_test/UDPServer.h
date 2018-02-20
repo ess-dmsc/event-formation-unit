@@ -7,6 +7,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated"
 #pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wunused-variable"
 #include <asio.hpp>
 #pragma GCC diagnostic pop
 
@@ -27,7 +28,7 @@ public:
   bool TransmitPacket(const std::uint8_t *DataPtr, const std::uint32_t Size);
 private:
   std::atomic_bool ConnectionOk = {false};
-  std::atomic_uint64_t PacketsSent = {0};
+  std::atomic<std::int64_t> PacketsSent = {0};
   asio::io_service Service;
   WorkPtr Work;
   void threadFunction();
