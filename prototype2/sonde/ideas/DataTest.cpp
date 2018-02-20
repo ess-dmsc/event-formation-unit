@@ -15,7 +15,9 @@ protected:
     readout = new IDEASData(&geometry);
     memset(readout->data, 0, sizeof(readout->data));
   }
-  virtual void TearDown() {}
+  virtual void TearDown() {
+    delete readout;
+  }
 };
 
 /** Test cases below */
