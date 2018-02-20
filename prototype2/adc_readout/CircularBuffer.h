@@ -16,7 +16,7 @@ namespace SpscBuffer {
   
   template <class DataType>
   struct NopDeleter {
-    void operator()(DataType* __attribute__ ((unused)) Ptr) const {
+    void operator()(DataType* Ptr __attribute__ ((unused))) const {
     }
   };
   
