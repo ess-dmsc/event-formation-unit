@@ -38,7 +38,6 @@ using namespace memory_sequential_consistent; // Lock free fifo
 const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
 
 /** ----------------------------------------------------- */
-const char *classname = "CSPEC Detector (2 thread pipeline)";
 
 class CSPEC : public Detector {
 public:
@@ -140,7 +139,7 @@ int CSPEC::ShowCalib(std::vector<std::string> cmdargs, char *output,
   return Parser::OK;
 }
 
-CSPEC::CSPEC(BaseSettings settings) : Detector(classname, settings) {
+CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC Detector (2 thread pipeline)", settings) {
   Stats.setPrefix("efu.cspec2");
 
   XTRACE(INIT, ALW, "Adding stats\n");
@@ -181,8 +180,6 @@ CSPEC::CSPEC(BaseSettings settings) : Detector(classname, settings) {
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
 }
-
-const char *CSPEC::detectorname() { return classname; }
 
 void CSPEC::input_thread() {
   /** Connection setup */

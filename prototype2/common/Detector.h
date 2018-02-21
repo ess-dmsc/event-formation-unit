@@ -67,7 +67,7 @@ public:
     Stats.setPrefix(NewStatsPrefix);
   }
 
-  virtual const char *detectorname() { return "no detector"; }
+  virtual const char *detectorname() { return DetectorName.c_str(); }
 
   virtual ThreadList &GetThreadInfo() { return Threads; };
 
