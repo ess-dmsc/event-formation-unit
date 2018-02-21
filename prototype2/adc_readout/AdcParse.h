@@ -26,7 +26,7 @@ public:
     D_ABCD,
     H_LENGTH,
     H_TYPE,
-    I_LENGTH,a
+    I_LENGTH,
   };
   ParserException(std::string ErrorStr);
   ParserException(Type ErrorType);
