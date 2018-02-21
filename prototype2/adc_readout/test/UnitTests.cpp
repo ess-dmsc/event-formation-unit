@@ -1,3 +1,9 @@
+/** Copyright (C) 2018 European Spallation Source ERIC */
+
+/** @file
+ *
+ *  @brief Starts unit tests.
+ */
 
 #include <gtest/gtest.h>
 

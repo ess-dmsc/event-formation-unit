@@ -1,10 +1,9 @@
-//
-//  CircularBufferTest.cpp
-//  ADC_Data_Receiver
-//
-//  Created by Jonas Nilsson on 2017-11-01.
-//  Copyright © 2017 European Spallation Source. All rights reserved.
-//
+/** Copyright (C) 2018 European Spallation Source ERIC */
+
+/** @file
+ *
+ *  @brief Unit tests.
+ */
 
 #include <gtest/gtest.h>
 #include <chrono>

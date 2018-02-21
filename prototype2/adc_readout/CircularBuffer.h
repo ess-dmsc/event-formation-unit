@@ -1,10 +1,9 @@
-//
-//  CircularBuffer.hpp
-//  ADC_Data_Receiver
-//
-//  Created by Jonas Nilsson on 2017-10-24.
-//  Copyright © 2017 European Spallation Source. All rights reserved.
-//
+/** Copyright (C) 2018 European Spallation Source ERIC */
+
+/** @file
+ *
+ *  @brief Circular buffer based on a lock less queue.
+ */
 
 #pragma once
 

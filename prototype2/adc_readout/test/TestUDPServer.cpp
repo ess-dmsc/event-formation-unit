@@ -1,6 +1,9 @@
-//
-// Created by Jonas Nilsson on 2017-11-08.
-//
+/** Copyright (C) 2018 European Spallation Source ERIC */
+
+/** @file
+ *
+ *  @brief Code for testing the ADC UDP functionality.
+ */
 
 #include <functional>
 #include <iostream>

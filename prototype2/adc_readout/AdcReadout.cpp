@@ -1,10 +1,9 @@
-//
-//  ADC_Readout.cpp
-//  ADC_Data_Receiver
-//
-//  Created by Jonas Nilsson on 2017-10-17.
-//  Copyright © 2017 European Spallation Source. All rights reserved.
-//
+/** Copyright (C) 2018 European Spallation Source ERIC */
+
+/** @file
+ *
+ *  @brief ADC readout detector module.
+ */
 
 #include <iostream>
 #include "AdcReadout.h"
