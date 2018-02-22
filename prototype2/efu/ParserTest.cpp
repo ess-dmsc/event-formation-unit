@@ -7,8 +7,8 @@
 #include <memory>
 #include <test/TestBase.h>
 
-extern int forcefstatfail;
-extern int forcereadfail;
+//extern int forcefstatfail;
+//extern int forcereadfail;
 
 #define UNUSED __attribute__((unused))
 
