@@ -58,7 +58,7 @@ void UDPRaw::input_thread() {
   uint32_t first_dropped = 0;
   while (runThreads) {
     char buffer[10000];
-    auto tmprx = raw.receive(buffer, EFUSettings.DetectorRxBufferSize); //Fix this, its blocking
+    auto tmprx = raw.receive(buffer, EFUSettings.DetectorRxBufferSize);
     auto tmpseq = *((uint32_t *)buffer);
 
     if (seqno == tmpseq) {
