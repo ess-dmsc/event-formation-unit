@@ -8,7 +8,7 @@
 
 class TestDetector : public Detector {
 public:
-  TestDetector(UNUSED BaseSettings settings) : Detector("Some name", settings) {
+  TestDetector(UNUSED BaseSettings settings) : Detector("no detector", settings) {
     std::cout << "TestDetector" << std::endl;
   };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
@@ -57,7 +57,7 @@ TEST_F(DetectorTest, StatAPI) {
   ASSERT_EQ("", name);
 
   auto detectorname = det->detectorname();
-  ASSERT_EQ("no detector", detectorname);
+  ASSERT_STREQ("no detector", detectorname);
 }
 
 TEST_F(DetectorTest, ThreadInfoNoThreads) {
