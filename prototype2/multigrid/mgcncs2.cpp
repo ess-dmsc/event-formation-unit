@@ -45,8 +45,6 @@ public:
   void input_thread();
   void processing_thread();
 
-  const char *detectorname();
-
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 1000;
   static const int eth_buffer_size = 9000;
