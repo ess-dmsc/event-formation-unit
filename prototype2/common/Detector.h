@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include <CLI/CLI11.hpp>
+#include <CLI11.hpp>
 #include <atomic>
 #include <common/NewStats.h>
 #include <common/Trace.h>
@@ -30,7 +30,7 @@ struct BaseSettings {
   std::string   KafkaBroker          = {"localhost:9092"};
   std::string   GraphiteAddress      = {"127.0.0.1"};
   std::uint16_t GraphitePort         = {2003};
-  //std::string KafkaTopic = {""};
+  std::string   KafkaTopic           = {""};
   std::string   ConfigFile           = {""};
   std::uint64_t UpdateIntervalSec    = {1};
   std::uint32_t StopAfterSec         = {0xffffffffU};
@@ -48,7 +48,7 @@ public:
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
-  Detector(BaseSettings settings) : EFUSettings(settings), Stats(""){};
+  Detector(std::string Name, BaseSettings settings) : EFUSettings(settings), Stats(Name), DetectorName(Name) {};
   // default constructor, all instruments must implement these methods
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
@@ -67,12 +67,18 @@ public:
     Stats.setPrefix(NewStatsPrefix);
   }
 
-  virtual const char *detectorname() { return "no detector"; }
+  virtual const char *detectorname() { return DetectorName.c_str(); }
 
   virtual ThreadList &GetThreadInfo() { return Threads; };
 
   virtual std::map<std::string, CommandFunction> GetDetectorCommandFunctions() {
     return DetectorCommands;
+  }
+  
+  virtual void startThreads() {
+    for (auto &tInfo : Threads) {
+      tInfo.thread = std::thread(tInfo.func);
+    }
   }
 
   virtual void stopThreads() {
@@ -99,7 +105,7 @@ protected:
   NewStats Stats;
 
 private:
-  std::string noname{""};
+  std::string DetectorName;
 };
 
 struct PopulateCLIParser {

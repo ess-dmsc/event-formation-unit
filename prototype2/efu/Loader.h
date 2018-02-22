@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include <CLI/CLI11.hpp>
+#include <CLI11.hpp>
 #include <common/Detector.h>
 #include <functional>
 #include <memory>
@@ -26,9 +26,12 @@ public:
   /** @brief Load instrument plugin from detector name
    *  @param name Instrument name - .so suffix will be added
    */
-  Loader(std::string name);
+  Loader();
 
   Loader(Detector *detector);
+  
+  bool loadPlugin(std::string lib);
+  void unloadPlugin();
 
   /** @brief minimal destructor */
   ~Loader();

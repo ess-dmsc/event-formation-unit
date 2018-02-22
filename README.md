@@ -104,9 +104,11 @@ What follows is a list of dependencies that are required for building this proje
 * [**librdkafka**](https://github.com/edenhill/librdkafka) _Version 0.11.3_
 * [**Boost**](https://boost.org) _Version 1.58.0_
 * [**HDF5**](https://support.hdfgroup.org/HDF5/) _Version 1.8.13_
-* [**h5cpp**](https://github.com/ess-dmsc/h5cpp) _Version 0.0.4_ **Note**: Make sure to delete the h5cpp source directory after having installed the libraries and headers. CMake is known to pick the wrong library root in some cases.
+* [**h5cpp**](https://github.com/ess-dmsc/h5cpp) _Version 0.0.5_
 * [**Streaming Data Types**](https://github.com/ess-dmsc/streaming-data-types) Note that you have to run CMake for this project in order to generate the required header files. The directory including the header files will have to be given as an argument for running the EFU CMake file. See below for instructions on how to do that.
 * [**ESSGeometry**](https://github.com/ess-dmsc/logical-geometry) The header file provided by this dependency (`ESSGeometry.h`) has to be manually moved to a directory named `logical_geometry`. The directory containing this directory then has to be passed to the EFU CMake file in the same way as done for the *Streaming Data Types* dependency. See below.
+* [**CLI11**](https://github.com/CLIUtils/CLI11) As of this writing, the master branch is required.
+* [**ASIO**](https://think-async.com/Asio) _Version 1.10.0_
 
 Extra features are also provided by the following dependencies:
 * [**libpcap**](http://www.tcpdump.org)

@@ -30,7 +30,7 @@ public:
 
 const char *UDPRaw::detectorname() { return classname; }
 
-UDPRaw::UDPRaw(BaseSettings settings) : Detector(settings) {
+UDPRaw::UDPRaw(BaseSettings settings) : Detector("UDPRaw", settings) {
   std::function<void()> inputFunc = [this]() { UDPRaw::input_thread(); };
   AddThreadFunction(inputFunc, "input");
   std::cout << "    UDPRaw created" << std::endl;
@@ -46,7 +46,7 @@ void UDPRaw::input_thread() {
                          EFUSettings.DetectorPort);
   UDPServer raw(local);
   raw.setbuffers(4000000, 4000000);
-  // raw.settimeout(0, 100000);
+  raw.settimeout(0, 100000);
   raw.printbuffers();
 
   Timer rate_timer;
@@ -56,7 +56,7 @@ void UDPRaw::input_thread() {
   uint32_t dropped = 0;
   uint32_t timeseq = 0;
   uint32_t first_dropped = 0;
-  for (;;) {
+  while (runThreads) {
     char buffer[10000];
     auto tmprx = raw.receive(buffer, EFUSettings.DetectorRxBufferSize);
     auto tmpseq = *((uint32_t *)buffer);
@@ -97,6 +97,10 @@ void UDPRaw::input_thread() {
 }
 
 /** ----------------------------------------------------- */
+
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
+
+PopulateCLIParser PopulateParser{SetCLIArguments};
 
 class UDPRawFactory : public DetectorFactory {
 public:

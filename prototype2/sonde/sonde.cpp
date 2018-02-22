@@ -75,7 +75,7 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
-SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector(settings) {
+SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDEA readout", settings) {
   Stats.setPrefix("efu.sonde");
 
   XTRACE(INIT, ALW, "Adding stats\n");
@@ -184,12 +184,11 @@ void SONDEIDEA::processing_thread() {
           mystats.tx_bytes += flatbuffer.produce();
           produce_timer.now();
         }
-
-        if (not runThreads) {
-          XTRACE(INPUT, ALW, "Stopping input thread.\n");
-          return;
-        }
       }
+    }
+    if (not runThreads) {
+      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      return;
     }
   }
 }
