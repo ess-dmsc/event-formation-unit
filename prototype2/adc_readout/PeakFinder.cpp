@@ -10,7 +10,7 @@
 #include <limits>
 #include "ev42_events_generated.h"
 
-PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod, bool PositivePolarity) : AdcDataProcessor(Prod), PositivePulse(PositivePolarity) {
+PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod) : AdcDataProcessor(Prod) {
   
 }
 
@@ -20,17 +20,8 @@ void PeakFinder::operator()(const PacketData &Data) {
   }
   for (auto &Module : Data.Modules) {
     auto Result = FindPeak(Module.Data);
-    std::uint16_t Amplitude;
-    std::uint16_t SampleNr;
-    if (PositivePulse) {
-      Amplitude = Result.Max;
-      SampleNr = Result.MaxLocation;
-    } else {
-      Amplitude = Result.Min;
-      SampleNr = Result.MinLocation;
-    }
-    std::uint64_t PeakTimeStamp = TimeStamp::CalcSample(Module.TimeStampSeconds, Module.TimeStampSecondsFrac, SampleNr);
-    SendData(PeakTimeStamp, Amplitude, Module.Channel);
+    std::uint64_t PeakTimeStamp = TimeStamp::CalcSample(Module.TimeStampSeconds, Module.TimeStampSecondsFrac, Result.MaxLocation);
+    SendData(PeakTimeStamp, Result.Max, Module.Channel);
     
   }
 }

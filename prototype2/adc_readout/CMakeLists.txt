@@ -9,6 +9,7 @@ set(AdcReadout_SRC
   AdcParse.cpp
   PeakFinder.cpp
   AdcDataProcessor.cpp
+  SampleProcessing.cpp
 )
 
 set(AdcReadout_INC
@@ -20,6 +21,7 @@ set(AdcReadout_INC
   readerwriterqueue.h
   PeakFinder.h
   AdcDataProcessor.h
+  SampleProcessing.h
 )
 
 create_module(AdcReadout "")
@@ -36,6 +38,7 @@ set(AdcReadoutTest_SRC
   test/TestUDPServer.cpp
   test/PeakFinderTest.cpp
   test/AdcDataProcessorTest.cpp
+  test/SampleProcessingTest.cpp
   ${AdcReadout_SRC})
 
 set(AdcReadoutTest_INC

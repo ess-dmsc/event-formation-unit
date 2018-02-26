@@ -1,4 +1,10 @@
-#include <iostream>
+/** Copyright (C) 2018 European Spallation Source ERIC */
+
+/** @file
+ *
+ *  @brief Simple application for simulating chopper TDC and monitor event data production.
+ */
+
 #include <fstream>
 #include "UDPServer.h"
 #include "PacketGenerator.h"

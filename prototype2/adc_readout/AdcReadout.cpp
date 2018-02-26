@@ -10,19 +10,15 @@
 #include "libs/include/Socket.h"
 
 static struct AdcSettingsStruct {
-  enum class PipelineType {RawData = 0, PeakFinder = 1};
-  PipelineType Pipeline{PipelineType::RawData};
-  enum class Polarity {Negative = 0, Positive = 1};
-  Polarity PeakPolarity;
-  std::uint16_t PeakDiscLow;
-  std::uint16_t PeakDiscHigh;
+  bool SerializeSamples{false};
+  bool PeakDetection{false};
+  unsigned int TakeMeanOfNrOfSamples{1};
 } AdcSettings;
 
 void SetCLIArguments(CLI::App &parser) {
-//  parser.add_option("--pipeline", AdcSettings.Pipeline, "Select data processong pipeline (StoreData = 0, PeakFinder = 1).")->group("ADC Readout Options")->set_default_val("0");
-//  parser.add_option("--peak_low_discriminator", AdcSettings.PeakDiscLow, "When using peak finding, ignores peaks that are smaller than this value above baseline.")->group("ADC Readout Options")->set_default_val("0");
-//  parser.add_option("--peak_high_discriminator", AdcSettings.PeakDiscHigh, "When using peak finding, ignores peaks that are bigger than this value above baseline.")->group("ADC Readout Options")->set_default_val("65536");
-  parser.add_option("--peak_polarity", AdcSettings.PeakPolarity, "Select expected peak polarity in relation to the baseline (Negative = 0, Positive = 1).")->group("ADC Readout Options")->set_default_val("1");
+  parser.add_option("--serialize_samples", AdcSettings.SerializeSamples, "Serialize sample data and send to Kafka broker.")->group("ADC Readout Options")->set_default_val("0");
+  parser.add_option("--peak_detection", AdcSettings.PeakDetection, "Find the maximum value in a range of samples and send that value along with its time-stamp to he Kafka broker.")->group("ADC Readout Options")->set_default_val("0");
+  parser.add_option("--mean_of_samples", AdcSettings.TakeMeanOfNrOfSamples, "Only used when serializing data. Take the mean of # of samples and serialize that mean.")->group("ADC Readout Options")->set_default_val("1");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
@@ -53,18 +49,8 @@ AdcReadout::AdcReadout(BaseSettings Settings) : Detector("AdcReadout", Settings)
   Stats.create("processing.packets.lost", AdcStats.processing_packets_lost);
   AdcStats.processing_packets_lost = -1; //To compensate for the first error.
   
-  Processor = std::unique_ptr<AdcDataProcessor>(new PeakFinder(ProducerPtr, bool(AdcSettings.PeakPolarity)));
+  Processor = std::unique_ptr<AdcDataProcessor>(new PeakFinder(ProducerPtr));
   
-//  switch (AdcSettings.Pipeline) {
-//    case AdcSettingsStruct::PipelineType::RawData:
-//      ProcessingFunction = {[this](PacketData &Data){rawData(Data);}};
-//      break;
-//    case AdcSettingsStruct::PipelineType::PeakFinder:
-//      ProcessingFunction = {[this](PacketData &Data){peakFind(Data);}};
-//      break;
-//    default:
-//      break;
-//  }
 }
 
 void AdcReadout::inputThread() {
