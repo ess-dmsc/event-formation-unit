@@ -6,52 +6,84 @@
 #include <iostream>
 #include <regex>
 #include <string>
+#include <fstream>
 
-// clang-format off
 EFUArgs::EFUArgs() {
+  CLIParser.set_help_flag(); //Removes the default help flag
+  CLIParser.allow_extras(true);
+  CLIParser.allow_ini_extras(true);
+  HelpOption = CLIParser.add_flag("-h,--help", "Print this help message and exit")->group("EFU Options")->configurable(false);
   CLIParser
-      .add_option("-a,--logip", GraylogConfig.address, "Graylog server IP address")
-      ->group("EFU Options")->set_default_val("127.0.0.1");
+      .add_option("-a,--logip", GraylogConfig.address,
+                  "Graylog server IP address")
+      ->group("EFU Options")
+      ->set_default_val("127.0.0.1");
   CLIParser
-      .add_option("-b,--broker", EFUSettings.KafkaBroker, "Kafka broker address")
-      ->group("EFU Options")->set_default_val("localhost:9092");
-  // CLIParser
-  //     .add_option("-t,--broker_topic", EFUSettings.KafkaTopic, "Kafka broker topic")
-  //     ->group("EFU Options")->set_default_val("Detector_data");
-  CLIParser.add_option("-c,--core_affinity", [this](std::vector<std::string> Input) {
+      .add_option("-b,--broker_addr", EFUSettings.KafkaBroker,
+                  "Kafka broker address")
+      ->group("EFU Options")
+      ->set_default_val("localhost");
+  CLIParser
+      .add_option("-t,--broker_topic", EFUSettings.KafkaTopic,
+                  "Kafka broker topic")
+      ->group("EFU Options")
+      ->set_default_val("Detector_data");
+  CLIParser
+      .add_option("-c,--core_affinity",
+                  [this](std::vector<std::string> Input) {
                     return parseAffinityStrings(Input);
-                  },                                                         "Thread to core affinity. Ex: \"-c input_t:4\"")
+                  },
+                  "Thread to core affinity. Ex: \"-c input_t:4\"")
       ->group("EFU Options");
-  detectorOption = CLIParser.add_option("-d,--det", EFUSettings.DetectorPluginName, "Detector name")
-                       ->group("EFU Options")->required();
-  CLIParser.add_option("-i,--dip",         EFUSettings.DetectorAddress,      "IP address of receive interface")
-      ->group("EFU Options")->set_default_val("0.0.0.0");
-
-  CLIParser.add_option("-p,--port",        EFUSettings.DetectorPort,         "TCP/UDP receive port")
-      ->group("EFU Options")->set_default_val("9000");
-
-  CLIParser.add_option("-m,--cmdport",     EFUSettings.CommandServerPort,    "Command parser tcp port")
-      ->group("EFU Options")->set_default_val("8888");
-
-  CLIParser.add_option("-g,--graphite",    EFUSettings.GraphiteAddress,      "IP address of graphite metrics server")
-      ->group("EFU Options")->set_default_val("127.0.0.1");
-
-  CLIParser.add_option("-o,--gport",       EFUSettings.GraphitePort,         "Graphite tcp port")
-      ->group("EFU Options")->set_default_val("2003");
-
-  CLIParser.add_option("-s,--stopafter",   EFUSettings.StopAfterSec,         "Terminate after timeout seconds")
-      ->group("EFU Options")->set_default_val("4294967295"); // 0xffffffffU
-
-  CLIParser.add_option("--updateinterval", EFUSettings.UpdateIntervalSec,    "Stats and event data update interval (seconds).")
-      ->group("EFU Options")->set_default_val("1");
-
-  CLIParser.add_option("--rxbuffer",       EFUSettings.DetectorRxBufferSize, "Input thread UDP receive buffer size.")
-      ->group("EFU Options")->set_default_val("2000000");
-
-  CLIParser.add_option("--txbuffer",       EFUSettings.DetectorTxBufferSize, "Input thread UDP transmit buffer size.")
-      ->group("EFU Options")->set_default_val("200000");
+  DetectorOption = CLIParser.add_option("-d,--det", DetectorName, "Detector name")
+                       ->group("EFU Options")
+                       ->required();
+  CLIParser
+      .add_option("-i,--dip", EFUSettings.DetectorAddress,
+                  "IP address of receive interface")
+      ->group("EFU Options")
+      ->set_default_val("0.0.0.0");
+  CLIParser
+      .add_option("-p,--port", EFUSettings.DetectorPort, "TCP/UDP receive port")
+      ->group("EFU Options")
+      ->set_default_val("9000");
+  CLIParser
+      .add_option("-m,--cmdport", EFUSettings.CommandServerPort,
+                  "Command parser tcp port")
+      ->group("EFU Options")
+      ->set_default_val("8888");
+  CLIParser
+      .add_option("-g,--graphite", EFUSettings.GraphiteAddress,
+                  "IP address of graphite metrics server")
+      ->group("EFU Options")
+      ->set_default_val("127.0.0.1");
+  CLIParser
+      .add_option("-o,--gport", EFUSettings.GraphitePort, "Graphite tcp port")
+      ->group("EFU Options")
+      ->set_default_val("2003");
+  CLIParser
+      .add_option("-s,--stopafter", EFUSettings.StopAfterSec,
+                  "Terminate after timeout seconds")
+      ->group("EFU Options")
+      ->set_default_val("4294967295"); // 0xffffffffU
+  WriteConfigOption = CLIParser.add_option("--write_config", ConfigFileName, "Write CLI options with default values to config file.")->group("EFU Options")->configurable(false);
+  ReadConfigOption = CLIParser.set_config("--read_config", "", "Read CLI options from config file.", false)->group("EFU Options")->excludes(WriteConfigOption);
+  CLIParser
+  .add_option("--updateinterval", EFUSettings.UpdateIntervalSec,
+              "Stats and event data update interval (seconds).")
+  ->group("EFU Options")
+  ->set_default_val("1");
+  CLIParser
+  .add_option("--rxbuffer", EFUSettings.DetectorRxBufferSize,
+              "Receive from detector buffer size.")
+  ->group("EFU Options")
+  ->set_default_val("2000000");
+  CLIParser
+  .add_option("--txbuffer", EFUSettings.DetectorTxBufferSize,
+              "Transmit to detector buffer size.")
+  ->group("EFU Options")
+  ->set_default_val("9216");
 }
-// clang-format on
 
 bool EFUArgs::parseAffinityStrings(
     std::vector<std::string> ThreadAffinityStrings) {
@@ -85,13 +117,14 @@ bool EFUArgs::parseAffinityStrings(
 void EFUArgs::printSettings() {
   XTRACE(INIT, ALW, "Starting event processing pipeline2\n");
   XTRACE(INIT, ALW, "  Log IP:        %s\n", GraylogConfig.address.c_str());
-  XTRACE(INIT, ALW, "  Detector:      %s\n", EFUSettings.DetectorPluginName.c_str());
+  XTRACE(INIT, ALW, "  Detector:      %s\n", DetectorName.c_str());
   //    XTRACE(INIT, ALW, "  CPU Offset:    %d\n", cpustart);
   XTRACE(INIT, ALW, "  Config file:   %s\n", EFUSettings.ConfigFile.c_str());
   XTRACE(INIT, ALW, "  IP addr:       %s\n",
          EFUSettings.DetectorAddress.c_str());
   XTRACE(INIT, ALW, "  UDP Port:      %d\n", EFUSettings.DetectorPort);
-  XTRACE(INIT, ALW, "  Kafka broker:  %s\n", EFUSettings.KafkaBroker.c_str());
+  XTRACE(INIT, ALW, "  Kafka broker:  %s\n",
+         EFUSettings.KafkaBroker.c_str());
   XTRACE(INIT, ALW, "  Graphite:      %s\n",
          EFUSettings.GraphiteAddress.c_str());
   XTRACE(INIT, ALW, "  Graphite port: %d\n", EFUSettings.GraphitePort);
@@ -99,29 +132,45 @@ void EFUArgs::printSettings() {
   XTRACE(INIT, ALW, "  Stopafter:     %u\n", EFUSettings.StopAfterSec);
 }
 
-void EFUArgs::printHelp() { std::cout << CLIParser.help(); }
+void EFUArgs::printHelp() { std::cout << CLIParser.help(30); }
 
-bool EFUArgs::parseAndProceed(const int argc, char *argv[]) {
-  try {
-    CLIParser.parse(argc, argv);
-  } catch (const CLI::ParseError &e) {
-    if (0 == detectorOption->count()) {
-      CLIParser.exit(e);
-      return false;
-    } else {
-      EFUSettings.DetectorPluginName = detectorOption->results()[0];
-    }
-  }
-  CLIParser.reset();
-  return true;
-}
-
-bool EFUArgs::parseAgain(const int argc, char *argv[]) {
+EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
   try {
     CLIParser.parse(argc, argv);
   } catch (const CLI::ParseError &e) {
     CLIParser.exit(e);
-    return false;
   }
-  return true;
+  if ((*HelpOption and not *DetectorOption) or (not *HelpOption and not *DetectorOption)) {
+    printHelp();
+    return Status::EXIT;
+  }
+  CLIParser.reset();
+  CLIParser.allow_extras(false);
+  CLIParser.allow_ini_extras(false);
+  return Status::CONTINUE;
+}
+
+EFUArgs::Status EFUArgs::parseSecondPass(const int argc, char *argv[]) {
+  try {
+    CLIParser.parse(argc, argv);
+  } catch (const CLI::ParseError &e) {
+    CLIParser.exit(e);
+    return Status::EXIT;
+  }
+  if (*HelpOption and *DetectorOption) {
+    printHelp();
+    return Status::EXIT;
+  }
+  if (*WriteConfigOption) {
+    std::ofstream ConfigFile(ConfigFileName, std::ios::binary);
+    if (not ConfigFile.is_open()) {
+      std::cout << "Failed to open config file for writing." << std::endl;
+      return Status::EXIT;
+    }
+    ConfigFile << CLIParser.config_to_str(true, "", true);
+    ConfigFile.close();
+    std::cout << "Config file created, now exiting." << std::endl;
+    return Status::EXIT;
+  }
+  return Status::CONTINUE;
 }

@@ -1,60 +1,11 @@
-cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
-enable_testing()
-include_directories(. .. ../.. ${FLATBUFFERS_INCLUDE_DIR})
-
-find_package(h5cpp)
-set(h5_optional)
-
-if (DUMPTOFILE)
-set(datasave_SRC ../../dataformats/multigrid/src/DataSave.cpp)
-set(datasave_INC ../../dataformats/multigrid/inc/DataSave.h)
-endif ()
-
-#
-# Tools and Data generators
-#
-
-if (h5cpp_FOUND)
-  set(gennmxfile_SRC
-    nmx/Eventlet.cpp
-    nmxgen/nmxfile.cpp
-    nmxgen/NMXArgs.cpp
-    nmxgen/ReaderVMM.cpp)
-  set(gennmxfile_INC
-    nmx/Eventlet.h
-    nmxgen/NMXArgs.h
-    nmxgen/ReaderVMM.h)
-  create_executable(gennmxfile "")
-  target_link_libraries(gennmxfile h5cpp_shared)
-  set(h5_optional h5cpp_shared)
-else ()
-  message(STATUS "Unable to compile gennmxfile as h5cpp was not found.")
-endif ()
-
-#
-if (PCAP_FOUND)
-  include_directories(${PCAP_INCLUDE_DIR})
-  set(gennmxpcap_SRC
-    nmxgen/wireshark.cpp
-    nmxgen/ReaderPcap.cpp
-    nmxgen/NMXArgs.cpp)
-  set(gennmxpcap_INC
-    nmxgen/ReaderPcap.h
-    nmxgen/NMXArgs.h)
-  create_executable(gennmxpcap "pcap")
-else ()
-  message(STATUS "Unable to compile gennmxpcap as libpcap was not found.")
-endif ()
-
-
-#
+#=============================================================================
 # Detector Pipeline Plugins
-#
+#=============================================================================
 
 set(gdgem_SRC
+  ../../dataformats/multigrid/src/jsoncpp.cpp
   gdgem.cpp
   NMXConfig.cpp
-  ../../dataformats/multigrid/src/jsoncpp.cpp
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Eventlet.cpp
@@ -67,7 +18,8 @@ set(gdgem_SRC
   vmm2srs/SRSMappings.cpp
   vmm2srs/SRSTime.cpp
   vmm2srs/ParserSRS.cpp
-  vmm2srs/EventletBuilderSRS.cpp)
+  vmm2srs/EventletBuilderSRS.cpp
+  )
 set(gdgem_INC
   NMXConfig.h
   nmx/Clusterer.h
@@ -82,15 +34,58 @@ set(gdgem_INC
   vmm2srs/SRSMappings.h
   vmm2srs/SRSTime.h
   vmm2srs/ParserSRS.h
-  vmm2srs/EventletBuilderSRS.h)
-create_module(gdgem "")
-target_link_libraries(gdgem ${h5_optional})
+  vmm2srs/EventletBuilderSRS.h
+  )
+create_module(gdgem)
 
-#
-# NMX / VMM Tests
-#
+
+#=============================================================================
+# Data generators
+#=============================================================================
+
+if(h5cpp_FOUND)
+  set(gennmxfile_SRC
+    nmx/Eventlet.cpp
+    nmxgen/nmxfile.cpp
+    nmxgen/NMXArgs.cpp
+    nmxgen/ReaderVMM.cpp
+    )
+  set(gennmxfile_INC
+    nmx/Eventlet.h
+    nmxgen/NMXArgs.h
+    nmxgen/ReaderVMM.h
+    )
+  create_executable(gennmxfile)
+else()
+  message(STATUS "*** Unable to compile gennmxfile as h5cpp was not found.")
+endif()
+
+find_package(PCAP)
+if(PCAP_FOUND)
+  set(gennmxpcap_SRC
+    nmxgen/wireshark.cpp
+    nmxgen/ReaderPcap.cpp
+    nmxgen/NMXArgs.cpp
+    )
+  set(gennmxpcap_INC
+    nmxgen/ReaderPcap.h
+    nmxgen/NMXArgs.h
+    )
+  set(gennmxpcap_LIB
+    ${PCAP_LIBRARY}
+    )
+  create_executable(gennmxpcap)
+else()
+  message(STATUS "*** Unable to compile gennmxpcap as libpcap was not found.")
+endif()
+
+
+#=============================================================================
+# Tests
+#=============================================================================
 
 # Doros gdgem event algorithm
+
 set(NMXClustererTest_SRC
   dg_impl/NMXClusterer.cpp
   dg_impl/NMXClustererTest.cpp)
@@ -104,6 +99,7 @@ set(NMXClustererBenchmarkTest_INC dg_impl/NMXClusterer.h dg_impl/TestData.h)
 set(NMXClustererBenchmarkTest_SRC dg_impl/NMXClusterer.cpp dg_impl/NMXClustererBenchmarkTest.cpp)
 create_benchmark_executable(NMXClustererBenchmarkTest "")
 
+
 set(EventFormationTest_SRC
   nmx/AbstractEventletBuilder.cpp
   nmx/Clusterer.cpp
@@ -113,7 +109,8 @@ set(EventFormationTest_SRC
   vmm2srs/EventFormationTest.cpp
   vmm2srs/ParserSRS.cpp
   vmm2srs/SRSTime.cpp
-  vmm2srs/SRSMappings.cpp)
+  vmm2srs/SRSMappings.cpp
+  )
 set(EventFormationTest_INC
   nmx/AbstractEventletBuilder.h
   nmx/Clusterer.h
@@ -122,69 +119,87 @@ set(EventFormationTest_INC
   vmm2srs/EventletBuilderSRS.h
   vmm2srs/ParserSRS.h
   vmm2srs/SRSTime.h
-  vmm2srs/SRSMappings.h)
-create_test_executable(EventFormationTest "")
+  vmm2srs/SRSMappings.h
+  )
+create_test_executable(EventFormationTest)
 
 
-set(EventletBuilderBenchmarkTest_SRC nmx/Clusterer.cpp nmx/EventNMX.cpp nmx/Hists.cpp
-  nmx/AbstractEventletBuilder.cpp vmm2srs/EventletBuilderSRSBenchmarkTest.cpp vmm2srs/EventletBuilderSRS.cpp
-  vmm2srs/ParserSRS.cpp vmm2srs/SRSMappings.cpp vmm2srs/SRSTime.cpp)
-set(EventletBuilderBenchmarkTest_INC nmx/Clusterer.h nmx/EventNMX.h nmx/Hists.h
-  nmx/Eventlet.h vmm2srs/ParserSRS.h vmm2srs/EventletBuilderSRS.h vmm2srs/SRSTime.h
-  vmm2srs/SRSMappings.h)
-create_benchmark_executable(EventletBuilderBenchmarkTest "")
-
-
+set(EventletBuilderBenchmarkTest_SRC
+  nmx/Clusterer.cpp
+  nmx/EventNMX.cpp nmx/Hists.cpp
+  nmx/AbstractEventletBuilder.cpp
+  vmm2srs/EventletBuilderSRSBenchmarkTest.cpp
+  vmm2srs/EventletBuilderSRS.cpp
+  vmm2srs/ParserSRS.cpp
+  vmm2srs/SRSMappings.cpp
+  vmm2srs/SRSTime.cpp
+  )
+set(EventletBuilderBenchmarkTest_INC
+  nmx/Clusterer.h
+  nmx/EventNMX.h
+  nmx/Hists.h
+  nmx/Eventlet.h
+  vmm2srs/ParserSRS.h
+  vmm2srs/EventletBuilderSRS.h
+  vmm2srs/SRSTime.h
+  vmm2srs/SRSMappings.h
+  )
+create_benchmark_executable(EventletBuilderBenchmarkTest)
 
 
 set(HistSerializerTest_SRC
   nmx/Hists.cpp
   nmx/HistSerializerTest.cpp
-  nmx/HistSerializer.cpp)
+  nmx/HistSerializer.cpp
+  )
 set(HistSerializerTest_INC
   nmx/Eventlet.h
   nmx/Hists.h
   nmx/HistSerializer.h
-  ../common/Producer.h)
-create_test_executable(HistSerializerTest "")
+  ../common/Producer.h
+  )
+create_test_executable(HistSerializerTest)
 
 set(TrackSerializerTest_SRC
   nmx/Eventlet.cpp
   nmx/EventNMX.cpp
   nmx/TrackSerializerTest.cpp
-  nmx/TrackSerializer.cpp)
+  nmx/TrackSerializer.cpp
+  )
 set(TrackSerializerTest_INC
   nmx/EventNMX.h
   nmx/Eventlet.h
-  nmx/TrackSerializer.h)
-create_test_executable(TrackSerializerTest "")
+  nmx/TrackSerializer.h
+  )
+create_test_executable(TrackSerializerTest)
 
 set(ParserSRSTest_SRC
   vmm2srs/ParserSRSTest.cpp
   vmm2srs/ParserSRS.cpp
-  vmm2srs/ParserSRS.h)
-create_test_executable(ParserSRSTest "")
+  )
+set(ParserSRSTest_INC
+  vmm2srs/ParserSRS.h
+  )
+create_test_executable(ParserSRSTest)
 
 set(EventletBuilderH5Test_SRC
-  ${datasave_SRC}
   nmx/EventNMX.cpp
   nmx/Clusterer.cpp
   nmx/Hists.cpp
   nmx/AbstractEventletBuilder.cpp
   nmxgen/EventletBuilderH5Test.cpp
-  nmxgen/EventletBuilderH5.cpp)
+  nmxgen/EventletBuilderH5.cpp
+  )
 set(EventletBuilderH5Test_INC
-  ${datasave_INC}
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
   nmx/Hists.h
-  nmxgen/EventletBuilderH5.h)
-create_test_executable(EventletBuilderH5Test "")
-target_link_libraries(EventletBuilderH5Test ${h5_optional})
+  nmxgen/EventletBuilderH5.h
+  )
+create_test_executable(EventletBuilderH5Test)
 
 set(EventletBuilderTest_SRC
-  ${datasave_SRC}
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Hists.cpp
@@ -193,9 +208,9 @@ set(EventletBuilderTest_SRC
   vmm2srs/EventletBuilderSRS.cpp
   vmm2srs/ParserSRS.cpp
   vmm2srs/SRSMappings.cpp
-  vmm2srs/SRSTime.cpp)
+  vmm2srs/SRSTime.cpp
+  )
 set(EventletBuilderTest_INC
-  ${datasave_INC}
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Hists.h
@@ -203,44 +218,57 @@ set(EventletBuilderTest_INC
   vmm2srs/ParserSRS.h
   vmm2srs/EventletBuilderSRS.h
   vmm2srs/SRSTime.h
-  vmm2srs/SRSMappings.h)
-create_test_executable(EventletBuilderTest "")
-target_link_libraries(EventletBuilderTest ${h5_optional})
+  vmm2srs/SRSMappings.h
+  )
+create_test_executable(EventletBuilderTest)
 
 set(EventletTest_SRC
   nmx/EventletTest.cpp
   nmx/Eventlet.cpp
-  nmx/Eventlet.h)
-create_test_executable(EventletTest "")
+  )
+set(EventletTest_INC
+  nmx/Eventlet.h
+  )
+create_test_executable(EventletTest)
 
 set(SRSMappingsTest_SRC
   vmm2srs/SRSMappingsTest.cpp
-  vmm2srs/SRSMappings.cpp)
-create_test_executable(SRSMappingsTest "")
+  vmm2srs/SRSMappings.cpp
+  )
+create_test_executable(SRSMappingsTest)
 
 set(SRSTimeTest_SRC
   vmm2srs/SRSTimeTest.cpp
   vmm2srs/SRSTime.cpp
-  vmm2srs/SRSTime.h)
-create_test_executable(SRSTimeTest "")
+  vmm2srs/SRSTime.h
+  )
+create_test_executable(SRSTimeTest)
 
 set(GeometryTest_SRC
   nmx/GeometryTest.cpp
   nmx/Geometry.cpp
-  nmx/Geometry.h)
-create_test_executable(GeometryTest "")
+  )
+set(GeometryTest_INC
+  nmx/Geometry.h
+  )
+create_test_executable(GeometryTest)
 
 set(ClustererTest_SRC
   nmx/ClustererTest.cpp
   nmx/Clusterer.cpp
-  nmx/EventNMX.cpp)
+  nmx/EventNMX.cpp
+  )
 set(ClustererTest_INC
   nmx/Clusterer.h
-  nmx/EventNMX.h)
-create_test_executable(ClustererTest "")
+  nmx/EventNMX.h
+  )
+create_test_executable(ClustererTest)
 
 set(EventNMXTest_SRC
   nmx/EventNMXTest.cpp
   nmx/EventNMX.cpp
-  nmx/EventNMX.h)
-create_test_executable(EventNMXTest "")
+  )
+set(EventNMXTest_INC
+  nmx/EventNMX.h
+  )
+create_test_executable(EventNMXTest)

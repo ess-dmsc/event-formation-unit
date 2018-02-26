@@ -105,8 +105,8 @@ PopulateCLIParser PopulateParser{SetCLIArguments};
 
 NMX::~NMX() { printf("NMX detector destructor called\n"); }
 
-NMX::NMX(BaseSettings settings) : Detector(settings) {
-  Stats.setPrefix("efu2.nmx");
+NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
+  Stats.setPrefix("efu.nmx");
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off

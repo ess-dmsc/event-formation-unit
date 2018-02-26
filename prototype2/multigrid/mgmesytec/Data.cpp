@@ -22,7 +22,7 @@ int MesytecData::getPixel() {
   int y = mgseq.ycoord(gridmax);
   int z = mgseq.zcoord(wiremax);
 
-  return mg.pixelSP3D(x,y,z);
+  return mg.pixel3D(x,y,z);
 }
 
 int MesytecData::getTime() {

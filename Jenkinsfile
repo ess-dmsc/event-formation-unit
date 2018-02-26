@@ -1,24 +1,25 @@
 project = "efu"
+coverage_on = "centos7"
 
 images = [
-    'centos': [
-        'name': 'essdmscdm/centos-build-node:0.9.0',
+    'centos7': [
+        'name': 'essdmscdm/centos7-build-node:1.0.1',
         'sh': 'sh'
     ],
-    'centos-gcc6': [
-        'name': 'essdmscdm/centos-gcc6-build-node:0.3.0',
+    'centos7-gcc6': [
+        'name': 'essdmscdm/centos7-gcc6-build-node:1.0.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
     ],
-    'fedora': [
-        'name': 'essdmscdm/fedora-build-node:0.4.1',
+    'fedora25': [
+        'name': 'essdmscdm/fedora25-build-node:1.0.0',
         'sh': 'sh'
     ],
     'ubuntu1604': [
-        'name': 'essdmscdm/ubuntu16.04-build-node:0.0.1',
+        'name': 'essdmscdm/ubuntu16.04-build-node:2.0.0',
         'sh': 'sh'
     ],
     'ubuntu1710': [
-        'name': 'essdmscdm/ubuntu17.10-build-node:0.0.2',
+        'name': 'essdmscdm/ubuntu17.10-build-node:1.0.0',
         'sh': 'sh'
     ]
 ]
@@ -42,25 +43,32 @@ def docker_dependencies(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         mkdir build
         cd build
-        conan --version
-        set +x
-        conan remote add \
-        desy-packages https://api.bintray.com/conan/eugenwintersberger/desy-packages
         conan remote add \
             --insert 0 \
             ${conan_remote} ${local_conan_server}
-        conan install --file=../${project}/conanfile.txt --build=missing
+        conan install --build=outdated ../${project}
     \""""
 }
 
 def docker_cmake(image_key) {
     cmake_exec = "cmake"
     def custom_sh = images[image_key]['sh']
-    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        cd build
-        ${cmake_exec} --version
-        ${cmake_exec} -DCONAN_FILE=conanfile.txt -DCMAKE_BUILD_TYPE=Debug ../${project}
-    \""""
+    if (image_key == "centos7")
+    {
+        sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+            cd build
+            . ./activate_run.sh
+            ${cmake_exec} --version
+            ${cmake_exec} -DDUMPTOFILE=ON -DCOV=ON ../${project}
+        \""""
+    } else {
+        sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+            cd build
+            . ./activate_run.sh
+            ${cmake_exec} --version
+            ${cmake_exec} -DDUMPTOFILE=ON ../${project}
+        \""""
+    }
 }
 
 def docker_build(image_key) {
@@ -68,21 +76,54 @@ def docker_build(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd build
         make --version
-        make
+        make VERBOSE=ON
     \""""
 }
 
 def docker_tests(image_key) {
     def custom_sh = images[image_key]['sh']
-    dir("${project}/tests") {
         try {
             sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd build
-                make runtest
+                . ./activate_run.sh
+                make runtest VERBOSE=ON
+                make runefu VERBOSE=ON
             \""""
         } catch(e) {
-            sh "docker cp ${container_name(image_key)}:/home/jenkins/build/test/*.xml ."
-            junit '*.xml'
+            failure_function(e, 'Run tests (${container_name(image_key)}) failed')
+        }
+}
+
+def docker_tests_coverage(image_key) {
+    def custom_sh = images[image_key]['sh']
+    dir("${project}") {
+        try {
+            sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+                cd build
+                . ./activate_run.sh
+                make VERBOSE=ON
+                make runefu VERBOSE=ON
+                make coverage VERBOSE=ON
+                make valgrind VERBOSE=ON
+            \""""
+            sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
+            junit 'build/test_results/*.xml'
+            step([
+                $class: 'CoberturaPublisher',
+                autoUpdateHealth: true,
+                autoUpdateStability: true,
+                coberturaReportFile: 'build/coverage/coverage.xml',
+                failUnhealthy: false,
+                failUnstable: false,
+                maxNumberOfBuilds: 0,
+                onlyStable: false,
+                sourceEncoding: 'ASCII',
+                zoomCoverageChart: false
+            ])
+            //archiveArtifacts artifacts: 'build/'
+        } catch(e) {
+            sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
+            junit 'build/test_results/*.xml'
             failure_function(e, 'Run tests (${container_name(image_key)}) failed')
         }
     }
@@ -93,7 +134,6 @@ def Object get_container(image_key) {
     def container = image.run("\
         --name ${container_name(image_key)} \
         --tty \
-        --network=host \
         --env http_proxy=${env.http_proxy} \
         --env https_proxy=${env.https_proxy} \
         --env local_conan_server=${env.local_conan_server} \
@@ -135,7 +175,13 @@ def get_pipeline(image_key)
                     failure_function(e, "Build for ${image_key} failed")
                 }
 
-                docker_tests(image_key)
+                if (image_key == coverage_on) {
+                    docker_tests_coverage(image_key)
+                } else {
+                    docker_tests(image_key)
+                }
+
+                //docker_tests(image_key)
             } catch(e) {
                 failure_function(e, "Unknown build failure for ${image_key}")
             } finally {
@@ -146,10 +192,10 @@ def get_pipeline(image_key)
     }
 }
 
-def get_osx_pipeline()
+def get_macos_pipeline()
 {
     return {
-        stage("MacOSX") {
+        stage("macOS") {
             node ("macos") {
             // Delete workspace when build is done
                 cleanWs()
@@ -164,16 +210,27 @@ def get_osx_pipeline()
 
                 dir("${project}/build") {
                     try {
-                        sh "conan install --file=../code/conanfile.txt --build=missing"
-                        sh "cmake ../code"
+                        sh "conan install --build=outdated ../code"
+                    } catch (e) {
+                        failure_function(e, 'MacOSX / getting dependencies failed')
+                    }
+
+                    try {
+                        sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
                     } catch (e) {
                         failure_function(e, 'MacOSX / CMake failed')
                     }
 
                     try {
+                        sh "make"
+                    } catch (e) {
+                        failure_function(e, 'MacOSX / make failed')
+                    }
+
+                    try {
                         sh "make runtest"
                     } catch (e) {
-                        failure_function(e, 'MacOSX / build failed')
+                        failure_function(e, 'MacOSX / tests failed')
                     }
                 }
 
@@ -187,39 +244,11 @@ node('docker && dmbuild03.dm.esss.dk') {
     // Delete workspace when build is done
     cleanWs()
 
-    stage('Checkout') {
-        dir("${project}/code") {
+    dir("${project}/code") {
+
+        stage('Checkout') {
             try {
                 scm_vars = checkout scm
-            } catch (e) {
-                failure_function(e, 'Checkout failed')
-            }
-        }
-    }
-
-    def builders = [:]
-    //builders['centos'] = get_pipeline('centos')
-    //builders['centos-gcc6'] = get_pipeline('centos-gcc6')
-    //builders['fedora'] = get_pipeline('fedora')
-    //builders['ubuntu1604'] = get_pipeline('ubuntu1604')
-    //builders['MocOSX'] = get_osx_pipeline()
-
-    /*
-    for (x in images.keySet()) {
-        def image_key = x
-        builders[image_key] = get_pipeline(image_key)
-    }
-    */
-    parallel builders
-}
-
-node('kafka-client && centos7') {
-    cleanWs()
-
-    dir("code") {
-        stage("Checkout") {
-            try {
-                checkout scm
             } catch (e) {
                 failure_function(e, 'Checkout failed')
             }
@@ -236,38 +265,13 @@ node('kafka-client && centos7') {
         }
     }
 
+    def builders = [:]
 
-    dir("build") {
-        stage("Build") {
-            try {
-                sh "cmake -DCOV=1 ../code"
-                sh "make -j 5 VERBOSE=ON"
-            } catch (e) {
-                failure_function(e, 'Failed to compile')
-            }
-        }
-
-        stage("Run tests") {
-            try {
-                sh "make -j 5 runtest VERBOSE=ON"
-                junit 'test_results/*.xml'
-                sh "make coverage_xml"
-                step([
-                    $class: 'CoberturaPublisher',
-                    autoUpdateHealth: true,
-                    autoUpdateStability: true,
-                    coberturaReportFile: 'coverage/coverage.xml',
-                    failUnhealthy: false,
-                    failUnstable: false,
-                    maxNumberOfBuilds: 0,
-                    onlyStable: false,
-                    sourceEncoding: 'ASCII',
-                    zoomCoverageChart: false
-                ])
-            } catch (e) {
-                junit 'test_results/*.xml'
-                failure_function(e, 'Unit tests failed')
-            }
-        }
+    for (x in images.keySet()) {
+        def image_key = x
+        builders[image_key] = get_pipeline(image_key)
     }
+    builders['macOS'] = get_macos_pipeline()
+
+    parallel builders
 }

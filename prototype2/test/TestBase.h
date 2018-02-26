@@ -5,7 +5,11 @@
  *  @brief Base class for all unit tests - provides colored print using MESSAGE
  */
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wsign-compare"
 #include <gtest/gtest.h>
+#pragma GCC diagnostic pop
 
 namespace testing {
 namespace internal {

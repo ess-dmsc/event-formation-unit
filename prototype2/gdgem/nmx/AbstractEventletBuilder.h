@@ -11,8 +11,14 @@
 #include <gdgem/nmx/Hists.h>
 
 #ifdef DUMPTOFILE
-#include <dataformats/multigrid/inc/DataSave.h>
+#include <common/DataSave.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wall"
+#pragma GCC diagnostic ignored "-Wpedantic"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <h5cpp/hdf5.hpp>
+#pragma GCC diagnostic pop
 #endif
 
 class AbstractBuilder {

@@ -96,8 +96,8 @@ private:
   } ALIGN(64) mystats;
 };
 
-CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
-  Stats.setPrefix("efu2.mgmesytec");
+CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
+  Stats.setPrefix("efu.mgmesytec");
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off

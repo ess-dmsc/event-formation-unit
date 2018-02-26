@@ -51,7 +51,7 @@ private:
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
-  NewStats ns{"efu2.sonde."}; //
+  NewStats ns{"efu.sonde."}; //
 
   struct {
     // Input Counters
@@ -75,8 +75,8 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
-SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector(settings) {
-  Stats.setPrefix("efu2.sonde");
+SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDEA readout", settings) {
+  Stats.setPrefix("efu.sonde");
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
@@ -184,12 +184,11 @@ void SONDEIDEA::processing_thread() {
           mystats.tx_bytes += flatbuffer.produce();
           produce_timer.now();
         }
-
-        if (not runThreads) {
-          XTRACE(INPUT, ALW, "Stopping input thread.\n");
-          return;
-        }
       }
+    }
+    if (not runThreads) {
+      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      return;
     }
   }
 }
