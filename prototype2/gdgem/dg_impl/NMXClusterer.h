@@ -130,15 +130,15 @@ private:
 	float pDeltaTimeSpan;
 	float pDeltaTimePlanes;
 
-	int m_eventNr = 0;
+	// These are in play for triggering the actual clustering
 	double m_oldTriggerTimestamp_ns = 0;
     unsigned int m_oldFrameCounter = 0;
+    bool m_subsequentTrigger = false;
 
     // For debug output only
     double m_timeStamp_ms = 0;
     int m_oldVmmID = 0;
-
-    bool m_subsequentTrigger = false;
+    int m_eventNr = 0;
 
     // For all 0s correction
 	int m_oldBcidX = 0;

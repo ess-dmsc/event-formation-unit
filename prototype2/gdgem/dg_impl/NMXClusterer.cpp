@@ -61,13 +61,6 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
   double chipTime = pTime.chip_time(bcid, tdc);
 
 
-  // Section below deals only with received trigger & frame counter parameters
-  // The following member variables are only used in this function
-  //    m_oldTriggerTimestamp_ns
-  //    m_eventNr
-  //    m_oldFrameCounter
-  //    m_timeStamp_ms
-
   bool newEvent = false;
   double triggerTimestamp_ns = triggerTimestamp * pTime.trigger_resolution();
   double deltaTriggerTimestamp_ns = 0;
@@ -77,14 +70,6 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     newEvent = true;
     m_subsequentTrigger = false;
     m_eventNr++;
-  }
-
-  // This is likely resolved. Candidate for removal?
-  if ((frameCounter < m_oldFrameCounter) && !(m_oldFrameCounter > frameCounter + 1000000000)) {
-    DTRACE(DEB, "\n*********************************** SCRAMBLED eventNr  %d, "
-                "old framecounter %d, new framecounter %u\n",
-           m_eventNr, m_oldFrameCounter, frameCounter);
-    stats_fc_error++;
   }
 
   if (m_oldTriggerTimestamp_ns > triggerTimestamp_ns &&
@@ -100,11 +85,6 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
   if (newEvent &&
       (deltaTriggerTimestamp_ns <= 1000 * 4096 / pTime.bc_clock())) {
     m_subsequentTrigger = true;
-  }
-
-  // Is this mostly for fun? I only see it being used for printing Trace info
-  if (m_eventNr > 1) {
-    m_timeStamp_ms = m_timeStamp_ms + deltaTriggerTimestamp_ns * 0.000001;
   }
 
   // Crucial step
@@ -123,6 +103,19 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     DTRACE(DEB, "fecID  %d\n", fecID);
   }
 
+
+  // This is likely resolved. Candidate for removal?
+  if ((frameCounter < m_oldFrameCounter) && !(m_oldFrameCounter > frameCounter + 1000000000)) {
+    DTRACE(DEB, "\n*********************************** SCRAMBLED eventNr  %d, "
+        "old framecounter %d, new framecounter %u\n",
+           m_eventNr, m_oldFrameCounter, frameCounter);
+    stats_fc_error++;
+  }
+
+  // m_timeStamp_ms is used for printing Trace info
+  if (m_eventNr > 1) {
+    m_timeStamp_ms = m_timeStamp_ms + deltaTriggerTimestamp_ns * 0.000001;
+  }
   if (deltaTriggerTimestamp_ns > 0) {
     DTRACE(DEB, "\tTimestamp %.2f [ms]\n", m_timeStamp_ms);
     DTRACE(DEB, "\tTime since last trigger %.4f us (%.4f kHz)\n",
