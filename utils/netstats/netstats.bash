@@ -5,7 +5,13 @@ PORT=$2
 
 while [[ 1 ]]
 do
-  INDG=$(cat /proc/net/snmp | grep "Udp:" | grep -v InDatagrams | awk '{print $2}')
-  echo "efu.net.rx_udp $INDG $(date +%s)" | nc $IP $PORT
+  DATE=$(date +%s)
+  SNMP=$(cat /proc/net/snmp | grep Udp: | grep -v InDatagrams)
+  INDG=$(echo $SNMP | awk '{print $2}')
+  INERR=$(echo $SNMP | awk '{print $4}')
+  echo "efu.net.udp_rx $INDG $DATE"
+  echo "efu.net.udp_rxerr $INERR $DATE"
+  echo "efu.net.udp_rx $INDG $DATE" | nc $IP $PORT
+  echo "efu.net.udp_rxperr $INERR $DATE" | nc $IP $PORT
   sleep 1
 done
