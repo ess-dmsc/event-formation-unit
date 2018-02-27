@@ -30,10 +30,12 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
                               int fecID, int vmmID, int chNo, int bcid, int tdc,
                               int adc, int overThresholdFlag) {
 
-  // Ready for factoring out
+  // Ready for factoring out, logic tested elsewhere
   uint8_t planeID = pChips.get_plane(fecID, vmmID);
   uint16_t strip = pChips.get_strip(fecID, vmmID, chNo);
 
+  // These variables are used only here
+  // Block is candidate for factoring out
   if (planeID == planeID_X) {
     // Fix for entries with all zeros
     if (bcid == 0 && tdc == 0 && overThresholdFlag) {
@@ -54,6 +56,9 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     m_oldTdcY = tdc;
   }
 
+  // Could be factored out depending on above block
+  double chipTime = pTime.chip_time(bcid, tdc);
+
 
   bool newEvent = false;
   double triggerTimestamp_ns = triggerTimestamp * pTime.trigger_resolution();
@@ -66,6 +71,7 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     m_eventNr++;
   }
 
+  // This is likely resolved. Candidate for removal?
   if ((frameCounter < m_oldFrameCounter) && !(m_oldFrameCounter > frameCounter + 1000000000)) {
     DTRACE(DEB, "\n*********************************** SCRAMBLED eventNr  %d, "
                 "old framecounter %d, new framecounter %u\n",
@@ -91,22 +97,9 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     m_timeStamp_ms = m_timeStamp_ms + deltaTriggerTimestamp_ns * 0.000001;
   }
 
-  // Calculate bcTime [us]
-  double bcTime = bcid / pTime.bc_clock();
-
-  // TDC time: pTAC * tdc value (8 bit)/ramp length
-  // [ns]
-
-  // TDC has reduced resolution due to most significant bit problem of current
-  // sources (like ADC)
-  int tdcRebinned = (int)tdc / 8;
-  tdc = tdcRebinned * 8;
-  double tdcTime = pTime.tac_slope() * (double)tdc / 255;
-
-  // Chip time: bcid plus tdc value
-  // Talk Vinnie: HIT time  = BCIDx25 + ADC*125/255 [ns]
-  double chipTime = bcTime * 1000 + tdcTime;
-
+  // Crucial step
+  // Storing hit to appropriate buffer
+  // Trigger TS magic above appears to be irrelevant?
   if (overThresholdFlag || (adc >= pADCThreshold)) {
     if (planeID == planeID_X) {
       StoreX(strip, adc, bcid, chipTime);
@@ -143,8 +136,7 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     DTRACE(DEB, "\t\tPlane for vmmID %d not defined!\n", vmmID);
   }
   DTRACE(DEB, "\t\t\tbcid %d, tdc %d, adc %d\n", bcid, tdc, adc);
-  DTRACE(DEB, "\t\t\tbcTime %.2f us, tdcTime %.2f ns, time %.2f us\n", bcTime,
-         tdcTime, chipTime * 0.001);
+  DTRACE(DEB, "\t\t\tchipTime %.2f us\n", chipTime * 0.001);
 
   m_oldTriggerTimestamp_ns = triggerTimestamp_ns;
   m_oldFrameCounter = frameCounter;
