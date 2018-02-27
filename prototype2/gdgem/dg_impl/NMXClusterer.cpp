@@ -36,6 +36,7 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
 
   // These variables are used only here
   // Block is candidate for factoring out
+  // Perhaps an adapter class responsible for recovery from this error condition?
   if (planeID == planeID_X) {
     // Fix for entries with all zeros
     if (bcid == 0 && tdc == 0 && overThresholdFlag) {
@@ -59,6 +60,13 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
   // Could be factored out depending on above block
   double chipTime = pTime.chip_time(bcid, tdc);
 
+
+  // Section below deals only with received trigger & frame counter parameters
+  // The following member variables are only used in this function
+  //    m_oldTriggerTimestamp_ns
+  //    m_eventNr
+  //    m_oldFrameCounter
+  //    m_timeStamp_ms
 
   bool newEvent = false;
   double triggerTimestamp_ns = triggerTimestamp * pTime.trigger_resolution();
@@ -88,11 +96,13 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     deltaTriggerTimestamp_ns = (triggerTimestamp_ns - m_oldTriggerTimestamp_ns);
   }
 
+  // Can we name these hardcoded constants?
   if (newEvent &&
       (deltaTriggerTimestamp_ns <= 1000 * 4096 / pTime.bc_clock())) {
     m_subsequentTrigger = true;
   }
 
+  // Is this mostly for fun? I only see it being used for printing Trace info
   if (m_eventNr > 1) {
     m_timeStamp_ms = m_timeStamp_ms + deltaTriggerTimestamp_ns * 0.000001;
   }
@@ -540,7 +550,6 @@ void NMXClusterer::AsyncClustererY() {
 			pDeltaTimeSpan, "y");
 
 	DTRACE(DEB, "%d cluster in y\n", cntY);
-
 }
 
 //====================================================================================================================
@@ -563,5 +572,4 @@ void NMXClusterer::AsyncClustererX() {
 			pDeltaTimeSpan, "x");
 
 	DTRACE(DEB, "%d cluster in x\n", cntX);
-
 }

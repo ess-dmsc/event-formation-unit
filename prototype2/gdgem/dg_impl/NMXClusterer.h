@@ -132,10 +132,15 @@ private:
 
 	int m_eventNr = 0;
 	double m_oldTriggerTimestamp_ns = 0;
-	bool m_subsequentTrigger = false;
-	int m_oldVmmID = 0;
-	unsigned int m_oldFrameCounter = 0;
-	double m_timeStamp_ms = 0;
+    unsigned int m_oldFrameCounter = 0;
+
+    // For debug output only
+    double m_timeStamp_ms = 0;
+    int m_oldVmmID = 0;
+
+    bool m_subsequentTrigger = false;
+
+    // For all 0s correction
 	int m_oldBcidX = 0;
 	int m_oldTdcX = 0;
 	int m_oldBcidY = 0;
