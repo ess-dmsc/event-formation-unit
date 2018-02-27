@@ -26,9 +26,34 @@ NMXClusterer::NMXClusterer(SRSTime time,
 NMXClusterer::~NMXClusterer() {}
 
 //====================================================================================================================
-int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
+bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
                               int fecID, int vmmID, int chNo, int bcid, int tdc,
                               int adc, int overThresholdFlag) {
+
+  // Ready for factoring out
+  uint8_t planeID = pChips.get_plane(fecID, vmmID);
+  uint16_t strip = pChips.get_strip(fecID, vmmID, chNo);
+
+  if (planeID == planeID_X) {
+    // Fix for entries with all zeros
+    if (bcid == 0 && tdc == 0 && overThresholdFlag) {
+      bcid = m_oldBcidX;
+      tdc = m_oldTdcX;
+      stats_bcid_tdc_error++;
+    }
+    m_oldBcidX = bcid;
+    m_oldTdcX = tdc;
+  } else if (planeID == planeID_Y) {
+    // Fix for entries with all zeros
+    if (bcid == 0 && tdc == 0 && overThresholdFlag) {
+      bcid = m_oldBcidY;
+      tdc = m_oldTdcY;
+      stats_bcid_tdc_error++;
+    }
+    m_oldBcidY = bcid;
+    m_oldTdcY = tdc;
+  }
+
 
   bool newEvent = false;
   double triggerTimestamp_ns = triggerTimestamp * pTime.trigger_resolution();
@@ -66,32 +91,6 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     m_timeStamp_ms = m_timeStamp_ms + deltaTriggerTimestamp_ns * 0.000001;
   }
 
-  int planeID = pChips.get_plane(fecID, vmmID);
-
-  int x = -1;
-  int y = -1;
-  if (planeID == planeID_X) {
-    // Fix for entries with all zeros
-    if (bcid == 0 && tdc == 0 && overThresholdFlag) {
-      bcid = m_oldBcidX;
-      tdc = m_oldTdcX;
-      stats_bcid_tdc_error++;
-    }
-    m_oldBcidX = bcid;
-    m_oldTdcX = tdc;
-    x = pChips.get_strip(fecID, vmmID, chNo);
-  } else if (planeID == planeID_Y) {
-    // Fix for entries with all zeros
-    if (bcid == 0 && tdc == 0 && overThresholdFlag) {
-      bcid = m_oldBcidY;
-      tdc = m_oldTdcY;
-      stats_bcid_tdc_error++;
-    }
-    m_oldBcidY = bcid;
-    m_oldTdcY = tdc;
-    y = pChips.get_strip(fecID, vmmID, chNo);
-  }
-
   // Calculate bcTime [us]
   double bcTime = bcid / pTime.bc_clock();
 
@@ -108,7 +107,13 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
   // Talk Vinnie: HIT time  = BCIDx25 + ADC*125/255 [ns]
   double chipTime = bcTime * 1000 + tdcTime;
 
-  StoreHits(x, y, adc, bcid, chipTime, overThresholdFlag);
+  if (overThresholdFlag || (adc >= pADCThreshold)) {
+    if (planeID == planeID_X) {
+      StoreX(strip, adc, bcid, chipTime);
+    } else if (planeID == planeID_Y) {
+      StoreY(strip, adc, bcid, chipTime);
+    }
+  }
 
   if (newEvent) {
     DTRACE(DEB, "\neventNr  %d\n", m_eventNr);
@@ -129,10 +134,10 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     DTRACE(DEB, "\tvmmID  %d\n", vmmID);
   }
   if (planeID == planeID_X) {
-    DTRACE(DEB, "\t\tx-channel %d (chNo  %d) - overThresholdFlag %d\n", x, chNo,
+    DTRACE(DEB, "\t\tx-channel %d (chNo  %d) - overThresholdFlag %d\n", strip, chNo,
            overThresholdFlag);
   } else if (planeID == planeID_Y) {
-    DTRACE(DEB, "\t\ty-channel %d (chNo  %d) - overThresholdFlag %d\n", y, chNo,
+    DTRACE(DEB, "\t\ty-channel %d (chNo  %d) - overThresholdFlag %d\n", strip, chNo,
            overThresholdFlag);
   } else {
     DTRACE(DEB, "\t\tPlane for vmmID %d not defined!\n", vmmID);
@@ -144,28 +149,24 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
   m_oldTriggerTimestamp_ns = triggerTimestamp_ns;
   m_oldFrameCounter = frameCounter;
   m_oldVmmID = vmmID;
-  return 0;
+  return true;
 }
 
 //====================================================================================================================
-void NMXClusterer::StoreHits(short x, short y, short adc, short bcid,
-                             float chipTime, bool overThresholdFlag) {
+void NMXClusterer::StoreX(uint16_t strip, short adc, short bcid, float chipTime) {
+  if (bcid < pAcqWin * pTime.bc_clock() / 40) {
+    m_hitsX.emplace_back(chipTime, strip, adc);
+  } else {
+    m_hitsOldX.emplace_back(chipTime, strip, adc);
+  }
+}
 
-  if ((adc >= pADCThreshold || overThresholdFlag)) {
-    if (x > -1) {
-      if (bcid < pAcqWin * pTime.bc_clock() / 40) {
-        m_hitsX.emplace_back(chipTime, x, adc);
-      } else {
-        m_hitsOldX.emplace_back(chipTime, x, adc);
-      }
-    } else if (y > -1) {
-      if (bcid < pAcqWin * pTime.bc_clock() / 40) {
-        m_hitsY.emplace_back(chipTime, y, adc);
-
-      } else {
-        m_hitsOldY.emplace_back(chipTime, y, adc);
-      }
-    }
+//====================================================================================================================
+void NMXClusterer::StoreY(uint16_t strip, short adc, short bcid, float chipTime) {
+  if (bcid < pAcqWin * pTime.bc_clock() / 40) {
+    m_hitsY.emplace_back(chipTime, strip, adc);
+  } else {
+    m_hitsOldY.emplace_back(chipTime, strip, adc);
   }
 }
 

@@ -61,13 +61,13 @@ public:
 	~NMXClusterer();
 
 	// Analyzing and storing the hits
-	int AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
+	bool AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
 			int vmmID, int chNo, int bcid, int tdc, int adc,
 			int overThresholdFlag);
-	void StoreHits(short x, short y, short adc, short bcid, float chipTime,
-			bool overThresholdFlag);
+	void StoreX(uint16_t strip, short adc, short bcid, float chipTime);
+    void StoreY(uint16_t strip, short adc, short bcid, float chipTime);
 
-	// Analyzing and storing the clusters
+  // Analyzing and storing the clusters
 	void AnalyzeClusters();
 	void AsyncClustererX();
 	void AsyncClustererY();
@@ -115,8 +115,8 @@ public:
 	uint64_t stats_bcid_tdc_error { 0 };
 	uint64_t stats_triggertime_wraps { 0 };
 
-	const int planeID_X { 0 };
-	const int planeID_Y { 1 };
+	const uint8_t planeID_X { 0 };
+	const uint8_t planeID_Y { 1 };
 
 private:
   	SRSTime pTime;
