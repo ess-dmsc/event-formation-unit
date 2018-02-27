@@ -8,6 +8,7 @@
 #include <future>   // async
 
 #include <gdgem/vmm2srs/SRSMappings.h>
+#include <gdgem/vmm2srs/SRSTime.h>
 
 using std::string;
 
@@ -50,8 +51,9 @@ using ClusterVector = std::vector<ClusterNMX>;
 
 class NMXClusterer {
 public:
-	NMXClusterer(int bc, int tac, int acqWin,
+	NMXClusterer(SRSTime time,
 				 SRSMappings chips,
+				 int acqWin,
 				 int adcThreshold, int minClusterSize,
 				 float deltaTimeHits, int deltaStripHits, float deltaTimeSpan,
 				 float deltaTimePlanes);
@@ -117,11 +119,10 @@ public:
 	const int planeID_Y { 1 };
 
 private:
-	int pBC;
-	int pTAC;
-	int pAcqWin;
+  	SRSTime pTime;
 	SRSMappings pChips;
 
+	int pAcqWin;
 	int pADCThreshold;
 	int pMinClusterSize;
 	float pDeltaTimeHits;

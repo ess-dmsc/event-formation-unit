@@ -12,20 +12,36 @@
 class NMXClustererTest : public TestBase {
 protected:
   virtual void SetUp() {
+    SRSTime time;
+    time.set_bc_clock(pBC);
+    time.set_tac_slope(pTAC);
+    time.set_trigger_resolution(pTriggerRes);
     SRSMappings chips;
     chips.define_plane(0, pXChips);
     chips.define_plane(1, pYChips);
-    nmxdata = new NMXClusterer(pBC, pTAC, pAcqWin, chips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
+    nmxdata = new NMXClusterer(time, chips,
+                               pAcqWin, pADCThreshold, pMinClusterSize,
+                               pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,
+                               pDeltaTimePlanes);
   }
 
   virtual void TearDown() {
     delete nmxdata;
   }
 
-    std::list<std::pair<uint16_t, uint16_t>> pXChips {{0, 0}, {0, 1}, {0, 6}, {0, 7}};
-    std::list<std::pair<uint16_t, uint16_t>> pYChips {{0, 10}, {0, 11}, {0, 14}, {0, 15}};
-	int pTAC = 60;
-	int pBC = 20;
+    ////////////////////////////////////////////////
+    // Hardware config should be part of TestData!!!
+    ////////////////////////////////////////////////
+    // Timing config
+    int pTAC = 60;
+    int pBC = 20;
+    double pTriggerRes = 3.125;
+    // Chip config
+    std::list<std::pair<uint16_t, uint16_t>> pXChips {{1, 0}, {1, 1}, {1, 6}, {1, 7}};
+    std::list<std::pair<uint16_t, uint16_t>> pYChips {{1, 10}, {1, 11}, {1, 14}, {1, 15}};
+
+
+    // Clustering params
 	int pAcqWin = 4000;
 	int pADCThreshold=0;
   	int pMinClusterSize = 3;

@@ -7,14 +7,16 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-NMXClusterer::NMXClusterer(int bc, int tac, int acqWin,
+NMXClusterer::NMXClusterer(SRSTime time,
 						   SRSMappings chips,
+						   int acqWin,
 						   int adcThreshold,
                            int minClusterSize, float deltaTimeHits,
                            int deltaStripHits, float deltaTimeSpan,
                            float deltaTimePlanes)
-    : pBC(bc), pTAC(tac), pAcqWin(acqWin),
+    : pTime(time),
 	  pChips(chips),
+	  pAcqWin(acqWin),
       pADCThreshold(adcThreshold), pMinClusterSize(minClusterSize),
       pDeltaTimeHits(deltaTimeHits), pDeltaStripHits(deltaStripHits),
       pDeltaTimeSpan(deltaTimeSpan), pDeltaTimePlanes(deltaTimePlanes),
@@ -29,7 +31,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
                               int adc, int overThresholdFlag) {
 
   bool newEvent = false;
-  double triggerTimestamp_ns = triggerTimestamp * 3.125;
+  double triggerTimestamp_ns = triggerTimestamp * pTime.trigger_resolution();
   double deltaTriggerTimestamp_ns = 0;
 
   if (m_oldTriggerTimestamp_ns != triggerTimestamp_ns) {
@@ -56,7 +58,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
   }
 
   if (newEvent &&
-      (deltaTriggerTimestamp_ns <= 1000 * 4096 * (1 / (double)pBC))) {
+      (deltaTriggerTimestamp_ns <= 1000 * 4096 / pTime.bc_clock())) {
     m_subsequentTrigger = true;
   }
 
@@ -64,7 +66,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     m_timeStamp_ms = m_timeStamp_ms + deltaTriggerTimestamp_ns * 0.000001;
   }
 
-  int planeID = pChips.get_plane(0, vmmID);
+  int planeID = pChips.get_plane(fecID, vmmID);
 
   int x = -1;
   int y = -1;
@@ -77,7 +79,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     }
     m_oldBcidX = bcid;
     m_oldTdcX = tdc;
-    x = pChips.get_strip(0, vmmID, chNo);
+    x = pChips.get_strip(fecID, vmmID, chNo);
   } else if (planeID == planeID_Y) {
     // Fix for entries with all zeros
     if (bcid == 0 && tdc == 0 && overThresholdFlag) {
@@ -87,11 +89,11 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     }
     m_oldBcidY = bcid;
     m_oldTdcY = tdc;
-    y = pChips.get_strip(0, vmmID, chNo);
+    y = pChips.get_strip(fecID, vmmID, chNo);
   }
 
   // Calculate bcTime [us]
-  double bcTime = bcid * (1 / (double)pBC);
+  double bcTime = bcid / pTime.bc_clock();
 
   // TDC time: pTAC * tdc value (8 bit)/ramp length
   // [ns]
@@ -100,7 +102,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
   // sources (like ADC)
   int tdcRebinned = (int)tdc / 8;
   tdc = tdcRebinned * 8;
-  double tdcTime = pTAC * (double)tdc / 255;
+  double tdcTime = pTime.tac_slope() * (double)tdc / 255;
 
   // Chip time: bcid plus tdc value
   // Talk Vinnie: HIT time  = BCIDx25 + ADC*125/255 [ns]
@@ -151,13 +153,13 @@ void NMXClusterer::StoreHits(short x, short y, short adc, short bcid,
 
   if ((adc >= pADCThreshold || overThresholdFlag)) {
     if (x > -1) {
-      if (bcid < pAcqWin * pBC / 40) {
+      if (bcid < pAcqWin * pTime.bc_clock() / 40) {
         m_hitsX.emplace_back(chipTime, x, adc);
       } else {
         m_hitsOldX.emplace_back(chipTime, x, adc);
       }
     } else if (y > -1) {
-      if (bcid < pAcqWin * pBC / 40) {
+      if (bcid < pAcqWin * pTime.bc_clock() / 40) {
         m_hitsY.emplace_back(chipTime, y, adc);
 
       } else {
@@ -493,7 +495,7 @@ void NMXClusterer::CorrectTriggerData(HitContainer &hits, HitContainer &oldHits,
 		const auto& itOldHitsBegin = oldHits.rend();
 		const auto& itOldHitsEnd = oldHits.rbegin();
 		if (itHitsBegin != itHitsEnd && itOldHitsBegin != itOldHitsEnd) {
-			float bcPeriod = 1000 * 4096 * (1 / (float) pBC);
+			float bcPeriod = 1000 * 4096 / static_cast<float>(pTime.bc_clock());
 			float timePrevious = std::get < 0 > (*itOldHitsEnd);
 			float timeNext = std::get < 0 > (*itHitsBegin) + bcPeriod;
 			float deltaTime = timeNext - timePrevious;

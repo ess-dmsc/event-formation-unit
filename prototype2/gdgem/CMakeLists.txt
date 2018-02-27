@@ -88,10 +88,12 @@ endif()
 
 set(NMXClustererTest_SRC
   vmm2srs/SRSMappings.cpp
+  vmm2srs/SRSTime.cpp
   dg_impl/NMXClusterer.cpp
   dg_impl/NMXClustererTest.cpp)
 set(NMXClustererTest_INC
   vmm2srs/SRSMappings.h
+  vmm2srs/SRSTime.h
   dg_impl/NMXClusterer.h
   dg_impl/TestData.h)
 create_test_executable(NMXClustererTest "")
