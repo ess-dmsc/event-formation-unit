@@ -7,6 +7,8 @@
 #include <vector>
 #include <future>   // async
 
+#include <gdgem/vmm2srs/SRSMappings.h>
+
 using std::string;
 
 struct ClusterNMX {
@@ -48,10 +50,11 @@ using ClusterVector = std::vector<ClusterNMX>;
 
 class NMXClusterer {
 public:
-	NMXClusterer(int bc, int tac, int acqWin, std::vector<int> xChips,
-			std::vector<int> yChips, int adcThreshold, int minClusterSize,
-			float deltaTimeHits, int deltaStripHits, float deltaTimeSpan,
-			float deltaTimePlanes);
+	NMXClusterer(int bc, int tac, int acqWin,
+				 SRSMappings chips,
+				 int adcThreshold, int minClusterSize,
+				 float deltaTimeHits, int deltaStripHits, float deltaTimeSpan,
+				 float deltaTimePlanes);
 
 	~NMXClusterer();
 
@@ -84,8 +87,8 @@ public:
 			float correctionTime);
 
 	// Helper methods that map channels to strips
-	int GetPlaneID(int chipID);
-	int GetChannel(std::vector<int> &chipIDs, int chipID, int channelID);
+//	int GetPlaneID(int chipID);
+//	int GetChannel(std::vector<int> &chipIDs, int chipID, int channelID);
 
 	int getNumClustersX() {
 		return m_clusterX.size();
@@ -117,8 +120,7 @@ private:
 	int pBC;
 	int pTAC;
 	int pAcqWin;
-	std::vector<int> pXChipIDs;
-	std::vector<int> pYChipIDs;
+	SRSMappings pChips;
 
 	int pADCThreshold;
 	int pMinClusterSize;

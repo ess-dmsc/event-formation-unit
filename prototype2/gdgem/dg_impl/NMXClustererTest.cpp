@@ -12,15 +12,18 @@
 class NMXClustererTest : public TestBase {
 protected:
   virtual void SetUp() {
-    nmxdata = new NMXClusterer(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
+    SRSMappings chips;
+    chips.define_plane(0, pXChips);
+    chips.define_plane(1, pYChips);
+    nmxdata = new NMXClusterer(pBC, pTAC, pAcqWin, chips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
   }
 
   virtual void TearDown() {
     delete nmxdata;
   }
 
-	std::vector<int> pXChips {0, 1, 6, 7};
-	std::vector<int> pYChips {10, 11, 14, 15};
+    std::list<std::pair<uint16_t, uint16_t>> pXChips {{0, 0}, {0, 1}, {0, 6}, {0, 7}};
+    std::list<std::pair<uint16_t, uint16_t>> pYChips {{0, 10}, {0, 11}, {0, 14}, {0, 15}};
 	int pTAC = 60;
 	int pBC = 20;
 	int pAcqWin = 4000;
@@ -57,29 +60,6 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323)
 	ASSERT_EQ(nmxdata->getNumClustersXY(), 2);
 	ASSERT_EQ(nmxdata->getNumClustersXY_uTPC(), 2);
 }
-
-TEST_F(NMXClustererTest, GetPlaneID)
-{
-  ASSERT_EQ(0, nmxdata->GetPlaneID(0));
-  ASSERT_EQ(0, nmxdata->GetPlaneID(1));
-  ASSERT_EQ(0, nmxdata->GetPlaneID(6));
-  ASSERT_EQ(0, nmxdata->GetPlaneID(7));
-
-  ASSERT_EQ(1, nmxdata->GetPlaneID(10));
-  ASSERT_EQ(1, nmxdata->GetPlaneID(11));
-  ASSERT_EQ(1, nmxdata->GetPlaneID(14));
-  ASSERT_EQ(1, nmxdata->GetPlaneID(15));
-
-  ASSERT_EQ(-1, nmxdata->GetPlaneID(42));
-}
-
-
-TEST_F(NMXClustererTest, GetChannel)
-{
-  ASSERT_EQ(0, nmxdata->GetChannel(pXChips, 0, 0));
-  ASSERT_EQ(-1, nmxdata->GetChannel(pXChips, 42, 0));
-}
-
 
 TEST_F(NMXClustererTest, FrameCounterError)
 {

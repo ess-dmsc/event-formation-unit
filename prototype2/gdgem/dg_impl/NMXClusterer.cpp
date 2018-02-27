@@ -7,16 +7,19 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-NMXClusterer::NMXClusterer(int bc, int tac, int acqWin, std::vector<int> xChips,
-                           std::vector<int> yChips, int adcThreshold,
+NMXClusterer::NMXClusterer(int bc, int tac, int acqWin,
+						   SRSMappings chips,
+						   int adcThreshold,
                            int minClusterSize, float deltaTimeHits,
                            int deltaStripHits, float deltaTimeSpan,
                            float deltaTimePlanes)
-    : pBC(bc), pTAC(tac), pAcqWin(acqWin), pXChipIDs(xChips), pYChipIDs(yChips),
+    : pBC(bc), pTAC(tac), pAcqWin(acqWin),
+	  pChips(chips),
       pADCThreshold(adcThreshold), pMinClusterSize(minClusterSize),
       pDeltaTimeHits(deltaTimeHits), pDeltaStripHits(deltaStripHits),
       pDeltaTimeSpan(deltaTimeSpan), pDeltaTimePlanes(deltaTimePlanes),
-      m_eventNr(0) {}
+      m_eventNr(0)
+{}
 
 NMXClusterer::~NMXClusterer() {}
 
@@ -61,7 +64,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     m_timeStamp_ms = m_timeStamp_ms + deltaTriggerTimestamp_ns * 0.000001;
   }
 
-  int planeID = GetPlaneID(vmmID);
+  int planeID = pChips.get_plane(0, vmmID);
 
   int x = -1;
   int y = -1;
@@ -74,7 +77,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     }
     m_oldBcidX = bcid;
     m_oldTdcX = tdc;
-    x = GetChannel(pXChipIDs, vmmID, chNo);
+    x = pChips.get_strip(0, vmmID, chNo);
   } else if (planeID == planeID_Y) {
     // Fix for entries with all zeros
     if (bcid == 0 && tdc == 0 && overThresholdFlag) {
@@ -84,7 +87,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
     }
     m_oldBcidY = bcid;
     m_oldTdcY = tdc;
-    y = GetChannel(pYChipIDs, vmmID, chNo);
+    y = pChips.get_strip(0, vmmID, chNo);
   }
 
   // Calculate bcTime [us]
@@ -566,31 +569,4 @@ void NMXClusterer::AsyncClustererX() {
 
 	DTRACE(DEB, "%d cluster in x\n", cntX);
 
-}
-
-
-//====================================================================================================================
-int NMXClusterer::GetPlaneID(int chipID) {
-  auto chip = std::find(begin(pXChipIDs), end(pXChipIDs), chipID);
-  if (chip != end(pXChipIDs)) {
-    return planeID_X;
-  } else {
-    auto chip = std::find(begin(pYChipIDs), end(pYChipIDs), chipID);
-    if (chip != end(pYChipIDs)) {
-      return planeID_Y;
-    } else {
-      return -1;
-    }
-  }
-}
-
-//====================================================================================================================
-int NMXClusterer::GetChannel(std::vector<int> &chipIDs, int chipID,
-                             int channelID) {
-  auto chip = std::find(begin(chipIDs), end(chipIDs), chipID);
-  if (chip != end(chipIDs)) {
-    return channelID + (chip - begin(chipIDs)) * 64;
-  } else {
-    return -1;
-  }
 }

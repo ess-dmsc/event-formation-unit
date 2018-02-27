@@ -87,9 +87,11 @@ endif()
 # Doros gdgem event algorithm
 
 set(NMXClustererTest_SRC
+  vmm2srs/SRSMappings.cpp
   dg_impl/NMXClusterer.cpp
   dg_impl/NMXClustererTest.cpp)
 set(NMXClustererTest_INC
+  vmm2srs/SRSMappings.h
   dg_impl/NMXClusterer.h
   dg_impl/TestData.h)
 create_test_executable(NMXClustererTest "")
