@@ -257,12 +257,12 @@ def get_release_pipeline()
                         ")
                     def custom_sh = "sh"
 
-                    sh """docker exec ${container_name} ${custom_sh} -c \"
-                        git clone \
-                            --branch ${env.BRANCH_NAME} \
-                            https://github.com/ess-dmsc/event-formation-unit.git \
-                            ${project}
-                    \""""
+                    // sh """docker exec ${container_name} ${custom_sh} -c \"
+                    //     git clone \
+                    //         --branch ${env.BRANCH_NAME} \
+                    //         https://github.com/ess-dmsc/event-formation-unit.git \
+                    //         ${project}
+                    // \""""
 
                     // sh """docker exec ${container_name} ${custom_sh} -c \"
                     //     mkdir build && \
@@ -345,11 +345,11 @@ node('docker') {
 
     def builders = [:]
 
-    for (x in images.keySet()) {
-        def image_key = x
-        builders[image_key] = get_pipeline(image_key)
-    }
-    builders['macOS'] = get_macos_pipeline()
+    // for (x in images.keySet()) {
+    //     def image_key = x
+    //     builders[image_key] = get_pipeline(image_key)
+    // }
+    // builders['macOS'] = get_macos_pipeline()
     builders['release-centos7'] = get_release_pipeline()
 
     parallel builders
