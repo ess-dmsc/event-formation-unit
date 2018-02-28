@@ -273,8 +273,7 @@ def get_release_pipeline()
                 \""""
 
                 sh """docker exec ${container_name} ${custom_sh} -c \"
-                    cd \${project}
-                    cd ${project} && \
+                    cd ${project}
                     BUILDSTR=$(git log --oneline | head -n 1 | awk '{print \$1}') && \
                     cd ../build && \
                     . ./activate_run.sh && \
