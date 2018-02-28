@@ -239,6 +239,81 @@ def get_macos_pipeline()
     }
 }
 
+def get_release_pipeline()
+{
+    // Build with release settings to archive artefacts.
+    return {
+        stage("release-centos7") {
+            try {
+                def image = docker.image(images[image_key]['name'])
+                def container = image.run("\
+                    --name ${base_container_name}-release-centos7 \
+                    --tty \
+                    --env http_proxy=${env.http_proxy} \
+                    --env https_proxy=${env.https_proxy} \
+                    --env local_conan_server=${env.local_conan_server} \
+                    ")
+                def custom_sh = "sh"
+
+                sh """docker exec ${container_name} ${custom_sh} -c \"
+                    git clone \
+                        --branch ${env.BRANCH_NAME} \
+                        https://github.com/ess-dmsc/event-formation-unit.git \
+                        ${project}
+                \""""
+
+                sh """docker exec ${container_name} ${custom_sh} -c \"
+                    mkdir build && \
+                    cd build && \
+                    conan remote add \
+                        --insert 0 \
+                        ${conan_remote} ${local_conan_server} && \
+                    conan install --build=outdated ../${project}
+                \""""
+
+                sh """docker exec ${container_name} ${custom_sh} -c \"
+                    cd ${project} && \
+                    BUILDSTR=$(git log --oneline | head -n 1 | awk '{print \$1}') && \
+                    cd ../build && \
+                    . ./activate_run.sh && \
+                    cmake --version && \
+                    cmake \
+                        -DCMAKE_BUILD_TYPE=Release \
+                        -DCMAKE_SKIP_BUILD_RPATH=ON \
+                        -DBUILDSTR=\$BUILDSTR \
+                        -DDUMPTOFILE=ON \
+                        ../${project}
+                \""""
+
+                sh """docker exec ${container_name} ${custom_sh} -c \"
+                    cd build && \
+                    . ./activate_run.sh && \
+                    make VERBOSE=ON -j4 && \
+                    make VERBOSE=ON -j4 runefu && \
+                    make VERBOSE=ON -j4 runtest
+                \""""
+
+                sh """docker exec ${container_name} ${custom_sh} -c \"
+                    mkdir -p archive/efu-centos7 && \
+                    cp -r build/bin /archive/efu-centos7 && \
+                    cp -r build/lib /archive/efu-centos7 && \
+                    cp -r build/licenses /archive/efu-centos7 && \
+                    cd archive && \
+                    tar czvf efu-centos7.tar.gz efu-centos7
+                \""""
+
+                sh "docker cp ${container_name}:/home/jenkins/archive/efu-centos7.tar.gz ."
+                archiveArtifacts "efu-centos7.tar.gz"
+            } catch(e) {
+                failure_function(e, "Unknown build failure for release-centos7")
+            } finally {
+                sh "docker stop ${base_container_name}-release-centos7"
+                sh "docker rm -f ${base_container_name}-release-centos7"
+            }
+        }
+    }
+}
+
 node('docker') {
 
     // Delete workspace when build is done
@@ -272,6 +347,7 @@ node('docker') {
         builders[image_key] = get_pipeline(image_key)
     }
     builders['macOS'] = get_macos_pipeline()
+    builders['release-centos7'] = get_release_pipeline()
 
     parallel builders
 }

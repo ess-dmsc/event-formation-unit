@@ -17,3 +17,7 @@ virtualrunenv
 [options]
 gtest:shared=True
 librdkafka:shared=True
+
+[imports]
+lib, * -> ./lib
+., LICENSE* -> ./licenses @ folder=True, ignore_case=True
