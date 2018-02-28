@@ -245,9 +245,9 @@ def get_release_pipeline()
     return {
         stage("release-centos7") {
             node('docker') {
+                def container_name = "${base_container_name}-release-centos7"
                 try {
                     def image = docker.image("essdmscdm/centos7-build-node:1.0.1")
-                    def container_name = "${base_container_name}-release-centos7"
                     def container = image.run("\
                         --name ${container_name} \
                         --tty \
