@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
         return -1;
       }
 
-      int readsize = (opts.buflen / readoutdatasize) * readoutdatasize;
+      unsigned int readsize = (opts.buflen / readoutdatasize) * readoutdatasize;
       assert(readsize <= 9000);
       int readsz;
 

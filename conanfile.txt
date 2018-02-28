@@ -9,7 +9,6 @@ cmake_installer/3.10.0@conan/stable
 
 [generators]
 cmake
-virtualbuildenv
 virtualrunenv
 
 [options]

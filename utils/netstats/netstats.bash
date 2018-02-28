@@ -13,5 +13,5 @@ do
   echo "efu.net.udp_rxerr $INERR $DATE"
   echo "efu.net.udp_rx $INDG $DATE" | nc $IP $PORT
   echo "efu.net.udp_rxperr $INERR $DATE" | nc $IP $PORT
-  sleep 1
+  sleep 2
 done
