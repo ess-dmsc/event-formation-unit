@@ -243,8 +243,8 @@ def get_release_pipeline()
 {
     // Build with release settings to archive artefacts.
     return {
-        node('docker') {
-            stage("release-centos7") {
+        stage("release-centos7") {
+            node('docker') {
                 try {
                     def image = docker.image("essdmscdm/centos7-build-node:1.0.1")
                     def container_name = "${base_container_name}-release-centos7"
@@ -264,48 +264,48 @@ def get_release_pipeline()
                             ${project}
                     \""""
 
-                    sh """docker exec ${container_name} ${custom_sh} -c \"
-                        mkdir build && \
-                        cd build && \
-                        conan remote add \
-                            --insert 0 \
-                            ${conan_remote} ${local_conan_server} && \
-                        conan install --build=outdated ../${project}
-                    \""""
-
-                    sh """docker exec ${container_name} ${custom_sh} -c \"
-                        cd ${project} && \
-                        BUILDSTR=$(git log --oneline | head -n 1 | awk '{print \$1}') && \
-                        cd ../build && \
-                        . ./activate_run.sh && \
-                        cmake --version && \
-                        cmake \
-                            -DCMAKE_BUILD_TYPE=Release \
-                            -DCMAKE_SKIP_BUILD_RPATH=ON \
-                            -DBUILDSTR=\$BUILDSTR \
-                            -DDUMPTOFILE=ON \
-                            ../${project}
-                    \""""
-
-                    sh """docker exec ${container_name} ${custom_sh} -c \"
-                        cd build && \
-                        . ./activate_run.sh && \
-                        make VERBOSE=ON -j4 && \
-                        make VERBOSE=ON -j4 runefu && \
-                        make VERBOSE=ON -j4 runtest
-                    \""""
-
-                    sh """docker exec ${container_name} ${custom_sh} -c \"
-                        mkdir -p archive/efu-centos7 && \
-                        cp -r build/bin /archive/efu-centos7 && \
-                        cp -r build/lib /archive/efu-centos7 && \
-                        cp -r build/licenses /archive/efu-centos7 && \
-                        cd archive && \
-                        tar czvf efu-centos7.tar.gz efu-centos7
-                    \""""
-
-                    sh "docker cp ${container_name}:/home/jenkins/archive/efu-centos7.tar.gz ."
-                    archiveArtifacts "efu-centos7.tar.gz"
+                    // sh """docker exec ${container_name} ${custom_sh} -c \"
+                    //     mkdir build && \
+                    //     cd build && \
+                    //     conan remote add \
+                    //         --insert 0 \
+                    //         ${conan_remote} ${local_conan_server} && \
+                    //     conan install --build=outdated ../${project}
+                    // \""""
+                    //
+                    // sh """docker exec ${container_name} ${custom_sh} -c \"
+                    //     cd ${project} && \
+                    //     BUILDSTR=$(git log --oneline | head -n 1 | awk '{print \$1}') && \
+                    //     cd ../build && \
+                    //     . ./activate_run.sh && \
+                    //     cmake --version && \
+                    //     cmake \
+                    //         -DCMAKE_BUILD_TYPE=Release \
+                    //         -DCMAKE_SKIP_BUILD_RPATH=ON \
+                    //         -DBUILDSTR=\$BUILDSTR \
+                    //         -DDUMPTOFILE=ON \
+                    //         ../${project}
+                    // \""""
+                    //
+                    // sh """docker exec ${container_name} ${custom_sh} -c \"
+                    //     cd build && \
+                    //     . ./activate_run.sh && \
+                    //     make VERBOSE=ON -j4 && \
+                    //     make VERBOSE=ON -j4 runefu && \
+                    //     make VERBOSE=ON -j4 runtest
+                    // \""""
+                    //
+                    // sh """docker exec ${container_name} ${custom_sh} -c \"
+                    //     mkdir -p archive/efu-centos7 && \
+                    //     cp -r build/bin /archive/efu-centos7 && \
+                    //     cp -r build/lib /archive/efu-centos7 && \
+                    //     cp -r build/licenses /archive/efu-centos7 && \
+                    //     cd archive && \
+                    //     tar czvf efu-centos7.tar.gz efu-centos7
+                    // \""""
+                    //
+                    // sh "docker cp ${container_name}:/home/jenkins/archive/efu-centos7.tar.gz ."
+                    // archiveArtifacts "efu-centos7.tar.gz"
                 } catch(e) {
                     failure_function(e, "Unknown build failure for release-centos7")
                 } finally {
