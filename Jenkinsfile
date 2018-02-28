@@ -239,7 +239,7 @@ def get_macos_pipeline()
     }
 }
 
-node('docker && dmbuild03.dm.esss.dk') {
+node('docker') {
 
     // Delete workspace when build is done
     cleanWs()
