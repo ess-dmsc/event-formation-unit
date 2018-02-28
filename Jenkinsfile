@@ -245,9 +245,10 @@ def get_release_pipeline()
     return {
         stage("release-centos7") {
             try {
-                def image = docker.image(images[image_key]['name'])
+                def image = docker.image("essdmscdm/centos7-build-node:1.0.1")
+                def container_name = "${base_container_name}-release-centos7"
                 def container = image.run("\
-                    --name ${base_container_name}-release-centos7 \
+                    --name ${container_name} \
                     --tty \
                     --env http_proxy=${env.http_proxy} \
                     --env https_proxy=${env.https_proxy} \
@@ -307,8 +308,8 @@ def get_release_pipeline()
             } catch(e) {
                 failure_function(e, "Unknown build failure for release-centos7")
             } finally {
-                sh "docker stop ${base_container_name}-release-centos7"
-                sh "docker rm -f ${base_container_name}-release-centos7"
+                sh "docker stop ${container_name}"
+                sh "docker rm -f ${container_name}"
             }
         }
     }
