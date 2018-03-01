@@ -47,6 +47,7 @@ struct DataModule {
   std::uint32_t TimeStampSeconds;
   std::uint32_t TimeStampSecondsFrac;
   std::uint16_t Channel;
+  std::uint16_t OversamplingFactor{1};
   std::vector<std::uint16_t> Data;
 };
 

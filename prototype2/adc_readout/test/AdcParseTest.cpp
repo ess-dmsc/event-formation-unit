@@ -120,7 +120,8 @@ TEST_F(AdcParsing, ParseCorrectPacket) {
 TEST_F(AdcParsingStream, ParseCorrectStreamPacket) {
   PacketData ResultingData;
   EXPECT_NO_THROW(ResultingData = parsePacket(Packet));
-  EXPECT_EQ(ResultingData.Modules.size(), 4u);
+  ASSERT_EQ(ResultingData.Modules.size(), 4u);
+  EXPECT_EQ(ResultingData.Modules.at(0).OversamplingFactor, 4);
 }
 
 TEST_F(AdcParsingStreamFail, LengthFail) {
