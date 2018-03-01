@@ -276,14 +276,14 @@ def get_release_pipeline()
 
                     sh """docker exec ${container_name} ${custom_sh} -c \"
                         cd ${project} && \
-                        BUILDSTR=\$(git log --oneline | head -n 1 | awk '{print \$1}') && \
+                        BUILDSTR=\\\$(git log --oneline | head -n 1 | awk '{print \\\$1}') && \
                         cd ../build && \
                         . ./activate_run.sh && \
                         cmake --version && \
                         cmake \
                             -DCMAKE_BUILD_TYPE=Release \
                             -DCMAKE_SKIP_BUILD_RPATH=ON \
-                            -DBUILDSTR=\$BUILDSTR \
+                            -DBUILDSTR=\\\$BUILDSTR \
                             -DDUMPTOFILE=ON \
                             ../${project}
                     \""""
