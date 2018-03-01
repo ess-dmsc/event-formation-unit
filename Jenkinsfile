@@ -28,7 +28,9 @@ base_container_name = "${project}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
 
 def failure_function(exception_obj, failureMessage) {
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
-    emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage + '\"\n\nCheck console output at $BUILD_URL to view the results.', recipientProviders: toEmails, subject: '${DEFAULT_SUBJECT}'
+    if (${env.BRANCH_NAME} == 'master') {
+      emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage + '\"\n\nCheck console output at $BUILD_URL to view the results.', recipientProviders: toEmails, subject: '${DEFAULT_SUBJECT}'
+    }
     slackSend color: 'danger', message: "event-formation-unit: " + failureMessage
     throw exception_obj
 }
