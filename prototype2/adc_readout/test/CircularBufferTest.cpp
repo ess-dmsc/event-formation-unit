@@ -38,33 +38,36 @@ TEST(GetEmpty, GetMultiple) {
   EXPECT_EQ(SomePtr.get(), nullptr);
 }
 
-//TEST(GetEmpty, WaitGetSingle) {
-//  ElementPtr<int> somePtr(nullptr);
-//  CircularBuffer<int> someBuffer(10);
-//  EXPECT_TRUE(someBuffer.wait_get_empty(somePtr, 1000));
-//  EXPECT_NE(somePtr.get(), nullptr);
-//}
-//
-//TEST(GetEmpty, WaitGetMultiple) {
-//  ElementPtr<int> somePtr(nullptr);
-//  int elements = 10;
-//  CircularBuffer<int> someBuffer(elements);
-//  for (int y = 0; y < elements; y++) {
-//    EXPECT_TRUE(someBuffer.tryGetEmpty(somePtr));
-//    EXPECT_NE(somePtr.get(), nullptr);
-//    someBuffer.tryPutData(std::move(somePtr));
-//    somePtr.reset();
-//  }
-//  somePtr.reset();
-//  std::int64_t uSecTimeout = 1000;
-//  std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-//  EXPECT_FALSE(someBuffer.wait_get_empty(somePtr, uSecTimeout));
-//  std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
-//  std::int64_t actualTimeout = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
-//  EXPECT_GE(actualTimeout, uSecTimeout);
-//  EXPECT_LE(actualTimeout, uSecTimeout * 2);
-//  EXPECT_EQ(somePtr.get(), nullptr);
-//}
+#if 0
+//These tests take too long
+TEST(GetEmpty, WaitGetSingle) {
+  ElementPtr<int> somePtr(nullptr);
+  CircularBuffer<int> someBuffer(10);
+  EXPECT_TRUE(someBuffer.wait_get_empty(somePtr, 1000));
+  EXPECT_NE(somePtr.get(), nullptr);
+}
+
+TEST(GetEmpty, WaitGetMultiple) {
+  ElementPtr<int> somePtr(nullptr);
+  int elements = 10;
+  CircularBuffer<int> someBuffer(elements);
+  for (int y = 0; y < elements; y++) {
+    EXPECT_TRUE(someBuffer.tryGetEmpty(somePtr));
+    EXPECT_NE(somePtr.get(), nullptr);
+    someBuffer.tryPutData(std::move(somePtr));
+    somePtr.reset();
+  }
+  somePtr.reset();
+  std::int64_t uSecTimeout = 1000;
+  std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+  EXPECT_FALSE(someBuffer.wait_get_empty(somePtr, uSecTimeout));
+  std::chrono::high_resolution_clock::time_point t2 = std::chrono::high_resolution_clock::now();
+  std::int64_t actualTimeout = std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count();
+  EXPECT_GE(actualTimeout, uSecTimeout);
+  EXPECT_LE(actualTimeout, uSecTimeout * 2);
+  EXPECT_EQ(somePtr.get(), nullptr);
+}
+#endif
 
 TEST(PutElem, PutOne) {
   ElementPtr<int> SomePtr(nullptr);
