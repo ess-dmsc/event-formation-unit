@@ -84,28 +84,28 @@ void AdcReadout::addParserError(ParserException::Type ExceptionType) {
     case ParserException::Type::UNKNOWN:
       ++AdcStats.parser_errors_unknown;
       break;
-    case ParserException::Type::T_FEEDF00D:
+    case ParserException::Type::TRAILER_FEEDF00D:
       ++AdcStats.parser_errors_feedf00d;
       break;
-    case ParserException::Type::T_0x55:
+    case ParserException::Type::TRAILER_0x55:
       ++AdcStats.parser_errors_filler;
       break;
-    case ParserException::Type::D_BEEFCAFE:
+    case ParserException::Type::DATA_BEEFCAFE:
       ++AdcStats.parser_errors_beefcafe;
       break;
-    case ParserException::Type::D_LENGTH:
+    case ParserException::Type::DATA_LENGTH:
       ++AdcStats.parser_errors_dlength;
       break;
-    case ParserException::Type::D_ABCD:
+    case ParserException::Type::DATA_ABCD:
       ++AdcStats.parser_errors_abcd;
       break;
-    case ParserException::Type::H_LENGTH:
+    case ParserException::Type::HEADER_LENGTH:
       ++AdcStats.parser_errors_hlength;
       break;
-    case ParserException::Type::H_TYPE:
+    case ParserException::Type::HEADER_TYPE:
       ++AdcStats.parser_errors_type;
       break;
-    case ParserException::Type::I_LENGTH:
+    case ParserException::Type::IDLE_LENGTH:
       ++AdcStats.parser_errors_ilength;
       break;
     default:

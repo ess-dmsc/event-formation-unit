@@ -16,12 +16,66 @@ public:
   }
   virtual void SetUp() {
     std::string PacketPath = TEST_PACKET_PATH;
-    std::ifstream PacketFile(PacketPath, std::ios::binary);
+    std::ifstream PacketFile(PacketPath + "test_packet_1.dat", std::ios::binary);
     ASSERT_TRUE(PacketFile.good());
     PacketFile.read(reinterpret_cast<char*>(&Packet.Data), 1470);
     ASSERT_TRUE(PacketFile.good());
     Packet.Length = 1470;
   }
+  InData Packet;
+};
+
+class AdcParsingIdle : public ::testing::Test {
+public:
+  static void SetUpTestCas() {
+    
+  }
+  virtual void SetUp() {
+    std::string PacketPath = TEST_PACKET_PATH;
+    std::ifstream PacketFile(PacketPath + "test_packet_idle.dat", std::ios::binary);
+    ASSERT_TRUE(PacketFile.good());
+    PacketFile.read(reinterpret_cast<char*>(&Packet.Data), 22);
+    ASSERT_TRUE(PacketFile.good());
+    Packet.Length = 22;
+  }
+  InData Packet;
+};
+
+class AdcParsingStream : public ::testing::Test {
+public:
+  static void SetUpTestCas() {
+    
+  }
+  virtual void SetUp() {
+    std::string PacketPath = TEST_PACKET_PATH;
+    std::ifstream PacketFile(PacketPath + "test_packet_stream.dat", std::ios::binary);
+    ASSERT_TRUE(PacketFile.good());
+    PacketFile.read(reinterpret_cast<char*>(&Packet.Data), 1470);
+    ASSERT_TRUE(PacketFile.good());
+    Packet.Length = 1470;
+  }
+  InData Packet;
+};
+
+class AdcParsingStreamFail : public ::testing::Test {
+public:
+  static void SetUpTestCas() {
+    
+  }
+  virtual void SetUp() {
+    std::string PacketPath = TEST_PACKET_PATH;
+    std::ifstream PacketFile(PacketPath + "test_packet_stream.dat", std::ios::binary);
+    ASSERT_TRUE(PacketFile.good());
+    PacketFile.read(reinterpret_cast<char*>(&Packet.Data), 1470);
+    ASSERT_TRUE(PacketFile.good());
+    Packet.Length = 1470;
+    Header = reinterpret_cast<PacketHeader*>(Packet.Data);
+    StreamHead = reinterpret_cast<StreamHeader*>(Packet.Data + sizeof(PacketHeader));
+    BEEFCAFE = Packet.Data + 1470 - 8;
+  }
+  std::uint8_t *BEEFCAFE;
+  PacketHeader *Header;
+  StreamHeader *StreamHead;
   InData Packet;
 };
 
@@ -61,6 +115,77 @@ TEST_F(AdcParsing, ParseCorrectPacket) {
   PacketData ResultingData;
   EXPECT_NO_THROW(ResultingData = parsePacket(Packet));
   EXPECT_EQ(ResultingData.Modules.size(), 1u);
+}
+
+TEST_F(AdcParsingStream, ParseCorrectStreamPacket) {
+  PacketData ResultingData;
+  EXPECT_NO_THROW(ResultingData = parsePacket(Packet));
+  EXPECT_EQ(ResultingData.Modules.size(), 4u);
+}
+
+TEST_F(AdcParsingStreamFail, LengthFail) {
+  StreamHead->fixEndian();
+  StreamHead->Length = 500;
+  StreamHead->fixEndian();
+  EXPECT_THROW(parsePacket(Packet), ParserException);
+}
+
+TEST_F(AdcParsingStreamFail, ABCDFail) {
+  StreamHead->fixEndian();
+  StreamHead->MagicValue = 0xCDAB;
+  StreamHead->fixEndian();
+  EXPECT_THROW(parsePacket(Packet), ParserException);
+}
+
+TEST_F(AdcParsingStreamFail, HeaderLengthFail) {
+  Packet.Length = sizeof(PacketHeader) + 10;
+  Header->fixEndian();
+  Header->ReadoutLength = sizeof(PacketHeader) + 8;
+  Header->fixEndian();
+  EXPECT_THROW(parsePacket(Packet), ParserException);
+}
+
+TEST_F(AdcParsingStreamFail, BEEFCAFEFail) {
+  *BEEFCAFE = 0X00;
+  EXPECT_THROW(parsePacket(Packet), ParserException);
+}
+
+TEST_F(AdcParsingIdle, ParseCorrectIdlePacket) {
+  PacketData ResultingData;
+  EXPECT_NO_THROW(ResultingData = parsePacket(Packet));
+  EXPECT_EQ(ResultingData.Modules.size(), 0u);
+  EXPECT_EQ(ResultingData.IdleTimeStampSeconds, 0xAAAA0000);
+  EXPECT_EQ(ResultingData.IdleTimeStampSecondsFrac, 0x0000AAAA);
+}
+
+TEST(AdcStreamSetting, IncorrectFirstByte) {
+  std::uint16_t Setting = 0x31f4;
+  EXPECT_THROW(parseStreamSettings(Setting), ParserException);
+}
+
+TEST(AdcStreamSetting, IncorrectOversampling1) {
+  std::uint16_t Setting = 0x33f5;
+  EXPECT_THROW(parseStreamSettings(Setting), ParserException);
+}
+
+TEST(AdcStreamSetting, IncorrectOversampling2) {
+  std::uint16_t Setting = 0x3331;
+  EXPECT_THROW(parseStreamSettings(Setting), ParserException);
+}
+
+TEST(AdcStreamSetting, IncorrectOversampling3) {
+  std::uint16_t Setting = 0x33f0;
+  EXPECT_THROW(parseStreamSettings(Setting), ParserException);
+}
+
+TEST(AdcStreamSetting, CorrectSetting) {
+  std::uint16_t Setting = 0x33f4;
+  EXPECT_NO_THROW(parseStreamSettings(Setting));
+  auto CurrentSetting = parseStreamSettings(Setting);
+  EXPECT_EQ(CurrentSetting.OversamplingFactor, 4);
+  EXPECT_EQ(CurrentSetting.ChannelsActive.size(), 4);
+  std::vector<int> ExpectedChannels{0, 1, 2, 3};
+  EXPECT_EQ(CurrentSetting.ChannelsActive, ExpectedChannels);
 }
 
 TEST(AdcHeadParse, IdleHeadTest) {
@@ -106,6 +231,26 @@ TEST(AdcHeadParse, IdleDataFail) {
   InData Packet;
   Packet.Length = 2;
   EXPECT_THROW(parseIdle(Packet, 0), ParserException);
+}
+
+TEST(ExceptionTypes, ExceptionTypeTest) {
+  ParserException::Type SomeType(ParserException::Type::TRAILER_FEEDF00D);
+  ParserException SomeException(SomeType);
+  EXPECT_EQ(SomeException.getErrorType(), SomeType);
+}
+
+TEST(ExceptionTypes, InitWithString) {
+  std::string SomeTestString = "Something";
+  ParserException SomeException(SomeTestString);
+  EXPECT_STREQ(SomeException.what(), SomeTestString.c_str());
+  EXPECT_EQ(SomeException.getErrorType(), ParserException::Type::UNKNOWN);
+}
+
+TEST(ExceptionTypes, IncorrectExceptionType) {
+  int ExceptionTypeInt = 4242;
+  ParserException SomeException((ParserException::Type(ExceptionTypeInt)));
+  std::string ExpectedExceptionString("ParserException error string not defined for exception of type " + std::to_string(ExceptionTypeInt));
+  EXPECT_STREQ(SomeException.what(), ExpectedExceptionString.c_str());
 }
 
 TEST(AdcHeadParse, UnknownHeadTest) {
@@ -243,5 +388,4 @@ public:
 TEST_F(AdcFillerParsing2, IncorrectFillerLength) {
   EXPECT_THROW(parseTrailer(Packet, 0), ParserException);
 }
-
 

@@ -18,14 +18,21 @@ class ParserException : public std::runtime_error {
 public:
   enum class Type {
     UNKNOWN,
-    T_FEEDF00D,
-    T_0x55,
-    D_BEEFCAFE,
-    D_LENGTH,
-    D_ABCD,
-    H_LENGTH,
-    H_TYPE,
-    I_LENGTH,
+    TRAILER_FEEDF00D,
+    TRAILER_0x55,
+    DATA_BEEFCAFE,
+    DATA_LENGTH,
+    DATA_ABCD,
+    STREAM_HEADER,
+    STREAM_ABCD,
+    STREAM_TYPE,
+    STREAM_OVERSAMPLING,
+    STREAM_CHANNELS_MASK,
+    STREAM_SIZE,
+    STREAM_BEEFCAFE,
+    HEADER_LENGTH,
+    HEADER_TYPE,
+    IDLE_LENGTH,
   };
   ParserException(std::string ErrorStr);
   ParserException(Type ErrorType);
@@ -48,7 +55,7 @@ struct AdcData {
   std::int32_t FillerStart = 0;
 };
 
-enum class PacketType {Idle, Data, Unknown};
+enum class PacketType {Idle, Data, Stream, Unknown};
 
 struct PacketData {
   std::uint16_t GlobalCount;
@@ -64,6 +71,7 @@ struct HeaderInfo {
   std::uint16_t GlobalCount;
   std::uint16_t ReadoutCount;
   std::int32_t DataStart = 0;
+  std::uint16_t TypeValue; //Used only by streaming data
 };
 
 struct TrailerInfo {
@@ -74,6 +82,11 @@ struct IdleInfo {
   std::uint32_t TimeStampSeconds = 0;
   std::uint32_t TimeStampSecondsFrac = 0;
   std::int32_t FillerStart = 0;
+};
+
+struct StreamSetting {
+  std::vector<int> ChannelsActive;
+  int OversamplingFactor{1};
 };
 
 #pragma pack(push, 2)
@@ -108,6 +121,19 @@ struct DataHeader {
   }
 };
 
+struct StreamHeader {
+  std::uint16_t MagicValue;
+  std::uint16_t Length;
+  std::uint32_t TimeStampSeconds;
+  std::uint32_t TimeStampSecondsFrac;
+  void fixEndian() {
+    MagicValue = ntohs(MagicValue);
+    Length = ntohs(Length);
+    TimeStampSeconds = ntohl(TimeStampSeconds);
+    TimeStampSecondsFrac = ntohl(TimeStampSecondsFrac);
+  }
+};
+
 struct IdleHeader {
   std::uint32_t TimeStampSeconds;
   std::uint32_t TimeStampSecondsFrac;
@@ -120,7 +146,10 @@ struct IdleHeader {
 
 PacketData parsePacket(const InData &Packet);
 AdcData parseData(const InData &Packet, std::uint32_t StartByte);
+AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte, std::uint16_t TypeValue);
 HeaderInfo parseHeader(const InData &Packet);
 TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte);
 IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte);
+StreamSetting parseStreamSettings(const std::uint16_t &SettingsRaw);
+
 
