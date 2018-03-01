@@ -261,7 +261,7 @@ def get_release_pipeline()
                         git clone \
                             --branch ${env.BRANCH_NAME} \
                             https://github.com/ess-dmsc/event-formation-unit.git \
-                            efu
+                            ${project}
                     \""""
 
                     sh """docker exec ${container_name} ${custom_sh} -c \"
@@ -270,11 +270,11 @@ def get_release_pipeline()
                         conan remote add \
                             --insert 0 \
                             ${conan_remote} ${local_conan_server} && \
-                        conan install --build=outdated ../efu
+                        conan install --build=outdated ../${project}
                     \""""
 
                     sh """docker exec ${container_name} ${custom_sh} -c \"
-                        cd efu && \
+                        cd ${project} && \
                         BUILDSTR=$(git log --oneline | head -n 1 | awk '{print \$1}') && \
                         cd ../build && \
                         . ./activate_run.sh && \
@@ -284,7 +284,7 @@ def get_release_pipeline()
                             -DCMAKE_SKIP_BUILD_RPATH=ON \
                             -DBUILDSTR=\$BUILDSTR \
                             -DDUMPTOFILE=ON \
-                            ../efu
+                            ../${project}
                     \""""
 
                     sh """docker exec ${container_name} ${custom_sh} -c \"
