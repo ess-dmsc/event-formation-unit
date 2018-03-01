@@ -6,15 +6,16 @@
  */
 
 #include <gtest/gtest.h>
-#include "../AdcReadout.h"
+#include "../AdcReadoutCore.h"
 #include "TestUDPServer.h"
 #include <random>
 
-class AdcReadoutStandIn : public AdcReadout {
+class AdcReadoutStandIn : public AdcReadoutCore {
 public:
-  AdcReadoutStandIn(BaseSettings Settings) : AdcReadout(Settings) {};
+  AdcReadoutStandIn(BaseSettings Settings) : AdcReadoutCore(Settings, AdcSettings) {};
   using Detector::Threads;
-  using AdcReadout::toParsingQueue;
+  using AdcReadoutCore::toParsingQueue;
+  AdcSettingsStruct AdcSettings;
 };
 
 class AdcReadoutTest : public ::testing::Test {

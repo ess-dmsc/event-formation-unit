@@ -4,16 +4,21 @@ project("AdcReadout" LANGUAGES CXX C)
 
 include_directories(${CMAKE_SOURCE_DIR})
 
-set(AdcReadout_SRC
-  AdcReadout.cpp
+set(AdcReadoutCore_SRC
+  AdcReadoutCore.cpp
   AdcParse.cpp
   PeakFinder.cpp
   AdcDataProcessor.cpp
   SampleProcessing.cpp
 )
 
-set(AdcReadout_INC
-  AdcReadout.h
+set(AdcReadout_SRC
+  AdcReadout.cpp
+  ${AdcReadoutCore_SRC}
+)
+
+set(AdcReadoutCore_INC
+  AdcReadoutCore.h
   AdcParse.h
   AdcBufferElements.h
   atomicops.h
@@ -22,6 +27,11 @@ set(AdcReadout_INC
   PeakFinder.h
   AdcDataProcessor.h
   SampleProcessing.h
+  AdcSettings.h
+)
+
+set(AdcReadout_INC
+  ${AdcReadoutCore_INC}
 )
 
 create_module(AdcReadout "")
@@ -39,11 +49,12 @@ set(AdcReadoutTest_SRC
   test/PeakFinderTest.cpp
   test/AdcDataProcessorTest.cpp
   test/SampleProcessingTest.cpp
-  ${AdcReadout_SRC})
+  test/CLIArgumentsTest.cpp
+  ${AdcReadoutCore_SRC})
 
 set(AdcReadoutTest_INC
   test/TestUDPServer.h
-  ${AdcReadout_INC}
+  ${AdcReadoutCore_INC}
 )
 
 find_package(ASIO)

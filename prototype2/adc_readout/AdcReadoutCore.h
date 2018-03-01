@@ -14,13 +14,14 @@
 #include "AdcBufferElements.h"
 #include "AdcParse.h"
 #include "PeakFinder.h"
+#include "AdcSettings.h"
 
-class AdcReadout : public Detector {
+class AdcReadoutCore : public Detector {
 public:
-  AdcReadout(BaseSettings Settings);
-  AdcReadout(const AdcReadout&) = delete;
-  AdcReadout(const AdcReadout&&) = delete;
-  ~AdcReadout() = default;
+  AdcReadoutCore(BaseSettings Settings, AdcSettingsStruct &AdcSettings);
+  AdcReadoutCore(const AdcReadoutCore&) = delete;
+  AdcReadoutCore(const AdcReadoutCore&&) = delete;
+  ~AdcReadoutCore() = default;
 protected:
   void inputThread();
   void parsingThread();
@@ -53,11 +54,5 @@ protected:
   void addParserError(ParserException::Type ExceptionType);
   
   std::shared_ptr<Producer> ProducerPtr;
-};
-
-class ADC_Readout_Factory : public DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings Settings) {
-    return std::shared_ptr<Detector>(new AdcReadout(Settings));
-  }
+  AdcSettingsStruct &AdcSettings;
 };

@@ -11,9 +11,6 @@
 
 class AdcParsing : public ::testing::Test {
 public:
-  static void SetUpTestCas() {
-    
-  }
   virtual void SetUp() {
     std::string PacketPath = TEST_PACKET_PATH;
     std::ifstream PacketFile(PacketPath + "test_packet_1.dat", std::ios::binary);
@@ -27,9 +24,6 @@ public:
 
 class AdcParsingIdle : public ::testing::Test {
 public:
-  static void SetUpTestCas() {
-    
-  }
   virtual void SetUp() {
     std::string PacketPath = TEST_PACKET_PATH;
     std::ifstream PacketFile(PacketPath + "test_packet_idle.dat", std::ios::binary);
@@ -43,9 +37,6 @@ public:
 
 class AdcParsingStream : public ::testing::Test {
 public:
-  static void SetUpTestCas() {
-    
-  }
   virtual void SetUp() {
     std::string PacketPath = TEST_PACKET_PATH;
     std::ifstream PacketFile(PacketPath + "test_packet_stream.dat", std::ios::binary);
@@ -59,9 +50,6 @@ public:
 
 class AdcParsingStreamFail : public ::testing::Test {
 public:
-  static void SetUpTestCas() {
-    
-  }
   virtual void SetUp() {
     std::string PacketPath = TEST_PACKET_PATH;
     std::ifstream PacketFile(PacketPath + "test_packet_stream.dat", std::ios::binary);
@@ -122,6 +110,12 @@ TEST_F(AdcParsingStream, ParseCorrectStreamPacket) {
   EXPECT_NO_THROW(ResultingData = parsePacket(Packet));
   ASSERT_EQ(ResultingData.Modules.size(), 4u);
   EXPECT_EQ(ResultingData.Modules.at(0).OversamplingFactor, 4);
+  std::uint32_t ExpectedTimeStampSeconds = 101;
+  std::uint32_t ExpectedTimeStampSecondsFrac = 22974588;
+  for (auto &Module : ResultingData.Modules) {
+    EXPECT_EQ(Module.TimeStampSeconds, ExpectedTimeStampSeconds);
+    EXPECT_EQ(Module.TimeStampSecondsFrac, ExpectedTimeStampSecondsFrac);
+  }
 }
 
 TEST_F(AdcParsingStreamFail, LengthFail) {

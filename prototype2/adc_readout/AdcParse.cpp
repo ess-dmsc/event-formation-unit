@@ -132,6 +132,8 @@ AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte, std::uint
     ReturnData.Modules.emplace_back(DataModule());
     ReturnData.Modules.at(i).Data.resize(ElementsPerChannel);
     ReturnData.Modules.at(i).OversamplingFactor = CurrentSettings.OversamplingFactor;
+    ReturnData.Modules.at(i).TimeStampSeconds = Header.TimeStampSeconds;
+    ReturnData.Modules.at(i).TimeStampSecondsFrac = Header.TimeStampSecondsFrac;
   }
   if (StartByte + Header.Length + 4 != Packet.Length) {
     throw ParserException(ParserException::Type::STREAM_SIZE);
