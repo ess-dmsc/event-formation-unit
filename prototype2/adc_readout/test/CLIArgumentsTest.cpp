@@ -22,7 +22,7 @@ TEST_F(CLITesting, DefaultValuesTest) {
   std::vector<char*> CArgs;
   CArgs.reserve(TestArguments.size());
   
-  for (int i = 0; i < TestArguments.size(); ++i) {
+  for (size_t i = 0; i < TestArguments.size(); ++i) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   TestApp.parse(CArgs.size(), &CArgs[0]);
@@ -37,7 +37,7 @@ TEST_F(CLITesting, EnableStreaming) {
   std::vector<char*> CArgs;
   CArgs.reserve(TestArguments.size());
   
-  for (int i = 0; i < TestArguments.size(); ++i) {
+  for (size_t i = 0; i < TestArguments.size(); ++i) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   TestApp.parse(CArgs.size(), &CArgs[0]);
@@ -49,7 +49,7 @@ TEST_F(CLITesting, EnablePeakDetect) {
   std::vector<char*> CArgs;
   CArgs.reserve(TestArguments.size());
   
-  for (int i = 0; i < TestArguments.size(); ++i) {
+  for (size_t i = 0; i < TestArguments.size(); ++i) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   TestApp.parse(CArgs.size(), &CArgs[0]);
@@ -61,7 +61,7 @@ TEST_F(CLITesting, MeanOfSamples) {
   std::vector<char*> CArgs;
   CArgs.reserve(TestArguments.size());
   
-  for (int i = 0; i < TestArguments.size(); ++i) {
+  for (size_t i = 0; i < TestArguments.size(); ++i) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   TestApp.parse(CArgs.size(), &CArgs[0]);
@@ -73,7 +73,7 @@ TEST_F(CLITesting, MeanOfSamplesFail1) {
   std::vector<char*> CArgs;
   CArgs.reserve(TestArguments.size());
   
-  for (int i = 0; i < TestArguments.size(); ++i) {
+  for (size_t i = 0; i < TestArguments.size(); ++i) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   EXPECT_THROW(TestApp.parse(CArgs.size(), &CArgs[0]), CLI::ParseError);
@@ -84,7 +84,7 @@ TEST_F(CLITesting, MeanOfSamplesFail2) {
   std::vector<char*> CArgs;
   CArgs.reserve(TestArguments.size());
   
-  for (int i = 0; i < TestArguments.size(); ++i) {
+  for (size_t i = 0; i < TestArguments.size(); ++i) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   EXPECT_THROW(TestApp.parse(CArgs.size(), &CArgs[0]), CLI::ParseError);
@@ -95,7 +95,7 @@ TEST_F(CLITesting, MeanOfSamplesFail3) {
   std::vector<char*> CArgs;
   CArgs.reserve(TestArguments.size());
   
-  for (int i = 0; i < TestArguments.size(); ++i) {
+  for (size_t i = 0; i < TestArguments.size(); ++i) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   EXPECT_THROW(TestApp.parse(CArgs.size(), &CArgs[0]), CLI::ParseError);
@@ -106,7 +106,7 @@ TEST_F(CLITesting, TimeStampLocSuccess1) {
   std::vector<char*> CArgs;
   CArgs.reserve(TestArguments.size());
   
-  for (int i = 0; i < TestArguments.size(); ++i) {
+  for (size_t i = 0; i < TestArguments.size(); ++i) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   EXPECT_NO_THROW(TestApp.parse(CArgs.size(), &CArgs[0]));
@@ -117,7 +117,7 @@ TEST_F(CLITesting, TimeStampLocSuccess2) {
   std::vector<char*> CArgs;
   CArgs.reserve(TestArguments.size());
   
-  for (int i = 0; i < TestArguments.size(); ++i) {
+  for (size_t i = 0; i < TestArguments.size(); ++i) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   EXPECT_NO_THROW(TestApp.parse(CArgs.size(), &CArgs[0]));
@@ -128,7 +128,7 @@ TEST_F(CLITesting, TimeStampLocSuccess3) {
   std::vector<char*> CArgs;
   CArgs.reserve(TestArguments.size());
   
-  for (int i = 0; i < TestArguments.size(); ++i) {
+  for (size_t i = 0; i < TestArguments.size(); ++i) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   EXPECT_NO_THROW(TestApp.parse(CArgs.size(), &CArgs[0]));
@@ -139,7 +139,7 @@ TEST_F(CLITesting, TimeStampLocFail) {
   std::vector<char*> CArgs;
   CArgs.reserve(TestArguments.size());
   
-  for (int i = 0; i < TestArguments.size(); ++i) {
+  for (size_t i = 0; i < TestArguments.size(); ++i) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   EXPECT_THROW(TestApp.parse(CArgs.size(), &CArgs[0]), CLI::ParseError);

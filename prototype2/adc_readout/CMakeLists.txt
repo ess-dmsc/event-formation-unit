@@ -10,6 +10,7 @@ set(AdcReadoutCore_SRC
   PeakFinder.cpp
   AdcDataProcessor.cpp
   SampleProcessing.cpp
+  AdcSettings.cpp
 )
 
 set(AdcReadout_SRC

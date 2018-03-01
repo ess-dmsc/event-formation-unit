@@ -149,8 +149,8 @@ TEST_F(AdcParsingIdle, ParseCorrectIdlePacket) {
   PacketData ResultingData;
   EXPECT_NO_THROW(ResultingData = parsePacket(Packet));
   EXPECT_EQ(ResultingData.Modules.size(), 0u);
-  EXPECT_EQ(ResultingData.IdleTimeStampSeconds, 0xAAAA0000);
-  EXPECT_EQ(ResultingData.IdleTimeStampSecondsFrac, 0x0000AAAA);
+  EXPECT_EQ(ResultingData.IdleTimeStampSeconds, 0xAAAA0000u);
+  EXPECT_EQ(ResultingData.IdleTimeStampSecondsFrac, 0x0000AAAAu);
 }
 
 TEST(AdcStreamSetting, IncorrectFirstByte) {
@@ -178,7 +178,7 @@ TEST(AdcStreamSetting, CorrectSetting) {
   EXPECT_NO_THROW(parseStreamSettings(Setting));
   auto CurrentSetting = parseStreamSettings(Setting);
   EXPECT_EQ(CurrentSetting.OversamplingFactor, 4);
-  EXPECT_EQ(CurrentSetting.ChannelsActive.size(), 4);
+  EXPECT_EQ(CurrentSetting.ChannelsActive.size(), 4u);
   std::vector<int> ExpectedChannels{0, 1, 2, 3};
   EXPECT_EQ(CurrentSetting.ChannelsActive, ExpectedChannels);
 }

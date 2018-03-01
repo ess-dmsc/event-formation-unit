@@ -219,7 +219,7 @@ StreamSetting parseStreamSettings(const std::uint16_t &SettingsRaw) {
   if ((ActiveChannels.count() == 4 and 4 != OversamplingSetting) or (ActiveChannels.count() == 2 and OversamplingSetting < 2)) {
     throw ParserException(ParserException::Type::STREAM_CHANNELS_MASK);
   }
-  for (int i = 0; i < ActiveChannels.size(); i++) {
+  for (size_t i = 0; i < ActiveChannels.size(); i++) {
     if (ActiveChannels.test(ActiveChannels.size() - 1 - i)){
       ReturnSetting.ChannelsActive.emplace_back(i);
     }

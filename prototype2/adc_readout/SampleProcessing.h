@@ -25,10 +25,10 @@ class ChannelProcessing {
 public:
   ChannelProcessing();
   ProcessedSamples operator()(const DataModule &Samples);
-  void setMeanOfSamples(unsigned int NrOfSamples);
+  void setMeanOfSamples(int NrOfSamples);
   void reset();
 private:
-  unsigned int MeanOfNrOfSamples{1};
+  int MeanOfNrOfSamples{1};
   int SumOfSamples{0};
   int NrOfSamplesSummed{0};
   std::uint64_t TimeStampOfFirstSample;
@@ -39,7 +39,7 @@ class SampleProcessing : public AdcDataProcessor {
 public:
   SampleProcessing(std::shared_ptr<Producer> Prod);
   virtual void operator()(const PacketData &Data) override;
-  void setMeanOfSamples(unsigned int NrOfSamples);
+  void setMeanOfSamples(int NrOfSamples);
 protected:
   void serializeData(const ProcessedSamples &Data) const;
   void transmitData(const std::uint8_t &DataPtr, const size_t Size) const;

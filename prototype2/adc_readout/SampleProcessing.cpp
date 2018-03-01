@@ -14,7 +14,7 @@ ChannelProcessing::ChannelProcessing() {
 ProcessedSamples ChannelProcessing::operator()(const DataModule &Samples) {
 //  int SampleCounter = 0;
   ProcessedSamples ReturnSamples;
-  for (int i = 0; i < Samples.Data.size(); i++) {
+  for (size_t i = 0; i < Samples.Data.size(); i++) {
     SumOfSamples += Samples.Data.at(i);
     NrOfSamplesSummed++;
     if (NrOfSamplesSummed == MeanOfNrOfSamples) {
@@ -26,7 +26,7 @@ ProcessedSamples ChannelProcessing::operator()(const DataModule &Samples) {
   return ReturnSamples;
 }
 
-void ChannelProcessing::setMeanOfSamples(unsigned int NrOfSamples) {
+void ChannelProcessing::setMeanOfSamples(int NrOfSamples) {
   MeanOfNrOfSamples = NrOfSamples;
 }
 
@@ -40,7 +40,7 @@ SampleProcessing::SampleProcessing(std::shared_ptr<Producer> Prod) : AdcDataProc
   
 }
 
-void SampleProcessing::setMeanOfSamples(unsigned int NrOfSamples) {
+void SampleProcessing::setMeanOfSamples(int NrOfSamples) {
   
 }
 
