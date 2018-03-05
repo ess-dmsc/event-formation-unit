@@ -13,7 +13,7 @@ struct AdcSettingsStruct {
   bool SerializeSamples{false};
   bool PeakDetection{false};
   int TakeMeanOfNrOfSamples{1};
-  std::string TimeStampLocation;
+  std::string TimeStampLocation{"Middle"};
 };
 
 void SetCLIArguments(CLI::App &parser, AdcSettingsStruct &AdcSettings);
