@@ -7,9 +7,10 @@
  */
 
 #pragma once
-#include <logical_geometry/ESSGeometry.h>
-#include <common/ReadoutSerializer.h>
+#include <common/FBSerializer.h>
 #include <common/DataSave.h>
+#include <common/ReadoutSerializer.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <multigrid/mgmesytec/MG24Detector.h>
 
 class MesytecData {
@@ -54,19 +55,23 @@ public:
   /** @brief parse a binary payload buffer, return number of data element
    * @todo Uses NMXHists  - refactor and move ?
    */
-  int parse(const char *buffer, int size, NMXHists &hists, ReadoutSerializer &serializer);
+  int parse(const char *buffer, int size, NMXHists &hists, FBSerializer & fbserializer, ReadoutSerializer &serializer);
 
   /** @brief parse n 32 bit words from mesytec VMMR-8/16 card */
   void mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &hists, ReadoutSerializer &serializer);
 
+  // Statistics returned by parse()
   int readouts{0}; /**< number of channels read out */
   int discards{0};
+  int triggers{0};
+  int events{0};
+  int tx_bytes{0};
+  int geometry_errors{0};
 
+private:
   int wiremax{-1}; // initial alg.: wire with max adc
   int gridmax{-1}; // initial alg.: grid with max adc
   int time{-1};
-
-private:
   int wireThresholdLo{0};
   int wireThresholdHi{65535};
   int gridThresholdLo{0};
