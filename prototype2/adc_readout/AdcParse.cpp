@@ -95,8 +95,7 @@ AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
     DataModule CurrentDataModule;
     CurrentDataModule.Data.resize(NrOfSamples);
     CurrentDataModule.Channel = Header.Channel;
-    CurrentDataModule.TimeStampSeconds = Header.TimeStampSeconds;
-    CurrentDataModule.TimeStampSecondsFrac = Header.TimeStampSecondsFrac;
+    CurrentDataModule.TimeStamp = Header.TimeStamp;
     const std::uint16_t *ElementPointer = reinterpret_cast<const std::uint16_t*>(Packet.Data + StartByte + sizeof(DataHeader));
     for (int i = 0; i < NrOfSamples; ++i) {
       CurrentDataModule.Data[i] = ntohs(ElementPointer[i]);
@@ -132,8 +131,7 @@ AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte, std::uint
     ReturnData.Modules.emplace_back(DataModule());
     ReturnData.Modules.at(i).Data.resize(ElementsPerChannel);
     ReturnData.Modules.at(i).OversamplingFactor = CurrentSettings.OversamplingFactor;
-    ReturnData.Modules.at(i).TimeStampSeconds = Header.TimeStampSeconds;
-    ReturnData.Modules.at(i).TimeStampSecondsFrac = Header.TimeStampSecondsFrac;
+    ReturnData.Modules.at(i).TimeStamp = Header.TimeStamp;
   }
   if (StartByte + Header.Length + 4 != Packet.Length) {
     throw ParserException(ParserException::Type::STREAM_SIZE);
@@ -185,8 +183,7 @@ PacketData parsePacket(const InData &Packet) {
   } else if (PacketType::Idle == Header.Type) {
     IdleInfo Idle = parseIdle(Packet, Header.DataStart);
     ReturnData.Type = PacketType::Idle;
-    ReturnData.IdleTimeStampSeconds = Idle.TimeStampSeconds;
-    ReturnData.IdleTimeStampSecondsFrac = Idle.TimeStampSecondsFrac;
+    ReturnData.IdleTimeStamp = Idle.TimeStamp;
   }
   return ReturnData;
 }
@@ -199,8 +196,7 @@ IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte) {
   const IdleHeader *HeaderRaw = reinterpret_cast<const IdleHeader*>(Packet.Data + StartByte);
   IdleHeader Header(*HeaderRaw);
   Header.fixEndian();
-  ReturnData.TimeStampSeconds = Header.TimeStampSeconds;
-  ReturnData.TimeStampSecondsFrac = Header.TimeStampSecondsFrac;
+  ReturnData.TimeStamp = Header.TimeStamp;
   return ReturnData;
 }
 

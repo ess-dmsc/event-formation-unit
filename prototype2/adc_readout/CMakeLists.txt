@@ -11,6 +11,7 @@ set(AdcReadoutCore_SRC
   AdcDataProcessor.cpp
   SampleProcessing.cpp
   AdcSettings.cpp
+  AdcTimeStamp.cpp
 )
 
 set(AdcReadout_SRC
@@ -29,6 +30,7 @@ set(AdcReadoutCore_INC
   AdcDataProcessor.h
   SampleProcessing.h
   AdcSettings.h
+  AdcTimeStamp.h
 )
 
 set(AdcReadout_INC
@@ -51,6 +53,7 @@ set(AdcReadoutTest_SRC
   test/AdcDataProcessorTest.cpp
   test/SampleProcessingTest.cpp
   test/CLIArgumentsTest.cpp
+  test/AdcTimeStampTest.cpp
   ${AdcReadoutCore_SRC})
 
 set(AdcReadoutTest_INC

@@ -13,6 +13,7 @@
 #include <exception>
 #include <string>
 #include <stdexcept>
+#include "AdcTimeStamp.h"
 
 class ParserException : public std::runtime_error {
 public:
@@ -44,8 +45,8 @@ private:
 };
 
 struct DataModule {
-  std::uint32_t TimeStampSeconds;
-  std::uint32_t TimeStampSecondsFrac;
+  DataModule() = default;
+  RawTimeStamp TimeStamp;
   std::uint16_t Channel;
   std::uint16_t OversamplingFactor{1};
   std::vector<std::uint16_t> Data;
@@ -63,8 +64,7 @@ struct PacketData {
   std::uint16_t ReadoutCount;
   PacketType Type = PacketType::Unknown;
   std::vector<DataModule> Modules;
-  std::uint32_t IdleTimeStampSeconds = 0;
-  std::uint32_t IdleTimeStampSecondsFrac = 0;
+  RawTimeStamp IdleTimeStamp;
 };
 
 struct HeaderInfo {
@@ -80,8 +80,7 @@ struct TrailerInfo {
 };
 
 struct IdleInfo {
-  std::uint32_t TimeStampSeconds = 0;
-  std::uint32_t TimeStampSecondsFrac = 0;
+  RawTimeStamp TimeStamp;
   std::int32_t FillerStart = 0;
 };
 
@@ -110,37 +109,31 @@ struct DataHeader {
   std::uint16_t Length;
   std::uint16_t Channel;
   std::uint16_t Fragment;
-  std::uint32_t TimeStampSeconds;
-  std::uint32_t TimeStampSecondsFrac;
+  RawTimeStamp TimeStamp;
   void fixEndian() {
     MagicValue = ntohs(MagicValue);
     Length = ntohs(Length);
     Channel = ntohs(Channel);
     Fragment = ntohs(Fragment);
-    TimeStampSeconds = ntohl(TimeStampSeconds);
-    TimeStampSecondsFrac = ntohl(TimeStampSecondsFrac);
+    TimeStamp.fixEndian();
   }
 };
 
 struct StreamHeader {
   std::uint16_t MagicValue;
   std::uint16_t Length;
-  std::uint32_t TimeStampSeconds;
-  std::uint32_t TimeStampSecondsFrac;
+  RawTimeStamp TimeStamp;
   void fixEndian() {
     MagicValue = ntohs(MagicValue);
     Length = ntohs(Length);
-    TimeStampSeconds = ntohl(TimeStampSeconds);
-    TimeStampSecondsFrac = ntohl(TimeStampSecondsFrac);
+    TimeStamp.fixEndian();
   }
 };
 
 struct IdleHeader {
-  std::uint32_t TimeStampSeconds;
-  std::uint32_t TimeStampSecondsFrac;
+  RawTimeStamp TimeStamp;
   void fixEndian() {
-    TimeStampSeconds = ntohl(TimeStampSeconds);
-    TimeStampSecondsFrac = ntohl(TimeStampSecondsFrac);
+    TimeStamp.fixEndian();
   }
 };
 #pragma pack(pop)

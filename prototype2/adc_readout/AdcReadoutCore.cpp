@@ -8,10 +8,13 @@
 #include "AdcReadoutCore.h"
 #include "libs/include/Socket.h"
 #include "AdcSettings.h"
+#include "PeakFinder.h"
+#include "SampleProcessing.h"
 
 AdcReadoutCore::AdcReadoutCore(BaseSettings Settings, AdcSettingsStruct &AdcSettings) : Detector("AdcReadout", Settings), toParsingQueue(100), ProducerPtr(new Producer(Settings.KafkaBroker, Settings.KafkaTopic)), AdcSettings(AdcSettings) {
   std::function<void()> inputFunc = [this](){this->inputThread();};
   Detector::AddThreadFunction(inputFunc, "input");
+  std::map<std::string, TimeStampLocation> TimeStampLocationMap{{"Start", TimeStampLocation::Start}, {"Middle", TimeStampLocation::Middle}, {"End", TimeStampLocation::End}};
 
   std::function<void()> processingFunc = [this](){this->parsingThread();};
   Detector::AddThreadFunction(processingFunc, "parsing");
@@ -29,9 +32,10 @@ AdcReadoutCore::AdcReadoutCore(BaseSettings Settings, AdcSettingsStruct &AdcSett
     Processors.emplace_back(std::unique_ptr<AdcDataProcessor>(new PeakFinder(ProducerPtr)));
   }
   if (AdcSettings.SerializeSamples) {
-    Processors.emplace_back(std::unique_ptr<AdcDataProcessor>(new PeakFinder(ProducerPtr)));
+    Processors.emplace_back(std::unique_ptr<AdcDataProcessor>(new SampleProcessing(ProducerPtr)));
+    dynamic_cast<SampleProcessing*>(Processors.at(Processors.size() - 1).get())->setTimeStampLocation(TimeStampLocationMap.at(AdcSettings.TimeStampLocation));
+    dynamic_cast<SampleProcessing*>(Processors.at(Processors.size() - 1).get())->setMeanOfSamples(AdcSettings.TakeMeanOfNrOfSamples);
   }
-  
 }
 
 void AdcReadoutCore::inputThread() {
@@ -40,7 +44,7 @@ void AdcReadoutCore::inputThread() {
   UDPServer mbdata(local);
   mbdata.setbuffers(0, 2000000);
   mbdata.printbuffers();
-  mbdata.settimeout(0, 100000); // One tenth of a second
+  mbdata.settimeout(0, 100000); // One tenth of a second (100ms)
   ElementPtr DataElement;
   bool outCome;
   

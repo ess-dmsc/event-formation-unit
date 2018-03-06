@@ -20,7 +20,8 @@ void PeakFinder::operator()(const PacketData &Data) {
   }
   for (auto &Module : Data.Modules) {
     auto Result = FindPeak(Module.Data);
-    std::uint64_t PeakTimeStamp = TimeStamp::CalcSample(Module.TimeStampSeconds, Module.TimeStampSecondsFrac, Result.MaxLocation);
+    //std::uint64_t PeakTimeStamp = TimeStamp::CalcSample(Module.TimeStampSeconds, Module.TimeStampSecondsFrac, Result.MaxLocation);
+    std::uint64_t PeakTimeStamp = Module.TimeStamp.GetOffsetTimeStamp(Result.MaxLocation).GetTimeStampNS();
     SendData(PeakTimeStamp, Result.Max, Module.Channel);
     
   }

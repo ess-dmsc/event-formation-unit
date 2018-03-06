@@ -13,7 +13,6 @@
 #include "CircularBuffer.h"
 #include "AdcBufferElements.h"
 #include "AdcParse.h"
-#include "PeakFinder.h"
 #include "SampleProcessing.h"
 #include "AdcSettings.h"
 
@@ -40,7 +39,7 @@ protected:
     std::int64_t parser_packets_idle = 0;
     std::int64_t parser_packets_data = 0;
     std::int64_t parser_packets_stream = 0;
-    std::int64_t processing_packets_lost = 0;
+    std::int64_t processing_packets_lost = -1; //This should be -1
   } AdcStats;
   
   std::shared_ptr<Producer> ProducerPtr;

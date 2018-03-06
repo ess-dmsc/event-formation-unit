@@ -109,12 +109,12 @@ TEST_F(AdcParsingStream, ParseCorrectStreamPacket) {
   PacketData ResultingData;
   EXPECT_NO_THROW(ResultingData = parsePacket(Packet));
   ASSERT_EQ(ResultingData.Modules.size(), 4u);
-  EXPECT_EQ(ResultingData.Modules.at(0).OversamplingFactor, 4);
   std::uint32_t ExpectedTimeStampSeconds = 101;
   std::uint32_t ExpectedTimeStampSecondsFrac = 22974588;
   for (auto &Module : ResultingData.Modules) {
-    EXPECT_EQ(Module.TimeStampSeconds, ExpectedTimeStampSeconds);
-    EXPECT_EQ(Module.TimeStampSecondsFrac, ExpectedTimeStampSecondsFrac);
+    EXPECT_EQ(Module.TimeStamp.Seconds, ExpectedTimeStampSeconds);
+    EXPECT_EQ(Module.TimeStamp.SecondsFrac, ExpectedTimeStampSecondsFrac);
+    EXPECT_EQ(Module.OversamplingFactor, 4u);
   }
 }
 
@@ -149,8 +149,8 @@ TEST_F(AdcParsingIdle, ParseCorrectIdlePacket) {
   PacketData ResultingData;
   EXPECT_NO_THROW(ResultingData = parsePacket(Packet));
   EXPECT_EQ(ResultingData.Modules.size(), 0u);
-  EXPECT_EQ(ResultingData.IdleTimeStampSeconds, 0xAAAA0000u);
-  EXPECT_EQ(ResultingData.IdleTimeStampSecondsFrac, 0x0000AAAAu);
+  EXPECT_EQ(ResultingData.IdleTimeStamp.Seconds, 0xAAAA0000u);
+  EXPECT_EQ(ResultingData.IdleTimeStamp.SecondsFrac, 0x0000AAAAu);
 }
 
 TEST(AdcStreamSetting, IncorrectFirstByte) {
@@ -204,8 +204,8 @@ TEST(AdcHeadParse, IdleDataTest) {
   Packet.Length = sizeof(std::uint32_t) * 2;
   IdleInfo IdleResult;
   EXPECT_NO_THROW(IdleResult = parseIdle(Packet, 0));
-  EXPECT_EQ(IdleResult.TimeStampSeconds, TimeStampValue);
-  EXPECT_EQ(IdleResult.TimeStampSecondsFrac, TimeStampValueFrac);
+  EXPECT_EQ(IdleResult.TimeStamp.Seconds, TimeStampValue);
+  EXPECT_EQ(IdleResult.TimeStamp.SecondsFrac, TimeStampValueFrac);
 }
 
 TEST(AdcHeadParse, IdleDataFailTest) {
@@ -218,8 +218,8 @@ TEST(AdcHeadParse, IdleDataFailTest) {
   Packet.Length = sizeof(std::uint32_t) * 2;
   IdleInfo IdleResult;
   EXPECT_NO_THROW(IdleResult = parseIdle(Packet, 0));
-  EXPECT_NE(IdleResult.TimeStampSeconds, TimeStampValue);
-  EXPECT_NE(IdleResult.TimeStampSecondsFrac, TimeStampValueFrac);
+  EXPECT_NE(IdleResult.TimeStamp.Seconds, TimeStampValue);
+  EXPECT_NE(IdleResult.TimeStamp.SecondsFrac, TimeStampValueFrac);
 }
 
 TEST(AdcHeadParse, IdleDataFail) {
@@ -289,8 +289,8 @@ public:
     DataPointer[0].Data.MagicValue = htons(0xABCD);
     DataPointer[0].Data.Length = htons(24);
     DataPointer[0].Trailer = htonl(0xBEEFCAFE);
-    DataPointer[0].Data.TimeStampSecondsFrac = htonl(0x0000FFFF);
-    DataPointer[0].Data.TimeStampSeconds = htonl(0xAAAA0000);
+    DataPointer[0].Data.TimeStamp.SecondsFrac = htonl(0x0000FFFF);
+    DataPointer[0].Data.TimeStamp.Seconds = htonl(0xAAAA0000);
     DataPointer[0].Data.Channel = htons(0xAA00);
     DataPointer[0].TestData[0] = htons(0xFF00);
     DataPointer[0].TestData[1] = htons(0x00FF);
@@ -307,8 +307,8 @@ TEST_F(AdcDataParsing, FakeDataTest) {
   AdcData ChannelData;
   EXPECT_NO_THROW(ChannelData = parseData(Packet, 0));
   EXPECT_EQ(ChannelData.Modules.size(), 2u);
-  EXPECT_EQ(ChannelData.Modules[0].TimeStampSecondsFrac, 0x0000FFFFu);
-  EXPECT_EQ(ChannelData.Modules[0].TimeStampSeconds, 0xAAAA0000u);
+  EXPECT_EQ(ChannelData.Modules[0].TimeStamp.SecondsFrac, 0x0000FFFFu);
+  EXPECT_EQ(ChannelData.Modules[0].TimeStamp.Seconds, 0xAAAA0000u);
   EXPECT_EQ(ChannelData.Modules[0].Channel, 0xAA00);
   EXPECT_EQ(ChannelData.Modules[0].Data.size(), 2u);
   EXPECT_EQ(ChannelData.Modules[0].Data[0], 0xFF00);

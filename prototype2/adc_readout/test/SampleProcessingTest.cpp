@@ -18,8 +18,8 @@ private:
 class ChannelProcessingTest : public ::testing::Test {
 public:
   virtual void SetUp() override {
-    Module.TimeStampSeconds = 42;
-    Module.TimeStampSecondsFrac = 65;
+    Module.TimeStamp.Seconds = 42;
+    Module.TimeStamp.SecondsFrac = 65;
     Module.Channel = 3;
     Module.Data.push_back(1);
     Module.Data.push_back(15);

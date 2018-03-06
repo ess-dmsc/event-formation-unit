@@ -13,6 +13,12 @@
 #include <map>
 #include "AdcDataProcessor.h"
 
+enum class TimeStampLocation {
+  Start,
+  Middle,
+  End,
+};
+
 struct ProcessedSamples {
   int ChannelNr;
   std::uint64_t TimeStamp;
@@ -26,13 +32,14 @@ public:
   ChannelProcessing();
   ProcessedSamples operator()(const DataModule &Samples);
   void setMeanOfSamples(int NrOfSamples);
+  void setTimeStampLocation(TimeStampLocation Location);
   void reset();
 private:
   int MeanOfNrOfSamples{1};
   int SumOfSamples{0};
   int NrOfSamplesSummed{0};
-  std::uint64_t TimeStampOfFirstSample;
-//  std::deque<std::uint16_t> SampleBuffer;
+  RawTimeStamp TimeStampOfFirstSample;
+  TimeStampLocation TSLocation{TimeStampLocation::Start};
 };
 
 class SampleProcessing : public AdcDataProcessor {
@@ -40,11 +47,13 @@ public:
   SampleProcessing(std::shared_ptr<Producer> Prod);
   virtual void operator()(const PacketData &Data) override;
   void setMeanOfSamples(int NrOfSamples);
+  void setTimeStampLocation(TimeStampLocation Location);
+  TimeStampLocation getTimeStampLocation() const {return TSLocation;};
 protected:
   void serializeData(const ProcessedSamples &Data) const;
   void transmitData(const std::uint8_t &DataPtr, const size_t Size) const;
-private:
-  
-  //std::map<int, > SampleBuffers;
+  std::map<int, ChannelProcessing> ProcessingInstances;
+  int MeanOfNrOfSamples{1};
+  TimeStampLocation TSLocation{TimeStampLocation::Start};
 };
 
