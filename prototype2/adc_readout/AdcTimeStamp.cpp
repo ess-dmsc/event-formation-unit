@@ -8,7 +8,7 @@
 #include "AdcTimeStamp.h"
 #include <cmath>
 
-static const std::uint32_t TimerCounterMax = 88052500/2;
+static const std::int32_t TimerCounterMax = 88052500/2;
   
 std::uint64_t RawTimeStamp::GetTimeStampNS() const {
   std::uint64_t NanoSec = static_cast<std::uint64_t>((static_cast<double>(SecondsFrac) / static_cast<double>(TimerCounterMax)) * 1e9 + 0.5);
@@ -25,12 +25,13 @@ std::uint64_t RawTimeStamp::GetTimeStampNSFast() const {
 RawTimeStamp RawTimeStamp::GetOffsetTimeStamp(const std::int32_t &SampleOffset) const {
   std::int32_t TempSecondsFrac = SecondsFrac + SampleOffset;
   std::int32_t RemainderSecondsFrac = TempSecondsFrac % TimerCounterMax;
-  std::int32_t NewSecondsFrac;
+  std::int32_t NewSecondsFrac = RemainderSecondsFrac;
+  int SecondsChange = static_cast<std::int32_t>(TempSecondsFrac) / TimerCounterMax;
   if (TempSecondsFrac < 0) {
-    NewSecondsFrac = TimerCounterMax - RemainderSecondsFrac;
-  } else {
-    NewSecondsFrac = RemainderSecondsFrac;
+    SecondsChange = -SecondsChange - 1;
   }
-  int SecondsChange = TempSecondsFrac / TimerCounterMax;
+  if (RemainderSecondsFrac < 0) {
+    NewSecondsFrac = TimerCounterMax + RemainderSecondsFrac;
+  }
   return RawTimeStamp(Seconds + SecondsChange, NewSecondsFrac);
 }

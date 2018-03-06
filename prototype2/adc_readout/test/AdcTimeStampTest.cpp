@@ -65,3 +65,21 @@ TEST(TimeStampCalcTest, Sample4) {
   EXPECT_EQ(TS1.GetOffsetTimeStamp(SampleNr).GetTimeStampNS(), TS2.GetTimeStampNS());
 }
 
+TEST(TimeStampCalcTest, Sample5) {
+  std::uint32_t Sec = 54;
+  std::uint32_t SecFrac = 100;
+  std::int32_t SampleNr = -50;
+  RawTimeStamp TS1{Sec, SecFrac};
+  RawTimeStamp TS2{Sec, SecFrac + SampleNr};
+  EXPECT_EQ(TS1.GetOffsetTimeStamp(SampleNr).GetTimeStampNS(), TS2.GetTimeStampNS());
+}
+
+TEST(TimeStampCalcTest, Sample6) {
+  std::uint32_t Sec = 54;
+  std::uint32_t SecFrac = 10;
+  std::int32_t SampleNr = -50;
+  RawTimeStamp TS1{Sec, SecFrac};
+  RawTimeStamp TS2{Sec - 1, TimerCounterMax + SecFrac + SampleNr};
+  EXPECT_EQ(TS1.GetOffsetTimeStamp(SampleNr).GetTimeStampNS(), TS2.GetTimeStampNS());
+}
+

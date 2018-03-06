@@ -27,6 +27,8 @@ struct ProcessedSamples {
   std::vector<std::uint64_t> TimeStamps;
 };
 
+std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start, const RawTimeStamp &End, const TimeStampLocation Location);
+
 class ChannelProcessing {
 public:
   ChannelProcessing();

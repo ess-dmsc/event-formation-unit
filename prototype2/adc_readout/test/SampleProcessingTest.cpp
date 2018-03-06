@@ -62,3 +62,22 @@ TEST_F(ChannelProcessingTest, Oversampling3X_TwoModules) {
   std::vector<std::uint16_t> ExpectedResult{5, };
   EXPECT_EQ(ExpectedResult, Result.Samples);
 }
+
+TEST(CalcTimeStamp, StartTest) {
+  RawTimeStamp TS1{53, 500};
+  RawTimeStamp TS2{53, 1000};
+  EXPECT_EQ(CalcSampleTimeStamp(TS1, TS2, TimeStampLocation::Start), TS1.GetTimeStampNS());
+}
+
+TEST(CalcTimeStamp, EndTest) {
+  RawTimeStamp TS1{53, 500};
+  RawTimeStamp TS2{53, 1000};
+  EXPECT_EQ(CalcSampleTimeStamp(TS1, TS2, TimeStampLocation::End), TS2.GetTimeStampNS());
+}
+
+TEST(CalcTimeStamp, MiddleTest1) {
+  RawTimeStamp TS1{53, 500};
+  RawTimeStamp TSMid{53, 750};
+  RawTimeStamp TS2{53, 1000};
+  EXPECT_EQ(CalcSampleTimeStamp(TS1, TS2, TimeStampLocation::Middle), TSMid.GetTimeStampNS());
+}
