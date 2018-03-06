@@ -32,6 +32,94 @@ public:
   DataModule Module;
 };
 
+
+TEST_F(ChannelProcessingTest, OversamplingAndTime1) {
+  ChannelProcessing Processing;
+  Processing.setMeanOfSamples(1);
+  Processing.setTimeStampLocation(TimeStampLocation::Start);
+  auto Result = Processing(Module);
+  for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
+    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i).GetTimeStampNS(), Result.TimeStamps.at(i));
+  }
+}
+
+TEST_F(ChannelProcessingTest, OversamplingAndTime2) {
+  ChannelProcessing Processing;
+  Processing.setMeanOfSamples(2);
+  Processing.setTimeStampLocation(TimeStampLocation::Start);
+  auto Result = Processing(Module);
+  for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
+    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 2).GetTimeStampNS(), Result.TimeStamps.at(i));
+  }
+}
+
+TEST_F(ChannelProcessingTest, OversamplingAndTime3) {
+  ChannelProcessing Processing;
+  Processing.setMeanOfSamples(2);
+  Processing.setTimeStampLocation(TimeStampLocation::End);
+  auto Result = Processing(Module);
+  for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
+    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 2 + 1).GetTimeStampNS(), Result.TimeStamps.at(i));
+  }
+}
+
+TEST_F(ChannelProcessingTest, OversamplingAndTime4) {
+  ChannelProcessing Processing;
+  Module.OversamplingFactor = 4;
+  Processing.setMeanOfSamples(1);
+  Processing.setTimeStampLocation(TimeStampLocation::Start);
+  auto Result = Processing(Module);
+  for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
+    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 4 - 3).GetTimeStampNS(), Result.TimeStamps.at(i));
+  }
+}
+
+TEST_F(ChannelProcessingTest, OversamplingAndTime5) {
+  ChannelProcessing Processing;
+  Module.OversamplingFactor = 4;
+  Processing.setMeanOfSamples(1);
+  Processing.setTimeStampLocation(TimeStampLocation::End);
+  auto Result = Processing(Module);
+  for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
+    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 4).GetTimeStampNS(), Result.TimeStamps.at(i));
+  }
+}
+
+TEST_F(ChannelProcessingTest, OversamplingAndTime6) {
+  ChannelProcessing Processing;
+  Module.OversamplingFactor = 4;
+  Processing.setMeanOfSamples(2);
+  Processing.setTimeStampLocation(TimeStampLocation::End);
+  auto Result = Processing(Module);
+  for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
+    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 2 * 4 + 4).GetTimeStampNS(), Result.TimeStamps.at(i));
+  }
+}
+
+TEST_F(ChannelProcessingTest, OversamplingAndTime7) {
+  ChannelProcessing Processing;
+  Module.OversamplingFactor = 4;
+  Processing.setMeanOfSamples(2);
+  Processing.setTimeStampLocation(TimeStampLocation::Start);
+  auto Result = Processing(Module);
+  for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
+    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 2 * 4 - 3).GetTimeStampNS(), Result.TimeStamps.at(i));
+  }
+}
+
+TEST_F(ChannelProcessingTest, OversamplingAndTime8) {
+  ChannelProcessing Processing;
+  Module.OversamplingFactor = 4;
+  Processing.setMeanOfSamples(2);
+  Processing.setTimeStampLocation(TimeStampLocation::Middle);
+  auto Result = Processing(Module);
+  for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
+    std::uint64_t StartTS = Module.TimeStamp.GetOffsetTimeStamp(i * 2 * 4 - 3).GetTimeStampNS();
+    std::uint64_t EndTS = Module.TimeStamp.GetOffsetTimeStamp(i * 2 * 4 + 4).GetTimeStampNS();
+    EXPECT_EQ(StartTS + (EndTS - StartTS) / 2, Result.TimeStamps.at(i));
+  }
+}
+
 TEST_F(ChannelProcessingTest, DefaultSetup) {
   ChannelProcessing Processing;
   auto Result = Processing(Module);
@@ -80,4 +168,22 @@ TEST(CalcTimeStamp, MiddleTest1) {
   RawTimeStamp TSMid{53, 750};
   RawTimeStamp TS2{53, 1000};
   EXPECT_EQ(CalcSampleTimeStamp(TS1, TS2, TimeStampLocation::Middle), TSMid.GetTimeStampNS());
+}
+
+TEST(CalcTimeStamp, MiddleTest2) {
+  RawTimeStamp TS{53, 0};
+  RawTimeStamp TSMid{53, 0};
+  EXPECT_EQ(CalcSampleTimeStamp(TS.GetOffsetTimeStamp(-150), TS.GetOffsetTimeStamp(150), TimeStampLocation::Middle), TSMid.GetTimeStampNS());
+}
+
+TEST(CalcTimeStamp, MiddleTest3) {
+  RawTimeStamp TS{53, 1};
+  RawTimeStamp TSMid{53, 1};
+  EXPECT_EQ(CalcSampleTimeStamp(TS.GetOffsetTimeStamp(-150), TS.GetOffsetTimeStamp(150), TimeStampLocation::Middle), TSMid.GetTimeStampNS());
+}
+
+TEST(CalcTimeStamp, MiddleTest4) {
+  RawTimeStamp TS{53, 88052500/2 - 5};
+  RawTimeStamp TSMid{53, 88052500/2 - 5};
+  EXPECT_EQ(CalcSampleTimeStamp(TS.GetOffsetTimeStamp(-150), TS.GetOffsetTimeStamp(150), TimeStampLocation::Middle), TSMid.GetTimeStampNS());
 }
