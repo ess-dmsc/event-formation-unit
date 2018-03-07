@@ -92,7 +92,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
         serializer.addEntry(0, addr, time, adc);
 
         #ifdef DUMPTOFILE
-              mgdata.tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
+          mgdata.tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
         #endif
       } else {
         //DTRACE(DEB, "   discarding %d,%d,%d,%d\n", time, bus, addr, adc);
