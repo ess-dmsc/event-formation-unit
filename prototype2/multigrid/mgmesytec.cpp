@@ -149,9 +149,6 @@ void CSPEC::input_thread() {
       mystats.geometry_errors+= dat.geometry_errors;
       mystats.tx_bytes += dat.tx_bytes;
       mystats.rx_events += dat.events;
-
-
-
     }
 
     // Checking for exit
