@@ -11,7 +11,7 @@
 #include <string>
 #include <sys/types.h>
 #include <unistd.h>
-#include <common/Producer.h>
+//#include <common/Producer.h>
 
 class DataSave {
 public:
@@ -69,7 +69,7 @@ private:
   const int flags = O_TRUNC | O_CREAT | O_RDWR;
   const int mode = S_IRUSR | S_IWUSR;
 
-  Producer producer{"localhost:9092", "C-SPEC_rawdump"};
+  //Producer producer{"localhost:9092", "C-SPEC_rawdump"};
 
   /** @brief figure out if a new file needs to be created */
   int adjustfilesize(int bytes);
