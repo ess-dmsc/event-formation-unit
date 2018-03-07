@@ -40,9 +40,10 @@ struct DetectorSettingsStruct {
   uint32_t wireThresholdHi = {65535}; // accept all
   uint32_t gridThresholdLo = {0};     // accept all
   uint32_t gridThresholdHi = {65535}; // accept all
+  uint32_t swapWires = {0}; // do not swap
 } DetectorSettings;
 
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+void SetCLIArguments(CLI::App & parser) {
   parser.add_option("--wlo", DetectorSettings.wireThresholdLo,
          "minimum wire adc value for accept")->group("MGMesytec");
   parser.add_option("--whi", DetectorSettings.wireThresholdHi,
@@ -51,6 +52,8 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
          "minimum grid adc value for accept")->group("MGMesytec");
   parser.add_option("--ghi", DetectorSettings.gridThresholdHi,
          "maximum grid adc value for accept")->group("MGMesytec");
+  parser.add_flag("--swap", DetectorSettings.swapWires,
+         "swap wires to match electrical wiring")->group("MGMesytec");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
@@ -75,8 +78,9 @@ private:
     // Input Counters
     int64_t rx_packets;
     int64_t rx_bytes;
+    int64_t triggers;
     int64_t rx_readouts;
-    int64_t rx_error_bytes;
+    int64_t parse_errors;
     int64_t rx_discards;
     int64_t geometry_errors;
     int64_t rx_events;
@@ -89,14 +93,15 @@ CSPEC::CSPEC(BaseSettings settings) : Detector(settings) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  Stats.create("rx_packets",           mystats.rx_packets);
-  Stats.create("rx_bytes",             mystats.rx_bytes);
-  Stats.create("readouts",             mystats.rx_readouts);
-  Stats.create("readouts_error_bytes", mystats.rx_error_bytes);
-  Stats.create("readouts_discarded",   mystats.rx_discards);
-  Stats.create("geometry_errors",      mystats.geometry_errors);
-  Stats.create("events",               mystats.rx_events);
-  Stats.create("tx_bytes",             mystats.tx_bytes);
+  Stats.create("rx_packets",            mystats.rx_packets);
+  Stats.create("rx_bytes",              mystats.rx_bytes);
+  Stats.create("readouts",              mystats.rx_readouts);
+  Stats.create("triggers",              mystats.triggers);
+  Stats.create("readouts_parse_errors", mystats.parse_errors);
+  Stats.create("readouts_discarded",    mystats.rx_discards);
+  Stats.create("geometry_errors",       mystats.geometry_errors);
+  Stats.create("events",                mystats.rx_events);
+  Stats.create("tx_bytes",              mystats.tx_bytes);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { CSPEC::input_thread(); };
@@ -133,24 +138,20 @@ void CSPEC::input_thread() {
       mystats.rx_bytes += rdsize;
       XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
 
-      auto res = dat.parse(buffer, rdsize, hists, readouts);
-
+      auto res = dat.parse(buffer, rdsize, hists, flatbuffer, readouts);
       if (res < 0) {
-        continue;
+        mystats.parse_errors++;
       }
 
       mystats.rx_readouts += dat.readouts;
       mystats.rx_discards += dat.discards;
+      mystats.triggers += dat.triggers;
+      mystats.geometry_errors+= dat.geometry_errors;
+      mystats.tx_bytes += dat.tx_bytes;
+      mystats.rx_events += dat.events;
 
-      int pixel = dat.getPixel();
-      int time  = dat.getTime();
-      XTRACE(PROCESS, DEB, "Time %d, pixel: %d\n", time, pixel);
-      if (pixel != 0) {
-        mystats.tx_bytes += flatbuffer.addevent(time, pixel);
-        mystats.rx_events++;
-      } else {
-        mystats.geometry_errors++;
-      }
+
+
     }
 
     // Checking for exit
