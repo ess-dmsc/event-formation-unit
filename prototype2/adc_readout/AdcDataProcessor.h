@@ -13,8 +13,8 @@
 
 class AdcDataProcessor {
 public:
-  AdcDataProcessor(std::shared_ptr<Producer> Prod);
+  AdcDataProcessor(std::shared_ptr<ProducerBase> Prod);
   virtual void operator()(const PacketData &Data) = 0;
 protected:
-  std::shared_ptr<Producer> ProducerPtr;
+  std::shared_ptr<ProducerBase> ProducerPtr;
 };

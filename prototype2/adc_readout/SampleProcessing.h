@@ -48,14 +48,13 @@ private:
 
 class SampleProcessing : public AdcDataProcessor {
 public:
-  SampleProcessing(std::shared_ptr<Producer> Prod);
+  SampleProcessing(std::shared_ptr<ProducerBase> Prod);
   virtual void operator()(PacketData const &Data) override;
   void setMeanOfSamples(int NrOfSamples);
   void setTimeStampLocation(TimeStampLocation Location);
   TimeStampLocation getTimeStampLocation() const {return TSLocation;};
 protected:
-  void serializeData(ProcessedSamples const &Data) const;
-  void transmitData(std::uint8_t const &DataPtr, size_t const Size) const;
+  virtual void serializeAndTransmitData(ProcessedSamples const &Data) const;
   std::map<int, ChannelProcessing> ProcessingInstances;
   int MeanOfNrOfSamples{1};
   TimeStampLocation TSLocation{TimeStampLocation::Middle};

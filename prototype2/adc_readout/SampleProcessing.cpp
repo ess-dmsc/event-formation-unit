@@ -56,7 +56,7 @@ void ChannelProcessing::reset() {
   NrOfSamplesSummed = 0;
 }
 
-SampleProcessing::SampleProcessing(std::shared_ptr<Producer> Prod) : AdcDataProcessor(Prod) {
+SampleProcessing::SampleProcessing(std::shared_ptr<ProducerBase> Prod) : AdcDataProcessor(Prod) {
   
 }
 
@@ -83,11 +83,11 @@ void SampleProcessing::operator()(const PacketData &Data) {
     }
     auto ResultingSamples = ProcessingInstances.at(Module.Channel)(Module);
     if (ResultingSamples.Samples.size() > 0) {
-      serializeData(ResultingSamples);
+      serializeAndTransmitData(ResultingSamples);
     }
   }
 }
 
-void SampleProcessing::serializeData(const ProcessedSamples &Data) const {
+void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) const {
   
 }

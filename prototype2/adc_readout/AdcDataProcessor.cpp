@@ -7,6 +7,6 @@
 
 #include "AdcDataProcessor.h"
 
-AdcDataProcessor::AdcDataProcessor(std::shared_ptr<Producer> Prod) : ProducerPtr(Prod) {
+AdcDataProcessor::AdcDataProcessor(std::shared_ptr<ProducerBase> Prod) : ProducerPtr(Prod) {
   
 }
