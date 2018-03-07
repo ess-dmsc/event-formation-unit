@@ -1,17 +1,15 @@
 #pragma once
 
-#include <iostream>
 #include <fstream>
-#include <vector>
+#include <iostream>
 #include <map>
 #include <sstream>
-
+#include <vector>
+#include <future>   // async
 
 using std::string;
 
-
-struct ClusterNMX
-{
+struct ClusterNMX {
 	int size;
 	int adc;
 	float position;
@@ -20,10 +18,13 @@ struct ClusterNMX
 	float time_uTPC;
 	bool clusterXAndY;
 	bool clusterXAndY_uTPC;
+	float maxDeltaTime;
+	float maxDeltaStrip;
+	float deltaSpan;
+
 };
 
-struct CommonClusterNMX
-{
+struct CommonClusterNMX {
 	int sizeX;
 	int sizeY;
 	int adcX;
@@ -32,6 +33,11 @@ struct CommonClusterNMX
 	float positionY;
 	float timeX;
 	float timeY;
+	float deltaPlane;
+	float maxDeltaTimeX;
+	float maxDeltaTimeY;
+	int maxDeltaStripX;
+	int maxDeltaStripY;
 };
 
 using HitContainer = std::vector<std::tuple<float, int, int>>;
@@ -40,8 +46,7 @@ using HitTuple = std::tuple<float, int, int>;
 using ClusterTuple = std::tuple<int, float, int>;
 using ClusterVector = std::vector<ClusterNMX>;
 
-class NMXClusterer
-{
+class NMXClusterer {
 public:
 	NMXClusterer(int bc, int tac, int acqWin, std::vector<int> xChips,
 			std::vector<int> yChips, int adcThreshold, int minClusterSize,
@@ -50,53 +55,63 @@ public:
 
 	~NMXClusterer();
 
-
-// Analyzing and storing the hits
+	// Analyzing and storing the hits
 	int AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
 			int vmmID, int chNo, int bcid, int tdc, int adc,
 			int overThresholdFlag);
-	void StoreHits(short x, short y, short adc, short bcid, float chipTime, bool overThresholdFlag);
+	void StoreHits(short x, short y, short adc, short bcid, float chipTime,
+			bool overThresholdFlag);
 
-// Analyzing and storing the clusters
+	// Analyzing and storing the clusters
 	void AnalyzeClusters();
-	int ClusterByTime(HitContainer& oldHits,
-			float dTime, int dStrip, float dSpan, string coordinate);
-	int ClusterByStrip(ClusterContainer &cluster,
-			int dStrip, float dSpan, string coordinate);
+	void AsyncClustererX();
+	void AsyncClustererY();
+
+
+	int ClusterByTime(HitContainer& oldHits, float dTime, int dStrip,
+				float dSpan, string coordinate);
+	int ClusterByStrip(ClusterContainer &cluster, int dStrip, float dSpan,
+				string coordinate, float maxDeltaTime);
 
 	void StoreClusters(float clusterPosition, float clusterPositionUTPC,
-			short clusterSize, int clusterADC, float clusterTime,
-			float clusterTimeUTPC, string coordinate);
+				short clusterSize, int clusterADC, float clusterTime,
+				float clusterTimeUTPC, string coordinate, float maxDeltaTime, int maxDeltaStrip, float deltaSpan);
+
 
 	void MatchClustersXY(float dPlane);
-	
-	void CorrectTriggerData(HitContainer& hits, HitContainer& oldHits, float correctionTime);
 
-// Helper methods that map channels to strips
+	void CorrectTriggerData(HitContainer &hits, HitContainer &oldHits,
+			float correctionTime);
+
+	// Helper methods that map channels to strips
 	int GetPlaneID(int chipID);
-	int GetChannel(std::vector<int>& chipIDs, int chipID, int channelID);
+	int GetChannel(std::vector<int> &chipIDs, int chipID, int channelID);
 
-	int getNumClustersX()
-	{
+	int getNumClustersX() {
 		return m_clusterX.size();
 	}
 	;
-	int getNumClustersY()
-	{
+	int getNumClustersY() {
 		return m_clusterY.size();
 	}
 	;
-	int getNumClustersXY()
-	{
+	int getNumClustersXY() {
 		return m_clusterXY.size();
 	}
 	;
 
-	int getNumClustersXY_uTPC()
-	{
+	int getNumClustersXY_uTPC() {
 		return m_clusterXY_uTPC.size();
 	}
 	;
+
+	// Statistics counters
+	uint64_t stats_fc_error { 0 };
+	uint64_t stats_bcid_tdc_error { 0 };
+	uint64_t stats_triggertime_wraps { 0 };
+
+	const int planeID_X { 0 };
+	const int planeID_Y { 1 };
 
 private:
 	int pBC;
@@ -127,7 +142,6 @@ private:
 	HitContainer m_hitsOldY;
 	HitContainer m_hitsX;
 	HitContainer m_hitsY;
-	
 
 	std::vector<CommonClusterNMX> m_clusterXY;
 	std::vector<CommonClusterNMX> m_clusterXY_uTPC;
@@ -135,6 +149,4 @@ private:
 	std::vector<ClusterNMX> m_tempClusterY;
 	std::vector<ClusterNMX> m_clusterX;
 	std::vector<ClusterNMX> m_clusterY;
-
 };
-

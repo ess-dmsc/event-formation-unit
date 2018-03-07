@@ -35,7 +35,7 @@ public:
 private:
    int strip_{0};
    int adc_{0};
-   double readoutlatency = 200 * ns;
+   double readoutlatency = 20 * ns;
 };
 
 bool HitEvent::debug = false;

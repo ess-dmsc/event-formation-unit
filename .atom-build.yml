@@ -9,10 +9,10 @@ targets:
     cmd: 'cd utils/gemsim && make'
   gemsim_run:
     cmd: 'cd utils/gemsim && ./gemsim'
-  rootfiletest:
-    cmd: 'cd build && make RootFileTest'
-  rootfiletest_run:
-    cmd: 'cd build && ./unit_tests/RootFileTest'
+  nmxclusterertest:
+    cmd: 'cd build && make NMXClustererTest'
+  nmxclusterer_run:
+    cmd: 'cd build && ./unit_tests/NMXClustererTest'
   cppcheck_init:
     cmd: 'cd build && cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..'
   cppcheck:
