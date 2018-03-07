@@ -27,35 +27,37 @@ struct ProcessedSamples {
   std::vector<std::uint64_t> TimeStamps;
 };
 
-std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start, const RawTimeStamp &End, const TimeStampLocation Location);
+std::uint64_t CalcSampleTimeStamp(RawTimeStamp const &Start, RawTimeStamp const &End, TimeStampLocation const Location);
 
 class ChannelProcessing {
 public:
   ChannelProcessing();
-  ProcessedSamples operator()(const DataModule &Samples);
+  ProcessedSamples operator()(DataModule const &Samples);
   void setMeanOfSamples(int NrOfSamples);
+  int getMeanOfSamples() const {return MeanOfNrOfSamples;};
   void setTimeStampLocation(TimeStampLocation Location);
+  TimeStampLocation getTimeStampLocation() const {return TSLocation;};
   void reset();
 private:
   int MeanOfNrOfSamples{1};
   int SumOfSamples{0};
   int NrOfSamplesSummed{0};
   RawTimeStamp TimeStampOfFirstSample;
-  TimeStampLocation TSLocation{TimeStampLocation::Start};
+  TimeStampLocation TSLocation{TimeStampLocation::Middle};
 };
 
 class SampleProcessing : public AdcDataProcessor {
 public:
   SampleProcessing(std::shared_ptr<Producer> Prod);
-  virtual void operator()(const PacketData &Data) override;
+  virtual void operator()(PacketData const &Data) override;
   void setMeanOfSamples(int NrOfSamples);
   void setTimeStampLocation(TimeStampLocation Location);
   TimeStampLocation getTimeStampLocation() const {return TSLocation;};
 protected:
-  void serializeData(const ProcessedSamples &Data) const;
-  void transmitData(const std::uint8_t &DataPtr, const size_t Size) const;
+  void serializeData(ProcessedSamples const &Data) const;
+  void transmitData(std::uint8_t const &DataPtr, size_t const Size) const;
   std::map<int, ChannelProcessing> ProcessingInstances;
   int MeanOfNrOfSamples{1};
-  TimeStampLocation TSLocation{TimeStampLocation::Start};
+  TimeStampLocation TSLocation{TimeStampLocation::Middle};
 };
 

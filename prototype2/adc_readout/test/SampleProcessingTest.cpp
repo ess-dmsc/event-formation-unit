@@ -11,9 +11,19 @@
 class SampleProcessingStandIn : public SampleProcessing {
 public:
   SampleProcessingStandIn(std::shared_ptr<Producer> Prod) : SampleProcessing(Prod) {}
-private:
-  
+  using SampleProcessing::ProcessingInstances;
+  using SampleProcessing::MeanOfNrOfSamples;
+  using SampleProcessing::TSLocation;
 };
+
+TEST(SampleProcessing, InitChannel) {
+  std::shared_ptr<Producer> TestProducer(new Producer("None", "None"));
+  SampleProcessingStandIn TestProcessor(TestProducer);
+}
+
+TEST(SampleProcessingSettingsTest, SetMeanOfSamples) {
+  
+}
 
 class ChannelProcessingTest : public ::testing::Test {
 public:
