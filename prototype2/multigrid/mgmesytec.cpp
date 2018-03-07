@@ -40,7 +40,8 @@ struct DetectorSettingsStruct {
   uint32_t wireThresholdHi = {65535}; // accept all
   uint32_t gridThresholdLo = {0};     // accept all
   uint32_t gridThresholdHi = {65535}; // accept all
-  uint32_t swapWires = {0}; // do not swap
+  uint32_t module = {0}; // 0 defaults to 16 wires in z, 1
+  uint32_t dumptofile = {0}; // (requires cmake  -DDUMPTOFILE=ON)
 } DetectorSettings;
 
 void SetCLIArguments(CLI::App & parser) {
@@ -52,8 +53,10 @@ void SetCLIArguments(CLI::App & parser) {
          "minimum grid adc value for accept")->group("MGMesytec");
   parser.add_option("--ghi", DetectorSettings.gridThresholdHi,
          "maximum grid adc value for accept")->group("MGMesytec");
-  parser.add_flag("--swap", DetectorSettings.swapWires,
-         "swap wires to match electrical wiring")->group("MGMesytec");
+  parser.add_option("--module", DetectorSettings.module,
+         "select module for correct wire swapping (0==16z, 1==20z)")->group("MGMesytec");
+  parser.add_flag("--dumptofile", DetectorSettings.dumptofile,
+         "dump to file or not (requires cmake -DDUMPTOFILE=ON")->group("MGMesytec");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
@@ -124,7 +127,7 @@ void CSPEC::input_thread() {
   HistSerializer histfb;
   NMXHists hists;
 
-  MesytecData dat;
+  MesytecData dat(DetectorSettings.dumptofile, DetectorSettings.module);
 
   dat.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
   dat.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);

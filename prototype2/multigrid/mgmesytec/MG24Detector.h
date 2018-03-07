@@ -16,12 +16,17 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-
 class MG24Detector {
 private:
-  int module_select = 0; // 1 == 20 wires, 0 == 16 in z
+  uint32_t module_select = 0; // 1 == 20 wires, 0 == 16 in z
 
 public:
+
+  /** @brief select hardware configuration (module) of the detector for correct wire swapping */
+  void select_module(uint32_t module) {
+    XTRACE(DATA, ALW, "Select detector module: %d\n", module);
+    module_select = module;
+  }
   /** @brief identifies which channels are wires, from drawing by Anton */
   inline bool isWire(int channel) { return (channel <= 79) && (channel >= 0); }
 

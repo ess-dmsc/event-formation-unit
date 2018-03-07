@@ -32,7 +32,8 @@ public:
   };
   // clang-fomat on
 
-  MesytecData() {
+  MesytecData(uint32_t filedump, uint32_t module) : dumptofile(filedump) {
+    mgseq.select_module(module);
 #ifdef DUMPTOFILE
     mgdata.tofile("#Time, Bus, Address, ADC\n");
 #endif
@@ -69,6 +70,7 @@ public:
   int geometry_errors{0};
 
 private:
+  uint32_t dumptofile{0};
   int wiremax{-1}; // initial alg.: wire with max adc
   int gridmax{-1}; // initial alg.: grid with max adc
   int time{-1};

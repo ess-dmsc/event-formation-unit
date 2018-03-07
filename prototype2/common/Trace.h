@@ -37,7 +37,7 @@
 /** Add trace masks below, bitwise or of grouops */
 #define TRC_M_ALL                                                              \
   (TRC_G_INPUT | TRC_G_OUTPUT | TRC_G_PROCESS | TRC_G_MAIN | TRC_G_INIT |      \
-   TRC_G_IPC   | TRC_G_CMD )
+   TRC_G_IPC   | TRC_G_CMD | TRC_G_DATA)
 
 /** Do not edit below */
 #define TRC_M_NONE 0
