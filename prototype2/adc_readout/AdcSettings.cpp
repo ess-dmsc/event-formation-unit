@@ -10,6 +10,7 @@
 void SetCLIArguments(CLI::App &parser, AdcSettingsStruct &AdcSettings) {
   parser.add_flag("--serialize_samples", AdcSettings.SerializeSamples, "Serialize sample data and send to Kafka broker.")->group("ADC Readout Options");
   parser.add_flag("--peak_detection", AdcSettings.PeakDetection, "Find the maximum value in a range of samples and send that value along with its time-stamp to he Kafka broker.")->group("ADC Readout Options");
+  parser.add_option("--name", AdcSettings.Name, "Name of the source of the data as made available on the Kafka broker.")->group("ADC Readout Options")->set_default_val("AdcDemonstrator");
   auto IsPositiveInt = [&AdcSettings](std::vector<std::string> Input) -> bool {
     int InputVal;
     try {
