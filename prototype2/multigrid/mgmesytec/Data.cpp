@@ -11,7 +11,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-
 // @todo can only create a single event per UDP buffer
 int MesytecData::getPixel() {
   if (gridmax < 0 || wiremax < 0) {
@@ -21,7 +20,6 @@ int MesytecData::getPixel() {
   int x = mgseq.xcoord(0, wiremax);
   int y = mgseq.ycoord(gridmax);
   int z = mgseq.zcoord(wiremax);
-
   return mg.pixel3D(x,y,z);
 }
 
@@ -45,7 +43,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
   int gridadcmax = 0;
   int wireadcmax = 0;
   int accept = 0;
-  printf("parse n words: %d\n", nWords);
+  //printf("parse n words: %d\n", nWords);
 
   // Sneak peek on time although it is actually last in packet
   uint32_t *tptr = (buffer + nWords - 1);
@@ -58,7 +56,6 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
 
     switch (datatype) {
     case mesytecHeader:
-
       dataWords = *datap & 0x000003ff;
       assert(nWords > dataWords);
       module = (*datap & 0x00ff0000) >> 16;
