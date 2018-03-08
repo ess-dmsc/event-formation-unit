@@ -7,8 +7,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-//#define DUMPKAFKA 1
-
 DataSave::DataSave(std::string filename, void *buffer, uint64_t datasize)
     : filename_prefix(filename) {
 
@@ -83,11 +81,7 @@ int DataSave::tofile(const char *fmt, ...) {
     XTRACE(PROCESS, DEB, "Writing chunk of size %d\n", bufferlen);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
-  #ifdef DUMPKAFKA
-    producer.produce(buffer, bufferlen);
-  #else
     write(fd, buffer, bufferlen);
-  #endif
 #pragma GCC diagnostic pop
     retlen = bufferlen;
     bufferlen = 0;
@@ -101,11 +95,7 @@ DataSave::~DataSave() {
     XTRACE(PROCESS, INF, "Flushing DataSave buffer\n");
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
-  #ifdef DUMPKAFKA
-    producer.produce(buffer, bufferlen);
-  #else
     write(fd, buffer, bufferlen);
-  #endif
 #pragma GCC diagnostic pop
   }
   close(fd);
