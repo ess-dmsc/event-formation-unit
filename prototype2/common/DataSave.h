@@ -11,7 +11,6 @@
 #include <string>
 #include <sys/types.h>
 #include <unistd.h>
-//#include <common/Producer.h>
 
 class DataSave {
 public:
@@ -20,7 +19,7 @@ public:
    * @param data pointer to data buffere
    * @param datasize number of bytes to write
    */
-  DataSave(std::string filename, void *data, size_t datasize);
+  DataSave(std::string filename, void *data, uint64_t datasize);
 
   /** @brief create file for later writing
    * @param filename filename which can include path
@@ -33,13 +32,13 @@ public:
    * @param maxfilesize split file into chunks of this size, adds sequence
    * number
    */
-  DataSave(std::string fileprefix, int maxfilesize);
+  DataSave(std::string fileprefix, uint64_t maxfilesize);
 
   /** @brief write string to file, not buffered, slow */
   int tofile(std::string);
 
   /** @brief write buffer of size len to file */
-  int tofile(char *buffer, size_t len);
+  int tofile(char *buffer, uint64_t len);
 
   /** @brief printf-like formatting using buffered writes
    * for better performance
@@ -62,17 +61,15 @@ private:
   int sequence_number{1};          /**< filename sequence number */
   std::string filename_prefix{""}; /**< base filename */
   std::string startTime{""};       /**< start time common to all files */
-  uint32_t curfilesize{0};         /**< bytes written to file */
-  uint32_t maxfilesize{
-      50000000}; /**< create new sequence number after maxfilesize bytes */
+  uint64_t curfilesize{0};         /**< bytes written to file */
+  uint64_t maxfilesize{50000000};  /**< create new sequence number after maxfilesize bytes */
 
   const int flags = O_TRUNC | O_CREAT | O_RDWR;
   const int mode = S_IRUSR | S_IWUSR;
 
-  //Producer producer{"localhost:9092", "C-SPEC_rawdump"};
-
   /** @brief figure out if a new file needs to be created */
   int adjustfilesize(int bytes);
+
   /** @brief close old file, create new (with new sequence number) */
   void createfile();
 };

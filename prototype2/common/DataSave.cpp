@@ -9,7 +9,7 @@
 
 //#define DUMPKAFKA 1
 
-DataSave::DataSave(std::string filename, void *buffer, size_t datasize)
+DataSave::DataSave(std::string filename, void *buffer, uint64_t datasize)
     : filename_prefix(filename) {
 
   if ((fd = open(filename_prefix.c_str(), flags, mode)) < 0) {
@@ -32,7 +32,7 @@ DataSave::DataSave(std::string filename) : filename_prefix(filename) {
   }
 }
 
-DataSave::DataSave(std::string name, int maxlen)
+DataSave::DataSave(std::string name, uint64_t maxlen)
     : filename_prefix(name), maxfilesize(maxlen) {
 
   char cStartTime[50];
@@ -46,7 +46,7 @@ DataSave::DataSave(std::string name, int maxlen)
   createfile();
 }
 
-int DataSave::tofile(char *buffer, size_t len) {
+int DataSave::tofile(char *buffer, uint64_t len) {
   if (fd < 0)
     return -1;
 
