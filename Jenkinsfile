@@ -123,8 +123,8 @@ def docker_tests_coverage(image_key) {
             ])
             step([$class: 'ValgrindPublisher',
                   pattern: 'build/memcheck_res/*.valgrind',
-                  failBuildOnMissingReports: false,
-                  failBuildOnInvalidReports: false,
+                  failBuildOnMissingReports: true,
+                  failBuildOnInvalidReports: true,
                   publishResultsForAbortedBuilds: false,
                   publishResultsForFailedBuilds: false,
                   failThresholdInvalidReadWrite: '',
