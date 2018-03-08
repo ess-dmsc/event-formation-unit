@@ -42,7 +42,7 @@ private:
   int n_{1}; // number of strips hit per neutron
   double x_{0.0};
   double y_{0.0};
-  const double drifttime{1.5 * us};
+  const double drifttime{0.5 * us};
 };
 
 bool NeutronEvent::debug = false;

@@ -9,7 +9,6 @@
 #include <test/TestBase.h>
 
 
-
 static void Doit(benchmark::State &state)
 {
 	std::vector<int> pXChips {0, 1, 6, 7};
@@ -33,7 +32,7 @@ static void Doit(benchmark::State &state)
 
 
 
- NMXClusterer nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
+  NMXClusterer nmxdata(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
   for (auto _ : state) {
   	for (auto hit : Run16_line_110168_110323) { // replace with UDP receive()
 		  int result = nmxdata.AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
@@ -43,6 +42,8 @@ static void Doit(benchmark::State &state)
 			  break;
 		  }
     }
+    //ASSERT_TRUE(nmxdata.getNumClustersX() < 3);
+		//printf("getNumClustersX(): %d\n", nmxdata.getNumClustersX());	
     items += 156; // 156 hits in the Run16_line_110168_110323 dataset
   }
   // state.SetComplexityN(state.range(0));
@@ -53,5 +54,3 @@ static void Doit(benchmark::State &state)
 BENCHMARK(Doit);
 
 BENCHMARK_MAIN();
-
-

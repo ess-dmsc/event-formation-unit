@@ -11,9 +11,9 @@ int main(int argc, char * argv[])
   HitEvent::debug = true;
 
 
-  int strips_per_neutron = 3;
-  int neutron_events = 100;
-  double t = 0;
+  int strips_per_neutron = 6;
+  int neutron_events = 1;
+  double t = 0.0;
 
   if (argc == 3) {
     neutron_events = atoi(argv[1]);
