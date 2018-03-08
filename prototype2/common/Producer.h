@@ -9,7 +9,12 @@
 
 #include <librdkafka/rdkafkacpp.h>
 
-class Producer {
+class ProducerBase {
+public:
+  virtual int produce(char *buffer, int length) = 0;
+};
+
+class Producer : public ProducerBase {
 public:
   /** @brief Construct a producer object.
    * @param broker 'URL' specifying host and port, example "127.0.0.1:9009"
@@ -24,7 +29,7 @@ public:
    *  @param buffer Pointer to char buffer containing data to be tx'ed
    *  @param length Size of buffer data in bytes
    */
-  int produce(char *buffer, int length);
+  int produce(char *buffer, int length) override;
 
 private:
   std::string errstr;
