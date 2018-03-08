@@ -5,7 +5,8 @@ images = [
     'centos7': [
         'name': 'essdmscdm/centos7-build-node:1.0.1',
         'sh': 'sh'
-    ],
+    ]
+    //,
 //    'centos7-gcc6': [
 //        'name': 'essdmscdm/centos7-gcc6-build-node:1.0.0',
 //        'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
@@ -121,7 +122,7 @@ def docker_tests_coverage(image_key) {
                 zoomCoverageChart: false
             ])
             step([$class: 'ValgrindPublisher',
-                  pattern: 'build/valgrind/*.xml',
+                  pattern: 'build/memcheck_res/*.valgrind',
                   failBuildOnMissingReports: false,
                   failBuildOnInvalidReports: false,
                   publishResultsForAbortedBuilds: false,
@@ -284,7 +285,7 @@ node('docker && dmbuild03.dm.esss.dk') {
         def image_key = x
         builders[image_key] = get_pipeline(image_key)
     }
-    builders['macOS'] = get_macos_pipeline()
+    //builders['macOS'] = get_macos_pipeline()
 
     parallel builders
 }
