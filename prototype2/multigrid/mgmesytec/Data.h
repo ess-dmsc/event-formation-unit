@@ -32,10 +32,14 @@ public:
   };
   // clang-fomat on
 
-  MesytecData(uint32_t filedump, uint32_t module) : dumptofile(filedump) {
+  MesytecData(bool filedump, std::string fileprefix, uint32_t module) : dumptofile(filedump) {
+
     mgseq.select_module(module);
 #ifdef DUMPTOFILE
-    mgdata.tofile("#Time, Bus, Address, ADC\n");
+    if (dumptofile) {
+      mgdata = std::make_shared<DataSave>(fileprefix, 100000000);
+      mgdata->tofile("#Time, Bus, Address, ADC\n");
+    }
 #endif
   };
 
@@ -70,7 +74,7 @@ public:
   int geometry_errors{0};
 
 private:
-  uint32_t dumptofile{0};
+  bool dumptofile{false};
   int wiremax{-1}; // initial alg.: wire with max adc
   int gridmax{-1}; // initial alg.: grid with max adc
   int time{-1};
@@ -82,6 +86,6 @@ private:
   ESSGeometry mg{4, 48, 20, 1};
 
 #ifdef DUMPTOFILE
-  DataSave mgdata{std::string("multigrid_mesytec_"), 100000000};
+  std::shared_ptr<DataSave>(mgdata);
 #endif
 };

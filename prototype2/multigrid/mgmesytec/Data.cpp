@@ -93,7 +93,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
 
         #ifdef DUMPTOFILE
           if (dumptofile) {
-            mgdata.tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
+            mgdata->tofile("%d, %d, %d, %d\n", time, bus, addr, adc);
           }
         #endif
       } else {
