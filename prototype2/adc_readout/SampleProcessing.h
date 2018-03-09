@@ -11,6 +11,7 @@
 #include <deque>
 #include <vector>
 #include <map>
+#include "AdcSettings.h"
 #include "AdcDataProcessor.h"
 
 enum class TimeStampLocation {
@@ -20,7 +21,7 @@ enum class TimeStampLocation {
 };
 
 struct ProcessedSamples {
-  int ChannelNr;
+  int Channel;
   std::uint64_t TimeStamp;
   double TimeDelta;
   std::vector<std::uint16_t> Samples;
@@ -48,13 +49,16 @@ private:
 
 class SampleProcessing : public AdcDataProcessor {
 public:
-  SampleProcessing(std::shared_ptr<ProducerBase> Prod);
+  SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string const &Name);
   virtual void operator()(PacketData const &Data) override;
   void setMeanOfSamples(int NrOfSamples);
   void setTimeStampLocation(TimeStampLocation Location);
   TimeStampLocation getTimeStampLocation() const {return TSLocation;};
 protected:
-  virtual void serializeAndTransmitData(ProcessedSamples const &Data) const;
+  std::map<TimeStampLocation, int> TimeLocSerialisationMap{{TimeStampLocation::Start, 1}, {TimeStampLocation::Middle, 2}, {TimeStampLocation::End, 3}};
+  std::string AdcName;
+  virtual void serializeAndTransmitData(ProcessedSamples const &Data);
+  std::map<int, std::uint64_t> MessageCounters;
   std::map<int, ChannelProcessing> ProcessingInstances;
   int MeanOfNrOfSamples{1};
   TimeStampLocation TSLocation{TimeStampLocation::Middle};

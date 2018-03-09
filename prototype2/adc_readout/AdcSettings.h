@@ -13,6 +13,7 @@ struct AdcSettingsStruct {
   bool SerializeSamples{false};
   bool PeakDetection{false};
   int TakeMeanOfNrOfSamples{1};
+  bool IncludeTimeStamp{false};
   std::string TimeStampLocation{"Middle"};
   std::string Name;
 };

@@ -32,7 +32,7 @@ AdcReadoutCore::AdcReadoutCore(BaseSettings Settings, AdcSettingsStruct &AdcSett
     Processors.emplace_back(std::unique_ptr<AdcDataProcessor>(new PeakFinder(ProducerPtr)));
   }
   if (AdcSettings.SerializeSamples) {
-    Processors.emplace_back(std::unique_ptr<AdcDataProcessor>(new SampleProcessing(ProducerPtr)));
+    Processors.emplace_back(std::unique_ptr<AdcDataProcessor>(new SampleProcessing(ProducerPtr, AdcSettings.Name)));
     dynamic_cast<SampleProcessing*>(Processors.at(Processors.size() - 1).get())->setTimeStampLocation(TimeStampLocationMap.at(AdcSettings.TimeStampLocation));
     dynamic_cast<SampleProcessing*>(Processors.at(Processors.size() - 1).get())->setMeanOfSamples(AdcSettings.TakeMeanOfNrOfSamples);
   }

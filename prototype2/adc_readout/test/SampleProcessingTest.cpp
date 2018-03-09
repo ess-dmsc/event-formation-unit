@@ -8,42 +8,45 @@
 #include <gtest/gtest.h>
 #include "../SampleProcessing.h"
 #include <trompeloeil.hpp>
+#include "senv_data_generated.h"
+#include <array>
 
 class SampleProcessingStandIn : public SampleProcessing {
 public:
-  SampleProcessingStandIn(std::shared_ptr<ProducerBase> Prod) : SampleProcessing(Prod) {}
+  SampleProcessingStandIn(std::shared_ptr<ProducerBase> Prod, std::string Name) : SampleProcessing(Prod, Name) {}
   using SampleProcessing::ProcessingInstances;
   using SampleProcessing::MeanOfNrOfSamples;
   using SampleProcessing::TSLocation;
-  MAKE_CONST_MOCK1(serializeAndTransmitData, void(const ProcessedSamples&), override);
+  void serializeAndTransmitAlt(ProcessedSamples const &Data) {
+    SampleProcessing::serializeAndTransmitData(Data);
+  };
+  MAKE_MOCK1(serializeAndTransmitData, void(const ProcessedSamples&), override);
 };
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 class ProducerStandIn : public ProducerBase  {
 public:
-  int produce(char *buffer, int length) override {
-    return 0;
-  };
+  MAKE_MOCK2(produce, int(char*, int), override);
 };
 #pragma GCC diagnostic pop
 
 TEST(SampleProcessing, InitChannel) {
   std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
-  SampleProcessingStandIn TestProcessor(TestProducer);
-  EXPECT_EQ(TestProcessor.ProcessingInstances.size(), 0);
+  SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
+  EXPECT_EQ(TestProcessor.ProcessingInstances.size(), 0u);
   PacketData TempPacket;
   DataModule TempModule;
   TempModule.Channel = 1;
   TempPacket.Modules.emplace_back(TempModule);
   TestProcessor(TempPacket);
-  EXPECT_EQ(TestProcessor.ProcessingInstances.size(), 1);
+  EXPECT_EQ(TestProcessor.ProcessingInstances.size(), 1u);
   EXPECT_NE(TestProcessor.ProcessingInstances.find(TempModule.Channel), TestProcessor.ProcessingInstances.end());
 }
 
 TEST(SampleProcessing, SetMeanOfChannels) {
   std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
-  SampleProcessingStandIn TestProcessor(TestProducer);
+  SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   PacketData TempPacket;
   DataModule TempModule;
   TempModule.Channel = 1;
@@ -57,7 +60,7 @@ TEST(SampleProcessing, SetMeanOfChannels) {
 
 TEST(SampleProcessing, SetTimeStampLocation) {
   std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
-  SampleProcessingStandIn TestProcessor(TestProducer);
+  SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   PacketData TempPacket;
   DataModule TempModule;
   TempModule.Channel = 1;
@@ -73,6 +76,7 @@ DataModule getTestModule() {
   DataModule Module;
   Module.TimeStamp.Seconds = 42;
   Module.TimeStamp.SecondsFrac = 65;
+  Module.OversamplingFactor = 1;
   Module.Channel = 3;
   Module.Data.push_back(1);
   Module.Data.push_back(15);
@@ -83,7 +87,7 @@ DataModule getTestModule() {
 
 TEST(SampleProcessing, ProcessCallTest) {
   std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
-  SampleProcessingStandIn TestProcessor(TestProducer);
+  SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   REQUIRE_CALL(TestProcessor, serializeAndTransmitData(ANY(ProcessedSamples))).TIMES(1);
   PacketData TempPacket;
   TempPacket.Modules.emplace_back(getTestModule());
@@ -92,7 +96,7 @@ TEST(SampleProcessing, ProcessCallTest) {
 
 TEST(SampleProcessing, ProcessFailCallTest) {
   std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
-  SampleProcessingStandIn TestProcessor(TestProducer);
+  SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   ProcessedSamples CallTest;
   REQUIRE_CALL(TestProcessor, serializeAndTransmitData(ANY(ProcessedSamples))).TIMES(0);
   PacketData TempPacket;
@@ -105,7 +109,7 @@ TEST(SampleProcessing, ProcessFailCallTest) {
 
 TEST(SampleProcessing, ProcessContentTest) {
   std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
-  SampleProcessingStandIn TestProcessor(TestProducer);
+  SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   ProcessedSamples CallTest;
   REQUIRE_CALL(TestProcessor, serializeAndTransmitData(ANY(ProcessedSamples))).LR_SIDE_EFFECT(CallTest = _1).TIMES(1);
   PacketData TempPacket;
@@ -114,6 +118,80 @@ TEST(SampleProcessing, ProcessContentTest) {
   TestProcessor(TempPacket);
   EXPECT_EQ(CallTest.Samples.size(), TempModule.Data.size());
   EXPECT_EQ(CallTest.TimeStamps.size(), TempModule.Data.size());
+}
+
+TEST(SampleProcessing, SerialisationProduceCallTest) {
+  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
+  ProcessedSamples CallTest;
+  REQUIRE_CALL(TestProcessor, serializeAndTransmitData(ANY(ProcessedSamples))).LR_SIDE_EFFECT(CallTest = _1).TIMES(1).LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn*>(TestProducer.get()), produce(ANY(char*), ANY(int))).TIMES(1).RETURN(0);
+  PacketData TempPacket;
+  auto TempModule = getTestModule();
+  TempPacket.Modules.emplace_back(TempModule);
+  TestProcessor(TempPacket);
+}
+
+TEST(SampleProcessing, SerialisationFlatbufferTest1) {
+  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  std::string Name = "SomeTestName";
+  SampleProcessingStandIn TestProcessor(TestProducer, Name);
+  TestProcessor.setTimeStampLocation(TimeStampLocation::End);
+  ProcessedSamples CallTest;
+  std::array<std::uint8_t, 4096> TempBuffer;
+  int BytesCopied = 0;
+  REQUIRE_CALL(TestProcessor, serializeAndTransmitData(ANY(ProcessedSamples))).LR_SIDE_EFFECT(CallTest = _1).TIMES(1).LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn*>(TestProducer.get()), produce(ANY(char*), ANY(int))).TIMES(1).RETURN(0).LR_SIDE_EFFECT(std::memcpy(reinterpret_cast<void*>(&TempBuffer[0]), _1, _2); BytesCopied = _2;);
+  PacketData TempPacket;
+  auto TempModule = getTestModule();
+  TempPacket.Modules.emplace_back(TempModule);
+  TestProcessor(TempPacket);
+  
+  ASSERT_TRUE(BytesCopied != 0);
+  auto Verifier = flatbuffers::Verifier(&TempBuffer[0], BytesCopied);
+  ASSERT_TRUE(Verifysenv_dataBuffer(Verifier));
+  auto SampleData = Getsenv_data(&TempBuffer[0]);
+  EXPECT_EQ(SampleData->Name()->str(), Name + "_" + std::to_string(TempModule.Channel));
+  EXPECT_EQ(SampleData->PacketTimeStamp(), TempModule.TimeStamp.GetTimeStampNS());
+  EXPECT_NEAR(SampleData->TimeDelta(), TempModule.OversamplingFactor/(88052500/2), 0.05);
+  EXPECT_EQ(SampleData->TimeStampLocation(), Location::End);
+  EXPECT_EQ(SampleData->Channel(), TempModule.Channel);
+  EXPECT_TRUE(SampleData->MessageCounter() == 0);
+  EXPECT_EQ(SampleData->Values()->size(), TempModule.Data.size());
+  EXPECT_EQ(SampleData->TimeStamps()->size(), TempModule.Data.size());
+}
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+TEST(SampleProcessing, SerialisationFlatbufferTest2) {
+  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  std::string Name = "SomeTestName";
+  SampleProcessingStandIn TestProcessor(TestProducer, Name);
+  TestProcessor.setTimeStampLocation(TimeStampLocation::End);
+  int MessageCounter = 0;
+  auto TestMessage = [&MessageCounter](char* DataPtr, int Bytes) {
+    auto SampleData = Getsenv_data(DataPtr);
+    EXPECT_EQ(SampleData->MessageCounter(), MessageCounter);
+    MessageCounter++;
+  };
+  REQUIRE_CALL(TestProcessor, serializeAndTransmitData(ANY(ProcessedSamples))).TIMES(2).LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn*>(TestProducer.get()), produce(ANY(char*), ANY(int))).TIMES(2).RETURN(0).LR_SIDE_EFFECT(TestMessage(_1, _2));
+  PacketData TempPacket;
+  auto TempModule = getTestModule();
+  TempPacket.Modules.emplace_back(TempModule);
+  TempPacket.Modules.emplace_back(TempModule);
+  TestProcessor(TempPacket);
+}
+#pragma GCC diagnostic pop
+
+TEST(SampleProcessing, SerialisationFlatbufferNotCalledTest) {
+  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  std::string Name = "SomeTestName";
+  SampleProcessingStandIn TestProcessor(TestProducer, Name);
+  TestProcessor.setTimeStampLocation(TimeStampLocation::End);
+  
+  FORBID_CALL(TestProcessor, serializeAndTransmitData(ANY(ProcessedSamples)));
+  PacketData TempPacket;
+  TestProcessor(TempPacket);
 }
 
 class ChannelProcessingTest : public ::testing::Test {

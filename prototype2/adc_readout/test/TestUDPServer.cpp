@@ -12,7 +12,7 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wreorder"
-TestUDPServer::TestUDPServer(std::uint16_t SrcPort, std::uint16_t DstPort, int PacketSize) : Service(), Socket(Service, asio::ip::udp::endpoint(asio::ip::udp::v4(), SrcPort)), Resolver(Service), PacketTimer(Service), SourcePort(SrcPort), DestinationPort(DstPort) {
+TestUDPServer::TestUDPServer(std::uint16_t SrcPort, std::uint16_t DstPort, int PacketSize) : Service(), Socket(Service, asio::ip::udp::endpoint(asio::ip::udp::v4(), SourcePort)), Resolver(Service), PacketTimer(Service), SourcePort(SrcPort), DestinationPort(DstPort) {
   BufferSize = PacketSize;
   SendBuffer = std::unique_ptr<std::uint8_t[]>(new std::uint8_t[PacketSize]);
 }
