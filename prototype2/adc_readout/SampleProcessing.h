@@ -7,12 +7,12 @@
 
 #pragma once
 
-#include <memory>
-#include <deque>
-#include <vector>
-#include <map>
-#include "AdcSettings.h"
 #include "AdcDataProcessor.h"
+#include "AdcSettings.h"
+#include <deque>
+#include <map>
+#include <memory>
+#include <vector>
 
 enum class TimeStampLocation {
   Start,
@@ -28,17 +28,20 @@ struct ProcessedSamples {
   std::vector<std::uint64_t> TimeStamps;
 };
 
-std::uint64_t CalcSampleTimeStamp(RawTimeStamp const &Start, RawTimeStamp const &End, TimeStampLocation const Location);
+std::uint64_t CalcSampleTimeStamp(RawTimeStamp const &Start,
+                                  RawTimeStamp const &End,
+                                  TimeStampLocation const Location);
 
 class ChannelProcessing {
 public:
   ChannelProcessing() = default;
   ProcessedSamples operator()(DataModule const &Samples);
   void setMeanOfSamples(int NrOfSamples);
-  int getMeanOfSamples() const {return MeanOfNrOfSamples;};
+  int getMeanOfSamples() const { return MeanOfNrOfSamples; };
   void setTimeStampLocation(TimeStampLocation Location);
-  TimeStampLocation getTimeStampLocation() const {return TSLocation;};
+  TimeStampLocation getTimeStampLocation() const { return TSLocation; };
   void reset();
+
 private:
   int MeanOfNrOfSamples{1};
   int SumOfSamples{0};
@@ -54,9 +57,13 @@ public:
   virtual void operator()(PacketData const &Data) override;
   void setMeanOfSamples(int NrOfSamples);
   void setTimeStampLocation(TimeStampLocation Location);
-  TimeStampLocation getTimeStampLocation() const {return TSLocation;};
+  TimeStampLocation getTimeStampLocation() const { return TSLocation; };
+
 protected:
-  std::map<TimeStampLocation, int> TimeLocSerialisationMap{{TimeStampLocation::Start, 1}, {TimeStampLocation::Middle, 2}, {TimeStampLocation::End, 3}};
+  std::map<TimeStampLocation, int> TimeLocSerialisationMap{
+      {TimeStampLocation::Start, 1},
+      {TimeStampLocation::Middle, 2},
+      {TimeStampLocation::End, 3}};
   std::string AdcName;
   virtual void serializeAndTransmitData(ProcessedSamples const &Data);
   std::map<int, std::uint64_t> MessageCounters;
@@ -64,4 +71,3 @@ protected:
   int MeanOfNrOfSamples{1};
   TimeStampLocation TSLocation{TimeStampLocation::Middle};
 };
-

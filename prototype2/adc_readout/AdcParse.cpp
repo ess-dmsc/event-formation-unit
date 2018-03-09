@@ -7,44 +7,61 @@
 
 #include "AdcParse.h"
 #include <arpa/inet.h>
-#include <netinet/in.h>
-#include <map>
 #include <bitset>
+#include <map>
+#include <netinet/in.h>
 
-ParserException::ParserException(std::string const &ErrorStr) : std::runtime_error(ErrorStr), ParserErrorType(Type::UNKNOWN), Error(ErrorStr) {
-}
+ParserException::ParserException(std::string const &ErrorStr)
+    : std::runtime_error(ErrorStr), ParserErrorType(Type::UNKNOWN),
+      Error(ErrorStr) {}
 
-ParserException::ParserException(Type ErrorType) : std::runtime_error("Parser error of type " + std::to_string(static_cast<int>(ErrorType))), ParserErrorType(ErrorType) {
-
-}
+ParserException::ParserException(Type ErrorType)
+    : std::runtime_error("Parser error of type " +
+                         std::to_string(static_cast<int>(ErrorType))),
+      ParserErrorType(ErrorType) {}
 
 ParserException::Type ParserException::getErrorType() const {
   return ParserErrorType;
 }
 
-const char* ParserException::what() const noexcept {
+const char *ParserException::what() const noexcept {
   static std::map<ParserException::Type, std::string> ErrorTypeStrings = {
-    {ParserException::Type::TRAILER_FEEDF00D, "Magic bytes (0xFEEDF00D) not found at the end of the packet."},
-    {ParserException::Type::TRAILER_0x55, "Filler byte was not of value 0x55."},
-    {ParserException::Type::DATA_BEEFCAFE, "Magic bytes (0xBEEFCAFE) was not at the end of the data module."},
-    {ParserException::Type::DATA_LENGTH, "Packet size to short to hold expected number of samples."},
-    {ParserException::Type::DATA_ABCD, "Data module did not start with magic bytes (0xABCD)."},
-    {ParserException::Type::STREAM_ABCD, "Stream data module did not start with magic bytes (0xABCD)."},
-    {ParserException::Type::STREAM_HEADER, "Stream module header does not fit in packet."},
-    {ParserException::Type::STREAM_TYPE, "Type for data module was not correct (0xFFXX)."},
-    {ParserException::Type::STREAM_OVERSAMPLING, "Unknown oversampling setting."},
-    {ParserException::Type::STREAM_CHANNELS_MASK, "Too many active channels for current oversampling setting."},
-    {ParserException::Type::STREAM_SIZE, "Packet to small to hold declared number of elements."},
-    {ParserException::Type::STREAM_BEEFCAFE, "Magic bytes (0xBEEFCAFE) was not at the end of the data module."},
-    {ParserException::Type::HEADER_LENGTH, "Packet size was to short to hold header and expected payload."},
-    {ParserException::Type::HEADER_TYPE, "Indicated packet type is unknown."},
-    {ParserException::Type::IDLE_LENGTH, "Packet size was to short to hold idle time stamp."},
+      {ParserException::Type::TRAILER_FEEDF00D,
+       "Magic bytes (0xFEEDF00D) not found at the end of the packet."},
+      {ParserException::Type::TRAILER_0x55,
+       "Filler byte was not of value 0x55."},
+      {ParserException::Type::DATA_BEEFCAFE,
+       "Magic bytes (0xBEEFCAFE) was not at the end of the data module."},
+      {ParserException::Type::DATA_LENGTH,
+       "Packet size to short to hold expected number of samples."},
+      {ParserException::Type::DATA_ABCD,
+       "Data module did not start with magic bytes (0xABCD)."},
+      {ParserException::Type::STREAM_ABCD,
+       "Stream data module did not start with magic bytes (0xABCD)."},
+      {ParserException::Type::STREAM_HEADER,
+       "Stream module header does not fit in packet."},
+      {ParserException::Type::STREAM_TYPE,
+       "Type for data module was not correct (0xFFXX)."},
+      {ParserException::Type::STREAM_OVERSAMPLING,
+       "Unknown oversampling setting."},
+      {ParserException::Type::STREAM_CHANNELS_MASK,
+       "Too many active channels for current oversampling setting."},
+      {ParserException::Type::STREAM_SIZE,
+       "Packet to small to hold declared number of elements."},
+      {ParserException::Type::STREAM_BEEFCAFE,
+       "Magic bytes (0xBEEFCAFE) was not at the end of the data module."},
+      {ParserException::Type::HEADER_LENGTH,
+       "Packet size was to short to hold header and expected payload."},
+      {ParserException::Type::HEADER_TYPE, "Indicated packet type is unknown."},
+      {ParserException::Type::IDLE_LENGTH,
+       "Packet size was to short to hold idle time stamp."},
   };
   if (ParserException::Type::UNKNOWN == ParserErrorType) {
     return Error.c_str();
   }
   if (ErrorTypeStrings.find(ParserErrorType) == ErrorTypeStrings.end()) {
-    return "ParserException error string not defined for exceptions of this type.";
+    return "ParserException error string not defined for exceptions of this "
+           "type.";
   }
   return ErrorTypeStrings.at(ParserErrorType).c_str();
 }
@@ -54,7 +71,7 @@ HeaderInfo parseHeader(const InData &Packet) {
   if (Packet.Length < sizeof(PacketHeader)) {
     throw ParserException(ParserException::Type::HEADER_LENGTH);
   }
-  auto HeaderRaw = reinterpret_cast<const PacketHeader*>(Packet.Data);
+  auto HeaderRaw = reinterpret_cast<const PacketHeader *>(Packet.Data);
   PacketHeader Header(*HeaderRaw);
   Header.fixEndian();
   if (0x1111 == Header.PacketType) {
@@ -79,7 +96,8 @@ HeaderInfo parseHeader(const InData &Packet) {
 AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
   AdcData ReturnData;
   while (StartByte + sizeof(DataHeader) < Packet.Length) {
-    auto HeaderRaw = reinterpret_cast<const DataHeader*>(Packet.Data + StartByte);
+    auto HeaderRaw =
+        reinterpret_cast<const DataHeader *>(Packet.Data + StartByte);
     DataHeader Header(*HeaderRaw);
     Header.fixEndian();
     if (0xABCD != Header.MagicValue) {
@@ -89,14 +107,17 @@ AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
       throw ParserException(ParserException::Type::DATA_ABCD);
     }
     std::uint16_t NrOfSamples = (Header.Length - 20) / 2;
-    if (StartByte + sizeof(DataHeader) + NrOfSamples * sizeof(std::uint16_t) + 4> Packet.Length) {
+    if (StartByte + sizeof(DataHeader) + NrOfSamples * sizeof(std::uint16_t) +
+            4 >
+        Packet.Length) {
       throw ParserException(ParserException::Type::DATA_LENGTH);
     }
     DataModule CurrentDataModule;
     CurrentDataModule.Data.resize(NrOfSamples);
     CurrentDataModule.Channel = Header.Channel;
     CurrentDataModule.TimeStamp = Header.TimeStamp;
-    auto ElementPointer = reinterpret_cast<const std::uint16_t*>(Packet.Data + StartByte + sizeof(DataHeader));
+    auto ElementPointer = reinterpret_cast<const std::uint16_t *>(
+        Packet.Data + StartByte + sizeof(DataHeader));
     for (int i = 0; i < NrOfSamples; ++i) {
       CurrentDataModule.Data[i] = ntohs(ElementPointer[i]);
     }
@@ -113,13 +134,15 @@ AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
   return ReturnData;
 }
 
-AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte, std::uint16_t TypeValue) {
+AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte,
+                        std::uint16_t TypeValue) {
   AdcData ReturnData;
   StreamSetting CurrentSettings = parseStreamSettings(TypeValue);
   if (StartByte + sizeof(StreamHeader) > Packet.Length) {
     throw ParserException(ParserException::Type::STREAM_HEADER);
   }
-  auto HeaderRaw = reinterpret_cast<const StreamHeader*>(Packet.Data + StartByte);
+  auto HeaderRaw =
+      reinterpret_cast<const StreamHeader *>(Packet.Data + StartByte);
   StreamHeader Header(*HeaderRaw);
   Header.fixEndian();
   if (0xABCD != Header.MagicValue) {
@@ -131,16 +154,20 @@ AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte, std::uint
   for (int i = 0; i < NumberOfChannels; i++) {
     ReturnData.Modules.emplace_back(DataModule());
     ReturnData.Modules.at(i).Data.resize(ElementsPerChannel);
-    ReturnData.Modules.at(i).OversamplingFactor = CurrentSettings.OversamplingFactor;
+    ReturnData.Modules.at(i).OversamplingFactor =
+        CurrentSettings.OversamplingFactor;
     ReturnData.Modules.at(i).TimeStamp = Header.TimeStamp;
   }
   if (StartByte + Header.Length + 4 != Packet.Length) {
     throw ParserException(ParserException::Type::STREAM_SIZE);
   }
   for (int j = 0; j < NrOfElements; j++) {
-    auto CurrentValue = reinterpret_cast<const std::uint16_t*>(Packet.Data + StartByte + sizeof(StreamHeader) + j * sizeof(std::uint16_t));
+    auto CurrentValue = reinterpret_cast<const std::uint16_t *>(
+        Packet.Data + StartByte + sizeof(StreamHeader) +
+        j * sizeof(std::uint16_t));
 
-    ReturnData.Modules.at(j % NumberOfChannels).Data.at(j / NumberOfChannels) = ntohs(*CurrentValue);
+    ReturnData.Modules.at(j % NumberOfChannels).Data.at(j / NumberOfChannels) =
+        ntohs(*CurrentValue);
   }
   ReturnData.FillerStart = StartByte + Header.Length;
   const std::uint8_t *TrailerPointer = Packet.Data + ReturnData.FillerStart - 4;
@@ -153,14 +180,16 @@ AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte, std::uint
 
 TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte) {
   TrailerInfo ReturnInfo;
-  auto FillerPointer = reinterpret_cast<const std::uint8_t*>(Packet.Data + StartByte);
+  auto FillerPointer =
+      reinterpret_cast<const std::uint8_t *>(Packet.Data + StartByte);
   for (unsigned int i = 0; i < Packet.Length - StartByte - 4; i++) {
     if (FillerPointer[i] != 0x55) {
       throw ParserException(ParserException::Type::TRAILER_0x55);
     }
     ++ReturnInfo.FillerBytes;
   }
-  const std::uint8_t *TrailerPointer = Packet.Data + StartByte + ReturnInfo.FillerBytes;
+  const std::uint8_t *TrailerPointer =
+      Packet.Data + StartByte + ReturnInfo.FillerBytes;
   const std::uint32_t MagicValue = htonl(0xFEEDF00D);
   if (0 != std::memcmp(TrailerPointer, &MagicValue, sizeof(MagicValue))) {
     throw ParserException(ParserException::Type::TRAILER_FEEDF00D);
@@ -196,7 +225,8 @@ IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte) {
     throw ParserException(ParserException::Type::IDLE_LENGTH);
   }
   IdleInfo ReturnData;
-  auto *HeaderRaw = reinterpret_cast<const IdleHeader*>(Packet.Data + StartByte);
+  auto *HeaderRaw =
+      reinterpret_cast<const IdleHeader *>(Packet.Data + StartByte);
   IdleHeader Header(*HeaderRaw);
   Header.fixEndian();
   ReturnData.TimeStamp = Header.TimeStamp;
@@ -210,16 +240,18 @@ StreamSetting parseStreamSettings(const std::uint16_t &SettingsRaw) {
     throw ParserException(ParserException::Type::STREAM_TYPE);
   }
   unsigned int OversamplingSetting = SettingsRaw & 0x0Fu;
-  if (OversamplingSetting > 4 or 3 == OversamplingSetting or 0 == OversamplingSetting) {
+  if (OversamplingSetting > 4 or 3 == OversamplingSetting or
+      0 == OversamplingSetting) {
     throw ParserException(ParserException::Type::STREAM_OVERSAMPLING);
   }
   ReturnSetting.OversamplingFactor = OversamplingSetting;
   std::bitset<4> ActiveChannels((SettingsRaw & 0xF0u) >> 4);
-  if ((ActiveChannels.count() == 4 and 4 != OversamplingSetting) or (ActiveChannels.count() == 2 and OversamplingSetting < 2)) {
+  if ((ActiveChannels.count() == 4 and 4 != OversamplingSetting) or
+      (ActiveChannels.count() == 2 and OversamplingSetting < 2)) {
     throw ParserException(ParserException::Type::STREAM_CHANNELS_MASK);
   }
   for (size_t i = 0; i < ActiveChannels.size(); i++) {
-    if (ActiveChannels.test(ActiveChannels.size() - 1 - i)){
+    if (ActiveChannels.test(ActiveChannels.size() - 1 - i)) {
       ReturnSetting.ChannelsActive.emplace_back(i);
     }
   }

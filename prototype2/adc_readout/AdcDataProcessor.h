@@ -7,15 +7,16 @@
 
 #pragma once
 
+#include "AdcParse.h"
 #include <common/Producer.h>
 #include <memory>
-#include "AdcParse.h"
 
 class AdcDataProcessor {
 public:
   AdcDataProcessor(std::shared_ptr<ProducerBase> Prod);
   virtual ~AdcDataProcessor() = default;
   virtual void operator()(const PacketData &Data) = 0;
+
 protected:
   std::shared_ptr<ProducerBase> ProducerPtr;
 };

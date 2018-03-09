@@ -7,13 +7,13 @@
 
 #pragma once
 
-#include <vector>
-#include <netinet/in.h>
 #include "AdcBufferElements.h"
-#include <exception>
-#include <string>
-#include <stdexcept>
 #include "AdcTimeStamp.h"
+#include <exception>
+#include <netinet/in.h>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
 class ParserException : public std::runtime_error {
 public:
@@ -37,8 +37,9 @@ public:
   };
   ParserException(std::string const &ErrorStr);
   ParserException(Type ErrorType);
-  virtual const char* what() const noexcept override;
+  virtual const char *what() const noexcept override;
   Type getErrorType() const;
+
 private:
   Type ParserErrorType;
   std::string Error;
@@ -57,7 +58,7 @@ struct AdcData {
   std::int32_t FillerStart = 0;
 };
 
-enum class PacketType {Idle, Data, Stream, Unknown};
+enum class PacketType { Idle, Data, Stream, Unknown };
 
 struct PacketData {
   std::uint16_t GlobalCount;
@@ -72,7 +73,7 @@ struct HeaderInfo {
   std::uint16_t GlobalCount;
   std::uint16_t ReadoutCount;
   std::int32_t DataStart = 0;
-  std::uint16_t TypeValue; //Used only by streaming data
+  std::uint16_t TypeValue; // Used only by streaming data
 };
 
 struct TrailerInfo {
@@ -132,15 +133,14 @@ struct StreamHeader {
 
 struct IdleHeader {
   RawTimeStamp TimeStamp;
-  void fixEndian() {
-    TimeStamp.fixEndian();
-  }
+  void fixEndian() { TimeStamp.fixEndian(); }
 } __attribute__((packed));
 #pragma pack(pop)
 
 PacketData parsePacket(const InData &Packet);
 AdcData parseData(const InData &Packet, std::uint32_t StartByte);
-AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte, std::uint16_t TypeValue);
+AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte,
+                        std::uint16_t TypeValue);
 HeaderInfo parseHeader(const InData &Packet);
 TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte);
 IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte);

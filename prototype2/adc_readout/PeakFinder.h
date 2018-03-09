@@ -13,8 +13,10 @@ class PeakFinder : public AdcDataProcessor {
 public:
   PeakFinder(std::shared_ptr<Producer> Prod);
   virtual void operator()(const PacketData &Data) override;
+
 private:
-  void SendData(const std::uint64_t &TimeStamp, const std::uint16_t &Amplitude, const std::uint16_t &Channel);
+  void SendData(const std::uint64_t &TimeStamp, const std::uint16_t &Amplitude,
+                const std::uint16_t &Channel);
   std::uint64_t EventCounter{0};
 };
 
