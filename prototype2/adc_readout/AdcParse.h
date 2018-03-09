@@ -102,7 +102,7 @@ struct PacketHeader {
     ReadoutLength = ntohs(ReadoutLength);
     ReadoutCount = ntohs(ReadoutCount);
   }
-};
+} __attribute__((packed));
 
 struct DataHeader {
   std::uint16_t MagicValue;
@@ -117,7 +117,7 @@ struct DataHeader {
     Fragment = ntohs(Fragment);
     TimeStamp.fixEndian();
   }
-};
+} __attribute__((packed));
 
 struct StreamHeader {
   std::uint16_t MagicValue;
@@ -128,14 +128,14 @@ struct StreamHeader {
     Length = ntohs(Length);
     TimeStamp.fixEndian();
   }
-};
+} __attribute__((packed));
 
 struct IdleHeader {
   RawTimeStamp TimeStamp;
   void fixEndian() {
     TimeStamp.fixEndian();
   }
-};
+} __attribute__((packed));
 #pragma pack(pop)
 
 PacketData parsePacket(const InData &Packet);

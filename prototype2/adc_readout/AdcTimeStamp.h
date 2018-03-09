@@ -25,4 +25,4 @@ struct RawTimeStamp {
     
   //Note: This function might be significantly (a lot) slower than TimeStamp::Calc() for some cases. The reverse is also true.
   std::uint64_t GetTimeStampNSFast() const;
-};
+} __attribute__((packed));

@@ -44,7 +44,7 @@ const char* ParserException::what() const noexcept {
     return Error.c_str();
   }
   if (ErrorTypeStrings.find(ParserErrorType) == ErrorTypeStrings.end()) {
-    return ("ParserException error string not defined for exception of type " + std::to_string(static_cast<int>(ParserErrorType))).c_str();
+    return "ParserException error string not defined for exceptions of this type.";
   }
   return ErrorTypeStrings.at(ParserErrorType).c_str();
 }
@@ -101,8 +101,9 @@ AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
       CurrentDataModule.Data[i] = ntohs(ElementPointer[i]);
     }
     StartByte += sizeof(DataHeader) + NrOfSamples * sizeof(std::uint16_t);
-    const std::uint32_t *TrailerPointer = reinterpret_cast<const std::uint32_t*>(Packet.Data + StartByte);
-    if (ntohl(*TrailerPointer) != 0xBEEFCAFE) {
+    const std::uint8_t *TrailerPointer = Packet.Data + StartByte;
+    const std::uint32_t MagicValue = htonl(0xBEEFCAFE);
+    if (std::memcmp(TrailerPointer, &MagicValue, sizeof(MagicValue)) != 0) {
       throw ParserException(ParserException::Type::DATA_BEEFCAFE);
     }
     StartByte += 4;
@@ -142,8 +143,9 @@ AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte, std::uint
     ReturnData.Modules.at(j % NumberOfChannels).Data.at(j / NumberOfChannels) = ntohs(*CurrentValue);
   }
   ReturnData.FillerStart = StartByte + Header.Length;
-  const std::uint32_t *TrailerPointer = reinterpret_cast<const std::uint32_t*>(Packet.Data + ReturnData.FillerStart - 4);
-  if (ntohl(*TrailerPointer) != 0xBEEFCAFE) {
+  const std::uint8_t *TrailerPointer = Packet.Data + ReturnData.FillerStart - 4;
+  const std::uint32_t MagicValue = htonl(0xBEEFCAFE);
+  if (0 != std::memcmp(TrailerPointer, &MagicValue, sizeof(MagicValue))) {
     throw ParserException(ParserException::Type::STREAM_BEEFCAFE);
   }
   return ReturnData;
@@ -158,8 +160,9 @@ TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte) {
     }
     ++ReturnInfo.FillerBytes;
   }
-  const std::uint32_t *TrailerPointer = reinterpret_cast<const std::uint32_t*>(Packet.Data + StartByte + ReturnInfo.FillerBytes);
-  if (ntohl(*TrailerPointer) != 0xFEEDF00D) {
+  const std::uint8_t *TrailerPointer = Packet.Data + StartByte + ReturnInfo.FillerBytes;
+  const std::uint32_t MagicValue = htonl(0xFEEDF00D);
+  if (0 != std::memcmp(TrailerPointer, &MagicValue, sizeof(MagicValue))) {
     throw ParserException(ParserException::Type::TRAILER_FEEDF00D);
   }
   return ReturnInfo;

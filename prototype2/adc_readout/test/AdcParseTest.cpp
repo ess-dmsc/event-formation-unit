@@ -244,7 +244,7 @@ TEST(ExceptionTypes, InitWithString) {
 TEST(ExceptionTypes, IncorrectExceptionType) {
   int ExceptionTypeInt = 4242;
   ParserException SomeException((ParserException::Type(ExceptionTypeInt)));
-  std::string ExpectedExceptionString("ParserException error string not defined for exception of type " + std::to_string(ExceptionTypeInt));
+  std::string ExpectedExceptionString("ParserException error string not defined for exceptions of this type.");
   EXPECT_STREQ(SomeException.what(), ExpectedExceptionString.c_str());
 }
 
