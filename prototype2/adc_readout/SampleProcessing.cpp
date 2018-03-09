@@ -100,6 +100,10 @@ void SampleProcessing::operator()(const PacketData &Data) {
   }
 }
 
+SampleProcessing::~SampleProcessing() {
+  
+}
+
 void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
   flatbuffers::FlatBufferBuilder builder;
   auto FBSampleData = builder.CreateVector(Data.Samples);

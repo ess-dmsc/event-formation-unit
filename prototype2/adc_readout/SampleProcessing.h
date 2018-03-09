@@ -50,6 +50,7 @@ private:
 class SampleProcessing : public AdcDataProcessor {
 public:
   SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string const &Name);
+  ~SampleProcessing();
   virtual void operator()(PacketData const &Data) override;
   void setMeanOfSamples(int NrOfSamples);
   void setTimeStampLocation(TimeStampLocation Location);

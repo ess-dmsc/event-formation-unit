@@ -10,3 +10,8 @@
 AdcDataProcessor::AdcDataProcessor(std::shared_ptr<ProducerBase> Prod) : ProducerPtr(Prod) {
   
 }
+
+AdcDataProcessor::~AdcDataProcessor() {
+  
+}
+
