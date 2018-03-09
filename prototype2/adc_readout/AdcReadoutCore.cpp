@@ -11,7 +11,7 @@
 #include "PeakFinder.h"
 #include "SampleProcessing.h"
 
-AdcReadoutCore::AdcReadoutCore(BaseSettings Settings, AdcSettingsStruct &AdcSettings) : Detector("AdcReadout", Settings), toParsingQueue(100), ProducerPtr(new Producer(Settings.KafkaBroker, Settings.KafkaTopic)), AdcSettings(AdcSettings) {
+AdcReadoutCore::AdcReadoutCore(BaseSettings Settings, AdcSettingsStruct &AdcSettings) : Detector("AdcReadout", Settings), toParsingQueue(100), AdcSettings(AdcSettings), GeneralSettings(Settings) {
   std::function<void()> inputFunc = [this](){this->inputThread();};
   Detector::AddThreadFunction(inputFunc, "input");
   std::map<std::string, TimeStampLocation> TimeStampLocationMap{{"Start", TimeStampLocation::Start}, {"Middle", TimeStampLocation::Middle}, {"End", TimeStampLocation::End}};
@@ -36,6 +36,13 @@ AdcReadoutCore::AdcReadoutCore(BaseSettings Settings, AdcSettingsStruct &AdcSett
     dynamic_cast<SampleProcessing*>(Processors.at(Processors.size() - 1).get())->setTimeStampLocation(TimeStampLocationMap.at(AdcSettings.TimeStampLocation));
     dynamic_cast<SampleProcessing*>(Processors.at(Processors.size() - 1).get())->setMeanOfSamples(AdcSettings.TakeMeanOfNrOfSamples);
   }
+}
+
+std::shared_ptr<Producer> AdcReadoutCore::getProducer() {
+  if (ProducerPtr == nullptr) {
+    ProducerPtr = std::shared_ptr<Producer>(new Producer(GeneralSettings.KafkaBroker, GeneralSettings.KafkaTopic));
+  }
+  return ProducerPtr;
 }
 
 void AdcReadoutCore::inputThread() {

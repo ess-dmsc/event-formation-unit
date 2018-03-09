@@ -18,12 +18,12 @@ PopulateCLIParser PopulateParser{CLIArguments};
 
 class AdcReadout : public AdcReadoutCore {
 public:
-  AdcReadout(BaseSettings Settings) : AdcReadoutCore(Settings, LocalAdcSettings) {}
+  AdcReadout(BaseSettings Settings) : AdcReadoutCore(std::move(Settings), LocalAdcSettings) {}
 };
 
 class ADC_Readout_Factory : public DetectorFactory {
 public:
-  std::shared_ptr<Detector> create(BaseSettings Settings) {
+  std::shared_ptr<Detector> create(BaseSettings Settings) override {
     return std::shared_ptr<Detector>(new AdcReadout(Settings));
   }
 };

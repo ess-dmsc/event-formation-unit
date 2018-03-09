@@ -25,10 +25,11 @@ public:
 protected:
   virtual void inputThread();
   virtual void parsingThread();
+  virtual std::shared_ptr<Producer> getProducer();
   using ElementPtr = SpscBuffer::ElementPtr<InData>;
   using Queue = SpscBuffer::CircularBuffer<InData>;
   Queue toParsingQueue;
-  std::uint16_t LastGlobalCount;
+  std::uint16_t LastGlobalCount{0};
   
   std::vector<std::unique_ptr<AdcDataProcessor>> Processors;
   
@@ -44,4 +45,5 @@ protected:
   
   std::shared_ptr<Producer> ProducerPtr;
   AdcSettingsStruct &AdcSettings;
+  BaseSettings GeneralSettings;
 };

@@ -32,7 +32,7 @@ std::uint64_t CalcSampleTimeStamp(RawTimeStamp const &Start, RawTimeStamp const 
 
 class ChannelProcessing {
 public:
-  ChannelProcessing();
+  ChannelProcessing() = default;
   ProcessedSamples operator()(DataModule const &Samples);
   void setMeanOfSamples(int NrOfSamples);
   int getMeanOfSamples() const {return MeanOfNrOfSamples;};
@@ -50,7 +50,7 @@ private:
 class SampleProcessing : public AdcDataProcessor {
 public:
   SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string const &Name);
-  ~SampleProcessing();
+  ~SampleProcessing() = default;
   virtual void operator()(PacketData const &Data) override;
   void setMeanOfSamples(int NrOfSamples);
   void setTimeStampLocation(TimeStampLocation Location);

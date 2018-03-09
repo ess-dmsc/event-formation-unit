@@ -53,6 +53,8 @@ public:
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
    */
+  
+  virtual ~Detector() = default;
 
   /** @brief document */
   virtual int statsize() { return Stats.size(); }

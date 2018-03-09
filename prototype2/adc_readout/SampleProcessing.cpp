@@ -13,7 +13,8 @@ std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start, const RawTimeStamp 
   std::uint64_t EndNS = End.GetTimeStampNS();
   if (TimeStampLocation::Start == Location) {
     return StartNS;
-  } else if (TimeStampLocation::End == Location) {
+  }
+  if (TimeStampLocation::End == Location) {
     return EndNS;
   }
   return StartNS + (EndNS - StartNS) / 2;
@@ -22,10 +23,6 @@ std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start, const RawTimeStamp 
 double CalcTimeStampDelta(int OversamplingFactor) {
   constexpr double SampleTime = 1.0 / (88052500/2);
   return SampleTime * OversamplingFactor;
-}
-
-ChannelProcessing::ChannelProcessing() {
-  
 }
 
 ProcessedSamples ChannelProcessing::operator()(const DataModule &Samples) {
@@ -46,7 +43,7 @@ ProcessedSamples ChannelProcessing::operator()(const DataModule &Samples) {
       NrOfSamplesSummed = 0;
     }
   }
-  if (ReturnSamples.TimeStamps.size() > 0) {
+  if (not ReturnSamples.TimeStamps.empty()) {
     ReturnSamples.TimeStamp = ReturnSamples.TimeStamps.at(0);
   }
   ReturnSamples.Channel = Samples.Channel;
@@ -68,7 +65,7 @@ void ChannelProcessing::reset() {
   NrOfSamplesSummed = 0;
 }
 
-SampleProcessing::SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string const &Name) : AdcDataProcessor(Prod), AdcName(Name) {
+SampleProcessing::SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string const &Name) : AdcDataProcessor(std::move(Prod)), AdcName(Name) {
   
 }
 
@@ -94,14 +91,10 @@ void SampleProcessing::operator()(const PacketData &Data) {
       setTimeStampLocation(TSLocation);
     }
     auto ResultingSamples = ProcessingInstances.at(Module.Channel)(Module);
-    if (ResultingSamples.Samples.size() > 0) {
+    if (not ResultingSamples.Samples.empty()) {
       serializeAndTransmitData(ResultingSamples);
     }
   }
-}
-
-SampleProcessing::~SampleProcessing() {
-  
 }
 
 void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {

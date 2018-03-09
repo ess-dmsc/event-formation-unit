@@ -11,7 +11,7 @@
 static const std::int32_t TimerCounterMax = 88052500/2;
   
 std::uint64_t RawTimeStamp::GetTimeStampNS() const {
-  std::uint64_t NanoSec = static_cast<std::uint64_t>((static_cast<double>(SecondsFrac) / static_cast<double>(TimerCounterMax)) * 1e9 + 0.5);
+  auto NanoSec = static_cast<std::uint64_t>(std::llround(static_cast<double>(SecondsFrac) / static_cast<double>(TimerCounterMax) * 1e9));
   return static_cast<std::uint64_t>(static_cast<std::uint64_t>(Seconds) * 1000000000 + NanoSec);
 }
   
@@ -33,5 +33,5 @@ RawTimeStamp RawTimeStamp::GetOffsetTimeStamp(const std::int32_t &SampleOffset) 
   if (RemainderSecondsFrac < 0) {
     NewSecondsFrac = TimerCounterMax + RemainderSecondsFrac;
   }
-  return RawTimeStamp(Seconds + SecondsChange, NewSecondsFrac);
+  return {Seconds + SecondsChange, static_cast<uint32_t>(NewSecondsFrac)};
 }

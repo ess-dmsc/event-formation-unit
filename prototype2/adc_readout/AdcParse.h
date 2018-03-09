@@ -35,7 +35,7 @@ public:
     HEADER_TYPE,
     IDLE_LENGTH,
   };
-  ParserException(std::string ErrorStr);
+  ParserException(std::string const &ErrorStr);
   ParserException(Type ErrorType);
   virtual const char* what() const noexcept override;
   Type getErrorType() const;
@@ -145,5 +145,3 @@ HeaderInfo parseHeader(const InData &Packet);
 TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte);
 IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte);
 StreamSetting parseStreamSettings(const std::uint16_t &SettingsRaw);
-
-

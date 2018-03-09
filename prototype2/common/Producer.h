@@ -11,6 +11,8 @@
 
 class ProducerBase {
 public:
+  ProducerBase() = default;
+  virtual ~ProducerBase() = default;
   virtual int produce(char *buffer, int length) = 0;
 };
 

@@ -10,8 +10,8 @@
 #include <limits>
 #include "ev42_events_generated.h"
 
-PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod) : AdcDataProcessor(Prod) {
-  
+PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod) : AdcDataProcessor(std::move(Prod)) {
+
 }
 
 void PeakFinder::operator()(const PacketData &Data) {
@@ -23,7 +23,7 @@ void PeakFinder::operator()(const PacketData &Data) {
     //std::uint64_t PeakTimeStamp = TimeStamp::CalcSample(Module.TimeStampSeconds, Module.TimeStampSecondsFrac, Result.MaxLocation);
     std::uint64_t PeakTimeStamp = Module.TimeStamp.GetOffsetTimeStamp(Result.MaxLocation).GetTimeStampNS();
     SendData(PeakTimeStamp, Result.Max, Module.Channel);
-    
+
   }
 }
 
@@ -59,4 +59,3 @@ ModuleAnalysisResult FindPeak(const std::vector<std::uint16_t> &SampleRun) {
   ReturnData.Mean = Sum / SampleRun.size();
   return ReturnData;
 }
-

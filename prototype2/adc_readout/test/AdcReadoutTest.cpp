@@ -159,7 +159,7 @@ TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
   Readout.startThreads();
   LoadPacketFile("test_packet_stream.dat");
   std::chrono::duration<std::int64_t, std::milli> SleepTime(50);
-  PacketHeader *PacketHeadPointer = reinterpret_cast<PacketHeader*>(BufferPtr);
+  auto PacketHeadPointer = reinterpret_cast<PacketHeader*>(BufferPtr);
   {
     TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort, BufferPtr, PacketSize);
     Server1.startPacketTransmission(1, 100);

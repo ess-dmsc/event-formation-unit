@@ -11,11 +11,11 @@
 #include <map>
 #include <bitset>
 
-ParserException::ParserException(std::string ErrorStr) : std::runtime_error(ErrorStr), ParserErrorType(Type::UNKNOWN), Error(ErrorStr) {
+ParserException::ParserException(std::string const &ErrorStr) : std::runtime_error(ErrorStr), ParserErrorType(Type::UNKNOWN), Error(ErrorStr) {
 }
 
 ParserException::ParserException(Type ErrorType) : std::runtime_error("Parser error of type " + std::to_string(static_cast<int>(ErrorType))), ParserErrorType(ErrorType) {
-  
+
 }
 
 ParserException::Type ParserException::getErrorType() const {
@@ -54,14 +54,14 @@ HeaderInfo parseHeader(const InData &Packet) {
   if (Packet.Length < sizeof(PacketHeader)) {
     throw ParserException(ParserException::Type::HEADER_LENGTH);
   }
-  const PacketHeader *HeaderRaw = reinterpret_cast<const PacketHeader*>(Packet.Data);
+  auto HeaderRaw = reinterpret_cast<const PacketHeader*>(Packet.Data);
   PacketHeader Header(*HeaderRaw);
   Header.fixEndian();
   if (0x1111 == Header.PacketType) {
     ReturnInfo.Type = PacketType::Data;
   } else if (0x2222 == Header.PacketType) {
     ReturnInfo.Type = PacketType::Idle;
-  } else if (0x3300 == (Header.PacketType & 0xFF00)) {
+  } else if (0x3300 == (Header.PacketType & 0xFF00u)) {
     ReturnInfo.Type = PacketType::Stream;
   } else {
     throw ParserException(ParserException::Type::HEADER_TYPE);
@@ -79,7 +79,7 @@ HeaderInfo parseHeader(const InData &Packet) {
 AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
   AdcData ReturnData;
   while (StartByte + sizeof(DataHeader) < Packet.Length) {
-    const DataHeader *HeaderRaw = reinterpret_cast<const DataHeader*>(Packet.Data + StartByte);
+    auto HeaderRaw = reinterpret_cast<const DataHeader*>(Packet.Data + StartByte);
     DataHeader Header(*HeaderRaw);
     Header.fixEndian();
     if (0xABCD != Header.MagicValue) {
@@ -96,7 +96,7 @@ AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
     CurrentDataModule.Data.resize(NrOfSamples);
     CurrentDataModule.Channel = Header.Channel;
     CurrentDataModule.TimeStamp = Header.TimeStamp;
-    const std::uint16_t *ElementPointer = reinterpret_cast<const std::uint16_t*>(Packet.Data + StartByte + sizeof(DataHeader));
+    auto ElementPointer = reinterpret_cast<const std::uint16_t*>(Packet.Data + StartByte + sizeof(DataHeader));
     for (int i = 0; i < NrOfSamples; ++i) {
       CurrentDataModule.Data[i] = ntohs(ElementPointer[i]);
     }
@@ -119,7 +119,7 @@ AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte, std::uint
   if (StartByte + sizeof(StreamHeader) > Packet.Length) {
     throw ParserException(ParserException::Type::STREAM_HEADER);
   }
-  const StreamHeader *HeaderRaw = reinterpret_cast<const StreamHeader*>(Packet.Data + StartByte);
+  auto HeaderRaw = reinterpret_cast<const StreamHeader*>(Packet.Data + StartByte);
   StreamHeader Header(*HeaderRaw);
   Header.fixEndian();
   if (0xABCD != Header.MagicValue) {
@@ -138,8 +138,8 @@ AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte, std::uint
     throw ParserException(ParserException::Type::STREAM_SIZE);
   }
   for (int j = 0; j < NrOfElements; j++) {
-    const std::uint16_t *CurrentValue = reinterpret_cast<const std::uint16_t*>(Packet.Data + StartByte + sizeof(StreamHeader) + j * sizeof(std::uint16_t));
-    
+    auto CurrentValue = reinterpret_cast<const std::uint16_t*>(Packet.Data + StartByte + sizeof(StreamHeader) + j * sizeof(std::uint16_t));
+
     ReturnData.Modules.at(j % NumberOfChannels).Data.at(j / NumberOfChannels) = ntohs(*CurrentValue);
   }
   ReturnData.FillerStart = StartByte + Header.Length;
@@ -153,7 +153,7 @@ AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte, std::uint
 
 TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte) {
   TrailerInfo ReturnInfo;
-  const std::uint8_t *FillerPointer = reinterpret_cast<const std::uint8_t*>(Packet.Data + StartByte);
+  auto FillerPointer = reinterpret_cast<const std::uint8_t*>(Packet.Data + StartByte);
   for (unsigned int i = 0; i < Packet.Length - StartByte - 4; i++) {
     if (FillerPointer[i] != 0x55) {
       throw ParserException(ParserException::Type::TRAILER_0x55);
@@ -196,7 +196,7 @@ IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte) {
     throw ParserException(ParserException::Type::IDLE_LENGTH);
   }
   IdleInfo ReturnData;
-  const IdleHeader *HeaderRaw = reinterpret_cast<const IdleHeader*>(Packet.Data + StartByte);
+  auto *HeaderRaw = reinterpret_cast<const IdleHeader*>(Packet.Data + StartByte);
   IdleHeader Header(*HeaderRaw);
   Header.fixEndian();
   ReturnData.TimeStamp = Header.TimeStamp;
@@ -209,12 +209,12 @@ StreamSetting parseStreamSettings(const std::uint16_t &SettingsRaw) {
   if (0x33 != LeadingByte) {
     throw ParserException(ParserException::Type::STREAM_TYPE);
   }
-  int OversamplingSetting = SettingsRaw & 0x0F;
+  unsigned int OversamplingSetting = SettingsRaw & 0x0Fu;
   if (OversamplingSetting > 4 or 3 == OversamplingSetting or 0 == OversamplingSetting) {
     throw ParserException(ParserException::Type::STREAM_OVERSAMPLING);
   }
   ReturnSetting.OversamplingFactor = OversamplingSetting;
-  std::bitset<4> ActiveChannels((SettingsRaw & 0xF0) >> 4);
+  std::bitset<4> ActiveChannels((SettingsRaw & 0xF0u) >> 4);
   if ((ActiveChannels.count() == 4 and 4 != OversamplingSetting) or (ActiveChannels.count() == 2 and OversamplingSetting < 2)) {
     throw ParserException(ParserException::Type::STREAM_CHANNELS_MASK);
   }
