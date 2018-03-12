@@ -148,6 +148,11 @@ def get_pipeline(image_key)
                     def container = get_container(image_key)
                     def custom_sh = images[image_key]['sh']
 
+                    // Break build to test notification
+                    if (image_key == "centos7" || image_key == "fedora25") {
+                        1 / 0
+                    }
+
                     docker_clone(image_key)
                     docker_dependencies(image_key)
                     docker_cmake(image_key)
