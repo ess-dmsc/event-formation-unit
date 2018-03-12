@@ -91,50 +91,39 @@ def docker_build(image_key) {
 
 def docker_tests(image_key) {
     def custom_sh = images[image_key]['sh']
-        try {
-            sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-                cd build
-                . ./activate_run.sh
-                make runtest VERBOSE=ON
-                make runefu VERBOSE=ON
-            \""""
-        } catch(e) {
-            failure_function(e, 'Run tests (${container_name(image_key)}) failed')
-        }
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+        cd build
+        . ./activate_run.sh
+        make runtest VERBOSE=ON
+        make runefu VERBOSE=ON
+    \""""
 }
 
 def docker_tests_coverage(image_key) {
     def custom_sh = images[image_key]['sh']
     dir("${project}") {
-        try {
-            sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-                cd build
-                . ./activate_run.sh
-                make VERBOSE=ON
-                make runefu VERBOSE=ON
-                make coverage VERBOSE=ON
-                make valgrind VERBOSE=ON
-            \""""
-            sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
-            junit 'build/test_results/*.xml'
-            step([
-                $class: 'CoberturaPublisher',
-                autoUpdateHealth: true,
-                autoUpdateStability: true,
-                coberturaReportFile: 'build/coverage/coverage.xml',
-                failUnhealthy: false,
-                failUnstable: false,
-                maxNumberOfBuilds: 0,
-                onlyStable: false,
-                sourceEncoding: 'ASCII',
-                zoomCoverageChart: false
-            ])
-            //archiveArtifacts artifacts: 'build/'
-        } catch(e) {
-            sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
-            junit 'build/test_results/*.xml'
-            failure_function(e, 'Run tests (${container_name(image_key)}) failed')
-        }
+        sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+            cd build
+            . ./activate_run.sh
+            make VERBOSE=ON
+            make runefu VERBOSE=ON
+            make coverage VERBOSE=ON
+            make valgrind VERBOSE=ON
+        \""""
+        sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
+        junit 'build/test_results/*.xml'
+        step([
+            $class: 'CoberturaPublisher',
+            autoUpdateHealth: true,
+            autoUpdateStability: true,
+            coberturaReportFile: 'build/coverage/coverage.xml',
+            failUnhealthy: false,
+            failUnstable: false,
+            maxNumberOfBuilds: 0,
+            onlyStable: false,
+            sourceEncoding: 'ASCII',
+            zoomCoverageChart: false
+        ])
     }
 }
 
@@ -159,39 +148,16 @@ def get_pipeline(image_key)
                     def container = get_container(image_key)
                     def custom_sh = images[image_key]['sh']
 
-                    try {
-                        docker_clone(image_key)
-                    } catch (e) {
-                        failure_function(e, "Git clone for ${image_key} failed")
-                    }
-
-                    try {
-                        docker_dependencies(image_key)
-                    } catch (e) {
-                        failure_function(e, "Get dependencies for ${image_key} failed")
-                    }
-
-                    try {
-                        docker_cmake(image_key)
-                    } catch (e) {
-                        failure_function(e, "CMake for ${image_key} failed")
-                    }
-
-                    try {
-                        docker_build(image_key)
-                    } catch (e) {
-                        failure_function(e, "Build for ${image_key} failed")
-                    }
+                    docker_clone(image_key)
+                    docker_dependencies(image_key)
+                    docker_cmake(image_key)
+                    docker_build(image_key)
 
                     if (image_key == coverage_on) {
                         docker_tests_coverage(image_key)
                     } else {
                         docker_tests(image_key)
                     }
-
-                    //docker_tests(image_key)
-                } catch(e) {
-                    failure_function(e, "Unknown build failure for ${image_key}")
                 } finally {
                     sh "docker stop ${container_name(image_key)}"
                     sh "docker rm -f ${container_name(image_key)}"
@@ -210,39 +176,15 @@ def get_macos_pipeline()
                 cleanWs()
 
                 dir("${project}/code") {
-                    try {
-                        checkout scm
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / Checkout failed')
-                    }
+                    checkout scm
                 }
 
                 dir("${project}/build") {
-                    try {
-                        sh "conan install --build=outdated ../code"
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / getting dependencies failed')
-                    }
-
-                    try {
-                        sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / CMake failed')
-                    }
-
-                    try {
-                        sh "make"
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / make failed')
-                    }
-
-                    try {
-                        sh "make runtest"
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / tests failed')
-                    }
+                    sh "conan install --build=outdated ../code"
+                    sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
+                    sh "make"
+                    sh "make runtest"
                 }
-
             }
         }
     }
@@ -315,8 +257,6 @@ def get_release_pipeline()
 
                     sh "docker cp ${container_name}:/home/jenkins/archive/efu-centos7.tar.gz ."
                     archiveArtifacts "efu-centos7.tar.gz"
-                } catch(e) {
-                    failure_function(e, "Unknown build failure for release-centos7")
                 } finally {
                     sh "docker stop ${container_name}"
                     sh "docker rm -f ${container_name}"
@@ -361,5 +301,9 @@ node('docker') {
     builders['macOS'] = get_macos_pipeline()
     builders['release-centos7'] = get_release_pipeline()
 
-    parallel builders
+    try {
+        parallel builders
+    } catch (e) {
+        failure_function(e, 'Job failed')
+    }
 }
