@@ -38,6 +38,7 @@ def Object container_name(image_key) {
 }
 
 def docker_clone(image_key) {
+    def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         git clone \
             --branch ${env.BRANCH_NAME} \
