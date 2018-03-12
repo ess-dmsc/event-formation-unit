@@ -37,6 +37,14 @@ def Object container_name(image_key) {
     return "${base_container_name}-${image_key}"
 }
 
+def docker_clone(image_key) {
+    sh """docker exec ${container_name} ${custom_sh} -c \"
+        git clone \
+            --branch ${env.BRANCH_NAME} \
+            https://github.com/ess-dmsc/event-formation-unit.git
+    \""""
+}
+
 def docker_dependencies(image_key) {
     def conan_remote = "ess-dmsc-local"
     def custom_sh = images[image_key]['sh']
@@ -150,12 +158,10 @@ def get_pipeline(image_key)
                     def container = get_container(image_key)
                     def custom_sh = images[image_key]['sh']
 
-                    // Copy sources to container and change owner and group.
-                    dir("${project}") {
-                        sh "docker cp code ${container_name(image_key)}:/home/jenkins/${project}"
-                        sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
-                            chown -R jenkins.jenkins /home/jenkins/${project}
-                            \""""
+                    try {
+                        docker_clone(image_key)
+                    } catch (e) {
+                        failure_function(e, "Git clone for ${image_key} failed")
                     }
 
                     try {
