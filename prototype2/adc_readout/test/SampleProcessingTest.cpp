@@ -7,9 +7,26 @@
 
 #include <gtest/gtest.h>
 #include "../SampleProcessing.h"
+#ifdef TROMPLELOEIL_AVAILABLE
 #include <trompeloeil.hpp>
+#endif
 #include "senv_data_generated.h"
 #include <array>
+
+DataModule getTestModule() {
+  DataModule Module;
+  Module.TimeStamp.Seconds = 42;
+  Module.TimeStamp.SecondsFrac = 65;
+  Module.OversamplingFactor = 1;
+  Module.Channel = 3;
+  Module.Data.push_back(1);
+  Module.Data.push_back(15);
+  Module.Data.push_back(128);
+  Module.Data.push_back(0);
+  return Module;
+}
+
+#ifdef TROMPLELOEIL_AVAILABLE
 
 class SampleProcessingStandIn : public SampleProcessing {
 public:
@@ -70,19 +87,6 @@ TEST(SampleProcessing, SetTimeStampLocation) {
   TestProcessor.setTimeStampLocation(UsedLocation);
   EXPECT_EQ(TestProcessor.TSLocation, UsedLocation);
   EXPECT_EQ(TestProcessor.ProcessingInstances.at(TempModule.Channel).getTimeStampLocation(), UsedLocation);
-}
-
-DataModule getTestModule() {
-  DataModule Module;
-  Module.TimeStamp.Seconds = 42;
-  Module.TimeStamp.SecondsFrac = 65;
-  Module.OversamplingFactor = 1;
-  Module.Channel = 3;
-  Module.Data.push_back(1);
-  Module.Data.push_back(15);
-  Module.Data.push_back(128);
-  Module.Data.push_back(0);
-  return Module;
 }
 
 TEST(SampleProcessing, ProcessCallTest) {
@@ -225,6 +229,8 @@ TEST(SampleProcessing, SerialisationFlatbufferNotCalledTest) {
   PacketData TempPacket;
   TestProcessor(TempPacket);
 }
+
+#endif
 
 class ChannelProcessingTest : public ::testing::Test {
 public:

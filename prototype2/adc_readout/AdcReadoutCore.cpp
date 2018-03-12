@@ -39,10 +39,15 @@ AdcReadoutCore::AdcReadoutCore(BaseSettings Settings,
         std::unique_ptr<AdcDataProcessor>(new PeakFinder(ProducerPtr)));
   }
   if (AdcSettings.SerializeSamples) {
-    std::unique_ptr<AdcDataProcessor> Processor(new SampleProcessing(ProducerPtr, AdcSettings.Name));
-    dynamic_cast<SampleProcessing *>(Processor.get())->setTimeStampLocation(TimeStampLocationMap.at(AdcSettings.TimeStampLocation));
-    dynamic_cast<SampleProcessing *>(Processor.get())->setMeanOfSamples(AdcSettings.TakeMeanOfNrOfSamples);
-    dynamic_cast<SampleProcessing *>(Processor.get())->setSerializeTimestamps(AdcSettings.SampleTimeStamp);
+    std::unique_ptr<AdcDataProcessor> Processor(
+        new SampleProcessing(ProducerPtr, AdcSettings.Name));
+    dynamic_cast<SampleProcessing *>(Processor.get())
+        ->setTimeStampLocation(
+            TimeStampLocationMap.at(AdcSettings.TimeStampLocation));
+    dynamic_cast<SampleProcessing *>(Processor.get())
+        ->setMeanOfSamples(AdcSettings.TakeMeanOfNrOfSamples);
+    dynamic_cast<SampleProcessing *>(Processor.get())
+        ->setSerializeTimestamps(AdcSettings.SampleTimeStamp);
     Processors.emplace_back(std::move(Processor));
   }
 }

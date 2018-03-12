@@ -6,6 +6,8 @@
  */
 
 #include <gtest/gtest.h>
+
+#ifdef TROMPLELOEIL_AVAILABLE
 #include <trompeloeil.hpp>
 
 namespace trompeloeil {
@@ -22,6 +24,7 @@ namespace trompeloeil {
     ADD_FAILURE_AT(file, line) << msg;
   }
 }
+#endif
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

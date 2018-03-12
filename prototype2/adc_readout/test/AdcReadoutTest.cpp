@@ -9,7 +9,10 @@
 #include "../AdcReadoutCore.h"
 #include "TestUDPServer.h"
 #include <random>
+
+#ifdef TROMPLELOEIL_AVAILABLE
 #include <trompeloeil.hpp>
+#endif
 
 std::uint16_t GetPortNumber() {
   static std::uint16_t CurrentPortNumber = 0;
@@ -181,6 +184,7 @@ TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
 }
 
+#ifdef TROMPLELOEIL_AVAILABLE
 class AdcReadoutMock : public AdcReadoutCore {
 public:
   AdcReadoutMock(BaseSettings Settings, AdcSettingsStruct AdcSettings) : AdcReadoutCore(Settings, AdcSettings) {};
@@ -235,4 +239,4 @@ TEST_F(AdcReadoutSimpleTest, FailSetTimeStampLoc) {
   EXPECT_ANY_THROW(AdcReadoutMock(Settings, AdcSettings));
 }
 
-
+#endif
