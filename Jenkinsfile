@@ -38,7 +38,7 @@ def Object container_name(image_key) {
 }
 
 def docker_clone(image_key) {
-    sh """docker exec ${container_name} ${custom_sh} -c \"
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         git clone \
             --branch ${env.BRANCH_NAME} \
             https://github.com/ess-dmsc/event-formation-unit.git
