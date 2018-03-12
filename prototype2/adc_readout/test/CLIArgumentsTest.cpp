@@ -28,6 +28,7 @@ TEST_F(CLITesting, DefaultValuesTest) {
   TestApp.parse(CArgs.size(), &CArgs[0]);
   EXPECT_EQ(AdcSettings.PeakDetection, false);
   EXPECT_EQ(AdcSettings.SerializeSamples, false);
+  EXPECT_EQ(AdcSettings.SampleTimeStamp, false);
   EXPECT_EQ(AdcSettings.TakeMeanOfNrOfSamples, 1);
   EXPECT_EQ(AdcSettings.TimeStampLocation, "Middle");
 }
@@ -54,6 +55,18 @@ TEST_F(CLITesting, EnablePeakDetect) {
   }
   TestApp.parse(CArgs.size(), &CArgs[0]);
   EXPECT_EQ(AdcSettings.PeakDetection, true);
+}
+
+TEST_F(CLITesting, EnableSampleTimeStamps) {
+  std::vector<std::string> TestArguments{"AppName", "--sample_timestamp"};
+  std::vector<char*> CArgs;
+  CArgs.reserve(TestArguments.size());
+  
+  for (size_t i = 0; i < TestArguments.size(); ++i) {
+    CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
+  }
+  TestApp.parse(CArgs.size(), &CArgs[0]);
+  EXPECT_EQ(AdcSettings.SampleTimeStamp, true);
 }
 
 TEST_F(CLITesting, MeanOfSamples) {

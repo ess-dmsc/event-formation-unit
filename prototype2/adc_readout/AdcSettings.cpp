@@ -23,6 +23,7 @@ void SetCLIArguments(CLI::App &parser, AdcSettingsStruct &AdcSettings) {
                   "Kafka broker.")
       ->group("ADC Readout Options")
       ->set_default_val("AdcDemonstrator");
+  parser.add_flag("--sample_timestamp", AdcSettings.SampleTimeStamp, "Provide a timestamp with every single ADC sample. Note: this drastically increases the bandwidth requirements.")->group("ADC Readout Options");
   auto IsPositiveInt = [&AdcSettings](std::vector<std::string> Input) -> bool {
     int InputVal;
     try {

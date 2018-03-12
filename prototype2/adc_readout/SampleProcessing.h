@@ -57,6 +57,7 @@ public:
   virtual void operator()(PacketData const &Data) override;
   void setMeanOfSamples(int NrOfSamples);
   void setTimeStampLocation(TimeStampLocation Location);
+  void setSerializeTimestamps(bool SerializeTimeStamps);
   TimeStampLocation getTimeStampLocation() const { return TSLocation; };
 
 protected:
@@ -69,5 +70,6 @@ protected:
   std::map<int, std::uint64_t> MessageCounters;
   std::map<int, ChannelProcessing> ProcessingInstances;
   int MeanOfNrOfSamples{1};
+  bool SampleTimestamps{false};
   TimeStampLocation TSLocation{TimeStampLocation::Middle};
 };

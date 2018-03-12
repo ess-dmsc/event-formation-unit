@@ -82,6 +82,10 @@ void SampleProcessing::setMeanOfSamples(int NrOfSamples) {
   }
 }
 
+void SampleProcessing::setSerializeTimestamps(bool SerializeTimeStamps) {
+  SampleTimestamps = SerializeTimeStamps;
+}
+
 void SampleProcessing::setTimeStampLocation(TimeStampLocation Location) {
   TSLocation = Location;
   for (auto &Processor : ProcessingInstances) {
@@ -106,13 +110,19 @@ void SampleProcessing::operator()(const PacketData &Data) {
 void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
   flatbuffers::FlatBufferBuilder builder;
   auto FBSampleData = builder.CreateVector(Data.Samples);
-  auto FBTimeStamps = builder.CreateVector(Data.TimeStamps);
+  flatbuffers::Offset<flatbuffers::Vector<std::uint64_t>> FBTimeStamps;
+  if (SampleTimestamps) {
+    FBTimeStamps = builder.CreateVector(Data.TimeStamps);
+  }
+
   auto FBName =
       builder.CreateString(AdcName + "_" + std::to_string(Data.Channel));
   senv_dataBuilder MessageBuilder(builder);
   MessageBuilder.add_Name(FBName);
   MessageBuilder.add_Values(FBSampleData);
-  MessageBuilder.add_TimeStamps(FBTimeStamps);
+  if (SampleTimestamps) {
+    MessageBuilder.add_TimeStamps(FBTimeStamps);
+  }
   MessageBuilder.add_Channel(Data.Channel);
   MessageBuilder.add_PacketTimeStamp(Data.TimeStamp);
   MessageBuilder.add_TimeDelta(Data.TimeDelta);
