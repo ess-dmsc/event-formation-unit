@@ -297,9 +297,9 @@ def get_release_pipeline()
 
                     sh """docker exec ${container_name} ${custom_sh} -c \"
                         mkdir -p archive/efu-centos7 && \
-                        cp -r build/bin /archive/efu-centos7 && \
-                        cp -r build/lib /archive/efu-centos7 && \
-                        cp -r build/licenses /archive/efu-centos7 && \
+                        cp -r build/bin archive/efu-centos7 && \
+                        cp -r build/lib archive/efu-centos7 && \
+                        cp -r build/licenses archive/efu-centos7 && \
                         cd archive && \
                         tar czvf efu-centos7.tar.gz efu-centos7
                     \""""
