@@ -23,6 +23,11 @@ set(efu_INC
   
 add_definitions(-std=c++11)
 create_executable(efu)
+get_filename_component(EFU_RUN_INSTRUCTIONS "Executing artefacts.md" ABSOLUTE)
+add_custom_command(TARGET efu POST_BUILD
+                COMMAND ${CMAKE_COMMAND} -E copy
+                ${EFU_RUN_INSTRUCTIONS}
+                "$<TARGET_FILE_DIR:efu>/")
 
 #=============================================================================
 # EFU Tests
