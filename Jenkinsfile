@@ -102,28 +102,48 @@ def docker_tests(image_key) {
 def docker_tests_coverage(image_key) {
     def custom_sh = images[image_key]['sh']
     dir("${project}") {
-        sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-            cd build
-            . ./activate_run.sh
-            make VERBOSE=ON
-            make runefu VERBOSE=ON
-            make coverage VERBOSE=ON
-            make valgrind VERBOSE=ON
-        \""""
-        sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
-        junit 'build/test_results/*.xml'
-        step([
-            $class: 'CoberturaPublisher',
-            autoUpdateHealth: true,
-            autoUpdateStability: true,
-            coberturaReportFile: 'build/coverage/coverage.xml',
-            failUnhealthy: false,
-            failUnstable: false,
-            maxNumberOfBuilds: 0,
-            onlyStable: false,
-            sourceEncoding: 'ASCII',
-            zoomCoverageChart: false
-        ])
+        try {
+            sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+                cd build
+                . ./activate_run.sh
+                make VERBOSE=ON
+                make runefu VERBOSE=ON
+                make coverage VERBOSE=ON
+                make valgrind VERBOSE=ON
+            \""""
+            sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
+            junit 'build/test_results/*.xml'
+            step([
+                $class: 'CoberturaPublisher',
+                autoUpdateHealth: true,
+                autoUpdateStability: true,
+                coberturaReportFile: 'build/coverage/coverage.xml',
+                failUnhealthy: false,
+                failUnstable: false,
+                maxNumberOfBuilds: 0,
+                onlyStable: false,
+                sourceEncoding: 'ASCII',
+                zoomCoverageChart: false
+            ])
+            step([$class: 'ValgrindPublisher',
+                  pattern: 'build/memcheck_res/*.valgrind',
+                  failBuildOnMissingReports: true,
+                  failBuildOnInvalidReports: true,
+                  publishResultsForAbortedBuilds: false,
+                  publishResultsForFailedBuilds: false,
+                  failThresholdInvalidReadWrite: '',
+                  unstableThresholdInvalidReadWrite: '',
+                  failThresholdDefinitelyLost: '',
+                  unstableThresholdDefinitelyLost: '',
+                  failThresholdTotal: '',
+                  unstableThresholdTotal: '99'
+            ])
+            //archiveArtifacts artifacts: 'build/'
+        } catch(e) {
+            sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
+            junit 'build/test_results/*.xml'
+            failure_function(e, 'Run tests (${container_name(image_key)}) failed')
+        }
     }
 }
 
