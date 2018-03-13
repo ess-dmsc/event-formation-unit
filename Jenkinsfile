@@ -37,6 +37,15 @@ def Object container_name(image_key) {
     return "${base_container_name}-${image_key}"
 }
 
+def docker_clone(image_key) {
+    def custom_sh = images[image_key]['sh']
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+        git clone \
+            --branch ${env.BRANCH_NAME} \
+            https://github.com/ess-dmsc/event-formation-unit.git ${project}
+    \""""
+}
+
 def docker_dependencies(image_key) {
     def conan_remote = "ess-dmsc-local"
     def custom_sh = images[image_key]['sh']
@@ -82,16 +91,12 @@ def docker_build(image_key) {
 
 def docker_tests(image_key) {
     def custom_sh = images[image_key]['sh']
-        try {
-            sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-                cd build
-                . ./activate_run.sh
-                make runtest VERBOSE=ON
-                make runefu VERBOSE=ON
-            \""""
-        } catch(e) {
-            failure_function(e, 'Run tests (${container_name(image_key)}) failed')
-        }
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+        cd build
+        . ./activate_run.sh
+        make runtest VERBOSE=ON
+        make runefu VERBOSE=ON
+    \""""
 }
 
 def docker_tests_coverage(image_key) {
@@ -158,48 +163,25 @@ def get_pipeline(image_key)
 {
     return {
         stage("${image_key}") {
-            try {
-                def container = get_container(image_key)
-                def custom_sh = images[image_key]['sh']
-
-                // Copy sources to container and change owner and group.
-                dir("${project}") {
-                    sh "docker cp code ${container_name(image_key)}:/home/jenkins/${project}"
-                    sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
-                        chown -R jenkins.jenkins /home/jenkins/${project}
-                        \""""
-                }
-
+            node ("docker") {
                 try {
+                    def container = get_container(image_key)
+                    def custom_sh = images[image_key]['sh']
+
+                    docker_clone(image_key)
                     docker_dependencies(image_key)
-                } catch (e) {
-                    failure_function(e, "Get dependencies for ${image_key} failed")
-                }
-
-                try {
                     docker_cmake(image_key)
-                } catch (e) {
-                    failure_function(e, "CMake for ${image_key} failed")
-                }
-
-                try {
                     docker_build(image_key)
-                } catch (e) {
-                    failure_function(e, "Build for ${image_key} failed")
-                }
 
-                if (image_key == coverage_on) {
-                    docker_tests_coverage(image_key)
-                } else {
-                    docker_tests(image_key)
+                    if (image_key == coverage_on) {
+                        docker_tests_coverage(image_key)
+                    } else {
+                        docker_tests(image_key)
+                    }
+                } finally {
+                    sh "docker stop ${container_name(image_key)}"
+                    sh "docker rm -f ${container_name(image_key)}"
                 }
-
-                //docker_tests(image_key)
-            } catch(e) {
-                failure_function(e, "Unknown build failure for ${image_key}")
-            } finally {
-                sh "docker stop ${container_name(image_key)}"
-                sh "docker rm -f ${container_name(image_key)}"
             }
         }
     }
@@ -214,45 +196,97 @@ def get_macos_pipeline()
                 cleanWs()
 
                 dir("${project}/code") {
-                    try {
-                        checkout scm
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / Checkout failed')
-                    }
+                    checkout scm
                 }
 
                 dir("${project}/build") {
-                    try {
-                        sh "conan install --build=outdated ../code"
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / getting dependencies failed')
-                    }
-
-                    try {
-                        sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / CMake failed')
-                    }
-
-                    try {
-                        sh "make"
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / make failed')
-                    }
-
-                    try {
-                        sh "make runtest"
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / tests failed')
-                    }
+                    sh "conan install --build=outdated ../code"
+                    sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
+                    sh "make"
+                    sh "make runtest"
                 }
-
             }
         }
     }
 }
 
-node('docker && dmbuild03.dm.esss.dk') {
+def get_release_pipeline()
+{
+    // Build with release settings to archive artefacts.
+    return {
+        stage("release-centos7") {
+            node('docker') {
+                def container_name = "${base_container_name}-release-centos7"
+                try {
+                    def image = docker.image("essdmscdm/centos7-build-node:1.0.1")
+                    def container = image.run("\
+                        --name ${container_name} \
+                        --tty \
+                        --env http_proxy=${env.http_proxy} \
+                        --env https_proxy=${env.https_proxy} \
+                        --env local_conan_server=${env.local_conan_server} \
+                        ")
+                    def custom_sh = "sh"
+                    def conan_remote = "ess-dmsc-local"
+
+                    sh """docker exec ${container_name} ${custom_sh} -c \"
+                        git clone \
+                            --branch ${env.BRANCH_NAME} \
+                            https://github.com/ess-dmsc/event-formation-unit.git \
+                            ${project}
+                    \""""
+
+                    sh """docker exec ${container_name} ${custom_sh} -c \"
+                        mkdir build && \
+                        cd build && \
+                        conan remote add \
+                            --insert 0 \
+                            ${conan_remote} ${local_conan_server} && \
+                        conan install --build=outdated ../${project}
+                    \""""
+
+                    sh """docker exec ${container_name} ${custom_sh} -c \"
+                        cd ${project} && \
+                        BUILDSTR=\\\$(git log --oneline | head -n 1 | awk '{print \\\$1}') && \
+                        cd ../build && \
+                        . ./activate_run.sh && \
+                        cmake --version && \
+                        cmake \
+                            -DCMAKE_BUILD_TYPE=Release \
+                            -DCMAKE_SKIP_BUILD_RPATH=ON \
+                            -DBUILDSTR=\\\$BUILDSTR \
+                            -DDUMPTOFILE=ON \
+                            ../${project}
+                    \""""
+
+                    sh """docker exec ${container_name} ${custom_sh} -c \"
+                        cd build && \
+                        . ./activate_run.sh && \
+                        make VERBOSE=ON -j4 && \
+                        make VERBOSE=ON -j4 runefu
+                    \""""
+
+                    sh """docker exec ${container_name} ${custom_sh} -c \"
+                        mkdir -p archive/efu-centos7 && \
+                        cp -r build/bin archive/efu-centos7 && \
+                        cp -r build/lib archive/efu-centos7 && \
+                        cp -r build/licenses archive/efu-centos7 && \
+                        cd archive && \
+                        tar czvf efu-centos7.tar.gz efu-centos7
+                    \""""
+
+                    sh "docker cp ${container_name}:/home/jenkins/archive/efu-centos7.tar.gz ."
+                    archiveArtifacts "efu-centos7.tar.gz"
+                } finally {
+                    sh "docker stop ${container_name}"
+                    sh "docker rm -f ${container_name}"
+                }
+            }
+        }
+    }
+}
+
+node('docker') {
 
     // Delete workspace when build is done
     cleanWs()
@@ -285,6 +319,11 @@ node('docker && dmbuild03.dm.esss.dk') {
         builders[image_key] = get_pipeline(image_key)
     }
     builders['macOS'] = get_macos_pipeline()
+    builders['release-centos7'] = get_release_pipeline()
 
-    parallel builders
+    try {
+        parallel builders
+    } catch (e) {
+        failure_function(e, 'Job failed')
+    }
 }
