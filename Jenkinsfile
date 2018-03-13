@@ -131,7 +131,7 @@ def docker_tests_coverage(image_key) {
                   failThresholdDefinitelyLost: '',
                   unstableThresholdDefinitelyLost: '',
                   failThresholdTotal: '',
-                  unstableThresholdTotal: '0'
+                  unstableThresholdTotal: '50'
             ])
             //archiveArtifacts artifacts: 'build/'
         } catch(e) {
