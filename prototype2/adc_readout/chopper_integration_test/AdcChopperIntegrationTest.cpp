@@ -16,6 +16,7 @@
 #include "Producer.h"
 #include <random>
 #include <algorithm>
+#include <iostream>
 
 bool RunLoop = true;
 

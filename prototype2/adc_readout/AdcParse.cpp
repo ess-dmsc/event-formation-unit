@@ -9,6 +9,7 @@
 #include <arpa/inet.h>
 #include <bitset>
 #include <map>
+#include <cstring>
 #include <netinet/in.h>
 
 ParserException::ParserException(std::string const &ErrorStr)
