@@ -117,21 +117,21 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
 
   auto FBName =
       builder.CreateString(AdcName + "_" + std::to_string(Data.Channel));
-  senv_dataBuilder MessageBuilder(builder);
+  SampleEnvironmentDataBuilder MessageBuilder(builder);
   MessageBuilder.add_Name(FBName);
   MessageBuilder.add_Values(FBSampleData);
   if (SampleTimestamps) {
-    MessageBuilder.add_TimeStamps(FBTimeStamps);
+    MessageBuilder.add_Timestamps(FBTimeStamps);
   }
   MessageBuilder.add_Channel(Data.Channel);
-  MessageBuilder.add_PacketTimeStamp(Data.TimeStamp);
+  MessageBuilder.add_PacketTimestamp(Data.TimeStamp);
   MessageBuilder.add_TimeDelta(Data.TimeDelta);
 
   // Note: std::map zero initialises new elements when using the [] operator
   MessageBuilder.add_MessageCounter(MessageCounters[Data.Channel]++);
-  MessageBuilder.add_TimeStampLocation(
+  MessageBuilder.add_TimestampLocation(
       Location(TimeLocSerialisationMap.at(TSLocation)));
-  builder.Finish(MessageBuilder.Finish(), senv_dataIdentifier());
+  builder.Finish(MessageBuilder.Finish(), SampleEnvironmentDataIdentifier());
   ProducerPtr->produce(reinterpret_cast<char *>(builder.GetBufferPointer()),
                        builder.GetSize());
 }

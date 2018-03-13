@@ -153,16 +153,16 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
   
   ASSERT_TRUE(BytesCopied != 0);
   auto Verifier = flatbuffers::Verifier(&TempBuffer[0], BytesCopied);
-  ASSERT_TRUE(Verifysenv_dataBuffer(Verifier));
-  auto SampleData = Getsenv_data(&TempBuffer[0]);
+  ASSERT_TRUE(VerifySampleEnvironmentDataBuffer(Verifier));
+  auto SampleData = GetSampleEnvironmentData(&TempBuffer[0]);
   EXPECT_EQ(SampleData->Name()->str(), Name + "_" + std::to_string(TempModule.Channel));
-  EXPECT_EQ(SampleData->PacketTimeStamp(), TempModule.TimeStamp.GetTimeStampNS());
+  EXPECT_EQ(SampleData->PacketTimestamp(), TempModule.TimeStamp.GetTimeStampNS());
   EXPECT_NEAR(SampleData->TimeDelta(), TempModule.OversamplingFactor/(88052500/2), 0.05);
-  EXPECT_EQ(SampleData->TimeStampLocation(), Location::End);
+  EXPECT_EQ(SampleData->TimestampLocation(), Location::End);
   EXPECT_EQ(SampleData->Channel(), TempModule.Channel);
   EXPECT_TRUE(SampleData->MessageCounter() == 0);
   EXPECT_EQ(SampleData->Values()->size(), TempModule.Data.size());
-  EXPECT_EQ(flatbuffers::IsFieldPresent(SampleData, senv_data::VT_TIMESTAMPS), false);
+  EXPECT_EQ(flatbuffers::IsFieldPresent(SampleData, SampleEnvironmentData::VT_TIMESTAMPS), false);
 }
 
 TEST(SampleProcessing, SerialisationFlatbufferTest3) {
@@ -183,17 +183,17 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
   
   ASSERT_TRUE(BytesCopied != 0);
   auto Verifier = flatbuffers::Verifier(&TempBuffer[0], BytesCopied);
-  ASSERT_TRUE(Verifysenv_dataBuffer(Verifier));
-  auto SampleData = Getsenv_data(&TempBuffer[0]);
+  ASSERT_TRUE(VerifySampleEnvironmentDataBuffer(Verifier));
+  auto SampleData = GetSampleEnvironmentData(&TempBuffer[0]);
   EXPECT_EQ(SampleData->Name()->str(), Name + "_" + std::to_string(TempModule.Channel));
-  EXPECT_EQ(SampleData->PacketTimeStamp(), TempModule.TimeStamp.GetTimeStampNS());
+  EXPECT_EQ(SampleData->PacketTimestamp(), TempModule.TimeStamp.GetTimeStampNS());
   EXPECT_NEAR(SampleData->TimeDelta(), TempModule.OversamplingFactor/(88052500/2), 0.05);
-  EXPECT_EQ(SampleData->TimeStampLocation(), Location::End);
+  EXPECT_EQ(SampleData->TimestampLocation(), Location::End);
   EXPECT_EQ(SampleData->Channel(), TempModule.Channel);
   EXPECT_TRUE(SampleData->MessageCounter() == 0);
   EXPECT_EQ(SampleData->Values()->size(), TempModule.Data.size());
-  ASSERT_EQ(flatbuffers::IsFieldPresent(SampleData, senv_data::VT_TIMESTAMPS), true);
-  EXPECT_EQ(SampleData->TimeStamps()->size(), TempModule.Data.size());
+  ASSERT_EQ(flatbuffers::IsFieldPresent(SampleData, SampleEnvironmentData::VT_TIMESTAMPS), true);
+  EXPECT_EQ(SampleData->Timestamps()->size(), TempModule.Data.size());
 }
 
 #pragma GCC diagnostic push
@@ -203,9 +203,9 @@ TEST(SampleProcessing, SerialisationFlatbufferTest2) {
   std::string Name = "SomeTestName";
   SampleProcessingStandIn TestProcessor(TestProducer, Name);
   TestProcessor.setTimeStampLocation(TimeStampLocation::End);
-  int MessageCounter = 0;
+  unsigned int MessageCounter = 0;
   auto TestMessage = [&MessageCounter](char* DataPtr, int Bytes) {
-    auto SampleData = Getsenv_data(DataPtr);
+    auto SampleData = GetSampleEnvironmentData(DataPtr);
     EXPECT_EQ(SampleData->MessageCounter(), MessageCounter);
     MessageCounter++;
   };
