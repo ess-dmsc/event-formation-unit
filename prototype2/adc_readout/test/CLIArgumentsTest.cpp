@@ -11,9 +11,9 @@
 class CLITesting : public ::testing::Test {
 public:
   virtual void SetUp() {
-    SetCLIArguments(TestApp, AdcSettings);
+    SetCLIArguments(TestApp, ReadoutSettings);
   }
-  AdcSettings AdcSettings;
+  AdcSettings ReadoutSettings;
   CLI::App TestApp;
 };
 
@@ -26,11 +26,11 @@ TEST_F(CLITesting, DefaultValuesTest) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   TestApp.parse(CArgs.size(), &CArgs[0]);
-  EXPECT_EQ(AdcSettings.PeakDetection, false);
-  EXPECT_EQ(AdcSettings.SerializeSamples, false);
-  EXPECT_EQ(AdcSettings.SampleTimeStamp, false);
-  EXPECT_EQ(AdcSettings.TakeMeanOfNrOfSamples, 1);
-  EXPECT_EQ(AdcSettings.TimeStampLocation, "Middle");
+  EXPECT_EQ(ReadoutSettings.PeakDetection, false);
+  EXPECT_EQ(ReadoutSettings.SerializeSamples, false);
+  EXPECT_EQ(ReadoutSettings.SampleTimeStamp, false);
+  EXPECT_EQ(ReadoutSettings.TakeMeanOfNrOfSamples, 1);
+  EXPECT_EQ(ReadoutSettings.TimeStampLocation, "Middle");
 }
 
 TEST_F(CLITesting, EnableStreaming) {
@@ -42,7 +42,7 @@ TEST_F(CLITesting, EnableStreaming) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   TestApp.parse(CArgs.size(), &CArgs[0]);
-  EXPECT_EQ(AdcSettings.SerializeSamples, true);
+  EXPECT_EQ(ReadoutSettings.SerializeSamples, true);
 }
 
 TEST_F(CLITesting, EnablePeakDetect) {
@@ -54,7 +54,7 @@ TEST_F(CLITesting, EnablePeakDetect) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   TestApp.parse(CArgs.size(), &CArgs[0]);
-  EXPECT_EQ(AdcSettings.PeakDetection, true);
+  EXPECT_EQ(ReadoutSettings.PeakDetection, true);
 }
 
 TEST_F(CLITesting, EnableSampleTimeStamps) {
@@ -66,7 +66,7 @@ TEST_F(CLITesting, EnableSampleTimeStamps) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   TestApp.parse(CArgs.size(), &CArgs[0]);
-  EXPECT_EQ(AdcSettings.SampleTimeStamp, true);
+  EXPECT_EQ(ReadoutSettings.SampleTimeStamp, true);
 }
 
 TEST_F(CLITesting, MeanOfSamples) {
@@ -78,7 +78,7 @@ TEST_F(CLITesting, MeanOfSamples) {
     CArgs.push_back(const_cast<char*>(TestArguments[i].c_str()));
   }
   TestApp.parse(CArgs.size(), &CArgs[0]);
-  EXPECT_EQ(AdcSettings.TakeMeanOfNrOfSamples, 5);
+  EXPECT_EQ(ReadoutSettings.TakeMeanOfNrOfSamples, 5);
 }
 
 TEST_F(CLITesting, MeanOfSamplesFail1) {

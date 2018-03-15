@@ -27,7 +27,7 @@ std::uint16_t GetPortNumber() {
 
 class AdcReadoutStandIn : public AdcReadoutBase {
 public:
-  AdcReadoutStandIn(BaseSettings Settings, AdcSettings AdcSettings) : AdcReadoutBase(Settings, AdcSettings) {};
+  AdcReadoutStandIn(BaseSettings Settings, AdcSettings ReadoutSettings) : AdcReadoutBase(Settings, ReadoutSettings) {};
   using Detector::Threads;
   using AdcReadoutBase::Processors;
   using AdcReadoutBase::toParsingQueue;
@@ -54,7 +54,7 @@ public:
     Settings.DetectorPort = GetPortNumber();
   }
   BaseSettings Settings;
-  AdcSettings AdcSettings;
+  AdcSettings ReadoutSettings;
   
   static const int MaxPacketSize = 2048;
   std::uint8_t BufferPtr[MaxPacketSize];
@@ -73,7 +73,7 @@ public:
 };
 
 TEST_F(AdcReadoutTest, SinglePacketInQueue) {
-  AdcReadoutStandIn Readout(Settings, AdcSettings);
+  AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.Threads.at(0).thread = std::thread(Readout.Threads.at(0).func);
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, 100);
   Server.startPacketTransmission(1, 100);
@@ -84,7 +84,7 @@ TEST_F(AdcReadoutTest, SinglePacketInQueue) {
 }
 
 TEST_F(AdcReadoutTest, SinglePacketStats) {
-  AdcReadoutStandIn Readout(Settings, AdcSettings);
+  AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, 1470);
   Server.startPacketTransmission(1, 100);
@@ -96,7 +96,7 @@ TEST_F(AdcReadoutTest, SinglePacketStats) {
 }
 
 TEST_F(AdcReadoutTest, SingleIdlePacket) {
-  AdcReadoutStandIn Readout(Settings, AdcSettings);
+  AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_idle.dat");
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr, PacketSize);
@@ -111,7 +111,7 @@ TEST_F(AdcReadoutTest, SingleIdlePacket) {
 }
 
 TEST_F(AdcReadoutTest, SingleDataPacket) {
-  AdcReadoutStandIn Readout(Settings, AdcSettings);
+  AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_1.dat");
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr, PacketSize);
@@ -126,7 +126,7 @@ TEST_F(AdcReadoutTest, SingleDataPacket) {
 }
 
 TEST_F(AdcReadoutTest, SingleStreamPacket) {
-  AdcReadoutStandIn Readout(Settings, AdcSettings);
+  AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_stream.dat");
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr, PacketSize);
@@ -142,7 +142,7 @@ TEST_F(AdcReadoutTest, SingleStreamPacket) {
 }
 
 TEST_F(AdcReadoutTest, GlobalCounterError) {
-  AdcReadoutStandIn Readout(Settings, AdcSettings);
+  AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_stream.dat");
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr, PacketSize);
@@ -158,7 +158,7 @@ TEST_F(AdcReadoutTest, GlobalCounterError) {
 }
 
 TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
-  AdcReadoutStandIn Readout(Settings, AdcSettings);
+  AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_stream.dat");
   std::chrono::duration<std::int64_t, std::milli> SleepTime(50);
@@ -187,7 +187,7 @@ TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
 #ifdef TROMPLELOEIL_AVAILABLE
 class AdcReadoutMock : public AdcReadoutBase {
 public:
-  AdcReadoutMock(BaseSettings Settings, AdcSettings AdcSettings) : AdcReadoutBase(Settings, AdcSettings) {};
+  AdcReadoutMock(BaseSettings Settings, AdcSettings ReadoutSettings) : AdcReadoutBase(Settings, ReadoutSettings) {};
   using Detector::Threads;
   using AdcReadoutBase::Processors;
   MAKE_MOCK0(inputThread, void(), override);
@@ -197,11 +197,11 @@ public:
 class AdcReadoutSimpleTest : public ::testing::Test {
 public:
   BaseSettings Settings;
-  AdcSettings AdcSettings;
+  AdcSettings ReadoutSettings;
 };
 
 TEST_F(AdcReadoutSimpleTest, StartProcessingThreads) {
-  AdcReadoutMock Readout(Settings, AdcSettings);
+  AdcReadoutMock Readout(Settings, ReadoutSettings);
   REQUIRE_CALL(Readout, inputThread()).TIMES(1);
   REQUIRE_CALL(Readout, parsingThread()).TIMES(1);
   Readout.startThreads();
@@ -209,34 +209,34 @@ TEST_F(AdcReadoutSimpleTest, StartProcessingThreads) {
 }
 
 TEST_F(AdcReadoutSimpleTest, DefaultProcessors) {
-  AdcReadoutMock Readout(Settings, AdcSettings);
+  AdcReadoutMock Readout(Settings, ReadoutSettings);
   EXPECT_EQ(Readout.Processors.size(), 0u);
 }
 
 TEST_F(AdcReadoutSimpleTest, ActivateProcessors) {
-  AdcSettings.SerializeSamples = true;
-  AdcSettings.PeakDetection = true;
-  AdcReadoutMock Readout(Settings, AdcSettings);
+  ReadoutSettings.SerializeSamples = true;
+  ReadoutSettings.PeakDetection = true;
+  AdcReadoutMock Readout(Settings, ReadoutSettings);
   EXPECT_EQ(Readout.Processors.size(), 2u);
 }
 
 TEST_F(AdcReadoutSimpleTest, SetTimeStampLoc) {
-  AdcSettings.SerializeSamples = true;
-  AdcSettings.PeakDetection = false;
+  ReadoutSettings.SerializeSamples = true;
+  ReadoutSettings.PeakDetection = false;
   std::vector<std::pair<std::string, TimeStampLocation>> TimeStampLocSettings{{"Start", TimeStampLocation::Start}, {"Middle", TimeStampLocation::Middle}, {"End", TimeStampLocation::End}};
   for (auto &Setting : TimeStampLocSettings) {
-    AdcSettings.TimeStampLocation = Setting.first;
-    AdcReadoutMock Readout(Settings, AdcSettings);
+    ReadoutSettings.TimeStampLocation = Setting.first;
+    AdcReadoutMock Readout(Settings, ReadoutSettings);
     const SampleProcessing *ProcessingPtr =  dynamic_cast<SampleProcessing*>(Readout.Processors.at(0).get());
     EXPECT_EQ(ProcessingPtr->getTimeStampLocation(), Setting.second);
   }
 }
 
 TEST_F(AdcReadoutSimpleTest, FailSetTimeStampLoc) {
-  AdcSettings.SerializeSamples = true;
-  AdcSettings.PeakDetection = false;
-  AdcSettings.TimeStampLocation = "unknown";
-  EXPECT_ANY_THROW(AdcReadoutMock(Settings, AdcSettings));
+  ReadoutSettings.SerializeSamples = true;
+  ReadoutSettings.PeakDetection = false;
+  ReadoutSettings.TimeStampLocation = "unknown";
+  EXPECT_ANY_THROW(AdcReadoutMock(Settings, ReadoutSettings));
 }
 
 #endif
