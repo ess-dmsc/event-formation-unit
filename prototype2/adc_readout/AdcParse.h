@@ -15,8 +15,10 @@
 #include <string>
 #include <vector>
 
+/// @brief Custom exception to handle parsing errors.
 class ParserException : public std::runtime_error {
 public:
+  /// @brief Different types of parsing errors known by the parser.
   enum class Type {
     UNKNOWN,
     TRAILER_FEEDF00D,
@@ -35,7 +37,11 @@ public:
     HEADER_TYPE,
     IDLE_LENGTH,
   };
+  /// @brief Sets the (parsing) error type to Type::UNKNOWN.
+  /// @param[ErrorStr] The string describing the exception.
   ParserException(std::string const &ErrorStr);
+  /// @brief Sets the parsing error to the give type.
+  /// @param[ErrorType] The parser error type.
   ParserException(Type ErrorType);
   virtual const char *what() const noexcept override;
   Type getErrorType() const;
@@ -45,6 +51,7 @@ private:
   std::string Error;
 };
 
+/// @brief Data stored in this struct represents a (properly parsed) sampling run.
 struct DataModule {
   DataModule() = default;
   RawTimeStamp TimeStamp;
@@ -53,13 +60,16 @@ struct DataModule {
   std::vector<std::uint16_t> Data;
 };
 
+/// @brief Output from the payload parser.
 struct AdcData {
   std::vector<DataModule> Modules;
   std::int32_t FillerStart = 0;
 };
 
+/// @brief Different types of data packets form teh ADC hardware.
 enum class PacketType { Idle, Data, Stream, Unknown };
 
+/// @brief Parsed data containing 0 or more data modules form sampling runs.
 struct PacketData {
   std::uint16_t GlobalCount;
   std::uint16_t ReadoutCount;
@@ -68,6 +78,7 @@ struct PacketData {
   RawTimeStamp IdleTimeStamp;
 };
 
+/// @brief Returned by the header parser.
 struct HeaderInfo {
   PacketType Type = PacketType::Unknown;
   std::uint16_t GlobalCount;
@@ -76,14 +87,17 @@ struct HeaderInfo {
   std::uint16_t TypeValue; // Used only by streaming data
 };
 
+/// @brief Returned by the trailer parser.
 struct TrailerInfo {
   std::uint32_t FillerBytes = 0;
 };
 
+/// @brief Returned by the idle packet parser.
 struct IdleInfo {
   RawTimeStamp TimeStamp;
   std::int32_t FillerStart = 0;
 };
+
 
 struct StreamSetting {
   std::vector<int> ChannelsActive;

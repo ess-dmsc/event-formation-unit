@@ -84,7 +84,7 @@ public:
   ~SampleProcessing() = default;
   
   /// @brief Called to actually process, serialise and transmit the (already) parsed data.
-  /// @note Will concatenate sample runs from the same channel. Samples from each data module in Data will be put in a seperate flatbuffer.
+  /// @note Will NOT concatenate sample runs from the same channel. Samples from each data module in Data will be put in a seperate flatbuffer.
   /// @param[Data] Parsed data to process.
   virtual void processPacket(PacketData const &Data) override;
   
