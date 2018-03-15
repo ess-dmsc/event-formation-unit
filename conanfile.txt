@@ -7,7 +7,7 @@ h5cpp/0.0.4-dm1@ess-dmsc/stable
 logical-geometry/09097f2@ess-dmsc/stable
 cmake_installer/3.10.0@conan/stable
 asio/1.11.0@bincrafters/stable
-cli11/1.4-dm1@ess-dmsc/stable
+cli11/1.4-dm2@ess-dmsc/stable
 
 [generators]
 cmake
@@ -17,3 +17,8 @@ virtualrunenv
 [options]
 gtest:shared=True
 librdkafka:shared=True
+
+[imports]
+lib, * -> ./lib
+lib64, * -> ./lib
+., LICENSE* -> ./licenses @ folder=True, ignore_case=True
