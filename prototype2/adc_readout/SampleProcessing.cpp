@@ -46,8 +46,7 @@ ProcessedSamples ChannelProcessing::processModule(const DataModule &Samples) {
           Samples.TimeStamp.GetOffsetTimeStamp(i * Samples.OversamplingFactor);
       ReturnSamples.TimeStamps.emplace_back(CalcSampleTimeStamp(
           TimeStampOfFirstSample, TimeStampOfLastSample, TSLocation));
-      SumOfSamples = 0;
-      NrOfSamplesSummed = 0;
+      ChannelProcessing::reset();
     }
   }
   if (not ReturnSamples.TimeStamps.empty()) {
