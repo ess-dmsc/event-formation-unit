@@ -7,161 +7,160 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-NMXClusterer::NMXClusterer(int bc, int tac, int acqWin, std::vector<int> xChips,
-                           std::vector<int> yChips, int adcThreshold,
-                           int minClusterSize, float deltaTimeHits,
-                           int deltaStripHits, float deltaTimeSpan,
-                           float deltaTimePlanes)
-    : pBC(bc), pTAC(tac), pAcqWin(acqWin), pXChipIDs(xChips), pYChipIDs(yChips),
-      pADCThreshold(adcThreshold), pMinClusterSize(minClusterSize),
-      pDeltaTimeHits(deltaTimeHits), pDeltaStripHits(deltaStripHits),
-      pDeltaTimeSpan(deltaTimeSpan), pDeltaTimePlanes(deltaTimePlanes),
-      m_eventNr(0) {}
+NMXClusterer::NMXClusterer(SRSTime time, SRSMappings chips, int acqWin,
+		int adcThreshold, int minClusterSize, float deltaTimeHits,
+		int deltaStripHits, float deltaTimeSpan, float deltaTimePlanes) :
+		pTime(time), pChips(chips), pAcqWin(acqWin), pADCThreshold(
+				adcThreshold), pMinClusterSize(minClusterSize), pDeltaTimeHits(
+				deltaTimeHits), pDeltaStripHits(deltaStripHits), pDeltaTimeSpan(
+				deltaTimeSpan), pDeltaTimePlanes(deltaTimePlanes), m_eventNr(0) {
+}
 
-NMXClusterer::~NMXClusterer() {}
-
-//====================================================================================================================
-int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
-                              int fecID, int vmmID, int chNo, int bcid, int tdc,
-                              int adc, int overThresholdFlag) {
-
-  bool newEvent = false;
-  double triggerTimestamp_ns = triggerTimestamp * 3.125;
-  double deltaTriggerTimestamp_ns = 0;
-
-  if (m_oldTriggerTimestamp_ns != triggerTimestamp_ns) {
-    AnalyzeClusters();
-    newEvent = true;
-    m_subsequentTrigger = false;
-    m_eventNr++;
-  }
-
-  if ((frameCounter < m_oldFrameCounter) && !(m_oldFrameCounter > frameCounter + 1000000000)) {
-    DTRACE(DEB, "\n*********************************** SCRAMBLED eventNr  %d, "
-                "old framecounter %d, new framecounter %u\n",
-           m_eventNr, m_oldFrameCounter, frameCounter);
-    stats_fc_error++;
-  }
-
-  if (m_oldTriggerTimestamp_ns > triggerTimestamp_ns &&
-      (m_oldFrameCounter <= frameCounter ||
-       m_oldFrameCounter > frameCounter + 1000000000)) {
-    deltaTriggerTimestamp_ns = (13421772800 + triggerTimestamp_ns - m_oldTriggerTimestamp_ns);
-    stats_triggertime_wraps++;
-  } else {
-    deltaTriggerTimestamp_ns = (triggerTimestamp_ns - m_oldTriggerTimestamp_ns);
-  }
-
-  if (newEvent &&
-      (deltaTriggerTimestamp_ns <= 1000 * 4096 * (1 / (double)pBC))) {
-    m_subsequentTrigger = true;
-  }
-
-  if (m_eventNr > 1) {
-    m_timeStamp_ms = m_timeStamp_ms + deltaTriggerTimestamp_ns * 0.000001;
-  }
-
-  int planeID = GetPlaneID(vmmID);
-
-  int x = -1;
-  int y = -1;
-  if (planeID == planeID_X) {
-    // Fix for entries with all zeros
-    if (bcid == 0 && tdc == 0 && overThresholdFlag) {
-      bcid = m_oldBcidX;
-      tdc = m_oldTdcX;
-      stats_bcid_tdc_error++;
-    }
-    m_oldBcidX = bcid;
-    m_oldTdcX = tdc;
-    x = GetChannel(pXChipIDs, vmmID, chNo);
-  } else if (planeID == planeID_Y) {
-    // Fix for entries with all zeros
-    if (bcid == 0 && tdc == 0 && overThresholdFlag) {
-      bcid = m_oldBcidY;
-      tdc = m_oldTdcY;
-      stats_bcid_tdc_error++;
-    }
-    m_oldBcidY = bcid;
-    m_oldTdcY = tdc;
-    y = GetChannel(pYChipIDs, vmmID, chNo);
-  }
-
-  // Calculate bcTime [us]
-  double bcTime = bcid * (1 / (double)pBC);
-
-  // TDC time: pTAC * tdc value (8 bit)/ramp length
-  // [ns]
-
-  // TDC has reduced resolution due to most significant bit problem of current
-  // sources (like ADC)
-  int tdcRebinned = (int)tdc / 8;
-  tdc = tdcRebinned * 8;
-  double tdcTime = pTAC * (double)tdc / 255;
-
-  // Chip time: bcid plus tdc value
-  // Talk Vinnie: HIT time  = BCIDx25 + ADC*125/255 [ns]
-  double chipTime = bcTime * 1000 + tdcTime;
-
-  StoreHits(x, y, adc, bcid, chipTime, overThresholdFlag);
-
-  if (newEvent) {
-    DTRACE(DEB, "\neventNr  %d\n", m_eventNr);
-    DTRACE(DEB, "fecID  %d\n", fecID);
-  }
-
-  if (deltaTriggerTimestamp_ns > 0) {
-    DTRACE(DEB, "\tTimestamp %.2f [ms]\n", m_timeStamp_ms);
-    DTRACE(DEB, "\tTime since last trigger %.4f us (%.4f kHz)\n",
-           deltaTriggerTimestamp_ns * 0.001,
-           1000000 / deltaTriggerTimestamp_ns);
-    DTRACE(DEB, "\tTriggerTimestamp %.2f [ns]\n", triggerTimestamp_ns);
-  }
-  if (m_oldFrameCounter != frameCounter || newEvent) {
-    DTRACE(DEB, "\n\tFrameCounter %u\n", frameCounter);
-  }
-  if (m_oldVmmID != vmmID || newEvent) {
-    DTRACE(DEB, "\tvmmID  %d\n", vmmID);
-  }
-  if (planeID == planeID_X) {
-    DTRACE(DEB, "\t\tx-channel %d (chNo  %d) - overThresholdFlag %d\n", x, chNo,
-           overThresholdFlag);
-  } else if (planeID == planeID_Y) {
-    DTRACE(DEB, "\t\ty-channel %d (chNo  %d) - overThresholdFlag %d\n", y, chNo,
-           overThresholdFlag);
-  } else {
-    DTRACE(DEB, "\t\tPlane for vmmID %d not defined!\n", vmmID);
-  }
-  DTRACE(DEB, "\t\t\tbcid %d, tdc %d, adc %d\n", bcid, tdc, adc);
-  DTRACE(DEB, "\t\t\tbcTime %.2f us, tdcTime %.2f ns, time %.2f us\n", bcTime,
-         tdcTime, chipTime * 0.001);
-
-  m_oldTriggerTimestamp_ns = triggerTimestamp_ns;
-  m_oldFrameCounter = frameCounter;
-  m_oldVmmID = vmmID;
-  return 0;
+NMXClusterer::~NMXClusterer() {
 }
 
 //====================================================================================================================
-void NMXClusterer::StoreHits(short x, short y, short adc, short bcid,
-                             float chipTime, bool overThresholdFlag) {
+bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
+		int fecID, int vmmID, int chNo, int bcid, int tdc, int adc,
+		int overThresholdFlag) {
 
-  if ((adc >= pADCThreshold || overThresholdFlag)) {
-    if (x > -1) {
-      if (bcid < pAcqWin * pBC / 40) {
-        m_hitsX.emplace_back(chipTime, x, adc);
-      } else {
-        m_hitsOldX.emplace_back(chipTime, x, adc);
-      }
-    } else if (y > -1) {
-      if (bcid < pAcqWin * pBC / 40) {
-        m_hitsY.emplace_back(chipTime, y, adc);
+	// Ready for factoring out, logic tested elsewhere
+	uint8_t planeID = pChips.get_plane(fecID, vmmID);
+	uint16_t strip = pChips.get_strip(fecID, vmmID, chNo);
 
-      } else {
-        m_hitsOldY.emplace_back(chipTime, y, adc);
-      }
-    }
-  }
+	// These variables are used only here
+	// Block is candidate for factoring out
+	// Perhaps an adapter class responsible for recovery from this error condition?
+	if (planeID == planeID_X) {
+		// Fix for entries with all zeros
+		if (bcid == 0 && tdc == 0 && overThresholdFlag) {
+			bcid = m_oldBcidX;
+			tdc = m_oldTdcX;
+			stats_bcid_tdc_error++;
+		}
+		m_oldBcidX = bcid;
+		m_oldTdcX = tdc;
+	} else if (planeID == planeID_Y) {
+		// Fix for entries with all zeros
+		if (bcid == 0 && tdc == 0 && overThresholdFlag) {
+			bcid = m_oldBcidY;
+			tdc = m_oldTdcY;
+			stats_bcid_tdc_error++;
+		}
+		m_oldBcidY = bcid;
+		m_oldTdcY = tdc;
+	}
+
+	// Could be factored out depending on above block
+	double chipTime = pTime.chip_time(bcid, tdc);
+
+	bool newEvent = false;
+	double triggerTimestamp_ns = triggerTimestamp * pTime.trigger_resolution();
+	double deltaTriggerTimestamp_ns = 0;
+
+	if (m_oldTriggerTimestamp_ns != triggerTimestamp_ns) {
+		AnalyzeClusters();
+		newEvent = true;
+		m_subsequentTrigger = false;
+		m_eventNr++;
+	}
+
+	if (m_oldTriggerTimestamp_ns > triggerTimestamp_ns
+			&& (m_oldFrameCounter <= frameCounter
+					|| m_oldFrameCounter > frameCounter + 1000000000)) {
+		deltaTriggerTimestamp_ns = (13421772800 + triggerTimestamp_ns
+				- m_oldTriggerTimestamp_ns);
+		stats_triggertime_wraps++;
+	} else {
+		deltaTriggerTimestamp_ns = (triggerTimestamp_ns
+				- m_oldTriggerTimestamp_ns);
+	}
+
+	// Can we name these hardcoded constants?
+	if (newEvent
+			&& (deltaTriggerTimestamp_ns <= 1000 * 4096 / pTime.bc_clock())) {
+		m_subsequentTrigger = true;
+	}
+
+	// Crucial step
+	// Storing hit to appropriate buffer
+	// Trigger TS magic above appears to be irrelevant?
+	if (overThresholdFlag || (adc >= pADCThreshold)) {
+		if (planeID == planeID_X) {
+			StoreX(strip, adc, bcid, chipTime);
+		} else if (planeID == planeID_Y) {
+			StoreY(strip, adc, bcid, chipTime);
+		}
+	}
+
+	if (newEvent) {
+		DTRACE(DEB, "\neventNr  %d\n", m_eventNr);
+		DTRACE(DEB, "fecID  %d\n", fecID);
+	}
+
+	// This is likely resolved. Candidate for removal?
+	if ((frameCounter < m_oldFrameCounter)
+			&& !(m_oldFrameCounter > frameCounter + 1000000000)) {
+		DTRACE(DEB,
+				"\n*********************************** SCRAMBLED eventNr  %d, "
+						"old framecounter %d, new framecounter %u\n", m_eventNr,
+				m_oldFrameCounter, frameCounter);
+		stats_fc_error++;
+	}
+
+	// m_timeStamp_ms is used for printing Trace info
+	if (m_eventNr > 1) {
+		m_timeStamp_ms = m_timeStamp_ms + deltaTriggerTimestamp_ns * 0.000001;
+	}
+	if (deltaTriggerTimestamp_ns > 0) {
+		DTRACE(DEB, "\tTimestamp %.2f [ms]\n", m_timeStamp_ms);
+		DTRACE(DEB, "\tTime since last trigger %.4f us (%.4f kHz)\n",
+				deltaTriggerTimestamp_ns * 0.001,
+				1000000 / deltaTriggerTimestamp_ns);
+		DTRACE(DEB, "\tTriggerTimestamp %.2f [ns]\n", triggerTimestamp_ns);
+	}
+	if (m_oldFrameCounter != frameCounter || newEvent) {
+		DTRACE(DEB, "\n\tFrameCounter %u\n", frameCounter);
+	}
+	if (m_oldVmmID != vmmID || newEvent) {
+		DTRACE(DEB, "\tvmmID  %d\n", vmmID);
+	}
+	if (planeID == planeID_X) {
+		DTRACE(DEB, "\t\tx-channel %d (chNo  %d) - overThresholdFlag %d\n",
+				strip, chNo, overThresholdFlag);
+	} else if (planeID == planeID_Y) {
+		DTRACE(DEB, "\t\ty-channel %d (chNo  %d) - overThresholdFlag %d\n",
+				strip, chNo, overThresholdFlag);
+	} else {
+		DTRACE(DEB, "\t\tPlane for vmmID %d not defined!\n", vmmID);
+	}
+	DTRACE(DEB, "\t\t\tbcid %d, tdc %d, adc %d\n", bcid, tdc, adc);
+	DTRACE(DEB, "\t\t\tchipTime %.2f us\n", chipTime * 0.001);
+
+	m_oldTriggerTimestamp_ns = triggerTimestamp_ns;
+	m_oldFrameCounter = frameCounter;
+	m_oldVmmID = vmmID;
+	return true;
+}
+
+//====================================================================================================================
+void NMXClusterer::StoreX(uint16_t strip, short adc, short bcid,
+		float chipTime) {
+	if (bcid < pAcqWin * pTime.bc_clock() / 40) {
+		m_hitsX.emplace_back(chipTime, strip, adc);
+	} else {
+		m_hitsOldX.emplace_back(chipTime, strip, adc);
+	}
+}
+
+//====================================================================================================================
+void NMXClusterer::StoreY(uint16_t strip, short adc, short bcid,
+		float chipTime) {
+	if (bcid < pAcqWin * pTime.bc_clock() / 40) {
+		m_hitsY.emplace_back(chipTime, strip, adc);
+	} else {
+		m_hitsOldY.emplace_back(chipTime, strip, adc);
+	}
 }
 
 //====================================================================================================================
@@ -334,7 +333,6 @@ void NMXClusterer::StoreClusters(float clusterPosition,
 
 }
 
-
 //====================================================================================================================
 void NMXClusterer::MatchClustersXY(float dPlane) {
 
@@ -444,28 +442,63 @@ void NMXClusterer::MatchClustersXY(float dPlane) {
 
 }
 
-
 //====================================================================================================================
 void NMXClusterer::AnalyzeClusters() {
 
-	auto fX = async(std::launch::async, &NMXClusterer::AsyncClustererX, this);
-	auto fY = async(std::launch::async, &NMXClusterer::AsyncClustererY, this);
+	auto fX = std::async(std::launch::async, [&] {
+		std::sort(begin(m_hitsOldX), end(m_hitsOldX),
+				[](const ClusterTuple &t1, const ClusterTuple &t2)
+				{
+					return std::get<0>(t1) < std::get<0>(t2);
+				});
+
+		std::sort(begin(m_hitsX), end(m_hitsX),
+				[](const ClusterTuple &t1, const ClusterTuple &t2)
+				{
+					return std::get<0>(t1) < std::get<0>(t2);
+				});
+
+		CorrectTriggerData(m_hitsX, m_hitsOldX, pDeltaTimeHits);
+		int cntX = ClusterByTime(m_hitsOldX, pDeltaTimeHits, pDeltaStripHits,
+				pDeltaTimeSpan, "x");
+
+		DTRACE(DEB, "%d cluster in x\n", cntX);
+		m_hitsOldX = std::move(m_hitsX);
+		if (!m_hitsX.empty()) {
+			m_hitsX.clear();
+		}
+	});
+
+	auto fY = std::async(std::launch::async, [&] {
+
+		std::sort(begin(m_hitsOldY), end(m_hitsOldY),
+				[](const ClusterTuple &t1, const ClusterTuple &t2)
+				{
+					return std::get<0>(t1) < std::get<0>(t2);
+				});
+
+		std::sort(begin(m_hitsY), end(m_hitsY),
+				[](const ClusterTuple &t1, const ClusterTuple &t2)
+				{
+					return std::get<0>(t1) < std::get<0>(t2);
+				});
+
+		CorrectTriggerData(m_hitsY, m_hitsOldY, pDeltaTimeHits);
+		int cntY = ClusterByTime(m_hitsOldY, pDeltaTimeHits, pDeltaStripHits,
+				pDeltaTimeSpan, "y");
+
+		DTRACE(DEB, "%d cluster in y\n", cntY);
+		m_hitsOldY = std::move(m_hitsY);
+		if (!m_hitsY.empty()) {
+			m_hitsY.clear();
+		}
+	});
 
 	fX.get();
 	fY.get();
 
-
 	MatchClustersXY(pDeltaTimePlanes);
 
-	m_hitsOldX = std::move(m_hitsX);
-	m_hitsOldY = std::move(m_hitsY);
-
-	if (!m_hitsX.empty()) {
-		m_hitsX.clear();
-	}
-	if (!m_hitsY.empty()) {
-		m_hitsY.clear();
-	}
 
 
 	m_clusterX.insert(m_clusterX.end(),
@@ -474,7 +507,6 @@ void NMXClusterer::AnalyzeClusters() {
 	m_clusterY.insert(m_clusterY.end(),
 			std::make_move_iterator(m_tempClusterY.begin()),
 			std::make_move_iterator(m_tempClusterY.end()));
-
 
 	m_tempClusterX.clear();
 	m_tempClusterY.clear();
@@ -490,7 +522,7 @@ void NMXClusterer::CorrectTriggerData(HitContainer &hits, HitContainer &oldHits,
 		const auto& itOldHitsBegin = oldHits.rend();
 		const auto& itOldHitsEnd = oldHits.rbegin();
 		if (itHitsBegin != itHitsEnd && itOldHitsBegin != itOldHitsEnd) {
-			float bcPeriod = 1000 * 4096 * (1 / (float) pBC);
+			float bcPeriod = 1000 * 4096 / static_cast<float>(pTime.bc_clock());
 			float timePrevious = std::get < 0 > (*itOldHitsEnd);
 			float timeNext = std::get < 0 > (*itHitsBegin) + bcPeriod;
 			float deltaTime = timeNext - timePrevious;
@@ -522,75 +554,3 @@ void NMXClusterer::CorrectTriggerData(HitContainer &hits, HitContainer &oldHits,
 	}
 }
 
-//====================================================================================================================
-void NMXClusterer::AsyncClustererY() {
-
-	std::sort(begin(m_hitsOldY), end(m_hitsOldY),
-			[](const ClusterTuple &t1, const ClusterTuple &t2)
-			{
-				return std::get<0>(t1) < std::get<0>(t2);
-			});
-
-	std::sort(begin(m_hitsY), end(m_hitsY),
-			[](const ClusterTuple &t1, const ClusterTuple &t2)
-			{
-				return std::get<0>(t1) < std::get<0>(t2);
-			});
-
-	CorrectTriggerData(m_hitsY, m_hitsOldY, pDeltaTimeHits);
-	int cntY = ClusterByTime(m_hitsOldY, pDeltaTimeHits, pDeltaStripHits,
-			pDeltaTimeSpan, "y");
-
-	DTRACE(DEB, "%d cluster in y\n", cntY);
-
-}
-
-//====================================================================================================================
-void NMXClusterer::AsyncClustererX() {
-
-	std::sort(begin(m_hitsOldX), end(m_hitsOldX),
-			[](const ClusterTuple &t1, const ClusterTuple &t2)
-			{
-				return std::get<0>(t1) < std::get<0>(t2);
-			});
-
-	std::sort(begin(m_hitsX), end(m_hitsX),
-			[](const ClusterTuple &t1, const ClusterTuple &t2)
-			{
-				return std::get<0>(t1) < std::get<0>(t2);
-			});
-
-	CorrectTriggerData(m_hitsX, m_hitsOldX, pDeltaTimeHits);
-	int cntX = ClusterByTime(m_hitsOldX, pDeltaTimeHits, pDeltaStripHits,
-			pDeltaTimeSpan, "x");
-
-	DTRACE(DEB, "%d cluster in x\n", cntX);
-
-}
-
-
-//====================================================================================================================
-int NMXClusterer::GetPlaneID(int chipID) {
-  auto chip = std::find(begin(pXChipIDs), end(pXChipIDs), chipID);
-  if (chip != end(pXChipIDs)) {
-    return planeID_X;
-  } else {
-    auto chip = std::find(begin(pYChipIDs), end(pYChipIDs), chipID);
-    if (chip != end(pYChipIDs)) {
-      return planeID_Y;
-    } else {
-      return -1;
-    }
-  }
-}
-
-//====================================================================================================================
-int NMXClusterer::GetChannel(std::vector<int> &chipIDs, int chipID,
-                             int channelID) {
-  auto chip = std::find(begin(chipIDs), end(chipIDs), chipID);
-  if (chip != end(chipIDs)) {
-    return channelID + (chip - begin(chipIDs)) * 64;
-  } else {
-    return -1;
-  }
-}

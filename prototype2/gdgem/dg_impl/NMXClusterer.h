@@ -7,6 +7,9 @@
 #include <vector>
 #include <future>   // async
 
+#include <gdgem/vmm2srs/SRSMappings.h>
+#include <gdgem/vmm2srs/SRSTime.h>
+
 using std::string;
 
 struct ClusterNMX {
@@ -48,24 +51,24 @@ using ClusterVector = std::vector<ClusterNMX>;
 
 class NMXClusterer {
 public:
-	NMXClusterer(int bc, int tac, int acqWin, std::vector<int> xChips,
-			std::vector<int> yChips, int adcThreshold, int minClusterSize,
-			float deltaTimeHits, int deltaStripHits, float deltaTimeSpan,
-			float deltaTimePlanes);
+	NMXClusterer(SRSTime time,
+				 SRSMappings chips,
+				 int acqWin,
+				 int adcThreshold, int minClusterSize,
+				 float deltaTimeHits, int deltaStripHits, float deltaTimeSpan,
+				 float deltaTimePlanes);
 
 	~NMXClusterer();
 
 	// Analyzing and storing the hits
-	int AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
+	bool AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
 			int vmmID, int chNo, int bcid, int tdc, int adc,
 			int overThresholdFlag);
-	void StoreHits(short x, short y, short adc, short bcid, float chipTime,
-			bool overThresholdFlag);
+	void StoreX(uint16_t strip, short adc, short bcid, float chipTime);
+    void StoreY(uint16_t strip, short adc, short bcid, float chipTime);
 
-	// Analyzing and storing the clusters
+    // Analyzing and storing the clusters
 	void AnalyzeClusters();
-	void AsyncClustererX();
-	void AsyncClustererY();
 
 
 	int ClusterByTime(HitContainer& oldHits, float dTime, int dStrip,
@@ -83,9 +86,6 @@ public:
 	void CorrectTriggerData(HitContainer &hits, HitContainer &oldHits,
 			float correctionTime);
 
-	// Helper methods that map channels to strips
-	int GetPlaneID(int chipID);
-	int GetChannel(std::vector<int> &chipIDs, int chipID, int channelID);
 
 	int getNumClustersX() {
 		return m_clusterX.size();
@@ -110,16 +110,14 @@ public:
 	uint64_t stats_bcid_tdc_error { 0 };
 	uint64_t stats_triggertime_wraps { 0 };
 
-	const int planeID_X { 0 };
-	const int planeID_Y { 1 };
+	const uint8_t planeID_X { 0 };
+	const uint8_t planeID_Y { 1 };
 
 private:
-	int pBC;
-	int pTAC;
-	int pAcqWin;
-	std::vector<int> pXChipIDs;
-	std::vector<int> pYChipIDs;
+  	SRSTime pTime;
+	SRSMappings pChips;
 
+	int pAcqWin;
 	int pADCThreshold;
 	int pMinClusterSize;
 	float pDeltaTimeHits;
@@ -127,12 +125,17 @@ private:
 	float pDeltaTimeSpan;
 	float pDeltaTimePlanes;
 
-	int m_eventNr = 0;
+	// These are in play for triggering the actual clustering
 	double m_oldTriggerTimestamp_ns = 0;
-	bool m_subsequentTrigger = false;
-	int m_oldVmmID = 0;
-	unsigned int m_oldFrameCounter = 0;
-	double m_timeStamp_ms = 0;
+    unsigned int m_oldFrameCounter = 0;
+    bool m_subsequentTrigger = false;
+
+    // For debug output only
+    double m_timeStamp_ms = 0;
+    int m_oldVmmID = 0;
+    int m_eventNr = 0;
+
+    // For all 0s correction
 	int m_oldBcidX = 0;
 	int m_oldTdcX = 0;
 	int m_oldBcidY = 0;
