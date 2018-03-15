@@ -7,6 +7,7 @@
 
 #include "SampleProcessing.h"
 #include "senv_data_generated.h"
+#include "AdcReadoutConstants.h"
 
 std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start,
                                   const RawTimeStamp &End,
@@ -23,11 +24,11 @@ std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start,
 }
 
 double CalcTimeStampDelta(int OversamplingFactor) {
-  constexpr double SampleTime = 1.0 / (88052500 / 2);
+  constexpr double SampleTime = 1.0 / AdcTimerCounterMax;
   return SampleTime * OversamplingFactor;
 }
 
-ProcessedSamples ChannelProcessing::operator()(const DataModule &Samples) {
+ProcessedSamples ChannelProcessing::processModule(const DataModule &Samples) {
   ProcessedSamples ReturnSamples;
   int FinalOversamplingFactor = MeanOfNrOfSamples * Samples.OversamplingFactor;
 
@@ -93,14 +94,14 @@ void SampleProcessing::setTimeStampLocation(TimeStampLocation Location) {
   }
 }
 
-void SampleProcessing::operator()(const PacketData &Data) {
+void SampleProcessing::processPacket(const PacketData &Data) {
   for (auto &Module : Data.Modules) {
     if (ProcessingInstances.find(Module.Channel) == ProcessingInstances.end()) {
       ProcessingInstances[Module.Channel] = ChannelProcessing();
       setMeanOfSamples(MeanOfNrOfSamples);
       setTimeStampLocation(TSLocation);
     }
-    auto ResultingSamples = ProcessingInstances.at(Module.Channel)(Module);
+    auto ResultingSamples = ProcessingInstances.at(Module.Channel).processModule(Module);
     if (not ResultingSamples.Samples.empty()) {
       serializeAndTransmitData(ResultingSamples);
     }

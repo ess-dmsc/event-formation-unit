@@ -12,6 +12,7 @@
 #endif
 #include "senv_data_generated.h"
 #include <array>
+#include "../AdcReadoutConstants.h"
 
 DataModule getTestModule() {
   DataModule Module;
@@ -157,7 +158,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
   auto SampleData = GetSampleEnvironmentData(&TempBuffer[0]);
   EXPECT_EQ(SampleData->Name()->str(), Name + "_" + std::to_string(TempModule.Channel));
   EXPECT_EQ(SampleData->PacketTimestamp(), TempModule.TimeStamp.GetTimeStampNS());
-  EXPECT_NEAR(SampleData->TimeDelta(), TempModule.OversamplingFactor/(88052500/2), 0.05);
+  EXPECT_NEAR(SampleData->TimeDelta(), TempModule.OversamplingFactor/AdcTimerCounterMax, 0.05);
   EXPECT_EQ(SampleData->TimestampLocation(), Location::End);
   EXPECT_EQ(SampleData->Channel(), TempModule.Channel);
   EXPECT_TRUE(SampleData->MessageCounter() == 0);
@@ -187,7 +188,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
   auto SampleData = GetSampleEnvironmentData(&TempBuffer[0]);
   EXPECT_EQ(SampleData->Name()->str(), Name + "_" + std::to_string(TempModule.Channel));
   EXPECT_EQ(SampleData->PacketTimestamp(), TempModule.TimeStamp.GetTimeStampNS());
-  EXPECT_NEAR(SampleData->TimeDelta(), TempModule.OversamplingFactor/(88052500/2), 0.05);
+  EXPECT_NEAR(SampleData->TimeDelta(), TempModule.OversamplingFactor/AdcTimerCounterMax, 0.05);
   EXPECT_EQ(SampleData->TimestampLocation(), Location::End);
   EXPECT_EQ(SampleData->Channel(), TempModule.Channel);
   EXPECT_TRUE(SampleData->MessageCounter() == 0);
@@ -248,7 +249,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime1) {
   ChannelProcessing Processing;
   Processing.setMeanOfSamples(1);
   Processing.setTimeStampLocation(TimeStampLocation::Start);
-  auto Result = Processing(Module);
+  auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
     EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i).GetTimeStampNS(), Result.TimeStamps.at(i));
   }
@@ -258,7 +259,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime2) {
   ChannelProcessing Processing;
   Processing.setMeanOfSamples(2);
   Processing.setTimeStampLocation(TimeStampLocation::Start);
-  auto Result = Processing(Module);
+  auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
     EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 2).GetTimeStampNS(), Result.TimeStamps.at(i));
   }
@@ -268,7 +269,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime3) {
   ChannelProcessing Processing;
   Processing.setMeanOfSamples(2);
   Processing.setTimeStampLocation(TimeStampLocation::End);
-  auto Result = Processing(Module);
+  auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
     EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 2 + 1).GetTimeStampNS(), Result.TimeStamps.at(i));
   }
@@ -279,7 +280,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime4) {
   Module.OversamplingFactor = 4;
   Processing.setMeanOfSamples(1);
   Processing.setTimeStampLocation(TimeStampLocation::Start);
-  auto Result = Processing(Module);
+  auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
     EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 4 - 3).GetTimeStampNS(), Result.TimeStamps.at(i));
   }
@@ -290,7 +291,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime5) {
   Module.OversamplingFactor = 4;
   Processing.setMeanOfSamples(1);
   Processing.setTimeStampLocation(TimeStampLocation::End);
-  auto Result = Processing(Module);
+  auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
     EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 4).GetTimeStampNS(), Result.TimeStamps.at(i));
   }
@@ -301,7 +302,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime6) {
   Module.OversamplingFactor = 4;
   Processing.setMeanOfSamples(2);
   Processing.setTimeStampLocation(TimeStampLocation::End);
-  auto Result = Processing(Module);
+  auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
     EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 2 * 4 + 4).GetTimeStampNS(), Result.TimeStamps.at(i));
   }
@@ -312,7 +313,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime7) {
   Module.OversamplingFactor = 4;
   Processing.setMeanOfSamples(2);
   Processing.setTimeStampLocation(TimeStampLocation::Start);
-  auto Result = Processing(Module);
+  auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
     EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 2 * 4 - 3).GetTimeStampNS(), Result.TimeStamps.at(i));
   }
@@ -323,7 +324,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime8) {
   Module.OversamplingFactor = 4;
   Processing.setMeanOfSamples(2);
   Processing.setTimeStampLocation(TimeStampLocation::Middle);
-  auto Result = Processing(Module);
+  auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
     std::uint64_t StartTS = Module.TimeStamp.GetOffsetTimeStamp(i * 2 * 4 - 3).GetTimeStampNS();
     std::uint64_t EndTS = Module.TimeStamp.GetOffsetTimeStamp(i * 2 * 4 + 4).GetTimeStampNS();
@@ -333,7 +334,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime8) {
 
 TEST_F(ChannelProcessingTest, DefaultSetup) {
   ChannelProcessing Processing;
-  auto Result = Processing(Module);
+  auto Result = Processing.processModule(Module);
   EXPECT_EQ(Module.Data, Result.Samples);
 }
 
@@ -341,7 +342,7 @@ TEST_F(ChannelProcessingTest, Oversampling2X) {
   ChannelProcessing Processing;
   Processing.setMeanOfSamples(2);
   std::vector<std::uint16_t> ExpectedResult{8, 64};
-  auto Result = Processing(Module);
+  auto Result = Processing.processModule(Module);
   EXPECT_EQ(ExpectedResult, Result.Samples);
 }
 
@@ -349,15 +350,15 @@ TEST_F(ChannelProcessingTest, Oversampling3X_OneModule) {
   ChannelProcessing Processing;
   Processing.setMeanOfSamples(3);
   std::vector<std::uint16_t> ExpectedResult{48, };
-  auto Result = Processing(Module);
+  auto Result = Processing.processModule(Module);
   EXPECT_EQ(ExpectedResult, Result.Samples);
 }
 
 TEST_F(ChannelProcessingTest, Oversampling3X_TwoModules) {
   ChannelProcessing Processing;
   Processing.setMeanOfSamples(3);
-  Processing(Module);
-  auto Result = Processing(Module);
+  Processing.processModule(Module);
+  auto Result = Processing.processModule(Module);
   std::vector<std::uint16_t> ExpectedResult{5, };
   EXPECT_EQ(ExpectedResult, Result.Samples);
 }
@@ -394,7 +395,7 @@ TEST(CalcTimeStamp, MiddleTest3) {
 }
 
 TEST(CalcTimeStamp, MiddleTest4) {
-  RawTimeStamp TS{53, 88052500/2 - 5};
-  RawTimeStamp TSMid{53, 88052500/2 - 5};
+  RawTimeStamp TS{53, AdcTimerCounterMax - 5};
+  RawTimeStamp TSMid{53, AdcTimerCounterMax - 5};
   EXPECT_EQ(CalcSampleTimeStamp(TS.GetOffsetTimeStamp(-150), TS.GetOffsetTimeStamp(150), TimeStampLocation::Middle), TSMid.GetTimeStampNS());
 }

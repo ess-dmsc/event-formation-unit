@@ -5,10 +5,11 @@
  *  @brief ADC readout detector module.
  */
 
-#include "AdcReadoutCore.h"
+#include "Detector.h"
+#include "AdcReadoutBase.h"
 #include "AdcSettings.h"
 
-static AdcSettingsStruct LocalAdcSettings;
+static AdcSettings LocalAdcSettings;
 
 void CLIArguments(CLI::App &parser) {
   SetCLIArguments(parser, LocalAdcSettings);
@@ -16,10 +17,10 @@ void CLIArguments(CLI::App &parser) {
 
 PopulateCLIParser PopulateParser{CLIArguments};
 
-class AdcReadout : public AdcReadoutCore {
+class AdcReadout : public AdcReadoutBase {
 public:
   AdcReadout(BaseSettings Settings)
-      : AdcReadoutCore(std::move(Settings), LocalAdcSettings) {}
+      : AdcReadoutBase(std::move(Settings), LocalAdcSettings) {}
 };
 
 class ADC_Readout_Factory : public DetectorFactory {

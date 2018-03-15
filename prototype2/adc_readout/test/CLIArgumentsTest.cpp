@@ -13,7 +13,7 @@ public:
   virtual void SetUp() {
     SetCLIArguments(TestApp, AdcSettings);
   }
-  AdcSettingsStruct AdcSettings;
+  AdcSettings AdcSettings;
   CLI::App TestApp;
 };
 

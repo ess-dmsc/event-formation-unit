@@ -12,7 +12,7 @@
 class PeakFinder : public AdcDataProcessor {
 public:
   PeakFinder(std::shared_ptr<Producer> Prod);
-  virtual void operator()(const PacketData &Data) override;
+  virtual void processPacket(const PacketData &Data) override;
 
 private:
   void SendData(const std::uint64_t &TimeStamp, const std::uint16_t &Amplitude,
@@ -23,8 +23,6 @@ private:
 struct ModuleAnalysisResult {
   std::uint16_t Max;
   std::uint16_t MaxLocation;
-  std::uint16_t Min;
-  std::uint16_t MinLocation;
   std::uint16_t Mean;
 };
 

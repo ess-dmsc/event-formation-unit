@@ -5,16 +5,16 @@
  *  @brief ADC readout detector module.
  */
 
-#include "AdcReadoutCore.h"
+#include "AdcReadoutBase.h"
 #include "AdcSettings.h"
 #include "PeakFinder.h"
 #include "SampleProcessing.h"
 #include "libs/include/Socket.h"
 
-AdcReadoutCore::AdcReadoutCore(BaseSettings Settings,
-                               AdcSettingsStruct &AdcSettings)
-    : Detector("AdcReadout", Settings), toParsingQueue(100),
-      AdcSettings(AdcSettings), GeneralSettings(Settings) {
+AdcReadoutBase::AdcReadoutBase(BaseSettings Settings,
+                               AdcSettings &ReadoutSettings)
+    : Detector("AdcReadout", Settings), toParsingQueue(MessageQueueSize),
+      ReadoutSettings(ReadoutSettings), GeneralSettings(Settings) {
   std::function<void()> inputFunc = [this]() { this->inputThread(); };
   Detector::AddThreadFunction(inputFunc, "input");
   std::map<std::string, TimeStampLocation> TimeStampLocationMap{
@@ -34,25 +34,25 @@ AdcReadoutCore::AdcReadoutCore(BaseSettings Settings,
   Stats.create("processing.packets.lost", AdcStats.processing_packets_lost);
   AdcStats.processing_packets_lost = -1; // To compensate for the first error.
 
-  if (AdcSettings.PeakDetection) {
+  if (ReadoutSettings.PeakDetection) {
     Processors.emplace_back(
         std::unique_ptr<AdcDataProcessor>(new PeakFinder(ProducerPtr)));
   }
-  if (AdcSettings.SerializeSamples) {
+  if (ReadoutSettings.SerializeSamples) {
     std::unique_ptr<AdcDataProcessor> Processor(
-        new SampleProcessing(ProducerPtr, AdcSettings.Name));
+        new SampleProcessing(ProducerPtr, ReadoutSettings.Name));
     dynamic_cast<SampleProcessing *>(Processor.get())
         ->setTimeStampLocation(
-            TimeStampLocationMap.at(AdcSettings.TimeStampLocation));
+            TimeStampLocationMap.at(ReadoutSettings.TimeStampLocation));
     dynamic_cast<SampleProcessing *>(Processor.get())
-        ->setMeanOfSamples(AdcSettings.TakeMeanOfNrOfSamples);
+        ->setMeanOfSamples(ReadoutSettings.TakeMeanOfNrOfSamples);
     dynamic_cast<SampleProcessing *>(Processor.get())
-        ->setSerializeTimestamps(AdcSettings.SampleTimeStamp);
+        ->setSerializeTimestamps(ReadoutSettings.SampleTimeStamp);
     Processors.emplace_back(std::move(Processor));
   }
 }
 
-std::shared_ptr<Producer> AdcReadoutCore::getProducer() {
+std::shared_ptr<Producer> AdcReadoutBase::getProducer() {
   if (ProducerPtr == nullptr) {
     ProducerPtr = std::shared_ptr<Producer>(
         new Producer(GeneralSettings.KafkaBroker, GeneralSettings.KafkaTopic));
@@ -60,7 +60,7 @@ std::shared_ptr<Producer> AdcReadoutCore::getProducer() {
   return ProducerPtr;
 }
 
-void AdcReadoutCore::inputThread() {
+void AdcReadoutBase::inputThread() {
   std::int64_t BytesReceived = 0;
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
@@ -89,7 +89,7 @@ void AdcReadoutCore::inputThread() {
   }
 }
 
-void AdcReadoutCore::parsingThread() {
+void AdcReadoutBase::parsingThread() {
   ElementPtr DataElement;
   bool GotElement = false;
   while (Detector::runThreads) {
@@ -110,7 +110,7 @@ void AdcReadoutCore::parsingThread() {
           ++AdcStats.parser_packets_stream;
         }
         for (auto &Processor : Processors) {
-          (*Processor)(ParsedAdcData);
+          (*Processor).processPacket(ParsedAdcData);
         }
       } catch (ParserException &e) {
         ++AdcStats.parser_errors;

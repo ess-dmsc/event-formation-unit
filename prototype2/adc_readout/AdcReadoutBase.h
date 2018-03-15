@@ -16,12 +16,13 @@
 #include <cstdint>
 #include <mutex>
 
-class AdcReadoutCore : public Detector {
+class AdcReadoutBase : public Detector {
 public:
-  AdcReadoutCore(BaseSettings Settings, AdcSettingsStruct &AdcSettings);
-  AdcReadoutCore(const AdcReadoutCore &) = delete;
-  AdcReadoutCore(const AdcReadoutCore &&) = delete;
-  ~AdcReadoutCore() = default;
+  AdcReadoutBase(BaseSettings Settings, AdcSettings &ReadoutSettings);
+  AdcReadoutBase(const AdcReadoutBase &) = delete;
+  AdcReadoutBase(const AdcReadoutBase &&) = delete;
+  AdcReadoutBase& operator=(const AdcReadoutBase&) = delete;
+  ~AdcReadoutBase() = default;
 
 protected:
   virtual void inputThread();
@@ -45,6 +46,7 @@ protected:
   } AdcStats;
 
   std::shared_ptr<Producer> ProducerPtr;
-  AdcSettingsStruct &AdcSettings;
+  AdcSettings &ReadoutSettings;
   BaseSettings GeneralSettings;
+  static const int MessageQueueSize = 100;
 };

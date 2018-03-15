@@ -6,7 +6,7 @@
  */
 
 #include <gtest/gtest.h>
-#include "../AdcReadoutCore.h"
+#include "../AdcReadoutBase.h"
 #include "TestUDPServer.h"
 #include <random>
 
@@ -25,13 +25,13 @@ std::uint16_t GetPortNumber() {
   return ++CurrentPortNumber;
 }
 
-class AdcReadoutStandIn : public AdcReadoutCore {
+class AdcReadoutStandIn : public AdcReadoutBase {
 public:
-  AdcReadoutStandIn(BaseSettings Settings, AdcSettingsStruct AdcSettings) : AdcReadoutCore(Settings, AdcSettings) {};
+  AdcReadoutStandIn(BaseSettings Settings, AdcSettings AdcSettings) : AdcReadoutBase(Settings, AdcSettings) {};
   using Detector::Threads;
-  using AdcReadoutCore::Processors;
-  using AdcReadoutCore::toParsingQueue;
-  using AdcReadoutCore::AdcStats;
+  using AdcReadoutBase::Processors;
+  using AdcReadoutBase::toParsingQueue;
+  using AdcReadoutBase::AdcStats;
   static const int MaxPacketSize = 2048;
   std::uint8_t BufferPtr[MaxPacketSize];
   int PacketSize;
@@ -54,7 +54,7 @@ public:
     Settings.DetectorPort = GetPortNumber();
   }
   BaseSettings Settings;
-  AdcSettingsStruct AdcSettings;
+  AdcSettings AdcSettings;
   
   static const int MaxPacketSize = 2048;
   std::uint8_t BufferPtr[MaxPacketSize];
@@ -185,11 +185,11 @@ TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
 }
 
 #ifdef TROMPLELOEIL_AVAILABLE
-class AdcReadoutMock : public AdcReadoutCore {
+class AdcReadoutMock : public AdcReadoutBase {
 public:
-  AdcReadoutMock(BaseSettings Settings, AdcSettingsStruct AdcSettings) : AdcReadoutCore(Settings, AdcSettings) {};
+  AdcReadoutMock(BaseSettings Settings, AdcSettings AdcSettings) : AdcReadoutBase(Settings, AdcSettings) {};
   using Detector::Threads;
-  using AdcReadoutCore::Processors;
+  using AdcReadoutBase::Processors;
   MAKE_MOCK0(inputThread, void(), override);
   MAKE_MOCK0(parsingThread, void(), override);
 };
@@ -197,7 +197,7 @@ public:
 class AdcReadoutSimpleTest : public ::testing::Test {
 public:
   BaseSettings Settings;
-  AdcSettingsStruct AdcSettings;
+  AdcSettings AdcSettings;
 };
 
 TEST_F(AdcReadoutSimpleTest, StartProcessingThreads) {

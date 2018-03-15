@@ -9,7 +9,7 @@
 
 #include <CLI11.hpp>
 
-struct AdcSettingsStruct {
+struct AdcSettings {
   bool SerializeSamples{false};
   bool PeakDetection{false};
   bool SampleTimeStamp{false};
@@ -19,4 +19,4 @@ struct AdcSettingsStruct {
   std::string Name;
 };
 
-void SetCLIArguments(CLI::App &parser, AdcSettingsStruct &AdcSettings);
+void SetCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings);

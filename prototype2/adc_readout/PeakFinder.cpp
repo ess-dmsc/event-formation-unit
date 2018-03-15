@@ -13,15 +13,12 @@
 PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod)
     : AdcDataProcessor(std::move(Prod)) {}
 
-void PeakFinder::operator()(const PacketData &Data) {
+void PeakFinder::processPacket(const PacketData &Data) {
   if (Data.Type != PacketType::Data) {
     return;
   }
   for (auto &Module : Data.Modules) {
     auto Result = FindPeak(Module.Data);
-    // std::uint64_t PeakTimeStamp =
-    // TimeStamp::CalcSample(Module.TimeStampSeconds,
-    // Module.TimeStampSecondsFrac, Result.MaxLocation);
     std::uint64_t PeakTimeStamp =
         Module.TimeStamp.GetOffsetTimeStamp(Result.MaxLocation)
             .GetTimeStampNS();
@@ -51,17 +48,13 @@ void PeakFinder::SendData(const std::uint64_t &TimeStamp,
 
 ModuleAnalysisResult FindPeak(const std::vector<std::uint16_t> &SampleRun) {
   ModuleAnalysisResult ReturnData{
-      0, 0, std::numeric_limits<std::uint16_t>::max(), 0, 0};
+      0, 0, 0};
   std::int64_t Sum = 0;
-  for (std::uint32_t i = 0; i < SampleRun.size(); ++i) {
+  for (std::size_t i = 0; i < SampleRun.size(); ++i) {
     Sum += SampleRun[i];
     if (SampleRun[i] > ReturnData.Max) {
       ReturnData.Max = SampleRun[i];
       ReturnData.MaxLocation = i;
-    }
-    if (SampleRun[i] < ReturnData.Min) {
-      ReturnData.Min = SampleRun[i];
-      ReturnData.MinLocation = i;
     }
   }
   ReturnData.Mean = Sum / SampleRun.size();
