@@ -5,7 +5,7 @@
  *  @brief ADC readout detector module.
  */
 
-#include "Detector.h"
+#include <Detector.h>
 #include "AdcReadoutBase.h"
 #include "AdcSettings.h"
 
