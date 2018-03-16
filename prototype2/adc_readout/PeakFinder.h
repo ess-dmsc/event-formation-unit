@@ -12,7 +12,7 @@
 /// @brief Finds a peak in a sample run and serialises its maximum value and timestamp.
 class PeakFinder : public AdcDataProcessor {
 public:
-  /// @param[Prod] A shared pointer to the Kafka producer that handles data production.
+  /// @param[in] Prod A shared pointer to the Kafka producer that handles data production.
   PeakFinder(std::shared_ptr<Producer> Prod);
   
   /// @brief Handles peak detection, serialisation of the result and transmission to the Kafka broker.
@@ -35,6 +35,6 @@ struct ModuleAnalysisResult {
 
 /// @brief Implements the actual peak finding algorithm
 /// The algorithm is very simple (to a fault) and only attempts to find the maximum value in a sampling run and then also calculates the timestamp of that maximum value. This algorithm will fail for doubles, exessive noise, wide peaks, valleys (inverted peaks) and probably other situations as well.
-/// @param[SampleRun] A vector of samples to find the peak in.
+/// @param[in] SampleRun A vector of samples to find the peak in.
 /// @return The results of the peak finding algorithm.
 ModuleAnalysisResult FindPeak(const std::vector<std::uint16_t> &SampleRun);

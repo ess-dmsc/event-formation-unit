@@ -33,7 +33,7 @@ struct RawTimeStamp {
   
   /// @brief Calculate the raw timestamp based on sample offset.
   /// Adds or subtracts the specified number of clock cycles (samples). Correctly wraps around the fractional seconds if so required to get the correct value.
-  /// @param[SampleOffset] The number of samples that the time stamp should be offset. Can be negative and positive.
+  /// @param[in] SampleOffset The number of samples that the time stamp should be offset. Can be negative and positive.
   /// @return The resulting new timestamp.
   RawTimeStamp GetOffsetTimeStamp(const std::int32_t &SampleOffset) const;
   

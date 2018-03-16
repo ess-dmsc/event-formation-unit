@@ -36,11 +36,11 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings Settings,
 
   if (ReadoutSettings.PeakDetection) {
     Processors.emplace_back(
-        std::unique_ptr<AdcDataProcessor>(new PeakFinder(ProducerPtr)));
+        std::unique_ptr<AdcDataProcessor>(new PeakFinder(getProducer())));
   }
   if (ReadoutSettings.SerializeSamples) {
     std::unique_ptr<AdcDataProcessor> Processor(
-        new SampleProcessing(ProducerPtr, ReadoutSettings.Name));
+        new SampleProcessing(getProducer(), ReadoutSettings.Name));
     dynamic_cast<SampleProcessing *>(Processor.get())
         ->setTimeStampLocation(
             TimeStampLocationMap.at(ReadoutSettings.TimeStampLocation));

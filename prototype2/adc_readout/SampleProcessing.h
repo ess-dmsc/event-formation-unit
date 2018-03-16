@@ -31,9 +31,9 @@ struct ProcessedSamples {
 };
 
 /// @brief Selects the Start, End or a midpoint between them (based on Location) and returns that time point as nanoseconds.
-/// @param[Start] Time stamp of first sample.
-/// @param[End] Time stamp of last sample.
-/// @param[Location] Which timestamp to return.
+/// @param[in] Start Time stamp of first sample.
+/// @param[in] End Time stamp of last sample.
+/// @param[in] Location Which timestamp to return.
 /// @return The selected timestamp converted to nanoseconds.
 std::uint64_t CalcSampleTimeStamp(RawTimeStamp const &Start,
                                   RawTimeStamp const &End,
@@ -46,7 +46,7 @@ public:
   ChannelProcessing() = default;
   /// @brief Called with the data that is to be processed.
   /// @note Does not actually check that it is called with data from the correct channel. The caller has to make sure that this is the case.
-  /// @param[Samples] The datamodule (sampling run) to proccess.
+  /// @param[in] Samples The datamodule (sampling run) to proccess.
   /// @return Processed (oversampled) data sample points.
   ProcessedSamples processModule(DataModule const &Samples);
   
@@ -57,7 +57,7 @@ public:
   int getMeanOfSamples() const { return MeanOfNrOfSamples; };
   
   /// @brief Sets the time stamp location for overasmpled samples.
-  /// @param[Location] Three different values are possible; Start, Middle, End.
+  /// @param[in] Location Three different values are possible; Start, Middle, End.
   void setTimeStampLocation(TimeStampLocation Location);
   
   /// @brief Get the time stamp location setting.
@@ -78,14 +78,14 @@ private:
 /// @brief Handles processing of sample data, serialization and transmission (prouction) to a Kafka broker.
 class SampleProcessing : public AdcDataProcessor {
 public:
-  /// @param[Prod] Shared pointer to Kafka producer instance.
-  /// @param[Name] Name of the data source. Used when setting the name of the source of the flatbuffer.
+  /// @param[in] Prod Shared pointer to Kafka producer instance.
+  /// @param[in] Name Name of the data source. Used when setting the name of the source of the flatbuffer.
   SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string const &Name);
   ~SampleProcessing() = default;
   
   /// @brief Called to actually process, serialise and transmit the (already) parsed data.
   /// @note Will NOT concatenate sample runs from the same channel. Samples from each data module in Data will be put in a seperate flatbuffer.
-  /// @param[Data] Parsed data to process.
+  /// @param[in] Data Parsed data to process.
   virtual void processPacket(PacketData const &Data) override;
   
   void setMeanOfSamples(int NrOfSamples);
