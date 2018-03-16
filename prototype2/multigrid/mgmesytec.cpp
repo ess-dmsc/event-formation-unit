@@ -134,15 +134,15 @@ void CSPEC::input_thread() {
   dat.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
 
   char buffer[9010];
-  int rdsize;
+  int ReadSize;
   TSCTimer report_timer;
   for (;;) {
-    if ((rdsize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
+    if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
-      mystats.rx_bytes += rdsize;
-      XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
+      mystats.rx_bytes += ReadSize;
+      XTRACE(INPUT, DEB, "rdsize: %u\n", ReadSize);
 
-      auto res = dat.parse(buffer, rdsize, hists, flatbuffer, readouts);
+      auto res = dat.parse(buffer, ReadSize, hists, flatbuffer, readouts);
       if (res < 0) {
         mystats.parse_errors++;
       }

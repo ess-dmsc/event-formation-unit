@@ -32,8 +32,7 @@ public:
   };
   // clang-fomat on
 
-  MesytecData(bool filedump, std::string fileprefix, uint32_t module) : dumptofile(filedump) {
-
+  MesytecData(bool filedump, __attribute__((unused)) std::string fileprefix, uint32_t module) : dumptofile(filedump) {
     mgseq.select_module(module);
 #ifdef DUMPTOFILE
     if (dumptofile) {
@@ -74,7 +73,7 @@ public:
   int geometry_errors{0};
 
 private:
-  bool dumptofile{false};
+  bool __attribute__((unused)) dumptofile{false}; // only active when cmake -DDUMPTOFILE
   int wiremax{-1}; // initial alg.: wire with max adc
   int gridmax{-1}; // initial alg.: grid with max adc
   int time{-1};
