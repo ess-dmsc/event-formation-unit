@@ -51,7 +51,7 @@ protected:
   /// @brief Stores pointers to data processors.
   std::vector<std::unique_ptr<AdcDataProcessor>> Processors;
   
-  /// @brief Counters that are used to move data to Grafana.
+  /// @brief Counters that are used to store stats that are sent to Grafana.
   struct {
     std::int64_t input_bytes_received = 0;
     std::int64_t parser_errors = 0;

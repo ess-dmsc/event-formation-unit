@@ -9,6 +9,7 @@
 
 #include <CLI11.hpp>
 
+/// @brief ADC readout (and processing) specific settings.
 struct AdcSettings {
   bool SerializeSamples{false};
   bool PeakDetection{false};
