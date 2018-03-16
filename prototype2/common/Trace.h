@@ -8,8 +8,11 @@
 #include <cstdio>
 #include <libgen.h>
 #ifdef GRAYLOG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #include <graylog_logger/GraylogInterface.hpp>
 #include <graylog_logger/Log.hpp>
+#pragma GCC diagnostic pop
 #define GLOG_DEB(x) Log::Msg(Severity::Debug, x)
 #define GLOG_INF(x) Log::Msg(Severity::Informational, x)
 #define GLOG_WAR(x) Log::Msg(Severity::Warning, x)
