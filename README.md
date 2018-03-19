@@ -71,6 +71,7 @@ By using Conan, all dependencies are downloaded and compiled (if required) autom
 For conan to know where the dependencies can be downloaded from, package repositories must be added by running the following commands:
 
 * ``conan remote add ess-dmsc https://api.bintray.com/conan/ess-dmsc/conan``
+* ``conan remote add bincrafters https://api.bintray.com/conan/bincrafters/public-conan``
 
 Note also that for additional functionality you might want to install the following dependencies:
 
