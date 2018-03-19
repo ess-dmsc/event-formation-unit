@@ -13,8 +13,11 @@
 #include <cstdarg>
 #include <libgen.h>
 #ifdef GRAYLOG
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #include <graylog_logger/GraylogInterface.hpp>
 #include <graylog_logger/Log.hpp>
+#pragma GCC diagnostic pop
 #endif
 
 /** Add trace groups below - must be powers of two */
