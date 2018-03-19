@@ -38,7 +38,7 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
 
   if ((frameCounter < m_oldFrameCounter) && !(m_oldFrameCounter > frameCounter + 1000000000)) {
     DTRACE(DEB, "\n*********************************** SCRAMBLED eventNr  %d, "
-                "old framecounter %d, new framecounter %u\n",
+                "old framecounter %d, new framecounter %u",
            m_eventNr, m_oldFrameCounter, frameCounter);
     stats_fc_error++;
   }
@@ -106,34 +106,34 @@ int NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
   StoreHits(x, y, adc, bcid, chipTime, overThresholdFlag);
 
   if (newEvent) {
-    DTRACE(DEB, "\neventNr  %d\n", m_eventNr);
-    DTRACE(DEB, "fecID  %d\n", fecID);
+    DTRACE(DEB, "\neventNr  %d", m_eventNr);
+    DTRACE(DEB, "fecID  %d", fecID);
   }
 
   if (deltaTriggerTimestamp_ns > 0) {
-    DTRACE(DEB, "\tTimestamp %.2f [ms]\n", m_timeStamp_ms);
-    DTRACE(DEB, "\tTime since last trigger %.4f us (%.4f kHz)\n",
+    DTRACE(DEB, "\tTimestamp %.2f [ms]", m_timeStamp_ms);
+    DTRACE(DEB, "\tTime since last trigger %.4f us (%.4f kHz)",
            deltaTriggerTimestamp_ns * 0.001,
            1000000 / deltaTriggerTimestamp_ns);
-    DTRACE(DEB, "\tTriggerTimestamp %.2f [ns]\n", triggerTimestamp_ns);
+    DTRACE(DEB, "\tTriggerTimestamp %.2f [ns]", triggerTimestamp_ns);
   }
   if (m_oldFrameCounter != frameCounter || newEvent) {
-    DTRACE(DEB, "\n\tFrameCounter %u\n", frameCounter);
+    DTRACE(DEB, "\n\tFrameCounter %u", frameCounter);
   }
   if (m_oldVmmID != vmmID || newEvent) {
-    DTRACE(DEB, "\tvmmID  %d\n", vmmID);
+    DTRACE(DEB, "\tvmmID  %d", vmmID);
   }
   if (planeID == planeID_X) {
-    DTRACE(DEB, "\t\tx-channel %d (chNo  %d) - overThresholdFlag %d\n", x, chNo,
+    DTRACE(DEB, "\t\tx-channel %d (chNo  %d) - overThresholdFlag %d", x, chNo,
            overThresholdFlag);
   } else if (planeID == planeID_Y) {
-    DTRACE(DEB, "\t\ty-channel %d (chNo  %d) - overThresholdFlag %d\n", y, chNo,
+    DTRACE(DEB, "\t\ty-channel %d (chNo  %d) - overThresholdFlag %d", y, chNo,
            overThresholdFlag);
   } else {
-    DTRACE(DEB, "\t\tPlane for vmmID %d not defined!\n", vmmID);
+    DTRACE(DEB, "\t\tPlane for vmmID %d not defined!", vmmID);
   }
-  DTRACE(DEB, "\t\t\tbcid %d, tdc %d, adc %d\n", bcid, tdc, adc);
-  DTRACE(DEB, "\t\t\tbcTime %.2f us, tdcTime %.2f ns, time %.2f us\n", bcTime,
+  DTRACE(DEB, "\t\t\tbcid %d, tdc %d, adc %d", bcid, tdc, adc);
+  DTRACE(DEB, "\t\t\tbcTime %.2f us, tdcTime %.2f ns, time %.2f us", bcTime,
          tdcTime, chipTime * 0.001);
 
   m_oldTriggerTimestamp_ns = triggerTimestamp_ns;
@@ -240,7 +240,7 @@ int NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
 		if (stripCount == 0) {
 			maxDeltaStrip = 0;
 			startTime = time1;
-			DTRACE(DEB, "\n%s cluster:\n", coordinate.c_str());
+			DTRACE(DEB, "\n%s cluster:", coordinate.c_str());
 		}
 
 		// Add members of a cluster, if it is either the beginning of a cluster,
@@ -249,7 +249,7 @@ int NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
 				|| (std::abs(strip1 - strip2) > 0
 						&& std::abs(strip1 - strip2) <= (dStrip + 1)
 						&& time1 - startTime <= dSpan)) {
-			DTRACE(DEB, "\tstrip %d, time %f, adc %d:\n", strip1, time1, adc1);
+			DTRACE(DEB, "\tstrip %d, time %f, adc %d:", strip1, time1, adc1);
 			if (time1 > largestTime) {
 				largestTime = time1;
 				clusterPositionUTPC = strip1;
@@ -277,7 +277,7 @@ int NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
 						totalADC, centerOfTime, largestTime, coordinate,
 						maxDeltaTime, maxDeltaStrip, deltaSpan);
 				clusterCount++;
-				DTRACE(DEB, "******** VALID ********\n");
+				DTRACE(DEB, "******** VALID ********");
 				maxDeltaStrip = 0;
 
 			}
@@ -302,7 +302,7 @@ int NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
 				totalADC, centerOfTime, largestTime, coordinate, maxDeltaTime,
 				maxDeltaStrip, deltaSpan);
 		clusterCount++;
-		DTRACE(DEB, "******** VALID ********\n");
+		DTRACE(DEB, "******** VALID ********");
 	}
 	return clusterCount;
 }
@@ -541,7 +541,7 @@ void NMXClusterer::AsyncClustererY() {
 	int cntY = ClusterByTime(m_hitsOldY, pDeltaTimeHits, pDeltaStripHits,
 			pDeltaTimeSpan, "y");
 
-	DTRACE(DEB, "%d cluster in y\n", cntY);
+	DTRACE(DEB, "%d cluster in y", cntY);
 
 }
 
@@ -564,7 +564,7 @@ void NMXClusterer::AsyncClustererX() {
 	int cntX = ClusterByTime(m_hitsOldX, pDeltaTimeHits, pDeltaStripHits,
 			pDeltaTimeSpan, "x");
 
-	DTRACE(DEB, "%d cluster in x\n", cntX);
+	DTRACE(DEB, "%d cluster in x", cntX);
 
 }
 

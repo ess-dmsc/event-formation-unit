@@ -54,7 +54,7 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
       break;
   }
 
-  XTRACE(PROCESS, DEB, "center_sum=%f center_count=%f\n", center_sum,
+  XTRACE(PROCESS, DEB, "center_sum=%f center_count=%f", center_sum,
          center_count);
 
   center = center_sum / center_count;
@@ -87,7 +87,7 @@ void EventNMX::insert_eventlet(const Eventlet &e) {
 
 void EventNMX::analyze(bool weighted, int16_t max_timebins,
                        int16_t max_timedif) {
-  XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu\n",
+  XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu",
          x.entries.size(), y.entries.size());
   if (x.entries.size()) {
     x.analyze(weighted, max_timebins, max_timedif);

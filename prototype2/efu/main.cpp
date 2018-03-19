@@ -60,22 +60,18 @@ int main(int argc, char *argv[]) {
   Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
   Log::SetMinimumSeverity(Severity::Debug);
 #endif
-
-  GLOG_INF("Starting Event Formation Unit");
-  GLOG_INF("Event Formation Unit version: " + efu_version());
-  GLOG_INF("Event Formation Unit build: " + efu_buildstr());
-  XTRACE(MAIN, ALW, "Starting Event Formation unit\n");
-  XTRACE(MAIN, ALW, "Event Formation Software Version: %s\n",
+  
+  XTRACE(MAIN, ALW, "Starting Event Formation unit");
+  XTRACE(MAIN, ALW, "Event Formation Software Version: %s",
          efu_version().c_str());
-  XTRACE(MAIN, ALW, "Event Formation Unit build: %s\n", EFU_STR(BUILDSTR));
+  XTRACE(MAIN, ALW, "Event Formation Unit build: %s", EFU_STR(BUILDSTR));
 
   if (DetectorSettings.StopAfterSec == 0) {
-    XTRACE(MAIN, ALW, "Event Formation Unit Exit (Immediate)\n");
-    GLOG_INF("Event Formation Unit Exit (Immediate)");
+    XTRACE(MAIN, ALW, "Event Formation Unit Exit (Immediate)");
     return 0;
   }
 
-  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", DetectorName.c_str());
+  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s", DetectorName.c_str());
 
   Launcher launcher(AffinitySettings);
 
@@ -91,7 +87,7 @@ int main(int argc, char *argv[]) {
   while (1) {
     if (stop_cmd.timeus() >= (uint64_t)ONE_SECOND_US / 10) {
       if (keep_running == 0) {
-        XTRACE(INIT, ALW, "Application stop, Exiting...\n");
+        XTRACE(INIT, ALW, "Application stop, Exiting...");
         detector->stopThreads();
         sleep(2);
         break;
@@ -100,8 +96,7 @@ int main(int argc, char *argv[]) {
 
     if (stop_timer.timeus() >=
         DetectorSettings.StopAfterSec * (uint64_t)ONE_SECOND_US) {
-      XTRACE(MAIN, ALW, "Application timeout, Exiting...\n");
-      GLOG_INF("Event Formation Unit Exiting (User timeout)");
+      XTRACE(MAIN, ALW, "Application timeout, Exiting...");
       detector->stopThreads();
       sleep(2);
       break;
@@ -120,7 +115,7 @@ int main(int argc, char *argv[]) {
   if (detector.use_count() > 1) {
     XTRACE(MAIN, WAR,
            "There are more than 1 strong pointers to the detector. This "
-           "application may crash on exit.\n");
+           "application may crash on exit.");
   }
   detector.reset();
 

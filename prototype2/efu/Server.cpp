@@ -41,7 +41,7 @@ Server::Server(int port, Parser &parse) : port_(port), parser(parse) {
 }
 
 void Server::server_close(int socket) {
-  XTRACE(IPC, DEB, "Closing socket fd %d\n", socket);
+  XTRACE(IPC, DEB, "Closing socket fd %d", socket);
   close(socket);
   auto client = std::find(clientfd.begin(), clientfd.end(), socket);
   assert(client != clientfd.end());
@@ -51,7 +51,7 @@ void Server::server_close(int socket) {
 /** @brief Setup socket parameters
  */
 void Server::server_open() {
-  XTRACE(IPC, INF, "Server::open() called on port %d\n", port_);
+  XTRACE(IPC, INF, "Server::open() called on port %d", port_);
 
   struct sockaddr_in socket_address;
   UNUSED int ret;
@@ -82,9 +82,9 @@ void Server::server_open() {
 }
 
 int Server::server_send(int socketfd) {
-  XTRACE(IPC, DEB, "server_send() - %d bytes\n", output.bytes);
+  XTRACE(IPC, DEB, "server_send() - %d bytes", output.bytes);
   if (send(socketfd, output.buffer, output.bytes, 0) < 0) {
-    XTRACE(IPC, WAR, "Error sending command reply\n");
+    XTRACE(IPC, WAR, "Error sending command reply");
     return -1;
   }
   output.bytes = 0;
@@ -115,17 +115,17 @@ void Server::server_poll() {
   if (ready > 0 && FD_ISSET(serverfd, &fd_working)) {
     auto freefd = std::find(clientfd.begin(), clientfd.end(), -1);
     if (freefd == clientfd.end()) {
-      XTRACE(IPC, WAR, "Max clients connected, can't accept()\n");
+      XTRACE(IPC, WAR, "Max clients connected, can't accept()");
       auto tmpsock = accept(serverfd, NULL, NULL);
       close(tmpsock);
     } else {
-      XTRACE(IPC, INF, "Accept new connection\n");
+      XTRACE(IPC, INF, "Accept new connection");
       *freefd = accept(serverfd, NULL, NULL);
       if (*freefd < 0 && errno != EWOULDBLOCK) {
         assert(1 == 0);
       }
       FD_SET(*freefd, &fd_master);
-      XTRACE(IPC, DEB, "New clent socket: %d, ready: %d\n", *freefd, ready);
+      XTRACE(IPC, DEB, "New clent socket: %d, ready: %d", *freefd, ready);
     }
     ready--;
   }
@@ -137,31 +137,31 @@ void Server::server_poll() {
                         SERVER_BUFFER_SIZE - input.bytes, 0);
 
       if ((bytes < 0) && (errno != EWOULDBLOCK || errno != EAGAIN)) {
-        XTRACE(IPC, WAR, "recv() failed, errno: %d\n", errno);
+        XTRACE(IPC, WAR, "recv() failed, errno: %d", errno);
         perror("recv() failed");
         server_close(cli);
         return;
       }
       if (bytes == 0) {
-        XTRACE(IPC, INF, "Peer closed socket %d\n", cli);
+        XTRACE(IPC, INF, "Peer closed socket %d", cli);
         server_close(cli);
         return;
       }
-      XTRACE(IPC, INF, "Received %ld bytes on socket %d\n", bytes, cli);
+      XTRACE(IPC, INF, "Received %ld bytes on socket %d", bytes, cli);
       input.bytes += bytes;
 
       assert(input.bytes <= SERVER_BUFFER_SIZE);
-      XTRACE(IPC, DEB, "input.bytes: %d\n", input.bytes);
+      XTRACE(IPC, DEB, "input.bytes: %d", input.bytes);
 
       // Parse and generate reply
       if (parser.parse((char *)input.buffer, input.bytes, (char *)output.buffer,
                        &output.bytes) < 0) {
-        XTRACE(IPC, WAR, "Parse error\n");
+        XTRACE(IPC, WAR, "Parse error");
       }
       input.bytes = 0;
       input.data = input.buffer;
       if (server_send(cli) < 0) {
-        XTRACE(IPC, WAR, "server_send() failed\n");
+        XTRACE(IPC, WAR, "server_send() failed");
         server_close(cli);
         return;
       }

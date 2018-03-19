@@ -94,10 +94,9 @@ PopulateCLIParser PopulateParser{SetCLIArguments};
 int CSPEC::LoadCalib(std::vector<std::string> cmdargs,
                      __attribute__((unused)) char *output,
                      __attribute__((unused)) unsigned int *obytes) {
-  XTRACE(CMD, INF, "CSPEC_LOAD_CALIB\n");
-  GLOG_INF("CSPEC_LOAD_CALIB");
+  XTRACE(CMD, INF, "CSPEC_LOAD_CALIB");
   if (cmdargs.size() != 2) {
-    XTRACE(CMD, WAR, "CSPEC_LOAD_CALIB: wrong number of arguments\n");
+    XTRACE(CMD, WAR, "CSPEC_LOAD_CALIB: wrong number of arguments");
     return -Parser::EBADARGS;
   }
   CalibrationFile calibfile;
@@ -115,14 +114,13 @@ int CSPEC::ShowCalib(std::vector<std::string> cmdargs, char *output,
                      unsigned int *obytes) {
   auto nargs = cmdargs.size();
   unsigned int offset = 0;
-  XTRACE(CMD, INF, "CSPEC_SHOW_CALIB\n");
-  GLOG_INF("CSPEC_SHOW_CALIB");
+  XTRACE(CMD, INF, "CSPEC_SHOW_CALIB");
   if (nargs == 1) {
     offset = 0;
   } else if (nargs == 2) {
     offset = atoi(cmdargs.at(1).c_str());
   } else {
-    XTRACE(CMD, WAR, "CSPEC_SHOW_CALIB: wrong number of arguments\n");
+    XTRACE(CMD, WAR, "CSPEC_SHOW_CALIB: wrong number of arguments");
     return -Parser::EBADARGS;
   }
 
@@ -140,7 +138,7 @@ int CSPEC::ShowCalib(std::vector<std::string> cmdargs, char *output,
 CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC Detector (2 thread pipeline)", settings) {
   Stats.setPrefix("efu.cspec2");
 
-  XTRACE(INIT, ALW, "Adding stats\n");
+  XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("input.rx_packets",                mystats.rx_packets);
   Stats.create("input.rx_bytes",                  mystats.rx_bytes);
@@ -174,7 +172,7 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC Detector (2 thread pipelin
                        return CSPEC::ShowCalib(cmdargs, output, obytes);
                      });
 
-  XTRACE(INIT, ALW, "Creating %d Ethernet ringbuffers of size %d\n",
+  XTRACE(INIT, ALW, "Creating %d Ethernet ringbuffers of size %d",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
 }
@@ -199,7 +197,7 @@ void CSPEC::input_thread() {
       eth_ringbuf->setdatalength(eth_index, rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
-      XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
+      XTRACE(INPUT, DEB, "rdsize: %u", rdsize);
 
       if (input2proc_fifo.push(eth_index) == false) {
         mystats.fifo_push_errors++;
@@ -210,7 +208,7 @@ void CSPEC::input_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      XTRACE(INPUT, ALW, "Stopping input thread.");
       return;
     }
   }
@@ -233,7 +231,7 @@ void CSPEC::processing_thread() {
   while (1) {
     // Check for control from mothership (main)
     if (NewCalibrationData) {
-      XTRACE(PROCESS, INF, "processing_thread loading new calibrations\n");
+      XTRACE(PROCESS, INF, "processing_thread loading new calibrations");
       conv.load_calibration(wirecal, gridcal);
       NewCalibrationData = false;
     }
@@ -278,7 +276,7 @@ void CSPEC::processing_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping processing thread.\n");
+      XTRACE(INPUT, ALW, "Stopping processing thread.");
       return;
     }
   }

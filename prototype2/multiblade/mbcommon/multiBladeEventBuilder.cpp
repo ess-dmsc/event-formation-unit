@@ -22,7 +22,7 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel,
                                           const uint16_t &ADC,
                                           const uint32_t &clock) {
 
-  XTRACE(PROCESS, DEB, "Data-point received (%d, %d, %d)\n",
+  XTRACE(PROCESS, DEB, "Data-point received (%d, %d, %d)",
          static_cast<uint>(channel), static_cast<uint>(ADC),
          static_cast<uint>(clock));
 
@@ -30,7 +30,7 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel,
   m_datapoints_received++;
 
   if (ADC < m_ADC_theshold) {
-    XTRACE(PROCESS, DEB, "ADC-value below threshold. %d < %d\n",
+    XTRACE(PROCESS, DEB, "ADC-value below threshold. %d < %d",
            static_cast<uint>(ADC), static_cast<uint>(m_ADC_theshold));
     return false;
   }
@@ -39,7 +39,7 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel,
   // strip channels
   if (channel >= m_nwire_channels + m_nstrip_channels) {
     XTRACE(PROCESS, WAR,
-           "Recieved channel number : %d - max channel-number : %d\n",
+           "Recieved channel number : %d - max channel-number : %d",
            static_cast<uint>(channel),
            static_cast<uint>(m_nwire_channels + m_nstrip_channels));
     return false;
@@ -50,7 +50,7 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel,
     m_cluster_clock = clock;
     m_first_signal = false;
 
-    XTRACE(PROCESS, DEB, "First signal. Setting start clock to : %u\n", clock);
+    XTRACE(PROCESS, DEB, "First signal. Setting start clock to : %u", clock);
   }
 
   // Calculate the number of clock-cycles from the timestamp
@@ -60,7 +60,7 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel,
   if (clock_diff < m_time_window) {
 
     // point is within time-window
-    XTRACE(PROCESS, DEB, "Within time-window [%u < %u]\n", clock_diff,
+    XTRACE(PROCESS, DEB, "Within time-window [%u < %u]", clock_diff,
            m_time_window);
 
     // Add point to cluster
@@ -70,7 +70,7 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel,
   }
 
   // point is outside time-window - the cluster is complete.
-  XTRACE(PROCESS, DEB, "Outside time-window [%u > %u]\n", clock_diff,
+  XTRACE(PROCESS, DEB, "Outside time-window [%u > %u]", clock_diff,
          m_time_window);
 
   // multiBladeEventBuilder the stored clusters. True is returned if all checks
@@ -113,14 +113,14 @@ bool multiBladeEventBuilder::processClusters() {
   // Calculate the time-stamp
   m_time_stamp = m_cluster_clock;
 
-  XTRACE(PROCESS, DEB, "Calculated position : Pos(%1.4f, %1.4f)\n", m_wire_pos,
+  XTRACE(PROCESS, DEB, "Calculated position : Pos(%1.4f, %1.4f)", m_wire_pos,
          m_strip_pos);
 
   if ((m_wire_pos < 0) && (m_strip_pos < 0)) {
 
     m_rejected_position++;
 
-    XTRACE(PROCESS, WAR, "Both positions less than 0 - not an event!\n");
+    XTRACE(PROCESS, WAR, "Both positions less than 0 - not an event!");
 
     return false;
   } else {
@@ -142,7 +142,7 @@ bool multiBladeEventBuilder::pointsAdjacent() {
   // Both sets have to be adjacent for a valid cluster
   bool adjacent = wires_adjacent && strips_adjacent;
 
-  XTRACE(PROCESS, DEB, "Wires are%s adjacent, strips are%s adjacent!\n",
+  XTRACE(PROCESS, DEB, "Wires are%s adjacent, strips are%s adjacent!",
          (wires_adjacent ? "" : "not"), (strips_adjacent ? "" : "not"));
 
   return adjacent;
@@ -283,7 +283,7 @@ void multiBladeEventBuilder::incrementCounters(
       m_2D_wires.at(5)++;
 
       XTRACE(PROCESS, DEB,
-             "More points than expected! Number of wire data points = %d\n",
+             "More points than expected! Number of wire data points = %d",
              static_cast<int>(m_wire_cluster.size()));
     }
     if (m_strip_cluster.size() <= 5) {
@@ -292,7 +292,7 @@ void multiBladeEventBuilder::incrementCounters(
       m_2D_strips.at(5)++;
 
       XTRACE(PROCESS, DEB,
-             "More points than expected! Number of strip data points = %d\n",
+             "More points than expected! Number of strip data points = %d",
              static_cast<int>(m_strip_cluster.size()));
     }
   }
@@ -306,7 +306,7 @@ void multiBladeEventBuilder::incrementCounters(
       m_1D_wires.at(5)++;
 
       XTRACE(PROCESS, DEB,
-             "More points than expected! Number of wire data points = %d\n",
+             "More points than expected! Number of wire data points = %d",
              static_cast<int>(m_wire_cluster.size()));
     }
   }
@@ -320,7 +320,7 @@ void multiBladeEventBuilder::incrementCounters(
       m_1D_strips.at(5)++;
 
       XTRACE(PROCESS, DEB,
-             "More points than expected! Number of strip data points = %lu\n",
+             "More points than expected! Number of strip data points = %lu",
              m_strip_cluster.size());
     }
   }

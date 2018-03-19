@@ -24,7 +24,7 @@ public:
 
   /** @brief select hardware configuration (module) of the detector for correct wire swapping */
   void select_module(uint32_t module) {
-    XTRACE(DATA, ALW, "Select detector module: %d\n", module);
+    XTRACE(DATA, ALW, "Select detector module: %d", module);
     module_select = module;
   }
   /** @brief identifies which channels are wires, from drawing by Anton */
@@ -36,7 +36,7 @@ public:
   /** @brief return the x coordinate of the detector */
   inline int xcoord(int digno, int channel) {
     if (!isWire(channel)) {
-      XTRACE(DATA, WAR, "Getting xcoord() from non wire channel\n");
+      XTRACE(DATA, WAR, "Getting xcoord() from non wire channel");
       return -1;
     }
     // wire == channel, wires range from 0 - 79
@@ -55,7 +55,7 @@ public:
       channel -= 1;
     }
     if (!isGrid(channel)) {
-      XTRACE(DATA, WAR, "Getting ycoord() from non grid channel\n");
+      XTRACE(DATA, WAR, "Getting ycoord() from non grid channel");
       return -1;
     }
 
@@ -65,7 +65,7 @@ public:
   /** @brief return the z coordinate of the detector */
   inline int zcoord(int channel) {
     if (!isWire(channel)) {
-      XTRACE(DATA, WAR, "Getting zcoord() from non wire channel\n");
+      XTRACE(DATA, WAR, "Getting zcoord() from non wire channel");
       return -1;
     }
     if (module_select == 1) {

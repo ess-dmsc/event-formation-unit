@@ -38,7 +38,7 @@ void AbstractBuilder::setup_h5(std::string dump_dir) {
   size_t chunksize = 9000;
   std::string fileName = dump_dir + "VMM3_" + time_str() + ".h5";
 
-  XTRACE(PROCESS, ALW, "Will dump to H5 file: %s\n", fileName.c_str());
+  XTRACE(PROCESS, ALW, "Will dump to H5 file: %s", fileName.c_str());
 
   file_ = hdf5::file::open(fileName, hdf5::file::AccessFlags::TRUNCATE);
 

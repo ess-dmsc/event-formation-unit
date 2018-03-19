@@ -17,7 +17,7 @@ public:
   BuilderSRS(SRSTime time_intepreter, SRSMappings geometry_interpreter,
              std::string dump_dir, bool dump_csv, bool dump_h5);
 
-  ~BuilderSRS() { XTRACE(INIT, DEB, "BuilderSRS destructor called\n"); }
+  ~BuilderSRS() { XTRACE(INIT, DEB, "BuilderSRS destructor called"); }
 
   /** @todo Martin document */
   ResultStats process_buffer(char *buf, size_t size, Clusterer &clusterer,

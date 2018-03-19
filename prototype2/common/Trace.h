@@ -5,49 +5,41 @@
  *  @brief Trace macros with masks and levels
  */
 
+// Regular "#ifndef" guards due to "#pragma once" failure
+#ifndef __TRACE_H__
+#define __TRACE_H__
+
 #include <cstdio>
 #include <libgen.h>
 #ifdef GRAYLOG
 #include <graylog_logger/GraylogInterface.hpp>
 #include <graylog_logger/Log.hpp>
-#define GLOG_DEB(x) Log::Msg(Severity::Debug, x)
-#define GLOG_INF(x) Log::Msg(Severity::Informational, x)
-#define GLOG_WAR(x) Log::Msg(Severity::Warning, x)
-#define GLOG_ERR(x) Log::Msg(Severity::Error, x)
-#define GLOG_CRI(x) Log::Msg(Severity::Critical, x)
-#else
-#define GLOG_DEB(x)
-#define GLOG_INF(x)
-#define GLOG_WAR(x)
-#define GLOG_ERR(x)
-#define GLOG_CRI(x)
 #endif
 
 /** Add trace groups below - must be powers of two */
 // clang-format off
-#define TRC_G_INPUT   0x00000001U
-#define TRC_G_OUTPUT  0x00000002U
-#define TRC_G_PROCESS 0x00000004U
-#define TRC_G_MAIN    0x00000008U
-#define TRC_G_INIT    0x00000010U
-#define TRC_G_IPC     0x00000020U
-#define TRC_G_CMD     0x00000040U
-#define TRC_G_DATA    0x00000080U
+const unsigned int TRC_G_INPUT   = 0x00000001U;
+const unsigned int TRC_G_OUTPUT  = 0x00000002U;
+const unsigned int TRC_G_PROCESS = 0x00000004U;
+const unsigned int TRC_G_MAIN    = 0x00000008U;
+const unsigned int TRC_G_INIT    = 0x00000010U;
+const unsigned int TRC_G_IPC     = 0x00000020U;
+const unsigned int TRC_G_CMD     = 0x00000040U;
+const unsigned int TRC_G_DATA    = 0x00000080U;
 
 /** Add trace masks below, bitwise or of grouops */
-#define TRC_M_ALL                                                              \
-  (TRC_G_INPUT | TRC_G_OUTPUT | TRC_G_PROCESS | TRC_G_MAIN | TRC_G_INIT |      \
-   TRC_G_IPC   | TRC_G_CMD | TRC_G_DATA)
+const unsigned int TRC_M_ALL = (TRC_G_INPUT | TRC_G_OUTPUT | TRC_G_PROCESS | TRC_G_MAIN | TRC_G_INIT | TRC_G_IPC   | TRC_G_CMD | TRC_G_DATA);
 
 /** Do not edit below */
-#define TRC_M_NONE 0
+const unsigned int TRC_M_NONE = 0;
 
-#define TRC_L_ALW 12
-#define TRC_L_CRI 10
-#define TRC_L_ERR 8
-#define TRC_L_WAR 6
-#define TRC_L_INF 4
-#define TRC_L_DEB 2
+const unsigned int TRC_L_ALW  = 1; //Should not be used
+const unsigned int TRC_L_CRI  = 2;
+const unsigned int TRC_L_ERR  = 3;
+const unsigned int TRC_L_WAR  = 4;
+const unsigned int TRC_L_NOTE = 5;
+const unsigned int TRC_L_INF  = 6;
+const unsigned int TRC_L_DEB  = 7;
 // clang-format on
 
 /** @brief get rid of annoying warning
@@ -56,27 +48,90 @@
 #pragma GCC system_header
 
 #ifndef TRC_MASK
-#define TRC_MASK TRC_M_ALL
+const unsigned int USED_TRC_MASK = TRC_M_ALL;
+#else
+const unsigned int USED_TRC_MASK = TRC_MASK;
 #endif
 
 #ifndef TRC_LEVEL
-#define TRC_LEVEL TRC_L_ERR
+const unsigned int USED_TRC_LEVEL = TRC_L_ERR;
+#else
+const unsigned int USED_TRC_LEVEL = TRC_LEVEL;
 #endif
 
-#if 1
-#define XTRACE(group, level, fmt, ...)                                         \
-  (void)(((TRC_L_##level >= TRC_LEVEL) && (TRC_MASK & TRC_G_##group))          \
-             ? printf("%-3s %-80s %5d %-s - " fmt, #level, __FILE__, __LINE__, \
-                      #group, ##__VA_ARGS__)                                   \
-             : 0)
+struct SeverityToString {
+  int SeverityLevel;
+  std::string SeverityName;
+};
 
-// Raw trace
-#define DTRACE(level, fmt, ...)                                                \
-  (void)((TRC_L_##level >= TRC_LEVEL) ? printf(fmt, ##__VA_ARGS__) : 0)
+static SeverityToString SeverityArray[] = {
+  {0, "EMERGENCY"},
+  {1, "ALW"},
+  {2, "CRI"},
+  {3, "ERR"},
+  {4, "WAR"},
+  {5, "NOTE"},
+  {6, "ERR"},
+  {7, "DEB"},
+};
+
+struct GroupToString {
+  int GroupId;
+  std::string GroupName;
+};
+
+static GroupToString GroupArray[] = {
+  {0, "INPUT"},
+  {1, "OUTPUT"},
+  {2, "PROCESS"},
+  {3, "MAIN"},
+  {4, "INIT"},
+  {5, "IPC"},
+  {6, "CMD"},
+  {7, "DATA"},
+};
+
+inline void Trace(int LineNumber, std::string File, const int Group, unsigned int SeverityLevel, const char *Format, ...) {
+  char *MessageBuffer = nullptr;
+  
+  va_list args;
+  va_start (args, Format);
+  __attribute__((unused)) int Characters = vasprintf(&MessageBuffer, Format, args);
+  va_end (args);
+  
+  int TempGroupValue = Group;
+  int GroupBitPosition = 0;
+  TempGroupValue >>= 1;
+  for (GroupBitPosition = 0; TempGroupValue != 0; GroupBitPosition++) {
+    TempGroupValue >>= 1;
+  }
+  if (SeverityLevel <= USED_TRC_LEVEL and USED_TRC_MASK & Group) {
+    printf("%-3s %-80s %5d %-s - %s\n", SeverityArray[SeverityLevel].SeverityName.c_str(), File.c_str(), LineNumber, GroupArray[GroupBitPosition].GroupName.c_str(), MessageBuffer);
+  }
+#ifdef GRAYLOG
+  Log::Msg(Severity(SeverityLevel), std::string(MessageBuffer, Characters), {{"file", File}, {"line", static_cast<std::int64_t>(LineNumber)}, {"group", GroupArray[GroupBitPosition].GroupName}});
 #endif
+  
+  free(MessageBuffer);
+}
 
-// #define XTRACE(group, level, fmt, ...)                                         \
-//   (void)(((TRC_L_##level >= TRC_LEVEL) && (TRC_MASK & TRC_G_##group))          \
-//              ? printf("%-3s %-8s" fmt, #level,\
-//                       #group, ##__VA_ARGS__)                                   \
-//              : 0)
+#define XTRACE(Group, Level, Format, ...) Trace(__LINE__, __FILE__, TRC_G_##Group, TRC_L_##Level, Format, ##__VA_ARGS__)
+
+inline void DebugTrace(unsigned int SeverityLevel, const char *Format, ...) {
+  char *MessageBuffer = nullptr;
+  va_list args;
+  va_start (args, Format);
+  __attribute__((unused)) int Characters = vasprintf(&MessageBuffer, Format, args);
+  va_end (args);
+#ifdef GRAYLOG
+  Log::Msg(Severity(SeverityLevel), std::string(MessageBuffer, Characters));
+#endif
+  if (SeverityLevel <= USED_TRC_LEVEL) {
+    printf("%s\n", MessageBuffer);
+  }
+  free(MessageBuffer);
+}
+
+#define DTRACE(Level, Format, ...) DebugTrace(TRC_L_##Level, Format, ##__VA_ARGS__)
+
+#endif
