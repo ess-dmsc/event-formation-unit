@@ -10,6 +10,7 @@
 #define __TRACE_H__
 
 #include <cstdio>
+#include <cstdarg>
 #include <libgen.h>
 #ifdef GRAYLOG
 #include <graylog_logger/GraylogInterface.hpp>
