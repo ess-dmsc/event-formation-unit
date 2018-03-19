@@ -267,16 +267,16 @@ def get_release_pipeline()
                     \""""
 
                     sh """docker exec ${container_name} ${custom_sh} -c \"
-                        mkdir -p archive/efu-centos7 && \
-                        cp -r build/bin archive/efu-centos7 && \
-                        cp -r build/lib archive/efu-centos7 && \
-                        cp -r build/licenses archive/efu-centos7 && \
+                        mkdir -p archive/event-formation-unit && \
+                        cp -r build/bin archive/event-formation-unit && \
+                        cp -r build/lib archive/event-formation-unit && \
+                        cp -r build/licenses archive/event-formation-unit && \
                         cd archive && \
-                        tar czvf efu-centos7.tar.gz efu-centos7
+                        tar czvf event-formation-unit-centos7.tar.gz event-formation-unit
                     \""""
 
-                    sh "docker cp ${container_name}:/home/jenkins/archive/efu-centos7.tar.gz ."
-                    archiveArtifacts "efu-centos7.tar.gz"
+                    sh "docker cp ${container_name}:/home/jenkins/archive/event-formation-unit-centos7.tar.gz ."
+                    archiveArtifacts "event-formation-unit-centos7.tar.gz"
                 } finally {
                     sh "docker stop ${container_name}"
                     sh "docker rm -f ${container_name}"
