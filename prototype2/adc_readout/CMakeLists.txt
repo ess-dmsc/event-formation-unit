@@ -66,7 +66,29 @@ find_package(ASIO)
 
 if(${ASIO_FOUND})
   
-  create_test_executable(AdcReadoutTest ${LibRDKafka_LIBRARIES})
+  #create_test_executable(AdcReadoutTest ${LibRDKafka_LIBRARIES})
+  
+  add_executable(AdcReadoutTest EXCLUDE_FROM_ALL
+    ${AdcReadoutTest_SRC}
+    ${AdcReadoutTest_INC})
+  target_include_directories(AdcReadoutTest
+    PRIVATE ${GTEST_INCLUDE_DIRS})
+
+  target_link_libraries(AdcReadoutTest
+    ${LibRDKafka_LIBRARIES}
+    ${EFU_COMMON_LIBS}
+    ${GTEST_LIBRARIES})
+
+  add_test(NAME regular_AdcReadoutTest
+    COMMAND AdcReadoutTest
+    "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
+
+  set(unit_test_targets
+    ${unit_test_targets} AdcReadoutTest
+    CACHE INTERNAL "All targets")
+
+  enable_coverage(AdcReadoutTest)
+  
   get_filename_component(TEST_PACKET_PATH "test/test_packet_1.dat" DIRECTORY)
   target_compile_definitions(AdcReadoutTest PRIVATE TEST_PACKET_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_PACKET_PATH}/")
   message(STATUS "Test ADC packets in path: ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_PACKET_PATH}/")
