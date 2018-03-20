@@ -1,4 +1,4 @@
-project = "efu"
+project = "event-formation-unit"
 coverage_on = "centos7"
 
 images = [
