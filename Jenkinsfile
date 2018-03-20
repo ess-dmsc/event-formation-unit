@@ -52,19 +52,13 @@ def Object get_container(image_key) {
     return container
 }
 
-def docker_copy(image_key) {
+def docker_clone(image_key) {
     def custom_sh = images[image_key]['sh']
-    // Copy sources to container and change owner and group.
-    sh "docker cp ${project}_code ${container_name(image_key)}:/home/jenkins/${project}"
-    sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
-                        chown -R jenkins.jenkins /home/jenkins/${project}
-                        \""""
-
-//    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-//        git clone \
-//            --branch ${env.BRANCH_NAME} \
-//            https://github.com/ess-dmsc/event-formation-unit.git ${project}
-//    \""""
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+        git clone \
+            --branch ${env.BRANCH_NAME} \
+            https://github.com/ess-dmsc/event-formation-unit.git /home/jenkins/${project}
+    \""""
 }
 
 def docker_dependencies(image_key) {
@@ -180,9 +174,8 @@ def get_pipeline(image_key)
             node ("docker") {
                 try {
                     def container = get_container(image_key)
-                    def custom_sh = images[image_key]['sh']
 
-                    docker_copy(image_key)
+                    docker_clone(image_key)
                     docker_dependencies(image_key)
                     docker_cmake(image_key)
                     docker_build(image_key)
