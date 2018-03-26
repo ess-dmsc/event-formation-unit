@@ -11,7 +11,7 @@ Socket::Socket(Socket::type stype) {
   auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
 
   if ((s_ = socket(AF_INET, type, proto)) == -1) {
-    XTRACE(INIT, ALW, "socket() failed\n");
+    XTRACE(INIT, ALW, "socket() failed");
     exit(1);
   }
 }
@@ -26,8 +26,8 @@ int Socket::setbuffers(int sndbuf, int rcvbuf) {
 }
 
 void Socket::printbuffers(void) {
-  XTRACE(IPC, ALW, "Socket receive buffer size: %d\n", getopt(SO_RCVBUF));
-  XTRACE(IPC, ALW, "Socket send buffer size: %d\n", getopt(SO_SNDBUF));
+  XTRACE(IPC, ALW, "Socket receive buffer size: %d", getopt(SO_RCVBUF));
+  XTRACE(IPC, ALW, "Socket send buffer size: %d", getopt(SO_SNDBUF));
 }
 
 int Socket::settimeout(int seconds, int usecs) {
@@ -124,7 +124,7 @@ TCPClient::TCPClient(const char *ipaddr, int port) {
 
   ret = connect(s_, (struct sockaddr *)&remote_, sizeof(remote_));
   if (ret < 0) {
-    XTRACE(IPC, ALW, "connect() to %s:%d failed\n", ipaddr, port);
+    XTRACE(IPC, ALW, "connect() to %s:%d failed", ipaddr, port);
     s_ = -1;
   }
 }
@@ -135,12 +135,12 @@ int TCPClient::senddata(char *buffer, int len) {
   }
 
   if (len <= 0) {
-    XTRACE(IPC, WAR, "TCPClient::senddata() no data specified\n");
+    XTRACE(IPC, WAR, "TCPClient::senddata() no data specified");
     return 0;
   }
   int ret = send(s_, buffer, len, 0);
   if (ret <= 0) {
-    XTRACE(IPC, WAR, "TCPClient::send() returns %d\n", ret);
+    XTRACE(IPC, WAR, "TCPClient::send() returns %d", ret);
   }
   return ret;
 }

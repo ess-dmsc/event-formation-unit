@@ -43,17 +43,17 @@ AbstractBuilder::ResultStats BuilderSRS::process_buffer(char *buf, size_t size,
     eventlet.over_threshold = (d.overThreshold != 0);
 
     XTRACE(PROCESS, DEB,
-           "srs/vmm timestamp: srs: 0x%08x, bc: 0x%08x, tdc: 0x%08x\n",
+           "srs/vmm timestamp: srs: 0x%08x, bc: 0x%08x, tdc: 0x%08x",
            parser_.srshdr.time, d.bcid, d.tdc);
-    XTRACE(PROCESS, DEB, "srs/vmm chip: %d, channel: %d\n", chip_id, d.chno);
+    XTRACE(PROCESS, DEB, "srs/vmm chip: %d, channel: %d", chip_id, d.chno);
     XTRACE(PROCESS, DEB,
-           "eventlet plane_id: %d, strip: %d, time: %" PRIu64 "\n",
+           "eventlet plane_id: %d, strip: %d, time: %" PRIu64,
            eventlet.plane_id, eventlet.strip, eventlet.time);
     /**< @todo flags? */
 
     if (eventlet.plane_id == NMX_INVALID_PLANE_ID) {
       geom_errors++;
-      XTRACE(PROCESS, DEB, "Bad SRS mapping --  fec: %d, chip: %d\n", fec_id,
+      XTRACE(PROCESS, DEB, "Bad SRS mapping --  fec: %d, chip: %d", fec_id,
              chip_id);
     } else {
       hists.bin(eventlet);

@@ -108,7 +108,7 @@ NMX::~NMX() { printf("NMX detector destructor called\n"); }
 NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   Stats.setPrefix("efu.nmx");
 
-  XTRACE(INIT, ALW, "Adding stats\n");
+  XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("rx_packets",           mystats.rx_packets);
   Stats.create("rx_bytes",             mystats.rx_bytes);
@@ -135,7 +135,7 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   std::function<void()> processingFunc = [this]() { NMX::processing_thread(); };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
+  XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(
       eth_buffer_max_entries + 11); /**< @todo testing workaround */
@@ -166,7 +166,7 @@ void NMX::input_thread() {
     if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
                                   eth_ringbuf->getmaxbufsize())) > 0) {
       eth_ringbuf->setdatalength(eth_index, rdsize);
-      XTRACE(INPUT, DEB, "rdsize: %d\n", rdsize);
+      XTRACE(INPUT, DEB, "rdsize: %d", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
@@ -180,7 +180,7 @@ void NMX::input_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      XTRACE(INPUT, ALW, "Stopping input thread.");
       return;
     }
   }
@@ -189,7 +189,7 @@ void NMX::input_thread() {
 void NMX::processing_thread() {
   init_builder(NMXSettings.ConfigFile);
   if (!builder_) {
-    XTRACE(PROCESS, WAR, "No builder specified, exiting thread\n");
+    XTRACE(PROCESS, WAR, "No builder specified, exiting thread");
     return;
   }
 
@@ -233,7 +233,7 @@ void NMX::processing_thread() {
         mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
 
         while (clusterer.event_ready()) {
-          XTRACE(PROCESS, DEB, "event_ready()\n");
+          XTRACE(PROCESS, DEB, "event_ready()");
           event = clusterer.get_event();
           mystats.unclustered = clusterer.unclustered();
           hists.bin(event);
@@ -242,7 +242,7 @@ void NMX::processing_thread() {
                         nmx_opts.analyze_max_timedif);
 
           if (event.valid()) {
-            XTRACE(PROCESS, DEB, "event.good\n");
+            XTRACE(PROCESS, DEB, "event.good");
 
             mystats.clusters_xy++;
 
@@ -250,7 +250,7 @@ void NMX::processing_thread() {
               sample_next_track = trackfb.add_track(event);
             }
 
-            XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
+            XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
                    event.x.center_rounded(), event.y.center_rounded());
 
             if ( (!nmx_opts.enforce_lower_uncertainty_limit ||
@@ -270,7 +270,7 @@ void NMX::processing_thread() {
               } else {
                 time = static_cast<uint32_t>(event.time_start());
 
-                XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n", time, pixelid);
+                XTRACE(PROCESS, DEB, "time: %d, pixelid %d", time, pixelid);
 
                 mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
                 mystats.clusters_events++;
@@ -305,12 +305,12 @@ void NMX::processing_thread() {
       char *txbuffer;
       auto len = trackfb.serialize(&txbuffer);
       if (len != 0) {
-        XTRACE(PROCESS, DEB, "Sending tracks with size %d\n", len);
+        XTRACE(PROCESS, DEB, "Sending tracks with size %d", len);
         monitorprod.produce(txbuffer, len);
       }
 
       if (!hists.isEmpty()) {
-        XTRACE(PROCESS, DEB, "Sending histogram for %zu eventlets and %zu clusters \n",
+        XTRACE(PROCESS, DEB, "Sending histogram for %zu eventlets and %zu clusters ",
                hists.eventlet_count(), hists.cluster_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
@@ -319,7 +319,7 @@ void NMX::processing_thread() {
       }
 
       if (not runThreads) {
-        XTRACE(INPUT, ALW, "Stopping input thread.\n");
+        XTRACE(INPUT, ALW, "Stopping input thread.");
         builder_.reset(); /**< @fixme this is a hack to force ~BuilderSRS() call */
         delete builder_.get(); /**< @fixme see above */
         return;
@@ -335,16 +335,16 @@ void NMX::init_builder(std::string jsonfile) {
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
   if (nmx_opts.builder_type == "H5") {
-    XTRACE(INIT, DEB, "Make BuilderH5\n");
+    XTRACE(INIT, DEB, "Make BuilderH5");
     builder_ = std::make_shared<BuilderH5>(nmx_opts.dump_directory,
                                            nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else if (nmx_opts.builder_type == "SRS") {
-    XTRACE(INIT, DEB, "Make BuilderSRS\n");
+    XTRACE(INIT, DEB, "Make BuilderSRS");
     builder_ = std::make_shared<BuilderSRS>(
         nmx_opts.time_config, nmx_opts.srs_mappings, nmx_opts.dump_directory,
         nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else {
-    XTRACE(INIT, ALW, "Unrecognized builder type in config\n");
+    XTRACE(INIT, ALW, "Unrecognized builder type in config");
   }
 }
 

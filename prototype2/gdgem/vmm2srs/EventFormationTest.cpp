@@ -49,7 +49,7 @@ TEST_F(EventFormationTest, Initial) {
     readouts_error_bytes += stats.error_bytes; // From srs data parser
 
     while (clusterer.event_ready()) {
-      //XTRACE(PROCESS, DEB, "event_ready()\n");
+      //XTRACE(PROCESS, DEB, "event_ready()");
       event = clusterer.get_event();
       hists.bin(event);
       event.analyze(true /*analyze_weighted*/, 3 /*analyze_max_timebins */, 7 /*analyze_max_timedif*/);
@@ -102,7 +102,7 @@ int main(int argc, char **argv) {
 //               } else {
 //                 time = static_cast<uint32_t>(event.time_start());
 //
-//                 XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n", time, pixelid);
+//                 XTRACE(PROCESS, DEB, "time: %d, pixelid %d", time, pixelid);
 //
 //                 mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
 //                 mystats.clusters_events++;

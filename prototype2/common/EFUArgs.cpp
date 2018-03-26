@@ -115,21 +115,21 @@ bool EFUArgs::parseAffinityStrings(
 }
 
 void EFUArgs::printSettings() {
-  XTRACE(INIT, ALW, "Starting event processing pipeline2\n");
-  XTRACE(INIT, ALW, "  Log IP:        %s\n", GraylogConfig.address.c_str());
-  XTRACE(INIT, ALW, "  Detector:      %s\n", DetectorName.c_str());
-  //    XTRACE(INIT, ALW, "  CPU Offset:    %d\n", cpustart);
-  XTRACE(INIT, ALW, "  Config file:   %s\n", EFUSettings.ConfigFile.c_str());
-  XTRACE(INIT, ALW, "  IP addr:       %s\n",
+  XTRACE(INIT, ALW, "Starting event processing pipeline2");
+  XTRACE(INIT, ALW, "  Log IP:        %s", GraylogConfig.address.c_str());
+  XTRACE(INIT, ALW, "  Detector:      %s", DetectorName.c_str());
+  //    XTRACE(INIT, ALW, "  CPU Offset:    %d", cpustart);
+  XTRACE(INIT, ALW, "  Config file:   %s", EFUSettings.ConfigFile.c_str());
+  XTRACE(INIT, ALW, "  IP addr:       %s",
          EFUSettings.DetectorAddress.c_str());
-  XTRACE(INIT, ALW, "  UDP Port:      %d\n", EFUSettings.DetectorPort);
-  XTRACE(INIT, ALW, "  Kafka broker:  %s\n",
+  XTRACE(INIT, ALW, "  UDP Port:      %d", EFUSettings.DetectorPort);
+  XTRACE(INIT, ALW, "  Kafka broker:  %s",
          EFUSettings.KafkaBroker.c_str());
-  XTRACE(INIT, ALW, "  Graphite:      %s\n",
+  XTRACE(INIT, ALW, "  Graphite:      %s",
          EFUSettings.GraphiteAddress.c_str());
-  XTRACE(INIT, ALW, "  Graphite port: %d\n", EFUSettings.GraphitePort);
-  XTRACE(INIT, ALW, "  Command port:  %d\n", EFUSettings.CommandServerPort);
-  XTRACE(INIT, ALW, "  Stopafter:     %u\n", EFUSettings.StopAfterSec);
+  XTRACE(INIT, ALW, "  Graphite port: %d", EFUSettings.GraphitePort);
+  XTRACE(INIT, ALW, "  Command port:  %d", EFUSettings.CommandServerPort);
+  XTRACE(INIT, ALW, "  Stopafter:     %u", EFUSettings.StopAfterSec);
 }
 
 void EFUArgs::printHelp() { std::cout << CLIParser.help(30); }

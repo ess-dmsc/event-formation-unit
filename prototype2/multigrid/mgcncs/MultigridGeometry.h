@@ -37,12 +37,12 @@ public:
    *  @param wireid Wire ID , calculated from adc values
    */
   inline int getdetectorpixelid(int panel, int gridid, int wireid) {
-    XTRACE(PROCESS, DEB, "panel %d, gridid %d, wireid %d\n", panel, gridid,
+    XTRACE(PROCESS, DEB, "panel %d, gridid %d, wireid %d", panel, gridid,
            wireid);
 
     if ((panel < 1) || (gridid < 1) || (wireid < 1)) {
       XTRACE(PROCESS, WAR,
-             "undersize geometry: panel %d, gridid %d, wireid %d\n", panel,
+             "undersize geometry: panel %d, gridid %d, wireid %d", panel,
              gridid, wireid);
       return -1;
     }
@@ -50,7 +50,7 @@ public:
     if ((panel > panls_) || (gridid > mods_ * grids_) ||
         (wireid > (mods_ * xwires_ * zwires_))) {
       XTRACE(PROCESS, WAR,
-             "oversize geometry: panel %d, gridid %d, wireid %d\n", panel,
+             "oversize geometry: panel %d, gridid %d, wireid %d", panel,
              gridid, wireid);
       return -1;
     }
@@ -60,25 +60,25 @@ public:
     // printf("column: %d\n", column);
     int gridmin = (column - 1) * grids_ + 1;
     int gridmax = gridmin + grids_ - 1;
-    XTRACE(PROCESS, DEB, "grid: %d, min: %d, max: %d\n", gridid, gridmin,
+    XTRACE(PROCESS, DEB, "grid: %d, min: %d, max: %d", gridid, gridmin,
            gridmax);
     if ((gridid < gridmin) || (gridid > gridmax)) {
-      XTRACE(PROCESS, WAR, "geometry mismatch: wire %d, grid %d\n", wireid,
+      XTRACE(PROCESS, WAR, "geometry mismatch: wire %d, grid %d", wireid,
              gridid);
       return -1;
     }
 
     int panel_offset = mods_ * xwires_ * (panel - 1);
     int x_offset = mods_ * xwires_ - (wireid - 1) / zwires_;
-    XTRACE(PROCESS, DEB, "panel_offset: %d\n", panel_offset);
-    XTRACE(PROCESS, DEB, "x_offset: %d\n", x_offset);
+    XTRACE(PROCESS, DEB, "panel_offset: %d", panel_offset);
+    XTRACE(PROCESS, DEB, "x_offset: %d", x_offset);
     int x = panel_offset + x_offset;
     int y = (gridid - 1) % grids_ + 1;
     int z = (wireid - 1) % zwires_ + 1;
 
     int pixelid = (x - 1) * grids_ * zwires_ + (y - 1) * zwires_ + z;
 
-    XTRACE(PROCESS, DEB, "x: %d, y: %d, z: %d (pixel %d)\n", x, y, z, pixelid);
+    XTRACE(PROCESS, DEB, "x: %d, y: %d, z: %d (pixel %d)", x, y, z, pixelid);
 
     return pixelid;
   }

@@ -66,19 +66,19 @@ int DataSave::tofile(const char *fmt, ...) {
   auto maxwritelen = BUFFERSIZE + MARGIN - bufferlen;
   int ret = vsnprintf(buffer + bufferlen, maxwritelen, fmt, args);
   if (ret < 0) {
-    XTRACE(PROCESS, ERR, "vsnprintf failed\n");
+    XTRACE(PROCESS, ERR, "vsnprintf failed");
     return ret;
   }
   va_end(args);
 
   if (ret > maxwritelen) {
-    XTRACE(PROCESS, WAR, "datasave has been truncated\n");
+    XTRACE(PROCESS, WAR, "datasave has been truncated");
     ret = maxwritelen;
   }
 
   bufferlen += ret;
   if (bufferlen >= BUFFERSIZE) {
-    XTRACE(PROCESS, DEB, "Writing chunk of size %d\n", bufferlen);
+    XTRACE(PROCESS, DEB, "Writing chunk of size %d", bufferlen);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
     write(fd, buffer, bufferlen);
@@ -90,9 +90,9 @@ int DataSave::tofile(const char *fmt, ...) {
 }
 
 DataSave::~DataSave() {
-  XTRACE(PROCESS, DEB, "~DataSave bufferlen %d\n", bufferlen);
+  XTRACE(PROCESS, DEB, "~DataSave bufferlen %d", bufferlen);
   if (bufferlen > 0) {
-    XTRACE(PROCESS, INF, "Flushing DataSave buffer\n");
+    XTRACE(PROCESS, INF, "Flushing DataSave buffer");
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
     write(fd, buffer, bufferlen);

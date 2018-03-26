@@ -78,7 +78,7 @@ PopulateCLIParser PopulateParser{SetCLIArguments};
 SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDEA readout", settings) {
   Stats.setPrefix("efu.sonde");
 
-  XTRACE(INIT, ALW, "Adding stats\n");
+  XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("input.rx_packets",                mystats.rx_packets);
   Stats.create("input.rx_bytes",                  mystats.rx_bytes);
@@ -98,7 +98,7 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDE
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d SONDE Rx ringbuffers of size %d\n",
+  XTRACE(INIT, ALW, "Creating %d SONDE Rx ringbuffers of size %d",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(
       eth_buffer_max_entries + 1); /** @todo testing workaround */
@@ -137,7 +137,7 @@ void SONDEIDEA::input_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      XTRACE(INPUT, ALW, "Stopping input thread.");
       return;
     }
   }
@@ -172,7 +172,7 @@ void SONDEIDEA::processing_thread() {
 
         if (events > 0) {
           for (int i = 0; i < events; i++) {
-            XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)\n",
+            XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)",
                    i, ideasdata.data[i].time, ideasdata.data[i].pixel_id);
             mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time,
                                                     ideasdata.data[i].pixel_id);
@@ -187,7 +187,7 @@ void SONDEIDEA::processing_thread() {
       }
     }
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      XTRACE(INPUT, ALW, "Stopping input thread.");
       return;
     }
   }

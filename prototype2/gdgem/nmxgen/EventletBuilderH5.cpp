@@ -38,7 +38,7 @@ Eventlet BuilderH5::make_eventlet() {
   ret.over_threshold = (data[3] >> 16) & 0x1;
   ret.adc = data[3] & 0xFFFF;
 
-  XTRACE(PROCESS, DEB, "Made eventlet: %s\n", ret.debug().c_str());
+  XTRACE(PROCESS, DEB, "Made eventlet: %s", ret.debug().c_str());
 
 #ifdef DUMPTOFILE
   if (dump_csv_)
