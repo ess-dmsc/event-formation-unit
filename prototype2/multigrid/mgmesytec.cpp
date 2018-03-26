@@ -40,9 +40,11 @@ struct DetectorSettingsStruct {
   uint32_t wireThresholdHi = {65535}; // accept all
   uint32_t gridThresholdLo = {0};     // accept all
   uint32_t gridThresholdHi = {65535}; // accept all
+  uint32_t module = {0}; // 0 defaults to 16 wires in z, 1
+  std::string fileprefix = {""}; // (requires cmake  -DDUMPTOFILE=ON)
 } DetectorSettings;
 
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+void SetCLIArguments(CLI::App & parser) {
   parser.add_option("--wlo", DetectorSettings.wireThresholdLo,
          "minimum wire adc value for accept")->group("MGMesytec");
   parser.add_option("--whi", DetectorSettings.wireThresholdHi,
@@ -51,6 +53,10 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
          "minimum grid adc value for accept")->group("MGMesytec");
   parser.add_option("--ghi", DetectorSettings.gridThresholdHi,
          "maximum grid adc value for accept")->group("MGMesytec");
+  parser.add_option("--module", DetectorSettings.module,
+         "select module for correct wire swapping (0==16z, 1==20z)")->group("MGMesytec");
+  parser.add_option("--dumptofile", DetectorSettings.fileprefix,
+         "dump to specified file (requires cmake -DDUMPTOFILE=ON")->group("MGMesytec");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
@@ -62,35 +68,24 @@ class CSPEC : public Detector {
 public:
   CSPEC(BaseSettings settings);
   void input_thread();
-  void processing_thread();
 
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 1000;
   static const int eth_buffer_size = 9000;
   static const int kafka_buffer_size = 1000000;
 
 private:
-  /** Shared between input_thread and processing_thread*/
-  CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
-  RingBuffer<eth_buffer_size> *eth_ringbuf;
 
   struct {
     // Input Counters
     int64_t rx_packets;
     int64_t rx_bytes;
-    int64_t fifo_push_errors;
-    int64_t pad_a[5]; /**< @todo check alignment*/
-
-    // Processing Counters
+    int64_t triggers;
     int64_t rx_readouts;
-    int64_t rx_error_bytes;
+    int64_t parse_errors;
     int64_t rx_discards;
-    int64_t rx_idle1;
     int64_t geometry_errors;
-    int64_t fifo_seq_errors;
-    // Output Counters
     int64_t rx_events;
     int64_t tx_bytes;
   } ALIGN(64) mystats;
@@ -101,30 +96,19 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  Stats.create("rx_packets",           mystats.rx_packets);
-  Stats.create("rx_bytes",             mystats.rx_bytes);
-  Stats.create("i2pfifo_dropped",      mystats.fifo_push_errors);
-  Stats.create("readouts",             mystats.rx_readouts);
-  Stats.create("readouts_error_bytes", mystats.rx_error_bytes);
-  Stats.create("readouts_discarded",   mystats.rx_discards);
-  Stats.create("processing_idle",      mystats.rx_idle1);
-  Stats.create("geometry_errors",      mystats.geometry_errors);
-  Stats.create("fifo_seq_errors",      mystats.fifo_seq_errors);
-  Stats.create("events",               mystats.rx_events);
-  Stats.create("tx_bytes",             mystats.tx_bytes);
+  Stats.create("rx_packets",            mystats.rx_packets);
+  Stats.create("rx_bytes",              mystats.rx_bytes);
+  Stats.create("readouts",              mystats.rx_readouts);
+  Stats.create("triggers",              mystats.triggers);
+  Stats.create("readouts_parse_errors", mystats.parse_errors);
+  Stats.create("readouts_discarded",    mystats.rx_discards);
+  Stats.create("geometry_errors",       mystats.geometry_errors);
+  Stats.create("events",                mystats.rx_events);
+  Stats.create("tx_bytes",              mystats.tx_bytes);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { CSPEC::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
-
-  std::function<void()> processingFunc = [this]() {
-    CSPEC::processing_thread();
-  };
-  Detector::AddThreadFunction(processingFunc, "processing");
-
-  XTRACE(INIT, ALW, "Creating %d Ethernet ringbuffers of size %d\n",
-         eth_buffer_max_entries, eth_buffer_size);
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
 }
 
 const char *CSPEC::detectorname() { return classname; }
@@ -136,36 +120,6 @@ void CSPEC::input_thread() {
   cspecdata.setbuffers(EFUSettings.DetectorTxBufferSize, EFUSettings.DetectorRxBufferSize);
   cspecdata.printbuffers();
   cspecdata.settimeout(0, 100000); // One tenth of a second
-
-  int rdsize;
-  for (;;) {
-    unsigned int eth_index = eth_ringbuf->getindex();
-
-    /** this is the processing step */
-    eth_ringbuf->setdatalength(eth_index, 0);
-    if ((rdsize = cspecdata.receive(eth_ringbuf->getdatabuffer(eth_index),
-                                    eth_ringbuf->getmaxbufsize())) > 0) {
-      eth_ringbuf->setdatalength(eth_index, rdsize);
-      mystats.rx_packets++;
-      mystats.rx_bytes += rdsize;
-      XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
-
-      if (input2proc_fifo.push(eth_index) == false) {
-        mystats.fifo_push_errors++;
-      } else {
-        eth_ringbuf->nextbuffer();
-      }
-    }
-
-    // Checking for exit
-    if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.\n");
-      return;
-    }
-  }
-}
-
-void CSPEC::processing_thread() {
   Producer producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
   Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
   FBSerializer flatbuffer(kafka_buffer_size, producer);
@@ -173,43 +127,32 @@ void CSPEC::processing_thread() {
   HistSerializer histfb;
   NMXHists hists;
 
-  MesytecData dat;
+  bool dumptofile = !DetectorSettings.fileprefix.empty();
+  MesytecData dat(dumptofile, DetectorSettings.fileprefix, DetectorSettings.module);
 
   dat.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
   dat.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
 
+  char buffer[9010];
+  int ReadSize;
   TSCTimer report_timer;
+  for (;;) {
+    if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
+      mystats.rx_packets++;
+      mystats.rx_bytes += ReadSize;
+      XTRACE(INPUT, DEB, "rdsize: %u\n", ReadSize);
 
-  unsigned int data_index;
-  while (1) {
-
-    if ((input2proc_fifo.pop(data_index)) == false) {
-      mystats.rx_idle1++;
-      usleep(1);
-    } else {
-      auto len = eth_ringbuf->getdatalength(data_index);
-      if (len == 0) {
-        mystats.fifo_seq_errors++;
-      } else {
-        auto res = dat.parse(eth_ringbuf->getdatabuffer(data_index),
-                  eth_ringbuf->getdatalength(data_index), hists, readouts);
-
-        if (res < 0) {
-          continue;
-        }
-
-        int pixel = dat.getPixel();
-        int time  = dat.getTime();
-        XTRACE(PROCESS, DEB, "Time %d, pixel: %d\n", time, pixel);
-        if (pixel != 0) {
-          mystats.tx_bytes += flatbuffer.addevent(time, pixel);
-          mystats.rx_events++;
-          mystats.rx_readouts += dat.readouts;
-          mystats.rx_discards += dat.discards;
-        } else {
-          mystats.geometry_errors++;
-        }
+      auto res = dat.parse(buffer, ReadSize, hists, flatbuffer, readouts);
+      if (res < 0) {
+        mystats.parse_errors++;
       }
+
+      mystats.rx_readouts += dat.readouts;
+      mystats.rx_discards += dat.discards;
+      mystats.triggers += dat.triggers;
+      mystats.geometry_errors+= dat.geometry_errors;
+      mystats.tx_bytes += dat.tx_bytes;
+      mystats.rx_events += dat.events;
     }
 
     // Checking for exit
@@ -219,7 +162,7 @@ void CSPEC::processing_thread() {
       auto entries = readouts.getNumEntries();
       if (entries) {
         XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", entries);
-        readouts.produce(); // Periodically produce of readouts
+        //readouts.produce(); // Periodically produce of readouts
       }
 
       if (!hists.isEmpty()) {
