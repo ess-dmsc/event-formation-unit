@@ -45,7 +45,6 @@ set(mgmesytec_INC
   )
 create_module(mgmesytec)
 
-
 #=============================================================================
 # Data generators
 #=============================================================================
@@ -86,6 +85,14 @@ create_executable(mgcncsgenjson)
 #=============================================================================
 # Tests
 #=============================================================================
+
+
+set(DataBenchmarkTest_INC mgmesytec/Data.h mgmesytec/TestData.h)
+set(DataBenchmarkTest_SRC mgmesytec/DataBenchmarkTest.cpp mgmesytec/Data.cpp ../gdgem/nmx/Hists.cpp
+  ../common/ReadoutSerializer.cpp
+  ../common/Producer.cpp)
+set(DataBenchmarkTest_LIB ${EFU_COMMON_LIBS})
+create_benchmark_executable(DataBenchmarkTest "")
 
 set(MGCNCSChanConvTest_SRC
   mgcncs/ChanConvTest.cpp

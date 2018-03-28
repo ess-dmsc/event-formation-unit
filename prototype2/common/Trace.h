@@ -51,6 +51,8 @@ const unsigned int TRC_L_DEB  = 7;
  */
 #pragma GCC system_header
 
+#define TRC_LEVEL 7
+
 #ifndef TRC_MASK
 const unsigned int USED_TRC_MASK = TRC_M_ALL;
 #else
@@ -63,12 +65,15 @@ const unsigned int USED_TRC_LEVEL = TRC_L_ERR;
 const unsigned int USED_TRC_LEVEL = TRC_LEVEL;
 #endif
 
+#define TRC_MASK USED_TRC_MASK
+#define TRC_LEVEL USED_TRC_LEVEL
+
 struct SeverityToString {
-  int SeverityLevel;
-  std::string SeverityName;
+  int const SeverityLevel;
+  char const *SeverityName;
 };
 
-static SeverityToString SeverityArray[] = {
+static SeverityToString const SeverityArray[] = {
   {0, "EMERGENCY"},
   {1, "ALW"},
   {2, "CRI"},
@@ -80,11 +85,11 @@ static SeverityToString SeverityArray[] = {
 };
 
 struct GroupToString {
-  int GroupId;
-  std::string GroupName;
+  int const GroupId;
+  char const *GroupName;
 };
 
-static GroupToString GroupArray[] = {
+static GroupToString const GroupArray[] = {
   {0, "INPUT"},
   {1, "OUTPUT"},
   {2, "PROCESS"},
@@ -95,47 +100,60 @@ static GroupToString GroupArray[] = {
   {7, "DATA"},
 };
 
-inline void Trace(int LineNumber, std::string File, const int Group, unsigned int SeverityLevel, const char *Format, ...) {
-  char *MessageBuffer = nullptr;
-  
-  va_list args;
-  va_start (args, Format);
-  __attribute__((unused)) int Characters = vasprintf(&MessageBuffer, Format, args);
-  va_end (args);
-  
-  int TempGroupValue = Group;
-  int GroupBitPosition = 0;
-  TempGroupValue >>= 1;
-  for (GroupBitPosition = 0; TempGroupValue != 0; GroupBitPosition++) {
-    TempGroupValue >>= 1;
-  }
+inline void Trace(int const LineNumber, char const *File, const int Group, unsigned int const SeverityLevel, const char* GroupName,  const char* SeverityName, const char *Format, ...) {
   if (SeverityLevel <= USED_TRC_LEVEL and USED_TRC_MASK & Group) {
-    printf("%-3s %-80s %5d %-s - %s\n", SeverityArray[SeverityLevel].SeverityName.c_str(), File.c_str(), LineNumber, GroupArray[GroupBitPosition].GroupName.c_str(), MessageBuffer);
-  }
+    char *MessageBuffer = nullptr;
+
+    va_list args;
+    va_start (args, Format);
+    __attribute__((unused)) int Characters = vasprintf(&MessageBuffer, Format, args);
+    va_end (args);
+
+    int TempGroupValue = Group;
+    int GroupBitPosition = 0;
+    TempGroupValue >>= 1;
+    for (GroupBitPosition = 0; TempGroupValue != 0; GroupBitPosition++) {
+      TempGroupValue >>= 1;
+    }
+    printf("%-3s %-80s %5d %-s - %s\n", SeverityName, File, LineNumber, GroupName, MessageBuffer);
 #ifdef GRAYLOG
-  Log::Msg(Severity(SeverityLevel), std::string(MessageBuffer, Characters), {{"file", File}, {"line", static_cast<std::int64_t>(LineNumber)}, {"group", GroupArray[GroupBitPosition].GroupName}});
+//    Log::Msg(Severity(SeverityLevel), std::string(MessageBuffer, Characters), {{"file", std::string(File)}, {"line", static_cast<std::int64_t>(LineNumber)}, {"group", std::string(GroupArray[GroupBitPosition].GroupName)}});
 #endif
-  
-  free(MessageBuffer);
+
+    free(MessageBuffer);
+  }
 }
 
-#define XTRACE(Group, Level, Format, ...) Trace(__LINE__, __FILE__, TRC_G_##Group, TRC_L_##Level, Format, ##__VA_ARGS__)
 
-inline void DebugTrace(unsigned int SeverityLevel, const char *Format, ...) {
-  char *MessageBuffer = nullptr;
-  va_list args;
-  va_start (args, Format);
-  __attribute__((unused)) int Characters = vasprintf(&MessageBuffer, Format, args);
-  va_end (args);
-#ifdef GRAYLOG
-  Log::Msg(Severity(SeverityLevel), std::string(MessageBuffer, Characters));
-#endif
+
+inline void DebugTrace(unsigned int const SeverityLevel, char const *Format, ...) {
   if (SeverityLevel <= USED_TRC_LEVEL) {
+    char *MessageBuffer = nullptr;
+    va_list args;
+    va_start (args, Format);
+    __attribute__((unused)) int Characters = vasprintf(&MessageBuffer, Format, args);
+    va_end (args);
+#ifdef GRAYLOG
+//    Log::Msg(Severity(SeverityLevel), std::string(MessageBuffer, Characters));
+#endif
     printf("%s\n", MessageBuffer);
+    free(MessageBuffer);
   }
-  free(MessageBuffer);
 }
 
-#define DTRACE(Level, Format, ...) DebugTrace(TRC_L_##Level, Format, ##__VA_ARGS__)
+#define XTRACE(Group, Level, Format, ...) Trace(__LINE__, __FILE__, TRC_G_##Group, TRC_L_##Level, #Group, #Level, Format, ##__VA_ARGS__)
+
+//#define XTRACE(group, level, fmt, ...)                                         \
+//(void)(((TRC_L_##level <= TRC_LEVEL) && (TRC_MASK & TRC_G_##group))          \
+//? printf("%-3s %-80s %5d %-s - " fmt, #level, __FILE__, __LINE__, \
+//#group, ##__VA_ARGS__)                                   \
+//: 0)
+
+//#define DTRACE(Level, Format, ...) DebugTrace(TRC_L_##Level, Format, ##__VA_ARGS__)
+// Raw trace
+#define DTRACE(level, fmt, ...)                                                \
+(void)((TRC_L_##level <= TRC_LEVEL) ? printf(fmt "\n", ##__VA_ARGS__) : 0)
 
 #endif
+
+
