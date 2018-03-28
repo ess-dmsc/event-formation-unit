@@ -24,8 +24,8 @@ struct PacketHeaderSim : public PacketHeader {
 
 struct DataHeaderSim : public DataHeader {
   void setTime(std::uint32_t TS_Sec, std::uint32_t TS_SecFrac) {
-    TimeStampSeconds = htonl(TS_Sec);
-    TimeStampSecondsFrac = htonl(TS_SecFrac);
+    TimeStamp.Seconds = htonl(TS_Sec);
+    TimeStamp.SecondsFrac = htonl(TS_SecFrac);
   }
   void setChannel(std::uint16_t NewChannel) {
     Channel = htons(NewChannel);

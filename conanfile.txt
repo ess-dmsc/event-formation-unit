@@ -1,8 +1,8 @@
 [requires]
 gtest/3121b20-dm2@ess-dmsc/stable
 librdkafka/0.11.3-dm2@ess-dmsc/stable
-streaming-data-types/3e85b23@ess-dmsc/stable
-graylog-logger/1.0.4-dm1@ess-dmsc/stable
+streaming-data-types/361bf7b@ess-dmsc/stable
+graylog-logger/1.0.5-dm1@ess-dmsc/stable
 h5cpp/0.0.4-dm1@ess-dmsc/stable
 logical-geometry/09097f2@ess-dmsc/stable
 cmake_installer/3.10.0@conan/stable
