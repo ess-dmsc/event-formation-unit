@@ -278,6 +278,11 @@ def get_release_pipeline()
                         cp -r build/bin archive/event-formation-unit && \
                         cp -r build/lib archive/event-formation-unit && \
                         cp -r build/licenses archive/event-formation-unit && \
+                        mkdir archive/event-formation-unit/util && \
+                        cp -r ${project}/utils/efushell archive/event-formation-unit/util && \
+                        cp -r ${project}/monitors/* archive/event-formation-unit/util && \
+                        mkdir archive/event-formation-unit/data && \
+                        cp -r ${project}/prototype2/multigrid/calib_data/* archive/event-formation-unit/util && \
                         cd archive && \
                         tar czvf event-formation-unit-centos7.tar.gz event-formation-unit
                     \""""
