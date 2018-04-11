@@ -217,8 +217,6 @@ def get_macos_pipeline()
     }
 }
 
-docker exec -u root 68bc08ebc15b yum install -y libpcap-devel
-
 def get_release_pipeline()
 {
     // Build with release settings to archive artefacts.
