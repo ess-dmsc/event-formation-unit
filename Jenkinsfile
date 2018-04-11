@@ -217,6 +217,8 @@ def get_macos_pipeline()
     }
 }
 
+docker exec -u root 68bc08ebc15b yum install -y libpcap-devel
+
 def get_release_pipeline()
 {
     // Build with release settings to archive artefacts.
@@ -241,6 +243,10 @@ def get_release_pipeline()
                             --branch ${env.BRANCH_NAME} \
                             https://github.com/ess-dmsc/event-formation-unit.git \
                             ${project}
+                    \""""
+
+                    sh """docker exec -u root ${container_name} ${custom_sh} -c \"
+                        yum install -y libpcap-devel
                     \""""
 
                     sh """docker exec ${container_name} ${custom_sh} -c \"
