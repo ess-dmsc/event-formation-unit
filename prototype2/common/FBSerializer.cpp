@@ -29,7 +29,8 @@ FBSerializer::FBSerializer(size_t maxarraylength, Producer &prod)
   auto evMsgHeader = CreateEventMessage(builder, sourceName, sequenceNr,
                                         pulseTime, timeoff, pixeloff);
   FinishEventMessageBuffer(builder, evMsgHeader);
-  // builder.Finish(evMsgHeader);
+
+  //Use reinterpret_cast
   fbBufferPointer = (char *)builder.GetBufferPointer();
   fbSize = builder.GetSize();
   assert(fbSize > 0);

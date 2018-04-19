@@ -42,16 +42,16 @@ private:
   int setopt(int option, void *value, int size);
 };
 
-class UDPServer : public Socket {
+class UDPReceiver : public Socket {
 public:
-  UDPServer(Endpoint local) : Socket(Socket::type::UDP) {
+  UDPReceiver(Endpoint local) : Socket(Socket::type::UDP) {
     this->local(local.ipaddr, local.port);
   };
 };
 
-class UDPClient : public Socket {
+class UDPTransmitter : public Socket {
 public:
-  UDPClient(Endpoint local, Endpoint remote) : Socket(Socket::type::UDP) {
+  UDPTransmitter(Endpoint local, Endpoint remote) : Socket(Socket::type::UDP) {
     this->local(local.ipaddr, local.port);
     this->remote(remote.ipaddr, remote.port);
   };

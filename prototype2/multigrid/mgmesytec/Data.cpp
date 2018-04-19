@@ -63,6 +63,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
       break;
 
     case mesytecData:
+      // value in using something like getValue(Buffer, NBits, Offset) ?
       bus = (*datap & 0x0f000000) >> 24;
       addr = (*datap & 0x00fff000) >> 12; /**< channel */
       adc = (*datap & 0x00000fff);
