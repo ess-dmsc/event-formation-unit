@@ -3,7 +3,7 @@
 #include <cassert>
 #include <common/Trace.h>
 #include <cstring>
-#include <multigrid/mgcncs/Data.h>
+#include <multigrid/mgcncs/DataParser.h>
 
 struct multi_grid {
   uint32_t header;

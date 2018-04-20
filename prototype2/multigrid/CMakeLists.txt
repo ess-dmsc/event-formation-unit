@@ -16,12 +16,12 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/calib_data
 # For the old readout system
 set(mgcncs2_SRC
   mgcncs2.cpp
-  mgcncs/Data.cpp
+  mgcncs/DataParser.cpp
   mgcncs/ChanConv.cpp
   mgcncs/CalibrationFile.cpp
   )
 set(mgcncs2_INC
-  mgcncs/Data.h
+  mgcncs/DataParser.h
   mgcncs/ChanConv.h
   mgcncs/MultigridGeometry.h
   mgcncs/CalibrationFile.h
@@ -35,13 +35,13 @@ set(mgmesytec_SRC
   ../gdgem/nmx/HistSerializer.cpp
   ../common/ReadoutSerializer.cpp
   mgmesytec.cpp
-  mgmesytec/Data.cpp
+  mgmesytec/DataParser.cpp
   )
 set(mgmesytec_INC
   ../gdgem/nmx/Hists.h
   ../gdgem/nmx/HistSerializer.h
   ../common/ReadoutSerializer.h
-  mgmesytec/Data.h
+  mgmesytec/DataParser.h
   )
 create_module(mgmesytec)
 
@@ -54,11 +54,11 @@ create_module(mgmesytec)
 set(mgcncsgen_SRC
   mgcncsgen/mgcncsgen.cpp
   mgcncsgen/DGArgs.cpp
-  mgcncs/Data.cpp
+  mgcncs/DataParser.cpp
   )
 set(mgcncsgen_INC
   mgcncsgen/DGArgs.h
-  mgcncs/Data.h
+  mgcncs/DataParser.h
   )
 create_executable(mgcncsgen)
 
@@ -94,12 +94,12 @@ set(MGCNCSChanConvTest_SRC
 create_test_executable(MGCNCSChanConvTest)
 
 set(MGCNCSDataTest_SRC
-  mgcncs/DataTest.cpp
-  mgcncs/Data.cpp
+  mgcncs/DataParserTest.cpp
+  mgcncs/DataParser.cpp
   mgcncs/ChanConv.cpp
   )
 set(MGCNCSDataTest_INC
-  mgcncs/Data.h
+  mgcncs/DataParser.h
   mgcncs/ChanConv.h
   mgcncs/TestData.h
   mgcncs/MultigridGeometry.h
@@ -111,14 +111,14 @@ set(MGMesytecDataTest_SRC
   ../gdgem/nmx/Hists.cpp
   ../common/ReadoutSerializer.cpp
   ../common/Producer.cpp
-  mgmesytec/DataTest.cpp
-  mgmesytec/Data.cpp
+  mgmesytec/DataParserTest.cpp
+  mgmesytec/DataParser.cpp
   )
 set(MGMesytecDataTest_INC
   ../gdgem/nmx/Hists.h
   ../common/ReadoutSerializer.h
   ../common/Producer.h
-  mgmesytec/Data.h
+  mgmesytec/DataParser.h
   mgmesytec/TestData.h
   )
 create_test_executable(MGMesytecDataTest)

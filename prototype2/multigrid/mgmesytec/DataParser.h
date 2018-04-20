@@ -22,7 +22,7 @@ public:
   // Struck: mvme-src-0.9.2-281-g1c4c24c.tar
   // Struck: Ethernet UDP Addendum revision 107
   // Mesytec Datasheet: VMMR-8/16 v00.01
-  enum class? DataType {
+  enum DataType {
     mesytecData       = 0x10000000,
     mesytecTimeOffset = 0x20000000,
     mesytecHeader     = 0x40000000,
@@ -59,7 +59,7 @@ public:
   /** @brief parse a binary payload buffer, return number of data element
    * @todo Uses NMXHists  - refactor and move ?
    */
-  int parse(const char *buffer, int size, NMXHists &hists, FBSerializer & fbserializer, ReadoutSerializer &serializer);
+  error parse(const char *buffer, int size, NMXHists &hists, FBSerializer & fbserializer, ReadoutSerializer &serializer);
   // Change parse() to return a enum instead of an int
 
   /** @brief parse n 32 bit words from mesytec VMMR-8/16 card */

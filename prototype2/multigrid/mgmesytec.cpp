@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief CSPEC Detector implementation
- */
+/** Copyright (C) 2016-2018 European Spallation Source */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// Processing pipeline for CSPEC instrument (Multi-Grid detector using
+/// Mesytec readout)
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
@@ -22,7 +24,7 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
-#include <multigrid/mgmesytec/Data.h>
+#include <multigrid/mgmesytec/DataParser.h>
 #include <queue>
 #include <stdio.h>
 #include <unistd.h>
@@ -62,18 +64,19 @@ PopulateCLIParser PopulateParser{SetCLIArguments};
 /** ----------------------------------------------------- */
 const char *classname = "CSPEC Detector Mesytec readout";
 
-// Maybe change class name or filename
+///
 class CSPEC : public Detector {
 public:
   CSPEC(BaseSettings settings);
-  void input_thread();
+  void mainThread();
 
   const char *detectorname();
 
-  /** @todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_size = 9000;
-  static const int kafka_buffer_size = 1000000;
-  // Maybe move these settings around or change them to be a CLI arguments
+  /// Some hardcoded constants
+  static const int eth_buffer_size = 9000;          /// used for experimentation
+  static const int kafka_buffer_size = 1000000;     /// -||-
+  static const int readout_entries = 100000;        /// number of raw readout entries
+  static const int one_tenth_second_usecs = 100000; ///
 
 private:
 
@@ -107,53 +110,53 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.create("tx_bytes",              mystats.tx_bytes);
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { CSPEC::input_thread(); };
-  Detector::AddThreadFunction(inputFunc, "input");
+  std::function<void()> inputFunc = [this]() { CSPEC::mainThread(); };
+  Detector::AddThreadFunction(inputFunc, "main");
 }
 
 const char *CSPEC::detectorname() { return classname; }
 
 // Maybe change the name of the function to e.g. main_thread
-void CSPEC::input_thread() {
+void CSPEC::mainThread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort); //Change name or add more comments
   UDPReceiver cspecdata(local);
-  cspecdata.setbuffers(EFUSettings.DetectorTxBufferSize, EFUSettings.DetectorRxBufferSize);
+  cspecdata.setBufferSizes(EFUSettings.DetectorTxBufferSize, EFUSettings.DetectorRxBufferSize);
   cspecdata.printBufferSizes();
-  cspecdata.settimeout(0, 100000); // One tenth of a second
+  cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
   Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
-  FBSerializer flatbuffer(kafka_buffer_size, EventProducer); // Pass EventProducer by value or add std::move functionality
-  ReadoutSerializer readouts(100000, monitorprod); // Magic number
+  FBSerializer flatbuffer(kafka_buffer_size, EventProducer);
+  ReadoutSerializer readouts(readout_entries, monitorprod);
   HistSerializer histfb;
   NMXHists hists;
 
   bool dumptofile = !DetectorSettings.fileprefix.empty();
-  MesytecData dat(dumptofile, DetectorSettings.fileprefix, DetectorSettings.module); // A more descriptive name than `dat`
+  MesytecData mesytecdata(dumptofile, DetectorSettings.fileprefix, DetectorSettings.module);
 
-  dat.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
-  dat.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
+  mesytecdata.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
+  mesytecdata.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
 
-  char buffer[eth_buffer_size]; // Magic number
+  char buffer[eth_buffer_size];
   int ReadSize;
   TSCTimer report_timer;
   for (;;) {
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += ReadSize;
-      XTRACE(INPUT, DEB, "rdsize: %u\n", ReadSize);
+      XTRACE(INPUT, DEB, "read size: %u\n", ReadSize);
 
-      auto res = dat.parse(buffer, ReadSize, hists, flatbuffer, readouts);
-      if (res < 0) { // Modify to compare to MesytecData::error:OK
+      auto res = mesytecdata.parse(buffer, ReadSize, hists, flatbuffer, readouts);
+      if (res != MesytecData::error::OK) {
         mystats.parse_errors++;
       }
 
-      mystats.rx_readouts += dat.readouts;
-      mystats.rx_discards += dat.discards;
-      mystats.triggers += dat.triggers;
-      mystats.geometry_errors+= dat.geometry_errors;
-      mystats.tx_bytes += dat.tx_bytes;
-      mystats.rx_events += dat.events;
+      mystats.rx_readouts += mesytecdata.readouts;
+      mystats.rx_discards += mesytecdata.discards;
+      mystats.triggers += mesytecdata.triggers;
+      mystats.geometry_errors+= mesytecdata.geometry_errors;
+      mystats.tx_bytes += mesytecdata.tx_bytes;
+      mystats.rx_events += mesytecdata.events;
     }
 
     // Force periodic flushing

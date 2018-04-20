@@ -15,7 +15,7 @@
 #include <efu/Server.h>
 #include <multigrid/mgcncs/CalibrationFile.h>
 #include <multigrid/mgcncs/ChanConv.h>
-#include <multigrid/mgcncs/Data.h>
+#include <multigrid/mgcncs/DataParser.h>
 #include <multigrid/mgcncs/MultigridGeometry.h>
 //#include <cspec/CSPECEvent.h>
 #include <cstring>
@@ -183,10 +183,10 @@ void CSPEC::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
-  UDPServer cspecdata(local);
-  cspecdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
-  cspecdata.printbuffers();
-  cspecdata.settimeout(0, 100000); // One tenth of a second
+  UDPReceiver cspecdata(local);
+  cspecdata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  cspecdata.printBufferSizes();
+  cspecdata.setRecvTimeout(0, 100000); // secs, usecs, One tenth of a second
 
   int rdsize;
   for (;;) {

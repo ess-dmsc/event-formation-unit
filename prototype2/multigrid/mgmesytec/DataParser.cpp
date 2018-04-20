@@ -5,7 +5,7 @@
 #include <common/Trace.h>
 #include <cstring>
 #include <gdgem/nmx/Hists.h>
-#include <multigrid/mgmesytec/Data.h>
+#include <multigrid/mgmesytec/DataParser.h>
 #include <common/ReadoutSerializer.h>
 
 // #undef TRC_LEVEL
@@ -132,7 +132,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
   }
 }
 
-int MesytecData::parse(const char *buffer, int size, NMXHists &hists, FBSerializer & fbserializer, ReadoutSerializer &serializer) {
+MesytecData::error MesytecData::parse(const char *buffer, int size, NMXHists &hists, FBSerializer & fbserializer, ReadoutSerializer &serializer) {
   int bytesleft = size;
   readouts = 0;
   discards = 0;
@@ -142,11 +142,11 @@ int MesytecData::parse(const char *buffer, int size, NMXHists &hists, FBSerializ
   tx_bytes = 0;
 
   if (buffer[0] != 0x60) {
-    return -error::EUNSUPP;
+    return error::EUNSUPP;
   }
 
   if (size < 19) {
-    return -error::ESIZE;
+    return error::ESIZE;
   }
 
   uint32_t *datap = (uint32_t *)(buffer + 3);
@@ -155,7 +155,7 @@ int MesytecData::parse(const char *buffer, int size, NMXHists &hists, FBSerializ
   while (bytesleft > 16) {
     if ((*datap & 0x000000ff) != 0x58) {
       XTRACE(DATA, WAR, "expeced data value 0x58\n");
-      return -error::EUNSUPP;
+      return error::EUNSUPP;
     }
 
     auto len = ntohs((*datap & 0x00ffff00) >> 8);
@@ -165,7 +165,7 @@ int MesytecData::parse(const char *buffer, int size, NMXHists &hists, FBSerializ
 
     if ((*datap & 0xff000000) != sisBeginReadout) {
       XTRACE(DATA, WAR, "expected readout header value 0x%04x, got 0x%04x\n", sisBeginReadout, (*datap & 0xff000000));
-      return -error::EHEADER;
+      return error::EHEADER;
     }
     datap++;
     bytesleft -= 4;
@@ -187,13 +187,13 @@ int MesytecData::parse(const char *buffer, int size, NMXHists &hists, FBSerializ
 
     if (*datap != 0x87654321) {
       XTRACE(DATA, WAR, "Protocol mismatch, expected 0x87654321\n");
-      return -error::EHEADER;
+      return error::EHEADER;
     }
     datap++;
     bytesleft -= 4;
 
     if ((*datap & 0xff000000) != sisEndReadout) {
-      return -error::EHEADER;
+      return error::EHEADER;
     }
     datap++;
     bytesleft -= 4;
