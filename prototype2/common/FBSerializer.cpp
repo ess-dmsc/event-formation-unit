@@ -31,7 +31,7 @@ FBSerializer::FBSerializer(size_t maxarraylength, Producer &prod)
   FinishEventMessageBuffer(builder, evMsgHeader);
 
   //Use reinterpret_cast
-  fbBufferPointer = (char *)builder.GetBufferPointer();
+  fbBufferPointer = reinterpret_cast<char*>(builder.GetBufferPointer());
   fbSize = builder.GetSize();
   assert(fbSize > 0);
   assert(fbBufferPointer != nullptr);
