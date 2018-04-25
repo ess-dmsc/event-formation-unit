@@ -64,10 +64,10 @@ void AdcReadoutBase::inputThread() {
   std::int64_t BytesReceived = 0;
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
-  UDPServer mbdata(local);
-  mbdata.setbuffers(0, 2000000);
-  mbdata.printbuffers();
-  mbdata.settimeout(0, 100000); // One tenth of a second (100ms)
+  UDPReceiver mbdata(local);
+  mbdata.setBufferSizes(0, 2000000);
+  mbdata.printBufferSizes();
+  mbdata.setRecvTimeout(0, 100000); // secs, usecs, One tenth of a second (100ms)
   ElementPtr DataElement;
   bool outCome;
 

@@ -109,11 +109,11 @@ void MBCAEN::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
-  UDPServer mbdata(local);
+  UDPReceiver mbdata(local);
   // mbdata.buflen(opts->buflen);
-  mbdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
-  mbdata.printbuffers();
-  mbdata.settimeout(0, 100000); // One tenth of a second
+  mbdata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  mbdata.printBufferSizes();
+  mbdata.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
   int rdsize;
   for (;;) {

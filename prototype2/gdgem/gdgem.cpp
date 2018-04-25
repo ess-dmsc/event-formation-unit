@@ -149,11 +149,11 @@ void NMX::input_thread() {
   // Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
-  UDPServer nmxdata(local);
+  UDPReceiver nmxdata(local);
   // nmxdata.buflen(opts->buflen);
-  nmxdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
-  nmxdata.printbuffers();
-  nmxdata.settimeout(0, 100000); // 1/10 second
+  nmxdata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  nmxdata.printBufferSizes();
+  nmxdata.setRecvTimeout(0, 100000 ); /// secs, usecs 
 
   int rdsize;
   TSCTimer report_timer;

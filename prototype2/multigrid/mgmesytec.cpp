@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief CSPEC Detector implementation
- */
+/** Copyright (C) 2016-2018 European Spallation Source */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// Processing pipeline for CSPEC instrument (Multi-Grid detector using
+/// Mesytec readout)
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
@@ -22,7 +24,7 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
-#include <multigrid/mgmesytec/Data.h>
+#include <multigrid/mgmesytec/DataParser.h>
 #include <queue>
 #include <stdio.h>
 #include <unistd.h>
@@ -30,18 +32,16 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-using namespace memory_sequential_consistent; // Lock free fifo
-
 const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
 
 /** ----------------------------------------------------- */
 struct DetectorSettingsStruct {
-  uint32_t wireThresholdLo = {0};     // accept all
-  uint32_t wireThresholdHi = {65535}; // accept all
-  uint32_t gridThresholdLo = {0};     // accept all
-  uint32_t gridThresholdHi = {65535}; // accept all
-  uint32_t module = {0}; // 0 defaults to 16 wires in z, 1
-  std::string fileprefix = {""}; // (requires cmake  -DDUMPTOFILE=ON)
+  uint32_t wireThresholdLo{0};     // accept all
+  uint32_t wireThresholdHi{65535}; // accept all
+  uint32_t gridThresholdLo{0};     // accept all
+  uint32_t gridThresholdHi{65535}; // accept all
+  uint32_t module{0}; // 0 defaults to 16 wires in z, 1
+  std::string fileprefix{""}; // (requires cmake  -DDUMPTOFILE=ON)
 } DetectorSettings;
 
 void SetCLIArguments(CLI::App & parser) {
@@ -64,16 +64,19 @@ PopulateCLIParser PopulateParser{SetCLIArguments};
 /** ----------------------------------------------------- */
 const char *classname = "CSPEC Detector Mesytec readout";
 
+///
 class CSPEC : public Detector {
 public:
   CSPEC(BaseSettings settings);
-  void input_thread();
+  void mainThread();
 
   const char *detectorname();
 
-  /** @todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_size = 9000;
-  static const int kafka_buffer_size = 1000000;
+  /// Some hardcoded constants
+  static const int eth_buffer_size = 9000;          /// used for experimentation
+  static const int kafka_buffer_size = 1000000;     /// -||-
+  static const int readout_entries = 100000;        /// number of raw readout entries
+  static const int one_tenth_second_usecs = 100000; ///
 
 private:
 
@@ -107,60 +110,61 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.create("tx_bytes",              mystats.tx_bytes);
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { CSPEC::input_thread(); };
-  Detector::AddThreadFunction(inputFunc, "input");
+  std::function<void()> inputFunc = [this]() { CSPEC::mainThread(); };
+  Detector::AddThreadFunction(inputFunc, "main");
 }
 
 const char *CSPEC::detectorname() { return classname; }
 
-void CSPEC::input_thread() {
+// Maybe change the name of the function to e.g. main_thread
+void CSPEC::mainThread() {
   /** Connection setup */
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
-  UDPServer cspecdata(local);
-  cspecdata.setbuffers(EFUSettings.DetectorTxBufferSize, EFUSettings.DetectorRxBufferSize);
-  cspecdata.printbuffers();
-  cspecdata.settimeout(0, 100000); // One tenth of a second
-  Producer producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
+  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort); //Change name or add more comments
+  UDPReceiver cspecdata(local);
+  cspecdata.setBufferSizes(EFUSettings.DetectorTxBufferSize, EFUSettings.DetectorRxBufferSize);
+  cspecdata.printBufferSizes();
+  cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
+  Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
   Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
-  FBSerializer flatbuffer(kafka_buffer_size, producer);
-  ReadoutSerializer readouts(100000, monitorprod);
+  FBSerializer flatbuffer(kafka_buffer_size, EventProducer);
+  ReadoutSerializer readouts(readout_entries, monitorprod);
   HistSerializer histfb;
   NMXHists hists;
 
   bool dumptofile = !DetectorSettings.fileprefix.empty();
-  MesytecData dat(dumptofile, DetectorSettings.fileprefix, DetectorSettings.module);
+  MesytecData mesytecdata(dumptofile, DetectorSettings.fileprefix, DetectorSettings.module);
 
-  dat.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
-  dat.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
+  mesytecdata.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
+  mesytecdata.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
 
-  char buffer[9010];
+  char buffer[eth_buffer_size];
   int ReadSize;
   TSCTimer report_timer;
   for (;;) {
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += ReadSize;
-      XTRACE(INPUT, DEB, "rdsize: %u\n", ReadSize);
+      XTRACE(INPUT, DEB, "read size: %u\n", ReadSize);
 
-      auto res = dat.parse(buffer, ReadSize, hists, flatbuffer, readouts);
-      if (res < 0) {
+      auto res = mesytecdata.parse(buffer, ReadSize, hists, flatbuffer, readouts);
+      if (res != MesytecData::error::OK) {
         mystats.parse_errors++;
       }
 
-      mystats.rx_readouts += dat.readouts;
-      mystats.rx_discards += dat.discards;
-      mystats.triggers += dat.triggers;
-      mystats.geometry_errors+= dat.geometry_errors;
-      mystats.tx_bytes += dat.tx_bytes;
-      mystats.rx_events += dat.events;
+      mystats.rx_readouts += mesytecdata.readouts;
+      mystats.rx_discards += mesytecdata.discards;
+      mystats.triggers += mesytecdata.triggers;
+      mystats.geometry_errors+= mesytecdata.geometry_errors;
+      mystats.tx_bytes += mesytecdata.tx_bytes;
+      mystats.rx_events += mesytecdata.events;
     }
 
-    // Checking for exit
+    // Force periodic flushing
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       mystats.tx_bytes += flatbuffer.produce();
 
       auto entries = readouts.getNumEntries();
-      if (entries) {
+      if (entries > 0) {
         XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", entries);
         //readouts.produce(); // Periodically produce of readouts
       }

@@ -24,9 +24,9 @@ int main(int argc, char *argv[]) {
   const int B1M = 1000000;
 
   Socket::Endpoint local("0.0.0.0", 9000);
-  UDPServer NMX(local);
-  NMX.setbuffers(0, 500000);
-  NMX.printbuffers();
+  UDPReceiver NMX(local);
+  NMX.setBufferSizes(0, 500000);
+  NMX.printBufferSizes();
 
   Timer upd;
   auto usecs = upd.timeus();
