@@ -23,6 +23,8 @@ enum class TimeStampLocation {
 
 /// @brief Contains data that is to be serialized into a flatbuffer.
 struct ProcessedSamples {
+  ProcessedSamples() = default;
+  ProcessedSamples(size_t NrOfSamples) : Samples(NrOfSamples), TimeStamps(NrOfSamples) {}
   int Channel;
   std::uint64_t TimeStamp;
   double TimeDelta;
