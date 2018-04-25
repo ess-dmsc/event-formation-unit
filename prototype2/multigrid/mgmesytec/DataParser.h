@@ -1,10 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class to parse detector readout for multigrid via
- * sis3153 / Mesytec digitizer
- */
+/** Copyright (C) 2016-2018 European Spallation Source */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// Class to parse detector readout for multigrid via
+/// sis3153 / Mesytec digitizer
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 #include <common/FBSerializer.h>
@@ -32,15 +33,20 @@ public:
   };
   // clang-format on
 
-  MesytecData(bool filedump, __attribute__((unused)) std::string fileprefix, uint32_t module) : dumptofile(filedump) {
-    mgseq.select_module(module);
+/// @
 #ifdef DUMPTOFILE
+  MesytecData(bool filedump, std::string fileprefix, uint32_t module) : dumptofile(filedump) {
+    mgseq.select_module(module);
     if (dumptofile) {
       mgdata = std::make_shared<DataSave>(fileprefix, 100000000);
       mgdata->tofile("#Time, Bus, Address, ADC\n");
     }
-#endif
   };
+  #else
+  MesytecData(uint32_t module) {
+    mgseq.select_module(module);
+  };
+  #endif
 
   ~MesytecData(){};
 
@@ -60,7 +66,6 @@ public:
    * @todo Uses NMXHists  - refactor and move ?
    */
   error parse(const char *buffer, int size, NMXHists &hists, FBSerializer & fbserializer, ReadoutSerializer &serializer);
-  // Change parse() to return a enum instead of an int
 
   /** @brief parse n 32 bit words from mesytec VMMR-8/16 card */
   void mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &hists, ReadoutSerializer &serializer);
@@ -74,7 +79,6 @@ public:
   int geometry_errors{0};
 
 private:
-  bool __attribute__((unused)) dumptofile{false};
   int wiremax{-1}; // initial alg.: wire with max adc
   int gridmax{-1}; // initial alg.: grid with max adc
   int time{-1};
@@ -86,6 +90,7 @@ private:
   ESSGeometry mg{4, 48, 20, 1};
 
 #ifdef DUMPTOFILE
+  bool dumptofile{false};
   std::shared_ptr<DataSave>(mgdata);
 #endif
 };

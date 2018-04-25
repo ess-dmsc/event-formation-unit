@@ -55,8 +55,10 @@ void SetCLIArguments(CLI::App & parser) {
          "maximum grid adc value for accept")->group("MGMesytec");
   parser.add_option("--module", DetectorSettings.module,
          "select module for correct wire swapping (0==16z, 1==20z)")->group("MGMesytec");
+  #ifdef DUMPTOFILE
   parser.add_option("--dumptofile", DetectorSettings.fileprefix,
          "dump to specified file (requires cmake -DDUMPTOFILE=ON")->group("MGMesytec");
+  #endif
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
@@ -131,8 +133,12 @@ void CSPEC::mainThread() {
   HistSerializer histfb;
   NMXHists hists;
 
-  bool dumptofile = !DetectorSettings.fileprefix.empty();
-  MesytecData mesytecdata(dumptofile, DetectorSettings.fileprefix, DetectorSettings.module);
+  #ifdef DUMPTOFILE
+    bool dumptofile = !DetectorSettings.fileprefix.empty();
+    MesytecData mesytecdata(dumptofile, DetectorSettings.fileprefix, DetectorSettings.module);
+  #else
+    MesytecData mesytecdata(DetectorSettings.module);
+  #endif
 
   mesytecdata.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
   mesytecdata.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
