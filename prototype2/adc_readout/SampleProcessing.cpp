@@ -25,7 +25,7 @@ std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start,
 }
 
 double CalcTimeStampDelta(int OversamplingFactor) {
-  constexpr double SampleTime = 1.0 / AdcTimerCounterMax;
+  constexpr double SampleTime = 1e9 / AdcTimerCounterMax;
   return SampleTime * OversamplingFactor;
 }
 
@@ -38,9 +38,9 @@ ProcessedSamples ChannelProcessing::processModule(const DataModule &Samples) {
   ReturnSamples.TimeDelta = CalcTimeStampDelta(FinalOversamplingFactor);
   std::uint64_t TimeStampOffset{0};
   if (TSLocation == TimeStampLocation::Middle) {
-    TimeStampOffset = std::llround(0.5 * (1e9*ReturnSamples.TimeDelta  / FinalOversamplingFactor) * (FinalOversamplingFactor - 1));
+    TimeStampOffset = std::llround(0.5 * (ReturnSamples.TimeDelta  / FinalOversamplingFactor) * (FinalOversamplingFactor - 1));
   } else if (TSLocation == TimeStampLocation::End) {
-    TimeStampOffset = std::llround((1e9*ReturnSamples.TimeDelta  / FinalOversamplingFactor) * (FinalOversamplingFactor - 1));
+    TimeStampOffset = std::llround((ReturnSamples.TimeDelta  / FinalOversamplingFactor) * (FinalOversamplingFactor - 1));
   }
   
   for (size_t i = 0; i < Samples.Data.size(); i++) {
