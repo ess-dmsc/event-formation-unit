@@ -153,19 +153,19 @@ void NMX::input_thread() {
   // nmxdata.buflen(opts->buflen);
   nmxdata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
   nmxdata.printBufferSizes();
-  nmxdata.setRecvTimeout(0, 100000 ); /// secs, usecs 
+  nmxdata.setRecvTimeout(0, 100000 ); /// secs, usecs
 
   int rdsize;
   TSCTimer report_timer;
   for (;;) {
-    unsigned int eth_index = eth_ringbuf->getindex();
+    unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */
-    eth_ringbuf->setdatalength(
+    eth_ringbuf->setDataLength(
         eth_index, 0); /**@todo @fixme buffer corruption can occur */
-    if ((rdsize = nmxdata.receive(eth_ringbuf->getdatabuffer(eth_index),
-                                  eth_ringbuf->getmaxbufsize())) > 0) {
-      eth_ringbuf->setdatalength(eth_index, rdsize);
+    if ((rdsize = nmxdata.receive(eth_ringbuf->getDataBuffer(eth_index),
+                                  eth_ringbuf->getMaxBufSize())) > 0) {
+      eth_ringbuf->setDataLength(eth_index, rdsize);
       XTRACE(INPUT, DEB, "rdsize: %d\n", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
@@ -174,7 +174,7 @@ void NMX::input_thread() {
       if (input2proc_fifo.push(eth_index) == false) {
         mystats.fifo_push_errors++;
       } else {
-        eth_ringbuf->nextbuffer();
+        eth_ringbuf->getNextBuffer();
       }
     }
 
@@ -222,12 +222,12 @@ void NMX::processing_thread() {
       mystats.processing_idle++;
       usleep(1);
     } else {
-      auto len = eth_ringbuf->getdatalength(data_index);
+      auto len = eth_ringbuf->getDataLength(data_index);
       if (len == 0) {
         mystats.fifo_seq_errors++;
       } else {
         // printf("received packet with length %d\n", len);
-        auto stats = builder_->process_buffer(eth_ringbuf->getdatabuffer(data_index), len, clusterer, hists);
+        auto stats = builder_->process_buffer(eth_ringbuf->getDataBuffer(data_index), len, clusterer, hists);
 
         mystats.readouts += stats.valid_eventlets;
         mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
