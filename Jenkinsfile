@@ -266,7 +266,6 @@ def get_release_pipeline()
                             -DCMAKE_BUILD_TYPE=Release \
                             -DCMAKE_SKIP_BUILD_RPATH=ON \
                             -DBUILDSTR=\\\$BUILDSTR \
-                            -DDUMPTOFILE=ON \
                             ../${project}
                     \""""
 
