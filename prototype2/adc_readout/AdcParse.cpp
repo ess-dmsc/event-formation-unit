@@ -113,8 +113,9 @@ AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
         Packet.Length) {
       throw ParserException(ParserException::Type::DATA_LENGTH);
     }
-    DataModule CurrentDataModule;
-    CurrentDataModule.Data.resize(NrOfSamples);
+    ReturnData.Modules.emplace_back(NrOfSamples);
+    
+    DataModule &CurrentDataModule = ReturnData.Modules[ReturnData.Modules.size() - 1];
     CurrentDataModule.Channel = Header.Channel;
     CurrentDataModule.TimeStamp = Header.TimeStamp;
     auto ElementPointer = reinterpret_cast<const std::uint16_t *>(
@@ -129,7 +130,6 @@ AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
       throw ParserException(ParserException::Type::DATA_BEEFCAFE);
     }
     StartByte += 4;
-    ReturnData.Modules.emplace_back(CurrentDataModule);
   }
   ReturnData.FillerStart = StartByte;
   return ReturnData;

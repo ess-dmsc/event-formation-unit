@@ -12,7 +12,7 @@
 
 int main(int argc, char *argv[]) {
   NMXArgs opts(argc, argv);
-  char buffer[9000];
+  char buffer[10000];
 
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
