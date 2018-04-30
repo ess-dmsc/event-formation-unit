@@ -57,7 +57,7 @@ struct DataModule {
   DataModule(size_t NrOfElements) noexcept : Data(NrOfElements) {}
   ~DataModule() = default;
   DataModule(const DataModule &&Other) : TimeStamp(Other.TimeStamp), Channel(Other.Channel), OversamplingFactor(Other.OversamplingFactor), Data(std::move(Other.Data)) {}
-  DataModule& operator=( const DataModule& Other ) = default;
+  DataModule& operator=( const DataModule&) = default;
   RawTimeStamp TimeStamp;
   std::uint16_t Channel;
   std::uint16_t OversamplingFactor{1};
