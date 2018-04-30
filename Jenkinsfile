@@ -273,7 +273,7 @@ def get_release_pipeline()
                         cd build && \
                         . ./activate_run.sh && \
                         make VERBOSE=ON -j4 && \
-                        make VERBOSE=ON -j4 runtest \
+                        make VERBOSE=ON -j4 runtest && \
                         make VERBOSE=ON -j4 runefu
                     \""""
 
