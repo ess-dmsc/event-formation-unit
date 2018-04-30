@@ -134,14 +134,14 @@ create_test_executable(MG24DetectorTest "")
 #create_test_executable(CSPECEventTest)
 
 
-# Is this ever used ???
-set(PYTHON_EXECUTABLE /usr/bin/python)
+# This was moved out from the IS_GNUCXX because it is needed
+# in efu/CMakeLists
+add_library(calibfile OBJECT mgcncs/CalibrationFile.cpp)
+
 
 if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
   message(STATUS "*** Skipping CalibrationFileTest - fails with Release compile flags")
-else()
-if(${CMAKE_COMPILER_IS_GNUCXX})
-  add_library(calibfile OBJECT mgcncs/CalibrationFile.cpp)
+elseif(${CMAKE_COMPILER_IS_GNUCXX})
   enable_coverage_flags(calibfile)
 
   set(CalibrationFileTestLibrary_SRC
@@ -163,7 +163,6 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
     "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 else()
   message(STATUS "*** Skipping CalibrationFileTest - requires gcc/linux")
-endif()
 endif()
 
 set(MultiGridGeometryTest_SRC
