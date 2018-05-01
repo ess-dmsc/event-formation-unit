@@ -7,7 +7,7 @@ images = [
 //        'sh': 'sh'
 //    ],
     'centos7-gcc6': [
-        'name': 'essdmscdm/centos7-gcc6-build-node:1.0.0',
+        'name': 'essdmscdm/centos7-gcc6-build-node:2.1.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
     ],
     'fedora25': [
@@ -15,11 +15,11 @@ images = [
         'sh': 'sh'
     ],
     'ubuntu1604': [
-        'name': 'essdmscdm/ubuntu16.04-build-node:2.0.0',
+        'name': 'essdmscdm/ubuntu16.04-build-node:2.1.0',
         'sh': 'sh'
     ],
     'ubuntu1710': [
-        'name': 'essdmscdm/ubuntu17.10-build-node:1.0.0',
+        'name': 'essdmscdm/ubuntu17.10-build-node:2.0.0',
         'sh': 'sh'
     ]
 ]
