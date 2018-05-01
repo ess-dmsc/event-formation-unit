@@ -117,13 +117,13 @@ void MBCAEN::input_thread() {
 
   int rdsize;
   for (;;) {
-    unsigned int eth_index = eth_ringbuf->getindex();
+    unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */
-    eth_ringbuf->setdatalength(eth_index, 0);
-    if ((rdsize = mbdata.receive(eth_ringbuf->getdatabuffer(eth_index),
-                                 eth_ringbuf->getmaxbufsize())) > 0) {
-      eth_ringbuf->setdatalength(eth_index, rdsize);
+    eth_ringbuf->setDataLength(eth_index, 0);
+    if ((rdsize = mbdata.receive(eth_ringbuf->getDataBuffer(eth_index),
+                                 eth_ringbuf->getMaxBufSize())) > 0) {
+      eth_ringbuf->setDataLength(eth_index, rdsize);
       XTRACE(PROCESS, DEB, "Received an udp packet of length %d bytes\n",
              rdsize);
       mystats.rx_packets++;
@@ -132,7 +132,7 @@ void MBCAEN::input_thread() {
       if (input2proc_fifo.push(eth_index) == false) {
         mystats.fifo1_push_errors++;
       } else {
-        eth_ringbuf->nextbuffer();
+        eth_ringbuf->getNextBuffer();
       }
     }
 
@@ -190,11 +190,11 @@ void MBCAEN::processing_thread() {
       usleep(10);
 
     } else { // There is data in the FIFO - do processing
-      auto datalen = eth_ringbuf->getdatalength(data_index);
+      auto datalen = eth_ringbuf->getDataLength(data_index);
       if (datalen == 0) {
         mystats.fifo_seq_errors++;
       } else {
-        auto dataptr = eth_ringbuf->getdatabuffer(data_index);
+        auto dataptr = eth_ringbuf->getDataBuffer(data_index);
         mbdata.receive(dataptr, datalen);
 
         auto dat = mbdata.data;

@@ -118,20 +118,20 @@ void SONDEIDEA::input_thread() {
 
   int rdsize;
   for (;;) {
-    unsigned int eth_index = eth_ringbuf->getindex();
+    unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */
-    eth_ringbuf->setdatalength(eth_index, 0);
-    if ((rdsize = sondedata.receive(eth_ringbuf->getdatabuffer(eth_index),
-                                    eth_ringbuf->getmaxbufsize())) > 0) {
+    eth_ringbuf->setDataLength(eth_index, 0);
+    if ((rdsize = sondedata.receive(eth_ringbuf->getDataBuffer(eth_index),
+                                    eth_ringbuf->getMaxBufSize())) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
-      eth_ringbuf->setdatalength(eth_index, rdsize);
+      eth_ringbuf->setDataLength(eth_index, rdsize);
 
       if (input2proc_fifo.push(eth_index) == false) {
         mystats.fifo_push_errors++;
       } else {
-        eth_ringbuf->nextbuffer();
+        eth_ringbuf->getNextBuffer();
       }
     }
 
@@ -159,12 +159,12 @@ void SONDEIDEA::processing_thread() {
 
     } else {
 
-      auto len = eth_ringbuf->getdatalength(data_index);
+      auto len = eth_ringbuf->getDataLength(data_index);
       if (len == 0) {
         mystats.fifo_synch_errors++;
       } else {
         int events =
-            ideasdata.parse_buffer(eth_ringbuf->getdatabuffer(data_index), len);
+            ideasdata.parse_buffer(eth_ringbuf->getDataBuffer(data_index), len);
 
         mystats.rx_geometry_errors += ideasdata.errors;
         mystats.rx_events += ideasdata.events;

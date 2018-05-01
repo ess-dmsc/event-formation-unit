@@ -266,7 +266,6 @@ def get_release_pipeline()
                             -DCMAKE_BUILD_TYPE=Release \
                             -DCMAKE_SKIP_BUILD_RPATH=ON \
                             -DBUILDSTR=\\\$BUILDSTR \
-                            -DDUMPTOFILE=ON \
                             ../${project}
                     \""""
 
@@ -274,6 +273,7 @@ def get_release_pipeline()
                         cd build && \
                         . ./activate_run.sh && \
                         make VERBOSE=ON -j4 && \
+                        make VERBOSE=ON -j4 runtest && \
                         make VERBOSE=ON -j4 runefu
                     \""""
 
