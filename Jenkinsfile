@@ -91,6 +91,7 @@ def docker_build(image_key) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd ${project}/build
+        . ./activate_run.sh
         make --version
         make VERBOSE=ON
     \""""
