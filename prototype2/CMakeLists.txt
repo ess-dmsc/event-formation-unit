@@ -1,5 +1,4 @@
-include_directories(. ..)
-include(Utilities.cmake)
+include_directories(.)
 
 #=============================================================================
 # Optionally dump raw data to file
@@ -72,24 +71,7 @@ add_subdirectory(sonde)
 add_subdirectory(udp)
 add_subdirectory(adc_readout)
 
-
-#=============================================================================
-#  These commands must be at the end of this file
-#=============================================================================
-
-# Should unit_test_targets depend on default targets ???
-
-add_custom_target(runtest
-  COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
-  DEPENDS ${unit_test_targets})
-add_custom_target(valgrind
-  COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*
-  DEPENDS ${unit_test_targets})
-add_custom_target(benchmark
-  DEPENDS ${benchmark_targets})
-
 add_custom_target(runefu
-  COMMAND efu "-d" "../lib/mgmesytec" "-s" "1"
-  DEPENDS efu mgmesytec
-  )
-
+    COMMAND efu "-d" "../lib/mgmesytec" "-s" "1"
+    DEPENDS efu mgmesytec
+    )

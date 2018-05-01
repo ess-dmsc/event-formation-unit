@@ -92,12 +92,12 @@ set(NMXClustererTest_SRC
 set(NMXClustererTest_INC
   dg_impl/NMXClusterer.h
   dg_impl/TestData.h)
-create_test_executable(NMXClustererTest "")
+create_test_executable(NMXClustererTest)
 
 # GOOGLE BENCHMARK
 set(NMXClustererBenchmarkTest_INC dg_impl/NMXClusterer.h dg_impl/TestData.h)
 set(NMXClustererBenchmarkTest_SRC dg_impl/NMXClusterer.cpp dg_impl/NMXClustererBenchmarkTest.cpp)
-create_benchmark_executable(NMXClustererBenchmarkTest "")
+create_benchmark_executable(NMXClustererBenchmarkTest)
 
 
 set(EventFormationTest_SRC

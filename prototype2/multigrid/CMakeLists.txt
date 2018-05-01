@@ -127,7 +127,7 @@ set(MG24DetectorTest_SRC
   mgmesytec/MG24DetectorTest.cpp)
 set(MG24DetectorTest_INC
   mgmesytec/MG24Detector.h)
-create_test_executable(MG24DetectorTest "")
+create_test_executable(MG24DetectorTest)
 
 #set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
 #set(CSPECEventTest_INC cspec/CSPECEvent.h)

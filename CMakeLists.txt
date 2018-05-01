@@ -39,10 +39,27 @@ include(${EXTRA_MODULES_DIR}/Memcheck.cmake)
 #=============================================================================
 # The code
 #=============================================================================
+include_directories(.)
+include(Utilities.cmake)
 add_subdirectory(libs)
 add_subdirectory(prototype2)
 add_subdirectory(udp)
-#add_subdirectory(dataformats) # built separately for now
+add_subdirectory(dataformats)
+
+#=============================================================================
+# Finalize tests
+#=============================================================================
+
+# Should unit_test_targets depend on default targets ???
+
+add_custom_target(runtest
+    COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
+    DEPENDS ${unit_test_targets})
+add_custom_target(valgrind
+    COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*
+    DEPENDS ${unit_test_targets})
+add_custom_target(benchmark
+    DEPENDS ${benchmark_targets})
 
 #=============================================================================
 # Finalize coverage
@@ -56,6 +73,10 @@ create_coverage_targets(
   ${CMAKE_SOURCE_DIR}/
   ${PROJECT_BINARY_DIR}/coverage
   ${gcovr_excl_opts})
+
+#=============================================================================
+# Hints
+#=============================================================================
 
 add_custom_target(hints
   COMMAND echo ""
