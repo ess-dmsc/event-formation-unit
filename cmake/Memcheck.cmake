@@ -15,13 +15,13 @@ endfunction()
 set(vagrind_targets "" CACHE INTERNAL "All valgrind targets")
 
 function(memcheck_test test_target test_binary_dir)
-  if (${VALGRIND_ENABLED})
+  if(${VALGRIND_ENABLED})
     add_custom_target(memcheck_${test_target} COMMAND ${VALGRIND_CMD}
-      --tool=memcheck --leak-check=full --verbose --xml=yes
-      --xml-file=${VALGRIND_RESULTS_DIR}/${test_target}_memcheck.valgrind
-      ${test_binary_dir}/${test_target})
+        --tool=memcheck --leak-check=full --verbose --xml=yes
+        --xml-file=${VALGRIND_RESULTS_DIR}/${test_target}_memcheck.valgrind
+        ${test_binary_dir}/${test_target})
     set(valgrind_targets
         ${valgrind_targets} memcheck_${test_target}
         CACHE INTERNAL "All valgrind targets")
-  endif ()
+  endif()
 endfunction()
