@@ -1,5 +1,5 @@
 project = "event-formation-unit"
-coverage_on = "centos7"
+coverage_on = "centos7-gcc6"
 
 images = [
     'centos7': [
