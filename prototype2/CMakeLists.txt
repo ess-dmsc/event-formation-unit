@@ -75,3 +75,6 @@ add_custom_target(runefu
     COMMAND efu "-d" "../lib/mgmesytec" "-s" "1"
     DEPENDS efu mgmesytec
     )
+
+
+set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)

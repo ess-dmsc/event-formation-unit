@@ -6,6 +6,10 @@ images = [
 //        'name': 'essdmscdm/centos7-build-node:1.0.1',
 //        'sh': 'sh'
 //    ],
+    'centos7-release': [
+        'name': 'essdmscdm/centos7-build-node:1.0.1',
+        'sh': 'sh'
+    ],
     'centos7-gcc6': [
         'name': 'essdmscdm/centos7-gcc6-build-node:2.1.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
