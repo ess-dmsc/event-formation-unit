@@ -35,6 +35,7 @@ include(${EXTRA_MODULES_DIR}/CoverageReports.cmake)
 include(${EXTRA_MODULES_DIR}/Benchmarks.cmake)
 include(${EXTRA_MODULES_DIR}/Profiling.cmake)
 include(${EXTRA_MODULES_DIR}/Memcheck.cmake)
+setup_memcheck(${CMAKE_BINARY_DIR}/memcheck_res)
 
 #=============================================================================
 # The code
@@ -56,10 +57,11 @@ add_custom_target(runtest
     COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
     DEPENDS ${unit_test_targets})
 add_custom_target(valgrind
-    COMMAND ${CMAKE_CTEST_COMMAND} -R memcheck_*
-    DEPENDS ${unit_test_targets})
+    DEPENDS ${valgrind_targets})
 add_custom_target(benchmark
     DEPENDS ${benchmark_targets})
+
+message(STATUS "targets= ${BUILDSYSTEM_TARGETS}")
 
 #=============================================================================
 # Finalize coverage

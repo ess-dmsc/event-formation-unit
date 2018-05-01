@@ -38,8 +38,7 @@ endfunction(create_executable)
 #=============================================================================
 # Generate unit test targets
 #=============================================================================
-setup_memcheck(${CMAKE_BINARY_DIR}/memcheck_res)
-set(unit_test_targets "" CACHE INTERNAL "All targets")
+set(unit_test_targets "" CACHE INTERNAL "All test targets")
 
 function(create_test_executable exec_name)
   add_executable(${exec_name} EXCLUDE_FROM_ALL
@@ -67,7 +66,7 @@ function(create_test_executable exec_name)
 
   set(unit_test_targets
     ${unit_test_targets} ${exec_name}
-    CACHE INTERNAL "All targets")
+    CACHE INTERNAL "All test targets")
 
   enable_coverage(${exec_name})
   memcheck_test(${exec_name} ${CMAKE_BINARY_DIR}/bin)
