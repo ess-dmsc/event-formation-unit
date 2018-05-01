@@ -12,67 +12,77 @@ protected:
 /** Test cases below */
 TEST_F(RingBufferTest, Constructor) {
   RingBuffer<9000> buf(100);
-  ASSERT_EQ(buf.getmaxelems(), 100);
-  ASSERT_EQ(buf.getmaxbufsize(), 9000);
+  ASSERT_EQ(buf.getMaxElements(), 100);
+  ASSERT_EQ(buf.getMaxBufSize(), 9000);
 }
 
 TEST_F(RingBufferTest, Datalength) {
   RingBuffer<9000> buf(100);
-  unsigned int index = buf.getindex();
-  buf.setdatalength(index, 9000);
-  ASSERT_EQ(9000, buf.getdatalength(index));
-  buf.setdatalength(index, 900);
-  ASSERT_EQ(900, buf.getdatalength(index));
+  unsigned int index = buf.getDataIndex();
+  buf.setDataLength(index, 9000);
+  ASSERT_EQ(9000, buf.getDataLength(index));
+  buf.setDataLength(index, 900);
+  ASSERT_EQ(900, buf.getDataLength(index));
 }
 
 TEST_F(RingBufferTest, CircularWrap) {
   int N = 997;
-  int size = 9000;
-  RingBuffer<9000> buf(N);
+  const int size = 9000;
+  RingBuffer<size> buf(N);
 
-  unsigned int index = buf.getindex();
-  char *first = buf.getdatabuffer(index);
-  ASSERT_EQ(buf.getmaxelems(), N);
-  ASSERT_EQ(buf.getmaxbufsize(), size);
+  ASSERT_EQ(buf.getMaxElements(), N);
+  ASSERT_EQ(buf.getMaxBufSize(), size);
+
+  unsigned int index = buf.getDataIndex();
+  ASSERT_EQ(index, 0);
+
+  char *first = buf.getDataBuffer(index); // Save for last
 
   for (int i = 0; i < N; i++) {
-    unsigned int index = buf.getindex();
-    int *ip = (int *)buf.getdatabuffer(index);
+    unsigned int index = buf.getDataIndex();
+    ASSERT_EQ(i, index);
+
+    int *ip = (int *)buf.getDataBuffer(index);
     ASSERT_NE(ip, nullptr);
-    ASSERT_EQ(i, buf.getindex());
+    ASSERT_EQ(i, buf.getDataIndex());
     *ip = N + i;
-    buf.nextbuffer();
+    buf.getNextBuffer();
   }
-  ASSERT_EQ(0, buf.getindex());
+  ASSERT_EQ(0, buf.getDataIndex());
 
   for (int i = 0; i < N; i++) {
-    unsigned int index = buf.getindex();
-    int *ip = (int *)buf.getdatabuffer(index);
+    unsigned int index = buf.getDataIndex();
+    int *ip = (int *)buf.getDataBuffer(index);
     ASSERT_EQ(*ip, N + i);
-    buf.nextbuffer();
+    buf.getNextBuffer();
   }
-  index = buf.getindex();
-  ASSERT_EQ(first, buf.getdatabuffer(index));
+  index = buf.getDataIndex();
+  ASSERT_EQ(first, buf.getDataBuffer(index));
 }
 
 TEST_F(RingBufferTest, OverWriteLocal) {
   RingBuffer<9000> buf(2);
-  unsigned int index = buf.getindex();
-  char *buffer = buf.getdatabuffer(index);
+  unsigned int index = buf.getDataIndex();
+  char *buffer = buf.getDataBuffer(index);
   std::fill_n(buffer, 9001, 0);
+
   MESSAGE() << "Next buffer should be ok\n";
-  buf.nextbuffer();
+  index = buf.getNextBuffer();
+  ASSERT_TRUE(buf.verifyBufferCookies(index));
+
   MESSAGE() << "Next2 buffer should be corrupt\n";
-  ASSERT_DEATH(buf.nextbuffer(), "COOKIE2");
+  index = buf.getNextBuffer();
+  ASSERT_FALSE(buf.verifyBufferCookies(index));
 }
 
 TEST_F(RingBufferTest, OverWriteNext) {
   RingBuffer<9000> buf(2);
-  unsigned int index = buf.getindex();
-  char *buffer = buf.getdatabuffer(index);
+  unsigned int index = buf.getDataIndex();
+  char *buffer = buf.getDataBuffer(index);
   std::fill_n(buffer, 9005, 0);
   MESSAGE() << "Next buffer should be corrupt\n";
-  ASSERT_DEATH(buf.nextbuffer(), "COOKIE1");
+  index = buf.getNextBuffer();
+  ASSERT_FALSE(buf.verifyBufferCookies(index));
 }
 
 int main(int argc, char **argv) {
