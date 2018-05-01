@@ -28,8 +28,8 @@ public:
   ~TestUDPServer();
 
 private:
-  std::uint16_t SourcePort, DestinationPort;
   asio::io_service Service;
+  std::uint16_t SourcePort, DestinationPort;
   void threadFunction();
   std::thread AsioThread;
   asio::ip::udp::socket Socket;

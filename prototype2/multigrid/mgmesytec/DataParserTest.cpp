@@ -9,7 +9,6 @@ static Producer producer {"noserver", "nostream"};
 
 static const int MG24_Z_20 = 1;
 
-
 class MesytecDataTest : public TestBase {
 protected:
   NMXHists hists;

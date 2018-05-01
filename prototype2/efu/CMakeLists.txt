@@ -21,7 +21,6 @@ set(efu_INC
   Server.h
   )
   
-add_definitions(-std=c++11)
 create_executable(efu)
 get_filename_component(EFU_RUN_INSTRUCTIONS "Executing artefacts.md" ABSOLUTE)
 add_custom_command(TARGET efu POST_BUILD
