@@ -57,6 +57,10 @@ function(create_test_executable exec_name)
     ${EFU_COMMON_LIBS}
     ${GTEST_LIBRARIES})
 
+  if(${CMAKE_COMPILER_IS_GNUCXX})
+    add_linker_flags(${exec_name} "-Wl,--no-as-needed")
+  endif()
+
   add_test(NAME regular_${exec_name}
     COMMAND ${exec_name}
     "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")

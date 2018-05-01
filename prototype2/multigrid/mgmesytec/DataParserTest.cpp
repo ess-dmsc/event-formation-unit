@@ -10,7 +10,11 @@ static Producer producer {"noserver", "nostream"};
 class MesytecDataTest : public TestBase {
 protected:
   NMXHists hists;
-  MesytecData mesytec{0, "nofile", 1}; // Dont dumptofile select module with 20 depth in z
+#ifdef DUMPTOFILE
+MesytecData mesytec{0, "nofile", 1}; // Dont dumptofile select module with 20 depth in z
+#else
+MesytecData mesytec {1}; // Dont dumptofile select module with 20 depth in z
+#endif
   ReadoutSerializer * serializer;
   FBSerializer * fbserializer;
   virtual void SetUp() {
