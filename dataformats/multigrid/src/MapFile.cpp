@@ -12,6 +12,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdexcept>
 
 MapFile::MapFile(std::string filename) {
   struct stat sb;
@@ -22,16 +23,20 @@ MapFile::MapFile(std::string filename) {
   }
 
   auto res = fstat(fd, &sb);
-  assert(res != -1);
+  if (res == -1)
+    throw(std::runtime_error("MapFile assert 1 failed"));
 
   filesize = sb.st_size;
   address = mmap(NULL, filesize, PROT_READ, MAP_PRIVATE, fd, 0);
-  assert(address != MAP_FAILED);
+  if (address == MAP_FAILED)
+    throw(std::runtime_error("MapFile assert 2 failed"));
 }
 
 MapFile::~MapFile() {
-  auto res = munmap(address, filesize);
-  assert(res == 0);
+  munmap(address, filesize);
+//  auto res = munmap(address, filesize);
+//  if (res != 0)
+//    throw(std::runtime_error("MapFile assert 3 failed"));
   close(fd);
 }
 

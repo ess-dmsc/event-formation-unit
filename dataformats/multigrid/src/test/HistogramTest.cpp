@@ -1,7 +1,7 @@
 /** Copyright (C) 2016 European Spallation Source ERIC */
 
 #include <Histogram.h>
-#include <TestBase.h>
+#include <test/TestBase.h>
 
 class HistogramTest : public TestBase {
 protected:

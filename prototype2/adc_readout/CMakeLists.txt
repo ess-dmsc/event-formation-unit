@@ -35,8 +35,7 @@ set(AdcReadout_INC
     ${AdcReadoutBase_INC}
     )
 
-create_module(AdcReadout "")
-
+create_module(AdcReadout)
 
 set(AdcReadoutTest_SRC
     test/UnitTests.cpp
@@ -63,18 +62,11 @@ set(AdcReadoutTest_LIB
 
 create_test_executable(AdcReadoutTest)
 
-#  add_test(NAME regular_AdcReadoutTest
-#    COMMAND AdcReadoutTest
-#    "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
-#
-#  set(unit_test_targets
-#    ${unit_test_targets} AdcReadoutTest
-#    CACHE INTERNAL "All targets")
-
 get_filename_component(TEST_PACKET_PATH "test/test_packet_1.dat" DIRECTORY)
 target_compile_definitions(AdcReadoutTest
     PRIVATE TEST_PACKET_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_PACKET_PATH}/")
 message(STATUS "Test ADC packets in path: ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_PACKET_PATH}/")
 
 target_include_directories(AdcReadoutTest PRIVATE ${ASIO_INCLUDE_DIR})
+
 add_subdirectory("chopper_integration_test")

@@ -21,8 +21,6 @@ if(${DUMPTOFILE})
   set(efu_common_INC ${efu_common_INC} DataSave.h)
 endif()
 
-add_definitions(-std=c++11)
-
 find_package(CLI11 REQUIRED)
 
 add_library(efu_common STATIC
@@ -31,7 +29,14 @@ add_library(efu_common STATIC
   
 target_include_directories(efu_common PUBLIC ${CLI11_INCLUDE_DIR})
 
+if(${CMAKE_COMPILER_IS_GNUCXX})
+  add_linker_flags(efu_common "-Wl,--no-as-needed")
+endif()
+
 enable_coverage(efu_common)
+
+target_link_libraries(efu_common
+    ${EFU_COMMON_LIBS})
 
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} efu_common PARENT_SCOPE)
 

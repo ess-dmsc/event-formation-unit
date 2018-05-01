@@ -6,8 +6,12 @@ images = [
         'name': 'essdmscdm/centos7-build-node:1.0.1',
         'sh': 'sh'
     ],
+//    'centos7-release': [
+//        'name': 'essdmscdm/centos7-build-node:1.0.1',
+//        'sh': 'sh'
+//    ],
     'centos7-gcc6': [
-        'name': 'essdmscdm/centos7-gcc6-build-node:1.0.0',
+        'name': 'essdmscdm/centos7-gcc6-build-node:2.1.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
     ],
     'fedora25': [
@@ -15,11 +19,11 @@ images = [
         'sh': 'sh'
     ],
     'ubuntu1604': [
-        'name': 'essdmscdm/ubuntu16.04-build-node:2.0.0',
+        'name': 'essdmscdm/ubuntu16.04-build-node:2.1.0',
         'sh': 'sh'
     ],
     'ubuntu1710': [
-        'name': 'essdmscdm/ubuntu17.10-build-node:1.0.0',
+        'name': 'essdmscdm/ubuntu17.10-build-node:2.0.0',
         'sh': 'sh'
     ]
 ]
@@ -74,25 +78,15 @@ def docker_dependencies(image_key) {
     \""""
 }
 
-def docker_cmake(image_key) {
+def docker_cmake(image_key, xtra_flags) {
     cmake_exec = "cmake"
     def custom_sh = images[image_key]['sh']
-    if (image_key == coverage_on)
-    {
-        sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-            cd ${project}/build
-            . ./activate_run.sh
-            ${cmake_exec} --version
-            ${cmake_exec} -DDUMPTOFILE=ON -DCOV=ON ..
-        \""""
-    } else {
-        sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-            cd ${project}/build
-            . ./activate_run.sh
-            ${cmake_exec} --version
-            ${cmake_exec} -DDUMPTOFILE=ON ..
-        \""""
-    }
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+        cd ${project}/build
+        . ./activate_run.sh
+        ${cmake_exec} --version
+        ${cmake_exec} ${xtra_flags} ..
+    \""""
 }
 
 def docker_build(image_key) {
@@ -177,7 +171,13 @@ def get_pipeline(image_key)
 
                     docker_clone(image_key)
                     docker_dependencies(image_key)
-                    docker_cmake(image_key)
+
+                    if (image_key == coverage_on) {
+                        docker_cmake(image_key, "-DDUMPTOFILE=ON -DCOV=1")
+                    } else {
+                        docker_cmake(image_key, "-DDUMPTOFILE=ON")
+                    }
+
                     docker_build(image_key)
 
                     if (image_key == coverage_on) {
