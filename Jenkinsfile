@@ -74,7 +74,6 @@ def docker_dependencies(image_key) {
         conan remote add \
             --insert 0 \
             ${conan_remote} ${local_conan_server}
-        conan install --build=outdated ..
     \""""
 }
 
@@ -83,7 +82,6 @@ def docker_cmake(image_key, xtra_flags) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd ${project}/build
-        . ./activate_run.sh
         ${cmake_exec} --version
         ${cmake_exec} ${xtra_flags} ..
     \""""
@@ -207,7 +205,6 @@ def get_macos_pipeline()
                 }
 
                 dir("${project}/build") {
-                    sh "conan install --build=outdated ../code"
                     sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
                     sh "make"
                     sh "make runtest"
@@ -253,14 +250,12 @@ def get_release_pipeline()
                         conan remote add \
                             --insert 0 \
                             ${conan_remote} ${local_conan_server} && \
-                        conan install --build=outdated ../${project}
                     \""""
 
                     sh """docker exec ${container_name} ${custom_sh} -c \"
                         cd ${project} && \
                         BUILDSTR=\\\$(git log --oneline | head -n 1 | awk '{print \\\$1}') && \
                         cd ../build && \
-                        . ./activate_run.sh && \
                         cmake --version && \
                         cmake \
                             -DCMAKE_BUILD_TYPE=Release \
