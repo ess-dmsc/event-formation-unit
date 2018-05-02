@@ -199,9 +199,7 @@ def get_pipeline(image_key)
 
                     docker_clone(image_key)
                     docker_dependencies(image_key)
-
                     docker_cmake(image_key, images[image_key]['cmake_flags'])
-
                     docker_build(image_key)
 
                     if (image_key == coverage_on) {
@@ -237,7 +235,7 @@ def get_macos_pipeline()
 
                 dir("${project}/build") {
                     sh "conan install --build=outdated ../code"
-                    sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
+                    sh "cmake -DCONAN=MANUAL -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
                     sh "make -j4"
                     sh "make -j4 runtest"
                     sh "make runefu"
