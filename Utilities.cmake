@@ -63,9 +63,9 @@ function(create_test_executable exec_name)
     ${EFU_COMMON_LIBS}
     ${GTEST_LIBRARIES})
 
-  if(${CMAKE_COMPILER_IS_GNUCXX})
-    add_linker_flags(${exec_name} "-Wl,--no-as-needed")
-  endif()
+#  if(${CMAKE_COMPILER_IS_GNUCXX})
+#    add_linker_flags(${exec_name} "-Wl,--no-as-needed")
+#  endif()
 
   add_test(NAME regular_${exec_name}
     COMMAND ${exec_name}
@@ -76,7 +76,7 @@ function(create_test_executable exec_name)
     CACHE INTERNAL "All test targets")
 
   enable_coverage(${exec_name})
-  memcheck_test(${exec_name} ${CMAKE_BINARY_DIR}/bin)
+  memcheck_test(${exec_name} ${CMAKE_BINARY_DIR}/unit_tests)
 endfunction(create_test_executable)
 
 function(create_integration_test_executable exec_name)
