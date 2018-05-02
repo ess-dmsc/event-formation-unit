@@ -4,27 +4,33 @@ coverage_on = "centos7"
 images = [
     'centos7': [
         'name': 'essdmscdm/centos7-build-node:1.0.1',
-        'sh': 'sh'
+        'sh': 'sh',
+        'cmake_flags': '-DCOV=ON -DDUMPTOFILE=ON'
     ],
 //    'centos7-release': [
 //        'name': 'essdmscdm/centos7-build-node:1.0.1',
-//        'sh': 'sh'
+//        'sh': 'sh',
+//        'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
 //    ],
     'centos7-gcc6': [
         'name': 'essdmscdm/centos7-gcc6-build-node:2.1.0',
-        'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
+        'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash',
+        'cmake_flags': '-DDUMPTOFILE=ON'
     ],
     'fedora25': [
         'name': 'essdmscdm/fedora25-build-node:1.0.0',
-        'sh': 'sh'
+        'sh': 'sh',
+        'cmake_flags': '-DDUMPTOFILE=ON'
     ],
     'ubuntu1604': [
         'name': 'essdmscdm/ubuntu16.04-build-node:2.1.0',
-        'sh': 'sh'
+        'sh': 'sh',
+        'cmake_flags': '-DDUMPTOFILE=ON'
     ],
     'ubuntu1710': [
         'name': 'essdmscdm/ubuntu17.10-build-node:2.0.0',
-        'sh': 'sh'
+        'sh': 'sh',
+        'cmake_flags': '-DDUMPTOFILE=ON'
     ]
 ]
 
@@ -79,14 +85,22 @@ def docker_dependencies(image_key) {
 }
 
 def docker_cmake(image_key, xtra_flags) {
-    cmake_exec = "cmake"
+//    cmake_exec = "cmake"
     def custom_sh = images[image_key]['sh']
-    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        cd ${project}/build
-        . ./activate_run.sh
-        ${cmake_exec} --version
-        ${cmake_exec} -DCONAN=MANUAL ${xtra_flags} ..
-    \""""
+//    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+//        cd ${project}/build
+//        . ./activate_run.sh
+//        ${cmake_exec} --version
+//        ${cmake_exec} -DCONAN=MANUAL ${xtra_flags} ..
+//    \""""
+    sh """docker exec ${container_name} ${custom_sh} -c \"
+                        cd ${project} && \
+                        BUILDSTR=\\\$(git log --oneline | head -n 1 | awk '{print \\\$1}') && \
+                        cd build && \
+                        . ./activate_run.sh && \
+                        cmake --version && \
+                        cmake -DCONAN=MANUAL ${xtra_flags} -DBUILDSTR=\\\$BUILDSTR ..
+                    \""""
 }
 
 def docker_build(image_key) {
@@ -172,11 +186,12 @@ def get_pipeline(image_key)
                     docker_clone(image_key)
                     docker_dependencies(image_key)
 
-                    if (image_key == coverage_on) {
-                        docker_cmake(image_key, "-DDUMPTOFILE=ON -DCOV=1")
-                    } else {
-                        docker_cmake(image_key, "-DDUMPTOFILE=ON")
-                    }
+//                    if (image_key == coverage_on) {
+//                        docker_cmake(image_key, "-DDUMPTOFILE=ON -DCOV=1")
+//                    } else {
+//                        docker_cmake(image_key, "-DDUMPTOFILE=ON")
+//                    }
+                    docker_cmake(image_key, images[image_key]['cmake_flags'])
 
                     docker_build(image_key)
 
@@ -207,8 +222,8 @@ def get_macos_pipeline()
                 }
 
                 dir("${project}/build") {
-                    sh "conan install --build=outdated ../code"
-                    sh "cmake -DCONAN=MANUAL -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
+                    //sh "conan install --build=outdated ../code"
+                    sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
                     sh "make"
                     sh "make runtest"
                     sh "make runefu"
