@@ -74,6 +74,7 @@ def docker_dependencies(image_key) {
         conan remote add \
             --insert 0 \
             ${conan_remote} ${local_conan_server}
+        conan install --build=outdated ..
     \""""
 }
 
@@ -82,8 +83,9 @@ def docker_cmake(image_key, xtra_flags) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd ${project}/build
+        . ./activate_run.sh
         ${cmake_exec} --version
-        ${cmake_exec} ${xtra_flags} ..
+        ${cmake_exec} -DCONAN=MANUAL ${xtra_flags} ..
     \""""
 }
 
@@ -91,7 +93,6 @@ def docker_build(image_key) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd ${project}/build
-        . ./activate_run.sh
         make --version
         make VERBOSE=ON
     \""""
@@ -206,7 +207,8 @@ def get_macos_pipeline()
                 }
 
                 dir("${project}/build") {
-                    sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
+                    sh "conan install --build=outdated ../code"
+                    sh "cmake -DCONAN=MANUAL -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
                     sh "make"
                     sh "make runtest"
                 }
@@ -251,14 +253,16 @@ def get_release_pipeline()
                         conan remote add \
                             --insert 0 \
                             ${conan_remote} ${local_conan_server} && \
+                        conan install --build=outdated ../${project}
                     \""""
 
                     sh """docker exec ${container_name} ${custom_sh} -c \"
                         cd ${project} && \
                         BUILDSTR=\\\$(git log --oneline | head -n 1 | awk '{print \\\$1}') && \
                         cd ../build && \
+                        . ./activate_run.sh && \
                         cmake --version && \
-                        cmake \
+                        cmake -DCONAN=MANUAL \
                             -DCMAKE_BUILD_TYPE=Release \
                             -DCMAKE_SKIP_BUILD_RPATH=ON \
                             -DBUILDSTR=\\\$BUILDSTR \

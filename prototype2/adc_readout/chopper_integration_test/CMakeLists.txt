@@ -11,7 +11,7 @@ set(AdcChopperIntgerationTest_INC
   TDCGenerator.h
 )
 
-create_executable(AdcChopperIntgerationTest)
+create_integration_test_executable(AdcChopperIntgerationTest)
 target_include_directories(AdcChopperIntgerationTest PRIVATE "../")
 
 get_filename_component(ADC_CONFIG_FILE "AdcChopperIntegrationTestConfig.ini" ABSOLUTE)
