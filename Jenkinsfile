@@ -103,6 +103,7 @@ def docker_build(image_key) {
         cd ${project}/build
         make --version
         make -j4 VERBOSE=ON
+        make -j4 unit_tests VERBOSE=ON
     \""""
 }
 
@@ -111,8 +112,8 @@ def docker_tests(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd ${project}/build
         . ./activate_run.sh
-        make -j4 runtest VERBOSE=ON
-        make runefu VERBOSE=ON
+        make runtest
+        make runefu
     \""""
 }
 
@@ -124,9 +125,9 @@ def docker_tests_coverage(image_key) {
         sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd ${project}/build
                 . ./activate_run.sh
-                make runefu VERBOSE=ON
-                make coverage VERBOSE=ON
-                make valgrind VERBOSE=ON
+                make runefu
+                make coverage
+                make valgrind
             \""""
         sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ./"
     } catch(e) {
