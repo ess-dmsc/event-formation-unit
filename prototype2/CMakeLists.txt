@@ -63,7 +63,7 @@ add_subdirectory(udp)
 add_subdirectory(adc_readout)
 
 add_custom_target(runefu
-    COMMAND efu "-d" "../lib/mgmesytec" "-s" "1"
+    COMMAND efu "-d" "../bin/modules/mgmesytec" "-s" "1"
     DEPENDS efu mgmesytec
     )
 

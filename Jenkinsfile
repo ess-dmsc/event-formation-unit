@@ -211,6 +211,7 @@ def get_macos_pipeline()
                     sh "cmake -DCONAN=MANUAL -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
                     sh "make"
                     sh "make runtest"
+                    sh "make runefu"
                 }
             }
         }
