@@ -69,4 +69,4 @@ message(STATUS "Test ADC packets in path: ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_PAC
 
 target_include_directories(AdcReadoutTest PRIVATE ${ASIO_INCLUDE_DIR})
 
-add_subdirectory("chopper_integration_test")
+add_subdirectory("integration_test")
