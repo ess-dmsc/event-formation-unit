@@ -1,6 +1,6 @@
 project = "event-formation-unit"
 coverage_on = "centos7"
-archivbe_what = "centos7-release"
+archive_what = "centos7-release"
 
 images = [
     'centos7': [
@@ -86,22 +86,15 @@ def docker_dependencies(image_key) {
 }
 
 def docker_cmake(image_key, xtra_flags) {
-//    cmake_exec = "cmake"
     def custom_sh = images[image_key]['sh']
-//    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-//        cd ${project}/build
-//        . ./activate_run.sh
-//        ${cmake_exec} --version
-//        ${cmake_exec} -DCONAN=MANUAL ${xtra_flags} ..
-//    \""""
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-                        cd ${project} && \
-                        BUILDSTR=\\\$(git log --oneline | head -n 1 | awk '{print \\\$1}') && \
-                        cd build && \
-                        . ./activate_run.sh && \
-                        cmake --version && \
-                        cmake -DCONAN=MANUAL ${xtra_flags} -DBUILDSTR=\\\$BUILDSTR ..
-                    \""""
+        cd ${project} && \
+        BUILDSTR=\\\$(git log --oneline | head -n 1 | awk '{print \\\$1}') && \
+        cd build && \
+        . ./activate_run.sh && \
+        cmake --version && \
+        cmake -DCONAN=MANUAL ${xtra_flags} -DBUILDSTR=\\\$BUILDSTR ..
+    \""""
 }
 
 def docker_build(image_key) {
@@ -208,11 +201,6 @@ def get_pipeline(image_key)
                     docker_clone(image_key)
                     docker_dependencies(image_key)
 
-//                    if (image_key == coverage_on) {
-//                        docker_cmake(image_key, "-DDUMPTOFILE=ON -DCOV=1")
-//                    } else {
-//                        docker_cmake(image_key, "-DDUMPTOFILE=ON")
-//                    }
                     docker_cmake(image_key, images[image_key]['cmake_flags'])
 
                     docker_build(image_key)
@@ -223,7 +211,7 @@ def get_pipeline(image_key)
                         docker_tests(image_key)
                     }
 
-                    if (image_key == archivbe_what) {
+                    if (image_key == archive_what) {
                         docker_archive(image_key)
                     }
 
@@ -249,97 +237,11 @@ def get_macos_pipeline()
                 }
 
                 dir("${project}/build") {
-                    //sh "conan install --build=outdated ../code"
-//                    sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
-                    sh "cmake -DDUMPTOFILE=ON ../code"
+                    sh "conan install --build=outdated ../code"
+                    sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
                     sh "make"
                     sh "make runtest"
                     sh "make runefu"
-                }
-            }
-        }
-    }
-}
-
-def get_release_pipeline()
-{
-    // Build with release settings to archive artefacts.
-    return {
-        stage("release-centos7") {
-            node('docker') {
-                def container_name = "${base_container_name}-release-centos7"
-                try {
-                    def image = docker.image("essdmscdm/centos7-build-node:1.0.1")
-                    def container = image.run("\
-                        --name ${container_name} \
-                        --tty \
-                        --env http_proxy=${env.http_proxy} \
-                        --env https_proxy=${env.https_proxy} \
-                        --env local_conan_server=${env.local_conan_server} \
-                        ")
-                    def custom_sh = "sh"
-                    def conan_remote = "ess-dmsc-local"
-
-                    sh """docker exec ${container_name} ${custom_sh} -c \"
-                        git clone \
-                            --branch ${env.BRANCH_NAME} \
-                            https://github.com/ess-dmsc/event-formation-unit.git \
-                            ${project}
-                    \""""
-
-                    sh """docker exec -u root ${container_name} ${custom_sh} -c \"
-                        yum install -y libpcap-devel
-                    \""""
-
-                    sh """docker exec ${container_name} ${custom_sh} -c \"
-                        mkdir build && \
-                        cd build && \
-                        conan remote add \
-                            --insert 0 \
-                            ${conan_remote} ${local_conan_server} && \
-                        conan install --build=outdated ../${project}
-                    \""""
-
-                    sh """docker exec ${container_name} ${custom_sh} -c \"
-                        cd ${project} && \
-                        BUILDSTR=\\\$(git log --oneline | head -n 1 | awk '{print \\\$1}') && \
-                        cd ../build && \
-                        . ./activate_run.sh && \
-                        cmake --version && \
-                        cmake -DCONAN=MANUAL \
-                            -DCMAKE_BUILD_TYPE=Release \
-                            -DCMAKE_SKIP_BUILD_RPATH=ON \
-                            -DBUILDSTR=\\\$BUILDSTR \
-                            ../${project}
-                    \""""
-
-                    sh """docker exec ${container_name} ${custom_sh} -c \"
-                        cd build && \
-                        . ./activate_run.sh && \
-                        make VERBOSE=ON -j4 && \
-                        make VERBOSE=ON -j4 runtest && \
-                        make VERBOSE=ON -j4 runefu
-                    \""""
-
-                    sh """docker exec ${container_name} ${custom_sh} -c \"
-                        mkdir -p archive/event-formation-unit && \
-                        cp -r build/bin archive/event-formation-unit && \
-                        cp -r build/lib archive/event-formation-unit && \
-                        cp -r build/licenses archive/event-formation-unit && \
-                        mkdir archive/event-formation-unit/util && \
-                        cp -r ${project}/utils/efushell archive/event-formation-unit/util && \
-                        cp -r ${project}/monitors/* archive/event-formation-unit/util && \
-                        mkdir archive/event-formation-unit/data && \
-                        cp -r ${project}/prototype2/multigrid/calib_data/* archive/event-formation-unit/data && \
-                        cd archive && \
-                        tar czvf event-formation-unit-centos7.tar.gz event-formation-unit
-                    \""""
-
-                    sh "docker cp ${container_name}:/home/jenkins/archive/event-formation-unit-centos7.tar.gz ."
-                    archiveArtifacts "event-formation-unit-centos7.tar.gz"
-                } finally {
-                    sh "docker stop ${container_name}"
-                    sh "docker rm -f ${container_name}"
                 }
             }
         }
