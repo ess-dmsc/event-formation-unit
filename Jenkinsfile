@@ -238,7 +238,8 @@ def get_macos_pipeline()
                     sh "conan install --build=outdated ../code"
                     sh "cmake -DCONAN=MANUAL -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
                     sh "make -j4"
-                    sh "make -j4 runtest"
+                    sh "make -j4 unit_tests"
+                    sh "make runtest"
                     sh "make runefu"
                 }
             }
