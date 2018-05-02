@@ -34,13 +34,13 @@ struct DataHeaderSim : public DataHeader {
 
 class PacketGenerator {
 public:
-  PacketGenerator();
+  PacketGenerator(std::uint16_t OversamplingFactor);
   
   PacketInfo GeneratePacket(std::uint32_t TS_Sec, double SecFrac, std::uint16_t ChannelNr);
 private:
   std::unique_ptr<std::uint8_t[]> TemplateData;
   PacketHeaderSim *PacketHeaderPtr;
   DataHeaderSim *DataHeaderPtr;
-  std::size_t DataSize = {1470};
+  std::size_t DataSize = {8970};
 };
 }

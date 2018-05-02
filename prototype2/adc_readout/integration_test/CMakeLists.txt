@@ -2,13 +2,11 @@ set(AdcSimulator_SRC
   AdcSimulator.cpp
   UDPServer.cpp
   PacketGenerator.cpp
-  ../../common/Producer.cpp
 )
 
 set(AdcSimulator_INC
   UDPServer.h
   PacketGenerator.h
-  ../../common/Producer.h
 )
 
 find_package(Threads REQUIRED)
