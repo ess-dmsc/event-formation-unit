@@ -12,7 +12,7 @@ static const int MG24_Z_20 = 1;
 class MesytecDataTest : public TestBase {
 protected:
   NMXHists hists;
-  MesytecData mesytec{0, "nofile", MG24_Z_20}; // Dont dumptofile select module with 20 depth in z
+  MesytecData mesytec{false, "nofile", MG24_Z_20}; // Dont dumptofile select module with 20 depth in z
   ReadoutSerializer * serializer;
   FBSerializer * fbserializer;
   virtual void SetUp() {

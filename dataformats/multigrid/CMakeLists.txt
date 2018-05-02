@@ -11,6 +11,7 @@ add_executable(batchreader
   src/PeakFinder.cpp
   src/RunSpecParse.cpp
   src/jsoncpp.cpp
+  ../../prototype2/common/DataSave.cpp
   ../../prototype2/multigrid/mgcncs/ChanConv.cpp
   ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp
   ../../prototype2/multigrid/mgcncs/DataParser.cpp

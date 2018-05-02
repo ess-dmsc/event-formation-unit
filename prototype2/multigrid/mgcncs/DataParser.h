@@ -9,6 +9,7 @@
 #include <common/DataSave.h>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/MultigridGeometry.h>
+#include <memory>
 
 class CSPECData {
 public:
@@ -34,15 +35,17 @@ public:
   };
 
   /** Let user specify calibration parameters */
-  CSPECData(unsigned int maxevents, CSPECChanConv *calibration,
+  CSPECData(bool filedump, std::string fileprefix, unsigned int maxevents,
+            CSPECChanConv *calibration,
             MultiGridGeometry *geometry)
-      : datalen(maxevents), chanconv(calibration), multigridgeom(geometry) {
+      : datalen(maxevents), chanconv(calibration), multigridgeom(geometry), dumptofile(filedump) {
 
     data = new struct MultiGridData[maxevents];
 
-#ifdef DUMPTOFILE
-    mgdata.tofile("#module, time, d0, d1, d2, d3, d4, d5, d6, d7\n");
-#endif
+    if (dumptofile) {
+      mgdata = std::make_shared<DataSave>(fileprefix, 100000000);
+      mgdata->tofile("#module, time, d0, d1, d2, d3, d4, d5, d6, d7\n");
+    }
   };
 
   CSPECData(unsigned int maxevents, unsigned int wthresh, unsigned int gthresh,
@@ -86,7 +89,6 @@ public:
   MultiGridGeometry *multigridgeom{nullptr};
 
 private:
-#ifdef DUMPTOFILE
-  DataSave mgdata{std::string("multigrid_"), 100000000};
-#endif
+  bool dumptofile{false};
+  std::shared_ptr<DataSave>(mgdata);
 };

@@ -86,7 +86,14 @@ private:
   uint16_t gridcal[CSPECChanConv::adcsize];
 };
 
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
+struct DetectorSettingsStruct {
+  std::string fileprefix{""};
+} DetectorSettings;
+
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+  parser.add_option("--dumptofile", DetectorSettings.fileprefix,
+                    "dump to specified file")->group("MGCNCS");
+}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
@@ -224,7 +231,8 @@ void CSPEC::processing_thread() {
 
   MultiGridGeometry geom(1, 2, 48, 4, 16);
 
-  CSPECData dat(250, &conv, &geom); // Default signal thresholds
+  bool dumptofile = !DetectorSettings.fileprefix.empty();
+  CSPECData dat(dumptofile, DetectorSettings.fileprefix, 250, &conv, &geom); // Default signal thresholds
 
   TSCTimer report_timer;
   TSCTimer timestamp;
