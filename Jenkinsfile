@@ -93,7 +93,7 @@ def docker_cmake(image_key, xtra_flags) {
 //        ${cmake_exec} --version
 //        ${cmake_exec} -DCONAN=MANUAL ${xtra_flags} ..
 //    \""""
-    sh """docker exec ${container_name} ${custom_sh} -c \"
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                         cd ${project} && \
                         BUILDSTR=\\\$(git log --oneline | head -n 1 | awk '{print \\\$1}') && \
                         cd build && \
