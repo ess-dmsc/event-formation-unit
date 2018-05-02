@@ -102,7 +102,7 @@ def docker_build(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd ${project}/build
         make --version
-        make VERBOSE=ON
+        make -j4 VERBOSE=ON
     \""""
 }
 
@@ -111,7 +111,7 @@ def docker_tests(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd ${project}/build
         . ./activate_run.sh
-        make runtest VERBOSE=ON
+        make -j4 runtest VERBOSE=ON
         make runefu VERBOSE=ON
     \""""
 }
@@ -124,7 +124,6 @@ def docker_tests_coverage(image_key) {
         sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd ${project}/build
                 . ./activate_run.sh
-                make VERBOSE=ON
                 make runefu VERBOSE=ON
                 make coverage VERBOSE=ON
                 make valgrind VERBOSE=ON
@@ -239,8 +238,8 @@ def get_macos_pipeline()
                 dir("${project}/build") {
                     sh "conan install --build=outdated ../code"
                     sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
-                    sh "make"
-                    sh "make runtest"
+                    sh "make -j4"
+                    sh "make -j4 runtest"
                     sh "make runefu"
                 }
             }
@@ -281,7 +280,6 @@ node('docker') {
         builders[image_key] = get_pipeline(image_key)
     }
     builders['macOS'] = get_macos_pipeline()
-//    builders['release-centos7'] = get_release_pipeline()
 
     try {
         parallel builders
