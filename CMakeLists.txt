@@ -119,7 +119,6 @@ add_custom_target(hints
   COMMAND echo "Suggest PCAP root:                      cmake -DPCAP_ROOT_DIR=/opt/dmg_grp .."
   COMMAND echo "Suggest GraylogLogger root:             cmake -DGraylogLogger_ROOT_DIR=/opt/dmg_grp .."
   COMMAND echo "Suggest LibRDKafka root:                cmake -DLibRDKafka_ROOT_DIR=/opt/dmg_grp .."
-  COMMAND echo "Dump vmm readout to file - det. group:  cmake -DDUMPTOFILE=ON .."
   COMMAND echo "List cmake variables:                   cmake .. -LH     "
   COMMAND echo ""
   )

@@ -5,6 +5,7 @@ set(efu_common_SRC
   FBSerializer.cpp
   NewStats.cpp
   Producer.cpp
+  DataSave.cpp
   )
 set(efu_common_INC
   ../../libs/include/gccintel.h
@@ -14,12 +15,8 @@ set(efu_common_INC
   NewStats.h
   Producer.h
   Trace.h
+  DataSave.h
   )
-
-if(${DUMPTOFILE})
-  set(efu_common_SRC ${efu_common_SRC} DataSave.cpp)
-  set(efu_common_INC ${efu_common_INC} DataSave.h)
-endif()
 
 find_package(CLI11 REQUIRED)
 
@@ -56,14 +53,12 @@ else()
   message(STATUS "*** Skipping ProducerTest - requires gcc/linux")
 endif()
 
-if(${DUMPTOFILE})
-  set(DataSaveTest_SRC
+set(DataSaveTest_SRC
     DataSaveTest.cpp
     DataSave.cpp)
-  set(DataSaveTest_INC
+set(DataSaveTest_INC
     DataSave.h)
-  create_test_executable(DataSaveTest)
-endif()
+create_test_executable(DataSaveTest)
 
 set(DetectorTest_SRC
   DetectorTest.cpp

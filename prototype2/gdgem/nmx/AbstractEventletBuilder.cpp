@@ -12,17 +12,14 @@
 AbstractBuilder::AbstractBuilder(std::string __attribute__((unused)) dump_dir,
                                  bool dump_csv, bool dump_h5)
     : dump_csv_(dump_csv), dump_h5_(dump_h5) {
-#ifdef DUMPTOFILE
   if (dump_h5_) {
     setup_h5(dump_dir);
   }
   if (dump_csv_) {
     vmmsave = std::make_shared<DataSave>(dump_dir + "VMM_", 100000000);
   }
-#endif
 }
 
-#ifdef DUMPTOFILE
 std::string AbstractBuilder::time_str() {
   char cStartTime[50];
   time_t rawtime;
@@ -69,4 +66,3 @@ void AbstractBuilder::setup_h5(std::string dump_dir) {
                               {hdf5::dataspace::Simple::UNLIMITED, 4}),
       lcpl, dcpl);
 }
-#endif
