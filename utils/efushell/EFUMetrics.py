@@ -1,5 +1,6 @@
 from SocketDriver import SimpleSocket
 
+
 class Metrics:
     def __init__(self, ip, port):
         self.metrics = {}
@@ -7,7 +8,7 @@ class Metrics:
         self.port = port
         self.driver = SimpleSocket(self.ip, self.port)
 
-    def getEFUCommand(self, cmd):
+    def _get_efu_command(self, cmd):
         res = self.driver.Ask(cmd)
 
         if res.find("Error") != -1:
@@ -15,20 +16,18 @@ class Metrics:
             sys.exit(1)
         return res
 
-    def getNumberOfStats(self):
-        return int(self.getEFUCommand('STAT_GET_COUNT').split()[1])
+    def get_number_of_stats(self):
+        return int(self._get_efu_command('STAT_GET_COUNT').split()[1])
 
-    def getAllMetrics(self, num_metrics):
-        for i in range(num_metrics):
-            res =  self.getEFUCommand('STAT_GET ' + str(i + 1)).split()
+    def get_all_metrics(self, num_metrics):
+        for i in range(1, num_metrics + 1):
+            res =  self._get_efu_command('STAT_GET ' + str(i)).split()
             name = res[1]
             value = int(res[2])
             self.metrics[name] = value
 
-    def compareMetric(self, name, value):
+    def compare_metric(self, name, value):
         try:
-            res = (self.metrics[name] == value)
+            return self.metrics[name] == value
         except:
             return False
-
-        return res
