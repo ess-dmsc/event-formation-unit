@@ -71,7 +71,14 @@ private:
   } ALIGN(64) mystats;
 };
 
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
+struct DetectorSettingsStruct {
+  std::string fileprefix{""};
+} DetectorSettings;
+
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+  parser.add_option("--dumptofile", DetectorSettings.fileprefix,
+                    "dump to specified file")->group("Sonde");
+}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
@@ -145,7 +152,9 @@ void SONDEIDEA::input_thread() {
 
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
-  IDEASData ideasdata(&geometry);
+
+  bool dumptofile = !DetectorSettings.fileprefix.empty();
+  IDEASData ideasdata(dumptofile, DetectorSettings.fileprefix, &geometry);
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 

@@ -36,14 +36,19 @@ public:
   } __attribute__((packed));
 
   /** Empty constructor */
-  IDEASData(SoNDeGeometry *geom) : sondegeometry(geom) {
-#ifdef DUMPTOFILE
-    mephdata.tofile(
-        "# hdr_count, evtime, trigger_type, asic, channel, sample\n");
-    sephdata.tofile("# hdr_hdrtime, trigger_type, hold_delay, triggering_asic, "
-                    "triggering_channel, sample\n");
-    eventdata.tofile("# hdr_count, hdr_hdrtime, hdr_sysno, asic, channel\n");
-#endif
+  IDEASData(bool filedump, std::string fileprefix, SoNDeGeometry *geom)
+      : sondegeometry(geom), dumptofile(filedump) {
+    if (dumptofile) {
+      mephdata = std::make_shared<DataSave>(fileprefix + "_single_ch_spec_", 100000000);
+      sephdata = std::make_shared<DataSave>(fileprefix + "_all_ch_spec_", 100000000);
+      eventdata = std::make_shared<DataSave>(fileprefix + "_TOF_", 100000000);
+
+      mephdata->tofile(
+          "# hdr_count, evtime, trigger_type, asic, channel, sample\n");
+      sephdata->tofile("# hdr_hdrtime, trigger_type, hold_delay, triggering_asic, "
+                       "triggering_channel, sample\n");
+      eventdata->tofile("# hdr_count, hdr_hdrtime, hdr_sysno, asic, channel\n");
+    }
   }
 
   ~IDEASData() {}
@@ -80,9 +85,8 @@ private:
   int hdr_hdrtime{0};
   int hdr_length{0};
 
-#ifdef DUMPTOFILE
-  DataSave mephdata{"single_ch_spec_", 100000000};
-  DataSave sephdata{"all_ch_spec_", 100000000};
-  DataSave eventdata{"TOF_", 100000000};
-#endif
+  bool dumptofile{false};
+  std::shared_ptr<DataSave>(mephdata);
+  std::shared_ptr<DataSave>(sephdata);
+  std::shared_ptr<DataSave>(eventdata);
 };
