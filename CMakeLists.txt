@@ -72,7 +72,7 @@ add_custom_target(unit_tests
   DEPENDS ${unit_test_targets})
 add_custom_target(runtest
     COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
-    DEPENDS ${unit_tests})
+    DEPENDS unit_tests)
 add_custom_target(valgrind
     DEPENDS ${valgrind_targets})
 add_custom_target(benchmark
