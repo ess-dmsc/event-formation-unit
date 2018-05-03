@@ -16,7 +16,7 @@ function(create_module module_name)
   endif()
 
   set_target_properties(${module_name} PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/modules")
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/modules")
 
   enable_coverage(${module_name})
   install(TARGETS ${module_name} DESTINATION bin)
