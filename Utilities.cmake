@@ -71,6 +71,9 @@ function(create_test_executable)
     add_linker_flags(${exec_name} "-Wl,--no-as-needed")
   endif()
 
+  set_target_properties(${exec_name} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
+
   add_test(NAME regular_${exec_name}
     COMMAND ${exec_name}
     "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
@@ -81,7 +84,7 @@ function(create_test_executable)
 
   enable_coverage(${exec_name})
   if(NOT ${create_test_executable_SKIP_MEMGRIND})
-    memcheck_test(${exec_name} ${CMAKE_BINARY_DIR}/bin)
+    memcheck_test(${exec_name} ${CMAKE_BINARY_DIR}/unit_tests)
   endif()
 endfunction(create_test_executable)
 
