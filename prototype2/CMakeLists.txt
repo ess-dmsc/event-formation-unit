@@ -30,21 +30,12 @@ set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
 #=============================================================================
 # Optional external libraries
 #=============================================================================
-find_package(GraylogLogger)
-if(GraylogLogger_FOUND)
-  set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} ${GraylogLogger_STATIC_LIBRARIES})
-  add_definitions("-DGRAYLOG")
-else()
-  message(WARNING "GraylogLogger not found.")
-endif()
+find_package(GraylogLogger REQUIRED)
+set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} ${GraylogLogger_STATIC_LIBRARIES})
+add_definitions("-DGRAYLOG")
 
-find_package(h5cpp)
-if(h5cpp_FOUND)
-  set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} h5cpp ${HDF5_C_LIBRARIES} ${Boost_LIBRARIES})
-else()
-  message(WARNING "h5cpp not found.")
-endif()
-
+find_package(h5cpp REQUIRED)
+set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} h5cpp ${HDF5_C_LIBRARIES} ${Boost_LIBRARIES})
 
 #=============================================================================
 # Dependencies common to EFU and plugins
@@ -72,7 +63,7 @@ add_subdirectory(udp)
 add_subdirectory(adc_readout)
 
 add_custom_target(runefu
-    COMMAND efu "-d" "../lib/mgmesytec" "-s" "1"
+    COMMAND efu "-d" "../modules/mgmesytec" "-s" "1"
     DEPENDS efu mgmesytec
     )
 

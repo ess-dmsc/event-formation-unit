@@ -60,7 +60,9 @@ set(AdcReadoutTest_LIB
     eventlib
     )
 
-create_test_executable(AdcReadoutTest)
+# Jonas has some reason for this
+# which he briefly explains here
+create_test_executable(AdcReadoutTest SKIP_MEMGRIND)
 
 get_filename_component(TEST_PACKET_PATH "test/test_packet_1.dat" DIRECTORY)
 target_compile_definitions(AdcReadoutTest
