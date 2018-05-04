@@ -19,7 +19,7 @@ if(${CONAN} MATCHES "AUTO")
   include(${CMAKE_MODULE_PATH}/conan.cmake)
   conan_cmake_run(CONANFILE conanfile.txt
       PROFILE ${CONAN_PROFILE}
-      BASIC_SETUP NO_OUTPUT_DIRS SKIP_RPATH
+      BASIC_SETUP NO_OUTPUT_DIRS KEEP_RPATHS
       BUILD_TYPE "None"
       BUILD outdated)
 elseif(${CONAN} MATCHES "MANUAL")
@@ -72,7 +72,7 @@ add_custom_target(unit_tests
   DEPENDS ${unit_test_targets})
 add_custom_target(runtest
     COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
-    DEPENDS ${unit_tests})
+    DEPENDS unit_tests)
 add_custom_target(valgrind
     DEPENDS ${valgrind_targets})
 add_custom_target(benchmark

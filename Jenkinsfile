@@ -127,7 +127,7 @@ def docker_tests_coverage(image_key) {
                 . ./activate_run.sh
                 make runefu
                 make coverage
-                make valgrind
+                make -j4 valgrind
             \""""
         sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ./"
     } catch(e) {
@@ -175,6 +175,7 @@ def docker_archive(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                         mkdir -p archive/event-formation-unit && \
                         cp -r ${project}/build/bin archive/event-formation-unit && \
+                        cp -r ${project}/build/modules archive/event-formation-unit && \
                         cp -r ${project}/build/lib archive/event-formation-unit && \
                         cp -r ${project}/build/licenses archive/event-formation-unit && \
                         mkdir archive/event-formation-unit/util && \
