@@ -6,7 +6,7 @@ images = [
     'centos7': [
         'name': 'essdmscdm/centos7-build-node:1.0.1',
         'sh': 'sh',
-        'cmake_flags': '-DCOV=ON -DDUMPTOFILE=ON'
+        'cmake_flags': '-DCOV=ON'
     ],
     'centos7-release': [
         'name': 'essdmscdm/centos7-build-node:1.0.1',
@@ -16,22 +16,22 @@ images = [
     'centos7-gcc6': [
         'name': 'essdmscdm/centos7-gcc6-build-node:2.1.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash',
-        'cmake_flags': '-DDUMPTOFILE=ON'
+        'cmake_flags': ''
     ],
     'fedora25': [
         'name': 'essdmscdm/fedora25-build-node:1.0.0',
         'sh': 'sh',
-        'cmake_flags': '-DDUMPTOFILE=ON'
+        'cmake_flags': ''
     ],
     'ubuntu1604': [
         'name': 'essdmscdm/ubuntu16.04-build-node:2.1.0',
         'sh': 'sh',
-        'cmake_flags': '-DDUMPTOFILE=ON'
+        'cmake_flags': ''
     ],
     'ubuntu1710': [
         'name': 'essdmscdm/ubuntu17.10-build-node:2.0.0',
         'sh': 'sh',
-        'cmake_flags': '-DDUMPTOFILE=ON'
+        'cmake_flags': ''
     ]
 ]
 
@@ -237,7 +237,7 @@ def get_macos_pipeline()
 
                 dir("${project}/build") {
                     sh "conan install --build=outdated ../code"
-                    sh "cmake -DCONAN=MANUAL -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
+                    sh "cmake -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON ../code"
                     sh "make -j4"
                     sh "make -j4 unit_tests"
                     sh "make runtest"

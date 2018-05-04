@@ -152,14 +152,6 @@ See options and targets by
 
     > make hints
 
-Two important options, however, are
-
-Option                | Description
--------------         | -------------
-`-DDUMPTOFILE`          | Activates code for writing readout to disk (default OFF)
-`-DUSE_OLD_ABI`         | On CentOS we currently use the old ABI which can conflict on <br> newer distributions (default OFF)
-
-
 Target                | Description
 -------------         | -------------
 *hints*                 | DEFAULT and NORMATIVE target and option guide

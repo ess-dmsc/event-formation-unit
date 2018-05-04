@@ -12,12 +12,10 @@ BuilderSRS::BuilderSRS(SRSTime time_intepreter,
     : AbstractBuilder(dump_dir, dump_csv, dump_h5), parser_(1125),
       time_intepreter_(time_intepreter),
       geometry_interpreter_(geometry_interpreter) {
-#ifdef DUMPTOFILE
   if (dump_csv_) {
     vmmsave->tofile("# fec, chip_id, frame counter, srs timestamp, channel, "
                     "bcid, tdc, adc, overthreshold\n");
   }
-#endif
 }
 
 AbstractBuilder::ResultStats BuilderSRS::process_buffer(char *buf, size_t size,
@@ -59,13 +57,11 @@ AbstractBuilder::ResultStats BuilderSRS::process_buffer(char *buf, size_t size,
       hists.bin(eventlet);
       clusterer.insert(eventlet);
     }
-#ifdef DUMPTOFILE
     if (dump_csv_) {
       vmmsave->tofile("%2d, %2d, %u, %u, %2d, %d, %d, %d, %d\n", fec_id,
                       chip_id, parser_.srshdr.fc, parser_.srshdr.time, d.chno,
                       d.bcid, d.tdc, d.adc, d.overThreshold);
     }
-#endif
       //printf("readout: time: %llu, plane: %d, strip: %d, adc: %d\n", eventlet.time, eventlet.plane_id, eventlet.strip, eventlet.adc);
   }
 

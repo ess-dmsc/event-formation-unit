@@ -1,17 +1,6 @@
 include_directories(.)
 
 #=============================================================================
-# Optionally dump raw data to file
-#=============================================================================
-option(DUMPTOFILE "Dump raw readout data to file " OFF)
-if(${DUMPTOFILE})
-  message(STATUS "Dumping of raw readout data to file enabled.")
-  add_definitions("-DDUMPTOFILE")
-else()
-  message(STATUS "Dumping of raw readout data to file disabled (-DUMPTOFILE=NO)")
-endif()
-
-#=============================================================================
 # Required external libraries
 #=============================================================================
 set(EFU_COMMON_LIBS ${CMAKE_DL_LIBS})

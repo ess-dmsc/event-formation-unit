@@ -10,7 +10,6 @@
 #include <gdgem/nmx/Clusterer.h>
 #include <gdgem/nmx/Hists.h>
 
-#ifdef DUMPTOFILE
 #include <common/DataSave.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
@@ -19,7 +18,6 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <h5cpp/hdf5.hpp>
 #pragma GCC diagnostic pop
-#endif
 
 class AbstractBuilder {
 public:
@@ -45,8 +43,6 @@ protected:
   bool dump_csv_{false};
   bool dump_h5_{false};
 
-#ifdef DUMPTOFILE
-
   // CSV
   std::shared_ptr<DataSave> vmmsave;
 
@@ -59,5 +55,4 @@ protected:
 
   static std::string time_str();
   void setup_h5(std::string dump_dir);
-#endif
 };
