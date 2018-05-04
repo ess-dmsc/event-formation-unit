@@ -39,6 +39,28 @@ double SRSTime::trigger_resolution() const {
 	return trigger_resolution_;
 }
 
+double SRSTime::timestamp_ns(int trigger_timestamp) const {
+	return trigger_timestamp*trigger_resolution_;
+}
+
+
+double SRSTime::delta_timestamp_ns(double old_timestamp_ns, double timestamp_ns,
+		unsigned int old_framecounter, unsigned int framecounter, uint64_t & stats_triggertime_wraps) const {
+	if (old_timestamp_ns > timestamp_ns
+				&& (old_framecounter <= framecounter
+						|| old_framecounter > framecounter + 1000000000)) {
+			return (13421772800 + timestamp_ns - old_timestamp_ns);
+			stats_triggertime_wraps++;
+		} else {
+			return (timestamp_ns - old_timestamp_ns);
+		}
+
+}
+
+double SRSTime::trigger_period() const {
+	return 1000 * 4096 / bc_clock_;
+}
+
 double SRSTime::target_resolution() const {
 	return target_resolution_ns_;
 }

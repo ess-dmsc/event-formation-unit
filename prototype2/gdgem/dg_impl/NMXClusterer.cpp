@@ -55,36 +55,26 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
 	double chipTime = pTime.chip_time(bcid, tdc);
 
 	bool newEvent = false;
-	double triggerTimestamp_ns = triggerTimestamp * pTime.trigger_resolution();
 	double deltaTriggerTimestamp_ns = 0;
+	double triggerTimestamp_ns = pTime.timestamp_ns(triggerTimestamp);
 
 	if (m_oldTriggerTimestamp_ns != triggerTimestamp_ns) {
 		AnalyzeClusters();
 		newEvent = true;
 		m_subsequentTrigger = false;
 		m_eventNr++;
-	}
+		deltaTriggerTimestamp_ns = pTime.delta_timestamp_ns(
+				m_oldTriggerTimestamp_ns, triggerTimestamp_ns,
+				m_oldFrameCounter, frameCounter, stats_triggertime_wraps);
 
-	if (m_oldTriggerTimestamp_ns > triggerTimestamp_ns
-			&& (m_oldFrameCounter <= frameCounter
-					|| m_oldFrameCounter > frameCounter + 1000000000)) {
-		deltaTriggerTimestamp_ns = (13421772800 + triggerTimestamp_ns
-				- m_oldTriggerTimestamp_ns);
-		stats_triggertime_wraps++;
-	} else {
-		deltaTriggerTimestamp_ns = (triggerTimestamp_ns
-				- m_oldTriggerTimestamp_ns);
-	}
+		if (deltaTriggerTimestamp_ns <= pTime.trigger_period()) {
+			m_subsequentTrigger = true;
+		}
 
-	// Can we name these hardcoded constants?
-	if (newEvent
-			&& (deltaTriggerTimestamp_ns <= 1000 * 4096 / pTime.bc_clock())) {
-		m_subsequentTrigger = true;
 	}
 
 	// Crucial step
 	// Storing hit to appropriate buffer
-	// Trigger TS magic above appears to be irrelevant?
 	if (overThresholdFlag || (adc >= pADCThreshold)) {
 		if (planeID == planeID_X) {
 			StoreX(strip, adc, bcid, chipTime);
@@ -445,7 +435,7 @@ void NMXClusterer::MatchClustersXY(float dPlane) {
 //====================================================================================================================
 void NMXClusterer::AnalyzeClusters() {
 
-	auto fX = std::async(std::launch::async, [&] {
+	//auto fX = std::async(std::launch::async, [&] {
 		std::sort(begin(m_hitsOldX), end(m_hitsOldX),
 				[](const ClusterTuple &t1, const ClusterTuple &t2)
 				{
@@ -467,9 +457,9 @@ void NMXClusterer::AnalyzeClusters() {
 		if (!m_hitsX.empty()) {
 			m_hitsX.clear();
 		}
-	});
+	//});
 
-	auto fY = std::async(std::launch::async, [&] {
+	//auto fY = std::async(std::launch::async, [&] {
 
 		std::sort(begin(m_hitsOldY), end(m_hitsOldY),
 				[](const ClusterTuple &t1, const ClusterTuple &t2)
@@ -492,14 +482,12 @@ void NMXClusterer::AnalyzeClusters() {
 		if (!m_hitsY.empty()) {
 			m_hitsY.clear();
 		}
-	});
+	//});
 
-	fX.get();
-	fY.get();
+	//fX.get();
+	//fY.get();
 
 	MatchClustersXY(pDeltaTimePlanes);
-
-
 
 	m_clusterX.insert(m_clusterX.end(),
 			std::make_move_iterator(m_tempClusterX.begin()),
