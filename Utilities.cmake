@@ -48,7 +48,7 @@ endfunction(create_executable)
 #=============================================================================
 set(unit_test_targets "" CACHE INTERNAL "All test targets")
 
-function(create_test_executable exec_name)
+function(create_leaky_test_executable exec_name)
   add_executable(${exec_name} EXCLUDE_FROM_ALL
     ${${exec_name}_SRC}
     ${${exec_name}_INC})
@@ -72,6 +72,10 @@ function(create_test_executable exec_name)
     CACHE INTERNAL "All test targets")
 
   enable_coverage(${exec_name})
+endfunction(create_leaky_test_executable)
+
+function(create_test_executable exec_name)
+  create_leaky_test_executable(${exec_name})
   memcheck_test(${exec_name} ${CMAKE_BINARY_DIR}/unit_tests)
 endfunction(create_test_executable)
 
