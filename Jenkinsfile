@@ -127,7 +127,7 @@ def docker_tests_coverage(image_key) {
                 . ./activate_run.sh
                 make runefu
                 make coverage
-                make valgrind
+                make -j4 valgrind
             \""""
         sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ./"
     } catch(e) {
