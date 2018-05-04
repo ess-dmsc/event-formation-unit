@@ -36,8 +36,9 @@ public:
   } __attribute__((packed));
 
   /** Empty constructor */
-  IDEASData(bool filedump, std::string fileprefix, SoNDeGeometry *geom)
-      : sondegeometry(geom), dumptofile(filedump) {
+  IDEASData(SoNDeGeometry *geom, std::string fileprefix = "")
+      : sondegeometry(geom) {
+    dumptofile = !fileprefix.empty();
     if (dumptofile) {
       mephdata = std::make_shared<DataSave>(fileprefix + "_single_ch_spec_", 100000000);
       sephdata = std::make_shared<DataSave>(fileprefix + "_all_ch_spec_", 100000000);

@@ -231,8 +231,7 @@ void CSPEC::processing_thread() {
 
   MultiGridGeometry geom(1, 2, 48, 4, 16);
 
-  bool dumptofile = !DetectorSettings.fileprefix.empty();
-  CSPECData dat(dumptofile, DetectorSettings.fileprefix, 250, &conv, &geom); // Default signal thresholds
+  CSPECData dat(250, &conv, &geom, DetectorSettings.fileprefix); // Default signal thresholds
 
   TSCTimer report_timer;
   TSCTimer timestamp;

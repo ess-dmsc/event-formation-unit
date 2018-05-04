@@ -153,8 +153,7 @@ void SONDEIDEA::input_thread() {
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
 
-  bool dumptofile = !DetectorSettings.fileprefix.empty();
-  IDEASData ideasdata(dumptofile, DetectorSettings.fileprefix, &geometry);
+  IDEASData ideasdata(&geometry, DetectorSettings.fileprefix);
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 

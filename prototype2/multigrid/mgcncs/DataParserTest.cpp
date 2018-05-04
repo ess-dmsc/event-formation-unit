@@ -20,7 +20,7 @@ protected:
 
   virtual void SetUp() {
     cspecgeometry = new MultiGridGeometry(1, 80, 160, 4, 16);
-    dat = std::unique_ptr<CSPECData>(new CSPECData(false, "nofile", 250, &conv, cspecgeometry));
+    dat = std::unique_ptr<CSPECData>(new CSPECData(250, &conv, cspecgeometry));
   }
   virtual void TearDown() { delete cspecgeometry; }
 

@@ -34,8 +34,9 @@ public:
   // clang-format on
 
 /// @
-  MesytecData(bool filedump, std::string fileprefix, uint32_t module) : dumptofile(filedump) {
+  MesytecData(uint32_t module, std::string fileprefix = "") {
     mgseq.select_module(module);
+    dumptofile = !fileprefix.empty();
     if (dumptofile) {
       mgdata = std::make_shared<DataSave>(fileprefix, 100000000);
       mgdata->tofile("#Time, Bus, Address, ADC\n");

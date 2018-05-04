@@ -131,8 +131,7 @@ void CSPEC::mainThread() {
   HistSerializer histfb;
   NMXHists hists;
 
-  bool dumptofile = !DetectorSettings.fileprefix.empty();
-  MesytecData mesytecdata(dumptofile, DetectorSettings.fileprefix, DetectorSettings.module);
+  MesytecData mesytecdata(DetectorSettings.module, DetectorSettings.fileprefix);
 
   mesytecdata.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
   mesytecdata.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);

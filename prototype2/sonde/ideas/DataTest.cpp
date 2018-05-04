@@ -12,7 +12,7 @@ protected:
   SoNDeGeometry geometry;
   IDEASData *readout;
   virtual void SetUp() {
-    readout = new IDEASData(false, "nofile", &geometry);
+    readout = new IDEASData(&geometry);
     memset(readout->data, 0, sizeof(readout->data));
   }
   virtual void TearDown() {

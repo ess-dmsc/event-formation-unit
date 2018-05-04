@@ -35,13 +35,15 @@ public:
   };
 
   /** Let user specify calibration parameters */
-  CSPECData(bool filedump, std::string fileprefix, unsigned int maxevents,
+  CSPECData(unsigned int maxevents,
             CSPECChanConv *calibration,
-            MultiGridGeometry *geometry)
-      : datalen(maxevents), chanconv(calibration), multigridgeom(geometry), dumptofile(filedump) {
+            MultiGridGeometry *geometry,
+            std::string fileprefix = "")
+      : datalen(maxevents), chanconv(calibration), multigridgeom(geometry) {
 
     data = new struct MultiGridData[maxevents];
 
+    dumptofile = !fileprefix.empty();
     if (dumptofile) {
       mgdata = std::make_shared<DataSave>(fileprefix, 100000000);
       mgdata->tofile("#module, time, d0, d1, d2, d3, d4, d5, d6, d7\n");
