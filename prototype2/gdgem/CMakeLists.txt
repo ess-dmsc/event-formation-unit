@@ -88,10 +88,14 @@ endif()
 
 set(NMXClustererTest_SRC
     dg_impl/NMXClusterer.cpp
-    dg_impl/NMXClustererTest.cpp vmm2srs/SRSTime.cpp vmm2srs/SRSMappings.cpp)
+    dg_impl/NMXClustererTest.cpp
+    vmm2srs/SRSTime.cpp
+    vmm2srs/SRSMappings.cpp)
 set(NMXClustererTest_INC
     dg_impl/NMXClusterer.h
-    dg_impl/TestData.h vmm2srs/SRSTime.h vmm2srs/SRSMappings.h)
+    dg_impl/TestData.h
+    vmm2srs/SRSTime.h
+    vmm2srs/SRSMappings.h)
 create_test_executable(NMXClustererTest "")
 
 # GOOGLE BENCHMARK
