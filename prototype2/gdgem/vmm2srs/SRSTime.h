@@ -46,7 +46,7 @@ public:
   std::string debug() const;
 
 private:
-  bool rebin_tdc_ {true};            // rebin tdc (for VMM3 bug)
+  bool rebin_tdc_{true};            // rebin tdc (for VMM3 bug)
   double bc_clock_{40};              // bc clock divisor
   double tac_slope_{125};            // tdc clock divisor
 

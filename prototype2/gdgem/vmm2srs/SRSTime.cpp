@@ -27,8 +27,7 @@ double SRSTime::trigger_resolution() const { return trigger_resolution_; }
 
 double SRSTime::target_resolution() const { return target_resolution_ns_; }
 
-double SRSTime::chip_time(uint16_t bc, uint16_t tdc) const
-{
+double SRSTime::chip_time(uint16_t bc, uint16_t tdc) const {
   // Calculate bcTime [us]
 
   double bcTime = bc / bc_clock_;
@@ -61,7 +60,7 @@ double SRSTime::timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) {
 
 uint64_t SRSTime::timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) {
   return static_cast<uint64_t>(timestamp_ns(trigger, bc, tdc) *
-                               target_resolution_ns_);
+      target_resolution_ns_);
 }
 
 std::string SRSTime::debug() const {
