@@ -7,6 +7,7 @@
 class MG24DetectorTest : public TestBase {};
 
 /** Test cases below */
+
 TEST_F(MG24DetectorTest, IsWireIsGrid) {
   MG24Detector mgdet;
 
@@ -24,6 +25,7 @@ TEST_F(MG24DetectorTest, IsWireIsGrid) {
   ASSERT_FALSE(mgdet.isGrid(128));
 }
 
+#if 0
 TEST_F(MG24DetectorTest, XZCoordinates) {
   MG24Detector mgdet;
   int digitizer = 0;
@@ -58,6 +60,8 @@ TEST_F(MG24DetectorTest, YCoordinates) {
     ASSERT_EQ(-1, mgdet.zcoord(channel));
   }
 }
+
+#endif
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

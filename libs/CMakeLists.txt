@@ -17,8 +17,6 @@ set(library_INC
   include/StatCounter.h
   )
 
-add_definitions(-std=c++11)
-
 add_library(eventlib
   ${library_SRC}
   ${library_INC}

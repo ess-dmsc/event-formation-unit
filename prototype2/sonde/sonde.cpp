@@ -71,7 +71,14 @@ private:
   } ALIGN(64) mystats;
 };
 
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
+struct DetectorSettingsStruct {
+  std::string fileprefix{""};
+} DetectorSettings;
+
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+  parser.add_option("--dumptofile", DetectorSettings.fileprefix,
+                    "dump to specified file")->group("Sonde");
+}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
@@ -111,27 +118,27 @@ void SONDEIDEA::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
-  UDPServer sondedata(local);
-  sondedata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
-  sondedata.printbuffers();
-  sondedata.settimeout(0, 100000); // 1/10 second
+  UDPReceiver sondedata(local);
+  sondedata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  sondedata.printBufferSizes();
+  sondedata.setRecvTimeout(0, 100000); // secs, usecs, 1/10 second
 
   int rdsize;
   for (;;) {
-    unsigned int eth_index = eth_ringbuf->getindex();
+    unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */
-    eth_ringbuf->setdatalength(eth_index, 0);
-    if ((rdsize = sondedata.receive(eth_ringbuf->getdatabuffer(eth_index),
-                                    eth_ringbuf->getmaxbufsize())) > 0) {
+    eth_ringbuf->setDataLength(eth_index, 0);
+    if ((rdsize = sondedata.receive(eth_ringbuf->getDataBuffer(eth_index),
+                                    eth_ringbuf->getMaxBufSize())) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
-      eth_ringbuf->setdatalength(eth_index, rdsize);
+      eth_ringbuf->setDataLength(eth_index, rdsize);
 
       if (input2proc_fifo.push(eth_index) == false) {
         mystats.fifo_push_errors++;
       } else {
-        eth_ringbuf->nextbuffer();
+        eth_ringbuf->getNextBuffer();
       }
     }
 
@@ -145,7 +152,8 @@ void SONDEIDEA::input_thread() {
 
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
-  IDEASData ideasdata(&geometry);
+
+  IDEASData ideasdata(&geometry, DetectorSettings.fileprefix);
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
@@ -159,12 +167,12 @@ void SONDEIDEA::processing_thread() {
 
     } else {
 
-      auto len = eth_ringbuf->getdatalength(data_index);
+      auto len = eth_ringbuf->getDataLength(data_index);
       if (len == 0) {
         mystats.fifo_synch_errors++;
       } else {
         int events =
-            ideasdata.parse_buffer(eth_ringbuf->getdatabuffer(data_index), len);
+            ideasdata.parse_buffer(eth_ringbuf->getDataBuffer(data_index), len);
 
         mystats.rx_geometry_errors += ideasdata.errors;
         mystats.rx_events += ideasdata.events;

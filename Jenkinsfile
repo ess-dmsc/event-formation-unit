@@ -1,26 +1,37 @@
-project = "efu"
+project = "event-formation-unit"
 coverage_on = "centos7"
+archive_what = "centos7-release"
 
 images = [
     'centos7': [
         'name': 'essdmscdm/centos7-build-node:1.0.1',
-        'sh': 'sh'
+        'sh': 'sh',
+        'cmake_flags': '-DCOV=ON'
+    ],
+    'centos7-release': [
+        'name': 'essdmscdm/centos7-build-node:1.0.1',
+        'sh': 'sh',
+        'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
     ],
     'centos7-gcc6': [
-        'name': 'essdmscdm/centos7-gcc6-build-node:1.0.0',
-        'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash'
+        'name': 'essdmscdm/centos7-gcc6-build-node:2.1.0',
+        'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash',
+        'cmake_flags': ''
     ],
     'fedora25': [
         'name': 'essdmscdm/fedora25-build-node:1.0.0',
-        'sh': 'sh'
+        'sh': 'sh',
+        'cmake_flags': ''
     ],
     'ubuntu1604': [
-        'name': 'essdmscdm/ubuntu16.04-build-node:2.0.0',
-        'sh': 'sh'
+        'name': 'essdmscdm/ubuntu16.04-build-node:2.1.0',
+        'sh': 'sh',
+        'cmake_flags': ''
     ],
     'ubuntu1710': [
-        'name': 'essdmscdm/ubuntu17.10-build-node:1.0.0',
-        'sh': 'sh'
+        'name': 'essdmscdm/ubuntu17.10-build-node:2.0.0',
+        'sh': 'sh',
+        'cmake_flags': ''
     ]
 ]
 
@@ -28,105 +39,16 @@ base_container_name = "${project}-${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
 
 def failure_function(exception_obj, failureMessage) {
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
-    emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage + '\"\n\nCheck console output at $BUILD_URL to view the results.', recipientProviders: toEmails, subject: '${DEFAULT_SUBJECT}'
-    slackSend color: 'danger', message: "event-formation-unit: " + failureMessage
+    emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage + '\"\n\nCheck console output at $BUILD_URL to view the results.',
+            recipientProviders: toEmails,
+            subject: '${DEFAULT_SUBJECT}'
+    slackSend color: 'danger',
+            message: "${project}-${env.BRANCH_NAME}: " + failureMessage
     throw exception_obj
 }
 
 def Object container_name(image_key) {
     return "${base_container_name}-${image_key}"
-}
-
-def docker_dependencies(image_key) {
-    def conan_remote = "ess-dmsc-local"
-    def custom_sh = images[image_key]['sh']
-    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        mkdir build
-        cd build
-        conan remote add \
-            --insert 0 \
-            ${conan_remote} ${local_conan_server}
-        conan install --build=outdated ../${project}
-    \""""
-}
-
-def docker_cmake(image_key) {
-    cmake_exec = "cmake"
-    def custom_sh = images[image_key]['sh']
-    if (image_key == "centos7")
-    {
-        sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-            cd build
-            . ./activate_run.sh
-            ${cmake_exec} --version
-            ${cmake_exec} -DDUMPTOFILE=ON -DCOV=ON ../${project}
-        \""""
-    } else {
-        sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-            cd build
-            . ./activate_run.sh
-            ${cmake_exec} --version
-            ${cmake_exec} -DDUMPTOFILE=ON ../${project}
-        \""""
-    }
-}
-
-def docker_build(image_key) {
-    def custom_sh = images[image_key]['sh']
-    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        cd build
-        make --version
-        make VERBOSE=ON
-    \""""
-}
-
-def docker_tests(image_key) {
-    def custom_sh = images[image_key]['sh']
-        try {
-            sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-                cd build
-                . ./activate_run.sh
-                make runtest VERBOSE=ON
-                make runefu VERBOSE=ON
-            \""""
-        } catch(e) {
-            failure_function(e, 'Run tests (${container_name(image_key)}) failed')
-        }
-}
-
-def docker_tests_coverage(image_key) {
-    def custom_sh = images[image_key]['sh']
-    dir("${project}") {
-        try {
-            sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-                cd build
-                . ./activate_run.sh
-                make VERBOSE=ON
-                make runefu VERBOSE=ON
-                make coverage VERBOSE=ON
-                make valgrind VERBOSE=ON
-            \""""
-            sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
-            junit 'build/test_results/*.xml'
-            step([
-                $class: 'CoberturaPublisher',
-                autoUpdateHealth: true,
-                autoUpdateStability: true,
-                coberturaReportFile: 'build/coverage/coverage.xml',
-                failUnhealthy: false,
-                failUnstable: false,
-                maxNumberOfBuilds: 0,
-                onlyStable: false,
-                sourceEncoding: 'ASCII',
-                zoomCoverageChart: false
-            ])
-            //archiveArtifacts artifacts: 'build/'
-        } catch(e) {
-            sh "docker cp ${container_name(image_key)}:/home/jenkins/build ./"
-            junit 'build/test_results/*.xml'
-            failure_function(e, 'Run tests (${container_name(image_key)}) failed')
-        }
-    }
 }
 
 def Object get_container(image_key) {
@@ -141,52 +63,161 @@ def Object get_container(image_key) {
     return container
 }
 
+def docker_clone(image_key) {
+    def custom_sh = images[image_key]['sh']
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+        git clone \
+            --branch ${env.BRANCH_NAME} \
+            https://github.com/ess-dmsc/event-formation-unit.git /home/jenkins/${project}
+    \""""
+}
+
+def docker_dependencies(image_key) {
+    def conan_remote = "ess-dmsc-local"
+    def custom_sh = images[image_key]['sh']
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+        mkdir ${project}/build
+        cd ${project}/build
+        conan remote add \
+            --insert 0 \
+            ${conan_remote} ${local_conan_server}
+        conan install --build=outdated ..
+    \""""
+}
+
+def docker_cmake(image_key, xtra_flags) {
+    def custom_sh = images[image_key]['sh']
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+        cd ${project} && \
+        BUILDSTR=\\\$(git log --oneline | head -n 1 | awk '{print \\\$1}') && \
+        cd build && \
+        . ./activate_run.sh && \
+        cmake --version && \
+        cmake -DCONAN=MANUAL ${xtra_flags} -DBUILDSTR=\\\$BUILDSTR ..
+    \""""
+}
+
+def docker_build(image_key) {
+    def custom_sh = images[image_key]['sh']
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+        cd ${project}/build
+        make --version
+        make -j4 VERBOSE=ON
+        make -j4 unit_tests VERBOSE=ON
+    \""""
+}
+
+def docker_tests(image_key) {
+    def custom_sh = images[image_key]['sh']
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+        cd ${project}/build
+        . ./activate_run.sh
+        make runtest
+        make runefu
+    \""""
+}
+
+def docker_tests_coverage(image_key) {
+    def custom_sh = images[image_key]['sh']
+    abs_dir = pwd()
+
+    try {
+        sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+                cd ${project}/build
+                . ./activate_run.sh
+                make runefu
+                make coverage
+                make -j4 valgrind
+            \""""
+        sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ./"
+    } catch(e) {
+        sh "docker cp ${container_name(image_key)}:/home/jenkins/${project}/build/test_results ./"
+        junit 'test_results/*.xml'
+        failure_function(e, 'Run tests (${container_name(image_key)}) failed')
+    }
+
+    dir("${project}/build") {
+            junit 'test_results/*.xml'
+            sh "../jenkins/redirect_coverage.sh ./coverage/coverage.xml ${abs_dir}/${project}"
+
+            step([
+                $class: 'CoberturaPublisher',
+                autoUpdateHealth: true,
+                autoUpdateStability: true,
+                coberturaReportFile: 'coverage/coverage.xml',
+                failUnhealthy: false,
+                failUnstable: false,
+                maxNumberOfBuilds: 0,
+                onlyStable: false,
+                sourceEncoding: 'ASCII',
+                zoomCoverageChart: true
+            ])
+            step([$class: 'ValgrindPublisher',
+                  pattern: 'memcheck_res/*.valgrind',
+                  failBuildOnMissingReports: true,
+                  failBuildOnInvalidReports: true,
+                  publishResultsForAbortedBuilds: false,
+                  publishResultsForFailedBuilds: false,
+                  failThresholdInvalidReadWrite: '',
+                  unstableThresholdInvalidReadWrite: '',
+                  failThresholdDefinitelyLost: '',
+                  unstableThresholdDefinitelyLost: '',
+                  failThresholdTotal: '',
+                  unstableThresholdTotal: '99'
+            ])
+            //archiveArtifacts artifacts: 'build/'
+    }
+}
+
+def docker_archive(image_key) {
+    def custom_sh = images[image_key]['sh']
+
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+                        mkdir -p archive/event-formation-unit && \
+                        cp -r ${project}/build/bin archive/event-formation-unit && \
+                        cp -r ${project}/build/modules archive/event-formation-unit && \
+                        cp -r ${project}/build/lib archive/event-formation-unit && \
+                        cp -r ${project}/build/licenses archive/event-formation-unit && \
+                        mkdir archive/event-formation-unit/util && \
+                        cp -r ${project}/utils/efushell archive/event-formation-unit/util && \
+                        cp -r ${project}/monitors/* archive/event-formation-unit/util && \
+                        mkdir archive/event-formation-unit/data && \
+                        cp -r ${project}/prototype2/multigrid/calib_data/* archive/event-formation-unit/data && \
+                        cd archive && \
+                        tar czvf event-formation-unit-centos7.tar.gz event-formation-unit
+                    \""""
+
+    sh "docker cp ${container_name(image_key)}:/home/jenkins/archive/event-formation-unit-centos7.tar.gz ."
+    archiveArtifacts "event-formation-unit-centos7.tar.gz"
+}
+
 def get_pipeline(image_key)
 {
     return {
         stage("${image_key}") {
-            try {
-                def container = get_container(image_key)
-                def custom_sh = images[image_key]['sh']
-
-                // Copy sources to container and change owner and group.
-                dir("${project}") {
-                    sh "docker cp code ${container_name(image_key)}:/home/jenkins/${project}"
-                    sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
-                        chown -R jenkins.jenkins /home/jenkins/${project}
-                        \""""
-                }
-
+            node ("docker") {
                 try {
+                    def container = get_container(image_key)
+
+                    docker_clone(image_key)
                     docker_dependencies(image_key)
-                } catch (e) {
-                    failure_function(e, "Get dependencies for ${image_key} failed")
-                }
-
-                try {
-                    docker_cmake(image_key)
-                } catch (e) {
-                    failure_function(e, "CMake for ${image_key} failed")
-                }
-
-                try {
+                    docker_cmake(image_key, images[image_key]['cmake_flags'])
                     docker_build(image_key)
-                } catch (e) {
-                    failure_function(e, "Build for ${image_key} failed")
-                }
 
-                if (image_key == coverage_on) {
-                    docker_tests_coverage(image_key)
-                } else {
-                    docker_tests(image_key)
-                }
+                    if (image_key == coverage_on) {
+                        docker_tests_coverage(image_key)
+                    } else {
+                        docker_tests(image_key)
+                    }
 
-                //docker_tests(image_key)
-            } catch(e) {
-                failure_function(e, "Unknown build failure for ${image_key}")
-            } finally {
-                sh "docker stop ${container_name(image_key)}"
-                sh "docker rm -f ${container_name(image_key)}"
+                    if (image_key == archive_what) {
+                        docker_archive(image_key)
+                    }
+
+                } finally {
+                    sh "docker stop ${container_name(image_key)}"
+                    sh "docker rm -f ${container_name(image_key)}"
+                }
             }
         }
     }
@@ -201,50 +232,28 @@ def get_macos_pipeline()
                 cleanWs()
 
                 dir("${project}/code") {
-                    try {
-                        checkout scm
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / Checkout failed')
-                    }
+                    checkout scm
                 }
 
                 dir("${project}/build") {
-                    try {
-                        sh "conan install --build=outdated ../code"
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / getting dependencies failed')
-                    }
-
-                    try {
-                        sh "cmake -DDUMPTOFILE=ON -DCMAKE_MACOSX_RPATH=ON ../code"
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / CMake failed')
-                    }
-
-                    try {
-                        sh "make"
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / make failed')
-                    }
-
-                    try {
-                        sh "make runtest"
-                    } catch (e) {
-                        failure_function(e, 'MacOSX / tests failed')
-                    }
+                    sh "conan install --build=outdated ../code"
+                    sh "cmake -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON ../code"
+                    sh "make -j4"
+                    sh "make -j4 unit_tests"
+                    sh "make runtest"
+                    sh "make runefu"
                 }
-
             }
         }
     }
 }
 
-node('docker && dmbuild03.dm.esss.dk') {
+node('docker') {
 
     // Delete workspace when build is done
     cleanWs()
 
-    dir("${project}/code") {
+    dir("${project}_code") {
 
         stage('Checkout') {
             try {
@@ -273,5 +282,9 @@ node('docker && dmbuild03.dm.esss.dk') {
     }
     builders['macOS'] = get_macos_pipeline()
 
-    parallel builders
+    try {
+        parallel builders
+    } catch (e) {
+        failure_function(e, 'Job failed')
+    }
 }

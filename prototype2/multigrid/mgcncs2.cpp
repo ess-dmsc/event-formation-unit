@@ -15,7 +15,7 @@
 #include <efu/Server.h>
 #include <multigrid/mgcncs/CalibrationFile.h>
 #include <multigrid/mgcncs/ChanConv.h>
-#include <multigrid/mgcncs/Data.h>
+#include <multigrid/mgcncs/DataParser.h>
 #include <multigrid/mgcncs/MultigridGeometry.h>
 //#include <cspec/CSPECEvent.h>
 #include <cstring>
@@ -86,7 +86,14 @@ private:
   uint16_t gridcal[CSPECChanConv::adcsize];
 };
 
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
+struct DetectorSettingsStruct {
+  std::string fileprefix{""};
+} DetectorSettings;
+
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+  parser.add_option("--dumptofile", DetectorSettings.fileprefix,
+                    "dump to specified file")->group("MGCNCS");
+}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
@@ -183,20 +190,20 @@ void CSPEC::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
-  UDPServer cspecdata(local);
-  cspecdata.setbuffers(0, EFUSettings.DetectorRxBufferSize);
-  cspecdata.printbuffers();
-  cspecdata.settimeout(0, 100000); // One tenth of a second
+  UDPReceiver cspecdata(local);
+  cspecdata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  cspecdata.printBufferSizes();
+  cspecdata.setRecvTimeout(0, 100000); // secs, usecs, One tenth of a second
 
   int rdsize;
   for (;;) {
-    unsigned int eth_index = eth_ringbuf->getindex();
+    unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */
-    eth_ringbuf->setdatalength(eth_index, 0);
-    if ((rdsize = cspecdata.receive(eth_ringbuf->getdatabuffer(eth_index),
-                                    eth_ringbuf->getmaxbufsize())) > 0) {
-      eth_ringbuf->setdatalength(eth_index, rdsize);
+    eth_ringbuf->setDataLength(eth_index, 0);
+    if ((rdsize = cspecdata.receive(eth_ringbuf->getDataBuffer(eth_index),
+                                    eth_ringbuf->getMaxBufSize())) > 0) {
+      eth_ringbuf->setDataLength(eth_index, rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
       XTRACE(INPUT, DEB, "rdsize: %u\n", rdsize);
@@ -204,7 +211,7 @@ void CSPEC::input_thread() {
       if (input2proc_fifo.push(eth_index) == false) {
         mystats.fifo_push_errors++;
       } else {
-        eth_ringbuf->nextbuffer();
+        eth_ringbuf->getNextBuffer();
       }
     }
 
@@ -224,7 +231,7 @@ void CSPEC::processing_thread() {
 
   MultiGridGeometry geom(1, 2, 48, 4, 16);
 
-  CSPECData dat(250, &conv, &geom); // Default signal thresholds
+  CSPECData dat(250, &conv, &geom, DetectorSettings.fileprefix); // Default signal thresholds
 
   TSCTimer report_timer;
   TSCTimer timestamp;
@@ -242,12 +249,12 @@ void CSPEC::processing_thread() {
       mystats.rx_idle1++;
       usleep(1);
     } else {
-      auto len = eth_ringbuf->getdatalength(data_index);
+      auto len = eth_ringbuf->getDataLength(data_index);
       if (len == 0) {
         mystats.fifo_seq_errors++;
       } else {
-        dat.receive(eth_ringbuf->getdatabuffer(data_index),
-                    eth_ringbuf->getdatalength(data_index));
+        dat.receive(eth_ringbuf->getDataBuffer(data_index),
+                    eth_ringbuf->getDataLength(data_index));
         mystats.rx_readouts += dat.elems;
         mystats.rx_error_bytes += dat.error;
         mystats.rx_discards += dat.input_filter();

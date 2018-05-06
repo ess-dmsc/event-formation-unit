@@ -3,7 +3,7 @@
 #include "PeakFinderTestData.h"
 #include <Histogram.h>
 #include <PeakFinder.h>
-#include <TestBase.h>
+#include <test/TestBase.h>
 
 class PeakFinderTest : public TestBase {
 protected:

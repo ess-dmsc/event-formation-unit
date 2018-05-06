@@ -7,35 +7,37 @@
 #include <stdlib.h>
 #include <string>
 
-int *ExitHandler::keep_running = nullptr;
+static ExitHandler::Exit DoExit{ExitHandler::Exit::NoExit};
+static int LastSignal{0};
 
-void ExitHandler::InitExitHandler(int *runflag) {
-  ExitHandler::keep_running = runflag;
-  signal(SIGINT, &ExitHandler::noncritical);
+void ExitHandler::InitExitHandler() {
+  signal(SIGINT, &ExitHandler::nonCritical);
   signal(SIGSEGV, &ExitHandler::critical);
   signal(SIGTERM, &ExitHandler::critical);
   signal(SIGBUS, &ExitHandler::critical);
 }
 
 void ExitHandler::critical(int sig) {
-  XTRACE(MAIN, ALW, "efu terminated with critical signal %d\n", sig);
-  std::string message =
-      "efu terminated with critical signal " + std::to_string(sig) + "\n";
-  GLOG_CRI(message);
-  print_trace();
+  // Calling printf is undefined behaviour but we accept that here as we call exit immediately anyways.
+  printf("efu terminated with critical signal %d\n", sig);
+  printTrace();
   exit(1);
 }
 
-void ExitHandler::noncritical(int sig) {
-  XTRACE(MAIN, ALW, "efu terminated with signal %d\n", sig);
-  std::string message =
-      "efu terminated with signal " + std::to_string(sig) + "\n";
-  GLOG_CRI(message);
-  *ExitHandler::keep_running = 0;
+void ExitHandler::nonCritical(int sig) {
+  DoExit = Exit::Exit;
+  LastSignal = sig;
+}
+
+ExitHandler::Exit ExitHandler::HandleLastSignal() {
+  if (Exit::Exit == DoExit) {
+    XTRACE(MAIN, ALW, "efu terminated with signal %d\n", LastSignal);
+  }
+  return DoExit;
 }
 
 /* Obtain a backtrace and print it to stdout. */
-void ExitHandler::print_trace(void) {
+void ExitHandler::printTrace(void) {
   void *array[10];
   size_t size;
   char **strings;
@@ -44,10 +46,10 @@ void ExitHandler::print_trace(void) {
   size = backtrace(array, 10);
   strings = backtrace_symbols(array, size);
 
-  XTRACE(MAIN, ALW, "Obtained %zd stack frames.\n", size);
+  printf("Obtained %zd stack frames.\n", size);
 
   for (i = 0; i < size; i++)
-    XTRACE(MAIN, ALW, "%s\n", strings[i]);
+    printf("%s\n", strings[i]);
 
   free(strings);
 }

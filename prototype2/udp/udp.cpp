@@ -44,10 +44,10 @@ void UDPRaw::input_thread() {
 
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
-  UDPServer raw(local);
-  raw.setbuffers(4000000, 4000000);
-  raw.settimeout(0, 100000);
-  raw.printbuffers();
+  UDPReceiver raw(local);
+  raw.setBufferSizes(4000000, 4000000);
+  raw.setRecvTimeout(0, 100000); /// secs, usecs 1/10 s
+  raw.printBufferSizes();
 
   Timer rate_timer;
   TSCTimer report_timer;

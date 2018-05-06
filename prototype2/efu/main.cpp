@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 
   int keep_running = 1;
 
-  ExitHandler::InitExitHandler(&keep_running);
+  ExitHandler::InitExitHandler();
 
 #ifdef GRAYLOG
   Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
@@ -86,24 +86,25 @@ int main(int argc, char *argv[]) {
   Parser cmdParser(detector, keep_running);
   Server cmdAPI(DetectorSettings.CommandServerPort, cmdParser);
 
-  Timer stop_timer, stop_cmd, livestats;
+  Timer RunTimer, livestats;
 
-  while (1) {
-    if (stop_cmd.timeus() >= (uint64_t)ONE_SECOND_US / 10) {
+  while (true) {
+    //Do not allow immediate exits
+    if (RunTimer.timeus() >= (uint64_t)ONE_SECOND_US / 10) {
       if (keep_running == 0) {
         XTRACE(INIT, ALW, "Application stop, Exiting...\n");
         detector->stopThreads();
-        sleep(2);
+        sleep(1);
         break;
       }
     }
 
-    if (stop_timer.timeus() >=
+    if (RunTimer.timeus() >=
         DetectorSettings.StopAfterSec * (uint64_t)ONE_SECOND_US) {
       XTRACE(MAIN, ALW, "Application timeout, Exiting...\n");
       GLOG_INF("Event Formation Unit Exiting (User timeout)");
       detector->stopThreads();
-      sleep(2);
+      sleep(1);
       break;
     }
 
@@ -113,8 +114,11 @@ int main(int argc, char *argv[]) {
     }
 
     cmdAPI.server_poll();
-
-    usleep(1000);
+    ExitHandler::Exit DoExit = ExitHandler::HandleLastSignal();
+    if (DoExit == ExitHandler::Exit::Exit) {
+      keep_running = 0;
+    }
+    usleep(500);
   }
 
   if (detector.use_count() > 1) {

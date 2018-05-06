@@ -1,4 +1,11 @@
-/** Copyright (C) 2016 European Spallation Source */
+/** Copyright (C) 2016-2018 European Spallation Source */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// This file contains the declaration of the Socket abstration for BSD sockets
+/// it is used in detector pipeline plugins for receive and in udptx for transmit
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
@@ -7,6 +14,7 @@
 #include <cinttypes>
 #include <sys/socket.h>
 
+/// BSD Socket abstractions for TCP and UDP transmitters and receivers
 class Socket {
 public:
   enum class type { UDP, TCP };
@@ -20,49 +28,65 @@ public:
         : ipaddr(ip_address), port(port_number) {}
   };
 
+  /// Create a socker abstraction of type UDP or TCP
   Socket(Socket::type type);
 
-  int setbuffers(int sndbuf, int rcvbuf);
-  void printbuffers(void);
-  int settimeout(int seconds, int usecs);
+  /// Attempt to specify the socket receive and transmit buffer sizes (for performance)
+  int setBufferSizes(int sndbuf, int rcvbuf);
 
-  void local(const char *ipaddr, int port);
-  void remote(const char *ipaddr, int port);
+  /// Print the current values for receive and trasmit buffer sizes
+  void printBufferSizes(void);
 
-  int receive(void *buffer, int rcvlen);
+  /// Set a timeout for recv() function rather than wait for ever
+  int setRecvTimeout(int seconds, int usecs);
 
-  int send(void *buffer, int len); /**< send user specified data */
+  /// Specify ip address of interface to receive data on and port number to listen on
+  void setLocalSocket(const char *ipaddr, int port);
+
+  /// Specify ip address and port number of remote end
+  void setRemoteSocket(const char *ipaddr, int port);
+
+  /// Receive data on socket into buffer with specified length
+  int receive(void *receiveBuffer, int bufferSize);
+
+  /// Send data in buffer with specified length
+  int send(void *dataBuffer, int dataLength);
 
 private:
-  int s_{-1};
-  struct sockaddr_in local_;
-  struct sockaddr_in remote_;
+  int socketFileDescriptor{-1};     ///
+  struct sockaddr_in localSockAddr;
+  struct sockaddr_in remoteSockAddr;
 
-  int getopt(int option);
-  int setopt(int option, void *value, int size);
+  /// wrapper for getsockopt() system call
+  int getSockOpt(int option);
+
+  /// wrapper for setsockopt() system call
+  int setSockOpt(int option, void *value, int size);
 };
 
-class UDPServer : public Socket {
+/// UDP receiver only needs to specify local socket
+class UDPReceiver : public Socket {
 public:
-  UDPServer(Endpoint local) : Socket(Socket::type::UDP) {
-    this->local(local.ipaddr, local.port);
+  UDPReceiver(Endpoint local) : Socket(Socket::type::UDP) {
+    this->setLocalSocket(local.ipaddr, local.port);
   };
 };
 
-class UDPClient : public Socket {
+/// UDP transmitter needs to specify both local and remote socket
+class UDPTransmitter : public Socket {
 public:
-  UDPClient(Endpoint local, Endpoint remote) : Socket(Socket::type::UDP) {
-    this->local(local.ipaddr, local.port);
-    this->remote(remote.ipaddr, remote.port);
+  UDPTransmitter(Endpoint local, Endpoint remote) : Socket(Socket::type::UDP) {
+    this->setLocalSocket(local.ipaddr, local.port);
+    this->setRemoteSocket(remote.ipaddr, remote.port);
   };
 };
 
-class TCPClient {
+class TCPTransmitter {
 public:
-  TCPClient(const char *ip, int port);
+  TCPTransmitter(const char *ip, int port);
   int senddata(char *buffer, int len);
 
 private:
-  int s_{-1};
-  sockaddr_in remote_;
+  int socketFileDescriptor{-1};
+  sockaddr_in remoteSockAddr;
 };
