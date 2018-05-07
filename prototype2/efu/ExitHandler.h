@@ -10,20 +10,23 @@
 #include <stdlib.h>
 
 class ExitHandler {
-
 public:
+  enum class Exit {
+    NoExit,
+    Exit,
+  };
   /** @brief constructor does nothing */
-  static void InitExitHandler(int *runflag);
+  static void InitExitHandler();
+  
+  static Exit HandleLastSignal();
 
 private:
   /** noncritical signals (Ctrl-C), stop threads nicely */
-  static void noncritical(int a);
+  static void nonCritical(int a);
 
   /** Critical signals, immediate exit */
   static void critical(int a);
 
   /** print a stack trace */
-  static void print_trace(void);
-
-  static int *keep_running;
+  static void printTrace(void);
 };

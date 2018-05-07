@@ -30,9 +30,9 @@ int main(int argc, char *argv[]) {
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
 
-  UDPClient DataSource(local, remote);
-  DataSource.setbuffers(opts.sndbuf, 0);
-  DataSource.printbuffers();
+  UDPTransmitter DataSource(local, remote);
+  DataSource.setBufferSizes(opts.sndbuf, 0);
+  DataSource.printBufferSizes();
 
   ReaderVMM file(opts.filename);
 

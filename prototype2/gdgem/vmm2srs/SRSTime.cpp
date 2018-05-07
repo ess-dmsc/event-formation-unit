@@ -50,9 +50,10 @@ double SRSTime::delta_timestamp_ns(double old_timestamp_ns,
                                    uint64_t &stats_triggertime_wraps) const {
   if (old_timestamp_ns > timestamp_ns
       && (old_framecounter <= framecounter
-          || old_framecounter > framecounter + 1000000000)) {
-    return (13421772800 + timestamp_ns - old_timestamp_ns);
+          || old_framecounter > framecounter + 1000000000))
+  {
     stats_triggertime_wraps++;
+    return (13421772800 + timestamp_ns - old_timestamp_ns);
   } else {
     return (timestamp_ns - old_timestamp_ns);
   }

@@ -43,22 +43,18 @@ create_module(gdgem)
 # Data generators
 #=============================================================================
 
-if(h5cpp_FOUND)
-  set(gennmxfile_SRC
-      nmx/Eventlet.cpp
-      nmxgen/nmxfile.cpp
-      nmxgen/NMXArgs.cpp
-      nmxgen/ReaderVMM.cpp
-      )
-  set(gennmxfile_INC
-      nmx/Eventlet.h
-      nmxgen/NMXArgs.h
-      nmxgen/ReaderVMM.h
-      )
-  create_executable(gennmxfile)
-else()
-  message(STATUS "*** Unable to compile gennmxfile as h5cpp was not found.")
-endif()
+set(gennmxfile_SRC
+    nmx/Eventlet.cpp
+    nmxgen/nmxfile.cpp
+    nmxgen/NMXArgs.cpp
+    nmxgen/ReaderVMM.cpp
+    )
+set(gennmxfile_INC
+    nmx/Eventlet.h
+    nmxgen/NMXArgs.h
+    nmxgen/ReaderVMM.h
+    )
+create_executable(gennmxfile)
 
 find_package(PCAP)
 if(PCAP_FOUND)
@@ -99,10 +95,17 @@ set(NMXClustererTest_INC
 create_test_executable(NMXClustererTest "")
 
 # GOOGLE BENCHMARK
-set(NMXClustererBenchmarkTest_INC dg_impl/NMXClusterer.h dg_impl/TestData.h vmm2srs/SRSTime.h vmm2srs/SRSMappings.h)
-set(NMXClustererBenchmarkTest_SRC dg_impl/NMXClusterer.cpp dg_impl/NMXClustererBenchmarkTest.cpp vmm2srs/SRSTime.cpp vmm2srs/SRSMappings.cpp)
+set(NMXClustererBenchmarkTest_INC
+    dg_impl/NMXClusterer.h
+    dg_impl/TestData.h
+    vmm2srs/SRSTime.h
+    vmm2srs/SRSMappings.h)
+set(NMXClustererBenchmarkTest_SRC
+    dg_impl/NMXClusterer.cpp
+    dg_impl/NMXClustererBenchmarkTest.cpp
+    vmm2srs/SRSTime.cpp
+    vmm2srs/SRSMappings.cpp)
 create_benchmark_executable(NMXClustererBenchmarkTest "")
-
 
 set(EventFormationTest_SRC
     nmx/AbstractEventletBuilder.cpp

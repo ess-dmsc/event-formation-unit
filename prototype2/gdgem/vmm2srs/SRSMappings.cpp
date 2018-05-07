@@ -6,7 +6,7 @@
 // This is done only once, when starting EFU
 void SRSMappings::define_plane(
     uint8_t planeID,
-    std::initializer_list<std::pair<uint16_t, uint16_t>> chips) {
+    std::list<std::pair<uint16_t, uint16_t>> chips) {
   int offset = 0;
   for (auto c : chips) {
     set_mapping(c.first, c.second, planeID, offset);

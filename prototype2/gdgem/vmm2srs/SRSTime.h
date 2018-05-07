@@ -49,7 +49,7 @@ public:
 
   double chip_time(uint16_t bc, uint16_t tdc) const;
 
-// @brief prints out time configuration
+  // @brief prints out time configuration
   std::string debug() const;
 
 private:

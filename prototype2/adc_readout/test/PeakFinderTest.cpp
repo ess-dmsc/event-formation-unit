@@ -17,9 +17,6 @@ TEST(PeakFinderTest, GetMaxValue) {
   auto Results = FindPeak(TestData);
   EXPECT_EQ(MaxValue, Results.Max);
   EXPECT_EQ(MaxLoc, Results.MaxLocation);
-  
-  EXPECT_EQ(NormalValue, Results.Min);
-  EXPECT_EQ(0, Results.MinLocation);
 }
 
 TEST(PeakFinderTest, GetMinValue) {
@@ -29,8 +26,6 @@ TEST(PeakFinderTest, GetMinValue) {
   std::uint16_t MinValue = 5;
   TestData[MinLoc] = MinValue;
   auto Results = FindPeak(TestData);
-  EXPECT_EQ(MinValue, Results.Min);
-  EXPECT_EQ(MinLoc, Results.MinLocation);
   
   EXPECT_EQ(NormalValue, Results.Max);
   EXPECT_EQ(0, Results.MaxLocation);

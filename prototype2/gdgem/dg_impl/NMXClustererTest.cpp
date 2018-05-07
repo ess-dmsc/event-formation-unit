@@ -14,7 +14,6 @@
 class NMXClustererTest : public TestBase {
 protected:
   virtual void SetUp() {
-
     SRSMappings mapping;
 
     mapping.set_mapping(1, 0, 0, 0);

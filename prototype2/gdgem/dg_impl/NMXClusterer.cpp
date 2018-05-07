@@ -433,7 +433,6 @@ void NMXClusterer::MatchClustersXY(float dPlane) {
 
 //====================================================================================================================
 void NMXClusterer::AnalyzeClusters() {
-
   //auto fX = std::async(std::launch::async, [&] {
   std::sort(begin(m_hitsOldX), end(m_hitsOldX),
             [](const ClusterTuple &t1, const ClusterTuple &t2) {

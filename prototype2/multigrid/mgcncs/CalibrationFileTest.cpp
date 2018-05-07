@@ -100,6 +100,7 @@ TEST_F(CalibrationFileTest, LoadFstatFail) {
   uint16_t gbuffer[CSPECChanConv::adcsize];
   CalibrationFile calibfile;
   forcefstatfail = 1;
+  MESSAGE() << "forcefstatfail: " << forcefstatfail << std::endl;
   int res =
       calibfile.load(std::string("cal_zero"), (char *)wbuffer, (char *)gbuffer);
   ASSERT_EQ(res, -1);

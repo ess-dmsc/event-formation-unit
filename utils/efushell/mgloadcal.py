@@ -12,18 +12,17 @@ parser.add_argument("-p", metavar='port', help = "server tcp port (default 8888)
 parser.add_argument('calibfile', help='multigrid calibration file for loading')
 args = parser.parse_args()
 
-if args.i != None:
+if args.i is not None:
     svr_ip_addr = args.i
 
-if args.p != None:
+if args.p is not None:
     svr_tcp_port = args.p
- 
-print("Connection info. ip address: %s, tcp port: %s" % (svr_ip_addr, svr_tcp_port)) 
+
+print("Connection info. ip address: %s, tcp port: %s" % (svr_ip_addr, svr_tcp_port))
 driver = SimpleSocket(svr_ip_addr, svr_tcp_port)
 
-
 calibfile=args.calibfile
-print("attempting to load file %s" % (calibfile))
+print("attempting to load file {}".format(calibfile))
 
 res = driver.Ask('CSPEC_LOAD_CALIB ' + calibfile)
 print res
