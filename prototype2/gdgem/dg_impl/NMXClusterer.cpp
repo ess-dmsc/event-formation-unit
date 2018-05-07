@@ -392,8 +392,8 @@ void NMXClusterer::MatchClustersXY(float dPlane) {
       DTRACE(DEB, "\tsize x/size y: %u/%u", theCommonCluster.sizeX,
              theCommonCluster.sizeY);
       DTRACE(DEB, "\tdelta time planes: %f", theCommonCluster.deltaPlane);
-      m_clusterXY.emplace_back(std::move(theCommonCluster));
-
+      //m_clusterXY.emplace_back(std::move(theCommonCluster));
+      m_clusterXY_size++;
     }
     if (it_uTPC != end(m_tempClusterY)) {
       nx.clusterXAndY_uTPC = true;
@@ -424,8 +424,8 @@ void NMXClusterer::MatchClustersXY(float dPlane) {
              theCommonCluster_uTPC.sizeY);
       DTRACE(DEB, "\tdelta time planes: %f",
              theCommonCluster_uTPC.deltaPlane);
-      m_clusterXY_uTPC.emplace_back(std::move(theCommonCluster_uTPC));
-
+      //m_clusterXY_uTPC.emplace_back(std::move(theCommonCluster_uTPC));
+      m_clusterXY_uTPC_size++;
     }
   }
 
@@ -483,13 +483,16 @@ void NMXClusterer::AnalyzeClusters() {
 
   MatchClustersXY(pDeltaTimePlanes);
 
-  m_clusterX.insert(m_clusterX.end(),
-                    std::make_move_iterator(m_tempClusterX.begin()),
-                    std::make_move_iterator(m_tempClusterX.end()));
-  m_clusterY.insert(m_clusterY.end(),
-                    std::make_move_iterator(m_tempClusterY.begin()),
-                    std::make_move_iterator(m_tempClusterY.end()));
+  // m_clusterX.insert(m_clusterX.end(),
+  //                   std::make_move_iterator(m_tempClusterX.begin()),
+  //                   std::make_move_iterator(m_tempClusterX.end()));
+  //
+  // m_clusterY.insert(m_clusterY.end(),
+  //                   std::make_move_iterator(m_tempClusterY.begin()),
+  //                   std::make_move_iterator(m_tempClusterY.end()));
 
+  m_clusterX_size += m_tempClusterX.size();
+  m_clusterY_size += m_tempClusterY.size();
   m_tempClusterX.clear();
   m_tempClusterY.clear();
 }
@@ -535,4 +538,3 @@ void NMXClusterer::CorrectTriggerData(HitContainer &hits, HitContainer &oldHits,
     }
   }
 }
-

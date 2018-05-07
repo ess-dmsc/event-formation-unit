@@ -7,6 +7,7 @@
 #include <gdgem/vmm2srs/SRSTime.h>
 #include <gdgem/dg_impl/NMXClusterer.h>
 #include <gdgem/dg_impl/TestData.h>
+#include <gdgem/dg_impl/TestDataLong.h>
 #include <test/TestBase.h>
 
 #define UNUSED __attribute__((unused))
@@ -57,7 +58,7 @@ protected:
 };
 
 TEST_F(NMXClustererTest, Run16_line_110168_110323) {
-  for (auto hit : Run16_line_110168_110323) { // replace with UDP receive()
+  for (auto hit : Run16) { // replace with UDP receive()
     int result = nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
                                       hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
                                       hit.overthreshold);
@@ -73,6 +74,26 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
   ASSERT_EQ(nmxdata->getNumClustersY(), 4);
   ASSERT_EQ(nmxdata->getNumClustersXY(), 2);
   ASSERT_EQ(nmxdata->getNumClustersXY_uTPC(), 2);
+}
+
+
+TEST_F(NMXClustererTest, Run16_Long) {
+  for (auto hit : Run16_Long) { // replace with UDP receive()
+    int result = nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
+                                      hit.overthreshold);
+    if (result == -1) {
+      printf("result == -1\n");
+      break;
+    }
+  }
+  ASSERT_EQ(0, nmxdata->stats_triggertime_wraps);
+  ASSERT_EQ(0, nmxdata->stats_fc_error);
+  ASSERT_EQ(0, nmxdata->stats_bcid_tdc_error);
+  EXPECT_EQ(nmxdata->getNumClustersX(), 9110);
+  EXPECT_EQ(nmxdata->getNumClustersY(), 11276);
+  EXPECT_EQ(nmxdata->getNumClustersXY(), 7303);
+  EXPECT_EQ(nmxdata->getNumClustersXY_uTPC(), 7089);
 }
 
 TEST_F(NMXClustererTest, FrameCounterError) {

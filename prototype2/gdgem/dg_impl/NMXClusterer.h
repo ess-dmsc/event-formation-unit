@@ -12,6 +12,19 @@
 
 using std::string;
 
+struct Hit
+{
+	unsigned int fec;
+	unsigned int chip_id;
+	unsigned int framecounter;
+	unsigned int srs_timestamp;
+	unsigned int channel;
+	unsigned int bcid;
+	unsigned int tdc;
+	unsigned int adc;
+	unsigned int overthreshold;
+};
+
 struct ClusterNMX {
   int size;
   int adc;
@@ -85,17 +98,17 @@ public:
                           float correctionTime);
 
   int getNumClustersX() {
-    return m_clusterX.size();
+    return m_clusterX_size;
   };
   int getNumClustersY() {
-    return m_clusterY.size();
+    return m_clusterY_size;
   };
   int getNumClustersXY() {
-    return m_clusterXY.size();
+    return m_clusterXY_size;
   };
 
   int getNumClustersXY_uTPC() {
-    return m_clusterXY_uTPC.size();
+    return m_clusterXY_uTPC_size;
   };
 
   // Statistics counters
@@ -139,10 +152,14 @@ private:
   HitContainer m_hitsX;
   HitContainer m_hitsY;
 
-  std::vector<CommonClusterNMX> m_clusterXY;
-  std::vector<CommonClusterNMX> m_clusterXY_uTPC;
+  // std::vector<CommonClusterNMX> m_clusterXY;
+  // std::vector<CommonClusterNMX> m_clusterXY_uTPC;
   std::vector<ClusterNMX> m_tempClusterX;
   std::vector<ClusterNMX> m_tempClusterY;
-  std::vector<ClusterNMX> m_clusterX;
-  std::vector<ClusterNMX> m_clusterY;
+  //std::vector<ClusterNMX> m_clusterX;
+  //std::vector<ClusterNMX> m_clusterY;
+  uint64_t m_clusterXY_size{0};
+  uint64_t m_clusterX_size{0};
+  uint64_t m_clusterY_size{0};
+  uint64_t m_clusterXY_uTPC_size{0};
 };

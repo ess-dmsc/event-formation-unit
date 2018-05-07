@@ -1,18 +1,6 @@
 #pragma once
 #include <vector>
-
-struct Hit
-{
-	unsigned int fec;
-	unsigned int chip_id;
-	unsigned int framecounter;
-	unsigned int srs_timestamp;
-	unsigned int channel;
-	unsigned int bcid;
-	unsigned int tdc;
-	unsigned int adc;
-	unsigned int overthreshold;
-};
+#include "NMXClusterer.h"
 
 
 // Scrambled FrameCounter
@@ -42,7 +30,7 @@ std::vector<Hit> err_triggertime_error
 };
 
 
-std::vector<Hit> Run16_line_110168_110323
+std::vector<Hit> Run16
 {
 { 1,  0, 255783208, 236388352,  7, 839, 178, 176, 1},
 { 1,  0, 255783208, 236388352,  8, 839, 224, 352, 1},
