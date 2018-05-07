@@ -92,7 +92,7 @@ set(NMXClustererTest_INC
     dg_impl/TestData.h
     vmm2srs/SRSTime.h
     vmm2srs/SRSMappings.h)
-create_test_executable(NMXClustererTest "")
+create_test_executable(NMXClustererTest SKIP_MEMGRIND)
 
 # GOOGLE BENCHMARK
 set(NMXClustererBenchmarkTest_INC
@@ -105,7 +105,7 @@ set(NMXClustererBenchmarkTest_SRC
     dg_impl/NMXClustererBenchmarkTest.cpp
     vmm2srs/SRSTime.cpp
     vmm2srs/SRSMappings.cpp)
-create_benchmark_executable(NMXClustererBenchmarkTest "")
+create_benchmark_executable(NMXClustererBenchmarkTest)
 
 set(EventFormationTest_SRC
     nmx/AbstractEventletBuilder.cpp
