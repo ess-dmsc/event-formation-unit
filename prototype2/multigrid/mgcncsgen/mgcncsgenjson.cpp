@@ -21,9 +21,9 @@ int main(int argc, char *argv[]) {
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
 
-  UDPClient DataSource(local, remote);
-  DataSource.setbuffers(opts.sndbuf, 0);
-  DataSource.printbuffers();
+  UDPTransmitter DataSource(local, remote);
+  DataSource.setBufferSizes(opts.sndbuf, 0);
+  DataSource.printBufferSizes();
 
   std::vector<RunSpec *> runs;
   if (!opts.runfile.empty()) { /**< get config from json file */
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
         return -1;
       }
 
-      int readsize = (opts.buflen / readoutdatasize) * readoutdatasize;
+      unsigned int readsize = (opts.buflen / readoutdatasize) * readoutdatasize;
       assert(readsize <= 9000);
       int readsz;
 

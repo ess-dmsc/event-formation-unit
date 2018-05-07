@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief runtime statistics
- */
+/** Copyright (C) 2016-2018 European Spallation Source */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// This file contains the declaration of the StatPublisher class for transmitting
+/// time series metrics to a Graphite/Carbon server over TCP
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
@@ -13,12 +15,12 @@
 
 class StatPublisher {
 public:
-  /** @todo document */
+  /// Connect to a Carbon/Graphite server bu ip address and tcp port
   StatPublisher(std::string ip, int port);
 
-  /** @todo document */
+  /// Send detector metrics to Carbon/Graphite server
   void publish(std::shared_ptr<Detector> detector);
 
 private:
-  TCPClient *statdb;
+  TCPTransmitter *statdb;
 };

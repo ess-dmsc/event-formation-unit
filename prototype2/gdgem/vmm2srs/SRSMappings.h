@@ -8,7 +8,7 @@
 #pragma once
 
 #include <cinttypes>
-#include <initializer_list>
+#include <list>
 #include <string>
 #include <vector>
 
@@ -25,7 +25,7 @@ public:
    * number
    */
   void define_plane(uint8_t planeID,
-                    std::initializer_list<std::pair<uint16_t, uint16_t>> chips);
+                    std::list<std::pair<uint16_t, uint16_t>> chips);
 
   /** @brief define channel mappings for one chip
    * @param fecID ID of FEC

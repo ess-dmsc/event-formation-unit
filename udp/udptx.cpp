@@ -23,9 +23,9 @@ int main(int argc, char *argv[]) {
 
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
-  UDPClient udptx(local, remote);
-  udptx.setbuffers(4000000, 4000000);
-  udptx.printbuffers();
+  UDPTransmitter udptx(local, remote);
+  udptx.setBufferSizes(4000000, 4000000);
+  udptx.printBufferSizes();
 
   Timer rate_timer;
   TSCTimer report_timer;

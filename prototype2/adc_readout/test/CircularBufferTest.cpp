@@ -266,62 +266,67 @@ std::int32_t ThreadTestFunction(std::int32_t Elements, std::int64_t ProducerDela
   return DataErrors;
 }
 
-const std::int32_t RunTimeMs = 50;
+const std::int32_t RunTimeMs = 100;
 const std::int32_t ShortQueue = 3;
-const std::int32_t LongQueue = 1000000;
+const std::int32_t LongQueue = 100000;
+
+const std::int32_t SmallestElementSize = 1;
+const std::int32_t SmallElementSize = 4;
+const std::int32_t LargeElementSize = 512;
+
 TEST(ProducerConsumer, Size1_ShortQueue_ConsumerDelay) {
-  EXPECT_EQ(ThreadTestFunction<1>(ShortQueue, 0, 2, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(ShortQueue, 0, 2, RunTimeMs), 0);
 }
 TEST(ProducerConsumer, Size1_LongQueue_ConsumerDelay) {
-  EXPECT_EQ(ThreadTestFunction<1>(LongQueue, 0, 2, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(LongQueue, 0, 2, RunTimeMs), 0);
 }
 TEST(ProducerConsumer, Size1_ShortQueue_ProducerDelay) {
-  EXPECT_EQ(ThreadTestFunction<1>(ShortQueue, 2, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(ShortQueue, 2, 0, RunTimeMs), 0);
 }
 TEST(ProducerConsumer, Size1_LongQueue_ProducerDelay) {
-  EXPECT_EQ(ThreadTestFunction<1>(LongQueue, 2, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(LongQueue, 2, 0, RunTimeMs), 0);
 }
 TEST(ProducerConsumer, Size1_LongQueue_NoDelay) {
-  EXPECT_EQ(ThreadTestFunction<1>(LongQueue, 0, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(LongQueue, 0, 0, RunTimeMs), 0);
 }
 TEST(ProducerConsumer, Size1_ShortQueue_NoDelay) {
-  EXPECT_EQ(ThreadTestFunction<1>(ShortQueue, 0, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(ShortQueue, 0, 0, RunTimeMs), 0);
 }
 
 TEST(ProducerConsumer, Size4_ShortQueue_ConsumerDelay) {
-  EXPECT_EQ(ThreadTestFunction<4>(ShortQueue, 0, 2, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(ShortQueue, 0, 2, RunTimeMs), 0);
 }
 TEST(ProducerConsumer, Size4_LongQueue_ConsumerDelay) {
-  EXPECT_EQ(ThreadTestFunction<4>(LongQueue, 0, 2, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(LongQueue, 0, 2, RunTimeMs), 0);
 }
 TEST(ProducerConsumer, Size4_ShortQueue_ProducerDelay) {
-  EXPECT_EQ(ThreadTestFunction<4>(ShortQueue, 2, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(ShortQueue, 2, 0, RunTimeMs), 0);
 }
 TEST(ProducerConsumer, Size4_LongQueue_ProducerDelay) {
-  EXPECT_EQ(ThreadTestFunction<4>(LongQueue, 2, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(LongQueue, 2, 0, RunTimeMs), 0);
 }
 TEST(ProducerConsumer, Size4_LongQueue_NoDelay) {
-  EXPECT_EQ(ThreadTestFunction<4>(LongQueue, 0, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(LongQueue, 0, 0, RunTimeMs), 0);
 }
 TEST(ProducerConsumer, Size4_ShortQueue_NoDelay) {
-  EXPECT_EQ(ThreadTestFunction<4>(ShortQueue, 0, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(ShortQueue, 0, 0, RunTimeMs), 0);
 }
 
-TEST(ProducerConsumer, Size2048_ShortQueue_ConsumerDelay) {
-  EXPECT_EQ(ThreadTestFunction<2048>(ShortQueue, 0, 2, RunTimeMs), 0);
+TEST(ProducerConsumer, LargeSize_ShortQueue_ConsumerDelay) {
+  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(ShortQueue, 0, 2, RunTimeMs), 0);
 }
-TEST(ProducerConsumer, Size2048_LongQueue_ConsumerDelay) {
-  EXPECT_EQ(ThreadTestFunction<2048>(LongQueue, 0, 2, RunTimeMs), 0);
+TEST(ProducerConsumer, LargeSize_LongQueue_ConsumerDelay) {
+  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(LongQueue, 0, 2, RunTimeMs), 0);
 }
-TEST(ProducerConsumer, Size2048_ShortQueue_ProducerDelay) {
-  EXPECT_EQ(ThreadTestFunction<2048>(ShortQueue, 2, 0, RunTimeMs), 0);
+TEST(ProducerConsumer, LargeSize_ShortQueue_ProducerDelay) {
+  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(ShortQueue, 2, 0, RunTimeMs), 0);
 }
-TEST(ProducerConsumer, Size2048_LongQueue_ProducerDelay) {
-  EXPECT_EQ(ThreadTestFunction<2048>(LongQueue, 2, 0, RunTimeMs), 0);
+TEST(ProducerConsumer, LargeSize_LongQueue_ProducerDelay) {
+  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(LongQueue, 2, 0, RunTimeMs), 0);
 }
-TEST(ProducerConsumer, Size2048_LongQueue_NoDelay) {
-  EXPECT_EQ(ThreadTestFunction<2048>(LongQueue, 0, 0, RunTimeMs), 0);
+TEST(ProducerConsumer, LargeSize_LongQueue_NoDelay) {
+  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(LongQueue, 0, 0, RunTimeMs), 0);
 }
-TEST(ProducerConsumer, Size2048_ShortQueue_NoDelay) {
-  EXPECT_EQ(ThreadTestFunction<2048>(ShortQueue, 0, 0, RunTimeMs), 0);
+TEST(ProducerConsumer, LargeSize_ShortQueue_NoDelay) {
+  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(ShortQueue, 0, 0, RunTimeMs), 0);
 }

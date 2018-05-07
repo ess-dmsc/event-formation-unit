@@ -2,10 +2,10 @@ import string
 import socket
 import sys
 import time
-import threading 
+import threading
+
 
 class SimpleSocket:
-
   def __init__(self, hostname = "localhost", port = 8888, timeout = 2):
     self.access_semaphor = threading.Semaphore(1)
     try:
@@ -21,7 +21,6 @@ class SimpleSocket:
     except socket.error, msg:
         sys.stderr.write("connect() [Socket connection error] Cannot connect to %s:%d, error: %s\n" % (hostname, port, msg[0]))
         sys.exit(2)
-
 
   def SendCommand(self, cmd):
     self.access_semaphor.acquire()
