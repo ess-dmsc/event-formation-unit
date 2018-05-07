@@ -9,7 +9,8 @@
 
 NMXClusterer::NMXClusterer(SRSTime time, SRSMappings chips, int acqWin,
                            int adcThreshold, int minClusterSize, float deltaTimeHits,
-                           int deltaStripHits, float deltaTimeSpan, float deltaTimePlanes) :
+                           int deltaStripHits, float deltaTimeSpan, float deltaTimePlanes
+                           /* callback() */ ) :
     pTime(time), pChips(chips), pAcqWin(acqWin), pADCThreshold(
     adcThreshold), pMinClusterSize(minClusterSize), pDeltaTimeHits(
     deltaTimeHits), pDeltaStripHits(deltaStripHits), pDeltaTimeSpan(
@@ -311,7 +312,7 @@ void NMXClusterer::StoreClusters(float clusterPosition,
   theCluster.clusterXAndY_uTPC = false;
   theCluster.maxDeltaTime = maxDeltaTime;
   theCluster.maxDeltaStrip = maxDeltaStrip;
-  theCluster.deltaSpan = deltaSpan;
+  theCluster.deltaSpan = deltaSpan; // rename to something with time
 
   if (coordinate == "x" && clusterPosition > -1.0) {
     m_tempClusterX.emplace_back(std::move(theCluster));
@@ -328,8 +329,8 @@ void NMXClusterer::MatchClustersXY(float dPlane) {
   for (auto &nx : m_tempClusterX) {
     float tx = nx.time;
     float posx = nx.position;
-    float tx_uTPC = nx.time_uTPC;
-    float posx_uTPC = nx.position_uTPC;
+    //float tx_uTPC = nx.time_uTPC;
+    //float posx_uTPC = nx.position_uTPC;
 
     float minDelta = 99999999;
     float deltaT = 0;
@@ -338,11 +339,11 @@ void NMXClusterer::MatchClustersXY(float dPlane) {
     float ty = 0;
     float posy = 0;
 
-    float minDelta_uTPC = 99999999;
-    float deltaT_uTPC = 0;
-    ClusterVector::iterator it_uTPC = end(m_tempClusterY);
-    float ty_uTPC = 0;
-    float posy_uTPC = 0;
+    // float minDelta_uTPC = 99999999;
+    // float deltaT_uTPC = 0;
+    // //ClusterVector::iterator it_uTPC = end(m_tempClusterY);
+    // float ty_uTPC = 0;
+    // float posy_uTPC = 0;
 
     for (ClusterVector::iterator ny = begin(m_tempClusterY);
          ny != end(m_tempClusterY); ++ny) {
@@ -354,14 +355,14 @@ void NMXClusterer::MatchClustersXY(float dPlane) {
           it = ny;
         }
       }
-      if ((*ny).clusterXAndY_uTPC == false) {
-        ty_uTPC = (*ny).time_uTPC;
-        deltaT_uTPC = std::abs(ty_uTPC - tx_uTPC);
-        if (deltaT_uTPC < minDelta_uTPC && deltaT_uTPC <= dPlane) {
-          minDelta_uTPC = deltaT_uTPC;
-          it_uTPC = ny;
-        }
-      }
+      // if ((*ny).clusterXAndY_uTPC == false) {
+      //   ty_uTPC = (*ny).time_uTPC;
+      //   deltaT_uTPC = std::abs(ty_uTPC - tx_uTPC);
+      //   if (deltaT_uTPC < minDelta_uTPC && deltaT_uTPC <= dPlane) {
+      //     minDelta_uTPC = deltaT_uTPC;
+      //     it_uTPC = ny;
+      //   }
+      // }
     }
     if (it != end(m_tempClusterY)) {
       nx.clusterXAndY = true;
@@ -393,40 +394,41 @@ void NMXClusterer::MatchClustersXY(float dPlane) {
              theCommonCluster.sizeY);
       DTRACE(DEB, "\tdelta time planes: %f", theCommonCluster.deltaPlane);
       //m_clusterXY.emplace_back(std::move(theCommonCluster));
+      // callback(theCommonCluster))
       m_clusterXY_size++;
     }
-    if (it_uTPC != end(m_tempClusterY)) {
-      nx.clusterXAndY_uTPC = true;
-      (*it_uTPC).clusterXAndY_uTPC = true;
-
-      CommonClusterNMX theCommonCluster_uTPC;
-      theCommonCluster_uTPC.sizeX = nx.size;
-      theCommonCluster_uTPC.sizeY = (*it_uTPC).size;
-      theCommonCluster_uTPC.adcX = nx.adc;
-      theCommonCluster_uTPC.adcY = (*it_uTPC).adc;
-      theCommonCluster_uTPC.positionX = nx.position_uTPC;
-      theCommonCluster_uTPC.positionY = (*it_uTPC).position_uTPC;
-      theCommonCluster_uTPC.timeX = nx.time_uTPC;
-      theCommonCluster_uTPC.timeY = (*it_uTPC).time_uTPC;
-      theCommonCluster_uTPC.deltaPlane = theCommonCluster_uTPC.timeX
-          - theCommonCluster_uTPC.timeY;
-      theCommonCluster_uTPC.maxDeltaTimeX = nx.maxDeltaTime;
-      theCommonCluster_uTPC.maxDeltaTimeY = (*it_uTPC).maxDeltaTime;
-      theCommonCluster_uTPC.maxDeltaStripX = nx.maxDeltaStrip;
-      theCommonCluster_uTPC.maxDeltaStripY = (*it_uTPC).maxDeltaStrip;
-
-      DTRACE(DEB, "\ncommon cluster x/y (uTPC):");
-      DTRACE(DEB, "\tpos x/pos y: %f/%f", posx_uTPC, posy_uTPC);
-      DTRACE(DEB, "\ttime x/time y: : %f/%f", tx_uTPC, ty_uTPC);
-      DTRACE(DEB, "\tadc x/adc y: %u/%u", theCommonCluster_uTPC.adcX,
-             theCommonCluster_uTPC.adcY);
-      DTRACE(DEB, "\tsize x/size y: %u/%u", theCommonCluster_uTPC.sizeX,
-             theCommonCluster_uTPC.sizeY);
-      DTRACE(DEB, "\tdelta time planes: %f",
-             theCommonCluster_uTPC.deltaPlane);
-      //m_clusterXY_uTPC.emplace_back(std::move(theCommonCluster_uTPC));
-      m_clusterXY_uTPC_size++;
-    }
+    // if (it_uTPC != end(m_tempClusterY)) {
+    //   nx.clusterXAndY_uTPC = true;
+    //   (*it_uTPC).clusterXAndY_uTPC = true;
+    //
+    //   CommonClusterNMX theCommonCluster_uTPC;
+    //   theCommonCluster_uTPC.sizeX = nx.size;
+    //   theCommonCluster_uTPC.sizeY = (*it_uTPC).size;
+    //   theCommonCluster_uTPC.adcX = nx.adc;
+    //   theCommonCluster_uTPC.adcY = (*it_uTPC).adc;
+    //   theCommonCluster_uTPC.positionX = nx.position_uTPC;
+    //   theCommonCluster_uTPC.positionY = (*it_uTPC).position_uTPC;
+    //   theCommonCluster_uTPC.timeX = nx.time_uTPC;
+    //   theCommonCluster_uTPC.timeY = (*it_uTPC).time_uTPC;
+    //   theCommonCluster_uTPC.deltaPlane = theCommonCluster_uTPC.timeX
+    //       - theCommonCluster_uTPC.timeY;
+    //   theCommonCluster_uTPC.maxDeltaTimeX = nx.maxDeltaTime;
+    //   theCommonCluster_uTPC.maxDeltaTimeY = (*it_uTPC).maxDeltaTime;
+    //   theCommonCluster_uTPC.maxDeltaStripX = nx.maxDeltaStrip;
+    //   theCommonCluster_uTPC.maxDeltaStripY = (*it_uTPC).maxDeltaStrip;
+    //
+    //   DTRACE(DEB, "\ncommon cluster x/y (uTPC):");
+    //   DTRACE(DEB, "\tpos x/pos y: %f/%f", posx_uTPC, posy_uTPC);
+    //   DTRACE(DEB, "\ttime x/time y: : %f/%f", tx_uTPC, ty_uTPC);
+    //   DTRACE(DEB, "\tadc x/adc y: %u/%u", theCommonCluster_uTPC.adcX,
+    //          theCommonCluster_uTPC.adcY);
+    //   DTRACE(DEB, "\tsize x/size y: %u/%u", theCommonCluster_uTPC.sizeX,
+    //          theCommonCluster_uTPC.sizeY);
+    //   DTRACE(DEB, "\tdelta time planes: %f",
+    //          theCommonCluster_uTPC.deltaPlane);
+    //   //m_clusterXY_uTPC.emplace_back(std::move(theCommonCluster_uTPC));
+    //   m_clusterXY_uTPC_size++;
+    // }
   }
 
 }

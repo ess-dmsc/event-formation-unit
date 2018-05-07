@@ -73,7 +73,7 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
   ASSERT_EQ(nmxdata->getNumClustersX(), 3);
   ASSERT_EQ(nmxdata->getNumClustersY(), 4);
   ASSERT_EQ(nmxdata->getNumClustersXY(), 2);
-  ASSERT_EQ(nmxdata->getNumClustersXY_uTPC(), 2);
+  //ASSERT_EQ(nmxdata->getNumClustersXY_uTPC(), 2);
 }
 
 
@@ -93,7 +93,7 @@ TEST_F(NMXClustererTest, Run16_Long) {
   EXPECT_EQ(nmxdata->getNumClustersX(), 9110);
   EXPECT_EQ(nmxdata->getNumClustersY(), 11276);
   EXPECT_EQ(nmxdata->getNumClustersXY(), 7303);
-  EXPECT_EQ(nmxdata->getNumClustersXY_uTPC(), 7089);
+  //EXPECT_EQ(nmxdata->getNumClustersXY_uTPC(), 7089);
 }
 
 TEST_F(NMXClustererTest, FrameCounterError) {
