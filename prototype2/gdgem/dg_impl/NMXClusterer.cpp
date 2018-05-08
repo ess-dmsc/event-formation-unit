@@ -461,14 +461,14 @@ void NMXClusterer::AnalyzeClusters() {
   size_t cntX = ClusterByTime(hitsX.hits(), pDeltaTimeHits, pDeltaStripHits,
                            pDeltaTimeSpan, "x");
 
-  DTRACE(DEB, "%d cluster in x\n", cntX);
+  DTRACE(DEB, "%z cluster in x\n", cntX);
 
   hitsY.sort_and_correct();
 
   size_t cntY = ClusterByTime(hitsY.hits(), pDeltaTimeHits, pDeltaStripHits,
                            pDeltaTimeSpan, "y");
 
-  DTRACE(DEB, "%d cluster in y\n", cntY);
+  DTRACE(DEB, "%z cluster in y\n", cntY);
 
   MatchClustersXY(pDeltaTimePlanes);
 
