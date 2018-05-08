@@ -109,12 +109,11 @@ void HitsQueue::CorrectTriggerData() {
 
 NMXClusterer::NMXClusterer(SRSTime time, SRSMappings chips,
                            uint16_t adcThreshold, size_t minClusterSize, double deltaTimeHits,
-                           uint16_t deltaStripHits, double deltaTimeSpan, double deltaTimePlanes
-                           /* callback() */ ) :
+                           uint16_t deltaStripHits, double deltaTimeSpan  /*, callback() */ ) :
     pTime(time), pChips(chips), pADCThreshold(
     adcThreshold), pMinClusterSize(minClusterSize), pDeltaTimeHits(
     deltaTimeHits), pDeltaStripHits(deltaStripHits), pDeltaTimeSpan(
-    deltaTimeSpan), pDeltaTimePlanes(deltaTimePlanes), m_eventNr(0),
+    deltaTimeSpan), m_eventNr(0),
     hitsX(pTime, deltaTimeHits), hitsY(pTime, deltaTimeHits)
 {
 }
@@ -238,12 +237,11 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
 }
 
 //====================================================================================================================
-size_t NMXClusterer::ClusterByTime(const HitContainer &oldHits, double dTime, int dStrip,
-                                double dSpan, string coordinate) {
+void NMXClusterer::ClusterByTime(const HitContainer &oldHits, double dTime, int dStrip,
+                                double dSpan, std::vector<ClusterNMX>& clusters) {
 
-  ClusterContainer cluster;
+  HitContainer cluster;
   double maxDeltaTime = 0;
-  size_t clusterCount = 0;
   size_t stripCount = 0;
   double time1 = 0, time2 = 0;
   uint16_t adc1 = 0;
@@ -262,8 +260,7 @@ size_t NMXClusterer::ClusterByTime(const HitContainer &oldHits, double dTime, in
     }
 
     if (time1 - time2 > dTime && stripCount > 0) {
-      clusterCount += ClusterByStrip(cluster, dStrip, dSpan, coordinate,
-                                     maxDeltaTime);
+      ClusterByStrip(cluster, dStrip, dSpan, clusters, maxDeltaTime);
       cluster.clear();
       maxDeltaTime = 0;
     }
@@ -275,16 +272,13 @@ size_t NMXClusterer::ClusterByTime(const HitContainer &oldHits, double dTime, in
     stripCount++;
   }
 
-  if (stripCount > 0) {
-    clusterCount += ClusterByStrip(cluster, dStrip, dSpan, coordinate,
-                                   maxDeltaTime);
-  }
-  return clusterCount;
+  if (stripCount > 0)
+    ClusterByStrip(cluster, dStrip, dSpan, clusters, maxDeltaTime);
 }
 
 //====================================================================================================================
-size_t NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
-                                 double dSpan, string coordinate, double maxDeltaTime) {
+void NMXClusterer::ClusterByStrip(HitContainer &cluster, int dStrip,
+                                 double dSpan, std::vector<ClusterNMX>& clusters, double maxDeltaTime) {
   uint16_t maxDeltaStrip = 0;
   double deltaSpan = 0;
 
@@ -298,7 +292,6 @@ size_t NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
   uint16_t adc1 = 0;
   uint16_t strip1 = 0, strip2 = 0;
   size_t stripCount = 0;
-  size_t clusterCount = 0;
 
   std::sort(begin(cluster), end(cluster),
             [](const Eventlet &e1, const Eventlet &e2) {
@@ -315,7 +308,7 @@ size_t NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
     if (stripCount == 0) {
       maxDeltaStrip = 0;
       startTime = time1;
-      DTRACE(DEB, "\n%s cluster:\n", coordinate.c_str());
+      //DTRACE(DEB, "\n%s cluster:\n", coordinate.c_str());
     }
 
     // Add members of a cluster, if it is either the beginning of a cluster,
@@ -343,10 +336,9 @@ size_t NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
       if (stripCount >= pMinClusterSize) {
         centerOfGravity = (centerOfGravity / (double) totalADC);
         centerOfTime = (centerOfTime / (double) totalADC);
-        StoreClusters(centerOfGravity, stripCount,
-                      totalADC, centerOfTime, coordinate,
+        StoreClusters(clusters, centerOfGravity, stripCount,
+                      totalADC, centerOfTime,
                       maxDeltaTime, maxDeltaStrip, deltaSpan);
-        clusterCount++;
         DTRACE(DEB, "******** VALID ********\n");
         maxDeltaStrip = 0;
 
@@ -367,18 +359,15 @@ size_t NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
     deltaSpan = (largestTime - startTime);
     centerOfGravity = (centerOfGravity / (double) totalADC);
     centerOfTime = (centerOfTime / totalADC);
-    StoreClusters(centerOfGravity, stripCount,
-                  totalADC, centerOfTime, coordinate, maxDeltaTime,
+    StoreClusters(clusters, centerOfGravity, stripCount,
+                  totalADC, centerOfTime, maxDeltaTime,
                   maxDeltaStrip, deltaSpan);
-    clusterCount++;
     DTRACE(DEB, "******** VALID ********\n");
   }
-  return clusterCount;
 }
 //====================================================================================================================
-void NMXClusterer::StoreClusters(double clusterPosition, short clusterSize, int clusterADC,
-                                 double clusterTime, string coordinate,
-                                 double maxDeltaTime, int maxDeltaStrip, double deltaSpan) {
+void NMXClusterer::StoreClusters(std::vector<ClusterNMX>& clusters, double clusterPosition, short clusterSize, int clusterADC,
+                                 double clusterTime, double maxDeltaTime, int maxDeltaStrip, double deltaSpan) {
 
   ClusterNMX theCluster;
   theCluster.size = clusterSize;
@@ -390,41 +379,62 @@ void NMXClusterer::StoreClusters(double clusterPosition, short clusterSize, int 
   theCluster.maxDeltaStrip = maxDeltaStrip;
   theCluster.deltaSpan = deltaSpan; // rename to something with time
 
-  if (coordinate == "x" && clusterPosition > -1.0) {
-    m_tempClusterX.emplace_back(std::move(theCluster));
+  if (clusterPosition > -1.0) {
+    clusters.emplace_back(std::move(theCluster));
   }
-  if (coordinate == "y" && clusterPosition > -1.0) {
-    m_tempClusterY.emplace_back(std::move(theCluster));
-  }
+}
 
+bool NMXClusterer::ready() const
+{
+  return (m_tempClusterX.size() || m_tempClusterY.size());
+}
+
+void NMXClusterer::AnalyzeClusters() {
+  hitsX.sort_and_correct();
+  ClusterByTime(hitsX.hits(), pDeltaTimeHits, pDeltaStripHits, pDeltaTimeSpan, m_tempClusterX);
+
+
+  hitsY.sort_and_correct();
+  ClusterByTime(hitsY.hits(), pDeltaTimeHits, pDeltaStripHits, pDeltaTimeSpan, m_tempClusterY);
+
+  DTRACE(DEB, "%z cluster in x\n", m_tempClusterX.size());
+  DTRACE(DEB, "%z cluster in y\n", m_tempClusterY.size());
+
+  stats_clusterX_count += m_tempClusterX.size();
+  stats_clusterY_count += m_tempClusterY.size();
 }
 
 //====================================================================================================================
-void NMXClusterer::MatchClustersXY(double dPlane) {
 
-  for (auto &nx : m_tempClusterX) {
+NMXClusterMatcher::NMXClusterMatcher(double dPlane) : pdPlane(dPlane)
+{
+}
+
+void NMXClusterMatcher::match(std::vector<ClusterNMX>& x_clusters, std::vector<ClusterNMX>& y_clusters)
+{
+  for (auto &nx : x_clusters) {
     double tx = nx.time;
     double posx = nx.position;
 
     double minDelta = 99999999;
     double deltaT = 0;
-    ClusterVector::iterator it = end(m_tempClusterY);
+    ClusterVector::iterator it = end(y_clusters);
 
     double ty = 0;
     double posy = 0;
 
-    for (ClusterVector::iterator ny = begin(m_tempClusterY);
-         ny != end(m_tempClusterY); ++ny) {
+    for (ClusterVector::iterator ny = begin(y_clusters);
+         ny != end(y_clusters); ++ny) {
       if ((*ny).clusterXAndY == false) {
         ty = (*ny).time;
         deltaT = std::abs(ty - tx);
-        if (deltaT < minDelta && deltaT <= dPlane) {
+        if (deltaT < minDelta && deltaT <= pdPlane) {
           minDelta = deltaT;
           it = ny;
         }
       }
     }
-    if (it != end(m_tempClusterY)) {
+    if (it != end(y_clusters)) {
       nx.clusterXAndY = true;
       (*it).clusterXAndY = true;
 
@@ -448,40 +458,10 @@ void NMXClusterer::MatchClustersXY(double dPlane) {
       DTRACE(DEB, "\tdelta time planes: %f", theCommonCluster.deltaPlane);
       //m_clusterXY.emplace_back(std::move(theCommonCluster));
       // callback(theCommonCluster))
-      m_clusterXY_size++;
+      stats_cluster_count++;
     }
   }
 
-}
-
-//====================================================================================================================
-void NMXClusterer::AnalyzeClusters() {
-  hitsX.sort_and_correct();
-
-  size_t cntX = ClusterByTime(hitsX.hits(), pDeltaTimeHits, pDeltaStripHits,
-                           pDeltaTimeSpan, "x");
-
-  DTRACE(DEB, "%z cluster in x\n", cntX);
-
-  hitsY.sort_and_correct();
-
-  size_t cntY = ClusterByTime(hitsY.hits(), pDeltaTimeHits, pDeltaStripHits,
-                           pDeltaTimeSpan, "y");
-
-  DTRACE(DEB, "%z cluster in y\n", cntY);
-
-  MatchClustersXY(pDeltaTimePlanes);
-
-  // m_clusterX.insert(m_clusterX.end(),
-  //                   std::make_move_iterator(m_tempClusterX.begin()),
-  //                   std::make_move_iterator(m_tempClusterX.end()));
-  //
-  // m_clusterY.insert(m_clusterY.end(),
-  //                   std::make_move_iterator(m_tempClusterY.begin()),
-  //                   std::make_move_iterator(m_tempClusterY.end()));
-
-  m_clusterX_size += m_tempClusterX.size();
-  m_clusterY_size += m_tempClusterY.size();
-  m_tempClusterX.clear();
-  m_tempClusterY.clear();
+  x_clusters.clear();
+  y_clusters.clear();
 }

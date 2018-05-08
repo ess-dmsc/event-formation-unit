@@ -47,14 +47,8 @@ struct CommonClusterNMX {
   double deltaPlane;
 };
 
-//using HitTuple = std::tuple<double, int, int>;
-using HitTuple = Eventlet;
-using HitContainer = std::vector<HitTuple>;
-//using ClusterTuple = std::tuple<int, double, int>;
-using ClusterTuple = Eventlet;
-using ClusterContainer = std::vector<ClusterTuple>;
+using HitContainer = std::vector<Eventlet>;
 using ClusterVector = std::vector<ClusterNMX>;
-
 
 class HitsQueue {
 public:
@@ -76,14 +70,24 @@ private:
   bool m_subsequentTrigger {false};
 };
 
+class NMXClusterMatcher {
+public:
+  NMXClusterMatcher(double dPlane);
+  void match(std::vector<ClusterNMX>& x, std::vector<ClusterNMX>& y);
+
+  size_t stats_cluster_count {0};
+  std::vector<ClusterNMX> matched_clusters;
+
+private:
+  double pdPlane {0};
+};
 
 class NMXClusterer {
 public:
   NMXClusterer(SRSTime time,
                SRSMappings chips,
                uint16_t adcThreshold, size_t minClusterSize,
-               double deltaTimeHits, uint16_t deltaStripHits, double deltaTimeSpan,
-               double deltaTimePlanes);
+               double deltaTimeHits, uint16_t deltaStripHits, double deltaTimeSpan);
 
   ~NMXClusterer();
 
@@ -95,34 +99,29 @@ public:
   // Analyzing and storing the clusters
   void AnalyzeClusters();
 
-  size_t ClusterByTime(const HitContainer &oldHits, double dTime, int dStrip,
-                    double dSpan, string coordinate);
-  size_t ClusterByStrip(ClusterContainer &cluster, int dStrip, double dSpan,
-                     string coordinate, double maxDeltaTime);
+  void ClusterByTime(const HitContainer &oldHits, double dTime, int dStrip,
+                    double dSpan, std::vector<ClusterNMX>& clusters);
+  void ClusterByStrip(HitContainer &cluster, int dStrip, double dSpan,
+                      std::vector<ClusterNMX>& clusters, double maxDeltaTime);
 
-  void StoreClusters(double clusterPosition,
+  void StoreClusters(std::vector<ClusterNMX>& clusters, double clusterPosition,
                      short clusterSize, int clusterADC, double clusterTime,
-                     string coordinate, double maxDeltaTime, int maxDeltaStrip, double deltaSpan);
+                     double maxDeltaTime, int maxDeltaStrip, double deltaSpan);
 
-  void MatchClustersXY(double dPlane);
-
-  int getNumClustersX() {
-    return m_clusterX_size;
-  };
-  int getNumClustersY() {
-    return m_clusterY_size;
-  };
-  int getNumClustersXY() {
-    return m_clusterXY_size;
-  };
+  bool ready() const;
 
   // Statistics counters
-  uint64_t stats_fc_error{0};
-  uint64_t stats_bcid_tdc_error{0};
-  uint64_t stats_triggertime_wraps{0};
+  size_t stats_fc_error{0};
+  size_t stats_bcid_tdc_error{0};
+  size_t stats_triggertime_wraps{0};
+  size_t stats_clusterX_count{0};
+  size_t stats_clusterY_count{0};
 
   const uint8_t planeID_X{0};
   const uint8_t planeID_Y{1};
+
+  std::vector<ClusterNMX> m_tempClusterX;
+  std::vector<ClusterNMX> m_tempClusterY;
 
 private:
   SRSTime pTime;
@@ -133,7 +132,6 @@ private:
   double pDeltaTimeHits;
   uint16_t pDeltaStripHits;
   double pDeltaTimeSpan;
-  double pDeltaTimePlanes;
 
   // These are in play for triggering the actual clustering
   double m_oldTriggerTimestamp_ns = 0;
@@ -152,14 +150,4 @@ private:
 
   HitsQueue hitsX;
   HitsQueue hitsY;
-
-  // std::vector<CommonClusterNMX> m_clusterXY;
-  std::vector<ClusterNMX> m_tempClusterX;
-  std::vector<ClusterNMX> m_tempClusterY;
-  //std::vector<ClusterNMX> m_clusterX;
-  //std::vector<ClusterNMX> m_clusterY;
-
-  uint64_t m_clusterXY_size{0};
-  uint64_t m_clusterX_size{0};
-  uint64_t m_clusterY_size{0};
 };
