@@ -5,6 +5,7 @@
 #include <common/Trace.h>
 #include <cstdio>
 #include <gdgem/vmm2srs/ParserSRS.h>
+#include <libs/include/BitMath.h>
 #include <string.h>
 
 //#undef TRC_LEVEL
@@ -12,12 +13,12 @@
 
 int NMXVMM2SRSData::parse(uint32_t data1, uint32_t data2,
                           struct VMM2Data *vmd) {
-  data1 = reversebits(data1);
-  data2 = reversebits(data2);
+  data1 = BitMath::reversebits32(data1);
+  data2 = BitMath::reversebits32(data2);
 
   vmd->tdc = ((data1 >> 18) & 0x3f) + (((data1 >> 8) & 0x03) << 6);
   vmd->adc = ((data1 >> 24) & 0xff) + (((data1 >> 16) & 0x03) << 8);
-  vmd->bcid = gray2bin32(((data1 >> 10) & 0x3f) + (((data1 >> 0) & 0x3f) << 6));
+  vmd->bcid = BitMath::gray2bin32(((data1 >> 10) & 0x3f) + (((data1 >> 0) & 0x3f) << 6));
   vmd->chno = (data2 >> 2) & 0x3f;
   vmd->overThreshold = (data2 >> 1) & 0x01;
   return 0;
@@ -95,21 +96,4 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
     }
   }
   return elems;
-}
-
-unsigned int NMXVMM2SRSData::gray2bin32(unsigned int num) {
-  num = num ^ (num >> 16);
-  num = num ^ (num >> 8);
-  num = num ^ (num >> 4);
-  num = num ^ (num >> 2);
-  num = num ^ (num >> 1);
-  return num;
-}
-
-unsigned int NMXVMM2SRSData::reversebits(register unsigned int x) {
-  x = (((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1));
-  x = (((x & 0xcccccccc) >> 2) | ((x & 0x33333333) << 2));
-  x = (((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4));
-  x = (((x & 0xff00ff00) >> 8) | ((x & 0x00ff00ff) << 8));
-  return ((x >> 16) | (x << 16));
 }
