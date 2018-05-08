@@ -11,6 +11,7 @@ set(CounterTest_INC
   ../libs/include/Counter.h)
 create_test_executable(CounterTest "")
 
+
 set(StatCounterTest_SRC
   ../libs/test/Counter/testmain.cpp
   ../libs/test/Counter/StatCounterTest.cpp)
@@ -19,3 +20,8 @@ set(StatCounterTest_INC
 create_test_executable(StatCounterTest "")
 
 
+set(BitMathTest_SRC
+../libs/test/BitMathTest.cpp)
+set(StatCounterTest_INC
+../libs/include/BitMath.h)
+create_test_executable(BitMathTest "")
