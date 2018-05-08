@@ -31,8 +31,8 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
   int16_t lspan_max = std::numeric_limits<int16_t>::min();
   int16_t uspan_min = std::numeric_limits<int16_t>::max();
   int16_t uspan_max = std::numeric_limits<int16_t>::min();
-  uint64_t earliest = std::min(time_start, time_end - static_cast<uint64_t>(max_timedif));
-  std::set<uint64_t> timebins;
+  double earliest = std::min(time_start, time_end - static_cast<double>(max_timedif));
+  std::set<double> timebins;
   for (auto it = entries.rbegin(); it != entries.rend(); ++it) {
     auto e = *it;
     if (e.time == time_end) {
@@ -136,4 +136,4 @@ bool EventNMX::meets_lower_cirterion(int16_t max_lu) const {
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }
 
-uint64_t EventNMX::time_start() const { return time_start_; }
+double EventNMX::time_start() const { return time_start_; }

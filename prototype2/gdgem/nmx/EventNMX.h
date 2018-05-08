@@ -40,8 +40,8 @@ struct PlaneNMX {
   int16_t uncert_upper{
       -1}; // upper uncertainty (strip span of eventlets in latest few timebins)
 
-  uint64_t time_start{0}; // start of event timestamp
-  uint64_t time_end{0};   // end of event timestamp
+  double time_start{0}; // start of event timestamp
+  double time_end{0};   // end of event timestamp
   double integral{0.0};   // sum of adc values
 
   std::list<Eventlet> entries; // eventlets in plane
@@ -70,7 +70,7 @@ public:
   bool meets_lower_cirterion(int16_t max_lu) const;
 
   // @brief returns timestamp for start of event (earlier of 2 planes)
-  uint64_t time_start() const;
+  double time_start() const;
 
   // @brief prints values for debug purposes
   std::string debug() const;
@@ -81,5 +81,5 @@ public:
 
 private:
   bool valid_{false};      // event has valid entry strips in both planes
-  uint64_t time_start_{0}; // start of event timestamp (earlier of 2 planes)
+  double time_start_{0}; // start of event timestamp (earlier of 2 planes)
 };

@@ -7,7 +7,7 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-HitsQueue::HitsQueue(SRSTime Time, float deltaTimeHits)
+HitsQueue::HitsQueue(SRSTime Time, double deltaTimeHits)
     : pTime(Time), pDeltaTimeHits(deltaTimeHits) {}
 
 const HitContainer& HitsQueue::hits() const
@@ -15,26 +15,34 @@ const HitContainer& HitsQueue::hits() const
   return hitsOut;
 }
 
-void HitsQueue::store(uint16_t strip, short adc, float chipTime) {
+void HitsQueue::store(uint16_t strip, uint16_t adc, double chipTime) {
   if (chipTime < pTime.max_chip_time_in_window()) {
-    hitsNew.emplace_back(chipTime, strip, adc);
+    hitsNew.emplace_back(Eventlet());
+    auto &e = hitsNew[hitsNew.size() - 1];
+    e.adc = adc;
+    e.strip = strip;
+    e.time = chipTime;
   } else {
-    hitsOld.emplace_back(chipTime, strip, adc);
+    hitsOld.emplace_back(Eventlet());
+    auto &e = hitsOld[hitsOld.size() - 1];
+    e.adc = adc;
+    e.strip = strip;
+    e.time = chipTime;
   }
 }
 
 void HitsQueue::sort_and_correct()
 {
   std::sort(begin(hitsOld), end(hitsOld),
-            [](const ClusterTuple &t1, const ClusterTuple &t2) {
-              return std::get<0>(t1) < std::get<0>(t2);
+            [](const Eventlet &e1, const Eventlet &e2) {
+              return e1.time <= e2.time;
             });
 
   std::sort(begin(hitsNew), end(hitsNew),
-            [](const ClusterTuple &t1, const ClusterTuple &t2) {
-              return std::get<0>(t1) < std::get<0>(t2);
+            [](const Eventlet &e1, const Eventlet &e2) {
+              return e1.time <= e2.time;
             });
-  CorrectTriggerData(hitsNew, hitsOld, pDeltaTimeHits);
+  CorrectTriggerData();
 
   hitsOut = std::move(hitsOld);
 
@@ -49,26 +57,25 @@ void HitsQueue::subsequentTrigger(bool trig)
   m_subsequentTrigger = trig;
 }
 
-void HitsQueue::CorrectTriggerData(HitContainer &hits, HitContainer &oldHits,
-                                   float correctionTime) {
+void HitsQueue::CorrectTriggerData() {
   if (!m_subsequentTrigger)
     return;
 
-  const auto &itHitsBegin = begin(hits);
-  const auto &itHitsEnd = end(hits);
-  const auto &itOldHitsBegin = oldHits.rend();
-  const auto &itOldHitsEnd = oldHits.rbegin();
+  const auto &itHitsBegin = begin(hitsNew);
+  const auto &itHitsEnd = end(hitsNew);
+  const auto &itOldHitsBegin = hitsOld.rend();
+  const auto &itOldHitsEnd = hitsOld.rbegin();
 
   // If either list is empty
   if (itHitsBegin == itHitsEnd || itOldHitsBegin == itOldHitsEnd)
     return;
 
-  float timePrevious = std::get<0>(*itOldHitsEnd); // Newest of the old
+  double timePrevious = itOldHitsEnd->time; // Newest of the old
   // oldest of the new + correct into time space of the old
-  float timeNext = std::get<0>(*itHitsBegin) + pTime.trigger_period();
-  float deltaTime = timeNext - timePrevious;
+  double timeNext = itHitsBegin->time + pTime.trigger_period();
+  double deltaTime = timeNext - timePrevious;
   //Continue only if the first hit in hits is close enough in time to the last hit in oldHits
-  if (deltaTime > correctionTime)
+  if (deltaTime > pDeltaTimeHits)
     return;
 
   HitContainer::iterator itFind;
@@ -78,28 +85,31 @@ void HitsQueue::CorrectTriggerData(HitContainer &hits, HitContainer &oldHits,
     timePrevious = timeNext;
     //At the first iteration, timeNext is again set to the time of the first hit in hits
     // + correct into time space of the old
-    timeNext = std::get<0>(*itFind) + pTime.trigger_period();
+    timeNext = itFind->time + pTime.trigger_period();
 
     //At the first iteration, delta time is 0
     deltaTime = timeNext - timePrevious;
 
-    if (deltaTime > correctionTime)
+    if (deltaTime > pDeltaTimeHits)
       break;
 
-    oldHits.emplace_back(timeNext, std::get<1>(*itFind),
-                         std::get<2>(*itFind));
+    hitsOld.emplace_back(Eventlet());
+    auto &e = hitsNew[hitsNew.size() - 1];
+    e.adc = itFind->adc;
+    e.strip = itFind->strip;
+    e.time = timeNext;
   }
 
   //Deleting all hits that have been inserted into oldHits (up to itFind, but not including itFind)
-  hits.erase(itHitsBegin, itFind);
+  hitsNew.erase(itHitsBegin, itFind);
 }
 
 
 
 
 NMXClusterer::NMXClusterer(SRSTime time, SRSMappings chips,
-                           int adcThreshold, int minClusterSize, float deltaTimeHits,
-                           int deltaStripHits, float deltaTimeSpan, float deltaTimePlanes
+                           int adcThreshold, int minClusterSize, double deltaTimeHits,
+                           int deltaStripHits, double deltaTimeSpan, double deltaTimePlanes
                            /* callback() */ ) :
     pTime(time), pChips(chips), pADCThreshold(
     adcThreshold), pMinClusterSize(minClusterSize), pDeltaTimeHits(
@@ -228,11 +238,11 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
 }
 
 //====================================================================================================================
-int NMXClusterer::ClusterByTime(const HitContainer &oldHits, float dTime, int dStrip,
-                                float dSpan, string coordinate) {
+int NMXClusterer::ClusterByTime(const HitContainer &oldHits, double dTime, int dStrip,
+                                double dSpan, string coordinate) {
 
   ClusterContainer cluster;
-  float maxDeltaTime = 0;
+  double maxDeltaTime = 0;
   int clusterCount = 0;
   int stripCount = 0;
   double time1 = 0, time2 = 0;
@@ -242,9 +252,9 @@ int NMXClusterer::ClusterByTime(const HitContainer &oldHits, float dTime, int dS
   for (const auto &itOldHits : oldHits) {
     time2 = time1;
 
-    time1 = std::get<0>(itOldHits);
-    strip1 = std::get<1>(itOldHits);
-    adc1 = std::get<2>(itOldHits);
+    time1 = itOldHits.time;
+    strip1 = itOldHits.strip;
+    adc1 = itOldHits.adc;
 
     if (time1 - time2 <= dTime && stripCount > 0
         && maxDeltaTime < (time1 - time2)) {
@@ -270,17 +280,17 @@ int NMXClusterer::ClusterByTime(const HitContainer &oldHits, float dTime, int dS
 
 //====================================================================================================================
 int NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
-                                 float dSpan, string coordinate, float maxDeltaTime) {
+                                 double dSpan, string coordinate, double maxDeltaTime) {
   int maxDeltaStrip = 0;
-  float deltaSpan = 0;
+  double deltaSpan = 0;
 
-  float startTime = 0;
-  float largestTime = 0;
+  double startTime = 0;
+  double largestTime = 0;
 
-  float centerOfGravity = -1;
-  float centerOfTime = 0;
+  double centerOfGravity = -1;
+  double centerOfTime = 0;
   int totalADC = 0;
-  float time1 = 0;
+  double time1 = 0;
   int adc1 = 0;
   int strip1 = 0, strip2 = 0;
   int stripCount = 0;
@@ -327,8 +337,8 @@ int NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
         || largestTime - startTime > dSpan) {
       // Valid cluster
       if (stripCount >= pMinClusterSize) {
-        centerOfGravity = (centerOfGravity / (float) totalADC);
-        centerOfTime = (centerOfTime / (float) totalADC);
+        centerOfGravity = (centerOfGravity / (double) totalADC);
+        centerOfTime = (centerOfTime / (double) totalADC);
         StoreClusters(centerOfGravity, stripCount,
                       totalADC, centerOfTime, coordinate,
                       maxDeltaTime, maxDeltaStrip, deltaSpan);
@@ -351,7 +361,7 @@ int NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
   // At the end of the clustering, check again if there is a last valid cluster
   if (stripCount >= pMinClusterSize) {
     deltaSpan = (largestTime - startTime);
-    centerOfGravity = (centerOfGravity / (float) totalADC);
+    centerOfGravity = (centerOfGravity / (double) totalADC);
     centerOfTime = (centerOfTime / totalADC);
     StoreClusters(centerOfGravity, stripCount,
                   totalADC, centerOfTime, coordinate, maxDeltaTime,
@@ -362,9 +372,9 @@ int NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
   return clusterCount;
 }
 //====================================================================================================================
-void NMXClusterer::StoreClusters(float clusterPosition, short clusterSize, int clusterADC,
-                                 float clusterTime, string coordinate,
-                                 float maxDeltaTime, int maxDeltaStrip, float deltaSpan) {
+void NMXClusterer::StoreClusters(double clusterPosition, short clusterSize, int clusterADC,
+                                 double clusterTime, string coordinate,
+                                 double maxDeltaTime, int maxDeltaStrip, double deltaSpan) {
 
   ClusterNMX theCluster;
   theCluster.size = clusterSize;
@@ -386,18 +396,18 @@ void NMXClusterer::StoreClusters(float clusterPosition, short clusterSize, int c
 }
 
 //====================================================================================================================
-void NMXClusterer::MatchClustersXY(float dPlane) {
+void NMXClusterer::MatchClustersXY(double dPlane) {
 
   for (auto &nx : m_tempClusterX) {
-    float tx = nx.time;
-    float posx = nx.position;
+    double tx = nx.time;
+    double posx = nx.position;
 
-    float minDelta = 99999999;
-    float deltaT = 0;
+    double minDelta = 99999999;
+    double deltaT = 0;
     ClusterVector::iterator it = end(m_tempClusterY);
 
-    float ty = 0;
-    float posy = 0;
+    double ty = 0;
+    double posy = 0;
 
     for (ClusterVector::iterator ny = begin(m_tempClusterY);
          ny != end(m_tempClusterY); ++ny) {

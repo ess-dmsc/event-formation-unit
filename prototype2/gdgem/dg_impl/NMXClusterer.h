@@ -29,12 +29,12 @@ struct Hit
 struct ClusterNMX {
   int size;
   int adc;
-  float position;
-  float time;
+  double position;
+  double time;
   bool clusterXAndY;
-  float maxDeltaTime;
-  float maxDeltaStrip;
-  float deltaSpan;
+  double maxDeltaTime;
+  double maxDeltaStrip;
+  double deltaSpan;
 };
 
 struct CommonClusterNMX {
@@ -42,24 +42,25 @@ struct CommonClusterNMX {
   int sizeY;
   int adcX;
   int adcY;
-  float timeX;
-  float timeY;
-  float deltaPlane;
+  double timeX;
+  double timeY;
+  double deltaPlane;
 };
 
-using HitTuple = std::tuple<float, int, int>;
+//using HitTuple = std::tuple<double, int, int>;
+using HitTuple = Eventlet;
 using HitContainer = std::vector<HitTuple>;
-using ClusterTuple = std::tuple<int, float, int>;
+using ClusterTuple = std::tuple<int, double, int>;
 using ClusterContainer = std::vector<ClusterTuple>;
 using ClusterVector = std::vector<ClusterNMX>;
 
 
 class HitsQueue {
 public:
-  HitsQueue(SRSTime Time, float deltaTimeHits);
-  void store(uint16_t strip, short adc, float chipTime);
+  HitsQueue(SRSTime Time, double deltaTimeHits);
+  void store(uint16_t strip, uint16_t adc, double chipTime);
   void sort_and_correct();
-  void CorrectTriggerData(HitContainer &hits, HitContainer &oldHits, float correctionTime);
+  void CorrectTriggerData();
   void subsequentTrigger(bool);
 
   const HitContainer& hits() const;
@@ -70,7 +71,7 @@ private:
   HitContainer hitsOut;
 
   SRSTime pTime;
-  float pDeltaTimeHits {200};
+  double pDeltaTimeHits {200};
   bool m_subsequentTrigger {false};
 };
 
@@ -80,8 +81,8 @@ public:
   NMXClusterer(SRSTime time,
                SRSMappings chips,
                int adcThreshold, int minClusterSize,
-               float deltaTimeHits, int deltaStripHits, float deltaTimeSpan,
-               float deltaTimePlanes);
+               double deltaTimeHits, int deltaStripHits, double deltaTimeSpan,
+               double deltaTimePlanes);
 
   ~NMXClusterer();
 
@@ -93,16 +94,16 @@ public:
   // Analyzing and storing the clusters
   void AnalyzeClusters();
 
-  int ClusterByTime(const HitContainer &oldHits, float dTime, int dStrip,
-                    float dSpan, string coordinate);
-  int ClusterByStrip(ClusterContainer &cluster, int dStrip, float dSpan,
-                     string coordinate, float maxDeltaTime);
+  int ClusterByTime(const HitContainer &oldHits, double dTime, int dStrip,
+                    double dSpan, string coordinate);
+  int ClusterByStrip(ClusterContainer &cluster, int dStrip, double dSpan,
+                     string coordinate, double maxDeltaTime);
 
-  void StoreClusters(float clusterPosition,
-                     short clusterSize, int clusterADC, float clusterTime,
-                     string coordinate, float maxDeltaTime, int maxDeltaStrip, float deltaSpan);
+  void StoreClusters(double clusterPosition,
+                     short clusterSize, int clusterADC, double clusterTime,
+                     string coordinate, double maxDeltaTime, int maxDeltaStrip, double deltaSpan);
 
-  void MatchClustersXY(float dPlane);
+  void MatchClustersXY(double dPlane);
 
   int getNumClustersX() {
     return m_clusterX_size;
@@ -128,10 +129,10 @@ private:
 
   int pADCThreshold;
   int pMinClusterSize;
-  float pDeltaTimeHits;
+  double pDeltaTimeHits;
   int pDeltaStripHits;
-  float pDeltaTimeSpan;
-  float pDeltaTimePlanes;
+  double pDeltaTimeSpan;
+  double pDeltaTimePlanes;
 
   // These are in play for triggering the actual clustering
   double m_oldTriggerTimestamp_ns = 0;
