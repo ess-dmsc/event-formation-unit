@@ -10,6 +10,7 @@
 
 #include <cinttypes>
 #include <string.h>
+#include <libs/include/BitMath.h>
 
 static const int maximumNumberVMM{32};
 
@@ -82,14 +83,4 @@ public:
   uint32_t timet0s{0};
 
   uint32_t max_elements{0}; // Maximum capacity of data array
-
-private:
-  /// helper function to reverse bits in a uint32_t
-  uint32_t reversebits(uint32_t data);
-
-  /// helper function to reverse bits in a uint16_t
-  uint16_t reversebits16(register unsigned short data);
-
-  unsigned int
-  gray2bin32(unsigned int num); /**< helper function to decode gray codes */
 };

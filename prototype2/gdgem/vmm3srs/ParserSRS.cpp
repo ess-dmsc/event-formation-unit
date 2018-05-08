@@ -7,8 +7,8 @@
 #include <gdgem/vmm3srs/ParserSRS.h>
 #include <string.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 
@@ -18,13 +18,13 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
   if (dataflag) {
     /// Data
     XTRACE(PROCESS, DEB, "SRS Data\n");
-    uint32_t data1r = reversebits(data1);
-    uint16_t data2r = reversebits16(data2);
+    uint32_t data1r = BitMath::reversebits32(data1);
+    uint16_t data2r = BitMath::reversebits16(data2);
 
     vmd->vmmid = (data1 >> 22) & 0x1F;
     vmd->tdc = data2r & 0xff;
     vmd->adc = (data1r >> 10) & 0x3FF;
-    vmd->bcid = gray2bin32(((data1r >> 20) & 0xFFF));
+    vmd->bcid = BitMath::gray2bin32(((data1r >> 20) & 0xFFF));
     vmd->chno = (data2r >> 8) & 0x3f;
     vmd->overThreshold = (data2r >> 1) & 0x01;
     uint8_t triggerOffset = (data1 >> 27) & 0x1F;
@@ -118,31 +118,4 @@ int VMM3SRSData::receive(const char *buffer, int size) {
     }
   }
   return elems;
-}
-
-unsigned int VMM3SRSData::gray2bin32(unsigned int num) {
-  num = num ^ (num >> 16);
-  num = num ^ (num >> 8);
-  num = num ^ (num >> 4);
-  num = num ^ (num >> 2);
-  num = num ^ (num >> 1);
-  return num;
-}
-
-///
-unsigned int VMM3SRSData::reversebits(register unsigned int x) {
-  x = (((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1));
-  x = (((x & 0xcccccccc) >> 2) | ((x & 0x33333333) << 2));
-  x = (((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4));
-  x = (((x & 0xff00ff00) >> 8) | ((x & 0x00ff00ff) << 8));
-  return ((x >> 16) | (x << 16));
-}
-
-///
-uint16_t VMM3SRSData::reversebits16(register unsigned short x) {
-  x = (((x & 0xaaaa) >> 1) | ((x & 0x5555) << 1));
-  x = (((x & 0xcccc) >> 2) | ((x & 0x3333) << 2));
-  x = (((x & 0xf0f0) >> 4) | ((x & 0x0f0f) << 4));
-  x = (((x & 0xff00) >> 8) | ((x & 0x00ff) << 8));
-  return ((x >> 16) | (x << 16));
 }
