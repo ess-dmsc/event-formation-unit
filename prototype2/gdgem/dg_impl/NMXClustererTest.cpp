@@ -91,8 +91,8 @@ TEST_F(NMXClustererTest, Run16_Long) {
   EXPECT_EQ(0, nmxdata->stats_fc_error);
   EXPECT_EQ(0, nmxdata->stats_bcid_tdc_error);
   EXPECT_EQ(nmxdata->getNumClustersX(), 9110);
-  EXPECT_EQ(nmxdata->getNumClustersY(), 11276);
-  EXPECT_EQ(nmxdata->getNumClustersXY(), 7303);
+  EXPECT_EQ(nmxdata->getNumClustersY(), 11275);
+  EXPECT_EQ(nmxdata->getNumClustersXY(), 7302);
   //EXPECT_EQ(nmxdata->getNumClustersXY_uTPC(), 7089);
 }
 

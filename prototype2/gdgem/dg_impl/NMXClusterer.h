@@ -9,6 +9,7 @@
 
 #include <gdgem/vmm2srs/SRSMappings.h>
 #include <gdgem/vmm2srs/SRSTime.h>
+#include <gdgem/nmx/Eventlet.h>
 
 using std::string;
 
@@ -29,15 +30,11 @@ struct ClusterNMX {
   int size;
   int adc;
   float position;
-  float position_uTPC;
   float time;
-  float time_uTPC;
   bool clusterXAndY;
-  bool clusterXAndY_uTPC;
   float maxDeltaTime;
   float maxDeltaStrip;
   float deltaSpan;
-
 };
 
 struct CommonClusterNMX {
@@ -45,28 +42,22 @@ struct CommonClusterNMX {
   int sizeY;
   int adcX;
   int adcY;
-  float positionX;
-  float positionY;
   float timeX;
   float timeY;
   float deltaPlane;
-  float maxDeltaTimeX;
-  float maxDeltaTimeY;
-  int maxDeltaStripX;
-  int maxDeltaStripY;
 };
 
-using HitContainer = std::vector<std::tuple<float, int, int>>;
-using ClusterContainer = std::vector<std::tuple<int, float, int>>;
 using HitTuple = std::tuple<float, int, int>;
+using HitContainer = std::vector<HitTuple>;
 using ClusterTuple = std::tuple<int, float, int>;
+using ClusterContainer = std::vector<ClusterTuple>;
 using ClusterVector = std::vector<ClusterNMX>;
 
 
 class HitsQueue {
 public:
   HitsQueue(SRSTime Time, float deltaTimeHits);
-  void store(uint16_t strip, short adc, short bcid, float chipTime);
+  void store(uint16_t strip, short adc, float chipTime);
   void sort_and_correct();
   void CorrectTriggerData(HitContainer &hits, HitContainer &oldHits, float correctionTime);
   void subsequentTrigger(bool);
@@ -107,9 +98,9 @@ public:
   int ClusterByStrip(ClusterContainer &cluster, int dStrip, float dSpan,
                      string coordinate, float maxDeltaTime);
 
-  void StoreClusters(float clusterPosition, float clusterPositionUTPC,
+  void StoreClusters(float clusterPosition,
                      short clusterSize, int clusterADC, float clusterTime,
-                     float clusterTimeUTPC, string coordinate, float maxDeltaTime, int maxDeltaStrip, float deltaSpan);
+                     string coordinate, float maxDeltaTime, int maxDeltaStrip, float deltaSpan);
 
   void MatchClustersXY(float dPlane);
 
@@ -121,10 +112,6 @@ public:
   };
   int getNumClustersXY() {
     return m_clusterXY_size;
-  };
-
-  int getNumClustersXY_uTPC() {
-    return m_clusterXY_uTPC_size;
   };
 
   // Statistics counters
@@ -165,7 +152,6 @@ private:
   HitsQueue hitsY;
 
   // std::vector<CommonClusterNMX> m_clusterXY;
-  // std::vector<CommonClusterNMX> m_clusterXY_uTPC;
   std::vector<ClusterNMX> m_tempClusterX;
   std::vector<ClusterNMX> m_tempClusterY;
   //std::vector<ClusterNMX> m_clusterX;
@@ -174,5 +160,4 @@ private:
   uint64_t m_clusterXY_size{0};
   uint64_t m_clusterX_size{0};
   uint64_t m_clusterY_size{0};
-  uint64_t m_clusterXY_uTPC_size{0};
 };

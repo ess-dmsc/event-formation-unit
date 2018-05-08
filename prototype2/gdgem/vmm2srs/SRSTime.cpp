@@ -9,7 +9,6 @@ void SRSTime::set_rebin_tdc(bool rebin_tdc) {
 
 void SRSTime::set_bc_clock(double bc_clock) {
   bc_clock_ = bc_clock;
-  max_bcid_in_window_ = acquisition_window_ * bc_clock_ / internal_SRS_clock_;
 }
 
 void SRSTime::set_tac_slope(double tac_slope) {
@@ -27,7 +26,7 @@ void SRSTime::set_target_resolution(double target_resolution) {
 void SRSTime::set_acquisition_window(uint16_t acq_win)
 {
   acquisition_window_ = acq_win;
-  max_bcid_in_window_ = acquisition_window_ * bc_clock_ / internal_SRS_clock_;
+  max_chip_time_in_window_ = 1000 * acquisition_window_ / internal_SRS_clock_;
 }
 
 bool SRSTime::rebin_tdc() const {
@@ -55,9 +54,9 @@ uint16_t SRSTime::acquisition_window() const
   return acquisition_window_;
 }
 
-double SRSTime::max_bcid_in_window() const
+double SRSTime::max_chip_time_in_window() const
 {
-  return max_bcid_in_window_;
+  return max_chip_time_in_window_;
 }
 
 double SRSTime::delta_timestamp_ns(double old_timestamp_ns,
