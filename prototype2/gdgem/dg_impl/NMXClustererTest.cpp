@@ -9,6 +9,7 @@
 #include <gdgem/dg_impl/TestData.h>
 #include <gdgem/dg_impl/TestDataLong.h>
 #include <test/TestBase.h>
+#include <functional>
 
 #define UNUSED __attribute__((unused))
 
@@ -33,110 +34,111 @@ protected:
     srstime.set_trigger_resolution(3.125);
     srstime.set_acquisition_window(4000);
 
-    nmxdata =
-        new NMXClusterer(srstime, mapping, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits, pDeltaTimeSpan);
-    matcher = new NMXClusterMatcher(pDeltaTimePlanes);
+    matcher = std::make_shared<NMXClusterMatcher>(pDeltaTimePlanes);
+    clusters_x = std::make_shared<NMXClusterer>(srstime, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits, pDeltaTimeSpan);
+    clusters_y = std::make_shared<NMXClusterer>(srstime, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits, pDeltaTimeSpan);
+    sorter = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold,  pDeltaTimeHits, *clusters_x, *clusters_y);
   }
 
   virtual void TearDown() {
-    delete nmxdata;
-    delete matcher;
   }
 
-  int pADCThreshold = 0;
-  int pMinClusterSize = 3;
+  uint16_t pADCThreshold = 0;
+  size_t pMinClusterSize = 3;
   //Maximum time difference between strips in time sorted cluster (x or y)
   float pDeltaTimeHits = 200;
   //Number of missing strips in strip sorted cluster (x or y)
-  int pDeltaStripHits = 2;
+  uint16_t pDeltaStripHits = 2;
   //Maximum time span for total cluster (x or y)
   float pDeltaTimeSpan = 500;
   //Maximum cluster time difference between matching clusters in x and y
   //Cluster time is either calculated with center-of-mass or uTPC method
   float pDeltaTimePlanes = 200;
 
-  NMXClusterer *nmxdata;
-  NMXClusterMatcher *matcher;
+  std::shared_ptr<NMXClusterMatcher> matcher;
+  std::shared_ptr<NMXClusterer> clusters_x;
+  std::shared_ptr<NMXClusterer> clusters_y;
+  std::shared_ptr<NMXHitSorter> sorter;
 };
 
 TEST_F(NMXClustererTest, Run16_line_110168_110323) {
   for (auto hit : Run16) { // replace with UDP receive()
-    int result = nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
-                                      hit.overthreshold);
+    int result = sorter->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                                     hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
+                                     hit.overthreshold);
     if (result == -1) {
       printf("result == -1\n");
       break;
     }
-    if (nmxdata->ready())
+    if (clusters_x->ready() || clusters_y->ready())
     {
-      matcher->match(nmxdata->m_tempClusterX, nmxdata->m_tempClusterY);
+      matcher->match(clusters_x->clusters, clusters_y->clusters);
     }
   }
-  EXPECT_EQ(0, nmxdata->stats_triggertime_wraps);
-  EXPECT_EQ(0, nmxdata->stats_fc_error);
-  EXPECT_EQ(0, nmxdata->stats_bcid_tdc_error);
-  EXPECT_EQ(nmxdata->stats_clusterX_count, 3);
-  EXPECT_EQ(nmxdata->stats_clusterY_count, 4);
-  EXPECT_EQ(matcher->stats_cluster_count, 2);
-  EXPECT_EQ(nmxdata->stats_fc_error, 0);
+  EXPECT_EQ(0, sorter->stats_triggertime_wraps);
+  EXPECT_EQ(0, sorter->stats_fc_error);
+  EXPECT_EQ(0, sorter->stats_bcid_tdc_error);
+  EXPECT_EQ(clusters_x->stats_cluster_count, 5);
+  EXPECT_EQ(clusters_y->stats_cluster_count, 8);
+  EXPECT_EQ(matcher->stats_cluster_count, 4);
+  EXPECT_EQ(sorter->stats_fc_error, 0);
 }
 
 
 TEST_F(NMXClustererTest, Run16_Long) {
   for (auto hit : Run16_Long) { // replace with UDP receive()
-    int result = nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
-                                      hit.overthreshold);
+    int result = sorter->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                                     hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
+                                     hit.overthreshold);
     if (result == -1) {
       printf("result == -1\n");
       break;
     }
-    if (nmxdata->ready())
+    if (clusters_x->ready() || clusters_y->ready())
     {
-      matcher->match(nmxdata->m_tempClusterX, nmxdata->m_tempClusterY);
+      matcher->match(clusters_x->clusters, clusters_y->clusters);
     }
   }
-  EXPECT_EQ(0, nmxdata->stats_triggertime_wraps);
-  EXPECT_EQ(0, nmxdata->stats_fc_error);
-  EXPECT_EQ(0, nmxdata->stats_bcid_tdc_error);
-  EXPECT_EQ(nmxdata->stats_clusterX_count, 9106);
-  EXPECT_EQ(nmxdata->stats_clusterY_count, 11268);
+  EXPECT_EQ(0, sorter->stats_triggertime_wraps);
+  EXPECT_EQ(0, sorter->stats_fc_error);
+  EXPECT_EQ(0, sorter->stats_bcid_tdc_error);
+  EXPECT_EQ(clusters_x->stats_cluster_count, 9106);
+  EXPECT_EQ(clusters_y->stats_cluster_count, 11268);
   EXPECT_EQ(matcher->stats_cluster_count, 7297);
-  EXPECT_EQ(nmxdata->stats_fc_error, 0);
+  EXPECT_EQ(sorter->stats_fc_error,0);
 }
 
 TEST_F(NMXClustererTest, FrameCounterError) {
-  EXPECT_EQ(0, nmxdata->stats_fc_error);
+  EXPECT_EQ(0, sorter->stats_fc_error);
 
   for (auto hit : err_fc_error) {
-    nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec,
+    sorter->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec,
                          hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
                          hit.overthreshold);
   }
-  EXPECT_EQ(1, nmxdata->stats_fc_error);
+  EXPECT_EQ(1, sorter->stats_fc_error);
 }
 
 TEST_F(NMXClustererTest, BcidTdcError) {
-  EXPECT_EQ(0, nmxdata->stats_bcid_tdc_error);
+  EXPECT_EQ(0, sorter->stats_bcid_tdc_error);
 
   for (auto hit : err_bcid_tdc_error) {
-    nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec,
+    sorter->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec,
                          hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
                          hit.overthreshold);
   }
-  EXPECT_EQ(4, nmxdata->stats_bcid_tdc_error); // Two in X and Two in Y
+  EXPECT_EQ(4, sorter->stats_bcid_tdc_error); // Two in X and Two in Y
 }
 
 TEST_F(NMXClustererTest, TriggerTimeWraps) {
-  EXPECT_EQ(0, nmxdata->stats_triggertime_wraps);
+  EXPECT_EQ(0, sorter->stats_triggertime_wraps);
 
   for (auto hit : err_triggertime_error) {
-    nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec,
+    sorter->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec,
                          hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
                          hit.overthreshold);
   }
-  EXPECT_EQ(1, nmxdata->stats_triggertime_wraps);
+  EXPECT_EQ(1, sorter->stats_triggertime_wraps);
 }
 
 #if 0

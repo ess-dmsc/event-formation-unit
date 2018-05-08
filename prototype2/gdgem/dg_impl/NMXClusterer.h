@@ -31,19 +31,45 @@ private:
   bool m_subsequentTrigger {false};
 };
 
+class NMXClusterer {
+public:
+  NMXClusterer(SRSTime time, size_t minClusterSize,
+               double deltaTimeHits, uint16_t deltaStripHits, double deltaTimeSpan);
+
+  void ClusterByTime(const HitContainer &oldHits);
+  void ClusterByStrip(HitContainer &cluster, double maxDeltaTime);
+
+  void StoreClusters(double clusterPosition, size_t clusterSize, uint64_t clusterADC, double clusterTime,
+                     double maxDeltaTime, int maxDeltaStrip, double deltaSpan);
+
+  bool ready() const;
+
+  size_t stats_cluster_count{0};
+
+  std::vector<ClusterNMX> clusters;
+
+private:
+  SRSTime pTime;
+
+  uint16_t pADCThreshold;
+  size_t pMinClusterSize;
+  double pDeltaTimeHits;
+  uint16_t pDeltaStripHits;
+  double pDeltaTimeSpan;
+};
+
 class NMXHitSorter {
-
-  using Callback_t = std::function<void(const HitsQueue&)>;
-
-  NMXHitSorter(SRSTime time, SRSMappings chips,
-               uint16_t adcThreshold, size_t minClusterSize,
-               double deltaTimeHits, uint16_t deltaStripHits, double deltaTimeSpan,
-               Callback_t cb_x, Callback_t cb_y);
+public:
+  NMXHitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold, double deltaTimeHits,
+               NMXClusterer& cb_x, NMXClusterer& cb_y);
 
   // Analyzing and storing the hits
   bool AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
                    int vmmID, int chNo, int bcid, int tdc, int adc,
                    int overThresholdFlag);
+
+  // Analyzing and storing the clusters
+  void AnalyzeClusters();
 
   // Statistics counters
   size_t stats_fc_error{0};
@@ -61,10 +87,7 @@ private:
   SRSMappings pChips;
 
   uint16_t pADCThreshold;
-  size_t pMinClusterSize;
   double pDeltaTimeHits;
-  uint16_t pDeltaStripHits;
-  double pDeltaTimeSpan;
 
   // These are in play for triggering the actual clustering
   double m_oldTriggerTimestamp_ns {0};
@@ -81,73 +104,6 @@ private:
   int m_oldBcidY {0};
   int m_oldTdcY {0};
 
-  Callback_t callback_x_;
-  Callback_t callback_y_;
-};
-
-
-class NMXClusterer {
-public:
-  NMXClusterer(SRSTime time,
-               SRSMappings chips,
-               uint16_t adcThreshold, size_t minClusterSize,
-               double deltaTimeHits, uint16_t deltaStripHits, double deltaTimeSpan);
-
-  // Analyzing and storing the hits
-  bool AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
-                   int vmmID, int chNo, int bcid, int tdc, int adc,
-                   int overThresholdFlag);
-
-  // Analyzing and storing the clusters
-  void AnalyzeClusters();
-
-  void ClusterByTime(const HitContainer &oldHits, std::vector<ClusterNMX>& clusters);
-  void ClusterByStrip(HitContainer &cluster, std::vector<ClusterNMX>& clusters, double maxDeltaTime);
-
-  void StoreClusters(std::vector<ClusterNMX>& clusters, double clusterPosition,
-                     size_t clusterSize, uint64_t clusterADC, double clusterTime,
-                     double maxDeltaTime, int maxDeltaStrip, double deltaSpan);
-
-  bool ready() const;
-
-  // Statistics counters
-  size_t stats_fc_error{0};
-  size_t stats_bcid_tdc_error{0};
-  size_t stats_triggertime_wraps{0};
-  size_t stats_clusterX_count{0};
-  size_t stats_clusterY_count{0};
-
-  const uint8_t planeID_X{0};
-  const uint8_t planeID_Y{1};
-
-  std::vector<ClusterNMX> m_tempClusterX;
-  std::vector<ClusterNMX> m_tempClusterY;
-
-private:
-  SRSTime pTime;
-  SRSMappings pChips;
-
-  uint16_t pADCThreshold;
-  size_t pMinClusterSize;
-  double pDeltaTimeHits;
-  uint16_t pDeltaStripHits;
-  double pDeltaTimeSpan;
-
-  // These are in play for triggering the actual clustering
-  double m_oldTriggerTimestamp_ns = 0;
-  unsigned int m_oldFrameCounter = 0;
-
-  // For debug output only
-  double m_timeStamp_ms = 0;
-  int m_oldVmmID = 0;
-  int m_eventNr = 0;
-
-  // For all 0s correction
-  int m_oldBcidX = 0;
-  int m_oldTdcX = 0;
-  int m_oldBcidY = 0;
-  int m_oldTdcY = 0;
-
-  HitsQueue hitsX;
-  HitsQueue hitsY;
+  NMXClusterer& callback_x_;
+  NMXClusterer& callback_y_;
 };
