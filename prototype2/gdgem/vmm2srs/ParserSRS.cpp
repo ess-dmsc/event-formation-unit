@@ -12,7 +12,7 @@
 
 int NMXVMM2SRSData::parse(uint32_t data1, uint32_t data2,
                           struct VMM2Data *vmd) {
-  data1 = reverssebits(data1);
+  data1 = reversebits(data1);
   data2 = reversebits(data2);
 
   vmd->tdc = ((data1 >> 18) & 0x3f) + (((data1 >> 8) & 0x03) << 6);
