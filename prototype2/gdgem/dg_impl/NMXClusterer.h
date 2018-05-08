@@ -9,46 +9,7 @@
 
 #include <gdgem/vmm2srs/SRSMappings.h>
 #include <gdgem/vmm2srs/SRSTime.h>
-#include <gdgem/nmx/Eventlet.h>
-
-using std::string;
-
-struct Hit
-{
-	unsigned int fec;
-	unsigned int chip_id;
-	unsigned int framecounter;
-	unsigned int srs_timestamp;
-	unsigned int channel;
-	unsigned int bcid;
-	unsigned int tdc;
-	unsigned int adc;
-	unsigned int overthreshold;
-};
-
-struct ClusterNMX {
-  int size;
-  int adc;
-  double position;
-  double time;
-  bool clusterXAndY;
-  double maxDeltaTime;
-  double maxDeltaStrip;
-  double deltaSpan;
-};
-
-struct CommonClusterNMX {
-  int sizeX;
-  int sizeY;
-  int adcX;
-  int adcY;
-  double timeX;
-  double timeY;
-  double deltaPlane;
-};
-
-using HitContainer = std::vector<Eventlet>;
-using ClusterVector = std::vector<ClusterNMX>;
+#include <gdgem/dg_impl/NMXClusterMatcher.h>
 
 class HitsQueue {
 public:
