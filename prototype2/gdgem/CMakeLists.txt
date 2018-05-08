@@ -182,6 +182,15 @@ set(ParserSRSTest_INC
     )
 create_test_executable(ParserSRSTest)
 
+set(ParserSRSVMM3Test_SRC
+    vmm3srs/ParserSRSTest.cpp
+    vmm3srs/ParserSRS.cpp
+    )
+set(ParserSRSVMM3Test_INC
+    vmm3srs/ParserSRS.h
+    )
+create_test_executable(ParserSRSVMM3Test)
+
 set(EventletBuilderH5Test_SRC
     nmx/EventNMX.cpp
     nmx/Clusterer.cpp
