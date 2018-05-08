@@ -83,11 +83,14 @@ endif()
 # Doros gdgem event algorithm
 
 set(NMXClustererTest_SRC
+    dg_impl/NMXClusterMatcher.cpp
     dg_impl/NMXClusterer.cpp
     dg_impl/NMXClustererTest.cpp
     vmm2srs/SRSTime.cpp
     vmm2srs/SRSMappings.cpp)
 set(NMXClustererTest_INC
+    dg_impl/NMXCluster.h
+    dg_impl/NMXClusterMatcher.h
     dg_impl/NMXClusterer.h
     dg_impl/TestData.h
     vmm2srs/SRSTime.h
@@ -96,11 +99,14 @@ create_test_executable(NMXClustererTest SKIP_MEMGRIND)
 
 # GOOGLE BENCHMARK
 set(NMXClustererBenchmarkTest_INC
+    dg_impl/NMXCluster.h
+    dg_impl/NMXClusterMatcher.h
     dg_impl/NMXClusterer.h
     dg_impl/TestData.h
     vmm2srs/SRSTime.h
     vmm2srs/SRSMappings.h)
 set(NMXClustererBenchmarkTest_SRC
+    dg_impl/NMXClusterMatcher.cpp
     dg_impl/NMXClusterer.cpp
     dg_impl/NMXClustererBenchmarkTest.cpp
     vmm2srs/SRSTime.cpp

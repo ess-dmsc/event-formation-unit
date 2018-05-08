@@ -34,12 +34,13 @@ protected:
     srstime.set_acquisition_window(4000);
 
     nmxdata =
-        new NMXClusterer(srstime, mapping, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,
-                         pDeltaTimeSpan, pDeltaTimePlanes);
+        new NMXClusterer(srstime, mapping, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits, pDeltaTimeSpan);
+    matcher = new NMXClusterMatcher(pDeltaTimePlanes);
   }
 
   virtual void TearDown() {
     delete nmxdata;
+    delete matcher;
   }
 
   int pADCThreshold = 0;
@@ -55,6 +56,7 @@ protected:
   float pDeltaTimePlanes = 200;
 
   NMXClusterer *nmxdata;
+  NMXClusterMatcher *matcher;
 };
 
 TEST_F(NMXClustererTest, Run16_line_110168_110323) {
@@ -66,14 +68,17 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
       printf("result == -1\n");
       break;
     }
+    if (nmxdata->ready())
+    {
+      matcher->match(nmxdata->m_tempClusterX, nmxdata->m_tempClusterY);
+    }
   }
   EXPECT_EQ(0, nmxdata->stats_triggertime_wraps);
   EXPECT_EQ(0, nmxdata->stats_fc_error);
   EXPECT_EQ(0, nmxdata->stats_bcid_tdc_error);
-  EXPECT_EQ(nmxdata->getNumClustersX(), 3);
-  EXPECT_EQ(nmxdata->getNumClustersY(), 4);
-  EXPECT_EQ(nmxdata->getNumClustersXY(), 2);
-  //EXPECT_EQ(nmxdata->getNumClustersXY_uTPC(), 2);
+  EXPECT_EQ(nmxdata->stats_clusterX_count, 3);
+  EXPECT_EQ(nmxdata->stats_clusterY_count, 4);
+  EXPECT_EQ(matcher->stats_cluster_count, 2);
 }
 
 
@@ -86,14 +91,17 @@ TEST_F(NMXClustererTest, Run16_Long) {
       printf("result == -1\n");
       break;
     }
+    if (nmxdata->ready())
+    {
+      matcher->match(nmxdata->m_tempClusterX, nmxdata->m_tempClusterY);
+    }
   }
   EXPECT_EQ(0, nmxdata->stats_triggertime_wraps);
   EXPECT_EQ(0, nmxdata->stats_fc_error);
   EXPECT_EQ(0, nmxdata->stats_bcid_tdc_error);
-  EXPECT_EQ(nmxdata->getNumClustersX(), 9106);
-  EXPECT_EQ(nmxdata->getNumClustersY(), 11268);
-  EXPECT_EQ(nmxdata->getNumClustersXY(), 7297);
-  //EXPECT_EQ(nmxdata->getNumClustersXY_uTPC(), 7089);
+  EXPECT_EQ(nmxdata->stats_clusterX_count, 9106);
+  EXPECT_EQ(nmxdata->stats_clusterY_count, 11268);
+  EXPECT_EQ(matcher->stats_cluster_count, 7297);
 }
 
 TEST_F(NMXClustererTest, FrameCounterError) {
