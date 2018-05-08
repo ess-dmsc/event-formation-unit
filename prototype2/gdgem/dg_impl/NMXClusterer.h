@@ -31,18 +31,6 @@ private:
   bool m_subsequentTrigger {false};
 };
 
-class NMXClusterMatcher {
-public:
-  NMXClusterMatcher(double dPlane);
-  void match(std::vector<ClusterNMX>& x, std::vector<ClusterNMX>& y);
-
-  size_t stats_cluster_count {0};
-  std::vector<ClusterNMX> matched_clusters;
-
-private:
-  double pdPlane {0};
-};
-
 class NMXClusterer {
 public:
   NMXClusterer(SRSTime time,
