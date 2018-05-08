@@ -73,7 +73,6 @@ double SRSTime::delta_timestamp_ns(double old_timestamp_ns,
   } else {
     return (timestamp_ns - old_timestamp_ns);
   }
-
 }
 
 double SRSTime::trigger_period() const {

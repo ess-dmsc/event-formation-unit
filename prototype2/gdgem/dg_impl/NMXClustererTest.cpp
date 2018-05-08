@@ -16,8 +16,6 @@
 class NMXClustererTest : public TestBase {
 protected:
   virtual void SetUp() {
-    SRSMappings mapping;
-
     mapping.set_mapping(1, 0, 0, 0);
     mapping.set_mapping(1, 1, 0, 64);
     mapping.set_mapping(1, 6, 0, 128);
@@ -37,7 +35,8 @@ protected:
     matcher = std::make_shared<NMXClusterMatcher>(pDeltaTimePlanes);
     clusters_x = std::make_shared<NMXClusterer>(srstime, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits, pDeltaTimeSpan);
     clusters_y = std::make_shared<NMXClusterer>(srstime, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits, pDeltaTimeSpan);
-    sorter = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold,  pDeltaTimeHits, *clusters_x, *clusters_y);
+    sorter_x = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold,  pDeltaTimeHits, *clusters_x);
+    sorter_y = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold,  pDeltaTimeHits, *clusters_y);
   }
 
   virtual void TearDown() {
@@ -55,93 +54,155 @@ protected:
   //Cluster time is either calculated with center-of-mass or uTPC method
   float pDeltaTimePlanes = 200;
 
+  SRSMappings mapping;
+
   std::shared_ptr<NMXClusterMatcher> matcher;
   std::shared_ptr<NMXClusterer> clusters_x;
   std::shared_ptr<NMXClusterer> clusters_y;
-  std::shared_ptr<NMXHitSorter> sorter;
+  std::shared_ptr<NMXHitSorter> sorter_x;
+  std::shared_ptr<NMXHitSorter> sorter_y;
 };
 
 TEST_F(NMXClustererTest, Run16_line_110168_110323) {
   for (auto hit : Run16) { // replace with UDP receive()
-    int result = sorter->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                                     hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
-                                     hit.overthreshold);
-    if (result == -1) {
-      printf("result == -1\n");
-      break;
+    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
+    if (planeID == 1) {
+      sorter_y->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                            hit.adc,
+                            hit.overthreshold);
+    } else {
+      sorter_x->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                            hit.adc,
+                            hit.overthreshold);
     }
-    if (clusters_x->ready() || clusters_y->ready())
-    {
-      matcher->match(clusters_x->clusters, clusters_y->clusters);
-    }
+
+//    if (clusters_x->ready() && clusters_y->ready())
+//    {
+//      matcher->match(clusters_x->clusters, clusters_y->clusters);
+//    }
   }
-  EXPECT_EQ(0, sorter->stats_triggertime_wraps);
-  EXPECT_EQ(0, sorter->stats_fc_error);
-  EXPECT_EQ(0, sorter->stats_bcid_tdc_error);
+  EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
+  EXPECT_EQ(0, sorter_x->stats_fc_error);
+  EXPECT_EQ(0, sorter_x->stats_bcid_tdc_error);
+  EXPECT_EQ(0, sorter_x->stats_fc_error);
+  EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
+  EXPECT_EQ(0, sorter_y->stats_fc_error);
+  EXPECT_EQ(0, sorter_y->stats_bcid_tdc_error);
+  EXPECT_EQ(0, sorter_y->stats_fc_error);
   EXPECT_EQ(clusters_x->stats_cluster_count, 5);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 8);
+  EXPECT_EQ(clusters_y->stats_cluster_count, 9);
+
+  matcher->match(clusters_x->clusters, clusters_y->clusters);
   EXPECT_EQ(matcher->stats_cluster_count, 4);
-  EXPECT_EQ(sorter->stats_fc_error, 0);
 }
 
 
 TEST_F(NMXClustererTest, Run16_Long) {
   for (auto hit : Run16_Long) { // replace with UDP receive()
-    int result = sorter->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                                     hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
-                                     hit.overthreshold);
-    if (result == -1) {
-      printf("result == -1\n");
-      break;
+    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
+    if (planeID == 1) {
+      sorter_y->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                            hit.adc,
+                            hit.overthreshold);
+    } else {
+      sorter_x->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                            hit.adc,
+                            hit.overthreshold);
     }
-    if (clusters_x->ready() || clusters_y->ready())
-    {
-      matcher->match(clusters_x->clusters, clusters_y->clusters);
-    }
-  }
-  EXPECT_EQ(0, sorter->stats_triggertime_wraps);
-  EXPECT_EQ(0, sorter->stats_fc_error);
-  EXPECT_EQ(0, sorter->stats_bcid_tdc_error);
-  EXPECT_EQ(clusters_x->stats_cluster_count, 9106);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 11268);
-  EXPECT_EQ(matcher->stats_cluster_count, 7297);
-  EXPECT_EQ(sorter->stats_fc_error,0);
-}
 
-TEST_F(NMXClustererTest, FrameCounterError) {
-  EXPECT_EQ(0, sorter->stats_fc_error);
-
-  for (auto hit : err_fc_error) {
-    sorter->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec,
-                         hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
-                         hit.overthreshold);
+//    if (clusters_x->ready() && clusters_y->ready())
+//    {
+//      matcher->match(clusters_x->clusters, clusters_y->clusters);
+//    }
   }
-  EXPECT_EQ(1, sorter->stats_fc_error);
+  EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
+  EXPECT_EQ(0, sorter_x->stats_fc_error);
+  EXPECT_EQ(0, sorter_x->stats_bcid_tdc_error);
+  EXPECT_EQ(0, sorter_x->stats_fc_error);
+  EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
+  EXPECT_EQ(0, sorter_y->stats_fc_error);
+  EXPECT_EQ(0, sorter_y->stats_bcid_tdc_error);
+  EXPECT_EQ(0, sorter_y->stats_fc_error);
+  EXPECT_EQ(clusters_x->stats_cluster_count, 10290);
+  EXPECT_EQ(clusters_y->stats_cluster_count, 12425);
+
+  matcher->match(clusters_x->clusters, clusters_y->clusters);
+  EXPECT_EQ(matcher->stats_cluster_count, 10173);
 }
 
 TEST_F(NMXClustererTest, BcidTdcError) {
-  EXPECT_EQ(0, sorter->stats_bcid_tdc_error);
+  EXPECT_EQ(0, sorter_x->stats_bcid_tdc_error);
+  EXPECT_EQ(0, sorter_y->stats_bcid_tdc_error);
 
   for (auto hit : err_bcid_tdc_error) {
-    sorter->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec,
-                         hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
-                         hit.overthreshold);
+    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
+    if (planeID == 1) {
+      sorter_y->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                            hit.adc,
+                            hit.overthreshold);
+    } else {
+      sorter_x->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                            hit.adc,
+                            hit.overthreshold);
+    }
   }
-  EXPECT_EQ(4, sorter->stats_bcid_tdc_error); // Two in X and Two in Y
-}
-
-TEST_F(NMXClustererTest, TriggerTimeWraps) {
-  EXPECT_EQ(0, sorter->stats_triggertime_wraps);
-
-  for (auto hit : err_triggertime_error) {
-    sorter->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec,
-                         hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
-                         hit.overthreshold);
-  }
-  EXPECT_EQ(1, sorter->stats_triggertime_wraps);
+  // Two in X and Two in Y
+  EXPECT_EQ(2, sorter_x->stats_bcid_tdc_error);
+  EXPECT_EQ(2, sorter_y->stats_bcid_tdc_error);
 }
 
 #if 0
+
+TEST_F(NMXClustererTest, FrameCounterError) {
+  EXPECT_EQ(0, sorter_x->stats_fc_error);
+  EXPECT_EQ(0, sorter_y->stats_fc_error);
+
+  for (auto hit : err_fc_error) {
+    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
+    if (planeID == 1) {
+      sorter_y->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                            hit.adc,
+                            hit.overthreshold);
+    } else {
+      sorter_x->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                            hit.adc,
+                            hit.overthreshold);
+    }
+  }
+  EXPECT_EQ(1, sorter_x->stats_fc_error);
+  EXPECT_EQ(1, sorter_y->stats_fc_error);
+}
+
+TEST_F(NMXClustererTest, TriggerTimeWraps) {
+  EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
+  EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
+
+  for (auto hit : err_triggertime_error) {
+    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
+    if (planeID == 1) {
+      sorter_y->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                            hit.adc,
+                            hit.overthreshold);
+    } else {
+      sorter_x->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
+                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                            hit.adc,
+                            hit.overthreshold);
+    }
+  }
+  EXPECT_EQ(1, sorter_x->stats_triggertime_wraps);
+  EXPECT_EQ(1, sorter_y->stats_triggertime_wraps);
+}
+
 int distributeto(UNUSED int fec, int asic, int channel, int width) {
     int cutoff = 63 - width;
     if ((asic == 10) || (asic == 11 && (channel < cutoff)) )

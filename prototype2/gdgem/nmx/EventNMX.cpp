@@ -14,11 +14,14 @@ void PlaneNMX::insert_eventlet(const Eventlet &e) {
     return;
   if (entries.empty()) {
     time_start = time_end = e.time;
+    strip_start = strip_end = e.strip;
   }
   entries.push_back(e);
   integral += e.adc;
   time_start = std::min(time_start, e.time);
   time_end = std::max(time_end, e.time);
+  strip_start = std::min(strip_start, e.strip);
+  strip_end = std::max(strip_end, e.strip);
 }
 
 void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,

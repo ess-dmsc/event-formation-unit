@@ -37,10 +37,9 @@ public:
                double deltaTimeHits, uint16_t deltaStripHits, double deltaTimeSpan);
 
   void ClusterByTime(const HitContainer &oldHits);
-  void ClusterByStrip(HitContainer &cluster, double maxDeltaTime);
+  void ClusterByStrip(HitContainer &cluster);
 
-  void StoreClusters(double clusterPosition, size_t clusterSize, uint64_t clusterADC, double clusterTime,
-                     double maxDeltaTime, int maxDeltaStrip, double deltaSpan);
+  void stash_cluster(PlaneNMX plane);
 
   bool ready() const;
 
@@ -51,7 +50,6 @@ public:
 private:
   SRSTime pTime;
 
-  uint16_t pADCThreshold;
   size_t pMinClusterSize;
   double pDeltaTimeHits;
   uint16_t pDeltaStripHits;
@@ -61,10 +59,10 @@ private:
 class NMXHitSorter {
 public:
   NMXHitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold, double deltaTimeHits,
-               NMXClusterer& cb_x, NMXClusterer& cb_y);
+               NMXClusterer& cb);
 
   // Analyzing and storing the hits
-  bool AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
+  void AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
                    int vmmID, int chNo, int bcid, int tdc, int adc,
                    int overThresholdFlag);
 
@@ -76,11 +74,7 @@ public:
   size_t stats_bcid_tdc_error{0};
   size_t stats_triggertime_wraps{0};
 
-  const uint8_t planeID_X{0};
-  const uint8_t planeID_Y{1};
-
-  HitsQueue hitsX;
-  HitsQueue hitsY;
+  HitsQueue hits;
 
 private:
   SRSTime pTime;
@@ -99,11 +93,8 @@ private:
   int m_eventNr {0};
 
   // For all 0s correction
-  int m_oldBcidX {0};
-  int m_oldTdcX {0};
-  int m_oldBcidY {0};
-  int m_oldTdcY {0};
+  int m_oldBcid {0};
+  int m_oldTdc {0};
 
-  NMXClusterer& callback_x_;
-  NMXClusterer& callback_y_;
+  NMXClusterer& callback_;
 };

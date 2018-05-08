@@ -14,8 +14,10 @@ NMXClusterMatcher::NMXClusterMatcher(double dPlane) : pdPlane(dPlane)
 void NMXClusterMatcher::match(std::vector<ClusterNMX>& x_clusters, std::vector<ClusterNMX>& y_clusters)
 {
   for (auto &nx : x_clusters) {
-    double tx = nx.time;
-    double posx = nx.position;
+    nx.plane.analyze(true, 10000, 10000);
+
+    double tx = nx.plane.time_start;
+    double posx = nx.plane.center;
 
     double minDelta = 99999999;
     double deltaT = 0;
@@ -27,7 +29,7 @@ void NMXClusterMatcher::match(std::vector<ClusterNMX>& x_clusters, std::vector<C
     for (ClusterVector::iterator ny = begin(y_clusters);
          ny != end(y_clusters); ++ny) {
       if ((*ny).clusterXAndY == false) {
-        ty = (*ny).time;
+        ty = (*ny).plane.time_start;
         deltaT = std::abs(ty - tx);
         if (deltaT < minDelta && deltaT <= pdPlane) {
           minDelta = deltaT;
@@ -40,14 +42,13 @@ void NMXClusterMatcher::match(std::vector<ClusterNMX>& x_clusters, std::vector<C
       (*it).clusterXAndY = true;
 
       CommonClusterNMX theCommonCluster;
-      theCommonCluster.sizeX = nx.size;
-      theCommonCluster.sizeY = (*it).size;
-      theCommonCluster.adcX = nx.adc;
-      theCommonCluster.adcY = (*it).adc;
-      theCommonCluster.timeX = nx.time;
-      theCommonCluster.timeY = (*it).time;
-      theCommonCluster.deltaPlane = theCommonCluster.timeX
-          - theCommonCluster.timeY;
+      theCommonCluster.sizeX = nx.plane.entries.size();
+      theCommonCluster.sizeY = (*it).plane.entries.size();
+      theCommonCluster.adcX = nx.plane.integral;
+      theCommonCluster.adcY = (*it).plane.integral;
+      theCommonCluster.timeX = nx.plane.time_start;
+      theCommonCluster.timeY = (*it).plane.time_start;
+      theCommonCluster.deltaPlane = std::abs(theCommonCluster.timeX - theCommonCluster.timeY);
 
       DTRACE(DEB, "\ncommon cluster x/y (center of mass):");
       DTRACE(DEB, "\tpos x/pos y: %f/%f", posx, posy);

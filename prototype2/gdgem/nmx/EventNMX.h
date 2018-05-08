@@ -40,6 +40,9 @@ struct PlaneNMX {
   int16_t uncert_upper{
       -1}; // upper uncertainty (strip span of eventlets in latest few timebins)
 
+  uint16_t strip_start{0};
+  uint16_t strip_end{0};
+
   double time_start{0}; // start of event timestamp
   double time_end{0};   // end of event timestamp
   double integral{0.0};   // sum of adc values

@@ -107,45 +107,34 @@ void HitsQueue::CorrectTriggerData() {
 
 
 NMXHitSorter::NMXHitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
-                           double deltaTimeHits, NMXClusterer& cb_x, NMXClusterer& cb_y) :
-    hitsX(pTime, deltaTimeHits), hitsY(pTime, deltaTimeHits),
-    pTime(time), pChips(chips), pADCThreshold(ADCThreshold), callback_x_(cb_x), callback_y_(cb_y)
+                           double deltaTimeHits, NMXClusterer& cb) :
+    hits(pTime, deltaTimeHits),
+    pTime(time), pChips(chips), pADCThreshold(ADCThreshold), callback_(cb)
 {
 
 }
 
 
 //====================================================================================================================
-bool NMXHitSorter::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
+void NMXHitSorter::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
                                int fecID, int vmmID, int chNo, int bcid, int tdc, int adc,
                                int overThresholdFlag) {
 
   // Ready for factoring out, logic tested elsewhere
-  uint8_t planeID = pChips.get_plane(fecID, vmmID);
   uint16_t strip = pChips.get_strip(fecID, vmmID, chNo);
 
   // These variables are used only here
   // Block is candidate for factoring out
   // Perhaps an adapter class responsible for recovery from this error condition?
-  if (planeID == planeID_X) {
-    // Fix for entries with all zeros
-    if (bcid == 0 && tdc == 0 && overThresholdFlag) {
-      bcid = m_oldBcidX;
-      tdc = m_oldTdcX;
-      stats_bcid_tdc_error++;
-    }
-    m_oldBcidX = bcid;
-    m_oldTdcX = tdc;
-  } else if (planeID == planeID_Y) {
-    // Fix for entries with all zeros
-    if (bcid == 0 && tdc == 0 && overThresholdFlag) {
-      bcid = m_oldBcidY;
-      tdc = m_oldTdcY;
-      stats_bcid_tdc_error++;
-    }
-    m_oldBcidY = bcid;
-    m_oldTdcY = tdc;
+
+  // Fix for entries with all zeros
+  if (bcid == 0 && tdc == 0 && overThresholdFlag) {
+    bcid = m_oldBcid;
+    tdc = m_oldTdc;
+    stats_bcid_tdc_error++;
   }
+  m_oldBcid = bcid;
+  m_oldTdc = tdc;
 
   // Could be factored out depending on above block
   double chipTime = pTime.chip_time(bcid, tdc);
@@ -157,27 +146,21 @@ bool NMXHitSorter::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
   if (m_oldTriggerTimestamp_ns != triggerTimestamp_ns) {
     AnalyzeClusters();
     newEvent = true;
-    hitsX.subsequentTrigger(false);
-    hitsY.subsequentTrigger(false);
+    hits.subsequentTrigger(false);
     m_eventNr++;
     deltaTriggerTimestamp_ns = pTime.delta_timestamp_ns(
         m_oldTriggerTimestamp_ns, triggerTimestamp_ns,
         m_oldFrameCounter, frameCounter, stats_triggertime_wraps);
 
     if (deltaTriggerTimestamp_ns <= pTime.trigger_period()) {
-      hitsX.subsequentTrigger(true);
-      hitsY.subsequentTrigger(true);
+      hits.subsequentTrigger(true);
     }
   }
 
   // Crucial step
   // Storing hit to appropriate buffer
   if (overThresholdFlag || (adc >= pADCThreshold)) {
-    if (planeID == planeID_X) {
-      hitsX.store(strip, adc, chipTime);
-    } else if (planeID == planeID_Y) {
-      hitsY.store(strip, adc, chipTime);
-    }
+    hits.store(strip, adc, chipTime);
   }
 
   if (newEvent) {
@@ -208,30 +191,19 @@ bool NMXHitSorter::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
   if (m_oldVmmID != vmmID || newEvent) {
     DTRACE(DEB, "\tvmmID  %d\n", vmmID);
   }
-  if (planeID == planeID_X) {
-    DTRACE(DEB, "\t\tx-channel %d (chNo  %d) - overThresholdFlag %d\n",
-           strip, chNo, overThresholdFlag);
-  } else if (planeID == planeID_Y) {
-    DTRACE(DEB, "\t\ty-channel %d (chNo  %d) - overThresholdFlag %d\n",
-           strip, chNo, overThresholdFlag);
-  } else {
-    DTRACE(DEB, "\t\tPlane for vmmID %d not defined!\n", vmmID);
-  }
+  DTRACE(DEB, "\t\tchannel %d (chNo  %d) - overThresholdFlag %d\n",
+         strip, chNo, overThresholdFlag);
   DTRACE(DEB, "\t\t\tbcid %d, tdc %d, adc %d\n", bcid, tdc, adc);
   DTRACE(DEB, "\t\t\tchipTime %.2f us\n", chipTime * 0.001);
 
   m_oldTriggerTimestamp_ns = triggerTimestamp_ns;
   m_oldFrameCounter = frameCounter;
   m_oldVmmID = vmmID;
-  return true;
 }
 
 void NMXHitSorter::AnalyzeClusters() {
-  hitsX.sort_and_correct();
-  callback_x_.ClusterByTime(hitsX.hits());
-
-  hitsY.sort_and_correct();
-  callback_y_.ClusterByTime(hitsY.hits());
+  hits.sort_and_correct();
+  callback_.ClusterByTime(hits.hits());
 
 //  DTRACE(DEB, "%z cluster in x\n", m_tempClusterX.size());
 //  DTRACE(DEB, "%z cluster in y\n", m_tempClusterY.size());
@@ -248,7 +220,7 @@ NMXClusterer::NMXClusterer(SRSTime time, size_t minClusterSize, double deltaTime
 }
 
 //====================================================================================================================
-void NMXClusterer::ClusterByTime(const HitContainer &oldHits) {
+void NMXClusterer::ClusterByTime(const HitContainer &hits) {
 
   auto pre = clusters.size();
 
@@ -259,12 +231,12 @@ void NMXClusterer::ClusterByTime(const HitContainer &oldHits) {
   uint16_t adc1 = 0;
   uint16_t strip1 = 0;
 
-  for (const auto &itOldHits : oldHits) {
+  for (const auto &itHits : hits) {
     time2 = time1;
 
-    time1 = itOldHits.time;
-    strip1 = itOldHits.strip;
-    adc1 = itOldHits.adc;
+    time1 = itHits.time;
+    strip1 = itHits.strip;
+    adc1 = itHits.adc;
 
     if (time1 - time2 <= pDeltaTimeHits && stripCount > 0
         && maxDeltaTime < (time1 - time2)) {
@@ -272,7 +244,7 @@ void NMXClusterer::ClusterByTime(const HitContainer &oldHits) {
     }
 
     if (time1 - time2 > pDeltaTimeHits && stripCount > 0) {
-      ClusterByStrip(cluster, maxDeltaTime);
+      ClusterByStrip(cluster/*, maxDeltaTime*/);
       cluster.clear();
       maxDeltaTime = 0;
     }
@@ -285,116 +257,61 @@ void NMXClusterer::ClusterByTime(const HitContainer &oldHits) {
   }
 
   if (stripCount > 0)
-    ClusterByStrip(cluster, maxDeltaTime);
+    ClusterByStrip(cluster);
 
   stats_cluster_count += (clusters.size() - pre);
 }
 
 //====================================================================================================================
-void NMXClusterer::ClusterByStrip(HitContainer &cluster, double maxDeltaTime) {
-  uint16_t maxDeltaStrip = 0;
-  double deltaSpan = 0;
+void NMXClusterer::ClusterByStrip(HitContainer &hits) {
+  PlaneNMX cluster;
 
-  double startTime = 0;
-  double largestTime = 0;
-
-  double centerOfGravity = -1;
-  double centerOfTime = 0;
-  uint64_t totalADC = 0;
-  double time1 = 0;
-  uint16_t adc1 = 0;
-  uint16_t strip1 = 0, strip2 = 0;
-  size_t stripCount = 0;
-
-  std::sort(begin(cluster), end(cluster),
+  std::sort(begin(hits), end(hits),
             [](const Eventlet &e1, const Eventlet &e2) {
               return e1.strip < e2.strip;
             });
 
-  for (auto &itCluster : cluster) {
-    strip2 = strip1;
-    strip1 = itCluster.strip;
-    time1 = itCluster.time;
-    adc1 = itCluster.adc;
-
-    // At beginning of cluster, set start time of cluster
-    if (stripCount == 0) {
-      maxDeltaStrip = 0;
-      startTime = time1;
-      //DTRACE(DEB, "\n%s cluster:\n", coordinate.c_str());
+  for (auto &hit : hits) {
+    // If empty cluster, just add and move on
+    if (!cluster.entries.size()) {
+      cluster.insert_eventlet(hit);
+      continue;
     }
 
-    // Add members of a cluster, if it is either the beginning of a cluster,
-    // or if strip gap and time span is correct
-    if (stripCount == 0
-        || (std::abs(strip1 - strip2) > 0
-            && std::abs(strip1 - strip2) <= (pDeltaStripHits + 1)
-            && time1 - startTime <= pDeltaTimeSpan)) {
-      DTRACE(DEB, "\tstrip %d, time %f, adc %d:\n", strip1, time1, adc1);
-      largestTime = std::max(time1, largestTime);
-      startTime = std::min(time1, startTime);
-      if (stripCount > 0 && maxDeltaStrip < std::abs(strip1 - strip2)) {
-        maxDeltaStrip = std::abs(strip1 - strip2);
-      }
-      deltaSpan = (largestTime - startTime);
-      centerOfGravity += strip1 * adc1;
-      centerOfTime += time1 * adc1;
-      totalADC += adc1;
-      stripCount++;
-    }
-      // Stop clustering if gap between strips is too large or time span too long
-    else if (std::abs(strip1 - strip2) > (pDeltaStripHits + 1)
-        || largestTime - startTime > pDeltaTimeSpan) {
-      // Valid cluster
-      if (stripCount >= pMinClusterSize) {
-        centerOfGravity = (centerOfGravity / (double) totalADC);
-        centerOfTime = (centerOfTime / (double) totalADC);
-        StoreClusters(centerOfGravity, stripCount,
-                      totalADC, centerOfTime,
-                      maxDeltaTime, maxDeltaStrip, deltaSpan);
-        DTRACE(DEB, "******** VALID ********\n");
-        maxDeltaStrip = 0;
+    // Stash cluster if strip gap to next hit is too large
+    // filtering is done elsewhere
+    auto strip_gap = std::abs(hit.strip - cluster.strip_end);
+    if (strip_gap > (pDeltaStripHits + 1))
+    {
+      // Attempt to stash
+      stash_cluster(cluster);
 
-      }
-
-      // Reset all parameters
-      startTime = 0;
-      largestTime = 0;
-      stripCount = 0;
-      centerOfGravity = 0;
-      centerOfTime = 0;
-      totalADC = 0;
-      strip1 = 0;
+      // Reset and move on
+      cluster = PlaneNMX();
     }
+
+    // insert in either case
+    cluster.insert_eventlet(hit);
   }
+
   // At the end of the clustering, check again if there is a last valid cluster
-  if (stripCount >= pMinClusterSize) {
-    deltaSpan = (largestTime - startTime);
-    centerOfGravity = (centerOfGravity / (double) totalADC);
-    centerOfTime = (centerOfTime / totalADC);
-    StoreClusters(centerOfGravity, stripCount,
-                  totalADC, centerOfTime, maxDeltaTime,
-                  maxDeltaStrip, deltaSpan);
-    DTRACE(DEB, "******** VALID ********\n");
+  if (cluster.entries.size() >= pMinClusterSize) {
+    stash_cluster(cluster);
   }
 }
 //====================================================================================================================
-void NMXClusterer::StoreClusters(double clusterPosition, size_t clusterSize, uint64_t clusterADC,
-                                 double clusterTime, double maxDeltaTime, int maxDeltaStrip, double deltaSpan) {
+void NMXClusterer::stash_cluster(PlaneNMX cluster) {
 
+  // Some filtering can happen here
+  if (cluster.entries.size() < pMinClusterSize)
+    return;
+
+  // pDeltaTimeSpan ?
+
+  DTRACE(DEB, "******** VALID ********\n");
   ClusterNMX theCluster;
-  theCluster.size = clusterSize;
-  theCluster.adc = clusterADC;
-  theCluster.time = clusterTime;
-  theCluster.position = clusterPosition;
-  theCluster.clusterXAndY = false;
-  theCluster.maxDeltaTime = maxDeltaTime;
-  theCluster.maxDeltaStrip = maxDeltaStrip;
-  theCluster.deltaSpan = deltaSpan; // rename to something with time
-
-  if (clusterPosition > -1.0) {
-    clusters.emplace_back(std::move(theCluster));
-  }
+  theCluster.plane = cluster;
+  clusters.emplace_back(std::move(theCluster));
 }
 
 bool NMXClusterer::ready() const
