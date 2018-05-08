@@ -62,11 +62,32 @@ using HitTuple = std::tuple<float, int, int>;
 using ClusterTuple = std::tuple<int, float, int>;
 using ClusterVector = std::vector<ClusterNMX>;
 
+
+class HitsQueue {
+public:
+  HitsQueue(SRSTime Time, float deltaTimeHits);
+  void store(uint16_t strip, short adc, short bcid, float chipTime);
+  void sort_and_correct();
+  void CorrectTriggerData(HitContainer &hits, HitContainer &oldHits, float correctionTime);
+  void subsequentTrigger(bool);
+
+  const HitContainer& hits() const;
+
+private:
+  HitContainer hitsOld;
+  HitContainer hitsNew;
+  HitContainer hitsOut;
+
+  SRSTime pTime;
+  float pDeltaTimeHits {200};
+  bool m_subsequentTrigger {false};
+};
+
+
 class NMXClusterer {
 public:
   NMXClusterer(SRSTime time,
                SRSMappings chips,
-               int acqWin,
                int adcThreshold, int minClusterSize,
                float deltaTimeHits, int deltaStripHits, float deltaTimeSpan,
                float deltaTimePlanes);
@@ -77,13 +98,11 @@ public:
   bool AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
                    int vmmID, int chNo, int bcid, int tdc, int adc,
                    int overThresholdFlag);
-  void StoreX(uint16_t strip, short adc, short bcid, float chipTime);
-  void StoreY(uint16_t strip, short adc, short bcid, float chipTime);
 
   // Analyzing and storing the clusters
   void AnalyzeClusters();
 
-  int ClusterByTime(HitContainer &oldHits, float dTime, int dStrip,
+  int ClusterByTime(const HitContainer &oldHits, float dTime, int dStrip,
                     float dSpan, string coordinate);
   int ClusterByStrip(ClusterContainer &cluster, int dStrip, float dSpan,
                      string coordinate, float maxDeltaTime);
@@ -93,9 +112,6 @@ public:
                      float clusterTimeUTPC, string coordinate, float maxDeltaTime, int maxDeltaStrip, float deltaSpan);
 
   void MatchClustersXY(float dPlane);
-
-  void CorrectTriggerData(HitContainer &hits, HitContainer &oldHits,
-                          float correctionTime);
 
   int getNumClustersX() {
     return m_clusterX_size;
@@ -123,7 +139,6 @@ private:
   SRSTime pTime;
   SRSMappings pChips;
 
-  int pAcqWin;
   int pADCThreshold;
   int pMinClusterSize;
   float pDeltaTimeHits;
@@ -134,7 +149,6 @@ private:
   // These are in play for triggering the actual clustering
   double m_oldTriggerTimestamp_ns = 0;
   unsigned int m_oldFrameCounter = 0;
-  bool m_subsequentTrigger = false;
 
   // For debug output only
   double m_timeStamp_ms = 0;
@@ -147,10 +161,8 @@ private:
   int m_oldBcidY = 0;
   int m_oldTdcY = 0;
 
-  HitContainer m_hitsOldX;
-  HitContainer m_hitsOldY;
-  HitContainer m_hitsX;
-  HitContainer m_hitsY;
+  HitsQueue hitsX;
+  HitsQueue hitsY;
 
   // std::vector<CommonClusterNMX> m_clusterXY;
   // std::vector<CommonClusterNMX> m_clusterXY_uTPC;
@@ -158,6 +170,7 @@ private:
   std::vector<ClusterNMX> m_tempClusterY;
   //std::vector<ClusterNMX> m_clusterX;
   //std::vector<ClusterNMX> m_clusterY;
+
   uint64_t m_clusterXY_size{0};
   uint64_t m_clusterX_size{0};
   uint64_t m_clusterY_size{0};

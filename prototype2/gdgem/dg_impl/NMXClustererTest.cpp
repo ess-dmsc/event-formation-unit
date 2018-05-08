@@ -31,9 +31,10 @@ protected:
     srstime.set_bc_clock(20);
     srstime.set_tac_slope(60);
     srstime.set_trigger_resolution(3.125);
+    srstime.set_acquisition_window(4000);
 
     nmxdata =
-        new NMXClusterer(srstime, mapping, pAcqWin, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,
+        new NMXClusterer(srstime, mapping, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,
                          pDeltaTimeSpan, pDeltaTimePlanes);
   }
 
@@ -41,7 +42,6 @@ protected:
     delete nmxdata;
   }
 
-  int pAcqWin = 4000;
   int pADCThreshold = 0;
   int pMinClusterSize = 3;
   //Maximum time difference between strips in time sorted cluster (x or y)
@@ -67,13 +67,13 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
       break;
     }
   }
-  ASSERT_EQ(0, nmxdata->stats_triggertime_wraps);
-  ASSERT_EQ(0, nmxdata->stats_fc_error);
-  ASSERT_EQ(0, nmxdata->stats_bcid_tdc_error);
-  ASSERT_EQ(nmxdata->getNumClustersX(), 3);
-  ASSERT_EQ(nmxdata->getNumClustersY(), 4);
-  ASSERT_EQ(nmxdata->getNumClustersXY(), 2);
-  //ASSERT_EQ(nmxdata->getNumClustersXY_uTPC(), 2);
+  EXPECT_EQ(0, nmxdata->stats_triggertime_wraps);
+  EXPECT_EQ(0, nmxdata->stats_fc_error);
+  EXPECT_EQ(0, nmxdata->stats_bcid_tdc_error);
+  EXPECT_EQ(nmxdata->getNumClustersX(), 3);
+  EXPECT_EQ(nmxdata->getNumClustersY(), 4);
+  EXPECT_EQ(nmxdata->getNumClustersXY(), 2);
+  //EXPECT_EQ(nmxdata->getNumClustersXY_uTPC(), 2);
 }
 
 
@@ -87,9 +87,9 @@ TEST_F(NMXClustererTest, Run16_Long) {
       break;
     }
   }
-  ASSERT_EQ(0, nmxdata->stats_triggertime_wraps);
-  ASSERT_EQ(0, nmxdata->stats_fc_error);
-  ASSERT_EQ(0, nmxdata->stats_bcid_tdc_error);
+  EXPECT_EQ(0, nmxdata->stats_triggertime_wraps);
+  EXPECT_EQ(0, nmxdata->stats_fc_error);
+  EXPECT_EQ(0, nmxdata->stats_bcid_tdc_error);
   EXPECT_EQ(nmxdata->getNumClustersX(), 9110);
   EXPECT_EQ(nmxdata->getNumClustersY(), 11276);
   EXPECT_EQ(nmxdata->getNumClustersXY(), 7303);
@@ -97,36 +97,36 @@ TEST_F(NMXClustererTest, Run16_Long) {
 }
 
 TEST_F(NMXClustererTest, FrameCounterError) {
-  ASSERT_EQ(0, nmxdata->stats_fc_error);
+  EXPECT_EQ(0, nmxdata->stats_fc_error);
 
   for (auto hit : err_fc_error) {
     nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec,
                          hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
                          hit.overthreshold);
   }
-  ASSERT_EQ(1, nmxdata->stats_fc_error);
+  EXPECT_EQ(1, nmxdata->stats_fc_error);
 }
 
 TEST_F(NMXClustererTest, BcidTdcError) {
-  ASSERT_EQ(0, nmxdata->stats_bcid_tdc_error);
+  EXPECT_EQ(0, nmxdata->stats_bcid_tdc_error);
 
   for (auto hit : err_bcid_tdc_error) {
     nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec,
                          hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
                          hit.overthreshold);
   }
-  ASSERT_EQ(4, nmxdata->stats_bcid_tdc_error); // Two in X and Two in Y
+  EXPECT_EQ(4, nmxdata->stats_bcid_tdc_error); // Two in X and Two in Y
 }
 
 TEST_F(NMXClustererTest, TriggerTimeWraps) {
-  ASSERT_EQ(0, nmxdata->stats_triggertime_wraps);
+  EXPECT_EQ(0, nmxdata->stats_triggertime_wraps);
 
   for (auto hit : err_triggertime_error) {
     nmxdata->AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec,
                          hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc,
                          hit.overthreshold);
   }
-  ASSERT_EQ(1, nmxdata->stats_triggertime_wraps);
+  EXPECT_EQ(1, nmxdata->stats_triggertime_wraps);
 }
 
 #if 0
@@ -153,10 +153,10 @@ TEST_F(NMXClustererTest, TestLoadDistribution)
             nmxdata2.AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
         }
     }
-    ASSERT_EQ(nmxdata1.getNumClustersX() + nmxdata2.getNumClustersX(), 3);
-    ASSERT_EQ(nmxdata1.getNumClustersY() + nmxdata2.getNumClustersY(), 4);
-    ASSERT_EQ(nmxdata1.getNumClustersXY() + nmxdata2.getNumClustersXY(), 2);
-    ASSERT_EQ(nmxdata1.getNumClustersXY_uTPC() + nmxdata1.getNumClustersXY_uTPC(), 2);
+    EXPECT_EQ(nmxdata1.getNumClustersX() + nmxdata2.getNumClustersX(), 3);
+    EXPECT_EQ(nmxdata1.getNumClustersY() + nmxdata2.getNumClustersY(), 4);
+    EXPECT_EQ(nmxdata1.getNumClustersXY() + nmxdata2.getNumClustersXY(), 2);
+    EXPECT_EQ(nmxdata1.getNumClustersXY_uTPC() + nmxdata1.getNumClustersXY_uTPC(), 2);
 }
 #endif
 
