@@ -5,8 +5,8 @@
 #include <gdgem/nmx/Eventlet.h>
 
 struct ClusterNMX {
-  int size;
-  int adc;
+  size_t size;
+  uint64_t adc;
   double position;
   double time;
   bool clusterXAndY;
