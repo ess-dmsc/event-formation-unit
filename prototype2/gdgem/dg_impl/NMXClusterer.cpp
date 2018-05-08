@@ -108,8 +108,8 @@ void HitsQueue::CorrectTriggerData() {
 
 
 NMXClusterer::NMXClusterer(SRSTime time, SRSMappings chips,
-                           int adcThreshold, int minClusterSize, double deltaTimeHits,
-                           int deltaStripHits, double deltaTimeSpan, double deltaTimePlanes
+                           uint16_t adcThreshold, size_t minClusterSize, double deltaTimeHits,
+                           uint16_t deltaStripHits, double deltaTimeSpan, double deltaTimePlanes
                            /* callback() */ ) :
     pTime(time), pChips(chips), pADCThreshold(
     adcThreshold), pMinClusterSize(minClusterSize), pDeltaTimeHits(
@@ -238,16 +238,16 @@ bool NMXClusterer::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
 }
 
 //====================================================================================================================
-int NMXClusterer::ClusterByTime(const HitContainer &oldHits, double dTime, int dStrip,
+size_t NMXClusterer::ClusterByTime(const HitContainer &oldHits, double dTime, int dStrip,
                                 double dSpan, string coordinate) {
 
   ClusterContainer cluster;
   double maxDeltaTime = 0;
-  int clusterCount = 0;
-  int stripCount = 0;
+  size_t clusterCount = 0;
+  size_t stripCount = 0;
   double time1 = 0, time2 = 0;
-  int adc1 = 0;
-  int strip1 = 0;
+  uint16_t adc1 = 0;
+  uint16_t strip1 = 0;
 
   for (const auto &itOldHits : oldHits) {
     time2 = time1;
@@ -267,7 +267,11 @@ int NMXClusterer::ClusterByTime(const HitContainer &oldHits, double dTime, int d
       cluster.clear();
       maxDeltaTime = 0;
     }
-    cluster.emplace_back(strip1, time1, adc1);
+    cluster.emplace_back(Eventlet());
+    auto &e = cluster[cluster.size()-1];
+    e.strip = strip1;
+    e.time = time1;
+    e.adc = adc1;
     stripCount++;
   }
 
@@ -279,9 +283,9 @@ int NMXClusterer::ClusterByTime(const HitContainer &oldHits, double dTime, int d
 }
 
 //====================================================================================================================
-int NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
+size_t NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
                                  double dSpan, string coordinate, double maxDeltaTime) {
-  int maxDeltaStrip = 0;
+  uint16_t maxDeltaStrip = 0;
   double deltaSpan = 0;
 
   double startTime = 0;
@@ -289,23 +293,23 @@ int NMXClusterer::ClusterByStrip(ClusterContainer &cluster, int dStrip,
 
   double centerOfGravity = -1;
   double centerOfTime = 0;
-  int totalADC = 0;
+  uint64_t totalADC = 0;
   double time1 = 0;
-  int adc1 = 0;
-  int strip1 = 0, strip2 = 0;
-  int stripCount = 0;
-  int clusterCount = 0;
+  uint16_t adc1 = 0;
+  uint16_t strip1 = 0, strip2 = 0;
+  size_t stripCount = 0;
+  size_t clusterCount = 0;
 
   std::sort(begin(cluster), end(cluster),
-            [](const ClusterTuple &t1, const ClusterTuple &t2) {
-              return std::get<0>(t1) < std::get<0>(t2);
+            [](const Eventlet &e1, const Eventlet &e2) {
+              return e1.strip < e2.strip;
             });
 
   for (auto &itCluster : cluster) {
     strip2 = strip1;
-    strip1 = std::get<0>(itCluster);
-    time1 = std::get<1>(itCluster);
-    adc1 = std::get<2>(itCluster);
+    strip1 = itCluster.strip;
+    time1 = itCluster.time;
+    adc1 = itCluster.adc;
 
     // At beginning of cluster, set start time of cluster
     if (stripCount == 0) {
@@ -454,14 +458,14 @@ void NMXClusterer::MatchClustersXY(double dPlane) {
 void NMXClusterer::AnalyzeClusters() {
   hitsX.sort_and_correct();
 
-  int cntX = ClusterByTime(hitsX.hits(), pDeltaTimeHits, pDeltaStripHits,
+  size_t cntX = ClusterByTime(hitsX.hits(), pDeltaTimeHits, pDeltaStripHits,
                            pDeltaTimeSpan, "x");
 
   DTRACE(DEB, "%d cluster in x\n", cntX);
 
   hitsY.sort_and_correct();
 
-  int cntY = ClusterByTime(hitsY.hits(), pDeltaTimeHits, pDeltaStripHits,
+  size_t cntY = ClusterByTime(hitsY.hits(), pDeltaTimeHits, pDeltaStripHits,
                            pDeltaTimeSpan, "y");
 
   DTRACE(DEB, "%d cluster in y\n", cntY);

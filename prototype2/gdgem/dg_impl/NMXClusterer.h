@@ -50,7 +50,8 @@ struct CommonClusterNMX {
 //using HitTuple = std::tuple<double, int, int>;
 using HitTuple = Eventlet;
 using HitContainer = std::vector<HitTuple>;
-using ClusterTuple = std::tuple<int, double, int>;
+//using ClusterTuple = std::tuple<int, double, int>;
+using ClusterTuple = Eventlet;
 using ClusterContainer = std::vector<ClusterTuple>;
 using ClusterVector = std::vector<ClusterNMX>;
 
@@ -80,8 +81,8 @@ class NMXClusterer {
 public:
   NMXClusterer(SRSTime time,
                SRSMappings chips,
-               int adcThreshold, int minClusterSize,
-               double deltaTimeHits, int deltaStripHits, double deltaTimeSpan,
+               uint16_t adcThreshold, size_t minClusterSize,
+               double deltaTimeHits, uint16_t deltaStripHits, double deltaTimeSpan,
                double deltaTimePlanes);
 
   ~NMXClusterer();
@@ -94,9 +95,9 @@ public:
   // Analyzing and storing the clusters
   void AnalyzeClusters();
 
-  int ClusterByTime(const HitContainer &oldHits, double dTime, int dStrip,
+  size_t ClusterByTime(const HitContainer &oldHits, double dTime, int dStrip,
                     double dSpan, string coordinate);
-  int ClusterByStrip(ClusterContainer &cluster, int dStrip, double dSpan,
+  size_t ClusterByStrip(ClusterContainer &cluster, int dStrip, double dSpan,
                      string coordinate, double maxDeltaTime);
 
   void StoreClusters(double clusterPosition,
@@ -127,10 +128,10 @@ private:
   SRSTime pTime;
   SRSMappings pChips;
 
-  int pADCThreshold;
-  int pMinClusterSize;
+  uint16_t pADCThreshold;
+  size_t pMinClusterSize;
   double pDeltaTimeHits;
-  int pDeltaStripHits;
+  uint16_t pDeltaStripHits;
   double pDeltaTimeSpan;
   double pDeltaTimePlanes;
 
