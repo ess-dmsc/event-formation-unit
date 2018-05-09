@@ -47,9 +47,6 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
   parser.add_option("-f,--file", NMXSettings.ConfigFile,
                   "NMX (gdgem) specific config file")
       ->group("NMX")->required();
-  parser.add_option("--srs", NMXSettings.SRSParserID,
-                  "RSR Readout parser id ()./ef ")
-      ->group("NMX");
 }
 
 class NMX : public Detector {
