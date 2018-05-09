@@ -159,8 +159,6 @@ TEST_F(NMXClustererTest, BcidTdcError) {
   EXPECT_EQ(2, sorter_y->stats_bcid_tdc_error);
 }
 
-#if 0
-
 TEST_F(NMXClustererTest, FrameCounterError) {
   EXPECT_EQ(0, sorter_x->stats_fc_error);
   EXPECT_EQ(0, sorter_y->stats_fc_error);
@@ -180,7 +178,7 @@ TEST_F(NMXClustererTest, FrameCounterError) {
     }
   }
   EXPECT_EQ(1, sorter_x->stats_fc_error);
-  EXPECT_EQ(1, sorter_y->stats_fc_error);
+  EXPECT_EQ(0, sorter_y->stats_fc_error);
 }
 
 TEST_F(NMXClustererTest, TriggerTimeWraps) {
@@ -201,9 +199,11 @@ TEST_F(NMXClustererTest, TriggerTimeWraps) {
                             hit.overthreshold);
     }
   }
-  EXPECT_EQ(1, sorter_x->stats_triggertime_wraps);
+  EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(1, sorter_y->stats_triggertime_wraps);
 }
+
+#if 0
 
 int distributeto(UNUSED int fec, int asic, int channel, int width) {
     int cutoff = 63 - width;

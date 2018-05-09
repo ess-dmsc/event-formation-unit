@@ -16,13 +16,13 @@ protected:
 TEST_F(PlaneTest, Insert) {
   Eventlet e1;
   plane->insert_eventlet(e1);
-  ASSERT_EQ(plane->entries.size(), 0);
+  ASSERT_EQ(plane->entries.size(), 1);
   e1.adc = 1;
   plane->insert_eventlet(e1);
-  ASSERT_EQ(plane->entries.size(), 1);
+  ASSERT_EQ(plane->entries.size(), 2);
   e1.strip = 1;
   plane->insert_eventlet(e1);
-  ASSERT_EQ(plane->entries.size(), 2);
+  ASSERT_EQ(plane->entries.size(), 3);
 }
 
 TEST_F(PlaneTest, AnalyzeInvalid) {
