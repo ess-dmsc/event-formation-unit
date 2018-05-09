@@ -7,57 +7,77 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-NMXClusterMatcher::NMXClusterMatcher(double dPlane) : pdPlane(dPlane)
-{
+NMXClusterMatcher::NMXClusterMatcher(double dPlane) : pdPlane(dPlane) {
 }
 
-void NMXClusterMatcher::match(std::vector<ClusterNMX>& x_clusters, std::vector<ClusterNMX>& y_clusters)
-{
-  for (auto &nx : x_clusters) {
-    nx.plane.analyze(true, 10000, 10000);
-
-    double tx = nx.plane.time_start;
-    double posx = nx.plane.center;
+void NMXClusterMatcher::match_end(ClusterVector &x_clusters,
+                                  ClusterVector &y_clusters) {
+  for (ClusterVector::iterator nx = begin(x_clusters);
+       nx != end(x_clusters); ++nx) {
+    double tx = nx->time_end;
 
     double minDelta = 99999999;
     double deltaT = 0;
-    ClusterVector::iterator it = end(y_clusters);
+    ClusterVector::iterator it_y = end(y_clusters);
 
     double ty = 0;
-    double posy = 0;
 
-    for (ClusterVector::iterator ny = begin(y_clusters);
-         ny != end(y_clusters); ++ny) {
-      if ((*ny).clusterXAndY == false) {
-        ty = (*ny).plane.time_start;
+    for (auto ny = y_clusters.begin(); ny != y_clusters.end(); ++ny) {
+        ty = ny->time_end;
         deltaT = std::abs(ty - tx);
         if (deltaT < minDelta && deltaT <= pdPlane) {
           minDelta = deltaT;
-          it = ny;
+          it_y = ny;
         }
+    }
+
+    if (it_y != end(y_clusters)) {
+      DTRACE(DEB, "\ncommon cluster x/y (center of mass):");
+      DTRACE(DEB, "\tpos x/pos y: %f/%f", nx->center, it_y->center);
+      DTRACE(DEB, "\ttime x/time y: : %f/%f", tx, ty);
+
+      y_clusters.erase(it_y++);
+      //x_clusters.erase(nx++);
+
+      //m_clusterXY.emplace_back(std::move(theCommonCluster));
+      // callback(theCommonCluster))
+      stats_cluster_count++;
+    }
+  }
+
+  x_clusters.clear();
+  y_clusters.clear();
+}
+
+void NMXClusterMatcher::match_overlap(ClusterVector &x_clusters,
+                                      ClusterVector &y_clusters) {
+  for (ClusterVector::iterator nx = begin(x_clusters);
+       nx != end(x_clusters); ++nx) {
+    double tx = nx->time_end;
+
+    double minDelta = 99999999;
+    double deltaT = 0;
+    ClusterVector::iterator it_y = end(y_clusters);
+
+    double ty = 0;
+
+    for (auto ny = y_clusters.begin(); ny != y_clusters.end(); ++ny) {
+      ty = ny->time_end;
+      deltaT = std::abs(ty - tx);
+      if (deltaT < minDelta && deltaT <= pdPlane) {
+        minDelta = deltaT;
+        it_y = ny;
       }
     }
-    if (it != end(y_clusters)) {
-      nx.clusterXAndY = true;
-      (*it).clusterXAndY = true;
 
-      CommonClusterNMX theCommonCluster;
-      theCommonCluster.sizeX = nx.plane.entries.size();
-      theCommonCluster.sizeY = (*it).plane.entries.size();
-      theCommonCluster.adcX = nx.plane.integral;
-      theCommonCluster.adcY = (*it).plane.integral;
-      theCommonCluster.timeX = nx.plane.time_start;
-      theCommonCluster.timeY = (*it).plane.time_start;
-      theCommonCluster.deltaPlane = std::abs(theCommonCluster.timeX - theCommonCluster.timeY);
-
+    if (it_y != end(y_clusters)) {
       DTRACE(DEB, "\ncommon cluster x/y (center of mass):");
-      DTRACE(DEB, "\tpos x/pos y: %f/%f", posx, posy);
+      DTRACE(DEB, "\tpos x/pos y: %f/%f", nx->center, it_y->center);
       DTRACE(DEB, "\ttime x/time y: : %f/%f", tx, ty);
-      DTRACE(DEB, "\tadc x/adc y: %u/%u", theCommonCluster.adcX,
-             theCommonCluster.adcY);
-      DTRACE(DEB, "\tsize x/size y: %u/%u", theCommonCluster.sizeX,
-             theCommonCluster.sizeY);
-      DTRACE(DEB, "\tdelta time planes: %f", theCommonCluster.deltaPlane);
+
+      y_clusters.erase(it_y++);
+      //x_clusters.erase(nx++);
+
       //m_clusterXY.emplace_back(std::move(theCommonCluster));
       // callback(theCommonCluster))
       stats_cluster_count++;

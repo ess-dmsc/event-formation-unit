@@ -2,23 +2,14 @@
 
 #include <gdgem/dg_impl/NMXCluster.h>
 
-struct CommonClusterNMX {
-  int sizeX;
-  int sizeY;
-  int adcX;
-  int adcY;
-  double timeX;
-  double timeY;
-  double deltaPlane;
-};
-
 class NMXClusterMatcher {
 public:
   NMXClusterMatcher(double dPlane);
-  void match(std::vector<ClusterNMX>& x, std::vector<ClusterNMX>& y);
+  void match_end(ClusterVector& x, ClusterVector& y);
+  void match_overlap(ClusterVector& x, ClusterVector& y);
 
   size_t stats_cluster_count {0};
-  ClusterVector matched_clusters;
+  std::list<EventNMX> matched_clusters;
 
 private:
   double pdPlane {0};

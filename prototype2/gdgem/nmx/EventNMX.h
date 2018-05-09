@@ -19,6 +19,10 @@ struct PlaneNMX {
    */
   void insert_eventlet(const Eventlet &eventlet);
 
+  void merge(PlaneNMX& other);
+
+  double time_overlap(const PlaneNMX& other) const;
+
   /** @brief analyzes particle track
    * @param weighted determine entry strip using weighted average
    * @param max_timebins maximum number of timebins to consider for upper
@@ -34,17 +38,18 @@ struct PlaneNMX {
   // @brief returns calculated and rounded entry strip number for pixid
   int16_t center_rounded() const;
 
+  // only after analyze
   double center{std::numeric_limits<double>::quiet_NaN()}; // entry strip
-  int16_t uncert_lower{
-      -1}; // lower uncertainty (strip span of eventlets in latest timebin)
-  int16_t uncert_upper{
-      -1}; // upper uncertainty (strip span of eventlets in latest few timebins)
+  int16_t uncert_lower{-1}; // strip span of eventlets in latest timebin
+  int16_t uncert_upper{-1}; // strip span of eventlets in latest few timebins
 
+  // calculated as eventlets are added
   uint16_t strip_start{0};
   uint16_t strip_end{0};
 
   double time_start{0}; // start of event timestamp
   double time_end{0};   // end of event timestamp
+
   double integral{0.0};   // sum of adc values
 
   std::list<Eventlet> entries; // eventlets in plane
@@ -56,6 +61,8 @@ public:
    * @param eventlet to be added
    */
   void insert_eventlet(const Eventlet &e);
+
+  void merge(PlaneNMX& cluster, uint8_t plane_id);
 
   /** @brief analyzes particle track
    * @param weighted determine entry strip using weighted average

@@ -300,7 +300,7 @@ void NMXClusterer::ClusterByStrip(HitContainer &hits) {
   }
 }
 //====================================================================================================================
-void NMXClusterer::stash_cluster(PlaneNMX cluster) {
+void NMXClusterer::stash_cluster(PlaneNMX& cluster) {
 
   // Some filtering can happen here
   if (cluster.entries.size() < pMinClusterSize)
@@ -309,9 +309,7 @@ void NMXClusterer::stash_cluster(PlaneNMX cluster) {
   // pDeltaTimeSpan ?
 
   DTRACE(DEB, "******** VALID ********\n");
-  ClusterNMX theCluster;
-  theCluster.plane = cluster;
-  clusters.emplace_back(std::move(theCluster));
+  clusters.emplace_back(std::move(cluster));
 }
 
 bool NMXClusterer::ready() const

@@ -39,13 +39,13 @@ public:
   void ClusterByTime(const HitContainer &oldHits);
   void ClusterByStrip(HitContainer &cluster);
 
-  void stash_cluster(PlaneNMX plane);
+  void stash_cluster(PlaneNMX& plane);
 
   bool ready() const;
 
   size_t stats_cluster_count{0};
 
-  std::vector<ClusterNMX> clusters;
+  ClusterVector clusters;
 
 private:
   SRSTime pTime;

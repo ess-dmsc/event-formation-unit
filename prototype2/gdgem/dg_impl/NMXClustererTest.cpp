@@ -94,7 +94,7 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
   EXPECT_EQ(clusters_x->stats_cluster_count, 5);
   EXPECT_EQ(clusters_y->stats_cluster_count, 9);
 
-  matcher->match(clusters_x->clusters, clusters_y->clusters);
+  matcher->match_end(clusters_x->clusters, clusters_y->clusters);
   EXPECT_EQ(matcher->stats_cluster_count, 4);
 }
 
@@ -127,11 +127,11 @@ TEST_F(NMXClustererTest, Run16_Long) {
   EXPECT_EQ(0, sorter_y->stats_fc_error);
   EXPECT_EQ(0, sorter_y->stats_bcid_tdc_error);
   EXPECT_EQ(0, sorter_y->stats_fc_error);
-  EXPECT_EQ(clusters_x->stats_cluster_count, 10290);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 12425);
+  EXPECT_EQ(clusters_x->stats_cluster_count, 10198);
+  EXPECT_EQ(clusters_y->stats_cluster_count, 12432);
 
-  matcher->match(clusters_x->clusters, clusters_y->clusters);
-  EXPECT_EQ(matcher->stats_cluster_count, 10173);
+  matcher->match_end(clusters_x->clusters, clusters_y->clusters);
+  EXPECT_EQ(matcher->stats_cluster_count, 10111);
 }
 
 TEST_F(NMXClustererTest, BcidTdcError) {
