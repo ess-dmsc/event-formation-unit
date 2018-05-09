@@ -1,11 +1,11 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <vector>
+#include <memory>
 #include <stdio.h>
 #include <unistd.h>
-#include <gdgem/vmm2srs/SRSMappings.h>
-#include <gdgem/vmm2srs/SRSTime.h>
 #include <gdgem/dg_impl/NMXClusterer.h>
+#include <gdgem/dg_impl/NMXClusterMatcher.h>
+#include <gdgem/dg_impl/NMXSorter.h>
 #include <gdgem/dg_impl/TestData.h>
 #include <gdgem/dg_impl/TestDataLong.h>
 #include <test/TestBase.h>

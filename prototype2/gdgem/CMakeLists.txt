@@ -86,6 +86,7 @@ set(NMXClustererTest_SRC
     dg_impl/NMXClusterMatcher.cpp
     dg_impl/NMXClusterer.cpp
     dg_impl/NMXClustererTest.cpp
+    dg_impl/NMXSorter.cpp
     nmx/EventNMX.cpp
     vmm2srs/SRSTime.cpp
     vmm2srs/SRSMappings.cpp)
@@ -94,27 +95,30 @@ set(NMXClustererTest_INC
     dg_impl/NMXClusterMatcher.h
     dg_impl/NMXClusterer.h
     dg_impl/TestData.h
+    dg_impl/NMXSorter.h
     nmx/EventNMX.h
     vmm2srs/SRSTime.h
     vmm2srs/SRSMappings.h)
 create_test_executable(NMXClustererTest SKIP_MEMGRIND)
 
 # GOOGLE BENCHMARK
+set(NMXClustererBenchmarkTest_SRC
+    dg_impl/NMXClusterMatcher.cpp
+    dg_impl/NMXClusterer.cpp
+    dg_impl/NMXClustererBenchmarkTest.cpp
+    dg_impl/NMXSorter.cpp
+    nmx/EventNMX.cpp
+    vmm2srs/SRSTime.cpp
+    vmm2srs/SRSMappings.cpp)
 set(NMXClustererBenchmarkTest_INC
     dg_impl/NMXCluster.h
     dg_impl/NMXClusterMatcher.h
     dg_impl/NMXClusterer.h
     dg_impl/TestData.h
+    dg_impl/NMXSorter.h
     nmx/EventNMX.h
     vmm2srs/SRSTime.h
     vmm2srs/SRSMappings.h)
-set(NMXClustererBenchmarkTest_SRC
-    dg_impl/NMXClusterMatcher.cpp
-    dg_impl/NMXClusterer.cpp
-    dg_impl/NMXClustererBenchmarkTest.cpp
-    nmx/EventNMX.cpp
-    vmm2srs/SRSTime.cpp
-    vmm2srs/SRSMappings.cpp)
 create_benchmark_executable(NMXClustererBenchmarkTest)
 
 set(EventFormationTest_SRC
