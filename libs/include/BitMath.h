@@ -12,7 +12,7 @@
 class BitMath {
 public:
   ///
-  static uint32_t reversebits32(register uint32_t x) {
+  inline static uint32_t reversebits32(register uint32_t x) {
     x = (((x & 0xaaaaaaaa) >> 1) | ((x & 0x55555555) << 1));
     x = (((x & 0xcccccccc) >> 2) | ((x & 0x33333333) << 2));
     x = (((x & 0xf0f0f0f0) >> 4) | ((x & 0x0f0f0f0f) << 4));
@@ -21,12 +21,12 @@ public:
   }
 
   /// @fixme test this
-  static uint16_t reversebits16(register uint16_t x) {
+  inline static uint16_t reversebits16(register uint16_t x) {
     uint32_t temp = reversebits32(x);
     return (temp >> 16);
   };
 
-  static uint32_t gray2bin32(uint32_t num) {
+  inline static uint32_t gray2bin32(uint32_t num) {
     num = num ^ (num >> 16);
     num = num ^ (num >> 8);
     num = num ^ (num >> 4);
