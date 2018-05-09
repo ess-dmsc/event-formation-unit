@@ -34,7 +34,7 @@ private:
 class NMXClusterer {
 public:
   NMXClusterer(SRSTime time, size_t minClusterSize,
-               double deltaTimeHits, uint16_t deltaStripHits, double deltaTimeSpan);
+               double deltaTimeHits, uint16_t deltaStripHits);
 
   void ClusterByTime(const HitContainer &oldHits);
   void ClusterByStrip(HitContainer &cluster);
@@ -53,7 +53,6 @@ private:
   size_t pMinClusterSize;
   double pDeltaTimeHits;
   uint16_t pDeltaStripHits;
-  double pDeltaTimeSpan;
 };
 
 class NMXHitSorter {
@@ -69,19 +68,11 @@ public:
   // Analyzing and storing the clusters
   void AnalyzeClusters();
 
-  // Statistics counters
-  size_t stats_fc_error{0};
-  size_t stats_bcid_tdc_error{0};
-  size_t stats_triggertime_wraps{0};
-
-  HitsQueue hits;
-
 private:
   SRSTime pTime;
   SRSMappings pChips;
 
   uint16_t pADCThreshold;
-  double pDeltaTimeHits;
 
   // These are in play for triggering the actual clustering
   double m_oldTriggerTimestamp_ns {0};
@@ -97,4 +88,12 @@ private:
   int m_oldTdc {0};
 
   NMXClusterer& callback_;
+
+public:
+  // Statistics counters
+  size_t stats_fc_error{0};
+  size_t stats_bcid_tdc_error{0};
+  size_t stats_triggertime_wraps{0};
+
+  HitsQueue hits;
 };

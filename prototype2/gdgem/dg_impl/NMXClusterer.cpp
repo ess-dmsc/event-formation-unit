@@ -108,8 +108,9 @@ void HitsQueue::CorrectTriggerData() {
 
 NMXHitSorter::NMXHitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
                            double deltaTimeHits, NMXClusterer& cb) :
-    hits(pTime, deltaTimeHits),
-    pTime(time), pChips(chips), pADCThreshold(ADCThreshold), callback_(cb)
+    pTime(time), pChips(chips),
+    pADCThreshold(ADCThreshold), callback_(cb),
+    hits(pTime, deltaTimeHits)
 {
 
 }
@@ -213,9 +214,9 @@ void NMXHitSorter::AnalyzeClusters() {
 
 
 NMXClusterer::NMXClusterer(SRSTime time, size_t minClusterSize, double deltaTimeHits,
-                           uint16_t deltaStripHits, double deltaTimeSpan) :
+                           uint16_t deltaStripHits) :
     pTime(time), pMinClusterSize(minClusterSize), pDeltaTimeHits(deltaTimeHits),
-    pDeltaStripHits(deltaStripHits), pDeltaTimeSpan(deltaTimeSpan)
+    pDeltaStripHits(deltaStripHits)
 {
 }
 

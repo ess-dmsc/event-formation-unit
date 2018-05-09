@@ -33,8 +33,8 @@ protected:
     srstime.set_acquisition_window(4000);
 
     matcher = std::make_shared<NMXClusterMatcher>(pDeltaTimePlanes);
-    clusters_x = std::make_shared<NMXClusterer>(srstime, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits, pDeltaTimeSpan);
-    clusters_y = std::make_shared<NMXClusterer>(srstime, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits, pDeltaTimeSpan);
+    clusters_x = std::make_shared<NMXClusterer>(srstime, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits);
+    clusters_y = std::make_shared<NMXClusterer>(srstime, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits);
     sorter_x = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold,  pDeltaTimeHits, *clusters_x);
     sorter_y = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold,  pDeltaTimeHits, *clusters_y);
   }
@@ -91,12 +91,12 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
   EXPECT_EQ(0, sorter_y->stats_fc_error);
   EXPECT_EQ(0, sorter_y->stats_bcid_tdc_error);
   EXPECT_EQ(0, sorter_y->stats_fc_error);
-  EXPECT_EQ(clusters_x->stats_cluster_count, 5);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 9);
+  EXPECT_EQ(clusters_x->stats_cluster_count, 3);
+  EXPECT_EQ(clusters_y->stats_cluster_count, 4);
 
   matcher->match_end(clusters_x->clusters, clusters_y->clusters);
 //  matcher->match_overlap(clusters_x->clusters, clusters_y->clusters);
-  EXPECT_EQ(matcher->stats_cluster_count, 4);
+  EXPECT_EQ(matcher->stats_cluster_count, 2);
 }
 
 

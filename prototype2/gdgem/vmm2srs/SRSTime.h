@@ -34,7 +34,7 @@ public:
 
   double delta_timestamp_ns(double old_timestamp_ns, double timestamp_ns,
                             unsigned int old_framecounter, unsigned int framecounter,
-                            uint64_t &stats_triggertime_wraps) const;
+                            size_t &stats_triggertime_wraps) const;
 
   double trigger_period() const;
 

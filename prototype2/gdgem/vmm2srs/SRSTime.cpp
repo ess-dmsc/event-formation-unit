@@ -63,7 +63,7 @@ double SRSTime::delta_timestamp_ns(double old_timestamp_ns,
                                    double timestamp_ns,
                                    unsigned int old_framecounter,
                                    unsigned int framecounter,
-                                   uint64_t &stats_triggertime_wraps) const {
+                                   size_t &stats_triggertime_wraps) const {
   if (old_timestamp_ns > timestamp_ns
       && (old_framecounter <= framecounter
           || old_framecounter > framecounter + 1000000000))
