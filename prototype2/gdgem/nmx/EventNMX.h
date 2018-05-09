@@ -22,6 +22,7 @@ struct PlaneNMX {
   void merge(PlaneNMX& other);
 
   double time_overlap(const PlaneNMX& other) const;
+  double time_span() const;
 
   /** @brief analyzes particle track
    * @param weighted determine entry strip using weighted average
@@ -64,6 +65,13 @@ public:
 
   void merge(PlaneNMX& cluster, uint8_t plane_id);
 
+  bool time_overlap_thresh(const PlaneNMX& other, double thresh) const;
+
+  double time_overlap(const PlaneNMX& other) const;
+  double time_span() const;
+  double time_end() const;
+  double time_start() const;
+
   /** @brief analyzes particle track
    * @param weighted determine entry strip using weighted average
    * @param max_timebins maximum number of timebins to consider for upper
@@ -73,6 +81,8 @@ public:
    */
   void analyze(bool weighted, int16_t max_timebins, int16_t max_timedif);
 
+  bool empty() const;
+
   // @brief indicates if entry strips were determined in for both planes
   bool valid() const;
 
@@ -80,7 +90,7 @@ public:
   bool meets_lower_cirterion(int16_t max_lu) const;
 
   // @brief returns timestamp for start of event (earlier of 2 planes)
-  double time_start() const;
+  double time() const;
 
   // @brief prints values for debug purposes
   std::string debug() const;

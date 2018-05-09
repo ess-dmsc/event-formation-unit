@@ -44,6 +44,10 @@ double PlaneNMX::time_overlap(const PlaneNMX& other) const
   return (earliest_end - latest_start);
 }
 
+double PlaneNMX::time_span() const
+{
+  return time_end - time_start;
+}
 
 void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
                        uint16_t max_timedif) {
@@ -165,10 +169,45 @@ void EventNMX::debug2() {
   }
 }
 
+bool EventNMX::time_overlap_thresh(const PlaneNMX& other, double thresh) const
+{
+  auto ovr = time_overlap(other);
+  return (((ovr / other.time_span()) + (ovr / time_span())) > thresh);
+}
+
+double EventNMX::time_overlap(const PlaneNMX& other) const
+{
+  auto latest_start = std::max(other.time_start, time_start());
+  auto earliest_end = std::min(other.time_end, time_end());
+  if (latest_start > earliest_end)
+    return 0;
+  return (earliest_end - latest_start);
+}
+
+double EventNMX::time_end() const
+{
+  return std::max(x.time_end, y.time_end);
+}
+
+double EventNMX::time_start() const
+{
+  return std::min(x.time_start, y.time_start);
+}
+
+double EventNMX::time_span() const
+{
+  return (time_end() - time_start());
+}
+
 bool EventNMX::valid() const { return valid_; }
+
+bool EventNMX::empty() const
+{
+  return x.entries.empty() && y.entries.empty();
+}
 
 bool EventNMX::meets_lower_cirterion(int16_t max_lu) const {
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }
 
-double EventNMX::time_start() const { return time_start_; }
+double EventNMX::time() const { return time_start_; }
