@@ -33,14 +33,14 @@ void HitsQueue::store(uint16_t strip, uint16_t adc, double chipTime) {
 
 void HitsQueue::sort_and_correct()
 {
-  std::sort(begin(hitsOld), end(hitsOld),
+  std::sort(hitsOld.begin(), hitsOld.end(),
             [](const Eventlet &e1, const Eventlet &e2) {
-              return e1.time <= e2.time;
+              return e1.time < e2.time;
             });
 
-  std::sort(begin(hitsNew), end(hitsNew),
+  std::sort(hitsNew.begin(), hitsNew.end(),
             [](const Eventlet &e1, const Eventlet &e2) {
-              return e1.time <= e2.time;
+              return e1.time < e2.time;
             });
   CorrectTriggerData();
 
@@ -266,7 +266,7 @@ void NMXClusterer::ClusterByTime(const HitContainer &hits) {
 void NMXClusterer::ClusterByStrip(HitContainer &hits) {
   PlaneNMX cluster;
 
-  std::sort(begin(hits), end(hits),
+  std::sort(hits.begin(), hits.end(),
             [](const Eventlet &e1, const Eventlet &e2) {
               return e1.strip < e2.strip;
             });
