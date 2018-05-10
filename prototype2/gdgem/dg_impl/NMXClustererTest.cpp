@@ -55,8 +55,8 @@ protected:
     matcher = std::make_shared<NMXClusterMatcher>(pDeltaTimePlanes);
     clusters_x = std::make_shared<NMXClusterer>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
     clusters_y = std::make_shared<NMXClusterer>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
-    sorter_x = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold,  pMaxTimeGap, *clusters_x);
-    sorter_y = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold,  pMaxTimeGap, *clusters_y);
+    sorter_x = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, *clusters_x);
+    sorter_y = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, *clusters_y);
   }
 
   virtual void TearDown() {
@@ -67,15 +67,15 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
   for (auto hit : Run16) { // replace with UDP receive()
     uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
     if (planeID == 1) {
-      sorter_y->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                            hit.adc,
-                            hit.overthreshold);
+      sorter_y->store(hit.srs_timestamp, hit.framecounter,
+                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                      hit.adc,
+                      hit.overthreshold);
     } else {
-      sorter_x->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                            hit.adc,
-                            hit.overthreshold);
+      sorter_x->store(hit.srs_timestamp, hit.framecounter,
+                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                      hit.adc,
+                      hit.overthreshold);
     }
 
 //    if (clusters_x->ready() && clusters_y->ready())
@@ -100,20 +100,19 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
 //  EXPECT_EQ(matcher->stats_cluster_count, 2);
 }
 
-
 TEST_F(NMXClustererTest, Run16_Long) {
   for (auto hit : Run16_Long) { // replace with UDP receive()
     uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
     if (planeID == 1) {
-      sorter_y->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                            hit.adc,
-                            hit.overthreshold);
+      sorter_y->store(hit.srs_timestamp, hit.framecounter,
+                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                      hit.adc,
+                      hit.overthreshold);
     } else {
-      sorter_x->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                            hit.adc,
-                            hit.overthreshold);
+      sorter_x->store(hit.srs_timestamp, hit.framecounter,
+                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                      hit.adc,
+                      hit.overthreshold);
     }
 
 //    if (clusters_x->ready() && clusters_y->ready())
@@ -145,15 +144,15 @@ TEST_F(NMXClustererTest, BcidTdcError) {
   for (auto hit : err_bcid_tdc_error) {
     uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
     if (planeID == 1) {
-      sorter_y->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                            hit.adc,
-                            hit.overthreshold);
+      sorter_y->store(hit.srs_timestamp, hit.framecounter,
+                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                      hit.adc,
+                      hit.overthreshold);
     } else {
-      sorter_x->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                            hit.adc,
-                            hit.overthreshold);
+      sorter_x->store(hit.srs_timestamp, hit.framecounter,
+                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                      hit.adc,
+                      hit.overthreshold);
     }
   }
   // Two in X and Two in Y
@@ -168,15 +167,15 @@ TEST_F(NMXClustererTest, FrameCounterError) {
   for (auto hit : err_fc_error) {
     uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
     if (planeID == 1) {
-      sorter_y->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                            hit.adc,
-                            hit.overthreshold);
+      sorter_y->store(hit.srs_timestamp, hit.framecounter,
+                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                      hit.adc,
+                      hit.overthreshold);
     } else {
-      sorter_x->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                            hit.adc,
-                            hit.overthreshold);
+      sorter_x->store(hit.srs_timestamp, hit.framecounter,
+                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                      hit.adc,
+                      hit.overthreshold);
     }
   }
   EXPECT_EQ(1, sorter_x->stats_fc_error);
@@ -190,15 +189,15 @@ TEST_F(NMXClustererTest, TriggerTimeWraps) {
   for (auto hit : err_triggertime_error) {
     uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
     if (planeID == 1) {
-      sorter_y->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                            hit.adc,
-                            hit.overthreshold);
+      sorter_y->store(hit.srs_timestamp, hit.framecounter,
+                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                      hit.adc,
+                      hit.overthreshold);
     } else {
-      sorter_x->AnalyzeHits(hit.srs_timestamp, hit.framecounter,
-                            hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                            hit.adc,
-                            hit.overthreshold);
+      sorter_x->store(hit.srs_timestamp, hit.framecounter,
+                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                      hit.adc,
+                      hit.overthreshold);
     }
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
@@ -224,10 +223,10 @@ TEST_F(NMXClustererTest, TestLoadDistribution)
     for (auto hit : Run16_line_110168_110323) { // replace with UDP receive()
         printf("fec: %d, asic: %d, ch: %d -> %d\n", hit.fec, hit.chip_id, hit.channel, distributeto(hit.fec, hit.chip_id, hit.channel, 10));
         if (distributeto(hit.fec, hit.chip_id, hit.channel, 10) & 0x01) {
-            nmxdata1.AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
+            nmxdata1.store(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
         }
         if (distributeto(hit.fec, hit.chip_id, hit.channel, 10) & 0x02) {
-            nmxdata2.AnalyzeHits(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
+            nmxdata2.store(hit.srs_timestamp, hit.framecounter, hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
         }
     }
     EXPECT_EQ(nmxdata1.getNumClustersX() + nmxdata2.getNumClustersX(), 3);

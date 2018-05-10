@@ -5,11 +5,10 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-HitsQueue::HitsQueue(SRSTime Time, double deltaTimeHits)
-    : pTime(Time), pDeltaTimeHits(deltaTimeHits) {}
+HitsQueue::HitsQueue(SRSTime Time, double maxTimeGap)
+    : pTime(Time), pMaxTimeGap(maxTimeGap) {}
 
-const HitContainer& HitsQueue::hits() const
-{
+const HitContainer &HitsQueue::hits() const {
   return hitsOut;
 }
 
@@ -29,8 +28,7 @@ void HitsQueue::store(uint16_t strip, uint16_t adc, double chipTime) {
   }
 }
 
-void HitsQueue::sort_and_correct()
-{
+void HitsQueue::sort_and_correct() {
   std::sort(hitsOld.begin(), hitsOld.end(),
             [](const Eventlet &e1, const Eventlet &e2) {
               return e1.time < e2.time;
@@ -40,7 +38,7 @@ void HitsQueue::sort_and_correct()
             [](const Eventlet &e1, const Eventlet &e2) {
               return e1.time < e2.time;
             });
-  CorrectTriggerData();
+  correct_trigger_data();
 
   hitsOut = std::move(hitsOld);
 
@@ -50,13 +48,12 @@ void HitsQueue::sort_and_correct()
   }
 }
 
-void HitsQueue::subsequentTrigger(bool trig)
-{
-  m_subsequentTrigger = trig;
+void HitsQueue::subsequent_trigger(bool trig) {
+  subsequent_trigger_ = trig;
 }
 
-void HitsQueue::CorrectTriggerData() {
-  if (!m_subsequentTrigger)
+void HitsQueue::correct_trigger_data() {
+  if (!subsequent_trigger_)
     return;
 
   const auto &itHitsBegin = begin(hitsNew);
@@ -73,7 +70,7 @@ void HitsQueue::CorrectTriggerData() {
   double timeNext = itHitsBegin->time + pTime.trigger_period();
   double deltaTime = timeNext - timePrevious;
   //Continue only if the first hit in hits is close enough in time to the last hit in oldHits
-  if (deltaTime > pDeltaTimeHits)
+  if (deltaTime > pMaxTimeGap)
     return;
 
   HitContainer::iterator itFind;
@@ -88,7 +85,7 @@ void HitsQueue::CorrectTriggerData() {
     //At the first iteration, delta time is 0
     deltaTime = timeNext - timePrevious;
 
-    if (deltaTime > pDeltaTimeHits)
+    if (deltaTime > pMaxTimeGap)
       break;
 
     hitsOld.emplace_back(Eventlet());
@@ -102,105 +99,67 @@ void HitsQueue::CorrectTriggerData() {
   hitsNew.erase(itHitsBegin, itFind);
 }
 
-
-
 NMXHitSorter::NMXHitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
-                           double deltaTimeHits, NMXClusterer& cb) :
+                           double maxTimeGap, NMXClusterer &cb) :
     pTime(time), pChips(chips),
     pADCThreshold(ADCThreshold), callback_(cb),
-    hits(pTime, deltaTimeHits)
-{
+    hits(pTime, maxTimeGap) {
 
 }
 
-
 //====================================================================================================================
-void NMXHitSorter::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
-                               int fecID, int vmmID, int chNo, int bcid, int tdc, int adc,
-                               int overThresholdFlag) {
+void NMXHitSorter::store(int triggerTimestamp, unsigned int frameCounter,
+                         int fecID, int vmmID, int chNo, int bcid, int tdc, int adc,
+                         int overThresholdFlag) {
 
   // Ready for factoring out, logic tested elsewhere
   uint16_t strip = pChips.get_strip(fecID, vmmID, chNo);
 
-  // These variables are used only here
-  // Block is candidate for factoring out
-  // Perhaps an adapter class responsible for recovery from this error condition?
-
   // Fix for entries with all zeros
   if (bcid == 0 && tdc == 0 && overThresholdFlag) {
-    bcid = m_oldBcid;
-    tdc = m_oldTdc;
+    bcid = oldBcid;
+    tdc = oldTdc;
     stats_bcid_tdc_error++;
   }
-  m_oldBcid = bcid;
-  m_oldTdc = tdc;
+  oldBcid = bcid;
+  oldTdc = tdc;
+  // oldVmmID = vmmID; // does this need to match for above logic?
 
   // Could be factored out depending on above block
   double chipTime = pTime.chip_time(bcid, tdc);
 
-  bool newEvent = false;
-  double deltaTriggerTimestamp_ns = 0;
   double triggerTimestamp_ns = pTime.timestamp_ns(triggerTimestamp);
-
-  if (m_oldTriggerTimestamp_ns != triggerTimestamp_ns) {
-    AnalyzeClusters();
-    newEvent = true;
-    hits.subsequentTrigger(false);
-    m_eventNr++;
-    deltaTriggerTimestamp_ns = pTime.delta_timestamp_ns(
-        m_oldTriggerTimestamp_ns, triggerTimestamp_ns,
-        m_oldFrameCounter, frameCounter, stats_triggertime_wraps);
+  if (oldTriggerTimestamp_ns != triggerTimestamp_ns) {
+    stats_trigger_count++;
+    analyze();
+    hits.subsequent_trigger(false);
+    double deltaTriggerTimestamp_ns =
+        pTime.delta_timestamp_ns(oldTriggerTimestamp_ns,
+                                 triggerTimestamp_ns,
+                                 oldFrameCounter,
+                                 frameCounter,
+                                 stats_triggertime_wraps);
 
     if (deltaTriggerTimestamp_ns <= pTime.trigger_period()) {
-      hits.subsequentTrigger(true);
+      hits.subsequent_trigger(true); // should this happen before analyze?
     }
   }
+  oldTriggerTimestamp_ns = triggerTimestamp_ns;
 
-  // Crucial step
-  // Storing hit to appropriate buffer
+  // This is likely resolved. Candidate for removal?
+  if ((frameCounter < oldFrameCounter)
+      && !(oldFrameCounter > frameCounter + 1000000000)) {
+    stats_fc_error++;
+  }
+  oldFrameCounter = frameCounter;
+
+  // Store hit to appropriate buffer
   if (overThresholdFlag || (adc >= pADCThreshold)) {
     hits.store(strip, adc, chipTime);
   }
-
-  if (newEvent) {
-    DTRACE(DEB, "\neventNr  %d\n", m_eventNr);
-    DTRACE(DEB, "fecID  %d\n", fecID);
-  }
-
-  // This is likely resolved. Candidate for removal?
-  if ((frameCounter < m_oldFrameCounter)
-      && !(m_oldFrameCounter > frameCounter + 1000000000)) {
-    stats_fc_error++;
-  }
-
-  // m_timeStamp_ms is used for printing Trace info
-  if (m_eventNr > 1) {
-    m_timeStamp_ms = m_timeStamp_ms + deltaTriggerTimestamp_ns * 0.000001;
-  }
-  if (deltaTriggerTimestamp_ns > 0) {
-    DTRACE(DEB, "\tTimestamp %.2f [ms]\n", m_timeStamp_ms);
-    DTRACE(DEB, "\tTime since last trigger %.4f us (%.4f kHz)\n",
-           deltaTriggerTimestamp_ns * 0.001,
-           1000000 / deltaTriggerTimestamp_ns);
-    DTRACE(DEB, "\tTriggerTimestamp %.2f [ns]\n", triggerTimestamp_ns);
-  }
-  if (m_oldFrameCounter != frameCounter || newEvent) {
-    DTRACE(DEB, "\n\tFrameCounter %u\n", frameCounter);
-  }
-  if (m_oldVmmID != vmmID || newEvent) {
-    DTRACE(DEB, "\tvmmID  %d\n", vmmID);
-  }
-  DTRACE(DEB, "\t\tchannel %d (chNo  %d) - overThresholdFlag %d\n",
-         strip, chNo, overThresholdFlag);
-  DTRACE(DEB, "\t\t\tbcid %d, tdc %d, adc %d\n", bcid, tdc, adc);
-  DTRACE(DEB, "\t\t\tchipTime %.2f us\n", chipTime * 0.001);
-
-  m_oldTriggerTimestamp_ns = triggerTimestamp_ns;
-  m_oldFrameCounter = frameCounter;
-  m_oldVmmID = vmmID;
 }
 
-void NMXHitSorter::AnalyzeClusters() {
+void NMXHitSorter::analyze() {
   hits.sort_and_correct();
   callback_.cluster(hits.hits());
 }

@@ -6,63 +6,59 @@
 
 class HitsQueue {
 public:
-  HitsQueue(SRSTime Time, double deltaTimeHits);
+  HitsQueue(SRSTime Time, double maxTimeGap);
   void store(uint16_t strip, uint16_t adc, double chipTime);
   void sort_and_correct();
-  void CorrectTriggerData();
-  void subsequentTrigger(bool);
+  void correct_trigger_data();
+  void subsequent_trigger(bool);
 
   const HitContainer& hits() const;
 
 private:
+  // tripple buffer
+
   HitContainer hitsOld;
   HitContainer hitsNew;
   HitContainer hitsOut;
 
   SRSTime pTime;
-  double pDeltaTimeHits {200};
-  bool m_subsequentTrigger {false};
+  double pMaxTimeGap {200};
+  bool subsequent_trigger_{false};
 };
 
 class NMXHitSorter {
 public:
-  NMXHitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold, double deltaTimeHits,
+  NMXHitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold, double maxTimeGap,
                NMXClusterer& cb);
 
   // Analyzing and storing the hits
-  void AnalyzeHits(int triggerTimestamp, unsigned int frameCounter, int fecID,
-                   int vmmID, int chNo, int bcid, int tdc, int adc,
-                   int overThresholdFlag);
-
-  // Analyzing and storing the clusters
-  void AnalyzeClusters();
+  void store(int triggerTimestamp, unsigned int frameCounter, int fecID,
+             int vmmID, int chNo, int bcid, int tdc, int adc,
+             int overThresholdFlag);
 
 private:
-  SRSTime pTime;
-  SRSMappings pChips;
-
-  uint16_t pADCThreshold;
-
   // These are in play for triggering the actual clustering
-  double m_oldTriggerTimestamp_ns {0};
-  unsigned int m_oldFrameCounter {0};
-
-  // For debug output only
-  double m_timeStamp_ms {0};
-  int m_oldVmmID {0};
-  int m_eventNr {0};
+  double oldTriggerTimestamp_ns {0};
+  unsigned int oldFrameCounter {0};
 
   // For all 0s correction
-  int m_oldBcid {0};
-  int m_oldTdc {0};
+  int oldBcid {0};
+  int oldTdc {0};
 
+  SRSTime pTime;
+  SRSMappings pChips;
+  uint16_t pADCThreshold;
   NMXClusterer& callback_;
+
+  void analyze();
 
 public:
   // Statistics counters
   size_t stats_fc_error{0};
   size_t stats_bcid_tdc_error{0};
   size_t stats_triggertime_wraps{0};
+  size_t stats_trigger_count {0};
 
   HitsQueue hits;
+
 };
