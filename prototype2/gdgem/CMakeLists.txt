@@ -146,6 +146,12 @@ set(NMXClustererBenchmarkTest_INC
     ${ClusteringBase_INC})
 create_benchmark_executable(NMXClustererBenchmarkTest)
 
+set(GrayCodeBenchmarkTest_INC ../../libs/include/BitMath.h)
+set(GrayCodeBenchmarkTest_SRC dg_impl/GrayCodeBenchmarkTest.cpp)
+create_benchmark_executable(GrayCodeBenchmarkTest)
+
+#
+# Unit Tests
 set(EventFormationTest_SRC
     nmx/AbstractEventletBuilder.cpp
     nmx/Clusterer.cpp
@@ -227,6 +233,15 @@ set(ParserSRSTest_INC
     vmm2srs/ParserSRS.h
     )
 create_test_executable(ParserSRSTest)
+
+set(ParserSRSVMM3Test_SRC
+    vmm3srs/ParserSRSTest.cpp
+    vmm3srs/ParserSRS.cpp
+    )
+set(ParserSRSVMM3Test_INC
+    vmm3srs/ParserSRS.h
+    )
+create_test_executable(ParserSRSVMM3Test)
 
 set(EventletBuilderH5Test_SRC
     nmx/EventNMX.cpp
