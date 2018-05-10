@@ -5,25 +5,37 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-NMXClusterMatcher::NMXClusterMatcher(double dPlane) : pdPlane(dPlane) {
+ClusterMatcher::ClusterMatcher(double dPlane) : pdPlane(dPlane) {
 }
 
-void NMXClusterMatcher::match_end(NMXClusterer &x_clusters,
-                                  NMXClusterer &y_clusters, bool force) {
-  for (auto nx = x_clusters.clusters.begin(); nx != x_clusters.clusters.end();) {
-    if (!force && !x_clusters.ready(nx->time_end))
+bool ClusterMatcher::ready(const ClusterList& clusters) const
+{
+  return ((clusters.size() > 2) && ready(clusters.front().time_end, clusters));
+}
+
+bool ClusterMatcher::ready(double time, const ClusterList& clusters) const
+{
+  return ((clusters.size() > 2) &&
+      (clusters.back().time_start - time) > (pdPlane*3));
+}
+
+
+void ClusterMatcher::match_end(ClusterList& x_clusters,
+                                  ClusterList& y_clusters, bool force) {
+  for (auto nx = x_clusters.begin(); nx != x_clusters.end();) {
+    if (!force && !ready(nx->time_end, x_clusters))
       break;
 
     double tx = nx->time_end;
 
     double minDelta = 99999999;
     double deltaT = 0;
-    ClusterList::iterator it_y = y_clusters.clusters.end();
+    ClusterList::iterator it_y = y_clusters.end();
 
     double ty = 0;
 
-    for (auto ny = y_clusters.clusters.begin(); ny != y_clusters.clusters.end(); ++ny) {
-      if (!force && !y_clusters.ready(nx->time_end))
+    for (auto ny = y_clusters.begin(); ny != y_clusters.end(); ++ny) {
+      if (!force && !ready(nx->time_end, y_clusters))
         break;
 
       ty = ny->time_end;
@@ -34,11 +46,11 @@ void NMXClusterMatcher::match_end(NMXClusterer &x_clusters,
       }
     }
 
-    if (it_y != y_clusters.clusters.end()) {
+    if (it_y != y_clusters.end()) {
       DTRACE(DEB, "\ttime x/time y: : %f/%f", tx, ty);
 
-      y_clusters.clusters.erase(it_y++);
-      x_clusters.clusters.erase(nx++);
+      y_clusters.erase(it_y++);
+      x_clusters.erase(nx++);
 
       //m_clusterXY.emplace_back(std::move(theCommonCluster));
       // callback(theCommonCluster))
@@ -46,17 +58,15 @@ void NMXClusterMatcher::match_end(NMXClusterer &x_clusters,
     } else
       nx++;
   }
-
-//  x_clusters.clear();
-//  y_clusters.clear();
 }
 
-void NMXClusterMatcher::match_overlap(NMXClusterer &x_clusters, NMXClusterer &y_clusters) {
+void ClusterMatcher::match_overlap(ClusterList& x_clusters,
+                                      ClusterList& y_clusters) {
   double max_gap = 200;
   double overlap_thresh = 0.7;
   EventNMX evt;
 
-  for (auto nx = x_clusters.clusters.begin(); nx != x_clusters.clusters.end();) {
+  for (auto nx = x_clusters.begin(); nx != x_clusters.end();) {
     // if matched cluster exists and we no longer overlap
     // stash it, increment and reset
     if (!evt.empty() && !evt.time_overlap_thresh(*nx, overlap_thresh)) {
@@ -67,19 +77,16 @@ void NMXClusterMatcher::match_overlap(NMXClusterer &x_clusters, NMXClusterer &y_
 
     // it was either emptied or still overlapping
     evt.merge(*nx, 0);
-    x_clusters.clusters.erase(nx++);
+    x_clusters.erase(nx++);
 
-    for (auto ny = y_clusters.clusters.begin(); ny != y_clusters.clusters.end();) {
+    for (auto ny = y_clusters.begin(); ny != y_clusters.end();) {
       if ((ny->time_start - evt.time_end()) > max_gap)
         break;
       else if (evt.time_overlap_thresh(*ny, overlap_thresh)) {
         evt.merge(*ny, 1);
-        y_clusters.clusters.erase(ny++);
+        y_clusters.erase(ny++);
       } else
         ny++;
     }
   }
-
-//  x_clusters.clear();
-//  y_clusters.clear();
 }

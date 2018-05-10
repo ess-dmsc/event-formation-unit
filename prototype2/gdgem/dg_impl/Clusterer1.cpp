@@ -1,22 +1,23 @@
-#include <gdgem/dg_impl/NMXClusterer.h>
+#include <gdgem/dg_impl/Clusterer1.h>
 #include <algorithm>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-NMXClusterer::NMXClusterer(double maxTimeGap, uint16_t maxStripGap, size_t minClusterSize)
-    : pMaxTimeGap(maxTimeGap)
+Clusterer1::Clusterer1(double maxTimeGap, uint16_t maxStripGap, size_t minClusterSize)
+    : AbstractClusterer()
+    , pMaxTimeGap(maxTimeGap)
     , pMaxStripGap(maxStripGap)
     , pMinClusterSize(minClusterSize)
 {
 }
 
-void NMXClusterer::cluster(const HitContainer &hits) {
+void Clusterer1::cluster(const HitContainer &hits) {
   cluster_by_time(hits);
 }
 
-void NMXClusterer::cluster_by_time(const HitContainer &hits) {
+void Clusterer1::cluster_by_time(const HitContainer &hits) {
   HitContainer cluster;
 
   for (const auto &hit : hits) {
@@ -42,7 +43,7 @@ void NMXClusterer::cluster_by_time(const HitContainer &hits) {
 }
 
 //====================================================================================================================
-void NMXClusterer::cluster_by_strip(HitContainer &hits) {
+void Clusterer1::cluster_by_strip(HitContainer &hits) {
   PlaneNMX cluster;
 
   std::sort(hits.begin(), hits.end(),
@@ -77,7 +78,7 @@ void NMXClusterer::cluster_by_strip(HitContainer &hits) {
   stash_cluster(cluster);
 }
 //====================================================================================================================
-void NMXClusterer::stash_cluster(PlaneNMX& cluster) {
+void Clusterer1::stash_cluster(PlaneNMX& cluster) {
 
   // Some filtering can happen here
   if (cluster.entries.size() < pMinClusterSize)
@@ -88,15 +89,4 @@ void NMXClusterer::stash_cluster(PlaneNMX& cluster) {
   DTRACE(DEB, "******** VALID ********\n");
   clusters.emplace_back(std::move(cluster));
   stats_cluster_count ++;
-}
-
-bool NMXClusterer::ready() const
-{
-  return ((clusters.size() > 2) && ready(clusters.front().time_end));
-}
-
-bool NMXClusterer::ready(double time) const
-{
-  return ((clusters.size() > 2) &&
-      (clusters.back().time_start - time) > (pMaxTimeGap*3));
 }

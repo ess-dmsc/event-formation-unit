@@ -1,13 +1,14 @@
 #pragma once
 
-#include <gdgem/dg_impl/NMXClusterer.h>
+#include <gdgem/dg_impl/AbstractClusterer.h>
 #include <gdgem/dg_impl/HitsQueue.h>
 #include <gdgem/vmm2srs/SRSMappings.h>
+#include <memory>
 
 class HitSorter {
 public:
   HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold, double maxTimeGap,
-               NMXClusterer& cb);
+            std::shared_ptr<AbstractClusterer> cb);
 
   // Analyzing and storing the hits
   void store(int triggerTimestamp, unsigned int frameCounter, int fecID,
@@ -26,7 +27,7 @@ private:
   SRSTime pTime;
   SRSMappings pChips;
   uint16_t pADCThreshold;
-  NMXClusterer& callback_;
+  std::shared_ptr<AbstractClusterer> callback_;
 
   void analyze();
 

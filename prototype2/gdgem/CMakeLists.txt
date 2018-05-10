@@ -85,7 +85,6 @@ endif()
 set(ClusteringBase_SRC
     dg_impl/HitsQueue.cpp
     dg_impl/HitSorter.cpp
-    dg_impl/NMXClusterer.cpp
     dg_impl/ClusterMatcher.cpp
     nmx/EventNMX.cpp
     nmx/Eventlet.cpp
@@ -95,7 +94,7 @@ set(ClusteringBase_INC
     dg_impl/HitContainer.h
     dg_impl/HitsQueue.h
     dg_impl/HitSorter.h
-    dg_impl/NMXClusterer.h
+    dg_impl/AbstractClusterer.h
     dg_impl/ClusterMatcher.h
     dg_impl/TestData.h
     dg_impl/TestDataShort.h
@@ -119,12 +118,25 @@ set(HitSorterTest_INC
     ${ClusteringBase_INC})
 create_test_executable(HitSorterTest SKIP_MEMGRIND)
 
-set(NMXClustererTest_SRC
+set(Clusterer1Test_SRC
     ${ClusteringBase_SRC}
-    dg_impl/NMXClustererTest.cpp)
-set(NMXClustererTest_INC
+    dg_impl/Clusterer1.cpp
+    dg_impl/Clusterer1Test.cpp)
+set(Clusterer1Test_INC
+    dg_impl/Clusterer1.h
     ${ClusteringBase_INC})
-create_test_executable(NMXClustererTest SKIP_MEMGRIND)
+create_test_executable(Clusterer1Test SKIP_MEMGRIND)
+
+set(ClusterMatcherTest_SRC
+    ${ClusteringBase_SRC}
+    dg_impl/ClusterMatcher.cpp
+    dg_impl/Clusterer1.cpp
+    dg_impl/ClusterMatcherTest.cpp)
+set(ClusterMatcherTest_INC
+    dg_impl/ClusterMatcher.h
+    dg_impl/Clusterer1.h
+    ${ClusteringBase_INC})
+create_test_executable(ClusterMatcherTest SKIP_MEMGRIND)
 
 # GOOGLE BENCHMARK
 set(NMXClustererBenchmarkTest_SRC

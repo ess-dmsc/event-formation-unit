@@ -6,7 +6,7 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 HitSorter::HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
-                           double maxTimeGap, NMXClusterer &cb) :
+                           double maxTimeGap, std::shared_ptr<AbstractClusterer> cb) :
     pTime(time), pChips(chips),
     pADCThreshold(ADCThreshold), callback_(cb),
     hits(pTime, maxTimeGap) {
@@ -67,6 +67,7 @@ void HitSorter::store(int triggerTimestamp, unsigned int frameCounter,
 
 void HitSorter::analyze() {
   hits.sort_and_correct();
-  callback_.cluster(hits.hits());
+  if (callback_)
+    callback_->cluster(hits.hits());
 }
 

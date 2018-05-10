@@ -49,7 +49,7 @@ static void Doit(benchmark::State &state) {
 			pMinClusterSize, pDeltaTimeHits, pDeltaStripHits, pDeltaTimeSpan,
 			pDeltaTimePlanes);
 	for (auto _ : state) {
-		for (auto hit : Run16_Long) { // replace with UDP receive()
+		for (auto hit : Run16_Long) {
 			int result = nmxdata.AnalyzeHits(hit.srs_timestamp,
 					hit.framecounter, hit.fec, hit.chip_id, hit.channel,
 					hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
