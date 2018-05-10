@@ -1,6 +1,3 @@
-#include <algorithm>
-#include <cmath>
-#include <cassert>
 #include <common/Trace.h>
 #include <gdgem/dg_impl/NMXClusterMatcher.h>
 

@@ -78,10 +78,10 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
                             hit.overthreshold);
     }
 
-    if (clusters_x->ready() && clusters_y->ready())
-    {
-      matcher->match_end(clusters_x->clusters, clusters_y->clusters);
-    }
+//    if (clusters_x->ready() && clusters_y->ready())
+//    {
+//      matcher->match_end(clusters_x->clusters, clusters_y->clusters);
+//    }
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_x->stats_fc_error);
@@ -97,7 +97,7 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
 //  matcher->match_end(clusters_x->clusters, clusters_y->clusters);
 
   //  matcher->match_overlap(clusters_x->clusters, clusters_y->clusters);
-  EXPECT_EQ(matcher->stats_cluster_count, 2);
+//  EXPECT_EQ(matcher->stats_cluster_count, 2);
 }
 
 
@@ -116,10 +116,10 @@ TEST_F(NMXClustererTest, Run16_Long) {
                             hit.overthreshold);
     }
 
-    if (clusters_x->ready() && clusters_y->ready())
-    {
-      matcher->match_end(clusters_x->clusters, clusters_y->clusters);
-    }
+//    if (clusters_x->ready() && clusters_y->ready())
+//    {
+//      matcher->match_end(clusters_x->clusters, clusters_y->clusters);
+//    }
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_x->stats_fc_error);
@@ -135,7 +135,7 @@ TEST_F(NMXClustererTest, Run16_Long) {
 //  matcher->match_end(clusters_x->clusters, clusters_y->clusters);
 
   //  matcher->match_overlap(clusters_x->clusters, clusters_y->clusters);
-  EXPECT_EQ(matcher->stats_cluster_count, 10111);
+//  EXPECT_EQ(matcher->stats_cluster_count, 10111);
 }
 
 TEST_F(NMXClustererTest, BcidTdcError) {

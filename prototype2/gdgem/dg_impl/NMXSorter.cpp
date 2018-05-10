@@ -1,6 +1,5 @@
 #include <gdgem/dg_impl/NMXSorter.h>
 #include <algorithm>
-#include <cmath>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL
