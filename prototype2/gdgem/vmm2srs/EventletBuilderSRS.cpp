@@ -45,7 +45,7 @@ AbstractBuilder::ResultStats BuilderSRS::process_buffer(char *buf, size_t size,
            parser_.srshdr.time, d.bcid, d.tdc);
     XTRACE(PROCESS, DEB, "srs/vmm chip: %d, channel: %d\n", chip_id, d.chno);
     XTRACE(PROCESS, DEB,
-           "eventlet plane_id: %d, strip: %d, time: %" PRIu64 "\n",
+           "eventlet plane_id: %d, strip: %d, time: %f\n",
            eventlet.plane_id, eventlet.strip, eventlet.time);
     /**< @todo flags? */
 

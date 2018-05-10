@@ -267,7 +267,7 @@ void NMX::processing_thread() {
               if (pixelid == 0) {
                 mystats.geom_errors++;
               } else {
-                time = static_cast<uint32_t>(event.time_start());
+                time = static_cast<uint32_t>(event.time());
 
                 XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n", time, pixelid);
 

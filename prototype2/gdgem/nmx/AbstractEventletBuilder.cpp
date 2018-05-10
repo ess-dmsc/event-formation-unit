@@ -41,7 +41,6 @@ void AbstractBuilder::setup_h5(std::string dump_dir) {
 
   hdf5::node::Group root = file_.root();
 
-  hdf5::property::LinkCreationList lcpl;
   hdf5::property::DatasetCreationList dcpl;
   dcpl.layout(hdf5::property::DatasetLayout::CHUNKED);
 
@@ -49,20 +48,17 @@ void AbstractBuilder::setup_h5(std::string dump_dir) {
   srstime_ = root.create_dataset(
       "srs_time", hdf5::datatype::create<uint32_t>(),
       hdf5::dataspace::Simple({chunksize},
-                              {hdf5::dataspace::Simple::UNLIMITED}),
-      lcpl, dcpl);
+                              {hdf5::dataspace::Simple::UNLIMITED}), dcpl);
 
   dcpl.chunk({chunksize, 3});
   bc_tdc_adc_ = root.create_dataset(
       "bc_tdc_adc", hdf5::datatype::create<uint16_t>(),
       hdf5::dataspace::Simple({chunksize, 3},
-                              {hdf5::dataspace::Simple::UNLIMITED, 3}),
-      lcpl, dcpl);
+                              {hdf5::dataspace::Simple::UNLIMITED, 3}), dcpl);
 
   dcpl.chunk({chunksize, 4});
   fec_chip_chan_thresh_ = root.create_dataset(
       "fec_chip_chan_thresh", hdf5::datatype::create<uint8_t>(),
       hdf5::dataspace::Simple({chunksize, 4},
-                              {hdf5::dataspace::Simple::UNLIMITED, 4}),
-      lcpl, dcpl);
+                              {hdf5::dataspace::Simple::UNLIMITED, 4}), dcpl);
 }

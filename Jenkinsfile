@@ -4,32 +4,32 @@ archive_what = "centos7-release"
 
 images = [
     'centos7': [
-        'name': 'essdmscdm/centos7-build-node:1.0.1',
+        'name': 'essdmscdm/centos7-build-node:1.1.0',
         'sh': 'sh',
         'cmake_flags': '-DCOV=ON'
     ],
     'centos7-release': [
-        'name': 'essdmscdm/centos7-build-node:1.0.1',
+        'name': 'essdmscdm/centos7-build-node:1.1.0',
         'sh': 'sh',
         'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
     ],
     'centos7-gcc6': [
-        'name': 'essdmscdm/centos7-gcc6-build-node:2.1.0',
+        'name': 'essdmscdm/centos7-gcc6-build-node:2.2.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash',
         'cmake_flags': ''
     ],
     'fedora25': [
-        'name': 'essdmscdm/fedora25-build-node:1.0.0',
+        'name': 'essdmscdm/fedora25-build-node:1.1.0',
         'sh': 'sh',
         'cmake_flags': ''
     ],
     'ubuntu1604': [
-        'name': 'essdmscdm/ubuntu16.04-build-node:2.1.0',
+        'name': 'essdmscdm/ubuntu16.04-build-node:2.4.0',
         'sh': 'sh',
         'cmake_flags': ''
     ],
     'ubuntu1710': [
-        'name': 'essdmscdm/ubuntu17.10-build-node:2.0.0',
+        'name': 'essdmscdm/ubuntu17.10-build-node:2.1.1',
         'sh': 'sh',
         'cmake_flags': ''
     ]

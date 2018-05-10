@@ -16,7 +16,7 @@ public:
   /** @brief create an NMX event clusterer
    * @param min_time_span minimum timebins that constitute one event
    */
-  Clusterer(uint64_t min_time_span);
+  Clusterer(double min_time_span);
 
   /** @brief add eventlet onto the clustering stack
    * @param eventlet with valid timestamp and non-zero adc value
@@ -33,10 +33,10 @@ public:
   size_t unclustered() const;
 
 private:
-  std::multimap<uint64_t, Eventlet>
+  std::multimap<double, Eventlet>
       backlog_; // stack of chronologically ordered events
-  uint64_t min_time_span_{1};
+  double min_time_span_{1};
 
-  uint64_t latest_time_{0};
-  uint64_t current_time_offset_{0};
+  double latest_time_{0};
+  double current_time_offset_{0};
 };

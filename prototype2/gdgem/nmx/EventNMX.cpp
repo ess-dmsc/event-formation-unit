@@ -10,15 +10,43 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 void PlaneNMX::insert_eventlet(const Eventlet &e) {
-  if (!e.adc)
-    return;
+//  if (!e.adc)
+//    return;
   if (entries.empty()) {
     time_start = time_end = e.time;
+    strip_start = strip_end = e.strip;
   }
   entries.push_back(e);
   integral += e.adc;
   time_start = std::min(time_start, e.time);
   time_end = std::max(time_end, e.time);
+  strip_start = std::min(strip_start, e.strip);
+  strip_end = std::max(strip_end, e.strip);
+}
+
+void PlaneNMX::merge(PlaneNMX& other)
+{
+  // merge instead?
+  entries.splice(entries.end(), other.entries);
+  integral += other.integral;
+  time_start = std::min(time_start, other.time_start);
+  time_end = std::max(time_end, other.time_end);
+  strip_start = std::min(strip_start, other.strip_start);
+  strip_end = std::max(strip_end, other.strip_end);
+}
+
+double PlaneNMX::time_overlap(const PlaneNMX& other) const
+{
+  auto latest_start = std::max(other.time_start, time_start);
+  auto earliest_end = std::min(other.time_end, time_end);
+  if (latest_start > earliest_end)
+    return 0;
+  return (earliest_end - latest_start);
+}
+
+double PlaneNMX::time_span() const
+{
+  return time_end - time_start;
 }
 
 void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
@@ -31,8 +59,8 @@ void PlaneNMX::analyze(bool weighted, uint16_t max_timebins,
   int16_t lspan_max = std::numeric_limits<int16_t>::min();
   int16_t uspan_min = std::numeric_limits<int16_t>::max();
   int16_t uspan_max = std::numeric_limits<int16_t>::min();
-  uint64_t earliest = std::min(time_start, time_end - static_cast<uint64_t>(max_timedif));
-  std::set<uint64_t> timebins;
+  double earliest = std::min(time_start, time_end - static_cast<double>(max_timedif));
+  std::set<double> timebins;
   for (auto it = entries.rbegin(); it != entries.rend(); ++it) {
     auto e = *it;
     if (e.time == time_end) {
@@ -77,11 +105,22 @@ std::string PlaneNMX::debug() const {
   return ss.str();
 }
 
+
+
 void EventNMX::insert_eventlet(const Eventlet &e) {
   if (e.plane_id == 1) { /**< @todo deal with multiple panels */
     y.insert_eventlet(e);
   } else if (e.plane_id == 0) {
     x.insert_eventlet(e);
+  }
+}
+
+void EventNMX::merge(PlaneNMX& cluster, uint8_t plane_id)
+{
+  if (plane_id == 1) { /**< @todo deal with multiple panels */
+    y.merge(cluster);
+  } else if (plane_id == 0) {
+    x.merge(cluster);
   }
 }
 
@@ -130,10 +169,45 @@ void EventNMX::debug2() {
   }
 }
 
+bool EventNMX::time_overlap_thresh(const PlaneNMX& other, double thresh) const
+{
+  auto ovr = time_overlap(other);
+  return (((ovr / other.time_span()) + (ovr / time_span())) > thresh);
+}
+
+double EventNMX::time_overlap(const PlaneNMX& other) const
+{
+  auto latest_start = std::max(other.time_start, time_start());
+  auto earliest_end = std::min(other.time_end, time_end());
+  if (latest_start > earliest_end)
+    return 0;
+  return (earliest_end - latest_start);
+}
+
+double EventNMX::time_end() const
+{
+  return std::max(x.time_end, y.time_end);
+}
+
+double EventNMX::time_start() const
+{
+  return std::min(x.time_start, y.time_start);
+}
+
+double EventNMX::time_span() const
+{
+  return (time_end() - time_start());
+}
+
 bool EventNMX::valid() const { return valid_; }
+
+bool EventNMX::empty() const
+{
+  return x.entries.empty() && y.entries.empty();
+}
 
 bool EventNMX::meets_lower_cirterion(int16_t max_lu) const {
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }
 
-uint64_t EventNMX::time_start() const { return time_start_; }
+double EventNMX::time() const { return time_start_; }
