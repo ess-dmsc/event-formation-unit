@@ -10,14 +10,14 @@
 NMXClusterMatcher::NMXClusterMatcher(double dPlane) : pdPlane(dPlane) {
 }
 
-void NMXClusterMatcher::match_end(ClusterVector &x_clusters,
-                                  ClusterVector &y_clusters) {
+void NMXClusterMatcher::match_end(ClusterList &x_clusters,
+                                  ClusterList &y_clusters) {
   for (auto nx = begin(x_clusters); nx != end(x_clusters);) {
     double tx = nx->time_end;
 
     double minDelta = 99999999;
     double deltaT = 0;
-    ClusterVector::iterator it_y = end(y_clusters);
+    ClusterList::iterator it_y = end(y_clusters);
 
     double ty = 0;
 
@@ -48,7 +48,7 @@ void NMXClusterMatcher::match_end(ClusterVector &x_clusters,
 //  y_clusters.clear();
 }
 
-void NMXClusterMatcher::match_overlap(ClusterVector &x_clusters, ClusterVector &y_clusters)
+void NMXClusterMatcher::match_overlap(ClusterList &x_clusters, ClusterList &y_clusters)
 {
   double max_gap = 200;
   double overlap_thresh = 0.7;

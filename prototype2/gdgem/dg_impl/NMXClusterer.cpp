@@ -9,12 +9,15 @@
 NMXClusterer::NMXClusterer(SRSTime time, size_t minClusterSize, double deltaTimeHits,
                            uint16_t deltaStripHits) :
     pTime(time), pMinClusterSize(minClusterSize), pDeltaTimeHits(deltaTimeHits),
-    pDeltaStripHits(deltaStripHits)
+    pMaximumStripSeparation(deltaStripHits)
 {
 }
 
-//====================================================================================================================
-void NMXClusterer::ClusterByTime(const HitContainer &hits) {
+void NMXClusterer::cluster(const HitContainer &hits) {
+  cluster_by_time(hits);
+}
+
+void NMXClusterer::cluster_by_time(const HitContainer &hits) {
 
   auto pre = clusters.size();
 
@@ -38,7 +41,7 @@ void NMXClusterer::ClusterByTime(const HitContainer &hits) {
     }
 
     if (time1 - time2 > pDeltaTimeHits && stripCount > 0) {
-      ClusterByStrip(cluster/*, maxDeltaTime*/);
+      cluster_by_strip(cluster);
       cluster.clear();
       maxDeltaTime = 0;
     }
@@ -51,13 +54,13 @@ void NMXClusterer::ClusterByTime(const HitContainer &hits) {
   }
 
   if (stripCount > 0)
-    ClusterByStrip(cluster);
+    cluster_by_strip(cluster);
 
   stats_cluster_count += (clusters.size() - pre);
 }
 
 //====================================================================================================================
-void NMXClusterer::ClusterByStrip(HitContainer &hits) {
+void NMXClusterer::cluster_by_strip(HitContainer &hits) {
   PlaneNMX cluster;
 
   std::sort(hits.begin(), hits.end(),
@@ -75,7 +78,7 @@ void NMXClusterer::ClusterByStrip(HitContainer &hits) {
     // Stash cluster if strip gap to next hit is too large
     // filtering is done elsewhere
     auto strip_gap = std::abs(hit.strip - cluster.strip_end);
-    if (strip_gap > (pDeltaStripHits + 1))
+    if (strip_gap > (pMaximumStripSeparation + 1))
     {
       // Attempt to stash
       stash_cluster(cluster);
@@ -108,5 +111,6 @@ void NMXClusterer::stash_cluster(PlaneNMX& cluster) {
 
 bool NMXClusterer::ready() const
 {
-  return (clusters.size());
+  return ((clusters.size() > 2) &&
+      (clusters.back().time_start - clusters.front().time_end) > (pDeltaTimeHits*3));
 }

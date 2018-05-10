@@ -15,6 +15,26 @@
 
 class NMXClustererTest : public TestBase {
 protected:
+  uint16_t pADCThreshold = 0;
+  size_t pMinClusterSize = 3;
+  // Maximum time difference between hits in time sorted cluster (x or y)
+  double pDeltaTimeHits = 200;
+  // Maximum number of missing strips in strip sorted cluster (x or y)
+  uint16_t pDeltaStripHits = 2;
+  //Maximum cluster time difference between matching clusters in x and y
+  //Cluster time is either calculated with center-of-mass or uTPC method
+  double pDeltaTimePlanes = 200;
+  // Maximum time span for total cluster (x or y)
+  // double pDeltaTimeSpan = 500;
+
+  SRSMappings mapping;
+
+  std::shared_ptr<NMXClusterMatcher> matcher;
+  std::shared_ptr<NMXClusterer> clusters_x;
+  std::shared_ptr<NMXClusterer> clusters_y;
+  std::shared_ptr<NMXHitSorter> sorter_x;
+  std::shared_ptr<NMXHitSorter> sorter_y;
+
   virtual void SetUp() {
     mapping.set_mapping(1, 0, 0, 0);
     mapping.set_mapping(1, 1, 0, 64);
@@ -41,26 +61,6 @@ protected:
 
   virtual void TearDown() {
   }
-
-  uint16_t pADCThreshold = 0;
-  size_t pMinClusterSize = 3;
-  //Maximum time difference between strips in time sorted cluster (x or y)
-  float pDeltaTimeHits = 200;
-  //Number of missing strips in strip sorted cluster (x or y)
-  uint16_t pDeltaStripHits = 2;
-  //Maximum time span for total cluster (x or y)
-  float pDeltaTimeSpan = 500;
-  //Maximum cluster time difference between matching clusters in x and y
-  //Cluster time is either calculated with center-of-mass or uTPC method
-  float pDeltaTimePlanes = 200;
-
-  SRSMappings mapping;
-
-  std::shared_ptr<NMXClusterMatcher> matcher;
-  std::shared_ptr<NMXClusterer> clusters_x;
-  std::shared_ptr<NMXClusterer> clusters_y;
-  std::shared_ptr<NMXHitSorter> sorter_x;
-  std::shared_ptr<NMXHitSorter> sorter_y;
 };
 
 TEST_F(NMXClustererTest, Run16_line_110168_110323) {
@@ -78,10 +78,10 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
                             hit.overthreshold);
     }
 
-//    if (clusters_x->ready() && clusters_y->ready())
-//    {
-//      matcher->match_end(clusters_x->clusters, clusters_y->clusters);
-//    }
+    if (clusters_x->ready() && clusters_y->ready())
+    {
+      matcher->match_end(clusters_x->clusters, clusters_y->clusters);
+    }
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_x->stats_fc_error);
@@ -94,8 +94,9 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
   EXPECT_EQ(clusters_x->stats_cluster_count, 3);
   EXPECT_EQ(clusters_y->stats_cluster_count, 4);
 
-  matcher->match_end(clusters_x->clusters, clusters_y->clusters);
-//  matcher->match_overlap(clusters_x->clusters, clusters_y->clusters);
+//  matcher->match_end(clusters_x->clusters, clusters_y->clusters);
+
+  //  matcher->match_overlap(clusters_x->clusters, clusters_y->clusters);
   EXPECT_EQ(matcher->stats_cluster_count, 2);
 }
 
@@ -115,10 +116,10 @@ TEST_F(NMXClustererTest, Run16_Long) {
                             hit.overthreshold);
     }
 
-//    if (clusters_x->ready() && clusters_y->ready())
-//    {
-//      matcher->match_end(clusters_x->clusters, clusters_y->clusters);
-//    }
+    if (clusters_x->ready() && clusters_y->ready())
+    {
+      matcher->match_end(clusters_x->clusters, clusters_y->clusters);
+    }
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_x->stats_fc_error);
@@ -131,8 +132,9 @@ TEST_F(NMXClustererTest, Run16_Long) {
   EXPECT_EQ(clusters_x->stats_cluster_count, 10198);
   EXPECT_EQ(clusters_y->stats_cluster_count, 12432);
 
-  matcher->match_end(clusters_x->clusters, clusters_y->clusters);
-//  matcher->match_overlap(clusters_x->clusters, clusters_y->clusters);
+//  matcher->match_end(clusters_x->clusters, clusters_y->clusters);
+
+  //  matcher->match_overlap(clusters_x->clusters, clusters_y->clusters);
   EXPECT_EQ(matcher->stats_cluster_count, 10111);
 }
 

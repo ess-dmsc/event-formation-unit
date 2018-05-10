@@ -203,6 +203,6 @@ void NMXHitSorter::AnalyzeHits(int triggerTimestamp, unsigned int frameCounter,
 
 void NMXHitSorter::AnalyzeClusters() {
   hits.sort_and_correct();
-  callback_.ClusterByTime(hits.hits());
+  callback_.cluster(hits.hits());
 }
 
