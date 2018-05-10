@@ -1,6 +1,7 @@
-#include <common/Trace.h>
 #include <gdgem/dg_impl/NMXClusterMatcher.h>
 
+#include <cmath>
+#include <common/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 

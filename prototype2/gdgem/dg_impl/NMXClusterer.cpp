@@ -17,45 +17,28 @@ void NMXClusterer::cluster(const HitContainer &hits) {
 }
 
 void NMXClusterer::cluster_by_time(const HitContainer &hits) {
-
-  auto pre = clusters.size();
-
   HitContainer cluster;
-  double maxDeltaTime = 0;
-  size_t stripCount = 0;
-  double time1 = 0, time2 = 0;
-  uint16_t adc1 = 0;
-  uint16_t strip1 = 0;
 
-  for (const auto &itHits : hits) {
-    time2 = time1;
-
-    time1 = itHits.time;
-    strip1 = itHits.strip;
-    adc1 = itHits.adc;
-
-    if (time1 - time2 <= pDeltaTimeHits && stripCount > 0
-        && maxDeltaTime < (time1 - time2)) {
-      maxDeltaTime = (time1 - time2);
+  for (const auto &hit : hits) {
+    // If empty cluster, just add and move on
+    if (cluster.empty()) {
+      cluster.emplace_back(hit);
+      continue;
     }
 
-    if (time1 - time2 > pDeltaTimeHits && stripCount > 0) {
+    // Stash cluster if time gap to next hit is too large
+    auto time_gap = hit.time - cluster.back().time;
+    if (time_gap > pDeltaTimeHits) {
       cluster_by_strip(cluster);
       cluster.clear();
-      maxDeltaTime = 0;
     }
-    cluster.emplace_back(Eventlet());
-    auto &e = cluster[cluster.size()-1];
-    e.strip = strip1;
-    e.time = time1;
-    e.adc = adc1;
-    stripCount++;
+
+    // insert in either case
+    cluster.emplace_back(hit);
   }
 
-  if (stripCount > 0)
+  if (cluster.size())
     cluster_by_strip(cluster);
-
-  stats_cluster_count += (clusters.size() - pre);
 }
 
 //====================================================================================================================
@@ -69,14 +52,14 @@ void NMXClusterer::cluster_by_strip(HitContainer &hits) {
 
   for (auto &hit : hits) {
     // If empty cluster, just add and move on
-    if (!cluster.entries.size()) {
+    if (cluster.entries.empty()) {
       cluster.insert_eventlet(hit);
       continue;
     }
 
     // Stash cluster if strip gap to next hit is too large
     // filtering is done elsewhere
-    auto strip_gap = std::abs(hit.strip - cluster.strip_end);
+    auto strip_gap = hit.strip - cluster.strip_end;
     if (strip_gap > (pMaximumStripSeparation + 1))
     {
       // Attempt to stash
@@ -90,10 +73,8 @@ void NMXClusterer::cluster_by_strip(HitContainer &hits) {
     cluster.insert_eventlet(hit);
   }
 
-  // At the end of the clustering, check again if there is a last valid cluster
-  if (cluster.entries.size() >= pMinClusterSize) {
-    stash_cluster(cluster);
-  }
+  // At the end of the clustering, attempt to stash any leftovers
+  stash_cluster(cluster);
 }
 //====================================================================================================================
 void NMXClusterer::stash_cluster(PlaneNMX& cluster) {
@@ -106,6 +87,7 @@ void NMXClusterer::stash_cluster(PlaneNMX& cluster) {
 
   DTRACE(DEB, "******** VALID ********\n");
   clusters.emplace_back(std::move(cluster));
+  stats_cluster_count ++;
 }
 
 bool NMXClusterer::ready() const
