@@ -1,7 +1,7 @@
 #pragma once
 
 #include <list>
-#include <gdgem/dg_impl/NMXCluster.h>
+#include <gdgem/dg_impl/HitContainer.h>
 #include <gdgem/nmx/EventNMX.h>
 
 using ClusterList = std::list<PlaneNMX>;
@@ -13,6 +13,8 @@ public:
   void cluster(const HitContainer &hits);
 
   bool ready() const;
+  bool ready(double time) const;
+
 
   size_t stats_cluster_count{0};
   ClusterList clusters;

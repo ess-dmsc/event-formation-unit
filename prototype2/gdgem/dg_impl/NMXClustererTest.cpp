@@ -3,13 +3,17 @@
 #include <memory>
 #include <stdio.h>
 #include <unistd.h>
-#include <gdgem/dg_impl/NMXClusterer.h>
-#include <gdgem/dg_impl/NMXClusterMatcher.h>
-#include <gdgem/dg_impl/NMXSorter.h>
-#include <gdgem/dg_impl/TestData.h>
-#include <gdgem/dg_impl/TestDataLong.h>
+#include <gdgem/dg_impl/ClusterMatcher.h>
+#include <gdgem/dg_impl/HitSorter.h>
 #include <test/TestBase.h>
 #include <functional>
+
+#include <gdgem/dg_impl/TestDataShort.h>
+#include <gdgem/dg_impl/TestDataLong.h>
+
+#include <common/Trace.h>
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 #define UNUSED __attribute__((unused))
 
@@ -32,8 +36,8 @@ protected:
   std::shared_ptr<NMXClusterMatcher> matcher;
   std::shared_ptr<NMXClusterer> clusters_x;
   std::shared_ptr<NMXClusterer> clusters_y;
-  std::shared_ptr<NMXHitSorter> sorter_x;
-  std::shared_ptr<NMXHitSorter> sorter_y;
+  std::shared_ptr<HitSorter> sorter_x;
+  std::shared_ptr<HitSorter> sorter_y;
 
   virtual void SetUp() {
     mapping.set_mapping(1, 0, 0, 0);
@@ -55,8 +59,8 @@ protected:
     matcher = std::make_shared<NMXClusterMatcher>(pDeltaTimePlanes);
     clusters_x = std::make_shared<NMXClusterer>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
     clusters_y = std::make_shared<NMXClusterer>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
-    sorter_x = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, *clusters_x);
-    sorter_y = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, *clusters_y);
+    sorter_x = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, *clusters_x);
+    sorter_y = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, *clusters_y);
   }
 
   virtual void TearDown() {
@@ -78,10 +82,10 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
                       hit.overthreshold);
     }
 
-//    if (clusters_x->ready() && clusters_y->ready())
-//    {
-//      matcher->match_end(clusters_x->clusters, clusters_y->clusters);
-//    }
+    if (clusters_x->ready() && clusters_y->ready())
+    {
+      matcher->match_end(*clusters_x, *clusters_y, false);
+    }
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_x->stats_fc_error);
@@ -94,10 +98,8 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
   EXPECT_EQ(clusters_x->stats_cluster_count, 3);
   EXPECT_EQ(clusters_y->stats_cluster_count, 4);
 
-//  matcher->match_end(clusters_x->clusters, clusters_y->clusters);
-
-  //  matcher->match_overlap(clusters_x->clusters, clusters_y->clusters);
-//  EXPECT_EQ(matcher->stats_cluster_count, 2);
+   matcher->match_end(*clusters_x, *clusters_y, true);
+   EXPECT_EQ(matcher->stats_cluster_count, 2);
 }
 
 TEST_F(NMXClustererTest, Run16_Long) {
@@ -117,7 +119,8 @@ TEST_F(NMXClustererTest, Run16_Long) {
 
 //    if (clusters_x->ready() && clusters_y->ready())
 //    {
-//      matcher->match_end(clusters_x->clusters, clusters_y->clusters);
+//      DTRACE(DEB, "\tready\n");
+//      matcher->match_end(*clusters_x, *clusters_y, false);
 //    }
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
@@ -131,10 +134,8 @@ TEST_F(NMXClustererTest, Run16_Long) {
   EXPECT_EQ(clusters_x->stats_cluster_count, 10198);
   EXPECT_EQ(clusters_y->stats_cluster_count, 12432);
 
-//  matcher->match_end(clusters_x->clusters, clusters_y->clusters);
-
-  //  matcher->match_overlap(clusters_x->clusters, clusters_y->clusters);
-//  EXPECT_EQ(matcher->stats_cluster_count, 10111);
+  matcher->match_end(*clusters_x, *clusters_y, true);
+  EXPECT_EQ(matcher->stats_cluster_count, 10111);
 }
 
 TEST_F(NMXClustererTest, BcidTdcError) {

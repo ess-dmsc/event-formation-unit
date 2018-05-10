@@ -80,45 +80,58 @@ endif()
 # Tests
 #=============================================================================
 
-# Doros gdgem event algorithm
+# Clustering
 
-set(NMXClustererTest_SRC
-    dg_impl/NMXClusterMatcher.cpp
+set(ClusteringBase_SRC
+    dg_impl/HitsQueue.cpp
+    dg_impl/HitSorter.cpp
     dg_impl/NMXClusterer.cpp
-    dg_impl/NMXClustererTest.cpp
-    dg_impl/NMXSorter.cpp
+    dg_impl/ClusterMatcher.cpp
     nmx/EventNMX.cpp
+    nmx/Eventlet.cpp
     vmm2srs/SRSTime.cpp
     vmm2srs/SRSMappings.cpp)
-set(NMXClustererTest_INC
-    dg_impl/NMXCluster.h
-    dg_impl/NMXClusterMatcher.h
+set(ClusteringBase_INC
+    dg_impl/HitContainer.h
+    dg_impl/HitsQueue.h
+    dg_impl/HitSorter.h
     dg_impl/NMXClusterer.h
+    dg_impl/ClusterMatcher.h
     dg_impl/TestData.h
-    dg_impl/NMXSorter.h
+    dg_impl/TestDataShort.h
+    dg_impl/TestDataLong.h
     nmx/EventNMX.h
+    nmx/Eventlet.h
     vmm2srs/SRSTime.h
     vmm2srs/SRSMappings.h)
+
+set(HitsQueueTest_SRC
+    ${ClusteringBase_SRC}
+    dg_impl/HitsQueueTest.cpp)
+set(HitsQueueTest_INC
+    ${ClusteringBase_INC})
+create_test_executable(HitsQueueTest SKIP_MEMGRIND)
+
+set(HitSorterTest_SRC
+    ${ClusteringBase_SRC}
+    dg_impl/HitSorterTest.cpp)
+set(HitSorterTest_INC
+    ${ClusteringBase_INC})
+create_test_executable(HitSorterTest SKIP_MEMGRIND)
+
+set(NMXClustererTest_SRC
+    ${ClusteringBase_SRC}
+    dg_impl/NMXClustererTest.cpp)
+set(NMXClustererTest_INC
+    ${ClusteringBase_INC})
 create_test_executable(NMXClustererTest SKIP_MEMGRIND)
 
 # GOOGLE BENCHMARK
 set(NMXClustererBenchmarkTest_SRC
-    dg_impl/NMXClusterMatcher.cpp
-    dg_impl/NMXClusterer.cpp
-    dg_impl/NMXClustererBenchmarkTest.cpp
-    dg_impl/NMXSorter.cpp
-    nmx/EventNMX.cpp
-    vmm2srs/SRSTime.cpp
-    vmm2srs/SRSMappings.cpp)
+    ${ClusteringBase_SRC}
+    dg_impl/NMXClustererBenchmarkTest.cpp)
 set(NMXClustererBenchmarkTest_INC
-    dg_impl/NMXCluster.h
-    dg_impl/NMXClusterMatcher.h
-    dg_impl/NMXClusterer.h
-    dg_impl/TestData.h
-    dg_impl/NMXSorter.h
-    nmx/EventNMX.h
-    vmm2srs/SRSTime.h
-    vmm2srs/SRSMappings.h)
+    ${ClusteringBase_INC})
 create_benchmark_executable(NMXClustererBenchmarkTest)
 
 set(EventFormationTest_SRC

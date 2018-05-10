@@ -92,6 +92,11 @@ void NMXClusterer::stash_cluster(PlaneNMX& cluster) {
 
 bool NMXClusterer::ready() const
 {
+  return ((clusters.size() > 2) && ready(clusters.front().time_end));
+}
+
+bool NMXClusterer::ready(double time) const
+{
   return ((clusters.size() > 2) &&
-      (clusters.back().time_start - clusters.front().time_end) > (pMaxTimeGap*3));
+      (clusters.back().time_start - time) > (pMaxTimeGap*3));
 }
