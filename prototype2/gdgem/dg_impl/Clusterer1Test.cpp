@@ -11,10 +11,6 @@
 #include <gdgem/dg_impl/TestDataShort.h>
 #include <gdgem/dg_impl/TestDataLong.h>
 
-#include <common/Trace.h>
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
-
 #define UNUSED __attribute__((unused))
 
 class NMXClustererTest : public TestBase {
