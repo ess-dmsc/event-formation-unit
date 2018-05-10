@@ -5,10 +5,10 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-NMXClusterer::NMXClusterer(SRSTime time, size_t minClusterSize, double deltaTimeHits,
-                           uint16_t deltaStripHits) :
-    pTime(time), pMinClusterSize(minClusterSize), pDeltaTimeHits(deltaTimeHits),
-    pMaximumStripSeparation(deltaStripHits)
+NMXClusterer::NMXClusterer(double maxTimeGap, uint16_t maxStripGap, size_t minClusterSize)
+    : pMaxTimeGap(maxTimeGap)
+    , pMaxStripGap(maxStripGap)
+    , pMinClusterSize(minClusterSize)
 {
 }
 
@@ -28,7 +28,7 @@ void NMXClusterer::cluster_by_time(const HitContainer &hits) {
 
     // Stash cluster if time gap to next hit is too large
     auto time_gap = hit.time - cluster.back().time;
-    if (time_gap > pDeltaTimeHits) {
+    if (time_gap > pMaxTimeGap) {
       cluster_by_strip(cluster);
       cluster.clear();
     }
@@ -60,7 +60,7 @@ void NMXClusterer::cluster_by_strip(HitContainer &hits) {
     // Stash cluster if strip gap to next hit is too large
     // filtering is done elsewhere
     auto strip_gap = hit.strip - cluster.strip_end;
-    if (strip_gap > (pMaximumStripSeparation + 1))
+    if (strip_gap > (pMaxStripGap + 1))
     {
       // Attempt to stash
       stash_cluster(cluster);
@@ -93,5 +93,5 @@ void NMXClusterer::stash_cluster(PlaneNMX& cluster) {
 bool NMXClusterer::ready() const
 {
   return ((clusters.size() > 2) &&
-      (clusters.back().time_start - clusters.front().time_end) > (pDeltaTimeHits*3));
+      (clusters.back().time_start - clusters.front().time_end) > (pMaxTimeGap*3));
 }

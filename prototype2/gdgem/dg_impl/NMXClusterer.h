@@ -1,7 +1,6 @@
 #pragma once
 
 #include <list>
-#include <gdgem/vmm2srs/SRSTime.h>
 #include <gdgem/dg_impl/NMXCluster.h>
 #include <gdgem/nmx/EventNMX.h>
 
@@ -9,8 +8,7 @@ using ClusterList = std::list<PlaneNMX>;
 
 class NMXClusterer {
 public:
-  NMXClusterer(SRSTime time, size_t minClusterSize,
-               double deltaTimeHits, uint16_t deltaStripHits);
+  NMXClusterer(double maxTimeGap, uint16_t maxStripGap, size_t minClusterSize);
 
   void cluster(const HitContainer &hits);
 
@@ -20,10 +18,9 @@ public:
   ClusterList clusters;
 
 private:
-  SRSTime pTime;
+  double pMaxTimeGap;
+  uint16_t pMaxStripGap;
   size_t pMinClusterSize;
-  double pDeltaTimeHits;
-  uint16_t pMaximumStripSeparation;
 
   void cluster_by_time(const HitContainer &oldHits);
   void cluster_by_strip(HitContainer &cluster);

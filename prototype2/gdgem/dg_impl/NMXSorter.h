@@ -1,6 +1,7 @@
 #pragma once
 
 #include <gdgem/dg_impl/NMXClusterer.h>
+#include <gdgem/vmm2srs/SRSTime.h>
 #include <gdgem/vmm2srs/SRSMappings.h>
 
 class HitsQueue {

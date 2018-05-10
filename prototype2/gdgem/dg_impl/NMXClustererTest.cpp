@@ -18,9 +18,9 @@ protected:
   uint16_t pADCThreshold = 0;
   size_t pMinClusterSize = 3;
   // Maximum time difference between hits in time sorted cluster (x or y)
-  double pDeltaTimeHits = 200;
+  double pMaxTimeGap = 200;
   // Maximum number of missing strips in strip sorted cluster (x or y)
-  uint16_t pDeltaStripHits = 2;
+  uint16_t pMaxStripGap = 2;
   //Maximum cluster time difference between matching clusters in x and y
   //Cluster time is either calculated with center-of-mass or uTPC method
   double pDeltaTimePlanes = 200;
@@ -53,10 +53,10 @@ protected:
     srstime.set_acquisition_window(4000);
 
     matcher = std::make_shared<NMXClusterMatcher>(pDeltaTimePlanes);
-    clusters_x = std::make_shared<NMXClusterer>(srstime, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits);
-    clusters_y = std::make_shared<NMXClusterer>(srstime, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits);
-    sorter_x = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold,  pDeltaTimeHits, *clusters_x);
-    sorter_y = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold,  pDeltaTimeHits, *clusters_y);
+    clusters_x = std::make_shared<NMXClusterer>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
+    clusters_y = std::make_shared<NMXClusterer>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
+    sorter_x = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold,  pMaxTimeGap, *clusters_x);
+    sorter_y = std::make_shared<NMXHitSorter>(srstime, mapping, pADCThreshold,  pMaxTimeGap, *clusters_y);
   }
 
   virtual void TearDown() {
@@ -218,8 +218,8 @@ int distributeto(UNUSED int fec, int asic, int channel, int width) {
 
 TEST_F(NMXClustererTest, TestLoadDistribution)
 {
-    NMXClusterer nmxdata1(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
-    NMXClusterer nmxdata2(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pDeltaTimeHits, pDeltaStripHits,pDeltaTimeSpan,pDeltaTimePlanes);
+    NMXClusterer nmxdata1(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pMaxTimeGap, pMaxStripGap,pDeltaTimeSpan,pDeltaTimePlanes);
+    NMXClusterer nmxdata2(pBC, pTAC, pAcqWin, pXChips, pYChips, pADCThreshold, pMinClusterSize, pMaxTimeGap, pMaxStripGap,pDeltaTimeSpan,pDeltaTimePlanes);
 
     for (auto hit : Run16_line_110168_110323) { // replace with UDP receive()
         printf("fec: %d, asic: %d, ch: %d -> %d\n", hit.fec, hit.chip_id, hit.channel, distributeto(hit.fec, hit.chip_id, hit.channel, 10));
