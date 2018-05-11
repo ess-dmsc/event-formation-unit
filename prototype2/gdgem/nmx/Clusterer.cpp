@@ -38,10 +38,10 @@ bool Clusterer::event_ready() const {
 
 size_t Clusterer::unclustered() const { return backlog_.size(); }
 
-EventNMX Clusterer::get_event() {
+Event Clusterer::get_event() {
   if (!event_ready())
-    return EventNMX();
-  EventNMX ret;
+    return Event();
+  Event ret;
   auto latest = backlog_.begin()->first + min_time_span_;
   while (backlog_.begin()->first <= latest) {
     ret.insert_eventlet(backlog_.begin()->second);

@@ -22,7 +22,7 @@ TrackSerializer::TrackSerializer(size_t maxarraylength, size_t minhits)
 
 TrackSerializer::~TrackSerializer() {}
 
-int TrackSerializer::add_track(const EventNMX &event) {
+int TrackSerializer::add_track(const Event &event) {
   if ((event.x.entries.size() < minhits_) ||
       (event.y.entries.size() < minhits_)) {
     return 1;

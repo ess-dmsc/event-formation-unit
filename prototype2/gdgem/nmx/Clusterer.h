@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <gdgem/nmx/EventNMX.h>
+#include <gdgem/nmx/Event.h>
 #include <gdgem/nmx/Eventlet.h>
 #include <map>
 
@@ -27,7 +27,7 @@ public:
   bool event_ready() const;
 
   // @brief returns a clustered event (if one is ready, else empty event)
-  EventNMX get_event();
+  Event get_event();
 
   // @brief returns number of unclustered eventlets in backlog
   size_t unclustered() const;

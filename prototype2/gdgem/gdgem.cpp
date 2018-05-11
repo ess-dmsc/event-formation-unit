@@ -209,7 +209,7 @@ void NMX::processing_thread() {
 
   TSCTimer global_time, report_timer;
 
-  EventNMX event;
+  Event event;
   std::vector<uint16_t> coords{0, 0};
   uint32_t time;
   uint32_t pixelid;

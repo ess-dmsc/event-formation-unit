@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <cstring>
-#include <gdgem/nmx/EventNMX.h>
+#include <gdgem/nmx/Event.h>
 #include <gdgem/nmx/Eventlet.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <test/TestBase.h>
@@ -13,7 +13,7 @@ const unsigned int ENTRY_OVERHEAD = 16;
 class TrackSerializerTest : public TestBase {
   virtual void SetUp() {
     e = new Eventlet();
-    event = new EventNMX();
+    event = new Event();
   }
 
   virtual void TearDown() {
@@ -23,7 +23,7 @@ class TrackSerializerTest : public TestBase {
 
 protected:
   Eventlet *e;
-  EventNMX *event;
+  Event *event;
   char *buffer;
   char flatbuffer[100000];
 

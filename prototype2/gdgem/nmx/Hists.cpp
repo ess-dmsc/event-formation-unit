@@ -67,7 +67,7 @@ void NMXHists::binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16
     eventlet_count_++;
 }
 
-void NMXHists::bin(const EventNMX &e) {
+void NMXHists::bin(const Event &e) {
   uint32_t sum = e.x.integral + e.y.integral;
   if (!sum)
     return;
