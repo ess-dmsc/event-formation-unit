@@ -17,6 +17,7 @@ create_executable(nmxgen_apv)
 
 set(EventletBuilderAPVTest_SRC
     ../nmx/Event.cpp
+    ../nmx/Cluster.cpp
     ../nmx/Clusterer.cpp
     ../nmx/Hists.cpp
     ../nmx/AbstractEventletBuilder.cpp
@@ -25,6 +26,7 @@ set(EventletBuilderAPVTest_SRC
     )
 set(EventletBuilderAPVTest_INC
     ../nmx/Clusterer.h
+    ../nmx/Cluster.h
     ../nmx/Event.h
     ../nmx/Eventlet.h
     ../nmx/Hists.h

@@ -7,6 +7,7 @@ set(gdgem_SRC
     gdgem.cpp
     NMXConfig.cpp
     nmx/Clusterer.cpp
+    nmx/Cluster.cpp
     nmx/Event.cpp
     nmx/Eventlet.cpp
     nmx/Geometry.cpp
@@ -18,12 +19,13 @@ set(gdgem_SRC
     generators/EventletBuilderEventlets.cpp
     srs/SRSMappings.cpp
     srs/SRSTime.cpp
-    vmm2/ParserSRS.cpp
-    vmm2/EventletBuilderSRS.cpp
+    vmm2/ParserVMM2.cpp
+    vmm2/EventletBuilderVMM2.cpp
     )
 set(gdgem_INC
     NMXConfig.h
     nmx/Clusterer.h
+    nmx/Cluster.h
     nmx/Event.h
     nmx/Eventlet.h
     nmx/Geometry.h
@@ -35,10 +37,10 @@ set(gdgem_INC
     generators/EventletBuilderEventlets.h
     srs/SRSMappings.h
     srs/SRSTime.h
-    vmm2/ParserSRS.h
-    vmm2/EventletBuilderSRS.h
+    vmm2/ParserVMM2.h
+    vmm2/EventletBuilderVMM2.h
     )
-#create_module(gdgem)
+create_module(gdgem)
 
 #=============================================================================
 # Component tests

@@ -44,7 +44,7 @@ void Clusterer1::cluster_by_time(const HitContainer &hits) {
 
 //====================================================================================================================
 void Clusterer1::cluster_by_strip(HitContainer &hits) {
-  PlaneNMX cluster;
+  Cluster cluster;
 
   std::sort(hits.begin(), hits.end(),
             [](const Eventlet &e1, const Eventlet &e2) {
@@ -67,7 +67,7 @@ void Clusterer1::cluster_by_strip(HitContainer &hits) {
       stash_cluster(cluster);
 
       // Reset and move on
-      cluster = PlaneNMX();
+      cluster = Cluster();
     }
 
     // insert in either case
@@ -78,7 +78,7 @@ void Clusterer1::cluster_by_strip(HitContainer &hits) {
   stash_cluster(cluster);
 }
 //====================================================================================================================
-void Clusterer1::stash_cluster(PlaneNMX& cluster) {
+void Clusterer1::stash_cluster(Cluster& cluster) {
 
   // Some filtering can happen here
   if (cluster.entries.size() < pMinClusterSize)

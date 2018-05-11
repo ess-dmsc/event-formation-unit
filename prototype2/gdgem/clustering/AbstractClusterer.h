@@ -4,7 +4,7 @@
 #include <gdgem/clustering/HitContainer.h>
 #include <gdgem/nmx/Event.h>
 
-using ClusterList = std::list<PlaneNMX>;
+using ClusterList = std::list<Cluster>;
 
 class AbstractClusterer {
 public:

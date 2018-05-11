@@ -2,13 +2,13 @@
 # Tests
 #=============================================================================
 
-set(ParserSRSVMM3Test_SRC
-    ParserSRSTest.cpp
-    ParserSRS.cpp
+set(ParserVMM3VMM3Test_SRC
+    ParserVMM3Test.cpp
+    ParserVMM3.cpp
     )
-set(ParserSRSVMM3Test_INC
-    ParserSRSTestData.h
-    ParserSRS.h
+set(ParserVMM3VMM3Test_INC
+    ParserVMM3TestData.h
+    ParserVMM3.h
     )
 
-create_test_executable(ParserSRSVMM3Test)
+create_test_executable(ParserVMM3VMM3Test)

@@ -4,7 +4,7 @@
 #include <cinttypes>
 #include <common/Trace.h>
 #include <cstdio>
-#include <gdgem/vmm2/ParserSRS.h>
+#include <gdgem/vmm2/ParserVMM2.h>
 #include <libs/include/BitMath.h>
 #include <string.h>
 

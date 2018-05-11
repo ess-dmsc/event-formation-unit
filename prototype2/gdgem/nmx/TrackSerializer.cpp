@@ -32,7 +32,7 @@ int TrackSerializer::add_track(const Event &event) {
     return 1;
   }
 
-  time_offset = event.time();
+  time_offset = event.utpc_earliest();
 
   for (auto &evx : event.x.entries) {
     xtrack.push_back(
@@ -44,8 +44,8 @@ int TrackSerializer::add_track(const Event &event) {
         Createpos(builder, evy.time - time_offset, evy.strip, evy.adc));
   }
 
-  xpos = event.x.center;
-  ypos = event.y.center;
+  xpos = event.x.utpc_center;
+  ypos = event.y.utpc_center;
 
   return 0;
 }

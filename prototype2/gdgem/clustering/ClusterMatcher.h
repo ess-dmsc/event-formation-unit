@@ -21,6 +21,6 @@ private:
   bool ready(double time, const ClusterList&) const;
   bool can_discard(double time, const Event& event) const;
 
-  double delta1(const Event& event, const PlaneNMX& cluster) const;
-  bool belongs1(const Event& event, const PlaneNMX& cluster) const;
+  double delta1(const Event& event, const Cluster& cluster) const;
+  bool belongs1(const Event& event, const Cluster& cluster) const;
 };

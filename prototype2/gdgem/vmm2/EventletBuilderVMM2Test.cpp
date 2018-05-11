@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/vmm2/EventletBuilderSRS.h>
-#include <gdgem/vmm2/SRSTestData.h>
+#include <gdgem/vmm2/EventletBuilderVMM2.h>
+#include <gdgem/vmm2/ParserVMM2TestData.h>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>

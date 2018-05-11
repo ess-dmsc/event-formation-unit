@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/Trace.h>
-#include <gdgem/vmm2/EventletBuilderSRS.h>
+#include <gdgem/vmm2/EventletBuilderVMM2.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

@@ -2,7 +2,7 @@
 
 #include <gdgem/clustering/AbstractClusterer.h>
 
-using ClusterList = std::list<PlaneNMX>;
+using ClusterList = std::list<Cluster>;
 
 class Clusterer1 : public AbstractClusterer {
 public:
@@ -18,5 +18,5 @@ private:
 
   void cluster_by_time(const HitContainer &oldHits);
   void cluster_by_strip(HitContainer &cluster);
-  void stash_cluster(PlaneNMX &plane);
+  void stash_cluster(Cluster &plane);
 };

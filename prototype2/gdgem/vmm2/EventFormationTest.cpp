@@ -7,7 +7,7 @@
 #include <gdgem/srs/SRSTime.h>
 
 #include <gdgem/vmm2/EventFormationTestData.h>
-#include <gdgem/vmm2/EventletBuilderSRS.h>
+#include <gdgem/vmm2/EventletBuilderVMM2.h>
 #include <memory>
 #include <test/TestBase.h>
 

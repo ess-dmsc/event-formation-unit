@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/vmm2/ParserSRS.h>
+#include <gdgem/vmm2/ParserVMM2.h>
 #include <test/TestBase.h>
 #include <vector>
 

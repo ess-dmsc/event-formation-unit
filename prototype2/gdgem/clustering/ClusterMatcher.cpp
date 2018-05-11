@@ -24,12 +24,12 @@ bool ClusterMatcher::can_discard(double time, const Event& event) const
   return (!event.empty() && (time - event.time_end()) > (pdPlane*5));
 }
 
-double ClusterMatcher::delta1(const Event& event, const PlaneNMX& cluster) const
+double ClusterMatcher::delta1(const Event& event, const Cluster& cluster) const
 {
   return std::abs(event.time_end() - cluster.time_end);
 }
 
-bool ClusterMatcher::belongs1(const Event& event, const PlaneNMX& cluster) const
+bool ClusterMatcher::belongs1(const Event& event, const Cluster& cluster) const
 {
   return (delta1(event, cluster) <= pdPlane);
 }
