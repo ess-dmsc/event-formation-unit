@@ -53,10 +53,13 @@ add_subdirectory(generators)
 
 # Clustering
 
+get_filename_component(TEST_DATA_PATH "dg_impl/test/Run16Long.h5" DIRECTORY)
+
 set(ClusteringBase_SRC
     dg_impl/HitsQueue.cpp
     dg_impl/HitSorter.cpp
     dg_impl/ClusterMatcher.cpp
+    dg_impl/TestData.cpp
     nmx/EventNMX.cpp
     nmx/Eventlet.cpp
     vmm2srs/SRSTime.cpp
@@ -69,11 +72,17 @@ set(ClusteringBase_INC
     dg_impl/ClusterMatcher.h
     dg_impl/TestData.h
     dg_impl/TestDataShort.h
-    dg_impl/TestDataLong.h
     nmx/EventNMX.h
     nmx/Eventlet.h
     vmm2srs/SRSTime.h
     vmm2srs/SRSMappings.h)
+
+#set(hdr2h5_SRC
+#    ${ClusteringBase_SRC}
+#    dg_impl/hdr2h5.cpp)
+#set(hdr2h5_INC
+#    ${ClusteringBase_INC})
+#create_executable(hdr2h5)
 
 set(HitsQueueTest_SRC
     ${ClusteringBase_SRC}
@@ -88,6 +97,8 @@ set(HitSorterTest_SRC
 set(HitSorterTest_INC
     ${ClusteringBase_INC})
 create_test_executable(HitSorterTest SKIP_MEMGRIND)
+target_compile_definitions(HitSorterTest
+    PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
 set(Clusterer1Test_SRC
     ${ClusteringBase_SRC}
@@ -97,6 +108,8 @@ set(Clusterer1Test_INC
     dg_impl/Clusterer1.h
     ${ClusteringBase_INC})
 create_test_executable(Clusterer1Test SKIP_MEMGRIND)
+target_compile_definitions(Clusterer1Test
+    PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
 set(ClusterMatcherTest_SRC
     ${ClusteringBase_SRC}
@@ -108,6 +121,8 @@ set(ClusterMatcherTest_INC
     dg_impl/Clusterer1.h
     ${ClusteringBase_INC})
 create_test_executable(ClusterMatcherTest SKIP_MEMGRIND)
+target_compile_definitions(ClusterMatcherTest
+    PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
 # GOOGLE BENCHMARK
 set(NMXClustererBenchmarkTest_SRC
