@@ -23,4 +23,11 @@ private:
   std::vector<uint32_t> data;
 
   Eventlet make_eventlet();
+
+  hdf5::datatype::Datatype dtype_;
+  hdf5::node::Dataset dataset_;
+  hdf5::dataspace::Hyperslab slab_ {{0}, {1}};
+
+
+  void setup_h5(std::string dump_dir);
 };

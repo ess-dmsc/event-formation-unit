@@ -14,7 +14,7 @@ set(gdgem_SRC
     nmx/HistSerializer.cpp
     nmx/TrackSerializer.cpp
     nmx/AbstractEventletBuilder.cpp
-    nmxgen/EventletBuilderH5.cpp
+    generators/EventletBuilderAPV.cpp
     vmm2srs/SRSMappings.cpp
     vmm2srs/SRSTime.cpp
     vmm2srs/ParserSRS.cpp
@@ -30,7 +30,7 @@ set(gdgem_INC
     nmx/HistSerializer.h
     nmx/TrackSerializer.h
     nmx/AbstractEventletBuilder.h
-    nmxgen/EventletBuilderH5.h
+    generators/EventletBuilderAPV.h
     vmm2srs/SRSMappings.h
     vmm2srs/SRSTime.h
     vmm2srs/ParserSRS.h
@@ -43,38 +43,7 @@ create_module(gdgem)
 # Data generators
 #=============================================================================
 
-set(gennmxfile_SRC
-    nmx/Eventlet.cpp
-    nmxgen/nmxfile.cpp
-    nmxgen/NMXArgs.cpp
-    nmxgen/ReaderVMM.cpp
-    )
-set(gennmxfile_INC
-    nmx/Eventlet.h
-    nmxgen/NMXArgs.h
-    nmxgen/ReaderVMM.h
-    )
-create_executable(gennmxfile)
-
-find_package(PCAP)
-if(PCAP_FOUND)
-  set(gennmxpcap_SRC
-      nmxgen/wireshark.cpp
-      nmxgen/ReaderPcap.cpp
-      nmxgen/NMXArgs.cpp
-      )
-  set(gennmxpcap_INC
-      nmxgen/ReaderPcap.h
-      nmxgen/NMXArgs.h
-      )
-  set(gennmxpcap_LIB
-      ${PCAP_LIBRARY}
-      )
-  create_executable(gennmxpcap)
-else()
-  message(STATUS "*** Unable to compile gennmxpcap as libpcap was not found.")
-endif()
-
+add_subdirectory(generators)
 
 #=============================================================================
 # Tests
@@ -242,23 +211,6 @@ set(ParserSRSVMM3Test_INC
     vmm3srs/ParserSRS.h
     )
 create_test_executable(ParserSRSVMM3Test)
-
-set(EventletBuilderH5Test_SRC
-    nmx/EventNMX.cpp
-    nmx/Clusterer.cpp
-    nmx/Hists.cpp
-    nmx/AbstractEventletBuilder.cpp
-    nmxgen/EventletBuilderH5Test.cpp
-    nmxgen/EventletBuilderH5.cpp
-    )
-set(EventletBuilderH5Test_INC
-    nmx/Clusterer.h
-    nmx/EventNMX.h
-    nmx/Eventlet.h
-    nmx/Hists.h
-    nmxgen/EventletBuilderH5.h
-    )
-create_test_executable(EventletBuilderH5Test)
 
 set(EventletBuilderTest_SRC
     nmx/Clusterer.cpp

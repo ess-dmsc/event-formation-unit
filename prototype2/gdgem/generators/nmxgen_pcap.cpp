@@ -3,8 +3,8 @@
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>
-#include <gdgem/nmxgen/NMXArgs.h>
-#include <gdgem/nmxgen/ReaderPcap.h>
+#include <gdgem/generators/NMXArgs.h>
+#include <gdgem/generators/ReaderPcap.h>
 #include <libs/include/Socket.h>
 #include <string.h>
 #include <string>

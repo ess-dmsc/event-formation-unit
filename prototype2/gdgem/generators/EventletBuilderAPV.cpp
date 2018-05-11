@@ -1,17 +1,20 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/Trace.h>
+#include <gdgem/generators/EventletBuilderAPV.h>
 #include <cstring>
-#include <gdgem/nmxgen/EventletBuilderH5.h>
 
+#include <common/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
+
 
 BuilderH5::BuilderH5(std::string dump_dir, bool dump_csv, bool dump_h5)
     : AbstractBuilder(dump_dir, dump_csv, dump_h5) {
   data.resize(4);
   if (dump_csv_)
     vmmsave->tofile("# time, plane, strip, adc, overthreshold\n");
+  if (dump_h5_)
+    setup_h5(dump_dir);
 }
 
 AbstractBuilder::ResultStats BuilderH5::process_buffer(char *buf, size_t size,
@@ -43,17 +46,30 @@ Eventlet BuilderH5::make_eventlet() {
                     ret.strip, ret.adc, ret.over_threshold);
 
   if (dump_h5_) {
-    //    srstime_.write(data[0], {event_num_});
-    //    bc_tdc_adc_.write(static_cast<uint16_t>(data[1] >> 16), {event_num_,
-    //    0}); bc_tdc_adc_.write(static_cast<uint16_t>(data[1] & 0xFF),
-    //    {event_num_, 1}); bc_tdc_adc_.write(ret.adc, {event_num_, 2});
-    //    fec_chip_chan_thresh_.write(uint8_t(0), {event_num_, 0});
-    //    fec_chip_chan_thresh_.write(ret.plane_id, {event_num_, 1});
-    //    fec_chip_chan_thresh_.write(static_cast<uint8_t>(ret.strip),
-    //    {event_num_, 2}); fec_chip_chan_thresh_.write(uint8_t(0), {event_num_,
-    //    3});
-    event_num_++;
+    slab_.offset({event_num_++});
+    dataset_.extent({event_num_});
+    dataset_.write(ret, slab_);
   }
 
   return ret;
+}
+
+void BuilderH5::setup_h5(std::string dump_dir) {
+  size_t chunksize = 9000;
+  std::string fileName = dump_dir + "apv2vmm_" + time_str() + ".h5";
+
+  XTRACE(PROCESS, ALW, "Will dump to H5 file: %s\n", fileName.c_str());
+
+  file_ = hdf5::file::create(fileName, hdf5::file::AccessFlags::TRUNCATE);
+
+  hdf5::node::Group root = file_.root();
+
+  hdf5::property::DatasetCreationList dcpl;
+  dcpl.layout(hdf5::property::DatasetLayout::CHUNKED);
+  dcpl.chunk({chunksize});
+
+  dtype_ = hdf5::datatype::create<Eventlet>();
+
+  dataset_ = root.create_dataset("h5eventlets", dtype_,
+      hdf5::dataspace::Simple({0}, {hdf5::dataspace::Simple::UNLIMITED}), dcpl);
 }

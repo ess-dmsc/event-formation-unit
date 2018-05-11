@@ -9,8 +9,8 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 
-#include <gdgem/nmxgen/NMXArgs.h>
-#include <gdgem/nmxgen/ReaderVMM.h>
+#include <gdgem/generators/NMXArgs.h>
+#include <gdgem/generators/ReaderAPV.h>
 #include <libs/include/Socket.h>
 #include <unistd.h>
 

@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmxgen/EventletBuilderH5.h>
+#include <gdgem/generators/EventletBuilderAPV.h>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>

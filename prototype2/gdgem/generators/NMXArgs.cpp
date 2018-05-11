@@ -3,7 +3,7 @@
 #include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
-#include <gdgem/nmxgen/NMXArgs.h>
+#include <gdgem/generators/NMXArgs.h>
 #include <getopt.h>
 #include <unistd.h>
 

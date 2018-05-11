@@ -5,7 +5,7 @@
 #include <cassert>
 #include <cinttypes>
 #include <cstring>
-#include <gdgem/nmxgen/ReaderPcap.h>
+#include <gdgem/generators/ReaderPcap.h>
 #include <netinet/ip.h>
 #include <netinet/udp.h>
 
