@@ -13,11 +13,11 @@ ReaderEventlets::ReaderEventlets(std::string filename) {
 
   try {
     file_ = hdf5::file::open(filename);
-    dataset_ = file_.root().get_dataset("RawVMM/points");
+    dataset_ = file_.root().get_dataset("h5eventlets");
 
     auto shape = hdf5::dataspace::Simple(dataset_.dataspace()).current_dimensions();
-    if ((shape.size() != 2) || (shape[1] != 4))
-      throw std::runtime_error("ReaderEventlets: wrong dimensions for RawVMM/points");
+    if (shape.size() != 1)
+      throw std::runtime_error("ReaderEventlets: wrong dimensions for h5eventlets");
 
     total_ = shape[0] - 1;
     std::cout << "<ReaderEventlets> opened " << filename << " with " << total_

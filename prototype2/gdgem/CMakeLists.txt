@@ -15,6 +15,7 @@ set(gdgem_SRC
     nmx/TrackSerializer.cpp
     nmx/AbstractEventletBuilder.cpp
     generators/EventletBuilderAPV.cpp
+    generators/EventletBuilderEventlets.cpp
     vmm2srs/SRSMappings.cpp
     vmm2srs/SRSTime.cpp
     vmm2srs/ParserSRS.cpp
@@ -31,6 +32,7 @@ set(gdgem_INC
     nmx/TrackSerializer.h
     nmx/AbstractEventletBuilder.h
     generators/EventletBuilderAPV.h
+    generators/EventletBuilderEventlets.h
     vmm2srs/SRSMappings.h
     vmm2srs/SRSTime.h
     vmm2srs/ParserSRS.h
