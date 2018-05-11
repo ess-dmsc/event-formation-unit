@@ -18,11 +18,12 @@
 
 #include <map>
 #include <vector>
+#include <gdgem/nmx/Eventlet.h>
 
-class ReaderAPV {
+class ReaderEventlets {
 public:
   /** @todo document */
-  ReaderAPV(std::string filename);
+  ReaderEventlets(std::string filename);
 
   /** @todo document */
   size_t read(char *buf);
@@ -33,12 +34,11 @@ private:
 
   size_t total_{0};
   size_t current_{0};
-  size_t psize_{sizeof(uint32_t) * 4};
-  size_t max_in_buf_{9000 / (sizeof(uint32_t) * 4)};
+  size_t max_in_buf_{9000 / sizeof(Eventlet)};
 
-  hdf5::dataspace::Hyperslab slab_{{0, 0}, {1, 4}};
+  hdf5::dataspace::Hyperslab slab_{{0}, {9000 / sizeof(Eventlet)}};
 
-  std::vector<uint32_t> data;
+  std::vector<Eventlet> data;
 };
 
 #endif

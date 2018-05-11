@@ -335,7 +335,7 @@ void NMX::init_builder(std::string jsonfile) {
 
   if (nmx_opts.builder_type == "H5") {
     XTRACE(INIT, DEB, "Make BuilderH5\n");
-    builder_ = std::make_shared<BuilderH5>(nmx_opts.dump_directory,
+    builder_ = std::make_shared<BuilderAPV>(nmx_opts.dump_directory,
                                            nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else if (nmx_opts.builder_type == "SRS") {
     XTRACE(INIT, DEB, "Make BuilderSRS\n");

@@ -5,14 +5,14 @@
 #include <test/TestBase.h>
 #include <unistd.h>
 
-class EventletBuilderH5Test : public TestBase {
+class EventletBuilderAPVTest : public TestBase {
 protected:
-  BuilderH5 *builder;
-  virtual void SetUp() { builder = new BuilderH5("", false, false); }
+  BuilderAPV *builder;
+  virtual void SetUp() { builder = new BuilderAPV("", false, false); }
   virtual void TearDown() { delete builder; }
 };
 
-TEST_F(EventletBuilderH5Test, Process) {
+TEST_F(EventletBuilderAPVTest, Process) {
   NMXHists hists;
   Clusterer clusterer(30);
   // char data[9000];

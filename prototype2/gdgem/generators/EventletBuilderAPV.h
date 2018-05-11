@@ -10,9 +10,9 @@
 #include <gdgem/nmx/AbstractEventletBuilder.h>
 #include <vector>
 
-class BuilderH5 : public AbstractBuilder {
+class BuilderAPV : public AbstractBuilder {
 public:
-  BuilderH5(std::string dump_dir, bool dump_csv, bool dump_h5);
+  BuilderAPV(std::string dump_dir, bool dump_csv, bool dump_h5);
 
   /** @todo Martin document */
   ResultStats process_buffer(char *buf, size_t size, Clusterer &clusterer,
@@ -22,12 +22,13 @@ private:
   size_t psize{sizeof(uint32_t) * 4};
   std::vector<uint32_t> data;
 
-  Eventlet make_eventlet();
+  void make_eventlet(size_t idx);
 
   hdf5::datatype::Datatype dtype_;
   hdf5::node::Dataset dataset_;
-  hdf5::dataspace::Hyperslab slab_ {{0}, {1}};
-
+  hdf5::dataspace::Hyperslab slab_{{0}, {9000 / sizeof(Eventlet)}};
+  std::vector<Eventlet> converted_data;
 
   void setup_h5(std::string dump_dir);
+  void write_h5();
 };

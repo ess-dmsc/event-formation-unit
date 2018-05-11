@@ -1,5 +1,5 @@
 #=============================================================================
-# Data generators
+# APV2VMM Generator (h5)
 #=============================================================================
 
 set(nmxgen_apv_SRC
@@ -31,6 +31,27 @@ set(EventletBuilderAPVTest_INC
     EventletBuilderAPV.h
     )
 create_test_executable(EventletBuilderAPVTest)
+
+#=============================================================================
+# Raw evenlet generator (h5)
+#=============================================================================
+
+set(nmxgen_eventlets_SRC
+    ../nmx/Eventlet.cpp
+    nmxgen_eventlets.cpp
+    ReaderEventlets.cpp
+    NMXArgs.cpp
+    )
+set(nmxgen_eventlets_INC
+    ../nmx/Eventlet.h
+    ReaderEventlets.h
+    NMXArgs.h
+    )
+create_executable(nmxgen_eventlets)
+
+#=============================================================================
+# PCAP generator
+#=============================================================================
 
 find_package(PCAP)
 if(PCAP_FOUND)
