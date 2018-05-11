@@ -15,7 +15,7 @@
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/generators/EventletBuilderAPV.h>
 #include <gdgem/generators/EventletBuilderEventlets.h>
-#include <gdgem/vmm2srs/EventletBuilderSRS.h>
+#include <gdgem/vmm2/EventletBuilderVMM2.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
@@ -251,7 +251,7 @@ void NMX::processing_thread() {
             }
 
             XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
-                   event.x.center_rounded(), event.y.center_rounded());
+                   event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
 
             if ( (!nmx_opts.enforce_lower_uncertainty_limit ||
                    event.meets_lower_cirterion(nmx_opts.lower_uncertainty_limit)) &&
@@ -262,13 +262,13 @@ void NMX::processing_thread() {
               // printf("\nHave a cluster:\n");
               // event.debug2();
 
-              coords[0] = event.x.center_rounded();
-              coords[1] = event.y.center_rounded();
+              coords[0] = event.x.utpc_center_rounded();
+              coords[1] = event.y.utpc_center_rounded();
               pixelid = geometry.to_pixid(coords);
               if (pixelid == 0) {
                 mystats.geom_errors++;
               } else {
-                time = static_cast<uint32_t>(event.time());
+                time = static_cast<uint32_t>(event.utpc_earliest());
 
                 XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n", time, pixelid);
 

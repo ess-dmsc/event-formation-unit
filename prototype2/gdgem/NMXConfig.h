@@ -4,8 +4,8 @@
 
 #include <cinttypes>
 #include <gdgem/nmx/Geometry.h>
-#include <gdgem/vmm2srs/SRSMappings.h>
-#include <gdgem/vmm2srs/SRSTime.h>
+#include <gdgem/srs/SRSMappings.h>
+#include <gdgem/srs/SRSTime.h>
 #include <string>
 
 struct NMXConfig {
