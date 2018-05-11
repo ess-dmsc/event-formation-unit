@@ -13,7 +13,8 @@
 #include <gdgem/nmx/Geometry.h>
 #include <gdgem/nmx/HistSerializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
-#include <gdgem/nmxgen/EventletBuilderH5.h>
+#include <gdgem/generators/EventletBuilderAPV.h>
+#include <gdgem/generators/EventletBuilderEventlets.h>
 #include <gdgem/vmm2srs/EventletBuilderSRS.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
@@ -332,13 +333,16 @@ void NMX::processing_thread() {
 void NMX::init_builder(std::string jsonfile) {
   nmx_opts = NMXConfig(jsonfile);
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
-
-  if (nmx_opts.builder_type == "H5") {
-    XTRACE(INIT, DEB, "Make BuilderH5\n");
-    builder_ = std::make_shared<BuilderH5>(nmx_opts.dump_directory,
-                                           nmx_opts.dump_csv, nmx_opts.dump_h5);
+  if (nmx_opts.builder_type == "Eventlets") {
+    XTRACE(INIT, DEB, "Using BuilderEventlets\n");
+    builder_ = std::make_shared<BuilderEventlets>(nmx_opts.dump_directory,
+                                                  nmx_opts.dump_csv, nmx_opts.dump_h5);
+  } else if (nmx_opts.builder_type == "APV") {
+    XTRACE(INIT, DEB, "Using BuilderAPV\n");
+    builder_ = std::make_shared<BuilderAPV>(nmx_opts.dump_directory,
+                                            nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else if (nmx_opts.builder_type == "SRS") {
-    XTRACE(INIT, DEB, "Make BuilderSRS\n");
+    XTRACE(INIT, DEB, "Using BuilderSRS\n");
     builder_ = std::make_shared<BuilderSRS>(
         nmx_opts.time_config, nmx_opts.srs_mappings, nmx_opts.dump_directory,
         nmx_opts.dump_csv, nmx_opts.dump_h5);

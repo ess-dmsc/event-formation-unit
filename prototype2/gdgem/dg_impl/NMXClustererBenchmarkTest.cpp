@@ -51,8 +51,8 @@ static void Doit(benchmark::State &state) {
 	for (auto _ : state) {
 		for (auto hit : Run16_Long) {
 			int result = nmxdata.AnalyzeHits(hit.srs_timestamp,
-					hit.framecounter, hit.fec, hit.chip_id, hit.channel,
-					hit.bcid, hit.tdc, hit.adc, hit.overthreshold);
+					hit.frame_counter, hit.fec, hit.chip_id, hit.channel,
+					hit.bcid, hit.tdc, hit.adc, hit.over_threshold);
 
 			if (result == -1) {
 				printf("result == -1\n");

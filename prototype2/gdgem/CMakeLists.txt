@@ -14,7 +14,8 @@ set(gdgem_SRC
     nmx/HistSerializer.cpp
     nmx/TrackSerializer.cpp
     nmx/AbstractEventletBuilder.cpp
-    nmxgen/EventletBuilderH5.cpp
+    generators/EventletBuilderAPV.cpp
+    generators/EventletBuilderEventlets.cpp
     vmm2srs/SRSMappings.cpp
     vmm2srs/SRSTime.cpp
     vmm2srs/ParserSRS.cpp
@@ -30,7 +31,8 @@ set(gdgem_INC
     nmx/HistSerializer.h
     nmx/TrackSerializer.h
     nmx/AbstractEventletBuilder.h
-    nmxgen/EventletBuilderH5.h
+    generators/EventletBuilderAPV.h
+    generators/EventletBuilderEventlets.h
     vmm2srs/SRSMappings.h
     vmm2srs/SRSTime.h
     vmm2srs/ParserSRS.h
@@ -43,38 +45,7 @@ create_module(gdgem)
 # Data generators
 #=============================================================================
 
-set(gennmxfile_SRC
-    nmx/Eventlet.cpp
-    nmxgen/nmxfile.cpp
-    nmxgen/NMXArgs.cpp
-    nmxgen/ReaderVMM.cpp
-    )
-set(gennmxfile_INC
-    nmx/Eventlet.h
-    nmxgen/NMXArgs.h
-    nmxgen/ReaderVMM.h
-    )
-create_executable(gennmxfile)
-
-find_package(PCAP)
-if(PCAP_FOUND)
-  set(gennmxpcap_SRC
-      nmxgen/wireshark.cpp
-      nmxgen/ReaderPcap.cpp
-      nmxgen/NMXArgs.cpp
-      )
-  set(gennmxpcap_INC
-      nmxgen/ReaderPcap.h
-      nmxgen/NMXArgs.h
-      )
-  set(gennmxpcap_LIB
-      ${PCAP_LIBRARY}
-      )
-  create_executable(gennmxpcap)
-else()
-  message(STATUS "*** Unable to compile gennmxpcap as libpcap was not found.")
-endif()
-
+add_subdirectory(generators)
 
 #=============================================================================
 # Tests
@@ -82,10 +53,13 @@ endif()
 
 # Clustering
 
+get_filename_component(TEST_DATA_PATH "dg_impl/test/Run16Long.h5" DIRECTORY)
+
 set(ClusteringBase_SRC
     dg_impl/HitsQueue.cpp
     dg_impl/HitSorter.cpp
     dg_impl/ClusterMatcher.cpp
+    dg_impl/TestData.cpp
     nmx/EventNMX.cpp
     nmx/Eventlet.cpp
     vmm2srs/SRSTime.cpp
@@ -98,11 +72,17 @@ set(ClusteringBase_INC
     dg_impl/ClusterMatcher.h
     dg_impl/TestData.h
     dg_impl/TestDataShort.h
-    dg_impl/TestDataLong.h
     nmx/EventNMX.h
     nmx/Eventlet.h
     vmm2srs/SRSTime.h
     vmm2srs/SRSMappings.h)
+
+#set(hdr2h5_SRC
+#    ${ClusteringBase_SRC}
+#    dg_impl/hdr2h5.cpp)
+#set(hdr2h5_INC
+#    ${ClusteringBase_INC})
+#create_executable(hdr2h5)
 
 set(HitsQueueTest_SRC
     ${ClusteringBase_SRC}
@@ -117,6 +97,8 @@ set(HitSorterTest_SRC
 set(HitSorterTest_INC
     ${ClusteringBase_INC})
 create_test_executable(HitSorterTest SKIP_MEMGRIND)
+target_compile_definitions(HitSorterTest
+    PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
 set(Clusterer1Test_SRC
     ${ClusteringBase_SRC}
@@ -126,6 +108,8 @@ set(Clusterer1Test_INC
     dg_impl/Clusterer1.h
     ${ClusteringBase_INC})
 create_test_executable(Clusterer1Test SKIP_MEMGRIND)
+target_compile_definitions(Clusterer1Test
+    PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
 set(ClusterMatcherTest_SRC
     ${ClusteringBase_SRC}
@@ -137,6 +121,8 @@ set(ClusterMatcherTest_INC
     dg_impl/Clusterer1.h
     ${ClusteringBase_INC})
 create_test_executable(ClusterMatcherTest SKIP_MEMGRIND)
+target_compile_definitions(ClusterMatcherTest
+    PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
 # GOOGLE BENCHMARK
 set(NMXClustererBenchmarkTest_SRC
@@ -242,23 +228,6 @@ set(ParserSRSVMM3Test_INC
     vmm3srs/ParserSRS.h
     )
 create_test_executable(ParserSRSVMM3Test)
-
-set(EventletBuilderH5Test_SRC
-    nmx/EventNMX.cpp
-    nmx/Clusterer.cpp
-    nmx/Hists.cpp
-    nmx/AbstractEventletBuilder.cpp
-    nmxgen/EventletBuilderH5Test.cpp
-    nmxgen/EventletBuilderH5.cpp
-    )
-set(EventletBuilderH5Test_INC
-    nmx/Clusterer.h
-    nmx/EventNMX.h
-    nmx/Eventlet.h
-    nmx/Hists.h
-    nmxgen/EventletBuilderH5.h
-    )
-create_test_executable(EventletBuilderH5Test)
 
 set(EventletBuilderTest_SRC
     nmx/Clusterer.cpp

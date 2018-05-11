@@ -8,12 +8,13 @@
 #include <functional>
 
 #include <gdgem/dg_impl/TestDataShort.h>
-#include <gdgem/dg_impl/TestDataLong.h>
 
 #define UNUSED __attribute__((unused))
 
 class NMXClustererTest : public TestBase {
 protected:
+  SRSHitIO long_data;
+
   uint16_t pADCThreshold = 0;
   double pMaxTimeGap = 200;
 
@@ -23,6 +24,9 @@ protected:
   std::shared_ptr<HitSorter> sorter_y;
 
   virtual void SetUp() {
+    std::string DataPath = TEST_DATA_PATH;
+    long_data.read(DataPath + "Run16Long.h5");
+
     mapping.set_mapping(1, 0, 0, 0);
     mapping.set_mapping(1, 1, 0, 64);
     mapping.set_mapping(1, 6, 0, 128);
@@ -51,18 +55,18 @@ TEST_F(NMXClustererTest, BcidTdcError) {
   EXPECT_EQ(0, sorter_x->stats_bcid_tdc_error);
   EXPECT_EQ(0, sorter_y->stats_bcid_tdc_error);
 
-  for (auto hit : err_bcid_tdc_error) {
+  for (const auto& hit : err_bcid_tdc_error) {
     uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
     if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.framecounter,
+      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
                       hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
                       hit.adc,
-                      hit.overthreshold);
+                      hit.over_threshold);
     } else {
-      sorter_x->store(hit.srs_timestamp, hit.framecounter,
+      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
                       hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
                       hit.adc,
-                      hit.overthreshold);
+                      hit.over_threshold);
     }
   }
   // Two in X and Two in Y
@@ -76,18 +80,18 @@ TEST_F(NMXClustererTest, FrameCounterError) {
   EXPECT_EQ(0, sorter_x->stats_fc_error);
   EXPECT_EQ(0, sorter_y->stats_fc_error);
 
-  for (auto hit : err_fc_error) {
+  for (const auto& hit : err_fc_error) {
     uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
     if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.framecounter,
+      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
                       hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
                       hit.adc,
-                      hit.overthreshold);
+                      hit.over_threshold);
     } else {
-      sorter_x->store(hit.srs_timestamp, hit.framecounter,
+      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
                       hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
                       hit.adc,
-                      hit.overthreshold);
+                      hit.over_threshold);
     }
   }
   EXPECT_EQ(1, sorter_x->stats_fc_error);
@@ -100,18 +104,18 @@ TEST_F(NMXClustererTest, TriggerTimeWraps) {
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
 
-  for (auto hit : err_triggertime_error) {
+  for (const auto& hit : err_triggertime_error) {
     uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
     if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.framecounter,
+      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
                       hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
                       hit.adc,
-                      hit.overthreshold);
+                      hit.over_threshold);
     } else {
-      sorter_x->store(hit.srs_timestamp, hit.framecounter,
+      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
                       hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
                       hit.adc,
-                      hit.overthreshold);
+                      hit.over_threshold);
     }
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
@@ -121,24 +125,19 @@ TEST_F(NMXClustererTest, TriggerTimeWraps) {
   EXPECT_EQ(2, sorter_y->stats_trigger_count);
 }
 
-int main(int argc, char **argv) {
-  testing::InitGoogleTest(&argc, argv);
-  return RUN_ALL_TESTS();
-}
-
 TEST_F(NMXClustererTest, Run16_line_110168_110323) {
-  for (auto hit : Run16) {
+  for (const auto& hit : Run16) {
     uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
     if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.framecounter,
+      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
                       hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
                       hit.adc,
-                      hit.overthreshold);
+                      hit.over_threshold);
     } else {
-      sorter_x->store(hit.srs_timestamp, hit.framecounter,
+      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
                       hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
                       hit.adc,
-                      hit.overthreshold);
+                      hit.over_threshold);
     }
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
@@ -153,18 +152,18 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
 }
 
 TEST_F(NMXClustererTest, Run16_Long) {
-  for (auto hit : Run16_Long) {
+  for (const auto& hit : long_data.data) {
     uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
     if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.framecounter,
+      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
                       hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
                       hit.adc,
-                      hit.overthreshold);
+                      hit.over_threshold);
     } else {
-      sorter_x->store(hit.srs_timestamp, hit.framecounter,
+      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
                       hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
                       hit.adc,
-                      hit.overthreshold);
+                      hit.over_threshold);
     }
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
@@ -180,3 +179,9 @@ TEST_F(NMXClustererTest, Run16_Long) {
 }
 
 // Make some tests using a mock clusterer
+
+
+int main(int argc, char **argv) {
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

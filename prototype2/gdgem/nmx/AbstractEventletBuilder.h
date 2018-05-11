@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Bastract class for creating NMX eventlets
+ *  @brief Abstract class for creating NMX eventlets
  */
 
 #pragma once
@@ -48,11 +48,7 @@ protected:
 
   // H5
   hdf5::file::File file_;
-  hdf5::node::Dataset srstime_;
-  hdf5::node::Dataset bc_tdc_adc_;
-  hdf5::node::Dataset fec_chip_chan_thresh_;
   hsize_t event_num_{0};
 
   static std::string time_str();
-  void setup_h5(std::string dump_dir);
 };
