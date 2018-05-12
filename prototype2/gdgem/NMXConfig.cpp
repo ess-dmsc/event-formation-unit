@@ -89,8 +89,8 @@ std::string NMXConfig::debug() const {
   ss << "  geometry_x = " << geometry.nx() << "\n";
   ss << "  geometry_y = " << geometry.ny() << "\n";
 
-  ss << "  dump_csv = " << dump_csv << "\n";
-  ss << "  dump_h5 = " << dump_h5 << "\n";
+  ss << "  dump_csv = " << (dump_csv ? "YES" : "no") << "\n";
+  ss << "  dump_h5 = " << (dump_h5 ? "YES" : "no") << "\n";
   ss << "  dump_directory = " << dump_directory << "\n";
   return ss.str();
 }

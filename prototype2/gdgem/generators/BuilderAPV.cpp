@@ -14,7 +14,7 @@ BuilderAPV::BuilderAPV(std::string dump_dir, bool dump_csv, bool dump_h5)
     vmmsave->tofile("# time, plane, strip, adc, overthreshold\n");
   if (dump_h5_) {
     eventlet_file_ = std::make_shared<EventletFile>();
-    eventlet_file_->open_rw(dump_dir + "gdgem_apv_" + time_str());
+    eventlet_file_->open_rw(dump_dir + "gdgem_apv2vmm_" + time_str() + ".h5");
   }
 }
 
@@ -22,6 +22,7 @@ AbstractBuilder::ResultStats BuilderAPV::process_buffer(char *buf, size_t size,
                                                        Clusterer &clusterer,
                                                        NMXHists &hists) {
   size_t count = std::min(size / psize, size_t(9000 / psize));
+  converted_data.resize(count);
   for (size_t i = 0; i < count; ++i) {
     memcpy(data.data(), buf, psize);
     make_eventlet(i);

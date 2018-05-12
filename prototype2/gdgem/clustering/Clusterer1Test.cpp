@@ -34,7 +34,7 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-    ReadoutFile::read(DataPath + "Run16Long.h5", long_data);
+    ReadoutFile::read(DataPath + "run16long.h5", long_data);
 
     mapping.set_mapping(1, 0, 0, 0);
     mapping.set_mapping(1, 1, 0, 64);

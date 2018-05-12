@@ -61,9 +61,9 @@ std::string SRSMappings::debug() const {
       if (planes_[i][j] == NMX_INVALID_PLANE_ID)
         continue;
       ss << "    (FEC=" << i << ",VMM=" << j << ") --> "
-         << "(plane=" << planes_[i][j] << ","
-         << " strips=[" << offsets_[i][j] << "-"
-         << offsets_[i][j] + NMX_CHIP_CHANNELS - 1 << "])\n";
+         << "(plane=" << uint32_t(planes_[i][j]) << ","
+         << " strips=[" << uint32_t(offsets_[i][j]) << "-"
+         << uint32_t(offsets_[i][j] + NMX_CHIP_CHANNELS - 1) << "])\n";
     }
   }
   return ss.str();

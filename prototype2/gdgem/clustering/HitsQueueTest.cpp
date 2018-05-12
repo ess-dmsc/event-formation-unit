@@ -23,7 +23,7 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-    ReadoutFile::read(DataPath + "Run16Long.h5", long_data);
+    ReadoutFile::read(DataPath + "run16long.h5", long_data);
 
     srstime.set_bc_clock(20);
     srstime.set_tac_slope(60);

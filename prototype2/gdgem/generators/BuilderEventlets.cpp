@@ -14,7 +14,7 @@ BuilderEventlets::BuilderEventlets(std::string dump_dir, bool dump_csv, bool dum
     vmmsave->tofile("# time, plane, strip, adc, overthreshold\n");
   if (dump_h5_) {
     eventlet_file_ = std::make_shared<EventletFile>();
-    eventlet_file_->open_rw(dump_dir + "gdgem_eventlets_" + time_str());
+    eventlet_file_->open_rw(dump_dir + "gdgem_eventlets_" + time_str() + ".h5");
   }
 }
 

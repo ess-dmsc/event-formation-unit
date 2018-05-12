@@ -7,10 +7,10 @@ int main(int argc, char *argv[]) {
 
   SRSHitIO io;
   io.data = Run16_Long;
-  io.write("Run16Long.h5");
+  io.write("run16long.h5");
 
   io.data.clear();
-  io.read("Run16Long.h5");
+  io.read("run16long.h5");
 
   bool same = (io.data.size() == Run16_Long.size());
   if (same) {

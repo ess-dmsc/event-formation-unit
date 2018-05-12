@@ -29,6 +29,7 @@ public:
 class NMXClustererTest : public TestBase {
 protected:
   std::vector<Readout> long_data;
+  std::vector<Readout> super_long_data;
 
   uint16_t pADCThreshold = 0;
   double pMaxTimeGap = 200;
@@ -42,7 +43,8 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-    ReadoutFile::read(DataPath + "Run16Long.h5", long_data);
+    ReadoutFile::read(DataPath + "run16long.h5", long_data);
+    ReadoutFile::read(DataPath + "run16full.h5", super_long_data);
 
     mapping.set_mapping(1, 0, 0, 0);
     mapping.set_mapping(1, 1, 0, 64);
@@ -209,6 +211,33 @@ TEST_F(NMXClustererTest, Mock_long_chrono) {
   EXPECT_EQ(115827, mock_y->all_hits.size());
   EXPECT_EQ(long_data.size(), (mock_x->all_hits.size() + mock_y->all_hits.size()));
 }
+
+TEST_F(NMXClustererTest, Mock_super_long_chrono) {
+  for (const auto& readout : super_long_data) {
+    store_hit(readout);
+  }
+
+//  double prevtime = mock_x->all_hits.front().time;
+//  for (const auto &e : mock_x->all_hits) {
+//    EXPECT_GE(e.time, prevtime);
+//    prevtime = e.time;
+//  }
+//
+//  prevtime = mock_y->all_hits.front().time;
+//  for (const auto &e : mock_y->all_hits) {
+//    EXPECT_GE(e.time, prevtime);
+//    prevtime = e.time;
+//  }
+
+  // flush, but must it be with trigger?
+  sorter_x->flush();
+  sorter_y->flush();
+
+  EXPECT_EQ(441260, mock_x->all_hits.size());
+  EXPECT_EQ(610127, mock_y->all_hits.size());
+  EXPECT_EQ(super_long_data.size(), (mock_x->all_hits.size() + mock_y->all_hits.size()));
+}
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

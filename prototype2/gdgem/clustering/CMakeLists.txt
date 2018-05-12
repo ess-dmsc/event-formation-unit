@@ -4,7 +4,7 @@
 
 # Clustering
 
-get_filename_component(TEST_DATA_PATH "test_data/Run16Long.h5" DIRECTORY)
+get_filename_component(TEST_DATA_PATH "test_data/run16long.h5" DIRECTORY)
 
 set(ClusteringBase_SRC
     ../nmx/Event.cpp
