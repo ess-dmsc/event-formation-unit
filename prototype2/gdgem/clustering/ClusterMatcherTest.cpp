@@ -100,14 +100,21 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
 
 TEST_F(NMXClustererTest, Run16_Long_identical) {
   for (const auto& hit : long_data.data) {
-    store_hit(hit);
+    sorter_y->store(hit.srs_timestamp, hit.frame_counter,
+                    hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                    hit.adc,
+                    hit.over_threshold);
+    sorter_x->store(hit.srs_timestamp, hit.frame_counter,
+                    hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                    hit.adc,
+                    hit.over_threshold);
   }
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(clusters_x->stats_cluster_count, 10203);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 12444);
+  EXPECT_EQ(clusters_x->stats_cluster_count, 20278);
+  EXPECT_EQ(clusters_y->stats_cluster_count, 20278);
   matcher->match_end(clusters_x->clusters, clusters_y->clusters, true);
-//  EXPECT_EQ(matcher->stats_cluster_count, 12432);
+//  EXPECT_EQ(matcher->stats_cluster_count, 20278);
 }
 
 TEST_F(NMXClustererTest, Run16_Long) {

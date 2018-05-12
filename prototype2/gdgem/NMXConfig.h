@@ -3,7 +3,7 @@
 #pragma once
 
 #include <cinttypes>
-#include <gdgem/nmx/Geometry.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
 #include <string>
@@ -34,8 +34,7 @@ struct NMXConfig {
   size_t track_sample_minhits{6};
 
   // Event formation
-  size_t geometry_x{256};
-  size_t geometry_y{256};
+  ESSGeometry geometry;
 
   std::string debug() const;
 

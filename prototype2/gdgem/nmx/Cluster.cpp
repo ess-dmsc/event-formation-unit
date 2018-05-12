@@ -85,8 +85,8 @@ void Cluster::analyze(bool weighted, uint16_t max_timebins,
   uncert_upper = uspan_max - uspan_min + 1;
 }
 
-int16_t Cluster::utpc_center_rounded() const {
-  return static_cast<int16_t>(std::round(utpc_center));
+uint32_t Cluster::utpc_center_rounded() const {
+  return static_cast<uint32_t>(std::round(utpc_center));
 }
 
 void Cluster::merge(Cluster &other) {

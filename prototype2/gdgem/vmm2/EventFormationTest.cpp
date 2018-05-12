@@ -1,6 +1,6 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
-#include <gdgem/nmx/Geometry.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <gdgem/nmx/Clusterer.h>
 #include <gdgem/nmx/Hists.h>
 #include <gdgem/srs/SRSMappings.h>

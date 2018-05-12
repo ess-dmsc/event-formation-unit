@@ -33,16 +33,6 @@ set(EventTest_INC
     )
 create_test_executable(EventTest)
 
-# Get rid of this. Use LogicalGeometry
-set(GeometryTest_SRC
-    GeometryTest.cpp
-    Geometry.cpp
-    )
-set(GeometryTest_INC
-    Geometry.h
-    )
-create_test_executable(GeometryTest)
-
 set(HistSerializerTest_SRC
     Hists.cpp
     HistSerializerTest.cpp

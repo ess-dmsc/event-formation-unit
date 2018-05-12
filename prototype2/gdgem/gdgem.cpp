@@ -1,32 +1,33 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <cinttypes>
+#include <dataformats/multigrid/inc/json.h>
+
+#include <libs/include/SPSCFifo.h>
+#include <libs/include/Socket.h>
+#include <libs/include/TSCTimer.h>
+#include <libs/include/Timer.h>
+
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/FBSerializer.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
-#include <cstring>
-#include <dataformats/multigrid/inc/json.h>
-#include <fstream>
-#include <gdgem/nmx/Geometry.h>
+
+#include <gdgem/NMXConfig.h>
 #include <gdgem/nmx/HistSerializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/generators/EventletBuilderAPV.h>
 #include <gdgem/generators/EventletBuilderEventlets.h>
 #include <gdgem/vmm2/EventletBuilderVMM2.h>
+
 #include <iostream>
-#include <libs/include/SPSCFifo.h>
-#include <libs/include/Socket.h>
-#include <libs/include/TSCTimer.h>
-#include <libs/include/Timer.h>
 #include <memory>
 #include <sstream>
-#include <stdio.h>
+#include <cstdio>
+#include <cstring>
+#include <fstream>
 #include <unistd.h>
-
-#include <gdgem/NMXConfig.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -193,10 +194,6 @@ void NMX::processing_thread() {
     return;
   }
 
-  Geometry geometry;
-  geometry.add_dimension(nmx_opts.geometry_x);
-  geometry.add_dimension(nmx_opts.geometry_y);
-
   Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
@@ -210,7 +207,6 @@ void NMX::processing_thread() {
   TSCTimer global_time, report_timer;
 
   Event event;
-  std::vector<uint16_t> coords{0, 0};
   uint32_t time;
   uint32_t pixelid;
 
@@ -262,10 +258,9 @@ void NMX::processing_thread() {
               // printf("\nHave a cluster:\n");
               // event.debug2();
 
-              coords[0] = event.x.utpc_center_rounded();
-              coords[1] = event.y.utpc_center_rounded();
-              pixelid = geometry.to_pixid(coords);
-              if (pixelid == 0) {
+              pixelid = nmx_opts.geometry.pixel2D(event.x.utpc_center_rounded(),
+                                                  event.y.utpc_center_rounded());
+              if (!nmx_opts.geometry.valid_id(pixelid)) {
                 mystats.geom_errors++;
               } else {
                 time = static_cast<uint32_t>(event.utpc_time());

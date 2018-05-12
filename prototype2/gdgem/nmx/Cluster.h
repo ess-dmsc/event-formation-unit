@@ -58,7 +58,7 @@ struct Cluster {
   int16_t uncert_upper{-1}; // strip span of eventlets in latest few timebins
 
   // @brief returns calculated and rounded entry strip number for pixid
-  int16_t utpc_center_rounded() const;
+  uint32_t utpc_center_rounded() const;
 
 
   // @brief prints values for debug purposes
