@@ -9,15 +9,8 @@
 
 #include <gdgem/nmx/Clusterer.h>
 #include <gdgem/nmx/Hists.h>
-
 #include <common/DataSave.h>
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-#pragma GCC diagnostic ignored "-Wpedantic"
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <h5cpp/hdf5.hpp>
-#pragma GCC diagnostic pop
+#include <memory>
 
 class AbstractBuilder {
 public:
@@ -45,10 +38,6 @@ protected:
 
   // CSV
   std::shared_ptr<DataSave> vmmsave;
-
-  // H5
-  hdf5::file::File file_;
-  hsize_t event_num_{0};
 
   static std::string time_str();
 };

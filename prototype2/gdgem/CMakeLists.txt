@@ -14,9 +14,9 @@ set(gdgem_SRC
     nmx/Hists.cpp
     nmx/HistSerializer.cpp
     nmx/TrackSerializer.cpp
-    nmx/AbstractEventletBuilder.cpp
-    generators/EventletBuilderAPV.cpp
-    generators/EventletBuilderEventlets.cpp
+    nmx/AbstractBuilder.cpp
+    generators/BuilderAPV.cpp
+    generators/BuilderEventlets.cpp
     srs/SRSMappings.cpp
     srs/SRSTime.cpp
     vmm2/ParserVMM2.cpp
@@ -33,9 +33,9 @@ set(gdgem_INC
     nmx/ReadoutFile.h
     nmx/HistSerializer.h
     nmx/TrackSerializer.h
-    nmx/AbstractEventletBuilder.h
-    generators/EventletBuilderAPV.h
-    generators/EventletBuilderEventlets.h
+    nmx/AbstractBuilder.h
+    generators/BuilderAPV.h
+    generators/BuilderEventlets.h
     srs/SRSMappings.h
     srs/SRSTime.h
     vmm2/ParserVMM2.h

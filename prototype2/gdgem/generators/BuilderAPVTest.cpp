@@ -1,18 +1,18 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/generators/EventletBuilderAPV.h>
+#include <gdgem/generators/BuilderAPV.h>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>
 
-class EventletBuilderAPVTest : public TestBase {
+class BuilderAPVTest : public TestBase {
 protected:
   BuilderAPV *builder;
   virtual void SetUp() { builder = new BuilderAPV("", false, false); }
   virtual void TearDown() { delete builder; }
 };
 
-TEST_F(EventletBuilderAPVTest, Process) {
+TEST_F(BuilderAPVTest, Process) {
   NMXHists hists;
   Clusterer clusterer(30);
   // char data[9000];

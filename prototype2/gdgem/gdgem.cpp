@@ -17,8 +17,8 @@
 #include <gdgem/NMXConfig.h>
 #include <gdgem/nmx/HistSerializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
-#include <gdgem/generators/EventletBuilderAPV.h>
-#include <gdgem/generators/EventletBuilderEventlets.h>
+#include <gdgem/generators/BuilderAPV.h>
+#include <gdgem/generators/BuilderEventlets.h>
 #include <gdgem/vmm2/BuilderVMM2.h>
 
 #include <iostream>

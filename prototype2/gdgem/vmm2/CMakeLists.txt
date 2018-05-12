@@ -3,7 +3,7 @@
 #=============================================================================
 
 set(EventFormationTest_SRC
-    ../nmx/AbstractEventletBuilder.cpp
+    ../nmx/AbstractBuilder.cpp
     ../nmx/Clusterer.cpp
     ../nmx/Cluster.cpp
     ../nmx/Event.cpp
@@ -16,7 +16,7 @@ set(EventFormationTest_SRC
     ParserVMM2.cpp
     )
 set(EventFormationTest_INC
-    ../nmx/AbstractEventletBuilder.h
+    ../nmx/AbstractBuilder.h
     ../nmx/Clusterer.h
     ../nmx/Cluster.h
     ../nmx/Event.h
@@ -36,7 +36,7 @@ set(BuilderBenchmarkTest_SRC
     ../nmx/Cluster.cpp
     ../nmx/Event.cpp
     ../nmx/Hists.cpp
-    ../nmx/AbstractEventletBuilder.cpp
+    ../nmx/AbstractBuilder.cpp
     ../srs/SRSTime.cpp
     ../srs/SRSMappings.cpp
     BuilderVMM2BenchmarkTest.cpp
@@ -71,7 +71,7 @@ set(BuilderVMM2Test_SRC
     ../nmx/Cluster.cpp
     ../nmx/Event.cpp
     ../nmx/Hists.cpp
-    ../nmx/AbstractEventletBuilder.cpp
+    ../nmx/AbstractBuilder.cpp
     ../srs/SRSTime.cpp
     ../srs/SRSMappings.cpp
     BuilderVMM2Test.cpp

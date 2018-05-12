@@ -21,6 +21,17 @@ set(EventletTest_INC
     )
 create_test_executable(EventletTest)
 
+set(EventletFileTest_SRC
+    EventletFileTest.cpp
+    EventletFile.cpp
+    Eventlet.cpp
+    )
+set(EventletFileTest_INC
+    EventletFile.h
+    Eventlet.h
+    )
+create_test_executable(EventletFileTest)
+
 set(ClusterTest_SRC
     ClusterTest.cpp
     Cluster.cpp

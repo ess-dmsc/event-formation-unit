@@ -5,7 +5,7 @@
  *  @brief Bastract class for creating NMX eventlets
  */
 
-#include "AbstractEventletBuilder.h"
+#include "AbstractBuilder.h"
 
 #include <common/Trace.h>
 

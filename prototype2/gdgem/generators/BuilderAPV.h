@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <gdgem/nmx/AbstractEventletBuilder.h>
-#include <vector>
+#include <gdgem/nmx/AbstractBuilder.h>
+#include <gdgem/nmx/EventletFile.h>
 
 class BuilderAPV : public AbstractBuilder {
 public:
@@ -24,11 +24,6 @@ private:
 
   void make_eventlet(size_t idx);
 
-  hdf5::datatype::Datatype dtype_;
-  hdf5::node::Dataset dataset_;
-  hdf5::dataspace::Hyperslab slab_{{0}, {9000 / sizeof(Eventlet)}};
+  std::shared_ptr<EventletFile> eventlet_file_;
   std::vector<Eventlet> converted_data;
-
-  void setup_h5(std::string dump_dir);
-  void write_h5();
 };

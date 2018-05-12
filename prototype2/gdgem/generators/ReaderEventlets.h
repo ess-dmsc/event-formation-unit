@@ -5,20 +5,9 @@
  *  @brief Wrapper class for reading VMM data from HDF5 files
  */
 
-#ifndef READER_VMM_H
-#define READER_VMM_H
+#pragma once
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-#pragma GCC diagnostic ignored "-Wpedantic"
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <h5cpp/hdf5.hpp>
-#pragma GCC diagnostic pop
-
-#include <map>
-#include <vector>
-#include <gdgem/nmx/Eventlet.h>
+#include <gdgem/nmx/EventletFile.h>
 
 class ReaderEventlets {
 public:
@@ -29,16 +18,8 @@ public:
   size_t read(char *buf);
 
 private:
-  hdf5::file::File file_;
-  hdf5::node::Dataset dataset_;
+  EventletFile file;
 
   size_t total_{0};
   size_t current_{0};
-  size_t max_in_buf_{9000 / sizeof(Eventlet)};
-
-  hdf5::dataspace::Hyperslab slab_{{0}, {9000 / sizeof(Eventlet)}};
-
-  std::vector<Eventlet> data;
 };
-
-#endif

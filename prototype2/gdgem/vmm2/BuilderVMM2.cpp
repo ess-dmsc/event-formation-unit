@@ -18,7 +18,7 @@ BuilderVMM2::BuilderVMM2(SRSTime time_intepreter,
   }
   if (dump_h5_) {
     readout_file_ = std::make_shared<ReadoutFile>();
-    readout_file_->open_rw(dump_dir + "apv2vmm_" + time_str());
+    readout_file_->open_rw(dump_dir + "gdgem_vmm2_" + time_str());
   }
 }
 

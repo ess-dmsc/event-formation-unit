@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include <gdgem/nmx/AbstractEventletBuilder.h>
+#include <gdgem/nmx/AbstractBuilder.h>
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
 #include <gdgem/vmm2/ParserVMM2.h>

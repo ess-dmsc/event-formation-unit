@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/generators/EventletBuilderAPV.h>
+#include <gdgem/generators/BuilderAPV.h>
 #include <cstring>
 
 #include <common/Trace.h>
@@ -12,8 +12,10 @@ BuilderAPV::BuilderAPV(std::string dump_dir, bool dump_csv, bool dump_h5)
   data.resize(4);
   if (dump_csv_)
     vmmsave->tofile("# time, plane, strip, adc, overthreshold\n");
-  if (dump_h5_)
-    setup_h5(dump_dir);
+  if (dump_h5_) {
+    eventlet_file_ = std::make_shared<EventletFile>();
+    eventlet_file_->open_rw(dump_dir + "gdgem_apv_" + time_str());
+  }
 }
 
 AbstractBuilder::ResultStats BuilderAPV::process_buffer(char *buf, size_t size,
@@ -32,7 +34,8 @@ AbstractBuilder::ResultStats BuilderAPV::process_buffer(char *buf, size_t size,
   }
 
   if (dump_h5_) {
-    write_h5();
+    eventlet_file_->data = std::move(converted_data);
+    eventlet_file_->write();
   }
 
   return AbstractBuilder::ResultStats(count, 0, 0);
@@ -51,35 +54,4 @@ void BuilderAPV::make_eventlet(size_t idx) {
   if (dump_csv_)
     vmmsave->tofile("%" PRIu64 ", %u, %u, %u, %u\n", e.time, e.plane_id,
                     e.strip, e.adc, e.over_threshold);
-}
-
-void BuilderAPV::write_h5() {
-  slab_.offset(0, event_num_);
-  slab_.block(0, converted_data.size());
-  dataset_.extent({event_num_ + converted_data.size()});
-  dataset_.write(converted_data, slab_);
-  event_num_ += converted_data.size();
-}
-
-void BuilderAPV::setup_h5(std::string dump_dir) {
-  using namespace hdf5;
-
-  converted_data.resize(9000 / sizeof(Eventlet));
-
-  std::string fileName = dump_dir + "apv2vmm_" + time_str() + ".h5";
-
-  XTRACE(PROCESS, ALW, "Will dump to H5 file: %s\n", fileName.c_str());
-
-  file_ = file::create(fileName, file::AccessFlags::TRUNCATE);
-
-  node::Group root = file_.root();
-
-  property::DatasetCreationList dcpl;
-  dcpl.layout(property::DatasetLayout::CHUNKED);
-  dcpl.chunk({converted_data.size()});
-
-  dtype_ = datatype::create<Eventlet>();
-
-  dataset_ = root.create_dataset("h5eventlets", dtype_,
-      dataspace::Simple({0}, {dataspace::Simple::UNLIMITED}), dcpl);
 }
