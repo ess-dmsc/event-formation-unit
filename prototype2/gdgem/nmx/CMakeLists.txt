@@ -2,6 +2,16 @@
 # Tests
 #=============================================================================
 
+set(ReadoutFileTest_SRC
+    ReadoutFileTest.cpp
+    ReadoutFile.cpp
+    )
+set(ReadoutFileTest_INC
+    ReadoutFile.h
+    Readout.h
+    )
+create_test_executable(ReadoutFileTest)
+
 set(EventletTest_SRC
     EventletTest.cpp
     Eventlet.cpp

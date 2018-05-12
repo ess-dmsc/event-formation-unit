@@ -1,14 +1,14 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/vmm2/EventletBuilderVMM2.h>
+#include <gdgem/vmm2/BuilderVMM2.h>
 #include <gdgem/vmm2/ParserVMM2TestData.h>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>
 
-class EventletBuilderTest : public TestBase {
+class BuilderVMM2Test : public TestBase {
 protected:
-  BuilderSRS *builder;
+  BuilderVMM2 *builder;
   Clusterer clusterer{30};
   NMXHists hists;
 
@@ -17,12 +17,12 @@ protected:
     SRSMappings geometry;
     geometry.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
     geometry.define_plane(1, {{1, 10}, {1, 11}, {1, 14}, {1, 15}});
-    builder = new BuilderSRS(time, geometry, "", false, false);
+    builder = new BuilderVMM2(time, geometry, "", false, false);
   }
   virtual void TearDown() { delete builder; }
 };
 
-TEST_F(EventletBuilderTest, DataTooShortForEventlets) {
+TEST_F(BuilderVMM2Test, DataTooShortForEventlets) {
   auto stats =
       builder->process_buffer((char *)srsdata_0_eventlets,
                               sizeof(srsdata_0_eventlets), clusterer, hists);
@@ -30,7 +30,7 @@ TEST_F(EventletBuilderTest, DataTooShortForEventlets) {
   ASSERT_EQ(stats.geom_errors, 0);
 }
 
-TEST_F(EventletBuilderTest, InvalidGeometry) {
+TEST_F(BuilderVMM2Test, InvalidGeometry) {
   auto stats = builder->process_buffer((char *)srsdata_invalid_geometry,
                                        sizeof(srsdata_invalid_geometry),
                                        clusterer, hists);
@@ -38,7 +38,7 @@ TEST_F(EventletBuilderTest, InvalidGeometry) {
   ASSERT_EQ(stats.geom_errors, 1);
 }
 
-TEST_F(EventletBuilderTest, Process22Eventlets) {
+TEST_F(BuilderVMM2Test, Process22Eventlets) {
   auto stats =
       builder->process_buffer((char *)srsdata_22_eventlets,
                               sizeof(srsdata_22_eventlets), clusterer, hists);

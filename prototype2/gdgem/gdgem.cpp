@@ -19,7 +19,7 @@
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/generators/EventletBuilderAPV.h>
 #include <gdgem/generators/EventletBuilderEventlets.h>
-#include <gdgem/vmm2/EventletBuilderVMM2.h>
+#include <gdgem/vmm2/BuilderVMM2.h>
 
 #include <iostream>
 #include <memory>
@@ -338,7 +338,7 @@ void NMX::init_builder(std::string jsonfile) {
                                             nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else if (nmx_opts.builder_type == "SRS") {
     XTRACE(INIT, DEB, "Using BuilderSRS\n");
-    builder_ = std::make_shared<BuilderSRS>(
+    builder_ = std::make_shared<BuilderVMM2>(
         nmx_opts.time_config, nmx_opts.srs_mappings, nmx_opts.dump_directory,
         nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else {

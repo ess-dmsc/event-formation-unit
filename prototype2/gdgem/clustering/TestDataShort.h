@@ -1,15 +1,15 @@
 #pragma once
-#include "TestData.h"
+#include <gdgem/nmx/Readout.h>
 
 // Scrambled FrameCounter
-std::vector<Hit> err_fc_error
+std::vector<Readout> err_fc_error
 {//              *
 	{ 1,  7, 255783212, 236388352,  7, 4094, 202, 109, 1},
 	{ 1,  1, 255783211, 236388352, 34, 839, 96, 93, 1},
 };
 
 // 'scrambled' (0) values occasionally seen
-std::vector<Hit> err_bcid_tdc_error
+std::vector<Readout> err_bcid_tdc_error
 { //                                 *  * X
 	{ 1,  0, 255783208, 236388352, 18, 0, 0, 574, 1},
 	{ 1,  0, 255783208, 236388352, 19, 0, 0, 400, 1},
@@ -19,7 +19,7 @@ std::vector<Hit> err_bcid_tdc_error
 };
 
 // Scrambled trigger time
-std::vector<Hit> err_triggertime_error
+std::vector<Readout> err_triggertime_error
 {
 	{ 1, 14, 255783214, 236453888, 41, 4094, 161, 191, 1},
 	{ 1, 14, 255783214, 236453888, 42, 4094, 193, 106, 1},
@@ -28,7 +28,7 @@ std::vector<Hit> err_triggertime_error
 };
 
 
-std::vector<Hit> Run16
+std::vector<Readout> Run16
 {
 { 1,  0, 255783208, 236388352,  7, 839, 178, 176, 1},
 { 1,  0, 255783208, 236388352,  8, 839, 224, 352, 1},

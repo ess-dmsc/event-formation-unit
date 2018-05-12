@@ -10,12 +10,13 @@
 #include <functional>
 
 #include <gdgem/clustering/TestDataShort.h>
+#include <gdgem/nmx/ReadoutFile.h>
 
 #define UNUSED __attribute__((unused))
 
 class NMXClustererTest : public TestBase {
 protected:
-  SRSHitIO long_data;
+  std::vector<Readout> long_data;
 
   uint16_t pADCThreshold = 0;
   size_t pMinClusterSize = 3;
@@ -39,7 +40,7 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-    long_data.read(DataPath + "Run16Long.h5");
+    ReadoutFile::read(DataPath + "Run16Long.h5", long_data);
 
     mapping.set_mapping(1, 0, 0, 0);
     mapping.set_mapping(1, 1, 0, 64);
@@ -67,19 +68,19 @@ protected:
   virtual void TearDown() {
   }
 
-  void store_hit(const Hit& hit)
+  void store_hit(const Readout& readout)
   {
-    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
+    uint8_t planeID = mapping.get_plane(readout.fec, readout.chip_id);
     if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
+      sorter_y->store(readout.srs_timestamp, readout.frame_counter,
+                      readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
+                      readout.adc,
+                      readout.over_threshold);
     } else {
-      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
+      sorter_x->store(readout.srs_timestamp, readout.frame_counter,
+                      readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
+                      readout.adc,
+                      readout.over_threshold);
     }
   }
 };
@@ -87,8 +88,8 @@ protected:
 // Test these without clusterer, with preclustered data in both dimensions
 
 TEST_F(NMXClustererTest, Run16_line_110168_110323) {
-  for (const auto& hit : Run16) {
-    store_hit(hit);
+  for (const auto& readout : Run16) {
+    store_hit(readout);
   }
   sorter_x->flush();
   sorter_y->flush();
@@ -99,15 +100,15 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
 }
 
 TEST_F(NMXClustererTest, Run16_Long_identical) {
-  for (const auto& hit : long_data.data) {
-    sorter_y->store(hit.srs_timestamp, hit.frame_counter,
-                    hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                    hit.adc,
-                    hit.over_threshold);
-    sorter_x->store(hit.srs_timestamp, hit.frame_counter,
-                    hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                    hit.adc,
-                    hit.over_threshold);
+  for (const auto& readout : long_data) {
+    sorter_y->store(readout.srs_timestamp, readout.frame_counter,
+                    readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
+                    readout.adc,
+                    readout.over_threshold);
+    sorter_x->store(readout.srs_timestamp, readout.frame_counter,
+                    readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
+                    readout.adc,
+                    readout.over_threshold);
   }
   sorter_x->flush();
   sorter_y->flush();
@@ -118,8 +119,8 @@ TEST_F(NMXClustererTest, Run16_Long_identical) {
 }
 
 TEST_F(NMXClustererTest, Run16_Long) {
-  for (const auto& hit : long_data.data) {
-    store_hit(hit);
+  for (const auto& readout : long_data) {
+    store_hit(readout);
   }
   sorter_x->flush();
   sorter_y->flush();

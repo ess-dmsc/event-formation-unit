@@ -6,6 +6,7 @@ set(gdgem_SRC
     ../../dataformats/multigrid/src/jsoncpp.cpp
     gdgem.cpp
     NMXConfig.cpp
+    nmx/ReadoutFile.cpp
     nmx/Clusterer.cpp
     nmx/Cluster.cpp
     nmx/Event.cpp
@@ -19,7 +20,7 @@ set(gdgem_SRC
     srs/SRSMappings.cpp
     srs/SRSTime.cpp
     vmm2/ParserVMM2.cpp
-    vmm2/EventletBuilderVMM2.cpp
+    vmm2/BuilderVMM2.cpp
     )
 set(gdgem_INC
     NMXConfig.h
@@ -28,6 +29,8 @@ set(gdgem_INC
     nmx/Event.h
     nmx/Eventlet.h
     nmx/Hists.h
+    nmx/Readout.h
+    nmx/ReadoutFile.h
     nmx/HistSerializer.h
     nmx/TrackSerializer.h
     nmx/AbstractEventletBuilder.h
@@ -36,7 +39,7 @@ set(gdgem_INC
     srs/SRSMappings.h
     srs/SRSTime.h
     vmm2/ParserVMM2.h
-    vmm2/EventletBuilderVMM2.h
+    vmm2/BuilderVMM2.h
     )
 create_module(gdgem)
 

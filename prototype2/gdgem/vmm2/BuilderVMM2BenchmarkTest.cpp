@@ -6,7 +6,7 @@
 #include <string>
 #include <unistd.h>
 
-BuilderSRS *builder;
+BuilderVMM2 *builder;
 Clusterer clusterer(30);
 NMXHists hists;
 
@@ -15,7 +15,7 @@ static void Setup(__attribute__((unused)) benchmark::State &state) {
   SRSTime time;
   geometry.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
   geometry.define_plane(1, {{1, 10}, {1, 11}, {1, 14}, {1, 15}});
-  builder = new BuilderSRS(time, geometry, "", false, false);
+  builder = new BuilderVMM2(time, geometry, "", false, false);
 }
 BENCHMARK(Setup);
 

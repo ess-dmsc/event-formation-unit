@@ -4,23 +4,25 @@
 
 # Clustering
 
-get_filename_component(TEST_DATA_PATH "test/Run16Long.h5" DIRECTORY)
+get_filename_component(TEST_DATA_PATH "test_data/Run16Long.h5" DIRECTORY)
 
 set(ClusteringBase_SRC
     ../nmx/Event.cpp
     ../nmx/Cluster.cpp
     ../nmx/Eventlet.cpp
+    ../nmx/ReadoutFile.cpp
     ../srs/SRSTime.cpp
     ../srs/SRSMappings.cpp
     HitsQueue.cpp
     HitSorter.cpp
     ClusterMatcher.cpp
-    TestData.cpp
     )
 set(ClusteringBase_INC
     ../nmx/Event.h
+    ../nmx/Readout.h
     ../nmx/Cluster.h
     ../nmx/Eventlet.h
+    ../nmx/ReadoutFile.h
     ../srs/SRSTime.h
     ../srs/SRSMappings.h
     HitContainer.h
@@ -28,13 +30,12 @@ set(ClusteringBase_INC
     HitSorter.h
     AbstractClusterer.h
     ClusterMatcher.h
-    TestData.h
     TestDataShort.h
     )
 
 #set(hdr2h5_SRC
 #    ${ClusteringBase_SRC}
-#    hdr2h5.cpp)
+#    test_data/hdr2h5.cpp)
 #set(hdr2h5_INC
 #    ${ClusteringBase_INC})
 #create_executable(hdr2h5)

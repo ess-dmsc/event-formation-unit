@@ -8,6 +8,7 @@
 #include <functional>
 
 #include <gdgem/clustering/TestDataShort.h>
+#include <gdgem/nmx/ReadoutFile.h>
 
 #define UNUSED __attribute__((unused))
 
@@ -27,7 +28,7 @@ public:
 
 class NMXClustererTest : public TestBase {
 protected:
-  SRSHitIO long_data;
+  std::vector<Readout> long_data;
 
   uint16_t pADCThreshold = 0;
   double pMaxTimeGap = 200;
@@ -41,7 +42,7 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-    long_data.read(DataPath + "Run16Long.h5");
+    ReadoutFile::read(DataPath + "Run16Long.h5", long_data);
 
     mapping.set_mapping(1, 0, 0, 0);
     mapping.set_mapping(1, 1, 0, 64);
@@ -68,19 +69,19 @@ protected:
   virtual void TearDown() {
   }
 
-  void store_hit(const Hit& hit)
+  void store_hit(const Readout& readout)
   {
-    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
+    uint8_t planeID = mapping.get_plane(readout.fec, readout.chip_id);
     if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
+      sorter_y->store(readout.srs_timestamp, readout.frame_counter,
+                      readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
+                      readout.adc,
+                      readout.over_threshold);
     } else {
-      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
+      sorter_x->store(readout.srs_timestamp, readout.frame_counter,
+                      readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
+                      readout.adc,
+                      readout.over_threshold);
     }
   }
 };
@@ -89,8 +90,8 @@ TEST_F(NMXClustererTest, BcidTdcError) {
   EXPECT_EQ(0, sorter_x->stats_bcid_tdc_error);
   EXPECT_EQ(0, sorter_y->stats_bcid_tdc_error);
 
-  for (const auto& hit : err_bcid_tdc_error) {
-    store_hit(hit);
+  for (const auto& readout : err_bcid_tdc_error) {
+    store_hit(readout);
   }
   // Two in X and Two in Y
   EXPECT_EQ(2, sorter_x->stats_bcid_tdc_error);
@@ -103,8 +104,8 @@ TEST_F(NMXClustererTest, FrameCounterError) {
   EXPECT_EQ(0, sorter_x->stats_fc_error);
   EXPECT_EQ(0, sorter_y->stats_fc_error);
 
-  for (const auto& hit : err_fc_error) {
-    store_hit(hit);
+  for (const auto& readout : err_fc_error) {
+    store_hit(readout);
   }
   EXPECT_EQ(1, sorter_x->stats_fc_error);
   EXPECT_EQ(0, sorter_y->stats_fc_error);
@@ -116,8 +117,8 @@ TEST_F(NMXClustererTest, TriggerTimeWraps) {
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
 
-  for (const auto& hit : err_triggertime_error) {
-    store_hit(hit);
+  for (const auto& readout : err_triggertime_error) {
+    store_hit(readout);
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(1, sorter_y->stats_triggertime_wraps);
@@ -127,8 +128,8 @@ TEST_F(NMXClustererTest, TriggerTimeWraps) {
 }
 
 TEST_F(NMXClustererTest, Run16_line_110168_110323) {
-  for (const auto& hit : Run16) {
-    store_hit(hit);
+  for (const auto& readout : Run16) {
+    store_hit(readout);
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
@@ -142,8 +143,8 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
 }
 
 TEST_F(NMXClustererTest, Run16_Long) {
-  for (const auto& hit : long_data.data) {
-    store_hit(hit);
+  for (const auto& readout : long_data) {
+    store_hit(readout);
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
@@ -158,8 +159,8 @@ TEST_F(NMXClustererTest, Run16_Long) {
 }
 
 TEST_F(NMXClustererTest, Mock_short_chrono) {
-  for (const auto& hit : Run16) {
-    store_hit(hit);
+  for (const auto& readout : Run16) {
+    store_hit(readout);
   }
 
   double prevtime = mock_x->all_hits.front().time;
@@ -184,8 +185,8 @@ TEST_F(NMXClustererTest, Mock_short_chrono) {
 }
 
 TEST_F(NMXClustererTest, Mock_long_chrono) {
-  for (const auto& hit : long_data.data) {
-    store_hit(hit);
+  for (const auto& readout : long_data) {
+    store_hit(readout);
   }
 
 //  double prevtime = mock_x->all_hits.front().time;
@@ -206,7 +207,7 @@ TEST_F(NMXClustererTest, Mock_long_chrono) {
 
   EXPECT_EQ(84168, mock_x->all_hits.size());
   EXPECT_EQ(115827, mock_y->all_hits.size());
-  EXPECT_EQ(long_data.data.size(), (mock_x->all_hits.size() + mock_y->all_hits.size()));
+  EXPECT_EQ(long_data.size(), (mock_x->all_hits.size() + mock_y->all_hits.size()));
 }
 
 int main(int argc, char **argv) {

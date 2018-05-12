@@ -1,12 +1,12 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/Trace.h>
-#include <gdgem/vmm2/EventletBuilderVMM2.h>
+#include <gdgem/vmm2/BuilderVMM2.h>
 
+#include <common/Trace.h>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-BuilderSRS::BuilderSRS(SRSTime time_intepreter,
+BuilderVMM2::BuilderVMM2(SRSTime time_intepreter,
                        SRSMappings geometry_interpreter, std::string dump_dir,
                        bool dump_csv, bool dump_h5)
     : AbstractBuilder(dump_dir, dump_csv, dump_h5), parser_(1125),
@@ -16,9 +16,13 @@ BuilderSRS::BuilderSRS(SRSTime time_intepreter,
     vmmsave->tofile("# fec, chip_id, frame counter, srs timestamp, channel, "
                     "bcid, tdc, adc, overthreshold\n");
   }
+  if (dump_h5_) {
+    readout_file_ = std::make_shared<ReadoutFile>();
+    readout_file_->open_rw(dump_dir + "apv2vmm_" + time_str());
+  }
 }
 
-AbstractBuilder::ResultStats BuilderSRS::process_buffer(char *buf, size_t size,
+AbstractBuilder::ResultStats BuilderVMM2::process_buffer(char *buf, size_t size,
                                                         Clusterer &clusterer,
                                                         NMXHists &hists) {
   parser_.receive(buf, size);
@@ -29,6 +33,11 @@ AbstractBuilder::ResultStats BuilderSRS::process_buffer(char *buf, size_t size,
   uint16_t chip_id =
       parser_.srshdr.dataid & 0xf; /**< @todo may belong elswhere */
   uint32_t geom_errors{0};
+
+  if (dump_h5_)
+  {
+    readout_file_->data.resize(parser_.elems);
+  }
 
   Eventlet eventlet;
   for (unsigned int i = 0; i < parser_.elems; i++) {
@@ -62,7 +71,24 @@ AbstractBuilder::ResultStats BuilderSRS::process_buffer(char *buf, size_t size,
                       chip_id, parser_.srshdr.fc, parser_.srshdr.time, d.chno,
                       d.bcid, d.tdc, d.adc, d.overThreshold);
     }
-      //printf("readout: time: %llu, plane: %d, strip: %d, adc: %d\n", eventlet.time, eventlet.plane_id, eventlet.strip, eventlet.adc);
+    if (dump_h5_)
+    {
+      auto& r = readout_file_->data[i];
+      r.fec = fec_id;
+      r.chip_id = chip_id;
+      r.frame_counter = parser_.srshdr.fc;
+      r.srs_timestamp = parser_.srshdr.time;
+      r.channel = d.chno;
+      r.bcid = d.bcid;
+      r.tdc = d.tdc;
+      r.adc = d.adc;
+      r.over_threshold = d.overThreshold;
+    }
+  }
+
+  if (dump_h5_)
+  {
+    readout_file_->write();
   }
 
   return AbstractBuilder::ResultStats(parser_.elems, parser_.error,

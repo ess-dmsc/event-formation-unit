@@ -7,7 +7,7 @@
 #include <gdgem/srs/SRSTime.h>
 
 #include <gdgem/vmm2/EventFormationTestData.h>
-#include <gdgem/vmm2/EventletBuilderVMM2.h>
+#include <gdgem/vmm2/BuilderVMM2.h>
 #include <memory>
 #include <test/TestBase.h>
 
@@ -34,7 +34,7 @@ protected:
 TEST_F(EventFormationTest, Initial) {
   Clusterer clusterer(20000); // cluster_min_timespan
 
-  auto builder = std::make_shared<BuilderSRS>(time_intepreter, geometry_interpreter, "", 0, 0);
+  auto builder = std::make_shared<BuilderVMM2>(time_intepreter, geometry_interpreter, "", 0, 0);
 
   uint64_t readouts = 0;
   uint64_t readouts_error_bytes = 0;

@@ -2,7 +2,6 @@
 # Tests
 #=============================================================================
 
-# Unit Tests
 set(EventFormationTest_SRC
     ../nmx/AbstractEventletBuilder.cpp
     ../nmx/Clusterer.cpp
@@ -11,7 +10,8 @@ set(EventFormationTest_SRC
     ../nmx/Hists.cpp
     ../srs/SRSTime.cpp
     ../srs/SRSMappings.cpp
-    EventletBuilderVMM2.cpp
+    ../nmx/ReadoutFile.cpp
+    BuilderVMM2.cpp
     EventFormationTest.cpp
     ParserVMM2.cpp
     )
@@ -23,13 +23,15 @@ set(EventFormationTest_INC
     ../nmx/Hists.h
     ../srs/SRSTime.h
     ../srs/SRSMappings.h
-    EventletBuilderVMM2.h
+    ../nmx/ReadoutFile.h
+    ../nmx/Readout.h
+    BuilderVMM2.h
     ParserVMM2.h
     )
 create_test_executable(EventFormationTest)
 
 
-set(EventletBuilderBenchmarkTest_SRC
+set(BuilderBenchmarkTest_SRC
     ../nmx/Clusterer.cpp
     ../nmx/Cluster.cpp
     ../nmx/Event.cpp
@@ -37,11 +39,11 @@ set(EventletBuilderBenchmarkTest_SRC
     ../nmx/AbstractEventletBuilder.cpp
     ../srs/SRSTime.cpp
     ../srs/SRSMappings.cpp
-    EventletBuilderVMM2BenchmarkTest.cpp
-    EventletBuilderVMM2.cpp
+    BuilderVMM2BenchmarkTest.cpp
+    BuilderVMM2.cpp
     ParserVMM2.cpp
     )
-set(EventletBuilderBenchmarkTest_INC
+set(BuilderBenchmarkTest_INC
     ../nmx/Clusterer.h
     ../nmx/Cluster.h
     ../nmx/Event.h
@@ -50,9 +52,9 @@ set(EventletBuilderBenchmarkTest_INC
     ../srs/SRSTime.h
     ../srs/SRSMappings.h
     ParserVMM2.h
-    EventletBuilderVMM2.h
+    BuilderVMM2.h
     )
-create_benchmark_executable(EventletBuilderBenchmarkTest)
+create_benchmark_executable(BuilderBenchmarkTest)
 
 set(ParserVMM2Test_SRC
     ParserVMM2Test.cpp
@@ -63,7 +65,8 @@ set(ParserVMM2Test_INC
     )
 create_test_executable(ParserVMM2Test)
 
-set(EventletBuilderTest_SRC
+set(BuilderVMM2Test_SRC
+    ../nmx/ReadoutFile.cpp
     ../nmx/Clusterer.cpp
     ../nmx/Cluster.cpp
     ../nmx/Event.cpp
@@ -71,11 +74,13 @@ set(EventletBuilderTest_SRC
     ../nmx/AbstractEventletBuilder.cpp
     ../srs/SRSTime.cpp
     ../srs/SRSMappings.cpp
-    EventletBuilderVMM2Test.cpp
-    EventletBuilderVMM2.cpp
+    BuilderVMM2Test.cpp
+    BuilderVMM2.cpp
     ParserVMM2.cpp
     )
-set(EventletBuilderTest_INC
+set(BuilderVMM2Test_INC
+    ../nmx/ReadoutFile.h
+    ../nmx/Readout.h
     ../nmx/Clusterer.h
     ../nmx/Cluster.h
     ../nmx/Event.h
@@ -84,6 +89,6 @@ set(EventletBuilderTest_INC
     ../srs/SRSTime.h
     ../srs/SRSMappings.h
     ParserVMM2.h
-    EventletBuilderVMM2.h
+    BuilderVMM2.h
     )
-create_test_executable(EventletBuilderTest)
+create_test_executable(BuilderVMM2Test)

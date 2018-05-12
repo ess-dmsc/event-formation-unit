@@ -8,12 +8,13 @@
 #include <functional>
 
 #include <gdgem/clustering/TestDataShort.h>
+#include <gdgem/nmx/ReadoutFile.h>
 
 #define UNUSED __attribute__((unused))
 
 class HitsQueueTest : public TestBase {
 protected:
-  SRSHitIO long_data;
+  std::vector<Readout> long_data;
 
   // Maximum time difference between hits in time sorted cluster (x or y)
   double pMaxTimeGap = 200;
@@ -22,7 +23,7 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-    long_data.read(DataPath + "Run16Long.h5");
+    ReadoutFile::read(DataPath + "Run16Long.h5", long_data);
 
     srstime.set_bc_clock(20);
     srstime.set_tac_slope(60);
@@ -112,7 +113,7 @@ TEST_F(HitsQueueTest, Run16_chronological_with_trigger) {
 }
 
 TEST_F(HitsQueueTest, Long_chronological_no_trigger) {
-  for (auto hit : long_data.data) {
+  for (auto hit : long_data) {
     auto chiptime = srstime.chip_time(hit.bcid, hit.tdc);
     queue->store(0,0,chiptime);
   }
@@ -132,7 +133,7 @@ TEST_F(HitsQueueTest, Long_chronological_no_trigger) {
 }
 
 TEST_F(HitsQueueTest, Long_chronological_with_trigger) {
-  for (auto hit : long_data.data) {
+  for (auto hit : long_data) {
     auto chiptime = srstime.chip_time(hit.bcid, hit.tdc);
     queue->store(0,0,chiptime);
   }

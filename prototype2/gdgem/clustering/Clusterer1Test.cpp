@@ -1,10 +1,12 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
+#include <gdgem/nmx/ReadoutFile.h>
+#include <gdgem/clustering/HitSorter.h>
+#include <gdgem/clustering/Clusterer1.h>
+
 #include <memory>
 #include <stdio.h>
 #include <unistd.h>
-#include <gdgem/clustering/HitSorter.h>
-#include <gdgem/clustering/Clusterer1.h>
 #include <test/TestBase.h>
 #include <functional>
 
@@ -14,7 +16,7 @@
 
 class NMXClustererTest : public TestBase {
 protected:
-  SRSHitIO long_data;
+  std::vector<Readout> long_data;
 
   uint16_t pADCThreshold = 0;
   size_t pMinClusterSize = 3;
@@ -32,7 +34,7 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-    long_data.read(DataPath + "Run16Long.h5");
+    ReadoutFile::read(DataPath + "Run16Long.h5", long_data);
 
     mapping.set_mapping(1, 0, 0, 0);
     mapping.set_mapping(1, 1, 0, 64);
@@ -58,44 +60,38 @@ protected:
 
   virtual void TearDown() {
   }
+
+  void store_hit(const Readout& readout)
+  {
+    uint8_t planeID = mapping.get_plane(readout.fec, readout.chip_id);
+    if (planeID == 1) {
+      sorter_y->store(readout.srs_timestamp, readout.frame_counter,
+                      readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
+                      readout.adc,
+                      readout.over_threshold);
+    } else {
+      sorter_x->store(readout.srs_timestamp, readout.frame_counter,
+                      readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
+                      readout.adc,
+                      readout.over_threshold);
+    }
+  }
 };
 
 // Test this without sorter!!!
 // Use presorted data that we understand
 
 TEST_F(NMXClustererTest, Run16_line_110168_110323) {
-  for (const auto& hit : Run16) {
-    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
-    if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    } else {
-      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    }
+  for (const auto& readout : Run16) {
+    store_hit(readout);
   }
   EXPECT_EQ(clusters_x->stats_cluster_count, 3);
   EXPECT_EQ(clusters_y->stats_cluster_count, 4);
 }
 
 TEST_F(NMXClustererTest, Run16_Long) {
-  for (const auto& hit : long_data.data) {
-    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
-    if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    } else {
-      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    }
+  for (const auto& readout : long_data) {
+    store_hit(readout);
   }
   EXPECT_EQ(clusters_x->stats_cluster_count, 10198);
   EXPECT_EQ(clusters_y->stats_cluster_count, 12432);
