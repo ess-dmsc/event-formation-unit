@@ -11,6 +11,7 @@ set(gdgem_SRC
     nmx/Cluster.cpp
     nmx/Event.cpp
     nmx/Eventlet.cpp
+    nmx/EventletFile.cpp
     nmx/Hists.cpp
     nmx/HistSerializer.cpp
     nmx/TrackSerializer.cpp
