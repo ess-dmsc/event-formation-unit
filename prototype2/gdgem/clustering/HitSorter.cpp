@@ -65,6 +65,12 @@ void HitSorter::store(int triggerTimestamp, unsigned int frameCounter,
   }
 }
 
+void HitSorter::flush() {
+  //flush both buffers in queue
+  analyze();
+  analyze();
+}
+
 void HitSorter::analyze() {
   hits.sort_and_correct();
   if (callback_)

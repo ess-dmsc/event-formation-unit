@@ -66,73 +66,61 @@ protected:
 
   virtual void TearDown() {
   }
+
+  void store_hit(const Hit& hit)
+  {
+    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
+    if (planeID == 1) {
+      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
+                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                      hit.adc,
+                      hit.over_threshold);
+    } else {
+      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
+                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
+                      hit.adc,
+                      hit.over_threshold);
+    }
+  }
 };
 
 // Test these without clusterer, with preclustered data in both dimensions
 
 TEST_F(NMXClustererTest, Run16_line_110168_110323) {
   for (const auto& hit : Run16) {
-    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
-    if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    } else {
-      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    }
+    store_hit(hit);
   }
-  EXPECT_EQ(clusters_x->stats_cluster_count, 3);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 4);
-//  matcher->match_end(clusters_x->clusters, clusters_y->clusters, true);
+  sorter_x->flush();
+  sorter_y->flush();
+  EXPECT_EQ(clusters_x->stats_cluster_count, 7);
+  EXPECT_EQ(clusters_y->stats_cluster_count, 11);
+  matcher->match_end(clusters_x->clusters, clusters_y->clusters, true);
 //  EXPECT_EQ(matcher->stats_cluster_count, 2);
-}
-
-TEST_F(NMXClustererTest, Run16_Long) {
-  for (const auto& hit : long_data.data) {
-    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
-    if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    } else {
-      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    }
-  }
-  EXPECT_EQ(clusters_x->stats_cluster_count, 10198);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 12432);
-//  matcher->match_end(clusters_x->clusters, clusters_y->clusters, true);
-//  EXPECT_EQ(matcher->stats_cluster_count, 10111);
 }
 
 TEST_F(NMXClustererTest, Run16_Long_identical) {
   for (const auto& hit : long_data.data) {
-    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
-    if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    }
+    store_hit(hit);
   }
-  EXPECT_EQ(clusters_x->stats_cluster_count, 12432);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 12432);
-//  matcher->match_end(clusters_x->clusters, clusters_y->clusters, true);
+  sorter_x->flush();
+  sorter_y->flush();
+  EXPECT_EQ(clusters_x->stats_cluster_count, 10203);
+  EXPECT_EQ(clusters_y->stats_cluster_count, 12444);
+  matcher->match_end(clusters_x->clusters, clusters_y->clusters, true);
 //  EXPECT_EQ(matcher->stats_cluster_count, 12432);
 }
 
-
+TEST_F(NMXClustererTest, Run16_Long) {
+  for (const auto& hit : long_data.data) {
+    store_hit(hit);
+  }
+  sorter_x->flush();
+  sorter_y->flush();
+  EXPECT_EQ(clusters_x->stats_cluster_count, 10203);
+  EXPECT_EQ(clusters_y->stats_cluster_count, 12444);
+//  matcher->match_end(clusters_x->clusters, clusters_y->clusters, true);
+//  EXPECT_EQ(matcher->stats_cluster_count, 10111);
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

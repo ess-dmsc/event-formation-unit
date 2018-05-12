@@ -41,8 +41,7 @@ struct Cluster {
 
   void merge(Cluster& other);
   double time_overlap(const Cluster& other) const;
-
-
+  bool time_touch(const Cluster& other) const;
 
   /** @brief analyzes particle track
    * @param weighted determine entry strip using weighted average

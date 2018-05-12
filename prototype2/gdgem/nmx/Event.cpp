@@ -25,35 +25,9 @@ void Event::merge(Cluster& cluster, uint8_t plane_id)
   }
 }
 
-void Event::analyze(bool weighted, int16_t max_timebins,
-                       int16_t max_timedif) {
-  XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu\n",
-         x.entries.size(), y.entries.size());
-  if (x.entries.size()) {
-    x.analyze(weighted, max_timebins, max_timedif);
-  }
-  if (y.entries.size()) {
-    y.analyze(weighted, max_timebins, max_timedif);
-  }
-  valid_ = x.entries.size() && y.entries.size();
-  if (valid_) {
-    time_start_ = std::min(x.time_start, y.time_start);
-  }
-}
-
-bool Event::time_overlap_thresh(const Cluster& other, double thresh) const
+bool Event::empty() const
 {
-  auto ovr = time_overlap(other);
-  return (((ovr / other.time_span()) + (ovr / time_span())) > thresh);
-}
-
-double Event::time_overlap(const Cluster& other) const
-{
-  auto latest_start = std::max(other.time_start, time_start());
-  auto earliest_end = std::min(other.time_end, time_end());
-  if (latest_start > earliest_end)
-    return 0;
-  return (earliest_end - latest_start);
+  return x.entries.empty() && y.entries.empty();
 }
 
 double Event::time_end() const
@@ -71,25 +45,55 @@ double Event::time_span() const
   return (time_end() - time_start());
 }
 
-bool Event::valid() const { return valid_; }
-
-bool Event::empty() const
+double Event::time_overlap(const Cluster& other) const
 {
-  return x.entries.empty() && y.entries.empty();
+  auto latest_start = std::max(other.time_start, time_start());
+  auto earliest_end = std::min(other.time_end, time_end());
+  if (latest_start > earliest_end)
+    return 0;
+  return (earliest_end - latest_start);
 }
 
-bool Event::meets_lower_cirterion(int16_t max_lu) const {
+bool Event::time_overlap_thresh(const Cluster& other, double thresh) const
+{
+  auto ovr = time_overlap(other);
+  return (((ovr / other.time_span()) + (ovr / time_span())) > thresh);
+}
+
+void Event::analyze(bool weighted, int16_t max_timebins,
+                    int16_t max_timedif) {
+  XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu\n",
+         x.entries.size(), y.entries.size());
+  if (x.entries.size()) {
+    x.analyze(weighted, max_timebins, max_timedif);
+  }
+  if (y.entries.size()) {
+    y.analyze(weighted, max_timebins, max_timedif);
+  }
+  valid_ = x.entries.size() && y.entries.size();
+  if (valid_) {
+    utpc_time_ = std::max(x.time_end, y.time_end);
+  }
+}
+
+bool Event::valid() const
+{
+  return valid_;
+}
+
+bool Event::meets_lower_cirterion(int16_t max_lu) const
+{
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }
 
-double Event::utpc_earliest() const
+double Event::utpc_time() const
 {
-  return time_start_;
+  return utpc_time_;
 }
 
 std::string Event::debug() const {
   std::stringstream ss;
-  ss << "Tstart=" << time_start_;
+  ss << "Tstart=" << utpc_time_;
   if (valid_)
     ss << "  GOOD\n";
   else

@@ -8,18 +8,22 @@
 #include <functional>
 
 #include <gdgem/clustering/TestDataShort.h>
-//#include <gdgem/clustering/TestDataLong.h>
 
 #define UNUSED __attribute__((unused))
 
 class HitsQueueTest : public TestBase {
 protected:
+  SRSHitIO long_data;
+
   // Maximum time difference between hits in time sorted cluster (x or y)
   double pMaxTimeGap = 200;
   std::shared_ptr<HitsQueue> queue;
   SRSTime srstime;
 
   virtual void SetUp() {
+    std::string DataPath = TEST_DATA_PATH;
+    long_data.read(DataPath + "Run16Long.h5");
+
     srstime.set_bc_clock(20);
     srstime.set_tac_slope(60);
     srstime.set_trigger_resolution(3.125);
@@ -61,6 +65,92 @@ TEST_F(HitsQueueTest, Run16_with_trigger) {
   queue->subsequent_trigger(true);
   queue->sort_and_correct();
   EXPECT_EQ(queue->hits().size(), 0);
+}
+
+// TODO: some checks disabled, this is not stricly chronological!!!
+
+TEST_F(HitsQueueTest, Run16_chronological_no_trigger) {
+  for (auto hit : Run16) {
+    auto chiptime = srstime.chip_time(hit.bcid, hit.tdc);
+    queue->store(0,0,chiptime);
+  }
+
+  double prevtime{0};
+
+  queue->sort_and_correct();
+  while(queue->hits().size()) {
+//    EXPECT_GE(queue->hits().front().time, prevtime);
+    prevtime = queue->hits().front().time;
+    for (const auto &e : queue->hits()) {
+      EXPECT_GE(e.time, prevtime);
+      prevtime = e.time;
+    }
+    queue->sort_and_correct();
+  };
+}
+
+TEST_F(HitsQueueTest, Run16_chronological_with_trigger) {
+  for (auto hit : Run16) {
+    auto chiptime = srstime.chip_time(hit.bcid, hit.tdc);
+    queue->store(0,0,chiptime);
+  }
+
+  double prevtime{0};
+
+  queue->subsequent_trigger(true);
+  queue->sort_and_correct();
+  while(queue->hits().size()) {
+//    EXPECT_GE(queue->hits().front().time, prevtime);
+    prevtime = queue->hits().front().time;
+    for (const auto &e : queue->hits()) {
+      EXPECT_GE(e.time, prevtime);
+      prevtime = e.time;
+    }
+    queue->subsequent_trigger(true);
+    queue->sort_and_correct();
+  };
+}
+
+TEST_F(HitsQueueTest, Long_chronological_no_trigger) {
+  for (auto hit : long_data.data) {
+    auto chiptime = srstime.chip_time(hit.bcid, hit.tdc);
+    queue->store(0,0,chiptime);
+  }
+
+  double prevtime{0};
+
+  queue->sort_and_correct();
+  while(queue->hits().size()) {
+//    EXPECT_GE(queue->hits().front().time, prevtime);
+    prevtime = queue->hits().front().time;
+    for (const auto &e : queue->hits()) {
+      EXPECT_GE(e.time, prevtime);
+      prevtime = e.time;
+    }
+    queue->sort_and_correct();
+  };
+}
+
+TEST_F(HitsQueueTest, Long_chronological_with_trigger) {
+  for (auto hit : long_data.data) {
+    auto chiptime = srstime.chip_time(hit.bcid, hit.tdc);
+    queue->store(0,0,chiptime);
+  }
+
+  double prevtime{0};
+
+  queue->subsequent_trigger(true);
+  queue->sort_and_correct();
+  while(queue->hits().size()) {
+    EXPECT_GE(queue->hits().front().time, prevtime);
+    prevtime = queue->hits().front().time;
+    for (const auto &e : queue->hits()) {
+      EXPECT_GE(e.time, prevtime);
+      prevtime = e.time;
+    }
+    queue->subsequent_trigger(true);
+    queue->sort_and_correct();
+  };
 }
 
 int main(int argc, char **argv) {

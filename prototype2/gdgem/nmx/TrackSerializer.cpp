@@ -32,7 +32,7 @@ int TrackSerializer::add_track(const Event &event) {
     return 1;
   }
 
-  time_offset = event.utpc_earliest();
+  time_offset = event.utpc_time();
 
   for (auto &evx : event.x.entries) {
     xtrack.push_back(

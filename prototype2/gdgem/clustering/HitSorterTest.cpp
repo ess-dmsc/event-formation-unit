@@ -11,6 +11,20 @@
 
 #define UNUSED __attribute__((unused))
 
+class MockClusterer : public AbstractClusterer {
+public:
+  MockClusterer() {}
+  virtual ~MockClusterer() {}
+
+  void cluster(const HitContainer &hits) override
+  {
+    all_hits.insert(all_hits.end(), hits.begin(), hits.end());
+  }
+
+  HitContainer all_hits;
+};
+
+
 class NMXClustererTest : public TestBase {
 protected:
   SRSHitIO long_data;
@@ -20,6 +34,8 @@ protected:
 
   SRSMappings mapping;
 
+  std::shared_ptr<MockClusterer> mock_x;
+  std::shared_ptr<MockClusterer> mock_y;
   std::shared_ptr<HitSorter> sorter_x;
   std::shared_ptr<HitSorter> sorter_y;
 
@@ -43,19 +59,17 @@ protected:
     srstime.set_trigger_resolution(3.125);
     srstime.set_acquisition_window(4000);
 
-    sorter_x = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, nullptr);
-    sorter_y = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, nullptr);
+    mock_x = std::make_shared<MockClusterer>();
+    mock_y = std::make_shared<MockClusterer>();
+    sorter_x = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, mock_x);
+    sorter_y = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, mock_y);
   }
 
   virtual void TearDown() {
   }
-};
 
-TEST_F(NMXClustererTest, BcidTdcError) {
-  EXPECT_EQ(0, sorter_x->stats_bcid_tdc_error);
-  EXPECT_EQ(0, sorter_y->stats_bcid_tdc_error);
-
-  for (const auto& hit : err_bcid_tdc_error) {
+  void store_hit(const Hit& hit)
+  {
     uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
     if (planeID == 1) {
       sorter_y->store(hit.srs_timestamp, hit.frame_counter,
@@ -68,6 +82,15 @@ TEST_F(NMXClustererTest, BcidTdcError) {
                       hit.adc,
                       hit.over_threshold);
     }
+  }
+};
+
+TEST_F(NMXClustererTest, BcidTdcError) {
+  EXPECT_EQ(0, sorter_x->stats_bcid_tdc_error);
+  EXPECT_EQ(0, sorter_y->stats_bcid_tdc_error);
+
+  for (const auto& hit : err_bcid_tdc_error) {
+    store_hit(hit);
   }
   // Two in X and Two in Y
   EXPECT_EQ(2, sorter_x->stats_bcid_tdc_error);
@@ -81,18 +104,7 @@ TEST_F(NMXClustererTest, FrameCounterError) {
   EXPECT_EQ(0, sorter_y->stats_fc_error);
 
   for (const auto& hit : err_fc_error) {
-    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
-    if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    } else {
-      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    }
+    store_hit(hit);
   }
   EXPECT_EQ(1, sorter_x->stats_fc_error);
   EXPECT_EQ(0, sorter_y->stats_fc_error);
@@ -105,18 +117,7 @@ TEST_F(NMXClustererTest, TriggerTimeWraps) {
   EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
 
   for (const auto& hit : err_triggertime_error) {
-    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
-    if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    } else {
-      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    }
+    store_hit(hit);
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(1, sorter_y->stats_triggertime_wraps);
@@ -127,18 +128,7 @@ TEST_F(NMXClustererTest, TriggerTimeWraps) {
 
 TEST_F(NMXClustererTest, Run16_line_110168_110323) {
   for (const auto& hit : Run16) {
-    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
-    if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    } else {
-      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    }
+    store_hit(hit);
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
@@ -153,18 +143,7 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
 
 TEST_F(NMXClustererTest, Run16_Long) {
   for (const auto& hit : long_data.data) {
-    uint8_t planeID = mapping.get_plane(hit.fec, hit.chip_id);
-    if (planeID == 1) {
-      sorter_y->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    } else {
-      sorter_x->store(hit.srs_timestamp, hit.frame_counter,
-                      hit.fec, hit.chip_id, hit.channel, hit.bcid, hit.tdc,
-                      hit.adc,
-                      hit.over_threshold);
-    }
+    store_hit(hit);
   }
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
@@ -178,8 +157,57 @@ TEST_F(NMXClustererTest, Run16_Long) {
   EXPECT_EQ(1540, sorter_y->stats_trigger_count);
 }
 
-// Make some tests using a mock clusterer
+TEST_F(NMXClustererTest, Mock_short_chrono) {
+  for (const auto& hit : Run16) {
+    store_hit(hit);
+  }
 
+  double prevtime = mock_x->all_hits.front().time;
+  for (const auto &e : mock_x->all_hits) {
+    EXPECT_GE(e.time, prevtime);
+    prevtime = e.time;
+  }
+
+  prevtime = mock_y->all_hits.front().time;
+  for (const auto &e : mock_y->all_hits) {
+    EXPECT_GE(e.time, prevtime);
+    prevtime = e.time;
+  }
+
+  // flush, but must it be with trigger?
+  sorter_x->flush();
+  sorter_y->flush();
+
+  EXPECT_EQ(55, mock_x->all_hits.size());
+  EXPECT_EQ(101, mock_y->all_hits.size());
+  EXPECT_EQ(Run16.size(), (mock_x->all_hits.size() + mock_y->all_hits.size()));
+}
+
+TEST_F(NMXClustererTest, Mock_long_chrono) {
+  for (const auto& hit : long_data.data) {
+    store_hit(hit);
+  }
+
+//  double prevtime = mock_x->all_hits.front().time;
+//  for (const auto &e : mock_x->all_hits) {
+//    EXPECT_GE(e.time, prevtime);
+//    prevtime = e.time;
+//  }
+//
+//  prevtime = mock_y->all_hits.front().time;
+//  for (const auto &e : mock_y->all_hits) {
+//    EXPECT_GE(e.time, prevtime);
+//    prevtime = e.time;
+//  }
+
+  // flush, but must it be with trigger?
+  sorter_x->flush();
+  sorter_y->flush();
+
+  EXPECT_EQ(84168, mock_x->all_hits.size());
+  EXPECT_EQ(115827, mock_y->all_hits.size());
+  EXPECT_EQ(long_data.data.size(), (mock_x->all_hits.size() + mock_y->all_hits.size()));
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

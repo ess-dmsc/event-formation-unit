@@ -23,11 +23,7 @@ public:
 
   void merge(Cluster& cluster, uint8_t plane_id);
 
-
   bool empty() const;
-
-  // @brief indicates if entry strips were determined in for both planes
-  bool valid() const;
 
 
   double time_end() const;
@@ -35,6 +31,7 @@ public:
   double time_span() const;
   double time_overlap(const Cluster& other) const;
   bool time_overlap_thresh(const Cluster& other, double thresh) const;
+
 
   /** @brief analyzes particle track
    * @param weighted determine entry strip using weighted average
@@ -45,12 +42,15 @@ public:
    */
   void analyze(bool weighted, int16_t max_timebins, int16_t max_timedif);
 
+  // @brief indicates if entry strips were determined in for both planes
+  bool valid() const;
 
   // @brief returns timestamp for start of event (earlier of 2 planes)
-  double utpc_earliest() const;
+  double utpc_time() const;
 
   // @brief indicates if both dimensions meet lower uncertainty criterion
   bool meets_lower_cirterion(int16_t max_lu) const;
+
 
 
   // @brief prints values for debug purposes
@@ -59,5 +59,5 @@ public:
 
 private:
   bool valid_{false};      // event has valid entry strips in both planes
-  double time_start_{0}; // start of event timestamp (earlier of 2 planes)
+  double utpc_time_{0}; // start of event timestamp (earlier of 2 planes)
 };

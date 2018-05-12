@@ -15,6 +15,8 @@ public:
              int vmmID, int chNo, int bcid, int tdc, int adc,
              int overThresholdFlag);
 
+  void flush();
+
 private:
   // These are in play for triggering the actual clustering
   double oldTriggerTimestamp_ns {0};

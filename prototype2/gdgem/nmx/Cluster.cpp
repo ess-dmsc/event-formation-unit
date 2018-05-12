@@ -26,30 +26,26 @@ void Cluster::insert_eventlet(const Eventlet &e) {
   strip_end = std::max(strip_end, e.strip);
 }
 
-double Cluster::time_span() const
-{
+double Cluster::time_span() const {
   return time_end - time_start;
 }
 
-uint16_t Cluster::strip_span() const
-{
+uint16_t Cluster::strip_span() const {
   if (!entries.size())
     return 0;
   return (strip_end - strip_start) + 1u;
 }
 
-double Cluster::strip_center() const
-{
+double Cluster::strip_center() const {
   return strip_mass / adc_sum;
 }
 
-double Cluster::time_center() const
-{
+double Cluster::time_center() const {
   return time_mass / adc_sum;
 }
 
 void Cluster::analyze(bool weighted, uint16_t max_timebins,
-                       uint16_t max_timedif) {
+                      uint16_t max_timedif) {
   if (entries.empty())
     return;
   double center_sum{0};
@@ -93,9 +89,16 @@ int16_t Cluster::utpc_center_rounded() const {
   return static_cast<int16_t>(std::round(utpc_center));
 }
 
-void Cluster::merge(Cluster& other)
-{
-  // merge instead?
+void Cluster::merge(Cluster &other) {
+  if (other.entries.empty())
+    return;
+
+  if (entries.empty()) {
+    *this = std::move(other);
+    return;
+  }
+
+  // merge rather than splice?
   entries.splice(entries.end(), other.entries);
   adc_sum += other.adc_sum;
   strip_mass += other.strip_mass;
@@ -106,13 +109,23 @@ void Cluster::merge(Cluster& other)
   strip_end = std::max(strip_end, other.strip_end);
 }
 
-double Cluster::time_overlap(const Cluster& other) const
-{
+double Cluster::time_overlap(const Cluster &other) const {
   auto latest_start = std::max(other.time_start, time_start);
   auto earliest_end = std::min(other.time_end, time_end);
   if (latest_start > earliest_end)
     return 0;
   return (earliest_end - latest_start);
+}
+
+bool Cluster::time_touch(const Cluster &other) const {
+  if ((other.time_start == other.time_end) &&
+      (time_start < other.time_end) && (other.time_end < time_end))
+    return true;
+  if ((time_start == time_end) &&
+      (other.time_start < time_end) && (time_end < other.time_end))
+    return true;
+  return ((time_start == other.time_end) ||
+      (time_end == other.time_start));
 }
 
 std::string Cluster::debug() const {

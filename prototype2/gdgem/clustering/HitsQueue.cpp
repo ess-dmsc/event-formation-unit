@@ -41,8 +41,14 @@ void HitsQueue::sort_and_correct() {
   correct_trigger_data();
 
   hitsOut = std::move(hitsOld);
-
   hitsOld = std::move(hitsNew);
+
+  std::sort(hitsOut.begin(), hitsOut.end(),
+            [](const Eventlet &e1, const Eventlet &e2) {
+              return e1.time < e2.time;
+            });
+
+
   if (!hitsNew.empty()) {
     hitsNew.clear();
   }

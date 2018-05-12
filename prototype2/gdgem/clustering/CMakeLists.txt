@@ -45,6 +45,8 @@ set(HitsQueueTest_SRC
 set(HitsQueueTest_INC
     ${ClusteringBase_INC})
 create_test_executable(HitsQueueTest SKIP_MEMGRIND)
+target_compile_definitions(HitsQueueTest
+    PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
 set(HitSorterTest_SRC
     ${ClusteringBase_SRC}

@@ -8,67 +8,119 @@
 
 class EventTest : public TestBase {
 protected:
+  Eventlet e;
   Event event;
   virtual void SetUp() {  }
   virtual void TearDown() {  }
 };
 
 TEST_F(EventTest, Insert) {
-  Eventlet e1;
-  e1.adc = 1;
-  event.insert_eventlet(e1);
-  ASSERT_EQ(event.x.entries.size(), 1);
-  e1.plane_id = 1;
-  event.insert_eventlet(e1);
-  ASSERT_EQ(event.y.entries.size(), 1);
+  event.insert_eventlet(e);
+  EXPECT_EQ(event.x.entries.size(), 1);
+  e.plane_id = 1;
+  event.insert_eventlet(e);
+  EXPECT_EQ(event.y.entries.size(), 1);
 }
 
+TEST_F(EventTest, Empty) {
+  EXPECT_TRUE(event.empty());
+  event.insert_eventlet(e);
+  EXPECT_FALSE(event.empty());
+}
+
+TEST_F(EventTest, Merge) {
+  Cluster x;
+
+  x.insert_eventlet(e);
+  x.insert_eventlet(e);
+  event.merge(x, 0);
+  EXPECT_FALSE(event.empty());
+  EXPECT_EQ(x.entries.size(), 0);
+  EXPECT_EQ(event.x.entries.size(), 2);
+}
+
+TEST_F(EventTest, MergeTwice) {
+  Cluster x;
+
+  x.insert_eventlet(e);
+  x.insert_eventlet(e);
+  event.merge(x, 0);
+  EXPECT_EQ(event.x.entries.size(), 2);
+
+  x.insert_eventlet(e);
+  x.insert_eventlet(e);
+  x.insert_eventlet(e);
+  event.merge(x, 0);
+  EXPECT_EQ(event.x.entries.size(), 5);
+}
+
+TEST_F(EventTest, MergeXY) {
+  Cluster x, y;
+
+  x.insert_eventlet(e);
+  x.insert_eventlet(e);
+  event.merge(x, 0);
+
+  y.insert_eventlet(e);
+  y.insert_eventlet(e);
+  y.insert_eventlet(e);
+  event.merge(y, 1);
+  EXPECT_EQ(event.x.entries.size(), 2);
+  EXPECT_EQ(event.y.entries.size(), 3);
+}
+
+TEST_F(EventTest, TimeSpan) {
+  Cluster x, y;
+
+  e.time = 3; x.insert_eventlet(e);
+  e.time = 7; x.insert_eventlet(e);
+  event.merge(x, 0);
+
+  e.time = 5; y.insert_eventlet(e);
+  e.time = 1; y.insert_eventlet(e);
+  event.merge(y, 1);
+  EXPECT_EQ(event.time_end(), 7);
+  EXPECT_EQ(event.time_start(), 1);
+  EXPECT_EQ(event.time_span(), 6);
+}
+
+
 TEST_F(EventTest, AnalyzeBadY) {
-  Eventlet e1;
-  e1.adc = 1;
-  event.insert_eventlet(e1);
+  event.insert_eventlet(e);
   event.analyze(true, 5, 5);
-  ASSERT_FALSE(event.valid());
+  EXPECT_FALSE(event.valid());
 }
 
 TEST_F(EventTest, AnalyzeBadX) {
-  Eventlet e1;
-  e1.adc = 1;
-  e1.plane_id = 1;
-  event.insert_eventlet(e1);
+  e.plane_id = 1;
+  event.insert_eventlet(e);
   event.analyze(true, 5, 5);
-  ASSERT_FALSE(event.valid());
+  EXPECT_FALSE(event.valid());
 }
 
 TEST_F(EventTest, AnalyzeGood) {
-  Eventlet e1;
-  e1.adc = 1;
-  event.insert_eventlet(e1);
-  e1.plane_id = 1;
-  event.insert_eventlet(e1);
+  event.insert_eventlet(e);
+  e.plane_id = 1;
+  event.insert_eventlet(e);
   event.analyze(true, 5, 5);
-  ASSERT_TRUE(event.valid());
+  EXPECT_TRUE(event.valid());
 }
 
 TEST_F(EventTest, InsertInvalid) {
-  Eventlet e1;
-  e1.adc = 1;
-  e1.plane_id = 0;
-  event.insert_eventlet(e1);
-  e1.plane_id = 1;
-  event.insert_eventlet(e1);
-  e1.plane_id = 2;
-  event.insert_eventlet(e1);
-  ASSERT_EQ(2, event.x.entries.size() + event.y.entries.size());
+  e.plane_id = 0;
+  event.insert_eventlet(e);
+  e.plane_id = 1;
+  event.insert_eventlet(e);
+  e.plane_id = 2;
+  event.insert_eventlet(e);
+  EXPECT_EQ(2, event.x.entries.size() + event.y.entries.size());
 }
 
 TEST_F(EventTest, DebugPrint) {
   MESSAGE() << "This is not a test, just calling debug print function\n";
-  Eventlet e1;
-  e1.adc = 1;
-  event.insert_eventlet(e1);
-  e1.plane_id = 1;
-  event.insert_eventlet(e1);
+  event.insert_eventlet(e);
+  e.plane_id = 1;
+  event.insert_eventlet(e);
   event.analyze(true, 5, 5);
   auto debugstr = event.debug();
   MESSAGE() << debugstr << "\n";
