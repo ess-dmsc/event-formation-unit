@@ -7,7 +7,6 @@ set(gdgem_SRC
     gdgem.cpp
     NMXConfig.cpp
     nmx/ReadoutFile.cpp
-    nmx/Clusterer.cpp
     nmx/Cluster.cpp
     nmx/Event.cpp
     nmx/Eventlet.cpp
@@ -18,6 +17,10 @@ set(gdgem_SRC
     nmx/AbstractBuilder.cpp
     generators/BuilderAPV.cpp
     generators/BuilderEventlets.cpp
+    clustering/HitsQueue.cpp
+    clustering/HitSorter.cpp
+    clustering/ClusterMatcher.cpp
+    clustering/Clusterer1.cpp
     srs/SRSMappings.cpp
     srs/SRSTime.cpp
     vmm2/ParserVMM2.cpp
@@ -25,7 +28,6 @@ set(gdgem_SRC
     )
 set(gdgem_INC
     NMXConfig.h
-    nmx/Clusterer.h
     nmx/Cluster.h
     nmx/Event.h
     nmx/Eventlet.h
@@ -37,6 +39,12 @@ set(gdgem_INC
     nmx/AbstractBuilder.h
     generators/BuilderAPV.h
     generators/BuilderEventlets.h
+    clustering/HitsQueue.h
+    clustering/HitSorter.h
+    clustering/ClusterMatcher.h
+    clustering/Clusterer1.h
+    clustering/HitContainer.h
+    clustering/AbstractClusterer.h
     srs/SRSMappings.h
     srs/SRSTime.h
     vmm2/ParserVMM2.h

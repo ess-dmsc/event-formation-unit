@@ -19,8 +19,7 @@ BuilderAPV::BuilderAPV(std::string dump_dir, bool dump_csv, bool dump_h5)
 }
 
 AbstractBuilder::ResultStats BuilderAPV::process_buffer(char *buf, size_t size,
-                                                       Clusterer &clusterer,
-                                                       NMXHists &hists) {
+                                                        NMXHists &hists) {
   size_t count = std::min(size / psize, size_t(9000 / psize));
   converted_data.resize(count);
   for (size_t i = 0; i < count; ++i) {
@@ -29,15 +28,27 @@ AbstractBuilder::ResultStats BuilderAPV::process_buffer(char *buf, size_t size,
     buf += psize;
   }
 
+  std::vector<Eventlet> converted_x;
+  std::vector<Eventlet> converted_y;
+
   for (const auto& e : converted_data) {
+    // TODO: make this optional
     hists.bin(e);
-    clusterer.insert(e);
+    if (e.plane_id)
+      converted_y.push_back(e);
+    else
+      converted_x.push_back(e);
   }
 
   if (dump_h5_) {
     eventlet_file_->data = std::move(converted_data);
     eventlet_file_->write();
   }
+
+  if (clusterer_x)
+    clusterer_x->cluster(converted_x);
+  if (clusterer_y)
+    clusterer_y->cluster(converted_y);
 
   return AbstractBuilder::ResultStats(count, 0, 0);
 }

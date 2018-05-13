@@ -19,16 +19,22 @@ BuilderEventlets::BuilderEventlets(std::string dump_dir, bool dump_csv, bool dum
 }
 
 AbstractBuilder::ResultStats BuilderEventlets::process_buffer(char *buf, size_t size,
-                                                       Clusterer &clusterer,
                                                        NMXHists &hists) {
   size_t count = std::min(size / psize, size_t(9000 / psize));
 
   converted_data.resize(count);
   memcpy(converted_data.data(), buf, count*psize);
 
+  std::vector<Eventlet> converted_x;
+  std::vector<Eventlet> converted_y;
+
   for (const auto& e : converted_data) {
+    // TODO: make this optional
     hists.bin(e);
-    clusterer.insert(e);
+    if (e.plane_id)
+      converted_y.push_back(e);
+    else
+      converted_x.push_back(e);
     if (dump_csv_)
       vmmsave->tofile("%" PRIu64 ", %u, %u, %u, %u\n", e.time, e.plane_id,
                       e.strip, e.adc, e.over_threshold);
@@ -38,6 +44,11 @@ AbstractBuilder::ResultStats BuilderEventlets::process_buffer(char *buf, size_t 
     eventlet_file_->data = std::move(converted_data);
     eventlet_file_->write();
   }
+
+  if (clusterer_x)
+    clusterer_x->cluster(converted_x);
+  if (clusterer_y)
+    clusterer_y->cluster(converted_y);
 
   return AbstractBuilder::ResultStats(count, 0, 0);
 }

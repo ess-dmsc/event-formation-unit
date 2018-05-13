@@ -264,7 +264,7 @@ TEST_F(NMXClustererTest, Run16_Long_identical) {
   EXPECT_EQ(matcher->unmatched_clusters.size(), 40556);
 
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 17504);
+  EXPECT_EQ(matcher->stats_cluster_count, 14974);
   //may be separated in time but remerged here
 }
 

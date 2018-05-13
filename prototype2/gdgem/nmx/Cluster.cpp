@@ -51,6 +51,11 @@ void Cluster::analyze(bool weighted, uint16_t max_timebins,
                       uint16_t max_timedif) {
   if (entries.empty())
     return;
+
+  entries.sort([](const Eventlet &c1, const Eventlet &c2) {
+    return c1.time < c2.time;
+  });
+
   double center_sum{0};
   double center_count{0};
   int16_t lspan_min = std::numeric_limits<int16_t>::max();

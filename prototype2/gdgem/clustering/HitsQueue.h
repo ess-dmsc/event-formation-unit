@@ -6,7 +6,7 @@
 class HitsQueue {
 public:
   HitsQueue(SRSTime Time, double maxTimeGap);
-  void store(uint16_t strip, uint16_t adc, double chipTime);
+  void store(uint8_t plane, uint16_t strip, uint16_t adc, double chipTime);
   void sort_and_correct();
   void subsequent_trigger(bool);
 

@@ -14,7 +14,7 @@ protected:
 
 TEST_F(BuilderAPVTest, Process) {
   NMXHists hists;
-  Clusterer clusterer(30);
+//  Clusterer clusterer(30);
   // char data[9000];
 
   // auto num1 = builder->process_buffer(data, 16, clusterer, hists);

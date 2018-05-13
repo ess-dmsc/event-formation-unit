@@ -1,10 +1,12 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
 #include <logical_geometry/ESSGeometry.h>
-#include <gdgem/nmx/Clusterer.h>
 #include <gdgem/nmx/Hists.h>
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
+
+#include <gdgem/clustering/Clusterer1.h>
+#include <gdgem/clustering/ClusterMatcher.h>
 
 #include <gdgem/vmm2/EventFormationTestData.h>
 #include <gdgem/vmm2/BuilderVMM2.h>
@@ -18,6 +20,9 @@ protected:
   SRSTime time_intepreter;
   SRSMappings geometry_interpreter;
 
+  std::shared_ptr<Clusterer1> cx;
+  std::shared_ptr<Clusterer1> cy;
+
   virtual void SetUp() {
     time_intepreter.set_bc_clock(20.0);
     time_intepreter.set_tac_slope(60.0);
@@ -27,14 +32,18 @@ protected:
 
     geometry_interpreter.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
     geometry_interpreter.define_plane(1, {{1, 10}, {1, 11}, {1, 14}, {1, 15}});
+
+    cx = std::make_shared<Clusterer1>(200, 3, 3);
+    cy = std::make_shared<Clusterer1>(200, 3, 3);
   }
   virtual void TearDown() {}
 };
 
 TEST_F(EventFormationTest, Initial) {
-  Clusterer clusterer(20000); // cluster_min_timespan
+  ClusterMatcher matcher(10);
 
-  auto builder = std::make_shared<BuilderVMM2>(time_intepreter, geometry_interpreter, "", 0, 0);
+  auto builder = std::make_shared<BuilderVMM2>(time_intepreter, geometry_interpreter,
+      cx, cy, "", 0, 0);
 
   uint64_t readouts = 0;
   uint64_t readouts_error_bytes = 0;
@@ -45,13 +54,20 @@ TEST_F(EventFormationTest, Initial) {
   uint64_t clusters_discarded = 0;
 
   for (auto pkt : Run16_1_to_16) {
-    auto stats = builder->process_buffer((char *)&pkt[0], pkt.size(), clusterer, hists);
+    auto stats = builder->process_buffer((char *)&pkt[0], pkt.size(), hists);
     readouts += stats.valid_eventlets;
     readouts_error_bytes += stats.error_bytes; // From srs data parser
 
-    while (clusterer.event_ready()) {
+    matcher.merge(builder->clusterer_x->clusters);
+    matcher.merge(builder->clusterer_y->clusters);
+    matcher.match_end(false);
+
+
+    while (!matcher.matched_clusters.empty()) {
       //XTRACE(PROCESS, DEB, "event_ready()\n");
-      event = clusterer.get_event();
+      event = matcher.matched_clusters.front();
+      matcher.matched_clusters.pop_front();
+
       hists.bin(event);
       event.analyze(true /*analyze_weighted*/, 3 /*analyze_max_timebins */, 7 /*analyze_max_timedif*/);
       if (event.valid()) {

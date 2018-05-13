@@ -17,6 +17,15 @@ AbstractBuilder::AbstractBuilder(std::string __attribute__((unused)) dump_dir,
   }
 }
 
+AbstractBuilder::AbstractBuilder(std::shared_ptr<AbstractClusterer> x,
+                                 std::shared_ptr<AbstractClusterer> y,
+                                 std::string dump_dir, bool dump_csv, bool dump_h5) :
+    AbstractBuilder(dump_dir, dump_csv, dump_h5) {
+  clusterer_x = x;
+  clusterer_y = y;
+}
+
+
 std::string AbstractBuilder::time_str() {
   char cStartTime[50];
   time_t rawtime;

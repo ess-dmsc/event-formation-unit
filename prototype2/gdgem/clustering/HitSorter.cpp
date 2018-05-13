@@ -61,7 +61,7 @@ void HitSorter::store(int triggerTimestamp, unsigned int frameCounter,
 
   // Store hit to appropriate buffer
   if (overThresholdFlag || (adc >= pADCThreshold)) {
-    hits.store(strip, adc, chipTime);
+    hits.store(pChips.get_plane(fecID, vmmID), strip, adc, chipTime);
   }
 }
 

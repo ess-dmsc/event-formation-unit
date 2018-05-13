@@ -12,16 +12,18 @@ const HitContainer &HitsQueue::hits() const {
   return hitsOut;
 }
 
-void HitsQueue::store(uint16_t strip, uint16_t adc, double chipTime) {
+void HitsQueue::store(uint8_t plane, uint16_t strip, uint16_t adc, double chipTime) {
   if (chipTime < pTime.max_chip_time_in_window()) {
     hitsNew.emplace_back(Eventlet());
     auto &e = hitsNew[hitsNew.size() - 1];
+    e.plane_id = plane;
     e.adc = adc;
     e.strip = strip;
     e.time = chipTime;
   } else {
     hitsOld.emplace_back(Eventlet());
     auto &e = hitsOld[hitsOld.size() - 1];
+    e.plane_id = plane;
     e.adc = adc;
     e.strip = strip;
     e.time = chipTime;
@@ -96,6 +98,7 @@ void HitsQueue::correct_trigger_data() {
 
     hitsOld.emplace_back(Eventlet());
     auto &e = hitsNew[hitsNew.size() - 1];
+    e.plane_id = itFind->plane_id;
     e.adc = itFind->adc;
     e.strip = itFind->strip;
     e.time = timeNext;

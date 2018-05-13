@@ -7,9 +7,9 @@
 
 #pragma once
 
-#include <gdgem/nmx/Clusterer.h>
 #include <gdgem/nmx/Hists.h>
 #include <common/DataSave.h>
+#include <gdgem/clustering/AbstractClusterer.h>
 #include <memory>
 
 class AbstractBuilder {
@@ -26,11 +26,19 @@ public:
 
   AbstractBuilder(std::string dump_dir, bool dump_csv, bool dump_h5);
 
+  AbstractBuilder(std::shared_ptr<AbstractClusterer> x,
+                  std::shared_ptr<AbstractClusterer> y,
+                  std::string dump_dir, bool dump_csv, bool dump_h5);
+
+
   virtual ~AbstractBuilder() {}
 
   /** @todo Martin document */
   virtual ResultStats process_buffer(char *buf, size_t size,
-                                     Clusterer &clusterer, NMXHists &hists) = 0;
+                                     NMXHists &hists) = 0;
+
+  std::shared_ptr<AbstractClusterer> clusterer_y;
+  std::shared_ptr<AbstractClusterer> clusterer_x;
 
 protected:
   bool dump_csv_{false};

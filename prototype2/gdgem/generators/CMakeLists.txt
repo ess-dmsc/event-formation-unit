@@ -19,7 +19,6 @@ set(BuilderAPVTest_SRC
     ../nmx/EventletFile.cpp
     ../nmx/Event.cpp
     ../nmx/Cluster.cpp
-    ../nmx/Clusterer.cpp
     ../nmx/Hists.cpp
     ../nmx/AbstractBuilder.cpp
     BuilderAPVTest.cpp
@@ -27,14 +26,13 @@ set(BuilderAPVTest_SRC
     )
 set(BuilderAPVTest_INC
     ../nmx/EventletFile.h
-    ../nmx/Clusterer.h
     ../nmx/Cluster.h
     ../nmx/Event.h
     ../nmx/Eventlet.h
     ../nmx/Hists.h
     BuilderAPV.h
     )
-create_test_executable(BuilderAPVTest)
+#create_test_executable(BuilderAPVTest)
 
 #=============================================================================
 # Raw evenlet generator (h5)
