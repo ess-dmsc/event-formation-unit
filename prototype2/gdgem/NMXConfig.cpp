@@ -66,9 +66,12 @@ NMXConfig::NMXConfig(std::string jsonfile) {
   filter.minimum_eventlets = f["minimum_eventlets"].asInt();
 
 
+  eventlet_histograms = root["eventlet_histograms"].asBool();
   track_sample_minhits = root["track_sample_minhits"].asInt();
   cluster_adc_downshift = root["cluster_adc_downshift"].asInt();
+  send_tracks = root["send_tracks"].asBool();
 
+  // TODO deduce geometry from SRS mappings?
   geometry.nx(root["geometry_x"].asInt());
   geometry.ny(root["geometry_y"].asInt());
   geometry.nz(1);
@@ -81,10 +84,14 @@ NMXConfig::NMXConfig(std::string jsonfile) {
 
 std::string NMXConfig::debug() const {
   std::stringstream ss;
-  ss << "  builder_type = " << builder_type << "\n";
-  if (builder_type == "SRS") {
+  ss << "  =====================================\n";
+  ss << "  =====     builder:  "
+     << builder_type
+     << "     =====\n";
+  ss << "  =====================================\n";
+  if ((builder_type == "VMM2") || (builder_type == "VMM3")) {
     ss << "  time = " << time_config.debug() << "\n";
-    ss << "  mappings:\n" << srs_mappings.debug();
+    ss << "  Chip geometry:\n" << srs_mappings.debug();
   }
 
   ss << "  Clusterer-X:\n";
@@ -116,8 +123,10 @@ std::string NMXConfig::debug() const {
   if (filter.enforce_minimum_eventlets)
     ss << "    minimum_eventlets = " << filter.minimum_eventlets << "\n";
 
-  ss << "  track_sample_minhits = " << track_sample_minhits << "\n";
+  ss << "  eventlet_histograms = " << (eventlet_histograms ? "YES" : "no") << "\n";
   ss << "  cluster_adc_downshift = " << cluster_adc_downshift << "\n";
+  ss << "  track_sample_minhits = " << track_sample_minhits << "\n";
+  ss << "  send_tracks = " << (send_tracks ? "YES" : "no") << "\n";
 
   ss << "  geometry_x = " << geometry.nx() << "\n";
   ss << "  geometry_y = " << geometry.ny() << "\n";

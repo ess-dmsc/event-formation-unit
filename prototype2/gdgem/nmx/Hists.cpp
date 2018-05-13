@@ -46,6 +46,13 @@ void NMXHists::clear() {
   cluster_count_ = 0;
 }
 
+void NMXHists::bin_hists(const std::list<Cluster>& cl)
+{
+  for (const auto& cluster : cl)
+    for (const auto& e : cluster.entries)
+      bin(e);
+}
+
 void NMXHists::bin(const Eventlet &e) {
   if (e.plane_id == 0) {
     x_strips_hist[e.strip]++;

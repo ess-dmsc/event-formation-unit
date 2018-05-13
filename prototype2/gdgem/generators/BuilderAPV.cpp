@@ -18,8 +18,7 @@ BuilderAPV::BuilderAPV(std::string dump_dir, bool dump_csv, bool dump_h5)
   }
 }
 
-AbstractBuilder::ResultStats BuilderAPV::process_buffer(char *buf, size_t size,
-                                                        NMXHists &hists) {
+AbstractBuilder::ResultStats BuilderAPV::process_buffer(char *buf, size_t size) {
   size_t count = std::min(size / psize, size_t(9000 / psize));
   converted_data.resize(count);
   for (size_t i = 0; i < count; ++i) {
@@ -32,8 +31,6 @@ AbstractBuilder::ResultStats BuilderAPV::process_buffer(char *buf, size_t size,
   std::vector<Eventlet> converted_y;
 
   for (const auto& e : converted_data) {
-    // TODO: make this optional
-    hists.bin(e);
     if (e.plane_id)
       converted_y.push_back(e);
     else

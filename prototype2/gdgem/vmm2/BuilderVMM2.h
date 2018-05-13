@@ -29,8 +29,7 @@ public:
   ~BuilderVMM2() { XTRACE(INIT, DEB, "BuilderVMM2 destructor called\n"); }
 
   /** @todo Martin document */
-  ResultStats process_buffer(char *buf, size_t size,
-                             NMXHists &hists) override;
+  ResultStats process_buffer(char *buf, size_t size) override;
 
 private:
   NMXVMM2SRSData parser_;
@@ -40,4 +39,9 @@ private:
   HitSorter sorter_x, sorter_y;
 
   std::shared_ptr<ReadoutFile> readout_file_;
+
+  // preallocated and reused
+  Readout readout;
+  uint8_t plane;
+  uint32_t geom_errors;
 };

@@ -227,14 +227,18 @@ void NMX::processing_thread() {
         mystats.fifo_seq_errors++;
       } else {
         // printf("received packet with length %d\n", len);
-        auto stats = builder_->process_buffer(eth_ringbuf->getDataBuffer(data_index), len, hists);
+        auto stats = builder_->process_buffer(eth_ringbuf->getDataBuffer(data_index), len);
 
         mystats.readouts += stats.valid_eventlets;
         mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
 
+        if (nmx_opts.eventlet_histograms) {
+          hists.bin_hists(builder_->clusterer_x->clusters);
+          hists.bin_hists(builder_->clusterer_y->clusters);
+        }
+
         if (builder_->clusterer_x->clusters.size() &&
-            builder_->clusterer_y->clusters.size())
-        {
+            builder_->clusterer_y->clusters.size()) {
           matcher.merge(builder_->clusterer_x->clusters);
           matcher.merge(builder_->clusterer_y->clusters);
           matcher.match_end(false);
@@ -246,16 +250,21 @@ void NMX::processing_thread() {
           matcher.matched_clusters.pop_front();
 
           //mystats.unclustered = clusterer.unclustered();
-          hists.bin(event);
+
           event.analyze(nmx_opts.analyze_weighted,
                         nmx_opts.analyze_max_timebins,
                         nmx_opts.analyze_max_timedif);
+
+          if (nmx_opts.eventlet_histograms) {
+            hists.bin(event);
+          }
 
           if (event.valid()) {
             XTRACE(PROCESS, DEB, "event.good\n");
 
             mystats.clusters_xy++;
 
+            // TODO: Should it be here or outside of event.valid()?
             if (sample_next_track) {
               sample_next_track = trackfb.add_track(event);
             }
@@ -303,7 +312,7 @@ void NMX::processing_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
-      sample_next_track = 1;
+      sample_next_track = nmx_opts.send_tracks;
 
       mystats.tx_bytes += flatbuffer.produce();
 
@@ -362,8 +371,8 @@ void NMX::init_builder(std::string jsonfile) {
         std::make_shared<Clusterer1>(nmx_opts.clusterer_y.max_time_gap,
                                      nmx_opts.clusterer_y.max_strip_gap,
                                      nmx_opts.clusterer_y.min_cluster_size);
-  } else if (nmx_opts.builder_type == "SRS") {
-    XTRACE(INIT, DEB, "Using BuilderSRS\n");
+  } else if (nmx_opts.builder_type == "VMM2") {
+    XTRACE(INIT, DEB, "Using BuilderVMM2\n");
     auto clusx = std::make_shared<Clusterer1>(nmx_opts.clusterer_x.max_time_gap,
                                               nmx_opts.clusterer_x.max_strip_gap,
                                               nmx_opts.clusterer_x.min_cluster_size);

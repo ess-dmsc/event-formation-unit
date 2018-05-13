@@ -17,21 +17,29 @@ struct ClustererConfig {
 };
 
 struct EventFilter {
+
   bool enforce_lower_uncertainty_limit{false};
   int16_t lower_uncertainty_limit{6};
+  size_t lower_uncertainty_dropped{0};
+
+
   bool enforce_minimum_eventlets{false};
   uint32_t minimum_eventlets{6};
+  size_t minimum_eventlets_dropped{0};
 
-  // TODO: stats of dropped
-  bool valid(Event& event) const
+  bool valid(Event& event)
   {
     if (enforce_lower_uncertainty_limit &&
-        !event.meets_lower_criterion(lower_uncertainty_limit))
+        !event.meets_lower_criterion(lower_uncertainty_limit)) {
+      lower_uncertainty_dropped++;
       return false;
+    }
     if (enforce_minimum_eventlets &&
             ((event.x.entries.size() < minimum_eventlets) ||
-                (event.y.entries.size() < minimum_eventlets)))
+                (event.y.entries.size() < minimum_eventlets))) {
+      minimum_eventlets_dropped++;
       return false;
+    }
     return  true;
   }
 };
@@ -40,7 +48,7 @@ struct NMXConfig {
   NMXConfig() {}
   NMXConfig(std::string jsonfile);
 
-  std::string builder_type{"SRS"};
+  std::string builder_type{"VMM2"};
 
   // SRS only
   SRSTime time_config;
@@ -61,7 +69,9 @@ struct NMXConfig {
   EventFilter filter;
 
   // Monitor
+  bool eventlet_histograms {false};
   uint32_t cluster_adc_downshift{6};
+  bool send_tracks {false};
   size_t track_sample_minhits{6};
 
   // Event formation
