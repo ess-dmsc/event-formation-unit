@@ -8,8 +8,7 @@
 
 class HitSorter {
 public:
-  HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold, double maxTimeGap,
-            std::shared_ptr<AbstractClusterer> cb);
+  HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold, double maxTimeGap);
 
   // TODO: should be by constref
   void insert(Readout readout);
@@ -28,8 +27,6 @@ private:
   SRSMappings pChips;
   uint16_t pADCThreshold;
 
-  std::shared_ptr<AbstractClusterer> callback_;
-
   void analyze();
 
 public:
@@ -39,6 +36,8 @@ public:
   size_t stats_triggertime_wraps{0};
   size_t stats_trigger_count {0};
 
-  HitsQueue hits;
+  std::shared_ptr<AbstractClusterer> clusterer;
 
+  // TODO private?
+  HitsQueue hits;
 };

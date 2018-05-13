@@ -45,7 +45,7 @@ double SRSTime::trigger_resolution() const {
   return trigger_resolution_;
 }
 
-double SRSTime::timestamp_ns(int trigger_timestamp) const {
+double SRSTime::trigger_timestamp_ns(uint32_t trigger_timestamp) const {
   return trigger_timestamp * trigger_resolution_;
 }
 
@@ -61,14 +61,15 @@ double SRSTime::max_chip_time_in_window() const
 
 double SRSTime::delta_timestamp_ns(double old_timestamp_ns,
                                    double timestamp_ns,
-                                   unsigned int old_framecounter,
-                                   unsigned int framecounter,
+                                   uint32_t old_framecounter,
+                                   uint32_t framecounter,
                                    size_t &stats_triggertime_wraps) const {
   if (old_timestamp_ns > timestamp_ns
       && (old_framecounter <= framecounter
           || old_framecounter > framecounter + 1000000000))
   {
     stats_triggertime_wraps++;
+    // TODO: magic numbers
     return (13421772800 + timestamp_ns - old_timestamp_ns);
   } else {
     return (timestamp_ns - old_timestamp_ns);
@@ -76,6 +77,7 @@ double SRSTime::delta_timestamp_ns(double old_timestamp_ns,
 }
 
 double SRSTime::trigger_period() const {
+  // TODO: magic numbers
   return 1000 * 4096 / bc_clock_;
 }
 
@@ -91,18 +93,22 @@ double SRSTime::chip_time(uint16_t bc, uint16_t tdc) const {
   // TDC time: pTAC * tdc value (8 bit)/ramp length
   // [ns]
 
+  // TODO: Test this logic
   // TDC has reduced resolution due to most significant bit problem of current
   // sources (like ADC)
   if (rebin_tdc_) {
-    int tdcRebinned = (int) tdc / 8;
+    // TODO: use bit shifting instead?
+    uint16_t tdcRebinned = (uint16_t) tdc / 8;
     tdc = tdcRebinned * 8;
   }
 
+  // TODO: magic numbers
   // should this not be 256.0?
   double tdcTime = tac_slope_ * static_cast<double>(tdc) / 255.0;
 
   // Chip time: bcid plus tdc value
   // Talk Vinnie: HIT time  = BCIDx25 + ADC*125/255 [ns]
+  // TODO: magic numbers
   return bcTime * 1000 + tdcTime;
 }
 
@@ -111,7 +117,8 @@ double SRSTime::timestamp_ns(uint32_t trigger, uint16_t bc, uint16_t tdc) {
     bonus_++;
   recent_trigger_ = trigger;
 
-  return (bonus_ << 32) + (trigger * trigger_resolution_) + chip_time(bc, tdc);
+  return (bonus_ << 32) +
+      trigger_timestamp_ns(trigger) + chip_time(bc, tdc);
 }
 
 uint64_t SRSTime::timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) {
@@ -120,6 +127,7 @@ uint64_t SRSTime::timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) {
 }
 
 std::string SRSTime::debug() const {
+  // TODO: improve this, with more parameters now
   std::stringstream ss;
   ss << "(" << "trigger*" << trigger_resolution_ << " + bc*1000/" << bc_clock_
      << " + tdc*" << tac_slope_ << "/256" << ")ns * "

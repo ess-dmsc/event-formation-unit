@@ -45,12 +45,6 @@ void HitsQueue::sort_and_correct() {
   hitsOut = std::move(hitsOld);
   hitsOld = std::move(hitsNew);
 
-  std::sort(hitsOut.begin(), hitsOut.end(),
-            [](const Eventlet &e1, const Eventlet &e2) {
-              return e1.time < e2.time;
-            });
-
-
   if (!hitsNew.empty()) {
     hitsNew.clear();
   }
@@ -64,18 +58,13 @@ void HitsQueue::correct_trigger_data() {
   if (!subsequent_trigger_)
     return;
 
-  const auto &itHitsBegin = begin(hitsNew);
-  const auto &itHitsEnd = end(hitsNew);
-  const auto &itOldHitsBegin = hitsOld.rend();
-  const auto &itOldHitsEnd = hitsOld.rbegin();
-
-  // If either list is empty
-  if (itHitsBegin == itHitsEnd || itOldHitsBegin == itOldHitsEnd)
+  // TODO Does this happen? Does it really mean do nothing?
+  if (hitsNew.empty() || hitsOld.empty())
     return;
 
-  double timePrevious = itOldHitsEnd->time; // Newest of the old
+  double timePrevious = hitsOld.rbegin()->time; // Newest of the old
   // oldest of the new + correct into time space of the old
-  double timeNext = itHitsBegin->time + pTime.trigger_period();
+  double timeNext = hitsNew.begin()->time + pTime.trigger_period();
   double deltaTime = timeNext - timePrevious;
   //Continue only if the first hit in hits is close enough in time to the last hit in oldHits
   if (deltaTime > pMaxTimeGap)
@@ -83,8 +72,8 @@ void HitsQueue::correct_trigger_data() {
 
   HitContainer::iterator itFind;
   //Loop through all hits in hits
-  for (itFind = itHitsBegin; itFind != itHitsEnd; ++itFind) {
-    //At the first iteration, timePrevious is sett to the time of the first hit in hits
+  for (itFind = hitsNew.begin(); itFind != hitsNew.end(); ++itFind) {
+    //At the first iteration, timePrevious is set to the time of the first hit in hits
     timePrevious = timeNext;
     //At the first iteration, timeNext is again set to the time of the first hit in hits
     // + correct into time space of the old
@@ -105,5 +94,13 @@ void HitsQueue::correct_trigger_data() {
   }
 
   //Deleting all hits that have been inserted into oldHits (up to itFind, but not including itFind)
-  hitsNew.erase(itHitsBegin, itFind);
+  hitsNew.erase(hitsNew.begin(), itFind);
+
+  // TODO This also needs to happen after moving the hits (done!)
+  std::sort(hitsOld.begin(), hitsOld.end(),
+            [](const Eventlet &e1, const Eventlet &e2) {
+              return e1.time < e2.time;
+            });
+
+  // TODO if al hits were transferred, flag edge as possibly invalid
 }

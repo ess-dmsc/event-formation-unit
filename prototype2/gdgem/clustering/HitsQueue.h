@@ -15,6 +15,8 @@ public:
 private:
   // tripple buffer
 
+  // TODO: trigger_timestamp must be added
+
   HitContainer hitsOld;
   HitContainer hitsNew;
   HitContainer hitsOut;

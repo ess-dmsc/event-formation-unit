@@ -27,13 +27,13 @@ public:
   double bc_clock() const;
   double tac_slope() const;
   double trigger_resolution() const;
-  double timestamp_ns(int trigger_timestamp) const;
+  double trigger_timestamp_ns(uint32_t trigger_timestamp) const;
   uint16_t acquisition_window() const;
 
   double max_chip_time_in_window() const; // in ns
 
   double delta_timestamp_ns(double old_timestamp_ns, double timestamp_ns,
-                            unsigned int old_framecounter, unsigned int framecounter,
+                            uint32_t old_framecounter, uint32_t framecounter,
                             size_t &stats_triggertime_wraps) const;
 
   double trigger_period() const;

@@ -14,9 +14,11 @@ BuilderVMM2::BuilderVMM2(SRSTime time_intepreter, SRSMappings geometry_interpret
     , parser_(1125)
     , time_intepreter_(time_intepreter)
     , geometry_interpreter_(geometry_interpreter)
-    , sorter_x(time_intepreter_, geometry_interpreter_, 0, 200, clusterer_x)
-    , sorter_y(time_intepreter_, geometry_interpreter_, 0, 200, clusterer_y)
+    , sorter_x(time_intepreter_, geometry_interpreter_, 0, 200)
+    , sorter_y(time_intepreter_, geometry_interpreter_, 0, 200)
 {
+  sorter_x.clusterer = clusterer_x;
+  sorter_y.clusterer = clusterer_y;
   if (dump_csv_) {
     vmmsave->tofile("# fec, chip_id, frame counter, srs timestamp, channel, "
                     "bcid, tdc, adc, overthreshold\n");

@@ -14,7 +14,7 @@
 
 #define UNUSED __attribute__((unused))
 
-class NMXClustererTest : public TestBase {
+class Clusterer1Test : public TestBase {
 protected:
   std::vector<Readout> long_data;
 
@@ -27,8 +27,6 @@ protected:
 
   SRSMappings mapping;
 
-  std::shared_ptr<AbstractClusterer> clusters_x;
-  std::shared_ptr<AbstractClusterer> clusters_y;
   std::shared_ptr<HitSorter> sorter_x;
   std::shared_ptr<HitSorter> sorter_y;
 
@@ -52,10 +50,10 @@ protected:
     srstime.set_trigger_resolution(3.125);
     srstime.set_acquisition_window(4000);
 
-    clusters_x = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
-    clusters_y = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
-    sorter_x = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, clusters_x);
-    sorter_y = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, clusters_y);
+    sorter_x = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
+    sorter_y = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
+    sorter_x->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
+    sorter_y->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
   }
 
   virtual void TearDown() {
@@ -72,23 +70,30 @@ protected:
   }
 };
 
-// Test this without sorter!!!
-// Use presorted data that we understand
+// TODO: Test this without sorter!!! Use presorted data that we understand
 
-TEST_F(NMXClustererTest, Run16_line_110168_110323) {
+TEST_F(Clusterer1Test, Run16_line_110168_110323) {
   for (const auto& readout : Run16) {
     store_hit(readout);
   }
-  EXPECT_EQ(clusters_x->stats_cluster_count, 3);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 4);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 3);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 4);
+  sorter_x->flush();
+  sorter_y->flush();
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 7);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 11);
 }
 
-TEST_F(NMXClustererTest, Run16_Long) {
+TEST_F(Clusterer1Test, Run16_Long) {
   for (const auto& readout : long_data) {
     store_hit(readout);
   }
-  EXPECT_EQ(clusters_x->stats_cluster_count, 10198);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 12432);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10198);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12432);
+  sorter_x->flush();
+  sorter_y->flush();
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10203);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12444);
 }
 
 

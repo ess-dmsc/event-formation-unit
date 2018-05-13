@@ -33,8 +33,8 @@ protected:
   SRSMappings mapping;
 
   std::shared_ptr<ClusterMatcher> matcher;
-  std::shared_ptr<AbstractClusterer> clusters_x;
-  std::shared_ptr<AbstractClusterer> clusters_y;
+//  std::shared_ptr<AbstractClusterer> sorter_x->clusterer;
+//  std::shared_ptr<AbstractClusterer> sorter_y->clusterer;
   std::shared_ptr<HitSorter> sorter_x;
   std::shared_ptr<HitSorter> sorter_y;
 
@@ -59,10 +59,12 @@ protected:
     srstime.set_acquisition_window(4000);
 
     matcher = std::make_shared<ClusterMatcher>(pDeltaTimePlanes);
-    clusters_x = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
-    clusters_y = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
-    sorter_x = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, clusters_x);
-    sorter_y = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap, clusters_y);
+//    sorter_x->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
+//    sorter_y->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
+    sorter_x = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
+    sorter_y = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
+    sorter_x->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
+    sorter_y->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
   }
 
   virtual void TearDown() {
@@ -218,19 +220,19 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
   for (const auto& readout : Run16) {
     store_hit(readout);
   }
-  EXPECT_EQ(clusters_x->stats_cluster_count, 3);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 4);
-  matcher->merge(clusters_x->clusters);
-  matcher->merge(clusters_y->clusters);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 3);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 4);
+  matcher->merge(sorter_x->clusterer->clusters);
+  matcher->merge(sorter_y->clusterer->clusters);
   matcher->match_end(false);
   EXPECT_EQ(matcher->stats_cluster_count, 2);
 
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(clusters_x->stats_cluster_count, 7);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 11);
-  matcher->merge(clusters_x->clusters);
-  matcher->merge(clusters_y->clusters);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 7);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 11);
+  matcher->merge(sorter_x->clusterer->clusters);
+  matcher->merge(sorter_y->clusterer->clusters);
   matcher->match_end(true);
   EXPECT_EQ(matcher->stats_cluster_count, 7);
 }
@@ -242,12 +244,12 @@ TEST_F(NMXClustererTest, Run16_Long_identical) {
   }
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(clusters_x->clusters.size(), 20278);
-  EXPECT_EQ(clusters_y->clusters.size(), 20278);
+  EXPECT_EQ(sorter_x->clusterer->clusters.size(), 20278);
+  EXPECT_EQ(sorter_y->clusterer->clusters.size(), 20278);
 
   matcher = std::make_shared<ClusterMatcher>(0);
-  matcher->merge(clusters_x->clusters);
-  matcher->merge(clusters_y->clusters);
+  matcher->merge(sorter_x->clusterer->clusters);
+  matcher->merge(sorter_y->clusterer->clusters);
 
   EXPECT_EQ(matcher->unmatched_clusters.size(), 40556);
 
@@ -262,12 +264,12 @@ TEST_F(NMXClustererTest, Run16_Long) {
   }
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(clusters_x->stats_cluster_count, 10203);
-  EXPECT_EQ(clusters_y->stats_cluster_count, 12444);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10203);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12444);
 
   matcher = std::make_shared<ClusterMatcher>(10);
-  matcher->merge(clusters_x->clusters);
-  matcher->merge(clusters_y->clusters);
+  matcher->merge(sorter_x->clusterer->clusters);
+  matcher->merge(sorter_y->clusterer->clusters);
   EXPECT_EQ(matcher->unmatched_clusters.size(), 22647);
   matcher->match_end(true);
   EXPECT_EQ(matcher->stats_cluster_count, 6141);
