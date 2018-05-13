@@ -9,7 +9,7 @@
 
 #include "mo01_nmx_generated.h"
 
-#include <gdgem/nmx/EventNMX.h>
+#include <gdgem/nmx/Event.h>
 
 class TrackSerializer {
 public:
@@ -21,7 +21,7 @@ public:
 
   /** @todo document */
   // int add_track(uint32_t plane, uint32_t strip, uint32_t time, uint32_t adc);
-  int add_track(const EventNMX &event);
+  int add_track(const Event &event);
 
   /** @todo document */
   int serialize(char **buffer);

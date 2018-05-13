@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <gdgem/nmx/EventNMX.h>
+#include <gdgem/nmx/Event.h>
 #include <math.h>
 #include <vector>
 
@@ -32,7 +32,7 @@ public:
   void clear();
 
   void bin(const Eventlet &e);
-  void bin(const EventNMX &e);
+  void bin(const Event &e);
   void binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16_t yadc);
 
   bool isEmpty() const;

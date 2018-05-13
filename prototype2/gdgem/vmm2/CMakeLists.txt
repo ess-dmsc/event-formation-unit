@@ -1,0 +1,108 @@
+#=============================================================================
+# Tests
+#=============================================================================
+
+set(EventFormationTest_SRC
+    ../nmx/AbstractBuilder.cpp
+    ../nmx/Cluster.cpp
+    ../nmx/Event.cpp
+    ../nmx/Hists.cpp
+    ../srs/SRSTime.cpp
+    ../srs/SRSMappings.cpp
+    ../nmx/ReadoutFile.cpp
+    ../clustering/HitsQueue.cpp
+    ../clustering/HitSorter.cpp
+    ../clustering/ClusterMatcher.cpp
+    ../clustering/Clusterer1.cpp
+    BuilderVMM2.cpp
+    EventFormationTest.cpp
+    ParserVMM2.cpp
+    )
+set(EventFormationTest_INC
+    ../nmx/AbstractBuilder.h
+    ../nmx/Cluster.h
+    ../nmx/Event.h
+    ../nmx/Hists.h
+    ../srs/SRSTime.h
+    ../srs/SRSMappings.h
+    ../nmx/ReadoutFile.h
+    ../nmx/Readout.h
+    ../clustering/HitsQueue.h
+    ../clustering/HitSorter.h
+    ../clustering/ClusterMatcher.h
+    ../clustering/Clusterer1.h
+    ../clustering/HitContainer.h
+    ../clustering/AbstractClusterer.h
+    BuilderVMM2.h
+    ParserVMM2.h
+    )
+create_test_executable(EventFormationTest)
+
+
+set(BuilderBenchmarkTest_SRC
+    ../nmx/Clusterer.cpp
+    ../nmx/Cluster.cpp
+    ../nmx/Event.cpp
+    ../nmx/Hists.cpp
+    ../nmx/AbstractBuilder.cpp
+    ../srs/SRSTime.cpp
+    ../srs/SRSMappings.cpp
+    BuilderVMM2BenchmarkTest.cpp
+    BuilderVMM2.cpp
+    ParserVMM2.cpp
+    )
+set(BuilderBenchmarkTest_INC
+    ../nmx/Clusterer.h
+    ../nmx/Cluster.h
+    ../nmx/Event.h
+    ../nmx/Hists.h
+    ../nmx/Eventlet.h
+    ../srs/SRSTime.h
+    ../srs/SRSMappings.h
+    ParserVMM2.h
+    BuilderVMM2.h
+    )
+create_benchmark_executable(BuilderBenchmarkTest)
+
+set(ParserVMM2Test_SRC
+    ParserVMM2Test.cpp
+    ParserVMM2.cpp
+    )
+set(ParserVMM2Test_INC
+    ParserVMM2.h
+    )
+create_test_executable(ParserVMM2Test)
+
+set(BuilderVMM2Test_SRC
+    ../nmx/ReadoutFile.cpp
+    ../nmx/Cluster.cpp
+    ../nmx/Event.cpp
+    ../nmx/Hists.cpp
+    ../nmx/AbstractBuilder.cpp
+    ../srs/SRSTime.cpp
+    ../srs/SRSMappings.cpp
+    ../clustering/HitsQueue.cpp
+    ../clustering/HitSorter.cpp
+    ../clustering/Clusterer1.cpp
+    BuilderVMM2Test.cpp
+    BuilderVMM2.cpp
+    ParserVMM2.cpp
+    )
+set(BuilderVMM2Test_INC
+    ../nmx/ReadoutFile.h
+    ../nmx/Readout.h
+    ../nmx/Cluster.h
+    ../nmx/Event.h
+    ../nmx/Hists.h
+    ../nmx/Eventlet.h
+    ../srs/SRSTime.h
+    ../srs/SRSMappings.h
+    ../clustering/Clusterer1.h
+    ../clustering/HitsQueue.h
+    ../clustering/HitSorter.h
+    ../clustering/HitContainer.h
+    ../clustering/AbstractClusterer.h
+    ParserVMM2.h
+    BuilderVMM2.h
+    )
+create_test_executable(BuilderVMM2Test)

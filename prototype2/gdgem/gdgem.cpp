@@ -1,33 +1,37 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <cinttypes>
+#include <dataformats/multigrid/inc/json.h>
+
+#include <libs/include/SPSCFifo.h>
+#include <libs/include/Socket.h>
+#include <libs/include/TSCTimer.h>
+#include <libs/include/Timer.h>
+
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/FBSerializer.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
-#include <common/Trace.h>
-#include <cstring>
-#include <dataformats/multigrid/inc/json.h>
-#include <fstream>
-#include <gdgem/nmx/Geometry.h>
-#include <gdgem/nmx/HistSerializer.h>
-#include <gdgem/nmx/TrackSerializer.h>
-#include <gdgem/generators/EventletBuilderAPV.h>
-#include <gdgem/generators/EventletBuilderEventlets.h>
-#include <gdgem/vmm2srs/EventletBuilderSRS.h>
-#include <iostream>
-#include <libs/include/SPSCFifo.h>
-#include <libs/include/Socket.h>
-#include <libs/include/TSCTimer.h>
-#include <libs/include/Timer.h>
-#include <memory>
-#include <sstream>
-#include <stdio.h>
-#include <unistd.h>
 
 #include <gdgem/NMXConfig.h>
+#include <gdgem/nmx/HistSerializer.h>
+#include <gdgem/nmx/TrackSerializer.h>
+#include <gdgem/generators/BuilderAPV.h>
+#include <gdgem/generators/BuilderEventlets.h>
+#include <gdgem/vmm2/BuilderVMM2.h>
 
+#include <gdgem/clustering/ClusterMatcher.h>
+#include <gdgem/clustering/Clusterer1.h>
+
+#include <iostream>
+#include <memory>
+#include <sstream>
+#include <cstdio>
+#include <cstring>
+#include <fstream>
+#include <unistd.h>
+
+#include <common/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
@@ -44,9 +48,9 @@ struct NMXSettingsStruct {
   int SRSParserID; //
 } NMXSettings;
 
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {
   parser.add_option("-f,--file", NMXSettings.ConfigFile,
-                  "NMX (gdgem) specific config file")
+                    "NMX (gdgem) specific config file")
       ->group("NMX")->required();
 }
 
@@ -110,23 +114,23 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
 
   XTRACE(INIT, ALW, "Adding stats\n");
   // clang-format off
-  Stats.create("rx_packets",           mystats.rx_packets);
-  Stats.create("rx_bytes",             mystats.rx_bytes);
-  Stats.create("i2pfifo_dropped",      mystats.fifo_push_errors);
-  Stats.create("readouts",             mystats.readouts);
+  Stats.create("rx_packets", mystats.rx_packets);
+  Stats.create("rx_bytes", mystats.rx_bytes);
+  Stats.create("i2pfifo_dropped", mystats.fifo_push_errors);
+  Stats.create("readouts", mystats.readouts);
   Stats.create("readouts_error_bytes", mystats.readouts_error_bytes);
-  Stats.create("readouts_discarded",   mystats.readouts_discarded);
-  Stats.create("clusters_discarded",   mystats.clusters_discarded);
-  Stats.create("clusters_events",      mystats.clusters_events);
-  Stats.create("clusters_x",           mystats.clusters_x);
-  Stats.create("clusters_y",           mystats.clusters_y);
-  Stats.create("clusters_xy",          mystats.clusters_xy);
-  Stats.create("processing_idle",      mystats.processing_idle);
-  Stats.create("fifo_seq_errors",      mystats.fifo_seq_errors);
-  Stats.create("unclustered",          mystats.unclustered);
-  Stats.create("geom_errors",          mystats.geom_errors);
+  Stats.create("readouts_discarded", mystats.readouts_discarded);
+  Stats.create("clusters_discarded", mystats.clusters_discarded);
+  Stats.create("clusters_events", mystats.clusters_events);
+  Stats.create("clusters_x", mystats.clusters_x);
+  Stats.create("clusters_y", mystats.clusters_y);
+  Stats.create("clusters_xy", mystats.clusters_xy);
+  Stats.create("processing_idle", mystats.processing_idle);
+  Stats.create("fifo_seq_errors", mystats.fifo_seq_errors);
+  Stats.create("unclustered", mystats.unclustered);
+  Stats.create("geom_errors", mystats.geom_errors);
 
-  Stats.create("tx_bytes",             mystats.tx_bytes);
+  Stats.create("tx_bytes", mystats.tx_bytes);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { NMX::input_thread(); };
@@ -153,7 +157,7 @@ void NMX::input_thread() {
   // nmxdata.buflen(opts->buflen);
   nmxdata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
   nmxdata.printBufferSizes();
-  nmxdata.setRecvTimeout(0, 100000 ); /// secs, usecs
+  nmxdata.setRecvTimeout(0, 100000); /// secs, usecs
 
   int rdsize;
   TSCTimer report_timer;
@@ -193,10 +197,6 @@ void NMX::processing_thread() {
     return;
   }
 
-  Geometry geometry;
-  geometry.add_dimension(nmx_opts.geometry_x);
-  geometry.add_dimension(nmx_opts.geometry_y);
-
   Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
@@ -205,12 +205,12 @@ void NMX::processing_thread() {
   HistSerializer histfb;
   NMXHists hists;
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
-  Clusterer clusterer(nmx_opts.cluster_min_timespan);
+
+  ClusterMatcher matcher(200);
 
   TSCTimer global_time, report_timer;
 
-  EventNMX event;
-  std::vector<uint16_t> coords{0, 0};
+  Event event;
   uint32_t time;
   uint32_t pixelid;
 
@@ -227,15 +227,25 @@ void NMX::processing_thread() {
         mystats.fifo_seq_errors++;
       } else {
         // printf("received packet with length %d\n", len);
-        auto stats = builder_->process_buffer(eth_ringbuf->getDataBuffer(data_index), len, clusterer, hists);
+        auto stats = builder_->process_buffer(eth_ringbuf->getDataBuffer(data_index), len, hists);
 
         mystats.readouts += stats.valid_eventlets;
         mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
 
-        while (clusterer.event_ready()) {
+        if (builder_->clusterer_x->clusters.size() &&
+            builder_->clusterer_y->clusters.size())
+        {
+          matcher.merge(builder_->clusterer_x->clusters);
+          matcher.merge(builder_->clusterer_y->clusters);
+          matcher.match_end(false);
+        }
+
+        while (!matcher.matched_clusters.empty()) {
           XTRACE(PROCESS, DEB, "event_ready()\n");
-          event = clusterer.get_event();
-          mystats.unclustered = clusterer.unclustered();
+          event = matcher.matched_clusters.front();
+          matcher.matched_clusters.pop_front();
+
+          //mystats.unclustered = clusterer.unclustered();
           hists.bin(event);
           event.analyze(nmx_opts.analyze_weighted,
                         nmx_opts.analyze_max_timebins,
@@ -251,24 +261,23 @@ void NMX::processing_thread() {
             }
 
             XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
-                   event.x.center_rounded(), event.y.center_rounded());
+                   event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
 
-            if ( (!nmx_opts.enforce_lower_uncertainty_limit ||
-                   event.meets_lower_cirterion(nmx_opts.lower_uncertainty_limit)) &&
-                 (!nmx_opts.enforce_minimum_eventlets ||
-                 (event.x.entries.size() >= nmx_opts.minimum_eventlets &&
-                  event.y.entries.size() >= nmx_opts.minimum_eventlets))) {
+            if ((!nmx_opts.enforce_lower_uncertainty_limit ||
+                event.meets_lower_cirterion(nmx_opts.lower_uncertainty_limit)) &&
+                (!nmx_opts.enforce_minimum_eventlets ||
+                    (event.x.entries.size() >= nmx_opts.minimum_eventlets &&
+                        event.y.entries.size() >= nmx_opts.minimum_eventlets))) {
 
               // printf("\nHave a cluster:\n");
               // event.debug2();
 
-              coords[0] = event.x.center_rounded();
-              coords[1] = event.y.center_rounded();
-              pixelid = geometry.to_pixid(coords);
-              if (pixelid == 0) {
+              pixelid = nmx_opts.geometry.pixel2D(event.x.utpc_center_rounded(),
+                                                  event.y.utpc_center_rounded());
+              if (!nmx_opts.geometry.valid_id(pixelid)) {
                 mystats.geom_errors++;
               } else {
-                time = static_cast<uint32_t>(event.time());
+                time = static_cast<uint32_t>(event.utpc_time());
 
                 XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n", time, pixelid);
 
@@ -337,15 +346,21 @@ void NMX::init_builder(std::string jsonfile) {
     XTRACE(INIT, DEB, "Using BuilderEventlets\n");
     builder_ = std::make_shared<BuilderEventlets>(nmx_opts.dump_directory,
                                                   nmx_opts.dump_csv, nmx_opts.dump_h5);
+    builder_->clusterer_x = std::make_shared<Clusterer1>(200, 3, 3);
+    builder_->clusterer_y = std::make_shared<Clusterer1>(200, 3, 3);
   } else if (nmx_opts.builder_type == "APV") {
     XTRACE(INIT, DEB, "Using BuilderAPV\n");
     builder_ = std::make_shared<BuilderAPV>(nmx_opts.dump_directory,
                                             nmx_opts.dump_csv, nmx_opts.dump_h5);
+    builder_->clusterer_x = std::make_shared<Clusterer1>(15, 15, 3);
+    builder_->clusterer_y = std::make_shared<Clusterer1>(15, 15, 3);
   } else if (nmx_opts.builder_type == "SRS") {
     XTRACE(INIT, DEB, "Using BuilderSRS\n");
-    builder_ = std::make_shared<BuilderSRS>(
-        nmx_opts.time_config, nmx_opts.srs_mappings, nmx_opts.dump_directory,
-        nmx_opts.dump_csv, nmx_opts.dump_h5);
+    auto clusx = std::make_shared<Clusterer1>(200, 3, 3);
+    auto clusy = std::make_shared<Clusterer1>(200, 3, 3);
+    builder_ = std::make_shared<BuilderVMM2>(
+        nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
+        nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else {
     XTRACE(INIT, ALW, "Unrecognized builder type in config\n");
   }

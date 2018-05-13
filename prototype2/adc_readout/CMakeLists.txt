@@ -60,15 +60,13 @@ set(AdcReadoutTest_LIB
     eventlib
     )
 
-# Jonas has some reason for this
-# which he briefly explains here
-create_test_executable(AdcReadoutTest SKIP_MEMGRIND)
-
-get_filename_component(TEST_PACKET_PATH "test/test_packet_1.dat" DIRECTORY)
-target_compile_definitions(AdcReadoutTest
-    PRIVATE TEST_PACKET_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_PACKET_PATH}/")
-message(STATUS "Test ADC packets in path: ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_PACKET_PATH}/")
-
-target_include_directories(AdcReadoutTest PRIVATE ${ASIO_INCLUDE_DIR})
+#create_test_executable(AdcReadoutTest SKIP_MEMGRIND)
+#
+#get_filename_component(TEST_PACKET_PATH "test/test_packet_1.dat" DIRECTORY)
+#target_compile_definitions(AdcReadoutTest
+#    PRIVATE TEST_PACKET_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_PACKET_PATH}/")
+#message(STATUS "Test ADC packets in path: ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_PACKET_PATH}/")
+#
+#target_include_directories(AdcReadoutTest PRIVATE ${ASIO_INCLUDE_DIR})
 
 add_subdirectory("chopper_integration_test")

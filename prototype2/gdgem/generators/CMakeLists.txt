@@ -15,34 +15,38 @@ set(nmxgen_apv_INC
     )
 create_executable(nmxgen_apv)
 
-set(EventletBuilderAPVTest_SRC
-    ../nmx/EventNMX.cpp
-    ../nmx/Clusterer.cpp
+set(BuilderAPVTest_SRC
+    ../nmx/EventletFile.cpp
+    ../nmx/Event.cpp
+    ../nmx/Cluster.cpp
     ../nmx/Hists.cpp
-    ../nmx/AbstractEventletBuilder.cpp
-    EventletBuilderAPVTest.cpp
-    EventletBuilderAPV.cpp
+    ../nmx/AbstractBuilder.cpp
+    BuilderAPVTest.cpp
+    BuilderAPV.cpp
     )
-set(EventletBuilderAPVTest_INC
-    ../nmx/Clusterer.h
-    ../nmx/EventNMX.h
+set(BuilderAPVTest_INC
+    ../nmx/EventletFile.h
+    ../nmx/Cluster.h
+    ../nmx/Event.h
     ../nmx/Eventlet.h
     ../nmx/Hists.h
-    EventletBuilderAPV.h
+    BuilderAPV.h
     )
-create_test_executable(EventletBuilderAPVTest)
+#create_test_executable(BuilderAPVTest)
 
 #=============================================================================
 # Raw evenlet generator (h5)
 #=============================================================================
 
 set(nmxgen_eventlets_SRC
+    ../nmx/EventletFile.cpp
     ../nmx/Eventlet.cpp
     nmxgen_eventlets.cpp
     ReaderEventlets.cpp
     NMXArgs.cpp
     )
 set(nmxgen_eventlets_INC
+    ../nmx/EventletFile.h
     ../nmx/Eventlet.h
     ReaderEventlets.h
     NMXArgs.h

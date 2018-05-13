@@ -82,7 +82,7 @@ add_custom_target(benchmark
 # Finalize coverage
 #=============================================================================
 set(gcovr_excl_opts
-  "-e .*Test.cpp -e .*gtest.*.h -e .*_generated.h -e .*CLI11.hpp")
+    "--exclude='.*Test.*' --exclude='.*gtest.*.h' --exclude='.*CLI11.hpp'")
 create_coverage_targets(
   coverage
   runtest

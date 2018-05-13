@@ -53,8 +53,10 @@ NMXConfig::NMXConfig(std::string jsonfile) {
   track_sample_minhits = root["track_sample_minhits"].asInt();
   cluster_adc_downshift = root["cluster_adc_downshift"].asInt();
 
-  geometry_x = root["geometry_x"].asInt();
-  geometry_y = root["geometry_y"].asInt();
+  geometry.nx(root["geometry_x"].asInt());
+  geometry.ny(root["geometry_y"].asInt());
+  geometry.nz(1);
+  geometry.np(1);
 
   dump_csv = root["dump_csv"].asBool();
   dump_h5 = root["dump_h5"].asBool();
@@ -84,11 +86,11 @@ std::string NMXConfig::debug() const {
   ss << "  track_sample_minhits = " << track_sample_minhits << "\n";
   ss << "  cluster_adc_downshift = " << cluster_adc_downshift << "\n";
 
-  ss << "  geometry_x = " << geometry_x << "\n";
-  ss << "  geometry_y = " << geometry_y << "\n";
+  ss << "  geometry_x = " << geometry.nx() << "\n";
+  ss << "  geometry_y = " << geometry.ny() << "\n";
 
-  ss << "  dump_csv = " << dump_csv << "\n";
-  ss << "  dump_h5 = " << dump_h5 << "\n";
+  ss << "  dump_csv = " << (dump_csv ? "YES" : "no") << "\n";
+  ss << "  dump_h5 = " << (dump_h5 ? "YES" : "no") << "\n";
   ss << "  dump_directory = " << dump_directory << "\n";
   return ss.str();
 }

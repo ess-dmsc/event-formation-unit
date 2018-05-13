@@ -67,8 +67,8 @@ void NMXHists::binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16
     eventlet_count_++;
 }
 
-void NMXHists::bin(const EventNMX &e) {
-  uint32_t sum = e.x.integral + e.y.integral;
+void NMXHists::bin(const Event &e) {
+  uint32_t sum = e.x.adc_sum + e.y.adc_sum;
   if (!sum)
     return;
   cluster_adc_hist[static_cast<uint16_t>(sum >> downshift_)]++;
