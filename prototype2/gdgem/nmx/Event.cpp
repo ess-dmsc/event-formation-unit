@@ -16,11 +16,11 @@ void Event::insert_eventlet(const Eventlet &e) {
   }
 }
 
-void Event::merge(Cluster& cluster, uint8_t plane_id)
+void Event::merge(Cluster& cluster)
 {
-  if (plane_id == 1) { /**< @todo deal with multiple panels */
+  if (cluster.plane_id == 1) { /**< @todo deal with multiple panels */
     y.merge(cluster);
-  } else if (plane_id == 0) {
+  } else if (cluster.plane_id == 0) {
     x.merge(cluster);
   }
 }
@@ -32,11 +32,19 @@ bool Event::empty() const
 
 double Event::time_end() const
 {
+  if (x.entries.empty())
+    return y.time_end;
+  if (y.entries.empty())
+    return x.time_end;
   return std::max(x.time_end, y.time_end);
 }
 
 double Event::time_start() const
 {
+  if (x.entries.empty())
+    return y.time_start;
+  if (y.entries.empty())
+    return x.time_start;
   return std::min(x.time_start, y.time_start);
 }
 

@@ -6,21 +6,21 @@
 class ClusterMatcher {
 public:
   ClusterMatcher(double dPlane);
-  void match_end(ClusterList& x,
-                 ClusterList& y, bool force);
-  void match_overlap(ClusterList& x,
-                     ClusterList& y);
+
+  void merge(ClusterList& c);
+
+  void match_end(bool force);
 
   size_t stats_cluster_count {0};
+
+  ClusterList unmatched_clusters;
   std::list<Event> matched_clusters;
 
 private:
   double pdPlane {0};
 
-  bool ready(const ClusterList&) const;
-  bool ready(double time, const ClusterList&) const;
-  bool can_discard(double time, const Event& event) const;
+  bool ready(double time) const;
 
-  double delta1(const Event& event, const Cluster& cluster) const;
-  bool belongs1(const Event& event, const Cluster& cluster) const;
+  double delta_end(const Event& event, const Cluster& cluster) const;
+  bool belongs_end(const Event& event, const Cluster& cluster) const;
 };

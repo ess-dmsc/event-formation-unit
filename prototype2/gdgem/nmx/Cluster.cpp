@@ -10,12 +10,15 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 void Cluster::insert_eventlet(const Eventlet &e) {
-//  if (!e.adc)
-//    return;
   if (entries.empty()) {
+    plane_id = e.plane_id;
     time_start = time_end = e.time;
     strip_start = strip_end = e.strip;
   }
+
+  if (plane_id != e.plane_id)
+    plane_id = -1;
+
   entries.push_back(e);
   adc_sum += e.adc;
   strip_mass += e.adc * e.strip;
@@ -98,6 +101,9 @@ void Cluster::merge(Cluster &other) {
     return;
   }
 
+  if (other.plane_id != plane_id)
+    return;
+
   // merge rather than splice?
   entries.splice(entries.end(), other.entries);
   adc_sum += other.adc_sum;
@@ -107,6 +113,9 @@ void Cluster::merge(Cluster &other) {
   time_end = std::max(time_end, other.time_end);
   strip_start = std::min(strip_start, other.strip_start);
   strip_end = std::max(strip_end, other.strip_end);
+
+  // what if different?
+  plane_id = other.plane_id;
 }
 
 double Cluster::time_overlap(const Cluster &other) const {

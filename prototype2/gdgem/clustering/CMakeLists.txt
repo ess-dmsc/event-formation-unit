@@ -82,7 +82,7 @@ create_test_executable(ClusterMatcherTest SKIP_MEMGRIND)
 target_compile_definitions(ClusterMatcherTest
     PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
-# GOOGLE BENCHMARK
+## GOOGLE BENCHMARK
 set(NMXClustererBenchmarkTest_SRC
     ${ClusteringBase_SRC}
     NMXClustererBenchmarkTest.cpp)

@@ -278,6 +278,8 @@ TEST_F(ClusterTest, AnalyzeUncert) {
   EXPECT_EQ(cluster.utpc_center_rounded(), 17);
 }
 
+// TODO: cluster plane identity tests
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

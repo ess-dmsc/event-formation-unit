@@ -13,6 +13,8 @@
 
 struct Cluster {
 
+  int16_t plane_id {-1};
+
   /** @brief adds eventlet to event's plane
    * @param eventlet to be added
    */

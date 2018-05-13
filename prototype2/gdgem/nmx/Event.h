@@ -21,7 +21,7 @@ public:
    */
   void insert_eventlet(const Eventlet &e);
 
-  void merge(Cluster& cluster, uint8_t plane_id);
+  void merge(Cluster& cluster);
 
   bool empty() const;
 

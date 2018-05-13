@@ -30,10 +30,10 @@ TEST_F(EventTest, Empty) {
 
 TEST_F(EventTest, Merge) {
   Cluster x;
-
+  e.plane_id = 0;
   x.insert_eventlet(e);
   x.insert_eventlet(e);
-  event.merge(x, 0);
+  event.merge(x);
   EXPECT_FALSE(event.empty());
   EXPECT_EQ(x.entries.size(), 0);
   EXPECT_EQ(event.x.entries.size(), 2);
@@ -41,30 +41,33 @@ TEST_F(EventTest, Merge) {
 
 TEST_F(EventTest, MergeTwice) {
   Cluster x;
+  e.plane_id = 0;
 
   x.insert_eventlet(e);
   x.insert_eventlet(e);
-  event.merge(x, 0);
+  event.merge(x);
   EXPECT_EQ(event.x.entries.size(), 2);
 
   x.insert_eventlet(e);
   x.insert_eventlet(e);
   x.insert_eventlet(e);
-  event.merge(x, 0);
+  event.merge(x);
   EXPECT_EQ(event.x.entries.size(), 5);
 }
 
 TEST_F(EventTest, MergeXY) {
   Cluster x, y;
 
+  e.plane_id = 0;
   x.insert_eventlet(e);
   x.insert_eventlet(e);
-  event.merge(x, 0);
+  event.merge(x);
 
+  e.plane_id = 1;
   y.insert_eventlet(e);
   y.insert_eventlet(e);
   y.insert_eventlet(e);
-  event.merge(y, 1);
+  event.merge(y);
   EXPECT_EQ(event.x.entries.size(), 2);
   EXPECT_EQ(event.y.entries.size(), 3);
 }
@@ -72,13 +75,15 @@ TEST_F(EventTest, MergeXY) {
 TEST_F(EventTest, TimeSpan) {
   Cluster x, y;
 
+  e.plane_id = 0;
   e.time = 3; x.insert_eventlet(e);
   e.time = 7; x.insert_eventlet(e);
-  event.merge(x, 0);
+  event.merge(x);
 
+  e.plane_id = 1;
   e.time = 5; y.insert_eventlet(e);
   e.time = 1; y.insert_eventlet(e);
-  event.merge(y, 1);
+  event.merge(y);
   EXPECT_EQ(event.time_end(), 7);
   EXPECT_EQ(event.time_start(), 1);
   EXPECT_EQ(event.time_span(), 6);
