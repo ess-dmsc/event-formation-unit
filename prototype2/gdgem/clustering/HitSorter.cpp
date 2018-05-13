@@ -14,54 +14,52 @@ HitSorter::HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
 }
 
 //====================================================================================================================
-void HitSorter::store(int triggerTimestamp, unsigned int frameCounter,
-                         int fecID, int vmmID, int chNo, int bcid, int tdc, int adc,
-                         int overThresholdFlag) {
+void HitSorter::insert(Readout readout) {
 
-  // Ready for factoring out, logic tested elsewhere
-  uint16_t strip = pChips.get_strip(fecID, vmmID, chNo);
-
+  // TODO: factor this out?
   // Fix for entries with all zeros
-  if (bcid == 0 && tdc == 0 && overThresholdFlag) {
-    bcid = oldBcid;
-    tdc = oldTdc;
+  if (readout.bcid == 0 && readout.tdc == 0 && readout.over_threshold) {
+    readout.bcid = old_bcid_;
+    readout.tdc = old_tdc_;
     stats_bcid_tdc_error++;
   }
-  oldBcid = bcid;
-  oldTdc = tdc;
+  old_bcid_ = readout.bcid;
+  old_tdc_ = readout.tdc;
   // oldVmmID = vmmID; // does this need to match for above logic?
 
   // Could be factored out depending on above block
-  double chipTime = pTime.chip_time(bcid, tdc);
+  double chipTime = pTime.chip_time(readout.bcid, readout.tdc);
 
-  double triggerTimestamp_ns = pTime.timestamp_ns(triggerTimestamp);
-  if (oldTriggerTimestamp_ns != triggerTimestamp_ns) {
+  double triggerTimestamp_ns = pTime.timestamp_ns(readout.srs_timestamp);
+  if (old_trigger_timestamp_ns_ != triggerTimestamp_ns) {
     stats_trigger_count++;
     analyze();
     hits.subsequent_trigger(false);
     double deltaTriggerTimestamp_ns =
-        pTime.delta_timestamp_ns(oldTriggerTimestamp_ns,
+        pTime.delta_timestamp_ns(old_trigger_timestamp_ns_,
                                  triggerTimestamp_ns,
-                                 oldFrameCounter,
-                                 frameCounter,
+                                 old_frame_counter_,
+                                 readout.frame_counter,
                                  stats_triggertime_wraps);
 
     if (deltaTriggerTimestamp_ns <= pTime.trigger_period()) {
       hits.subsequent_trigger(true); // should this happen before analyze?
     }
   }
-  oldTriggerTimestamp_ns = triggerTimestamp_ns;
+  old_trigger_timestamp_ns_ = triggerTimestamp_ns;
 
   // This is likely resolved. Candidate for removal?
-  if ((frameCounter < oldFrameCounter)
-      && !(oldFrameCounter > frameCounter + 1000000000)) {
+  if ((readout.frame_counter < old_frame_counter_)
+      && !(old_frame_counter_ > readout.frame_counter + 1000000000)) {
     stats_fc_error++;
   }
-  oldFrameCounter = frameCounter;
+  old_frame_counter_ = readout.frame_counter;
 
   // Store hit to appropriate buffer
-  if (overThresholdFlag || (adc >= pADCThreshold)) {
-    hits.store(pChips.get_plane(fecID, vmmID), strip, adc, chipTime);
+  if (readout.over_threshold || (readout.adc >= pADCThreshold)) {
+    hits.store(pChips.get_plane(readout.fec, readout.chip_id),
+               pChips.get_strip(readout.fec, readout.chip_id, readout.channel),
+               readout.adc, chipTime);
   }
 }
 

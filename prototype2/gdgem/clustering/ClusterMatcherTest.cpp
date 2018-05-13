@@ -72,15 +72,9 @@ protected:
   {
     uint8_t planeID = mapping.get_plane(readout.fec, readout.chip_id);
     if (planeID == 1) {
-      sorter_y->store(readout.srs_timestamp, readout.frame_counter,
-                      readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
-                      readout.adc,
-                      readout.over_threshold);
+      sorter_y->insert(readout);
     } else {
-      sorter_x->store(readout.srs_timestamp, readout.frame_counter,
-                      readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
-                      readout.adc,
-                      readout.over_threshold);
+      sorter_x->insert(readout);
     }
   }
 
@@ -243,14 +237,8 @@ TEST_F(NMXClustererTest, Run16_line_110168_110323) {
 
 TEST_F(NMXClustererTest, Run16_Long_identical) {
   for (const auto& readout : long_data) {
-    sorter_y->store(readout.srs_timestamp, readout.frame_counter,
-                    readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
-                    readout.adc,
-                    readout.over_threshold);
-    sorter_x->store(readout.srs_timestamp, readout.frame_counter,
-                    readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
-                    readout.adc,
-                    readout.over_threshold);
+    sorter_y->insert(readout);
+    sorter_x->insert(readout);
   }
   sorter_x->flush();
   sorter_y->flush();

@@ -76,13 +76,9 @@ AbstractBuilder::ResultStats BuilderVMM2::process_buffer(char *buf, size_t size,
              chip_id);
     } else {
       if (planeID)
-        sorter_y.store(readout.srs_timestamp, readout.frame_counter,
-                       readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
-                       readout.adc, readout.over_threshold);
+        sorter_y.insert(readout);
       else
-        sorter_x.store(readout.srs_timestamp, readout.frame_counter,
-                       readout.fec, readout.chip_id, readout.channel, readout.bcid, readout.tdc,
-                       readout.adc, readout.over_threshold);
+        sorter_x.insert(readout);
 
       // TODO: make this optional
       //hists.bin(readout);

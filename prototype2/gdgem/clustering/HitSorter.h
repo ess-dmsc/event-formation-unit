@@ -3,6 +3,7 @@
 #include <gdgem/clustering/AbstractClusterer.h>
 #include <gdgem/clustering/HitsQueue.h>
 #include <gdgem/srs/SRSMappings.h>
+#include <gdgem/nmx/Readout.h>
 #include <memory>
 
 class HitSorter {
@@ -10,25 +11,23 @@ public:
   HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold, double maxTimeGap,
             std::shared_ptr<AbstractClusterer> cb);
 
-  // Analyzing and storing the hits
-  void store(int triggerTimestamp, unsigned int frameCounter, int fecID,
-             int vmmID, int chNo, int bcid, int tdc, int adc,
-             int overThresholdFlag);
-
+  // TODO: should be by constref
+  void insert(Readout readout);
   void flush();
 
 private:
   // These are in play for triggering the actual clustering
-  double oldTriggerTimestamp_ns {0};
-  unsigned int oldFrameCounter {0};
+  double old_trigger_timestamp_ns_ {0};
+  uint32_t old_frame_counter_ {0};
 
   // For all 0s correction
-  int oldBcid {0};
-  int oldTdc {0};
+  uint16_t old_bcid_ {0};
+  uint16_t old_tdc_ {0};
 
   SRSTime pTime;
   SRSMappings pChips;
   uint16_t pADCThreshold;
+
   std::shared_ptr<AbstractClusterer> callback_;
 
   void analyze();
