@@ -2,6 +2,7 @@
 
 #include <cinttypes>
 
+// TODO: initialize values to 0?
 struct Readout
 {
   uint8_t fec;

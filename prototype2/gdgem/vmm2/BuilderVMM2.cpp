@@ -68,7 +68,7 @@ AbstractBuilder::ResultStats BuilderVMM2::process_buffer(char *buf, size_t size,
 //           planeID, readout.strip, readout.time);
     /**< @todo flags? */
 
-    planeID = geometry_interpreter_.get_plane(readout.fec, readout.chip_id);
+    planeID = geometry_interpreter_.get_plane(readout);
 
     if (planeID == NMX_INVALID_PLANE_ID) {
       geom_errors++;

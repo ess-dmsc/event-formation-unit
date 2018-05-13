@@ -70,7 +70,7 @@ protected:
 
   void store_hit(const Readout& readout)
   {
-    uint8_t planeID = mapping.get_plane(readout.fec, readout.chip_id);
+    uint8_t planeID = mapping.get_plane(readout);
     if (planeID == 1) {
       sorter_y->insert(readout);
     } else {

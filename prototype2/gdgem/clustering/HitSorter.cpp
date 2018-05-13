@@ -57,9 +57,9 @@ void HitSorter::insert(Readout readout) {
 
   // Store hit to appropriate buffer
   if (readout.over_threshold || (readout.adc >= pADCThreshold)) {
-    hits.store(pChips.get_plane(readout.fec, readout.chip_id),
-               pChips.get_strip(readout.fec, readout.chip_id, readout.channel),
-               readout.adc, chipTime);
+    hits.store(pChips.get_plane(readout), pChips.get_strip(readout), readout.adc,
+               chipTime);
+    // TODO: chipTime + trigger time?
   }
 }
 
