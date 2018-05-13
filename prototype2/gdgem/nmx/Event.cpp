@@ -89,7 +89,7 @@ bool Event::valid() const
   return valid_;
 }
 
-bool Event::meets_lower_cirterion(int16_t max_lu) const
+bool Event::meets_lower_criterion(int16_t max_lu) const
 {
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }

@@ -33,8 +33,6 @@ protected:
   SRSMappings mapping;
 
   std::shared_ptr<ClusterMatcher> matcher;
-//  std::shared_ptr<AbstractClusterer> sorter_x->clusterer;
-//  std::shared_ptr<AbstractClusterer> sorter_y->clusterer;
   std::shared_ptr<HitSorter> sorter_x;
   std::shared_ptr<HitSorter> sorter_y;
 
@@ -59,8 +57,6 @@ protected:
     srstime.set_acquisition_window(4000);
 
     matcher = std::make_shared<ClusterMatcher>(pDeltaTimePlanes);
-//    sorter_x->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
-//    sorter_y->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
     sorter_x = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
     sorter_y = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
     sorter_x->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
@@ -255,7 +251,6 @@ TEST_F(NMXClustererTest, Run16_Long_identical) {
 
   matcher->match_end(true);
   EXPECT_EQ(matcher->stats_cluster_count, 14974);
-  //may be separated in time but remerged here
 }
 
 TEST_F(NMXClustererTest, Run16_Long) {

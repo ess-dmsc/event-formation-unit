@@ -43,7 +43,7 @@ TEST_F(EventFormationTest, Initial) {
   ClusterMatcher matcher(10);
 
   auto builder = std::make_shared<BuilderVMM2>(time_intepreter, geometry_interpreter,
-      cx, cy, "", 0, 0);
+      cx, cy, 0, 200, 0, 200, "", 0, 0);
 
   uint64_t readouts = 0;
   uint64_t readouts_error_bytes = 0;

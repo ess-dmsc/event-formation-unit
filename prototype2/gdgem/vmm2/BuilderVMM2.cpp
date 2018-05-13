@@ -8,15 +8,20 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 BuilderVMM2::BuilderVMM2(SRSTime time_intepreter, SRSMappings geometry_interpreter,
-                         std::shared_ptr<AbstractClusterer> x, std::shared_ptr<AbstractClusterer> y,
+                         std::shared_ptr<AbstractClusterer> x,
+                         std::shared_ptr<AbstractClusterer> y,
+                         uint16_t adc_threshold_x, double max_time_gap_x,
+                         uint16_t adc_threshold_y, double max_time_gap_y,
                          std::string dump_dir, bool dump_csv, bool dump_h5)
     : AbstractBuilder(x, y, dump_dir, dump_csv, dump_h5)
     , parser_(1125)
     , time_intepreter_(time_intepreter)
     , geometry_interpreter_(geometry_interpreter)
-    , sorter_x(time_intepreter_, geometry_interpreter_, 0, 200)
-    , sorter_y(time_intepreter_, geometry_interpreter_, 0, 200)
+    , sorter_x(time_intepreter_, geometry_interpreter_, adc_threshold_x, max_time_gap_x)
+    , sorter_y(time_intepreter_, geometry_interpreter_, adc_threshold_y, max_time_gap_y)
 {
+  clusterer_x = x;
+  clusterer_y = y;
   sorter_x.clusterer = clusterer_x;
   sorter_y.clusterer = clusterer_y;
   if (dump_csv_) {

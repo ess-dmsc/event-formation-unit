@@ -23,6 +23,7 @@ NMXConfig::NMXConfig(std::string jsonfile) {
 
   if (builder_type == "SRS") {
     /**< @todo get from slow control? */
+    // TODO: decimate tdc bug?
     auto tc = root["time_config"];
     time_config.set_tac_slope(tc["tac_slope"].asInt());
     time_config.set_bc_clock(tc["bc_clock"].asInt());
@@ -39,16 +40,31 @@ NMXConfig::NMXConfig(std::string jsonfile) {
     }
   }
 
-  cluster_min_timespan = root["cluster_min_timespan"].asInt();
+  auto cx = root["clusterer x"];
+  clusterer_x.eventlet_adc_threshold = cx["eventlet_adc_threshold"].asUInt();
+  clusterer_x.max_strip_gap = cx["max_strip_gap"].asUInt();
+  clusterer_x.max_time_gap = cx["max_time_gap"].asDouble();
+  clusterer_x.min_cluster_size = cx["min_cluster_size"].asLargestUInt();
+
+  auto cy = root["clusterer y"];
+  clusterer_y.eventlet_adc_threshold = cy["eventlet_adc_threshold"].asUInt();
+  clusterer_y.max_strip_gap = cy["max_strip_gap"].asUInt();
+  clusterer_y.max_time_gap = cy["max_time_gap"].asDouble();
+  clusterer_y.min_cluster_size = cy["min_cluster_size"].asLargestUInt();
+
+  matcher_max_delta_time = root["matcher_max_delta_time"].asDouble();
+
   analyze_weighted = root["analyze_weighted"].asBool();
   analyze_max_timebins = root["analyze_max_timebins"].asInt();
   analyze_max_timedif = root["analyze_max_timedif"].asInt();
 
-  enforce_lower_uncertainty_limit =
-      root["enforce_lower_uncertainty_limit"].asBool();
-  lower_uncertainty_limit = root["lower_uncertainty_limit"].asInt();
-  enforce_minimum_eventlets = root["enforce_minimum_eventlets"].asBool();
-  minimum_eventlets = root["minimum_eventlets"].asInt();
+  auto f = root["filters"];
+  filter.enforce_lower_uncertainty_limit =
+      f["enforce_lower_uncertainty_limit"].asBool();
+  filter.lower_uncertainty_limit = f["lower_uncertainty_limit"].asInt();
+  filter.enforce_minimum_eventlets = f["enforce_minimum_eventlets"].asBool();
+  filter.minimum_eventlets = f["minimum_eventlets"].asInt();
+
 
   track_sample_minhits = root["track_sample_minhits"].asInt();
   cluster_adc_downshift = root["cluster_adc_downshift"].asInt();
@@ -70,18 +86,35 @@ std::string NMXConfig::debug() const {
     ss << "  time = " << time_config.debug() << "\n";
     ss << "  mappings:\n" << srs_mappings.debug();
   }
-  ss << "  cluster_min_timespan = " << cluster_min_timespan << "\n";
+
+  ss << "  Clusterer-X:\n";
+  ss << "    eventlet_adc_threshold = " << clusterer_x.eventlet_adc_threshold << "\n";
+  ss << "    max_time_gap = " << clusterer_x.max_time_gap << "\n";
+  ss << "    max_strip_gap = " << clusterer_x.max_strip_gap<< "\n";
+  ss << "    min_cluster_size = " << clusterer_x.min_cluster_size << "\n";
+
+  ss << "  Clusterer-Y:\n";
+  ss << "    eventlet_adc_threshold = " << clusterer_y.eventlet_adc_threshold << "\n";
+  ss << "    max_time_gap = " << clusterer_y.max_time_gap << "\n";
+  ss << "    max_strip_gap = " << clusterer_y.max_strip_gap<< "\n";
+  ss << "    min_cluster_size = " << clusterer_y.min_cluster_size << "\n";
+
+  ss << "  matcher_max_delta_time = " << matcher_max_delta_time << "\n";
+
   ss << "  analyze_weighted = " << (analyze_weighted ? "true" : "false")
      << "\n";
   ss << "  analyze_max_timebins = " << analyze_max_timebins << "\n";
   ss << "  analyze_max_timedif = " << analyze_max_timedif << "\n";
 
-  ss << "  enforce_lower_uncertainty_limit = "
-     << (enforce_lower_uncertainty_limit ? "true" : "false") << "\n";
-  ss << "  lower_uncertainty_limit = " << lower_uncertainty_limit << "\n";
-  ss << "  enforce_minimum_eventlets = "
-     << (enforce_minimum_eventlets ? "true" : "false") << "\n";
-  ss << "  minimum_eventlets = " << minimum_eventlets << "\n";
+  ss << "  Filters:\n";
+  ss << "    enforce_lower_uncertainty_limit = "
+     << (filter.enforce_lower_uncertainty_limit ? "YES" : "no") << "\n";
+  if (filter.enforce_lower_uncertainty_limit)
+    ss << "    lower_uncertainty_limit = " << filter.lower_uncertainty_limit << "\n";
+  ss << "    enforce_minimum_eventlets = "
+     << (filter.enforce_minimum_eventlets ? "YES" : "no") << "\n";
+  if (filter.enforce_minimum_eventlets)
+    ss << "    minimum_eventlets = " << filter.minimum_eventlets << "\n";
 
   ss << "  track_sample_minhits = " << track_sample_minhits << "\n";
   ss << "  cluster_adc_downshift = " << cluster_adc_downshift << "\n";

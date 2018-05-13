@@ -49,7 +49,7 @@ public:
   double utpc_time() const;
 
   // @brief indicates if both dimensions meet lower uncertainty criterion
-  bool meets_lower_cirterion(int16_t max_lu) const;
+  bool meets_lower_criterion(int16_t max_lu) const;
 
 
 

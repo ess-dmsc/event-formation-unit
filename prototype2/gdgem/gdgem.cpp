@@ -206,7 +206,7 @@ void NMX::processing_thread() {
   NMXHists hists;
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
-  ClusterMatcher matcher(200);
+  ClusterMatcher matcher(nmx_opts.matcher_max_delta_time);
 
   TSCTimer global_time, report_timer;
 
@@ -263,11 +263,7 @@ void NMX::processing_thread() {
             XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
                    event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
 
-            if ((!nmx_opts.enforce_lower_uncertainty_limit ||
-                event.meets_lower_cirterion(nmx_opts.lower_uncertainty_limit)) &&
-                (!nmx_opts.enforce_minimum_eventlets ||
-                    (event.x.entries.size() >= nmx_opts.minimum_eventlets &&
-                        event.y.entries.size() >= nmx_opts.minimum_eventlets))) {
+            if (nmx_opts.filter.valid(event)) {
 
               // printf("\nHave a cluster:\n");
               // event.debug2();
@@ -346,20 +342,38 @@ void NMX::init_builder(std::string jsonfile) {
     XTRACE(INIT, DEB, "Using BuilderEventlets\n");
     builder_ = std::make_shared<BuilderEventlets>(nmx_opts.dump_directory,
                                                   nmx_opts.dump_csv, nmx_opts.dump_h5);
-    builder_->clusterer_x = std::make_shared<Clusterer1>(200, 3, 3);
-    builder_->clusterer_y = std::make_shared<Clusterer1>(200, 3, 3);
+    builder_->clusterer_x =
+        std::make_shared<Clusterer1>(nmx_opts.clusterer_x.max_time_gap,
+                                     nmx_opts.clusterer_x.max_strip_gap,
+                                     nmx_opts.clusterer_x.min_cluster_size);
+    builder_->clusterer_y =
+        std::make_shared<Clusterer1>(nmx_opts.clusterer_y.max_time_gap,
+                                     nmx_opts.clusterer_y.max_strip_gap,
+                                     nmx_opts.clusterer_y.min_cluster_size);
   } else if (nmx_opts.builder_type == "APV") {
     XTRACE(INIT, DEB, "Using BuilderAPV\n");
     builder_ = std::make_shared<BuilderAPV>(nmx_opts.dump_directory,
                                             nmx_opts.dump_csv, nmx_opts.dump_h5);
-    builder_->clusterer_x = std::make_shared<Clusterer1>(15, 15, 3);
-    builder_->clusterer_y = std::make_shared<Clusterer1>(15, 15, 3);
+    builder_->clusterer_x =
+        std::make_shared<Clusterer1>(nmx_opts.clusterer_x.max_time_gap,
+                                     nmx_opts.clusterer_x.max_strip_gap,
+                                     nmx_opts.clusterer_x.min_cluster_size);
+    builder_->clusterer_y =
+        std::make_shared<Clusterer1>(nmx_opts.clusterer_y.max_time_gap,
+                                     nmx_opts.clusterer_y.max_strip_gap,
+                                     nmx_opts.clusterer_y.min_cluster_size);
   } else if (nmx_opts.builder_type == "SRS") {
     XTRACE(INIT, DEB, "Using BuilderSRS\n");
-    auto clusx = std::make_shared<Clusterer1>(200, 3, 3);
-    auto clusy = std::make_shared<Clusterer1>(200, 3, 3);
+    auto clusx = std::make_shared<Clusterer1>(nmx_opts.clusterer_x.max_time_gap,
+                                              nmx_opts.clusterer_x.max_strip_gap,
+                                              nmx_opts.clusterer_x.min_cluster_size);
+    auto clusy = std::make_shared<Clusterer1>(nmx_opts.clusterer_y.max_time_gap,
+                                              nmx_opts.clusterer_y.max_strip_gap,
+                                              nmx_opts.clusterer_y.min_cluster_size);
     builder_ = std::make_shared<BuilderVMM2>(
         nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
+        nmx_opts.clusterer_x.eventlet_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
+        nmx_opts.clusterer_y.eventlet_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
         nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else {
     XTRACE(INIT, ALW, "Unrecognized builder type in config\n");

@@ -59,7 +59,7 @@ void Clusterer1::cluster_by_strip(HitContainer &hits) {
 //====================================================================================================================
 void Clusterer1::stash_cluster(Cluster &cluster) {
 
-  // TODO: Decide if filters go here
+  // TODO: Decide if filters go here?
 
   if (cluster.entries.size() < pMinClusterSize)
     return;
