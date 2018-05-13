@@ -5,11 +5,13 @@
 
 class ClusterMatcher {
 public:
-  ClusterMatcher(double dPlane);
+  ClusterMatcher(double maxDeltaTime);
 
   void merge(ClusterList& c);
 
   void match_end(bool force);
+
+  // TODO: match in other ways -- mass, overlap?
 
   size_t stats_cluster_count {0};
 
@@ -17,7 +19,7 @@ public:
   std::list<Event> matched_clusters;
 
 private:
-  double pdPlane {0};
+  double pMaxDeltaTime {0};
 
   bool ready(double time) const;
 

@@ -7,28 +7,28 @@
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB
 
-ClusterMatcher::ClusterMatcher(double dPlane) : pdPlane(dPlane) {
+ClusterMatcher::ClusterMatcher(double maxDeltaTime) : pMaxDeltaTime(maxDeltaTime) {
 }
 
-bool ClusterMatcher::ready(double time) const
-{
+bool ClusterMatcher::ready(double time) const {
+  // TODO Parametrize threshold
   return ((unmatched_clusters.size() > 2) &&
-      (unmatched_clusters.back().time_start - time) > (pdPlane*3));
+      (unmatched_clusters.back().time_start - time) > (pMaxDeltaTime * 3));
 }
 
-double ClusterMatcher::delta_end(const Event& event, const Cluster& cluster) const
-{
+double ClusterMatcher::delta_end(const Event &event, const Cluster &cluster) const {
   return std::abs(event.time_end() - cluster.time_end);
 }
 
-bool ClusterMatcher::belongs_end(const Event& event, const Cluster& cluster) const
-{
-  return (delta_end(event, cluster) <= pdPlane);
+bool ClusterMatcher::belongs_end(const Event &event, const Cluster &cluster) const {
+  return (delta_end(event, cluster) <= pMaxDeltaTime);
 }
 
-void ClusterMatcher::merge(ClusterList& c) {
+void ClusterMatcher::merge(ClusterList &c) {
   unmatched_clusters.splice(unmatched_clusters.end(), c);
 }
+
+// TODO make it aware of X and Y limits
 
 void ClusterMatcher::match_end(bool force) {
 

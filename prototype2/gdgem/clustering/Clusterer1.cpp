@@ -6,11 +6,7 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 Clusterer1::Clusterer1(double maxTimeGap, uint16_t maxStripGap, size_t minClusterSize)
-    : AbstractClusterer()
-    , pMaxTimeGap(maxTimeGap)
-    , pMaxStripGap(maxStripGap)
-    , pMinClusterSize(minClusterSize)
-{
+    : AbstractClusterer(), pMaxTimeGap(maxTimeGap), pMaxStripGap(maxStripGap), pMinClusterSize(minClusterSize) {
 }
 
 void Clusterer1::cluster(const HitContainer &hits) {
@@ -21,20 +17,14 @@ void Clusterer1::cluster_by_time(const HitContainer &hits) {
   HitContainer cluster;
 
   for (const auto &hit : hits) {
-    // If empty cluster, just add and move on
-    if (cluster.empty()) {
-      cluster.emplace_back(hit);
-      continue;
-    }
-
     // Stash cluster if time gap to next hit is too large
-    auto time_gap = hit.time - cluster.back().time;
-    if (time_gap > pMaxTimeGap) {
+    if (!cluster.empty() &&
+        (hit.time - cluster.back().time) > pMaxTimeGap) {
       cluster_by_strip(cluster);
       cluster.clear();
     }
 
-    // insert in either case
+    // Insert in either case
     cluster.emplace_back(hit);
   }
 
@@ -52,21 +42,10 @@ void Clusterer1::cluster_by_strip(HitContainer &hits) {
             });
 
   for (auto &hit : hits) {
-    // If empty cluster, just add and move on
-    if (cluster.entries.empty()) {
-      cluster.insert_eventlet(hit);
-      continue;
-    }
-
     // Stash cluster if strip gap to next hit is too large
-    // filtering is done elsewhere
-    auto strip_gap = hit.strip - cluster.strip_end;
-    if (strip_gap > (pMaxStripGap + 1))
-    {
-      // Attempt to stash
+    if (!cluster.empty() &&
+        (hit.strip - cluster.strip_end) > (pMaxStripGap + 1)) {
       stash_cluster(cluster);
-
-      // Reset and move on
       cluster = Cluster();
     }
 
@@ -78,15 +57,16 @@ void Clusterer1::cluster_by_strip(HitContainer &hits) {
   stash_cluster(cluster);
 }
 //====================================================================================================================
-void Clusterer1::stash_cluster(Cluster& cluster) {
+void Clusterer1::stash_cluster(Cluster &cluster) {
 
-  // Some filtering can happen here
+  // TODO: Decide if filters go here
+
   if (cluster.entries.size() < pMinClusterSize)
     return;
 
-  // pDeltaTimeSpan ?
+  // TODO: time span filter?
 
   DTRACE(DEB, "******** VALID ********\n");
   clusters.emplace_back(std::move(cluster));
-  stats_cluster_count ++;
+  stats_cluster_count++;
 }
