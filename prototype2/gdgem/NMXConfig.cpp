@@ -21,7 +21,7 @@ NMXConfig::NMXConfig(std::string jsonfile) {
 
   builder_type = root["builder_type"].asString();
 
-  if (builder_type == "SRS") {
+  if ((builder_type == "VMM2") || (builder_type == "VMM3")) {
     /**< @todo get from slow control? */
     // TODO: decimate tdc bug?
     auto tc = root["time_config"];
@@ -106,12 +106,12 @@ std::string NMXConfig::debug() const {
   ss << "    max_strip_gap = " << clusterer_y.max_strip_gap<< "\n";
   ss << "    min_cluster_size = " << clusterer_y.min_cluster_size << "\n";
 
-  ss << "  matcher_max_delta_time = " << matcher_max_delta_time << "\n";
+  ss << "  Matcher\n    max_delta_time = " << matcher_max_delta_time << "\n";
 
-  ss << "  analyze_weighted = " << (analyze_weighted ? "true" : "false")
-     << "\n";
-  ss << "  analyze_max_timebins = " << analyze_max_timebins << "\n";
-  ss << "  analyze_max_timedif = " << analyze_max_timedif << "\n";
+  ss << "  Event analysis\n";
+  ss << "    weighted = " << (analyze_weighted ? "true" : "false") << "\n";
+  ss << "    max_timebins = " << analyze_max_timebins << "\n";
+  ss << "    max_timedif = " << analyze_max_timedif << "\n";
 
   ss << "  Filters:\n";
   ss << "    enforce_lower_uncertainty_limit = "
@@ -123,16 +123,19 @@ std::string NMXConfig::debug() const {
   if (filter.enforce_minimum_eventlets)
     ss << "    minimum_eventlets = " << filter.minimum_eventlets << "\n";
 
-  ss << "  eventlet_histograms = " << (eventlet_histograms ? "YES" : "no") << "\n";
-  ss << "  cluster_adc_downshift = " << cluster_adc_downshift << "\n";
-  ss << "  track_sample_minhits = " << track_sample_minhits << "\n";
-  ss << "  send_tracks = " << (send_tracks ? "YES" : "no") << "\n";
+  ss << "  Histogram eventlets = " << (eventlet_histograms ? "YES" : "no") << "\n";
+  if (eventlet_histograms)
+    ss << "    cluster_adc_downshift = " << cluster_adc_downshift << "\n";
+  ss << "  Send tracks = " << (send_tracks ? "YES" : "no") << "\n";
+  if (send_tracks)
+    ss << "    sample_minhits = " << track_sample_minhits << "\n";
 
   ss << "  geometry_x = " << geometry.nx() << "\n";
   ss << "  geometry_y = " << geometry.ny() << "\n";
 
-  ss << "  dump_csv = " << (dump_csv ? "YES" : "no") << "\n";
-  ss << "  dump_h5 = " << (dump_h5 ? "YES" : "no") << "\n";
-  ss << "  dump_directory = " << dump_directory << "\n";
+  ss << "  Dump csv = " << (dump_csv ? "YES" : "no") << "\n";
+  ss << "  Dump h5 = " << (dump_h5 ? "YES" : "no") << "\n";
+  if (dump_csv || dump_h5)
+    ss << "  dump_directory = " << dump_directory << "\n";
   return ss.str();
 }

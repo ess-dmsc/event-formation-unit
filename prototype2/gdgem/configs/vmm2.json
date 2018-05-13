@@ -1,5 +1,5 @@
 {
-  "builder_type" : "SRS",
+  "builder_type" : "VMM2",
 
   "time_config" :
   {
@@ -51,8 +51,10 @@
     "minimum_eventlets" : 6
   },
 
+  "eventlet_histograms" : true,
   "track_sample_minhits" : 6,
   "cluster_adc_downshift" : 6,
+  "send_tracks" : false,
 
   "geometry_x" : 256,
   "geometry_y" : 256,
