@@ -6,7 +6,9 @@
     "tac_slope" : 60,
     "bc_clock" : 20,
     "trigger_resolution" : 3.125,
-    "target_resolution" : 0.5
+    "target_resolution" : 0.5,
+    "acquisition_window" : 4000,
+    "rebin_tdc" : true
   },
 
   "srs_mappings" :

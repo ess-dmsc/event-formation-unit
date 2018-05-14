@@ -347,38 +347,28 @@ void NMX::processing_thread() {
 void NMX::init_builder(std::string jsonfile) {
   nmx_opts = NMXConfig(jsonfile);
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
+
+  auto clusx = std::make_shared<Clusterer1>(nmx_opts.clusterer_x.max_time_gap,
+                                            nmx_opts.clusterer_x.max_strip_gap,
+                                            nmx_opts.clusterer_x.min_cluster_size);
+  auto clusy = std::make_shared<Clusterer1>(nmx_opts.clusterer_y.max_time_gap,
+                                            nmx_opts.clusterer_y.max_strip_gap,
+                                            nmx_opts.clusterer_y.min_cluster_size);
+
   if (nmx_opts.builder_type == "Eventlets") {
     XTRACE(INIT, DEB, "Using BuilderEventlets\n");
     builder_ = std::make_shared<BuilderEventlets>(nmx_opts.dump_directory,
                                                   nmx_opts.dump_csv, nmx_opts.dump_h5);
-    builder_->clusterer_x =
-        std::make_shared<Clusterer1>(nmx_opts.clusterer_x.max_time_gap,
-                                     nmx_opts.clusterer_x.max_strip_gap,
-                                     nmx_opts.clusterer_x.min_cluster_size);
-    builder_->clusterer_y =
-        std::make_shared<Clusterer1>(nmx_opts.clusterer_y.max_time_gap,
-                                     nmx_opts.clusterer_y.max_strip_gap,
-                                     nmx_opts.clusterer_y.min_cluster_size);
+    builder_->clusterer_x = clusx;
+    builder_->clusterer_y = clusy;
   } else if (nmx_opts.builder_type == "APV") {
     XTRACE(INIT, DEB, "Using BuilderAPV\n");
     builder_ = std::make_shared<BuilderAPV>(nmx_opts.dump_directory,
                                             nmx_opts.dump_csv, nmx_opts.dump_h5);
-    builder_->clusterer_x =
-        std::make_shared<Clusterer1>(nmx_opts.clusterer_x.max_time_gap,
-                                     nmx_opts.clusterer_x.max_strip_gap,
-                                     nmx_opts.clusterer_x.min_cluster_size);
-    builder_->clusterer_y =
-        std::make_shared<Clusterer1>(nmx_opts.clusterer_y.max_time_gap,
-                                     nmx_opts.clusterer_y.max_strip_gap,
-                                     nmx_opts.clusterer_y.min_cluster_size);
+    builder_->clusterer_x = clusx;
+    builder_->clusterer_y = clusy;
   } else if (nmx_opts.builder_type == "VMM2") {
     XTRACE(INIT, DEB, "Using BuilderVMM2\n");
-    auto clusx = std::make_shared<Clusterer1>(nmx_opts.clusterer_x.max_time_gap,
-                                              nmx_opts.clusterer_x.max_strip_gap,
-                                              nmx_opts.clusterer_x.min_cluster_size);
-    auto clusy = std::make_shared<Clusterer1>(nmx_opts.clusterer_y.max_time_gap,
-                                              nmx_opts.clusterer_y.max_strip_gap,
-                                              nmx_opts.clusterer_y.min_cluster_size);
     builder_ = std::make_shared<BuilderVMM2>(
         nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
         nmx_opts.clusterer_x.eventlet_adc_threshold, nmx_opts.clusterer_x.max_time_gap,

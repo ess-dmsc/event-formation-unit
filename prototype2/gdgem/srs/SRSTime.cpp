@@ -45,8 +45,8 @@ double SRSTime::trigger_resolution() const {
   return trigger_resolution_;
 }
 
-double SRSTime::trigger_timestamp_ns(uint32_t trigger_timestamp) const {
-  return trigger_timestamp * trigger_resolution_;
+double SRSTime::target_resolution() const {
+  return target_resolution_ns_;
 }
 
 uint16_t SRSTime::acquisition_window() const
@@ -57,6 +57,10 @@ uint16_t SRSTime::acquisition_window() const
 double SRSTime::max_chip_time_in_window() const
 {
   return max_chip_time_in_window_;
+}
+
+double SRSTime::trigger_timestamp_ns(uint32_t trigger_timestamp) const {
+  return trigger_timestamp * trigger_resolution_;
 }
 
 double SRSTime::delta_timestamp_ns(double old_timestamp_ns,
@@ -79,10 +83,6 @@ double SRSTime::delta_timestamp_ns(double old_timestamp_ns,
 double SRSTime::trigger_period() const {
   // TODO: magic numbers
   return 1000 * 4096 / bc_clock_;
-}
-
-double SRSTime::target_resolution() const {
-  return target_resolution_ns_;
 }
 
 double SRSTime::chip_time(uint16_t bc, uint16_t tdc) const {
@@ -127,11 +127,12 @@ uint64_t SRSTime::timestamp(uint32_t trigger, uint16_t bc, uint16_t tdc) {
 }
 
 std::string SRSTime::debug() const {
-  // TODO: improve this, with more parameters now
   std::stringstream ss;
-  ss << "(" << "trigger*" << trigger_resolution_ << " + bc*1000/" << bc_clock_
-     << " + tdc*" << tac_slope_ << "/256" << ")ns * "
-     << target_resolution_ns_;
+  ss << "    Chip time = bc*1000/" << bc_clock_ << " + tdc*" << tac_slope_ << "/255 (ns)\n";
+  ss << "         Rebin TDC (for VMM3 bug) = " << (rebin_tdc_ ? "YES" : "no") << " (ns)\n";
+  ss << "    Trigger time = " << trigger_resolution_ << "*trigger (ns)\n";
+  ss << "    Maximum chip time in window = " << max_chip_time_in_window_ << " (ns)\n";
+  ss << "    Target resolution = " << target_resolution_ns_ << "  (ns)\n";
   return ss.str();
 }
 

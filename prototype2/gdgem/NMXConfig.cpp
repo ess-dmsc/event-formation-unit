@@ -23,12 +23,13 @@ NMXConfig::NMXConfig(std::string jsonfile) {
 
   if ((builder_type == "VMM2") || (builder_type == "VMM3")) {
     /**< @todo get from slow control? */
-    // TODO: decimate tdc bug?
     auto tc = root["time_config"];
     time_config.set_tac_slope(tc["tac_slope"].asInt());
     time_config.set_bc_clock(tc["bc_clock"].asInt());
     time_config.set_trigger_resolution(tc["trigger_resolution"].asDouble());
     time_config.set_target_resolution(tc["target_resolution"].asDouble());
+    time_config.set_acquisition_window(tc["acquisition_window"].asUInt());
+    time_config.set_rebin_tdc(tc["rebin_tdc"].asBool());
 
     auto sm = root["srs_mappings"];
     for (unsigned int index = 0; index < sm.size(); index++) {
@@ -84,13 +85,13 @@ NMXConfig::NMXConfig(std::string jsonfile) {
 
 std::string NMXConfig::debug() const {
   std::stringstream ss;
-  ss << "  =====================================\n";
-  ss << "  =====     builder:  "
+  ss << "  ==========================================\n";
+  ss << "  ========       builder: "
      << builder_type
-     << "     =====\n";
-  ss << "  =====================================\n";
+     << "      ========\n";
+  ss << "  ==========================================\n";
   if ((builder_type == "VMM2") || (builder_type == "VMM3")) {
-    ss << "  time = " << time_config.debug() << "\n";
+    ss << "  Time config:\n" << time_config.debug();
     ss << "  Chip geometry:\n" << srs_mappings.debug();
   }
 
