@@ -1,7 +1,6 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
 #include <logical_geometry/ESSGeometry.h>
-#include <gdgem/nmx/Hists.h>
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
 
@@ -16,7 +15,6 @@
 class EventFormationTest : public TestBase {
 protected:
   Event event;
-  NMXHists hists;
   SRSTime time_intepreter;
   SRSMappings geometry_interpreter;
 
@@ -43,7 +41,7 @@ TEST_F(EventFormationTest, Initial) {
   ClusterMatcher matcher(10);
 
   auto builder = std::make_shared<BuilderVMM2>(time_intepreter, geometry_interpreter,
-      cx, cy, "", 0, 0);
+      cx, cy, 0, 200, 0, 200, "", 0, 0);
 
   uint64_t readouts = 0;
   uint64_t readouts_error_bytes = 0;
@@ -54,13 +52,13 @@ TEST_F(EventFormationTest, Initial) {
   uint64_t clusters_discarded = 0;
 
   for (auto pkt : Run16_1_to_16) {
-    auto stats = builder->process_buffer((char *)&pkt[0], pkt.size(), hists);
+    auto stats = builder->process_buffer((char *)&pkt[0], pkt.size());
     readouts += stats.valid_eventlets;
     readouts_error_bytes += stats.error_bytes; // From srs data parser
 
-    matcher.merge(builder->clusterer_x->clusters);
-    matcher.merge(builder->clusterer_y->clusters);
-    matcher.match_end(false);
+    matcher.merge(0, builder->clusterer_x->clusters);
+    matcher.merge(1, builder->clusterer_y->clusters);
+    matcher.match_end(true);
 
 
     while (!matcher.matched_clusters.empty()) {
@@ -68,8 +66,9 @@ TEST_F(EventFormationTest, Initial) {
       event = matcher.matched_clusters.front();
       matcher.matched_clusters.pop_front();
 
-      hists.bin(event);
-      event.analyze(true /*analyze_weighted*/, 3 /*analyze_max_timebins */, 7 /*analyze_max_timedif*/);
+      event.analyze(true /*analyze_weighted*/,
+                    3 /*analyze_max_timebins */,
+                    7 /*analyze_max_timedif*/);
       if (event.valid()) {
         printf("\nHave a cluster:\n");
         event.debug2();
@@ -100,38 +99,3 @@ int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
-
-//             if ( (!nmx_opts.enforce_lower_uncertainty_limit ||
-//                    event.meets_lower_cirterion(nmx_opts.lower_uncertainty_limit)) &&
-//                  (!nmx_opts.enforce_minimum_eventlets ||
-//                  (event.x.entries.size() >= nmx_opts.minimum_eventlets &&
-//                   event.y.entries.size() >= nmx_opts.minimum_eventlets))) {
-//
-//               // printf("\nHave a cluster:\n");
-//               // event.debug2();
-//
-//               coords[0] = event.x.center_rounded();
-//               coords[1] = event.y.center_rounded();
-//               pixelid = geometry.to_pixid(coords);
-//               if (pixelid == 0) {
-//                 mystats.geom_errors++;
-//               } else {
-//                 time = static_cast<uint32_t>(event.time_start());
-//
-//                 XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n", time, pixelid);
-//
-//                 mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
-//                 mystats.clusters_events++;
-//               }
-//             } else { // Does not meet criteria
-//               /** @todo increments counters when failing this */
-//               // printf("\nInvalid cluster:\n");
-//               // event.debug2();
-//             }
-//           }
-//         }
-//       }
-//     }
-//   }
-// }

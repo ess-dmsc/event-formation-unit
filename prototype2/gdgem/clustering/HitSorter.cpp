@@ -6,74 +6,74 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 HitSorter::HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
-                           double maxTimeGap, std::shared_ptr<AbstractClusterer> cb) :
+                           double maxTimeGap) :
     pTime(time), pChips(chips),
-    pADCThreshold(ADCThreshold), callback_(cb),
+    pADCThreshold(ADCThreshold),
     hits(pTime, maxTimeGap) {
 
 }
 
 //====================================================================================================================
-void HitSorter::store(int triggerTimestamp, unsigned int frameCounter,
-                         int fecID, int vmmID, int chNo, int bcid, int tdc, int adc,
-                         int overThresholdFlag) {
+void HitSorter::insert(Readout readout) {
 
-  // Ready for factoring out, logic tested elsewhere
-  uint16_t strip = pChips.get_strip(fecID, vmmID, chNo);
+  double triggerTimestamp_ns = pTime.trigger_timestamp_ns(readout.srs_timestamp);
+  if (old_trigger_timestamp_ns_ != triggerTimestamp_ns) {
 
-  // Fix for entries with all zeros
-  if (bcid == 0 && tdc == 0 && overThresholdFlag) {
-    bcid = oldBcid;
-    tdc = oldTdc;
-    stats_bcid_tdc_error++;
-  }
-  oldBcid = bcid;
-  oldTdc = tdc;
-  // oldVmmID = vmmID; // does this need to match for above logic?
-
-  // Could be factored out depending on above block
-  double chipTime = pTime.chip_time(bcid, tdc);
-
-  double triggerTimestamp_ns = pTime.timestamp_ns(triggerTimestamp);
-  if (oldTriggerTimestamp_ns != triggerTimestamp_ns) {
-    stats_trigger_count++;
     analyze();
-    hits.subsequent_trigger(false);
-    double deltaTriggerTimestamp_ns =
-        pTime.delta_timestamp_ns(oldTriggerTimestamp_ns,
+
+    double delta_trigger_ns =
+        pTime.delta_timestamp_ns(old_trigger_timestamp_ns_,
                                  triggerTimestamp_ns,
-                                 oldFrameCounter,
-                                 frameCounter,
+                                 old_frame_counter_,
+                                 readout.frame_counter,
                                  stats_triggertime_wraps);
 
-    if (deltaTriggerTimestamp_ns <= pTime.trigger_period()) {
-      hits.subsequent_trigger(true); // should this happen before analyze?
-    }
-  }
-  oldTriggerTimestamp_ns = triggerTimestamp_ns;
+    // TODO: should this happen before analyze?
+    hits.subsequent_trigger(delta_trigger_ns <= pTime.trigger_period());
 
-  // This is likely resolved. Candidate for removal?
-  if ((frameCounter < oldFrameCounter)
-      && !(oldFrameCounter > frameCounter + 1000000000)) {
+    stats_trigger_count++;
+  }
+  old_trigger_timestamp_ns_ = triggerTimestamp_ns;
+
+  // TODO: This is likely resolved. Candidate for removal?
+  if ((readout.frame_counter < old_frame_counter_)
+      && !(old_frame_counter_ > readout.frame_counter + 1000000000)) {
     stats_fc_error++;
   }
-  oldFrameCounter = frameCounter;
+  old_frame_counter_ = readout.frame_counter;
 
-  // Store hit to appropriate buffer
-  if (overThresholdFlag || (adc >= pADCThreshold)) {
-    hits.store(pChips.get_plane(fecID, vmmID), strip, adc, chipTime);
+
+  // TODO: factor this out?
+  // Fix for entries with all zeros
+  if (readout.bcid == 0 && readout.tdc == 0 && readout.over_threshold) {
+    readout.bcid = old_bcid_;
+    readout.tdc = old_tdc_;
+    stats_bcid_tdc_error++;
+  }
+  old_bcid_ = readout.bcid;
+  old_tdc_ = readout.tdc;
+  // TODO: should this include oldVmmID = vmmID, do they need to match?
+  // Could be factored out depending on above block
+  double chipTime = pTime.chip_time(readout.bcid, readout.tdc);
+
+  if (readout.over_threshold || (readout.adc >= pADCThreshold)) {
+    // TODO: if adc=0 && over_threshold, adc=dumm_val?
+    hits.store(pChips.get_plane(readout), pChips.get_strip(readout),
+               readout.adc, chipTime);
+    // TODO: who adds chipTime + trigger time? queue?
   }
 }
 
 void HitSorter::flush() {
   //flush both buffers in queue
+  // TODO: subsequent trigger? How do we know?
   analyze();
   analyze();
 }
 
 void HitSorter::analyze() {
   hits.sort_and_correct();
-  if (callback_)
-    callback_->cluster(hits.hits());
+  if (clusterer)
+    clusterer->cluster(hits.hits());
 }
 

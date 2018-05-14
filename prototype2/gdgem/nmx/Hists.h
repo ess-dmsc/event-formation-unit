@@ -31,8 +31,10 @@ public:
   /** @brief clears histograms */
   void clear();
 
-  void bin(const Eventlet &e);
   void bin(const Event &e);
+  void bin_hists(const std::list<Cluster>& cl);
+
+  void bin(const Eventlet &e);
   void binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16_t yadc);
 
   bool isEmpty() const;

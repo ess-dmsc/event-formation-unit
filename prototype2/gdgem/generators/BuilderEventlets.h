@@ -15,8 +15,7 @@ public:
   BuilderEventlets(std::string dump_dir, bool dump_csv, bool dump_h5);
 
   /** @todo Martin document */
-  ResultStats process_buffer(char *buf, size_t size,
-                             NMXHists &hists) override;
+  ResultStats process_buffer(char *buf, size_t size) override;
 
 private:
   static constexpr size_t psize{sizeof(Eventlet)};

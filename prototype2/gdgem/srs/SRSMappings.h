@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <cinttypes>
+#include <gdgem/nmx/Readout.h>
 #include <list>
 #include <string>
 #include <vector>
@@ -36,18 +36,9 @@ public:
   void set_mapping(uint16_t fecID, uint16_t vmmID, uint8_t planeID,
                    uint16_t strip_offset);
 
-  /** @brief get strip number
-   * @param fecID ID of FEC
-   * @param vmmID ID of chip
-   * @param channelID channel number
-   */
-  uint16_t get_strip(uint16_t fecID, uint16_t vmmID, uint32_t channelID) const;
+  uint16_t get_strip(const Readout& readout) const;
 
-  /** @brief get plane ID
-   * @param fecID ID of FEC
-   * @param vmmID ID of chip
-   */
-  uint8_t get_plane(uint16_t fecID, uint16_t vmmID) const;
+  uint8_t get_plane(const Readout& readout) const;
 
   // @brief prints out configuration
   std::string debug() const;

@@ -18,8 +18,7 @@ BuilderEventlets::BuilderEventlets(std::string dump_dir, bool dump_csv, bool dum
   }
 }
 
-AbstractBuilder::ResultStats BuilderEventlets::process_buffer(char *buf, size_t size,
-                                                       NMXHists &hists) {
+AbstractBuilder::ResultStats BuilderEventlets::process_buffer(char *buf, size_t size) {
   size_t count = std::min(size / psize, size_t(9000 / psize));
 
   converted_data.resize(count);
@@ -29,8 +28,6 @@ AbstractBuilder::ResultStats BuilderEventlets::process_buffer(char *buf, size_t 
   std::vector<Eventlet> converted_y;
 
   for (const auto& e : converted_data) {
-    // TODO: make this optional
-    hists.bin(e);
     if (e.plane_id)
       converted_y.push_back(e);
     else

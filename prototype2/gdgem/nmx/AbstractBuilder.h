@@ -7,9 +7,8 @@
 
 #pragma once
 
-#include <gdgem/nmx/Hists.h>
-#include <common/DataSave.h>
 #include <gdgem/clustering/AbstractClusterer.h>
+#include <common/DataSave.h>
 #include <memory>
 
 class AbstractBuilder {
@@ -34,8 +33,7 @@ public:
   virtual ~AbstractBuilder() {}
 
   /** @todo Martin document */
-  virtual ResultStats process_buffer(char *buf, size_t size,
-                                     NMXHists &hists) = 0;
+  virtual ResultStats process_buffer(char *buf, size_t size) = 0;
 
   std::shared_ptr<AbstractClusterer> clusterer_y;
   std::shared_ptr<AbstractClusterer> clusterer_x;

@@ -14,7 +14,8 @@
 class TrackSerializer {
 public:
   /** @todo document */
-  TrackSerializer(size_t maxarraylength, size_t minhits = 0);
+  TrackSerializer(size_t maxarraylength,
+                  size_t minhits, double target_res);
 
   /** @todo document */
   ~TrackSerializer();
@@ -30,8 +31,9 @@ private:
   flatbuffers::FlatBufferBuilder builder;
   size_t maxlen{0};
   size_t minhits_{0};
+  double target_resolution_ {1};
 
-  uint64_t time_offset{0};
+  double time_offset{0};
   std::vector<flatbuffers::Offset<pos>> xtrack;
   std::vector<flatbuffers::Offset<pos>> ytrack;
   double xpos{-1};

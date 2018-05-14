@@ -10,7 +10,6 @@
 class BuilderVMM2Test : public TestBase {
 protected:
   BuilderVMM2 *builder;
-  NMXHists hists;
   std::shared_ptr<Clusterer1> cx;
   std::shared_ptr<Clusterer1> cy;
 
@@ -22,7 +21,7 @@ protected:
 
     geometry.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
     geometry.define_plane(1, {{1, 10}, {1, 11}, {1, 14}, {1, 15}});
-    builder = new BuilderVMM2(time, geometry, cx, cy, "", false, false);
+    builder = new BuilderVMM2(time, geometry, cx, cy, 0, 200, 0, 200, "", false, false);
   }
   virtual void TearDown() { delete builder; }
 };
@@ -30,15 +29,14 @@ protected:
 TEST_F(BuilderVMM2Test, DataTooShortForEventlets) {
   auto stats =
       builder->process_buffer((char *)srsdata_0_eventlets,
-                              sizeof(srsdata_0_eventlets), hists);
+                              sizeof(srsdata_0_eventlets));
   ASSERT_EQ(stats.valid_eventlets, 0);
   ASSERT_EQ(stats.geom_errors, 0);
 }
 
 TEST_F(BuilderVMM2Test, InvalidGeometry) {
   auto stats = builder->process_buffer((char *)srsdata_invalid_geometry,
-                                       sizeof(srsdata_invalid_geometry),
-                                       hists);
+                                       sizeof(srsdata_invalid_geometry));
   ASSERT_EQ(stats.valid_eventlets, 1);
   ASSERT_EQ(stats.geom_errors, 1);
 }
@@ -46,7 +44,7 @@ TEST_F(BuilderVMM2Test, InvalidGeometry) {
 TEST_F(BuilderVMM2Test, Process22Eventlets) {
   auto stats =
       builder->process_buffer((char *)srsdata_22_eventlets,
-                              sizeof(srsdata_22_eventlets), hists);
+                              sizeof(srsdata_22_eventlets));
   ASSERT_EQ(stats.valid_eventlets, 22);
   ASSERT_EQ(stats.geom_errors, 0);
 }

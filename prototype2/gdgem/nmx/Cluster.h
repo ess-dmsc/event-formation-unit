@@ -20,18 +20,19 @@ struct Cluster {
    */
   void insert_eventlet(const Eventlet &eventlet);
 
-  std::list<Eventlet> entries; // eventlets in plane
+  std::list<Eventlet> entries;
+  bool empty() const;
 
   // calculated as eventlets are added
   uint16_t strip_start{0};
   uint16_t strip_end{0};
   uint16_t strip_span() const;
 
-  double time_start{0}; // start of event timestamp
-  double time_end{0};   // end of event timestamp
+  double time_start{0};
+  double time_end{0};
   double time_span() const;
 
-  double adc_sum{0.0};   // sum of adc values
+  double adc_sum{0.0};
 
   double strip_mass{0.0};   // sum of strip*adc
   double strip_center() const;

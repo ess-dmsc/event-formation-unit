@@ -102,7 +102,7 @@ private:
   NMXConfig nmx_opts;
 
   std::shared_ptr<AbstractBuilder> builder_{nullptr};
-  void init_builder(std::string jsonfile);
+  void init_builder();
 };
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
@@ -191,7 +191,8 @@ void NMX::input_thread() {
 }
 
 void NMX::processing_thread() {
-  init_builder(NMXSettings.ConfigFile);
+  nmx_opts = NMXConfig(NMXSettings.ConfigFile);
+  init_builder();
   if (!builder_) {
     XTRACE(PROCESS, WAR, "No builder specified, exiting thread\n");
     return;
@@ -201,12 +202,13 @@ void NMX::processing_thread() {
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
   Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
-  TrackSerializer trackfb(256, nmx_opts.track_sample_minhits);
+  TrackSerializer trackfb(256, nmx_opts.track_sample_minhits,
+                          nmx_opts.time_config.target_resolution());
   HistSerializer histfb;
   NMXHists hists;
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
-  ClusterMatcher matcher(200);
+  ClusterMatcher matcher(nmx_opts.matcher_max_delta_time);
 
   TSCTimer global_time, report_timer;
 
@@ -218,7 +220,7 @@ void NMX::processing_thread() {
   int sample_next_track{0};
   while (1) {
     // mystats.fifo_free = input2proc_fifo.free();
-    if ((input2proc_fifo.pop(data_index)) == false) {
+    if (!input2proc_fifo.pop(data_index)) {
       mystats.processing_idle++;
       usleep(1);
     } else {
@@ -227,18 +229,21 @@ void NMX::processing_thread() {
         mystats.fifo_seq_errors++;
       } else {
         // printf("received packet with length %d\n", len);
-        auto stats = builder_->process_buffer(eth_ringbuf->getDataBuffer(data_index), len, hists);
+        auto stats = builder_->process_buffer(eth_ringbuf->getDataBuffer(data_index), len);
 
         mystats.readouts += stats.valid_eventlets;
         mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
 
-        if (builder_->clusterer_x->clusters.size() &&
-            builder_->clusterer_y->clusters.size())
-        {
-          matcher.merge(builder_->clusterer_x->clusters);
-          matcher.merge(builder_->clusterer_y->clusters);
-          matcher.match_end(false);
+        if (nmx_opts.eventlet_histograms) {
+          hists.bin_hists(builder_->clusterer_x->clusters);
+          hists.bin_hists(builder_->clusterer_y->clusters);
         }
+
+        if (!builder_->clusterer_x->empty() && !builder_->clusterer_y->empty()) {
+          matcher.merge(0, builder_->clusterer_x->clusters);
+          matcher.merge(1, builder_->clusterer_y->clusters);
+        }
+        matcher.match_end(false);
 
         while (!matcher.matched_clusters.empty()) {
           XTRACE(PROCESS, DEB, "event_ready()\n");
@@ -246,16 +251,21 @@ void NMX::processing_thread() {
           matcher.matched_clusters.pop_front();
 
           //mystats.unclustered = clusterer.unclustered();
-          hists.bin(event);
+
           event.analyze(nmx_opts.analyze_weighted,
                         nmx_opts.analyze_max_timebins,
                         nmx_opts.analyze_max_timedif);
+
+          if (nmx_opts.eventlet_histograms) {
+            hists.bin(event);
+          }
 
           if (event.valid()) {
             XTRACE(PROCESS, DEB, "event.good\n");
 
             mystats.clusters_xy++;
 
+            // TODO: Should it be here or outside of event.valid()?
             if (sample_next_track) {
               sample_next_track = trackfb.add_track(event);
             }
@@ -263,11 +273,7 @@ void NMX::processing_thread() {
             XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
                    event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
 
-            if ((!nmx_opts.enforce_lower_uncertainty_limit ||
-                event.meets_lower_cirterion(nmx_opts.lower_uncertainty_limit)) &&
-                (!nmx_opts.enforce_minimum_eventlets ||
-                    (event.x.entries.size() >= nmx_opts.minimum_eventlets &&
-                        event.y.entries.size() >= nmx_opts.minimum_eventlets))) {
+            if (nmx_opts.filter.valid(event)) {
 
               // printf("\nHave a cluster:\n");
               // event.debug2();
@@ -307,7 +313,7 @@ void NMX::processing_thread() {
     // Checking for exit
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
-      sample_next_track = 1;
+      sample_next_track = nmx_opts.send_tracks;
 
       mystats.tx_bytes += flatbuffer.produce();
 
@@ -328,6 +334,9 @@ void NMX::processing_thread() {
       }
 
       if (not runThreads) {
+
+        // TODO flush all clusters?
+
         XTRACE(INPUT, ALW, "Stopping input thread.\n");
         builder_.reset(); /**< @fixme this is a hack to force ~BuilderSRS() call */
         delete builder_.get(); /**< @fixme see above */
@@ -339,27 +348,34 @@ void NMX::processing_thread() {
   }
 }
 
-void NMX::init_builder(std::string jsonfile) {
-  nmx_opts = NMXConfig(jsonfile);
+void NMX::init_builder() {
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
+
+  auto clusx = std::make_shared<Clusterer1>(nmx_opts.clusterer_x.max_time_gap,
+                                            nmx_opts.clusterer_x.max_strip_gap,
+                                            nmx_opts.clusterer_x.min_cluster_size);
+  auto clusy = std::make_shared<Clusterer1>(nmx_opts.clusterer_y.max_time_gap,
+                                            nmx_opts.clusterer_y.max_strip_gap,
+                                            nmx_opts.clusterer_y.min_cluster_size);
+
   if (nmx_opts.builder_type == "Eventlets") {
     XTRACE(INIT, DEB, "Using BuilderEventlets\n");
     builder_ = std::make_shared<BuilderEventlets>(nmx_opts.dump_directory,
                                                   nmx_opts.dump_csv, nmx_opts.dump_h5);
-    builder_->clusterer_x = std::make_shared<Clusterer1>(200, 3, 3);
-    builder_->clusterer_y = std::make_shared<Clusterer1>(200, 3, 3);
+    builder_->clusterer_x = clusx;
+    builder_->clusterer_y = clusy;
   } else if (nmx_opts.builder_type == "APV") {
     XTRACE(INIT, DEB, "Using BuilderAPV\n");
     builder_ = std::make_shared<BuilderAPV>(nmx_opts.dump_directory,
                                             nmx_opts.dump_csv, nmx_opts.dump_h5);
-    builder_->clusterer_x = std::make_shared<Clusterer1>(15, 15, 3);
-    builder_->clusterer_y = std::make_shared<Clusterer1>(15, 15, 3);
-  } else if (nmx_opts.builder_type == "SRS") {
-    XTRACE(INIT, DEB, "Using BuilderSRS\n");
-    auto clusx = std::make_shared<Clusterer1>(200, 3, 3);
-    auto clusy = std::make_shared<Clusterer1>(200, 3, 3);
+    builder_->clusterer_x = clusx;
+    builder_->clusterer_y = clusy;
+  } else if (nmx_opts.builder_type == "VMM2") {
+    XTRACE(INIT, DEB, "Using BuilderVMM2\n");
     builder_ = std::make_shared<BuilderVMM2>(
         nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
+        nmx_opts.clusterer_x.eventlet_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
+        nmx_opts.clusterer_y.eventlet_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
         nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else {
     XTRACE(INIT, ALW, "Unrecognized builder type in config\n");

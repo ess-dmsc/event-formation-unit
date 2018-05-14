@@ -32,26 +32,25 @@ void SRSMappings::set_mapping(uint16_t fecID, uint16_t vmmID, uint8_t planeID,
   planes_[fecID][vmmID] = planeID;
 }
 
-uint16_t SRSMappings::get_strip(uint16_t fecID, uint16_t vmmID,
-                                uint32_t channelID) const {
-  if (fecID >= offsets_.size())
+uint16_t SRSMappings::get_strip(const Readout& readout) const {
+  if (readout.fec >= offsets_.size())
     return NMX_INVALID_GEOM_ID;
-  const auto &fec = offsets_[fecID];
-  if (vmmID >= fec.size())
+  const auto &fec = offsets_[readout.fec];
+  if (readout.chip_id >= fec.size())
     return NMX_INVALID_GEOM_ID;
-  const auto &chip = fec[vmmID];
+  const auto &chip = fec[readout.chip_id];
   if (chip != NMX_INVALID_GEOM_ID)
-    return chip + channelID;
+    return chip + readout.channel;
   return NMX_INVALID_GEOM_ID;
 }
 
-uint8_t SRSMappings::get_plane(uint16_t fecID, uint16_t vmmID) const {
-  if (fecID >= planes_.size())
+uint8_t SRSMappings::get_plane(const Readout& readout) const {
+  if (readout.fec >= planes_.size())
     return NMX_INVALID_PLANE_ID;
-  const auto &fec = planes_[fecID];
-  if (vmmID >= fec.size())
+  const auto &fec = planes_[readout.fec];
+  if (readout.chip_id >= fec.size())
     return NMX_INVALID_PLANE_ID;
-  return fec[vmmID];
+  return fec[readout.chip_id];
 }
 
 std::string SRSMappings::debug() const {

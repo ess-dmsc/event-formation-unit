@@ -29,6 +29,11 @@ void Cluster::insert_eventlet(const Eventlet &e) {
   strip_end = std::max(strip_end, e.strip);
 }
 
+bool Cluster::empty() const
+{
+  return entries.empty();
+}
+
 double Cluster::time_span() const {
   return time_end - time_start;
 }

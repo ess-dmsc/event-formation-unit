@@ -4,29 +4,33 @@
 #include <algorithm>
 
 #include <common/Trace.h>
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
-ClusterMatcher::ClusterMatcher(double dPlane) : pdPlane(dPlane) {
+ClusterMatcher::ClusterMatcher(double maxDeltaTime) : pMaxDeltaTime(maxDeltaTime) {
 }
 
-bool ClusterMatcher::ready(double time) const
-{
+bool ClusterMatcher::ready(double time) const {
+  // TODO Parametrize threshold
   return ((unmatched_clusters.size() > 2) &&
-      (unmatched_clusters.back().time_start - time) > (pdPlane*3));
+      (std::min(latest_x, latest_y) - time) > (pMaxDeltaTime * 3));
 }
 
-double ClusterMatcher::delta_end(const Event& event, const Cluster& cluster) const
-{
+double ClusterMatcher::delta_end(const Event &event, const Cluster &cluster) const {
   return std::abs(event.time_end() - cluster.time_end);
 }
 
-bool ClusterMatcher::belongs_end(const Event& event, const Cluster& cluster) const
-{
-  return (delta_end(event, cluster) <= pdPlane);
+bool ClusterMatcher::belongs_end(const Event &event, const Cluster &cluster) const {
+  return (delta_end(event, cluster) <= pMaxDeltaTime);
 }
 
-void ClusterMatcher::merge(ClusterList& c) {
+void ClusterMatcher::merge(uint8_t plane, ClusterList &c) {
+  if (c.empty())
+    return;
+  if (plane)
+    latest_y = std::max(latest_y, c.back().time_start);
+  else
+    latest_x = std::max(latest_x, c.back().time_start);
   unmatched_clusters.splice(unmatched_clusters.end(), c);
 }
 
