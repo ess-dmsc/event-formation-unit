@@ -43,7 +43,7 @@ protected:
 };
 
 TEST_F(TrackSerializerTest, Constructor) {
-  TrackSerializer tser(256);
+  TrackSerializer tser(2560, 0, 1);
   auto len = tser.serialize(&buffer);
   ASSERT_EQ(len, 0);
   ASSERT_EQ(buffer, nullptr);
@@ -51,14 +51,14 @@ TEST_F(TrackSerializerTest, Constructor) {
 
 TEST_F(TrackSerializerTest, AddTrackTooFewHits) {
   int entries = NB_ENTRIES;
-  TrackSerializer tser(entries, 1);
+  TrackSerializer tser(entries, 1, 1);
   auto tres = tser.add_track(*event);
   ASSERT_EQ(tres, 1);
 }
 
 TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
   int entries = NB_ENTRIES;
-  TrackSerializer tser(entries);
+  TrackSerializer tser(entries, 0, 1);
   for (int i = 0; i < entries + 1; i++) {
     addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
@@ -68,7 +68,7 @@ TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
 
 TEST_F(TrackSerializerTest, Serialize) {
   unsigned int entries = NB_ENTRIES;
-  TrackSerializer tser(entries);
+  TrackSerializer tser(entries, 0, 1);
   for (unsigned int i = 0; i < entries; i++) {
     addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
@@ -85,7 +85,7 @@ TEST_F(TrackSerializerTest, DeSerialize) {
   unsigned int entries = NB_ENTRIES;
   unsigned int entry_size = 4 * 3; // Three uint32_t's
 
-  TrackSerializer tser(entries);
+  TrackSerializer tser(entries, 0, 1);
   for (unsigned int i = 0; i < entries; i++) {
     addxandy(i, 0x1111, 0x2222, 100 + i, 0x3333, 0x4444);
   }
@@ -125,7 +125,7 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
     ASSERT_FALSE(event->x.entries.size());
     ASSERT_FALSE(event->y.entries.size());
 
-    TrackSerializer tser(entries);
+    TrackSerializer tser(entries, 0, 1);
     for (unsigned int i = 0; i < entries; i++) {
       addxandy(i, i * 2, i * 3 + 1, entries - i, i * 2 + 0x1000,
                i * 3 + 0x2000);
@@ -169,7 +169,7 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
   unsigned int entries = 256;
   unsigned int entry_size = 4 * 3; // Three uint32_t's
   MESSAGE() << "Reusing the same TrackSerializer object\n";
-  TrackSerializer tser(entries);
+  TrackSerializer tser(entries, 0, 1);
   for (unsigned int i = 1; i <= 1000; i *= 2) {
     event->x.entries.clear();
     event->y.entries.clear();
