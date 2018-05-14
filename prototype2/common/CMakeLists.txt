@@ -5,6 +5,7 @@ set(efu_common_SRC
   FBSerializer.cpp
   NewStats.cpp
   Producer.cpp
+  DetectorModuleRegister.cpp
   )
 set(efu_common_INC
   ../../libs/include/gccintel.h
@@ -14,6 +15,7 @@ set(efu_common_INC
   NewStats.h
   Producer.h
   Trace.h
+  DetectorModuleRegister.h
   )
 
 if(${DUMPTOFILE})

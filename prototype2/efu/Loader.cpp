@@ -6,6 +6,8 @@
 #include <iostream>
 #include <string.h>
 #include <string>
+#include <common/DetectorModuleRegister.h>
+
 
 Loader::~Loader() {
   XTRACE(INIT, ALW, "Loader destructor called\n");
@@ -25,6 +27,15 @@ void Loader::unloadPlugin() {
 }
 
 bool Loader::loadPlugin(const std::string lib) {
+  try {
+    auto &FoundModule = DetectorModuleRegistration::find(lib);
+    ParserPopulator = FoundModule.CLISetup;
+    myFactory = FoundModule.DetectorFactory.get();
+    XTRACE(INIT, INF, "Loaded statically linked detector module.");
+    return true;
+  } catch (std::runtime_error &Error) {
+    XTRACE(INIT, INF, "Unable to find statically linked detector module with name\"%s\". Attempting to open external plugin.", lib.c_str());
+  }
   std::string libname = "./" + lib + ".so";
   const char *libstr = strdup(libname.c_str());
 
@@ -36,7 +47,7 @@ bool Loader::loadPlugin(const std::string lib) {
   }
   free((void *)libstr);
 
-  if (!(myFactory = (DetectorFactory *)dlsym(handle, "Factory"))) {
+  if (!(myFactory = (DetectorFactoryBase *)dlsym(handle, "Factory"))) {
     XTRACE(INIT, CRI, "Could not find Factory in %s\n", libname.c_str());
     return false;
   }
@@ -52,6 +63,13 @@ bool Loader::loadPlugin(const std::string lib) {
     } else {
       ParserPopulator = tempParserPopulator->Function;
     }
+  }
+  return true;
+}
+
+bool Loader::IsOk() {
+  if (nullptr == myFactory) {
+    return false;
   }
   return true;
 }

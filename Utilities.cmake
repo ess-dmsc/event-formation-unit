@@ -19,6 +19,19 @@ function(create_module module_name)
 endfunction(create_module)
 
 #=============================================================================
+# Generate a loadable detector module
+#=============================================================================
+function(create_static_module module_name)
+  add_library(${module_name} STATIC
+    ${${module_name}_SRC}
+    ${${module_name}_INC})
+  target_link_libraries(${module_name}
+    ${${module_name}_LIB}
+    ${EFU_COMMON_LIBS}
+    eventlib)
+endfunction(link_module)
+
+#=============================================================================
 # Generate an executable program
 #=============================================================================
 function(create_executable exec_name)
@@ -40,16 +53,19 @@ endfunction(create_executable)
 #=============================================================================
 set(unit_test_targets "" CACHE INTERNAL "All test targets")
 
-function(create_test_executable exec_name)
+function(create_test_executable)
+  set(options SKIP_MEMGRIND)
+  set(oneValueArgs "")
+  set(multiValueArgs "")
+  cmake_parse_arguments(create_test_executable "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
+  
+  set(exec_name ${create_test_executable_UNPARSED_ARGUMENTS})
+  
   add_executable(${exec_name} EXCLUDE_FROM_ALL
     ${${exec_name}_SRC}
     ${${exec_name}_INC})
   target_include_directories(${exec_name}
     PRIVATE ${GTEST_INCLUDE_DIRS})
-
-  # This does not seem to work right now. Conan to blame ???
-  #  set_target_properties(${exec_name} PROPERTIES
-  #    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
 
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
@@ -69,7 +85,9 @@ function(create_test_executable exec_name)
     CACHE INTERNAL "All test targets")
 
   enable_coverage(${exec_name})
-  memcheck_test(${exec_name} ${CMAKE_BINARY_DIR}/bin)
+  if (NOT ${create_test_executable_SKIP_MEMGRIND})
+    memcheck_test(${exec_name} ${CMAKE_BINARY_DIR}/bin)
+  endif()
 
 endfunction(create_test_executable)
 

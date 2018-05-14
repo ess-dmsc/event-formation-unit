@@ -114,9 +114,17 @@ struct PopulateCLIParser {
   std::function<void(CLI::App &)> Function;
 };
 
-class DetectorFactory {
+class DetectorFactoryBase {
 public:
   /** @brief creates the detector object. All instruments must implement this
    */
   virtual std::shared_ptr<Detector> create(BaseSettings settings) = 0;
+};
+
+template <class DetectorModule>
+class DetectorFactory : public DetectorFactoryBase {
+public:
+  std::shared_ptr<Detector> create(BaseSettings Settings) override {
+    return std::shared_ptr<Detector>(new DetectorModule(Settings));
+  }
 };

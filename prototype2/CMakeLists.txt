@@ -70,6 +70,7 @@ add_subdirectory(multigrid)
 add_subdirectory(sonde)
 add_subdirectory(udp)
 add_subdirectory(adc_readout)
+target_link_libraries(efu AdcReadout)
 
 add_custom_target(runefu
     COMMAND efu "-d" "../lib/mgmesytec" "-s" "1"

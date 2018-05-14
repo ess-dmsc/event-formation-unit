@@ -35,7 +35,7 @@ set(AdcReadout_INC
     ${AdcReadoutBase_INC}
     )
 
-create_module(AdcReadout)
+create_static_module(AdcReadout)
 
 set(AdcReadoutTest_SRC
     test/UnitTests.cpp
@@ -60,7 +60,7 @@ set(AdcReadoutTest_LIB
     eventlib
     )
 
-create_test_executable(AdcReadoutTest)
+create_test_executable(AdcReadoutTest SKIP_MEMGRIND)
 
 get_filename_component(TEST_PACKET_PATH "test/test_packet_1.dat" DIRECTORY)
 target_compile_definitions(AdcReadoutTest

@@ -16,7 +16,7 @@ class Loader {
 private:
   void *handle{nullptr};
 
-  DetectorFactory *myFactory{nullptr};
+  DetectorFactoryBase *myFactory{nullptr};
 
   std::function<void(CLI::App &CLIParser)> ParserPopulator;
 
@@ -36,12 +36,7 @@ public:
   /** @brief minimal destructor */
   ~Loader();
 
-  bool IsOk() {
-    if (nullptr == myFactory) {
-      return false;
-    }
-    return true;
-  }
+  bool IsOk();
 
   std::shared_ptr<Detector> createDetector(BaseSettings settings);
 
