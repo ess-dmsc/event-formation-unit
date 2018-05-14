@@ -33,7 +33,7 @@
 
   "eventlet_histograms" : true,
   "cluster_adc_downshift" : 6,
-  "send_tracks" : false,
+  "send_tracks" : true,
   "track_sample_minhits" : 6,
 
   "geometry_x" : 256,

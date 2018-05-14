@@ -14,9 +14,9 @@
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-TrackSerializer::TrackSerializer(size_t maxarraylength, size_t minhits)
+TrackSerializer::TrackSerializer(size_t maxarraylength, size_t minhits, double target_res)
     : builder(maxarraylength * EV_SIZE * 2 + BUF_STATIC_SIZE + 256),
-      maxlen(maxarraylength), minhits_(minhits) {
+      maxlen(maxarraylength), minhits_(minhits), target_resolution_(target_res) {
   builder.Clear();
 }
 
@@ -32,16 +32,20 @@ int TrackSerializer::add_track(const Event &event) {
     return 1;
   }
 
-  time_offset = event.utpc_time();
+  time_offset = event.time_start();
 
   for (auto &evx : event.x.entries) {
     xtrack.push_back(
-        Createpos(builder, evx.time - time_offset, evx.strip, evx.adc));
+        Createpos(builder,
+                  static_cast<uint16_t>((evx.time - time_offset) * target_resolution_),
+                  evx.strip, evx.adc));
   }
 
   for (auto &evy : event.y.entries) {
     ytrack.push_back(
-        Createpos(builder, evy.time - time_offset, evy.strip, evy.adc));
+        Createpos(builder,
+                  static_cast<uint16_t>((evy.time - time_offset) * target_resolution_),
+                  evy.strip, evy.adc));
   }
 
   xpos = event.x.utpc_center;
@@ -63,7 +67,7 @@ int TrackSerializer::serialize(char **buffer) {
   auto msg =
       CreateMonitorMessage(builder, 0, DataField::GEMTrack, dataoff.Union());
   builder.Finish(msg);
-  *buffer = (char *)builder.GetBufferPointer();
+  *buffer = (char *) builder.GetBufferPointer();
   xtrack.clear();
   ytrack.clear();
   auto buffersize = builder.GetSize();
