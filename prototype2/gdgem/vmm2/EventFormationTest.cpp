@@ -56,9 +56,9 @@ TEST_F(EventFormationTest, Initial) {
     readouts += stats.valid_eventlets;
     readouts_error_bytes += stats.error_bytes; // From srs data parser
 
-    matcher.merge(builder->clusterer_x->clusters);
-    matcher.merge(builder->clusterer_y->clusters);
-    matcher.match_end(false);
+    matcher.merge(0, builder->clusterer_x->clusters);
+    matcher.merge(1, builder->clusterer_y->clusters);
+    matcher.match_end(true);
 
 
     while (!matcher.matched_clusters.empty()) {

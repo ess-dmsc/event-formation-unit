@@ -7,7 +7,7 @@ class ClusterMatcher {
 public:
   ClusterMatcher(double maxDeltaTime);
 
-  void merge(ClusterList& c);
+  void merge(uint8_t plane, ClusterList& c);
 
   void match_end(bool force);
 
@@ -25,4 +25,7 @@ private:
 
   double delta_end(const Event& event, const Cluster& cluster) const;
   bool belongs_end(const Event& event, const Cluster& cluster) const;
+
+  double latest_x {0};
+  double latest_y {0};
 };

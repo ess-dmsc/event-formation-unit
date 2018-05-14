@@ -64,8 +64,6 @@ void Clusterer1::stash_cluster(Cluster &cluster) {
   if (cluster.entries.size() < pMinClusterSize)
     return;
 
-  // TODO: time span filter?
-
   DTRACE(DEB, "******** VALID ********\n");
   clusters.emplace_back(std::move(cluster));
   stats_cluster_count++;

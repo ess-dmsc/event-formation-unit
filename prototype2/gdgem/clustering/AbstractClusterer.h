@@ -13,6 +13,12 @@ public:
 
   virtual void cluster(const HitContainer &hits) = 0;
 
+  bool empty() const
+  {
+    return clusters.empty();
+  }
+
+  uint8_t plane{0};
   size_t stats_cluster_count{0};
   ClusterList clusters;
 };

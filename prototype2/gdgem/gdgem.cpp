@@ -102,7 +102,7 @@ private:
   NMXConfig nmx_opts;
 
   std::shared_ptr<AbstractBuilder> builder_{nullptr};
-  void init_builder(std::string jsonfile);
+  void init_builder();
 };
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
@@ -191,7 +191,8 @@ void NMX::input_thread() {
 }
 
 void NMX::processing_thread() {
-  init_builder(NMXSettings.ConfigFile);
+  nmx_opts = NMXConfig(NMXSettings.ConfigFile);
+  init_builder();
   if (!builder_) {
     XTRACE(PROCESS, WAR, "No builder specified, exiting thread\n");
     return;
@@ -218,7 +219,7 @@ void NMX::processing_thread() {
   int sample_next_track{0};
   while (1) {
     // mystats.fifo_free = input2proc_fifo.free();
-    if ((input2proc_fifo.pop(data_index)) == false) {
+    if (!input2proc_fifo.pop(data_index)) {
       mystats.processing_idle++;
       usleep(1);
     } else {
@@ -237,12 +238,11 @@ void NMX::processing_thread() {
           hists.bin_hists(builder_->clusterer_y->clusters);
         }
 
-        if (builder_->clusterer_x->clusters.size() &&
-            builder_->clusterer_y->clusters.size()) {
-          matcher.merge(builder_->clusterer_x->clusters);
-          matcher.merge(builder_->clusterer_y->clusters);
-          matcher.match_end(false);
+        if (!builder_->clusterer_x->empty() && !builder_->clusterer_y->empty()) {
+          matcher.merge(0, builder_->clusterer_x->clusters);
+          matcher.merge(1, builder_->clusterer_y->clusters);
         }
+        matcher.match_end(false);
 
         while (!matcher.matched_clusters.empty()) {
           XTRACE(PROCESS, DEB, "event_ready()\n");
@@ -333,6 +333,9 @@ void NMX::processing_thread() {
       }
 
       if (not runThreads) {
+
+        // TODO flush all clusters?
+
         XTRACE(INPUT, ALW, "Stopping input thread.\n");
         builder_.reset(); /**< @fixme this is a hack to force ~BuilderSRS() call */
         delete builder_.get(); /**< @fixme see above */
@@ -344,8 +347,7 @@ void NMX::processing_thread() {
   }
 }
 
-void NMX::init_builder(std::string jsonfile) {
-  nmx_opts = NMXConfig(jsonfile);
+void NMX::init_builder() {
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
   auto clusx = std::make_shared<Clusterer1>(nmx_opts.clusterer_x.max_time_gap,

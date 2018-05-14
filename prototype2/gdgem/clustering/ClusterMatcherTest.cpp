@@ -208,27 +208,27 @@ TEST_F(NMXClustererTest, DontForce) {
 
   matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 900, 1000));
   matcher->match_end(false);
-  ASSERT_EQ(matcher->matched_clusters.size(), 1);
+  ASSERT_EQ(matcher->matched_clusters.size(), 0);
 }
 
 
-TEST_F(NMXClustererTest, Run16_line_110168_110323) {
+TEST_F(NMXClustererTest, Run16_Short) {
   for (const auto& readout : Run16) {
     store_hit(readout);
   }
   EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 3);
   EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 4);
-  matcher->merge(sorter_x->clusterer->clusters);
-  matcher->merge(sorter_y->clusterer->clusters);
+  matcher->merge(0, sorter_x->clusterer->clusters);
+  matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(false);
-  EXPECT_EQ(matcher->stats_cluster_count, 2);
+  EXPECT_EQ(matcher->stats_cluster_count, 1);
 
   sorter_x->flush();
   sorter_y->flush();
   EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 7);
   EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 11);
-  matcher->merge(sorter_x->clusterer->clusters);
-  matcher->merge(sorter_y->clusterer->clusters);
+  matcher->merge(0, sorter_x->clusterer->clusters);
+  matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(true);
   EXPECT_EQ(matcher->stats_cluster_count, 7);
 }
@@ -244,8 +244,8 @@ TEST_F(NMXClustererTest, Run16_Long_identical) {
   EXPECT_EQ(sorter_y->clusterer->clusters.size(), 20278);
 
   matcher = std::make_shared<ClusterMatcher>(0);
-  matcher->merge(sorter_x->clusterer->clusters);
-  matcher->merge(sorter_y->clusterer->clusters);
+  matcher->merge(0, sorter_x->clusterer->clusters);
+  matcher->merge(1, sorter_y->clusterer->clusters);
 
   EXPECT_EQ(matcher->unmatched_clusters.size(), 40556);
 
@@ -263,8 +263,8 @@ TEST_F(NMXClustererTest, Run16_Long) {
   EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12444);
 
   matcher = std::make_shared<ClusterMatcher>(10);
-  matcher->merge(sorter_x->clusterer->clusters);
-  matcher->merge(sorter_y->clusterer->clusters);
+  matcher->merge(0, sorter_x->clusterer->clusters);
+  matcher->merge(1, sorter_y->clusterer->clusters);
   EXPECT_EQ(matcher->unmatched_clusters.size(), 22647);
   matcher->match_end(true);
   EXPECT_EQ(matcher->stats_cluster_count, 6141);
