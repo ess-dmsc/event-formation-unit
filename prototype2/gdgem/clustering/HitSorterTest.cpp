@@ -107,19 +107,6 @@ TEST_F(HitSorterTest, BcidTdcError) {
   EXPECT_EQ(1, sorter_y->stats_trigger_count);
 }
 
-TEST_F(HitSorterTest, FrameCounterError) {
-  EXPECT_EQ(0, sorter_x->stats_fc_error);
-  EXPECT_EQ(0, sorter_y->stats_fc_error);
-
-  for (const auto& readout : err_fc_error) {
-    store_hit(readout);
-  }
-  EXPECT_EQ(1, sorter_x->stats_fc_error);
-  EXPECT_EQ(0, sorter_y->stats_fc_error);
-  EXPECT_EQ(1, sorter_x->stats_trigger_count);
-  EXPECT_EQ(0, sorter_y->stats_trigger_count);
-}
-
 TEST_F(HitSorterTest, TriggerTimeWraps) {
   EXPECT_EQ(0, sorter_x->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
@@ -142,8 +129,6 @@ TEST_F(HitSorterTest, Run16_Short) {
   EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_x->stats_bcid_tdc_error);
   EXPECT_EQ(0, sorter_y->stats_bcid_tdc_error);
-  EXPECT_EQ(0, sorter_x->stats_fc_error);
-  EXPECT_EQ(0, sorter_y->stats_fc_error);
 
   EXPECT_EQ(2, sorter_x->stats_trigger_count);
   EXPECT_EQ(2, sorter_y->stats_trigger_count);
@@ -157,8 +142,6 @@ TEST_F(HitSorterTest, Run16_Long) {
   EXPECT_EQ(0, sorter_y->stats_triggertime_wraps);
   EXPECT_EQ(0, sorter_x->stats_bcid_tdc_error);
   EXPECT_EQ(0, sorter_y->stats_bcid_tdc_error);
-  EXPECT_EQ(0, sorter_x->stats_fc_error);
-  EXPECT_EQ(0, sorter_y->stats_fc_error);
 
   // Need an intermediate-size dataset where this can be confirmed analytically
   EXPECT_EQ(1539, sorter_x->stats_trigger_count);

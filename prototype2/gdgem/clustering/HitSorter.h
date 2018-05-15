@@ -15,7 +15,6 @@ public:
   void flush();
 
   // Statistics counters
-  size_t stats_fc_error{0};
   size_t stats_bcid_tdc_error{0};
   size_t stats_triggertime_wraps{0};
   size_t stats_trigger_count {0};
@@ -30,7 +29,6 @@ private:
 
   // These are in play for triggering the actual clustering
   double old_trigger_timestamp_ns_ {0};
-  uint32_t old_frame_counter_ {0};
 
   void analyze();
 };

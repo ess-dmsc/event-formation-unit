@@ -23,8 +23,6 @@ void HitSorter::insert(Readout readout) {
     double delta_trigger_ns =
         pTime.delta_timestamp_ns(old_trigger_timestamp_ns_,
                                  triggerTimestamp_ns,
-                                 old_frame_counter_,
-                                 readout.frame_counter,
                                  stats_triggertime_wraps);
 
     hits.subsequent_trigger(delta_trigger_ns <= pTime.trigger_period_ns());
@@ -33,15 +31,7 @@ void HitSorter::insert(Readout readout) {
   }
   old_trigger_timestamp_ns_ = triggerTimestamp_ns;
 
-  // TODO: This is likely resolved. Candidate for removal?
-  if ((readout.frame_counter < old_frame_counter_)
-      && !(old_frame_counter_ > readout.frame_counter + 1000000000)) {
-    stats_fc_error++;
-  }
-  old_frame_counter_ = readout.frame_counter;
-
-
-  // Register as error, but don't do correction
+  // TODO: Belongs in parser?
   if (readout.bcid == 0 && readout.tdc == 0 && readout.over_threshold) {
     stats_bcid_tdc_error++;
   }
@@ -58,9 +48,7 @@ void HitSorter::insert(Readout readout) {
 void HitSorter::flush() {
   //flush both buffers in queue
   // TODO: subsequent trigger? How do we know?
-//  hits.subsequent_trigger(true);
   analyze();
-//  hits.subsequent_trigger(true);
   analyze();
 }
 

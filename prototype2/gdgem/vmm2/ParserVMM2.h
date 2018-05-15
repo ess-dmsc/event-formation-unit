@@ -9,8 +9,11 @@
 #pragma once
 
 #include <cinttypes>
+#include <limits>
 
 class NMXVMM2SRSData {
+  static  constexpr uint32_t max_frame_counter {std::numeric_limits<uint32_t>::max() / 2};
+
 public:
   /**< Do NOT rearrange fields, used for casting to data pointer*/
   struct SRSHdr {
@@ -60,7 +63,16 @@ public:
   uint32_t elems{0}; // number of events
   uint32_t error{0}; // bytes of invalid data
 
+  uint32_t old_frame_counter {0};
+
   uint32_t max_elements{0}; // Maximum capacity of data array
+
+  inline bool frame_counter_overflow(uint32_t old_framecounter,
+                                     uint32_t framecounter)
+  {
+    return (old_framecounter > (framecounter + max_frame_counter));
+  }
+
 
 private:
   uint32_t reversebits(

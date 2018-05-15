@@ -61,6 +61,13 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
     return 0;
   }
 
+  if ((srshdr.fc < old_frame_counter)
+      && !frame_counter_overflow(old_frame_counter, srshdr.fc)) {
+    XTRACE(PROCESS, WAR, "Frame counter error\n");
+    error++;
+  }
+  old_frame_counter = srshdr.fc;
+
   if (size < 20) {
     XTRACE(PROCESS, INF, "No room for data in packet, implicit empty?\n");
     error += size;

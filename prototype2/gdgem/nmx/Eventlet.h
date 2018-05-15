@@ -11,6 +11,7 @@
 #include <limits>
 #include <string>
 
+// TODO: rename this to Hit
 struct Eventlet {
   using strip_type = uint16_t;
   using adc_type = uint16_t;
@@ -21,7 +22,7 @@ struct Eventlet {
   uint8_t plane_id{0};
   strip_type strip{0};
   adc_type adc{0};
-  bool over_threshold{false};
+  bool over_threshold{false}; //TODO: remove this
 
   // @brief prints values for debug purposes
   std::string debug() const;
