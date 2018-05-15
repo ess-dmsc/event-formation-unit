@@ -15,12 +15,12 @@ protected:
 TEST_F(SRSTimeTest, SettersGetters) {
   time->set_bc_clock(42.0);
   time->set_tac_slope(42.0);
-  time->set_trigger_resolution(42.0);
-  time->set_target_resolution(42.0);
+  time->set_trigger_resolution_ns(42.0);
+  time->set_target_resolution_ns(42.0);
   ASSERT_EQ(time->bc_clock(), 42.0);
   ASSERT_EQ(time->tac_slope(), 42.0);
-  ASSERT_EQ(time->trigger_resolution(), 42.0);
-  ASSERT_EQ(time->target_resolution(), 42.0);
+  ASSERT_EQ(time->trigger_resolution_ns(), 42.0);
+  ASSERT_EQ(time->target_resolution_ns(), 42.0);
 }
 
 TEST_F(SRSTimeTest, Eval) {

@@ -47,7 +47,7 @@ protected:
     SRSTime srstime;
     srstime.set_bc_clock(20);
     srstime.set_tac_slope(60);
-    srstime.set_trigger_resolution(3.125);
+    srstime.set_trigger_resolution_ns(3.125);
     srstime.set_acquisition_window(4000);
 
     sorter_x = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
@@ -88,12 +88,12 @@ TEST_F(Clusterer1Test, Run16_Long) {
   for (const auto& readout : long_data) {
     store_hit(readout);
   }
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10198);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12432);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10202);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12433);
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10203);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12444);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10207);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12445);
 }
 
 

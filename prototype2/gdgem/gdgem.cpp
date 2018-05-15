@@ -203,7 +203,7 @@ void NMX::processing_thread() {
 
   Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
   TrackSerializer trackfb(256, nmx_opts.track_sample_minhits,
-                          nmx_opts.time_config.target_resolution());
+                          nmx_opts.time_config.target_resolution_ns());
   HistSerializer histfb;
   NMXHists hists;
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);

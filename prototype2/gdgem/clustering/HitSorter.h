@@ -32,9 +32,5 @@ private:
   double old_trigger_timestamp_ns_ {0};
   uint32_t old_frame_counter_ {0};
 
-  // For all 0s correction
-  uint16_t old_bcid_ {0};
-  uint16_t old_tdc_ {0};
-
   void analyze();
 };

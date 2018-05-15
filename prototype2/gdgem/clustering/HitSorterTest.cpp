@@ -68,7 +68,7 @@ protected:
     SRSTime srstime;
     srstime.set_bc_clock(20);
     srstime.set_tac_slope(60);
-    srstime.set_trigger_resolution(3.125);
+    srstime.set_trigger_resolution_ns(3.125);
     srstime.set_acquisition_window(4000);
 
     mock_x = std::make_shared<MockClusterer>();

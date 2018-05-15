@@ -53,7 +53,7 @@ protected:
     SRSTime srstime;
     srstime.set_bc_clock(20);
     srstime.set_tac_slope(60);
-    srstime.set_trigger_resolution(3.125);
+    srstime.set_trigger_resolution_ns(3.125);
     srstime.set_acquisition_window(4000);
 
     matcher = std::make_shared<ClusterMatcher>(pDeltaTimePlanes);
@@ -240,17 +240,17 @@ TEST_F(NMXClustererTest, Run16_Long_identical) {
   }
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->clusters.size(), 20278);
-  EXPECT_EQ(sorter_y->clusterer->clusters.size(), 20278);
+  EXPECT_EQ(sorter_x->clusterer->clusters.size(), 20284);
+  EXPECT_EQ(sorter_y->clusterer->clusters.size(), 20284);
 
   matcher = std::make_shared<ClusterMatcher>(0);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
 
-  EXPECT_EQ(matcher->unmatched_clusters.size(), 40556);
+  EXPECT_EQ(matcher->unmatched_clusters.size(), 40568);
 
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 14974);
+  EXPECT_EQ(matcher->stats_cluster_count, 14985);
 }
 
 TEST_F(NMXClustererTest, Run16_Long) {
@@ -259,15 +259,15 @@ TEST_F(NMXClustererTest, Run16_Long) {
   }
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10203);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12444);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10207);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12445);
 
   matcher = std::make_shared<ClusterMatcher>(10);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
-  EXPECT_EQ(matcher->unmatched_clusters.size(), 22647);
+  EXPECT_EQ(matcher->unmatched_clusters.size(), 22652);
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 6141);
+  EXPECT_EQ(matcher->stats_cluster_count, 6140);
 }
 
 int main(int argc, char **argv) {

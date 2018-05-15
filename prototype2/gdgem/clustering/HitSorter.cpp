@@ -18,8 +18,7 @@ void HitSorter::insert(Readout readout) {
 
   double triggerTimestamp_ns = pTime.trigger_timestamp_ns(readout.srs_timestamp);
   if (old_trigger_timestamp_ns_ != triggerTimestamp_ns) {
-
-    analyze();
+    stats_trigger_count++;
 
     double delta_trigger_ns =
         pTime.delta_timestamp_ns(old_trigger_timestamp_ns_,
@@ -28,10 +27,9 @@ void HitSorter::insert(Readout readout) {
                                  readout.frame_counter,
                                  stats_triggertime_wraps);
 
-    // TODO: should this happen before analyze?
-    hits.subsequent_trigger(delta_trigger_ns <= pTime.trigger_period());
+    hits.subsequent_trigger(delta_trigger_ns <= pTime.trigger_period_ns());
 
-    stats_trigger_count++;
+    analyze();
   }
   old_trigger_timestamp_ns_ = triggerTimestamp_ns;
 
@@ -43,23 +41,16 @@ void HitSorter::insert(Readout readout) {
   old_frame_counter_ = readout.frame_counter;
 
 
-  // TODO: factor this out?
-  // Fix for entries with all zeros
+  // Register as error, but don't do correction
   if (readout.bcid == 0 && readout.tdc == 0 && readout.over_threshold) {
-    readout.bcid = old_bcid_;
-    readout.tdc = old_tdc_;
     stats_bcid_tdc_error++;
   }
-  old_bcid_ = readout.bcid;
-  old_tdc_ = readout.tdc;
-  // TODO: should this include oldVmmID = vmmID, do they need to match?
-  // Could be factored out depending on above block
-  double chipTime = pTime.chip_time(readout.bcid, readout.tdc);
+
+  // TODO: add test for if adc=0 && over_threshold, and report
 
   if (readout.over_threshold || (readout.adc >= pADCThreshold)) {
-    // TODO: if adc=0 && over_threshold, adc=dumm_val?
     hits.store(pChips.get_plane(readout), pChips.get_strip(readout),
-               readout.adc, chipTime);
+               readout.adc, pTime.chip_time_ns(readout.bcid, readout.tdc));
     // TODO: who adds chipTime + trigger time? queue?
   }
 }
@@ -67,7 +58,9 @@ void HitSorter::insert(Readout readout) {
 void HitSorter::flush() {
   //flush both buffers in queue
   // TODO: subsequent trigger? How do we know?
+//  hits.subsequent_trigger(true);
   analyze();
+//  hits.subsequent_trigger(true);
   analyze();
 }
 

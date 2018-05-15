@@ -26,8 +26,8 @@ NMXConfig::NMXConfig(std::string jsonfile) {
     auto tc = root["time_config"];
     time_config.set_tac_slope(tc["tac_slope"].asInt());
     time_config.set_bc_clock(tc["bc_clock"].asInt());
-    time_config.set_trigger_resolution(tc["trigger_resolution"].asDouble());
-    time_config.set_target_resolution(tc["target_resolution"].asDouble());
+    time_config.set_trigger_resolution_ns(tc["trigger_resolution"].asDouble());
+    time_config.set_target_resolution_ns(tc["target_resolution"].asDouble());
     time_config.set_acquisition_window(tc["acquisition_window"].asUInt());
     time_config.set_rebin_tdc(tc["rebin_tdc"].asBool());
 

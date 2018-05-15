@@ -24,8 +24,8 @@ protected:
   virtual void SetUp() {
     time_intepreter.set_bc_clock(20.0);
     time_intepreter.set_tac_slope(60.0);
-    time_intepreter.set_trigger_resolution(3.125);
-    time_intepreter.set_target_resolution(0.5);
+    time_intepreter.set_trigger_resolution_ns(3.125);
+    time_intepreter.set_target_resolution_ns(0.5);
     // acquisition window parameter?
 
     geometry_interpreter.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
