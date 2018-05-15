@@ -29,7 +29,6 @@ NMXConfig::NMXConfig(std::string jsonfile) {
     time_config.set_trigger_resolution_ns(tc["trigger_resolution"].asDouble());
     time_config.set_target_resolution_ns(tc["target_resolution"].asDouble());
     time_config.set_acquisition_window(tc["acquisition_window"].asUInt());
-    time_config.set_rebin_tdc(tc["rebin_tdc"].asBool());
 
     auto sm = root["srs_mappings"];
     for (unsigned int index = 0; index < sm.size(); index++) {

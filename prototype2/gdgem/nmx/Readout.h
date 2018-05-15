@@ -7,7 +7,7 @@ struct Readout
 {
   uint8_t fec;
   uint8_t chip_id;
-  uint32_t frame_counter;
+  uint32_t bonus_timestamp;
   uint32_t srs_timestamp;
   uint16_t channel;
   uint16_t bcid;
@@ -20,7 +20,7 @@ struct Readout
     return (
         (fec == other.fec) &&
         (chip_id == other.chip_id) &&
-        (frame_counter == other.frame_counter) &&
+        (bonus_timestamp == other.bonus_timestamp) &&
         (srs_timestamp == other.srs_timestamp) &&
         (channel == other.channel) &&
         (bcid == other.bcid) &&

@@ -15,8 +15,6 @@ public:
   void flush();
 
   // Statistics counters
-  size_t stats_bcid_tdc_error{0};
-  size_t stats_triggertime_wraps{0};
   size_t stats_trigger_count {0};
 
   std::shared_ptr<AbstractClusterer> clusterer;

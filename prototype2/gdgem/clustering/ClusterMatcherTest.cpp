@@ -14,7 +14,7 @@
 
 #define UNUSED __attribute__((unused))
 
-class NMXClustererTest : public TestBase {
+class ClusterMatcherTest : public TestBase {
 protected:
   std::vector<Readout> long_data;
 
@@ -93,7 +93,7 @@ protected:
 
 };
 
-TEST_F(NMXClustererTest, OneX) {
+TEST_F(ClusterMatcherTest, OneX) {
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 0, 200));
   matcher->match_end(true);
   ASSERT_EQ(matcher->stats_cluster_count, 1);
@@ -103,7 +103,7 @@ TEST_F(NMXClustererTest, OneX) {
   EXPECT_EQ(matcher->matched_clusters.front().y.entries.size(), 0);
 }
 
-TEST_F(NMXClustererTest, OneY) {
+TEST_F(ClusterMatcherTest, OneY) {
   matcher->unmatched_clusters.push_back(mock_cluster(1, 0, 10, 0, 200));
   matcher->match_end(true);
   ASSERT_EQ(matcher->stats_cluster_count, 1);
@@ -113,7 +113,7 @@ TEST_F(NMXClustererTest, OneY) {
   EXPECT_EQ(matcher->matched_clusters.front().y.entries.size(), 122);
 }
 
-TEST_F(NMXClustererTest, TwoX) {
+TEST_F(ClusterMatcherTest, TwoX) {
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 0, 200));
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 500, 700));
   matcher->match_end(true);
@@ -127,7 +127,7 @@ TEST_F(NMXClustererTest, TwoX) {
   EXPECT_EQ(matcher->matched_clusters.back().y.entries.size(), 0);
 }
 
-TEST_F(NMXClustererTest, TwoY) {
+TEST_F(ClusterMatcherTest, TwoY) {
   matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 0, 200));
   matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 500, 700));
   matcher->match_end(true);
@@ -141,7 +141,7 @@ TEST_F(NMXClustererTest, TwoY) {
   EXPECT_EQ(matcher->matched_clusters.back().y.entries.size(), 122);
 }
 
-TEST_F(NMXClustererTest, OneXOneY) {
+TEST_F(ClusterMatcherTest, OneXOneY) {
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 0, 200));
   matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 500, 700));
   matcher->match_end(true);
@@ -155,7 +155,7 @@ TEST_F(NMXClustererTest, OneXOneY) {
   EXPECT_EQ(matcher->matched_clusters.back().y.entries.size(), 122);
 }
 
-TEST_F(NMXClustererTest, OneXY) {
+TEST_F(ClusterMatcherTest, OneXY) {
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 0, 200));
   matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 0, 200));
   matcher->match_end(true);
@@ -166,7 +166,7 @@ TEST_F(NMXClustererTest, OneXY) {
   EXPECT_EQ(matcher->matched_clusters.front().y.entries.size(), 122);
 }
 
-TEST_F(NMXClustererTest, TwoXY) {
+TEST_F(ClusterMatcherTest, TwoXY) {
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 0, 200));
   matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 1, 300));
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 600, 800));
@@ -182,21 +182,21 @@ TEST_F(NMXClustererTest, TwoXY) {
   EXPECT_EQ(matcher->matched_clusters.back().y.entries.size(), 122);
 }
 
-TEST_F(NMXClustererTest, JustIntside) {
+TEST_F(ClusterMatcherTest, JustIntside) {
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 0, 200));
   matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 200, 400));
   matcher->match_end(true);
   ASSERT_EQ(matcher->matched_clusters.size(), 1);
 }
 
-TEST_F(NMXClustererTest, JustOutside) {
+TEST_F(ClusterMatcherTest, JustOutside) {
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 0, 200));
   matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 200, 401));
   matcher->match_end(true);
   ASSERT_EQ(matcher->matched_clusters.size(), 2);
 }
 
-TEST_F(NMXClustererTest, DontForce) {
+TEST_F(ClusterMatcherTest, DontForce) {
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 0, 200));
   matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 200, 401));
   matcher->match_end(false);
@@ -212,8 +212,14 @@ TEST_F(NMXClustererTest, DontForce) {
 }
 
 
-TEST_F(NMXClustererTest, Run16_Short) {
-  for (const auto& readout : Run16) {
+TEST_F(ClusterMatcherTest, Run16_Short) {
+  uint32_t bonus = 0;
+  uint32_t old = 0;
+  for (auto readout : Run16) {
+    if (readout.srs_timestamp < old)
+      bonus++;
+    old = readout.srs_timestamp;
+    readout.bonus_timestamp = bonus;
     store_hit(readout);
   }
   EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 3);
@@ -233,41 +239,54 @@ TEST_F(NMXClustererTest, Run16_Short) {
   EXPECT_EQ(matcher->stats_cluster_count, 7);
 }
 
-TEST_F(NMXClustererTest, Run16_Long_identical) {
-  for (const auto& readout : long_data) {
+TEST_F(ClusterMatcherTest, Run16_Long_identical) {
+  uint32_t bonus = 0;
+  uint32_t old = 0;
+  for (auto readout : long_data) {
+    if (readout.srs_timestamp < old)
+      bonus++;
+    old = readout.srs_timestamp;
+    readout.bonus_timestamp = bonus;
     sorter_y->insert(readout);
     sorter_x->insert(readout);
   }
+
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->clusters.size(), 20284);
-  EXPECT_EQ(sorter_y->clusterer->clusters.size(), 20284);
+  EXPECT_EQ(sorter_x->clusterer->clusters.size(), 20282);
+  EXPECT_EQ(sorter_y->clusterer->clusters.size(), 20282);
 
   matcher = std::make_shared<ClusterMatcher>(0);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
 
-  EXPECT_EQ(matcher->unmatched_clusters.size(), 40568);
+  EXPECT_EQ(matcher->unmatched_clusters.size(), 40564);
 
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 14985);
+  EXPECT_EQ(matcher->stats_cluster_count, 16545);
 }
 
-TEST_F(NMXClustererTest, Run16_Long) {
-  for (const auto& readout : long_data) {
+TEST_F(ClusterMatcherTest, Run16_Long) {
+  uint32_t bonus = 0;
+  uint32_t old = 0;
+  for (auto readout : long_data) {
+    if (readout.srs_timestamp < old)
+      bonus++;
+    old = readout.srs_timestamp;
+    readout.bonus_timestamp = bonus;
     store_hit(readout);
   }
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10207);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12445);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10206);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12443);
 
   matcher = std::make_shared<ClusterMatcher>(10);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
-  EXPECT_EQ(matcher->unmatched_clusters.size(), 22652);
+  EXPECT_EQ(matcher->unmatched_clusters.size(), 22649);
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 6140);
+  EXPECT_EQ(matcher->stats_cluster_count, 6250);
 }
 
 int main(int argc, char **argv) {

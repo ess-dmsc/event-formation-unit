@@ -48,7 +48,6 @@ AbstractBuilder::ResultStats BuilderVMM2::process_buffer(char *buf, size_t size)
   for (unsigned int i = 0; i < parser_.elems; i++) {
     auto &d = parser_.data[i];
 
-    readout.frame_counter = parser_.srshdr.fc;
     readout.srs_timestamp = parser_.srshdr.time;
     readout.channel = d.chno;
     readout.bcid = d.bcid;

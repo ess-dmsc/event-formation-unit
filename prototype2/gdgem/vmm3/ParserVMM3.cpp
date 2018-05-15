@@ -29,6 +29,17 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
     vmd->overThreshold = (data2r >> 1) & 0x01;
     uint8_t triggerOffset = (data1 >> 27) & 0x1F;
     vmd->triggerCounter = markers[vmd->vmmid].triggerCount + triggerOffset;
+
+    // TODO: Test this logic
+    // Affects only VMM3 but not VMM3a
+    // TDC has reduced resolution due to most significant bit problem of current
+    // sources (like ADC)
+    if (false) {
+      // TODO: use bit shifting instead?
+      uint16_t tdcRebinned = (uint16_t) vmd->tdc / 8;
+      vmd->tdc = tdcRebinned * 8;
+    }
+
     return 1;
   } else {
     /// Marker

@@ -73,7 +73,13 @@ protected:
 // TODO: Test this without sorter!!! Use presorted data that we understand
 
 TEST_F(Clusterer1Test, Run16_line_110168_110323) {
-  for (const auto& readout : Run16) {
+  uint32_t bonus = 0;
+  uint32_t old = 0;
+  for (auto readout : Run16) {
+    if (readout.srs_timestamp < old)
+      bonus++;
+    old = readout.srs_timestamp;
+    readout.bonus_timestamp = bonus;
     store_hit(readout);
   }
   EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 3);
@@ -85,15 +91,21 @@ TEST_F(Clusterer1Test, Run16_line_110168_110323) {
 }
 
 TEST_F(Clusterer1Test, Run16_Long) {
-  for (const auto& readout : long_data) {
+  uint32_t bonus = 0;
+  uint32_t old = 0;
+  for (auto readout : long_data) {
+    if (readout.srs_timestamp < old)
+      bonus++;
+    old = readout.srs_timestamp;
+    readout.bonus_timestamp = bonus;
     store_hit(readout);
   }
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10202);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12433);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10201);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12431);
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10207);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12445);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10206);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12443);
 }
 
 

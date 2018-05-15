@@ -21,6 +21,14 @@ int NMXVMM2SRSData::parse(uint32_t data1, uint32_t data2,
   vmd->bcid = BitMath::gray2bin32(((data1 >> 10) & 0x3f) + (((data1 >> 0) & 0x3f) << 6));
   vmd->chno = (data2 >> 2) & 0x3f;
   vmd->overThreshold = (data2 >> 1) & 0x01;
+
+  // TODO: Belongs in parser?
+  if (vmd->bcid == 0 && vmd->tdc == 0 && vmd->overThreshold) {
+    stats_bcid_tdc_errors++;
+  }
+
+  // TODO: add test for if adc=0 && over_threshold, and report
+
   return 0;
 }
 
@@ -47,8 +55,13 @@ int NMXVMM2SRSData::receive(const char *buffer, int size) {
     return 0;
   }
 
-  srshdr.time = ntohl(srsptr->time);
   srshdr.dataid = ntohl(srsptr->dataid);
+  srshdr.time = ntohl(srsptr->time);
+
+  // Count overflow for adding to timestamp later
+  if (srshdr.time < old_time)
+    time_bonus++;
+  old_time = srshdr.time;
 
   if (srshdr.dataid == 0x56413200) {
     XTRACE(PROCESS, DEB, "No Data\n");

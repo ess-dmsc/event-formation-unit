@@ -27,7 +27,7 @@ public:
     type.insert("chip_id",
                 u8,
                 datatype::create<std::uint8_t>());
-    type.insert("frame_counter",
+    type.insert("bonus_timestamp",
                 2*u8,
                 datatype::create<std::uint32_t>());
     type.insert("srs_timestamp",
