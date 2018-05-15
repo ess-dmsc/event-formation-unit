@@ -10,7 +10,7 @@
 #include <string>
 
 struct ClustererConfig {
-  uint16_t eventlet_adc_threshold {0};
+  uint16_t hit_adc_threshold {0};
   uint16_t max_strip_gap {2};
   double max_time_gap {200};
   size_t min_cluster_size {3};
@@ -23,9 +23,9 @@ struct EventFilter {
   size_t lower_uncertainty_dropped{0};
 
 
-  bool enforce_minimum_eventlets{false};
-  uint32_t minimum_eventlets{6};
-  size_t minimum_eventlets_dropped{0};
+  bool enforce_minimum_hits{false};
+  uint32_t minimum_hits{6};
+  size_t minimum_hits_dropped{0};
 
   bool valid(Event& event)
   {
@@ -34,10 +34,10 @@ struct EventFilter {
       lower_uncertainty_dropped++;
       return false;
     }
-    if (enforce_minimum_eventlets &&
-            ((event.x.entries.size() < minimum_eventlets) ||
-                (event.y.entries.size() < minimum_eventlets))) {
-      minimum_eventlets_dropped++;
+    if (enforce_minimum_hits &&
+            ((event.x.entries.size() < minimum_hits) ||
+                (event.y.entries.size() < minimum_hits))) {
+      minimum_hits_dropped++;
       return false;
     }
     return  true;
@@ -69,7 +69,7 @@ struct NMXConfig {
   EventFilter filter;
 
   // Monitor
-  bool eventlet_histograms {false};
+  bool hit_histograms {false};
   uint32_t cluster_adc_downshift{6};
   bool send_tracks {false};
   size_t track_sample_minhits{6};

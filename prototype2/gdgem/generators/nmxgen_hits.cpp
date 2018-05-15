@@ -10,7 +10,7 @@
 #include <libs/include/Timer.h>
 
 #include <gdgem/generators/NMXArgs.h>
-#include <gdgem/generators/ReaderEventlets.h>
+#include <gdgem/generators/ReaderHits.h>
 #include <libs/include/Socket.h>
 #include <unistd.h>
 
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
   DataSource.setBufferSizes(opts.sndbuf, 0);
   DataSource.printBufferSizes();
 
-  ReaderEventlets file(opts.filename);
+  ReaderHits file(opts.filename);
 
   int readsz;
 

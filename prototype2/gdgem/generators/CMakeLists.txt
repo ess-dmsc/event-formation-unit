@@ -3,20 +3,20 @@
 #=============================================================================
 
 set(nmxgen_apv_SRC
-    ../nmx/Eventlet.cpp
+    ../nmx/Hit.cpp
     nmxgen_apv.cpp
     NMXArgs.cpp
     ReaderAPV.cpp
     )
 set(nmxgen_apv_INC
-    ../nmx/Eventlet.h
+    ../nmx/Hit.h
     NMXArgs.h
     ReaderAPV.h
     )
 create_executable(nmxgen_apv)
 
 set(BuilderAPVTest_SRC
-    ../nmx/EventletFile.cpp
+    ../nmx/HitFile.cpp
     ../nmx/Event.cpp
     ../nmx/Cluster.cpp
     ../nmx/Hists.cpp
@@ -25,10 +25,10 @@ set(BuilderAPVTest_SRC
     BuilderAPV.cpp
     )
 set(BuilderAPVTest_INC
-    ../nmx/EventletFile.h
+    ../nmx/HitFile.h
     ../nmx/Cluster.h
     ../nmx/Event.h
-    ../nmx/Eventlet.h
+    ../nmx/Hit.h
     ../nmx/Hists.h
     BuilderAPV.h
     )
@@ -38,20 +38,20 @@ set(BuilderAPVTest_INC
 # Raw evenlet generator (h5)
 #=============================================================================
 
-set(nmxgen_eventlets_SRC
-    ../nmx/EventletFile.cpp
-    ../nmx/Eventlet.cpp
-    nmxgen_eventlets.cpp
-    ReaderEventlets.cpp
+set(nmxgen_hits_SRC
+    ../nmx/HitFile.cpp
+    ../nmx/Hit.cpp
+    nmxgen_hits.cpp
+    ReaderHits.cpp
     NMXArgs.cpp
     )
-set(nmxgen_eventlets_INC
-    ../nmx/EventletFile.h
-    ../nmx/Eventlet.h
-    ReaderEventlets.h
+set(nmxgen_hits_INC
+    ../nmx/HitFile.h
+    ../nmx/Hit.h
+    ReaderHits.h
     NMXArgs.h
     )
-create_executable(nmxgen_eventlets)
+create_executable(nmxgen_hits)
 
 #=============================================================================
 # PCAP generator

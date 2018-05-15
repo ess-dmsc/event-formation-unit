@@ -34,11 +34,11 @@ public:
   void bin(const Event &e);
   void bin_hists(const std::list<Cluster>& cl);
 
-  void bin(const Eventlet &e);
+  void bin(const Hit &e);
   void binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16_t yadc);
 
   bool isEmpty() const;
-  size_t eventlet_count() const;
+  size_t hit_count() const;
   size_t cluster_count() const;
 
   uint32_t bin_width() const;
@@ -46,7 +46,7 @@ public:
 
 private:
   uint32_t downshift_{0};
-  size_t eventlet_count_{0};
+  size_t hit_count_{0};
   size_t cluster_count_{0};
 
   static size_t strip_hist_size();

@@ -26,26 +26,26 @@ protected:
   virtual void TearDown() { delete builder; }
 };
 
-TEST_F(BuilderVMM2Test, DataTooShortForEventlets) {
+TEST_F(BuilderVMM2Test, DataTooShortForHits) {
   auto stats =
-      builder->process_buffer((char *)srsdata_0_eventlets,
-                              sizeof(srsdata_0_eventlets));
-  ASSERT_EQ(stats.valid_eventlets, 0);
+      builder->process_buffer((char *)srsdata_0_hits,
+                              sizeof(srsdata_0_hits));
+  ASSERT_EQ(stats.valid_hits, 0);
   ASSERT_EQ(stats.geom_errors, 0);
 }
 
 TEST_F(BuilderVMM2Test, InvalidGeometry) {
   auto stats = builder->process_buffer((char *)srsdata_invalid_geometry,
                                        sizeof(srsdata_invalid_geometry));
-  ASSERT_EQ(stats.valid_eventlets, 1);
+  ASSERT_EQ(stats.valid_hits, 1);
   ASSERT_EQ(stats.geom_errors, 1);
 }
 
-TEST_F(BuilderVMM2Test, Process22Eventlets) {
+TEST_F(BuilderVMM2Test, Process22Hits) {
   auto stats =
-      builder->process_buffer((char *)srsdata_22_eventlets,
-                              sizeof(srsdata_22_eventlets));
-  ASSERT_EQ(stats.valid_eventlets, 22);
+      builder->process_buffer((char *)srsdata_22_hits,
+                              sizeof(srsdata_22_hits));
+  ASSERT_EQ(stats.valid_hits, 22);
   ASSERT_EQ(stats.geom_errors, 0);
 }
 

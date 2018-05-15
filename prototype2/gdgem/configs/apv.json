@@ -3,7 +3,7 @@
 
   "clusterer x" :
   {
-    "eventlet_adc_threshold" : 0,
+    "hit_adc_threshold" : 0,
     "max_strip_gap" : 25,
     "max_time_gap" : 25,
     "min_cluster_size" : 1
@@ -11,7 +11,7 @@
 
   "clusterer y" :
   {
-    "eventlet_adc_threshold" : 0,
+    "hit_adc_threshold" : 0,
     "max_strip_gap" : 25,
     "max_time_gap" : 25,
     "min_cluster_size" : 1
@@ -27,11 +27,11 @@
   {
     "enforce_lower_uncertainty_limit" : false,
     "lower_uncertainty_limit" : 6,
-    "enforce_minimum_eventlets" : false,
-    "minimum_eventlets" : 6
+    "enforce_minimum_hits" : false,
+    "minimum_hits" : 6
   },
 
-  "eventlet_histograms" : true,
+  "hit_histograms" : true,
   "cluster_adc_downshift" : 6,
   "send_tracks" : true,
   "track_sample_minhits" : 6,

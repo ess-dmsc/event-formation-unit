@@ -53,7 +53,7 @@ TEST_F(EventFormationTest, Initial) {
 
   for (auto pkt : Run16_1_to_16) {
     auto stats = builder->process_buffer((char *)&pkt[0], pkt.size());
-    readouts += stats.valid_eventlets;
+    readouts += stats.valid_hits;
     readouts_error_bytes += stats.error_bytes; // From srs data parser
 
     matcher.merge(0, builder->clusterer_x->clusters);

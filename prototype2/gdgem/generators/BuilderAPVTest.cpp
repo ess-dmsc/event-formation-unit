@@ -18,10 +18,10 @@ TEST_F(BuilderAPVTest, Process) {
   // char data[9000];
 
   // auto num1 = builder->process_buffer(data, 16, clusterer, hists);
-  // ASSERT_EQ(num1.valid_eventlets, 1);
+  // ASSERT_EQ(num1.valid_hits, 1);
 
   // auto num2 = builder->process_buffer(data, 64, clusterer, hists);
-  // ASSERT_EQ(num2.valid_eventlets, 4);
+  // ASSERT_EQ(num2.valid_hits, 4);
 }
 
 int main(int argc, char **argv) {

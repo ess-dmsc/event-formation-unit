@@ -17,7 +17,7 @@
 #include <gdgem/nmx/HistSerializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/generators/BuilderAPV.h>
-#include <gdgem/generators/BuilderEventlets.h>
+#include <gdgem/generators/BuilderHits.h>
 #include <gdgem/vmm2/BuilderVMM2.h>
 
 #include <gdgem/clustering/ClusterMatcher.h>
@@ -231,10 +231,10 @@ void NMX::processing_thread() {
         // printf("received packet with length %d\n", len);
         auto stats = builder_->process_buffer(eth_ringbuf->getDataBuffer(data_index), len);
 
-        mystats.readouts += stats.valid_eventlets;
+        mystats.readouts += stats.valid_hits;
         mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
 
-        if (nmx_opts.eventlet_histograms) {
+        if (nmx_opts.hit_histograms) {
           hists.bin_hists(builder_->clusterer_x->clusters);
           hists.bin_hists(builder_->clusterer_y->clusters);
         }
@@ -256,7 +256,7 @@ void NMX::processing_thread() {
                         nmx_opts.analyze_max_timebins,
                         nmx_opts.analyze_max_timedif);
 
-          if (nmx_opts.eventlet_histograms) {
+          if (nmx_opts.hit_histograms) {
             hists.bin(event);
           }
 
@@ -325,8 +325,8 @@ void NMX::processing_thread() {
       }
 
       if (!hists.isEmpty()) {
-        XTRACE(PROCESS, DEB, "Sending histogram for %zu eventlets and %zu clusters \n",
-               hists.eventlet_count(), hists.cluster_count());
+        XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters \n",
+               hists.hit_count(), hists.cluster_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
         monitorprod.produce(txbuffer, len);
@@ -358,9 +358,9 @@ void NMX::init_builder() {
                                             nmx_opts.clusterer_y.max_strip_gap,
                                             nmx_opts.clusterer_y.min_cluster_size);
 
-  if (nmx_opts.builder_type == "Eventlets") {
-    XTRACE(INIT, DEB, "Using BuilderEventlets\n");
-    builder_ = std::make_shared<BuilderEventlets>(nmx_opts.dump_directory,
+  if (nmx_opts.builder_type == "Hits") {
+    XTRACE(INIT, DEB, "Using BuilderHits\n");
+    builder_ = std::make_shared<BuilderHits>(nmx_opts.dump_directory,
                                                   nmx_opts.dump_csv, nmx_opts.dump_h5);
     builder_->clusterer_x = clusx;
     builder_->clusterer_y = clusy;
@@ -374,8 +374,8 @@ void NMX::init_builder() {
     XTRACE(INIT, DEB, "Using BuilderVMM2\n");
     builder_ = std::make_shared<BuilderVMM2>(
         nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
-        nmx_opts.clusterer_x.eventlet_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
-        nmx_opts.clusterer_y.eventlet_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
+        nmx_opts.clusterer_x.hit_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
+        nmx_opts.clusterer_y.hit_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
         nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else {
     XTRACE(INIT, ALW, "Unrecognized builder type in config\n");

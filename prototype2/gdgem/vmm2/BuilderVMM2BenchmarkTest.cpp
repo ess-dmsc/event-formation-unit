@@ -20,17 +20,17 @@ static void Setup(__attribute__((unused)) benchmark::State &state) {
 BENCHMARK(Setup);
 
 static void ParseData(benchmark::State &state) {
-  uint64_t eventlets = 0;
+  uint64_t hits = 0;
   Setup(state);
 
   for (auto _ : state) {
     auto stats =
-        builder->process_buffer((char *)srsdata_22_eventlets,
-                                sizeof(srsdata_22_eventlets), clusterer, hists);
-    eventlets += stats.valid_eventlets;
+        builder->process_buffer((char *)srsdata_22_hits,
+                                sizeof(srsdata_22_hits), clusterer, hists);
+    hits += stats.valid_hits;
   }
-  state.SetBytesProcessed(state.iterations() * sizeof(srsdata_22_eventlets));
-  state.SetItemsProcessed(eventlets);
+  state.SetBytesProcessed(state.iterations() * sizeof(srsdata_22_hits));
+  state.SetItemsProcessed(hits);
 };
 BENCHMARK(ParseData);
 

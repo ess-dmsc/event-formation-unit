@@ -42,13 +42,13 @@ NMXConfig::NMXConfig(std::string jsonfile) {
   }
 
   auto cx = root["clusterer x"];
-  clusterer_x.eventlet_adc_threshold = cx["eventlet_adc_threshold"].asUInt();
+  clusterer_x.hit_adc_threshold = cx["hit_adc_threshold"].asUInt();
   clusterer_x.max_strip_gap = cx["max_strip_gap"].asUInt();
   clusterer_x.max_time_gap = cx["max_time_gap"].asDouble();
   clusterer_x.min_cluster_size = cx["min_cluster_size"].asLargestUInt();
 
   auto cy = root["clusterer y"];
-  clusterer_y.eventlet_adc_threshold = cy["eventlet_adc_threshold"].asUInt();
+  clusterer_y.hit_adc_threshold = cy["hit_adc_threshold"].asUInt();
   clusterer_y.max_strip_gap = cy["max_strip_gap"].asUInt();
   clusterer_y.max_time_gap = cy["max_time_gap"].asDouble();
   clusterer_y.min_cluster_size = cy["min_cluster_size"].asLargestUInt();
@@ -63,11 +63,11 @@ NMXConfig::NMXConfig(std::string jsonfile) {
   filter.enforce_lower_uncertainty_limit =
       f["enforce_lower_uncertainty_limit"].asBool();
   filter.lower_uncertainty_limit = f["lower_uncertainty_limit"].asInt();
-  filter.enforce_minimum_eventlets = f["enforce_minimum_eventlets"].asBool();
-  filter.minimum_eventlets = f["minimum_eventlets"].asInt();
+  filter.enforce_minimum_hits = f["enforce_minimum_hits"].asBool();
+  filter.minimum_hits = f["minimum_hits"].asInt();
 
 
-  eventlet_histograms = root["eventlet_histograms"].asBool();
+  hit_histograms = root["hit_histograms"].asBool();
   track_sample_minhits = root["track_sample_minhits"].asInt();
   cluster_adc_downshift = root["cluster_adc_downshift"].asInt();
   send_tracks = root["send_tracks"].asBool();
@@ -96,13 +96,13 @@ std::string NMXConfig::debug() const {
   }
 
   ss << "  Clusterer-X:\n";
-  ss << "    eventlet_adc_threshold = " << clusterer_x.eventlet_adc_threshold << "\n";
+  ss << "    hit_adc_threshold = " << clusterer_x.hit_adc_threshold << "\n";
   ss << "    max_time_gap = " << clusterer_x.max_time_gap << "\n";
   ss << "    max_strip_gap = " << clusterer_x.max_strip_gap<< "\n";
   ss << "    min_cluster_size = " << clusterer_x.min_cluster_size << "\n";
 
   ss << "  Clusterer-Y:\n";
-  ss << "    eventlet_adc_threshold = " << clusterer_y.eventlet_adc_threshold << "\n";
+  ss << "    hit_adc_threshold = " << clusterer_y.hit_adc_threshold << "\n";
   ss << "    max_time_gap = " << clusterer_y.max_time_gap << "\n";
   ss << "    max_strip_gap = " << clusterer_y.max_strip_gap<< "\n";
   ss << "    min_cluster_size = " << clusterer_y.min_cluster_size << "\n";
@@ -119,13 +119,13 @@ std::string NMXConfig::debug() const {
      << (filter.enforce_lower_uncertainty_limit ? "YES" : "no") << "\n";
   if (filter.enforce_lower_uncertainty_limit)
     ss << "    lower_uncertainty_limit = " << filter.lower_uncertainty_limit << "\n";
-  ss << "    enforce_minimum_eventlets = "
-     << (filter.enforce_minimum_eventlets ? "YES" : "no") << "\n";
-  if (filter.enforce_minimum_eventlets)
-    ss << "    minimum_eventlets = " << filter.minimum_eventlets << "\n";
+  ss << "    enforce_minimum_hits = "
+     << (filter.enforce_minimum_hits ? "YES" : "no") << "\n";
+  if (filter.enforce_minimum_hits)
+    ss << "    minimum_hits = " << filter.minimum_hits << "\n";
 
-  ss << "  Histogram eventlets = " << (eventlet_histograms ? "YES" : "no") << "\n";
-  if (eventlet_histograms)
+  ss << "  Histogram hits = " << (hit_histograms ? "YES" : "no") << "\n";
+  if (hit_histograms)
     ss << "    cluster_adc_downshift = " << cluster_adc_downshift << "\n";
   ss << "  Send tracks = " << (send_tracks ? "YES" : "no") << "\n";
   if (send_tracks)

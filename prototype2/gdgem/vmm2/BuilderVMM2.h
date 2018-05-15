@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Class for creating NMX eventlets from SRS/VMM data
+ *  @brief Class for creating NMX hits from SRS/VMM data
  */
 
 #pragma once

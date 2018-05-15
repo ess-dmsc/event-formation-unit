@@ -9,14 +9,14 @@ set(gdgem_SRC
     nmx/ReadoutFile.cpp
     nmx/Cluster.cpp
     nmx/Event.cpp
-    nmx/Eventlet.cpp
-    nmx/EventletFile.cpp
+    nmx/Hit.cpp
+    nmx/HitFile.cpp
     nmx/Hists.cpp
     nmx/HistSerializer.cpp
     nmx/TrackSerializer.cpp
     nmx/AbstractBuilder.cpp
     generators/BuilderAPV.cpp
-    generators/BuilderEventlets.cpp
+    generators/BuilderHits.cpp
     clustering/HitsQueue.cpp
     clustering/HitSorter.cpp
     clustering/ClusterMatcher.cpp
@@ -30,7 +30,7 @@ set(gdgem_INC
     NMXConfig.h
     nmx/Cluster.h
     nmx/Event.h
-    nmx/Eventlet.h
+    nmx/Hit.h
     nmx/Hists.h
     nmx/Readout.h
     nmx/ReadoutFile.h
@@ -38,7 +38,7 @@ set(gdgem_INC
     nmx/TrackSerializer.h
     nmx/AbstractBuilder.h
     generators/BuilderAPV.h
-    generators/BuilderEventlets.h
+    generators/BuilderHits.h
     clustering/HitsQueue.h
     clustering/HitSorter.h
     clustering/ClusterMatcher.h

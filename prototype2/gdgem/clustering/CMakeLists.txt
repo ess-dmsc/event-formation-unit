@@ -9,7 +9,7 @@ get_filename_component(TEST_DATA_PATH "test_data/run16long.h5" DIRECTORY)
 set(ClusteringBase_SRC
     ../nmx/Event.cpp
     ../nmx/Cluster.cpp
-    ../nmx/Eventlet.cpp
+    ../nmx/Hit.cpp
     ../nmx/ReadoutFile.cpp
     ../srs/SRSTime.cpp
     ../srs/SRSMappings.cpp
@@ -21,7 +21,7 @@ set(ClusteringBase_INC
     ../nmx/Event.h
     ../nmx/Readout.h
     ../nmx/Cluster.h
-    ../nmx/Eventlet.h
+    ../nmx/Hit.h
     ../nmx/ReadoutFile.h
     ../srs/SRSTime.h
     ../srs/SRSMappings.h

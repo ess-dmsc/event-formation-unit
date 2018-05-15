@@ -7,18 +7,18 @@
 
 #pragma once
 
-#include <gdgem/nmx/EventletFile.h>
+#include <gdgem/nmx/HitFile.h>
 
-class ReaderEventlets {
+class ReaderHits {
 public:
   /** @todo document */
-  ReaderEventlets(std::string filename);
+  ReaderHits(std::string filename);
 
   /** @todo document */
   size_t read(char *buf);
 
 private:
-  EventletFile file;
+  HitFile file;
 
   size_t total_{0};
   size_t current_{0};

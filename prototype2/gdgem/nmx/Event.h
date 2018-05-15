@@ -16,10 +16,10 @@ class Event {
 public:
   Cluster x, y; // tracks in x and y planes
 
-  /** @brief adds eventlet to event
-   * @param eventlet to be added
+  /** @brief adds hit to event
+   * @param hit to be added
    */
-  void insert_eventlet(const Eventlet &e);
+  void insert_hit(const Hit &e);
 
   void merge(Cluster& cluster);
 

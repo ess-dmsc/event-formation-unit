@@ -37,7 +37,7 @@ void Clusterer1::cluster_by_strip(HitContainer &hits) {
   Cluster cluster;
 
   std::sort(hits.begin(), hits.end(),
-            [](const Eventlet &e1, const Eventlet &e2) {
+            [](const Hit &e1, const Hit &e2) {
               return e1.strip < e2.strip;
             });
 
@@ -50,7 +50,7 @@ void Clusterer1::cluster_by_strip(HitContainer &hits) {
     }
 
     // insert in either case
-    cluster.insert_eventlet(hit);
+    cluster.insert_hit(hit);
   }
 
   // At the end of the clustering, attempt to stash any leftovers

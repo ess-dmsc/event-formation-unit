@@ -1,6 +1,6 @@
 #pragma once
 
 #include <vector>
-#include <gdgem/nmx/Eventlet.h>
+#include <gdgem/nmx/Hit.h>
 
-using HitContainer = std::vector<Eventlet>;
+using HitContainer = std::vector<Hit>;

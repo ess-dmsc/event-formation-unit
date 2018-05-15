@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Eventlet struct for NMX event formation
+ *  @brief Hit struct for NMX event formation
  */
 
 #pragma once
@@ -12,7 +12,7 @@
 #include <string>
 
 // TODO: rename this to Hit
-struct Eventlet {
+struct Hit {
   using strip_type = uint16_t;
   using adc_type = uint16_t;
   static constexpr strip_type strip_max_val{std::numeric_limits<strip_type>::max()};
@@ -22,7 +22,6 @@ struct Eventlet {
   uint8_t plane_id{0};
   strip_type strip{0};
   adc_type adc{0};
-  bool over_threshold{false}; //TODO: remove this
 
   // @brief prints values for debug purposes
   std::string debug() const;

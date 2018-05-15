@@ -79,15 +79,15 @@ protected:
   Cluster mock_cluster(uint8_t plane, uint16_t strip_start, uint16_t strip_end,
                        double time_start, double time_end) {
     Cluster ret;
-    Eventlet e;
+    Hit e;
     e.plane_id = plane;
     e.adc = 1;
     double time_step = (time_end - time_start) / 10.0;
     for (e.time = time_start; e.time <= time_end; e.time += time_step)
       for (e.strip = strip_start; e.strip <= strip_end; ++e.strip)
-        ret.insert_eventlet(e);
+        ret.insert_hit(e);
     e.time = time_end;
-    ret.insert_eventlet(e);
+    ret.insert_hit(e);
     return ret;
   }
 

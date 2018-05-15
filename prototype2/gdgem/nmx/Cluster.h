@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <gdgem/nmx/Eventlet.h>
+#include <gdgem/nmx/Hit.h>
 #include <limits>
 #include <list>
 
@@ -15,15 +15,15 @@ struct Cluster {
 
   int16_t plane_id {-1};
 
-  /** @brief adds eventlet to event's plane
-   * @param eventlet to be added
+  /** @brief adds hit to event's plane
+   * @param hit to be added
    */
-  void insert_eventlet(const Eventlet &eventlet);
+  void insert_hit(const Hit &hit);
 
-  std::list<Eventlet> entries;
+  std::list<Hit> entries;
   bool empty() const;
 
-  // calculated as eventlets are added
+  // calculated as hits are added
   uint16_t strip_start{0};
   uint16_t strip_end{0};
   uint16_t strip_span() const;
@@ -57,8 +57,8 @@ struct Cluster {
 
   // only after analyze
   double utpc_center{std::numeric_limits<double>::quiet_NaN()}; // entry strip
-  int16_t uncert_lower{-1}; // strip span of eventlets in latest timebin
-  int16_t uncert_upper{-1}; // strip span of eventlets in latest few timebins
+  int16_t uncert_lower{-1}; // strip span of hits in latest timebin
+  int16_t uncert_upper{-1}; // strip span of hits in latest few timebins
 
   // @brief returns calculated and rounded entry strip number for pixid
   uint32_t utpc_center_rounded() const;

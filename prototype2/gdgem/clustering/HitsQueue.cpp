@@ -14,14 +14,14 @@ const HitContainer &HitsQueue::hits() const {
 
 void HitsQueue::store(uint8_t plane, uint16_t strip, uint16_t adc, double chipTime) {
   if (chipTime < pTime.max_chip_time_in_window_ns()) {
-    hitsNew.emplace_back(Eventlet());
+    hitsNew.emplace_back(Hit());
     auto &e = hitsNew[hitsNew.size() - 1];
     e.plane_id = plane;
     e.adc = adc;
     e.strip = strip;
     e.time = chipTime;
   } else {
-    hitsOld.emplace_back(Eventlet());
+    hitsOld.emplace_back(Hit());
     auto &e = hitsOld[hitsOld.size() - 1];
     e.plane_id = plane;
     e.adc = adc;
@@ -32,12 +32,12 @@ void HitsQueue::store(uint8_t plane, uint16_t strip, uint16_t adc, double chipTi
 
 void HitsQueue::sort_and_correct() {
   std::sort(hitsOld.begin(), hitsOld.end(),
-            [](const Eventlet &e1, const Eventlet &e2) {
+            [](const Hit &e1, const Hit &e2) {
               return e1.time < e2.time;
             });
 
   std::sort(hitsNew.begin(), hitsNew.end(),
-            [](const Eventlet &e1, const Eventlet &e2) {
+            [](const Hit &e1, const Hit &e2) {
               return e1.time < e2.time;
             });
   correct_trigger_data();
@@ -85,7 +85,7 @@ void HitsQueue::correct_trigger_data() {
     if (deltaTime > pMaxTimeGap)
       break;
 
-    hitsOld.emplace_back(Eventlet());
+    hitsOld.emplace_back(Hit());
     auto &e = hitsOld[hitsOld.size() - 1];
     e.plane_id = itFind->plane_id;
     e.adc = itFind->adc;
@@ -98,7 +98,7 @@ void HitsQueue::correct_trigger_data() {
 
 // TODO Confirm that this is not needed
 //  std::sort(hitsOld.begin(), hitsOld.end(),
-//            [](const Eventlet &e1, const Eventlet &e2) {
+//            [](const Hit &e1, const Hit &e2) {
 //              return e1.time < e2.time;
 //            });
 

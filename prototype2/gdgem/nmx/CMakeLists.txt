@@ -12,32 +12,32 @@ set(ReadoutFileTest_INC
     )
 create_test_executable(ReadoutFileTest)
 
-set(EventletTest_SRC
-    EventletTest.cpp
-    Eventlet.cpp
+set(HitTest_SRC
+    HitTest.cpp
+    Hit.cpp
     )
-set(EventletTest_INC
-    Eventlet.h
+set(HitTest_INC
+    Hit.h
     )
-create_test_executable(EventletTest)
+create_test_executable(HitTest)
 
-set(EventletFileTest_SRC
-    EventletFileTest.cpp
-    EventletFile.cpp
-    Eventlet.cpp
+set(HitFileTest_SRC
+    HitFileTest.cpp
+    HitFile.cpp
+    Hit.cpp
     )
-set(EventletFileTest_INC
-    EventletFile.h
-    Eventlet.h
+set(HitFileTest_INC
+    HitFile.h
+    Hit.h
     )
-create_test_executable(EventletFileTest)
+create_test_executable(HitFileTest)
 
 set(ClusterTest_SRC
     ClusterTest.cpp
     Cluster.cpp
     )
 set(EventTest_INC
-    Eventlet.h
+    Hit.h
     Cluster.h
     )
 create_test_executable(ClusterTest)
@@ -48,7 +48,7 @@ set(EventTest_SRC
     Event.cpp
     )
 set(EventTest_INC
-    Eventlet.h
+    Hit.h
     Cluster.h
     Event.h
     )
@@ -60,7 +60,7 @@ set(HistSerializerTest_SRC
     HistSerializer.cpp
     )
 set(HistSerializerTest_INC
-    Eventlet.h
+    Hit.h
     Hists.h
     HistSerializer.h
     ../../common/Producer.h
@@ -68,7 +68,7 @@ set(HistSerializerTest_INC
 create_test_executable(HistSerializerTest)
 
 set(TrackSerializerTest_SRC
-    Eventlet.cpp
+    Hit.cpp
     Cluster.cpp
     Event.cpp
     TrackSerializerTest.cpp
@@ -77,7 +77,7 @@ set(TrackSerializerTest_SRC
 set(TrackSerializerTest_INC
     Event.h
     Cluster.h
-    Eventlet.h
+    Hit.h
     TrackSerializer.h
     )
 create_test_executable(TrackSerializerTest)

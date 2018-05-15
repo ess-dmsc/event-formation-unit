@@ -8,11 +8,11 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-void Event::insert_eventlet(const Eventlet &e) {
+void Event::insert_hit(const Hit &e) {
   if (e.plane_id == 1) { /**< @todo deal with multiple panels */
-    y.insert_eventlet(e);
+    y.insert_hit(e);
   } else if (e.plane_id == 0) {
-    x.insert_eventlet(e);
+    x.insert_hit(e);
   }
 }
 

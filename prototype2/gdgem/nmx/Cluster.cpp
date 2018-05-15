@@ -9,7 +9,7 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-void Cluster::insert_eventlet(const Eventlet &e) {
+void Cluster::insert_hit(const Hit &e) {
   if (entries.empty()) {
     plane_id = e.plane_id;
     time_start = time_end = e.time;
@@ -57,7 +57,7 @@ void Cluster::analyze(bool weighted, uint16_t max_timebins,
   if (entries.empty())
     return;
 
-  entries.sort([](const Eventlet &c1, const Eventlet &c2) {
+  entries.sort([](const Hit &c1, const Hit &c2) {
     return c1.time < c2.time;
   });
 

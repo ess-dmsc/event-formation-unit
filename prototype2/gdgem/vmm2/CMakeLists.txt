@@ -56,7 +56,7 @@ set(BuilderBenchmarkTest_INC
     ../nmx/Cluster.h
     ../nmx/Event.h
     ../nmx/Hists.h
-    ../nmx/Eventlet.h
+    ../nmx/Hit.h
     ../srs/SRSTime.h
     ../srs/SRSMappings.h
     ParserVMM2.h
@@ -94,7 +94,7 @@ set(BuilderVMM2Test_INC
     ../nmx/Cluster.h
     ../nmx/Event.h
     ../nmx/Hists.h
-    ../nmx/Eventlet.h
+    ../nmx/Hit.h
     ../srs/SRSTime.h
     ../srs/SRSMappings.h
     ../clustering/Clusterer1.h

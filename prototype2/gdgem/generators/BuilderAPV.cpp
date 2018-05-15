@@ -11,10 +11,10 @@ BuilderAPV::BuilderAPV(std::string dump_dir, bool dump_csv, bool dump_h5)
     : AbstractBuilder(dump_dir, dump_csv, dump_h5) {
   data.resize(4);
   if (dump_csv_)
-    vmmsave->tofile("# time, plane, strip, adc, overthreshold\n");
+    vmmsave->tofile("# time, plane, strip, adc\n");
   if (dump_h5_) {
-    eventlet_file_ = std::make_shared<EventletFile>();
-    eventlet_file_->open_rw(dump_dir + "gdgem_apv2vmm_" + time_str() + ".h5");
+    hit_file_ = std::make_shared<HitFile>();
+    hit_file_->open_rw(dump_dir + "gdgem_apv2vmm_" + time_str() + ".h5");
   }
 }
 
@@ -23,12 +23,12 @@ AbstractBuilder::ResultStats BuilderAPV::process_buffer(char *buf, size_t size) 
   converted_data.resize(count);
   for (size_t i = 0; i < count; ++i) {
     memcpy(data.data(), buf, psize);
-    make_eventlet(i);
+    make_hit(i);
     buf += psize;
   }
 
-  std::vector<Eventlet> converted_x;
-  std::vector<Eventlet> converted_y;
+  std::vector<Hit> converted_x;
+  std::vector<Hit> converted_y;
 
   for (const auto& e : converted_data) {
     if (e.plane_id)
@@ -38,8 +38,8 @@ AbstractBuilder::ResultStats BuilderAPV::process_buffer(char *buf, size_t size) 
   }
 
   if (dump_h5_) {
-    eventlet_file_->data = std::move(converted_data);
-    eventlet_file_->write();
+    hit_file_->data = std::move(converted_data);
+    hit_file_->write();
   }
 
   if (clusterer_x)
@@ -50,17 +50,16 @@ AbstractBuilder::ResultStats BuilderAPV::process_buffer(char *buf, size_t size) 
   return AbstractBuilder::ResultStats(count, 0, 0);
 }
 
-void BuilderAPV::make_eventlet(size_t idx) {
+void BuilderAPV::make_hit(size_t idx) {
   auto& e = converted_data[idx];
   e.time = (uint64_t(data[0]) << 32) | uint64_t(data[1]);
   e.plane_id = data[2] >> 16;
   e.strip = data[2] & 0xFFFF;
-  e.over_threshold = (data[3] >> 16) & 0x1;
   e.adc = data[3] & 0xFFFF;
 
-  XTRACE(PROCESS, DEB, "Made eventlet: %s\n", e.debug().c_str());
+  XTRACE(PROCESS, DEB, "Made hit: %s\n", e.debug().c_str());
 
   if (dump_csv_)
     vmmsave->tofile("%" PRIu64 ", %u, %u, %u, %u\n", e.time, e.plane_id,
-                    e.strip, e.adc, e.over_threshold);
+                    e.strip, e.adc);
 }

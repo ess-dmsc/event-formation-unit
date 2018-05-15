@@ -1,20 +1,20 @@
-#include <gdgem/nmx/EventletFile.h>
+#include <gdgem/nmx/HitFile.h>
 
-#define DATSET_NAME "gdgem_eventlets"
+#define DATSET_NAME "gdgem_hits"
 
 namespace hdf5 {
 
 namespace datatype {
 template<>
-class TypeTrait<Eventlet>
+class TypeTrait<Hit>
 {
 public:
-  using Type = Eventlet;
+  using Type = Hit;
   using TypeClass = Compound;
 
   static TypeClass create(const Type & = Type())
   {
-    auto type = datatype::Compound::create(sizeof(Eventlet));
+    auto type = datatype::Compound::create(sizeof(Hit));
     type.insert("time",
                 0,
                 datatype::create<double>());
@@ -23,14 +23,10 @@ public:
                 datatype::create<std::uint8_t>());
     type.insert("strip",
                 sizeof(double) + sizeof(std::uint8_t),
-                datatype::create<Eventlet::strip_type>());
+                datatype::create<Hit::strip_type>());
     type.insert("adc",
-                sizeof(double) + sizeof(std::uint8_t) + sizeof(Eventlet::strip_type),
-                datatype::create<Eventlet::adc_type>());
-    type.insert("over_threshold",
-                sizeof(double) + sizeof(std::uint8_t) + sizeof(Eventlet::strip_type)
-                    + sizeof(Eventlet::adc_type),
-                datatype::create<bool>());
+                sizeof(double) + sizeof(std::uint8_t) + sizeof(Hit::strip_type),
+                datatype::create<Hit::adc_type>());
     return type;
   }
 };
@@ -39,26 +35,26 @@ public:
 }
 
 
-EventletFile::EventletFile()
+HitFile::HitFile()
 {
-  dtype_ = hdf5::datatype::create<Eventlet>();
+  dtype_ = hdf5::datatype::create<Hit>();
 }
 
-EventletFile EventletFile::create(boost::filesystem::path file_path)
+HitFile HitFile::create(boost::filesystem::path file_path)
 {
-  EventletFile ret;
+  HitFile ret;
   ret.open_rw(file_path);
   return ret;
 }
 
-EventletFile EventletFile::open(boost::filesystem::path file_path)
+HitFile HitFile::open(boost::filesystem::path file_path)
 {
-  EventletFile ret;
+  HitFile ret;
   ret.open_r(file_path);
   return ret;
 }
 
-void EventletFile::open_rw(boost::filesystem::path file_path)
+void HitFile::open_rw(boost::filesystem::path file_path)
 {
   using namespace hdf5;
 
@@ -72,7 +68,7 @@ void EventletFile::open_rw(boost::filesystem::path file_path)
       dataspace::Simple({0}, {dataspace::Simple::UNLIMITED}), dcpl);
 }
 
-void EventletFile::open_r(boost::filesystem::path file_path)
+void HitFile::open_r(boost::filesystem::path file_path)
 {
   using namespace hdf5;
 
@@ -80,12 +76,12 @@ void EventletFile::open_r(boost::filesystem::path file_path)
   dataset_ = file_.root().get_dataset(DATSET_NAME);
 }
 
-size_t EventletFile::count() const
+size_t HitFile::count() const
 {
   return hdf5::dataspace::Simple(dataset_.dataspace()).current_dimensions().at(0);
 }
 
-void EventletFile::write()
+void HitFile::write()
 {
   slab_.offset(0, count());
   slab_.block(0, data.size());
@@ -93,7 +89,7 @@ void EventletFile::write()
   dataset_.write(data, slab_);
 }
 
-void EventletFile::read_at(size_t idx, size_t count)
+void HitFile::read_at(size_t idx, size_t count)
 {
   slab_.offset(0, idx);
   slab_.block(0, count);
@@ -101,9 +97,9 @@ void EventletFile::read_at(size_t idx, size_t count)
   dataset_.read(data, slab_);
 }
 
-void EventletFile::read(std::string file_name, std::vector<Eventlet>& external_data)
+void HitFile::read(std::string file_name, std::vector<Hit>& external_data)
 {
-  auto file = EventletFile::open(file_name);
+  auto file = HitFile::open(file_name);
   file.read_at(0, file.count());
   external_data = std::move(file.data);
 }

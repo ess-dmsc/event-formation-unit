@@ -1,6 +1,6 @@
 #pragma once
 
-#include <gdgem/nmx/Eventlet.h>
+#include <gdgem/nmx/Hit.h>
 #include <vector>
 
 #pragma GCC diagnostic push
@@ -11,26 +11,26 @@
 #include <h5cpp/hdf5.hpp>
 #pragma GCC diagnostic pop
 
-class EventletFile
+class HitFile
 {
 public:
-  EventletFile();
+  HitFile();
 
   void open_rw(boost::filesystem::path file_path);
   void open_r(boost::filesystem::path file_path);
 
-  static EventletFile create(boost::filesystem::path file_path);
-  static EventletFile open(boost::filesystem::path file_path);
+  static HitFile create(boost::filesystem::path file_path);
+  static HitFile open(boost::filesystem::path file_path);
 
   size_t count() const;
   void write();
   void read_at(size_t idx, size_t count);
 
-  static void read(std::string file, std::vector<Eventlet>& external_data);
+  static void read(std::string file, std::vector<Hit>& external_data);
 
-  std::vector<Eventlet> data;
+  std::vector<Hit> data;
 
-  static constexpr size_t chunk_size{9000 / sizeof(Eventlet)};
+  static constexpr size_t chunk_size{9000 / sizeof(Hit)};
 
 private:
   hdf5::file::File file_;

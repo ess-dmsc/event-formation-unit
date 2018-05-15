@@ -2,7 +2,7 @@
 
 #include <cstring>
 #include <gdgem/nmx/Event.h>
-#include <gdgem/nmx/Eventlet.h>
+#include <gdgem/nmx/Hit.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <test/TestBase.h>
 
@@ -12,7 +12,7 @@ const unsigned int ENTRY_OVERHEAD = 16;
 
 class TrackSerializerTest : public TestBase {
   virtual void SetUp() {
-    e = new Eventlet();
+    e = new Hit();
     event = new Event();
   }
 
@@ -22,7 +22,7 @@ class TrackSerializerTest : public TestBase {
   }
 
 protected:
-  Eventlet *e;
+  Hit *e;
   Event *event;
   char *buffer;
   char flatbuffer[100000];
@@ -33,12 +33,12 @@ protected:
     e->time = xt;
     e->adc = xa;
     e->plane_id = 0;
-    event->insert_eventlet((const Eventlet &)(*e));
+    event->insert_hit((const Hit &)(*e));
     e->strip = ys;
     e->time = yt;
     e->adc = ya;
     e->plane_id = 1;
-    event->insert_eventlet((const Eventlet &)(*e));
+    event->insert_hit((const Hit &)(*e));
   }
 };
 

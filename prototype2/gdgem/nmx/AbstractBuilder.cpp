@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Bastract class for creating NMX eventlets
+ *  @brief Bastract class for creating NMX hits
  */
 
 #include "AbstractBuilder.h"
