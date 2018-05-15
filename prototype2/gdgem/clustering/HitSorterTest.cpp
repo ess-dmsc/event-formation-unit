@@ -122,29 +122,59 @@ protected:
 //}
 
 TEST_F(HitSorterTest, Run16_Short) {
+  uint32_t bonus = 0;
+  uint32_t old = 0;
   for (auto readout : Run16) {
-    readout.bonus_timestamp = 0;
+    if (readout.srs_timestamp < old)
+      bonus++;
+    old = readout.srs_timestamp;
+    readout.bonus_timestamp = bonus;
     store_hit(readout);
   }
+  EXPECT_EQ(bonus, 0);
+
   EXPECT_EQ(2, sorter_x->stats_trigger_count);
   EXPECT_EQ(2, sorter_y->stats_trigger_count);
+
+  EXPECT_EQ(0, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
 }
 
 TEST_F(HitSorterTest, Run16_Long) {
+  uint32_t bonus = 0;
+  uint32_t old = 0;
   for (auto readout : long_data) {
-    readout.bonus_timestamp = 0;
+    if (readout.srs_timestamp < old)
+      bonus++;
+    old = readout.srs_timestamp;
+    readout.bonus_timestamp = bonus;
     store_hit(readout);
   }
+  EXPECT_EQ(bonus, 0);
+
   // Need an intermediate-size dataset where this can be confirmed analytically
   EXPECT_EQ(1539, sorter_x->stats_trigger_count);
   EXPECT_EQ(1540, sorter_y->stats_trigger_count);
+
+  EXPECT_EQ(0, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
 }
 
 TEST_F(HitSorterTest, Mock_short_chrono) {
+  uint32_t bonus = 0;
+  uint32_t old = 0;
   for (auto readout : Run16) {
-    readout.bonus_timestamp = 0;
+    if (readout.srs_timestamp < old)
+      bonus++;
+    old = readout.srs_timestamp;
+    readout.bonus_timestamp = bonus;
     store_hit(readout);
   }
+
+  EXPECT_EQ(0, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
+
+  EXPECT_EQ(bonus, 0);
 
   EXPECT_EQ(mock_x->stats_chrono_errors, 0);
   EXPECT_EQ(mock_y->stats_chrono_errors, 0);
@@ -163,13 +193,21 @@ TEST_F(HitSorterTest, Mock_short_chrono) {
 }
 
 TEST_F(HitSorterTest, Mock_long_chrono) {
+  uint32_t bonus = 0;
+  uint32_t old = 0;
   for (auto readout : long_data) {
+    if (readout.srs_timestamp < old)
+      bonus++;
+    old = readout.srs_timestamp;
     readout.bonus_timestamp = 0;
     store_hit(readout);
   }
+  EXPECT_EQ(bonus, 0);
+
+  EXPECT_EQ(0, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
 
   //TODO: why is this failing?
-
 //  EXPECT_EQ(mock_x->stats_chrono_errors, 0);
 //  EXPECT_EQ(mock_y->stats_chrono_errors, 0);
 
@@ -183,10 +221,16 @@ TEST_F(HitSorterTest, Mock_long_chrono) {
 }
 
 TEST_F(HitSorterTest, Mock_super_long_chrono) {
+  uint32_t bonus = 0;
+  uint32_t old = 0;
   for (auto readout : super_long_data) {
+    if (readout.srs_timestamp < old)
+      bonus++;
+    old = readout.srs_timestamp;
     readout.bonus_timestamp = 0;
     store_hit(readout);
   }
+  EXPECT_EQ(bonus, 0);
 
   //TODO: why is this failing?
 

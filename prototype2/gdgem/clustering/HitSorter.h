@@ -16,6 +16,7 @@ public:
 
   // Statistics counters
   size_t stats_trigger_count {0};
+  size_t stats_subsequent_triggers {0};
 
   std::shared_ptr<AbstractClusterer> clusterer;
 
@@ -24,6 +25,8 @@ private:
   SRSMappings pChips;
   uint16_t pADCThreshold;
   HitsQueue hits;
+
+  HitContainer buffer;
 
   // These are in play for triggering the actual clustering
   double old_trigger_timestamp_ns_ {0};

@@ -4,9 +4,17 @@
 #include <gdgem/srs/SRSTime.h>
 
 class HitsQueue {
+private:
+  struct HitBUffer
+  {
+    double trigger_time {0};
+    HitContainer buffer;
+  };
+
 public:
   HitsQueue(SRSTime Time, double maxTimeGap);
-  void store(uint8_t plane, uint16_t strip, uint16_t adc, double chipTime);
+  void store(uint8_t plane, uint16_t strip, uint16_t adc,
+             double chipTime, double trigger_time = 0);
 
   // TODO: add a flush flag here
   void sort_and_correct();
@@ -19,9 +27,9 @@ private:
 
   // TODO: trigger_timestamp must be added
 
-  HitContainer hitsOld;
-  HitContainer hitsNew;
-  HitContainer hitsOut;
+  HitBUffer hitsOld;
+  HitBUffer hitsNew;
+  HitBUffer hitsOut;
 
   SRSTime pTime;
   double pMaxTimeGap {200};

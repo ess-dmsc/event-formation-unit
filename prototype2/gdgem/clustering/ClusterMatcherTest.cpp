@@ -236,7 +236,7 @@ TEST_F(ClusterMatcherTest, Run16_Short) {
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 7);
+  EXPECT_EQ(matcher->stats_cluster_count, 6);
 }
 
 TEST_F(ClusterMatcherTest, Run16_Long_identical) {
@@ -263,7 +263,7 @@ TEST_F(ClusterMatcherTest, Run16_Long_identical) {
   EXPECT_EQ(matcher->unmatched_clusters.size(), 40564);
 
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 16545);
+  EXPECT_EQ(matcher->stats_cluster_count, 16963);
 }
 
 TEST_F(ClusterMatcherTest, Run16_Long) {
@@ -286,7 +286,8 @@ TEST_F(ClusterMatcherTest, Run16_Long) {
   matcher->merge(1, sorter_y->clusterer->clusters);
   EXPECT_EQ(matcher->unmatched_clusters.size(), 22649);
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 6250);
+//  EXPECT_EQ(matcher->stats_cluster_count, 6250);
+  EXPECT_EQ(matcher->stats_cluster_count, 19073);
 }
 
 int main(int argc, char **argv) {
