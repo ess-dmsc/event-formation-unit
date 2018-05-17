@@ -21,15 +21,11 @@ endfunction(create_module)
 #=============================================================================
 # Generate a loadable detector module
 #=============================================================================
-function(create_static_module module_name)
-  add_library(${module_name} STATIC
+function(create_object_module module_name)
+  add_library(${module_name} OBJECT
     ${${module_name}_SRC}
     ${${module_name}_INC})
-  target_link_libraries(${module_name}
-    ${${module_name}_LIB}
-    ${EFU_COMMON_LIBS}
-    eventlib)
-endfunction(link_module)
+endfunction(create_object_module)
 
 #=============================================================================
 # Generate an executable program

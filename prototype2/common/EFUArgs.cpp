@@ -7,6 +7,7 @@
 #include <regex>
 #include <string>
 #include <fstream>
+#include <common/DetectorModuleRegister.h>
 
 EFUArgs::EFUArgs() {
   CLIParser.set_help_flag(); //Removes the default help flag
@@ -35,7 +36,17 @@ EFUArgs::EFUArgs() {
                   },
                   "Thread to core affinity. Ex: \"-c input_t:4\"")
       ->group("EFU Options");
-  DetectorOption = CLIParser.add_option("-d,--det", DetectorName, "Detector name")
+  
+  std::string DetectorDescription{"Detector name"};
+  std::map<std::string, DetectorModuleSetup> StaticDetModules = DetectorModuleRegistration::getFactories();
+  if (not StaticDetModules.empty()) {
+    DetectorDescription += " (Known modules:";
+    for (auto &Item : StaticDetModules) {
+      DetectorDescription += " " + Item.first;
+    }
+    DetectorDescription += ")";
+  }
+  DetectorOption = CLIParser.add_option("-d,--det", DetectorName, DetectorDescription)
                        ->group("EFU Options")
                        ->required();
   CLIParser

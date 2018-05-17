@@ -22,6 +22,8 @@ set(efu_INC
   )
   
 create_executable(efu)
+add_dependencies(efu AdcReadout)
+target_link_libraries(efu $<TARGET_OBJECTS:AdcReadout>)
 get_filename_component(EFU_RUN_INSTRUCTIONS "Executing artefacts.md" ABSOLUTE)
 add_custom_command(TARGET efu POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy
