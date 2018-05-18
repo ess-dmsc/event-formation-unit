@@ -350,11 +350,4 @@ void NMX::init_builder(std::string jsonfile) {
 
 /** ----------------------------------------------------- */
 
-class NMXFactory : DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    return std::shared_ptr<Detector>(new NMX(settings));
-  }
-};
-
-NMXFactory Factory;
+DetectorFactory<NMX> Factory;

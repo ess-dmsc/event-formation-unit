@@ -195,11 +195,4 @@ void SONDEIDEA::processing_thread() {
 
 /** ----------------------------------------------------- */
 
-class SONDEIDEAFactory : DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    return std::shared_ptr<Detector>(new SONDEIDEA(settings));
-  }
-};
-
-SONDEIDEAFactory Factory;
+DetectorFactory<SONDEIDEA> Factory;
