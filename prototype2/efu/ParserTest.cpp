@@ -60,15 +60,8 @@ public:
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
 
-class TestDetectorFactory : public DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    std::cout << "TestDetectorFactory" << std::endl;
-    return std::shared_ptr<Detector>(new TestDetector(settings));
-  }
-};
 
-TestDetectorFactory Factory;
+DetectorFactory<TestDetector> Factory;
 
 class ParserTest : public TestBase {
 protected:
