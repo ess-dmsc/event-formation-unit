@@ -80,6 +80,8 @@ set(EFUArgsTest_SRC
   EFUArgs.cpp)
 set(EFUArgsTest_INC
   EFUArgs.h)
+set(EFUArgsTest_LIB
+  efu_common)
 create_test_executable(EFUArgsTest)
 
 set(FBSerializerTest_SRC
