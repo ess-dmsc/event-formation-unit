@@ -244,6 +244,41 @@ public:
   DataModule Module;
 };
 
+TEST_F(ChannelProcessingTest, NumberOfSamplesSummed1) {
+  ChannelProcessing Processing;
+  Module.OversamplingFactor = 2;
+  Processing.setMeanOfSamples(1);
+  Processing.setTimeStampLocation(TimeStampLocation::Start);
+  auto Result = Processing.processModule(Module);
+  EXPECT_EQ(Result.Samples.size(), Module.Data.size());
+}
+
+TEST_F(ChannelProcessingTest, NumberOfSamplesSummed2) {
+  ChannelProcessing Processing;
+  Module.OversamplingFactor = 1;
+  Processing.setMeanOfSamples(1);
+  Processing.setTimeStampLocation(TimeStampLocation::Start);
+  auto Result = Processing.processModule(Module);
+  EXPECT_EQ(Result.Samples.size(), Module.Data.size());
+}
+
+TEST_F(ChannelProcessingTest, NumberOfSamplesSummed3) {
+  ChannelProcessing Processing;
+  Module.OversamplingFactor = 1;
+  Processing.setMeanOfSamples(2);
+  Processing.setTimeStampLocation(TimeStampLocation::Start);
+  auto Result = Processing.processModule(Module);
+  EXPECT_EQ(Result.Samples.size(), Module.Data.size() / 2);
+}
+
+TEST_F(ChannelProcessingTest, NumberOfSamplesSummed4) {
+  ChannelProcessing Processing;
+  Module.OversamplingFactor = 2;
+  Processing.setMeanOfSamples(2);
+  Processing.setTimeStampLocation(TimeStampLocation::Start);
+  auto Result = Processing.processModule(Module);
+  EXPECT_EQ(Result.Samples.size(), Module.Data.size() / 2);
+}
 
 TEST_F(ChannelProcessingTest, OversamplingAndTime1) {
   ChannelProcessing Processing;
