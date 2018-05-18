@@ -2,8 +2,10 @@
 
 #include <gdgem/clustering/AbstractClusterer.h>
 
+// Vector would be better also is duplicated
 using ClusterList = std::list<Cluster>;
 
+// TODO: better name
 class Clusterer1 : public AbstractClusterer {
 public:
   Clusterer1(double maxTimeGap, uint16_t maxStripGap, size_t minClusterSize);

@@ -5,7 +5,7 @@
 
 class ClusterMatcher {
 public:
-  ClusterMatcher(double maxDeltaTime);
+  explicit ClusterMatcher(double maxDeltaTime);
 
   void merge(uint8_t plane, ClusterList& c);
 
@@ -16,6 +16,8 @@ public:
   size_t stats_cluster_count {0};
 
   ClusterList unmatched_clusters;
+
+  //Replace std::list with std::vector or std:deque
   std::list<Event> matched_clusters;
 
 private:

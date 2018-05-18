@@ -28,8 +28,9 @@ void Clusterer1::cluster_by_time(const HitContainer &hits) {
     cluster.emplace_back(hit);
   }
 
-  if (cluster.size())
+  if (!cluster.empty()) {
     cluster_by_strip(cluster);
+  }
 }
 
 //====================================================================================================================
@@ -58,9 +59,6 @@ void Clusterer1::cluster_by_strip(HitContainer &hits) {
 }
 //====================================================================================================================
 void Clusterer1::stash_cluster(Cluster &cluster) {
-
-  // TODO: Decide if filters go here?
-
   if (cluster.entries.size() < pMinClusterSize)
     return;
 

@@ -14,24 +14,31 @@ HitSorter::HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
 }
 
 //====================================================================================================================
-void HitSorter::insert(Readout readout) {
 
+bool requires_analysis(...) {
   double triggerTimestamp_ns =
       pTime.trigger_timestamp_ns(readout.srs_timestamp + readout.bonus_timestamp);
-  if (old_trigger_timestamp_ns_ != triggerTimestamp_ns) {
-    stats_trigger_count++;
 
-    double delta_trigger_ns = triggerTimestamp_ns - old_trigger_timestamp_ns_;
 
-    bool subs = (delta_trigger_ns <= pTime.trigger_period_ns());
-    if (subs)
-      stats_subsequent_triggers++;
-    hits.subsequent_trigger(subs);
+if (old_trigger_timestamp_ns_ != triggerTimestamp_ns) {
+  stats_trigger_count++;
 
-    analyze();
-  }
-  old_trigger_timestamp_ns_ = triggerTimestamp_ns;
+  double delta_trigger_ns = triggerTimestamp_ns - old_trigger_timestamp_ns_;
 
+  bool subs = (delta_trigger_ns <= pTime.trigger_period_ns());
+  if (subs)
+    stats_subsequent_triggers++;
+  hits.subsequent_trigger(subs);
+}
+
+// What morten said
+void HitSorter::insert(Readout readout) {
+  //
+  //   analyze();
+  // }
+  // old_trigger_timestamp_ns_ = triggerTimestamp_ns;
+
+//This stays here
   // TODO: Move this to parser?
   if (readout.over_threshold || (readout.adc >= pADCThreshold)) {
     hits.store(pChips.get_plane(readout), pChips.get_strip(readout), readout.adc,
@@ -53,4 +60,3 @@ void HitSorter::analyze() {
   if (clusterer)
     clusterer->cluster(hits.hits());
 }
-
