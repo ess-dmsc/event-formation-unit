@@ -26,13 +26,6 @@ public:
     DATA_BEEFCAFE,
     DATA_LENGTH,
     DATA_ABCD,
-    STREAM_HEADER,
-    STREAM_ABCD,
-    STREAM_TYPE,
-    STREAM_OVERSAMPLING,
-    STREAM_CHANNELS_MASK,
-    STREAM_SIZE,
-    STREAM_BEEFCAFE,
     HEADER_LENGTH,
     HEADER_TYPE,
     IDLE_LENGTH,
@@ -71,7 +64,7 @@ struct AdcData {
 };
 
 /// @brief Different types of data packets form teh ADC hardware.
-enum class PacketType { Idle, Data, Stream, Unknown };
+enum class PacketType { Idle, Data, Unknown };
 
 /// @brief Parsed data containing 0 or more data modules form sampling runs.
 struct PacketData {
@@ -88,7 +81,6 @@ struct HeaderInfo {
   std::uint16_t GlobalCount;
   std::uint16_t ReadoutCount;
   std::int32_t DataStart = 0;
-  std::uint16_t TypeValue; // Used only by streaming data
 };
 
 /// @brief Returned by the trailer parser.
@@ -100,12 +92,6 @@ struct TrailerInfo {
 struct IdleInfo {
   RawTimeStamp TimeStamp;
   std::int32_t FillerStart = 0;
-};
-
-/// @brief Used to store the extracted oversampling factor and active channels from a packet.
-struct StreamSetting {
-  std::vector<int> ChannelsActive;
-  int OversamplingFactor{1};
 };
 
 #pragma pack(push, 2)
@@ -129,25 +115,13 @@ struct DataHeader {
   std::uint16_t MagicValue;
   std::uint16_t Length;
   std::uint16_t Channel;
-  std::uint16_t Fragment;
+  std::uint16_t Oversampling;
   RawTimeStamp TimeStamp;
   void fixEndian() {
     MagicValue = ntohs(MagicValue);
     Length = ntohs(Length);
     Channel = ntohs(Channel);
-    Fragment = ntohs(Fragment);
-    TimeStamp.fixEndian();
-  }
-} __attribute__((packed));
-
-/// @brief Used by the stream parser to map types to the binary data.
-struct StreamHeader {
-  std::uint16_t MagicValue;
-  std::uint16_t Length;
-  RawTimeStamp TimeStamp;
-  void fixEndian() {
-    MagicValue = ntohs(MagicValue);
-    Length = ntohs(Length);
+    Oversampling = ntohs(Oversampling);
     TimeStamp.fixEndian();
   }
 } __attribute__((packed));
@@ -172,15 +146,6 @@ PacketData parsePacket(const InData &Packet);
 /// @throw ParserException See exception type for possible parsing failures.
 AdcData parseData(const InData &Packet, std::uint32_t StartByte);
 
-/// @brief Parses the (stream) payload of a packet. Called by parsePacket().
-/// @param[in] Packet Raw data buffer.
-/// @param[in] StartByte The byte on which the payload starts.
-/// @param[in] TypeValue An integer that has information on oversampling ratio and active channels.
-/// @return Data modules and an integer indicating the filler starts.
-/// @throw ParserException See exception type for possible parsing failures.
-AdcData parseStreamData(const InData &Packet, std::uint32_t StartByte,
-                        std::uint16_t TypeValue);
-
 /// @brief Parses the header of a packet. Called by parsePacket().
 /// @param[in] Packet Raw data buffer.
 /// @return Data extracted from the header and an integer indicating the start of the payload.
@@ -200,9 +165,3 @@ TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte);
 /// @return Idle packet timestamp.
 /// @throw ParserException See exception type for possible parsing failures.
 IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte);
-
-/// @brief Extracts the stream settings information from the stream setting short int.
-/// @param[in] SettingsRaw This short integer contains oversampling factor of the sampes and which channels are active.
-/// @return The extracted information.
-/// @throw ParserException See exception type for possible parsing failures.
-StreamSetting parseStreamSettings(const std::uint16_t &SettingsRaw);

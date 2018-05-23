@@ -30,7 +30,6 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings Settings,
   Stats.create("parser.packets.total", AdcStats.parser_packets_total);
   Stats.create("parser.packets.idle", AdcStats.parser_packets_idle);
   Stats.create("parser.packets.data", AdcStats.parser_packets_data);
-  Stats.create("parser.packets.stream", AdcStats.parser_packets_stream);
   Stats.create("processing.packets.lost", AdcStats.processing_packets_lost);
   AdcStats.processing_packets_lost = -1; // To compensate for the first error.
 
@@ -106,8 +105,6 @@ void AdcReadoutBase::parsingThread() {
           ++AdcStats.parser_packets_data;
         } else if (PacketType::Idle == ParsedAdcData.Type) {
           ++AdcStats.parser_packets_idle;
-        } else if (PacketType::Stream == ParsedAdcData.Type) {
-          ++AdcStats.parser_packets_stream;
         }
         for (auto &Processor : Processors) {
           (*Processor).processPacket(ParsedAdcData);

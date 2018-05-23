@@ -22,6 +22,19 @@ public:
   InData Packet;
 };
 
+class AdcParsingAlt : public ::testing::Test {
+public:
+  virtual void SetUp() {
+    std::string PacketPath = TEST_PACKET_PATH;
+    std::ifstream PacketFile(PacketPath + "test_packet_2.dat", std::ios::binary);
+    ASSERT_TRUE(PacketFile.good());
+    PacketFile.read(reinterpret_cast<char*>(&Packet.Data), 9186);
+    ASSERT_TRUE(PacketFile.good());
+    Packet.Length = 9186;
+  }
+  InData Packet;
+};
+
 class AdcParsingIdle : public ::testing::Test {
 public:
   virtual void SetUp() {
@@ -35,35 +48,22 @@ public:
   InData Packet;
 };
 
-class AdcParsingStream : public ::testing::Test {
+class AdcParsingDataFail : public ::testing::Test {
 public:
   virtual void SetUp() {
     std::string PacketPath = TEST_PACKET_PATH;
-    std::ifstream PacketFile(PacketPath + "test_packet_stream.dat", std::ios::binary);
-    ASSERT_TRUE(PacketFile.good());
-    PacketFile.read(reinterpret_cast<char*>(&Packet.Data), 1470);
-    ASSERT_TRUE(PacketFile.good());
-    Packet.Length = 1470;
-  }
-  InData Packet;
-};
-
-class AdcParsingStreamFail : public ::testing::Test {
-public:
-  virtual void SetUp() {
-    std::string PacketPath = TEST_PACKET_PATH;
-    std::ifstream PacketFile(PacketPath + "test_packet_stream.dat", std::ios::binary);
+    std::ifstream PacketFile(PacketPath + "test_packet_2.dat", std::ios::binary);
     ASSERT_TRUE(PacketFile.good());
     PacketFile.read(reinterpret_cast<char*>(&Packet.Data), 1470);
     ASSERT_TRUE(PacketFile.good());
     Packet.Length = 1470;
     Header = reinterpret_cast<PacketHeader*>(Packet.Data);
-    StreamHead = reinterpret_cast<StreamHeader*>(Packet.Data + sizeof(PacketHeader));
+    DataHead = reinterpret_cast<DataHeader*>(Packet.Data + sizeof(PacketHeader));
     BEEFCAFE = Packet.Data + 1470 - 8;
   }
   std::uint8_t *BEEFCAFE;
   PacketHeader *Header;
-  StreamHeader *StreamHead;
+  DataHeader *DataHead;
   InData Packet;
 };
 
@@ -99,40 +99,34 @@ TEST_F(AdcParsing, ParseCorrectTrailer) {
   }
 }
 
+TEST_F(AdcParsingAlt, ParseCorrectPacket) {
+  PacketData ResultingData;
+  EXPECT_NO_THROW(ResultingData = parsePacket(Packet));
+  EXPECT_EQ(ResultingData.Modules.size(), 1u);
+  EXPECT_EQ(ResultingData.Modules.at(0).OversamplingFactor, 4);
+}
+
 TEST_F(AdcParsing, ParseCorrectPacket) {
   PacketData ResultingData;
   EXPECT_NO_THROW(ResultingData = parsePacket(Packet));
   EXPECT_EQ(ResultingData.Modules.size(), 1u);
 }
 
-TEST_F(AdcParsingStream, ParseCorrectStreamPacket) {
-  PacketData ResultingData;
-  EXPECT_NO_THROW(ResultingData = parsePacket(Packet));
-  ASSERT_EQ(ResultingData.Modules.size(), 4u);
-  std::uint32_t ExpectedTimeStampSeconds = 101;
-  std::uint32_t ExpectedTimeStampSecondsFrac = 22974588;
-  for (auto &Module : ResultingData.Modules) {
-    EXPECT_EQ(Module.TimeStamp.Seconds, ExpectedTimeStampSeconds);
-    EXPECT_EQ(Module.TimeStamp.SecondsFrac, ExpectedTimeStampSecondsFrac);
-    EXPECT_EQ(Module.OversamplingFactor, 4u);
-  }
-}
-
-TEST_F(AdcParsingStreamFail, LengthFail) {
-  StreamHead->fixEndian();
-  StreamHead->Length = 500;
-  StreamHead->fixEndian();
+TEST_F(AdcParsingDataFail, LengthFail) {
+  DataHead->fixEndian();
+  DataHead->Length = 500;
+  DataHead->fixEndian();
   EXPECT_THROW(parsePacket(Packet), ParserException);
 }
 
-TEST_F(AdcParsingStreamFail, ABCDFail) {
-  StreamHead->fixEndian();
-  StreamHead->MagicValue = 0xCDAB;
-  StreamHead->fixEndian();
+TEST_F(AdcParsingDataFail, ABCDFail) {
+  DataHead->fixEndian();
+  DataHead->MagicValue = 0xCDAB;
+  DataHead->fixEndian();
   EXPECT_THROW(parsePacket(Packet), ParserException);
 }
 
-TEST_F(AdcParsingStreamFail, HeaderLengthFail) {
+TEST_F(AdcParsingDataFail, HeaderLengthFail) {
   Packet.Length = sizeof(PacketHeader) + 10;
   Header->fixEndian();
   Header->ReadoutLength = sizeof(PacketHeader) + 8;
@@ -140,7 +134,7 @@ TEST_F(AdcParsingStreamFail, HeaderLengthFail) {
   EXPECT_THROW(parsePacket(Packet), ParserException);
 }
 
-TEST_F(AdcParsingStreamFail, BEEFCAFEFail) {
+TEST_F(AdcParsingDataFail, BEEFCAFEFail) {
   *BEEFCAFE = 0X00;
   EXPECT_THROW(parsePacket(Packet), ParserException);
 }
@@ -151,36 +145,6 @@ TEST_F(AdcParsingIdle, ParseCorrectIdlePacket) {
   EXPECT_EQ(ResultingData.Modules.size(), 0u);
   EXPECT_EQ(ResultingData.IdleTimeStamp.Seconds, 0xAAAA0000u);
   EXPECT_EQ(ResultingData.IdleTimeStamp.SecondsFrac, 0x0000AAAAu);
-}
-
-TEST(AdcStreamSetting, IncorrectFirstByte) {
-  std::uint16_t Setting = 0x31f4;
-  EXPECT_THROW(parseStreamSettings(Setting), ParserException);
-}
-
-TEST(AdcStreamSetting, IncorrectOversampling1) {
-  std::uint16_t Setting = 0x33f5;
-  EXPECT_THROW(parseStreamSettings(Setting), ParserException);
-}
-
-TEST(AdcStreamSetting, IncorrectOversampling2) {
-  std::uint16_t Setting = 0x3331;
-  EXPECT_THROW(parseStreamSettings(Setting), ParserException);
-}
-
-TEST(AdcStreamSetting, IncorrectOversampling3) {
-  std::uint16_t Setting = 0x33f0;
-  EXPECT_THROW(parseStreamSettings(Setting), ParserException);
-}
-
-TEST(AdcStreamSetting, CorrectSetting) {
-  std::uint16_t Setting = 0x33f4;
-  EXPECT_NO_THROW(parseStreamSettings(Setting));
-  auto CurrentSetting = parseStreamSettings(Setting);
-  EXPECT_EQ(CurrentSetting.OversamplingFactor, 4);
-  EXPECT_EQ(CurrentSetting.ChannelsActive.size(), 4u);
-  std::vector<int> ExpectedChannels{0, 1, 2, 3};
-  EXPECT_EQ(CurrentSetting.ChannelsActive, ExpectedChannels);
 }
 
 TEST(AdcHeadParse, IdleHeadTest) {

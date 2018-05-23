@@ -125,26 +125,10 @@ TEST_F(AdcReadoutTest, SingleDataPacket) {
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
 }
 
-TEST_F(AdcReadoutTest, SingleStreamPacket) {
-  AdcReadoutStandIn Readout(Settings, ReadoutSettings);
-  Readout.startThreads();
-  LoadPacketFile("test_packet_stream.dat");
-  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr, PacketSize);
-  Server.startPacketTransmission(1, 100);
-  std::chrono::duration<std::int64_t, std::milli> SleepTime(200);
-  std::this_thread::sleep_for(SleepTime);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 1470);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_total, 1);
-  EXPECT_EQ(Readout.AdcStats.parser_errors, 0);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_stream, 1);
-  EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
-}
-
 TEST_F(AdcReadoutTest, GlobalCounterError) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
-  LoadPacketFile("test_packet_stream.dat");
+  LoadPacketFile("test_packet_1.dat");
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr, PacketSize);
   Server.startPacketTransmission(2, 100);
   std::chrono::duration<std::int64_t, std::milli> SleepTime(200);
@@ -153,14 +137,14 @@ TEST_F(AdcReadoutTest, GlobalCounterError) {
   EXPECT_EQ(Readout.AdcStats.input_bytes_received, 2*1470);
   EXPECT_EQ(Readout.AdcStats.parser_packets_total, 2);
   EXPECT_EQ(Readout.AdcStats.parser_errors, 0);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_stream, 2);
+  EXPECT_EQ(Readout.AdcStats.parser_packets_data, 2);
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 1);
 }
 
 TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
-  LoadPacketFile("test_packet_stream.dat");
+  LoadPacketFile("test_packet_1.dat");
   std::chrono::duration<std::int64_t, std::milli> SleepTime(50);
   auto PacketHeadPointer = reinterpret_cast<PacketHeader*>(BufferPtr);
   {
@@ -180,7 +164,7 @@ TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
   EXPECT_EQ(Readout.AdcStats.input_bytes_received, 2*1470);
   EXPECT_EQ(Readout.AdcStats.parser_packets_total, 2);
   EXPECT_EQ(Readout.AdcStats.parser_errors, 0);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_stream, 2);
+  EXPECT_EQ(Readout.AdcStats.parser_packets_data, 2);
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
 }
 

@@ -58,7 +58,6 @@ protected:
     std::int64_t parser_packets_total = 0;
     std::int64_t parser_packets_idle = 0;
     std::int64_t parser_packets_data = 0;
-    std::int64_t parser_packets_stream = 0;
     std::int64_t processing_packets_lost = -1; // This should be -1
   } AdcStats;
 
