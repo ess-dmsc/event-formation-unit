@@ -10,7 +10,7 @@
 #include "mo01_nmx_generated.h"
 
 #include <common/Producer.h>
-#include <gdgem/nmx/Hists.h>
+#include <common/Hists.h>
 #include <libs/include/gccintel.h>
 
 class HistSerializer {

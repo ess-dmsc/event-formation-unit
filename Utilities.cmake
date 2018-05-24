@@ -103,4 +103,3 @@ function(create_integration_test_executable exec_name)
     ${EFU_COMMON_LIBS}
     eventlib)
 endfunction(create_integration_test_executable)
-

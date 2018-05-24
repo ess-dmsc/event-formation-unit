@@ -7,11 +7,6 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/calib_data
 # Detector Pipeline Plugins
 #=============================================================================
 
-# Multi Grid demonstrator detector - obsolete
-#set(mgcncs_SRC mgcncs.cpp mgcncs/Data.cpp mgcncs/ChanConv.cpp)
-#set(mgcncs_INC mgcncs/Data.h mgcncs/ChanConv.h mgcncs/MultigridGeometry.h)
-#create_module(mgcncs)
-
 # Two-thread implementation of Multi Grid demonstrator detector
 # For the old readout system
 set(mgcncs2_SRC
@@ -31,15 +26,15 @@ create_module(mgcncs2)
 # Two-thread implementation of Multi Grid demonstrator detector
 # for Mesytec Readout
 set(mgmesytec_SRC
-  ../gdgem/nmx/Hists.cpp
-  ../gdgem/nmx/HistSerializer.cpp
+  ../common/Hists.cpp
+  ../common/HistSerializer.cpp
   ../common/ReadoutSerializer.cpp
   mgmesytec.cpp
   mgmesytec/DataParser.cpp
   )
 set(mgmesytec_INC
-  ../gdgem/nmx/Hists.h
-  ../gdgem/nmx/HistSerializer.h
+  ../common/Hists.h
+  ../common/HistSerializer.h
   ../common/ReadoutSerializer.h
   mgmesytec/DataParser.h
   )
@@ -108,14 +103,14 @@ create_test_executable(MGCNCSDataTest)
 
 
 set(MGMesytecDataTest_SRC
-  ../gdgem/nmx/Hists.cpp
+  ../common/Hists.cpp
   ../common/ReadoutSerializer.cpp
   ../common/Producer.cpp
   mgmesytec/DataParserTest.cpp
   mgmesytec/DataParser.cpp
   )
 set(MGMesytecDataTest_INC
-  ../gdgem/nmx/Hists.h
+  ../common/Hists.h
   ../common/ReadoutSerializer.h
   ../common/Producer.h
   mgmesytec/DataParser.h

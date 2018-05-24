@@ -2,7 +2,7 @@
 
 #include <common/Producer.h>
 #include <cstring>
-#include <gdgem/nmx/HistSerializer.h>
+#include <common/HistSerializer.h>
 #include <test/TestBase.h>
 
 class HistSerializerTest : public TestBase {
