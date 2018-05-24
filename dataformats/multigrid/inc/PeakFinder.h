@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <memory>
 
 class PeakData {
 public:
@@ -39,7 +40,7 @@ public:
   /** @brief calculate the peak positions from histogram data
    * @param histogram pre-populated histogram data
    */
-  std::vector<PeakData *> &findpeaks(const std::vector<int> &data);
+  std::vector<std::unique_ptr<PeakData>> &findpeaks(const std::vector<int> &data);
 
   /** @brief prints misc. stats from the peak list
    */
@@ -58,7 +59,7 @@ public:
   int getcapped() { return capped; }
 
 private:
-  std::vector<PeakData *> peaks{};
+  std::vector<std::unique_ptr<PeakData>> peaks{};
   int minwidth{1}; /**< minimum width for identifying peaks */
   int thresh{-1};  /**< values above this are considered signals */
   int low{0};
