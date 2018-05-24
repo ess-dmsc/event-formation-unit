@@ -1,6 +1,6 @@
 [requires]
 gtest/3121b20-dm3@ess-dmsc/stable
-librdkafka/0.11.4@ess-dmsc/stable
+librdkafka/0.11.3-dm3@ess-dmsc/testing
 streaming-data-types/361bf7b@ess-dmsc/stable
 graylog-logger/1.0.5-dm1@ess-dmsc/stable
 h5cpp/0.0.5@ess-dmsc/stable
