@@ -8,8 +8,13 @@
 PeakFinder::PeakFinder(int minimum_width, int signal_threshold, int low_cut)
     : minwidth(minimum_width), thresh(signal_threshold), low(low_cut) {}
 
+PeakFinder::~PeakFinder() {
+  peaks.clear();
+}
+
 std::vector<PeakData *> &PeakFinder::findpeaks(const std::vector<int> &data) {
   assert(data.size() != 0);
+  peaks.clear(); // allow multiple calls to findpeaks with different data
   StatCounter<int> peakstats;
 
   std::vector<int> datacopy = data;
