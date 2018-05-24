@@ -32,6 +32,10 @@ public:
    */
   PeakFinder(int minimum_width, int signal_threshold, int low_cut);
 
+  /** @brief destructor - delete the vecotr of peak data
+   */
+  ~PeakFinder();
+
   /** @brief calculate the peak positions from histogram data
    * @param histogram pre-populated histogram data
    */
