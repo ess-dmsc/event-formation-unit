@@ -12,7 +12,7 @@ PeakFinder::~PeakFinder() {
   peaks.clear();
 }
 
-std::vector<PeakData *> &PeakFinder::findpeaks(const std::vector<int> &data) {
+std::vector<std::unique_ptr<PeakData>> &PeakFinder::findpeaks(const std::vector<int> &data) {
   assert(data.size() != 0);
   peaks.clear(); // allow multiple calls to findpeaks with different data
   StatCounter<int> peakstats;
