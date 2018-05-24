@@ -100,9 +100,9 @@ def docker_cmake(image_key, xtra_flags) {
 def docker_build(image_key) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        cd ${project}/build
-        make --version
-        make -j4 VERBOSE=ON
+        cd ${project}/build && \
+        make --version && \
+        make -j4 VERBOSE=ON && \
         make -j4 unit_tests VERBOSE=ON
     \""""
 }
@@ -110,9 +110,9 @@ def docker_build(image_key) {
 def docker_tests(image_key) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        cd ${project}/build
-        . ./activate_run.sh
-        make runtest
+        cd ${project}/build && \
+        . ./activate_run.sh && \
+        make runtest && \
         make runefu
     \""""
 }
@@ -123,10 +123,10 @@ def docker_tests_coverage(image_key) {
 
     try {
         sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-                cd ${project}/build
-                . ./activate_run.sh
-                make runefu
-                make coverage
+                cd ${project}/build && \
+                . ./activate_run.sh && \
+                make runefu && \
+                make coverage && \
                 make -j4 valgrind
             \""""
         sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ./"
