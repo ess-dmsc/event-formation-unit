@@ -28,10 +28,10 @@ std::uint16_t GetPortNumber() {
 class AdcReadoutStandIn : public AdcReadoutBase {
 public:
   AdcReadoutStandIn(BaseSettings Settings, AdcSettings ReadoutSettings) : AdcReadoutBase(Settings, ReadoutSettings) {};
+  ~AdcReadoutStandIn() = default;
   using Detector::Threads;
-  using AdcReadoutBase::Processors;
-  using AdcReadoutBase::toParsingQueue;
   using AdcReadoutBase::AdcStats;
+  using AdcReadoutBase::DataModuleQueues;
   static const int MaxPacketSize = 2048;
   std::uint8_t BufferPtr[MaxPacketSize];
   int PacketSize;
@@ -56,7 +56,7 @@ public:
   BaseSettings Settings;
   AdcSettings ReadoutSettings;
   
-  static const int MaxPacketSize = 2048;
+  static const int MaxPacketSize = 10000;
   std::uint8_t BufferPtr[MaxPacketSize];
   int PacketSize;
   
@@ -71,17 +71,6 @@ public:
     ASSERT_TRUE(PacketFile.good());
   };
 };
-
-TEST_F(AdcReadoutTest, SinglePacketInQueue) {
-  AdcReadoutStandIn Readout(Settings, ReadoutSettings);
-  Readout.Threads.at(0).thread = std::thread(Readout.Threads.at(0).func);
-  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, 100);
-  Server.startPacketTransmission(1, 100);
-  SpscBuffer::ElementPtr<InData> elem;
-  EXPECT_TRUE(Readout.toParsingQueue.waitGetData(elem, 10000));
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 100);
-  Readout.stopThreads();
-}
 
 TEST_F(AdcReadoutTest, SinglePacketStats) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
@@ -143,7 +132,8 @@ TEST_F(AdcReadoutTest, GlobalCounterError) {
 
 TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
-  Readout.startThreads();
+  Readout.Threads.at(0).thread = std::thread(Readout.Threads.at(0).func);
+  Readout.Threads.at(1).thread = std::thread(Readout.Threads.at(1).func);
   LoadPacketFile("test_packet_1.dat");
   std::chrono::duration<std::int64_t, std::milli> SleepTime(50);
   auto PacketHeadPointer = reinterpret_cast<PacketHeader*>(BufferPtr);

@@ -16,7 +16,7 @@ public:
   PeakFinder(std::shared_ptr<Producer> Prod);
   
   /// @brief Handles peak detection, serialisation of the result and transmission to the Kafka broker.
-  virtual void processPacket(const PacketData &Data) override;
+  virtual void processData(DataModule const &Data) override;
 
 private:
   /// @brief Implements serialisation and transmission of the peak data.

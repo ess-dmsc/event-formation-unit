@@ -85,9 +85,7 @@ SampleProcessing::SampleProcessing(std::shared_ptr<ProducerBase> Prod,
 
 void SampleProcessing::setMeanOfSamples(int NrOfSamples) {
   MeanOfNrOfSamples = NrOfSamples;
-  for (auto &Processor : ProcessingInstances) {
-    Processor.second.setMeanOfSamples(NrOfSamples);
-  }
+  ProcessingInstance.setMeanOfSamples(MeanOfNrOfSamples);
 }
 
 void SampleProcessing::setSerializeTimestamps(bool SerializeTimeStamps) {
@@ -96,22 +94,13 @@ void SampleProcessing::setSerializeTimestamps(bool SerializeTimeStamps) {
 
 void SampleProcessing::setTimeStampLocation(TimeStampLocation Location) {
   TSLocation = Location;
-  for (auto &Processor : ProcessingInstances) {
-    Processor.second.setTimeStampLocation(Location);
-  }
+  ProcessingInstance.setTimeStampLocation(TSLocation);
 }
 
-void SampleProcessing::processPacket(const PacketData &Data) {
-  for (auto &Module : Data.Modules) {
-    if (ProcessingInstances.find(Module.Channel) == ProcessingInstances.end()) {
-      ProcessingInstances[Module.Channel] = ChannelProcessing();
-      setMeanOfSamples(MeanOfNrOfSamples);
-      setTimeStampLocation(TSLocation);
-    }
-    auto ResultingSamples = ProcessingInstances[Module.Channel].processModule(Module);
-    if (not ResultingSamples.Samples.empty()) {
-      serializeAndTransmitData(ResultingSamples);
-    }
+void SampleProcessing::processData(const DataModule &Data) {
+  auto ResultingSamples = ProcessingInstance.processModule(Data);
+  if (not ResultingSamples.Samples.empty()) {
+    serializeAndTransmitData(ResultingSamples);
   }
 }
 
@@ -135,8 +124,7 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
   MessageBuilder.add_PacketTimestamp(Data.TimeStamp);
   MessageBuilder.add_TimeDelta(Data.TimeDelta);
 
-  // Note: std::map zero initialises new elements when using the [] operator
-  MessageBuilder.add_MessageCounter(MessageCounters[Data.Channel]++);
+  MessageBuilder.add_MessageCounter(MessageCounter++);
   MessageBuilder.add_TimestampLocation(
       Location(TimeLocSerialisationMap.at(TSLocation)));
   builder.Finish(MessageBuilder.Finish(), SampleEnvironmentDataIdentifier());

@@ -14,6 +14,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <functional>
 
 /// @brief Custom exception to handle parsing errors.
 class ParserException : public std::runtime_error {
@@ -26,6 +27,8 @@ public:
     DATA_BEEFCAFE,
     DATA_LENGTH,
     DATA_ABCD,
+    DATA_NO_MODULE,
+    DATA_CANT_PROCESS,
     HEADER_LENGTH,
     HEADER_TYPE,
     IDLE_LENGTH,
@@ -47,32 +50,39 @@ private:
 /// @brief Data stored in this struct represents a (properly parsed) sampling run.
 struct DataModule {
   DataModule() = default;
-  DataModule(size_t NrOfElements) noexcept : Data(NrOfElements) {}
+  DataModule(size_t ReserveElements) noexcept : Data(ReserveElements) {
+    Data.clear();
+  }
   ~DataModule() = default;
   DataModule(const DataModule &&Other) : TimeStamp(Other.TimeStamp), Channel(Other.Channel), OversamplingFactor(Other.OversamplingFactor), Data(std::move(Other.Data)) {}
   DataModule& operator=( const DataModule&) = default;
   RawTimeStamp TimeStamp;
+  void reset() {
+    Data.clear();
+    OversamplingFactor = 1;
+    Channel = 0;
+    TimeStamp.Seconds = 0;
+    TimeStamp.SecondsFrac = 0;
+  }
   std::uint16_t Channel;
   std::uint16_t OversamplingFactor{1};
   std::vector<std::uint16_t> Data;
 };
 
-/// @brief Output from the payload parser.
-struct AdcData {
-  std::vector<DataModule> Modules;
-  std::int32_t FillerStart = 0;
+class ModuleProcessingException : public std::runtime_error {
+public:
+  ModuleProcessingException(DataModule *Data) : std::runtime_error("Unable to processe data module"), UnproccesedData(Data) {}
+  DataModule *UnproccesedData;
 };
 
 /// @brief Different types of data packets form teh ADC hardware.
 enum class PacketType { Idle, Data, Unknown };
 
 /// @brief Parsed data containing 0 or more data modules form sampling runs.
-struct PacketData {
+struct PacketInfo {
   std::uint16_t GlobalCount;
   std::uint16_t ReadoutCount;
   PacketType Type = PacketType::Unknown;
-  std::vector<DataModule> Modules;
-  RawTimeStamp IdleTimeStamp;
 };
 
 /// @brief Returned by the header parser.
@@ -133,18 +143,25 @@ struct IdleHeader {
 } __attribute__((packed));
 #pragma pack(pop)
 
-/// @brief Parses a packet of binary data.
-/// @param[in] Packet Raw data, straight from the socket.
-/// @return Parsed data.
-/// @throw ParserException See exception type for possible parsing failures.
-PacketData parsePacket(const InData &Packet);
-
-/// @brief Parses the payload of a packet. Called by parsePacket().
-/// @param[in] Packet Raw data buffer.
-/// @param[in] StartByte The byte on which the payload starts.
-/// @return Data modules and an integer indicating where the filler starts.
-/// @throw ParserException See exception type for possible parsing failures.
-AdcData parseData(const InData &Packet, std::uint32_t StartByte);
+class PacketParser {
+public:
+  PacketParser(std::function<bool(DataModule*)> ModuleHandler, std::function<DataModule*(int Channel)> ModuleProducer);
+  /// @brief Parses a packet of binary data.
+  /// @param[in] Packet Raw data, straight from the socket.
+  /// @return Some general information about the packet.
+  /// @throw ParserException See exception type for possible parsing failures.
+  PacketInfo parsePacket(const InData &Packet);
+protected:
+  /// @brief Parses the payload of a packet. Called by parsePacket().
+  /// @param[in] Packet Raw data buffer.
+  /// @param[in] StartByte The byte on which the payload starts.
+  /// @return The start of the filler/trailer in the array.
+  /// @throw ParserException See exception type for possible parsing failures.
+  size_t parseData(const InData &Packet, std::uint32_t StartByte);
+private:
+  std::function<bool(DataModule*)> HandleModule;
+  std::function<DataModule*(int Channel)> ProduceModule;
+};
 
 /// @brief Parses the header of a packet. Called by parsePacket().
 /// @param[in] Packet Raw data buffer.

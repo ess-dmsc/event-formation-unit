@@ -26,7 +26,7 @@ PacketGenerator::PacketGenerator(std::uint16_t OversamplingFactor) {
   DataHeaderPtr = reinterpret_cast<DataHeaderSim*>(TemplateData.get() + sizeof(PacketHeader));
   PacketHeaderPtr->GlobalCount = 0;
   PacketHeaderPtr->ReadoutCount = 0;
-  DataHeaderPtr->Fragment = htons(OversamplingFactor);
+  DataHeaderPtr->Oversampling = htons(OversamplingFactor);
 }
 
 PacketInfo PacketGenerator::GeneratePacket(std::uint32_t TS_Sec, double SecFrac, std::uint16_t ChannelNr) {

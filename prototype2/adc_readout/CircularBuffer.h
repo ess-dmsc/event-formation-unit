@@ -13,13 +13,8 @@
 
 namespace SpscBuffer {
 
-/// @brief A dummy data deallocator. Used so that we can use a contigous set of memory in the buffer.
-template <class DataType> struct NopDeleter {
-  void operator()(DataType *Ptr __attribute__((unused))) const {}
-};
-
 template <class DataType>
-using ElementPtr = std::unique_ptr<DataType, NopDeleter<DataType>>;
+using ElementPtr = DataType*;
 
 /// @brief Sets the name of the queue type in use to Queue. Note that using the non-blocking version, (i.e. setting SPSC_NO_WAIT) is MUCH(!) faster than the blocking version.
 template <class DataType>
@@ -55,7 +50,7 @@ public:
     if (Success and ProducerElemPtr != nullptr) {
       assert(false);
     } else {
-      ProducerElemPtr = Element.get();
+      ProducerElemPtr = Element;
     }
 #endif
     return Success;
@@ -72,7 +67,7 @@ public:
     if (Success and ProducerElemPtr != nullptr) {
       assert(false);
     } else {
-      ProducerElemPtr = Element.get();
+      ProducerElemPtr = Element;
     }
 #endif
     return Success;
@@ -84,7 +79,7 @@ public:
   /// @return Returns true if the element was put in the queue, false otherwise. If false is returned, you are then still responsible for the pointer.
   bool tryPutData(ElementPtr<DataType> &&Element) {
 #ifndef NDEBUG
-    DataType *TempPtr = Element.get();
+    DataType *TempPtr = Element;
 #endif
     bool Success =
         DataQueue.try_enqueue(std::forward<ElementPtr<DataType>>(Element));
@@ -108,7 +103,7 @@ public:
     if (Success and ConsumerElemPtr != nullptr) {
       assert(false);
     } else {
-      ConsumerElemPtr = Element.get();
+      ConsumerElemPtr = Element;
     }
 #endif
     return Success;
@@ -125,7 +120,7 @@ public:
     if (Success and ConsumerElemPtr != nullptr) {
       assert(false);
     } else {
-      ConsumerElemPtr = Element.get();
+      ConsumerElemPtr = Element;
     }
 #endif
     return Success;
@@ -137,7 +132,7 @@ public:
   /// @return Returns true if the element was put in the empty queue, false otherwise.
   bool tryPutEmpty(ElementPtr<DataType> &&Element) {
 #ifndef NDEBUG
-    DataType *TempPtr = Element.get();
+    DataType *TempPtr = Element;
 #endif
     bool Success =
         EmptyQueue.try_enqueue(std::forward<ElementPtr<DataType>>(Element));

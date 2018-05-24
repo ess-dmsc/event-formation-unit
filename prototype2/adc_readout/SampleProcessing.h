@@ -88,7 +88,7 @@ public:
   /// @brief Called to actually process, serialise and transmit the (already) parsed data.
   /// @note Will NOT concatenate sample runs from the same channel. Samples from each data module in Data will be put in a seperate flatbuffer.
   /// @param[in] Data Parsed data to process.
-  virtual void processPacket(PacketData const &Data) override;
+  virtual void processData(DataModule const &Data) override;
   
   void setMeanOfSamples(int NrOfSamples);
   void setTimeStampLocation(TimeStampLocation Location);
@@ -105,8 +105,8 @@ protected:
   /// @brief Does the actual serialisation and transmission of the data.
   /// @note Should only be called by SampleProcessing::processPacket().
   virtual void serializeAndTransmitData(ProcessedSamples const &Data);
-  std::map<int, std::uint64_t> MessageCounters;
-  std::map<int, ChannelProcessing> ProcessingInstances;
+  std::uint64_t MessageCounter{0};
+  ChannelProcessing ProcessingInstance;
   int MeanOfNrOfSamples{1};
   bool SampleTimestamps{false};
   TimeStampLocation TSLocation{TimeStampLocation::Middle};

@@ -35,6 +35,10 @@ const char *ParserException::what() const noexcept {
        "Magic bytes (0xBEEFCAFE) was not at the end of the data module."},
       {ParserException::Type::DATA_LENGTH,
        "Packet size to short to hold expected number of samples."},
+      {ParserException::Type::DATA_NO_MODULE,
+        "Did not get data module instance to store de-serialised samples."},
+      {ParserException::Type::DATA_CANT_PROCESS,
+        "Unable to process samples."},
       {ParserException::Type::DATA_ABCD,
        "Data module did not start with magic bytes (0xABCD)."},
       {ParserException::Type::HEADER_LENGTH,
@@ -51,6 +55,25 @@ const char *ParserException::what() const noexcept {
            "type.";
   }
   return ErrorTypeStrings.at(ParserErrorType).c_str();
+}
+
+PacketParser::PacketParser(std::function<bool(DataModule*)> ModuleHandler, std::function<DataModule*(int Channel)> ModuleProducer) : HandleModule(ModuleHandler), ProduceModule(ModuleProducer) {
+}
+
+PacketInfo PacketParser::parsePacket(const InData &Packet) {
+  HeaderInfo Header = parseHeader(Packet);
+  PacketInfo ReturnData;
+  ReturnData.GlobalCount = Header.GlobalCount;
+  ReturnData.ReadoutCount = Header.ReadoutCount;
+  if (PacketType::Data == Header.Type) {
+    size_t FillerStart = parseData(Packet, Header.DataStart);
+    parseTrailer(Packet, FillerStart);
+    ReturnData.Type = PacketType::Data;
+  } else if (PacketType::Idle == Header.Type) {
+    parseIdle(Packet, Header.DataStart);
+    ReturnData.Type = PacketType::Idle;
+  }
+  return ReturnData;
 }
 
 HeaderInfo parseHeader(const InData &Packet) {
@@ -77,8 +100,7 @@ HeaderInfo parseHeader(const InData &Packet) {
   return ReturnInfo;
 }
 
-AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
-  AdcData ReturnData;
+size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte) {
   while (StartByte + sizeof(DataHeader) < Packet.Length) {
     auto HeaderRaw =
         reinterpret_cast<const DataHeader *>(Packet.Data + StartByte);
@@ -96,16 +118,23 @@ AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
         Packet.Length) {
       throw ParserException(ParserException::Type::DATA_LENGTH);
     }
-    ReturnData.Modules.emplace_back(NrOfSamples);
-    
-    DataModule &CurrentDataModule = ReturnData.Modules[ReturnData.Modules.size() - 1];
-    CurrentDataModule.Channel = Header.Channel;
-    CurrentDataModule.TimeStamp = Header.TimeStamp;
-    CurrentDataModule.OversamplingFactor = Header.Oversampling;
-    auto ElementPointer = reinterpret_cast<const std::uint16_t *>(
-        Packet.Data + StartByte + sizeof(DataHeader));
-    for (int i = 0; i < NrOfSamples; ++i) {
-      CurrentDataModule.Data[i] = ntohs(ElementPointer[i]);
+    DataModule* CurrentDataModule = ProduceModule(Header.Channel);
+    if (CurrentDataModule != nullptr) {
+      CurrentDataModule->Data.resize(NrOfSamples);
+      CurrentDataModule->Channel = Header.Channel;
+      CurrentDataModule->TimeStamp = Header.TimeStamp;
+      CurrentDataModule->OversamplingFactor = Header.Oversampling;
+      auto ElementPointer = reinterpret_cast<const std::uint16_t *>(
+                                                                    Packet.Data + StartByte + sizeof(DataHeader));
+      for (int i = 0; i < NrOfSamples; ++i) {
+        CurrentDataModule->Data[i] = ntohs(ElementPointer[i]);
+      }
+      if (not HandleModule(std::move(CurrentDataModule))) {
+        // Things will be very problematic for us if we dont get rid of the claimed data module, hence why we have a special exception for this case.
+        throw ModuleProcessingException(std::move(CurrentDataModule));
+      }
+    } else {
+      throw ParserException(ParserException::Type::DATA_NO_MODULE);
     }
     StartByte += sizeof(DataHeader) + NrOfSamples * sizeof(std::uint16_t);
     const std::uint8_t *TrailerPointer = Packet.Data + StartByte;
@@ -115,8 +144,7 @@ AdcData parseData(const InData &Packet, std::uint32_t StartByte) {
     }
     StartByte += 4;
   }
-  ReturnData.FillerStart = StartByte;
-  return ReturnData;
+  return StartByte;
 }
 
 TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte) {
@@ -136,24 +164,6 @@ TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte) {
     throw ParserException(ParserException::Type::TRAILER_FEEDF00D);
   }
   return ReturnInfo;
-}
-
-PacketData parsePacket(const InData &Packet) {
-  HeaderInfo Header = parseHeader(Packet);
-  PacketData ReturnData;
-  ReturnData.GlobalCount = Header.GlobalCount;
-  ReturnData.ReadoutCount = Header.ReadoutCount;
-  if (PacketType::Data == Header.Type) {
-    AdcData Data = parseData(Packet, Header.DataStart);
-    parseTrailer(Packet, Data.FillerStart);
-    ReturnData.Type = PacketType::Data;
-    ReturnData.Modules = std::move(Data.Modules);
-  } else if (PacketType::Idle == Header.Type) {
-    IdleInfo Idle = parseIdle(Packet, Header.DataStart);
-    ReturnData.Type = PacketType::Idle;
-    ReturnData.IdleTimeStamp = Idle.TimeStamp;
-  }
-  return ReturnData;
 }
 
 IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte) {
