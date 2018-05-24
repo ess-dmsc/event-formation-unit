@@ -11,7 +11,7 @@ images = [
     'centos7': [
         'name': 'essdmscdm/centos7-build-node:3.0.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash',
-        'cmake_flags': ''
+        'cmake_flags': '-DCOV=ON'
     ],
     'ubuntu1804': [
         'name': 'essdmscdm/ubuntu18.04-build-node:1.1.0',
