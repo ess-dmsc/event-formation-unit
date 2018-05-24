@@ -24,7 +24,7 @@ def makeasiccfg(threshold):
     #      0x1X   Could add disabled ch's here
     #         |                                 only every 2'd byte    last byte is only 4 bits!
     #         |                                    is threshold
-    res = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00] + [threshold]*36      + [0x00 0x00 0x00]
+    res = [0x00, 0x00, 0x00, 0x00, 0x00, 0x00] + [threshold]*36      + [0x00, 0x00, 0x00]
     return res
 
 registers = {'Serial Number': 0x0000,
