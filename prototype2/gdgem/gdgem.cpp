@@ -11,7 +11,7 @@
 #include <dataformats/multigrid/inc/json.h>
 #include <fstream>
 #include <gdgem/nmx/Geometry.h>
-#include <gdgem/nmx/HistSerializer.h>
+#include <common/HistSerializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/nmxgen/EventletBuilderH5.h>
 #include <gdgem/vmm2srs/EventletBuilderSRS.h>

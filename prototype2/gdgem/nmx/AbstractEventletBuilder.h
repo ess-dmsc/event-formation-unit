@@ -8,7 +8,7 @@
 #pragma once
 
 #include <gdgem/nmx/Clusterer.h>
-#include <gdgem/nmx/Hists.h>
+#include <common/Hists.h>
 
 #include <common/DataSave.h>
 #pragma GCC diagnostic push

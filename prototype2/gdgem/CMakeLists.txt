@@ -10,8 +10,8 @@ set(gdgem_SRC
   nmx/EventNMX.cpp
   nmx/Eventlet.cpp
   nmx/Geometry.cpp
-  nmx/Hists.cpp
-  nmx/HistSerializer.cpp
+  ../common/Hists.cpp
+  ../common/HistSerializer.cpp
   nmx/TrackSerializer.cpp
   nmx/AbstractEventletBuilder.cpp
   nmxgen/EventletBuilderH5.cpp
@@ -26,8 +26,8 @@ set(gdgem_INC
   nmx/EventNMX.h
   nmx/Eventlet.h
   nmx/Geometry.h
-  nmx/Hists.h
-  nmx/HistSerializer.h
+  ../common/Hists.h
+  ../common/HistSerializer.h
   nmx/TrackSerializer.h
   nmx/AbstractEventletBuilder.h
   nmxgen/EventletBuilderH5.h
@@ -100,7 +100,7 @@ set(EventFormationTest_SRC
   nmx/AbstractEventletBuilder.cpp
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
-  nmx/Hists.cpp
+  ../common/Hists.cpp
   vmm2srs/EventletBuilderSRS.cpp
   vmm2srs/EventFormationTest.cpp
   vmm2srs/ParserSRS.cpp
@@ -111,7 +111,7 @@ set(EventFormationTest_INC
   nmx/AbstractEventletBuilder.h
   nmx/Clusterer.h
   nmx/EventNMX.h
-  nmx/Hists.h
+  ../common/Hists.h
   vmm2srs/EventletBuilderSRS.h
   vmm2srs/ParserSRS.h
   vmm2srs/SRSTime.h
@@ -122,7 +122,7 @@ create_test_executable(EventFormationTest)
 
 set(EventletBuilderBenchmarkTest_SRC
   nmx/Clusterer.cpp
-  nmx/EventNMX.cpp nmx/Hists.cpp
+  nmx/EventNMX.cpp ../common/Hists.cpp
   nmx/AbstractEventletBuilder.cpp
   vmm2srs/EventletBuilderSRSBenchmarkTest.cpp
   vmm2srs/EventletBuilderSRS.cpp
@@ -133,7 +133,7 @@ set(EventletBuilderBenchmarkTest_SRC
 set(EventletBuilderBenchmarkTest_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
-  nmx/Hists.h
+  ../common/Hists.h
   nmx/Eventlet.h
   vmm2srs/ParserSRS.h
   vmm2srs/EventletBuilderSRS.h
@@ -144,14 +144,14 @@ create_benchmark_executable(EventletBuilderBenchmarkTest)
 
 
 set(HistSerializerTest_SRC
-  nmx/Hists.cpp
-  nmx/HistSerializerTest.cpp
-  nmx/HistSerializer.cpp
+  ../common/Hists.cpp
+  ../common//HistSerializerTest.cpp
+  ../common//HistSerializer.cpp
   )
 set(HistSerializerTest_INC
   nmx/Eventlet.h
-  nmx/Hists.h
-  nmx/HistSerializer.h
+  ../common/Hists.h
+  ../common/HistSerializer.h
   ../common/Producer.h
   )
 create_test_executable(HistSerializerTest)
@@ -181,7 +181,7 @@ create_test_executable(ParserSRSTest)
 set(EventletBuilderH5Test_SRC
   nmx/EventNMX.cpp
   nmx/Clusterer.cpp
-  nmx/Hists.cpp
+  ../common/Hists.cpp
   nmx/AbstractEventletBuilder.cpp
   nmxgen/EventletBuilderH5Test.cpp
   nmxgen/EventletBuilderH5.cpp
@@ -190,7 +190,7 @@ set(EventletBuilderH5Test_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
-  nmx/Hists.h
+  ../common/Hists.h
   nmxgen/EventletBuilderH5.h
   )
 create_test_executable(EventletBuilderH5Test)
@@ -198,7 +198,7 @@ create_test_executable(EventletBuilderH5Test)
 set(EventletBuilderTest_SRC
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
-  nmx/Hists.cpp
+  ../common/Hists.cpp
   nmx/AbstractEventletBuilder.cpp
   vmm2srs/EventletBuilderSRSTest.cpp
   vmm2srs/EventletBuilderSRS.cpp
@@ -209,7 +209,7 @@ set(EventletBuilderTest_SRC
 set(EventletBuilderTest_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
-  nmx/Hists.h
+  ../common/Hists.h
   nmx/Eventlet.h
   vmm2srs/ParserSRS.h
   vmm2srs/EventletBuilderSRS.h

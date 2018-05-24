@@ -2,7 +2,7 @@
 
 #include <gdgem/nmx/Geometry.h>
 #include <gdgem/nmx/Clusterer.h>
-#include <gdgem/nmx/Hists.h>
+#include <common/Hists.h>
 #include <gdgem/vmm2srs/EventFormationTestData.h>
 #include <gdgem/vmm2srs/EventletBuilderSRS.h>
 #include <gdgem/vmm2srs/SRSMappings.h>
