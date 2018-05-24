@@ -79,7 +79,7 @@ std::vector<PeakData *> &PeakFinder::findpeaks(const std::vector<int> &data) {
         // // this is a peak
         if ((peak_end - peak_start >= minwidth)) { // this is a peak
           // printf("adding peak. begin %d, end %d\n", peak_start, peak_end);
-          peaks.push_back(new PeakData(peak_start, peak_end));
+          peaks.push_back(std::unique_ptr<PeakData>(new PeakData(peak_start, peak_end)));
         } else {
           // printf("too narrow\n");
         }
