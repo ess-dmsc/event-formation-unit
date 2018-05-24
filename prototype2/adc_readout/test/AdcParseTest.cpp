@@ -339,8 +339,7 @@ TEST_F(AdcDataParsing, FakeDataTest) {
   });
   ParserStandIn Parser(ProccessingFunction, GetModule);
   
-  size_t FillerStart;
-  EXPECT_NO_THROW(FillerStart = Parser.parseData(Packet, 0));
+  EXPECT_NO_THROW(Parser.parseData(Packet, 0));
   EXPECT_EQ(NrOfModules, 2);
   EXPECT_EQ(ModulePtr.TimeStamp.SecondsFrac, 0x0000FFFFu);
   EXPECT_EQ(ModulePtr.TimeStamp.Seconds, 0xAAAA0000u);
