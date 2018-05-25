@@ -89,7 +89,7 @@ def docker_build(image_key) {
         make --version && \
         make -j4 VERBOSE=OFF && \
         make -j4 unit_tests VERBOSE=OFF && \
-        cd ${project}/utils/udpredirect && \
+        cd ../utils/udpredirect && \
         make
     \""""
 }
