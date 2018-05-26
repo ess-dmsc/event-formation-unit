@@ -15,7 +15,7 @@ add_executable(AdcSimulator EXCLUDE_FROM_ALL ${AdcSimulator_SRC} ${AdcSimulator_
 
 target_include_directories(AdcSimulator PRIVATE ${ASIO_INCLUDE_DIR} "../" "../../common/")
 
-# target_link_libraries(AdcSimulator ${LibRDKafka_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(AdcSimulator ${CMAKE_THREAD_LIBS_INIT})
 
 get_filename_component(ADC_CONFIG_FILE "AdcIntegrationTestConfig.ini" ABSOLUTE)
 add_custom_command(
