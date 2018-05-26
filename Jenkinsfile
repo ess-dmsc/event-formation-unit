@@ -88,7 +88,9 @@ def docker_build(image_key) {
         cd ${project}/build && \
         make --version && \
         make -j4 VERBOSE=OFF && \
-        make -j4 unit_tests VERBOSE=OFF
+        make -j4 unit_tests VERBOSE=OFF && \
+        cd ../utils/udpredirect && \
+        make
     \""""
 }
 
@@ -165,6 +167,7 @@ def docker_archive(image_key) {
                         cp -r ${project}/build/licenses archive/event-formation-unit && \
                         mkdir archive/event-formation-unit/util && \
                         cp -r ${project}/utils/efushell archive/event-formation-unit/util && \
+                        cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util && \
                         cp -r ${project}/monitors/* archive/event-formation-unit/util && \
                         mkdir archive/event-formation-unit/data && \
                         cp -r ${project}/prototype2/multigrid/calib_data/* archive/event-formation-unit/data && \
