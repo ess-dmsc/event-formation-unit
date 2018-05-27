@@ -112,13 +112,11 @@ set(VersionTest_INC
   Version.h)
 create_test_executable(VersionTest)
 
-set(ESSGeometryTest_SRC
-ESSGeometryTest.cpp)
-set(ESSGeometryTest_INC
-ESSGeometry.h)
+set(ESSGeometryTest_SRC ESSGeometryTest.cpp)
+#set(ESSGeometryTest_INC ESSGeometry.h)
 create_test_executable(ESSGeometryTest)
 
 # GOOGLE BENCHMARKS
-set(ESSGeometryBenchmarkTest_INC ESSGeometry.h ../gdgem/nmx/Geometry.h)
+set(ESSGeometryBenchmarkTest_INC ../gdgem/nmx/Geometry.h)
 set(ESSGeometryBenchmarkTest_SRC ESSGeometryBenchmarkTest.cpp ../gdgem/nmx/Geometry.cpp)
 create_benchmark_executable(ESSGeometryBenchmarkTest)
