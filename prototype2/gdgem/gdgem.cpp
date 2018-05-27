@@ -11,6 +11,7 @@
 #include <dataformats/multigrid/inc/json.h>
 #include <fstream>
 #include <gdgem/nmx/Geometry.h>
+#include <common/ESSGeometry.h>
 #include <gdgem/nmx/HistSerializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/nmxgen/EventletBuilderH5.h>
@@ -197,6 +198,8 @@ void NMX::processing_thread() {
   geometry.add_dimension(nmx_opts.geometry_x);
   geometry.add_dimension(nmx_opts.geometry_y);
 
+  ESSGeometry essgeometry(nmx_opts.geometry_x, nmx_opts.geometry_y, 1, 1);
+
   Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
@@ -265,6 +268,7 @@ void NMX::processing_thread() {
               coords[0] = event.x.center_rounded();
               coords[1] = event.y.center_rounded();
               pixelid = geometry.to_pixid(coords);
+              //assert(pixelid == essgeometry.getPixelSP2D(coords[0], coords[1]));
               if (pixelid == 0) {
                 mystats.geom_errors++;
               } else {
