@@ -9,7 +9,6 @@ set(gdgem_SRC
   nmx/Clusterer.cpp
   nmx/EventNMX.cpp
   nmx/Eventlet.cpp
-  nmx/Geometry.cpp
   nmx/Hists.cpp
   nmx/HistSerializer.cpp
   nmx/TrackSerializer.cpp
@@ -25,7 +24,6 @@ set(gdgem_INC
   nmx/Clusterer.h
   nmx/EventNMX.h
   nmx/Eventlet.h
-  nmx/Geometry.h
   nmx/Hists.h
   nmx/HistSerializer.h
   nmx/TrackSerializer.h
