@@ -9,7 +9,6 @@
 #pragma once
 #include <cinttypes>
 #include <common/Trace.h>
-#include <logical_geometry/ESSGeometry.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -76,8 +75,7 @@ public:
     int x = panel_offset + x_offset;
     int y = (gridid - 1) % grids_ + 1;
     int z = (wireid - 1) % zwires_ + 1;
-
-    int pixelid = essgeometry.pixel3D(x, y, z);
+    int pixelid = (x - 1) * grids_ * zwires_ + (y - 1) * zwires_ + z;
     XTRACE(PROCESS, DEB, "x: %d, y: %d, z: %d (pixel %d)\n", x, y, z, pixelid);
 
     return pixelid;
@@ -98,6 +96,4 @@ private:
   int grids_;  /**< number of grids per module (grid column) */
   int xwires_; /**< number of cells in the x-direction */
   int zwires_; /**< number of cells in the z-direction */
-
-  ESSGeometry essgeometry{8, 48, 16, 1};
 };
