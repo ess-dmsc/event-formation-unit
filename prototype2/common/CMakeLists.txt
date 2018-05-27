@@ -23,7 +23,7 @@ find_package(CLI11 REQUIRED)
 add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC})
-  
+
 target_include_directories(efu_common PUBLIC ${CLI11_INCLUDE_DIR})
 
 if(${CMAKE_COMPILER_IS_GNUCXX})
@@ -112,3 +112,11 @@ set(VersionTest_INC
   Version.h)
 create_test_executable(VersionTest)
 
+set(ESSGeometryTest_SRC ESSGeometryTest.cpp)
+#set(ESSGeometryTest_INC ESSGeometry.h)
+create_test_executable(ESSGeometryTest)
+
+# GOOGLE BENCHMARKS
+set(ESSGeometryBenchmarkTest_INC ../gdgem/nmx/Geometry.h)
+set(ESSGeometryBenchmarkTest_SRC ESSGeometryBenchmarkTest.cpp ../gdgem/nmx/Geometry.cpp)
+create_benchmark_executable(ESSGeometryBenchmarkTest)

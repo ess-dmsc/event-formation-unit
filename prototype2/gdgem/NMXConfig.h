@@ -3,9 +3,9 @@
 #pragma once
 
 #include <cinttypes>
-#include <gdgem/nmx/Geometry.h>
 #include <gdgem/vmm2srs/SRSMappings.h>
 #include <gdgem/vmm2srs/SRSTime.h>
+//#include <logical_geometry/ESSGeometry.h>
 #include <string>
 
 struct NMXConfig {
