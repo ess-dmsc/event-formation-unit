@@ -9,12 +9,19 @@ PeakFinder::PeakFinder(int minimum_width, int signal_threshold, int low_cut)
     : minwidth(minimum_width), thresh(signal_threshold), low(low_cut) {}
 
 PeakFinder::~PeakFinder() {
+  for (auto peakptr : peaks) {
+    delete peakptr;
+  }
   peaks.clear();
 }
 
-std::vector<std::unique_ptr<PeakData>> &PeakFinder::findpeaks(const std::vector<int> &data) {
+std::vector<PeakData *> &PeakFinder::findpeaks(const std::vector<int> &data) {
   assert(data.size() != 0);
-  peaks.clear(); // allow multiple calls to findpeaks with different data
+  for (auto peakptr : peaks) {
+    delete peakptr;
+  }
+  peaks.clear();
+
   StatCounter<int> peakstats;
 
   std::vector<int> datacopy = data;
@@ -79,7 +86,7 @@ std::vector<std::unique_ptr<PeakData>> &PeakFinder::findpeaks(const std::vector<
         // // this is a peak
         if ((peak_end - peak_start >= minwidth)) { // this is a peak
           // printf("adding peak. begin %d, end %d\n", peak_start, peak_end);
-          peaks.push_back(std::unique_ptr<PeakData>(new PeakData(peak_start, peak_end)));
+          peaks.push_back( (PeakData*)new PeakData(peak_start, peak_end));
         } else {
           // printf("too narrow\n");
         }
