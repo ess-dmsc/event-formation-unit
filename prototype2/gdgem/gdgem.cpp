@@ -10,8 +10,7 @@
 #include <cstring>
 #include <dataformats/multigrid/inc/json.h>
 #include <fstream>
-#include <gdgem/nmx/Geometry.h>
-#include <common/ESSGeometry.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <gdgem/nmx/HistSerializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/nmxgen/EventletBuilderH5.h>
@@ -194,10 +193,6 @@ void NMX::processing_thread() {
     return;
   }
 
-  Geometry geometry;
-  geometry.add_dimension(nmx_opts.geometry_x);
-  geometry.add_dimension(nmx_opts.geometry_y);
-
   ESSGeometry essgeometry(nmx_opts.geometry_x, nmx_opts.geometry_y, 1, 1);
 
   Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
@@ -213,7 +208,6 @@ void NMX::processing_thread() {
   TSCTimer global_time, report_timer;
 
   EventNMX event;
-  std::vector<uint16_t> coords{0, 0};
   uint32_t time;
   uint32_t pixelid;
 
@@ -265,10 +259,8 @@ void NMX::processing_thread() {
               // printf("\nHave a cluster:\n");
               // event.debug2();
 
-              coords[0] = event.x.center_rounded();
-              coords[1] = event.y.center_rounded();
-              pixelid = geometry.to_pixid(coords);
-              //assert(pixelid == essgeometry.getPixelSP2D(coords[0], coords[1]));
+              pixelid = essgeometry.pixel2D(event.x.center_rounded(), event.y.center_rounded());
+
               if (pixelid == 0) {
                 mystats.geom_errors++;
               } else {
