@@ -173,7 +173,7 @@ class IdeasCtrl():
 
    def start_TOF_readout(self, threshold, numevents):
       asiccfg = makeasiccfg(threshold)
-      asiccfgbits=356
+      asiccfg_bits=356
       self.writesystemregister8('cfg_timing_readout_en', 0)
       self.writesystemregister8('cfg_phystrig_en', 0)
       self.writesystemregister8('cfg_all_ch_en', 0)
@@ -189,10 +189,28 @@ class IdeasCtrl():
       self.writesystemregister16('cfg_event_num_timing', numevents)
       self.writesystemregister8('cfg_timing_readout_en', 1)
 
-   # def start_all_ch_spec_readout(self):
-   #    self.stopreadout()
-   #    self.writesystemregister8('cfg_all_ch_en', 1)
-   #
+   def start_all_ch_spec_readout(self):
+       asiccfg = makeasiccfg(threshold)
+       asiccfg_bits=356
+       self.writesystemregister8('cfg_timing_readout_en', 0)
+       self.writesystemregister8('cfg_phystrig_en', 0)
+       self.writesystemregister8('cfg_forced_en', 0)
+       self.writesystemregister8('cfg_all_ch_en', 0)
+       self.writesystemregister8('cfg_event_num_vata', 1)
+       self.writeasicconf(self.asic.id0, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id1, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id2, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id3, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id0, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id1, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id2, asiccfg, asiccfg_bits)
+       self.writeasicconf(self.asic.id3, asiccfg, asiccfg_bits)
+
+       self.writesystemregister8('cfg_phystrig_en', 1)
+       #TODO: maybe clear any event that was registered here
+       self.writesystemregister8('cfg_phystrig_en', 0)
+       self.writesystemregister8('cfg_all_ch_en', 1)
+
    # def start_single_ch_spec_readout(self):
    #    self.stopreadout()
    #    self.writesystemregister8('cfg_phystrig_en', 1)  # guessing
@@ -227,7 +245,7 @@ if __name__ == '__main__':
    parser = argparse.ArgumentParser()
    parser.add_argument("-i", metavar='ipaddr', help = "server ip address (default %s)" % (svr_ip_addr), type = str)
    parser.add_argument("-p", metavar='port', help = "server tcp port (default %d)" % (svr_tcp_port), type = int)
-   parser.add_argument("-c", metavar='cmd', help = "command (config, start_TOF, start_single_ch, start_all_ch, stop)", type = str)
+   parser.add_argument("-c", metavar='cmd', help = "command (config, start_TOF, start_single_ch, start_all_ch, stop, dumpreg)", type = str)
    parser.add_argument("-t", metavar='thresh', help = "asic threshold", type = int)
    parser.add_argument("-e", metavar='pkts', help = "events in packet", type = int)
    parser.add_argument("-v", help = "add debug prints", action='store_true')
@@ -260,9 +278,9 @@ if __name__ == '__main__':
       #    print("Starting single ch spec Readout")
       #    ctrl.start_single_ch_spec_readout()
       #
-      # elif args.c == "start_all_ch":
-      #    print("Starting all ch spec Readout")
-      #    ctrl.start_all_ch_spec_readout()
+      elif args.c == "start_all_ch":
+          print("Starting all ch spec Readout")
+          ctrl.start_all_ch_spec_readout()
       #
       # elif args.c == "config":
       #    print("Configure System for Time Triggered Readout")
@@ -270,5 +288,7 @@ if __name__ == '__main__':
 
       elif args.c == "dumpreg":
          ctrl.dumpallregisters()
+      else:
+         print("Invalid command: %s" % (args.c))
    else:
       print("No command specified")
