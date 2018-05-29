@@ -87,10 +87,6 @@ mkdir build
 
 cd build
 
-conan install --build=outdated ..
-
-source activate_run.sh
-
 cmake ..
 
 make
@@ -151,25 +147,10 @@ Wen using conan to provide the dependencies, an extra option has to be provided:
 conan install --build=outdated .. --settings compiler.libcxx=libstdc++11
 ```
 
-You will also need to force the EFU build system to use the correct flags by adding `-DUSE_OLD_ABI=0`. I.e, when running CMake, run it as follows:
-
-```bash
-cmake .. -DUSE_OLD_ABI=0
-```
-Installing the dependencies manually has been tested under Ubuntu and this appears to be generally working. Note however that you will need to run CMake with the ``-DUSE_OLD_ABI=0`` argument in this case as well.
-
 ## Targets and options
 See options and targets by
 
     > make hints
-
-Two important options, however, are
-
-Option                | Description
--------------         | -------------
-`-DDUMPTOFILE`          | Activates code for writing readout to disk (default OFF)
-`-DUSE_OLD_ABI`         | On CentOS we currently use the old ABI which can conflict on <br> newer distributions (default OFF)
-
 
 Target                | Description
 -------------         | -------------

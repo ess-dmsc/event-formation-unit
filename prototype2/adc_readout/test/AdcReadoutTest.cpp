@@ -47,7 +47,7 @@ public:
   }
 };
 
-class AdcReadoutTest : public ::testing::Test {
+class DISABLED_AdcReadoutTest : public ::testing::Test {
 public:
   virtual void SetUp() {
     Settings.DetectorAddress = "localhost";
@@ -72,7 +72,7 @@ public:
   };
 };
 
-TEST_F(AdcReadoutTest, SinglePacketStats) {
+TEST_F(DISABLED_AdcReadoutTest, SinglePacketStats) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, 1470);
@@ -84,7 +84,7 @@ TEST_F(AdcReadoutTest, SinglePacketStats) {
   EXPECT_EQ(Readout.AdcStats.parser_errors, 1);
 }
 
-TEST_F(AdcReadoutTest, SingleIdlePacket) {
+TEST_F(DISABLED_AdcReadoutTest, SingleIdlePacket) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_idle.dat");
@@ -99,7 +99,7 @@ TEST_F(AdcReadoutTest, SingleIdlePacket) {
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
 }
 
-TEST_F(AdcReadoutTest, SingleDataPacket) {
+TEST_F(DISABLED_AdcReadoutTest, SingleDataPacket) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_1.dat");
@@ -114,7 +114,7 @@ TEST_F(AdcReadoutTest, SingleDataPacket) {
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
 }
 
-TEST_F(AdcReadoutTest, GlobalCounterError) {
+TEST_F(DISABLED_AdcReadoutTest, GlobalCounterError) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_1.dat");
@@ -130,7 +130,7 @@ TEST_F(AdcReadoutTest, GlobalCounterError) {
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 1);
 }
 
-TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
+TEST_F(DISABLED_AdcReadoutTest, GlobalCounterCorrect) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.Threads.at(0).thread = std::thread(Readout.Threads.at(0).func);
   Readout.Threads.at(1).thread = std::thread(Readout.Threads.at(1).func);

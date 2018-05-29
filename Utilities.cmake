@@ -14,6 +14,10 @@ function(create_module module_name)
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${module_name} "-Wl,--no-as-needed")
   endif()
+
+  set_target_properties(${module_name} PROPERTIES
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/modules")
+
   enable_coverage(${module_name})
   install(TARGETS ${module_name} DESTINATION bin)
 endfunction(create_module)
@@ -39,6 +43,10 @@ function(create_executable exec_name)
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
     eventlib)
+
+  set_target_properties(${exec_name} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
   enable_coverage(${exec_name})
   install(TARGETS ${exec_name} DESTINATION bin)
 endfunction(create_executable)
@@ -72,6 +80,9 @@ function(create_test_executable)
     add_linker_flags(${exec_name} "-Wl,--no-as-needed")
   endif()
 
+  set_target_properties(${exec_name} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/unit_tests")
+
   add_test(NAME regular_${exec_name}
     COMMAND ${exec_name}
     "--gtest_output=xml:${CMAKE_BINARY_DIR}/test_results/${exec_name}test.xml")
@@ -81,9 +92,24 @@ function(create_test_executable)
     CACHE INTERNAL "All test targets")
 
   enable_coverage(${exec_name})
-  if (NOT ${create_test_executable_SKIP_MEMGRIND})
-    memcheck_test(${exec_name} ${CMAKE_BINARY_DIR}/bin)
+  if(NOT ${create_test_executable_SKIP_MEMGRIND})
+    memcheck_test(${exec_name} ${CMAKE_BINARY_DIR}/unit_tests)
   endif()
-
 endfunction(create_test_executable)
+
+function(create_integration_test_executable exec_name)
+  add_executable(${exec_name} EXCLUDE_FROM_ALL
+    ${${exec_name}_SRC}
+    ${${exec_name}_INC})
+  target_include_directories(${exec_name}
+    PRIVATE ${GTEST_INCLUDE_DIRS})
+
+  set_target_properties(${exec_name} PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/integration_tests")
+
+  target_link_libraries(${exec_name}
+    ${${exec_name}_LIB}
+    ${EFU_COMMON_LIBS}
+    eventlib)
+endfunction(create_integration_test_executable)
 

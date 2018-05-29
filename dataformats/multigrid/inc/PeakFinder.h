@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <string>
 #include <vector>
+#include <memory>
 
 class PeakData {
 public:
@@ -31,6 +32,10 @@ public:
    * @param low_cut values below this index are also zeroed as noise
    */
   PeakFinder(int minimum_width, int signal_threshold, int low_cut);
+
+  /** @brief destructor - delete the vecotr of peak data
+   */
+  ~PeakFinder();
 
   /** @brief calculate the peak positions from histogram data
    * @param histogram pre-populated histogram data

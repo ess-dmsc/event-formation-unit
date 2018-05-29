@@ -43,22 +43,18 @@ create_module(gdgem)
 # Data generators
 #=============================================================================
 
-if(h5cpp_FOUND)
-  set(gennmxfile_SRC
+set(gennmxfile_SRC
     nmx/Eventlet.cpp
     nmxgen/nmxfile.cpp
     nmxgen/NMXArgs.cpp
     nmxgen/ReaderVMM.cpp
     )
-  set(gennmxfile_INC
+set(gennmxfile_INC
     nmx/Eventlet.h
     nmxgen/NMXArgs.h
     nmxgen/ReaderVMM.h
     )
-  create_executable(gennmxfile)
-else()
-  message(STATUS "*** Unable to compile gennmxfile as h5cpp was not found.")
-endif()
+create_executable(gennmxfile)
 
 find_package(PCAP)
 if(PCAP_FOUND)
