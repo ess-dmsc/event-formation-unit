@@ -23,7 +23,7 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings Settings,
     std::function<void()> processingFunc = [this,y]() { this->processingThread(*this->DataModuleQueues.at(y)); };
     Detector::AddThreadFunction(processingFunc, "processing_" + std::to_string(y));
   }
-  Stats.setPrefix("adc_readout");
+  Stats.setPrefix("adc_readout" + ReadoutSettings.GrafanaNameSuffix);
   Stats.create("input.bytes.received", AdcStats.input_bytes_received);
   Stats.create("parser.errors", AdcStats.parser_errors);
         Stats.create("parser.unknown_channel", AdcStats.parser_unknown_channel);

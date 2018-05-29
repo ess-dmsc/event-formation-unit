@@ -25,6 +25,11 @@ void SetCLIArguments(CLI::App &parser, AdcSettings &Settings) {
       ->group("ADC Readout Options")
       ->set_default_val("AdcDemonstrator");
   parser
+  .add_option("--stats_suffix", Settings.GrafanaNameSuffix,
+              "Grafana root name suffix, used for the stats.")
+  ->group("ADC Readout Options")
+  ->set_default_val("");
+  parser
       .add_flag("--sample_timestamp", Settings.SampleTimeStamp,
                 "Provide a timestamp with every single ADC sample. Note: this "
                 "drastically increases the bandwidth requirements.")
