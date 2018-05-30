@@ -23,7 +23,7 @@ public:
 private:
   double pMaxDeltaTime {0};
 
-  bool ready(double time) const;
+  bool ready_to_be_matched(double time) const;
 
   double delta_end(const Event& event, const Cluster& cluster) const;
   bool belongs_end(const Event& event, const Cluster& cluster) const;

@@ -47,7 +47,7 @@ void ClusterMatcher::match_end(bool force) {
 
     auto n = unmatched_clusters.begin();
 
-    if (!force && !ready(n->time_end))
+    if (!force && !ready_to_be_matched(n->time_end))
       break;
 
     if (!evt.empty() && !belongs_end(evt, *n)) {

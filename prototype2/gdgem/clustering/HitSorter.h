@@ -10,8 +10,7 @@ class HitSorter {
 public:
   HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold, double maxTimeGap);
 
-  // TODO: would be better by constref?
-  void insert(Readout readout);
+  void insert(const Readout& readout);
   void flush();
 
   // Statistics counters
@@ -28,8 +27,10 @@ private:
 
   HitContainer buffer;
 
-  // These are in play for triggering the actual clustering
+  // This is in play for triggering the actual clustering
   double old_trigger_timestamp_ns_ {0};
+
+  bool requires_analysis(double triggerTimestamp_ns);
 
   void analyze();
 };
