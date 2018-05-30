@@ -29,7 +29,7 @@ public:
    *  @param function pointer to command implementation
    */
   int registercmd(std::string cmd_name, cmdFunction cmd_fn);
-  
+
   void clearCommands();
 
   /** @brief parse a command
@@ -40,6 +40,6 @@ public:
    */
   int parse(char *input, unsigned int isize, char *output, unsigned int *osize);
 
-private:
+//private:
   std::map<std::string, cmdFunction> commands; /**< map of all commands */
 };
