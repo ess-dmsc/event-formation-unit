@@ -3,33 +3,18 @@ coverage_on = "centos7"
 archive_what = "centos7-release"
 
 images = [
-    'centos7': [
-        'name': 'essdmscdm/centos7-build-node:1.1.0',
-        'sh': 'sh',
-        'cmake_flags': '-DCOV=ON'
-    ],
     'centos7-release': [
-        'name': 'essdmscdm/centos7-build-node:1.1.0',
-        'sh': 'sh',
+        'name': 'essdmscdm/centos7-build-node:3.0.0',
+        'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash',
         'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
     ],
-    'centos7-gcc6': [
-        'name': 'essdmscdm/centos7-gcc6-build-node:2.2.0',
+    'centos7': [
+        'name': 'essdmscdm/centos7-build-node:3.0.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash',
-        'cmake_flags': ''
+        'cmake_flags': '-DCOV=ON'
     ],
-    'fedora25': [
-        'name': 'essdmscdm/fedora25-build-node:1.1.0',
-        'sh': 'sh',
-        'cmake_flags': ''
-    ],
-    'ubuntu1604': [
-        'name': 'essdmscdm/ubuntu16.04-build-node:2.4.0',
-        'sh': 'sh',
-        'cmake_flags': ''
-    ],
-    'ubuntu1710': [
-        'name': 'essdmscdm/ubuntu17.10-build-node:2.1.1',
+    'ubuntu1804': [
+        'name': 'essdmscdm/ubuntu18.04-build-node:1.1.0',
         'sh': 'sh',
         'cmake_flags': ''
     ]
@@ -100,19 +85,21 @@ def docker_cmake(image_key, xtra_flags) {
 def docker_build(image_key) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        cd ${project}/build
-        make --version
-        make -j4 VERBOSE=ON
-        make -j4 unit_tests VERBOSE=ON
+        cd ${project}/build && \
+        make --version && \
+        make -j4 VERBOSE=OFF && \
+        make -j4 unit_tests VERBOSE=OFF && \
+        cd ../utils/udpredirect && \
+        make
     \""""
 }
 
 def docker_tests(image_key) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        cd ${project}/build
-        . ./activate_run.sh
-        make runtest
+        cd ${project}/build && \
+        . ./activate_run.sh && \
+        make runtest && \
         make runefu
     \""""
 }
@@ -123,10 +110,10 @@ def docker_tests_coverage(image_key) {
 
     try {
         sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-                cd ${project}/build
-                . ./activate_run.sh
-                make runefu
-                make coverage
+                cd ${project}/build && \
+                . ./activate_run.sh && \
+                make runefu && \
+                make coverage && \
                 make -j4 valgrind
             \""""
         sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ./"
@@ -180,6 +167,7 @@ def docker_archive(image_key) {
                         cp -r ${project}/build/licenses archive/event-formation-unit && \
                         mkdir archive/event-formation-unit/util && \
                         cp -r ${project}/utils/efushell archive/event-formation-unit/util && \
+                        cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util && \
                         cp -r ${project}/monitors/* archive/event-formation-unit/util && \
                         mkdir archive/event-formation-unit/data && \
                         cp -r ${project}/prototype2/multigrid/calib_data/* archive/event-formation-unit/data && \
