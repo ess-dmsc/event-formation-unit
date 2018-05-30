@@ -59,6 +59,7 @@ protected:
   
   /// @brief Counters that are used to store stats that are sent to Grafana.
   struct {
+    std::int64_t current_ts_seconds = 0;
     std::int64_t input_bytes_received = 0;
     std::int64_t parser_errors = 0;
     std::int64_t parser_unknown_channel = 0;

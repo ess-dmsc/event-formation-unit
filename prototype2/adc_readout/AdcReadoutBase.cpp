@@ -31,6 +31,7 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings Settings,
   Stats.create("parser.packets.idle", AdcStats.parser_packets_idle);
   Stats.create("parser.packets.data", AdcStats.parser_packets_data);
   Stats.create("processing.packets.lost", AdcStats.processing_packets_lost);
+  Stats.create("current_ts", AdcStats.current_ts_seconds);
   AdcStats.processing_packets_lost = -1; // To compensate for the first error.
 }
 
@@ -68,6 +69,7 @@ void AdcReadoutBase::inputThread() {
     return this->GetDataModule(Channel);
   });
   std::function<bool(DataModule*)> QueingFunction([this](DataModule *Data){
+    this->AdcStats.current_ts_seconds = Data->TimeStamp.Seconds;
     return this->QueueUpDataModule(Data);
   });
   PacketParser Parser(QueingFunction, DataModuleProducer);
