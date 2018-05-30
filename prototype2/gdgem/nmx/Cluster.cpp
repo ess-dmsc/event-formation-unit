@@ -4,6 +4,7 @@
 #include <cmath>
 #include <set>
 #include <sstream>
+#include <algorithm>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL
@@ -16,8 +17,11 @@ void Cluster::insert_hit(const Hit &e) {
     strip_start = strip_end = e.strip;
   }
 
-  if (plane_id != e.plane_id)
+  // If plane identities don't match, invalidate
+  // TODO: this needs more testing
+  if (plane_id != e.plane_id) {
     plane_id = -1;
+  }
 
   entries.push_back(e);
   adc_sum += e.adc;
@@ -39,8 +43,9 @@ double Cluster::time_span() const {
 }
 
 uint16_t Cluster::strip_span() const {
-  if (!entries.size())
+  if (entries.empty()) {
     return 0;
+  }
   return (strip_end - strip_start) + 1u;
 }
 
@@ -52,12 +57,15 @@ double Cluster::time_center() const {
   return time_mass / adc_sum;
 }
 
+// TODO: make work with doubles (or not, if we decimate timestamps?)
 void Cluster::analyze(bool weighted, uint16_t max_timebins,
                       uint16_t max_timedif) {
-  if (entries.empty())
+  if (entries.empty()) {
     return;
+  }
 
-  entries.sort([](const Hit &c1, const Hit &c2) {
+  std::sort(entries.begin(), entries.end(),
+      [](const Hit &c1, const Hit &c2) {
     return c1.time < c2.time;
   });
 
@@ -86,8 +94,9 @@ void Cluster::analyze(bool weighted, uint16_t max_timebins,
       timebins.insert(e.time);
       uspan_min = std::min(uspan_min, static_cast<int16_t>(e.strip));
       uspan_max = std::max(uspan_max, static_cast<int16_t>(e.strip));
-    } else
+    } else {
       break;
+    }
   }
 
   XTRACE(PROCESS, DEB, "center_sum=%f center_count=%f\n", center_sum,
@@ -103,19 +112,22 @@ uint32_t Cluster::utpc_center_rounded() const {
 }
 
 void Cluster::merge(Cluster &other) {
-  if (other.entries.empty())
+  if (other.entries.empty()) {
     return;
+  }
 
   if (entries.empty()) {
     *this = std::move(other);
     return;
   }
 
-  if (other.plane_id != plane_id)
+  if (other.plane_id != plane_id) {
     return;
+  }
 
-  // merge rather than splice?
-  entries.splice(entries.end(), other.entries);
+  entries.reserve( entries.size() + other.entries.size() ); // preallocate memory
+  entries.insert( entries.end(), other.entries.begin(), other.entries.end() );
+
   adc_sum += other.adc_sum;
   strip_mass += other.strip_mass;
   time_mass += other.time_mass;
@@ -123,26 +135,29 @@ void Cluster::merge(Cluster &other) {
   time_end = std::max(time_end, other.time_end);
   strip_start = std::min(strip_start, other.strip_start);
   strip_end = std::max(strip_end, other.strip_end);
-
-  // what if different?
-  plane_id = other.plane_id;
 }
 
+// TODO: Unit tests for this
 double Cluster::time_overlap(const Cluster &other) const {
   auto latest_start = std::max(other.time_start, time_start);
   auto earliest_end = std::min(other.time_end, time_end);
-  if (latest_start > earliest_end)
+  if (latest_start > earliest_end) {
     return 0;
-  return (earliest_end - latest_start);
+  }
+  return earliest_end - latest_start;
 }
 
+// TODO: Precision of comparisons
+// TODO: Comments or helper methods
 bool Cluster::time_touch(const Cluster &other) const {
   if ((other.time_start == other.time_end) &&
-      (time_start < other.time_end) && (other.time_end < time_end))
+      (time_start < other.time_end) && (other.time_end < time_end)) {
     return true;
+  }
   if ((time_start == time_end) &&
-      (other.time_start < time_end) && (time_end < other.time_end))
+      (other.time_start < time_end) && (time_end < other.time_end)) {
     return true;
+  }
   return ((time_start == other.time_end) ||
       (time_end == other.time_start));
 }

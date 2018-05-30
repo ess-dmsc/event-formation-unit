@@ -2,7 +2,7 @@
 
 #include <gdgem/nmx/ReadoutFile.h>
 #include <gdgem/clustering/HitSorter.h>
-#include <gdgem/clustering/Clusterer1.h>
+#include <gdgem/clustering/DoroClusterer.h>
 
 #include <memory>
 #include <stdio.h>
@@ -14,7 +14,7 @@
 
 #define UNUSED __attribute__((unused))
 
-class Clusterer1Test : public TestBase {
+class DoroClustererTest : public TestBase {
 protected:
   std::vector<Readout> long_data;
 
@@ -52,8 +52,8 @@ protected:
 
     sorter_x = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
     sorter_y = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
-    sorter_x->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
-    sorter_y->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
+    sorter_x->clusterer = std::make_shared<DoroClusterer>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
+    sorter_y->clusterer = std::make_shared<DoroClusterer>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
   }
 
   virtual void TearDown() {
@@ -72,7 +72,7 @@ protected:
 
 // TODO: Test this without sorter!!! Use presorted data that we understand
 
-TEST_F(Clusterer1Test, Run16_line_110168_110323) {
+TEST_F(DoroClustererTest, Run16_line_110168_110323) {
   uint32_t bonus = 0;
   uint32_t old = 0;
   for (auto readout : Run16) {
@@ -90,7 +90,7 @@ TEST_F(Clusterer1Test, Run16_line_110168_110323) {
   EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 11);
 }
 
-TEST_F(Clusterer1Test, Run16_Long) {
+TEST_F(DoroClustererTest, Run16_Long) {
   uint32_t bonus = 0;
   uint32_t old = 0;
   for (auto readout : long_data) {

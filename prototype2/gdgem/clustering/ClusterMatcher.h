@@ -2,10 +2,11 @@
 
 #include <memory>
 #include <gdgem/clustering/AbstractClusterer.h>
+#include <deque>
 
 class ClusterMatcher {
 public:
-  ClusterMatcher(double maxDeltaTime);
+  explicit ClusterMatcher(double maxDeltaTime);
 
   void merge(uint8_t plane, ClusterList& c);
 
@@ -16,12 +17,13 @@ public:
   size_t stats_cluster_count {0};
 
   ClusterList unmatched_clusters;
-  std::list<Event> matched_clusters;
+
+  std::deque<Event> matched_clusters;
 
 private:
   double pMaxDeltaTime {0};
 
-  bool ready(double time) const;
+  bool ready_to_be_matched(double time) const;
 
   double delta_end(const Event& event, const Cluster& cluster) const;
   bool belongs_end(const Event& event, const Cluster& cluster) const;

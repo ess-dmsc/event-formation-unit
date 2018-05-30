@@ -20,7 +20,7 @@ set(gdgem_SRC
     clustering/HitsQueue.cpp
     clustering/HitSorter.cpp
     clustering/ClusterMatcher.cpp
-    clustering/Clusterer1.cpp
+    clustering/DoroClusterer.cpp
     srs/SRSMappings.cpp
     srs/SRSTime.cpp
     vmm2/ParserVMM2.cpp
@@ -42,7 +42,7 @@ set(gdgem_INC
     clustering/HitsQueue.h
     clustering/HitSorter.h
     clustering/ClusterMatcher.h
-    clustering/Clusterer1.h
+    clustering/DoroClusterer.h
     clustering/HitContainer.h
     clustering/AbstractClusterer.h
     srs/SRSMappings.h

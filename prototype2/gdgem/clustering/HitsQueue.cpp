@@ -12,28 +12,26 @@ const HitContainer &HitsQueue::hits() const {
   return hitsOut.buffer;
 }
 
+// TODO: sort out Hit constr
 void HitsQueue::store(uint8_t plane, uint16_t strip, uint16_t adc,
                       double chipTime, double trigger_time) {
+  HitBuffer* b = &hitsOld;
   if (chipTime < pTime.max_chip_time_in_window_ns()) {
-    hitsNew.trigger_time = trigger_time;
-    hitsNew.buffer.emplace_back(Hit());
-    auto &e = hitsNew.buffer[hitsNew.buffer.size() - 1];
-    e.plane_id = plane;
-    e.adc = adc;
-    e.strip = strip;
-    e.time = chipTime;
-  } else {
-    hitsOld.trigger_time = trigger_time;
-    hitsOld.buffer.emplace_back(Hit());
-    auto &e = hitsOld.buffer[hitsOld.buffer.size() - 1];
-    e.plane_id = plane;
-    e.adc = adc;
-    e.strip = strip;
-    e.time = chipTime;
+    b = &hitsNew;
   }
+  b->trigger_time = trigger_time;
+  b->buffer.push_back(Hit());
+  auto &e = b->buffer.back();
+  e.plane_id = plane;
+  e.adc = adc;
+  e.strip = strip;
+  e.time = chipTime;
 }
 
+
 void HitsQueue::sort_and_correct() {
+  // TODO: What are the sizes of (number of elements) in hitsOld and hitsNew?
+  // TODO: This might be relevant to the type of sorting that should be used.
   std::sort(hitsOld.buffer.begin(), hitsOld.buffer.end(),
             [](const Hit &e1, const Hit &e2) {
               return e1.time < e2.time;

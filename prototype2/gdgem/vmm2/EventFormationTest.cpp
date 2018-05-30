@@ -4,7 +4,7 @@
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
 
-#include <gdgem/clustering/Clusterer1.h>
+#include <gdgem/clustering/DoroClusterer.h>
 #include <gdgem/clustering/ClusterMatcher.h>
 
 #include <gdgem/vmm2/EventFormationTestData.h>
@@ -18,8 +18,8 @@ protected:
   SRSTime time_intepreter;
   SRSMappings geometry_interpreter;
 
-  std::shared_ptr<Clusterer1> cx;
-  std::shared_ptr<Clusterer1> cy;
+  std::shared_ptr<DoroClusterer> cx;
+  std::shared_ptr<DoroClusterer> cy;
 
   virtual void SetUp() {
     time_intepreter.set_bc_clock(20.0);
@@ -31,8 +31,8 @@ protected:
     geometry_interpreter.define_plane(0, {{1, 0}, {1, 1}, {1, 6}, {1, 7}});
     geometry_interpreter.define_plane(1, {{1, 10}, {1, 11}, {1, 14}, {1, 15}});
 
-    cx = std::make_shared<Clusterer1>(200, 3, 3);
-    cy = std::make_shared<Clusterer1>(200, 3, 3);
+    cx = std::make_shared<DoroClusterer>(200, 3, 3);
+    cy = std::make_shared<DoroClusterer>(200, 3, 3);
   }
   virtual void TearDown() {}
 };

@@ -208,7 +208,6 @@ TEST_F(ClusterTest, Merge) {
   cluster.merge(cluster2);
 
   EXPECT_EQ(cluster.entries.size(), 5);
-  EXPECT_EQ(cluster2.entries.size(), 0);
   EXPECT_EQ(cluster.time_span(), 12);
   EXPECT_EQ(cluster.strip_span(), 11);
   EXPECT_EQ(cluster.adc_sum, 5);

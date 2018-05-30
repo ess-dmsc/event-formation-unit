@@ -10,7 +10,7 @@
 ClusterMatcher::ClusterMatcher(double maxDeltaTime) : pMaxDeltaTime(maxDeltaTime) {
 }
 
-bool ClusterMatcher::ready(double time) const {
+bool ClusterMatcher::ready_to_be_matched(double time) const {
   // TODO Parametrize threshold
   return ((unmatched_clusters.size() > 2) &&
       (std::min(latest_x, latest_y) - time) > (pMaxDeltaTime * 3));
@@ -25,17 +25,19 @@ bool ClusterMatcher::belongs_end(const Event &event, const Cluster &cluster) con
 }
 
 void ClusterMatcher::merge(uint8_t plane, ClusterList &c) {
-  if (c.empty())
+  if (c.empty()) {
     return;
-  if (plane)
+  }
+  if (plane == 1) {
     latest_y = std::max(latest_y, c.back().time_start);
-  else
+  } else if (plane == 0) {
     latest_x = std::max(latest_x, c.back().time_start);
+  }
   unmatched_clusters.splice(unmatched_clusters.end(), c);
 }
 
 void ClusterMatcher::match_end(bool force) {
-
+  // TODO: is it already sorted?
   unmatched_clusters.sort([](const Cluster &c1, const Cluster &c2) {
     return c1.time_end < c2.time_end;
   });
@@ -46,7 +48,7 @@ void ClusterMatcher::match_end(bool force) {
 
     auto n = unmatched_clusters.begin();
 
-    if (!force && !ready(n->time_end))
+    if (!force && !ready_to_be_matched(n->time_end))
       break;
 
     if (!evt.empty() && !belongs_end(evt, *n)) {

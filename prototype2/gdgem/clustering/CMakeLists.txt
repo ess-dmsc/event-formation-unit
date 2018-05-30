@@ -58,25 +58,25 @@ create_test_executable(HitSorterTest SKIP_MEMGRIND)
 target_compile_definitions(HitSorterTest
     PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
-set(Clusterer1Test_SRC
+set(DoroClustererTest_SRC
     ${ClusteringBase_SRC}
-    Clusterer1.cpp
-    Clusterer1Test.cpp)
-set(Clusterer1Test_INC
-    Clusterer1.h
+    DoroClusterer.cpp
+    DoroClustererTest.cpp)
+set(DoroClustererTest_INC
+    DoroClusterer.h
     ${ClusteringBase_INC})
-create_test_executable(Clusterer1Test SKIP_MEMGRIND)
-target_compile_definitions(Clusterer1Test
+create_test_executable(DoroClustererTest SKIP_MEMGRIND)
+target_compile_definitions(DoroClustererTest
     PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
 set(ClusterMatcherTest_SRC
     ${ClusteringBase_SRC}
     ClusterMatcher.cpp
-    Clusterer1.cpp
+    DoroClusterer.cpp
     ClusterMatcherTest.cpp)
 set(ClusterMatcherTest_INC
     ClusterMatcher.h
-    Clusterer1.h
+    DoroClusterer.h
     ${ClusteringBase_INC})
 create_test_executable(ClusterMatcherTest SKIP_MEMGRIND)
 target_compile_definitions(ClusterMatcherTest

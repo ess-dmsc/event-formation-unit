@@ -2,12 +2,10 @@
 
 #include <gdgem/clustering/AbstractClusterer.h>
 
-using ClusterList = std::list<Cluster>;
-
-class Clusterer1 : public AbstractClusterer {
+class DoroClusterer : public AbstractClusterer {
 public:
-  Clusterer1(double maxTimeGap, uint16_t maxStripGap, size_t minClusterSize);
-  ~Clusterer1() {}
+  DoroClusterer(double maxTimeGap, uint16_t maxStripGap, size_t minClusterSize);
+  ~DoroClusterer() {}
 
   void cluster(const HitContainer &hits) override;
 
