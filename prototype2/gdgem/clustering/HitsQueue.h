@@ -5,7 +5,7 @@
 
 class HitsQueue {
 private:
-  struct HitBUffer
+  struct HitBuffer
   {
     double trigger_time {0};
     HitContainer buffer;
@@ -27,9 +27,9 @@ private:
 
   // TODO: trigger_timestamp must be added
 
-  HitBUffer hitsOld;
-  HitBUffer hitsNew;
-  HitBUffer hitsOut;
+  HitBuffer hitsOld;
+  HitBuffer hitsNew;
+  HitBuffer hitsOut;
 
   SRSTime pTime;
   double pMaxTimeGap {200};

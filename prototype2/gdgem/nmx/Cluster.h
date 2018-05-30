@@ -10,6 +10,7 @@
 #include <gdgem/nmx/Hit.h>
 #include <limits>
 #include <list>
+#include <vector>
 
 struct Cluster {
 
@@ -20,8 +21,7 @@ struct Cluster {
    */
   void insert_hit(const Hit &hit);
 
-  //Replace std::list with std::vector
-  std::list<Hit> entries;
+  std::vector<Hit> entries;
   bool empty() const;
 
   // calculated as hits are added

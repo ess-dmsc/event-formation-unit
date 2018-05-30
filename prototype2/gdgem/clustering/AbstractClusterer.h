@@ -4,6 +4,7 @@
 #include <gdgem/clustering/HitContainer.h>
 #include <gdgem/nmx/Event.h>
 
+// TODO: pick a faster data structure
 using ClusterList = std::list<Cluster>;
 
 class AbstractClusterer {

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <gdgem/clustering/AbstractClusterer.h>
+#include <deque>
 
 class ClusterMatcher {
 public:
@@ -17,8 +18,7 @@ public:
 
   ClusterList unmatched_clusters;
 
-  //Replace std::list with std::vector or std:deque
-  std::list<Event> matched_clusters;
+  std::deque<Event> matched_clusters;
 
 private:
   double pMaxDeltaTime {0};

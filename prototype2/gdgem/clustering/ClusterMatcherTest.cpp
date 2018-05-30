@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <gdgem/clustering/HitSorter.h>
-#include <gdgem/clustering/Clusterer1.h>
+#include <gdgem/clustering/DoroClusterer.h>
 #include <gdgem/clustering/ClusterMatcher.h>
 #include <test/TestBase.h>
 #include <functional>
@@ -59,8 +59,8 @@ protected:
     matcher = std::make_shared<ClusterMatcher>(pDeltaTimePlanes);
     sorter_x = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
     sorter_y = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
-    sorter_x->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
-    sorter_y->clusterer = std::make_shared<Clusterer1>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
+    sorter_x->clusterer = std::make_shared<DoroClusterer>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
+    sorter_y->clusterer = std::make_shared<DoroClusterer>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
   }
 
   virtual void TearDown() {

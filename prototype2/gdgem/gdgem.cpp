@@ -21,7 +21,7 @@
 #include <gdgem/vmm2/BuilderVMM2.h>
 
 #include <gdgem/clustering/ClusterMatcher.h>
-#include <gdgem/clustering/Clusterer1.h>
+#include <gdgem/clustering/DoroClusterer.h>
 
 #include <iostream>
 #include <memory>
@@ -351,10 +351,10 @@ void NMX::processing_thread() {
 void NMX::init_builder() {
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
-  auto clusx = std::make_shared<Clusterer1>(nmx_opts.clusterer_x.max_time_gap,
+  auto clusx = std::make_shared<DoroClusterer>(nmx_opts.clusterer_x.max_time_gap,
                                             nmx_opts.clusterer_x.max_strip_gap,
                                             nmx_opts.clusterer_x.min_cluster_size);
-  auto clusy = std::make_shared<Clusterer1>(nmx_opts.clusterer_y.max_time_gap,
+  auto clusy = std::make_shared<DoroClusterer>(nmx_opts.clusterer_y.max_time_gap,
                                             nmx_opts.clusterer_y.max_strip_gap,
                                             nmx_opts.clusterer_y.min_cluster_size);
 

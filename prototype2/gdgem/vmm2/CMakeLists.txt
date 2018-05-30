@@ -13,7 +13,7 @@ set(EventFormationTest_SRC
     ../clustering/HitsQueue.cpp
     ../clustering/HitSorter.cpp
     ../clustering/ClusterMatcher.cpp
-    ../clustering/Clusterer1.cpp
+    ../clustering/DoroClusterer.cpp
     BuilderVMM2.cpp
     EventFormationTest.cpp
     ParserVMM2.cpp
@@ -30,7 +30,7 @@ set(EventFormationTest_INC
     ../clustering/HitsQueue.h
     ../clustering/HitSorter.h
     ../clustering/ClusterMatcher.h
-    ../clustering/Clusterer1.h
+    ../clustering/DoroClusterer.h
     ../clustering/HitContainer.h
     ../clustering/AbstractClusterer.h
     BuilderVMM2.h
@@ -83,7 +83,7 @@ set(BuilderVMM2Test_SRC
     ../srs/SRSMappings.cpp
     ../clustering/HitsQueue.cpp
     ../clustering/HitSorter.cpp
-    ../clustering/Clusterer1.cpp
+    ../clustering/DoroClusterer.cpp
     BuilderVMM2Test.cpp
     BuilderVMM2.cpp
     ParserVMM2.cpp
@@ -97,7 +97,7 @@ set(BuilderVMM2Test_INC
     ../nmx/Hit.h
     ../srs/SRSTime.h
     ../srs/SRSMappings.h
-    ../clustering/Clusterer1.h
+    ../clustering/DoroClusterer.h
     ../clustering/HitsQueue.h
     ../clustering/HitSorter.h
     ../clustering/HitContainer.h

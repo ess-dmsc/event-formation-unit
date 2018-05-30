@@ -1,19 +1,19 @@
-#include <gdgem/clustering/Clusterer1.h>
+#include <gdgem/clustering/DoroClusterer.h>
 #include <algorithm>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-Clusterer1::Clusterer1(double maxTimeGap, uint16_t maxStripGap, size_t minClusterSize)
+DoroClusterer::DoroClusterer(double maxTimeGap, uint16_t maxStripGap, size_t minClusterSize)
     : AbstractClusterer(), pMaxTimeGap(maxTimeGap), pMaxStripGap(maxStripGap), pMinClusterSize(minClusterSize) {
 }
 
-void Clusterer1::cluster(const HitContainer &hits) {
+void DoroClusterer::cluster(const HitContainer &hits) {
   cluster_by_time(hits);
 }
 
-void Clusterer1::cluster_by_time(const HitContainer &hits) {
+void DoroClusterer::cluster_by_time(const HitContainer &hits) {
   HitContainer cluster;
 
   for (const auto &hit : hits) {
@@ -34,7 +34,7 @@ void Clusterer1::cluster_by_time(const HitContainer &hits) {
 }
 
 //====================================================================================================================
-void Clusterer1::cluster_by_strip(HitContainer &hits) {
+void DoroClusterer::cluster_by_strip(HitContainer &hits) {
   Cluster cluster;
 
   std::sort(hits.begin(), hits.end(),
@@ -58,7 +58,7 @@ void Clusterer1::cluster_by_strip(HitContainer &hits) {
   stash_cluster(cluster);
 }
 //====================================================================================================================
-void Clusterer1::stash_cluster(Cluster &cluster) {
+void DoroClusterer::stash_cluster(Cluster &cluster) {
   if (cluster.entries.size() < pMinClusterSize)
     return;
 

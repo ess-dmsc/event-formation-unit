@@ -24,19 +24,20 @@ bool ClusterMatcher::belongs_end(const Event &event, const Cluster &cluster) con
   return (delta_end(event, cluster) <= pMaxDeltaTime);
 }
 
-// brackets
 void ClusterMatcher::merge(uint8_t plane, ClusterList &c) {
-  if (c.empty())
+  if (c.empty()) {
     return;
-  if (plane == 1)
+  }
+  if (plane == 1) {
     latest_y = std::max(latest_y, c.back().time_start);
-  else // plane = 0
+  } else if (plane == 0) {
     latest_x = std::max(latest_x, c.back().time_start);
+  }
   unmatched_clusters.splice(unmatched_clusters.end(), c);
 }
 
 void ClusterMatcher::match_end(bool force) {
-  // Perhaps it is already sorted?
+  // TODO: is it already sorted?
   unmatched_clusters.sort([](const Cluster &c1, const Cluster &c2) {
     return c1.time_end < c2.time_end;
   });
