@@ -207,6 +207,16 @@ TEST_F(ParserTest, DuplicateCommands) {
   ASSERT_EQ(res, -1);
 }
 
+TEST_F(ParserTest, NullDetector) {
+  int keeprunning{1};
+  Parser parser(nullptr, keeprunning); // No detector, no STAT_GET_COUNT command
+
+  const char *cmd = "STAT_GET_COUNT";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser.parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(res, -Parser::EBADCMD);
+}
+
 #if 0
 TEST_F(ParserTest, SysCallFail) {
   const char *cmd = "CSPEC_LOAD_CALIB calib_data/cal_zero";
