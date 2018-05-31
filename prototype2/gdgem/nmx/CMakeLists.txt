@@ -10,7 +10,7 @@ set(ReadoutFileTest_INC
     ReadoutFile.h
     Readout.h
     )
-create_test_executable(ReadoutFileTest)
+create_test_executable(ReadoutFileTest SKIP_MEMGRIND)
 
 set(HitTest_SRC
     HitTest.cpp
@@ -30,7 +30,7 @@ set(HitFileTest_INC
     HitFile.h
     Hit.h
     )
-create_test_executable(HitFileTest)
+create_test_executable(HitFileTest SKIP_MEMGRIND)
 
 set(ClusterTest_SRC
     ClusterTest.cpp
