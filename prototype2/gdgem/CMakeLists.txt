@@ -96,6 +96,10 @@ set(NMXClustererBenchmarkTest_SRC dg_impl/NMXClusterer.cpp dg_impl/NMXClustererB
 create_benchmark_executable(NMXClustererBenchmarkTest)
 
 
+set(NMXConfigTest_INC NMXConfig.h vmm2srs/SRSMappings.h vmm2srs/SRSTime.h)
+set(NMXConfigTest_SRC NMXConfig.cpp NMXConfigTest.cpp vmm2srs/SRSMappings.cpp vmm2srs/SRSTime.cpp)
+create_test_executable(NMXConfigTest)
+
 set(EventFormationTest_SRC
   nmx/AbstractEventletBuilder.cpp
   nmx/Clusterer.cpp
