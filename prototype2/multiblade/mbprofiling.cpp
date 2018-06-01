@@ -9,8 +9,8 @@
 #include <chrono>
 
 #include "mbcommon/TextFile.h"
-#include "mbcommon/dumpEventBuilderInfo.h"
-#include "mbcommon/multiBladeEventBuilder.h"
+#include "mbcommon/DumpEventBuilderInfo.h"
+#include "mbcommon/MultiBladeEventBuilder.h"
 
 #define UNUSED __attribute__((unused))
 
