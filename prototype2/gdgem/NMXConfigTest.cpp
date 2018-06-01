@@ -34,6 +34,12 @@ TEST_F(NMXConfigTest, NoConfigFile) {
   ASSERT_FALSE(nmxconfig.dump_h5);
 }
 
+TEST_F(NMXConfigTest, DebugPrint) {
+  MESSAGE() << "This is Not a test, but simply exercises the debug print code" << "\n";
+  NMXConfig nmxconfig;
+  auto str = nmxconfig.debug();
+  MESSAGE() << str << "\n";
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
