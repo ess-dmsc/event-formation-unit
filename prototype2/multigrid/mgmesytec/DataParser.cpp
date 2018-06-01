@@ -101,7 +101,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
       }
       break;
 
-    case mesytecTimeOffset:
+    case mesytecExtendedTimeStamp:
       bus = (*datap & 0x0f000000) >> 24;
       DTRACE(INF, "   Timeoffset (bus %d) %d\n", bus, (*datap & 0x0000ffff));
       break;
