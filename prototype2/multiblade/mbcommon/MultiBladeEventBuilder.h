@@ -7,7 +7,7 @@
  * time-window. The clusters are then checked for
  * adjacency and if passed the position of the cluster will be determined. The
  * position can be either determined as the
- * wire/strip with maximum signal of the cluster or be calculated using a
+ * wire/strip wit h maximum signal of the cluster or be calculated using a
  * weighted average with the signals as the
  * weights.
  *

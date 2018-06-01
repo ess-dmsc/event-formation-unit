@@ -3,7 +3,7 @@
 //
 
 #include <algorithm>
-#include <multiblade/mbcommon/multiBladeEventBuilder.h>
+#include <multiblade/mbcommon/MultiBladeEventBuilder.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB

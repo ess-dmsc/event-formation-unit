@@ -2,7 +2,7 @@
 #ifndef MULTIBLADE_PROCESSINFO_H
 #define MULTIBLADE_PROCESSINFO_H
 
-#include "mbcommon/multiBladeEventBuilder.h"
+#include "mbcommon/MultiBladeEventBuilder.h"
 
 class dumpEventBuilderInfo {
 
