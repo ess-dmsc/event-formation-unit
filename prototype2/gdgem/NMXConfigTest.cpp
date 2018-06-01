@@ -25,6 +25,15 @@ TEST_F(NMXConfigTest, ConstructorDefaults) {
 }
 
 
+TEST_F(NMXConfigTest, NoConfigFile) {
+  NMXConfig nmxconfig("file_does_not_exist");
+  ASSERT_EQ("SRS", nmxconfig.builder_type);
+  ASSERT_EQ(256, nmxconfig.geometry_x);
+  ASSERT_EQ(256, nmxconfig.geometry_y);
+  ASSERT_FALSE(nmxconfig.dump_csv);
+  ASSERT_FALSE(nmxconfig.dump_h5);
+}
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
