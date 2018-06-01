@@ -74,7 +74,7 @@ create_benchmark_executable(MultiBladeEventBuilderBenchmarkTest)
 
 
 # Common include path for both tests
-set(mbtest_INC mbcommon/MultiBladeEventBuilder.h mbtest/multiBladeTestData.h)
+set(mbtest_INC mbcommon/MultiBladeEventBuilder.h mbtest/MultiBladeTestData.h)
 
 # Create excecutable for the test of counters
 set(MultiBladeEventBuilderTest_INC ${mbtest_INC} )
