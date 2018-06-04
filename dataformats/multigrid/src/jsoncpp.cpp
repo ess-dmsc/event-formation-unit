@@ -1,4 +1,5 @@
 // clang-format off
+// GCOVR_EXCL_START
 /// Json-cpp amalgated source (http://jsoncpp.sourceforge.net/).
 /// It is intended to be used with #include "json/json.h"
 

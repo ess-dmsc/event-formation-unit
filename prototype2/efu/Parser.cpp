@@ -69,6 +69,49 @@ static int version_get(std::vector<std::string> cmdargs, char *output,
 }
 
 //=============================================================================
+static int cmd_get_count(std::vector<std::string> cmdargs, char *output,
+                       unsigned int *obytes,
+                       int count) {
+  auto nargs = cmdargs.size();
+  XTRACE(CMD, INF, "CMD_GET_COUNT\n");
+  GLOG_INF("CMD_GET_COUNT");
+  if (nargs != 1) {
+    XTRACE(CMD, WAR, "CMD_GET_COUNT: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "CMD_GET_COUNT %d", count);
+
+  return Parser::OK;
+}
+
+//=============================================================================
+static int cmd_get(std::vector<std::string> cmdargs, char *output,
+                       unsigned int *obytes,
+                       Parser * parser) {
+  auto nargs = cmdargs.size();
+  XTRACE(CMD, INF, "CMD_GET\n");
+  GLOG_INF("CMD_GET");
+  if (nargs != 2) {
+    XTRACE(CMD, WAR, "CMD_GET: wrong number of arguments\n");
+    return -Parser::EBADARGS;
+  }
+
+  size_t index = atoi(cmdargs.at(1).c_str());
+  if (index < 1 || index > parser->commands.size()) {
+    XTRACE(CMD, WAR, "CMD_GET: command index %lu, out of range (1 - %lu)\n", index, parser->commands.size());
+    return -Parser::EBADARGS;
+  }
+
+  auto cmditerator = parser->commands.begin();
+  std::advance(cmditerator, index - 1);
+
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "CMD_GET %s", cmditerator->first.c_str());
+
+  return Parser::OK;
+}
+
+//=============================================================================
 static int detector_info_get(std::vector<std::string> cmdargs, char *output,
                              unsigned int *obytes,
                              std::shared_ptr<Detector> detector) {
@@ -108,6 +151,16 @@ static int efu_exit(std::vector<std::string> cmdargs, UNUSED char *output,
 Parser::Parser(std::shared_ptr<Detector> detector, int &keep_running) {
 
   registercmd("VERSION_GET", version_get);
+
+  registercmd("CMD_GET_COUNT", [this](std::vector<std::string> cmd, char *resp,
+                                     unsigned int *nrChars) {
+    return cmd_get_count(cmd, resp, nrChars, this->commands.size());
+  });
+
+  registercmd("CMD_GET", [this](std::vector<std::string> cmd, char *resp,
+                                     unsigned int *nrChars) {
+    return cmd_get(cmd, resp, nrChars, this);
+  });
 
   registercmd("EXIT", [&keep_running](std::vector<std::string> cmd, char *resp,
                                       unsigned int *nrChars) {
