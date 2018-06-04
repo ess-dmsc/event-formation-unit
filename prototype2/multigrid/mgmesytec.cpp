@@ -169,7 +169,7 @@ void CSPEC::mainThread() {
       }
 
       if (!hists.isEmpty()) {
-        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.eventlet_count());
+        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.hit_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
         monitorprod.produce(txbuffer, len);

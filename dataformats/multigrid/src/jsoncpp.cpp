@@ -72,7 +72,7 @@ license you like.
 
 
 
-
+/// GCOVR_EXCL_START
 
 
 #include <dataformats/multigrid/inc/json.h>
@@ -5306,4 +5306,4 @@ JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM& sout, Value const& root) {
 // //////////////////////////////////////////////////////////////////////
 // End of content of file: src/lib_json/json_writer.cpp
 // //////////////////////////////////////////////////////////////////////
-// GCOVR_EXCL_STOP
+/// GCOVR_EXCL_STOP
