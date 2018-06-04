@@ -38,6 +38,15 @@ TEST_F(PeakFinderTest, ValidateFromTestData) {
   f.printstats("test data statistics");
 }
 
+TEST_F(PeakFinderTest, ReusePeakFinder) {
+  PeakFinder f(1, 100, 0);
+  auto peaks = f.findpeaks(testdata);
+  MESSAGE() << "Expecting 128 peaks in test dataset\n";
+  ASSERT_EQ(128, peaks.size());
+  peaks = f.findpeaks(testdata);
+  ASSERT_EQ(128, peaks.size());
+}
+
 TEST_F(PeakFinderTest, MakeCal) {
   uint16_t buffer[2600];
   PeakFinder f(1, 100, 0);

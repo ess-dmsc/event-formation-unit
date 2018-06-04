@@ -9,7 +9,7 @@ class HistSerializerTest : public TestBase {
   virtual void SetUp() {
     for (size_t i = 0; i < hists.x_strips_hist.size(); i++) {
       hists.x_strips_hist[i] = i;
-      hists.y_strips_hist[i] = Eventlet::strip_max_val - i;
+      hists.y_strips_hist[i] = Hit::strip_max_val - i;
     }
   }
 
@@ -45,7 +45,7 @@ TEST_F(HistSerializerTest, DeSerialize) {
 
   for (size_t i = 0; i < hists.x_strips_hist.size(); i++) {
     ASSERT_EQ((*xdat)[i], i);
-    EXPECT_EQ((*ydat)[i], Eventlet::strip_max_val - i);
+    EXPECT_EQ((*ydat)[i], Hit::strip_max_val - i);
   }
 }
 
