@@ -1,12 +1,16 @@
-//
-// Unit tests for multiBladeEventBuilder using Google Test.
-// Here the clustering algoritm is tested
-//
-// Author: Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
-// e-mail: soegaard@nbi.dk
+/** Copyright (C) 2017-2018 European Spallation Source */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///  Unit tests for MultiBladeEventBuilder using Google Test.
+/// Here the clustering algoritm is tested
+///
+/// Author: Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
+///
+//===----------------------------------------------------------------------===//
 
-#include "mbcommon/multiBladeEventBuilder.h"
-#include "multiBladeTestData.h"
+#include "mbcommon/MultiBladeEventBuilder.h"
+#include "MultiBladeTestData.h"
 #include "test/TestBase.h"
 
 TEST(MBEventBuilder__Test, Threshold) {

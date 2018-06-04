@@ -4,6 +4,8 @@
 // Author: Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
 // e-mail: soegaard@nbi.dk
 
+/// GCOVR_EXCL_START
+
 #ifndef MULTIBLADE_MULTIBLADETESTDATA_H_H
 #define MULTIBLADE_MULTIBLADETESTDATA_H_H
 
@@ -98,3 +100,4 @@ std::vector<double> validation_max{
     static_cast<double>(15)};
 
 #endif // MULTIBLADE_MULTIBLADETESTDATA_H_H
+/// GCOVR_EXCL_STOP

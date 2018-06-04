@@ -102,6 +102,7 @@ function(create_coverage_targets target_base_name run_target bin_dir source_dir 
       add_custom_target(${target_base_name} DEPENDS ${target_base_name}_html)
     elseif(${CMAKE_CXX_COMPILER_ID} STREQUAL GNU)
       add_custom_target(${target_base_name}_xml
+
           COMMAND ${COVERAGE_GCOVR_PATH}
           "${bin_dir}"
 #          "--verbose"
