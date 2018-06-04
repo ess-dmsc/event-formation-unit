@@ -39,30 +39,34 @@ set(EventFormationTest_INC
 create_test_executable(EventFormationTest)
 
 
-set(BuilderBenchmarkTest_SRC
-    ../nmx/Clusterer.cpp
-    ../nmx/Cluster.cpp
-    ../nmx/Event.cpp
-    ../nmx/Hists.cpp
-    ../nmx/AbstractBuilder.cpp
-    ../srs/SRSTime.cpp
-    ../srs/SRSMappings.cpp
-    BuilderVMM2BenchmarkTest.cpp
-    BuilderVMM2.cpp
-    ParserVMM2.cpp
-    )
-set(BuilderBenchmarkTest_INC
-    ../nmx/Clusterer.h
-    ../nmx/Cluster.h
-    ../nmx/Event.h
-    ../nmx/Hists.h
-    ../nmx/Hit.h
-    ../srs/SRSTime.h
-    ../srs/SRSMappings.h
-    ParserVMM2.h
-    BuilderVMM2.h
-    )
-create_benchmark_executable(BuilderBenchmarkTest)
+
+  message(STATUS "!!! *** Skipping BuilderBenchmarkTest - does not link ***")
+# set(BuilderBenchmarkTest_SRC
+#     ../clustering/DoroClusterer.cpp
+#     ../nmx/ReadoutFile.cpp
+#     ../nmx/Cluster.cpp
+#     ../nmx/Event.cpp
+#     ../nmx/Hists.cpp
+#     ../nmx/AbstractBuilder.cpp
+#     ../srs/SRSTime.cpp
+#     ../srs/SRSMappings.cpp
+#     BuilderVMM2BenchmarkTest.cpp
+#     BuilderVMM2.cpp
+#     ParserVMM2.cpp
+#     )
+# set(BuilderBenchmarkTest_INC
+#     ../clustering/DoroClusterer.h
+#     ../nmx/ReadoutFile.h
+#     ../nmx/Cluster.h
+#     ../nmx/Event.h
+#     ../nmx/Hists.h
+#     ../nmx/Hit.h
+#     ../srs/SRSTime.h
+#     ../srs/SRSMappings.h
+#     ParserVMM2.h
+#     BuilderVMM2.h
+#     )
+# create_benchmark_executable(BuilderBenchmarkTest)
 
 set(ParserVMM2Test_SRC
     ParserVMM2Test.cpp

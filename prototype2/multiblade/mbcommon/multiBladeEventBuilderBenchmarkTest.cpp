@@ -1,7 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <benchmark/benchmark.h>
-#include <multiblade/mbcommon/multiBladeEventBuilder.h>
+#include <multiblade/mbcommon/MultiBladeEventBuilder.h>
 #include <string>
 #include <unistd.h>
 
