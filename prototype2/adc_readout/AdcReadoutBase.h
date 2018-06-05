@@ -16,7 +16,8 @@
 #include <cstdint>
 #include <mutex>
 
-/// @brief Implements the code for the ADC detector module. Is a base of AdcReadout in order to simplify unit testing.
+/// @brief Implements the code for the ADC detector module. Is a base of
+/// AdcReadout in order to simplify unit testing.
 class AdcReadoutBase : public Detector {
 public:
   /// @param Settings EFU base command line settings.
@@ -24,39 +25,42 @@ public:
   AdcReadoutBase(BaseSettings Settings, AdcSettings &ReadoutSettings);
   AdcReadoutBase(const AdcReadoutBase &) = delete;
   AdcReadoutBase(const AdcReadoutBase &&) = delete;
-  AdcReadoutBase& operator=(const AdcReadoutBase&) = delete;
+  AdcReadoutBase &operator=(const AdcReadoutBase &) = delete;
   ~AdcReadoutBase() = default;
 
 protected:
   using DataModulePtr = SpscBuffer::ElementPtr<DataModule>;
   using Queue = SpscBuffer::CircularBuffer<DataModule>;
-  
+
   /// @brief Implements the thread doing the socket communication.
   /// This function will return when Detector::runThreads is set to false.
-  /// @note There is probably no performance benefit runnign this on a seperate thread.
+  /// @note There is probably no performance benefit runnign this on a seperate
+  /// thread.
   virtual void inputThread();
-  
-  /// @brief The function that executes the code for parsing and processing the sample data.
+
+  /// @brief The function that executes the code for parsing and processing the
+  /// sample data.
   /// This function will return when Detector::runThreads is set to false.
   virtual void processingThread(Queue &DataModuleQueue);
-  
+
   /// @brief Does on demand instatiation of Kafka producer.
   /// Used in order to simplify unit testing.
   virtual std::shared_ptr<Producer> getProducer();
-  
-  DataModule* GetDataModule(int Channel);
+
+  DataModule *GetDataModule(int Channel);
   bool QueueUpDataModule(DataModule *Data);
-  
+
   std::vector<std::unique_ptr<Queue>> DataModuleQueues;
-  
-  /// @brief Used to keeps track of the global counter provided by the ADC hardware in order to figure out if a packet has been lost.
+
+  /// @brief Used to keeps track of the global counter provided by the ADC
+  /// hardware in order to figure out if a packet has been lost.
   std::uint16_t LastGlobalCount{0};
-  
+
   std::map<std::string, TimeStampLocation> TimeStampLocationMap{
-    {"Start", TimeStampLocation::Start},
-    {"Middle", TimeStampLocation::Middle},
-    {"End", TimeStampLocation::End}};
-  
+      {"Start", TimeStampLocation::Start},
+      {"Middle", TimeStampLocation::Middle},
+      {"End", TimeStampLocation::End}};
+
   /// @brief Counters that are used to store stats that are sent to Grafana.
   struct {
     std::int64_t current_ts_seconds = 0;

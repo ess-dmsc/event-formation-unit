@@ -8,8 +8,8 @@
 #include "AdcParse.h"
 #include <arpa/inet.h>
 #include <bitset>
-#include <map>
 #include <cstring>
+#include <map>
 #include <netinet/in.h>
 
 ParserException::ParserException(std::string const &ErrorStr)
@@ -36,9 +36,8 @@ const char *ParserException::what() const noexcept {
       {ParserException::Type::DATA_LENGTH,
        "Packet size to short to hold expected number of samples."},
       {ParserException::Type::DATA_NO_MODULE,
-        "Did not get data module instance to store de-serialised samples."},
-      {ParserException::Type::DATA_CANT_PROCESS,
-        "Unable to process samples."},
+       "Did not get data module instance to store de-serialised samples."},
+      {ParserException::Type::DATA_CANT_PROCESS, "Unable to process samples."},
       {ParserException::Type::DATA_ABCD,
        "Data module did not start with magic bytes (0xABCD)."},
       {ParserException::Type::HEADER_LENGTH,
@@ -57,8 +56,10 @@ const char *ParserException::what() const noexcept {
   return ErrorTypeStrings.at(ParserErrorType).c_str();
 }
 
-PacketParser::PacketParser(std::function<bool(DataModule*)> ModuleHandler, std::function<DataModule*(int Channel)> ModuleProducer) : HandleModule(ModuleHandler), ProduceModule(ModuleProducer) {
-}
+PacketParser::PacketParser(
+    std::function<bool(DataModule *)> ModuleHandler,
+    std::function<DataModule *(int Channel)> ModuleProducer)
+    : HandleModule(ModuleHandler), ProduceModule(ModuleProducer) {}
 
 PacketInfo PacketParser::parsePacket(const InData &Packet) {
   HeaderInfo Header = parseHeader(Packet);
@@ -118,19 +119,21 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte) {
         Packet.Length) {
       throw ParserException(ParserException::Type::DATA_LENGTH);
     }
-    DataModule* CurrentDataModule = ProduceModule(Header.Channel);
+    DataModule *CurrentDataModule = ProduceModule(Header.Channel);
     if (CurrentDataModule != nullptr) {
       CurrentDataModule->Data.resize(NrOfSamples);
       CurrentDataModule->Channel = Header.Channel;
       CurrentDataModule->TimeStamp = Header.TimeStamp;
       CurrentDataModule->OversamplingFactor = Header.Oversampling;
       auto ElementPointer = reinterpret_cast<const std::uint16_t *>(
-                                                                    Packet.Data + StartByte + sizeof(DataHeader));
+          Packet.Data + StartByte + sizeof(DataHeader));
       for (int i = 0; i < NrOfSamples; ++i) {
         CurrentDataModule->Data[i] = ntohs(ElementPointer[i]);
       }
       if (not HandleModule(std::move(CurrentDataModule))) {
-        // Things will be very problematic for us if we dont get rid of the claimed data module, hence why we have a special exception for this case.
+        // Things will be very problematic for us if we dont get rid of the
+        // claimed data module, hence why we have a special exception for this
+        // case.
         throw ModuleProcessingException(std::move(CurrentDataModule));
       }
     } else {

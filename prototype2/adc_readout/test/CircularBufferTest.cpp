@@ -5,10 +5,10 @@
  *  @brief Unit tests.
  */
 
-#include <gtest/gtest.h>
-#include <chrono>
-#include <random>
 #include "../CircularBuffer.h"
+#include <chrono>
+#include <gtest/gtest.h>
+#include <random>
 #include <thread>
 #ifdef __linux__
 #include <pthread.h>
@@ -78,20 +78,22 @@ TEST(PutElem, PutOne) {
 
 TEST(PutElem, PutMultiple) {
   ElementPtr<int> SomePtr(nullptr);
-  int Elements = 15; //One less than a power of 2 value due to the implementation of the queue
+  int Elements = 15; // One less than a power of 2 value due to the
+                     // implementation of the queue
   CircularBuffer<int> SomeBuffer(Elements);
   for (int j = 0; j < Elements; j++) {
     SomeBuffer.tryGetEmpty(SomePtr);
     EXPECT_TRUE(SomeBuffer.tryPutData(std::move(SomePtr)));
   }
   int SomeValue = 5;
-  ElementPtr<int> SomeOtherPtr(static_cast<int*>(&SomeValue));
+  ElementPtr<int> SomeOtherPtr(static_cast<int *>(&SomeValue));
   EXPECT_FALSE(SomeBuffer.tryPutData(std::move(SomeOtherPtr)));
 }
 
 TEST(GetElem, GetOneFail) {
   ElementPtr<int> SomePtr(nullptr);
-  int Elements = 15; //One less than a power of 2 value due to the implementation of the queue
+  int Elements = 15; // One less than a power of 2 value due to the
+                     // implementation of the queue
   CircularBuffer<int> SomeBuffer(Elements);
   EXPECT_FALSE(SomeBuffer.tryGetData(SomePtr));
   EXPECT_EQ(SomePtr, nullptr);
@@ -99,7 +101,8 @@ TEST(GetElem, GetOneFail) {
 
 TEST(GetElem, GetOneSuccess) {
   ElementPtr<int> SomePtr(nullptr);
-  int Elements = 15; //One less than a power of 2 value due to the implementation of the queue
+  int Elements = 15; // One less than a power of 2 value due to the
+                     // implementation of the queue
   CircularBuffer<int> SomeBuffer(Elements);
   SomeBuffer.tryGetEmpty(SomePtr);
   SomeBuffer.tryPutData(std::move(SomePtr));
@@ -109,7 +112,8 @@ TEST(GetElem, GetOneSuccess) {
 
 TEST(GetElem, GetMultiple) {
   ElementPtr<int> SomePtr(nullptr);
-  int Elements = 15; //One less than a power of 2 value due to the implementation of the queue
+  int Elements = 15; // One less than a power of 2 value due to the
+                     // implementation of the queue
   CircularBuffer<int> SomeBuffer(Elements);
   for (int i = 0; i < Elements; i++) {
     SomeBuffer.tryGetEmpty(SomePtr);
@@ -128,10 +132,11 @@ TEST(GetElem, GetMultiple) {
 
 TEST(PutGetElem, One) {
   std::default_random_engine Generator;
-  std::uniform_int_distribution<int> Distribution(2,100000);
-  
+  std::uniform_int_distribution<int> Distribution(2, 100000);
+
   ElementPtr<int> SomePtr(nullptr);
-  int Elements = 15; //One less than a power of 2 value due to the implementation of the queue
+  int Elements = 15; // One less than a power of 2 value due to the
+                     // implementation of the queue
   CircularBuffer<int> SomeBuffer(Elements);
   SomeBuffer.tryGetEmpty(SomePtr);
   int *TempPtr = SomePtr;
@@ -146,12 +151,13 @@ TEST(PutGetElem, One) {
 
 TEST(PutGetElem, Multiple) {
   std::default_random_engine Generator;
-  std::uniform_int_distribution<int> Distribution(2,100000);
-  
+  std::uniform_int_distribution<int> Distribution(2, 100000);
+
   ElementPtr<int> SomePtr(nullptr);
-  int Elements = 15; //One less than a power of 2 value due to the implementation of the queue
+  int Elements = 15; // One less than a power of 2 value due to the
+                     // implementation of the queue
   std::vector<int> Data;
-  std::vector<int*> DataPtr;
+  std::vector<int *> DataPtr;
   CircularBuffer<int> SomeBuffer(Elements);
   for (int e = 0; e < Elements; e++) {
     int SomeInt = Distribution(Generator);
@@ -161,7 +167,7 @@ TEST(PutGetElem, Multiple) {
     DataPtr.push_back(SomePtr);
     SomeBuffer.tryPutData(std::move(SomePtr));
   }
-  
+
   ElementPtr<int> AnotherPtr(nullptr);
   for (int g = 0; g < Elements; g++) {
     SomeBuffer.tryGetData(AnotherPtr);
@@ -173,21 +179,22 @@ TEST(PutGetElem, Multiple) {
 
 TEST(PutGetElem, EmptyReturn) {
   ElementPtr<int> SomePtr(nullptr);
-  int Elements = 15; //One less than a power of 2 value due to the implementation of the queue
-  std::vector<int*> DataPtr;
+  int Elements = 15; // One less than a power of 2 value due to the
+                     // implementation of the queue
+  std::vector<int *> DataPtr;
   CircularBuffer<int> SomeBuffer(Elements);
-  
+
   for (int e = 0; e < Elements; e++) {
     EXPECT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
     DataPtr.push_back(SomePtr);
     SomeBuffer.tryPutData(std::move(SomePtr));
   }
-  
+
   for (int g = 0; g < Elements; g++) {
     SomeBuffer.tryGetData(SomePtr);
     SomeBuffer.tryPutEmpty(std::move(SomePtr));
   }
-  
+
   for (int g = 0; g < Elements; g++) {
     SomeBuffer.tryGetEmpty(SomePtr);
     EXPECT_EQ(SomePtr, DataPtr[g]);
@@ -196,13 +203,16 @@ TEST(PutGetElem, EmptyReturn) {
 }
 
 template <int N>
-std::int32_t ThreadTestFunction(std::int32_t Elements, std::int64_t ProducerDelayMs, std::int64_t ConsumerDelayMs, std::int32_t RunTime) {
+std::int32_t
+ThreadTestFunction(std::int32_t Elements, std::int64_t ProducerDelayMs,
+                   std::int64_t ConsumerDelayMs, std::int32_t RunTime) {
   CircularBuffer<std::int32_t[N]> Buffer(Elements);
   std::int32_t DataErrors = 0;
   using sys_clk = std::chrono::system_clock;
-  sys_clk::time_point StopTime = sys_clk::now() + std::chrono::duration<int, std::ratio<1, 1000>>(RunTime);
+  sys_clk::time_point StopTime =
+      sys_clk::now() + std::chrono::duration<int, std::ratio<1, 1000>>(RunTime);
   std::int32_t ProducerCounter, ConsumerCounter;
-  
+
   auto Producer = [&]() {
     std::int32_t Counter = 0;
     ElementPtr<std::int32_t[N]> ProducerData(nullptr);
@@ -212,7 +222,8 @@ std::int32_t ThreadTestFunction(std::int32_t Elements, std::int64_t ProducerDela
         for (int i = 0; i < N; i++) {
           (*ProducerData)[i] = Counter++;
         }
-        while (not Buffer.tryPutData(std::move(ProducerData))) {}
+        while (not Buffer.tryPutData(std::move(ProducerData))) {
+        }
         ProducerData = nullptr;
         if (ProducerDelayMs != 0) {
           std::this_thread::sleep_for(SleepTime);
@@ -221,7 +232,7 @@ std::int32_t ThreadTestFunction(std::int32_t Elements, std::int64_t ProducerDela
     }
     ProducerCounter = Counter;
   };
-  
+
   auto Consumer = [&]() {
     std::int32_t Counter = 0;
     ElementPtr<std::int32_t[N]> ConsumerData(nullptr);
@@ -233,7 +244,8 @@ std::int32_t ThreadTestFunction(std::int32_t Elements, std::int64_t ProducerDela
             DataErrors++;
           }
         }
-        while (not Buffer.tryPutEmpty(std::move(ConsumerData))) {}
+        while (not Buffer.tryPutEmpty(std::move(ConsumerData))) {
+        }
         ConsumerData = nullptr;
         if (ConsumerDelayMs != 0) {
           std::this_thread::sleep_for(SleepTime);
@@ -252,13 +264,16 @@ std::int32_t ThreadTestFunction(std::int32_t Elements, std::int64_t ProducerDela
   std::thread ProducerThread(Producer);
   std::thread ConsumerThread(Consumer);
 #ifdef __linux__
-  pthread_setaffinity_np(ProducerThread.native_handle(), sizeof(cpu_set_t), &ProducerCpu);
-  pthread_setaffinity_np(ConsumerThread.native_handle(), sizeof(cpu_set_t), &ConsumerCpu);
+  pthread_setaffinity_np(ProducerThread.native_handle(), sizeof(cpu_set_t),
+                         &ProducerCpu);
+  pthread_setaffinity_np(ConsumerThread.native_handle(), sizeof(cpu_set_t),
+                         &ConsumerCpu);
 #endif
   ConsumerThread.join();
   ProducerThread.join();
-  
-//  std::cout << "Prod/cons ctr: " << prod_ctr << " / " << cons_ctr << std::endl;
+
+  //  std::cout << "Prod/cons ctr: " << prod_ctr << " / " << cons_ctr <<
+  //  std::endl;
   return DataErrors;
 }
 
@@ -271,58 +286,76 @@ const std::int32_t SmallElementSize = 4;
 const std::int32_t LargeElementSize = 512;
 
 TEST(ProducerConsumer, Size1_ShortQueue_ConsumerDelay) {
-  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(ShortQueue, 0, 2, RunTimeMs), 0);
+  EXPECT_EQ(
+      ThreadTestFunction<SmallestElementSize>(ShortQueue, 0, 2, RunTimeMs), 0);
 }
 TEST(ProducerConsumer, Size1_LongQueue_ConsumerDelay) {
-  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(LongQueue, 0, 2, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(LongQueue, 0, 2, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, Size1_ShortQueue_ProducerDelay) {
-  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(ShortQueue, 2, 0, RunTimeMs), 0);
+  EXPECT_EQ(
+      ThreadTestFunction<SmallestElementSize>(ShortQueue, 2, 0, RunTimeMs), 0);
 }
 TEST(ProducerConsumer, Size1_LongQueue_ProducerDelay) {
-  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(LongQueue, 2, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(LongQueue, 2, 0, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, Size1_LongQueue_NoDelay) {
-  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(LongQueue, 0, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(LongQueue, 0, 0, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, Size1_ShortQueue_NoDelay) {
-  EXPECT_EQ(ThreadTestFunction<SmallestElementSize>(ShortQueue, 0, 0, RunTimeMs), 0);
+  EXPECT_EQ(
+      ThreadTestFunction<SmallestElementSize>(ShortQueue, 0, 0, RunTimeMs), 0);
 }
 
 TEST(ProducerConsumer, Size4_ShortQueue_ConsumerDelay) {
-  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(ShortQueue, 0, 2, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(ShortQueue, 0, 2, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, Size4_LongQueue_ConsumerDelay) {
-  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(LongQueue, 0, 2, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(LongQueue, 0, 2, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, Size4_ShortQueue_ProducerDelay) {
-  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(ShortQueue, 2, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(ShortQueue, 2, 0, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, Size4_LongQueue_ProducerDelay) {
-  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(LongQueue, 2, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(LongQueue, 2, 0, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, Size4_LongQueue_NoDelay) {
-  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(LongQueue, 0, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(LongQueue, 0, 0, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, Size4_ShortQueue_NoDelay) {
-  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(ShortQueue, 0, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<SmallElementSize>(ShortQueue, 0, 0, RunTimeMs),
+            0);
 }
 
 TEST(ProducerConsumer, LargeSize_ShortQueue_ConsumerDelay) {
-  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(ShortQueue, 0, 2, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(ShortQueue, 0, 2, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, LargeSize_LongQueue_ConsumerDelay) {
-  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(LongQueue, 0, 2, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(LongQueue, 0, 2, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, LargeSize_ShortQueue_ProducerDelay) {
-  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(ShortQueue, 2, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(ShortQueue, 2, 0, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, LargeSize_LongQueue_ProducerDelay) {
-  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(LongQueue, 2, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(LongQueue, 2, 0, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, LargeSize_LongQueue_NoDelay) {
-  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(LongQueue, 0, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(LongQueue, 0, 0, RunTimeMs),
+            0);
 }
 TEST(ProducerConsumer, LargeSize_ShortQueue_NoDelay) {
-  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(ShortQueue, 0, 0, RunTimeMs), 0);
+  EXPECT_EQ(ThreadTestFunction<LargeElementSize>(ShortQueue, 0, 0, RunTimeMs),
+            0);
 }

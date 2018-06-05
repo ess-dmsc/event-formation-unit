@@ -15,8 +15,9 @@ PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod)
 
 void PeakFinder::processData(DataModule const &Data) {
   auto Result = FindPeak(Data.Data);
-  std::uint64_t PeakTimeStamp = Data.TimeStamp.GetOffsetTimeStamp(Result.MaxLocation).GetTimeStampNS();
-    SendData(PeakTimeStamp, Result.Max, Data.Channel);
+  std::uint64_t PeakTimeStamp =
+      Data.TimeStamp.GetOffsetTimeStamp(Result.MaxLocation).GetTimeStampNS();
+  SendData(PeakTimeStamp, Result.Max, Data.Channel);
 }
 
 void PeakFinder::SendData(const std::uint64_t &TimeStamp,
@@ -40,8 +41,7 @@ void PeakFinder::SendData(const std::uint64_t &TimeStamp,
 }
 
 ModuleAnalysisResult FindPeak(std::vector<std::uint16_t> const &SampleRun) {
-  ModuleAnalysisResult ReturnData{
-      0, 0, 0};
+  ModuleAnalysisResult ReturnData{0, 0, 0};
   std::int64_t Sum = 0;
   for (std::size_t i = 0; i < SampleRun.size(); ++i) {
     Sum += SampleRun[i];

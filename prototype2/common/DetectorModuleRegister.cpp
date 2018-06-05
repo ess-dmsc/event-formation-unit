@@ -2,7 +2,8 @@
 
 /** @file
  *
- * @brief Implementation for a system for registering detector modules when statically linking the
+ * @brief Implementation for a system for registering detector modules when
+ * statically linking the
  * modules to the EFU executable.
  */
 

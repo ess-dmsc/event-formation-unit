@@ -1,13 +1,12 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <common/DetectorModuleRegister.h>
 #include <common/Trace.h>
 #include <dlfcn.h>
 #include <efu/Loader.h>
 #include <iostream>
 #include <string.h>
 #include <string>
-#include <common/DetectorModuleRegister.h>
-
 
 Loader::~Loader() {
   XTRACE(INIT, ALW, "Loader destructor called\n");
@@ -15,9 +14,7 @@ Loader::~Loader() {
   unloadPlugin();
 }
 
-Loader::Loader() {
-  
-}
+Loader::Loader() {}
 
 void Loader::unloadPlugin() {
   ParserPopulator = nullptr;
@@ -34,7 +31,9 @@ bool Loader::loadPlugin(const std::string lib) {
     XTRACE(INIT, INF, "Loaded statically linked detector module.");
     return true;
   } catch (std::runtime_error &Error) {
-    XTRACE(INIT, INF, "Unable to find statically linked detector module with name\"%s\". Attempting to open external plugin.", lib.c_str());
+    XTRACE(INIT, INF, "Unable to find statically linked detector module with "
+                      "name\"%s\". Attempting to open external plugin.",
+           lib.c_str());
   }
   std::string libname = "./" + lib + ".so";
   const char *libstr = strdup(libname.c_str());

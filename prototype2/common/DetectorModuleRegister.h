@@ -2,7 +2,8 @@
 
 /** @file
  *
- * @brief Header for a system for registering detector modules when statically linking the modules
+ * @brief Header for a system for registering detector modules when statically
+ * linking the modules
  * to the EFU executable.
  */
 
@@ -11,9 +12,11 @@
 
 struct DetectorModuleSetup {
   DetectorModuleSetup() = default;
-  DetectorModuleSetup(std::shared_ptr<DetectorFactoryBase> Factory, std::function<void(CLI::App&)> Setup) : DetectorFactory(Factory), CLISetup(Setup) {}
+  DetectorModuleSetup(std::shared_ptr<DetectorFactoryBase> Factory,
+                      std::function<void(CLI::App &)> Setup)
+      : DetectorFactory(Factory), CLISetup(Setup) {}
   std::shared_ptr<DetectorFactoryBase> DetectorFactory;
-  std::function<void(CLI::App&)> CLISetup;
+  std::function<void(CLI::App &)> CLISetup;
 };
 
 namespace DetectorModuleRegistration {
@@ -24,7 +27,8 @@ DetectorModuleSetup &find(std::string const &ModuleName);
 
 template <class Module> class Registrar {
 public:
-  explicit Registrar(std::string DetectorName, std::function<void(CLI::App&)> CLIPopulator) {
+  explicit Registrar(std::string DetectorName,
+                     std::function<void(CLI::App &)> CLIPopulator) {
     std::shared_ptr<DetectorFactoryBase> Factory(new DetectorFactory<Module>());
     addDetectorModule(DetectorName, DetectorModuleSetup(Factory, CLIPopulator));
   };

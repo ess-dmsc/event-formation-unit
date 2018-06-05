@@ -8,7 +8,8 @@
 
 class TestDetector : public Detector {
 public:
-  TestDetector(UNUSED BaseSettings settings) : Detector("no detector", settings) {
+  TestDetector(UNUSED BaseSettings settings)
+      : Detector("no detector", settings) {
     std::cout << "TestDetector" << std::endl;
   };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
@@ -53,7 +54,7 @@ TEST_F(DetectorTest, StatAPI) {
 }
 
 TEST_F(DetectorTest, ThreadInfoNoThreads) {
-  auto & threadlist = det->GetThreadInfo();
+  auto &threadlist = det->GetThreadInfo();
   ASSERT_EQ(0, threadlist.size());
 }
 

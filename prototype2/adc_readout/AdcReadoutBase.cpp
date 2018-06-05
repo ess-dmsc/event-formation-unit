@@ -13,20 +13,23 @@
 
 AdcReadoutBase::AdcReadoutBase(BaseSettings Settings,
                                AdcSettings &ReadoutSettings)
-    : Detector("AdcReadout", Settings),
-      ReadoutSettings(ReadoutSettings), GeneralSettings(Settings) {
+    : Detector("AdcReadout", Settings), ReadoutSettings(ReadoutSettings),
+      GeneralSettings(Settings) {
   std::function<void()> inputFunc = [this]() { this->inputThread(); };
   Detector::AddThreadFunction(inputFunc, "input");
-  
+
   for (int y = 0; y < 4; y++) {
     DataModuleQueues.emplace_back(new Queue(MessageQueueSize));
-    std::function<void()> processingFunc = [this,y]() { this->processingThread(*this->DataModuleQueues.at(y)); };
-    Detector::AddThreadFunction(processingFunc, "processing_" + std::to_string(y));
+    std::function<void()> processingFunc = [this, y]() {
+      this->processingThread(*this->DataModuleQueues.at(y));
+    };
+    Detector::AddThreadFunction(processingFunc,
+                                "processing_" + std::to_string(y));
   }
   Stats.setPrefix("adc_readout" + ReadoutSettings.GrafanaNameSuffix);
   Stats.create("input.bytes.received", AdcStats.input_bytes_received);
   Stats.create("parser.errors", AdcStats.parser_errors);
-        Stats.create("parser.unknown_channel", AdcStats.parser_unknown_channel);
+  Stats.create("parser.unknown_channel", AdcStats.parser_unknown_channel);
   Stats.create("parser.packets.total", AdcStats.parser_packets_total);
   Stats.create("parser.packets.idle", AdcStats.parser_packets_idle);
   Stats.create("parser.packets.data", AdcStats.parser_packets_data);
@@ -43,7 +46,7 @@ std::shared_ptr<Producer> AdcReadoutBase::getProducer() {
   return ProducerPtr;
 }
 
-DataModule* AdcReadoutBase::GetDataModule(int Channel) {
+DataModule *AdcReadoutBase::GetDataModule(int Channel) {
   SpscBuffer::ElementPtr<DataModule> ReturnModule{nullptr};
   bool Success = DataModuleQueues.at(Channel)->tryGetEmpty(ReturnModule);
   if (Success) {
@@ -53,7 +56,8 @@ DataModule* AdcReadoutBase::GetDataModule(int Channel) {
 }
 
 bool AdcReadoutBase::QueueUpDataModule(DataModule *Data) {
-  return DataModuleQueues.at(Data->Channel)->tryPutData(SpscBuffer::ElementPtr<DataModule>(Data));
+  return DataModuleQueues.at(Data->Channel)
+      ->tryPutData(SpscBuffer::ElementPtr<DataModule>(Data));
 }
 
 void AdcReadoutBase::inputThread() {
@@ -63,12 +67,12 @@ void AdcReadoutBase::inputThread() {
   UDPReceiver mbdata(local);
   mbdata.setBufferSizes(0, 2000000);
   mbdata.printBufferSizes();
-  mbdata.setRecvTimeout(0, 100000); // secs, usecs, One tenth of a second (100ms)
+  mbdata.setRecvTimeout(0,
+                        100000); // secs, usecs, One tenth of a second (100ms)
   InData ReceivedPacket;
-  std::function<DataModule*(int)> DataModuleProducer([this](int Channel){
-    return this->GetDataModule(Channel);
-  });
-  std::function<bool(DataModule*)> QueingFunction([this](DataModule *Data){
+  std::function<DataModule *(int)> DataModuleProducer(
+      [this](int Channel) { return this->GetDataModule(Channel); });
+  std::function<bool(DataModule *)> QueingFunction([this](DataModule *Data) {
     this->AdcStats.current_ts_seconds = Data->TimeStamp.Seconds;
     return this->QueueUpDataModule(Data);
   });
@@ -98,7 +102,8 @@ void AdcReadoutBase::inputThread() {
         }
       } catch (ModuleProcessingException &E) {
         AdcStats.processing_buffer_full++;
-        while (Detector::runThreads and not QueueUpDataModule(std::move(E.UnproccesedData))) {
+        while (Detector::runThreads and
+               not QueueUpDataModule(std::move(E.UnproccesedData))) {
         }
       }
     }
@@ -107,23 +112,24 @@ void AdcReadoutBase::inputThread() {
 
 void AdcReadoutBase::processingThread(Queue &DataModuleQueue) {
   std::vector<std::unique_ptr<AdcDataProcessor>> Processors;
-  
+
   if (ReadoutSettings.PeakDetection) {
-    Processors.push_back(std::unique_ptr<AdcDataProcessor>(new PeakFinder(getProducer())));
+    Processors.push_back(
+        std::unique_ptr<AdcDataProcessor>(new PeakFinder(getProducer())));
   }
   if (ReadoutSettings.SerializeSamples) {
     std::unique_ptr<AdcDataProcessor> Processor(
-                                                new SampleProcessing(getProducer(), ReadoutSettings.Name));
+        new SampleProcessing(getProducer(), ReadoutSettings.Name));
     dynamic_cast<SampleProcessing *>(Processor.get())
-    ->setTimeStampLocation(
-                           TimeStampLocationMap.at(ReadoutSettings.TimeStampLocation));
+        ->setTimeStampLocation(
+            TimeStampLocationMap.at(ReadoutSettings.TimeStampLocation));
     dynamic_cast<SampleProcessing *>(Processor.get())
-    ->setMeanOfSamples(ReadoutSettings.TakeMeanOfNrOfSamples);
+        ->setMeanOfSamples(ReadoutSettings.TakeMeanOfNrOfSamples);
     dynamic_cast<SampleProcessing *>(Processor.get())
-    ->setSerializeTimestamps(ReadoutSettings.SampleTimeStamp);
+        ->setSerializeTimestamps(ReadoutSettings.SampleTimeStamp);
     Processors.emplace_back(std::move(Processor));
   }
-  
+
   bool GotModule = false;
   DataModulePtr Data;
   while (Detector::runThreads) {

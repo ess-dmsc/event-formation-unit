@@ -10,11 +10,11 @@
 #include "AdcBufferElements.h"
 #include "AdcTimeStamp.h"
 #include <exception>
+#include <functional>
 #include <netinet/in.h>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <functional>
 
 /// @brief Custom exception to handle parsing errors.
 class ParserException : public std::runtime_error {
@@ -47,15 +47,19 @@ private:
   std::string Error;
 };
 
-/// @brief Data stored in this struct represents a (properly parsed) sampling run.
+/// @brief Data stored in this struct represents a (properly parsed) sampling
+/// run.
 struct DataModule {
   DataModule() = default;
   DataModule(size_t ReserveElements) noexcept : Data(ReserveElements) {
     Data.clear();
   }
   ~DataModule() = default;
-  DataModule(const DataModule &&Other) : TimeStamp(Other.TimeStamp), Channel(Other.Channel), OversamplingFactor(Other.OversamplingFactor), Data(std::move(Other.Data)) {}
-  DataModule& operator=( const DataModule&) = default;
+  DataModule(const DataModule &&Other)
+      : TimeStamp(Other.TimeStamp), Channel(Other.Channel),
+        OversamplingFactor(Other.OversamplingFactor),
+        Data(std::move(Other.Data)) {}
+  DataModule &operator=(const DataModule &) = default;
   RawTimeStamp TimeStamp;
   void reset() {
     Data.clear();
@@ -71,7 +75,9 @@ struct DataModule {
 
 class ModuleProcessingException : public std::runtime_error {
 public:
-  ModuleProcessingException(DataModule *Data) : std::runtime_error("Unable to processe data module"), UnproccesedData(Data) {}
+  ModuleProcessingException(DataModule *Data)
+      : std::runtime_error("Unable to processe data module"),
+        UnproccesedData(Data) {}
   DataModule *UnproccesedData;
 };
 
@@ -145,12 +151,14 @@ struct IdleHeader {
 
 class PacketParser {
 public:
-  PacketParser(std::function<bool(DataModule*)> ModuleHandler, std::function<DataModule*(int Channel)> ModuleProducer);
+  PacketParser(std::function<bool(DataModule *)> ModuleHandler,
+               std::function<DataModule *(int Channel)> ModuleProducer);
   /// @brief Parses a packet of binary data.
   /// @param[in] Packet Raw data, straight from the socket.
   /// @return Some general information about the packet.
   /// @throw ParserException See exception type for possible parsing failures.
   PacketInfo parsePacket(const InData &Packet);
+
 protected:
   /// @brief Parses the payload of a packet. Called by parsePacket().
   /// @param[in] Packet Raw data buffer.
@@ -158,18 +166,21 @@ protected:
   /// @return The start of the filler/trailer in the array.
   /// @throw ParserException See exception type for possible parsing failures.
   size_t parseData(const InData &Packet, std::uint32_t StartByte);
+
 private:
-  std::function<bool(DataModule*)> HandleModule;
-  std::function<DataModule*(int Channel)> ProduceModule;
+  std::function<bool(DataModule *)> HandleModule;
+  std::function<DataModule *(int Channel)> ProduceModule;
 };
 
 /// @brief Parses the header of a packet. Called by parsePacket().
 /// @param[in] Packet Raw data buffer.
-/// @return Data extracted from the header and an integer indicating the start of the payload.
+/// @return Data extracted from the header and an integer indicating the start
+/// of the payload.
 /// @throw ParserException See exception type for possible parsing failures.
 HeaderInfo parseHeader(const InData &Packet);
 
-/// @brief Checks the conents and the size of the packet filler as well as the trailer. Called by parsePacket().
+/// @brief Checks the conents and the size of the packet filler as well as the
+/// trailer. Called by parsePacket().
 /// @param[in] Packet Raw data buffer.
 /// @param[in] StartByte The byte at which the filler/trailer starts.
 /// @return The number of bytes in the filler.

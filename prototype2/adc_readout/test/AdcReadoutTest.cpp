@@ -5,9 +5,9 @@
  *  @brief Unit tests.
  */
 
-#include <gtest/gtest.h>
 #include "../AdcReadoutBase.h"
 #include "TestUDPServer.h"
+#include <gtest/gtest.h>
 #include <random>
 
 #ifdef TROMPLELOEIL_AVAILABLE
@@ -19,7 +19,7 @@ std::uint16_t GetPortNumber() {
   if (0 == CurrentPortNumber) {
     std::random_device Device;
     std::mt19937 Generator(Device());
-    std::uniform_int_distribution<std::uint16_t> Distribution (2048, 60000);
+    std::uniform_int_distribution<std::uint16_t> Distribution(2048, 60000);
     CurrentPortNumber = Distribution(Generator);
   }
   return ++CurrentPortNumber;
@@ -27,7 +27,8 @@ std::uint16_t GetPortNumber() {
 
 class AdcReadoutStandIn : public AdcReadoutBase {
 public:
-  AdcReadoutStandIn(BaseSettings Settings, AdcSettings ReadoutSettings) : AdcReadoutBase(Settings, ReadoutSettings) {};
+  AdcReadoutStandIn(BaseSettings Settings, AdcSettings ReadoutSettings)
+      : AdcReadoutBase(Settings, ReadoutSettings){};
   ~AdcReadoutStandIn() = default;
   using Detector::Threads;
   using AdcReadoutBase::AdcStats;
@@ -42,7 +43,7 @@ public:
     PacketFile.seekg(0, std::ios::end);
     PacketSize = PacketFile.tellg();
     PacketFile.seekg(0, std::ios::beg);
-    PacketFile.read(reinterpret_cast<char*>(&BufferPtr), PacketSize);
+    PacketFile.read(reinterpret_cast<char *>(&BufferPtr), PacketSize);
     ASSERT_TRUE(PacketFile.good());
   }
 };
@@ -55,11 +56,11 @@ public:
   }
   BaseSettings Settings;
   AdcSettings ReadoutSettings;
-  
+
   static const int MaxPacketSize = 10000;
   std::uint8_t BufferPtr[MaxPacketSize];
   int PacketSize;
-  
+
   void LoadPacketFile(std::string FileName) {
     std::string PacketPath = TEST_PACKET_PATH;
     std::ifstream PacketFile(PacketPath + FileName, std::ios::binary);
@@ -67,7 +68,7 @@ public:
     PacketFile.seekg(0, std::ios::end);
     PacketSize = PacketFile.tellg();
     PacketFile.seekg(0, std::ios::beg);
-    PacketFile.read(reinterpret_cast<char*>(&BufferPtr), PacketSize);
+    PacketFile.read(reinterpret_cast<char *>(&BufferPtr), PacketSize);
     ASSERT_TRUE(PacketFile.good());
   };
 };
@@ -88,7 +89,8 @@ TEST_F(DISABLED_AdcReadoutTest, SingleIdlePacket) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_idle.dat");
-  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr, PacketSize);
+  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+                       PacketSize);
   Server.startPacketTransmission(1, 100);
   std::chrono::duration<std::int64_t, std::milli> SleepTime(200);
   std::this_thread::sleep_for(SleepTime);
@@ -103,7 +105,8 @@ TEST_F(DISABLED_AdcReadoutTest, SingleDataPacket) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_1.dat");
-  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr, PacketSize);
+  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+                       PacketSize);
   Server.startPacketTransmission(1, 100);
   std::chrono::duration<std::int64_t, std::milli> SleepTime(200);
   std::this_thread::sleep_for(SleepTime);
@@ -118,12 +121,13 @@ TEST_F(DISABLED_AdcReadoutTest, GlobalCounterError) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_1.dat");
-  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr, PacketSize);
+  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+                       PacketSize);
   Server.startPacketTransmission(2, 100);
   std::chrono::duration<std::int64_t, std::milli> SleepTime(200);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 2*1470);
+  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 2 * 1470);
   EXPECT_EQ(Readout.AdcStats.parser_packets_total, 2);
   EXPECT_EQ(Readout.AdcStats.parser_errors, 0);
   EXPECT_EQ(Readout.AdcStats.parser_packets_data, 2);
@@ -136,9 +140,10 @@ TEST_F(DISABLED_AdcReadoutTest, GlobalCounterCorrect) {
   Readout.Threads.at(1).thread = std::thread(Readout.Threads.at(1).func);
   LoadPacketFile("test_packet_1.dat");
   std::chrono::duration<std::int64_t, std::milli> SleepTime(50);
-  auto PacketHeadPointer = reinterpret_cast<PacketHeader*>(BufferPtr);
+  auto PacketHeadPointer = reinterpret_cast<PacketHeader *>(BufferPtr);
   {
-    TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort, BufferPtr, PacketSize);
+    TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+                          PacketSize);
     Server1.startPacketTransmission(1, 100);
     std::this_thread::sleep_for(SleepTime);
   }
@@ -146,12 +151,13 @@ TEST_F(DISABLED_AdcReadoutTest, GlobalCounterCorrect) {
   PacketHeadPointer->GlobalCount++;
   PacketHeadPointer->fixEndian();
   {
-    TestUDPServer Server2(GetPortNumber(), Settings.DetectorPort, BufferPtr, PacketSize);
+    TestUDPServer Server2(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+                          PacketSize);
     Server2.startPacketTransmission(1, 100);
     std::this_thread::sleep_for(SleepTime);
   }
   Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 2*1470);
+  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 2 * 1470);
   EXPECT_EQ(Readout.AdcStats.parser_packets_total, 2);
   EXPECT_EQ(Readout.AdcStats.parser_errors, 0);
   EXPECT_EQ(Readout.AdcStats.parser_packets_data, 2);
@@ -161,7 +167,8 @@ TEST_F(DISABLED_AdcReadoutTest, GlobalCounterCorrect) {
 #ifdef TROMPLELOEIL_AVAILABLE
 class AdcReadoutMock : public AdcReadoutBase {
 public:
-  AdcReadoutMock(BaseSettings Settings, AdcSettings ReadoutSettings) : AdcReadoutBase(Settings, ReadoutSettings) {};
+  AdcReadoutMock(BaseSettings Settings, AdcSettings ReadoutSettings)
+      : AdcReadoutBase(Settings, ReadoutSettings){};
   using Detector::Threads;
   using AdcReadoutBase::Processors;
   MAKE_MOCK0(inputThread, void(), override);
@@ -197,11 +204,15 @@ TEST_F(AdcReadoutSimpleTest, ActivateProcessors) {
 TEST_F(AdcReadoutSimpleTest, SetTimeStampLoc) {
   ReadoutSettings.SerializeSamples = true;
   ReadoutSettings.PeakDetection = false;
-  std::vector<std::pair<std::string, TimeStampLocation>> TimeStampLocSettings{{"Start", TimeStampLocation::Start}, {"Middle", TimeStampLocation::Middle}, {"End", TimeStampLocation::End}};
+  std::vector<std::pair<std::string, TimeStampLocation>> TimeStampLocSettings{
+      {"Start", TimeStampLocation::Start},
+      {"Middle", TimeStampLocation::Middle},
+      {"End", TimeStampLocation::End}};
   for (auto &Setting : TimeStampLocSettings) {
     ReadoutSettings.TimeStampLocation = Setting.first;
     AdcReadoutMock Readout(Settings, ReadoutSettings);
-    const SampleProcessing *ProcessingPtr =  dynamic_cast<SampleProcessing*>(Readout.Processors.at(0).get());
+    const SampleProcessing *ProcessingPtr =
+        dynamic_cast<SampleProcessing *>(Readout.Processors.at(0).get());
     EXPECT_EQ(ProcessingPtr->getTimeStampLocation(), Setting.second);
   }
 }
