@@ -55,14 +55,14 @@ set(EventTest_INC
 create_test_executable(EventTest)
 
 set(HistSerializerTest_SRC
-    Hists.cpp
-    HistSerializerTest.cpp
-    HistSerializer.cpp
+    ../../common/Hists.cpp
+    ../../common/HistSerializerTest.cpp
+    ../../common/HistSerializer.cpp
     )
 set(HistSerializerTest_INC
     Hit.h
-    Hists.h
-    HistSerializer.h
+    ../../common/Hists.h
+    ../../common/HistSerializer.h
     ../../common/Producer.h
     )
 create_test_executable(HistSerializerTest)
@@ -81,4 +81,3 @@ set(TrackSerializerTest_INC
     TrackSerializer.h
     )
 create_test_executable(TrackSerializerTest)
-

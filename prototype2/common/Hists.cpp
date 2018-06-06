@@ -1,6 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/Hists.h>
+#include <common/Hists.h>
 #include <string.h>
 
 // static

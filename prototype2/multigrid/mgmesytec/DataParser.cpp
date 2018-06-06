@@ -4,7 +4,7 @@
 #include <cassert>
 #include <common/Trace.h>
 #include <cstring>
-#include <gdgem/nmx/Hists.h>
+#include <common/Hists.h>
 #include <multigrid/mgmesytec/DataParser.h>
 #include <common/ReadoutSerializer.h>
 
