@@ -6,7 +6,7 @@ set(EventFormationTest_SRC
     ../nmx/AbstractBuilder.cpp
     ../nmx/Cluster.cpp
     ../nmx/Event.cpp
-    ../nmx/Hists.cpp
+    ../../common/Hists.cpp
     ../srs/SRSTime.cpp
     ../srs/SRSMappings.cpp
     ../nmx/ReadoutFile.cpp
@@ -22,7 +22,7 @@ set(EventFormationTest_INC
     ../nmx/AbstractBuilder.h
     ../nmx/Cluster.h
     ../nmx/Event.h
-    ../nmx/Hists.h
+    ../../common/Hists.h
     ../srs/SRSTime.h
     ../srs/SRSMappings.h
     ../nmx/ReadoutFile.h
@@ -43,7 +43,7 @@ set(BuilderBenchmarkTest_SRC
     ../nmx/Clusterer.cpp
     ../nmx/Cluster.cpp
     ../nmx/Event.cpp
-    ../nmx/Hists.cpp
+    ../../common/Hists.cpp
     ../nmx/AbstractBuilder.cpp
     ../srs/SRSTime.cpp
     ../srs/SRSMappings.cpp
@@ -55,7 +55,7 @@ set(BuilderBenchmarkTest_INC
     ../nmx/Clusterer.h
     ../nmx/Cluster.h
     ../nmx/Event.h
-    ../nmx/Hists.h
+    ../../common/Hists.h
     ../nmx/Hit.h
     ../srs/SRSTime.h
     ../srs/SRSMappings.h
@@ -77,7 +77,7 @@ set(BuilderVMM2Test_SRC
     ../nmx/ReadoutFile.cpp
     ../nmx/Cluster.cpp
     ../nmx/Event.cpp
-    ../nmx/Hists.cpp
+    ../../common/Hists.cpp
     ../nmx/AbstractBuilder.cpp
     ../srs/SRSTime.cpp
     ../srs/SRSMappings.cpp
@@ -93,7 +93,7 @@ set(BuilderVMM2Test_INC
     ../nmx/Readout.h
     ../nmx/Cluster.h
     ../nmx/Event.h
-    ../nmx/Hists.h
+    ../../common/Hists.h
     ../nmx/Hit.h
     ../srs/SRSTime.h
     ../srs/SRSMappings.h

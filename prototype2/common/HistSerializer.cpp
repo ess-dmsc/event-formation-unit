@@ -2,7 +2,7 @@
 
 #include <cinttypes>
 #include <common/Trace.h>
-#include <gdgem/nmx/HistSerializer.h>
+#include <common/HistSerializer.h>
 
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
