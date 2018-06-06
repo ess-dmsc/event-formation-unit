@@ -117,6 +117,5 @@ set(ESSGeometryTest_SRC ESSGeometryTest.cpp)
 create_test_executable(ESSGeometryTest)
 
 # GOOGLE BENCHMARKS
-set(ESSGeometryBenchmarkTest_INC ../gdgem/nmx/Geometry.h)
-set(ESSGeometryBenchmarkTest_SRC ESSGeometryBenchmarkTest.cpp ../gdgem/nmx/Geometry.cpp)
+set(ESSGeometryBenchmarkTest_SRC ESSGeometryBenchmarkTest.cpp)
 create_benchmark_executable(ESSGeometryBenchmarkTest)
