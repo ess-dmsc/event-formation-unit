@@ -2,7 +2,7 @@
 
 #include <benchmark/benchmark.h>
 #include <multiblade/mbcommon/MultiBladeEventBuilder.h>
-#include <string>
+#include <cstring>
 #include <unistd.h>
 
 /** @file
@@ -33,7 +33,7 @@ static void AddDataPoint(benchmark::State &state) {
   state.SetComplexityN(state.range(0));
   state.SetBytesProcessed(state.iterations() * state.range(0));
   state.SetItemsProcessed(items);
-};
+}
 BENCHMARK(AddDataPoint)->RangeMultiplier(2)->Range(2, 64)->Complexity();
 
 BENCHMARK_MAIN();
