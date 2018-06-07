@@ -22,7 +22,7 @@
 #include <libs/include/Timer.h>
 
 #include <mbcaen/MB16Detector.h>
-#include <mbcaen/MBData.h>
+#include <mbcaen/DataParser.h>
 #include <mbcommon/MultiBladeEventBuilder.h>
 
 #include <logical_geometry/ESSGeometry.h>
@@ -66,6 +66,7 @@ private:
     // Processing Counters
     int64_t rx_idle1;
     int64_t rx_readouts;
+    int64_t rx_error_bytes;
     int64_t tx_bytes;
     int64_t rx_events;
     int64_t geometry_errors;
@@ -91,6 +92,7 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
   // clang-format off
     Stats.create("input.rx_packets",                mystats.rx_packets);
     Stats.create("input.rx_bytes",                  mystats.rx_bytes);
+    Stats.create("input.rx_error_bytes",            mystats.rx_error_bytes);
     Stats.create("input.fifo1_push_errors",         mystats.fifo1_push_errors);
     Stats.create("processing.rx_readouts",          mystats.rx_readouts);
     Stats.create("processing.rx_idle1",             mystats.rx_idle1);
@@ -181,7 +183,7 @@ void MBCAEN::processing_thread() {
     builder[i].setNumberOfStripChannels(nstrips);
   }
 
-  MBData mbdata;
+  DataParser mbdata;
 
   unsigned int data_index;
   TSCTimer produce_timer;
@@ -210,33 +212,36 @@ void MBCAEN::processing_thread() {
         mystats.fifo_seq_errors++;
       } else {
         auto dataptr = eth_ringbuf->getDataBuffer(data_index);
-        mbdata.receive(dataptr, datalen);
+        if (mbdata.parse(dataptr, datalen) < 0) {
+          mystats.rx_error_bytes += mbdata.stats.error_bytes;
+          continue;
+        }
+        mystats.rx_readouts += mbdata.mbheader->numElements;
 
-        auto dat = mbdata.data;
-        mystats.rx_readouts += dat.size();
+        auto digitizerId = mbdata.mbheader->digitizerID;
+        for (uint i = 0; i < mbdata.mbheader->numElements; i++) {
 
-        for (uint i = 0; i < dat.size(); i++) {
+          auto dp = mbdata.mbdata[i];
 
-          auto dp = dat.at(i);
+          // // @todo fixme remove - is an artifact of mbtext2udp
+          // if (dp.digi == UINT8_MAX && dp.chan == UINT8_MAX &&
+          //     dp.adc == UINT16_MAX && dp.time == UINT32_MAX) {
+          //   XTRACE(PROCESS, DEB, "Last point\n");
+          //   builder[0].lastPoint();
+          //   break;
+          // }
 
-          // @todo fixme remove - is an artifact of mbtext2udp
-          if (dp.digi == UINT8_MAX && dp.chan == UINT8_MAX &&
-              dp.adc == UINT16_MAX && dp.time == UINT32_MAX) {
-            XTRACE(PROCESS, DEB, "Last point\n");
-            builder[0].lastPoint();
-            break;
-          }
-
-          auto cassette = mb16.cassette(dp.digi);
+          auto cassette = mb16.cassette(digitizerId);
           if (cassette < 0) {
+            XTRACE(DATA, WAR, "Invalid digitizerId: %d\n", digitizerId);
             break;
           }
 
           if (dumptofile) {
-            mbdatasave->tofile("%d,%d,%d,%d\n", dp.time, dp.digi, dp.chan, dp.adc);
+            mbdatasave->tofile("%d,%d,%d,%d\n", dp.localTime, digitizerId, dp.channel, dp.adcValue);
           }
 
-          if (builder[cassette].addDataPoint(dp.chan, dp.adc, dp.time)) {
+          if (builder[cassette].addDataPoint(dp.channel, dp.adcValue, dp.localTime)) {
             auto xcoord =
                 builder[cassette].getStripPosition() - 32; // pos 32 - 63
             auto ycoord = cassette * nwires +
@@ -246,7 +251,7 @@ void MBCAEN::processing_thread() {
 
             XTRACE(PROCESS, DEB,
                    "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d\n",
-                   dp.digi, (int)xcoord, (int)ycoord,
+                   digitizerId, (int)xcoord, (int)ycoord,
                    (int)builder[cassette].getWirePosition(),
                    (int)builder[cassette].getStripPosition(), pixel_id);
 

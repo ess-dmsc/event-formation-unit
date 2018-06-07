@@ -4,13 +4,13 @@ include_directories(.)
 # Detector Pipeline Plugins
 #=============================================================================
 set(mbcaen_INC
-  mbcaen/MBData.h
+  mbcaen/DataParser.h
   mbcommon/MultiBladeEventBuilder.h
   mbcommon/DumpEventBuilderInfo.h
   )
 set(mbcaen_SRC
   mbcaen.cpp
-  mbcaen/MBData.cpp
+  mbcaen/DataParser.cpp
   mbcommon/MultiBladeEventBuilder.cpp
   mbcommon/DumpEventBuilderInfo.cpp
   )
@@ -60,9 +60,9 @@ else()
 endif()
 
 # GOOGLE BENCHMARK
-set(MBDataBenchmarkTest_INC ${mbtest_INC})
-set(MBDataBenchmarkTest_SRC mbcaen/MBData.cpp mbcaen/MBDataBenchmarkTest.cpp)
-create_benchmark_executable(MBDataBenchmarkTest)
+set(DataParserBenchmarkTest_INC ${mbtest_INC})
+set(DataParserBenchmarkTest_SRC mbcaen/DataParser.cpp mbcaen/DataParserBenchmarkTest.cpp)
+create_benchmark_executable(DataParserBenchmarkTest)
 
 # GOOGLE BENCHMARK
 set(MultiBladeEventBuilderBenchmarkTest_INC ${mbtest_INC})
@@ -71,6 +71,12 @@ set(MultiBladeEventBuilderBenchmarkTest_SRC
   mbcommon/MultiBladeEventBuilderBenchmarkTest.cpp
   )
 create_benchmark_executable(MultiBladeEventBuilderBenchmarkTest)
+
+
+# Create excecutable for the test of geometry
+set(MBDataParserTest_INC mbcaen/DataParser.h)
+set(MBDataParserTest_SRC mbcaen/DataParser.cpp mbcaen/DataParserTest.cpp)
+create_test_executable(MBDataParserTest)
 
 
 # Common include path for both tests
