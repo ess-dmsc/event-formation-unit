@@ -8,8 +8,8 @@
 #include <multigrid/mgmesytec/DataParser.h>
 #include <common/ReadoutSerializer.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 // @todo can only create a single event per UDP buffer
 int MesytecData::getPixel() {
@@ -37,6 +37,8 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
   int addr = -1;
   int adc = -1;
   int dataWords = -1;
+  int time_diff = -1;
+  int extended_ts = -1;
 
   gridmax = -1;
   wiremax = -1;
@@ -47,27 +49,35 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
 
   // Sneak peek on time although it is actually last in packet
   uint32_t *tptr = (buffer + nWords - 1);
-  if ((*tptr & 0xc0000000) == 0xc0000000) {
+  if ((*tptr & MesytecType::EndOfEvent) == MesytecType::EndOfEvent) {
     time = *tptr & 0x3fffffff;
   }
 
   while (wordsleft > 0) {
-    auto datatype = *datap & 0xff000000;
+    auto datatype = *datap & MesytecTypeMask;
 
     switch (datatype) {
-    case mesytecHeader:
+    case MesytecType::Header:
       dataWords = *datap & 0x000003ff;
       assert(nWords > dataWords);
       module = (*datap & 0x00ff0000) >> 16;
-      DTRACE(INF, "   trigger %d, data len %d (words), module %d\n", triggers, dataWords, module);
+      DTRACE(INF, "   Header:  trigger=%d,  data len=%d (words),  module=%d\n", triggers, dataWords, module);
       break;
 
-    case mesytecData:
+    case MesytecType::DataEvent1:
+      bus = (*datap & 0x0f000000) >> 24;
+      time_diff = (*datap & 0x0000ffff);
+      DTRACE(INF, "   DataEvent1:  bus=%d,  time_diff=%d\n", bus, time_diff);
+      break;
+
+    case MesytecType::DataEvent2:
       // value in using something like getValue(Buffer, NBits, Offset) ?
       bus = (*datap & 0x0f000000) >> 24;
       addr = (*datap & 0x00fff000) >> 12; /**< channel */
       adc = (*datap & 0x00000fff);
       readouts++;
+
+      DTRACE(INF, "   DataEvent2:  bus=%d  channel=%d  adc=%d\n", bus, addr, adc);
 
       accept = 0;
       if (mgseq.isWire(addr) && adc >= wireThresholdLo && adc <= wireThresholdHi) {
@@ -75,7 +85,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
         if (adc > wireadcmax) {
           wiremax = addr;
           wireadcmax = adc;
-          XTRACE(DATA, DEB, "   new wadcmax: ch %d\n", addr);
+          DTRACE(INF, "     new wadcmax: ch %d\n", addr);
         }
         hists.binstrips(addr, adc, 0, 0);
       } else if (mgseq.isGrid(addr) && adc >= gridThresholdLo && adc <= gridThresholdHi) {
@@ -83,7 +93,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
         if (adc > gridadcmax) {
           gridmax = addr;
           gridadcmax = adc;
-          XTRACE(DATA, DEB, "   new gadcmax: ch %d\n", addr);
+          DTRACE(INF, "     new gadcmax: ch %d\n", addr);
         }
         hists.binstrips(0,0, addr, adc);
       }
@@ -101,19 +111,18 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &
       }
       break;
 
-    case mesytecExtendedTimeStamp:
-      bus = (*datap & 0x0f000000) >> 24;
-      DTRACE(INF, "   Timeoffset (bus %d) %d\n", bus, (*datap & 0x0000ffff));
+    case MesytecType::ExtendedTimeStamp:
+      extended_ts = (*datap & 0x0000ffff);
+      DTRACE(INF, "   ExtendedTimeStamp: high_bits=%d\n", extended_ts);
+      break;
+
+    case MesytecType::FillDummy:
+      DTRACE(DEB, "   FillDummy\n");
       break;
 
     default:
-      if ((*datap & mesytecTimeStamp) == mesytecTimeStamp) {
-        DTRACE(INF, "   Timestamp: %d\n", *datap & 0x3fffffff);
-        break;
-      }
-
-      if (*datap == 0x00000000) {
-        DTRACE(DEB, "   End of Data\n");
+      if ((*datap & MesytecType::EndOfEvent) == MesytecType::EndOfEvent) {
+        DTRACE(INF, "   EndOfEvent: timestamp: %d\n", *datap & 0x3fffffff);
         break;
       }
 
@@ -161,8 +170,9 @@ MesytecData::error MesytecData::parse(const char *buffer, int size, NMXHists &hi
     datap++;
     bytesleft -= 4;
 
-    if ((*datap & 0xff000000) != sisBeginReadout) {
-      XTRACE(DATA, WAR, "expected readout header value 0x%04x, got 0x%04x\n", sisBeginReadout, (*datap & 0xff000000));
+    if ((*datap & 0xff000000) != SisType::BeginReadout) {
+      XTRACE(DATA, WAR, "expected readout header value 0x%04x, got 0x%04x\n",
+          SisType::BeginReadout, (*datap & 0xff000000));
       return error::EHEADER;
     }
     datap++;
@@ -172,7 +182,8 @@ MesytecData::error MesytecData::parse(const char *buffer, int size, NMXHists &hi
 
     int pixel = getPixel();
     int time  = getTime();
-    DTRACE(DEB, "Event: time %d, pixel: %d\n", time, pixel);
+    DTRACE(DEB, "Event: (gridmax=%d,wiremax=%d) -->  pixel: %d, time: %d \n\n",
+        gridmax, wiremax, pixel, time);
     if (pixel != 0) {
       tx_bytes += fbserializer.addevent(time, pixel);
       events++;
@@ -190,7 +201,7 @@ MesytecData::error MesytecData::parse(const char *buffer, int size, NMXHists &hi
     datap++;
     bytesleft -= 4;
 
-    if ((*datap & 0xff000000) != sisEndReadout) {
+    if ((*datap & 0xff000000) != SisType::EndReadout) {
       return error::EHEADER;
     }
     datap++;

@@ -22,18 +22,25 @@ public:
   // sis3153 and mesytec data types from
   // Struck: mvme-src-0.9.2-281-g1c4c24c.tar
   // Struck: Ethernet UDP Addendum revision 107
+  enum SisType {
+    BeginReadout          = 0xbb000000,
+    EndReadout            = 0xee000000
+  };
+
+  static constexpr uint32_t MesytecTypeMask {0xf0000000};
   // Mesytec Datasheet: VMMR-8/16 v00.01
-  enum DataType {
-    mesytecData              = 0x10000000,
-    mesytecExtendedTimeStamp = 0x20000000,
-    mesytecHeader            = 0x40000000,
-    mesytecTimeStamp         = 0xc0000000,
-    sisBeginReadout          = 0xbb000000,
-    sisEndReadout            = 0xee000000
+  enum MesytecType {
+    Header            = 0x40000000,
+    ExtendedTimeStamp = 0x20000000,
+    DataEvent1        = 0x30000000,
+    DataEvent2        = 0x10000000,
+    EndOfEvent        = 0xc0000000,
+    FillDummy         = 0x00000000
   };
   // clang-format on
 
-/// @
+
+  /// @
   MesytecData(uint32_t module, std::string fileprefix = "") {
     mgseq.select_module(module);
     dumptofile = !fileprefix.empty();

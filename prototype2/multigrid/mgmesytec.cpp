@@ -29,8 +29,8 @@
 #include <stdio.h>
 #include <unistd.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
 
