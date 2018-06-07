@@ -18,28 +18,6 @@ class MesytecData {
 public:
   enum class error { OK = 0, ESIZE, EHEADER, EUNSUPP };
 
-  // clang-format off
-  // sis3153 and mesytec data types from
-  // Struck: mvme-src-0.9.2-281-g1c4c24c.tar
-  // Struck: Ethernet UDP Addendum revision 107
-  enum SisType {
-    BeginReadout          = 0xbb000000,
-    EndReadout            = 0xee000000
-  };
-
-  static constexpr uint32_t MesytecTypeMask {0xf0000000};
-  // Mesytec Datasheet: VMMR-8/16 v00.01
-  enum MesytecType {
-    Header            = 0x40000000,
-    ExtendedTimeStamp = 0x20000000,
-    DataEvent1        = 0x30000000,
-    DataEvent2        = 0x10000000,
-    EndOfEvent        = 0xc0000000,
-    FillDummy         = 0x00000000
-  };
-  // clang-format on
-
-
   /// @
   MesytecData(uint32_t module, std::string fileprefix = "") {
     mgseq.select_module(module);
@@ -52,8 +30,8 @@ public:
 
   ~MesytecData(){};
 
-  int getPixel(); // @todo (too) simple implm. but agreed for now
-  int getTime();  // @todo (too) simple implm. but agreed for now
+  uint32_t getPixel(); // @todo (too) simple implm. but agreed for now
+  uint32_t getTime();  // @todo (too) simple implm. but agreed for now
 
   void setWireThreshold(int low, int high) {
      wireThresholdLo = low;
@@ -70,7 +48,7 @@ public:
   error parse(const char *buffer, int size, NMXHists &hists, FBSerializer & fbserializer, ReadoutSerializer &serializer);
 
   /** @brief parse n 32 bit words from mesytec VMMR-8/16 card */
-  void mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &hists, ReadoutSerializer &serializer);
+  void mesytec_parse_n_words(uint32_t *buffer, uint16_t nWords, NMXHists &hists, ReadoutSerializer &serializer);
 
   // Statistics returned by parse()
   int readouts{0}; /**< number of channels read out */
@@ -81,13 +59,20 @@ public:
   int geometry_errors{0};
 
 private:
-  int wiremax{-1}; // initial alg.: wire with max adc
-  int gridmax{-1}; // initial alg.: grid with max adc
-  int time{-1};
-  int wireThresholdLo{0};
-  int wireThresholdHi{65535};
-  int gridThresholdLo{0};
-  int gridThresholdHi{65535};
+  bool BusGood {false};
+  bool WireGood {false};
+  bool GridGood {false};
+  bool TimeGood {false};
+  uint8_t Bus;
+  uint32_t Wire{0}; // initial alg.: wire with max adc
+  uint32_t Grid{0}; // initial alg.: grid with max adc
+  uint32_t Time;
+  uint16_t HighTime;
+
+  uint16_t wireThresholdLo{0};
+  uint16_t wireThresholdHi{std::numeric_limits<uint16_t>::max()};
+  uint16_t gridThresholdLo{0};
+  uint16_t gridThresholdHi{std::numeric_limits<uint16_t>::max()};
   MG24Detector mgseq;
   ESSGeometry mg{4, 48, 20, 1};
 
