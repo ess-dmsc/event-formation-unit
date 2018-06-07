@@ -8,8 +8,8 @@
 #include <multigrid/mgmesytec/DataParser.h>
 #include <common/ReadoutSerializer.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_WAR
 
 // clang-format off
 // sis3153 and mesytec data types from
