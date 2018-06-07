@@ -48,13 +48,12 @@ public:
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
-  Detector(std::string Name, BaseSettings settings)
-      : EFUSettings(settings), Stats(Name), DetectorName(Name){};
+  Detector(std::string Name, BaseSettings settings) : EFUSettings(settings), Stats(Name), DetectorName(Name) {};
   // default constructor, all instruments must implement these methods
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
    */
-
+  
   virtual ~Detector() = default;
 
   /** @brief document */
@@ -77,7 +76,7 @@ public:
   virtual std::map<std::string, CommandFunction> GetDetectorCommandFunctions() {
     return DetectorCommands;
   }
-
+  
   virtual void startThreads() {
     for (auto &tInfo : Threads) {
       tInfo.thread = std::thread(tInfo.func);
@@ -115,17 +114,9 @@ struct PopulateCLIParser {
   std::function<void(CLI::App &)> Function;
 };
 
-class DetectorFactoryBase {
+class DetectorFactory {
 public:
   /** @brief creates the detector object. All instruments must implement this
    */
   virtual std::shared_ptr<Detector> create(BaseSettings settings) = 0;
-};
-
-template <class DetectorModule>
-class DetectorFactory : public DetectorFactoryBase {
-public:
-  std::shared_ptr<Detector> create(BaseSettings Settings) override {
-    return std::shared_ptr<Detector>(new DetectorModule(Settings));
-  }
 };

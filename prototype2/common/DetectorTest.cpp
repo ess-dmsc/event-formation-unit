@@ -8,14 +8,21 @@
 
 class TestDetector : public Detector {
 public:
-  TestDetector(UNUSED BaseSettings settings)
-      : Detector("no detector", settings) {
+  TestDetector(UNUSED BaseSettings settings) : Detector("no detector", settings) {
     std::cout << "TestDetector" << std::endl;
   };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
 
-DetectorFactory<TestDetector> Factory;
+class TestDetectorFactory : public DetectorFactory {
+public:
+  std::shared_ptr<Detector> create(BaseSettings settings) {
+    std::cout << "TestDetectorFactory" << std::endl;
+    return std::shared_ptr<Detector>(new TestDetector(settings));
+  }
+};
+
+TestDetectorFactory Factory;
 
 /** Test fixture and tests below */
 
@@ -54,7 +61,7 @@ TEST_F(DetectorTest, StatAPI) {
 }
 
 TEST_F(DetectorTest, ThreadInfoNoThreads) {
-  auto &threadlist = det->GetThreadInfo();
+  auto & threadlist = det->GetThreadInfo();
   ASSERT_EQ(0, threadlist.size());
 }
 

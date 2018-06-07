@@ -1,6 +1,11 @@
-//
-// Created by soegaard on 8/22/17.
-//
+/** Copyright (C) 2017-2018 European Spallation Source */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// Implementation of the detector pipeline plugin for MUlti-Blade
+/// detectors.
+/// Contributor: Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
+//===----------------------------------------------------------------------===//
 
 #include <cinttypes>
 #include <common/Detector.h>
@@ -18,7 +23,7 @@
 
 #include <mbcaen/MB16Detector.h>
 #include <mbcaen/MBData.h>
-#include <mbcommon/multiBladeEventBuilder.h>
+#include <mbcommon/MultiBladeEventBuilder.h>
 
 #include <logical_geometry/ESSGeometry.h>
 
@@ -261,4 +266,11 @@ void MBCAEN::processing_thread() {
 
 /** ----------------------------------------------------- */
 
-DetectorFactory<MBCAEN> Factory;
+class MBCAENFactory : DetectorFactory {
+public:
+  std::shared_ptr<Detector> create(BaseSettings settings) {
+    return std::shared_ptr<Detector>(new MBCAEN(settings));
+  }
+};
+
+MBCAENFactory Factory;

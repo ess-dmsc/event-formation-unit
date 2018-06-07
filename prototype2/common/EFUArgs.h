@@ -24,10 +24,10 @@ struct ThreadCoreAffinitySetting {
 
 class EFUArgs {
 public:
-  enum class Status { EXIT, CONTINUE };
+  enum class Status {EXIT, CONTINUE};
   EFUArgs();
   Status parseFirstPass(const int argc, char *argv[]);
-
+  
   Status parseSecondPass(const int argc, char *argv[]);
 
   void printHelp();
@@ -49,7 +49,7 @@ public:
 
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
-
+  
   std::string DetectorName;
 
   std::vector<ThreadCoreAffinitySetting> ThreadAffinity;

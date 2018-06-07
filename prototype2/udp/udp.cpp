@@ -102,4 +102,11 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
-DetectorFactory<UDPRaw> Factory;
+class UDPRawFactory : public DetectorFactory {
+public:
+  std::shared_ptr<Detector> create(BaseSettings settings) {
+    return std::shared_ptr<Detector>(new UDPRaw(settings));
+  }
+};
+
+UDPRawFactory Factory;

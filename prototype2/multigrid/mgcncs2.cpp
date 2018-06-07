@@ -293,4 +293,11 @@ void CSPEC::processing_thread() {
 
 /** ----------------------------------------------------- */
 
-DetectorFactory<CSPEC> Factory;
+class CSPECFactory : public DetectorFactory {
+public:
+  std::shared_ptr<Detector> create(BaseSettings settings) {
+    return std::shared_ptr<Detector>(new CSPEC(settings));
+  }
+};
+
+CSPECFactory Factory;

@@ -23,15 +23,6 @@ function(create_module module_name)
 endfunction(create_module)
 
 #=============================================================================
-# Generate a loadable detector module
-#=============================================================================
-function(create_object_module module_name)
-  add_library(${module_name} OBJECT
-    ${${module_name}_SRC}
-    ${${module_name}_INC})
-endfunction(create_object_module)
-
-#=============================================================================
 # Generate an executable program
 #=============================================================================
 function(create_executable exec_name)
@@ -62,9 +53,9 @@ function(create_test_executable)
   set(oneValueArgs "")
   set(multiValueArgs "")
   cmake_parse_arguments(create_test_executable "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  
+
   set(exec_name ${create_test_executable_UNPARSED_ARGUMENTS})
-  
+
   add_executable(${exec_name} EXCLUDE_FROM_ALL
     ${${exec_name}_SRC}
     ${${exec_name}_INC})
@@ -112,4 +103,3 @@ function(create_integration_test_executable exec_name)
     ${EFU_COMMON_LIBS}
     eventlib)
 endfunction(create_integration_test_executable)
-
