@@ -8,6 +8,7 @@
 #include "SampleProcessing.h"
 #include "senv_data_generated.h"
 #include "AdcReadoutConstants.h"
+#include <cmath>
 
 std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start,
                                   const RawTimeStamp &End,
@@ -24,36 +25,43 @@ std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start,
 }
 
 double CalcTimeStampDelta(int OversamplingFactor) {
-  constexpr double SampleTime = 1.0 / AdcTimerCounterMax;
+  constexpr double SampleTime = 1e9 / AdcTimerCounterMax;
   return SampleTime * OversamplingFactor;
 }
 
 ProcessedSamples ChannelProcessing::processModule(const DataModule &Samples) {
-  ProcessedSamples ReturnSamples;
   int FinalOversamplingFactor = MeanOfNrOfSamples * Samples.OversamplingFactor;
-
+  size_t SampleIndex{0};
+  size_t TotalNumberOfSamples = (Samples.Data.size() + NrOfSamplesSummed) / MeanOfNrOfSamples;
+  ProcessedSamples ReturnSamples(TotalNumberOfSamples);
+  
+  ReturnSamples.TimeDelta = CalcTimeStampDelta(FinalOversamplingFactor);
+  std::uint64_t TimeStampOffset{0};
+  if (TSLocation == TimeStampLocation::Middle) {
+    TimeStampOffset = std::llround(0.5 * (ReturnSamples.TimeDelta  / FinalOversamplingFactor) * (FinalOversamplingFactor - 1));
+  } else if (TSLocation == TimeStampLocation::End) {
+    TimeStampOffset = std::llround((ReturnSamples.TimeDelta  / FinalOversamplingFactor) * (FinalOversamplingFactor - 1));
+  }
+  
   for (size_t i = 0; i < Samples.Data.size(); i++) {
     if (0 == NrOfSamplesSummed) {
       TimeStampOfFirstSample = Samples.TimeStamp.GetOffsetTimeStamp(
           i * Samples.OversamplingFactor - (Samples.OversamplingFactor - 1));
     }
-    SumOfSamples += Samples.Data.at(i);
+    SumOfSamples += Samples.Data[i];
     NrOfSamplesSummed++;
     if (NrOfSamplesSummed == MeanOfNrOfSamples) {
-      ReturnSamples.Samples.emplace_back(SumOfSamples /
-                                         FinalOversamplingFactor);
-      RawTimeStamp TimeStampOfLastSample =
-          Samples.TimeStamp.GetOffsetTimeStamp(i * Samples.OversamplingFactor);
-      ReturnSamples.TimeStamps.emplace_back(CalcSampleTimeStamp(
-          TimeStampOfFirstSample, TimeStampOfLastSample, TSLocation));
+      ReturnSamples.Samples[SampleIndex] = SumOfSamples / FinalOversamplingFactor;
+        ReturnSamples.TimeStamps[SampleIndex] = TimeStampOfFirstSample.GetTimeStampNS() + TimeStampOffset;
+
       ChannelProcessing::reset();
+      ++SampleIndex;
     }
   }
   if (not ReturnSamples.TimeStamps.empty()) {
-    ReturnSamples.TimeStamp = ReturnSamples.TimeStamps.at(0);
+    ReturnSamples.TimeStamp = ReturnSamples.TimeStamps[0];
   }
   ReturnSamples.Channel = Samples.Channel;
-  ReturnSamples.TimeDelta = CalcTimeStampDelta(FinalOversamplingFactor);
   return ReturnSamples;
 }
 
@@ -100,7 +108,7 @@ void SampleProcessing::processPacket(const PacketData &Data) {
       setMeanOfSamples(MeanOfNrOfSamples);
       setTimeStampLocation(TSLocation);
     }
-    auto ResultingSamples = ProcessingInstances.at(Module.Channel).processModule(Module);
+    auto ResultingSamples = ProcessingInstances[Module.Channel].processModule(Module);
     if (not ResultingSamples.Samples.empty()) {
       serializeAndTransmitData(ResultingSamples);
     }

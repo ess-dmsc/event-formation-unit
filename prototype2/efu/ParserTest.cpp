@@ -24,6 +24,7 @@ std::vector<std::string> commands {
 //  "CSPEC_SHOW_CALIB",               "wire 0 0x0000, grid 0 0x0000",
 //  "CSPEC_SHOW_CALIB 5",             "wire 5 0x0000, grid 5 0x0000",
   "STAT_GET_COUNT",                 "STAT_GET_COUNT 0",
+  "CMD_GET_COUNT",                  "CMD_GET_COUNT 7",
   "STAT_GET 1",                     "STAT_GET  -1",
   "EXIT",                           "<OK>"
 };
@@ -38,6 +39,11 @@ std::vector<std::string> commands_badargs {
 //  "CSPEC_SHOW_CALIB 16384",
   "STAT_GET_COUNT 1",
   "STAT_GET",
+  "CMD_GET_COUNT 1",
+  "CMD_GET",
+  "CMD_GET 1 2",
+  "CMD_GET 0",
+  "CMD_GET 9999",
   "VERSION_GET 1",
   "DETECTOR_INFO_GET 1",
   "EXIT 1"
@@ -180,11 +186,35 @@ TEST_F(ParserTest, VersionGet) {
   ASSERT_EQ(0, res);
 }
 
+TEST_F(ParserTest, ParserClearCommands) {
+  auto cmd = "VERSION_GET";
+  std::memcpy(input, cmd, strlen(cmd));
+  MESSAGE() << "Checking command: " << cmd << "\n";
+  auto res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(0, res);
+
+  parser->clearCommands();
+  std::memcpy(input, cmd, strlen(cmd));
+  MESSAGE() << "Checking command: " << cmd << "\n";
+  res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(res, -Parser::EBADCMD);
+}
+
 TEST_F(ParserTest, DuplicateCommands) {
   int res = parser->registercmd("DUMMY_COMMAND", dummy_command);
   ASSERT_EQ(res, 0);
   res = parser->registercmd("DUMMY_COMMAND", dummy_command);
   ASSERT_EQ(res, -1);
+}
+
+TEST_F(ParserTest, NullDetector) {
+  int keeprunning{1};
+  Parser parser(nullptr, keeprunning); // No detector, no STAT_GET_COUNT command
+
+  const char *cmd = "STAT_GET_COUNT";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser.parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(res, -Parser::EBADCMD);
 }
 
 #if 0
@@ -228,6 +258,22 @@ TEST_F(ParserTest, DetectorInfo) {
   const char *cmd = "DETECTOR_INFO_GET";
   std::memcpy(input, cmd, strlen(cmd));
   int res = parser->parse(input, strlen(cmd), output, &obytes);
+  ASSERT_EQ(res, -Parser::OK);
+}
+
+TEST_F(ParserTest, CmdGetCount) {
+  const char *cmd = "CMD_GET_COUNT";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser->parse(input, strlen(cmd), output, &obytes);
+  MESSAGE() << output << '\n';
+  ASSERT_EQ(res, -Parser::OK);
+}
+
+TEST_F(ParserTest, CmdGet) {
+  const char *cmd = "CMD_GET 1";
+  std::memcpy(input, cmd, strlen(cmd));
+  int res = parser->parse(input, strlen(cmd), output, &obytes);
+  MESSAGE() << output << '\n';
   ASSERT_EQ(res, -Parser::OK);
 }
 

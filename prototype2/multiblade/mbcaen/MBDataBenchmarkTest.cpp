@@ -2,7 +2,7 @@
 
 #include <benchmark/benchmark.h>
 #include <multiblade/mbcaen/MBData.h>
-#include <string>
+#include <cstring>
 #include <unistd.h>
 
 /** @file
@@ -30,7 +30,7 @@ static void ReceiveData(benchmark::State &state) {
   state.SetComplexityN(state.range(0));
   state.SetBytesProcessed(state.iterations() * state.range(0));
   state.SetItemsProcessed(items);
-};
+}
 BENCHMARK(ReceiveData)->RangeMultiplier(2)->Range(8, 80 << 10)->Complexity();
 
 BENCHMARK_MAIN();

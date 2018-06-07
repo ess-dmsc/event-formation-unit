@@ -54,6 +54,10 @@ private:
 /// @brief Data stored in this struct represents a (properly parsed) sampling run.
 struct DataModule {
   DataModule() = default;
+  DataModule(size_t NrOfElements) noexcept : Data(NrOfElements) {}
+  ~DataModule() = default;
+  DataModule(const DataModule &&Other) : TimeStamp(Other.TimeStamp), Channel(Other.Channel), OversamplingFactor(Other.OversamplingFactor), Data(std::move(Other.Data)) {}
+  DataModule& operator=( const DataModule&) = default;
   RawTimeStamp TimeStamp;
   std::uint16_t Channel;
   std::uint16_t OversamplingFactor{1};

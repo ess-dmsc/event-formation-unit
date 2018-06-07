@@ -5,6 +5,7 @@ set(efu_common_SRC
   FBSerializer.cpp
   NewStats.cpp
   Producer.cpp
+  DataSave.cpp
   )
 set(efu_common_INC
   ../../libs/include/gccintel.h
@@ -14,24 +15,25 @@ set(efu_common_INC
   NewStats.h
   Producer.h
   Trace.h
+  DataSave.h
   )
-
-if(${DUMPTOFILE})
-  set(efu_common_SRC ${efu_common_SRC} DataSave.cpp)
-  set(efu_common_INC ${efu_common_INC} DataSave.h)
-endif()
-
-add_definitions(-std=c++11)
 
 find_package(CLI11 REQUIRED)
 
 add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC})
-  
+
 target_include_directories(efu_common PUBLIC ${CLI11_INCLUDE_DIR})
 
+if(${CMAKE_COMPILER_IS_GNUCXX})
+  add_linker_flags(efu_common "-Wl,--no-as-needed")
+endif()
+
 enable_coverage(efu_common)
+
+target_link_libraries(efu_common
+    ${EFU_COMMON_LIBS})
 
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} efu_common PARENT_SCOPE)
 
@@ -51,14 +53,12 @@ else()
   message(STATUS "*** Skipping ProducerTest - requires gcc/linux")
 endif()
 
-if(${DUMPTOFILE})
-  set(DataSaveTest_SRC
+set(DataSaveTest_SRC
     DataSaveTest.cpp
     DataSave.cpp)
-  set(DataSaveTest_INC
+set(DataSaveTest_INC
     DataSave.h)
-  create_test_executable(DataSaveTest)
-endif()
+create_test_executable(DataSaveTest)
 
 set(DetectorTest_SRC
   DetectorTest.cpp
@@ -112,3 +112,10 @@ set(VersionTest_INC
   Version.h)
 create_test_executable(VersionTest)
 
+set(ESSGeometryTest_SRC ESSGeometryTest.cpp)
+#set(ESSGeometryTest_INC ESSGeometry.h)
+create_test_executable(ESSGeometryTest)
+
+# GOOGLE BENCHMARKS
+set(ESSGeometryBenchmarkTest_SRC ESSGeometryBenchmarkTest.cpp)
+create_benchmark_executable(ESSGeometryBenchmarkTest)

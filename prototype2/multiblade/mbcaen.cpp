@@ -1,6 +1,11 @@
-//
-// Created by soegaard on 8/22/17.
-//
+/** Copyright (C) 2017-2018 European Spallation Source */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// Implementation of the detector pipeline plugin for MUlti-Blade
+/// detectors.
+/// Contributor: Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
+//===----------------------------------------------------------------------===//
 
 #include <cinttypes>
 #include <common/Detector.h>
@@ -18,7 +23,7 @@
 
 #include <mbcaen/MB16Detector.h>
 #include <mbcaen/MBData.h>
-#include <mbcommon/multiBladeEventBuilder.h>
+#include <mbcommon/MultiBladeEventBuilder.h>
 
 #include <logical_geometry/ESSGeometry.h>
 
@@ -68,7 +73,14 @@ private:
   } ALIGN(64) mystats;
 };
 
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
+struct DetectorSettingsStruct {
+  std::string fileprefix{""};
+} DetectorSettings;
+
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+  parser.add_option("--dumptofile", DetectorSettings.fileprefix,
+                    "dump to specified file")->group("MBCAEN");
+}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
@@ -149,10 +161,13 @@ void MBCAEN::processing_thread() {
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
 
-#ifdef DUMPTOFILE // only active if cmake -DDUMPTOFILE=ON
-  DataSave mbdatasave{"multiblade_", 100000000};
-  mbdatasave.tofile("# time, digitizer, channel, adc\n");
-#endif
+  std::shared_ptr<DataSave> mbdatasave;
+  bool dumptofile = !DetectorSettings.fileprefix.empty();
+  if (dumptofile)
+  {
+    mbdatasave = std::make_shared<DataSave>(DetectorSettings.fileprefix + "_multiblade_", 100000000);
+    mbdatasave->tofile("# time, digitizer, channel, adc\n");
+  }
 
   ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
   MB16Detector mb16;
@@ -217,9 +232,9 @@ void MBCAEN::processing_thread() {
             break;
           }
 
-#ifdef DUMPTOFILE
-          mbdatasave.tofile("%d,%d,%d,%d\n", dp.time, dp.digi, dp.chan, dp.adc);
-#endif
+          if (dumptofile) {
+            mbdatasave->tofile("%d,%d,%d,%d\n", dp.time, dp.digi, dp.chan, dp.adc);
+          }
 
           if (builder[cassette].addDataPoint(dp.chan, dp.adc, dp.time)) {
             auto xcoord =

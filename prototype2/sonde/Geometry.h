@@ -9,6 +9,7 @@
 #pragma once
 #include <cinttypes>
 #include <common/Trace.h>
+#include <logical_geometry/ESSGeometry.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -21,7 +22,7 @@ public:
 
   /** @brief returns the maximum available pixelid for this geometry
    */
-  int getmaxpixelid() { return 64; }
+  int getmaxpixelid() { return essgeometry.max_pixel(); }
 
   // Sometimes asic and channel are separate @todo make this one the default
   int getdetectorpixelid(int module, int asic, int channel) {
@@ -58,9 +59,12 @@ public:
       x = 7 - x;
       y = 7 - y;
     }
-    int pixelid = x + 8 * y + 1;
+
+    int pixelid = essgeometry.pixel2D(x,y);
     XTRACE(PROCESS, DEB, "coordinates: x %d, y %d, pixel_id: %d\n", x, y,
            pixelid);
     return pixelid;
   }
+private:
+  ESSGeometry essgeometry{8, 8, 1, 1}; /// 1x1 module has 8x8 pixels
 };

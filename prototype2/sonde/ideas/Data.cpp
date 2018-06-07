@@ -99,10 +99,10 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
     if (pixelid >= 1) {
       data[events].time = time;
       data[events].pixel_id = static_cast<uint32_t>(pixelid);
-#ifdef DUMPTOFILE
-      eventdata.tofile("%d, %u, %d, %d, %d\n", hdr_count, hdr_hdrtime,
-                       hdr_sysno, asch >> 6, asch & 0x3f);
-#endif
+      if (dumptofile) {
+        eventdata->tofile("%d, %u, %d, %d, %d\n", hdr_count, hdr_hdrtime,
+                         hdr_sysno, asch >> 6, asch & 0x3f);
+      }
       XTRACE(PROCESS, INF, "event: %d, time: 0x%08x, pixel: %d\n", i, time,
              data[events].pixel_id);
       events++;
@@ -148,10 +148,10 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
     uint16_t sample = ntohs(*(uint16_t *)(buffer + i * 2 + 7));
     XTRACE(PROCESS, INF, "sample %3d: 0x%x (%d)\n", i, sample, sample);
 
-#ifdef DUMPTOFILE
-    sephdata.tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, trigger_type,
-                    hold_delay, asic, channel, sample);
-#endif
+    if (dumptofile) {
+      sephdata->tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, trigger_type,
+                      hold_delay, asic, channel, sample);
+    }
   }
 
   return events;
@@ -198,10 +198,10 @@ int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
       }
       XTRACE(PROCESS, INF, "time %x, tt %d, as %d, ch %d, sampl %x\n", evtime,
              trigger_type, asic, channel, sample);
-#ifdef DUMPTOFILE
-      mephdata.tofile("%d, %u, %d, %d, %d, %d\n", hdr_count, evtime,
-                      trigger_type, asic, channel, sample);
-#endif
+      if (dumptofile) {
+        mephdata->tofile("%d, %u, %d, %d, %d, %d\n", hdr_count, evtime,
+                        trigger_type, asic, channel, sample);
+      }
     }
   }
 

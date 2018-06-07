@@ -75,9 +75,7 @@ public:
     int x = panel_offset + x_offset;
     int y = (gridid - 1) % grids_ + 1;
     int z = (wireid - 1) % zwires_ + 1;
-
     int pixelid = (x - 1) * grids_ * zwires_ + (y - 1) * zwires_ + z;
-
     XTRACE(PROCESS, DEB, "x: %d, y: %d, z: %d (pixel %d)\n", x, y, z, pixelid);
 
     return pixelid;

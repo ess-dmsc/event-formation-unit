@@ -34,19 +34,14 @@ public:
   // clang-format on
 
 /// @
-#ifdef DUMPTOFILE
-  MesytecData(bool filedump, std::string fileprefix, uint32_t module) : dumptofile(filedump) {
+  MesytecData(uint32_t module, std::string fileprefix = "") {
     mgseq.select_module(module);
+    dumptofile = !fileprefix.empty();
     if (dumptofile) {
       mgdata = std::make_shared<DataSave>(fileprefix, 100000000);
       mgdata->tofile("#Time, Bus, Address, ADC\n");
     }
   };
-  #else
-  MesytecData(uint32_t module) {
-    mgseq.select_module(module);
-  };
-  #endif
 
   ~MesytecData(){};
 
@@ -89,8 +84,6 @@ private:
   MG24Detector mgseq;
   ESSGeometry mg{4, 48, 20, 1};
 
-#ifdef DUMPTOFILE
   bool dumptofile{false};
   std::shared_ptr<DataSave>(mgdata);
-#endif
 };

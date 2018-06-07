@@ -16,7 +16,7 @@
 #include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <gdgem/nmx/HistSerializer.h>
+#include <common/HistSerializer.h>
 #include <common/ReadoutSerializer.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
@@ -41,7 +41,7 @@ struct DetectorSettingsStruct {
   uint32_t gridThresholdLo{0};     // accept all
   uint32_t gridThresholdHi{65535}; // accept all
   uint32_t module{0}; // 0 defaults to 16 wires in z, 1
-  std::string fileprefix{""}; // (requires cmake  -DDUMPTOFILE=ON)
+  std::string fileprefix{""};
 } DetectorSettings;
 
 void SetCLIArguments(CLI::App & parser) {
@@ -55,10 +55,8 @@ void SetCLIArguments(CLI::App & parser) {
          "maximum grid adc value for accept")->group("MGMesytec");
   parser.add_option("--module", DetectorSettings.module,
          "select module for correct wire swapping (0==16z, 1==20z)")->group("MGMesytec");
-  #ifdef DUMPTOFILE
   parser.add_option("--dumptofile", DetectorSettings.fileprefix,
-         "dump to specified file (requires cmake -DDUMPTOFILE=ON")->group("MGMesytec");
-  #endif
+         "dump to specified file")->group("MGMesytec");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
@@ -133,12 +131,7 @@ void CSPEC::mainThread() {
   HistSerializer histfb;
   NMXHists hists;
 
-  #ifdef DUMPTOFILE
-    bool dumptofile = !DetectorSettings.fileprefix.empty();
-    MesytecData mesytecdata(dumptofile, DetectorSettings.fileprefix, DetectorSettings.module);
-  #else
-    MesytecData mesytecdata(DetectorSettings.module);
-  #endif
+  MesytecData mesytecdata(DetectorSettings.module, DetectorSettings.fileprefix);
 
   mesytecdata.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
   mesytecdata.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
@@ -176,7 +169,7 @@ void CSPEC::mainThread() {
       }
 
       if (!hists.isEmpty()) {
-        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.eventlet_count());
+        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.hit_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
         monitorprod.produce(txbuffer, len);

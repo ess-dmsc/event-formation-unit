@@ -332,6 +332,28 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime8) {
   }
 }
 
+TEST_F(ChannelProcessingTest, OversamplingAndTime9) {
+  ChannelProcessing Processing;
+  Module.OversamplingFactor = 1;
+  Processing.setMeanOfSamples(1);
+  Processing.setTimeStampLocation(TimeStampLocation::Middle);
+  auto Result = Processing.processModule(Module);
+  for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
+    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i).GetTimeStampNS(), Result.TimeStamps.at(i));
+  }
+}
+
+TEST_F(ChannelProcessingTest, OversamplingAndTime10) {
+  ChannelProcessing Processing;
+  Module.OversamplingFactor = 1;
+  Processing.setMeanOfSamples(1);
+  Processing.setTimeStampLocation(TimeStampLocation::End);
+  auto Result = Processing.processModule(Module);
+  for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
+    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i).GetTimeStampNS(), Result.TimeStamps.at(i));
+  }
+}
+
 TEST_F(ChannelProcessingTest, DefaultSetup) {
   ChannelProcessing Processing;
   auto Result = Processing.processModule(Module);

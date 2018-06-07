@@ -71,7 +71,14 @@ private:
   } ALIGN(64) mystats;
 };
 
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
+struct DetectorSettingsStruct {
+  std::string fileprefix{""};
+} DetectorSettings;
+
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+  parser.add_option("--dumptofile", DetectorSettings.fileprefix,
+                    "dump to specified file")->group("Sonde");
+}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
@@ -101,7 +108,7 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDE
   XTRACE(INIT, ALW, "Creating %d SONDE Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(
-      eth_buffer_max_entries + 1); /** @todo testing workaround */
+      eth_buffer_max_entries + 11); /** @todo testing workaround */
   assert(eth_ringbuf != 0);
 }
 
@@ -145,7 +152,8 @@ void SONDEIDEA::input_thread() {
 
 void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
-  IDEASData ideasdata(&geometry);
+
+  IDEASData ideasdata(&geometry, DetectorSettings.fileprefix);
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
