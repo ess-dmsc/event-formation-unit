@@ -23,7 +23,9 @@ function(create_module module_name)
 endfunction(create_module)
 
 #=============================================================================
-# Generate a loadable detector module
+# Compile detector module code for static linking into the EFU 
+# Note that you must add the compiled code to the EFU for linking using (e.g)
+# target_link_libraries(efu $<TARGET_OBJECTS:SomeDetectorModule>)
 #=============================================================================
 function(create_object_module module_name)
   add_library(${module_name} OBJECT
