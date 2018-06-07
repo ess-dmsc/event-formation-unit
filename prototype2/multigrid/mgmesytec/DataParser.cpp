@@ -56,7 +56,6 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
                                         ReadoutSerializer &serializer) {
   uint32_t *datap = buffer;
 
-  bool module_good{false};
   uint8_t module;
 
   uint16_t addr;
@@ -74,14 +73,6 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
   uint16_t WireAdcMax = 0;
   //printf("parse n words: %d\n", nWords);
 
-
-  // Sneak peek on time although it is actually last in packet
-  uint32_t *tptr = (buffer + nWords - 1);
-  if ((*tptr & MesytecType::EndOfEvent) == MesytecType::EndOfEvent) {
-    TimeGood = true;
-    Time = *tptr & MesytecTimeMask;
-  }
-
   uint16_t wordsleft = nWords;
   while (wordsleft > 0) {
     auto datatype = *datap & MesytecTypeMask;
@@ -90,7 +81,6 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
     case MesytecType::Header:dataWords = *datap & 0x000003ff;
       assert(nWords > dataWords);
       module = (*datap & 0x00ff0000) >> 16;
-      module_good = true;
       DTRACE(INF, "   Header:  trigger=%d,  data len=%d (words),  module=%d\n",
              triggers, dataWords, module);
       break;
@@ -141,7 +131,8 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
         serializer.addEntry(0, addr, Time, adc);
 
         if (dumptofile) {
-          mgdata->tofile("%d, %d, %d, %d\n", time, Bus, addr, adc);
+          mgdata->tofile("%d, %d, %d, %d, %d, %d\n",
+              triggers, HighTime, Time, Bus, addr, adc);
         }
       } else {
         //DTRACE(DEB, "   discarding %d,%d,%d,%d\n", time, bus, addr, adc);
@@ -157,7 +148,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
 
       if ((*datap & MesytecType::EndOfEvent) == MesytecType::EndOfEvent) {
         TimeGood = true;
-        Time = *tptr & MesytecTimeMask;
+        Time = *datap & MesytecTimeMask;
         DTRACE(INF, "   EndOfEvent: timestamp=%d\n", Time);
         break;
       }
@@ -165,13 +156,14 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       DTRACE(WAR, "   Unknown: 0x%08x\n", *datap);
       break;
     }
+
     wordsleft--;
     datap++;
   }
 
-  if (!TimeGood || !module_good) {
-    XTRACE(DATA, WAR, "   Warning: time or module not set\n");
-    readouts = 0;
+  if (dumptofile && TimeGood && (!WireGood || !GridGood)) {
+    mgdata->tofile("%d, %d, %d, -1, -1, -1\n",
+                   triggers, HighTime, Time);
   }
 }
 
@@ -183,7 +175,6 @@ MesytecData::error MesytecData::parse(const char *buffer,
   int bytesleft = size;
   readouts = 0;
   discards = 0;
-  triggers = 0;
   geometry_errors = 0;
   events = 0;
   tx_bytes = 0;
@@ -220,7 +211,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
     triggers++;
     mesytec_parse_n_words(datap, len - 3, hists, serializer);
 
-    if (TimeGood &&  BusGood && GridGood && WireGood) {
+    if (TimeGood && BusGood && GridGood && WireGood) {
       uint32_t pixel = getPixel();
       uint32_t time = getTime();
       DTRACE(DEB, "Event: pixel: %d, time: %d \n\n", pixel, time);

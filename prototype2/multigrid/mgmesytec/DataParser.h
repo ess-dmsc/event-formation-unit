@@ -24,7 +24,7 @@ public:
     dumptofile = !fileprefix.empty();
     if (dumptofile) {
       mgdata = std::make_shared<DataSave>(fileprefix, 100000000);
-      mgdata->tofile("#Time, Bus, Address, ADC\n");
+      mgdata->tofile("Trigger, HighTime, Time, Bus, Channel, ADC\n");
     }
   };
 
