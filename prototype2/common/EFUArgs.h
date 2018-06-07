@@ -9,7 +9,6 @@
 #include <CLI11.hpp>
 #include <common/Detector.h>
 #include <cstdint>
-#include <multigrid/mgcncs/ChanConv.h>
 #include <string>
 
 struct GraylogSettings {
