@@ -16,7 +16,7 @@
 #include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <gdgem/nmx/HistSerializer.h>
+#include <common/HistSerializer.h>
 #include <common/ReadoutSerializer.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
@@ -169,7 +169,7 @@ void CSPEC::mainThread() {
       }
 
       if (!hists.isEmpty()) {
-        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.eventlet_count());
+        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.hit_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
         monitorprod.produce(txbuffer, len);

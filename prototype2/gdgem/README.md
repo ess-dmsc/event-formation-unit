@@ -4,7 +4,7 @@
 Files/Directories     | Function
 -------------         | -------------
 nmx/                  | Contains common code for event processing
-nmxgen/               | Data generators for Gd-GEM: gennmxfile, gennmxpcap
+generators/               | Data generators for Gd-GEM: gennmxfile, gennmxpcap
 vmm2srs/              | Code for parsing VMM data by the SRS readout system
 gdgem.cpp             | Plugin for the Gd-GEM pipeline
 nmx_config.json       | config file for NMX, can be read by -f option to the EFU
