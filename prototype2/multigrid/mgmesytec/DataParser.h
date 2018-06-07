@@ -58,6 +58,8 @@ public:
   int tx_bytes{0};
   int geometry_errors{0};
 
+  uint64_t FakePulseTime{0};
+
 private:
   bool BusGood {false};
   bool WireGood {false};
@@ -75,6 +77,8 @@ private:
   uint16_t gridThresholdHi{std::numeric_limits<uint16_t>::max()};
   MG24Detector mgseq;
   ESSGeometry mg{4, 48, 20, 1};
+
+  uint32_t PreviousTime{0};
 
   bool dumptofile{false};
   std::shared_ptr<DataSave>(mgdata);

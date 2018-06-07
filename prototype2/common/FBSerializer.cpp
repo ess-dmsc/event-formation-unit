@@ -29,7 +29,7 @@ FBSerializer::FBSerializer(size_t maxarraylength, Producer &prod)
   auto evMsgHeader = CreateEventMessage(builder, sourceName, sequenceNr,
                                         pulseTime, timeoff, pixeloff);
   FinishEventMessageBuffer(builder, evMsgHeader);
-  
+
   fbBufferPointer = reinterpret_cast<char*>(builder.GetBufferPointer());
   fbSize = builder.GetSize();
   assert(fbSize > 0);
@@ -48,13 +48,13 @@ FBSerializer::FBSerializer(size_t maxarraylength, Producer &prod)
 
 FBSerializer::~FBSerializer() {}
 
-int FBSerializer::serialize(uint64_t time, uint64_t seqno, size_t entries,
+int FBSerializer::serialize(size_t entries,
                             char **buffer) {
   if (entries > maxlen) {
     *buffer = 0;
     return 0;
   }
-  eventMsg->mutate_pulse_time(time);
+  eventMsg->mutate_pulse_time(pulse_time);
   eventMsg->mutate_message_id(seqno);
   *timeLenPtr = entries;
   *pixelLenPtr = entries;
@@ -74,7 +74,8 @@ int FBSerializer::produce() {
 
     XTRACE(OUTPUT, DEB, "produce %zu events \n", events);
     char *txbuffer;
-    txlen = serialize((uint64_t)0x01, seqno++, events, &txbuffer);
+    txlen = serialize(events, &txbuffer);
+    seqno++;
     assert(txlen > 0);
     XTRACE(OUTPUT, DEB, "Flatbuffer tx length %d\n", txlen);
     producer.produce(txbuffer, txlen);
@@ -88,6 +89,17 @@ int FBSerializer::produce() {
   }
   return txlen;
 }
+
+//void FBSerializer::set_pulse_time(uint64_t time)
+//{
+//  eventMsg->mutate_pulse_time(time);
+//}
+//
+//uint64_t FBSerializer::get_pulse_time()
+//{
+//  return eventMsg->pulse_time();
+//}
+
 
 int FBSerializer::addevent(uint32_t time, uint32_t pixel) {
   XTRACE(OUTPUT, DEB, "Add event: %d %u\n", time, pixel);

@@ -8,8 +8,8 @@
 #include <multigrid/mgmesytec/DataParser.h>
 #include <common/ReadoutSerializer.h>
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_WAR
 
 // clang-format off
 // sis3153 and mesytec data types from
@@ -141,7 +141,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       break;
 
     case MesytecType::FillDummy:
-      DTRACE(WAR, "   FillDummy\n");
+      DTRACE(INF, "   FillDummy\n");
       break;
 
     default:
@@ -214,6 +214,19 @@ MesytecData::error MesytecData::parse(const char *buffer,
     if (TimeGood && BusGood && GridGood && WireGood) {
       uint32_t pixel = getPixel();
       uint32_t time = getTime();
+
+      if (time < PreviousTime)
+      {
+        //TODO: mystats.tx_bytes +=
+        fbserializer.pulse_time = FakePulseTime;
+        fbserializer.produce();
+//        fbserializer.pulse_time = FakePulseTime + PreviousTime;
+//        fbserializer.reinitialize("multigrid_mesytec", 0, FakePulseTime + PreviousTime);
+//        XTRACE(PROCESS, WAR, "Updated fake pulse time = %zu to %zu by delta %zu\n",
+//            FakePulseTime, fbserializer.get_pulse_time(), PreviousTime);
+        FakePulseTime += PreviousTime;
+      }
+
       DTRACE(DEB, "Event: pixel: %d, time: %d \n\n", pixel, time);
       if (pixel != 0) {
         tx_bytes += fbserializer.addevent(time, pixel);
@@ -222,6 +235,8 @@ MesytecData::error MesytecData::parse(const char *buffer,
         geometry_errors++;
       }
     }
+
+    PreviousTime = Time;
 
     datap += (len - 3);
     bytesleft -= (len - 3) * 4;

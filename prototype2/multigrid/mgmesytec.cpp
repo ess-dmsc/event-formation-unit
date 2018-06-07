@@ -127,6 +127,7 @@ void CSPEC::mainThread() {
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
   Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
   FBSerializer flatbuffer(kafka_buffer_size, EventProducer);
+
   ReadoutSerializer readouts(readout_entries, monitorprod);
   HistSerializer histfb;
   NMXHists hists;
@@ -160,13 +161,6 @@ void CSPEC::mainThread() {
 
     // Force periodic flushing
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
-      mystats.tx_bytes += flatbuffer.produce();
-
-      auto entries = readouts.getNumEntries();
-      if (entries > 0) {
-        XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", entries);
-        //readouts.produce(); // Periodically produce of readouts
-      }
 
       if (!hists.isEmpty()) {
         XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.hit_count());
@@ -181,6 +175,13 @@ void CSPEC::mainThread() {
 
     // Checking for exit
     if (not runThreads) {
+      mystats.tx_bytes += flatbuffer.produce();
+      auto entries = readouts.getNumEntries();
+      if (entries > 0) {
+        XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", entries);
+        //readouts.produce(); // Periodically produce of readouts
+      }
+
       XTRACE(INPUT, ALW, "Stopping processing thread.\n");
       return;
     }

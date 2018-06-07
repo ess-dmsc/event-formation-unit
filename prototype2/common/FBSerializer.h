@@ -19,7 +19,10 @@ public:
   ~FBSerializer();
 
   /** @todo document */
-  int serialize(uint64_t time, uint64_t seqno, size_t entries, char **buffer);
+  int serialize(size_t entries, char **buffer);
+
+  /** @todo document */
+  uint64_t get_pulse_time();
 
   /** @todo document */
   int addevent(uint32_t time, uint32_t pixel);
@@ -27,7 +30,11 @@ public:
   /** @todo document */
   int produce();
 
+  std::string source_name;
+  uint64_t pulse_time {0};
+
 private:
+
   flatbuffers::FlatBufferBuilder builder;
   size_t maxlen{0};
   uint8_t *timeptr{nullptr};
