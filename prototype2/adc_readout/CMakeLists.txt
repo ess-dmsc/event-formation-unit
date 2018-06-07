@@ -35,7 +35,7 @@ set(AdcReadout_INC
     ${AdcReadoutBase_INC}
     )
 
-create_object_module(AdcReadout)
+create_module(AdcReadout)
 
 set(AdcReadoutTest_SRC
     test/UnitTests.cpp

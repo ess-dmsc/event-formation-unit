@@ -8,7 +8,6 @@
 #include "AdcReadoutBase.h"
 #include "AdcSettings.h"
 #include <common/Detector.h>
-#include <common/DetectorModuleRegister.h>
 
 static AdcSettings LocalAdcSettings;
 
@@ -26,5 +25,5 @@ public:
 
 // DetectorFactory<AdcReadout> Factory;
 
-DetectorModuleRegistration::Registrar<AdcReadout> Register("AdcReadout",
-                                                           CLIArguments);
+//DetectorModuleRegistration::Registrar<AdcReadout> Register("AdcReadout",
+//                                                           CLIArguments);
