@@ -82,6 +82,33 @@ TEST_F(VMM3SRSDataTest, MarkerAndDataMixed) {
   }
 }
 
+TEST_F(VMM3SRSDataTest, NoData) {
+  int res = data->receive((char *)&no_data[0], no_data.size());
+  ASSERT_EQ(res, 0);
+  assertfields(0, 0, 0);
+}
+
+TEST_F(VMM3SRSDataTest, InvalidDataId) {
+  int res = data->receive((char *)&invalid_dataid[0], invalid_dataid.size());
+  ASSERT_EQ(res, 0);
+  assertfields(0, 0, invalid_dataid.size());
+}
+
+TEST_F(VMM3SRSDataTest, InconsistentDataLength) {
+  int res = data->receive((char *)&inconsistent_datalen[0], inconsistent_datalen.size());
+  ASSERT_EQ(res, 0);
+  assertfields(0, 0, inconsistent_datalen.size());
+}
+
+TEST_F(VMM3SRSDataTest, DataLengthOverflow) {
+  VMM3SRSData shortvmmbuffer(2);
+  int res = shortvmmbuffer.receive((char *)& data_3_ch0[0],  data_3_ch0.size());
+  ASSERT_EQ(res, 2);
+  ASSERT_EQ(2, shortvmmbuffer.elems);
+  ASSERT_EQ(0, shortvmmbuffer.timet0s);
+  ASSERT_EQ(6, shortvmmbuffer.error);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
