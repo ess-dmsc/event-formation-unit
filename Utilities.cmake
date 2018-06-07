@@ -64,7 +64,7 @@ function(create_test_executable)
   set(oneValueArgs "")
   set(multiValueArgs "")
   cmake_parse_arguments(create_test_executable "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
-  
+
   set(exec_name ${create_test_executable_UNPARSED_ARGUMENTS})
   
   add_executable(${exec_name} EXCLUDE_FROM_ALL
