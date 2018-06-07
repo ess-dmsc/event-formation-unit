@@ -11,7 +11,7 @@
 cncsread
 batchreader
 genpixids
-efu
+bin/efu
 gencspec
 gencspecfile
 gennmxfile

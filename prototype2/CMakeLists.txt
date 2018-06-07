@@ -36,10 +36,9 @@ add_subdirectory(readout)
 
 include(UnitTests.cmake) # This has only libs unit tests now ???
 
-#=============================================================================
-# Event Formation Unit
-#=============================================================================
-
+##=============================================================================
+## Event Formation Unit
+##=============================================================================
 add_subdirectory(efu)
 
 #=============================================================================
@@ -56,6 +55,5 @@ add_custom_target(runefu
     COMMAND efu "-d" "../modules/mgmesytec" "-s" "1"
     DEPENDS efu mgmesytec
     )
-
 
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)

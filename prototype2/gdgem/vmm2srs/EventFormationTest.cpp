@@ -1,12 +1,13 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
-#include <gdgem/nmx/Geometry.h>
+
 #include <gdgem/nmx/Clusterer.h>
 #include <gdgem/nmx/Hists.h>
 #include <gdgem/vmm2srs/EventFormationTestData.h>
 #include <gdgem/vmm2srs/EventletBuilderSRS.h>
 #include <gdgem/vmm2srs/SRSMappings.h>
 #include <gdgem/vmm2srs/SRSTime.h>
+//#include <logical_geometry/Geometry.h>
 #include <memory>
 #include <test/TestBase.h>
 

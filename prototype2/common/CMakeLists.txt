@@ -112,6 +112,9 @@ set(VersionTest_INC
   Version.h)
 create_test_executable(VersionTest)
 
+set(ESSGeometryTest_SRC ESSGeometryTest.cpp)
+#set(ESSGeometryTest_INC ESSGeometry.h)
+create_test_executable(ESSGeometryTest)
 
 # GOOGLE BENCHMARKS
 set(ESSGeometryBenchmarkTest_SRC ESSGeometryBenchmarkTest.cpp)

@@ -7,14 +7,9 @@ function(makebuildstr)
   set(BUILDSTR "${date} [${m_name}:${user_name}] [${m_version}] ${hash}" PARENT_SCOPE)
 endfunction()
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
-  if (NOT DEFINED BUILDSTR)
-    message(FATAL_ERROR "Build string must be set manually when compiling using release mode e.g. \"-DBUILDSTR=v1.2.3\".")
-  endif ()
-else ()
-  set(BUILDSTR "")
-  makebuildstr()
-endif ()
+set(BUILDSTR "")
+makebuildstr()
+
 message(STATUS "Build str: ${BUILDSTR}")
 
 add_definitions("-DBUILDSTR=${BUILDSTR}")
