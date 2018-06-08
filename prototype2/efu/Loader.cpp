@@ -35,16 +35,20 @@ bool Loader::loadPlugin(const std::string lib) {
                       "name\"%s\". Attempting to open external plugin.",
            lib.c_str());
   }
-  std::string libname = "./" + lib + ".so";
-  const char *libstr = strdup(libname.c_str());
-
-  if ((handle = dlopen(libstr, RTLD_NOW)) == 0) {
-    XTRACE(INIT, CRI, "Could not open library %s: %s\n", libname.c_str(),
+  std::vector<std::string> PossibleSuffixes{"", ".so", ".dll", ".dylib"};
+  
+  for (auto &CSuffix : PossibleSuffixes) {
+    std::string TestLibName = "./" + lib + CSuffix;
+    handle = dlopen(TestLibName.c_str(), RTLD_NOW);
+    if (handle != nullptr) {
+      break;
+    }
+  }
+  if (handle == nullptr) {
+    XTRACE(INIT, CRI, "Could not open library %s: %s\n", lib.c_str(),
            dlerror());
-    free((void *)libstr);
     return false;
   }
-  free((void *)libstr);
 
   if (!(myFactory = (DetectorFactoryBase *)dlsym(handle, "Factory"))) {
     XTRACE(INIT, CRI, "Could not find Factory in %s\n", libname.c_str());
