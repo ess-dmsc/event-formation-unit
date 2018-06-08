@@ -51,7 +51,7 @@ bool Loader::loadPlugin(const std::string lib) {
   }
 
   if (!(myFactory = (DetectorFactoryBase *)dlsym(handle, "Factory"))) {
-    XTRACE(INIT, CRI, "Could not find Factory in %s\n", libname.c_str());
+    XTRACE(INIT, CRI, "Could not find Factory in %s\n", lib.c_str());
     return false;
   }
 
@@ -59,7 +59,7 @@ bool Loader::loadPlugin(const std::string lib) {
       (PopulateCLIParser *)dlsym(handle, "PopulateParser");
   if (nullptr == tempParserPopulator) {
     XTRACE(INIT, WAR, "Unable to find function to populate CLI parser in %s\n",
-           libname.c_str());
+           lib.c_str());
   } else {
     if (nullptr == tempParserPopulator->Function) {
       XTRACE(INIT, WAR, "Function to populate CLI parser not set");
