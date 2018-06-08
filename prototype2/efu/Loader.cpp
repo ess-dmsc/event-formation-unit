@@ -41,6 +41,8 @@ bool Loader::loadPlugin(const std::string lib) {
     std::string TestLibName = "./" + lib + CSuffix;
     handle = dlopen(TestLibName.c_str(), RTLD_NOW);
     if (handle != nullptr) {
+      TRACE(INIT, INF, "Loaded library \"%s\".",
+            TestLibName.c_str());
       break;
     }
   }
