@@ -14,7 +14,7 @@
 #include <common/RingBuffer.h>
 
 #include <gdgem/NMXConfig.h>
-#include <gdgem/nmx/HistSerializer.h>
+#include <common/HistSerializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/generators/BuilderAPV.h>
 #include <gdgem/generators/BuilderHits.h>
@@ -384,11 +384,4 @@ void NMX::init_builder() {
 
 /** ----------------------------------------------------- */
 
-class NMXFactory : DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    return std::shared_ptr<Detector>(new NMX(settings));
-  }
-};
-
-NMXFactory Factory;
+DetectorFactory<NMX> Factory;

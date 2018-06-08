@@ -16,7 +16,7 @@
 #include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <gdgem/nmx/HistSerializer.h>
+#include <common/HistSerializer.h>
 #include <common/ReadoutSerializer.h>
 #include <iostream>
 #include <libs/include/SPSCFifo.h>
@@ -189,11 +189,4 @@ void CSPEC::mainThread() {
 
 /** ----------------------------------------------------- */
 
-class CSPECFactory : public DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    return std::shared_ptr<Detector>(new CSPEC(settings));
-  }
-};
-
-CSPECFactory Factory;
+DetectorFactory<CSPEC> Factory;

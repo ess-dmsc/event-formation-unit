@@ -21,7 +21,7 @@ function(create_benchmark_executable exec_name)
       ${link_libraries}
       ${GTEST_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
-      -lbenchmark)
+      -lbenchmark -lpthread)
     set(benchmark_targets
       ${exec_name}
       ${benchmark_targets}

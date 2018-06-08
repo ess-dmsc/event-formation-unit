@@ -11,8 +11,8 @@ set(gdgem_SRC
     nmx/Event.cpp
     nmx/Hit.cpp
     nmx/HitFile.cpp
-    nmx/Hists.cpp
-    nmx/HistSerializer.cpp
+    ../common/Hists.cpp
+    ../common/HistSerializer.cpp
     nmx/TrackSerializer.cpp
     nmx/AbstractBuilder.cpp
     generators/BuilderAPV.cpp
@@ -31,10 +31,10 @@ set(gdgem_INC
     nmx/Cluster.h
     nmx/Event.h
     nmx/Hit.h
-    nmx/Hists.h
+    ../common/Hists.h
     nmx/Readout.h
     nmx/ReadoutFile.h
-    nmx/HistSerializer.h
+    ../common/HistSerializer.h
     nmx/TrackSerializer.h
     nmx/AbstractBuilder.h
     generators/BuilderAPV.h

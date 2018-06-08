@@ -23,6 +23,17 @@ function(create_module module_name)
 endfunction(create_module)
 
 #=============================================================================
+# Compile detector module code for static linking into the EFU 
+# Note that you must add the compiled code to the EFU for linking using (e.g)
+# target_link_libraries(efu $<TARGET_OBJECTS:SomeDetectorModule>)
+#=============================================================================
+function(create_object_module module_name)
+  add_library(${module_name} OBJECT
+    ${${module_name}_SRC}
+    ${${module_name}_INC})
+endfunction(create_object_module)
+
+#=============================================================================
 # Generate an executable program
 #=============================================================================
 function(create_executable exec_name)
@@ -103,4 +114,3 @@ function(create_integration_test_executable exec_name)
     ${EFU_COMMON_LIBS}
     eventlib)
 endfunction(create_integration_test_executable)
-

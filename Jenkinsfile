@@ -74,11 +74,10 @@ def docker_cmake(image_key, xtra_flags) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd ${project} && \
-        BUILDSTR=\\\$(git log --oneline | head -n 1 | awk '{print \\\$1}') && \
         cd build && \
         . ./activate_run.sh && \
         cmake --version && \
-        cmake -DCONAN=MANUAL ${xtra_flags} -DBUILDSTR=\\\$BUILDSTR ..
+        cmake -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
     \""""
 }
 
@@ -89,6 +88,7 @@ def docker_build(image_key) {
         make --version && \
         make -j4 VERBOSE=OFF && \
         make -j4 unit_tests VERBOSE=OFF && \
+        make -j4 benchmark && \
         cd ../utils/udpredirect && \
         make
     \""""
