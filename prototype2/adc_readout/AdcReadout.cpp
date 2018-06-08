@@ -23,11 +23,5 @@ public:
       : AdcReadoutBase(std::move(Settings), LocalAdcSettings) {}
 };
 
-class ADC_Readout_Factory : public DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings Settings) override {
-    return std::shared_ptr<Detector>(new AdcReadout(Settings));
-  }
-};
 
-ADC_Readout_Factory Factory;
+DetectorFactory<AdcReadout> Factory;

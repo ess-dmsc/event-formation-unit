@@ -266,11 +266,4 @@ void MBCAEN::processing_thread() {
 
 /** ----------------------------------------------------- */
 
-class MBCAENFactory : DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    return std::shared_ptr<Detector>(new MBCAEN(settings));
-  }
-};
-
-MBCAENFactory Factory;
+DetectorFactory<MBCAEN> Factory;

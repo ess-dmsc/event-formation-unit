@@ -5,6 +5,7 @@ set(efu_common_SRC
   FBSerializer.cpp
   NewStats.cpp
   Producer.cpp
+  DetectorModuleRegister.cpp
   DataSave.cpp
   )
 set(efu_common_INC
@@ -15,6 +16,7 @@ set(efu_common_INC
   NewStats.h
   Producer.h
   Trace.h
+  DetectorModuleRegister.h
   DataSave.h
   )
 
@@ -61,9 +63,11 @@ set(DataSaveTest_INC
 create_test_executable(DataSaveTest)
 
 set(DetectorTest_SRC
+  DetectorModuleRegister.cpp
   DetectorTest.cpp
   NewStats.cpp)
 set(DetectorTest_INC
+  DetectorModuleRegister.h
   NewStats.h
   Detector.h)
 create_test_executable(DetectorTest)
@@ -73,6 +77,8 @@ set(EFUArgsTest_SRC
   EFUArgs.cpp)
 set(EFUArgsTest_INC
   EFUArgs.h)
+set(EFUArgsTest_LIB
+  efu_common)
 create_test_executable(EFUArgsTest)
 
 set(FBSerializerTest_SRC

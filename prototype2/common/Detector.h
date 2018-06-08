@@ -48,12 +48,13 @@ public:
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
-  Detector(std::string Name, BaseSettings settings) : EFUSettings(settings), Stats(Name), DetectorName(Name) {};
+  Detector(std::string Name, BaseSettings settings)
+      : EFUSettings(settings), Stats(Name), DetectorName(Name){};
   // default constructor, all instruments must implement these methods
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
    */
-  
+
   virtual ~Detector() = default;
 
   /** @brief document */
@@ -76,7 +77,7 @@ public:
   virtual std::map<std::string, CommandFunction> GetDetectorCommandFunctions() {
     return DetectorCommands;
   }
-  
+
   virtual void startThreads() {
     for (auto &tInfo : Threads) {
       tInfo.thread = std::thread(tInfo.func);
@@ -114,9 +115,22 @@ struct PopulateCLIParser {
   std::function<void(CLI::App &)> Function;
 };
 
-class DetectorFactory {
+/// \brief Base class for the creation of detector factories.
+class DetectorFactoryBase {
 public:
-  /** @brief creates the detector object. All instruments must implement this
-   */
   virtual std::shared_ptr<Detector> create(BaseSettings settings) = 0;
+};
+
+/// \brief Template for creating detector factories in dynamically loaded detector modules.
+///
+/// Usage example: DetectorFactory<Sonde> Factory;
+template <class DetectorModule>
+class DetectorFactory : public DetectorFactoryBase {
+public:
+  /// \brief Instantiates the cooresponding detector module.
+  ///
+  /// This member function is only called by the efu when loading a detector module.
+  std::shared_ptr<Detector> create(BaseSettings Settings) override {
+    return std::shared_ptr<Detector>(new DetectorModule(Settings));
+  }
 };

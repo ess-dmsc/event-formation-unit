@@ -189,11 +189,4 @@ void CSPEC::mainThread() {
 
 /** ----------------------------------------------------- */
 
-class CSPECFactory : public DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    return std::shared_ptr<Detector>(new CSPEC(settings));
-  }
-};
-
-CSPECFactory Factory;
+DetectorFactory<CSPEC> Factory;
