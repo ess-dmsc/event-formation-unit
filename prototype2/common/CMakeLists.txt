@@ -61,9 +61,11 @@ set(DataSaveTest_INC
 create_test_executable(DataSaveTest)
 
 set(DetectorTest_SRC
+  DetectorModuleRegister.cpp
   DetectorTest.cpp
   NewStats.cpp)
 set(DetectorTest_INC
+  DetectorModuleRegister.h
   NewStats.h
   Detector.h)
 create_test_executable(DetectorTest)

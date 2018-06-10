@@ -28,10 +28,6 @@ Producer::Producer(std::string broker, std::string topicstr) : ProducerBase() {
   assert(errstr.empty() == true);
   conf->set("message.copy.max.bytes", "10000000", errstr);
   assert(errstr.empty() == true);
-  conf->set("queue.buffering.max.ms", "500", errstr);
-  assert(errstr.empty() == true);
-  conf->set("batch.num.messages", "10000", errstr);
-  assert(errstr.empty() == true);
 
   producer = RdKafka::Producer::create(conf, errstr);
   if (!producer) {
