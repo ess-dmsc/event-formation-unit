@@ -21,7 +21,7 @@ public:
 
   /// @brief Pure virtual function that must be implemented in order to process
   /// parsed data.
-  virtual void processData(DataModule const &Data) = 0;
+  virtual void processData(SamplingRun const &Data) = 0;
 
 protected:
   std::shared_ptr<ProducerBase> ProducerPtr;

@@ -46,8 +46,8 @@ std::shared_ptr<Producer> AdcReadoutBase::getProducer() {
   return ProducerPtr;
 }
 
-DataModule *AdcReadoutBase::GetDataModule(int Channel) {
-  SpscBuffer::ElementPtr<DataModule> ReturnModule{nullptr};
+SamplingRun *AdcReadoutBase::GetDataModule(int Channel) {
+  SpscBuffer::ElementPtr<SamplingRun> ReturnModule{nullptr};
   bool Success = DataModuleQueues.at(Channel)->tryGetEmpty(ReturnModule);
   if (Success) {
     return ReturnModule;
@@ -55,9 +55,9 @@ DataModule *AdcReadoutBase::GetDataModule(int Channel) {
   return nullptr;
 }
 
-bool AdcReadoutBase::QueueUpDataModule(DataModule *Data) {
+bool AdcReadoutBase::QueueUpDataModule(SamplingRun *Data) {
   return DataModuleQueues.at(Data->Channel)
-      ->tryPutData(SpscBuffer::ElementPtr<DataModule>(Data));
+      ->tryPutData(SpscBuffer::ElementPtr<SamplingRun>(Data));
 }
 
 void AdcReadoutBase::inputThread() {
@@ -70,9 +70,9 @@ void AdcReadoutBase::inputThread() {
   mbdata.setRecvTimeout(0,
                         100000); // secs, usecs, One tenth of a second (100ms)
   InData ReceivedPacket;
-  std::function<DataModule *(int)> DataModuleProducer(
+  std::function<SamplingRun *(int)> DataModuleProducer(
       [this](int Channel) { return this->GetDataModule(Channel); });
-  std::function<bool(DataModule *)> QueingFunction([this](DataModule *Data) {
+  std::function<bool(SamplingRun *)> QueingFunction([this](SamplingRun *Data) {
     this->AdcStats.current_ts_seconds = Data->TimeStamp.Seconds;
     return this->QueueUpDataModule(Data);
   });

@@ -29,7 +29,7 @@ double CalcTimeStampDelta(int OversamplingFactor) {
   return SampleTime * OversamplingFactor;
 }
 
-ProcessedSamples ChannelProcessing::processModule(const DataModule &Samples) {
+ProcessedSamples ChannelProcessing::processModule(const SamplingRun &Samples) {
   int FinalOversamplingFactor = MeanOfNrOfSamples * Samples.OversamplingFactor;
   size_t SampleIndex{0};
   size_t TotalNumberOfSamples =
@@ -104,7 +104,7 @@ void SampleProcessing::setTimeStampLocation(TimeStampLocation Location) {
   ProcessingInstance.setTimeStampLocation(TSLocation);
 }
 
-void SampleProcessing::processData(const DataModule &Data) {
+void SampleProcessing::processData(const SamplingRun &Data) {
   auto ResultingSamples = ProcessingInstance.processModule(Data);
   if (not ResultingSamples.Samples.empty()) {
     serializeAndTransmitData(ResultingSamples);

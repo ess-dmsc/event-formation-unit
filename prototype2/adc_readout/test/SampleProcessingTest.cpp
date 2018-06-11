@@ -15,8 +15,8 @@
 #include "senv_data_generated.h"
 #include <array>
 
-DataModule getTestModule() {
-  DataModule Module;
+SamplingRun getTestModule() {
+  SamplingRun Module;
   Module.TimeStamp.Seconds = 42;
   Module.TimeStamp.SecondsFrac = 65;
   Module.OversamplingFactor = 1;
@@ -57,7 +57,7 @@ public:
 TEST(SampleProcessing, NoSamples) {
   std::shared_ptr<ProducerStandIn> TestProducer(new ProducerStandIn());
   SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
-  DataModule TempModule;
+  SamplingRun TempModule;
   TempModule.Channel = 1;
   TestProcessor.processData(TempModule);
   FORBID_CALL(*TestProducer.get(), produce(_,_));
@@ -243,7 +243,7 @@ class ChannelProcessingTest : public ::testing::Test {
 public:
   virtual void SetUp() override { Module = getTestModule(); }
   virtual void TearDown() override { Module.Data.clear(); }
-  DataModule Module;
+  SamplingRun Module;
 };
 
 TEST_F(ChannelProcessingTest, NumberOfSamplesSummed1) {

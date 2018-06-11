@@ -29,8 +29,8 @@ public:
   ~AdcReadoutBase() = default;
 
 protected:
-  using DataModulePtr = SpscBuffer::ElementPtr<DataModule>;
-  using Queue = SpscBuffer::CircularBuffer<DataModule>;
+  using DataModulePtr = SpscBuffer::ElementPtr<SamplingRun>;
+  using Queue = SpscBuffer::CircularBuffer<SamplingRun>;
 
   /// @brief Implements the thread doing the socket communication.
   /// This function will return when Detector::runThreads is set to false.
@@ -47,8 +47,8 @@ protected:
   /// Used in order to simplify unit testing.
   virtual std::shared_ptr<Producer> getProducer();
 
-  DataModule *GetDataModule(int Channel);
-  bool QueueUpDataModule(DataModule *Data);
+  SamplingRun *GetDataModule(int Channel);
+  bool QueueUpDataModule(SamplingRun *Data);
 
   std::vector<std::unique_ptr<Queue>> DataModuleQueues;
 

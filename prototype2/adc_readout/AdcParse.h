@@ -49,17 +49,17 @@ private:
 
 /// @brief Data stored in this struct represents a (properly parsed) sampling
 /// run.
-struct DataModule {
-  DataModule() = default;
-  DataModule(size_t ReserveElements) noexcept : Data(ReserveElements) {
+struct SamplingRun {
+  SamplingRun() = default;
+  SamplingRun(size_t ReserveElements) noexcept : Data(ReserveElements) {
     Data.clear();
   }
-  ~DataModule() = default;
-  DataModule(const DataModule &&Other)
+  ~SamplingRun() = default;
+  SamplingRun(const SamplingRun &&Other)
       : TimeStamp(Other.TimeStamp), Channel(Other.Channel),
         OversamplingFactor(Other.OversamplingFactor),
         Data(std::move(Other.Data)) {}
-  DataModule &operator=(const DataModule &) = default;
+  SamplingRun &operator=(const SamplingRun &) = default;
   RawTimeStamp TimeStamp;
   void reset() {
     Data.clear();
@@ -75,10 +75,10 @@ struct DataModule {
 
 class ModuleProcessingException : public std::runtime_error {
 public:
-  ModuleProcessingException(DataModule *Data)
+  ModuleProcessingException(SamplingRun *Data)
       : std::runtime_error("Unable to processe data module"),
         UnproccesedData(Data) {}
-  DataModule *UnproccesedData;
+  SamplingRun *UnproccesedData;
 };
 
 /// @brief Different types of data packets form teh ADC hardware.
@@ -151,8 +151,8 @@ struct IdleHeader {
 
 class PacketParser {
 public:
-  PacketParser(std::function<bool(DataModule *)> ModuleHandler,
-               std::function<DataModule *(int Channel)> ModuleProducer);
+  PacketParser(std::function<bool(SamplingRun *)> ModuleHandler,
+               std::function<SamplingRun *(int Channel)> ModuleProducer);
   /// @brief Parses a packet of binary data.
   /// @param[in] Packet Raw data, straight from the socket.
   /// @return Some general information about the packet.
@@ -168,8 +168,8 @@ protected:
   size_t parseData(const InData &Packet, std::uint32_t StartByte);
 
 private:
-  std::function<bool(DataModule *)> HandleModule;
-  std::function<DataModule *(int Channel)> ProduceModule;
+  std::function<bool(SamplingRun *)> HandleModule;
+  std::function<SamplingRun *(int Channel)> ProduceModule;
 };
 
 /// @brief Parses the header of a packet. Called by parsePacket().

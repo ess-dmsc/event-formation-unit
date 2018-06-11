@@ -79,23 +79,23 @@ TEST_F(AdcParsing, ParseCorrectHeader) {
   EXPECT_GT(Header.DataStart, 0);
 }
 
-DataModule *GetModule(int) {
-  static DataModule TestModule(10);
+SamplingRun *GetModule(int) {
+  static SamplingRun TestModule(10);
   return &TestModule;
 }
 
 class ParserStandIn : public PacketParser {
 public:
-  ParserStandIn(std::function<bool(DataModule *)> ModuleHandler,
-                std::function<DataModule *(int Channel)> ModuleProducer)
+  ParserStandIn(std::function<bool(SamplingRun *)> ModuleHandler,
+                std::function<SamplingRun *(int Channel)> ModuleProducer)
       : PacketParser(ModuleHandler, ModuleProducer) {}
   using PacketParser::parseData;
 };
 
 TEST_F(AdcParsing, ParseCorrectDataModule) {
   int NrOfModules{0};
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [&NrOfModules](DataModule *) {
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [&NrOfModules](SamplingRun *) {
         NrOfModules++;
         return true;
       });
@@ -113,8 +113,8 @@ TEST_F(AdcParsing, ParseCorrectDataModule) {
 }
 
 TEST_F(AdcParsing, ParseCorrectTrailer) {
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [](DataModule *) { return true; });
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [](SamplingRun *) { return true; });
   ParserStandIn Parser(ProccessingFunction, GetModule);
   HeaderInfo Header;
   EXPECT_NO_THROW(Header = parseHeader(Packet));
@@ -130,8 +130,8 @@ TEST_F(AdcParsing, ParseCorrectTrailer) {
 TEST_F(AdcParsingAlt, ParseCorrectPacket) {
   int NrOfModules{0};
   int OversamplingFactor;
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [&NrOfModules, &OversamplingFactor](DataModule *Module) {
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [&NrOfModules, &OversamplingFactor](SamplingRun *Module) {
         OversamplingFactor = Module->OversamplingFactor;
         NrOfModules++;
         return true;
@@ -145,8 +145,8 @@ TEST_F(AdcParsingAlt, ParseCorrectPacket) {
 
 TEST_F(AdcParsing, ParseCorrectPacket) {
   int NrOfModules{0};
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [&NrOfModules](DataModule *) {
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [&NrOfModules](SamplingRun *) {
         NrOfModules++;
         return true;
       });
@@ -157,8 +157,8 @@ TEST_F(AdcParsing, ParseCorrectPacket) {
 }
 
 TEST_F(AdcParsingDataFail, LengthFail) {
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [](DataModule *) { return true; });
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [](SamplingRun *) { return true; });
   ParserStandIn Parser(ProccessingFunction, GetModule);
   DataHead->fixEndian();
   DataHead->Length = 500;
@@ -167,8 +167,8 @@ TEST_F(AdcParsingDataFail, LengthFail) {
 }
 
 TEST_F(AdcParsingDataFail, ABCDFail) {
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [](DataModule *) { return true; });
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [](SamplingRun *) { return true; });
   ParserStandIn Parser(ProccessingFunction, GetModule);
   DataHead->fixEndian();
   DataHead->MagicValue = 0xCDAB;
@@ -177,8 +177,8 @@ TEST_F(AdcParsingDataFail, ABCDFail) {
 }
 
 TEST_F(AdcParsingDataFail, HeaderLengthFail) {
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [](DataModule *) { return true; });
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [](SamplingRun *) { return true; });
   ParserStandIn Parser(ProccessingFunction, GetModule);
   Packet.Length = sizeof(PacketHeader) + 10;
   Header->fixEndian();
@@ -188,8 +188,8 @@ TEST_F(AdcParsingDataFail, HeaderLengthFail) {
 }
 
 TEST_F(AdcParsingDataFail, BEEFCAFEFail) {
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [](DataModule *) { return true; });
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [](SamplingRun *) { return true; });
   ParserStandIn Parser(ProccessingFunction, GetModule);
   *BEEFCAFE = 0X00;
   EXPECT_THROW(Parser.parsePacket(Packet), ParserException);
@@ -197,8 +197,8 @@ TEST_F(AdcParsingDataFail, BEEFCAFEFail) {
 
 TEST_F(AdcParsingIdle, ParseCorrectIdlePacket) {
   int NrOfModules{0};
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [&NrOfModules](DataModule *) {
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [&NrOfModules](SamplingRun *) {
         NrOfModules++;
         return true;
       });
@@ -333,10 +333,10 @@ public:
 
 TEST_F(AdcDataParsing, FakeDataTest) {
   int NrOfModules{0};
-  DataModule ModulePtr;
+  SamplingRun ModulePtr;
   bool FirstModule = true;
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [&NrOfModules, &ModulePtr, &FirstModule](DataModule *NewModule) {
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [&NrOfModules, &ModulePtr, &FirstModule](SamplingRun *NewModule) {
         NrOfModules++;
         if (FirstModule) {
           FirstModule = false;
@@ -357,24 +357,24 @@ TEST_F(AdcDataParsing, FakeDataTest) {
 }
 
 TEST_F(AdcDataParsing, MagicWordFail) {
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [](DataModule *) { return true; });
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [](SamplingRun *) { return true; });
   ParserStandIn Parser(ProccessingFunction, GetModule);
   DataPointer[1].Data.MagicValue = 0x0000;
   EXPECT_THROW(Parser.parseData(Packet, 0), ParserException);
 }
 
 TEST_F(AdcDataParsing, TrailerFail) {
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [](DataModule *) { return true; });
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [](SamplingRun *) { return true; });
   ParserStandIn Parser(ProccessingFunction, GetModule);
   DataPointer[1].Trailer = 0;
   EXPECT_THROW(Parser.parseData(Packet, 0), ParserException);
 }
 
 TEST_F(AdcDataParsing, NrOfSamplesFail) {
-  std::function<bool(DataModule *)> ProccessingFunction(
-      [](DataModule *) { return true; });
+  std::function<bool(SamplingRun *)> ProccessingFunction(
+      [](SamplingRun *) { return true; });
   ParserStandIn Parser(ProccessingFunction, GetModule);
   DataPointer[1].Data.Length = 20;
   EXPECT_THROW(Parser.parseData(Packet, 0), ParserException);

@@ -13,7 +13,7 @@
 PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod)
     : AdcDataProcessor(std::move(Prod)) {}
 
-void PeakFinder::processData(DataModule const &Data) {
+void PeakFinder::processData(SamplingRun const &Data) {
   auto Result = FindPeak(Data.Data);
   std::uint64_t PeakTimeStamp =
       Data.TimeStamp.GetOffsetTimeStamp(Result.MaxLocation).GetTimeStampNS();

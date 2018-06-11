@@ -19,7 +19,7 @@ public:
 
   /// @brief Handles peak detection, serialisation of the result and
   /// transmission to the Kafka broker.
-  virtual void processData(DataModule const &Data) override;
+  virtual void processData(SamplingRun const &Data) override;
 
 private:
   /// @brief Implements serialisation and transmission of the peak data.

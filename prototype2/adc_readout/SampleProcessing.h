@@ -55,7 +55,7 @@ public:
   /// channel. The caller has to make sure that this is the case.
   /// @param[in] Samples The datamodule (sampling run) to proccess.
   /// @return Processed (oversampled) data sample points.
-  ProcessedSamples processModule(DataModule const &Samples);
+  ProcessedSamples processModule(SamplingRun const &Samples);
 
   /// @brief Sets oversampling factor. Default on instantiation is 1, i.e. no
   /// oversampling.
@@ -100,7 +100,7 @@ public:
   /// @note Will NOT concatenate sample runs from the same channel. Samples from
   /// each data module in Data will be put in a seperate flatbuffer.
   /// @param[in] Data Parsed data to process.
-  virtual void processData(DataModule const &Data) override;
+  virtual void processData(SamplingRun const &Data) override;
 
   void setMeanOfSamples(int NrOfSamples);
   void setTimeStampLocation(TimeStampLocation Location);
