@@ -1,5 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <common/DetectorModuleRegister.h>
 #include <common/EFUArgs.h>
 #include <common/Trace.h>
 #include <cstdio>
@@ -38,8 +39,19 @@ EFUArgs::EFUArgs() {
                   },
                   "Thread to core affinity. Ex: \"-c input_t:4\"")
       ->group("EFU Options");
+
+  std::string DetectorDescription{"Detector name"};
+  std::map<std::string, DetectorModuleSetup> StaticDetModules =
+      DetectorModuleRegistration::getFactories();
+  if (not StaticDetModules.empty()) {
+    DetectorDescription += " (Known modules:";
+    for (auto &Item : StaticDetModules) {
+      DetectorDescription += " " + Item.first;
+    }
+    DetectorDescription += ")";
+  }
   DetectorOption =
-      CLIParser.add_option("-d,--det", DetectorName, "Detector name")
+      CLIParser.add_option("-d,--det", DetectorName, DetectorDescription)
           ->group("EFU Options")
           ->required();
   CLIParser

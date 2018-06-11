@@ -36,12 +36,13 @@ bool Loader::loadPlugin(const std::string lib) {
            lib.c_str());
   }
   std::vector<std::string> PossibleSuffixes{"", ".so", ".dll", ".dylib"};
-
+  
   for (auto &CSuffix : PossibleSuffixes) {
     std::string TestLibName = "./" + lib + CSuffix;
     handle = dlopen(TestLibName.c_str(), RTLD_NOW);
     if (handle != nullptr) {
-      XTRACE(INIT, INF, "Loaded library \"%s\".", TestLibName.c_str());
+      XTRACE(INIT, INF, "Loaded library \"%s\".",
+            TestLibName.c_str());
       break;
     }
   }
@@ -67,6 +68,13 @@ bool Loader::loadPlugin(const std::string lib) {
     } else {
       ParserPopulator = tempParserPopulator->Function;
     }
+  }
+  return true;
+}
+
+bool Loader::IsOk() {
+  if (nullptr == myFactory) {
+    return false;
   }
   return true;
 }

@@ -36,12 +36,7 @@ public:
   /** @brief minimal destructor */
   ~Loader();
 
-  bool IsOk() {
-    if (nullptr == myFactory) {
-      return false;
-    }
-    return true;
-  }
+  bool IsOk();
 
   std::shared_ptr<Detector> createDetector(BaseSettings settings);
 
