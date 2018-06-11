@@ -65,6 +65,7 @@ create_test_executable(AdcReadoutTest SKIP_MEMGRIND)
 
 if(trompeloeil_FOUND)
     target_compile_definitions(AdcReadoutTest PRIVATE TROMPLELOEIL_AVAILABLE)
+    target_link_libraries(AdcReadoutTest trompeloeil)
 endif()
 
 get_filename_component(TEST_PACKET_PATH "test/test_packet_1.dat" DIRECTORY)

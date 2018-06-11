@@ -165,14 +165,17 @@ TEST_F(DISABLED_AdcReadoutTest, GlobalCounterCorrect) {
 }
 
 #ifdef TROMPLELOEIL_AVAILABLE
+
+using trompeloeil::_;
+
 class AdcReadoutMock : public AdcReadoutBase {
 public:
   AdcReadoutMock(BaseSettings Settings, AdcSettings ReadoutSettings)
       : AdcReadoutBase(Settings, ReadoutSettings){};
   using Detector::Threads;
-  using AdcReadoutBase::Processors;
+  using AdcReadoutBase::DataModuleQueues;
   MAKE_MOCK0(inputThread, void(), override);
-  MAKE_MOCK0(parsingThread, void(), override);
+  MAKE_MOCK1(processingThread, void(Queue&), override);
 };
 
 class AdcReadoutSimpleTest : public ::testing::Test {
@@ -184,44 +187,14 @@ public:
 TEST_F(AdcReadoutSimpleTest, StartProcessingThreads) {
   AdcReadoutMock Readout(Settings, ReadoutSettings);
   REQUIRE_CALL(Readout, inputThread()).TIMES(1);
-  REQUIRE_CALL(Readout, parsingThread()).TIMES(1);
+  REQUIRE_CALL(Readout, processingThread(_)).TIMES(4);
   Readout.startThreads();
   Readout.stopThreads();
 }
 
-TEST_F(AdcReadoutSimpleTest, DefaultProcessors) {
+TEST_F(AdcReadoutSimpleTest, DataQueues) {
   AdcReadoutMock Readout(Settings, ReadoutSettings);
-  EXPECT_EQ(Readout.Processors.size(), 0u);
-}
-
-TEST_F(AdcReadoutSimpleTest, ActivateProcessors) {
-  ReadoutSettings.SerializeSamples = true;
-  ReadoutSettings.PeakDetection = true;
-  AdcReadoutMock Readout(Settings, ReadoutSettings);
-  EXPECT_EQ(Readout.Processors.size(), 2u);
-}
-
-TEST_F(AdcReadoutSimpleTest, SetTimeStampLoc) {
-  ReadoutSettings.SerializeSamples = true;
-  ReadoutSettings.PeakDetection = false;
-  std::vector<std::pair<std::string, TimeStampLocation>> TimeStampLocSettings{
-      {"Start", TimeStampLocation::Start},
-      {"Middle", TimeStampLocation::Middle},
-      {"End", TimeStampLocation::End}};
-  for (auto &Setting : TimeStampLocSettings) {
-    ReadoutSettings.TimeStampLocation = Setting.first;
-    AdcReadoutMock Readout(Settings, ReadoutSettings);
-    const SampleProcessing *ProcessingPtr =
-        dynamic_cast<SampleProcessing *>(Readout.Processors.at(0).get());
-    EXPECT_EQ(ProcessingPtr->getTimeStampLocation(), Setting.second);
-  }
-}
-
-TEST_F(AdcReadoutSimpleTest, FailSetTimeStampLoc) {
-  ReadoutSettings.SerializeSamples = true;
-  ReadoutSettings.PeakDetection = false;
-  ReadoutSettings.TimeStampLocation = "unknown";
-  EXPECT_ANY_THROW(AdcReadoutMock(Settings, ReadoutSettings));
+  EXPECT_EQ(Readout.DataModuleQueues.size(), 4u);
 }
 
 #endif
