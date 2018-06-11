@@ -29,7 +29,7 @@ public:
   Loader();
 
   Loader(Detector *detector);
-  
+
   bool loadPlugin(std::string lib);
   void unloadPlugin();
 

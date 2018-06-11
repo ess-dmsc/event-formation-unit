@@ -1,12 +1,12 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <common/DetectorModuleRegister.h>
 #include <common/Trace.h>
 #include <dlfcn.h>
 #include <efu/Loader.h>
 #include <iostream>
 #include <string.h>
 #include <string>
-#include <common/DetectorModuleRegister.h>
 
 Loader::~Loader() {
   XTRACE(INIT, ALW, "Loader destructor called\n");
@@ -14,9 +14,7 @@ Loader::~Loader() {
   unloadPlugin();
 }
 
-Loader::Loader() {
-  
-}
+Loader::Loader() {}
 
 void Loader::unloadPlugin() {
   ParserPopulator = nullptr;
@@ -38,13 +36,12 @@ bool Loader::loadPlugin(const std::string lib) {
            lib.c_str());
   }
   std::vector<std::string> PossibleSuffixes{"", ".so", ".dll", ".dylib"};
-  
+
   for (auto &CSuffix : PossibleSuffixes) {
     std::string TestLibName = "./" + lib + CSuffix;
     handle = dlopen(TestLibName.c_str(), RTLD_NOW);
     if (handle != nullptr) {
-      XTRACE(INIT, INF, "Loaded library \"%s\".",
-            TestLibName.c_str());
+      XTRACE(INIT, INF, "Loaded library \"%s\".", TestLibName.c_str());
       break;
     }
   }
