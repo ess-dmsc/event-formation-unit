@@ -384,11 +384,4 @@ void NMX::init_builder() {
 
 /** ----------------------------------------------------- */
 
-class NMXFactory : DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    return std::shared_ptr<Detector>(new NMX(settings));
-  }
-};
-
-NMXFactory Factory;
+DetectorFactory<NMX> Factory;

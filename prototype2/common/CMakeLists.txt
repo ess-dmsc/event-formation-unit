@@ -6,9 +6,11 @@ set(efu_common_SRC
   NewStats.cpp
   Producer.cpp
   DataSave.cpp
+  DetectorModuleRegister.cpp
   )
 set(efu_common_INC
   ../../libs/include/gccintel.h
+  DetectorModuleRegister.h
   Detector.h
   EFUArgs.h
   FBSerializer.h

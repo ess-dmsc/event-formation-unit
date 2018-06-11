@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string.h>
 #include <string>
+#include <common/DetectorModuleRegister.h>
 
 Loader::~Loader() {
   XTRACE(INIT, ALW, "Loader destructor called\n");
