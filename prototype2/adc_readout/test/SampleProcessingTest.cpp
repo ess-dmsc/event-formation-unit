@@ -8,9 +8,7 @@
 
 #include "../SampleProcessing.h"
 #include <gtest/gtest.h>
-#ifdef TROMPLELOEIL_AVAILABLE
 #include <trompeloeil.hpp>
-#endif
 #include "../AdcReadoutConstants.h"
 #include "senv_data_generated.h"
 #include <array>
@@ -27,8 +25,6 @@ SamplingRun getTestModule() {
   Module.Data.push_back(0);
   return Module;
 }
-
-#ifdef TROMPLELOEIL_AVAILABLE
 
 using trompeloeil::_;
 
@@ -438,7 +434,6 @@ TEST_F(ChannelProcessingTest, Oversampling3X_TwoModules) {
   };
   EXPECT_EQ(ExpectedResult, Result.Samples);
 }
-#endif
 
 TEST(CalcTimeStamp, StartTest) {
   RawTimeStamp TS1{53, 500};

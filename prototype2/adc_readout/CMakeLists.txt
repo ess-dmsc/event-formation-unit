@@ -1,5 +1,5 @@
 find_package(ASIO REQUIRED)
-find_package(trompeloeil)
+find_package(trompeloeil REQUIRED)
 
 set(AdcReadoutBase_SRC
     AdcReadoutBase.cpp
@@ -62,11 +62,7 @@ set(AdcReadoutTest_LIB
     )
 
 create_test_executable(AdcReadoutTest SKIP_MEMGRIND)
-
-if(trompeloeil_FOUND)
-    target_compile_definitions(AdcReadoutTest PRIVATE TROMPLELOEIL_AVAILABLE)
-    target_link_libraries(AdcReadoutTest trompeloeil)
-endif()
+target_link_libraries(AdcReadoutTest trompeloeil)
 
 get_filename_component(TEST_PACKET_PATH "test/test_packet_1.dat" DIRECTORY)
 target_compile_definitions(AdcReadoutTest
