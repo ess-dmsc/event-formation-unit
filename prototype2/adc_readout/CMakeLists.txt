@@ -1,5 +1,5 @@
 find_package(ASIO REQUIRED)
-find_package(trompeloeil REQUIRED)
+find_package(Trompeloeil REQUIRED)
 
 set(AdcReadoutBase_SRC
     AdcReadoutBase.cpp
