@@ -62,7 +62,7 @@ set(AdcReadoutTest_LIB
     )
 
 create_test_executable(AdcReadoutTest SKIP_MEMGRIND)
-target_link_libraries(AdcReadoutTest trompeloeil)
+target_include_directories(AdcReadoutTest PRIVATE ${Trompeloeil_INCLUDE_DIR})
 
 get_filename_component(TEST_PACKET_PATH "test/test_packet_1.dat" DIRECTORY)
 target_compile_definitions(AdcReadoutTest
