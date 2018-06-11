@@ -73,9 +73,11 @@ set(DetectorTest_INC
 create_test_executable(DetectorTest)
 
 set(EFUArgsTest_SRC
+  DetectorModuleRegister.cpp
   EFUArgsTest.cpp
   EFUArgs.cpp)
 set(EFUArgsTest_INC
+  DetectorModuleRegister.h
   EFUArgs.h)
 create_test_executable(EFUArgsTest)
 
