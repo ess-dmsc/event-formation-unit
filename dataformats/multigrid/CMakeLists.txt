@@ -34,6 +34,9 @@ install(TARGETS cncsread genpixids batchreader DESTINATION tools)
 #
 # Unit tests
 #
+set(RunSpecTest_SRC inc/RunSpecTest.cpp)
+set(RunSpecTest_INC inc/RunSpec.h)
+create_test_executable(RunSpecTest)
 
 set(PeakFinderTest_SRC
     src/test/PeakFinderTest.cpp
