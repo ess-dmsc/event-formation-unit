@@ -50,6 +50,19 @@ TEST_F(NMXConfigTest, JsonConfig) {
 }
 
 int main(int argc, char **argv) {
+    system("pwd");
+
+    // Assume root is build/ directory - for running manually
+    int ret = chdir("../build");
+    if (ret != 0) {
+      // Assume we're in prototype2/build/unit_tests
+      ret = chdir("../../build");
+      if (ret != 0) {
+        printf("Unable to locate configs directory relative to:\n");
+        int ret2 __attribute__((unused)) = system("pwd");
+        return -1;
+      }
+    }
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
