@@ -16,26 +16,35 @@ std::string runspecjson = " \
     ] \n\
 }";
 
+std::string invalidjson = "{ \"this is not valid json\" }";
+
 class RunSpecParseTest : public TestBase {
 protected:
 };
 
 /** Test cases below */
 
-TEST_F(RunSpecParseTest, DefaultConstructor) {
-   DataSave tempfile(filename, (void *)runspecjson.c_str(), runspecjson.size());
-   RunSpecParse runspec(filename);
+TEST_F(RunSpecParseTest, ParseJson) {
+  DataSave tempfile(filename, (void *)runspecjson.c_str(), runspecjson.size());
+  RunSpecParse runspec(filename);
 
-   auto runs = runspec.getruns("test", "basedir", "outputdir", 1, 200);
+  auto runs = runspec.getruns("test", "basedir", "outputdir", 1, 200);
 
-   ASSERT_EQ(1, runs.size());
-   ASSERT_EQ(runs.at(0)->dir_, "basedir/mydir");
-   ASSERT_EQ(runs.at(0)->ofile_, "outputdir/test_42");
-   ASSERT_EQ(runs.at(0)->prefix_, "myprefix");
-   ASSERT_EQ(runs.at(0)->postfix_, "mypostfix");
-   ASSERT_EQ(runs.at(0)->start_, 1);
-   ASSERT_EQ(runs.at(0)->end_, 999);
+  ASSERT_EQ(1, runs.size());
+  ASSERT_EQ(runs.at(0)->dir_, "basedir/mydir");
+  ASSERT_EQ(runs.at(0)->ofile_, "outputdir/test_42");
+  ASSERT_EQ(runs.at(0)->prefix_, "myprefix");
+  ASSERT_EQ(runs.at(0)->postfix_, "mypostfix");
+  ASSERT_EQ(runs.at(0)->start_, 1);
+  ASSERT_EQ(runs.at(0)->end_, 999);
+}
 
+TEST_F(RunSpecParseTest, InvalidJson) {
+  DataSave tempfile(filename, (void *)invalidjson.c_str(), invalidjson.size());
+  RunSpecParse runspec(filename);
+
+  // DeathTest
+  ASSERT_EXIT(runspec.getruns("test", "basedir", "outputdir", 1, 200), ::testing::ExitedWithCode(1), "");
 }
 
 int main(int argc, char **argv) {
