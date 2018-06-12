@@ -12,6 +12,14 @@
 #include <map>
 #include <netinet/in.h>
 
+static const std::uint16_t IDLE_PACKET{0x1111};
+static const std::uint16_t DATA_PACKET{0x2222};
+static const std::uint32_t PACKET_TRAILER{0xFEEDF00D};
+static const std::uint16_t MODULE_HEADER{0xABCD};
+static const std::uint32_t MODULE_TRAILER{0xBEEFCAFE};
+static const std::uint8_t FILLER_BYTE{0x55};
+static const std::uint16_t TWO_FILLER_BYTES{0x5555};
+
 ParserException::ParserException(std::string const &ErrorStr)
     : std::runtime_error(ErrorStr), ParserErrorType(Type::UNKNOWN),
       Error(ErrorStr) {}
@@ -85,9 +93,9 @@ HeaderInfo parseHeader(const InData &Packet) {
   auto HeaderRaw = reinterpret_cast<const PacketHeader *>(Packet.Data);
   PacketHeader Header(*HeaderRaw);
   Header.fixEndian();
-  if (0x1111 == Header.PacketType) {
+  if (IDLE_PACKET == Header.PacketType) {
     ReturnInfo.Type = PacketType::Data;
-  } else if (0x2222 == Header.PacketType) {
+  } else if (DATA_PACKET == Header.PacketType) {
     ReturnInfo.Type = PacketType::Idle;
   } else {
     throw ParserException(ParserException::Type::HEADER_TYPE);
@@ -107,8 +115,8 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte) {
         reinterpret_cast<const DataHeader *>(Packet.Data + StartByte);
     DataHeader Header(*HeaderRaw);
     Header.fixEndian();
-    if (0xABCD != Header.MagicValue) {
-      if (0x5555 == Header.MagicValue) {
+    if (MODULE_HEADER != Header.MagicValue) {
+      if (TWO_FILLER_BYTES == Header.MagicValue) {
         break;
       }
       throw ParserException(ParserException::Type::DATA_ABCD);
@@ -141,7 +149,7 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte) {
     }
     StartByte += sizeof(DataHeader) + NrOfSamples * sizeof(std::uint16_t);
     const std::uint8_t *TrailerPointer = Packet.Data + StartByte;
-    const std::uint32_t MagicValue = htonl(0xBEEFCAFE);
+    const std::uint32_t MagicValue = htonl(MODULE_TRAILER);
     if (std::memcmp(TrailerPointer, &MagicValue, sizeof(MagicValue)) != 0) {
       throw ParserException(ParserException::Type::DATA_BEEFCAFE);
     }
@@ -155,14 +163,14 @@ TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte) {
   auto FillerPointer =
       reinterpret_cast<const std::uint8_t *>(Packet.Data + StartByte);
   for (unsigned int i = 0; i < Packet.Length - StartByte - 4; i++) {
-    if (FillerPointer[i] != 0x55) {
+    if (FillerPointer[i] != FILLER_BYTE) {
       throw ParserException(ParserException::Type::TRAILER_0x55);
     }
     ++ReturnInfo.FillerBytes;
   }
   const std::uint8_t *TrailerPointer =
       Packet.Data + StartByte + ReturnInfo.FillerBytes;
-  const std::uint32_t MagicValue = htonl(0xFEEDF00D);
+  const std::uint32_t MagicValue = htonl(PACKET_TRAILER);
   if (0 != std::memcmp(TrailerPointer, &MagicValue, sizeof(MagicValue))) {
     throw ParserException(ParserException::Type::TRAILER_FEEDF00D);
   }

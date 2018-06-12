@@ -19,8 +19,8 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
   // AdcReadoutBase::inputThread() for the unit tests to work
   std::function<void()> inputFunc = [this]() { this->inputThread(); };
   Detector::AddThreadFunction(inputFunc, "input");
-
-  for (int y = 0; y < 4; y++) {
+  const int NrOfChannels{4};
+  for (int y = 0; y < NrOfChannels; y++) {
     DataModuleQueues.emplace_back(new Queue(MessageQueueSize));
     // Note: Must call this->processingThread() instead of
     // AdcReadoutBase::processingThread() for the unit tests to work
@@ -136,8 +136,9 @@ void AdcReadoutBase::processingThread(Queue &DataModuleQueue) {
 
   bool GotModule = false;
   DataModulePtr Data;
+  const std::int64_t TimeoutUSecs = 1000000;
   while (Detector::runThreads) {
-    GotModule = DataModuleQueue.waitGetData(Data, 1000000);
+    GotModule = DataModuleQueue.waitGetData(Data, TimeoutUSecs);
     if (GotModule) {
       try {
         for (auto &Processor : Processors) {
