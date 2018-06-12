@@ -8,33 +8,34 @@
 #include "AdcSettings.h"
 #include "AdcReadoutConstants.h"
 
-void SetCLIArguments(CLI::App &parser, AdcSettings &Settings) {
+void SetCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings) {
   parser
-      .add_flag("--serialize_samples", Settings.SerializeSamples,
+      .add_flag("--serialize_samples", ReadoutSettings.SerializeSamples,
                 "Serialize sample data and send to Kafka broker.")
       ->group("ADC Readout Options");
   parser
-      .add_flag("--peak_detection", Settings.PeakDetection,
+      .add_flag("--peak_detection", ReadoutSettings.PeakDetection,
                 "Find the maximum value in a range of samples and send that "
                 "value along with its time-stamp to he Kafka broker.")
       ->group("ADC Readout Options");
   parser
-      .add_option("--name", Settings.Name,
+      .add_option("--name", ReadoutSettings.Name,
                   "Name of the source of the data as made available on the "
                   "Kafka broker.")
       ->group("ADC Readout Options")
       ->set_default_val("AdcDemonstrator");
   parser
-      .add_option("--stats_suffix", Settings.GrafanaNameSuffix,
+      .add_option("--stats_suffix", ReadoutSettings.GrafanaNameSuffix,
                   "Grafana root name suffix, used for the stats.")
       ->group("ADC Readout Options")
       ->set_default_val("");
   parser
-      .add_flag("--sample_timestamp", Settings.SampleTimeStamp,
+      .add_flag("--sample_timestamp", ReadoutSettings.SampleTimeStamp,
                 "Provide a timestamp with every single ADC sample. Note: this "
                 "drastically increases the bandwidth requirements.")
       ->group("ADC Readout Options");
-  auto IsPositiveInt = [&Settings](std::vector<std::string> Input) -> bool {
+  auto IsPositiveInt =
+      [&ReadoutSettings](std::vector<std::string> Input) -> bool {
     int InputVal;
     try {
       InputVal = std::stoi(Input[0]);
@@ -46,7 +47,7 @@ void SetCLIArguments(CLI::App &parser, AdcSettings &Settings) {
     } catch (std::out_of_range &E) {
       return false;
     }
-    Settings.TakeMeanOfNrOfSamples = InputVal;
+    ReadoutSettings.TakeMeanOfNrOfSamples = InputVal;
     return true;
   };
   CLI::callback_t CBFunc(IsPositiveInt);
@@ -57,7 +58,7 @@ void SetCLIArguments(CLI::App &parser, AdcSettings &Settings) {
       ->group("ADC Readout Options")
       ->set_default_val("1");
   parser
-      .add_set("--time_stamp_loc", Settings.TimeStampLocation,
+      .add_set("--time_stamp_loc", ReadoutSettings.TimeStampLocation,
                {"Start", "Middle", "End"},
                "Only used when serializing oversampled data. The time stamp "
                "corresponds to one of the following: 'Start', 'Middle', 'End'.")

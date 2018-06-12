@@ -11,15 +11,19 @@
 #include "SampleProcessing.h"
 #include "libs/include/Socket.h"
 
-AdcReadoutBase::AdcReadoutBase(BaseSettings Settings,
+AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
                                AdcSettings &ReadoutSettings)
     : Detector("AdcReadout", Settings), ReadoutSettings(ReadoutSettings),
       GeneralSettings(Settings) {
+  // Note: Must call this->inputThread() instead of
+  // AdcReadoutBase::inputThread() for the unit tests to work
   std::function<void()> inputFunc = [this]() { this->inputThread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   for (int y = 0; y < 4; y++) {
     DataModuleQueues.emplace_back(new Queue(MessageQueueSize));
+    // Note: Must call this->processingThread() instead of
+    // AdcReadoutBase::processingThread() for the unit tests to work
     std::function<void()> processingFunc = [this, y]() {
       this->processingThread(*this->DataModuleQueues.at(y));
     };

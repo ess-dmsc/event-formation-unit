@@ -17,5 +17,5 @@ set(EXTRA_CXX_FLAGS "-Werror -Wall -Wpedantic -Wextra -fprofile-instr-generate -
 Run CMake as follows:
 
 ```
-cmake .. -DCMAKE_CXX_CLANG_TIDY:STRING="clang-tidy-mp-devel;-checks=*"
+cmake .. -DCMAKE_CXX_CLANG_TIDY:STRING="clang-tidy-mp-devel;-checks=*,-cppcoreguidelines-pro-type-reinterpret-cast,-cppcoreguidelines-pro-bounds-pointer-arithmetic,-cppcoreguidelines-pro-type-vararg,-cppcoreguidelines-pro-bounds-array-to-pointer-decay"
 ```

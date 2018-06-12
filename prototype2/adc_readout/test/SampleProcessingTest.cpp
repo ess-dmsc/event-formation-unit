@@ -6,12 +6,12 @@
  * individual samples).
  */
 
-#include "../SampleProcessing.h"
-#include <gtest/gtest.h>
-#include <trompeloeil.hpp>
 #include "../AdcReadoutConstants.h"
+#include "../SampleProcessing.h"
 #include "senv_data_generated.h"
 #include <array>
+#include <gtest/gtest.h>
+#include <trompeloeil.hpp>
 
 SamplingRun getTestModule() {
   SamplingRun Module;
@@ -56,7 +56,7 @@ TEST(SampleProcessing, NoSamples) {
   SamplingRun TempModule;
   TempModule.Channel = 1;
   TestProcessor.processData(TempModule);
-  FORBID_CALL(*TestProducer.get(), produce(_,_));
+  FORBID_CALL(*TestProducer.get(), produce(_, _));
 }
 
 TEST(SampleProcessing, SetMeanOfChannels) {

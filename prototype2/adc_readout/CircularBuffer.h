@@ -122,7 +122,7 @@ public:
   /// @brief Blocking version of CircularBuffer::tryGetData().
   /// @param[out] Element The pointer to the element.
   /// @param[in] TimeoutUSecs The number of micro seconds to block (wait) for
-  ///new data before failing (returning false).
+  /// new data before failing (returning false).
   /// @return Returns true if the pointer can be used to access a data element,
   /// false otherwise.
   bool waitGetData(ElementPtr<DataType> &Element, std::int64_t TimeoutUSecs) {

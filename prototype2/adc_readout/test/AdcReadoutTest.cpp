@@ -170,7 +170,7 @@ public:
   using Detector::Threads;
   using AdcReadoutBase::DataModuleQueues;
   MAKE_MOCK0(inputThread, void(), override);
-  MAKE_MOCK1(processingThread, void(Queue&), override);
+  MAKE_MOCK1(processingThread, void(Queue &), override);
 };
 
 class AdcReadoutSimpleTest : public ::testing::Test {
