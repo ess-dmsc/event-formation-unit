@@ -7,6 +7,9 @@
 #include <fstream>
 #include <sstream>
 
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
+
 NMXConfig::NMXConfig(std::string jsonfile) {
   Json::Value root{};
   Json::Reader reader{};
