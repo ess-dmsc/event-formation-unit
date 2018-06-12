@@ -64,9 +64,6 @@ int main(int argc, char **argv) {
   if (cwdContains("build/prototype2")) { //Linux
   // Assume we're in prototype2/build/prototype2/gdgem
     pathprefix = "../../../build/";
-  } else if (cwdContains("code/prototype2")) { //MacOS
-  // Assume we're in prototype2/code/prototype2/gdgem
-    pathprefix = "../../../code/prototype2/";
   }
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

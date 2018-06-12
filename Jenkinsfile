@@ -219,13 +219,13 @@ def get_macos_pipeline()
             // Delete workspace when build is done
                 cleanWs()
 
-                dir("${project}/code") {
+                dir("${project}") {
                     checkout scm
                 }
 
                 dir("${project}/build") {
-                    sh "conan install --build=outdated ../code"
-                    sh "cmake -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON ../code"
+                    sh "conan install --build=outdated .."
+                    sh "cmake -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
                     sh "make -j4"
                     sh "make -j4 unit_tests"
                     sh "make runtest"
