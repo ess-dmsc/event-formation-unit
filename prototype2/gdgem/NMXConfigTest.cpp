@@ -8,15 +8,6 @@
 #include <test/TestBase.h>
 
 
-// std::string filename{"deleteme.json"};
-//
-// std::string runspecjson = " \
-// { \n\
-//   \"test\" :\n\
-//     [ \
-//       {\"id\": 42,  \"dir\": \"mydir\",  \"prefix\": \"myprefix\",  \"postfix\": \"mypostfix\", \"start\": 1, \"end\":   999, \"thresh\": 124} \n\
-//     ] \n\
-// }";
 
 class NMXConfigTest : public TestBase {
 protected:
