@@ -7,7 +7,7 @@
 #include <memory>
 #include <test/TestBase.h>
 
-
+std::string pathprefix{""};
 
 class NMXConfigTest : public TestBase {
 protected:
@@ -44,7 +44,7 @@ TEST_F(NMXConfigTest, DebugPrint) {
 }
 
 TEST_F(NMXConfigTest, JsonConfig) {
-  NMXConfig nmxconfig("../prototype2/gdgem/configs/vmm2.json");
+  NMXConfig nmxconfig(pathprefix + "../prototype2/gdgem/configs/vmm2.json");
   ASSERT_EQ(60, nmxconfig.time_config.tac_slope()); // Parsed from json
   ASSERT_EQ(20, nmxconfig.time_config.bc_clock());
 }
@@ -55,13 +55,8 @@ int main(int argc, char **argv) {
     // Assume root is build/ directory - for running manually
     int ret = chdir("../build");
     if (ret != 0) {
-      // Assume we're in prototype2/build/unit_tests
-      ret = chdir("../../build");
-      if (ret != 0) {
-        printf("Unable to locate configs directory relative to:\n");
-        int ret2 __attribute__((unused)) = system("pwd");
-        return -1;
-      }
+      // Assume we're in prototype2/build/prototype2/gdgem
+      pathprefix = "../../../build/";
     }
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
