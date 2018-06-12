@@ -12,3 +12,10 @@ set(EXTRA_CXX_FLAGS "-Werror -Wall -Wpedantic -Wextra -fprofile-instr-generate -
 * Compile and run unit tests.
 * Process data from application run: `llvm-profdata-mp-devel merge -sparse default.profraw -o default.profdata`
 * Convert coverage data to something useful: `llvm-cov-mp-devel  show ./AdcReadoutTest  -instr-profile=default.profdata -format=html -o coverage`
+
+### Clang-tidy
+Run CMake as follows:
+
+```
+cmake .. -DCMAKE_CXX_CLANG_TIDY:STRING="clang-tidy-mp-devel;-checks=*"
+```
