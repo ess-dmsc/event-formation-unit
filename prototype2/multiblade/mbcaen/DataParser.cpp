@@ -16,6 +16,9 @@
 #include <mbcaen/DataParser.h>
 #include <memory>
 
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
+
 int DataParser::parse(const char *buffer, unsigned int size) {
 
   mbheader = nullptr;

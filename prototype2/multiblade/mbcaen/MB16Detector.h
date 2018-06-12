@@ -10,6 +10,7 @@
 
 class MB16Detector {
 public:
+
   inline int cassette(int digid) {
     switch (digid) {
     case 137:

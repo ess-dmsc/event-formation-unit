@@ -27,8 +27,8 @@
 
 #include <logical_geometry/ESSGeometry.h>
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 using namespace memory_sequential_consistent; // Lock free fifo
 
@@ -47,8 +47,8 @@ public:
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 1000;
-  static const int eth_buffer_size = 1600;
+  static const int eth_buffer_max_entries = 100;
+  static const int eth_buffer_size = 10000;
   static const int kafka_buffer_size = 1000000;
 
 private:
@@ -216,12 +216,15 @@ void MBCAEN::processing_thread() {
           mystats.rx_error_bytes += mbdata.stats.error_bytes;
           continue;
         }
+        XTRACE(DATA, DEB, "Received %d Readouts\n", mbdata.mbheader->numElements);
         mystats.rx_readouts += mbdata.mbheader->numElements;
 
         auto digitizerId = mbdata.mbheader->digitizerID;
         for (uint i = 0; i < mbdata.mbheader->numElements; i++) {
 
           auto dp = mbdata.mbdata[i];
+          // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d\n",
+          //       digitizerId, dp.localTime, dp.channel, dp.adcValue);
 
           // // @todo fixme remove - is an artifact of mbtext2udp
           // if (dp.digi == UINT8_MAX && dp.chan == UINT8_MAX &&
@@ -242,8 +245,8 @@ void MBCAEN::processing_thread() {
           }
 
           if (builder[cassette].addDataPoint(dp.channel, dp.adcValue, dp.localTime)) {
-            auto xcoord =
-                builder[cassette].getStripPosition() - 32; // pos 32 - 63
+
+            auto xcoord = builder[cassette].getStripPosition() - 32; // pos 32 - 63
             auto ycoord = cassette * nwires +
                           builder[cassette].getWirePosition(); // pos 0 - 31
 

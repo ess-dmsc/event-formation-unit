@@ -5,8 +5,8 @@
 #include <algorithm>
 #include <multiblade/mbcommon/MultiBladeEventBuilder.h>
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 multiBladeEventBuilder::multiBladeEventBuilder()
     : m_ADC_theshold(0), m_time_window(185), m_nwire_channels(32),
@@ -150,6 +150,10 @@ bool multiBladeEventBuilder::pointsAdjacent() {
 
 bool multiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
 
+  if (cluster.size() == 0) {
+    return false;
+  }
+
   if (cluster.size() <= 1)
     return true;
 
@@ -158,7 +162,7 @@ bool multiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
 
 // Cluster iterator
 
-#if 1
+#if 0
   if ((cluster.back().channel - cluster.front().channel) >
       (cluster.size() - 1)) {
     cluster.clear();
@@ -252,10 +256,13 @@ std::vector<double> multiBladeEventBuilder::getPosition() {
 void multiBladeEventBuilder::addPointToCluster(uint32_t channel, uint32_t ADC) {
 
   point point = {channel, ADC};
-  if (channel < m_nwire_channels)
+  if (channel < m_nwire_channels) {
+    XTRACE(DATA, DEB, "Add wire channel: %d\n", channel);
     m_wire_cluster.push_back(point);
-  else
+  } else {
+    XTRACE(DATA, DEB, "Add strip channel: %d\n", channel);
     m_strip_cluster.push_back(point);
+  }
 }
 
 void multiBladeEventBuilder::resetCounters() {
