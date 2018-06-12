@@ -56,6 +56,7 @@ add_custom_target(runefu
     COMMAND efu "-d" "../modules/mgcncs2" "-s" "1"
     COMMAND efu "-d" "../modules/sonde" "-s" "1"
     COMMAND efu "-d" "../modules/mbcaen" "-s" "1"
+    COMMAND efu "-d" "../modules/AdcReadout" "-s" "1"
     DEPENDS efu mgmesytec mgcncs2 gdgem sonde mbcaen
     )
 

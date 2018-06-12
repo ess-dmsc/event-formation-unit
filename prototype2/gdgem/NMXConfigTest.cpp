@@ -56,7 +56,8 @@ int main(int argc, char **argv) {
     int ret = chdir("../build");
     if (ret != 0) {
       // Assume we're in prototype2/build/prototype2/gdgem
-      pathprefix = "../../../build/";
+      //pathprefix = "../../../build/";
+      pathprefix = "../../../code/prototype2/";
     }
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
