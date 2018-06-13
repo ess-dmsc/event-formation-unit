@@ -79,7 +79,7 @@ size_t FBSerializer::produce() {
     txlen = serialize(events, &txbuffer);
     seqno++;
     assert(txlen > 0);
-    XTRACE(OUTPUT, DEB, "Flatbuffer tx length %d\n", txlen);
+    XTRACE(OUTPUT, DEB, "Flatbuffer tx length %zu\n", txlen);
     producer.produce(txbuffer, txlen);
 
 #if 0
