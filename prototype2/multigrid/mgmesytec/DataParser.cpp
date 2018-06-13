@@ -9,8 +9,8 @@
 #include <common/ReadoutSerializer.h>
 #include <string.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+ #undef TRC_LEVEL
+ #define TRC_LEVEL TRC_L_DEB
 
 // clang-format off
 // sis3153 and mesytec data types from
@@ -72,6 +72,8 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
   GridGood = false;
   uint16_t GridAdcMax = 0;
   uint16_t WireAdcMax = 0;
+
+  size_t chan_count {0};
   //printf("parse n words: %d\n", nWords);
 
   uint16_t wordsleft = nWords;
@@ -88,6 +90,8 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       break;
 
     case MesytecType::ExtendedTimeStamp:
+      // This always comes before events on particular Bus
+      // TODO: not meaningful for now
       HighTime = (*datap & 0x0000ffff);
       DTRACE(INF, "   ExtendedTimeStamp: high_time=%d\n", HighTime);
       break;
@@ -100,14 +104,17 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       break;
 
     case MesytecType::DataEvent2:
+      // TODO: What if Bus number changes?
+
       // value in using something like getValue(Buffer, NBits, Offset) ?
       Bus = (*datap & 0x0f000000) >> 24;
       addr = (*datap & 0x00fff000) >> 12; /**< channel */
       adc = (*datap & 0x00000fff);
       BusGood = true;
       stats.readouts++;
+      chan_count++;
 
-      DTRACE(INF, "   DataEvent2:  bus=%d  channel=%d  adc=%d\n", Bus, addr, adc);
+      //DTRACE(INF, "   DataEvent2:  bus=%d  channel=%d  adc=%d\n", Bus, addr, adc);
 
       accept = false;
       if (mgseq.isWire(addr) && adc >= wireThresholdLo && adc <= wireThresholdHi) {
@@ -116,7 +123,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
           WireGood = true;
           Wire = addr;
           WireAdcMax = adc;
-          DTRACE(INF, "     new wire adc max: ch %d\n", addr);
+          //DTRACE(INF, "     new wire adc max: ch %d\n", addr);
         }
         hists.binstrips(addr, adc, 0, 0);
       } else if (mgseq.isGrid(addr) && adc >= gridThresholdLo && adc <= gridThresholdHi) {
@@ -125,7 +132,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
           GridGood = true;
           Grid = addr;
           GridAdcMax = adc;
-          DTRACE(INF, "     new grid adc max: ch %d\n", addr);
+          //DTRACE(INF, "     new grid adc max: ch %d\n", addr);
         }
         hists.binstrips(0, 0, addr, adc);
       }
@@ -165,10 +172,19 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
     datap++;
   }
 
+  if (chan_count)
+    DTRACE(INF, "   Bus=%d  Chan_count=%d\n", Bus, chan_count);
+
   if (dumptofile && TimeGood && (!WireGood || !GridGood)) {
     mgdata->tofile("%d, %d, %d, -1, -1, -1\n",
                    stats.triggers, HighTime, Time);
   }
+
+  if (nWords < 5)
+    DTRACE(INF, "==========================================================\n"
+                "================    SYNCHRO PULSE?   =====================\n"
+                "==========================================================\n\n");
+
 }
 
 MesytecData::error MesytecData::parse(const char *buffer,
