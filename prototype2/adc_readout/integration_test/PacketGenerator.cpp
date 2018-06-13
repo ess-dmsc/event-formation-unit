@@ -8,8 +8,8 @@
 
 namespace ADC {
 
-PacketGenerator::PacketGenerator() {
-  std::ifstream InStream("DataPacketTemplate.dat", std::ios::binary);
+PacketGenerator::PacketGenerator(std::uint16_t OversamplingFactor) {
+  std::ifstream InStream(std::string(DATA_TEMPLATE_PATH) + "DataPacketTemplate.dat", std::ios::binary);
   if (not InStream.good()) {
     throw std::runtime_error("Could not read data packet template file.");
   }
@@ -26,6 +26,7 @@ PacketGenerator::PacketGenerator() {
   DataHeaderPtr = reinterpret_cast<DataHeaderSim*>(TemplateData.get() + sizeof(PacketHeader));
   PacketHeaderPtr->GlobalCount = 0;
   PacketHeaderPtr->ReadoutCount = 0;
+  DataHeaderPtr->Oversampling = htons(OversamplingFactor);
 }
 
 PacketInfo PacketGenerator::GeneratePacket(std::uint32_t TS_Sec, double SecFrac, std::uint16_t ChannelNr) {

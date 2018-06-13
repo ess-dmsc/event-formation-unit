@@ -5,18 +5,18 @@ set(efu_common_SRC
   FBSerializer.cpp
   NewStats.cpp
   Producer.cpp
-  DetectorModuleRegister.cpp
   DataSave.cpp
+  DetectorModuleRegister.cpp
   )
 set(efu_common_INC
   ../../libs/include/gccintel.h
+  DetectorModuleRegister.h
   Detector.h
   EFUArgs.h
   FBSerializer.h
   NewStats.h
   Producer.h
   Trace.h
-  DetectorModuleRegister.h
   DataSave.h
   )
 
@@ -73,12 +73,12 @@ set(DetectorTest_INC
 create_test_executable(DetectorTest)
 
 set(EFUArgsTest_SRC
+  DetectorModuleRegister.cpp
   EFUArgsTest.cpp
   EFUArgs.cpp)
 set(EFUArgsTest_INC
+  DetectorModuleRegister.h
   EFUArgs.h)
-set(EFUArgsTest_LIB
-  efu_common)
 create_test_executable(EFUArgsTest)
 
 set(FBSerializerTest_SRC

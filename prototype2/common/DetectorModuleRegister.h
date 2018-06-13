@@ -9,6 +9,7 @@
 
 #pragma once
 #include <common/Detector.h>
+#include <string>
 
 /// \brief Stores a factory function and CLI set-up function for a detector module.
 struct DetectorModuleSetup {

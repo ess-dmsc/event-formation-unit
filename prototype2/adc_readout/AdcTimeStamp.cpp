@@ -6,8 +6,8 @@
  */
 
 #include "AdcTimeStamp.h"
-#include <cmath>
 #include "AdcReadoutConstants.h"
+#include <cmath>
 
 std::uint64_t RawTimeStamp::GetTimeStampNS() const {
   auto NanoSec = static_cast<std::uint64_t>(
