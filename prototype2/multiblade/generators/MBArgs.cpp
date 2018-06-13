@@ -8,6 +8,8 @@
 
 #include <mbgen/MBArgs.h>
 
+/// GCOVR_EXCL_START
+
 MBArgs::MBArgs(int argc, char *argv[]) {
 
   int c;
@@ -101,3 +103,4 @@ MBArgs::MBArgs(int argc, char *argv[]) {
   printf("Other properties\n");
   printf("  update interval:        %us\n", updint);
 }
+/// GCOVR_EXCL_STOP
