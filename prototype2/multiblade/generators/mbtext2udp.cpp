@@ -9,7 +9,7 @@
 #include <iomanip>
 #include <libs/include/Socket.h>
 #include <generators/TextFile.h>
-#include <mbgen/MBArgs.h>
+#include <generators/MBArgs.h>
 
 /// GCOVR_EXCL_START
 

@@ -6,7 +6,7 @@
 #include <getopt.h>
 #include <stdlib.h>
 
-#include <mbgen/MBArgs.h>
+#include <generators/MBArgs.h>
 
 /// GCOVR_EXCL_START
 
