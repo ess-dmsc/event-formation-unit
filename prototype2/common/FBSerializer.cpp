@@ -9,6 +9,8 @@
 #define TIMESIZE 4
 #define PIXELSIZE 4
 
+#define INITIAL_PULSE_TIME 0
+
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
@@ -20,14 +22,12 @@ FBSerializer::FBSerializer(size_t maxarraylength, Producer &prod)
       producer(prod) {
 
   auto sourceName = builder.CreateString("c_spec_data");
-  std::uint64_t sequenceNr = 1; // Placeholder, must not be 0
-  std::uint64_t pulseTime = 1;  // Placeholder, must not be 0
   auto timeoff = builder.CreateUninitializedVector(maxlen, TIMESIZE, &timeptr);
   auto pixeloff =
       builder.CreateUninitializedVector(maxlen, PIXELSIZE, &pixelptr);
 
-  auto evMsgHeader = CreateEventMessage(builder, sourceName, sequenceNr,
-                                        pulseTime, timeoff, pixeloff);
+  auto evMsgHeader = CreateEventMessage(builder, sourceName, seqno,
+                                        INITIAL_PULSE_TIME, timeoff, pixeloff);
   FinishEventMessageBuffer(builder, evMsgHeader);
 
   fbBufferPointer = reinterpret_cast<char*>(builder.GetBufferPointer());
@@ -46,15 +46,14 @@ FBSerializer::FBSerializer(size_t maxarraylength, Producer &prod)
       1;
 }
 
-FBSerializer::~FBSerializer() {}
-
-int FBSerializer::serialize(size_t entries,
+size_t FBSerializer::serialize(size_t entries,
                             char **buffer) {
   if (entries > maxlen) {
+    // TODO: this should probably throw instead?
+
     *buffer = 0;
     return 0;
   }
-  eventMsg->mutate_pulse_time(pulse_time);
   eventMsg->mutate_message_id(seqno);
   *timeLenPtr = entries;
   *pixelLenPtr = entries;
@@ -63,8 +62,8 @@ int FBSerializer::serialize(size_t entries,
   return fbSize;
 }
 
-int FBSerializer::produce() {
-  int txlen = 0;
+size_t FBSerializer::produce() {
+  size_t txlen = 0;
   if (events != 0) {
     // Debug
     // for (unsigned int i = 0; i < events; i++) {
@@ -90,18 +89,17 @@ int FBSerializer::produce() {
   return txlen;
 }
 
-//void FBSerializer::set_pulse_time(uint64_t time)
-//{
-//  eventMsg->mutate_pulse_time(time);
-//}
-//
-//uint64_t FBSerializer::get_pulse_time()
-//{
-//  return eventMsg->pulse_time();
-//}
+void FBSerializer::set_pulse_time(uint64_t time)
+{
+  eventMsg->mutate_pulse_time(time);
+}
 
+uint64_t FBSerializer::get_pulse_time() const
+{
+  return eventMsg->pulse_time();
+}
 
-int FBSerializer::addevent(uint32_t time, uint32_t pixel) {
+size_t FBSerializer::addevent(uint32_t time, uint32_t pixel) {
   XTRACE(OUTPUT, DEB, "Add event: %d %u\n", time, pixel);
   ((uint32_t *)timeptr)[events] = time;
   ((uint32_t *)pixelptr)[events] = pixel;

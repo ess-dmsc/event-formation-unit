@@ -16,22 +16,19 @@ public:
   FBSerializer(size_t maxarraylength, Producer &prod);
 
   /** @todo document */
-  ~FBSerializer();
+  void set_pulse_time(uint64_t time);
 
   /** @todo document */
-  int serialize(size_t entries, char **buffer);
+  uint64_t get_pulse_time() const;
 
   /** @todo document */
-  uint64_t get_pulse_time();
+  size_t serialize(size_t entries, char **buffer);
 
   /** @todo document */
-  int addevent(uint32_t time, uint32_t pixel);
+  size_t addevent(uint32_t time, uint32_t pixel);
 
   /** @todo document */
-  int produce();
-
-  std::string source_name;
-  uint64_t pulse_time {0};
+  size_t produce();
 
 private:
 
@@ -50,5 +47,5 @@ private:
   Producer &producer;
 
   size_t events{0};
-  size_t seqno{1};
+  uint64_t seqno{1};
 };

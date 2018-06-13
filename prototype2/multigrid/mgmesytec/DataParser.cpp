@@ -15,19 +15,19 @@
 // sis3153 and mesytec data types from
 // Struck: mvme-src-0.9.2-281-g1c4c24c.tar
 // Struck: Ethernet UDP Addendum revision 107
-enum SisType {
+enum SisType : uint32_t {
   BeginReadout = 0xbb000000,
-  EndReadout = 0xee000000
+  EndReadout   = 0xee000000
 };
 
 // Mesytec Datasheet: VMMR-8/16 v00.01
-enum MesytecType {
-  Header = 0x40000000,
+enum MesytecType : uint32_t {
+  Header            = 0x40000000,
   ExtendedTimeStamp = 0x20000000,
-  DataEvent1 = 0x30000000,
-  DataEvent2 = 0x10000000,
-  EndOfEvent = 0xc0000000,
-  FillDummy = 0x00000000
+  DataEvent1        = 0x30000000,
+  DataEvent2        = 0x10000000,
+  EndOfEvent        = 0xc0000000,
+  FillDummy         = 0x00000000
 };
 // clang-format on
 
@@ -217,14 +217,12 @@ MesytecData::error MesytecData::parse(const char *buffer,
 
       if (time < PreviousTime)
       {
-        //TODO: mystats.tx_bytes +=
-        fbserializer.pulse_time = FakePulseTime;
+        // TODO mystats.tx_bytes +=
         fbserializer.produce();
-//        fbserializer.pulse_time = FakePulseTime + PreviousTime;
-//        fbserializer.reinitialize("multigrid_mesytec", 0, FakePulseTime + PreviousTime);
 //        XTRACE(PROCESS, WAR, "Updated fake pulse time = %zu to %zu by delta %zu\n",
 //            FakePulseTime, fbserializer.get_pulse_time(), PreviousTime);
         FakePulseTime += PreviousTime;
+        fbserializer.set_pulse_time(FakePulseTime);
       }
 
       DTRACE(DEB, "Event: pixel: %d, time: %d \n\n", pixel, time);
