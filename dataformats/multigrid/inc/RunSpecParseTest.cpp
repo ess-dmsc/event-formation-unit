@@ -5,18 +5,17 @@
 #include <test/TestBase.h>
 #include <cstring>
 
-
 std::string filename{"deleteme.json"};
 
-std::string runspecjson = " \
-{ \n\
-  \"test\" :\n\
-    [ \
-      {\"id\": 42,  \"dir\": \"mydir\",  \"prefix\": \"myprefix\",  \"postfix\": \"mypostfix\", \"start\": 1, \"end\":   999, \"thresh\": 124} \n\
-    ] \n\
-}";
+std::string runspecjson = R"(
+{
+  "test" :
+    [
+      {"id": 42,  "dir": "mydir",  "prefix": "myprefix",  "postfix": "mypostfix", "start": 1, "end":   999, "thresh": 124}
+    ]
+})";
 
-std::string invalidjson = "{ \"this is not valid json\" }";
+std::string invalidjson = R"({ "this is not valid json" })";
 
 class RunSpecParseTest : public TestBase {
 protected:
