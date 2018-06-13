@@ -19,8 +19,8 @@ create_module(mbcaen)
 #=============================================================================
 # Build MB text 2 UDP
 #=============================================================================
-set(mbtext2udp_INC mbgen/MBArgs.h)
-set(mbtext2udp_SRC generators/mbtext2udp.cpp mbgen/MBArgs.cpp generators/TextFile.cpp)
+set(mbtext2udp_INC generators/MBArgs.h)
+set(mbtext2udp_SRC generators/mbtext2udp.cpp generators/MBArgs.cpp generators/TextFile.cpp)
 create_executable(mbtext2udp)
 
 # Excecutables to build if TCLAP is installed
