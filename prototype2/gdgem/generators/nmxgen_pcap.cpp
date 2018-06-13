@@ -9,7 +9,7 @@
 #include <string.h>
 #include <string>
 #include <unistd.h>
-
+/// GCOVR_EXCL_START
 int main(int argc, char *argv[]) {
   NMXArgs opts(argc, argv);
   char buffer[10000];
@@ -59,3 +59,4 @@ int main(int argc, char *argv[]) {
   printf("Sent %" PRIu64 " packets\n", totpackets);
   return 0;
 }
+/// GCOVR_EXCL_STOP

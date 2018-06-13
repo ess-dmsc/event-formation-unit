@@ -6,7 +6,7 @@
 #include <gdgem/generators/NMXArgs.h>
 #include <getopt.h>
 #include <unistd.h>
-
+/// GCOVR_EXCL_START
 NMXArgs::NMXArgs(int argc, char *argv[]) {
 
   int c;
@@ -108,3 +108,4 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
   printf("Other properties\n");
   printf("  update interval:        %us\n", updint);
 }
+/// GCOVR_EXCL_STOP

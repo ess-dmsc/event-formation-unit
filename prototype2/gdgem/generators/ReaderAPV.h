@@ -4,7 +4,7 @@
  *
  *  @brief Wrapper class for reading VMM data from HDF5 files
  */
-
+/// GCOVR_EXCL_START
 #ifndef READER_VMM_H
 #define READER_VMM_H
 
@@ -42,3 +42,4 @@ private:
 };
 
 #endif
+/// GCOVR_EXCL_STOP
