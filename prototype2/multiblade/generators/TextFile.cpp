@@ -2,6 +2,8 @@
 // Created by troels on 6/2/17.
 //
 
+/// GCOVR_EXCL_START
+
 #include "TextFile.h"
 
 TextFile::TextFile(std::string fileName) {
@@ -73,3 +75,4 @@ size_t TextFile::nextChunk(TextFile::Entry *buf, size_t size) {
   }
   return i * sizeof(Entry);
 }
+/// GCOVR_EXCL_STOP

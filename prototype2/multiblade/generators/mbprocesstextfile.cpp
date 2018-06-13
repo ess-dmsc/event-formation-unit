@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <tclap/CmdLine.h>
 
-#include "mbcommon/TextFile.h"
+#include "generators/TextFile.h"
 #include "mbcommon/DumpEventBuilderInfo.h"
 #include "mbcommon/MultiBladeEventBuilder.h"
 

@@ -8,7 +8,7 @@
 #include <cstring>
 #include <iomanip>
 #include <libs/include/Socket.h>
-#include <mbcommon/TextFile.h>
+#include <generators/TextFile.h>
 #include <mbgen/MBArgs.h>
 
 /// GCOVR_EXCL_START
