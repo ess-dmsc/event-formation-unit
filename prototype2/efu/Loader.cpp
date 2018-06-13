@@ -1,5 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <common/DetectorModuleRegister.h>
 #include <common/Trace.h>
 #include <dlfcn.h>
 #include <efu/Loader.h>
@@ -13,9 +14,7 @@ Loader::~Loader() {
   unloadPlugin();
 }
 
-Loader::Loader() {
-  
-}
+Loader::Loader() {}
 
 void Loader::unloadPlugin() {
   ParserPopulator = nullptr;
@@ -25,19 +24,36 @@ void Loader::unloadPlugin() {
 }
 
 bool Loader::loadPlugin(const std::string lib) {
-  std::string libname = "./" + lib + ".so";
-  const char *libstr = strdup(libname.c_str());
-
-  if ((handle = dlopen(libstr, RTLD_NOW)) == 0) {
-    XTRACE(INIT, CRI, "Could not open library %s: %s\n", libname.c_str(),
+  try {
+    auto &FoundModule = DetectorModuleRegistration::find(lib);
+    ParserPopulator = FoundModule.CLISetup;
+    myFactory = FoundModule.DetectorFactory.get();
+    XTRACE(INIT, INF, "Loaded statically linked detector module.");
+    return true;
+  } catch (std::runtime_error &Error) {
+    XTRACE(INIT, INF, "Unable to find statically linked detector module with "
+                      "name\"%s\". Attempting to open external plugin.",
+           lib.c_str());
+  }
+  std::vector<std::string> PossibleSuffixes{"", ".so", ".dll", ".dylib"};
+  
+  for (auto &CSuffix : PossibleSuffixes) {
+    std::string TestLibName = "./" + lib + CSuffix;
+    handle = dlopen(TestLibName.c_str(), RTLD_NOW);
+    if (handle != nullptr) {
+      XTRACE(INIT, INF, "Loaded library \"%s\".",
+            TestLibName.c_str());
+      break;
+    }
+  }
+  if (handle == nullptr) {
+    XTRACE(INIT, CRI, "Could not open library %s: %s\n", lib.c_str(),
            dlerror());
-    free((void *)libstr);
     return false;
   }
-  free((void *)libstr);
 
-  if (!(myFactory = (DetectorFactory *)dlsym(handle, "Factory"))) {
-    XTRACE(INIT, CRI, "Could not find Factory in %s\n", libname.c_str());
+  if (!(myFactory = (DetectorFactoryBase *)dlsym(handle, "Factory"))) {
+    XTRACE(INIT, CRI, "Could not find Factory in %s\n", lib.c_str());
     return false;
   }
 
@@ -45,13 +61,20 @@ bool Loader::loadPlugin(const std::string lib) {
       (PopulateCLIParser *)dlsym(handle, "PopulateParser");
   if (nullptr == tempParserPopulator) {
     XTRACE(INIT, WAR, "Unable to find function to populate CLI parser in %s\n",
-           libname.c_str());
+           lib.c_str());
   } else {
     if (nullptr == tempParserPopulator->Function) {
       XTRACE(INIT, WAR, "Function to populate CLI parser not set");
     } else {
       ParserPopulator = tempParserPopulator->Function;
     }
+  }
+  return true;
+}
+
+bool Loader::IsOk() {
+  if (nullptr == myFactory) {
+    return false;
   }
   return true;
 }

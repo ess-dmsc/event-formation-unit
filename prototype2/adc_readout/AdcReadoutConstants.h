@@ -7,6 +7,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 ///@brief Clock frequency of the MRF timing hardware clock.
 static const std::int32_t TimerClockFrequency = 88052500;
 static const std::int32_t AdcSamplingRate = TimerClockFrequency / 2;

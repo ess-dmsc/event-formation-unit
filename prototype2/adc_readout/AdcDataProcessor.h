@@ -12,14 +12,16 @@
 #include <memory>
 
 /// @brief Base class for the AdcReadout data processors.
-/// Classes that inherit from AdcDataProcessor must implement AdcDataProcessor::processPacket().
+/// Classes that inherit from AdcDataProcessor must implement
+/// AdcDataProcessor::processPacket().
 class AdcDataProcessor {
 public:
   AdcDataProcessor(std::shared_ptr<ProducerBase> Prod);
   virtual ~AdcDataProcessor() = default;
-  
-  /// @brief Pure virtual function that must be implemented in order to process parsed data.
-  virtual void processPacket(const PacketData &Data) = 0;
+
+  /// @brief Pure virtual function that must be implemented in order to process
+  /// parsed data.
+  virtual void processData(SamplingRun const &Data) = 0;
 
 protected:
   std::shared_ptr<ProducerBase> ProducerPtr;

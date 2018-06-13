@@ -5,9 +5,9 @@
  *  @brief ADC readout detector module.
  */
 
-#include <common/Detector.h>
 #include "AdcReadoutBase.h"
 #include "AdcSettings.h"
+#include <common/Detector.h>
 
 static AdcSettings LocalAdcSettings;
 
@@ -19,15 +19,11 @@ PopulateCLIParser PopulateParser{CLIArguments};
 
 class AdcReadout : public AdcReadoutBase {
 public:
-  AdcReadout(BaseSettings Settings)
+  explicit AdcReadout(BaseSettings Settings)
       : AdcReadoutBase(std::move(Settings), LocalAdcSettings) {}
 };
 
-class ADC_Readout_Factory : public DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings Settings) override {
-    return std::shared_ptr<Detector>(new AdcReadout(Settings));
-  }
-};
+DetectorFactory<AdcReadout> Factory;
 
-ADC_Readout_Factory Factory;
+// DetectorModuleRegistration::Registrar<AdcReadout> Register("AdcReadout",
+//                                                           CLIArguments);

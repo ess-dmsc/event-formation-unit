@@ -5,6 +5,5 @@
  *  @brief Unit tests.
  */
 
-#include <gtest/gtest.h>
 #include "../AdcDataProcessor.h"
-
+#include <gtest/gtest.h>
