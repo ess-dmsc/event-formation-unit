@@ -7,9 +7,10 @@
 #include <common/Hists.h>
 #include <multigrid/mgmesytec/DataParser.h>
 #include <common/ReadoutSerializer.h>
+#include <string.h>
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 // clang-format off
 // sis3153 and mesytec data types from
@@ -78,18 +79,21 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
     auto datatype = *datap & MesytecTypeMask;
 
     switch (datatype) {
-    case MesytecType::Header:dataWords = *datap & 0x000003ff;
+    case MesytecType::Header:
+      dataWords = *datap & 0x000003ff;
       assert(nWords > dataWords);
       module = (*datap & 0x00ff0000) >> 16;
       DTRACE(INF, "   Header:  trigger=%d,  data len=%d (words),  module=%d\n",
-             triggers, dataWords, module);
+             stats.triggers, dataWords, module);
       break;
 
-    case MesytecType::ExtendedTimeStamp:HighTime = (*datap & 0x0000ffff);
+    case MesytecType::ExtendedTimeStamp:
+      HighTime = (*datap & 0x0000ffff);
       DTRACE(INF, "   ExtendedTimeStamp: high_time=%d\n", HighTime);
       break;
 
-    case MesytecType::DataEvent1:BusGood = true;
+    case MesytecType::DataEvent1:
+      BusGood = true;
       Bus = (*datap & 0x0f000000) >> 24;
       time_diff = (*datap & 0x0000ffff);
       DTRACE(INF, "   DataEvent1:  bus=%d,  time_diff=%d\n", Bus, time_diff);
@@ -101,7 +105,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       addr = (*datap & 0x00fff000) >> 12; /**< channel */
       adc = (*datap & 0x00000fff);
       BusGood = true;
-      readouts++;
+      stats.readouts++;
 
       DTRACE(INF, "   DataEvent2:  bus=%d  channel=%d  adc=%d\n", Bus, addr, adc);
 
@@ -132,11 +136,11 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
 
         if (dumptofile) {
           mgdata->tofile("%d, %d, %d, %d, %d, %d\n",
-              triggers, HighTime, Time, Bus, addr, adc);
+              stats.triggers, HighTime, Time, Bus, addr, adc);
         }
       } else {
         //DTRACE(DEB, "   discarding %d,%d,%d,%d\n", time, bus, addr, adc);
-        discards++;
+        stats.discards++;
       }
       break;
 
@@ -163,7 +167,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
 
   if (dumptofile && TimeGood && (!WireGood || !GridGood)) {
     mgdata->tofile("%d, %d, %d, -1, -1, -1\n",
-                   triggers, HighTime, Time);
+                   stats.triggers, HighTime, Time);
   }
 }
 
@@ -173,11 +177,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
                                       FBSerializer &fbserializer,
                                       ReadoutSerializer &serializer) {
   int bytesleft = size;
-  readouts = 0;
-  discards = 0;
-  geometry_errors = 0;
-  events = 0;
-  tx_bytes = 0;
+  memset(&stats, 0, sizeof(stats));
 
   if (buffer[0] != 0x60) {
     return error::EUNSUPP;
@@ -208,7 +208,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
     }
     datap++;
     bytesleft -= 4;
-    triggers++;
+    stats.triggers++;
     mesytec_parse_n_words(datap, len - 3, hists, serializer);
 
     if (TimeGood && BusGood && GridGood && WireGood) {
@@ -227,11 +227,13 @@ MesytecData::error MesytecData::parse(const char *buffer,
 
       DTRACE(DEB, "Event: pixel: %d, time: %d \n\n", pixel, time);
       if (pixel != 0) {
-        tx_bytes += fbserializer.addevent(time, pixel);
-        events++;
+        stats.tx_bytes += fbserializer.addevent(time, pixel);
+        stats.events++;
       } else {
-        geometry_errors++;
+        stats.geometry_errors++;
       }
+    } else {
+      stats.badtriggers++;
     }
 
     PreviousTime = Time;

@@ -50,13 +50,16 @@ public:
   /** @brief parse n 32 bit words from mesytec VMMR-8/16 card */
   void mesytec_parse_n_words(uint32_t *buffer, uint16_t nWords, NMXHists &hists, ReadoutSerializer &serializer);
 
-  // Statistics returned by parse()
-  int readouts{0}; /**< number of channels read out */
-  int discards{0};
-  int triggers{0};
-  int events{0};
-  int tx_bytes{0};
-  int geometry_errors{0};
+  // Statistics updated by parse()
+  struct {
+    int readouts{0}; /**< number of channels read out */
+    int discards{0}; /**< readouts discarded due to adc thresholds */
+    int triggers{0}; /**< number of 0x58 blocks in packet */
+    int events{0};   /**< number of events from this packets */
+    int tx_bytes{0}; /**< number of bytes produced by librdkafka */
+    int geometry_errors{0}; /**< number of invalid pixels from readout */
+    int badtriggers{0}; /**< number of empty triggers or triggers without valid data */
+  } stats;
 
   uint64_t FakePulseTime{0};
 
