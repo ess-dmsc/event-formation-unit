@@ -8,7 +8,7 @@
 #include <iomanip>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
-#include <multigrid/mgcncsgen/JsonArgs.h>
+#include <multigrid/generators/JsonArgs.h>
 #include <sstream>
 #include <unistd.h>
 

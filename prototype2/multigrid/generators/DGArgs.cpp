@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <getopt.h>
 #include <iostream>
-#include <multigrid/mgcncsgen/DGArgs.h>
+#include <multigrid/generators/DGArgs.h>
 #include <unistd.h>
 
 DGArgs::DGArgs(int argc, char *argv[]) {

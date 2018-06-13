@@ -4,7 +4,7 @@
 #include <cstdio>
 #include <getopt.h>
 #include <iostream>
-#include <multigrid/mgcncsgen/JsonArgs.h>
+#include <multigrid/generators/JsonArgs.h>
 #include <unistd.h>
 
 JsonArgs::JsonArgs(int argc, char *argv[]) {

@@ -6,7 +6,7 @@
 #include <cstring>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
-#include <multigrid/mgcncsgen/DGArgs.h>
+#include <multigrid/generators/DGArgs.h>
 #include <unistd.h>
 
 const int TSC_MHZ = 2900; // Not accurate

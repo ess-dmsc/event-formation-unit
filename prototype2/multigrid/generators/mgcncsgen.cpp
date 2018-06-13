@@ -7,7 +7,7 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <multigrid/mgcncs/DataParser.h>
-#include <multigrid/mgcncsgen/DGArgs.h>
+#include <multigrid/generators/DGArgs.h>
 #include <unistd.h>
 
 const int TSC_MHZ = 2900;
