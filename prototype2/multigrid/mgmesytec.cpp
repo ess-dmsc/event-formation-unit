@@ -85,6 +85,7 @@ private:
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t triggers;
+    int64_t badtriggers;
     int64_t rx_readouts;
     int64_t parse_errors;
     int64_t rx_discards;
@@ -103,6 +104,7 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.create("rx_bytes",              mystats.rx_bytes);
   Stats.create("readouts",              mystats.rx_readouts);
   Stats.create("triggers",              mystats.triggers);
+  Stats.create("badtriggers",           mystats.badtriggers);
   Stats.create("readouts_parse_errors", mystats.parse_errors);
   Stats.create("readouts_discarded",    mystats.rx_discards);
   Stats.create("geometry_errors",       mystats.geometry_errors);
@@ -151,12 +153,13 @@ void CSPEC::mainThread() {
         mystats.parse_errors++;
       }
 
-      mystats.rx_readouts += mesytecdata.readouts;
-      mystats.rx_discards += mesytecdata.discards;
-      mystats.triggers += mesytecdata.triggers;
-      mystats.geometry_errors+= mesytecdata.geometry_errors;
-      mystats.tx_bytes += mesytecdata.tx_bytes;
-      mystats.rx_events += mesytecdata.events;
+      mystats.rx_readouts += mesytecdata.stats.readouts;
+      mystats.rx_discards += mesytecdata.stats.discards;
+      mystats.triggers += mesytecdata.stats.triggers;
+      mystats.badtriggers += mesytecdata.stats.badtriggers;
+      mystats.geometry_errors+= mesytecdata.stats.geometry_errors;
+      mystats.tx_bytes += mesytecdata.stats.tx_bytes;
+      mystats.rx_events += mesytecdata.stats.events;
     }
 
     // Force periodic flushing
