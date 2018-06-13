@@ -35,6 +35,22 @@ enum MesytecType : uint32_t {
 static constexpr uint32_t MesytecTypeMask{0xf0000000};
 static constexpr uint32_t MesytecTimeMask{0x3fffffff};
 
+static constexpr uint32_t MesytecDataWordsMask{0x000003ff};
+
+static constexpr uint32_t MesytecModuleMask{0x00ff0000};
+static constexpr uint8_t MesytecModuleBitShift{16};
+
+static constexpr uint32_t MesytecHighTimeMask{0x0000ffff};
+
+static constexpr uint32_t MesytecBusMask{0x0f000000};
+static constexpr uint8_t MesytecBusBitShift{24};
+static constexpr uint32_t MesytecTimeDiffMask{0x0000ffff};
+
+static constexpr uint32_t MesytecAddressMask{0x00fff000};
+static constexpr uint8_t MesytecAddressBitShift{12};
+static constexpr uint32_t MesytecAdcMask{0x00000fff};
+
+
 // @todo can only create a single event per UDP buffer
 uint32_t MesytecData::getPixel() {
   if (!GridGood || !WireGood) {
@@ -59,7 +75,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
 
   uint8_t module;
 
-  uint16_t addr;
+  uint16_t channel;
   uint16_t adc;
   uint16_t dataWords;
   uint16_t time_diff;
@@ -82,9 +98,9 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
 
     switch (datatype) {
     case MesytecType::Header:
-      dataWords = *datap & 0x000003ff;
+      dataWords = static_cast<uint16_t>(*datap & MesytecDataWordsMask);
       assert(nWords > dataWords);
-      module = (*datap & 0x00ff0000) >> 16;
+      module = static_cast<uint8_t>((*datap & MesytecModuleMask) >> MesytecModuleBitShift);
       DTRACE(INF, "   Header:  trigger=%d,  data len=%d (words),  module=%d\n",
              stats.triggers, dataWords, module);
       break;
@@ -92,14 +108,14 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
     case MesytecType::ExtendedTimeStamp:
       // This always comes before events on particular Bus
       // TODO: not meaningful for now
-      HighTime = (*datap & 0x0000ffff);
+      HighTime = static_cast<uint16_t>(*datap & MesytecHighTimeMask);
       DTRACE(INF, "   ExtendedTimeStamp: high_time=%d\n", HighTime);
       break;
 
     case MesytecType::DataEvent1:
       BusGood = true;
-      Bus = (*datap & 0x0f000000) >> 24;
-      time_diff = (*datap & 0x0000ffff);
+      Bus = static_cast<uint8_t>((*datap & MesytecBusMask) >> MesytecBusBitShift);
+      time_diff = static_cast<uint16_t>(*datap & MesytecTimeDiffMask);
       DTRACE(INF, "   DataEvent1:  bus=%d,  time_diff=%d\n", Bus, time_diff);
       break;
 
@@ -107,46 +123,46 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       // TODO: What if Bus number changes?
 
       // value in using something like getValue(Buffer, NBits, Offset) ?
-      Bus = (*datap & 0x0f000000) >> 24;
-      addr = (*datap & 0x00fff000) >> 12; /**< channel */
-      adc = (*datap & 0x00000fff);
+      Bus = static_cast<uint8_t>((*datap & MesytecBusMask) >> MesytecBusBitShift);
+      channel = static_cast<uint16_t>((*datap & MesytecAddressMask) >> MesytecAddressBitShift);
+      adc = static_cast<uint16_t>(*datap & MesytecAdcMask);
       BusGood = true;
       stats.readouts++;
       chan_count++;
 
-      //DTRACE(INF, "   DataEvent2:  bus=%d  channel=%d  adc=%d\n", Bus, addr, adc);
+      //DTRACE(INF, "   DataEvent2:  bus=%d  channel=%d  adc=%d\n", Bus, channel, adc);
 
       accept = false;
-      if (mgseq.isWire(addr) && adc >= wireThresholdLo && adc <= wireThresholdHi) {
+      if (mgseq.isWire(channel) && adc >= wireThresholdLo && adc <= wireThresholdHi) {
         accept = true;
         if (adc > WireAdcMax) {
           WireGood = true;
-          Wire = addr;
+          Wire = channel;
           WireAdcMax = adc;
-          //DTRACE(INF, "     new wire adc max: ch %d\n", addr);
+          //DTRACE(INF, "     new wire adc max: ch %d\n", channel);
         }
-        hists.binstrips(addr, adc, 0, 0);
-      } else if (mgseq.isGrid(addr) && adc >= gridThresholdLo && adc <= gridThresholdHi) {
+        hists.binstrips(channel, adc, 0, 0);
+      } else if (mgseq.isGrid(channel) && adc >= gridThresholdLo && adc <= gridThresholdHi) {
         accept = true;
         if (adc > GridAdcMax) {
           GridGood = true;
-          Grid = addr;
+          Grid = channel;
           GridAdcMax = adc;
-          //DTRACE(INF, "     new grid adc max: ch %d\n", addr);
+          //DTRACE(INF, "     new grid adc max: ch %d\n", channel);
         }
-        hists.binstrips(0, 0, addr, adc);
+        hists.binstrips(0, 0, channel, adc);
       }
 
       if (accept) {
-        //DTRACE(DEB, "   accepting %d,%d,%d,%d\n", time, bus, addr, adc);
-        serializer.addEntry(0, addr, Time, adc);
+        //DTRACE(DEB, "   accepting %d,%d,%d,%d\n", time, bus, channel, adc);
+        serializer.addEntry(0, channel, Time, adc);
 
         if (dumptofile) {
           mgdata->tofile("%d, %d, %d, %d, %d, %d\n",
-              stats.triggers, HighTime, Time, Bus, addr, adc);
+              stats.triggers, HighTime, Time, Bus, channel, adc);
         }
       } else {
-        //DTRACE(DEB, "   discarding %d,%d,%d,%d\n", time, bus, addr, adc);
+        //DTRACE(DEB, "   discarding %d,%d,%d,%d\n", time, bus, channel, adc);
         stats.discards++;
       }
       break;
@@ -173,7 +189,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
   }
 
   if (chan_count)
-    DTRACE(INF, "   Bus=%d  Chan_count=%d\n", Bus, chan_count);
+    DTRACE(INF, "   Bus=%d  Chan_count=%zu\n", Bus, chan_count);
 
   if (dumptofile && TimeGood && (!WireGood || !GridGood)) {
     mgdata->tofile("%d, %d, %d, -1, -1, -1\n",
