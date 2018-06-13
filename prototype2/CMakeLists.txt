@@ -52,13 +52,13 @@ add_subdirectory(udp)
 add_subdirectory(adc_readout)
 
 add_custom_target(runefu
-    COMMAND efu "-d" "../modules/mgmesytec" "-s" "1"
-    COMMAND efu "-d" "../modules/mgcncs2" "-s" "1"
-    COMMAND efu "-d" "../modules/sonde" "-s" "1"
-    COMMAND efu "-d" "../modules/mbcaen" "-s" "1"
+    COMMAND efu "-d" "../modules/mgmesytec" "-s" "1" "--dumptofile" "deleteme_"
+    COMMAND efu "-d" "../modules/mgcncs2" "-s" "1" "--dumptofile" "deleteme_"
+    COMMAND efu "-d" "../modules/sonde" "-s" "1" "--dumptofile" "deleteme_"
+    COMMAND efu "-d" "../modules/mbcaen" "-s" "1" "--dumptofile" "deleteme_"
     COMMAND efu "-d" "../modules/AdcReadout" "-s" "1"
     COMMAND efu "-d" "../modules/udp" "-s" "1"
-    #COMMAND efu "-d" "../modules/gdgem" "-f" "?/gdgem/configs/vmm2.json" "-s" "2"
+    COMMAND efu "-d" "../modules/gdgem" "-f" "nocfgfile" "-s" "2"
     DEPENDS efu mgmesytec mgcncs2 gdgem sonde mbcaen udp AdcReadout
     )
 
