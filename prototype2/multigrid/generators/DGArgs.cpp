@@ -7,6 +7,8 @@
 #include <multigrid/generators/DGArgs.h>
 #include <unistd.h>
 
+/// GCOVR_EXCL_START
+
 DGArgs::DGArgs(int argc, char *argv[]) {
 
   int c;
@@ -102,3 +104,4 @@ DGArgs::DGArgs(int argc, char *argv[]) {
   printf("Other properties\n");
   printf("  update interval:        %us\n", updint);
 }
+/// GCOVR_EXCL_STOP

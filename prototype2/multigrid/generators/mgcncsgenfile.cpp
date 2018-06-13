@@ -11,6 +11,8 @@
 
 const int TSC_MHZ = 2900; // Not accurate
 
+/// GCOVR_EXCL_START
+
 int main(int argc, char *argv[]) {
   DGArgs opts(argc, argv);
 
@@ -59,3 +61,4 @@ int main(int argc, char *argv[]) {
   fclose(f);
   return 0;
 }
+/// GCOVR_EXCL_STOP
