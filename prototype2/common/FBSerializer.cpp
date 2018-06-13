@@ -6,10 +6,13 @@
 #include <common/DataSave.h>
 #include <libs/include/gccintel.h>
 
-#define TIMESIZE 4
-#define PIXELSIZE 4
+static constexpr size_t TimeSize = sizeof(uint32_t);
+static constexpr size_t PixelSize = sizeof(uint32_t);
 
-#define INITIAL_PULSE_TIME 0
+// These must be non-0 because of Flatbuffers being stupid
+// If they are initially set to 0, they will not be mutable
+static constexpr uint64_t InitialPulseTime = 1;
+static constexpr uint64_t InitialSeqNo = 1;
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -22,12 +25,12 @@ FBSerializer::FBSerializer(size_t maxarraylength, Producer &prod)
       producer(prod) {
 
   auto sourceName = builder.CreateString("c_spec_data");
-  auto timeoff = builder.CreateUninitializedVector(maxlen, TIMESIZE, &timeptr);
+  auto timeoff = builder.CreateUninitializedVector(maxlen, TimeSize, &timeptr);
   auto pixeloff =
-      builder.CreateUninitializedVector(maxlen, PIXELSIZE, &pixelptr);
+      builder.CreateUninitializedVector(maxlen, PixelSize, &pixelptr);
 
-  auto evMsgHeader = CreateEventMessage(builder, sourceName, seqno,
-                                        INITIAL_PULSE_TIME, timeoff, pixeloff);
+  auto evMsgHeader = CreateEventMessage(builder, sourceName, InitialSeqNo,
+                                        InitialPulseTime, timeoff, pixeloff);
   FinishEventMessageBuffer(builder, evMsgHeader);
 
   fbBufferPointer = reinterpret_cast<char*>(builder.GetBufferPointer());
