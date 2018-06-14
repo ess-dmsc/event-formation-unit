@@ -8,9 +8,11 @@
 #include <iomanip>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
-#include <multigrid/mgcncsgen/JsonArgs.h>
+#include <multigrid/generators/JsonArgs.h>
 #include <sstream>
 #include <unistd.h>
+
+/// GCOVR_EXCL_START
 
 int main(int argc, char *argv[]) {
   JsonArgs opts(argc, argv);
@@ -73,3 +75,4 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+/// GCOVR_EXCL_STOP

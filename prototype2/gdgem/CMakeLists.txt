@@ -52,9 +52,18 @@ set(gdgem_INC
     )
 create_module(gdgem)
 
+#
+# Unit Tests
+#
+set(NMXConfigTest_INC NMXConfig.h srs/SRSTime.h srs/SRSMappings.h)
+set(NMXConfigTest_SRC NMXConfigTest.cpp NMXConfig.cpp srs/SRSTime.cpp srs/SRSMappings.cpp)
+create_test_executable(NMXConfigTest)
+
 #=============================================================================
 # Component tests
 #=============================================================================
+
+
 
 add_subdirectory(nmx)
 add_subdirectory(srs)
@@ -62,4 +71,3 @@ add_subdirectory(vmm2)
 add_subdirectory(vmm3)
 add_subdirectory(clustering)
 add_subdirectory(generators)
-

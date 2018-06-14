@@ -30,7 +30,7 @@ public:
 
   HitContainer all_hits;
   size_t stats_chrono_errors {0};
-  
+
   double prev_time_{0};
 };
 
@@ -120,6 +120,15 @@ protected:
 //  EXPECT_EQ(0, sorter_x->stats_trigger_count);
 //  EXPECT_EQ(2, sorter_y->stats_trigger_count);
 //}
+
+TEST_F(HitSorterTest, Constructor) {
+  ASSERT_EQ(0, sorter_x->stats_trigger_count);
+  ASSERT_EQ(0, sorter_y->stats_trigger_count);
+  ASSERT_EQ(0, sorter_x->stats_subsequent_triggers);
+  ASSERT_EQ(0, sorter_y->stats_subsequent_triggers);
+  ASSERT_EQ(true, mock_x->empty());
+  ASSERT_EQ(true, mock_y->empty());
+}
 
 TEST_F(HitSorterTest, Run16_Short) {
   uint32_t bonus = 0;

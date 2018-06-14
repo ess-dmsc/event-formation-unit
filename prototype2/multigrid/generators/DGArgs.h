@@ -4,7 +4,7 @@
  *
  *  @brief Command line argument parser for cspecgen
  */
-
+/// GCOVR_EXCL_START
 #pragma once
 #include <string>
 
@@ -32,3 +32,4 @@ public:
 
   unsigned int updint{1}; /**< update interval (seconds) */
 };
+/// GCOVR_EXCL_STOP

@@ -20,7 +20,7 @@ protected:
 
   virtual void SetUp() {
     cspecgeometry = new MultiGridGeometry(1, 80, 160, 4, 16);
-    dat = std::unique_ptr<CSPECData>(new CSPECData(250, &conv, cspecgeometry));
+    dat = std::unique_ptr<CSPECData>(new CSPECData(250, &conv, cspecgeometry, "deleteme_"));
   }
   virtual void TearDown() { delete cspecgeometry; }
 
@@ -36,6 +36,13 @@ TEST_F(CspecDataTest, Constructor) {
   ASSERT_LT(dat->wire_thresh, 16384);
   ASSERT_LT(dat->grid_thresh, 16384);
   ASSERT_EQ(dat->datasize, 40);
+}
+
+TEST_F(CspecDataTest, DefaultConstructor) {
+  CSPECData mgcncs2;
+  ASSERT_EQ(0, mgcncs2.datalen);
+  ASSERT_EQ(0, mgcncs2.elems);
+  ASSERT_EQ(0, mgcncs2.error);
 }
 
 TEST_F(CspecDataTest, ValidData) {

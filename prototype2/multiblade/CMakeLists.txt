@@ -19,8 +19,8 @@ create_module(mbcaen)
 #=============================================================================
 # Build MB text 2 UDP
 #=============================================================================
-set(mbtext2udp_INC mbgen/MBArgs.h)
-set(mbtext2udp_SRC mbtext2udp.cpp mbgen/MBArgs.cpp mbcommon/TextFile.cpp)
+set(mbtext2udp_INC generators/MBArgs.h)
+set(mbtext2udp_SRC generators/mbtext2udp.cpp generators/MBArgs.cpp generators/TextFile.cpp)
 create_executable(mbtext2udp)
 
 # Excecutables to build if TCLAP is installed
@@ -29,13 +29,13 @@ if(TCLAP_FOUND)
   # Create an excecutable for the event-builder to process recorded data from a text-file.
   set(mbprocesstextfile_INC
     mbcommon/MultiBladeEventBuilder.h
-    mbcommon/TextFile.h
+    generators/TextFile.h
     mbcommon/DumpEventBuilderInfo.h
     )
   set(mbprocesstextfile_SRC
-    mbprocesstextfile.cpp
+    generators/mbprocesstextfile.cpp
+    generators/TextFile.cpp
     mbcommon/MultiBladeEventBuilder.cpp
-    mbcommon/TextFile.cpp
     mbcommon/DumpEventBuilderInfo.cpp
     )
 
@@ -44,13 +44,13 @@ if(TCLAP_FOUND)
   # Create an excecutable to pass data several times for profiling
   # Not really usefull unless built with -gp
   set(mbprofiling_INC
+    generators/TextFile.h
     mbcommon/MultiBladeEventBuilder.h
-    mbcommon/TextFile.h
     mbcommon/DumpEventBuilderInfo.h
     )
-  set(mbprofiling_SRC mbprofiling.cpp
+  set(mbprofiling_SRC generators/mbprofiling.cpp
+    generators/TextFile.cpp
     mbcommon/MultiBladeEventBuilder.cpp
-    mbcommon/TextFile.cpp
     mbcommon/DumpEventBuilderInfo.cpp
     )
   create_executable(mbprofiling)

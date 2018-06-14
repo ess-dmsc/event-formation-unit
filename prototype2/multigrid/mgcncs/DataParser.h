@@ -59,7 +59,11 @@ public:
 
   CSPECData(){}; // Discouraged, but used in cspecgen
 
-  ~CSPECData() { delete[] data; }
+  ~CSPECData() {
+    if (data != nullptr) {
+      delete[] data; 
+    }
+  }
 
   /** @brief parse a binary payload buffer, return number of data elements
    */
@@ -82,7 +86,7 @@ public:
 
   // This data is overwritten on receive()
   // struct MultiGridData data[250];
-  struct MultiGridData *data;
+  struct MultiGridData *data{nullptr};
   unsigned datalen{0};
   unsigned int elems{0};
   unsigned int error{0};
