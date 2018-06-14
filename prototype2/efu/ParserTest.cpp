@@ -66,7 +66,6 @@ public:
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
 
-
 DetectorFactory<TestDetector> Factory;
 
 class ParserTest : public TestBase {

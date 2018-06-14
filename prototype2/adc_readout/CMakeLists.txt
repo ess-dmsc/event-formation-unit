@@ -1,4 +1,5 @@
 find_package(ASIO REQUIRED)
+find_package(Trompeloeil REQUIRED)
 
 set(AdcReadoutBase_SRC
     AdcReadoutBase.cpp
@@ -61,6 +62,7 @@ set(AdcReadoutTest_LIB
     )
 
 create_test_executable(AdcReadoutTest SKIP_MEMGRIND)
+target_include_directories(AdcReadoutTest PRIVATE ${Trompeloeil_INCLUDE_DIR})
 
 get_filename_component(TEST_PACKET_PATH "test/test_packet_1.dat" DIRECTORY)
 target_compile_definitions(AdcReadoutTest
@@ -69,4 +71,4 @@ message(STATUS "Test ADC packets in path: ${CMAKE_CURRENT_SOURCE_DIR}/${TEST_PAC
 
 target_include_directories(AdcReadoutTest PRIVATE ${ASIO_INCLUDE_DIR})
 
-add_subdirectory("chopper_integration_test")
+add_subdirectory("integration_test")

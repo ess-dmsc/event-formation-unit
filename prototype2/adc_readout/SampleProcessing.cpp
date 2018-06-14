@@ -6,8 +6,8 @@
  */
 
 #include "SampleProcessing.h"
-#include "senv_data_generated.h"
 #include "AdcReadoutConstants.h"
+#include "senv_data_generated.h"
 #include <cmath>
 
 std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start,
@@ -29,20 +29,25 @@ double CalcTimeStampDelta(int OversamplingFactor) {
   return SampleTime * OversamplingFactor;
 }
 
-ProcessedSamples ChannelProcessing::processModule(const DataModule &Samples) {
+ProcessedSamples ChannelProcessing::processModule(const SamplingRun &Samples) {
   int FinalOversamplingFactor = MeanOfNrOfSamples * Samples.OversamplingFactor;
   size_t SampleIndex{0};
-  size_t TotalNumberOfSamples = (Samples.Data.size() + NrOfSamplesSummed) / MeanOfNrOfSamples;
+  size_t TotalNumberOfSamples =
+      (Samples.Data.size() + NrOfSamplesSummed) / MeanOfNrOfSamples;
   ProcessedSamples ReturnSamples(TotalNumberOfSamples);
-  
+
   ReturnSamples.TimeDelta = CalcTimeStampDelta(FinalOversamplingFactor);
   std::uint64_t TimeStampOffset{0};
   if (TSLocation == TimeStampLocation::Middle) {
-    TimeStampOffset = std::llround(0.5 * (ReturnSamples.TimeDelta  / FinalOversamplingFactor) * (FinalOversamplingFactor - 1));
+    TimeStampOffset =
+        std::llround(0.5 * (ReturnSamples.TimeDelta / FinalOversamplingFactor) *
+                     (FinalOversamplingFactor - 1));
   } else if (TSLocation == TimeStampLocation::End) {
-    TimeStampOffset = std::llround((ReturnSamples.TimeDelta  / FinalOversamplingFactor) * (FinalOversamplingFactor - 1));
+    TimeStampOffset =
+        std::llround((ReturnSamples.TimeDelta / FinalOversamplingFactor) *
+                     (FinalOversamplingFactor - 1));
   }
-  
+
   for (size_t i = 0; i < Samples.Data.size(); i++) {
     if (0 == NrOfSamplesSummed) {
       TimeStampOfFirstSample = Samples.TimeStamp.GetOffsetTimeStamp(
@@ -51,8 +56,10 @@ ProcessedSamples ChannelProcessing::processModule(const DataModule &Samples) {
     SumOfSamples += Samples.Data[i];
     NrOfSamplesSummed++;
     if (NrOfSamplesSummed == MeanOfNrOfSamples) {
-      ReturnSamples.Samples[SampleIndex] = SumOfSamples / FinalOversamplingFactor;
-        ReturnSamples.TimeStamps[SampleIndex] = TimeStampOfFirstSample.GetTimeStampNS() + TimeStampOffset;
+      ReturnSamples.Samples[SampleIndex] =
+          SumOfSamples / FinalOversamplingFactor;
+      ReturnSamples.TimeStamps[SampleIndex] =
+          TimeStampOfFirstSample.GetTimeStampNS() + TimeStampOffset;
 
       ChannelProcessing::reset();
       ++SampleIndex;
@@ -85,9 +92,7 @@ SampleProcessing::SampleProcessing(std::shared_ptr<ProducerBase> Prod,
 
 void SampleProcessing::setMeanOfSamples(int NrOfSamples) {
   MeanOfNrOfSamples = NrOfSamples;
-  for (auto &Processor : ProcessingInstances) {
-    Processor.second.setMeanOfSamples(NrOfSamples);
-  }
+  ProcessingInstance.setMeanOfSamples(MeanOfNrOfSamples);
 }
 
 void SampleProcessing::setSerializeTimestamps(bool SerializeTimeStamps) {
@@ -96,22 +101,13 @@ void SampleProcessing::setSerializeTimestamps(bool SerializeTimeStamps) {
 
 void SampleProcessing::setTimeStampLocation(TimeStampLocation Location) {
   TSLocation = Location;
-  for (auto &Processor : ProcessingInstances) {
-    Processor.second.setTimeStampLocation(Location);
-  }
+  ProcessingInstance.setTimeStampLocation(TSLocation);
 }
 
-void SampleProcessing::processPacket(const PacketData &Data) {
-  for (auto &Module : Data.Modules) {
-    if (ProcessingInstances.find(Module.Channel) == ProcessingInstances.end()) {
-      ProcessingInstances[Module.Channel] = ChannelProcessing();
-      setMeanOfSamples(MeanOfNrOfSamples);
-      setTimeStampLocation(TSLocation);
-    }
-    auto ResultingSamples = ProcessingInstances[Module.Channel].processModule(Module);
-    if (not ResultingSamples.Samples.empty()) {
-      serializeAndTransmitData(ResultingSamples);
-    }
+void SampleProcessing::processData(const SamplingRun &Data) {
+  auto ResultingSamples = ProcessingInstance.processModule(Data);
+  if (not ResultingSamples.Samples.empty()) {
+    serializeAndTransmitData(ResultingSamples);
   }
 }
 
@@ -135,8 +131,7 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
   MessageBuilder.add_PacketTimestamp(Data.TimeStamp);
   MessageBuilder.add_TimeDelta(Data.TimeDelta);
 
-  // Note: std::map zero initialises new elements when using the [] operator
-  MessageBuilder.add_MessageCounter(MessageCounters[Data.Channel]++);
+  MessageBuilder.add_MessageCounter(MessageCounter++);
   MessageBuilder.add_TimestampLocation(
       Location(TimeLocSerialisationMap.at(TSLocation)));
   builder.Finish(MessageBuilder.Finish(), SampleEnvironmentDataIdentifier());

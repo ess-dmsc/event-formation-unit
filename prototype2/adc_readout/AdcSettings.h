@@ -18,6 +18,7 @@ struct AdcSettings {
   bool IncludeTimeStamp{false};
   std::string TimeStampLocation{"Middle"};
   std::string Name;
+  std::string GrafanaNameSuffix;
 };
 
 void SetCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings);
