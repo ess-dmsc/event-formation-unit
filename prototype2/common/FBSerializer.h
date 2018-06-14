@@ -10,10 +10,15 @@
 #include "ev42_events_generated.h"
 #include <common/Producer.h>
 
+//TODO: rename this
 class FBSerializer {
 public:
+  //TODO: source name as param
+  //TODO: repalce producer with functor for sending off
   /** @todo document */
   FBSerializer(size_t maxarraylength, Producer &prod);
+
+  //TODO: more getters
 
   /** @todo document */
   void set_pulse_time(uint64_t time);
@@ -21,6 +26,7 @@ public:
   /** @todo document */
   uint64_t get_pulse_time() const;
 
+  //TODO: make private
   /** @todo document */
   size_t serialize(size_t entries, char **buffer);
 
@@ -47,5 +53,6 @@ private:
   Producer &producer;
 
   size_t events{0};
+  //TODO make 0
   uint64_t seqno{1};
 };
