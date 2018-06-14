@@ -164,6 +164,7 @@ void CSPEC::mainThread() {
 
     // Force periodic flushing
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+      mystats.tx_bytes += flatbuffer.produce();
 
       if (!hists.isEmpty()) {
         XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.hit_count());

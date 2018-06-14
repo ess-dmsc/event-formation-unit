@@ -247,10 +247,8 @@ MesytecData::error MesytecData::parse(const char *buffer,
       uint32_t pixel = getPixel();
       uint32_t time = getTime();
 
-      if (time < PreviousTime)
-      {
-        // TODO mystats.tx_bytes +=
-        fbserializer.produce();
+      if (time < PreviousTime) {
+        stats.tx_bytes += fbserializer.produce();
 //        XTRACE(PROCESS, WAR, "Updated fake pulse time = %zu to %zu by delta %zu\n",
 //            FakePulseTime, fbserializer.get_pulse_time(), PreviousTime);
         FakePulseTime += PreviousTime;
