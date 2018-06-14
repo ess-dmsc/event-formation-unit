@@ -9,6 +9,7 @@ logical-geometry/09097f2@ess-dmsc/stable
 streaming-data-types/361bf7b@ess-dmsc/stable
 trompeloeil/v31@ess-dmsc/stable
 asio/1.11.0@bincrafters/stable
+readerwriterqueue/07e22ec@ess-dmsc/stable
 cmake_installer/3.10.0@conan/stable
 
 [generators]

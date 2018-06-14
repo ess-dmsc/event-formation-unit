@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "readerwriterqueue.h"
+#include <readerwriterqueue/readerwriterqueue.h>
 #include <cassert>
 #include <memory>
 
