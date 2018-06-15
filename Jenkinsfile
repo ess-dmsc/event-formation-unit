@@ -207,11 +207,13 @@ def get_pipeline(image_key)
             node ("docker") {
                 try {
                     def container = get_container(image_key)
-
+                    
                     docker_clone(image_key)
-                    docker_dependencies(image_key)
-                    docker_cmake(image_key, images[image_key]['cmake_flags'])
-                    docker_build(image_key)
+                    if (image_key != clangformat_os) {
+                      docker_dependencies(image_key)
+                      docker_cmake(image_key, images[image_key]['cmake_flags'])
+                      docker_build(image_key)
+                    }
 
                     if (image_key == coverage_on) {
                         docker_tests_coverage(image_key)
@@ -224,7 +226,6 @@ def get_pipeline(image_key)
                     }
                     
                     if (image_key == clangformat_os) {
-                        docker_formatting(image_key)
                         docker_cppcheck(image_key)
                         step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: 'cppcheck.txt']]])
                     }
