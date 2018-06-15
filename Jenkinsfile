@@ -63,14 +63,6 @@ def docker_clone(image_key) {
     \""""
 }
 
-def docker_copy_code(image_key) {
-    def custom_sh = images[image_key]['sh']
-    sh "docker cp ${project} ${container_name(image_key)}:/home/jenkins/${project}"
-    sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
-                        chown -R jenkins.jenkins /home/jenkins/${project}
-                        \""""
-}
-
 def docker_dependencies(image_key) {
     def conan_remote = "ess-dmsc-local"
     def custom_sh = images[image_key]['sh']
@@ -117,7 +109,7 @@ def docker_cppcheck(image_key) {
                         cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" prototype2/ 2> ${test_output}
                     """
         sh "docker exec ${container_name(image_key)} ${custom_sh} -c \"${cppcheck_script}\""
-        sh "docker cp ${container_name(image_key)}:/home/jenkins/${project}/${test_output} ."
+        sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ."
     } catch (e) {
         failure_function(e, "Cppcheck step for (${container_name(image_key)}) failed")
     }
@@ -236,9 +228,8 @@ def get_pipeline(image_key)
                     }
                     
                     if (image_key == clangformat_os) {
-                        docker_copy_code(image_key)
                         docker_cppcheck(image_key)
-                        step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: 'cppcheck.txt']]])
+                        step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "${project}/cppcheck.txt"]]])
                     }
                 } finally {
                     sh "docker stop ${container_name(image_key)}"
