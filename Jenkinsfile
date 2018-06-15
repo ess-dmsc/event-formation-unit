@@ -63,6 +63,14 @@ def docker_clone(image_key) {
     \""""
 }
 
+def docker_copy_code(image_key) {
+    def custom_sh = images[image_key]['sh']
+    sh "docker cp ${project} ${container_name(image_key)}:/home/jenkins/${project}"
+    sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
+                        chown -R jenkins.jenkins /home/jenkins/${project}
+                        \""""
+}
+
 def docker_dependencies(image_key) {
     def conan_remote = "ess-dmsc-local"
     def custom_sh = images[image_key]['sh']
@@ -228,6 +236,7 @@ def get_pipeline(image_key)
                     }
                     
                     if (image_key == clangformat_os) {
+                        docker_copy_code(image_key)
                         docker_cppcheck(image_key)
                         step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: 'cppcheck.txt']]])
                     }
