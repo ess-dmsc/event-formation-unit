@@ -106,7 +106,7 @@ def docker_cppcheck(image_key) {
         def test_output = "cppcheck.txt"
         def cppcheck_script = """
                         cd ${project} && \
-                        cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" prototype2/ 2> ${test_output}
+                        cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ 2> ${test_output}
                     """
         sh "docker exec ${container_name(image_key)} ${custom_sh} -c \"${cppcheck_script}\""
         sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ."
