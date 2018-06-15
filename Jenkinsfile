@@ -4,7 +4,7 @@ clangformat_os = "fedora25"
 archive_what = "centos7-release"
 
 images = [
-    'centos7-release': [
+/*    'centos7-release': [
         'name': 'essdmscdm/centos7-build-node:3.0.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash',
         'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
@@ -18,7 +18,7 @@ images = [
         'name': 'essdmscdm/ubuntu18.04-build-node:1.1.0',
         'sh': 'sh',
         'cmake_flags': ''
-    ],
+    ],*/
     'fedora25': [
         'name': 'essdmscdm/fedora25-build-node:1.0.0',
         'sh'  : 'sh',
@@ -106,7 +106,7 @@ def docker_cppcheck(image_key) {
         def test_output = "cppcheck.txt"
         def cppcheck_script = """
                         cd ${project} && \
-                        cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ 2> ${test_output}
+                        cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" prototype2/ 2> ${test_output}
                     """
         sh "docker exec ${container_name(image_key)} ${custom_sh} -c \"${cppcheck_script}\""
         sh "docker cp ${container_name(image_key)}:/home/jenkins/${project}/${test_output} ."
