@@ -1,5 +1,6 @@
 project = "event-formation-unit"
 coverage_on = "centos7"
+clangformat_os = "fedora25"
 archive_what = "centos7-release"
 
 images = [
@@ -17,6 +18,10 @@ images = [
         'name': 'essdmscdm/ubuntu18.04-build-node:1.1.0',
         'sh': 'sh',
         'cmake_flags': ''
+    ],
+    'fedora25': [
+        'name': 'essdmscdm/fedora25-build-node:1.0.0',
+        'sh'  : 'sh'
     ]
 ]
 
@@ -92,6 +97,21 @@ def docker_build(image_key) {
         cd ../utils/udpredirect && \
         make
     \""""
+}
+
+def docker_cppcheck(image_key) {
+    try {
+        def custom_sh = images[image_key]['sh']
+        def test_output = "cppcheck.txt"
+        def cppcheck_script = """
+                        cd ${project} && \
+                        cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" src/ 2> ${test_output}
+                    """
+        sh "docker exec ${container_name(image_key)} ${custom_sh} -c \"${cppcheck_script}\""
+        sh "docker cp ${container_name(image_key)}:/home/jenkins/${project}/${test_output} ."
+    } catch (e) {
+        failure_function(e, "Cppcheck step for (${container_name(image_key)}) failed")
+    }
 }
 
 def docker_tests(image_key) {
@@ -201,7 +221,12 @@ def get_pipeline(image_key)
                     if (image_key == archive_what) {
                         docker_archive(image_key)
                     }
-
+                    
+                    if (image_key == clangformat_os) {
+                        docker_formatting(image_key)
+                        docker_cppcheck(image_key)
+                        step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: 'cppcheck.txt']]])
+                    }
                 } finally {
                     sh "docker stop ${container_name(image_key)}"
                     sh "docker rm -f ${container_name(image_key)}"
