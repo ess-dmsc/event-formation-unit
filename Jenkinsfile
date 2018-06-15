@@ -21,7 +21,8 @@ images = [
     ],
     'fedora25': [
         'name': 'essdmscdm/fedora25-build-node:1.0.0',
-        'sh'  : 'sh'
+        'sh'  : 'sh',
+        'cmake_flags': ''
     ]
 ]
 
