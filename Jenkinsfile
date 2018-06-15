@@ -297,7 +297,7 @@ node('docker') {
         def image_key = x
         builders[image_key] = get_pipeline(image_key)
     }
-    builders['macOS'] = get_macos_pipeline()
+/*    builders['macOS'] = get_macos_pipeline()*/
 
     try {
         parallel builders
