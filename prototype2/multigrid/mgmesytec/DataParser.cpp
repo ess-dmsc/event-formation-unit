@@ -9,8 +9,8 @@
 #include <common/ReadoutSerializer.h>
 #include <string.h>
 
- #undef TRC_LEVEL
- #define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 // clang-format off
 // sis3153 and mesytec data types from
