@@ -57,10 +57,10 @@ uint32_t MesytecData::getPixel() {
     return 0;
   }
 
-  int x = mgseq.xcoord(0, Wire);
-  int y = mgseq.ycoord(Grid);
-  int z = mgseq.zcoord(Wire);
-  return mg.pixel3D(x, y, z);
+  int x = MgMappings.xcoord(Bus, Wire);
+  int y = MgMappings.ycoord(Grid);
+  int z = MgMappings.zcoord(Wire);
+  return Geometry.pixel3D(x, y, z);
 }
 
 uint32_t MesytecData::getTime() {
@@ -130,10 +130,10 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       stats.readouts++;
       chan_count++;
 
-      //DTRACE(INF, "   DataEvent2:  bus=%d  channel=%d  adc=%d\n", Bus, channel, adc);
+//      DTRACE(INF, "   DataEvent2:  bus=%d  channel=%d  adc=%d\n", Bus, channel, adc);
 
       accept = false;
-      if (mgseq.isWire(channel) && adc >= wireThresholdLo && adc <= wireThresholdHi) {
+      if (MgMappings.isWire(channel) && adc >= wireThresholdLo && adc <= wireThresholdHi) {
         accept = true;
         if (adc > WireAdcMax) {
           WireGood = true;
@@ -142,7 +142,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
           //DTRACE(INF, "     new wire adc max: ch %d\n", channel);
         }
         hists.binstrips(channel, adc, 0, 0);
-      } else if (mgseq.isGrid(channel) && adc >= gridThresholdLo && adc <= gridThresholdHi) {
+      } else if (MgMappings.isGrid(channel) && adc >= gridThresholdLo && adc <= gridThresholdHi) {
         accept = true;
         if (adc > GridAdcMax) {
           GridGood = true;
@@ -154,11 +154,11 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       }
 
       if (accept) {
-        //DTRACE(DEB, "   accepting %d,%d,%d,%d\n", time, bus, channel, adc);
+//        DTRACE(DEB, "   accepting %d,%d,%d,%d\n", time, Bus, channel, adc);
         serializer.addEntry(0, channel, Time, adc);
 
         if (dumptofile) {
-          mgdata->tofile("%d, %d, %d, %d, %d, %d\n",
+          CsvFile->tofile("%d, %d, %d, %d, %d, %d\n",
               stats.triggers, HighTime, Time, Bus, channel, adc);
         }
       } else {
@@ -168,7 +168,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       break;
 
     case MesytecType::FillDummy:
-      DTRACE(INF, "   FillDummy\n");
+//      DTRACE(INF, "   FillDummy\n");
       break;
 
     default:
@@ -192,7 +192,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
     DTRACE(INF, "   Bus=%d  Chan_count=%zu\n", Bus, chan_count);
 
   if (dumptofile && TimeGood && (!WireGood || !GridGood)) {
-    mgdata->tofile("%d, %d, %d, -1, -1, -1\n",
+    CsvFile->tofile("%d, %d, %d, -1, -1, -1\n",
                    stats.triggers, HighTime, Time);
   }
 

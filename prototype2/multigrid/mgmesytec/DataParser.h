@@ -13,6 +13,7 @@
 #include <common/ReadoutSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <multigrid/mgmesytec/MG24Detector.h>
+#include <multigrid/mgmesytec/MgSeqGeometry.h>
 
 class MesytecData {
 public:
@@ -20,11 +21,11 @@ public:
 
   /// @
   MesytecData(uint32_t module, std::string fileprefix = "") {
-    mgseq.select_module(module);
+    MgMappings.select_module(module);
     dumptofile = !fileprefix.empty();
     if (dumptofile) {
-      mgdata = std::make_shared<DataSave>(fileprefix, 100000000);
-      mgdata->tofile("Trigger, HighTime, Time, Bus, Channel, ADC\n");
+      CsvFile = std::make_shared<DataSave>(fileprefix, 100000000);
+      CsvFile->tofile("Trigger, HighTime, Time, Bus, Channel, ADC\n");
     }
   };
 
@@ -78,11 +79,11 @@ private:
   uint16_t wireThresholdHi{std::numeric_limits<uint16_t>::max()};
   uint16_t gridThresholdLo{0};
   uint16_t gridThresholdHi{std::numeric_limits<uint16_t>::max()};
-  MG24Detector mgseq;
-  ESSGeometry mg{4, 48, 20, 1};
+  MgSeqGeometry MgMappings;
+  ESSGeometry Geometry{36, 40, 20, 1};
 
   uint32_t PreviousTime{0};
 
   bool dumptofile{false};
-  std::shared_ptr<DataSave>(mgdata);
+  std::shared_ptr<DataSave> CsvFile;
 };
