@@ -13,6 +13,42 @@
 local t0=0
 local fc0=0
 
+function i64_ax(h,l)
+ local o = {}; o.l = l; o.h = h; return o;
+end -- +assign 64-bit v.as 2 regs
+
+function i64u(x)
+ return ( ( (bit.rshift(x,1) * 2) + bit.band(x,1) ) % (0xFFFFFFFF+1));
+end -- keeps [1+0..0xFFFFFFFFF]
+
+
+function i64_rshift(a,n)
+ local o = {};
+ if(n==0) then
+   o.l=a.l; o.h=a.h;
+ else
+   if(n<32) then
+     o.l= bit.rshift(a.l, n)+i64u( bit.lshift(a.h, (32-n))); o.h=bit.rshift(a.h, n);
+   else
+     o.l=bit.rshift(a.h, (n-32)); o.h=0;
+   end
+  end
+  return o;
+end
+
+function i64_toInt(a)
+  return (a.l + (a.h * (0xFFFFFFFF+1)));
+end -- value=2^53 or even less, so better use a.l value
+
+function i64_toString(a)
+  local s1=string.format("%x",a.l);
+  local s2=string.format("%x",a.h);
+  -- reduced to 44 bit
+  --local s3="00000000000";
+  --s3=string.sub(s3,1,16-string.len(s1))..s1;
+  --s3=string.sub(s3,1,8-string.len(s2))..s2..string.sub(s3,9);
+  return "0x"..string.upper(s2)..string.upper(s1);
+end
 
 function reversebits(value)
   nibswap = {0, 8, 4, 0xc, 2, 0xa, 6, 0xe, 1, 9, 5, 0xd, 3, 0xb, 7, 0xf}
@@ -69,21 +105,23 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
 		srshdr:add(buffer(0,4),"Frame Counter: " .. fc .. " (" .. (fc-fc0) .. ")")
 		if dataid == 0x564d32 then
 			local fecid = buffer(7,1):uint()
+			local overflow = buffer(12,4):uint()
 			srshdr:add(buffer(4,3),"Data Id: VMM3a Data")
 			srshdr:add(buffer(7,1),"FEC ID: " .. fecid)
 			srshdr:add(buffer(8,4),"UDP Timestamp: " .. time .. " (" .. (time - t0) .. ")")
+			srshdr:add(buffer(12,4),"Offset overflow last frame: " .. overflow)
 
 
 
-			if protolen >= 12 then
-				local hits = (protolen-12)/data_length_byte
+			if protolen >= 16 then
+				local hits = (protolen-16)/data_length_byte
 				pinfo.cols.info = string.format("FEC: %d, Hits: %3d", fecid, hits)
 				local hit_id = 0
 				local marker_id = 0
 				for i=1,hits do
 		 
-					local d1 = buffer(12 + (i-1)*data_length_byte, 4)
-					local d2 = buffer(16 + (i-1)*data_length_byte, 2)
+					local d1 = buffer(16 + (i-1)*data_length_byte, 4)
+					local d2 = buffer(20 + (i-1)*data_length_byte, 2)
 					local d1rev = reversebits(d1)
 					local d2rev = reversebits(d2)
 					-- data marker
@@ -92,38 +130,39 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
 					if flag == 0 then
 					-- marker
 						--data 2 (16 bit):
-						
-						-- 	triggercounter: 1-10: 10 bit
-						-- 	vmmid: 11-15 : 5 bit
-						--	flag: 0: 1 bit
+						-- 	flag: 0: 1 bit
+						-- 	vmmid: 1-5 : 5 bit
+						--	timestamp: 6-15: 10 bit
 
 						--data 1 (32 bit):
-						-- 	timestamp: 0-31: 32 bit
+						--	timestamp: 0-31: 32 bit
 	
 						marker_id = marker_id + 1
-						local timestamp = d1:uint() 
-						local triggercounter = bit.band(bit.rshift(d2:uint(), 5), 0x03FF) 
-						local vmmid = bit.band(d2:uint(), 0x1F) 
-						local hit = srshdr:add(buffer(12 + (i-1)*data_length_byte, data_length_byte),
-							string.format("Marker: %3d, SRS timestamp: %d, triggercounter: %2d, vmmid: %d",
-							marker_id, timestamp, triggercounter, vmmid))
+						local timestamp1 = d1:uint() 
+						local vmmid =  bit.band(bit.rshift(d2:uint(), 10), 0x1F) 
+						local timestamp2 = bit.lshift(d2:uint(), 22) 
+
+						local temp = i64_ax(timestamp1,timestamp2)
+						local timestamp = i64_rshift(temp,22)
+
+						local hit = srshdr:add(buffer(16 + (i-1)*data_length_byte, data_length_byte),
+							string.format("Marker: %3d, SRS timestamp: %d, vmmid: %d",
+							marker_id, i64_toInt(timestamp), vmmid))
 
 						local d1handle = hit:add(d1, "Data1 " .. d1)
 						d1handle:append_text(", (" .. d1rev .. ")")
-						d1handle:add(d1, "timestamp: " .. timestamp)
+						d1handle:add(d1, "timestamp: " .. i64_toString(timestamp))
 						
-
 						local d2handle = hit:add(d2, "Data2 " .. d2)
 						d2handle:append_text(", (" .. d2rev .. ")")
 						d2handle:add(d2, "flag: " .. flag)
-						d2handle:add(d2, "triggercounter: " .. triggercounter)
 						d2handle:add(d2, "vmmid: " .. vmmid)
 						
 					else
 					-- hit
 						hit_id = hit_id + 1
 						--data 2 (16 bit):
-						--	flag: 1
+						--	flag: 0
 						-- 	overThreshold: 1
 						-- 	chno: 2-7 : 6 bit
 						-- 	tdc: 8-15: 8 bit
@@ -136,11 +175,9 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
 									
 						
 						local othr = bit.band(bit.rshift(d2:uint(), 14), 0x01) 
-						-- local chno = shiftmask(d2rev, 24, 0x3f, 0, 0, 0)
-						local chno =  bit.band(bit.rshift(tonumber(d2rev,16), 24), 0x3F) 
-						
-						--local tdc  = shiftmask(d2rev, 16, 0xff, 0, 0, 0)
-						local tdc  = bit.band(bit.rshift(tonumber(d2rev,16), 16), 0xFF) 
+						local chno = bit.band(bit.rshift(tonumber(d2rev,16), 18), 0x3f) 
+						local tdc  = bit.band(bit.rshift(tonumber(d2rev,16), 24), 0x3f) 
+
 					
 						local offset = bit.band(bit.rshift(d1:uint(), 27), 0x1f) 
 						local vmmid = bit.band(bit.rshift(d1:uint(), 22), 0x1f) 
@@ -152,7 +189,7 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
 					
 					
 
-						local hit = srshdr:add(buffer(12 + (i-1)*data_length_byte, data_length_byte),
+						local hit = srshdr:add(buffer(16 + (i-1)*data_length_byte, data_length_byte),
 							string.format("Hit: %3d, offset: %d, vmmID: %2d, ch: %2d, bcid: %4d, tdc: %4d, adc: %4d, over thr: %d",
 							hit_id, offset, vmmid, chno, bcid, tdc, adc, othr))
 
