@@ -205,9 +205,9 @@ def docker_archive(image_key) {
 
                         # Create file with build information
                         touch BUILD_INFO
-                        echo \"Repository: ${project}/${env.BRANCH_NAME}\" >> BUILD_INFO
-                        echo \"Commit: ${git_commit}\" >> BUILD_INFO
-                        echo \"Jenkins build: ${BUILD_NUMBER}\" >> BUILD_INFO
+                        echo 'Repository: ${project}/${env.BRANCH_NAME}' >> BUILD_INFO
+                        echo 'Commit: ${git_commit}' >> BUILD_INFO
+                        echo 'Jenkins build: ${BUILD_NUMBER}' >> BUILD_INFO
                     \""""
 
     sh "docker cp ${container_name(image_key)}:/home/jenkins/archive/event-formation-unit-centos7.tar.gz ."
