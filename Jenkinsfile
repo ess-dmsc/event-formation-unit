@@ -182,7 +182,7 @@ def docker_archive(image_key) {
     def custom_sh = images[image_key]['sh']
 
     git_commit = sh(
-        script: """docker exec ${container_name} ${custom_sh} -c \"
+        script: """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd ${project} && git rev-parse HEAD
             \"""",
         returnStdout: true
