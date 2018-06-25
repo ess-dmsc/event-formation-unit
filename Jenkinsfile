@@ -195,10 +195,17 @@ def docker_archive(image_key) {
                         cp -r ${project}/prototype2/multigrid/calib_data/* archive/event-formation-unit/data && \
                         cd archive && \
                         tar czvf event-formation-unit-centos7.tar.gz event-formation-unit
+
+                        # Create file with build information
+                        touch BUILD_INFO
+                        echo "Repository: ${project}/${env.BRANCH_NAME}" >> BUILD_INFO
+                        echo "Commit: \$(git rev-parse HEAD)" >> BUILD_INFO
+                        echo "Jenkins build: ${BUILD_NUMBER}" >> BUILD_INFO
                     \""""
 
     sh "docker cp ${container_name(image_key)}:/home/jenkins/archive/event-formation-unit-centos7.tar.gz ."
-    archiveArtifacts "event-formation-unit-centos7.tar.gz"
+    sh "docker cp ${container_name(image_key)}:/home/jenkins/archive/BUILD_INFO ."
+    archiveArtifacts "event-formation-unit-centos7.tar.gz,BUILD_INFO"
 }
 
 def get_pipeline(image_key)
@@ -208,7 +215,7 @@ def get_pipeline(image_key)
             node ("docker") {
                 try {
                     def container = get_container(image_key)
-                    
+
                     docker_clone(image_key)
                     if (image_key != clangformat_os) {
                       docker_dependencies(image_key)
@@ -219,7 +226,7 @@ def get_pipeline(image_key)
                     if (image_key == coverage_on) {
                         docker_tests_coverage(image_key)
                     } else if (image_key == clangformat_os) {
-                        
+
                     } else {
                       docker_tests(image_key)
                     }
@@ -227,7 +234,7 @@ def get_pipeline(image_key)
                     if (image_key == archive_what) {
                         docker_archive(image_key)
                     }
-                    
+
                     if (image_key == clangformat_os) {
                         docker_cppcheck(image_key)
                         step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
