@@ -199,7 +199,7 @@ def docker_archive(image_key) {
                         # Create file with build information
                         touch BUILD_INFO
                         echo \"Repository: ${project}/${env.BRANCH_NAME}\" >> BUILD_INFO
-                        echo \"Commit: \\\$(git rev-parse HEAD)\" >> BUILD_INFO
+                        echo \"Commit: \\\\\\\$(git rev-parse HEAD)\" >> BUILD_INFO
                         echo \"Jenkins build: ${BUILD_NUMBER}\" >> BUILD_INFO
                     \""""
 
