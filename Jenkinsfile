@@ -180,14 +180,6 @@ def docker_tests_coverage(image_key) {
 
 def docker_archive(image_key) {
     def custom_sh = images[image_key]['sh']
-
-    git_commit = sh(
-        script: """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-                cd ${project} && git rev-parse HEAD
-            \"""",
-        returnStdout: true
-    ).trim()
-
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                         mkdir -p archive/event-formation-unit && \
                         cp -r ${project}/build/bin archive/event-formation-unit && \
@@ -206,7 +198,7 @@ def docker_archive(image_key) {
                         # Create file with build information
                         touch BUILD_INFO
                         echo 'Repository: ${project}/${env.BRANCH_NAME}' >> BUILD_INFO
-                        echo 'Commit: ${git_commit}' >> BUILD_INFO
+                        echo 'Commit: ${scm_vars.GIT_COMMIT}' >> BUILD_INFO
                         echo 'Jenkins build: ${BUILD_NUMBER}' >> BUILD_INFO
                     \""""
 
