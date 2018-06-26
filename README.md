@@ -1,10 +1,7 @@
-# Code Snippets and Experiments
+# Event Formation Unit 
 
 [![DOI](https://zenodo.org/badge/80731668.svg)](https://zenodo.org/badge/latestdoi/80731668)
 
-
-This repository holds code snippets in C++, C and bash for testing ideas
- related to network packet processing and  event processing.
 
 ## Directories
 The repository contains the following directories
