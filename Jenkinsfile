@@ -224,7 +224,7 @@ def get_pipeline(image_key)
 
                     if (image_key == coverage_on) {
                         docker_tests_coverage(image_key)
-                    } else {
+                    } else if (image_key != clangformat_os) {
                       docker_tests(image_key)
                     }
 
