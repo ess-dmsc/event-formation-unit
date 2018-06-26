@@ -110,7 +110,7 @@ def docker_cppcheck(image_key) {
                     """
         sh "docker exec ${container_name(image_key)} ${custom_sh} -c \"${cppcheck_script}\""
         sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ."
-        sh "mv -f ./${project}/* ./"
+        sh "mv -bf ./${project}/* ./"
     } catch (e) {
         failure_function(e, "Cppcheck step for (${container_name(image_key)}) failed")
     }
@@ -224,8 +224,6 @@ def get_pipeline(image_key)
 
                     if (image_key == coverage_on) {
                         docker_tests_coverage(image_key)
-                    } else if (image_key == clangformat_os) {
-
                     } else {
                       docker_tests(image_key)
                     }
