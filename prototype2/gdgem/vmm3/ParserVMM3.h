@@ -16,11 +16,14 @@ static const int maximumNumberVMM{32};
 
 class VMM3SRSData {
 public:
+  static const int SRSHeaderSize{16};
   /**< Do NOT rearrange fields, used for casting to data pointer*/
   struct SRSHdr {
     uint32_t fc;     /**< frame counter packet field */
     uint32_t dataid; /**< data type identifier packet field */
     uint32_t txtime; /**< Transmission time for UDP packet */
+    uint32_t offset_overflow;
+    uint8_t fec;
   };
 
   struct VMM3Marker {

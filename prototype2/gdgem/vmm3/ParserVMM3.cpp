@@ -7,8 +7,8 @@
 #include <gdgem/vmm3/ParserVMM3.h>
 #include <string.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 
@@ -20,7 +20,6 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
     XTRACE(PROCESS, DEB, "SRS Data\n");
     uint32_t data1r = BitMath::reversebits32(data1);
     uint16_t data2r = BitMath::reversebits16(data2);
-
     vmd->vmmid = (data1 >> 22) & 0x1F;
     vmd->tdc = data2r & 0xff;
     vmd->adc = (data1r >> 10) & 0x3FF;
@@ -64,12 +63,13 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 
   struct SRSHdr *srsptr = (struct SRSHdr *)buffer;
   srshdr.fc = ntohl(srsptr->fc);
-  // if (srshdr.fc == 0xfafafafa) {
-  //   XTRACE(PROCESS, DEB, "End of Frame\n");
-  //   return -1;
-  // }
 
-  if (size < 12) {
+  if (srshdr.fc == 0xfafafafa) {
+    XTRACE(PROCESS, DEB, "End of Frame\n");
+    return -1;
+  }
+
+  if (size < SRSHeaderSize) {
     XTRACE(PROCESS, WAR, "Undersize data\n");
     error += size;
     return 0;
@@ -77,6 +77,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 
   srshdr.txtime = ntohl(srsptr->txtime);
   srshdr.dataid = ntohl(srsptr->dataid);
+  srshdr.fec = srshdr.dataid & 0xff;
 
   if (srshdr.dataid == 0x56413200) {
     XTRACE(PROCESS, DEB, "No Data\n");
@@ -96,7 +97,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
     return 0;
   }
 
-  auto datalen = size - 12;
+  auto datalen = size - SRSHeaderSize;
   if ((datalen % 6) != 0) {
     XTRACE(PROCESS, WAR, "Invalid data length: %d\n", datalen);
     error += size;
@@ -106,12 +107,16 @@ int VMM3SRSData::receive(const char *buffer, int size) {
   // XTRACE(PROCESS, DEB, "VMM3a Data, VMM Id %d\n", vmmid);
 
   int dataIndex = 0;
+  static const int Data1Size{4};
+  static const int HitAndMarkerSize{6};
   int readoutIndex = 0;
-  while (datalen >= 6) {
+  while (datalen >= HitAndMarkerSize) {
     XTRACE(PROCESS, DEB, "readoutIndex: %d, datalen %d, elems: %u\n", readoutIndex, datalen,
            elems);
-    uint32_t data1 = htonl(*(uint32_t *)&buffer[12 + 6 * readoutIndex]);
-    uint16_t data2 = htons(*(uint16_t *)&buffer[16 + 6 * readoutIndex]);
+    auto Data1Offset = SRSHeaderSize + HitAndMarkerSize * readoutIndex;
+    auto Data2Offset = Data1Offset + Data1Size;
+    uint32_t data1 = htonl(*(uint32_t *)&buffer[Data1Offset]);
+    uint16_t data2 = htons(*(uint16_t *)&buffer[Data2Offset]);
 
     int res = parse(data1, data2, &data[dataIndex]);
     if (res == 1) { // This was data
