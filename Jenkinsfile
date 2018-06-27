@@ -6,22 +6,22 @@ archive_what = "centos7-release"
 images = [
     'centos7-release': [
         'name': 'essdmscdm/centos7-build-node:3.0.0',
-        'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash',
+        'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
     ],
     'centos7': [
         'name': 'essdmscdm/centos7-build-node:3.0.0',
-        'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash',
+        'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCOV=ON'
     ],
     'ubuntu1804': [
         'name': 'essdmscdm/ubuntu18.04-build-node:1.1.0',
-        'sh': 'sh',
+        'sh': 'bash -e',
         'cmake_flags': ''
     ],
     'fedora25': [
         'name': 'essdmscdm/fedora25-build-node:1.0.0',
-        'sh'  : 'sh',
+        'sh'  : 'bash -e',
         'cmake_flags': ''
     ]
 ]
@@ -79,10 +79,10 @@ def docker_dependencies(image_key) {
 def docker_cmake(image_key, xtra_flags) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        cd ${project} && \
-        cd build && \
-        . ./activate_run.sh && \
-        cmake --version && \
+        cd ${project}
+        cd build
+        . ./activate_run.sh
+        cmake --version
         cmake -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
     \""""
 }
@@ -90,12 +90,12 @@ def docker_cmake(image_key, xtra_flags) {
 def docker_build(image_key) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        cd ${project}/build && \
-        make --version && \
-        make -j4 VERBOSE=OFF && \
-        make -j4 unit_tests VERBOSE=OFF && \
-        make -j4 benchmark && \
-        cd ../utils/udpredirect && \
+        cd ${project}/build
+        make --version
+        make -j4 VERBOSE=OFF
+        make -j4 unit_tests VERBOSE=OFF
+        make -j4 benchmark
+        cd ../utils/udpredirect
         make
     \""""
 }
@@ -105,7 +105,7 @@ def docker_cppcheck(image_key) {
         def custom_sh = images[image_key]['sh']
         def test_output = "cppcheck.txt"
         def cppcheck_script = """
-                        cd ${project} && \
+                        cd ${project}
                         cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ 2> ${test_output}
                     """
         sh "docker exec ${container_name(image_key)} ${custom_sh} -c \"${cppcheck_script}\""
@@ -119,9 +119,9 @@ def docker_cppcheck(image_key) {
 def docker_tests(image_key) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        cd ${project}/build && \
-        . ./activate_run.sh && \
-        make runtest && \
+        cd ${project}/build
+        . ./activate_run.sh
+        make runtest
         make runefu
     \""""
 }
@@ -132,10 +132,10 @@ def docker_tests_coverage(image_key) {
 
     try {
         sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-                cd ${project}/build && \
-                . ./activate_run.sh && \
-                make runefu && \
-                make coverage && \
+                cd ${project}/build
+                . ./activate_run.sh
+                make runefu
+                make coverage
                 make -j4 valgrind
             \""""
         sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ./"
@@ -181,18 +181,18 @@ def docker_tests_coverage(image_key) {
 def docker_archive(image_key) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-                        mkdir -p archive/event-formation-unit && \
-                        cp -r ${project}/build/bin archive/event-formation-unit && \
-                        cp -r ${project}/build/modules archive/event-formation-unit && \
-                        cp -r ${project}/build/lib archive/event-formation-unit && \
-                        cp -r ${project}/build/licenses archive/event-formation-unit && \
-                        mkdir archive/event-formation-unit/util && \
-                        cp -r ${project}/utils/efushell archive/event-formation-unit/util && \
-                        cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util && \
-                        cp -r ${project}/monitors/* archive/event-formation-unit/util && \
-                        mkdir archive/event-formation-unit/data && \
-                        cp -r ${project}/prototype2/multigrid/calib_data/* archive/event-formation-unit/data && \
-                        cd archive && \
+                        mkdir -p archive/event-formation-unit
+                        cp -r ${project}/build/bin archive/event-formation-unit
+                        cp -r ${project}/build/modules archive/event-formation-unit
+                        cp -r ${project}/build/lib archive/event-formation-unit
+                        cp -r ${project}/build/licenses archive/event-formation-unit
+                        mkdir archive/event-formation-unit/util
+                        cp -r ${project}/utils/efushell archive/event-formation-unit/util
+                        cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
+                        cp -r ${project}/monitors/* archive/event-formation-unit/util
+                        mkdir archive/event-formation-unit/data
+                        cp -r ${project}/prototype2/multigrid/calib_data/* archive/event-formation-unit/data
+                        cd archive 
                         tar czvf event-formation-unit-centos7.tar.gz event-formation-unit
 
                         # Create file with build information
