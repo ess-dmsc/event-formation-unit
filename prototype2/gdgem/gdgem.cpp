@@ -98,6 +98,9 @@ private:
     int64_t clusters_discarded;
     int64_t tx_bytes;
     int64_t fifo_seq_errors;
+    int64_t lost_frames;
+    int64_t bad_frames;
+    int64_t good_frames;
   } ALIGN(64) mystats;
 
   NMXConfig nmx_opts;
@@ -130,7 +133,9 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   Stats.create("fifo_seq_errors", mystats.fifo_seq_errors);
   Stats.create("unclustered", mystats.unclustered);
   Stats.create("geom_errors", mystats.geom_errors);
-
+  Stats.create("lost_frames", mystats.lost_frames);
+  Stats.create("bad_frames", mystats.bad_frames);
+  Stats.create("good_frames", mystats.good_frames);
   Stats.create("tx_bytes", mystats.tx_bytes);
   // clang-format on
 
@@ -234,6 +239,10 @@ void NMX::processing_thread() {
 
         mystats.readouts += stats.valid_hits;
         mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
+        mystats.lost_frames += stats.lost_frames;
+        mystats.bad_frames += stats.bad_frames;
+        printf("bad_frames II: %" PRIu64 "\n", mystats.bad_frames);
+        mystats.good_frames += stats.good_frames;
 
         if (nmx_opts.hit_histograms) {
           hists.bin_hists(builder_->clusterer_x->clusters);

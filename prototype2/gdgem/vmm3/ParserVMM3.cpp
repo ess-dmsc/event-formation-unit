@@ -7,8 +7,8 @@
 #include <gdgem/vmm3/ParserVMM3.h>
 #include <string.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_INF
 
 int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 
@@ -52,8 +52,7 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 }
 
 int VMM3SRSData::receive(const char *buffer, int size) {
-  elems = 0;
-  error = 0;
+  memset(&stats, 0, sizeof(stats));
 
   // if (size < 4) {
   //   XTRACE(PROCESS, DEB, "Undersize data\n");
@@ -61,58 +60,77 @@ int VMM3SRSData::receive(const char *buffer, int size) {
   //   return 0;
   // }
 
-  struct SRSHdr *srsptr = (struct SRSHdr *)buffer;
-  srshdr.fc = ntohl(srsptr->fc);
+  struct SRSHdr *srsHeaderPtr = (struct SRSHdr *)buffer;
+  srsHeader.frameCounter = ntohl(srsHeaderPtr->frameCounter);
 
-  if (srshdr.fc == 0xfafafafa) {
-    XTRACE(PROCESS, DEB, "End of Frame\n");
+  if (srsHeader.frameCounter == 0xfafafafa) {
+    XTRACE(PROCESS, INF, "End of Frame\n");
+    stats.bad_frames++;
+    printf("bad frames I: %d\n", stats.bad_frames);
+    stats.errors += size;
     return -1;
   }
 
-  if (size < SRSHeaderSize) {
+  if (parserData.fcIsInitialized == true) {
+    ///
+    int64_t fcDiff = srsHeader.frameCounter - parserData.nextFrameCounter;
+    if (fcDiff < 0) {
+      fcDiff += 0xffffffff;
+    }
+    if (fcDiff) {
+       printf("FC: curr: %d, expect: %d, diff: %" PRId64 "\n", srsHeader.frameCounter,
+              parserData.nextFrameCounter, fcDiff);
+       stats.lost_frames += fcDiff; /// @todo test
+       parserData.nextFrameCounter = srsHeader.frameCounter + 1;
+    } else {
+      parserData.nextFrameCounter++;
+    }
+  } else {
+    parserData.nextFrameCounter = srsHeader.frameCounter + 1;
+    parserData.fcIsInitialized = true;
+  }
+
+  if (size < SRSHeaderSize + HitAndMarkerSize) {
     XTRACE(PROCESS, WAR, "Undersize data\n");
-    error += size;
+    stats.bad_frames++;
+    stats.errors += size;
     return 0;
   }
 
-  srshdr.txtime = ntohl(srsptr->txtime);
-  srshdr.dataid = ntohl(srsptr->dataid);
-  srshdr.fec = srshdr.dataid & 0xff;
+  srsHeader.txtime = ntohl(srsHeaderPtr->txtime);
+  srsHeader.dataid = ntohl(srsHeaderPtr->dataid);
+  parserData.fec = srsHeader.dataid & 0xff;
 
-  if (srshdr.dataid == 0x56413200) {
-    XTRACE(PROCESS, DEB, "No Data\n");
+  if (srsHeader.dataid == 0x56413200) {
+    XTRACE(PROCESS, INF, "No Data\n");
+    stats.bad_frames++;
+    stats.errors += size;
     return 0;
   }
 
   /// maybe add a protocol error counter here
-  if ((srshdr.dataid & 0xffffff00) != 0x564d3200) {
+  if ((srsHeader.dataid & 0xffffff00) != 0x564d3200) {
     XTRACE(PROCESS, WAR, "Unknown data\n");
-    error += size;
-    return 0;
-  }
-
-  if (size < 18) {
-    XTRACE(PROCESS, INF, "No room for data in packet, implicit empty?\n");
-    error += size;
+    stats.bad_frames++;
+    stats.errors += size;
     return 0;
   }
 
   auto datalen = size - SRSHeaderSize;
   if ((datalen % 6) != 0) {
     XTRACE(PROCESS, WAR, "Invalid data length: %d\n", datalen);
-    error += size;
+    stats.bad_frames++;
+    stats.errors += size;
     return 0;
   }
 
   // XTRACE(PROCESS, DEB, "VMM3a Data, VMM Id %d\n", vmmid);
 
   int dataIndex = 0;
-  static const int Data1Size{4};
-  static const int HitAndMarkerSize{6};
   int readoutIndex = 0;
   while (datalen >= HitAndMarkerSize) {
     XTRACE(PROCESS, DEB, "readoutIndex: %d, datalen %d, elems: %u\n", readoutIndex, datalen,
-           elems);
+           stats.hits);
     auto Data1Offset = SRSHeaderSize + HitAndMarkerSize * readoutIndex;
     auto Data2Offset = Data1Offset + Data1Size;
     uint32_t data1 = htonl(*(uint32_t *)&buffer[Data1Offset]);
@@ -120,19 +138,21 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 
     int res = parse(data1, data2, &data[dataIndex]);
     if (res == 1) { // This was data
-      elems++;
+      stats.hits++;
       dataIndex++;
     } else {
-      timet0s++;
+      stats.timet0s++;
     }
     readoutIndex++;
 
     datalen -= 6;
-    if (elems == max_elements && datalen > 0) {
-      XTRACE(PROCESS, DEB, "Data overflow, skipping %d bytes\n", datalen);
-      error += datalen;
+    if (stats.hits == max_elements && datalen > 0) {
+      XTRACE(PROCESS, INF, "Data overflow, skipping %d bytes\n", datalen);
+      stats.errors += datalen;
       break;
     }
   }
-  return elems;
+  stats.good_frames++;
+
+  return stats.hits;
 }

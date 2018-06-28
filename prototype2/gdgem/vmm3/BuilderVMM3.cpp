@@ -13,7 +13,7 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter, SRSMappings geometry_interpret
                          uint16_t adc_threshold_x, double max_time_gap_x,
                          uint16_t adc_threshold_y, double max_time_gap_y,
                          std::string dump_dir, bool dump_csv, bool dump_h5)
-    : AbstractBuilder(x, y, dump_dir, dump_csv, dump_h5), parser_(1125), time_intepreter_(time_intepreter),
+    : AbstractBuilder(x, y, dump_dir, dump_csv, dump_h5), parser_(1500), time_intepreter_(time_intepreter),
       geometry_interpreter_(geometry_interpreter),
       sorter_x(time_intepreter_, geometry_interpreter_, adc_threshold_x, max_time_gap_x),
       sorter_y(time_intepreter_, geometry_interpreter_, adc_threshold_y, max_time_gap_y) {
@@ -33,21 +33,25 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter, SRSMappings geometry_interpret
 
 AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size) {
   parser_.receive(buf, size);
-  if (!parser_.elems)
-    return AbstractBuilder::ResultStats();
+
+  if (!parser_.stats.hits) {
+    auto & stats = parser_.stats;
+    return AbstractBuilder::ResultStats(stats.hits, stats.errors,
+                                        geom_errors, stats.lost_frames, stats.bad_frames, stats.good_frames);
+  }
 
   geom_errors = 0;
 
   if (dump_h5_) {
-    readout_file_->data.resize(parser_.elems);
+    readout_file_->data.resize(parser_.stats.hits);
   }
 
 
 
-  for (unsigned int i = 0; i < parser_.elems; i++) {
+  for (unsigned int i = 0; i < parser_.stats.hits; i++) {
     /// TODO two next lines could be moved out of the loop
-    readout.fec = parser_.srshdr.fec;
-    readout.srs_timestamp = parser_.srshdr.txtime;
+    readout.fec = parser_.parserData.fec;
+    readout.srs_timestamp = parser_.srsHeader.txtime;
 
     auto &d = parser_.data[i];
     readout.chip_id = d.vmmid;
@@ -82,7 +86,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 
     if (dump_csv_) {
       vmmsave->tofile("%2d, %2d, %u, %u, %2d, %d, %d, %d, %d\n", readout.fec,
-                      readout.chip_id, parser_.srshdr.fc, parser_.srshdr.txtime, d.chno,
+                      readout.chip_id, parser_.srsHeader.frameCounter, parser_.srsHeader.txtime, d.chno,
                       d.bcid, d.tdc, d.adc, d.overThreshold);
     }
   }
@@ -91,6 +95,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
     readout_file_->write();
   }
 
-  return AbstractBuilder::ResultStats(parser_.elems, parser_.error,
-                                      geom_errors);
+  auto & stats = parser_.stats;
+  return AbstractBuilder::ResultStats(stats.hits, stats.errors,
+                                      geom_errors, stats.lost_frames, stats.bad_frames, stats.good_frames);
 }

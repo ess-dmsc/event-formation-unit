@@ -13,10 +13,10 @@ protected:
   virtual void SetUp() { data = new VMM3SRSData(1125); }
   virtual void TearDown() { delete data; }
 
-  void assertfields(unsigned int elements, unsigned int timet0s, unsigned int errors) {
-    ASSERT_EQ(data->elems, elements);
-    ASSERT_EQ(data->timet0s, timet0s);
-    ASSERT_EQ(data->error, errors);
+  void assertfields(unsigned int hits, unsigned int timet0s, unsigned int errors) {
+    ASSERT_EQ(data->stats.hits, hits);
+    ASSERT_EQ(data->stats.timet0s, timet0s);
+    ASSERT_EQ(data->stats.errors, errors);
   }
 };
 
@@ -31,7 +31,7 @@ TEST_F(VMM3SRSDataTest, Constructor) {
 }
 
 TEST_F(VMM3SRSDataTest, UndersizeData) {
-  for (int dataLength = 0; dataLength <= 12; dataLength++) {
+  for (int dataLength = 0; dataLength <= 16; dataLength++) {
     int res = data->receive((char *)&data_3_ch0[0], dataLength);
     ASSERT_EQ(res, 0);
     assertfields(0, 0, dataLength);
@@ -85,7 +85,7 @@ TEST_F(VMM3SRSDataTest, MarkerAndDataMixed) {
 TEST_F(VMM3SRSDataTest, NoData) {
   int res = data->receive((char *)&no_data[0], no_data.size());
   ASSERT_EQ(res, 0);
-  assertfields(0, 0, 0);
+  assertfields(0, 0, no_data.size());
 }
 
 TEST_F(VMM3SRSDataTest, InvalidDataId) {
@@ -104,9 +104,9 @@ TEST_F(VMM3SRSDataTest, DataLengthOverflow) {
   VMM3SRSData shortvmmbuffer(2);
   int res = shortvmmbuffer.receive((char *)& data_3_ch0[0],  data_3_ch0.size());
   ASSERT_EQ(res, 2);
-  ASSERT_EQ(2, shortvmmbuffer.elems);
-  ASSERT_EQ(0, shortvmmbuffer.timet0s);
-  ASSERT_EQ(6, shortvmmbuffer.error);
+  ASSERT_EQ(2, shortvmmbuffer.stats.hits);
+  ASSERT_EQ(0, shortvmmbuffer.stats.timet0s);
+  ASSERT_EQ(6, shortvmmbuffer.stats.errors);
 }
 
 int main(int argc, char **argv) {
