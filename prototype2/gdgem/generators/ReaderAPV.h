@@ -19,6 +19,11 @@
 #include <map>
 #include <vector>
 
+/// Assuming MTU has been set to 9000 bytes
+/// Max UDP is then: MTU  - IP_HEADER - UDP_HEADER
+///                  9000 - 20        - 8
+const int maxUdpPayloadSize{8972};
+
 class ReaderAPV {
 public:
   /** @todo document */
@@ -34,7 +39,7 @@ private:
   size_t total_{0};
   size_t current_{0};
   size_t psize_{sizeof(uint32_t) * 4};
-  size_t max_in_buf_{9000 / (sizeof(uint32_t) * 4)};
+  size_t max_in_buf_{maxUdpPayloadSize / (sizeof(uint32_t) * 4)};
 
   hdf5::dataspace::Hyperslab slab_{{0, 0}, {1, 4}};
 
