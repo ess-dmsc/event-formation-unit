@@ -70,10 +70,13 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
     plane = geometry_interpreter_.get_plane(readout);
 
     if (plane != NMX_INVALID_PLANE_ID) {
-      if (plane)
+      if (plane) {
+        XTRACE(PROCESS, DEB, "Insert into y-hits\n");
         sorter_y.insert(readout);
-      else
+      } else {
+        XTRACE(PROCESS, DEB, "Insert into x-hits\n");
         sorter_x.insert(readout);
+      }
     } else {
       geom_errors++;
       XTRACE(PROCESS, DEB, "Bad SRS mapping --  fec: %d, chip: %d\n", readout.fec,

@@ -7,8 +7,8 @@
 #include <gdgem/vmm3/ParserVMM3.h>
 #include <string.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_INF
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_INF
 
 int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 
@@ -66,7 +66,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
   if (srsHeader.frameCounter == 0xfafafafa) {
     XTRACE(PROCESS, INF, "End of Frame\n");
     stats.bad_frames++;
-    printf("bad frames I: %d\n", stats.bad_frames);
+    //printf("bad frames I: %d\n", stats.bad_frames);
     stats.errors += size;
     return -1;
   }
@@ -78,8 +78,8 @@ int VMM3SRSData::receive(const char *buffer, int size) {
       fcDiff += 0xffffffff;
     }
     if (fcDiff) {
-       printf("FC: curr: %d, expect: %d, diff: %" PRId64 "\n", srsHeader.frameCounter,
-              parserData.nextFrameCounter, fcDiff);
+       //printf("FC: curr: %u, expect: %u, diff: %" PRId64 "\n", srsHeader.frameCounter,
+      //        parserData.nextFrameCounter, fcDiff);
        stats.lost_frames += fcDiff; /// @todo test
        parserData.nextFrameCounter = srsHeader.frameCounter + 1;
     } else {

@@ -241,7 +241,6 @@ void NMX::processing_thread() {
         mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
         mystats.lost_frames += stats.lost_frames;
         mystats.bad_frames += stats.bad_frames;
-        printf("bad_frames II: %" PRIu64 "\n", mystats.bad_frames);
         mystats.good_frames += stats.good_frames;
 
         if (nmx_opts.hit_histograms) {
@@ -256,6 +255,7 @@ void NMX::processing_thread() {
         matcher.match_end(false);
 
         while (!matcher.matched_clusters.empty()) {
+          //printf("MATCHED_CLUSTERS\n");
           XTRACE(PROCESS, DEB, "event_ready()\n");
           event = matcher.matched_clusters.front();
           matcher.matched_clusters.pop_front();
