@@ -189,10 +189,11 @@ def docker_archive(image_key) {
                         mkdir archive/event-formation-unit/util
                         cp -r ${project}/utils/efushell archive/event-formation-unit/util
                         cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
+                        cp -r ${project}/utils/hwcheck archive/event-formation-unit/util/
                         cp -r ${project}/monitors/* archive/event-formation-unit/util
                         mkdir archive/event-formation-unit/data
                         cp -r ${project}/prototype2/multigrid/calib_data/* archive/event-formation-unit/data
-                        cd archive 
+                        cd archive
                         tar czvf event-formation-unit-centos7.tar.gz event-formation-unit
 
                         # Create file with build information
