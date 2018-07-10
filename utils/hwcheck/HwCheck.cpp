@@ -3,6 +3,7 @@
 
 #include <HwCheck.h>
 #include <arpa/inet.h>
+#include <cstring>
 #include <ifaddrs.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
@@ -32,19 +33,20 @@ bool HwCheck::checkMTU(std::vector<std::string> ignore) {
       continue;
     }
 
-
-
+    bool tobeignored = false;
     for (auto & ignorePattern : ignore) {
       if (strstr(ifa->ifa_name, ignorePattern.c_str()) != NULL) {
-        printf("no checking of MTU for %s\n", ifa->ifa_name);
-        break;
-      } else {
-        printf("checking MTU for %s\n", ifa->ifa_name);
-        if (!checkMTU(ifa->ifa_name)) {
-          return false;
-        }
+        tobeignored = true;
       }
-   }
+    }
+
+    if (tobeignored) {
+      printf("no checking of MTU for %s\n", ifa->ifa_name);
+    } else {
+      if (!checkMTU(ifa->ifa_name)) {
+        return false;
+      }
+    }
   }
   return true;
 }
@@ -52,21 +54,21 @@ bool HwCheck::checkMTU(std::vector<std::string> ignore) {
 ///
 bool HwCheck::checkMTU(const char * interface) {
   int s, af = AF_INET;
-	struct ifreq ifr;
+  struct ifreq ifr;
 
-	if ((s = socket(af, SOCK_DGRAM, 0)) < 0) {
-		printf("error: socket\n");
+  if ((s = socket(af, SOCK_DGRAM, 0)) < 0) {
+    printf("error: socket\n");
   }
 
-	ifr.ifr_addr.sa_family = af;
-	strcpy(ifr.ifr_name, interface);
-	if (ioctl(s, SIOCGIFMTU, (caddr_t)&ifr) < 0) {
-		printf("warn: ioctl (get mtu): %s\n", ifr.ifr_name);
+  ifr.ifr_addr.sa_family = af;
+  strcpy(ifr.ifr_name, interface);
+  if (ioctl(s, SIOCGIFMTU, (caddr_t)&ifr) < 0) {
+    printf("warn: ioctl (get mtu): %s\n", ifr.ifr_name);
     return false;
   }
 
-	fprintf(stdout, "MTU of %s is %d\n", interface, ifr.ifr_mtu);
-	close(s);
+  fprintf(stdout, "MTU of %s is %d\n", interface, ifr.ifr_mtu);
+  close(s);
 
   return ifr.ifr_mtu >= minimumMtu;
 }
@@ -94,7 +96,7 @@ void HwCheck::debugPrint(struct ifaddrs * ifa) {
 int main(int argc, char * argv []) {
   HwCheck hwcheck(9000);
 
-  std::vector<std::string> ignore = {"ppp0"};
+  std::vector<std::string> ignore = {"ppp0", "docker", "ov-"};
 
   if (!hwcheck.checkMTU(ignore)) {
     printf("MTU check failed\n");
