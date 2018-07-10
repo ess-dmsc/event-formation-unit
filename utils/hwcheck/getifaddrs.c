@@ -3,7 +3,9 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <ifaddrs.h>
-//#include <net/ethernet.h>
+#include <net/if.h>
+
+#define MYFLAGS (IFF_UP || IFF_RUNNING)
 
 
 int main(int argc, char * argv[]) {
@@ -24,18 +26,27 @@ int main(int argc, char * argv[]) {
 
            family = ifa->ifa_addr->sa_family;
 
-           //if (family != AF_INET) {
-           //    continue;
-           //}
+           if (family != AF_INET) {
+               continue;
+           }
+
+           if ((ifa->ifa_flags & MYFLAGS) == 0) {
+               continue;
+           }
 
            /* Display interface name and family (including symbolic
               form of the latter for the common families) */
 
-           printf("%-8s %s (%d)\n",
+           printf("%-8s %s (%d) FLAGS: %08x\n",
                   ifa->ifa_name,
+                  #ifdef __linux__
+                  (family == AF_PACKET) ? "AF_PACKET" :
+                  #else
                   (family == AF_LINK) ? "AF_LINK" :
+                  #endif
                   (family == AF_INET) ? "AF_INET" :
                   (family == AF_INET6) ? "AF_INET6" : "???",
-                  family);
+                  family, 
+                  ifa->ifa_flags);
         }
 }
