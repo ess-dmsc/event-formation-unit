@@ -1,7 +1,7 @@
 ///
 ///
 
-#include <HwCheck.h>
+#include <efu/HwCheck.h>
 #include <arpa/inet.h>
 #include <cstring>
 #include <ifaddrs.h>
@@ -13,7 +13,7 @@
 
 bool HwCheck::checkMTU(std::vector<std::string> ignore) {
   struct ifaddrs *ifaddr, *ifa;
-  int family, s, n;
+  int n;
 
   if (getifaddrs(&ifaddr) == -1) {
      printf("error getifaddrs()\n");
@@ -93,6 +93,7 @@ void HwCheck::debugPrint(struct ifaddrs * ifa) {
 }
 
 
+#if 0
 int main(int argc, char * argv []) {
   HwCheck hwcheck(9000);
 
@@ -102,3 +103,4 @@ int main(int argc, char * argv []) {
     printf("MTU check failed\n");
   }
 }
+#endif 

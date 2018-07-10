@@ -5,6 +5,7 @@
 #include <common/Trace.h>
 #include <common/Version.h>
 #include <efu/ExitHandler.h>
+#include <efu/HwCheck.h>
 #include <efu/Launcher.h>
 #include <efu/Loader.h>
 #include <efu/Parser.h>
@@ -25,6 +26,8 @@ int main(int argc, char *argv[]) {
   std::string DetectorName;
   GraylogSettings GLConfig;
   Loader loader;
+  HwCheck hwcheck(HwCheck::defaultMinimumMTU);
+
   { //Make sure that the EFUArgs instance is deallocated before the detector plugin is
     EFUArgs efu_args;
     if (EFUArgs::Status::EXIT == efu_args.parseFirstPass(argc, argv)) {
@@ -35,7 +38,7 @@ int main(int argc, char *argv[]) {
       efu_args.printHelp();
       return -1;
     }
-    
+
     { // This is to prevent accessing unloaded memory in a (potentially) unloaded
       // plugin.
       auto CLIArgPopulator = loader.GetCLIParserPopulator();
@@ -69,11 +72,18 @@ int main(int argc, char *argv[]) {
          efu_version().c_str());
   XTRACE(MAIN, ALW, "Event Formation Unit build: %s\n", EFU_STR(BUILDSTR));
 
+  if (hwcheck.checkMTU(hwcheck.defaultIgnoredInterfaces) == false) {
+    XTRACE(MAIN, ERR, "MTU checks failed, exiting...\n");
+    GLOG_ERR("MTU checks failed, exiting.");
+    return 1;
+  }
+
   if (DetectorSettings.StopAfterSec == 0) {
     XTRACE(MAIN, ALW, "Event Formation Unit Exit (Immediate)\n");
     GLOG_INF("Event Formation Unit Exit (Immediate)");
     return 0;
   }
+
 
   XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", DetectorName.c_str());
 
