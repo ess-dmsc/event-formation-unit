@@ -159,6 +159,8 @@ int main(int argc, char *argv[]) {
   assert((stat.events + stat.zeropos + stat.multi + stat.noise) * 40 ==
          stat.rx - stat.errors * 4);
 
+  fclose(f);
+
   printf("=======================\nStats\n");
   printf("Bytes read:    %d\n", stat.rx);
   printf("Bytes error:   %d\n", stat.errors * 4);

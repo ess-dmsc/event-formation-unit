@@ -138,7 +138,7 @@ int CSPEC::ShowCalib(std::vector<std::string> cmdargs, char *output,
   }
 
   *obytes =
-      snprintf(output, SERVER_BUFFER_SIZE, "wire %d 0x%04x, grid %d 0x%04x",
+      snprintf(output, SERVER_BUFFER_SIZE, "wire %u 0x%04x, grid %u 0x%04x",
                offset, wirecal[offset], offset, gridcal[offset]);
 
   return Parser::OK;

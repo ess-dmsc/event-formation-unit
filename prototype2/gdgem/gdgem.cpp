@@ -159,9 +159,9 @@ void NMX::input_thread() {
   nmxdata.printBufferSizes();
   nmxdata.setRecvTimeout(0, 100000); /// secs, usecs
 
-  int rdsize;
   TSCTimer report_timer;
   for (;;) {
+    int rdsize;
     unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */

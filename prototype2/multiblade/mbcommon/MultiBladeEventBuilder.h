@@ -93,7 +93,7 @@ public:
    *
    * @return Calculated wire position
    */
-  double getWirePosition() { return m_wire_pos; }
+  double getWirePosition() const { return m_wire_pos; }
 
   /*! Returns the calculated strip position. The value is only updated when a
    * cluster/event is complete.
@@ -102,7 +102,7 @@ public:
    *
    * @return Calculated strip position
    */
-  double getStripPosition() { return m_strip_pos; }
+  double getStripPosition() const { return m_strip_pos; }
 
   /*! Returns the timestamp of the cluster. The value is only updated when a
    * cluster/event is complete.
@@ -111,7 +111,7 @@ public:
    *
    * @return The time-stamp in seconds.
    */
-  uint32_t getTimeStamp() { return m_time_stamp; }
+  uint32_t getTimeStamp() const { return m_time_stamp; }
 
   /*! Returns the cluster position [wire, strip, time-stamp]
    *
@@ -173,36 +173,36 @@ public:
   // Functions for monitoring and/or debugging
 
   /*! Return the number of data-points received */
-  uint64_t getNumberOfDatapointsReceived() { return m_datapoints_received; }
+  uint64_t getNumberOfDatapointsReceived() const { return m_datapoints_received; }
   /*! Return the number of events */
-  uint64_t getNumberOfEvents() { return m_nevents; }
+  uint64_t getNumberOfEvents() const { return m_nevents; }
   /*! Return the number of events rejected due to not being adjacent */
-  uint64_t getNumberOfAdjacencyRejected() { return m_rejected_adjacency; }
+  uint64_t getNumberOfAdjacencyRejected() const { return m_rejected_adjacency; }
   /*! Return the number of events rejected due to not having a valid position */
-  uint64_t getNumberOfPositionRejected() { return m_rejected_position; }
+  uint64_t getNumberOfPositionRejected() const { return m_rejected_position; }
 
   /*! Returns the 2D-counter for wire clusters. */
-  std::array<uint64_t, 6> get2DWireClusterCounter() { return m_2D_wires; }
+  std::array<uint64_t, 6> get2DWireClusterCounter() const { return m_2D_wires; }
   /*! Returns the 2D-counter for strip clusters */
-  std::array<uint64_t, 6> get2DStripClusterCounter() { return m_2D_strips; }
+  std::array<uint64_t, 6> get2DStripClusterCounter() const { return m_2D_strips; }
   /*! Returns the 1D-counter for wire clusters */
-  std::array<uint64_t, 6> get1DWireClusterCounter() { return m_1D_wires; }
+  std::array<uint64_t, 6> get1DWireClusterCounter() const { return m_1D_wires; }
   /*! Returns the 1D-counter for strip clusters */
-  std::array<uint64_t, 6> get1DStripClusterCounter() { return m_1D_strips; }
+  std::array<uint64_t, 6> get1DStripClusterCounter() const { return m_1D_strips; }
 
   /*! Return the size of the wire signal cluster
    * Probably only useful for real-time debugging */
-  unsigned long getWireClusterSize() { return m_wire_cluster.size(); }
+  unsigned long getWireClusterSize() const { return m_wire_cluster.size(); }
   /*! Return the size of the strip signal cluster
    * Probably only useful for real-time debugging */
-  unsigned long getStripClusterSize() { return m_strip_cluster.size(); }
+  unsigned long getStripClusterSize() const { return m_strip_cluster.size(); }
 
   /*! Return the clock-cycle number for the current cluster
    * Useful only for debugging
    *
    * @return Clock-cycle number for the current cluster
    */
-  u_int32_t getClusterClock() { return m_cluster_clock; }
+  u_int32_t getClusterClock() const { return m_cluster_clock; }
 
   /*! Reset debugging and monitoring counters */
   void resetCounters();
