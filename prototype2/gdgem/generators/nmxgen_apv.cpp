@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
   hdf5::error::Singleton::instance().auto_print(false);
   //  hdf5::error::auto_print(false);
 
-  char buffer[9000];
+  char buffer[maxUdpPayloadSize + 100];
 
   const int B1M = 1000000;
   Socket::Endpoint local("0.0.0.0", 0);
