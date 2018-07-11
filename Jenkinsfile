@@ -110,7 +110,7 @@ def docker_cppcheck(image_key) {
                     """
         sh "docker exec ${container_name(image_key)} ${custom_sh} -c \"${cppcheck_script}\""
         sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ."
-        sh "mv -bf ./${project}/* ./"
+        sh "mv -f ./${project}/* ./"
     } catch (e) {
         failure_function(e, "Cppcheck step for (${container_name(image_key)}) failed")
     }
@@ -275,6 +275,9 @@ node('docker') {
 
     // Delete workspace when build is done
     cleanWs()
+
+    // Delete old source code directory
+    sh "rm -rf ${project}_code"
 
     dir("${project}_code") {
 
