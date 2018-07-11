@@ -79,8 +79,9 @@ public:
 
 
 private:
-  uint32_t reversebits(
-      uint32_t data); /**< helper function to reverse bits in a uint32_t */
-  unsigned int
-  gray2bin32(unsigned int num); /**< helper function to decode gray codes */
+  /// helper function to reverse bits in a uint32_t
+  uint32_t reversebits(uint32_t data);
+
+  /// helper function to decode gray codes
+  unsigned int gray2bin32(unsigned int num);
 };

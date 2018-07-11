@@ -75,6 +75,11 @@ uint64_t SRSTime::timestamp(uint64_t trigger, uint16_t bc, uint16_t tdc) {
       * target_resolution_ns_);
 }
 
+uint32_t SRSTime::internal_clock_period_ns() const
+{
+	return internal_SRS_clock_period_ns;
+}
+
 std::string SRSTime::debug() const {
   std::stringstream ss;
   ss << "    Chip time = bc*1000/" << bc_clock_MHz_ << " + tdc*" << tac_slope_ns_ << "/255 (ns)\n";
@@ -83,4 +88,3 @@ std::string SRSTime::debug() const {
   ss << "    Target resolution = " << target_resolution_ns_ << "  (ns)\n";
   return ss.str();
 }
-

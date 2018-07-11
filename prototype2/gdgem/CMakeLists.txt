@@ -25,6 +25,8 @@ set(gdgem_SRC
     srs/SRSTime.cpp
     vmm2/ParserVMM2.cpp
     vmm2/BuilderVMM2.cpp
+    vmm3/ParserVMM3.cpp
+    vmm3/BuilderVMM3.cpp
     )
 set(gdgem_INC
     NMXConfig.h
@@ -49,6 +51,8 @@ set(gdgem_INC
     srs/SRSTime.h
     vmm2/ParserVMM2.h
     vmm2/BuilderVMM2.h
+    vmm3/ParserVMM3.h
+    vmm3/BuilderVMM3.h
     )
 create_module(gdgem)
 
