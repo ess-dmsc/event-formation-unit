@@ -13,9 +13,9 @@ protected:
   virtual void SetUp() { data = new VMM3SRSData(1125); }
   virtual void TearDown() { delete data; }
 
-  void assertfields(unsigned int hits, unsigned int timet0s, unsigned int errors) {
+  void assertfields(unsigned int hits, unsigned int markers, unsigned int errors) {
     ASSERT_EQ(data->stats.hits, hits);
-    ASSERT_EQ(data->stats.timet0s, timet0s);
+    ASSERT_EQ(data->stats.markers, markers);
     ASSERT_EQ(data->stats.errors, errors);
   }
 };
@@ -25,8 +25,7 @@ TEST_F(VMM3SRSDataTest, Constructor) {
   ASSERT_TRUE(data->data != nullptr);
   assertfields(0, 0, 0);
   for (int i = 0; i < 32; i++) {
-    ASSERT_EQ(data->markers[i].timeStamp, 0U);
-    ASSERT_EQ(data->markers[i].triggerCount, 0U);
+    ASSERT_EQ(data->markers[i].fecTimeStamp, 0U);
   }
 }
 
@@ -36,8 +35,7 @@ TEST_F(VMM3SRSDataTest, UndersizeData) {
     ASSERT_EQ(res, 0);
     assertfields(0, 0, dataLength);
     for (int i = 0; i < 32; i++) {
-      ASSERT_EQ(data->markers[i].timeStamp, 0U);
-      ASSERT_EQ(data->markers[i].triggerCount, 0U);
+      ASSERT_EQ(data->markers[i].fecTimeStamp, 0U);
     }
   }
 }
@@ -47,8 +45,7 @@ TEST_F(VMM3SRSDataTest, DataOnly) {
   ASSERT_EQ(res, 3); // three hits in the readout packet
   assertfields(3, 0, 0);
   for (int i = 0; i < 32; i++) {
-    ASSERT_EQ(data->markers[i].timeStamp, 0U);
-    ASSERT_EQ(data->markers[i].triggerCount, 0U);
+    ASSERT_EQ(data->markers[i].fecTimeStamp, 0U);
   }
 }
 
@@ -57,8 +54,8 @@ TEST_F(VMM3SRSDataTest, MarkerOnly) {
   ASSERT_EQ(res, 0);
   assertfields(0, 3, 0);
   for (int i = 0; i < 3; i++) {
-    ASSERT_EQ(data->markers[i].timeStamp, i + 1);
-    ASSERT_EQ(data->markers[i].triggerCount, 1000 - i);
+    int vmmid = i + 1; // see test data
+    ASSERT_EQ(data->markers[vmmid].fecTimeStamp, i + 1);
   }
 }
 
@@ -67,8 +64,8 @@ TEST_F(VMM3SRSDataTest, MarkerAndData) {
   ASSERT_EQ(res, 3); // three hits in the readout packet
   assertfields(3, 3, 0);
   for (int i = 0; i < 3; i++) {
-    ASSERT_EQ(data->markers[i].timeStamp, i + 1);
-    ASSERT_EQ(data->markers[i].triggerCount, 1000 - i);
+    int vmmid = i + 1; // see test data
+    ASSERT_EQ(data->markers[vmmid].fecTimeStamp, i + 1);
   }
 }
 
@@ -77,8 +74,8 @@ TEST_F(VMM3SRSDataTest, MarkerAndDataMixed) {
   ASSERT_EQ(res, 3); // three hits in the readout packet
   assertfields(3, 3, 0);
   for (int i = 0; i < 3; i++) {
-    ASSERT_EQ(data->markers[i].timeStamp, i + 1);
-    ASSERT_EQ(data->markers[i].triggerCount, 1000 - i);
+    int vmmid = i + 1; // see test data
+    ASSERT_EQ(data->markers[vmmid].fecTimeStamp, i + 1);
   }
 }
 
@@ -105,7 +102,7 @@ TEST_F(VMM3SRSDataTest, DataLengthOverflow) {
   int res = shortvmmbuffer.receive((char *)& data_3_ch0[0],  data_3_ch0.size());
   ASSERT_EQ(res, 2);
   ASSERT_EQ(2, shortvmmbuffer.stats.hits);
-  ASSERT_EQ(0, shortvmmbuffer.stats.timet0s);
+  ASSERT_EQ(0, shortvmmbuffer.stats.markers);
   ASSERT_EQ(6, shortvmmbuffer.stats.errors);
 }
 
