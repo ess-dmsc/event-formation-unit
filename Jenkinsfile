@@ -276,8 +276,8 @@ node('docker') {
     // Delete workspace when build is done
     cleanWs()
 
-    // Delete old directory
-    sh "rm -rf ${project}"
+    // Delete old contents from directory
+    sh "rm -rf *"
 
     dir("${project}_code") {
 
