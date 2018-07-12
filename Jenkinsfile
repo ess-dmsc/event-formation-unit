@@ -214,6 +214,9 @@ def get_pipeline(image_key)
         stage("${image_key}") {
             node ("docker") {
                 try {
+                    // Delete old contents from directory
+                    sh "rm -rf *"
+
                     def container = get_container(image_key)
 
                     docker_clone(image_key)
@@ -272,12 +275,8 @@ def get_macos_pipeline()
 }
 
 node('docker') {
-
     // Delete workspace when build is done
     cleanWs()
-
-    // Delete old contents from directory
-    sh "rm -rf *"
 
     dir("${project}_code") {
 
