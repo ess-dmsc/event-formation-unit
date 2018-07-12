@@ -34,6 +34,7 @@ struct BaseSettings {
   std::string   ConfigFile           = {""};
   std::uint64_t UpdateIntervalSec    = {1};
   std::uint32_t StopAfterSec         = {0xffffffffU};
+  std::uint16_t MinimumMTU           = {9000};
 };
 // clang-format on
 
@@ -53,7 +54,7 @@ public:
   /** @brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
    */
-  
+
   virtual ~Detector() = default;
 
   /** @brief document */
@@ -76,7 +77,7 @@ public:
   virtual std::map<std::string, CommandFunction> GetDetectorCommandFunctions() {
     return DetectorCommands;
   }
-  
+
   virtual void startThreads() {
     for (auto &tInfo : Threads) {
       tInfo.thread = std::thread(tInfo.func);

@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
   std::string DetectorName;
   GraylogSettings GLConfig;
   Loader loader;
-  HwCheck hwcheck(HwCheck::defaultMinimumMTU);
+  HwCheck hwcheck;
 
   { //Make sure that the EFUArgs instance is deallocated before the detector plugin is
     EFUArgs efu_args;
@@ -54,6 +54,8 @@ int main(int argc, char *argv[]) {
     DetectorName = efu_args.getDetectorName();
     GLConfig = efu_args.getGraylogSettings();
   }
+
+  hwcheck.setMinimumMTU(DetectorSettings.MinimumMTU);
 
   int keep_running = 1;
 
