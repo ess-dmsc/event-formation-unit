@@ -1,7 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <benchmark/benchmark.h>
-#include <multiblade/mbcaen/MBData.h>
+#include <multiblade/mbcaen/DataParser.h>
 #include <cstring>
 #include <unistd.h>
 
@@ -11,7 +11,7 @@
  * File:
  */
 
-MBData mbdata;
+DataParser mbdata;
 unsigned char databuffer[100000];
 
 static void Setup(__attribute__((unused)) benchmark::State &state) {
@@ -24,7 +24,7 @@ static void ReceiveData(benchmark::State &state) {
   uint32_t items = 0;
 
   for (auto _ : state) {
-    auto ret = mbdata.receive((char *)databuffer, state.range(0));
+    auto ret = mbdata.parse((char *)databuffer, state.range(0));
     items += ret;
   }
   state.SetComplexityN(state.range(0));

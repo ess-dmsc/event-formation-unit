@@ -83,20 +83,20 @@ create_test_executable(MBDataParserTest)
 set(mbtest_INC mbcommon/MultiBladeEventBuilder.h mbtest/MultiBladeTestData.h)
 
 # Create excecutable for the test of counters
-set(MultiBladeEventBuilderTest_INC ${mbtest_INC} )
-set(MultiBladeEventBuilderTest_SRC
-  mbcommon/MultiBladeEventBuilder.cpp
-  mbtest/MultiBladeEventBuilderCounterTest.cpp
-  )
-create_test_executable(MultiBladeEventBuilderTest)
+# set(MultiBladeEventBuilderTest_INC ${mbtest_INC} )
+# set(MultiBladeEventBuilderTest_SRC
+#   mbcommon/MultiBladeEventBuilder.cpp
+#   mbtest/MultiBladeEventBuilderCounterTest.cpp
+#   )
+# create_test_executable(MultiBladeEventBuilderTest)
 
 # Create excecutable for the test of clustering
-set(MBClusterTest_INC ${mbtest_INC})
-set(MBClusterTest_SRC
-  mbcommon/MultiBladeEventBuilder.cpp
-  mbtest/MultiBladeEventBuilderClusteringTest.cpp
-  )
-create_test_executable(MBClusterTest)
+# set(MBClusterTest_INC ${mbtest_INC})
+# set(MBClusterTest_SRC
+#   mbcommon/MultiBladeEventBuilder.cpp
+#   mbtest/MultiBladeEventBuilderClusteringTest.cpp
+#   )
+# create_test_executable(MBClusterTest)
 
 # Create excecutable for the test of geometry
 set(MB16DetectorTest_INC mbcaen/MB16Detector.h)

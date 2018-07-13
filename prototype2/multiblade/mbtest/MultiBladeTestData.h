@@ -3,6 +3,7 @@
 //
 // Author: Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
 // e-mail: soegaard@nbi.dk
+/// FIXME TODO No longer valid - NEW data format
 
 /// GCOVR_EXCL_START
 
