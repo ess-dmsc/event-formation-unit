@@ -6,6 +6,7 @@
 *.pyc
 *.gcda
 *.gcno
+a.out
 
 # Misc programs
 cncsread
