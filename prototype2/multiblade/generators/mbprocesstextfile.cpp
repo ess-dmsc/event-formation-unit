@@ -5,10 +5,10 @@
 #include <sys/stat.h>
 #include <tclap/CmdLine.h>
 
-#include "mbcommon/TextFile.h"
+#include "generators/TextFile.h"
 #include "mbcommon/DumpEventBuilderInfo.h"
 #include "mbcommon/MultiBladeEventBuilder.h"
-
+/// GCOVR_EXCL_START
 int main(int argc, const char **argv) {
 
   std::string ifile;
@@ -126,3 +126,4 @@ int main(int argc, const char **argv) {
 
   return 0;
 }
+/// GCOVR_EXCL_STOP

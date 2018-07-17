@@ -5,7 +5,7 @@ Files/Directories     | Function
 -------------         | -------------
 calib_data/           | MG.CNCS specific calibration files for unit testing
 mgcncs/               | Code for parsing mc.cncs readout data
-mgcncsgen/            | Data generators: mgcncsgen, mgcncsgenfile, mgcncsgenjson
+generators/           | Data generators: mgcncsgen, mgcncsgenfile, mgcncsgenjson
 mgcncs.cpp            | Obsolete - old three-stage pipeline
 mgcncs2.cpp           | Plugin for the multigrid detector pipeline
 

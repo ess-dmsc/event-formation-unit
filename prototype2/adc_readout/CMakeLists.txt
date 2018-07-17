@@ -16,9 +16,7 @@ set(AdcReadoutBase_INC
     AdcReadoutBase.h
     AdcParse.h
     AdcBufferElements.h
-    atomicops.h
     CircularBuffer.h
-    readerwriterqueue.h
     PeakFinder.h
     AdcDataProcessor.h
     SampleProcessing.h

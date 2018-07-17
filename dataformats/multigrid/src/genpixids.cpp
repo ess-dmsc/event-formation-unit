@@ -210,6 +210,8 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  fclose(ff);
+
   printf("Writing data\n");
   // for (int i = 0; i < 6144; i++) {
   //  printf("voxel: %4d, intensity %6d\n", i + 1, values[i]);

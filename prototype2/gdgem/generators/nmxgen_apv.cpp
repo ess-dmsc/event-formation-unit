@@ -13,7 +13,7 @@
 #include <gdgem/generators/ReaderAPV.h>
 #include <libs/include/Socket.h>
 #include <unistd.h>
-
+/// GCOVR_EXCL_START
 const int TSC_MHZ = 2900;
 
 int main(int argc, char *argv[]) {
@@ -24,7 +24,7 @@ int main(int argc, char *argv[]) {
   hdf5::error::Singleton::instance().auto_print(false);
   //  hdf5::error::auto_print(false);
 
-  char buffer[9000];
+  char buffer[maxUdpPayloadSize + 100];
 
   const int B1M = 1000000;
   Socket::Endpoint local("0.0.0.0", 0);
@@ -77,3 +77,4 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+/// GCOVR_EXCL_STOP

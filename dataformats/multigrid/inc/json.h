@@ -1,4 +1,5 @@
 // clang-format off
+/// GCOVR_EXCL_START
 /*
 The JsonCpp library's source code, including accompanying documentation,
 tests and demonstration applications, are licensed under the following
@@ -2135,3 +2136,4 @@ JSON_API JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM&, const Value& root);
 
 
 #endif //ifndef JSON_AMALGATED_H_INCLUDED
+/// GCOVR_EXCL_STOP

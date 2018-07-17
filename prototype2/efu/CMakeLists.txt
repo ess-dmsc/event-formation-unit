@@ -5,6 +5,7 @@ set(efu_SRC
   ../common/EFUArgs.cpp
   ../common/StatPublisher.cpp
   ExitHandler.cpp
+  HwCheck.cpp
   Launcher.cpp
   Loader.cpp
   main.cpp
@@ -15,12 +16,13 @@ set(efu_SRC
 set(efu_INC
   ../common/StatPublisher.h
   ExitHandler.h
+  HwCheck.h
   Launcher.h
   Loader.h
   Parser.h
   Server.h
   )
-  
+
 create_executable(efu)
 target_link_libraries(efu efu_common)
 get_filename_component(EFU_RUN_INSTRUCTIONS "Executing artefacts.md" ABSOLUTE)

@@ -8,9 +8,11 @@
 
 #include <chrono>
 
-#include "mbcommon/TextFile.h"
+#include "generators/TextFile.h"
 #include "mbcommon/DumpEventBuilderInfo.h"
 #include "mbcommon/MultiBladeEventBuilder.h"
+
+/// GCOVR_EXCL_START
 
 #define UNUSED __attribute__((unused))
 
@@ -124,3 +126,4 @@ int main(int argc, const char **argv) {
 
   return 0;
 }
+/// GCOVR_EXCL_STOP

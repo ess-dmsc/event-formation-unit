@@ -24,6 +24,6 @@ int main(int argc, char *argv[]) {
     addr += sizeof(data);
     printf("%08x ", data);
   }
-
+  fclose(f);
   return 0;
 }

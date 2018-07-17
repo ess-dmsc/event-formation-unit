@@ -37,6 +37,7 @@ void HitSorter::insert(const Readout &readout) {
       pTime.trigger_timestamp_ns(readout.srs_timestamp + readout.bonus_timestamp);
 
   if (requires_analysis(triggerTimestamp_ns)) {
+    XTRACE(PROCESS, DEB, "analysis required\n");
     analyze();
   }
   old_trigger_timestamp_ns_ = triggerTimestamp_ns;

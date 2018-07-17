@@ -1,7 +1,7 @@
 //
 // Copied from NMXArgs.h
 //
-
+/// GCOVR_EXCL_START
 #include <string>
 
 #pragma once
@@ -30,3 +30,4 @@ public:
 
   unsigned int updint{1}; /**< update interval (seconds) */
 };
+/// GCOVR_EXCL_STOP

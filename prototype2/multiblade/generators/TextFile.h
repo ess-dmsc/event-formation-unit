@@ -1,6 +1,7 @@
 //
 // Created by troels on 6/2/17.
 //
+/// GCOVR_EXCL_START
 
 #ifndef MBUDPGEN_TEXTFILE_H
 #define MBUDPGEN_TEXTFILE_H
@@ -35,3 +36,4 @@ public:
 };
 
 #endif // MBUDPGEN_TEXTFILE_H
+/// GCOVR_EXCL_STOP

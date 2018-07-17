@@ -16,6 +16,7 @@
 class SRSTime {
   static constexpr double us_to_ns {1000};
   static constexpr double internal_SRS_clock_MHz {40};
+  static constexpr double internal_SRS_clock_period_ns {25};
   static constexpr double bc_range {4095};
   static constexpr double tdc_range {255};
 
@@ -39,6 +40,8 @@ class SRSTime {
   double trigger_period_ns() const;
 
   double target_resolution_ns() const;
+
+  uint32_t internal_clock_period_ns() const;
 
   /** @brief generate absolute timestamp in nanoseconds
    * @param trigger trigger timestamp from SRS header

@@ -65,11 +65,12 @@ int DataSave::tofile(const char *fmt, ...) {
   /** @brief prevent buffer overrun, but data could be truncated */
   auto maxwritelen = BUFFERSIZE + MARGIN - bufferlen;
   int ret = vsnprintf(buffer + bufferlen, maxwritelen, fmt, args);
+  va_end(args);
+
   if (ret < 0) {
     XTRACE(PROCESS, ERR, "vsnprintf failed\n");
     return ret;
   }
-  va_end(args);
 
   if (ret > maxwritelen) {
     XTRACE(PROCESS, WAR, "datasave has been truncated\n");

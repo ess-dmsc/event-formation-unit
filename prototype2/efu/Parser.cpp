@@ -8,8 +8,8 @@
 #include <efu/Parser.h>
 #include <efu/Server.h>
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 #define UNUSED __attribute__((unused))
 

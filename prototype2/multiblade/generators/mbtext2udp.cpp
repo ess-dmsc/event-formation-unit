@@ -8,8 +8,8 @@
 #include <cstring>
 #include <iomanip>
 #include <libs/include/Socket.h>
-#include <mbcommon/TextFile.h>
-#include <mbgen/MBArgs.h>
+#include <generators/TextFile.h>
+#include <generators/MBArgs.h>
 
 /// GCOVR_EXCL_START
 

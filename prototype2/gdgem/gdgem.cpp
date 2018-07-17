@@ -19,6 +19,7 @@
 #include <gdgem/generators/BuilderAPV.h>
 #include <gdgem/generators/BuilderHits.h>
 #include <gdgem/vmm2/BuilderVMM2.h>
+#include <gdgem/vmm3/BuilderVMM3.h>
 
 #include <gdgem/clustering/ClusterMatcher.h>
 #include <gdgem/clustering/DoroClusterer.h>
@@ -97,6 +98,9 @@ private:
     int64_t clusters_discarded;
     int64_t tx_bytes;
     int64_t fifo_seq_errors;
+    int64_t lost_frames;
+    int64_t bad_frames;
+    int64_t good_frames;
   } ALIGN(64) mystats;
 
   NMXConfig nmx_opts;
@@ -129,7 +133,9 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   Stats.create("fifo_seq_errors", mystats.fifo_seq_errors);
   Stats.create("unclustered", mystats.unclustered);
   Stats.create("geom_errors", mystats.geom_errors);
-
+  Stats.create("lost_frames", mystats.lost_frames);
+  Stats.create("bad_frames", mystats.bad_frames);
+  Stats.create("good_frames", mystats.good_frames);
   Stats.create("tx_bytes", mystats.tx_bytes);
   // clang-format on
 
@@ -159,9 +165,9 @@ void NMX::input_thread() {
   nmxdata.printBufferSizes();
   nmxdata.setRecvTimeout(0, 100000); /// secs, usecs
 
-  int rdsize;
   TSCTimer report_timer;
   for (;;) {
+    int rdsize;
     unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */
@@ -233,6 +239,9 @@ void NMX::processing_thread() {
 
         mystats.readouts += stats.valid_hits;
         mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
+        mystats.lost_frames += stats.lost_frames;
+        mystats.bad_frames += stats.bad_frames;
+        mystats.good_frames += stats.good_frames;
 
         if (nmx_opts.hit_histograms) {
           hists.bin_hists(builder_->clusterer_x->clusters);
@@ -246,6 +255,7 @@ void NMX::processing_thread() {
         matcher.match_end(false);
 
         while (!matcher.matched_clusters.empty()) {
+          //printf("MATCHED_CLUSTERS\n");
           XTRACE(PROCESS, DEB, "event_ready()\n");
           event = matcher.matched_clusters.front();
           matcher.matched_clusters.pop_front();
@@ -377,6 +387,13 @@ void NMX::init_builder() {
         nmx_opts.clusterer_x.hit_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
         nmx_opts.clusterer_y.hit_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
         nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
+  } else if (nmx_opts.builder_type == "VMM3") {
+      XTRACE(INIT, DEB, "Using BuilderVMM3\n");
+      builder_ = std::make_shared<BuilderVMM3>(
+          nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
+          nmx_opts.clusterer_x.hit_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
+          nmx_opts.clusterer_y.hit_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
+          nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else {
     XTRACE(INIT, ALW, "Unrecognized builder type in config\n");
   }
