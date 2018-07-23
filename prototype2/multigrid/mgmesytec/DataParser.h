@@ -62,18 +62,24 @@ public:
     int badtriggers{0}; /**< number of empty triggers or triggers without valid data */
   } stats;
 
-  uint64_t FakePulseTime{0};
+  uint64_t RecentPulseTime{0};
 
 private:
+  bool ExternalTrigger{false};
+  uint8_t Bus;
+  uint32_t Wire{0}; // initial alg.: wire with max adc
+  uint32_t Grid{0}; // initial alg.: grid with max adc
+
+  uint32_t LowTime {0};
+  uint32_t PreviousLowTime{0};
+  uint32_t HighTime {0};
+
+  uint64_t TotalTime{0};
+
   bool BusGood {false};
   bool WireGood {false};
   bool GridGood {false};
   bool TimeGood {false};
-  uint8_t Bus;
-  uint32_t Wire{0}; // initial alg.: wire with max adc
-  uint32_t Grid{0}; // initial alg.: grid with max adc
-  uint32_t Time;
-  uint16_t HighTime;
 
   uint16_t wireThresholdLo{0};
   uint16_t wireThresholdHi{std::numeric_limits<uint16_t>::max()};
@@ -81,8 +87,6 @@ private:
   uint16_t gridThresholdHi{std::numeric_limits<uint16_t>::max()};
   MgSeqGeometry MgMappings;
   ESSGeometry Geometry{36, 40, 20, 1};
-
-  uint32_t PreviousTime{0};
 
   bool dumptofile{false};
   std::shared_ptr<DataSave> CsvFile;

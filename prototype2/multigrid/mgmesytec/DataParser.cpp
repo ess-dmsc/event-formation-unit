@@ -9,8 +9,8 @@
 #include <common/ReadoutSerializer.h>
 #include <string.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+ #undef TRC_LEVEL
+ #define TRC_LEVEL TRC_L_DEB
 
 // clang-format off
 // sis3153 and mesytec data types from
@@ -42,6 +42,8 @@ static constexpr uint8_t MesytecModuleBitShift{16};
 
 static constexpr uint32_t MesytecHighTimeMask{0x0000ffff};
 
+static constexpr uint32_t MesytecExternalTriggerMask{0x01000000};
+
 static constexpr uint32_t MesytecBusMask{0x0f000000};
 static constexpr uint8_t MesytecBusBitShift{24};
 static constexpr uint32_t MesytecTimeDiffMask{0x0000ffff};
@@ -64,7 +66,7 @@ uint32_t MesytecData::getPixel() {
 }
 
 uint32_t MesytecData::getTime() {
-  return Time;
+  return static_cast<uint32_t>(TotalTime - RecentPulseTime);
 }
 
 void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
@@ -82,7 +84,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
 
   bool accept {false};
 
-  HighTime = 0;
+  //HighTime = 0;
   TimeGood = false;
   WireGood = false;
   GridGood = false;
@@ -101,8 +103,9 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       dataWords = static_cast<uint16_t>(*datap & MesytecDataWordsMask);
       assert(nWords > dataWords);
       module = static_cast<uint8_t>((*datap & MesytecModuleMask) >> MesytecModuleBitShift);
-      DTRACE(INF, "   Header:  trigger=%d,  data len=%d (words),  module=%d\n",
-             stats.triggers, dataWords, module);
+      ExternalTrigger = (0 != (*datap & MesytecExternalTriggerMask));
+      DTRACE(INF, "   Header:  trigger=%d,  data len=%d (words),  module=%d, external_trigger=%s\n",
+             stats.triggers, dataWords, module, ExternalTrigger?"true":"false");
       break;
 
     case MesytecType::ExtendedTimeStamp:
@@ -123,14 +126,14 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       // TODO: What if Bus number changes?
 
       // value in using something like getValue(Buffer, NBits, Offset) ?
+      BusGood = true;
       Bus = static_cast<uint8_t>((*datap & MesytecBusMask) >> MesytecBusBitShift);
       channel = static_cast<uint16_t>((*datap & MesytecAddressMask) >> MesytecAddressBitShift);
       adc = static_cast<uint16_t>(*datap & MesytecAdcMask);
-      BusGood = true;
       stats.readouts++;
       chan_count++;
 
-//      DTRACE(INF, "   DataEvent2:  bus=%d  channel=%d  adc=%d\n", Bus, channel, adc);
+      DTRACE(INF, "   DataEvent2:  bus=%d  channel=%d  adc=%d\n", Bus, channel, adc);
 
       accept = false;
       if (MgMappings.isWire(channel) && adc >= wireThresholdLo && adc <= wireThresholdHi) {
@@ -155,11 +158,11 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
 
       if (accept) {
 //        DTRACE(DEB, "   accepting %d,%d,%d,%d\n", time, Bus, channel, adc);
-        serializer.addEntry(0, channel, Time, adc);
+        serializer.addEntry(0, channel, TotalTime, adc);
 
         if (dumptofile) {
           CsvFile->tofile("%d, %d, %d, %d, %d, %d\n",
-              stats.triggers, HighTime, Time, Bus, channel, adc);
+              stats.triggers, HighTime, TotalTime, Bus, channel, adc);
         }
       } else {
         //DTRACE(DEB, "   discarding %d,%d,%d,%d\n", time, bus, channel, adc);
@@ -168,15 +171,19 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       break;
 
     case MesytecType::FillDummy:
-//      DTRACE(INF, "   FillDummy\n");
+      DTRACE(INF, "   FillDummy\n");
       break;
 
     default:
 
       if ((*datap & MesytecType::EndOfEvent) == MesytecType::EndOfEvent) {
         TimeGood = true;
-        Time = *datap & MesytecTimeMask;
-        DTRACE(INF, "   EndOfEvent: timestamp=%d\n", Time);
+        LowTime = *datap & MesytecTimeMask;
+        if (LowTime < PreviousLowTime)
+          HighTime++;
+        PreviousLowTime = LowTime;
+        TotalTime = (static_cast<uint64_t>(HighTime) << 30) + LowTime;
+        DTRACE(INF, "   EndOfEvent: timestamp=%d, total_time=%" PRIu64 "\n", LowTime, TotalTime);
         break;
       }
 
@@ -193,14 +200,8 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
 
   if (dumptofile && TimeGood && (!WireGood || !GridGood)) {
     CsvFile->tofile("%d, %d, %d, -1, -1, -1\n",
-                   stats.triggers, HighTime, Time);
+                   stats.triggers, HighTime, TotalTime);
   }
-
-  if (nWords < 5)
-    DTRACE(INF, "==========================================================\n"
-                "================    SYNCHRO PULSE?   =====================\n"
-                "==========================================================\n\n");
-
 }
 
 MesytecData::error MesytecData::parse(const char *buffer,
@@ -243,17 +244,17 @@ MesytecData::error MesytecData::parse(const char *buffer,
     stats.triggers++;
     mesytec_parse_n_words(datap, len - 3, hists, serializer);
 
+    if (ExternalTrigger) {
+      stats.tx_bytes += fbserializer.produce();
+//        XTRACE(PROCESS, WAR, "Updated fake pulse time = %zu to %zu by delta %zu\n",
+//            FakePulseTime, fbserializer.get_pulse_time(), PreviousTime);
+      fbserializer.set_pulse_time(RecentPulseTime);
+      RecentPulseTime = TotalTime;
+    }
+
     if (TimeGood && BusGood && GridGood && WireGood) {
       uint32_t pixel = getPixel();
       uint32_t time = getTime();
-
-      if (time < PreviousTime) {
-        stats.tx_bytes += fbserializer.produce();
-//        XTRACE(PROCESS, WAR, "Updated fake pulse time = %zu to %zu by delta %zu\n",
-//            FakePulseTime, fbserializer.get_pulse_time(), PreviousTime);
-        FakePulseTime += PreviousTime;
-        fbserializer.set_pulse_time(FakePulseTime);
-      }
 
       DTRACE(DEB, "Event: pixel: %d, time: %d \n\n", pixel, time);
       if (pixel != 0) {
@@ -265,8 +266,6 @@ MesytecData::error MesytecData::parse(const char *buffer,
     } else {
       stats.badtriggers++;
     }
-
-    PreviousTime = Time;
 
     datap += (len - 3);
     bytesleft -= (len - 3) * 4;
