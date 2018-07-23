@@ -1,15 +1,25 @@
 #!/bin/bash
 
+# on mjc workstation, try 172.17.12.31 2003 enp0s25
+
 ip=$1
 port=$2
+dev=${3:-enp0s31f6}
 
+function errexit() {
+    echo error: device $1 doesn\'t exist
+    exit 1
+}
+
+
+ethtool -S $dev || errexit $dev
 
 while [[ 1 ]]
 do
   DATE=$(date +%s)
   SNMP=$(cat /proc/net/snmp | grep Udp: | grep -v InDatagrams)
-  ETHT=$(ethtool -S enp0s31f6 | grep rx_no_buffer_count)
-  ETHPKT=$(ethtool -S enp0s31f6 | grep rx_packets)
+  ETHT=$(ethtool -S $dev | grep rx_no_buffer_count)
+  ETHPKT=$(ethtool -S $dev | grep rx_packets)
 
   INDG=$(echo $SNMP | awk '{print $2}')
   INERR=$(echo $SNMP | awk '{print $4}')
