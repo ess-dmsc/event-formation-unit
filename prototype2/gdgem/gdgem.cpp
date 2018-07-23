@@ -156,14 +156,21 @@ const char *NMX::detectorname() { return classname; }
 
 void NMX::input_thread() {
   /** Connection setup */
-  // Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
+  int rxBuffer, txBuffer;
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver nmxdata(local);
-  // nmxdata.buflen(opts->buflen);
-  nmxdata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+
+  nmxdata.setBufferSizes(0 /*use default */, EFUSettings.DetectorRxBufferSize);
+  nmxdata.getBufferSizes(txBuffer, rxBuffer);
+  if (rxBuffer < EFUSettings.DetectorRxBufferSize) {
+    XTRACE(INIT, ERR, "Receive buffer sizes too small, wanted %d, got %d\n",
+           EFUSettings.DetectorRxBufferSize, rxBuffer);
+    return;
+  }
   nmxdata.printBufferSizes();
   nmxdata.setRecvTimeout(0, 100000); /// secs, usecs
+
 
   TSCTimer report_timer;
   for (;;) {
@@ -197,10 +204,11 @@ void NMX::input_thread() {
 }
 
 void NMX::processing_thread() {
+  XTRACE(PROCESS, ALW, "NMX Config file: %s\n", NMXSettings.ConfigFile.c_str());
   nmx_opts = NMXConfig(NMXSettings.ConfigFile);
   init_builder();
   if (!builder_) {
-    XTRACE(PROCESS, WAR, "No builder specified, exiting thread\n");
+    XTRACE(PROCESS, ERR, "No builder specified, exiting thread\n");
     return;
   }
 
@@ -284,10 +292,6 @@ void NMX::processing_thread() {
                    event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
 
             if (nmx_opts.filter.valid(event)) {
-
-              // printf("\nHave a cluster:\n");
-              // event.debug2();
-
               pixelid = nmx_opts.geometry.pixel2D(event.x.utpc_center_rounded(),
                                                   event.y.utpc_center_rounded());
               if (!nmx_opts.geometry.valid_id(pixelid)) {
@@ -302,12 +306,8 @@ void NMX::processing_thread() {
               }
             } else { // Does not meet criteria
               /** @todo increments counters when failing this */
-              // printf("\nInvalid cluster:\n");
-              // event.debug2();
             }
-          } else {
-            //printf("No valid cluster:\n");
-            //event.debug2();
+          } else { /// no valid event
             if (event.x.entries.size() != 0) {
               mystats.clusters_x++;
             } else {
