@@ -29,7 +29,7 @@ e1000e)
 tg3)
   # Ubuntu + tg3 
   echo tg3 found - STATS NOT VERIFIED
-  PATT_NICERR=rx_discard
+  PATT_NICERR=rx_discards
   PATT_NICRX=rx_ucast_packets
   ;;
 *)
