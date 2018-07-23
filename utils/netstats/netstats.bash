@@ -11,13 +11,16 @@ function errexit() {
     exit 1
 }
 
+# Check that ethtool exists
+ethtool -h &>/dev/null || errexit "ethtool is not available, please install it"
+echo "ethtool available (ok)"
+
 # Check that device exists
 ethtool -S $dev &>/dev/null || errexit "device: $dev does'nt exist"
-
+echo "device $dev available (ok)"
 
 # Get the driver specific pattern match for counter
 driver=$(ethtool -i $dev | grep driver | awk '{print $2}')
-
 
 case $driver in
 e1000e)
@@ -37,6 +40,8 @@ tg3)
   ;;
 esac
 PATT_UDPRX=InDatagrams
+
+echo "driver for device $dev available (ok) - entering main loop"
 
 while [[ 1 ]]
 do
