@@ -15,6 +15,10 @@ function(create_module module_name)
     add_linker_flags(${module_name} "-Wl,--no-as-needed")
   endif()
 
+  if (GPERF)
+    target_link_libraries(${module_name} ${GPERFTOOLS_PROFILER})
+  endif()
+
   set_target_properties(${module_name} PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/modules")
 
@@ -23,7 +27,7 @@ function(create_module module_name)
 endfunction(create_module)
 
 #=============================================================================
-# Compile detector module code for static linking into the EFU 
+# Compile detector module code for static linking into the EFU
 # Note that you must add the compiled code to the EFU for linking using (e.g)
 # target_link_libraries(efu $<TARGET_OBJECTS:SomeDetectorModule>)
 #=============================================================================
@@ -45,6 +49,10 @@ function(create_executable exec_name)
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
     eventlib)
+
+  if (GPERF)
+    target_link_libraries(${exec_name} ${GPERFTOOLS_PROFILER})
+  endif()
 
   set_target_properties(${exec_name} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
