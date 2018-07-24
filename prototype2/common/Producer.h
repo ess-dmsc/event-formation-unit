@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Wrapper class for sending data to Kafka broker
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Wrapper class for sending data to Kafka broker
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
@@ -18,7 +20,7 @@ public:
 
 class Producer : public ProducerBase {
 public:
-  /** @brief Construct a producer object.
+  /** \brief Construct a producer object.
    * @param broker 'URL' specifying host and port, example "127.0.0.1:9009"
    * @param topicstr Name of Kafka topic according to agreement, example
    * "T-REX_detectors"
@@ -27,7 +29,7 @@ public:
 
   ~Producer();
 
-  /** @brief Function called to send data to a broker
+  /** \brief Function called to send data to a broker
    *  @param buffer Pointer to char buffer containing data to be tx'ed
    *  @param length Size of buffer data in bytes
    */

@@ -1,4 +1,11 @@
-/** Copyright (C) 2016 European Spallation Source */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief wrapper for slow but accurate time
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 #include <chrono>

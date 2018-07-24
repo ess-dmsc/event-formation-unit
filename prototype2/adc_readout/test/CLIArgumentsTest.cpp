@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Tests of command line arguments.
+ *  \brief Tests of command line arguments.
  */
 
 #include "../AdcSettings.h"

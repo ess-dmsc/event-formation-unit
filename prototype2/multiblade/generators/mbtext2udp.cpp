@@ -1,6 +1,9 @@
-//
-// Created by soegaard on 8/23/17.
-//
+/// Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
 
 #include <iostream>
 #include <sstream>

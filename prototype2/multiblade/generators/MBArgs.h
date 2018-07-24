@@ -1,14 +1,20 @@
-//
-// Copied from NMXArgs.h
-//
+/// Copyright (C) 2017-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// Copied from NMXArgs.h
+///
+//===----------------------------------------------------------------------===//
 /// GCOVR_EXCL_START
+
 #include <string>
 
 #pragma once
 
 class MBArgs {
 public:
-  /** @brief constructor for program arguments parsed via getopt_long()
+  /** \brief constructor for program arguments parsed via getopt_long()
    * @param argc Argument count - typically taken from main()
    * @param argv Argument array - typically taken from main()
    */

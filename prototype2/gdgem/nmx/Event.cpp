@@ -9,7 +9,7 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 void Event::insert_hit(const Hit &e) {
-  if (e.plane_id == 1) { /**< @todo deal with multiple panels */
+  if (e.plane_id == 1) { /**< \todo deal with multiple panels */
     y.insert_hit(e);
   } else if (e.plane_id == 0) {
     x.insert_hit(e);
@@ -18,7 +18,7 @@ void Event::insert_hit(const Hit &e) {
 
 void Event::merge(Cluster& cluster)
 {
-  if (cluster.plane_id == 1) { /**< @todo deal with multiple panels */
+  if (cluster.plane_id == 1) { /**< \todo deal with multiple panels */
     y.merge(cluster);
   } else if (cluster.plane_id == 0) {
     x.merge(cluster);

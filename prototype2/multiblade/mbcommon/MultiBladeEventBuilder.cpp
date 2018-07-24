@@ -1,6 +1,9 @@
-//
-// Created by soegaard on 6/2/17.
-//
+/// Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
 
 #include <algorithm>
 #include <multiblade/mbcommon/MultiBladeEventBuilder.h>

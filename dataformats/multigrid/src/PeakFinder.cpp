@@ -37,7 +37,7 @@ std::vector<PeakData *> &PeakFinder::findpeaks(const std::vector<int> &data) {
 
   if (thresh == -1) { /**< use automatic background level */
     printf("Automatic threshold\n");
-    thresh = peakstats.avg() / 5; /**< @todo avoid hard coded value */
+    thresh = peakstats.avg() / 5; /**< \todo avoid hard coded value */
   }
 
   for (unsigned int i = 0; i < datacopy.size(); i++) {

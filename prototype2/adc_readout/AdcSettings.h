@@ -1,15 +1,17 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief ADC settings.
- */
+/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief ADC settings.
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
 #include <CLI11.hpp>
 
-/// @brief ADC readout (and processing) specific settings.
+/// \brief ADC readout (and processing) specific settings.
 struct AdcSettings {
   bool SerializeSamples{false};
   bool PeakDetection{false};

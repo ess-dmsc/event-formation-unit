@@ -32,8 +32,8 @@ public:
 
   ~MesytecData(){};
 
-  uint32_t getPixel(); // @todo (too) simple implm. but agreed for now
-  uint32_t getTime();  // @todo (too) simple implm. but agreed for now
+  uint32_t getPixel(); // \todo (too) simple implm. but agreed for now
+  uint32_t getTime();  // \todo (too) simple implm. but agreed for now
 
   void setWireThreshold(int low, int high) {
      wireThresholdLo = low;
@@ -44,12 +44,12 @@ public:
      gridThresholdLo = low;
      gridThresholdHi = high;
    };
-  /** @brief parse a binary payload buffer, return number of data element
-   * @todo Uses NMXHists  - refactor and move ?
+  /** \brief parse a binary payload buffer, return number of data element
+   * \todo Uses NMXHists  - refactor and move ?
    */
   error parse(const char *buffer, int size, NMXHists &hists, FBSerializer & fbserializer, ReadoutSerializer &serializer);
 
-  /** @brief parse n 32 bit words from mesytec VMMR-8/16 card */
+  /** \brief parse n 32 bit words from mesytec VMMR-8/16 card */
   void mesytec_parse_n_words(uint32_t *buffer, uint16_t nWords, NMXHists &hists, ReadoutSerializer &serializer);
 
   // Statistics updated by parse()

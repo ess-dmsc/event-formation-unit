@@ -1,3 +1,10 @@
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
+
 #include <Args.h>
 #include <cstdio>
 #include <iostream>

@@ -1,11 +1,14 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Command line argument parser for EFU
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Command line argument parser for EFU
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
+
 #include <CLI11.hpp>
 #include <common/Detector.h>
 #include <cstdint>

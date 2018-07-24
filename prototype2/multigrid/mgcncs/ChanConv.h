@@ -1,10 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Lookup (calibration) tables for conversion of CSPEC adc to wire/grid
- * number
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Lookup (calibration) tables for conversion of CSPEC adc to wire/grid number
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
@@ -14,26 +15,26 @@ class CSPECChanConv {
 public:
   static const int adcsize = 16384;
 
-  /** @brief constructor, sets calibration data to initval */
+  /** \brief constructor, sets calibration data to initval */
   CSPECChanConv(uint16_t initval);
 
-  /** @brief constructor, sets calibration data to same as input
+  /** \brief constructor, sets calibration data to same as input
    * (identity mapping)
-   * @todo document
+   * \todo document
    */
   CSPECChanConv();
 
-  /** @brief return the wireid from an adc value using calibration data
+  /** \brief return the wireid from an adc value using calibration data
    *  @param wire_adc readout value for wire position
    */
   uint16_t getwireid(unsigned int wire_adc) { return wirecal[wire_adc]; };
 
-  /** @brief return the gridid from an adc value using calibration data
+  /** \brief return the gridid from an adc value using calibration data
    *  @param grid_adc readout value for wire position
    */
   uint16_t getgridid(unsigned int grid_adc) { return gridcal[grid_adc]; };
 
-  /** @brief generate linear wire calibration, used for testing
+  /** \brief generate linear wire calibration, used for testing
    *  @param min starting offset for wire ids
    *  @param max ending offset for wire ids
    *  @param nb_channels number of channels to generate
@@ -43,7 +44,7 @@ public:
     return makecal(wirecal, min, max, nb_channels);
   }
 
-  /** @brief generate linear wire calibration, used for testing
+  /** \brief generate linear wire calibration, used for testing
    *  @param min starting offset for grid ids
    *  @param max ending offset for grid ids
    *  @param nb_channels number of channels to generate
@@ -53,7 +54,7 @@ public:
     return makecal(gridcal, min, max, nb_channels);
   }
 
-  /** @brief loads wire and grid calibrations from efu_args
+  /** \brief loads wire and grid calibrations from efu_args
    */
   void load_calibration(uint16_t *wirecal_new, uint16_t *gridcal_new);
 

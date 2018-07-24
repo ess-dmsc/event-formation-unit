@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Testing of time stamp calculations.
+ *  \brief Testing of time stamp calculations.
  */
 
 #include "../AdcReadoutConstants.h"

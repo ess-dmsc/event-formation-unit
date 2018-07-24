@@ -1,5 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// plugin for gdgem detector data reception, parsing and event formation
+///
+//===----------------------------------------------------------------------===//
 #include <dataformats/multigrid/inc/json.h>
 
 #include <libs/include/SPSCFifo.h>
@@ -64,7 +70,7 @@ public:
 
   const char *detectorname();
 
-  /** @todo figure out the right size  of the .._max_entries  */
+  /** \todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 2000;
   static const int eth_buffer_size = 9000;
   static const int kafka_buffer_size = 12400;
@@ -82,7 +88,7 @@ private:
     int64_t rx_bytes;
     int64_t fifo_push_errors;
     // int64_t fifo_free;
-    int64_t pad_a[5]; /**< @todo check alignment*/
+    int64_t pad_a[5]; /**< \todo check alignment*/
 
     // Processing Counters
     int64_t readouts;
@@ -148,7 +154,7 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(
-      eth_buffer_max_entries + 11); /**< @todo testing workaround */
+      eth_buffer_max_entries + 11); /**< \todo testing workaround */
   assert(eth_ringbuf != 0);
 }
 
@@ -172,7 +178,7 @@ void NMX::input_thread() {
 
     /** this is the processing step */
     eth_ringbuf->setDataLength(
-        eth_index, 0); /**@todo @fixme buffer corruption can occur */
+        eth_index, 0); /**\todo \todo buffer corruption can occur */
     if ((rdsize = nmxdata.receive(eth_ringbuf->getDataBuffer(eth_index),
                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
@@ -301,7 +307,7 @@ void NMX::processing_thread() {
                 mystats.clusters_events++;
               }
             } else { // Does not meet criteria
-              /** @todo increments counters when failing this */
+              /** \todo increments counters when failing this */
               // printf("\nInvalid cluster:\n");
               // event.debug2();
             }
@@ -348,8 +354,8 @@ void NMX::processing_thread() {
         // TODO flush all clusters?
 
         XTRACE(INPUT, ALW, "Stopping input thread.\n");
-        builder_.reset(); /**< @fixme this is a hack to force ~BuilderSRS() call */
-        delete builder_.get(); /**< @fixme see above */
+        builder_.reset(); /**< \todo this is a hack to force ~BuilderSRS() call */
+        delete builder_.get(); /**< \todo see above */
         return;
       }
 

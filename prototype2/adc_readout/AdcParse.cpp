@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief ADC data parsing code.
+ *  \brief ADC data parsing code.
  */
 
 #include "AdcParse.h"

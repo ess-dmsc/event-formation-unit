@@ -1,6 +1,9 @@
-//
-// Created by Jonas Nilsson on 2017-11-08.
-//
+/// Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
 
 #include <functional>
 #include <iostream>
@@ -52,7 +55,7 @@ void UDPServer::handleConnect(const asio::error_code &Err,
                           std::bind(&UDPServer::handleConnect, this,
                                       std::placeholders::_1, ++EndpointIter));
   }
-  
+
 }
 
 bool UDPServer::TransmitPacket(const std::uint8_t *DataPtr, const std::uint32_t Size) {

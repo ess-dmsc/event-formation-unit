@@ -1,31 +1,29 @@
-/*! \mainpage Process the raw data from the Multi-blade detector.
- *
- * This class processes data-points from one cassette of the multi-blade
- * detector.
- *
- * The data-points are first formed into clusters within a certain preset
- * time-window. The clusters are then checked for
- * adjacency and if passed the position of the cluster will be determined. The
- * position can be either determined as the
- * wire/strip wit h maximum signal of the cluster or be calculated using a
- * weighted average with the signals as the
- * weights.
- *
- * This class is a reimplementation of clustering algorithm written in MatLab by
- * Francesco Piscitelli <Francesco.Piscitelli@esss.se>.
- *
- * - \subpage clustering
- *
- * - \subpage checks
- *
- * - \subpage position
- *
- * - \author Carsten Søgaard \n Niels Bohr Institute, University of Copenhagen
- * \n <soegaard@nbi.dk>
- *
- */
-
-// The remaining documentation is found in the docu.dox file
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Process the raw data from the Multi-blade detector.
+///
+/// This class processes data-points from one cassette of the multi-blade
+/// detector.
+///
+/// The data-points are first formed into clusters within a certain preset
+/// time-window. The clusters are then checked for
+/// adjacency and if passed the position of the cluster will be determined. The
+/// position can be either determined as the
+/// wire/strip wit h maximum signal of the cluster or be calculated using a
+/// weighted average with the signals as the
+/// weights.
+///
+/// This class is a reimplementation of clustering algorithm written in MatLab by
+/// Francesco Piscitelli <Francesco.Piscitelli@esss.se>.
+///
+///
+/// \author Carsten Søgaard \n Niels Bohr Institute, University of Copenhagenn <soegaard@nbi.dk>
+///
+/// The remaining documentation is found in the docu.dox file
+//===----------------------------------------------------------------------===//
 
 #ifndef MULTIBLADE_EVENTBUILDER_H
 #define MULTIBLADE_EVENTBUILDER_H

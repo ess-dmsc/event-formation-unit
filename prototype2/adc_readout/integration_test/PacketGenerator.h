@@ -1,6 +1,9 @@
-//
-// Created by Jonas Nilsson on 2017-11-08.
-//
+/// Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
@@ -35,7 +38,7 @@ struct DataHeaderSim : public DataHeader {
 class PacketGenerator {
 public:
   PacketGenerator(std::uint16_t OversamplingFactor);
-  
+
   PacketInfo GeneratePacket(std::uint32_t TS_Sec, double SecFrac, std::uint16_t ChannelNr);
 private:
   std::unique_ptr<std::uint8_t[]> TemplateData;

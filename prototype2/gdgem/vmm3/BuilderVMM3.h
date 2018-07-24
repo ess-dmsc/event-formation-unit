@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class for creating NMX hits from SRS/VMM data
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class for creating NMX hits from SRS/VMM data
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 #include <gdgem/nmx/AbstractBuilder.h>
@@ -28,7 +30,7 @@ public:
 
   ~BuilderVMM3() { XTRACE(INIT, DEB, "BuilderVMM2 destructor called\n"); }
 
-  /** @todo Martin document */
+  /** \todo Martin document */
   ResultStats process_buffer(char *buf, size_t size) override;
 
 private:

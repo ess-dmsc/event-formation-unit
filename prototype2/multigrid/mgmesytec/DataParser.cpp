@@ -53,7 +53,7 @@ static constexpr uint8_t MesytecAddressBitShift{12};
 static constexpr uint32_t MesytecAdcMask{0x00000fff};
 
 
-// @todo can only create a single event per UDP buffer
+// \todo can only create a single event per UDP buffer
 uint32_t MesytecData::getPixel() {
   if (!GridGood || !WireGood) {
     return 0;

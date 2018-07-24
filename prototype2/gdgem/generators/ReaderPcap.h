@@ -1,27 +1,29 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Wrapper class for reading UDP data from wireshark pcap files
- * one packet at a time.
- */
- /// GCOVR_EXCL_START
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Wrapper class for reading UDP data from wireshark pcap files
+/// one packet at a time.
+//===----------------------------------------------------------------------===//
+/// GCOVR_EXCL_START
 
 #pragma once
+
 #include <cstdint>
 #include <pcap.h>
 #include <string>
 
 class ReaderPcap {
 public:
-  /** @brief construct a reader for a specific file
+  /** \brief construct a reader for a specific file
    * @param filename name of pcap file
    */
   ReaderPcap(std::string filename);
 
   ~ReaderPcap();
 
-  /* @brief read data from a packet into user specified buffer
+  /* \brief read data from a packet into user specified buffer
    * @param buffer user allocated buffer, must be at least bufferlen bytes
    * @param bufferlen length in bytes
    */

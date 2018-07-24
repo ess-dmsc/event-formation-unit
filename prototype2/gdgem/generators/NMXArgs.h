@@ -1,16 +1,20 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Command line argument parser for nmxgen
- */
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Command line argument parser for nmxgen
+///
+//===----------------------------------------------------------------------===//
 /// GCOVR_EXCL_START
+
 #pragma once
+
 #include <string>
 
 class NMXArgs {
 public:
-  /** @brief constructor for program arguments parsed via getopt_long()
+  /** \brief constructor for program arguments parsed via getopt_long()
    * @param argc Argument count - typically taken from main()
    * @param argv Argument array - typically taken from main()
    */

@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/Hists.h> // @fixme
+#include <common/Hists.h> // \todo
 #include <multigrid/mgmesytec/DataParser.h>
 #include <multigrid/mgmesytec/TestData.h>
 #include <test/TestBase.h>
@@ -12,7 +12,7 @@ static const int MG24_Z_20 = 1;
 class MesytecDataTest : public TestBase {
 protected:
   NMXHists hists;
-  MesytecData mesytec{MG24_Z_20}; // Select module with 20 depth in z
+  MesytecData mesytec {MG24_Z_20, true}; // Select module with 20 depth in z
   ReadoutSerializer * serializer;
   FBSerializer * fbserializer;
   virtual void SetUp() {

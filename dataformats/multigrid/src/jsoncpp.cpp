@@ -1,3 +1,9 @@
+/// Copyright see description below
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
 // clang-format off
 /// GCOVR_EXCL_START
 /// Json-cpp amalgated source (http://jsoncpp.sourceforge.net/).

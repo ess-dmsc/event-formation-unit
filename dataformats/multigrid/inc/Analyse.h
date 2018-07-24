@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+ /// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+ //===----------------------------------------------------------------------===//
+ ///
+ /// \file
+ /// \brief Class doing batch reading, event formation, stats and output
+ ///
+ //===----------------------------------------------------------------------===//
 
-/** @file
- *
- *  @brief Class doing batch reading, event formation, stats and output
- */
 #pragma once
 
 #include <Args.h>

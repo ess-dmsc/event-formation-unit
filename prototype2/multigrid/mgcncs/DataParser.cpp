@@ -14,7 +14,7 @@ struct multi_grid {
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-/** @todo no error checking, assumes valid data and valid buffer */
+/** \todo no error checking, assumes valid data and valid buffer */
 int CSPECData::createevent(const MultiGridData &data, uint32_t *time,
                            uint32_t *pixel) {
   auto panel = data.module;
@@ -23,7 +23,7 @@ int CSPECData::createevent(const MultiGridData &data, uint32_t *time,
 
   XTRACE(PROCESS, DEB, "panel %u, grid %d, wire %d\n", panel, grid, wire);
 
-  /** @todo eventually get rid of this, but electronics is wrongly wired
+  /** \todo eventually get rid of this, but electronics is wrongly wired
    * on the prototype detector currently being tested
    */
 

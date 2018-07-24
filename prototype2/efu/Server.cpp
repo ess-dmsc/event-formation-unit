@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Implements a command server
+ *  \brief Implements a command server
  */
 
 //#include <algorithm>
@@ -48,7 +48,7 @@ void Server::server_close(int socket) {
   *client = -1;
 }
 
-/** @brief Setup socket parameters
+/** \brief Setup socket parameters
  */
 void Server::server_open() {
   XTRACE(IPC, INF, "Server::open() called on port %d\n", port_);
@@ -92,7 +92,7 @@ int Server::server_send(int socketfd) {
   return 0;
 }
 
-/** @brief Called in main program loop
+/** \brief Called in main program loop
  */
 void Server::server_poll() {
 

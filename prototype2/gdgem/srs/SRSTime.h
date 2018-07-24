@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class for NMX timestemp interpretation
- */
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class for NMX timestemp interpretation
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
@@ -43,14 +45,14 @@ class SRSTime {
 
   uint32_t internal_clock_period_ns() const;
 
-  /** @brief generate absolute timestamp in nanoseconds
+  /** \brief generate absolute timestamp in nanoseconds
    * @param trigger trigger timestamp from SRS header
    * @param bc bunc crossing ID from VMM
    * @param tdc tdc value from VMM
    */
   double timestamp_ns(uint64_t trigger, uint16_t bc, uint16_t tdc);
 
-  /** @brief generate absolute integer-valued timestamp
+  /** \brief generate absolute integer-valued timestamp
    * @param trigger trigger timestamp from SRS header
    * @param bc bunc crossing ID from VMM
    * @param tdc tdc value from VMM
@@ -59,7 +61,7 @@ class SRSTime {
 
   double chip_time_ns(uint16_t bc, uint16_t tdc) const;
 
-  // @brief prints out time configuration
+  // \brief prints out time configuration
   std::string debug() const;
 
 private:

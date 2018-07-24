@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Unit tests.
+ *  \brief Unit tests.
  */
 
 #include "../CircularBuffer.h"
