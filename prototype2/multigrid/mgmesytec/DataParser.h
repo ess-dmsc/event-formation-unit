@@ -45,8 +45,8 @@ public:
 
   ~MesytecData(){};
 
-  int getPixel(); // @todo (too) simple implm. but agreed for now
-  int getTime();  // @todo (too) simple implm. but agreed for now
+  int getPixel(); // \todo (too) simple implm. but agreed for now
+  int getTime();  // \todo (too) simple implm. but agreed for now
 
   void setWireThreshold(int low, int high) {
      wireThresholdLo = low;
@@ -58,7 +58,7 @@ public:
      gridThresholdHi = high;
    };
   /** \brief parse a binary payload buffer, return number of data element
-   * @todo Uses NMXHists  - refactor and move ?
+   * \todo Uses NMXHists  - refactor and move ?
    */
   error parse(const char *buffer, int size, NMXHists &hists, FBSerializer & fbserializer, ReadoutSerializer &serializer);
 

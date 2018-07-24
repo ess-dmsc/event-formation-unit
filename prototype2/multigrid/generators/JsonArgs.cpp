@@ -84,7 +84,7 @@ JsonArgs::JsonArgs(int argc, char *argv[]) {
     }
   }
   printf("Generating a bulk data stream\n");
-  /** @todo add basedir, runfile, runspec */
+  /** \todo add basedir, runfile, runspec */
   printf("  speed throttle:         %d\n", speed_level);
   printf("Network properties\n");
   printf("  destination ip address: %s\n", dest_ip.c_str());

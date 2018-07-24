@@ -15,18 +15,18 @@
 
 class TrackSerializer {
 public:
-  /** @todo document */
+  /** \todo document */
   TrackSerializer(size_t maxarraylength,
                   size_t minhits, double target_res);
 
-  /** @todo document */
+  /** \todo document */
   ~TrackSerializer();
 
-  /** @todo document */
+  /** \todo document */
   // int add_track(uint32_t plane, uint32_t strip, uint32_t time, uint32_t adc);
   int add_track(const Event &event);
 
-  /** @todo document */
+  /** \todo document */
   int serialize(char **buffer);
 
 private:

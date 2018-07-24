@@ -45,7 +45,7 @@ public:
 
   const char *detectorname();
 
-  /** @todo figure out the right size  of the .._max_entries  */
+  /** \todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
   static const int eth_buffer_size = 9000;
   static const int kafka_buffer_size = 124000; /**< events */
@@ -112,7 +112,7 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDE
   XTRACE(INIT, ALW, "Creating %d SONDE Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(
-      eth_buffer_max_entries + 11); /** @todo testing workaround */
+      eth_buffer_max_entries + 11); /** \todo testing workaround */
   assert(eth_ringbuf != 0);
 }
 

@@ -17,7 +17,7 @@
 #include <sys/select.h>
 #include <sys/types.h>
 
-/** @todo make this work with public static unsigned int */
+/** \todo make this work with public static unsigned int */
 #define SERVER_BUFFER_SIZE 9000U
 #define SERVER_MAX_CLIENTS 16
 

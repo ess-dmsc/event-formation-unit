@@ -34,14 +34,14 @@ Producer::Producer(std::string broker, std::string topicstr) : ProducerBase() {
   producer = RdKafka::Producer::create(conf, errstr);
   if (!producer) {
     std::cerr << "Failed to create producer: " << errstr << std::endl;
-    /** @fixme add logging to Greylog */
+    /** \todo add logging to Greylog */
     return;
   }
 
   topic = RdKafka::Topic::create(producer, topicstr, tconf, errstr);
   if (!topic) {
     std::cerr << "Failed to create topic: " << errstr << std::endl;
-    /** @fixme add logging to Greylog */
+    /** \todo add logging to Greylog */
     return;
   }
 }

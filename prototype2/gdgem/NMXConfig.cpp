@@ -25,7 +25,7 @@ NMXConfig::NMXConfig(std::string jsonfile) {
   builder_type = root["builder_type"].asString();
 
   if ((builder_type == "VMM2") || (builder_type == "VMM3")) {
-    /**< @todo get from slow control? */
+    /**< \todo get from slow control? */
     auto tc = root["time_config"];
     time_config.set_tac_slope(tc["tac_slope"].asInt());
     time_config.set_bc_clock(tc["bc_clock"].asInt());

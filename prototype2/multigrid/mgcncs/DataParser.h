@@ -83,7 +83,7 @@ public:
   /** \brief serialize event to buffer
    *  @param data Multi grid data from event readout system
    *  @param buffer User specified buffer (must be large enough to hold event
-   *  @todo document return value
+   *  \todo document return value
    */
   int createevent(const MultiGridData &data, uint32_t *time, uint32_t *pixel);
 

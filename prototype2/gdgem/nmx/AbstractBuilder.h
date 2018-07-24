@@ -44,7 +44,7 @@ public:
 
   virtual ~AbstractBuilder() {}
 
-  /** @todo Martin document */
+  /** \todo Martin document */
   virtual ResultStats process_buffer(char *buf, size_t size) = 0;
 
   std::shared_ptr<AbstractClusterer> clusterer_y;

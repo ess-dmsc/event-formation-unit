@@ -13,10 +13,10 @@
 
 class ReaderHits {
 public:
-  /** @todo document */
+  /** \todo document */
   ReaderHits(std::string filename);
 
-  /** @todo document */
+  /** \todo document */
   size_t read(char *buf);
 
 private:

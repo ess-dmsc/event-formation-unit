@@ -12,7 +12,7 @@
 int Readout::validate(const char *buffer, uint32_t size) {
   if (buffer == 0) {
     XTRACE(PROCESS, WAR,
-           "no buffer specified\n"); /**< @todo increment counter */
+           "no buffer specified\n"); /**< \todo increment counter */
     return -Readout::EBUFFER;
   }
 

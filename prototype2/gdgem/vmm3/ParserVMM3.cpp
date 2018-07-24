@@ -79,7 +79,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 		if (fcDiff) {
 			//printf("FC: curr: %d, expect: %d, diff: %" PRId64 "\n", srsHeader.frameCounter,
 			//		parserData.nextFrameCounter, fcDiff);
-			stats.lostFrames += fcDiff; /// @todo test
+			stats.lostFrames += fcDiff; /// \todo test
 			parserData.nextFrameCounter = srsHeader.frameCounter + 1;
 		} else {
 			parserData.nextFrameCounter++;

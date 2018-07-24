@@ -22,7 +22,7 @@ public:
   int lastnonzero = -1;
   int nonzero = 0;
 
-  Histogram() : hist(histsize) { /**< @todo parametrize with size */
+  Histogram() : hist(histsize) { /**< \todo parametrize with size */
     clear();
   }
 

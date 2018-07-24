@@ -28,10 +28,10 @@ const int maxUdpPayloadSize{8972};
 
 class ReaderAPV {
 public:
-  /** @todo document */
+  /** \todo document */
   ReaderAPV(std::string filename);
 
-  /** @todo document */
+  /** \todo document */
   size_t read(char *buf);
 
 private:

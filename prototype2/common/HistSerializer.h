@@ -17,13 +17,13 @@
 
 class HistSerializer {
 public:
-  /** @todo document */
+  /** \todo document */
   HistSerializer();
 
-  /** @todo document */
+  /** \todo document */
   ~HistSerializer();
 
-  /** @todo document */
+  /** \todo document */
   size_t serialize(const NMXHists &hists, char **buffer);
 
 private:

@@ -110,7 +110,7 @@ void RingBuffer<N>::setDataLength(unsigned int index, unsigned int length) {
   data[index].length = length;
 }
 
-/** @todo using powers of two and bitmask in stead of modulus */
+/** \todo using powers of two and bitmask in stead of modulus */
 template <const unsigned int N> int RingBuffer<N>::getNextBuffer() {
   entry_ = (entry_ + 1) % max_entries_;
   return entry_;

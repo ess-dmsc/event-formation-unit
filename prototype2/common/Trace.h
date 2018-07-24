@@ -56,7 +56,7 @@
 // clang-format on
 
 /** \brief get rid of annoying warning
- * @todo See if there is a better solution than pragma
+ * \todo See if there is a better solution than pragma
  */
 #pragma GCC system_header
 

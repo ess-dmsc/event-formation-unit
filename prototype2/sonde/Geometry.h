@@ -26,7 +26,7 @@ public:
    */
   int getmaxpixelid() { return essgeometry.max_pixel(); }
 
-  // Sometimes asic and channel are separate @todo make this one the default
+  // Sometimes asic and channel are separate \todo make this one the default
   int getdetectorpixelid(int module, int asic, int channel) {
     return getdetectorpixelid(module, (asic << 6) + (channel & 0x3f));
   }
