@@ -17,7 +17,7 @@
 
 class PeakData {
 public:
-  /** @brief Specification of a peak:
+  /** \brief Specification of a peak:
    * @param start start of peak_end
    * @param end end of peak + 1
    */
@@ -28,23 +28,23 @@ public:
 
 class PeakFinder {
 public:
-  /** @brief Constructor, sets private member variables
+  /** \brief Constructor, sets private member variables
    * @param minimum_width the minimum width for valid peaks
    * @param signal_threshold sets the noise level
    * @param low_cut values below this index are also zeroed as noise
    */
   PeakFinder(int minimum_width, int signal_threshold, int low_cut);
 
-  /** @brief destructor - delete the vecotr of peak data
+  /** \brief destructor - delete the vecotr of peak data
    */
   ~PeakFinder();
 
-  /** @brief calculate the peak positions from histogram data
+  /** \brief calculate the peak positions from histogram data
    * @param histogram pre-populated histogram data
    */
   std::vector<PeakData *> &findpeaks(const std::vector<int> &data);
 
-  /** @brief prints misc. stats from the peak list
+  /** \brief prints misc. stats from the peak list
    */
   void printstats(std::string info);
 

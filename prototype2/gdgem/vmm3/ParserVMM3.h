@@ -55,7 +55,7 @@ public:
     bool hasDataMarker;    ///
 };
 
-  /// @brief create a data handler for VMM3 SRS data of fixed size Capacity
+  /// \brief create a data handler for VMM3 SRS data of fixed size Capacity
   /// @param maxelements The maximum number of readout elements
   VMM3SRSData(int maxelements) : maxHits(maxelements) {
     markers = new struct VMM3Marker[maximumNumberVMM];
@@ -71,11 +71,11 @@ public:
     markers = nullptr;
   }
 
-  /// @brief reveive readouts from a binary payload buffer, return number of
+  /// \brief reveive readouts from a binary payload buffer, return number of
   /// data elements
   int receive(const char *buffer, int size);
 
-  /// @brief parse the readouts into a data array
+  /// \brief parse the readouts into a data array
   /// @param data1 the raw (unbitreversed) data1 field of a SRS packet
   /// @param data2 the raw (unbitreversed) data2 field of a SRS packet
   /// @param vmd VMM2Data structure holding the parsed data (tdc, bcid, adc, ...)

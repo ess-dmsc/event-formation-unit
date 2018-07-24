@@ -17,7 +17,7 @@ public:
     NoExit,
     Exit,
   };
-  /** @brief constructor does nothing */
+  /** \brief constructor does nothing */
   static void InitExitHandler();
 
   static Exit HandleLastSignal();

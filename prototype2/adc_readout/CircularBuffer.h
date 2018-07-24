@@ -17,7 +17,7 @@ namespace SpscBuffer {
 
 template <class DataType> using ElementPtr = DataType *;
 
-/// @brief Sets the name of the queue type in use to Queue. Note that using the
+/// \brief Sets the name of the queue type in use to Queue. Note that using the
 /// non-blocking version, (i.e. setting SPSC_NO_WAIT) is MUCH(!) faster than the
 /// blocking version.
 template <class DataType>
@@ -27,7 +27,7 @@ using Queue = moodycamel::ReaderWriterQueue<ElementPtr<DataType>>;
 using Queue = moodycamel::BlockingReaderWriterQueue<ElementPtr<DataType>>;
 #endif
 
-/// @brief Single producer, single consumer lock less data buffer/queue.
+/// \brief Single producer, single consumer lock less data buffer/queue.
 /// This class actually implements two different queues; one for elements
 /// containing data and one for empty ones.
 /// You must always process the elements (and return them to the correct queue)
@@ -46,7 +46,7 @@ public:
     ConsumerElemPtr = nullptr;
 #endif
   }
-  /// @brief Get empty element that can then be used to store data.
+  /// \brief Get empty element that can then be used to store data.
   /// @param[out] Element The pointer to the element.
   /// @return Returns true if the pointer can be used to access an empty
   /// element, false otherwise.
@@ -63,7 +63,7 @@ public:
   };
 
 #ifndef SPSC_NO_WAIT
-  /// @brief Same as CircularBuffer::tryGetEmpty() but blocks for a specific
+  /// \brief Same as CircularBuffer::tryGetEmpty() but blocks for a specific
   /// amount of time.
   /// @param[out] Element The pointer to the element.
   /// @param[in] TimeoutUSecs The amount of time to wait for an empty element
@@ -83,7 +83,7 @@ public:
   };
 #endif
 
-  /// @brief Put non empty element in the data queue.
+  /// \brief Put non empty element in the data queue.
   /// @param[in] Element The pointer to the element.
   /// @return Returns true if the element was put in the queue, false otherwise.
   /// If false is returned, you are then still responsible for the pointer.
@@ -104,7 +104,7 @@ public:
   }
   // End producer
 
-  /// @brief Get data element.
+  /// \brief Get data element.
   /// @param[out] Element The pointer to the element.
   /// @return Returns true if the pointer can be used to access a data element,
   /// false otherwise.
@@ -121,7 +121,7 @@ public:
   }
 
 #ifndef SPSC_NO_WAIT
-  /// @brief Blocking version of CircularBuffer::tryGetData().
+  /// \brief Blocking version of CircularBuffer::tryGetData().
   /// @param[out] Element The pointer to the element.
   /// @param[in] TimeoutUSecs The number of micro seconds to block (wait) for
   /// new data before failing (returning false).
@@ -140,7 +140,7 @@ public:
   }
 #endif
 
-  /// @brief Put empty (processed) element back in the empty queue.
+  /// \brief Put empty (processed) element back in the empty queue.
   /// @param[in] Element The pointer to the element.
   /// @return Returns true if the element was put in the empty queue, false
   /// otherwise.

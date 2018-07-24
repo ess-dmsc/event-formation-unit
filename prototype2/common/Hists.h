@@ -30,7 +30,7 @@ public:
 
   void set_cluster_adc_downshift(uint32_t bits);
 
-  /** @brief clears histograms */
+  /** \brief clears histograms */
   void clear();
 
   void bin(const Event &e);

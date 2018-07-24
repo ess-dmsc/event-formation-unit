@@ -68,7 +68,7 @@ public:
     }
   }
 
-  /** @brief parse a binary payload buffer, return number of data elements
+  /** \brief parse a binary payload buffer, return number of data elements
    */
   int receive(const char *buffer, int size);
 
@@ -80,7 +80,7 @@ public:
   int generate(char *buffer, int size, int elems, unsigned int wire_adc,
                unsigned int grid_adc);
 
-  /** @brief serialize event to buffer
+  /** \brief serialize event to buffer
    *  @param data Multi grid data from event readout system
    *  @param buffer User specified buffer (must be large enough to hold event
    *  @todo document return value

@@ -20,7 +20,7 @@ public:
 
 class Producer : public ProducerBase {
 public:
-  /** @brief Construct a producer object.
+  /** \brief Construct a producer object.
    * @param broker 'URL' specifying host and port, example "127.0.0.1:9009"
    * @param topicstr Name of Kafka topic according to agreement, example
    * "T-REX_detectors"
@@ -29,7 +29,7 @@ public:
 
   ~Producer();
 
-  /** @brief Function called to send data to a broker
+  /** \brief Function called to send data to a broker
    *  @param buffer Pointer to char buffer containing data to be tx'ed
    *  @param length Size of buffer data in bytes
    */

@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Code for testing the ADC UDP functionality.
+ *  \brief Code for testing the ADC UDP functionality.
  */
 
 #include "TestUDPServer.h"

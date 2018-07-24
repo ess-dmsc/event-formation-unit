@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Populate the command line parser with possible arguments.
+ *  \brief Populate the command line parser with possible arguments.
  */
 
 #include "AdcSettings.h"

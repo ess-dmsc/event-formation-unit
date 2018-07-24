@@ -13,20 +13,20 @@
 
 class MapFile {
 public:
-  /** @brief mmap a filename
+  /** \brief mmap a filename
    *  @filename File to be mmap'ed
    */
   MapFile(std::string filename);
 
-  /** @brief descructor handles cleanup
+  /** \brief descructor handles cleanup
    */
   ~MapFile();
 
-  /** @brief get the address of the mmap'ed file
+  /** \brief get the address of the mmap'ed file
    */
   const char *getaddress();
 
-  /** @brief get the size of the mmap'ed file
+  /** \brief get the size of the mmap'ed file
    */
   size_t getsize();
 

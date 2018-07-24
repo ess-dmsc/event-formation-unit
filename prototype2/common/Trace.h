@@ -55,7 +55,7 @@
 #define TRC_L_DEB 2
 // clang-format on
 
-/** @brief get rid of annoying warning
+/** \brief get rid of annoying warning
  * @todo See if there is a better solution than pragma
  */
 #pragma GCC system_header

@@ -25,7 +25,7 @@ private:
 public:
   //  std::shared_ptr<Detector> detector{nullptr};
 
-  /** @brief Load instrument plugin from detector name
+  /** \brief Load instrument plugin from detector name
    *  @param name Instrument name - .so suffix will be added
    */
   Loader();
@@ -35,7 +35,7 @@ public:
   bool loadPlugin(std::string lib);
   void unloadPlugin();
 
-  /** @brief minimal destructor */
+  /** \brief minimal destructor */
   ~Loader();
 
   bool IsOk();

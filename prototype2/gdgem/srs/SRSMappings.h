@@ -21,7 +21,7 @@
 
 class SRSMappings {
 public:
-  /** @brief define mappings for sequence of chips in one plane
+  /** \brief define mappings for sequence of chips in one plane
    * @param planeID ID of plane (edge of panel) being defined
    * @param chips list of (FEC, VMM) pairs in the order of increasing strip
    * number
@@ -29,7 +29,7 @@ public:
   void define_plane(uint8_t planeID,
                     std::list<std::pair<uint16_t, uint16_t>> chips);
 
-  /** @brief define channel mappings for one chip
+  /** \brief define channel mappings for one chip
    * @param fecID ID of FEC
    * @param vmmID ID of chip
    * @param planeID ID of plane (edge of panel)
@@ -42,7 +42,7 @@ public:
 
   uint8_t get_plane(const Readout& readout) const;
 
-  // @brief prints out configuration
+  // \brief prints out configuration
   std::string debug() const;
 
 private:

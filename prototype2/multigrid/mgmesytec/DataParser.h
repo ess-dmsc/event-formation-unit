@@ -57,12 +57,12 @@ public:
      gridThresholdLo = low;
      gridThresholdHi = high;
    };
-  /** @brief parse a binary payload buffer, return number of data element
+  /** \brief parse a binary payload buffer, return number of data element
    * @todo Uses NMXHists  - refactor and move ?
    */
   error parse(const char *buffer, int size, NMXHists &hists, FBSerializer & fbserializer, ReadoutSerializer &serializer);
 
-  /** @brief parse n 32 bit words from mesytec VMMR-8/16 card */
+  /** \brief parse n 32 bit words from mesytec VMMR-8/16 card */
   void mesytec_parse_n_words(uint32_t *buffer, int nWords, NMXHists &hists, ReadoutSerializer &serializer);
 
   // Statistics returned by parse()

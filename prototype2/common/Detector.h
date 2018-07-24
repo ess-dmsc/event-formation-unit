@@ -54,19 +54,19 @@ public:
   using ThreadList = std::vector<ThreadInfo>;
   Detector(std::string Name, BaseSettings settings) : EFUSettings(settings), Stats(Name), DetectorName(Name) {};
   // default constructor, all instruments must implement these methods
-  /** @brief generic pthread argument
+  /** \brief generic pthread argument
    * @param arg user supplied pointer to pthread argument data
    */
 
   virtual ~Detector() = default;
 
-  /** @brief document */
+  /** \brief document */
   virtual int statsize() { return Stats.size(); }
 
-  /** @brief document */
+  /** \brief document */
   virtual int64_t statvalue(size_t index) { return Stats.value(index); }
 
-  /** @brief document */
+  /** \brief document */
   virtual std::string &statname(size_t index) { return Stats.name(index); }
 
   void setStatsPrefix(std::string NewStatsPrefix) {

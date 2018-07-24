@@ -27,7 +27,7 @@ public:
     uint16_t reserved;
   } __attribute__((packed));
 
-  /** @brief validate a readout buffer
+  /** \brief validate a readout buffer
    *  @param[in] buffer pointer to data
    *  @param[in] size length of buffer in bytes
    *  @return on success return 0, else -1

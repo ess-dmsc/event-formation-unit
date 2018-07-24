@@ -25,26 +25,26 @@ static_assert(SERVER_MAX_CLIENTS <= FD_SETSIZE, "Too many clients");
 
 class Server {
 public:
-  /** @brief Server for program control and stats
+  /** \brief Server for program control and stats
    *  @param port tcp port
    *  @param args - needed to access Stat.h counters
    */
   Server(int port, Parser &parse);
 
-  /** @brief Setup socket parameters
+  /** \brief Setup socket parameters
    */
   void server_open();
 
-  /** @brief Teardown socket
+  /** \brief Teardown socket
    *  @param socketfd socket file descriptor
    */
   void server_close(int socketfd);
 
-  /** @brief Called in main program loop
+  /** \brief Called in main program loop
    */
   void server_poll();
 
-  /** @brief Send reply to Client
+  /** \brief Send reply to Client
    *  @param socketfd socket file descriptor
    */
   int server_send(int socketfd);

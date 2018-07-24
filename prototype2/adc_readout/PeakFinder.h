@@ -11,7 +11,7 @@
 
 #include "AdcDataProcessor.h"
 
-/// @brief Finds a peak in a sample run and serialises its maximum value and
+/// \brief Finds a peak in a sample run and serialises its maximum value and
 /// timestamp.
 class PeakFinder : public AdcDataProcessor {
 public:
@@ -19,12 +19,12 @@ public:
   /// production.
   PeakFinder(std::shared_ptr<Producer> Prod);
 
-  /// @brief Handles peak detection, serialisation of the result and
+  /// \brief Handles peak detection, serialisation of the result and
   /// transmission to the Kafka broker.
   virtual void processData(SamplingRun const &Data) override;
 
 private:
-  /// @brief Implements serialisation and transmission of the peak data.
+  /// \brief Implements serialisation and transmission of the peak data.
   /// Currently uses the EventMessage flatbuffer schema for serialisation. This
   /// is not a good fit for the analysed data and another schema should probably
   /// be used.
@@ -39,7 +39,7 @@ struct ModuleAnalysisResult {
   std::uint16_t Mean;
 };
 
-/// @brief Implements the actual peak finding algorithm
+/// \brief Implements the actual peak finding algorithm
 /// The algorithm is very simple (to a fault) and only attempts to find the
 /// maximum value in a sampling run and then also calculates the timestamp of
 /// that maximum value. This algorithm will fail for doubles, exessive noise,

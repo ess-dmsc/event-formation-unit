@@ -45,14 +45,14 @@ class SRSTime {
 
   uint32_t internal_clock_period_ns() const;
 
-  /** @brief generate absolute timestamp in nanoseconds
+  /** \brief generate absolute timestamp in nanoseconds
    * @param trigger trigger timestamp from SRS header
    * @param bc bunc crossing ID from VMM
    * @param tdc tdc value from VMM
    */
   double timestamp_ns(uint64_t trigger, uint16_t bc, uint16_t tdc);
 
-  /** @brief generate absolute integer-valued timestamp
+  /** \brief generate absolute integer-valued timestamp
    * @param trigger trigger timestamp from SRS header
    * @param bc bunc crossing ID from VMM
    * @param tdc tdc value from VMM
@@ -61,7 +61,7 @@ class SRSTime {
 
   double chip_time_ns(uint16_t bc, uint16_t tdc) const;
 
-  // @brief prints out time configuration
+  // \brief prints out time configuration
   std::string debug() const;
 
 private:

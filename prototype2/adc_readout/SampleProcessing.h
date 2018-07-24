@@ -16,7 +16,7 @@
 #include <memory>
 #include <vector>
 
-/// @brief For keeping track of where the time stamp originates in oversampled
+/// \brief For keeping track of where the time stamp originates in oversampled
 /// data.
 enum class TimeStampLocation {
   Start,
@@ -24,7 +24,7 @@ enum class TimeStampLocation {
   End,
 };
 
-/// @brief Contains data that is to be serialized into a flatbuffer.
+/// \brief Contains data that is to be serialized into a flatbuffer.
 struct ProcessedSamples {
   ProcessedSamples() = default;
   ProcessedSamples(size_t NrOfSamples)
@@ -36,7 +36,7 @@ struct ProcessedSamples {
   std::vector<std::uint64_t> TimeStamps;
 };
 
-/// @brief Selects the Start, End or a midpoint between them (based on Location)
+/// \brief Selects the Start, End or a midpoint between them (based on Location)
 /// and returns that time point as nanoseconds.
 /// @param[in] Start Time stamp of first sample.
 /// @param[in] End Time stamp of last sample.
@@ -46,35 +46,35 @@ std::uint64_t CalcSampleTimeStamp(RawTimeStamp const &Start,
                                   RawTimeStamp const &End,
                                   TimeStampLocation const Location);
 
-/// @brief Does processing of individual samples before serialisation.
+/// \brief Does processing of individual samples before serialisation.
 /// Implements oversampling functionality, i.e. taking the mean of x number of
 /// samples.
 class ChannelProcessing {
 public:
   ChannelProcessing() = default;
-  /// @brief Called with the data that is to be processed.
+  /// \brief Called with the data that is to be processed.
   /// @note Does not actually check that it is called with data from the correct
   /// channel. The caller has to make sure that this is the case.
   /// @param[in] Samples The datamodule (sampling run) to proccess.
   /// @return Processed (oversampled) data sample points.
   ProcessedSamples processModule(SamplingRun const &Samples);
 
-  /// @brief Sets oversampling factor. Default on instantiation is 1, i.e. no
+  /// \brief Sets oversampling factor. Default on instantiation is 1, i.e. no
   /// oversampling.
   void setMeanOfSamples(int NrOfSamples);
 
-  /// @brief Get oversampling factor.
+  /// \brief Get oversampling factor.
   int getMeanOfSamples() const { return MeanOfNrOfSamples; };
 
-  /// @brief Sets the time stamp location for overasmpled samples.
+  /// \brief Sets the time stamp location for overasmpled samples.
   /// @param[in] Location Three different values are possible; Start, Middle,
   /// End.
   void setTimeStampLocation(TimeStampLocation Location);
 
-  /// @brief Get the time stamp location setting.
+  /// \brief Get the time stamp location setting.
   TimeStampLocation getTimeStampLocation() const { return TSLocation; };
 
-  /// @brief Resets the oversampling state.
+  /// \brief Resets the oversampling state.
   /// Should be called between the processing of non-contigous sample runs. Is
   /// called by ChannelProcessing::setMeanOfSamples().
   void reset();
@@ -87,7 +87,7 @@ private:
   TimeStampLocation TSLocation{TimeStampLocation::Middle};
 };
 
-/// @brief Handles processing of sample data, serialization and transmission
+/// \brief Handles processing of sample data, serialization and transmission
 /// (prouction) to a Kafka broker.
 class SampleProcessing : public AdcDataProcessor {
 public:
@@ -97,7 +97,7 @@ public:
   SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string const &Name);
   ~SampleProcessing() = default;
 
-  /// @brief Called to actually process, serialise and transmit the (already)
+  /// \brief Called to actually process, serialise and transmit the (already)
   /// parsed data.
   /// @note Will NOT concatenate sample runs from the same channel. Samples from
   /// each data module in Data will be put in a seperate flatbuffer.
@@ -116,7 +116,7 @@ protected:
       {TimeStampLocation::End, 3}};
   std::string AdcName;
 
-  /// @brief Does the actual serialisation and transmission of the data.
+  /// \brief Does the actual serialisation and transmission of the data.
   /// @note Should only be called by SampleProcessing::processPacket().
   virtual void serializeAndTransmitData(ProcessedSamples const &Data);
   std::uint64_t MessageCounter{0};

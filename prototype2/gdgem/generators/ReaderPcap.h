@@ -16,14 +16,14 @@
 
 class ReaderPcap {
 public:
-  /** @brief construct a reader for a specific file
+  /** \brief construct a reader for a specific file
    * @param filename name of pcap file
    */
   ReaderPcap(std::string filename);
 
   ~ReaderPcap();
 
-  /* @brief read data from a packet into user specified buffer
+  /* \brief read data from a packet into user specified buffer
    * @param buffer user allocated buffer, must be at least bufferlen bytes
    * @param bufferlen length in bytes
    */

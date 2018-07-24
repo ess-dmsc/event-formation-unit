@@ -25,6 +25,6 @@ struct Hit {
   strip_type strip{0};
   adc_type adc{0};
 
-  // @brief prints values for debug purposes
+  // \brief prints values for debug purposes
   std::string debug() const;
 };

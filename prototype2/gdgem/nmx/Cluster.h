@@ -18,7 +18,7 @@ struct Cluster {
 
   int16_t plane_id {-1};
 
-  /** @brief adds hit to event's plane
+  /** \brief adds hit to event's plane
    * @param hit to be added
    */
   void insert_hit(const Hit &hit);
@@ -49,7 +49,7 @@ struct Cluster {
   double time_overlap(const Cluster& other) const;
   bool time_touch(const Cluster& other) const;
 
-  /** @brief analyzes particle track
+  /** \brief analyzes particle track
    * @param weighted determine entry strip using weighted average
    * @param max_timebins maximum number of timebins to consider for upper
    * uncertainty
@@ -63,11 +63,11 @@ struct Cluster {
   int16_t uncert_lower{-1}; // strip span of hits in latest timebin
   int16_t uncert_upper{-1}; // strip span of hits in latest few timebins
 
-  // @brief returns calculated and rounded entry strip number for pixid
+  // \brief returns calculated and rounded entry strip number for pixid
   uint32_t utpc_center_rounded() const;
 
 
-  // @brief prints values for debug purposes
+  // \brief prints values for debug purposes
   std::string debug() const;
 
 };

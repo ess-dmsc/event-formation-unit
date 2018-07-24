@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Sample processing of the ADC data.
+ *  \brief Sample processing of the ADC data.
  */
 
 #include "SampleProcessing.h"

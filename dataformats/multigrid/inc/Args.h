@@ -13,7 +13,7 @@
 
 class Args {
 public:
-  /** @brief constructor for program arguments parsed via getopt_long()
+  /** \brief constructor for program arguments parsed via getopt_long()
    * @param argc Argument count - typically taken from main()
    * @param argv Argument array - typically taken from main()
    */

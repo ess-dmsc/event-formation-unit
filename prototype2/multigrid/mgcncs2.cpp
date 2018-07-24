@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief CSPEC Detector implementation
+ *  \brief CSPEC Detector implementation
  */
 
 #include <common/Detector.h>

@@ -56,17 +56,17 @@ public:
 
   ~IDEASData() {}
 
-  /** @brief parse a binary payload buffer, return number of data elements
+  /** \brief parse a binary payload buffer, return number of data elements
    */
   int parse_buffer(const char *buffer, int size);
 
-  /** @brief Section 2.4.5 page 15 */
+  /** \brief Section 2.4.5 page 15 */
   int parse_trigger_time_data_packet(const char *buffer);
 
-  /** @brief Section 2.4.3 page 12 */
+  /** \brief Section 2.4.3 page 12 */
   int parse_single_event_pulse_height_data_packet(const char *buffer);
 
-  /** @brief Section 2.4.3 page 12 */
+  /** \brief Section 2.4.3 page 12 */
   int parse_multi_event_pulse_height_data_packet(const char *buffer);
 
   struct SoNDeData data[500];

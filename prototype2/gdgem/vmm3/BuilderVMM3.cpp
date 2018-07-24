@@ -1,4 +1,4 @@
-/** Copyright (C) 2016 - 2018 European Spallation Source ERIC */
+/** Copyright (C) 2016-2018 European Spallation Source ERIC */
 
 #include <gdgem/vmm3/BuilderVMM3.h>
 #include <gdgem/clustering/DoroClusterer.h>

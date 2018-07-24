@@ -18,11 +18,11 @@
 
 class SoNDeGeometry {
 public:
-  /** @brief Create a SoNDe Geometry based on number of columns, grid
+  /** \brief Create a SoNDe Geometry based on number of columns, grid
    */
   SoNDeGeometry() {}
 
-  /** @brief returns the maximum available pixelid for this geometry
+  /** \brief returns the maximum available pixelid for this geometry
    */
   int getmaxpixelid() { return essgeometry.max_pixel(); }
 
@@ -31,7 +31,7 @@ public:
     return getdetectorpixelid(module, (asic << 6) + (channel & 0x3f));
   }
 
-  /** @brief Return the global detector pixel id from
+  /** \brief Return the global detector pixel id from
    */
   inline int getdetectorpixelid(int module, int asch) {
     int asic = asch >> 6;
