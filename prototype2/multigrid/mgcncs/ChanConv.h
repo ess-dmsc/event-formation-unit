@@ -1,10 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Lookup (calibration) tables for conversion of CSPEC adc to wire/grid
- * number
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Lookup (calibration) tables for conversion of CSPEC adc to wire/grid number
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

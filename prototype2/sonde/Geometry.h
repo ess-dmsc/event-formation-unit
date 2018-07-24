@@ -1,12 +1,14 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Specifying the geometry of a SoNDe Detector, provides
- * a calculation of global detector pixel id
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Specifying the geometry of a SoNDe Detector, provides a calculation of global detector pixel id
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
+
 #include <cinttypes>
 #include <common/Trace.h>
 #include <logical_geometry/ESSGeometry.h>

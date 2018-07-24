@@ -1,3 +1,9 @@
+/// Copyright (C) 2017-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
 
 #ifndef MULTIBLADE_PROCESSINFO_H
 #define MULTIBLADE_PROCESSINFO_H

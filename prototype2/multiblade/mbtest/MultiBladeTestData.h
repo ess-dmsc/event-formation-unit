@@ -1,9 +1,13 @@
-//
-// Test data to use with unit testing of multiBladeEventBuilder.
-//
-// Author: Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
-// e-mail: soegaard@nbi.dk
-
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Test data to use with unit testing of multiBladeEventBuilder.
+///
+/// \author Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
+/// e-mail: soegaard@nbi.dk
+//===----------------------------------------------------------------------===//
 /// GCOVR_EXCL_START
 
 #ifndef MULTIBLADE_MULTIBLADETESTDATA_H_H

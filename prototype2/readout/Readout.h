@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief ESS Readout System Data definitions and parsing functions
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief ESS Readout System Data definitions and parsing functions
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

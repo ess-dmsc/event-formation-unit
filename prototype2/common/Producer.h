@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Wrapper class for sending data to Kafka broker
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Wrapper class for sending data to Kafka broker
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

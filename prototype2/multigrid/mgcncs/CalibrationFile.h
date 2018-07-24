@@ -1,10 +1,12 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Load CSPEC wire and grid calibratyion from file
- *  @todo no array bounds checking is done for buffers passed as ptrs.
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Load CSPEC wire and grid calibratyion from file
+/// \todo no array bounds checking is done for buffers passed as ptrs.
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

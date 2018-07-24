@@ -1,11 +1,14 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Factory and Class for dynamically loadable detector types
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Factory and Class for dynamically loadable detector types
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
+
 #include <CLI11.hpp>
 #include <atomic>
 #include <common/NewStats.h>

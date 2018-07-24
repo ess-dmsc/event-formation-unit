@@ -1,10 +1,12 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class for registering stat counters and associating them
- *  with names. All counters are int64_t
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class for registering stat counters and associating them
+/// with names. All counters are int64_t
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

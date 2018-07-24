@@ -1,12 +1,14 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class to receive SoNDe data from IDEAS readout
- *
- *  Data formats based on IDEAS Readout and Control Packet Protocol Reference
- * DRAFT Reference : IDE-REP-Ref-V1.7 Date : 2017-05-23
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class to receive SoNDe data from IDEAS readout
+///
+/// Data formats based on IDEAS Readout and Control Packet Protocol Reference
+/// DRAFT Reference : IDE-REP-Ref-V1.7 Date : 2017-05-23
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

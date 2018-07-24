@@ -1,11 +1,14 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class to receive and generate CSPEC detector readout
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class to receive and generate CSPEC detector readout
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
+
 #include <common/DataSave.h>
 #include <multigrid/mgcncs/ChanConv.h>
 #include <multigrid/mgcncs/MultigridGeometry.h>
@@ -61,7 +64,7 @@ public:
 
   ~CSPECData() {
     if (data != nullptr) {
-      delete[] data; 
+      delete[] data;
     }
   }
 

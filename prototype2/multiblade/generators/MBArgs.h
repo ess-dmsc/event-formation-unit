@@ -1,7 +1,13 @@
-//
-// Copied from NMXArgs.h
-//
+/// Copyright (C) 2017-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// Copied from NMXArgs.h
+///
+//===----------------------------------------------------------------------===//
 /// GCOVR_EXCL_START
+
 #include <string>
 
 #pragma once

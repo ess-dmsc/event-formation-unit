@@ -1,13 +1,14 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Multigrid electronics
- * Handles mappings between (digitizere, channels) and (x,y,z) coordinates
- *
- * This currently (18/1 2018) is compatible with MG.24, MG.24.T and MG.CNCS
- * detector demonstrators although not all channels may be in use
- */
+/// Copyright (C) 2017-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Multigrid electronics Handles mappings between (digitizere, channels) and (x,y,z) coordinates
+///
+/// This currently (18/1 2018) is compatible with MG.24, MG.24.T and MG.CNCS
+/// detector demonstrators although not all channels may be in use
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

@@ -1,6 +1,9 @@
-//
-// Created by troels on 6/2/17.
-//
+/// Copyright (C) 2017-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
 /// GCOVR_EXCL_START
 
 #ifndef MBUDPGEN_TEXTFILE_H

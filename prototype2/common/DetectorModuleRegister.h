@@ -1,13 +1,16 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- * @brief Header for a system for registering detector modules when statically
- * linking the modules
- * to the EFU executable.
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Header for a system for registering detector modules when statically
+/// linking the modules
+/// to the EFU executable.
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
+
 #include <common/Detector.h>
 #include <string>
 
