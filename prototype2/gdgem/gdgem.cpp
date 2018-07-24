@@ -1,5 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// plugin for gdgem detector data reception, parsing and event formation
+///
+//===----------------------------------------------------------------------===//
 #include <dataformats/multigrid/inc/json.h>
 
 #include <libs/include/SPSCFifo.h>

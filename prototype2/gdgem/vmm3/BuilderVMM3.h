@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class for creating NMX hits from SRS/VMM data
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class for creating NMX hits from SRS/VMM data
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 #include <gdgem/nmx/AbstractBuilder.h>

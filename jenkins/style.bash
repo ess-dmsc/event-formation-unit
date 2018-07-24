@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#cmd=${1:-all}
+
+
 function err()
 {
     ERRORS=$((ERRORS + 1))
@@ -8,13 +11,12 @@ function err()
 
 function copyright()
 {
-    echo Checking for Copyright notice
+  echo Checking for Copyright notice
 
-    FILES=$(find . -name "*.cpp" -o -name "*.c" -o -name "*.h")
-    for file in $FILES; 
+  files=$(find . -name "*.cpp" -o -name "*.c" -o -name "*.h" -o -name "*.hpp")
+    for file in $files;
     do
         head -n 1 $file | grep "Copyright" &>/dev/null || err "No copyright in $file"
-        head -n 1 $file | grep "Copyright" | grep "2017" &>/dev/null || err "Copyright missing 2017 in $file"
     done
     echo
 }
@@ -23,10 +25,10 @@ function doxygen()
 {
     echo Checking for Doxygen comments
 
-    FILES=$(find . -name "*.h")
-    for file in $FILES; 
+  files=$(find . -name "*.h")
+    for file in $files;
     do
-        grep "@file" $file &>/dev/null || err "Missing @file description in $file"
+        grep '/// \\file' $file &>/dev/null || err "Missing /// \file description in $file"
     done
     echo
 }

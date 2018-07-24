@@ -1,10 +1,12 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief class to find peaks from histogram data and generate
- * conversion tables for adc to wire and grid ids
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// class to find peaks from histogram data and generate
+/// conversion tables for adc to wire and grid ids
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
