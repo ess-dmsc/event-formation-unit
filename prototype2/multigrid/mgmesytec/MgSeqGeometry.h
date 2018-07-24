@@ -5,7 +5,7 @@
  *  @brief Multigrid electronics
  * Handles mappings between (digitizere, channels) and (x,y,z) coordinates
  *
- * This currently (18/1 2018) is compatible with MG.24, MG.24.T and MG.CNCS
+ * This currently (18/8 2018) is compatible with MG.Saquoia
  * detector demonstrators although not all channels may be in use
  */
 
@@ -19,6 +19,7 @@
 class MgSeqGeometry {
 private:
   uint32_t module_select {0}; // 1 == 20 wires, 0 == 16 in z
+  bool swap_wires_on {false};
 
 public:
 
@@ -27,11 +28,25 @@ public:
     XTRACE(DATA, ALW, "Select detector module: %d\n", module);
     module_select = module;
   }
+
+  void swap_on(bool swap) {
+    swap_wires_on = swap;
+  }
+
   /** @brief identifies which channels are wires, from drawing by Anton */
   inline bool isWire(int channel) { return (channel <= 79) && (channel >= 0); }
 
   /** @brief identifies which channels are grids, from drawing by Anton */
   inline bool isGrid(int channel) { return (channel >= 80) && (channel < 128); }
+
+  inline void swap_wires(int& channel)
+  {
+    if (channel % 2 == 0) {
+      channel += 1;
+    } else {
+      channel -= 1;
+    }
+  }
 
   /** @brief return the x coordinate of the detector */
   inline int xcoord(int bus, int channel) {
@@ -39,6 +54,8 @@ public:
       XTRACE(DATA, WAR, "Getting xcoord() from non wire channel\n");
       return -1;
     }
+    if (swap_wires_on)
+      swap_wires(channel);
     // wire == channel, wires range from 0 - 79
     return (channel) / 20 + bus * 4;
   }
@@ -59,6 +76,8 @@ public:
       XTRACE(DATA, WAR, "Getting zcoord() from non wire channel\n");
       return -1;
     }
+    if (swap_wires_on)
+      swap_wires(channel);
     if (module_select == 1) {
       return 19 - (channel) % 20;
     } else {

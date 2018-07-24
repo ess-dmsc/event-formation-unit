@@ -20,8 +20,9 @@ public:
   enum class error { OK = 0, ESIZE, EHEADER, EUNSUPP };
 
   /// @
-  MesytecData(uint32_t module, std::string fileprefix = "") {
+  MesytecData(uint32_t module, bool swap_wires, std::string fileprefix = "") {
     MgMappings.select_module(module);
+    MgMappings.swap_on(swap_wires);
     dumptofile = !fileprefix.empty();
     if (dumptofile) {
       CsvFile = std::make_shared<DataSave>(fileprefix, 100000000);
