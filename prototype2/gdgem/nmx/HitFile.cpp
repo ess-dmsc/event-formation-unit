@@ -1,3 +1,10 @@
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
+
 #include <gdgem/nmx/HitFile.h>
 
 #define DATSET_NAME "gdgem_hits"

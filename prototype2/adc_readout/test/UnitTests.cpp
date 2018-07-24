@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Starts unit tests.
+ *  \brief Starts unit tests.
  */
 
 #include <gtest/gtest.h>

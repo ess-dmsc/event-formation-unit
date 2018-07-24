@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Base class for all unit tests - provides colored print using MESSAGE
- */
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Base class for all unit tests - provides colored print using MESSAGE
+///
+//===----------------------------------------------------------------------===//
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"

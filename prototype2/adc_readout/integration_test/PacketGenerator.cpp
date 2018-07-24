@@ -1,6 +1,9 @@
-//
-// Created by Jonas Nilsson on 2017-11-08.
-//
+/// Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
 
 #include "PacketGenerator.h"
 #include <cmath>
@@ -13,7 +16,7 @@ PacketGenerator::PacketGenerator(std::uint16_t OversamplingFactor) {
   if (not InStream.good()) {
     throw std::runtime_error("Could not read data packet template file.");
   }
-  
+
   InStream.seekg(0, std::ios::end);
   std::size_t FileSize = InStream.tellg();
   if (DataSize != FileSize) {

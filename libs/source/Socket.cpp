@@ -87,7 +87,7 @@ int Socket::send(void *buffer, int len) {
   if (ret < 0) {
     std::cout << "unable to send on socket" << std::endl;
     perror("send");
-    exit(1); /**< @todo a bit harsh maybe ? */
+    exit(1); /**< \todo a bit harsh maybe ? */
   }
 
   return ret;

@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2016-2018 European Spallation Source ERIC */
 
 #include <gdgem/vmm3/BuilderVMM3.h>
 #include <gdgem/clustering/DoroClusterer.h>
@@ -34,17 +34,18 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 	}
 }
 
-AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf,
-		size_t size) {
+AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size) {
+	geom_errors = 0;
 	parser_.receive(buf, size);
 	if (!parser_.stats.hits) {
+		XTRACE(PROCESS, DEB, "NO HITS after parse\n");
 		auto & stats = parser_.stats;
 		return AbstractBuilder::ResultStats(stats.hits, stats.errors,
 				geom_errors, stats.lostFrames, stats.badFrames,
 				stats.goodFrames);
 	}
+  XTRACE(PROCESS, DEB, "HITS after parse: %d\n", parser_.stats.hits);
 
-	geom_errors = 0;
 
 	if (dump_h5_) {
 		readout_file_->data.resize(parser_.stats.hits);
@@ -53,7 +54,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf,
 	uint32_t udp_timestamp_ns = parser_.srsHeader.udpTimeStamp
 			* time_intepreter_.internal_clock_period_ns();
 	//field fec id starts at 0
-	readout.fec = parser_.parserData.fecId+1;
+	readout.fec = parser_.parserData.fecId + 1; // TODO validte this!
 	for (unsigned int i = 0; i < parser_.stats.hits; i++) {
 		auto &d = parser_.data[i];
 		if (d.hasDataMarker) {
@@ -104,8 +105,9 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf,
 						complete_timestamp_ns, readout.fec, readout.chip_id,
 						readout.channel, readout.bcid, readout.tdc, readout.adc,
 						readout.over_threshold);
-
 			}
+		} else {
+			XTRACE(PROCESS, DEB, "No data marker in hit (increment counter?)\n");
 		}
 	}
 

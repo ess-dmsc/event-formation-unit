@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief ADC readout detector module.
+ *  \brief ADC readout detector module.
  */
 
 #include "AdcReadoutBase.h"

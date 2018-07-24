@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Simple peak finding implementation.
+ *  \brief Simple peak finding implementation.
  */
 
 #include "PeakFinder.h"

@@ -7,8 +7,8 @@
 #include <gdgem/vmm3/ParserVMM3.h>
 #include <string.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 
@@ -79,7 +79,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 		if (fcDiff) {
 			//printf("FC: curr: %d, expect: %d, diff: %" PRId64 "\n", srsHeader.frameCounter,
 			//		parserData.nextFrameCounter, fcDiff);
-			stats.lostFrames += fcDiff; /// @todo test
+			stats.lostFrames += fcDiff; /// \todo test
 			parserData.nextFrameCounter = srsHeader.frameCounter + 1;
 		} else {
 			parserData.nextFrameCounter++;

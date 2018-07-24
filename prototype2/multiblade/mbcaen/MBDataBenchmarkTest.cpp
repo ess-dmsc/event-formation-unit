@@ -7,7 +7,7 @@
 
 /** @file
  *
- *  @brief Reading null data
+ *  \brief Reading null data
  * File:
  */
 

@@ -1,13 +1,15 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- * @brief Contains readout data copied from Wireshark traces
- * for use in EventFormationTest
- *
- * Run16 was taken at IFE in Oslo in December 2017, the packets 1
- * to 16 are now the initial small reference dataset for NMX
- */
+/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Contains readout data copied from Wireshark traces
+/// for use in EventFormationTest
+///
+/// Run16 was taken at IFE in Oslo in December 2017, the packets 1
+/// to 16 are now the initial small reference dataset for NMX
+///
+//===----------------------------------------------------------------------===//
 
 std::vector<uint8_t >  Run16_pkt1 {
             0x0f, 0x3e, 0xd6, 0xf8, 0x56, 0x4d, /* ...>..VM */

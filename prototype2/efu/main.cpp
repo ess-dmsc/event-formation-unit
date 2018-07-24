@@ -75,7 +75,9 @@ int main(int argc, char *argv[]) {
   XTRACE(MAIN, ALW, "Event Formation Unit build: %s\n", EFU_STR(BUILDSTR));
 
   if (hwcheck.checkMTU(hwcheck.defaultIgnoredInterfaces) == false) {
-    XTRACE(MAIN, ERR, "MTU checks failed, exiting...\n");
+    XTRACE(MAIN, ERR, "MTU checks failed, for a quick fix, try\n");
+    XTRACE(MAIN, ERR, "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)\n");
+    XTRACE(MAIN, ERR, "exiting...\n");
     GLOG_ERR("MTU checks failed, exiting.");
     return 1;
   }

@@ -1,3 +1,12 @@
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief class for handling configuration and command line options
+///
+//===----------------------------------------------------------------------===//
+
 #include <string>
 
 class Args {

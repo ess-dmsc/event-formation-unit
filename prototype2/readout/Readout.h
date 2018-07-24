@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief ESS Readout System Data definitions and parsing functions
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief ESS Readout System Data definitions and parsing functions
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
@@ -25,7 +27,7 @@ public:
     uint16_t reserved;
   } __attribute__((packed));
 
-  /** @brief validate a readout buffer
+  /** \brief validate a readout buffer
    *  @param[in] buffer pointer to data
    *  @param[in] size length of buffer in bytes
    *  @return on success return 0, else -1

@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief CSPEC Detector implementation
+ *  \brief CSPEC Detector implementation
  */
 
 #include <common/Detector.h>
@@ -45,7 +45,7 @@ public:
   void input_thread();
   void processing_thread();
 
-  /** @todo figure out the right size  of the .._max_entries  */
+  /** \todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 1000;
   static const int eth_buffer_size = 9000;
   static const int kafka_buffer_size = 1000000;
@@ -67,7 +67,7 @@ private:
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t fifo_push_errors;
-    int64_t pad_a[5]; /**< @todo check alignment*/
+    int64_t pad_a[5]; /**< \todo check alignment*/
 
     // Processing Counters
     int64_t rx_readouts;

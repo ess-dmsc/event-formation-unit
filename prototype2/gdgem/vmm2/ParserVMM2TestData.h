@@ -1,10 +1,12 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Contains readout data copied from Wireshark traces
- * File: wireshark_VMM2_X_0_1_Y_14_15_FE55_11Gbq_col_MM_D300V_A544V.pcap
- */
+/// Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Contains readout data copied from Wireshark traces
+/// from file: wireshark_VMM2_X_0_1_Y_14_15_FE55_11Gbq_col_MM_D300V_A544V.pcap
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

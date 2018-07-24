@@ -77,7 +77,7 @@ int IDEASData::parse_buffer(const char *buffer, int size) {
 /** Parse data according to IDEAS documentation */
 int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
   static const int BYTES_PER_ENTRY = 5;
-  /**< @todo add check for minimum size */
+  /**< \todo add check for minimum size */
   uint8_t *datap = (uint8_t *)(buffer);
   int nentries = *datap;
   XTRACE(PROCESS, DEB, "Number of readout events in packet: %d\n", nentries);
@@ -119,7 +119,7 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
  */
 int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
   static const int BYTES_PER_ENTRY = 2;
-  /** @todo check minimum header length */
+  /** \todo check minimum header length */
   int nentries = ntohs(*(uint16_t *)(buffer + 5));
   XTRACE(PROCESS, DEB, "Number of readout events in packet: %d\n", nentries);
 
@@ -158,7 +158,7 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
 }
 
 /** Parse data according to IDEAS documentation
- * does not generate events, always return 0 @todo
+ * does not generate events, always return 0 \todo
  */
 int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
   static const int BYTES_PER_SAMPLE = 5;

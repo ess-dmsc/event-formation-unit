@@ -20,7 +20,7 @@ public:
     return ((x >> 16) | (x << 16));
   }
 
-  /// @fixme test this
+  /// \todo test this
   inline static uint16_t reversebits16(register uint16_t x) {
     uint32_t temp = reversebits32(x);
     return (temp >> 16);

@@ -1,10 +1,13 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Specifying the geometry of a Multi Grid Detector, provides
+/// a calculation of global detector pixel id
+///
+//===----------------------------------------------------------------------===//
 
-/** @file
- *
- *  @brief Specifying the geometry of a Multi Grid Detector, provides
- * a calculation of global detector pixel id
- */
 
 #pragma once
 #include <cinttypes>
@@ -15,27 +18,24 @@
 
 class MultiGridGeometry {
 public:
-  /** @brief Create a MG Geometry based on number of columns, grids and
-   * grid wire layout. All are input data
-   * @param panels Number of panels in detector
-   * @param modules Number of modules (columns) per panel
-   * @param grids Number of grids per module
-   * @param xwires Number of wires in the x-direction
-   * @param zwires Number of wires in the z-direction
-   */
+  /// \brief Create a MG Geometry based on number of columns, grids and
+  /// grid wire layout. All are input data
+  /// \param panels Number of panels in detector
+  /// \param modules Number of modules (columns) per panel
+  /// \param grids Number of grids per module
+  /// \param xwires Number of wires in the x-direction
+  /// \param zwires Number of wires in the z-direction
   MultiGridGeometry(int panels, int modules, int grids, int xwires, int zwires)
       : panls_(panels), mods_(modules), grids_(grids), xwires_(xwires),
         zwires_(zwires) {}
 
-  /** @brief returns the maximum available pixelid for this geometry
-   */
+  /// \brief returns the maximum available pixelid for this geometry
   int getmaxpixelid() { return xwires_ * zwires_ * grids_ * mods_ * panls_; }
 
-  /** @brief Return the global detector pixel id from wires and grids
-   *  @param panel Panel ID, from module id of readoutsystem
-   *  @param gridid Grid ID, calculated from adc values
-   *  @param wireid Wire ID , calculated from adc values
-   */
+  /// \brief Return the global detector pixel id from wires and grids
+  /// \param panel Panel ID, from module id of readoutsystem
+  /// \param gridid Grid ID, calculated from adc values
+  /// \param wireid Wire ID , calculated from adc values
   inline int getdetectorpixelid(int panel, int gridid, int wireid) {
     XTRACE(PROCESS, DEB, "panel %d, gridid %d, wireid %d\n", panel, gridid,
            wireid);
@@ -81,13 +81,13 @@ public:
     return pixelid;
   }
 
-  /** @brief return logical x-coordinate of a pixel */
+  /// \brief return logical x-coordinate of a pixel
   int getxcoord(int pixelid) { return (pixelid - 1) / (grids_ * zwires_) + 1; }
 
-  /** @brief return logical x-coordinate of a pixel */
+  /// \brief return logical x-coordinate of a pixel
   int getycoord(int pixelid) { return ((pixelid - 1) / zwires_) % grids_ + 1; }
 
-  /** @brief return logical x-coordinate of a pixel */
+  /// \brief return logical x-coordinate of a pixel
   int getzcoord(int pixelid) { return (pixelid - 1) % zwires_ + 1; }
 
 private:

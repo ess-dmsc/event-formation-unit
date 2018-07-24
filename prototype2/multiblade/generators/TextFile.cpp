@@ -1,7 +1,9 @@
-//
-// Created by troels on 6/2/17.
-//
-
+/// Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
 /// GCOVR_EXCL_START
 
 #include "TextFile.h"

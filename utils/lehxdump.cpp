@@ -1,7 +1,11 @@
-//
-//
-// Simple utility that reads binary data in 32 bit chunks in little endian
-// and prints it as big endian for human parseability
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Simple utility that reads binary data in 32 bit chunks in little endian
+/// and prints it as big endian for human parseability
+//===----------------------------------------------------------------------===//
 
 #include <cinttypes>
 #include <cstdio>

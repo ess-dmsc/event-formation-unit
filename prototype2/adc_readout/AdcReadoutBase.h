@@ -1,9 +1,12 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
+/// Copyright (C) 2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Adc readout detector class.
+///
+//===----------------------------------------------------------------------===//
 
-/** @file
- *
- *  @brief Adc readout detector class.
- */
 #pragma once
 
 #include "AdcBufferElements.h"
@@ -16,7 +19,7 @@
 #include <cstdint>
 #include <mutex>
 
-/// @brief Implements the code for the ADC detector module. Is a base of
+/// \brief Implements the code for the ADC detector module. Is a base of
 /// AdcReadout in order to simplify unit testing.
 class AdcReadoutBase : public Detector {
 public:
@@ -32,18 +35,18 @@ protected:
   using DataModulePtr = SpscBuffer::ElementPtr<SamplingRun>;
   using Queue = SpscBuffer::CircularBuffer<SamplingRun>;
 
-  /// @brief Implements the thread doing the socket communication.
+  /// \brief Implements the thread doing the socket communication.
   /// This function will return when Detector::runThreads is set to false.
   /// @note There is probably no performance benefit runnign this on a seperate
   /// thread.
   virtual void inputThread();
 
-  /// @brief The function that executes the code for parsing and processing the
+  /// \brief The function that executes the code for parsing and processing the
   /// sample data.
   /// This function will return when Detector::runThreads is set to false.
   virtual void processingThread(Queue &DataModuleQueue);
 
-  /// @brief Does on demand instatiation of Kafka producer.
+  /// \brief Does on demand instatiation of Kafka producer.
   /// Used in order to simplify unit testing.
   virtual std::shared_ptr<Producer> getProducer();
 
@@ -52,7 +55,7 @@ protected:
 
   std::vector<std::unique_ptr<Queue>> DataModuleQueues;
 
-  /// @brief Used to keeps track of the global counter provided by the ADC
+  /// \brief Used to keeps track of the global counter provided by the ADC
   /// hardware in order to figure out if a packet has been lost.
   std::uint16_t LastGlobalCount{0};
 
@@ -61,7 +64,7 @@ protected:
       {"Middle", TimeStampLocation::Middle},
       {"End", TimeStampLocation::End}};
 
-  /// @brief Counters that are used to store stats that are sent to Grafana.
+  /// \brief Counters that are used to store stats that are sent to Grafana.
   struct {
     std::int64_t current_ts_seconds = 0;
     std::int64_t input_bytes_received = 0;
