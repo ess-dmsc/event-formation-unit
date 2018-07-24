@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Trace macros with masks and levels
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Trace macros with masks and levels
+///
+//===----------------------------------------------------------------------===//
 
 #include <cstdio>
 #include <libgen.h>
@@ -53,8 +55,8 @@
 #define TRC_L_DEB 2
 // clang-format on
 
-/** @brief get rid of annoying warning
- * @todo See if there is a better solution than pragma
+/** \brief get rid of annoying warning
+ * \todo See if there is a better solution than pragma
  */
 #pragma GCC system_header
 

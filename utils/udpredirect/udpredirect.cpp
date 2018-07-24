@@ -1,3 +1,10 @@
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
+
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -20,22 +27,22 @@ int main(int argc, char *argv[]) {
 
     memset(&a, 0, sizeof(a));
     a.sin_family=AF_INET;
-    a.sin_addr.s_addr=inet_addr(argv[1]); 
+    a.sin_addr.s_addr=inet_addr(argv[1]);
     a.sin_port=htons(atoi(argv[2]));
 
     if( bind(os, (struct sockaddr *)&a, sizeof(a)) == -1) {
         printf("Can't bind our address (%s:%s)\n", argv[1], argv[2]);
-        exit(1); 
+        exit(1);
     }
 
     struct sockaddr_in destAddr;
     socklen_t destAddrLen = sizeof(destAddr);
     memset(&destAddr, 0, sizeof(destAddr));
-    if(argc==5) { 
+    if(argc==5) {
         printf("Setting output ip address and port number\n");
         destAddr.sin_family=AF_INET;
-        destAddr.sin_addr.s_addr = inet_addr(argv[3]); 
-        destAddr.sin_port = htons(atoi(argv[4])); 
+        destAddr.sin_addr.s_addr = inet_addr(argv[3]);
+        destAddr.sin_port = htons(atoi(argv[4]));
     }
 
     char buf[65535];
@@ -48,9 +55,9 @@ int main(int argc, char *argv[]) {
 
         if(n<=0) {
             continue;
-        } 
+        }
 
-        if(argc==3) { 
+        if(argc==3) {
             sendto(os, buf, n, 0, (struct sockaddr *)&sa, sn);
             printf("Case A: echo mode\n");
         } else {
@@ -63,4 +70,3 @@ int main(int argc, char *argv[]) {
         }
     }
 }
-

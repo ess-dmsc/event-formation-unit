@@ -1,6 +1,10 @@
-//
-// Created by soegaard on 8/25/17.
-//
+/// Copyright (C) 2017-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// /brief parser for multiblade data readout using Caen digitizers
+//===----------------------------------------------------------------------===//
 
 #pragma once
 #include <cstdint>

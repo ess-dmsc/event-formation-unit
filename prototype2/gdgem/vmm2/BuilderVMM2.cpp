@@ -36,7 +36,7 @@ AbstractBuilder::ResultStats BuilderVMM2::process_buffer(char *buf, size_t size)
   if (!parser_.elems)
     return AbstractBuilder::ResultStats(); // BUG, return error cunters
 
-  readout.fec = 1; /**< @todo not hardcode */
+  readout.fec = 1; /**< \todo not hardcode */
   readout.chip_id = static_cast<uint8_t >(parser_.srshdr.dataid & 0xf);
 
   geom_errors = 0;

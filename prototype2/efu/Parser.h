@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Command parser
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Command parser
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/EFUArgs.h>
 #include <map>
@@ -20,11 +22,11 @@ public:
   static const unsigned int max_command_size = 100;
   enum error { OK = 0, EUSIZE, EOSIZE, ENOTOKENS, EBADCMD, EBADARGS };
 
-  /** @brief Create parser with the currently fixed commands
+  /** \brief Create parser with the currently fixed commands
    */
   Parser(std::shared_ptr<Detector> detector, int &keep_running);
 
-  /** @brief used to register new commands with the Parser
+  /** \brief used to register new commands with the Parser
    *  @param cmd_name name of command
    *  @param function pointer to command implementation
    */
@@ -32,7 +34,7 @@ public:
 
   void clearCommands();
 
-  /** @brief parse a command
+  /** \brief parse a command
    *  @param[in] input char array holding command and its arguments
    *  @param[in] isize input size in bytes
    *  @param[out] output reply for the command

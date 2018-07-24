@@ -1,6 +1,9 @@
-//
-// Created by Jonas Nilsson on 2017-11-08.
-//
+/// Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
@@ -23,7 +26,7 @@ class UDPServer {
 public:
   UDPServer(std::uint16_t SrcPort, std::uint16_t DstPort);
   ~UDPServer();
-  
+
   bool IsOk() {return ConnectionOk;};
   bool TransmitPacket(const std::uint8_t *DataPtr, const std::uint32_t Size);
 private:
@@ -35,7 +38,7 @@ private:
   std::thread AsioThread;
   asio::ip::udp::socket Socket;
   asio::ip::udp::resolver Resolver;
-  
+
   void handleWrite(const asio::error_code &err, std::size_t BytesSent, BufferPtr Buffer);
   void handleResolve(const asio::error_code &Err, asio::ip::udp::resolver::iterator EndpointIter);
   void handleConnect(const asio::error_code &Err, asio::ip::udp::resolver::iterator EndpointIter);

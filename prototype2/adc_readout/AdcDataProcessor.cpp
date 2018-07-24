@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Utility code for processing ADC data.
+ *  \brief Utility code for processing ADC data.
  */
 
 #include "AdcDataProcessor.h"

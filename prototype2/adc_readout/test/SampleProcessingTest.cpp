@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Unit tests for the sample processing code (peak extraction and
+ *  \brief Unit tests for the sample processing code (peak extraction and
  * individual samples).
  */
 

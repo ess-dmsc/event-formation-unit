@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief flatbuffer serialization
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief flatbuffer serialization
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
@@ -12,19 +14,19 @@
 
 class FBSerializer {
 public:
-  /** @todo document */
+  /** \todo document */
   FBSerializer(size_t maxarraylength, Producer &prod);
 
-  /** @todo document */
+  /** \todo document */
   ~FBSerializer();
 
-  /** @todo document */
+  /** \todo document */
   int serialize(uint64_t time, uint64_t seqno, size_t entries, char **buffer);
 
-  /** @todo document */
+  /** \todo document */
   int addevent(uint32_t time, uint32_t pixel);
 
-  /** @todo document */
+  /** \todo document */
   int produce();
 
 private:

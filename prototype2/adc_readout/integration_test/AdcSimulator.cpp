@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Simple application for simulating chopper TDC and monitor event data production.
+ *  \brief Simple application for simulating chopper TDC and monitor event data production.
  */
 
 #include <fstream>

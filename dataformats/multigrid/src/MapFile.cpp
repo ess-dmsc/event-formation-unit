@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief simple histogram class
+ *  \brief simple histogram class
  */
 
 #include <MapFile.h>

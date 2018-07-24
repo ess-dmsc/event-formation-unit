@@ -1,16 +1,20 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Command line argument parser for cspecgen
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Command line argument parser for cspecgen
+///
+//===----------------------------------------------------------------------===//
 /// GCOVR_EXCL_START
+
 #pragma once
+
 #include <string>
 
 class DGArgs {
 public:
-  /** @brief constructor for program arguments parsed via getopt_long()
+  /** \brief constructor for program arguments parsed via getopt_long()
    * @param argc Argument count - typically taken from main()
    * @param argv Argument array - typically taken from main()
    */

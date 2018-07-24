@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief command line argument parser
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief command line argument parser
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
@@ -11,7 +13,7 @@
 
 class Args {
 public:
-  /** @brief constructor for program arguments parsed via getopt_long()
+  /** \brief constructor for program arguments parsed via getopt_long()
    * @param argc Argument count - typically taken from main()
    * @param argv Argument array - typically taken from main()
    */

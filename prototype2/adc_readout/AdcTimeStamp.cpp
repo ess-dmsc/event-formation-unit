@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief For doing time stamp calculations.
+ *  \brief For doing time stamp calculations.
  */
 
 #include "AdcTimeStamp.h"

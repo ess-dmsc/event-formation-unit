@@ -1,3 +1,7 @@
+/// Copyright (c) 2007-2010 Baptiste Lepilleur
+//===----------------------------------------------------------------------===//
+/// \file
+//===----------------------------------------------------------------------===//
 // clang-format off
 /// GCOVR_EXCL_START
 /*
@@ -2093,7 +2097,7 @@ JSON_API JSONCPP_OSTREAM& operator<<(JSONCPP_OSTREAM&, const Value& root);
  */
 #if JSON_USE_EXCEPTION
 
-// @todo <= add detail about condition in exception
+// \todo <= add detail about condition in exception
 # define JSON_ASSERT(condition)                                                \
   {if (!(condition)) {Json::throwLogicError( "assert json failed" );}}
 

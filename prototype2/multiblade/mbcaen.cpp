@@ -46,7 +46,7 @@ public:
 
   const char *detectorname();
 
-  /** @todo figure out the right size  of the .._max_entries  */
+  /** \todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 1000;
   static const int eth_buffer_size = 1600;
   static const int kafka_buffer_size = 1000000;
@@ -111,7 +111,7 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
   XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d\n",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries +
-                                                11); // @todo workaround
+                                                11); // \todo workaround
   assert(eth_ringbuf != 0);
 }
 
@@ -219,7 +219,7 @@ void MBCAEN::processing_thread() {
 
           auto dp = dat.at(i);
 
-          // @todo fixme remove - is an artifact of mbtext2udp
+          // \todo fixme remove - is an artifact of mbtext2udp
           if (dp.digi == UINT8_MAX && dp.chan == UINT8_MAX &&
               dp.adc == UINT16_MAX && dp.time == UINT32_MAX) {
             XTRACE(PROCESS, DEB, "Last point\n");

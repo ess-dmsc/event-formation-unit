@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/Hists.h> // @fixme
+#include <common/Hists.h> // \todo
 #include <multigrid/mgmesytec/DataParser.h>
 #include <multigrid/mgmesytec/TestData.h>
 #include <test/TestBase.h>

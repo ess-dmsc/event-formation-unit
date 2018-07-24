@@ -62,7 +62,7 @@ int DataSave::tofile(const char *fmt, ...) {
   int retlen = 0;
   va_list args;
   va_start(args, fmt);
-  /** @brief prevent buffer overrun, but data could be truncated */
+  /** \brief prevent buffer overrun, but data could be truncated */
   auto maxwritelen = BUFFERSIZE + MARGIN - bufferlen;
   int ret = vsnprintf(buffer + bufferlen, maxwritelen, fmt, args);
   va_end(args);

@@ -1,4 +1,12 @@
-/** Copyright (C) 2016 European Spallation Source */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief a simple counter class
+/// \todo check if this is actually in use, and where
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 class Counter {
