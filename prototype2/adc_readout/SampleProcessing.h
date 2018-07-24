@@ -1,9 +1,11 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Sample processing of the ADC data.
- */
+/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Sample processing of the ADC data.
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

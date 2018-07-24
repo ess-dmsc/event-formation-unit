@@ -1,9 +1,11 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Code for testing the UDP interface to the ADC detector module.
- */
+/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Code for testing the UDP interface to the ADC detector module.
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

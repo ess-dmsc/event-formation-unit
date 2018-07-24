@@ -1,13 +1,14 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief API for getting and comparing version numbers
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief API for getting and comparing version numbers
+///
+//===----------------------------------------------------------------------===//
 
 #define STRINGIFY(x) #x
 #define EFU_STR(x) STRINGIFY(x)
-//#define EFU_STR(x) #X
 
 #include <cassert>
 #include <common/version_num.h>

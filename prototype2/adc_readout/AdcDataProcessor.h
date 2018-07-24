@@ -1,9 +1,11 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Some general utility code for implementing ADC data processing.
- */
+/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Some general utility code for implementing ADC data processing.
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

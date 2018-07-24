@@ -1,28 +1,30 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief For doing time stamp calculations.
- */
+/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief For doing time stamp calculations.
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
 #include <cstdint>
 #include <netinet/in.h>
 
-/// @brief Maps to the timestamps as received from (and used by) the ADC
+/// \brief Maps to the timestamps as received from (and used by) the ADC
 /// hardware.
 struct RawTimeStamp {
   RawTimeStamp() = default;
   RawTimeStamp(std::uint32_t Sec, std::uint32_t SecFrac)
       : Seconds(Sec), SecondsFrac(SecFrac) {}
 
-  /// @brief Number of seconds since EPICS epoch (1980-01-01 00:00).
+  /// \brief Number of seconds since EPICS epoch (1980-01-01 00:00).
   /// This value is provided originally by the MRF hardware.
-  /// @note The epoch might change in the future.
+  /// \note The epoch might change in the future.
   std::uint32_t Seconds{0};
 
-  /// @brief Number of clock cycles of the timing hardware clock divided by two.
+  /// \brief Number of clock cycles of the timing hardware clock divided by two.
   // This value resets to zero once every second and has a maximum value of ≈44
   // million.
   // @note It is possible that in future systems, the clock frequency will not

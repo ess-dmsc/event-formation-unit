@@ -1,9 +1,11 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Simple peak finding algorithm implementation header.
- */
+/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Simple peak finding algorithm implementation header.
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

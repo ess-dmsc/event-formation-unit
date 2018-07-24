@@ -1,9 +1,11 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Circular buffer based on a lock less queue.
- */
+/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Circular buffer based on a lock less queue.
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

@@ -1,9 +1,12 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
+/// Copyright (C) 2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Adc readout detector class.
+///
+//===----------------------------------------------------------------------===//
 
-/** @file
- *
- *  @brief Adc readout detector class.
- */
 #pragma once
 
 #include "AdcBufferElements.h"
