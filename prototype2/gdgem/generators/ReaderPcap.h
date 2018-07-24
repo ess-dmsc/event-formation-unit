@@ -1,13 +1,15 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Wrapper class for reading UDP data from wireshark pcap files
- * one packet at a time.
- */
- /// GCOVR_EXCL_START
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Wrapper class for reading UDP data from wireshark pcap files
+/// one packet at a time.
+//===----------------------------------------------------------------------===//
+/// GCOVR_EXCL_START
 
 #pragma once
+
 #include <cstdint>
 #include <pcap.h>
 #include <string>

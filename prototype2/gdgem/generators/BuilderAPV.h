@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class for creating NMX hits from h5 data
- */
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class for creating NMX hits from h5 data
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

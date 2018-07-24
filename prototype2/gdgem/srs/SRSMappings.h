@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class for NMX plane ID & strip mappings
- */
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class for NMX plane ID & strip mappings
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

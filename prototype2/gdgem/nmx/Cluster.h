@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Classes for NMX event formation
- */
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Classes for NMX event formation
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

@@ -1,11 +1,15 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Command line argument parser for nmxgen
- */
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Command line argument parser for nmxgen
+///
+//===----------------------------------------------------------------------===//
 /// GCOVR_EXCL_START
+
 #pragma once
+
 #include <string>
 
 class NMXArgs {

@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Hit struct for NMX event formation
- */
+/// Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Hit struct for NMX event formation
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
@@ -26,4 +28,3 @@ struct Hit {
   // @brief prints values for debug purposes
   std::string debug() const;
 };
-

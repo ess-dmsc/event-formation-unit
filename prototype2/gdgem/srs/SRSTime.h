@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class for NMX timestemp interpretation
- */
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class for NMX timestemp interpretation
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

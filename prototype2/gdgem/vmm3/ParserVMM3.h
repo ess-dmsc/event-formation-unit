@@ -1,10 +1,12 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class to receive and generate Gd-GEM detector readout
- * from VMM3 ASICS via the SRS readout system
- */
+/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class to receive and generate Gd-GEM detector readout
+/// from VMM3 ASICS via the SRS readout system
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

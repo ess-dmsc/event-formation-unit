@@ -1,12 +1,14 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Wrapper class for reading VMM data from HDF5 files
- */
+/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Wrapper class for reading VMM data from HDF5 files
+///
+//===----------------------------------------------------------------------===//
 /// GCOVR_EXCL_START
-#ifndef READER_VMM_H
-#define READER_VMM_H
+
+#pragma once
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
@@ -45,6 +47,4 @@ private:
 
   std::vector<uint32_t> data;
 };
-
-#endif
 /// GCOVR_EXCL_STOP
