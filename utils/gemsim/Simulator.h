@@ -1,10 +1,11 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Simulator/Generator for Gd-GEM
- */
-
+/// Copyright (C) 2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Simulator/Generator for Gd-GEM
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

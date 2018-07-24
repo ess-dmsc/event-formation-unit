@@ -1,4 +1,12 @@
-/** Copyright (C) 2016 European Spallation Source */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief template for a more generic counter class
+/// \todo check if this is in use
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 template <class T> class StatCounter {

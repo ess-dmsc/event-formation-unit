@@ -1,11 +1,13 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Implements a command server. The server supports multiple
- * clients, and is of type request-response. A client request is
- * handled synchronously to completion before servring next request.
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// Implements a command server. The server supports multiple
+/// clients, and is of type request-response. A client request is
+/// handled synchronously to completion before servring next request.
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 #include <algorithm>

@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Loads detector plugins (shared objects)
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Loads detector plugins (shared objects)
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 #include <CLI11.hpp>

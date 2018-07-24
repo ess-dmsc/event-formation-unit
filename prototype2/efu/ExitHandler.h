@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class to register exit handlers for program termination
- */
+/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class to register exit handlers for program termination
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 #include <common/Trace.h>
@@ -17,7 +19,7 @@ public:
   };
   /** @brief constructor does nothing */
   static void InitExitHandler();
-  
+
   static Exit HandleLastSignal();
 
 private:

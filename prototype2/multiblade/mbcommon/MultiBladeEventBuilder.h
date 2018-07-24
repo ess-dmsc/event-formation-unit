@@ -1,4 +1,4 @@
-/*! \mainpage Process the raw data from the Multi-blade detector.
+/*! \brief Process the raw data from the Multi-blade detector.
  *
  * This class processes data-points from one cassette of the multi-blade
  * detector.
