@@ -129,11 +129,9 @@ bool EFUArgs::parseAffinityStrings(
 }
 
 void EFUArgs::printSettings() {
-
   // clang-format off
   XTRACE(INIT, ALW, "Starting event processing pipeline2 with main properties:\n");
   XTRACE(INIT, ALW, "  Detector:                 %s\n",    DetectorName.c_str());
-  XTRACE(INIT, ALW, "  Config file:              %s\n",    EFUSettings.ConfigFile.c_str());
   XTRACE(INIT, ALW, "  Rx UDP Socket:            %s:%d\n",
          EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
   XTRACE(INIT, ALW, "  Minimum required MTU      %d\n", EFUSettings.MinimumMTU);

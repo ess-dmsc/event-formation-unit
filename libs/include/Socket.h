@@ -34,6 +34,9 @@ public:
   /// Attempt to specify the socket receive and transmit buffer sizes (for performance)
   int setBufferSizes(int sndbuf, int rcvbuf);
 
+  /// Get tx and rx buffer sizes
+  void getBufferSizes(int & sendBuffer, int & receiveBuffer);
+
   /// Print the current values for receive and trasmit buffer sizes
   void printBufferSizes(void);
 

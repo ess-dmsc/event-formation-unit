@@ -50,6 +50,7 @@ add_subdirectory(multigrid)
 add_subdirectory(sonde)
 add_subdirectory(udp)
 add_subdirectory(adc_readout)
+add_subdirectory(tools)
 
 add_custom_target(runefu
     COMMAND efu "-d" "../modules/mgmesytec" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"

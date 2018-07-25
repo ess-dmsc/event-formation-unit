@@ -3,15 +3,15 @@
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>
-#include <gdgem/generators/NMXArgs.h>
-#include <gdgem/generators/ReaderPcap.h>
+#include <tools/PcapArgs.h>
+#include <tools/ReaderPcap.h>
 #include <libs/include/Socket.h>
 #include <string.h>
 #include <string>
 #include <unistd.h>
 /// GCOVR_EXCL_START
 int main(int argc, char *argv[]) {
-  NMXArgs opts(argc, argv);
+  PcapArgs opts(argc, argv);
   char buffer[10000];
 
   Socket::Endpoint local("0.0.0.0", 0);
