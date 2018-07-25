@@ -52,26 +52,3 @@ set(nmxgen_hits_INC
     NMXArgs.h
     )
 create_executable(nmxgen_hits)
-
-#=============================================================================
-# PCAP generator
-#=============================================================================
-
-find_package(PCAP)
-if(PCAP_FOUND)
-  set(nmxgen_pcap_SRC
-      nmxgen_pcap.cpp
-      ReaderPcap.cpp
-      NMXArgs.cpp
-      )
-  set(nmxgen_pcap_INC
-      ReaderPcap.h
-      NMXArgs.h
-      )
-  set(nmxgen_pcap_LIB
-      ${PCAP_LIBRARY}
-      )
-  create_executable(nmxgen_pcap)
-else()
-  message(STATUS "*** Unable to compile gennmxpcap as libpcap was not found.")
-endif()
