@@ -17,12 +17,28 @@ Socket::Socket(Socket::type stype) {
 }
 
 int Socket::setBufferSizes(int sndbuf, int rcvbuf) {
-  int res = 0;
-  if (sndbuf)
-    res += setSockOpt(SO_SNDBUF, &sndbuf, sizeof(sndbuf));
-  if (rcvbuf)
-    res += setSockOpt(SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
-  return res;
+  int ok{true};
+  int res{0};
+  if (sndbuf) {
+    if ((res = setSockOpt(SO_SNDBUF, &sndbuf, sizeof(sndbuf))) < 0) {
+      ok = false;
+    }
+  }
+  if (rcvbuf) {
+    if ((res = setSockOpt(SO_RCVBUF, &rcvbuf, sizeof(rcvbuf))) < 0) {
+      ok = false;
+    }
+  }
+  if (!ok) {
+    return -1;
+  } else {
+    return 0;
+  }
+}
+
+void Socket::getBufferSizes(int & sendBuffer, int & receiveBuffer) {
+  sendBuffer = getSockOpt(SO_SNDBUF);
+  receiveBuffer = getSockOpt(SO_RCVBUF);
 }
 
 void Socket::printBufferSizes(void) {
