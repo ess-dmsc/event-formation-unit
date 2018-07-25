@@ -37,6 +37,8 @@ set(mgmesytec_INC
   ../common/HistSerializer.h
   ../common/ReadoutSerializer.h
   mgmesytec/DataParser.h
+  mgmesytec/MgSeqGeometry.h
+  mgmesytec/MgGeometry.h
   )
 create_module(mgmesytec)
 
@@ -112,6 +114,8 @@ set(MGMesytecDataTest_INC
   ../common/Producer.h
   mgmesytec/DataParser.h
   mgmesytec/TestData.h
+  mgmesytec/MgSeqGeometry.h
+  mgmesytec/MgGeometry.h
   )
 create_test_executable(MGMesytecDataTest)
 

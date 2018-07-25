@@ -67,12 +67,12 @@ void MesytecData::setSpoofHighTime(bool spoof) {
   spoof_high_time = spoof;
 }
 
-void MesytecData::setWireThreshold(int low, int high) {
+void MesytecData::setWireThreshold(uint16_t low, uint16_t high) {
   wireThresholdLo = low;
   wireThresholdHi = high;
 }
 
-void MesytecData::setGridThreshold(int low, int high) {
+void MesytecData::setGridThreshold(uint16_t low, uint16_t high) {
   gridThresholdLo = low;
   gridThresholdHi = high;
 }
@@ -83,10 +83,9 @@ uint32_t MesytecData::getPixel() {
     return 0;
   }
 
-  int x = MgMappings.xcoord(Bus, Wire);
-  int y = MgMappings.ycoord(Grid);
-  int z = MgMappings.zcoord(Wire);
-  return Geometry.pixel3D(x, y, z);
+  return Geometry.pixel3D(MgMappings.x(Bus, Wire),
+                          MgMappings.y(Bus, Grid),
+                          MgMappings.z(Bus, Wire));
 }
 
 uint32_t MesytecData::getTime() {

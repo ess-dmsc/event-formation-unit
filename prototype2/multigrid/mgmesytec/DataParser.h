@@ -28,8 +28,8 @@ public:
   uint32_t getTime();  // \todo (too) simple implm. but agreed for now
 
   void setSpoofHighTime(bool spoof);
-  void setWireThreshold(int low, int high);
-  void setGridThreshold(int low, int high);
+  void setWireThreshold(uint16_t low, uint16_t high);
+  void setGridThreshold(uint16_t low, uint16_t high);
 
   /** \brief parse a binary payload buffer, return number of data element
    * \todo Uses NMXHists  - refactor and move ?
@@ -55,8 +55,8 @@ public:
 private:
   bool ExternalTrigger{false};
   uint8_t Bus;
-  uint32_t Wire{0}; // initial alg.: wire with max adc
-  uint32_t Grid{0}; // initial alg.: grid with max adc
+  uint16_t Wire{0}; // initial alg.: wire with max adc
+  uint16_t Grid{0}; // initial alg.: grid with max adc
 
   uint32_t LowTime{0};
   uint32_t PreviousLowTime{0};
