@@ -18,7 +18,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-class MG24Detector : public MgGeometry {
+class MG25Geometry : public MgGeometry {
 private:
   uint32_t module_select = 0; // 1 == 20 wires, 0 == 16 in z
 

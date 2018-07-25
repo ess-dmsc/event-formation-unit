@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <libs/include/TSCTimer.h>
-#include <multigrid/mgmesytec/MG24Detector.h>
+#include <multigrid/mgmesytec/MG24Geometry.h>
 #include <test/TestBase.h>
 
 class MG24DetectorTest : public TestBase {};
@@ -9,7 +9,7 @@ class MG24DetectorTest : public TestBase {};
 /** Test cases below */
 
 TEST_F(MG24DetectorTest, IsWireIsGrid) {
-  MG24Detector mgdet;
+  MG25Geometry mgdet;
 
   for (int i = 0; i <= 79; i++) {
     ASSERT_TRUE(mgdet.isWire(i));

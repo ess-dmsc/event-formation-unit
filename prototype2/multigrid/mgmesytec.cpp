@@ -29,6 +29,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
+#include <multigrid/mgmesytec/MgSeqGeometry.h>
+#include <multigrid/mgmesytec/MG24Geometry.h>
+
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
@@ -134,7 +137,10 @@ void CSPEC::mainThread() {
   HistSerializer histfb;
   NMXHists hists;
 
-  MesytecData mesytecdata(DetectorSettings.module, true, DetectorSettings.fileprefix);
+  auto mg_mappings = std::make_shared<MgSeqGeometry>();
+  mg_mappings->select_module(DetectorSettings.module);
+  mg_mappings->swap_on(true);
+  MesytecData mesytecdata(mg_mappings, DetectorSettings.fileprefix);
 
   mesytecdata.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
   mesytecdata.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);

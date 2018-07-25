@@ -119,11 +119,11 @@ set(MGMesytecDataTest_INC
   )
 create_test_executable(MGMesytecDataTest)
 
-set(MG24DetectorTest_SRC
-  mgmesytec/MG24DetectorTest.cpp)
-set(MG24DetectorTest_INC
-  mgmesytec/MG24Detector.h)
-create_test_executable(MG24DetectorTest)
+set(MG24GeometryTest_SRC
+  mgmesytec/MG24GeometryTest.cpp)
+set(MG24GeometryTest_INC
+  mgmesytec/MG24Geometry.h)
+create_test_executable(MG24GeometryTest)
 
 
 set(MgSeqGeometryTest_SRC

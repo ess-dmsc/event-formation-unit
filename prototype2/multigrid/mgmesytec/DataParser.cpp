@@ -52,50 +52,33 @@ static constexpr uint32_t MesytecAddressMask{0x00fff000};
 static constexpr uint8_t MesytecAddressBitShift{12};
 static constexpr uint32_t MesytecAdcMask{0x00000fff};
 
-MesytecData::MesytecData(uint32_t module, bool swap_wires, std::string fileprefix) {
-  MgMappings.select_module(module);
-  MgMappings.swap_on(swap_wires);
+VMMR16Parser::VMMR16Parser(std::shared_ptr<MgGeometry> mg_mappings) {
+  if (!mg_mappings)
+    throw std::runtime_error("No valid Multigrid geometry mappings provided.");
 
-  dumptofile = !fileprefix.empty();
-  if (dumptofile) {
-    CsvFile = std::make_shared<DataSave>(fileprefix, 100000000);
-    CsvFile->tofile("Trigger, HighTime, Time, Bus, Channel, ADC\n");
-  }
+  MgMappings = mg_mappings;
 }
 
-void MesytecData::setSpoofHighTime(bool spoof) {
+void VMMR16Parser::setSpoofHighTime(bool spoof) {
   spoof_high_time = spoof;
 }
 
-void MesytecData::setWireThreshold(uint16_t low, uint16_t high) {
+void VMMR16Parser::setWireThreshold(uint16_t low, uint16_t high) {
   wireThresholdLo = low;
   wireThresholdHi = high;
 }
 
-void MesytecData::setGridThreshold(uint16_t low, uint16_t high) {
+void VMMR16Parser::setGridThreshold(uint16_t low, uint16_t high) {
   gridThresholdLo = low;
   gridThresholdHi = high;
 }
 
-// \todo can only create a single event per UDP buffer
-uint32_t MesytecData::getPixel() {
-  if (!GridGood || !WireGood) {
-    return 0;
-  }
-
-  return Geometry.pixel3D(MgMappings.x(Bus, Wire),
-                          MgMappings.y(Bus, Grid),
-                          MgMappings.z(Bus, Wire));
-}
-
-uint32_t MesytecData::getTime() {
-  return static_cast<uint32_t>(TotalTime - RecentPulseTime);
-}
-
-void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
-                                        uint16_t nWords,
-                                        NMXHists &hists,
-                                        ReadoutSerializer &serializer) {
+void VMMR16Parser::mesytec_parse_n_words(uint32_t *buffer,
+                                         uint16_t nWords,
+                                         NMXHists &hists,
+                                         ReadoutSerializer &serializer,
+                                         MgStats& stats,
+                                         std::shared_ptr<DataSave> CsvFile) {
   uint32_t *datap = buffer;
 
   uint8_t module;
@@ -158,7 +141,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       DTRACE(INF, "   DataEvent2:  bus=%d  channel=%d  adc=%d\n", Bus, channel, adc);
 
       accept = false;
-      if (MgMappings.isWire(channel) && adc >= wireThresholdLo && adc <= wireThresholdHi) {
+      if (MgMappings->isWire(channel) && adc >= wireThresholdLo && adc <= wireThresholdHi) {
         accept = true;
         if (adc > WireAdcMax) {
           WireGood = true;
@@ -167,7 +150,7 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
           //DTRACE(INF, "     new wire adc max: ch %d\n", channel);
         }
         hists.binstrips(channel, adc, 0, 0);
-      } else if (MgMappings.isGrid(channel) && adc >= gridThresholdLo && adc <= gridThresholdHi) {
+      } else if (MgMappings->isGrid(channel) && adc >= gridThresholdLo && adc <= gridThresholdHi) {
         accept = true;
         if (adc > GridAdcMax) {
           GridGood = true;
@@ -182,9 +165,9 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
 //        DTRACE(DEB, "   accepting %d,%d,%d,%d\n", time, Bus, channel, adc);
         serializer.addEntry(0, channel, TotalTime, adc);
 
-        if (dumptofile) {
+        if (CsvFile) {
           CsvFile->tofile("%d, %d, %d, %d, %d, %d\n",
-              stats.triggers, HighTime, TotalTime, Bus, channel, adc);
+                          stats.triggers, HighTime, TotalTime, Bus, channel, adc);
         }
       } else {
         //DTRACE(DEB, "   discarding %d,%d,%d,%d\n", time, bus, channel, adc);
@@ -222,10 +205,49 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
   if (chan_count)
     DTRACE(INF, "   Bus=%d  Chan_count=%zu\n", Bus, chan_count);
 
-  if (dumptofile && TimeGood && (!WireGood || !GridGood)) {
+  if (CsvFile && TimeGood && (!WireGood || !GridGood)) {
     CsvFile->tofile("%d, %d, %d, -1, -1, -1\n",
-                   stats.triggers, HighTime, TotalTime);
+                    stats.triggers, HighTime, TotalTime);
   }
+
+  GoodEvent = TimeGood && BusGood && GridGood && WireGood;
+}
+
+MesytecData::MesytecData(std::shared_ptr<MgGeometry> mg_mappings, std::string fileprefix)
+  : vmmr16Parser(mg_mappings)
+{
+  if (!mg_mappings)
+    throw std::runtime_error("No valid Multigrid geometry mappings provided.");
+
+  MgMappings = mg_mappings;
+
+  if (!fileprefix.empty()) {
+    CsvFile = std::make_shared<DataSave>(fileprefix, 100000000);
+    CsvFile->tofile("Trigger, HighTime, Time, Bus, Channel, ADC\n");
+  }
+}
+
+void MesytecData::setSpoofHighTime(bool spoof) {
+  vmmr16Parser.setSpoofHighTime(spoof);
+}
+
+void MesytecData::setWireThreshold(uint16_t low, uint16_t high) {
+  vmmr16Parser.setWireThreshold(low, high);
+}
+
+void MesytecData::setGridThreshold(uint16_t low, uint16_t high) {
+  vmmr16Parser.setGridThreshold(low, high);
+}
+
+// \todo can only create a single event per UDP buffer
+uint32_t MesytecData::getPixel() {
+  return Geometry.pixel3D(MgMappings->x(vmmr16Parser.Bus, vmmr16Parser.Wire),
+                          MgMappings->y(vmmr16Parser.Bus, vmmr16Parser.Grid),
+                          MgMappings->z(vmmr16Parser.Bus, vmmr16Parser.Wire));
+}
+
+uint32_t MesytecData::getTime() {
+  return static_cast<uint32_t>(vmmr16Parser.TotalTime - RecentPulseTime);
 }
 
 MesytecData::error MesytecData::parse(const char *buffer,
@@ -266,17 +288,19 @@ MesytecData::error MesytecData::parse(const char *buffer,
     datap++;
     bytesleft -= 4;
     stats.triggers++;
-    mesytec_parse_n_words(datap, len - 3, hists, serializer);
+    vmmr16Parser.mesytec_parse_n_words(datap, len - 3, hists, serializer, stats, CsvFile);
 
-    if (ExternalTrigger) {
+    if (vmmr16Parser.ExternalTrigger) {
+//      if (fbserializer.get_pulse_time() == 0)
+//        fbserializer.set_pulse_time(RecentPulseTime);
       stats.tx_bytes += fbserializer.produce();
 //        XTRACE(PROCESS, WAR, "Updated fake pulse time = %zu to %zu by delta %zu\n",
 //            FakePulseTime, fbserializer.get_pulse_time(), PreviousTime);
       fbserializer.set_pulse_time(RecentPulseTime);
-      RecentPulseTime = TotalTime;
+      RecentPulseTime = vmmr16Parser.TotalTime;
     }
 
-    if (TimeGood && BusGood && GridGood && WireGood) {
+    if (vmmr16Parser.GoodEvent) {
       uint32_t pixel = getPixel();
       uint32_t time = getTime();
 
