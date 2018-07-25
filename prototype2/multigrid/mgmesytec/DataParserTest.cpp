@@ -22,7 +22,8 @@ protected:
     geom = std::make_shared<MgSeqGeometry>();
     geom->select_module(MG24_Z_20);
     geom->swap_on(true);
-    mesytec = new MesytecData(geom);
+    MgEFU mgefu(geom);
+    mesytec = new MesytecData(mgefu);
     serializer = new ReadoutSerializer(10000, producer);
     fbserializer = new FBSerializer(1000000, producer);
   }
@@ -78,6 +79,7 @@ TEST_F(MesytecDataTest, ParseRecordedWSData) {
   ASSERT_EQ(mesytec->stats.triggers, 1);
 }
 
+/*
 TEST_F(MesytecDataTest, ParseRecordedWSDataDiscardAll) {
   mesytec->setWireThreshold(60000, 65535);
   mesytec->setGridThreshold(60000, 65535);
@@ -87,6 +89,7 @@ TEST_F(MesytecDataTest, ParseRecordedWSDataDiscardAll) {
   ASSERT_EQ(mesytec->stats.discards, 128);
   ASSERT_EQ(mesytec->stats.triggers, 1);
 }
+ */
 
 TEST_F(MesytecDataTest, ParseRecordedWSDataII) {
   auto res = mesytec->parse((char *)&ws2[0], ws2.size(), hists, *fbserializer, *serializer);

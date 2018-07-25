@@ -140,10 +140,11 @@ void CSPEC::mainThread() {
   auto mg_mappings = std::make_shared<MgSeqGeometry>();
   mg_mappings->select_module(DetectorSettings.module);
   mg_mappings->swap_on(true);
-  MesytecData mesytecdata(mg_mappings, DetectorSettings.fileprefix);
+  MgEFU mg_efu(mg_mappings);
+  mg_efu.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
+  mg_efu.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
 
-  mesytecdata.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
-  mesytecdata.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
+  MesytecData mesytecdata(mg_efu, DetectorSettings.fileprefix);
 
   char buffer[eth_buffer_size];
   int ReadSize;
