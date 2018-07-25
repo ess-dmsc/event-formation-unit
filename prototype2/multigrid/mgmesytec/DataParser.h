@@ -19,48 +19,35 @@ class MesytecData {
 public:
   enum class error { OK = 0, ESIZE, EHEADER, EUNSUPP };
 
-  /// @
-  MesytecData(uint32_t module, bool swap_wires, std::string fileprefix = "") {
-    MgMappings.select_module(module);
-    MgMappings.swap_on(swap_wires);
-    dumptofile = !fileprefix.empty();
-    if (dumptofile) {
-      CsvFile = std::make_shared<DataSave>(fileprefix, 100000000);
-      CsvFile->tofile("Trigger, HighTime, Time, Bus, Channel, ADC\n");
-    }
-  };
+  /// \brief if it looks like a constructor...
+  MesytecData(uint32_t module, bool swap_wires, std::string fileprefix = "");
 
-  ~MesytecData(){};
+  ~MesytecData() = default;
 
   uint32_t getPixel(); // \todo (too) simple implm. but agreed for now
   uint32_t getTime();  // \todo (too) simple implm. but agreed for now
 
-  void setWireThreshold(int low, int high) {
-     wireThresholdLo = low;
-     wireThresholdHi = high;
-   };
+  void setSpoofHighTime(bool spoof);
+  void setWireThreshold(int low, int high);
+  void setGridThreshold(int low, int high);
 
-  void setGridThreshold(int low, int high) {
-     gridThresholdLo = low;
-     gridThresholdHi = high;
-   };
   /** \brief parse a binary payload buffer, return number of data element
    * \todo Uses NMXHists  - refactor and move ?
    */
-  error parse(const char *buffer, int size, NMXHists &hists, FBSerializer & fbserializer, ReadoutSerializer &serializer);
+  error parse(const char *buffer, int size, NMXHists &hists, FBSerializer &fbserializer, ReadoutSerializer &serializer);
 
   /** \brief parse n 32 bit words from mesytec VMMR-8/16 card */
   void mesytec_parse_n_words(uint32_t *buffer, uint16_t nWords, NMXHists &hists, ReadoutSerializer &serializer);
 
   // Statistics updated by parse()
   struct {
-    int readouts{0}; /**< number of channels read out */
-    int discards{0}; /**< readouts discarded due to adc thresholds */
-    int triggers{0}; /**< number of 0x58 blocks in packet */
-    int events{0};   /**< number of events from this packets */
-    int tx_bytes{0}; /**< number of bytes produced by librdkafka */
-    int geometry_errors{0}; /**< number of invalid pixels from readout */
-    int badtriggers{0}; /**< number of empty triggers or triggers without valid data */
+    size_t readouts{0}; /**< number of channels read out */
+    size_t discards{0}; /**< readouts discarded due to adc thresholds */
+    size_t triggers{0}; /**< number of 0x58 blocks in packet */
+    size_t events{0};   /**< number of events from this packets */
+    size_t tx_bytes{0}; /**< number of bytes produced by librdkafka */
+    size_t geometry_errors{0}; /**< number of invalid pixels from readout */
+    size_t badtriggers{0}; /**< number of empty triggers or triggers without valid data */
   } stats;
 
   uint64_t RecentPulseTime{0};
@@ -71,16 +58,16 @@ private:
   uint32_t Wire{0}; // initial alg.: wire with max adc
   uint32_t Grid{0}; // initial alg.: grid with max adc
 
-  uint32_t LowTime {0};
+  uint32_t LowTime{0};
   uint32_t PreviousLowTime{0};
-  uint32_t HighTime {0};
+  uint32_t HighTime{0};
 
   uint64_t TotalTime{0};
 
-  bool BusGood {false};
-  bool WireGood {false};
-  bool GridGood {false};
-  bool TimeGood {false};
+  bool BusGood{false};
+  bool WireGood{false};
+  bool GridGood{false};
+  bool TimeGood{false};
 
   uint16_t wireThresholdLo{0};
   uint16_t wireThresholdHi{std::numeric_limits<uint16_t>::max()};
@@ -89,6 +76,7 @@ private:
   MgSeqGeometry MgMappings;
   ESSGeometry Geometry{36, 40, 20, 1};
 
+  bool spoof_high_time{false};
   bool dumptofile{false};
   std::shared_ptr<DataSave> CsvFile;
 };

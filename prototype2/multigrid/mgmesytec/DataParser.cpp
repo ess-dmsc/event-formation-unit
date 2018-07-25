@@ -52,6 +52,30 @@ static constexpr uint32_t MesytecAddressMask{0x00fff000};
 static constexpr uint8_t MesytecAddressBitShift{12};
 static constexpr uint32_t MesytecAdcMask{0x00000fff};
 
+MesytecData::MesytecData(uint32_t module, bool swap_wires, std::string fileprefix) {
+  MgMappings.select_module(module);
+  MgMappings.swap_on(swap_wires);
+
+  dumptofile = !fileprefix.empty();
+  if (dumptofile) {
+    CsvFile = std::make_shared<DataSave>(fileprefix, 100000000);
+    CsvFile->tofile("Trigger, HighTime, Time, Bus, Channel, ADC\n");
+  }
+}
+
+void MesytecData::setSpoofHighTime(bool spoof) {
+  spoof_high_time = spoof;
+}
+
+void MesytecData::setWireThreshold(int low, int high) {
+  wireThresholdLo = low;
+  wireThresholdHi = high;
+}
+
+void MesytecData::setGridThreshold(int low, int high) {
+  gridThresholdLo = low;
+  gridThresholdHi = high;
+}
 
 // \todo can only create a single event per UDP buffer
 uint32_t MesytecData::getPixel() {
@@ -110,7 +134,6 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
 
     case MesytecType::ExtendedTimeStamp:
       // This always comes before events on particular Bus
-      // TODO: not meaningful for now
       HighTime = static_cast<uint16_t>(*datap & MesytecHighTimeMask);
       DTRACE(INF, "   ExtendedTimeStamp: high_time=%d\n", HighTime);
       break;
@@ -179,9 +202,11 @@ void MesytecData::mesytec_parse_n_words(uint32_t *buffer,
       if ((*datap & MesytecType::EndOfEvent) == MesytecType::EndOfEvent) {
         TimeGood = true;
         LowTime = *datap & MesytecTimeMask;
-        if (LowTime < PreviousLowTime)
-          HighTime++;
-        PreviousLowTime = LowTime;
+        if (spoof_high_time) {
+          if (LowTime < PreviousLowTime)
+            HighTime++;
+          PreviousLowTime = LowTime;
+        }
         TotalTime = (static_cast<uint64_t>(HighTime) << 30) + LowTime;
         DTRACE(INF, "   EndOfEvent: timestamp=%d, total_time=%" PRIu64 "\n", LowTime, TotalTime);
         break;
