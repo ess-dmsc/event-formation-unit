@@ -14,7 +14,7 @@
 #include <generators/TextFile.h>
 #include <generators/MBArgs.h>
 
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 int main(int argc, char *argv[]) {
   MBArgs opts(argc, argv);
@@ -120,4 +120,4 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

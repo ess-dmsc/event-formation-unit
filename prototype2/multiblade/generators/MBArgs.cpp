@@ -11,7 +11,7 @@
 
 #include <generators/MBArgs.h>
 
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 MBArgs::MBArgs(int argc, char *argv[]) {
 
@@ -106,4 +106,4 @@ MBArgs::MBArgs(int argc, char *argv[]) {
   printf("Other properties\n");
   printf("  update interval:        %us\n", updint);
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

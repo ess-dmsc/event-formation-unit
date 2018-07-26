@@ -12,7 +12,7 @@
 #include <sstream>
 #include <unistd.h>
 
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 int main(int argc, char *argv[]) {
   JsonArgs opts(argc, argv);
@@ -75,4 +75,4 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

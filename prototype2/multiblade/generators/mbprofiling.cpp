@@ -19,7 +19,7 @@
 #include "mbcommon/DumpEventBuilderInfo.h"
 #include "mbcommon/MultiBladeEventBuilder.h"
 
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 #define UNUSED __attribute__((unused))
 
@@ -133,4 +133,4 @@ int main(int argc, const char **argv) {
 
   return 0;
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

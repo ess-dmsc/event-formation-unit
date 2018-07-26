@@ -13,7 +13,7 @@
 #include <gdgem/generators/ReaderHits.h>
 #include <libs/include/Socket.h>
 #include <unistd.h>
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 const int TSC_MHZ = 2900;
 
 int main(int argc, char *argv[]) {
@@ -77,4 +77,4 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

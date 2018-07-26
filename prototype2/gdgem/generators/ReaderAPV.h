@@ -6,7 +6,7 @@
 /// \brief Wrapper class for reading VMM data from HDF5 files
 ///
 //===----------------------------------------------------------------------===//
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 #pragma once
 
@@ -47,4 +47,4 @@ private:
 
   std::vector<uint32_t> data;
 };
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

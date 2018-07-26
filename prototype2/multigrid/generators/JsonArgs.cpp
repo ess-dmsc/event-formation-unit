@@ -7,7 +7,7 @@
 #include <multigrid/generators/JsonArgs.h>
 #include <unistd.h>
 
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 JsonArgs::JsonArgs(int argc, char *argv[]) {
 
@@ -94,4 +94,4 @@ JsonArgs::JsonArgs(int argc, char *argv[]) {
   printf("Other properties\n");
   printf("  update interval:        %ds\n", updint);
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

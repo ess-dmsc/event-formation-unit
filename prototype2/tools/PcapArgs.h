@@ -6,7 +6,7 @@
 /// \brief Command line argument parser for udpgen_pcap
 ///
 //===----------------------------------------------------------------------===//
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 #pragma once
 
@@ -27,4 +27,4 @@ public:
   int loop{0};       ///< single shot or loop
   int pcapoffset{0}; ///< for pcap: start after offset
 };
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

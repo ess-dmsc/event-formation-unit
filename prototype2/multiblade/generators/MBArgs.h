@@ -6,7 +6,7 @@
 /// Copied from NMXArgs.h
 ///
 //===----------------------------------------------------------------------===//
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 #include <string>
 
@@ -35,4 +35,4 @@ public:
 
   unsigned int updint{1}; ///< update interval (seconds)
 };
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

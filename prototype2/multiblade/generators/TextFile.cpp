@@ -4,7 +4,7 @@
 /// \file
 ///
 //===----------------------------------------------------------------------===//
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 #include "TextFile.h"
 
@@ -77,4 +77,4 @@ size_t TextFile::nextChunk(TextFile::Entry *buf, size_t size) {
   }
   return i * sizeof(Entry);
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

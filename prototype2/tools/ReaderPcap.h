@@ -6,7 +6,7 @@
 /// \brief Wrapper class for reading UDP data from wireshark pcap files
 /// one packet at a time.
 //===----------------------------------------------------------------------===//
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 #pragma once
 
@@ -44,4 +44,4 @@ public:
 private:
   pcap_t *pcap{NULL}; ///< pcap handle used for parsing
 };
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP
