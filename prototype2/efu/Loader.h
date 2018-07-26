@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -23,11 +23,9 @@ private:
   std::function<void(CLI::App &CLIParser)> ParserPopulator;
 
 public:
-  //  std::shared_ptr<Detector> detector{nullptr};
 
-  /** \brief Load instrument plugin from detector name
-   *  @param name Instrument name - .so suffix will be added
-   */
+  /// \brief Load instrument plugin from detector name
+  /// \param name Instrument name - .so suffix will be added
   Loader();
 
   Loader(Detector *detector);
@@ -35,7 +33,7 @@ public:
   bool loadPlugin(std::string lib);
   void unloadPlugin();
 
-  /** \brief minimal destructor */
+  /// \brief minimal destructor
   ~Loader();
 
   bool IsOk();

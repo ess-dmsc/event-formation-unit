@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -17,13 +17,13 @@
 
 class HistSerializer {
 public:
-  /** \todo document */
+  /// \todo document
   HistSerializer();
 
-  /** \todo document */
+  /// \todo document
   ~HistSerializer();
 
-  /** \todo document */
+  /// \todo document
   size_t serialize(const NMXHists &hists, char **buffer);
 
 private:

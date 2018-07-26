@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,17 +16,15 @@
 
 class ReaderPcap {
 public:
-  /** \brief construct a reader for a specific file
-   * @param filename name of pcap file
-   */
+  /// \brief construct a reader for a specific file
+  /// \param filename name of pcap file
   ReaderPcap(std::string filename);
 
   ~ReaderPcap();
 
-  /* \brief read data from a packet into user specified buffer
-   * @param buffer user allocated buffer, must be at least bufferlen bytes
-   * @param bufferlen length in bytes
-   */
+  /// \brief read data from a packet into user specified buffer
+  /// \param buffer user allocated buffer, must be at least bufferlen bytes
+  /// \param bufferlen length in bytes
   int read(char *buffer, size_t bufferlen);
 
   void printstats();
@@ -44,6 +42,6 @@ public:
   } stats;
 
 private:
-  pcap_t *pcap{NULL}; /**< pcap handle used for parsing */
+  pcap_t *pcap{NULL}; ///< pcap handle used for parsing
 };
 /// GCOVR_EXCL_STOP

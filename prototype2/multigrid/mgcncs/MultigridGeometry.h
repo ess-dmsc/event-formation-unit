@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -91,9 +91,9 @@ public:
   int getzcoord(int pixelid) { return (pixelid - 1) % zwires_ + 1; }
 
 private:
-  int panls_;  /**< number of panels per detector */
-  int mods_;   /**< number of modules per panel */
-  int grids_;  /**< number of grids per module (grid column) */
-  int xwires_; /**< number of cells in the x-direction */
-  int zwires_; /**< number of cells in the z-direction */
+  int panls_;  ///< number of panels per detector
+  int mods_;   ///< number of modules per panel
+  int grids_;  ///< number of grids per module (grid column)
+  int xwires_; ///< number of cells in the x-direction
+  int zwires_; ///< number of cells in the z-direction
 };

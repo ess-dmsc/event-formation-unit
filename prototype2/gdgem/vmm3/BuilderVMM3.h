@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -30,7 +30,7 @@ public:
 
   ~BuilderVMM3() { XTRACE(INIT, DEB, "BuilderVMM2 destructor called\n"); }
 
-  /** \todo Martin document */
+  /// \todo Martin document
   ResultStats process_buffer(char *buf, size_t size) override;
 
 private:

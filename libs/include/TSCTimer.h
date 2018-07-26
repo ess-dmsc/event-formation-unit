@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -16,9 +16,9 @@ class TSCTimer {
 public:
   TSCTimer(void);
 
-  void now(void); /**< record current time_point */
+  void now(void); ///< record current time_point
 
-  uint64_t timetsc(void); /**< time since t1 */
+  uint64_t timetsc(void); ///< time since t1
 
 private:
   uint64_t t1;

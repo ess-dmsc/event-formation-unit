@@ -1,4 +1,4 @@
-/// Copyright see description below
+/*  Copyright see description below */
 //===----------------------------------------------------------------------===//
 ///
 /// \file

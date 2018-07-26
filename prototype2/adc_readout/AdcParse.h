@@ -1,4 +1,4 @@
-/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -36,10 +36,10 @@ public:
     IDLE_LENGTH,
   };
   /// \brief Sets the (parsing) error type to Type::UNKNOWN.
-  /// @param[in] ErrorStr The string describing the exception.
+  /// \param[in] ErrorStr The string describing the exception.
   ParserException(std::string const &ErrorStr);
   /// \brief Sets the parsing error to the give type.
-  /// @param[in] ErrorType The parser error type.
+  /// \param[in] ErrorType The parser error type.
   ParserException(Type ErrorType);
   virtual const char *what() const noexcept override;
   Type getErrorType() const;
@@ -156,17 +156,17 @@ public:
   PacketParser(std::function<bool(SamplingRun *)> ModuleHandler,
                std::function<SamplingRun *(int Channel)> ModuleProducer);
   /// \brief Parses a packet of binary data.
-  /// @param[in] Packet Raw data, straight from the socket.
-  /// @return Some general information about the packet.
-  /// @throw ParserException See exception type for possible parsing failures.
+  /// \param[in] Packet Raw data, straight from the socket.
+  /// \return Some general information about the packet.
+  /// \throw ParserException See exception type for possible parsing failures.
   PacketInfo parsePacket(const InData &Packet);
 
 protected:
   /// \brief Parses the payload of a packet. Called by parsePacket().
-  /// @param[in] Packet Raw data buffer.
-  /// @param[in] StartByte The byte on which the payload starts.
-  /// @return The start of the filler/trailer in the array.
-  /// @throw ParserException See exception type for possible parsing failures.
+  /// \param[in] Packet Raw data buffer.
+  /// \param[in] StartByte The byte on which the payload starts.
+  /// \return The start of the filler/trailer in the array.
+  /// \throw ParserException See exception type for possible parsing failures.
   size_t parseData(const InData &Packet, std::uint32_t StartByte);
 
 private:
@@ -175,23 +175,23 @@ private:
 };
 
 /// \brief Parses the header of a packet. Called by parsePacket().
-/// @param[in] Packet Raw data buffer.
-/// @return Data extracted from the header and an integer indicating the start
+/// \param[in] Packet Raw data buffer.
+/// \return Data extracted from the header and an integer indicating the start
 /// of the payload.
-/// @throw ParserException See exception type for possible parsing failures.
+/// \throw ParserException See exception type for possible parsing failures.
 HeaderInfo parseHeader(const InData &Packet);
 
 /// \brief Checks the conents and the size of the packet filler as well as the
 /// trailer. Called by parsePacket().
-/// @param[in] Packet Raw data buffer.
-/// @param[in] StartByte The byte at which the filler/trailer starts.
-/// @return The number of bytes in the filler.
-/// @throw ParserException See exception type for possible parsing failures.
+/// \param[in] Packet Raw data buffer.
+/// \param[in] StartByte The byte at which the filler/trailer starts.
+/// \return The number of bytes in the filler.
+/// \throw ParserException See exception type for possible parsing failures.
 TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte);
 
 /// \brief Parses the idle packet payload. Called by parsePacket().
-/// @param[in] Packet Raw data buffer.
-/// @param[in] StartByte First byte of the idle packet payload.
-/// @return Idle packet timestamp.
-/// @throw ParserException See exception type for possible parsing failures.
+/// \param[in] Packet Raw data buffer.
+/// \param[in] StartByte First byte of the idle packet payload.
+/// \return Idle packet timestamp.
+/// \throw ParserException See exception type for possible parsing failures.
 IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte);

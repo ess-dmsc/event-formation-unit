@@ -1,4 +1,4 @@
-/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -34,7 +34,7 @@ using Queue = moodycamel::BlockingReaderWriterQueue<ElementPtr<DataType>>;
 /// in the order that you have received them.
 template <class DataType> class CircularBuffer {
 public:
-  /// @param[in] Elements Number of elements in the buffer/queue.
+  /// \param[in] Elements Number of elements in the buffer/queue.
   CircularBuffer(std::int32_t Elements)
       : DataBuffer(new DataType[Elements]), DataQueue(Elements),
         EmptyQueue(Elements) {
@@ -47,8 +47,8 @@ public:
 #endif
   }
   /// \brief Get empty element that can then be used to store data.
-  /// @param[out] Element The pointer to the element.
-  /// @return Returns true if the pointer can be used to access an empty
+  /// \param[out] Element The pointer to the element.
+  /// \return Returns true if the pointer can be used to access an empty
   /// element, false otherwise.
   bool tryGetEmpty(ElementPtr<DataType> &Element) {
     bool Success = EmptyQueue.try_dequeue(Element);
@@ -65,10 +65,10 @@ public:
 #ifndef SPSC_NO_WAIT
   /// \brief Same as CircularBuffer::tryGetEmpty() but blocks for a specific
   /// amount of time.
-  /// @param[out] Element The pointer to the element.
-  /// @param[in] TimeoutUSecs The amount of time to wait for an empty element
+  /// \param[out] Element The pointer to the element.
+  /// \param[in] TimeoutUSecs The amount of time to wait for an empty element
   /// before failing.
-  /// @return Returns true if the pointer can be used to access an empty
+  /// \return Returns true if the pointer can be used to access an empty
   /// element, false otherwise.
   bool waitGetEmpty(ElementPtr<DataType> &Element, std::int64_t TimeoutUSecs) {
     bool Success = EmptyQueue.wait_dequeue_timed(Element, TimeoutUSecs);
@@ -84,8 +84,8 @@ public:
 #endif
 
   /// \brief Put non empty element in the data queue.
-  /// @param[in] Element The pointer to the element.
-  /// @return Returns true if the element was put in the queue, false otherwise.
+  /// \param[in] Element The pointer to the element.
+  /// \return Returns true if the element was put in the queue, false otherwise.
   /// If false is returned, you are then still responsible for the pointer.
   bool tryPutData(ElementPtr<DataType> &&Element) {
 #ifndef NDEBUG
@@ -105,8 +105,8 @@ public:
   // End producer
 
   /// \brief Get data element.
-  /// @param[out] Element The pointer to the element.
-  /// @return Returns true if the pointer can be used to access a data element,
+  /// \param[out] Element The pointer to the element.
+  /// \return Returns true if the pointer can be used to access a data element,
   /// false otherwise.
   bool tryGetData(ElementPtr<DataType> &Element) {
     bool Success = DataQueue.try_dequeue(Element);
@@ -122,10 +122,10 @@ public:
 
 #ifndef SPSC_NO_WAIT
   /// \brief Blocking version of CircularBuffer::tryGetData().
-  /// @param[out] Element The pointer to the element.
-  /// @param[in] TimeoutUSecs The number of micro seconds to block (wait) for
+  /// \param[out] Element The pointer to the element.
+  /// \param[in] TimeoutUSecs The number of micro seconds to block (wait) for
   /// new data before failing (returning false).
-  /// @return Returns true if the pointer can be used to access a data element,
+  /// \return Returns true if the pointer can be used to access a data element,
   /// false otherwise.
   bool waitGetData(ElementPtr<DataType> &Element, std::int64_t TimeoutUSecs) {
     bool Success = DataQueue.wait_dequeue_timed(Element, TimeoutUSecs);
@@ -141,8 +141,8 @@ public:
 #endif
 
   /// \brief Put empty (processed) element back in the empty queue.
-  /// @param[in] Element The pointer to the element.
-  /// @return Returns true if the element was put in the empty queue, false
+  /// \param[in] Element The pointer to the element.
+  /// \return Returns true if the element was put in the empty queue, false
   /// otherwise.
   bool tryPutEmpty(ElementPtr<DataType> &&Element) {
 #ifndef NDEBUG

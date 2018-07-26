@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -9,7 +9,7 @@
 
 #pragma once
 
-/** branch prediction macros */
+/// branch prediction macros
 #if 0
 #define likely(x) __builtin_expect(!!(x), 1)
 #define unlikely(x) __builtin_expect(!!(x), 0)
@@ -18,7 +18,7 @@
 #define unlikely(x) (x)
 #endif
 
-/** read time stamp counter - runs at processer Hz */
+/// read time stamp counter - runs at processer Hz
 static __inline__ unsigned long long rdtsc(void) {
   unsigned hi, lo;
   __asm__ __volatile__("rdtsc" : "=a"(lo), "=d"(hi));

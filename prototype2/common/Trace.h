@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -28,7 +28,7 @@
 #define GLOG_CRI(x)
 #endif
 
-/** Add trace groups below - must be powers of two */
+/// Add trace groups below - must be powers of two
 // clang-format off
 #define TRC_G_INPUT   0x00000001U
 #define TRC_G_OUTPUT  0x00000002U
@@ -39,12 +39,12 @@
 #define TRC_G_CMD     0x00000040U
 #define TRC_G_DATA    0x00000080U
 
-/** Add trace masks below, bitwise or of grouops */
+/// Add trace masks below, bitwise or of grouops
 #define TRC_M_ALL                                                              \
   (TRC_G_INPUT | TRC_G_OUTPUT | TRC_G_PROCESS | TRC_G_MAIN | TRC_G_INIT |      \
    TRC_G_IPC   | TRC_G_CMD | TRC_G_DATA)
 
-/** Do not edit below */
+/// Do not edit below
 #define TRC_M_NONE 0
 
 #define TRC_L_ALW 12
@@ -55,9 +55,8 @@
 #define TRC_L_DEB 2
 // clang-format on
 
-/** \brief get rid of annoying warning
- * \todo See if there is a better solution than pragma
- */
+/// \brief get rid of annoying warning
+/// \todo See if there is a better solution than pragma
 #pragma GCC system_header
 
 #ifndef TRC_MASK
@@ -75,7 +74,7 @@
                       #group, ##__VA_ARGS__)                                   \
              : 0)
 
-// Raw trace
+/// \brief Raw trace
 #define DTRACE(level, fmt, ...)                                                \
   (void)((TRC_L_##level >= TRC_LEVEL) ? printf(fmt, ##__VA_ARGS__) : 0)
 #endif

@@ -1,4 +1,4 @@
-/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -27,7 +27,7 @@ struct RawTimeStamp {
   /// \brief Number of clock cycles of the timing hardware clock divided by two.
   // This value resets to zero once every second and has a maximum value of ≈44
   // million.
-  // @note It is possible that in future systems, the clock frequency will not
+  // \note It is possible that in future systems, the clock frequency will not
   // be 44 MHz.
   std::uint32_t SecondsFrac{0};
 
@@ -40,9 +40,9 @@ struct RawTimeStamp {
   /// Adds or subtracts the specified number of clock cycles (samples).
   /// Correctly wraps around the fractional seconds if so required to get the
   /// correct value.
-  /// @param[in] SampleOffset The number of samples that the time stamp should
+  /// \param[in] SampleOffset The number of samples that the time stamp should
   /// be offset. Can be negative and positive.
-  /// @return The resulting new timestamp.
+  /// \return The resulting new timestamp.
   RawTimeStamp GetOffsetTimeStamp(const std::int32_t &SampleOffset) const;
 
   /// \brief Convert from raw timestamp (seconds plus fractional seconds) into
@@ -50,7 +50,7 @@ struct RawTimeStamp {
   /// This version uses floating point math to do the conversion and is likely
   /// to be slower than RawTimeStamp::GetTimeStampNSFast() on machines with a
   /// slow floating point unit.
-  /// @return Number of nanoseconds since epoch (currently EPICS epoch).
+  /// \return Number of nanoseconds since epoch (currently EPICS epoch).
   std::uint64_t GetTimeStampNS() const;
 
   /// \brief Convert from raw timestamp (seconds plus fractional seconds) into
@@ -58,6 +58,6 @@ struct RawTimeStamp {
   /// This version uses integer math to do the conversion and is likely to as
   /// fast as or slower than RawTimeStamp::GetTimeStampNS() on CPUs that have a
   /// fast floating point unit.
-  /// @return Number of nanoseconds since epoch (currently EPICS epoch).
+  /// \return Number of nanoseconds since epoch (currently EPICS epoch).
   std::uint64_t GetTimeStampNSFast() const;
 } __attribute__((packed));

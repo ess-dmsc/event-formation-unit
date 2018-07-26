@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -28,10 +28,10 @@ const int maxUdpPayloadSize{8972};
 
 class ReaderAPV {
 public:
-  /** \todo document */
+  /// \todo document
   ReaderAPV(std::string filename);
 
-  /** \todo document */
+  /// \todo document
   size_t read(char *buf);
 
 private:

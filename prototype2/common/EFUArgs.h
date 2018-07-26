@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -47,7 +47,7 @@ public:
 
   CLI::App CLIParser{"Event formation unit (efu)"};
 
-  int buflen{9000}; /**< rx buffer length (B) */
+  int buflen{9000}; ///< rx buffer length (B)
 
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);

@@ -1,4 +1,4 @@
-/// Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file
+/* Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -44,7 +44,7 @@ public:
 
   virtual ~AbstractBuilder() {}
 
-  /** \todo Martin document */
+  /// \todo Martin document
   virtual ResultStats process_buffer(char *buf, size_t size) = 0;
 
   std::shared_ptr<AbstractClusterer> clusterer_y;

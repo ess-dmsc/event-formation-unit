@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -18,17 +18,17 @@ private:
   T min_{0};
 
 public:
-  void add(T value); /**< add element to template vector*/
+  void add(T value); ///< add element to template vector
 
-  T sum(void); /**< returns the value of the counter */
+  T sum(void); ///< returns the value of the counter
 
-  int count(void); /**< return number of adds */
+  int count(void); ///< return number of adds
 
-  T avg(void); /**< calculate 'average' of vector */
+  T avg(void); ///< calculate 'average' of vector
 
-  T max(void); /**< return max element of vector */
+  T max(void); ///< return max element of vector
 
-  T min(void); /**< return min element of vector */
+  T min(void); ///< return min element of vector
 
   void clear();
 };

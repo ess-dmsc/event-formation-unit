@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -18,21 +18,18 @@
 
 class SoNDeGeometry {
 public:
-  /** \brief Create a SoNDe Geometry based on number of columns, grid
-   */
+  /// \brief Create a SoNDe Geometry based on number of columns, grid
   SoNDeGeometry() {}
 
-  /** \brief returns the maximum available pixelid for this geometry
-   */
+  /// \brief returns the maximum available pixelid for this geometry
   int getmaxpixelid() { return essgeometry.max_pixel(); }
 
-  // Sometimes asic and channel are separate \todo make this one the default
+  /// Sometimes asic and channel are separate \todo make this one the default
   int getdetectorpixelid(int module, int asic, int channel) {
     return getdetectorpixelid(module, (asic << 6) + (channel & 0x3f));
   }
 
-  /** \brief Return the global detector pixel id from
-   */
+  /// \brief Return the global detector pixel id from
   inline int getdetectorpixelid(int module, int asch) {
     int asic = asch >> 6;
     if (asic > 3) {

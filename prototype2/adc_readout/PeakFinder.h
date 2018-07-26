@@ -1,4 +1,4 @@
-/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,7 +15,7 @@
 /// timestamp.
 class PeakFinder : public AdcDataProcessor {
 public:
-  /// @param[in] Prod A shared pointer to the Kafka producer that handles data
+  /// \param[in] Prod A shared pointer to the Kafka producer that handles data
   /// production.
   PeakFinder(std::shared_ptr<Producer> Prod);
 
@@ -44,6 +44,6 @@ struct ModuleAnalysisResult {
 /// maximum value in a sampling run and then also calculates the timestamp of
 /// that maximum value. This algorithm will fail for doubles, exessive noise,
 /// wide peaks, valleys (inverted peaks) and probably other situations as well.
-/// @param[in] SampleRun A vector of samples to find the peak in.
-/// @return The results of the peak finding algorithm.
+/// \param[in] SampleRun A vector of samples to find the peak in.
+/// \return The results of the peak finding algorithm.
 ModuleAnalysisResult FindPeak(const std::vector<std::uint16_t> &SampleRun);

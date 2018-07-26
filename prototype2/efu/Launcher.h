@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -14,12 +14,11 @@
 
 class Launcher {
 public:
-  /** \brief Launches previously Loaded detector functions
-   *  @param ld Dynamic detector object (from Loader)
-   *  @param args Arguments to be passed to threads
-   *  @param cpus vector of three cpuids for launching input, processing and
-   *  output threads.
-   */
+  /// \brief Launches previously Loaded detector functions
+  /// \param ld Dynamic detector object (from Loader)
+  /// \param args Arguments to be passed to threads
+  /// \param cpus vector of three cpuids for launching input, processing and
+  /// output threads.
   Launcher(std::vector<ThreadCoreAffinitySetting> ThreadAffinity)
       : ThreadCoreAffinity(ThreadAffinity){};
 

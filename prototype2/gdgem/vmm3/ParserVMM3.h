@@ -1,4 +1,4 @@
-/// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
+/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -23,7 +23,7 @@ public:
   static const int HitAndMarkerSize { 6 };
   static const int Data1Size { 4 };
 
-  /**< Do NOT rearrange fields, used for casting to data pointer*/
+  ///< Do NOT rearrange fields, used for casting to data pointer
   struct SRSHdr {
     uint32_t frameCounter;   /// frame counter packet field
     uint32_t dataId;         /// data type identifier packet field + ID of the FEC card (0-255)
@@ -56,7 +56,7 @@ public:
 };
 
   /// \brief create a data handler for VMM3 SRS data of fixed size Capacity
-  /// @param maxelements The maximum number of readout elements
+  /// \param maxelements The maximum number of readout elements
   VMM3SRSData(int maxelements) : maxHits(maxelements) {
     markers = new struct VMM3Marker[maximumNumberVMM];
     data = new struct VMM3Data[maxHits];
@@ -76,9 +76,9 @@ public:
   int receive(const char *buffer, int size);
 
   /// \brief parse the readouts into a data array
-  /// @param data1 the raw (unbitreversed) data1 field of a SRS packet
-  /// @param data2 the raw (unbitreversed) data2 field of a SRS packet
-  /// @param vmd VMM2Data structure holding the parsed data (tdc, bcid, adc, ...)
+  /// \param data1 the raw (unbitreversed) data1 field of a SRS packet
+  /// \param data2 the raw (unbitreversed) data2 field of a SRS packet
+  /// \param vmd VMM2Data structure holding the parsed data (tdc, bcid, adc, ...)
   int parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd);
 
   /// Holds data common to all readouts in a packet

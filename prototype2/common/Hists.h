@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -30,7 +30,7 @@ public:
 
   void set_cluster_adc_downshift(uint32_t bits);
 
-  /** \brief clears histograms */
+  /// \brief clears histograms
   void clear();
 
   void bin(const Event &e);

@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,18 +15,17 @@
 
 class TrackSerializer {
 public:
-  /** \todo document */
+  /// \todo document
   TrackSerializer(size_t maxarraylength,
                   size_t minhits, double target_res);
 
-  /** \todo document */
+  /// \todo document
   ~TrackSerializer();
 
-  /** \todo document */
-  // int add_track(uint32_t plane, uint32_t strip, uint32_t time, uint32_t adc);
+  /// \todo document
   int add_track(const Event &event);
 
-  /** \todo document */
+  /// \todo document
   int serialize(char **buffer);
 
 private:
