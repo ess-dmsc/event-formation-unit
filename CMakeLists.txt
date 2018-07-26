@@ -69,7 +69,7 @@ add_subdirectory(dataformats)
 # Should unit_test_targets depend on default targets ???
 
 add_custom_target(unit_tests
-  DEPENDS ${unit_test_targets})
+    DEPENDS ${unit_test_targets})
 add_custom_target(runtest
     COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
     DEPENDS unit_tests)
@@ -77,6 +77,8 @@ add_custom_target(valgrind
     DEPENDS ${valgrind_targets})
 add_custom_target(benchmark
     DEPENDS ${benchmark_targets})
+add_custom_target(doxygen
+    COMMAND doxygen ../prototype2/doxyfile)
 
 #=============================================================================
 # Finalize coverage
