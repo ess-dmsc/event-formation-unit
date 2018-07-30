@@ -12,7 +12,7 @@
 #include <cinttypes>
 #include <string>
 
-struct MGHit {
+struct __attribute__ ((packed)) MGHit {
 
   size_t trigger_count {0};
   int8_t external_trigger {0};

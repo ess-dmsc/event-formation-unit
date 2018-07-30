@@ -128,7 +128,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
                          NMXHists &hists,
                          ReadoutSerializer &serializer,
                          MgStats &stats,
-                         std::shared_ptr<DataSave> CsvFile) {
+                         bool dump_data) {
 
   stats.triggers++;
   hit.trigger_count++;
@@ -211,10 +211,8 @@ void VMMR16Parser::parse(uint32_t *buffer,
 //        DTRACE(DEB, "   accepting %d,%d,%d,%d\n", time, Bus, channel, adc);
         serializer.addEntry(0, hit.channel, hit.total_time, hit.adc);
 
-        if (CsvFile) {
-          CsvFile->tofile("%zu, %d, %d, %d, %d, %d\n",
-                          stats.triggers, hit.high_time, hit.total_time,
-                          hit.bus, hit.channel, hit.adc);
+        if (dump_data) {
+          converted_data.push_back(hit);
         }
       } else {
         //DTRACE(DEB, "   discarding %d,%d,%d,%d\n", time, bus, channel, adc);
@@ -240,21 +238,32 @@ void VMMR16Parser::parse(uint32_t *buffer,
 
   if (!chan_count) {
     DTRACE(INF, "   No hits:  %s\n", hit.debug().c_str());
-    if (CsvFile) {
-      CsvFile->tofile("%zu, %d, %d, -1, -1, -1\n",
-                      stats.triggers, hit.high_time, hit.total_time);
+    if (dump_data) {
+      converted_data.push_back(hit);
     }
   }
 
   GoodEvent = TimeGood && mgEfu.GridGood && mgEfu.WireGood;
 }
 
+std::string MesytecData::time_str() {
+  char cStartTime[50];
+  time_t rawtime;
+  struct tm *timeinfo;
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  strftime(cStartTime, 50, "%Y-%m-%d-%H-%M-%S", timeinfo);
+  std::string startTime = cStartTime;
+  return startTime;
+}
+
+
 MesytecData::MesytecData(MgEFU mg_efu, std::string fileprefix)
     : vmmr16Parser(mg_efu) {
 
   if (!fileprefix.empty()) {
-    CsvFile = std::make_shared<DataSave>(fileprefix, 100000000);
-    CsvFile->tofile("Trigger, HighTime, Time, Bus, Channel, ADC\n");
+    dumpfile = std::make_shared<MGHitFile>();
+    dumpfile->open_rw(fileprefix + "mesytec_" + time_str() + ".h5");
   }
 }
 
@@ -288,6 +297,9 @@ MesytecData::error MesytecData::parse(const char *buffer,
   uint32_t *datap = (uint32_t *) (buffer + 3);
   bytesleft -= 3;
 
+  if (dumpfile)
+    vmmr16Parser.converted_data.clear();
+
   while (bytesleft > 16) {
     if ((*datap & 0x000000ff) != 0x58) {
       XTRACE(DATA, WAR, "expeced data value 0x58\n");
@@ -306,7 +318,8 @@ MesytecData::error MesytecData::parse(const char *buffer,
     }
     datap++;
     bytesleft -= 4;
-    vmmr16Parser.parse(datap, len - 3, hists, serializer, stats, CsvFile);
+    vmmr16Parser.parse(datap, len - 3, hists, serializer,
+        stats, static_cast<bool>(dumpfile));
 
     if (vmmr16Parser.externalTrigger()) {
 //      if (fbserializer.get_pulse_time() == 0)
@@ -349,6 +362,11 @@ MesytecData::error MesytecData::parse(const char *buffer,
     datap++;
     bytesleft -= 4;
   }
-  // printf("bytesleft %d\n", bytesleft);
+
+  if (dumpfile) {
+    dumpfile->data = std::move(vmmr16Parser.converted_data);
+    dumpfile->write();
+  }
+    // printf("bytesleft %d\n", bytesleft);
   return error::OK;
 }

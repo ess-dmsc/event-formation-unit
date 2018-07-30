@@ -13,7 +13,7 @@
 #include <common/ReadoutSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <multigrid/mgmesytec/MgGeometry.h>
-#include <multigrid/mgmesytec/Hit.h>
+#include <multigrid/mgmesytec/HitFile.h>
 
 struct MgStats {
   size_t readouts{0}; /**< number of channels read out */
@@ -65,7 +65,7 @@ public:
   /** \brief parse n 32 bit words from mesytec VMMR-8/16 card */
   void parse(uint32_t *buffer, uint16_t nWords,
              NMXHists &hists, ReadoutSerializer &serializer,
-             MgStats& stats, std::shared_ptr<DataSave> CsvFile);
+             MgStats& stats, bool dump_data);
 
 
   uint64_t time() const;
@@ -73,6 +73,7 @@ public:
   bool goodEvent() const;
 
   MgEFU mgEfu;
+  std::vector<MGHit> converted_data;
 
 private:
 
@@ -113,5 +114,8 @@ private:
   // \todo deduce this from mappings
   ESSGeometry Geometry{36, 40, 20, 1};
 
-  std::shared_ptr<DataSave> CsvFile {nullptr};
+  std::shared_ptr<MGHitFile> dumpfile;
+
+  // \todo factor this out, common with gdgem
+  static std::string time_str();
 };

@@ -32,6 +32,7 @@ set(mgmesytec_SRC
   mgmesytec.cpp
   mgmesytec/DataParser.cpp
   mgmesytec/Hit.cpp
+  mgmesytec/HitFile.cpp
   )
 set(mgmesytec_INC
   ../common/Hists.h
@@ -39,6 +40,7 @@ set(mgmesytec_INC
   ../common/ReadoutSerializer.h
   mgmesytec/DataParser.h
   mgmesytec/Hit.h
+  mgmesytec/HitFile.h
   mgmesytec/MgSeqGeometry.h
   mgmesytec/MgGeometry.h
   )
@@ -102,6 +104,16 @@ set(MGCNCSDataTest_INC
   )
 create_test_executable(MGCNCSDataTest)
 
+set(MGHitFileTest_SRC
+  mgmesytec/HitFileTest.cpp
+  mgmesytec/HitFile.cpp
+  mgmesytec/Hit.cpp
+  )
+set(MGHitFileTest_INC
+  mgmesytec/HitFile.h
+  mgmesytec/Hit.h
+  )
+create_test_executable(MGHitFileTest SKIP_MEMGRIND)
 
 set(MGMesytecDataTest_SRC
   ../common/Hists.cpp
@@ -110,6 +122,7 @@ set(MGMesytecDataTest_SRC
   mgmesytec/DataParserTest.cpp
   mgmesytec/DataParser.cpp
   mgmesytec/Hit.cpp
+  mgmesytec/HitFile.cpp
   )
 set(MGMesytecDataTest_INC
   ../common/Hists.h
@@ -117,6 +130,7 @@ set(MGMesytecDataTest_INC
   ../common/Producer.h
   mgmesytec/DataParser.h
   mgmesytec/Hit.h
+  mgmesytec/HitFile.h
   mgmesytec/TestData.h
   mgmesytec/MgSeqGeometry.h
   mgmesytec/MgGeometry.h
