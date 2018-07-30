@@ -8,6 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
+#include <limits>
+#include <memory>
 #include <common/Hists.h>
 #include <multigrid/mgmesytec/MgGeometry.h>
 

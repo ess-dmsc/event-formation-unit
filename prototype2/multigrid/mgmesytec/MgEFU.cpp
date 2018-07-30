@@ -1,14 +1,10 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <arpa/inet.h>
-#include <cassert>
-#include <common/Trace.h>
-#include <cstring>
 #include <multigrid/mgmesytec/MgEFU.h>
-#include <string.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#include <common/Trace.h>
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 MgEFU::MgEFU(std::shared_ptr<MgGeometry> mg_mappings, std::shared_ptr<NMXHists> h)
     : hists(h), MgMappings(mg_mappings) {
@@ -40,7 +36,7 @@ bool MgEFU::ingest(uint8_t bus, uint16_t channel, uint16_t adc) {
       WireAdcMax = adc;
       x = MgMappings->x(bus, channel);
       z = MgMappings->z(bus, channel);
-      //DTRACE(INF, "     new wire adc max: ch %d\n", channel);
+      DTRACE(INF, "     new wire adc max: ch %d\n", channel);
     }
     if (hists)
       hists->binstrips(channel, adc, 0, 0);
@@ -50,7 +46,7 @@ bool MgEFU::ingest(uint8_t bus, uint16_t channel, uint16_t adc) {
       GridGood = true;
       GridAdcMax = adc;
       y = MgMappings->y(bus, channel);
-      //DTRACE(INF, "     new grid adc max: ch %d\n", channel);
+      DTRACE(INF, "     new grid adc max: ch %d\n", channel);
     }
     if (hists)
       hists->binstrips(0, 0, channel, adc);

@@ -1,19 +1,12 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <arpa/inet.h>
-#include <cassert>
-#include <common/Trace.h>
-#include <cstring>
-#include <common/Hists.h>
 #include <multigrid/mgmesytec/Vmmr16Parser.h>
-#include <common/ReadoutSerializer.h>
-#include <string.h>
 
+#include <common/Trace.h>
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB
 
 // clang-format off
-
 // Mesytec Datasheet: VMMR-8/16 v00.01
 enum MesytecType : uint32_t {
   Header = 0x40000000,

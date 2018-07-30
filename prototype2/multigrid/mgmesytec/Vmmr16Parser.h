@@ -8,10 +8,9 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
-#include <common/FBSerializer.h>
 #include <common/ReadoutSerializer.h>
 #include <multigrid/mgmesytec/MgEFU.h>
-#include <multigrid/mgmesytec/HitFile.h>
+#include <multigrid/mgmesytec/Hit.h>
 
 struct MgStats {
   size_t readouts{0}; /**< number of channels read out */

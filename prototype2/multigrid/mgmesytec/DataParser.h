@@ -9,10 +9,9 @@
 
 #pragma once
 #include <common/FBSerializer.h>
-#include <common/Hists.h>
-#include <common/ReadoutSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <multigrid/mgmesytec/Vmmr16Parser.h>
+#include <multigrid/mgmesytec/HitFile.h>
 
 class MesytecData {
 public:

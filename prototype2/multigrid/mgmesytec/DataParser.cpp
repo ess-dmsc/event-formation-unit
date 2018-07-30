@@ -1,16 +1,10 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <arpa/inet.h>
-#include <cassert>
-#include <common/Trace.h>
-#include <cstring>
-#include <common/Hists.h>
 #include <multigrid/mgmesytec/DataParser.h>
-#include <common/ReadoutSerializer.h>
-#include <string.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#include <common/Trace.h>
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 // clang-format off
 // sis3153 and mesytec data types from
