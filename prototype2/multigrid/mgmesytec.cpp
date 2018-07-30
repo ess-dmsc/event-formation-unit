@@ -135,8 +135,9 @@ void CSPEC::mainThread() {
   // \todo make this optional
   Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
   auto readouts = std::make_shared<ReadoutSerializer>(readout_entries, monitorprod);
-  HistSerializer histfb;
-  auto hists = std::make_shared<NMXHists>();
+  auto hists = std::make_shared<NMXHists>(std::numeric_limits<uint16_t>::max(),
+                                          std::numeric_limits<uint16_t>::max());
+  HistSerializer histfb(hists->needed_buffer_size());
 
   auto mg_mappings = std::make_shared<MgSeqGeometry>();
   mg_mappings->select_module(DetectorSettings.module);

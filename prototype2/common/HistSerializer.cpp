@@ -7,8 +7,8 @@
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-HistSerializer::HistSerializer()
-    : builder(2 * NMXHists::needed_buffer_size() + 256) {}
+HistSerializer::HistSerializer(size_t buffer_half_size)
+    : builder(2 * buffer_half_size + 256) {}
 
 HistSerializer::~HistSerializer() {}
 

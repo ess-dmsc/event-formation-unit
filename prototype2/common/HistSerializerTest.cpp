@@ -5,30 +5,32 @@
 #include <common/HistSerializer.h>
 #include <test/TestBase.h>
 
+#define MAX_STRIP_VAL_TEST 5000
+
 class HistSerializerTest : public TestBase {
   virtual void SetUp() {
     for (size_t i = 0; i < hists.x_strips_hist.size(); i++) {
       hists.x_strips_hist[i] = i;
-      hists.y_strips_hist[i] = Hit::strip_max_val - i;
+      hists.y_strips_hist[i] = MAX_STRIP_VAL_TEST - i;
     }
   }
 
   virtual void TearDown() {}
 
 protected:
-  NMXHists hists;
+  NMXHists hists {MAX_STRIP_VAL_TEST, MAX_STRIP_VAL_TEST};
   char *buffer;
   char flatbuffer[1024 * 1024 * 5];
 };
 
 TEST_F(HistSerializerTest, Serialize) {
-  HistSerializer histfb;
+  HistSerializer histfb(hists.needed_buffer_size());
   auto len = histfb.serialize(hists, &buffer);
   ASSERT_TRUE(len >= hists.needed_buffer_size());
 }
 
 TEST_F(HistSerializerTest, DeSerialize) {
-  HistSerializer histfb;
+  HistSerializer histfb(hists.needed_buffer_size());
 
   auto length = histfb.serialize(hists, &buffer);
 
@@ -45,7 +47,7 @@ TEST_F(HistSerializerTest, DeSerialize) {
 
   for (size_t i = 0; i < hists.x_strips_hist.size(); i++) {
     ASSERT_EQ((*xdat)[i], i);
-    EXPECT_EQ((*ydat)[i], Hit::strip_max_val - i);
+    EXPECT_EQ((*ydat)[i], MAX_STRIP_VAL_TEST - i);
   }
 }
 

@@ -209,6 +209,29 @@ void NMX::input_thread() {
   }
 }
 
+void bin(NMXHists& hists, const Event &e)
+{
+  uint32_t sum = e.x.adc_sum + e.y.adc_sum;
+  hists.bincluster(sum);
+}
+
+void bin(NMXHists& hists, const Hit &e)
+{
+  if (e.plane_id == 0) {
+    hists.binstrips(e.strip, e.adc, 0, 0);
+  } else if (e.plane_id == 1) {
+    hists.binstrips(0, 0, e.strip, e.adc);
+  }
+}
+
+void bin_hists(NMXHists& hists, const std::list<Cluster>& cl)
+{
+  for (const auto& cluster : cl)
+    for (const auto& e : cluster.entries)
+      bin(hists, e);
+}
+
+
 void NMX::processing_thread() {
   XTRACE(PROCESS, ALW, "NMX Config file: %s\n", NMXSettings.ConfigFile.c_str());
   nmx_opts = NMXConfig(NMXSettings.ConfigFile);
@@ -224,8 +247,8 @@ void NMX::processing_thread() {
   Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
   TrackSerializer trackfb(256, nmx_opts.track_sample_minhits,
                           nmx_opts.time_config.target_resolution_ns());
-  HistSerializer histfb;
-  NMXHists hists;
+  NMXHists hists(Hit::strip_max_val, Hit::adc_max_val);
+  HistSerializer histfb(hists.needed_buffer_size());
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
   ClusterMatcher matcher(nmx_opts.matcher_max_delta_time);
@@ -258,8 +281,8 @@ void NMX::processing_thread() {
         mystats.good_frames += stats.good_frames;
 
         if (nmx_opts.hit_histograms) {
-          hists.bin_hists(builder_->clusterer_x->clusters);
-          hists.bin_hists(builder_->clusterer_y->clusters);
+          bin_hists(hists, builder_->clusterer_x->clusters);
+          bin_hists(hists, builder_->clusterer_y->clusters);
         }
 
         if (!builder_->clusterer_x->empty() && !builder_->clusterer_y->empty()) {
@@ -281,7 +304,7 @@ void NMX::processing_thread() {
                         nmx_opts.analyze_max_timedif);
 
           if (nmx_opts.hit_histograms) {
-            hists.bin(event);
+            bin(hists, event);
           }
 
           if (event.valid()) {

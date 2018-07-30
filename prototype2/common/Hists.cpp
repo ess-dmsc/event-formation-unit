@@ -3,12 +3,17 @@
 #include <common/Hists.h>
 #include <string.h>
 
+size_t NMXHists::strip_hist_size() { return strip_max_val + 1; }
+
+size_t NMXHists::adc_hist_size() { return adc_max_val + 1; }
+
 size_t NMXHists::needed_buffer_size() {
   return elem_size *
          (strip_hist_size() * 2 + adc_hist_size() * 3 + 1 /*bin_width*/);
 }
 
-NMXHists::NMXHists() {
+NMXHists::NMXHists(size_t strip_max, size_t adc_max)
+: strip_max_val(strip_max), adc_max_val(adc_max) {
   x_strips_hist.resize(strip_hist_size(), 0);
   y_strips_hist.resize(strip_hist_size(), 0);
   x_adc_hist.resize(adc_hist_size(), 0);
@@ -48,33 +53,8 @@ void NMXHists::binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16
     hit_count_++;
 }
 
-// \todo To be used for multigrid also factor out the following and move them elsewhere
-
-size_t NMXHists::strip_hist_size() { return Hit::strip_max_val + 1; }
-
-size_t NMXHists::adc_hist_size() { return Hit::adc_max_val + 1; }
-
-void NMXHists::bin_hists(const std::list<Cluster>& cl)
+void NMXHists::bincluster(uint32_t sum)
 {
-  for (const auto& cluster : cl)
-    for (const auto& e : cluster.entries)
-      bin(e);
-}
-
-void NMXHists::bin(const Hit &e) {
-  if (e.plane_id == 0) {
-    x_strips_hist[e.strip]++;
-    x_adc_hist[e.adc]++;
-  } else if (e.plane_id == 1) {
-    y_strips_hist[e.strip]++;
-    y_adc_hist[e.adc]++;
-  } else
-    return;
-  hit_count_++;
-}
-
-void NMXHists::bin(const Event &e) {
-  uint32_t sum = e.x.adc_sum + e.y.adc_sum;
   if (!sum)
     return;
   cluster_adc_hist[static_cast<uint16_t>(sum >> downshift_)]++;

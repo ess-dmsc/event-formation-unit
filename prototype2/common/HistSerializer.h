@@ -18,7 +18,7 @@
 class HistSerializer {
 public:
   /** \todo document */
-  HistSerializer();
+  HistSerializer(size_t buffer_half_size);
 
   /** \todo document */
   ~HistSerializer();
