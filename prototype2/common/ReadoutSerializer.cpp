@@ -18,7 +18,7 @@ ReadoutSerializer::ReadoutSerializer(size_t maxarraylength, Producer &prod)
 
 ReadoutSerializer::~ReadoutSerializer() {}
 
-int ReadoutSerializer::produce() {
+size_t ReadoutSerializer::produce() {
   if (entries == 0) {
     return 0;
   }
@@ -45,7 +45,7 @@ int ReadoutSerializer::produce() {
   return buffersize;
 }
 
-int ReadoutSerializer::addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc) {
+size_t ReadoutSerializer::addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc) {
   int ret = 0;
 
   planes.push_back(plane);

@@ -6,7 +6,7 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-MgEFU::MgEFU(std::shared_ptr<MgGeometry> mg_mappings, std::shared_ptr<NMXHists> h)
+MgEFU::MgEFU(std::shared_ptr<MgGeometry> mg_mappings, std::shared_ptr<Hists> h)
     : hists(h), MgMappings(mg_mappings) {
   if (!MgMappings)
     throw std::runtime_error("No valid Multigrid geometry mappings provided.");

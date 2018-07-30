@@ -15,7 +15,7 @@
 
 class MgEFU {
 public:
-  MgEFU(std::shared_ptr<MgGeometry> mg_mappings, std::shared_ptr<NMXHists> h);
+  MgEFU(std::shared_ptr<MgGeometry> mg_mappings, std::shared_ptr<Hists> h);
   ~MgEFU() = default;
 
   void setWireThreshold(uint16_t low, uint16_t high);
@@ -25,7 +25,7 @@ public:
   bool ingest(uint8_t bus, uint16_t channel, uint16_t adc);
   bool event_good() const;
 
-  std::shared_ptr<NMXHists> hists;
+  std::shared_ptr<Hists> hists;
 
   uint32_t x;
   uint32_t y;

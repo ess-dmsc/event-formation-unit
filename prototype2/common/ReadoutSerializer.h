@@ -27,10 +27,10 @@ public:
   /// \param channel datasource identifier (strip, wire, grid, ...)
   /// \param time timestamp
   /// \param adc digitizer adc value (charge, voltage, ...)
-  int addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc);
+  size_t addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc);
 
   /// \brief publish data to Kafka broker and clear internal counters
-  int produce();
+  size_t produce();
 
   /// \brief return the number of queues samples
   size_t getNumEntries(){return entries;};

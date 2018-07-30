@@ -43,23 +43,29 @@ struct DetectorSettingsStruct {
   uint32_t wireThresholdHi{65535}; // accept all
   uint32_t gridThresholdLo{0};     // accept all
   uint32_t gridThresholdHi{65535}; // accept all
+  bool swap_wires{true};
   uint32_t module{0}; // 0 defaults to 16 wires in z, 1
   std::string fileprefix{""};
+  bool monitor{true};
 } DetectorSettings;
 
 void SetCLIArguments(CLI::App & parser) {
   parser.add_option("--wlo", DetectorSettings.wireThresholdLo,
-         "minimum wire adc value for accept")->group("MGMesytec");
+         "minimum wire adc value for accept")->group("MGMesytec")->configurable(true);
   parser.add_option("--whi", DetectorSettings.wireThresholdHi,
-         "maximum wire adc value for accept")->group("MGMesytec");
+         "maximum wire adc value for accept")->group("MGMesytec")->configurable(true);
   parser.add_option("--glo", DetectorSettings.gridThresholdLo,
-         "minimum grid adc value for accept")->group("MGMesytec");
+         "minimum grid adc value for accept")->group("MGMesytec")->configurable(true);
   parser.add_option("--ghi", DetectorSettings.gridThresholdHi,
-         "maximum grid adc value for accept")->group("MGMesytec");
+         "maximum grid adc value for accept")->group("MGMesytec")->configurable(true);
   parser.add_option("--module", DetectorSettings.module,
-         "select module for correct wire swapping (0==16z, 1==20z)")->group("MGMesytec");
+         "select module for reversing z coordinates")->group("MGMesytec")->configurable(true);
+  parser.add_flag("--swap_wires", DetectorSettings.swap_wires,
+         "swap odd and even wires")->group("MGMesytec")->configurable(true);
   parser.add_option("--dumptofile", DetectorSettings.fileprefix,
-         "dump to specified file")->group("MGMesytec");
+         "dump to specified file")->group("MGMesytec")->configurable(true);
+  parser.add_flag("--monitor", DetectorSettings.monitor,
+         "stream monitor data")->group("MGMesytec")->configurable(true);
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
@@ -135,13 +141,13 @@ void CSPEC::mainThread() {
   // \todo make this optional
   Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
   auto readouts = std::make_shared<ReadoutSerializer>(readout_entries, monitorprod);
-  auto hists = std::make_shared<NMXHists>(std::numeric_limits<uint16_t>::max(),
+  auto hists = std::make_shared<Hists>(std::numeric_limits<uint16_t>::max(),
                                           std::numeric_limits<uint16_t>::max());
-  HistSerializer histfb(hists->needed_buffer_size());
+  HistSerializer histfb(hists->needed_buffer_size(), monitorprod);
 
   auto mg_mappings = std::make_shared<MgSeqGeometry>();
   mg_mappings->select_module(DetectorSettings.module);
-  mg_mappings->swap_on(true);
+  mg_mappings->swap_on(DetectorSettings.swap_wires);
   MgEFU mg_efu(mg_mappings, hists);
   mg_efu.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
   mg_efu.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
@@ -177,9 +183,7 @@ void CSPEC::mainThread() {
 
       if (hists && !hists->isEmpty()) {
         XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists->hit_count());
-        char *txbuffer;
-        auto len = histfb.serialize(*hists, &txbuffer);
-        monitorprod.produce(txbuffer, len);
+        histfb.produce(*hists);
         hists->clear();
       }
 

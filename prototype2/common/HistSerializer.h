@@ -18,16 +18,19 @@
 class HistSerializer {
 public:
   /** \todo document */
-  HistSerializer(size_t buffer_half_size);
+  HistSerializer(size_t buffer_half_size, Producer &producer);
 
   /** \todo document */
   ~HistSerializer();
 
   /** \todo document */
-  size_t serialize(const NMXHists &hists, char **buffer);
+  size_t produce(const Hists &hists);
 
 private:
+  Producer &producer; ///< wrapper for Kafka producer
+
   flatbuffers::FlatBufferBuilder builder;
+
   uint8_t *xtrackptr{nullptr};
   uint8_t *ytrackptr{nullptr};
 

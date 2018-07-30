@@ -13,7 +13,7 @@ protected:
   static const int arraysize = 10000; // max entries
   static const int fboverhead = 82;   // found by experimentation
   static const int entrysize = 10;    // three u16 + one u32
-  Producer producer{"localhost:9092", "NMX_monitor"};
+  Producer producer{"localhost:9092", "test_monitor"};
 };
 
 TEST_F(ReadoutSerializerTest, Constructor) {

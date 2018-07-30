@@ -7,12 +7,12 @@
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-HistSerializer::HistSerializer(size_t buffer_half_size)
-    : builder(2 * buffer_half_size + 256) {}
+HistSerializer::HistSerializer(size_t buffer_half_size, Producer &prod)
+    : producer(prod), builder(2 * buffer_half_size + 256) {}
 
 HistSerializer::~HistSerializer() {}
 
-size_t HistSerializer::serialize(const NMXHists &hists, char **buffer) {
+size_t HistSerializer::produce(const Hists &hists) {
   builder.Clear();
   auto x_strip_off = builder.CreateUninitializedVector(
       hists.x_strips_hist.size(), hists.elem_size, &xtrackptr);
@@ -44,6 +44,7 @@ size_t HistSerializer::serialize(const NMXHists &hists, char **buffer) {
       CreateMonitorMessage(builder, 0, DataField::GEMHist, dataoff.Union());
 
   builder.Finish(msg);
-  *buffer = (char *)builder.GetBufferPointer();
+  producer.produce((char *)builder.GetBufferPointer(), builder.GetSize());
+
   return builder.GetSize();
 }

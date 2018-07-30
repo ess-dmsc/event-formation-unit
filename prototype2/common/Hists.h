@@ -13,7 +13,7 @@
 #include <vector>
 #include <cinttypes>
 
-class NMXHists {
+class Hists {
 public:
   using nmx_hist_type = uint32_t;
   static constexpr size_t elem_size{sizeof(nmx_hist_type)};
@@ -26,7 +26,7 @@ public:
   std::vector<nmx_hist_type> cluster_adc_hist;
 
 public:
-  NMXHists(size_t strip_max, size_t adc_max);
+  Hists(size_t strip_max, size_t adc_max);
 
   void set_cluster_adc_downshift(uint32_t bits);
 

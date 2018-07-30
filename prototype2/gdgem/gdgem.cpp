@@ -209,13 +209,13 @@ void NMX::input_thread() {
   }
 }
 
-void bin(NMXHists& hists, const Event &e)
+void bin(Hists& hists, const Event &e)
 {
   uint32_t sum = e.x.adc_sum + e.y.adc_sum;
   hists.bincluster(sum);
 }
 
-void bin(NMXHists& hists, const Hit &e)
+void bin(Hists& hists, const Hit &e)
 {
   if (e.plane_id == 0) {
     hists.binstrips(e.strip, e.adc, 0, 0);
@@ -224,7 +224,7 @@ void bin(NMXHists& hists, const Hit &e)
   }
 }
 
-void bin_hists(NMXHists& hists, const std::list<Cluster>& cl)
+void bin_hists(Hists& hists, const std::list<Cluster>& cl)
 {
   for (const auto& cluster : cl)
     for (const auto& e : cluster.entries)
@@ -247,8 +247,8 @@ void NMX::processing_thread() {
   Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
   TrackSerializer trackfb(256, nmx_opts.track_sample_minhits,
                           nmx_opts.time_config.target_resolution_ns());
-  NMXHists hists(Hit::strip_max_val, Hit::adc_max_val);
-  HistSerializer histfb(hists.needed_buffer_size());
+  Hists hists(Hit::strip_max_val, Hit::adc_max_val);
+  HistSerializer histfb(hists.needed_buffer_size(), monitorprod);
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
   ClusterMatcher matcher(nmx_opts.matcher_max_delta_time);
@@ -366,9 +366,7 @@ void NMX::processing_thread() {
       if (!hists.isEmpty()) {
         XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters \n",
                hists.hit_count(), hists.cluster_count());
-        char *txbuffer;
-        auto len = histfb.serialize(hists, &txbuffer);
-        monitorprod.produce(txbuffer, len);
+        histfb.produce(hists);
         hists.clear();
       }
 
