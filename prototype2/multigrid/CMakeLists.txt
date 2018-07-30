@@ -30,6 +30,8 @@ set(mgmesytec_SRC
   ../common/HistSerializer.cpp
   ../common/ReadoutSerializer.cpp
   mgmesytec.cpp
+  mgmesytec/MgEFU.cpp
+  mgmesytec/Vmmr16Parser.cpp
   mgmesytec/DataParser.cpp
   mgmesytec/Hit.cpp
   mgmesytec/HitFile.cpp
@@ -38,6 +40,8 @@ set(mgmesytec_INC
   ../common/Hists.h
   ../common/HistSerializer.h
   ../common/ReadoutSerializer.h
+  mgmesytec/MgEFU.h
+  mgmesytec/Vmmr16Parser.h
   mgmesytec/DataParser.h
   mgmesytec/Hit.h
   mgmesytec/HitFile.h
@@ -121,6 +125,8 @@ set(MGMesytecDataTest_SRC
   ../common/Producer.cpp
   mgmesytec/DataParserTest.cpp
   mgmesytec/DataParser.cpp
+  mgmesytec/MgEFU.cpp
+  mgmesytec/Vmmr16Parser.cpp
   mgmesytec/Hit.cpp
   mgmesytec/HitFile.cpp
   )
@@ -134,6 +140,8 @@ set(MGMesytecDataTest_INC
   mgmesytec/TestData.h
   mgmesytec/MgSeqGeometry.h
   mgmesytec/MgGeometry.h
+  mgmesytec/MgEFU.h
+  mgmesytec/Vmmr16Parser.h
   )
 create_test_executable(MGMesytecDataTest)
 
