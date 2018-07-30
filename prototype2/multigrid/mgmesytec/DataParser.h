@@ -13,6 +13,7 @@
 #include <common/ReadoutSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <multigrid/mgmesytec/MgGeometry.h>
+#include <multigrid/mgmesytec/Hit.h>
 
 struct MgStats {
   size_t readouts{0}; /**< number of channels read out */
@@ -68,18 +69,17 @@ public:
 
 
   uint64_t time() const;
+  bool externalTrigger() const;
+  bool goodEvent() const;
 
-  bool ExternalTrigger{false};
-  bool GoodEvent {false};
   MgEFU mgEfu;
 
 private:
-  uint64_t TotalTime{0};
 
-  uint8_t Bus {0};
-  uint32_t LowTime{0};
+  MGHit hit;
+
+  bool GoodEvent {false};
   uint32_t PreviousLowTime{0};
-  uint32_t HighTime{0};
 
   bool spoof_high_time{false};
 };

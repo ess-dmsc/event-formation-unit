@@ -31,12 +31,14 @@ set(mgmesytec_SRC
   ../common/ReadoutSerializer.cpp
   mgmesytec.cpp
   mgmesytec/DataParser.cpp
+  mgmesytec/Hit.cpp
   )
 set(mgmesytec_INC
   ../common/Hists.h
   ../common/HistSerializer.h
   ../common/ReadoutSerializer.h
   mgmesytec/DataParser.h
+  mgmesytec/Hit.h
   mgmesytec/MgSeqGeometry.h
   mgmesytec/MgGeometry.h
   )
@@ -107,12 +109,14 @@ set(MGMesytecDataTest_SRC
   ../common/Producer.cpp
   mgmesytec/DataParserTest.cpp
   mgmesytec/DataParser.cpp
+  mgmesytec/Hit.cpp
   )
 set(MGMesytecDataTest_INC
   ../common/Hists.h
   ../common/ReadoutSerializer.h
   ../common/Producer.h
   mgmesytec/DataParser.h
+  mgmesytec/Hit.h
   mgmesytec/TestData.h
   mgmesytec/MgSeqGeometry.h
   mgmesytec/MgGeometry.h

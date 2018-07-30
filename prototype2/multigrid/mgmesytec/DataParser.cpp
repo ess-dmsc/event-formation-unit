@@ -110,77 +110,111 @@ void VMMR16Parser::setSpoofHighTime(bool spoof) {
 
 uint64_t VMMR16Parser::time() const
 {
-  return TotalTime;
+  return hit.total_time;
+}
+
+bool VMMR16Parser::externalTrigger() const
+{
+  return hit.external_trigger;
+}
+
+bool VMMR16Parser::goodEvent() const
+{
+  return GoodEvent;
 }
 
 void VMMR16Parser::parse(uint32_t *buffer,
-                                         uint16_t nWords,
-                                         NMXHists &hists,
-                                         ReadoutSerializer &serializer,
-                                         MgStats &stats,
-                                         std::shared_ptr<DataSave> CsvFile) {
-  uint32_t *datap = buffer;
+                         uint16_t nWords,
+                         NMXHists &hists,
+                         ReadoutSerializer &serializer,
+                         MgStats &stats,
+                         std::shared_ptr<DataSave> CsvFile) {
 
-  uint8_t module;
-
-  uint16_t channel;
-  uint16_t adc;
-  uint16_t dataWords;
-  uint16_t time_diff;
-
-  bool TimeGood{false};
+  stats.triggers++;
+  hit.trigger_count++;
 
   mgEfu.reset_maxima();
+  hit.bus = 0;
+  hit.channel = 0;
+  hit.adc = 0;
+  hit.time_diff = 0;
 
-  size_t chan_count{0};
-  //printf("parse n words: %d\n", nWords);
+
+  uint32_t *datap = buffer;
+
+  uint16_t dataWords;
 
   uint16_t wordsleft = nWords;
+
+  size_t chan_count{0};
+  bool TimeGood{false};
+
+  // Sneak peek on time although it is actually last in packet
+  uint32_t *tptr = (buffer + nWords - 1);
+  if ((*tptr & MesytecType::EndOfEvent) == MesytecType::EndOfEvent) {
+    TimeGood = true;
+    hit.low_time = *tptr & MesytecTimeMask;
+
+    // Spoof high time if needed
+    if (spoof_high_time) {
+      if (hit.low_time < PreviousLowTime)
+        hit.high_time++;
+      PreviousLowTime = hit.low_time;
+    }
+
+    hit.total_time = (static_cast<uint64_t>(hit.high_time) << 30) + hit.low_time;
+  }
+
+
+
   while (wordsleft > 0) {
     auto datatype = *datap & MesytecTypeMask;
 
     switch (datatype) {
-    case MesytecType::Header:dataWords = static_cast<uint16_t>(*datap & MesytecDataWordsMask);
+    case MesytecType::Header:
+      dataWords = static_cast<uint16_t>(*datap & MesytecDataWordsMask);
       assert(nWords > dataWords);
-      module = static_cast<uint8_t>((*datap & MesytecModuleMask) >> MesytecModuleBitShift);
-      ExternalTrigger = (0 != (*datap & MesytecExternalTriggerMask));
-      DTRACE(INF, "   Header:  trigger=%zu,  data len=%d (words),  module=%d, external_trigger=%s\n",
-             stats.triggers, dataWords, module, ExternalTrigger ? "true" : "false");
+      hit.module = static_cast<uint8_t>((*datap & MesytecModuleMask) >> MesytecModuleBitShift);
+      hit.external_trigger = (0 != (*datap & MesytecExternalTriggerMask));
+//      DTRACE(INF, "   Header:  trigger=%zu,  data len=%d (words),  module=%d, external_trigger=%s\n",
+//             stats.triggers, dataWords, hit.module, hit.external_trigger ? "true" : "false");
       break;
 
     case MesytecType::ExtendedTimeStamp:
       // This always comes before events on particular Bus
-      HighTime = static_cast<uint16_t>(*datap & MesytecHighTimeMask);
-      DTRACE(INF, "   ExtendedTimeStamp: high_time=%d\n", HighTime);
+      hit.high_time = static_cast<uint16_t>(*datap & MesytecHighTimeMask);
+      hit.total_time = (static_cast<uint64_t>(hit.high_time) << 30) + hit.low_time;
+//      DTRACE(INF, "   ExtendedTimeStamp: high_time=%d\n", hit.high_time);
       break;
 
     case MesytecType::DataEvent1:
       // TODO: What if Bus number changes?
 
-      Bus = static_cast<uint8_t>((*datap & MesytecBusMask) >> MesytecBusBitShift);
-      time_diff = static_cast<uint16_t>(*datap & MesytecTimeDiffMask);
-      DTRACE(INF, "   DataEvent1:  bus=%d,  time_diff=%d\n", Bus, time_diff);
+      hit.bus = static_cast<uint8_t>((*datap & MesytecBusMask) >> MesytecBusBitShift);
+      hit.time_diff = static_cast<uint16_t>(*datap & MesytecTimeDiffMask);
+//      DTRACE(INF, "   DataEvent1:  bus=%d,  time_diff=%d\n", hit.bus, hit.time_diff);
       break;
 
     case MesytecType::DataEvent2:
       // TODO: What if Bus number changes?
 
       // value in using something like getValue(Buffer, NBits, Offset) ?
-      Bus = static_cast<uint8_t>((*datap & MesytecBusMask) >> MesytecBusBitShift);
-      channel = static_cast<uint16_t>((*datap & MesytecAddressMask) >> MesytecAddressBitShift);
-      adc = static_cast<uint16_t>(*datap & MesytecAdcMask);
+      hit.bus = static_cast<uint8_t>((*datap & MesytecBusMask) >> MesytecBusBitShift);
+      hit.channel = static_cast<uint16_t>((*datap & MesytecAddressMask) >> MesytecAddressBitShift);
+      hit.adc = static_cast<uint16_t>(*datap & MesytecAdcMask);
       stats.readouts++;
       chan_count++;
 
-      DTRACE(INF, "   DataEvent2:  bus=%d  channel=%d  adc=%d\n", Bus, channel, adc);
+      DTRACE(INF, "   DataEvent2:  %s\n", hit.debug().c_str());
 
-      if (mgEfu.ingest(Bus, channel, adc, hists)) {
+      if (mgEfu.ingest(hit.bus, hit.channel, hit.adc, hists)) {
 //        DTRACE(DEB, "   accepting %d,%d,%d,%d\n", time, Bus, channel, adc);
-        serializer.addEntry(0, channel, TotalTime, adc);
+        serializer.addEntry(0, hit.channel, hit.total_time, hit.adc);
 
         if (CsvFile) {
           CsvFile->tofile("%zu, %d, %d, %d, %d, %d\n",
-                          stats.triggers, HighTime, TotalTime, Bus, channel, adc);
+                          stats.triggers, hit.high_time, hit.total_time,
+                          hit.bus, hit.channel, hit.adc);
         }
       } else {
         //DTRACE(DEB, "   discarding %d,%d,%d,%d\n", time, bus, channel, adc);
@@ -188,27 +222,15 @@ void VMMR16Parser::parse(uint32_t *buffer,
       }
       break;
 
-    case MesytecType::FillDummy:DTRACE(INF, "   FillDummy\n");
+    case MesytecType::FillDummy:
       break;
 
     default:
 
-      if ((*datap & MesytecType::EndOfEvent) == MesytecType::EndOfEvent) {
-        TimeGood = true;
-        LowTime = *datap & MesytecTimeMask;
-        if (spoof_high_time) {
-          if (LowTime < PreviousLowTime)
-            HighTime++;
-          PreviousLowTime = LowTime;
-        }
-        TotalTime = (static_cast<uint64_t>(HighTime) << 30) + LowTime;
-        DTRACE(INF, "   EndOfEvent: timestamp=%d, total_time=%"
-            PRIu64
-            "\n", LowTime, TotalTime);
-        break;
+      if ((*datap & MesytecType::EndOfEvent) != MesytecType::EndOfEvent) {
+        DTRACE(WAR, "   Unknown: 0x%08x\n", *datap);
       }
 
-      DTRACE(WAR, "   Unknown: 0x%08x\n", *datap);
       break;
     }
 
@@ -216,12 +238,12 @@ void VMMR16Parser::parse(uint32_t *buffer,
     datap++;
   }
 
-  if (chan_count)
-    DTRACE(INF, "   Bus=%d  Chan_count=%zu\n", Bus, chan_count);
-
-  if (CsvFile && TimeGood && (!mgEfu.WireGood || !mgEfu.GridGood)) {
-    CsvFile->tofile("%zu, %d, %d, -1, -1, -1\n",
-                    stats.triggers, HighTime, TotalTime);
+  if (!chan_count) {
+    DTRACE(INF, "   No hits:  %s\n", hit.debug().c_str());
+    if (CsvFile) {
+      CsvFile->tofile("%zu, %d, %d, -1, -1, -1\n",
+                      stats.triggers, hit.high_time, hit.total_time);
+    }
   }
 
   GoodEvent = TimeGood && mgEfu.GridGood && mgEfu.WireGood;
@@ -284,10 +306,9 @@ MesytecData::error MesytecData::parse(const char *buffer,
     }
     datap++;
     bytesleft -= 4;
-    stats.triggers++;
     vmmr16Parser.parse(datap, len - 3, hists, serializer, stats, CsvFile);
 
-    if (vmmr16Parser.ExternalTrigger) {
+    if (vmmr16Parser.externalTrigger()) {
 //      if (fbserializer.get_pulse_time() == 0)
 //        fbserializer.set_pulse_time(RecentPulseTime);
       stats.tx_bytes += fbserializer.produce();
@@ -297,7 +318,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
       RecentPulseTime = vmmr16Parser.time();
     }
 
-    if (vmmr16Parser.GoodEvent) {
+    if (vmmr16Parser.goodEvent()) {
       uint32_t pixel = getPixel();
       uint32_t time = getTime();
 
