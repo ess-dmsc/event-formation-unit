@@ -130,21 +130,22 @@ void CSPEC::mainThread() {
   cspecdata.printBufferSizes();
   cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
   FBSerializer flatbuffer(kafka_buffer_size, EventProducer);
 
-  ReadoutSerializer readouts(readout_entries, monitorprod);
+  // \todo make this optional
+  Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
+  auto readouts = std::make_shared<ReadoutSerializer>(readout_entries, monitorprod);
   HistSerializer histfb;
-  NMXHists hists;
+  auto hists = std::make_shared<NMXHists>();
 
   auto mg_mappings = std::make_shared<MgSeqGeometry>();
   mg_mappings->select_module(DetectorSettings.module);
   mg_mappings->swap_on(true);
-  MgEFU mg_efu(mg_mappings);
+  MgEFU mg_efu(mg_mappings, hists);
   mg_efu.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
   mg_efu.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
 
-  MesytecData mesytecdata(mg_efu, DetectorSettings.fileprefix);
+  MesytecData mesytecdata(mg_efu, readouts, DetectorSettings.fileprefix);
 
   char buffer[eth_buffer_size];
   int ReadSize;
@@ -155,7 +156,7 @@ void CSPEC::mainThread() {
       mystats.rx_bytes += ReadSize;
       XTRACE(INPUT, DEB, "read size: %u\n", ReadSize);
 
-      auto res = mesytecdata.parse(buffer, ReadSize, hists, flatbuffer, readouts);
+      auto res = mesytecdata.parse(buffer, ReadSize, flatbuffer);
       if (res != MesytecData::error::OK) {
         mystats.parse_errors++;
       }
@@ -173,12 +174,12 @@ void CSPEC::mainThread() {
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       mystats.tx_bytes += flatbuffer.produce();
 
-      if (!hists.isEmpty()) {
-        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.hit_count());
+      if (hists && !hists->isEmpty()) {
+        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists->hit_count());
         char *txbuffer;
-        auto len = histfb.serialize(hists, &txbuffer);
+        auto len = histfb.serialize(*hists, &txbuffer);
         monitorprod.produce(txbuffer, len);
-        hists.clear();
+        hists->clear();
       }
 
       report_timer.now();
@@ -187,7 +188,7 @@ void CSPEC::mainThread() {
     // Checking for exit
     if (not runThreads) {
       mystats.tx_bytes += flatbuffer.produce();
-      auto entries = readouts.getNumEntries();
+      auto entries = readouts->getNumEntries();
       if (entries > 0) {
         XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", entries);
         //readouts.produce(); // Periodically produce of readouts

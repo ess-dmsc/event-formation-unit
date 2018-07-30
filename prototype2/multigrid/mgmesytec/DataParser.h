@@ -9,7 +9,7 @@
 
 #pragma once
 #include <common/FBSerializer.h>
-#include <common/DataSave.h>
+#include <common/Hists.h>
 #include <common/ReadoutSerializer.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <multigrid/mgmesytec/MgGeometry.h>
@@ -27,36 +27,40 @@ struct MgStats {
 
 class MgEFU {
 public:
-  MgEFU(std::shared_ptr<MgGeometry> mg_mappings);
+  MgEFU(std::shared_ptr<MgGeometry> mg_mappings, std::shared_ptr<NMXHists> h);
   ~MgEFU() = default;
 
   void setWireThreshold(uint16_t low, uint16_t high);
   void setGridThreshold(uint16_t low, uint16_t high);
 
   void reset_maxima();
-  bool ingest(uint8_t bus, uint16_t channel, uint16_t adc, NMXHists &hists);
+  bool ingest(uint8_t bus, uint16_t channel, uint16_t adc);
+  bool event_good() const;
 
+  std::shared_ptr<NMXHists> hists;
+
+  uint32_t x;
+  uint32_t y;
+  uint32_t z;
+
+private:
   uint16_t wireThresholdLo{0};
   uint16_t wireThresholdHi{std::numeric_limits<uint16_t>::max()};
   uint16_t gridThresholdLo{0};
   uint16_t gridThresholdHi{std::numeric_limits<uint16_t>::max()};
   std::shared_ptr<MgGeometry> MgMappings;
 
-  bool WireGood{false};
-  bool GridGood{false};
-
   uint16_t GridAdcMax {0};
   uint16_t WireAdcMax {0};
 
-  uint32_t x;
-  uint32_t y;
-  uint32_t z;
+  bool WireGood{false};
+  bool GridGood{false};
 };
 
 class VMMR16Parser {
 public:
   /// \brief if it looks like a constructor...
-  VMMR16Parser(MgEFU mg_efu);
+  VMMR16Parser(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s);
 
   ~VMMR16Parser() = default;
 
@@ -64,7 +68,6 @@ public:
 
   /** \brief parse n 32 bit words from mesytec VMMR-8/16 card */
   void parse(uint32_t *buffer, uint16_t nWords,
-             NMXHists &hists, ReadoutSerializer &serializer,
              MgStats& stats, bool dump_data);
 
 
@@ -77,12 +80,14 @@ public:
 
 private:
 
+  std::shared_ptr<ReadoutSerializer> hit_serializer;
+
   MGHit hit;
 
   bool GoodEvent {false};
-  uint32_t PreviousLowTime{0};
 
   bool spoof_high_time{false};
+  uint32_t PreviousLowTime{0};
 };
 
 
@@ -91,7 +96,7 @@ public:
   enum class error { OK = 0, ESIZE, EHEADER, EUNSUPP };
 
   /// \brief if it looks like a constructor...
-  MesytecData(MgEFU mg_efu, std::string fileprefix = "");
+  MesytecData(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s, std::string fileprefix = "");
 
   ~MesytecData() = default;
 
@@ -101,7 +106,7 @@ public:
   /** \brief parse a binary payload buffer, return number of data element
    * \todo Uses NMXHists  - refactor and move ?
    */
-  error parse(const char *buffer, int size, NMXHists &hists, FBSerializer &fbserializer, ReadoutSerializer &serializer);
+  error parse(const char *buffer, int size, FBSerializer &fbserializer);
 
   // Statistics updated by parse()
   MgStats stats;

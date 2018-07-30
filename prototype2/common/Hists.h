@@ -12,6 +12,7 @@
 #include <gdgem/nmx/Event.h>
 #include <math.h>
 #include <vector>
+#include <cinttypes>
 
 class NMXHists {
 public:

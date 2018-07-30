@@ -52,11 +52,10 @@ static constexpr uint32_t MesytecAddressMask{0x00fff000};
 static constexpr uint8_t MesytecAddressBitShift{12};
 static constexpr uint32_t MesytecAdcMask{0x00000fff};
 
-MgEFU::MgEFU(std::shared_ptr<MgGeometry> mg_mappings) {
-  if (!mg_mappings)
+MgEFU::MgEFU(std::shared_ptr<MgGeometry> mg_mappings, std::shared_ptr<NMXHists> h)
+    : hists(h), MgMappings(mg_mappings) {
+  if (!MgMappings)
     throw std::runtime_error("No valid Multigrid geometry mappings provided.");
-
-  MgMappings = mg_mappings;
 }
 
 void MgEFU::setWireThreshold(uint16_t low, uint16_t high) {
@@ -76,7 +75,7 @@ void MgEFU::reset_maxima() {
   GridGood = false;
 }
 
-bool MgEFU::ingest(uint8_t bus, uint16_t channel, uint16_t adc, NMXHists &hists) {
+bool MgEFU::ingest(uint8_t bus, uint16_t channel, uint16_t adc) {
   if (MgMappings->isWire(channel) && adc >= wireThresholdLo && adc <= wireThresholdHi) {
     if (adc > WireAdcMax) {
       WireGood = true;
@@ -85,7 +84,8 @@ bool MgEFU::ingest(uint8_t bus, uint16_t channel, uint16_t adc, NMXHists &hists)
       z = MgMappings->z(bus, channel);
       //DTRACE(INF, "     new wire adc max: ch %d\n", channel);
     }
-    hists.binstrips(channel, adc, 0, 0);
+    if (hists)
+      hists->binstrips(channel, adc, 0, 0);
     return true;
   } else if (MgMappings->isGrid(channel) && adc >= gridThresholdLo && adc <= gridThresholdHi) {
     if (adc > GridAdcMax) {
@@ -94,15 +94,20 @@ bool MgEFU::ingest(uint8_t bus, uint16_t channel, uint16_t adc, NMXHists &hists)
       y = MgMappings->y(bus, channel);
       //DTRACE(INF, "     new grid adc max: ch %d\n", channel);
     }
-    hists.binstrips(0, 0, channel, adc);
+    if (hists)
+      hists->binstrips(0, 0, channel, adc);
     return true;
   }
   return false;
 }
 
-VMMR16Parser::VMMR16Parser(MgEFU mg_efu)
-    : mgEfu(mg_efu) {
+bool MgEFU::event_good() const
+{
+  return WireGood && GridGood;
 }
+
+VMMR16Parser::VMMR16Parser(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s)
+    : mgEfu(mg_efu), hit_serializer(s) {}
 
 void VMMR16Parser::setSpoofHighTime(bool spoof) {
   spoof_high_time = spoof;
@@ -125,8 +130,6 @@ bool VMMR16Parser::goodEvent() const
 
 void VMMR16Parser::parse(uint32_t *buffer,
                          uint16_t nWords,
-                         NMXHists &hists,
-                         ReadoutSerializer &serializer,
                          MgStats &stats,
                          bool dump_data) {
 
@@ -205,11 +208,14 @@ void VMMR16Parser::parse(uint32_t *buffer,
       stats.readouts++;
       chan_count++;
 
-      DTRACE(INF, "   DataEvent2:  %s\n", hit.debug().c_str());
+//      DTRACE(INF, "   DataEvent2:  %s\n", hit.debug().c_str());
 
-      if (mgEfu.ingest(hit.bus, hit.channel, hit.adc, hists)) {
+      if (mgEfu.ingest(hit.bus, hit.channel, hit.adc)) {
 //        DTRACE(DEB, "   accepting %d,%d,%d,%d\n", time, Bus, channel, adc);
-        serializer.addEntry(0, hit.channel, hit.total_time, hit.adc);
+
+        if (hit_serializer) {
+          hit_serializer->addEntry(0, hit.channel, hit.total_time, hit.adc);
+        }
 
         if (dump_data) {
           converted_data.push_back(hit);
@@ -237,15 +243,16 @@ void VMMR16Parser::parse(uint32_t *buffer,
   }
 
   if (!chan_count) {
-    DTRACE(INF, "   No hits:  %s\n", hit.debug().c_str());
+//    DTRACE(INF, "   No hits:  %s\n", hit.debug().c_str());
     if (dump_data) {
       converted_data.push_back(hit);
     }
   }
 
-  GoodEvent = TimeGood && mgEfu.GridGood && mgEfu.WireGood;
+  GoodEvent = TimeGood && mgEfu.event_good();
 }
 
+// \todo put this somewhere else
 std::string MesytecData::time_str() {
   char cStartTime[50];
   time_t rawtime;
@@ -258,8 +265,8 @@ std::string MesytecData::time_str() {
 }
 
 
-MesytecData::MesytecData(MgEFU mg_efu, std::string fileprefix)
-    : vmmr16Parser(mg_efu) {
+MesytecData::MesytecData(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s, std::string fileprefix)
+    : vmmr16Parser(mg_efu, s) {
 
   if (!fileprefix.empty()) {
     dumpfile = std::make_shared<MGHitFile>();
@@ -280,9 +287,7 @@ uint32_t MesytecData::getTime() {
 
 MesytecData::error MesytecData::parse(const char *buffer,
                                       int size,
-                                      NMXHists &hists,
-                                      FBSerializer &fbserializer,
-                                      ReadoutSerializer &serializer) {
+                                      FBSerializer &fbserializer) {
   int bytesleft = size;
   memset(&stats, 0, sizeof(stats));
 
@@ -302,7 +307,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
 
   while (bytesleft > 16) {
     if ((*datap & 0x000000ff) != 0x58) {
-      XTRACE(DATA, WAR, "expeced data value 0x58\n");
+      XTRACE(DATA, WAR, "expected data value 0x58\n");
       return error::EUNSUPP;
     }
 
@@ -318,15 +323,10 @@ MesytecData::error MesytecData::parse(const char *buffer,
     }
     datap++;
     bytesleft -= 4;
-    vmmr16Parser.parse(datap, len - 3, hists, serializer,
-        stats, static_cast<bool>(dumpfile));
+    vmmr16Parser.parse(datap, len - 3, stats, static_cast<bool>(dumpfile));
 
     if (vmmr16Parser.externalTrigger()) {
-//      if (fbserializer.get_pulse_time() == 0)
-//        fbserializer.set_pulse_time(RecentPulseTime);
       stats.tx_bytes += fbserializer.produce();
-//        XTRACE(PROCESS, WAR, "Updated fake pulse time = %zu to %zu by delta %zu\n",
-//            FakePulseTime, fbserializer.get_pulse_time(), PreviousTime);
       fbserializer.set_pulse_time(RecentPulseTime);
       RecentPulseTime = vmmr16Parser.time();
     }

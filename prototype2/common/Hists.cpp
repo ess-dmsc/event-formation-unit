@@ -3,12 +3,6 @@
 #include <common/Hists.h>
 #include <string.h>
 
-// static
-
-size_t NMXHists::strip_hist_size() { return Hit::strip_max_val + 1; }
-
-size_t NMXHists::adc_hist_size() { return Hit::adc_max_val + 1; }
-
 size_t NMXHists::needed_buffer_size() {
   return elem_size *
          (strip_hist_size() * 2 + adc_hist_size() * 3 + 1 /*bin_width*/);
@@ -46,6 +40,20 @@ void NMXHists::clear() {
   cluster_count_ = 0;
 }
 
+void NMXHists::binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16_t yadc) {
+    x_strips_hist[xstrip]++;
+    x_adc_hist[xadc]++;
+    y_strips_hist[ystrip]++;
+    y_adc_hist[yadc]++;
+    hit_count_++;
+}
+
+// \todo To be used for multigrid also factor out the following and move them elsewhere
+
+size_t NMXHists::strip_hist_size() { return Hit::strip_max_val + 1; }
+
+size_t NMXHists::adc_hist_size() { return Hit::adc_max_val + 1; }
+
 void NMXHists::bin_hists(const std::list<Cluster>& cl)
 {
   for (const auto& cluster : cl)
@@ -63,15 +71,6 @@ void NMXHists::bin(const Hit &e) {
   } else
     return;
   hit_count_++;
-}
-
-// To be used for multigrid also - consider refactoring and moving elsewhere
-void NMXHists::binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16_t yadc) {
-    x_strips_hist[xstrip]++;
-    x_adc_hist[xadc]++;
-    y_strips_hist[ystrip]++;
-    y_adc_hist[yadc]++;
-    hit_count_++;
 }
 
 void NMXHists::bin(const Event &e) {
