@@ -45,11 +45,13 @@ bool Loader::loadPlugin(const std::string lib) {
             TestLibName.c_str());
       break;
     }
+    else {
+      XTRACE(INIT, CRI, "Could not open library %s: %s\n", TestLibName.c_str(),
+             dlerror());
+    }
   }
   if (handle == nullptr) {
-    XTRACE(INIT, CRI, "Could not open library %s: %s\n", lib.c_str(),
-           dlerror());
-    return false;
+    XTRACE(INIT, CRI, "All variations of DL failed. Womp womp.\n");
   }
 
   if (!(myFactory = (DetectorFactoryBase *)dlsym(handle, "Factory"))) {
