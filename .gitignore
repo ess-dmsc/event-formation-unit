@@ -18,5 +18,6 @@ doxygen/
 
 #IDE
 CMakeLists.txt.user
-.idea/
+.idea/workspace.xml
+.idea/usage.statistics.xml
 cmake-build-*/
