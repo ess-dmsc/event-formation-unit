@@ -10,7 +10,6 @@
 #include <efu/Loader.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <iostream>
 #include <libs/include/Timer.h>
 #include <libs/include/gccintel.h>
 #include <unistd.h> // sleep()
@@ -33,6 +32,13 @@ int main(int argc, char *argv[]) {
     if (EFUArgs::Status::EXIT == efu_args.parseFirstPass(argc, argv)) {
       return 0;
     }
+    // Set-up logging before we start doing important stuff
+    Log::SetMinimumSeverity(Severity(efu_args.getLogLevel()));
+    Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
+    if (efu_args.getLogFileName().size() > 0) {
+      Log::AddLogHandler(new FileInterface(efu_args.getLogFileName()));
+    }
+    
     loader.loadPlugin(efu_args.getDetectorName());
     if (not loader.IsOk()) {
       efu_args.printHelp();
@@ -60,11 +66,6 @@ int main(int argc, char *argv[]) {
   int keep_running = 1;
 
   ExitHandler::InitExitHandler();
-
-#ifdef GRAYLOG
-  Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
-  Log::SetMinimumSeverity(Severity::Debug);
-#endif
 
   LOG(Sev::Info, "Starting Event Formation Unit");
   LOG(Sev::Info, "Event Formation Unit version: {}", efu_version());

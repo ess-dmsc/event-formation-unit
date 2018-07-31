@@ -3,11 +3,10 @@
 #pragma once
 
 #include <fmt/format.h>
-#include <iostream>
-#include <string>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
 #include <graylog_logger/GraylogInterface.hpp>
+#include <graylog_logger/FileInterface.hpp>
 #include <graylog_logger/Log.hpp>
 #pragma GCC diagnostic pop
 

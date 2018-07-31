@@ -42,6 +42,9 @@ public:
   std::vector<ThreadCoreAffinitySetting> getThreadCoreAffinity() {
     return ThreadAffinity;
   };
+  
+  int getLogLevel() {return LogMessageLevel;};
+  std::string getLogFileName() {return LogFileName;};
 
   BaseSettings getBaseSettings() { return EFUSettings; };
 
@@ -51,8 +54,10 @@ public:
 
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
-
+  bool parseLogLevel(std::vector<std::string> LogLevelString);
+  int LogMessageLevel{6};
   std::string DetectorName;
+  std::string LogFileName;
 
   std::vector<ThreadCoreAffinitySetting> ThreadAffinity;
   CLI::Option *DetectorOption;
