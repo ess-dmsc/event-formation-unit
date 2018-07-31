@@ -51,7 +51,7 @@ uint32_t MesytecData::getTime() {
 
 MesytecData::error MesytecData::parse(const char *buffer,
                                       int size,
-                                      FBSerializer &fbserializer) {
+                                      EV42Serializer &EV42Serializer) {
   int bytesleft = size;
   memset(&stats, 0, sizeof(stats));
 
@@ -90,8 +90,8 @@ MesytecData::error MesytecData::parse(const char *buffer,
     vmmr16Parser.parse(datap, len - 3, stats, static_cast<bool>(dumpfile));
 
     if (vmmr16Parser.externalTrigger()) {
-      stats.tx_bytes += fbserializer.produce();
-      fbserializer.set_pulse_time(RecentPulseTime);
+      stats.tx_bytes += EV42Serializer.produce();
+      EV42Serializer.set_pulse_time(RecentPulseTime);
       RecentPulseTime = vmmr16Parser.time();
     }
 
@@ -101,7 +101,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
 
       DTRACE(DEB, "Event: pixel: %d, time: %d \n", pixel, time);
       if (pixel != 0) {
-        stats.tx_bytes += fbserializer.addevent(time, pixel);
+        stats.tx_bytes += EV42Serializer.addevent(time, pixel);
         stats.events++;
       } else {
         stats.geometry_errors++;

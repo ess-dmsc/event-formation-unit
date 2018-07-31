@@ -8,7 +8,7 @@
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
-#include <common/FBSerializer.h>
+#include <common/EV42Serializer.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
@@ -159,7 +159,7 @@ void SONDEIDEA::processing_thread() {
 
   IDEASData ideasdata(&geometry, DetectorSettings.fileprefix);
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
-  FBSerializer flatbuffer(kafka_buffer_size, eventprod);
+  EV42Serializer flatbuffer(kafka_buffer_size, eventprod, "multigrid");
 
   unsigned int data_index;
 

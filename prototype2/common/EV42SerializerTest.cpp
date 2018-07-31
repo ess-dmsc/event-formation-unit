@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/FBSerializer.h>
+#include <common/EV42Serializer.h>
 #include <common/Producer.h>
 #include <cstring>
 #include <test/TestBase.h>
@@ -10,7 +10,7 @@
 
 static Producer prod{"nobroker", "notopic"};
 
-class FBSerializerTest : public TestBase {
+class EV42SerializerTest : public TestBase {
   virtual void SetUp() {
     for (int i = 0; i < 200000; i++) {
       tarr[i] = i;
@@ -25,24 +25,22 @@ protected:
   uint32_t tarr[200000];
   uint32_t parr[200000];
   char *buffer;
-  FBSerializer fb{ARRAYLENGTH, prod};
+  EV42Serializer fb{ARRAYLENGTH, prod, "nameless"};
 };
 
-TEST_F(FBSerializerTest, Serialize) {
-  auto length = fb.serialize(ARRAYLENGTH, &buffer);
+TEST_F(EV42SerializerTest, Serialize) {
+  for (size_t i=0; i < ARRAYLENGTH; i++)
+    fb.addevent(i,i);
+  auto length = fb.serialize(&buffer);
   ASSERT_TRUE(length >= ARRAYLENGTH * 8);
   ASSERT_TRUE(length <= ARRAYLENGTH * 8 + 2048);
   ASSERT_TRUE(buffer != 0);
 }
 
-TEST_F(FBSerializerTest, SerializeOversize) {
-  auto length = fb.serialize(ARRAYLENGTH + 1, &buffer);
-  ASSERT_EQ(length, 0);
-  ASSERT_EQ(buffer, nullptr);
-}
-
-TEST_F(FBSerializerTest, SerDeserialize) {
-  auto length = fb.serialize(ARRAYLENGTH, &buffer);
+TEST_F(EV42SerializerTest, SerDeserialize) {
+  for (size_t i=0; i < ARRAYLENGTH-1; i++)
+    fb.addevent(i,i);
+  auto length = fb.serialize(&buffer);
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
   auto events = GetEventMessage(flatbuffer);
@@ -53,10 +51,10 @@ TEST_F(FBSerializerTest, SerDeserialize) {
   ASSERT_EQ(events->message_id(), 1);
 }
 
-TEST_F(FBSerializerTest, SerPulseTime) {
+TEST_F(EV42SerializerTest, SerPulseTime) {
   fb.set_pulse_time(12345);
   ASSERT_EQ(fb.get_pulse_time(), 12345);
-  auto length = fb.serialize(ARRAYLENGTH, &buffer);
+  auto length = fb.serialize(&buffer);
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
   auto events = GetEventMessage(flatbuffer);
@@ -67,16 +65,14 @@ TEST_F(FBSerializerTest, SerPulseTime) {
   ASSERT_EQ(events->pulse_time(), 12345);
 }
 
-TEST_F(FBSerializerTest, DeserializeCheckData) {
+TEST_F(EV42SerializerTest, DeserializeCheckData) {
   for (int i = 0; i < ARRAYLENGTH - 1; i++) {
     auto len = fb.addevent(tarr[i], parr[i]);
     ASSERT_EQ(len, 0);
+    ASSERT_EQ(fb.events(), i+1);
   }
 
-  auto len = fb.addevent(tarr[ARRAYLENGTH - 1], parr[ARRAYLENGTH - 1]);
-  ASSERT_TRUE(len > 0);
-
-  auto length = fb.serialize(ARRAYLENGTH, &buffer);
+  auto length = fb.serialize(&buffer);
   ASSERT_TRUE(length > 0);
   ASSERT_TRUE(buffer != nullptr);
 
@@ -86,15 +82,26 @@ TEST_F(FBSerializerTest, DeserializeCheckData) {
   auto events = GetEventMessage(flatbuffer);
 
   auto detvec = events->detector_id();
-  ASSERT_EQ(detvec->size(), ARRAYLENGTH);
+  EXPECT_EQ(detvec->size(), ARRAYLENGTH - 1);
 
   auto timevec = events->time_of_flight();
-  ASSERT_EQ(timevec->size(), ARRAYLENGTH);
+  EXPECT_EQ(timevec->size(), ARRAYLENGTH - 1);
 
-  for (int i = 0; i < ARRAYLENGTH; i++) {
-    ASSERT_EQ((*timevec)[i], i);
-    ASSERT_EQ((*detvec)[i], 200000 - i);
+  for (int i = 0; i < ARRAYLENGTH - 1; i++) {
+    EXPECT_EQ((*timevec)[i], i);
+    EXPECT_EQ((*detvec)[i], 200000 - i);
   }
+}
+
+TEST_F(EV42SerializerTest, AutoDeserialize) {
+  for (int i = 0; i < ARRAYLENGTH - 1; i++) {
+    auto len = fb.addevent(tarr[i], parr[i]);
+    ASSERT_EQ(len, 0);
+    ASSERT_EQ(fb.events(), i + 1);
+  }
+
+  auto len = fb.addevent(tarr[ARRAYLENGTH - 1], parr[ARRAYLENGTH - 1]);
+  ASSERT_TRUE(len > 0);
 }
 
 int main(int argc, char **argv) {

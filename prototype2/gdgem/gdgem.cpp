@@ -15,7 +15,7 @@
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
-#include <common/FBSerializer.h>
+#include <common/EV42Serializer.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 
@@ -242,7 +242,7 @@ void NMX::processing_thread() {
   }
 
   Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
-  FBSerializer flatbuffer(kafka_buffer_size, eventprod);
+  EV42Serializer flatbuffer(kafka_buffer_size, eventprod, "nmx");
 
   Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
   TrackSerializer trackfb(256, nmx_opts.track_sample_minhits,

@@ -2,7 +2,7 @@
 # Common functionality for all detector plugins
 #=============================================================================
 set(efu_common_SRC
-  FBSerializer.cpp
+  EV42Serializer.cpp
   NewStats.cpp
   Producer.cpp
   DataSave.cpp
@@ -13,7 +13,7 @@ set(efu_common_INC
   DetectorModuleRegister.h
   Detector.h
   EFUArgs.h
-  FBSerializer.h
+  EV42Serializer.h
   NewStats.h
   Producer.h
   Trace.h
@@ -81,14 +81,14 @@ set(EFUArgsTest_INC
   EFUArgs.h)
 create_test_executable(EFUArgsTest)
 
-set(FBSerializerTest_SRC
-  FBSerializerTest.cpp
-  FBSerializer.cpp
+set(EV42SerializerTest_SRC
+  EV42SerializerTest.cpp
+  EV42Serializer.cpp
   Producer.cpp)
-set(FBSerializerTest_INC
-  FBSerializer.h
+set(EV42SerializerTest_INC
+  EV42Serializer.h
   Producer.h)
-create_test_executable(FBSerializerTest)
+create_test_executable(EV42SerializerTest)
 
 set(NewStatsTest_SRC
   NewStatsTest.cpp

@@ -9,7 +9,7 @@
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
-#include <common/FBSerializer.h>
+#include <common/EV42Serializer.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
@@ -136,14 +136,17 @@ void CSPEC::mainThread() {
   cspecdata.printBufferSizes();
   cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  FBSerializer flatbuffer(kafka_buffer_size, EventProducer);
+  EV42Serializer flatbuffer(kafka_buffer_size, EventProducer, "multigrid");
 
   // \todo make this optional
+  std::shared_ptr<ReadoutSerializer> readouts;
+  std::shared_ptr<Hists> hists;
+  std::shared_ptr<HistSerializer> histfb;
   Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
-  auto readouts = std::make_shared<ReadoutSerializer>(readout_entries, monitorprod);
-  auto hists = std::make_shared<Hists>(std::numeric_limits<uint16_t>::max(),
-                                          std::numeric_limits<uint16_t>::max());
-  HistSerializer histfb(hists->needed_buffer_size(), monitorprod);
+  readouts = std::make_shared<ReadoutSerializer>(readout_entries, monitorprod);
+  hists = std::make_shared<Hists>(std::numeric_limits<uint16_t>::max(),
+                                  std::numeric_limits<uint16_t>::max());
+  histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size(), monitorprod);
 
   auto mg_mappings = std::make_shared<MgSeqGeometry>();
   mg_mappings->select_module(DetectorSettings.module);
@@ -183,7 +186,7 @@ void CSPEC::mainThread() {
 
       if (hists && !hists->isEmpty()) {
         XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists->hit_count());
-        histfb.produce(*hists);
+        histfb->produce(*hists);
         hists->clear();
       }
 

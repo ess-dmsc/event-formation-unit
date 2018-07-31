@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
-#include <common/FBSerializer.h>
+#include <common/EV42Serializer.h>
 #include <logical_geometry/ESSGeometry.h>
 #include <multigrid/mgmesytec/Vmmr16Parser.h>
 #include <multigrid/mgmesytec/HitFile.h>
@@ -28,7 +28,7 @@ public:
   /** \brief parse a binary payload buffer, return number of data element
    * \todo Uses NMXHists  - refactor and move ?
    */
-  error parse(const char *buffer, int size, FBSerializer &fbserializer);
+  error parse(const char *buffer, int size, EV42Serializer &EV42Serializer);
 
   // Statistics updated by parse()
   MgStats stats;

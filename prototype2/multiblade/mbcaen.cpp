@@ -10,7 +10,7 @@
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
-#include <common/FBSerializer.h>
+#include <common/EV42Serializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <common/DataSave.h>
@@ -173,7 +173,7 @@ void MBCAEN::processing_thread() {
   MB16Detector mb16;
 
   Producer eventprod(EFUSettings.KafkaBroker, "MB_detector");
-  FBSerializer flatbuffer(kafka_buffer_size, eventprod);
+  EV42Serializer flatbuffer(kafka_buffer_size, eventprod, "multiblade");
 
   multiBladeEventBuilder builder[ncass];
   for (uint32_t i = 0; i < ncass; i++) {
