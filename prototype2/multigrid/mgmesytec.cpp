@@ -145,8 +145,6 @@ struct Monitor
   }
 
   void close() {
-    readouts->set_callback(nullptr);
-    histfb->set_callback(nullptr);
     enabled_ = false;
     hists.reset();
     readouts.reset();
@@ -155,12 +153,16 @@ struct Monitor
   }
 
   void produce() {
-    if (hists && !hists->isEmpty()) {
+    if (!enabled_)
+      return;
+
+    if (!hists->isEmpty()) {
       XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists->hit_count());
       histfb->produce(*hists);
       hists->clear();
     }
-    if (readouts && readouts->getNumEntries()) {
+
+    if (readouts->getNumEntries()) {
       XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", readouts->getNumEntries());
       readouts->produce();
     }
@@ -169,6 +171,9 @@ struct Monitor
   bool enabled() const {
     return enabled_;
   }
+
+  Monitor() = default;
+  ~Monitor() { close(); }
 
 private:
   bool enabled_ {false};
@@ -239,7 +244,6 @@ void CSPEC::mainThread() {
       // flush anything that remains
       mystats.tx_bytes += flatbuffer.produce();
       monitor.produce();
-      monitor.close();
       XTRACE(INPUT, ALW, "Stopping processing thread.\n");
       return;
     }
