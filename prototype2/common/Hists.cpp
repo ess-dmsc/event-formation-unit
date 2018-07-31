@@ -2,6 +2,7 @@
 
 #include <common/Hists.h>
 #include <string.h>
+#include <math.h>
 
 size_t Hists::strip_hist_size() { return strip_max_val + 1; }
 

@@ -18,9 +18,9 @@ public:
   virtual ~ProducerBase() = default;
   virtual int produce(char *buffer, size_t length) = 0;
 
-  inline int produce2(const Buffer& buffer)
+  inline void produce2(const Buffer& buffer)
   {
-    return this->produce(buffer.buffer, buffer.size);
+    this->produce(buffer.buffer, buffer.size);
   }
 
 };

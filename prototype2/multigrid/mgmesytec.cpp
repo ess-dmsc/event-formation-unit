@@ -135,8 +135,11 @@ void CSPEC::mainThread() {
   cspecdata.setBufferSizes(EFUSettings.DetectorTxBufferSize, EFUSettings.DetectorRxBufferSize);
   cspecdata.printBufferSizes();
   cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
+
+  EV42Serializer flatbuffer(kafka_buffer_size, "multigrid");
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  EV42Serializer flatbuffer(kafka_buffer_size, EventProducer, "multigrid");
+  flatbuffer.set_callback(
+      std::bind(&Producer::produce2, &EventProducer, std::placeholders::_1));
 
   // \todo make this optional
   std::shared_ptr<ReadoutSerializer> readouts;

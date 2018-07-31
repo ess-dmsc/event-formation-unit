@@ -11,6 +11,7 @@
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
+#include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <common/DataSave.h>
@@ -172,8 +173,10 @@ void MBCAEN::processing_thread() {
   ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
   MB16Detector mb16;
 
+  EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
   Producer eventprod(EFUSettings.KafkaBroker, "MB_detector");
-  EV42Serializer flatbuffer(kafka_buffer_size, eventprod, "multiblade");
+  flatbuffer.set_callback(
+      std::bind(&Producer::produce2, &eventprod, std::placeholders::_1));
 
   multiBladeEventBuilder builder[ncass];
   for (uint32_t i = 0; i < ncass; i++) {

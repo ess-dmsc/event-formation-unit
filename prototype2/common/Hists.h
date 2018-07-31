@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include <math.h>
 #include <vector>
 #include <cinttypes>
+#include <cstddef>
 
 class Hists {
 public:

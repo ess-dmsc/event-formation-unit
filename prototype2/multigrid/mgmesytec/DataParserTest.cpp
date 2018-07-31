@@ -7,8 +7,6 @@
 
 #include <multigrid/mgmesytec/MgSeqGeometry.h>
 
-static Producer producer {"noserver", "nostream"};
-
 static const int MG24_Z_20 = 1;
 
 class MesytecDataTest : public TestBase {
@@ -22,7 +20,7 @@ protected:
     geom->swap_on(true);
     MgEFU mgefu(geom, nullptr);
     mesytec = new MesytecData(mgefu, nullptr);
-    serializer = new EV42Serializer(1000000, producer, "nameless");
+    serializer = new EV42Serializer(1000000, "nameless");
   }
   virtual void TearDown() {
     delete mesytec;

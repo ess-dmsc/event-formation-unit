@@ -8,13 +8,11 @@
 //#define ARRAYLENGTH 125000
 #define ARRAYLENGTH 10
 
-static Producer prod{"nobroker", "notopic"};
-
 class EV42SerializerTest : public TestBase {
   virtual void SetUp() {
     for (int i = 0; i < 200000; i++) {
-      tarr[i] = i;
-      parr[i] = 200000 - i;
+      time[i] = i;
+      pixel[i] = 200000 - i;
     }
   }
 
@@ -22,9 +20,9 @@ class EV42SerializerTest : public TestBase {
 
 protected:
   char flatbuffer[1024 * 1024];
-  uint32_t tarr[200000];
-  uint32_t parr[200000];
-  EV42Serializer fb{ARRAYLENGTH, prod, "nameless"};
+  uint32_t time[200000];
+  uint32_t pixel[200000];
+  EV42Serializer fb{ARRAYLENGTH, "nameless"};
 };
 
 TEST_F(EV42SerializerTest, Serialize) {
@@ -66,7 +64,7 @@ TEST_F(EV42SerializerTest, SerPulseTime) {
 
 TEST_F(EV42SerializerTest, DeserializeCheckData) {
   for (int i = 0; i < ARRAYLENGTH - 1; i++) {
-    auto len = fb.addevent(tarr[i], parr[i]);
+    auto len = fb.addevent(time[i], pixel[i]);
     ASSERT_EQ(len, 0);
     ASSERT_EQ(fb.events(), i+1);
   }
@@ -94,12 +92,12 @@ TEST_F(EV42SerializerTest, DeserializeCheckData) {
 
 TEST_F(EV42SerializerTest, AutoDeserialize) {
   for (int i = 0; i < ARRAYLENGTH - 1; i++) {
-    auto len = fb.addevent(tarr[i], parr[i]);
+    auto len = fb.addevent(time[i], pixel[i]);
     ASSERT_EQ(len, 0);
     ASSERT_EQ(fb.events(), i + 1);
   }
 
-  auto len = fb.addevent(tarr[ARRAYLENGTH - 1], parr[ARRAYLENGTH - 1]);
+  auto len = fb.addevent(time[ARRAYLENGTH - 1], pixel[ARRAYLENGTH - 1]);
   ASSERT_TRUE(len > 0);
 }
 

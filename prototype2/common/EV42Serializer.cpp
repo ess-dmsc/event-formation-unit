@@ -18,10 +18,9 @@ static constexpr uint64_t InitialMessageId = 1;
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-EV42Serializer::EV42Serializer(size_t max_array_length, Producer &prod, std::string source_name)
+EV42Serializer::EV42Serializer(size_t max_array_length, std::string source_name)
     : max_events_(max_array_length)
-    , builder(max_events_ * 8 + 256)
-    , producer(prod) {
+    , builder(max_events_ * 8 + 256) {
 
   auto sourceName = builder.CreateString(source_name);
   auto timeoff = builder.CreateUninitializedVector(max_events_, TimeSize, &timeptr);
@@ -77,7 +76,8 @@ size_t EV42Serializer::produce() {
   if (events_ != 0) {
     XTRACE(OUTPUT, DEB, "autoproduce %zu events \n", events_);
     auto buffer = serialize();
-    producer.produce(buffer.buffer, buffer.size);
+    if (callback)
+      callback(buffer);
     return buffer.size;
   }
   return 0;
