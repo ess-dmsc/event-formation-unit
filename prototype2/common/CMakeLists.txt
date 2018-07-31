@@ -8,7 +8,6 @@ set(efu_common_SRC
   Producer.cpp
   DataSave.cpp
   DetectorModuleRegister.cpp
-  Log.cpp
   )
 set(efu_common_INC
   ../../libs/include/gccintel.h

@@ -8,7 +8,6 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
-#include <common/Trace.h>
 #include <stdlib.h>
 
 class ExitHandler {
