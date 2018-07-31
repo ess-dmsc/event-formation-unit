@@ -29,7 +29,7 @@ public:
               uint16_t adc_threshold_y, double max_time_gap_y,
               std::string dump_dir, bool dump_csv, bool dump_h5);
 
-  ~BuilderVMM2() { XTRACE(INIT, DEB, "BuilderVMM2 destructor called\n"); }
+  ~BuilderVMM2() { XTRACE(INIT, DEB, "BuilderVMM2 destructor called"); }
 
   /// \todo Martin document
   ResultStats process_buffer(char *buf, size_t size) override;

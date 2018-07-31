@@ -122,7 +122,7 @@ NMX::~NMX() { printf("NMX detector destructor called\n"); }
 NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   Stats.setPrefix("efu.nmx");
 
-  XTRACE(INIT, ALW, "Adding stats\n");
+  XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("rx_packets", mystats.rx_packets);
   Stats.create("rx_bytes", mystats.rx_bytes);
@@ -151,7 +151,7 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   std::function<void()> processingFunc = [this]() { NMX::processing_thread(); };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
+  XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(
       eth_buffer_max_entries + 11); /**< \todo testing workaround */
@@ -170,7 +170,7 @@ void NMX::input_thread() {
   nmxdata.setBufferSizes(0 /*use default */, EFUSettings.DetectorRxBufferSize);
   nmxdata.getBufferSizes(txBuffer, rxBuffer);
   if (rxBuffer < EFUSettings.DetectorRxBufferSize) {
-    XTRACE(INIT, ERR, "Receive buffer sizes too small, wanted %d, got %d\n",
+    XTRACE(INIT, ERR, "Receive buffer sizes too small, wanted %d, got %d",
            EFUSettings.DetectorRxBufferSize, rxBuffer);
     return;
   }
@@ -189,7 +189,7 @@ void NMX::input_thread() {
     if ((rdsize = nmxdata.receive(eth_ringbuf->getDataBuffer(eth_index),
                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-      XTRACE(INPUT, DEB, "rdsize: %d\n", rdsize);
+      XTRACE(INPUT, DEB, "rdsize: %d", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
@@ -203,18 +203,18 @@ void NMX::input_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      XTRACE(INPUT, ALW, "Stopping input thread.");
       return;
     }
   }
 }
 
 void NMX::processing_thread() {
-  XTRACE(PROCESS, ALW, "NMX Config file: %s\n", NMXSettings.ConfigFile.c_str());
+  XTRACE(PROCESS, ALW, "NMX Config file: %s", NMXSettings.ConfigFile.c_str());
   nmx_opts = NMXConfig(NMXSettings.ConfigFile);
   init_builder();
   if (!builder_) {
-    XTRACE(PROCESS, ERR, "No builder specified, exiting thread\n");
+    XTRACE(PROCESS, ERR, "No builder specified, exiting thread");
     return;
   }
 
@@ -270,7 +270,7 @@ void NMX::processing_thread() {
 
         while (!matcher.matched_clusters.empty()) {
           //printf("MATCHED_CLUSTERS\n");
-          XTRACE(PROCESS, DEB, "event_ready()\n");
+          XTRACE(PROCESS, DEB, "event_ready()");
           event = matcher.matched_clusters.front();
           matcher.matched_clusters.pop_front();
 
@@ -285,7 +285,7 @@ void NMX::processing_thread() {
           }
 
           if (event.valid()) {
-            XTRACE(PROCESS, DEB, "event.good\n");
+            XTRACE(PROCESS, DEB, "event.good");
 
             mystats.clusters_xy++;
 
@@ -294,7 +294,7 @@ void NMX::processing_thread() {
               sample_next_track = trackfb.add_track(event);
             }
 
-            XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
+            XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
                    event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
 
             if (nmx_opts.filter.valid(event)) {
@@ -305,7 +305,7 @@ void NMX::processing_thread() {
               } else {
                 time = static_cast<uint32_t>(event.utpc_time());
 
-                XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n", time, pixelid);
+                XTRACE(PROCESS, DEB, "time: %d, pixelid %d", time, pixelid);
 
                 mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
                 mystats.clusters_events++;
@@ -336,12 +336,12 @@ void NMX::processing_thread() {
       char *txbuffer;
       auto len = trackfb.serialize(&txbuffer);
       if (len != 0) {
-        XTRACE(PROCESS, DEB, "Sending tracks with size %d\n", len);
+        XTRACE(PROCESS, DEB, "Sending tracks with size %d", len);
         monitorprod.produce(txbuffer, len);
       }
 
       if (!hists.isEmpty()) {
-        XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters \n",
+        XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters ",
                hists.hit_count(), hists.cluster_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
@@ -353,7 +353,7 @@ void NMX::processing_thread() {
 
         // TODO flush all clusters?
 
-        XTRACE(INPUT, ALW, "Stopping input thread.\n");
+        XTRACE(INPUT, ALW, "Stopping input thread.");
         builder_.reset(); /**< \todo this is a hack to force ~BuilderSRS() call */
         delete builder_.get(); /**< \todo see above */
         return;
@@ -375,33 +375,33 @@ void NMX::init_builder() {
                                             nmx_opts.clusterer_y.min_cluster_size);
 
   if (nmx_opts.builder_type == "Hits") {
-    XTRACE(INIT, DEB, "Using BuilderHits\n");
+    XTRACE(INIT, DEB, "Using BuilderHits");
     builder_ = std::make_shared<BuilderHits>(nmx_opts.dump_directory,
                                                   nmx_opts.dump_csv, nmx_opts.dump_h5);
     builder_->clusterer_x = clusx;
     builder_->clusterer_y = clusy;
   } else if (nmx_opts.builder_type == "APV") {
-    XTRACE(INIT, DEB, "Using BuilderAPV\n");
+    XTRACE(INIT, DEB, "Using BuilderAPV");
     builder_ = std::make_shared<BuilderAPV>(nmx_opts.dump_directory,
                                             nmx_opts.dump_csv, nmx_opts.dump_h5);
     builder_->clusterer_x = clusx;
     builder_->clusterer_y = clusy;
   } else if (nmx_opts.builder_type == "VMM2") {
-    XTRACE(INIT, DEB, "Using BuilderVMM2\n");
+    XTRACE(INIT, DEB, "Using BuilderVMM2");
     builder_ = std::make_shared<BuilderVMM2>(
         nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
         nmx_opts.clusterer_x.hit_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
         nmx_opts.clusterer_y.hit_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
         nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else if (nmx_opts.builder_type == "VMM3") {
-      XTRACE(INIT, DEB, "Using BuilderVMM3\n");
+      XTRACE(INIT, DEB, "Using BuilderVMM3");
       builder_ = std::make_shared<BuilderVMM3>(
           nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
           nmx_opts.clusterer_x.hit_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
           nmx_opts.clusterer_y.hit_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
           nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else {
-    XTRACE(INIT, ALW, "Unrecognized builder type in config\n");
+    XTRACE(INIT, ALW, "Unrecognized builder type in config");
   }
 }
 

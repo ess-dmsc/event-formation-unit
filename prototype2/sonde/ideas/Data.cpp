@@ -15,12 +15,12 @@ int IDEASData::parse_buffer(const char *buffer, int size) {
   errors = 0;
 
   if (buffer == nullptr) {
-    XTRACE(PROCESS, WAR, "Invalid buffer\n");
+    XTRACE(PROCESS, WAR, "Invalid buffer");
     return -IDEASData::EBUFFER;
   }
 
   if (size < 11) {
-    XTRACE(PROCESS, WAR, "IDEAS readout header too short (%d bytes)\n", size);
+    XTRACE(PROCESS, WAR, "IDEAS readout header too short (%d bytes)", size);
     return -IDEASData::EBADSIZE;
   }
 
@@ -28,7 +28,7 @@ int IDEASData::parse_buffer(const char *buffer, int size) {
 
   int version = (ntohs(hdr->id) & 0xe000) >> 13;
   if (version != 0) {
-    XTRACE(PROCESS, WAR, "Illegal version number (%d)\n", version);
+    XTRACE(PROCESS, WAR, "Illegal version number (%d)", version);
     return -IDEASData::EHEADER;
   }
   hdr_sysno = (ntohs(hdr->id) & 0x1fff) >> 8;
@@ -45,14 +45,14 @@ int IDEASData::parse_buffer(const char *buffer, int size) {
 
   next_seq_no = (hdr_count + 1) & 0x3fff;
 
-  XTRACE(PROCESS, DEB, "version: %d, sysno: %d, type: 0x%02x\n", version,
+  XTRACE(PROCESS, DEB, "version: %d, sysno: %d, type: 0x%02x", version,
          hdr_sysno, hdr_type);
-  XTRACE(PROCESS, DEB, "sequence flag: %d, packet count: %d\n", hdr_seqflag,
+  XTRACE(PROCESS, DEB, "sequence flag: %d, packet count: %d", hdr_seqflag,
          hdr_count);
-  XTRACE(PROCESS, DEB, "time: 0x%08x, size: 0x%04x\n", hdr_hdrtime, hdr_length);
+  XTRACE(PROCESS, DEB, "time: 0x%08x, size: 0x%04x", hdr_hdrtime, hdr_length);
 
   if (hdr_length + (int)sizeof(struct Header) != size) {
-    XTRACE(PROCESS, WAR, "Packet length mismatch: udp: %d, parsed: %d\n", size,
+    XTRACE(PROCESS, WAR, "Packet length mismatch: udp: %d, parsed: %d", size,
            hdr_length + (int)sizeof(struct Header));
     return -IDEASData::EHEADER;
   }
@@ -60,16 +60,16 @@ int IDEASData::parse_buffer(const char *buffer, int size) {
   auto pktdata = buffer + sizeof(struct Header);
   // auto pktdatasize = size - sizeof(struct Header);
   if (hdr_type == 0xD6) {
-    XTRACE(PROCESS, DEB, "Trigger Time Data Packet\n");
+    XTRACE(PROCESS, DEB, "Trigger Time Data Packet");
     return parse_trigger_time_data_packet(pktdata);
   } else if (hdr_type == 0xD5) {
-    XTRACE(PROCESS, DEB, "Single Event Pulse Height Data Packet\n");
+    XTRACE(PROCESS, DEB, "Single Event Pulse Height Data Packet");
     return parse_single_event_pulse_height_data_packet(pktdata);
   } else if (hdr_type == 0xD4) {
-    XTRACE(PROCESS, DEB, "Multi Event Pulse Height Data Packet\n");
+    XTRACE(PROCESS, DEB, "Multi Event Pulse Height Data Packet");
     return parse_multi_event_pulse_height_data_packet(pktdata);
   } else {
-    XTRACE(PROCESS, WAR, "Unsupported readout format: 0x%02x\n", hdr_type);
+    XTRACE(PROCESS, WAR, "Unsupported readout format: 0x%02x", hdr_type);
     return -IDEASData::EUNSUPP;
   }
 }
@@ -80,11 +80,11 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
   /**< \todo add check for minimum size */
   uint8_t *datap = (uint8_t *)(buffer);
   int nentries = *datap;
-  XTRACE(PROCESS, DEB, "Number of readout events in packet: %d\n", nentries);
+  XTRACE(PROCESS, DEB, "Number of readout events in packet: %d", nentries);
 
   if (nentries * BYTES_PER_ENTRY + 1 !=
       hdr_length) { /** magic packet numbers, check documentation */
-    XTRACE(PROCESS, WAR, "Data length error: events %d (len %d), got: %d\n",
+    XTRACE(PROCESS, WAR, "Data length error: events %d (len %d), got: %d",
            nentries, nentries * BYTES_PER_ENTRY + 1, hdr_length);
     return -IDEASData::EHEADER;
   }
@@ -103,15 +103,15 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
         eventdata->tofile("%d, %u, %d, %d, %d\n", hdr_count, hdr_hdrtime,
                          hdr_sysno, asch >> 6, asch & 0x3f);
       }
-      XTRACE(PROCESS, INF, "event: %d, time: 0x%08x, pixel: %d\n", i, time,
+      XTRACE(PROCESS, INF, "event: %d, time: 0x%08x, pixel: %d", i, time,
              data[events].pixel_id);
       events++;
     } else {
-      XTRACE(PROCESS, WAR, "Geometry error in entry %d (asch %d)\n", i, asch);
+      XTRACE(PROCESS, WAR, "Geometry error in entry %d (asch %d)", i, asch);
       errors++;
     }
   }
-  XTRACE(PROCESS, DEB, "Number of events in buffer: %u\n", events);
+  XTRACE(PROCESS, DEB, "Number of events in buffer: %u", events);
   return events;
 }
 
@@ -121,10 +121,10 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
   static const int BYTES_PER_ENTRY = 2;
   /** \todo check minimum header length */
   int nentries = ntohs(*(uint16_t *)(buffer + 5));
-  XTRACE(PROCESS, DEB, "Number of readout events in packet: %d\n", nentries);
+  XTRACE(PROCESS, DEB, "Number of readout events in packet: %d", nentries);
 
   if (nentries * BYTES_PER_ENTRY + 7 != hdr_length) {
-    XTRACE(PROCESS, WAR, "Data length error: events %d (len %d), got: %d\n",
+    XTRACE(PROCESS, WAR, "Data length error: events %d (len %d), got: %d",
            nentries, nentries * BYTES_PER_ENTRY + 5, hdr_length);
     return -IDEASData::EHEADER;
   }
@@ -133,7 +133,7 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
   int channel = *(uint8_t *)(buffer + 2);
   int hold_delay = ntohs(*(uint16_t *)(buffer + 3));
   XTRACE(PROCESS, DEB,
-         "asic: %d, channel: %d, trigger type: %d, hold delay: %d\n", asic,
+         "asic: %d, channel: %d, trigger type: %d, hold delay: %d", asic,
          channel, trigger_type, hold_delay);
 
   int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asic, channel);
@@ -146,7 +146,7 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
   for (int i = 0; i < nentries; i++) {
     samples++;
     uint16_t sample = ntohs(*(uint16_t *)(buffer + i * 2 + 7));
-    XTRACE(PROCESS, INF, "sample %3d: 0x%x (%d)\n", i, sample, sample);
+    XTRACE(PROCESS, INF, "sample %3d: 0x%x (%d)", i, sample, sample);
 
     if (dumptofile) {
       sephdata->tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, trigger_type,
@@ -163,17 +163,17 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
 int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
   static const int BYTES_PER_SAMPLE = 5;
   if (hdr_length < 12) {
-    XTRACE(PROCESS, WAR, "data packet too short for mpeh data\n");
+    XTRACE(PROCESS, WAR, "data packet too short for mpeh data");
     return -IDEASData::EBADSIZE;
   }
 
   int N = *(uint8_t *)buffer;               /**< number of events            */
   int M = ntohs(*(uint16_t *)(buffer + 1)); /**< number of samples per event */
-  XTRACE(PROCESS, DEB, "Readout events: %d, samples per event %d\n", N, M);
+  XTRACE(PROCESS, DEB, "Readout events: %d, samples per event %d", N, M);
 
   int expect_len = (4 + BYTES_PER_SAMPLE * M) * N + 3;
   if (expect_len > hdr_length) {
-    XTRACE(PROCESS, WAR, "Data length error: expected len %d, got: %d\n",
+    XTRACE(PROCESS, WAR, "Data length error: expected len %d, got: %d",
            expect_len, hdr_length);
     return -IDEASData::EHEADER;
   }
@@ -196,7 +196,7 @@ int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
         data[events].pixel_id = static_cast<uint32_t>(pixelid);
         events++;
       }
-      XTRACE(PROCESS, INF, "time %x, tt %d, as %d, ch %d, sampl %x\n", evtime,
+      XTRACE(PROCESS, INF, "time %x, tt %d, as %d, ch %d, sampl %x", evtime,
              trigger_type, asic, channel, sample);
       if (dumptofile) {
         mephdata->tofile("%d, %u, %d, %d, %d, %d\n", hdr_count, evtime,

@@ -130,24 +130,24 @@ bool EFUArgs::parseAffinityStrings(
 
 void EFUArgs::printSettings() {
   // clang-format off
-  XTRACE(INIT, ALW, "Starting event processing pipeline2 with main properties:\n");
-  XTRACE(INIT, ALW, "  Detector:                 %s\n",    DetectorName.c_str());
-  XTRACE(INIT, ALW, "  Rx UDP Socket:            %s:%d\n",
+  XTRACE(INIT, ALW, "Starting event processing pipeline2 with main properties:");
+  XTRACE(INIT, ALW, "  Detector:                 %s",    DetectorName.c_str());
+  XTRACE(INIT, ALW, "  Rx UDP Socket:            %s:%d",
          EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
-  XTRACE(INIT, ALW, "  Minimum required MTU      %d\n", EFUSettings.MinimumMTU);
-  XTRACE(INIT, ALW, "  Kafka broker:             %s\n", EFUSettings.KafkaBroker.c_str());
-  XTRACE(INIT, ALW, "  Log IP:                   %s\n", GraylogConfig.address.c_str());
-  XTRACE(INIT, ALW, "  Graphite TCP socket:      %s:%d\n",
+  XTRACE(INIT, ALW, "  Minimum required MTU      %d", EFUSettings.MinimumMTU);
+  XTRACE(INIT, ALW, "  Kafka broker:             %s", EFUSettings.KafkaBroker.c_str());
+  XTRACE(INIT, ALW, "  Log IP:                   %s", GraylogConfig.address.c_str());
+  XTRACE(INIT, ALW, "  Graphite TCP socket:      %s:%d",
         EFUSettings.GraphiteAddress.c_str(), EFUSettings.GraphitePort);
-  XTRACE(INIT, ALW, "  CLI TCP Socket:           localhost:%d\n", EFUSettings.CommandServerPort);
+  XTRACE(INIT, ALW, "  CLI TCP Socket:           localhost:%d", EFUSettings.CommandServerPort);
 
   if (EFUSettings.StopAfterSec == 0xffffffffU) {
-    XTRACE(INIT, ALW, "  Stopafter:                never\n");
+    XTRACE(INIT, ALW, "  Stopafter:                never");
   } else {
-    XTRACE(INIT, ALW, "  Stopafter:                %us\n", EFUSettings.StopAfterSec);
+    XTRACE(INIT, ALW, "  Stopafter:                %us", EFUSettings.StopAfterSec);
   }
 
-  XTRACE(INIT, ALW, "<<< NOT ALL CONFIGURABLE SETTINGS MAY BE DISPLAYED >>>\n");
+  XTRACE(INIT, ALW, "<<< NOT ALL CONFIGURABLE SETTINGS MAY BE DISPLAYED >>>");
   // clang-format on
 }
 

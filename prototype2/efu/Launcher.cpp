@@ -11,9 +11,9 @@
 
 void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
   auto startThreadsWithoutAffinity = [&detector]() {
-    XTRACE(MAIN, ALW, "Launching threads without core affinity.\n");
+    XTRACE(MAIN, ALW, "Launching threads without core affinity.");
     for (auto &ThreadInfo : detector->GetThreadInfo()) {
-      XTRACE(MAIN, ALW, "Creating new thread (id: %s)\n",
+      XTRACE(MAIN, ALW, "Creating new thread (id: %s)",
              ThreadInfo.name.c_str());
       ThreadInfo.thread = std::thread(ThreadInfo.func);
     }
@@ -25,7 +25,7 @@ void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     CPU_SET(core, &cpuset);
-    XTRACE(MAIN, ALW, "Setting thread affinity to core %d\n", core);
+    XTRACE(MAIN, ALW, "Setting thread affinity to core %d", core);
     GLOG_INF("Setting thread affinity to core " + std::to_string(core));
 
     int __attribute__((unused)) s = pthread_setaffinity_np(
@@ -45,18 +45,18 @@ void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
     startThreadsWithoutAffinity();
   } else if (1 == ThreadCoreAffinity.size() and
              ThreadCoreAffinity[0].Name == "implicit_affinity") {
-    XTRACE(MAIN, ALW, "Launching threads with implicit core affinity.\n");
+    XTRACE(MAIN, ALW, "Launching threads with implicit core affinity.");
     int CoreCounter = ThreadCoreAffinity[0].Core;
     for (auto &ThreadInfo : detector->GetThreadInfo()) {
-      XTRACE(MAIN, ALW, "Creating new thread (id: %s)\n",
+      XTRACE(MAIN, ALW, "Creating new thread (id: %s)",
              ThreadInfo.name.c_str());
       ThreadInfo.thread = std::thread(ThreadInfo.func);
       setThreadCoreAffinity(ThreadInfo.thread, CoreCounter++);
     }
   } else {
-    XTRACE(MAIN, ALW, "Launching threads with explicit core affinity.\n");
+    XTRACE(MAIN, ALW, "Launching threads with explicit core affinity.");
     for (auto &ThreadInfo : detector->GetThreadInfo()) {
-      XTRACE(MAIN, ALW, "Creating new thread (id: %s)\n",
+      XTRACE(MAIN, ALW, "Creating new thread (id: %s)",
              ThreadInfo.name.c_str());
       ThreadInfo.thread = std::thread(ThreadInfo.func);
       if (1 == AffinityMap.count(ThreadInfo.name)) {
@@ -64,7 +64,7 @@ void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
       } else {
         XTRACE(MAIN, ALW,
                "No thread core affinity information available for thread with "
-               "id: %s\n",
+               "id: %s",
                ThreadInfo.name.c_str());
       }
     }

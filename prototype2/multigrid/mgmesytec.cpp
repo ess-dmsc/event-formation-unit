@@ -97,7 +97,7 @@ private:
 CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.setPrefix("efu.mgmesytec");
 
-  XTRACE(INIT, ALW, "Adding stats\n");
+  XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("rx_packets",            mystats.rx_packets);
   Stats.create("rx_bytes",              mystats.rx_bytes);
@@ -143,7 +143,7 @@ void CSPEC::mainThread() {
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += ReadSize;
-      XTRACE(INPUT, DEB, "read size: %u\n", ReadSize);
+      XTRACE(INPUT, DEB, "read size: %u", ReadSize);
 
       auto res = mesytecdata.parse(buffer, ReadSize, hists, flatbuffer, readouts);
       if (res != MesytecData::error::OK) {
@@ -164,12 +164,12 @@ void CSPEC::mainThread() {
 
       auto entries = readouts.getNumEntries();
       if (entries > 0) {
-        XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", entries);
+        XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts", entries);
         //readouts.produce(); // Periodically produce of readouts
       }
 
       if (!hists.isEmpty()) {
-        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.hit_count());
+        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts", hists.hit_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
         monitorprod.produce(txbuffer, len);
@@ -181,7 +181,7 @@ void CSPEC::mainThread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping processing thread.\n");
+      XTRACE(INPUT, ALW, "Stopping processing thread.");
       return;
     }
   }

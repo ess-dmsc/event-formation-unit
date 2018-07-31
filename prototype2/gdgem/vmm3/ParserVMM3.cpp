@@ -12,12 +12,12 @@
 
 int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 
-	XTRACE(PROCESS, DEB, "data1: 0x%08x, data2: 0x%04x\n", data1, data2);
+	XTRACE(PROCESS, DEB, "data1: 0x%08x, data2: 0x%04x", data1, data2);
 	int dataflag = (data2 >> 15) & 0x1;
 
 	if (dataflag) {
 		/// Data
-		XTRACE(PROCESS, DEB, "SRS Data\n");
+		XTRACE(PROCESS, DEB, "SRS Data");
 
 		vmd->overThreshold = (data2 >> 14) & 0x01;
 		vmd->chno = (data2 >> 8) & 0x3f;
@@ -42,10 +42,10 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 		uint64_t timestamp_42bit = (timestamp_upper_32bit << 10)
 				+ timestamp_lower_10bit;
 		XTRACE(PROCESS, DEB, "SRS Marker vmmid %d: timestamp lower 10bit %u, timestamp upper 32 bit %u, 42 bit timestamp %" 
-		       PRIu64 "\n",  vmmid, timestamp_lower_10bit, timestamp_upper_32bit,timestamp_42bit);
+		       PRIu64 "",  vmmid, timestamp_lower_10bit, timestamp_upper_32bit,timestamp_42bit);
 		markers[vmmid].fecTimeStamp = timestamp_42bit;
 
-		//XTRACE(PROCESS, DEB, "vmmid: %d\n", vmmid);
+		//XTRACE(PROCESS, DEB, "vmmid: %d", vmmid);
 		return 0;
 	}
 }
@@ -54,7 +54,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 	memset(&stats, 0, sizeof(stats));
 
 	if (size < 4) {
-		XTRACE(PROCESS, DEB, "Undersize data\n");
+		XTRACE(PROCESS, DEB, "Undersize data");
 		stats.errors += size;
 		return 0;
 	}
@@ -62,7 +62,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 	struct SRSHdr *srsHeaderPtr = (struct SRSHdr *) buffer;
 	srsHeader.frameCounter = ntohl(srsHeaderPtr->frameCounter);
 	if (srsHeader.frameCounter == 0xfafafafa) {
-		//XTRACE(PROCESS, INF, "End of Frame\n");
+		//XTRACE(PROCESS, INF, "End of Frame");
 		stats.badFrames++;
 		//printf("bad frames I: %d\n", stats.bad_frames);
 		stats.errors += size;
@@ -90,7 +90,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 	}
 
 	if (size < SRSHeaderSize + HitAndMarkerSize) {
-		XTRACE(PROCESS, WAR, "Undersize data\n");
+		XTRACE(PROCESS, WAR, "Undersize data");
 		stats.badFrames++;
 		stats.errors += size;
 		return 0;
@@ -99,7 +99,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 	srsHeader.dataId = ntohl(srsHeaderPtr->dataId);
 	/// maybe add a protocol error counter here
 	if ((srsHeader.dataId & 0xffffff00) != 0x564d3200) {
-		XTRACE(PROCESS, WAR, "Unknown data\n");
+		XTRACE(PROCESS, WAR, "Unknown data");
 		stats.badFrames++;
 		stats.errors += size;
 		return 0;
@@ -112,18 +112,18 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 
 	auto datalen = size - SRSHeaderSize;
 	if ((datalen % 6) != 0) {
-		XTRACE(PROCESS, WAR, "Invalid data length: %d\n", datalen);
+		XTRACE(PROCESS, WAR, "Invalid data length: %d", datalen);
 		stats.badFrames++;
 		stats.errors += size;
 		return 0;
 	}
 
-	// XTRACE(PROCESS, DEB, "VMM3a Data, VMM Id %d\n", vmmid);
+	// XTRACE(PROCESS, DEB, "VMM3a Data, VMM Id %d", vmmid);
 
 	int dataIndex = 0;
 	int readoutIndex = 0;
 	while (datalen >= HitAndMarkerSize) {
-		//XTRACE(PROCESS, DEB, "readoutIndex: %d, datalen %d, elems: %u\n",
+		//XTRACE(PROCESS, DEB, "readoutIndex: %d, datalen %d, elems: %u",
 		//		readoutIndex, datalen, stats.hits);
 		auto Data1Offset = SRSHeaderSize + HitAndMarkerSize * readoutIndex;
 		auto Data2Offset = Data1Offset + Data1Size;
@@ -141,7 +141,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 
 		datalen -= 6;
 		if (stats.hits == maxHits && datalen > 0) {
-			XTRACE(PROCESS, INF, "Data overflow, skipping %d bytes\n", datalen);
+			XTRACE(PROCESS, INF, "Data overflow, skipping %d bytes", datalen);
 			stats.errors += datalen;
 			break;
 		}

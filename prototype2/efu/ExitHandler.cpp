@@ -31,7 +31,7 @@ void ExitHandler::nonCritical(int sig) {
 
 ExitHandler::Exit ExitHandler::HandleLastSignal() {
   if (Exit::Exit == DoExit) {
-    XTRACE(MAIN, ALW, "efu terminated with signal %d\n", LastSignal);
+    XTRACE(MAIN, ALW, "efu terminated with signal %d", LastSignal);
   }
   return DoExit;
 }

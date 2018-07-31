@@ -9,7 +9,7 @@
 #include <string>
 
 Loader::~Loader() {
-  XTRACE(INIT, ALW, "Loader destructor called\n");
+  XTRACE(INIT, ALW, "Loader destructor called");
   // Remove pointer before closing the handle to prevent accessing freed memory
   unloadPlugin();
 }
@@ -47,20 +47,20 @@ bool Loader::loadPlugin(const std::string lib) {
     }
   }
   if (handle == nullptr) {
-    XTRACE(INIT, CRI, "Could not open library %s: %s\n", lib.c_str(),
+    XTRACE(INIT, CRI, "Could not open library %s: %s", lib.c_str(),
            dlerror());
     return false;
   }
 
   if (!(myFactory = (DetectorFactoryBase *)dlsym(handle, "Factory"))) {
-    XTRACE(INIT, CRI, "Could not find Factory in %s\n", lib.c_str());
+    XTRACE(INIT, CRI, "Could not find Factory in %s", lib.c_str());
     return false;
   }
 
   PopulateCLIParser *tempParserPopulator =
       (PopulateCLIParser *)dlsym(handle, "PopulateParser");
   if (nullptr == tempParserPopulator) {
-    XTRACE(INIT, WAR, "Unable to find function to populate CLI parser in %s\n",
+    XTRACE(INIT, WAR, "Unable to find function to populate CLI parser in %s",
            lib.c_str());
   } else {
     if (nullptr == tempParserPopulator->Function) {

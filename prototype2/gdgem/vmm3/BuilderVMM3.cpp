@@ -38,13 +38,13 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 	geom_errors = 0;
 	parser_.receive(buf, size);
 	if (!parser_.stats.hits) {
-		XTRACE(PROCESS, DEB, "NO HITS after parse\n");
+		XTRACE(PROCESS, DEB, "NO HITS after parse");
 		auto & stats = parser_.stats;
 		return AbstractBuilder::ResultStats(stats.hits, stats.errors,
 				geom_errors, stats.lostFrames, stats.badFrames,
 				stats.goodFrames);
 	}
-  XTRACE(PROCESS, DEB, "HITS after parse: %d\n", parser_.stats.hits);
+  XTRACE(PROCESS, DEB, "HITS after parse: %d", parser_.stats.hits);
 
 
 	if (dump_h5_) {
@@ -72,9 +72,9 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 			readout.over_threshold = (d.overThreshold != 0);
 
 			XTRACE(PROCESS, DEB,
-					"srs/vmm timestamp: srs: 0x%08x, bc: 0x%08x, tdc: 0x%08x\n",
+					"srs/vmm timestamp: srs: 0x%08x, bc: 0x%08x, tdc: 0x%08x",
 					readout.srs_timestamp, d.bcid, d.tdc);
-			XTRACE(PROCESS, DEB, "srs/vmm chip: %d, channel: %d\n",
+			XTRACE(PROCESS, DEB, "srs/vmm chip: %d, channel: %d",
 					readout.chip_id, d.chno);
 
 			plane = geometry_interpreter_.get_plane(readout);
@@ -89,7 +89,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 			} else {
 				geom_errors++;
 
-				XTRACE(PROCESS, DEB, "Bad SRS mapping --  fec: %d, chip: %d\n",
+				XTRACE(PROCESS, DEB, "Bad SRS mapping --  fec: %d, chip: %d",
 						readout.fec, readout.chip_id);
 			}
 
@@ -107,7 +107,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 						readout.over_threshold);
 			}
 		} else {
-			XTRACE(PROCESS, DEB, "No data marker in hit (increment counter?)\n");
+			XTRACE(PROCESS, DEB, "No data marker in hit (increment counter?)");
 		}
 	}
 
