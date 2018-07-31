@@ -14,6 +14,7 @@ set(efu_common_INC
   Detector.h
   EFUArgs.h
   EV42Serializer.h
+  Buffer.h
   NewStats.h
   Producer.h
   Trace.h

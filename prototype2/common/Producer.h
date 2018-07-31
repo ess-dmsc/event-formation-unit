@@ -10,12 +10,19 @@
 #pragma once
 
 #include <librdkafka/rdkafkacpp.h>
+#include <common/Buffer.h>
 
 class ProducerBase {
 public:
   ProducerBase() = default;
   virtual ~ProducerBase() = default;
-  virtual int produce(char *buffer, int length) = 0;
+  virtual int produce(char *buffer, size_t length) = 0;
+
+  inline int produce2(const Buffer& buffer)
+  {
+    return this->produce(buffer.buffer, buffer.size);
+  }
+
 };
 
 class Producer : public ProducerBase {
@@ -33,7 +40,7 @@ public:
    *  @param buffer Pointer to char buffer containing data to be tx'ed
    *  @param length Size of buffer data in bytes
    */
-  int produce(char *buffer, int length) override;
+  int produce(char *buffer, size_t length) override;
 
 private:
   std::string errstr;

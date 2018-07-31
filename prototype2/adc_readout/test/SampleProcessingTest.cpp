@@ -46,7 +46,7 @@ public:
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 class ProducerStandIn : public ProducerBase {
 public:
-  MAKE_MOCK2(produce, int(char *, int), override);
+  MAKE_MOCK2(produce, int(char *, size_t), override);
 };
 #pragma GCC diagnostic pop
 
@@ -118,7 +118,7 @@ TEST(SampleProcessing, SerialisationProduceCallTest) {
       .TIMES(1)
       .LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(TestProducer.get()),
-               produce(ANY(char *), ANY(int)))
+               produce(ANY(char *), ANY(size_t)))
       .TIMES(1)
       .RETURN(0);
   auto TempModule = getTestModule();
@@ -138,7 +138,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
       .TIMES(1)
       .LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(TestProducer.get()),
-               produce(ANY(char *), ANY(int)))
+               produce(ANY(char *), ANY(size_t)))
       .TIMES(1)
       .RETURN(0)
       .LR_SIDE_EFFECT(
@@ -180,7 +180,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
       .TIMES(1)
       .LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(TestProducer.get()),
-               produce(ANY(char *), ANY(int)))
+               produce(ANY(char *), ANY(size_t)))
       .TIMES(1)
       .RETURN(0)
       .LR_SIDE_EFFECT(
@@ -226,7 +226,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest2) {
       .TIMES(2)
       .LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(TestProducer.get()),
-               produce(ANY(char *), ANY(int)))
+               produce(ANY(char *), ANY(size_t)))
       .TIMES(2)
       .RETURN(0)
       .LR_SIDE_EFFECT(TestMessage(_1, _2));

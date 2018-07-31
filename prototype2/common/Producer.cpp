@@ -54,7 +54,7 @@ Producer::~Producer() {
 }
 
 /** called to actually send data to Kafka cluster */
-int Producer::produce(char *buffer, int length) {
+int Producer::produce(char *buffer, size_t length) {
   if (producer == nullptr || topic == nullptr) {
     return RdKafka::ERR_UNKNOWN;
   }

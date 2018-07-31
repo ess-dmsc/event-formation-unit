@@ -24,29 +24,28 @@ protected:
   char flatbuffer[1024 * 1024];
   uint32_t tarr[200000];
   uint32_t parr[200000];
-  char *buffer;
   EV42Serializer fb{ARRAYLENGTH, prod, "nameless"};
 };
 
 TEST_F(EV42SerializerTest, Serialize) {
   for (size_t i=0; i < ARRAYLENGTH; i++)
     fb.addevent(i,i);
-  auto length = fb.serialize(&buffer);
-  ASSERT_TRUE(length >= ARRAYLENGTH * 8);
-  ASSERT_TRUE(length <= ARRAYLENGTH * 8 + 2048);
-  ASSERT_TRUE(buffer != 0);
+  auto buffer = fb.serialize();
+  ASSERT_TRUE(buffer.size >= ARRAYLENGTH * 8);
+  ASSERT_TRUE(buffer.size <= ARRAYLENGTH * 8 + 2048);
+  ASSERT_TRUE(buffer.buffer != nullptr);
 }
 
 TEST_F(EV42SerializerTest, SerDeserialize) {
   for (size_t i=0; i < ARRAYLENGTH-1; i++)
     fb.addevent(i,i);
-  auto length = fb.serialize(&buffer);
+  auto buffer = fb.serialize();
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
   auto events = GetEventMessage(flatbuffer);
   ASSERT_NE(events->message_id(), 1);
 
-  memcpy(flatbuffer, buffer, length);
+  memcpy(flatbuffer, buffer.buffer, buffer.size);
   events = GetEventMessage(flatbuffer);
   ASSERT_EQ(events->message_id(), 1);
 }
@@ -54,13 +53,13 @@ TEST_F(EV42SerializerTest, SerDeserialize) {
 TEST_F(EV42SerializerTest, SerPulseTime) {
   fb.set_pulse_time(12345);
   ASSERT_EQ(fb.get_pulse_time(), 12345);
-  auto length = fb.serialize(&buffer);
+  auto buffer = fb.serialize();
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
   auto events = GetEventMessage(flatbuffer);
   ASSERT_NE(events->pulse_time(), 12345);
 
-  memcpy(flatbuffer, buffer, length);
+  memcpy(flatbuffer, buffer.buffer, buffer.size);
   events = GetEventMessage(flatbuffer);
   ASSERT_EQ(events->pulse_time(), 12345);
 }
@@ -72,12 +71,12 @@ TEST_F(EV42SerializerTest, DeserializeCheckData) {
     ASSERT_EQ(fb.events(), i+1);
   }
 
-  auto length = fb.serialize(&buffer);
-  ASSERT_TRUE(length > 0);
-  ASSERT_TRUE(buffer != nullptr);
+  auto buffer = fb.serialize();
+  ASSERT_TRUE(buffer.size > 0);
+  ASSERT_TRUE(buffer.buffer != nullptr);
 
-  memcpy(flatbuffer, buffer, length);
-  auto veri = flatbuffers::Verifier((uint8_t *)flatbuffer, length);
+  memcpy(flatbuffer, buffer.buffer, buffer.size);
+  auto veri = flatbuffers::Verifier((uint8_t *)flatbuffer, buffer.size);
   ASSERT_TRUE(VerifyEventMessageBuffer(veri));
   auto events = GetEventMessage(flatbuffer);
 

@@ -48,33 +48,37 @@ EV42Serializer::EV42Serializer(size_t max_array_length, Producer &prod, std::str
       1;
 }
 
-size_t EV42Serializer::serialize(char **buffer) {
+void EV42Serializer::set_callback(std::function<void(Buffer)> cb)
+{
+  callback = cb;
+}
+
+Buffer EV42Serializer::serialize() {
+  Buffer ret;
   if (events_ > max_events_) {
     // TODO: this should probably throw instead?
-
-    *buffer = 0;
-    return 0;
+    return ret;
   }
   eventMsg->mutate_message_id(message_id_);
   *timeLenPtr = events_;
   *pixelLenPtr = events_;
 
-  *buffer = fbBufferPointer;
+  ret.buffer = fbBufferPointer;
+  ret.size = fbSize;
 
   // reset counter and increment message counter
   events_ = 0;
   message_id_++;
 
-  return fbSize;
+  return ret;
 }
 
 size_t EV42Serializer::produce() {
   if (events_ != 0) {
     XTRACE(OUTPUT, DEB, "autoproduce %zu events \n", events_);
-    char *txbuffer;
-    auto txlen = serialize(&txbuffer);
-    producer.produce(txbuffer, txlen);
-    return txlen;
+    auto buffer = serialize();
+    producer.produce(buffer.buffer, buffer.size);
+    return buffer.size;
   }
   return 0;
 }

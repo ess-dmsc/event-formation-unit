@@ -10,13 +10,17 @@
 #pragma once
 
 #include "ev42_events_generated.h"
+#include <common/Buffer.h>
 #include <common/Producer.h>
+#include <functional>
 
 class EV42Serializer {
 public:
   //TODO: repalce producer with functor for sending off
   /** \todo document */
   EV42Serializer(size_t max_array_length, Producer &prod, std::string source_name);
+
+  void set_callback(std::function<void(Buffer)> cb);
 
   /** \todo document */
   void set_pulse_time(uint64_t time);
@@ -38,7 +42,7 @@ public:
 
   //TODO: make private
   /** \todo document */
-  size_t serialize(char **buffer);
+  Buffer serialize();
 
 private:
   // \todo should this not be predefined in terms of jumbo frame?
@@ -56,6 +60,8 @@ private:
   flatbuffers::uoffset_t *pixelLenPtr;
 
   Producer &producer;
+
+  std::function<void(Buffer)> callback;
 
   size_t events_{0};
   uint64_t message_id_{1};
