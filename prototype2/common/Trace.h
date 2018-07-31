@@ -45,7 +45,7 @@ const unsigned int TRC_L_DEB  = 7;
  */
 #pragma GCC system_header
 
-#define TRC_LEVEL 7
+#define TRC_LEVEL 6
 
 #ifndef TRC_MASK
 const unsigned int USED_TRC_MASK = TRC_M_ALL;
@@ -88,7 +88,7 @@ inline int DebugTrace(unsigned int const SeverityLevel, char const *Format, ...)
 }
 
 #define XTRACE(Group, Level, Format, ...)                                   \
-(void)(((TRC_L_##Level >= TRC_LEVEL) && (TRC_MASK & TRC_G_##Group))          \
+(void)(((TRC_L_##Level <= TRC_LEVEL) && (TRC_MASK & TRC_G_##Group))          \
 ? Trace(__LINE__, __FILE__, TRC_G_##Group, TRC_L_##Level, #Group, #Level, Format,\
 ##__VA_ARGS__) \
 : 0)
@@ -96,4 +96,4 @@ inline int DebugTrace(unsigned int const SeverityLevel, char const *Format, ...)
 
 /// \brief Raw trace
 #define DTRACE(Level, Format, ...)                                                \
-(void)((TRC_L_##Level >= TRC_LEVEL) ? DebugTrace(TRC_L_##Level, Format, ##__VA_ARGS__) : 0)
+(void)((TRC_L_##Level <= TRC_LEVEL) ? DebugTrace(TRC_L_##Level, Format, ##__VA_ARGS__) : 0)

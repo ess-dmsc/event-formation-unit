@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/DetectorModuleRegister.h>
-#include <common/Trace.h>
+#include <common/Log.h>
 #include <dlfcn.h>
 #include <efu/Loader.h>
 #include <iostream>
@@ -9,7 +9,7 @@
 #include <string>
 
 Loader::~Loader() {
-  XTRACE(INIT, ALW, "Loader destructor called");
+  LOG(Sev::Debug, "Loader destructor called");
   // Remove pointer before closing the handle to prevent accessing freed memory
   unloadPlugin();
 }
@@ -28,12 +28,12 @@ bool Loader::loadPlugin(const std::string lib) {
     auto &FoundModule = DetectorModuleRegistration::find(lib);
     ParserPopulator = FoundModule.CLISetup;
     myFactory = FoundModule.DetectorFactory.get();
-    XTRACE(INIT, INF, "Loaded statically linked detector module.");
+    LOG(Sev::Info, "Loaded statically linked detector module.");
     return true;
   } catch (std::runtime_error &Error) {
-    XTRACE(INIT, INF, "Unable to find statically linked detector module with "
-                      "name\"%s\". Attempting to open external plugin.",
-           lib.c_str());
+    LOG(Sev::Notice, "Unable to find statically linked detector module with "
+        "name\"{}\". Attempting to open external plugin.",
+           lib);
   }
   std::vector<std::string> PossibleSuffixes{"", ".so", ".dll", ".dylib"};
   
@@ -41,30 +41,30 @@ bool Loader::loadPlugin(const std::string lib) {
     std::string TestLibName = "./" + lib + CSuffix;
     handle = dlopen(TestLibName.c_str(), RTLD_NOW);
     if (handle != nullptr) {
-      XTRACE(INIT, INF, "Loaded library \"%s\".",
-            TestLibName.c_str());
+      LOG(Sev::Info, "Loaded library \"{}\".",
+            TestLibName);
       break;
     }
   }
   if (handle == nullptr) {
-    XTRACE(INIT, CRI, "Could not open library %s: %s", lib.c_str(),
+    LOG(Sev::Error, "Could not open library {}: {}", lib,
            dlerror());
     return false;
   }
 
   if (!(myFactory = (DetectorFactoryBase *)dlsym(handle, "Factory"))) {
-    XTRACE(INIT, CRI, "Could not find Factory in %s", lib.c_str());
+    LOG(Sev::Error, "Could not find Factory in {}", lib);
     return false;
   }
 
   PopulateCLIParser *tempParserPopulator =
       (PopulateCLIParser *)dlsym(handle, "PopulateParser");
   if (nullptr == tempParserPopulator) {
-    XTRACE(INIT, WAR, "Unable to find function to populate CLI parser in %s",
-           lib.c_str());
+    LOG(Sev::Warning, "Unable to find function to populate CLI parser in {}",
+           lib);
   } else {
     if (nullptr == tempParserPopulator->Function) {
-      XTRACE(INIT, WAR, "Function to populate CLI parser not set");
+      LOG(Sev::Warning, "Function to populate CLI parser not set");
     } else {
       ParserPopulator = tempParserPopulator->Function;
     }
