@@ -43,10 +43,10 @@ struct DetectorSettingsStruct {
   uint32_t wireThresholdHi{65535}; // accept all
   uint32_t gridThresholdLo{0};     // accept all
   uint32_t gridThresholdHi{65535}; // accept all
-  bool swap_wires{true};
+  bool swap_wires{false};
   uint32_t module{0}; // 0 defaults to 16 wires in z, 1
   std::string fileprefix{""};
-  bool monitor{true};
+  bool monitor{false};
 } DetectorSettings;
 
 void SetCLIArguments(CLI::App & parser) {
@@ -127,6 +127,56 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
 
 const char *CSPEC::detectorname() { return classname; }
 
+struct Monitor
+{
+  std::shared_ptr<Hists> hists;
+  std::shared_ptr<ReadoutSerializer> readouts;
+
+  void init(std::string broker, size_t max_readouts) {
+    readouts = std::make_shared<ReadoutSerializer>(max_readouts);
+    hists = std::make_shared<Hists>(std::numeric_limits<uint16_t>::max(),
+                                    std::numeric_limits<uint16_t>::max());
+    histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size());
+
+    producer = std::make_shared<Producer>(broker, "C-SPEC_monitor");
+    readouts->set_callback(std::bind(&Producer::produce2, producer.get(), std::placeholders::_1));
+    histfb->set_callback(std::bind(&Producer::produce2, producer.get(), std::placeholders::_1));
+    enabled_ = true;
+  }
+
+  void close() {
+    readouts->set_callback(nullptr);
+    histfb->set_callback(nullptr);
+    enabled_ = false;
+    hists.reset();
+    readouts.reset();
+    histfb.reset();
+    producer.reset();
+  }
+
+  void produce() {
+    if (hists && !hists->isEmpty()) {
+      XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists->hit_count());
+      histfb->produce(*hists);
+      hists->clear();
+    }
+    if (readouts && readouts->getNumEntries()) {
+      XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", readouts->getNumEntries());
+      readouts->produce();
+    }
+  }
+
+  bool enabled() const {
+    return enabled_;
+  }
+
+private:
+  bool enabled_ {false};
+
+  std::shared_ptr<Producer> producer;
+  std::shared_ptr<HistSerializer> histfb;
+};
+
 // Maybe change the name of the function to e.g. main_thread
 void CSPEC::mainThread() {
   /** Connection setup */
@@ -141,27 +191,18 @@ void CSPEC::mainThread() {
   flatbuffer.set_callback(std::bind(&Producer::produce2, &EventProducer, std::placeholders::_1));
 
   // \todo make this optional
-  std::shared_ptr<ReadoutSerializer> readouts;
-  std::shared_ptr<Hists> hists;
-  std::shared_ptr<HistSerializer> histfb;
-  readouts = std::make_shared<ReadoutSerializer>(readout_entries);
-
-  hists = std::make_shared<Hists>(std::numeric_limits<uint16_t>::max(),
-                                  std::numeric_limits<uint16_t>::max());
-  histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size());
-
-  Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
-  readouts->set_callback(std::bind(&Producer::produce2, &monitorprod, std::placeholders::_1));
-  histfb->set_callback(std::bind(&Producer::produce2, &monitorprod, std::placeholders::_1));
+  Monitor monitor;
+  if (DetectorSettings.monitor)
+    monitor.init(EFUSettings.KafkaBroker, readout_entries);
 
   auto mg_mappings = std::make_shared<MgSeqGeometry>();
   mg_mappings->select_module(DetectorSettings.module);
   mg_mappings->swap_on(DetectorSettings.swap_wires);
-  MgEFU mg_efu(mg_mappings, hists);
+  MgEFU mg_efu(mg_mappings, monitor.hists);
   mg_efu.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
   mg_efu.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
 
-  MesytecData mesytecdata(mg_efu, readouts, DetectorSettings.fileprefix);
+  MesytecData mesytecdata(mg_efu, monitor.readouts, DetectorSettings.fileprefix);
 
   char buffer[eth_buffer_size];
   int ReadSize;
@@ -189,25 +230,16 @@ void CSPEC::mainThread() {
     // Force periodic flushing
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       mystats.tx_bytes += flatbuffer.produce();
-
-      if (hists && !hists->isEmpty()) {
-        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists->hit_count());
-        histfb->produce(*hists);
-        hists->clear();
-      }
-
+      monitor.produce();
       report_timer.now();
     }
 
     // Checking for exit
     if (not runThreads) {
+      // flush anything that remains
       mystats.tx_bytes += flatbuffer.produce();
-      auto entries = readouts->getNumEntries();
-      if (entries > 0) {
-        XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", entries);
-        //readouts.produce(); // Periodically produce of readouts
-      }
-
+      monitor.produce();
+      monitor.close();
       XTRACE(INPUT, ALW, "Stopping processing thread.\n");
       return;
     }

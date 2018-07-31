@@ -83,7 +83,7 @@ TEST_F(MesytecDataTest, ParseRecordedWSDataDiscardAll) {
   ASSERT_EQ(mesytec->stats.discards, 128);
   ASSERT_EQ(mesytec->stats.triggers, 1);
 }
- */
+*/
 
 TEST_F(MesytecDataTest, ParseRecordedWSDataII) {
   auto res = mesytec->parse((char *)&ws2[0], ws2.size(), *serializer);

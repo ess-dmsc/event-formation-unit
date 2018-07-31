@@ -7,7 +7,7 @@
 
 #include <multigrid/mgmesytec/HitFile.h>
 
-#define DATSET_NAME "gdgem_hits"
+#define DATSET_NAME "mgmesytec_hits"
 
 namespace hdf5 {
 

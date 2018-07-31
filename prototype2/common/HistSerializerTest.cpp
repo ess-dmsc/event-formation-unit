@@ -18,8 +18,16 @@ class HistSerializerTest : public TestBase {
   virtual void TearDown() {}
 
 protected:
+
   Hists hists {MAX_STRIP_VAL_TEST, MAX_STRIP_VAL_TEST};
   char flatbuffer[1024 * 1024 * 5];
+
+public:
+  void copy_buffer(Buffer b)
+  {
+    memcpy(flatbuffer, b.buffer, b.size);
+  }
+
 };
 
 TEST_F(HistSerializerTest, Serialize) {
@@ -28,14 +36,13 @@ TEST_F(HistSerializerTest, Serialize) {
   ASSERT_TRUE(len >= hists.needed_buffer_size());
 }
 
-// \todo reimplement this test with a verifier?
-/*
 TEST_F(HistSerializerTest, DeSerialize) {
-  HistSerializer histfb(hists.needed_buffer_size(), producer);
+  HistSerializer histfb(hists.needed_buffer_size());
+  histfb.set_callback(std::bind(&HistSerializerTest::copy_buffer,
+      this, std::placeholders::_1));
 
-  auto length = histfb.produce((hists);
+  histfb.produce(hists);
 
-  memcpy(flatbuffer, buffer, length);
   auto monitor = GetMonitorMessage(flatbuffer);
   auto dtype = monitor->data_type();
   ASSERT_EQ(dtype, DataField::GEMHist);
@@ -51,7 +58,6 @@ TEST_F(HistSerializerTest, DeSerialize) {
     EXPECT_EQ((*ydat)[i], MAX_STRIP_VAL_TEST - i);
   }
 }
-*/
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
