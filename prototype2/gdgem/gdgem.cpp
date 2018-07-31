@@ -52,10 +52,9 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 struct NMXSettingsStruct {
   std::string ConfigFile;
-  int SRSParserID; //
 } NMXSettings;
 
-void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {
+void SetCLIArguments(CLI::App& parser) {
   parser.add_option("-f,--file", NMXSettings.ConfigFile,
                     "NMX (gdgem) specific config file")
       ->group("NMX")->required();

@@ -56,6 +56,4 @@ protected:
 
   // CSV
   std::shared_ptr<DataSave> vmmsave;
-
-  static std::string time_str();
 };

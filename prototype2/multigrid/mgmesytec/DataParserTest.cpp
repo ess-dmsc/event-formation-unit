@@ -19,7 +19,7 @@ protected:
     geom->select_module(MG24_Z_20);
     geom->swap_on(true);
     MgEFU mgefu(geom, nullptr);
-    mesytec = new MesytecData(mgefu, nullptr);
+    mesytec = new MesytecData(mgefu, nullptr, false);
     serializer = new EV42Serializer(1000000, "nameless");
   }
   virtual void TearDown() {

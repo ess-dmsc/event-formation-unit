@@ -7,6 +7,7 @@ set(efu_common_SRC
   Producer.cpp
   DataSave.cpp
   DetectorModuleRegister.cpp
+  TimeString.cpp
   )
 set(efu_common_INC
   ../../libs/include/gccintel.h
@@ -19,6 +20,7 @@ set(efu_common_INC
   Producer.h
   Trace.h
   DataSave.h
+  TimeString.h
   )
 
 find_package(CLI11 REQUIRED)
@@ -58,9 +60,11 @@ endif()
 
 set(DataSaveTest_SRC
     DataSaveTest.cpp
-    DataSave.cpp)
+    DataSave.cpp
+    TimeString.cpp)
 set(DataSaveTest_INC
-    DataSave.h)
+    DataSave.h
+    TimeString.h)
 create_test_executable(DataSaveTest)
 
 set(DetectorTest_SRC

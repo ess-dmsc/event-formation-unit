@@ -2,6 +2,7 @@
 
 #include <gdgem/vmm3/BuilderVMM3.h>
 #include <gdgem/clustering/DoroClusterer.h>
+#include <common/TimeString.h>
 
 #include <common/Trace.h>
 // #undef TRC_LEVEL
@@ -30,7 +31,7 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 
 	if (dump_h5_) {
 		readout_file_ = std::make_shared<ReadoutFile>();
-		readout_file_->open_rw(dump_dir + "gdgem_vmm3_readouts_" + time_str() + ".h5");
+		readout_file_->open_rw(dump_dir + "gdgem_vmm3_readouts_" + timeString() + ".h5");
 	}
 }
 

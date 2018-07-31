@@ -16,26 +16,12 @@ enum SisType : uint32_t {
 };
 // clang-format on
 
-// \todo put this somewhere else
-std::string MesytecData::time_str() {
-  char cStartTime[50];
-  time_t rawtime;
-  struct tm *timeinfo;
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
-  strftime(cStartTime, 50, "%Y-%m-%d-%H-%M-%S", timeinfo);
-  std::string startTime = cStartTime;
-  return startTime;
-}
-
-
-MesytecData::MesytecData(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s, std::string fileprefix)
-    : vmmr16Parser(mg_efu, s) {
-
-  if (!fileprefix.empty()) {
-    dumpfile = std::make_shared<MGHitFile>();
-    dumpfile->open_rw(fileprefix + "mesytec_" + time_str() + ".h5");
-  }
+MesytecData::MesytecData(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s,
+                         bool spoof_ht,
+                         std::shared_ptr<MGHitFile> dump)
+    : vmmr16Parser(mg_efu, s)
+    , dumpfile(dump) {
+  vmmr16Parser.setSpoofHighTime(spoof_ht);
 }
 
 // \todo can only create a single event per UDP buffer
@@ -51,7 +37,7 @@ uint32_t MesytecData::getTime() {
 
 MesytecData::error MesytecData::parse(const char *buffer,
                                       int size,
-                                      EV42Serializer &EV42Serializer) {
+                                      EV42Serializer &serializer) {
   int bytesleft = size;
   memset(&stats, 0, sizeof(stats));
 
@@ -90,8 +76,8 @@ MesytecData::error MesytecData::parse(const char *buffer,
     vmmr16Parser.parse(datap, len - 3, stats, static_cast<bool>(dumpfile));
 
     if (vmmr16Parser.externalTrigger()) {
-      stats.tx_bytes += EV42Serializer.produce();
-      EV42Serializer.set_pulse_time(RecentPulseTime);
+      stats.tx_bytes += serializer.produce();
+      serializer.set_pulse_time(RecentPulseTime);
       RecentPulseTime = vmmr16Parser.time();
     }
 
@@ -101,7 +87,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
 
       DTRACE(DEB, "Event: pixel: %d, time: %d \n", pixel, time);
       if (pixel != 0) {
-        stats.tx_bytes += EV42Serializer.addevent(time, pixel);
+        stats.tx_bytes += serializer.addevent(time, pixel);
         stats.events++;
       } else {
         stats.geometry_errors++;

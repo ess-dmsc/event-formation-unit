@@ -12,6 +12,7 @@ add_executable(batchreader
   src/RunSpecParse.cpp
   src/jsoncpp.cpp
   ../../prototype2/common/DataSave.cpp
+  ../../prototype2/common/TimeString.cpp
   ../../prototype2/multigrid/mgcncs/ChanConv.cpp
   ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp
   ../../prototype2/multigrid/mgcncs/DataParser.cpp
@@ -22,6 +23,7 @@ add_executable(cncsread src/cncsread.cpp)
 add_executable(genpixids
   src/genpixids.cpp
   ../../prototype2/common/DataSave.cpp
+  ../../prototype2/common/TimeString.cpp
   ../../prototype2/multigrid/mgcncs/ChanConv.cpp
   ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp
   )

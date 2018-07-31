@@ -18,19 +18,21 @@ public:
   enum class error { OK = 0, ESIZE, EHEADER, EUNSUPP };
 
   /// \brief if it looks like a constructor...
-  MesytecData(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s, std::string fileprefix = "");
+  MesytecData(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s, bool spoof_ht,
+              std::shared_ptr<MGHitFile> dump = nullptr);
 
   ~MesytecData() = default;
 
-  uint32_t getPixel(); // \todo (too) simple implm. but agreed for now
-  uint32_t getTime();  // \todo (too) simple implm. but agreed for now
+  /// \todo document
+  uint32_t getPixel();
 
-  /** \brief parse a binary payload buffer, return number of data element
-   * \todo Uses NMXHists  - refactor and move ?
-   */
+  /// \todo document
+  uint32_t getTime();
+
+  /// \brief parse a binary payload buffer, return number of data element
   error parse(const char *buffer, int size, EV42Serializer &EV42Serializer);
 
-  // Statistics updated by parse()
+  /// Statistics updated by parse()
   MgStats stats;
 
   uint64_t RecentPulseTime{0};
@@ -42,7 +44,4 @@ private:
   ESSGeometry Geometry{36, 40, 20, 1};
 
   std::shared_ptr<MGHitFile> dumpfile;
-
-  // \todo factor this out, common with gdgem
-  static std::string time_str();
 };

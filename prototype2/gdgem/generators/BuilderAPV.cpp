@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <gdgem/generators/BuilderAPV.h>
-#include <cstring>
+#include <common/TimeString.h>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL
@@ -14,7 +14,7 @@ BuilderAPV::BuilderAPV(std::string dump_dir, bool dump_csv, bool dump_h5)
     vmmsave->tofile("# time, plane, strip, adc\n");
   if (dump_h5_) {
     hit_file_ = std::make_shared<HitFile>();
-    hit_file_->open_rw(dump_dir + "gdgem_apv2vmm_" + time_str() + ".h5");
+    hit_file_->open_rw(dump_dir + "gdgem_apv2vmm_" + timeString() + ".h5");
   }
 }
 

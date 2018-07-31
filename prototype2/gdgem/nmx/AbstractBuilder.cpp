@@ -24,16 +24,3 @@ AbstractBuilder::AbstractBuilder(std::shared_ptr<AbstractClusterer> x,
   clusterer_x = x;
   clusterer_y = y;
 }
-
-
-std::string AbstractBuilder::time_str() {
-  char cStartTime[50];
-  time_t rawtime;
-  struct tm *timeinfo;
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
-  strftime(cStartTime, 50, "%Y-%m-%d-%H-%M-%S", timeinfo);
-  std::string startTime = cStartTime;
-  return startTime;
-}
-

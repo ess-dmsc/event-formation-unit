@@ -12,7 +12,7 @@
 #include <common/EV42Serializer.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
-#include <common/Trace.h>
+#include <common/TimeString.h>
 #include <cstring>
 #include <efu/Parser.h>
 #include <efu/Server.h>
@@ -32,6 +32,7 @@
 #include <multigrid/mgmesytec/MgSeqGeometry.h>
 #include <multigrid/mgmesytec/MG24Geometry.h>
 
+#include <common/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
@@ -39,33 +40,64 @@ const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
 
 /** ----------------------------------------------------- */
 struct DetectorSettingsStruct {
+  bool monitor{false};
+  std::string fileprefix{""};
+
+  bool swap_wires{false};
+  uint32_t module{0}; // flipped z
+  bool spoof_high_time{false};
+
   uint32_t wireThresholdLo{0};     // accept all
   uint32_t wireThresholdHi{65535}; // accept all
   uint32_t gridThresholdLo{0};     // accept all
   uint32_t gridThresholdHi{65535}; // accept all
-  bool swap_wires{false};
-  uint32_t module{0}; // 0 defaults to 16 wires in z, 1
-  std::string fileprefix{""};
-  bool monitor{false};
+
+  std::string debug() const;
 } DetectorSettings;
 
 void SetCLIArguments(CLI::App & parser) {
-  parser.add_option("--wlo", DetectorSettings.wireThresholdLo,
-         "minimum wire adc value for accept")->group("MGMesytec")->configurable(true);
-  parser.add_option("--whi", DetectorSettings.wireThresholdHi,
-         "maximum wire adc value for accept")->group("MGMesytec")->configurable(true);
-  parser.add_option("--glo", DetectorSettings.gridThresholdLo,
-         "minimum grid adc value for accept")->group("MGMesytec")->configurable(true);
-  parser.add_option("--ghi", DetectorSettings.gridThresholdHi,
-         "maximum grid adc value for accept")->group("MGMesytec")->configurable(true);
-  parser.add_option("--module", DetectorSettings.module,
-         "select module for reversing z coordinates")->group("MGMesytec")->configurable(true);
-  parser.add_flag("--swap_wires", DetectorSettings.swap_wires,
-         "swap odd and even wires")->group("MGMesytec")->configurable(true);
-  parser.add_option("--dumptofile", DetectorSettings.fileprefix,
-         "dump to specified file")->group("MGMesytec")->configurable(true);
   parser.add_flag("--monitor", DetectorSettings.monitor,
-         "stream monitor data")->group("MGMesytec")->configurable(true);
+                  "stream monitor data")->group("MGMesytec")->configurable(true)->set_default_val("true");
+  parser.add_option("--dumptofile", DetectorSettings.fileprefix,
+                    "dump to specified file")->group("MGMesytec")->configurable(true);
+
+  parser.add_flag("--swap_wires", DetectorSettings.swap_wires,
+                  "swap odd and even wires")->group("MGMesytec")->configurable(true)->set_default_val("true");
+  parser.add_option("--module", DetectorSettings.module,
+         "select module for reversing z coordinates")->group("MGMesytec")->
+         configurable(true)->set_default_val("1");
+
+  parser.add_flag("--spoof_high", DetectorSettings.spoof_high_time,
+                  "spoof high time")->group("MGMesytec")->configurable(true)->set_default_val("false");
+
+  parser.add_option("--wlo", DetectorSettings.wireThresholdLo,
+                    "minimum wire adc value for accept")->group("MGMesytec")->configurable(true)->set_default_val("0");
+  parser.add_option("--whi", DetectorSettings.wireThresholdHi,
+                    "maximum wire adc value for accept")->group("MGMesytec")->configurable(true)->set_default_val("65535");
+  parser.add_option("--glo", DetectorSettings.gridThresholdLo,
+                    "minimum grid adc value for accept")->group("MGMesytec")->configurable(true)->set_default_val("0");
+  parser.add_option("--ghi", DetectorSettings.gridThresholdHi,
+                    "maximum grid adc value for accept")->group("MGMesytec")->configurable(true)->set_default_val("65535");
+}
+
+std::string DetectorSettingsStruct::debug() const {
+  std::stringstream ss;
+  ss << "  ===============================================\n";
+  ss << "  ========       multigrid mesytec       ========\n";
+  ss << "  ===============================================\n";
+  ss << "  Stream monitor data = " << (monitor ? "YES" : "no") << "\n";
+  if (!fileprefix.empty())
+    ss << "  Dump h5 data in path = " << fileprefix << "\n";
+  ss << "\n";
+  ss << "  Spoof high time = " << (spoof_high_time ? "YES" : "no") << "\n";
+  ss << "  Swap odd/even wires = " << (swap_wires ? "YES" : "no") << "\n";
+  ss << "  Flip z coordinates on bus# = " << module << "\n";
+  ss << "  Thresholds:\n";
+  ss << "    wire min = " << wireThresholdLo << "\n";
+  ss << "    wire max = " << wireThresholdHi << "\n";
+  ss << "    grid min = " << gridThresholdLo << "\n";
+  ss << "    grid max = " << gridThresholdHi << "\n";
+  return ss.str();
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
@@ -123,6 +155,8 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
 
   std::function<void()> inputFunc = [this]() { CSPEC::mainThread(); };
   Detector::AddThreadFunction(inputFunc, "main");
+
+  XTRACE(INIT, ALW, "Detector Settings:\n%s", DetectorSettings.debug().c_str());
 }
 
 const char *CSPEC::detectorname() { return classname; }
@@ -182,7 +216,6 @@ private:
   std::shared_ptr<HistSerializer> histfb;
 };
 
-// Maybe change the name of the function to e.g. main_thread
 void CSPEC::mainThread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort); //Change name or add more comments
@@ -195,7 +228,6 @@ void CSPEC::mainThread() {
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
   flatbuffer.set_callback(std::bind(&Producer::produce2, &EventProducer, std::placeholders::_1));
 
-  // \todo make this optional
   Monitor monitor;
   if (DetectorSettings.monitor)
     monitor.init(EFUSettings.KafkaBroker, readout_entries);
@@ -207,7 +239,14 @@ void CSPEC::mainThread() {
   mg_efu.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
   mg_efu.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
 
-  MesytecData mesytecdata(mg_efu, monitor.readouts, DetectorSettings.fileprefix);
+  std::shared_ptr<MGHitFile> dumpfile;
+  if (!DetectorSettings.fileprefix.empty())
+  {
+    dumpfile = std::make_shared<MGHitFile>();
+    dumpfile->open_rw(DetectorSettings.fileprefix + "mgmesytec_" + timeString() + ".h5");
+  }
+  MesytecData mesytecdata(mg_efu, monitor.readouts,
+      DetectorSettings.spoof_high_time, dumpfile);
 
   char buffer[eth_buffer_size];
   int ReadSize;

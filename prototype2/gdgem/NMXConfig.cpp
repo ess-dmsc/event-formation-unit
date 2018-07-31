@@ -74,7 +74,7 @@ NMXConfig::NMXConfig(std::string jsonfile) {
   cluster_adc_downshift = root["cluster_adc_downshift"].asInt();
   send_tracks = root["send_tracks"].asBool();
 
-  // TODO deduce geometry from SRS mappings?
+  // \todo deduce geometry from SRS mappings?
   geometry.nx(root["geometry_x"].asInt());
   geometry.ny(root["geometry_y"].asInt());
   geometry.nz(1);
