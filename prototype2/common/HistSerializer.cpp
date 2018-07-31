@@ -1,16 +1,20 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <cinttypes>
-#include <common/Trace.h>
 #include <common/HistSerializer.h>
+#include <libs/include/gccintel.h>
+
+#include <common/Trace.h>
 
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-HistSerializer::HistSerializer(size_t buffer_half_size, Producer &prod)
-    : producer(prod), builder(2 * buffer_half_size + 256) {}
+HistSerializer::HistSerializer(size_t buffer_half_size)
+    : builder(2 * buffer_half_size + 256) {}
 
-HistSerializer::~HistSerializer() {}
+
+void HistSerializer::set_callback(std::function<void(Buffer)> cb) {
+  producer_callback = cb;
+}
 
 size_t HistSerializer::produce(const Hists &hists) {
   builder.Clear();
@@ -44,7 +48,14 @@ size_t HistSerializer::produce(const Hists &hists) {
       CreateMonitorMessage(builder, 0, DataField::GEMHist, dataoff.Union());
 
   builder.Finish(msg);
-  producer.produce((char *)builder.GetBufferPointer(), builder.GetSize());
 
-  return builder.GetSize();
+  Buffer buffer;
+  buffer.buffer = (char *)builder.GetBufferPointer();
+  buffer.size = builder.GetSize();
+
+  if (producer_callback) {
+    producer_callback(buffer);
+  }
+
+  return buffer.size;
 }

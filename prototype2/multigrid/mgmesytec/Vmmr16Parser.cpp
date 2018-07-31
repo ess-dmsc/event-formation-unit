@@ -78,8 +78,6 @@ void VMMR16Parser::parse(uint32_t *buffer,
 
   uint32_t *datap = buffer;
 
-  uint16_t dataWords;
-
   uint16_t wordsleft = nWords;
 
   size_t chan_count{0};
@@ -108,8 +106,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
 
     switch (datatype) {
     case MesytecType::Header:
-      dataWords = static_cast<uint16_t>(*datap & MesytecDataWordsMask);
-      assert(nWords > dataWords);
+      assert(nWords > static_cast<uint16_t>(*datap & MesytecDataWordsMask));
       hit.module = static_cast<uint8_t>((*datap & MesytecModuleMask) >> MesytecModuleBitShift);
       hit.external_trigger = (0 != (*datap & MesytecExternalTriggerMask));
 //      DTRACE(INF, "   Header:  trigger=%zu,  data len=%d (words),  module=%d, external_trigger=%s\n",

@@ -138,18 +138,21 @@ void CSPEC::mainThread() {
 
   EV42Serializer flatbuffer(kafka_buffer_size, "multigrid");
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  flatbuffer.set_callback(
-      std::bind(&Producer::produce2, &EventProducer, std::placeholders::_1));
+  flatbuffer.set_callback(std::bind(&Producer::produce2, &EventProducer, std::placeholders::_1));
 
   // \todo make this optional
   std::shared_ptr<ReadoutSerializer> readouts;
   std::shared_ptr<Hists> hists;
   std::shared_ptr<HistSerializer> histfb;
-  Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
-  readouts = std::make_shared<ReadoutSerializer>(readout_entries, monitorprod);
+  readouts = std::make_shared<ReadoutSerializer>(readout_entries);
+
   hists = std::make_shared<Hists>(std::numeric_limits<uint16_t>::max(),
                                   std::numeric_limits<uint16_t>::max());
-  histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size(), monitorprod);
+  histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size());
+
+  Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
+  readouts->set_callback(std::bind(&Producer::produce2, &monitorprod, std::placeholders::_1));
+  histfb->set_callback(std::bind(&Producer::produce2, &monitorprod, std::placeholders::_1));
 
   auto mg_mappings = std::make_shared<MgSeqGeometry>();
   mg_mappings->select_module(DetectorSettings.module);

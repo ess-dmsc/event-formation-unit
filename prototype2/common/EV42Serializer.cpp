@@ -49,7 +49,7 @@ EV42Serializer::EV42Serializer(size_t max_array_length, std::string source_name)
 
 void EV42Serializer::set_callback(std::function<void(Buffer)> cb)
 {
-  callback = cb;
+  producer_callback = cb;
 }
 
 Buffer EV42Serializer::serialize() {
@@ -76,8 +76,8 @@ size_t EV42Serializer::produce() {
   if (events_ != 0) {
     XTRACE(OUTPUT, DEB, "autoproduce %zu events \n", events_);
     auto buffer = serialize();
-    if (callback)
-      callback(buffer);
+    if (producer_callback)
+      producer_callback(buffer);
     return buffer.size;
   }
   return 0;

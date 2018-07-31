@@ -250,7 +250,10 @@ void NMX::processing_thread() {
   TrackSerializer trackfb(256, nmx_opts.track_sample_minhits,
                           nmx_opts.time_config.target_resolution_ns());
   Hists hists(Hit::strip_max_val, Hit::adc_max_val);
-  HistSerializer histfb(hists.needed_buffer_size(), monitorprod);
+  HistSerializer histfb(hists.needed_buffer_size());
+  histfb.set_callback(
+      std::bind(&Producer::produce2, &monitorprod, std::placeholders::_1));
+
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
   ClusterMatcher matcher(nmx_opts.matcher_max_delta_time);

@@ -50,7 +50,7 @@ private:
   // \todo maybe should be mutated directly in buffer?
   uint64_t message_id_{1};
 
-  std::function<void(Buffer)> callback;
+  std::function<void(Buffer)> producer_callback;
 
   // All of this is the flatbuffer
   flatbuffers::FlatBufferBuilder builder;

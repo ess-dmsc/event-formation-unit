@@ -20,11 +20,10 @@ class HistSerializerTest : public TestBase {
 protected:
   Hists hists {MAX_STRIP_VAL_TEST, MAX_STRIP_VAL_TEST};
   char flatbuffer[1024 * 1024 * 5];
-  Producer producer{"localhost:9092", "test_monitor"};
 };
 
 TEST_F(HistSerializerTest, Serialize) {
-  HistSerializer histfb(hists.needed_buffer_size(), producer);
+  HistSerializer histfb(hists.needed_buffer_size());
   auto len = histfb.produce(hists);
   ASSERT_TRUE(len >= hists.needed_buffer_size());
 }
