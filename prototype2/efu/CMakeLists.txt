@@ -24,7 +24,8 @@ set(efu_INC
   )
 
 create_executable(efu)
-target_link_libraries(efu efu_common)
+target_link_libraries(efu PUBLIC efu_common)
+set_target_properties(efu PROPERTIES ENABLE_EXPORTS 1)
 get_filename_component(EFU_RUN_INSTRUCTIONS "Executing artefacts.md" ABSOLUTE)
 add_custom_command(TARGET efu POST_BUILD
                 COMMAND ${CMAKE_COMMAND} -E copy

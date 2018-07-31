@@ -40,8 +40,6 @@ enable_coverage(efu_common)
 
 target_link_libraries(efu_common PUBLIC ${EFU_COMMON_LIBS} fmt::fmt)
 
-set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} efu_common PARENT_SCOPE)
-
 
 #=============================================================================
 # Tests

@@ -7,7 +7,7 @@ function(create_module module_name)
     ${${module_name}_INC})
   set_target_properties(${module_name} PROPERTIES PREFIX "")
   set_target_properties(${module_name} PROPERTIES SUFFIX ".so")
-  target_link_libraries(${module_name}
+  target_link_libraries(${module_name} efu
     ${${module_name}_LIB}
     ${EFU_COMMON_LIBS}
     eventlib)

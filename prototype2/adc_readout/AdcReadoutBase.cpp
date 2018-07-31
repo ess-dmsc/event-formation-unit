@@ -119,12 +119,10 @@ void AdcReadoutBase::processingThread(Queue &DataModuleQueue) {
   std::vector<std::unique_ptr<AdcDataProcessor>> Processors;
 
   if (ReadoutSettings.PeakDetection) {
-    LOG(Sev::Info, "AdcReadout: Peak detection enabled.");
     Processors.push_back(
         std::unique_ptr<AdcDataProcessor>(new PeakFinder(getProducer())));
   }
   if (ReadoutSettings.SerializeSamples) {
-    LOG(Sev::Info, "AdcReadout: Sample serialisation enabled.");
     std::unique_ptr<AdcDataProcessor> Processor(
         new SampleProcessing(getProducer(), ReadoutSettings.Name));
     dynamic_cast<SampleProcessing *>(Processor.get())
