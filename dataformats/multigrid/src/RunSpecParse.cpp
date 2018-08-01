@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iomanip>
 #include <string>
+#include <stdexcept>
 
 RunSpecParse::RunSpecParse(std::string filename) : jsonfile(filename) {}
 
@@ -26,7 +27,7 @@ std::vector<RunSpec *> &RunSpecParse::getruns(std::string runspec,
 
   if (!reader.parse(str, root, 0)) {
     printf("error: file \"%s\" is not valid json\n", jsonfile.c_str());
-    exit(1);
+    throw std::runtime_error("Parsed file was not valid JSON.");
   }
 
   const Json::Value plugins = root[runspec];
