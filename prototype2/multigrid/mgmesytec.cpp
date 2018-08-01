@@ -68,7 +68,7 @@ void SetCLIArguments(CLI::App & parser) {
          configurable(true)->set_default_val("1");
 
   parser.add_flag("--spoof_high", DetectorSettings.spoof_high_time,
-                  "spoof high time")->group("MGMesytec")->configurable(true)->set_default_val("false");
+                  "spoof high time")->group("MGMesytec")->configurable(true);
 
   parser.add_option("--wlo", DetectorSettings.wireThresholdLo,
                     "minimum wire adc value for accept")->group("MGMesytec")->configurable(true)->set_default_val("0");
