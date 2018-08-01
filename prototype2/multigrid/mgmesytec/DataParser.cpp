@@ -26,6 +26,8 @@ MesytecData::MesytecData(std::shared_ptr<MgEFU> mg_efu, std::shared_ptr<ReadoutS
 
 // \todo can only create a single event per UDP buffer
 uint32_t MesytecData::getPixel() {
+  if (!vmmr16Parser.mgEfu)
+    return 0;
   return Geometry.pixel3D(vmmr16Parser.mgEfu->x(),
                           vmmr16Parser.mgEfu->y(),
                           vmmr16Parser.mgEfu->z());
@@ -93,6 +95,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
         stats.geometry_errors++;
       }
     } else {
+      // \todo external triggers treated as "bad"?
       stats.badtriggers++;
     }
 

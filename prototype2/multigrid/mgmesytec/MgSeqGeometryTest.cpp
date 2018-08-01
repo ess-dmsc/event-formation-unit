@@ -16,7 +16,7 @@ TEST_F(MgSeqGeometryTest, IsWireIsGrid) {
     ASSERT_FALSE(mgdet.isGrid(i));
   }
 
-  for (int i = 80; i <= 127; i++) {
+  for (int i = 80; i <= 119; i++) {
     ASSERT_FALSE(mgdet.isWire(i));
     ASSERT_TRUE(mgdet.isGrid(i));
   }

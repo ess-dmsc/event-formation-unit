@@ -28,6 +28,8 @@ void MgEfuCenterMass::reset() {
   zsum = 0;
 }
 
+// \todo pick only a few data points
+
 bool MgEfuCenterMass::ingest(uint8_t bus, uint16_t channel, uint16_t adc) {
   if (mappings->isWire(channel) && adc) {
     xmass += mappings->x(bus, channel) * adc;

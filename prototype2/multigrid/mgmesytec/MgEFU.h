@@ -12,6 +12,8 @@
 #include <common/Hists.h>
 #include <multigrid/mgmesytec/MgGeometry.h>
 
+// \todo rescale and thresholds per channel
+
 class MgEFU {
 public:
   MgEFU() = default;

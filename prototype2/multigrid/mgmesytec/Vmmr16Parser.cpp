@@ -69,7 +69,8 @@ void VMMR16Parser::parse(uint32_t *buffer,
   stats.triggers++;
   hit.trigger_count++;
 
-  mgEfu->reset();
+  if (mgEfu)
+    mgEfu->reset();
   hit.bus = 0;
   hit.channel = 0;
   hit.adc = 0;
@@ -141,16 +142,16 @@ void VMMR16Parser::parse(uint32_t *buffer,
 
       DTRACE(INF, "   DataEvent2:  %s\n", hit.debug().c_str());
 
-      if (mgEfu->ingest(hit.bus, hit.channel, hit.adc)) {
+      if (hit_serializer) {
+        hit_serializer->addEntry(0, hit.channel, hit.total_time, hit.adc);
+      }
+
+      if (dump_data) {
+        converted_data.push_back(hit);
+      }
+
+      if (mgEfu && mgEfu->ingest(hit.bus, hit.channel, hit.adc)) {
 //        DTRACE(DEB, "   accepting %d,%d,%d\n", hit.bus, hit.channel, hit.adc);
-
-        if (hit_serializer) {
-          hit_serializer->addEntry(0, hit.channel, hit.total_time, hit.adc);
-        }
-
-        if (dump_data) {
-          converted_data.push_back(hit);
-        }
       } else {
 //        DTRACE(DEB, "   discarding %d,%d,%d\n", hit.bus, hit.channel, hit.adc);
         stats.discards++;
@@ -180,5 +181,5 @@ void VMMR16Parser::parse(uint32_t *buffer,
     }
   }
 
-  GoodEvent = TimeGood && mgEfu->event_good();
+  GoodEvent = TimeGood && mgEfu && mgEfu->event_good();
 }

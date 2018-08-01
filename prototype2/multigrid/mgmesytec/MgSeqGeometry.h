@@ -11,6 +11,8 @@
 
 #pragma once
 
+// \todo map to grids and wires before xyz, subtract to get grid numbers
+
 #include <multigrid/mgmesytec/MgGeometry.h>
 
 #include <common/Trace.h>
@@ -19,12 +21,17 @@
 
 class MgSeqGeometry : public MgGeometry {
 private:
+  // \todo per bus
   bool swap_wires_on{false};
-  uint32_t module_select {0}; // flipped z
+  // \todo per bus, boolean
+  // \todo rename flipped z
+  uint32_t module_select {0};
 
-  static constexpr uint16_t BusCount{4};
+  // \todo possibly parametrize all these
+  static constexpr uint16_t XinBus{4};
   static constexpr uint16_t WiresInZ{20};
   static constexpr uint16_t GridsInY{80};
+  static constexpr uint16_t maxChannel{120}; // \todo parameter
 
 public:
 
@@ -41,14 +48,14 @@ public:
   bool isWire(uint16_t channel) override { return (channel < GridsInY); }
 
   /** @brief identifies which channels are grids, from drawing by Anton */
-  bool isGrid(uint16_t channel) override { return (channel >= GridsInY) && (channel < 128); }
+  bool isGrid(uint16_t channel) override { return (channel >= GridsInY) && (channel < maxChannel); }
 
   /** @brief return the x coordinate of the detector */
   uint32_t x(uint8_t bus, uint16_t channel) override {
     if (swap_wires_on)
       swap(channel);
     // wire == channel, wires range from 0 - 79
-    return channel / WiresInZ + bus * BusCount;
+    return channel / WiresInZ + bus * XinBus;
   }
 
   /** @brief return the y coordinate of the detector */
