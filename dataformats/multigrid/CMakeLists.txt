@@ -17,6 +17,8 @@ add_executable(batchreader
   ../../prototype2/multigrid/mgcncs/DataParser.cpp
   )
 
+target_link_libraries(batchreader PRIVATE efu_common)
+
 add_executable(cncsread src/cncsread.cpp)
 
 add_executable(genpixids
@@ -25,6 +27,7 @@ add_executable(genpixids
   ../../prototype2/multigrid/mgcncs/ChanConv.cpp
   ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp
   )
+target_link_libraries(genpixids PRIVATE efu_common)
 
 #
 # Install Files
