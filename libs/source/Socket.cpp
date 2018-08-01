@@ -42,8 +42,8 @@ void Socket::getBufferSizes(int & sendBuffer, int & receiveBuffer) {
 }
 
 void Socket::printBufferSizes(void) {
-  LOG(Sev::Info, "Socket receive buffer size: %d", getSockOpt(SO_RCVBUF));
-  LOG(Sev::Info, "Socket send buffer size: %d", getSockOpt(SO_SNDBUF));
+  LOG(Sev::Info, "Socket receive buffer size: {}", getSockOpt(SO_RCVBUF));
+  LOG(Sev::Info, "Socket send buffer size: {}", getSockOpt(SO_SNDBUF));
 }
 
 int Socket::setRecvTimeout(int seconds, int usecs) {
@@ -156,7 +156,7 @@ int TCPTransmitter::senddata(char *buffer, int len) {
   }
   int ret = send(socketFileDescriptor, buffer, len, 0);
   if (ret <= 0) {
-    LOG(Sev::Warning, "TCPClient::send() returns %d", ret);
+    LOG(Sev::Warning, "TCPClient::send() returns {}", ret);
   }
   return ret;
 }
