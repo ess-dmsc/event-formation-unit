@@ -32,6 +32,9 @@
 #include <multigrid/mgmesytec/MgSeqGeometry.h>
 #include <multigrid/mgmesytec/MG24Geometry.h>
 
+#include <multigrid/mgmesytec/MgEfuMaximum.h>
+#include <multigrid/mgmesytec/MgEfuCenterMass.h>
+
 #include <common/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -46,6 +49,8 @@ struct DetectorSettingsStruct {
   bool swap_wires{false};
   uint32_t module{0}; // flipped z
   bool spoof_high_time{false};
+
+  std::string reduction_strategy;
 
   uint32_t wireThresholdLo{0};     // accept all
   uint32_t wireThresholdHi{65535}; // accept all
@@ -70,6 +75,9 @@ void SetCLIArguments(CLI::App & parser) {
   parser.add_flag("--spoof_high", DetectorSettings.spoof_high_time,
                   "spoof high time")->group("MGMesytec")->configurable(true);
 
+  parser.add_option("--strategy", DetectorSettings.reduction_strategy,
+                    "reduction strategy (maximum, center-mass)")->group("MGMesytec")->configurable(true)->set_default_val("maximum");
+
   parser.add_option("--wlo", DetectorSettings.wireThresholdLo,
                     "minimum wire adc value for accept")->group("MGMesytec")->configurable(true)->set_default_val("0");
   parser.add_option("--whi", DetectorSettings.wireThresholdHi,
@@ -92,11 +100,14 @@ std::string DetectorSettingsStruct::debug() const {
   ss << "  Spoof high time = " << (spoof_high_time ? "YES" : "no") << "\n";
   ss << "  Swap odd/even wires = " << (swap_wires ? "YES" : "no") << "\n";
   ss << "  Flip z coordinates on bus# = " << module << "\n";
-  ss << "  Thresholds:\n";
-  ss << "    wire min = " << wireThresholdLo << "\n";
-  ss << "    wire max = " << wireThresholdHi << "\n";
-  ss << "    grid min = " << gridThresholdLo << "\n";
-  ss << "    grid max = " << gridThresholdHi << "\n";
+  ss << "  Event reduction strategy: " << reduction_strategy << "\n";
+  if (reduction_strategy == "maximum") {
+    ss << "    Thresholds:\n";
+    ss << "     wire min = " << wireThresholdLo << "\n";
+    ss << "     wire max = " << wireThresholdHi << "\n";
+    ss << "     grid min = " << gridThresholdLo << "\n";
+    ss << "     grid max = " << gridThresholdHi << "\n";
+  }
   return ss.str();
 }
 
@@ -235,9 +246,17 @@ void CSPEC::mainThread() {
   auto mg_mappings = std::make_shared<MgSeqGeometry>();
   mg_mappings->select_module(DetectorSettings.module);
   mg_mappings->swap_on(DetectorSettings.swap_wires);
-  MgEFU mg_efu(mg_mappings, monitor.hists);
-  mg_efu.setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
-  mg_efu.setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
+  std::shared_ptr<MgEFU> mg_efu;
+  if (DetectorSettings.reduction_strategy == "center-mass") {
+    mg_efu = std::make_shared<MgEfuCenterMass>();
+  } else {
+    auto mg_efum = std::make_shared<MgEfuMaximum>();
+    mg_efum->setWireThreshold(DetectorSettings.wireThresholdLo, DetectorSettings.wireThresholdHi);
+    mg_efum->setGridThreshold(DetectorSettings.gridThresholdLo, DetectorSettings.gridThresholdHi);
+    mg_efu = mg_efum;
+  }
+  mg_efu->mappings = mg_mappings;
+  mg_efu->hists = monitor.hists;
 
   std::shared_ptr<MGHitFile> dumpfile;
   if (!DetectorSettings.fileprefix.empty())

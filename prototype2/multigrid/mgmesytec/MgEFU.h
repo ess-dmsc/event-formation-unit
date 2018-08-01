@@ -8,39 +8,23 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
-#include <limits>
 #include <memory>
 #include <common/Hists.h>
 #include <multigrid/mgmesytec/MgGeometry.h>
 
 class MgEFU {
 public:
-  MgEFU(std::shared_ptr<MgGeometry> mg_mappings, std::shared_ptr<Hists> h);
-  ~MgEFU() = default;
+  MgEFU() = default;
+  virtual ~MgEFU() = default;
 
-  void setWireThreshold(uint16_t low, uint16_t high);
-  void setGridThreshold(uint16_t low, uint16_t high);
+  virtual void reset() = 0;
+  virtual bool ingest(uint8_t bus, uint16_t channel, uint16_t adc) = 0;
+  virtual bool event_good() const = 0;
 
-  void reset_maxima();
-  bool ingest(uint8_t bus, uint16_t channel, uint16_t adc);
-  bool event_good() const;
-
+  std::shared_ptr<MgGeometry> mappings;
   std::shared_ptr<Hists> hists;
 
-  uint32_t x;
-  uint32_t y;
-  uint32_t z;
-
-private:
-  uint16_t wireThresholdLo{0};
-  uint16_t wireThresholdHi{std::numeric_limits<uint16_t>::max()};
-  uint16_t gridThresholdLo{0};
-  uint16_t gridThresholdHi{std::numeric_limits<uint16_t>::max()};
-  std::shared_ptr<MgGeometry> MgMappings;
-
-  uint16_t GridAdcMax {0};
-  uint16_t WireAdcMax {0};
-
-  bool WireGood{false};
-  bool GridGood{false};
+  virtual uint32_t x() const = 0;
+  virtual uint32_t y() const = 0;
+  virtual uint32_t z() const = 0;
 };

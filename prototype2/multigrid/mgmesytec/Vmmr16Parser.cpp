@@ -3,8 +3,8 @@
 #include <multigrid/mgmesytec/Vmmr16Parser.h>
 
 #include <common/Trace.h>
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 // clang-format off
 // Mesytec Datasheet: VMMR-8/16 v00.01
@@ -39,7 +39,7 @@ static constexpr uint8_t MesytecAddressBitShift{12};
 static constexpr uint32_t MesytecAdcMask{0x00000fff};
 
 
-VMMR16Parser::VMMR16Parser(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s)
+VMMR16Parser::VMMR16Parser(std::shared_ptr<MgEFU> mg_efu, std::shared_ptr<ReadoutSerializer> s)
     : mgEfu(mg_efu), hit_serializer(s) {}
 
 void VMMR16Parser::setSpoofHighTime(bool spoof) {
@@ -69,7 +69,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
   stats.triggers++;
   hit.trigger_count++;
 
-  mgEfu.reset_maxima();
+  mgEfu->reset();
   hit.bus = 0;
   hit.channel = 0;
   hit.adc = 0;
@@ -99,7 +99,8 @@ void VMMR16Parser::parse(uint32_t *buffer,
     hit.total_time = (static_cast<uint64_t>(hit.high_time) << 30) + hit.low_time;
   }
 
-
+  DTRACE(INF, "VMMR16 Buffer:  size=%d, preparsed lowtime=%d, total_time=%zu\n",
+      nWords, hit.low_time, hit.total_time);
 
   while (wordsleft > 0) {
     auto datatype = *datap & MesytecTypeMask;
@@ -109,15 +110,15 @@ void VMMR16Parser::parse(uint32_t *buffer,
       assert(nWords > static_cast<uint16_t>(*datap & MesytecDataWordsMask));
       hit.module = static_cast<uint8_t>((*datap & MesytecModuleMask) >> MesytecModuleBitShift);
       hit.external_trigger = (0 != (*datap & MesytecExternalTriggerMask));
-//      DTRACE(INF, "   Header:  trigger=%zu,  data len=%d (words),  module=%d, external_trigger=%s\n",
-//             stats.triggers, dataWords, hit.module, hit.external_trigger ? "true" : "false");
+      DTRACE(INF, "   Header:  trigger=%zu, module=%d, external_trigger=%s\n",
+             stats.triggers, hit.module, hit.external_trigger ? "true" : "false");
       break;
 
     case MesytecType::ExtendedTimeStamp:
       // This always comes before events on particular Bus
       hit.high_time = static_cast<uint16_t>(*datap & MesytecHighTimeMask);
       hit.total_time = (static_cast<uint64_t>(hit.high_time) << 30) + hit.low_time;
-//      DTRACE(INF, "   ExtendedTimeStamp: high_time=%d\n", hit.high_time);
+      DTRACE(INF, "   ExtendedTimeStamp: high_time=%d, total_time=%zu\n", hit.high_time, hit.total_time);
       break;
 
     case MesytecType::DataEvent1:
@@ -125,7 +126,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
 
       hit.bus = static_cast<uint8_t>((*datap & MesytecBusMask) >> MesytecBusBitShift);
       hit.time_diff = static_cast<uint16_t>(*datap & MesytecTimeDiffMask);
-//      DTRACE(INF, "   DataEvent1:  bus=%d,  time_diff=%d\n", hit.bus, hit.time_diff);
+      DTRACE(INF, "   DataEvent1:  bus=%d,  time_diff=%d\n", hit.bus, hit.time_diff);
       break;
 
     case MesytecType::DataEvent2:
@@ -138,10 +139,10 @@ void VMMR16Parser::parse(uint32_t *buffer,
       stats.readouts++;
       chan_count++;
 
-//      DTRACE(INF, "   DataEvent2:  %s\n", hit.debug().c_str());
+      DTRACE(INF, "   DataEvent2:  %s\n", hit.debug().c_str());
 
-      if (mgEfu.ingest(hit.bus, hit.channel, hit.adc)) {
-//        DTRACE(DEB, "   accepting %d,%d,%d,%d\n", time, Bus, channel, adc);
+      if (mgEfu->ingest(hit.bus, hit.channel, hit.adc)) {
+//        DTRACE(DEB, "   accepting %d,%d,%d\n", hit.bus, hit.channel, hit.adc);
 
         if (hit_serializer) {
           hit_serializer->addEntry(0, hit.channel, hit.total_time, hit.adc);
@@ -151,7 +152,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
           converted_data.push_back(hit);
         }
       } else {
-        //DTRACE(DEB, "   discarding %d,%d,%d,%d\n", time, bus, channel, adc);
+//        DTRACE(DEB, "   discarding %d,%d,%d\n", hit.bus, hit.channel, hit.adc);
         stats.discards++;
       }
       break;
@@ -173,11 +174,11 @@ void VMMR16Parser::parse(uint32_t *buffer,
   }
 
   if (!chan_count) {
-//    DTRACE(INF, "   No hits:  %s\n", hit.debug().c_str());
+    DTRACE(INF, "   No hits:  %s\n", hit.debug().c_str());
     if (dump_data) {
       converted_data.push_back(hit);
     }
   }
 
-  GoodEvent = TimeGood && mgEfu.event_good();
+  GoodEvent = TimeGood && mgEfu->event_good();
 }

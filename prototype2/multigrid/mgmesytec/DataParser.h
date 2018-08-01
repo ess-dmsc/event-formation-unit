@@ -18,7 +18,8 @@ public:
   enum class error { OK = 0, ESIZE, EHEADER, EUNSUPP };
 
   /// \brief if it looks like a constructor...
-  MesytecData(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s, bool spoof_ht,
+  MesytecData(std::shared_ptr<MgEFU> mg_efu,
+              std::shared_ptr<ReadoutSerializer> s, bool spoof_ht,
               std::shared_ptr<MGHitFile> dump = nullptr);
 
   ~MesytecData() = default;

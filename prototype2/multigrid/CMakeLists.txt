@@ -30,7 +30,8 @@ set(mgmesytec_SRC
   ../common/HistSerializer.cpp
   ../common/ReadoutSerializer.cpp
   mgmesytec.cpp
-  mgmesytec/MgEFU.cpp
+  mgmesytec/MgEfuMaximum.cpp
+  mgmesytec/MgEfuCenterMass.cpp
   mgmesytec/Vmmr16Parser.cpp
   mgmesytec/DataParser.cpp
   mgmesytec/Hit.cpp
@@ -41,6 +42,8 @@ set(mgmesytec_INC
   ../common/HistSerializer.h
   ../common/ReadoutSerializer.h
   mgmesytec/MgEFU.h
+  mgmesytec/MgEfuMaximum.h
+  mgmesytec/MgEfuCenterMass.h
   mgmesytec/Vmmr16Parser.h
   mgmesytec/DataParser.h
   mgmesytec/Hit.h
@@ -125,7 +128,6 @@ set(MGMesytecDataTest_SRC
   ../common/Producer.cpp
   mgmesytec/DataParserTest.cpp
   mgmesytec/DataParser.cpp
-  mgmesytec/MgEFU.cpp
   mgmesytec/Vmmr16Parser.cpp
   mgmesytec/Hit.cpp
   mgmesytec/HitFile.cpp

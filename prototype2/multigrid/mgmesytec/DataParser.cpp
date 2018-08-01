@@ -16,7 +16,7 @@ enum SisType : uint32_t {
 };
 // clang-format on
 
-MesytecData::MesytecData(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s,
+MesytecData::MesytecData(std::shared_ptr<MgEFU> mg_efu, std::shared_ptr<ReadoutSerializer> s,
                          bool spoof_ht,
                          std::shared_ptr<MGHitFile> dump)
     : vmmr16Parser(mg_efu, s)
@@ -26,9 +26,9 @@ MesytecData::MesytecData(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s,
 
 // \todo can only create a single event per UDP buffer
 uint32_t MesytecData::getPixel() {
-  return Geometry.pixel3D(vmmr16Parser.mgEfu.x,
-                          vmmr16Parser.mgEfu.y,
-                          vmmr16Parser.mgEfu.z);
+  return Geometry.pixel3D(vmmr16Parser.mgEfu->x(),
+                          vmmr16Parser.mgEfu->y(),
+                          vmmr16Parser.mgEfu->z());
 }
 
 uint32_t MesytecData::getTime() {

@@ -25,7 +25,7 @@ struct MgStats {
 class VMMR16Parser {
 public:
   /// \brief if it looks like a constructor...
-  VMMR16Parser(MgEFU mg_efu, std::shared_ptr<ReadoutSerializer> s);
+  VMMR16Parser(std::shared_ptr<MgEFU> mg_efu, std::shared_ptr<ReadoutSerializer> s);
 
   ~VMMR16Parser() = default;
 
@@ -40,7 +40,7 @@ public:
   bool externalTrigger() const;
   bool goodEvent() const;
 
-  MgEFU mgEfu;
+  std::shared_ptr<MgEFU> mgEfu;
   std::vector<MGHit> converted_data;
 
 private:
