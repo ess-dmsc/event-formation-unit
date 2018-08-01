@@ -4,14 +4,14 @@
 #include <cstring>
 #include <iostream>
 #include <libs/include/Socket.h>
-#include <prototype2/common/Trace.h>
+#include <prototype2/common/Log.h>
 
 Socket::Socket(Socket::type stype) {
   auto type = (stype == Socket::type::UDP) ? SOCK_DGRAM : SOCK_STREAM;
   auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
 
   if ((socketFileDescriptor = socket(AF_INET, type, proto)) == -1) {
-    XTRACE(INIT, ALW, "socket() failed");
+    LOG(Sev::Error, "socket() failed");
     exit(1);
   }
 }
@@ -42,8 +42,8 @@ void Socket::getBufferSizes(int & sendBuffer, int & receiveBuffer) {
 }
 
 void Socket::printBufferSizes(void) {
-  XTRACE(IPC, ALW, "Socket receive buffer size: %d", getSockOpt(SO_RCVBUF));
-  XTRACE(IPC, ALW, "Socket send buffer size: %d", getSockOpt(SO_SNDBUF));
+  LOG(Sev::Info, "Socket receive buffer size: %d", getSockOpt(SO_RCVBUF));
+  LOG(Sev::Info, "Socket send buffer size: %d", getSockOpt(SO_SNDBUF));
 }
 
 int Socket::setRecvTimeout(int seconds, int usecs) {
@@ -140,7 +140,7 @@ TCPTransmitter::TCPTransmitter(const char *ipaddr, int port) {
 
   ret = connect(socketFileDescriptor, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
   if (ret < 0) {
-    XTRACE(IPC, ALW, "connect() to %s:%d failed", ipaddr, port);
+    LOG(Sev::Error, "connect() to {}:{} failed", ipaddr, port);
     socketFileDescriptor = -1;
   }
 }
@@ -151,12 +151,12 @@ int TCPTransmitter::senddata(char *buffer, int len) {
   }
 
   if (len <= 0) {
-    XTRACE(IPC, WAR, "TCPClient::senddata() no data specified");
+    LOG(Sev::Warning, "TCPClient::senddata() no data specified");
     return 0;
   }
   int ret = send(socketFileDescriptor, buffer, len, 0);
   if (ret <= 0) {
-    XTRACE(IPC, WAR, "TCPClient::send() returns %d", ret);
+    LOG(Sev::Warning, "TCPClient::send() returns %d", ret);
   }
   return ret;
 }

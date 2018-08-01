@@ -17,6 +17,11 @@
 
 #define ONE_SECOND_US 1000000U
 
+std::string ConsoleFormatter(const LogMessage &msg) {
+  static const std::vector<std::string> SevToString{"EMG", "ALR", "CRI", "ERR", "WAR", "NOTE", "INF", "DEB"};
+  return fmt::format("{:5}{:21}{:5} - {}", SevToString.at(int(msg.severity)), basename((char*)msg.additionalFields[0].second.strVal.c_str()), msg.additionalFields[1].second.intVal, msg.message);
+}
+
 /** Load detector, launch pipeline threads, then sleep until timeout or break */
 int main(int argc, char *argv[]) {
   BaseSettings DetectorSettings;
@@ -33,6 +38,12 @@ int main(int argc, char *argv[]) {
       return 0;
     }
     // Set-up logging before we start doing important stuff
+    Log::RemoveAllHandlers();
+    
+    auto CI = new ConsoleInterface();
+    CI->SetMessageStringCreatorFunction(ConsoleFormatter);
+    Log::AddLogHandler(CI);
+    
     Log::SetMinimumSeverity(Severity(efu_args.getLogLevel()));
     Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
     if (efu_args.getLogFileName().size() > 0) {
