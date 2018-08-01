@@ -46,9 +46,9 @@ function(create_executable exec_name)
     ${${exec_name}_INC})
 
   target_link_libraries(${exec_name}
-    ${${exec_name}_LIB}
+    PUBLIC ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    eventlib)
+    eventlib efu_common)
 
   if (GPERF)
     target_link_libraries(${exec_name} ${GPERFTOOLS_PROFILER})

@@ -56,7 +56,6 @@ set(mgcncsgen_INC
   mgcncs/DataParser.h
   )
 create_executable(mgcncsgen)
-target_link_libraries(mgcncsgen PRIVATE efu_common)
 
 #
 set(mgcncsgenfile_INC generators/DGArgs.h )
