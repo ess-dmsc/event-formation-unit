@@ -15,6 +15,7 @@
 #include <cinttypes>
 #include <common/DataSave.h>
 #include <sonde/Geometry.h>
+#include <memory>
 
 class IDEASData {
 public:
