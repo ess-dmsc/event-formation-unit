@@ -1,6 +1,6 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
-// #include <arpa/inet.h>
+#include <arpa/inet.h>
 #include <cinttypes>
 #include <common/Trace.h>
 #include <cstdio>
