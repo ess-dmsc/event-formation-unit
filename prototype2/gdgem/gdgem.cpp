@@ -232,8 +232,6 @@ void bin_hists(Hists& hists, const std::list<Cluster>& cl)
 
 
 void NMX::processing_thread() {
-  XTRACE(PROCESS, ALW, "NMX Config file: %s\n", NMXSettings.ConfigFile.c_str());
-  nmx_opts = NMXConfig(NMXSettings.ConfigFile);
   init_builder();
   if (!builder_) {
     XTRACE(PROCESS, ERR, "No builder specified, exiting thread\n");
@@ -390,6 +388,9 @@ void NMX::processing_thread() {
 }
 
 void NMX::init_builder() {
+  XTRACE(PROCESS, ALW, "NMX Config file: %s\n", NMXSettings.ConfigFile.c_str());
+  nmx_opts = NMXConfig(NMXSettings.ConfigFile);
+
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
   auto clusx = std::make_shared<DoroClusterer>(nmx_opts.clusterer_x.max_time_gap,

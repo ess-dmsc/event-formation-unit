@@ -30,6 +30,7 @@ set(mgmesytec_SRC
   ../common/HistSerializer.cpp
   ../common/ReadoutSerializer.cpp
   mgmesytec.cpp
+  MgConfig.cpp
   mgmesytec/MgEfuMaximum.cpp
   mgmesytec/MgEfuCenterMass.cpp
   mgmesytec/Vmmr16Parser.cpp
@@ -41,6 +42,7 @@ set(mgmesytec_INC
   ../common/Hists.h
   ../common/HistSerializer.h
   ../common/ReadoutSerializer.h
+  MgConfig.h
   mgmesytec/MgEFU.h
   mgmesytec/MgEfuMaximum.h
   mgmesytec/MgEfuCenterMass.h
