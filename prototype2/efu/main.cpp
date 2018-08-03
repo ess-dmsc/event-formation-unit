@@ -17,9 +17,18 @@
 
 #define ONE_SECOND_US 1000000U
 
-std::string ConsoleFormatter(const LogMessage &msg) {
+std::string ConsoleFormatter(const LogMessage &Msg) {
   static const std::vector<std::string> SevToString{"EMG", "ALR", "CRI", "ERR", "WAR", "NOTE", "INF", "DEB"};
-  return fmt::format("{:5}{:21}{:5} - {}", SevToString.at(int(msg.severity)), basename((char*)msg.additionalFields[0].second.strVal.c_str()), msg.additionalFields[1].second.intVal, msg.message);
+  std::string FileName;
+  std::int64_t LineNr = -1;
+  for (auto &CField : Msg.additionalFields) {
+    if (CField.first == "file") {
+      FileName = CField.second.strVal;
+    } else if (CField.first == "line") {
+      LineNr = CField.second.intVal;
+    }
+  }
+  return fmt::format("{:5}{:21}{:5} - {}", SevToString.at(int(Msg.severity)), FileName, LineNr, Msg.message);
 }
 
 /** Load detector, launch pipeline threads, then sleep until timeout or break */
