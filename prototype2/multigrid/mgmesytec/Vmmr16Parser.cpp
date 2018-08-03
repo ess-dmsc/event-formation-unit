@@ -175,7 +175,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
   }
 
   if (!chan_count) {
-    DTRACE(INF, "   No hits:  %s", hit.debug());
+    DTRACE(INF, "   No hits:  %s", hit.debug().c_str());
     if (dump_data) {
       converted_data.push_back(hit);
     }
