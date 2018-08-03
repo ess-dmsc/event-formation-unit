@@ -6,16 +6,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-void MgEfuMaximum::setWireThreshold(uint16_t low, uint16_t high) {
-  wireThresholdLo = low;
-  wireThresholdHi = high;
-}
-
-void MgEfuMaximum::setGridThreshold(uint16_t low, uint16_t high) {
-  gridThresholdLo = low;
-  gridThresholdHi = high;
-}
-
 void MgEfuMaximum::reset() {
   GridAdcMax = 0;
   WireAdcMax = 0;
@@ -36,7 +26,8 @@ uint32_t MgEfuMaximum::z() const {
 }
 
 bool MgEfuMaximum::ingest(uint8_t bus, uint16_t channel, uint16_t adc) {
-  if (mappings.isWire(bus, channel) && adc >= wireThresholdLo && adc <= wireThresholdHi) {
+  adc = mappings.rescale(bus, channel, adc);
+  if (mappings.isWire(bus, channel)) {
     if (adc > WireAdcMax) {
       WireGood = true;
       WireAdcMax = adc;
@@ -47,7 +38,7 @@ bool MgEfuMaximum::ingest(uint8_t bus, uint16_t channel, uint16_t adc) {
     if (hists)
       hists->binstrips(mappings.wire(bus, channel), adc, 0, 0);
     return true;
-  } else if (mappings.isGrid(bus, channel) && adc >= gridThresholdLo && adc <= gridThresholdHi) {
+  } else if (mappings.isGrid(bus, channel)) {
     if (adc > GridAdcMax) {
       GridGood = true;
       GridAdcMax = adc;

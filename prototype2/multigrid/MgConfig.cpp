@@ -32,8 +32,8 @@ MgConfig::MgConfig(std::string jsonfile) {
   spoof_high_time = root["spoof_high_time"].asBool();
 
   auto m = root["geometry_mappings"];
-  for (size_t i = 0; i < m.size(); i++) {
-    auto mi = m[index];
+  for (unsigned int i = 0; i < m.size(); i++) {
+    auto mi = m[i];
 
     MgBusGeometry g;
     g.max_channel(mi["max_channel"].asUInt());
@@ -48,16 +48,16 @@ MgConfig::MgConfig(std::string jsonfile) {
     auto wf = mi["wire_filters"];
     g.set_wire_filters(get_filter(wf["blanket"]));
     auto wfe = wf["exceptions"];
-    for (size_t j = 0; j < wfe.size(); j++) {
-      uint16_t idx = wfe[j]["idx"].asUint();
+    for (unsigned int j = 0; j < wfe.size(); j++) {
+      uint16_t idx = wfe[j]["idx"].asUInt();
       g.override_wire_filter(idx, get_filter(wfe[j]));
     }
 
     auto gf = mi["grid_filters"];
     g.set_grid_filters(get_filter(gf["blanket"]));
     auto gfe = gf["exceptions"];
-    for (size_t j = 0; j < wfe.size(); j++) {
-      uint16_t idx = gfe[j]["idx"].asUint();
+    for (unsigned int j = 0; j < gfe.size(); j++) {
+      uint16_t idx = gfe[j]["idx"].asUInt();
       g.override_grid_filter(idx, get_filter(gfe[j]));
     }
 

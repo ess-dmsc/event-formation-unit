@@ -16,9 +16,6 @@ public:
   MgEfuMaximum() = default;
   ~MgEfuMaximum() = default;
 
-  void setWireThreshold(uint16_t low, uint16_t high);
-  void setGridThreshold(uint16_t low, uint16_t high);
-
   void reset() override;
   bool ingest(uint8_t bus, uint16_t channel, uint16_t adc) override;
   bool event_good() const override;
@@ -28,11 +25,6 @@ public:
   uint32_t z() const override;
 
 private:
-  uint16_t wireThresholdLo{0};
-  uint16_t wireThresholdHi{std::numeric_limits<uint16_t>::max()};
-  uint16_t gridThresholdLo{0};
-  uint16_t gridThresholdHi{std::numeric_limits<uint16_t>::max()};
-
   uint16_t GridAdcMax {0};
   uint16_t WireAdcMax {0};
 

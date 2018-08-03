@@ -5,9 +5,52 @@
 
   "geometry_mappings" :
   [
-    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true},
-    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true},
-    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true}
+    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true,
+      "wire_filters":{
+        "blanket":{"min":0, "max":65535, "rescale":1.0},
+        "exceptions":[
+          {"idx":0, "min":0, "max":65535, "rescale":1.0}
+        ]
+      },
+      "grid_filters":{
+        "blanket":{"min":0, "max":65535, "rescale":1.0},
+        "exceptions":[
+          {"idx":0, "min":0, "max":65535, "rescale":1.0}
+        ]
+      }
+    },
+    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true,
+      "wire_filters":{
+        "blanket":{"min":0, "max":65535, "rescale":1.0},
+        "exceptions":[
+          {"idx":0, "min":0, "max":65535, "rescale":1.0}
+        ]
+      },
+      "grid_filters":{
+        "blanket":{"min":0, "max":65535, "rescale":1.0},
+        "exceptions":[
+          {"idx":26, "min":0, "max":65535, "rescale":1.5},
+          {"idx":28, "min":0, "max":65535, "rescale":1.5},
+          {"idx":29, "min":0, "max":65535, "rescale":0.5},
+          {"idx":33, "min":0, "max":65535, "rescale":1.5},
+          {"idx":34, "min":0, "max":65535, "rescale":1.5}
+        ]
+      }
+    },
+    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true,
+      "wire_filters":{
+        "blanket":{"min":0, "max":65535, "rescale":1.0},
+        "exceptions":[
+          {"idx":0, "min":0, "max":65535, "rescale":1.0}
+        ]
+      },
+      "grid_filters":{
+        "blanket":{"min":0, "max":65535, "rescale":1.0},
+        "exceptions":[
+          {"idx":0, "min":0, "max":65535, "rescale":1.0}
+        ]
+      }
+    }
   ]
   
 }

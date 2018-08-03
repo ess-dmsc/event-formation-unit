@@ -48,6 +48,22 @@ public:
     buses.push_back(g);
   }
 
+  inline uint16_t rescale(uint8_t bus, uint16_t channel, uint16_t adc) const {
+    if (bus >= buses.size())
+      return adc;
+    if (isWire(bus, channel))
+    {
+      auto w = wire(bus, channel);
+      return buses.at(bus).geometry.rescale_wire(w, adc);
+    }
+    else if (isGrid(bus, channel))
+    {
+      auto g = grid(bus, channel);
+      return buses.at(bus).geometry.rescale_grid(g, adc);
+    }
+    return adc;
+  }
+
   /** @brief identifies which channels are wires, from drawing by Anton */
   inline bool isWire(uint8_t bus, uint16_t channel) const {
     if (bus >= buses.size())

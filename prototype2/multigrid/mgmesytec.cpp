@@ -200,8 +200,6 @@ void CSPEC::init_config()
     mg_efu = std::make_shared<MgEfuCenterMass>();
   } else {
     auto mg_efum = std::make_shared<MgEfuMaximum>();
-    mg_efum->setWireThreshold(mg_config.wireThresholdLo, mg_config.wireThresholdHi);
-    mg_efum->setGridThreshold(mg_config.gridThresholdLo, mg_config.gridThresholdHi);
     mg_efu = mg_efum;
   }
   mg_efu->mappings = mg_config.mappings;
