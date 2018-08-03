@@ -47,10 +47,10 @@ int CSPECChanConv::makecal(uint16_t *array, unsigned int min, unsigned int max,
 void CSPECChanConv::load_calibration(uint16_t *wirecal_new,
                                      uint16_t *gridcal_new) {
   if ((wirecal_new == NULL) || (gridcal_new == NULL)) {
-    XTRACE(PROCESS, ERR, "Invalid calibration data\n");
+    XTRACE(PROCESS, ERR, "Invalid calibration data");
     return;
   }
-  XTRACE(PROCESS, INF, "Loading calibration data\n");
+  XTRACE(PROCESS, INF, "Loading calibration data");
   std::memcpy(wirecal, wirecal_new, sizeof(wirecal));
   std::memcpy(gridcal, gridcal_new, sizeof(gridcal));
 }

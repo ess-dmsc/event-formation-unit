@@ -6,7 +6,7 @@
 #include <tools/PcapArgs.h>
 #include <getopt.h>
 #include <unistd.h>
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 PcapArgs::PcapArgs(int argc, char *argv[]) {
   int c;
   while (1) {
@@ -76,4 +76,4 @@ PcapArgs::PcapArgs(int argc, char *argv[]) {
   printf("  destination ip address: %s\n", dest_ip.c_str());
   printf("  destination udp port:   %d\n", port);
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

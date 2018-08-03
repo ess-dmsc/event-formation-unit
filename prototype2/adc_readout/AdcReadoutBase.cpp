@@ -10,6 +10,7 @@
 #include "PeakFinder.h"
 #include "SampleProcessing.h"
 #include "libs/include/Socket.h"
+#include <common/Log.h>
 
 AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
                                AdcSettings &ReadoutSettings)

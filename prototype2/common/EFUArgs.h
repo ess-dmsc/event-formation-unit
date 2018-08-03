@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -42,17 +42,22 @@ public:
   std::vector<ThreadCoreAffinitySetting> getThreadCoreAffinity() {
     return ThreadAffinity;
   };
+  
+  int getLogLevel() {return LogMessageLevel;};
+  std::string getLogFileName() {return LogFileName;};
 
   BaseSettings getBaseSettings() { return EFUSettings; };
 
   CLI::App CLIParser{"Event formation unit (efu)"};
 
-  int buflen{9000}; /**< rx buffer length (B) */
+  int buflen{9000}; ///< rx buffer length (B)
 
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
-
+  bool parseLogLevel(std::vector<std::string> LogLevelString);
+  int LogMessageLevel{6};
   std::string DetectorName;
+  std::string LogFileName;
 
   std::vector<ThreadCoreAffinitySetting> ThreadAffinity;
   CLI::Option *DetectorOption;

@@ -1,4 +1,4 @@
-/// Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file
+/* Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,7 +15,7 @@
 #include "generators/TextFile.h"
 #include "mbcommon/DumpEventBuilderInfo.h"
 #include "mbcommon/MultiBladeEventBuilder.h"
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 int main(int argc, const char **argv) {
 
   std::string ifile;
@@ -133,4 +133,4 @@ int main(int argc, const char **argv) {
 
   return 0;
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

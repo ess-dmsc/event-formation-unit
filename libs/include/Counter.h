@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,10 +15,10 @@ private:
   long long n{0};
 
 public:
-  /** count up by 1*/
+  /// count up by
   void add() { n++; }
 
-  /** return number of adds */
+  /// return number of adds
   long long count(void) { return n; }
 
   void clear() { n = 0; }

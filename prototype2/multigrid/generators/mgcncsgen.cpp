@@ -11,7 +11,7 @@
 #include <unistd.h>
 
 const int TSC_MHZ = 2900;
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 int main(int argc, char *argv[]) {
   DGArgs opts(argc, argv); // Parse command line opts
@@ -79,4 +79,4 @@ int main(int argc, char *argv[]) {
     }
   }
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

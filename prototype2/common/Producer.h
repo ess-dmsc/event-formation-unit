@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -27,11 +27,10 @@ public:
 
 class Producer : public ProducerBase {
 public:
-  /** \brief Construct a producer object.
-   * @param broker 'URL' specifying host and port, example "127.0.0.1:9009"
-   * @param topicstr Name of Kafka topic according to agreement, example
-   * "T-REX_detectors"
-   */
+  /// \brief Construct a producer object.
+  /// \param broker 'URL' specifying host and port, example "127.0.0.1:9009"
+  /// \param topicstr Name of Kafka topic according to agreement, example
+  /// "T-REX_detectors"
   Producer(std::string broker, std::string topicstr);
 
   ~Producer();

@@ -9,7 +9,7 @@
 
 #include <efu/HwCheck.h>
 #include <arpa/inet.h>
-#include <common/Trace.h>
+#include <common/Log.h>
 #include <cstring>
 #include <ifaddrs.h>
 #include <stdio.h>
@@ -30,7 +30,7 @@ bool HwCheck::checkMTU(std::vector<std::string> ignore) {
   int n;
 
   if (getifaddrs(&ifaddr) == -1) {
-     XTRACE(INIT, ERR, "error getifaddrs()\n");
+    LOG(Sev::Error, "error getifaddrs()");
      return false;
   }
 
@@ -52,7 +52,7 @@ bool HwCheck::checkMTU(std::vector<std::string> ignore) {
     }
 
     if (tobeignored) {
-      XTRACE(INIT, DEB, "no checking of MTU for %s\n", ifa->ifa_name);
+      LOG(Sev::Debug, "no checking of MTU for {}", ifa->ifa_name);
     } else {
       if (!checkMTU(ifa->ifa_name)) {
         freeifaddrs(ifaddr);
@@ -70,17 +70,17 @@ bool HwCheck::checkMTU(const char * interface) {
   struct ifreq ifr;
 
   if ((s = socket(af, SOCK_DGRAM, 0)) < 0) {
-    XTRACE(INIT, ERR, "error: socket\n");
+    LOG(Sev::Error, "error: socket");
   }
 
   ifr.ifr_addr.sa_family = af;
   strcpy(ifr.ifr_name, interface);
   if (ioctl(s, SIOCGIFMTU, (caddr_t)&ifr) < 0) {
-    XTRACE(INIT, WAR, "warn: ioctl (get mtu): %s\n", ifr.ifr_name);
+    LOG(Sev::Warning, "warn: ioctl (get mtu): {}", ifr.ifr_name);
     return false;
   }
 
-  XTRACE(INIT, INF, "MTU of %s is %d\n", interface, ifr.ifr_mtu);
+  LOG(Sev::Info, "MTU of {} is {}", interface, ifr.ifr_mtu);
   close(s);
 
   return ifr.ifr_mtu >= minimumMtu;

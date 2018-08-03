@@ -11,7 +11,7 @@ add_executable(udptx
   ${udptx_SRC}
   ${udptx_INC}
   )
-target_link_libraries(udptx eventlib)
+target_link_libraries(udptx eventlib efu_common)
 set_target_properties(udptx PROPERTIES
   COMPILE_FLAGS "-fno-strict-aliasing")
 
@@ -26,7 +26,7 @@ add_executable(udprx
   ${udprx_SRC}
   ${udprx_INC}
   )
-target_link_libraries(udprx eventlib)
+target_link_libraries(udprx eventlib efu_common)
 
 install(TARGETS
   udptx

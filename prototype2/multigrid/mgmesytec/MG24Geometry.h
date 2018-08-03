@@ -1,4 +1,4 @@
-/// Copyright (C) 2017-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -20,15 +20,15 @@
 
 class MG25Geometry : public MgGeometry {
 private:
-  uint32_t module_select = 0; // 1 == 20 wires, 0 == 16 in z
+  uint32_t module_select = 0; /// 1 == 20 wires, 0 == 16 in z
 
   static constexpr uint16_t XinBus{4};
 
 public:
 
-  /** \brief select hardware configuration (module) of the detector for correct wire swapping */
+  /// \brief select hardware configuration (module) of the detector for correct wire swapping
   void select_module(uint32_t module) {
-    XTRACE(DATA, ALW, "Select detector module: %d\n", module);
+    XTRACE(DATA, ALW, "Select detector module: %d", module);
     module_select = module;
   }
 

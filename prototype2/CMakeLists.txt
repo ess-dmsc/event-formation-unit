@@ -53,7 +53,7 @@ add_subdirectory(adc_readout)
 add_subdirectory(tools)
 
 add_custom_target(runefu
-    COMMAND efu "-d" "../modules/mgmesytec" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
+    COMMAND efu "-d" "../modules/mgmesytec" "-f" "nocfgfile" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/mgcncs2" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/sonde" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/mbcaen" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"

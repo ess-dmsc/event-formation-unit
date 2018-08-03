@@ -8,7 +8,7 @@
 #include <tools/ReaderPcap.h>
 #include <netinet/ip.h>
 #include <netinet/udp.h>
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 ReaderPcap::ReaderPcap(std::string filename) {
   char errbuff[PCAP_ERRBUF_SIZE];
@@ -118,4 +118,4 @@ void ReaderPcap::printstats() {
   printf("rx short   %" PRIu64 "\n", stats.rx_skipped);
   printf("rx bytes   %" PRIu64 "\n", stats.rx_bytes);
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

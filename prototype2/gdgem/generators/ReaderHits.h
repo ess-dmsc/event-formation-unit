@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -13,10 +13,10 @@
 
 class ReaderHits {
 public:
-  /** \todo document */
+  /// \todo document
   ReaderHits(std::string filename);
 
-  /** \todo document */
+  /// \todo document
   size_t read(char *buf);
 
 private:

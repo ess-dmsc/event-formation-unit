@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -138,7 +138,7 @@ std::vector<uint8_t> type_0xd4_meph_err_hdr_len
 
 // clang-format on
 
-/** Raw packet data above, now collect into iterable containers */
+/// Raw packet data above, now collect into iterable containers
 
 std::vector<std::vector<uint8_t>> err_hdr{err_version, err_datatype, err_length,
                                           err_nb_event_mismatch};

@@ -1,6 +1,7 @@
 #=============================================================================
 # Common functionality for all detector plugins
 #=============================================================================
+
 set(efu_common_SRC
   EV42Serializer.cpp
   NewStats.cpp
@@ -19,11 +20,13 @@ set(efu_common_INC
   NewStats.h
   Producer.h
   Trace.h
+  Log.h
   DataSave.h
   TimeString.h
   )
 
 find_package(CLI11 REQUIRED)
+find_package(fmt REQUIRED)
 
 add_library(efu_common STATIC
   ${efu_common_SRC}
@@ -37,10 +40,7 @@ endif()
 
 enable_coverage(efu_common)
 
-target_link_libraries(efu_common
-    ${EFU_COMMON_LIBS})
-
-set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} efu_common PARENT_SCOPE)
+target_link_libraries(efu_common PUBLIC ${EFU_COMMON_LIBS} fmt::fmt)
 
 
 #=============================================================================

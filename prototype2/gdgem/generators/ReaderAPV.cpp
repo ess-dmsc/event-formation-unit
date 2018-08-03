@@ -3,7 +3,7 @@
 #include <gdgem/generators/ReaderAPV.h>
 #include <iostream>
 //#include <cstring>
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 ReaderAPV::ReaderAPV(std::string filename) {
   data.resize(max_in_buf_ * 4, 0);
@@ -53,4 +53,4 @@ size_t ReaderAPV::read(char *buf) {
   current_ += slab_.block()[0];
   return psize_ * slab_.block()[0];
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

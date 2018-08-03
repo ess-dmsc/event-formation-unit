@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -15,6 +15,7 @@
 #include <cinttypes>
 #include <common/DataSave.h>
 #include <sonde/Geometry.h>
+#include <memory>
 
 class IDEASData {
 public:
@@ -26,10 +27,9 @@ public:
     uint32_t pixel_id;
   };
 
-  /** from IDEAS Readout and Control Packet Protocol Reference
-   *  Ref: IDE-REP-Ref-V1.7 Date: 2017-05-23
-   *  Direction: System -> PC
-   */
+  /// \note from IDEAS Readout and Control Packet Protocol Reference
+  /// Ref: IDE-REP-Ref-V1.7 Date: 2017-05-23
+  /// Direction: System -> PC
   struct Header {
     uint16_t id;
     uint16_t pktseq;
@@ -37,7 +37,7 @@ public:
     uint16_t length;
   } __attribute__((packed));
 
-  /** Empty constructor */
+  /// \todo document
   IDEASData(SoNDeGeometry *geom, std::string fileprefix = "")
       : sondegeometry(geom) {
     dumptofile = !fileprefix.empty();
@@ -56,31 +56,30 @@ public:
 
   ~IDEASData() {}
 
-  /** \brief parse a binary payload buffer, return number of data elements
-   */
+  /// \brief parse a binary payload buffer, return number of data elements
   int parse_buffer(const char *buffer, int size);
 
-  /** \brief Section 2.4.5 page 15 */
+  /// \brief Section 2.4.5 page 15
   int parse_trigger_time_data_packet(const char *buffer);
 
-  /** \brief Section 2.4.3 page 12 */
+  /// \brief Section 2.4.3 page 12
   int parse_single_event_pulse_height_data_packet(const char *buffer);
 
-  /** \brief Section 2.4.3 page 12 */
+  /// \brief Section 2.4.3 page 12
   int parse_multi_event_pulse_height_data_packet(const char *buffer);
 
   struct SoNDeData data[500];
-  unsigned int events{0};  /**< number of valid events */
-  unsigned int errors{0};  /**< number of geometry errors in readout */
-  unsigned int samples{0}; /**< number of samples in readout */
+  unsigned int events{0};  ///< number of valid events
+  unsigned int errors{0};  ///< number of geometry errors in readout
+  unsigned int samples{0}; ///< number of samples in readout
 
   uint64_t ctr_outof_sequence{0};
 
 private:
   SoNDeGeometry *sondegeometry{nullptr};
-  int next_seq_no{0}; // Used to count lost packets, assumes we start at 0
+  int next_seq_no{0}; /// Used to count lost packets, assumes we start at 0
 
-  // Protocol header fields
+  /// Protocol header fields
   int hdr_sysno{0};
   int hdr_type{0};
   int hdr_seqflag{0};

@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -22,7 +22,7 @@ public:
   int lastnonzero = -1;
   int nonzero = 0;
 
-  Histogram() : hist(histsize) { /**< \todo parametrize with size */
+  Histogram() : hist(histsize) {
     clear();
   }
 

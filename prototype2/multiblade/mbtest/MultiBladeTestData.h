@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -8,7 +8,7 @@
 /// \author Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
 /// e-mail: soegaard@nbi.dk
 //===----------------------------------------------------------------------===//
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 #ifndef MULTIBLADE_MULTIBLADETESTDATA_H_H
 #define MULTIBLADE_MULTIBLADETESTDATA_H_H
@@ -104,4 +104,4 @@ std::vector<double> validation_max{
     static_cast<double>(15)};
 
 #endif // MULTIBLADE_MULTIBLADETESTDATA_H_H
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

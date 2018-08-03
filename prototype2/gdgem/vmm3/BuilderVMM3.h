@@ -1,4 +1,4 @@
-/// Copyright (C) 2016-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -28,9 +28,9 @@ public:
               uint16_t adc_threshold_y, double max_time_gap_y,
               std::string dump_dir, bool dump_csv, bool dump_h5);
 
-  ~BuilderVMM3() { XTRACE(INIT, DEB, "BuilderVMM2 destructor called\n"); }
+  ~BuilderVMM3() { XTRACE(INIT, DEB, "BuilderVMM2 destructor called"); }
 
-  /** \todo Martin document */
+  /// \todo Martin document
   ResultStats process_buffer(char *buf, size_t size) override;
 
 private:

@@ -160,7 +160,7 @@ private:
 CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.setPrefix("efu.mgmesytec");
 
-  XTRACE(INIT, ALW, "Adding stats\n");
+  XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("rx_packets",            mystats.rx_packets);
   Stats.create("rx_bytes",              mystats.rx_bytes);
@@ -241,7 +241,7 @@ void CSPEC::mainThread() {
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += ReadSize;
-      XTRACE(INPUT, DEB, "read size: %u\n", ReadSize);
+      XTRACE(INPUT, DEB, "read size: %u", ReadSize);
 
       auto res = mesytecdata->parse(buffer, ReadSize, flatbuffer);
       if (res != MesytecData::error::OK) {

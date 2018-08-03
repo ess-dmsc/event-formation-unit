@@ -1,4 +1,4 @@
-/// Copyright (C) 2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -23,8 +23,8 @@
 /// AdcReadout in order to simplify unit testing.
 class AdcReadoutBase : public Detector {
 public:
-  /// @param Settings EFU base command line settings.
-  /// @param ReadoutSettings AdcReadout specific settings.
+  /// \param Settings EFU base command line settings.
+  /// \param ReadoutSettings AdcReadout specific settings.
   AdcReadoutBase(BaseSettings const &Settings, AdcSettings &ReadoutSettings);
   AdcReadoutBase(const AdcReadoutBase &) = delete;
   AdcReadoutBase(const AdcReadoutBase &&) = delete;
@@ -37,7 +37,7 @@ protected:
 
   /// \brief Implements the thread doing the socket communication.
   /// This function will return when Detector::runThreads is set to false.
-  /// @note There is probably no performance benefit runnign this on a seperate
+  /// \note There is probably no performance benefit runnign this on a seperate
   /// thread.
   virtual void inputThread();
 

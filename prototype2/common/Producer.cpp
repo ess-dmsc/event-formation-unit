@@ -2,7 +2,7 @@
 
 #include <cassert>
 #include <common/Producer.h>
-#include <iostream>
+#include <common/Log.h>
 #include <libs/include/gccintel.h>
 
 Producer::Producer(std::string broker, std::string topicstr) : ProducerBase() {
@@ -11,12 +11,12 @@ Producer::Producer(std::string broker, std::string topicstr) : ProducerBase() {
   tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
 
   if (conf == nullptr) {
-    std::cerr << "Unable to create CONF_GLOBAL object" << std::endl;
+    LOG(Sev::Error, "Unable to create CONF_GLOBAL object");
     return;
   }
 
   if (tconf == nullptr) {
-    std::cerr << "Unable to create CONF_TOPIC object" << std::endl;
+    LOG(Sev::Error, "Unable to create CONF_TOPIC object");
     return;
   }
 
@@ -33,14 +33,14 @@ Producer::Producer(std::string broker, std::string topicstr) : ProducerBase() {
 
   producer = RdKafka::Producer::create(conf, errstr);
   if (!producer) {
-    std::cerr << "Failed to create producer: " << errstr << std::endl;
+    LOG(Sev::Error, "Failed to create producer: {}", errstr);
     /** \todo add logging to Greylog */
     return;
   }
 
   topic = RdKafka::Topic::create(producer, topicstr, tconf, errstr);
   if (!topic) {
-    std::cerr << "Failed to create topic: " << errstr << std::endl;
+    LOG(Sev::Error, "Failed to create topic: {}", errstr);
     /** \todo add logging to Greylog */
     return;
   }
@@ -62,8 +62,7 @@ int Producer::produce(char *buffer, size_t length) {
       topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */, buffer,
       length, NULL, NULL);
   if (resp != RdKafka::ERR_NO_ERROR) {
-    // std::cerr << "% Produce failed: " << RdKafka::err2str(resp) << std::endl;
-    printf("Produce failed: %s\n", RdKafka::err2str(resp).c_str());
+    LOG(Sev::Error, "Produce failed: {}", RdKafka::err2str(resp));
     return resp;
   }
   producer->poll(0);

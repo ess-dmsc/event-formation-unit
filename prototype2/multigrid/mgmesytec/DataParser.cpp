@@ -1,6 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <multigrid/mgmesytec/DataParser.h>
+#include <netinet/in.h>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL
@@ -103,7 +104,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
     bytesleft -= (len - 3) * 4;
 
     if (*datap != 0x87654321) {
-      XTRACE(DATA, WAR, "Protocol mismatch, expected 0x87654321\n");
+      XTRACE(DATA, WAR, "Protocol mismatch, expected 0x87654321");
       return error::EHEADER;
     }
     datap++;

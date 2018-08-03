@@ -6,7 +6,7 @@
 #include <gdgem/generators/NMXArgs.h>
 #include <getopt.h>
 #include <unistd.h>
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 NMXArgs::NMXArgs(int argc, char *argv[]) {
 
   int c;
@@ -16,9 +16,6 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
         {"ipaddr", required_argument, 0, 'i'},
         {"data", required_argument, 0, 'd'},
         {"packets", required_argument, 0, 'a'},
-        {"events", required_argument, 0, 'n'},
-        {"loop", no_argument, 0, 'l'},
-        {"pcapoffset", no_argument, 0, 'o'},
         {"port", required_argument, 0, 'p'},
         {"size", required_argument, 0, 's'},
         {"throttle", required_argument, 0, 't'},
@@ -29,7 +26,7 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:d:f:o:i:ln:p:s:t:u:hx", long_options,
+    c = getopt_long(argc, argv, "a:d:f:i:p:s:t:u:hx", long_options,
                     &option_index);
 
     if (c == -1)
@@ -49,15 +46,6 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
       break;
     case 'i':
       dest_ip.assign(optarg);
-      break;
-    case 'n':
-      txEvt = atoi(optarg);
-      break;
-    case 'o':
-      pcapoffset = atoi(optarg);
-      break;
-    case 'l':
-      loop = 1;
       break;
     case 'p':
       port = atoi(optarg);
@@ -108,4 +96,4 @@ NMXArgs::NMXArgs(int argc, char *argv[]) {
   printf("Other properties\n");
   printf("  update interval:        %us\n", updint);
 }
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

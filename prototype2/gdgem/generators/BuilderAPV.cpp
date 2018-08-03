@@ -57,7 +57,7 @@ void BuilderAPV::make_hit(size_t idx) {
   e.strip = data[2] & 0xFFFF;
   e.adc = data[3] & 0xFFFF;
 
-  XTRACE(PROCESS, DEB, "Made hit: %s\n", e.debug().c_str());
+  XTRACE(PROCESS, DEB, "Made hit: %s", e.debug().c_str());
 
   if (dump_csv_)
     vmmsave->tofile("%" PRIu64 ", %u, %u, %u, %u\n", e.time, e.plane_id,

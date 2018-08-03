@@ -88,7 +88,7 @@ PopulateCLIParser PopulateParser{SetCLIArguments};
 MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
   Stats.setPrefix("efu.mbcaen");
 
-  XTRACE(INIT, ALW, "Adding stats\n");
+  XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
     Stats.create("input.rx_packets",                mystats.rx_packets);
     Stats.create("input.rx_bytes",                  mystats.rx_bytes);
@@ -109,7 +109,7 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d\n",
+  XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries +
                                                 11); // \todo workaround
@@ -137,7 +137,7 @@ void MBCAEN::input_thread() {
     if ((rdsize = mbdata.receive(eth_ringbuf->getDataBuffer(eth_index),
                                  eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-      XTRACE(PROCESS, DEB, "Received an udp packet of length %d bytes\n",
+      XTRACE(PROCESS, DEB, "Received an udp packet of length %d bytes",
              rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
@@ -151,7 +151,7 @@ void MBCAEN::input_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      XTRACE(INPUT, ALW, "Stopping input thread.");
       return;
     }
   }
@@ -199,7 +199,7 @@ void MBCAEN::processing_thread() {
         mystats.tx_bytes += flatbuffer.produce();
 
         if (not runThreads) {
-          XTRACE(INPUT, ALW, "Stopping processing thread.\n");
+          XTRACE(INPUT, ALW, "Stopping processing thread.");
           return;
         }
 
@@ -225,7 +225,7 @@ void MBCAEN::processing_thread() {
           // \todo fixme remove - is an artifact of mbtext2udp
           if (dp.digi == UINT8_MAX && dp.chan == UINT8_MAX &&
               dp.adc == UINT16_MAX && dp.time == UINT32_MAX) {
-            XTRACE(PROCESS, DEB, "Last point\n");
+            XTRACE(PROCESS, DEB, "Last point");
             builder[0].lastPoint();
             break;
           }
@@ -248,7 +248,7 @@ void MBCAEN::processing_thread() {
             uint32_t pixel_id = essgeom.pixel2D(xcoord, ycoord);
 
             XTRACE(PROCESS, DEB,
-                   "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d\n",
+                   "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d",
                    dp.digi, (int)xcoord, (int)ycoord,
                    (int)builder[cassette].getWirePosition(),
                    (int)builder[cassette].getStripPosition(), pixel_id);

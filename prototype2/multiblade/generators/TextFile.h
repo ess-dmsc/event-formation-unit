@@ -1,10 +1,10 @@
-/// Copyright (C) 2017-2018 European Spallation Source, see LICENSE file
+/* Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
 ///
 //===----------------------------------------------------------------------===//
-/// GCOVR_EXCL_START
+// GCOVR_EXCL_START
 
 #ifndef MBUDPGEN_TEXTFILE_H
 #define MBUDPGEN_TEXTFILE_H
@@ -39,4 +39,4 @@ public:
 };
 
 #endif // MBUDPGEN_TEXTFILE_H
-/// GCOVR_EXCL_STOP
+// GCOVR_EXCL_STOP

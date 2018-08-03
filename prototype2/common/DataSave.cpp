@@ -2,8 +2,9 @@
 
 #include <cassert>
 #include <common/DataSave.h>
-#include <prototype2/common/Trace.h>
 #include <common/TimeString.h>
+
+#include <prototype2/common/Log.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -62,18 +63,18 @@ int DataSave::tofile(const char *fmt, ...) {
   va_end(args);
 
   if (ret < 0) {
-    XTRACE(PROCESS, ERR, "vsnprintf failed\n");
+    LOG(Sev::Error, "vsnprintf failed");
     return ret;
   }
 
   if (ret > maxwritelen) {
-    XTRACE(PROCESS, WAR, "datasave has been truncated\n");
+    LOG(Sev::Warning, "datasave has been truncated");
     ret = maxwritelen;
   }
 
   bufferlen += ret;
   if (bufferlen >= BUFFERSIZE) {
-    XTRACE(PROCESS, DEB, "Writing chunk of size %d\n", bufferlen);
+    LOG(Sev::Debug, "Writing chunk of size {}", bufferlen);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
     write(fd, buffer, bufferlen);
@@ -85,9 +86,9 @@ int DataSave::tofile(const char *fmt, ...) {
 }
 
 DataSave::~DataSave() {
-  XTRACE(PROCESS, DEB, "~DataSave bufferlen %d\n", bufferlen);
+  LOG(Sev::Debug, "~DataSave bufferlen {}", bufferlen);
   if (bufferlen > 0) {
-    XTRACE(PROCESS, INF, "Flushing DataSave buffer\n");
+    LOG(Sev::Info, "Flushing DataSave buffer");
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
     write(fd, buffer, bufferlen);
