@@ -144,7 +144,7 @@ bool EFUArgs::parseLogLevel(std::vector<std::string> LogLevelString) {
     LogMessageLevel = LevelMap.at(LogLevelString.at(0));
     return true;
   } catch (std::out_of_range &e) {
-    //Do nothing
+    // Do nothing
   }
   try {
     int TempLogMessageLevel = std::stoi(LogLevelString.at(0));
