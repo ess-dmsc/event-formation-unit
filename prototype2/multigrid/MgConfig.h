@@ -20,11 +20,6 @@ struct MgConfig {
 
   std::string reduction_strategy;
 
-  uint32_t wireThresholdLo{0};     // accept all
-  uint32_t wireThresholdHi{65535}; // accept all
-  uint32_t gridThresholdLo{0};     // accept all
-  uint32_t gridThresholdHi{65535}; // accept all
-
   // Event formation
   ESSGeometry geometry;
 

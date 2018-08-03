@@ -8,6 +8,15 @@
 
 #include <common/Log.h>
 
+MgFilter get_filter(Json::Value& v)
+{
+  MgFilter ret;
+  ret.minimum = v["min"].asUInt();
+  ret.maximum = v["max"].asUInt();
+  ret.rescale = v["rescale"].asDouble();
+  return ret;
+}
+
 MgConfig::MgConfig(std::string jsonfile) {
   Json::Value root{};
   Json::Reader reader{};
@@ -23,25 +32,39 @@ MgConfig::MgConfig(std::string jsonfile) {
   spoof_high_time = root["spoof_high_time"].asBool();
 
   auto m = root["geometry_mappings"];
-  for (unsigned int index = 0; index < m.size(); index++) {
-    MgBusGeometry g;
-    g.max_channel(m[index]["max_channel"].asUInt());
-    g.max_wire(m[index]["max_wire"].asUInt());
-    g.max_z(m[index]["max_z"].asUInt());
+  for (size_t i = 0; i < m.size(); i++) {
+    auto mi = m[index];
 
-    g.swap_wires(m[index]["swap_wires"].asBool());
-    g.swap_grids(m[index]["swap_grids"].asBool());
-    g.flipped_x(m[index]["flipped_x"].asBool());
-    g.flipped_z(m[index]["flipped_z"].asBool());
+    MgBusGeometry g;
+    g.max_channel(mi["max_channel"].asUInt());
+    g.max_wire(mi["max_wire"].asUInt());
+    g.max_z(mi["max_z"].asUInt());
+
+    g.swap_wires(mi["swap_wires"].asBool());
+    g.swap_grids(mi["swap_grids"].asBool());
+    g.flipped_x(mi["flipped_x"].asBool());
+    g.flipped_z(mi["flipped_z"].asBool());
+
+    auto wf = mi["wire_filters"];
+    g.set_wire_filters(get_filter(wf["blanket"]));
+    auto wfe = wf["exceptions"];
+    for (size_t j = 0; j < wfe.size(); j++) {
+      uint16_t idx = wfe[j]["idx"].asUint();
+      g.override_wire_filter(idx, get_filter(wfe[j]));
+    }
+
+    auto gf = mi["grid_filters"];
+    g.set_grid_filters(get_filter(gf["blanket"]));
+    auto gfe = gf["exceptions"];
+    for (size_t j = 0; j < wfe.size(); j++) {
+      uint16_t idx = gfe[j]["idx"].asUint();
+      g.override_grid_filter(idx, get_filter(gfe[j]));
+    }
+
     mappings.add_bus(g);
   }
 
   reduction_strategy = root["reduction_strategy"].asString();
-
-//  wireThresholdLo = root["wireThresholdLo"].asUInt();
-//  wireThresholdHi = root["wireThresholdHi"].asUInt();
-//  gridThresholdLo = root["gridThresholdLo"].asUInt();
-//  gridThresholdHi = root["gridThresholdHi"].asUInt();
 
   // deduced geometry from MG mappings
   geometry.nx(mappings.max_x());
@@ -62,13 +85,7 @@ std::string MgConfig::debug() const {
   ss << mappings.debug("  ") << "\n";
 
   ss << "  Event reduction strategy: " << reduction_strategy << "\n";
-  if (reduction_strategy == "maximum") {
-    ss << "    Thresholds:\n";
-    ss << "     wire min = " << wireThresholdLo << "\n";
-    ss << "     wire max = " << wireThresholdHi << "\n";
-    ss << "     grid min = " << gridThresholdLo << "\n";
-    ss << "     grid max = " << gridThresholdHi << "\n";
-  }
+
   ss << "  geometry_x = " << geometry.nx() << "\n";
   ss << "  geometry_y = " << geometry.ny() << "\n";
   ss << "  geometry_z = " << geometry.nz() << "\n";

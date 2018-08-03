@@ -12,6 +12,31 @@
 #include <string>
 #include <sstream>
 
+#include <limits>
+#include <vector>
+
+struct MgFilter {
+  uint16_t minimum {0};
+  uint16_t maximum {std::numeric_limits<uint16_t>::max()};
+  double rescale {1.0};
+
+  bool non_trivial() const {
+    return ((minimum != 0) || (maximum != std::numeric_limits<uint16_t>::max()) ||
+        (rescale != 1.0));
+  }
+
+  std::string debug() const {
+    std::stringstream ss;
+    if (minimum != 0)
+      ss << "min=" << minimum << "  ";
+    if (maximum != std::numeric_limits<uint16_t>::max())
+      ss << "max=" << maximum << "  ";
+    if (rescale != 1.0)
+      ss << "rescale=" << rescale << "  ";
+    return ss.str();
+  }
+};
+
 class MgBusGeometry {
 protected:
   static inline void swap(uint16_t &channel) {
@@ -32,8 +57,65 @@ protected:
   bool swap_wires_{false};
   bool swap_grids_{false};
 
+  std::vector<MgFilter> wire_filters_;
+  std::vector<MgFilter> grid_filters_;
+
 public:
-  
+
+  inline uint16_t rescale_wire(uint16_t wire, uint16_t adc) const
+  {
+    if (wire >= wire_filters_.size())
+      return adc;
+    return static_cast<uint16_t>(adc * wire_filters_.at(wire).rescale);
+  }
+
+  inline uint16_t rescale_grid(uint16_t grid, uint16_t adc) const
+  {
+    if (grid >= grid_filters_.size())
+      return adc;
+    return static_cast<uint16_t>(adc * grid_filters_.at(grid).rescale);
+  }
+
+  inline bool valid_wire(uint16_t wire, uint16_t adc) const
+  {
+    if (wire >= wire_filters_.size())
+      return true;
+    const auto& f = wire_filters_.at(wire);
+    return ((f.minimum <= adc) && (adc <= f.maximum));
+  }
+
+  inline bool valid_grid(uint16_t grid, uint16_t adc) const
+  {
+    if (grid >= grid_filters_.size())
+      return true;
+    const auto& f = grid_filters_.at(grid);
+    return ((f.minimum <= adc) && (adc <= f.maximum));
+  }
+
+  void set_wire_filters(MgFilter mgf) {
+    wire_filters_.resize(max_wire());
+    for (auto& f : wire_filters_)
+      f = mgf;
+  }
+
+  void set_grid_filters(MgFilter mgf) {
+    grid_filters_.resize(max_grid());
+    for (auto& f : grid_filters_)
+      f = mgf;
+  }
+
+  void override_wire_filter(uint16_t n, MgFilter mgf) {
+    if (wire_filters_.size() <= n)
+      wire_filters_.resize(n+1);
+    wire_filters_[n] = mgf;
+  }
+
+  void override_grid_filter(uint16_t n, MgFilter mgf) {
+    if (grid_filters_.size() <= n)
+      grid_filters_.resize(n+1);
+    grid_filters_[n] = mgf;
+  }
+
   inline void swap_wires(bool s) {
     swap_wires_ = s;
   }
@@ -171,6 +253,32 @@ public:
       ss << prefix << "(flipped in X)\n";
     if (flipped_z_)
       ss << prefix << "(flipped in Z)\n";
+
+    std::stringstream wfilters;
+    bool validwf {false};
+    for (size_t i=0; i < wire_filters_.size(); i++) {
+      const auto& f = wire_filters_.at(i);
+      if (f.non_trivial()) {
+        wfilters << prefix << "  [" << i  << "]  " <<  f.debug() << "\n";
+        validwf = true;
+      }
+    }
+    if (validwf) {
+      ss << prefix << "Wire filters:\n" << wfilters.str();
+    }
+
+    std::stringstream gfilters;
+    bool validgf {false};
+    for (size_t i=0; i < grid_filters_.size(); i++) {
+      const auto& f = grid_filters_.at(i);
+      if (f.non_trivial()) {
+        gfilters << prefix << "  [" << i  << "]  " <<  f.debug() << "\n";
+        validgf = true;
+      }
+    }
+    if (validgf) {
+      ss << prefix << "Grid filters:\n" << gfilters.str();
+    }
 
     return ss.str();
   }
