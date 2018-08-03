@@ -14,7 +14,7 @@
 #include <libgen.h>
 #include <stdarg.h>
 
-/** Add trace groups below - must be powers of two */
+/// Add trace groups below - must be powers of two
 // clang-format off
 const unsigned int TRC_G_INPUT   = 0x00000001U;
 const unsigned int TRC_G_OUTPUT  = 0x00000002U;
@@ -25,10 +25,10 @@ const unsigned int TRC_G_IPC     = 0x00000020U;
 const unsigned int TRC_G_CMD     = 0x00000040U;
 const unsigned int TRC_G_DATA    = 0x00000080U;
 
-/** Add trace masks below, bitwise or of grouops */
+/// Add trace masks below, bitwise or of grouops
 constexpr unsigned int TRC_M_ALL = (TRC_G_INPUT | TRC_G_OUTPUT | TRC_G_PROCESS | TRC_G_MAIN | TRC_G_INIT | TRC_G_IPC   | TRC_G_CMD | TRC_G_DATA);
 
-/** Do not edit below */
+// Do not edit below
 const unsigned int TRC_M_NONE = 0;
 
 const unsigned int TRC_L_ALW  = 1; //Should not be used
@@ -40,9 +40,8 @@ const unsigned int TRC_L_INF  = 6;
 const unsigned int TRC_L_DEB  = 7;
 // clang-format on
 
-/** @brief get rid of annoying warning
- * @todo See if there is a better solution than pragma
- */
+/// \brief get rid of annoying warning
+/// \todo See if there is a better solution than pragma
 #pragma GCC system_header
 
 #define TRC_LEVEL 6
