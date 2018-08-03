@@ -42,7 +42,7 @@ bool MgEfuMaximum::ingest(uint8_t bus, uint16_t channel, uint16_t adc) {
       WireAdcMax = adc;
       x_ = mappings.x(bus, channel);
       z_ = mappings.z(bus, channel);
-      DTRACE(INF, "     new wire adc max: ch %d", channel);
+      XTRACE(PROCESS, DEB, "     new wire adc max: ch %d", channel);
     }
     if (hists)
       hists->binstrips(mappings.wire(bus, channel), adc, 0, 0);
@@ -52,7 +52,7 @@ bool MgEfuMaximum::ingest(uint8_t bus, uint16_t channel, uint16_t adc) {
       GridGood = true;
       GridAdcMax = adc;
       y_ = mappings.y(bus, channel);
-      DTRACE(INF, "     new grid adc max: ch %d", channel);
+      XTRACE(PROCESS, DEB, "     new grid adc max: ch %d", channel);
     }
     if (hists)
       hists->binstrips(0, 0, mappings.grid(bus, channel), adc);

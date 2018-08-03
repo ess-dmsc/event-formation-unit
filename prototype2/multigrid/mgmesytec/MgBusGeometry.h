@@ -24,8 +24,7 @@ protected:
 
   uint16_t max_channel_{120};
   uint16_t max_wire_{80};
-
-  uint16_t wires_in_z_ {20};
+  uint16_t max_z_ {20};
 
   bool flipped_x_ {false};
   bool flipped_z_ {false};
@@ -51,8 +50,8 @@ public:
     max_channel_ = g;
   }
 
-  inline void wires_in_z(uint16_t w) {
-    wires_in_z_ = w;
+  inline void max_z(uint16_t w) {
+    max_z_ = w;
   }
 
   inline void flipped_x(bool f) {
@@ -92,8 +91,17 @@ public:
     return flipped_z_;
   }
 
-  inline uint16_t wires_in_z() const {
-    return wires_in_z_;
+
+  inline uint32_t max_x() const {
+    return max_wire_ / max_z_;
+  }
+
+  inline uint32_t max_y() const {
+    return max_grid();
+  }
+
+  inline uint16_t max_z() const {
+    return max_z_;
   }
 
   /** @brief identifies which channels are wires, from drawing by Anton */
@@ -125,9 +133,9 @@ public:
   /** @brief return the x coordinate of the detector */
   inline uint32_t x(uint16_t channel) const {
     if (flipped_x_) {
-      return (max_wire_ / wires_in_z_) - uint16_t(1) - wire(channel) / wires_in_z_;
+      return (max_wire_ / max_z_) - uint16_t(1) - wire(channel) / max_z_;
     } else {
-      return wire(channel) / wires_in_z_;
+      return wire(channel) / max_z_;
     }
   }
 
@@ -139,22 +147,10 @@ public:
   /** @brief return the z coordinate of the detector */
   inline uint32_t z(uint16_t channel) const {
     if (flipped_z_) {
-      return (wires_in_z_ - uint16_t(1)) - wire(channel) % wires_in_z_;
+      return (max_z_ - uint16_t(1)) - wire(channel) % max_z_;
     } else {
-      return wire(channel) % wires_in_z_;
+      return wire(channel) % max_z_;
     }
-  }
-
-  inline uint32_t max_x() const {
-    return max_wire_ / wires_in_z_;
-  }
-
-  inline uint32_t max_y() const {
-    return max_grid();
-  }
-
-  inline uint32_t max_z() const {
-    return wires_in_z_;
   }
 
   std::string debug(std::string prefix) const {
@@ -162,20 +158,19 @@ public:
 
     ss << prefix <<  "wires=chan[0," << (max_wire_-1) << "] ";
     if (swap_wires_)
-      ss << "(wires swapped)";
+      ss << "(swapped)";
     ss << "\n";
 
     ss << prefix <<  "grids=chan[" << max_wire_ << "," << (max_channel_-1) << "] ";
     if (swap_grids_)
-      ss << "(grids swapped)";
+      ss << "(swapped)";
     ss << "\n";
 
-    ss << prefix << "bounds [" << max_x() << "," << max_y() << "," << max_z() << "] ";
+    ss << prefix << "size [" << max_x() << "," << max_y() << "," << max_z() << "]\n";
     if (flipped_x_)
-      ss << "(flipped in X) ";
+      ss << prefix << "(flipped in X)\n";
     if (flipped_z_)
-      ss << "(flipped in Z) ";
-    ss << "\n";
+      ss << prefix << "(flipped in Z)\n";
 
     return ss.str();
   }

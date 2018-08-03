@@ -25,6 +25,10 @@ MgConfig::MgConfig(std::string jsonfile) {
   auto m = root["geometry_mappings"];
   for (unsigned int index = 0; index < m.size(); index++) {
     MgBusGeometry g;
+    g.max_channel(m[index]["max_channel"].asUInt());
+    g.max_wire(m[index]["max_wire"].asUInt());
+    g.max_z(m[index]["max_z"].asUInt());
+
     g.swap_wires(m[index]["swap_wires"].asBool());
     g.swap_grids(m[index]["swap_grids"].asBool());
     g.flipped_x(m[index]["flipped_x"].asBool());
@@ -39,10 +43,10 @@ MgConfig::MgConfig(std::string jsonfile) {
 //  gridThresholdLo = root["gridThresholdLo"].asUInt();
 //  gridThresholdHi = root["gridThresholdHi"].asUInt();
 
-  // \todo deduce geometry from MG mappings?
-  geometry.nx(root["geometry_x"].asInt());
-  geometry.ny(root["geometry_y"].asInt());
-  geometry.nz(root["geometry_z"].asInt());
+  // deduced geometry from MG mappings
+  geometry.nx(mappings.max_x());
+  geometry.ny(mappings.max_y());
+  geometry.nz(mappings.max_z());
   geometry.np(1);
 }
 

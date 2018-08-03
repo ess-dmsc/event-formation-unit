@@ -30,6 +30,8 @@ public:
   /// \todo document
   uint32_t getTime();
 
+  void set_geometry(ESSGeometry);
+
   /// \brief parse a binary payload buffer, return number of data element
   error parse(const char *buffer, int size, EV42Serializer &EV42Serializer);
 
@@ -41,8 +43,7 @@ public:
 private:
   VMMR16Parser vmmr16Parser;
 
-  // \todo deduce this from mappings
-  ESSGeometry Geometry{36, 40, 20, 1};
+  ESSGeometry Geometry;
 
   std::shared_ptr<MGHitFile> dumpfile;
 };

@@ -215,7 +215,7 @@ void CSPEC::init_config()
   }
   mesytecdata = std::make_shared<MesytecData>(mg_efu, monitor.readouts,
                                               mg_config.spoof_high_time, dumpfile);
-
+  mesytecdata->set_geometry(mg_config.geometry);
 }
 
 void CSPEC::mainThread() {

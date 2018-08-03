@@ -25,6 +25,11 @@ MesytecData::MesytecData(std::shared_ptr<MgEFU> mg_efu, std::shared_ptr<ReadoutS
   vmmr16Parser.setSpoofHighTime(spoof_ht);
 }
 
+void MesytecData::set_geometry(ESSGeometry g)
+{
+  Geometry = g;
+}
+
 // \todo can only create a single event per UDP buffer
 uint32_t MesytecData::getPixel() {
   if (!vmmr16Parser.mgEfu)

@@ -1,0 +1,13 @@
+{
+  "reduction_strategy" : "maximum",
+
+  "spoof_high_time" : true,
+
+  "geometry_mappings" :
+  [
+    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true},
+    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true},
+    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true}
+  ]
+  
+}
