@@ -3,7 +3,7 @@
 #include <cassert>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
-#include <common/Trace.h>
+#include <common/Log.h>
 #include <efu/Launcher.h>
 #include <iostream>
 #include <map>
@@ -11,10 +11,9 @@
 
 void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
   auto startThreadsWithoutAffinity = [&detector]() {
-    XTRACE(MAIN, ALW, "Launching threads without core affinity.\n");
+    LOG(Sev::Info, "Launching threads without core affinity.");
     for (auto &ThreadInfo : detector->GetThreadInfo()) {
-      XTRACE(MAIN, ALW, "Creating new thread (id: %s)\n",
-             ThreadInfo.name.c_str());
+      LOG(Sev::Debug, "Creating new thread (id: {})", ThreadInfo.name);
       ThreadInfo.thread = std::thread(ThreadInfo.func);
     }
   };
@@ -25,15 +24,14 @@ void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     CPU_SET(core, &cpuset);
-    XTRACE(MAIN, ALW, "Setting thread affinity to core %d\n", core);
-    GLOG_INF("Setting thread affinity to core " + std::to_string(core));
+    LOG(Sev::Debug, "Setting thread affinity to core {}", core);
 
     int __attribute__((unused)) s = pthread_setaffinity_np(
         thread.native_handle(), sizeof(cpu_set_t), &cpuset);
     assert(s == 0);
 #else
 #pragma message("setaffinity only implemented for Linux")
-    GLOG_WAR("setaffinity only implemented for Linux");
+    LOG(Sev::Notice, "setaffinity only implemented for Linux");
 #endif
   };
 
@@ -45,27 +43,24 @@ void Launcher::launchThreads(std::shared_ptr<Detector> &detector) {
     startThreadsWithoutAffinity();
   } else if (1 == ThreadCoreAffinity.size() and
              ThreadCoreAffinity[0].Name == "implicit_affinity") {
-    XTRACE(MAIN, ALW, "Launching threads with implicit core affinity.\n");
+    LOG(Sev::Info, "Launching threads with implicit core affinity.");
     int CoreCounter = ThreadCoreAffinity[0].Core;
     for (auto &ThreadInfo : detector->GetThreadInfo()) {
-      XTRACE(MAIN, ALW, "Creating new thread (id: %s)\n",
-             ThreadInfo.name.c_str());
+      LOG(Sev::Debug, "Creating new thread (id: {})", ThreadInfo.name);
       ThreadInfo.thread = std::thread(ThreadInfo.func);
       setThreadCoreAffinity(ThreadInfo.thread, CoreCounter++);
     }
   } else {
-    XTRACE(MAIN, ALW, "Launching threads with explicit core affinity.\n");
+    LOG(Sev::Info, "Launching threads with explicit core affinity.");
     for (auto &ThreadInfo : detector->GetThreadInfo()) {
-      XTRACE(MAIN, ALW, "Creating new thread (id: %s)\n",
-             ThreadInfo.name.c_str());
+      LOG(Sev::Debug, "Creating new thread (id: {})", ThreadInfo.name);
       ThreadInfo.thread = std::thread(ThreadInfo.func);
       if (1 == AffinityMap.count(ThreadInfo.name)) {
         setThreadCoreAffinity(ThreadInfo.thread, AffinityMap[ThreadInfo.name]);
       } else {
-        XTRACE(MAIN, ALW,
+        LOG(Sev::Notice,
                "No thread core affinity information available for thread with "
-               "id: %s\n",
-               ThreadInfo.name.c_str());
+               "id: {}", ThreadInfo.name);
       }
     }
   }

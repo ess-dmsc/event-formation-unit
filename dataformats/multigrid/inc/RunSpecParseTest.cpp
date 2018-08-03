@@ -43,7 +43,7 @@ TEST_F(RunSpecParseTest, InvalidJson) {
   RunSpecParse runspec(filename);
 
   // DeathTest
-  ASSERT_EXIT(runspec.getruns("test", "basedir", "outputdir", 1, 200), ::testing::ExitedWithCode(1), "");
+  ASSERT_THROW(runspec.getruns("test", "basedir", "outputdir", 1, 200), std::runtime_error);
 }
 
 int main(int argc, char **argv) {

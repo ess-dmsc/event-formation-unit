@@ -8,10 +8,9 @@
 
 #include <common/DetectorModuleRegister.h>
 #include <common/EFUArgs.h>
-#include <common/Trace.h>
+#include <common/Log.h>
 #include <cstdio>
 #include <fstream>
-#include <iostream>
 #include <regex>
 #include <string>
 
@@ -37,6 +36,14 @@ EFUArgs::EFUArgs() {
                     return parseAffinityStrings(Input);
                   }, "Thread to core affinity. Ex: \"-c input_t:4\"")
       ->group("EFU Options");
+  
+  CLIParser.add_option("-l,--log_level", [this](std::vector<std::string> Input) {
+    return parseLogLevel(Input);
+  }, "Set log message level. Set to 1 - 7 or one of \n                              `Critical`, `Error`, `Warning`, `Notice`, `Info`,\n                              or `Debug`. Ex: \"-l Notice\"")
+  ->group("EFU Options")->set_default_val("Info");
+  
+  CLIParser.add_option("--log_file", LogFileName, "Write log messages to file.")
+  ->group("EFU Options");
 
   CLIParser.add_option("-u,--min_mtu", EFUSettings.MinimumMTU, "Minimum value of MTU for all active interfaces")
       ->group("EFU Options")->set_default_val("9000");
@@ -128,26 +135,49 @@ bool EFUArgs::parseAffinityStrings(
   return true;
 }
 
+bool EFUArgs::parseLogLevel(std::vector<std::string> LogLevelString) {
+  std::map<std::string, int> LevelMap{{"Critical", 2}, {"Error", 3}, {"Warning", 4}, {"Notice", 5}, {"Info", 6}, {"Debug", 7}};
+  if (LogLevelString.size() != 1) {
+    return false;
+  }
+  try {
+    LogMessageLevel = LevelMap.at(LogLevelString.at(0));
+    return true;
+  } catch (std::out_of_range &e) {
+    // Do nothing
+  }
+  try {
+    int TempLogMessageLevel = std::stoi(LogLevelString.at(0));
+    if (TempLogMessageLevel < 1 or TempLogMessageLevel > 7) {
+      return false;
+    }
+    LogMessageLevel = TempLogMessageLevel;
+  } catch (std::invalid_argument &e) {
+    return false;
+  }
+  return true;
+}
+
 void EFUArgs::printSettings() {
   // clang-format off
-  XTRACE(INIT, ALW, "Starting event processing pipeline2 with main properties:\n");
-  XTRACE(INIT, ALW, "  Detector:                 %s\n",    DetectorName.c_str());
-  XTRACE(INIT, ALW, "  Rx UDP Socket:            %s:%d\n",
-         EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
-  XTRACE(INIT, ALW, "  Minimum required MTU      %d\n", EFUSettings.MinimumMTU);
-  XTRACE(INIT, ALW, "  Kafka broker:             %s\n", EFUSettings.KafkaBroker.c_str());
-  XTRACE(INIT, ALW, "  Log IP:                   %s\n", GraylogConfig.address.c_str());
-  XTRACE(INIT, ALW, "  Graphite TCP socket:      %s:%d\n",
-        EFUSettings.GraphiteAddress.c_str(), EFUSettings.GraphitePort);
-  XTRACE(INIT, ALW, "  CLI TCP Socket:           localhost:%d\n", EFUSettings.CommandServerPort);
+  LOG(Sev::Info, "Starting event processing pipeline2 with main properties:");
+  LOG(Sev::Info, "  Detector:                 {}",    DetectorName);
+  LOG(Sev::Info, "  Rx UDP Socket:            {}:{}",
+         EFUSettings.DetectorAddress, EFUSettings.DetectorPort);
+  LOG(Sev::Info, "  Minimum required MTU      {}", EFUSettings.MinimumMTU);
+  LOG(Sev::Info, "  Kafka broker:             {}", EFUSettings.KafkaBroker);
+  LOG(Sev::Info, "  Log IP:                   {}", GraylogConfig.address);
+  LOG(Sev::Info, "  Graphite TCP socket:      {}:{}",
+        EFUSettings.GraphiteAddress, EFUSettings.GraphitePort);
+  LOG(Sev::Info, "  CLI TCP Socket:           localhost:{}", EFUSettings.CommandServerPort);
 
   if (EFUSettings.StopAfterSec == 0xffffffffU) {
-    XTRACE(INIT, ALW, "  Stopafter:                never\n");
+    LOG(Sev::Info, "  Stopafter:                never");
   } else {
-    XTRACE(INIT, ALW, "  Stopafter:                %us\n", EFUSettings.StopAfterSec);
+    LOG(Sev::Info, "  Stopafter:                {}s", EFUSettings.StopAfterSec);
   }
 
-  XTRACE(INIT, ALW, "<<< NOT ALL CONFIGURABLE SETTINGS MAY BE DISPLAYED >>>\n");
+  LOG(Sev::Info, "<<< NOT ALL CONFIGURABLE SETTINGS MAY BE DISPLAYED >>>");
   // clang-format on
 }
 
@@ -184,12 +214,12 @@ EFUArgs::Status EFUArgs::parseSecondPass(const int argc, char *argv[]) {
   if (*WriteConfigOption) {
     std::ofstream ConfigFile(ConfigFileName, std::ios::binary);
     if (not ConfigFile.is_open()) {
-      std::cout << "Failed to open config file for writing." << std::endl;
+      LOG(Sev::Error, "Failed to open config file for writing.");
       return Status::EXIT;
     }
     ConfigFile << CLIParser.config_to_str(true, "", true);
     ConfigFile.close();
-    std::cout << "Config file created, now exiting." << std::endl;
+    LOG(Sev::Info, "Config file created, now exiting.");
     return Status::EXIT;
   }
   return Status::CONTINUE;

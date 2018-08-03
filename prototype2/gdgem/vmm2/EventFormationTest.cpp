@@ -62,7 +62,7 @@ TEST_F(EventFormationTest, Initial) {
 
 
     while (!matcher.matched_clusters.empty()) {
-      //XTRACE(PROCESS, DEB, "event_ready()\n");
+      //XTRACE(PROCESS, DEB, "event_ready()");
       event = matcher.matched_clusters.front();
       matcher.matched_clusters.pop_front();
 

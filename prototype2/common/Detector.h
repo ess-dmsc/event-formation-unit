@@ -12,7 +12,6 @@
 #include <CLI11.hpp>
 #include <atomic>
 #include <common/NewStats.h>
-#include <common/Trace.h>
 #include <functional>
 #include <map>
 #include <memory>

@@ -7,7 +7,7 @@ function(create_module module_name)
     ${${module_name}_INC})
   set_target_properties(${module_name} PROPERTIES PREFIX "")
   set_target_properties(${module_name} PROPERTIES SUFFIX ".so")
-  target_link_libraries(${module_name}
+  target_link_libraries(${module_name} efu
     ${${module_name}_LIB}
     ${EFU_COMMON_LIBS}
     eventlib)
@@ -46,9 +46,9 @@ function(create_executable exec_name)
     ${${exec_name}_INC})
 
   target_link_libraries(${exec_name}
-    ${${exec_name}_LIB}
+    PUBLIC ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    eventlib)
+    eventlib efu_common)
 
   if (GPERF)
     target_link_libraries(${exec_name} ${GPERFTOOLS_PROFILER})
@@ -84,7 +84,7 @@ function(create_test_executable)
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    ${GTEST_LIBRARIES})
+    ${GTEST_LIBRARIES} efu_common)
 
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${exec_name} "-Wl,--no-as-needed")
@@ -120,5 +120,5 @@ function(create_integration_test_executable exec_name)
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    eventlib)
+    eventlib efu_common)
 endfunction(create_integration_test_executable)

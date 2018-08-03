@@ -2,7 +2,7 @@
 
 #include <common/EFUArgs.h>
 #include <common/StatPublisher.h>
-#include <common/Trace.h>
+#include <common/Log.h>
 #include <common/Version.h>
 #include <efu/ExitHandler.h>
 #include <efu/HwCheck.h>
@@ -10,13 +10,26 @@
 #include <efu/Loader.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
-#include <iostream>
 #include <libs/include/Timer.h>
 #include <libs/include/gccintel.h>
 #include <unistd.h> // sleep()
 #include <vector>
 
 #define ONE_SECOND_US 1000000U
+
+std::string ConsoleFormatter(const LogMessage &Msg) {
+  static const std::vector<std::string> SevToString{"EMG", "ALR", "CRI", "ERR", "WAR", "NOTE", "INF", "DEB"};
+  std::string FileName;
+  std::int64_t LineNr = -1;
+  for (auto &CField : Msg.additionalFields) {
+    if (CField.first == "file") {
+      FileName = CField.second.strVal;
+    } else if (CField.first == "line") {
+      LineNr = CField.second.intVal;
+    }
+  }
+  return fmt::format("{:5}{:21}{:5} - {}", SevToString.at(int(Msg.severity)), FileName, LineNr, Msg.message);
+}
 
 /** Load detector, launch pipeline threads, then sleep until timeout or break */
 int main(int argc, char *argv[]) {
@@ -33,6 +46,19 @@ int main(int argc, char *argv[]) {
     if (EFUArgs::Status::EXIT == efu_args.parseFirstPass(argc, argv)) {
       return 0;
     }
+    // Set-up logging before we start doing important stuff
+    Log::RemoveAllHandlers();
+    
+    auto CI = new ConsoleInterface();
+    CI->SetMessageStringCreatorFunction(ConsoleFormatter);
+    Log::AddLogHandler(CI);
+    
+    Log::SetMinimumSeverity(Severity(efu_args.getLogLevel()));
+    Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
+    if (efu_args.getLogFileName().size() > 0) {
+      Log::AddLogHandler(new FileInterface(efu_args.getLogFileName()));
+    }
+    
     loader.loadPlugin(efu_args.getDetectorName());
     if (not loader.IsOk()) {
       efu_args.printHelp();
@@ -61,35 +87,26 @@ int main(int argc, char *argv[]) {
 
   ExitHandler::InitExitHandler();
 
-#ifdef GRAYLOG
-  Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
-  Log::SetMinimumSeverity(Severity::Debug);
-#endif
-
-  GLOG_INF("Starting Event Formation Unit");
-  GLOG_INF("Event Formation Unit version: " + efu_version());
-  GLOG_INF("Event Formation Unit build: " + efu_buildstr());
-  XTRACE(MAIN, ALW, "Starting Event Formation unit\n");
-  XTRACE(MAIN, ALW, "Event Formation Software Version: %s\n",
-         efu_version().c_str());
-  XTRACE(MAIN, ALW, "Event Formation Unit build: %s\n", EFU_STR(BUILDSTR));
+  LOG(Sev::Info, "Starting Event Formation Unit");
+  LOG(Sev::Info, "Event Formation Unit version: {}", efu_version());
+  LOG(Sev::Info, "Event Formation Unit build: {}", efu_buildstr());
 
   if (hwcheck.checkMTU(hwcheck.defaultIgnoredInterfaces) == false) {
-    XTRACE(MAIN, ERR, "MTU checks failed, for a quick fix, try\n");
-    XTRACE(MAIN, ERR, "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)\n");
-    XTRACE(MAIN, ERR, "exiting...\n");
-    GLOG_ERR("MTU checks failed, exiting.");
-    return 1;
+    LOG(Sev::Error, "MTU checks failed, for a quick fix, try");
+    LOG(Sev::Error, "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)");
+    LOG(Sev::Error, "exiting...");
+    detector.reset(); //De-allocate detector before we unload detector module
+    return -1;
   }
 
   if (DetectorSettings.StopAfterSec == 0) {
-    XTRACE(MAIN, ALW, "Event Formation Unit Exit (Immediate)\n");
-    GLOG_INF("Event Formation Unit Exit (Immediate)");
+    LOG(Sev::Info, "Event Formation Unit Exit (Immediate)");
+    detector.reset(); //De-allocate detector before we unload detector module
     return 0;
   }
 
 
-  XTRACE(MAIN, ALW, "Launching EFU as Instrument %s\n", DetectorName.c_str());
+  LOG(Sev::Info, "Launching EFU as Instrument {}", DetectorName);
 
   Launcher launcher(AffinitySettings);
 
@@ -106,7 +123,7 @@ int main(int argc, char *argv[]) {
     //Do not allow immediate exits
     if (RunTimer.timeus() >= (uint64_t)ONE_SECOND_US / 10) {
       if (keep_running == 0) {
-        XTRACE(INIT, ALW, "Application stop, Exiting...\n");
+        LOG(Sev::Info, "Application stop, Exiting...");
         detector->stopThreads();
         sleep(1);
         break;
@@ -115,8 +132,7 @@ int main(int argc, char *argv[]) {
 
     if (RunTimer.timeus() >=
         DetectorSettings.StopAfterSec * (uint64_t)ONE_SECOND_US) {
-      XTRACE(MAIN, ALW, "Application timeout, Exiting...\n");
-      GLOG_INF("Event Formation Unit Exiting (User timeout)");
+      LOG(Sev::Info, "Application timeout, Exiting...");
       detector->stopThreads();
       sleep(1);
       break;
@@ -134,12 +150,7 @@ int main(int argc, char *argv[]) {
     }
     usleep(500);
   }
-
-  if (detector.use_count() > 1) {
-    XTRACE(MAIN, WAR,
-           "There are more than 1 strong pointers to the detector. This "
-           "application may crash on exit.\n");
-  }
+  
   detector.reset();
 
   return 0;

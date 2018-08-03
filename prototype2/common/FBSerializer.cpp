@@ -72,11 +72,11 @@ int FBSerializer::produce() {
     // }
     // printf("\n");
 
-    XTRACE(OUTPUT, DEB, "produce %zu events \n", events);
+    XTRACE(OUTPUT, DEB, "produce %zu events ", events);
     char *txbuffer;
     txlen = serialize((uint64_t)0x01, seqno++, events, &txbuffer);
     assert(txlen > 0);
-    XTRACE(OUTPUT, DEB, "Flatbuffer tx length %d\n", txlen);
+    XTRACE(OUTPUT, DEB, "Flatbuffer tx length %d", txlen);
     producer.produce(txbuffer, txlen);
 
 #if 0
@@ -90,7 +90,7 @@ int FBSerializer::produce() {
 }
 
 int FBSerializer::addevent(uint32_t time, uint32_t pixel) {
-  XTRACE(OUTPUT, DEB, "Add event: %d %u\n", time, pixel);
+  XTRACE(OUTPUT, DEB, "Add event: %d %u", time, pixel);
   ((uint32_t *)timeptr)[events] = time;
   ((uint32_t *)pixelptr)[events] = pixel;
   events++;

@@ -21,7 +21,7 @@ int CSPECData::createevent(const MultiGridData &data, uint32_t *time,
   auto grid = chanconv->getgridid(data.d[6]);
   auto wire = chanconv->getwireid(data.d[2]);
 
-  XTRACE(PROCESS, DEB, "panel %u, grid %d, wire %d\n", panel, grid, wire);
+  XTRACE(PROCESS, DEB, "panel %u, grid %d, wire %d", panel, grid, wire);
 
   /** \todo eventually get rid of this, but electronics is wrongly wired
    * on the prototype detector currently being tested
@@ -43,12 +43,12 @@ int CSPECData::createevent(const MultiGridData &data, uint32_t *time,
 
   auto pixid = multigridgeom->getdetectorpixelid(panel, grid, wire);
   if (pixid < 1) {
-    XTRACE(PROCESS, WAR, "panel %u, grid %d, wire %d, pixel %d\n", panel, grid,
+    XTRACE(PROCESS, WAR, "panel %u, grid %d, wire %d, pixel %d", panel, grid,
            wire, pixid);
     return -1;
   }
 
-  XTRACE(PROCESS, INF, "panel %u, grid %d, wire %d, pixel %d\n", panel, grid,
+  XTRACE(PROCESS, INF, "panel %u, grid %d, wire %d, pixel %d", panel, grid,
          wire, pixid);
 
   static_assert(sizeof(data.time) == 4, "time should be 32 bit");
@@ -70,17 +70,17 @@ int CSPECData::receive(const char *buffer, int size) {
   int oldsize = size;
 
   while (size >= 4) {
-    // XTRACE(PROCESS, DEB, "elems: %d, size: %d, datap: %p\n", elems, size,
+    // XTRACE(PROCESS, DEB, "elems: %d, size: %d, datap: %p", elems, size,
     // datap);
     switch (state) {
     // Parse Header
     case State::hdr:
       if (((*datap & header_mask) != header_id) ||
           ((*datap & 0xfff) != nwords)) {
-        XTRACE(PROCESS, INF, "State::hdr - header error\n");
+        XTRACE(PROCESS, INF, "State::hdr - header error");
         break;
       }
-      // XTRACE(PROCESS, DEB, "State::hdr valid data, next state State:dat\n");
+      // XTRACE(PROCESS, DEB, "State::hdr valid data, next state State:dat");
       data[elems].module = (*datap >> 16) & 0xff;
       datctr = 0;
       state = State::dat;
@@ -89,28 +89,28 @@ int CSPECData::receive(const char *buffer, int size) {
     // Parse Data
     case State::dat:
       if ((*datap & header_mask) != data_id) {
-        XTRACE(PROCESS, INF, "State::dat - header error\n");
+        XTRACE(PROCESS, INF, "State::dat - header error");
         state = State::hdr;
         break;
       }
       // XTRACE(PROCESS, DEB, "State::dat valid data (%d), next state
-      // State:dat\n",
+      // State:dat",
       //       datctr);
       channel = ((*datap) >> 16) & 0xff;
       // assert(channel == datctr); // asserts for 2016_08_16_0921_sample_ in
       // late 9000s
       if (channel != datctr) {
-        XTRACE(PROCESS, WAR, "State::dat - data order mismatch\n");
+        XTRACE(PROCESS, WAR, "State::dat - data order mismatch");
         state = State::hdr;
         break;
       }
 
       data[elems].d[datctr] = (*datap) & 0x3fff;
-      XTRACE(PROCESS, DEB, "data[%u].d[%u]: %u\n", elems, datctr,
+      XTRACE(PROCESS, DEB, "data[%u].d[%u]: %u", elems, datctr,
              data[elems].d[datctr]);
       datctr++;
       if (datctr == 8) {
-        // XTRACE(PROCESS, DEB, "State:dat all data, next state State:ftr\n");
+        // XTRACE(PROCESS, DEB, "State:dat all data, next state State:ftr");
         state = State::ftr;
       }
       break;
@@ -118,15 +118,15 @@ int CSPECData::receive(const char *buffer, int size) {
     // Parse Footer
     case State::ftr:
       if ((*datap & header_mask) != footer_id) {
-        XTRACE(PROCESS, WAR, "State::ftr - header error\n");
+        XTRACE(PROCESS, WAR, "State::ftr - header error");
         state = State::hdr;
         break;
       }
       // XTRACE(PROCESS, DEB,
-      //       "State::ftr valid data, next state State:hdr, events %u\n",
+      //       "State::ftr valid data, next state State:hdr, events %u",
       //       elems);
       data[elems].time = (*datap) & 0x3fffffff;
-      XTRACE(PROCESS, DEB, "time: %u\n", data[elems].time);
+      XTRACE(PROCESS, DEB, "time: %u", data[elems].time);
       elems++;
       state = State::hdr;
 
@@ -155,7 +155,7 @@ int CSPECData::input_filter() {
   for (unsigned int i = 0; i < elems; i++) {
     data[i].valid = 0;
     if ((data[i].d[0] < wire_thresh) || (data[i].d[4] < grid_thresh)) {
-      XTRACE(PROCESS, INF, "data 0 or 4 failed, thresholds: %u, %u\n",
+      XTRACE(PROCESS, INF, "data 0 or 4 failed, thresholds: %u, %u",
              wire_thresh, grid_thresh);
       discarded++; // due to low signal
       continue;
@@ -163,7 +163,7 @@ int CSPECData::input_filter() {
     data[i].valid = 1;
 
     if (data[i].d[1] >= wire_thresh) {
-      XTRACE(PROCESS, INF, "data 1 or 5 failed, thresholds: %u, %u\n",
+      XTRACE(PROCESS, INF, "data 1 or 5 failed, thresholds: %u, %u",
              wire_thresh, grid_thresh);
       discarded++;       // due to duplicate neutron event
       data[i].valid = 0; // invalidate

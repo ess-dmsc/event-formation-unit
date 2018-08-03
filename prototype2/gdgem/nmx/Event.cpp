@@ -70,7 +70,7 @@ bool Event::time_overlap_thresh(const Cluster& other, double thresh) const
 
 void Event::analyze(bool weighted, int16_t max_timebins,
                     int16_t max_timedif) {
-  XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu\n",
+  XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu",
          x.entries.size(), y.entries.size());
   if (x.entries.size()) {
     x.analyze(weighted, max_timebins, max_timedif);

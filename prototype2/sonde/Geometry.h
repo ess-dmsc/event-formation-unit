@@ -33,21 +33,21 @@ public:
   inline int getdetectorpixelid(int module, int asch) {
     int asic = asch >> 6;
     if (asic > 3) {
-      XTRACE(PROCESS, WAR, "Invalid asic: %d\n", asic);
+      XTRACE(PROCESS, WAR, "Invalid asic: %d", asic);
       return -1;
     }
     int channel = asch & 0x3f;
     if (channel > 15) {
-      XTRACE(PROCESS, WAR, "Invalid channel: %d\n", channel);
+      XTRACE(PROCESS, WAR, "Invalid channel: %d", channel);
       return -1;
     }
-    XTRACE(PROCESS, DEB, "module %d, asic %d, channel %d\n", module, asic,
+    XTRACE(PROCESS, DEB, "module %d, asic %d, channel %d", module, asic,
            channel);
 
     int x = channel % 4;
     int y = channel / 4;
 
-    XTRACE(PROCESS, DEB, "initial coords x: %d, y %d \n", x, y);
+    XTRACE(PROCESS, DEB, "initial coords x: %d, y %d ", x, y);
 
     if (asic == 0) {
       x = 7 - x;
@@ -60,7 +60,7 @@ public:
     }
 
     int pixelid = essgeometry.pixel2D(x,y);
-    XTRACE(PROCESS, DEB, "coordinates: x %d, y %d, pixel_id: %d\n", x, y,
+    XTRACE(PROCESS, DEB, "coordinates: x %d, y %d, pixel_id: %d", x, y,
            pixelid);
     return pixelid;
   }
