@@ -36,9 +36,7 @@
 #include <multigrid/mgmesytec/MgEfuMaximum.h>
 #include <multigrid/mgmesytec/MgEfuCenterMass.h>
 
-#include <common/Trace.h>
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#include <common/Log.h>
 
 const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
 
@@ -91,13 +89,13 @@ struct Monitor
       return;
 
     if (!hists->isEmpty()) {
-      XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists->hit_count());
+      LOG(Sev::Debug, "Flushing histograms for {} readouts", hists->hit_count());
       histfb->produce(*hists);
       hists->clear();
     }
 
     if (readouts->getNumEntries()) {
-      XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", readouts->getNumEntries());
+      LOG(Sev::Debug, "Flushing readout data for {} readouts", readouts->getNumEntries());
       readouts->produce();
     }
   }
@@ -160,7 +158,7 @@ private:
 CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.setPrefix("efu.mgmesytec");
 
-  XTRACE(INIT, ALW, "Adding stats");
+  LOG(Sev::Info, "Adding stats");
   // clang-format off
   Stats.create("rx_packets",            mystats.rx_packets);
   Stats.create("rx_bytes",              mystats.rx_bytes);
@@ -177,11 +175,11 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   std::function<void()> inputFunc = [this]() { CSPEC::mainThread(); };
   Detector::AddThreadFunction(inputFunc, "main");
 
-  XTRACE(INIT, ALW, "Stream monitor data = %s\n",
+  LOG(Sev::Info, "Stream monitor data = {}",
       (DetectorSettings.monitor ? "YES" : "no"));
   if (!DetectorSettings.fileprefix.empty())
-    XTRACE(INIT, ALW, "Dump h5 data in path: %s\n",
-           DetectorSettings.fileprefix.c_str());
+    LOG(Sev::Info, "Dump h5 data in path: {}",
+           DetectorSettings.fileprefix);
 }
 
 const char *CSPEC::detectorname() { return classname; }
@@ -190,9 +188,9 @@ const char *CSPEC::detectorname() { return classname; }
 
 void CSPEC::init_config()
 {
-  XTRACE(PROCESS, ALW, "MG Config file: %s\n", DetectorSettings.ConfigFile.c_str());
+  LOG(Sev::Info, "MG Config file: {}", DetectorSettings.ConfigFile);
   mg_config = MgConfig(DetectorSettings.ConfigFile);
-  XTRACE(PROCESS, ALW, "Multigrid Config\n%s\n", mg_config.debug().c_str());
+  LOG(Sev::Info, "Multigrid Config\n{}", mg_config.debug());
 
   if (DetectorSettings.monitor)
     monitor.init(EFUSettings.KafkaBroker, readout_entries);
@@ -241,7 +239,7 @@ void CSPEC::mainThread() {
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += ReadSize;
-      XTRACE(INPUT, DEB, "read size: %u", ReadSize);
+      LOG(Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
 
       auto res = mesytecdata->parse(buffer, ReadSize, flatbuffer);
       if (res != MesytecData::error::OK) {
@@ -269,7 +267,7 @@ void CSPEC::mainThread() {
       // flush anything that remains
       mystats.tx_bytes += flatbuffer.produce();
       monitor.produce();
-      XTRACE(INPUT, ALW, "Stopping processing thread.\n");
+      LOG(Sev::Info, "Stopping processing thread.");
       return;
     }
   }

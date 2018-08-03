@@ -7,8 +7,6 @@
 
 #include <multigrid/mgmesytec/MgSeqGeometry.h>
 
-static const int MG24_Z_20 = 1;
-
 class MesytecDataTest : public TestBase {
 protected:
   MesytecData mesytec {nullptr, nullptr, false};

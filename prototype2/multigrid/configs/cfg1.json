@@ -1,0 +1,22 @@
+{
+  "reduction_strategy" : "center-mass",
+
+  "spoof_high_time" : true,
+
+  "geometry_mappings" :
+  [
+    {"swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true},
+    {"swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true},
+    {"swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true},
+    {"swap_wires":true, "swap_grids":false, "flipped_x":false, "flipped_z":true},
+    {"swap_wires":true, "swap_grids":false, "flipped_x":false, "flipped_z":true},
+    {"swap_wires":true, "swap_grids":false, "flipped_x":false, "flipped_z":true},
+    {"swap_wires":true, "swap_grids":false, "flipped_x":false, "flipped_z":true},
+    {"swap_wires":true, "swap_grids":false, "flipped_x":false, "flipped_z":true},
+    {"swap_wires":true, "swap_grids":false, "flipped_x":false, "flipped_z":true}
+  ],
+  
+  "geometry_x" : 256,
+  "geometry_y" : 256,
+  "geometry_z" : 256
+}

@@ -60,17 +60,17 @@ MesytecData::error MesytecData::parse(const char *buffer,
 
   while (bytesleft > 16) {
     if ((*datap & 0x000000ff) != 0x58) {
-      XTRACE(DATA, WAR, "expected data value 0x58\n");
+      XTRACE(DATA, WAR, "expected data value 0x58");
       return error::EUNSUPP;
     }
 
     uint16_t len = ntohs((*datap & 0x00ffff00) >> 8);
-    DTRACE(DEB, "sis3153 datawords %d\n", len);
+    DTRACE(DEB, "sis3153 datawords %d", len);
     datap++;
     bytesleft -= 4;
 
     if ((*datap & 0xff000000) != SisType::BeginReadout) {
-      XTRACE(DATA, WAR, "expected readout header value 0x%04x, got 0x%04x\n",
+      XTRACE(DATA, WAR, "expected readout header value 0x%04x, got 0x%04x",
              SisType::BeginReadout, (*datap & 0xff000000));
       return error::EHEADER;
     }
@@ -88,7 +88,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
       uint32_t pixel = getPixel();
       uint32_t time = getTime();
 
-      DTRACE(DEB, "Event: pixel: %d, time: %d \n", pixel, time);
+      DTRACE(DEB, "Event: pixel: %d, time: %d ", pixel, time);
       if (pixel != 0) {
         stats.tx_bytes += serializer.addevent(time, pixel);
         stats.events++;
@@ -121,6 +121,5 @@ MesytecData::error MesytecData::parse(const char *buffer,
     dumpfile->data = std::move(vmmr16Parser.converted_data);
     dumpfile->write();
   }
-    // printf("bytesleft %d\n", bytesleft);
   return error::OK;
 }

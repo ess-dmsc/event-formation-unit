@@ -6,9 +6,7 @@
 #include <fstream>
 #include <sstream>
 
-#include <common/Trace.h>
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#include <common/Log.h>
 
 MgConfig::MgConfig(std::string jsonfile) {
   Json::Value root{};
@@ -18,7 +16,7 @@ MgConfig::MgConfig(std::string jsonfile) {
                   std::istreambuf_iterator<char>());
 
   if (!reader.parse(str, root, 0)) {
-    XTRACE(INIT, WAR, "Invalid Json file: %s\n", jsonfile.c_str());
+    LOG(Sev::Warning, "Invalid Json file: {}", jsonfile);
     return;
   }
 

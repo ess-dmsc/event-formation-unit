@@ -36,7 +36,7 @@ bool MgEfuCenterMass::ingest(uint8_t bus, uint16_t channel, uint16_t adc) {
     zmass += mappings.z(bus, channel) * adc;
     xsum += adc;
     zsum += adc;
-//    DTRACE(INF, "     wire: xmass=%d, zmass=%d, xcount=%d, xmass=%d\n", channel);
+//    DTRACE(INF, "     wire: xmass=%d, zmass=%d, xcount=%d, xmass=%d", channel);
     if (hists)
       hists->binstrips(mappings.wire(bus, channel), adc, 0, 0);
     return true;

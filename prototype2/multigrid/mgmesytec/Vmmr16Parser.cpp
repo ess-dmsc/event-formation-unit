@@ -100,7 +100,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
     hit.total_time = (static_cast<uint64_t>(hit.high_time) << 30) + hit.low_time;
   }
 
-  DTRACE(INF, "VMMR16 Buffer:  size=%d, preparsed lowtime=%d, total_time=%zu\n",
+  DTRACE(INF, "VMMR16 Buffer:  size=%d, preparsed lowtime=%d, total_time=%zu",
       nWords, hit.low_time, hit.total_time);
 
   while (wordsleft > 0) {
@@ -111,7 +111,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
       assert(nWords > static_cast<uint16_t>(*datap & MesytecDataWordsMask));
       hit.module = static_cast<uint8_t>((*datap & MesytecModuleMask) >> MesytecModuleBitShift);
       hit.external_trigger = (0 != (*datap & MesytecExternalTriggerMask));
-      DTRACE(INF, "   Header:  trigger=%zu, module=%d, external_trigger=%s\n",
+      DTRACE(INF, "   Header:  trigger=%zu, module=%d, external_trigger=%s",
              stats.triggers, hit.module, hit.external_trigger ? "true" : "false");
       break;
 
@@ -119,7 +119,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
       // This always comes before events on particular Bus
       hit.high_time = static_cast<uint16_t>(*datap & MesytecHighTimeMask);
       hit.total_time = (static_cast<uint64_t>(hit.high_time) << 30) + hit.low_time;
-      DTRACE(INF, "   ExtendedTimeStamp: high_time=%d, total_time=%zu\n", hit.high_time, hit.total_time);
+      DTRACE(INF, "   ExtendedTimeStamp: high_time=%d, total_time=%zu", hit.high_time, hit.total_time);
       break;
 
     case MesytecType::DataEvent1:
@@ -127,7 +127,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
 
       hit.bus = static_cast<uint8_t>((*datap & MesytecBusMask) >> MesytecBusBitShift);
       hit.time_diff = static_cast<uint16_t>(*datap & MesytecTimeDiffMask);
-      DTRACE(INF, "   DataEvent1:  bus=%d,  time_diff=%d\n", hit.bus, hit.time_diff);
+      DTRACE(INF, "   DataEvent1:  bus=%d,  time_diff=%d", hit.bus, hit.time_diff);
       break;
 
     case MesytecType::DataEvent2:
@@ -140,7 +140,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
       stats.readouts++;
       chan_count++;
 
-      DTRACE(INF, "   DataEvent2:  %s\n", hit.debug().c_str());
+      DTRACE(INF, "   DataEvent2:  %s", hit.debug().c_str());
 
       if (hit_serializer) {
         hit_serializer->addEntry(0, hit.channel, hit.total_time, hit.adc);
@@ -151,9 +151,9 @@ void VMMR16Parser::parse(uint32_t *buffer,
       }
 
       if (mgEfu && mgEfu->ingest(hit.bus, hit.channel, hit.adc)) {
-//        DTRACE(DEB, "   accepting %d,%d,%d\n", hit.bus, hit.channel, hit.adc);
+//        DTRACE(DEB, "   accepting %d,%d,%d", hit.bus, hit.channel, hit.adc);
       } else {
-//        DTRACE(DEB, "   discarding %d,%d,%d\n", hit.bus, hit.channel, hit.adc);
+//        DTRACE(DEB, "   discarding %d,%d,%d", hit.bus, hit.channel, hit.adc);
         stats.discards++;
       }
       break;
@@ -164,7 +164,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
     default:
 
       if ((*datap & MesytecType::EndOfEvent) != MesytecType::EndOfEvent) {
-        DTRACE(WAR, "   Unknown: 0x%08x\n", *datap);
+        DTRACE(WAR, "   Unknown: 0x%08x", *datap);
       }
 
       break;
@@ -175,7 +175,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
   }
 
   if (!chan_count) {
-    DTRACE(INF, "   No hits:  %s\n", hit.debug().c_str());
+    DTRACE(INF, "   No hits:  %s", hit.debug());
     if (dump_data) {
       converted_data.push_back(hit);
     }
