@@ -13,7 +13,7 @@
 
 int CalibrationFile::load(std::string calibration, char *wirecal,
                           char *gridcal) {
-  XTRACE(CMD, INF, "Attempt to load calibration %s", calibration);
+  XTRACE(CMD, INF, "Attempt to load calibration %s", calibration.c_str());
 
   auto file = calibration + std::string(".wcal");
   if (load_file(file, wirecal) < 0) {
@@ -28,7 +28,7 @@ int CalibrationFile::load(std::string calibration, char *wirecal,
 
 int CalibrationFile::save(std::string calibration, char *wirecal,
                           char *gridcal) {
-  XTRACE(CMD, INF, "Attempt to save calibration %s", calibration);
+  XTRACE(CMD, INF, "Attempt to save calibration %s", calibration.c_str());
 
   auto file = calibration + std::string(".wcal");
   if (save_file(file, wirecal) < 0) {
@@ -48,12 +48,12 @@ int CalibrationFile::load_file(std::string file, char *buffer) {
 
   int fd = open(file.c_str(), O_RDONLY);
   if (fd < 0) {
-    XTRACE(CMD, WAR, "file open() failed for %s", file);
+    XTRACE(CMD, WAR, "file open() failed for %s", file.c_str());
     return -10;
   }
 
   if (fstat(fd, &buf) != 0) {
-    XTRACE(CMD, ERR, "fstat() failed for %s", file);
+    XTRACE(CMD, ERR, "fstat() failed for %s", file.c_str());
     close(fd);
     return -11;
   }
@@ -67,11 +67,11 @@ int CalibrationFile::load_file(std::string file, char *buffer) {
 
   if (read(fd, buffer, CSPECChanConv::adcsize * 2) !=
       CSPECChanConv::adcsize * 2) {
-    XTRACE(CMD, ERR, "read() from %s incomplete", file);
+    XTRACE(CMD, ERR, "read() from %s incomplete", file.c_str());
     close(fd);
     return -13;
   }
-  XTRACE(CMD, INF, "Calibration file %s sucessfully read", file);
+  XTRACE(CMD, INF, "Calibration file %s sucessfully read", file.c_str());
   close(fd);
   return 0;
 }
@@ -83,12 +83,12 @@ int CalibrationFile::save_file(std::string file, char *buffer) {
   int fd;
 
   if ((fd = open(file.c_str(), flags, mode)) < 0) {
-    XTRACE(CMD, ERR, "open() %s failed", file);
+    XTRACE(CMD, ERR, "open() %s failed", file.c_str());
     return -21;
   }
   if (write(fd, buffer, CSPECChanConv::adcsize * 2) !=
       CSPECChanConv::adcsize * 2) {
-    XTRACE(CMD, ERR, "write() to %s incomplete", file);
+    XTRACE(CMD, ERR, "write() to %s incomplete", file.c_str());
     close(fd);
     return -22;
   }
