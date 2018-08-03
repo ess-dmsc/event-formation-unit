@@ -31,7 +31,7 @@
 #include <unistd.h>
 
 #include <multigrid/mgmesytec/MgSeqGeometry.h>
-#include <multigrid/mgmesytec/MG24Geometry.h>
+//#include <multigrid/mgmesytec/MG24Geometry.h>
 
 #include <multigrid/mgmesytec/MgEfuMaximum.h>
 #include <multigrid/mgmesytec/MgEfuCenterMass.h>
@@ -197,9 +197,6 @@ void CSPEC::init_config()
   if (DetectorSettings.monitor)
     monitor.init(EFUSettings.KafkaBroker, readout_entries);
 
-  auto mg_mappings = std::make_shared<MgSeqGeometry>();
-  mg_mappings->select_module(mg_config.module);
-  mg_mappings->swap_on(mg_config.swap_wires);
   std::shared_ptr<MgEFU> mg_efu;
   if (mg_config.reduction_strategy == "center-mass") {
     mg_efu = std::make_shared<MgEfuCenterMass>();
@@ -209,7 +206,7 @@ void CSPEC::init_config()
     mg_efum->setGridThreshold(mg_config.gridThresholdLo, mg_config.gridThresholdHi);
     mg_efu = mg_efum;
   }
-  mg_efu->mappings = mg_mappings;
+  mg_efu->mappings = mg_config.mappings;
   mg_efu->hists = monitor.hists;
 
   std::shared_ptr<MGHitFile> dumpfile;

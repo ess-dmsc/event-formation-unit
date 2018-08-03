@@ -10,7 +10,7 @@
 #pragma once
 #include <memory>
 #include <common/Hists.h>
-#include <multigrid/mgmesytec/MgGeometry.h>
+#include <multigrid/mgmesytec/MgSeqGeometry.h>
 
 // \todo rescale and thresholds per channel
 
@@ -23,7 +23,7 @@ public:
   virtual bool ingest(uint8_t bus, uint16_t channel, uint16_t adc) = 0;
   virtual bool event_good() const = 0;
 
-  std::shared_ptr<MgGeometry> mappings;
+  MgSeqGeometry mappings;
   std::shared_ptr<Hists> hists;
 
   virtual uint32_t x() const = 0;

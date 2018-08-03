@@ -7,9 +7,8 @@
 
 #pragma once
 
-#include <cinttypes>
 #include <logical_geometry/ESSGeometry.h>
-#include <string>
+#include <multigrid/mgmesytec/MgSeqGeometry.h>
 
 struct MgConfig {
   MgConfig() {}
@@ -17,8 +16,7 @@ struct MgConfig {
 
   bool spoof_high_time{false};
 
-  bool swap_wires{false};
-  uint32_t module{0}; // flipped z
+  MgSeqGeometry mappings;
 
   std::string reduction_strategy;
 

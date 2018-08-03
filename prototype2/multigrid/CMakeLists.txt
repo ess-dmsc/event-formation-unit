@@ -51,7 +51,7 @@ set(mgmesytec_INC
   mgmesytec/Hit.h
   mgmesytec/HitFile.h
   mgmesytec/MgSeqGeometry.h
-  mgmesytec/MgGeometry.h
+  mgmesytec/MgBusGeometry.h
   )
 create_module(mgmesytec)
 
@@ -143,17 +143,17 @@ set(MGMesytecDataTest_INC
   mgmesytec/HitFile.h
   mgmesytec/TestData.h
   mgmesytec/MgSeqGeometry.h
-  mgmesytec/MgGeometry.h
+  mgmesytec/MgBusGeometry.h
   mgmesytec/MgEFU.h
   mgmesytec/Vmmr16Parser.h
   )
 create_test_executable(MGMesytecDataTest)
 
-set(MG24GeometryTest_SRC
-  mgmesytec/MG24GeometryTest.cpp)
-set(MG24GeometryTest_INC
-  mgmesytec/MG24Geometry.h)
-create_test_executable(MG24GeometryTest)
+#set(MG24GeometryTest_SRC
+#  mgmesytec/MG24GeometryTest.cpp)
+#set(MG24GeometryTest_INC
+#  mgmesytec/MG24Geometry.h)
+#create_test_executable(MG24GeometryTest)
 
 
 set(MgSeqGeometryTest_SRC

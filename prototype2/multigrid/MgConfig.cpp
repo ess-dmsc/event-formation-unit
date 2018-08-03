@@ -1,12 +1,12 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <common/Trace.h>
 #include <multigrid/MgConfig.h>
 
 #include <dataformats/multigrid/inc/json.h>
 #include <fstream>
 #include <sstream>
 
+#include <common/Trace.h>
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB
 
@@ -24,8 +24,15 @@ MgConfig::MgConfig(std::string jsonfile) {
 
   spoof_high_time = root["spoof_high_time"].asBool();
 
-  swap_wires = root["swap_wires"].asBool();
-  module = root["flipped_module"].asUInt();
+  auto m = root["geometry_mappings"];
+  for (unsigned int index = 0; index < m.size(); index++) {
+    MgBusGeometry g;
+    g.swap_wires(m[index]["swap_wires"].asBool());
+    g.swap_grids(m[index]["swap_grids"].asBool());
+    g.flipped_x(m[index]["flipped_x"].asBool());
+    g.flipped_z(m[index]["flipped_z"].asBool());
+    mappings.add_bus(g);
+  }
 
   reduction_strategy = root["reduction_strategy"].asString();
 
@@ -48,8 +55,10 @@ std::string MgConfig::debug() const {
   ss << "  ===============================================\n";
 
   ss << "  Spoof high time = " << (spoof_high_time ? "YES" : "no") << "\n";
-  ss << "  Swap odd/even wires = " << (swap_wires ? "YES" : "no") << "\n";
-  ss << "  Flip z coordinates on bus# = " << module << "\n";
+
+  ss << "  Geometry mappings:\n";
+  ss << mappings.debug("  ") << "\n";
+
   ss << "  Event reduction strategy: " << reduction_strategy << "\n";
   if (reduction_strategy == "maximum") {
     ss << "    Thresholds:\n";

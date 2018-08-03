@@ -22,8 +22,7 @@ class MG25Geometry : public MgGeometry {
 private:
   uint32_t module_select = 0; // 1 == 20 wires, 0 == 16 in z
 
-  static constexpr uint16_t BusCount{4};
-  static constexpr uint16_t GridsInY{80};
+  static constexpr uint16_t XinBus{4};
 
 public:
 
@@ -33,29 +32,20 @@ public:
     module_select = module;
   }
 
-  /** @brief identifies which channels are wires, from drawing by Anton */
-  bool isWire(uint16_t channel) override { return (channel < GridsInY); }
-
-  /** @brief identifies which channels are grids, from drawing by Anton */
-  bool isGrid(uint16_t channel) override { return (channel >= GridsInY) && (channel < 128); }
-
   /** \brief return the x coordinate of the detector */
   uint32_t x(uint8_t bus, uint16_t channel) override {
     // wire == channel, wires range from 0 - 79
     if (channel < 64) {
-      return (channel) / 16 + bus * BusCount;
+      return (channel) / 16 + bus * XinBus;
     } else {
-      return (channel - 64) / 4 + bus * BusCount;
+      return (channel - 64) / 4 + bus * XinBus;
     }
   }
 
   /** \brief return the y coordinate of the detector */
   uint32_t y(uint8_t bus, uint16_t channel) override {
     (void) bus; //unused
-
-    swap(channel);
-
-    return channel - GridsInY; // ycoords range from 0 to 47
+    return grid(channel);
   }
 
   /** \brief return the z coordinate of the detector */

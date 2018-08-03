@@ -10,19 +10,20 @@ class MgSeqGeometryTest : public TestBase {};
 
 TEST_F(MgSeqGeometryTest, IsWireIsGrid) {
   MgSeqGeometry mgdet;
+  mgdet.add_bus(MgBusGeometry());
 
   for (int i = 0; i <= 79; i++) {
-    ASSERT_TRUE(mgdet.isWire(i));
-    ASSERT_FALSE(mgdet.isGrid(i));
+    ASSERT_TRUE(mgdet.isWire(0, i));
+    ASSERT_FALSE(mgdet.isGrid(0, i));
   }
 
   for (int i = 80; i <= 119; i++) {
-    ASSERT_FALSE(mgdet.isWire(i));
-    ASSERT_TRUE(mgdet.isGrid(i));
+    ASSERT_FALSE(mgdet.isWire(0, i));
+    ASSERT_TRUE(mgdet.isGrid(0, i));
   }
 
-  ASSERT_FALSE(mgdet.isWire(128));
-  ASSERT_FALSE(mgdet.isGrid(128));
+  ASSERT_FALSE(mgdet.isWire(0, 128));
+  ASSERT_FALSE(mgdet.isGrid(0, 128));
 }
 
 #if 0
