@@ -9,25 +9,12 @@
 
 #include <common/Log.h>
 
-MgFilter get_filter(nlohmann::json& v)
-{
-  MgFilter ret;
-  ret.minimum = v["min"];
-  ret.maximum = v["max"];
-  ret.rescale = v["rescale"];
-  return ret;
-}
-
 MgConfig::MgConfig(std::string jsonfile) {
-
-  std::ifstream t(jsonfile);
-  std::string str((std::istreambuf_iterator<char>(t)),
-                  std::istreambuf_iterator<char>());
-
-
   nlohmann::json root;
-
   try {
+    std::ifstream t(jsonfile);
+    std::string str((std::istreambuf_iterator<char>(t)),
+                    std::istreambuf_iterator<char>());
     root = nlohmann::json::parse(str);
   }
   catch (...)
@@ -40,35 +27,7 @@ MgConfig::MgConfig(std::string jsonfile) {
 
   auto m = root["geometry_mappings"];
   for (unsigned int i = 0; i < m.size(); i++) {
-    auto mi = m[i];
-
-    MgBusGeometry g;
-    g.max_channel(mi["max_channel"]);
-    g.max_wire(mi["max_wire"]);
-    g.max_z(mi["max_z"]);
-
-    g.swap_wires(mi["swap_wires"]);
-    g.swap_grids(mi["swap_grids"]);
-    g.flipped_x(mi["flipped_x"]);
-    g.flipped_z(mi["flipped_z"]);
-
-    auto wf = mi["wire_filters"];
-    g.set_wire_filters(get_filter(wf["blanket"]));
-    auto wfe = wf["exceptions"];
-    for (unsigned int j = 0; j < wfe.size(); j++) {
-      uint16_t idx = wfe[j]["idx"];
-      g.override_wire_filter(idx, get_filter(wfe[j]));
-    }
-
-    auto gf = mi["grid_filters"];
-    g.set_grid_filters(get_filter(gf["blanket"]));
-    auto gfe = gf["exceptions"];
-    for (unsigned int j = 0; j < gfe.size(); j++) {
-      uint16_t idx = gfe[j]["idx"];
-      g.override_grid_filter(idx, get_filter(gfe[j]));
-    }
-
-    mappings.add_bus(g);
+    mappings.add_bus(m[i]);
   }
 
   reduction_strategy = root["reduction_strategy"];

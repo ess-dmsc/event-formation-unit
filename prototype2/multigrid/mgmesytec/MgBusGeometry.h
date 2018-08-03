@@ -8,34 +8,14 @@
  */
 
 #pragma once
+#include <multigrid/mgmesytec/Filter.h>
+
 #include <cinttypes>
 #include <string>
 #include <sstream>
 
 #include <limits>
 #include <vector>
-
-struct MgFilter {
-  uint16_t minimum {0};
-  uint16_t maximum {std::numeric_limits<uint16_t>::max()};
-  double rescale {1.0};
-
-  bool non_trivial() const {
-    return ((minimum != 0) || (maximum != std::numeric_limits<uint16_t>::max()) ||
-        (rescale != 1.0));
-  }
-
-  std::string debug() const {
-    std::stringstream ss;
-    if (minimum != 0)
-      ss << "min=" << minimum << "  ";
-    if (maximum != std::numeric_limits<uint16_t>::max())
-      ss << "max=" << maximum << "  ";
-    if (rescale != 1.0)
-      ss << "rescale=" << rescale << "  ";
-    return ss.str();
-  }
-};
 
 class MgBusGeometry {
 protected:
@@ -66,30 +46,28 @@ public:
   {
     if (wire >= wire_filters_.size())
       return adc;
-    return static_cast<uint16_t>(adc * wire_filters_.at(wire).rescale);
+    return wire_filters_.at(wire).rescale(adc);
   }
 
   inline uint16_t rescale_grid(uint16_t grid, uint16_t adc) const
   {
     if (grid >= grid_filters_.size())
       return adc;
-    return static_cast<uint16_t>(adc * grid_filters_.at(grid).rescale);
+    return grid_filters_.at(grid).rescale(adc);
   }
 
   inline bool valid_wire(uint16_t wire, uint16_t adc) const
   {
     if (wire >= wire_filters_.size())
       return true;
-    const auto& f = wire_filters_.at(wire);
-    return ((f.minimum <= adc) && (adc <= f.maximum));
+    return wire_filters_.at(wire).valid(adc);
   }
 
   inline bool valid_grid(uint16_t grid, uint16_t adc) const
   {
     if (grid >= grid_filters_.size())
       return true;
-    const auto& f = grid_filters_.at(grid);
-    return ((f.minimum <= adc) && (adc <= f.maximum));
+    return grid_filters_.at(grid).valid(adc);
   }
 
   void set_wire_filters(MgFilter mgf) {
@@ -258,7 +236,7 @@ public:
     bool validwf {false};
     for (size_t i=0; i < wire_filters_.size(); i++) {
       const auto& f = wire_filters_.at(i);
-      if (f.non_trivial()) {
+      if (!f.trivial()) {
         wfilters << prefix << "  [" << i  << "]  " <<  f.debug() << "\n";
         validwf = true;
       }
@@ -271,7 +249,7 @@ public:
     bool validgf {false};
     for (size_t i=0; i < grid_filters_.size(); i++) {
       const auto& f = grid_filters_.at(i);
-      if (f.non_trivial()) {
+      if (!f.trivial()) {
         gfilters << prefix << "  [" << i  << "]  " <<  f.debug() << "\n";
         validgf = true;
       }
@@ -284,3 +262,40 @@ public:
   }
 
 };
+
+inline void from_json(const nlohmann::json& j, MgBusGeometry &g) {
+  g.max_channel(j["max_channel"]);
+  g.max_wire(j["max_wire"]);
+  g.max_z(j["max_z"]);
+
+  g.swap_wires(j["swap_wires"]);
+  g.swap_grids(j["swap_grids"]);
+  g.flipped_x(j["flipped_x"]);
+  g.flipped_z(j["flipped_z"]);
+
+  if (j.count("wire_filters")) {
+    auto wf = j["wire_filters"];
+    if (wf.count("blanket"))
+      g.set_wire_filters(wf["blanket"]);
+    if (wf.count("exceptions")) {
+      auto wfe = wf["exceptions"];
+      for (unsigned int j = 0; j < wfe.size(); j++) {
+        g.override_wire_filter(wfe[j]["idx"], wfe[j]);
+      }
+    }
+  }
+
+  if (j.count("grid_filters")) {
+    auto gf = j["grid_filters"];
+    if (gf.count("blanket"))
+      g.set_grid_filters(gf["blanket"]);
+    if (gf.count("exceptions")) {
+      auto gfe = gf["exceptions"];
+      for (unsigned int j = 0; j < gfe.size(); j++) {
+        g.override_grid_filter(gfe[j]["idx"], gfe[j]);
+      }
+    }
+  }
+
+}
+
