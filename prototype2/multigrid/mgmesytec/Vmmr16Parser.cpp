@@ -9,12 +9,12 @@
 // clang-format off
 // Mesytec Datasheet: VMMR-8/16 v00.01
 enum MesytecType : uint32_t {
-  Header = 0x40000000,
+  Header            = 0x40000000,
   ExtendedTimeStamp = 0x20000000,
-  DataEvent1 = 0x30000000,
-  DataEvent2 = 0x10000000,
-  EndOfEvent = 0xc0000000,
-  FillDummy = 0x00000000
+  DataEvent1        = 0x30000000,
+  DataEvent2        = 0x10000000,
+  EndOfEvent        = 0xc0000000,
+  FillDummy         = 0x00000000
 };
 // clang-format on
 
@@ -39,16 +39,13 @@ static constexpr uint8_t MesytecAddressBitShift{12};
 static constexpr uint32_t MesytecAdcMask{0x00000fff};
 
 
-VMMR16Parser::VMMR16Parser(std::shared_ptr<MgEFU> mg_efu, std::shared_ptr<ReadoutSerializer> s)
-    : mgEfu(mg_efu), hit_serializer(s) {}
-
 void VMMR16Parser::setSpoofHighTime(bool spoof) {
   spoof_high_time = spoof;
 }
 
 uint64_t VMMR16Parser::time() const
 {
-  return hit.total_time;
+  return hit.total_time; // \todo only the latest reported?
 }
 
 bool VMMR16Parser::externalTrigger() const
@@ -56,38 +53,36 @@ bool VMMR16Parser::externalTrigger() const
   return hit.external_trigger;
 }
 
-bool VMMR16Parser::goodEvent() const
+bool VMMR16Parser::timeGood() const
 {
-  return GoodEvent;
+  return time_good_;
 }
 
 void VMMR16Parser::parse(uint32_t *buffer,
                          uint16_t nWords,
-                         MgStats &stats,
-                         bool dump_data) {
+                         MgStats &stats) {
 
-  stats.triggers++;
-  hit.trigger_count++;
+  converted_data.clear();
+  time_good_ = false;
 
-  if (mgEfu)
-    mgEfu->reset();
-  hit.bus = 0;
-  hit.channel = 0;
-  hit.adc = 0;
-  hit.time_diff = 0;
+  trigger_count_++;
+  stats.triggers = trigger_count_;
 
+  uint32_t high_time {0};
+
+  hit = MGHit();
+  hit.trigger_count = trigger_count_;
 
   uint32_t *datap = buffer;
 
   uint16_t wordsleft = nWords;
 
   size_t chan_count{0};
-  bool TimeGood{false};
 
   // Sneak peek on time although it is actually last in packet
   uint32_t *tptr = (buffer + nWords - 1);
   if ((*tptr & MesytecType::EndOfEvent) == MesytecType::EndOfEvent) {
-    TimeGood = true;
+    time_good_ = true;
     hit.low_time = *tptr & MesytecTimeMask;
 
     // Spoof high time if needed
@@ -117,8 +112,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
 
     case MesytecType::ExtendedTimeStamp:
       // This always comes before events on particular Bus
-      hit.high_time = static_cast<uint16_t>(*datap & MesytecHighTimeMask);
-      hit.total_time = (static_cast<uint64_t>(hit.high_time) << 30) + hit.low_time;
+      high_time = static_cast<uint16_t>(*datap & MesytecHighTimeMask);
       XTRACE(PROCESS, DEB, "   ExtendedTimeStamp: high_time=%d, total_time=%zu", hit.high_time, hit.total_time);
       break;
 
@@ -142,20 +136,8 @@ void VMMR16Parser::parse(uint32_t *buffer,
 
       XTRACE(PROCESS, DEB, "   DataEvent2:  %s", hit.debug().c_str());
 
-      if (hit_serializer) {
-        hit_serializer->addEntry(0, hit.channel, hit.total_time, hit.adc);
-      }
+      converted_data.push_back(hit);
 
-      if (dump_data) {
-        converted_data.push_back(hit);
-      }
-
-      if (mgEfu && mgEfu->ingest(hit.bus, hit.channel, hit.adc)) {
-//        XTRACE(PROCESS, DEB, "   accepting %d,%d,%d", hit.bus, hit.channel, hit.adc);
-      } else {
-//        XTRACE(PROCESS, DEB, "   discarding %d,%d,%d", hit.bus, hit.channel, hit.adc);
-        stats.discards++;
-      }
       break;
 
     case MesytecType::FillDummy:
@@ -175,11 +157,15 @@ void VMMR16Parser::parse(uint32_t *buffer,
   }
 
   if (!chan_count) {
+    // Most probably only an external trigger occurred in this case
     XTRACE(PROCESS, DEB, "   No hits:  %s", hit.debug().c_str());
-    if (dump_data) {
-      converted_data.push_back(hit);
-    }
+    converted_data.push_back(hit);
   }
 
-  GoodEvent = TimeGood && mgEfu && mgEfu->event_good();
+  for (auto& h : converted_data) {
+    h.high_time = high_time;
+    h.total_time = (static_cast<uint64_t>(h.high_time) << 30)
+        + h.low_time
+        + h.time_diff;
+  }
 }

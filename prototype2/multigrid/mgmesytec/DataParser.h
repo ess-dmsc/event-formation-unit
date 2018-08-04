@@ -43,7 +43,11 @@ public:
 private:
   VMMR16Parser vmmr16Parser;
 
+  std::shared_ptr<MgEFU> mgEfu;
+
   ESSGeometry Geometry;
+
+  std::shared_ptr<ReadoutSerializer> hit_serializer;
 
   std::shared_ptr<MGHitFile> dumpfile;
 };

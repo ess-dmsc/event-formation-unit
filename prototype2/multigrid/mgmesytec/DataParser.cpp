@@ -20,7 +20,8 @@ enum SisType : uint32_t {
 MesytecData::MesytecData(std::shared_ptr<MgEFU> mg_efu, std::shared_ptr<ReadoutSerializer> s,
                          bool spoof_ht,
                          std::shared_ptr<MGHitFile> dump)
-    : vmmr16Parser(mg_efu, s)
+    : mgEfu(mg_efu)
+    , hit_serializer(s)
     , dumpfile(dump) {
   vmmr16Parser.setSpoofHighTime(spoof_ht);
 }
@@ -32,11 +33,11 @@ void MesytecData::set_geometry(ESSGeometry g)
 
 // \todo can only create a single event per UDP buffer
 uint32_t MesytecData::getPixel() {
-  if (!vmmr16Parser.mgEfu)
+  if (!mgEfu)
     return 0;
-  return Geometry.pixel3D(vmmr16Parser.mgEfu->x(),
-                          vmmr16Parser.mgEfu->y(),
-                          vmmr16Parser.mgEfu->z());
+  return Geometry.pixel3D(mgEfu->x(),
+                          mgEfu->y(),
+                          mgEfu->z());
 }
 
 uint32_t MesytecData::getTime() {
@@ -60,9 +61,6 @@ MesytecData::error MesytecData::parse(const char *buffer,
   uint32_t *datap = (uint32_t *) (buffer + 3);
   bytesleft -= 3;
 
-  if (dumpfile)
-    vmmr16Parser.converted_data.clear();
-
   while (bytesleft > 16) {
     if ((*datap & 0x000000ff) != 0x58) {
       XTRACE(DATA, WAR, "expected data value 0x58");
@@ -81,7 +79,23 @@ MesytecData::error MesytecData::parse(const char *buffer,
     }
     datap++;
     bytesleft -= 4;
-    vmmr16Parser.parse(datap, len - 3, stats, static_cast<bool>(dumpfile));
+    vmmr16Parser.parse(datap, len - 3, stats);
+    if (mgEfu)
+      mgEfu->reset();
+
+    for (auto& h : vmmr16Parser.converted_data) {
+      if (hit_serializer) {
+        hit_serializer->addEntry(0, h.channel, h.total_time, h.adc);
+      }
+
+      if (!vmmr16Parser.externalTrigger() &&
+        mgEfu && mgEfu->ingest(h.bus, h.channel, h.adc)) {
+//        XTRACE(PROCESS, DEB, "   accepting %d,%d,%d", h.bus, h.channel, h.adc);
+      } else {
+//        XTRACE(PROCESS, DEB, "   discarding %d,%d,%d", h.bus, h.channel, h.adc);
+        stats.discards++;
+      }
+    }
 
     if (vmmr16Parser.externalTrigger()) {
       stats.tx_bytes += serializer.produce();
@@ -89,7 +103,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
       RecentPulseTime = vmmr16Parser.time();
     }
 
-    if (vmmr16Parser.goodEvent()) {
+    if (vmmr16Parser.timeGood() && mgEfu && mgEfu->event_good()) {
       uint32_t pixel = getPixel();
       uint32_t time = getTime();
 
@@ -120,11 +134,12 @@ MesytecData::error MesytecData::parse(const char *buffer,
     }
     datap++;
     bytesleft -= 4;
+
+    if (dumpfile) {
+      dumpfile->data = std::move(vmmr16Parser.converted_data);
+      dumpfile->write();
+    }
   }
 
-  if (dumpfile) {
-    dumpfile->data = std::move(vmmr16Parser.converted_data);
-    dumpfile->write();
-  }
   return error::OK;
 }

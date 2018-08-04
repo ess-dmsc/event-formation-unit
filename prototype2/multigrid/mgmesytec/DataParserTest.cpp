@@ -94,7 +94,7 @@ TEST_F(MesytecDataTest, ParseRecordedWSDataMultipleTriggers) {
   ASSERT_EQ(res, MesytecData::error::OK);
   ASSERT_EQ(mesytec.stats.triggers, 36);
   ASSERT_EQ(mesytec.stats.readouts, 54);
-  ASSERT_EQ(mesytec.stats.discards, 54);
+  ASSERT_EQ(mesytec.stats.discards, 67); //includes ext triggers?
   ASSERT_EQ(mesytec.stats.events, 0);
   ASSERT_EQ(mesytec.stats.geometry_errors, 0);
   ASSERT_TRUE(mesytec.stats.triggers == mesytec.stats.badtriggers + mesytec.stats.events);

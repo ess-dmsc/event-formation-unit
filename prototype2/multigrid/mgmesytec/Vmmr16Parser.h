@@ -24,32 +24,25 @@ struct MgStats {
 
 class VMMR16Parser {
 public:
-  /// \brief if it looks like a constructor...
-  VMMR16Parser(std::shared_ptr<MgEFU> mg_efu, std::shared_ptr<ReadoutSerializer> s);
-
-  ~VMMR16Parser() = default;
-
   void setSpoofHighTime(bool spoof);
 
   /** \brief parse n 32 bit words from mesytec VMMR-8/16 card */
-  void parse(uint32_t *buffer, uint16_t nWords,
-             MgStats& stats, bool dump_data);
+  void parse(uint32_t *buffer, uint16_t nWords, MgStats& stats);
 
 
   uint64_t time() const;
   bool externalTrigger() const;
-  bool goodEvent() const;
+  bool timeGood() const;
 
-  std::shared_ptr<MgEFU> mgEfu;
   std::vector<MGHit> converted_data;
 
 private:
 
-  std::shared_ptr<ReadoutSerializer> hit_serializer;
-
   MGHit hit;
 
-  bool GoodEvent {false};
+  size_t trigger_count_{0};
+
+  bool time_good_ {false};
 
   bool spoof_high_time{false};
   uint32_t PreviousLowTime{0};
