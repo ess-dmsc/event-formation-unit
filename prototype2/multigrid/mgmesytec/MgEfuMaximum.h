@@ -17,7 +17,7 @@ public:
   ~MgEfuMaximum() = default;
 
   void reset() override;
-  bool ingest(uint8_t bus, uint16_t channel, uint16_t adc) override;
+  bool ingest(const MGHit& hit) override;
   bool event_good() const override;
 
   uint32_t x() const override;

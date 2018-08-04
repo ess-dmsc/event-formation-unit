@@ -25,28 +25,28 @@ uint32_t MgEfuMaximum::z() const {
   return z_;
 }
 
-bool MgEfuMaximum::ingest(uint8_t bus, uint16_t channel, uint16_t adc) {
-  adc = mappings.rescale(bus, channel, adc);
-  if (mappings.isWire(bus, channel)) {
+bool MgEfuMaximum::ingest(const MGHit& hit) {
+  auto adc = mappings.rescale(hit.bus, hit.channel, hit.adc);
+  if (mappings.isWire(hit.bus, hit.channel)) {
     if (adc > WireAdcMax) {
       WireGood = true;
       WireAdcMax = adc;
-      x_ = mappings.x(bus, channel);
-      z_ = mappings.z(bus, channel);
-      XTRACE(PROCESS, DEB, "     new wire adc max: ch %d", channel);
+      x_ = mappings.x(hit.bus, hit.channel);
+      z_ = mappings.z(hit.bus, hit.channel);
+      XTRACE(PROCESS, DEB, "     new wire adc max: ch %d", hit.channel);
     }
     if (hists)
-      hists->binstrips(mappings.wire(bus, channel), adc, 0, 0);
+      hists->binstrips(mappings.wire(hit.bus, hit.channel), adc, 0, 0);
     return true;
-  } else if (mappings.isGrid(bus, channel)) {
+  } else if (mappings.isGrid(hit.bus, hit.channel)) {
     if (adc > GridAdcMax) {
       GridGood = true;
       GridAdcMax = adc;
-      y_ = mappings.y(bus, channel);
-      XTRACE(PROCESS, DEB, "     new grid adc max: ch %d", channel);
+      y_ = mappings.y(hit.bus, hit.channel);
+      XTRACE(PROCESS, DEB, "     new grid adc max: ch %d", hit.channel);
     }
     if (hists)
-      hists->binstrips(0, 0, mappings.grid(bus, channel), adc);
+      hists->binstrips(0, 0, mappings.grid(hit.bus, hit.channel), adc);
     return true;
   }
   return false;

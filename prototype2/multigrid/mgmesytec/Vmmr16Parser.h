@@ -43,6 +43,7 @@ private:
   size_t trigger_count_{0};
 
   bool time_good_ {false};
+  bool external_trigger_ {false};
 
   bool spoof_high_time{false};
   uint32_t PreviousLowTime{0};

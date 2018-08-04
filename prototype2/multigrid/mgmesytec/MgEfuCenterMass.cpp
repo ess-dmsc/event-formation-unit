@@ -30,22 +30,24 @@ void MgEfuCenterMass::reset() {
 
 // \todo pick only a few data points
 
-bool MgEfuCenterMass::ingest(uint8_t bus, uint16_t channel, uint16_t adc) {
-  if (mappings.isWire(bus, channel) && adc) {
-    xmass += mappings.x(bus, channel) * adc;
-    zmass += mappings.z(bus, channel) * adc;
+bool MgEfuCenterMass::ingest(const MGHit& hit) {
+  auto adc = mappings.rescale(hit.bus, hit.channel, hit.adc);
+
+  if (mappings.isWire(hit.bus, hit.channel) && adc) {
+    xmass += mappings.x(hit.bus, hit.channel) * adc;
+    zmass += mappings.z(hit.bus, hit.channel) * adc;
     xsum += adc;
     zsum += adc;
 //    DTRACE(INF, "     wire: xmass=%d, zmass=%d, xcount=%d, xmass=%d", channel);
     if (hists)
-      hists->binstrips(mappings.wire(bus, channel), adc, 0, 0);
+      hists->binstrips(mappings.wire(hit.bus, hit.channel), adc, 0, 0);
     return true;
-  } else if (mappings.isGrid(bus, channel) && adc) {
-    ymass += mappings.y(bus, channel) * adc;
+  } else if (mappings.isGrid(hit.bus, hit.channel) && adc) {
+    ymass += mappings.y(hit.bus, hit.channel) * adc;
     ysum += adc;
 //    DTRACE(INF, "     new grid adc max: ch %d\n", channel);
     if (hists)
-      hists->binstrips(0, 0, mappings.grid(bus, channel), adc);
+      hists->binstrips(0, 0, mappings.grid(hit.bus, hit.channel), adc);
     return true;
   }
   return false;

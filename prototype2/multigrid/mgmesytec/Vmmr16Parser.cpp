@@ -50,7 +50,7 @@ uint64_t VMMR16Parser::time() const
 
 bool VMMR16Parser::externalTrigger() const
 {
-  return hit.external_trigger;
+  return external_trigger_;
 }
 
 bool VMMR16Parser::timeGood() const
@@ -64,6 +64,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
 
   converted_data.clear();
   time_good_ = false;
+  external_trigger_ = false;
 
   trigger_count_++;
   stats.triggers = trigger_count_;
@@ -76,8 +77,6 @@ void VMMR16Parser::parse(uint32_t *buffer,
   uint32_t *datap = buffer;
 
   uint16_t wordsleft = nWords;
-
-  size_t chan_count{0};
 
   // Sneak peek on time although it is actually last in packet
   uint32_t *tptr = (buffer + nWords - 1);
@@ -105,7 +104,12 @@ void VMMR16Parser::parse(uint32_t *buffer,
     case MesytecType::Header:
       assert(nWords > static_cast<uint16_t>(*datap & MesytecDataWordsMask));
       hit.module = static_cast<uint8_t>((*datap & MesytecModuleMask) >> MesytecModuleBitShift);
-      hit.external_trigger = (0 != (*datap & MesytecExternalTriggerMask));
+      external_trigger_ = (0 != (*datap & MesytecExternalTriggerMask));
+      if (external_trigger_)
+      {
+        converted_data.push_back(hit);
+        converted_data.back().external_trigger = true;
+      }
       XTRACE(PROCESS, DEB, "   Header:  trigger=%zu, module=%d, external_trigger=%s",
              stats.triggers, hit.module, hit.external_trigger ? "true" : "false");
       break;
@@ -132,7 +136,6 @@ void VMMR16Parser::parse(uint32_t *buffer,
       hit.channel = static_cast<uint16_t>((*datap & MesytecAddressMask) >> MesytecAddressBitShift);
       hit.adc = static_cast<uint16_t>(*datap & MesytecAdcMask);
       stats.readouts++;
-      chan_count++;
 
       XTRACE(PROCESS, DEB, "   DataEvent2:  %s", hit.debug().c_str());
 
@@ -154,12 +157,6 @@ void VMMR16Parser::parse(uint32_t *buffer,
 
     wordsleft--;
     datap++;
-  }
-
-  if (!chan_count) {
-    // Most probably only an external trigger occurred in this case
-    XTRACE(PROCESS, DEB, "   No hits:  %s", hit.debug().c_str());
-    converted_data.push_back(hit);
   }
 
   for (auto& h : converted_data) {

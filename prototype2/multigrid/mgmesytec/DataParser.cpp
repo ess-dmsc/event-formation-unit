@@ -62,16 +62,18 @@ MesytecData::error MesytecData::parse(const char *buffer,
   bytesleft -= 3;
 
   while (bytesleft > 16) {
+
+    // Header1?
     if ((*datap & 0x000000ff) != 0x58) {
       XTRACE(DATA, WAR, "expected data value 0x58");
       return error::EUNSUPP;
     }
-
     uint16_t len = ntohs((*datap & 0x00ffff00) >> 8);
     DTRACE(DEB, "sis3153 datawords %d", len);
     datap++;
     bytesleft -= 4;
 
+    // Header2?
     if ((*datap & 0xff000000) != SisType::BeginReadout) {
       XTRACE(DATA, WAR, "expected readout header value 0x%04x, got 0x%04x",
              SisType::BeginReadout, (*datap & 0xff000000));
@@ -79,48 +81,49 @@ MesytecData::error MesytecData::parse(const char *buffer,
     }
     datap++;
     bytesleft -= 4;
-    vmmr16Parser.parse(datap, len - 3, stats);
-    if (mgEfu)
-      mgEfu->reset();
 
-    for (auto& h : vmmr16Parser.converted_data) {
-      if (hit_serializer) {
+    // Parse VMMR16
+    vmmr16Parser.parse(datap, len - 3, stats);
+    datap += (len - 3);
+    bytesleft -= (len - 3) * 4;
+
+    if (hit_serializer) {
+      for (auto &h : vmmr16Parser.converted_data) {
         hit_serializer->addEntry(0, h.channel, h.total_time, h.adc);
       }
+    }
 
-      if (!vmmr16Parser.externalTrigger() &&
-        mgEfu && mgEfu->ingest(h.bus, h.channel, h.adc)) {
-//        XTRACE(PROCESS, DEB, "   accepting %d,%d,%d", h.bus, h.channel, h.adc);
-      } else {
-//        XTRACE(PROCESS, DEB, "   discarding %d,%d,%d", h.bus, h.channel, h.adc);
-        stats.discards++;
-      }
+    if (dumpfile) {
+      dumpfile->data = std::move(vmmr16Parser.converted_data);
+      dumpfile->write();
     }
 
     if (vmmr16Parser.externalTrigger()) {
-      stats.tx_bytes += serializer.produce();
       serializer.set_pulse_time(RecentPulseTime);
+      stats.tx_bytes += serializer.produce();
       RecentPulseTime = vmmr16Parser.time();
     }
 
-    if (vmmr16Parser.timeGood() && mgEfu && mgEfu->event_good()) {
-      uint32_t pixel = getPixel();
-      uint32_t time = getTime();
+    if (mgEfu) {
+      mgEfu->ingest(vmmr16Parser.converted_data);
+      //stats.discards++;
 
-      DTRACE(DEB, "Event: pixel: %d, time: %d ", pixel, time);
-      if (pixel != 0) {
-        stats.tx_bytes += serializer.addevent(time, pixel);
-        stats.events++;
+      if (mgEfu->event_good() && vmmr16Parser.timeGood()) {
+        uint32_t pixel = getPixel();
+        uint32_t time = getTime();
+
+        DTRACE(DEB, "Event: pixel: %d, time: %d ", pixel, time);
+        if (pixel != 0) {
+          stats.tx_bytes += serializer.addevent(time, pixel);
+          stats.events++;
+        } else {
+          stats.geometry_errors++;
+        }
       } else {
-        stats.geometry_errors++;
+        // \todo external triggers treated as "bad"?
+        stats.badtriggers++;
       }
-    } else {
-      // \todo external triggers treated as "bad"?
-      stats.badtriggers++;
     }
-
-    datap += (len - 3);
-    bytesleft -= (len - 3) * 4;
 
     if (*datap != 0x87654321) {
       XTRACE(DATA, WAR, "Protocol mismatch, expected 0x87654321");
@@ -135,10 +138,6 @@ MesytecData::error MesytecData::parse(const char *buffer,
     datap++;
     bytesleft -= 4;
 
-    if (dumpfile) {
-      dumpfile->data = std::move(vmmr16Parser.converted_data);
-      dumpfile->write();
-    }
   }
 
   return error::OK;
