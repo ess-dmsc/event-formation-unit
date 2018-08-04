@@ -23,6 +23,7 @@ public:
   uint32_t x() const override;
   uint32_t y() const override;
   uint32_t z() const override;
+  uint64_t time() const override;
 
 private:
   uint16_t GridAdcMax {0};
@@ -34,4 +35,6 @@ private:
   uint32_t x_;
   uint32_t y_;
   uint32_t z_;
+
+  uint64_t time_ {0};
 };

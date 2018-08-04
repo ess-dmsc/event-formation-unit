@@ -23,6 +23,7 @@ public:
   uint32_t x() const override;
   uint32_t y() const override;
   uint32_t z() const override;
+  uint64_t time() const override;
 
 private:
   uint64_t xmass {0};
@@ -32,4 +33,6 @@ private:
   uint64_t xsum {0};
   uint64_t ysum {0};
   uint64_t zsum {0};
+
+  uint64_t time_ {0};
 };

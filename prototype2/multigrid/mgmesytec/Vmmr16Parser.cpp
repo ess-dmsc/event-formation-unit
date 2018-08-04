@@ -53,23 +53,15 @@ bool VMMR16Parser::externalTrigger() const
   return external_trigger_;
 }
 
-bool VMMR16Parser::timeGood() const
-{
-  return time_good_;
-}
-
 void VMMR16Parser::parse(uint32_t *buffer,
                          uint16_t nWords,
                          MgStats &stats) {
 
   converted_data.clear();
-  time_good_ = false;
   external_trigger_ = false;
 
   trigger_count_++;
   stats.triggers = trigger_count_;
-
-  uint32_t high_time {0};
 
   hit = MGHit();
   hit.trigger_count = trigger_count_;
@@ -81,21 +73,18 @@ void VMMR16Parser::parse(uint32_t *buffer,
   // Sneak peek on time although it is actually last in packet
   uint32_t *tptr = (buffer + nWords - 1);
   if ((*tptr & MesytecType::EndOfEvent) == MesytecType::EndOfEvent) {
-    time_good_ = true;
     hit.low_time = *tptr & MesytecTimeMask;
 
     // Spoof high time if needed
     if (spoof_high_time) {
       if (hit.low_time < PreviousLowTime)
-        hit.high_time++;
+        high_time_++;
       PreviousLowTime = hit.low_time;
     }
-
-    hit.total_time = (static_cast<uint64_t>(hit.high_time) << 30) + hit.low_time;
   }
 
-  XTRACE(PROCESS, DEB, "VMMR16 Buffer:  size=%d, preparsed lowtime=%d, total_time=%zu",
-      nWords, hit.low_time, hit.total_time);
+  XTRACE(PROCESS, DEB, "VMMR16 Buffer:  size=%d, preparsed lowtime=%d",
+      nWords, hit.low_time);
 
   while (wordsleft > 0) {
     auto datatype = *datap & MesytecTypeMask;
@@ -111,13 +100,13 @@ void VMMR16Parser::parse(uint32_t *buffer,
         converted_data.back().external_trigger = true;
       }
       XTRACE(PROCESS, DEB, "   Header:  trigger=%zu, module=%d, external_trigger=%s",
-             stats.triggers, hit.module, hit.external_trigger ? "true" : "false");
+             stats.triggers, hit.module, external_trigger_ ? "true" : "false");
       break;
 
     case MesytecType::ExtendedTimeStamp:
       // This always comes before events on particular Bus
-      high_time = static_cast<uint16_t>(*datap & MesytecHighTimeMask);
-      XTRACE(PROCESS, DEB, "   ExtendedTimeStamp: high_time=%d, total_time=%zu", hit.high_time, hit.total_time);
+      high_time_ = static_cast<uint16_t>(*datap & MesytecHighTimeMask);
+      XTRACE(PROCESS, DEB, "   ExtendedTimeStamp: high_time=%d", high_time_);
       break;
 
     case MesytecType::DataEvent1:
@@ -135,11 +124,12 @@ void VMMR16Parser::parse(uint32_t *buffer,
       hit.bus = static_cast<uint8_t>((*datap & MesytecBusMask) >> MesytecBusBitShift);
       hit.channel = static_cast<uint16_t>((*datap & MesytecAddressMask) >> MesytecAddressBitShift);
       hit.adc = static_cast<uint16_t>(*datap & MesytecAdcMask);
+      converted_data.push_back(hit);
       stats.readouts++;
 
-      XTRACE(PROCESS, DEB, "   DataEvent2:  %s", hit.debug().c_str());
+      XTRACE(PROCESS, DEB, "   DataEvent2:  bus=%d, channel=%d, adc=%d",
+          hit.bus, hit.channel, hit.adc);
 
-      converted_data.push_back(hit);
 
       break;
 
@@ -159,10 +149,10 @@ void VMMR16Parser::parse(uint32_t *buffer,
     datap++;
   }
 
+  hit.high_time = high_time_;
+  hit.total_time = (static_cast<uint64_t>(high_time_) << 30) + hit.low_time;
   for (auto& h : converted_data) {
-    h.high_time = high_time;
-    h.total_time = (static_cast<uint64_t>(h.high_time) << 30)
-        + h.low_time
-        + h.time_diff;
+    h.high_time = high_time_;
+    h.total_time = hit.total_time + h.time_diff;
   }
 }

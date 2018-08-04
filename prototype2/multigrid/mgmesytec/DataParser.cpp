@@ -41,7 +41,7 @@ uint32_t MesytecData::getPixel() {
 }
 
 uint32_t MesytecData::getTime() {
-  return static_cast<uint32_t>(vmmr16Parser.time() - RecentPulseTime);
+  return static_cast<uint32_t>(mgEfu->time() - RecentPulseTime);
 }
 
 MesytecData::error MesytecData::parse(const char *buffer,
@@ -108,7 +108,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
       mgEfu->ingest(vmmr16Parser.converted_data);
       //stats.discards++;
 
-      if (mgEfu->event_good() && vmmr16Parser.timeGood()) {
+      if (mgEfu->event_good()) {
         uint32_t pixel = getPixel();
         uint32_t time = getTime();
 

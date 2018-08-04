@@ -32,7 +32,6 @@ public:
 
   uint64_t time() const;
   bool externalTrigger() const;
-  bool timeGood() const;
 
   std::vector<MGHit> converted_data;
 
@@ -41,8 +40,8 @@ private:
   MGHit hit;
 
   size_t trigger_count_{0};
+  uint32_t high_time_ {0};
 
-  bool time_good_ {false};
   bool external_trigger_ {false};
 
   bool spoof_high_time{false};

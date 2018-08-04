@@ -18,6 +18,10 @@ uint32_t MgEfuCenterMass::z() const {
   return static_cast<uint32_t>(zmass / zsum);
 }
 
+uint64_t MgEfuCenterMass::time() const {
+  return time_;
+}
+
 void MgEfuCenterMass::reset() {
   xmass = 0;
   ymass = 0;
@@ -32,6 +36,9 @@ void MgEfuCenterMass::reset() {
 
 bool MgEfuCenterMass::ingest(const MGHit& hit) {
   auto adc = mappings.rescale(hit.bus, hit.channel, hit.adc);
+
+  // Pick latest time
+  time_ = std::max(hit.total_time, time_);
 
   if (mappings.isWire(hit.bus, hit.channel) && adc) {
     xmass += mappings.x(hit.bus, hit.channel) * adc;

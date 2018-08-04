@@ -17,8 +17,8 @@
 
 class MgEFU {
 public:
-  MgEFU() = default;
-  virtual ~MgEFU() = default;
+  MgSeqGeometry mappings;
+  std::shared_ptr<Hists> hists;
 
   inline size_t ingest(const std::vector<MGHit> &hits) {
     reset();
@@ -39,10 +39,8 @@ public:
   virtual bool ingest(const MGHit& hit) = 0;
   virtual bool event_good() const = 0;
 
-  MgSeqGeometry mappings;
-  std::shared_ptr<Hists> hists;
-
   virtual uint32_t x() const = 0;
   virtual uint32_t y() const = 0;
   virtual uint32_t z() const = 0;
+  virtual uint64_t time() const = 0;
 };
