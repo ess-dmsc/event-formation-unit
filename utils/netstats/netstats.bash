@@ -29,6 +29,13 @@ e1000e)
   PATT_NICERR=rx_no_buffer_count
   PATT_NICRX=rx_packets
   ;;
+igb)
+  # Ubuntu + igb
+  echo igb found - STATS NOT VERIFIED
+  # potentially rx_dropped instead
+  PATT_NICERR=rx_no_buffer_count
+  PATT_NICRX=rx_packets
+  ;;
 tg3)
   # Ubuntu + tg3
   echo tg3 found - STATS NOT VERIFIED
