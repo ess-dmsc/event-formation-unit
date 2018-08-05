@@ -64,6 +64,22 @@ public:
     return adc;
   }
 
+  inline bool is_valid(uint8_t bus, uint16_t channel, uint16_t adc) const {
+    if (bus >= buses.size())
+      return false;
+    if (isWire(bus, channel))
+    {
+      auto w = wire(bus, channel);
+      return buses.at(bus).geometry.valid_wire(w, adc);
+    }
+    else if (isGrid(bus, channel))
+    {
+      auto g = grid(bus, channel);
+      return buses.at(bus).geometry.valid_grid(g, adc);
+    }
+    return false;
+  }
+
   /** @brief identifies which channels are wires, from drawing by Anton */
   inline bool isWire(uint8_t bus, uint16_t channel) const {
     if (bus >= buses.size())

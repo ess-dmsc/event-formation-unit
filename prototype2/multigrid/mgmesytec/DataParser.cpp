@@ -17,11 +17,10 @@ enum SisType : uint32_t {
 };
 // clang-format on
 
-MesytecData::MesytecData(std::shared_ptr<MgEFU> mg_efu, std::shared_ptr<ReadoutSerializer> s,
-                         bool spoof_ht,
-                         std::shared_ptr<MGHitFile> dump)
+MesytecData::MesytecData(std::shared_ptr<MgEFU> mg_efu,
+    bool spoof_ht, std::shared_ptr<MGHitFile> dump)
+
     : mgEfu(mg_efu)
-    , hit_serializer(s)
     , dumpfile(dump) {
   vmmr16Parser.setSpoofHighTime(spoof_ht);
 }
@@ -86,12 +85,6 @@ MesytecData::error MesytecData::parse(const char *buffer,
     vmmr16Parser.parse(datap, len - 3, stats);
     datap += (len - 3);
     bytesleft -= (len - 3) * 4;
-
-    if (hit_serializer) {
-      for (auto &h : vmmr16Parser.converted_data) {
-        hit_serializer->addEntry(0, h.channel, h.total_time, h.adc);
-      }
-    }
 
     if (dumpfile) {
       dumpfile->data = std::move(vmmr16Parser.converted_data);

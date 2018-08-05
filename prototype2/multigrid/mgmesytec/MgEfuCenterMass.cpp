@@ -30,12 +30,17 @@ void MgEfuCenterMass::reset() {
   xsum = 0;
   ysum = 0;
   zsum = 0;
+
+  time_ = 0;
 }
 
 // \todo pick only a few data points
 
 bool MgEfuCenterMass::ingest(const MGHit& hit) {
   auto adc = mappings.rescale(hit.bus, hit.channel, hit.adc);
+
+  if (!mappings.is_valid(hit.bus, hit.channel, adc))
+    return false;
 
   // Pick latest time
   time_ = std::max(hit.total_time, time_);
@@ -46,6 +51,8 @@ bool MgEfuCenterMass::ingest(const MGHit& hit) {
     xsum += adc;
     zsum += adc;
 //    DTRACE(INF, "     wire: xmass=%d, zmass=%d, xcount=%d, xmass=%d", channel);
+    if (raw1)
+      raw1->addEntry(1, mappings.wire(hit.bus, hit.channel), hit.total_time, adc);
     if (hists)
       hists->binstrips(mappings.wire(hit.bus, hit.channel), adc, 0, 0);
     return true;
@@ -53,6 +60,8 @@ bool MgEfuCenterMass::ingest(const MGHit& hit) {
     ymass += mappings.y(hit.bus, hit.channel) * adc;
     ysum += adc;
 //    DTRACE(INF, "     new grid adc max: ch %d\n", channel);
+    if (raw1)
+      raw1->addEntry(2, mappings.grid(hit.bus, hit.channel), hit.total_time, adc);
     if (hists)
       hists->binstrips(0, 0, mappings.grid(hit.bus, hit.channel), adc);
     return true;

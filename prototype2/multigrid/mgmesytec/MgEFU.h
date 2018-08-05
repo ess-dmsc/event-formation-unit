@@ -10,15 +10,16 @@
 #pragma once
 #include <memory>
 #include <common/Hists.h>
+#include <common/ReadoutSerializer.h>
 #include <multigrid/mgmesytec/Hit.h>
 #include <multigrid/mgmesytec/MgSeqGeometry.h>
-
-// \todo rescale and thresholds per channel
 
 class MgEFU {
 public:
   MgSeqGeometry mappings;
   std::shared_ptr<Hists> hists;
+  std::shared_ptr<ReadoutSerializer> raw1;
+  std::shared_ptr<ReadoutSerializer> raw2;
 
   inline size_t ingest(const std::vector<MGHit> &hits) {
     reset();

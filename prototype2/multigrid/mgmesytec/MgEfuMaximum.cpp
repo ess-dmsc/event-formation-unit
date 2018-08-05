@@ -33,6 +33,9 @@ uint64_t MgEfuMaximum::time() const {
 bool MgEfuMaximum::ingest(const MGHit& hit) {
   auto adc = mappings.rescale(hit.bus, hit.channel, hit.adc);
 
+  if (!mappings.is_valid(hit.bus, hit.channel, adc))
+    return false;
+
   // Pick latest time
   time_ = std::max(hit.total_time, time_);
 
@@ -44,6 +47,8 @@ bool MgEfuMaximum::ingest(const MGHit& hit) {
       z_ = mappings.z(hit.bus, hit.channel);
       XTRACE(PROCESS, DEB, "     new wire adc max: ch %d", hit.channel);
     }
+    if (raw1)
+      raw1->addEntry(1, mappings.wire(hit.bus, hit.channel), hit.total_time, adc);
     if (hists)
       hists->binstrips(mappings.wire(hit.bus, hit.channel), adc, 0, 0);
     return true;
@@ -54,6 +59,8 @@ bool MgEfuMaximum::ingest(const MGHit& hit) {
       y_ = mappings.y(hit.bus, hit.channel);
       XTRACE(PROCESS, DEB, "     new grid adc max: ch %d", hit.channel);
     }
+    if (raw1)
+      raw1->addEntry(2, mappings.grid(hit.bus, hit.channel), hit.total_time, adc);
     if (hists)
       hists->binstrips(0, 0, mappings.grid(hit.bus, hit.channel), adc);
     return true;

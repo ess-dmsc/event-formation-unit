@@ -20,6 +20,9 @@ void ReadoutSerializer::set_callback(std::function<void(Buffer)> cb) {
   producer_callback = cb;
 }
 
+// \todo labels for planes
+// \todo offset time
+
 size_t ReadoutSerializer::produce() {
   if (entries == 0) {
     return 0;

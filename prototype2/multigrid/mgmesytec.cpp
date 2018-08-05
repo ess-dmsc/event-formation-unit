@@ -204,6 +204,7 @@ void CSPEC::init_config()
   }
   mg_efu->mappings = mg_config.mappings;
   mg_efu->hists = monitor.hists;
+  mg_efu->raw1 = monitor.readouts;
 
   std::shared_ptr<MGHitFile> dumpfile;
   if (!DetectorSettings.fileprefix.empty())
@@ -211,8 +212,7 @@ void CSPEC::init_config()
     dumpfile = std::make_shared<MGHitFile>();
     dumpfile->open_rw(DetectorSettings.fileprefix + "mgmesytec_" + timeString() + ".h5");
   }
-  mesytecdata = std::make_shared<MesytecData>(mg_efu, monitor.readouts,
-                                              mg_config.spoof_high_time, dumpfile);
+  mesytecdata = std::make_shared<MesytecData>(mg_efu, mg_config.spoof_high_time, dumpfile);
   mesytecdata->set_geometry(mg_config.geometry);
 }
 

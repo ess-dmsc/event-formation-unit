@@ -18,8 +18,7 @@ public:
   enum class error { OK = 0, ESIZE, EHEADER, EUNSUPP };
 
   /// \brief if it looks like a constructor...
-  MesytecData(std::shared_ptr<MgEFU> mg_efu,
-              std::shared_ptr<ReadoutSerializer> s, bool spoof_ht,
+  MesytecData(std::shared_ptr<MgEFU> mg_efu, bool spoof_ht,
               std::shared_ptr<MGHitFile> dump = nullptr);
 
   ~MesytecData() = default;
@@ -32,6 +31,7 @@ public:
 
   void set_geometry(ESSGeometry);
 
+  // \todo register callback instead of passing serializer?
   /// \brief parse a binary payload buffer, return number of data element
   error parse(const char *buffer, int size, EV42Serializer &EV42Serializer);
 
@@ -46,8 +46,6 @@ private:
   std::shared_ptr<MgEFU> mgEfu;
 
   ESSGeometry Geometry;
-
-  std::shared_ptr<ReadoutSerializer> hit_serializer;
 
   std::shared_ptr<MGHitFile> dumpfile;
 };
