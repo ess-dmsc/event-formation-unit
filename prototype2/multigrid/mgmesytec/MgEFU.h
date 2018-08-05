@@ -22,7 +22,7 @@ public:
   std::shared_ptr<ReadoutSerializer> raw2;
 
   inline size_t ingest(const std::vector<MGHit> &hits) {
-    reset();
+    this->reset();
 
     size_t ret{0};
     for (const auto &h : hits) {

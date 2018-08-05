@@ -83,7 +83,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
     }
   }
 
-  XTRACE(PROCESS, DEB, "VMMR16 Buffer:  size=%d, preparsed lowtime=%d",
+  XTRACE(DATA, DEB, "VMMR16 Buffer:  size=%d, preparsed lowtime=%d",
       nWords, hit.low_time);
 
   while (wordsleft > 0) {
@@ -99,14 +99,14 @@ void VMMR16Parser::parse(uint32_t *buffer,
         converted_data.push_back(hit);
         converted_data.back().external_trigger = true;
       }
-      XTRACE(PROCESS, DEB, "   Header:  trigger=%zu, module=%d, external_trigger=%s",
+      XTRACE(DATA, DEB, "   Header:  trigger=%zu, module=%d, external_trigger=%s",
              stats.triggers, hit.module, external_trigger_ ? "true" : "false");
       break;
 
     case MesytecType::ExtendedTimeStamp:
       // This always comes before events on particular Bus
       high_time_ = static_cast<uint16_t>(*datap & MesytecHighTimeMask);
-      XTRACE(PROCESS, DEB, "   ExtendedTimeStamp: high_time=%d", high_time_);
+      XTRACE(DATA, DEB, "   ExtendedTimeStamp: high_time=%d", high_time_);
       break;
 
     case MesytecType::DataEvent1:
@@ -114,7 +114,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
 
       hit.bus = static_cast<uint8_t>((*datap & MesytecBusMask) >> MesytecBusBitShift);
       hit.time_diff = static_cast<uint16_t>(*datap & MesytecTimeDiffMask);
-      XTRACE(PROCESS, DEB, "   DataEvent1:  bus=%d,  time_diff=%d", hit.bus, hit.time_diff);
+      XTRACE(DATA, DEB, "   DataEvent1:  bus=%d,  time_diff=%d", hit.bus, hit.time_diff);
       break;
 
     case MesytecType::DataEvent2:
@@ -127,7 +127,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
       converted_data.push_back(hit);
       stats.readouts++;
 
-      XTRACE(PROCESS, DEB, "   DataEvent2:  bus=%d, channel=%d, adc=%d",
+      XTRACE(DATA, DEB, "   DataEvent2:  bus=%d, channel=%d, adc=%d",
           hit.bus, hit.channel, hit.adc);
 
 
@@ -155,4 +155,15 @@ void VMMR16Parser::parse(uint32_t *buffer,
     h.high_time = high_time_;
     h.total_time = hit.total_time + h.time_diff;
   }
+
+  // \todo make this optional?
+  sort( converted_data.begin( ), converted_data.end( ), [ ]( const auto& lhs, const auto& rhs )
+  {
+    return lhs.total_time < rhs.total_time;
+  });
+
+  for (const auto& h : converted_data) {
+    XTRACE(DATA, DEB, "     %s", h.debug().c_str());
+  }
+
 }

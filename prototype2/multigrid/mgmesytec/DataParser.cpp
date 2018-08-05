@@ -68,7 +68,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
       return error::EUNSUPP;
     }
     uint16_t len = ntohs((*datap & 0x00ffff00) >> 8);
-    DTRACE(DEB, "sis3153 datawords %d", len);
+    XTRACE(DATA, DEB, "sis3153 datawords %d", len);
     datap++;
     bytesleft -= 4;
 
@@ -86,11 +86,6 @@ MesytecData::error MesytecData::parse(const char *buffer,
     datap += (len - 3);
     bytesleft -= (len - 3) * 4;
 
-    if (dumpfile) {
-      dumpfile->data = std::move(vmmr16Parser.converted_data);
-      dumpfile->write();
-    }
-
     if (vmmr16Parser.externalTrigger()) {
       serializer.set_pulse_time(RecentPulseTime);
       stats.tx_bytes += serializer.produce();
@@ -105,7 +100,7 @@ MesytecData::error MesytecData::parse(const char *buffer,
         uint32_t pixel = getPixel();
         uint32_t time = getTime();
 
-        DTRACE(DEB, "Event: pixel: %d, time: %d ", pixel, time);
+        XTRACE(PROCESS, DEB, "Event: pixel: %d, time: %d ", pixel, time);
         if (pixel != 0) {
           stats.tx_bytes += serializer.addevent(time, pixel);
           stats.events++;
@@ -116,6 +111,11 @@ MesytecData::error MesytecData::parse(const char *buffer,
         // \todo external triggers treated as "bad"?
         stats.badtriggers++;
       }
+    }
+
+    if (dumpfile) {
+      dumpfile->data = std::move(vmmr16Parser.converted_data);
+      dumpfile->write();
     }
 
     if (*datap != 0x87654321) {
