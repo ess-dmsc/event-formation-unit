@@ -15,10 +15,9 @@ namespace Multigrid {
 
 class Sis3153Parser {
 public:
-  enum class error { OK = 0, ESIZE, EHEADER, EUNSUPP };
-
-  /// \brief parse a binary payload buffer, return number of data element
-  error parse(const Buffer &buffer);
+  /// \brief parse a binary payload, return number readout buffers within
+  ///        fills the buffer member variable with references to sub-buffers
+  size_t parse(const Buffer &buffer);
 
   std::vector<Buffer> buffers;
 };

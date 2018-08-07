@@ -53,7 +53,8 @@ size_t VMMR16Parser::trigger_count() const {
 
 size_t VMMR16Parser::parse(const Buffer &buffer) {
 
-  size_t readouts{0};
+  bool time_good {false};
+
   converted_data.clear();
   external_trigger_ = false;
   hit = Hit();
@@ -118,22 +119,25 @@ size_t VMMR16Parser::parse(const Buffer &buffer) {
       hit.channel = static_cast<uint16_t>((*datap & ChannelMask) >> ChannelBitShift);
       hit.adc = static_cast<uint16_t>(*datap & AdcMask);
       converted_data.push_back(hit);
-      readouts++;
 
       XTRACE(DATA, DEB, "   DataEvent2:  bus=%d, channel=%d, adc=%d",
              hit.bus, hit.channel, hit.adc);
 
       break;
 
-    case Type::FillDummy:break;
+    case Type::FillDummy:
+      XTRACE(DATA, DEB, "   FillDummy");
+      break;
 
     default:
 
       if ((*datap & Type::EndOfEvent) == Type::EndOfEvent) {
         hit.low_time = *datap & LowTimeMask;
-        XTRACE(DATA, DEB, "   EnfOfEvent:  low_time=%d", hit.low_time);
+        time_good = true;
+        XTRACE(DATA, DEB, "   EndOfEvent:  low_time=%d", hit.low_time);
       } else {
-        XTRACE(DATA, WAR, "   Unknown: 0x%08x", *datap);
+        XTRACE(DATA, WAR, "   EndOfEvent missing. Unknown field type: 0x%08x", *datap);
+        return 0;
       }
 
       break;
@@ -141,6 +145,11 @@ size_t VMMR16Parser::parse(const Buffer &buffer) {
 
     wordsleft--;
     datap++;
+  }
+
+  if (!time_good) {
+    XTRACE(DATA, WAR, "   Missing timestamp. Rejecting data.");
+    return 0;
   }
 
   // Spoof high time if needed
@@ -161,7 +170,7 @@ size_t VMMR16Parser::parse(const Buffer &buffer) {
     XTRACE(DATA, DEB, "     %s", h.debug().c_str());
   }
 
-  return readouts;
+  return converted_data.size();
 }
 
 }

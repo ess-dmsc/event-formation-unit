@@ -258,50 +258,54 @@ void CSPEC::mainThread() {
       mystats.rx_bytes += ReadSize;
       LOG(Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
 
-      auto res = sis3153parser.parse(Buffer(buffer, ReadSize));
-      if (res != Multigrid::Sis3153Parser::error::OK) {
-        mystats.parse_errors++;
-      }
+      if (sis3153parser.parse(Buffer(buffer, ReadSize))) {
 
-      for (const auto &b : sis3153parser.buffers) {
-// Parse VMMR16
-        mystats.rx_readouts += vmmr16Parser.parse(b);
-        mystats.triggers = vmmr16Parser.trigger_count();
+        for (const auto &b : sis3153parser.buffers) {
 
-        if (vmmr16Parser.externalTrigger()) {
-          ev42serializer.set_pulse_time(RecentPulseTime);
-          mystats.tx_bytes += ev42serializer.produce();
-          RecentPulseTime = vmmr16Parser.time();
-        }
+          auto parsed_readouts = vmmr16Parser.parse(b);
+          if (!parsed_readouts)
+            continue;
 
-        if (mgEfu) {
-          mgEfu->ingest(vmmr16Parser.converted_data);
+          mystats.rx_readouts += parsed_readouts;
+          mystats.triggers = vmmr16Parser.trigger_count();
+
+          if (vmmr16Parser.externalTrigger()) {
+            ev42serializer.set_pulse_time(RecentPulseTime);
+            mystats.tx_bytes += ev42serializer.produce();
+            RecentPulseTime = vmmr16Parser.time();
+          }
+
+          if (mgEfu) {
+            mgEfu->ingest(vmmr16Parser.converted_data);
 //stats.discards++;
 
-          if (mgEfu->event_good()) {
-            uint32_t pixel = getPixel();
-            uint32_t time = getTime();
+            if (mgEfu->event_good()) {
+              uint32_t pixel = getPixel();
+              uint32_t time = getTime();
 
-            XTRACE(PROCESS, DEB, "Event: pixel: %d, time: %d ", pixel, time);
-            if (pixel != 0) {
-              mystats.tx_bytes += ev42serializer.addevent(time, pixel);
-              mystats.rx_events ++;
+              XTRACE(PROCESS, DEB, "Event: pixel: %d, time: %d ", pixel, time);
+              if (pixel != 0) {
+                mystats.tx_bytes += ev42serializer.addevent(time, pixel);
+                mystats.rx_events++;
+              } else {
+                mystats.geometry_errors++;
+              }
             } else {
-              mystats.geometry_errors++;
-            }
-          } else {
 // \todo external triggers treated as "bad"?
-            mystats.badtriggers ++;
+              mystats.badtriggers++;
+            }
+          }
+
+          if (dumpfile) {
+            dumpfile->data = std::move(vmmr16Parser.converted_data);
+            dumpfile->write();
           }
         }
 
-        if (dumpfile) {
-          dumpfile->data = std::move(vmmr16Parser.converted_data);
-          dumpfile->write();
-        }
+        //mystats.rx_discards += stats.discards;
+      } else {
+        mystats.parse_errors++;
       }
-
-      //mystats.rx_discards += stats.discards;
     }
 
     // Force periodic flushing

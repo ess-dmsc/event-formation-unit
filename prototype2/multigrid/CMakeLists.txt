@@ -113,6 +113,16 @@ set(MGCNCSDataTest_INC
   )
 create_test_executable(MGCNCSDataTest)
 
+set(MGHitTest_SRC
+  mgmesytec/HitTest.cpp
+  mgmesytec/Hit.cpp
+  )
+set(MGHitTest_INC
+  mgmesytec/Hit.h
+  )
+create_test_executable(MGHitTest)
+
+
 set(MGHitFileTest_SRC
   mgmesytec/HitFileTest.cpp
   mgmesytec/HitFile.cpp
@@ -124,30 +134,31 @@ set(MGHitFileTest_INC
   )
 create_test_executable(MGHitFileTest SKIP_MEMGRIND)
 
-set(MGMesytecDataTest_SRC
-  ../common/Hists.cpp
-  ../common/ReadoutSerializer.cpp
-  ../common/Producer.cpp
+set(Sis3153ParserTest_SRC
   mgmesytec/Sis3153ParserTest.cpp
   mgmesytec/Sis3153Parser.cpp
-  mgmesytec/Vmmr16Parser.cpp
-  mgmesytec/Hit.cpp
-  mgmesytec/HitFile.cpp
   )
-set(MGMesytecDataTest_INC
-  ../common/Hists.h
-  ../common/ReadoutSerializer.h
-  ../common/Producer.h
+set(Sis3153ParserTest_INC
   mgmesytec/Sis3153Parser.h
-  mgmesytec/Hit.h
-  mgmesytec/HitFile.h
   mgmesytec/TestData.h
-  mgmesytec/SequoiaGeometry.h
-  mgmesytec/BusGeometry.h
-  mgmesytec/Efu.h
-  mgmesytec/Vmmr16Parser.h
+  ../common/Buffer.h
   )
-create_test_executable(MGMesytecDataTest)
+create_test_executable(Sis3153ParserTest)
+
+set(Vmmr16ParserTest_SRC
+  mgmesytec/Vmmr16ParserTest.cpp
+  mgmesytec/Vmmr16Parser.cpp
+  mgmesytec/Sis3153Parser.cpp
+  mgmesytec/Hit.cpp
+  )
+set(Vmmr16ParserTest_INC
+  ../common/Buffer.h
+  mgmesytec/Sis3153Parser.h
+  mgmesytec/Vmmr16Parser.h
+  mgmesytec/Hit.h
+  mgmesytec/TestData.h
+  )
+create_test_executable(Vmmr16ParserTest)
 
 #set(MG24GeometryTest_SRC
 #  mgmesytec/MG24GeometryTest.cpp)
