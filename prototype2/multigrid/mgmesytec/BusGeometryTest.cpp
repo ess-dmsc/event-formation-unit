@@ -274,6 +274,38 @@ TEST_F(BusGeometryTest, FromJsonMinimal) {
   EXPECT_EQ(geo.max_z(), 5);
 }
 
+TEST_F(BusGeometryTest, FromJson) {
+  nlohmann::json j;
+  j["max_channel"] = 100;
+  j["max_wire"] = 50;
+  j["max_z"] = 5;
+
+  j["swap_wires"] = true;
+  j["swap_grids"] = true;
+  j["flipped_x"] = true;
+  j["flipped_z"] = true;
+
+  auto j1 = j["wire_filters"]["blanket"];
+  j1["min"] = 3;
+  j1["max"] = 7;
+  j1["rescale"] = 0.5;
+
+  nlohmann::json j2;
+  j2["idx"] = 5;
+  j2["min"] = 3;
+  j2["max"] = 7;
+  j2["rescale"] = 0.5;
+  j["wire_filters"]["exceptions"].push_back(j2);
+
+  geo = j;
+
+  EXPECT_EQ(geo.max_x(), 10);
+  EXPECT_EQ(geo.max_y(), 50);
+  EXPECT_EQ(geo.max_z(), 5);
+
+  // \todo test correct parsing
+}
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

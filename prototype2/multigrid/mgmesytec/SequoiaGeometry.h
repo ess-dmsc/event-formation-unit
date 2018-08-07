@@ -54,11 +54,9 @@ public:
     if (bus >= buses.size())
       return adc;
     if (isWire(bus, channel)) {
-      auto w = wire(bus, channel);
-      return buses.at(bus).geometry.rescale_wire(w, adc);
+      return buses.at(bus).geometry.rescale_wire(channel, adc);
     } else if (isGrid(bus, channel)) {
-      auto g = grid(bus, channel);
-      return buses.at(bus).geometry.rescale_grid(g, adc);
+      return buses.at(bus).geometry.rescale_grid(channel, adc);
     }
     return adc;
   }
@@ -67,11 +65,9 @@ public:
     if (bus >= buses.size())
       return false;
     if (isWire(bus, channel)) {
-      auto w = wire(bus, channel);
-      return buses.at(bus).geometry.valid_wire(w, adc);
+      return buses.at(bus).geometry.valid_wire(channel, adc);
     } else if (isGrid(bus, channel)) {
-      auto g = grid(bus, channel);
-      return buses.at(bus).geometry.valid_grid(g, adc);
+      return buses.at(bus).geometry.valid_grid(channel, adc);
     }
     return false;
   }
@@ -91,15 +87,11 @@ public:
   }
 
   inline uint16_t wire(uint8_t bus, uint16_t channel) const {
-    if (bus >= buses.size())
-      throw std::runtime_error("Bus not defined");
     const auto &b = buses.at(bus);
     return b.wire_offset + b.geometry.wire(channel);
   }
 
   inline uint16_t grid(uint8_t bus, uint16_t channel) const {
-    if (bus >= buses.size())
-      throw std::runtime_error("Bus not defined");
     const auto &b = buses.at(bus);
     return b.grid_offset + b.geometry.grid(channel);
   }
@@ -120,24 +112,18 @@ public:
 
   /** @brief return the x coordinate of the detector */
   inline uint32_t x(uint8_t bus, uint16_t channel) const {
-    if (bus >= buses.size())
-      throw std::runtime_error("Bus not defined");
     const auto &b = buses.at(bus);
     return b.x_offset + b.geometry.x(channel);
   }
 
   /** @brief return the y coordinate of the detector */
   inline uint32_t y(uint8_t bus, uint16_t channel) const {
-    if (bus >= buses.size())
-      throw std::runtime_error("Bus not defined");
     const auto &b = buses.at(bus);
     return b.y_offset + b.geometry.y(channel);
   }
 
   /** @brief return the z coordinate of the detector */
   inline uint32_t z(uint8_t bus, uint16_t channel) const {
-    if (bus >= buses.size())
-      throw std::runtime_error("Bus not defined");
     const auto &b = buses.at(bus);
     return b.z_offset + b.geometry.z(channel);
   }

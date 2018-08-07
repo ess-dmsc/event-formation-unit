@@ -6,65 +6,139 @@
 
 using namespace Multigrid;
 
-class SequoiaGeometryTest : public TestBase {};
+class SequoiaGeometryTest : public TestBase {
+protected:
+  SequoiaGeometry geo;
+  BusGeometry bus;
 
-/** Test cases below */
+  virtual void SetUp() {
+  }
+  virtual void TearDown() {
+  }
+};
 
-TEST_F(SequoiaGeometryTest, IsWireIsGrid) {
-  SequoiaGeometry mgdet;
-  mgdet.add_bus(BusGeometry());
+TEST_F(SequoiaGeometryTest, Nothing) {
+
+  EXPECT_EQ(geo.max_wire(), 0);
+  EXPECT_EQ(geo.max_grid(), 0);
+  EXPECT_EQ(geo.max_x(), 0);
+  EXPECT_EQ(geo.max_y(), 0);
+  EXPECT_EQ(geo.max_z(), 0);
+
+  for (int i = 0; i < 120; i++) {
+    EXPECT_FALSE(geo.isWire(0, i));
+    EXPECT_FALSE(geo.isGrid(0, i));
+  }
+
+  for (int i = 0; i < 120; i++) {
+    EXPECT_FALSE(geo.isWire(1, i));
+    EXPECT_FALSE(geo.isGrid(1, i));
+  }
+
+  EXPECT_FALSE(geo.isWire(0, 128));
+  EXPECT_FALSE(geo.isGrid(0, 128));
+}
+
+
+TEST_F(SequoiaGeometryTest, OneBus) {
+  geo.add_bus(bus);
+
+  EXPECT_EQ(geo.max_wire(), 80);
+  EXPECT_EQ(geo.max_grid(), 40);
+  EXPECT_EQ(geo.max_x(), 4);
+  EXPECT_EQ(geo.max_y(), 40);
+  EXPECT_EQ(geo.max_z(), 20);
 
   for (int i = 0; i <= 79; i++) {
-    ASSERT_TRUE(mgdet.isWire(0, i));
-    ASSERT_FALSE(mgdet.isGrid(0, i));
+    EXPECT_TRUE(geo.isWire(0, i));
+    EXPECT_FALSE(geo.isWire(1, i));
+    EXPECT_FALSE(geo.isGrid(0, i));
+    EXPECT_FALSE(geo.isGrid(1, i));
+    EXPECT_EQ(geo.x(0,i), bus.x(i));
+    EXPECT_EQ(geo.z(0,i), bus.z(i));
   }
 
   for (int i = 80; i <= 119; i++) {
-    ASSERT_FALSE(mgdet.isWire(0, i));
-    ASSERT_TRUE(mgdet.isGrid(0, i));
+    EXPECT_FALSE(geo.isWire(0, i));
+    EXPECT_FALSE(geo.isWire(1, i));
+    EXPECT_TRUE(geo.isGrid(0, i));
+    EXPECT_FALSE(geo.isGrid(1, i));
+    EXPECT_EQ(geo.y(0,i), bus.y(i));
   }
 
-  ASSERT_FALSE(mgdet.isWire(0, 128));
-  ASSERT_FALSE(mgdet.isGrid(0, 128));
+  EXPECT_FALSE(geo.isWire(0, 128));
+  EXPECT_FALSE(geo.isGrid(0, 128));
 }
 
-#if 0
-TEST_F(SequoiaGeometryTest, XZCoordinates) {
-  SequoiaGeometry mgdet;
-  int digitizer = 0;
-  for (int xoffset = 0; xoffset < 4; xoffset++) {
-    MESSAGE() << "Lower wires: " << xoffset * 16 << " to " << (xoffset * 16 + 15) << "\n";
-    for (int zoffset = 0; zoffset < 16; zoffset++) {
-      int channel = xoffset * 16 + zoffset;
-      ASSERT_EQ(xoffset, mgdet.xcoord(digitizer, channel));
-      ASSERT_EQ(-1, mgdet.ycoord(channel));
-      ASSERT_EQ(zoffset , mgdet.zcoord(channel));
-    }
+TEST_F(SequoiaGeometryTest, TwoBuses) {
+
+  // confirms that they are stacked in x only
+
+  geo.add_bus(bus);
+  geo.add_bus(bus);
+
+  EXPECT_EQ(geo.max_wire(), 160);
+  EXPECT_EQ(geo.max_grid(), 80);
+  EXPECT_EQ(geo.max_x(), 8);
+  EXPECT_EQ(geo.max_y(), 40);
+  EXPECT_EQ(geo.max_z(), 20);
+
+  for (int i = 0; i <= 79; i++) {
+    EXPECT_TRUE(geo.isWire(0, i));
+    EXPECT_TRUE(geo.isWire(1, i));
+    EXPECT_FALSE(geo.isWire(2, i));
+    EXPECT_FALSE(geo.isGrid(0, i));
+    EXPECT_FALSE(geo.isGrid(1, i));
+    EXPECT_FALSE(geo.isGrid(2, i));
+
+    EXPECT_EQ(geo.x(0,i), bus.x(i));
+    EXPECT_EQ(geo.z(0,i), bus.z(i));
+
+    EXPECT_EQ(geo.x(1,i), bus.x(i) + bus.max_x());
+    EXPECT_EQ(geo.z(1,i), bus.z(i));
   }
 
-  for (int xoffset = 0; xoffset < 4; xoffset++) {
-    MESSAGE() << "Upper wires: " << 64 + xoffset * 4 << " to " << (64 + xoffset * 4 + 3) << "\n";
-    for (int zoffset = 0; zoffset < 4; zoffset++) {
-      int channel = 64 + xoffset * 4 + zoffset;
-      //MESSAGE() << "channel: " << channel << "\n";
-      ASSERT_EQ(xoffset, mgdet.xcoord(digitizer, channel));
-      ASSERT_EQ(-1 , mgdet.ycoord(channel));
-      ASSERT_EQ(16 + zoffset, mgdet.zcoord(channel));
-    }
+  for (int i = 80; i <= 119; i++) {
+    EXPECT_FALSE(geo.isWire(0, i));
+    EXPECT_FALSE(geo.isWire(1, i));
+    EXPECT_FALSE(geo.isWire(2, i));
+    EXPECT_TRUE(geo.isGrid(0, i));
+    EXPECT_TRUE(geo.isGrid(1, i));
+    EXPECT_FALSE(geo.isGrid(2, i));
+
+    EXPECT_EQ(geo.y(0,i), bus.y(i));
+    EXPECT_EQ(geo.y(1,i), bus.y(i));
   }
+
+  EXPECT_FALSE(geo.isWire(0, 128));
+  EXPECT_FALSE(geo.isGrid(0, 128));
 }
 
-TEST_F(SequoiaGeometryTest, YCoordinates) {
-  SequoiaGeometry mgdet;
-  int digitizer = 0;
-  for (int channel = 80; channel < 127; channel++) {
-    ASSERT_EQ(-1, mgdet.xcoord(digitizer, channel));
-    ASSERT_EQ(channel - 80 , mgdet.ycoord(channel));
-    ASSERT_EQ(-1, mgdet.zcoord(channel));
-  }
+TEST_F(SequoiaGeometryTest, Filters) {
+
+  // confirms that they are stacked in x only
+
+  geo.add_bus(bus);
+
+  Filter f;
+  f.minimum = 3;
+  f.maximum = 7;
+  f.rescale_factor = 0.5;
+  bus.override_wire_filter(5, f);
+  geo.add_bus(bus);
+
+  EXPECT_EQ(geo.rescale(0, 5, 10), 10);
+  EXPECT_EQ(geo.rescale(1, 4, 10), 10);
+  EXPECT_EQ(geo.rescale(1, 5, 10), 5);
+  EXPECT_EQ(geo.rescale(1, 6, 10), 10);
+
+  EXPECT_TRUE(geo.is_valid(0, 5, 10));
+  EXPECT_TRUE(geo.is_valid(1, 4, 10));
+  EXPECT_FALSE(geo.is_valid(1, 5, 10));
+  EXPECT_TRUE(geo.is_valid(1, 6, 10));
 }
 
-#endif
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
