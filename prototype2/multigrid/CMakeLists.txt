@@ -166,6 +166,17 @@ create_test_executable(Vmmr16ParserTest)
 #  mgmesytec/MG24Geometry.h)
 #create_test_executable(MG24GeometryTest)
 
+set(FilterTest_SRC
+  mgmesytec/FilterTest.cpp)
+set(FilterTest_INC
+  mgmesytec/Filter.h)
+create_test_executable(FilterTest)
+
+set(BusGeometryTest_SRC
+  mgmesytec/BusGeometryTest.cpp)
+set(BusGeometryTest_INC
+  mgmesytec/BusGeometry.h)
+create_test_executable(BusGeometryTest)
 
 set(SequoiaGeometryTest_SRC
         mgmesytec/SequoiaGeometryTest.cpp)

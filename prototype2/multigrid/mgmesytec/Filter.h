@@ -18,7 +18,7 @@
 
 namespace Multigrid {
 
-struct MgFilter {
+struct Filter {
   uint16_t minimum{0};
   uint16_t maximum{std::numeric_limits<uint16_t>::max()};
   double rescale_factor{1.0};
@@ -49,7 +49,7 @@ struct MgFilter {
   }
 };
 
-inline void from_json(const nlohmann::json &j, MgFilter &f) {
+inline void from_json(const nlohmann::json &j, Filter &f) {
   if (j.count("min"))
     f.minimum = j["min"];
   if (j.count("max"))

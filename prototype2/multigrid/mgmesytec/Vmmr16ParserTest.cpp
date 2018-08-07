@@ -80,6 +80,12 @@ TEST_F(Vmmr16ParserTest, ParseRecordedWSDataMultipleTriggers) {
   EXPECT_EQ(vmmr.trigger_count(), 36);
 }
 
+// \todo external trigger
+
+// \todo spoof high time
+
+// \todo EventData1
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
 

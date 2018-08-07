@@ -39,8 +39,8 @@ protected:
   bool swap_wires_{false};
   bool swap_grids_{false};
 
-  std::vector<MgFilter> wire_filters_;
-  std::vector<MgFilter> grid_filters_;
+  std::vector<Filter> wire_filters_;
+  std::vector<Filter> grid_filters_;
 
 public:
 
@@ -68,25 +68,25 @@ public:
     return grid_filters_.at(grid).valid(adc);
   }
 
-  void set_wire_filters(MgFilter mgf) {
+  void set_wire_filters(Filter mgf) {
     wire_filters_.resize(max_wire());
     for (auto &f : wire_filters_)
       f = mgf;
   }
 
-  void set_grid_filters(MgFilter mgf) {
+  void set_grid_filters(Filter mgf) {
     grid_filters_.resize(max_grid());
     for (auto &f : grid_filters_)
       f = mgf;
   }
 
-  void override_wire_filter(uint16_t n, MgFilter mgf) {
+  void override_wire_filter(uint16_t n, Filter mgf) {
     if (wire_filters_.size() <= n)
       wire_filters_.resize(n + 1);
     wire_filters_[n] = mgf;
   }
 
-  void override_grid_filter(uint16_t n, MgFilter mgf) {
+  void override_grid_filter(uint16_t n, Filter mgf) {
     if (grid_filters_.size() <= n)
       grid_filters_.resize(n + 1);
     grid_filters_[n] = mgf;
@@ -186,30 +186,42 @@ public:
     return channel - max_wire_;
   }
 
+  inline uint32_t x_from_wire(uint16_t w) const {
+    if (flipped_x_) {
+      return (max_wire_ / max_z_) - uint16_t(1) - w / max_z_;
+    } else {
+      return w / max_z_;
+    }
+  }
+
   /** @brief return the x coordinate of the detector */
   inline uint32_t x(uint16_t channel) const {
-    if (flipped_x_) {
-      return (max_wire_ / max_z_) - uint16_t(1) - wire(channel) / max_z_;
-    } else {
-      return wire(channel) / max_z_;
-    }
+    return x_from_wire(wire(channel));
+  }
+
+  inline uint32_t y_from_grid(uint16_t g) const {
+    return g;
   }
 
   /** @brief return the y coordinate of the detector */
   inline uint32_t y(uint16_t channel) const {
-    return grid(channel);
+    return y_from_grid(grid(channel));
+  }
+
+  inline uint32_t z_from_wire(uint16_t w) const {
+    if (flipped_z_) {
+      return (max_z_ - uint16_t(1)) - w % max_z_;
+    } else {
+      return w % max_z_;
+    }
   }
 
   /** @brief return the z coordinate of the detector */
   inline uint32_t z(uint16_t channel) const {
-    if (flipped_z_) {
-      return (max_z_ - uint16_t(1)) - wire(channel) % max_z_;
-    } else {
-      return wire(channel) % max_z_;
-    }
+    return z_from_wire(wire(channel));
   }
 
-  std::string debug(std::string prefix) const {
+  std::string debug(std::string prefix = "") const {
     std::stringstream ss;
 
     ss << prefix << "wires=chan[0," << (max_wire_ - 1) << "] ";
