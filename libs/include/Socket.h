@@ -50,7 +50,7 @@ public:
   void setRemoteSocket(const char *ipaddr, int port);
 
   /// Receive data on socket into buffer with specified length
-  int receive(void *receiveBuffer, int bufferSize);
+  ssize_t receive(void *receiveBuffer, int bufferSize);
 
   /// Send data in buffer with specified length
   int send(void *dataBuffer, int dataLength);

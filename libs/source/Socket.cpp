@@ -94,7 +94,7 @@ int Socket::send(void *buffer, int len) {
 }
 
 /** */
-int Socket::receive(void *buffer, int buflen) {
+ssize_t Socket::receive(void *buffer, int buflen) {
   socklen_t slen = 0;
   // try to receive some data, this is a blocking call
   return recvfrom(socketFileDescriptor, buffer, buflen, 0, (struct sockaddr *)&remoteSockAddr, &slen);

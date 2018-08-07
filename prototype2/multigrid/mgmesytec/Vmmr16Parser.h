@@ -8,9 +8,9 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
-#include <common/ReadoutSerializer.h>
-#include <multigrid/mgmesytec/MgEFU.h>
+#include <common/Buffer.h>
 #include <multigrid/mgmesytec/Hit.h>
+#include <vector>
 
 struct MgStats {
   size_t readouts{0}; /**< number of channels read out */
@@ -24,11 +24,11 @@ struct MgStats {
 
 class VMMR16Parser {
 public:
-  void setSpoofHighTime(bool spoof);
+  void spoof_high_time(bool spoof);
+  bool spoof_high_time() const;
 
   /** \brief parse n 32 bit words from mesytec VMMR-8/16 card */
-  void parse(uint32_t *buffer, uint16_t nWords, MgStats& stats);
-
+  void parse(const Buffer& buffer, MgStats& stats);
 
   uint64_t time() const;
   bool externalTrigger() const;
@@ -44,7 +44,7 @@ private:
 
   bool external_trigger_ {false};
 
-  bool spoof_high_time{false};
+  bool spoof_high_time_ {false};
   uint32_t previous_low_time_{0};
 
   // clang-format off

@@ -12,16 +12,27 @@
 #include <logical_geometry/ESSGeometry.h>
 #include <multigrid/mgmesytec/Vmmr16Parser.h>
 #include <multigrid/mgmesytec/HitFile.h>
+#include <multigrid/mgmesytec/MgEFU.h>
 
 class MesytecData {
 public:
   enum class error { OK = 0, ESIZE, EHEADER, EUNSUPP };
 
-  /// \brief if it looks like a constructor...
-  MesytecData(std::shared_ptr<MgEFU> mg_efu, bool spoof_ht,
-              std::shared_ptr<MGHitFile> dump = nullptr);
+  // \todo register callback instead of passing serializer?
+  /// \brief parse a binary payload buffer, return number of data element
+  error parse(const Buffer &buffer, MgStats& stats);
 
-  ~MesytecData() = default;
+  std::vector<Buffer> buffers;
+};
+
+class MesytecEFU {
+public:
+  /// \brief if it looks like a constructor...
+  MesytecEFU(std::shared_ptr<MgEFU> mg_efu, bool spoof_ht,
+      std::shared_ptr<MGHitFile> dump = nullptr);
+
+
+  void parse(const std::vector<Buffer>& buffers, EV42Serializer &EV42Serializer, MgStats& stats);
 
   /// \todo document
   uint32_t getPixel();
@@ -31,21 +42,13 @@ public:
 
   void set_geometry(ESSGeometry);
 
-  // \todo register callback instead of passing serializer?
-  /// \brief parse a binary payload buffer, return number of data element
-  error parse(const char *buffer, int size, EV42Serializer &EV42Serializer);
-
-  /// Statistics updated by parse()
-  MgStats stats;
-
   uint64_t RecentPulseTime{0};
 
 private:
   VMMR16Parser vmmr16Parser;
 
   std::shared_ptr<MgEFU> mgEfu;
-
   ESSGeometry Geometry;
-
   std::shared_ptr<MGHitFile> dumpfile;
 };
+

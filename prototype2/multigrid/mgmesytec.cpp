@@ -151,7 +151,8 @@ private:
 
   MgConfig mg_config;
   Monitor monitor;
-  std::shared_ptr<MesytecData> mesytecdata;
+  MgStats stats;
+  std::shared_ptr<MesytecEFU> mesytec_efu;
 
 };
 
@@ -212,8 +213,8 @@ void CSPEC::init_config()
     dumpfile = std::make_shared<MGHitFile>();
     dumpfile->open_rw(DetectorSettings.fileprefix + "mgmesytec_" + timeString() + ".h5");
   }
-  mesytecdata = std::make_shared<MesytecData>(mg_efu, mg_config.spoof_high_time, dumpfile);
-  mesytecdata->set_geometry(mg_config.geometry);
+  mesytec_efu = std::make_shared<MesytecEFU>(mg_efu, mg_config.spoof_high_time, dumpfile);
+  mesytec_efu->set_geometry(mg_config.geometry);
 }
 
 void CSPEC::mainThread() {
@@ -230,8 +231,10 @@ void CSPEC::mainThread() {
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
   flatbuffer.set_callback(std::bind(&Producer::produce2, &EventProducer, std::placeholders::_1));
 
+  MesytecData sis3153parser;
+
   char buffer[eth_buffer_size];
-  int ReadSize;
+  size_t ReadSize {0};
   TSCTimer report_timer;
   for (;;) {
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
@@ -239,18 +242,20 @@ void CSPEC::mainThread() {
       mystats.rx_bytes += ReadSize;
       LOG(Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
 
-      auto res = mesytecdata->parse(buffer, ReadSize, flatbuffer);
+      auto res = sis3153parser.parse(Buffer(buffer, ReadSize), stats);
       if (res != MesytecData::error::OK) {
         mystats.parse_errors++;
       }
 
-      mystats.rx_readouts += mesytecdata->stats.readouts;
-      mystats.rx_discards += mesytecdata->stats.discards;
-      mystats.triggers += mesytecdata->stats.triggers;
-      mystats.badtriggers += mesytecdata->stats.badtriggers;
-      mystats.geometry_errors+= mesytecdata->stats.geometry_errors;
-      mystats.tx_bytes += mesytecdata->stats.tx_bytes;
-      mystats.rx_events += mesytecdata->stats.events;
+      mesytec_efu->parse(sis3153parser.buffers, flatbuffer, stats);
+
+      mystats.rx_readouts += stats.readouts;
+      mystats.rx_discards += stats.discards;
+      mystats.triggers += stats.triggers;
+      mystats.badtriggers += stats.badtriggers;
+      mystats.geometry_errors+= stats.geometry_errors;
+      mystats.tx_bytes += stats.tx_bytes;
+      mystats.rx_events += stats.events;
     }
 
     // Force periodic flushing

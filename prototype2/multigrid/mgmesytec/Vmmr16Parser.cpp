@@ -31,8 +31,12 @@ static constexpr uint8_t ChannelBitShift{12};
 static constexpr uint32_t AdcMask{0x00000fff};
 
 
-void VMMR16Parser::setSpoofHighTime(bool spoof) {
-  spoof_high_time = spoof;
+void VMMR16Parser::spoof_high_time(bool spoof) {
+  spoof_high_time_ = spoof;
+}
+
+bool VMMR16Parser::spoof_high_time() const {
+  return spoof_high_time_;
 }
 
 uint64_t VMMR16Parser::time() const
@@ -45,9 +49,7 @@ bool VMMR16Parser::externalTrigger() const
   return external_trigger_;
 }
 
-void VMMR16Parser::parse(uint32_t *buffer,
-                         uint16_t nWords,
-                         MgStats &stats) {
+void VMMR16Parser::parse(const Buffer& buffer, MgStats &stats) {
 
   converted_data.clear();
   external_trigger_ = false;
@@ -57,8 +59,10 @@ void VMMR16Parser::parse(uint32_t *buffer,
   stats.triggers = trigger_count_;
   hit.trigger_count = trigger_count_;
 
-  uint32_t *datap = buffer;
-  uint16_t wordsleft = nWords;
+  auto datap = reinterpret_cast<uint32_t*>(buffer.buffer);
+  size_t wordsleft = buffer.size;
+
+  uint16_t words {0};
 
   /*
    * not using this implementation for now
@@ -69,15 +73,14 @@ void VMMR16Parser::parse(uint32_t *buffer,
   }
    */
 
-  XTRACE(DATA, DEB, "VMMR16 Buffer:  size=%d", nWords);
+  XTRACE(DATA, DEB, "VMMR16 Buffer:  size=%d", buffer.size);
 
   while (wordsleft > 0) {
     auto datatype = *datap & TypeMask;
 
     switch (datatype) {
     case Type::Header:
-      // \todo something other than assert?
-      assert(nWords > static_cast<uint16_t>(*datap & DataWordsMask));
+      words = static_cast<uint16_t>(*datap & DataWordsMask);
       hit.module = static_cast<uint8_t>((*datap & ModuleMask) >> ModuleBitShift);
       external_trigger_ = (0 != (*datap & ExternalTriggerMask));
       if (external_trigger_)
@@ -85,13 +88,19 @@ void VMMR16Parser::parse(uint32_t *buffer,
         converted_data.push_back(hit);
         converted_data.back().external_trigger = true;
       }
-      XTRACE(DATA, DEB, "   Header:  trigger=%zu, module=%d, external_trigger=%s",
-             stats.triggers, hit.module, external_trigger_ ? "true" : "false");
+      XTRACE(DATA, DEB, "   Header:  trigger=%zu, module=%d, external_trigger=%s, words=%d",
+             stats.triggers, hit.module, external_trigger_ ? "true" : "false", words);
+      if (words > buffer.size)
+      {
+        XTRACE(DATA, ERR, "   VMMR16 buffer size mismatch:  %d > %d",
+               words, buffer.size);
+        return;
+      }
       break;
 
     case Type::ExtendedTimeStamp:
       // This always comes before events on particular Bus
-      if (!spoof_high_time) {
+      if (!spoof_high_time_) {
         high_time_ = static_cast<uint16_t>(*datap & HighTimeMask);
         XTRACE(DATA, DEB, "   ExtendedTimeStamp: high_time=%d", high_time_);
       } else {
@@ -139,7 +148,7 @@ void VMMR16Parser::parse(uint32_t *buffer,
   }
 
   // Spoof high time if needed
-  if (spoof_high_time)  {
+  if (spoof_high_time_)  {
     if (hit.low_time < previous_low_time_) {
       high_time_++;
     }
