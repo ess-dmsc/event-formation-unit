@@ -6,10 +6,11 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Multigrid {
 
 static constexpr uint32_t TypeMask{0xf0000000};
 
-static constexpr uint8_t LowTimeBits {30};
+static constexpr uint8_t LowTimeBits{30};
 static constexpr uint32_t LowTimeMask{0x3fffffff};
 
 static constexpr uint32_t DataWordsMask{0x000003ff};
@@ -30,7 +31,6 @@ static constexpr uint8_t ChannelBitShift{12};
 
 static constexpr uint32_t AdcMask{0x00000fff};
 
-
 void VMMR16Parser::spoof_high_time(bool spoof) {
   spoof_high_time_ = spoof;
 }
@@ -39,36 +39,32 @@ bool VMMR16Parser::spoof_high_time() const {
   return spoof_high_time_;
 }
 
-uint64_t VMMR16Parser::time() const
-{
+uint64_t VMMR16Parser::time() const {
   return hit.total_time;
 }
 
-bool VMMR16Parser::externalTrigger() const
-{
+bool VMMR16Parser::externalTrigger() const {
   return external_trigger_;
 }
 
-size_t VMMR16Parser::trigger_count() const
-{
+size_t VMMR16Parser::trigger_count() const {
   return trigger_count_;
 }
 
+size_t VMMR16Parser::parse(const Buffer &buffer) {
 
-size_t VMMR16Parser::parse(const Buffer& buffer) {
-
-  size_t readouts {0};
+  size_t readouts{0};
   converted_data.clear();
   external_trigger_ = false;
-  hit = MGHit();
+  hit = Hit();
 
   trigger_count_++;
   hit.trigger_count = trigger_count_;
 
-  auto datap = reinterpret_cast<uint32_t*>(buffer.buffer);
+  auto datap = reinterpret_cast<uint32_t *>(buffer.buffer);
   size_t wordsleft = buffer.size;
 
-  uint16_t words {0};
+  uint16_t words{0};
 
   /*
    * not using this implementation for now
@@ -85,19 +81,16 @@ size_t VMMR16Parser::parse(const Buffer& buffer) {
     auto datatype = *datap & TypeMask;
 
     switch (datatype) {
-    case Type::Header:
-      words = static_cast<uint16_t>(*datap & DataWordsMask);
+    case Type::Header:words = static_cast<uint16_t>(*datap & DataWordsMask);
       hit.module = static_cast<uint8_t>((*datap & ModuleMask) >> ModuleBitShift);
       external_trigger_ = (0 != (*datap & ExternalTriggerMask));
-      if (external_trigger_)
-      {
+      if (external_trigger_) {
         converted_data.push_back(hit);
         converted_data.back().external_trigger = true;
       }
       XTRACE(DATA, DEB, "   Header:  module=%d, external_trigger=%s, words=%d",
              hit.module, external_trigger_ ? "true" : "false", words);
-      if (words > buffer.size)
-      {
+      if (words > buffer.size) {
         XTRACE(DATA, ERR, "   VMMR16 buffer size mismatch:  %d > %d",
                words, buffer.size);
         return 0;
@@ -114,8 +107,7 @@ size_t VMMR16Parser::parse(const Buffer& buffer) {
       }
       break;
 
-    case Type::DataEvent1:
-      hit.bus = static_cast<uint8_t>((*datap & BusMask) >> BusBitShift);
+    case Type::DataEvent1:hit.bus = static_cast<uint8_t>((*datap & BusMask) >> BusBitShift);
       hit.time_diff = static_cast<uint16_t>(*datap & TimeDiffMask);
       XTRACE(DATA, DEB, "   DataEvent1:  bus=%d, time_diff=%d", hit.bus, hit.time_diff);
       break;
@@ -129,13 +121,11 @@ size_t VMMR16Parser::parse(const Buffer& buffer) {
       readouts++;
 
       XTRACE(DATA, DEB, "   DataEvent2:  bus=%d, channel=%d, adc=%d",
-          hit.bus, hit.channel, hit.adc);
-
+             hit.bus, hit.channel, hit.adc);
 
       break;
 
-    case Type::FillDummy:
-      break;
+    case Type::FillDummy:break;
 
     default:
 
@@ -154,7 +144,7 @@ size_t VMMR16Parser::parse(const Buffer& buffer) {
   }
 
   // Spoof high time if needed
-  if (spoof_high_time_)  {
+  if (spoof_high_time_) {
     if (hit.low_time < previous_low_time_) {
       high_time_++;
     }
@@ -164,7 +154,7 @@ size_t VMMR16Parser::parse(const Buffer& buffer) {
   // Apply timestamp to all readouts
   hit.high_time = high_time_;
   hit.total_time = (static_cast<uint64_t>(high_time_) << LowTimeBits) + hit.low_time;
-  for (auto& h : converted_data) {
+  for (auto &h : converted_data) {
     h.high_time = high_time_;
     h.low_time = hit.low_time;
     h.total_time = hit.total_time;
@@ -172,4 +162,6 @@ size_t VMMR16Parser::parse(const Buffer& buffer) {
   }
 
   return readouts;
+}
+
 }

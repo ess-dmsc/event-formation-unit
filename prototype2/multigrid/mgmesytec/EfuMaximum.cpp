@@ -6,7 +6,9 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-void MgEfuMaximum::reset() {
+namespace Multigrid {
+
+void EfuMaximum::reset() {
   GridAdcMax = 0;
   WireAdcMax = 0;
   WireGood = false;
@@ -14,23 +16,23 @@ void MgEfuMaximum::reset() {
   time_ = 0;
 }
 
-uint32_t MgEfuMaximum::x() const {
+uint32_t EfuMaximum::x() const {
   return x_;
 }
 
-uint32_t MgEfuMaximum::y() const {
+uint32_t EfuMaximum::y() const {
   return y_;
 }
 
-uint32_t MgEfuMaximum::z() const {
+uint32_t EfuMaximum::z() const {
   return z_;
 }
 
-uint64_t MgEfuMaximum::time() const {
+uint64_t EfuMaximum::time() const {
   return time_;
 }
 
-bool MgEfuMaximum::ingest(const MGHit& hit) {
+bool EfuMaximum::ingest(const Hit &hit) {
   auto adc = mappings.rescale(hit.bus, hit.channel, hit.adc);
 
   if (!mappings.is_valid(hit.bus, hit.channel, adc))
@@ -68,6 +70,8 @@ bool MgEfuMaximum::ingest(const MGHit& hit) {
   return false;
 }
 
-bool MgEfuMaximum::event_good() const {
+bool EfuMaximum::event_good() const {
   return WireGood && GridGood;
+}
+
 }

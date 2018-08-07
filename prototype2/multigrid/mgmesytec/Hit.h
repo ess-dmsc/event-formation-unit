@@ -12,19 +12,23 @@
 #include <cinttypes>
 #include <string>
 
-struct __attribute__ ((packed)) MGHit {
+namespace Multigrid {
 
-  size_t trigger_count {0};
-  int8_t external_trigger {0};
-  uint8_t module {0};
-  uint32_t high_time {0};
-  uint32_t low_time {0};
-  uint64_t total_time {0};
-  uint8_t bus {0};
-  uint16_t channel {0};
-  uint16_t adc {0};
-  uint16_t time_diff {0};
+struct __attribute__ ((packed)) Hit {
+
+  size_t trigger_count{0};
+  int8_t external_trigger{0};
+  uint8_t module{0};
+  uint32_t high_time{0};
+  uint32_t low_time{0};
+  uint64_t total_time{0};
+  uint8_t bus{0};
+  uint16_t channel{0};
+  uint16_t adc{0};
+  uint16_t time_diff{0};
 
   // \brief prints values for debug purposes
   std::string debug() const;
 };
+
+}

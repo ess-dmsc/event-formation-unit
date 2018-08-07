@@ -11,13 +11,15 @@
 #include <multigrid/mgmesytec/Efu.h>
 #include <limits>
 
-class MgEfuCenterMass : public MgEFU {
+namespace Multigrid {
+
+class EfuCenterMass : public Efu {
 public:
-  MgEfuCenterMass() = default;
-  ~MgEfuCenterMass() = default;
+  EfuCenterMass() = default;
+  ~EfuCenterMass() = default;
 
   void reset() override;
-  bool ingest(const MGHit& hit) override;
+  bool ingest(const Hit& hit) override;
   bool event_good() const override;
 
   uint32_t x() const override;
@@ -36,3 +38,5 @@ private:
 
   uint64_t time_ {0};
 };
+
+}

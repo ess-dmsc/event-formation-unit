@@ -11,6 +11,8 @@
 #include <common/Buffer.h>
 #include <vector>
 
+namespace Multigrid {
+
 class Sis3153Parser {
 public:
   enum class error { OK = 0, ESIZE, EHEADER, EUNSUPP };
@@ -21,3 +23,4 @@ public:
   std::vector<Buffer> buffers;
 };
 
+}

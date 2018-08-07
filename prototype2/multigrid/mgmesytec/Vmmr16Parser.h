@@ -12,31 +12,33 @@
 #include <multigrid/mgmesytec/Hit.h>
 #include <vector>
 
+namespace Multigrid {
+
 class VMMR16Parser {
 public:
   void spoof_high_time(bool spoof);
   bool spoof_high_time() const;
 
   /** \brief parse n 32 bit words from mesytec VMMR-8/16 card */
-  size_t parse(const Buffer& buffer);
+  size_t parse(const Buffer &buffer);
 
   size_t trigger_count() const;
 
   uint64_t time() const;
   bool externalTrigger() const;
 
-  std::vector<MGHit> converted_data;
+  std::vector<Hit> converted_data;
 
 private:
 
-  MGHit hit;
+  Hit hit;
 
   size_t trigger_count_{0};
-  uint32_t high_time_ {0};
+  uint32_t high_time_{0};
 
-  bool external_trigger_ {false};
+  bool external_trigger_{false};
 
-  bool spoof_high_time_ {false};
+  bool spoof_high_time_{false};
   uint32_t previous_low_time_{0};
 
   // clang-format off
@@ -52,3 +54,5 @@ private:
 // clang-format on
 
 };
+
+}

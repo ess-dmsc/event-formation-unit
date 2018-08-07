@@ -6,23 +6,25 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-uint32_t MgEfuCenterMass::x() const {
+namespace Multigrid {
+
+uint32_t EfuCenterMass::x() const {
   return static_cast<uint32_t>(xmass / xsum);
 }
 
-uint32_t MgEfuCenterMass::y() const {
+uint32_t EfuCenterMass::y() const {
   return static_cast<uint32_t>(ymass / ysum);
 }
 
-uint32_t MgEfuCenterMass::z() const {
+uint32_t EfuCenterMass::z() const {
   return static_cast<uint32_t>(zmass / zsum);
 }
 
-uint64_t MgEfuCenterMass::time() const {
+uint64_t EfuCenterMass::time() const {
   return time_;
 }
 
-void MgEfuCenterMass::reset() {
+void EfuCenterMass::reset() {
   xmass = 0;
   ymass = 0;
   zmass = 0;
@@ -36,7 +38,7 @@ void MgEfuCenterMass::reset() {
 
 // \todo pick only a few data points
 
-bool MgEfuCenterMass::ingest(const MGHit& hit) {
+bool EfuCenterMass::ingest(const Hit &hit) {
   auto adc = mappings.rescale(hit.bus, hit.channel, hit.adc);
 
   if (!mappings.is_valid(hit.bus, hit.channel, adc))
@@ -69,6 +71,8 @@ bool MgEfuCenterMass::ingest(const MGHit& hit) {
   return false;
 }
 
-bool MgEfuCenterMass::event_good() const {
+bool EfuCenterMass::event_good() const {
   return xsum && ysum && zsum;
+}
+
 }

@@ -3,7 +3,9 @@
 #include <multigrid/mgmesytec/Hit.h>
 #include <sstream>
 
-std::string MGHit::debug() const {
+namespace Multigrid {
+
+std::string Hit::debug() const {
   std::stringstream ss;
   ss << " trigger_count=" << trigger_count;
   ss << " total_time=" << total_time;
@@ -24,4 +26,6 @@ std::string MGHit::debug() const {
   //ss << " module=" << static_cast<uint16_t>(module);
 
   return ss.str();
+}
+
 }

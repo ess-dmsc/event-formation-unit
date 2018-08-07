@@ -18,7 +18,9 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-class MgSeqGeometry {
+namespace Multigrid {
+
+class SequoiaGeometry {
 private:
   struct BusDefinitionStruct {
     uint16_t wire_offset{0};
@@ -27,14 +29,14 @@ private:
     uint32_t y_offset{0};
     uint32_t z_offset{0};
 
-    MgBusGeometry geometry;
+    BusGeometry geometry;
   };
 
   std::vector<BusDefinitionStruct> buses;
 
 public:
 
-  inline void add_bus(MgBusGeometry geom) {
+  inline void add_bus(BusGeometry geom) {
     BusDefinitionStruct g;
     g.geometry = geom;
     for (const auto &d : buses) {
@@ -51,13 +53,10 @@ public:
   inline uint16_t rescale(uint8_t bus, uint16_t channel, uint16_t adc) const {
     if (bus >= buses.size())
       return adc;
-    if (isWire(bus, channel))
-    {
+    if (isWire(bus, channel)) {
       auto w = wire(bus, channel);
       return buses.at(bus).geometry.rescale_wire(w, adc);
-    }
-    else if (isGrid(bus, channel))
-    {
+    } else if (isGrid(bus, channel)) {
       auto g = grid(bus, channel);
       return buses.at(bus).geometry.rescale_grid(g, adc);
     }
@@ -67,13 +66,10 @@ public:
   inline bool is_valid(uint8_t bus, uint16_t channel, uint16_t adc) const {
     if (bus >= buses.size())
       return false;
-    if (isWire(bus, channel))
-    {
+    if (isWire(bus, channel)) {
       auto w = wire(bus, channel);
       return buses.at(bus).geometry.valid_wire(w, adc);
-    }
-    else if (isGrid(bus, channel))
-    {
+    } else if (isGrid(bus, channel)) {
       auto g = grid(bus, channel);
       return buses.at(bus).geometry.valid_grid(g, adc);
     }
@@ -108,18 +104,17 @@ public:
     return b.grid_offset + b.geometry.grid(channel);
   }
 
-
   inline uint16_t max_wire() const {
     if (buses.empty())
       return 0;
-    const auto &b = buses.at(buses.size()-1);
+    const auto &b = buses.at(buses.size() - 1);
     return b.wire_offset + b.geometry.max_wire();
   }
 
   inline uint16_t max_grid() const {
     if (buses.empty())
       return 0;
-    const auto &b = buses.at(buses.size()-1);
+    const auto &b = buses.at(buses.size() - 1);
     return b.grid_offset + b.geometry.max_grid();
   }
 
@@ -151,7 +146,7 @@ public:
   inline uint32_t max_x() const {
     if (buses.empty())
       return 0;
-    const auto &b = buses.at(buses.size()-1);
+    const auto &b = buses.at(buses.size() - 1);
     return b.x_offset + b.geometry.max_x();
   }
 
@@ -159,7 +154,7 @@ public:
   inline uint32_t max_y() const {
     if (buses.empty())
       return 0;
-    const auto &b = buses.at(buses.size()-1);
+    const auto &b = buses.at(buses.size() - 1);
     return b.y_offset + b.geometry.max_y();
   }
 
@@ -167,7 +162,7 @@ public:
   inline uint32_t max_z() const {
     if (buses.empty())
       return 0;
-    const auto &b = buses.at(buses.size()-1);
+    const auto &b = buses.at(buses.size() - 1);
     return b.z_offset + b.geometry.max_z();
   }
 
@@ -189,3 +184,5 @@ public:
   }
 
 };
+
+}

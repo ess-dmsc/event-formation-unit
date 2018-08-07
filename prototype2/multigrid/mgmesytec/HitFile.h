@@ -18,26 +18,27 @@
 #include <h5cpp/hdf5.hpp>
 #pragma GCC diagnostic pop
 
-class MGHitFile
-{
+namespace Multigrid {
+
+class HitFile {
 public:
-  MGHitFile();
+  HitFile();
 
   void open_rw(boost::filesystem::path file_path);
   void open_r(boost::filesystem::path file_path);
 
-  static MGHitFile create(boost::filesystem::path file_path);
-  static MGHitFile open(boost::filesystem::path file_path);
+  static HitFile create(boost::filesystem::path file_path);
+  static HitFile open(boost::filesystem::path file_path);
 
   size_t count() const;
   void write();
   void read_at(size_t idx, size_t count);
 
-  static void read(std::string file, std::vector<MGHit>& external_data);
+  static void read(std::string file, std::vector<Hit> &external_data);
 
-  std::vector<MGHit> data;
+  std::vector<Hit> data;
 
-  static constexpr size_t chunk_size{9000 / sizeof(MGHit)};
+  static constexpr size_t chunk_size{9000 / sizeof(Hit)};
 
 private:
   hdf5::file::File file_;
@@ -45,3 +46,5 @@ private:
   hdf5::node::Dataset dataset_;
   hdf5::dataspace::Hyperslab slab_{{0}, {chunk_size}};
 };
+
+}

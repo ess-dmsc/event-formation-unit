@@ -1,16 +1,18 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <libs/include/TSCTimer.h>
-#include <multigrid/mgmesytec/MgSeqGeometry.h>
+#include <multigrid/mgmesytec/SequoiaGeometry.h>
 #include <test/TestBase.h>
 
-class MgSeqGeometryTest : public TestBase {};
+using namespace Multigrid;
+
+class SequoiaGeometryTest : public TestBase {};
 
 /** Test cases below */
 
-TEST_F(MgSeqGeometryTest, IsWireIsGrid) {
-  MgSeqGeometry mgdet;
-  mgdet.add_bus(MgBusGeometry());
+TEST_F(SequoiaGeometryTest, IsWireIsGrid) {
+  SequoiaGeometry mgdet;
+  mgdet.add_bus(BusGeometry());
 
   for (int i = 0; i <= 79; i++) {
     ASSERT_TRUE(mgdet.isWire(0, i));
@@ -27,8 +29,8 @@ TEST_F(MgSeqGeometryTest, IsWireIsGrid) {
 }
 
 #if 0
-TEST_F(MgSeqGeometryTest, XZCoordinates) {
-  MgSeqGeometry mgdet;
+TEST_F(SequoiaGeometryTest, XZCoordinates) {
+  SequoiaGeometry mgdet;
   int digitizer = 0;
   for (int xoffset = 0; xoffset < 4; xoffset++) {
     MESSAGE() << "Lower wires: " << xoffset * 16 << " to " << (xoffset * 16 + 15) << "\n";
@@ -52,8 +54,8 @@ TEST_F(MgSeqGeometryTest, XZCoordinates) {
   }
 }
 
-TEST_F(MgSeqGeometryTest, YCoordinates) {
-  MgSeqGeometry mgdet;
+TEST_F(SequoiaGeometryTest, YCoordinates) {
+  SequoiaGeometry mgdet;
   int digitizer = 0;
   for (int channel = 80; channel < 127; channel++) {
     ASSERT_EQ(-1, mgdet.xcoord(digitizer, channel));

@@ -13,15 +13,15 @@ namespace hdf5 {
 
 namespace datatype {
 template<>
-class TypeTrait<MGHit>
+class TypeTrait<Multigrid::Hit>
 {
 public:
-  using Type = MGHit;
+  using Type = Multigrid::Hit;
   using TypeClass = Compound;
 
   static TypeClass create(const Type & = Type())
   {
-    auto type = datatype::Compound::create(sizeof(MGHit));
+    auto type = datatype::Compound::create(sizeof(Multigrid::Hit));
     type.insert("trigger_count",
                 0,
                 datatype::create<size_t>());
@@ -68,27 +68,25 @@ public:
 }
 
 
-MGHitFile::MGHitFile()
-{
-  dtype_ = hdf5::datatype::create<MGHit>();
+namespace Multigrid {
+
+HitFile::HitFile() {
+  dtype_ = hdf5::datatype::create<Hit>();
 }
 
-MGHitFile MGHitFile::create(boost::filesystem::path file_path)
-{
-  MGHitFile ret;
+HitFile HitFile::create(boost::filesystem::path file_path) {
+  HitFile ret;
   ret.open_rw(file_path);
   return ret;
 }
 
-MGHitFile MGHitFile::open(boost::filesystem::path file_path)
-{
-  MGHitFile ret;
+HitFile HitFile::open(boost::filesystem::path file_path) {
+  HitFile ret;
   ret.open_r(file_path);
   return ret;
 }
 
-void MGHitFile::open_rw(boost::filesystem::path file_path)
-{
+void HitFile::open_rw(boost::filesystem::path file_path) {
   using namespace hdf5;
 
   file_ = file::create(file_path, file::AccessFlags::TRUNCATE);
@@ -98,41 +96,38 @@ void MGHitFile::open_rw(boost::filesystem::path file_path)
   dcpl.chunk({chunk_size});
 
   dataset_ = file_.root().create_dataset(DATSET_NAME, dtype_,
-      dataspace::Simple({0}, {dataspace::Simple::UNLIMITED}), dcpl);
+                                         dataspace::Simple({0}, {dataspace::Simple::UNLIMITED}), dcpl);
 }
 
-void MGHitFile::open_r(boost::filesystem::path file_path)
-{
+void HitFile::open_r(boost::filesystem::path file_path) {
   using namespace hdf5;
 
   file_ = file::open(file_path, file::AccessFlags::READONLY);
   dataset_ = file_.root().get_dataset(DATSET_NAME);
 }
 
-size_t MGHitFile::count() const
-{
+size_t HitFile::count() const {
   return hdf5::dataspace::Simple(dataset_.dataspace()).current_dimensions().at(0);
 }
 
-void MGHitFile::write()
-{
+void HitFile::write() {
   slab_.offset(0, count());
   slab_.block(0, data.size());
   dataset_.extent({count() + data.size()});
   dataset_.write(data, slab_);
 }
 
-void MGHitFile::read_at(size_t idx, size_t count)
-{
+void HitFile::read_at(size_t idx, size_t count) {
   slab_.offset(0, idx);
   slab_.block(0, count);
   data.resize(count);
   dataset_.read(data, slab_);
 }
 
-void MGHitFile::read(std::string file_name, std::vector<MGHit>& external_data)
-{
-  auto file = MGHitFile::open(file_name);
+void HitFile::read(std::string file_name, std::vector<Hit> &external_data) {
+  auto file = HitFile::open(file_name);
   file.read_at(0, file.count());
   external_data = std::move(file.data);
+}
+
 }

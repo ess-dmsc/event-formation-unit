@@ -17,7 +17,9 @@
 #include <limits>
 #include <vector>
 
-class MgBusGeometry {
+namespace Multigrid {
+
+class BusGeometry {
 protected:
   static inline void swap(uint16_t &channel) {
     if (channel % 2 == 0) {
@@ -29,10 +31,10 @@ protected:
 
   uint16_t max_channel_{120};
   uint16_t max_wire_{80};
-  uint16_t max_z_ {20};
+  uint16_t max_z_{20};
 
-  bool flipped_x_ {false};
-  bool flipped_z_ {false};
+  bool flipped_x_{false};
+  bool flipped_z_{false};
 
   bool swap_wires_{false};
   bool swap_grids_{false};
@@ -42,29 +44,25 @@ protected:
 
 public:
 
-  inline uint16_t rescale_wire(uint16_t wire, uint16_t adc) const
-  {
+  inline uint16_t rescale_wire(uint16_t wire, uint16_t adc) const {
     if (wire >= wire_filters_.size())
       return adc;
     return wire_filters_.at(wire).rescale(adc);
   }
 
-  inline uint16_t rescale_grid(uint16_t grid, uint16_t adc) const
-  {
+  inline uint16_t rescale_grid(uint16_t grid, uint16_t adc) const {
     if (grid >= grid_filters_.size())
       return adc;
     return grid_filters_.at(grid).rescale(adc);
   }
 
-  inline bool valid_wire(uint16_t wire, uint16_t adc) const
-  {
+  inline bool valid_wire(uint16_t wire, uint16_t adc) const {
     if (wire >= wire_filters_.size())
       return true;
     return wire_filters_.at(wire).valid(adc);
   }
 
-  inline bool valid_grid(uint16_t grid, uint16_t adc) const
-  {
+  inline bool valid_grid(uint16_t grid, uint16_t adc) const {
     if (grid >= grid_filters_.size())
       return true;
     return grid_filters_.at(grid).valid(adc);
@@ -72,25 +70,25 @@ public:
 
   void set_wire_filters(MgFilter mgf) {
     wire_filters_.resize(max_wire());
-    for (auto& f : wire_filters_)
+    for (auto &f : wire_filters_)
       f = mgf;
   }
 
   void set_grid_filters(MgFilter mgf) {
     grid_filters_.resize(max_grid());
-    for (auto& f : grid_filters_)
+    for (auto &f : grid_filters_)
       f = mgf;
   }
 
   void override_wire_filter(uint16_t n, MgFilter mgf) {
     if (wire_filters_.size() <= n)
-      wire_filters_.resize(n+1);
+      wire_filters_.resize(n + 1);
     wire_filters_[n] = mgf;
   }
 
   void override_grid_filter(uint16_t n, MgFilter mgf) {
     if (grid_filters_.size() <= n)
-      grid_filters_.resize(n+1);
+      grid_filters_.resize(n + 1);
     grid_filters_[n] = mgf;
   }
 
@@ -122,7 +120,6 @@ public:
     flipped_z_ = f;
   }
 
-
   inline bool swap_wires() const {
     return swap_wires_;
   }
@@ -150,7 +147,6 @@ public:
   inline bool flipped_z() const {
     return flipped_z_;
   }
-
 
   inline uint32_t max_x() const {
     return max_wire_ / max_z_;
@@ -216,12 +212,12 @@ public:
   std::string debug(std::string prefix) const {
     std::stringstream ss;
 
-    ss << prefix <<  "wires=chan[0," << (max_wire_-1) << "] ";
+    ss << prefix << "wires=chan[0," << (max_wire_ - 1) << "] ";
     if (swap_wires_)
       ss << "(swapped)";
     ss << "\n";
 
-    ss << prefix <<  "grids=chan[" << max_wire_ << "," << (max_channel_-1) << "] ";
+    ss << prefix << "grids=chan[" << max_wire_ << "," << (max_channel_ - 1) << "] ";
     if (swap_grids_)
       ss << "(swapped)";
     ss << "\n";
@@ -233,11 +229,11 @@ public:
       ss << prefix << "(flipped in Z)\n";
 
     std::stringstream wfilters;
-    bool validwf {false};
-    for (size_t i=0; i < wire_filters_.size(); i++) {
-      const auto& f = wire_filters_.at(i);
+    bool validwf{false};
+    for (size_t i = 0; i < wire_filters_.size(); i++) {
+      const auto &f = wire_filters_.at(i);
       if (!f.trivial()) {
-        wfilters << prefix << "  [" << i  << "]  " <<  f.debug() << "\n";
+        wfilters << prefix << "  [" << i << "]  " << f.debug() << "\n";
         validwf = true;
       }
     }
@@ -246,11 +242,11 @@ public:
     }
 
     std::stringstream gfilters;
-    bool validgf {false};
-    for (size_t i=0; i < grid_filters_.size(); i++) {
-      const auto& f = grid_filters_.at(i);
+    bool validgf{false};
+    for (size_t i = 0; i < grid_filters_.size(); i++) {
+      const auto &f = grid_filters_.at(i);
       if (!f.trivial()) {
-        gfilters << prefix << "  [" << i  << "]  " <<  f.debug() << "\n";
+        gfilters << prefix << "  [" << i << "]  " << f.debug() << "\n";
         validgf = true;
       }
     }
@@ -263,7 +259,7 @@ public:
 
 };
 
-inline void from_json(const nlohmann::json& j, MgBusGeometry &g) {
+inline void from_json(const nlohmann::json &j, BusGeometry &g) {
   g.max_channel(j["max_channel"]);
   g.max_wire(j["max_wire"]);
   g.max_z(j["max_z"]);
@@ -296,6 +292,8 @@ inline void from_json(const nlohmann::json& j, MgBusGeometry &g) {
       }
     }
   }
+
+}
 
 }
 

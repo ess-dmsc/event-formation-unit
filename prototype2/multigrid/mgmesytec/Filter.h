@@ -16,10 +16,12 @@
 
 #include <nlohmann/json.hpp>
 
+namespace Multigrid {
+
 struct MgFilter {
-  uint16_t minimum {0};
-  uint16_t maximum {std::numeric_limits<uint16_t>::max()};
-  double rescale_factor {1.0};
+  uint16_t minimum{0};
+  uint16_t maximum{std::numeric_limits<uint16_t>::max()};
+  double rescale_factor{1.0};
 
   inline bool trivial() const {
     return ((rescale_factor == 1.0)
@@ -47,7 +49,7 @@ struct MgFilter {
   }
 };
 
-inline void from_json(const nlohmann::json& j, MgFilter &f) {
+inline void from_json(const nlohmann::json &j, MgFilter &f) {
   if (j.count("min"))
     f.minimum = j["min"];
   if (j.count("max"))
@@ -56,3 +58,4 @@ inline void from_json(const nlohmann::json& j, MgFilter &f) {
     f.rescale_factor = j["rescale"];
 }
 
+}

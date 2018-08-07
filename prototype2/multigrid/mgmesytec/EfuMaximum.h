@@ -11,13 +11,15 @@
 #include <multigrid/mgmesytec/Efu.h>
 #include <limits>
 
-class MgEfuMaximum : public MgEFU {
+namespace Multigrid {
+
+class EfuMaximum : public Efu {
 public:
-  MgEfuMaximum() = default;
-  ~MgEfuMaximum() = default;
+  EfuMaximum() = default;
+  ~EfuMaximum() = default;
 
   void reset() override;
-  bool ingest(const MGHit& hit) override;
+  bool ingest(const Hit& hit) override;
   bool event_good() const override;
 
   uint32_t x() const override;
@@ -38,3 +40,5 @@ private:
 
   uint64_t time_ {0};
 };
+
+}

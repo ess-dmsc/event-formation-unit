@@ -151,15 +151,15 @@ private:
 
   void init_config();
 
-  MgConfig mg_config;
+  Multigrid::Config mg_config;
   Monitor monitor;
 
   uint64_t RecentPulseTime{0};
 
-  VMMR16Parser vmmr16Parser;
+  Multigrid::VMMR16Parser vmmr16Parser;
 
-  std::shared_ptr<MgEFU> mgEfu;
-  std::shared_ptr<MGHitFile> dumpfile;
+  std::shared_ptr<Multigrid::Efu> mgEfu;
+  std::shared_ptr<Multigrid::HitFile> dumpfile;
 
   uint32_t getPixel() {
     if (!mgEfu)
@@ -208,16 +208,16 @@ const char *CSPEC::detectorname() { return classname; }
 void CSPEC::init_config()
 {
   LOG(Sev::Info, "MG Config file: {}", DetectorSettings.ConfigFile);
-  mg_config = MgConfig(DetectorSettings.ConfigFile);
+  mg_config = Multigrid::Config(DetectorSettings.ConfigFile);
   LOG(Sev::Info, "Multigrid Config\n{}", mg_config.debug());
 
   if (DetectorSettings.monitor)
     monitor.init(EFUSettings.KafkaBroker, readout_entries);
 
   if (mg_config.reduction_strategy == "center-mass") {
-    mgEfu = std::make_shared<MgEfuCenterMass>();
+    mgEfu = std::make_shared<Multigrid::EfuCenterMass>();
   } else {
-    auto mg_efum = std::make_shared<MgEfuMaximum>();
+    auto mg_efum = std::make_shared<Multigrid::EfuMaximum>();
     mgEfu = mg_efum;
   }
   mgEfu->mappings = mg_config.mappings;
@@ -226,7 +226,7 @@ void CSPEC::init_config()
 
   if (!DetectorSettings.fileprefix.empty())
   {
-    dumpfile = std::make_shared<MGHitFile>();
+    dumpfile = std::make_shared<Multigrid::HitFile>();
     dumpfile->open_rw(DetectorSettings.fileprefix + "mgmesytec_" + timeString() + ".h5");
   }
   vmmr16Parser.spoof_high_time(mg_config.spoof_high_time);
@@ -246,7 +246,7 @@ void CSPEC::mainThread() {
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
   ev42serializer.set_callback(std::bind(&Producer::produce2, &EventProducer, std::placeholders::_1));
 
-  Sis3153Parser sis3153parser;
+  Multigrid::Sis3153Parser sis3153parser;
   sis3153parser.buffers.reserve(1000);
 
   char buffer[eth_buffer_size];
@@ -259,7 +259,7 @@ void CSPEC::mainThread() {
       LOG(Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
 
       auto res = sis3153parser.parse(Buffer(buffer, ReadSize));
-      if (res != Sis3153Parser::error::OK) {
+      if (res != Multigrid::Sis3153Parser::error::OK) {
         mystats.parse_errors++;
       }
 

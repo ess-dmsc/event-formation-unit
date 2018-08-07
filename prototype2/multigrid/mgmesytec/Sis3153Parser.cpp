@@ -7,6 +7,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Multigrid {
+
 // clang-format off
 // sis3153 and mesytec data types from
 // Struck: mvme-src-0.9.2-281-g1c4c24c.tar
@@ -18,7 +20,7 @@ enum SisType : uint32_t {
 // clang-format on
 
 
-Sis3153Parser::error Sis3153Parser::parse(const Buffer& buffer) {
+Sis3153Parser::error Sis3153Parser::parse(const Buffer &buffer) {
 
   buffers.clear();
 
@@ -32,7 +34,7 @@ Sis3153Parser::error Sis3153Parser::parse(const Buffer& buffer) {
     return error::ESIZE;
   }
 
-  uint32_t *datap = reinterpret_cast<uint32_t*>(buffer.buffer + 3);
+  uint32_t *datap = reinterpret_cast<uint32_t *>(buffer.buffer + 3);
   bytesleft -= 3;
 
   while (bytesleft > 16) {
@@ -75,6 +77,7 @@ Sis3153Parser::error Sis3153Parser::parse(const Buffer& buffer) {
     bytesleft -= 4;
   }
 
-
   return error::OK;
+}
+
 }

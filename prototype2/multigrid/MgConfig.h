@@ -10,13 +10,15 @@
 #include <logical_geometry/ESSGeometry.h>
 #include <multigrid/mgmesytec/SequoiaGeometry.h>
 
-struct MgConfig {
-  MgConfig() {}
-  MgConfig(std::string jsonfile);
+namespace Multigrid {
+
+struct Config {
+  Config() {}
+  Config(std::string jsonfile);
 
   bool spoof_high_time{false};
 
-  MgSeqGeometry mappings;
+  SequoiaGeometry mappings;
 
   std::string reduction_strategy;
 
@@ -25,3 +27,5 @@ struct MgConfig {
 
   std::string debug() const;
 };
+
+}

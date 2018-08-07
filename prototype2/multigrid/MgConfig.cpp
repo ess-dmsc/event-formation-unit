@@ -9,7 +9,9 @@
 
 #include <common/Log.h>
 
-MgConfig::MgConfig(std::string jsonfile) {
+namespace Multigrid {
+
+Config::Config(std::string jsonfile) {
   nlohmann::json root;
   try {
     std::ifstream t(jsonfile);
@@ -17,8 +19,7 @@ MgConfig::MgConfig(std::string jsonfile) {
                     std::istreambuf_iterator<char>());
     root = nlohmann::json::parse(str);
   }
-  catch (...)
-  {
+  catch (...) {
     LOG(Sev::Warning, "Invalid Json file: {}", jsonfile);
     return;
   }
@@ -39,7 +40,7 @@ MgConfig::MgConfig(std::string jsonfile) {
   geometry.np(1);
 }
 
-std::string MgConfig::debug() const {
+std::string Config::debug() const {
   std::stringstream ss;
   ss << "  ===============================================\n";
   ss << "  ========       multigrid mesytec       ========\n";
@@ -57,4 +58,6 @@ std::string MgConfig::debug() const {
   ss << "  geometry_z = " << geometry.nz() << "\n";
 
   return ss.str();
+}
+
 }

@@ -14,14 +14,16 @@
 #include <multigrid/mgmesytec/Hit.h>
 #include <multigrid/mgmesytec/SequoiaGeometry.h>
 
-class MgEFU {
+namespace Multigrid {
+
+class Efu {
 public:
-  MgSeqGeometry mappings;
+  SequoiaGeometry mappings;
   std::shared_ptr<Hists> hists;
   std::shared_ptr<ReadoutSerializer> raw1;
   std::shared_ptr<ReadoutSerializer> raw2;
 
-  inline size_t ingest(const std::vector<MGHit> &hits) {
+  inline size_t ingest(const std::vector<Hit> &hits) {
     this->reset();
 
     size_t ret{0};
@@ -37,7 +39,7 @@ public:
   }
 
   virtual void reset() = 0;
-  virtual bool ingest(const MGHit& hit) = 0;
+  virtual bool ingest(const Hit& hit) = 0;
   virtual bool event_good() const = 0;
 
   virtual uint32_t x() const = 0;
@@ -45,3 +47,5 @@ public:
   virtual uint32_t z() const = 0;
   virtual uint64_t time() const = 0;
 };
+
+}
