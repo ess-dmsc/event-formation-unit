@@ -56,6 +56,7 @@ TEST_F(SequoiaGeometryTest, OneBus) {
     EXPECT_FALSE(geo.isGrid(1, i));
     EXPECT_EQ(geo.x(0,i), bus.x(i));
     EXPECT_EQ(geo.z(0,i), bus.z(i));
+    EXPECT_EQ(geo.wire(0,i), bus.wire(i));
   }
 
   for (int i = 80; i <= 119; i++) {
@@ -64,6 +65,7 @@ TEST_F(SequoiaGeometryTest, OneBus) {
     EXPECT_TRUE(geo.isGrid(0, i));
     EXPECT_FALSE(geo.isGrid(1, i));
     EXPECT_EQ(geo.y(0,i), bus.y(i));
+    EXPECT_EQ(geo.grid(0,i), bus.grid(i));
   }
 
   EXPECT_FALSE(geo.isWire(0, 128));
@@ -93,9 +95,11 @@ TEST_F(SequoiaGeometryTest, TwoBuses) {
 
     EXPECT_EQ(geo.x(0,i), bus.x(i));
     EXPECT_EQ(geo.z(0,i), bus.z(i));
+    EXPECT_EQ(geo.wire(0,i), bus.wire(i));
 
     EXPECT_EQ(geo.x(1,i), bus.x(i) + bus.max_x());
     EXPECT_EQ(geo.z(1,i), bus.z(i));
+    EXPECT_EQ(geo.wire(1,i), bus.wire(i) + bus.max_wire());
   }
 
   for (int i = 80; i <= 119; i++) {
@@ -108,6 +112,7 @@ TEST_F(SequoiaGeometryTest, TwoBuses) {
 
     EXPECT_EQ(geo.y(0,i), bus.y(i));
     EXPECT_EQ(geo.y(1,i), bus.y(i));
+    EXPECT_EQ(geo.grid(0,i), bus.grid(i));
   }
 
   EXPECT_FALSE(geo.isWire(0, 128));
@@ -125,19 +130,27 @@ TEST_F(SequoiaGeometryTest, Filters) {
   f.maximum = 7;
   f.rescale_factor = 0.5;
   bus.override_wire_filter(5, f);
+  bus.override_grid_filter(10, f);
   geo.add_bus(bus);
 
   EXPECT_EQ(geo.rescale(0, 5, 10), 10);
   EXPECT_EQ(geo.rescale(1, 4, 10), 10);
   EXPECT_EQ(geo.rescale(1, 5, 10), 5);
   EXPECT_EQ(geo.rescale(1, 6, 10), 10);
+  EXPECT_EQ(geo.rescale(1, 90, 10), 5);
 
   EXPECT_TRUE(geo.is_valid(0, 5, 10));
   EXPECT_TRUE(geo.is_valid(1, 4, 10));
   EXPECT_FALSE(geo.is_valid(1, 5, 10));
   EXPECT_TRUE(geo.is_valid(1, 6, 10));
+  EXPECT_FALSE(geo.is_valid(1, 90, 10));
 }
 
+TEST_F(SequoiaGeometryTest, PrintsSelf) {
+
+  geo.add_bus(bus);
+  EXPECT_FALSE(geo.debug().empty());
+}
 
 
 int main(int argc, char **argv) {

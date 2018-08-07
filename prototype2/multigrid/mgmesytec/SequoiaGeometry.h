@@ -56,7 +56,8 @@ public:
     if (isWire(bus, channel)) {
       return buses.at(bus).geometry.rescale_wire(channel, adc);
     } else if (isGrid(bus, channel)) {
-      return buses.at(bus).geometry.rescale_grid(channel, adc);
+      const auto& b = buses.at(bus).geometry;
+      return b.rescale_grid(b.grid(channel), adc);
     }
     return adc;
   }
@@ -67,7 +68,8 @@ public:
     if (isWire(bus, channel)) {
       return buses.at(bus).geometry.valid_wire(channel, adc);
     } else if (isGrid(bus, channel)) {
-      return buses.at(bus).geometry.valid_grid(channel, adc);
+      const auto& b = buses.at(bus).geometry;
+      return b.valid_grid(b.grid(channel), adc);
     }
     return false;
   }
@@ -152,7 +154,7 @@ public:
     return b.z_offset + b.geometry.max_z();
   }
 
-  std::string debug(std::string prefix) const {
+  std::string debug(std::string prefix = "") const {
     std::stringstream ss;
 
     for (size_t i = 0; i < buses.size(); i++) {
