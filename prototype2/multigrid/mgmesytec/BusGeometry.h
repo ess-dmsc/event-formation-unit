@@ -276,10 +276,14 @@ inline void from_json(const nlohmann::json &j, BusGeometry &g) {
   g.max_wire(j["max_wire"]);
   g.max_z(j["max_z"]);
 
-  g.swap_wires(j["swap_wires"]);
-  g.swap_grids(j["swap_grids"]);
-  g.flipped_x(j["flipped_x"]);
-  g.flipped_z(j["flipped_z"]);
+  if (j.count("swap_wires"))
+    g.swap_wires(j["swap_wires"]);
+  if (j.count("swap_grids"))
+    g.swap_grids(j["swap_grids"]);
+  if (j.count("flipped_x"))
+    g.flipped_x(j["flipped_x"]);
+  if (j.count("flipped_z"))
+    g.flipped_z(j["flipped_z"]);
 
   if (j.count("wire_filters")) {
     auto wf = j["wire_filters"];

@@ -56,8 +56,21 @@ TEST_F(FilterTest, TrivialPrintsEmpty) {
 
 TEST_F(FilterTest, NonTrivialPrintsSomething) {
   f.rescale_factor = 3;
+  f.minimum = 1;
+  f.maximum = 7;
   EXPECT_FALSE(f.trivial());
   EXPECT_FALSE(f.debug().empty());
+}
+
+TEST_F(FilterTest, FromJson) {
+  nlohmann::json j;
+  j["min"] = 2;
+  j["max"] = 7;
+  j["rescale"] = 0.5;
+  f = j;
+  EXPECT_EQ(f.minimum, 2);
+  EXPECT_EQ(f.maximum, 7);
+  EXPECT_EQ(f.rescale_factor, 0.5);
 }
 
 

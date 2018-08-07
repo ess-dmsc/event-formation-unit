@@ -8,7 +8,11 @@ using namespace Multigrid;
 class BusGeometryTest : public TestBase {
 protected:
   BusGeometry geo;
+  Filter f;
   virtual void SetUp() {
+    f.minimum = 3;
+    f.maximum = 7;
+    f.rescale_factor = 0.5;
   }
   virtual void TearDown() {
   }
@@ -156,19 +160,20 @@ TEST_F(BusGeometryTest, GetY) {
 TEST_F(BusGeometryTest, GetZ) {
   EXPECT_FALSE(geo.swap_wires());
   EXPECT_EQ(geo.max_wire(), 80);
-  EXPECT_EQ(geo.max_z(), 20);
+  geo.max_z(10);
+  EXPECT_EQ(geo.max_x(), 8);
 
   EXPECT_EQ(geo.z_from_wire(0), 0);
   EXPECT_EQ(geo.z_from_wire(2), 2);
-  EXPECT_EQ(geo.z_from_wire(19), 19);
+  EXPECT_EQ(geo.z_from_wire(19), 9);
   EXPECT_EQ(geo.z_from_wire(20), 0);
-  EXPECT_EQ(geo.z_from_wire(39), 19);
+  EXPECT_EQ(geo.z_from_wire(39), 9);
 
   EXPECT_EQ(geo.z(0), 0);
   EXPECT_EQ(geo.z(2), 2);
-  EXPECT_EQ(geo.z(19), 19);
+  EXPECT_EQ(geo.z(19), 9);
   EXPECT_EQ(geo.z(20), 0);
-  EXPECT_EQ(geo.z(39), 19);
+  EXPECT_EQ(geo.z(39), 9);
 }
 
 TEST_F(BusGeometryTest, FlippedZ) {
@@ -190,8 +195,83 @@ TEST_F(BusGeometryTest, FlippedZ) {
   EXPECT_EQ(geo.z(39), 0);
 }
 
+TEST_F(BusGeometryTest, OneWireFilter) {
+  geo.override_wire_filter(5, f);
+
+  EXPECT_EQ(geo.rescale_wire(4, 2), 2);
+  EXPECT_TRUE(geo.valid_wire(4,10));
+
+  EXPECT_EQ(geo.rescale_wire(5, 2), 1);
+  EXPECT_FALSE(geo.valid_wire(5,10));
+
+  EXPECT_EQ(geo.rescale_wire(6, 2), 2);
+  EXPECT_TRUE(geo.valid_wire(6,10));
+}
+
+TEST_F(BusGeometryTest, BlanketWireFilter) {
+  geo.set_wire_filters(f);
+
+  EXPECT_EQ(geo.rescale_wire(1, 2), 1);
+  EXPECT_FALSE(geo.valid_wire(1,10));
+
+  EXPECT_EQ(geo.rescale_wire(5, 2), 1);
+  EXPECT_FALSE(geo.valid_wire(5,10));
+
+  EXPECT_EQ(geo.rescale_wire(70, 2), 1);
+  EXPECT_FALSE(geo.valid_wire(70,10));
+}
+
+TEST_F(BusGeometryTest, OneGridFilter) {
+  geo.override_grid_filter(5, f);
+
+  EXPECT_EQ(geo.rescale_grid(4, 2), 2);
+  EXPECT_TRUE(geo.valid_grid(4,10));
+
+  EXPECT_EQ(geo.rescale_grid(5, 2), 1);
+  EXPECT_FALSE(geo.valid_grid(5,10));
+
+  EXPECT_EQ(geo.rescale_grid(6, 2), 2);
+  EXPECT_TRUE(geo.valid_grid(6,10));
+}
+
+TEST_F(BusGeometryTest, BlanketGridFilter) {
+  geo.set_grid_filters(f);
+
+  EXPECT_EQ(geo.rescale_grid(1, 2), 1);
+  EXPECT_FALSE(geo.valid_grid(1,10));
+
+  EXPECT_EQ(geo.rescale_grid(5, 2), 1);
+  EXPECT_FALSE(geo.valid_grid(5,10));
+
+  EXPECT_EQ(geo.rescale_grid(30, 2), 1);
+  EXPECT_FALSE(geo.valid_grid(30,10));
+}
+
 TEST_F(BusGeometryTest, PrintsSelf) {
+  geo.swap_wires(true);
+  geo.swap_grids(true);
+  geo.flipped_x(true);
+  geo.flipped_z(true);
   EXPECT_FALSE(geo.debug().empty());
+}
+
+TEST_F(BusGeometryTest, FromJsonThrows) {
+  nlohmann::json j;
+  j["max_channel"] = "nonsense";
+  EXPECT_ANY_THROW((geo = j));
+}
+
+TEST_F(BusGeometryTest, FromJsonMinimal) {
+  nlohmann::json j;
+  j["max_channel"] = 100;
+  j["max_wire"] = 50;
+  j["max_z"] = 5;
+
+  geo = j;
+
+  EXPECT_EQ(geo.max_x(), 10);
+  EXPECT_EQ(geo.max_y(), 50);
+  EXPECT_EQ(geo.max_z(), 5);
 }
 
 
