@@ -1,6 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <multigrid/mgmesytec/MgEfuMaximum.h>
+#include <multigrid/mgmesytec/EfuMaximum.h>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL

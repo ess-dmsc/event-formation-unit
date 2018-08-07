@@ -24,17 +24,19 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 #include <memory>
-#include <multigrid/mgmesytec/DataParser.h>
+#include <multigrid/mgmesytec/Sis3153Parser.h>
+#include <multigrid/mgmesytec/Vmmr16Parser.h>
 #include <multigrid/MgConfig.h>
+#include <multigrid/mgmesytec/HitFile.h>
 #include <queue>
 #include <stdio.h>
 #include <unistd.h>
 
-#include <multigrid/mgmesytec/MgSeqGeometry.h>
+#include <multigrid/mgmesytec/SequoiaGeometry.h>
 //#include <multigrid/mgmesytec/MG24Geometry.h>
 
-#include <multigrid/mgmesytec/MgEfuMaximum.h>
-#include <multigrid/mgmesytec/MgEfuCenterMass.h>
+#include <multigrid/mgmesytec/EfuMaximum.h>
+#include <multigrid/mgmesytec/EfuCenterMass.h>
 
 #include <common/Log.h>
 
@@ -151,9 +153,25 @@ private:
 
   MgConfig mg_config;
   Monitor monitor;
-  MgStats stats;
-  std::shared_ptr<MesytecEFU> mesytec_efu;
 
+  uint64_t RecentPulseTime{0};
+
+  VMMR16Parser vmmr16Parser;
+
+  std::shared_ptr<MgEFU> mgEfu;
+  std::shared_ptr<MGHitFile> dumpfile;
+
+  uint32_t getPixel() {
+    if (!mgEfu)
+      return 0;
+    return mg_config.geometry.pixel3D(mgEfu->x(),
+                            mgEfu->y(),
+                            mgEfu->z());
+  }
+
+  uint32_t getTime() {
+    return static_cast<uint32_t>(mgEfu->time() - RecentPulseTime);
+  }
 };
 
 CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
@@ -196,25 +214,22 @@ void CSPEC::init_config()
   if (DetectorSettings.monitor)
     monitor.init(EFUSettings.KafkaBroker, readout_entries);
 
-  std::shared_ptr<MgEFU> mg_efu;
   if (mg_config.reduction_strategy == "center-mass") {
-    mg_efu = std::make_shared<MgEfuCenterMass>();
+    mgEfu = std::make_shared<MgEfuCenterMass>();
   } else {
     auto mg_efum = std::make_shared<MgEfuMaximum>();
-    mg_efu = mg_efum;
+    mgEfu = mg_efum;
   }
-  mg_efu->mappings = mg_config.mappings;
-  mg_efu->hists = monitor.hists;
-  mg_efu->raw1 = monitor.readouts;
+  mgEfu->mappings = mg_config.mappings;
+  mgEfu->hists = monitor.hists;
+  mgEfu->raw1 = monitor.readouts;
 
-  std::shared_ptr<MGHitFile> dumpfile;
   if (!DetectorSettings.fileprefix.empty())
   {
     dumpfile = std::make_shared<MGHitFile>();
     dumpfile->open_rw(DetectorSettings.fileprefix + "mgmesytec_" + timeString() + ".h5");
   }
-  mesytec_efu = std::make_shared<MesytecEFU>(mg_efu, mg_config.spoof_high_time, dumpfile);
-  mesytec_efu->set_geometry(mg_config.geometry);
+  vmmr16Parser.spoof_high_time(mg_config.spoof_high_time);
 }
 
 void CSPEC::mainThread() {
@@ -227,11 +242,12 @@ void CSPEC::mainThread() {
   cspecdata.printBufferSizes();
   cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
 
-  EV42Serializer flatbuffer(kafka_buffer_size, "multigrid");
+  EV42Serializer ev42serializer(kafka_buffer_size, "multigrid");
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  flatbuffer.set_callback(std::bind(&Producer::produce2, &EventProducer, std::placeholders::_1));
+  ev42serializer.set_callback(std::bind(&Producer::produce2, &EventProducer, std::placeholders::_1));
 
-  MesytecData sis3153parser;
+  Sis3153Parser sis3153parser;
+  sis3153parser.buffers.reserve(1000);
 
   char buffer[eth_buffer_size];
   size_t ReadSize {0};
@@ -242,25 +258,55 @@ void CSPEC::mainThread() {
       mystats.rx_bytes += ReadSize;
       LOG(Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
 
-      auto res = sis3153parser.parse(Buffer(buffer, ReadSize), stats);
-      if (res != MesytecData::error::OK) {
+      auto res = sis3153parser.parse(Buffer(buffer, ReadSize));
+      if (res != Sis3153Parser::error::OK) {
         mystats.parse_errors++;
       }
 
-      mesytec_efu->parse(sis3153parser.buffers, flatbuffer, stats);
+      for (const auto &b : sis3153parser.buffers) {
+// Parse VMMR16
+        mystats.rx_readouts += vmmr16Parser.parse(b);
+        mystats.triggers = vmmr16Parser.trigger_count();
 
-      mystats.rx_readouts += stats.readouts;
-      mystats.rx_discards += stats.discards;
-      mystats.triggers += stats.triggers;
-      mystats.badtriggers += stats.badtriggers;
-      mystats.geometry_errors+= stats.geometry_errors;
-      mystats.tx_bytes += stats.tx_bytes;
-      mystats.rx_events += stats.events;
+        if (vmmr16Parser.externalTrigger()) {
+          ev42serializer.set_pulse_time(RecentPulseTime);
+          mystats.tx_bytes += ev42serializer.produce();
+          RecentPulseTime = vmmr16Parser.time();
+        }
+
+        if (mgEfu) {
+          mgEfu->ingest(vmmr16Parser.converted_data);
+//stats.discards++;
+
+          if (mgEfu->event_good()) {
+            uint32_t pixel = getPixel();
+            uint32_t time = getTime();
+
+            XTRACE(PROCESS, DEB, "Event: pixel: %d, time: %d ", pixel, time);
+            if (pixel != 0) {
+              mystats.tx_bytes += ev42serializer.addevent(time, pixel);
+              mystats.rx_events ++;
+            } else {
+              mystats.geometry_errors++;
+            }
+          } else {
+// \todo external triggers treated as "bad"?
+            mystats.badtriggers ++;
+          }
+        }
+
+        if (dumpfile) {
+          dumpfile->data = std::move(vmmr16Parser.converted_data);
+          dumpfile->write();
+        }
+      }
+
+      //mystats.rx_discards += stats.discards;
     }
 
     // Force periodic flushing
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
-      mystats.tx_bytes += flatbuffer.produce();
+      mystats.tx_bytes += ev42serializer.produce();
       monitor.produce();
       report_timer.now();
     }
@@ -268,7 +314,7 @@ void CSPEC::mainThread() {
     // Checking for exit
     if (not runThreads) {
       // flush anything that remains
-      mystats.tx_bytes += flatbuffer.produce();
+      mystats.tx_bytes += ev42serializer.produce();
       monitor.produce();
       LOG(Sev::Info, "Stopping processing thread.");
       return;

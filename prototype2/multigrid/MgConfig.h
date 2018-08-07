@@ -8,7 +8,7 @@
 #pragma once
 
 #include <logical_geometry/ESSGeometry.h>
-#include <multigrid/mgmesytec/MgSeqGeometry.h>
+#include <multigrid/mgmesytec/SequoiaGeometry.h>
 
 struct MgConfig {
   MgConfig() {}

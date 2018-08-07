@@ -12,23 +12,15 @@
 #include <multigrid/mgmesytec/Hit.h>
 #include <vector>
 
-struct MgStats {
-  size_t readouts{0}; /**< number of channels read out */
-  size_t discards{0}; /**< readouts discarded due to adc thresholds */
-  size_t triggers{0}; /**< number of 0x58 blocks in packet */
-  size_t events{0};   /**< number of events from this packets */
-  size_t tx_bytes{0}; /**< number of bytes produced by librdkafka */
-  size_t geometry_errors{0}; /**< number of invalid pixels from readout */
-  size_t badtriggers{0}; /**< number of empty triggers or triggers without valid data */
-};
-
 class VMMR16Parser {
 public:
   void spoof_high_time(bool spoof);
   bool spoof_high_time() const;
 
   /** \brief parse n 32 bit words from mesytec VMMR-8/16 card */
-  void parse(const Buffer& buffer, MgStats& stats);
+  size_t parse(const Buffer& buffer);
+
+  size_t trigger_count() const;
 
   uint64_t time() const;
   bool externalTrigger() const;

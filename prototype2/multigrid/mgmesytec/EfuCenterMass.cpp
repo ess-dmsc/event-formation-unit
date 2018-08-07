@@ -1,6 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <multigrid/mgmesytec/MgEfuCenterMass.h>
+#include <multigrid/mgmesytec/EfuCenterMass.h>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL

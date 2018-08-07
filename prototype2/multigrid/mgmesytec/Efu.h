@@ -12,7 +12,7 @@
 #include <common/Hists.h>
 #include <common/ReadoutSerializer.h>
 #include <multigrid/mgmesytec/Hit.h>
-#include <multigrid/mgmesytec/MgSeqGeometry.h>
+#include <multigrid/mgmesytec/SequoiaGeometry.h>
 
 class MgEFU {
 public:

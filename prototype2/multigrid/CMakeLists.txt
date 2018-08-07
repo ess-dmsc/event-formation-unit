@@ -31,10 +31,10 @@ set(mgmesytec_SRC
   ../common/ReadoutSerializer.cpp
   mgmesytec.cpp
   MgConfig.cpp
-  mgmesytec/MgEfuMaximum.cpp
-  mgmesytec/MgEfuCenterMass.cpp
+  mgmesytec/EfuMaximum.cpp
+  mgmesytec/EfuCenterMass.cpp
   mgmesytec/Vmmr16Parser.cpp
-  mgmesytec/DataParser.cpp
+  mgmesytec/Sis3153Parser.cpp
   mgmesytec/Hit.cpp
   mgmesytec/HitFile.cpp
   )
@@ -43,15 +43,15 @@ set(mgmesytec_INC
   ../common/HistSerializer.h
   ../common/ReadoutSerializer.h
   MgConfig.h
-  mgmesytec/MgEFU.h
-  mgmesytec/MgEfuMaximum.h
-  mgmesytec/MgEfuCenterMass.h
+  mgmesytec/Efu.h
+  mgmesytec/EfuMaximum.h
+  mgmesytec/EfuCenterMass.h
   mgmesytec/Vmmr16Parser.h
-  mgmesytec/DataParser.h
+  mgmesytec/Sis3153Parser.h
   mgmesytec/Hit.h
   mgmesytec/HitFile.h
-  mgmesytec/MgSeqGeometry.h
-  mgmesytec/MgBusGeometry.h
+  mgmesytec/SequoiaGeometry.h
+  mgmesytec/BusGeometry.h
   )
 create_module(mgmesytec)
 
@@ -128,8 +128,8 @@ set(MGMesytecDataTest_SRC
   ../common/Hists.cpp
   ../common/ReadoutSerializer.cpp
   ../common/Producer.cpp
-  mgmesytec/DataParserTest.cpp
-  mgmesytec/DataParser.cpp
+  mgmesytec/Sis3153ParserTest.cpp
+  mgmesytec/Sis3153Parser.cpp
   mgmesytec/Vmmr16Parser.cpp
   mgmesytec/Hit.cpp
   mgmesytec/HitFile.cpp
@@ -138,13 +138,13 @@ set(MGMesytecDataTest_INC
   ../common/Hists.h
   ../common/ReadoutSerializer.h
   ../common/Producer.h
-  mgmesytec/DataParser.h
+  mgmesytec/Sis3153Parser.h
   mgmesytec/Hit.h
   mgmesytec/HitFile.h
   mgmesytec/TestData.h
-  mgmesytec/MgSeqGeometry.h
-  mgmesytec/MgBusGeometry.h
-  mgmesytec/MgEFU.h
+  mgmesytec/SequoiaGeometry.h
+  mgmesytec/BusGeometry.h
+  mgmesytec/Efu.h
   mgmesytec/Vmmr16Parser.h
   )
 create_test_executable(MGMesytecDataTest)
@@ -156,11 +156,11 @@ create_test_executable(MGMesytecDataTest)
 #create_test_executable(MG24GeometryTest)
 
 
-set(MgSeqGeometryTest_SRC
-        mgmesytec/MgSeqGeometryTest.cpp)
-set(MgSeqGeometryTest_INC
-        mgmesytec/MgSeqGeometry.h)
-create_test_executable(MgSeqGeometryTest)
+set(SequoiaGeometryTest_SRC
+        mgmesytec/SequoiaGeometryTest.cpp)
+set(SequoiaGeometryTest_INC
+        mgmesytec/SequoiaGeometry.h)
+create_test_executable(SequoiaGeometryTest)
 
 
 #set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)

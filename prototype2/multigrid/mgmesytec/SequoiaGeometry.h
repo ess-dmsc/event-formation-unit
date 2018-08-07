@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <multigrid/mgmesytec/MgBusGeometry.h>
+#include <multigrid/mgmesytec/BusGeometry.h>
 #include <vector>
 
 #include <common/Trace.h>

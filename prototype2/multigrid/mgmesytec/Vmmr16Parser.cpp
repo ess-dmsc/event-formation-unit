@@ -49,14 +49,20 @@ bool VMMR16Parser::externalTrigger() const
   return external_trigger_;
 }
 
-void VMMR16Parser::parse(const Buffer& buffer, MgStats &stats) {
+size_t VMMR16Parser::trigger_count() const
+{
+  return trigger_count_;
+}
 
+
+size_t VMMR16Parser::parse(const Buffer& buffer) {
+
+  size_t readouts {0};
   converted_data.clear();
   external_trigger_ = false;
   hit = MGHit();
 
   trigger_count_++;
-  stats.triggers = trigger_count_;
   hit.trigger_count = trigger_count_;
 
   auto datap = reinterpret_cast<uint32_t*>(buffer.buffer);
@@ -73,7 +79,7 @@ void VMMR16Parser::parse(const Buffer& buffer, MgStats &stats) {
   }
    */
 
-  XTRACE(DATA, DEB, "VMMR16 Buffer:  size=%d", buffer.size);
+  XTRACE(DATA, DEB, "VMMR16 Buffer:  size=%d, trigger=%d", buffer.size, trigger_count_);
 
   while (wordsleft > 0) {
     auto datatype = *datap & TypeMask;
@@ -88,13 +94,13 @@ void VMMR16Parser::parse(const Buffer& buffer, MgStats &stats) {
         converted_data.push_back(hit);
         converted_data.back().external_trigger = true;
       }
-      XTRACE(DATA, DEB, "   Header:  trigger=%zu, module=%d, external_trigger=%s, words=%d",
-             stats.triggers, hit.module, external_trigger_ ? "true" : "false", words);
+      XTRACE(DATA, DEB, "   Header:  module=%d, external_trigger=%s, words=%d",
+             hit.module, external_trigger_ ? "true" : "false", words);
       if (words > buffer.size)
       {
         XTRACE(DATA, ERR, "   VMMR16 buffer size mismatch:  %d > %d",
                words, buffer.size);
-        return;
+        return 0;
       }
       break;
 
@@ -120,7 +126,7 @@ void VMMR16Parser::parse(const Buffer& buffer, MgStats &stats) {
       hit.channel = static_cast<uint16_t>((*datap & ChannelMask) >> ChannelBitShift);
       hit.adc = static_cast<uint16_t>(*datap & AdcMask);
       converted_data.push_back(hit);
-      stats.readouts++;
+      readouts++;
 
       XTRACE(DATA, DEB, "   DataEvent2:  bus=%d, channel=%d, adc=%d",
           hit.bus, hit.channel, hit.adc);
@@ -165,4 +171,5 @@ void VMMR16Parser::parse(const Buffer& buffer, MgStats &stats) {
     XTRACE(DATA, DEB, "     %s", h.debug().c_str());
   }
 
+  return readouts;
 }

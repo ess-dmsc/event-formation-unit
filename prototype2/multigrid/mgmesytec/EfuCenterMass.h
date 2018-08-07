@@ -8,7 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #pragma once
-#include <multigrid/mgmesytec/MgEFU.h>
+#include <multigrid/mgmesytec/Efu.h>
 #include <limits>
 
 class MgEfuCenterMass : public MgEFU {
