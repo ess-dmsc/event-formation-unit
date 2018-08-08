@@ -42,7 +42,7 @@ bool EfuMaximum::ingest(const Hit &hit) {
   time_ = std::max(hit.total_time, time_);
 
   if (mappings.isWire(hit.bus, hit.channel)) {
-    if (adc > WireAdcMax) {
+    if (adc >= WireAdcMax) {
       WireGood = true;
       WireAdcMax = adc;
       x_ = mappings.x(hit.bus, hit.channel);
@@ -55,7 +55,7 @@ bool EfuMaximum::ingest(const Hit &hit) {
       hists->binstrips(mappings.wire(hit.bus, hit.channel), adc, 0, 0);
     return true;
   } else if (mappings.isGrid(hit.bus, hit.channel)) {
-    if (adc > GridAdcMax) {
+    if (adc >= GridAdcMax) {
       GridGood = true;
       GridAdcMax = adc;
       y_ = mappings.y(hit.bus, hit.channel);

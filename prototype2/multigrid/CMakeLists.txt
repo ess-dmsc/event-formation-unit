@@ -73,7 +73,7 @@ set(mgcncsgen_INC
 create_executable(mgcncsgen)
 
 #
-set(mgcncsgenfile_INC generators/DGArgs.h )
+set(mgcncsgenfile_INC generators/DGArgs.h)
 set(mgcncsgenfile_SRC
   generators/mgcncsgenfile.cpp
   generators/DGArgs.cpp
@@ -81,7 +81,7 @@ set(mgcncsgenfile_SRC
 create_executable(mgcncsgenfile)
 
 # Data generator for raw cspec data
-set(mgcncsgenjson_INC generators/JsonArgs.h )
+set(mgcncsgenjson_INC generators/JsonArgs.h)
 set(mgcncsgenjson_SRC
   generators/mgcncsgenjson.cpp
   generators/JsonArgs.cpp
@@ -179,10 +179,40 @@ set(BusGeometryTest_INC
 create_test_executable(BusGeometryTest)
 
 set(SequoiaGeometryTest_SRC
-        mgmesytec/SequoiaGeometryTest.cpp)
+  mgmesytec/SequoiaGeometryTest.cpp)
 set(SequoiaGeometryTest_INC
-        mgmesytec/SequoiaGeometry.h)
+  mgmesytec/SequoiaGeometry.h)
 create_test_executable(SequoiaGeometryTest)
+
+set(EfuMaximumTest_SRC
+  mgmesytec/EfuMaximumTest.cpp
+  mgmesytec/EfuMaximum.cpp
+  mgmesytec/Hit.cpp
+  ../common/Hists.cpp
+  ../common/ReadoutSerializer.cpp)
+set(EfuMaximumTest_INC
+  mgmesytec/EfuMaximum.h
+  mgmesytec/Efu.h
+  mgmesytec/SequoiaGeometry.h
+  mgmesytec/Hit.h
+  ../common/Hists.h
+  ../common/ReadoutSerializer.h)
+create_test_executable(EfuMaximumTest)
+
+set(EfuCenterMassTest_SRC
+  mgmesytec/EfuCenterMassTest.cpp
+  mgmesytec/EfuCenterMass.cpp
+  mgmesytec/Hit.cpp
+  ../common/Hists.cpp
+  ../common/ReadoutSerializer.cpp)
+set(EfuCenterMassTest_INC
+  mgmesytec/EfuCenterMass.h
+  mgmesytec/Efu.h
+  mgmesytec/SequoiaGeometry.h
+  mgmesytec/Hit.h
+  ../common/Hists.h
+  ../common/ReadoutSerializer.h)
+create_test_executable(EfuCenterMassTest)
 
 
 #set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
@@ -195,7 +225,7 @@ create_test_executable(SequoiaGeometryTest)
 add_library(calibfile OBJECT mgcncs/CalibrationFile.cpp)
 
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Release")
+if(${CMAKE_BUILD_TYPE} STREQUAL "Release")
   message(STATUS "*** Skipping CalibrationFileTest - fails with Release compile flags")
 elseif(${CMAKE_COMPILER_IS_GNUCXX})
   enable_coverage_flags(calibfile)

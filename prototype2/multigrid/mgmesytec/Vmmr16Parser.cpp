@@ -160,6 +160,11 @@ size_t VMMR16Parser::parse(const Buffer &buffer) {
     previous_low_time_ = hit.low_time;
   }
 
+  if (high_time_ < previous_high_time_) {
+    XTRACE(DATA, WAR, "   High time overflow!");
+  }
+  previous_high_time_ = high_time_;
+
   // Apply timestamp to all readouts
   hit.high_time = high_time_;
   hit.total_time = (static_cast<uint64_t>(high_time_) << LowTimeBits) + hit.low_time;

@@ -41,6 +41,8 @@ private:
   bool spoof_high_time_{false};
   uint32_t previous_low_time_{0};
 
+  uint32_t previous_high_time_{0};
+
   // clang-format off
 // Mesytec Datasheet: VMMR-8/16 v00.01
   enum Type : uint32_t {

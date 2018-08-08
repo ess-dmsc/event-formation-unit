@@ -271,7 +271,8 @@ void CSPEC::mainThread() {
 
           if (vmmr16Parser.externalTrigger()) {
             ev42serializer.set_pulse_time(RecentPulseTime);
-            mystats.tx_bytes += ev42serializer.produce();
+            if (ev42serializer.events())
+              mystats.tx_bytes += ev42serializer.produce();
             RecentPulseTime = vmmr16Parser.time();
           }
 
