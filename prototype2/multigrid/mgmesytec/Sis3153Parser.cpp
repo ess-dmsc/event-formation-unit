@@ -21,7 +21,7 @@ enum SisType : uint32_t {
 
 // \todo get rid of magic numbers
 
-size_t Sis3153Parser::parse(const Buffer &buffer) {
+size_t Sis3153Parser::parse(const Buffer<uint8_t> &buffer) {
 
   buffers.clear();
 
@@ -61,7 +61,7 @@ size_t Sis3153Parser::parse(const Buffer &buffer) {
     datap++;
     bytesleft -= 4;
 
-    buffers.emplace_back(Buffer(datap, len - 3));
+    buffers.emplace_back(Buffer<uint32_t>(datap, len - 3));
 
     datap += (len - 3);
     bytesleft -= (len - 3) * 4;

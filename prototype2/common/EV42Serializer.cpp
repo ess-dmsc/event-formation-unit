@@ -31,12 +31,12 @@ EV42Serializer::EV42Serializer(size_t max_array_length, std::string source_name)
                                         InitialPulseTime, timeoff, pixeloff);
   FinishEventMessageBuffer(builder, evMsgHeader);
 
-  fbBufferPointer = reinterpret_cast<char*>(builder.GetBufferPointer());
-  fbSize = builder.GetSize();
-  assert(fbSize > 0);
-  assert(fbBufferPointer != nullptr);
+  buffer.buffer = builder.GetBufferPointer();
+  buffer.size = builder.GetSize();
+  assert(buffer.size > 0);
+  assert(buffer.buffer != nullptr);
 
-  eventMsg = const_cast<EventMessage *>(GetEventMessage(fbBufferPointer));
+  eventMsg = const_cast<EventMessage *>(GetEventMessage(buffer.buffer));
   timeLenPtr =
       reinterpret_cast<flatbuffers::uoffset_t *>(
           const_cast<std::uint8_t *>(eventMsg->time_of_flight()->Data())) -
@@ -47,29 +47,25 @@ EV42Serializer::EV42Serializer(size_t max_array_length, std::string source_name)
       1;
 }
 
-void EV42Serializer::set_callback(std::function<void(Buffer)> cb)
+void EV42Serializer::set_callback(ProducerCallback cb)
 {
   producer_callback = cb;
 }
 
-Buffer EV42Serializer::serialize() {
-  Buffer ret;
+Buffer<uint8_t> EV42Serializer::serialize() {
   if (events_ > max_events_) {
     // TODO: this should probably throw instead?
-    return ret;
+    return {};
   }
   eventMsg->mutate_message_id(message_id_);
   *timeLenPtr = events_;
   *pixelLenPtr = events_;
 
-  ret.buffer = fbBufferPointer;
-  ret.size = fbSize;
-
   // reset counter and increment message counter
   events_ = 0;
   message_id_++;
 
-  return ret;
+  return buffer;
 }
 
 size_t EV42Serializer::produce() {

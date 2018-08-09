@@ -12,7 +12,7 @@ HistSerializer::HistSerializer(size_t buffer_half_size)
     : builder(2 * buffer_half_size + 256) {}
 
 
-void HistSerializer::set_callback(std::function<void(Buffer)> cb) {
+void HistSerializer::set_callback(ProducerCallback cb) {
   producer_callback = cb;
 }
 
@@ -49,9 +49,7 @@ size_t HistSerializer::produce(const Hists &hists) {
 
   builder.Finish(msg);
 
-  Buffer buffer;
-  buffer.buffer = (char *)builder.GetBufferPointer();
-  buffer.size = builder.GetSize();
+  Buffer<uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
 
   if (producer_callback) {
     producer_callback(buffer);

@@ -51,7 +51,7 @@ size_t VMMR16Parser::trigger_count() const {
   return trigger_count_;
 }
 
-size_t VMMR16Parser::parse(const Buffer &buffer) {
+size_t VMMR16Parser::parse(const Buffer<uint32_t> &buffer) {
 
   bool time_good {false};
 

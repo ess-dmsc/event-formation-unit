@@ -23,7 +23,7 @@ protected:
   char flatbuffer[1024 * 1024 * 5];
 
 public:
-  void copy_buffer(Buffer b)
+  void copy_buffer(Buffer<uint8_t> b)
   {
     memcpy(flatbuffer, b.buffer, b.size);
   }

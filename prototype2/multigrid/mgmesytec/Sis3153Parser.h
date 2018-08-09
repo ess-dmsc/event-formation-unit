@@ -17,9 +17,9 @@ class Sis3153Parser {
 public:
   /// \brief parse a binary payload, return number readout buffers within
   ///        fills the buffer member variable with references to sub-buffers
-  size_t parse(const Buffer &buffer);
+  size_t parse(const Buffer<uint8_t> &buffer);
 
-  std::vector<Buffer> buffers;
+  std::vector<Buffer<uint32_t>> buffers;
 };
 
 }

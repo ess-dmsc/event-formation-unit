@@ -12,21 +12,20 @@
 #include "mo01_nmx_generated.h"
 
 #include <common/Hists.h>
-#include <common/Buffer.h>
-#include <functional>
+#include <common/Producer.h>
 
 class HistSerializer {
 public:
   /** \todo document */
   HistSerializer(size_t buffer_half_size);
 
-  void set_callback(std::function<void(Buffer)> cb);
+  void set_callback(ProducerCallback cb);
 
   /** \todo document */
   size_t produce(const Hists &hists);
 
 private:
-  std::function<void(Buffer)> producer_callback;
+  ProducerCallback producer_callback;
 
   flatbuffers::FlatBufferBuilder builder;
 

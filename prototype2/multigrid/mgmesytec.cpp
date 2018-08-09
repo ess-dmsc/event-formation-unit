@@ -249,7 +249,7 @@ void CSPEC::mainThread() {
   Multigrid::Sis3153Parser sis3153parser;
   sis3153parser.buffers.reserve(1000);
 
-  char buffer[eth_buffer_size];
+  uint8_t buffer[eth_buffer_size];
   size_t ReadSize {0};
   TSCTimer report_timer;
   for (;;) {
@@ -258,7 +258,7 @@ void CSPEC::mainThread() {
       mystats.rx_bytes += ReadSize;
       LOG(Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
 
-      if (sis3153parser.parse(Buffer(buffer, ReadSize))) {
+      if (sis3153parser.parse(Buffer<uint8_t>(buffer, ReadSize))) {
 
         for (const auto &b : sis3153parser.buffers) {
 

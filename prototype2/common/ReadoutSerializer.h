@@ -10,7 +10,7 @@
 #pragma once
 
 #include "mo01_nmx_generated.h"
-#include <common/Buffer.h>
+#include "Producer.h"
 #include <functional>
 
 class ReadoutSerializer {
@@ -19,7 +19,7 @@ public:
   /// \param maxentries the number of readout tuples to buffer before sending to Kafka
   ReadoutSerializer(size_t maxentries);
 
-  void set_callback(std::function<void(Buffer)> cb);
+  void set_callback(ProducerCallback cb);
 
   /// \brief function to add a readout tuple to an array for later publishing to Kafka
   /// \param plane arbitrary data multiplexer (x, y, module, rack, ...)
@@ -35,7 +35,7 @@ public:
   size_t getNumEntries(){return entries;};
 
 private:
-  std::function<void(Buffer)> producer_callback;
+  ProducerCallback producer_callback;
 
   size_t maxlen{0}; ///< maximum number of entries in array
   flatbuffers::FlatBufferBuilder builder; ///< google flatbuffer builder

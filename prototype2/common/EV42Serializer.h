@@ -10,6 +10,7 @@
 #pragma once
 
 #include "ev42_events_generated.h"
+#include "Producer.h"
 #include <common/Buffer.h>
 #include <functional>
 
@@ -18,7 +19,7 @@ public:
   /** \todo document */
   EV42Serializer(size_t max_array_length, std::string source_name);
 
-  void set_callback(std::function<void(Buffer)> cb);
+  void set_callback(ProducerCallback cb);
 
   /** \todo document */
   void set_pulse_time(uint64_t time);
@@ -40,7 +41,7 @@ public:
 
   //TODO: make private
   /** \todo document */
-  Buffer serialize();
+  Buffer<uint8_t> serialize();
 
 private:
   // \todo should this not be predefined in terms of jumbo frame?
@@ -50,7 +51,7 @@ private:
   // \todo maybe should be mutated directly in buffer?
   uint64_t message_id_{1};
 
-  std::function<void(Buffer)> producer_callback;
+  ProducerCallback producer_callback;
 
   // All of this is the flatbuffer
   flatbuffers::FlatBufferBuilder builder;
@@ -59,8 +60,7 @@ private:
 
   EventMessage *eventMsg;
 
-  char *fbBufferPointer {nullptr};
-  size_t fbSize {0};
+  Buffer<uint8_t> buffer;
   flatbuffers::uoffset_t *timeLenPtr;
   flatbuffers::uoffset_t *pixelLenPtr;
 };

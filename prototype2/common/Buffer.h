@@ -3,7 +3,8 @@
 ///
 /// \file
 ///
-/// \brief common definition of buffer
+/// \brief common definition of buffer, used as reference to some location in
+///        memory with a length. NOT responsible for (de-)allocation!
 ///
 //===----------------------------------------------------------------------===//
 
@@ -11,22 +12,25 @@
 
 #include <cinttypes>
 #include <cstddef>
+#include <vector>
 
 // \todo make specific types, maybe template?
 
+template<typename T>
 struct Buffer {
   Buffer() {}
 
-  Buffer(char *address, size_t sz)
+  Buffer(T *address, size_t sz)
       : buffer(address), size(sz) {}
 
-  Buffer(uint16_t *address, size_t sz)
-      : buffer(reinterpret_cast<char*>(address)), size(sz) {}
+  Buffer(std::vector<T> &vector)
+      : Buffer(vector.data(), vector.size()) {}
 
-  Buffer(uint32_t *address, size_t sz)
-      : buffer(reinterpret_cast<char*>(address)), size(sz) {}
+  operator bool() const {
+    return (buffer && size);
+  }
 
-  char *buffer{nullptr};
+  T *buffer{nullptr};
   size_t size{0};
 };
 

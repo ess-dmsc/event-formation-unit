@@ -20,7 +20,7 @@ protected:
 // \todo test default state
 
 TEST_F(Vmmr16ParserTest, ErrNoTimeStamp) {
-  auto res = sis.parse(Buffer((char *)&err_no_timestamp[0], err_no_timestamp.size()));
+  auto res = sis.parse(err_no_timestamp);
   ASSERT_EQ(res, 1);
 
   EXPECT_EQ(vmmr.parse(sis.buffers.front()), 0);
@@ -29,7 +29,7 @@ TEST_F(Vmmr16ParserTest, ErrNoTimeStamp) {
 }
 
 TEST_F(Vmmr16ParserTest, ParseRecordedWSData) {
-  ASSERT_EQ(sis.parse(Buffer((char *)&ws1[0], ws1.size())), 1);
+  ASSERT_EQ(sis.parse(ws1), 1);
 
   auto res = vmmr.parse(sis.buffers.front());
 
@@ -41,7 +41,7 @@ TEST_F(Vmmr16ParserTest, ParseRecordedWSData) {
 }
 
 TEST_F(Vmmr16ParserTest, ParseRecordedWSDataII) {
-  ASSERT_EQ(sis.parse(Buffer((char *)&ws2[0], ws2.size())), 2);
+  ASSERT_EQ(sis.parse(ws2), 2);
 
   auto res = vmmr.parse(sis.buffers.front());
   EXPECT_EQ(res, 128);
@@ -59,7 +59,7 @@ TEST_F(Vmmr16ParserTest, ParseRecordedWSDataII) {
 }
 
 TEST_F(Vmmr16ParserTest, ParseRecordedWSDataIII) {
-  ASSERT_EQ(sis.parse(Buffer((char *)&ws3[0], ws3.size())), 4);
+  ASSERT_EQ(sis.parse(ws3), 4);
 
   size_t total{0};
   for (const auto&b : sis.buffers)
@@ -70,7 +70,7 @@ TEST_F(Vmmr16ParserTest, ParseRecordedWSDataIII) {
 }
 
 TEST_F(Vmmr16ParserTest, ParseRecordedWSDataMultipleTriggers) {
-  ASSERT_EQ(sis.parse(Buffer((char *)&ws4[0], ws4.size())), 36);
+  ASSERT_EQ(sis.parse(ws4), 36);
 
   size_t total{0};
   for (const auto&b : sis.buffers)

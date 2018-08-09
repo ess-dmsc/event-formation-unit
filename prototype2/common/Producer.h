@@ -11,18 +11,20 @@
 
 #include <librdkafka/rdkafkacpp.h>
 #include <common/Buffer.h>
+#include <functional>
 
 class ProducerBase {
 public:
   ProducerBase() = default;
   virtual ~ProducerBase() = default;
+
+  // \todo deprecate this function in favor of encapsulated buffer
   virtual int produce(char *buffer, size_t length) = 0;
 
-  inline void produce2(const Buffer& buffer)
+  inline void produce2(const Buffer<uint8_t>& buffer)
   {
-    this->produce(buffer.buffer, buffer.size);
+    this->produce(reinterpret_cast<char*>(buffer.buffer), buffer.size);
   }
-
 };
 
 class Producer : public ProducerBase {
@@ -48,3 +50,5 @@ private:
   RdKafka::Topic *topic{0};
   RdKafka::Producer *producer{0};
 };
+
+using ProducerCallback = std::function<void(Buffer<uint8_t>)>;

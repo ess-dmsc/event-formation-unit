@@ -16,7 +16,7 @@ ReadoutSerializer::ReadoutSerializer(size_t maxarraylength)
       builder.Clear();
 }
 
-void ReadoutSerializer::set_callback(std::function<void(Buffer)> cb) {
+void ReadoutSerializer::set_callback(ProducerCallback cb) {
   producer_callback = cb;
 }
 
@@ -36,9 +36,7 @@ size_t ReadoutSerializer::produce() {
   auto msg = CreateMonitorMessage(builder, 0, DataField::MONHit, dataoff.Union());
   builder.Finish(msg);
 
-  Buffer buffer;
-  buffer.buffer = (char *)builder.GetBufferPointer();
-  buffer.size = builder.GetSize();
+  Buffer<uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
   if (producer_callback) {
     producer_callback(buffer);
   }
