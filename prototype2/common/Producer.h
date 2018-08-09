@@ -19,11 +19,12 @@ public:
   virtual ~ProducerBase() = default;
 
   // \todo deprecate this function in favor of encapsulated buffer
-  virtual int produce(char *buffer, size_t length) = 0;
+  virtual int produce(void* buffer, size_t bytes) = 0;
 
-  inline void produce2(const Buffer<uint8_t>& buffer)
+  template<typename T>
+  inline void produce2(const Buffer<T>& buffer)
   {
-    this->produce(reinterpret_cast<char*>(buffer.buffer), buffer.size);
+    this->produce(buffer.address, buffer.bytes());
   }
 };
 
@@ -41,7 +42,7 @@ public:
    *  @param buffer Pointer to char buffer containing data to be tx'ed
    *  @param length Size of buffer data in bytes
    */
-  int produce(char *buffer, size_t length) override;
+  int produce(void* buffer, size_t bytes) override;
 
 private:
   std::string errstr;

@@ -241,7 +241,7 @@ void NMX::processing_thread() {
   Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
   EV42Serializer flatbuffer(kafka_buffer_size, "nmx");
   flatbuffer.set_callback(
-      std::bind(&Producer::produce2, &eventprod, std::placeholders::_1));
+      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
   Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
   TrackSerializer trackfb(256, nmx_opts.track_sample_minhits,
@@ -249,7 +249,7 @@ void NMX::processing_thread() {
   Hists hists(Hit::strip_max_val, Hit::adc_max_val);
   HistSerializer histfb(hists.needed_buffer_size());
   histfb.set_callback(
-      std::bind(&Producer::produce2, &monitorprod, std::placeholders::_1));
+      std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 

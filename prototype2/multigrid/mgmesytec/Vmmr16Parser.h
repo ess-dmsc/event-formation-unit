@@ -43,18 +43,6 @@ private:
 
   uint32_t previous_high_time_{0};
 
-  // clang-format off
-// Mesytec Datasheet: VMMR-8/16 v00.01
-  enum Type : uint32_t {
-    Header            = 0x40000000,
-    ExtendedTimeStamp = 0x20000000,
-    DataEvent1        = 0x30000000,
-    DataEvent2        = 0x10000000,
-    EndOfEvent        = 0xc0000000,
-    FillDummy         = 0x00000000
-  };
-// clang-format on
-
 };
 
 }

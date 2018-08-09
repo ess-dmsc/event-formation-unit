@@ -14,31 +14,61 @@
 #include <cstddef>
 #include <vector>
 
-// \todo make specific types, maybe template?
+// \todo reverse iteration facilities
 
 template<typename T>
 struct Buffer {
+
+  // \brief creates invalid buffer
   Buffer() {}
 
-  Buffer(T *address, size_t sz)
-      : buffer(address), size(sz) {}
+  // \brief creates buffer with provided address and size
+  Buffer(T *addr, size_t sz)
+      : address(addr), size(sz) {}
 
+  // \brief creates buffer as reference to standard vector
   Buffer(std::vector<T> &vector)
       : Buffer(vector.data(), vector.size()) {}
 
-  operator bool() const {
-    return (buffer && size);
+  size_t bytes() const {
+    return size * sizeof(T);
   }
 
-  // prefix ++
+  // \brief creates buffer from buffer, converting bit resolution
+  template<typename TT>
+  explicit Buffer(Buffer<TT> other)
+      : address(reinterpret_cast<T*>(other.address))
+      , size(other.bytes() / sizeof(T)) {}
+
+  // \brief checks buffer validity
+  operator bool() const {
+    return (address && size);
+  }
+
+  // \brief access buffer element by value
+  T operator [](size_t i) const {return address[i];}
+
+  // \brief access buffer element by reference
+  T& operator [](size_t i) {return address[i];}
+
+  // \brief access buffer element by const reference
+  const T& at(size_t i) const {return address[i];}
+
+  // \brief access first element by value
+  T operator *() const {return *address;}
+
+  // \brief access first element by reference
+  T& operator *() {return *address;}
+
+  // \brief prefix increment
   Buffer& operator++ ()
   {
-    ++buffer;
+    ++address;
     --size;
     return *this;
   }
 
-  // postfix ++
+  // \brief postfix increment
   Buffer operator++ (int)
   {
     Buffer result(*this);
@@ -46,14 +76,15 @@ struct Buffer {
     return result;
   }
 
+  // \brief increment by value
   Buffer operator+=(const size_t& rhs)
   {
-    this->buffer += rhs;
+    this->address += rhs;
     this->size -= rhs;
     return *this;
   }
 
-  T *buffer{nullptr};
+  T *address{nullptr};
   size_t size{0};
 };
 

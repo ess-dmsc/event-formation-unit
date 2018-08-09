@@ -176,7 +176,7 @@ void MBCAEN::processing_thread() {
   EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
   Producer eventprod(EFUSettings.KafkaBroker, "MB_detector");
   flatbuffer.set_callback(
-      std::bind(&Producer::produce2, &eventprod, std::placeholders::_1));
+      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
   multiBladeEventBuilder builder[ncass];
   for (uint32_t i = 0; i < ncass; i++) {

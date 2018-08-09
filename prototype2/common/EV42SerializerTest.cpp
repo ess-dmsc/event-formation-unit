@@ -31,7 +31,7 @@ TEST_F(EV42SerializerTest, Serialize) {
   auto buffer = fb.serialize();
   ASSERT_TRUE(buffer.size >= ARRAYLENGTH * 8);
   ASSERT_TRUE(buffer.size <= ARRAYLENGTH * 8 + 2048);
-  ASSERT_TRUE(buffer.buffer != nullptr);
+  ASSERT_TRUE(buffer);
 }
 
 TEST_F(EV42SerializerTest, SerDeserialize) {
@@ -43,7 +43,7 @@ TEST_F(EV42SerializerTest, SerDeserialize) {
   auto events = GetEventMessage(flatbuffer);
   ASSERT_NE(events->message_id(), 1);
 
-  memcpy(flatbuffer, buffer.buffer, buffer.size);
+  memcpy(flatbuffer, buffer.address, buffer.size);
   events = GetEventMessage(flatbuffer);
   ASSERT_EQ(events->message_id(), 1);
 }
@@ -57,7 +57,7 @@ TEST_F(EV42SerializerTest, SerPulseTime) {
   auto events = GetEventMessage(flatbuffer);
   ASSERT_NE(events->pulse_time(), 12345);
 
-  memcpy(flatbuffer, buffer.buffer, buffer.size);
+  memcpy(flatbuffer, buffer.address, buffer.size);
   events = GetEventMessage(flatbuffer);
   ASSERT_EQ(events->pulse_time(), 12345);
 }
@@ -70,10 +70,9 @@ TEST_F(EV42SerializerTest, DeserializeCheckData) {
   }
 
   auto buffer = fb.serialize();
-  ASSERT_TRUE(buffer.size > 0);
-  ASSERT_TRUE(buffer.buffer != nullptr);
+  ASSERT_TRUE(buffer);
 
-  memcpy(flatbuffer, buffer.buffer, buffer.size);
+  memcpy(flatbuffer, buffer.address, buffer.size);
   auto veri = flatbuffers::Verifier((uint8_t *)flatbuffer, buffer.size);
   ASSERT_TRUE(VerifyEventMessageBuffer(veri));
   auto events = GetEventMessage(flatbuffer);

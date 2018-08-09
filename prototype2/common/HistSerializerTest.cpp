@@ -25,7 +25,7 @@ protected:
 public:
   void copy_buffer(Buffer<uint8_t> b)
   {
-    memcpy(flatbuffer, b.buffer, b.size);
+    memcpy(flatbuffer, b.address, b.size);
   }
 
 };

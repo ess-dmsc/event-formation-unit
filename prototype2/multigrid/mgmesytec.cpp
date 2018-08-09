@@ -73,8 +73,8 @@ struct Monitor
     histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size());
 
     producer = std::make_shared<Producer>(broker, "C-SPEC_monitor");
-    readouts->set_callback(std::bind(&Producer::produce2, producer.get(), std::placeholders::_1));
-    histfb->set_callback(std::bind(&Producer::produce2, producer.get(), std::placeholders::_1));
+    readouts->set_callback(std::bind(&Producer::produce2<uint8_t>, producer.get(), std::placeholders::_1));
+    histfb->set_callback(std::bind(&Producer::produce2<uint8_t>, producer.get(), std::placeholders::_1));
     enabled_ = true;
   }
 
@@ -244,7 +244,7 @@ void CSPEC::mainThread() {
 
   EV42Serializer ev42serializer(kafka_buffer_size, "multigrid");
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  ev42serializer.set_callback(std::bind(&Producer::produce2, &EventProducer, std::placeholders::_1));
+  ev42serializer.set_callback(std::bind(&Producer::produce2<uint8_t>, &EventProducer, std::placeholders::_1));
 
   Multigrid::Sis3153Parser sis3153parser;
   sis3153parser.buffers.reserve(1000);

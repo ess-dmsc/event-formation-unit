@@ -54,13 +54,13 @@ Producer::~Producer() {
 }
 
 /** called to actually send data to Kafka cluster */
-int Producer::produce(char *buffer, size_t length) {
+int Producer::produce(void *buffer, size_t bytes) {
   if (producer == nullptr || topic == nullptr) {
     return RdKafka::ERR_UNKNOWN;
   }
   RdKafka::ErrorCode resp = producer->produce(
       topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */, buffer,
-      length, NULL, NULL);
+      bytes, NULL, NULL);
   if (resp != RdKafka::ERR_NO_ERROR) {
     LOG(Sev::Error, "Produce failed: {}", RdKafka::err2str(resp));
     return resp;

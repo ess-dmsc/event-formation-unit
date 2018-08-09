@@ -31,12 +31,11 @@ EV42Serializer::EV42Serializer(size_t max_array_length, std::string source_name)
                                         InitialPulseTime, timeoff, pixeloff);
   FinishEventMessageBuffer(builder, evMsgHeader);
 
-  buffer.buffer = builder.GetBufferPointer();
+  buffer.address = builder.GetBufferPointer();
   buffer.size = builder.GetSize();
-  assert(buffer.size > 0);
-  assert(buffer.buffer != nullptr);
+  assert(buffer);
 
-  eventMsg = const_cast<EventMessage *>(GetEventMessage(buffer.buffer));
+  eventMsg = const_cast<EventMessage *>(GetEventMessage(buffer.address));
   timeLenPtr =
       reinterpret_cast<flatbuffers::uoffset_t *>(
           const_cast<std::uint8_t *>(eventMsg->time_of_flight()->Data())) -
