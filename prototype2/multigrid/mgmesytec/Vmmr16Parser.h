@@ -20,7 +20,7 @@ public:
   bool spoof_high_time() const;
 
   /** \brief parse n 32 bit words from mesytec VMMR-8/16 card */
-  size_t parse(const Buffer<uint32_t> &buffer);
+  size_t parse(Buffer<uint32_t> buffer);
 
   size_t trigger_count() const;
 

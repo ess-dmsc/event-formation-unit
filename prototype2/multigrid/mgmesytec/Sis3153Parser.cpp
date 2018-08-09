@@ -15,17 +15,15 @@ namespace Multigrid {
 // Struck: Ethernet UDP Addendum revision 107
 enum SisType : uint32_t {
   BeginReadout = 0xbb000000,
-  EndReadout = 0xee000000
+  EndReadout   = 0xee000000
 };
 // clang-format on
 
 // \todo get rid of magic numbers
 
-size_t Sis3153Parser::parse(const Buffer<uint8_t> &buffer) {
+size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
 
   buffers.clear();
-
-  auto bytesleft = buffer.size;
 
   if (buffer.buffer[0] != 0x60) {
     XTRACE(DATA, WAR, "Expected buffer header value 0x60");
@@ -37,48 +35,43 @@ size_t Sis3153Parser::parse(const Buffer<uint8_t> &buffer) {
     return 0;
   }
 
-  uint32_t *datap = reinterpret_cast<uint32_t *>(buffer.buffer + 3);
-  bytesleft -= 3;
+  buffer += 3;
+  auto buf32 = Buffer<uint32_t>(reinterpret_cast<uint32_t *>(buffer.buffer), buffer.size/4);
 
-  while (bytesleft > 16) {
+  while (buf32.size > 4) {
 
     // Header1?
-    if ((*datap & 0x000000ff) != 0x58) {
+    if ((*buf32.buffer & 0x000000ff) != 0x58) {
       XTRACE(DATA, WAR, "Expected header value 0x58");
       return 0;
     }
-    uint16_t len = ntohs((*datap & 0x00ffff00) >> 8);
-    XTRACE(DATA, DEB, "sis3153 datawords %d", len);
-    datap++;
-    bytesleft -= 4;
+    auto length32 = ntohs(static_cast<uint16_t>((*buf32.buffer >> 8) & 0x0000ffff));
+    XTRACE(DATA, DEB, "sis3153 datawords %d", length32);
+    buf32++;
 
     // Header2?
-    if ((*datap & 0xff000000) != SisType::BeginReadout) {
+    if ((*buf32.buffer & 0xff000000) != SisType::BeginReadout) {
       XTRACE(DATA, WAR, "Expected readout header value 0x%04x, got 0x%04x",
-             SisType::BeginReadout, (*datap & 0xff000000));
+             SisType::BeginReadout, (*buf32.buffer & 0xff000000));
       return 0;
     }
-    datap++;
-    bytesleft -= 4;
+    buf32++;
 
-    buffers.emplace_back(Buffer<uint32_t>(datap, len - 3));
+    buffers.emplace_back(Buffer<uint32_t>(buf32.buffer, length32 - 3));
 
-    datap += (len - 3);
-    bytesleft -= (len - 3) * 4;
+    buf32 += (length32 - 3);
 
-    if (*datap != 0x87654321) {
+    if (*buf32.buffer != 0x87654321) {
       XTRACE(DATA, WAR, "Protocol mismatch, expected 0x87654321");
       return 0;
     }
-    datap++;
-    bytesleft -= 4;
+    buf32++;
 
-    if ((*datap & 0xff000000) != SisType::EndReadout) {
+    if ((*buf32.buffer & 0xff000000) != SisType::EndReadout) {
       XTRACE(DATA, WAR, "Missing End-of-readout marker");
       return 0;
     }
-    datap++;
-    bytesleft -= 4;
+    buf32++;
   }
 
   return buffers.size();

@@ -51,7 +51,7 @@ size_t VMMR16Parser::trigger_count() const {
   return trigger_count_;
 }
 
-size_t VMMR16Parser::parse(const Buffer<uint32_t> &buffer) {
+size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
 
   bool time_good {false};
 
@@ -61,9 +61,6 @@ size_t VMMR16Parser::parse(const Buffer<uint32_t> &buffer) {
 
   trigger_count_++;
   hit.trigger_count = trigger_count_;
-
-  auto datap = reinterpret_cast<uint32_t *>(buffer.buffer);
-  size_t wordsleft = buffer.size;
 
   uint16_t words{0};
 
@@ -78,13 +75,14 @@ size_t VMMR16Parser::parse(const Buffer<uint32_t> &buffer) {
 
   XTRACE(DATA, DEB, "VMMR16 Buffer:  size=%d, trigger=%d", buffer.size, trigger_count_);
 
-  while (wordsleft > 0) {
-    auto datatype = *datap & TypeMask;
+  for (;buffer; ++buffer)  {
+    auto datatype = *buffer.buffer & TypeMask;
 
     switch (datatype) {
-    case Type::Header:words = static_cast<uint16_t>(*datap & DataWordsMask);
-      hit.module = static_cast<uint8_t>((*datap & ModuleMask) >> ModuleBitShift);
-      external_trigger_ = (0 != (*datap & ExternalTriggerMask));
+    case Type::Header:
+      words = static_cast<uint16_t>(*buffer.buffer & DataWordsMask);
+      hit.module = static_cast<uint8_t>((*buffer.buffer & ModuleMask) >> ModuleBitShift);
+      external_trigger_ = (0 != (*buffer.buffer & ExternalTriggerMask));
       if (external_trigger_) {
         converted_data.push_back(hit);
         converted_data.back().external_trigger = true;
@@ -101,23 +99,23 @@ size_t VMMR16Parser::parse(const Buffer<uint32_t> &buffer) {
     case Type::ExtendedTimeStamp:
       // This always comes before events on particular Bus
       if (!spoof_high_time_) {
-        high_time_ = static_cast<uint16_t>(*datap & HighTimeMask);
+        high_time_ = static_cast<uint16_t>(*buffer.buffer & HighTimeMask);
         XTRACE(DATA, DEB, "   ExtendedTimeStamp: high_time=%d", high_time_);
       } else {
         XTRACE(DATA, DEB, "   ExtendedTimeStamp: ignored");
       }
       break;
 
-    case Type::DataEvent1:hit.bus = static_cast<uint8_t>((*datap & BusMask) >> BusBitShift);
-      hit.time_diff = static_cast<uint16_t>(*datap & TimeDiffMask);
+    case Type::DataEvent1:hit.bus = static_cast<uint8_t>((*buffer.buffer & BusMask) >> BusBitShift);
+      hit.time_diff = static_cast<uint16_t>(*buffer.buffer & TimeDiffMask);
       XTRACE(DATA, DEB, "   DataEvent1:  bus=%d, time_diff=%d", hit.bus, hit.time_diff);
       break;
 
     case Type::DataEvent2:
       // \todo use something like getValue(Buffer, NBits, Offset) ?
-      hit.bus = static_cast<uint8_t>((*datap & BusMask) >> BusBitShift);
-      hit.channel = static_cast<uint16_t>((*datap & ChannelMask) >> ChannelBitShift);
-      hit.adc = static_cast<uint16_t>(*datap & AdcMask);
+      hit.bus = static_cast<uint8_t>((*buffer.buffer & BusMask) >> BusBitShift);
+      hit.channel = static_cast<uint16_t>((*buffer.buffer & ChannelMask) >> ChannelBitShift);
+      hit.adc = static_cast<uint16_t>(*buffer.buffer & AdcMask);
       converted_data.push_back(hit);
 
       XTRACE(DATA, DEB, "   DataEvent2:  bus=%d, channel=%d, adc=%d",
@@ -131,20 +129,17 @@ size_t VMMR16Parser::parse(const Buffer<uint32_t> &buffer) {
 
     default:
 
-      if ((*datap & Type::EndOfEvent) == Type::EndOfEvent) {
-        hit.low_time = *datap & LowTimeMask;
+      if ((*buffer.buffer & Type::EndOfEvent) == Type::EndOfEvent) {
+        hit.low_time = *buffer.buffer & LowTimeMask;
         time_good = true;
         XTRACE(DATA, DEB, "   EndOfEvent:  low_time=%d", hit.low_time);
       } else {
-        XTRACE(DATA, WAR, "   EndOfEvent missing. Unknown field type: 0x%08x", *datap);
+        XTRACE(DATA, WAR, "   EndOfEvent missing. Unknown field type: 0x%08x", *buffer.buffer);
         return 0;
       }
 
       break;
     }
-
-    wordsleft--;
-    datap++;
   }
 
   if (!time_good) {

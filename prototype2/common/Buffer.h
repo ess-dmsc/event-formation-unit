@@ -30,6 +30,29 @@ struct Buffer {
     return (buffer && size);
   }
 
+  // prefix ++
+  Buffer& operator++ ()
+  {
+    ++buffer;
+    --size;
+    return *this;
+  }
+
+  // postfix ++
+  Buffer operator++ (int)
+  {
+    Buffer result(*this);
+    ++(*this);
+    return result;
+  }
+
+  Buffer operator+=(const size_t& rhs)
+  {
+    this->buffer += rhs;
+    this->size -= rhs;
+    return *this;
+  }
+
   T *buffer{nullptr};
   size_t size{0};
 };
