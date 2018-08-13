@@ -13,16 +13,14 @@
 
 namespace Multigrid {
 
-class EfuMaximum : public Efu {
+class EfuPrioritized : public Efu {
 public:
-  EfuMaximum() = default;
-  ~EfuMaximum() = default;
+  EfuPrioritized() = default;
+  ~EfuPrioritized() = default;
 
   size_t ingest(const std::vector<Hit>& hits) override;
 
   void reset();
-  bool ingest(const Hit& hit);
-
   bool event_good() const override;
 
   uint32_t x() const override;
@@ -31,15 +29,13 @@ public:
   uint64_t time() const override;
 
 private:
-  uint16_t GridAdcMax {0};
-  uint16_t WireAdcMax {0};
+  uint64_t xmass {0};
+  uint64_t ymass {0};
+  uint64_t zmass {0};
 
-  bool WireGood{false};
-  bool GridGood{false};
-
-  uint32_t x_;
-  uint32_t y_;
-  uint32_t z_;
+  uint64_t xsum {0};
+  uint64_t ysum {0};
+  uint64_t zsum {0};
 
   uint64_t time_ {0};
 };

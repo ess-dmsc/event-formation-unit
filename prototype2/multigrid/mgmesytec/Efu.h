@@ -23,23 +23,7 @@ public:
   std::shared_ptr<ReadoutSerializer> raw1;
   std::shared_ptr<ReadoutSerializer> raw2;
 
-  inline size_t ingest(const std::vector<Hit> &hits) {
-    this->reset();
-
-    size_t ret{0};
-    for (const auto &h : hits) {
-      // \todo filter out external trigger non-events
-      if (h.external_trigger)
-        continue;
-      if (this->ingest(h)) {
-        ret++;
-      }
-    }
-    return ret;
-  }
-
-  virtual void reset() = 0;
-  virtual bool ingest(const Hit& hit) = 0;
+  virtual size_t ingest(const std::vector<Hit> &hits) = 0;
   virtual bool event_good() const = 0;
 
   virtual uint32_t x() const = 0;

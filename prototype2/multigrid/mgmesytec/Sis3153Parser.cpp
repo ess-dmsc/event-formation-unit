@@ -34,7 +34,7 @@ size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
   buffers.clear();
 
   if (buffer[0] != Header1) {
-    XTRACE(DATA, WAR, "Missing Header1");
+    XTRACE(DATA, DEB, "Missing Header1");
     return 0;
   }
 
@@ -50,7 +50,7 @@ size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
 
     // Header1?
     if ((buf32[0] & HeaderMask) != Header2) {
-      XTRACE(DATA, WAR, "Missing Header2");
+      XTRACE(DATA, DEB, "Missing Header2");
       return 0;
     }
     auto length32 = ntohs(static_cast<uint16_t>((buf32[0] >> 8) & LengthMask));

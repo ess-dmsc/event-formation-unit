@@ -33,6 +33,7 @@ set(mgmesytec_SRC
   MgConfig.cpp
   mgmesytec/EfuMaximum.cpp
   mgmesytec/EfuCenterMass.cpp
+  mgmesytec/EfuPrioritized.cpp
   mgmesytec/Vmmr16Parser.cpp
   mgmesytec/Sis3153Parser.cpp
   mgmesytec/Hit.cpp
@@ -46,6 +47,7 @@ set(mgmesytec_INC
   mgmesytec/Efu.h
   mgmesytec/EfuMaximum.h
   mgmesytec/EfuCenterMass.h
+  mgmesytec/EfuPrioritized.h
   mgmesytec/Vmmr16Parser.h
   mgmesytec/Sis3153Parser.h
   mgmesytec/Hit.h
@@ -214,6 +216,20 @@ set(EfuCenterMassTest_INC
   ../common/ReadoutSerializer.h)
 create_test_executable(EfuCenterMassTest)
 
+set(EfuPrioritizedTest_SRC
+  mgmesytec/EfuPrioritizedTest.cpp
+  mgmesytec/EfuPrioritized.cpp
+  mgmesytec/Hit.cpp
+  ../common/Hists.cpp
+  ../common/ReadoutSerializer.cpp)
+set(EfuPrioritizedTest_INC
+  mgmesytec/EfuCenterMass.h
+  mgmesytec/Efu.h
+  mgmesytec/SequoiaGeometry.h
+  mgmesytec/Hit.h
+  ../common/Hists.h
+  ../common/ReadoutSerializer.h)
+create_test_executable(EfuPrioritizedTest)
 
 #set(CSPECEventTest_SRC cspec/CSPECEventTest.cpp)
 #set(CSPECEventTest_INC cspec/CSPECEvent.h)

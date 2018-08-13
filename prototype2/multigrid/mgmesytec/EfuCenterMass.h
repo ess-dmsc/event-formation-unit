@@ -18,8 +18,10 @@ public:
   EfuCenterMass() = default;
   ~EfuCenterMass() = default;
 
-  void reset() override;
-  bool ingest(const Hit& hit) override;
+  size_t ingest(const std::vector<Hit>& hits) override;
+
+  void reset();
+  bool ingest(const Hit& hit);
   bool event_good() const override;
 
   uint32_t x() const override;

@@ -8,6 +8,21 @@
 
 namespace Multigrid {
 
+size_t EfuMaximum::ingest(const std::vector<Hit> &hits) {
+  this->reset();
+
+  size_t ret{0};
+  for (const auto &h : hits) {
+    // \todo filter out external trigger non-events
+    if (h.external_trigger)
+      continue;
+    if (this->ingest(h)) {
+      ret++;
+    }
+  }
+  return ret;
+}
+
 void EfuMaximum::reset() {
   GridAdcMax = 0;
   WireAdcMax = 0;

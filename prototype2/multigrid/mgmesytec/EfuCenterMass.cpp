@@ -24,6 +24,21 @@ uint64_t EfuCenterMass::time() const {
   return time_;
 }
 
+size_t EfuCenterMass::ingest(const std::vector<Hit> &hits) {
+  this->reset();
+
+  size_t ret{0};
+  for (const auto &h : hits) {
+    // \todo filter out external trigger non-events
+    if (h.external_trigger)
+      continue;
+    if (this->ingest(h)) {
+      ret++;
+    }
+  }
+  return ret;
+}
+
 void EfuCenterMass::reset() {
   xmass = 0;
   ymass = 0;

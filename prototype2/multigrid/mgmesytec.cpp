@@ -37,6 +37,7 @@
 
 #include <multigrid/mgmesytec/EfuMaximum.h>
 #include <multigrid/mgmesytec/EfuCenterMass.h>
+#include <multigrid/mgmesytec/EfuPrioritized.h>
 
 #include <common/Log.h>
 
@@ -216,9 +217,10 @@ void CSPEC::init_config()
 
   if (mg_config.reduction_strategy == "center-mass") {
     mgEfu = std::make_shared<Multigrid::EfuCenterMass>();
+  } else if (mg_config.reduction_strategy == "prioritized") {
+    mgEfu = std::make_shared<Multigrid::EfuPrioritized>();
   } else {
-    auto mg_efum = std::make_shared<Multigrid::EfuMaximum>();
-    mgEfu = mg_efum;
+    mgEfu = std::make_shared<Multigrid::EfuMaximum>();
   }
   mgEfu->mappings = mg_config.mappings;
   mgEfu->hists = monitor.hists;
