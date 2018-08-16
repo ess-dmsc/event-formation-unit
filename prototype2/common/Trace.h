@@ -44,8 +44,6 @@ const unsigned int TRC_L_DEB  = 7;
 /// \todo See if there is a better solution than pragma
 #pragma GCC system_header
 
-#define TRC_LEVEL 6
-
 #ifndef TRC_MASK
 const unsigned int USED_TRC_MASK = TRC_M_ALL;
 #else
