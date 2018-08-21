@@ -26,6 +26,7 @@ const unsigned int TRC_G_CMD     = 0x00000040U;
 const unsigned int TRC_G_DATA    = 0x00000080U;
 
 /// Add trace masks below, bitwise or of grouops
+/// \todo use ~TRC_M_NONE instead?
 constexpr unsigned int TRC_M_ALL = (TRC_G_INPUT | TRC_G_OUTPUT | TRC_G_PROCESS | TRC_G_MAIN | TRC_G_INIT | TRC_G_IPC   | TRC_G_CMD | TRC_G_DATA);
 
 // Do not edit below
@@ -61,14 +62,14 @@ const unsigned int USED_TRC_LEVEL = TRC_LEVEL;
 
 inline int Trace(int const LineNumber, char const *File, const int Group, unsigned int const SeverityLevel, const char* GroupName,  const char* SeverityName, const char *Format, ...) {
   char *MessageBuffer = nullptr;
-  
+
   va_list args;
   va_start (args, Format);
   __attribute__((unused)) int Characters = vasprintf(&MessageBuffer, Format, args);
   va_end (args);
-  
+
   printf("%-3s %-20s %5d %-7s - %s\n", SeverityName, basename((char *)File), LineNumber, GroupName, MessageBuffer);
-  
+
   free(MessageBuffer);
   return 0;
 }
