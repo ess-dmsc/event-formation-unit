@@ -9,35 +9,32 @@
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB
 
-/// From edenhill/librdkafka - rdkafka_example.cpp
-class EventCallback : public RdKafka::EventCb {
-public:
-  void event_cb(RdKafka::Event &event) {
-    switch (event.type()) {
-       case RdKafka::Event::EVENT_ERROR:
-         printf("**** Rdkafka::Event::EVENT_ERROR: %s\n", RdKafka::err2str(event.err()).c_str());
-       break;
-       default:
-         printf("**** RdKafka::EventId: %d: %s\n", event.type(), RdKafka::err2str(event.err()).c_str());
-       break;
-    }
+
+void Producer::DeliveryCallback::dr_cb(RdKafka::Message &message) {
+  XTRACE(KAFKA, INF, "**** RdKafka Delivery Callback ****\n");
+  if (message.err() != RdKafka::ERR_NO_ERROR) {
+    stats.dr_error++;
+    XTRACE(KAFKA, WAR, "RdKafkaDr error message (%d):  %s\n", message.err(), message.errstr().c_str());
+  } else {
+    stats.dr_noerror++;
+    XTRACE(KAFKA, INF, "RdKafkaDr other message (%d):  %s\n", message.err(), message.errstr().c_str());
   }
-};
+}
 
-EventCallback event_callback;
 
-class DeliveryCallback : public RdKafka::DeliveryReportCb {
-public:
-  void dr_cb(RdKafka::Message &message) {
-    printf("**** RdKafka Delivery Callback ****\n"); fflush(stdout);
-    printf("RdKafkaDr message: %s\n", message.errstr().c_str()); fflush(stdout);
-    if (message.key()) {
-      printf("RdKafkaDr key: %s\n", message.key()->c_str()); fflush(stdout);
-    }
+void Producer::EventCallback::event_cb(RdKafka::Event &event) {
+  switch (event.type()) {
+     case RdKafka::Event::EVENT_ERROR:
+       printf("**** Rdkafka::Event::EVENT_ERROR: %s\n", RdKafka::err2str(event.err()).c_str());
+       stats.ev_error++;
+     break;
+     default:
+       printf("**** RdKafka::EventId: %d: %s\n", event.type(), RdKafka::err2str(event.err()).c_str());
+       stats.ev_other++;
+     break;
   }
-};
+}
 
-DeliveryCallback delivery_callback;
 
 Producer::Producer(std::string broker, std::string topicstr) : ProducerBase() {
 
@@ -55,35 +52,35 @@ Producer::Producer(std::string broker, std::string topicstr) : ProducerBase() {
   }
 
   RdKafka::Conf::ConfResult configResult;
-  configResult = conf->set("metadata.broker.list", broker, errstr);
+  configResult = conf->set("metadata.broker.list", broker, kafkaErrstr);
   assert(configResult == RdKafka::Conf::CONF_OK);
-  configResult = conf->set("message.max.bytes", "10000000", errstr);
+  configResult = conf->set("message.max.bytes", "10000000", kafkaErrstr);
   assert(configResult == RdKafka::Conf::CONF_OK);
-  configResult = conf->set("fetch.message.max.bytes", "10000000", errstr);
+  configResult = conf->set("fetch.message.max.bytes", "10000000", kafkaErrstr);
   assert(configResult == RdKafka::Conf::CONF_OK);
-  configResult = conf->set("message.copy.max.bytes", "10000000", errstr);
+  configResult = conf->set("message.copy.max.bytes", "10000000", kafkaErrstr);
   assert(configResult == RdKafka::Conf::CONF_OK);
-  configResult = conf->set("queue.buffering.max.ms", "100", errstr);
-  assert(configResult == RdKafka::Conf::CONF_OK);
-
-
-  configResult = conf->set("event_cb", &event_callback, errstr);
+  configResult = conf->set("queue.buffering.max.ms", "100", kafkaErrstr);
   assert(configResult == RdKafka::Conf::CONF_OK);
 
 
-  configResult = conf->set("dr_cb", &delivery_callback, errstr);
+  configResult = conf->set("event_cb", &event_callback, kafkaErrstr);
   assert(configResult == RdKafka::Conf::CONF_OK);
 
-  producer = RdKafka::Producer::create(conf, errstr);
+
+  configResult = conf->set("dr_cb", &delivery_callback, kafkaErrstr);
+  assert(configResult == RdKafka::Conf::CONF_OK);
+
+  producer = RdKafka::Producer::create(conf, kafkaErrstr);
   if (!producer) {
-    LOG(Sev::Error, "Failed to create producer: {}", errstr);
+    LOG(Sev::Error, "Failed to create producer: {}", kafkaErrstr);
     /** \todo add logging to Greylog */
     return;
   }
 
-  topic = RdKafka::Topic::create(producer, topicstr, tconf, errstr);
+  topic = RdKafka::Topic::create(producer, topicstr, tconf, kafkaErrstr);
   if (!topic) {
-    LOG(Sev::Error, "Failed to create topic: {}", errstr);
+    LOG(Sev::Error, "Failed to create topic: {}", kafkaErrstr);
     /** \todo add logging to Greylog */
     return;
   }

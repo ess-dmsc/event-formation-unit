@@ -24,13 +24,14 @@ const unsigned int TRC_G_INIT    = 0x00000010U;
 const unsigned int TRC_G_IPC     = 0x00000020U;
 const unsigned int TRC_G_CMD     = 0x00000040U;
 const unsigned int TRC_G_DATA    = 0x00000080U;
+const unsigned int TRC_G_KAFKA   = 0x00000100U;
 
 /// Add trace masks below, bitwise or of grouops
-/// \todo use ~TRC_M_NONE instead?
-constexpr unsigned int TRC_M_ALL = (TRC_G_INPUT | TRC_G_OUTPUT | TRC_G_PROCESS | TRC_G_MAIN | TRC_G_INIT | TRC_G_IPC   | TRC_G_CMD | TRC_G_DATA);
+
 
 // Do not edit below
 const unsigned int TRC_M_NONE = 0;
+const unsigned int TRC_M_ALL  = ~TRC_M_NONE;
 
 const unsigned int TRC_L_ALW  = 1; //Should not be used
 const unsigned int TRC_L_CRI  = 2;
