@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2016 - 2018 European Spallation Source ERIC */
 
 #include <cassert>
 #include <common/Producer.h>
@@ -6,9 +6,10 @@
 #include <common/Trace.h>
 #include <libs/include/gccintel.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
+///
 void Producer::DeliveryCallback::dr_cb(RdKafka::Message &message) {
   XTRACE(KAFKA, INF, "**** RdKafka Delivery Callback ****\n");
   if (message.err() != RdKafka::ERR_NO_ERROR) {
@@ -20,7 +21,7 @@ void Producer::DeliveryCallback::dr_cb(RdKafka::Message &message) {
   }
 }
 
-
+///
 void Producer::EventCallback::event_cb(RdKafka::Event &event) {
   switch (event.type()) {
      case RdKafka::Event::EVENT_ERROR:
@@ -34,7 +35,7 @@ void Producer::EventCallback::event_cb(RdKafka::Event &event) {
   }
 }
 
-
+///
 Producer::Producer(std::string broker, std::string topicstr) :
   ProducerBase(), topicString(topicstr) {
 
@@ -82,6 +83,7 @@ Producer::Producer(std::string broker, std::string topicstr) :
   }
 }
 
+///
 Producer::~Producer() {
   delete topic;
   delete producer;

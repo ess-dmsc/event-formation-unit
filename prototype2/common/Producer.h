@@ -41,7 +41,7 @@ public:
     struct {
       uint64_t dr_error;
       uint64_t dr_noerror;
-    } stats;
+    } stats = {};
   };
 
   /// \brief Kafka callback function for events
@@ -55,7 +55,7 @@ public:
       // uint64_t ev_log;
       // uint64_t ev_stats;
       // uint64_t ev_throttle;
-    } stats;
+    } stats = {};
   };
 
   DeliveryCallback delivery_callback;
