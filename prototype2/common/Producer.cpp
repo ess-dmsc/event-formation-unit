@@ -51,7 +51,7 @@ Producer::Producer(std::string broker, std::string topicstr) : ProducerBase() {
     return;
   }
 
-  RdKafka::Conf::ConfResult configResult;
+  RdKafka::Conf::ConfResult __attribute__((unused)) configResult;
   configResult = conf->set("metadata.broker.list", broker, kafkaErrstr);
   assert(configResult == RdKafka::Conf::CONF_OK);
   configResult = conf->set("message.max.bytes", "10000000", kafkaErrstr);
