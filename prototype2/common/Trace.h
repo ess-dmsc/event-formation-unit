@@ -31,7 +31,7 @@ const unsigned int TRC_G_KAFKA   = 0x00000100U;
 
 // Do not edit below
 const unsigned int TRC_M_NONE = 0;
-const unsigned int TRC_M_ALL  = ~TRC_M_NONE;
+const unsigned int TRC_M_ALL  = 0xffffffffU;
 
 const unsigned int TRC_L_ALW  = 1; //Should not be used
 const unsigned int TRC_L_CRI  = 2;

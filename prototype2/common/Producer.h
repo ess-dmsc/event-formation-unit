@@ -63,6 +63,7 @@ public:
 
 private:
   std::string kafkaErrstr;
+  std::string topicString;
   RdKafka::Conf *conf{0};
   RdKafka::Conf *tconf{0};
   RdKafka::Topic *topic{0};

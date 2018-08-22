@@ -107,6 +107,10 @@ private:
     int64_t lost_frames;
     int64_t bad_frames;
     int64_t good_frames;
+    int64_t kafka_ev_error;
+    int64_t kafka_ev_other;
+    int64_t kafka_dr_error;
+    int64_t kafka_dr_noerror;
   } ALIGN(64) mystats;
 
   NMXConfig nmx_opts;
@@ -143,6 +147,10 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   Stats.create("bad_frames", mystats.bad_frames);
   Stats.create("good_frames", mystats.good_frames);
   Stats.create("tx_bytes", mystats.tx_bytes);
+  Stats.create("kafka_ev_errors", mystats.kafka_ev_error);
+  Stats.create("kafka_ev_others", mystats.kafka_ev_other);
+  Stats.create("kafka_dr_errors", mystats.kafka_dr_error);
+  Stats.create("kafka_dr_others", mystats.kafka_dr_noerror);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { NMX::input_thread(); };
@@ -332,6 +340,10 @@ void NMX::processing_thread() {
       sample_next_track = nmx_opts.send_tracks;
 
       mystats.tx_bytes += flatbuffer.produce();
+      mystats.kafka_ev_error = eventprod.event_callback.stats.ev_error;
+      mystats.kafka_ev_other = eventprod.event_callback.stats.ev_other;
+      mystats.kafka_dr_error = eventprod.delivery_callback.stats.dr_error;
+      mystats.kafka_dr_noerror = eventprod.delivery_callback.stats.dr_noerror;
 
       char *txbuffer;
       auto len = trackfb.serialize(&txbuffer);

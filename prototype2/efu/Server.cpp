@@ -41,7 +41,7 @@ Server::Server(int port, Parser &parse) : port_(port), parser(parse) {
 }
 
 void Server::server_close(int socket) {
-  LOG(Sev::Debug, "Closing socket fd {}", socket);
+  //LOG(Sev::Debug, "Closing socket fd {}", socket);
   close(socket);
   auto client = std::find(clientfd.begin(), clientfd.end(), socket);
   assert(client != clientfd.end());
@@ -51,7 +51,7 @@ void Server::server_close(int socket) {
 /** \brief Setup socket parameters
  */
 void Server::server_open() {
-  LOG(Sev::Info, "Server::open() called on port {}", port_);
+  //LOG(Sev::Info, "Server::open() called on port {}", port_);
 
   struct sockaddr_in socket_address;
   UNUSED int ret;
@@ -82,7 +82,7 @@ void Server::server_open() {
 }
 
 int Server::server_send(int socketfd) {
-  LOG(Sev::Debug, "server_send() - {} bytes", output.bytes);
+  //LOG(Sev::Debug, "server_send() - {} bytes", output.bytes);
   if (send(socketfd, output.buffer, output.bytes, 0) < 0) {
     LOG(Sev::Warning, "Error sending command reply");
     return -1;
@@ -115,17 +115,17 @@ void Server::server_poll() {
   if (ready > 0 && FD_ISSET(serverfd, &fd_working)) {
     auto freefd = std::find(clientfd.begin(), clientfd.end(), -1);
     if (freefd == clientfd.end()) {
-      LOG(Sev::Warning, "Max clients connected, can't accept()");
+      //LOG(Sev::Warning, "Max clients connected, can't accept()");
       auto tmpsock = accept(serverfd, NULL, NULL);
       close(tmpsock);
     } else {
-      LOG(Sev::Info, "Accept new connection");
+      //LOG(Sev::Info, "Accept new connection");
       *freefd = accept(serverfd, NULL, NULL);
       if (*freefd < 0 && errno != EWOULDBLOCK) {
         assert(1 == 0);
       }
       FD_SET(*freefd, &fd_master);
-      LOG(Sev::Debug, "New clent socket: {}, ready: {}", *freefd, ready);
+      //LOG(Sev::Debug, "New clent socket: {}, ready: {}", *freefd, ready);
     }
     ready--;
   }
@@ -137,31 +137,31 @@ void Server::server_poll() {
                         SERVER_BUFFER_SIZE - input.bytes, 0);
 
       if ((bytes < 0) && (errno != EWOULDBLOCK || errno != EAGAIN)) {
-        LOG(Sev::Warning, "recv() failed, errno: {}", errno);
+        //LOG(Sev::Warning, "recv() failed, errno: {}", errno);
         perror("recv() failed");
         server_close(cli);
         return;
       }
       if (bytes == 0) {
-        LOG(Sev::Info, "Peer closed socket {}", cli);
+        //LOG(Sev::Info, "Peer closed socket {}", cli);
         server_close(cli);
         return;
       }
-      LOG(Sev::Info, "Received {} bytes on socket {}", bytes, cli);
+      //LOG(Sev::Info, "Received {} bytes on socket {}", bytes, cli);
       input.bytes += bytes;
 
       assert(input.bytes <= SERVER_BUFFER_SIZE);
-      LOG(Sev::Debug, "input.bytes: {}", input.bytes);
+      //LOG(Sev::Debug, "input.bytes: {}", input.bytes);
 
       // Parse and generate reply
       if (parser.parse((char *)input.buffer, input.bytes, (char *)output.buffer,
                        &output.bytes) < 0) {
-        LOG(Sev::Warning, "Parse error");
+        //LOG(Sev::Warning, "Parse error");
       }
       input.bytes = 0;
       input.data = input.buffer;
       if (server_send(cli) < 0) {
-        LOG(Sev::Warning, "server_send() failed");
+        //LOG(Sev::Warning, "server_send() failed");
         server_close(cli);
         return;
       }

@@ -9,7 +9,6 @@
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB
 
-
 void Producer::DeliveryCallback::dr_cb(RdKafka::Message &message) {
   XTRACE(KAFKA, INF, "**** RdKafka Delivery Callback ****\n");
   if (message.err() != RdKafka::ERR_NO_ERROR) {
@@ -25,18 +24,19 @@ void Producer::DeliveryCallback::dr_cb(RdKafka::Message &message) {
 void Producer::EventCallback::event_cb(RdKafka::Event &event) {
   switch (event.type()) {
      case RdKafka::Event::EVENT_ERROR:
-       printf("**** Rdkafka::Event::EVENT_ERROR: %s\n", RdKafka::err2str(event.err()).c_str());
+       XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR: %s\n", RdKafka::err2str(event.err()).c_str());
        stats.ev_error++;
      break;
      default:
-       printf("**** RdKafka::EventId: %d: %s\n", event.type(), RdKafka::err2str(event.err()).c_str());
+       XTRACE(KAFKA, INF, "RdKafka::Event:: %d: %s\n", event.type(), RdKafka::err2str(event.err()).c_str());
        stats.ev_other++;
      break;
   }
 }
 
 
-Producer::Producer(std::string broker, std::string topicstr) : ProducerBase() {
+Producer::Producer(std::string broker, std::string topicstr) :
+  ProducerBase(), topicString(topicstr) {
 
   conf = RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL);
   tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
@@ -62,12 +62,8 @@ Producer::Producer(std::string broker, std::string topicstr) : ProducerBase() {
   assert(configResult == RdKafka::Conf::CONF_OK);
   configResult = conf->set("queue.buffering.max.ms", "100", kafkaErrstr);
   assert(configResult == RdKafka::Conf::CONF_OK);
-
-
   configResult = conf->set("event_cb", &event_callback, kafkaErrstr);
   assert(configResult == RdKafka::Conf::CONF_OK);
-
-
   configResult = conf->set("dr_cb", &delivery_callback, kafkaErrstr);
   assert(configResult == RdKafka::Conf::CONF_OK);
 
@@ -102,11 +98,10 @@ int Producer::produce(char *buffer, int length) {
       topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */, buffer,
       length, NULL, NULL);
 
-  XTRACE(DATA, DEB, "produce returns %d\n", resp);
   producer->poll(0);
   if (resp != RdKafka::ERR_NO_ERROR) {
-
-    XTRACE(DATA, DEB, "produce: %s\n", RdKafka::err2str(resp).c_str());
+    XTRACE(KAFKA, DEB, "produce returns %d\n", resp);
+    XTRACE(KAFKA, DEB, "produce: %s\n", RdKafka::err2str(resp).c_str());
     LOG(Sev::Error, "Produce failed: {}", RdKafka::err2str(resp));
     return resp;
   }
