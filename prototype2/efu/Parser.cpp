@@ -187,7 +187,7 @@ Parser::Parser(std::shared_ptr<Detector> detector, int &keep_running) {
 }
 
 int Parser::registercmd(std::string cmd_name, cmdFunction cmd_fn) {
-  LOG(Sev::Debug, "Registering command: {}", cmd_name);
+  LOG(Sev::Info, "Registering command: {}", cmd_name);
   if (commands[cmd_name] != 0) {
     LOG(Sev::Warning, "Command already exist: {}", cmd_name);
     return -1;

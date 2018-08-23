@@ -9,9 +9,18 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+void Producer::setConfig(std::string name, std::string value) {
+  RdKafka::Conf::ConfResult configResult;
+  configResult = conf->set(name, value, kafkaErrstr);
+  LOG(Sev::Info, "Kafka set config {} to {}", name, value);
+  if (configResult != RdKafka::Conf::CONF_OK) {
+    LOG(Sev::Error, "Kafka Unable to set config {} to {}", name, value);
+  }
+  assert(configResult == RdKafka::Conf::CONF_OK); // compiles away in release build
+}
+
 ///
 void Producer::DeliveryCallback::dr_cb(RdKafka::Message &message) {
-  XTRACE(KAFKA, INF, "**** RdKafka Delivery Callback ****\n");
   if (message.err() != RdKafka::ERR_NO_ERROR) {
     stats.dr_error++;
     XTRACE(KAFKA, WAR, "RdKafkaDr error message (%d):  %s\n", message.err(), message.errstr().c_str());
@@ -52,33 +61,29 @@ Producer::Producer(std::string broker, std::string topicstr) :
     return;
   }
 
-  RdKafka::Conf::ConfResult __attribute__((unused)) configResult;
-  configResult = conf->set("metadata.broker.list", broker, kafkaErrstr);
-  assert(configResult == RdKafka::Conf::CONF_OK);
-  configResult = conf->set("message.max.bytes", "10000000", kafkaErrstr);
-  assert(configResult == RdKafka::Conf::CONF_OK);
-  configResult = conf->set("fetch.message.max.bytes", "10000000", kafkaErrstr);
-  assert(configResult == RdKafka::Conf::CONF_OK);
-  configResult = conf->set("message.copy.max.bytes", "10000000", kafkaErrstr);
-  assert(configResult == RdKafka::Conf::CONF_OK);
-  configResult = conf->set("queue.buffering.max.ms", "100", kafkaErrstr);
-  assert(configResult == RdKafka::Conf::CONF_OK);
-  configResult = conf->set("event_cb", &event_callback, kafkaErrstr);
-  assert(configResult == RdKafka::Conf::CONF_OK);
-  configResult = conf->set("dr_cb", &delivery_callback, kafkaErrstr);
-  assert(configResult == RdKafka::Conf::CONF_OK);
+  setConfig("metadata.broker.list", broker);
+  setConfig("message.max.bytes", "10000000");
+  setConfig("fetch.message.max.bytes", "10000000");
+  setConfig("message.copy.max.bytes", "10000000");
+  setConfig("queue.buffering.max.ms", "100");
+
+  if (conf->set("event_cb", &event_callback, kafkaErrstr) != RdKafka::Conf::CONF_OK) {
+    LOG(Sev::Error, "Kafka: unable to set event_cb");
+  }
+
+  if (conf->set("dr_cb", &delivery_callback, kafkaErrstr) != RdKafka::Conf::CONF_OK) {
+    LOG(Sev::Error, "Kafka: unable to set dr_cb");
+  }
 
   producer = RdKafka::Producer::create(conf, kafkaErrstr);
   if (!producer) {
     LOG(Sev::Error, "Failed to create producer: {}", kafkaErrstr);
-    /** \todo add logging to Greylog */
     return;
   }
 
   topic = RdKafka::Topic::create(producer, topicstr, tconf, kafkaErrstr);
   if (!topic) {
     LOG(Sev::Error, "Failed to create topic: {}", kafkaErrstr);
-    /** \todo add logging to Greylog */
     return;
   }
 }
@@ -102,9 +107,8 @@ int Producer::produce(char *buffer, int length) {
 
   producer->poll(0);
   if (resp != RdKafka::ERR_NO_ERROR) {
-    XTRACE(KAFKA, DEB, "produce returns %d\n", resp);
-    XTRACE(KAFKA, DEB, "produce: %s\n", RdKafka::err2str(resp).c_str());
-    LOG(Sev::Error, "Produce failed: {}", RdKafka::err2str(resp));
+    XTRACE(KAFKA, DEB, "produce: %s", RdKafka::err2str(resp).c_str());
+    stats.kafka_produce_fail++;
     return resp;
   }
 

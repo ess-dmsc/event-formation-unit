@@ -11,6 +11,7 @@
 
 #include <librdkafka/rdkafkacpp.h>
 
+///
 class ProducerBase {
 public:
   ProducerBase() = default;
@@ -26,12 +27,20 @@ public:
   /// "T-REX_detectors"
   Producer(std::string broker, std::string topicstr);
 
+  /// \brief cleans up by deleting allocated structures
   ~Producer();
 
   /// \brief Function called to send data to a broker
   /// \param buffer Pointer to char buffer containing data to be tx'ed
   /// \param length Size of buffer data in bytes
   int produce(char *buffer, int length) override;
+
+  /// \brief set kafka configuration and check result
+  void setConfig(std::string configName, std::string configValue);
+
+  /// \brief check kafka configuration result
+  void checkConfig(RdKafka::Conf::ConfResult configResult);
+
 
   /// \brief Kafka callback function for delivery reports
   class DeliveryCallback : public RdKafka::DeliveryReportCb {
@@ -60,6 +69,10 @@ public:
 
   DeliveryCallback delivery_callback;
   EventCallback event_callback;
+
+  struct {
+    uint64_t kafka_produce_fail;
+  } stats = {};
 
 private:
   std::string kafkaErrstr;
