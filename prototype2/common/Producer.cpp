@@ -22,10 +22,10 @@ void Producer::setConfig(std::string name, std::string value) {
 ///
 void Producer::DeliveryCallback::dr_cb(RdKafka::Message &message) {
   if (message.err() != RdKafka::ERR_NO_ERROR) {
-    stats.dr_error++;
+    stats.dr_errors++;
     XTRACE(KAFKA, WAR, "RdKafkaDr error message (%d):  %s\n", message.err(), message.errstr().c_str());
   } else {
-    stats.dr_noerror++;
+    stats.dr_noerrors++;
     XTRACE(KAFKA, INF, "RdKafkaDr other message (%d):  %s\n", message.err(), message.errstr().c_str());
   }
 }
@@ -35,11 +35,11 @@ void Producer::EventCallback::event_cb(RdKafka::Event &event) {
   switch (event.type()) {
      case RdKafka::Event::EVENT_ERROR:
        XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR: %s\n", RdKafka::err2str(event.err()).c_str());
-       stats.ev_error++;
+       stats.ev_errors++;
      break;
      default:
        XTRACE(KAFKA, INF, "RdKafka::Event:: %d: %s\n", event.type(), RdKafka::err2str(event.err()).c_str());
-       stats.ev_other++;
+       stats.ev_others++;
      break;
   }
 }
@@ -108,7 +108,7 @@ int Producer::produce(char *buffer, int length) {
   producer->poll(0);
   if (resp != RdKafka::ERR_NO_ERROR) {
     XTRACE(KAFKA, DEB, "produce: %s", RdKafka::err2str(resp).c_str());
-    stats.kafka_produce_fail++;
+    stats.produce_fails++;
     return resp;
   }
 

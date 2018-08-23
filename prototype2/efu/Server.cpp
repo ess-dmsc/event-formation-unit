@@ -147,7 +147,7 @@ void Server::server_poll() {
         server_close(cli);
         return;
       }
-      LOG(Sev::Info, "Received {} bytes on socket {}", bytes, cli);
+      LOG(Sev::Debug, "Received {} bytes on socket {}", bytes, cli);
       input.bytes += bytes;
 
       assert(input.bytes <= SERVER_BUFFER_SIZE);

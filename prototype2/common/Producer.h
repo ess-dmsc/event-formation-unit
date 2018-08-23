@@ -48,8 +48,8 @@ public:
     void dr_cb(RdKafka::Message &message);
 
     struct {
-      uint64_t dr_error;
-      uint64_t dr_noerror;
+      uint64_t dr_errors;
+      uint64_t dr_noerrors;
     } stats = {};
   };
 
@@ -59,8 +59,8 @@ public:
     void event_cb(RdKafka::Event &event);
 
     struct {
-      uint64_t ev_error;
-      uint64_t ev_other;
+      uint64_t ev_errors;
+      uint64_t ev_others;
       // uint64_t ev_log;
       // uint64_t ev_stats;
       // uint64_t ev_throttle;
@@ -71,7 +71,7 @@ public:
   EventCallback event_callback;
 
   struct {
-    uint64_t kafka_produce_fail;
+    uint64_t produce_fails;
   } stats = {};
 
 private:
