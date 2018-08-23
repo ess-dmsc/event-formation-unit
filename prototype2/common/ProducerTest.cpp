@@ -114,6 +114,10 @@ TEST_F(ProducerTest, ConstructorOK) {
   Producer prod{"nobroker", "notopic"};
   int ret = prod.produce(0, 0);
   ASSERT_EQ(ret, RdKafka::ERR_NO_ERROR);
+  ASSERT_EQ(prod.delivery_callback.stats.dr_error, 0);
+  ASSERT_EQ(prod.delivery_callback.stats.dr_noerror, 0);
+  ASSERT_EQ(prod.event_callback.stats.ev_error, 0);
+  ASSERT_EQ(prod.event_callback.stats.ev_other, 0);
 }
 
 TEST_F(ProducerTest, CreateConfGlobalFail) {
@@ -142,6 +146,7 @@ TEST_F(ProducerTest, CreateTopicFail) {
   Producer prod{"nobroker", "notopic"};
   int ret = prod.produce(0, 0);
   ASSERT_EQ(ret, RdKafka::ERR_UNKNOWN);
+
 }
 
 TEST_F(ProducerTest, ProducerFail) {
