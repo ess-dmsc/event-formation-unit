@@ -3,6 +3,18 @@ coverage_on = "centos7"
 clangformat_os = "fedora25"
 archive_what = "centos7-release"
 
+// Set number of old builds to keep.
+ properties([[
+     $class: 'BuildDiscarderProperty',
+     strategy: [
+         $class: 'LogRotator',
+         artifactDaysToKeepStr: '',
+         artifactNumToKeepStr: '10',
+         daysToKeepStr: '',
+         numToKeepStr: ''
+     ]
+ ]]);
+
 images = [
     'centos7-release': [
         'name': 'essdmscdm/centos7-build-node:3.0.0',
