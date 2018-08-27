@@ -12,14 +12,14 @@
 
   "srs_mappings" :
   [
-    {"fecID":0, "vmmID":0, "planeID":0, "strip_offset":0},
-    {"fecID":0, "vmmID":1, "planeID":0, "strip_offset":64},
-    {"fecID":0, "vmmID":6, "planeID":0, "strip_offset":128},
-    {"fecID":0, "vmmID":7, "planeID":0, "strip_offset":192},
-    {"fecID":0, "vmmID":10, "planeID":1, "strip_offset":0},
-    {"fecID":0, "vmmID":11, "planeID":1, "strip_offset":64},
-    {"fecID":0, "vmmID":14, "planeID":1, "strip_offset":128},
-    {"fecID":0, "vmmID":15, "planeID":1, "strip_offset":192}
+    {"fecID":1, "vmmID":0, "planeID":0, "strip_offset":0},
+    {"fecID":1, "vmmID":1, "planeID":0, "strip_offset":64},
+    {"fecID":1, "vmmID":6, "planeID":0, "strip_offset":128},
+    {"fecID":1, "vmmID":7, "planeID":0, "strip_offset":192},
+    {"fecID":1, "vmmID":10, "planeID":1, "strip_offset":0},
+    {"fecID":1, "vmmID":11, "planeID":1, "strip_offset":64},
+    {"fecID":1, "vmmID":14, "planeID":1, "strip_offset":128},
+    {"fecID":1, "vmmID":15, "planeID":1, "strip_offset":192}
   ],
 
   "clusterer x" :

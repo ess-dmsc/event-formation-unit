@@ -107,6 +107,12 @@ private:
     int64_t lost_frames;
     int64_t bad_frames;
     int64_t good_frames;
+    // Kafka stats below are common to all detectors
+    int64_t kafka_produce_fails;
+    int64_t kafka_ev_errors;
+    int64_t kafka_ev_others;
+    int64_t kafka_dr_errors;
+    int64_t kafka_dr_noerrors;
   } ALIGN(64) mystats;
 
   NMXConfig nmx_opts;
@@ -143,6 +149,12 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   Stats.create("bad_frames", mystats.bad_frames);
   Stats.create("good_frames", mystats.good_frames);
   Stats.create("tx_bytes", mystats.tx_bytes);
+  /// Todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { NMX::input_thread(); };
@@ -332,6 +344,14 @@ void NMX::processing_thread() {
       sample_next_track = nmx_opts.send_tracks;
 
       mystats.tx_bytes += flatbuffer.produce();
+
+      /// Kafka stats update - common to all detectors
+      /// don't increment as producer keeps absolute count
+      mystats.kafka_produce_fails = eventprod.stats.produce_fails;
+      mystats.kafka_ev_errors = eventprod.stats.ev_errors;
+      mystats.kafka_ev_others = eventprod.stats.ev_others;
+      mystats.kafka_dr_errors = eventprod.stats.dr_errors;
+      mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
 
       char *txbuffer;
       auto len = trackfb.serialize(&txbuffer);

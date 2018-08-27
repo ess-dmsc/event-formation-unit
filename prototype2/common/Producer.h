@@ -11,6 +11,7 @@
 
 #include <librdkafka/rdkafkacpp.h>
 
+///
 class ProducerBase {
 public:
   ProducerBase() = default;
@@ -18,7 +19,7 @@ public:
   virtual int produce(char *buffer, int length) = 0;
 };
 
-class Producer : public ProducerBase {
+class Producer : public ProducerBase, public RdKafka::DeliveryReportCb {
 public:
   /// \brief Construct a producer object.
   /// \param broker 'URL' specifying host and port, example "127.0.0.1:9009"
@@ -26,6 +27,7 @@ public:
   /// "T-REX_detectors"
   Producer(std::string broker, std::string topicstr);
 
+  /// \brief cleans up by deleting allocated structures
   ~Producer();
 
   /// \brief Function called to send data to a broker
@@ -33,8 +35,33 @@ public:
   /// \param length Size of buffer data in bytes
   int produce(char *buffer, int length) override;
 
+  /// \brief set kafka configuration and check result
+  void setConfig(std::string configName, std::string configValue);
+
+  /// \brief check kafka configuration result
+  void checkConfig(RdKafka::Conf::ConfResult configResult);
+
+
+  /// \brief Kafka callback function for delivery reports
+  void dr_cb(RdKafka::Message &message) override;
+
+  /// \brief Kafka callback function for events
+  void event_cb(RdKafka::Event &event);
+
+  struct {
+    uint64_t ev_errors;
+    uint64_t ev_others;
+    // uint64_t ev_log;
+    // uint64_t ev_stats;
+    // uint64_t ev_throttle;
+    uint64_t dr_errors;
+    uint64_t dr_noerrors;
+    uint64_t produce_fails;
+  } stats = {};
+
 private:
-  std::string errstr;
+  std::string kafkaErrstr;
+  std::string topicString;
   RdKafka::Conf *conf{0};
   RdKafka::Conf *tconf{0};
   RdKafka::Topic *topic{0};
