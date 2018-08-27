@@ -140,12 +140,14 @@ private:
     // Input Counters
     int64_t rx_packets;
     int64_t rx_bytes;
+    int64_t rx_discarded_bytes;
     int64_t triggers;
     int64_t badtriggers;
     int64_t rx_readouts;
     int64_t parse_errors;
     int64_t rx_discards;
     int64_t geometry_errors;
+    int64_t timing_errors;
     int64_t rx_events;
     int64_t tx_bytes;
     // Kafka stats below are common to all detectors
@@ -162,6 +164,8 @@ private:
   Monitor monitor;
 
   uint64_t RecentPulseTime{0};
+
+  uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
 
   Multigrid::VMMR16Parser vmmr16Parser;
 
@@ -188,12 +192,14 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   // clang-format off
   Stats.create("rx_packets",            mystats.rx_packets);
   Stats.create("rx_bytes",              mystats.rx_bytes);
+  Stats.create("rx_discarded_bytes",    mystats.rx_discarded_bytes);
   Stats.create("readouts",              mystats.rx_readouts);
   Stats.create("triggers",              mystats.triggers);
   Stats.create("badtriggers",           mystats.badtriggers);
   Stats.create("readouts_parse_errors", mystats.parse_errors);
   Stats.create("readouts_discarded",    mystats.rx_discards);
   Stats.create("geometry_errors",       mystats.geometry_errors);
+  Stats.create("timing_errors",         mystats.timing_errors);
   Stats.create("events",                mystats.rx_events);
   Stats.create("tx_bytes",              mystats.tx_bytes);
   /// Todo below stats are common to all detectors and could/should be moved
@@ -272,53 +278,61 @@ void CSPEC::mainThread() {
       mystats.rx_bytes += ReadSize;
       LOG(Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
 
-      if (sis3153parser.parse(Buffer<uint8_t>(buffer, ReadSize))) {
+      mystats.rx_discarded_bytes += sis3153parser.parse(Buffer<uint8_t>(buffer, ReadSize));
+      if (sis3153parser.buffers.empty()) {
+        mystats.parse_errors++;
+      }
 
-        for (const auto &b : sis3153parser.buffers) {
+      for (const auto &b : sis3153parser.buffers) {
 
-          auto parsed_readouts = vmmr16Parser.parse(b);
-          if (!parsed_readouts)
-            continue;
+        mystats.rx_discarded_bytes += vmmr16Parser.parse(b);
 
-          mystats.rx_readouts += parsed_readouts;
-          mystats.triggers = vmmr16Parser.trigger_count();
+        if (vmmr16Parser.converted_data.empty())
+          continue;
 
-          if (vmmr16Parser.externalTrigger()) {
-            ev42serializer.set_pulse_time(RecentPulseTime);
-            if (ev42serializer.events())
-              mystats.tx_bytes += ev42serializer.produce();
-            RecentPulseTime = vmmr16Parser.time();
-          }
-
-          if (mgEfu) {
-            mgEfu->ingest(vmmr16Parser.converted_data);
-//stats.discards++;
-
-            if (mgEfu->event_good()) {
-              uint32_t pixel = getPixel();
-              uint32_t time = getTime();
-
-              XTRACE(PROCESS, DEB, "Event: pixel: %d, time: %d ", pixel, time);
-              if (pixel != 0) {
-                mystats.tx_bytes += ev42serializer.addevent(time, pixel);
-                mystats.rx_events++;
-              } else {
-                mystats.geometry_errors++;
-              }
-            } else {
-// \todo external triggers treated as "bad"?
-              mystats.badtriggers++;
-            }
-          }
-
-          if (dumpfile) {
-            dumpfile->push(vmmr16Parser.converted_data);
-          }
+        if (dumpfile) {
+          dumpfile->push(vmmr16Parser.converted_data);
         }
 
-        //mystats.rx_discards += stats.discards;
-      } else {
-        mystats.parse_errors++;
+        auto parsed_readouts = vmmr16Parser.converted_data.size();
+
+        if (vmmr16Parser.externalTrigger()) {
+          parsed_readouts--;
+          ev42serializer.set_pulse_time(RecentPulseTime);
+          if (ev42serializer.events())
+            mystats.tx_bytes += ev42serializer.produce();
+          if (RecentPulseTime) {
+            auto PulsePeriod = vmmr16Parser.time() - RecentPulseTime;
+            ShortestPulsePeriod = std::min(ShortestPulsePeriod, PulsePeriod);
+          }
+          RecentPulseTime = vmmr16Parser.time();
+        }
+
+        mystats.triggers = vmmr16Parser.trigger_count();
+        mystats.rx_readouts += parsed_readouts;
+
+        if (mgEfu) {
+          mgEfu->ingest(vmmr16Parser.converted_data);
+//stats.discards++;
+
+          if (mgEfu->event_good()) {
+            uint32_t pixel = getPixel();
+            uint32_t time = getTime();
+
+            XTRACE(PROCESS, DEB, "Event: pixel: %d, time: %d ", pixel, time);
+            if (pixel == 0) {
+              mystats.geometry_errors++;
+            } else if (time > (1.00004 * ShortestPulsePeriod)) {
+              mystats.timing_errors++;
+            } else {
+              mystats.tx_bytes += ev42serializer.addevent(time, pixel);
+              mystats.rx_events++;
+            }
+          } else {
+// \todo external triggers treated as "bad"?
+            mystats.badtriggers++;
+          }
+        }
       }
     }
 

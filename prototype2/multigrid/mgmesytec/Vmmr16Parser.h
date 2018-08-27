@@ -19,7 +19,8 @@ public:
   void spoof_high_time(bool spoof);
   bool spoof_high_time() const;
 
-  /** \brief parse n 32 bit words from mesytec VMMR-8/16 card */
+  /// \brief parse n 32 bit words from mesytec VMMR-8/16 card
+  /// returns number of discarded(uparsed) bytes
   size_t parse(Buffer<uint32_t> buffer);
 
   size_t trigger_count() const;

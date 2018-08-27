@@ -35,12 +35,12 @@ size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
 
   if (buffer[0] != Header1) {
     XTRACE(DATA, DEB, "Missing Header1");
-    return 0;
+    return buffer.bytes();
   }
 
   if (buffer.size < 19) {
     XTRACE(DATA, WAR, "Buffer too small");
-    return 0;
+    return buffer.bytes();
   }
 
   buffer += 3;
@@ -51,7 +51,7 @@ size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
     // Header1?
     if ((buf32[0] & HeaderMask) != Header2) {
       XTRACE(DATA, DEB, "Missing Header2");
-      return 0;
+      return buf32.bytes();
     }
     auto length32 = ntohs(static_cast<uint16_t>((buf32[0] >> 8) & LengthMask));
     XTRACE(DATA, DEB, "sis3153 datawords %d", length32);
@@ -61,7 +61,7 @@ size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
     if ((buf32[0] & TypeMask) != SisType::BeginReadout) {
       XTRACE(DATA, WAR, "Expected readout header value 0x%04x, got 0x%04x",
              SisType::BeginReadout, (buf32[0] & TypeMask));
-      return 0;
+      return buf32.bytes();
     }
     buf32++;
 
@@ -74,18 +74,18 @@ size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
 
     if (buf32[0] != EndDataCookie) {
       XTRACE(DATA, WAR, "Protocol mismatch, end-of-data cookie missing");
-      return 0;
+      return buf32.bytes();
     }
     buf32++;
 
     if ((buf32[0] & TypeMask) != SisType::EndReadout) {
       XTRACE(DATA, WAR, "Missing end-of-readout marker");
-      return 0;
+      return buf32.bytes();
     }
     buf32++;
   }
 
-  return buffers.size();
+  return 0;
 }
 
 }

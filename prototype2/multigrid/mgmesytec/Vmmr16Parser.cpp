@@ -67,6 +67,7 @@ size_t VMMR16Parser::trigger_count() const {
 
 size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
 
+  auto bytes = buffer.bytes();
   bool time_good {false};
 
   converted_data.clear();
@@ -104,7 +105,7 @@ size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
       if (words > buffer.size) {
         XTRACE(DATA, ERR, "   VMMR16 buffer size mismatch:  %d > %d",
                words, buffer.size);
-        return 0;
+        return buffer.bytes();
       }
       break;
 
@@ -147,7 +148,7 @@ size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
         XTRACE(DATA, DEB, "   EndOfEvent:  low_time=%d", hit.low_time);
       } else {
         XTRACE(DATA, WAR, "   EndOfEvent missing. Unknown field type: 0x%08x", buffer[0]);
-        return 0;
+        return buffer.bytes();
       }
 
       break;
@@ -156,7 +157,8 @@ size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
 
   if (!time_good) {
     XTRACE(DATA, WAR, "   Missing timestamp. Rejecting data.");
-    return 0;
+    converted_data.clear();
+    return bytes;
   }
 
   // Spoof high time if needed
@@ -182,7 +184,7 @@ size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
     XTRACE(DATA, DEB, "     %s", h.debug().c_str());
   }
 
-  return converted_data.size();
+  return 0;
 }
 
 }

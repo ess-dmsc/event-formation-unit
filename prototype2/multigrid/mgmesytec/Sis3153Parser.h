@@ -15,10 +15,10 @@ namespace Multigrid {
 
 class Sis3153Parser {
 public:
-  /// \brief parse a binary payload, return number readout buffers within
-  ///        fills the buffer member variable with references to sub-buffers
+  /// \brief parse a binary payload, return number of bytes discarded
   size_t parse(Buffer<uint8_t> buffer);
 
+  /// \brief refrences to buffers within the Sis buffer
   std::vector<Buffer<uint32_t>> buffers;
 };
 
