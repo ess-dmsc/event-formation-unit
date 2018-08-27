@@ -16,8 +16,10 @@ add_definitions("-D__FAVOR_BSD") #Not working correctly?
 
 if(${CMAKE_SYSTEM_NAME} STREQUAL "Darwin")
   message(STATUS "Detected MacOSX")
+  add_definitions("-DSYSTEM_NAME_DARWIN")
 elseif(${CMAKE_SYSTEM_NAME} STREQUAL "Linux")
   message(STATUS "Detected Linux")
+  add_definitions("-DSYSTEM_NAME_LINUX")
   find_library(DL_LIB dl REQUIRED)
 else()
   message(FATAL_ERROR "Unknown system")

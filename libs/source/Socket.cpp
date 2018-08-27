@@ -5,6 +5,17 @@
 #include <iostream>
 #include <libs/include/Socket.h>
 #include <prototype2/common/Log.h>
+#include <prototype2/common/Trace.h>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
+
+/// \brief Use MSG_SIGNAL on Linuxes
+#ifdef MSG_NOSIGNAL
+#define SEND_FLAGS MSG_NOSIGNAL
+#else
+#define SEND_FLAGS 0
+#endif
 
 Socket::Socket(Socket::type stype) {
   auto type = (stype == Socket::type::UDP) ? SOCK_DGRAM : SOCK_STREAM;
@@ -82,6 +93,7 @@ void Socket::setRemoteSocket(const char *ipaddr, int port) {
 }
 
 int Socket::send(void *buffer, int len) {
+  XTRACE(IPC, DEB, "Socket::send(), length %d bytes", len);
   int ret =
       sendto(socketFileDescriptor, buffer, len, 0, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
   if (ret < 0) {
@@ -124,11 +136,16 @@ int Socket::setSockOpt(int option, void *value, int size) {
   return ret;
 }
 
+bool Socket::isValidSocket() {
+  return (socketFileDescriptor >= 0);
+}
+
 TCPTransmitter::TCPTransmitter(const char *ipaddr, int port) {
   socketFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
   if (socketFileDescriptor < 0) {
     std::cout << "TCPSocket(): socket() failed" << std::endl;
   }
+
   std::memset((char *)&remoteSockAddr, 0, sizeof(remoteSockAddr));
   remoteSockAddr.sin_family = AF_INET;
   remoteSockAddr.sin_port = htons(port);
@@ -137,6 +154,17 @@ TCPTransmitter::TCPTransmitter(const char *ipaddr, int port) {
     std::cout << "invalid ip address " << ipaddr << std::endl;
   }
   assert(ret != 0);
+
+  #ifdef SYSTEM_NAME_DARWIN
+  LOG(Sev::Info, "setsockopt() - MacOS specific");
+  int on = 1;
+  ret = setsockopt(socketFileDescriptor, SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof(on));
+  if (ret != 0) {
+    LOG(Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
+    perror("setsockopt():");
+  }
+  assert(ret ==0);
+  #endif
 
   ret = connect(socketFileDescriptor, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
   if (ret < 0) {
@@ -147,6 +175,7 @@ TCPTransmitter::TCPTransmitter(const char *ipaddr, int port) {
 
 int TCPTransmitter::senddata(char *buffer, int len) {
   if (socketFileDescriptor < 0) {
+    XTRACE(IPC, WAR, "No file descriptor for TCP transmitter");
     return -1;
   }
 
@@ -154,9 +183,17 @@ int TCPTransmitter::senddata(char *buffer, int len) {
     LOG(Sev::Warning, "TCPClient::senddata() no data specified");
     return 0;
   }
-  int ret = send(socketFileDescriptor, buffer, len, 0);
+
+
+
+  int ret = send(socketFileDescriptor, buffer, len, SEND_FLAGS);
   if (ret <= 0) {
-    LOG(Sev::Warning, "TCPClient::send() returns {}", ret);
+    LOG(Sev::Warning, "TCPClient::send() returns {}, clearing socket ", ret);
+    socketFileDescriptor = -1;
   }
   return ret;
+}
+
+bool TCPTransmitter::isValidSocket() {
+  return (socketFileDescriptor >= 0);
 }

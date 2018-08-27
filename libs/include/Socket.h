@@ -55,6 +55,9 @@ public:
   /// Send data in buffer with specified length
   int send(void *dataBuffer, int dataLength);
 
+  /// \brief To check is data can be transmitted or received
+  bool isValidSocket();
+
 private:
   int socketFileDescriptor{-1};     ///
   struct sockaddr_in localSockAddr;
@@ -86,8 +89,14 @@ public:
 
 class TCPTransmitter {
 public:
+  ///
   TCPTransmitter(const char *ip, int port);
+
+  ///
   int senddata(char *buffer, int len);
+
+  /// \brief To check is data can be transmitted or received
+  bool isValidSocket();
 
 private:
   int socketFileDescriptor{-1};
