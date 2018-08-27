@@ -241,7 +241,7 @@ void CSPEC::init_config()
   if (!DetectorSettings.fileprefix.empty())
   {
     dumpfile = Multigrid::HitFile::create(
-        DetectorSettings.fileprefix + "mgmesytec_" + timeString(), 500);
+        DetectorSettings.fileprefix + "mgmesytec_" + timeString(), 100);
   }
   vmmr16Parser.spoof_high_time(mg_config.spoof_high_time);
 }
