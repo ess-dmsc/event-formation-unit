@@ -343,12 +343,12 @@ void NMX::processing_thread() {
 
       mystats.tx_bytes += flatbuffer.produce();
 
-      /// dont increment as producer keeps absolute count
+      /// don't increment as producer keeps absolute count
       mystats.kafka_produce_fails = eventprod.stats.produce_fails;
-      mystats.kafka_ev_errors = eventprod.event_callback.stats.ev_errors;
-      mystats.kafka_ev_others = eventprod.event_callback.stats.ev_others;
-      mystats.kafka_dr_errors = eventprod.delivery_callback.stats.dr_errors;
-      mystats.kafka_dr_noerrors = eventprod.delivery_callback.stats.dr_noerrors;
+      mystats.kafka_ev_errors = eventprod.stats.ev_errors;
+      mystats.kafka_ev_others = eventprod.stats.ev_others;
+      mystats.kafka_dr_errors = eventprod.stats.dr_errors;
+      mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
 
       char *txbuffer;
       auto len = trackfb.serialize(&txbuffer);

@@ -19,7 +19,7 @@ public:
   virtual int produce(char *buffer, int length) = 0;
 };
 
-class Producer : public ProducerBase {
+class Producer : public ProducerBase, public RdKafka::DeliveryReportCb {
 public:
   /// \brief Construct a producer object.
   /// \param broker 'URL' specifying host and port, example "127.0.0.1:9009"
@@ -43,34 +43,19 @@ public:
 
 
   /// \brief Kafka callback function for delivery reports
-  class DeliveryCallback : public RdKafka::DeliveryReportCb {
-  public:
-    void dr_cb(RdKafka::Message &message);
-
-    struct {
-      uint64_t dr_errors;
-      uint64_t dr_noerrors;
-    } stats = {};
-  };
+  void dr_cb(RdKafka::Message &message) override;
 
   /// \brief Kafka callback function for events
-  class EventCallback : public RdKafka::EventCb {
-  public:
-    void event_cb(RdKafka::Event &event);
-
-    struct {
-      uint64_t ev_errors;
-      uint64_t ev_others;
-      // uint64_t ev_log;
-      // uint64_t ev_stats;
-      // uint64_t ev_throttle;
-    } stats = {};
-  };
-
-  DeliveryCallback delivery_callback;
-  EventCallback event_callback;
+  void event_cb(RdKafka::Event &event);
 
   struct {
+    uint64_t ev_errors;
+    uint64_t ev_others;
+    // uint64_t ev_log;
+    // uint64_t ev_stats;
+    // uint64_t ev_throttle;
+    uint64_t dr_errors;
+    uint64_t dr_noerrors;
     uint64_t produce_fails;
   } stats = {};
 

@@ -20,7 +20,7 @@ void Producer::setConfig(std::string name, std::string value) {
 }
 
 ///
-void Producer::DeliveryCallback::dr_cb(RdKafka::Message &message) {
+void Producer::dr_cb(RdKafka::Message &message) {
   if (message.err() != RdKafka::ERR_NO_ERROR) {
     stats.dr_errors++;
     XTRACE(KAFKA, WAR, "RdKafkaDr error message (%d):  %s\n", message.err(), message.errstr().c_str());
@@ -31,7 +31,7 @@ void Producer::DeliveryCallback::dr_cb(RdKafka::Message &message) {
 }
 
 ///
-void Producer::EventCallback::event_cb(RdKafka::Event &event) {
+void Producer::event_cb(RdKafka::Event &event) {
   switch (event.type()) {
      case RdKafka::Event::EVENT_ERROR:
        XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR: %s\n", RdKafka::err2str(event.err()).c_str());
@@ -67,11 +67,11 @@ Producer::Producer(std::string broker, std::string topicstr) :
   setConfig("message.copy.max.bytes", "10000000");
   setConfig("queue.buffering.max.ms", "100");
 
-  if (conf->set("event_cb", &event_callback, kafkaErrstr) != RdKafka::Conf::CONF_OK) {
+  if (conf->set("event_cb", this, kafkaErrstr) != RdKafka::Conf::CONF_OK) {
     LOG(Sev::Error, "Kafka: unable to set event_cb");
   }
 
-  if (conf->set("dr_cb", &delivery_callback, kafkaErrstr) != RdKafka::Conf::CONF_OK) {
+  if (conf->set("dr_cb", this, kafkaErrstr) != RdKafka::Conf::CONF_OK) {
     LOG(Sev::Error, "Kafka: unable to set dr_cb");
   }
 
