@@ -70,6 +70,12 @@ private:
     int64_t rx_events;
     int64_t geometry_errors;
     int64_t fifo_seq_errors;
+    // Kafka stats below are common to all detectors
+    int64_t kafka_produce_fails;
+    int64_t kafka_ev_errors;
+    int64_t kafka_ev_others;
+    int64_t kafka_dr_errors;
+    int64_t kafka_dr_noerrors;
   } ALIGN(64) mystats;
 };
 
@@ -89,15 +95,21 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-    Stats.create("input.rx_packets",                mystats.rx_packets);
-    Stats.create("input.rx_bytes",                  mystats.rx_bytes);
-    Stats.create("input.fifo1_push_errors",         mystats.fifo1_push_errors);
-    Stats.create("processing.rx_readouts",          mystats.rx_readouts);
-    Stats.create("processing.rx_idle1",             mystats.rx_idle1);
-    Stats.create("processing.tx_bytes",             mystats.tx_bytes);
-    Stats.create("processing.rx_events",            mystats.rx_events);
-    Stats.create("processing.rx_geometry_errors",   mystats.geometry_errors);
-    Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  Stats.create("input.rx_packets",                mystats.rx_packets);
+  Stats.create("input.rx_bytes",                  mystats.rx_bytes);
+  Stats.create("input.fifo1_push_errors",         mystats.fifo1_push_errors);
+  Stats.create("processing.rx_readouts",          mystats.rx_readouts);
+  Stats.create("processing.rx_idle1",             mystats.rx_idle1);
+  Stats.create("processing.tx_bytes",             mystats.tx_bytes);
+  Stats.create("processing.rx_events",            mystats.rx_events);
+  Stats.create("processing.rx_geometry_errors",   mystats.geometry_errors);
+  Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  /// Todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { MBCAEN::input_thread(); };
@@ -194,6 +206,14 @@ void MBCAEN::processing_thread() {
           EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
         mystats.tx_bytes += flatbuffer.produce();
+
+        /// Kafka stats update - common to all detectors
+        /// don't increment as producer keeps absolute count
+        mystats.kafka_produce_fails = eventprod.stats.produce_fails;
+        mystats.kafka_ev_errors = eventprod.stats.ev_errors;
+        mystats.kafka_ev_others = eventprod.stats.ev_others;
+        mystats.kafka_dr_errors = eventprod.stats.dr_errors;
+        mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
 
         if (not runThreads) {
           XTRACE(INPUT, ALW, "Stopping processing thread.");
