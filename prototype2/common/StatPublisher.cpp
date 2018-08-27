@@ -7,17 +7,16 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/StatPublisher.h>
-#include <common/Trace.h>
-
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#include <common/Log.h>
 
 const int bufferSize = 1000;
 
-StatPublisher::StatPublisher(std::string ip, int port) {
+///
+StatPublisher::StatPublisher(std::string ip, int port) :ip(ip), port(port) {
   statdb = new TCPTransmitter(ip.c_str(), port);
 }
 
+///
 void StatPublisher::publish(std::shared_ptr<Detector> detector) {
   char buffer[bufferSize];
   int unixtime = (int)time(NULL);
@@ -30,6 +29,35 @@ void StatPublisher::publish(std::shared_ptr<Detector> detector) {
       statdb->senddata(buffer, len);
     }
   } else {
-    XTRACE(IPC, WAR, "Carbon/Graphite socket is invalid");
+    handleReconnect();
+  }
+}
+
+///
+void StatPublisher::reconnectHelper() {
+    LOG(Sev::Warning, "Carbon/Graphite reconnect attempt {}/{}", retries + 1, maxReconnectAttempts);
+    delete statdb;
+    statdb = new TCPTransmitter(ip.c_str(), port);
+    if (statdb->isValidSocket()) {
+      LOG(Sev::Info, "Carbon/Graphite connection re-established");
+      retries = 0;
+    } else {
+      if (retries + 1 == maxReconnectAttempts) {
+        LOG(Sev::Error, "Unable to restore Carbon/Graphite connection");
+      }
+    }
+    reconnect.now();
+    retries++;
+}
+
+///
+void StatPublisher::handleReconnect() {
+  if (retries == 0) { // Not started yet
+    reconnectHelper();
+  } else {
+    if ((reconnect.timeus() < reconnectDelayUS) || (retries >= maxReconnectAttempts)) {
+      return;
+    }
+    reconnectHelper();
   }
 }

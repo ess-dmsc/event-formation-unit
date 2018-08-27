@@ -11,16 +11,33 @@
 
 #include <common/Detector.h>
 #include <libs/include/Socket.h>
+#include <libs/include/Timer.h>
 #include <string>
 
 class StatPublisher {
 public:
-  /// Connect to a Carbon/Graphite server bu ip address and tcp port
+  /// \brief Connect to a Carbon/Graphite server bu ip address and tcp port
   StatPublisher(std::string ip, int port);
 
-  /// Send detector metrics to Carbon/Graphite server
+  /// \brief Send detector metrics to Carbon/Graphite server
   void publish(std::shared_ptr<Detector> detector);
 
+  /// \brief called when senddata() fails
+  void handleReconnect();
+
+  /// \brief
+  void reconnectHelper();
+
 private:
+  /// Connection variable
   TCPTransmitter *statdb;
+  std::string ip{""};
+  uint16_t port{0};
+
+  /// Reconnect variables
+  int retries{0};
+  Timer reconnect;
+
+  const int maxReconnectAttempts{240}; /// equivalent to a couple of hours
+  const uint64_t reconnectDelayUS{30000000}; /// 30s
 };
