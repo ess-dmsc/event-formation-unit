@@ -19,6 +19,8 @@
 #include <h5cpp/hdf5.hpp>
 #pragma GCC diagnostic pop
 
+// \todo improve reading for multiple files
+
 namespace Multigrid {
 
 class HitFile {
