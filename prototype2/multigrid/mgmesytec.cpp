@@ -148,6 +148,12 @@ private:
     int64_t geometry_errors;
     int64_t rx_events;
     int64_t tx_bytes;
+    // Kafka stats below are common to all detectors
+    int64_t kafka_produce_fails;
+    int64_t kafka_ev_errors;
+    int64_t kafka_ev_others;
+    int64_t kafka_dr_errors;
+    int64_t kafka_dr_noerrors;
   } ALIGN(64) mystats;
 
   void init_config();
@@ -190,6 +196,12 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.create("geometry_errors",       mystats.geometry_errors);
   Stats.create("events",                mystats.rx_events);
   Stats.create("tx_bytes",              mystats.tx_bytes);
+  /// Todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { CSPEC::mainThread(); };
@@ -229,7 +241,7 @@ void CSPEC::init_config()
   if (!DetectorSettings.fileprefix.empty())
   {
     dumpfile = Multigrid::HitFile::create(
-        DetectorSettings.fileprefix + "mgmesytec_" + timeString(), 1000);
+        DetectorSettings.fileprefix + "mgmesytec_" + timeString(), 500);
   }
   vmmr16Parser.spoof_high_time(mg_config.spoof_high_time);
 }

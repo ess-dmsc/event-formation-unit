@@ -72,6 +72,12 @@ private:
     int64_t tx_bytes;
     int64_t rx_seq_errors;
     int64_t fifo_synch_errors;
+    // Kafka stats below are common to all detectors
+    int64_t kafka_produce_fails;
+    int64_t kafka_ev_errors;
+    int64_t kafka_ev_others;
+    int64_t kafka_dr_errors;
+    int64_t kafka_dr_noerrors;
   } ALIGN(64) mystats;
 };
 
@@ -100,6 +106,12 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDE
   Stats.create("processing.rx_geometry_errors",   mystats.rx_geometry_errors);
   Stats.create("processing.rx_seq_errors",        mystats.rx_seq_errors);
   Stats.create("output.tx_bytes",                 mystats.tx_bytes);
+  /// Todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
   std::function<void()> inputFunc = [this]() { SONDEIDEA::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
@@ -196,6 +208,14 @@ void SONDEIDEA::processing_thread() {
         if (produce_timer.timetsc() >=
             EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
           mystats.tx_bytes += flatbuffer.produce();
+
+          /// Kafka stats update - common to all detectors
+          /// don't increment as producer keeps absolute count
+          mystats.kafka_produce_fails = eventprod.stats.produce_fails;
+          mystats.kafka_ev_errors = eventprod.stats.ev_errors;
+          mystats.kafka_ev_others = eventprod.stats.ev_others;
+          mystats.kafka_dr_errors = eventprod.stats.dr_errors;
+          mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
           produce_timer.now();
         }
       }
