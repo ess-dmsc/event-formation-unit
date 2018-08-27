@@ -228,8 +228,8 @@ void CSPEC::init_config()
 
   if (!DetectorSettings.fileprefix.empty())
   {
-    dumpfile = std::make_shared<Multigrid::HitFile>();
-    dumpfile->open_rw(DetectorSettings.fileprefix + "mgmesytec_" + timeString() + ".h5");
+    dumpfile = Multigrid::HitFile::create(
+        DetectorSettings.fileprefix + "mgmesytec_" + timeString(), 1000);
   }
   vmmr16Parser.spoof_high_time(mg_config.spoof_high_time);
 }
@@ -300,8 +300,7 @@ void CSPEC::mainThread() {
           }
 
           if (dumpfile) {
-            dumpfile->data = std::move(vmmr16Parser.converted_data);
-            dumpfile->write();
+            dumpfile->push(vmmr16Parser.converted_data);
           }
         }
 

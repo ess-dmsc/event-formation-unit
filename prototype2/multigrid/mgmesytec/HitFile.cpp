@@ -70,26 +70,36 @@ public:
 
 namespace Multigrid {
 
-HitFile::HitFile() {
+HitFile::HitFile(const boost::filesystem::path& file_path, size_t max_Mb) {
   dtype_ = hdf5::datatype::create<Hit>();
+  max_size_ = max_Mb * 1000000 / sizeof(Hit);
+  path_base_ = file_path;
 }
 
-HitFile HitFile::create(boost::filesystem::path file_path) {
-  HitFile ret;
-  ret.open_rw(file_path);
+std::unique_ptr<HitFile> HitFile::create(const boost::filesystem::path& file_path, size_t max_Mb) {
+  auto ret = std::unique_ptr<HitFile>(new HitFile(file_path, max_Mb));
+  ret->open_rw();
   return ret;
 }
 
-HitFile HitFile::open(boost::filesystem::path file_path) {
-  HitFile ret;
-  ret.open_r(file_path);
+std::unique_ptr<HitFile> HitFile::open(const boost::filesystem::path& file_path) {
+  auto ret = std::unique_ptr<HitFile>(new HitFile(file_path, 0));
+  ret->open_r();
   return ret;
 }
 
-void HitFile::open_rw(boost::filesystem::path file_path) {
+boost::filesystem::path HitFile::get_full_path() const {
+  auto ret = path_base_;
+  if (sequence_number_ > 0)
+    ret += "_" + std::to_string(sequence_number_);
+  ret += ".h5";
+  return ret;
+}
+
+void HitFile::open_rw() {
   using namespace hdf5;
 
-  file_ = file::create(file_path, file::AccessFlags::TRUNCATE);
+  file_ = file::create(get_full_path(), file::AccessFlags::TRUNCATE);
 
   property::DatasetCreationList dcpl;
   dcpl.layout(property::DatasetLayout::CHUNKED);
@@ -99,10 +109,10 @@ void HitFile::open_rw(boost::filesystem::path file_path) {
                                          dataspace::Simple({0}, {dataspace::Simple::UNLIMITED}), dcpl);
 }
 
-void HitFile::open_r(boost::filesystem::path file_path) {
+void HitFile::open_r() {
   using namespace hdf5;
 
-  file_ = file::open(file_path, file::AccessFlags::READONLY);
+  file_ = file::open(get_full_path(), file::AccessFlags::READONLY);
   dataset_ = file_.root().get_dataset(DATSET_NAME);
 }
 
@@ -115,6 +125,11 @@ void HitFile::write() {
   slab_.block(0, data.size());
   dataset_.extent({count() + data.size()});
   dataset_.write(data, slab_);
+
+  if (max_size_ && (count() >= max_size_)) {
+    sequence_number_++;
+    open_rw();
+  }
 }
 
 void HitFile::read_at(size_t idx, size_t count) {
@@ -126,8 +141,17 @@ void HitFile::read_at(size_t idx, size_t count) {
 
 void HitFile::read(std::string file_name, std::vector<Hit> &external_data) {
   auto file = HitFile::open(file_name);
-  file.read_at(0, file.count());
-  external_data = std::move(file.data);
+  file->read_at(0, file->count());
+  external_data = std::move(file->data);
 }
+
+void HitFile::push(const std::vector<Hit>& hits) {
+  data.insert(data.end(), hits.begin(), hits.end());
+  if (data.size() >= chunk_size) {
+    write();
+    data.clear();
+  }
+}
+
 
 }
