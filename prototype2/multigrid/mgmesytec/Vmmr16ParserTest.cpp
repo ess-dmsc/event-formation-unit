@@ -21,62 +21,70 @@ protected:
 
 TEST_F(Vmmr16ParserTest, ErrNoTimeStamp) {
   auto res = sis.parse(err_no_timestamp);
-  ASSERT_EQ(res, 1);
+  ASSERT_EQ(res, 0);
 
-  EXPECT_EQ(vmmr.parse(sis.buffers.front()), 0);
+  EXPECT_EQ(vmmr.parse(sis.buffers.front()), 528);
 
   // \todo ensure strong guarantee?
 }
 
 TEST_F(Vmmr16ParserTest, ParseRecordedWSData) {
-  ASSERT_EQ(sis.parse(ws1), 1);
+  ASSERT_EQ(sis.parse(ws1), 0);
 
   auto res = vmmr.parse(sis.buffers.front());
 
-  EXPECT_EQ(res, 128);
-  EXPECT_EQ(vmmr.converted_data.size(), res);
+  EXPECT_EQ(res, 0);
+  EXPECT_EQ(vmmr.converted_data.size(), 128);
   EXPECT_EQ(vmmr.trigger_count(), 1);
   EXPECT_FALSE(vmmr.externalTrigger());
   EXPECT_EQ(vmmr.time(), 69134374606);
 }
 
 TEST_F(Vmmr16ParserTest, ParseRecordedWSDataII) {
-  ASSERT_EQ(sis.parse(ws2), 2);
+  ASSERT_EQ(sis.parse(ws2), 0);
 
   auto res = vmmr.parse(sis.buffers.front());
-  EXPECT_EQ(res, 128);
-  EXPECT_EQ(vmmr.converted_data.size(), res);
+  EXPECT_EQ(res, 0);
+  EXPECT_EQ(vmmr.converted_data.size(), 128);
   EXPECT_EQ(vmmr.trigger_count(), 1);
   EXPECT_FALSE(vmmr.externalTrigger());
   EXPECT_EQ(vmmr.time(), 68719698574);
 
   auto res2 = vmmr.parse(sis.buffers.back());
-  EXPECT_EQ(res2, 128);
-  EXPECT_EQ(vmmr.converted_data.size(), res2);
+  EXPECT_EQ(res2, 0);
+  EXPECT_EQ(vmmr.converted_data.size(), 128);
   EXPECT_EQ(vmmr.trigger_count(), 2);
   EXPECT_FALSE(vmmr.externalTrigger());
   EXPECT_EQ(vmmr.time(), 68719711681);
 }
 
 TEST_F(Vmmr16ParserTest, ParseRecordedWSDataIII) {
-  ASSERT_EQ(sis.parse(ws3), 4);
+  ASSERT_EQ(sis.parse(ws3), 0);
 
-  size_t total{0};
-  for (const auto&b : sis.buffers)
-    total += vmmr.parse(b);
+  size_t total_err{0};
+  size_t total_parsed{0};
+  for (const auto&b : sis.buffers) {
+    total_err += vmmr.parse(b);
+    total_parsed += vmmr.converted_data.size();
+  }
 
-  EXPECT_EQ(total, 256);
+  EXPECT_EQ(total_err, 0);
+  EXPECT_EQ(total_parsed, 256);
   EXPECT_EQ(vmmr.trigger_count(), 4);
 }
 
 TEST_F(Vmmr16ParserTest, ParseRecordedWSDataMultipleTriggers) {
-  ASSERT_EQ(sis.parse(ws4), 36);
+  ASSERT_EQ(sis.parse(ws4), 0);
 
-  size_t total{0};
-  for (const auto&b : sis.buffers)
-    total += vmmr.parse(b);
+  size_t total_err{0};
+  size_t total_parsed{0};
+  for (const auto&b : sis.buffers) {
+    total_err += vmmr.parse(b);
+    total_parsed += vmmr.converted_data.size();
+  }
 
-  EXPECT_EQ(total, 54);
+  EXPECT_EQ(total_err, 0);
+  EXPECT_EQ(total_parsed, 54);
   EXPECT_EQ(vmmr.trigger_count(), 36);
 }
 
