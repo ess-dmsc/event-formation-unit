@@ -38,7 +38,7 @@ private:
   bool checkMTU(const char * interface);
 
   ///
-  void debugPrint(struct ifaddrs * ifa);
+  //void debugPrint(struct ifaddrs * ifa);
 
   /// default for Ethernet interfaces is 1500 bytes, but better performance
   /// can be achieved using larger packet sizes

@@ -23,7 +23,7 @@ int main (int argc, char *argv[]) {
 
   int port = atoi(argv[1]);
 
-  int server_fd, client_fd, err;
+  int server_fd, err;
   struct sockaddr_in server, client;
   char buf[BUFFER_SIZE];
 
@@ -46,6 +46,7 @@ int main (int argc, char *argv[]) {
   printf("Server is listening on %d\n", port);
 
   while (1) {
+    int client_fd;
     socklen_t client_len = sizeof(client);
     client_fd = accept(server_fd, (struct sockaddr *) &client, &client_len);
 
