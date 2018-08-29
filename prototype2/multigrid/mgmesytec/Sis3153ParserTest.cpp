@@ -18,7 +18,7 @@ protected:
 /** Test cases below */
 TEST_F(Sis3153ParserTest, ErrUnsupportedCommand) {
   auto res = sis.parse(err_unsupported_cmd);
-  EXPECT_EQ(res, 0);
+  EXPECT_EQ(res, 22);
   EXPECT_EQ(sis.buffers.size(), 0);
 
   res = sis.parse(Buffer<uint8_t>(err_unsupported_cmd_II));
@@ -34,49 +34,49 @@ TEST_F(Sis3153ParserTest, ErrNoSisReadoutHeader) {
 
 TEST_F(Sis3153ParserTest, ErrNoSisReadoutTrailer) {
   auto res = sis.parse(err_no_sis_readout_trailer);
-  EXPECT_EQ(res, 0);
+  EXPECT_EQ(res, 4);
   EXPECT_EQ(sis.buffers.size(), 1);
 }
 
 TEST_F(Sis3153ParserTest, ErrNoTimeStamp) {
   auto res = sis.parse(err_no_timestamp);
-  EXPECT_EQ(res, 1);
+  EXPECT_EQ(res, 0);
   EXPECT_EQ(sis.buffers.size(), 1);
 }
 
 TEST_F(Sis3153ParserTest, ErrNoEndDataCookie) {
   auto res = sis.parse(err_no_end_data_cookie);
-  EXPECT_EQ(res, 0);
+  EXPECT_EQ(res, 8);
   EXPECT_EQ(sis.buffers.size(), 1);
 }
 
 TEST_F(Sis3153ParserTest, ErrPktShort) {
   auto res = sis.parse(err_pkt_too_short);
-  EXPECT_EQ(res, 0);
+  EXPECT_EQ(res, 10);
   EXPECT_EQ(sis.buffers.size(), 0);
 }
 
 TEST_F(Sis3153ParserTest, ParseRecordedWSData) {
   auto res = sis.parse(ws1);
-  EXPECT_EQ(res, 1);
+  EXPECT_EQ(res, 0);
   EXPECT_EQ(sis.buffers.size(), 1);
 }
 
 TEST_F(Sis3153ParserTest, ParseRecordedWSDataII) {
   auto res = sis.parse(ws2);
-  EXPECT_EQ(res, 2);
+  EXPECT_EQ(res, 0);
   EXPECT_EQ(sis.buffers.size(), 2);
 }
 
 TEST_F(Sis3153ParserTest, ParseRecordedWSDataIII) {
   auto res = sis.parse(ws3);
-  EXPECT_EQ(res, 4);
+  EXPECT_EQ(res, 0);
   EXPECT_EQ(sis.buffers.size(), 4);
 }
 
 TEST_F(Sis3153ParserTest, ParseRecordedWSDataMultipleTriggers) {
   auto res = sis.parse(ws4);
-  EXPECT_EQ(res, 36);
+  EXPECT_EQ(res, 0);
   EXPECT_EQ(sis.buffers.size(), 36);
 }
 
