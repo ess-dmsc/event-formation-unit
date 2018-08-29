@@ -31,6 +31,25 @@ std::string ConsoleFormatter(const LogMessage &Msg) {
   return fmt::format("{:5}{:21}{:5} - {}", SevToString.at(int(Msg.severity)), FileName, LineNr, Msg.message);
 }
 
+void EmptyGraylogMessageQueue() {
+  std::vector<LogHandler_P> GraylogHandlers(Log::GetHandlers());
+  if (not GraylogHandlers.empty()) {
+    int WaitLoops = 25;
+    auto SleepTime = std::chrono::milliseconds(20);
+    bool ContinueLoop = true;
+    for (int i = 0; i < WaitLoops and ContinueLoop; i++) {
+      std::this_thread::sleep_for(SleepTime);
+      ContinueLoop = false;
+      for (auto &Ptr : GraylogHandlers) {
+        if (Ptr->MessagesQueued()) {
+          ContinueLoop = true;
+        }
+      }
+    }
+  }
+  Log::RemoveAllHandlers();
+}
+
 /** Load detector, launch pipeline threads, then sleep until timeout or break */
 int main(int argc, char *argv[]) {
   BaseSettings DetectorSettings;
@@ -61,6 +80,7 @@ int main(int argc, char *argv[]) {
     loader.loadPlugin(efu_args.getDetectorName());
     if (not loader.IsOk()) {
       efu_args.printHelp();
+      EmptyGraylogMessageQueue();
       return -1;
     }
 
@@ -98,12 +118,14 @@ int main(int argc, char *argv[]) {
     LOG(Sev::Error, "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)");
     LOG(Sev::Error, "exiting...");
     detector.reset(); //De-allocate detector before we unload detector module
+    EmptyGraylogMessageQueue();
     return -1;
   }
 
   if (DetectorSettings.StopAfterSec == 0) {
     LOG(Sev::Info, "Event Formation Unit Exit (Immediate)");
     detector.reset(); //De-allocate detector before we unload detector module
+    EmptyGraylogMessageQueue();
     return 0;
   }
 
@@ -154,6 +176,7 @@ int main(int argc, char *argv[]) {
   }
   
   detector.reset();
-
+  
+  EmptyGraylogMessageQueue();
   return 0;
 }
