@@ -140,22 +140,17 @@ private:
     // Input Counters
     int64_t rx_packets;
     int64_t rx_bytes;
-    int64_t rx_discarded_bytes;
+    int64_t sis_discarded_bytes;
+    int64_t vmmr_discarded_bytes;
     int64_t triggers;
-    int64_t badtriggers;
-    int64_t rx_readouts;
-    int64_t parse_errors;
-    int64_t rx_discards;
+    int64_t bad_triggers;
+    int64_t readouts;
+    int64_t readouts_discarded;
+    int64_t readouts_culled;
     int64_t geometry_errors;
     int64_t timing_errors;
-    int64_t rx_events;
+    int64_t events;
     int64_t tx_bytes;
-    // Kafka stats below are common to all detectors
-    int64_t kafka_produce_fails;
-    int64_t kafka_ev_errors;
-    int64_t kafka_ev_others;
-    int64_t kafka_dr_errors;
-    int64_t kafka_dr_noerrors;
   } ALIGN(64) mystats;
 
   void init_config();
@@ -190,24 +185,19 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
 
   LOG(Sev::Info, "Adding stats");
   // clang-format off
-  Stats.create("rx_packets",            mystats.rx_packets);
-  Stats.create("rx_bytes",              mystats.rx_bytes);
-  Stats.create("rx_discarded_bytes",    mystats.rx_discarded_bytes);
-  Stats.create("readouts",              mystats.rx_readouts);
-  Stats.create("triggers",              mystats.triggers);
-  Stats.create("badtriggers",           mystats.badtriggers);
-  Stats.create("readouts_parse_errors", mystats.parse_errors);
-  Stats.create("readouts_discarded",    mystats.rx_discards);
-  Stats.create("geometry_errors",       mystats.geometry_errors);
-  Stats.create("timing_errors",         mystats.timing_errors);
-  Stats.create("events",                mystats.rx_events);
-  Stats.create("tx_bytes",              mystats.tx_bytes);
-  /// Todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
-  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
-  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
-  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
-  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
+  Stats.create("rx_packets",           mystats.rx_packets);
+  Stats.create("rx_bytes",             mystats.rx_bytes);
+  Stats.create("sis_discarded_bytes",  mystats.sis_discarded_bytes);
+  Stats.create("vmmr_discarded_bytes", mystats.vmmr_discarded_bytes);
+  Stats.create("triggers",             mystats.triggers);
+  Stats.create("bad_triggers",         mystats.bad_triggers);
+  Stats.create("readouts",             mystats.readouts);
+  Stats.create("readouts_discarded",   mystats.readouts_discarded);
+  Stats.create("readouts_culled",      mystats.readouts_culled);
+  Stats.create("geometry_errors",      mystats.geometry_errors);
+  Stats.create("timing_errors",        mystats.timing_errors);
+  Stats.create("events",               mystats.events);
+  Stats.create("tx_bytes",             mystats.tx_bytes);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { CSPEC::mainThread(); };
@@ -278,14 +268,11 @@ void CSPEC::mainThread() {
       mystats.rx_bytes += ReadSize;
       LOG(Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
 
-      mystats.rx_discarded_bytes += sis3153parser.parse(Buffer<uint8_t>(buffer, ReadSize));
-      if (sis3153parser.buffers.empty()) {
-        mystats.parse_errors++;
-      }
+      mystats.sis_discarded_bytes += sis3153parser.parse(Buffer<uint8_t>(buffer, ReadSize));
 
       for (const auto &b : sis3153parser.buffers) {
 
-        mystats.rx_discarded_bytes += vmmr16Parser.parse(b);
+        mystats.vmmr_discarded_bytes += vmmr16Parser.parse(b);
 
         if (vmmr16Parser.converted_data.empty())
           continue;
@@ -309,11 +296,10 @@ void CSPEC::mainThread() {
         }
 
         mystats.triggers = vmmr16Parser.trigger_count();
-        mystats.rx_readouts += parsed_readouts;
+        mystats.readouts += parsed_readouts;
 
         if (mgEfu) {
           mgEfu->ingest(vmmr16Parser.converted_data);
-//stats.discards++;
 
           if (mgEfu->event_good()) {
             uint32_t pixel = getPixel();
@@ -325,12 +311,14 @@ void CSPEC::mainThread() {
             } else if (time > (1.00004 * ShortestPulsePeriod)) {
               mystats.timing_errors++;
             } else {
+              mystats.readouts_culled += (parsed_readouts - mgEfu->used_readouts);
+              mystats.events++;
               mystats.tx_bytes += ev42serializer.addevent(time, pixel);
-              mystats.rx_events++;
             }
           } else {
-// \todo external triggers treated as "bad"?
-            mystats.badtriggers++;
+            mystats.readouts_discarded += parsed_readouts;
+            if (!vmmr16Parser.externalTrigger())
+              mystats.bad_triggers++;
           }
         }
       }

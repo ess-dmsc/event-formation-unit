@@ -67,6 +67,7 @@ size_t EfuPrioritized::ingest(const std::vector<Hit> &hits) {
     for (const auto &h : wires) {
       if (h.adc != highest_adc)
         break;
+      used_readouts++;
       xmass += mappings.x(h.bus, h.channel) * h.adc;
       zmass += mappings.z(h.bus, h.channel) * h.adc;
       xsum += h.adc;
@@ -86,6 +87,7 @@ size_t EfuPrioritized::ingest(const std::vector<Hit> &hits) {
     for (const auto &h : grids) {
       if (h.adc != highest_adc)
         break;
+      used_readouts++;
       ymass += mappings.y(h.bus, h.channel) * h.adc;
       ysum += h.adc;
       ret++;
@@ -105,6 +107,8 @@ void EfuPrioritized::reset() {
   zsum = 0;
 
   time_ = 0;
+
+  used_readouts = 0;
 }
 
 bool EfuPrioritized::event_good() const {

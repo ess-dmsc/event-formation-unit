@@ -18,6 +18,8 @@ namespace Multigrid {
 
 class Efu {
 public:
+  size_t used_readouts {0};
+
   SequoiaGeometry mappings;
   std::shared_ptr<Hists> hists;
   std::shared_ptr<ReadoutSerializer> raw1;
