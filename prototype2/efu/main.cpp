@@ -54,7 +54,6 @@ int main(int argc, char *argv[]) {
     Log::AddLogHandler(CI);
     
     Log::SetMinimumSeverity(Severity(efu_args.getLogLevel()));
-    Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
     if (efu_args.getLogFileName().size() > 0) {
       Log::AddLogHandler(new FileInterface(efu_args.getLogFileName()));
     }
@@ -73,12 +72,15 @@ int main(int argc, char *argv[]) {
     if (EFUArgs::Status::EXIT == efu_args.parseSecondPass(argc, argv)) {
       return 0;
     }
+    GLConfig = efu_args.getGraylogSettings();
+    if (not GLConfig.address.empty()) {
+      Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
+    }
     efu_args.printSettings();
     DetectorSettings = efu_args.getBaseSettings();
     detector = loader.createDetector(DetectorSettings);
     AffinitySettings = efu_args.getThreadCoreAffinity();
     DetectorName = efu_args.getDetectorName();
-    GLConfig = efu_args.getGraylogSettings();
   }
 
   hwcheck.setMinimumMTU(DetectorSettings.MinimumMTU);
