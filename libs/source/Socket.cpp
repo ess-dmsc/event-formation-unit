@@ -64,8 +64,27 @@ int Socket::setRecvTimeout(int seconds, int usecs) {
   return setSockOpt(SO_RCVTIMEO, &timeout, sizeof(timeout));
 }
 
+int Socket::setNOSIGPIPE() {
+#ifdef SYSTEM_NAME_DARWIN
+    LOG(Sev::Info, "setsockopt() - MacOS specific");
+    int on = 1;
+    int ret = setSockOpt(SO_NOSIGPIPE, &on, sizeof(on));
+    if (ret != 0) {
+        LOG(Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
+        perror("setsockopt():");
+    }
+    assert(ret ==0);
+    return ret;
+#else
+    return 0;
+#endif
+}
+
 void Socket::setLocalSocket(const char *ipaddr, int port) {
+  local_ip = ipaddr;
+  local_port = port;
   // zero out the structures
+
   std::memset((char *)&localSockAddr, 0, sizeof(localSockAddr));
   localSockAddr.sin_family = AF_INET;
   localSockAddr.sin_port = htons(port);
@@ -81,6 +100,8 @@ void Socket::setLocalSocket(const char *ipaddr, int port) {
 }
 
 void Socket::setRemoteSocket(const char *ipaddr, int port) {
+  remote_ip = ipaddr;
+  remote_port = port;
   // zero out the structures
   std::memset((char *)&remoteSockAddr, 0, sizeof(remoteSockAddr));
   remoteSockAddr.sin_family = AF_INET;
@@ -92,14 +113,32 @@ void Socket::setRemoteSocket(const char *ipaddr, int port) {
   assert(ret != 0);
 }
 
+int Socket::connectToRemote() {
+  // zero out the structures
+  struct sockaddr_in remoteSockAddr;
+  std::memset((char *)&remoteSockAddr, 0, sizeof(remoteSockAddr));
+  remoteSockAddr.sin_family = AF_INET;
+  remoteSockAddr.sin_port = htons(remote_port);
+  int ret = inet_aton(remote_ip, &remoteSockAddr.sin_addr);
+  if (ret == 0) {
+    std::cout << "invalid ip address " << remote_ip << std::endl;
+  }
+  assert(ret != 0);
+  ret = connect(socketFileDescriptor, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
+  if (ret < 0) {
+    LOG(Sev::Error, "connect() to {}:{} failed", remote_ip, remote_port);
+    socketFileDescriptor = -1;
+  }
+  return ret;
+}
+
 int Socket::send(void *buffer, int len) {
   XTRACE(IPC, DEB, "Socket::send(), length %d bytes", len);
   int ret =
-      sendto(socketFileDescriptor, buffer, len, 0, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
+      sendto(socketFileDescriptor, buffer, len, SEND_FLAGS, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
   if (ret < 0) {
-    std::cout << "unable to send on socket" << std::endl;
-    perror("send");
-    exit(1); /**< \todo a bit harsh maybe ? */
+    socketFileDescriptor = -1;
+      XTRACE(IPC, DEB, "sendto() failed with code %d", ret);
   }
 
   return ret;
@@ -140,41 +179,17 @@ bool Socket::isValidSocket() {
   return (socketFileDescriptor >= 0);
 }
 
-TCPTransmitter::TCPTransmitter(const char *ipaddr, int port) {
-  socketFileDescriptor = socket(AF_INET, SOCK_STREAM, 0);
-  if (socketFileDescriptor < 0) {
-    std::cout << "TCPSocket(): socket() failed" << std::endl;
-  }
-
-  std::memset((char *)&remoteSockAddr, 0, sizeof(remoteSockAddr));
-  remoteSockAddr.sin_family = AF_INET;
-  remoteSockAddr.sin_port = htons(port);
-  int ret = inet_aton(ipaddr, &remoteSockAddr.sin_addr);
-  if (ret == 0) {
-    std::cout << "invalid ip address " << ipaddr << std::endl;
-  }
-  assert(ret != 0);
-
-  #ifdef SYSTEM_NAME_DARWIN
-  LOG(Sev::Info, "setsockopt() - MacOS specific");
-  int on = 1;
-  ret = setsockopt(socketFileDescriptor, SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof(on));
-  if (ret != 0) {
-    LOG(Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
-    perror("setsockopt():");
-  }
-  assert(ret ==0);
-  #endif
-
-  ret = connect(socketFileDescriptor, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
-  if (ret < 0) {
-    LOG(Sev::Error, "connect() to {}:{} failed", ipaddr, port);
-    socketFileDescriptor = -1;
-  }
+///
+///
+///
+TCPTransmitter::TCPTransmitter(const char *ipaddr, int port) : Socket(Socket::type::TCP) {
+  setRemoteSocket(ipaddr, port);
+  setNOSIGPIPE();
+  connectToRemote();
 }
 
 int TCPTransmitter::senddata(char *buffer, int len) {
-  if (socketFileDescriptor < 0) {
+  if (!isValidSocket()) {
     XTRACE(IPC, WAR, "No file descriptor for TCP transmitter");
     return -1;
   }
@@ -184,16 +199,5 @@ int TCPTransmitter::senddata(char *buffer, int len) {
     return 0;
   }
 
-
-
-  int ret = send(socketFileDescriptor, buffer, len, SEND_FLAGS);
-  if (ret <= 0) {
-    LOG(Sev::Warning, "TCPClient::send() returns {}, clearing socket ", ret);
-    socketFileDescriptor = -1;
-  }
-  return ret;
-}
-
-bool TCPTransmitter::isValidSocket() {
-  return (socketFileDescriptor >= 0);
+  return send(buffer, len);
 }
