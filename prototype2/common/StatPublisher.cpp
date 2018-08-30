@@ -5,7 +5,7 @@
 /// Implementation of StatPublisher
 ///
 //===----------------------------------------------------------------------===//
-
+//
 #include <common/StatPublisher.h>
 #include <common/Log.h>
 
