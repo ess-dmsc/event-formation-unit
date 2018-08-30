@@ -36,7 +36,7 @@ void StatPublisher::publish(std::shared_ptr<Detector> detector) {
 
 ///
 void StatPublisher::reconnectHelper() {
-    LOqG(Sev::Warning, "Carbon/Graphite reconnect attempt {}", Retries);
+    LOG(Sev::Warning, "Carbon/Graphite reconnect attempt {}", Retries);
     StatDb.reset(new TCPTransmitter(IpAddress.c_str(), TCPPort));
     if (StatDb->isValidSocket()) {
       LOG(Sev::Info, "Carbon/Graphite connection re-established");
