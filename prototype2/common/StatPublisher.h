@@ -24,6 +24,9 @@ public:
 
 
 private:
+  static const int BufferSize = 1000;
+  char Buffer[BufferSize];
+
   /// \brief called when senddata() fails
   void handleReconnect();
 
