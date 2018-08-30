@@ -166,18 +166,6 @@ private:
 
   std::shared_ptr<Multigrid::Efu> mgEfu;
   std::shared_ptr<Multigrid::HitFile> dumpfile;
-
-  uint32_t getPixel() {
-    if (!mgEfu)
-      return 0;
-    return mg_config.geometry.pixel3D(mgEfu->x(),
-                            mgEfu->y(),
-                            mgEfu->z());
-  }
-
-  uint32_t getTime() {
-    return static_cast<uint32_t>(mgEfu->time() - RecentPulseTime);
-  }
 };
 
 CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
@@ -302,12 +290,14 @@ void CSPEC::mainThread() {
           mgEfu->ingest(vmmr16Parser.converted_data);
 
           if (mgEfu->event_good()) {
-            uint32_t pixel = getPixel();
-            uint32_t time = getTime();
+            uint32_t pixel = mg_config.geometry.pixel3D(mgEfu->x(), mgEfu->y(), mgEfu->z());
+            uint32_t time = static_cast<uint32_t>(mgEfu->time() - RecentPulseTime);
 
             XTRACE(PROCESS, DEB, "Event: pixel: %d, time: %d ", pixel, time);
             if (pixel == 0) {
               mystats.geometry_errors++;
+            } else if (mgEfu->time() < RecentPulseTime) {
+              mystats.timing_errors++;
             } else if (time > (1.00004 * ShortestPulsePeriod)) {
               mystats.timing_errors++;
             } else {
