@@ -22,22 +22,34 @@ public:
   /// \brief Send detector metrics to Carbon/Graphite server
   void publish(std::shared_ptr<Detector> detector);
 
+
+private:
   /// \brief called when senddata() fails
   void handleReconnect();
 
   /// \brief
   void reconnectHelper();
 
-private:
   /// Connection variable
-  TCPTransmitter *statdb;
-  std::string ip{""};
-  uint16_t port{0};
+  std::unique_ptr<TCPTransmitter> StatDb;
+
+  /// \brief ip address of the stat database server (dotted quad: x.y.z.a)
+  std::string IpAddress{""};
+
+  /// \brief TCP port number of database server
+  uint16_t TCPPort{0};
 
   /// Reconnect variables
-  int retries{0};
-  Timer reconnect;
+  /// \brief the number of connection attempts
+  unsigned int Retries{1};
 
-  const int maxReconnectAttempts{240}; /// equivalent to a couple of hours
-  const uint64_t reconnectDelayUS{30000000}; /// 30s
+  /// \brief timer for determining quiet period
+  Timer ReconnectTime;
+
+  /// \brief log an error messages after this many attempts
+  /// multiply with reconnectDelayUs to determine when this occurs
+  const uint64_t MaxReconnectAttempts{240};
+
+  /// \brief delay in us between reconnection attempts
+  const uint64_t ReconnectDelayUS{30 * 1000 * 1000};
 };
