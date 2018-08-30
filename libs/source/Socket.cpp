@@ -21,7 +21,7 @@ Socket::Socket(Socket::type stype) {
   auto type = (stype == Socket::type::UDP) ? SOCK_DGRAM : SOCK_STREAM;
   auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
 
-  if ((socketFileDescriptor = socket(AF_INET, type, proto)) == -1) {
+  if ((SocketFileDescriptor = socket(AF_INET, type, proto)) == -1) {
     LOG(Sev::Error, "socket() failed");
     exit(1);
   }
@@ -81,17 +81,20 @@ int Socket::setNOSIGPIPE() {
 }
 
 void Socket::setLocalSocket(const char *ipaddr, int port) {
-  local_ip = ipaddr;
-  local_port = port;
   // zero out the structures
-
+  struct sockaddr_in localSockAddr;
   std::memset((char *)&localSockAddr, 0, sizeof(localSockAddr));
   localSockAddr.sin_family = AF_INET;
   localSockAddr.sin_port = htons(port);
-  inet_aton(ipaddr, &localSockAddr.sin_addr);
+
+  int ret = inet_aton(ipaddr, &localSockAddr.sin_addr);
+  if (ret == 0) {
+    std::cout << "invalid ip address " << ipaddr << std::endl;
+  }
+  assert(ret != 0);
 
   // bind socket to port
-  int ret = bind(socketFileDescriptor, (struct sockaddr *)&localSockAddr, sizeof(localSockAddr));
+  ret = bind(SocketFileDescriptor, (struct sockaddr *)&localSockAddr, sizeof(localSockAddr));
   if (ret != 0) {
     std::cout << "bind failed - is port " << port << " already in use?"
               << std::endl;
@@ -100,12 +103,13 @@ void Socket::setLocalSocket(const char *ipaddr, int port) {
 }
 
 void Socket::setRemoteSocket(const char *ipaddr, int port) {
-  remote_ip = ipaddr;
-  remote_port = port;
+  RemoteIp = ipaddr;
+  RemotePort = port;
   // zero out the structures
   std::memset((char *)&remoteSockAddr, 0, sizeof(remoteSockAddr));
   remoteSockAddr.sin_family = AF_INET;
   remoteSockAddr.sin_port = htons(port);
+
   int ret = inet_aton(ipaddr, &remoteSockAddr.sin_addr);
   if (ret == 0) {
     std::cout << "invalid ip address " << ipaddr << std::endl;
@@ -118,16 +122,16 @@ int Socket::connectToRemote() {
   struct sockaddr_in remoteSockAddr;
   std::memset((char *)&remoteSockAddr, 0, sizeof(remoteSockAddr));
   remoteSockAddr.sin_family = AF_INET;
-  remoteSockAddr.sin_port = htons(remote_port);
-  int ret = inet_aton(remote_ip, &remoteSockAddr.sin_addr);
+  remoteSockAddr.sin_port = htons(RemotePort);
+  int ret = inet_aton(RemoteIp, &remoteSockAddr.sin_addr);
   if (ret == 0) {
-    std::cout << "invalid ip address " << remote_ip << std::endl;
+    std::cout << "invalid ip address " << RemoteIp << std::endl;
   }
   assert(ret != 0);
-  ret = connect(socketFileDescriptor, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
+  ret = connect(SocketFileDescriptor, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
   if (ret < 0) {
-    LOG(Sev::Error, "connect() to {}:{} failed", remote_ip, remote_port);
-    socketFileDescriptor = -1;
+    LOG(Sev::Error, "connect() to {}:{} failed", RemoteIp, RemotePort);
+    SocketFileDescriptor = -1;
   }
   return ret;
 }
@@ -135,10 +139,10 @@ int Socket::connectToRemote() {
 int Socket::send(void *buffer, int len) {
   XTRACE(IPC, DEB, "Socket::send(), length %d bytes", len);
   int ret =
-      sendto(socketFileDescriptor, buffer, len, SEND_FLAGS, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
+      sendto(SocketFileDescriptor, buffer, len, SEND_FLAGS, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
   if (ret < 0) {
-    socketFileDescriptor = -1;
-      XTRACE(IPC, DEB, "sendto() failed with code %d", ret);
+    SocketFileDescriptor = -1;
+    XTRACE(IPC, DEB, "sendto() failed with code %d", ret);
   }
 
   return ret;
@@ -148,7 +152,7 @@ int Socket::send(void *buffer, int len) {
 int Socket::receive(void *buffer, int buflen) {
   socklen_t slen = 0;
   // try to receive some data, this is a blocking call
-  return recvfrom(socketFileDescriptor, buffer, buflen, 0, (struct sockaddr *)&remoteSockAddr, &slen);
+  return recvfrom(SocketFileDescriptor, buffer, buflen, 0, (struct sockaddr *)&remoteSockAddr, &slen);
 }
 
 //
@@ -159,7 +163,7 @@ int Socket::getSockOpt(int option) {
   int optval, ret;
   socklen_t optlen;
   optlen = sizeof(optval);
-  if ((ret = getsockopt(socketFileDescriptor, SOL_SOCKET, option, (void *)&optval, &optlen)) <
+  if ((ret = getsockopt(SocketFileDescriptor, SOL_SOCKET, option, (void *)&optval, &optlen)) <
       0) {
     std::cout << "getsockopt() failed" << std::endl;
     return ret;
@@ -169,14 +173,14 @@ int Socket::getSockOpt(int option) {
 
 int Socket::setSockOpt(int option, void *value, int size) {
   int ret;
-  if ((ret = setsockopt(socketFileDescriptor, SOL_SOCKET, option, value, size)) < 0) {
+  if ((ret = setsockopt(SocketFileDescriptor, SOL_SOCKET, option, value, size)) < 0) {
     std::cout << "setsockopt() failed" << std::endl;
   }
   return ret;
 }
 
 bool Socket::isValidSocket() {
-  return (socketFileDescriptor >= 0);
+  return (SocketFileDescriptor >= 0);
 }
 
 ///

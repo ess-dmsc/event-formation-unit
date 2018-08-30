@@ -65,12 +65,9 @@ public:
   bool isValidSocket();
 
 private:
-  int socketFileDescriptor{-1};
-  const char * local_ip;
-  int local_port;
-  struct sockaddr_in localSockAddr;
-  const char * remote_ip;
-  int remote_port;
+  int SocketFileDescriptor{-1};
+  const char * RemoteIp;
+  int RemotePort;
   struct sockaddr_in remoteSockAddr;
 
   /// wrapper for getsockopt() system call
