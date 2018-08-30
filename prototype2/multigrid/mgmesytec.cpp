@@ -158,6 +158,7 @@ private:
   Multigrid::Config mg_config;
   Monitor monitor;
 
+  bool HavePulseTime{false};
   uint64_t RecentPulseTime{0};
 
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
@@ -281,6 +282,7 @@ void CSPEC::mainThread() {
             ShortestPulsePeriod = std::min(ShortestPulsePeriod, PulsePeriod);
           }
           RecentPulseTime = vmmr16Parser.time();
+          HavePulseTime = true;
         }
 
         mystats.triggers = vmmr16Parser.trigger_count();
@@ -299,6 +301,8 @@ void CSPEC::mainThread() {
             } else if (mgEfu->time() < RecentPulseTime) {
               mystats.timing_errors++;
             } else if (time > (1.00004 * ShortestPulsePeriod)) {
+              mystats.timing_errors++;
+            } else if (!HavePulseTime) {
               mystats.timing_errors++;
             } else {
               mystats.readouts_culled += (parsed_readouts - mgEfu->used_readouts);
