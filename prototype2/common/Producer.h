@@ -13,6 +13,7 @@
 #include <common/Buffer.h>
 #include <functional>
 
+
 ///
 class ProducerBase {
 public:
@@ -29,7 +30,7 @@ public:
   }
 };
 
-class Producer : public ProducerBase, public RdKafka::DeliveryReportCb {
+class Producer : public ProducerBase, public RdKafka::EventCb {
 public:
   /// \brief Construct a producer object.
   /// \param broker 'URL' specifying host and port, example "127.0.0.1:9009"
@@ -54,10 +55,10 @@ public:
 
 
   /// \brief Kafka callback function for delivery reports
-  void dr_cb(RdKafka::Message &message) override;
+  //void dr_cb(RdKafka::Message &message) override;
 
   /// \brief Kafka callback function for events
-  void event_cb(RdKafka::Event &event);
+  void event_cb(RdKafka::Event &event) override;
 
   struct {
     uint64_t ev_errors;

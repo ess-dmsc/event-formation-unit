@@ -15,20 +15,20 @@ std::map<std::string, DetectorModuleSetup> &getFactories() {
   return Modules;
 }
 
-DetectorModuleSetup &find(std::string const &DetectorName) {
+DetectorModuleSetup &find(std::string const &DetectorModuleName) {
   auto &Modules = getFactories();
-  auto FoundModule = Modules.find(DetectorName);
+  auto FoundModule = Modules.find(DetectorModuleName);
   if (FoundModule == Modules.end()) {
     throw std::runtime_error("No detector module found with that name.");
   }
   return FoundModule->second;
 }
 
-void addDetectorModule(std::string DetectorName, DetectorModuleSetup Module) {
+void addDetectorModule(std::string DetectorModuleName, DetectorModuleSetup Module) {
   auto &Modules = getFactories();
-  if (Modules.find(DetectorName) != Modules.end()) {
+  if (Modules.find(DetectorModuleName) != Modules.end()) {
     throw std::runtime_error("Detector module is already in list of modules.");
   }
-  Modules[DetectorName] = Module;
+  Modules[DetectorModuleName] = Module;
 }
 } // namespace DetectorModuleRegistration

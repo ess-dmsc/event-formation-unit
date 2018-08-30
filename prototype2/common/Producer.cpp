@@ -20,15 +20,15 @@ void Producer::setConfig(std::string name, std::string value) {
 }
 
 ///
-void Producer::dr_cb(RdKafka::Message &message) {
-  if (message.err() != RdKafka::ERR_NO_ERROR) {
-    stats.dr_errors++;
-    XTRACE(KAFKA, WAR, "RdKafkaDr error message (%d):  %s\n", message.err(), message.errstr().c_str());
-  } else {
-    stats.dr_noerrors++;
-    XTRACE(KAFKA, INF, "RdKafkaDr other message (%d):  %s\n", message.err(), message.errstr().c_str());
-  }
-}
+// void Producer::dr_cb(RdKafka::Message &message) {
+//   if (message.err() != RdKafka::ERR_NO_ERROR) {
+//     stats.dr_errors++;
+//     XTRACE(KAFKA, WAR, "RdKafkaDr error message (%d):  %s\n", message.err(), message.errstr().c_str());
+//   } else {
+//     stats.dr_noerrors++;
+//     XTRACE(KAFKA, INF, "RdKafkaDr other message (%d):  %s\n", message.err(), message.errstr().c_str());
+//   }
+// }
 
 ///
 void Producer::event_cb(RdKafka::Event &event) {
@@ -71,9 +71,9 @@ Producer::Producer(std::string broker, std::string topicstr) :
     LOG(Sev::Error, "Kafka: unable to set event_cb");
   }
 
-  if (conf->set("dr_cb", this, kafkaErrstr) != RdKafka::Conf::CONF_OK) {
-    LOG(Sev::Error, "Kafka: unable to set dr_cb");
-  }
+  // if (conf->set("dr_cb", this, kafkaErrstr) != RdKafka::Conf::CONF_OK) {
+  //   LOG(Sev::Error, "Kafka: unable to set dr_cb");
+  // }
 
   producer = RdKafka::Producer::create(conf, kafkaErrstr);
   if (!producer) {
