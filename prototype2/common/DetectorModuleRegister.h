@@ -34,7 +34,7 @@ void addDetectorModule(std::string key, DetectorModuleSetup Module);
 
 /// \brief Find a detector module, given a key.
 /// \throws std::runtime_error If the key is not found.
-DetectorModuleSetup &find(std::string const &ModuleName);
+DetectorModuleSetup &find(std::string const &DetectorModuleName);
 
 
 /// \brief Register a detector module by instantiating a member of
