@@ -119,7 +119,7 @@ void Server::server_poll() {
       auto tmpsock = accept(serverfd, NULL, NULL);
       close(tmpsock);
     } else {
-      LOG(Sev::Info, "Accept new connection");
+      LOG(Sev::Debug, "Accept new connection");
       *freefd = accept(serverfd, NULL, NULL);
       if (*freefd < 0 && errno != EWOULDBLOCK) {
         assert(1 == 0);
@@ -143,7 +143,7 @@ void Server::server_poll() {
         return;
       }
       if (bytes == 0) {
-        LOG(Sev::Info, "Peer closed socket {}", cli);
+        LOG(Sev::Debug, "Peer closed socket {}", cli);
         server_close(cli);
         return;
       }

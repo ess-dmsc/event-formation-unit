@@ -43,7 +43,7 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
 
   std::string name = detector->statname(index);
   int64_t value = detector->statvalue(index);
-  LOG(Sev::Info, "STAT_GET {} {}", name, value);
+  LOG(Sev::Debug, "STAT_GET {} {}", name, value);
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET %s %" PRIi64,
                      name.c_str(), value);
 

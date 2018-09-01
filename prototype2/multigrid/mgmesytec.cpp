@@ -138,19 +138,20 @@ private:
 
   struct {
     // Input Counters
-    int64_t rx_packets;
-    int64_t rx_bytes;
-    int64_t sis_discarded_bytes;
-    int64_t vmmr_discarded_bytes;
-    int64_t triggers;
-    int64_t bad_triggers;
-    int64_t readouts;
-    int64_t readouts_discarded;
-    int64_t readouts_culled;
-    int64_t geometry_errors;
-    int64_t timing_errors;
-    int64_t events;
-    int64_t tx_bytes;
+    int64_t rx_packets {0};
+    int64_t rx_bytes {0};
+    int64_t sis_discarded_bytes {0};
+    int64_t vmmr_discarded_bytes {0};
+    int64_t triggers {0};
+    int64_t bus_glitches {0};
+    int64_t bad_triggers {0};
+    int64_t readouts {0};
+    int64_t readouts_discarded {0};
+    int64_t readouts_culled {0};
+    int64_t geometry_errors {0};
+    int64_t timing_errors {0};
+    int64_t events {0};
+    int64_t tx_bytes {0};
   } ALIGN(64) mystats;
 
   void init_config();
@@ -179,6 +180,7 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.create("sis_discarded_bytes",  mystats.sis_discarded_bytes);
   Stats.create("vmmr_discarded_bytes", mystats.vmmr_discarded_bytes);
   Stats.create("triggers",             mystats.triggers);
+  Stats.create("bus_glitches",          mystats.bus_glitches);
   Stats.create("bad_triggers",         mystats.bad_triggers);
   Stats.create("readouts",             mystats.readouts);
   Stats.create("readouts_discarded",   mystats.readouts_discarded);
@@ -288,10 +290,14 @@ void CSPEC::mainThread() {
         mystats.triggers = vmmr16Parser.trigger_count();
         mystats.readouts += parsed_readouts;
 
+        bool bus_glitch = (vmmr16Parser.converted_data.size() > 40);
+        if (bus_glitch)
+          mystats.bus_glitches++;
+
         if (mgEfu) {
           mgEfu->ingest(vmmr16Parser.converted_data);
 
-          if (mgEfu->event_good()) {
+          if (mgEfu->event_good() && !bus_glitch) {
             uint32_t pixel = mg_config.geometry.pixel3D(mgEfu->x(), mgEfu->y(), mgEfu->z());
             uint32_t time = static_cast<uint32_t>(mgEfu->time() - RecentPulseTime);
 
