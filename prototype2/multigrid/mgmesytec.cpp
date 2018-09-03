@@ -114,7 +114,7 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.create("geometry_errors",       mystats.geometry_errors);
   Stats.create("events",                mystats.rx_events);
   Stats.create("tx_bytes",              mystats.tx_bytes);
-  /// Todo below stats are common to all detectors and could/should be moved
+  /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
   Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
   Stats.create("kafka_ev_others", mystats.kafka_ev_others);
