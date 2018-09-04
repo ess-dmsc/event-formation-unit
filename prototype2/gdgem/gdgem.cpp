@@ -148,7 +148,7 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   Stats.create("bad_frames", mystats.bad_frames);
   Stats.create("good_frames", mystats.good_frames);
   Stats.create("tx_bytes", mystats.tx_bytes);
-  /// Todo below stats are common to all detectors and could/should be moved
+  /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
   Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
   Stats.create("kafka_ev_others", mystats.kafka_ev_others);

@@ -105,7 +105,7 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
   Stats.create("processing.rx_events",            mystats.rx_events);
   Stats.create("processing.rx_geometry_errors",   mystats.geometry_errors);
   Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
-  /// Todo below stats are common to all detectors and could/should be moved
+  /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
   Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
   Stats.create("kafka_ev_others", mystats.kafka_ev_others);

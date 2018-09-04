@@ -180,7 +180,7 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.create("sis_discarded_bytes",  mystats.sis_discarded_bytes);
   Stats.create("vmmr_discarded_bytes", mystats.vmmr_discarded_bytes);
   Stats.create("triggers",             mystats.triggers);
-  Stats.create("bus_glitches",          mystats.bus_glitches);
+  Stats.create("bus_glitches",         mystats.bus_glitches);
   Stats.create("bad_triggers",         mystats.bad_triggers);
   Stats.create("readouts",             mystats.readouts);
   Stats.create("readouts_discarded",   mystats.readouts_discarded);
