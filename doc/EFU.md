@@ -21,7 +21,7 @@ The behaviour of the processing threads is completely determined by the author o
 
 ## Interfaces
 
-![EFU Interfaces](images/efu_uarchitecture.png)
+![EFU Interfaces](figures/efu_architecture.png)
 
 ### Command line Interfaces
 The EFU exposes a command line interface based on TCP for runtime control and configuration.
