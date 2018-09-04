@@ -58,6 +58,12 @@ else()
   message(STATUS "*** Skipping ProducerTest - requires gcc/linux")
 endif()
 
+set(BufferTest_SRC
+  BufferTest.cpp)
+set(BufferTest_INC
+  Buffer.h)
+create_test_executable(BufferTest)
+
 set(DataSaveTest_SRC
     DataSaveTest.cpp
     DataSave.cpp
