@@ -13,27 +13,73 @@ describing the EFU and four prototype detector implementations is given in https
 ### main
 The main function is responsible for parsing launch-time configuration parameters, performing system hardware checks, launching detector plugins, receiving and reacting to run-time commands, periodic publishing of statistics and the termination of the threads and the process itself.
 
-*prototype2/efu/main.cpp*
+
+[prototype2/efu/main.cpp](https://github.com/ess-dmsc/event-formation-unit/blob/master/prototype2/efu/main.cpp)
 
 
 ### Threads
-The behaviour of the processing threads is completely determined by the author of that plugin.
+The behaviour of the processing threads is completely determined by the author of that plugin. In order for a plugin to be usable it needs to adhere to the detector C++ interface. This is described in a later section.
+
+Four examples of already implemented detector interfaces, somewhat alike but also differing are found here
+
+[Gd-GEM](https://github.com/ess-dmsc/event-formation-unit/blob/master/prototype2/gdgem/gdgem.cpp) <br>
+[Multi-Grid](https://github.com/ess-dmsc/event-formation-unit/blob/master/prototype2/multigrid/mgmesytec.cpp) <br>
+[Multi-Blade](https://github.com/ess-dmsc/event-formation-unit/blob/master/prototype2/multiblade/mbcaen.cpp) <br>
+[SoNDe](https://github.com/ess-dmsc/event-formation-unit/blob/master/prototype2/sonde/sonde.cpp)
+
 
 ## Interfaces
 
 ![EFU Interfaces](figures/efu_architecture.png)
+
+### Data Interface
+The data interface of the EFU is completely open. Current detector implementations use UDP based on BSD Sockets. If using the provided Socket abstraction, a UDP receiver can be setup as follows
+
+    #include <libs/include/Socket.h>
+    ...
+    Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+                       EFUSettings.DetectorPort);
+    UDPReceiver datareceiver(local);
+    ...
+    int rx_bytes = datareceiver.receive(buffer, buffersize);
+
+The default behavior is to listen on all ip interfaces (0.0.0.0) and on UDP port 9000. This can be changed with the command line options **-i** and **-p**
+
+    efu -i 172.17.5.35 -p 9001
+
+### Logging interface
+The EFU supports logging via graylog. The current implementation can be found at https://github.com/ess-dmsc/graylog-logger
+
+The logging interface should probably not be used in the fast data path, but it is used for logging in the main process.
+
+    #include <common/Log.h>
+    ...
+    Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
+    ...
+    LOG(Sev::Warning, "CSPEC_SHOW_CALIB: wrong number of arguments");
+
+The default behavior is to send log messages to localhost on port 12201. The server ip address can be changed with the command line option **-a**.
+
+    efu -a 10.1.2.3
+
+### Kafka interface
+There is no requirement to use Kafka. But if you send event data in the ESS format this can be done using the Producer class. (Will soon be replaced by ????)
+
+The default behaviour is to use Kafka broker on localhost:9092, but this can be changed using the **-b** option.
+
+    efu -b "172.17.5.38:9092"
 
 ### Command line Interfaces
 The EFU exposes a command line interface based on TCP for runtime control and configuration.
 
 The default behaviour is for the command server to listen on TCP port 8888, but this can be changed with the **-m** option.
 
+    efu -m 8899
+
 The CLI interface consists of a multi-client server and a command parser. Some commands are common and some are detector specific. The important files are
 
 *prototype2/efu/Server.cpp* <br>
 *prototype2/efu/Parser.cpp*
-
-
 
 #### Global commands
 Registering a new global command (Parse.cpp) consist of creating a parser for that command, and registering the function.
@@ -77,7 +123,9 @@ For a brief summary of how this is used see
 https://www.linkedin.com/pulse/creating-cool-dashboards-grafana-morten-jagd-christensen/
 
 Every registered statistics counter will be published about once per second. The default behaviour is to publish stats in *localhost*
-and tcp port 2003 (Carbon). The server ip address can be changed by command line option **-g**
+and tcp port 2003 (Carbon). The server ip address and tcp port can be changed by command line options **-g** and **-o**.
+
+    efu -g 172.17.12.31 -o 4005
 
 To create a useful stat counter three things are needed:
 
@@ -97,6 +145,7 @@ We recommend that stats are grouped in a struct or similar, but this is not a re
       ...
     } ALIGN(64) mystats;
     ...
+    Stats.setPrefix("efu.input");
     Stats.create("rx_packets", mystats.rx_packets);
     ...
     // in main loop
