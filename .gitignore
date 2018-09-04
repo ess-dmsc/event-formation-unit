@@ -20,3 +20,4 @@ doxygen/
 #IDE
 CMakeLists.txt.user
 .idea/
+.idea
