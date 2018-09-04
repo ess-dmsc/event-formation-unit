@@ -187,7 +187,7 @@ void MBCAEN::processing_thread() {
 
   EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
   Producer eventprod(EFUSettings.KafkaBroker, "MB_detector");
-  flatbuffer.set_callback(
+  flatbuffer.producerCallback(
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
   multiBladeEventBuilder builder[ncass];
@@ -276,7 +276,7 @@ void MBCAEN::processing_thread() {
             if (pixel_id == 0) {
               mystats.geometry_errors++;
             } else {
-              mystats.tx_bytes += flatbuffer.addevent(
+              mystats.tx_bytes += flatbuffer.addEvent(
                   builder[cassette].getTimeStamp(), pixel_id);
               mystats.rx_events++;
             }

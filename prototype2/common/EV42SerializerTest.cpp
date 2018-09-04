@@ -27,7 +27,7 @@ protected:
 
 TEST_F(EV42SerializerTest, Serialize) {
   for (size_t i=0; i < ARRAYLENGTH; i++)
-    fb.addevent(i,i);
+    fb.addEvent(i,i);
   auto buffer = fb.serialize();
   ASSERT_TRUE(buffer.size >= ARRAYLENGTH * 8);
   ASSERT_TRUE(buffer.size <= ARRAYLENGTH * 8 + 2048);
@@ -36,7 +36,7 @@ TEST_F(EV42SerializerTest, Serialize) {
 
 TEST_F(EV42SerializerTest, SerDeserialize) {
   for (size_t i=0; i < ARRAYLENGTH-1; i++)
-    fb.addevent(i,i);
+    fb.addEvent(i,i);
   auto buffer = fb.serialize();
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
@@ -49,8 +49,8 @@ TEST_F(EV42SerializerTest, SerDeserialize) {
 }
 
 TEST_F(EV42SerializerTest, SerPulseTime) {
-  fb.set_pulse_time(12345);
-  ASSERT_EQ(fb.get_pulse_time(), 12345);
+  fb.pulseTime(12345);
+  ASSERT_EQ(fb.pulseTime(), 12345);
   auto buffer = fb.serialize();
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
@@ -64,9 +64,9 @@ TEST_F(EV42SerializerTest, SerPulseTime) {
 
 TEST_F(EV42SerializerTest, DeserializeCheckData) {
   for (int i = 0; i < ARRAYLENGTH - 1; i++) {
-    auto len = fb.addevent(time[i], pixel[i]);
+    auto len = fb.addEvent(time[i], pixel[i]);
     ASSERT_EQ(len, 0);
-    ASSERT_EQ(fb.events(), i+1);
+    ASSERT_EQ(fb.eventCount(), i+1);
   }
 
   auto buffer = fb.serialize();
@@ -91,12 +91,12 @@ TEST_F(EV42SerializerTest, DeserializeCheckData) {
 
 TEST_F(EV42SerializerTest, AutoDeserialize) {
   for (int i = 0; i < ARRAYLENGTH - 1; i++) {
-    auto len = fb.addevent(time[i], pixel[i]);
+    auto len = fb.addEvent(time[i], pixel[i]);
     ASSERT_EQ(len, 0);
-    ASSERT_EQ(fb.events(), i + 1);
+    ASSERT_EQ(fb.eventCount(), i + 1);
   }
 
-  auto len = fb.addevent(time[ARRAYLENGTH - 1], pixel[ARRAYLENGTH - 1]);
+  auto len = fb.addEvent(time[ARRAYLENGTH - 1], pixel[ARRAYLENGTH - 1]);
   ASSERT_TRUE(len > 0);
 }
 

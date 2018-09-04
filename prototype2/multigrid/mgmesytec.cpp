@@ -245,7 +245,7 @@ void CSPEC::mainThread() {
 
   EV42Serializer ev42serializer(kafka_buffer_size, "multigrid");
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  ev42serializer.set_callback(std::bind(&Producer::produce2<uint8_t>, &EventProducer, std::placeholders::_1));
+  ev42serializer.producerCallback(std::bind(&Producer::produce2<uint8_t>, &EventProducer, std::placeholders::_1));
 
   Multigrid::Sis3153Parser sis3153parser;
   sis3153parser.buffers.reserve(1000);
@@ -276,8 +276,8 @@ void CSPEC::mainThread() {
 
         if (vmmr16Parser.externalTrigger()) {
           parsed_readouts--;
-          ev42serializer.set_pulse_time(RecentPulseTime);
-          if (ev42serializer.events())
+          ev42serializer.pulseTime(RecentPulseTime);
+          if (ev42serializer.eventCount())
             mystats.tx_bytes += ev42serializer.produce();
           if (RecentPulseTime) {
             auto PulsePeriod = vmmr16Parser.time() - RecentPulseTime;
@@ -313,7 +313,7 @@ void CSPEC::mainThread() {
             } else {
               mystats.readouts_culled += (parsed_readouts - mgEfu->used_readouts);
               mystats.events++;
-              mystats.tx_bytes += ev42serializer.addevent(time, pixel);
+              mystats.tx_bytes += ev42serializer.addEvent(time, pixel);
             }
           } else {
             mystats.readouts_discarded += parsed_readouts;

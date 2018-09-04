@@ -172,7 +172,7 @@ void SONDEIDEA::processing_thread() {
   IDEASData ideasdata(&geometry, DetectorSettings.fileprefix);
   EV42Serializer flatbuffer(kafka_buffer_size, "multigrid");
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
-  flatbuffer.set_callback(
+  flatbuffer.producerCallback(
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
   unsigned int data_index;
@@ -200,7 +200,7 @@ void SONDEIDEA::processing_thread() {
           for (int i = 0; i < events; i++) {
             XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)",
                    i, ideasdata.data[i].time, ideasdata.data[i].pixel_id);
-            mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time,
+            mystats.tx_bytes += flatbuffer.addEvent(ideasdata.data[i].time,
                                                     ideasdata.data[i].pixel_id);
           }
         }

@@ -16,31 +16,37 @@
 
 class EV42Serializer {
 public:
-  /** \todo document */
+  /// \brief creates ev42 flat buffer serializer
+  /// \param max_array_length maximum number of events
+  /// \param source_name value for source_name field
   EV42Serializer(size_t max_array_length, std::string source_name);
 
-  void set_callback(ProducerCallback cb);
+  /// \brief sets producer callback
+  /// \param cb function to be called to send buffer to Kafka
+  void producerCallback(ProducerCallback callback);
 
-  /** \todo document */
-  void set_pulse_time(uint64_t time);
+  /// \brief changes pulse time
+  void pulseTime(uint64_t time);
 
-  /** \todo document */
-  uint64_t get_pulse_time() const;
+  /// \brief retrieves pulse time
+  uint64_t pulseTime() const;
 
-  /** \todo document */
-  size_t addevent(uint32_t time, uint32_t pixel);
+  /// \brief adds event
+  /// \param time time of event in relation to pulse time
+  /// \param pixl id of pixel as defined by logical geometry mapping
+  size_t addEvent(uint32_t time, uint32_t pixel);
 
-  /** \todo document */
-  size_t events() const;
+  /// \brief returns event count
+  size_t eventCount() const;
 
-  /** \todo document */
-  uint64_t current_message_id() const;
+  /// \brief returns current message counter
+  uint64_t currentMessageId() const;
 
-  /** \todo document */
+  /// \brief serializes and sends to producer, returns bytes
   size_t produce();
 
-  //TODO: make private
-  /** \todo document */
+  // \todo make private?
+  /// \brief serializes buffer
   Buffer<uint8_t> serialize();
 
 private:
@@ -51,7 +57,7 @@ private:
   // \todo maybe should be mutated directly in buffer?
   uint64_t message_id_{1};
 
-  ProducerCallback producer_callback;
+  ProducerCallback producer_callback_;
 
   // All of this is the flatbuffer
   flatbuffers::FlatBufferBuilder builder;

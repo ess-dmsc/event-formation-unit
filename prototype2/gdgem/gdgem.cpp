@@ -252,7 +252,7 @@ void NMX::processing_thread() {
 
   Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
   EV42Serializer flatbuffer(kafka_buffer_size, "nmx");
-  flatbuffer.set_callback(
+  flatbuffer.producerCallback(
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
   Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
@@ -344,7 +344,7 @@ void NMX::processing_thread() {
 
                 XTRACE(PROCESS, DEB, "time: %d, pixelid %d", time, pixelid);
 
-                mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
+                mystats.tx_bytes += flatbuffer.addEvent(time, pixelid);
                 mystats.clusters_events++;
               }
             } else { // Does not meet criteria

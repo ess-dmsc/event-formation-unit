@@ -227,7 +227,7 @@ void CSPEC::processing_thread() {
 
   Producer producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
   EV42Serializer flatbuffer(kafka_buffer_size, "multigrid");
-  flatbuffer.set_callback(
+  flatbuffer.producerCallback(
       std::bind(&Producer::produce2<uint8_t>, &producer, std::placeholders::_1));
 
   MultiGridGeometry geom(1, 2, 48, 4, 16);
@@ -269,7 +269,7 @@ void CSPEC::processing_thread() {
               mystats.geometry_errors++;
               assert(mystats.geometry_errors <= mystats.rx_readouts);
             } else {
-              mystats.tx_bytes += flatbuffer.addevent(tmptime, tmppixel);
+              mystats.tx_bytes += flatbuffer.addEvent(tmptime, tmppixel);
               mystats.rx_events++;
             }
           }
