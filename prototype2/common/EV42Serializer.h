@@ -51,18 +51,18 @@ public:
 
 private:
   // \todo should this not be predefined in terms of jumbo frame?
-  size_t max_events_{0};
-  size_t events_{0};
+  size_t maxEvents{0};
+  size_t events{0};
 
   // \todo maybe should be mutated directly in buffer?
-  uint64_t message_id_{1};
+  uint64_t messageId{1};
 
-  ProducerCallback producer_callback_;
+  ProducerCallback callbackFunction;
 
   // All of this is the flatbuffer
   flatbuffers::FlatBufferBuilder builder;
-  uint8_t *timeptr{nullptr};
-  uint8_t *pixelptr{nullptr};
+  uint8_t *timePtr{nullptr};
+  uint8_t *pixelPtr{nullptr};
 
   EventMessage *eventMsg;
 

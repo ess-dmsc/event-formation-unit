@@ -18,12 +18,12 @@ static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
 EV42Serializer::EV42Serializer(size_t max_array_length, std::string source_name)
-    : max_events_(max_array_length), builder(max_events_ * 8 + 256) {
+    : maxEvents(max_array_length), builder(maxEvents * 8 + 256) {
 
   auto sourceName = builder.CreateString(source_name);
-  auto timeoff = builder.CreateUninitializedVector(max_events_, TimeSize, &timeptr);
+  auto timeoff = builder.CreateUninitializedVector(maxEvents, TimeSize, &timePtr);
   auto pixeloff =
-      builder.CreateUninitializedVector(max_events_, PixelSize, &pixelptr);
+      builder.CreateUninitializedVector(maxEvents, PixelSize, &pixelPtr);
 
   auto evMsgHeader = CreateEventMessage(builder, sourceName, FBMutablePlaceholder,
                                         FBMutablePlaceholder, timeoff, pixeloff);
@@ -46,31 +46,31 @@ EV42Serializer::EV42Serializer(size_t max_array_length, std::string source_name)
 }
 
 void EV42Serializer::producerCallback(ProducerCallback callback) {
-  producer_callback_ = callback;
+  callbackFunction = callback;
 }
 
 Buffer<uint8_t> EV42Serializer::serialize() {
-  if (events_ > max_events_) {
+  if (events > maxEvents) {
     // TODO: this should probably throw instead?
     return {};
   }
-  eventMsg->mutate_message_id(message_id_);
-  *timeLenPtr = events_;
-  *pixelLenPtr = events_;
+  eventMsg->mutate_message_id(messageId);
+  *timeLenPtr = events;
+  *pixelLenPtr = events;
 
   // reset counter and increment message counter
-  events_ = 0;
-  message_id_++;
+  events = 0;
+  messageId++;
 
   return buffer;
 }
 
 size_t EV42Serializer::produce() {
-  if (events_ != 0) {
-    XTRACE(OUTPUT, DEB, "autoproduce %zu events \n", events_);
+  if (events != 0) {
+    XTRACE(OUTPUT, DEB, "autoproduce %zu events \n", events);
     auto buffer = serialize();
-    if (producer_callback_)
-      producer_callback_(buffer);
+    if (callbackFunction)
+      callbackFunction(buffer);
     return buffer.size;
   }
   return 0;
@@ -85,21 +85,21 @@ uint64_t EV42Serializer::pulseTime() const {
 }
 
 size_t EV42Serializer::eventCount() const {
-  return events_;
+  return events;
 }
 
 uint64_t EV42Serializer::currentMessageId() const {
-  return message_id_;
+  return messageId;
 }
 
 size_t EV42Serializer::addEvent(uint32_t time, uint32_t pixel) {
   XTRACE(OUTPUT, DEB, "Add event: %d %u\n", time, pixel);
-  ((uint32_t *) timeptr)[events_] = time;
-  ((uint32_t *) pixelptr)[events_] = pixel;
-  events_++;
+  ((uint32_t *) timePtr)[events] = time;
+  ((uint32_t *) pixelPtr)[events] = pixel;
+  events++;
 
   /** Produce when enough data has been accumulated */
-  if (events_ >= max_events_) {
+  if (events >= maxEvents) {
     return produce();
   }
   return 0;
