@@ -96,11 +96,11 @@ TEST_F(EfuMaximumTest, HighestAdcGrid) {
   EXPECT_EQ(efu.y(), efu.mappings.y(hit2.bus, hit2.channel));
 }
 
-// \todo time
+/// \todo time
 
-// \todo hists
+/// \todo hists
 
-// \todo serializer
+/// \todo serializer
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

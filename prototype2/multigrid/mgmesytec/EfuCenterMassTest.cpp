@@ -102,11 +102,11 @@ TEST_F(EfuCenterMassTest, HighestAdcGrid) {
   EXPECT_EQ(efu.y(), 22);
 }
 
-// \todo time
+/// \todo time
 
-// \todo hists
+/// \todo hists
 
-// \todo serializer
+/// \todo serializer
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

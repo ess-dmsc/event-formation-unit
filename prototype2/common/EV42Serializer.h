@@ -9,10 +9,10 @@
 
 #pragma once
 
-#include "ev42_events_generated.h"
 #include "Producer.h"
-#include <common/Buffer.h>
-#include <functional>
+#include "flatbuffers/flatbuffers.h"
+
+class EventMessage;
 
 class EV42Serializer {
 public:

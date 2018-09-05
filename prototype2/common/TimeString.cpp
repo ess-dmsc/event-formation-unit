@@ -8,7 +8,7 @@ std::string timeString() {
   struct tm *timeinfo;
   time(&rawtime);
   timeinfo = localtime(&rawtime);
-  strftime(cStartTime, 50, "%Y-%m-%d-%H-%M-%S", timeinfo);
+  strftime(cStartTime, 50, "%Y%m%d-%H%M%S", timeinfo);
   std::string startTime = cStartTime;
   return startTime;
 }

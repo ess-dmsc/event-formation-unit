@@ -4,6 +4,7 @@
 #include <common/Producer.h>
 #include <cstring>
 #include <test/TestBase.h>
+#include "ev42_events_generated.h"
 
 //#define ARRAYLENGTH 125000
 #define ARRAYLENGTH 10

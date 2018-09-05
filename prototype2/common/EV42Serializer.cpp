@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/EV42Serializer.h>
+#include "ev42_events_generated.h"
 #include <libs/include/gccintel.h>
 
 #include <common/Trace.h>
