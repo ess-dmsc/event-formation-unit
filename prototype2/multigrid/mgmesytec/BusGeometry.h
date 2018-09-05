@@ -47,25 +47,25 @@ public:
   inline uint16_t rescale_wire(uint16_t wire, uint16_t adc) const {
     if (wire >= wire_filters_.size())
       return adc;
-    return wire_filters_.at(wire).rescale(adc);
+    return wire_filters_[wire].rescale(adc);
   }
 
   inline uint16_t rescale_grid(uint16_t grid, uint16_t adc) const {
     if (grid >= grid_filters_.size())
       return adc;
-    return grid_filters_.at(grid).rescale(adc);
+    return grid_filters_[grid].rescale(adc);
   }
 
   inline bool valid_wire(uint16_t wire, uint16_t adc) const {
     if (wire >= wire_filters_.size())
       return true;
-    return wire_filters_.at(wire).valid(adc);
+    return wire_filters_[wire].valid(adc);
   }
 
   inline bool valid_grid(uint16_t grid, uint16_t adc) const {
     if (grid >= grid_filters_.size())
       return true;
-    return grid_filters_.at(grid).valid(adc);
+    return grid_filters_[grid].valid(adc);
   }
 
   void set_wire_filters(Filter mgf) {
@@ -243,7 +243,7 @@ public:
     std::stringstream wfilters;
     bool validwf{false};
     for (size_t i = 0; i < wire_filters_.size(); i++) {
-      const auto &f = wire_filters_.at(i);
+      const auto &f = wire_filters_[i];
       if (!f.trivial()) {
         wfilters << prefix << "  [" << i << "]  " << f.debug() << "\n";
         validwf = true;
@@ -256,7 +256,7 @@ public:
     std::stringstream gfilters;
     bool validgf{false};
     for (size_t i = 0; i < grid_filters_.size(); i++) {
-      const auto &f = grid_filters_.at(i);
+      const auto &f = grid_filters_[i];
       if (!f.trivial()) {
         gfilters << prefix << "  [" << i << "]  " << f.debug() << "\n";
         validgf = true;

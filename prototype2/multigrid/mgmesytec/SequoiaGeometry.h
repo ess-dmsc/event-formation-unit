@@ -54,9 +54,9 @@ public:
     if (bus >= buses.size())
       return adc;
     if (isWire(bus, channel)) {
-      return buses.at(bus).geometry.rescale_wire(channel, adc);
+      return buses[bus].geometry.rescale_wire(channel, adc);
     } else if (isGrid(bus, channel)) {
-      const auto& b = buses.at(bus).geometry;
+      const auto& b = buses[bus].geometry;
       return b.rescale_grid(b.grid(channel), adc);
     }
     return adc;
@@ -66,9 +66,9 @@ public:
     if (bus >= buses.size())
       return false;
     if (isWire(bus, channel)) {
-      return buses.at(bus).geometry.valid_wire(channel, adc);
+      return buses[bus].geometry.valid_wire(channel, adc);
     } else if (isGrid(bus, channel)) {
-      const auto& b = buses.at(bus).geometry;
+      const auto& b = buses[bus].geometry;
       return b.valid_grid(b.grid(channel), adc);
     }
     return false;
@@ -78,55 +78,55 @@ public:
   inline bool isWire(uint8_t bus, uint16_t channel) const {
     if (bus >= buses.size())
       return false;
-    return buses.at(bus).geometry.isWire(channel);
+    return buses[bus].geometry.isWire(channel);
   }
 
   /** @brief identifies which channels are grids, from drawing by Anton */
   inline bool isGrid(uint8_t bus, uint16_t channel) const {
     if (bus >= buses.size())
       return false;
-    return buses.at(bus).geometry.isGrid(channel);
+    return buses[bus].geometry.isGrid(channel);
   }
 
   inline uint16_t wire(uint8_t bus, uint16_t channel) const {
-    const auto &b = buses.at(bus);
+    const auto &b = buses[bus];
     return b.wire_offset + b.geometry.wire(channel);
   }
 
   inline uint16_t grid(uint8_t bus, uint16_t channel) const {
-    const auto &b = buses.at(bus);
+    const auto &b = buses[bus];
     return b.grid_offset + b.geometry.grid(channel);
   }
 
   inline uint16_t max_wire() const {
     if (buses.empty())
       return 0;
-    const auto &b = buses.at(buses.size() - 1);
+    const auto &b = buses.back();
     return b.wire_offset + b.geometry.max_wire();
   }
 
   inline uint16_t max_grid() const {
     if (buses.empty())
       return 0;
-    const auto &b = buses.at(buses.size() - 1);
+    const auto &b = buses.back();
     return b.grid_offset + b.geometry.max_grid();
   }
 
   /** @brief return the x coordinate of the detector */
   inline uint32_t x(uint8_t bus, uint16_t channel) const {
-    const auto &b = buses.at(bus);
+    const auto &b = buses[bus];
     return b.x_offset + b.geometry.x(channel);
   }
 
   /** @brief return the y coordinate of the detector */
   inline uint32_t y(uint8_t bus, uint16_t channel) const {
-    const auto &b = buses.at(bus);
+    const auto &b = buses[bus];
     return b.y_offset + b.geometry.y(channel);
   }
 
   /** @brief return the z coordinate of the detector */
   inline uint32_t z(uint8_t bus, uint16_t channel) const {
-    const auto &b = buses.at(bus);
+    const auto &b = buses[bus];
     return b.z_offset + b.geometry.z(channel);
   }
 
@@ -134,7 +134,7 @@ public:
   inline uint32_t max_x() const {
     if (buses.empty())
       return 0;
-    const auto &b = buses.at(buses.size() - 1);
+    const auto &b = buses.back();
     return b.x_offset + b.geometry.max_x();
   }
 
@@ -142,7 +142,7 @@ public:
   inline uint32_t max_y() const {
     if (buses.empty())
       return 0;
-    const auto &b = buses.at(buses.size() - 1);
+    const auto &b = buses.back();
     return b.y_offset + b.geometry.max_y();
   }
 
@@ -150,7 +150,7 @@ public:
   inline uint32_t max_z() const {
     if (buses.empty())
       return 0;
-    const auto &b = buses.at(buses.size() - 1);
+    const auto &b = buses.back();
     return b.z_offset + b.geometry.max_z();
   }
 
@@ -159,13 +159,13 @@ public:
 
     for (size_t i = 0; i < buses.size(); i++) {
       ss << prefix << "  Bus#" << i << "   "
-         << "grid+" << buses.at(i).grid_offset << "  "
-         << "wire+" << buses.at(i).wire_offset << "  "
-         << "x+" << buses.at(i).x_offset << "  "
-         << "y+" << buses.at(i).y_offset << "  "
-         << "z+" << buses.at(i).z_offset << "  "
+         << "grid+" << buses[i].grid_offset << "  "
+         << "wire+" << buses[i].wire_offset << "  "
+         << "x+" << buses[i].x_offset << "  "
+         << "y+" << buses[i].y_offset << "  "
+         << "z+" << buses[i].z_offset << "  "
          << "\n";
-      ss << buses.at(i).geometry.debug(prefix + "    ");
+      ss << buses[i].geometry.debug(prefix + "    ");
     }
 
     return ss.str();
