@@ -28,45 +28,48 @@ public:
   /// \brief changes pulse time
   void pulseTime(uint64_t time);
 
-  /// \brief retrieves pulse time
+  /// \returns the currently set pulse time
   uint64_t pulseTime() const;
 
-  /// \brief adds event
+  /// \brief adds event, if maximum count is exceeded, sends data using the producer callback
   /// \param time time of event in relation to pulse time
   /// \param pixl id of pixel as defined by logical geometry mapping
+  /// \returns bytes transmitted, if any
   size_t addEvent(uint32_t time, uint32_t pixel);
 
   /// \brief returns event count
   size_t eventCount() const;
 
-  /// \brief returns current message counter
+  /// \returns current message counter
   uint64_t currentMessageId() const;
 
-  /// \brief serializes and sends to producer, returns bytes
+  /// \brief serializes and sends to producer
+  /// \returns bytes transmitted
   size_t produce();
 
   // \todo make private?
   /// \brief serializes buffer
+  /// \returns reference to internally stored buffer
   Buffer<uint8_t> serialize();
 
 private:
   // \todo should this not be predefined in terms of jumbo frame?
-  size_t maxEvents{0};
-  size_t events{0};
+  size_t MaxEvents{0};
+  size_t EventCount{0};
 
   // \todo maybe should be mutated directly in buffer?
-  uint64_t messageId{1};
+  uint64_t MessageId{1};
 
-  ProducerCallback callbackFunction;
+  ProducerCallback ProduceFunctor;
 
   // All of this is the flatbuffer
-  flatbuffers::FlatBufferBuilder builder;
-  uint8_t *timePtr{nullptr};
-  uint8_t *pixelPtr{nullptr};
+  flatbuffers::FlatBufferBuilder Builder_;
+  uint8_t *TimePtr{nullptr};
+  uint8_t *PixelPtr{nullptr};
 
-  EventMessage *eventMsg;
+  EventMessage *EventMessage_;
 
-  Buffer<uint8_t> buffer;
-  flatbuffers::uoffset_t *timeLenPtr;
-  flatbuffers::uoffset_t *pixelLenPtr;
+  Buffer<uint8_t> Buffer_;
+  flatbuffers::uoffset_t *TimeLengthPtr;
+  flatbuffers::uoffset_t *PixelLengthPtr;
 };

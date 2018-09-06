@@ -19,88 +19,87 @@ static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
 EV42Serializer::EV42Serializer(size_t max_array_length, std::string source_name)
-    : maxEvents(max_array_length), builder(maxEvents * 8 + 256) {
+    : MaxEvents(max_array_length), Builder_(MaxEvents * 8 + 256) {
 
-  auto sourceName = builder.CreateString(source_name);
-  auto timeoff = builder.CreateUninitializedVector(maxEvents, TimeSize, &timePtr);
+  auto sourceName = Builder_.CreateString(source_name);
+  auto timeoff = Builder_.CreateUninitializedVector(MaxEvents, TimeSize, &TimePtr);
   auto pixeloff =
-      builder.CreateUninitializedVector(maxEvents, PixelSize, &pixelPtr);
+      Builder_.CreateUninitializedVector(MaxEvents, PixelSize, &PixelPtr);
 
-  auto evMsgHeader = CreateEventMessage(builder, sourceName, FBMutablePlaceholder,
+  auto evMsgHeader = CreateEventMessage(Builder_, sourceName, FBMutablePlaceholder,
                                         FBMutablePlaceholder, timeoff, pixeloff);
-  FinishEventMessageBuffer(builder, evMsgHeader);
+  FinishEventMessageBuffer(Builder_, evMsgHeader);
 
-  buffer.address = builder.GetBufferPointer();
-  buffer.size = builder.GetSize();
-  assert(buffer);
+  Buffer_.address = Builder_.GetBufferPointer();
+  Buffer_.size = Builder_.GetSize();
+  assert(Buffer_);
 
-  eventMsg = const_cast<EventMessage *>(GetEventMessage(buffer.address));
-  timeLenPtr =
+  EventMessage_ = const_cast<EventMessage *>(GetEventMessage(Buffer_.address));
+  TimeLengthPtr =
       reinterpret_cast<flatbuffers::uoffset_t *>(
-          const_cast<std::uint8_t *>(eventMsg->time_of_flight()->Data())) - 1;
-  pixelLenPtr =
+          const_cast<std::uint8_t *>(EventMessage_->time_of_flight()->Data())) - 1;
+  PixelLengthPtr =
       reinterpret_cast<flatbuffers::uoffset_t *>(
-          const_cast<std::uint8_t *>(eventMsg->detector_id()->Data())) - 1;
+          const_cast<std::uint8_t *>(EventMessage_->detector_id()->Data())) - 1;
 
-  eventMsg->mutate_message_id(0);
-  eventMsg->mutate_pulse_time(0);
+  EventMessage_->mutate_message_id(0);
+  EventMessage_->mutate_pulse_time(0);
 }
 
 void EV42Serializer::producerCallback(ProducerCallback callback) {
-  callbackFunction = callback;
+  ProduceFunctor = callback;
 }
 
 Buffer<uint8_t> EV42Serializer::serialize() {
-  if (events > maxEvents) {
-    // TODO: this should probably throw instead?
+  if (EventCount > MaxEvents) {
+    // \todo this should probably throw instead?
     return {};
   }
-  eventMsg->mutate_message_id(messageId);
-  *timeLenPtr = events;
-  *pixelLenPtr = events;
+  EventMessage_->mutate_message_id(MessageId);
+  *TimeLengthPtr = EventCount;
+  *PixelLengthPtr = EventCount;
 
   // reset counter and increment message counter
-  events = 0;
-  messageId++;
+  EventCount = 0;
+  MessageId++;
 
-  return buffer;
+  return Buffer_;
 }
 
 size_t EV42Serializer::produce() {
-  if (events != 0) {
-    XTRACE(OUTPUT, DEB, "autoproduce %zu events \n", events);
-    auto buffer = serialize();
-    if (callbackFunction)
-      callbackFunction(buffer);
-    return buffer.size;
+  if (EventCount != 0) {
+    XTRACE(OUTPUT, DEB, "autoproduce %zu EventCount_ \n", EventCount);
+    serialize();
+    if (ProduceFunctor)
+      ProduceFunctor(Buffer_);
+    return Buffer_.bytes();
   }
   return 0;
 }
 
 void EV42Serializer::pulseTime(uint64_t time) {
-  eventMsg->mutate_pulse_time(time);
+  EventMessage_->mutate_pulse_time(time);
 }
 
 uint64_t EV42Serializer::pulseTime() const {
-  return eventMsg->pulse_time();
+  return EventMessage_->pulse_time();
 }
 
 size_t EV42Serializer::eventCount() const {
-  return events;
+  return EventCount;
 }
 
 uint64_t EV42Serializer::currentMessageId() const {
-  return messageId;
+  return MessageId;
 }
 
 size_t EV42Serializer::addEvent(uint32_t time, uint32_t pixel) {
   XTRACE(OUTPUT, DEB, "Add event: %d %u\n", time, pixel);
-  ((uint32_t *) timePtr)[events] = time;
-  ((uint32_t *) pixelPtr)[events] = pixel;
-  events++;
+  ((uint32_t *) TimePtr)[EventCount] = time;
+  ((uint32_t *) PixelPtr)[EventCount] = pixel;
+  EventCount++;
 
-  /** Produce when enough data has been accumulated */
-  if (events >= maxEvents) {
+  if (EventCount >= MaxEvents) {
     return produce();
   }
   return 0;
