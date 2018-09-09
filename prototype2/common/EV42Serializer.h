@@ -12,7 +12,7 @@
 #include "Producer.h"
 #include "flatbuffers/flatbuffers.h"
 
-class EventMessage;
+struct EventMessage;
 
 class EV42Serializer {
 public:

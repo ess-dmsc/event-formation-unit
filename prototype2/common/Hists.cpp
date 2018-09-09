@@ -55,8 +55,9 @@ void Hists::binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16_t 
 }
 
 void Hists::bincluster(uint32_t sum) {
-  if (!sum)
+  if (!sum) {
     return;
+  }
   cluster_adc_hist[static_cast<uint16_t>(sum >> downshift_)]++;
   cluster_count_++;
 }
