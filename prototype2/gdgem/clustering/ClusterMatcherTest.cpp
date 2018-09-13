@@ -253,17 +253,17 @@ TEST_F(ClusterMatcherTest, Run16_Long_identical) {
 
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->clusters.size(), 20282);
-  EXPECT_EQ(sorter_y->clusterer->clusters.size(), 20282);
+  EXPECT_EQ(sorter_x->clusterer->clusters.size(), 20293);
+  EXPECT_EQ(sorter_y->clusterer->clusters.size(), 20293);
 
   matcher = std::make_shared<ClusterMatcher>(0);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
 
-  EXPECT_EQ(matcher->unmatched_clusters.size(), 40564);
+  EXPECT_EQ(matcher->unmatched_clusters.size(), 40586);
 
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 16963);
+  EXPECT_EQ(matcher->stats_cluster_count, 16954);
 }
 
 TEST_F(ClusterMatcherTest, Run16_Long) {
@@ -278,16 +278,16 @@ TEST_F(ClusterMatcherTest, Run16_Long) {
   }
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10206);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12443);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10226);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12467);
 
   matcher = std::make_shared<ClusterMatcher>(10);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
-  EXPECT_EQ(matcher->unmatched_clusters.size(), 22649);
+  EXPECT_EQ(matcher->unmatched_clusters.size(), 22693);
   matcher->match_end(true);
 //  EXPECT_EQ(matcher->stats_cluster_count, 6250);
-  EXPECT_EQ(matcher->stats_cluster_count, 19073);
+  EXPECT_EQ(matcher->stats_cluster_count, 19080);
 }
 
 int main(int argc, char **argv) {
