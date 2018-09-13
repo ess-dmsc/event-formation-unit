@@ -19,13 +19,23 @@
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <unistd.h>
+#include <signal.h>
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 #define UNUSED __attribute__((unused))
 
+/// \brief Use MSG_SIGNAL on Linuxes
+#ifdef MSG_NOSIGNAL
+#define SEND_FLAGS MSG_NOSIGNAL
+#else
+#define SEND_FLAGS 0
+#endif
+
 Server::Server(int port, Parser &parse) : port_(port), parser(parse) {
+
+  signal(SIGPIPE, SIG_IGN);
 
   for (auto &client : clientfd) {
     client = -1;
@@ -43,6 +53,7 @@ Server::Server(int port, Parser &parse) : port_(port), parser(parse) {
 void Server::server_close(int socket) {
   LOG(Sev::Debug, "Closing socket fd {}", socket);
   close(socket);
+  FD_CLR(socket, &fd_master);
   auto client = std::find(clientfd.begin(), clientfd.end(), socket);
   assert(client != clientfd.end());
   *client = -1;
@@ -82,8 +93,8 @@ void Server::server_open() {
 }
 
 int Server::server_send(int socketfd) {
-  LOG(Sev::Debug, "server_send() - {} bytes", output.bytes);
-  if (send(socketfd, output.buffer, output.bytes, 0) < 0) {
+  LOG(Sev::Debug, "server_send() - socket {} - {} bytes", socketfd, output.bytes);
+  if (send(socketfd, output.buffer, output.bytes, SEND_FLAGS) < 0) {
     LOG(Sev::Warning, "Error sending command reply");
     return -1;
   }
@@ -125,7 +136,17 @@ void Server::server_poll() {
         assert(1 == 0);
       }
       FD_SET(*freefd, &fd_master);
-      LOG(Sev::Debug, "New clent socket: {}, ready: {}", *freefd, ready);
+      LOG(Sev::Debug, "New cilent socket: {}, ready: {}", *freefd, ready);
+      #ifdef SYSTEM_NAME_DARWIN
+          LOG(Sev::Info, "setsockopt() - MacOS specific");
+          int on = 1;
+          int ret = setsockopt(*freefd, SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof(on));
+          if (ret != 0) {
+              LOG(Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
+              perror("setsockopt():");
+          }
+          assert(ret ==0);
+      #endif
     }
     ready--;
   }
