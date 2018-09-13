@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <string>
 
 class CalibrationFile {
 public:
@@ -22,6 +23,9 @@ public:
 
   ///
   CalibrationFile();
+
+  /// \brief loads calibration from json string
+  void LoadCalibration(std::string calibration);
 
   /// \brief Generate fast mappings from IDs to indexes
   int addCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo, float offset, float slope);

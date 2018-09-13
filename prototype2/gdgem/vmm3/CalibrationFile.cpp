@@ -7,10 +7,13 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <common/Log.h>
 #include <common/Trace.h>
 #include <gdgem/vmm3/CalibrationFile.h>
-#include <stdio.h>
-#include <string.h>
+#include <nlohmann/json.hpp>
+#include <iostream>
+
+using json = nlohmann::json;
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -21,6 +24,36 @@ CalibrationFile::CalibrationFile() {
   for (size_t i = 0; i < n; i++) {
     ((struct calibration_t *)calibrations)[i] = nocorr;
   }
+}
+
+void CalibrationFile::LoadCalibration(std::string jsonstring) {
+    nlohmann::json root;
+    try {
+      root = nlohmann::json::parse(jsonstring);
+    }
+    catch (...) {
+      LOG(Sev::Warning, "Invalid Json file: {}", jsonstring);
+      return;
+    }
+
+    auto m = root["vmm_calibration"];
+    for (unsigned int i = 0; i < m.size(); i++) {
+      auto fecid = m[i]["fecID"].get<unsigned int>();
+      auto vmmid = m[i]["vmmID"].get<unsigned int>();
+      XTRACE(INIT, DEB, "fecid: %d, vmmid: %d\n", fecid, vmmid);
+      auto offsets = m[i]["offsets"];
+      auto slopes = m[i]["slopes"];
+      if ((slopes.size() != MAX_CH) or (offsets.size() != MAX_CH)) {
+        XTRACE(INIT, WAR, "Invalid calibration file (number of channels)\n");
+        return;
+      }
+      for (unsigned int j = 0; j < offsets.size(); j ++) {
+        auto offset = offsets[j].get<float>();
+        auto slope = slopes[j].get<float>();
+        calibrations[fecid][vmmid][j].offset = offset;
+        calibrations[fecid][vmmid][j].slope = slope;
+      }
+    }
 }
 
 int CalibrationFile::addCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo, float offset, float slope) {
