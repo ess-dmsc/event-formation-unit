@@ -12,3 +12,14 @@ set(ParserVMM3Test_INC
     )
 
 create_test_executable(ParserVMM3Test)
+
+
+set(CalibrationFileTest_SRC
+    CalibrationFile.cpp
+    CalibrationFileTest.cpp
+    )
+
+set(CalibrationFileTest_INC
+    CalibrationFile.h
+    )
+create_test_executable(CalibrationFileTest)

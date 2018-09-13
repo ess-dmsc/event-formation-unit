@@ -63,7 +63,7 @@ double SRSTime::trigger_period_ns() const
 
 double SRSTime::chip_time_ns(uint16_t bc, uint16_t tdc) const
 {
-  return static_cast<double>(tdc) * tdc_factor_  + static_cast<double>(bc) * bc_factor_;
+  return  static_cast<double>(bc) * bc_factor_ - static_cast<double>(tdc) * tdc_factor_;
 }
 
 double SRSTime::timestamp_ns(uint64_t trigger, uint16_t bc, uint16_t tdc) {
