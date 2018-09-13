@@ -10,16 +10,14 @@ set(ParserVMM3Test_INC
     ParserVMM3TestData.h
     ParserVMM3.h
     )
-
 create_test_executable(ParserVMM3Test)
 
 
-set(CalibrationFileTestVMM3_SRC
+set(VMM3CalibrationFileTest_SRC
     CalibrationFile.cpp
     CalibrationFileTest.cpp
     )
-
-set(CalibrationFileTestVMM3_INC
+set(VMM3CalibrationFileTest_INC
     CalibrationFile.h
     )
-create_test_executable(CalibrationFileTestVMM3)
+create_test_executable(VMM3CalibrationFileTest)
