@@ -2,37 +2,9 @@
 
 #include <prototype2/common/DataSave.h>
 #include <gdgem/vmm3/CalibrationFile.h>
+#include <gdgem/vmm3/CalibrationFileTestData.h>
 #include <test/TestBase.h>
 #include <vector>
-
-std::string dummycal = R"(
-{
-  "vmm_calibration" :
-  [
-    {"fecID":1, "vmmID": 0, "offsets": [ 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7,
-                                         10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7,
-                                         10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7,
-                                         10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7
-                                       ],
-                            "slopes":  [ 1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7, 1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7,
-                                         1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7, 1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7,
-                                         1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7, 1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7,
-                                         1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7, 1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7
-                                       ]
-    },
-    {"fecID":1, "vmmID":15, "offsets": [ 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7,
-                                         2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7,
-                                         2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7,
-                                         2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7
-                                       ],
-                            "slopes":  [ 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7,
-                                         3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7,
-                                         3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7,
-                                         3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7, 3.0, 3.1, 3.2, 3.3, 3.4, 3.5, 3.6, 3.7
-                                       ]
-    }
-  ]
-})";
 
 
 class CalibrationFileTest : public TestBase {
@@ -107,7 +79,7 @@ TEST_F(CalibrationFileTest, AddCalibration) {
 
 TEST_F(CalibrationFileTest, LoadCalibration) {
   CalibrationFile cf;
-  cf.loadCalibration(dummycal);
+  cf.loadCalibration(DummyCal);
   auto cal = cf.getCalibration(1, 0, 0);
   ASSERT_FLOAT_EQ(cal.offset, 10.0);
   ASSERT_FLOAT_EQ(cal.slope, 1010.0);
@@ -126,10 +98,24 @@ TEST_F(CalibrationFileTest, LoadCalibration) {
   ASSERT_FLOAT_EQ(cal.slope, 3.7);
 }
 
+TEST_F(CalibrationFileTest, LoadCalibrationSizeMismatch) {
+  CalibrationFile cf;
+  cf.loadCalibration(ErrSizeMismatch);
+  // These should be skipped and default to NoCal
+  auto cal = cf.getCalibration(1, 0, 0);
+  ASSERT_FLOAT_EQ(cal.offset, 0.0);
+  ASSERT_FLOAT_EQ(cal.slope, 1.0);
+
+  // These should be ok
+  cal = cf.getCalibration(1, 15, 63);
+  ASSERT_FLOAT_EQ(cal.offset, 2.7);
+  ASSERT_FLOAT_EQ(cal.slope, 3.7);
+}
+
 
 TEST_F(CalibrationFileTest, LoadCalibrationFile) {
   std::string filename = "deleteme.json";
-  DataSave tempfile(filename, (void *)dummycal.c_str(), dummycal.size());
+  DataSave tempfile(filename, (void *)DummyCal.c_str(), DummyCal.size());
   CalibrationFile cf(filename);
 
   auto cal = cf.getCalibration(1, 0, 0);
