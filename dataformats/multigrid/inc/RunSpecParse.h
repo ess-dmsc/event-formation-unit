@@ -9,7 +9,10 @@
 
 #pragma once
 #include <dataformats/multigrid/inc/RunSpec.h>
-#include <dataformats/multigrid/inc/json.h>
+#include <nlohmann/json.hpp>
+
+using json = nlohmann::json;
+
 #include <vector>
 
 class RunSpecParse {
@@ -22,8 +25,8 @@ public:
                                   std::string outputdir, int start, int end);
 
 private:
-  Json::Value root{};    ///< for jsoncpp parser
-  Json::Reader reader{}; ///< for jsoncpp parser
+  //Json::Value root{};    ///< for jsoncpp parser
+  //Json::Reader reader{}; ///< for jsoncpp parser
   std::string jsonfile{};
   std::vector<RunSpec *> runs{};
 

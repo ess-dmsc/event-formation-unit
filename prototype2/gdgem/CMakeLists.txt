@@ -3,7 +3,6 @@
 #=============================================================================
 
 set(gdgem_SRC
-    ../../dataformats/multigrid/src/jsoncpp.cpp
     gdgem.cpp
     NMXConfig.cpp
     nmx/ReadoutFile.cpp

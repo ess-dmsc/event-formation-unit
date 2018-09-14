@@ -6,12 +6,13 @@
 /// plugin for gdgem detector data reception, parsing and event formation
 ///
 //===----------------------------------------------------------------------===//
-#include <dataformats/multigrid/inc/json.h>
+
 
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
+#include <nlohmann/json.hpp>
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
