@@ -21,9 +21,9 @@ using json = nlohmann::json;
 
 /// \brief clear the calibration array
 CalibrationFile::CalibrationFile() {
-  auto n = sizeof(calibrations)/sizeof(calibration);
-  for (size_t i = 0; i < n; i++) {
-    ((calibration *)calibrations)[i] = nocorr;
+  auto NumberEntries = sizeof(Calibrations)/sizeof(Calibration);
+  for (size_t i = 0; i < NumberEntries; i++) {
+    ((Calibration *)Calibrations)[i] = NoCorr;
   }
 }
 
@@ -31,30 +31,30 @@ CalibrationFile::CalibrationFile() {
 /// \brief load calibration from file
 CalibrationFile::CalibrationFile(std::string jsonfile) : CalibrationFile() {
   std::ifstream t(jsonfile);
-  std::string jsonstring((std::istreambuf_iterator<char>(t)),
+  std::string Jsonstring((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
 
-  loadCalibration(jsonstring);
+  loadCalibration(Jsonstring);
 }
 
 
 /// \brief parse json string with calibration data
 void CalibrationFile::loadCalibration(std::string jsonstring) {
-  nlohmann::json root;
+  nlohmann::json Root;
   try {
-    root = nlohmann::json::parse(jsonstring);
+    Root = nlohmann::json::parse(jsonstring);
   }
   catch (...) {
     LOG(Sev::Warning, "Invalid Json file: {}", jsonstring);
     return;
   }
 
-  auto vmmcal = root["vmm_calibration"];
-  for (unsigned int i = 0; i < vmmcal.size(); i++) {
-    auto fecid = vmmcal[i]["fecID"].get<unsigned int>();
-    auto vmmid = vmmcal[i]["vmmID"].get<unsigned int>();
-    auto offsets = vmmcal[i]["offsets"];
-    auto slopes = vmmcal[i]["slopes"];
+  auto VmmCals = Root["vmm_calibration"];
+  for (auto & vmmcal : VmmCals) {
+    auto fecid = vmmcal["fecID"].get<unsigned int>();
+    auto vmmid = vmmcal["vmmID"].get<unsigned int>();
+    auto offsets = vmmcal["offsets"];
+    auto slopes = vmmcal["slopes"];
     XTRACE(INIT, DEB, "fecid: %d, vmmid: %d, offsets(%d), slopes(%d)\n", fecid, vmmid, offsets.size(), slopes.size());
 
     if ((slopes.size() != MAX_CH) or (offsets.size() != MAX_CH)) {
@@ -63,27 +63,27 @@ void CalibrationFile::loadCalibration(std::string jsonstring) {
     }
 
     for (unsigned int j = 0; j < offsets.size(); j ++) {
-      calibrations[fecid][vmmid][j].offset = offsets[j].get<float>();
-      calibrations[fecid][vmmid][j].slope = slopes[j].get<float>();
+      Calibrations[fecid][vmmid][j].offset = offsets[j].get<float>();
+      Calibrations[fecid][vmmid][j].slope = slopes[j].get<float>();
     }
   }
 }
 
-int CalibrationFile::addCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo, float offset, float slope) {
+bool CalibrationFile::addCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo, float offset, float slope) {
   if ((fecId >= MAX_FEC) or (vmmId >= MAX_VMM) or (chNo >= MAX_CH)) {
     XTRACE(INIT, DEB, "invalid offsets: fec: %d, vmm: %d, ch:%d\n", fecId, vmmId, chNo);
-    return -1;
+    return false;
   }
-  calibrations[fecId][vmmId][chNo].slope = slope;
-  calibrations[fecId][vmmId][chNo].offset = offset;
-  return 0;
+  Calibrations[fecId][vmmId][chNo].slope = slope;
+  Calibrations[fecId][vmmId][chNo].offset = offset;
+  return true;
 }
 
-CalibrationFile::calibration & CalibrationFile::getCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo) {
+CalibrationFile::Calibration & CalibrationFile::getCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo) {
   if ((fecId >= MAX_FEC) or (vmmId >= MAX_VMM) or (chNo >= MAX_CH)) {
     XTRACE(INIT, DEB, "invalid offsets: fec: %d, vmm: %d, ch:%d\n", fecId, vmmId, chNo);
-    return errcorr;
+    return ErrCorr;
   }
 
-  return calibrations[fecId][vmmId][chNo];
+  return Calibrations[fecId][vmmId][chNo];
 }

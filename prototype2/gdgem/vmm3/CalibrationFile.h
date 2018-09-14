@@ -19,7 +19,7 @@ public:
   typedef struct {
     float offset;
     float slope;
-  } calibration;
+  } Calibration;
 
   /// \brief create default calibration (0.0 offset 1.0 slope)
   CalibrationFile();
@@ -31,19 +31,19 @@ public:
   void loadCalibration(std::string calibration);
 
   /// \brief Generate fast mappings from IDs to indexes
-  int addCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo, float offset, float slope);
+  bool addCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo, float offset, float slope);
 
   /// \brief get calibration data for (fec, vmm, channel)
   /// \todo check how vmm3 data is supplied, maybe getting an array for a given (fec, vmm) is better?
-  calibration & getCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo);
+  Calibration & getCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo);
 
 private:
 
-  calibration calibrations [MAX_FEC][MAX_VMM][MAX_CH];
+  Calibration Calibrations [MAX_FEC][MAX_VMM][MAX_CH];
 
   /// Default correction
-  calibration nocorr = {0.0, 1.0};
+  Calibration NoCorr = {0.0, 1.0};
 
   /// Slope zero indicates an error
-  calibration errcorr = {0.0, 0.0};
+  Calibration ErrCorr = {0.0, 0.0};
 };

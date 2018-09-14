@@ -59,9 +59,11 @@ TEST_F(CalibrationFileTest, GetCalibrationOutOfBounds) {
   auto & calib = cf.getCalibration(CalibrationFile::MAX_FEC, 0, 0);
   ASSERT_FLOAT_EQ(calib.slope, 0.0);
   ASSERT_FLOAT_EQ(calib.offset, 0.0);
+
   calib = cf.getCalibration(0, CalibrationFile::MAX_VMM, 0);
   ASSERT_FLOAT_EQ(calib.slope, 0.0);
   ASSERT_FLOAT_EQ(calib.offset, 0.0);
+
   calib = cf.getCalibration(0, 0, CalibrationFile::MAX_CH);
   ASSERT_FLOAT_EQ(calib.slope, 0.0);
   ASSERT_FLOAT_EQ(calib.offset, 0.0);
@@ -70,11 +72,11 @@ TEST_F(CalibrationFileTest, GetCalibrationOutOfBounds) {
 TEST_F(CalibrationFileTest, AddCalibrationOutOfBounds) {
   CalibrationFile cf;
   auto ret = cf.addCalibration(CalibrationFile::MAX_FEC, 0, 0, 1.0, 1.0);
-  ASSERT_FLOAT_EQ(ret, -1);
+  ASSERT_FLOAT_EQ(ret, false);
   ret = cf.addCalibration(0, CalibrationFile::MAX_VMM, 0, 1.0, 1.0);
-  ASSERT_FLOAT_EQ(ret, -1);
+  ASSERT_FLOAT_EQ(ret, false);
   ret = cf.addCalibration(0, 0, CalibrationFile::MAX_CH, 1.0, 1.0);
-  ASSERT_FLOAT_EQ(ret, -1);
+  ASSERT_FLOAT_EQ(ret, false);
 }
 
 TEST_F(CalibrationFileTest, AddCalibration) {
@@ -83,7 +85,7 @@ TEST_F(CalibrationFileTest, AddCalibration) {
   for (int fec = 0; fec < CalibrationFile::MAX_FEC; fec++) {
     for (int vmm = 0; vmm < CalibrationFile::MAX_VMM; vmm++) {
       for (int ch = 0; ch < CalibrationFile::MAX_CH; ch++) {
-        ASSERT_EQ(cf.addCalibration(fec, vmm, ch, 3.14159 + i, 2.71828 - i), 0);
+        ASSERT_EQ(cf.addCalibration(fec, vmm, ch, 3.14159 + i, 2.71828 - i), true);
         i++;
       }
     }
