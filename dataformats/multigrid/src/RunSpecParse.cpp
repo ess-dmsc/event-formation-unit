@@ -25,11 +25,6 @@ std::vector<RunSpec *> &RunSpecParse::getruns(std::string runspec,
     outputdir += '/';
   }
 
-  // if (!reader.parse(str, root, 0)) {
-  //   printf("error: file \"%s\" is not valid json\n", jsonfile.c_str());
-  //   throw std::runtime_error("Parsed file was not valid JSON.");
-  // }
-
   nlohmann::json root;
   try {
     root = nlohmann::json::parse(jsonstring);

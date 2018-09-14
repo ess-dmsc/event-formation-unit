@@ -25,8 +25,6 @@ public:
                                   std::string outputdir, int start, int end);
 
 private:
-  //Json::Value root{};    ///< for jsoncpp parser
-  //Json::Reader reader{}; ///< for jsoncpp parser
   std::string jsonfile{};
   std::vector<RunSpec *> runs{};
 
