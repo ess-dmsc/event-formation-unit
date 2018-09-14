@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Class for handling calibraiton files for VMM asics
+/// \brief Class for handling calibration files for VMM asics
 ///
 //===----------------------------------------------------------------------===//
 
@@ -13,34 +13,37 @@ class CalibrationFile {
 public:
   static constexpr int MAX_FEC = 40;
   static constexpr int MAX_VMM = 16;
-  static constexpr int MAX_CH   = 64;
+  static constexpr int MAX_CH  = 64;
 
   /// \todo check whether packing is necessary, static assert assert?
-  struct calibration_t {
+  typedef struct {
     float offset;
     float slope;
-  };
+  } calibration;
 
-  ///
+  /// \brief create default calibration (0.0 offset 1.0 slope)
   CalibrationFile();
 
+  /// \brief load calibration from json file
+  CalibrationFile(std::string filename);
+
   /// \brief loads calibration from json string
-  void LoadCalibration(std::string calibration);
+  void loadCalibration(std::string calibration);
 
   /// \brief Generate fast mappings from IDs to indexes
   int addCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo, float offset, float slope);
 
   /// \brief get calibration data for (fec, vmm, channel)
   /// \todo check how vmm3 data is supplied, maybe getting an array for a given (fec, vmm) is better?
-  struct calibration_t & getCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo);
+  calibration & getCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo);
 
 private:
 
-  struct calibration_t calibrations [MAX_FEC][MAX_VMM][MAX_CH];
+  calibration calibrations [MAX_FEC][MAX_VMM][MAX_CH];
 
   /// Default correction
-  struct calibration_t nocorr = {0.0, 1.0};
+  calibration nocorr = {0.0, 1.0};
 
   /// Slope zero indicates an error
-  struct calibration_t errcorr = {0.0, 0.0};
+  calibration errcorr = {0.0, 0.0};
 };

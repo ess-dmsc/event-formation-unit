@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Class for handling calibraiton files for VMM asics
+/// \brief Class for handling calibration files for VMM asics
 ///
 //===----------------------------------------------------------------------===//
 
@@ -11,49 +11,62 @@
 #include <common/Trace.h>
 #include <gdgem/vmm3/CalibrationFile.h>
 #include <nlohmann/json.hpp>
-#include <iostream>
+#include <fstream>
 
 using json = nlohmann::json;
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+
 /// \brief clear the calibration array
 CalibrationFile::CalibrationFile() {
-  auto n = sizeof(calibrations)/sizeof(calibration_t);
+  auto n = sizeof(calibrations)/sizeof(calibration);
   for (size_t i = 0; i < n; i++) {
-    ((struct calibration_t *)calibrations)[i] = nocorr;
+    ((calibration *)calibrations)[i] = nocorr;
   }
 }
 
-void CalibrationFile::LoadCalibration(std::string jsonstring) {
-    nlohmann::json root;
-    try {
-      root = nlohmann::json::parse(jsonstring);
-    }
-    catch (...) {
-      LOG(Sev::Warning, "Invalid Json file: {}", jsonstring);
-      return;
+
+/// \brief load calibration from file
+CalibrationFile::CalibrationFile(std::string jsonfile) : CalibrationFile() {
+  std::ifstream t(jsonfile);
+  std::string jsonstring((std::istreambuf_iterator<char>(t)),
+                  std::istreambuf_iterator<char>());
+
+  loadCalibration(jsonstring);
+}
+
+
+/// \brief parse json string with calibration data
+void CalibrationFile::loadCalibration(std::string jsonstring) {
+  nlohmann::json root;
+  try {
+    root = nlohmann::json::parse(jsonstring);
+  }
+  catch (...) {
+    LOG(Sev::Warning, "Invalid Json file: {}", jsonstring);
+    return;
+  }
+
+  auto vmmcal = root["vmm_calibration"];
+  for (unsigned int i = 0; i < vmmcal.size(); i++) {
+    auto fecid = vmmcal[i]["fecID"].get<unsigned int>();
+    auto vmmid = vmmcal[i]["vmmID"].get<unsigned int>();
+    auto offsets = vmmcal[i]["offsets"];
+    auto slopes = vmmcal[i]["slopes"];
+    XTRACE(INIT, DEB, "fecid: %d, vmmid: %d, offsets(%d), slopes(%d)\n", fecid, vmmid, offsets.size(), slopes.size());
+
+    if ((slopes.size() != MAX_CH) or (offsets.size() != MAX_CH)) {
+      LOG(Sev::Warning, "Invalid channel configuration, skipping for fec {} and vmm {}", fecid, vmmid);
+      continue;
     }
 
-    auto m = root["vmm_calibration"];
-    for (unsigned int i = 0; i < m.size(); i++) {
-      auto fecid = m[i]["fecID"].get<unsigned int>();
-      auto vmmid = m[i]["vmmID"].get<unsigned int>();
-      XTRACE(INIT, DEB, "fecid: %d, vmmid: %d\n", fecid, vmmid);
-      auto offsets = m[i]["offsets"];
-      auto slopes = m[i]["slopes"];
-      if ((slopes.size() != MAX_CH) or (offsets.size() != MAX_CH)) {
-        XTRACE(INIT, WAR, "Invalid calibration file (number of channels)\n");
-        return;
-      }
-      for (unsigned int j = 0; j < offsets.size(); j ++) {
-        auto offset = offsets[j].get<float>();
-        auto slope = slopes[j].get<float>();
-        calibrations[fecid][vmmid][j].offset = offset;
-        calibrations[fecid][vmmid][j].slope = slope;
-      }
+    for (unsigned int j = 0; j < offsets.size(); j ++) {
+      calibrations[fecid][vmmid][j].offset = offsets[j].get<float>();
+      calibrations[fecid][vmmid][j].slope = slopes[j].get<float>();
     }
+  }
 }
 
 int CalibrationFile::addCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo, float offset, float slope) {
@@ -66,7 +79,7 @@ int CalibrationFile::addCalibration(unsigned int fecId, unsigned int vmmId, unsi
   return 0;
 }
 
-struct CalibrationFile::calibration_t & CalibrationFile::getCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo) {
+CalibrationFile::calibration & CalibrationFile::getCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo) {
   if ((fecId >= MAX_FEC) or (vmmId >= MAX_VMM) or (chNo >= MAX_CH)) {
     XTRACE(INIT, DEB, "invalid offsets: fec: %d, vmm: %d, ch:%d\n", fecId, vmmId, chNo);
     return errcorr;

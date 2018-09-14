@@ -1,5 +1,6 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
+#include <prototype2/common/DataSave.h>
 #include <gdgem/vmm3/CalibrationFile.h>
 #include <test/TestBase.h>
 #include <vector>
@@ -8,15 +9,15 @@ std::string dummycal = R"(
 {
   "vmm_calibration" :
   [
-    {"fecID":1, "vmmID": 0, "offsets": [ 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7,
-                                         0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7,
-                                         0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7,
-                                         0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7
+    {"fecID":1, "vmmID": 0, "offsets": [ 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7,
+                                         10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7,
+                                         10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7,
+                                         10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7, 10.0, 10.1, 10.2, 10.3, 10.4, 10.5, 10.6, 10.7
                                        ],
-                            "slopes":  [ 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
-                                         1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
-                                         1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7,
-                                         1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7, 1.0, 1.1, 1.2, 1.3, 1.4, 1.5, 1.6, 1.7
+                            "slopes":  [ 1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7, 1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7,
+                                         1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7, 1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7,
+                                         1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7, 1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7,
+                                         1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7, 1010.0, 1010.1, 1010.2, 1010.3, 1010.4, 1010.5, 1010.6, 1010.7
                                        ]
     },
     {"fecID":1, "vmmID":15, "offsets": [ 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.0, 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7,
@@ -35,10 +36,9 @@ std::string dummycal = R"(
 
 
 class CalibrationFileTest : public TestBase {
-
 protected:
-  virtual void SetUp() {  }
-  virtual void TearDown() {  }
+  // virtual void SetUp() {  }
+  // virtual void TearDown() {  }
 };
 
 /** Test cases below */
@@ -105,14 +105,14 @@ TEST_F(CalibrationFileTest, AddCalibration) {
 
 TEST_F(CalibrationFileTest, LoadCalibration) {
   CalibrationFile cf;
-  cf.LoadCalibration(dummycal);
+  cf.loadCalibration(dummycal);
   auto cal = cf.getCalibration(1, 0, 0);
-  ASSERT_FLOAT_EQ(cal.offset, 0.0);
-  ASSERT_FLOAT_EQ(cal.slope, 1.0);
+  ASSERT_FLOAT_EQ(cal.offset, 10.0);
+  ASSERT_FLOAT_EQ(cal.slope, 1010.0);
 
   cal = cf.getCalibration(1, 0, 63);
-  ASSERT_FLOAT_EQ(cal.offset, 0.7);
-  ASSERT_FLOAT_EQ(cal.slope, 1.7);
+  ASSERT_FLOAT_EQ(cal.offset, 10.7);
+  ASSERT_FLOAT_EQ(cal.slope, 1010.7);
 
 
   cal = cf.getCalibration(1, 15, 0);
@@ -122,9 +122,23 @@ TEST_F(CalibrationFileTest, LoadCalibration) {
   cal = cf.getCalibration(1, 15, 63);
   ASSERT_FLOAT_EQ(cal.offset, 2.7);
   ASSERT_FLOAT_EQ(cal.slope, 3.7);
-
-  // Assert something
 }
+
+
+TEST_F(CalibrationFileTest, LoadCalibrationFile) {
+  std::string filename = "deleteme.json";
+  DataSave tempfile(filename, (void *)dummycal.c_str(), dummycal.size());
+  CalibrationFile cf(filename);
+
+  auto cal = cf.getCalibration(1, 0, 0);
+  ASSERT_FLOAT_EQ(cal.offset, 10.0);
+  ASSERT_FLOAT_EQ(cal.slope, 1010.0);
+
+  cal = cf.getCalibration(1, 0, 63);
+  ASSERT_FLOAT_EQ(cal.offset, 10.7);
+  ASSERT_FLOAT_EQ(cal.slope, 1010.7);
+}
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
