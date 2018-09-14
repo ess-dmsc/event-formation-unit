@@ -37,7 +37,6 @@ std::vector<RunSpec *> &RunSpecParse::getruns(std::string runspec,
   auto specs = root[runspec];
 
   /** Run through all runs for the selected runspec group */
-  //for (unsigned int index = 0; index < plugins.size(); index++) {
   for (unsigned int i = 0; i < specs.size(); i++) {
     auto runid = specs[i][ID].get<int>();
     if ((runid >= start && runid <= end) || start == 0) {
