@@ -10,10 +10,13 @@
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB
 
-NMXConfig::NMXConfig(std::string jsonfile) {
+NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
+
+  calfile = new CalibrationFile(calibrationfile);
+
   nlohmann::json root;
 
-  std::ifstream t(jsonfile);
+  std::ifstream t(configfile);
   std::string jsonstring((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
 
@@ -21,7 +24,7 @@ NMXConfig::NMXConfig(std::string jsonfile) {
     root = nlohmann::json::parse(jsonstring);
   }
   catch (...) {
-    XTRACE(INIT, WAR, "Invalid Json file: %s", jsonfile.c_str());
+    XTRACE(INIT, WAR, "Invalid Json file: %s", configfile.c_str());
     return;
   }
 

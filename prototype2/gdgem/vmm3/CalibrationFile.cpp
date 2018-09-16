@@ -30,6 +30,13 @@ CalibrationFile::CalibrationFile() {
 
 /// \brief load calibration from file
 CalibrationFile::CalibrationFile(std::string jsonfile) : CalibrationFile() {
+
+  if (jsonfile.empty()) {
+    return;
+  }
+
+  LOG(Sev::Info, "Loading calibration file {}", jsonfile);
+
   std::ifstream t(jsonfile);
   std::string Jsonstring((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());

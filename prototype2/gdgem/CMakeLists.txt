@@ -26,6 +26,7 @@ set(gdgem_SRC
     vmm2/BuilderVMM2.cpp
     vmm3/ParserVMM3.cpp
     vmm3/BuilderVMM3.cpp
+    vmm3/CalibrationFile.cpp  # Also works for VMM2
     )
 set(gdgem_INC
     NMXConfig.h
@@ -52,6 +53,7 @@ set(gdgem_INC
     vmm2/BuilderVMM2.h
     vmm3/ParserVMM3.h
     vmm3/BuilderVMM3.h
+    vmm3/CalibrationFile.h # also works for VMM2
     )
 create_module(gdgem)
 

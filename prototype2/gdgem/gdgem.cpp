@@ -53,13 +53,17 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 struct NMXSettingsStruct {
   std::string ConfigFile;
+  std::string CalibrationFile;
   int SRSParserID; //
 } NMXSettings;
 
 void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {
   parser.add_option("-f,--file", NMXSettings.ConfigFile,
-                    "NMX (gdgem) specific config file")
+                    "NMX (gdgem) specific config (json) file")
       ->group("NMX")->required();
+  parser.add_option("--calibration", NMXSettings.CalibrationFile,
+                    "NMX (gdgem) specific calibration (json) file")
+      ->group("NMX");
 }
 
 class NMX : public Detector {
@@ -224,7 +228,7 @@ void NMX::input_thread() {
 
 void NMX::processing_thread() {
   XTRACE(PROCESS, ALW, "NMX Config file: %s", NMXSettings.ConfigFile.c_str());
-  nmx_opts = NMXConfig(NMXSettings.ConfigFile);
+  nmx_opts = NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
   init_builder();
   if (!builder_) {
     XTRACE(PROCESS, ERR, "No builder specified, exiting thread");
