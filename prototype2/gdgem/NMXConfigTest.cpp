@@ -10,6 +10,8 @@
 
 std::string pathprefix{""};
 
+std::string nocalibration{""};
+
 class NMXConfigTest : public TestBase {
 protected:
   virtual void SetUp() {
@@ -37,7 +39,7 @@ TEST_F(NMXConfigTest, ConstructorDefaults) {
 
 
 TEST_F(NMXConfigTest, NoConfigFile) {
-  NMXConfig nmxconfig("file_does_not_exist");
+  NMXConfig nmxconfig("file_does_not_exist", nocalibration);
   ASSERT_EQ("VMM2", nmxconfig.builder_type);
   // ASSERT_EQ(256, nmxconfig.geometry_x);
   // ASSERT_EQ(256, nmxconfig.geometry_y);
@@ -53,7 +55,7 @@ TEST_F(NMXConfigTest, DebugPrint) {
 }
 
 TEST_F(NMXConfigTest, JsonConfig) {
-  NMXConfig nmxconfig(pathprefix + "../prototype2/gdgem/configs/vmm2.json");
+  NMXConfig nmxconfig(pathprefix + "../prototype2/gdgem/configs/vmm2.json", nocalibration);
   ASSERT_EQ(60, nmxconfig.time_config.tac_slope()); // Parsed from json
   ASSERT_EQ(20, nmxconfig.time_config.bc_clock());
 }

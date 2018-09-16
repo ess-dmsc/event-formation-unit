@@ -60,8 +60,8 @@ create_module(gdgem)
 #
 # Unit Tests
 #
-set(NMXConfigTest_INC NMXConfig.h srs/SRSTime.h srs/SRSMappings.h)
-set(NMXConfigTest_SRC NMXConfigTest.cpp NMXConfig.cpp srs/SRSTime.cpp srs/SRSMappings.cpp)
+set(NMXConfigTest_INC NMXConfig.h srs/SRSTime.h srs/SRSMappings.h vmm3/CalibrationFile.cpp)
+set(NMXConfigTest_SRC NMXConfigTest.cpp NMXConfig.cpp srs/SRSTime.cpp srs/SRSMappings.cpp vmm3/CalibrationFile.cpp)
 create_test_executable(NMXConfigTest)
 
 #=============================================================================
