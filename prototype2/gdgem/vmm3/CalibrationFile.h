@@ -15,7 +15,7 @@ class CalibrationFile {
 public:
   static constexpr int MAX_FEC = 40;
   static constexpr int MAX_VMM = 16;
-  static constexpr int MAX_CH  = 64;
+  static constexpr int MAX_CH = 64;
 
   /// \todo check whether packing is necessary, static assert assert?
   typedef struct {
@@ -33,15 +33,17 @@ public:
   void loadCalibration(std::string calibration);
 
   /// \brief Generate fast mappings from IDs to indexes
-  bool addCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo, float offset, float slope);
+  bool addCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo,
+                      float offset, float slope);
 
   /// \brief get calibration data for (fec, vmm, channel)
-  /// \todo check how vmm3 data is supplied, maybe getting an array for a given (fec, vmm) is better?
-  Calibration & getCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo);
+  /// \todo check how vmm3 data is supplied, maybe getting an array for a given
+  /// (fec, vmm) is better?
+  Calibration &getCalibration(unsigned int fecId, unsigned int vmmId,
+                              unsigned int chNo);
 
 private:
-
-  Calibration Calibrations [MAX_FEC][MAX_VMM][MAX_CH];
+  Calibration Calibrations[MAX_FEC][MAX_VMM][MAX_CH];
 
   /// Default correction
   Calibration NoCorr = {0.0, 1.0};

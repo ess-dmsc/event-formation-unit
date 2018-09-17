@@ -1,11 +1,10 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
-#include <prototype2/common/DataSave.h>
 #include <gdgem/vmm3/CalibrationFile.h>
 #include <gdgem/vmm3/CalibrationFileTestData.h>
+#include <prototype2/common/DataSave.h>
 #include <test/TestBase.h>
 #include <vector>
-
 
 class CalibrationFileTest : public TestBase {
 protected:
@@ -28,7 +27,7 @@ TEST_F(CalibrationFileTest, Constructor) {
 
 TEST_F(CalibrationFileTest, GetCalibrationOutOfBounds) {
   CalibrationFile cf;
-  auto & calib = cf.getCalibration(CalibrationFile::MAX_FEC, 0, 0);
+  auto &calib = cf.getCalibration(CalibrationFile::MAX_FEC, 0, 0);
   ASSERT_FLOAT_EQ(calib.slope, 0.0);
   ASSERT_FLOAT_EQ(calib.offset, 0.0);
 
@@ -57,7 +56,8 @@ TEST_F(CalibrationFileTest, AddCalibration) {
   for (int fec = 0; fec < CalibrationFile::MAX_FEC; fec++) {
     for (int vmm = 0; vmm < CalibrationFile::MAX_VMM; vmm++) {
       for (int ch = 0; ch < CalibrationFile::MAX_CH; ch++) {
-        ASSERT_EQ(cf.addCalibration(fec, vmm, ch, 3.14159 + i, 2.71828 - i), true);
+        ASSERT_EQ(cf.addCalibration(fec, vmm, ch, 3.14159 + i, 2.71828 - i),
+                  true);
         i++;
       }
     }
@@ -67,7 +67,7 @@ TEST_F(CalibrationFileTest, AddCalibration) {
   for (int fec = 0; fec < CalibrationFile::MAX_FEC; fec++) {
     for (int vmm = 0; vmm < CalibrationFile::MAX_VMM; vmm++) {
       for (int ch = 0; ch < CalibrationFile::MAX_CH; ch++) {
-        auto & calib = cf.getCalibration(fec, vmm, ch);
+        auto &calib = cf.getCalibration(fec, vmm, ch);
         ASSERT_FLOAT_EQ(calib.offset, 3.14159 + i);
         ASSERT_FLOAT_EQ(calib.slope, 2.71828 - i);
         i++;
@@ -75,7 +75,6 @@ TEST_F(CalibrationFileTest, AddCalibration) {
     }
   }
 }
-
 
 TEST_F(CalibrationFileTest, LoadCalibration) {
   CalibrationFile cf;
@@ -87,7 +86,6 @@ TEST_F(CalibrationFileTest, LoadCalibration) {
   cal = cf.getCalibration(1, 0, 63);
   ASSERT_FLOAT_EQ(cal.offset, 10.7);
   ASSERT_FLOAT_EQ(cal.slope, 1010.7);
-
 
   cal = cf.getCalibration(1, 15, 0);
   ASSERT_FLOAT_EQ(cal.offset, 2.0);
@@ -112,7 +110,6 @@ TEST_F(CalibrationFileTest, LoadCalibrationSizeMismatch) {
   ASSERT_FLOAT_EQ(cal.slope, 3.7);
 }
 
-
 TEST_F(CalibrationFileTest, LoadCalibrationFile) {
   std::string filename = "deleteme.json";
   DataSave tempfile(filename, (void *)DummyCal.c_str(), DummyCal.size());
@@ -126,7 +123,6 @@ TEST_F(CalibrationFileTest, LoadCalibrationFile) {
   ASSERT_FLOAT_EQ(cal.offset, 10.7);
   ASSERT_FLOAT_EQ(cal.slope, 1010.7);
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
