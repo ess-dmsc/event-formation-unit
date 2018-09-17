@@ -424,7 +424,7 @@ void NMX::init_builder() {
           nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
           nmx_opts.clusterer_x.hit_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
           nmx_opts.clusterer_y.hit_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
-          nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
+          nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5, nmx_opts.calfile);
   } else {
     XTRACE(INIT, ALW, "Unrecognized builder type in config");
   }
