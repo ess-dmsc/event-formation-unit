@@ -17,8 +17,11 @@
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/FBSerializer.h>
+#include <common/Log.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
+#include <efu/Parser.h>
+#include <efu/Server.h>
 
 #include <gdgem/NMXConfig.h>
 #include <common/HistSerializer.h>
@@ -70,10 +73,17 @@ class NMX : public Detector {
 public:
   NMX(BaseSettings settings);
   ~NMX();
+
+  /// \brief detector specific threads
   void input_thread();
   void processing_thread();
 
+  /// \brief
   const char *detectorname();
+
+  /// \brief detector specific commands
+  int getCalibration(std::vector<std::string> cmdargs, UNUSED char *output,
+                UNUSED unsigned int *obytes);
 
   /** \todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 2000;
@@ -128,6 +138,27 @@ private:
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
+int NMX::getCalibration(std::vector<std::string> cmdargs,
+                     __attribute__((unused)) char *output,
+                     __attribute__((unused)) unsigned int *obytes) {
+  std::string cmd = "NMX_GET_CALIB";
+  LOG(Sev::Info, "{}", cmd);
+  if (cmdargs.size() != 4) {
+    LOG(Sev::Warning, "{}: wrong number of arguments", cmd);
+    return -Parser::EBADARGS;
+  }
+
+  int fec = atoi(cmdargs.at(1).c_str());
+  int asic = atoi(cmdargs.at(2).c_str());
+  int channel = atoi(cmdargs.at(3).c_str());
+  auto calib = nmx_opts.calfile->getCalibration(fec, asic, channel);
+
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "%s offset: %f slope: %f",
+                     cmd.c_str(), calib.offset, calib.slope);
+
+  return Parser::OK;
+}
+
 NMX::~NMX() { printf("NMX detector destructor called\n"); }
 
 NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
@@ -167,6 +198,12 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
 
   std::function<void()> processingFunc = [this]() { NMX::processing_thread(); };
   Detector::AddThreadFunction(processingFunc, "processing");
+
+  AddCommandFunction("NMX_GET_CALIB",
+                     [this](std::vector<std::string> cmdargs, char *output,
+                            unsigned int *obytes) {
+                       return NMX::getCalibration(cmdargs, output, obytes);
+                     });
 
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d",
          eth_buffer_max_entries, eth_buffer_size);
