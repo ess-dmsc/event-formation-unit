@@ -34,9 +34,9 @@ BuilderVMM2::BuilderVMM2(SRSTime time_intepreter, SRSMappings geometry_interpret
 AbstractBuilder::ResultStats BuilderVMM2::process_buffer(char *buf, size_t size) {
   parser_.receive(buf, size);
   if (!parser_.elems)
-    return AbstractBuilder::ResultStats();
+    return AbstractBuilder::ResultStats(); // BUG, return error cunters
 
-  readout.fec = 1; /**< @todo not hardcode */
+  readout.fec = 1; /**< \todo not hardcode */
   readout.chip_id = static_cast<uint8_t >(parser_.srshdr.dataid & 0xf);
 
   geom_errors = 0;
@@ -58,7 +58,7 @@ AbstractBuilder::ResultStats BuilderVMM2::process_buffer(char *buf, size_t size)
     XTRACE(PROCESS, DEB,
            "srs/vmm timestamp: srs: 0x%08x, bc: 0x%08x, tdc: 0x%08x\n",
            parser_.srshdr.time, d.bcid, d.tdc);
-    XTRACE(PROCESS, DEB, "srs/vmm chip: %d, channel: %d\n", readout.chip_id, d.chno);
+    XTRACE(PROCESS, DEB, "srs/vmm chip: %d, channel: %d", readout.chip_id, d.chno);
 
     plane = geometry_interpreter_.get_plane(readout);
 
@@ -69,7 +69,7 @@ AbstractBuilder::ResultStats BuilderVMM2::process_buffer(char *buf, size_t size)
         sorter_x.insert(readout);
     } else {
       geom_errors++;
-      XTRACE(PROCESS, DEB, "Bad SRS mapping --  fec: %d, chip: %d\n", readout.fec,
+      XTRACE(PROCESS, DEB, "Bad SRS mapping --  fec: %d, chip: %d", readout.fec,
              readout.chip_id);
     }
 

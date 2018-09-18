@@ -25,6 +25,8 @@ set(gdgem_SRC
     srs/SRSTime.cpp
     vmm2/ParserVMM2.cpp
     vmm2/BuilderVMM2.cpp
+    vmm3/ParserVMM3.cpp
+    vmm3/BuilderVMM3.cpp
     )
 set(gdgem_INC
     NMXConfig.h
@@ -49,12 +51,23 @@ set(gdgem_INC
     srs/SRSTime.h
     vmm2/ParserVMM2.h
     vmm2/BuilderVMM2.h
+    vmm3/ParserVMM3.h
+    vmm3/BuilderVMM3.h
     )
 create_module(gdgem)
+
+#
+# Unit Tests
+#
+set(NMXConfigTest_INC NMXConfig.h srs/SRSTime.h srs/SRSMappings.h)
+set(NMXConfigTest_SRC NMXConfigTest.cpp NMXConfig.cpp srs/SRSTime.cpp srs/SRSMappings.cpp)
+create_test_executable(NMXConfigTest)
 
 #=============================================================================
 # Component tests
 #=============================================================================
+
+
 
 add_subdirectory(nmx)
 add_subdirectory(srs)
@@ -62,4 +75,3 @@ add_subdirectory(vmm2)
 add_subdirectory(vmm3)
 add_subdirectory(clustering)
 add_subdirectory(generators)
-

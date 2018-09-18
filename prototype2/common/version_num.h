@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Contain version numbers - do not manually edit this file
- */
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Contain version numbers - do not manually edit this file
+///
+//===----------------------------------------------------------------------===//
 
 #define EFU_VER_MAJ 0
 

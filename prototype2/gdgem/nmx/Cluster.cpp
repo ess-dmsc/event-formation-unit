@@ -99,7 +99,7 @@ void Cluster::analyze(bool weighted, uint16_t max_timebins,
     }
   }
 
-  XTRACE(PROCESS, DEB, "center_sum=%f center_count=%f\n", center_sum,
+  XTRACE(PROCESS, DEB, "center_sum=%f center_count=%f", center_sum,
          center_count);
 
   utpc_center = center_sum / center_count;

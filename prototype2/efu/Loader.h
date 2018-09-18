@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Loads detector plugins (shared objects)
- */
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Loads detector plugins (shared objects)
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 #include <CLI11.hpp>
@@ -16,32 +18,25 @@ class Loader {
 private:
   void *handle{nullptr};
 
-  DetectorFactory *myFactory{nullptr};
+  DetectorFactoryBase *myFactory{nullptr};
 
   std::function<void(CLI::App &CLIParser)> ParserPopulator;
 
 public:
-  //  std::shared_ptr<Detector> detector{nullptr};
 
-  /** @brief Load instrument plugin from detector name
-   *  @param name Instrument name - .so suffix will be added
-   */
+  /// \brief Load instrument plugin from detector name
+  /// \param name Instrument name - .so suffix will be added
   Loader();
 
   Loader(Detector *detector);
-  
+
   bool loadPlugin(std::string lib);
   void unloadPlugin();
 
-  /** @brief minimal destructor */
+  /// \brief minimal destructor
   ~Loader();
 
-  bool IsOk() {
-    if (nullptr == myFactory) {
-      return false;
-    }
-    return true;
-  }
+  bool IsOk();
 
   std::shared_ptr<Detector> createDetector(BaseSettings settings);
 

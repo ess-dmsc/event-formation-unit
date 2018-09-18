@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
         zyproj[z - 1][y - 1]++;
         xzproj[x - 1][z - 1]++;
 
-        char buf[1000]; /**< @todo should be done in tofile() method */
+        char buf[1000]; /**< \todo should be done in tofile() method */
         auto len = snprintf(buf, 1000, "%8d, %5d, %4d, %4d, %3d, %3d, %2d\n",
                             time, wireid, gridid, pixid, x, y, z);
         coords.tofile(buf, len);
@@ -209,6 +209,8 @@ int main(int argc, char *argv[]) {
       }
     }
   }
+
+  fclose(ff);
 
   printf("Writing data\n");
   // for (int i = 0; i < 6144; i++) {

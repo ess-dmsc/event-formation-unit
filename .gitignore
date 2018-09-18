@@ -6,22 +6,15 @@
 *.pyc
 *.gcda
 *.gcno
+a.out
 
 # Misc programs
-cncsread
-batchreader
-genpixids
-bin/efu
-gencspec
-gencspecfile
-gennmxfile
-gennmxpcap
-dgmgjson
-gemsim
+
 *Test$
 
 #directories
 build*/
+doxygen/
 
 #IDE
 CMakeLists.txt.user

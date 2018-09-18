@@ -1,3 +1,11 @@
+/* Copyright notice see below */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// /brief single producer single consumer lockless fifo
+///
+//===----------------------------------------------------------------------===//
 /*
  * Not any company's property but Public-Domain
  * Do with source-code as you will. No requirement to keep this
@@ -9,7 +17,7 @@
  *
  * Code & platform dependent issues with it was originally
  * published at http://www.kjellkod.cc/threadsafecircularqueue
- * 2012-16-19  @author Kjell Hedström, hedstrom@kjellkod.cc */
+ * 2012-16-19  @author Kjell HedstrÃ¶m, hedstrom@kjellkod.cc */
 
 // should be mentioned the thinking of what goes where
 // it is a "controversy" whether what is tail and what is head
@@ -108,7 +116,7 @@ bool CircularFifo<Element, Size>::isLockFree() const {
   return (_tail.is_lock_free() && _head.is_lock_free());
 }
 
-/** @todo powers of two and bitmask faster than modulus */
+/// \todo powers of two and bitmask faster than modulus
 template <typename Element, size_t Size>
 size_t CircularFifo<Element, Size>::increment(size_t idx) const {
   return (idx + 1) % Capacity;

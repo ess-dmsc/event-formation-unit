@@ -69,7 +69,7 @@ add_subdirectory(dataformats)
 # Should unit_test_targets depend on default targets ???
 
 add_custom_target(unit_tests
-  DEPENDS ${unit_test_targets})
+    DEPENDS ${unit_test_targets})
 add_custom_target(runtest
     COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
     DEPENDS unit_tests)
@@ -77,12 +77,14 @@ add_custom_target(valgrind
     DEPENDS ${valgrind_targets})
 add_custom_target(benchmark
     DEPENDS ${benchmark_targets})
+add_custom_target(doxygen
+    COMMAND doxygen ../prototype2/doxyfile)
 
 #=============================================================================
 # Finalize coverage
 #=============================================================================
 set(gcovr_excl_opts
-    "--exclude='.*Test.*' --exclude='.*gtest.*.h' --exclude='.*CLI11.hpp'")
+"--exclude='/.*Test.cpp' --exclude='.*gtest.*.h' --exclude='.*CLI11.hpp'")
 create_coverage_targets(
   coverage
   runtest
@@ -108,17 +110,18 @@ add_custom_target(hints
   COMMAND echo ""
   COMMAND echo "CMake hints"
   COMMAND echo "--------------------------------------------------------------------------------"
-  COMMAND echo "Enable code coverage:                   cmake -DCOV=ON .."
-  COMMAND echo "Specify a build string:                 cmake -DBUILDSTR=v1.2.3 .."
-  COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug .."
-  COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release .."
+  COMMAND echo "Enable code coverage:                   cmake -DCOV=ON"
+  COMMAND echo "Enable profiling with google perftools  cmake -DGPERF=ON"
+  COMMAND echo "Specify a build string:                 cmake -DBUILDSTR=v1.2.3"
+  COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug"
+  COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release"
   COMMAND echo "    NOTE: Relase mode requires a build string"
   COMMAND echo ""
   COMMAND echo "CMake hints advanced/not generally used"
   COMMAND echo "--------------------------------------------------------------------------------"
-  COMMAND echo "Suggest PCAP root:                      cmake -DPCAP_ROOT_DIR=/opt/dmg_grp .."
-  COMMAND echo "Suggest GraylogLogger root:             cmake -DGraylogLogger_ROOT_DIR=/opt/dmg_grp .."
-  COMMAND echo "Suggest LibRDKafka root:                cmake -DLibRDKafka_ROOT_DIR=/opt/dmg_grp .."
-  COMMAND echo "List cmake variables:                   cmake .. -LH     "
+  COMMAND echo "Suggest PCAP root:                      cmake -DPCAP_ROOT_DIR=/opt/dmg_grp"
+  COMMAND echo "Suggest GraylogLogger root:             cmake -DGraylogLogger_ROOT_DIR=/opt/dmg_grp"
+  COMMAND echo "Suggest LibRDKafka root:                cmake -DLibRDKafka_ROOT_DIR=/opt/dmg_grp"
+  COMMAND echo "List cmake variables:                   cmake -LH"
   COMMAND echo ""
   )

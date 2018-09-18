@@ -7,6 +7,9 @@
 #include <fstream>
 #include <sstream>
 
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
+
 NMXConfig::NMXConfig(std::string jsonfile) {
   Json::Value root{};
   Json::Reader reader{};
@@ -15,14 +18,14 @@ NMXConfig::NMXConfig(std::string jsonfile) {
                   std::istreambuf_iterator<char>());
 
   if (!reader.parse(str, root, 0)) {
-    XTRACE(INIT, WAR, "Invalid Json file: %s\n", jsonfile.c_str());
+    XTRACE(INIT, WAR, "Invalid Json file: %s", jsonfile.c_str());
     return;
   }
 
   builder_type = root["builder_type"].asString();
 
   if ((builder_type == "VMM2") || (builder_type == "VMM3")) {
-    /**< @todo get from slow control? */
+    /**< \todo get from slow control? */
     auto tc = root["time_config"];
     time_config.set_tac_slope(tc["tac_slope"].asInt());
     time_config.set_bc_clock(tc["bc_clock"].asInt());

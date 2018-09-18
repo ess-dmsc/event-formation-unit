@@ -2,14 +2,14 @@
 
 /** @file
  *
- *  @brief Implements a command server
+ *  \brief Implements a command server
  */
 
 //#include <algorithm>
 #include <arpa/inet.h>
 #include <cassert>
 #include <cinttypes>
-#include <common/Trace.h>
+#include <common/Log.h>
 #include <cstdio>
 #include <cstring>
 #include <efu/Parser.h>
@@ -41,17 +41,17 @@ Server::Server(int port, Parser &parse) : port_(port), parser(parse) {
 }
 
 void Server::server_close(int socket) {
-  XTRACE(IPC, DEB, "Closing socket fd %d\n", socket);
+  LOG(Sev::Debug, "Closing socket fd {}", socket);
   close(socket);
   auto client = std::find(clientfd.begin(), clientfd.end(), socket);
   assert(client != clientfd.end());
   *client = -1;
 }
 
-/** @brief Setup socket parameters
+/** \brief Setup socket parameters
  */
 void Server::server_open() {
-  XTRACE(IPC, INF, "Server::open() called on port %d\n", port_);
+  LOG(Sev::Info, "Server::open() called on port {}", port_);
 
   struct sockaddr_in socket_address;
   UNUSED int ret;
@@ -82,9 +82,9 @@ void Server::server_open() {
 }
 
 int Server::server_send(int socketfd) {
-  XTRACE(IPC, DEB, "server_send() - %d bytes\n", output.bytes);
+  LOG(Sev::Debug, "server_send() - {} bytes", output.bytes);
   if (send(socketfd, output.buffer, output.bytes, 0) < 0) {
-    XTRACE(IPC, WAR, "Error sending command reply\n");
+    LOG(Sev::Warning, "Error sending command reply");
     return -1;
   }
   output.bytes = 0;
@@ -92,7 +92,7 @@ int Server::server_send(int socketfd) {
   return 0;
 }
 
-/** @brief Called in main program loop
+/** \brief Called in main program loop
  */
 void Server::server_poll() {
 
@@ -115,17 +115,17 @@ void Server::server_poll() {
   if (ready > 0 && FD_ISSET(serverfd, &fd_working)) {
     auto freefd = std::find(clientfd.begin(), clientfd.end(), -1);
     if (freefd == clientfd.end()) {
-      XTRACE(IPC, WAR, "Max clients connected, can't accept()\n");
+      LOG(Sev::Warning, "Max clients connected, can't accept()");
       auto tmpsock = accept(serverfd, NULL, NULL);
       close(tmpsock);
     } else {
-      XTRACE(IPC, INF, "Accept new connection\n");
+      LOG(Sev::Info, "Accept new connection");
       *freefd = accept(serverfd, NULL, NULL);
       if (*freefd < 0 && errno != EWOULDBLOCK) {
         assert(1 == 0);
       }
       FD_SET(*freefd, &fd_master);
-      XTRACE(IPC, DEB, "New clent socket: %d, ready: %d\n", *freefd, ready);
+      LOG(Sev::Debug, "New clent socket: {}, ready: {}", *freefd, ready);
     }
     ready--;
   }
@@ -137,31 +137,31 @@ void Server::server_poll() {
                         SERVER_BUFFER_SIZE - input.bytes, 0);
 
       if ((bytes < 0) && (errno != EWOULDBLOCK || errno != EAGAIN)) {
-        XTRACE(IPC, WAR, "recv() failed, errno: %d\n", errno);
+        LOG(Sev::Warning, "recv() failed, errno: {}", errno);
         perror("recv() failed");
         server_close(cli);
         return;
       }
       if (bytes == 0) {
-        XTRACE(IPC, INF, "Peer closed socket %d\n", cli);
+        LOG(Sev::Info, "Peer closed socket {}", cli);
         server_close(cli);
         return;
       }
-      XTRACE(IPC, INF, "Received %ld bytes on socket %d\n", bytes, cli);
+      LOG(Sev::Debug, "Received {} bytes on socket {}", bytes, cli);
       input.bytes += bytes;
 
       assert(input.bytes <= SERVER_BUFFER_SIZE);
-      XTRACE(IPC, DEB, "input.bytes: %d\n", input.bytes);
+      LOG(Sev::Debug, "input.bytes: {}", input.bytes);
 
       // Parse and generate reply
       if (parser.parse((char *)input.buffer, input.bytes, (char *)output.buffer,
                        &output.bytes) < 0) {
-        XTRACE(IPC, WAR, "Parse error\n");
+        LOG(Sev::Warning, "Parse error");
       }
       input.bytes = 0;
       input.data = input.buffer;
       if (server_send(cli) < 0) {
-        XTRACE(IPC, WAR, "server_send() failed\n");
+        LOG(Sev::Warning, "server_send() failed");
         server_close(cli);
         return;
       }

@@ -1,10 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Dataset for running unit tests - do not edit if unsure of what they
- * do!
- */
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Dataset for running unit tests - do not edit if unsure of what they do!
+///
+//===----------------------------------------------------------------------===//
 
 #include <cinttypes>
 #include <vector>

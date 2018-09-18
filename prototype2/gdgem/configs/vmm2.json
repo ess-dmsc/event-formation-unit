@@ -62,5 +62,5 @@
 
   "dump_csv" : false,
   "dump_h5" : false,
-  "dump_directory" : "/home/martin/data/efu_dump/"
+  "dump_directory" : ""
 }

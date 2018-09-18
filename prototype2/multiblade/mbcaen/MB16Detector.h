@@ -1,9 +1,11 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Multiblade geometry
- */
+/* Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// /brief Multiblade geometry
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 #include <cstdio>

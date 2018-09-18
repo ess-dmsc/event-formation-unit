@@ -46,9 +46,15 @@ public:
 
   const char *detectorname();
 
+<<<<<<< HEAD
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 100;
   static const int eth_buffer_size = 10000;
+=======
+  /** \todo figure out the right size  of the .._max_entries  */
+  static const int eth_buffer_max_entries = 1000;
+  static const int eth_buffer_size = 1600;
+>>>>>>> master
   static const int kafka_buffer_size = 1000000;
 
 private:
@@ -71,6 +77,12 @@ private:
     int64_t rx_events;
     int64_t geometry_errors;
     int64_t fifo_seq_errors;
+    // Kafka stats below are common to all detectors
+    int64_t kafka_produce_fails;
+    int64_t kafka_ev_errors;
+    int64_t kafka_ev_others;
+    int64_t kafka_dr_errors;
+    int64_t kafka_dr_noerrors;
   } ALIGN(64) mystats;
 };
 
@@ -88,18 +100,23 @@ PopulateCLIParser PopulateParser{SetCLIArguments};
 MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
   Stats.setPrefix("efu.mbcaen");
 
-  XTRACE(INIT, ALW, "Adding stats\n");
+  XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-    Stats.create("input.rx_packets",                mystats.rx_packets);
-    Stats.create("input.rx_bytes",                  mystats.rx_bytes);
-    Stats.create("input.rx_error_bytes",            mystats.rx_error_bytes);
-    Stats.create("input.fifo1_push_errors",         mystats.fifo1_push_errors);
-    Stats.create("processing.rx_readouts",          mystats.rx_readouts);
-    Stats.create("processing.rx_idle1",             mystats.rx_idle1);
-    Stats.create("processing.tx_bytes",             mystats.tx_bytes);
-    Stats.create("processing.rx_events",            mystats.rx_events);
-    Stats.create("processing.rx_geometry_errors",   mystats.geometry_errors);
-    Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  Stats.create("input.rx_packets",                mystats.rx_packets);
+  Stats.create("input.rx_bytes",                  mystats.rx_bytes);
+  Stats.create("input.fifo1_push_errors",         mystats.fifo1_push_errors);
+  Stats.create("processing.rx_readouts",          mystats.rx_readouts);
+  Stats.create("processing.rx_idle1",             mystats.rx_idle1);
+  Stats.create("processing.tx_bytes",             mystats.tx_bytes);
+  Stats.create("processing.rx_events",            mystats.rx_events);
+  Stats.create("processing.rx_geometry_errors",   mystats.geometry_errors);
+  Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  /// \todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { MBCAEN::input_thread(); };
@@ -110,10 +127,10 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d\n",
+  XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries +
-                                                11); // @todo workaround
+                                                11); // \todo workaround
   assert(eth_ringbuf != 0);
 }
 
@@ -138,7 +155,7 @@ void MBCAEN::input_thread() {
     if ((rdsize = mbdata.receive(eth_ringbuf->getDataBuffer(eth_index),
                                  eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-      XTRACE(PROCESS, DEB, "Received an udp packet of length %d bytes\n",
+      XTRACE(PROCESS, DEB, "Received an udp packet of length %d bytes",
              rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
@@ -152,7 +169,7 @@ void MBCAEN::input_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      XTRACE(INPUT, ALW, "Stopping input thread.");
       return;
     }
   }
@@ -197,8 +214,16 @@ void MBCAEN::processing_thread() {
 
         mystats.tx_bytes += flatbuffer.produce();
 
+        /// Kafka stats update - common to all detectors
+        /// don't increment as producer keeps absolute count
+        mystats.kafka_produce_fails = eventprod.stats.produce_fails;
+        mystats.kafka_ev_errors = eventprod.stats.ev_errors;
+        mystats.kafka_ev_others = eventprod.stats.ev_others;
+        mystats.kafka_dr_errors = eventprod.stats.dr_errors;
+        mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
+
         if (not runThreads) {
-          XTRACE(INPUT, ALW, "Stopping processing thread.\n");
+          XTRACE(INPUT, ALW, "Stopping processing thread.");
           return;
         }
 
@@ -274,11 +299,4 @@ void MBCAEN::processing_thread() {
 
 /** ----------------------------------------------------- */
 
-class MBCAENFactory : DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    return std::shared_ptr<Detector>(new MBCAEN(settings));
-  }
-};
-
-MBCAENFactory Factory;
+DetectorFactory<MBCAEN> Factory;

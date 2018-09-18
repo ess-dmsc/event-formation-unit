@@ -80,7 +80,7 @@ void UDPRaw::input_thread() {
       auto usecs = rate_timer.timeus();
       if (timeseq == 2) {
         first_dropped = dropped;
-        printf("Recorded %d dropped frames as baseline\n", first_dropped);
+        printf("Recorded %u dropped frames as baseline\n", first_dropped);
       }
       rx_total += rx;
       printf("Rx rate: %.2f Mbps, %.0f pps rx %" PRIu64 " MB (total: %" PRIu64
@@ -102,11 +102,4 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {}
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
-class UDPRawFactory : public DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    return std::shared_ptr<Detector>(new UDPRaw(settings));
-  }
-};
-
-UDPRawFactory Factory;
+DetectorFactory<UDPRaw> Factory;

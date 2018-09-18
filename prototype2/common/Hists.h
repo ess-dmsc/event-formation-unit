@@ -1,9 +1,11 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class to histogram raw amd clustered VMM data for NMX
- */
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class to histogram raw amd clustered VMM data for NMX
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 
@@ -28,7 +30,7 @@ public:
 
   void set_cluster_adc_downshift(uint32_t bits);
 
-  /** @brief clears histograms */
+  /// \brief clears histograms
   void clear();
 
   void bin(const Event &e);

@@ -1,9 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Simple example of a derived class of the Readout base class
- */
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Simple example of a derived class of the Readout base class
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

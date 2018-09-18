@@ -1,5 +1,9 @@
-
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/* Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
 
 #include <cinttypes>
 #include <common/Detector.h>
@@ -41,7 +45,7 @@ public:
 
   const char *detectorname();
 
-  /** @todo figure out the right size  of the .._max_entries  */
+  /** \todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 20000;
   static const int eth_buffer_size = 9000;
   static const int kafka_buffer_size = 124000; /**< events */
@@ -68,6 +72,12 @@ private:
     int64_t tx_bytes;
     int64_t rx_seq_errors;
     int64_t fifo_synch_errors;
+    // Kafka stats below are common to all detectors
+    int64_t kafka_produce_fails;
+    int64_t kafka_ev_errors;
+    int64_t kafka_ev_others;
+    int64_t kafka_dr_errors;
+    int64_t kafka_dr_noerrors;
   } ALIGN(64) mystats;
 };
 
@@ -85,7 +95,7 @@ PopulateCLIParser PopulateParser{SetCLIArguments};
 SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDEA readout", settings) {
   Stats.setPrefix("efu.sonde");
 
-  XTRACE(INIT, ALW, "Adding stats\n");
+  XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("input.rx_packets",                mystats.rx_packets);
   Stats.create("input.rx_bytes",                  mystats.rx_bytes);
@@ -96,6 +106,12 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDE
   Stats.create("processing.rx_geometry_errors",   mystats.rx_geometry_errors);
   Stats.create("processing.rx_seq_errors",        mystats.rx_seq_errors);
   Stats.create("output.tx_bytes",                 mystats.tx_bytes);
+  /// \todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
   std::function<void()> inputFunc = [this]() { SONDEIDEA::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
@@ -105,10 +121,10 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDE
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d SONDE Rx ringbuffers of size %d\n",
+  XTRACE(INIT, ALW, "Creating %d SONDE Rx ringbuffers of size %d",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(
-      eth_buffer_max_entries + 11); /** @todo testing workaround */
+      eth_buffer_max_entries + 11); /** \todo testing workaround */
   assert(eth_ringbuf != 0);
 }
 
@@ -144,7 +160,7 @@ void SONDEIDEA::input_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      XTRACE(INPUT, ALW, "Stopping input thread.");
       return;
     }
   }
@@ -180,7 +196,7 @@ void SONDEIDEA::processing_thread() {
 
         if (events > 0) {
           for (int i = 0; i < events; i++) {
-            XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)\n",
+            XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)",
                    i, ideasdata.data[i].time, ideasdata.data[i].pixel_id);
             mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time,
                                                     ideasdata.data[i].pixel_id);
@@ -190,12 +206,20 @@ void SONDEIDEA::processing_thread() {
         if (produce_timer.timetsc() >=
             EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
           mystats.tx_bytes += flatbuffer.produce();
+
+          /// Kafka stats update - common to all detectors
+          /// don't increment as producer keeps absolute count
+          mystats.kafka_produce_fails = eventprod.stats.produce_fails;
+          mystats.kafka_ev_errors = eventprod.stats.ev_errors;
+          mystats.kafka_ev_others = eventprod.stats.ev_others;
+          mystats.kafka_dr_errors = eventprod.stats.dr_errors;
+          mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
           produce_timer.now();
         }
       }
     }
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      XTRACE(INPUT, ALW, "Stopping input thread.");
       return;
     }
   }
@@ -203,11 +227,4 @@ void SONDEIDEA::processing_thread() {
 
 /** ----------------------------------------------------- */
 
-class SONDEIDEAFactory : DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    return std::shared_ptr<Detector>(new SONDEIDEA(settings));
-  }
-};
-
-SONDEIDEAFactory Factory;
+DetectorFactory<SONDEIDEA> Factory;

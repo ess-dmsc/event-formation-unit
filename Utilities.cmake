@@ -7,12 +7,16 @@ function(create_module module_name)
     ${${module_name}_INC})
   set_target_properties(${module_name} PROPERTIES PREFIX "")
   set_target_properties(${module_name} PROPERTIES SUFFIX ".so")
-  target_link_libraries(${module_name}
+  target_link_libraries(${module_name} efu
     ${${module_name}_LIB}
     ${EFU_COMMON_LIBS}
     eventlib)
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${module_name} "-Wl,--no-as-needed")
+  endif()
+
+  if (GPERF)
+    target_link_libraries(${module_name} ${GPERFTOOLS_PROFILER})
   endif()
 
   set_target_properties(${module_name} PROPERTIES
@@ -23,6 +27,17 @@ function(create_module module_name)
 endfunction(create_module)
 
 #=============================================================================
+# Compile detector module code for static linking into the EFU
+# Note that you must add the compiled code to the EFU for linking using (e.g)
+# target_link_libraries(efu $<TARGET_OBJECTS:SomeDetectorModule>)
+#=============================================================================
+function(create_object_module module_name)
+  add_library(${module_name} OBJECT
+    ${${module_name}_SRC}
+    ${${module_name}_INC})
+endfunction(create_object_module)
+
+#=============================================================================
 # Generate an executable program
 #=============================================================================
 function(create_executable exec_name)
@@ -31,9 +46,13 @@ function(create_executable exec_name)
     ${${exec_name}_INC})
 
   target_link_libraries(${exec_name}
-    ${${exec_name}_LIB}
+    PUBLIC ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    eventlib)
+    eventlib efu_common)
+
+  if (GPERF)
+    target_link_libraries(${exec_name} ${GPERFTOOLS_PROFILER})
+  endif()
 
   set_target_properties(${exec_name} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
@@ -65,7 +84,7 @@ function(create_test_executable)
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    ${GTEST_LIBRARIES})
+    ${GTEST_LIBRARIES} efu_common)
 
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${exec_name} "-Wl,--no-as-needed")
@@ -101,5 +120,5 @@ function(create_integration_test_executable exec_name)
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    eventlib)
+    eventlib efu_common)
 endfunction(create_integration_test_executable)

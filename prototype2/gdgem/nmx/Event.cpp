@@ -9,7 +9,7 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 void Event::insert_hit(const Hit &e) {
-  if (e.plane_id == 1) { /**< @todo deal with multiple panels */
+  if (e.plane_id == 1) { /**< \todo deal with multiple panels */
     y.insert_hit(e);
   } else if (e.plane_id == 0) {
     x.insert_hit(e);
@@ -18,7 +18,7 @@ void Event::insert_hit(const Hit &e) {
 
 void Event::merge(Cluster& cluster)
 {
-  if (cluster.plane_id == 1) { /**< @todo deal with multiple panels */
+  if (cluster.plane_id == 1) { /**< \todo deal with multiple panels */
     y.merge(cluster);
   } else if (cluster.plane_id == 0) {
     x.merge(cluster);
@@ -70,7 +70,7 @@ bool Event::time_overlap_thresh(const Cluster& other, double thresh) const
 
 void Event::analyze(bool weighted, int16_t max_timebins,
                     int16_t max_timedif) {
-  XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu\n",
+  XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu",
          x.entries.size(), y.entries.size());
   if (x.entries.size()) {
     x.analyze(weighted, max_timebins, max_timedif);

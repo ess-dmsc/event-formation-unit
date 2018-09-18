@@ -1,3 +1,10 @@
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
+
 #include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -103,7 +110,6 @@ void reader(uint64_t addr) {
 }
 
 int main(int argc, char *argv[]) {
-  int cpu1, cpu2;
 
   if ((argc != 1 && argc != 2) || strcmp(argv[0], "-h") == 0) {
     helptext();

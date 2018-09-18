@@ -2,7 +2,7 @@
 
 /** @file
  *
- *  @brief Simple peak finding implementation.
+ *  \brief Simple peak finding implementation.
  */
 
 #include "PeakFinder.h"
@@ -13,17 +13,11 @@
 PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod)
     : AdcDataProcessor(std::move(Prod)) {}
 
-void PeakFinder::processPacket(const PacketData &Data) {
-  if (Data.Type != PacketType::Data) {
-    return;
-  }
-  for (auto &Module : Data.Modules) {
-    auto Result = FindPeak(Module.Data);
-    std::uint64_t PeakTimeStamp =
-        Module.TimeStamp.GetOffsetTimeStamp(Result.MaxLocation)
-            .GetTimeStampNS();
-    SendData(PeakTimeStamp, Result.Max, Module.Channel);
-  }
+void PeakFinder::processData(SamplingRun const &Data) {
+  auto Result = FindPeak(Data.Data);
+  std::uint64_t PeakTimeStamp =
+      Data.TimeStamp.GetOffsetTimeStamp(Result.MaxLocation).GetTimeStampNS();
+  SendData(PeakTimeStamp, Result.Max, Data.Channel);
 }
 
 void PeakFinder::SendData(const std::uint64_t &TimeStamp,
@@ -46,9 +40,8 @@ void PeakFinder::SendData(const std::uint64_t &TimeStamp,
                        builder.GetSize());
 }
 
-ModuleAnalysisResult FindPeak(const std::vector<std::uint16_t> &SampleRun) {
-  ModuleAnalysisResult ReturnData{
-      0, 0, 0};
+ModuleAnalysisResult FindPeak(std::vector<std::uint16_t> const &SampleRun) {
+  ModuleAnalysisResult ReturnData{0, 0, 0};
   std::int64_t Sum = 0;
   for (std::size_t i = 0; i < SampleRun.size(); ++i) {
     Sum += SampleRun[i];

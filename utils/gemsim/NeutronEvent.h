@@ -1,9 +1,11 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Derived class for Neutron Events
- */
+/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Derived class for Neutron Events
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 #include <cassert>

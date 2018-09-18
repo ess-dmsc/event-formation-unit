@@ -1,5 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// plugin for gdgem detector data reception, parsing and event formation
+///
+//===----------------------------------------------------------------------===//
 #include <dataformats/multigrid/inc/json.h>
 
 #include <libs/include/SPSCFifo.h>
@@ -19,6 +25,7 @@
 #include <gdgem/generators/BuilderAPV.h>
 #include <gdgem/generators/BuilderHits.h>
 #include <gdgem/vmm2/BuilderVMM2.h>
+#include <gdgem/vmm3/BuilderVMM3.h>
 
 #include <gdgem/clustering/ClusterMatcher.h>
 #include <gdgem/clustering/DoroClusterer.h>
@@ -63,7 +70,7 @@ public:
 
   const char *detectorname();
 
-  /** @todo figure out the right size  of the .._max_entries  */
+  /** \todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 2000;
   static const int eth_buffer_size = 9000;
   static const int kafka_buffer_size = 12400;
@@ -81,7 +88,7 @@ private:
     int64_t rx_bytes;
     int64_t fifo_push_errors;
     // int64_t fifo_free;
-    int64_t pad_a[5]; /**< @todo check alignment*/
+    int64_t pad_a[5]; /**< \todo check alignment*/
 
     // Processing Counters
     int64_t readouts;
@@ -97,6 +104,15 @@ private:
     int64_t clusters_discarded;
     int64_t tx_bytes;
     int64_t fifo_seq_errors;
+    int64_t lost_frames;
+    int64_t bad_frames;
+    int64_t good_frames;
+    // Kafka stats below are common to all detectors
+    int64_t kafka_produce_fails;
+    int64_t kafka_ev_errors;
+    int64_t kafka_ev_others;
+    int64_t kafka_dr_errors;
+    int64_t kafka_dr_noerrors;
   } ALIGN(64) mystats;
 
   NMXConfig nmx_opts;
@@ -112,7 +128,7 @@ NMX::~NMX() { printf("NMX detector destructor called\n"); }
 NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   Stats.setPrefix("efu.nmx");
 
-  XTRACE(INIT, ALW, "Adding stats\n");
+  XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("rx_packets", mystats.rx_packets);
   Stats.create("rx_bytes", mystats.rx_bytes);
@@ -129,8 +145,16 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   Stats.create("fifo_seq_errors", mystats.fifo_seq_errors);
   Stats.create("unclustered", mystats.unclustered);
   Stats.create("geom_errors", mystats.geom_errors);
-
+  Stats.create("lost_frames", mystats.lost_frames);
+  Stats.create("bad_frames", mystats.bad_frames);
+  Stats.create("good_frames", mystats.good_frames);
   Stats.create("tx_bytes", mystats.tx_bytes);
+  /// \todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { NMX::input_thread(); };
@@ -139,10 +163,10 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   std::function<void()> processingFunc = [this]() { NMX::processing_thread(); };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d\n",
+  XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(
-      eth_buffer_max_entries + 11); /**< @todo testing workaround */
+      eth_buffer_max_entries + 11); /**< \todo testing workaround */
   assert(eth_ringbuf != 0);
 }
 
@@ -150,27 +174,34 @@ const char *NMX::detectorname() { return classname; }
 
 void NMX::input_thread() {
   /** Connection setup */
-  // Socket::Endpoint local(opts->ip_addr.c_str(), opts->port);
+  int rxBuffer, txBuffer;
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver nmxdata(local);
-  // nmxdata.buflen(opts->buflen);
-  nmxdata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+
+  nmxdata.setBufferSizes(0 /*use default */, EFUSettings.DetectorRxBufferSize);
+  nmxdata.getBufferSizes(txBuffer, rxBuffer);
+  if (rxBuffer < EFUSettings.DetectorRxBufferSize) {
+    XTRACE(INIT, ERR, "Receive buffer sizes too small, wanted %d, got %d",
+           EFUSettings.DetectorRxBufferSize, rxBuffer);
+    return;
+  }
   nmxdata.printBufferSizes();
   nmxdata.setRecvTimeout(0, 100000); /// secs, usecs
 
-  int rdsize;
+
   TSCTimer report_timer;
   for (;;) {
+    int rdsize;
     unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */
     eth_ringbuf->setDataLength(
-        eth_index, 0); /**@todo @fixme buffer corruption can occur */
+        eth_index, 0); /**\todo \todo buffer corruption can occur */
     if ((rdsize = nmxdata.receive(eth_ringbuf->getDataBuffer(eth_index),
                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-      XTRACE(INPUT, DEB, "rdsize: %d\n", rdsize);
+      XTRACE(INPUT, DEB, "rdsize: %d", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
@@ -184,17 +215,18 @@ void NMX::input_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.\n");
+      XTRACE(INPUT, ALW, "Stopping input thread.");
       return;
     }
   }
 }
 
 void NMX::processing_thread() {
+  XTRACE(PROCESS, ALW, "NMX Config file: %s", NMXSettings.ConfigFile.c_str());
   nmx_opts = NMXConfig(NMXSettings.ConfigFile);
   init_builder();
   if (!builder_) {
-    XTRACE(PROCESS, WAR, "No builder specified, exiting thread\n");
+    XTRACE(PROCESS, ERR, "No builder specified, exiting thread");
     return;
   }
 
@@ -233,6 +265,9 @@ void NMX::processing_thread() {
 
         mystats.readouts += stats.valid_hits;
         mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
+        mystats.lost_frames += stats.lost_frames;
+        mystats.bad_frames += stats.bad_frames;
+        mystats.good_frames += stats.good_frames;
 
         if (nmx_opts.hit_histograms) {
           hists.bin_hists(builder_->clusterer_x->clusters);
@@ -246,7 +281,8 @@ void NMX::processing_thread() {
         matcher.match_end(false);
 
         while (!matcher.matched_clusters.empty()) {
-          XTRACE(PROCESS, DEB, "event_ready()\n");
+          //printf("MATCHED_CLUSTERS\n");
+          XTRACE(PROCESS, DEB, "event_ready()");
           event = matcher.matched_clusters.front();
           matcher.matched_clusters.pop_front();
 
@@ -261,7 +297,7 @@ void NMX::processing_thread() {
           }
 
           if (event.valid()) {
-            XTRACE(PROCESS, DEB, "event.good\n");
+            XTRACE(PROCESS, DEB, "event.good");
 
             mystats.clusters_xy++;
 
@@ -270,14 +306,10 @@ void NMX::processing_thread() {
               sample_next_track = trackfb.add_track(event);
             }
 
-            XTRACE(PROCESS, DEB, "x.center: %d, y.center %d\n",
+            XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
                    event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
 
             if (nmx_opts.filter.valid(event)) {
-
-              // printf("\nHave a cluster:\n");
-              // event.debug2();
-
               pixelid = nmx_opts.geometry.pixel2D(event.x.utpc_center_rounded(),
                                                   event.y.utpc_center_rounded());
               if (!nmx_opts.geometry.valid_id(pixelid)) {
@@ -285,19 +317,15 @@ void NMX::processing_thread() {
               } else {
                 time = static_cast<uint32_t>(event.utpc_time());
 
-                XTRACE(PROCESS, DEB, "time: %d, pixelid %d\n", time, pixelid);
+                XTRACE(PROCESS, DEB, "time: %d, pixelid %d", time, pixelid);
 
                 mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
                 mystats.clusters_events++;
               }
             } else { // Does not meet criteria
-              /** @todo increments counters when failing this */
-              // printf("\nInvalid cluster:\n");
-              // event.debug2();
+              /** \todo increments counters when failing this */
             }
-          } else {
-            //printf("No valid cluster:\n");
-            //event.debug2();
+          } else { /// no valid event
             if (event.x.entries.size() != 0) {
               mystats.clusters_x++;
             } else {
@@ -317,15 +345,23 @@ void NMX::processing_thread() {
 
       mystats.tx_bytes += flatbuffer.produce();
 
+      /// Kafka stats update - common to all detectors
+      /// don't increment as producer keeps absolute count
+      mystats.kafka_produce_fails = eventprod.stats.produce_fails;
+      mystats.kafka_ev_errors = eventprod.stats.ev_errors;
+      mystats.kafka_ev_others = eventprod.stats.ev_others;
+      mystats.kafka_dr_errors = eventprod.stats.dr_errors;
+      mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
+
       char *txbuffer;
       auto len = trackfb.serialize(&txbuffer);
       if (len != 0) {
-        XTRACE(PROCESS, DEB, "Sending tracks with size %d\n", len);
+        XTRACE(PROCESS, DEB, "Sending tracks with size %d", len);
         monitorprod.produce(txbuffer, len);
       }
 
       if (!hists.isEmpty()) {
-        XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters \n",
+        XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters ",
                hists.hit_count(), hists.cluster_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
@@ -337,9 +373,9 @@ void NMX::processing_thread() {
 
         // TODO flush all clusters?
 
-        XTRACE(INPUT, ALW, "Stopping input thread.\n");
-        builder_.reset(); /**< @fixme this is a hack to force ~BuilderSRS() call */
-        delete builder_.get(); /**< @fixme see above */
+        XTRACE(INPUT, ALW, "Stopping input thread.");
+        builder_.reset(); /**< \todo this is a hack to force ~BuilderSRS() call */
+        delete builder_.get(); /**< \todo see above */
         return;
       }
 
@@ -359,36 +395,36 @@ void NMX::init_builder() {
                                             nmx_opts.clusterer_y.min_cluster_size);
 
   if (nmx_opts.builder_type == "Hits") {
-    XTRACE(INIT, DEB, "Using BuilderHits\n");
+    XTRACE(INIT, DEB, "Using BuilderHits");
     builder_ = std::make_shared<BuilderHits>(nmx_opts.dump_directory,
                                                   nmx_opts.dump_csv, nmx_opts.dump_h5);
     builder_->clusterer_x = clusx;
     builder_->clusterer_y = clusy;
   } else if (nmx_opts.builder_type == "APV") {
-    XTRACE(INIT, DEB, "Using BuilderAPV\n");
+    XTRACE(INIT, DEB, "Using BuilderAPV");
     builder_ = std::make_shared<BuilderAPV>(nmx_opts.dump_directory,
                                             nmx_opts.dump_csv, nmx_opts.dump_h5);
     builder_->clusterer_x = clusx;
     builder_->clusterer_y = clusy;
   } else if (nmx_opts.builder_type == "VMM2") {
-    XTRACE(INIT, DEB, "Using BuilderVMM2\n");
+    XTRACE(INIT, DEB, "Using BuilderVMM2");
     builder_ = std::make_shared<BuilderVMM2>(
         nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
         nmx_opts.clusterer_x.hit_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
         nmx_opts.clusterer_y.hit_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
         nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
+  } else if (nmx_opts.builder_type == "VMM3") {
+      XTRACE(INIT, DEB, "Using BuilderVMM3");
+      builder_ = std::make_shared<BuilderVMM3>(
+          nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
+          nmx_opts.clusterer_x.hit_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
+          nmx_opts.clusterer_y.hit_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
+          nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else {
-    XTRACE(INIT, ALW, "Unrecognized builder type in config\n");
+    XTRACE(INIT, ALW, "Unrecognized builder type in config");
   }
 }
 
 /** ----------------------------------------------------- */
 
-class NMXFactory : DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    return std::shared_ptr<Detector>(new NMX(settings));
-  }
-};
-
-NMXFactory Factory;
+DetectorFactory<NMX> Factory;

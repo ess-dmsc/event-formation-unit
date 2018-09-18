@@ -47,34 +47,31 @@ create_module(mgmesytec)
 
 # Generates dummy 'CSPEC' data matching the Multi Grid demonstrator
 set(mgcncsgen_SRC
-  mgcncsgen/mgcncsgen.cpp
-  mgcncsgen/DGArgs.cpp
+  generators/mgcncsgen.cpp
+  generators/DGArgs.cpp
   mgcncs/DataParser.cpp
   )
 set(mgcncsgen_INC
-  mgcncsgen/DGArgs.h
+  generators/DGArgs.h
   mgcncs/DataParser.h
   )
 create_executable(mgcncsgen)
 
 #
+set(mgcncsgenfile_INC generators/DGArgs.h )
 set(mgcncsgenfile_SRC
-  mgcncsgen/mgcncsgenfile.cpp
-  mgcncsgen/DGArgs.cpp
-  )
-set(mgcncsgenfile_INC
-  mgcncsgen/DGArgs.h
+  generators/mgcncsgenfile.cpp
+  generators/DGArgs.cpp
   )
 create_executable(mgcncsgenfile)
 
 # Data generator for raw cspec data
+set(mgcncsgenjson_INC generators/JsonArgs.h )
 set(mgcncsgenjson_SRC
-  mgcncsgen/mgcncsgenjson.cpp
-  mgcncsgen/JsonArgs.cpp
+  generators/mgcncsgenjson.cpp
+  generators/JsonArgs.cpp
   ../../dataformats/multigrid/src/RunSpecParse.cpp
   ../../dataformats/multigrid/src/jsoncpp.cpp
-  )
-set(mgcncsgenjson_INC mgcncsgen/JsonArgs.h
   )
 create_executable(mgcncsgenjson)
 

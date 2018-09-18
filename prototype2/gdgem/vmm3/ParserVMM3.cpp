@@ -1,132 +1,152 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
-// #include <arpa/inet.h>
+#include <arpa/inet.h>
 #include <cinttypes>
 #include <common/Trace.h>
 #include <cstdio>
 #include <gdgem/vmm3/ParserVMM3.h>
 #include <string.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 
-  XTRACE(PROCESS, DEB, "data1: 0x%08x, data2: 0x%04x\n", data1, data2);
-  int dataflag = (data2 >> 15) & 0x1;
+	XTRACE(PROCESS, DEB, "data1: 0x%08x, data2: 0x%04x", data1, data2);
+	int dataflag = (data2 >> 15) & 0x1;
 
-  if (dataflag) {
-    /// Data
-    XTRACE(PROCESS, DEB, "SRS Data\n");
-    uint32_t data1r = BitMath::reversebits32(data1);
-    uint16_t data2r = BitMath::reversebits16(data2);
+	if (dataflag) {
+		/// Data
+		XTRACE(PROCESS, DEB, "SRS Data");
 
-    vmd->vmmid = (data1 >> 22) & 0x1F;
-    vmd->tdc = data2r & 0xff;
-    vmd->adc = (data1r >> 10) & 0x3FF;
-    vmd->bcid = BitMath::gray2bin32(((data1r >> 20) & 0xFFF));
-    vmd->chno = (data2r >> 8) & 0x3f;
-    vmd->overThreshold = (data2r >> 1) & 0x01;
-    uint8_t triggerOffset = (data1 >> 27) & 0x1F;
-    vmd->triggerCounter = markers[vmd->vmmid].triggerCount + triggerOffset;
+		vmd->overThreshold = (data2 >> 14) & 0x01;
+		vmd->chno = (data2 >> 8) & 0x3f;
+		vmd->tdc = data2 & 0xff;
 
-    // TODO: Test this logic
-    // Affects only VMM3 but not VMM3a
-    // TDC has reduced resolution due to most significant bit problem of current
-    // sources (like ADC)
-    if (false) {
-      // TODO: use bit shifting instead?
-      uint16_t tdcRebinned = (uint16_t) vmd->tdc / 8;
-      vmd->tdc = tdcRebinned * 8;
-    }
+		vmd->vmmid = (data1 >> 22) & 0x1F;
+		vmd->triggerOffset = (data1 >> 27) & 0x1F;
+		vmd->adc = (data1 >> 12) & 0x3FF;
+		vmd->bcid = BitMath::gray2bin32(data1 & 0xFFF);
 
-    return 1;
-  } else {
-    /// Marker
-    XTRACE(PROCESS, DEB, "SRS Marker\n");
-    uint8_t vmmid = (data2 & 0x1F);
-    markers[vmmid].timeStamp = data1;
-    markers[vmmid].triggerCount = (data2 >> 5) & 0x3FF;
-    XTRACE(PROCESS, DEB, "vmmid: %d\n", vmmid);
-    return 0;
-  }
+		vmd->fecTimeStamp = markers[vmd->vmmid].fecTimeStamp;
+		if (markers[vmd->vmmid].fecTimeStamp > 0) {
+			vmd->hasDataMarker = true;
+		}
+		return 1;
+	} else {
+		/// Marker
+		uint8_t vmmid = (data2 >> 10) & 0x1F;
+		uint32_t timestamp_lower_10bit = data2 & 0x03FF;
+		uint32_t timestamp_upper_32bit = data1;
+
+		uint64_t timestamp_42bit = (timestamp_upper_32bit << 10)
+				+ timestamp_lower_10bit;
+		XTRACE(PROCESS, DEB, "SRS Marker vmmid %d: timestamp lower 10bit %u, timestamp upper 32 bit %u, 42 bit timestamp %" 
+		       PRIu64 "",  vmmid, timestamp_lower_10bit, timestamp_upper_32bit,timestamp_42bit);
+		markers[vmmid].fecTimeStamp = timestamp_42bit;
+
+		//XTRACE(PROCESS, DEB, "vmmid: %d", vmmid);
+		return 0;
+	}
 }
 
 int VMM3SRSData::receive(const char *buffer, int size) {
-  elems = 0;
-  error = 0;
+	memset(&stats, 0, sizeof(stats));
 
-  // if (size < 4) {
-  //   XTRACE(PROCESS, DEB, "Undersize data\n");
-  //   error += size;
-  //   return 0;
-  // }
+	if (size < 4) {
+		XTRACE(PROCESS, DEB, "Undersize data");
+		stats.errors += size;
+		return 0;
+	}
 
-  struct SRSHdr *srsptr = (struct SRSHdr *)buffer;
-  srshdr.fc = ntohl(srsptr->fc);
-  // if (srshdr.fc == 0xfafafafa) {
-  //   XTRACE(PROCESS, DEB, "End of Frame\n");
-  //   return -1;
-  // }
+	struct SRSHdr *srsHeaderPtr = (struct SRSHdr *) buffer;
+	srsHeader.frameCounter = ntohl(srsHeaderPtr->frameCounter);
+	if (srsHeader.frameCounter == 0xfafafafa) {
+		//XTRACE(PROCESS, INF, "End of Frame");
+		stats.badFrames++;
+		//printf("bad frames I: %d\n", stats.bad_frames);
+		stats.errors += size;
+		return -1;
+	}
 
-  if (size < 12) {
-    XTRACE(PROCESS, WAR, "Undersize data\n");
-    error += size;
-    return 0;
-  }
+	if (parserData.fcIsInitialized == true) {
+		///
+		int64_t fcDiff = srsHeader.frameCounter
+				- parserData.nextFrameCounter;
+		if (fcDiff < 0) {
+			fcDiff += 0xffffffff;
+		}
+		if (fcDiff) {
+			//printf("FC: curr: %d, expect: %d, diff: %" PRId64 "\n", srsHeader.frameCounter,
+			//		parserData.nextFrameCounter, fcDiff);
+			stats.lostFrames += fcDiff; /// \todo test
+			parserData.nextFrameCounter = srsHeader.frameCounter + 1;
+		} else {
+			parserData.nextFrameCounter++;
+		}
+	} else {
+		parserData.nextFrameCounter = srsHeader.frameCounter + 1;
+		parserData.fcIsInitialized = true;
+	}
 
-  srshdr.txtime = ntohl(srsptr->txtime);
-  srshdr.dataid = ntohl(srsptr->dataid);
+	if (size < SRSHeaderSize + HitAndMarkerSize) {
+		XTRACE(PROCESS, WAR, "Undersize data");
+		stats.badFrames++;
+		stats.errors += size;
+		return 0;
+	}
 
-  if (srshdr.dataid == 0x56413200) {
-    XTRACE(PROCESS, DEB, "No Data\n");
-    return 0;
-  }
+	srsHeader.dataId = ntohl(srsHeaderPtr->dataId);
+	/// maybe add a protocol error counter here
+	if ((srsHeader.dataId & 0xffffff00) != 0x564d3200) {
+		XTRACE(PROCESS, WAR, "Unknown data");
+		stats.badFrames++;
+		stats.errors += size;
+		return 0;
+	}
 
-  /// maybe add a protocol error counter here
-  if ((srshdr.dataid & 0xffffff00) != 0x564d3200) {
-    XTRACE(PROCESS, WAR, "Unknown data\n");
-    error += size;
-    return 0;
-  }
+	parserData.fecId = srsHeader.dataId & 0xff;
 
-  if (size < 18) {
-    XTRACE(PROCESS, INF, "No room for data in packet, implicit empty?\n");
-    error += size;
-    return 0;
-  }
+	srsHeader.udpTimeStamp = ntohl(srsHeaderPtr->udpTimeStamp);
+	srsHeader.offsetOverflow = ntohl(srsHeaderPtr->offsetOverflow);
 
-  auto datalen = size - 12;
-  if ((datalen % 6) != 0) {
-    XTRACE(PROCESS, WAR, "Invalid data length: %d\n", datalen);
-    error += size;
-    return 0;
-  }
+	auto datalen = size - SRSHeaderSize;
+	if ((datalen % 6) != 0) {
+		XTRACE(PROCESS, WAR, "Invalid data length: %d", datalen);
+		stats.badFrames++;
+		stats.errors += size;
+		return 0;
+	}
 
-  // XTRACE(PROCESS, DEB, "VMM3a Data, VMM Id %d\n", vmmid);
+	// XTRACE(PROCESS, DEB, "VMM3a Data, VMM Id %d", vmmid);
 
-  int dataIndex = 0;
-  int readoutIndex = 0;
-  while (datalen >= 6) {
-    XTRACE(PROCESS, DEB, "readoutIndex: %d, datalen %d, elems: %u\n", readoutIndex, datalen,
-           elems);
-    uint32_t data1 = htonl(*(uint32_t *)&buffer[12 + 6 * readoutIndex]);
-    uint16_t data2 = htons(*(uint16_t *)&buffer[16 + 6 * readoutIndex]);
+	int dataIndex = 0;
+	int readoutIndex = 0;
+	while (datalen >= HitAndMarkerSize) {
+		//XTRACE(PROCESS, DEB, "readoutIndex: %d, datalen %d, elems: %u",
+		//		readoutIndex, datalen, stats.hits);
+		auto Data1Offset = SRSHeaderSize + HitAndMarkerSize * readoutIndex;
+		auto Data2Offset = Data1Offset + Data1Size;
+		uint32_t data1 = htonl(*(uint32_t *) &buffer[Data1Offset]);
+		uint16_t data2 = htons(*(uint16_t *) &buffer[Data2Offset]);
 
-    int res = parse(data1, data2, &data[dataIndex]);
-    if (res == 1) { // This was data
-      elems++;
-      dataIndex++;
-    } else {
-      timet0s++;
-    }
-    readoutIndex++;
+		int res = parse(data1, data2, &data[dataIndex]);
+		if (res == 1) { // This was data
+			stats.hits++;
+			dataIndex++;
+		} else {
+			stats.markers++;
+		}
+		readoutIndex++;
 
-    datalen -= 6;
-    if (elems == max_elements && datalen >= 6) {
-      XTRACE(PROCESS, DEB, "Data overflow, skipping %d bytes\n", datalen);
-      break;
-    }
-  }
-  return elems;
+		datalen -= 6;
+		if (stats.hits == maxHits && datalen > 0) {
+			XTRACE(PROCESS, INF, "Data overflow, skipping %d bytes", datalen);
+			stats.errors += datalen;
+			break;
+		}
+	}
+	stats.goodFrames++;
+
+	return stats.hits;
 }

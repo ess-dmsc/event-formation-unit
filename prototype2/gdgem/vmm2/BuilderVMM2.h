@@ -1,11 +1,14 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Class for creating NMX hits from SRS/VMM data
- */
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Class for creating NMX hits from SRS/VMM data
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
+
 #include <gdgem/nmx/AbstractBuilder.h>
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
@@ -26,9 +29,9 @@ public:
               uint16_t adc_threshold_y, double max_time_gap_y,
               std::string dump_dir, bool dump_csv, bool dump_h5);
 
-  ~BuilderVMM2() { XTRACE(INIT, DEB, "BuilderVMM2 destructor called\n"); }
+  ~BuilderVMM2() { XTRACE(INIT, DEB, "BuilderVMM2 destructor called"); }
 
-  /** @todo Martin document */
+  /// \todo Martin document
   ResultStats process_buffer(char *buf, size_t size) override;
 
 private:

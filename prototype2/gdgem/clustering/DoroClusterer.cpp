@@ -1,3 +1,10 @@
+/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
+
 #include <gdgem/clustering/DoroClusterer.h>
 #include <algorithm>
 
@@ -62,7 +69,7 @@ void DoroClusterer::stash_cluster(Cluster &cluster) {
   if (cluster.entries.size() < pMinClusterSize)
     return;
 
-  DTRACE(DEB, "******** VALID ********\n");
+  DTRACE(DEB, "******** VALID ********");
   clusters.emplace_back(std::move(cluster));
   stats_cluster_count++;
 }

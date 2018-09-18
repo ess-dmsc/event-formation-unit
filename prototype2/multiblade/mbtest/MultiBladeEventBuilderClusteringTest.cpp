@@ -322,8 +322,7 @@ TEST(MBEventBuilder__Test, Clustering) {
     // Create a sub-vector of the test data
     std::vector<uint> datapoint(&data[begin], &data[end]);
     // Wire data-points
-    EXPECT_EQ(datapoint[4],
-              p.addDataPoint(datapoint[0], datapoint[2], datapoint[3]));
+    EXPECT_EQ(datapoint[4], p.addDataPoint(datapoint[0], datapoint[2], datapoint[3]));
     // Strip data-points
     EXPECT_FALSE(p.addDataPoint(datapoint[1], datapoint[2], datapoint[3]));
 
@@ -366,8 +365,7 @@ TEST(MBEventBuilder__Test, Clustering) {
     uint end = begin + 5;
     std::vector<uint> datapoint(&data[begin], &data[end]);
     // Wire data-points
-    EXPECT_EQ(datapoint[4],
-              p.addDataPoint(datapoint[0], datapoint[2], datapoint[3]));
+    EXPECT_EQ(datapoint[4], p.addDataPoint(datapoint[0], datapoint[2], datapoint[3]));
     // Strip data-points
     EXPECT_FALSE(p.addDataPoint(datapoint[1], datapoint[2], datapoint[3]));
 

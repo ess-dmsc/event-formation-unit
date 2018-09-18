@@ -17,6 +17,8 @@ add_executable(batchreader
   ../../prototype2/multigrid/mgcncs/DataParser.cpp
   )
 
+target_link_libraries(batchreader PRIVATE efu_common)
+
 add_executable(cncsread src/cncsread.cpp)
 
 add_executable(genpixids
@@ -25,6 +27,7 @@ add_executable(genpixids
   ../../prototype2/multigrid/mgcncs/ChanConv.cpp
   ../../prototype2/multigrid/mgcncs/CalibrationFile.cpp
   )
+target_link_libraries(genpixids PRIVATE efu_common)
 
 #
 # Install Files
@@ -34,6 +37,13 @@ install(TARGETS cncsread genpixids batchreader DESTINATION tools)
 #
 # Unit tests
 #
+set(RunSpecTest_SRC inc/RunSpecTest.cpp)
+set(RunSpecTest_INC inc/RunSpec.h)
+create_test_executable(RunSpecTest)
+
+set(RunSpecParseTest_SRC src/RunSpecParse.cpp inc/RunSpecParseTest.cpp ../../prototype2/common/DataSave.cpp)
+set(RunSpecParseTest_INC inc/RunSpec.h inc/RunSpecParse.h)
+create_test_executable(RunSpecParseTest)
 
 set(PeakFinderTest_SRC
     src/test/PeakFinderTest.cpp

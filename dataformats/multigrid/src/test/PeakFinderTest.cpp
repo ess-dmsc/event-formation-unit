@@ -20,7 +20,7 @@ TEST_F(PeakFinderTest, Constructor) {
 
 TEST_F(PeakFinderTest, Capped) {
   MESSAGE() << "Expecting no data to be capped\n";
-  PeakFinder f(0, -2, 0); /**< @todo slight hack, consider changing API  */
+  PeakFinder f(0, -2, 0); /**< \todo slight hack, consider changing API  */
   auto peaks = f.findpeaks(testdata);
   ASSERT_EQ(0, f.getcapped());
 
@@ -32,6 +32,14 @@ TEST_F(PeakFinderTest, Capped) {
 
 TEST_F(PeakFinderTest, ValidateFromTestData) {
   PeakFinder f(1, 100, 0);
+  auto peaks = f.findpeaks(testdata);
+  MESSAGE() << "Expecting 128 peaks in test dataset\n";
+  ASSERT_EQ(128, peaks.size());
+  f.printstats("test data statistics");
+}
+
+TEST_F(PeakFinderTest, ValidateFromTestDataAutoThreshold) {
+  PeakFinder f(1, -1, 0);
   auto peaks = f.findpeaks(testdata);
   MESSAGE() << "Expecting 128 peaks in test dataset\n";
   ASSERT_EQ(128, peaks.size());

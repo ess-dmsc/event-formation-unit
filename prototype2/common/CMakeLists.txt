@@ -1,24 +1,29 @@
 #=============================================================================
 # Common functionality for all detector plugins
 #=============================================================================
+
 set(efu_common_SRC
   FBSerializer.cpp
   NewStats.cpp
   Producer.cpp
   DataSave.cpp
+  DetectorModuleRegister.cpp
   )
 set(efu_common_INC
   ../../libs/include/gccintel.h
+  DetectorModuleRegister.h
   Detector.h
   EFUArgs.h
   FBSerializer.h
   NewStats.h
   Producer.h
   Trace.h
+  Log.h
   DataSave.h
   )
 
 find_package(CLI11 REQUIRED)
+find_package(fmt REQUIRED)
 
 add_library(efu_common STATIC
   ${efu_common_SRC}
@@ -32,10 +37,7 @@ endif()
 
 enable_coverage(efu_common)
 
-target_link_libraries(efu_common
-    ${EFU_COMMON_LIBS})
-
-set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} efu_common PARENT_SCOPE)
+target_link_libraries(efu_common PUBLIC ${EFU_COMMON_LIBS} fmt::fmt)
 
 
 #=============================================================================
@@ -61,17 +63,21 @@ set(DataSaveTest_INC
 create_test_executable(DataSaveTest)
 
 set(DetectorTest_SRC
+  DetectorModuleRegister.cpp
   DetectorTest.cpp
   NewStats.cpp)
 set(DetectorTest_INC
+  DetectorModuleRegister.h
   NewStats.h
   Detector.h)
 create_test_executable(DetectorTest)
 
 set(EFUArgsTest_SRC
+  DetectorModuleRegister.cpp
   EFUArgsTest.cpp
   EFUArgs.cpp)
 set(EFUArgsTest_INC
+  DetectorModuleRegister.h
   EFUArgs.h)
 create_test_executable(EFUArgsTest)
 

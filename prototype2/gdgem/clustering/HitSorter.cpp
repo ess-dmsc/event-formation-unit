@@ -1,3 +1,10 @@
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
+
 #include <gdgem/clustering/HitSorter.h>
 #include <algorithm>
 
@@ -37,6 +44,7 @@ void HitSorter::insert(const Readout &readout) {
       pTime.trigger_timestamp_ns(readout.srs_timestamp + readout.bonus_timestamp);
 
   if (requires_analysis(triggerTimestamp_ns)) {
+    XTRACE(PROCESS, DEB, "analysis required");
     analyze();
   }
   old_trigger_timestamp_ns_ = triggerTimestamp_ns;

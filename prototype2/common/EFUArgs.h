@@ -1,15 +1,17 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Command line argument parser for EFU
- */
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Command line argument parser for EFU
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
+
 #include <CLI11.hpp>
 #include <common/Detector.h>
 #include <cstdint>
-#include <multigrid/mgcncs/ChanConv.h>
 #include <string>
 
 struct GraylogSettings {
@@ -24,10 +26,10 @@ struct ThreadCoreAffinitySetting {
 
 class EFUArgs {
 public:
-  enum class Status {EXIT, CONTINUE};
+  enum class Status { EXIT, CONTINUE };
   EFUArgs();
   Status parseFirstPass(const int argc, char *argv[]);
-  
+
   Status parseSecondPass(const int argc, char *argv[]);
 
   void printHelp();
@@ -40,17 +42,22 @@ public:
   std::vector<ThreadCoreAffinitySetting> getThreadCoreAffinity() {
     return ThreadAffinity;
   };
+  
+  int getLogLevel() {return LogMessageLevel;};
+  std::string getLogFileName() {return LogFileName;};
 
   BaseSettings getBaseSettings() { return EFUSettings; };
 
   CLI::App CLIParser{"Event formation unit (efu)"};
 
-  int buflen{9000}; /**< rx buffer length (B) */
+  int buflen{9000}; ///< rx buffer length (B)
 
 private:
   bool parseAffinityStrings(std::vector<std::string> ThreadAffinityStrings);
-  
+  bool parseLogLevel(std::vector<std::string> LogLevelString);
+  int LogMessageLevel{6};
   std::string DetectorName;
+  std::string LogFileName;
 
   std::vector<ThreadCoreAffinitySetting> ThreadAffinity;
   CLI::Option *DetectorOption;

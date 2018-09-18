@@ -34,11 +34,17 @@ public:
   /// Attempt to specify the socket receive and transmit buffer sizes (for performance)
   int setBufferSizes(int sndbuf, int rcvbuf);
 
+  /// Get tx and rx buffer sizes
+  void getBufferSizes(int & sendBuffer, int & receiveBuffer);
+
   /// Print the current values for receive and trasmit buffer sizes
   void printBufferSizes(void);
 
   /// Set a timeout for recv() function rather than wait for ever
   int setRecvTimeout(int seconds, int usecs);
+
+  /// Set socket option (Mac only) for not sending SIGPIPE on transmitting on invalid socket
+  int setNOSIGPIPE();
 
   /// Specify ip address of interface to receive data on and port number to listen on
   void setLocalSocket(const char *ipaddr, int port);
@@ -46,15 +52,22 @@ public:
   /// Specify ip address and port number of remote end
   void setRemoteSocket(const char *ipaddr, int port);
 
+  /// Connect (TCP only) to remote endpoint
+  int connectToRemote();
+
   /// Receive data on socket into buffer with specified length
   int receive(void *receiveBuffer, int bufferSize);
 
   /// Send data in buffer with specified length
   int send(void *dataBuffer, int dataLength);
 
+  /// \brief To check is data can be transmitted or received
+  bool isValidSocket();
+
 private:
-  int socketFileDescriptor{-1};     ///
-  struct sockaddr_in localSockAddr;
+  int SocketFileDescriptor{-1};
+  const char * RemoteIp;
+  int RemotePort;
   struct sockaddr_in remoteSockAddr;
 
   /// wrapper for getsockopt() system call
@@ -81,12 +94,11 @@ public:
   };
 };
 
-class TCPTransmitter {
+class TCPTransmitter : public Socket {
 public:
+  ///
   TCPTransmitter(const char *ip, int port);
-  int senddata(char *buffer, int len);
 
-private:
-  int socketFileDescriptor{-1};
-  sockaddr_in remoteSockAddr;
+  ///
+  int senddata(char *buffer, int len);
 };

@@ -1,10 +1,11 @@
-/** Copyright (C) 2016 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief test data for PeakFinder also used in peakfinder.py
- *  @todo add more test data to check algorithm sanity nd robustness
- */
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+/// test data for PeakFinder also used in peakfinder.py
+/// \todo add more test data to check algorithm sanity and robustness
+///
+//===----------------------------------------------------------------------===//
 
 #include <vector>
 

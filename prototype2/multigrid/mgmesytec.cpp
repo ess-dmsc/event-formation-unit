@@ -91,13 +91,19 @@ private:
     int64_t geometry_errors;
     int64_t rx_events;
     int64_t tx_bytes;
+    // Kafka stats below are common to all detectors
+    int64_t kafka_produce_fails;
+    int64_t kafka_ev_errors;
+    int64_t kafka_ev_others;
+    int64_t kafka_dr_errors;
+    int64_t kafka_dr_noerrors;
   } ALIGN(64) mystats;
 };
 
 CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.setPrefix("efu.mgmesytec");
 
-  XTRACE(INIT, ALW, "Adding stats\n");
+  XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
   Stats.create("rx_packets",            mystats.rx_packets);
   Stats.create("rx_bytes",              mystats.rx_bytes);
@@ -108,6 +114,12 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.create("geometry_errors",       mystats.geometry_errors);
   Stats.create("events",                mystats.rx_events);
   Stats.create("tx_bytes",              mystats.tx_bytes);
+  /// \todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { CSPEC::mainThread(); };
@@ -124,9 +136,9 @@ void CSPEC::mainThread() {
   cspecdata.setBufferSizes(EFUSettings.DetectorTxBufferSize, EFUSettings.DetectorRxBufferSize);
   cspecdata.printBufferSizes();
   cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
-  Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
+  Producer eventprod(EFUSettings.KafkaBroker, "C-SPEC_detector");
   Producer monitorprod(EFUSettings.KafkaBroker, "C-SPEC_monitor");
-  FBSerializer flatbuffer(kafka_buffer_size, EventProducer);
+  FBSerializer flatbuffer(kafka_buffer_size, eventprod);
   ReadoutSerializer readouts(readout_entries, monitorprod);
   HistSerializer histfb;
   NMXHists hists;
@@ -143,7 +155,7 @@ void CSPEC::mainThread() {
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += ReadSize;
-      XTRACE(INPUT, DEB, "read size: %u\n", ReadSize);
+      XTRACE(INPUT, DEB, "read size: %u", ReadSize);
 
       auto res = mesytecdata.parse(buffer, ReadSize, hists, flatbuffer, readouts);
       if (res != MesytecData::error::OK) {
@@ -162,14 +174,22 @@ void CSPEC::mainThread() {
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
       mystats.tx_bytes += flatbuffer.produce();
 
+      /// Kafka stats update - common to all detectors
+      /// don't increment as producer keeps absolute count
+      mystats.kafka_produce_fails = eventprod.stats.produce_fails;
+      mystats.kafka_ev_errors = eventprod.stats.ev_errors;
+      mystats.kafka_ev_others = eventprod.stats.ev_others;
+      mystats.kafka_dr_errors = eventprod.stats.dr_errors;
+      mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
+
       auto entries = readouts.getNumEntries();
       if (entries > 0) {
-        XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts\n", entries);
+        XTRACE(PROCESS, INF, "Flushing readout data for %zu readouts", entries);
         //readouts.produce(); // Periodically produce of readouts
       }
 
       if (!hists.isEmpty()) {
-        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts\n", hists.hit_count());
+        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts", hists.hit_count());
         char *txbuffer;
         auto len = histfb.serialize(hists, &txbuffer);
         monitorprod.produce(txbuffer, len);
@@ -181,7 +201,7 @@ void CSPEC::mainThread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping processing thread.\n");
+      XTRACE(INPUT, ALW, "Stopping processing thread.");
       return;
     }
   }
@@ -189,11 +209,4 @@ void CSPEC::mainThread() {
 
 /** ----------------------------------------------------- */
 
-class CSPECFactory : public DetectorFactory {
-public:
-  std::shared_ptr<Detector> create(BaseSettings settings) {
-    return std::shared_ptr<Detector>(new CSPEC(settings));
-  }
-};
-
-CSPECFactory Factory;
+DetectorFactory<CSPEC> Factory;

@@ -2,11 +2,11 @@
 
 /** @file
  *
- *  @brief Unit tests.
+ *  \brief Unit tests.
  */
 
-#include <gtest/gtest.h>
 #include "../PeakFinder.h"
+#include <gtest/gtest.h>
 
 TEST(PeakFinderTest, GetMaxValue) {
   std::uint16_t NormalValue = 500;
@@ -26,7 +26,7 @@ TEST(PeakFinderTest, GetMinValue) {
   std::uint16_t MinValue = 5;
   TestData[MinLoc] = MinValue;
   auto Results = FindPeak(TestData);
-  
+
   EXPECT_EQ(NormalValue, Results.Max);
   EXPECT_EQ(0, Results.MaxLocation);
 }
@@ -37,4 +37,3 @@ TEST(PeakFinderTest, GetMeanValue) {
   auto Results = FindPeak(TestData);
   EXPECT_EQ(NormalValue, Results.Mean);
 }
-

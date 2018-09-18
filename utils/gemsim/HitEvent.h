@@ -1,10 +1,11 @@
-/** Copyright (C) 2018 European Spallation Source ERIC */
-
-/** @file
- *
- *  @brief Derived class for Hit Events
- */
-
+/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Derived class for Hit Events
+///
+//===----------------------------------------------------------------------===//
 
 #include <Event.h>
 #include <ReadoutEvent.h>

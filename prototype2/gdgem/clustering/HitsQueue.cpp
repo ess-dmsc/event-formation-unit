@@ -1,3 +1,10 @@
+/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+//===----------------------------------------------------------------------===//
+
 #include <gdgem/clustering/HitsQueue.h>
 #include <algorithm>
 
