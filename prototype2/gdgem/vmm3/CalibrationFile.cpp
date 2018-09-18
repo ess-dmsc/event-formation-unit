@@ -20,7 +20,11 @@ using json = nlohmann::json;
 
 /// \brief clear the calibration array
 CalibrationFile::CalibrationFile() {
-  auto NumberEntries = sizeof(Calibrations) / sizeof(Calibration);
+  constexpr size_t NumberEntries = (size_t)(sizeof(Calibrations) / sizeof(Calibration));
+
+  static_assert(sizeof(Calibration) == 8, "struct packing issue");
+  static_assert(NumberEntries == MAX_FEC * MAX_VMM * MAX_CH, "calibration table size mismatch");
+
   for (size_t i = 0; i < NumberEntries; i++) {
     ((Calibration *)Calibrations)[i] = NoCorr;
   }
