@@ -46,15 +46,10 @@ public:
 
   const char *detectorname();
 
-<<<<<<< HEAD
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 100;
   static const int eth_buffer_size = 10000;
-=======
-  /** \todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 1000;
-  static const int eth_buffer_size = 1600;
->>>>>>> master
+
   static const int kafka_buffer_size = 1000000;
 
 private:
