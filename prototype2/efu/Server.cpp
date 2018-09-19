@@ -21,47 +21,24 @@
 #include <unistd.h>
 #include <signal.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
-
-#define UNUSED __attribute__((unused))
-
-/// \brief Use MSG_SIGNAL on Linuxes
-#ifdef MSG_NOSIGNAL
-#define SEND_FLAGS MSG_NOSIGNAL
-#else
-#define SEND_FLAGS 0
-#endif
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 Server::Server(int port, Parser &parse) : port_(port), parser(parse) {
-
-  signal(SIGPIPE, SIG_IGN);
-
   for (auto &client : clientfd) {
     client = -1;
   }
   assert(clientfd[0] == -1);
-  FD_ZERO(&fd_master);
-  FD_ZERO(&fd_working);
-  std::fill_n((char *)&input, sizeof(input), 0);
-  input.data = input.buffer;
-  std::fill_n((char *)&output, sizeof(output), 0);
-  output.data = output.buffer;
-  server_open();
+  assert(clientfd[SERVER_MAX_CLIENTS -1] == -1);
+
+  timeout.tv_sec = 0;
+  timeout.tv_usec = 1000;
+
+  serverOpen();
 }
 
-void Server::server_close(int socket) {
-  LOG(Sev::Debug, "Closing socket fd {}", socket);
-  close(socket);
-  FD_CLR(socket, &fd_master);
-  auto client = std::find(clientfd.begin(), clientfd.end(), socket);
-  assert(client != clientfd.end());
-  *client = -1;
-}
-
-/** \brief Setup socket parameters
- */
-void Server::server_open() {
+/// \brief Setup socket parameters
+void Server::serverOpen() {
   LOG(Sev::Info, "Server::open() called on port {}", port_);
 
   struct sockaddr_in socket_address;
@@ -74,8 +51,8 @@ void Server::server_open() {
   ret = setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &option, sizeof(option));
   assert(ret >= 0);
 
-  ret = ioctl(serverfd, FIONBIO, &option);
-  assert(ret >= 0);
+  // ret = ioctl(serverfd, FIONBIO, &option);
+  // assert(ret >= 0);
 
   std::fill_n((char *)&socket_address, sizeof(socket_address), 0);
   socket_address.sin_family = AF_INET;
@@ -86,91 +63,104 @@ void Server::server_open() {
              sizeof(socket_address));
   assert(ret >= 0);
 
-  ret = listen(serverfd, SERVER_MAX_CLIENTS);
+  ret = listen(serverfd, SERVER_MAX_BACKLOG);
   assert(ret >= 0);
-
-  FD_SET(serverfd, &fd_master);
 }
 
-int Server::server_send(int socketfd) {
+void Server::serverClose(int socket) {
+  LOG(Sev::Debug, "Closing socket fd {}", socket);
+
+  auto client = std::find(clientfd.begin(), clientfd.end(), socket);
+  assert(client != clientfd.end());
+  *client = -1;
+
+  close(socket);
+}
+
+
+
+int Server::serverSend(int socketfd) {
   LOG(Sev::Debug, "server_send() - socket {} - {} bytes", socketfd, output.bytes);
   if (send(socketfd, output.buffer, output.bytes, SEND_FLAGS) < 0) {
     LOG(Sev::Warning, "Error sending command reply");
     return -1;
   }
-  output.bytes = 0;
-  output.data = output.buffer;
   return 0;
 }
 
 /** \brief Called in main program loop
  */
-void Server::server_poll() {
-
+void Server::serverPoll() {
   // Prepare working file desc.
-  static_assert(sizeof(fd_master) == sizeof(fd_working), "fd_ struct mismatch");
-  memcpy(&fd_working, &fd_master, sizeof(fd_master));
-  struct timeval timeout;
-  timeout.tv_sec = 0;
-  timeout.tv_usec = 1000;
+  fd_set fds_working;
+  FD_ZERO(&fds_working);
+  FD_SET(serverfd, &fds_working);
 
-  auto max_client = std::max_element(clientfd.begin(), clientfd.end());
-  auto max_socket = std::max(serverfd, *max_client) + 1;
+  int max_sd = serverfd;
 
-  auto ready = select(max_socket, &fd_working, NULL, NULL, &timeout);
-  if (ready < 0) {
-    return;
+  for (auto sd : clientfd) {
+    if (sd != -1) {
+      FD_SET(sd, &fds_working);
+      if (sd > max_sd) {
+        max_sd = sd;
+      }
+    }
+  }
+
+  if (select(max_sd + 1, &fds_working, NULL, NULL, &timeout) <= 0) {
+    return; // -1 is error 0 is timeout, carry on
   }
 
   // Server has activity
-  if (ready > 0 && FD_ISSET(serverfd, &fd_working)) {
+  if (FD_ISSET(serverfd, &fds_working)) {
+    auto newsock = accept(serverfd, NULL, NULL);
+
     auto freefd = std::find(clientfd.begin(), clientfd.end(), -1);
     if (freefd == clientfd.end()) {
       LOG(Sev::Warning, "Max clients connected, can't accept()");
-      auto tmpsock = accept(serverfd, NULL, NULL);
-      close(tmpsock);
+      close(newsock);
     } else {
-      LOG(Sev::Info, "Accept new connection");
-      *freefd = accept(serverfd, NULL, NULL);
+      LOG(Sev::Info, "Accept new connection, socket {}", newsock);
+      *freefd = newsock;
       if (*freefd < 0 && errno != EWOULDBLOCK) {
         assert(1 == 0);
       }
-      FD_SET(*freefd, &fd_master);
-      LOG(Sev::Debug, "New cilent socket: {}, ready: {}", *freefd, ready);
+      LOG(Sev::Debug, "New cilent socket: {}", *freefd);
       #ifdef SYSTEM_NAME_DARWIN
-          LOG(Sev::Info, "setsockopt() - MacOS specific");
-          int on = 1;
-          int ret = setsockopt(*freefd, SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof(on));
-          if (ret != 0) {
-              LOG(Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
-              perror("setsockopt():");
-          }
-          assert(ret ==0);
+        LOG(Sev::Info, "setsockopt() - MacOS specific");
+        int on = 1;
+        int ret = setsockopt(*freefd, SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof(on));
+        if (ret != 0) {
+            LOG(Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
+            perror("setsockopt():");
+        }
+        assert(ret == 0);
       #endif
     }
-    ready--;
   }
 
   // Chek if some client has activity
-  for (auto cli : clientfd) {
-    if (ready > 0 && FD_ISSET(cli, &fd_working)) {
-      auto bytes = recv(cli, input.data + input.bytes,
-                        SERVER_BUFFER_SIZE - input.bytes, 0);
+  for (auto sd : clientfd) {
+    if (sd == -1) {
+      break;
+    }
+    //printf("Checking for activity on socket %d\n", sd);
+    if (FD_ISSET(sd, &fds_working)) {
+      auto bytes = recv(sd, input.buffer, SERVER_BUFFER_SIZE, 0);
 
-      if ((bytes < 0) && (errno != EWOULDBLOCK || errno != EAGAIN)) {
+      if ((bytes < 0) && (errno != EWOULDBLOCK) && (errno != EAGAIN)) {
         LOG(Sev::Warning, "recv() failed, errno: {}", errno);
         perror("recv() failed");
-        server_close(cli);
+        serverClose(sd);
         return;
       }
       if (bytes == 0) {
-        LOG(Sev::Info, "Peer closed socket {}", cli);
-        server_close(cli);
+        LOG(Sev::Info, "Peer closed socket {}", sd);
+        serverClose(sd);
         return;
       }
-      LOG(Sev::Debug, "Received {} bytes on socket {}", bytes, cli);
-      input.bytes += bytes;
-
+      LOG(Sev::Debug, "Received {} bytes on socket {}", input.bytes, sd);
+      input.bytes = bytes;
       assert(input.bytes <= SERVER_BUFFER_SIZE);
       LOG(Sev::Debug, "input.bytes: {}", input.bytes);
 
@@ -179,14 +169,11 @@ void Server::server_poll() {
                        &output.bytes) < 0) {
         LOG(Sev::Warning, "Parse error");
       }
-      input.bytes = 0;
-      input.data = input.buffer;
-      if (server_send(cli) < 0) {
+      if (serverSend(sd) < 0) {
         LOG(Sev::Warning, "server_send() failed");
-        server_close(cli);
+        serverClose(sd);
         return;
       }
-      ready--;
     }
   }
 }

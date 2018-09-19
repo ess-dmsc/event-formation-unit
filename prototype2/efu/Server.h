@@ -17,9 +17,19 @@
 #include <sys/select.h>
 #include <sys/types.h>
 
+#define UNUSED __attribute__((unused))
+
+/// \brief Use MSG_SIGNAL on Linuxes
+#ifdef MSG_NOSIGNAL
+#define SEND_FLAGS MSG_NOSIGNAL
+#else
+#define SEND_FLAGS 0
+#endif
+
 /** \todo make this work with public static unsigned int */
 #define SERVER_BUFFER_SIZE 9000U
 #define SERVER_MAX_CLIENTS 16
+#define SERVER_MAX_BACKLOG 3
 
 static_assert(SERVER_MAX_CLIENTS <= FD_SETSIZE, "Too many clients");
 
@@ -31,23 +41,22 @@ public:
   Server(int port, Parser &parse);
 
   /// \brief Setup socket parameters
-  void server_open();
+  void serverOpen();
 
   /// \brief Teardown socket
   /// \param socketfd socket file descriptor
-  void server_close(int socketfd);
+  void serverClose(int socketfd);
 
   /// \brief Called in main program loop
-  void server_poll();
+  void serverPoll();
 
   /// \brief Send reply to Client
   /// \param socketfd socket file descriptor
-  int server_send(int socketfd);
+  int serverSend(int socketfd);
 
 private:
   typedef struct {
     uint8_t buffer[SERVER_BUFFER_SIZE + 1];
-    uint8_t *data;
     uint32_t bytes;
   } socket_buffer_t;
 
@@ -57,7 +66,8 @@ private:
   int port_{0};
   int serverfd{-1};
   std::array<int, SERVER_MAX_CLIENTS> clientfd;
-  fd_set fd_master, fd_working;
+
+  struct timeval timeout;
 
   Parser &parser;
 };

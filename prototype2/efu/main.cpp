@@ -67,16 +67,16 @@ int main(int argc, char *argv[]) {
     }
     // Set-up logging before we start doing important stuff
     Log::RemoveAllHandlers();
-    
+
     auto CI = new ConsoleInterface();
     CI->SetMessageStringCreatorFunction(ConsoleFormatter);
     Log::AddLogHandler(CI);
-    
+
     Log::SetMinimumSeverity(Severity(efu_args.getLogLevel()));
     if (efu_args.getLogFileName().size() > 0) {
       Log::AddLogHandler(new FileInterface(efu_args.getLogFileName()));
     }
-    
+
     loader.loadPlugin(efu_args.getDetectorName());
     if (not loader.IsOk()) {
       efu_args.printHelp();
@@ -167,16 +167,16 @@ int main(int argc, char *argv[]) {
       livestats.now();
     }
 
-    cmdAPI.server_poll();
+    cmdAPI.serverPoll();
     ExitHandler::Exit DoExit = ExitHandler::HandleLastSignal();
     if (DoExit == ExitHandler::Exit::Exit) {
       keep_running = 0;
     }
     usleep(500);
   }
-  
+
   detector.reset();
-  
+
   EmptyGraylogMessageQueue();
   return 0;
 }
