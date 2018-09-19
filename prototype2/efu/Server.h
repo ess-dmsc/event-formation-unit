@@ -17,8 +17,6 @@
 #include <sys/select.h>
 #include <sys/types.h>
 
-#define UNUSED __attribute__((unused))
-
 /// \brief Use MSG_SIGNAL on Linuxes
 #ifdef MSG_NOSIGNAL
 #define SEND_FLAGS MSG_NOSIGNAL

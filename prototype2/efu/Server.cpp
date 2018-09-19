@@ -42,7 +42,7 @@ void Server::serverOpen() {
   LOG(Sev::Info, "Server::open() called on port {}", port_);
 
   struct sockaddr_in socket_address;
-  UNUSED int ret;
+  int __attribute__((unused)) ret;
   int option = 1; // any nonzero value will do
 
   serverfd = socket(AF_INET, SOCK_STREAM, 0);
