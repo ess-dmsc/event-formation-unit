@@ -25,8 +25,8 @@ public:
   struct __attribute__ ((__packed__)) ListElement422
   {
       uint32_t localTime;
-      uint16_t adcValue;
       uint16_t channel;
+      uint16_t adcValue;
   };
 
   DataParser() {};

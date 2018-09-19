@@ -236,10 +236,11 @@ void MBCAEN::processing_thread() {
           mystats.rx_error_bytes += mbdata.stats.error_bytes;
           continue;
         }
-        XTRACE(DATA, DEB, "Received %d Readouts\n", mbdata.mbheader->numElements);
+
         mystats.rx_readouts += mbdata.mbheader->numElements;
 
         auto digitizerId = mbdata.mbheader->digitizerID;
+        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d\n", mbdata.mbheader->numElements, digitizerId);
         for (uint i = 0; i < mbdata.mbheader->numElements; i++) {
 
           auto dp = mbdata.mbdata[i];
@@ -257,6 +258,7 @@ void MBCAEN::processing_thread() {
           auto cassette = mb16.cassette(digitizerId);
           if (cassette < 0) {
             XTRACE(DATA, WAR, "Invalid digitizerId: %d\n", digitizerId);
+
             break;
           }
 

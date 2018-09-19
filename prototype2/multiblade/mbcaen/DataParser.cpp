@@ -27,7 +27,7 @@ int DataParser::parse(const char *buffer, unsigned int size) {
 
   auto headerlen = sizeof(struct Header);
   if (size < headerlen) {
-    XTRACE(DATA, WAR, "Invalid data size: received %d, min. expected: %lu\n", size, headerlen);
+    XTRACE(DATA, WAR, "Invalid data size: received %d, min. expected: %lu", size, headerlen);
     stats.error_bytes += size;
     return -error::ESIZE;
   }
@@ -37,7 +37,7 @@ int DataParser::parse(const char *buffer, unsigned int size) {
   auto expectedsize = sizeof(struct Header) + mbheader->numElements * sizeof(struct ListElement422);
 
   if (size != expectedsize) {
-    XTRACE(DATA, WAR, "Data length mismatch: received %d, expected %lu\n", size, expectedsize);
+    XTRACE(DATA, WAR, "Data length mismatch: received %d, expected %lu", size, expectedsize);
     stats.error_bytes += size;
     return -error::ESIZE;
   }
