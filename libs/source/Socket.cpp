@@ -22,7 +22,7 @@ Socket::Socket(Socket::type stype) {
   auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
 
   if ((SocketFileDescriptor = socket(AF_INET, type, proto)) == -1) {
-    LOG(Sev::Error, "socket() failed");
+    LOG(IPC, Sev::Error, "socket() failed");
     exit(1);
   }
 }
@@ -53,8 +53,8 @@ void Socket::getBufferSizes(int & sendBuffer, int & receiveBuffer) {
 }
 
 void Socket::printBufferSizes(void) {
-  LOG(Sev::Info, "Socket receive buffer size: {}", getSockOpt(SO_RCVBUF));
-  LOG(Sev::Info, "Socket send buffer size: {}", getSockOpt(SO_SNDBUF));
+  LOG(IPC, Sev::Info, "Socket receive buffer size: {}", getSockOpt(SO_RCVBUF));
+  LOG(IPC, Sev::Info, "Socket send buffer size: {}", getSockOpt(SO_SNDBUF));
 }
 
 int Socket::setRecvTimeout(int seconds, int usecs) {
@@ -66,11 +66,11 @@ int Socket::setRecvTimeout(int seconds, int usecs) {
 
 int Socket::setNOSIGPIPE() {
 #ifdef SYSTEM_NAME_DARWIN
-    LOG(Sev::Info, "setsockopt() - MacOS specific");
+    LOG(IPC, Sev::Info, "setsockopt() - MacOS specific");
     int on = 1;
     int ret = setSockOpt(SO_NOSIGPIPE, &on, sizeof(on));
     if (ret != 0) {
-        LOG(Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
+        LOG(IPC, Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
         perror("setsockopt():");
     }
     assert(ret ==0);
@@ -130,7 +130,7 @@ int Socket::connectToRemote() {
   assert(ret != 0);
   ret = connect(SocketFileDescriptor, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
   if (ret < 0) {
-    LOG(Sev::Error, "connect() to {}:{} failed", RemoteIp, RemotePort);
+    LOG(IPC, Sev::Error, "connect() to {}:{} failed", RemoteIp, RemotePort);
     SocketFileDescriptor = -1;
   }
   return ret;
@@ -199,7 +199,7 @@ int TCPTransmitter::senddata(char *buffer, int len) {
   }
 
   if (len <= 0) {
-    LOG(Sev::Warning, "TCPClient::senddata() no data specified");
+    LOG(IPC, Sev::Warning, "TCPClient::senddata() no data specified");
     return 0;
   }
 

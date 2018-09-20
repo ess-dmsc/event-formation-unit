@@ -109,28 +109,28 @@ int main(int argc, char *argv[]) {
 
   ExitHandler::InitExitHandler();
 
-  LOG(Sev::Info, "Starting Event Formation Unit");
-  LOG(Sev::Info, "Event Formation Unit version: {}", efu_version());
-  LOG(Sev::Info, "Event Formation Unit build: {}", efu_buildstr());
+  LOG(MAIN, Sev::Info, "Starting Event Formation Unit");
+  LOG(MAIN, Sev::Info, "Event Formation Unit version: {}", efu_version());
+  LOG(MAIN, Sev::Info, "Event Formation Unit build: {}", efu_buildstr());
 
   if (hwcheck.checkMTU(hwcheck.defaultIgnoredInterfaces) == false) {
-    LOG(Sev::Error, "MTU checks failed, for a quick fix, try");
-    LOG(Sev::Error, "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)");
-    LOG(Sev::Error, "exiting...");
+    LOG(MAIN, Sev::Error, "MTU checks failed, for a quick fix, try");
+    LOG(MAIN, Sev::Error, "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)");
+    LOG(MAIN, Sev::Error, "exiting...");
     detector.reset(); //De-allocate detector before we unload detector module
     EmptyGraylogMessageQueue();
     return -1;
   }
 
   if (DetectorSettings.StopAfterSec == 0) {
-    LOG(Sev::Info, "Event Formation Unit Exit (Immediate)");
+    LOG(MAIN, Sev::Info, "Event Formation Unit Exit (Immediate)");
     detector.reset(); //De-allocate detector before we unload detector module
     EmptyGraylogMessageQueue();
     return 0;
   }
 
 
-  LOG(Sev::Info, "Launching EFU as Instrument {}", DetectorName);
+  LOG(MAIN, Sev::Info, "Launching EFU as Instrument {}", DetectorName);
 
   Launcher launcher(AffinitySettings);
 
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
     //Do not allow immediate exits
     if (RunTimer.timeus() >= (uint64_t)ONE_SECOND_US / 10) {
       if (keep_running == 0) {
-        LOG(Sev::Info, "Application stop, Exiting...");
+        LOG(MAIN, Sev::Info, "Application stop, Exiting...");
         detector->stopThreads();
         sleep(1);
         break;
@@ -156,7 +156,7 @@ int main(int argc, char *argv[]) {
 
     if (RunTimer.timeus() >=
         DetectorSettings.StopAfterSec * (uint64_t)ONE_SECOND_US) {
-      LOG(Sev::Info, "Application timeout, Exiting...");
+      LOG(MAIN, Sev::Info, "Application timeout, Exiting...");
       detector->stopThreads();
       sleep(1);
       break;

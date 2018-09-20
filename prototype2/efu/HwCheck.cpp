@@ -30,7 +30,7 @@ bool HwCheck::checkMTU(std::vector<std::string> ignore) {
   int n;
 
   if (getifaddrs(&ifaddr) == -1) {
-    LOG(Sev::Error, "error getifaddrs()");
+    LOG(INIT, Sev::Error, "error getifaddrs()");
      return false;
   }
 
@@ -52,7 +52,7 @@ bool HwCheck::checkMTU(std::vector<std::string> ignore) {
     }
 
     if (tobeignored) {
-      LOG(Sev::Debug, "no checking of MTU for {}", ifa->ifa_name);
+      LOG(INIT, Sev::Debug, "no checking of MTU for {}", ifa->ifa_name);
     } else {
       if (!checkMTU(ifa->ifa_name)) {
         freeifaddrs(ifaddr);
@@ -70,17 +70,17 @@ bool HwCheck::checkMTU(const char * interface) {
   struct ifreq ifr;
 
   if ((s = socket(af, SOCK_DGRAM, 0)) < 0) {
-    LOG(Sev::Error, "error: socket");
+    LOG(INIT, Sev::Error, "error: socket");
   }
 
   ifr.ifr_addr.sa_family = af;
   strcpy(ifr.ifr_name, interface);
   if (ioctl(s, SIOCGIFMTU, (caddr_t)&ifr) < 0) {
-    LOG(Sev::Warning, "warn: ioctl (get mtu): {}", ifr.ifr_name);
+    LOG(INIT, Sev::Warning, "warn: ioctl (get mtu): {}", ifr.ifr_name);
     return false;
   }
 
-  LOG(Sev::Info, "MTU of {} is {}", interface, ifr.ifr_mtu);
+  LOG(INIT, Sev::Info, "MTU of {} is {}", interface, ifr.ifr_mtu);
   close(s);
 
   return ifr.ifr_mtu >= minimumMtu;

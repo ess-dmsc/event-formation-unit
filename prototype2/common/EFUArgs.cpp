@@ -36,12 +36,12 @@ EFUArgs::EFUArgs() {
                     return parseAffinityStrings(Input);
                   }, "Thread to core affinity. Ex: \"-c input_t:4\"")
       ->group("EFU Options");
-  
+
   CLIParser.add_option("-l,--log_level", [this](std::vector<std::string> Input) {
     return parseLogLevel(Input);
   }, "Set log message level. Set to 1 - 7 or one of \n                              `Critical`, `Error`, `Warning`, `Notice`, `Info`,\n                              or `Debug`. Ex: \"-l Notice\"")
   ->group("EFU Options")->set_default_val("Info");
-  
+
   CLIParser.add_option("--log_file", LogFileName, "Write log messages to file.")
   ->group("EFU Options");
 
@@ -160,24 +160,24 @@ bool EFUArgs::parseLogLevel(std::vector<std::string> LogLevelString) {
 
 void EFUArgs::printSettings() {
   // clang-format off
-  LOG(Sev::Info, "Starting event processing pipeline2 with main properties:");
-  LOG(Sev::Info, "  Detector:                 {}",    DetectorName);
-  LOG(Sev::Info, "  Rx UDP Socket:            {}:{}",
+  LOG(INIT, Sev::Info, "Starting event processing pipeline2 with main properties:");
+  LOG(INIT, Sev::Info, "  Detector:                 {}",    DetectorName);
+  LOG(INIT, Sev::Info, "  Rx UDP Socket:            {}:{}",
          EFUSettings.DetectorAddress, EFUSettings.DetectorPort);
-  LOG(Sev::Info, "  Minimum required MTU      {}", EFUSettings.MinimumMTU);
-  LOG(Sev::Info, "  Kafka broker:             {}", EFUSettings.KafkaBroker);
-  LOG(Sev::Info, "  Log IP:                   {}", GraylogConfig.address);
-  LOG(Sev::Info, "  Graphite TCP socket:      {}:{}",
+  LOG(INIT, Sev::Info, "  Minimum required MTU      {}", EFUSettings.MinimumMTU);
+  LOG(INIT, Sev::Info, "  Kafka broker:             {}", EFUSettings.KafkaBroker);
+  LOG(INIT, Sev::Info, "  Log IP:                   {}", GraylogConfig.address);
+  LOG(INIT, Sev::Info, "  Graphite TCP socket:      {}:{}",
         EFUSettings.GraphiteAddress, EFUSettings.GraphitePort);
-  LOG(Sev::Info, "  CLI TCP Socket:           localhost:{}", EFUSettings.CommandServerPort);
+  LOG(INIT, Sev::Info, "  CLI TCP Socket:           localhost:{}", EFUSettings.CommandServerPort);
 
   if (EFUSettings.StopAfterSec == 0xffffffffU) {
-    LOG(Sev::Info, "  Stopafter:                never");
+    LOG(INIT, Sev::Info, "  Stopafter:                never");
   } else {
-    LOG(Sev::Info, "  Stopafter:                {}s", EFUSettings.StopAfterSec);
+    LOG(INIT, Sev::Info, "  Stopafter:                {}s", EFUSettings.StopAfterSec);
   }
 
-  LOG(Sev::Info, "<<< NOT ALL CONFIGURABLE SETTINGS MAY BE DISPLAYED >>>");
+  LOG(INIT, Sev::Info, "<<< NOT ALL CONFIGURABLE SETTINGS MAY BE DISPLAYED >>>");
   // clang-format on
 }
 
@@ -214,12 +214,12 @@ EFUArgs::Status EFUArgs::parseSecondPass(const int argc, char *argv[]) {
   if (*WriteConfigOption) {
     std::ofstream ConfigFile(ConfigFileName, std::ios::binary);
     if (not ConfigFile.is_open()) {
-      LOG(Sev::Error, "Failed to open config file for writing.");
+      LOG(INIT, Sev::Error, "Failed to open config file for writing.");
       return Status::EXIT;
     }
     ConfigFile << CLIParser.config_to_str(true, "", true);
     ConfigFile.close();
-    LOG(Sev::Info, "Config file created, now exiting.");
+    LOG(INIT, Sev::Info, "Config file created, now exiting.");
     return Status::EXIT;
   }
   return Status::CONTINUE;

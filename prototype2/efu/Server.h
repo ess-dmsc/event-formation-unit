@@ -53,19 +53,21 @@ public:
   int serverSend(int socketfd);
 
 private:
-  typedef struct {
+  struct {
     uint8_t buffer[SERVER_BUFFER_SIZE + 1];
     uint32_t bytes;
-  } socket_buffer_t;
+  } IBuffer, OBuffer; /// receive and transmit buffers
 
-  socket_buffer_t input;
-  socket_buffer_t output;
+  //SocketBuffer IBuffer; /// receive buffer
+  //SocketBuffer OBuffer; /// transmit buffer
 
-  int port_{0};
-  int serverfd{-1};
-  std::array<int, SERVER_MAX_CLIENTS> clientfd;
+  int Port{0}; /// server tcp port
+  int ServerFd{-1}; /// server file descriptor
+  std::array<int, SERVER_MAX_CLIENTS> ClientFd;
 
-  struct timeval timeout;
+  struct timeval Timeout; /// to set select() timeout
 
-  Parser &parser;
+  int SocketOptionOn{1}; // any nonzero value will do
+
+  Parser &Parser;
 };
