@@ -23,7 +23,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-Server::Server(int port, class Parser &parse) : Port(port), Parser(parse) {
+Server::Server(int port, Parser &parse) : Port(port), CommandParser(parse) {
   for (auto &client : ClientFd) {
     client = -1;
   }
@@ -154,7 +154,7 @@ void Server::serverPoll() {
       assert(IBuffer.bytes <= SERVER_BUFFER_SIZE);
 
       // Parse and generate reply
-      if (Parser.parse((char *)IBuffer.buffer, IBuffer.bytes, (char *)OBuffer.buffer,
+      if (CommandParser.parse((char *)IBuffer.buffer, IBuffer.bytes, (char *)OBuffer.buffer,
                        &OBuffer.bytes) < 0) {
         LOG(IPC, Sev::Warning, "Parse error");
       }

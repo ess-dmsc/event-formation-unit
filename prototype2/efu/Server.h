@@ -14,6 +14,7 @@
 #include <array>
 #include <cassert>
 #include <common/EFUArgs.h>
+#include <efu/Parser.h>
 #include <sys/select.h>
 #include <sys/types.h>
 
@@ -69,5 +70,5 @@ private:
 
   int SocketOptionOn{1}; // any nonzero value will do
 
-  Parser &Parser;
+  Parser &CommandParser;
 };
