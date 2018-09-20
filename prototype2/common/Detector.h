@@ -23,7 +23,7 @@
 // clang-format off
 struct BaseSettings {
   std::string   DetectorPluginName   = {""};
-  std::string   DetectorAddress      = {""};
+  std::string   DetectorAddress      = {"0.0.0.0"};
   std::uint16_t DetectorPort         = {9000};
   std::uint16_t CommandServerPort    = {8888};
   std::int32_t  ReceiveMaxBytes      = {9000}; // Jumbo frame support
