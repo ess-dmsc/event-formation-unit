@@ -25,19 +25,15 @@ enum class Sev : int {
   Notice = 5,
   Info = 6,
   Debug = 7,
-  };
+};
 
-  inline int SevToInt(Sev Level) { // Force the use of the correct type
-    return static_cast<int>(Level);
-  }
+inline int SevToInt(Sev Level) { // Force the use of the correct type
+  return static_cast<int>(Level);
+}
 
-#define LOG(Group, Severity, Format, ...) \
-  if ((TRC_MASK & TRC_G_##Group) != 0) {\
-    Log::Msg(SevToInt(Severity), fmt::format(Format, ##__VA_ARGS__), {{"file", std::string(__FILE__)}, {"line", std::int64_t(__LINE__)}}); \
-  }
 
-// #define XTRACE(Group, Level, Format, ...)                                   \
-// (void)(((TRC_L_##Level <= TRC_LEVEL) && (TRC_MASK & TRC_G_##Group))          \
-// ? Trace(__LINE__, __FILE__, #Group, #Level, Format,\
-// ##__VA_ARGS__) \
-// : 0)
+#define LOG(Group, Severity, Format, ...)   \
+  ((TRC_MASK & TRC_G_##Group)               \
+    ?  Log::Msg(SevToInt(Severity), fmt::format(Format, ##__VA_ARGS__), {{"file", std::string(__FILE__)}, {"line", std::int64_t(__LINE__)}}) \
+    : (void)0)
+
