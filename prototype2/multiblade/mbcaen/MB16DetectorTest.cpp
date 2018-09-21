@@ -13,8 +13,8 @@ TEST_F(MB16DetectorTest, CassetteValid) {
   ASSERT_EQ(1, mbg.cassette(143));
   ASSERT_EQ(2, mbg.cassette(142));
   ASSERT_EQ(3, mbg.cassette(31));
-  ASSERT_EQ(4, mbg.cassette(34));
-  ASSERT_EQ(5, mbg.cassette(33));
+  ASSERT_EQ(4, mbg.cassette(33));
+  ASSERT_EQ(5, mbg.cassette(34));
 }
 
 TEST_F(MB16DetectorTest, CassetteInValid) {
