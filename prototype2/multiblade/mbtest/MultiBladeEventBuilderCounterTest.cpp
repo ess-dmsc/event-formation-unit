@@ -9,7 +9,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-// FIXME TODO - nolonger valid , new data format
+/// \todo - nolonger valid - new data format
 
 #include "mbcommon/MultiBladeEventBuilder.h"
 #include "MultiBladeTestData.h"
