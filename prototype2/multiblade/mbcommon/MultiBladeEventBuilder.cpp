@@ -8,8 +8,8 @@
 #include <algorithm>
 #include <multiblade/mbcommon/MultiBladeEventBuilder.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 multiBladeEventBuilder::multiBladeEventBuilder()
     : m_ADC_theshold(0), m_time_window(185), m_nwire_channels(32),

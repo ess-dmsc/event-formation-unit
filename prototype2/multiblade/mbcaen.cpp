@@ -247,14 +247,6 @@ void MBCAEN::processing_thread() {
           // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d\n",
           //       digitizerId, dp.localTime, dp.channel, dp.adcValue);
 
-          // // @todo fixme remove - is an artifact of mbtext2udp
-          // if (dp.digi == UINT8_MAX && dp.chan == UINT8_MAX &&
-          //     dp.adc == UINT16_MAX && dp.time == UINT32_MAX) {
-          //   XTRACE(PROCESS, DEB, "Last point\n");
-          //   builder[0].lastPoint();
-          //   break;
-          // }
-
           auto cassette = mb16.cassette(digitizerId);
           if (cassette < 0) {
             XTRACE(DATA, WAR, "Invalid digitizerId: %d\n", digitizerId);
