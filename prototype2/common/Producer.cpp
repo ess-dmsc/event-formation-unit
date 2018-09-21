@@ -12,9 +12,9 @@
 void Producer::setConfig(std::string name, std::string value) {
   RdKafka::Conf::ConfResult configResult;
   configResult = conf->set(name, value, kafkaErrstr);
-  LOG(Sev::Info, "Kafka set config {} to {}", name, value);
+  LOG(KAFKA, Sev::Info, "Kafka set config {} to {}", name, value);
   if (configResult != RdKafka::Conf::CONF_OK) {
-    LOG(Sev::Error, "Kafka Unable to set config {} to {}", name, value);
+    LOG(KAFKA, Sev::Error, "Kafka Unable to set config {} to {}", name, value);
   }
   assert(configResult == RdKafka::Conf::CONF_OK); // compiles away in release build
 }
@@ -52,12 +52,12 @@ Producer::Producer(std::string broker, std::string topicstr) :
   tconf = RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC);
 
   if (conf == nullptr) {
-    LOG(Sev::Error, "Unable to create CONF_GLOBAL object");
+    LOG(KAFKA, Sev::Error, "Unable to create CONF_GLOBAL object");
     return;
   }
 
   if (tconf == nullptr) {
-    LOG(Sev::Error, "Unable to create CONF_TOPIC object");
+    LOG(KAFKA, Sev::Error, "Unable to create CONF_TOPIC object");
     return;
   }
 
@@ -68,22 +68,22 @@ Producer::Producer(std::string broker, std::string topicstr) :
   setConfig("queue.buffering.max.ms", "100");
 
   if (conf->set("event_cb", this, kafkaErrstr) != RdKafka::Conf::CONF_OK) {
-    LOG(Sev::Error, "Kafka: unable to set event_cb");
+    LOG(KAFKA, Sev::Error, "Kafka: unable to set event_cb");
   }
 
   // if (conf->set("dr_cb", this, kafkaErrstr) != RdKafka::Conf::CONF_OK) {
-  //   LOG(Sev::Error, "Kafka: unable to set dr_cb");
+  //   LOG(KAFKA, Sev::Error, "Kafka: unable to set dr_cb");
   // }
 
   producer = RdKafka::Producer::create(conf, kafkaErrstr);
   if (!producer) {
-    LOG(Sev::Error, "Failed to create producer: {}", kafkaErrstr);
+    LOG(KAFKA, Sev::Error, "Failed to create producer: {}", kafkaErrstr);
     return;
   }
 
   topic = RdKafka::Topic::create(producer, topicstr, tconf, kafkaErrstr);
   if (!topic) {
-    LOG(Sev::Error, "Failed to create topic: {}", kafkaErrstr);
+    LOG(KAFKA, Sev::Error, "Failed to create topic: {}", kafkaErrstr);
     return;
   }
 }

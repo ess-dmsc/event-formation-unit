@@ -68,18 +68,18 @@ int DataSave::tofile(const char *fmt, ...) {
   va_end(args);
 
   if (ret < 0) {
-    LOG(Sev::Error, "vsnprintf failed");
+    LOG(UTILS, Sev::Error, "vsnprintf failed");
     return ret;
   }
 
   if (ret > maxwritelen) {
-    LOG(Sev::Warning, "datasave has been truncated");
+    LOG(UTILS, Sev::Warning, "datasave has been truncated");
     ret = maxwritelen;
   }
 
   bufferlen += ret;
   if (bufferlen >= BUFFERSIZE) {
-    LOG(Sev::Debug, "Writing chunk of size {}", bufferlen);
+    LOG(UTILS, Sev::Debug, "Writing chunk of size {}", bufferlen);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
     write(fd, buffer, bufferlen);
@@ -91,9 +91,9 @@ int DataSave::tofile(const char *fmt, ...) {
 }
 
 DataSave::~DataSave() {
-  LOG(Sev::Debug, "~DataSave bufferlen {}", bufferlen);
+  LOG(UTILS, Sev::Debug, "~DataSave bufferlen {}", bufferlen);
   if (bufferlen > 0) {
-    LOG(Sev::Info, "Flushing DataSave buffer");
+    LOG(UTILS, Sev::Info, "Flushing DataSave buffer");
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-result"
     write(fd, buffer, bufferlen);

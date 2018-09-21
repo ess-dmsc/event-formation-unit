@@ -56,7 +56,7 @@ The logging interface should probably not be used in the fast data path, but it 
     ...
     Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
     ...
-    LOG(Sev::Warning, "CSPEC_SHOW_CALIB: wrong number of arguments");
+    LOG(PROCESS, Sev::Warning, "CSPEC_SHOW_CALIB: wrong number of arguments");
 
 The default behavior is to send log messages to localhost on port 12201. The server ip address can be changed with the command line option **-a**.
 
