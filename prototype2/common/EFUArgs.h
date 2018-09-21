@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <CLI11.hpp>
+#include <CLI/CLI.hpp>
 #include <common/Detector.h>
 #include <cstdint>
 #include <string>

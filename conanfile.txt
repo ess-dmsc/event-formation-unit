@@ -1,5 +1,5 @@
 [requires]
-cli11/1.4-dm3@ess-dmsc/stable
+cli11/1.6.0@bincrafters/stable
 graylog-logger/1.0.5-dm1@ess-dmsc/stable
 gtest/3121b20-dm3@ess-dmsc/stable
 google-benchmark/4c2af07-dm2@ess-dmsc/stable
