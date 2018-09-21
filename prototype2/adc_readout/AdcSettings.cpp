@@ -23,12 +23,12 @@ void SetCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings) {
                   "Name of the source of the data as made available on the "
                   "Kafka broker.")
       ->group("ADC Readout Options")
-      ->set_default_val("AdcDemonstrator");
+      ->default_str("AdcDemonstrator");
   parser
       .add_option("--stats_suffix", ReadoutSettings.GrafanaNameSuffix,
                   "Grafana root name suffix, used for the stats.")
       ->group("ADC Readout Options")
-      ->set_default_val("");
+      ->default_str("");
   parser
       .add_flag("--sample_timestamp", ReadoutSettings.SampleTimeStamp,
                 "Provide a timestamp with every single ADC sample. Note: this "
@@ -56,12 +56,12 @@ void SetCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings) {
                   "Only used when serializing data. Take the mean of # of "
                   "samples (oversample) and serialize that mean.")
       ->group("ADC Readout Options")
-      ->set_default_val("1");
+      ->default_str("1");
   parser
       .add_set("--time_stamp_loc", ReadoutSettings.TimeStampLocation,
                {"Start", "Middle", "End"},
                "Only used when serializing oversampled data. The time stamp "
                "corresponds to one of the following: 'Start', 'Middle', 'End'.")
       ->group("ADC Readout Options")
-      ->set_default_val("Middle");
+      ->default_str("Middle");
 }
