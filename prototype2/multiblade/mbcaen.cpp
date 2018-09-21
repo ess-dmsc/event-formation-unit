@@ -11,6 +11,7 @@
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/FBSerializer.h>
+#include <common/HistSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <common/DataSave.h>
@@ -175,6 +176,9 @@ void MBCAEN::processing_thread() {
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
 
+  HistSerializer histfb;
+  NMXHists histograms;
+
   std::shared_ptr<DataSave> mbdatasave;
   bool dumptofile = !DetectorSettings.fileprefix.empty();
   if (dumptofile)
@@ -187,6 +191,7 @@ void MBCAEN::processing_thread() {
   MB16Detector mb16;
 
   Producer eventprod(EFUSettings.KafkaBroker, "MB_detector");
+  Producer monitorprod(EFUSettings.KafkaBroker, "MB_monitor");
   FBSerializer flatbuffer(kafka_buffer_size, eventprod);
 
   multiBladeEventBuilder builder[ncass];
@@ -208,6 +213,14 @@ void MBCAEN::processing_thread() {
           EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
         mystats.tx_bytes += flatbuffer.produce();
+
+        if (!histograms.isEmpty()) {
+          XTRACE(PROCESS, INF, "Sending histogram for %zu readouts", histograms.hit_count());
+          char *txbuffer;
+          auto len = histfb.serialize(histograms, &txbuffer);
+          monitorprod.produce(txbuffer, len);
+          histograms.clear();
+        }
 
         /// Kafka stats update - common to all detectors
         /// don't increment as producer keeps absolute count
@@ -256,6 +269,12 @@ void MBCAEN::processing_thread() {
 
           if (dumptofile) {
             mbdatasave->tofile("%d,%d,%d,%d\n", dp.localTime, digitizerId, dp.channel, dp.adcValue);
+          }
+
+          if (dp.channel >= 32) {
+            histograms.binstrips(dp.channel, dp.adcValue, 0, 0);
+          } else {
+            histograms.binstrips(0, 0, dp.channel, dp.adcValue);
           }
 
           if (builder[cassette].addDataPoint(dp.channel, dp.adcValue, dp.localTime)) {

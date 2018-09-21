@@ -15,28 +15,6 @@
 #include "MultiBladeTestData.h"
 #include "test/TestBase.h"
 
-TEST(MBEventBuilder__Test, DataPointCounter) {
-
-  // Instanciate the event-builder
-  multiBladeEventBuilder p;
-
-  // Test proper initialization.
-  EXPECT_EQ(0U, p.getNumberOfEvents());
-
-  // In the following: test proper incrementing.
-  p.addDataPoint(0, 300, 0);
-  EXPECT_EQ(1, p.getNumberOfDatapointsReceived());
-
-  p.addDataPoint(1, 300, 1);
-  EXPECT_EQ(2, p.getNumberOfDatapointsReceived());
-
-  p.addDataPoint(2, 300, 2);
-  EXPECT_EQ(3, p.getNumberOfDatapointsReceived());
-
-  p.resetCounters();
-  EXPECT_EQ(0, p.getNumberOfDatapointsReceived());
-}
-
 TEST(MBEventBuilder__Test, EventCounter) {
 
   // Test that events are counted correctly

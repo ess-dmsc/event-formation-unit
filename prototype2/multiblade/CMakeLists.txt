@@ -4,11 +4,15 @@ include_directories(.)
 # Detector Pipeline Plugins
 #=============================================================================
 set(mbcaen_INC
+  ../common/Hists.h
+  ../common/HistSerializer.h
   mbcaen/DataParser.h
   mbcommon/MultiBladeEventBuilder.h
   mbcommon/DumpEventBuilderInfo.h
   )
 set(mbcaen_SRC
+  ../common/Hists.cpp
+  ../common/HistSerializer.cpp
   mbcaen.cpp
   mbcaen/DataParser.cpp
   mbcommon/MultiBladeEventBuilder.cpp

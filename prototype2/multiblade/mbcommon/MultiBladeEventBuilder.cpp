@@ -12,14 +12,12 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 multiBladeEventBuilder::multiBladeEventBuilder()
-    : m_ADC_theshold(0), m_time_window(185), m_nwire_channels(32),
+    : m_ADC_theshold(0), m_time_window(400), m_nwire_channels(32),
       m_nstrip_channels(32), m_use_weighted_average(true), m_wire_cluster(0),
       m_strip_cluster(0), m_time_stamp(0), m_cluster_clock(0),
       m_first_signal(true), m_nevents(0) {
   resetCounters();
 }
-
-multiBladeEventBuilder::~multiBladeEventBuilder() = default;
 
 bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel,
                                           const uint16_t &ADC,
@@ -29,12 +27,10 @@ bool multiBladeEventBuilder::addDataPoint(const uint8_t &channel,
          static_cast<uint>(channel), static_cast<uint>(ADC),
          static_cast<uint>(clock));
 
-  // Increment the counter for number of data-points received.
-  m_datapoints_received++;
-
   if (ADC < m_ADC_theshold) {
     XTRACE(PROCESS, DEB, "ADC-value below threshold. %d < %d",
            static_cast<uint>(ADC), static_cast<uint>(m_ADC_theshold));
+    Stats.readouts_discarded++;
     return false;
   }
 
@@ -116,7 +112,7 @@ bool multiBladeEventBuilder::processClusters() {
   // Calculate the time-stamp
   m_time_stamp = m_cluster_clock;
 
-  XTRACE(PROCESS, DEB, "Calculated position : Pos(%1.4f, %1.4f)", m_wire_pos,
+  XTRACE(PROCESS, DEB, "<<< Calculated position : Pos(%1.4f, %1.4f)>>>", m_wire_pos,
          m_strip_pos);
 
   if ((m_wire_pos < 0) && (m_strip_pos < 0)) {
@@ -260,17 +256,15 @@ void multiBladeEventBuilder::addPointToCluster(uint32_t channel, uint32_t ADC) {
 
   point point = {channel, ADC};
   if (channel < m_nwire_channels) {
-    XTRACE(DATA, DEB, "Add wire channel: %d\n", channel);
+    // XTRACE(DATA, DEB, "Add wire channel: %d\n", channel);
     m_wire_cluster.push_back(point);
   } else {
-    XTRACE(DATA, DEB, "Add strip channel: %d\n", channel);
+    // XTRACE(DATA, DEB, "Add strip channel: %d\n", channel);
     m_strip_cluster.push_back(point);
   }
 }
 
 void multiBladeEventBuilder::resetCounters() {
-
-  m_datapoints_received = 0;
   m_nevents = 0;
   m_rejected_adjacency = 0;
   m_rejected_position = 0;

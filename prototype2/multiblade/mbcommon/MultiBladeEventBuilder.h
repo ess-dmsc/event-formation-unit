@@ -25,8 +25,7 @@
 /// The remaining documentation is found in the docu.dox file
 //===----------------------------------------------------------------------===//
 
-#ifndef MULTIBLADE_EVENTBUILDER_H
-#define MULTIBLADE_EVENTBUILDER_H
+#pragma once
 
 #include <array>
 #include <cstdint>
@@ -56,7 +55,7 @@ public:
   multiBladeEventBuilder();
 
   /// Destructor
-  ~multiBladeEventBuilder();
+  ~multiBladeEventBuilder() = default;
 
   /// Data-points from one multi-blade detector cassette consists of a channel
   /// number, a signal value from the
@@ -158,8 +157,6 @@ public:
 
   // Functions for monitoring and/or debugging
 
-  /// Return the number of data-points received
-  uint64_t getNumberOfDatapointsReceived() const { return m_datapoints_received; }
   /// Return the number of events
   uint64_t getNumberOfEvents() const { return m_nevents; }
   /// Return the number of events rejected due to not being adjacent
@@ -224,7 +221,6 @@ private:
   bool m_first_signal;
 
   // Monitoring/debugging counters
-  uint64_t m_datapoints_received; /// Number of received data-points
   uint64_t m_nevents;             /// Number of valid events
   uint64_t
       m_rejected_adjacency; /// Number of events rejected due to adjacency
@@ -279,6 +275,9 @@ private:
   /// Increments monitoring counters.
   void incrementCounters(const std::vector<point> &m_wire_cluster,
                          const std::vector<point> &m_strip_cluster);
-};
 
-#endif // MULTIBLADE_EVENTBUILDER_H
+
+  struct {
+    uint64_t readouts_discarded{0};
+  } Stats;
+};
