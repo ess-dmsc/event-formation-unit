@@ -1,8 +1,13 @@
-//
-// Created by soegaard on 8/25/17.
-//
+/* Copyright (C) 2017-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Parser for JADAQ
+//===----------------------------------------------------------------------===//
 
 #pragma once
+
 #include <cstdint>
 #include <cstring>
 #include <vector>
@@ -33,10 +38,10 @@ public:
 
   int parse(const char * /*void **/ buffer, unsigned int size);
 
-  struct Header * mbheader{nullptr};
-  struct ListElement422 * mbdata{nullptr};
+  struct Header * MBHeader{nullptr};
+  struct ListElement422 * MBData{nullptr};
 
-  struct stats{
+  struct Stats {
     uint64_t error_bytes{0};
-  } stats;
+  } Stats;
 };

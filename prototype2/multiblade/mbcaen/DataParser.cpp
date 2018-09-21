@@ -21,28 +21,28 @@
 
 int DataParser::parse(const char *buffer, unsigned int size) {
 
-  mbheader = nullptr;
-  mbdata = nullptr;
-  memset(&stats, 0, sizeof(struct stats));
+  MBHeader = nullptr;
+  MBData = nullptr;
+  memset(&Stats, 0, sizeof(struct Stats));
 
   auto headerlen = sizeof(struct Header);
   if (size < headerlen) {
     XTRACE(DATA, WAR, "Invalid data size: received %d, min. expected: %lu", size, headerlen);
-    stats.error_bytes += size;
+    Stats.error_bytes += size;
     return -error::ESIZE;
   }
 
-  mbheader = (struct Header *)buffer;
+  MBHeader = (struct Header *)buffer;
 
-  auto expectedsize = sizeof(struct Header) + mbheader->numElements * sizeof(struct ListElement422);
+  auto expectedsize = sizeof(struct Header) + MBHeader->numElements * sizeof(struct ListElement422);
 
   if (size != expectedsize) {
     XTRACE(DATA, WAR, "Data length mismatch: received %d, expected %lu", size, expectedsize);
-    stats.error_bytes += size;
+    Stats.error_bytes += size;
     return -error::ESIZE;
   }
 
-  mbdata = (struct ListElement422 *)(buffer + sizeof(struct Header));
+  MBData = (struct ListElement422 *)(buffer + sizeof(struct Header));
 
-  return mbheader->numElements;
+  return MBHeader->numElements;
 }

@@ -233,17 +233,17 @@ void MBCAEN::processing_thread() {
       } else {
         auto dataptr = eth_ringbuf->getDataBuffer(data_index);
         if (mbdata.parse(dataptr, datalen) < 0) {
-          mystats.rx_error_bytes += mbdata.stats.error_bytes;
+          mystats.rx_error_bytes += mbdata.Stats.error_bytes;
           continue;
         }
 
-        mystats.rx_readouts += mbdata.mbheader->numElements;
+        mystats.rx_readouts += mbdata.MBHeader->numElements;
 
-        auto digitizerId = mbdata.mbheader->digitizerID;
-        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d\n", mbdata.mbheader->numElements, digitizerId);
-        for (uint i = 0; i < mbdata.mbheader->numElements; i++) {
+        auto digitizerId = mbdata.MBHeader->digitizerID;
+        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d\n", mbdata.MBHeader->numElements, digitizerId);
+        for (uint i = 0; i < mbdata.MBHeader->numElements; i++) {
 
-          auto dp = mbdata.mbdata[i];
+          auto dp = mbdata.MBData[i];
           // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d\n",
           //       digitizerId, dp.localTime, dp.channel, dp.adcValue);
 

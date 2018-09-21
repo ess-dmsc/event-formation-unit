@@ -18,9 +18,9 @@ protected:
 /** Test cases below */
 TEST_F(MultibladeDataTest, Constructor) {
   DataParser mbdata;
-  EXPECT_EQ(0, mbdata.stats.error_bytes);
-  EXPECT_EQ(nullptr, mbdata.mbdata);
-  EXPECT_EQ(nullptr, mbdata.mbheader);
+  EXPECT_EQ(0, mbdata.Stats.error_bytes);
+  EXPECT_EQ(nullptr, mbdata.MBData);
+  EXPECT_EQ(nullptr, mbdata.MBHeader);
 }
 
 
@@ -29,15 +29,15 @@ TEST_F(MultibladeDataTest, InvalidHeaderSizes) {
   for (int i = 0; i < 32; i++) {
     auto res = mbdata.parse((char *)&all_zeroes[0], i);
     ASSERT_EQ(res, -mbdata.error::ESIZE);
-    ASSERT_EQ(nullptr, mbdata.mbheader);
-    ASSERT_EQ(nullptr, mbdata.mbdata);
-    ASSERT_EQ(i, mbdata.stats.error_bytes);
+    ASSERT_EQ(nullptr, mbdata.MBHeader);
+    ASSERT_EQ(nullptr, mbdata.MBData);
+    ASSERT_EQ(i, mbdata.Stats.error_bytes);
   }
   auto res = mbdata.parse((char *)&all_zeroes[0], 32);
   ASSERT_EQ(res, 0);
-  ASSERT_NE(nullptr, mbdata.mbheader);
-  ASSERT_NE(nullptr, mbdata.mbdata);
-  ASSERT_EQ(0, mbdata.mbheader->numElements);
+  ASSERT_NE(nullptr, mbdata.MBHeader);
+  ASSERT_NE(nullptr, mbdata.MBData);
+  ASSERT_EQ(0, mbdata.MBHeader->numElements);
 }
 
 TEST_F(MultibladeDataTest, Packet13Triggered) {
@@ -46,9 +46,9 @@ TEST_F(MultibladeDataTest, Packet13Triggered) {
   auto res = mbdata.parse((char *)&pkt13[0], pkt13.size());
 
   EXPECT_EQ(res, eventsInPacket);
-  EXPECT_EQ(0, mbdata.stats.error_bytes);
-  EXPECT_NE(nullptr, mbdata.mbdata);
-  EXPECT_NE(nullptr, mbdata.mbheader);
+  EXPECT_EQ(0, mbdata.Stats.error_bytes);
+  EXPECT_NE(nullptr, mbdata.MBData);
+  EXPECT_NE(nullptr, mbdata.MBHeader);
 }
 
 
