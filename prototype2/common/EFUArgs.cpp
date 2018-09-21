@@ -18,19 +18,19 @@ EFUArgs::EFUArgs() {
   // clang-format off
   CLIParser.set_help_flag(); // Removes the default help flag
   CLIParser.allow_extras(true);
-  CLIParser.allow_ini_extras(true);
+  CLIParser.get_formatter()->column_width(30);
 
   HelpOption = CLIParser.add_flag("-h,--help", "Print this help message and exit")
       ->group("EFU Options")->configurable(false);
 
   CLIParser.add_option("-a,--logip", GraylogConfig.address, "Graylog server IP address")
-      ->group("EFU Options")->set_default_val("127.0.0.1");
+      ->group("EFU Options")->default_str("127.0.0.1");
 
   CLIParser.add_option("-b,--broker_addr", EFUSettings.KafkaBroker, "Kafka broker address")
-      ->group("EFU Options")->set_default_val("localhost");
+      ->group("EFU Options")->default_str("localhost");
 
   CLIParser.add_option("-t,--broker_topic", EFUSettings.KafkaTopic, "Kafka broker topic")
-      ->group("EFU Options")->set_default_val("Detector_data");
+      ->group("EFU Options")->default_str("Detector_data");
 
   CLIParser.add_option("-c,--core_affinity", [this](std::vector<std::string> Input) {
                     return parseAffinityStrings(Input);
@@ -40,13 +40,13 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-l,--log_level", [this](std::vector<std::string> Input) {
     return parseLogLevel(Input);
   }, "Set log message level. Set to 1 - 7 or one of \n                              `Critical`, `Error`, `Warning`, `Notice`, `Info`,\n                              or `Debug`. Ex: \"-l Notice\"")
-  ->group("EFU Options")->set_default_val("Info");
+  ->group("EFU Options")->default_str("Info");
 
   CLIParser.add_option("--log_file", LogFileName, "Write log messages to file.")
   ->group("EFU Options");
 
   CLIParser.add_option("-u,--min_mtu", EFUSettings.MinimumMTU, "Minimum value of MTU for all active interfaces")
-      ->group("EFU Options")->set_default_val("9000");
+      ->group("EFU Options")->default_str("9000");
 
   std::string DetectorDescription{"Detector name"};
   std::map<std::string, DetectorModuleSetup> StaticDetModules =
@@ -63,25 +63,25 @@ EFUArgs::EFUArgs() {
 
   CLIParser.add_option("-i,--dip", EFUSettings.DetectorAddress,
                        "IP address of receive interface")
-      ->group("EFU Options")->set_default_val("0.0.0.0");
+      ->group("EFU Options")->default_str("0.0.0.0");
 
   CLIParser.add_option("-p,--port", EFUSettings.DetectorPort, "TCP/UDP receive port")
-      ->group("EFU Options")->set_default_val("9000");
+      ->group("EFU Options")->default_str("9000");
 
   CLIParser.add_option("-m,--cmdport", EFUSettings.CommandServerPort,
                        "Command parser tcp port")
-      ->group("EFU Options")->set_default_val("8888");
+      ->group("EFU Options")->default_str("8888");
 
   CLIParser.add_option("-g,--graphite", EFUSettings.GraphiteAddress,
                        "IP address of graphite metrics server")
-      ->group("EFU Options")->set_default_val("127.0.0.1");
+      ->group("EFU Options")->default_str("127.0.0.1");
 
   CLIParser.add_option("-o,--gport", EFUSettings.GraphitePort, "Graphite tcp port")
-      ->group("EFU Options")->set_default_val("2003");
+      ->group("EFU Options")->default_str("2003");
 
   CLIParser.add_option("-s,--stopafter", EFUSettings.StopAfterSec,
                        "Terminate after timeout seconds")
-      ->group("EFU Options")->set_default_val("4294967295"); // 0xffffffffU
+      ->group("EFU Options")->default_str("4294967295"); // 0xffffffffU
 
   WriteConfigOption = CLIParser
       .add_option("--write_config", ConfigFileName,
@@ -94,15 +94,15 @@ EFUArgs::EFUArgs() {
 
   CLIParser.add_option("--updateinterval", EFUSettings.UpdateIntervalSec,
                        "Stats and event data update interval (seconds).")
-      ->group("EFU Options")->set_default_val("1");
+      ->group("EFU Options")->default_str("1");
 
   CLIParser.add_option("--rxbuffer", EFUSettings.DetectorRxBufferSize,
                        "Receive from detector buffer size.")
-      ->group("EFU Options")->set_default_val("2000000");
+      ->group("EFU Options")->default_str("2000000");
 
   CLIParser.add_option("--txbuffer", EFUSettings.DetectorTxBufferSize,
                   "Transmit to detector buffer size.")
-      ->group("EFU Options")->set_default_val("9216");
+      ->group("EFU Options")->default_str("9216");
   // clang-format on
 }
 
@@ -181,7 +181,7 @@ void EFUArgs::printSettings() {
   // clang-format on
 }
 
-void EFUArgs::printHelp() { std::cout << CLIParser.help(30); }
+void EFUArgs::printHelp() { std::cout << CLIParser.help(); }
 
 EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
   try {
@@ -194,9 +194,8 @@ EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
     printHelp();
     return Status::EXIT;
   }
-  CLIParser.reset();
+  CLIParser.clear();
   CLIParser.allow_extras(false);
-  CLIParser.allow_ini_extras(false);
   return Status::CONTINUE;
 }
 
@@ -217,7 +216,7 @@ EFUArgs::Status EFUArgs::parseSecondPass(const int argc, char *argv[]) {
       LOG(INIT, Sev::Error, "Failed to open config file for writing.");
       return Status::EXIT;
     }
-    ConfigFile << CLIParser.config_to_str(true, "", true);
+    ConfigFile << CLIParser.config_to_str(true, true);
     ConfigFile.close();
     LOG(INIT, Sev::Info, "Config file created, now exiting.");
     return Status::EXIT;

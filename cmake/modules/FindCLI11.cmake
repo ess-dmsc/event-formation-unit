@@ -1,10 +1,10 @@
 find_path(CLI11_ROOT_DIR
-  NAMES include/CLI11.hpp
+  NAMES include/CLI/CLI.hpp
 )
 
 find_path(CLI11_INCLUDE_DIR
-  NAMES CLI11.hpp
-  HINTS ${CLI11_ROOT_DIR}/include
+  NAMES CLI.hpp
+  HINTS ${CLI11_ROOT_DIR}/include/CLI
 )
 
 include(FindPackageHandleStandardArgs)
