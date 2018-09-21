@@ -117,6 +117,8 @@ struct PopulateCLIParser {
 class DetectorFactoryBase {
 public:
   virtual std::shared_ptr<Detector> create(BaseSettings settings) = 0;
+
+  virtual ~DetectorFactoryBase(){};
 };
 
 /// \brief Template for creating detector factories in dynamically loaded detector modules.
