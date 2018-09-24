@@ -48,10 +48,10 @@ public:
   const char *detectorname();
 
   /** @todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 100;
-  static const int eth_buffer_size = 10000;
+  static const int eth_buffer_max_entries = 500;
+  static const int eth_buffer_size = 1500; /// bytes
 
-  static const int kafka_buffer_size = 1000000;
+  static const int kafka_buffer_size = 124000; /// entries
 
 private:
   /** Shared between input_thread and processing_thread*/
