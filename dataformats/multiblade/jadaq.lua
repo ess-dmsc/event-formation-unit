@@ -13,12 +13,12 @@
 jadaq_proto = Proto("jadaq","JADAQ Protocol")
 
 function jadaq_proto.dissector(buffer,pinfo,tree)
-	pinfo.cols.protocol = "JADAQ"
-	local protolen = buffer():len()
+  pinfo.cols.protocol = "JADAQ"
+  local protolen = buffer():len()
 
-	local data_length_byte = 8
+  local data_length_byte = 8
 
-	if protolen >= 32 then
+  if protolen >= 32 then
     local run_lo   = buffer( 0, 4):le_uint()
     local run_hi   = buffer( 4, 4):le_uint()
     local time_lo   = buffer( 8, 4):le_uint()
@@ -30,30 +30,28 @@ function jadaq_proto.dissector(buffer,pinfo,tree)
     local vermin = buffer(25, 1):le_uint()
 
     local jadaqhdr = tree:add(jadaq_proto,buffer(),
-       string.format("JADAQ digitizer: %d, hits: %d", digit, hits))
+    string.format("JADAQ digitizer: %d, hits: %d", digit, hits))
 
     jadaqhdr:add(buffer( 0, 8),
-                 string.format("runid: %08x%08x", run_hi, run_lo))
+    string.format("runid: %08x%08x", run_hi, run_lo))
     jadaqhdr:add(buffer( 8, 8),
-                 string.format("time: %08x%08x", time_hi, time_lo))
+    string.format("time: %08x%08x", time_hi, time_lo))
     jadaqhdr:add(buffer(16, 4), "digitizer " .. digit)
     jadaqhdr:add(buffer(20, 2), "element id " .. elemid)
     jadaqhdr:add(buffer(22, 2), "number of elements " .. hits)
     jadaqhdr:add(buffer(24, 2), "version " .. vermaj .. "." .. vermin)
 
-		pinfo.cols.info = string.format("digitizer: %3d, hits: %3d", digit, hits)
+    pinfo.cols.info = string.format("digitizer: %3d, hits: %3d", digit, hits)
 
-
-
-		for i=1,hits do
+    for i=1,hits do
       local offset = 32 + (i - 1) * data_length_byte
       local time =    buffer(offset    , 4):le_uint()
       local channel = buffer(offset + 4, 2):le_uint()
       local adc =     buffer(offset + 6, 2):le_uint()
       jadaqhdr:add(buffer(offset, data_length_byte),
-                   string.format("time %10d, channel %3d, adc %5d", time, channel, adc))
+      string.format("time %10d, channel %3d, adc %5d", time, channel, adc))
     end
-	end
+  end
 end
 
 -- Register the protocol
