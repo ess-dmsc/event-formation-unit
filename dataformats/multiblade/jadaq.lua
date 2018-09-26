@@ -2,8 +2,6 @@
 -- Copyright (C) 2018 European Spallation Source ERIC
 -- Wireshark plugin for dissecting JADAQ readout data
 
--- helper variable and functions
-
 -- jadaq header from: https://github.com/ess-dmsc/jadaq/blob/devel/DataFormat.hpp
 
 
@@ -23,6 +21,7 @@ function jadaq_proto.dissector(buffer,pinfo,tree)
     local run_hi   = buffer( 4, 4):le_uint()
     local time_lo   = buffer( 8, 4):le_uint()
     local time_hi   = buffer(12, 4):le_uint()
+    local time64 = Int64.new(time_lo, time_hi)
     local digit = buffer(16, 4):le_uint()
     local elemid = buffer(20, 2):le_uint()
     local hits = buffer(22, 2):le_uint()
@@ -35,7 +34,7 @@ function jadaq_proto.dissector(buffer,pinfo,tree)
     jadaqhdr:add(buffer( 0, 8),
     string.format("runid: %08x%08x", run_hi, run_lo))
     jadaqhdr:add(buffer( 8, 8),
-    string.format("time: %08x%08x", time_hi, time_lo))
+    string.format("time: %08x%08x (%d)", time_hi, time_lo, (time64):tonumber()))
     jadaqhdr:add(buffer(16, 4), "digitizer " .. digit)
     jadaqhdr:add(buffer(20, 2), "element id " .. elemid)
     jadaqhdr:add(buffer(22, 2), "number of elements " .. hits)
@@ -49,7 +48,7 @@ function jadaq_proto.dissector(buffer,pinfo,tree)
       local channel = buffer(offset + 4, 2):le_uint()
       local adc =     buffer(offset + 6, 2):le_uint()
       jadaqhdr:add(buffer(offset, data_length_byte),
-      string.format("time %10d, channel %3d, adc %5d", time, channel, adc))
+      string.format("%2d: time %10d ns, channel %3d, adc %5d", i, time / 16, channel, adc))
     end
   end
 end

@@ -9,6 +9,7 @@ set(mbcaen_INC
   mbcaen/DataParser.h
   mbcommon/MultiBladeEventBuilder.h
   mbcommon/DumpEventBuilderInfo.h
+  mbcommon/MBConfig.h
   )
 set(mbcaen_SRC
   ../common/Hists.cpp
@@ -17,6 +18,7 @@ set(mbcaen_SRC
   mbcaen/DataParser.cpp
   mbcommon/MultiBladeEventBuilder.cpp
   mbcommon/DumpEventBuilderInfo.cpp
+  mbcommon/MBConfig.cpp
   )
 create_module(mbcaen)
 

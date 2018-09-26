@@ -24,6 +24,7 @@
 
 #include <mbcaen/MB16Detector.h>
 #include <mbcaen/DataParser.h>
+#include <mbcommon/MBConfig.h>
 #include <mbcommon/MultiBladeEventBuilder.h>
 
 #include <logical_geometry/ESSGeometry.h>
@@ -80,15 +81,22 @@ private:
     int64_t kafka_dr_errors;
     int64_t kafka_dr_noerrors;
   } ALIGN(64) mystats;
+
+  MBConfig mb_opts;
 };
 
 struct DetectorSettingsStruct {
-  std::string fileprefix{""};
+  std::string FilePrefix{""};
+  std::string ConfigFile{""};
 } DetectorSettings;
 
 void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
-  parser.add_option("--dumptofile", DetectorSettings.fileprefix,
+  parser.add_option("--dumptofile", DetectorSettings.FilePrefix,
                     "dump to specified file")->group("MBCAEN");
+
+  parser.add_option("-f, --file", DetectorSettings.ConfigFile,
+                    "Multi-Blade specific calibration (json) file")
+                    ->group("MBCAEN");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
@@ -128,6 +136,8 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries +
                                                 11); // \todo workaround
   assert(eth_ringbuf != 0);
+
+  mb_opts = MBConfig(DetectorSettings.ConfigFile);
 }
 
 const char *MBCAEN::detectorname() { return classname; }
@@ -180,10 +190,10 @@ void MBCAEN::processing_thread() {
   NMXHists histograms;
 
   std::shared_ptr<DataSave> mbdatasave;
-  bool dumptofile = !DetectorSettings.fileprefix.empty();
+  bool dumptofile = !DetectorSettings.FilePrefix.empty();
   if (dumptofile)
   {
-    mbdatasave = std::make_shared<DataSave>(DetectorSettings.fileprefix + "_multiblade_", 100000000);
+    mbdatasave = std::make_shared<DataSave>(DetectorSettings.FilePrefix + "_multiblade_", 100000000);
     mbdatasave->tofile("# time, digitizer, channel, adc\n");
   }
 
