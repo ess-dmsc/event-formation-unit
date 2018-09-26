@@ -33,14 +33,14 @@ void StatPublisher::publish(std::shared_ptr<Detector> detector) {
 
 ///
 void StatPublisher::reconnectHelper() {
-    LOG(Sev::Warning, "Carbon/Graphite reconnect attempt {}", Retries);
+    LOG(UTILS, Sev::Warning, "Carbon/Graphite reconnect attempt {}", Retries);
     StatDb.reset(new TCPTransmitter(IpAddress.c_str(), TCPPort));
     if (StatDb->isValidSocket()) {
-      LOG(Sev::Info, "Carbon/Graphite connection re-established");
+      LOG(UTILS, Sev::Info, "Carbon/Graphite connection re-established");
       Retries = 1;
     } else {
       if (Retries == MaxReconnectAttempts) {
-        LOG(Sev::Error, "Unable to restore Carbon/Graphite connection for {} seconds", MaxReconnectAttempts * ReconnectDelayUS / 1000000.0);
+        LOG(UTILS, Sev::Error, "Unable to restore Carbon/Graphite connection for {} seconds", MaxReconnectAttempts * ReconnectDelayUS / 1000000.0);
       }
     }
     ReconnectTime.now();

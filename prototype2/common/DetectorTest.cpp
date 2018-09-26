@@ -1,5 +1,9 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#pragma GCC diagnostic push
+#pragma message "Suppressing -Wdelete-non-virtual-dtor - maybe FIXME at some point"
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+
 #include <common/Detector.h>
 #include <common/DetectorModuleRegister.h>
 #include <memory>
@@ -123,3 +127,5 @@ int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
+
+#pragma GCC diagnostic pop

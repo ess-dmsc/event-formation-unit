@@ -7,6 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#pragma once
+
 #include <common/EFUArgs.h>
 #include <map>
 #include <string>

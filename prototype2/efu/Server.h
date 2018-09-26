@@ -14,12 +14,21 @@
 #include <array>
 #include <cassert>
 #include <common/EFUArgs.h>
+#include <efu/Parser.h>
 #include <sys/select.h>
 #include <sys/types.h>
+
+/// \brief Use MSG_SIGNAL on Linuxes
+#ifdef MSG_NOSIGNAL
+#define SEND_FLAGS MSG_NOSIGNAL
+#else
+#define SEND_FLAGS 0
+#endif
 
 /** \todo make this work with public static unsigned int */
 #define SERVER_BUFFER_SIZE 9000U
 #define SERVER_MAX_CLIENTS 16
+#define SERVER_MAX_BACKLOG 3
 
 static_assert(SERVER_MAX_CLIENTS <= FD_SETSIZE, "Too many clients");
 
@@ -31,33 +40,35 @@ public:
   Server(int port, Parser &parse);
 
   /// \brief Setup socket parameters
-  void server_open();
+  void serverOpen();
 
   /// \brief Teardown socket
   /// \param socketfd socket file descriptor
-  void server_close(int socketfd);
+  void serverClose(int socketfd);
 
   /// \brief Called in main program loop
-  void server_poll();
+  void serverPoll();
 
   /// \brief Send reply to Client
   /// \param socketfd socket file descriptor
-  int server_send(int socketfd);
+  int serverSend(int socketfd);
 
 private:
-  typedef struct {
+  struct {
     uint8_t buffer[SERVER_BUFFER_SIZE + 1];
-    uint8_t *data;
     uint32_t bytes;
-  } socket_buffer_t;
+  } IBuffer, OBuffer; /// receive and transmit buffers
 
-  socket_buffer_t input;
-  socket_buffer_t output;
+  //SocketBuffer IBuffer; /// receive buffer
+  //SocketBuffer OBuffer; /// transmit buffer
 
-  int port_{0};
-  int serverfd{-1};
-  std::array<int, SERVER_MAX_CLIENTS> clientfd;
-  fd_set fd_master, fd_working;
+  int Port{0}; /// server tcp port
+  int ServerFd{-1}; /// server file descriptor
+  std::array<int, SERVER_MAX_CLIENTS> ClientFd;
 
-  Parser &parser;
+  struct timeval Timeout; /// to set select() timeout
+
+  int SocketOptionOn{1}; // any nonzero value will do
+
+  Parser &CommandParser;
 };

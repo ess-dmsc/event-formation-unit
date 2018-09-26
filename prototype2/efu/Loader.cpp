@@ -9,7 +9,7 @@
 #include <string>
 
 Loader::~Loader() {
-  LOG(Sev::Debug, "Loader destructor called");
+  LOG(INIT, Sev::Debug, "Loader destructor called");
   // Remove pointer before closing the handle to prevent accessing freed memory
   unloadPlugin();
 }
@@ -28,43 +28,43 @@ bool Loader::loadPlugin(const std::string lib) {
     auto &FoundModule = DetectorModuleRegistration::find(lib);
     ParserPopulator = FoundModule.CLISetup;
     myFactory = FoundModule.DetectorFactory.get();
-    LOG(Sev::Info, "Loaded statically linked detector module.");
+    LOG(INIT, Sev::Info, "Loaded statically linked detector module.");
     return true;
   } catch (std::runtime_error &Error) {
-    LOG(Sev::Notice, "Unable to find statically linked detector module with "
+    LOG(INIT, Sev::Notice, "Unable to find statically linked detector module with "
         "name\"{}\". Attempting to open external plugin.",
            lib);
   }
   std::vector<std::string> PossibleSuffixes{"", ".so", ".dll", ".dylib"};
-  
+
   for (auto &CSuffix : PossibleSuffixes) {
     std::string TestLibName = "./" + lib + CSuffix;
     handle = dlopen(TestLibName.c_str(), RTLD_NOW);
     if (handle != nullptr) {
-      LOG(Sev::Info, "Loaded library \"{}\".",
+      LOG(INIT, Sev::Info, "Loaded library \"{}\".",
             TestLibName);
       break;
     }
   }
   if (handle == nullptr) {
-    LOG(Sev::Error, "Could not open library {}: {}", lib,
+    LOG(INIT, Sev::Error, "Could not open library {}: {}", lib,
            dlerror());
     return false;
   }
 
   if (!(myFactory = (DetectorFactoryBase *)dlsym(handle, "Factory"))) {
-    LOG(Sev::Error, "Could not find Factory in {}", lib);
+    LOG(INIT, Sev::Error, "Could not find Factory in {}", lib);
     return false;
   }
 
   PopulateCLIParser *tempParserPopulator =
       (PopulateCLIParser *)dlsym(handle, "PopulateParser");
   if (nullptr == tempParserPopulator) {
-    LOG(Sev::Warning, "Unable to find function to populate CLI parser in {}",
+    LOG(INIT, Sev::Warning, "Unable to find function to populate CLI parser in {}",
            lib);
   } else {
     if (nullptr == tempParserPopulator->Function) {
-      LOG(Sev::Warning, "Function to populate CLI parser not set");
+      LOG(INIT, Sev::Warning, "Function to populate CLI parser not set");
     } else {
       ParserPopulator = tempParserPopulator->Function;
     }
