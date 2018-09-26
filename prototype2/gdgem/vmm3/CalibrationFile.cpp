@@ -56,26 +56,32 @@ void CalibrationFile::loadCalibration(std::string jsonstring) {
     return;
   }
 
-  auto VmmCals = Root["vmm_calibration"];
-  for (auto &vmmcal : VmmCals) {
-    auto fecid = vmmcal["fecID"].get<unsigned int>();
-    auto vmmid = vmmcal["vmmID"].get<unsigned int>();
-    auto offsets = vmmcal["offsets"];
-    auto slopes = vmmcal["slopes"];
-    XTRACE(INIT, DEB, "fecid: %d, vmmid: %d, offsets(%d), slopes(%d)\n", fecid,
-           vmmid, offsets.size(), slopes.size());
+  try {
+    auto VmmCals = Root["vmm_calibration"];
+    for (auto &vmmcal : VmmCals) {
+      auto fecid = vmmcal["fecID"].get<unsigned int>();
+      auto vmmid = vmmcal["vmmID"].get<unsigned int>();
+      auto offsets = vmmcal["offsets"];
+      auto slopes = vmmcal["slopes"];
 
-    if ((slopes.size() != MAX_CH) or (offsets.size() != MAX_CH)) {
-      LOG(INIT, Sev::Warning,
-          "Invalid channel configuration, skipping for fec {} and vmm {}",
-          fecid, vmmid);
-      continue;
-    }
+      XTRACE(INIT, DEB, "fecid: %d, vmmid: %d, offsets(%d), slopes(%d)\n", fecid,
+             vmmid, offsets.size(), slopes.size());
 
-    for (unsigned int j = 0; j < offsets.size(); j++) {
-      Calibrations[fecid][vmmid][j].offset = offsets[j].get<float>();
-      Calibrations[fecid][vmmid][j].slope = slopes[j].get<float>();
+      if ((slopes.size() != MAX_CH) or (offsets.size() != MAX_CH)) {
+        LOG(INIT, Sev::Warning,
+            "Invalid channel configuration, skipping for fec {} and vmm {}",
+            fecid, vmmid);
+        continue;
+      }
+
+      for (unsigned int j = 0; j < offsets.size(); j++) {
+        Calibrations[fecid][vmmid][j].offset = offsets[j].get<float>();
+        Calibrations[fecid][vmmid][j].slope = slopes[j].get<float>();
+      }
     }
+  }
+  catch (const std::exception &exc) {
+    LOG(INIT, Sev::Error, "JSON config - invalid json: {}", exc.what());
   }
 }
 
