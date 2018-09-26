@@ -28,11 +28,11 @@ void MBConfig::loadConfigFile() {
   nlohmann::json root;
 
   if (ConfigFile.empty()) {
-    LOG(Sev::Info, "JSON config - no config file specified, using default configuration");
+    LOG(INIT, Sev::Info, "JSON config - no config file specified, using default configuration");
     return;
   }
 
-  LOG(Sev::Info, "JSON config - loading configuration from file {}", ConfigFile);
+  LOG(INIT, Sev::Info, "JSON config - loading configuration from file {}", ConfigFile);
   std::ifstream t(ConfigFile);
   std::string jsonstring((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
@@ -41,7 +41,7 @@ void MBConfig::loadConfigFile() {
     root = nlohmann::json::parse(jsonstring);
   }
   catch (...) {
-    LOG(Sev::Error, "JSON config - error: Invalid Json file: {}", ConfigFile);
+    LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}", ConfigFile);
     return;
   }
     /// extract config parameters below
@@ -54,11 +54,11 @@ void MBConfig::loadConfigFile() {
     } else if (instr.compare("Freia") == 0 ) {
       instrument = InstrumentGeometry::Freia;
     } else {
-      LOG(Sev::Warning, "JSON config - error: Unknown instrument specified, using default (Estia)");
+      LOG(INIT, Sev::Warning, "JSON config - error: Unknown instrument specified, using default (Estia)");
     }
   }
   catch (...) {
-    LOG(Sev::Error, "JSONC config - error: parser error for InstrumentGeometry");
+    LOG(INIT, Sev::Error, "JSONC config - error: parser error for InstrumentGeometry");
     return;
   }
 
@@ -67,11 +67,11 @@ void MBConfig::loadConfigFile() {
     for (auto &digitiser : digitisers) {
       auto index = digitiser["index"].get<unsigned int>();
       auto digid = digitiser["id"].get<unsigned int>();
-      LOG(Sev::Info, "JSON config - Digitiser {}, offset {}", digid, index);
+      LOG(INIT, Sev::Info, "JSON config - Digitiser {}, offset {}", digid, index);
     }
   }
   catch (...) {
-    LOG(Sev::Error, "JSONC config error: parser error for DigitizerConfig");
+    LOG(INIT, Sev::Error, "JSONC config error: parser error for DigitizerConfig");
     return;
   }
 
@@ -80,7 +80,7 @@ void MBConfig::loadConfigFile() {
     assert(TimeTickNS != 0);
   }
   catch (...) {
-    LOG(Sev::Error, "JSONC config error: parser error for TimeTickNS");
+    LOG(INIT, Sev::Error, "JSONC config error: parser error for TimeTickNS");
     return;
   }
 
