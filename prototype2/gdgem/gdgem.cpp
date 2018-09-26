@@ -145,9 +145,9 @@ int NMX::getCalibration(std::vector<std::string> cmdargs,
                         __attribute__((unused)) char *output,
                         __attribute__((unused)) unsigned int *obytes) {
   std::string cmd = "NMX_GET_CALIB";
-  LOG(Sev::Info, "{}", cmd);
+  LOG(CMD, Sev::Info, "{}", cmd);
   if (cmdargs.size() != 4) {
-    LOG(Sev::Warning, "{}: wrong number of arguments", cmd);
+    LOG(CMD, Sev::Warning, "{}: wrong number of arguments", cmd);
     return -Parser::EBADARGS;
   }
 

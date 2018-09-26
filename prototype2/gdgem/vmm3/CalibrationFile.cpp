@@ -37,7 +37,7 @@ CalibrationFile::CalibrationFile(std::string jsonfile) : CalibrationFile() {
     return;
   }
 
-  LOG(Sev::Info, "Loading calibration file {}", jsonfile);
+  LOG(INIT, Sev::Info, "Loading calibration file {}", jsonfile);
 
   std::ifstream t(jsonfile);
   std::string Jsonstring((std::istreambuf_iterator<char>(t)),
@@ -52,7 +52,7 @@ void CalibrationFile::loadCalibration(std::string jsonstring) {
   try {
     Root = nlohmann::json::parse(jsonstring);
   } catch (...) {
-    LOG(Sev::Warning, "Invalid Json file: {}", jsonstring);
+    LOG(INIT, Sev::Warning, "Invalid Json file: {}", jsonstring);
     return;
   }
 
@@ -66,7 +66,7 @@ void CalibrationFile::loadCalibration(std::string jsonstring) {
            vmmid, offsets.size(), slopes.size());
 
     if ((slopes.size() != MAX_CH) or (offsets.size() != MAX_CH)) {
-      LOG(Sev::Warning,
+      LOG(INIT, Sev::Warning,
           "Invalid channel configuration, skipping for fec {} and vmm {}",
           fecid, vmmid);
       continue;
