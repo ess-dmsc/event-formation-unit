@@ -84,7 +84,7 @@ add_custom_target(doxygen
 # Finalize coverage
 #=============================================================================
 set(gcovr_excl_opts
-"--exclude='/.*Test.cpp' --exclude='.*gtest.*.h' --exclude='.*CLI11.hpp'")
+"--exclude='/.*Test.cpp' --exclude='.*gtest.*.h' --exclude='.*CLI.hpp'")
 create_coverage_targets(
   coverage
   runtest

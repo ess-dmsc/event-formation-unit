@@ -102,9 +102,9 @@ PopulateCLIParser PopulateParser{SetCLIArguments};
 int CSPEC::LoadCalib(std::vector<std::string> cmdargs,
                      __attribute__((unused)) char *output,
                      __attribute__((unused)) unsigned int *obytes) {
-  LOG(Sev::Info, "CSPEC_LOAD_CALIB");
+  LOG(CMD, Sev::Info, "CSPEC_LOAD_CALIB");
   if (cmdargs.size() != 2) {
-    LOG(Sev::Warning, "CSPEC_LOAD_CALIB: wrong number of arguments");
+    LOG(CMD, Sev::Warning, "CSPEC_LOAD_CALIB: wrong number of arguments");
     return -Parser::EBADARGS;
   }
   CalibrationFile calibfile;
@@ -122,13 +122,13 @@ int CSPEC::ShowCalib(std::vector<std::string> cmdargs, char *output,
                      unsigned int *obytes) {
   auto nargs = cmdargs.size();
   unsigned int offset = 0;
-  LOG(Sev::Info, "CSPEC_SHOW_CALIB");
+  LOG(CMD, Sev::Info, "CSPEC_SHOW_CALIB");
   if (nargs == 1) {
     offset = 0;
   } else if (nargs == 2) {
     offset = atoi(cmdargs.at(1).c_str());
   } else {
-    LOG(Sev::Warning, "CSPEC_SHOW_CALIB: wrong number of arguments");
+    LOG(CMD, Sev::Warning, "CSPEC_SHOW_CALIB: wrong number of arguments");
     return -Parser::EBADARGS;
   }
 
@@ -146,7 +146,7 @@ int CSPEC::ShowCalib(std::vector<std::string> cmdargs, char *output,
 CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC Detector (2 thread pipeline)", settings) {
   Stats.setPrefix("efu.cspec2");
 
-  LOG(Sev::Debug, "Adding stats");
+  LOG(INIT, Sev::Debug, "Adding stats");
   // clang-format off
   Stats.create("input.rx_packets",                mystats.rx_packets);
   Stats.create("input.rx_bytes",                  mystats.rx_bytes);
@@ -180,7 +180,7 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC Detector (2 thread pipelin
                        return CSPEC::ShowCalib(cmdargs, output, obytes);
                      });
 
-  LOG(Sev::Debug, "Creating {} Ethernet ringbuffers of size {}",
+  LOG(INIT, Sev::Debug, "Creating {} Ethernet ringbuffers of size {}",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
 }
@@ -216,7 +216,7 @@ void CSPEC::input_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      LOG(Sev::Debug, "Stopping input thread.");
+      LOG(INPUT, Sev::Debug, "Stopping input thread.");
       return;
     }
   }
@@ -239,7 +239,7 @@ void CSPEC::processing_thread() {
   while (1) {
     // Check for control from mothership (main)
     if (NewCalibrationData) {
-      LOG(Sev::Info, "processing_thread loading new calibrations");
+      LOG(PROCESS, Sev::Info, "processing_thread loading new calibrations");
       conv.load_calibration(wirecal, gridcal);
       NewCalibrationData = false;
     }
@@ -284,7 +284,7 @@ void CSPEC::processing_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      LOG(Sev::Debug, "Stopping processing thread.");
+      LOG(PROCESS, Sev::Debug, "Stopping processing thread.");
       return;
     }
   }
