@@ -13,7 +13,7 @@
 class MB16Detector {
 public:
 
-  /// \brief mapping between didigizer ids (serial numbers) and physical order
+  /// \brief mapping between digitiser ids (serial numbers) and physical order
   inline int cassette(int digid) {
     switch (digid) {
     case 137:

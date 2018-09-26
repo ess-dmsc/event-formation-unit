@@ -20,7 +20,7 @@ public:
   MBConfig(){};
 
   /// \brief get configuration from file
-  MBConfig(std::string jsonfile);
+  explicit MBConfig(std::string jsonfile);
 
 private:
   enum class InstrumentGeometry {Estia, Freia};
