@@ -65,9 +65,11 @@ void MBConfig::loadConfigFile() {
   try {
     auto digitisers = root["DigitizerConfig"];
     for (auto &digitiser : digitisers) {
-      auto index = digitiser["index"].get<unsigned int>();
-      auto digid = digitiser["id"].get<unsigned int>();
-      LOG(INIT, Sev::Info, "JSON config - Digitiser {}, offset {}", digid, index);
+      struct Digitiser digit;
+      digit.index = digitiser["index"].get<unsigned int>();
+      digit.digid = digitiser["id"].get<unsigned int>();
+      Digitisers.push_back(digit);
+      LOG(INIT, Sev::Info, "JSON config - Digitiser {}, offset {}", digit.digid, digit.index);
     }
   }
   catch (...) {
@@ -84,5 +86,5 @@ void MBConfig::loadConfigFile() {
     return;
   }
 
-  IsValidConfig = true;
+  IsConfigLoaded = true;
 }

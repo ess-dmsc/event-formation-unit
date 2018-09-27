@@ -11,10 +11,16 @@
 
 #include <mbcaen/MB16Detector.h>
 #include <string>
-
+#include <vector>
 
 class MBConfig {
 public:
+  enum class InstrumentGeometry {Estia, Freia};
+
+  struct Digitiser {
+    int index; // order in which they are positioned in VME crate
+    int digid; // digitiser id
+  };
 
   ///
   MBConfig(){};
@@ -22,14 +28,10 @@ public:
   /// \brief get configuration from file
   explicit MBConfig(std::string jsonfile);
 
-private:
-  enum class InstrumentGeometry {Estia, Freia};
-
-  /// \brief helper function to load and parse json file
-  void loadConfigFile();
+  bool isConfigLoaded() {return IsConfigLoaded;}
 
   /// Name of the json configuratio file to load
-  std::string ConfigFile;
+  std::string ConfigFile{""};
 
   /// Specify the instrument geometry
   InstrumentGeometry instrument{InstrumentGeometry::Estia};
@@ -40,6 +42,15 @@ private:
   /// local readout timestamp resolution
   uint32_t TimeTickNS{16};
 
+  /// for now just hold a vector of the digitisers, \todo later
+  /// incorporate in the digital geometry
+  std::vector<struct Digitiser> Digitisers;
+
+private:
+
+  /// \brief helper function to load and parse json file
+  void loadConfigFile();
+
   /// Set to true by loadConfigFile() if all is well
-  bool IsValidConfig{false};
+  bool IsConfigLoaded{false};
 };

@@ -104,7 +104,16 @@ set(mbtest_INC mbcommon/MultiBladeEventBuilder.h mbtest/MultiBladeTestData.h)
 #   )
 # create_test_executable(MBClusterTest)
 
+#
+# MJC Unit tests below
+#
+
 # Create excecutable for the test of geometry
 set(MB16DetectorTest_INC mbcaen/MB16Detector.h)
 set(MB16DetectorTest_SRC mbcaen/MB16DetectorTest.cpp)
 create_test_executable(MB16DetectorTest)
+
+#
+set(MBConfigTest_INC mbcommon/MBConfig.h ../../prototype2/common/DataSave.h)
+set(MBConfigTest_SRC mbcommon/MBConfig.cpp mbcommon/MBConfigTest.cpp ../../prototype2/common/DataSave.cpp)
+create_test_executable(MBConfigTest)
