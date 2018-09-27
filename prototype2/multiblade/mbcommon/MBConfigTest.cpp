@@ -53,6 +53,18 @@ TEST_F(MBConfigTest, IncompleteConfigFile) {
   ASSERT_EQ(mbconf.Digitisers.size(), 0);
 }
 
+TEST_F(MBConfigTest, InvalidDigitiserInFile) {
+  std::string filename{"deleteme_invaliddigitiser.json"};
+  DataSave tempfile(filename, (void *)invaliddigitiser.c_str(), invaliddigitiser.size());
+  MBConfig mbconf;
+  mbconf = MBConfig(filename);
+  ASSERT_FALSE(mbconf.isConfigLoaded());
+  ASSERT_EQ(mbconf.TimeTickNS, 16);
+  ASSERT_NE(mbconf.detector, nullptr);
+  ASSERT_EQ(mbconf.ConfigFile, filename);
+  ASSERT_EQ(mbconf.Digitisers.size(), 0);
+}
+
 TEST_F(MBConfigTest, ValidConfigFile) {
   std::string filename{"deleteme_valid.json"};
   DataSave tempfile(filename, (void *)validconfig.c_str(), validconfig.size());

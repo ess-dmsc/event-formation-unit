@@ -22,6 +22,23 @@ std::string incompleteconfig = R"(
   }
 )";
 
+std::string invaliddigitiser = R"(
+  {
+    "InstrumentGeometry": "Estia",
+
+    "DigitizerConfig" : [
+      { "index" : 0, "id" : 137 },
+      { "index" : 1, "id" : 143 },
+      { "index" : 2, "id" : 142 },
+      { "index" : 3, "Zorglub" :  31 },
+      { "index" : 4, "id" :  33 },
+      { "index" : 5, "id" :  34 }
+    ],
+
+    "TimeTickNS": 17
+  }
+)";
+
 std::string validconfig = R"(
   {
     "InstrumentGeometry": "Estia",

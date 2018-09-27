@@ -73,6 +73,7 @@ void MBConfig::loadConfigFile() {
     }
   }
   catch (...) {
+    Digitisers.clear();
     LOG(INIT, Sev::Error, "JSONC config error: parser error for DigitizerConfig");
     return;
   }
