@@ -17,7 +17,7 @@ MBConfig::MBConfig(std::string jsonfile) : ConfigFile(jsonfile) {
   loadConfigFile();
 
   if (instrument == InstrumentGeometry::Estia) {
-    detector = new MB16Detector();
+    detector = new MB16Detector(Digitisers);
   }
 
   assert(detector != nullptr);
@@ -58,14 +58,14 @@ void MBConfig::loadConfigFile() {
     }
   }
   catch (...) {
-    LOG(INIT, Sev::Error, "JSONC config - error: parser error for InstrumentGeometry");
+    LOG(INIT, Sev::Error, "JSON config - error: parser error for InstrumentGeometry");
     return;
   }
 
   try {
     auto digitisers = root["DigitizerConfig"];
     for (auto &digitiser : digitisers) {
-      struct Digitiser digit;
+      struct MB16Detector::Digitiser digit;
       digit.index = digitiser["index"].get<unsigned int>();
       digit.digid = digitiser["id"].get<unsigned int>();
       Digitisers.push_back(digit);
@@ -74,7 +74,7 @@ void MBConfig::loadConfigFile() {
   }
   catch (...) {
     Digitisers.clear();
-    LOG(INIT, Sev::Error, "JSONC config error: parser error for DigitizerConfig");
+    LOG(INIT, Sev::Error, "JSON config error: parser error for DigitizerConfig");
     return;
   }
 
@@ -83,7 +83,7 @@ void MBConfig::loadConfigFile() {
     assert(TimeTickNS != 0);
   }
   catch (...) {
-    LOG(INIT, Sev::Error, "JSONC config error: parser error for TimeTickNS");
+    LOG(INIT, Sev::Error, "JSON config error: parser error for TimeTickNS");
     return;
   }
 

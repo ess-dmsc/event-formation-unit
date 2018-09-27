@@ -22,7 +22,6 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 
-#include <mbcaen/MB16Detector.h>
 #include <mbcaen/DataParser.h>
 #include <mbcommon/MBConfig.h>
 #include <mbcommon/MultiBladeEventBuilder.h>
@@ -133,11 +132,12 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
 
   XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d",
          eth_buffer_max_entries, eth_buffer_size);
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries +
-                                                11); // \todo workaround
+  /// \todo the number 11 is a workaround
+  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
   assert(eth_ringbuf != 0);
 
   mb_opts = MBConfig(DetectorSettings.ConfigFile);
+  assert(mb_opts.detector != nullptr);
 }
 
 const char *MBCAEN::detectorname() { return classname; }
@@ -198,7 +198,6 @@ void MBCAEN::processing_thread() {
   }
 
   ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
-  MB16Detector mb16;
 
   Producer eventprod(EFUSettings.KafkaBroker, "MB_detector");
   Producer monitorprod(EFUSettings.KafkaBroker, "MB_monitor");
@@ -211,6 +210,7 @@ void MBCAEN::processing_thread() {
   }
 
   DataParser mbdata;
+  MB16Detector mb16(mb_opts.Digitisers);
 
   unsigned int data_index;
   TSCTimer produce_timer;
@@ -270,7 +270,9 @@ void MBCAEN::processing_thread() {
           // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d\n",
           //       digitizerId, dp.localTime, dp.channel, dp.adcValue);
 
+          /// \todo why can't I use mb_opts.detector->cassette()
           auto cassette = mb16.cassette(digitizerId);
+
           if (cassette < 0) {
             XTRACE(DATA, WAR, "Invalid digitizerId: %d\n", digitizerId);
 

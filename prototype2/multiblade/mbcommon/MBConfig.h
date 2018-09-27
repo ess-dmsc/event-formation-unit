@@ -17,11 +17,6 @@ class MBConfig {
 public:
   enum class InstrumentGeometry {Estia, Freia};
 
-  struct Digitiser {
-    int index; // order in which they are positioned in VME crate
-    int digid; // digitiser id
-  };
-
   ///
   MBConfig(){};
 
@@ -44,7 +39,7 @@ public:
 
   /// for now just hold a vector of the digitisers, \todo later
   /// incorporate in the digital geometry
-  std::vector<struct Digitiser> Digitisers;
+  std::vector<struct MB16Detector::Digitiser> Digitisers;
 
 private:
 
