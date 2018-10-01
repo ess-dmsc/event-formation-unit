@@ -20,12 +20,7 @@ TEST_F(MBConfigTest, Constructor) {
 
 TEST_F(MBConfigTest, NoFile) {
   MBConfig mbconf;
-  mbconf = MBConfig("");
-  ASSERT_FALSE(mbconf.isConfigLoaded());
-  ASSERT_EQ(mbconf.getTimeTickNS(), 16);
-  ASSERT_NE(mbconf.getDetector(), nullptr);
-  ASSERT_TRUE(mbconf.getConfigFile().empty());
-  ASSERT_EQ(mbconf.getDigitisers().size(), 0);
+  ASSERT_THROW(mbconf = MBConfig(""), std::runtime_error);
 }
 
 
@@ -33,36 +28,21 @@ TEST_F(MBConfigTest, InvalidJSON) {
   std::string filename{"deleteme_invalid.json"};
   DataSave tempfile(filename, (void *)invalidjson.c_str(), invalidjson.size());
   MBConfig mbconf;
-  mbconf = MBConfig(filename);
-  ASSERT_FALSE(mbconf.isConfigLoaded());
-  ASSERT_EQ(mbconf.getTimeTickNS(), 16);
-  ASSERT_NE(mbconf.getDetector(), nullptr);
-  ASSERT_EQ(mbconf.getConfigFile(), filename);
-  ASSERT_EQ(mbconf.getDigitisers().size(), 0);
+  ASSERT_THROW(mbconf = MBConfig(filename), std::runtime_error);
 }
 
 TEST_F(MBConfigTest, IncompleteConfigFile) {
   std::string filename{"deleteme_incomplete.json"};
   DataSave tempfile(filename, (void *)incompleteconfig.c_str(), incompleteconfig.size());
   MBConfig mbconf;
-  mbconf = MBConfig(filename);
-  ASSERT_FALSE(mbconf.isConfigLoaded());
-  ASSERT_EQ(mbconf.getTimeTickNS(), 16);
-  ASSERT_NE(mbconf.getDetector(), nullptr);
-  ASSERT_EQ(mbconf.getConfigFile(), filename);
-  ASSERT_EQ(mbconf.getDigitisers().size(), 0);
+  ASSERT_THROW(mbconf = MBConfig(filename), std::runtime_error);
 }
 
 TEST_F(MBConfigTest, InvalidDigitiserInFile) {
   std::string filename{"deleteme_invaliddigitiser.json"};
   DataSave tempfile(filename, (void *)invaliddigitiser.c_str(), invaliddigitiser.size());
   MBConfig mbconf;
-  mbconf = MBConfig(filename);
-  ASSERT_FALSE(mbconf.isConfigLoaded());
-  ASSERT_EQ(mbconf.getTimeTickNS(), 16);
-  ASSERT_NE(mbconf.getDetector(), nullptr);
-  ASSERT_EQ(mbconf.getConfigFile(), filename);
-  ASSERT_EQ(mbconf.getDigitisers().size(), 0);
+  ASSERT_THROW(mbconf = MBConfig(filename), std::runtime_error);
 }
 
 TEST_F(MBConfigTest, ValidConfigFile) {
