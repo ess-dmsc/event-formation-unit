@@ -16,6 +16,10 @@ MBConfig::MBConfig(std::string jsonfile) : ConfigFile(jsonfile) {
 
   loadConfigFile();
 
+  if (!isConfigLoaded()) {
+    throw std::runtime_error("Unable to load configuration file.");
+  }
+
   if (Instrument == InstrumentGeometry::Estia) {
     Detector = new MB16Detector(Digitisers);
   }
