@@ -13,6 +13,7 @@
 #include <gdgem/srs/SRSTime.h>
 #include <gdgem/nmx/Event.h>
 #include <gdgem/vmm3/CalibrationFile.h>
+#include <memory>
 #include <string>
 
 struct ClustererConfig {
