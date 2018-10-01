@@ -202,9 +202,6 @@ def docker_archive(image_key) {
                         cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
                         cp -r ${project}/utils/hwcheck archive/event-formation-unit/util/
                         cp -r ${project}/monitors/* archive/event-formation-unit/util
-                        mkdir archive/event-formation-unit/configs
-                        cp -r ${project}/prototype2/multiblade/configs/* archive/event-formation-unit/configs/
-                        cp -r ${project}/prototype2/gdgem/configs/* archive/event-formation-unit/configs/
                         mkdir archive/event-formation-unit/data
                         cp -r ${project}/prototype2/multigrid/calib_data/* archive/event-formation-unit/data
                         cd archive
