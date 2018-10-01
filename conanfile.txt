@@ -12,6 +12,7 @@ asio/1.11.0@bincrafters/stable
 readerwriterqueue/07e22ec@ess-dmsc/stable
 cmake_installer/3.10.0@conan/stable
 fmt/5.1.0@bincrafters/stable
+jsonformoderncpp/3.1.0@vthiery/stable
 
 [generators]
 cmake

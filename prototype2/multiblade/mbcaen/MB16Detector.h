@@ -9,31 +9,28 @@
 
 #pragma once
 #include <cstdio>
+#include <vector>
 
 class MB16Detector {
 public:
+
+  struct Digitiser {
+    int index; // order in which they are positioned in VME crate
+    int digid; // digitiser id
+  };
+
+  MB16Detector(std::vector<struct MB16Detector::Digitiser> & digitisers) : Digitisers(digitisers) { };
+
+  /// \brief mapping between digitiser ids (serial numbers) and physical order
   inline int cassette(int digid) {
-    switch (digid) {
-    case 137:
-      return 0;
-      break;
-    case 143:
-      return 1;
-      break;
-    case 142:
-      return 2;
-      break;
-    case 31:
-      return 3;
-      break;
-    case 34:
-      return 4;
-      break;
-    case 33:
-      return 5;
-      break;
-    default:
-      return -1;
+    for (auto & digi : Digitisers) {
+      if (digi.digid == digid) {
+        return digi.index;
+      }
     }
+    return -1;
   }
+  
+private:
+  std::vector<struct MB16Detector::Digitiser> & Digitisers;
 };
