@@ -4,15 +4,21 @@ include_directories(.)
 # Detector Pipeline Plugins
 #=============================================================================
 set(mbcaen_INC
-  mbcaen/MBData.h
+  ../common/Hists.h
+  ../common/HistSerializer.h
+  mbcaen/DataParser.h
   mbcommon/MultiBladeEventBuilder.h
   mbcommon/DumpEventBuilderInfo.h
+  mbcommon/MBConfig.h
   )
 set(mbcaen_SRC
+  ../common/Hists.cpp
+  ../common/HistSerializer.cpp
   mbcaen.cpp
-  mbcaen/MBData.cpp
+  mbcaen/DataParser.cpp
   mbcommon/MultiBladeEventBuilder.cpp
   mbcommon/DumpEventBuilderInfo.cpp
+  mbcommon/MBConfig.cpp
   )
 create_module(mbcaen)
 
@@ -60,9 +66,9 @@ else()
 endif()
 
 # GOOGLE BENCHMARK
-set(MBDataBenchmarkTest_INC ${mbtest_INC})
-set(MBDataBenchmarkTest_SRC mbcaen/MBData.cpp mbcaen/MBDataBenchmarkTest.cpp)
-create_benchmark_executable(MBDataBenchmarkTest)
+set(DataParserBenchmarkTest_INC ${mbtest_INC})
+set(DataParserBenchmarkTest_SRC mbcaen/DataParser.cpp mbcaen/DataParserBenchmarkTest.cpp)
+create_benchmark_executable(DataParserBenchmarkTest)
 
 # GOOGLE BENCHMARK
 set(MultiBladeEventBuilderBenchmarkTest_INC ${mbtest_INC})
@@ -73,26 +79,41 @@ set(MultiBladeEventBuilderBenchmarkTest_SRC
 create_benchmark_executable(MultiBladeEventBuilderBenchmarkTest)
 
 
+# Create excecutable for the test of geometry
+set(MBDataParserTest_INC mbcaen/DataParser.h)
+set(MBDataParserTest_SRC mbcaen/DataParser.cpp mbcaen/DataParserTest.cpp)
+create_test_executable(MBDataParserTest)
+
+
 # Common include path for both tests
 set(mbtest_INC mbcommon/MultiBladeEventBuilder.h mbtest/MultiBladeTestData.h)
 
 # Create excecutable for the test of counters
-set(MultiBladeEventBuilderTest_INC ${mbtest_INC} )
-set(MultiBladeEventBuilderTest_SRC
-  mbcommon/MultiBladeEventBuilder.cpp
-  mbtest/MultiBladeEventBuilderCounterTest.cpp
-  )
-create_test_executable(MultiBladeEventBuilderTest)
+# set(MultiBladeEventBuilderTest_INC ${mbtest_INC} )
+# set(MultiBladeEventBuilderTest_SRC
+#   mbcommon/MultiBladeEventBuilder.cpp
+#   mbtest/MultiBladeEventBuilderCounterTest.cpp
+#   )
+# create_test_executable(MultiBladeEventBuilderTest)
 
 # Create excecutable for the test of clustering
-set(MBClusterTest_INC ${mbtest_INC})
-set(MBClusterTest_SRC
-  mbcommon/MultiBladeEventBuilder.cpp
-  mbtest/MultiBladeEventBuilderClusteringTest.cpp
-  )
-create_test_executable(MBClusterTest)
+# set(MBClusterTest_INC ${mbtest_INC})
+# set(MBClusterTest_SRC
+#   mbcommon/MultiBladeEventBuilder.cpp
+#   mbtest/MultiBladeEventBuilderClusteringTest.cpp
+#   )
+# create_test_executable(MBClusterTest)
+
+#
+# MJC Unit tests below
+#
 
 # Create excecutable for the test of geometry
 set(MB16DetectorTest_INC mbcaen/MB16Detector.h)
 set(MB16DetectorTest_SRC mbcaen/MB16DetectorTest.cpp)
 create_test_executable(MB16DetectorTest)
+
+#
+set(MBConfigTest_INC mbcommon/MBConfig.h ../../prototype2/common/DataSave.h)
+set(MBConfigTest_SRC mbcommon/MBConfig.cpp mbcommon/MBConfigTest.cpp ../../prototype2/common/DataSave.cpp)
+create_test_executable(MBConfigTest)

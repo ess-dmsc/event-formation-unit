@@ -12,6 +12,8 @@
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
 #include <gdgem/nmx/Event.h>
+#include <gdgem/vmm3/CalibrationFile.h>
+#include <memory>
 #include <string>
 
 struct ClustererConfig {
@@ -50,10 +52,13 @@ struct EventFilter {
 };
 
 struct NMXConfig {
-  NMXConfig() {}
-  NMXConfig(std::string jsonfile);
+  NMXConfig() { }
+  NMXConfig(std::string configfile, std::string calibrationfile);
 
   std::string builder_type{"VMM2"};
+
+  // VMM calibration
+  std::shared_ptr<CalibrationFile> calfile;
 
   // SRS only
   SRSTime time_config;

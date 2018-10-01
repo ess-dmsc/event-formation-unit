@@ -20,7 +20,7 @@ Config::Config(std::string jsonfile) {
     root = nlohmann::json::parse(str);
   }
   catch (...) {
-    LOG(Sev::Warning, "Invalid Json file: {}", jsonfile);
+    LOG(INIT, Sev::Warning, "Invalid Json file: {}", jsonfile);
     return;
   }
 

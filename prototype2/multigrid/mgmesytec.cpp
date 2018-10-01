@@ -55,7 +55,7 @@ void SetCLIArguments(CLI::App & parser) {
                     "NMX (gdgem) specific config file")->group("MGMesytec")->
                     required()->configurable(true);
   parser.add_flag("--monitor", DetectorSettings.monitor,
-                  "stream monitor data")->group("MGMesytec")->configurable(true)->set_default_val("true");
+                  "stream monitor data")->group("MGMesytec")->configurable(true)->default_val("true");
   parser.add_option("--dumptofile", DetectorSettings.fileprefix,
                     "dump to specified file")->group("MGMesytec")->configurable(true);
 }
@@ -92,13 +92,13 @@ struct Monitor
       return;
 
     if (!hists->isEmpty()) {
-      LOG(Sev::Debug, "Flushing histograms for {} readouts", hists->hit_count());
+      LOG(PROCESS, Sev::Debug, "Flushing histograms for {} readouts", hists->hit_count());
       histfb->produce(*hists);
       hists->clear();
     }
 
     if (readouts->getNumEntries()) {
-      LOG(Sev::Debug, "Flushing readout data for {} readouts", readouts->getNumEntries());
+      LOG(PROCESS, Sev::Debug, "Flushing readout data for {} readouts", readouts->getNumEntries());
       readouts->produce();
     }
   }
@@ -173,7 +173,7 @@ private:
 CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   Stats.setPrefix("efu.mgmesytec");
 
-  LOG(Sev::Info, "Adding stats");
+  LOG(INIT, Sev::Info, "Adding stats");
   // clang-format off
   Stats.create("rx_packets",           mystats.rx_packets);
   Stats.create("rx_bytes",             mystats.rx_bytes);
@@ -194,10 +194,10 @@ CSPEC::CSPEC(BaseSettings settings) : Detector("CSPEC", settings) {
   std::function<void()> inputFunc = [this]() { CSPEC::mainThread(); };
   Detector::AddThreadFunction(inputFunc, "main");
 
-  LOG(Sev::Info, "Stream monitor data = {}",
+  LOG(INIT, Sev::Info, "Stream monitor data = {}",
       (DetectorSettings.monitor ? "YES" : "no"));
   if (!DetectorSettings.fileprefix.empty())
-    LOG(Sev::Info, "Dump h5 data in path: {}",
+    LOG(INIT, Sev::Info, "Dump h5 data in path: {}",
            DetectorSettings.fileprefix);
 }
 
@@ -207,9 +207,9 @@ const char *CSPEC::detectorname() { return classname; }
 
 void CSPEC::init_config()
 {
-  LOG(Sev::Info, "MG Config file: {}", DetectorSettings.ConfigFile);
+  LOG(INIT, Sev::Info, "MG Config file: {}", DetectorSettings.ConfigFile);
   mg_config = Multigrid::Config(DetectorSettings.ConfigFile);
-  LOG(Sev::Info, "Multigrid Config\n{}", mg_config.debug());
+  LOG(INIT, Sev::Info, "Multigrid Config\n{}", mg_config.debug());
 
   if (DetectorSettings.monitor)
     monitor.init(EFUSettings.KafkaBroker, readout_entries);
@@ -257,7 +257,7 @@ void CSPEC::mainThread() {
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += ReadSize;
-      LOG(Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
+      LOG(PROCESS, Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
 
       mystats.sis_discarded_bytes += sis3153parser.parse(Buffer<uint8_t>(buffer, ReadSize));
 
@@ -336,7 +336,7 @@ void CSPEC::mainThread() {
       // flush anything that remains
       mystats.tx_bytes += ev42serializer.produce();
       monitor.produce();
-      LOG(Sev::Info, "Stopping processing thread.");
+      LOG(PROCESS, Sev::Info, "Stopping processing thread.");
       return;
     }
   }

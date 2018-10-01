@@ -52,15 +52,25 @@ add_subdirectory(udp)
 add_subdirectory(adc_readout)
 add_subdirectory(tools)
 
+get_filename_component(MB_CFG_FILE "multiblade/configs/MB16.json" ABSOLUTE)
+get_filename_component(GDGEM_CFG_FILE "gdgem/configs/vmm3.json" ABSOLUTE)
+add_custom_target(copycfgs
+COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/configs
+COMMAND ${CMAKE_COMMAND} -E copy ${MB_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+COMMENT "Copying ${MB_CFG_FILE} to ${PROJECT_BINARY_DIR}/configs"
+COMMAND ${CMAKE_COMMAND} -E copy ${GDGEM_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+COMMENT "Copying json configuration files to ${PROJECT_BINARY_DIR}/configs"
+)
+
 add_custom_target(runefu
     COMMAND efu "-d" "../modules/mgmesytec" "-f" "nocfgfile" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/mgcncs2" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/sonde" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
-    COMMAND efu "-d" "../modules/mbcaen" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
+    COMMAND efu "-d" "../modules/mbcaen" "-f" "../configs/MB16.json"  "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/AdcReadout" "-s" "1" "-u" "1500"
     COMMAND efu "-d" "../modules/udp" "-s" "1" "-u" "1500"
-    COMMAND efu "-d" "../modules/gdgem" "-f" "nocfgfile" "-s" "2" "-u" "1500"
-    DEPENDS efu mgmesytec mgcncs2 gdgem sonde mbcaen udp AdcReadout
+    COMMAND efu "-d" "../modules/gdgem" "-f" "../configs/vmm3.json" "-s" "2" "-u" "1500"
+    DEPENDS copycfgs efu mgmesytec mgcncs2 gdgem sonde mbcaen udp AdcReadout
     )
 
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <CLI11.hpp>
+#include <CLI/CLI.hpp>
 #include <atomic>
 #include <common/NewStats.h>
 #include <functional>
@@ -23,7 +23,7 @@
 // clang-format off
 struct BaseSettings {
   std::string   DetectorPluginName   = {""};
-  std::string   DetectorAddress      = {""};
+  std::string   DetectorAddress      = {"0.0.0.0"};
   std::uint16_t DetectorPort         = {9000};
   std::uint16_t CommandServerPort    = {8888};
   std::int32_t  ReceiveMaxBytes      = {9000}; // Jumbo frame support
@@ -117,6 +117,8 @@ struct PopulateCLIParser {
 class DetectorFactoryBase {
 public:
   virtual std::shared_ptr<Detector> create(BaseSettings settings) = 0;
+
+  virtual ~DetectorFactoryBase(){};
 };
 
 /// \brief Template for creating detector factories in dynamically loaded detector modules.
@@ -125,7 +127,7 @@ public:
 template <class DetectorModule>
 class DetectorFactory : public DetectorFactoryBase {
 public:
-  /// \brief Instantiates the cooresponding detector module.
+  /// \brief Instantiates the corresponding detector module.
   ///
   /// This member function is only called by the efu when loading a detector module.
   std::shared_ptr<Detector> create(BaseSettings Settings) override {

@@ -14,7 +14,7 @@ std::vector<RunSpec *> &RunSpecParse::getruns(std::string runspec,
                                               int end) {
 
   std::ifstream t(jsonfile);
-  std::string str((std::istreambuf_iterator<char>(t)),
+  std::string jsonstring((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
 
   if (basedir.back() != '/') {
@@ -25,29 +25,33 @@ std::vector<RunSpec *> &RunSpecParse::getruns(std::string runspec,
     outputdir += '/';
   }
 
-  if (!reader.parse(str, root, 0)) {
-    printf("error: file \"%s\" is not valid json\n", jsonfile.c_str());
+  nlohmann::json root;
+  try {
+    root = nlohmann::json::parse(jsonstring);
+  }
+  catch (...) {
+    printf("Invalid Json file: %s\n", jsonstring.c_str());
     throw std::runtime_error("Parsed file was not valid JSON.");
   }
 
-  const Json::Value plugins = root[runspec];
+  auto specs = root[runspec];
 
   /** Run through all runs for the selected runspec group */
-  for (unsigned int index = 0; index < plugins.size(); index++) {
-    auto runid = plugins[index][ID].asInt();
+  for (unsigned int i = 0; i < specs.size(); i++) {
+    auto runid = specs[i][ID].get<int>();
     if ((runid >= start && runid <= end) || start == 0) {
 
-      auto dir = basedir + plugins[index][DIR].asString();
-      auto pre = plugins[index][PREFIX].asString();
-      auto pos = plugins[index][POSTFIX].asString();
-      auto start = plugins[index][START].asInt();
-      auto end = plugins[index][END].asInt();
+      auto dir = basedir + specs[i][DIR].get<std::string>();
+      auto pre = specs[i][PREFIX].get<std::string>();
+      auto pos = specs[i][POSTFIX].get<std::string>();
+      auto start = specs[i][START].get<int>();
+      auto end = specs[i][END].get<int>();
 
       /** If threshold is specified, use it. Else use default threshold alg. */
       int thresh = -1;
-      auto object = plugins[index][THRESHOLD];
-      if (object != Json::Value::null) {
-        thresh = plugins[index][THRESHOLD].asInt();
+      auto object = specs[i][THRESHOLD];
+      if (!object.is_null()) {
+        thresh = specs[i][THRESHOLD].get<int>();
       }
 
       // Make unique filename from runspec and runid

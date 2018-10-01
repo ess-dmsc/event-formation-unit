@@ -6,39 +6,43 @@
 /// plugin for gdgem detector data reception, parsing and event formation
 ///
 //===----------------------------------------------------------------------===//
-#include <dataformats/multigrid/inc/json.h>
 
 #include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
+#include <nlohmann/json.hpp>
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
+#include <common/HistSerializer.h>
+#include <common/Log.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
+#include <common/Trace.h>
+#include <efu/Parser.h>
+#include <efu/Server.h>
 
 #include <gdgem/NMXConfig.h>
-#include <common/HistSerializer.h>
-#include <gdgem/nmx/TrackSerializer.h>
+
 #include <gdgem/generators/BuilderAPV.h>
 #include <gdgem/generators/BuilderHits.h>
+#include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/vmm2/BuilderVMM2.h>
 #include <gdgem/vmm3/BuilderVMM3.h>
 
 #include <gdgem/clustering/ClusterMatcher.h>
 #include <gdgem/clustering/DoroClusterer.h>
 
-#include <iostream>
-#include <memory>
-#include <sstream>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <iostream>
+#include <memory>
+#include <sstream>
 #include <unistd.h>
 
-#include <common/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
@@ -52,22 +56,36 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 struct NMXSettingsStruct {
   std::string ConfigFile;
+  std::string CalibrationFile;
 } NMXSettings;
 
-void SetCLIArguments(CLI::App& parser) {
-  parser.add_option("-f,--file", NMXSettings.ConfigFile,
-                    "NMX (gdgem) specific config file")
-      ->group("NMX")->required();
+void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+  parser
+      .add_option("-f,--file", NMXSettings.ConfigFile,
+                  "NMX (gdgem) specific config (json) file")
+      ->group("NMX")
+      ->required();
+  parser
+      .add_option("--calibration", NMXSettings.CalibrationFile,
+                  "NMX (gdgem) specific calibration (json) file")
+      ->group("NMX");
 }
 
 class NMX : public Detector {
 public:
   NMX(BaseSettings settings);
   ~NMX();
+
+  /// \brief detector specific threads
   void input_thread();
   void processing_thread();
 
+  /// \brief
   const char *detectorname();
+
+  /// \brief detector specific commands
+  int getCalibration(std::vector<std::string> cmdargs, UNUSED char *output,
+                     UNUSED unsigned int *obytes);
 
   /** \todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 2000;
@@ -122,6 +140,33 @@ private:
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
+int NMX::getCalibration(std::vector<std::string> cmdargs,
+                        __attribute__((unused)) char *output,
+                        __attribute__((unused)) unsigned int *obytes) {
+  std::string cmd = "NMX_GET_CALIB";
+  LOG(CMD, Sev::Info, "{}", cmd);
+  if (cmdargs.size() != 4) {
+    LOG(CMD, Sev::Warning, "{}: wrong number of arguments", cmd);
+    return -Parser::EBADARGS;
+  }
+
+  int fec = atoi(cmdargs.at(1).c_str());
+  int asic = atoi(cmdargs.at(2).c_str());
+  int channel = atoi(cmdargs.at(3).c_str());
+  auto calib = nmx_opts.calfile->getCalibration(fec, asic, channel);
+
+  if ((abs(calib.offset) <= 1e-6) and (abs(calib.slope) <= 1e-6)) {
+    *obytes =
+        snprintf(output, SERVER_BUFFER_SIZE, "<error> no calibration exist");
+    return -Parser::EBADARGS;
+  }
+
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "%s offset: %f slope: %f",
+                     cmd.c_str(), calib.offset, calib.slope);
+
+  return Parser::OK;
+}
+
 NMX::~NMX() { printf("NMX detector destructor called\n"); }
 
 NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
@@ -162,6 +207,12 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   std::function<void()> processingFunc = [this]() { NMX::processing_thread(); };
   Detector::AddThreadFunction(processingFunc, "processing");
 
+  AddCommandFunction("NMX_GET_CALIB",
+                     [this](std::vector<std::string> cmdargs, char *output,
+                            unsigned int *obytes) {
+                       return NMX::getCalibration(cmdargs, output, obytes);
+                     });
+
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d",
          eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(
@@ -188,15 +239,14 @@ void NMX::input_thread() {
   nmxdata.printBufferSizes();
   nmxdata.setRecvTimeout(0, 100000); /// secs, usecs
 
-
   TSCTimer report_timer;
   for (;;) {
     int rdsize;
     unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */
-    eth_ringbuf->setDataLength(
-        eth_index, 0); /**\todo \todo buffer corruption can occur */
+    eth_ringbuf->setDataLength(eth_index,
+                               0); /**\todo \todo buffer corruption can occur */
     if ((rdsize = nmxdata.receive(eth_ringbuf->getDataBuffer(eth_index),
                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
@@ -244,6 +294,8 @@ void bin_hists(Hists& hists, const std::list<Cluster>& cl)
 
 
 void NMX::processing_thread() {
+  XTRACE(PROCESS, ALW, "NMX Config file: %s", NMXSettings.ConfigFile.c_str());
+  nmx_opts = NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
   init_builder();
   if (!builder_) {
     XTRACE(PROCESS, ERR, "No builder specified, exiting thread");
@@ -286,10 +338,12 @@ void NMX::processing_thread() {
         mystats.fifo_seq_errors++;
       } else {
         // printf("received packet with length %d\n", len);
-        auto stats = builder_->process_buffer(eth_ringbuf->getDataBuffer(data_index), len);
+        auto stats = builder_->process_buffer(
+            eth_ringbuf->getDataBuffer(data_index), len);
 
         mystats.readouts += stats.valid_hits;
-        mystats.readouts_error_bytes += stats.error_bytes; // From srs data parser
+        mystats.readouts_error_bytes +=
+            stats.error_bytes; // From srs data parser
         mystats.lost_frames += stats.lost_frames;
         mystats.bad_frames += stats.bad_frames;
         mystats.good_frames += stats.good_frames;
@@ -299,19 +353,20 @@ void NMX::processing_thread() {
           bin_hists(hists, builder_->clusterer_y->clusters);
         }
 
-        if (!builder_->clusterer_x->empty() && !builder_->clusterer_y->empty()) {
+        if (!builder_->clusterer_x->empty() &&
+            !builder_->clusterer_y->empty()) {
           matcher.merge(0, builder_->clusterer_x->clusters);
           matcher.merge(1, builder_->clusterer_y->clusters);
         }
         matcher.match_end(false);
 
         while (!matcher.matched_clusters.empty()) {
-          //printf("MATCHED_CLUSTERS\n");
+          // printf("MATCHED_CLUSTERS\n");
           XTRACE(PROCESS, DEB, "event_ready()");
           event = matcher.matched_clusters.front();
           matcher.matched_clusters.pop_front();
 
-          //mystats.unclustered = clusterer.unclustered();
+          // mystats.unclustered = clusterer.unclustered();
 
           event.analyze(nmx_opts.analyze_weighted,
                         nmx_opts.analyze_max_timebins,
@@ -332,11 +387,12 @@ void NMX::processing_thread() {
             }
 
             XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
-                   event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
+                   event.x.utpc_center_rounded(),
+                   event.y.utpc_center_rounded());
 
             if (nmx_opts.filter.valid(event)) {
-              pixelid = nmx_opts.geometry.pixel2D(event.x.utpc_center_rounded(),
-                                                  event.y.utpc_center_rounded());
+              pixelid = nmx_opts.geometry.pixel2D(
+                  event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
               if (!nmx_opts.geometry.valid_id(pixelid)) {
                 mystats.geom_errors++;
               } else {
@@ -356,7 +412,8 @@ void NMX::processing_thread() {
             } else {
               mystats.clusters_y++;
             }
-            mystats.readouts_discarded += event.x.entries.size() + event.y.entries.size();
+            mystats.readouts_discarded +=
+                event.x.entries.size() + event.y.entries.size();
             mystats.clusters_discarded++;
           }
         }
@@ -364,7 +421,8 @@ void NMX::processing_thread() {
     }
 
     // Checking for exit
-    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (report_timer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
       sample_next_track = nmx_opts.send_tracks;
 
@@ -397,7 +455,8 @@ void NMX::processing_thread() {
         // TODO flush all clusters?
 
         XTRACE(INPUT, ALW, "Stopping input thread.");
-        builder_.reset(); /**< \todo this is a hack to force ~BuilderSRS() call */
+        builder_
+            .reset(); /**< \todo this is a hack to force ~BuilderSRS() call */
         delete builder_.get(); /**< \todo see above */
         return;
       }
@@ -408,44 +467,45 @@ void NMX::processing_thread() {
 }
 
 void NMX::init_builder() {
-  XTRACE(PROCESS, ALW, "NMX Config file: %s\n", NMXSettings.ConfigFile.c_str());
-  nmx_opts = NMXConfig(NMXSettings.ConfigFile);
-
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
-  auto clusx = std::make_shared<DoroClusterer>(nmx_opts.clusterer_x.max_time_gap,
-                                            nmx_opts.clusterer_x.max_strip_gap,
-                                            nmx_opts.clusterer_x.min_cluster_size);
-  auto clusy = std::make_shared<DoroClusterer>(nmx_opts.clusterer_y.max_time_gap,
-                                            nmx_opts.clusterer_y.max_strip_gap,
-                                            nmx_opts.clusterer_y.min_cluster_size);
+  auto clusx = std::make_shared<DoroClusterer>(
+      nmx_opts.clusterer_x.max_time_gap, nmx_opts.clusterer_x.max_strip_gap,
+      nmx_opts.clusterer_x.min_cluster_size);
+  auto clusy = std::make_shared<DoroClusterer>(
+      nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap,
+      nmx_opts.clusterer_y.min_cluster_size);
 
   if (nmx_opts.builder_type == "Hits") {
     XTRACE(INIT, DEB, "Using BuilderHits");
-    builder_ = std::make_shared<BuilderHits>(nmx_opts.dump_directory,
-                                                  nmx_opts.dump_csv, nmx_opts.dump_h5);
+    builder_ = std::make_shared<BuilderHits>(
+        nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
     builder_->clusterer_x = clusx;
     builder_->clusterer_y = clusy;
   } else if (nmx_opts.builder_type == "APV") {
     XTRACE(INIT, DEB, "Using BuilderAPV");
-    builder_ = std::make_shared<BuilderAPV>(nmx_opts.dump_directory,
-                                            nmx_opts.dump_csv, nmx_opts.dump_h5);
+    builder_ = std::make_shared<BuilderAPV>(
+        nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
     builder_->clusterer_x = clusx;
     builder_->clusterer_y = clusy;
   } else if (nmx_opts.builder_type == "VMM2") {
     XTRACE(INIT, DEB, "Using BuilderVMM2");
     builder_ = std::make_shared<BuilderVMM2>(
         nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
-        nmx_opts.clusterer_x.hit_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
-        nmx_opts.clusterer_y.hit_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
-        nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
+        nmx_opts.clusterer_x.hit_adc_threshold,
+        nmx_opts.clusterer_x.max_time_gap,
+        nmx_opts.clusterer_y.hit_adc_threshold,
+        nmx_opts.clusterer_y.max_time_gap, nmx_opts.dump_directory,
+        nmx_opts.dump_csv, nmx_opts.dump_h5);
   } else if (nmx_opts.builder_type == "VMM3") {
-      XTRACE(INIT, DEB, "Using BuilderVMM3");
-      builder_ = std::make_shared<BuilderVMM3>(
-          nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
-          nmx_opts.clusterer_x.hit_adc_threshold, nmx_opts.clusterer_x.max_time_gap,
-          nmx_opts.clusterer_y.hit_adc_threshold, nmx_opts.clusterer_y.max_time_gap,
-          nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
+    XTRACE(INIT, DEB, "Using BuilderVMM3");
+    builder_ = std::make_shared<BuilderVMM3>(
+        nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
+        nmx_opts.clusterer_x.hit_adc_threshold,
+        nmx_opts.clusterer_x.max_time_gap,
+        nmx_opts.clusterer_y.hit_adc_threshold,
+        nmx_opts.clusterer_y.max_time_gap, nmx_opts.dump_directory,
+        nmx_opts.dump_csv, nmx_opts.dump_h5, nmx_opts.calfile);
   } else {
     XTRACE(INIT, ALW, "Unrecognized builder type in config");
   }

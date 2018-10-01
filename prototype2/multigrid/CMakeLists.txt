@@ -88,7 +88,6 @@ set(mgcncsgenjson_SRC
   generators/mgcncsgenjson.cpp
   generators/JsonArgs.cpp
   ../../dataformats/multigrid/src/RunSpecParse.cpp
-  ../../dataformats/multigrid/src/jsoncpp.cpp
   )
 create_executable(mgcncsgenjson)
 

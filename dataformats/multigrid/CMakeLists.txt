@@ -10,7 +10,6 @@ add_executable(batchreader
   src/MapFile.cpp
   src/PeakFinder.cpp
   src/RunSpecParse.cpp
-  src/jsoncpp.cpp
   ../../prototype2/common/DataSave.cpp
   ../../prototype2/common/TimeString.cpp
   ../../prototype2/multigrid/mgcncs/ChanConv.cpp

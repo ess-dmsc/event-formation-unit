@@ -37,8 +37,6 @@ void dumpEventBuilderInfo::printOverview(multiBladeEventBuilder p) {
   uint64_t n1Dstripevents = sumArray(p.get1DStripClusterCounter());
 
   std::cout << "\n";
-  std::cout << "Number of data-points recieved : " << std::setw(10)
-            << p.getNumberOfDatapointsReceived() << std::endl;
   std::cout << "Number of events recorded      : " << std::setw(10)
             << p.getNumberOfEvents() << std::endl;
   std::cout << "Number of 2D events            : " << std::setw(10)

@@ -1,5 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <algorithm>
 #include <cassert>
 #include <common/EFUArgs.h>
 #include <common/Log.h>
@@ -18,9 +19,9 @@ static int stat_get_count(std::vector<std::string> cmdargs, char *output,
                           unsigned int *obytes,
                           std::shared_ptr<Detector> detector) {
   auto nargs = cmdargs.size();
-  LOG(Sev::Debug, "STAT_GET_COUNT");
+  LOG(CMD, Sev::Debug, "STAT_GET_COUNT");
   if (nargs != 1) {
-    LOG(Sev::Warning, "STAT_GET_COUNT: wrong number of arguments");
+    LOG(CMD, Sev::Warning, "STAT_GET_COUNT: wrong number of arguments");
     return -Parser::EBADARGS;
   }
 
@@ -34,16 +35,16 @@ static int stat_get_count(std::vector<std::string> cmdargs, char *output,
 static int stat_get(std::vector<std::string> cmdargs, char *output,
                     unsigned int *obytes, std::shared_ptr<Detector> detector) {
   auto nargs = cmdargs.size();
-  LOG(Sev::Debug, "STAT_GET");
+  LOG(CMD, Sev::Debug, "STAT_GET");
   if (nargs != 2) {
-    LOG(Sev::Warning, "STAT_GET: wrong number of arguments");
+    LOG(CMD, Sev::Warning, "STAT_GET: wrong number of arguments");
     return -Parser::EBADARGS;
   }
   auto index = atoi(cmdargs.at(1).c_str());
 
   std::string name = detector->statname(index);
   int64_t value = detector->statvalue(index);
-  LOG(Sev::Debug, "STAT_GET {} {}", name, value);
+  LOG(CMD, Sev::Debug, "STAT_GET {} {}", name, value);
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET %s %" PRIi64,
                      name.c_str(), value);
 
@@ -54,9 +55,9 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
 static int version_get(std::vector<std::string> cmdargs, char *output,
                        unsigned int *obytes) {
   auto nargs = cmdargs.size();
-  LOG(Sev::Debug, "VERSION_GET");
+  LOG(CMD, Sev::Debug, "VERSION_GET");
   if (nargs != 1) {
-    LOG(Sev::Warning, "VERSION_GET: wrong number of arguments");
+    LOG(CMD, Sev::Warning, "VERSION_GET: wrong number of arguments");
     return -Parser::EBADARGS;
   }
 
@@ -71,9 +72,9 @@ static int cmd_get_count(std::vector<std::string> cmdargs, char *output,
                        unsigned int *obytes,
                        int count) {
   auto nargs = cmdargs.size();
-  LOG(Sev::Debug, "CMD_GET_COUNT");
+  LOG(CMD, Sev::Debug, "CMD_GET_COUNT");
   if (nargs != 1) {
-    LOG(Sev::Warning, "CMD_GET_COUNT: wrong number of arguments");
+    LOG(CMD, Sev::Warning, "CMD_GET_COUNT: wrong number of arguments");
     return -Parser::EBADARGS;
   }
 
@@ -87,15 +88,15 @@ static int cmd_get(std::vector<std::string> cmdargs, char *output,
                        unsigned int *obytes,
                        Parser * parser) {
   auto nargs = cmdargs.size();
-  LOG(Sev::Debug, "CMD_GET");
+  LOG(CMD, Sev::Debug, "CMD_GET");
   if (nargs != 2) {
-    LOG(Sev::Warning, "CMD_GET: wrong number of arguments");
+    LOG(CMD, Sev::Warning, "CMD_GET: wrong number of arguments");
     return -Parser::EBADARGS;
   }
 
   size_t index = atoi(cmdargs.at(1).c_str());
   if (index < 1 || index > parser->commands.size()) {
-    LOG(Sev::Warning, "CMD_GET: command index {}, out of range (1 - {})", index, parser->commands.size());
+    LOG(CMD, Sev::Warning, "CMD_GET: command index {}, out of range (1 - {})", index, parser->commands.size());
     return -Parser::EBADARGS;
   }
 
@@ -112,9 +113,9 @@ static int detector_info_get(std::vector<std::string> cmdargs, char *output,
                              unsigned int *obytes,
                              std::shared_ptr<Detector> detector) {
   auto nargs = cmdargs.size();
-  LOG(Sev::Debug, "DETECTOR_INFO_GET");
+  LOG(CMD, Sev::Debug, "DETECTOR_INFO_GET");
   if (nargs != 1) {
-    LOG(Sev::Warning, "DETECTOR_INFO_GET: wrong number of arguments");
+    LOG(CMD, Sev::Warning, "DETECTOR_INFO_GET: wrong number of arguments");
     return -Parser::EBADARGS;
   }
 
@@ -128,13 +129,13 @@ static int detector_info_get(std::vector<std::string> cmdargs, char *output,
 static int efu_exit(std::vector<std::string> cmdargs, UNUSED char *output,
                     UNUSED unsigned int *obytes, int &keep_running) {
   auto nargs = cmdargs.size();
-  LOG(Sev::Debug, "EXIT");
+  LOG(CMD, Sev::Debug, "EXIT");
   if (nargs != 1) {
-    LOG(Sev::Warning, "EXIT: wrong number of arguments");
+    LOG(CMD, Sev::Warning, "EXIT: wrong number of arguments");
     return -Parser::EBADARGS;
   }
 
-  LOG(Sev::Info, "Sending TERMINATE command to EFU");
+  LOG(CMD, Sev::Info, "Sending TERMINATE command to EFU");
   keep_running = 0;
 
   return Parser::OK;
@@ -162,7 +163,7 @@ Parser::Parser(std::shared_ptr<Detector> detector, int &keep_running) {
   });
 
   if (detector == nullptr) {
-    LOG(Sev::Debug, "No detector specified, no detector commands loaded");
+    LOG(CMD, Sev::Debug, "No detector specified, no detector commands loaded");
     return;
   }
 
@@ -188,9 +189,9 @@ Parser::Parser(std::shared_ptr<Detector> detector, int &keep_running) {
 }
 
 int Parser::registercmd(std::string cmd_name, cmdFunction cmd_fn) {
-  LOG(Sev::Info, "Registering command: {}", cmd_name);
+  LOG(CMD, Sev::Info, "Registering command: {}", cmd_name);
   if (commands[cmd_name] != 0) {
-    LOG(Sev::Warning, "Command already exist: {}", cmd_name);
+    LOG(CMD, Sev::Warning, "Command already exist: {}", cmd_name);
     return -1;
   }
   commands[cmd_name] = cmd_fn;
@@ -199,7 +200,7 @@ int Parser::registercmd(std::string cmd_name, cmdFunction cmd_fn) {
 
 int Parser::parse(char *input, unsigned int ibytes, char *output,
                   unsigned int *obytes) {
-  LOG(Sev::Debug, "parse() received {} bytes", ibytes);
+  LOG(CMD, Sev::Debug, "parse() received {} bytes", ibytes);
   *obytes = 0;
   memset(output, 0, SERVER_BUFFER_SIZE);
 
@@ -213,7 +214,7 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
   }
 
   if (input[ibytes - 1] != '\0') {
-    LOG(Sev::Debug, "adding null termination");
+    LOG(CMD, Sev::Debug, "adding null termination");
     auto end = std::min(ibytes, SERVER_BUFFER_SIZE - 1);
     input[end] = '\0';
   }
@@ -227,31 +228,31 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
   }
 
   if ((int)tokens.size() < 1) {
-    LOG(Sev::Warning, "No tokens");
+    LOG(CMD, Sev::Warning, "No tokens");
     *obytes = snprintf(output, SERVER_BUFFER_SIZE, "Error: <BADCMD>");
     return -ENOTOKENS;
   }
 
-  LOG(Sev::Debug, "Tokens in command: {}", (int)tokens.size());
+  LOG(CMD, Sev::Debug, "Tokens in command: {}", (int)tokens.size());
   for (auto token : tokens) {
-    LOG(Sev::Debug, "Token: {}", token);
+    LOG(CMD, Sev::Debug, "Token: {}", token);
   }
 
   auto command = tokens.at(0);
   int res = -EBADCMD;
 
   if ((commands[command] != 0) && (command.size() < max_command_size)) {
-    LOG(Sev::Debug, "Calling registered command {}", command);
+    LOG(CMD, Sev::Debug, "Calling registered command {}", command);
     res = commands[command](tokens, output, obytes);
   }
 
-  LOG(Sev::Debug, "parse1 res: {}, obytes: {}", res, *obytes);
+  LOG(CMD, Sev::Debug, "parse1 res: {}, obytes: {}", res, *obytes);
   if (*obytes == 0) { // no  reply specified, create one
 
     assert((res == OK) || (res == -ENOTOKENS) || (res == -EBADCMD) ||
            (res == -EBADARGS));
 
-    LOG(Sev::Debug, "creating response");
+    LOG(CMD, Sev::Debug, "creating response");
     switch (res) {
     case OK:
       *obytes = snprintf(output, SERVER_BUFFER_SIZE, "<OK>");
@@ -265,7 +266,7 @@ int Parser::parse(char *input, unsigned int ibytes, char *output,
       break;
     }
   }
-  LOG(Sev::Debug, "parse2 res: {}, obytes: {}", res, *obytes);
+  LOG(CMD, Sev::Debug, "parse2 res: {}, obytes: {}", res, *obytes);
   return res;
 }
 

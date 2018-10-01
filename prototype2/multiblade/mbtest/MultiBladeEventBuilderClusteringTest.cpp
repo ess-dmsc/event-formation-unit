@@ -9,6 +9,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
+/// \todo - no longer valid - new data format
+
 #include "mbcommon/MultiBladeEventBuilder.h"
 #include "MultiBladeTestData.h"
 #include "test/TestBase.h"

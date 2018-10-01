@@ -57,7 +57,10 @@ class SRSTime {
   /// \param tdc tdc value from VMM
   uint64_t timestamp(uint64_t trigger, uint16_t bc, uint16_t tdc);
 
+  /// \brief original implamentation
   double chip_time_ns(uint16_t bc, uint16_t tdc) const;
+  /// \brief now using VMM calibration data
+  double chip_time_ns(uint16_t bc, uint16_t tdc, float offset, float slope) const;
 
   /// \brief prints out time configuration
   std::string debug() const;
