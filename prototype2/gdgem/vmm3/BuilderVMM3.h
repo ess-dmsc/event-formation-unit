@@ -27,7 +27,7 @@ public:
               std::shared_ptr<AbstractClusterer> x, std::shared_ptr<AbstractClusterer> y,
               uint16_t adc_threshold_x, double max_time_gap_x,
               uint16_t adc_threshold_y, double max_time_gap_y,
-              std::string dump_dir, bool dump_csv, bool dump_h5, CalibrationFile * calfile);
+              std::string dump_dir, bool dump_csv, bool dump_h5, std::shared_ptr<CalibrationFile> calfile);
 
   ~BuilderVMM3() { XTRACE(INIT, DEB, "BuilderVMM2 destructor called"); }
 
@@ -35,7 +35,7 @@ public:
   ResultStats process_buffer(char *buf, size_t size) override;
 
 private:
-  CalibrationFile * calfile_{nullptr};
+  std::shared_ptr<CalibrationFile> calfile_;
   VMM3SRSData parser_;
   SRSTime time_intepreter_;
   SRSMappings geometry_interpreter_;

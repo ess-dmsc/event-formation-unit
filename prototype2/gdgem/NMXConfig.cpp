@@ -12,7 +12,7 @@
 
 NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 
-  calfile = new CalibrationFile(calibrationfile);
+  calfile = std::make_shared<CalibrationFile>(calibrationfile);
 
   nlohmann::json root;
 

@@ -11,7 +11,7 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 		SRSMappings geometry_interpreter, std::shared_ptr<AbstractClusterer> x,
 		std::shared_ptr<AbstractClusterer> y, uint16_t adc_threshold_x,
 		double max_time_gap_x, uint16_t adc_threshold_y, double max_time_gap_y,
-		std::string dump_dir, bool dump_csv, bool dump_h5, CalibrationFile * calfile) :
+		std::string dump_dir, bool dump_csv, bool dump_h5, std::shared_ptr<CalibrationFile> calfile) :
 		AbstractBuilder(x, y, dump_dir, dump_csv, dump_h5), parser_(1500), time_intepreter_(
 				time_intepreter), geometry_interpreter_(geometry_interpreter), sorter_x(
 				time_intepreter_, geometry_interpreter_, adc_threshold_x,
