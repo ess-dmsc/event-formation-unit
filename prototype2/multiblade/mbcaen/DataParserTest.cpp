@@ -6,7 +6,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <multiblade/mbcaen/DataParser.h>
-#include <multiblade/mbcaen/TestData.h>
+#include <multiblade/mbcaen/DataParserTestData.h>
 #include <test/TestBase.h>
 
 class MultibladeDataTest : public TestBase {
@@ -38,6 +38,25 @@ TEST_F(MultibladeDataTest, InvalidHeaderSizes) {
   ASSERT_NE(nullptr, mbdata.MBHeader);
   ASSERT_NE(nullptr, mbdata.MBData);
   ASSERT_EQ(0, mbdata.MBHeader->numElements);
+}
+
+
+TEST_F(MultibladeDataTest, DataLengthMisMatch) {
+  DataParser mbdata;
+  auto res = mbdata.parse((char *)&all_zeroes[0], all_zeroes.size());
+  ASSERT_EQ(res, -DataParser::error::ESIZE);
+}
+
+TEST_F(MultibladeDataTest, InvalidVersion) {
+  DataParser mbdata;
+  auto res = mbdata.parse((char *)&invalid_version[0], invalid_version.size());
+  ASSERT_EQ(res, -DataParser::error::EHEADER);
+}
+
+TEST_F(MultibladeDataTest, InvalidType) {
+  DataParser mbdata;
+  auto res = mbdata.parse((char *)&invalid_type[0], invalid_type.size());
+  ASSERT_EQ(res, -DataParser::error::EHEADER);
 }
 
 TEST_F(MultibladeDataTest, Packet13Triggered) {

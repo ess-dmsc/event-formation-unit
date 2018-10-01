@@ -11,21 +11,21 @@ class MBConfigTest : public TestBase {};
 TEST_F(MBConfigTest, Constructor) {
   MBConfig mbconf;
   ASSERT_FALSE(mbconf.isConfigLoaded());
-  ASSERT_EQ(mbconf.TimeTickNS, 16);
-  ASSERT_EQ(mbconf.detector, nullptr);
-  ASSERT_EQ(mbconf.instrument, MBConfig::InstrumentGeometry::Estia);
-  ASSERT_TRUE(mbconf.ConfigFile.empty());
-  ASSERT_EQ(mbconf.Digitisers.size(), 0);
+  ASSERT_EQ(mbconf.getTimeTickNS(), 16);
+  ASSERT_EQ(mbconf.getDetector(), nullptr);
+  ASSERT_EQ(mbconf.getInstrument(), MBConfig::InstrumentGeometry::Estia);
+  ASSERT_TRUE(mbconf.getConfigFile().empty());
+  ASSERT_EQ(mbconf.getDigitisers().size(), 0);
 }
 
 TEST_F(MBConfigTest, NoFile) {
   MBConfig mbconf;
   mbconf = MBConfig("");
   ASSERT_FALSE(mbconf.isConfigLoaded());
-  ASSERT_EQ(mbconf.TimeTickNS, 16);
-  ASSERT_NE(mbconf.detector, nullptr);
-  ASSERT_TRUE(mbconf.ConfigFile.empty());
-  ASSERT_EQ(mbconf.Digitisers.size(), 0);
+  ASSERT_EQ(mbconf.getTimeTickNS(), 16);
+  ASSERT_NE(mbconf.getDetector(), nullptr);
+  ASSERT_TRUE(mbconf.getConfigFile().empty());
+  ASSERT_EQ(mbconf.getDigitisers().size(), 0);
 }
 
 
@@ -35,10 +35,10 @@ TEST_F(MBConfigTest, InvalidJSON) {
   MBConfig mbconf;
   mbconf = MBConfig(filename);
   ASSERT_FALSE(mbconf.isConfigLoaded());
-  ASSERT_EQ(mbconf.TimeTickNS, 16);
-  ASSERT_NE(mbconf.detector, nullptr);
-  ASSERT_EQ(mbconf.ConfigFile, filename);
-  ASSERT_EQ(mbconf.Digitisers.size(), 0);
+  ASSERT_EQ(mbconf.getTimeTickNS(), 16);
+  ASSERT_NE(mbconf.getDetector(), nullptr);
+  ASSERT_EQ(mbconf.getConfigFile(), filename);
+  ASSERT_EQ(mbconf.getDigitisers().size(), 0);
 }
 
 TEST_F(MBConfigTest, IncompleteConfigFile) {
@@ -47,10 +47,10 @@ TEST_F(MBConfigTest, IncompleteConfigFile) {
   MBConfig mbconf;
   mbconf = MBConfig(filename);
   ASSERT_FALSE(mbconf.isConfigLoaded());
-  ASSERT_EQ(mbconf.TimeTickNS, 16);
-  ASSERT_NE(mbconf.detector, nullptr);
-  ASSERT_EQ(mbconf.ConfigFile, filename);
-  ASSERT_EQ(mbconf.Digitisers.size(), 0);
+  ASSERT_EQ(mbconf.getTimeTickNS(), 16);
+  ASSERT_NE(mbconf.getDetector(), nullptr);
+  ASSERT_EQ(mbconf.getConfigFile(), filename);
+  ASSERT_EQ(mbconf.getDigitisers().size(), 0);
 }
 
 TEST_F(MBConfigTest, InvalidDigitiserInFile) {
@@ -59,10 +59,10 @@ TEST_F(MBConfigTest, InvalidDigitiserInFile) {
   MBConfig mbconf;
   mbconf = MBConfig(filename);
   ASSERT_FALSE(mbconf.isConfigLoaded());
-  ASSERT_EQ(mbconf.TimeTickNS, 16);
-  ASSERT_NE(mbconf.detector, nullptr);
-  ASSERT_EQ(mbconf.ConfigFile, filename);
-  ASSERT_EQ(mbconf.Digitisers.size(), 0);
+  ASSERT_EQ(mbconf.getTimeTickNS(), 16);
+  ASSERT_NE(mbconf.getDetector(), nullptr);
+  ASSERT_EQ(mbconf.getConfigFile(), filename);
+  ASSERT_EQ(mbconf.getDigitisers().size(), 0);
 }
 
 TEST_F(MBConfigTest, ValidConfigFile) {
@@ -71,10 +71,10 @@ TEST_F(MBConfigTest, ValidConfigFile) {
   MBConfig mbconf;
   mbconf = MBConfig(filename);
   ASSERT_TRUE(mbconf.isConfigLoaded());
-  ASSERT_EQ(mbconf.TimeTickNS, 17);
-  ASSERT_NE(mbconf.detector, nullptr);
-  ASSERT_EQ(mbconf.ConfigFile, filename);
-  ASSERT_EQ(mbconf.Digitisers.size(), 6);
+  ASSERT_EQ(mbconf.getTimeTickNS(), 17);
+  ASSERT_NE(mbconf.getDetector(), nullptr);
+  ASSERT_EQ(mbconf.getConfigFile(), filename);
+  ASSERT_EQ(mbconf.getDigitisers().size(), 6);
 }
 
 int main(int argc, char **argv) {

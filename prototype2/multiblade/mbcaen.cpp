@@ -137,7 +137,7 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
   assert(eth_ringbuf != 0);
 
   mb_opts = MBConfig(DetectorSettings.ConfigFile);
-  assert(mb_opts.detector != nullptr);
+  assert(mb_opts.getDetector() != nullptr);
 }
 
 const char *MBCAEN::detectorname() { return classname; }
@@ -210,7 +210,8 @@ void MBCAEN::processing_thread() {
   }
 
   DataParser mbdata;
-  MB16Detector mb16(mb_opts.Digitisers);
+  auto digitisers = mb_opts.getDigitisers();
+  MB16Detector mb16(digitisers);
 
   unsigned int data_index;
   TSCTimer produce_timer;

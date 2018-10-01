@@ -16,8 +16,8 @@
 #include <mbcaen/DataParser.h>
 #include <memory>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 int DataParser::parse(const char *buffer, unsigned int size) {
 
@@ -33,6 +33,16 @@ int DataParser::parse(const char *buffer, unsigned int size) {
   }
 
   MBHeader = (struct Header *)buffer;
+
+  if (MBHeader->version != Version) {
+    XTRACE(DATA, WAR, "Unsupported data version: 0x%04x (expected 0x04%x)\n", MBHeader->version, Version);
+    return -error::EHEADER;
+  }
+
+  if (MBHeader->elementType != ElementType) {
+    XTRACE(DATA, WAR, "Unsupported data type: 0x%04x (expected 0x04%x)\n", MBHeader->elementType, ElementType);
+    return -error::EHEADER;
+  }
 
   auto expectedsize = sizeof(struct Header) + MBHeader->numElements * sizeof(struct ListElement422);
 

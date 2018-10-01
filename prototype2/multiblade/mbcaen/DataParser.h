@@ -12,9 +12,17 @@
 #include <cstring>
 #include <vector>
 
+/// \todo consider using the real values  and using
+/// htons() in the parser
+// 0x0102 (1.2) byteswapped
+constexpr uint16_t Version = 0x0201;
+// 0x0100 byteswapped)
+constexpr uint16_t ElementType = 0x0001;
+
+
 class DataParser {
 public:
-  enum error { OK = 0, ESIZE};
+  enum error { OK = 0, ESIZE, EHEADER};
 
   struct __attribute__ ((__packed__)) Header // 32 bytes
   {

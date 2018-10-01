@@ -16,11 +16,11 @@ MBConfig::MBConfig(std::string jsonfile) : ConfigFile(jsonfile) {
 
   loadConfigFile();
 
-  if (instrument == InstrumentGeometry::Estia) {
-    detector = new MB16Detector(Digitisers);
+  if (Instrument == InstrumentGeometry::Estia) {
+    Detector = new MB16Detector(Digitisers);
   }
 
-  assert(detector != nullptr);
+  assert(Detector != nullptr);
 }
 
 ///
@@ -50,9 +50,9 @@ void MBConfig::loadConfigFile() {
     auto instr = root["InstrumentGeometry"].get<std::string>();
 
     if (instr.compare("Estia") == 0) {
-      instrument = InstrumentGeometry::Estia;
+      Instrument = InstrumentGeometry::Estia;
     } else if (instr.compare("Freia") == 0 ) {
-      instrument = InstrumentGeometry::Freia;
+      Instrument = InstrumentGeometry::Freia;
     } else {
       LOG(INIT, Sev::Warning, "JSON config - error: Unknown instrument specified, using default (Estia)");
     }
