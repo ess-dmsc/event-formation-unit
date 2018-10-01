@@ -18,6 +18,7 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 				max_time_gap_x), sorter_y(time_intepreter_,
 				geometry_interpreter_, adc_threshold_y, max_time_gap_y) {
 
+  assert(calfile != nullptr);
   calfile_ = calfile;
 	clusterer_x = x;
 	clusterer_y = y;

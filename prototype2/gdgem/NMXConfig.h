@@ -57,7 +57,7 @@ struct NMXConfig {
   std::string builder_type{"VMM2"};
 
   // VMM calibration
-  CalibrationFile * calfile;
+  CalibrationFile * calfile{nullptr};
 
   // SRS only
   SRSTime time_config;

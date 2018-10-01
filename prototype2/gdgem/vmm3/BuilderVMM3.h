@@ -35,7 +35,7 @@ public:
   ResultStats process_buffer(char *buf, size_t size) override;
 
 private:
-  CalibrationFile * calfile_;
+  CalibrationFile * calfile_{nullptr};
   VMM3SRSData parser_;
   SRSTime time_intepreter_;
   SRSMappings geometry_interpreter_;

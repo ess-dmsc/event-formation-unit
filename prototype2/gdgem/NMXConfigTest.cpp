@@ -34,6 +34,7 @@ TEST_F(NMXConfigTest, ConstructorDefaults) {
   ASSERT_EQ("VMM2", nmxconfig.builder_type);
   ASSERT_FALSE(nmxconfig.dump_csv);
   ASSERT_FALSE(nmxconfig.dump_h5);
+  ASSERT_EQ(nmxconfig.calfile, nullptr);
 }
 
 
