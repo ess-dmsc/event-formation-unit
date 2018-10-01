@@ -100,12 +100,12 @@ TEST_F(DoroClustererTest, Run16_Long) {
     readout.bonus_timestamp = bonus;
     store_hit(readout);
   }
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10201);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12431);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10221);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12455);
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10206);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12443);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 10226);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 12467);
 }
 
 
