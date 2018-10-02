@@ -146,8 +146,7 @@ void Server::serverPoll() {
       auto bytes = recv(sd, IBuffer.buffer, SERVER_BUFFER_SIZE, 0);
 
       if ((bytes < 0) && (errno != EWOULDBLOCK) && (errno != EAGAIN)) {
-        LOG(IPC, Sev::Warning, "recv() failed, errno: {}", errno);
-        perror("recv() failed");
+        LOG(IPC, Sev::Warning, "recv() failed (unclean close from peer?), errno: {}", errno);
         serverClose(sd);
         return;
       }

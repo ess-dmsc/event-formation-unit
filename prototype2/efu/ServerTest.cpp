@@ -1,12 +1,15 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
-#include <efu/Server.h>
-#include <test/TestBase.h>
 #include <arpa/inet.h>
+#include <chrono>
+#include <efu/Server.h>
 #include <sys/socket.h>
+#include <test/TestBase.h>
+#include <thread>
 
 uint16_t ServerPort = 8888;
 
+/// Used in pthread to connect to server and send data
 void senddata() {
   struct sockaddr_in server;
   int sock = socket(AF_INET , SOCK_STREAM , 0);
@@ -25,12 +28,16 @@ void senddata() {
       return;
   }
 
-  const char * message = "fffffffff\n";
+  const char * message = "DETECTOR_INFO_GET\n";
   if( send(sock , message , strlen(message) , 0) < 0)
   {
       puts("Send failed");
       return;
   }
+
+  /// Allow time for test to poll for data
+  std::this_thread::sleep_for(std::chrono::seconds(2));
+  close(sock);
 }
 
 class TestDetector : public Detector {
@@ -68,6 +75,14 @@ TEST_F(ServerTest, Constructor) {
   ASSERT_EQ(server.getNumClients(), 0);
 }
 
+TEST_F(ServerTest, ServerSendInvalidFd) {
+  Server server(ServerPort, *parser);
+  ASSERT_TRUE(server.getServerFd() != -1);
+  ASSERT_TRUE(server.getServerPort() == ServerPort);
+  ASSERT_EQ(server.getNumClients(), 0);
+  ASSERT_EQ(server.serverSend(42), -1);
+}
+
 TEST_F(ServerTest, PollNoData) {
   Server server(ServerPort, *parser);
   server.serverPoll();
@@ -80,10 +95,17 @@ TEST_F(ServerTest, PollWithData) {
   Server server(ServerPort, *parser);
   std::thread sendthread(senddata);
   server.serverPoll();
+  server.serverPoll();
+  server.serverPoll();
   ASSERT_EQ(server.getNumClients(), 1);
   ASSERT_TRUE(server.getServerFd() != -1);
   ASSERT_TRUE(server.getServerPort() == ServerPort);
+
   sendthread.join();
+  server.serverPoll();
+  server.serverPoll();
+  server.serverPoll();
+  ASSERT_EQ(server.getNumClients(), 0);
 }
 
 int main(int argc, char **argv) {
