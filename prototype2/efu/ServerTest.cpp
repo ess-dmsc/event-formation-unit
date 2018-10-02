@@ -9,6 +9,7 @@
 
 uint16_t ServerPort = 8888;
 
+/// Used in pthread to connect to server and send data
 void senddata() {
   struct sockaddr_in server;
   int sock = socket(AF_INET , SOCK_STREAM , 0);
@@ -34,8 +35,8 @@ void senddata() {
       return;
   }
 
+  /// Allow time for test to poll for data
   std::this_thread::sleep_for(std::chrono::seconds(2));
-
   close(sock);
 }
 
@@ -72,6 +73,14 @@ TEST_F(ServerTest, Constructor) {
   ASSERT_TRUE(server.getServerFd() != -1);
   ASSERT_TRUE(server.getServerPort() == ServerPort);
   ASSERT_EQ(server.getNumClients(), 0);
+}
+
+TEST_F(ServerTest, ServerSendInvalidFd) {
+  Server server(ServerPort, *parser);
+  ASSERT_TRUE(server.getServerFd() != -1);
+  ASSERT_TRUE(server.getServerPort() == ServerPort);
+  ASSERT_EQ(server.getNumClients(), 0);
+  ASSERT_EQ(server.serverSend(42), -1);
 }
 
 TEST_F(ServerTest, PollNoData) {
