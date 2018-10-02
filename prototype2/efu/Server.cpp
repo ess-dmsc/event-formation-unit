@@ -20,8 +20,8 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 Server::Server(int port, Parser &parse) : ServerPort(port), CommandParser(parse) {
   for (auto &client : ClientFd) {
