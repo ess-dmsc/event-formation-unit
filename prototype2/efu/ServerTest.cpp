@@ -9,13 +9,18 @@
 
 uint16_t ServerPort = 8888;
 
+constexpr int mask_close = 0x0001;
+constexpr int mask_connect = 0x0002;
+constexpr int mask_send = 0x0004;
+const char * message = "DETECTOR_INFO_GET\n";
+
 /// Used in pthread to connect to server and send data
-void senddata() {
+void client_thread(int command) {
   struct sockaddr_in server;
+
   int sock = socket(AF_INET , SOCK_STREAM , 0);
   if (sock == -1) {
-      printf("Could not create socket");
-      return;
+      printf("Could not create socket\n");
   }
 
   server.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -23,28 +28,28 @@ void senddata() {
   server.sin_port = htons( ServerPort );
 
   //Connect to remote server
-  if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0) {
-      perror("connect failed. Error");
-      return;
+  if (command & mask_connect) {
+    if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0) {
+        perror("connect failed. Error\n");
+    }
   }
 
-  const char * message = "DETECTOR_INFO_GET\n";
-  if( send(sock , message , strlen(message) , 0) < 0)
-  {
-      puts("Send failed");
-      return;
+  if (command & mask_send) {
+    if( send(sock , message , strlen(message) , 0) < 0) {
+        printf("Send failed\n");
+    }
+    /// Allow time for test to poll for data
+    std::this_thread::sleep_for(std::chrono::seconds(2));
   }
 
-  /// Allow time for test to poll for data
-  std::this_thread::sleep_for(std::chrono::seconds(2));
-  close(sock);
+  if (command & mask_close) {
+    close(sock);
+  }
 }
 
 class TestDetector : public Detector {
 public:
-  TestDetector(BaseSettings settings) : Detector("No name", settings) {
-    std::cout << "TestDetector" << std::endl;
-  };
+  TestDetector(BaseSettings settings) : Detector("No name", settings) { };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
 };
 
@@ -77,8 +82,6 @@ TEST_F(ServerTest, Constructor) {
 
 TEST_F(ServerTest, ServerSendInvalidFd) {
   Server server(ServerPort, *parser);
-  ASSERT_TRUE(server.getServerFd() != -1);
-  ASSERT_TRUE(server.getServerPort() == ServerPort);
   ASSERT_EQ(server.getNumClients(), 0);
   ASSERT_EQ(server.serverSend(42), -1);
 }
@@ -87,25 +90,37 @@ TEST_F(ServerTest, PollNoData) {
   Server server(ServerPort, *parser);
   server.serverPoll();
   ASSERT_EQ(server.getNumClients(), 0);
-  ASSERT_TRUE(server.getServerFd() != -1);
-  ASSERT_TRUE(server.getServerPort() == ServerPort);
 }
 
-TEST_F(ServerTest, PollWithData) {
+TEST_F(ServerTest, PollConnect) {
   Server server(ServerPort, *parser);
-  std::thread sendthread(senddata);
-  server.serverPoll();
+  std::thread client(client_thread, mask_connect);
+  client.join();
   server.serverPoll();
   server.serverPoll();
   ASSERT_EQ(server.getNumClients(), 1);
-  ASSERT_TRUE(server.getServerFd() != -1);
-  ASSERT_TRUE(server.getServerPort() == ServerPort);
+  ASSERT_EQ(server.getTotalBytesReceived(), 0);
+}
 
-  sendthread.join();
+TEST_F(ServerTest, PollWData) {
+  Server server(ServerPort, *parser);
+  std::thread client(client_thread, mask_connect | mask_send);
+  client.join();
+  server.serverPoll();
+  server.serverPoll();
+  ASSERT_EQ(server.getNumClients(), 1);
+  ASSERT_EQ(server.getTotalBytesReceived(), strlen(message));
+}
+
+TEST_F(ServerTest, PollWDataClose) {
+  Server server(ServerPort, *parser);
+  std::thread client(client_thread, mask_connect | mask_send | mask_close);
+  client.join();
   server.serverPoll();
   server.serverPoll();
   server.serverPoll();
   ASSERT_EQ(server.getNumClients(), 0);
+  ASSERT_EQ(server.getTotalBytesReceived(), strlen(message));
 }
 
 int main(int argc, char **argv) {

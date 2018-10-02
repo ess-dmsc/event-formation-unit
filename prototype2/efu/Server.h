@@ -65,11 +65,16 @@ public:
   /// \brief returns the number of active clients
   int getNumClients();
 
+  /// \brief getter function for private member variable
+  uint64_t getTotalBytesReceived() { return TotalBytesReceived; }
+
 private:
   struct {
     uint8_t buffer[SERVER_BUFFER_SIZE + 1];
     uint32_t bytes;
   } IBuffer, OBuffer; /// receive and transmit buffers
+
+  uint64_t TotalBytesReceived{0};
 
   int ServerPort{0}; /// server tcp port
   int ServerFd{-1}; /// server file descriptor
