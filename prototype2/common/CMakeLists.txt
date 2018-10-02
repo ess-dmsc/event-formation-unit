@@ -63,7 +63,6 @@ set(DataSaveTest_INC
 create_test_executable(DataSaveTest)
 
 set(DetectorTest_SRC
-  DetectorModuleRegister.cpp
   DetectorTest.cpp
   NewStats.cpp)
 set(DetectorTest_INC
@@ -73,7 +72,6 @@ set(DetectorTest_INC
 create_test_executable(DetectorTest)
 
 set(EFUArgsTest_SRC
-  DetectorModuleRegister.cpp
   EFUArgsTest.cpp
   EFUArgs.cpp)
 set(EFUArgsTest_INC
