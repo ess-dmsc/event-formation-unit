@@ -1,9 +1,11 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
-#include <efu/Server.h>
-#include <test/TestBase.h>
 #include <arpa/inet.h>
+#include <chrono>
+#include <efu/Server.h>
 #include <sys/socket.h>
+#include <test/TestBase.h>
+#include <thread>
 
 uint16_t ServerPort = 8888;
 
@@ -31,6 +33,8 @@ void senddata() {
       puts("Send failed");
       return;
   }
+
+  std::this_thread::sleep_for(std::chrono::seconds(2));
 }
 
 class TestDetector : public Detector {
