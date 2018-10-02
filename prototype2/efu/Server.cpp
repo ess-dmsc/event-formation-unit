@@ -173,3 +173,13 @@ void Server::serverPoll() {
     }
   }
 }
+
+int Server::getNumClients() {
+  int clientcount = 0;
+  for (auto & client : ClientFd) {
+    if (client != -1) {
+      clientcount++;
+    }
+  }
+  return clientcount;
+}

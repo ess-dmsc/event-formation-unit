@@ -62,6 +62,9 @@ public:
   /// \brief getter function for private member variable
   int getServerFd() { return ServerFd; }
 
+  /// \brief returns the number of active clients
+  int getNumClients();
+
 private:
   struct {
     uint8_t buffer[SERVER_BUFFER_SIZE + 1];

@@ -2,7 +2,36 @@
 
 #include <efu/Server.h>
 #include <test/TestBase.h>
+#include <arpa/inet.h>
+#include <sys/socket.h>
 
+uint16_t ServerPort = 8888;
+
+void senddata() {
+  struct sockaddr_in server;
+  int sock = socket(AF_INET , SOCK_STREAM , 0);
+  if (sock == -1) {
+      printf("Could not create socket");
+      return;
+  }
+
+  server.sin_addr.s_addr = inet_addr("127.0.0.1");
+  server.sin_family = AF_INET;
+  server.sin_port = htons( ServerPort );
+
+  //Connect to remote server
+  if (connect(sock , (struct sockaddr *)&server , sizeof(server)) < 0) {
+      perror("connect failed. Error");
+      return;
+  }
+
+  const char * message = "fffffffff\n";
+  if( send(sock , message , strlen(message) , 0) < 0)
+  {
+      puts("Send failed");
+      return;
+  }
+}
 
 class TestDetector : public Detector {
 public:
@@ -18,7 +47,7 @@ DetectorFactory<TestDetector> Factory;
 
 class ServerTest : public TestBase {
 protected:
-  uint16_t ServerPort = 8888;
+
   int keep_running = 1;
   EFUArgs efu_args;
   BaseSettings settings = efu_args.getBaseSettings();
@@ -36,13 +65,25 @@ TEST_F(ServerTest, Constructor) {
   Server server(ServerPort, *parser);
   ASSERT_TRUE(server.getServerFd() != -1);
   ASSERT_TRUE(server.getServerPort() == ServerPort);
+  ASSERT_EQ(server.getNumClients(), 0);
 }
 
-TEST_F(ServerTest, Poll) {
+TEST_F(ServerTest, PollNoData) {
   Server server(ServerPort, *parser);
   server.serverPoll();
+  ASSERT_EQ(server.getNumClients(), 0);
   ASSERT_TRUE(server.getServerFd() != -1);
   ASSERT_TRUE(server.getServerPort() == ServerPort);
+}
+
+TEST_F(ServerTest, PollWithData) {
+  Server server(ServerPort, *parser);
+  std::thread sendthread(senddata);
+  server.serverPoll();
+  ASSERT_EQ(server.getNumClients(), 1);
+  ASSERT_TRUE(server.getServerFd() != -1);
+  ASSERT_TRUE(server.getServerPort() == ServerPort);
+  sendthread.join();
 }
 
 int main(int argc, char **argv) {
