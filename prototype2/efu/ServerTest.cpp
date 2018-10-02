@@ -27,7 +27,7 @@ void senddata() {
       return;
   }
 
-  const char * message = "fffffffff\n";
+  const char * message = "DETECTOR_INFO_GET\n";
   if( send(sock , message , strlen(message) , 0) < 0)
   {
       puts("Send failed");
@@ -35,6 +35,8 @@ void senddata() {
   }
 
   std::this_thread::sleep_for(std::chrono::seconds(2));
+
+  close(sock);
 }
 
 class TestDetector : public Detector {
@@ -84,10 +86,17 @@ TEST_F(ServerTest, PollWithData) {
   Server server(ServerPort, *parser);
   std::thread sendthread(senddata);
   server.serverPoll();
+  server.serverPoll();
+  server.serverPoll();
   ASSERT_EQ(server.getNumClients(), 1);
   ASSERT_TRUE(server.getServerFd() != -1);
   ASSERT_TRUE(server.getServerPort() == ServerPort);
+
   sendthread.join();
+  server.serverPoll();
+  server.serverPoll();
+  server.serverPoll();
+  ASSERT_EQ(server.getNumClients(), 0);
 }
 
 int main(int argc, char **argv) {
