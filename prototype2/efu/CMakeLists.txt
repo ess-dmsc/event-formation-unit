@@ -34,6 +34,19 @@ add_custom_command(TARGET efu POST_BUILD
 #=============================================================================
 # EFU Tests
 #=============================================================================
+set(ServerTest_INC
+    Server.h
+    Parser.h
+    ../common/EFUArgs.h
+    )
+set(ServerTest_SRC
+    Server.cpp
+    ServerTest.cpp
+    Parser.cpp
+    ../common/EFUArgs.cpp)
+create_test_executable(ServerTest)
+
+
 if(${CMAKE_COMPILER_IS_GNUCXX})
   set(ParserTestLibrary_SRC
     ParserTest.cpp

@@ -23,7 +23,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-Server::Server(int port, Parser &parse) : Port(port), CommandParser(parse) {
+Server::Server(int port, Parser &parse) : ServerPort(port), CommandParser(parse) {
   for (auto &client : ClientFd) {
     client = -1;
   }
@@ -36,9 +36,16 @@ Server::Server(int port, Parser &parse) : Port(port), CommandParser(parse) {
   serverOpen();
 }
 
+Server::~Server() {
+  for (auto &client : ClientFd) {
+    close(client);
+  }
+  close(ServerFd);
+}
+
 /// \brief Setup socket parameters
 void Server::serverOpen() {
-  LOG(IPC, Sev::Info, "Server::open() called on port {}", Port);
+  LOG(IPC, Sev::Info, "Server::open() called on port {}", ServerPort);
 
   struct sockaddr_in socket_address;
   int __attribute__((unused)) ret;
@@ -52,7 +59,7 @@ void Server::serverOpen() {
   std::fill_n((char *)&socket_address, sizeof(socket_address), 0);
   socket_address.sin_family = AF_INET;
   socket_address.sin_addr.s_addr = htonl(INADDR_ANY);
-  socket_address.sin_port = htons(Port);
+  socket_address.sin_port = htons(ServerPort);
 
   ret = bind(ServerFd, (struct sockaddr *)&socket_address, sizeof(socket_address));
   assert(ret >= 0);
@@ -165,4 +172,14 @@ void Server::serverPoll() {
       }
     }
   }
+}
+
+int Server::getNumClients() {
+  int clientcount = 0;
+  for (auto & client : ClientFd) {
+    if (client != -1) {
+      clientcount++;
+    }
+  }
+  return clientcount;
 }
