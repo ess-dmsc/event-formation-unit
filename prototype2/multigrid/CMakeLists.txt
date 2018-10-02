@@ -161,11 +161,11 @@ set(Vmmr16ParserTest_INC
   )
 create_test_executable(Vmmr16ParserTest)
 
-#set(MG24GeometryTest_SRC
-#  mgmesytec/MG24GeometryTest.cpp)
-#set(MG24GeometryTest_INC
-#  mgmesytec/MG24Geometry.h)
-#create_test_executable(MG24GeometryTest)
+set(MG24GeometryTest_SRC
+  mgmesytec/MG24GeometryTest.cpp)
+set(MG24GeometryTest_INC
+  mgmesytec/MG24Geometry.h)
+create_test_executable(MG24GeometryTest)
 
 set(FilterTest_SRC
   mgmesytec/FilterTest.cpp)

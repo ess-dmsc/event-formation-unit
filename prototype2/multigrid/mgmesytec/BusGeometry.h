@@ -195,8 +195,8 @@ public:
   }
 
   /** @brief return the x coordinate of the detector */
-  inline uint32_t x(uint16_t channel) const {
-    return x_from_wire(wire(channel));
+  virtual uint32_t x(uint16_t channel) const {
+    return x_from_wire(this->wire(channel));
   }
 
   inline uint32_t y_from_grid(uint16_t g) const {
@@ -217,7 +217,7 @@ public:
   }
 
   /** @brief return the z coordinate of the detector */
-  inline uint32_t z(uint16_t channel) const {
+  virtual uint32_t z(uint16_t channel) const {
     return z_from_wire(wire(channel));
   }
 
