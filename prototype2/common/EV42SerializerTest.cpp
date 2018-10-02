@@ -9,6 +9,18 @@
 //#define ARRAYLENGTH 125000
 #define ARRAYLENGTH 10
 
+struct MockProducer {
+
+  template<typename T>
+  inline void produce(const Buffer<T>&)
+  {
+    NumberOfCalls++;
+  }
+
+
+  size_t NumberOfCalls {0};
+};
+
 class EV42SerializerTest : public TestBase {
   virtual void SetUp() {
     for (int i = 0; i < 200000; i++) {
@@ -91,14 +103,19 @@ TEST_F(EV42SerializerTest, DeserializeCheckData) {
 }
 
 TEST_F(EV42SerializerTest, AutoDeserialize) {
+  MockProducer mp;
+  fb.setProducerCallback(std::bind(&MockProducer::produce<uint8_t>, &mp, std::placeholders::_1));
+
   for (int i = 0; i < ARRAYLENGTH - 1; i++) {
     auto len = fb.addEvent(time[i], pixel[i]);
     ASSERT_EQ(len, 0);
     ASSERT_EQ(fb.eventCount(), i + 1);
   }
+  EXPECT_EQ(mp.NumberOfCalls, 0);
 
   auto len = fb.addEvent(time[ARRAYLENGTH - 1], pixel[ARRAYLENGTH - 1]);
   ASSERT_TRUE(len > 0);
+  EXPECT_EQ(mp.NumberOfCalls, 1);
 }
 
 int main(int argc, char **argv) {

@@ -18,17 +18,16 @@ static constexpr uint64_t FBMutablePlaceholder = 1;
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-EV42Serializer::EV42Serializer(size_t max_array_length, std::string source_name)
-    : MaxEvents(max_array_length), Builder_(MaxEvents * 8 + 256) {
+EV42Serializer::EV42Serializer(size_t MaxArrayLength, std::string SourceName)
+    : MaxEvents(MaxArrayLength), Builder_(MaxEvents * 8 + 256) {
 
-  auto sourceName = Builder_.CreateString(source_name);
-  auto timeoff = Builder_.CreateUninitializedVector(MaxEvents, TimeSize, &TimePtr);
-  auto pixeloff =
-      Builder_.CreateUninitializedVector(MaxEvents, PixelSize, &PixelPtr);
+  auto SourceNameOffset = Builder_.CreateString(SourceName);
+  auto TimeOffset = Builder_.CreateUninitializedVector(MaxEvents, TimeSize, &TimePtr);
+  auto PixelOffset = Builder_.CreateUninitializedVector(MaxEvents, PixelSize, &PixelPtr);
 
-  auto evMsgHeader = CreateEventMessage(Builder_, sourceName, FBMutablePlaceholder,
-                                        FBMutablePlaceholder, timeoff, pixeloff);
-  FinishEventMessageBuffer(Builder_, evMsgHeader);
+  auto HeaderOffset = CreateEventMessage(Builder_, SourceNameOffset,
+      FBMutablePlaceholder, FBMutablePlaceholder, TimeOffset, PixelOffset);
+  FinishEventMessageBuffer(Builder_, HeaderOffset);
 
   Buffer_.address = Builder_.GetBufferPointer();
   Buffer_.size = Builder_.GetSize();
@@ -46,8 +45,8 @@ EV42Serializer::EV42Serializer(size_t max_array_length, std::string source_name)
   EventMessage_->mutate_pulse_time(0);
 }
 
-void EV42Serializer::producerCallback(ProducerCallback callback) {
-  ProduceFunctor = callback;
+void EV42Serializer::setProducerCallback(ProducerCallback Callback) {
+  ProduceFunctor = Callback;
 }
 
 Buffer<uint8_t> EV42Serializer::serialize() {
@@ -77,8 +76,8 @@ size_t EV42Serializer::produce() {
   return 0;
 }
 
-void EV42Serializer::pulseTime(uint64_t time) {
-  EventMessage_->mutate_pulse_time(time);
+void EV42Serializer::pulseTime(uint64_t Time) {
+  EventMessage_->mutate_pulse_time(Time);
 }
 
 uint64_t EV42Serializer::pulseTime() const {
@@ -93,10 +92,10 @@ uint64_t EV42Serializer::currentMessageId() const {
   return MessageId;
 }
 
-size_t EV42Serializer::addEvent(uint32_t time, uint32_t pixel) {
-  XTRACE(OUTPUT, DEB, "Add event: %d %u\n", time, pixel);
-  ((uint32_t *) TimePtr)[EventCount] = time;
-  ((uint32_t *) PixelPtr)[EventCount] = pixel;
+size_t EV42Serializer::addEvent(uint32_t Time, uint32_t Pixel) {
+  XTRACE(OUTPUT, DEB, "Add event: %d %u\n", Time, Pixel);
+  reinterpret_cast<uint32_t*>(TimePtr)[EventCount] = Time;
+  reinterpret_cast<uint32_t*>(PixelPtr)[EventCount] = Pixel;
   EventCount++;
 
   if (EventCount >= MaxEvents) {

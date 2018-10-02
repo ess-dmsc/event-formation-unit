@@ -245,7 +245,7 @@ void CSPEC::mainThread() {
 
   EV42Serializer ev42serializer(kafka_buffer_size, "multigrid");
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  ev42serializer.producerCallback(std::bind(&Producer::produce2<uint8_t>, &EventProducer, std::placeholders::_1));
+  ev42serializer.setProducerCallback(std::bind(&Producer::produce2<uint8_t>, &EventProducer, std::placeholders::_1));
 
   Multigrid::Sis3153Parser sis3153parser;
   sis3153parser.buffers.reserve(1000);

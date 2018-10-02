@@ -172,7 +172,7 @@ void SONDEIDEA::processing_thread() {
   IDEASData ideasdata(&geometry, DetectorSettings.fileprefix);
   EV42Serializer flatbuffer(kafka_buffer_size, "SONDE");
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
-  flatbuffer.producerCallback(
+  flatbuffer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
   unsigned int data_index;

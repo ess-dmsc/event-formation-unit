@@ -199,7 +199,7 @@ void MBCAEN::processing_thread() {
 
   EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
   Producer eventprod(EFUSettings.KafkaBroker, "MB_detector");
-  flatbuffer.producerCallback(
+  flatbuffer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
   Hists histograms(nwires, nstrips);

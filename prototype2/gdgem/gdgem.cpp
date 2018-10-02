@@ -304,7 +304,7 @@ void NMX::processing_thread() {
 
   Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
   EV42Serializer flatbuffer(kafka_buffer_size, "nmx");
-  flatbuffer.producerCallback(
+  flatbuffer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
   Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");

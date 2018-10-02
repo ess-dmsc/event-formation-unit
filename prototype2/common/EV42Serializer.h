@@ -19,14 +19,14 @@ public:
   /// \brief creates ev42 flat buffer serializer
   /// \param max_array_length maximum number of events
   /// \param source_name value for source_name field
-  EV42Serializer(size_t max_array_length, std::string source_name);
+  EV42Serializer(size_t MaxArrayLength, std::string SourceName);
 
   /// \brief sets producer callback
   /// \param cb function to be called to send buffer to Kafka
-  void producerCallback(ProducerCallback callback);
+  void setProducerCallback(ProducerCallback Callback);
 
   /// \brief changes pulse time
-  void pulseTime(uint64_t time);
+  void pulseTime(uint64_t Time);
 
   /// \returns the currently set pulse time
   uint64_t pulseTime() const;
@@ -35,7 +35,7 @@ public:
   /// \param time time of event in relation to pulse time
   /// \param pixl id of pixel as defined by logical geometry mapping
   /// \returns bytes transmitted, if any
-  size_t addEvent(uint32_t time, uint32_t pixel);
+  size_t addEvent(uint32_t Time, uint32_t Pixel);
 
   /// \brief returns event count
   size_t eventCount() const;
@@ -57,7 +57,7 @@ private:
   size_t MaxEvents{0};
   size_t EventCount{0};
 
-  // \todo maybe should be mutated directly in buffer?
+  // \todo maybe should be mutated directly in buffer? Start at 0?
   uint64_t MessageId{1};
 
   ProducerCallback ProduceFunctor;
