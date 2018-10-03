@@ -32,7 +32,7 @@ images = [
         'cmake_flags': ''
     ],
     'fedora25': [
-        'name': 'essdmscdm/fedora25-build-node:1.0.0',
+        'name': 'essdmscdm/fedora25-build-node:2.0.0',
         'sh'  : 'bash -e',
         'cmake_flags': ''
     ]
