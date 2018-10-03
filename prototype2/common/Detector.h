@@ -118,6 +118,8 @@ class DetectorFactoryBase {
 public:
   virtual ~DetectorFactoryBase() = default;
   virtual std::shared_ptr<Detector> create(BaseSettings settings) = 0;
+
+  virtual ~DetectorFactoryBase(){};
 };
 
 /// \brief Template for creating detector factories in dynamically loaded detector modules.
@@ -126,7 +128,7 @@ public:
 template <class DetectorModule>
 class DetectorFactory : public DetectorFactoryBase {
 public:
-  /// \brief Instantiates the cooresponding detector module.
+  /// \brief Instantiates the corresponding detector module.
   ///
   /// This member function is only called by the efu when loading a detector module.
   std::shared_ptr<Detector> create(BaseSettings Settings) override {
