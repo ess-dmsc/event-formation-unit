@@ -24,6 +24,10 @@ class EFUShell(cmd.Cmd):
    def _send_command(self, line):
        print(self.driver.Ask(line))
 
+   def do_nmx_get_calib(self, line):
+       """Show NMX calibrations for fec, asic, channel"""
+       self._send_command('NMX_GET_CALIB {}'.format(line))
+
    def do_cspec_load_calib(self, line):
        """Load wire and grid calibrations from file"""
        self._send_command('CSPEC_LOAD_CALIB {}'.format(line))
