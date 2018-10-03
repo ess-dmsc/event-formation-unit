@@ -116,6 +116,7 @@ struct PopulateCLIParser {
 /// \brief Base class for the creation of detector factories.
 class DetectorFactoryBase {
 public:
+  virtual ~DetectorFactoryBase() = default;
   virtual std::shared_ptr<Detector> create(BaseSettings settings) = 0;
 };
 

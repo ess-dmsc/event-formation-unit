@@ -36,11 +36,6 @@ add_subdirectory(readout)
 
 include(UnitTests.cmake) # This has only libs unit tests now ???
 
-##=============================================================================
-## Event Formation Unit
-##=============================================================================
-add_subdirectory(efu)
-
 #=============================================================================
 # Plugins
 #=============================================================================
@@ -51,6 +46,12 @@ add_subdirectory(sonde)
 add_subdirectory(udp)
 add_subdirectory(adc_readout)
 add_subdirectory(tools)
+
+##=============================================================================
+## Event Formation Unit
+##=============================================================================
+# Add it last.
+add_subdirectory(efu)
 
 add_custom_target(runefu
     COMMAND efu "-d" "../modules/mgmesytec" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
