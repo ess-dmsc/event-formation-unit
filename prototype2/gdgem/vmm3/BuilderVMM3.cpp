@@ -72,10 +72,10 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 			readout.tdc = d.tdc;
 			readout.adc = d.adc;
 			readout.over_threshold = (d.overThreshold != 0);
-
 			auto calib = calfile_->getCalibration(readout.fec, readout.chip_id, readout.channel);
-			double complete_timestamp_ns = readout.srs_timestamp
-					+ time_intepreter_.chip_time_ns(d.bcid, d.tdc, calib.offset, calib.slope);
+			readout.ChipTimeNs = time_intepreter_.chip_time_ns(d.bcid, d.tdc, calib.offset, calib.slope);
+
+			double complete_timestamp_ns = readout.srs_timestamp + readout.ChipTimeNs;
 
 			XTRACE(PROCESS, DEB,
 					"srs/vmm timestamp: srs: 0x%08x, bc: 0x%08x, tdc: 0x%08x",
@@ -84,14 +84,12 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 					readout.chip_id, d.chno);
 
 			plane = geometry_interpreter_.get_plane(readout);
-
-
 			if (plane != NMX_INVALID_PLANE_ID) {
-
-				if (plane)
+				if (plane) {
 					sorter_y.insert(readout);
-				else
+				}	else {
 					sorter_x.insert(readout);
+				}
 			} else {
 				geom_errors++;
 

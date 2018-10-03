@@ -49,16 +49,14 @@ class SRSTime {
   /// \param trigger trigger timestamp from SRS header
   /// \param bc bunc crossing ID from VMM
   /// \param tdc tdc value from VMM
-  double timestamp_ns(uint64_t trigger, uint16_t bc, uint16_t tdc);
+  double timestamp_ns(uint64_t trigger, uint16_t bc, uint16_t tdc, float offset, float slope);
 
   /// \brief generate absolute integer-valued timestamp
   /// \param trigger trigger timestamp from SRS header
   /// \param bc bunc crossing ID from VMM
   /// \param tdc tdc value from VMM
-  uint64_t timestamp(uint64_t trigger, uint16_t bc, uint16_t tdc);
+  uint64_t timestamp(uint64_t trigger, uint16_t bc, uint16_t tdc, float offset, float slope);
 
-  /// \brief original implamentation
-  double chip_time_ns(uint16_t bc, uint16_t tdc) const;
   /// \brief now using VMM calibration data
   double chip_time_ns(uint16_t bc, uint16_t tdc, float offset, float slope) const;
 

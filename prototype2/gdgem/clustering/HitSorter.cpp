@@ -52,8 +52,7 @@ void HitSorter::insert(const Readout &readout) {
   // TODO: Move this check to parser?
   if (readout.over_threshold || (readout.adc >= pADCThreshold)) {
     hits.store(pChips.get_plane(readout), pChips.get_strip(readout), readout.adc,
-               pTime.chip_time_ns(readout.bcid, readout.tdc),
-               triggerTimestamp_ns);
+               readout.ChipTimeNs, triggerTimestamp_ns);
     // TODO: who adds chipTime + trigger time? queue?
   }
 }
