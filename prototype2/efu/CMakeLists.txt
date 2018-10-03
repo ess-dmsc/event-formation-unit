@@ -23,7 +23,13 @@ set(efu_INC
   Server.h
   )
 
+
+set(efu_LIB ${EFU_MODULES})
 create_executable(efu)
+if (NOT "${efu_LIB}" STREQUAL "")
+  add_dependencies(efu ${EFU_DEPENDENCIES})
+endif()
+
 set_target_properties(efu PROPERTIES ENABLE_EXPORTS 1)
 get_filename_component(EFU_RUN_INSTRUCTIONS "Executing artefacts.md" ABSOLUTE)
 add_custom_command(TARGET efu POST_BUILD
