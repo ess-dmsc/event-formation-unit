@@ -39,6 +39,9 @@ public:
   /// \param args - needed to access Stat.h counters
   Server(int port, Parser &parse);
 
+  /// \brief close open sockets
+  ~Server();
+
   /// \brief Setup socket parameters
   void serverOpen();
 
@@ -53,16 +56,27 @@ public:
   /// \param socketfd socket file descriptor
   int serverSend(int socketfd);
 
+  /// \brief getter function for private member variable
+  int getServerPort() { return ServerPort; }
+
+  /// \brief getter function for private member variable
+  int getServerFd() { return ServerFd; }
+
+  /// \brief returns the number of active clients
+  int getNumClients();
+
+  /// \brief getter function for private member variable
+  uint64_t getTotalBytesReceived() { return TotalBytesReceived; }
+
 private:
   struct {
     uint8_t buffer[SERVER_BUFFER_SIZE + 1];
     uint32_t bytes;
   } IBuffer, OBuffer; /// receive and transmit buffers
 
-  //SocketBuffer IBuffer; /// receive buffer
-  //SocketBuffer OBuffer; /// transmit buffer
+  uint64_t TotalBytesReceived{0};
 
-  int Port{0}; /// server tcp port
+  int ServerPort{0}; /// server tcp port
   int ServerFd{-1}; /// server file descriptor
   std::array<int, SERVER_MAX_CLIENTS> ClientFd;
 

@@ -36,11 +36,6 @@ add_subdirectory(readout)
 
 include(UnitTests.cmake) # This has only libs unit tests now ???
 
-##=============================================================================
-## Event Formation Unit
-##=============================================================================
-add_subdirectory(efu)
-
 #=============================================================================
 # Plugins
 #=============================================================================
@@ -51,6 +46,12 @@ add_subdirectory(sonde)
 add_subdirectory(udp)
 add_subdirectory(adc_readout)
 add_subdirectory(tools)
+
+##=============================================================================
+## Event Formation Unit
+##=============================================================================
+# Add it last.
+add_subdirectory(efu)
 
 get_filename_component(MB_CFG_FILE "multiblade/configs/MB16.json" ABSOLUTE)
 get_filename_component(GDGEM_CFG_FILE "gdgem/configs/vmm3.json" ABSOLUTE)

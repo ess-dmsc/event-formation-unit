@@ -23,7 +23,13 @@ set(efu_INC
   Server.h
   )
 
+
+set(efu_LIB ${EFU_MODULES})
 create_executable(efu)
+if (NOT "${efu_LIB}" STREQUAL "")
+  add_dependencies(efu ${EFU_DEPENDENCIES})
+endif()
+
 set_target_properties(efu PROPERTIES ENABLE_EXPORTS 1)
 get_filename_component(EFU_RUN_INSTRUCTIONS "Executing artefacts.md" ABSOLUTE)
 add_custom_command(TARGET efu POST_BUILD
@@ -34,6 +40,19 @@ add_custom_command(TARGET efu POST_BUILD
 #=============================================================================
 # EFU Tests
 #=============================================================================
+set(ServerTest_INC
+    Server.h
+    Parser.h
+    ../common/EFUArgs.h
+    )
+set(ServerTest_SRC
+    Server.cpp
+    ServerTest.cpp
+    Parser.cpp
+    ../common/EFUArgs.cpp)
+create_test_executable(ServerTest)
+
+
 if(${CMAKE_COMPILER_IS_GNUCXX})
   set(ParserTestLibrary_SRC
     ParserTest.cpp
