@@ -26,6 +26,7 @@ TEST_F(SRSTimeTest, SettersGetters) {
   ASSERT_EQ(time->trigger_resolution_ns(), 42.0);
   ASSERT_EQ(time->target_resolution_ns(), 42.0);
   ASSERT_EQ(time->acquisition_window(), 1234);
+  ASSERT_EQ(time->internal_clock_period_ns(), 25);
 }
 
 
