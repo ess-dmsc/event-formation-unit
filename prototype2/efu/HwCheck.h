@@ -20,18 +20,24 @@ public:
   /// there is link activity and an ip address has been assigned
   static const int myflags = IFF_UP | IFF_RUNNING;
 
-  /// Currently the constructor does nothing
+  /// \brief Currently the constructor does nothing
   HwCheck() {};
 
-  /// Select interfaces to check
+  /// \brief Select interfaces to check
   bool checkMTU(std::vector<std::string> ignore);
 
   /// setter for MTU size check, mostly used for reverting
   /// to a lower MTU size, when running on ad hoc servers
-  void setMinimumMTU(int mtu) { minimumMtu = mtu; }
+  void setMinimumMTU(int mtu) { MinimumMtu = mtu; }
 
   /// Gleaned from MacOS and CentOS and deemed ignore worthy
-  std::vector<std::string> defaultIgnoredInterfaces = {"ppp0", "docker", "ov-"};
+  std::vector<std::string> IgnoredInterfaces = {"ppp0", "docker", "ov-"};
+
+  /// \brief
+  bool checkDiskSpace(std::vector<std::string> checkdirs);
+
+  /// \brief
+  std::vector<std::string> DirectoriesToCheck = {".", "/"};
 
 private:
   /// Check a single interface
@@ -42,5 +48,13 @@ private:
 
   /// default for Ethernet interfaces is 1500 bytes, but better performance
   /// can be achieved using larger packet sizes
-  int minimumMtu{ 9000 };
+  int MinimumMtu{ 9000 };
+
+  /// \todo change arbitrary value to something better?
+  const uint64_t MinDiskAvailable = 30 * 1000 * 1000 * 1000ULL;
+
+  /// \todo change arbitrary value to something better?
+  const float MinDiskPercentFree = 50.0;
+
+
 };
