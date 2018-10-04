@@ -38,6 +38,13 @@ TEST_F(MBConfigTest, IncompleteConfigFile) {
   ASSERT_THROW(mbconf = MBConfig(filename), std::runtime_error);
 }
 
+TEST_F(MBConfigTest, InvaldInstrument) {
+  std::string filename{"deleteme_incomplete.json"};
+  DataSave tempfile(filename, (void *)invalidinstrument.c_str(), invalidinstrument.size());
+  MBConfig mbconf;
+  ASSERT_THROW(mbconf = MBConfig(filename), std::runtime_error);
+}
+
 TEST_F(MBConfigTest, InvalidDigitiserInFile) {
   std::string filename{"deleteme_invaliddigitiser.json"};
   DataSave tempfile(filename, (void *)invaliddigitiser.c_str(), invaliddigitiser.size());
