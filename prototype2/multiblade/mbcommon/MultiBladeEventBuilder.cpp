@@ -12,9 +12,7 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 MultiBladeEventBuilder::MultiBladeEventBuilder()
-    : m_ADC_theshold(0), m_time_window(400), m_nwire_channels(32),
-      m_nstrip_channels(32), m_use_weighted_average(true), m_wire_cluster(0),
-      m_strip_cluster(0), m_time_stamp(0), m_cluster_clock(0),
+    : m_wire_cluster(0), m_strip_cluster(0), m_time_stamp(0), m_cluster_clock(0),
       m_first_signal(true), m_nevents(0) {
   resetCounters();
 }

@@ -193,9 +193,9 @@ private:
   // Configuration variables
 
   /// Threshold for ADC-value. Set to discard gamma-events
-  uint16_t m_ADC_theshold;
+  uint16_t m_ADC_theshold{0};
   /// Time window for a single cluster. In number of clock-cycles
-  uint32_t m_time_window;
+  uint32_t m_time_window{400};
   /// Number of wire channels
   uint8_t m_nwire_channels{32};
   /// Number of strip channels
