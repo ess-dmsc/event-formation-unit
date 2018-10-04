@@ -105,7 +105,7 @@ int main(int argc, const char **argv) {
   auto acc_time = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
   auto ttime = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t0);
 
-  dumpEventBuilderInfo info;
+  DumpEventBuilderInfo info;
   info.print(p);
 
   long npoints = entries.size() * npasses;

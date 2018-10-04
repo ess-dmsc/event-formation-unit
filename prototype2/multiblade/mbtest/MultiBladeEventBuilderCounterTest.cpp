@@ -12,6 +12,7 @@
 /// \todo - nolonger valid - new data format
 
 #include "mbcommon/MultiBladeEventBuilder.h"
+#include "mbcommon/DumpEventBuilderInfo.h"
 #include "MultiBladeTestData.h"
 #include "test/TestBase.h"
 
@@ -20,7 +21,19 @@
 TEST(MBEventBuilderTest, Constructor) {
   MultiBladeEventBuilder evbuilder;
   ASSERT_EQ(evbuilder.getNumberOfEvents(), 0);
+  auto coords = evbuilder.getPosition();
+  ASSERT_TRUE(coords[0] < 0.0000001);
+  ASSERT_TRUE(coords[1] < 0.0000001);
+  ASSERT_TRUE(coords[2] < 0.0000001);
 }
+
+TEST(MBEventBuilderTest, EventBuilderDump) {
+  MultiBladeEventBuilder evbuilder;
+  printf("This is NOT a test, jsut calling debug print functions\n");
+  DumpEventBuilderInfo evbdump;
+  evbdump.print(evbuilder);
+}
+
 
 /// not easy to test
 TEST(MBEventBuilderTest, AddDataPoint) {

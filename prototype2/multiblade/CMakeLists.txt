@@ -92,6 +92,7 @@ set(mbtest_INC mbcommon/MultiBladeEventBuilder.h mbtest/MultiBladeTestData.h)
 set(MultiBladeEventBuilderTest_INC ${mbtest_INC} )
 set(MultiBladeEventBuilderTest_SRC
   mbcommon/MultiBladeEventBuilder.cpp
+  mbcommon/DumpEventBuilderInfo.cpp
   mbtest/MultiBladeEventBuilderCounterTest.cpp
   )
 create_test_executable(MultiBladeEventBuilderTest)

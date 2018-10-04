@@ -6,11 +6,8 @@
 /// Mesytec readout)
 ///
 //===----------------------------------------------------------------------===//
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
-#pragma message "XXXX Using GCC diagnostics push to suppress compiler warning XXX"
+
 #include <common/Detector.h>
-#pragma GCC diagnostic pop
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
 #include <common/Producer.h>

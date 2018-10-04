@@ -9,11 +9,11 @@
 
 #include "mbcommon/MultiBladeEventBuilder.h"
 
-class dumpEventBuilderInfo {
+class DumpEventBuilderInfo {
 
 public:
   /// Default and only constructor
-  dumpEventBuilderInfo();
+  DumpEventBuilderInfo();
 
   /// Call this to wite the information to stdout
   void print(MultiBladeEventBuilder p);

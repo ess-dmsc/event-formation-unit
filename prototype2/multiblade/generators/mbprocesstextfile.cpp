@@ -128,7 +128,7 @@ int main(int argc, const char **argv) {
 
   output.close();
 
-  dumpEventBuilderInfo info;
+  DumpEventBuilderInfo info;
   info.print(p);
 
   return 0;

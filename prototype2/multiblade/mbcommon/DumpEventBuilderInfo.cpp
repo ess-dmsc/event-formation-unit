@@ -10,7 +10,7 @@
 
 #include "DumpEventBuilderInfo.h"
 
-dumpEventBuilderInfo::dumpEventBuilderInfo()
+DumpEventBuilderInfo::DumpEventBuilderInfo()
 #if 0
 : m_2D_wire_events(0),
   m_2D_strip_events(0),
@@ -20,7 +20,7 @@ dumpEventBuilderInfo::dumpEventBuilderInfo()
 {
 }
 
-void dumpEventBuilderInfo::print(MultiBladeEventBuilder p) {
+void DumpEventBuilderInfo::print(MultiBladeEventBuilder p) {
 
   // clusterPoints(p);
   printOverview(p);
@@ -29,7 +29,7 @@ void dumpEventBuilderInfo::print(MultiBladeEventBuilder p) {
   printExcessivePoints(p);
 }
 
-void dumpEventBuilderInfo::printOverview(MultiBladeEventBuilder p) {
+void DumpEventBuilderInfo::printOverview(MultiBladeEventBuilder p) {
 
   uint64_t n2Dwireevents = sumArray(p.get2DWireClusterCounter());
   uint64_t n2Dstripevents = sumArray(p.get2DStripClusterCounter());
@@ -52,7 +52,7 @@ void dumpEventBuilderInfo::printOverview(MultiBladeEventBuilder p) {
             << " Must match number of events recorded! " << std::endl;
 }
 
-void dumpEventBuilderInfo::printClusterInfo(MultiBladeEventBuilder p) {
+void DumpEventBuilderInfo::printClusterInfo(MultiBladeEventBuilder p) {
 
   std::cout << "\n";
   std::cout << "2D events (both wire and strip signals) : \n";
@@ -77,7 +77,7 @@ void dumpEventBuilderInfo::printClusterInfo(MultiBladeEventBuilder p) {
                          "Percentage of strips fired per event         : ");
 }
 
-void dumpEventBuilderInfo::printRejected(MultiBladeEventBuilder p) {
+void DumpEventBuilderInfo::printRejected(MultiBladeEventBuilder p) {
 
   std::cout << "\n";
   std::cout << "Number of rejected clusters :" << std::endl;
@@ -87,7 +87,7 @@ void dumpEventBuilderInfo::printRejected(MultiBladeEventBuilder p) {
             << p.getNumberOfPositionRejected() << std::endl;
 }
 
-void dumpEventBuilderInfo::printExcessivePoints(MultiBladeEventBuilder p) {
+void DumpEventBuilderInfo::printExcessivePoints(MultiBladeEventBuilder p) {
 
   uint64_t sum_wire =
       p.get2DWireClusterCounter()[5] + p.get1DWireClusterCounter()[5];
@@ -102,7 +102,7 @@ void dumpEventBuilderInfo::printExcessivePoints(MultiBladeEventBuilder p) {
   std::cout << "     Strips : " << std::setw(10) << sum_strip << std::endl;
 }
 
-void dumpEventBuilderInfo::printClusterAbsolute(std::array<uint64_t, 6> array,
+void DumpEventBuilderInfo::printClusterAbsolute(std::array<uint64_t, 6> array,
                                                 std::string text) {
 
   std::cout << "     " << text;
@@ -110,7 +110,7 @@ void dumpEventBuilderInfo::printClusterAbsolute(std::array<uint64_t, 6> array,
   std::cout << "\n";
 }
 
-void dumpEventBuilderInfo::printClusterPercentage(std::array<uint64_t, 6> array,
+void DumpEventBuilderInfo::printClusterPercentage(std::array<uint64_t, 6> array,
                                                   std::string text) {
 
   std::cout << "     " << text;
@@ -118,14 +118,14 @@ void dumpEventBuilderInfo::printClusterPercentage(std::array<uint64_t, 6> array,
   std::cout << "\n";
 }
 
-void dumpEventBuilderInfo::printArray(std::array<uint64_t, 6> array) {
+void DumpEventBuilderInfo::printArray(std::array<uint64_t, 6> array) {
 
   for (int i = 0; i < 6; i++)
     std::cout << std::setw(10) << array[i] << " ("
               << (i < 5 ? std::to_string(i + 1) : ">5") << ")";
 }
 
-void dumpEventBuilderInfo::printArrayPercentage(std::array<uint64_t, 6> array) {
+void DumpEventBuilderInfo::printArrayPercentage(std::array<uint64_t, 6> array) {
 
   uint64_t sum = sumArray(array);
 
@@ -135,7 +135,7 @@ void dumpEventBuilderInfo::printArrayPercentage(std::array<uint64_t, 6> array) {
               << (i < 5 ? std::to_string(i + 1) : ">5") << ")";
 }
 
-uint64_t dumpEventBuilderInfo::sumArray(std::array<uint64_t, 6> array) {
+uint64_t DumpEventBuilderInfo::sumArray(std::array<uint64_t, 6> array) {
 
   uint64_t sum = 0;
 
