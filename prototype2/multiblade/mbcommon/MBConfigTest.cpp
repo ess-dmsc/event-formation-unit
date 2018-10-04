@@ -45,6 +45,24 @@ TEST_F(MBConfigTest, InvalidDigitiserInFile) {
   ASSERT_THROW(mbconf = MBConfig(filename), std::runtime_error);
 }
 
+TEST_F(MBConfigTest, UnknownInstrument) {
+  std::string filename{"deleteme_unknowninstrument.json"};
+  DataSave tempfile(filename, (void *)unknowninstrument.c_str(), unknowninstrument.size());
+  MBConfig mbconf;
+  mbconf = MBConfig(filename);
+  ASSERT_TRUE(mbconf.isConfigLoaded());
+  ASSERT_EQ(mbconf.getInstrument(), MBConfig::InstrumentGeometry::Estia);
+}
+
+TEST_F(MBConfigTest, InstrumentFreia) {
+  std::string filename{"deleteme_instrumentfreia.json"};
+  DataSave tempfile(filename, (void *)instrumentfreia.c_str(), instrumentfreia.size());
+  MBConfig mbconf;
+  mbconf = MBConfig(filename);
+  ASSERT_TRUE(mbconf.isConfigLoaded());
+  ASSERT_EQ(mbconf.getInstrument(), MBConfig::InstrumentGeometry::Freia);
+}
+
 TEST_F(MBConfigTest, ValidConfigFile) {
   std::string filename{"deleteme_valid.json"};
   DataSave tempfile(filename, (void *)validconfig.c_str(), validconfig.size());

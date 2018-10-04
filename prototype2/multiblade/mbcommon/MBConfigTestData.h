@@ -39,6 +39,40 @@ std::string invaliddigitiser = R"(
   }
 )";
 
+std::string instrumentfreia = R"(
+  {
+    "InstrumentGeometry": "Freia",
+
+    "DigitizerConfig" : [
+      { "index" : 0, "id" : 137 },
+      { "index" : 1, "id" : 143 },
+      { "index" : 2, "id" : 142 },
+      { "index" : 3, "id" :  31 },
+      { "index" : 4, "id" :  33 },
+      { "index" : 5, "id" :  34 }
+    ],
+
+    "TimeTickNS": 17
+  }
+)";
+
+std::string unknowninstrument = R"(
+  {
+    "InstrumentGeometry": "VakseViggo",
+
+    "DigitizerConfig" : [
+      { "index" : 0, "id" : 137 },
+      { "index" : 1, "id" : 143 },
+      { "index" : 2, "id" : 142 },
+      { "index" : 3, "id" :  31 },
+      { "index" : 4, "id" :  33 },
+      { "index" : 5, "id" :  34 }
+    ],
+
+    "TimeTickNS": 17
+  }
+)";
+
 std::string validconfig = R"(
   {
     "InstrumentGeometry": "Estia",
