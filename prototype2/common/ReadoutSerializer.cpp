@@ -11,14 +11,19 @@
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-ReadoutSerializer::ReadoutSerializer(size_t maxarraylength, Producer &prod)
-    : maxlen(maxarraylength), producer(prod) {
+ReadoutSerializer::ReadoutSerializer(size_t maxarraylength)
+    : maxlen(maxarraylength) {
       builder.Clear();
 }
 
-ReadoutSerializer::~ReadoutSerializer() {}
+void ReadoutSerializer::set_callback(ProducerCallback cb) {
+  producer_callback = cb;
+}
 
-int ReadoutSerializer::produce() {
+// \todo labels for planes
+// \todo offset time
+
+size_t ReadoutSerializer::produce() {
   if (entries == 0) {
     return 0;
   }
@@ -31,9 +36,10 @@ int ReadoutSerializer::produce() {
   auto msg = CreateMonitorMessage(builder, 0, DataField::MONHit, dataoff.Union());
   builder.Finish(msg);
 
-  char * buffer = (char *)builder.GetBufferPointer();
-  auto buffersize = builder.GetSize();
-  producer.produce(buffer, buffersize);
+  Buffer<uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
+  if (producer_callback) {
+    producer_callback(buffer);
+  }
 
   planes.clear();
   channels.clear();
@@ -42,12 +48,10 @@ int ReadoutSerializer::produce() {
   entries = 0;
   builder.Clear();
 
-  return buffersize;
+  return buffer.size;
 }
 
-int ReadoutSerializer::addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc) {
-  int ret = 0;
-
+size_t ReadoutSerializer::addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc) {
   planes.push_back(plane);
   channels.push_back(channel);
   times.push_back(time);
@@ -55,7 +59,7 @@ int ReadoutSerializer::addEntry(uint16_t plane, uint16_t channel, uint32_t time,
   entries++;
 
   if (entries == maxlen) {
-    ret = produce(); // entries will be set to 0
+    return produce(); // entries will be set to 0
   }
-  return ret;
+  return 0;
 }

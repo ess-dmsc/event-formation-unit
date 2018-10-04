@@ -3,23 +3,26 @@
 #=============================================================================
 
 set(efu_common_SRC
-  FBSerializer.cpp
+  EV42Serializer.cpp
   NewStats.cpp
   Producer.cpp
   DataSave.cpp
   DetectorModuleRegister.cpp
+  TimeString.cpp
   )
 set(efu_common_INC
   ../../libs/include/gccintel.h
   DetectorModuleRegister.h
   Detector.h
   EFUArgs.h
-  FBSerializer.h
+  EV42Serializer.h
+  Buffer.h
   NewStats.h
   Producer.h
   Trace.h
   Log.h
   DataSave.h
+  TimeString.h
   )
 
 find_package(CLI11 REQUIRED)
@@ -55,11 +58,19 @@ else()
   message(STATUS "*** Skipping ProducerTest - requires gcc/linux")
 endif()
 
+set(BufferTest_SRC
+  BufferTest.cpp)
+set(BufferTest_INC
+  Buffer.h)
+create_test_executable(BufferTest)
+
 set(DataSaveTest_SRC
     DataSaveTest.cpp
-    DataSave.cpp)
+    DataSave.cpp
+    TimeString.cpp)
 set(DataSaveTest_INC
-    DataSave.h)
+    DataSave.h
+    TimeString.h)
 create_test_executable(DataSaveTest)
 
 set(DetectorTest_SRC
@@ -79,14 +90,14 @@ set(EFUArgsTest_INC
   EFUArgs.h)
 create_test_executable(EFUArgsTest)
 
-set(FBSerializerTest_SRC
-  FBSerializerTest.cpp
-  FBSerializer.cpp
+set(EV42SerializerTest_SRC
+  EV42SerializerTest.cpp
+  EV42Serializer.cpp
   Producer.cpp)
-set(FBSerializerTest_INC
-  FBSerializer.h
+set(EV42SerializerTest_INC
+  EV42Serializer.h
   Producer.h)
-create_test_executable(FBSerializerTest)
+create_test_executable(EV42SerializerTest)
 
 set(NewStatsTest_SRC
   NewStatsTest.cpp

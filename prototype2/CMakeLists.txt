@@ -64,7 +64,7 @@ COMMENT "Copying json configuration files to ${PROJECT_BINARY_DIR}/configs"
 )
 
 add_custom_target(runefu
-    COMMAND efu "-d" "../modules/mgmesytec" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
+    COMMAND efu "-d" "../modules/mgmesytec" "-f" "nocfgfile" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/mgcncs2" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/sonde" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/mbcaen" "-f" "../configs/MB16.json"  "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"

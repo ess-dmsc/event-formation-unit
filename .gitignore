@@ -14,9 +14,10 @@ a.out
 
 #directories
 build*/
+cmake-build-*/
 doxygen/
 
 #IDE
 CMakeLists.txt.user
 .idea/
-cmake-build-*/
+.idea
