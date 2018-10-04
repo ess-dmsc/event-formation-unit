@@ -208,7 +208,7 @@ void MBCAEN::processing_thread() {
   histfb.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 
-  multiBladeEventBuilder builder[ncass];
+  MultiBladeEventBuilder builder[ncass];
   for (uint32_t i = 0; i < ncass; i++) {
     builder[i].setNumberOfWireChannels(nwires);
     builder[i].setNumberOfStripChannels(nstrips);

@@ -15,12 +15,80 @@
 #include "MultiBladeTestData.h"
 #include "test/TestBase.h"
 
-TEST(MBEventBuilder__Test, EventCounter) {
+
+/// \todo add further checks
+TEST(MBEventBuilderTest, Constructor) {
+  MultiBladeEventBuilder evbuilder;
+  ASSERT_EQ(evbuilder.getNumberOfEvents(), 0);
+}
+
+/// not easy to test
+TEST(MBEventBuilderTest, AddDataPoint) {
+  MultiBladeEventBuilder evbuilder;
+  bool retval = evbuilder.addDataPoint(0, 1000, 0); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(32, 1000, 10); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(32, 1000, 10000); // ch, adc, time, outside window
+  ASSERT_EQ(retval, true);
+  ASSERT_EQ(evbuilder.getNumberOfEvents(), 1);
+}
+
+/// not easy to test
+TEST(MBEventBuilderTest, AddDataPointBelowADCThreshold) {
+  MultiBladeEventBuilder evbuilder;
+  evbuilder.setThreshold(1000);
+  bool retval = evbuilder.addDataPoint(0, 999, 0); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(32, 999, 10); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(32, 999, 10000); // ch, adc, time, outside window
+  ASSERT_EQ(retval, false);
+  ASSERT_EQ(evbuilder.getNumberOfEvents(), 0);
+}
+
+TEST(MBEventBuilderTest, AddDataPointAboveADCThreshold) {
+  MultiBladeEventBuilder evbuilder;
+  evbuilder.setThreshold(1000);
+  bool retval = evbuilder.addDataPoint(0, 1000, 0); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(32, 1000, 10); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(32, 1000, 10000); // ch, adc, time, outside window
+  ASSERT_EQ(retval, true);
+  ASSERT_EQ(evbuilder.getNumberOfEvents(), 1);
+}
+
+/// not easy to test
+TEST(MBEventBuilderTest, AddDataPointInvalidChannels) {
+  MultiBladeEventBuilder evbuilder;
+  bool retval = evbuilder.addDataPoint(64, 1000, 0); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(64, 1000, 10); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(64, 1000, 10000); // ch, adc, time, outside window
+  ASSERT_EQ(retval, false);
+  ASSERT_EQ(evbuilder.getNumberOfEvents(), 0);
+}
+
+/// not easy to test
+TEST(MBEventBuilderTest, AddDataPointValidChannels) {
+  MultiBladeEventBuilder evbuilder;
+  bool retval = evbuilder.addDataPoint(31, 1000, 0); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(63, 1000, 10); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(63, 1000, 10000); // ch, adc, time, outside window
+  ASSERT_EQ(retval, true);
+  ASSERT_EQ(evbuilder.getNumberOfEvents(), 1);
+}
+
+TEST(MBEventBuilderTest, EventCounter) {
 
   // Test that events are counted correctly
 
   // Instanciate the event-builder
-  multiBladeEventBuilder p;
+  MultiBladeEventBuilder p;
 
   // Initialize the expected number of events counter
   uint nevents = 1;
@@ -66,12 +134,13 @@ TEST(MBEventBuilder__Test, EventCounter) {
   EXPECT_EQ(nevents, p.getNumberOfEvents());
 }
 
+#if 0
 TEST(MBEventBuilder__Test, ClusterCounters) {
 
   // Test the counters of number of points per event
 
   // Instaciate the event-counter and configure
-  multiBladeEventBuilder p;
+  MultiBladeEventBuilder p;
   p.setTimeWindow(config[0]);
   p.setNumberOfWireChannels(config[1]);
   p.setNumberOfStripChannels(config[2]);
@@ -94,10 +163,11 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
     uint end = begin + 5;
     std::vector<uint> datapoint(&data[begin], &data[end]);
     // Wire data-points
-    p.addDataPoint(datapoint[0], datapoint[2], datapoint[3]);
-
+    bool retval = p.addDataPoint(datapoint[0], datapoint[2], datapoint[3]);
+    ASSERT_EQ(retval, datapoint[4]);
     // Strip data-points
-    p.addDataPoint(datapoint[1], datapoint[2], datapoint[3]);
+    retval = p.addDataPoint(datapoint[1], datapoint[2], datapoint[3]);
+    ASSERT_EQ(retval, datapoint[4]);
 
     if (!datapoint[4]) {
 
@@ -231,9 +301,10 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
   }
 }
 
+
 TEST(MBEventBuilder__Test, NoDataRecieved) {
 
-  multiBladeEventBuilder p;
+  MultiBladeEventBuilder p;
 
   EXPECT_EQ(0, p.getNumberOfPositionRejected());
 
@@ -244,6 +315,9 @@ TEST(MBEventBuilder__Test, NoDataRecieved) {
 
   EXPECT_EQ(1, p.getNumberOfPositionRejected());
 }
+#endif
+
+
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

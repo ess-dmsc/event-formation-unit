@@ -16,7 +16,7 @@ public:
   dumpEventBuilderInfo();
 
   /// Call this to wite the information to stdout
-  void print(multiBladeEventBuilder p);
+  void print(MultiBladeEventBuilder p);
 
 private:
   /// \name Counters for number of channels hit per cluster/event.
@@ -41,12 +41,12 @@ private:
   //@}
 
   /// Writes overview information
-  void printOverview(multiBladeEventBuilder p);
+  void printOverview(MultiBladeEventBuilder p);
 
   /// \name Prints information of all processed clusters/events
   /// This print-out calls several function.
   //@{
-  void printClusterInfo(multiBladeEventBuilder p);
+  void printClusterInfo(MultiBladeEventBuilder p);
   void printClusterAbsolute(std::array<uint64_t, 6>, std::string text);
   void printClusterPercentage(std::array<uint64_t, 6>, std::string text);
   void printArray(std::array<uint64_t, 6> array);
@@ -55,10 +55,10 @@ private:
 
   /// Prints number of events with more than 5 signals per cluster/event for
   /// either wire or strip
-  void printExcessivePoints(multiBladeEventBuilder p);
+  void printExcessivePoints(MultiBladeEventBuilder p);
 
   /// Prints number of rejected clusters/events
-  void printRejected(multiBladeEventBuilder p);
+  void printRejected(MultiBladeEventBuilder p);
 
   /// Summs the contents of a std::array of uint64_t with dimension 6
   uint64_t sumArray(std::array<uint64_t, 6> array);

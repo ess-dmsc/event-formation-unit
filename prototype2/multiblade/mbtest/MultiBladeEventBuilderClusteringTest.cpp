@@ -17,7 +17,7 @@
 
 TEST(MBEventBuilder__Test, Threshold) {
 
-  multiBladeEventBuilder p;
+  MultiBladeEventBuilder p;
   p.setThreshold(10);
   p.setTimeWindow(1);
 
@@ -37,7 +37,7 @@ TEST(MBEventBuilder__Test, TimeWindow) {
   for (int itest = 0; itest < 4; itest++) {
 
     // Instanciate the event builder
-    multiBladeEventBuilder p;
+    MultiBladeEventBuilder p;
 
     // Set the number of clock-cycles for the time-window
     uint32_t window = static_cast<uint32_t>(itest) * 2 + 2;
@@ -64,7 +64,7 @@ TEST(MBEventBuilder__Test, TimeWindow_OverFlow) {
   // not be reset.
 
   // Instanciate the event-builder
-  multiBladeEventBuilder p;
+  MultiBladeEventBuilder p;
 
   // Set the number of clock-cycles for the time-window
   uint64_t window = 10;
@@ -91,7 +91,7 @@ TEST(MBEventBuilder__Test, ClusterTime) {
   // Also test that the time-stamp is calculated correctly.
 
   // Instanciate the event-builder
-  multiBladeEventBuilder p;
+  MultiBladeEventBuilder p;
 
   // Set the number of clock-cycles for the time-window
   uint64_t window = 10;
@@ -138,7 +138,7 @@ TEST(MBEventBuilder__Test, Adjacency) {
   for (int i = 0; i < 2; i++) {
 
     // Instanciate the event-builder.
-    multiBladeEventBuilder p;
+    MultiBladeEventBuilder p;
     // For simplicity, set the time window to one clock-cycle and the clock
     // duration to one second.
     p.setTimeWindow(1);
@@ -176,7 +176,7 @@ TEST(MBEventBuilder__Test, Adjacency) {
   for (int i = 0; i < 3; i++) {
 
     // Instanciate the event-builder
-    multiBladeEventBuilder p;
+    MultiBladeEventBuilder p;
     p.setTimeWindow(3);
     // For simplicity we use the maximum ADC location algorithm
     p.setUseWeightedAverage(false);
@@ -200,7 +200,7 @@ TEST(MBEventBuilder__Test, Adjacency) {
 
   for (int i = 0; i < 3; i++) {
 
-    multiBladeEventBuilder p;
+    MultiBladeEventBuilder p;
     p.setTimeWindow(10);
 
     // Check that the adjacency rejected counter is 0
@@ -222,7 +222,7 @@ TEST(MBEventBuilder__Test, Adjacency) {
 
   for (uint i = 0; i < 3; i++) {
 
-    multiBladeEventBuilder p;
+    MultiBladeEventBuilder p;
     p.setTimeWindow(3);
 
     // Check that the adjacency rejected counter is 0
@@ -261,7 +261,7 @@ TEST(MBEventBuilder__Test, WireStripPoints) {
   // Iterate over the 5 cases.
   for (uint i = 0; i < 5; i++) {
 
-    multiBladeEventBuilder p;
+    MultiBladeEventBuilder p;
     p.setNumberOfWireChannels(npoints[i]);
     p.setNumberOfStripChannels(npoints[i]);
     p.setTimeWindow(1000);
@@ -301,7 +301,7 @@ TEST(MBEventBuilder__Test, Clustering) {
   // We test the configuration functions also
 
   // Instanciate the event-builder.
-  multiBladeEventBuilder p;
+  MultiBladeEventBuilder p;
   // Configure the event-builder using the config info in multiBladeTestData.h
   p.setTimeWindow(config[0]);
   p.setNumberOfWireChannels(config[1]);

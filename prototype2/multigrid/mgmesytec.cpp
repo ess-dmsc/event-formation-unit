@@ -6,8 +6,11 @@
 /// Mesytec readout)
 ///
 //===----------------------------------------------------------------------===//
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
+#pragma message "XXXX Using GCC diagnostics push to suppress compiler warning XXX"
 #include <common/Detector.h>
+#pragma GCC diagnostic pop
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
 #include <common/Producer.h>
@@ -221,6 +224,7 @@ void CSPEC::init_config()
   } else {
     mgEfu = std::make_shared<Multigrid::EfuMaximum>();
   }
+
   mgEfu->mappings = mg_config.mappings;
   mgEfu->hists = monitor.hists;
   mgEfu->raw1 = monitor.readouts;

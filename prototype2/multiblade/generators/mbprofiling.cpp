@@ -61,7 +61,7 @@ int main(int argc, const char **argv) {
             << std::endl;
   std::cout << "\n";
 
-  multiBladeEventBuilder p;
+  MultiBladeEventBuilder p;
   p.setUseWeightedAverage(false);
 
   typedef std::chrono::high_resolution_clock Clock;

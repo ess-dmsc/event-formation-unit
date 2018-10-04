@@ -20,7 +20,7 @@ dumpEventBuilderInfo::dumpEventBuilderInfo()
 {
 }
 
-void dumpEventBuilderInfo::print(multiBladeEventBuilder p) {
+void dumpEventBuilderInfo::print(MultiBladeEventBuilder p) {
 
   // clusterPoints(p);
   printOverview(p);
@@ -29,7 +29,7 @@ void dumpEventBuilderInfo::print(multiBladeEventBuilder p) {
   printExcessivePoints(p);
 }
 
-void dumpEventBuilderInfo::printOverview(multiBladeEventBuilder p) {
+void dumpEventBuilderInfo::printOverview(MultiBladeEventBuilder p) {
 
   uint64_t n2Dwireevents = sumArray(p.get2DWireClusterCounter());
   uint64_t n2Dstripevents = sumArray(p.get2DStripClusterCounter());
@@ -52,7 +52,7 @@ void dumpEventBuilderInfo::printOverview(multiBladeEventBuilder p) {
             << " Must match number of events recorded! " << std::endl;
 }
 
-void dumpEventBuilderInfo::printClusterInfo(multiBladeEventBuilder p) {
+void dumpEventBuilderInfo::printClusterInfo(MultiBladeEventBuilder p) {
 
   std::cout << "\n";
   std::cout << "2D events (both wire and strip signals) : \n";
@@ -77,7 +77,7 @@ void dumpEventBuilderInfo::printClusterInfo(multiBladeEventBuilder p) {
                          "Percentage of strips fired per event         : ");
 }
 
-void dumpEventBuilderInfo::printRejected(multiBladeEventBuilder p) {
+void dumpEventBuilderInfo::printRejected(MultiBladeEventBuilder p) {
 
   std::cout << "\n";
   std::cout << "Number of rejected clusters :" << std::endl;
@@ -87,7 +87,7 @@ void dumpEventBuilderInfo::printRejected(multiBladeEventBuilder p) {
             << p.getNumberOfPositionRejected() << std::endl;
 }
 
-void dumpEventBuilderInfo::printExcessivePoints(multiBladeEventBuilder p) {
+void dumpEventBuilderInfo::printExcessivePoints(MultiBladeEventBuilder p) {
 
   uint64_t sum_wire =
       p.get2DWireClusterCounter()[5] + p.get1DWireClusterCounter()[5];
