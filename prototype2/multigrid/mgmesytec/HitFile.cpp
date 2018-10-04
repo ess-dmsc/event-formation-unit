@@ -7,7 +7,8 @@
 
 #include <multigrid/mgmesytec/HitFile.h>
 
-#define DATSET_NAME "mgmesytec_hits"
+// \todo use string_view when c++17 arrives
+constexpr char DatasetName[] = "mgmesytec_hits";
 
 namespace hdf5 {
 
@@ -71,85 +72,85 @@ public:
 namespace Multigrid {
 
 HitFile::HitFile(const boost::filesystem::path& file_path, size_t max_Mb) {
-  dtype_ = hdf5::datatype::create<Hit>();
-  max_size_ = max_Mb * 1000000 / sizeof(Hit);
-  path_base_ = file_path;
+  DataType = hdf5::datatype::create<Hit>();
+  MaxSize = max_Mb * 1000000 / sizeof(Hit);
+  PathBase = file_path;
 }
 
-std::unique_ptr<HitFile> HitFile::create(const boost::filesystem::path& file_path, size_t max_Mb) {
-  auto ret = std::unique_ptr<HitFile>(new HitFile(file_path, max_Mb));
-  ret->open_rw();
-  return ret;
+std::unique_ptr<HitFile> HitFile::create(const boost::filesystem::path& FilePath, size_t MaxMB) {
+  auto Ret = std::unique_ptr<HitFile>(new HitFile(FilePath, MaxMB));
+  Ret->openRW();
+  return Ret;
 }
 
-std::unique_ptr<HitFile> HitFile::open(const boost::filesystem::path& file_path) {
-  auto ret = std::unique_ptr<HitFile>(new HitFile(file_path, 0));
-  ret->open_r();
-  return ret;
+std::unique_ptr<HitFile> HitFile::open(const boost::filesystem::path& FilePath) {
+  auto Ret = std::unique_ptr<HitFile>(new HitFile(FilePath, 0));
+  Ret->openR();
+  return Ret;
 }
 
 boost::filesystem::path HitFile::get_full_path() const {
-  auto ret = path_base_;
-  if (sequence_number_ > 0)
-    ret += "_" + std::to_string(sequence_number_);
-  ret += ".h5";
-  return ret;
+  auto Ret = PathBase;
+  if (SequenceNumber > 0)
+    Ret += "_" + std::to_string(SequenceNumber);
+  Ret += ".h5";
+  return Ret;
 }
 
-void HitFile::open_rw() {
+void HitFile::openRW() {
   using namespace hdf5;
 
-  file_ = file::create(get_full_path(), file::AccessFlags::TRUNCATE);
+  File = file::create(get_full_path(), file::AccessFlags::TRUNCATE);
 
   property::DatasetCreationList dcpl;
   dcpl.layout(property::DatasetLayout::CHUNKED);
-  dcpl.chunk({chunk_size});
+  dcpl.chunk({ChunkSize});
 
-  dataset_ = file_.root().create_dataset(DATSET_NAME, dtype_,
+  DataSet = File.root().create_dataset(DatasetName, DataType,
                                          dataspace::Simple({0}, {dataspace::Simple::UNLIMITED}), dcpl);
 }
 
-void HitFile::open_r() {
+void HitFile::openR() {
   using namespace hdf5;
 
-  file_ = file::open(get_full_path(), file::AccessFlags::READONLY);
-  dataset_ = file_.root().get_dataset(DATSET_NAME);
+  File = file::open(get_full_path(), file::AccessFlags::READONLY);
+  DataSet = File.root().get_dataset(DatasetName);
 }
 
 size_t HitFile::count() const {
-  return hdf5::dataspace::Simple(dataset_.dataspace()).current_dimensions().at(0);
+  return hdf5::dataspace::Simple(DataSet.dataspace()).current_dimensions().at(0);
 }
 
 void HitFile::write() {
-  slab_.offset(0, count());
-  slab_.block(0, data.size());
-  dataset_.extent({count() + data.size()});
-  dataset_.write(data, slab_);
+  Slab.offset(0, count());
+  Slab.block(0, Data.size());
+  DataSet.extent({count() + Data.size()});
+  DataSet.write(Data, Slab);
 
-  if (max_size_ && (count() >= max_size_)) {
-    sequence_number_++;
-    open_rw();
+  if (MaxSize && (count() >= MaxSize)) {
+    SequenceNumber++;
+    openRW();
   }
 }
 
-void HitFile::read_at(size_t idx, size_t count) {
-  slab_.offset(0, idx);
-  slab_.block(0, count);
-  data.resize(count);
-  dataset_.read(data, slab_);
+void HitFile::readAt(size_t Index, size_t Count) {
+  Slab.offset(0, Index);
+  Slab.block(0, Count);
+  Data.resize(Count);
+  DataSet.read(Data, Slab);
 }
 
-void HitFile::read(std::string file_name, std::vector<Hit> &external_data) {
-  auto file = HitFile::open(file_name);
-  file->read_at(0, file->count());
-  external_data = std::move(file->data);
+void HitFile::read(const boost::filesystem::path &FilePath, std::vector<Hit> &ExternalData) {
+  auto TempFile = HitFile::open(FilePath);
+  TempFile->readAt(0, TempFile->count());
+  ExternalData = std::move(TempFile->Data);
 }
 
-void HitFile::push(const std::vector<Hit>& hits) {
-  data.insert(data.end(), hits.begin(), hits.end());
-  if (data.size() >= chunk_size) {
+void HitFile::push(const std::vector<Hit>& Hits) {
+  Data.insert(Data.end(), Hits.begin(), Hits.end());
+  if (Data.size() >= ChunkSize) {
     write();
-    data.clear();
+    Data.clear();
   }
 }
 

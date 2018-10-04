@@ -65,13 +65,13 @@ TEST_F(HitFileTest, Read) {
   file_out.reset();
 
   auto file = HitFile::open("readout_file_test");
-  EXPECT_EQ(file->data.size(), 0);
-  file->read_at(0, 3);
-  EXPECT_EQ(file->data.size(), 3);
-  file->read_at(0, 9);
-  EXPECT_EQ(file->data.size(), 9);
+  EXPECT_EQ(file->Data.size(), 0);
+  file->readAt(0, 3);
+  EXPECT_EQ(file->Data.size(), 3);
+  file->readAt(0, 9);
+  EXPECT_EQ(file->Data.size(), 9);
 
-  EXPECT_THROW(file->read_at(0, 1000), std::runtime_error);
+  EXPECT_THROW(file->readAt(0, 1000), std::runtime_error);
 }
 
 TEST_F(HitFileTest, ReadAll) {

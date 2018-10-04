@@ -27,40 +27,40 @@ class HitFile {
 public:
 
   static std::unique_ptr<HitFile>
-  create(const boost::filesystem::path &file_path, size_t max_Mb = 0);
+  create(const boost::filesystem::path &FilePath, size_t MaxMB = 0);
 
   static std::unique_ptr<HitFile>
-  open(const boost::filesystem::path &file_path);
+  open(const boost::filesystem::path &FilePath);
 
   size_t count() const;
-  void read_at(size_t idx, size_t count);
+  void readAt(size_t Index, size_t Count);
 
-  void push(const std::vector<Hit>& hits);
+  void push(const std::vector<Hit>& Hits);
 
-  static void read(std::string file, std::vector<Hit> &external_data);
+  static void read(const boost::filesystem::path &FilePath,
+      std::vector<Hit> &ExternalData);
 
-  std::vector<Hit> data;
+  std::vector<Hit> Data;
 
 private:
   HitFile(const boost::filesystem::path &file_path, size_t max_Mb);
 
-  static constexpr size_t chunk_size{9000 / sizeof(Hit)};
+  static constexpr size_t ChunkSize{9000 / sizeof(Hit)};
 
-  hdf5::file::File file_;
-  hdf5::datatype::Datatype dtype_;
-  hdf5::node::Dataset dataset_;
-  hdf5::dataspace::Hyperslab slab_{{0}, {chunk_size}};
+  hdf5::file::File File;
+  hdf5::datatype::Datatype DataType;
+  hdf5::node::Dataset DataSet;
+  hdf5::dataspace::Hyperslab Slab{{0}, {ChunkSize}};
 
-  boost::filesystem::path path_base_{};
-  size_t max_size_{0};
-  size_t sequence_number_{0};
+  boost::filesystem::path PathBase{};
+  size_t MaxSize{0};
+  size_t SequenceNumber{0};
 
-  void open_rw();
-  void open_r();
+  void openRW();
+  void openR();
   boost::filesystem::path get_full_path() const;
 
   void write();
-
 };
 
 }
