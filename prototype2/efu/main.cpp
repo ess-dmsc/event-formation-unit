@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
     DetectorName = efu_args.getDetectorName();
   }
 
-  hwcheck.setMinimumMTU(DetectorSettings.MinimumMTU);
+
 
   int keep_running = 1;
 
@@ -113,22 +113,26 @@ int main(int argc, char *argv[]) {
   LOG(MAIN, Sev::Info, "Event Formation Unit version: {}", efu_version());
   LOG(MAIN, Sev::Info, "Event Formation Unit build: {}", efu_buildstr());
 
-  if (hwcheck.checkMTU(hwcheck.IgnoredInterfaces) == false) {
-    LOG(MAIN, Sev::Error, "MTU checks failed, for a quick fix, try");
-    LOG(MAIN, Sev::Error, "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)");
-    LOG(MAIN, Sev::Error, "exiting...");
-    detector.reset(); //De-allocate detector before we unload detector module
-    EmptyGraylogMessageQueue();
-    return -1;
-  }
+  if (DetectorSettings.NoHwCheck) {
+    LOG(MAIN, Sev::Warning, "Skipping HwCheck - performance might suffer");
+  } else {
+    if (hwcheck.checkMTU(hwcheck.IgnoredInterfaces) == false) {
+      LOG(MAIN, Sev::Error, "MTU checks failed, for a quick fix, try");
+      LOG(MAIN, Sev::Error, "sudo ifconfig eth0 mtu 9000 (change eth0 to match your system)");
+      LOG(MAIN, Sev::Error, "exiting...");
+      detector.reset(); //De-allocate detector before we unload detector module
+      EmptyGraylogMessageQueue();
+      return -1;
+    }
 
-  // if (hwcheck.checkDiskSpace(hwcheck.DirectoriesToCheck) == false) {
-  //   LOG(MAIN, Sev::Error, "Not enough space on filesystem");
-  //   LOG(MAIN, Sev::Error, "exiting...");
-  //   detector.reset(); //De-allocate detector before we unload detector module
-  //   EmptyGraylogMessageQueue();
-  //   return -1;
-  // }
+    if (hwcheck.checkDiskSpace(hwcheck.DirectoriesToCheck) == false) {
+      LOG(MAIN, Sev::Error, "Not enough space on filesystem");
+      LOG(MAIN, Sev::Error, "exiting...");
+      detector.reset(); //De-allocate detector before we unload detector module
+      EmptyGraylogMessageQueue();
+      return -1;
+    }
+  }
 
   if (DetectorSettings.StopAfterSec == 0) {
     LOG(MAIN, Sev::Info, "Event Formation Unit Exit (Immediate)");

@@ -100,18 +100,17 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDE
   Stats.create("input.rx_packets",                mystats.rx_packets);
   Stats.create("input.rx_bytes",                  mystats.rx_bytes);
   Stats.create("input.dropped",                   mystats.fifo_push_errors);
-  Stats.create("input.rx_seq_errors",             mystats.rx_seq_errors);
   Stats.create("processing.idle",                 mystats.rx_idle1);
   Stats.create("processing.rx_events",            mystats.rx_events);
   Stats.create("processing.rx_geometry_errors",   mystats.rx_geometry_errors);
   Stats.create("processing.rx_seq_errors",        mystats.rx_seq_errors);
   Stats.create("output.tx_bytes",                 mystats.tx_bytes);
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
-  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
-  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
-  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
-  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
+  Stats.create("kafka_produce_fails",             mystats.kafka_produce_fails);
+  Stats.create("kafka_ev_errors",                 mystats.kafka_ev_errors);
+  Stats.create("kafka_ev_others",                 mystats.kafka_ev_others);
+  Stats.create("kafka_dr_errors",                 mystats.kafka_dr_errors);
+  Stats.create("kafka_dr_others",                 mystats.kafka_dr_noerrors);
   // clang-format on
   std::function<void()> inputFunc = [this]() { SONDEIDEA::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
