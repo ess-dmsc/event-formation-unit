@@ -45,7 +45,6 @@ add_subdirectory(multigrid)
 add_subdirectory(sonde)
 add_subdirectory(udp)
 add_subdirectory(adc_readout)
-# add_subdirectory(delay_line)
 add_subdirectory(tools)
 
 ##=============================================================================
