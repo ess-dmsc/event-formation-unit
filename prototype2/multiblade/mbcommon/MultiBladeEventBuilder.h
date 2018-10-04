@@ -197,11 +197,11 @@ private:
   /// Time window for a single cluster. In number of clock-cycles
   uint32_t m_time_window;
   /// Number of wire channels
-  uint8_t m_nwire_channels;
+  uint8_t m_nwire_channels{32};
   /// Number of strip channels
-  uint8_t m_nstrip_channels;
+  uint8_t m_nstrip_channels{32};
   /// Whether to use wieghted average or not when calculation position
-  bool m_use_weighted_average;
+  bool m_use_weighted_average{true};
 
   // Runtime variables
 
@@ -210,11 +210,11 @@ private:
   /// Container for one strip cluster
   std::vector<point> m_strip_cluster;
   /// Container for the calculated wire position
-  double m_wire_pos;
+  double m_wire_pos{0.0};
   /// Container for the calculated strip position
-  double m_strip_pos;
+  double m_strip_pos{0.0};
   /// Timestamp of the processed cluster
-  uint32_t m_time_stamp;
+  uint32_t m_time_stamp{0};
   /// Timestamp of current cluster. Also the beginning of time-window.
   uint32_t m_cluster_clock;
   /// True only at the beginning of each cluster
