@@ -87,7 +87,7 @@ int main(int argc, const char **argv) {
             << std::endl;
   std::cout << "\n";
 
-  multiBladeEventBuilder p;
+  MultiBladeEventBuilder p;
   p.setUseWeightedAverage(weighted);
 
   TextFile data(ifile);
@@ -121,14 +121,14 @@ int main(int argc, const char **argv) {
 
   p.lastPoint();
   // Repeated code ! Yes I know its bad, but this is just a test program for
-  // multiBladeEventBuilder.
+  // MultiBladeEventBuilder.
   output << std::fixed << std::setprecision(8) << std::setw(11)
          << p.getWirePosition() << " " << p.getStripPosition() << " "
          << p.getTimeStamp() << "\n";
 
   output.close();
 
-  dumpEventBuilderInfo info;
+  DumpEventBuilderInfo info;
   info.print(p);
 
   return 0;

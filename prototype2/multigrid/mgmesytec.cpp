@@ -221,6 +221,7 @@ void CSPEC::init_config()
   } else {
     mgEfu = std::make_shared<Multigrid::EfuMaximum>();
   }
+
   mgEfu->mappings = mg_config.mappings;
   mgEfu->hists = monitor.hists;
   mgEfu->raw1 = monitor.readouts;

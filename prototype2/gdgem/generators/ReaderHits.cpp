@@ -1,4 +1,5 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+// GCOVR_EXCL_START
 
 #include <gdgem/generators/ReaderHits.h>
 #include <iostream>
@@ -31,3 +32,4 @@ size_t ReaderHits::read(char *buf) {
   current_ += size;
   return sizeof(Hit) * size;
 }
+// GCOVR_EXCL_STOP
