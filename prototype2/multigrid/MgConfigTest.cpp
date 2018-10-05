@@ -49,6 +49,9 @@ TEST_F(MGConfigTest, Constructor) {
   ASSERT_FALSE(mgconfig.spoof_high_time);
   ASSERT_EQ(mgconfig.reduction_strategy, "");
   ASSERT_EQ(mgconfig.mappings.max_z(), 0);
+  ASSERT_FALSE(mgconfig.mappings.is_valid(0, 0, 1000));
+  ASSERT_FALSE(mgconfig.mappings.is_valid(1, 0, 1000));
+  ASSERT_FALSE(mgconfig.mappings.is_valid(2, 0, 1000));
 }
 
 TEST_F(MGConfigTest, ValidConfig) {
@@ -58,6 +61,9 @@ TEST_F(MGConfigTest, ValidConfig) {
   ASSERT_TRUE(mgconfig.spoof_high_time);
   ASSERT_EQ(mgconfig.reduction_strategy, "maximum");
   ASSERT_EQ(mgconfig.mappings.max_z(), 20);
+  ASSERT_TRUE(mgconfig.mappings.is_valid(0, 0, 1000));
+  ASSERT_TRUE(mgconfig.mappings.is_valid(1, 0, 1000));
+  ASSERT_TRUE(mgconfig.mappings.is_valid(2, 0, 1000));
 }
 
 
