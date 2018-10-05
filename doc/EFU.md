@@ -161,6 +161,4 @@ All detector implementations must conform to the Detector interface
 https://github.com/ess-dmsc/event-formation-unit/blob/master/prototype2/common/Detector.h
 
 A minimal viable detector plugin is shown in
-
-
- 
+https://github.com/ess-dmsc/event-formation-unit/blob/master/doc/minimaldetector/minimaldetector.cpp
