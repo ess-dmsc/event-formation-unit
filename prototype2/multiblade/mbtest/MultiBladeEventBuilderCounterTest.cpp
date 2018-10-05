@@ -10,6 +10,7 @@
 //===----------------------------------------------------------------------===//
 
 #pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wunknown-warning-option"
 #pragma GCC diagnostic ignored "-Wkeyword-macro"
 #pragma GCC diagnostic ignored "-Wmacro-redefined"
 #define private public
@@ -67,20 +68,22 @@ TEST_F(MBEventBuilderTest, CalculatePosition) {
   ASSERT_EQ(evbuilder.calculatePosition(adcmax20), 20.0);
 }
 
+TEST_F(MBEventBuilderTest, ProcessClusters) {
+  MultiBladeEventBuilder evbuilder;
+  ASSERT_EQ(evbuilder.m_rejected_position, 0);
+  evbuilder.m_wire_cluster = {{0, 0}}; // ch's < 32
+  evbuilder.m_strip_cluster = {{32, 0}}; // ch's >= 32
+  ASSERT_FALSE(evbuilder.processClusters());
+  ASSERT_EQ(evbuilder.m_rejected_position, 1);
+}
 
 TEST_F(MBEventBuilderTest, CheckIncrementOfCounters) {
   MultiBladeEventBuilder evbuilder;
-  for (auto ctr : evbuilder.m_2D_wires) {
-    ASSERT_EQ(ctr, 0);
-  }
-  for (auto ctr : evbuilder.m_2D_strips) {
-    ASSERT_EQ(ctr, 0);
-  }
-  for (auto ctr : evbuilder.m_1D_wires) {
-    ASSERT_EQ(ctr, 0);
-  }
-  for (auto ctr : evbuilder.m_1D_strips) {
-    ASSERT_EQ(ctr, 0);
+  for (unsigned int i = 0; i < evbuilder.m_2D_wires.size(); i++) {
+    ASSERT_EQ(evbuilder.m_2D_wires.at(i), 0);
+    ASSERT_EQ(evbuilder.m_2D_strips.at(i), 0);
+    ASSERT_EQ(evbuilder.m_1D_wires.at(i), 0);
+    ASSERT_EQ(evbuilder.m_1D_strips.at(i), 0);
   }
 
   std::vector<point> empty;
