@@ -3,68 +3,65 @@
 #include <algorithm>
 #include <common/DataSave.h>
 #include <cstring>
-#include <gdgem/NMXConfig.h>
+#include <multigrid/MgConfig.h>
 #include <memory>
 #include <test/TestBase.h>
 #include <unistd.h>
 
 std::string pathprefix{""};
 
-class NMXConfigTest : public TestBase {
-protected:
-  virtual void SetUp() {
-  }
+std::string validconfig = R"(
+{
+  "reduction_strategy" : "maximum",
 
+  "spoof_high_time" : true,
+
+  "geometry_mappings" :
+  [
+    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true},
+    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true,
+      "grid_filters":{
+        "blanket":{"min":0, "max":65535, "rescale":1.0},
+        "exceptions":[
+          {"idx":26, "rescale":1.5},
+          {"idx":28, "rescale":1.5},
+          {"idx":29, "rescale":0.5},
+          {"idx":33, "rescale":1.5},
+          {"idx":34, "rescale":1.5}
+        ]
+      }
+    },
+    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true}
+  ]
+
+}
+)";
+
+class MGConfigTest : public TestBase {
+protected:
+  virtual void SetUp() { }
   virtual void TearDown() { }
 };
 
-
-bool cwdContains(const char * searchfor) {
-  char cwdname[1024];
-  getcwd(cwdname, sizeof(cwdname));
-  auto rt = strstr(cwdname, searchfor);
-  return (rt != NULL);
-}
-
 /** Test cases below */
-TEST_F(NMXConfigTest, ConstructorDefaults) {
-  NMXConfig nmxconfig;
-  ASSERT_EQ("VMM2", nmxconfig.builder_type);
-  ASSERT_FALSE(nmxconfig.dump_csv);
-  ASSERT_FALSE(nmxconfig.dump_h5);
+TEST_F(MGConfigTest, Constructor) {
+  Multigrid::Config mgconfig;
+  ASSERT_FALSE(mgconfig.spoof_high_time);
+  ASSERT_EQ(mgconfig.reduction_strategy, "");
+  ASSERT_EQ(mgconfig.mappings.max_z(), 0);
 }
 
-
-
-TEST_F(NMXConfigTest, NoConfigFile) {
-  NMXConfig nmxconfig("file_does_not_exist");
-  ASSERT_EQ("VMM2", nmxconfig.builder_type);
-  // ASSERT_EQ(256, nmxconfig.geometry_x);
-  // ASSERT_EQ(256, nmxconfig.geometry_y);
-  ASSERT_FALSE(nmxconfig.dump_csv);
-  ASSERT_FALSE(nmxconfig.dump_h5);
+TEST_F(MGConfigTest, ValidConfig) {
+  std::string filename{"deleteme_mgvalidconfig.json"};
+  DataSave tempfile(filename, (void *)validconfig.c_str(), validconfig.size());
+  Multigrid::Config mgconfig(filename);
+  ASSERT_TRUE(mgconfig.spoof_high_time);
+  ASSERT_EQ(mgconfig.reduction_strategy, "maximum");
+  ASSERT_EQ(mgconfig.mappings.max_z(), 20);
 }
 
-TEST_F(NMXConfigTest, DebugPrint) {
-  MESSAGE() << "This is Not a test, but simply exercises the debug print code" << "\n";
-  NMXConfig nmxconfig;
-  auto str = nmxconfig.debug();
-  MESSAGE() << str << "\n";
-}
-
-TEST_F(NMXConfigTest, JsonConfig) {
-  NMXConfig nmxconfig(pathprefix + "../prototype2/gdgem/configs/vmm2.json");
-  ASSERT_EQ(60, nmxconfig.time_config.tac_slope()); // Parsed from json
-  ASSERT_EQ(20, nmxconfig.time_config.bc_clock());
-}
 
 int main(int argc, char **argv) {
-  // Assume root is build/ directory - for running manually
-  // but check for VM builds of Linux and MacOS
-  if (cwdContains("build/prototype2")) { //Linux
-  // Assume we're in prototype2/build/prototype2/gdgem
-    pathprefix = "../../../build/";
-  }
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -95,6 +95,18 @@ create_executable(mgcncsgenjson)
 # Tests
 #=============================================================================
 
+set(MgConfigTest_SRC
+  MgConfig.cpp
+  MgConfigTest.cpp
+  ../../prototype2/common/DataSave.cpp
+)
+set(MgConfigTest_INC
+  MgConfig.h
+  ../../prototype2/common/DataSave.h
+)
+create_test_executable(MgConfigTest)
+
+
 set(MGCNCSChanConvTest_SRC
   mgcncs/ChanConvTest.cpp
   mgcncs/ChanConv.cpp
