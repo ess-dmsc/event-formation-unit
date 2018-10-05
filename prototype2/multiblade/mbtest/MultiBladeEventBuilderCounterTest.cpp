@@ -10,13 +10,16 @@
 //===----------------------------------------------------------------------===//
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wunknown-warning-option"
-#pragma GCC diagnostic ignored "-Werror=pragmas"
+#ifdef SYSTEM_NAME_DARWIN
 #pragma GCC diagnostic ignored "-Wkeyword-macro"
 #pragma GCC diagnostic ignored "-Wmacro-redefined"
+#endif
 #define private public
 #include "mbcommon/MultiBladeEventBuilder.h"
+#ifdef private
+#undef private
 #define private private
+#endif
 #pragma GCC diagnostic pop
 
 #include "mbcommon/DumpEventBuilderInfo.h"
