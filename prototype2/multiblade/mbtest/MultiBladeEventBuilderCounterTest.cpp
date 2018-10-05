@@ -11,6 +11,7 @@
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunknown-warning-option"
+#pragma GCC diagnostic ignored "-Werror=pragmas"
 #pragma GCC diagnostic ignored "-Wkeyword-macro"
 #pragma GCC diagnostic ignored "-Wmacro-redefined"
 #define private public
