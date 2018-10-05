@@ -1,18 +1,22 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <cinttypes>
-#include <common/Trace.h>
 #include <common/HistSerializer.h>
+#include <libs/include/gccintel.h>
+
+#include <common/Trace.h>
 
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-HistSerializer::HistSerializer()
-    : builder(2 * NMXHists::needed_buffer_size() + 256) {}
+HistSerializer::HistSerializer(size_t buffer_half_size)
+    : builder(2 * buffer_half_size + 256) {}
 
-HistSerializer::~HistSerializer() {}
 
-size_t HistSerializer::serialize(const NMXHists &hists, char **buffer) {
+void HistSerializer::set_callback(ProducerCallback cb) {
+  producer_callback = cb;
+}
+
+size_t HistSerializer::produce(const Hists &hists) {
   builder.Clear();
   auto x_strip_off = builder.CreateUninitializedVector(
       hists.x_strips_hist.size(), hists.elem_size, &xtrackptr);
@@ -44,6 +48,12 @@ size_t HistSerializer::serialize(const NMXHists &hists, char **buffer) {
       CreateMonitorMessage(builder, 0, DataField::GEMHist, dataoff.Union());
 
   builder.Finish(msg);
-  *buffer = (char *)builder.GetBufferPointer();
-  return builder.GetSize();
+
+  Buffer<uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
+
+  if (producer_callback) {
+    producer_callback(buffer);
+  }
+
+  return buffer.size;
 }

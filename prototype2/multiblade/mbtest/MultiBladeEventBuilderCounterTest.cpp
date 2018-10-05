@@ -9,18 +9,182 @@
 ///
 //===----------------------------------------------------------------------===//
 
-/// \todo - nolonger valid - new data format
-
+#pragma GCC diagnostic push
+#ifdef SYSTEM_NAME_DARWIN
+#pragma GCC diagnostic ignored "-Wkeyword-macro"
+#pragma GCC diagnostic ignored "-Wmacro-redefined"
+#endif
+#define private public
 #include "mbcommon/MultiBladeEventBuilder.h"
+#ifdef private
+#undef private
+#define private private
+#endif
+#pragma GCC diagnostic pop
+
+#include "mbcommon/DumpEventBuilderInfo.h"
 #include "MultiBladeTestData.h"
 #include "test/TestBase.h"
 
-TEST(MBEventBuilder__Test, EventCounter) {
+class MBEventBuilderTest : public TestBase {
+protected:
+  virtual void SetUp() {}
+  virtual void TearDown() {}
+};
+
+/// \todo add further checks
+TEST_F(MBEventBuilderTest, Constructor) {
+  MultiBladeEventBuilder evbuilder;
+  ASSERT_EQ(evbuilder.getNumberOfEvents(), 0);
+  auto coords = evbuilder.getPosition();
+  ASSERT_TRUE(coords[0] == 0.00);
+  ASSERT_TRUE(coords[1] == 0.00);
+  ASSERT_TRUE(coords[2] == 0.00);
+  ASSERT_EQ(evbuilder.getWirePosition(), 0.0);
+  ASSERT_EQ(evbuilder.getStripPosition(), 0.0);
+}
+
+TEST_F(MBEventBuilderTest, EventBuilderDump) {
+  MultiBladeEventBuilder evbuilder;
+  printf("This is NOT a test, just calling debug print functions\n");
+  DumpEventBuilderInfo evbdump;
+  evbdump.print(evbuilder);
+}
+
+TEST_F(MBEventBuilderTest, CheckAdjacencyEmpty) {
+  MultiBladeEventBuilder evbuilder;
+  std::vector<point> nopoints;
+  ASSERT_FALSE(evbuilder.checkAdjacency(nopoints));
+  std::vector<point> onepoint = {{31, 1000}}; // ch, adc
+  ASSERT_TRUE(evbuilder.checkAdjacency(onepoint));
+}
+
+TEST_F(MBEventBuilderTest, CalculatePosition) {
+  MultiBladeEventBuilder evbuilder;
+  std::vector<point> threepoints = {{10, 1000}, {20, 1000}, {30, 1000}}; // ch, adc
+  ASSERT_EQ(evbuilder.calculatePosition(threepoints), 20.0);
+
+  std::vector<point> adcon10only = {{10, 1000}, {20, 0}, {30, 0}}; // ch, adc
+  ASSERT_EQ(evbuilder.calculatePosition(adcon10only), 10.0);
+
+  evbuilder.setUseWeightedAverage(false);
+  std::vector<point> adcmax20 = {{10, 998}, {20, 1000}, {30, 999}}; // ch, adc
+  ASSERT_EQ(evbuilder.calculatePosition(adcmax20), 20.0);
+}
+
+TEST_F(MBEventBuilderTest, ProcessClusters) {
+  MultiBladeEventBuilder evbuilder;
+  ASSERT_EQ(evbuilder.m_rejected_position, 0);
+  evbuilder.m_wire_cluster = {{0, 0}}; // ch's < 32
+  evbuilder.m_strip_cluster = {{32, 0}}; // ch's >= 32
+  ASSERT_FALSE(evbuilder.processClusters());
+  ASSERT_EQ(evbuilder.m_rejected_position, 1);
+}
+
+TEST_F(MBEventBuilderTest, CheckIncrementOfCounters) {
+  MultiBladeEventBuilder evbuilder;
+  for (unsigned int i = 0; i < evbuilder.m_2D_wires.size(); i++) {
+    ASSERT_EQ(evbuilder.m_2D_wires.at(i), 0);
+    ASSERT_EQ(evbuilder.m_2D_strips.at(i), 0);
+    ASSERT_EQ(evbuilder.m_1D_wires.at(i), 0);
+    ASSERT_EQ(evbuilder.m_1D_strips.at(i), 0);
+  }
+
+  std::vector<point> empty;
+  std::vector<point> twopoints = {{1, 1000}, {2, 2000}};
+  std::vector<point> sixpoints = {{1, 1000}, {2, 2000}, {3, 3000}, {4, 4000}, {5, 5000}, {6, 6000}};
+
+  evbuilder.incrementCounters(sixpoints, sixpoints);
+  ASSERT_EQ(evbuilder.m_2D_wires.at(5), 1);
+  ASSERT_EQ(evbuilder.m_2D_strips.at(5), 1);
+
+  evbuilder.incrementCounters(twopoints, empty);
+  ASSERT_EQ(evbuilder.m_1D_wires.at(1), 1);
+  ASSERT_EQ(evbuilder.m_1D_strips.at(1), 0);
+
+  evbuilder.incrementCounters(sixpoints, empty);
+  ASSERT_EQ(evbuilder.m_1D_wires.at(5), 1);
+  ASSERT_EQ(evbuilder.m_1D_strips.at(5), 0);
+
+  evbuilder.incrementCounters(empty, twopoints);
+  ASSERT_EQ(evbuilder.m_1D_wires.at(1), 1);
+  ASSERT_EQ(evbuilder.m_1D_strips.at(1), 1);
+
+  evbuilder.incrementCounters(empty, sixpoints);
+  ASSERT_EQ(evbuilder.m_1D_wires.at(5), 1);
+  ASSERT_EQ(evbuilder.m_1D_strips.at(5), 1);
+
+}
+
+
+
+/// not easy to test
+TEST_F(MBEventBuilderTest, AddDataPoint) {
+  MultiBladeEventBuilder evbuilder;
+  bool retval = evbuilder.addDataPoint(0, 1000, 0); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(32, 1000, 10); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(32, 1000, 10000); // ch, adc, time, outside window
+  ASSERT_EQ(retval, true);
+  ASSERT_EQ(evbuilder.getNumberOfEvents(), 1);
+}
+
+/// not easy to test
+TEST_F(MBEventBuilderTest, AddDataPointBelowADCThreshold) {
+  MultiBladeEventBuilder evbuilder;
+  evbuilder.setThreshold(1000);
+  bool retval = evbuilder.addDataPoint(0, 999, 0); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(32, 999, 10); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(32, 999, 10000); // ch, adc, time, outside window
+  ASSERT_EQ(retval, false);
+  ASSERT_EQ(evbuilder.getNumberOfEvents(), 0);
+}
+
+TEST_F(MBEventBuilderTest, AddDataPointAboveADCThreshold) {
+  MultiBladeEventBuilder evbuilder;
+  evbuilder.setThreshold(1000);
+  bool retval = evbuilder.addDataPoint(0, 1000, 0); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(32, 1000, 10); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(32, 1000, 10000); // ch, adc, time, outside window
+  ASSERT_EQ(retval, true);
+  ASSERT_EQ(evbuilder.getNumberOfEvents(), 1);
+}
+
+/// not easy to test
+TEST_F(MBEventBuilderTest, AddDataPointInvalidChannels) {
+  MultiBladeEventBuilder evbuilder;
+  bool retval = evbuilder.addDataPoint(64, 1000, 0); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(64, 1000, 10); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(64, 1000, 10000); // ch, adc, time, outside window
+  ASSERT_EQ(retval, false);
+  ASSERT_EQ(evbuilder.getNumberOfEvents(), 0);
+}
+
+/// not easy to test
+TEST_F(MBEventBuilderTest, AddDataPointValidChannels) {
+  MultiBladeEventBuilder evbuilder;
+  bool retval = evbuilder.addDataPoint(31, 1000, 0); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(63, 1000, 10); // ch, adc, time
+  ASSERT_EQ(retval, false);
+  retval = evbuilder.addDataPoint(63, 1000, 10000); // ch, adc, time, outside window
+  ASSERT_EQ(retval, true);
+  ASSERT_EQ(evbuilder.getNumberOfEvents(), 1);
+}
+
+TEST_F(MBEventBuilderTest, EventCounter) {
 
   // Test that events are counted correctly
 
   // Instanciate the event-builder
-  multiBladeEventBuilder p;
+  MultiBladeEventBuilder p;
 
   // Initialize the expected number of events counter
   uint nevents = 1;
@@ -66,12 +230,13 @@ TEST(MBEventBuilder__Test, EventCounter) {
   EXPECT_EQ(nevents, p.getNumberOfEvents());
 }
 
+#if 0
 TEST(MBEventBuilder__Test, ClusterCounters) {
 
   // Test the counters of number of points per event
 
   // Instaciate the event-counter and configure
-  multiBladeEventBuilder p;
+  MultiBladeEventBuilder p;
   p.setTimeWindow(config[0]);
   p.setNumberOfWireChannels(config[1]);
   p.setNumberOfStripChannels(config[2]);
@@ -94,10 +259,11 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
     uint end = begin + 5;
     std::vector<uint> datapoint(&data[begin], &data[end]);
     // Wire data-points
-    p.addDataPoint(datapoint[0], datapoint[2], datapoint[3]);
-
+    bool retval = p.addDataPoint(datapoint[0], datapoint[2], datapoint[3]);
+    ASSERT_EQ(retval, datapoint[4]);
     // Strip data-points
-    p.addDataPoint(datapoint[1], datapoint[2], datapoint[3]);
+    retval = p.addDataPoint(datapoint[1], datapoint[2], datapoint[3]);
+    ASSERT_EQ(retval, datapoint[4]);
 
     if (!datapoint[4]) {
 
@@ -231,9 +397,10 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
   }
 }
 
+
 TEST(MBEventBuilder__Test, NoDataRecieved) {
 
-  multiBladeEventBuilder p;
+  MultiBladeEventBuilder p;
 
   EXPECT_EQ(0, p.getNumberOfPositionRejected());
 
@@ -244,6 +411,9 @@ TEST(MBEventBuilder__Test, NoDataRecieved) {
 
   EXPECT_EQ(1, p.getNumberOfPositionRejected());
 }
+#endif
+
+
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

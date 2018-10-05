@@ -8,7 +8,7 @@
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
-#include <common/FBSerializer.h>
+#include <common/EV42Serializer.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
@@ -170,8 +170,10 @@ void SONDEIDEA::processing_thread() {
   SoNDeGeometry geometry;
 
   IDEASData ideasdata(&geometry, DetectorSettings.fileprefix);
+  EV42Serializer flatbuffer(kafka_buffer_size, "SONDE");
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
-  FBSerializer flatbuffer(kafka_buffer_size, eventprod);
+  flatbuffer.setProducerCallback(
+      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
   unsigned int data_index;
 
@@ -198,7 +200,7 @@ void SONDEIDEA::processing_thread() {
           for (int i = 0; i < events; i++) {
             XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)",
                    i, ideasdata.data[i].time, ideasdata.data[i].pixel_id);
-            mystats.tx_bytes += flatbuffer.addevent(ideasdata.data[i].time,
+            mystats.tx_bytes += flatbuffer.addEvent(ideasdata.data[i].time,
                                                     ideasdata.data[i].pixel_id);
           }
         }

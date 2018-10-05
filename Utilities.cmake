@@ -27,14 +27,14 @@ function(create_module module_name)
 endfunction(create_module)
 
 #=============================================================================
-# Compile detector module code for static linking into the EFU
-# Note that you must add the compiled code to the EFU for linking using (e.g)
-# target_link_libraries(efu $<TARGET_OBJECTS:SomeDetectorModule>)
+# Compile detector module code for static linking into the EFU.
 #=============================================================================
 function(create_object_module module_name)
   add_library(${module_name} OBJECT
     ${${module_name}_SRC}
     ${${module_name}_INC})
+  set(EFU_MODULES ${EFU_MODULES} $<TARGET_OBJECTS:${module_name}> CACHE INTERNAL "EFU_MODULES")
+  set(EFU_DEPENDENCIES ${EFU_DEPENDENCIES} ${module_name} CACHE INTERNAL "EFU_DEPENDENCIES")
 endfunction(create_object_module)
 
 #=============================================================================

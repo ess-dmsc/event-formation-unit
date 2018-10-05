@@ -10,7 +10,8 @@
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
-#include <common/FBSerializer.h>
+#include <common/EV42Serializer.h>
+#include <common/Producer.h>
 #include <common/HistSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
@@ -186,9 +187,6 @@ void MBCAEN::processing_thread() {
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
 
-  HistSerializer histfb;
-  NMXHists histograms;
-
   std::shared_ptr<DataSave> mbdatasave;
   bool dumptofile = !DetectorSettings.FilePrefix.empty();
   if (dumptofile)
@@ -199,11 +197,18 @@ void MBCAEN::processing_thread() {
 
   ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
 
+  EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
   Producer eventprod(EFUSettings.KafkaBroker, "MB_detector");
-  Producer monitorprod(EFUSettings.KafkaBroker, "MB_monitor");
-  FBSerializer flatbuffer(kafka_buffer_size, eventprod);
+  flatbuffer.setProducerCallback(
+      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
-  multiBladeEventBuilder builder[ncass];
+  Hists histograms(nwires, nstrips);
+  Producer monitorprod(EFUSettings.KafkaBroker, "MB_monitor");
+  HistSerializer histfb(histograms.needed_buffer_size());
+  histfb.set_callback(
+      std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
+
+  MultiBladeEventBuilder builder[ncass];
   for (uint32_t i = 0; i < ncass; i++) {
     builder[i].setNumberOfWireChannels(nwires);
     builder[i].setNumberOfStripChannels(nstrips);
@@ -227,9 +232,7 @@ void MBCAEN::processing_thread() {
 
         if (!histograms.isEmpty()) {
           XTRACE(PROCESS, INF, "Sending histogram for %zu readouts", histograms.hit_count());
-          char *txbuffer;
-          auto len = histfb.serialize(histograms, &txbuffer);
-          monitorprod.produce(txbuffer, len);
+          histfb.produce(histograms);
           histograms.clear();
         }
 
@@ -307,7 +310,7 @@ void MBCAEN::processing_thread() {
             if (pixel_id == 0) {
               mystats.geometry_errors++;
             } else {
-              mystats.tx_bytes += flatbuffer.addevent(
+              mystats.tx_bytes += flatbuffer.addEvent(
                   builder[cassette].getTimeStamp(), pixel_id);
               mystats.rx_events++;
             }
