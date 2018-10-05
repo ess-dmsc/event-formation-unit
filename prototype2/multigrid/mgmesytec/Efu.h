@@ -18,7 +18,8 @@ namespace Multigrid {
 
 class Efu {
 public:
-  virtual  ~Efu() = default;
+  virtual ~Efu() = default;
+
   size_t used_readouts {0};
 
   SequoiaGeometry mappings;
