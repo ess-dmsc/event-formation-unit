@@ -17,7 +17,7 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) { }
 /// \brief the detector interface specification
 class DemoDetector : public Detector {
 public:
-  DemoDetector(BaseSettings settings);
+  explicit DemoDetector(BaseSettings settings);
   ~DemoDetector();
   void main_thread();
   const char *detectorname();
