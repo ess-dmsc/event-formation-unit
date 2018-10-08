@@ -2,8 +2,7 @@
 # Detector Pipeline Plugins
 #=============================================================================
 
-set(GdGemBase_SRC
-    GdGemBase.cpp
+set(pipeline_common_source
     NMXConfig.cpp
     nmx/ReadoutFile.cpp
     nmx/Cluster.cpp
@@ -27,10 +26,9 @@ set(GdGemBase_SRC
     vmm3/ParserVMM3.cpp
     vmm3/BuilderVMM3.cpp
     vmm3/CalibrationFile.cpp  # Also works for VMM2
-    )
+)
 
-set(GdGemBase_INC
-    GdGemBase.h
+set(pipeline_common_inc
     NMXConfig.h
     nmx/Cluster.h
     nmx/Event.h
@@ -56,65 +54,14 @@ set(GdGemBase_INC
     vmm3/ParserVMM3.h
     vmm3/BuilderVMM3.h
     vmm3/CalibrationFile.h # also works for VMM2
-    )
+)
 
-set(GdGemReadout_SRC GdGemReadout.cpp ${GdGemBase_SRC})
-set(GdGemReadout_INC ${GdGemBase_INC})
+set(GdGemReadout_SRC GdGemReadout.cpp GdGemBase.cpp ${GdGemBase_SRC} ${pipeline_common_source})
+set(GdGemReadout_INC GdGemBase.h ${pipeline_common_inc})
 create_module(GdGemReadout)
 
-set(gdgem_SRC
-    gdgem.cpp
-    NMXConfig.cpp
-    nmx/ReadoutFile.cpp
-    nmx/Cluster.cpp
-    nmx/Event.cpp
-    nmx/Hit.cpp
-    nmx/HitFile.cpp
-    ../common/Hists.cpp
-    ../common/HistSerializer.cpp
-    nmx/TrackSerializer.cpp
-    nmx/AbstractBuilder.cpp
-    generators/BuilderAPV.cpp
-    generators/BuilderHits.cpp
-    clustering/HitsQueue.cpp
-    clustering/HitSorter.cpp
-    clustering/ClusterMatcher.cpp
-    clustering/DoroClusterer.cpp
-    srs/SRSMappings.cpp
-    srs/SRSTime.cpp
-    vmm2/ParserVMM2.cpp
-    vmm2/BuilderVMM2.cpp
-    vmm3/ParserVMM3.cpp
-    vmm3/BuilderVMM3.cpp
-    vmm3/CalibrationFile.cpp  # Also works for VMM2
-    )
-set(gdgem_INC
-    NMXConfig.h
-    nmx/Cluster.h
-    nmx/Event.h
-    nmx/Hit.h
-    ../common/Hists.h
-    nmx/Readout.h
-    nmx/ReadoutFile.h
-    ../common/HistSerializer.h
-    nmx/TrackSerializer.h
-    nmx/AbstractBuilder.h
-    generators/BuilderAPV.h
-    generators/BuilderHits.h
-    clustering/HitsQueue.h
-    clustering/HitSorter.h
-    clustering/ClusterMatcher.h
-    clustering/DoroClusterer.h
-    clustering/HitContainer.h
-    clustering/AbstractClusterer.h
-    srs/SRSMappings.h
-    srs/SRSTime.h
-    vmm2/ParserVMM2.h
-    vmm2/BuilderVMM2.h
-    vmm3/ParserVMM3.h
-    vmm3/BuilderVMM3.h
-    vmm3/CalibrationFile.h # also works for VMM2
-    )
+set(gdgem_SRC gdgem.cpp ${pipeline_common_source})
+set(gdgem_INC ${pipeline_common_inc})
 create_module(gdgem)
 
 #
@@ -123,6 +70,19 @@ create_module(gdgem)
 set(NMXConfigTest_INC NMXConfig.h srs/SRSTime.h srs/SRSMappings.h vmm3/CalibrationFile.cpp)
 set(NMXConfigTest_SRC NMXConfigTest.cpp NMXConfig.cpp srs/SRSTime.cpp srs/SRSMappings.cpp vmm3/CalibrationFile.cpp)
 create_test_executable(NMXConfigTest)
+
+set(GdGemBaseTest_INC
+    GdGemBase.h
+    ${pipeline_common_inc}
+    ../../libs/include/Socket.h
+    ../../libs/include/TSCTimer.h)
+set(GdGemBaseTest_SRC
+    GdGemBase.cpp
+    GdGemReadoutTest.cpp
+    ${pipeline_common_source}
+    ../../libs/source/Socket.cpp
+    ../../libs/source/TSCTimer.cpp)
+create_test_executable(GdGemBaseTest)
 
 #=============================================================================
 # Component tests

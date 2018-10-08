@@ -1,10 +1,15 @@
-
+/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief GdGem detector base plugin interface definition
+///
+//===----------------------------------------------------------------------===//
 #pragma once
 
 #include <common/Detector.h>
-
 #include <common/RingBuffer.h>
-
 #include <gdgem/nmx/AbstractBuilder.h>
 #include <gdgem/NMXConfig.h>
 #include <libs/include/SPSCFifo.h>
@@ -20,6 +25,7 @@ class GdGemBase : public Detector {
 public:
   GdGemBase(BaseSettings const & settings, NMXSettings & LocalNMXSettings);
   ~GdGemBase() = default;
+protected:
 
   /// \brief detector specific threads
   void input_thread();
@@ -34,7 +40,7 @@ public:
   static const int eth_buffer_size = 9000;
   static const int kafka_buffer_size = 12400;
 
-private:
+
   /** Shared between input_thread and processing_thread*/
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
