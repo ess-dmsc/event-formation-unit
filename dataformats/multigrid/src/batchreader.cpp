@@ -13,7 +13,8 @@ int main(int argc, char *argv[]) {
     runs = runspecfile.getruns(opts.runspec, opts.basedir, opts.ofile,
                                opts.start, opts.end);
   } else { /**< get config from command line */
-    runs.push_back(new RunSpec(opts.basedir + opts.dir, opts.prefix,
+    auto dir = opts.basedir + opts.dir;
+    runs.push_back(new RunSpec(dir, opts.prefix,
                                opts.postfix, opts.start, opts.end, opts.ofile,
                                -1));
   }

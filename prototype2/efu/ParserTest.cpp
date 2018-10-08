@@ -60,7 +60,7 @@ std::vector<std::string> check_detector_loaded {
 
 class TestDetector : public Detector {
 public:
-  TestDetector(UNUSED BaseSettings settings) : Detector("No name", settings) {
+  explicit TestDetector(UNUSED BaseSettings settings) : Detector("No name", settings) {
     std::cout << "TestDetector" << std::endl;
   };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };

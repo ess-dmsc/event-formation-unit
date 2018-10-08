@@ -18,7 +18,7 @@ using json = nlohmann::json;
 class RunSpecParse {
 public:
   /// \brief specify a json file containing run specifications (for Multigrid)
-  RunSpecParse(std::string jsonfile);
+  explicit RunSpecParse(std::string jsonfile);
 
   /// \brief create a list of runs from a given run specification
   std::vector<RunSpec *> &getruns(std::string runspec, std::string basedir,

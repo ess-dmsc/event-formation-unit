@@ -15,7 +15,11 @@ TEST_F(RunSpecTest, DefaultConstructor) {
   static const int start{1};
   static const int end{999};
   static const int thresh{124};
-  RunSpec runspec("dir", "prefix", "postfix", start, end, "ofile", thresh);
+  std::string dir = "dir";
+  std::string prefix = "prefix";
+  std::string postfix = "postfix";
+  std::string ofile = "ofile";
+  RunSpec runspec(dir, prefix, postfix, start, end, ofile, thresh);
   ASSERT_EQ(runspec.dir_, "dir");
   ASSERT_EQ(runspec.prefix_, "prefix");
   ASSERT_EQ(runspec.postfix_, "postfix");

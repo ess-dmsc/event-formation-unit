@@ -21,12 +21,12 @@ TEST_F(PeakFinderTest, Constructor) {
 TEST_F(PeakFinderTest, Capped) {
   MESSAGE() << "Expecting no data to be capped\n";
   PeakFinder f(0, -2, 0); /**< \todo slight hack, consider changing API  */
-  auto peaks = f.findpeaks(testdata);
+  f.findpeaks(testdata);
   ASSERT_EQ(0, f.getcapped());
 
   MESSAGE() << "Expecting all data to be capped\n";
   PeakFinder g(0, 20000, 0);
-  peaks = g.findpeaks(testdata);
+  auto peaks = g.findpeaks(testdata);
   ASSERT_EQ(testdata.size(), g.getcapped());
 }
 

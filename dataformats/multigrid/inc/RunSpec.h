@@ -12,8 +12,8 @@
 
 class RunSpec {
 public:
-  RunSpec(std::string dir, std::string prefix, std::string postfix,
-          unsigned int start, unsigned int end, std::string ofile,
+  RunSpec(std::string & dir, std::string & prefix, std::string & postfix,
+          unsigned int start, unsigned int end, std::string & ofile,
           unsigned int thresh)
       : dir_(dir), prefix_(prefix), postfix_(postfix), start_(start), end_(end),
         ofile_(ofile), thresh_(thresh){};

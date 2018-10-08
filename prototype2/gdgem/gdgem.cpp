@@ -73,7 +73,7 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
 
 class NMX : public Detector {
 public:
-  NMX(BaseSettings settings);
+  explicit NMX(BaseSettings settings);
   ~NMX();
 
   /// \brief detector specific threads
@@ -104,8 +104,7 @@ private:
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t fifo_push_errors;
-    // int64_t fifo_free;
-    int64_t pad_a[5]; /**< \todo check alignment*/
+    int64_t pad_a[5]; // cppcheck-suppress unusedStructMember
 
     // Processing Counters
     int64_t readouts;

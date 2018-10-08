@@ -123,7 +123,7 @@ const char *classname = "CSPEC Detector Mesytec readout";
 ///
 class CSPEC : public Detector {
 public:
-  CSPEC(BaseSettings settings);
+  explicit CSPEC(BaseSettings settings);
   void mainThread();
 
   const char *detectorname();

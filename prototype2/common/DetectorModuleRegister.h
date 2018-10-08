@@ -29,8 +29,8 @@ namespace DetectorModuleRegistration {
 std::map<std::string, DetectorModuleSetup> &getFactories();
 
 /// \brief Add a new detector module.
-/// \throws std::runtime_error If key already exists.
-void addDetectorModule(std::string key, DetectorModuleSetup Module);
+/// \throws std::runtime_error If DetectorModuleName already exists.
+void addDetectorModule(std::string DetectorModuleName, DetectorModuleSetup Module);
 
 /// \brief Find a detector module, given a key.
 /// \throws std::runtime_error If the key is not found.

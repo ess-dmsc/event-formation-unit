@@ -47,7 +47,7 @@ static const int kafka_buffer_size = 1000000;
 
 class CSPEC : public Detector {
 public:
-  CSPEC(BaseSettings settings);
+  explicit CSPEC(BaseSettings settings);
   void input_thread();
   void processing_thread();
 
@@ -68,7 +68,7 @@ private:
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t fifo_push_errors;
-    int64_t pad_a[5]; /**< \todo check alignment*/
+    int64_t pad_a[5]; // cppcheck-suppress unusedStructMember
 
     // Processing Counters
     int64_t rx_readouts;

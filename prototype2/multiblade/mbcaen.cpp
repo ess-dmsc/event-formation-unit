@@ -42,7 +42,7 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 class MBCAEN : public Detector {
 public:
-  MBCAEN(BaseSettings settings);
+  explicit MBCAEN(BaseSettings settings);
   void input_thread();
   void processing_thread();
 
@@ -64,7 +64,7 @@ private:
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t fifo1_push_errors;
-    int64_t pad[5];
+    int64_t pad[5]; // cppcheck-suppress unusedStructMember
 
     // Processing Counters
     int64_t rx_idle1;
