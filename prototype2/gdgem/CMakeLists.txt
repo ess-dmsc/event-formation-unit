@@ -3,6 +3,7 @@
 #=============================================================================
 
 set(pipeline_common_source
+    GdGemBase.cpp
     NMXConfig.cpp
     nmx/ReadoutFile.cpp
     nmx/Cluster.cpp
@@ -25,6 +26,7 @@ set(pipeline_common_source
 )
 
 set(pipeline_common_inc
+    GdGemBase.h
     NMXConfig.h
     nmx/Cluster.h
     nmx/Event.h
@@ -48,8 +50,8 @@ set(pipeline_common_inc
     vmm3/CalibrationFile.h # also works for VMM2
 )
 
-set(gdgem_SRC GdGemReadout.cpp GdGemBase.cpp ${GdGemBase_SRC} ${pipeline_common_source})
-set(gdgem_INC GdGemBase.h ${pipeline_common_inc})
+set(gdgem_SRC GdGemReadout.cpp ${GdGemBase_SRC} ${pipeline_common_source})
+set(gdgem_INC ${pipeline_common_inc})
 create_module(gdgem)
 
 #
@@ -60,13 +62,11 @@ set(NMXConfigTest_SRC NMXConfigTest.cpp NMXConfig.cpp srs/SRSTime.cpp srs/SRSMap
 create_test_executable(NMXConfigTest)
 
 set(GdGemBaseTest_INC
-    GdGemBase.h
     ${pipeline_common_inc}
     ../../libs/include/Socket.h
     ../../libs/include/TSCTimer.h
     ../adc_readout/test/TestUDPServer.h)
 set(GdGemBaseTest_SRC
-    GdGemBase.cpp
     GdGemBaseTest.cpp
     ${pipeline_common_source}
     ../../libs/source/Socket.cpp
