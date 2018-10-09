@@ -39,11 +39,6 @@ const char *classname = "Multiblade detector with CAEN readout";
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
-/** ----------------------------------------------------- */
-
-
-
-
 
 MBCAENBase::MBCAENBase(BaseSettings const &settings, struct MBCAENSettings & LocalMBCAENSettings)
     : Detector("MBCAEN", settings), MBCAENSettings(LocalMBCAENSettings) {
