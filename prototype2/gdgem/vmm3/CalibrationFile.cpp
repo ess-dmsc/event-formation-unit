@@ -107,6 +107,5 @@ CalibrationFile::getCalibration(unsigned int fecId, unsigned int vmmId,
            vmmId, chNo);
     return ErrCorr;
   }
-  printf("XXXXXXXXXX\n");
   return Calibrations[fecId][vmmId][chNo];
 }
