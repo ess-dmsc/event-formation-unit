@@ -140,7 +140,7 @@ void MBCAENBase::processing_thread() {
   flatbuffer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
-  Hists histograms(nwires, nstrips);
+  Hists histograms(std::max(nwires, nstrips), 65535);
   Producer monitorprod(EFUSettings.KafkaBroker, "MB_monitor");
   HistSerializer histfb(histograms.needed_buffer_size());
   histfb.set_callback(
