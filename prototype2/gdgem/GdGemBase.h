@@ -25,7 +25,7 @@ class GdGemBase : public Detector {
 public:
   GdGemBase(BaseSettings const & settings, NMXSettings & LocalNMXSettings);
   ~GdGemBase() = default;
-protected:
+
 
   /// \brief detector specific threads
   void input_thread();
@@ -34,6 +34,7 @@ protected:
   /// \brief detector specific commands
   int getCalibration(std::vector<std::string> cmdargs, char *output,
                      unsigned int *obytes);
+protected:
 
   /** \todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 2000;

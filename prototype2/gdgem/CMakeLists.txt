@@ -67,7 +67,7 @@ set(GdGemBaseTest_INC
     ../adc_readout/test/TestUDPServer.h)
 set(GdGemBaseTest_SRC
     GdGemBase.cpp
-    GdGemReadoutTest.cpp
+    GdGemBaseTest.cpp
     ${pipeline_common_source}
     ../../libs/source/Socket.cpp
     ../../libs/source/TSCTimer.cpp

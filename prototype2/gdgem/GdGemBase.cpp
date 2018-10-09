@@ -30,8 +30,8 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 /** ----------------------------------------------------- */
 
 int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
-                        __attribute__((unused)) char *output,
-                        __attribute__((unused)) unsigned int *obytes) {
+                        char *output,
+                        unsigned int *obytes) {
   std::string cmd = "NMX_GET_CALIB";
   LOG(CMD, Sev::Info, "{}", cmd);
   if (cmdargs.size() != 4) {
@@ -43,7 +43,6 @@ int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
   int asic = atoi(cmdargs.at(2).c_str());
   int channel = atoi(cmdargs.at(3).c_str());
   auto calib = nmx_opts.calfile->getCalibration(fec, asic, channel);
-
   if ((abs(calib.offset) <= 1e-6) and (abs(calib.slope) <= 1e-6)) {
     *obytes =
         snprintf(output, SERVER_BUFFER_SIZE, "<error> no calibration exist");
@@ -59,6 +58,9 @@ int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
 GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSettings) :
        Detector("NMX", settings), NMXSettings(LocalSettings) {
   Stats.setPrefix("efu.nmx");
+
+  XTRACE(PROCESS, ALW, "NMX Config file: %s", NMXSettings.ConfigFile.c_str());
+  nmx_opts = NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
@@ -180,8 +182,6 @@ void bin_hists(Hists& hists, const std::list<Cluster>& cl)
 
 
 void GdGemBase::processing_thread() {
-  XTRACE(PROCESS, ALW, "NMX Config file: %s", NMXSettings.ConfigFile.c_str());
-  nmx_opts = NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
   init_builder();
   if (!builder_) {
     XTRACE(PROCESS, ERR, "No builder specified, exiting thread");
