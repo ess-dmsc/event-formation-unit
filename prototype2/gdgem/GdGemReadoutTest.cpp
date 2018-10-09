@@ -5,11 +5,11 @@
  *  \brief Unit tests.
  */
 
-#include "GdGemBase.h"
+#include <common/DataSave.h>
+#include <gdgem/GdGemBase.h>
 #include <../prototype2/adc_readout/test/TestUDPServer.h>
-#include <gtest/gtest.h>
-//#include <random>
-//#include <trompeloeil.hpp>
+#include <gdgem/GdGemReadoutTestData.h>
+#include <test/TestBase.h>
 
 class GdGemBaseStandIn : public GdGemBase {
 public:
@@ -23,7 +23,7 @@ public:
 class GdGemBaseTest : public ::testing::Test {
 public:
   virtual void SetUp() {
-    LocalSettings.ConfigFile = "../prototype2/gdgem/configs/vmm3.json";
+    LocalSettings.ConfigFile = "vmm3.json";
     Settings.DetectorRxBufferSize = 100000;
     Settings.MinimumMTU = 1500;
   }
@@ -45,6 +45,9 @@ TEST_F(GdGemBaseTest, Constructor) {
 }
 
 int main(int argc, char **argv) {
+  std::string filename{"vmm3.json"};
+  DataSave tempfile(filename, (void *)vmm3json.c_str(), vmm3json.size());
+
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
