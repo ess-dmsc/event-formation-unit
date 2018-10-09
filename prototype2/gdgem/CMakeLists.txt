@@ -13,16 +13,12 @@ set(pipeline_common_source
     ../common/HistSerializer.cpp
     nmx/TrackSerializer.cpp
     nmx/AbstractBuilder.cpp
-    generators/BuilderAPV.cpp
-    generators/BuilderHits.cpp
     clustering/HitsQueue.cpp
     clustering/HitSorter.cpp
     clustering/ClusterMatcher.cpp
     clustering/DoroClusterer.cpp
     srs/SRSMappings.cpp
     srs/SRSTime.cpp
-    vmm2/ParserVMM2.cpp
-    vmm2/BuilderVMM2.cpp
     vmm3/ParserVMM3.cpp
     vmm3/BuilderVMM3.cpp
     vmm3/CalibrationFile.cpp  # Also works for VMM2
@@ -39,8 +35,6 @@ set(pipeline_common_inc
     ../common/HistSerializer.h
     nmx/TrackSerializer.h
     nmx/AbstractBuilder.h
-    generators/BuilderAPV.h
-    generators/BuilderHits.h
     clustering/HitsQueue.h
     clustering/HitSorter.h
     clustering/ClusterMatcher.h
@@ -49,8 +43,6 @@ set(pipeline_common_inc
     clustering/AbstractClusterer.h
     srs/SRSMappings.h
     srs/SRSTime.h
-    vmm2/ParserVMM2.h
-    vmm2/BuilderVMM2.h
     vmm3/ParserVMM3.h
     vmm3/BuilderVMM3.h
     vmm3/CalibrationFile.h # also works for VMM2
@@ -90,7 +82,6 @@ create_test_executable(GdGemBaseTest)
 
 add_subdirectory(nmx)
 add_subdirectory(srs)
-add_subdirectory(vmm2)
 add_subdirectory(vmm3)
 add_subdirectory(clustering)
 add_subdirectory(generators)

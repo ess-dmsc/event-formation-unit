@@ -11,10 +11,7 @@
 
 #include <gdgem/clustering/ClusterMatcher.h>
 #include <gdgem/clustering/DoroClusterer.h>
-#include <gdgem/generators/BuilderAPV.h>
-#include <gdgem/generators/BuilderHits.h>
 #include <gdgem/nmx/TrackSerializer.h>
-#include <gdgem/vmm2/BuilderVMM2.h>
 #include <gdgem/vmm3/BuilderVMM3.h>
 #include <common/EV42Serializer.h>
 #include <common/HistSerializer.h>
@@ -344,8 +341,8 @@ void GdGemBase::processing_thread() {
         // TODO flush all clusters?
 
         XTRACE(INPUT, ALW, "Stopping input thread.");
-        builder_
-            .reset(); /**< \todo this is a hack to force ~BuilderSRS() call */
+        /// \todo this is a hack to force ~BuilderSRS() call
+        builder_.reset();
         delete builder_.get(); /**< \todo see above */
         return;
       }
@@ -365,28 +362,7 @@ void GdGemBase::init_builder() {
       nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap,
       nmx_opts.clusterer_y.min_cluster_size);
 
-  if (nmx_opts.builder_type == "Hits") {
-    XTRACE(INIT, DEB, "Using BuilderHits");
-    builder_ = std::make_shared<BuilderHits>(
-        nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
-    builder_->clusterer_x = clusx;
-    builder_->clusterer_y = clusy;
-  } else if (nmx_opts.builder_type == "APV") {
-    XTRACE(INIT, DEB, "Using BuilderAPV");
-    builder_ = std::make_shared<BuilderAPV>(
-        nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
-    builder_->clusterer_x = clusx;
-    builder_->clusterer_y = clusy;
-  } else if (nmx_opts.builder_type == "VMM2") {
-    XTRACE(INIT, DEB, "Using BuilderVMM2");
-    builder_ = std::make_shared<BuilderVMM2>(
-        nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
-        nmx_opts.clusterer_x.hit_adc_threshold,
-        nmx_opts.clusterer_x.max_time_gap,
-        nmx_opts.clusterer_y.hit_adc_threshold,
-        nmx_opts.clusterer_y.max_time_gap, nmx_opts.dump_directory,
-        nmx_opts.dump_csv, nmx_opts.dump_h5);
-  } else if (nmx_opts.builder_type == "VMM3") {
+if (nmx_opts.builder_type == "VMM3") {
     XTRACE(INIT, DEB, "Using BuilderVMM3");
     builder_ = std::make_shared<BuilderVMM3>(
         nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
