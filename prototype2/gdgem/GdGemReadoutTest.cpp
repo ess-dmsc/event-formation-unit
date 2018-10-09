@@ -38,7 +38,7 @@ TEST_F(GdGemBaseTest, Constructor) {
   EXPECT_EQ(Readout.mystats.rx_packets, 0);
 }
 
-TEST_F(GdGemBaseTest, Constructor) {
+TEST_F(GdGemBaseTest, DataReceive) {
   GdGemBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
   TestUDPServer Server(43126, Settings.DetectorPort, 1470);
