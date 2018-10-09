@@ -75,13 +75,15 @@ set(GdGemBaseTest_INC
     GdGemBase.h
     ${pipeline_common_inc}
     ../../libs/include/Socket.h
-    ../../libs/include/TSCTimer.h)
+    ../../libs/include/TSCTimer.h
+    ../adc_readout/test/TestUDPServer.h)
 set(GdGemBaseTest_SRC
     GdGemBase.cpp
     GdGemReadoutTest.cpp
     ${pipeline_common_source}
     ../../libs/source/Socket.cpp
-    ../../libs/source/TSCTimer.cpp)
+    ../../libs/source/TSCTimer.cpp
+    ../adc_readout/test/TestUDPServer.cpp)
 create_test_executable(GdGemBaseTest)
 
 #=============================================================================

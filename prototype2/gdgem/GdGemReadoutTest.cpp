@@ -6,7 +6,7 @@
  */
 
 #include "GdGemBase.h"
-//#include "TestUDPServer.h"
+#include <../prototype2/adc_readout/test/TestUDPServer.h>
 #include <gtest/gtest.h>
 //#include <random>
 //#include <trompeloeil.hpp>
@@ -22,7 +22,11 @@ public:
 
 class GdGemBaseTest : public ::testing::Test {
 public:
-  virtual void SetUp() {}
+  virtual void SetUp() {
+    LocalSettings.ConfigFile = "../prototype2/gdgem/configs/vmm3.json";
+    Settings.DetectorRxBufferSize = 100000;
+    Settings.MinimumMTU = 1500;
+  }
   virtual void TearDown() {}
 
   BaseSettings Settings;
@@ -32,12 +36,12 @@ public:
 TEST_F(GdGemBaseTest, Constructor) {
   GdGemBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
-  // TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, 1470);
-  // Server.startPacketTransmission(1, 100);
-  // std::chrono::duration<std::int64_t, std::milli> SleepTime(200);
-  // std::this_thread::sleep_for(SleepTime);
+  TestUDPServer Server(43126, Settings.DetectorPort, 1470);
+  Server.startPacketTransmission(1, 100);
+  std::chrono::duration<std::int64_t, std::milli> SleepTime(200);
+  std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.mystats.rx_packets, 0);
+  EXPECT_EQ(Readout.mystats.rx_packets, 1);
 }
 
 int main(int argc, char **argv) {

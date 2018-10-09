@@ -27,8 +27,8 @@
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 /** ----------------------------------------------------- */
 
