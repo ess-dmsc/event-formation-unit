@@ -7,9 +7,6 @@
 #include <memory>
 #include <test/TestBase.h>
 
-//extern int forcefstatfail;
-//extern int forcereadfail;
-
 #define UNUSED __attribute__((unused))
 
 static int dummy_command(std::vector<std::string> UNUSED cmdargs,
@@ -19,10 +16,6 @@ static int dummy_command(std::vector<std::string> UNUSED cmdargs,
 
 // clang-format off
 std::vector<std::string> commands {
-  // doesnt work when tests are called outside prototype2/ dir
-//  "CSPEC_LOAD_CALIB calib_data/cal_zero", "<OK>",
-//  "CSPEC_SHOW_CALIB",               "wire 0 0x0000, grid 0 0x0000",
-//  "CSPEC_SHOW_CALIB 5",             "wire 5 0x0000, grid 5 0x0000",
   "STAT_GET_COUNT",                 "STAT_GET_COUNT 0",
   "CMD_GET_COUNT",                  "CMD_GET_COUNT 7",
   "STAT_GET 1",                     "STAT_GET  -1",
@@ -30,13 +23,6 @@ std::vector<std::string> commands {
 };
 
 std::vector<std::string> commands_badargs {
-//  "CSPEC_LOAD_CALIB",
-//  "CSPEC_LOAD_CALIB file1 file2",
-//  "CSPEC_LOAD_CALIB file_not_exist",
-//  "CSPEC_LOAD_CALIB calib_data/cal_badsize",
-//  "CSPEC_LOAD_CALIB calib_data/nogcal",
-//  "CSPEC_SHOW_CALIB 1 2",
-//  "CSPEC_SHOW_CALIB 16384",
   "STAT_GET_COUNT 1",
   "STAT_GET",
   "CMD_GET_COUNT 1",
@@ -209,42 +195,12 @@ TEST_F(ParserTest, NullDetector) {
   ASSERT_EQ(res, -Parser::EBADCMD);
 }
 
-#if 0
-TEST_F(ParserTest, SysCallFail) {
-  const char *cmd = "CSPEC_LOAD_CALIB calib_data/cal_zero";
-  std::memcpy(input, cmd, strlen(cmd));
-  forcefstatfail = 1;
-  int res = parser->parse(input, strlen(cmd), output, &obytes);
-  ASSERT_EQ(res, -Parser::EBADARGS);
-  ASSERT_EQ(0, forcefstatfail);
-
-  forcereadfail = 1;
-  std::memcpy(input, cmd, strlen(cmd));
-  res = parser->parse(input, strlen(cmd), output, &obytes);
-  ASSERT_EQ(res, -Parser::EBADARGS);
-  ASSERT_EQ(0, forcereadfail);
-}
-#endif
-
 TEST_F(ParserTest, DetInfoGetNoDetectorLoaded) {
   const char *cmd = "DETECTOR_INFO_GET";
   std::memcpy(input, cmd, strlen(cmd));
   int res = parser->parse(input, strlen(cmd), output, &obytes);
   ASSERT_EQ(res, -Parser::OK);
 }
-
-#if 0
-TEST_F(ParserTest, StatGetCountNoDetectorLoaded) {
-  for (auto cmdstr : check_detector_loaded) {
-    MESSAGE() << cmdstr << "\n";
-    const char *cmd = cmdstr.c_str();
-    std::memcpy(input, cmd, strlen(cmd));
-    int res = parser->parse(input, strlen(cmd), output, &obytes);
-    ASSERT_EQ(res, -Parser::OK);
-    ASSERT_NE(strstr(output, "error: no detector loaded"), nullptr);
-  }
-}
-#endif
 
 TEST_F(ParserTest, DetectorInfo) {
   const char *cmd = "DETECTOR_INFO_GET";
