@@ -109,12 +109,13 @@ void MGMesytecBase::mainThread() {
   sis3153parser.buffers.reserve(1000);
 
   uint8_t buffer[eth_buffer_size];
-  size_t ReadSize {0};
+  int ReadSize {0};
   TSCTimer report_timer;
   for (;;) {
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += ReadSize;
+      printf("rx: %d bytes\n", ReadSize);
       LOG(PROCESS, Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
 
       mystats.sis_discarded_bytes += sis3153parser.parse(Buffer<uint8_t>(buffer, ReadSize));

@@ -88,6 +88,21 @@ create_executable(mgcncsgenjson)
 # Tests
 #=============================================================================
 
+set(MGMesytecBaseTest_INC
+  ${mgmesytec_common_inc}
+  ../../libs/include/Socket.h
+  ../../libs/include/TSCTimer.h
+  ../adc_readout/test/TestUDPServer.h
+)
+set(MGMesytecBaseTest_SRC
+  ${mgmesytec_common_src}
+  MGMesytecBaseTest.cpp
+  ../../libs/source/Socket.cpp
+  ../../libs/source/TSCTimer.cpp
+  ../adc_readout/test/TestUDPServer.cpp
+)
+create_test_executable(MGMesytecBaseTest)
+
 set(MgConfigTest_SRC
   MgConfig.cpp
   MgConfigTest.cpp

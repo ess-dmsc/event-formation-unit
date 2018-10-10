@@ -94,7 +94,7 @@ public:
   const int readout_entries = 100000;        /// number of raw readout entries
   const int one_tenth_second_usecs = 100000; ///
 
-private:
+protected:
 
   struct {
     // Input Counters
