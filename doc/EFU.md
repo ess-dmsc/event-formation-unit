@@ -150,24 +150,4 @@ The following functions must be provided be the developer of a new detector plug
 
 
 #### Detector-specific commands
-To register a detector specific command we need to add the parser functions to the detector class.
-
-    class CSPEC : public Detector {
-    public:
-      ...
-      int LoadCalib(std::vector<std::string> cmdargs, UNUSED char *output, UNUSED unsigned int *obytes);
-      ...
-    };
-
-    int CSPEC::LoadCalib(std::vector<std::string> cmdargs, char *output, unsigned int *obytes) {
-      ...
-      return Parser::OK;
-    }
-
-    AddCommandFunction("CSPEC_LOAD_CALIB",
-                       [this](std::vector<std::string> cmdargs, char *output,
-                              unsigned int *obytes) {
-                         return CSPEC::LoadCalib(cmdargs, output, obytes);
-                       });
-
-An example of how detector-specific commands are registered can be found in *prototype2/multigrid/mgcncs2.cpp*
+TBA

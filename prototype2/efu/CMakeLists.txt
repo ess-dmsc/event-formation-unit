@@ -67,8 +67,7 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
 
   set(ParserTest_SRC
     Parser.cpp
-    ../common/EFUArgs.cpp
-    $<TARGET_OBJECTS:calibfile>)
+    ../common/EFUArgs.cpp)
   set(ParserTest_INC
     Parser.h
     ../common/EFUArgs.h)
