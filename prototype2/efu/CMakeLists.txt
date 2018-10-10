@@ -56,14 +56,11 @@ create_test_executable(ServerTest)
 if(${CMAKE_COMPILER_IS_GNUCXX})
   set(ParserTestLibrary_SRC
     ParserTest.cpp
-    ../test/SyscallWrappers.cpp
     ../common/NewStats.cpp)
   set(ParserTestLibrary_INC
     ../common/NewStats.h)
   add_library(ParserTestLibrary STATIC
     ${ParserTestLibrary_SRC})
-  add_compile_flags(ParserTestLibrary
-    "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 
   set(ParserTest_SRC
     Parser.cpp
@@ -74,10 +71,6 @@ if(${CMAKE_COMPILER_IS_GNUCXX})
   set(ParserTest_LIB
     ParserTestLibrary)
   create_test_executable(ParserTest)
-  add_compile_flags(ParserTest
-    "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
-  add_linker_flags(ParserTest
-    "-Wl,--wrap=fstat,--wrap=read,--wrap=write,--wrap=open")
 else()
   message(STATUS "*** Skipping ParserTest - requires gcc/linux")
 endif()
