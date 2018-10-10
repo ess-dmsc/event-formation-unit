@@ -26,6 +26,9 @@
 #include <multigrid/mgmesytec/EfuCenterMass.h>
 #include <multigrid/mgmesytec/EfuPrioritized.h>
 
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
+
 const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
 
 
@@ -54,19 +57,19 @@ MGMesytecBase::MGMesytecBase(BaseSettings const &settings, struct MGMesytecSetti
   std::function<void()> inputFunc = [this]() { MGMesytecBase::mainThread(); };
   Detector::AddThreadFunction(inputFunc, "main");
 
-  LOG(INIT, Sev::Info, "Stream monitor data = {}",
+  XTRACE(INIT, INF, "Stream monitor data = %s",
       (MGMesytecSettings.monitor ? "YES" : "no"));
   if (!MGMesytecSettings.fileprefix.empty())
-    LOG(INIT, Sev::Info, "Dump h5 data in path: {}",
+    XTRACE(INIT, INF, "Dump h5 data in path: %s",
            MGMesytecSettings.fileprefix);
 }
 
 ///
 void MGMesytecBase::init_config()
 {
-  LOG(INIT, Sev::Info, "MG Config file: {}", MGMesytecSettings.ConfigFile);
+  XTRACE(INIT, INF, "MG Config file: %s", MGMesytecSettings.ConfigFile.c_str());
   mg_config = Multigrid::Config(MGMesytecSettings.ConfigFile);
-  LOG(INIT, Sev::Info, "Multigrid Config\n{}", mg_config.debug());
+  XTRACE(INIT, INF, "Multigrid Config\n%s", mg_config.debug().c_str());
 
   if (MGMesytecSettings.monitor)
     monitor.init(EFUSettings.KafkaBroker, readout_entries);
@@ -96,6 +99,7 @@ void MGMesytecBase::mainThread() {
 
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort); //Change name or add more comments
+  XTRACE(INIT, DEB, "server: %s, port %d", EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
   UDPReceiver cspecdata(local);
   cspecdata.setBufferSizes(EFUSettings.DetectorTxBufferSize, EFUSettings.DetectorRxBufferSize);
   cspecdata.printBufferSizes();
@@ -115,7 +119,7 @@ void MGMesytecBase::mainThread() {
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += ReadSize;
-      LOG(PROCESS, Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
+      XTRACE(PROCESS, DEB, "Processed UDP packet of size: %d", ReadSize);
 
       mystats.sis_discarded_bytes += sis3153parser.parse(Buffer<uint8_t>(buffer, ReadSize));
 
@@ -194,7 +198,7 @@ void MGMesytecBase::mainThread() {
       // flush anything that remains
       mystats.tx_bytes += ev42serializer.produce();
       monitor.produce();
-      LOG(PROCESS, Sev::Info, "Stopping processing thread.");
+      XTRACE(PROCESS, INF, "Stopping processing thread.");
       return;
     }
   }

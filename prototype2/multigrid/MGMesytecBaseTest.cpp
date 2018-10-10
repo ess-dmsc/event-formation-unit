@@ -5,7 +5,6 @@
  *  \brief Unit tests.
  */
 
-#include <string>
 #include <common/DataSave.h>
 #include <multigrid/MGMesytecBase.h>
 #include <multigrid/mgmesytec/TestData.h>
@@ -47,7 +46,7 @@ public:
   using MGMesytecBase::mystats;
 };
 
-class MGMesytecBaseTest : public ::testing::Test {
+class MGMesytecBaseTest : public TestBase {
 public:
   virtual void SetUp() {
     LocalSettings.ConfigFile = "mgconfig.json";
