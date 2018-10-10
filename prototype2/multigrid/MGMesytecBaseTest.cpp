@@ -73,12 +73,12 @@ TEST_F(MGMesytecBaseTest, DataReceive) {
   Readout.startThreads();
   TestUDPServer Server(43126, Settings.DetectorPort, (unsigned char *)&ws2_short[0], ws2_short.size());
   Server.startPacketTransmission(1, 100);
-  std::chrono::duration<std::int64_t, std::milli> SleepTime(200);
+  std::chrono::duration<std::int64_t, std::milli> SleepTime(600);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
   EXPECT_EQ(Readout.mystats.rx_packets, 1);
   EXPECT_EQ(Readout.mystats.rx_bytes, ws2_short.size());
-  EXPECT_EQ(Readout.mystats.readouts, 34); // 
+  EXPECT_EQ(Readout.mystats.readouts, 34); //
   //EXPECT_EQ(Readout.mystats.events, 2);
   EXPECT_EQ(Readout.mystats.bus_glitches, 0);
 }
