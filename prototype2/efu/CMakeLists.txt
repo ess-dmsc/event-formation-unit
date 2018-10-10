@@ -53,24 +53,21 @@ set(ServerTest_SRC
 create_test_executable(ServerTest)
 
 
-if(${CMAKE_COMPILER_IS_GNUCXX})
-  set(ParserTestLibrary_SRC
-    ParserTest.cpp
-    ../common/NewStats.cpp)
-  set(ParserTestLibrary_INC
-    ../common/NewStats.h)
-  add_library(ParserTestLibrary STATIC
-    ${ParserTestLibrary_SRC})
 
-  set(ParserTest_SRC
-    Parser.cpp
-    ../common/EFUArgs.cpp)
-  set(ParserTest_INC
-    Parser.h
-    ../common/EFUArgs.h)
-  set(ParserTest_LIB
-    ParserTestLibrary)
-  create_test_executable(ParserTest)
-else()
-  message(STATUS "*** Skipping ParserTest - requires gcc/linux")
-endif()
+set(ParserTestLibrary_SRC
+  ParserTest.cpp
+  ../common/NewStats.cpp)
+set(ParserTestLibrary_INC
+  ../common/NewStats.h)
+add_library(ParserTestLibrary STATIC
+  ${ParserTestLibrary_SRC})
+
+set(ParserTest_SRC
+  Parser.cpp
+  ../common/EFUArgs.cpp)
+set(ParserTest_INC
+  Parser.h
+  ../common/EFUArgs.h)
+set(ParserTest_LIB
+  ParserTestLibrary)
+create_test_executable(ParserTest)
