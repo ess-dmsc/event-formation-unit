@@ -22,6 +22,8 @@ MBConfig::MBConfig(std::string jsonfile) : ConfigFile(jsonfile) {
 
   if (Instrument == InstrumentGeometry::Estia) {
     Detector = new MB16Detector(Digitisers);
+  } else if (Instrument == InstrumentGeometry::Freia) {
+    Detector = new MB16Detector(Digitisers); /// \todo add parameters for Freia
   }
 
   assert(Detector != nullptr);

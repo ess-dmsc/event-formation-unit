@@ -45,10 +45,13 @@ bool Loader::loadPlugin(const std::string lib) {
             TestLibName);
       break;
     }
+    else {
+      LOG(INIT, Sev::Warning, "Could not open library {}: {}", TestLibName,
+          dlerror());
+    }
   }
   if (handle == nullptr) {
-    LOG(INIT, Sev::Error, "Could not open library {}: {}", lib,
-           dlerror());
+    LOG(INIT, Sev::Error, "All variations of DL failed.");
     return false;
   }
 

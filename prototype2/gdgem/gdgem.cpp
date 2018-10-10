@@ -15,7 +15,7 @@
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
-#include <common/FBSerializer.h>
+#include <common/EV42Serializer.h>
 #include <common/HistSerializer.h>
 #include <common/Log.h>
 #include <common/Producer.h>
@@ -57,7 +57,6 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 struct NMXSettingsStruct {
   std::string ConfigFile;
   std::string CalibrationFile;
-  int SRSParserID; //
 } NMXSettings;
 
 void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
@@ -271,6 +270,29 @@ void NMX::input_thread() {
   }
 }
 
+void bin(Hists& hists, const Event &e)
+{
+  uint32_t sum = e.x.adc_sum + e.y.adc_sum;
+  hists.bincluster(sum);
+}
+
+void bin(Hists& hists, const Hit &e)
+{
+  if (e.plane_id == 0) {
+    hists.binstrips(e.strip, e.adc, 0, 0);
+  } else if (e.plane_id == 1) {
+    hists.binstrips(0, 0, e.strip, e.adc);
+  }
+}
+
+void bin_hists(Hists& hists, const std::list<Cluster>& cl)
+{
+  for (const auto& cluster : cl)
+    for (const auto& e : cluster.entries)
+      bin(hists, e);
+}
+
+
 void NMX::processing_thread() {
   XTRACE(PROCESS, ALW, "NMX Config file: %s", NMXSettings.ConfigFile.c_str());
   nmx_opts = NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
@@ -281,13 +303,18 @@ void NMX::processing_thread() {
   }
 
   Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
-  FBSerializer flatbuffer(kafka_buffer_size, eventprod);
+  EV42Serializer flatbuffer(kafka_buffer_size, "nmx");
+  flatbuffer.setProducerCallback(
+      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
   Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
   TrackSerializer trackfb(256, nmx_opts.track_sample_minhits,
                           nmx_opts.time_config.target_resolution_ns());
-  HistSerializer histfb;
-  NMXHists hists;
+  Hists hists(Hit::strip_max_val, Hit::adc_max_val);
+  HistSerializer histfb(hists.needed_buffer_size());
+  histfb.set_callback(
+      std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
+
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
   ClusterMatcher matcher(nmx_opts.matcher_max_delta_time);
@@ -322,8 +349,8 @@ void NMX::processing_thread() {
         mystats.good_frames += stats.good_frames;
 
         if (nmx_opts.hit_histograms) {
-          hists.bin_hists(builder_->clusterer_x->clusters);
-          hists.bin_hists(builder_->clusterer_y->clusters);
+          bin_hists(hists, builder_->clusterer_x->clusters);
+          bin_hists(hists, builder_->clusterer_y->clusters);
         }
 
         if (!builder_->clusterer_x->empty() &&
@@ -346,7 +373,7 @@ void NMX::processing_thread() {
                         nmx_opts.analyze_max_timedif);
 
           if (nmx_opts.hit_histograms) {
-            hists.bin(event);
+            bin(hists, event);
           }
 
           if (event.valid()) {
@@ -373,7 +400,7 @@ void NMX::processing_thread() {
 
                 XTRACE(PROCESS, DEB, "time: %d, pixelid %d", time, pixelid);
 
-                mystats.tx_bytes += flatbuffer.addevent(time, pixelid);
+                mystats.tx_bytes += flatbuffer.addEvent(time, pixelid);
                 mystats.clusters_events++;
               }
             } else { // Does not meet criteria
@@ -419,9 +446,7 @@ void NMX::processing_thread() {
       if (!hists.isEmpty()) {
         XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters ",
                hists.hit_count(), hists.cluster_count());
-        char *txbuffer;
-        auto len = histfb.serialize(hists, &txbuffer);
-        monitorprod.produce(txbuffer, len);
+        histfb.produce(hists);
         hists.clear();
       }
 

@@ -7,7 +7,7 @@
 
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
-#include <common/FBSerializer.h>
+#include <common/EV42Serializer.h>
 #include <common/Producer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
@@ -226,7 +226,9 @@ void CSPEC::processing_thread() {
   CSPECChanConv conv;
 
   Producer producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  FBSerializer flatbuffer(kafka_buffer_size, producer);
+  EV42Serializer flatbuffer(kafka_buffer_size, "multigrid");
+  flatbuffer.setProducerCallback(
+      std::bind(&Producer::produce2<uint8_t>, &producer, std::placeholders::_1));
 
   MultiGridGeometry geom(1, 2, 48, 4, 16);
 
@@ -267,7 +269,7 @@ void CSPEC::processing_thread() {
               mystats.geometry_errors++;
               assert(mystats.geometry_errors <= mystats.rx_readouts);
             } else {
-              mystats.tx_bytes += flatbuffer.addevent(tmptime, tmppixel);
+              mystats.tx_bytes += flatbuffer.addEvent(tmptime, tmppixel);
               mystats.rx_events++;
             }
           }

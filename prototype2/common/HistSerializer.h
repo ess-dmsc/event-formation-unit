@@ -11,23 +11,24 @@
 
 #include "mo01_nmx_generated.h"
 
-#include <common/Producer.h>
 #include <common/Hists.h>
-#include <libs/include/gccintel.h>
+#include <common/Producer.h>
 
 class HistSerializer {
 public:
-  /// \todo document
-  HistSerializer();
+  /** \todo document */
+  HistSerializer(size_t buffer_half_size);
 
-  /// \todo document
-  ~HistSerializer();
+  void set_callback(ProducerCallback cb);
 
-  /// \todo document
-  size_t serialize(const NMXHists &hists, char **buffer);
+  /** \todo document */
+  size_t produce(const Hists &hists);
 
 private:
+  ProducerCallback producer_callback;
+
   flatbuffers::FlatBufferBuilder builder;
+
   uint8_t *xtrackptr{nullptr};
   uint8_t *ytrackptr{nullptr};
 

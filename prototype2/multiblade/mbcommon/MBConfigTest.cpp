@@ -38,11 +38,36 @@ TEST_F(MBConfigTest, IncompleteConfigFile) {
   ASSERT_THROW(mbconf = MBConfig(filename), std::runtime_error);
 }
 
+TEST_F(MBConfigTest, InvaldInstrument) {
+  std::string filename{"deleteme_incomplete.json"};
+  DataSave tempfile(filename, (void *)invalidinstrument.c_str(), invalidinstrument.size());
+  MBConfig mbconf;
+  ASSERT_THROW(mbconf = MBConfig(filename), std::runtime_error);
+}
+
 TEST_F(MBConfigTest, InvalidDigitiserInFile) {
   std::string filename{"deleteme_invaliddigitiser.json"};
   DataSave tempfile(filename, (void *)invaliddigitiser.c_str(), invaliddigitiser.size());
   MBConfig mbconf;
   ASSERT_THROW(mbconf = MBConfig(filename), std::runtime_error);
+}
+
+TEST_F(MBConfigTest, UnknownInstrument) {
+  std::string filename{"deleteme_unknowninstrument.json"};
+  DataSave tempfile(filename, (void *)unknowninstrument.c_str(), unknowninstrument.size());
+  MBConfig mbconf;
+  mbconf = MBConfig(filename);
+  ASSERT_TRUE(mbconf.isConfigLoaded());
+  ASSERT_EQ(mbconf.getInstrument(), MBConfig::InstrumentGeometry::Estia);
+}
+
+TEST_F(MBConfigTest, InstrumentFreia) {
+  std::string filename{"deleteme_instrumentfreia.json"};
+  DataSave tempfile(filename, (void *)instrumentfreia.c_str(), instrumentfreia.size());
+  MBConfig mbconf;
+  mbconf = MBConfig(filename);
+  ASSERT_TRUE(mbconf.isConfigLoaded());
+  ASSERT_EQ(mbconf.getInstrument(), MBConfig::InstrumentGeometry::Freia);
 }
 
 TEST_F(MBConfigTest, ValidConfigFile) {

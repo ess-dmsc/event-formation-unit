@@ -5,34 +5,44 @@
 #include <common/HistSerializer.h>
 #include <test/TestBase.h>
 
+#define MAX_STRIP_VAL_TEST 5000
+
 class HistSerializerTest : public TestBase {
   virtual void SetUp() {
     for (size_t i = 0; i < hists.x_strips_hist.size(); i++) {
       hists.x_strips_hist[i] = i;
-      hists.y_strips_hist[i] = Hit::strip_max_val - i;
+      hists.y_strips_hist[i] = MAX_STRIP_VAL_TEST - i;
     }
   }
 
   virtual void TearDown() {}
 
 protected:
-  NMXHists hists;
-  char *buffer;
+
+  Hists hists {MAX_STRIP_VAL_TEST, MAX_STRIP_VAL_TEST};
   char flatbuffer[1024 * 1024 * 5];
+
+public:
+  void copy_buffer(Buffer<uint8_t> b)
+  {
+    memcpy(flatbuffer, b.address, b.size);
+  }
+
 };
 
 TEST_F(HistSerializerTest, Serialize) {
-  HistSerializer histfb;
-  auto len = histfb.serialize(hists, &buffer);
+  HistSerializer histfb(hists.needed_buffer_size());
+  auto len = histfb.produce(hists);
   ASSERT_TRUE(len >= hists.needed_buffer_size());
 }
 
 TEST_F(HistSerializerTest, DeSerialize) {
-  HistSerializer histfb;
+  HistSerializer histfb(hists.needed_buffer_size());
+  histfb.set_callback(std::bind(&HistSerializerTest::copy_buffer,
+      this, std::placeholders::_1));
 
-  auto length = histfb.serialize(hists, &buffer);
+  histfb.produce(hists);
 
-  memcpy(flatbuffer, buffer, length);
   auto monitor = GetMonitorMessage(flatbuffer);
   auto dtype = monitor->data_type();
   ASSERT_EQ(dtype, DataField::GEMHist);
@@ -45,7 +55,7 @@ TEST_F(HistSerializerTest, DeSerialize) {
 
   for (size_t i = 0; i < hists.x_strips_hist.size(); i++) {
     ASSERT_EQ((*xdat)[i], i);
-    EXPECT_EQ((*ydat)[i], Hit::strip_max_val - i);
+    EXPECT_EQ((*ydat)[i], MAX_STRIP_VAL_TEST - i);
   }
 }
 

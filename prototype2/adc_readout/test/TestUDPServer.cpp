@@ -4,6 +4,7 @@
  *
  *  \brief Code for testing the ADC UDP functionality.
  */
+// GCOVR_EXCL_START
 
 #include "TestUDPServer.h"
 #include <ciso646>
@@ -112,3 +113,4 @@ void TestUDPServer::handleNewPacket(const asio::error_code &Err) {
                                      std::placeholders::_1));
   }
 }
+// GCOVR_EXCL_STOP
