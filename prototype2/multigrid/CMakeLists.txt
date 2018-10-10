@@ -8,28 +8,12 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/calib_data
 #=============================================================================
 
 # Two-thread implementation of Multi Grid demonstrator detector
-# For the old readout system
-set(mgcncs2_SRC
-  mgcncs2.cpp
-  mgcncs/DataParser.cpp
-  mgcncs/ChanConv.cpp
-  mgcncs/CalibrationFile.cpp
-  )
-set(mgcncs2_INC
-  mgcncs/DataParser.h
-  mgcncs/ChanConv.h
-  mgcncs/MultigridGeometry.h
-  mgcncs/CalibrationFile.h
-  )
-create_module(mgcncs2)
-
-# Two-thread implementation of Multi Grid demonstrator detector
 # for Mesytec Readout
-set(mgmesytec_SRC
+set(mgmesytec_common_src
+  MGMesytecBase.cpp
   ../common/Hists.cpp
   ../common/HistSerializer.cpp
   ../common/ReadoutSerializer.cpp
-  mgmesytec.cpp
   MgConfig.cpp
   mgmesytec/EfuMaximum.cpp
   mgmesytec/EfuCenterMass.cpp
@@ -39,7 +23,8 @@ set(mgmesytec_SRC
   mgmesytec/Hit.cpp
   mgmesytec/HitFile.cpp
   )
-set(mgmesytec_INC
+set(mgmesytec_common_inc
+  MGMesytecBase.h
   ../common/Hists.h
   ../common/HistSerializer.h
   ../common/ReadoutSerializer.h
@@ -55,6 +40,14 @@ set(mgmesytec_INC
   mgmesytec/SequoiaGeometry.h
   mgmesytec/BusGeometry.h
   )
+
+set(mgmesytec_INC
+  ${mgmesytec_common_inc}
+)
+set(mgmesytec_SRC
+  MGMesytec.cpp
+  ${mgmesytec_common_src}
+)
 create_module(mgmesytec)
 
 
