@@ -71,8 +71,8 @@ TEST_F(MGMesytecBaseTest, DataReceive) {
   MGMesytecBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
   TestUDPServer Server(43126, Settings.DetectorPort, (unsigned char *)&ws2_short[0], ws2_short.size());
-  Server.startPacketTransmission(1, 100);
-  std::chrono::duration<std::int64_t, std::milli> SleepTime(600);
+  Server.startPacketTransmission(1, 1000);
+  std::chrono::duration<std::int64_t, std::milli> SleepTime(1000);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
   EXPECT_EQ(Readout.mystats.rx_packets, 1);

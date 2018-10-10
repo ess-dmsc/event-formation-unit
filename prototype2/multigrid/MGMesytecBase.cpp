@@ -61,7 +61,7 @@ MGMesytecBase::MGMesytecBase(BaseSettings const &settings, struct MGMesytecSetti
       (MGMesytecSettings.monitor ? "YES" : "no"));
   if (!MGMesytecSettings.fileprefix.empty())
     XTRACE(INIT, INF, "Dump h5 data in path: %s",
-           MGMesytecSettings.fileprefix);
+           MGMesytecSettings.fileprefix.c_str());
 }
 
 ///
