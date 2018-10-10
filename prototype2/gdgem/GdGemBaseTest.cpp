@@ -20,7 +20,7 @@ public:
   using GdGemBase::mystats;
 };
 
-class GdGemBaseTest : public ::testing::Test {
+class GdGemBaseTest : TestBase {
 public:
   virtual void SetUp() {
     LocalSettings.ConfigFile = "vmm3.json";

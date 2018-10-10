@@ -64,9 +64,9 @@ MGMesytecBase::MGMesytecBase(BaseSettings const &settings, struct MGMesytecSetti
 ///
 void MGMesytecBase::init_config()
 {
-  LOG(INIT, Sev::Info, "MG Config file: {}", MGMesytecSettings.ConfigFile);
+  XTRACE(INIT, INF, "MG Config file: %s", MGMesytecSettings.ConfigFile.c_str());
   mg_config = Multigrid::Config(MGMesytecSettings.ConfigFile);
-  LOG(INIT, Sev::Info, "Multigrid Config\n{}", mg_config.debug());
+  XTRACE(INIT, INF, "Multigrid Config\n%s", mg_config.debug().c_str());
 
   if (MGMesytecSettings.monitor)
     monitor.init(EFUSettings.KafkaBroker, readout_entries);
