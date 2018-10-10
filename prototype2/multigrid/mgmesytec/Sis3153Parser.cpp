@@ -4,8 +4,8 @@
 #include <netinet/in.h>
 
 #include <common/Trace.h>
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Multigrid {
 
@@ -56,6 +56,7 @@ size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
     auto length32 = ntohs(static_cast<uint16_t>((buf32[0] >> 8) & LengthMask));
     XTRACE(DATA, DEB, "sis3153 datawords %d", length32);
     buf32++;
+    /// \todo Check for size mismatch
 
     // Header2?
     if ((buf32[0] & TypeMask) != SisType::BeginReadout) {
