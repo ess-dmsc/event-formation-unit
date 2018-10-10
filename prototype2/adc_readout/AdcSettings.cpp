@@ -74,82 +74,121 @@ void SetCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings) {
       ->group("Sampling Options")
       ->default_str("Middle");
   parser
-  .add_option("--samples_topic", ReadoutSettings.SamplesKafkaTopic,
-              "The Kafka topic to which the raw sample data should be transmitted. Ignored if serialisation of waveforms is not enabled. If empty string, use the default setting.")
-  ->group("Sampling Options");
+      .add_option("--samples_topic", ReadoutSettings.SamplesKafkaTopic,
+                  "The Kafka topic to which the raw sample data should be "
+                  "transmitted. Ignored if serialisation of waveforms is not "
+                  "enabled. If empty string, use the default setting.")
+      ->group("Sampling Options");
   parser
-  .add_option("--alt_detector_interface", ReadoutSettings.AltDetectorInterface,
-              "The interface (actualy IP address) to which the alternative (other) ADC readout box is connected. Ignored if \"--alt_detector_port=0\".")
-  ->group("Delay Line Options")->default_str("0.0.0.0");
+      .add_option(
+          "--alt_detector_interface", ReadoutSettings.AltDetectorInterface,
+          "The interface (actualy IP address) to which the alternative (other) "
+          "ADC readout box is connected. Ignored if \"--alt_detector_port=0\".")
+      ->group("Delay Line Options")
+      ->default_str("0.0.0.0");
   parser
-  .add_option("--alt_detector_port", ReadoutSettings.AltDetectorPort,
-              "The UDP port to which the second (alternative) ADC readout box sends its data. Disables the second ADC readout box if set to 0.")
-  ->group("Delay Line Options")->default_str("0");
+      .add_option("--alt_detector_port", ReadoutSettings.AltDetectorPort,
+                  "The UDP port to which the second (alternative) ADC readout "
+                  "box sends its data. Disables the second ADC readout box if "
+                  "set to 0.")
+      ->group("Delay Line Options")
+      ->default_str("0");
   parser
-  .add_option("--xaxis_offset", ReadoutSettings.XAxisCalibOffset,
-              "The offset of the x-axis postion value.")
-  ->group("Delay Line Options")->default_str("0.0");
+      .add_option("--xaxis_offset", ReadoutSettings.XAxisCalibOffset,
+                  "The offset of the x-axis postion value.")
+      ->group("Delay Line Options")
+      ->default_str("0.0");
   parser
-  .add_option("--xaxis_slope", ReadoutSettings.XAxisCalibSlope,
-              "The slope multiplier of the x-axis postion value.")
-  ->group("Delay Line Options")->default_str("1.0");
+      .add_option("--xaxis_slope", ReadoutSettings.XAxisCalibSlope,
+                  "The slope multiplier of the x-axis postion value.")
+      ->group("Delay Line Options")
+      ->default_str("1.0");
   parser
-  .add_set("--xaxis_position_type", ReadoutSettings.XAxis, {PosType::AMPLITUDE, PosType::TIME, PosType::CONST}, "How to calculate the x-axis position. If set to \"CONST\", use the value of \"xaxis_offset\".")
-  ->group("Delay Line Options")->default_str("CONST");
-  
+      .add_set("--xaxis_position_type", ReadoutSettings.XAxis,
+               {PosType::AMPLITUDE, PosType::TIME, PosType::CONST},
+               "How to calculate the x-axis position. If set to \"CONST\", use "
+               "the value of \"xaxis_offset\".")
+      ->group("Delay Line Options")
+      ->default_str("CONST");
+
   parser
-  .add_option("--yaxis_offset", ReadoutSettings.YAxisCalibOffset,
-              "The offset of the y-axis postion value.")
-  ->group("Delay Line Options")->default_str("0.0");
+      .add_option("--yaxis_offset", ReadoutSettings.YAxisCalibOffset,
+                  "The offset of the y-axis postion value.")
+      ->group("Delay Line Options")
+      ->default_str("0.0");
   parser
-  .add_option("--yaxis_slope", ReadoutSettings.XAxisCalibSlope,
-              "The slope multiplier of the y-axis postion value.")
-  ->group("Delay Line Options")->default_str("1.0");
+      .add_option("--yaxis_slope", ReadoutSettings.XAxisCalibSlope,
+                  "The slope multiplier of the y-axis postion value.")
+      ->group("Delay Line Options")
+      ->default_str("1.0");
   parser
-  .add_set("--yaxis_position_type", ReadoutSettings.YAxis, {PosType::AMPLITUDE, PosType::TIME, PosType::CONST}, "How to calculate the y-axis position. If set to \"CONST\", use the value of \"yaxis_offset\".")
-  ->group("Delay Line Options")->default_str("CONST");
-  
+      .add_set("--yaxis_position_type", ReadoutSettings.YAxis,
+               {PosType::AMPLITUDE, PosType::TIME, PosType::CONST},
+               "How to calculate the y-axis position. If set to \"CONST\", use "
+               "the value of \"yaxis_offset\".")
+      ->group("Delay Line Options")
+      ->default_str("CONST");
+
   std::set<ChRole> RoleOptions;
   for (auto &Item : getRoleMapping()) {
     RoleOptions.emplace(Item.second);
   }
-  
+
   parser
-  .add_set("--adc1_ch1_role", ReadoutSettings.ADC1Channel1, std::move(RoleOptions), "Set the role of an input-channel.")
-  ->group("Delay Line Options")->default_str("NONE"); // Use std::move to work around a bug in CLI11
+      .add_set("--adc1_ch1_role", ReadoutSettings.ADC1Channel1,
+               std::move(RoleOptions), "Set the role of an input-channel.")
+      ->group("Delay Line Options")
+      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   parser
-  .add_set("--adc1_ch2_role", ReadoutSettings.ADC1Channel2, std::move(RoleOptions), "Set the role of an input-channel.")
-  ->group("Delay Line Options")->default_str("NONE"); // Use std::move to work around a bug in CLI11
+      .add_set("--adc1_ch2_role", ReadoutSettings.ADC1Channel2,
+               std::move(RoleOptions), "Set the role of an input-channel.")
+      ->group("Delay Line Options")
+      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   parser
-  .add_set("--adc1_ch3_role", ReadoutSettings.ADC1Channel3, std::move(RoleOptions), "Set the role of an input-channel.")
-  ->group("Delay Line Options")->default_str("NONE"); // Use std::move to work around a bug in CLI11
+      .add_set("--adc1_ch3_role", ReadoutSettings.ADC1Channel3,
+               std::move(RoleOptions), "Set the role of an input-channel.")
+      ->group("Delay Line Options")
+      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   parser
-  .add_set("--adc1_ch4_role", ReadoutSettings.ADC1Channel4, std::move(RoleOptions), "Set the role of an input-channel.")
-  ->group("Delay Line Options")->default_str("NONE"); // Use std::move to work around a bug in CLI11
-  
+      .add_set("--adc1_ch4_role", ReadoutSettings.ADC1Channel4,
+               std::move(RoleOptions), "Set the role of an input-channel.")
+      ->group("Delay Line Options")
+      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
+
   parser
-  .add_set("--adc2_ch1_role", ReadoutSettings.ADC2Channel1, std::move(RoleOptions), "Set the role of an input-channel.")
-  ->group("Delay Line Options")->default_str("NONE"); // Use std::move to work around a bug in CLI11
+      .add_set("--adc2_ch1_role", ReadoutSettings.ADC2Channel1,
+               std::move(RoleOptions), "Set the role of an input-channel.")
+      ->group("Delay Line Options")
+      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   parser
-  .add_set("--adc2_ch2_role", ReadoutSettings.ADC2Channel2, std::move(RoleOptions), "Set the role of an input-channel.")
-  ->group("Delay Line Options")->default_str("NONE"); // Use std::move to work around a bug in CLI11
+      .add_set("--adc2_ch2_role", ReadoutSettings.ADC2Channel2,
+               std::move(RoleOptions), "Set the role of an input-channel.")
+      ->group("Delay Line Options")
+      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   parser
-  .add_set("--adc2_ch3_role", ReadoutSettings.ADC2Channel3, std::move(RoleOptions), "Set the role of an input-channel.")
-  ->group("Delay Line Options")->default_str("NONE"); // Use std::move to work around a bug in CLI11
+      .add_set("--adc2_ch3_role", ReadoutSettings.ADC2Channel3,
+               std::move(RoleOptions), "Set the role of an input-channel.")
+      ->group("Delay Line Options")
+      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   parser
-  .add_set("--adc2_ch4_role", ReadoutSettings.ADC2Channel4, std::move(RoleOptions), "Set the role of an input-channel.")
-  ->group("Delay Line Options")->default_str("NONE"); // Use std::move to work around a bug in CLI11
+      .add_set("--adc2_ch4_role", ReadoutSettings.ADC2Channel4,
+               std::move(RoleOptions), "Set the role of an input-channel.")
+      ->group("Delay Line Options")
+      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
 }
 
 std::map<std::string, PosType> getTypeMapping() {
-  return {{"AMP", PosType::AMPLITUDE}, {"AMPLITUDE", PosType::AMPLITUDE}, {"CONST", PosType::CONST}, {"TIME", PosType::TIME}};
+  return {{"AMP", PosType::AMPLITUDE},
+          {"AMPLITUDE", PosType::AMPLITUDE},
+          {"CONST", PosType::CONST},
+          {"TIME", PosType::TIME}};
 }
 
 std::istream &operator>>(std::istream &in, PosType &Type) {
   std::map<std::string, PosType> TypeMap = getTypeMapping();
   std::string InString;
   in >> InString;
-  
+
   Type = TypeMap.at(InString);
   return in;
 }
@@ -166,7 +205,7 @@ std::istream &operator>>(std::istream &in, ChRole &Role) {
   std::map<std::string, ChRole> RoleMap = getRoleMapping();
   std::string InString;
   in >> InString;
-  
+
   Role = RoleMap.at(InString);
   return in;
 }
@@ -181,14 +220,13 @@ std::ostream &operator<<(std::ostream &in, const ChRole &Role) {
 
 std::map<std::string, ChRole> getRoleMapping() {
   return {{"REF_TIME", ChRole::REFERENCE_TIME},
-    {"AMP_X_1", ChRole::AMPLITUDE_X_AXIS_1},
-    {"AMP_X_2", ChRole::AMPLITUDE_X_AXIS_2},
-    {"AMP_Y_1", ChRole::AMPLITUDE_Y_AXIS_1},
-    {"AMP_Y_2", ChRole::AMPLITUDE_Y_AXIS_2},
-    {"TIME_X_1", ChRole::TIME_X_AXIS_1},
-    {"TIME_X_2", ChRole::TIME_X_AXIS_2},
-    {"TIME_Y_1", ChRole::TIME_Y_AXIS_1},
-    {"TIME_Y_2", ChRole::TIME_Y_AXIS_2},
-    {"NONE", ChRole::NONE}
-  };
+          {"AMP_X_1", ChRole::AMPLITUDE_X_AXIS_1},
+          {"AMP_X_2", ChRole::AMPLITUDE_X_AXIS_2},
+          {"AMP_Y_1", ChRole::AMPLITUDE_Y_AXIS_1},
+          {"AMP_Y_2", ChRole::AMPLITUDE_Y_AXIS_2},
+          {"TIME_X_1", ChRole::TIME_X_AXIS_1},
+          {"TIME_X_2", ChRole::TIME_X_AXIS_2},
+          {"TIME_Y_1", ChRole::TIME_Y_AXIS_1},
+          {"TIME_Y_2", ChRole::TIME_Y_AXIS_2},
+          {"NONE", ChRole::NONE}};
 }

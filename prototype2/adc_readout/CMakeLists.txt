@@ -9,6 +9,7 @@ set(AdcReadoutBase_SRC
     SampleProcessing.cpp
     AdcSettings.cpp
     AdcTimeStamp.cpp
+    UDPClient.cpp
     )
 
 set(AdcReadoutBase_INC
@@ -22,6 +23,7 @@ set(AdcReadoutBase_INC
     SampleProcessing.h
     AdcSettings.h
     AdcTimeStamp.h
+    UDPClient.h
     )
 
 
@@ -47,12 +49,12 @@ set(AdcReadoutTest_SRC
     test/SampleProcessingTest.cpp
     test/CLIArgumentsTest.cpp
     test/AdcTimeStampTest.cpp
-    ${AdcReadoutBase_SRC}
+    test/UDPClientTest.cpp
     )
 
 set(AdcReadoutTest_INC
     test/TestUDPServer.h
-    ${AdcReadoutBase_INC}
+    $<TARGET_OBJECTS:AdcReadout>
     )
 
 set(AdcReadoutTest_LIB

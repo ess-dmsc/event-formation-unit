@@ -49,6 +49,19 @@ private:
   std::string Error;
 };
 
+struct ChannelID {
+  std::uint16_t ChannelNr;
+  std::uint16_t SourceID;
+  bool operator==(ChannelID const &Other) const {
+    return Other.ChannelNr == ChannelNr and Other.SourceID == SourceID;
+  };
+  bool operator<(ChannelID const &Other) const {
+    const auto MaxNrOfChannels = 4;
+    return ChannelNr + SourceID * MaxNrOfChannels <
+           Other.ChannelNr + Other.SourceID * MaxNrOfChannels;
+  };
+};
+
 /// \brief Data stored in this struct represents a (properly parsed) sampling
 /// run.
 struct SamplingRun {
@@ -69,7 +82,10 @@ struct SamplingRun {
     Channel = 0;
     TimeStamp.Seconds = 0;
     TimeStamp.SecondsFrac = 0;
+    Identifier.ChannelNr = 0;
+    Identifier.SourceID = 0;
   }
+  ChannelID Identifier;
   std::uint16_t Channel;
   std::uint16_t OversamplingFactor{1};
   std::vector<std::uint16_t> Data;
@@ -153,8 +169,18 @@ struct IdleHeader {
 
 class PacketParser {
 public:
-  PacketParser(std::function<bool(SamplingRun *)> ModuleHandler,
-               std::function<SamplingRun *(int Channel)> ModuleProducer);
+  /// \brief Constructor, one instance should only handle data from a single
+  /// data source (ADC box).
+  /// \param[in] ModuleHandler Function for submitting the result of a parsed
+  /// packet to a handler which does further processing.
+  /// \param[in] ModuleProducer Function for getting an empty module for storing
+  /// processed data into.
+  /// \param[in] SourceID An integer used to identify the data source. This
+  /// value is passed on together with the parsed data.
+  PacketParser(
+      std::function<bool(SamplingRun *)> ModuleHandler,
+      std::function<SamplingRun *(ChannelID Identifier)> ModuleProducer,
+      std::uint16_t SourceID);
   /// \brief Parses a packet of binary data.
   /// \param[in] Packet Raw data, straight from the socket.
   /// \return Some general information about the packet.
@@ -171,7 +197,8 @@ protected:
 
 private:
   std::function<bool(SamplingRun *)> HandleModule;
-  std::function<SamplingRun *(int Channel)> ProduceModule;
+  std::function<SamplingRun *(ChannelID Identifier)> ProduceModule;
+  std::uint16_t Source;
 };
 
 /// \brief Parses the header of a packet. Called by parsePacket().

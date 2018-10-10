@@ -23,23 +23,23 @@ struct AdcSettings {
   std::string TimeStampLocation{"Middle"};
   std::string Name;
   std::string GrafanaNameSuffix;
-  std::string   AltDetectorInterface = {"0.0.0.0"};
+  std::string AltDetectorInterface = {"0.0.0.0"};
   std::uint16_t AltDetectorPort = {0};
-  
+
   double XAxisCalibOffset = {0.0};
   double XAxisCalibSlope = {1.0};
   double YAxisCalibOffset = {0.0};
   double YAxisCalibSlope = {1.0};
-  
+
   enum class PositionSensingType {
     AMPLITUDE,
     TIME,
     CONST,
   };
-  
+
   PositionSensingType XAxis = {PositionSensingType::CONST};
   PositionSensingType YAxis = {PositionSensingType::CONST};
-  
+
   enum class ChannelRole {
     REFERENCE_TIME,
     AMPLITUDE_X_AXIS_1,
@@ -56,7 +56,7 @@ struct AdcSettings {
   ChannelRole ADC1Channel2 = {ChannelRole::NONE};
   ChannelRole ADC1Channel3 = {ChannelRole::NONE};
   ChannelRole ADC1Channel4 = {ChannelRole::NONE};
-  
+
   ChannelRole ADC2Channel1 = {ChannelRole::NONE};
   ChannelRole ADC2Channel2 = {ChannelRole::NONE};
   ChannelRole ADC2Channel3 = {ChannelRole::NONE};

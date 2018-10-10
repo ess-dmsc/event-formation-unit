@@ -53,7 +53,9 @@ public:
   using ThreadList = std::vector<ThreadInfo>;
   Detector(std::string Name, BaseSettings settings) : EFUSettings(settings), Stats(Name), DetectorName(Name) {};
 
-  virtual ~Detector() = default;
+  virtual ~Detector() {
+    stopThreads();
+  };
 
   /// \brief document
   virtual int statsize() { return Stats.size(); }
