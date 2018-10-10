@@ -115,7 +115,6 @@ void MGMesytecBase::mainThread() {
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += ReadSize;
-      printf("rx: %d bytes\n", ReadSize);
       LOG(PROCESS, Sev::Debug, "Processed UDP packed of size: {}", ReadSize);
 
       mystats.sis_discarded_bytes += sis3153parser.parse(Buffer<uint8_t>(buffer, ReadSize));
