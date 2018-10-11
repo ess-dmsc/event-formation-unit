@@ -73,6 +73,8 @@ public:
 TEST_F(AdcReadoutTest, SinglePacketStats) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
+  std::chrono::duration<std::int64_t, std::milli> InitSleepTime {300};
+  std::this_thread::sleep_for(InitSleepTime);
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, 1470);
   Server.startPacketTransmission(1, 100);
   std::chrono::duration<std::int64_t, std::milli> SleepTime(200);
