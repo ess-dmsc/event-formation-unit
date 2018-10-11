@@ -61,25 +61,19 @@ double SRSTime::trigger_period_ns() const
   return bc_range * bc_factor_;
 }
 
-///
-double SRSTime::chip_time_ns(uint16_t bc, uint16_t tdc) const
-{
-  return  static_cast<double>(bc) * bc_factor_ - static_cast<double>(tdc) * tdc_factor_;
-}
-
-/// \brief using calibration data
+/// \brief using calibration data - corrected by Doro 3. october 2018
 /// \todo please someone verify this implementation :-)
 double SRSTime::chip_time_ns(uint16_t bc, uint16_t tdc, float offset, float slope) const
 {
-  return  (static_cast<double>(bc) * bc_factor_ - static_cast<double>(tdc) * tdc_factor_ - offset) * slope;
+  return static_cast<double>(bc) * bc_factor_ + (bc_factor_ - static_cast<double>(tdc) * tdc_factor_  - offset)*slope;
 }
 
-double SRSTime::timestamp_ns(uint64_t trigger, uint16_t bc, uint16_t tdc) {
-  return trigger_timestamp_ns(trigger) + chip_time_ns(bc, tdc);
+double SRSTime::timestamp_ns(uint64_t trigger, uint16_t bc, uint16_t tdc, float offset, float slope) {
+  return trigger_timestamp_ns(trigger) + chip_time_ns(bc, tdc, offset, slope);
 }
 
-uint64_t SRSTime::timestamp(uint64_t trigger, uint16_t bc, uint16_t tdc) {
-  return static_cast<uint64_t>(timestamp_ns(trigger, bc, tdc)
+uint64_t SRSTime::timestamp(uint64_t trigger, uint16_t bc, uint16_t tdc, float offset, float slope) {
+  return static_cast<uint64_t>(timestamp_ns(trigger, bc, tdc, offset, slope)
       * target_resolution_ns_);
 }
 
@@ -90,7 +84,7 @@ uint32_t SRSTime::internal_clock_period_ns() const
 
 std::string SRSTime::debug() const {
   std::stringstream ss;
-  ss << "    Chip time = bc*1000/" << bc_clock_MHz_ << " + tdc*" << tac_slope_ns_ << "/255 (ns)\n";
+  ss << "    Chip time = (bc+1)*1000/" << bc_clock_MHz_ << " - tdc*" << tac_slope_ns_ << "/255 (ns)\n";
   ss << "    Trigger time = " << trigger_resolution_ns_ << "*trigger (ns)\n";
   ss << "    Maximum chip time in window = " << max_chip_time_in_window_ns_ << " (ns)\n";
   ss << "    Target resolution = " << target_resolution_ns_ << "  (ns)\n";

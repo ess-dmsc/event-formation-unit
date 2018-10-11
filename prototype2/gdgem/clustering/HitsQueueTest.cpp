@@ -10,6 +10,9 @@
 #include <gdgem/clustering/TestDataShort.h>
 #include <gdgem/nmx/ReadoutFile.h>
 
+constexpr float no_offset = 0.0;
+constexpr float unit_slope = 1.0;
+
 #define UNUSED __attribute__((unused))
 
 class HitsQueueTest : public TestBase {
@@ -39,7 +42,7 @@ protected:
 
 TEST_F(HitsQueueTest, Run16_no_trigger) {
   for (auto hit : Run16) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc);
+    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
     queue->store(0,0,0,chiptime);
   }
   EXPECT_EQ(queue->hits().size(), 0);
@@ -53,7 +56,7 @@ TEST_F(HitsQueueTest, Run16_no_trigger) {
 
 TEST_F(HitsQueueTest, Run16_with_trigger) {
   for (auto hit : Run16) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc);
+    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
     queue->store(0,0,0,chiptime);
   }
   EXPECT_EQ(queue->hits().size(), 0);
@@ -72,7 +75,7 @@ TEST_F(HitsQueueTest, Run16_with_trigger) {
 
 TEST_F(HitsQueueTest, Run16_chronological_no_trigger) {
   for (auto hit : Run16) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc);
+    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
     queue->store(0,0,0,chiptime);
   }
 
@@ -114,7 +117,7 @@ TEST_F(HitsQueueTest, Run16_chronological_no_trigger) {
 
 TEST_F(HitsQueueTest, Long_chronological_no_trigger) {
   for (auto hit : long_data) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc);
+    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
     queue->store(0,0,0,chiptime);
   }
 
@@ -134,7 +137,7 @@ TEST_F(HitsQueueTest, Long_chronological_no_trigger) {
 
 TEST_F(HitsQueueTest, Long_chronological_with_trigger) {
   for (auto hit : long_data) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc);
+    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
     queue->store(0,0,0,chiptime);
   }
 
