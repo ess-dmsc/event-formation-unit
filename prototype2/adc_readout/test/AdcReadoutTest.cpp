@@ -45,10 +45,10 @@ public:
   }
 };
 
-class DISABLED_AdcReadoutTest : public ::testing::Test {
+class AdcReadoutTest : public ::testing::Test {
 public:
   virtual void SetUp() {
-    Settings.DetectorAddress = "localhost";
+    Settings.DetectorAddress = "127.0.0.1";
     Settings.DetectorPort = GetPortNumber();
   }
   BaseSettings Settings;
@@ -70,7 +70,7 @@ public:
   };
 };
 
-TEST_F(DISABLED_AdcReadoutTest, SinglePacketStats) {
+TEST_F(AdcReadoutTest, SinglePacketStats) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, 1470);
@@ -82,9 +82,11 @@ TEST_F(DISABLED_AdcReadoutTest, SinglePacketStats) {
   EXPECT_EQ(Readout.AdcStats.parser_errors, 1);
 }
 
-TEST_F(DISABLED_AdcReadoutTest, SingleIdlePacket) {
+TEST_F(AdcReadoutTest, SingleIdlePacket) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
+  std::chrono::duration<std::int64_t, std::milli> InitSleepTime {300};
+  std::this_thread::sleep_for(InitSleepTime);
   LoadPacketFile("test_packet_idle.dat");
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
                        PacketSize);
@@ -98,9 +100,11 @@ TEST_F(DISABLED_AdcReadoutTest, SingleIdlePacket) {
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
 }
 
-TEST_F(DISABLED_AdcReadoutTest, SingleDataPacket) {
+TEST_F(AdcReadoutTest, SingleDataPacket) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
+  std::chrono::duration<std::int64_t, std::milli> InitSleepTime {300};
+  std::this_thread::sleep_for(InitSleepTime);
   LoadPacketFile("test_packet_1.dat");
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
                        PacketSize);
@@ -114,9 +118,11 @@ TEST_F(DISABLED_AdcReadoutTest, SingleDataPacket) {
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
 }
 
-TEST_F(DISABLED_AdcReadoutTest, GlobalCounterError) {
+TEST_F(AdcReadoutTest, GlobalCounterError) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
+  std::chrono::duration<std::int64_t, std::milli> InitSleepTime {300};
+  std::this_thread::sleep_for(InitSleepTime);
   LoadPacketFile("test_packet_1.dat");
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
                        PacketSize);
@@ -131,10 +137,12 @@ TEST_F(DISABLED_AdcReadoutTest, GlobalCounterError) {
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 1);
 }
 
-TEST_F(DISABLED_AdcReadoutTest, GlobalCounterCorrect) {
+TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.Threads.at(0).thread = std::thread(Readout.Threads.at(0).func);
   Readout.Threads.at(1).thread = std::thread(Readout.Threads.at(1).func);
+  std::chrono::duration<std::int64_t, std::milli> InitSleepTime {300};
+  std::this_thread::sleep_for(InitSleepTime);
   LoadPacketFile("test_packet_1.dat");
   std::chrono::duration<std::int64_t, std::milli> SleepTime(50);
   auto PacketHeadPointer = reinterpret_cast<PacketHeader *>(BufferPtr);
