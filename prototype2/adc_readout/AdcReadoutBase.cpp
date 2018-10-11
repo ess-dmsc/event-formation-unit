@@ -61,6 +61,7 @@ SamplingRun *AdcReadoutBase::GetDataModule(ChannelID const Identifier) {
     Detector::AddThreadFunction(processingFunc, ThreadName);
     auto &NewThread = Detector::Threads.at(Detector::Threads.size() - 1);
     NewThread.thread = std::thread(NewThread.func);
+    LOG(INIT, Sev::Debug, "Lazily launching processing thread for channel {} of ADC #{}.", Identifier.ChannelNr, Identifier.SourceID);
   }
   SpscBuffer::ElementPtr<SamplingRun> ReturnModule{nullptr};
   bool Success = DataModuleQueues.at(Identifier)->tryGetEmpty(ReturnModule);
@@ -143,20 +144,19 @@ void AdcReadoutBase::processingThread(Queue &DataModuleQueue) {
   std::vector<std::unique_ptr<AdcDataProcessor>> Processors;
 
   if (ReadoutSettings.PeakDetection) {
-    Processors.push_back(
-        std::unique_ptr<AdcDataProcessor>(new PeakFinder(getProducer())));
+    Processors.emplace_back(
+        std::make_unique<PeakFinder>(getProducer()));
   }
   if (ReadoutSettings.SerializeSamples) {
-    std::unique_ptr<AdcDataProcessor> Processor(
-        new SampleProcessing(getProducer(), ReadoutSettings.Name));
-    dynamic_cast<SampleProcessing *>(Processor.get())
-        ->setTimeStampLocation(
+    auto Processor = std::make_unique<SampleProcessing>(getProducer(), ReadoutSettings.Name);
+    Processor->setTimeStampLocation(
             TimeStampLocationMap.at(ReadoutSettings.TimeStampLocation));
-    dynamic_cast<SampleProcessing *>(Processor.get())
-        ->setMeanOfSamples(ReadoutSettings.TakeMeanOfNrOfSamples);
-    dynamic_cast<SampleProcessing *>(Processor.get())
-        ->setSerializeTimestamps(ReadoutSettings.SampleTimeStamp);
+    Processor->setMeanOfSamples(ReadoutSettings.TakeMeanOfNrOfSamples);
+    Processor->setSerializeTimestamps(ReadoutSettings.SampleTimeStamp);
     Processors.emplace_back(std::move(Processor));
+  }
+  if (ReadoutSettings.DelayLineDetector) {
+    
   }
 
   bool GotModule = false;
