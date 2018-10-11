@@ -65,13 +65,12 @@ COMMENT "Copying json configuration files to ${PROJECT_BINARY_DIR}/configs"
 
 add_custom_target(runefu
     COMMAND efu "-d" "../modules/mgmesytec" "-f" "nocfgfile" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
-    COMMAND efu "-d" "../modules/mgcncs2" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/sonde" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/mbcaen" "-f" "../configs/MB16.json"  "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/AdcReadout" "-s" "1" "-u" "1500"
     COMMAND efu "-d" "../modules/udp" "-s" "1" "-u" "1500"
     COMMAND efu "-d" "../modules/gdgem" "-f" "../configs/vmm3.json" "-s" "2" "-u" "1500"
-    DEPENDS copycfgs efu mgmesytec mgcncs2 gdgem sonde mbcaen udp AdcReadout
+    DEPENDS copycfgs efu mgmesytec gdgem sonde mbcaen udp AdcReadout
     )
 
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)

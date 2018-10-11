@@ -10,6 +10,7 @@
 #pragma once
 
 #include <mbcaen/MB16Detector.h>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -18,7 +19,8 @@ public:
   enum class InstrumentGeometry {Estia, Freia};
 
   ///
-  MBConfig(){};
+  MBConfig() = default;
+  ~MBConfig() = default;
 
   /// \brief get configuration from file
   explicit MBConfig(std::string jsonfile);
@@ -30,7 +32,7 @@ public:
   std::string getConfigFile() { return ConfigFile; }
 
   /// \brief getter fcn for private member variable
-  MB16Detector * getDetector() { return Detector; }
+  std::shared_ptr<MB16Detector> getDetector() { return Detector; }
 
   /// \brief getter fcn for private member variable
   uint32_t getTimeTickNS() { return TimeTickNS; }
@@ -51,7 +53,7 @@ private:
   std::string ConfigFile{""};
 
   /// Specify the digital geometry
-  MB16Detector * Detector{nullptr};
+  std::shared_ptr<MB16Detector> Detector;
 
   /// Specify the instrument geometry
   InstrumentGeometry Instrument{InstrumentGeometry::Estia};

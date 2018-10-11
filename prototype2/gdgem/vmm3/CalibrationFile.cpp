@@ -101,11 +101,11 @@ bool CalibrationFile::addCalibration(unsigned int fecId, unsigned int vmmId,
 CalibrationFile::Calibration &
 CalibrationFile::getCalibration(unsigned int fecId, unsigned int vmmId,
                                 unsigned int chNo) {
+
   if ((fecId >= MAX_FEC) or (vmmId >= MAX_VMM) or (chNo >= MAX_CH)) {
     XTRACE(INIT, DEB, "invalid offsets: fec: %d, vmm: %d, ch:%d\n", fecId,
            vmmId, chNo);
     return ErrCorr;
   }
-
   return Calibrations[fecId][vmmId][chNo];
 }

@@ -7,142 +7,31 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <libs/include/SPSCFifo.h>
-#include <libs/include/Socket.h>
-#include <libs/include/TSCTimer.h>
-#include <libs/include/Timer.h>
-#include <nlohmann/json.hpp>
+#include "GdGemBase.h"
 
-#include <common/Detector.h>
-#include <common/EFUArgs.h>
+#include <gdgem/clustering/ClusterMatcher.h>
+#include <gdgem/clustering/DoroClusterer.h>
+#include <gdgem/nmx/TrackSerializer.h>
+#include <gdgem/vmm3/BuilderVMM3.h>
 #include <common/EV42Serializer.h>
 #include <common/HistSerializer.h>
 #include <common/Log.h>
 #include <common/Producer.h>
-#include <common/RingBuffer.h>
 #include <common/Trace.h>
-#include <efu/Parser.h>
 #include <efu/Server.h>
-
-#include <gdgem/NMXConfig.h>
-
-#include <gdgem/generators/BuilderAPV.h>
-#include <gdgem/generators/BuilderHits.h>
-#include <gdgem/nmx/TrackSerializer.h>
-#include <gdgem/vmm2/BuilderVMM2.h>
-#include <gdgem/vmm3/BuilderVMM3.h>
-
-#include <gdgem/clustering/ClusterMatcher.h>
-#include <gdgem/clustering/DoroClusterer.h>
-
-#include <cstdio>
-#include <cstring>
-#include <fstream>
-#include <iostream>
-#include <memory>
-#include <sstream>
-#include <unistd.h>
-
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
-
-using namespace memory_sequential_consistent; // Lock free fifo
-
-const char *classname = "NMX Detector";
+#include <libs/include/Socket.h>
+#include <libs/include/TSCTimer.h>
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
+
 /** ----------------------------------------------------- */
 
-struct NMXSettingsStruct {
-  std::string ConfigFile;
-  std::string CalibrationFile;
-} NMXSettings;
-
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
-  parser
-      .add_option("-f,--file", NMXSettings.ConfigFile,
-                  "NMX (gdgem) specific config (json) file")
-      ->group("NMX")
-      ->required();
-  parser
-      .add_option("--calibration", NMXSettings.CalibrationFile,
-                  "NMX (gdgem) specific calibration (json) file")
-      ->group("NMX");
-}
-
-class NMX : public Detector {
-public:
-  NMX(BaseSettings settings);
-  ~NMX();
-
-  /// \brief detector specific threads
-  void input_thread();
-  void processing_thread();
-
-  /// \brief
-  const char *detectorname();
-
-  /// \brief detector specific commands
-  int getCalibration(std::vector<std::string> cmdargs, UNUSED char *output,
-                     UNUSED unsigned int *obytes);
-
-  /** \todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 2000;
-  static const int eth_buffer_size = 9000;
-  static const int kafka_buffer_size = 12400;
-
-private:
-  /** Shared between input_thread and processing_thread*/
-  CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
-  RingBuffer<eth_buffer_size> *eth_ringbuf;
-
-  // Careful also using this for other NMX pipeline
-
-  struct {
-    // Input Counters
-    int64_t rx_packets;
-    int64_t rx_bytes;
-    int64_t fifo_push_errors;
-    // int64_t fifo_free;
-    int64_t pad_a[5]; /**< \todo check alignment*/
-
-    // Processing Counters
-    int64_t readouts;
-    int64_t readouts_discarded;
-    int64_t readouts_error_bytes;
-    int64_t processing_idle;
-    int64_t unclustered;
-    int64_t geom_errors;
-    int64_t clusters_x;
-    int64_t clusters_y;
-    int64_t clusters_xy;
-    int64_t clusters_events;
-    int64_t clusters_discarded;
-    int64_t tx_bytes;
-    int64_t fifo_seq_errors;
-    int64_t lost_frames;
-    int64_t bad_frames;
-    int64_t good_frames;
-    // Kafka stats below are common to all detectors
-    int64_t kafka_produce_fails;
-    int64_t kafka_ev_errors;
-    int64_t kafka_ev_others;
-    int64_t kafka_dr_errors;
-    int64_t kafka_dr_noerrors;
-  } ALIGN(64) mystats;
-
-  NMXConfig nmx_opts;
-
-  std::shared_ptr<AbstractBuilder> builder_{nullptr};
-  void init_builder();
-};
-
-PopulateCLIParser PopulateParser{SetCLIArguments};
-
-int NMX::getCalibration(std::vector<std::string> cmdargs,
-                        __attribute__((unused)) char *output,
-                        __attribute__((unused)) unsigned int *obytes) {
+int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
+                        char *output,
+                        unsigned int *obytes) {
   std::string cmd = "NMX_GET_CALIB";
   LOG(CMD, Sev::Info, "{}", cmd);
   if (cmdargs.size() != 4) {
@@ -154,7 +43,6 @@ int NMX::getCalibration(std::vector<std::string> cmdargs,
   int asic = atoi(cmdargs.at(2).c_str());
   int channel = atoi(cmdargs.at(3).c_str());
   auto calib = nmx_opts.calfile->getCalibration(fec, asic, channel);
-
   if ((abs(calib.offset) <= 1e-6) and (abs(calib.slope) <= 1e-6)) {
     *obytes =
         snprintf(output, SERVER_BUFFER_SIZE, "<error> no calibration exist");
@@ -167,10 +55,12 @@ int NMX::getCalibration(std::vector<std::string> cmdargs,
   return Parser::OK;
 }
 
-NMX::~NMX() { printf("NMX detector destructor called\n"); }
-
-NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
+GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSettings) :
+       Detector("NMX", settings), NMXSettings(LocalSettings) {
   Stats.setPrefix("efu.nmx");
+
+  XTRACE(PROCESS, ALW, "NMX Config file: %s", NMXSettings.ConfigFile.c_str());
+  nmx_opts = NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
@@ -201,16 +91,16 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { NMX::input_thread(); };
+  std::function<void()> inputFunc = [this]() { GdGemBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
-  std::function<void()> processingFunc = [this]() { NMX::processing_thread(); };
+  std::function<void()> processingFunc = [this]() { GdGemBase::processing_thread(); };
   Detector::AddThreadFunction(processingFunc, "processing");
 
   AddCommandFunction("NMX_GET_CALIB",
                      [this](std::vector<std::string> cmdargs, char *output,
                             unsigned int *obytes) {
-                       return NMX::getCalibration(cmdargs, output, obytes);
+                       return GdGemBase::getCalibration(cmdargs, output, obytes);
                      });
 
   XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d",
@@ -220,9 +110,7 @@ NMX::NMX(BaseSettings settings) : Detector("NMX", settings) {
   assert(eth_ringbuf != 0);
 }
 
-const char *NMX::detectorname() { return classname; }
-
-void NMX::input_thread() {
+void GdGemBase::input_thread() {
   /** Connection setup */
   int rxBuffer, txBuffer;
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
@@ -293,9 +181,7 @@ void bin_hists(Hists& hists, const std::list<Cluster>& cl)
 }
 
 
-void NMX::processing_thread() {
-  XTRACE(PROCESS, ALW, "NMX Config file: %s", NMXSettings.ConfigFile.c_str());
-  nmx_opts = NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
+void GdGemBase::processing_thread() {
   init_builder();
   if (!builder_) {
     XTRACE(PROCESS, ERR, "No builder specified, exiting thread");
@@ -455,8 +341,8 @@ void NMX::processing_thread() {
         // TODO flush all clusters?
 
         XTRACE(INPUT, ALW, "Stopping input thread.");
-        builder_
-            .reset(); /**< \todo this is a hack to force ~BuilderSRS() call */
+        /// \todo this is a hack to force ~BuilderSRS() call
+        builder_.reset();
         delete builder_.get(); /**< \todo see above */
         return;
       }
@@ -466,7 +352,7 @@ void NMX::processing_thread() {
   }
 }
 
-void NMX::init_builder() {
+void GdGemBase::init_builder() {
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
   auto clusx = std::make_shared<DoroClusterer>(
@@ -476,28 +362,7 @@ void NMX::init_builder() {
       nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap,
       nmx_opts.clusterer_y.min_cluster_size);
 
-  if (nmx_opts.builder_type == "Hits") {
-    XTRACE(INIT, DEB, "Using BuilderHits");
-    builder_ = std::make_shared<BuilderHits>(
-        nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
-    builder_->clusterer_x = clusx;
-    builder_->clusterer_y = clusy;
-  } else if (nmx_opts.builder_type == "APV") {
-    XTRACE(INIT, DEB, "Using BuilderAPV");
-    builder_ = std::make_shared<BuilderAPV>(
-        nmx_opts.dump_directory, nmx_opts.dump_csv, nmx_opts.dump_h5);
-    builder_->clusterer_x = clusx;
-    builder_->clusterer_y = clusy;
-  } else if (nmx_opts.builder_type == "VMM2") {
-    XTRACE(INIT, DEB, "Using BuilderVMM2");
-    builder_ = std::make_shared<BuilderVMM2>(
-        nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
-        nmx_opts.clusterer_x.hit_adc_threshold,
-        nmx_opts.clusterer_x.max_time_gap,
-        nmx_opts.clusterer_y.hit_adc_threshold,
-        nmx_opts.clusterer_y.max_time_gap, nmx_opts.dump_directory,
-        nmx_opts.dump_csv, nmx_opts.dump_h5);
-  } else if (nmx_opts.builder_type == "VMM3") {
+if (nmx_opts.builder_type == "VMM3") {
     XTRACE(INIT, DEB, "Using BuilderVMM3");
     builder_ = std::make_shared<BuilderVMM3>(
         nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
@@ -510,7 +375,3 @@ void NMX::init_builder() {
     XTRACE(INIT, ALW, "Unrecognized builder type in config");
   }
 }
-
-/** ----------------------------------------------------- */
-
-DetectorFactory<NMX> Factory;
