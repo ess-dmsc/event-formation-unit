@@ -2,8 +2,8 @@
 # Detector Pipeline Plugins
 #=============================================================================
 
-set(gdgem_SRC
-    gdgem.cpp
+set(pipeline_common_source
+    GdGemBase.cpp
     NMXConfig.cpp
     nmx/ReadoutFile.cpp
     nmx/Cluster.cpp
@@ -14,21 +14,19 @@ set(gdgem_SRC
     ../common/HistSerializer.cpp
     nmx/TrackSerializer.cpp
     nmx/AbstractBuilder.cpp
-    generators/BuilderAPV.cpp
-    generators/BuilderHits.cpp
     clustering/HitsQueue.cpp
     clustering/HitSorter.cpp
     clustering/ClusterMatcher.cpp
     clustering/DoroClusterer.cpp
     srs/SRSMappings.cpp
     srs/SRSTime.cpp
-    vmm2/ParserVMM2.cpp
-    vmm2/BuilderVMM2.cpp
     vmm3/ParserVMM3.cpp
     vmm3/BuilderVMM3.cpp
     vmm3/CalibrationFile.cpp  # Also works for VMM2
-    )
-set(gdgem_INC
+)
+
+set(pipeline_common_inc
+    GdGemBase.h
     NMXConfig.h
     nmx/Cluster.h
     nmx/Event.h
@@ -39,8 +37,6 @@ set(gdgem_INC
     ../common/HistSerializer.h
     nmx/TrackSerializer.h
     nmx/AbstractBuilder.h
-    generators/BuilderAPV.h
-    generators/BuilderHits.h
     clustering/HitsQueue.h
     clustering/HitSorter.h
     clustering/ClusterMatcher.h
@@ -49,12 +45,13 @@ set(gdgem_INC
     clustering/AbstractClusterer.h
     srs/SRSMappings.h
     srs/SRSTime.h
-    vmm2/ParserVMM2.h
-    vmm2/BuilderVMM2.h
     vmm3/ParserVMM3.h
     vmm3/BuilderVMM3.h
     vmm3/CalibrationFile.h # also works for VMM2
-    )
+)
+
+set(gdgem_SRC GdGemReadout.cpp ${GdGemBase_SRC} ${pipeline_common_source})
+set(gdgem_INC ${pipeline_common_inc})
 create_module(gdgem)
 
 #
@@ -64,6 +61,19 @@ set(NMXConfigTest_INC NMXConfig.h srs/SRSTime.h srs/SRSMappings.h vmm3/Calibrati
 set(NMXConfigTest_SRC NMXConfigTest.cpp NMXConfig.cpp srs/SRSTime.cpp srs/SRSMappings.cpp vmm3/CalibrationFile.cpp)
 create_test_executable(NMXConfigTest)
 
+set(GdGemBaseTest_INC
+    ${pipeline_common_inc}
+    ../../libs/include/Socket.h
+    ../../libs/include/TSCTimer.h
+    ../adc_readout/test/TestUDPServer.h)
+set(GdGemBaseTest_SRC
+    GdGemBaseTest.cpp
+    ${pipeline_common_source}
+    ../../libs/source/Socket.cpp
+    ../../libs/source/TSCTimer.cpp
+    ../adc_readout/test/TestUDPServer.cpp)
+create_test_executable(GdGemBaseTest)
+
 #=============================================================================
 # Component tests
 #=============================================================================
@@ -72,7 +82,6 @@ create_test_executable(NMXConfigTest)
 
 add_subdirectory(nmx)
 add_subdirectory(srs)
-add_subdirectory(vmm2)
 add_subdirectory(vmm3)
 add_subdirectory(clustering)
 add_subdirectory(generators)

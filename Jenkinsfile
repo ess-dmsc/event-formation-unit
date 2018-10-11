@@ -145,9 +145,9 @@ def docker_tests_coverage(image_key) {
         sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
                 cd ${project}/build
                 . ./activate_run.sh
-                make runefu
+                make -j 4 runefu
                 make coverage
-                make -j4 valgrind
+                echo skipping make -j 4 valgrind
             \""""
         sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ./"
     } catch(e) {
@@ -172,20 +172,19 @@ def docker_tests_coverage(image_key) {
                 sourceEncoding: 'ASCII',
                 zoomCoverageChart: true
             ])
-            step([$class: 'ValgrindPublisher',
-                  pattern: 'memcheck_res/*.valgrind',
-                  failBuildOnMissingReports: true,
-                  failBuildOnInvalidReports: true,
-                  publishResultsForAbortedBuilds: false,
-                  publishResultsForFailedBuilds: false,
-                  failThresholdInvalidReadWrite: '',
-                  unstableThresholdInvalidReadWrite: '',
-                  failThresholdDefinitelyLost: '',
-                  unstableThresholdDefinitelyLost: '',
-                  failThresholdTotal: '',
-                  unstableThresholdTotal: '99'
-            ])
-            //archiveArtifacts artifacts: 'build/'
+            // step([$class: 'ValgrindPublisher',
+            //      pattern: 'memcheck_res/*.valgrind',
+            //      failBuildOnMissingReports: true,
+            //      failBuildOnInvalidReports: true,
+            //      publishResultsForAbortedBuilds: false,
+            //      publishResultsForFailedBuilds: false,
+            //      failThresholdInvalidReadWrite: '',
+            //      unstableThresholdInvalidReadWrite: '',
+            //      failThresholdDefinitelyLost: '',
+            //      unstableThresholdDefinitelyLost: '',
+            //      failThresholdTotal: '',
+            //      unstableThresholdTotal: '99'
+            //])
     }
 }
 
@@ -314,7 +313,7 @@ node('docker') {
         def image_key = x
         builders[image_key] = get_pipeline(image_key)
     }
-    builders['macOS'] = get_macos_pipeline()
+    // builders['macOS'] = get_macos_pipeline()
 
     try {
         parallel builders

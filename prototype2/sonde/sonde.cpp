@@ -37,7 +37,7 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 class SONDEIDEA : public Detector {
 public:
-  SONDEIDEA(BaseSettings settings);
+  explicit SONDEIDEA(BaseSettings settings);
   ~SONDEIDEA() { printf("sonde destructor called\n"); }
 
   void input_thread();
@@ -62,8 +62,7 @@ private:
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t fifo_push_errors;
-    int64_t rx_pktlen_0;
-    int64_t pad[4];
+    int64_t pad[5]; // cppcheck-suppress unusedStructMember
 
     // Processing and Output counters
     int64_t rx_idle1;
@@ -139,8 +138,8 @@ void SONDEIDEA::input_thread() {
   sondedata.printBufferSizes();
   sondedata.setRecvTimeout(0, 100000); // secs, usecs, 1/10 second
 
-  int rdsize;
   for (;;) {
+    int rdsize;
     unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */

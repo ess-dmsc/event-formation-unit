@@ -3,7 +3,8 @@ include_directories(.)
 #=============================================================================
 # Detector Pipeline Plugins
 #=============================================================================
-set(mbcaen_INC
+set(mbcaen_common_inc
+  MBCaenBase.h
   ../common/Hists.h
   ../common/HistSerializer.h
   mbcaen/DataParser.h
@@ -11,16 +12,25 @@ set(mbcaen_INC
   mbcommon/DumpEventBuilderInfo.h
   mbcommon/MBConfig.h
   )
-set(mbcaen_SRC
+set(mbcaen_common_src
+  MBCaenBase.cpp
   ../common/Hists.cpp
   ../common/HistSerializer.cpp
-  mbcaen.cpp
   mbcaen/DataParser.cpp
   mbcommon/MultiBladeEventBuilder.cpp
   mbcommon/DumpEventBuilderInfo.cpp
   mbcommon/MBConfig.cpp
   )
+
+set(mbcaen_INC
+  ${mbcaen_common_inc}
+)
+set(mbcaen_SRC
+  MBCaen.cpp
+  ${mbcaen_common_src}
+)
 create_module(mbcaen)
+
 
 #=============================================================================
 # Build MB text 2 UDP
@@ -108,6 +118,21 @@ create_test_executable(MultiBladeEventBuilderTest)
 #
 # MJC Unit tests below
 #
+
+set(MBCAENBaseTest_INC
+  ${mbcaen_common_inc}
+  ../../libs/include/Socket.h
+  ../../libs/include/TSCTimer.h
+  ../adc_readout/test/TestUDPServer.h
+)
+set(MBCAENBaseTest_SRC
+  MBCaenBaseTest.cpp
+  ${mbcaen_common_src}
+  ../../libs/source/Socket.cpp
+  ../../libs/source/TSCTimer.cpp
+  ../adc_readout/test/TestUDPServer.cpp
+)
+create_test_executable(MBCAENBaseTest)
 
 # Create excecutable for the test of geometry
 set(MB16DetectorTest_INC mbcaen/MB16Detector.h)

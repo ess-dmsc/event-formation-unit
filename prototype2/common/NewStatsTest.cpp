@@ -143,7 +143,7 @@ TEST_F(NewStatsTest, StatValue) {
   ctr1 = INT64_MAX;
   ASSERT_EQ(INT64_MAX, stats.value(1));
 
-  ctr1++;
+  ctr1++; // cppcheck-suppress unreadVariable // IS read by stats.value()
   ASSERT_EQ(INT64_MIN, stats.value(1));
 }
 

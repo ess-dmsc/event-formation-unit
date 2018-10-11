@@ -7,8 +7,9 @@
 /// Contributor: Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
 //===----------------------------------------------------------------------===//
 
+#include "MBCaenBase.h"
+
 #include <cinttypes>
-#include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
 #include <common/Producer.h>
@@ -24,7 +25,7 @@
 #include <libs/include/Timer.h>
 
 #include <mbcaen/DataParser.h>
-#include <mbcommon/MBConfig.h>
+
 #include <mbcommon/MultiBladeEventBuilder.h>
 
 #include <logical_geometry/ESSGeometry.h>
@@ -38,70 +39,9 @@ const char *classname = "Multiblade detector with CAEN readout";
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
-/** ----------------------------------------------------- */
 
-class MBCAEN : public Detector {
-public:
-  MBCAEN(BaseSettings settings);
-  void input_thread();
-  void processing_thread();
-
-  const char *detectorname();
-
-  /** @todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 500;
-  static const int eth_buffer_size = 1500; /// bytes
-
-  static const int kafka_buffer_size = 124000; /// entries
-
-private:
-  /** Shared between input_thread and processing_thread*/
-  CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
-  RingBuffer<eth_buffer_size> *eth_ringbuf;
-
-  struct {
-    // Input Counters
-    int64_t rx_packets;
-    int64_t rx_bytes;
-    int64_t fifo1_push_errors;
-    int64_t pad[5];
-
-    // Processing Counters
-    int64_t rx_idle1;
-    int64_t rx_readouts;
-    int64_t rx_error_bytes;
-    int64_t tx_bytes;
-    int64_t rx_events;
-    int64_t geometry_errors;
-    int64_t fifo_seq_errors;
-    // Kafka stats below are common to all detectors
-    int64_t kafka_produce_fails;
-    int64_t kafka_ev_errors;
-    int64_t kafka_ev_others;
-    int64_t kafka_dr_errors;
-    int64_t kafka_dr_noerrors;
-  } ALIGN(64) mystats;
-
-  MBConfig mb_opts;
-};
-
-struct DetectorSettingsStruct {
-  std::string FilePrefix{""};
-  std::string ConfigFile{""};
-} DetectorSettings;
-
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
-  parser.add_option("--dumptofile", DetectorSettings.FilePrefix,
-                    "dump to specified file")->group("MBCAEN");
-
-  parser.add_option("-f, --file", DetectorSettings.ConfigFile,
-                    "Multi-Blade specific calibration (json) file")
-                    ->group("MBCAEN");
-}
-
-PopulateCLIParser PopulateParser{SetCLIArguments};
-
-MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
+MBCAENBase::MBCAENBase(BaseSettings const &settings, struct MBCAENSettings & LocalMBCAENSettings)
+    : Detector("MBCAEN", settings), MBCAENSettings(LocalMBCAENSettings) {
   Stats.setPrefix("efu.mbcaen");
 
   XTRACE(INIT, ALW, "Adding stats");
@@ -123,11 +63,11 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
   Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { MBCAEN::input_thread(); };
+  std::function<void()> inputFunc = [this]() { MBCAENBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    MBCAEN::processing_thread();
+    MBCAENBase::processing_thread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
@@ -137,13 +77,11 @@ MBCAEN::MBCAEN(BaseSettings settings) : Detector("MBCAEN", settings) {
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
   assert(eth_ringbuf != 0);
 
-  mb_opts = MBConfig(DetectorSettings.ConfigFile);
+  mb_opts = MBConfig(MBCAENSettings.ConfigFile);
   assert(mb_opts.getDetector() != nullptr);
 }
 
-const char *MBCAEN::detectorname() { return classname; }
-
-void MBCAEN::input_thread() {
+void MBCAENBase::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
@@ -182,16 +120,16 @@ void MBCAEN::input_thread() {
   }
 }
 
-void MBCAEN::processing_thread() {
+void MBCAENBase::processing_thread() {
   const uint32_t ncass = 6;
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
 
   std::shared_ptr<DataSave> mbdatasave;
-  bool dumptofile = !DetectorSettings.FilePrefix.empty();
+  bool dumptofile = !MBCAENSettings.FilePrefix.empty();
   if (dumptofile)
   {
-    mbdatasave = std::make_shared<DataSave>(DetectorSettings.FilePrefix + "_multiblade_", 100000000);
+    mbdatasave = std::make_shared<DataSave>(MBCAENSettings.FilePrefix + "_multiblade_", 100000000);
     mbdatasave->tofile("# time, digitizer, channel, adc\n");
   }
 
@@ -202,7 +140,7 @@ void MBCAEN::processing_thread() {
   flatbuffer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
-  Hists histograms(nwires, nstrips);
+  Hists histograms(std::max(nwires, nstrips), 65535);
   Producer monitorprod(EFUSettings.KafkaBroker, "MB_monitor");
   HistSerializer histfb(histograms.needed_buffer_size());
   histfb.set_callback(
@@ -320,7 +258,3 @@ void MBCAEN::processing_thread() {
     }
   }
 }
-
-/** ----------------------------------------------------- */
-
-DetectorFactory<MBCAEN> Factory;
