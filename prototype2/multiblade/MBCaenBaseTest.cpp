@@ -61,10 +61,10 @@ TEST_F(MBCAENBaseTest, Constructor) {
 TEST_F(MBCAENBaseTest, DataReceive) {
   MBCAENBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
-  //TestUDPServer Server(43126, Settings.DetectorPort, 1470);
+  std::chrono::duration<std::int64_t, std::milli> SleepTime{200};
+  std::this_thread::sleep_for(SleepTime);
   TestUDPServer Server(43126, Settings.DetectorPort, (unsigned char *)&pkt145701[0], pkt145701.size());
   Server.startPacketTransmission(1, 100);
-  std::chrono::duration<std::int64_t, std::milli> SleepTime(200);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
   EXPECT_EQ(Readout.mystats.rx_packets, 1);

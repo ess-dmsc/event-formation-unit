@@ -24,7 +24,7 @@ using namespace memory_sequential_consistent; // Lock free fifo
 class MBCAENBase : public Detector {
 public:
   MBCAENBase(BaseSettings const &settings, struct MBCAENSettings & LocalMBCAENSettings);
-  ~MBCAENBase() = default;
+  ~MBCAENBase() { delete eth_ringbuf; }
   void input_thread();
   void processing_thread();
 
