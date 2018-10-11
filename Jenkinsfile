@@ -147,7 +147,7 @@ def docker_tests_coverage(image_key) {
                 . ./activate_run.sh
                 make -j 4 runefu
                 make coverage
-                make -j 4 valgrind
+                echo skipping make -j 4 valgrind
             \""""
         sh "docker cp ${container_name(image_key)}:/home/jenkins/${project} ./"
     } catch(e) {
@@ -172,19 +172,19 @@ def docker_tests_coverage(image_key) {
                 sourceEncoding: 'ASCII',
                 zoomCoverageChart: true
             ])
-            step([$class: 'ValgrindPublisher',
-                  pattern: 'memcheck_res/*.valgrind',
-                  failBuildOnMissingReports: true,
-                  failBuildOnInvalidReports: true,
-                  publishResultsForAbortedBuilds: false,
-                  publishResultsForFailedBuilds: false,
-                  failThresholdInvalidReadWrite: '',
-                  unstableThresholdInvalidReadWrite: '',
-                  failThresholdDefinitelyLost: '',
-                  unstableThresholdDefinitelyLost: '',
-                  failThresholdTotal: '',
-                  unstableThresholdTotal: '99'
-            ])
+            // step([$class: 'ValgrindPublisher',
+            //      pattern: 'memcheck_res/*.valgrind',
+            //      failBuildOnMissingReports: true,
+            //      failBuildOnInvalidReports: true,
+            //      publishResultsForAbortedBuilds: false,
+            //      publishResultsForFailedBuilds: false,
+            //      failThresholdInvalidReadWrite: '',
+            //      unstableThresholdInvalidReadWrite: '',
+            //      failThresholdDefinitelyLost: '',
+            //      unstableThresholdDefinitelyLost: '',
+            //      failThresholdTotal: '',
+            //      unstableThresholdTotal: '99'
+            //])
             archiveArtifacts artifacts: 'build/'
     }
 }
