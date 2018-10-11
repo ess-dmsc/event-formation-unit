@@ -60,9 +60,10 @@ TEST_F(GdGemBaseTest, GetCalibrationCmd) {
 TEST_F(GdGemBaseTest, DataReceive) {
   GdGemBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
+  std::chrono::duration<std::int64_t, std::milli> SleepTime(200);
+  std::this_thread::sleep_for(SleepTime);
   TestUDPServer Server(43126, Settings.DetectorPort, 1470);
   Server.startPacketTransmission(1, 100);
-  std::chrono::duration<std::int64_t, std::milli> SleepTime(200);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
   EXPECT_EQ(Readout.mystats.rx_packets, 1);

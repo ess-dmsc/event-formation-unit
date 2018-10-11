@@ -24,7 +24,7 @@ using namespace memory_sequential_consistent; // Lock free fifo
 class GdGemBase : public Detector {
 public:
   GdGemBase(BaseSettings const & settings, NMXSettings & LocalNMXSettings);
-  ~GdGemBase() = default;
+  ~GdGemBase() {delete eth_ringbuf;}
 
 
   /// \brief detector specific threads
