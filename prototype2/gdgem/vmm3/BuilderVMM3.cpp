@@ -33,8 +33,7 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 	}
 
 	if (dump_h5_) {
-		readout_file_ = std::make_shared<ReadoutFile>();
-		readout_file_->open_rw(dump_dir + "gdgem_vmm3_readouts_" + timeString() + ".h5");
+		readout_file_ = ReadoutFile::create(dump_dir + "gdgem_vmm3_readouts_" + timeString() + ".h5", 100);
 	}
 }
 
@@ -50,10 +49,6 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 	}
   XTRACE(PROCESS, DEB, "HITS after parse: %d", parser_.stats.hits);
 
-
-	if (dump_h5_) {
-		readout_file_->data.resize(parser_.stats.hits);
-	}
 
 	uint32_t udp_timestamp_ns = parser_.srsHeader.udpTimeStamp
 			* time_intepreter_.internal_clock_period_ns();
@@ -99,7 +94,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 			}
 
 			if (dump_h5_) {
-				readout_file_->data[i] = readout;
+				readout_file_->push(readout);
 			}
 
 			if (dump_csv_) {
@@ -114,10 +109,6 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 		} else {
 			XTRACE(PROCESS, DEB, "No data marker in hit (increment counter?)");
 		}
-	}
-
-	if (dump_h5_) {
-		readout_file_->write();
 	}
 
 	auto & stats = parser_.stats;

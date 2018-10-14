@@ -4,7 +4,6 @@
 
 set(ReadoutFileTest_SRC
     ReadoutFileTest.cpp
-    ReadoutFile.cpp
     )
 set(ReadoutFileTest_INC
     ReadoutFile.h
@@ -23,7 +22,6 @@ create_test_executable(HitTest)
 
 set(HitFileTest_SRC
     HitFileTest.cpp
-    HitFile.cpp
     Hit.cpp
     )
 set(HitFileTest_INC

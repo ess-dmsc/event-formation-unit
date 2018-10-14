@@ -21,7 +21,6 @@ set(mgmesytec_common_src
   mgmesytec/Vmmr16Parser.cpp
   mgmesytec/Sis3153Parser.cpp
   mgmesytec/Hit.cpp
-  mgmesytec/HitFile.cpp
   )
 set(mgmesytec_common_inc
   MGMesytecBase.h
@@ -94,7 +93,6 @@ create_test_executable(MGHitTest)
 
 set(MGHitFileTest_SRC
   mgmesytec/HitFileTest.cpp
-  mgmesytec/HitFile.cpp
   mgmesytec/Hit.cpp
   )
 set(MGHitFileTest_INC

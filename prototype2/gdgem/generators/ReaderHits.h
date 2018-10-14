@@ -21,7 +21,7 @@ public:
   size_t read(char *buf);
 
 private:
-  HitFile file;
+  std::shared_ptr<HitFile> file;
 
   size_t total_{0};
   size_t current_{0};

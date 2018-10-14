@@ -8,40 +8,38 @@
 #pragma once
 
 #include <gdgem/nmx/Hit.h>
-#include <vector>
+#include <common/DumpFile.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-#pragma GCC diagnostic ignored "-Wpedantic"
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <h5cpp/hdf5.hpp>
-#pragma GCC diagnostic pop
+namespace hdf5 {
 
-class HitFile
+namespace datatype {
+template<>
+class TypeTrait<Hit>
 {
 public:
-  HitFile();
+  using Type = Hit;
+  using TypeClass = Compound;
 
-  void open_rw(boost::filesystem::path file_path);
-  void open_r(boost::filesystem::path file_path);
-
-  static HitFile create(boost::filesystem::path file_path);
-  static HitFile open(boost::filesystem::path file_path);
-
-  size_t count() const;
-  void write();
-  void read_at(size_t idx, size_t count);
-
-  static void read(std::string file, std::vector<Hit>& external_data);
-
-  std::vector<Hit> data;
-
-  static constexpr size_t chunk_size{9000 / sizeof(Hit)};
-
-private:
-  hdf5::file::File file_;
-  hdf5::datatype::Datatype dtype_;
-  hdf5::node::Dataset dataset_;
-  hdf5::dataspace::Hyperslab slab_{{0}, {chunk_size}};
+  static TypeClass create(const Type & = Type())
+  {
+    auto type = datatype::Compound::create(sizeof(Hit));
+    type.insert("time",
+                0,
+                datatype::create<double>());
+    type.insert("plane_id",
+                sizeof(double),
+                datatype::create<std::uint8_t>());
+    type.insert("strip",
+                sizeof(double) + sizeof(std::uint8_t),
+                datatype::create<Hit::strip_type>());
+    type.insert("adc",
+                sizeof(double) + sizeof(std::uint8_t) + sizeof(Hit::strip_type),
+                datatype::create<Hit::adc_type>());
+    return type;
+  }
 };
+}
+
+}
+
+using HitFile = DumpFile<Hit>;

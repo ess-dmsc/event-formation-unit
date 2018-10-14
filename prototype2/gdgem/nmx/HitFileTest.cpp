@@ -3,59 +3,83 @@
 #include <gdgem/nmx/HitFile.h>
 #include <test/TestBase.h>
 
-class HitFileTest : public TestBase {
+class NMXHitFileTest : public TestBase {
 protected:
-  virtual void SetUp() {}
+  virtual void SetUp() {
+    hdf5::error::Singleton::instance().auto_print(false);
+    if (boost::filesystem::exists("hit_file_test.h5"))
+    {
+      boost::filesystem::remove("hit_file_test.h5");
+    }
+
+    if (boost::filesystem::exists("hit_file_test_1.h5"))
+    {
+      boost::filesystem::remove("hit_file_test_1.h5");
+    }
+  }
   virtual void TearDown() {}
 };
 
-TEST_F(HitFileTest, CreateFile) {
-  HitFile::create("readout_file_test.h5");
-  EXPECT_TRUE(hdf5::file::is_hdf5_file("readout_file_test.h5"));
+TEST_F(NMXHitFileTest, CreateFile) {
+  HitFile::create("hit_file_test");
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test.h5"));
 }
 
-TEST_F(HitFileTest, OpenEmptyFile) {
-  HitFile::create("readout_file_test.h5");
-  auto file = HitFile::open("readout_file_test.h5");
-  EXPECT_EQ(file.count(), 0);
+TEST_F(NMXHitFileTest, OpenEmptyFile) {
+  HitFile::create("hit_file_test");
+  auto file = HitFile::open("hit_file_test");
+  EXPECT_EQ(file->count(), 0);
 }
 
-TEST_F(HitFileTest, Write) {
-  auto file = HitFile::create("readout_file_test.h5");
-  file.data.resize(3);
-  file.write();
-  EXPECT_EQ(file.count(), 3);
-  file.write();
-  EXPECT_EQ(file.count(), 6);
-  file.write();
-  EXPECT_EQ(file.count(), 9);
+TEST_F(NMXHitFileTest, Push) {
+  auto file = HitFile::create("hit_file_test");
+  file->push(std::vector<Hit>(100, Hit()));
+  EXPECT_EQ(file->count(), 0);
+  file->push(std::vector<Hit>(900, Hit()));
+  EXPECT_EQ(file->count(), 1000);
+  file->push(std::vector<Hit>(3000, Hit()));
+  EXPECT_EQ(file->count(), 4000);
 }
 
-TEST_F(HitFileTest, Read) {
-  auto file_out = HitFile::create("readout_file_test.h5");
-  file_out.data.resize(9);
-  file_out.write();
-  file_out = HitFile();
+TEST_F(NMXHitFileTest, PushFileRotation) {
+  auto file = HitFile::create("hit_file_test", 1);
+  file->push(std::vector<Hit>(100, Hit()));
+  EXPECT_EQ(file->count(), 0);
+  file->push(std::vector<Hit>(900, Hit()));
+  EXPECT_EQ(file->count(), 1000);
+  file->push(std::vector<Hit>(3000, Hit()));
+  EXPECT_EQ(file->count(), 4000);
 
-  auto file = HitFile::open("readout_file_test.h5");
-  EXPECT_EQ(file.data.size(), 0);
-  file.read_at(0, 3);
-  EXPECT_EQ(file.data.size(), 3);
-  file.read_at(0, 9);
-  EXPECT_EQ(file.data.size(), 9);
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test.h5"));
 
-  EXPECT_THROW(file.read_at(0, 12), std::runtime_error);
+  EXPECT_FALSE(boost::filesystem::exists("hit_file_test_1.h5"));
+  file->push(std::vector<Hit>(300000, Hit()));
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test_1.h5"));
 }
 
-TEST_F(HitFileTest, ReadAll) {
-  auto file_out = HitFile::create("readout_file_test.h5");
-  file_out.data.resize(9);
-  file_out.write();
-  file_out = HitFile();
+TEST_F(NMXHitFileTest, Read) {
+  auto file_out = HitFile::create("hit_file_test");
+  file_out->push(std::vector<Hit>(900, Hit()));
+  file_out.reset();
+
+  auto file = HitFile::open("hit_file_test");
+  EXPECT_EQ(file->Data.size(), 0);
+  file->readAt(0, 3);
+  EXPECT_EQ(file->Data.size(), 3);
+  file->readAt(0, 9);
+  EXPECT_EQ(file->Data.size(), 9);
+
+  EXPECT_THROW(file->readAt(0, 1000), std::runtime_error);
+}
+
+TEST_F(NMXHitFileTest, ReadAll) {
+  auto file_out = HitFile::create("hit_file_test");
+  file_out->push(std::vector<Hit>(900, Hit()));
+  file_out.reset();
 
   std::vector<Hit> data;
-  HitFile::read("readout_file_test.h5", data);
-  EXPECT_EQ(data.size(), 9);
+  HitFile::read("hit_file_test", data);
+  EXPECT_EQ(data.size(), 900);
 }
 
 int main(int argc, char **argv) {

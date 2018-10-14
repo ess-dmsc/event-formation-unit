@@ -10,7 +10,6 @@ set(ClusteringBase_SRC
     ../nmx/Event.cpp
     ../nmx/Cluster.cpp
     ../nmx/Hit.cpp
-    ../nmx/ReadoutFile.cpp
     ../srs/SRSTime.cpp
     ../srs/SRSMappings.cpp
     HitsQueue.cpp

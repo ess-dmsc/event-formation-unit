@@ -17,17 +17,17 @@ archive_what = "centos7-release"
 
 images = [
     'centos7-release': [
-        'name': 'essdmscdm/centos7-build-node:3.0.0',
+        'name': 'essdmscdm/centos7-build-node:3.2.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
     ],
     'centos7': [
-        'name': 'essdmscdm/centos7-build-node:3.0.0',
+        'name': 'essdmscdm/centos7-build-node:3.2.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCOV=ON'
     ],
     'ubuntu1804': [
-        'name': 'essdmscdm/ubuntu18.04-build-node:1.1.0',
+        'name': 'essdmscdm/ubuntu18.04-build-node:1.2.0',
         'sh': 'bash -e',
         'cmake_flags': ''
     ],

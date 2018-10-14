@@ -8,59 +8,66 @@
 #pragma once
 
 #include <multigrid/mgmesytec/Hit.h>
-#include <vector>
-#include <memory>
+#include <common/DumpFile.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wall"
-#pragma GCC diagnostic ignored "-Wpedantic"
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#include <h5cpp/hdf5.hpp>
-#pragma GCC diagnostic pop
+namespace hdf5 {
 
-// \todo improve reading for multiple files
+namespace datatype {
+template<>
+class TypeTrait<Multigrid::Hit> {
+public:
+  using Type = Multigrid::Hit;
+  using TypeClass = Compound;
+
+  static TypeClass create(const Type & = Type()) {
+    auto type = datatype::Compound::create(sizeof(Multigrid::Hit));
+    type.insert("trigger_count",
+                0,
+                datatype::create<size_t>());
+    type.insert("external_trigger",
+                sizeof(size_t),
+                datatype::create<std::int8_t>());
+    type.insert("module",
+                sizeof(size_t) + sizeof(std::int8_t),
+                datatype::create<std::uint8_t>());
+    type.insert("high_time",
+                sizeof(size_t) + sizeof(std::int8_t) + sizeof(std::uint8_t),
+                datatype::create<uint32_t>());
+    type.insert("low_time",
+                sizeof(size_t) + sizeof(std::int8_t) + sizeof(std::uint8_t) +
+                    sizeof(std::uint32_t),
+                datatype::create<uint32_t>());
+    type.insert("total_time",
+                sizeof(size_t) + sizeof(std::int8_t) + sizeof(std::uint8_t) +
+                    2 * sizeof(std::uint32_t),
+                datatype::create<uint64_t>());
+    type.insert("bus",
+                sizeof(size_t) + sizeof(std::int8_t) + sizeof(std::uint8_t) +
+                    2 * sizeof(std::uint32_t) + sizeof(std::uint64_t),
+                datatype::create<uint8_t>());
+    type.insert("channel",
+                sizeof(size_t) + sizeof(std::int8_t) + 2 * sizeof(std::uint8_t) +
+                    2 * sizeof(std::uint32_t) + sizeof(std::uint64_t),
+                datatype::create<uint16_t>());
+    type.insert("adc",
+                sizeof(size_t) + sizeof(std::int8_t) + 2 * sizeof(std::uint8_t) +
+                    2 * sizeof(std::uint32_t) + sizeof(std::uint64_t) +
+                    sizeof(std::uint16_t),
+                datatype::create<uint16_t>());
+    type.insert("time_diff",
+                sizeof(size_t) + sizeof(std::int8_t) + 2 * sizeof(std::uint8_t) +
+                    2 * sizeof(std::uint32_t) + sizeof(std::uint64_t) +
+                    2 * sizeof(std::uint16_t),
+                datatype::create<uint16_t>());
+    return type;
+  }
+};
+}
+
+}
 
 namespace Multigrid {
 
-class HitFile {
-public:
-
-  static std::unique_ptr<HitFile>
-  create(const boost::filesystem::path &FilePath, size_t MaxMB = 0);
-
-  static std::unique_ptr<HitFile>
-  open(const boost::filesystem::path &FilePath);
-
-  size_t count() const;
-  void readAt(size_t Index, size_t Count);
-
-  void push(const std::vector<Hit>& Hits);
-
-  static void read(const boost::filesystem::path &FilePath,
-      std::vector<Hit> &ExternalData);
-
-  std::vector<Hit> Data;
-
-private:
-  HitFile(const boost::filesystem::path &file_path, size_t max_Mb);
-
-  static constexpr size_t ChunkSize{9000 / sizeof(Hit)};
-
-  hdf5::file::File File;
-  hdf5::datatype::Datatype DataType;
-  hdf5::node::Dataset DataSet;
-  hdf5::dataspace::Hyperslab Slab{{0}, {ChunkSize}};
-
-  boost::filesystem::path PathBase{};
-  size_t MaxSize{0};
-  size_t SequenceNumber{0};
-
-  void openRW();
-  void openR();
-  boost::filesystem::path get_full_path() const;
-
-  void write();
-};
+using HitFile = DumpFile<Hit>;
 
 }

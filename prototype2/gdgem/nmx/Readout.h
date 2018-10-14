@@ -8,8 +8,9 @@
 #pragma once
 
 #include <cinttypes>
+#include <string>
 
-// TODO: initialize values to 0?
+// \todo initialize values to 0?
 struct Readout
 {
   uint8_t fec;
@@ -37,4 +38,8 @@ struct Readout
         (over_threshold == other.over_threshold)
     );
   }
+
+  // \todo use constexpr string_view when c++17 arrives
+  static std::string DatasetName() { return "srs_hits"; }
+  static std::string FormatVersion() { return "1.0.0"; }
 };

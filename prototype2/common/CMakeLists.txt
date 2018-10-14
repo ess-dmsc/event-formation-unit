@@ -10,6 +10,7 @@ set(efu_common_SRC
   DetectorModuleRegister.cpp
   TimeString.cpp
   )
+
 set(efu_common_INC
   ../../libs/include/gccintel.h
   DetectorModuleRegister.h
@@ -22,6 +23,7 @@ set(efu_common_INC
   Trace.h
   Log.h
   DataSave.h
+  DumpFile.h
   TimeString.h
   )
 

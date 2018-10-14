@@ -27,4 +27,8 @@ struct Hit {
 
   // \brief prints values for debug purposes
   std::string debug() const;
+
+  // \todo use constexpr string_view when c++17 arrives
+  static std::string DatasetName() { return "gdgem_hits"; }
+  static std::string FormatVersion() { return "1.0.0"; }
 };
