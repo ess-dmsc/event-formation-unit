@@ -75,6 +75,14 @@ set(DataSaveTest_INC
     TimeString.h)
 create_test_executable(DataSaveTest)
 
+set(DumpFileTest_SRC
+  DumpFileTest.cpp
+  TimeString.cpp)
+set(DumpFileTest_INC
+  DumpFile.h
+  TimeString.h)
+create_test_executable(DumpFileTest)
+
 set(DetectorTest_SRC
   DetectorTest.cpp
   NewStats.cpp)
