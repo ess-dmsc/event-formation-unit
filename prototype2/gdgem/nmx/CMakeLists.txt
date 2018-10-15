@@ -6,7 +6,6 @@ set(ReadoutFileTest_SRC
     ReadoutFileTest.cpp
     )
 set(ReadoutFileTest_INC
-    ReadoutFile.h
     Readout.h
     )
 create_test_executable(ReadoutFileTest SKIP_MEMGRIND)

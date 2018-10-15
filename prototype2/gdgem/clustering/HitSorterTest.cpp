@@ -8,7 +8,7 @@
 #include <functional>
 
 #include <gdgem/clustering/TestDataShort.h>
-#include <gdgem/nmx/ReadoutFile.h>
+#include <gdgem/nmx/Readout.h>
 
 #define UNUSED __attribute__((unused))
 

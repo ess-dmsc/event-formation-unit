@@ -69,6 +69,15 @@ TEST_F(DumpFileTest, OpenEmptyFile) {
   EXPECT_EQ(file->count(), 0);
 }
 
+TEST_F(DumpFileTest, PushOne) {
+  auto file = HitFile::create("dumpfile_test");
+  file->push(Hit());
+  EXPECT_EQ(file->count(), 0);
+  for (size_t i=0; i < 1000; ++i)
+    file->push(Hit());
+  EXPECT_EQ(file->count(), 9000 / sizeof(Hit));
+}
+
 TEST_F(DumpFileTest, Push) {
   auto file = HitFile::create("dumpfile_test");
   file->push(std::vector<Hit>(100, Hit()));

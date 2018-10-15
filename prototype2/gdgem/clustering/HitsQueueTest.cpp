@@ -8,7 +8,7 @@
 #include <functional>
 
 #include <gdgem/clustering/TestDataShort.h>
-#include <gdgem/nmx/ReadoutFile.h>
+#include <gdgem/nmx/Readout.h>
 
 constexpr float no_offset = 0.0;
 constexpr float unit_slope = 1.0;
