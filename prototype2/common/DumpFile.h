@@ -9,6 +9,7 @@
 
 #include <vector>
 #include <memory>
+#include <common/Version.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
@@ -30,11 +31,11 @@ public:
   open(const boost::filesystem::path &FilePath);
 
   size_t count() const;
-  void readAt(size_t Index, size_t Count);
 
   void push(const T& Hit);
   void push(const std::vector<T>& Hits);
 
+  void readAt(size_t Index, size_t Count);
   static void read(const boost::filesystem::path &FilePath,
       std::vector<T> &ExternalData);
 
@@ -103,6 +104,9 @@ void DumpFile<T>::openRW() {
 
   DataSet = File.root().create_dataset(T::DatasetName(), DataType,
                                        dataspace::Simple({0}, {dataspace::Simple::UNLIMITED}), dcpl);
+  DataSet.attributes.create_from("format_version", T::FormatVersion());
+  DataSet.attributes.create_from("EFU_version", efu_version());
+  DataSet.attributes.create_from("EFU_build_string", efu_buildstr());
 }
 
 template<typename T>
@@ -111,6 +115,7 @@ void DumpFile<T>::openR() {
 
   File = file::open(get_full_path(), file::AccessFlags::READONLY);
   DataSet = File.root().get_dataset(T::DatasetName());
+  // \todo format_version attribute should be compared using semver
 }
 
 template<typename T>

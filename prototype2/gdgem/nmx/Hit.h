@@ -13,7 +13,6 @@
 #include <limits>
 #include <string>
 
-// TODO: rename this to Hit
 struct Hit {
   using strip_type = uint16_t;
   using adc_type = uint16_t;
