@@ -9,7 +9,7 @@
 ///
 ///                              ADVARSEL
 ///
-///                              DEMESIO
+///                              DĖMESIO
 ///
 ///                              UWAGA
 ///
@@ -64,28 +64,15 @@ namespace hdf5 {
 
 namespace datatype {
 template<>
-class TypeTrait<Hit>
-{
+class TypeTrait<Hit> {
 public:
-  using Type = Hit;
-  using TypeClass = Compound;
-
-  static TypeClass create(const Type & = Type())
-  {
-    auto type = datatype::Compound::create(sizeof(Hit));
-    type.insert("time",
-                0,
-                datatype::create<double>());
-    type.insert("plane_id",
-                sizeof(double),
-                datatype::create<std::uint8_t>());
-    type.insert("strip",
-                sizeof(double) + sizeof(std::uint8_t),
-                datatype::create<Hit::strip_type>());
-    type.insert("adc",
-                sizeof(double) + sizeof(std::uint8_t) + sizeof(Hit::strip_type),
-                datatype::create<Hit::adc_type>());
-    return type;
+  H5_COMPOUND_DEFINE_TYPE(Hit) {
+    H5_COMPOUND_INIT;
+    H5_COMPOUND_INSERT_MEMBER(time);
+    H5_COMPOUND_INSERT_MEMBER(plane_id);
+    H5_COMPOUND_INSERT_MEMBER(strip);
+    H5_COMPOUND_INSERT_MEMBER(adc);
+    H5_COMPOUND_RETURN;
   }
 };
 }

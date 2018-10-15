@@ -19,8 +19,12 @@
 #include <h5cpp/hdf5.hpp>
 #pragma GCC diagnostic pop
 
-// \todo improve reading for multiple files
+#define H5_COMPOUND_DEFINE_TYPE(x) using Type = x; using TypeClass = Compound; static TypeClass create(const Type & = Type())
+#define H5_COMPOUND_INIT auto type = datatype::Compound::create(sizeof(Type))
+#define H5_COMPOUND_INSERT_MEMBER(member) type.insert(STRINGIFY(member), offsetof(Type, member), datatype::create<decltype(Type::member)>())
+#define H5_COMPOUND_RETURN return type
 
+// \todo improve reading for multiple files
 template<typename T>
 class DumpFile {
 public:
