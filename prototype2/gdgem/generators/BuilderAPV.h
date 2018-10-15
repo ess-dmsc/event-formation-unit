@@ -10,7 +10,7 @@
 #pragma once
 
 #include <gdgem/nmx/AbstractBuilder.h>
-#include <gdgem/nmx/HitFile.h>
+#include <gdgem/nmx/Hit.h>
 
 class BuilderAPV : public AbstractBuilder {
 public:

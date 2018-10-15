@@ -5,16 +5,29 @@
 #include <test/TestBase.h>
 #include <unistd.h>
 
-class HitTest : public TestBase {
+class NMXHitTest : public TestBase {
 protected:
   Hit hit;
-  virtual void SetUp() {  }
+  virtual void SetUp() {
+    hdf5::error::Singleton::instance().auto_print(false);
+    if (boost::filesystem::exists("hit_file_test.h5"))
+    {
+      boost::filesystem::remove("hit_file_test.h5");
+    }
+  }
   virtual void TearDown() { }
 };
 
-TEST_F(HitTest, Debug) {
+TEST_F(NMXHitTest, Debug) {
   ASSERT_FALSE(hit.debug().empty());
 }
+
+TEST_F(NMXHitTest, CreateFile) {
+  HitFile::create("hit_file_test");
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test.h5"));
+}
+
+// \todo test h5 compound type mapping
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

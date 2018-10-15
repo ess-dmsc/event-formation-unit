@@ -26,6 +26,10 @@
 ///
 /// If you cannot ensure the above, consult someone who can.
 ///
+/// \file
+///
+/// \brief Readout struct for NMX event formation
+///
 //===----------------------------------------------------------------------===//
 
 #pragma once

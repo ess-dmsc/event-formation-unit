@@ -24,7 +24,6 @@ set(BuilderAPVTest_SRC
     BuilderAPV.cpp
     )
 set(BuilderAPVTest_INC
-    ../nmx/HitFile.h
     ../nmx/Cluster.h
     ../nmx/Event.h
     ../nmx/Hit.h
@@ -44,7 +43,6 @@ set(nmxgen_hits_SRC
     NMXArgs.cpp
     )
 set(nmxgen_hits_INC
-    ../nmx/HitFile.h
     ../nmx/Hit.h
     ReaderHits.h
     NMXArgs.h

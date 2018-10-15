@@ -16,7 +16,7 @@
 #include <multigrid/MgConfig.h>
 #include <multigrid/mgmesytec/Vmmr16Parser.h>
 #include <multigrid/mgmesytec/Efu.h>
-#include <multigrid/mgmesytec/HitFile.h>
+#include <multigrid/mgmesytec/Hit.h>
 
 struct MGMesytecSettings {
   std::string ConfigFile;

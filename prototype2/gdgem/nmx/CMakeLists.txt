@@ -17,17 +17,7 @@ set(HitTest_SRC
 set(HitTest_INC
     Hit.h
     )
-create_test_executable(HitTest)
-
-set(HitFileTest_SRC
-    HitFileTest.cpp
-    Hit.cpp
-    )
-set(HitFileTest_INC
-    HitFile.h
-    Hit.h
-    )
-create_test_executable(HitFileTest SKIP_MEMGRIND)
+create_test_executable(HitTest SKIP_MEMGRIND)
 
 set(ClusterTest_SRC
     ClusterTest.cpp
