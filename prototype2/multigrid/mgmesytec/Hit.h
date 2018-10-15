@@ -43,7 +43,7 @@ namespace Multigrid {
 struct __attribute__ ((packed)) Hit {
   // \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "mgmesytec_hits"; }
-  static std::string FormatVersion() { return "1.0.0"; }
+  static uint16_t FormatVersion() { return 0; }
 
   // !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
   size_t trigger_count{0};

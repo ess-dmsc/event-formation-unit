@@ -2,13 +2,13 @@
 # Tests
 #=============================================================================
 
-set(ReadoutFileTest_SRC
-    ReadoutFileTest.cpp
+set(NMXReadoutTest_SRC
+    ReadoutTest.cpp
     )
-set(ReadoutFileTest_INC
+set(NMXReadoutTest_INC
     Readout.h
     )
-create_test_executable(ReadoutFileTest SKIP_MEMGRIND)
+create_test_executable(NMXReadoutTest SKIP_MEMGRIND)
 
 set(HitTest_SRC
     HitTest.cpp

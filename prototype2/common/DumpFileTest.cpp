@@ -9,37 +9,53 @@ struct __attribute__ ((packed)) Hit {
   uint32_t c{0};
 
   static std::string DatasetName() { return "hit_dataset"; }
-  static std::string FormatVersion() { return "1.0.0"; }
+  static uint16_t FormatVersion() { return 0; }
 };
 
 namespace hdf5 {
-
 namespace datatype {
 template<>
 class TypeTrait<Hit> {
 public:
-  using Type = Hit;
-  using TypeClass = Compound;
-
-  static TypeClass create(const Type & = Type()) {
-    auto type = datatype::Compound::create(sizeof(Hit));
-    type.insert("a",
-                0,
-                datatype::create<size_t>());
-    type.insert("b",
-                sizeof(size_t),
-                datatype::create<std::int8_t>());
-    type.insert("c",
-                sizeof(size_t) + sizeof(std::int8_t),
-                datatype::create<std::uint32_t>());
-    return type;
+  H5_COMPOUND_DEFINE_TYPE(Hit) {
+    H5_COMPOUND_INIT;
+    H5_COMPOUND_INSERT_MEMBER(a);
+    H5_COMPOUND_INSERT_MEMBER(b);
+    H5_COMPOUND_INSERT_MEMBER(c);
+    H5_COMPOUND_RETURN;
   }
 };
 }
-
 }
 
 using HitFile = DumpFile<Hit>;
+
+struct __attribute__ ((packed)) Hit2 {
+  size_t a{0};
+  int8_t b{0};
+  uint32_t c{0};
+
+  static std::string DatasetName() { return "hit_dataset"; }
+  static uint16_t FormatVersion() { return 1; }
+};
+
+namespace hdf5 {
+namespace datatype {
+template<>
+class TypeTrait<Hit2> {
+public:
+  H5_COMPOUND_DEFINE_TYPE(Hit2) {
+    H5_COMPOUND_INIT;
+    H5_COMPOUND_INSERT_MEMBER(a);
+    H5_COMPOUND_INSERT_MEMBER(b);
+    H5_COMPOUND_INSERT_MEMBER(c);
+    H5_COMPOUND_RETURN;
+  }
+};
+}
+}
+
+using Hit2File = DumpFile<Hit2>;
 
 class DumpFileTest : public TestBase {
 protected:
@@ -86,6 +102,15 @@ TEST_F(DumpFileTest, Push) {
   EXPECT_EQ(file->count(), 1000);
   file->push(std::vector<Hit>(3000, Hit()));
   EXPECT_EQ(file->count(), 4000);
+}
+
+TEST_F(DumpFileTest, WrongVersion) {
+  auto file = HitFile::create("dumpfile_test");
+  file->push(std::vector<Hit>(1000, Hit()));
+  EXPECT_EQ(file->count(), 1000);
+  file.reset();
+
+  EXPECT_ANY_THROW(Hit2File::open("dumpfile_test"));
 }
 
 TEST_F(DumpFileTest, PushFileRotation) {

@@ -119,7 +119,14 @@ void DumpFile<T>::openR() {
 
   File = file::open(get_full_path(), file::AccessFlags::READONLY);
   DataSet = File.root().get_dataset(T::DatasetName());
-  // \todo format_version attribute should be compared using semver
+  // if not initial version, expect it to be well formed
+  if (T::FormatVersion() > 0) {
+    uint16_t ver {0};
+    DataSet.attributes["format_version"].read(ver);
+    if (ver != T::FormatVersion()) {
+      throw std::runtime_error("DumpFile version mismatch");
+    }
+  }
 }
 
 template<typename T>

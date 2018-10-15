@@ -39,7 +39,7 @@
 struct __attribute__ ((packed)) Readout {
   // \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "srs_hits"; }
-  static std::string FormatVersion() { return "1.0.0"; }
+  static uint16_t FormatVersion() { return 0; }
 
   // !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
   uint8_t fec{0};
