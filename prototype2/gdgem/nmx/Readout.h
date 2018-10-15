@@ -15,12 +15,12 @@
 ///
 ///
 ///
-///          MODIFY THIS FILE ONLY AFTER READING THE FOLLOWING
+///          MODIFY THIS FILE ONLY AFTER UNDERSTANDING THE FOLLOWING
 ///
 ///
 ///   Any changes to non-static variable definitions will likely break h5 file
 /// writing and compatibility. If you rename, reorder or change the type of any
-/// of the member variables, you must do the following:
+/// of the member variables, you MUST:
 ///    A) Increment FormatVersion by 1
 ///    B) Ensure the hdf5 TypeTrait maps the struct correctly
 ///
@@ -77,6 +77,7 @@ class TypeTrait<Readout> {
 public:
   H5_COMPOUND_DEFINE_TYPE(Readout) {
     H5_COMPOUND_INIT;
+    // Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(fec);
     H5_COMPOUND_INSERT_MEMBER(chip_id);
     H5_COMPOUND_INSERT_MEMBER(bonus_timestamp);
