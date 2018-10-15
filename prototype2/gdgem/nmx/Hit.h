@@ -45,19 +45,17 @@ struct __attribute__ ((packed)) Hit {
   static uint16_t FormatVersion() { return 0; }
 
   // !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
-  using strip_type = uint16_t;
-  using adc_type = uint16_t;
   double time{0};
   uint8_t plane_id{0};
-  strip_type strip{0};
-  adc_type adc{0};
+  uint16_t strip{0};
+  uint16_t adc{0};
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
   // \brief prints values for debug purposes
   std::string debug() const;
 
-  static constexpr strip_type strip_max_val{std::numeric_limits<strip_type>::max()};
-  static constexpr adc_type adc_max_val{std::numeric_limits<adc_type>::max()};
+  static constexpr decltype(strip) strip_max_val{std::numeric_limits<decltype(strip)>::max()};
+  static constexpr decltype(adc) adc_max_val{std::numeric_limits<decltype(adc)>::max()};
 };
 
 namespace hdf5 {
