@@ -74,9 +74,9 @@ void SetCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings) {
       ->group("Sampling Options")
       ->default_str("Middle");
   parser
-      .add_option("--samples_topic", ReadoutSettings.SamplesKafkaTopic,
-                  "The Kafka topic to which the raw sample data should be "
-                  "transmitted. Ignored if serialisation of waveforms is not "
+      .add_option("--delayline_topic", ReadoutSettings.DelayLineKafkaTopic,
+                  "The Kafka topic to which the delay line event data should be"
+                  " transmitted. Ignored if delay line processing is not "
                   "enabled. If empty string, use the default setting.")
       ->group("Sampling Options");
   parser
@@ -128,6 +128,12 @@ void SetCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings) {
                "the value of \"yaxis_offset\".")
       ->group("Delay Line Options")
       ->default_str("CONST");
+  
+  parser
+  .add_option("--event_timeout", ReadoutSettings.EventTimeoutNS,
+           "The maximum amount of time between pulses before throwing away the event. Value is in nanoseconds (ns).")
+  ->group("Delay Line Options")
+  ->default_str("100");
 
   std::set<ChRole> RoleOptions;
   for (auto &Item : getRoleMapping()) {

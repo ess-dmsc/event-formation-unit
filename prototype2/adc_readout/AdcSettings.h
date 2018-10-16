@@ -19,7 +19,7 @@ struct AdcSettings {
   bool SampleTimeStamp{false};
   int TakeMeanOfNrOfSamples{1};
   bool IncludeTimeStamp{false};
-  std::string SamplesKafkaTopic;
+  std::string DelayLineKafkaTopic;
   std::string TimeStampLocation{"Middle"};
   std::string Name;
   std::string GrafanaNameSuffix;
@@ -30,6 +30,7 @@ struct AdcSettings {
   double XAxisCalibSlope = {1.0};
   double YAxisCalibOffset = {0.0};
   double YAxisCalibSlope = {1.0};
+  unsigned int EventTimeoutNS;
 
   enum class PositionSensingType {
     AMPLITUDE,
