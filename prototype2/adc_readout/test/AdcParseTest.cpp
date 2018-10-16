@@ -361,7 +361,6 @@ TEST_F(AdcDataParsing, FakeDataTest) {
   EXPECT_EQ(NrOfModules, 2);
   EXPECT_EQ(ModulePtr.TimeStamp.SecondsFrac, 0x0000FFFFu);
   EXPECT_EQ(ModulePtr.TimeStamp.Seconds, 0xAAAA0000u);
-  EXPECT_EQ(ModulePtr.Channel, 0xAA00);
   EXPECT_EQ(ModulePtr.Identifier.ChannelNr, 0xAA00);
   EXPECT_EQ(ModulePtr.Identifier.SourceID, SourceIDUsed);
   EXPECT_EQ(ModulePtr.Data.size(), 2u);

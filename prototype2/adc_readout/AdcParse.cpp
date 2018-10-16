@@ -133,9 +133,7 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte) {
         ProduceModule(ChannelID{Header.Channel, Source});
     if (CurrentDataModule != nullptr) {
       CurrentDataModule->Data.resize(NrOfSamples);
-      CurrentDataModule->Channel = Header.Channel;
-      CurrentDataModule->Identifier.ChannelNr = Header.Channel;
-      CurrentDataModule->Identifier.SourceID = Source;
+      CurrentDataModule->Identifier = {Header.Channel, Source};
       CurrentDataModule->TimeStamp = Header.TimeStamp;
       CurrentDataModule->OversamplingFactor = Header.Oversampling;
       auto ElementPointer = reinterpret_cast<const std::uint16_t *>(

@@ -71,7 +71,7 @@ struct SamplingRun {
   }
   ~SamplingRun() = default;
   SamplingRun(const SamplingRun &&Other)
-      : TimeStamp(Other.TimeStamp), Channel(Other.Channel),
+      : TimeStamp(Other.TimeStamp), Identifier(Other.Identifier),
         OversamplingFactor(Other.OversamplingFactor),
         Data(std::move(Other.Data)) {}
   SamplingRun &operator=(const SamplingRun &) = default;
@@ -79,14 +79,12 @@ struct SamplingRun {
   void reset() {
     Data.clear();
     OversamplingFactor = 1;
-    Channel = 0;
     TimeStamp.Seconds = 0;
     TimeStamp.SecondsFrac = 0;
     Identifier.ChannelNr = 0;
     Identifier.SourceID = 0;
   }
   ChannelID Identifier;
-  std::uint16_t Channel;
   std::uint16_t OversamplingFactor{1};
   std::vector<std::uint16_t> Data;
 };

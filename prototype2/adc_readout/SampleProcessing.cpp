@@ -68,7 +68,7 @@ ProcessedSamples ChannelProcessing::processModule(const SamplingRun &Samples) {
   if (not ReturnSamples.TimeStamps.empty()) {
     ReturnSamples.TimeStamp = ReturnSamples.TimeStamps[0];
   }
-  ReturnSamples.Channel = Samples.Channel;
+  ReturnSamples.Channel = Samples.Identifier.ChannelNr;
   return ReturnSamples;
 }
 
