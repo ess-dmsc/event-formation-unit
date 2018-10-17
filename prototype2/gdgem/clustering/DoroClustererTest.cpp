@@ -70,7 +70,7 @@ protected:
   }
 };
 
-// TODO: Test this without sorter!!! Use presorted data that we understand
+/// \todo Test this without sorter!!! Use presorted data that we understand
 
 TEST_F(DoroClustererTest, Run16_line_110168_110323) {
   uint32_t bonus = 0;

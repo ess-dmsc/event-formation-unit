@@ -267,7 +267,7 @@ void GdGemBase::processing_thread() {
 
             mystats.clusters_xy++;
 
-            // TODO: Should it be here or outside of event.valid()?
+            /// \todo Should it be here or outside of event.valid()?
             if (sample_next_track) {
               sample_next_track = trackfb.add_track(event);
             }

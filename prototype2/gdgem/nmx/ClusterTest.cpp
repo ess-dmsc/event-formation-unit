@@ -178,7 +178,7 @@ TEST_F(ClusterTest, MergeToEmpty) {
   cluster2.insert_hit(e);
   cluster2.insert_hit(e);
 
-  // TODO: old cluster stats should be reset
+  /// \todo old cluster stats should be reset
   cluster.merge(cluster2);
 
   EXPECT_EQ(cluster.entries.size(), 3);
@@ -204,7 +204,7 @@ TEST_F(ClusterTest, Merge) {
   e.time = 5;
   cluster2.insert_hit(e);
 
-  // TODO: old cluster stats should be reset
+  /// \todo old cluster stats should be reset
   cluster.merge(cluster2);
 
   EXPECT_EQ(cluster.entries.size(), 5);
@@ -277,7 +277,7 @@ TEST_F(ClusterTest, AnalyzeUncert) {
   EXPECT_EQ(cluster.utpc_center_rounded(), 17);
 }
 
-// TODO: cluster plane identity tests
+/// \todo cluster plane identity tests
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

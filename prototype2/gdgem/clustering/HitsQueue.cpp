@@ -19,7 +19,7 @@ const HitContainer &HitsQueue::hits() const {
   return hitsOut.buffer;
 }
 
-// TODO: sort out Hit constr
+/// \todo sort out Hit constr
 void HitsQueue::store(uint8_t plane, uint16_t strip, uint16_t adc,
                       double chipTime, double trigger_time) {
   HitBuffer* b = &hitsOld;
@@ -37,8 +37,8 @@ void HitsQueue::store(uint8_t plane, uint16_t strip, uint16_t adc,
 
 
 void HitsQueue::sort_and_correct() {
-  // TODO: What are the sizes of (number of elements) in hitsOld and hitsNew?
-  // TODO: This might be relevant to the type of sorting that should be used.
+  /// \todo What are the sizes of (number of elements) in hitsOld and hitsNew?
+  /// \todo This might be relevant to the type of sorting that should be used.
   std::sort(hitsOld.buffer.begin(), hitsOld.buffer.end(),
             [](const Hit &e1, const Hit &e2) {
               return e1.time < e2.time;

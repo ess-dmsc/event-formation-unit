@@ -1,10 +1,24 @@
 #=============================================================================
 # Detector Pipeline Plugins
 #=============================================================================
+set(sonde_common_inc
+  SoNDeBase.h
+  ideas/Data.h
+)
+set(sonde_common_src
+  SoNDeBase.cpp
+  ideas/Data.cpp
+)
+
+
 
 # IDEA based readout for SoNDe detector
-set(sonde_SRC sonde.cpp ideas/Data.cpp)
-set(sonde_INC ideas/Data.h)
+set(sonde_INC
+  ${sonde_common_inc}
+)
+set(sonde_SRC SoNDe.cpp
+  ${sonde_common_src}
+)
 create_module(sonde)
 
 
