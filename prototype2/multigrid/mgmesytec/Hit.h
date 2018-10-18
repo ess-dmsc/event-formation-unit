@@ -39,11 +39,12 @@
 namespace Multigrid {
 
 struct __attribute__ ((packed)) Hit {
-  // \todo use constexpr string_view when c++17 arrives
+  /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "mgmesytec_hits"; }
   static uint16_t FormatVersion() { return 0; }
 
-  // !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
+  /// \todo consider reordering these to optimize
+  /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
   size_t trigger_count{0};
   int8_t external_trigger{0};
   uint8_t module{0};
@@ -70,7 +71,7 @@ class TypeTrait<Multigrid::Hit> {
 public:
   H5_COMPOUND_DEFINE_TYPE(Multigrid::Hit) {
     H5_COMPOUND_INIT;
-    // Make sure ALL member variables are inserted
+    /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(trigger_count);
     H5_COMPOUND_INSERT_MEMBER(external_trigger);
     H5_COMPOUND_INSERT_MEMBER(module);

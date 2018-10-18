@@ -37,11 +37,12 @@
 #include <common/DumpFile.h>
 
 struct __attribute__ ((packed)) Readout {
-  // \todo use constexpr string_view when c++17 arrives
+  /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "srs_hits"; }
   static uint16_t FormatVersion() { return 0; }
 
-  // !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
+  /// \todo consider reordering these to optimize
+  /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
   uint8_t fec{0};
   uint8_t chip_id{0};
   uint32_t bonus_timestamp{0};
@@ -52,7 +53,7 @@ struct __attribute__ ((packed)) Readout {
   uint16_t adc{0};
   bool over_threshold{false};
   float ChipTimeNs{0.0};
-  // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
+  /// !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
   bool operator==(const Readout &other) const {
     return (
@@ -77,7 +78,7 @@ class TypeTrait<Readout> {
 public:
   H5_COMPOUND_DEFINE_TYPE(Readout) {
     H5_COMPOUND_INIT;
-    // Make sure ALL member variables are inserted
+    /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(fec);
     H5_COMPOUND_INSERT_MEMBER(chip_id);
     H5_COMPOUND_INSERT_MEMBER(bonus_timestamp);

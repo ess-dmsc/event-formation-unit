@@ -38,11 +38,12 @@
 #include <common/DumpFile.h>
 
 struct __attribute__ ((packed)) Hit {
-  // \todo use constexpr string_view when c++17 arrives
+  /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "gdgem_hits"; }
   static uint16_t FormatVersion() { return 0; }
 
-  // !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
+  /// \todo consider reordering these to optimize
+  /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
   double time{0};
   uint8_t plane_id{0};
   uint16_t strip{0};
@@ -64,7 +65,7 @@ class TypeTrait<Hit> {
 public:
   H5_COMPOUND_DEFINE_TYPE(Hit) {
     H5_COMPOUND_INIT;
-    // Make sure ALL member variables are inserted
+    /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(time);
     H5_COMPOUND_INSERT_MEMBER(plane_id);
     H5_COMPOUND_INSERT_MEMBER(strip);
