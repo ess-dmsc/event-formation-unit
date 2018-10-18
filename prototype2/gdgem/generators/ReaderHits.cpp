@@ -5,22 +5,22 @@
 #include <iostream>
 
 ReaderHits::ReaderHits(std::string filename) {
-  file.open_r(filename);
-  total_ = file.count();
+  file = HitFile::open(filename);
+  total_ = file->count();
   current_ = 0;
 }
 
 size_t ReaderHits::read(char *buf) {
-  size_t size = HitFile::chunk_size;
-  if ((current_ + HitFile::chunk_size) > total_)
+  size_t size = HitFile::ChunkSize;
+  if ((current_ + HitFile::ChunkSize) > total_)
   {
     size = total_ - current_;
   }
 
   if (size > 0) {
     try {
-      file.read_at(current_, size);
-      memcpy(buf, file.data.data(), sizeof(Hit) * size);
+      file->readAt(current_, size);
+      memcpy(buf, file->Data.data(), sizeof(Hit) * size);
     } catch (std::exception &e) {
       std::cout << "<ReaderHits> failed to read slab ("
                 << current_ << ", " << (current_ + size) << ")"

@@ -2,15 +2,13 @@
 # Tests
 #=============================================================================
 
-set(ReadoutFileTest_SRC
-    ReadoutFileTest.cpp
-    ReadoutFile.cpp
+set(NMXReadoutTest_SRC
+    ReadoutTest.cpp
     )
-set(ReadoutFileTest_INC
-    ReadoutFile.h
+set(NMXReadoutTest_INC
     Readout.h
     )
-create_test_executable(ReadoutFileTest SKIP_MEMGRIND)
+create_test_executable(NMXReadoutTest SKIP_MEMGRIND)
 
 set(HitTest_SRC
     HitTest.cpp
@@ -19,18 +17,7 @@ set(HitTest_SRC
 set(HitTest_INC
     Hit.h
     )
-create_test_executable(HitTest)
-
-set(HitFileTest_SRC
-    HitFileTest.cpp
-    HitFile.cpp
-    Hit.cpp
-    )
-set(HitFileTest_INC
-    HitFile.h
-    Hit.h
-    )
-create_test_executable(HitFileTest SKIP_MEMGRIND)
+create_test_executable(HitTest SKIP_MEMGRIND)
 
 set(ClusterTest_SRC
     ClusterTest.cpp

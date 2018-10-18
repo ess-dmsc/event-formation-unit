@@ -10,7 +10,6 @@ set(ClusteringBase_SRC
     ../nmx/Event.cpp
     ../nmx/Cluster.cpp
     ../nmx/Hit.cpp
-    ../nmx/ReadoutFile.cpp
     ../srs/SRSTime.cpp
     ../srs/SRSMappings.cpp
     HitsQueue.cpp
@@ -22,7 +21,7 @@ set(ClusteringBase_INC
     ../nmx/Readout.h
     ../nmx/Cluster.h
     ../nmx/Hit.h
-    ../nmx/ReadoutFile.h
+    ../nmx/Readout.h
     ../srs/SRSTime.h
     ../srs/SRSMappings.h
     HitContainer.h
@@ -33,12 +32,13 @@ set(ClusteringBase_INC
     TestDataShort.h
     )
 
-#set(hdr2h5_SRC
-#    ${ClusteringBase_SRC}
-#    test_data/hdr2h5.cpp)
-#set(hdr2h5_INC
-#    ${ClusteringBase_INC})
-#create_executable(hdr2h5)
+set(srs_converter_SRC
+    ${ClusteringBase_SRC}
+    test_data/srs_converter.cpp)
+set(srs_converter_INC
+  test_data/OldReadoutFile.h
+    ${ClusteringBase_INC})
+#create_executable(srs_converter)
 
 set(HitsQueueTest_SRC
     ${ClusteringBase_SRC}

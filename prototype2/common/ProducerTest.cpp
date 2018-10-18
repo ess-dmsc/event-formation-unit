@@ -6,9 +6,6 @@
 #include <librdkafka/rdkafkacpp.h>
 #include <test/TestBase.h>
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-
 int fail = -1; // Dont fail
 
 // Create pointers to the retuned objects
@@ -160,5 +157,3 @@ int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
-#pragma GCC diagnostic pop

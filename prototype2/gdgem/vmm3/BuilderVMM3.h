@@ -13,7 +13,7 @@
 #include <gdgem/srs/SRSTime.h>
 #include <gdgem/vmm3/ParserVMM3.h>
 #include <gdgem/vmm3/CalibrationFile.h>
-#include <gdgem/nmx/ReadoutFile.h>
+#include <gdgem/nmx/Readout.h>
 
 #include <gdgem/clustering/HitSorter.h>
 
