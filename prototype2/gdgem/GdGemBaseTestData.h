@@ -66,8 +66,8 @@ std::string vmm3json = R"(
   "geometry_x" : 256,
   "geometry_y" : 256,
 
-  "dump_csv" : false,
-  "dump_h5" : false,
+  "dump_csv" : true,
+  "dump_h5" : true,
   "dump_directory" : ""
 }
 )";
