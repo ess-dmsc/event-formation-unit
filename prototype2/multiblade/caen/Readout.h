@@ -28,7 +28,7 @@
 ///
 /// \file
 ///
-/// \brief Hit struct for Multigrid event formation
+/// \brief Readout struct for Multiblade CAEN event formation
 ///
 //===----------------------------------------------------------------------===//
 

@@ -23,6 +23,7 @@ namespace Multiblade {
 
 int DataParser::parse(const char *buffer, unsigned int size) {
 
+  readouts.clear();
   MBHeader = nullptr;
   Data = nullptr;
   memset(&Stats, 0, sizeof(struct Stats));
@@ -55,6 +56,17 @@ int DataParser::parse(const char *buffer, unsigned int size) {
   }
 
   Data = (struct ListElement422 *)(buffer + sizeof(struct Header));
+
+  prototype.global_time = MBHeader->globalTime;
+  prototype.digitizer = MBHeader->digitizerID;
+  readouts.resize(MBHeader->numElements, prototype);
+  for (size_t i=0; i < MBHeader->numElements; ++i) {
+    auto& r = readouts[i];
+    const auto& d = Data[i];
+    r.local_time = d.localTime;
+    r.channel = d.channel;
+    r.adc = d.adcValue;
+  }
 
   return MBHeader->numElements;
 }

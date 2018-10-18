@@ -16,7 +16,7 @@
 #include <common/HistSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
-#include <common/DataSave.h>
+#include <common/TimeString.h>
 #include <unistd.h>
 
 #include <libs/include/SPSCFifo.h>
@@ -127,11 +127,10 @@ void CAENBase::processing_thread() {
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
 
-  std::shared_ptr<DataSave> mbdatasave;
-  bool dumptofile = !MBCAENSettings.FilePrefix.empty();
-  if (dumptofile) {
-    mbdatasave = std::make_shared<DataSave>(MBCAENSettings.FilePrefix + "_multiblade_", 100000000);
-    mbdatasave->tofile("# time, digitizer, channel, adc\n");
+  std::shared_ptr<ReadoutFile> dumpfile;
+  if (!MBCAENSettings.FilePrefix.empty()) {
+    dumpfile = ReadoutFile::create(
+        MBCAENSettings.FilePrefix + "mbcaen_" + timeString(), 100);
   }
 
   ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
@@ -222,8 +221,8 @@ void CAENBase::processing_thread() {
             break;
           }
 
-          if (dumptofile) {
-            mbdatasave->tofile("%d,%d,%d,%d\n", dp.localTime, digitizerId, dp.channel, dp.adcValue);
+          if (dumpfile) {
+            dumpfile->push(mbdata.readouts);
           }
 
           if (dp.channel >= 32) {

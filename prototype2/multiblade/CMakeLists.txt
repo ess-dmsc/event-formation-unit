@@ -7,6 +7,7 @@ set(caen_common_inc
   MBCaenBase.h
   ../common/Hists.h
   ../common/HistSerializer.h
+  caen/Readout.cpp
   caen/DataParser.h
   common/EventBuilder.h
   common/DumpEventBuilderInfo.h
@@ -16,6 +17,7 @@ set(caen_common_src
   MBCaenBase.cpp
   ../common/Hists.cpp
   ../common/HistSerializer.cpp
+  caen/Readout.h
   caen/DataParser.cpp
   common/EventBuilder.cpp
   common/DumpEventBuilderInfo.cpp
