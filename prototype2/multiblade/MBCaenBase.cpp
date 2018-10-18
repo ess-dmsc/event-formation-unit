@@ -196,6 +196,7 @@ void CAENBase::processing_thread() {
       if (datalen == 0) {
         mystats.fifo_seq_errors++;
       } else {
+        /// \todo use the Buffer<T> class here and in parser
         auto dataptr = eth_ringbuf->getDataBuffer(data_index);
         if (parser.parse(dataptr, datalen) < 0) {
           mystats.rx_error_bytes += parser.Stats.error_bytes;
@@ -253,6 +254,8 @@ void CAENBase::processing_thread() {
               mystats.rx_events++;
             }
           }
+          /// \todo we need to also flush leftover clusters in case of loop termination
+
         }
       }
     }
