@@ -11,6 +11,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Multiblade {
+
 MultiBladeEventBuilder::MultiBladeEventBuilder()
     : m_wire_cluster(0), m_strip_cluster(0), m_time_stamp(0), m_cluster_clock(0),
       m_first_signal(true), m_nevents(0) {
@@ -210,7 +212,7 @@ double MultiBladeEventBuilder::calculatePosition(std::vector<point> &cluster) {
     }
     return (sum_denominator == 0 ? -1
                                  : static_cast<double>(sum_numerator) /
-                                       static_cast<double>(sum_denominator));
+            static_cast<double>(sum_denominator));
   } else {
     uint8_t max_channel = 0;
     uint64_t max_ADC = 0;
@@ -330,4 +332,6 @@ void MultiBladeEventBuilder::incrementCounters(
 
 bool operator<(const point &a, const point &b) {
   return (a.channel < b.channel);
+}
+
 }

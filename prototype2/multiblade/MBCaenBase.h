@@ -14,6 +14,8 @@
 #include <libs/include/SPSCFifo.h>
 #include <mbcommon/MBConfig.h>
 
+namespace Multiblade {
+
 struct MBCAENSettings {
   std::string FilePrefix{""};
   std::string ConfigFile{""};
@@ -23,7 +25,7 @@ using namespace memory_sequential_consistent; // Lock free fifo
 
 class MBCAENBase : public Detector {
 public:
-  MBCAENBase(BaseSettings const &settings, struct MBCAENSettings & LocalMBCAENSettings);
+  MBCAENBase(BaseSettings const &settings, struct MBCAENSettings &LocalMBCAENSettings);
   ~MBCAENBase() { delete eth_ringbuf; }
   void input_thread();
   void processing_thread();
@@ -65,3 +67,5 @@ protected:
   struct MBCAENSettings MBCAENSettings;
   MBConfig mb_opts;
 };
+
+}

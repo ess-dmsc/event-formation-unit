@@ -33,6 +33,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+namespace Multiblade {
+
 using namespace memory_sequential_consistent; // Lock free fifo
 
 const char *classname = "Multiblade detector with CAEN readout";
@@ -40,21 +42,21 @@ const char *classname = "Multiblade detector with CAEN readout";
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 
-MBCAENBase::MBCAENBase(BaseSettings const &settings, struct MBCAENSettings & LocalMBCAENSettings)
+MBCAENBase::MBCAENBase(BaseSettings const &settings, struct MBCAENSettings &LocalMBCAENSettings)
     : Detector("MBCAEN", settings), MBCAENSettings(LocalMBCAENSettings) {
   Stats.setPrefix("efu.mbcaen");
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("input.rx_packets",                mystats.rx_packets);
-  Stats.create("input.rx_bytes",                  mystats.rx_bytes);
-  Stats.create("input.fifo1_push_errors",         mystats.fifo1_push_errors);
-  Stats.create("processing.rx_readouts",          mystats.rx_readouts);
-  Stats.create("processing.rx_idle1",             mystats.rx_idle1);
-  Stats.create("processing.tx_bytes",             mystats.tx_bytes);
-  Stats.create("processing.rx_events",            mystats.rx_events);
-  Stats.create("processing.rx_geometry_errors",   mystats.geometry_errors);
-  Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  Stats.create("input.rx_packets", mystats.rx_packets);
+  Stats.create("input.rx_bytes", mystats.rx_bytes);
+  Stats.create("input.fifo1_push_errors", mystats.fifo1_push_errors);
+  Stats.create("processing.rx_readouts", mystats.rx_readouts);
+  Stats.create("processing.rx_idle1", mystats.rx_idle1);
+  Stats.create("processing.tx_bytes", mystats.tx_bytes);
+  Stats.create("processing.rx_events", mystats.rx_events);
+  Stats.create("processing.rx_geometry_errors", mystats.geometry_errors);
+  Stats.create("processing.fifo_seq_errors", mystats.fifo_seq_errors);
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
   Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
@@ -127,8 +129,7 @@ void MBCAENBase::processing_thread() {
 
   std::shared_ptr<DataSave> mbdatasave;
   bool dumptofile = !MBCAENSettings.FilePrefix.empty();
-  if (dumptofile)
-  {
+  if (dumptofile) {
     mbdatasave = std::make_shared<DataSave>(MBCAENSettings.FilePrefix + "_multiblade_", 100000000);
     mbdatasave->tofile("# time, digitizer, channel, adc\n");
   }
@@ -235,15 +236,15 @@ void MBCAENBase::processing_thread() {
 
             auto xcoord = builder[cassette].getStripPosition() - 32; // pos 32 - 63
             auto ycoord = cassette * nwires +
-                          builder[cassette].getWirePosition(); // pos 0 - 31
+                builder[cassette].getWirePosition(); // pos 0 - 31
 
             uint32_t pixel_id = essgeom.pixel2D(xcoord, ycoord);
 
             XTRACE(PROCESS, DEB,
                    "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d\n",
-                   digitizerId, (int)xcoord, (int)ycoord,
-                   (int)builder[cassette].getWirePosition(),
-                   (int)builder[cassette].getStripPosition(), pixel_id);
+                   digitizerId, (int) xcoord, (int) ycoord,
+                   (int) builder[cassette].getWirePosition(),
+                   (int) builder[cassette].getStripPosition(), pixel_id);
 
             if (pixel_id == 0) {
               mystats.geometry_errors++;
@@ -257,4 +258,6 @@ void MBCAENBase::processing_thread() {
       }
     }
   }
+}
+
 }

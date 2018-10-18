@@ -11,7 +11,7 @@
  * File:
  */
 
-DataParser mbdata;
+Multiblade::DataParser mbdata;
 unsigned char databuffer[100000];
 
 static void Setup(__attribute__((unused)) benchmark::State &state) {

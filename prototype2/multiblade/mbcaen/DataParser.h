@@ -12,6 +12,8 @@
 #include <cstring>
 #include <vector>
 
+namespace Multiblade {
+
 /// \todo consider using the real values  and using
 /// htons() in the parser
 // 0x0102 (1.2) byteswapped
@@ -53,3 +55,5 @@ public:
     uint64_t error_bytes{0};
   } Stats;
 };
+
+}

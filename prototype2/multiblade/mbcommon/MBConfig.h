@@ -14,9 +14,11 @@
 #include <string>
 #include <vector>
 
+namespace Multiblade {
+
 class MBConfig {
 public:
-  enum class InstrumentGeometry {Estia, Freia};
+  enum class InstrumentGeometry { Estia, Freia };
 
   ///
   MBConfig() = default;
@@ -65,3 +67,5 @@ private:
   /// incorporate in the digital geometry
   std::vector<struct MB16Detector::Digitiser> Digitisers;
 };
+
+}

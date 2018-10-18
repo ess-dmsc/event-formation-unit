@@ -19,6 +19,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+namespace Multiblade {
+
 int DataParser::parse(const char *buffer, unsigned int size) {
 
   MBHeader = nullptr;
@@ -55,4 +57,6 @@ int DataParser::parse(const char *buffer, unsigned int size) {
   MBData = (struct ListElement422 *)(buffer + sizeof(struct Header));
 
   return MBHeader->numElements;
+}
+
 }

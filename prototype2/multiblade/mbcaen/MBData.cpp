@@ -13,6 +13,8 @@
 #include <mbcaen/MBData.h>
 #include <memory>
 
+namespace Multiblade {
+
 MBData::MBData() : data(0) {}
 
 unsigned int MBData::receive(const char *buffer, unsigned int size) {
@@ -51,4 +53,6 @@ unsigned int MBData::receive(const char *buffer, unsigned int size) {
   } while (read_data < size);
 
   return data.size();
+}
+
 }

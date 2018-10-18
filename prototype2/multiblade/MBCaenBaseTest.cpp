@@ -30,13 +30,13 @@
 #include <../prototype2/adc_readout/test/TestUDPServer.h>
 #include <test/TestBase.h>
 
-class MBCAENBaseStandIn : public MBCAENBase {
+class MBCAENBaseStandIn : public Multiblade::MBCAENBase {
 public:
-  MBCAENBaseStandIn(BaseSettings Settings, struct MBCAENSettings ReadoutSettings)
-      : MBCAENBase(Settings, ReadoutSettings){};
+  MBCAENBaseStandIn(BaseSettings Settings, struct Multiblade::MBCAENSettings ReadoutSettings)
+      : Multiblade::MBCAENBase(Settings, ReadoutSettings){};
   ~MBCAENBaseStandIn() = default;
   using Detector::Threads;
-  using MBCAENBase::mystats;
+  using Multiblade::MBCAENBase::mystats;
 };
 
 class MBCAENBaseTest : public ::testing::Test {
@@ -49,7 +49,7 @@ public:
   virtual void TearDown() {}
 
   BaseSettings Settings;
-  MBCAENSettings LocalSettings;
+  Multiblade::MBCAENSettings LocalSettings;
 };
 
 TEST_F(MBCAENBaseTest, Constructor) {

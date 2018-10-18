@@ -10,7 +10,7 @@
 #include "MBCaenBase.h"
 #include <common/Detector.h>
 
-static struct MBCAENSettings LocalMBCAENSettings;
+static struct Multiblade::MBCAENSettings LocalMBCAENSettings;
 
 void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
   parser.add_option("--dumptofile", LocalMBCAENSettings.FilePrefix,
@@ -23,10 +23,10 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
 
-class MBCAEN : public MBCAENBase {
+class MBCAEN : public Multiblade::MBCAENBase {
 public:
   explicit MBCAEN(BaseSettings Settings)
-      : MBCAENBase(std::move(Settings), LocalMBCAENSettings) {}
+      : Multiblade::MBCAENBase(std::move(Settings), LocalMBCAENSettings) {}
 };
 
 DetectorFactory<MBCAEN> Factory;

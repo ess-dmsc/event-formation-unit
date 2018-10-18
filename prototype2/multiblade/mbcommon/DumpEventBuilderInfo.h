@@ -9,6 +9,8 @@
 
 #include "mbcommon/MultiBladeEventBuilder.h"
 
+namespace Multiblade {
+
 class DumpEventBuilderInfo {
 
 public:
@@ -63,3 +65,5 @@ private:
   /// Summs the contents of a std::array of uint64_t with dimension 6
   uint64_t sumArray(std::array<uint64_t, 6> array);
 };
+
+}

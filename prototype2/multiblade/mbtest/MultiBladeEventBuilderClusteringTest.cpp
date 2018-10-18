@@ -17,7 +17,7 @@
 
 TEST(MBEventBuilder__Test, Threshold) {
 
-  MultiBladeEventBuilder p;
+  Multiblade::MultiBladeEventBuilder p;
   p.setThreshold(10);
   p.setTimeWindow(1);
 
@@ -64,7 +64,7 @@ TEST(MBEventBuilder__Test, TimeWindow_OverFlow) {
   // not be reset.
 
   // Instanciate the event-builder
-  MultiBladeEventBuilder p;
+  Multiblade::MultiBladeEventBuilder p;
 
   // Set the number of clock-cycles for the time-window
   uint64_t window = 10;
@@ -91,7 +91,7 @@ TEST(MBEventBuilder__Test, ClusterTime) {
   // Also test that the time-stamp is calculated correctly.
 
   // Instanciate the event-builder
-  MultiBladeEventBuilder p;
+  Multiblade::MultiBladeEventBuilder p;
 
   // Set the number of clock-cycles for the time-window
   uint64_t window = 10;
@@ -261,7 +261,7 @@ TEST(MBEventBuilder__Test, WireStripPoints) {
   // Iterate over the 5 cases.
   for (uint i = 0; i < 5; i++) {
 
-    MultiBladeEventBuilder p;
+    Multiblade::MultiBladeEventBuilder p;
     p.setNumberOfWireChannels(npoints[i]);
     p.setNumberOfStripChannels(npoints[i]);
     p.setTimeWindow(1000);
@@ -301,7 +301,7 @@ TEST(MBEventBuilder__Test, Clustering) {
   // We test the configuration functions also
 
   // Instanciate the event-builder.
-  MultiBladeEventBuilder p;
+  Multiblade::MultiBladeEventBuilder p;
   // Configure the event-builder using the config info in multiBladeTestData.h
   p.setTimeWindow(config[0]);
   p.setNumberOfWireChannels(config[1]);

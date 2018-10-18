@@ -17,7 +17,7 @@ protected:
 
 /** Test cases below */
 TEST_F(MultibladeDataTest, Constructor) {
-  DataParser mbdata;
+  Multiblade::DataParser mbdata;
   EXPECT_EQ(0, mbdata.Stats.error_bytes);
   EXPECT_EQ(nullptr, mbdata.MBData);
   EXPECT_EQ(nullptr, mbdata.MBHeader);
@@ -25,7 +25,7 @@ TEST_F(MultibladeDataTest, Constructor) {
 
 
 TEST_F(MultibladeDataTest, InvalidHeaderSizes) {
-  DataParser mbdata;
+  Multiblade::DataParser mbdata;
   for (int i = 0; i < 32; i++) {
     auto res = mbdata.parse((char *)&all_zeroes[0], i);
     ASSERT_EQ(res, -mbdata.error::ESIZE);
@@ -42,26 +42,26 @@ TEST_F(MultibladeDataTest, InvalidHeaderSizes) {
 
 
 TEST_F(MultibladeDataTest, DataLengthMisMatch) {
-  DataParser mbdata;
+  Multiblade::DataParser mbdata;
   auto res = mbdata.parse((char *)&all_zeroes[0], all_zeroes.size());
-  ASSERT_EQ(res, -DataParser::error::ESIZE);
+  ASSERT_EQ(res, -Multiblade::DataParser::error::ESIZE);
 }
 
 TEST_F(MultibladeDataTest, InvalidVersion) {
-  DataParser mbdata;
+  Multiblade::DataParser mbdata;
   auto res = mbdata.parse((char *)&invalid_version[0], invalid_version.size());
-  ASSERT_EQ(res, -DataParser::error::EHEADER);
+  ASSERT_EQ(res, -Multiblade::DataParser::error::EHEADER);
 }
 
 TEST_F(MultibladeDataTest, InvalidType) {
-  DataParser mbdata;
+  Multiblade::DataParser mbdata;
   auto res = mbdata.parse((char *)&invalid_type[0], invalid_type.size());
-  ASSERT_EQ(res, -DataParser::error::EHEADER);
+  ASSERT_EQ(res, -Multiblade::DataParser::error::EHEADER);
 }
 
 TEST_F(MultibladeDataTest, Packet13Triggered) {
   unsigned int eventsInPacket{958};
-  DataParser mbdata;
+  Multiblade::DataParser mbdata;
   auto res = mbdata.parse((char *)&pkt13[0], pkt13.size());
 
   EXPECT_EQ(res, eventsInPacket);

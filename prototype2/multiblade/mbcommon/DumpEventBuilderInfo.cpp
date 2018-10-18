@@ -10,6 +10,8 @@
 
 #include "DumpEventBuilderInfo.h"
 
+namespace Multiblade {
+
 DumpEventBuilderInfo::DumpEventBuilderInfo()
 #if 0
 : m_2D_wire_events(0),
@@ -143,4 +145,6 @@ uint64_t DumpEventBuilderInfo::sumArray(std::array<uint64_t, 6> array) {
     sum += array[i];
 
   return sum;
+}
+
 }

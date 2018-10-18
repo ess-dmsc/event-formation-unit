@@ -10,6 +10,8 @@
 #include <cstdint>
 #include <vector>
 
+namespace Multiblade {
+
 struct datapoint {
   uint8_t digi;
   uint8_t chan;
@@ -27,3 +29,5 @@ public:
 
 private:
 };
+
+}

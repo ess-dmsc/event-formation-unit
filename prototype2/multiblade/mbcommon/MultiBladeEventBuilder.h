@@ -34,6 +34,8 @@
 
 #include <common/Trace.h>
 
+namespace Multiblade {
+
 /// Struct containing channel number and ADC-value for a singe strip or wire.
 struct point {
   uint32_t channel; ///< Number of either wire or strip channel
@@ -226,14 +228,14 @@ private:
       m_rejected_adjacency; /// Number of events rejected due to adjacency
   uint64_t m_rejected_position; /// Number of events rejected due to position
   std::array<uint64_t, 6> m_2D_wires; ///< 2D clusters. Number of wires fired.
-                                      ///>5 wires -> element 6
+  ///>5 wires -> element 6
   std::array<uint64_t, 6>
       m_2D_strips; ///< 2D clusters. Number of strips fired. >5 strips -> element 6
   std::array<uint64_t, 6> m_1D_wires; ///< 1D clusters. Number of wires fired.
-                                      /// >5 wires -> element 6
+  /// >5 wires -> element 6
   std::array<uint64_t, 6>
       m_1D_strips; ///< 1D clusters. Number of strips fired. >5 strips ->
-                   ///    element 6
+  ///    element 6
 
   // Private member functions
 
@@ -276,8 +278,9 @@ private:
   void incrementCounters(const std::vector<point> &m_wire_cluster,
                          const std::vector<point> &m_strip_cluster);
 
-
   struct {
     uint64_t readouts_discarded{0};
   } Stats;
 };
+
+}
