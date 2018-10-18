@@ -31,6 +31,14 @@ set(mbcaen_SRC
 )
 create_module(mbcaen)
 
+set(MBReadoutTest_SRC
+  caen/Readout.cpp
+  caen/ReadoutTest.cpp
+  )
+set(MBReadoutTest_INC
+  caen/Readout.h
+  )
+create_test_executable(MBReadoutTest SKIP_MEMGRIND)
 
 #=============================================================================
 # Build MB text 2 UDP
