@@ -1,6 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/ReadoutFile.h>
+#include <gdgem/nmx/Readout.h>
 #include <gdgem/clustering/HitSorter.h>
 #include <gdgem/clustering/DoroClusterer.h>
 
@@ -32,7 +32,7 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-    ReadoutFile::read(DataPath + "run16long.h5", long_data);
+    ReadoutFile::read(DataPath + "run16long", long_data);
 
     mapping.set_mapping(1, 0, 0, 0);
     mapping.set_mapping(1, 1, 0, 64);

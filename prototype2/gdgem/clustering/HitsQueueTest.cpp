@@ -8,7 +8,7 @@
 #include <functional>
 
 #include <gdgem/clustering/TestDataShort.h>
-#include <gdgem/nmx/ReadoutFile.h>
+#include <gdgem/nmx/Readout.h>
 
 constexpr float no_offset = 0.0;
 constexpr float unit_slope = 1.0;
@@ -26,7 +26,7 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-    ReadoutFile::read(DataPath + "run16long.h5", long_data);
+    ReadoutFile::read(DataPath + "run16long", long_data);
 
     srstime.set_bc_clock(20);
     srstime.set_tac_slope(60);

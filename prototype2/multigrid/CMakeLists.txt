@@ -21,7 +21,6 @@ set(mgmesytec_common_src
   mgmesytec/Vmmr16Parser.cpp
   mgmesytec/Sis3153Parser.cpp
   mgmesytec/Hit.cpp
-  mgmesytec/HitFile.cpp
   )
 set(mgmesytec_common_inc
   MGMesytecBase.h
@@ -36,7 +35,6 @@ set(mgmesytec_common_inc
   mgmesytec/Vmmr16Parser.h
   mgmesytec/Sis3153Parser.h
   mgmesytec/Hit.h
-  mgmesytec/HitFile.h
   mgmesytec/SequoiaGeometry.h
   mgmesytec/BusGeometry.h
   )
@@ -81,7 +79,6 @@ set(MgConfigTest_INC
 )
 create_test_executable(MgConfigTest)
 
-
 set(MGHitTest_SRC
   mgmesytec/HitTest.cpp
   mgmesytec/Hit.cpp
@@ -89,19 +86,7 @@ set(MGHitTest_SRC
 set(MGHitTest_INC
   mgmesytec/Hit.h
   )
-create_test_executable(MGHitTest)
-
-
-set(MGHitFileTest_SRC
-  mgmesytec/HitFileTest.cpp
-  mgmesytec/HitFile.cpp
-  mgmesytec/Hit.cpp
-  )
-set(MGHitFileTest_INC
-  mgmesytec/HitFile.h
-  mgmesytec/Hit.h
-  )
-create_test_executable(MGHitFileTest SKIP_MEMGRIND)
+create_test_executable(MGHitTest SKIP_MEMGRIND)
 
 set(Sis3153ParserTest_SRC
   mgmesytec/Sis3153ParserTest.cpp

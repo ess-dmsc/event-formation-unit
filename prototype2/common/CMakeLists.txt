@@ -10,6 +10,7 @@ set(efu_common_SRC
   DetectorModuleRegister.cpp
   TimeString.cpp
   )
+
 set(efu_common_INC
   ../../libs/include/gccintel.h
   DetectorModuleRegister.h
@@ -22,6 +23,7 @@ set(efu_common_INC
   Trace.h
   Log.h
   DataSave.h
+  DumpFile.h
   TimeString.h
   )
 
@@ -72,6 +74,14 @@ set(DataSaveTest_INC
     DataSave.h
     TimeString.h)
 create_test_executable(DataSaveTest)
+
+set(DumpFileTest_SRC
+  DumpFileTest.cpp
+  TimeString.cpp)
+set(DumpFileTest_INC
+  DumpFile.h
+  TimeString.h)
+create_test_executable(DumpFileTest)
 
 set(DetectorTest_SRC
   DetectorTest.cpp

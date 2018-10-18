@@ -16,7 +16,6 @@ set(nmxgen_apv_INC
 create_executable(nmxgen_apv)
 
 set(BuilderAPVTest_SRC
-    ../nmx/HitFile.cpp
     ../nmx/Event.cpp
     ../nmx/Cluster.cpp
     ../nmx/Hists.cpp
@@ -25,7 +24,6 @@ set(BuilderAPVTest_SRC
     BuilderAPV.cpp
     )
 set(BuilderAPVTest_INC
-    ../nmx/HitFile.h
     ../nmx/Cluster.h
     ../nmx/Event.h
     ../nmx/Hit.h
@@ -39,14 +37,12 @@ set(BuilderAPVTest_INC
 #=============================================================================
 
 set(nmxgen_hits_SRC
-    ../nmx/HitFile.cpp
     ../nmx/Hit.cpp
     nmxgen_hits.cpp
     ReaderHits.cpp
     NMXArgs.cpp
     )
 set(nmxgen_hits_INC
-    ../nmx/HitFile.h
     ../nmx/Hit.h
     ReaderHits.h
     NMXArgs.h

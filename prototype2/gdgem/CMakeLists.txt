@@ -5,11 +5,9 @@
 set(pipeline_common_source
     GdGemBase.cpp
     NMXConfig.cpp
-    nmx/ReadoutFile.cpp
     nmx/Cluster.cpp
     nmx/Event.cpp
     nmx/Hit.cpp
-    nmx/HitFile.cpp
     ../common/Hists.cpp
     ../common/HistSerializer.cpp
     nmx/TrackSerializer.cpp
@@ -33,7 +31,6 @@ set(pipeline_common_inc
     nmx/Hit.h
     ../common/Hists.h
     nmx/Readout.h
-    nmx/ReadoutFile.h
     ../common/HistSerializer.h
     nmx/TrackSerializer.h
     nmx/AbstractBuilder.h
