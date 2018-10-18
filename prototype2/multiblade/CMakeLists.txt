@@ -85,10 +85,18 @@ else()
   message(STATUS "*** Unable to compile mbprofiling as TCLAP was not found.")
 endif()
 
+# Common include path for both tests
+set(test_INC common/EventBuilder.h test/TestData.h)
+
 # GOOGLE BENCHMARK
 set(MBDataParserBenchmarkTest_INC ${test_INC})
-set(MBDataParserBenchmarkTest_SRC caen/DataParser.cpp caen/DataParserBenchmarkTest.cpp)
+set(MBDataParserBenchmarkTest_SRC
+  caen/DataParser.cpp
+  caen/DataParserBenchmarkTest.cpp)
 create_benchmark_executable(MBDataParserBenchmarkTest)
+if(GOOGLE_BENCHMARK)
+  target_link_libraries(MBDataParserBenchmarkTest PRIVATE h5cpp)
+endif()
 
 # GOOGLE BENCHMARK
 set(MBEventBuilderBenchmarkTest_INC ${test_INC})
@@ -98,15 +106,11 @@ set(MBEventBuilderBenchmarkTest_SRC
   )
 create_benchmark_executable(MBEventBuilderBenchmarkTest)
 
-
 # Create excecutable for the test of geometry
 set(MBDataParserTest_INC caen/DataParser.h)
 set(MBDataParserTest_SRC caen/DataParser.cpp caen/DataParserTest.cpp)
 create_test_executable(MBDataParserTest)
 
-
-# Common include path for both tests
-set(test_INC common/EventBuilder.h test/TestData.h)
 
 # Create excecutable for the test of counters
 set(MBEventBuilderTest_INC ${test_INC} )
