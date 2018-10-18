@@ -76,6 +76,16 @@ TEST_F(CalibrationFileTest, AddCalibration) {
   }
 }
 
+TEST_F(CalibrationFileTest, LoadCalibrationInvalidJsonFile) {
+  CalibrationFile cf;
+  ASSERT_THROW(cf.loadCalibration(InvalidJson), std::runtime_error);
+}
+
+TEST_F(CalibrationFileTest, LoadCalibrationInvalidOffsetField) {
+  CalibrationFile cf;
+  ASSERT_THROW(cf.loadCalibration(InvalidJson), std::runtime_error);
+}
+
 TEST_F(CalibrationFileTest, LoadCalibration) {
   CalibrationFile cf;
   cf.loadCalibration(DummyCal);
@@ -98,16 +108,7 @@ TEST_F(CalibrationFileTest, LoadCalibration) {
 
 TEST_F(CalibrationFileTest, LoadCalibrationSizeMismatch) {
   CalibrationFile cf;
-  cf.loadCalibration(ErrSizeMismatch);
-  // These should be skipped and default to NoCal
-  auto cal = cf.getCalibration(1, 0, 0);
-  ASSERT_FLOAT_EQ(cal.offset, 0.0);
-  ASSERT_FLOAT_EQ(cal.slope, 1.0);
-
-  // These should be ok
-  cal = cf.getCalibration(1, 15, 63);
-  ASSERT_FLOAT_EQ(cal.offset, 2.7);
-  ASSERT_FLOAT_EQ(cal.slope, 3.7);
+  ASSERT_THROW(cf.loadCalibration(ErrSizeMismatch), std::runtime_error);
 }
 
 TEST_F(CalibrationFileTest, LoadCalibrationFile) {
