@@ -81,8 +81,8 @@ set(MBDataParserBenchmarkTest_SRC caen/DataParser.cpp caen/DataParserBenchmarkTe
 create_benchmark_executable(MBDataParserBenchmarkTest)
 
 # GOOGLE BENCHMARK
-set(EventBuilderBenchmarkTest_INC ${test_INC})
-set(EventBuilderBenchmarkTest_SRC
+set(MBEventBuilderBenchmarkTest_INC ${test_INC})
+set(MBEventBuilderBenchmarkTest_SRC
   common/EventBuilder.cpp
   common/EventBuilderBenchmarkTest.cpp
   )
