@@ -13,8 +13,8 @@
 #include <tclap/CmdLine.h>
 
 #include "generators/TextFile.h"
-#include "mbcommon/DumpEventBuilderInfo.h"
-#include "mbcommon/EventBuilder.h"
+#include "common/DumpEventBuilderInfo.h"
+#include "common/EventBuilder.h"
 // GCOVR_EXCL_START
 int main(int argc, const char **argv) {
 
@@ -87,12 +87,12 @@ int main(int argc, const char **argv) {
             << std::endl;
   std::cout << "\n";
 
-  EventBuilder p;
+  Multiblade::EventBuilder p;
   p.setUseWeightedAverage(weighted);
 
-  TextFile data(ifile);
+  Multiblade::TextFile data(ifile);
 
-  TextFile::Entry entry = {0, 0, 0, 0};
+  Multiblade::TextFile::Entry entry = {0, 0, 0, 0};
 
   uint events = 0;
 
@@ -102,7 +102,7 @@ int main(int argc, const char **argv) {
   while (true) {
     try {
       entry = data.nextEntry();
-    } catch (TextFile::eof &e) {
+    } catch (Multiblade::TextFile::eof &e) {
       std::cout << "End of file reached." << std::endl;
       break;
     }
@@ -128,7 +128,7 @@ int main(int argc, const char **argv) {
 
   output.close();
 
-  DumpEventBuilderInfo info;
+  Multiblade::DumpEventBuilderInfo info;
   info.print(p);
 
   return 0;
