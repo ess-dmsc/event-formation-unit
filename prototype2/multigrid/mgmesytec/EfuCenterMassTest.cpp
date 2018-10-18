@@ -60,7 +60,7 @@ TEST_F(EfuCenterMassTest, WireAndGrid) {
   EXPECT_EQ(efu.z(), efu.mappings.z(wire_hit.bus, wire_hit.channel));
 }
 
-TEST_F(EfuCenterMassTest, Ingest) {
+TEST_F(EfuCenterMassTest, HitVectorIngest) {
   Hit hit1, hit2;
   hit1.channel = 10;
   hit1.adc = 10;
@@ -75,6 +75,15 @@ TEST_F(EfuCenterMassTest, Ingest) {
   hits = {hit1, hit2};
   ingested = efu.ingest(hits);
   EXPECT_EQ(ingested, 1);
+}
+
+TEST_F(EfuCenterMassTest, HitIngestInvalidMappings) {
+  Hit hit1;
+  hit1.channel = 10;
+  hit1.adc = 10;
+  hit1.bus = 199; // some invalid bus number
+  auto result = efu.ingest(hit1);
+  EXPECT_FALSE(result);
 }
 
 TEST_F(EfuCenterMassTest, HighestAdcWire) {
