@@ -87,11 +87,11 @@ void CAENBase::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
-  UDPReceiver mbdata(local);
-  // mbdata.buflen(opts->buflen);
-  mbdata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
-  mbdata.printBufferSizes();
-  mbdata.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
+  UDPReceiver parser(local);
+  // parser.buflen(opts->buflen);
+  parser.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  parser.printBufferSizes();
+  parser.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
   int rdsize;
   for (;;) {
@@ -99,7 +99,7 @@ void CAENBase::input_thread() {
 
     /** this is the processing step */
     eth_ringbuf->setDataLength(eth_index, 0);
-    if ((rdsize = mbdata.receive(eth_ringbuf->getDataBuffer(eth_index),
+    if ((rdsize = parser.receive(eth_ringbuf->getDataBuffer(eth_index),
                                  eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
       XTRACE(PROCESS, DEB, "Received an udp packet of length %d bytes",
@@ -152,7 +152,7 @@ void CAENBase::processing_thread() {
     builder[i].setNumberOfStripChannels(nstrips);
   }
 
-  DataParser mbdata;
+  DataParser parser;
   auto digitisers = mb_opts.getDigitisers();
   MB16Detector mb16(digitisers);
 
@@ -197,18 +197,22 @@ void CAENBase::processing_thread() {
         mystats.fifo_seq_errors++;
       } else {
         auto dataptr = eth_ringbuf->getDataBuffer(data_index);
-        if (mbdata.parse(dataptr, datalen) < 0) {
-          mystats.rx_error_bytes += mbdata.Stats.error_bytes;
+        if (parser.parse(dataptr, datalen) < 0) {
+          mystats.rx_error_bytes += parser.Stats.error_bytes;
           continue;
         }
 
-        mystats.rx_readouts += mbdata.MBHeader->numElements;
+        mystats.rx_readouts += parser.MBHeader->numElements;
 
-        auto digitizerId = mbdata.MBHeader->digitizerID;
-        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d\n", mbdata.MBHeader->numElements, digitizerId);
-        for (uint i = 0; i < mbdata.MBHeader->numElements; i++) {
+        if (dumpfile) {
+          dumpfile->push(parser.readouts);
+        }
 
-          auto dp = mbdata.Data[i];
+        auto digitizerId = parser.MBHeader->digitizerID;
+        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d\n", parser.MBHeader->numElements, digitizerId);
+        for (uint i = 0; i < parser.MBHeader->numElements; i++) {
+
+          auto dp = parser.Data[i];
           // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d\n",
           //       digitizerId, dp.localTime, dp.channel, dp.adcValue);
 
@@ -219,10 +223,6 @@ void CAENBase::processing_thread() {
             XTRACE(DATA, WAR, "Invalid digitizerId: %d\n", digitizerId);
 
             break;
-          }
-
-          if (dumpfile) {
-            dumpfile->push(mbdata.readouts);
           }
 
           if (dp.channel >= 32) {
