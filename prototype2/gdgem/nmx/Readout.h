@@ -20,6 +20,7 @@ struct Readout
   uint16_t bcid;
   uint16_t tdc;
   uint16_t adc;
+  float ChipTimeNs;
   bool over_threshold;
 
   bool operator==(const Readout& other) const
@@ -32,6 +33,7 @@ struct Readout
         (channel == other.channel) &&
         (bcid == other.bcid) &&
         (tdc == other.tdc) && (adc == other.adc) &&
+        (ChipTimeNs == other.ChipTimeNs) &&
         (over_threshold == other.over_threshold)
     );
   }
