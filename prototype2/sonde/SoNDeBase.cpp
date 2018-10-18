@@ -102,6 +102,20 @@ void SONDEIDEABase::processing_thread() {
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
+
+      if (produce_timer.timetsc() >=
+          EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+        mystats.tx_bytes += flatbuffer.produce();
+
+        /// Kafka stats update - common to all detectors
+        /// don't increment as producer keeps absolute count
+        mystats.kafka_produce_fails = eventprod.stats.produce_fails;
+        mystats.kafka_ev_errors = eventprod.stats.ev_errors;
+        mystats.kafka_ev_others = eventprod.stats.ev_others;
+        mystats.kafka_dr_errors = eventprod.stats.dr_errors;
+        mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
+        produce_timer.now();
+      }
       usleep(10);
 
     } else {
@@ -124,20 +138,6 @@ void SONDEIDEABase::processing_thread() {
             mystats.tx_bytes += flatbuffer.addEvent(ideasdata.data[i].time,
                                                     ideasdata.data[i].pixel_id);
           }
-        }
-
-        if (produce_timer.timetsc() >=
-            EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
-          mystats.tx_bytes += flatbuffer.produce();
-
-          /// Kafka stats update - common to all detectors
-          /// don't increment as producer keeps absolute count
-          mystats.kafka_produce_fails = eventprod.stats.produce_fails;
-          mystats.kafka_ev_errors = eventprod.stats.ev_errors;
-          mystats.kafka_ev_others = eventprod.stats.ev_others;
-          mystats.kafka_dr_errors = eventprod.stats.dr_errors;
-          mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
-          produce_timer.now();
         }
       }
     }
