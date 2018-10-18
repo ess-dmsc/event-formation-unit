@@ -87,11 +87,11 @@ void CAENBase::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
-  UDPReceiver parser(local);
+  UDPReceiver receiver(local);
   // parser.buflen(opts->buflen);
-  parser.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
-  parser.printBufferSizes();
-  parser.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
+  receiver.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  receiver.printBufferSizes();
+  receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
   int rdsize;
   for (;;) {
@@ -99,8 +99,8 @@ void CAENBase::input_thread() {
 
     /** this is the processing step */
     eth_ringbuf->setDataLength(eth_index, 0);
-    if ((rdsize = parser.receive(eth_ringbuf->getDataBuffer(eth_index),
-                                 eth_ringbuf->getMaxBufSize())) > 0) {
+    if ((rdsize = receiver.receive(eth_ringbuf->getDataBuffer(eth_index),
+                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
       XTRACE(PROCESS, DEB, "Received an udp packet of length %d bytes",
              rdsize);
@@ -202,37 +202,37 @@ void CAENBase::processing_thread() {
           continue;
         }
 
+        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d\n",
+               parser.MBHeader->numElements, parser.MBHeader->digitizerID);
+
         mystats.rx_readouts += parser.MBHeader->numElements;
 
         if (dumpfile) {
           dumpfile->push(parser.readouts);
         }
 
-        auto digitizerId = parser.MBHeader->digitizerID;
-        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d\n", parser.MBHeader->numElements, digitizerId);
-        for (uint i = 0; i < parser.MBHeader->numElements; i++) {
+        /// \todo why can't I use mb_opts.detector->cassette()
+        auto cassette = mb16.cassette(parser.MBHeader->digitizerID);
+        if (cassette < 0) {
+          XTRACE(DATA, WAR, "Invalid digitizerId: %d\n",
+                 parser.MBHeader->digitizerID);
+          continue;
+        }
 
-          auto dp = parser.Data[i];
+        for (const auto &dp : parser.readouts) {
           // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d\n",
-          //       digitizerId, dp.localTime, dp.channel, dp.adcValue);
+          //       dp.digitizer, dp.local_time, dp.channel, dp.adc);
 
-          /// \todo why can't I use mb_opts.detector->cassette()
-          auto cassette = mb16.cassette(digitizerId);
-
-          if (cassette < 0) {
-            XTRACE(DATA, WAR, "Invalid digitizerId: %d\n", digitizerId);
-
-            break;
-          }
-
+          /// \todo magic number? should be part of geometry class?
           if (dp.channel >= 32) {
-            histograms.binstrips(dp.channel, dp.adcValue, 0, 0);
+            histograms.binstrips(dp.channel, dp.adc, 0, 0);
           } else {
-            histograms.binstrips(0, 0, dp.channel, dp.adcValue);
+            histograms.binstrips(0, 0, dp.channel, dp.adc);
           }
 
-          if (builder[cassette].addDataPoint(dp.channel, dp.adcValue, dp.localTime)) {
+          if (builder[cassette].addDataPoint(dp.channel, dp.adc, dp.local_time)) {
 
+            /// \todo magic number? should be part of geometry class?
             auto xcoord = builder[cassette].getStripPosition() - 32; // pos 32 - 63
             auto ycoord = cassette * nwires +
                 builder[cassette].getWirePosition(); // pos 0 - 31
@@ -241,7 +241,7 @@ void CAENBase::processing_thread() {
 
             XTRACE(PROCESS, DEB,
                    "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d\n",
-                   digitizerId, (int) xcoord, (int) ycoord,
+                   dp.digitizer, (int) xcoord, (int) ycoord,
                    (int) builder[cassette].getWirePosition(),
                    (int) builder[cassette].getStripPosition(), pixel_id);
 

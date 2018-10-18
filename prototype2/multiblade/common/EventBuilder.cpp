@@ -19,9 +19,9 @@ EventBuilder::EventBuilder()
   resetCounters();
 }
 
-bool EventBuilder::addDataPoint(const uint8_t &channel,
-                                          const uint16_t &ADC,
-                                          const uint32_t &clock) {
+bool EventBuilder::addDataPoint(const uint16_t &channel,
+                                const uint16_t &ADC,
+                                const uint32_t &clock) {
 
   XTRACE(PROCESS, DEB, "Data-point received (%d, %d, %d)",
          static_cast<uint>(channel), static_cast<uint>(ADC),
@@ -203,8 +203,8 @@ bool EventBuilder::checkAdjacency(std::vector<point> &cluster) {
 double EventBuilder::calculatePosition(std::vector<point> &cluster) {
 
   if (m_use_weighted_average) {
-    uint64_t sum_numerator = 0;
-    uint64_t sum_denominator = 0;
+    uint64_t sum_numerator {0};
+    uint64_t sum_denominator {0};
     for (auto &it : cluster) {
       // printf("channel %d, adc: %d\n", it.channel, it.ADC);
       sum_numerator += it.channel * it.ADC;
@@ -214,8 +214,8 @@ double EventBuilder::calculatePosition(std::vector<point> &cluster) {
                                  : static_cast<double>(sum_numerator) /
             static_cast<double>(sum_denominator));
   } else {
-    uint8_t max_channel = 0;
-    uint64_t max_ADC = 0;
+    uint16_t max_channel {0};
+    uint16_t max_ADC {0};
     for (auto &it : cluster) {
       // printf("channel %d, adc: %d\n", it.channel, it.ADC);
       if (it.ADC > max_ADC) {
@@ -252,7 +252,7 @@ std::vector<double> EventBuilder::getPosition() {
   return coordinates;
 }
 
-void EventBuilder::addPointToCluster(uint32_t channel, uint32_t ADC) {
+void EventBuilder::addPointToCluster(uint16_t channel, uint16_t ADC) {
 
   point point = {channel, ADC};
   if (channel < m_nwire_channels) {
