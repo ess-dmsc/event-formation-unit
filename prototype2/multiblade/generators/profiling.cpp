@@ -17,7 +17,7 @@
 
 #include "generators/TextFile.h"
 #include "mbcommon/DumpEventBuilderInfo.h"
-#include "mbcommon/MultiBladeEventBuilder.h"
+#include "mbcommon/EventBuilder.h"
 
 // GCOVR_EXCL_START
 
@@ -61,7 +61,7 @@ int main(int argc, const char **argv) {
             << std::endl;
   std::cout << "\n";
 
-  MultiBladeEventBuilder p;
+  EventBuilder p;
   p.setUseWeightedAverage(false);
 
   typedef std::chrono::high_resolution_clock Clock;

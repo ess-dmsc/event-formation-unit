@@ -14,6 +14,8 @@
 #include <fstream>
 #include <vector>
 
+namespace Multiblade {
+
 class TextFile {
 private:
   std::ifstream file;
@@ -25,8 +27,8 @@ public:
     uint8_t digi;
     uint8_t chan;
     Entry(double t, double a, double d, double c)
-        : time((uint32_t)t), adc((uint16_t)a), digi((uint8_t)d),
-          chan((uint8_t)c) {}
+        : time((uint32_t) t), adc((uint16_t) a), digi((uint8_t) d),
+          chan((uint8_t) c) {}
   };
   class eof : public std::exception {
     virtual const char *what() const throw() { return "End of file reached"; }
@@ -40,3 +42,5 @@ public:
 
 #endif // MBUDPGEN_TEXTFILE_H
 // GCOVR_EXCL_STOP
+
+}

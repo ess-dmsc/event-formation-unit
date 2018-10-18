@@ -14,7 +14,7 @@
 
 #include "generators/TextFile.h"
 #include "mbcommon/DumpEventBuilderInfo.h"
-#include "mbcommon/MultiBladeEventBuilder.h"
+#include "mbcommon/EventBuilder.h"
 // GCOVR_EXCL_START
 int main(int argc, const char **argv) {
 
@@ -87,7 +87,7 @@ int main(int argc, const char **argv) {
             << std::endl;
   std::cout << "\n";
 
-  MultiBladeEventBuilder p;
+  EventBuilder p;
   p.setUseWeightedAverage(weighted);
 
   TextFile data(ifile);
@@ -121,7 +121,7 @@ int main(int argc, const char **argv) {
 
   p.lastPoint();
   // Repeated code ! Yes I know its bad, but this is just a test program for
-  // MultiBladeEventBuilder.
+  // EventBuilder.
   output << std::fixed << std::setprecision(8) << std::setw(11)
          << p.getWirePosition() << " " << p.getStripPosition() << " "
          << p.getTimeStamp() << "\n";

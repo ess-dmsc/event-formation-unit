@@ -24,9 +24,9 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 
-#include <mbcaen/DataParser.h>
+#include <caen/DataParser.h>
 
-#include <mbcommon/MultiBladeEventBuilder.h>
+#include <common/EventBuilder.h>
 
 #include <logical_geometry/ESSGeometry.h>
 
@@ -42,7 +42,7 @@ const char *classname = "Multiblade detector with CAEN readout";
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 
-MBCAENBase::MBCAENBase(BaseSettings const &settings, struct MBCAENSettings &LocalMBCAENSettings)
+CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAENSettings)
     : Detector("MBCAEN", settings), MBCAENSettings(LocalMBCAENSettings) {
   Stats.setPrefix("efu.mbcaen");
 
@@ -65,11 +65,11 @@ MBCAENBase::MBCAENBase(BaseSettings const &settings, struct MBCAENSettings &Loca
   Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { MBCAENBase::input_thread(); };
+  std::function<void()> inputFunc = [this]() { CAENBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    MBCAENBase::processing_thread();
+    CAENBase::processing_thread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
@@ -79,11 +79,11 @@ MBCAENBase::MBCAENBase(BaseSettings const &settings, struct MBCAENSettings &Loca
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
   assert(eth_ringbuf != 0);
 
-  mb_opts = MBConfig(MBCAENSettings.ConfigFile);
+  mb_opts = Config(MBCAENSettings.ConfigFile);
   assert(mb_opts.getDetector() != nullptr);
 }
 
-void MBCAENBase::input_thread() {
+void CAENBase::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
@@ -122,7 +122,7 @@ void MBCAENBase::input_thread() {
   }
 }
 
-void MBCAENBase::processing_thread() {
+void CAENBase::processing_thread() {
   const uint32_t ncass = 6;
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
@@ -147,7 +147,7 @@ void MBCAENBase::processing_thread() {
   histfb.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 
-  MultiBladeEventBuilder builder[ncass];
+  EventBuilder builder[ncass];
   for (uint32_t i = 0; i < ncass; i++) {
     builder[i].setNumberOfWireChannels(nwires);
     builder[i].setNumberOfStripChannels(nstrips);
@@ -209,7 +209,7 @@ void MBCAENBase::processing_thread() {
         XTRACE(DATA, DEB, "Received %d readouts from digitizer %d\n", mbdata.MBHeader->numElements, digitizerId);
         for (uint i = 0; i < mbdata.MBHeader->numElements; i++) {
 
-          auto dp = mbdata.MBData[i];
+          auto dp = mbdata.Data[i];
           // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d\n",
           //       digitizerId, dp.localTime, dp.channel, dp.adcValue);
 

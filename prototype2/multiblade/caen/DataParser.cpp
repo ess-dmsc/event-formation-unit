@@ -13,7 +13,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <mbcaen/DataParser.h>
+#include <caen/DataParser.h>
 #include <memory>
 
 // #undef TRC_LEVEL
@@ -24,7 +24,7 @@ namespace Multiblade {
 int DataParser::parse(const char *buffer, unsigned int size) {
 
   MBHeader = nullptr;
-  MBData = nullptr;
+  Data = nullptr;
   memset(&Stats, 0, sizeof(struct Stats));
 
   auto headerlen = sizeof(struct Header);
@@ -54,7 +54,7 @@ int DataParser::parse(const char *buffer, unsigned int size) {
     return -error::ESIZE;
   }
 
-  MBData = (struct ListElement422 *)(buffer + sizeof(struct Header));
+  Data = (struct ListElement422 *)(buffer + sizeof(struct Header));
 
   return MBHeader->numElements;
 }

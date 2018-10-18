@@ -6,20 +6,20 @@
 //===----------------------------------------------------------------------===//
 
 #include <algorithm>
-#include <multiblade/mbcommon/MultiBladeEventBuilder.h>
+#include <multiblade/common/EventBuilder.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
 namespace Multiblade {
 
-MultiBladeEventBuilder::MultiBladeEventBuilder()
+EventBuilder::EventBuilder()
     : m_wire_cluster(0), m_strip_cluster(0), m_time_stamp(0), m_cluster_clock(0),
       m_first_signal(true), m_nevents(0) {
   resetCounters();
 }
 
-bool MultiBladeEventBuilder::addDataPoint(const uint8_t &channel,
+bool EventBuilder::addDataPoint(const uint8_t &channel,
                                           const uint16_t &ADC,
                                           const uint32_t &clock) {
 
@@ -72,7 +72,7 @@ bool MultiBladeEventBuilder::addDataPoint(const uint8_t &channel,
   XTRACE(PROCESS, DEB, "Outside time-window [%u > %u]", clock_diff,
          m_time_window);
 
-  // MultiBladeEventBuilder the stored clusters. True is returned if all checks
+  // EventBuilder the stored clusters. True is returned if all checks
   // pass.
   bool position_determined = processClusters();
 
@@ -92,7 +92,7 @@ bool MultiBladeEventBuilder::addDataPoint(const uint8_t &channel,
   return position_determined;
 }
 
-bool MultiBladeEventBuilder::processClusters() {
+bool EventBuilder::processClusters() {
 
   // Currently removes clusters containing non-adjacent points.
   // Possible future modification could include formation of a new cluster.
@@ -131,7 +131,7 @@ bool MultiBladeEventBuilder::processClusters() {
   return true;
 }
 
-bool MultiBladeEventBuilder::pointsAdjacent() {
+bool EventBuilder::pointsAdjacent() {
 
   // Check if wire points are adjacent
   bool wires_adjacent = checkAdjacency(m_wire_cluster);
@@ -147,7 +147,7 @@ bool MultiBladeEventBuilder::pointsAdjacent() {
   return adjacent;
 }
 
-bool MultiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
+bool EventBuilder::checkAdjacency(std::vector<point> &cluster) {
 
   if (cluster.size() == 0) {
     return false;
@@ -200,7 +200,7 @@ bool MultiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
   return true;
 }
 
-double MultiBladeEventBuilder::calculatePosition(std::vector<point> &cluster) {
+double EventBuilder::calculatePosition(std::vector<point> &cluster) {
 
   if (m_use_weighted_average) {
     uint64_t sum_numerator = 0;
@@ -228,7 +228,7 @@ double MultiBladeEventBuilder::calculatePosition(std::vector<point> &cluster) {
   }
 }
 
-void MultiBladeEventBuilder::lastPoint() {
+void EventBuilder::lastPoint() {
 
   if (processClusters())
     m_nevents++;
@@ -243,7 +243,7 @@ void MultiBladeEventBuilder::lastPoint() {
   m_first_signal = true;
 }
 
-std::vector<double> MultiBladeEventBuilder::getPosition() {
+std::vector<double> EventBuilder::getPosition() {
   std::vector<double> coordinates(3);
   coordinates[0] = m_wire_pos;
   coordinates[1] = m_strip_pos;
@@ -252,7 +252,7 @@ std::vector<double> MultiBladeEventBuilder::getPosition() {
   return coordinates;
 }
 
-void MultiBladeEventBuilder::addPointToCluster(uint32_t channel, uint32_t ADC) {
+void EventBuilder::addPointToCluster(uint32_t channel, uint32_t ADC) {
 
   point point = {channel, ADC};
   if (channel < m_nwire_channels) {
@@ -264,7 +264,7 @@ void MultiBladeEventBuilder::addPointToCluster(uint32_t channel, uint32_t ADC) {
   }
 }
 
-void MultiBladeEventBuilder::resetCounters() {
+void EventBuilder::resetCounters() {
   m_nevents = 0;
   m_rejected_adjacency = 0;
   m_rejected_position = 0;
@@ -274,7 +274,7 @@ void MultiBladeEventBuilder::resetCounters() {
   m_1D_strips = {{0, 0, 0, 0, 0, 0}};
 }
 
-void MultiBladeEventBuilder::incrementCounters(
+void EventBuilder::incrementCounters(
     const std::vector<point> &m_wire_cluster,
     const std::vector<point> &m_strip_cluster) {
 

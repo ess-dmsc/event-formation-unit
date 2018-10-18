@@ -2,7 +2,7 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-///  Unit tests for Multiblade::MultiBladeEventBuilder using Google Test.
+///  Unit tests for Multiblade::EventBuilder using Google Test.
 /// Here the various counters are tested.
 ///
 /// Author: Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
@@ -15,15 +15,15 @@
 #pragma GCC diagnostic ignored "-Wmacro-redefined"
 #endif
 #define private public
-#include "mbcommon/MultiBladeEventBuilder.h"
+#include "common/EventBuilder.h"
 #ifdef private
 #undef private
 #define private private
 #endif
 #pragma GCC diagnostic pop
 
-#include "mbcommon/DumpEventBuilderInfo.h"
-#include "MultiBladeTestData.h"
+#include "common/DumpEventBuilderInfo.h"
+#include "TestData.h"
 #include "test/TestBase.h"
 
 class MBEventBuilderTest : public TestBase {
@@ -34,7 +34,7 @@ protected:
 
 /// \todo add further checks
 TEST_F(MBEventBuilderTest, Constructor) {
-  Multiblade::MultiBladeEventBuilder evbuilder;
+  Multiblade::EventBuilder evbuilder;
   ASSERT_EQ(evbuilder.getNumberOfEvents(), 0);
   auto coords = evbuilder.getPosition();
   ASSERT_TRUE(coords[0] == 0.00);
@@ -45,14 +45,14 @@ TEST_F(MBEventBuilderTest, Constructor) {
 }
 
 TEST_F(MBEventBuilderTest, EventBuilderDump) {
-  Multiblade::MultiBladeEventBuilder evbuilder;
+  Multiblade::EventBuilder evbuilder;
   printf("This is NOT a test, just calling debug print functions\n");
   Multiblade::DumpEventBuilderInfo evbdump;
   evbdump.print(evbuilder);
 }
 
 TEST_F(MBEventBuilderTest, CheckAdjacencyEmpty) {
-  Multiblade::MultiBladeEventBuilder evbuilder;
+  Multiblade::EventBuilder evbuilder;
   std::vector<Multiblade::point> nopoints;
   ASSERT_FALSE(evbuilder.checkAdjacency(nopoints));
   std::vector<Multiblade::point> onepoint = {{31, 1000}}; // ch, adc
@@ -60,7 +60,7 @@ TEST_F(MBEventBuilderTest, CheckAdjacencyEmpty) {
 }
 
 TEST_F(MBEventBuilderTest, CalculatePosition) {
-  Multiblade::MultiBladeEventBuilder evbuilder;
+  Multiblade::EventBuilder evbuilder;
   std::vector<Multiblade::point> threepoints = {{10, 1000}, {20, 1000}, {30, 1000}}; // ch, adc
   ASSERT_EQ(evbuilder.calculatePosition(threepoints), 20.0);
 
@@ -73,7 +73,7 @@ TEST_F(MBEventBuilderTest, CalculatePosition) {
 }
 
 TEST_F(MBEventBuilderTest, ProcessClusters) {
-  Multiblade::MultiBladeEventBuilder evbuilder;
+  Multiblade::EventBuilder evbuilder;
   ASSERT_EQ(evbuilder.m_rejected_position, 0);
   evbuilder.m_wire_cluster = {{0, 0}}; // ch's < 32
   evbuilder.m_strip_cluster = {{32, 0}}; // ch's >= 32
@@ -82,7 +82,7 @@ TEST_F(MBEventBuilderTest, ProcessClusters) {
 }
 
 TEST_F(MBEventBuilderTest, CheckIncrementOfCounters) {
-  Multiblade::MultiBladeEventBuilder evbuilder;
+  Multiblade::EventBuilder evbuilder;
   for (unsigned int i = 0; i < evbuilder.m_2D_wires.size(); i++) {
     ASSERT_EQ(evbuilder.m_2D_wires.at(i), 0);
     ASSERT_EQ(evbuilder.m_2D_strips.at(i), 0);
@@ -120,7 +120,7 @@ TEST_F(MBEventBuilderTest, CheckIncrementOfCounters) {
 
 /// not easy to test
 TEST_F(MBEventBuilderTest, AddDataPoint) {
-  Multiblade::MultiBladeEventBuilder evbuilder;
+  Multiblade::EventBuilder evbuilder;
   bool retval = evbuilder.addDataPoint(0, 1000, 0); // ch, adc, time
   ASSERT_EQ(retval, false);
   retval = evbuilder.addDataPoint(32, 1000, 10); // ch, adc, time
@@ -132,7 +132,7 @@ TEST_F(MBEventBuilderTest, AddDataPoint) {
 
 /// not easy to test
 TEST_F(MBEventBuilderTest, AddDataPointBelowADCThreshold) {
-  Multiblade::MultiBladeEventBuilder evbuilder;
+  Multiblade::EventBuilder evbuilder;
   evbuilder.setThreshold(1000);
   bool retval = evbuilder.addDataPoint(0, 999, 0); // ch, adc, time
   ASSERT_EQ(retval, false);
@@ -144,7 +144,7 @@ TEST_F(MBEventBuilderTest, AddDataPointBelowADCThreshold) {
 }
 
 TEST_F(MBEventBuilderTest, AddDataPointAboveADCThreshold) {
-  Multiblade::MultiBladeEventBuilder evbuilder;
+  Multiblade::EventBuilder evbuilder;
   evbuilder.setThreshold(1000);
   bool retval = evbuilder.addDataPoint(0, 1000, 0); // ch, adc, time
   ASSERT_EQ(retval, false);
@@ -157,7 +157,7 @@ TEST_F(MBEventBuilderTest, AddDataPointAboveADCThreshold) {
 
 /// not easy to test
 TEST_F(MBEventBuilderTest, AddDataPointInvalidChannels) {
-  Multiblade::MultiBladeEventBuilder evbuilder;
+  Multiblade::EventBuilder evbuilder;
   bool retval = evbuilder.addDataPoint(64, 1000, 0); // ch, adc, time
   ASSERT_EQ(retval, false);
   retval = evbuilder.addDataPoint(64, 1000, 10); // ch, adc, time
@@ -169,7 +169,7 @@ TEST_F(MBEventBuilderTest, AddDataPointInvalidChannels) {
 
 /// not easy to test
 TEST_F(MBEventBuilderTest, AddDataPointValidChannels) {
-  Multiblade::MultiBladeEventBuilder evbuilder;
+  Multiblade::EventBuilder evbuilder;
   bool retval = evbuilder.addDataPoint(31, 1000, 0); // ch, adc, time
   ASSERT_EQ(retval, false);
   retval = evbuilder.addDataPoint(63, 1000, 10); // ch, adc, time
@@ -184,7 +184,7 @@ TEST_F(MBEventBuilderTest, EventCounter) {
   // Test that events are counted correctly
 
   // Instanciate the event-builder
-  Multiblade::MultiBladeEventBuilder p;
+  Multiblade::EventBuilder p;
 
   // Initialize the expected number of events counter
   uint nevents = 1;
@@ -236,7 +236,7 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
   // Test the counters of number of points per event
 
   // Instaciate the event-counter and configure
-  Multiblade::MultiBladeEventBuilder p;
+  Multiblade::EventBuilder p;
   p.setTimeWindow(config[0]);
   p.setNumberOfWireChannels(config[1]);
   p.setNumberOfStripChannels(config[2]);
@@ -400,7 +400,7 @@ TEST(MBEventBuilder__Test, ClusterCounters) {
 
 TEST(MBEventBuilder__Test, NoDataRecieved) {
 
-  Multiblade::MultiBladeEventBuilder p;
+  Multiblade::EventBuilder p;
 
   EXPECT_EQ(0, p.getNumberOfPositionRejected());
 

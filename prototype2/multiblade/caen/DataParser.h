@@ -49,7 +49,7 @@ public:
   int parse(const char * /*void **/ buffer, unsigned int size);
 
   struct Header * MBHeader{nullptr};
-  struct ListElement422 * MBData{nullptr};
+  struct ListElement422 * Data{nullptr};
 
   struct Stats {
     uint64_t error_bytes{0};

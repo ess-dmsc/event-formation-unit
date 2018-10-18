@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "mbcommon/MultiBladeEventBuilder.h"
+#include <common/EventBuilder.h>
 
 namespace Multiblade {
 
@@ -18,7 +18,7 @@ public:
   DumpEventBuilderInfo();
 
   /// Call this to wite the information to stdout
-  void print(MultiBladeEventBuilder p);
+  void print(EventBuilder p);
 
 private:
   /// \name Counters for number of channels hit per cluster/event.
@@ -43,12 +43,12 @@ private:
   //@}
 
   /// Writes overview information
-  void printOverview(MultiBladeEventBuilder p);
+  void printOverview(EventBuilder p);
 
   /// \name Prints information of all processed clusters/events
   /// This print-out calls several function.
   //@{
-  void printClusterInfo(MultiBladeEventBuilder p);
+  void printClusterInfo(EventBuilder p);
   void printClusterAbsolute(std::array<uint64_t, 6>, std::string text);
   void printClusterPercentage(std::array<uint64_t, 6>, std::string text);
   void printArray(std::array<uint64_t, 6> array);
@@ -57,10 +57,10 @@ private:
 
   /// Prints number of events with more than 5 signals per cluster/event for
   /// either wire or strip
-  void printExcessivePoints(MultiBladeEventBuilder p);
+  void printExcessivePoints(EventBuilder p);
 
   /// Prints number of rejected clusters/events
-  void printRejected(MultiBladeEventBuilder p);
+  void printRejected(EventBuilder p);
 
   /// Summs the contents of a std::array of uint64_t with dimension 6
   uint64_t sumArray(std::array<uint64_t, 6> array);

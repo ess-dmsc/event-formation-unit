@@ -9,23 +9,23 @@
 
 #pragma once
 
-#include <mbcaen/MB16Detector.h>
+#include <caen/MB16Detector.h>
 #include <memory>
 #include <string>
 #include <vector>
 
 namespace Multiblade {
 
-class MBConfig {
+class Config {
 public:
   enum class InstrumentGeometry { Estia, Freia };
 
   ///
-  MBConfig() = default;
-  ~MBConfig() = default;
+  Config() = default;
+  ~Config() = default;
 
   /// \brief get configuration from file
-  explicit MBConfig(std::string jsonfile);
+  explicit Config(std::string jsonfile);
 
   /// \brief getter fcn for private member variable
   bool isConfigLoaded() { return IsConfigLoaded; }

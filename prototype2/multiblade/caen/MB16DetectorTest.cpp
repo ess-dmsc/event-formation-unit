@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multiblade/mbcaen/MB16Detector.h>
+#include <multiblade/caen/MB16Detector.h>
 #include <test/TestBase.h>
 
 class MB16DetectorTest : public TestBase {};

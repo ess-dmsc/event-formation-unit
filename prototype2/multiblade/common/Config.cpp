@@ -8,13 +8,13 @@
 
 #include <common/Log.h>
 #include <fstream>
-#include <multiblade/mbcommon/MBConfig.h>
+#include <multiblade/common/Config.h>
 #include <nlohmann/json.hpp>
 
 namespace Multiblade {
 
 ///
-MBConfig::MBConfig(std::string jsonfile) : ConfigFile(jsonfile) {
+Config::Config(std::string jsonfile) : ConfigFile(jsonfile) {
 
   loadConfigFile();
 
@@ -32,7 +32,7 @@ MBConfig::MBConfig(std::string jsonfile) : ConfigFile(jsonfile) {
 }
 
 ///
-void MBConfig::loadConfigFile() {
+void Config::loadConfigFile() {
   nlohmann::json root;
 
   if (ConfigFile.empty()) {

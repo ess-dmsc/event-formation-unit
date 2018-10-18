@@ -50,14 +50,14 @@ struct point {
 /// \return bool
 bool operator<(const point &a, const point &b);
 
-class MultiBladeEventBuilder {
+class EventBuilder {
 
 public:
   /// Constructor
-  MultiBladeEventBuilder();
+  EventBuilder();
 
   /// Destructor
-  ~MultiBladeEventBuilder() = default;
+  ~EventBuilder() = default;
 
   /// Data-points from one multi-blade detector cassette consists of a channel
   /// number, a signal value from the

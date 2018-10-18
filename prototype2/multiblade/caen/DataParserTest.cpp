@@ -5,8 +5,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <multiblade/mbcaen/DataParser.h>
-#include <multiblade/mbcaen/DataParserTestData.h>
+#include <multiblade/caen/DataParser.h>
+#include <multiblade/caen/DataParserTestData.h>
 #include <test/TestBase.h>
 
 class MultibladeDataTest : public TestBase {
@@ -19,7 +19,7 @@ protected:
 TEST_F(MultibladeDataTest, Constructor) {
   Multiblade::DataParser mbdata;
   EXPECT_EQ(0, mbdata.Stats.error_bytes);
-  EXPECT_EQ(nullptr, mbdata.MBData);
+  EXPECT_EQ(nullptr, mbdata.Data);
   EXPECT_EQ(nullptr, mbdata.MBHeader);
 }
 
@@ -30,13 +30,13 @@ TEST_F(MultibladeDataTest, InvalidHeaderSizes) {
     auto res = mbdata.parse((char *)&all_zeroes[0], i);
     ASSERT_EQ(res, -mbdata.error::ESIZE);
     ASSERT_EQ(nullptr, mbdata.MBHeader);
-    ASSERT_EQ(nullptr, mbdata.MBData);
+    ASSERT_EQ(nullptr, mbdata.Data);
     ASSERT_EQ(i, mbdata.Stats.error_bytes);
   }
   auto res = mbdata.parse((char *)&all_zeroes[0], 32);
   ASSERT_EQ(res, 0);
   ASSERT_NE(nullptr, mbdata.MBHeader);
-  ASSERT_NE(nullptr, mbdata.MBData);
+  ASSERT_NE(nullptr, mbdata.Data);
   ASSERT_EQ(0, mbdata.MBHeader->numElements);
 }
 
@@ -66,7 +66,7 @@ TEST_F(MultibladeDataTest, Packet13Triggered) {
 
   EXPECT_EQ(res, eventsInPacket);
   EXPECT_EQ(0, mbdata.Stats.error_bytes);
-  EXPECT_NE(nullptr, mbdata.MBData);
+  EXPECT_NE(nullptr, mbdata.Data);
   EXPECT_NE(nullptr, mbdata.MBHeader);
 }
 

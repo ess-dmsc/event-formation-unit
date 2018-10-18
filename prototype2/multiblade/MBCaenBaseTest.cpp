@@ -6,7 +6,7 @@
  */
 
 #include <string>
-#include <multiblade/mbcaen/DataParserTestData.h>
+#include <multiblade/caen/DataParserTestData.h>
 
  std::string mb16json = R"(
  {
@@ -30,16 +30,16 @@
 #include <../prototype2/adc_readout/test/TestUDPServer.h>
 #include <test/TestBase.h>
 
-class MBCAENBaseStandIn : public Multiblade::MBCAENBase {
+class CAENBaseStandIn : public Multiblade::CAENBase {
 public:
-  MBCAENBaseStandIn(BaseSettings Settings, struct Multiblade::MBCAENSettings ReadoutSettings)
-      : Multiblade::MBCAENBase(Settings, ReadoutSettings){};
-  ~MBCAENBaseStandIn() = default;
+  CAENBaseStandIn(BaseSettings Settings, struct Multiblade::CAENSettings ReadoutSettings)
+      : Multiblade::CAENBase(Settings, ReadoutSettings){};
+  ~CAENBaseStandIn() = default;
   using Detector::Threads;
-  using Multiblade::MBCAENBase::mystats;
+  using Multiblade::CAENBase::mystats;
 };
 
-class MBCAENBaseTest : public ::testing::Test {
+class CAENBaseTest : public ::testing::Test {
 public:
   virtual void SetUp() {
     LocalSettings.ConfigFile = "MB16.json";
@@ -49,17 +49,17 @@ public:
   virtual void TearDown() {}
 
   BaseSettings Settings;
-  Multiblade::MBCAENSettings LocalSettings;
+  Multiblade::CAENSettings LocalSettings;
 };
 
-TEST_F(MBCAENBaseTest, Constructor) {
-  MBCAENBaseStandIn Readout(Settings, LocalSettings);
+TEST_F(CAENBaseTest, Constructor) {
+  CAENBaseStandIn Readout(Settings, LocalSettings);
   EXPECT_EQ(Readout.mystats.rx_packets, 0);
 }
 
 
-TEST_F(MBCAENBaseTest, DataReceive) {
-  MBCAENBaseStandIn Readout(Settings, LocalSettings);
+TEST_F(CAENBaseTest, DataReceive) {
+  CAENBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);

@@ -12,21 +12,21 @@
 #include <common/Detector.h>
 #include <common/RingBuffer.h>
 #include <libs/include/SPSCFifo.h>
-#include <mbcommon/MBConfig.h>
+#include <common/Config.h>
 
 namespace Multiblade {
 
-struct MBCAENSettings {
+struct CAENSettings {
   std::string FilePrefix{""};
   std::string ConfigFile{""};
 };
 
 using namespace memory_sequential_consistent; // Lock free fifo
 
-class MBCAENBase : public Detector {
+class CAENBase : public Detector {
 public:
-  MBCAENBase(BaseSettings const &settings, struct MBCAENSettings &LocalMBCAENSettings);
-  ~MBCAENBase() { delete eth_ringbuf; }
+  CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAENSettings);
+  ~CAENBase() { delete eth_ringbuf; }
   void input_thread();
   void processing_thread();
 
@@ -64,8 +64,8 @@ protected:
     int64_t kafka_dr_noerrors;
   } __attribute__((aligned(64))) mystats;
 
-  struct MBCAENSettings MBCAENSettings;
-  MBConfig mb_opts;
+  struct CAENSettings MBCAENSettings;
+  Config mb_opts;
 };
 
 }
