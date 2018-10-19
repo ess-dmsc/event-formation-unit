@@ -15,6 +15,7 @@
 #include <cstdint>
 #include <limits>
 #include <unordered_map>
+#include <cmath>
 
 struct AxisEvent {
   int Position{0};
