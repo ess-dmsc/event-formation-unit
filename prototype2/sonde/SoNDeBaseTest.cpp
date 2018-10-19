@@ -24,6 +24,7 @@ public:
   virtual void SetUp() {
     Settings.DetectorRxBufferSize = 100000;
     Settings.MinimumMTU = 1500;
+    LocalSettings.fileprefix = "sonde_";
   }
   virtual void TearDown() {}
 

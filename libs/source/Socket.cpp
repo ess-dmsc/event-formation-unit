@@ -34,7 +34,7 @@ int Socket::setBufferSizes(int sndbuf, int rcvbuf) {
   if (rcvbuf) {
     setSockOpt(SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
   }
-  return 0; // setsock opt on Linux cannot fail.
+  return 0; // setsockopt for SO_SND/RCVBUFon Linux cannot fail.
 }
 
 void Socket::getBufferSizes(int & sendBuffer, int & receiveBuffer) {
