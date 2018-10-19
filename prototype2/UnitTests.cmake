@@ -4,24 +4,20 @@
 # Libs unit tests
 #
 
-set(CounterTest_SRC
-  ../libs/test/Counter/testmain.cpp
-  ../libs/test/Counter/CounterTest.cpp)
-set(CounterTest_INC
-  ../libs/include/Counter.h)
-create_test_executable(CounterTest "")
-
-
-set(StatCounterTest_SRC
-  ../libs/test/Counter/testmain.cpp
-  ../libs/test/Counter/StatCounterTest.cpp)
-set(StatCounterTest_INC
-  ../libs/include/StatCounter.h)
-create_test_executable(StatCounterTest "")
-
-
 set(BitMathTest_SRC
-../libs/test/BitMathTest.cpp)
-set(StatCounterTest_INC
-../libs/include/BitMath.h)
+  ../libs/test/BitMathTest.cpp
+)
+set(BitMathTest_INC
+  ../libs/include/BitMath.h
+)
 create_test_executable(BitMathTest "")
+
+
+set(SocketTest_SRC
+  ../libs/source/Socket.cpp
+  ../libs/test/SocketTest.cpp
+)
+set(SocketTest_INC
+  ../libs/include/Socket.h
+)
+create_test_executable(SocketTest "")
