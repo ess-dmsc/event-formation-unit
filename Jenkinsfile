@@ -103,9 +103,7 @@ def docker_build(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd ${project}/build
         make --version
-        make -j4 VERBOSE=OFF
-        make -j4 unit_tests VERBOSE=OFF
-        make -j4 benchmark
+        make all unit_tests benchmark -j4
         cd ../utils/udpredirect
         make
     \""""
