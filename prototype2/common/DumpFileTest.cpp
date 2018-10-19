@@ -154,6 +154,8 @@ TEST_F(DumpFileTest, ReadAll) {
   EXPECT_EQ(data.size(), 900);
 }
 
+/// \todo test flushing on destruction
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

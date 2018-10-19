@@ -28,6 +28,8 @@
 template<typename T>
 class DumpFile {
 public:
+  ~DumpFile();
+
   static std::unique_ptr<DumpFile>
   create(const boost::filesystem::path &FilePath, size_t MaxMB = 0);
 
@@ -65,6 +67,13 @@ private:
 
   void write();
 };
+
+template<typename T>
+DumpFile<T>::~DumpFile() {
+  if (Data.size()) {
+    write();
+  }
+}
 
 template<typename T>
 DumpFile<T>::DumpFile(const boost::filesystem::path& file_path, size_t max_Mb) {

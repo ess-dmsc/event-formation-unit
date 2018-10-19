@@ -88,7 +88,7 @@ void CAENBase::input_thread() {
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver receiver(local);
-  // parser.buflen(opts->buflen);
+  // receiver.buflen(opts->buflen);
   receiver.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
   receiver.printBufferSizes();
   receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
@@ -169,7 +169,8 @@ void CAENBase::processing_thread() {
         mystats.tx_bytes += flatbuffer.produce();
 
         if (!histograms.isEmpty()) {
-          XTRACE(PROCESS, INF, "Sending histogram for %zu readouts", histograms.hit_count());
+          XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
+              histograms.hit_count());
           histfb.produce(histograms);
           histograms.clear();
         }
@@ -203,25 +204,27 @@ void CAENBase::processing_thread() {
           continue;
         }
 
-        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d\n",
+        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
                parser.MBHeader->numElements, parser.MBHeader->digitizerID);
 
         mystats.rx_readouts += parser.MBHeader->numElements;
 
         if (dumpfile) {
           dumpfile->push(parser.readouts);
+          XTRACE(DATA, DEB, "Pushed %d readouts to dumpfile",
+                 parser.readouts.size());
         }
 
         /// \todo why can't I use mb_opts.detector->cassette()
         auto cassette = mb16.cassette(parser.MBHeader->digitizerID);
         if (cassette < 0) {
-          XTRACE(DATA, WAR, "Invalid digitizerId: %d\n",
+          XTRACE(DATA, WAR, "Invalid digitizerId: %d",
                  parser.MBHeader->digitizerID);
           continue;
         }
 
         for (const auto &dp : parser.readouts) {
-          // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d\n",
+          // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d",
           //       dp.digitizer, dp.local_time, dp.channel, dp.adc);
 
           /// \todo magic number? should be part of geometry class?
@@ -241,7 +244,7 @@ void CAENBase::processing_thread() {
             uint32_t pixel_id = essgeom.pixel2D(xcoord, ycoord);
 
             XTRACE(PROCESS, DEB,
-                   "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d\n",
+                   "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d",
                    dp.digitizer, (int) xcoord, (int) ycoord,
                    (int) builder[cassette].getWirePosition(),
                    (int) builder[cassette].getStripPosition(), pixel_id);

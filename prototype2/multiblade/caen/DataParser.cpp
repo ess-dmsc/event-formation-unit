@@ -38,12 +38,12 @@ int DataParser::parse(const char *buffer, unsigned int size) {
   MBHeader = (struct Header *)buffer;
 
   if (MBHeader->version != Version) {
-    XTRACE(DATA, WAR, "Unsupported data version: 0x%04x (expected 0x04%x)\n", MBHeader->version, Version);
+    XTRACE(DATA, WAR, "Unsupported data version: 0x%04x (expected 0x04%x)", MBHeader->version, Version);
     return -error::EHEADER;
   }
 
   if (MBHeader->elementType != ElementType) {
-    XTRACE(DATA, WAR, "Unsupported data type: 0x%04x (expected 0x04%x)\n", MBHeader->elementType, ElementType);
+    XTRACE(DATA, WAR, "Unsupported data type: 0x%04x (expected 0x04%x)", MBHeader->elementType, ElementType);
     return -error::EHEADER;
   }
 
@@ -66,6 +66,7 @@ int DataParser::parse(const char *buffer, unsigned int size) {
     r.local_time = d.localTime;
     r.channel = d.channel;
     r.adc = d.adcValue;
+    //XTRACE(DATA, DEB, "readout %s", r.debug().c_str());
   }
 
   return MBHeader->numElements;
