@@ -50,8 +50,8 @@ private:
 };
 
 struct ChannelID {
-  std::uint16_t ChannelNr;
-  std::uint16_t SourceID;
+  std::uint16_t ChannelNr{0};
+  std::uint16_t SourceID{0};
   bool operator==(ChannelID const &Other) const {
     return Other.ChannelNr == ChannelNr and Other.SourceID == SourceID;
   };
