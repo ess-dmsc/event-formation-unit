@@ -11,6 +11,7 @@
 
 #include "AdcBufferElements.h"
 #include "AdcTimeStamp.h"
+#include "ChannelID.h"
 #include <exception>
 #include <functional>
 #include <netinet/in.h>
@@ -47,19 +48,6 @@ public:
 private:
   Type ParserErrorType;
   std::string Error;
-};
-
-struct ChannelID {
-  std::uint16_t ChannelNr;
-  std::uint16_t SourceID;
-  bool operator==(ChannelID const &Other) const {
-    return Other.ChannelNr == ChannelNr and Other.SourceID == SourceID;
-  };
-  bool operator<(ChannelID const &Other) const {
-    const auto MaxNrOfChannels = 4;
-    return ChannelNr + SourceID * MaxNrOfChannels <
-           Other.ChannelNr + Other.SourceID * MaxNrOfChannels;
-  };
 };
 
 /// \brief Data stored in this struct represents a (properly parsed) sampling

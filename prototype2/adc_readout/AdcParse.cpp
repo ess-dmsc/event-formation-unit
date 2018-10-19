@@ -129,11 +129,12 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte) {
         Packet.Length) {
       throw ParserException(ParserException::Type::DATA_LENGTH);
     }
+    auto CurrentChannelID = ChannelID{Source, Header.Channel};
     SamplingRun *CurrentDataModule =
-        ProduceModule(ChannelID{Header.Channel, Source});
+        ProduceModule(CurrentChannelID);
     if (CurrentDataModule != nullptr) {
       CurrentDataModule->Data.resize(NrOfSamples);
-      CurrentDataModule->Identifier = {Header.Channel, Source};
+      CurrentDataModule->Identifier = CurrentChannelID;
       CurrentDataModule->TimeStamp = Header.TimeStamp;
       CurrentDataModule->OversamplingFactor = Header.Oversampling;
       auto ElementPointer = reinterpret_cast<const std::uint16_t *>(

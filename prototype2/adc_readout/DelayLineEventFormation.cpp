@@ -9,39 +9,32 @@
 #include <common/Log.h>
 #include <cstdlib>
 
+using AxisType = AdcSettings::PositionSensingType;
+
+std::unique_ptr<DelayLinePositionInterface> createCalculator(AxisType CalcType, int Timeout) {
+  switch (CalcType) {
+    case AxisType::AMPLITUDE:
+      return
+      std::make_unique<DelayLineAmpPosCalc>(Timeout);
+      break;
+    case AxisType::TIME:
+      return
+      std::make_unique<DelayLineAmpPosCalc>(Timeout);
+      break;
+    case AxisType::CONST: // Fall through
+    default:
+      break;
+  }
+  return std::make_unique<ConstDelayLinePosition>();
+}
+
 DelayLineEventFormation::DelayLineEventFormation(
     AdcSettings const &ReadoutSettings) {
-  switch (ReadoutSettings.XAxis) {
-  case AdcSettings::PositionSensingType::AMPLITUDE:
-    XAxisCalc =
-        std::make_unique<DelayLineAmpPosCalc>(ReadoutSettings.EventTimeoutNS);
-    break;
-  case AdcSettings::PositionSensingType::TIME:
-    XAxisCalc =
-        std::make_unique<DelayLineAmpPosCalc>(ReadoutSettings.EventTimeoutNS);
-    break;
-  case AdcSettings::PositionSensingType::CONST: // Fall through
-  default:
-    XAxisCalc = std::make_unique<ConstDelayLinePosition>();
-    break;
-  }
+  XAxisCalc = createCalculator(ReadoutSettings.XAxis, ReadoutSettings.EventTimeoutNS);
   XAxisCalc->setCalibrationValues(ReadoutSettings.XAxisCalibOffset,
                                   ReadoutSettings.XAxisCalibSlope);
 
-  switch (ReadoutSettings.YAxis) {
-  case AdcSettings::PositionSensingType::AMPLITUDE:
-    YAxisCalc =
-        std::make_unique<DelayLineAmpPosCalc>(ReadoutSettings.EventTimeoutNS);
-    break;
-  case AdcSettings::PositionSensingType::TIME:
-    YAxisCalc =
-        std::make_unique<DelayLineAmpPosCalc>(ReadoutSettings.EventTimeoutNS);
-    break;
-  case AdcSettings::PositionSensingType::CONST: // Fall through
-  default:
-    YAxisCalc = std::make_unique<ConstDelayLinePosition>();
-    break;
-  }
+  YAxisCalc = createCalculator(ReadoutSettings.YAxis, ReadoutSettings.EventTimeoutNS);
   YAxisCalc->setCalibrationValues(ReadoutSettings.YAxisCalibOffset,
                                   ReadoutSettings.YAxisCalibSlope);
 
@@ -77,43 +70,30 @@ DelayLineEventFormation::DelayLineEventFormation(
     }
     return true;
   };
-  using RoleList = std::tuple<DelayLinePosCalcInterface *,
+  using RoleParams = std::tuple<DelayLinePosCalcInterface *,
                               DelayLinePosCalcInterface::ChannelRole,
                               std::function<bool(DelayLinePosCalcInterface *)>>;
-  std::multimap<AdcSettings::ChannelRole, RoleList> ChannelRoleMap{
-      {AdcSettings::ChannelRole::AMPLITUDE_X_AXIS_1,
-       {dynamic_cast<DelayLinePosCalcInterface *>(XAxisCalc.get()),
-        DelayLinePosCalcInterface::ChannelRole::FIRST, IsAmpCalc}},
-      {AdcSettings::ChannelRole::AMPLITUDE_X_AXIS_2,
-       {dynamic_cast<DelayLinePosCalcInterface *>(XAxisCalc.get()),
-        DelayLinePosCalcInterface::ChannelRole::SECOND, IsAmpCalc}},
-      {AdcSettings::ChannelRole::AMPLITUDE_Y_AXIS_1,
-       {dynamic_cast<DelayLinePosCalcInterface *>(YAxisCalc.get()),
-        DelayLinePosCalcInterface::ChannelRole::FIRST, IsAmpCalc}},
-      {AdcSettings::ChannelRole::AMPLITUDE_Y_AXIS_2,
-       {dynamic_cast<DelayLinePosCalcInterface *>(YAxisCalc.get()),
-        DelayLinePosCalcInterface::ChannelRole::SECOND, IsAmpCalc}},
-
-      {AdcSettings::ChannelRole::TIME_X_AXIS_1,
-       {dynamic_cast<DelayLinePosCalcInterface *>(XAxisCalc.get()),
-        DelayLinePosCalcInterface::ChannelRole::FIRST, IsTimeCalc}},
-      {AdcSettings::ChannelRole::TIME_X_AXIS_2,
-       {dynamic_cast<DelayLinePosCalcInterface *>(XAxisCalc.get()),
-        DelayLinePosCalcInterface::ChannelRole::SECOND, IsTimeCalc}},
-      {AdcSettings::ChannelRole::TIME_Y_AXIS_1,
-       {dynamic_cast<DelayLinePosCalcInterface *>(YAxisCalc.get()),
-        DelayLinePosCalcInterface::ChannelRole::FIRST, IsTimeCalc}},
-      {AdcSettings::ChannelRole::TIME_Y_AXIS_2,
-       {dynamic_cast<DelayLinePosCalcInterface *>(YAxisCalc.get()),
-        DelayLinePosCalcInterface::ChannelRole::SECOND, IsTimeCalc}},
-
-      {AdcSettings::ChannelRole::REFERENCE_TIME,
-       {dynamic_cast<DelayLinePosCalcInterface *>(YAxisCalc.get()),
-        DelayLinePosCalcInterface::ChannelRole::REFERENCE, IsRefCalc}},
-      {AdcSettings::ChannelRole::REFERENCE_TIME,
-       {dynamic_cast<DelayLinePosCalcInterface *>(XAxisCalc.get()),
-        DelayLinePosCalcInterface::ChannelRole::REFERENCE, IsRefCalc}},
+  std::multimap<AdcSettings::ChannelRole, RoleParams> ChannelRoleMap;
+  
+  auto addRole = [&ChannelRoleMap](auto Role, auto &AxisPtr, auto CAxisRole, auto CheckFunc) {
+    ChannelRoleMap.emplace(Role, RoleParams{dynamic_cast<DelayLinePosCalcInterface *>(AxisPtr.get()), CAxisRole, CheckFunc});
   };
+  using ChannelRole = AdcSettings::ChannelRole;
+  using AxisRole = DelayLinePosCalcInterface::ChannelRole;
+  
+  // Add possible roles
+  addRole(ChannelRole::AMPLITUDE_X_AXIS_1, XAxisCalc, AxisRole::FIRST, IsAmpCalc);
+  addRole(ChannelRole::AMPLITUDE_X_AXIS_2, XAxisCalc, AxisRole::SECOND, IsAmpCalc);
+  addRole(ChannelRole::AMPLITUDE_Y_AXIS_1, YAxisCalc, AxisRole::FIRST, IsAmpCalc);
+  addRole(ChannelRole::AMPLITUDE_Y_AXIS_2, YAxisCalc, AxisRole::SECOND, IsAmpCalc);
+  
+  addRole(ChannelRole::TIME_X_AXIS_1, XAxisCalc, AxisRole::FIRST, IsTimeCalc);
+  addRole(ChannelRole::TIME_X_AXIS_2, XAxisCalc, AxisRole::SECOND, IsTimeCalc);
+  addRole(ChannelRole::TIME_Y_AXIS_1, YAxisCalc, AxisRole::FIRST, IsTimeCalc);
+  addRole(ChannelRole::TIME_Y_AXIS_2, YAxisCalc, AxisRole::SECOND, IsTimeCalc);
+  
+  addRole(ChannelRole::REFERENCE_TIME, XAxisCalc, AxisRole::REFERENCE, IsRefCalc);
+  addRole(ChannelRole::REFERENCE_TIME, YAxisCalc, AxisRole::REFERENCE, IsRefCalc);
 
   auto DoChannelRoleMapping = [&](ChannelID ID, auto Role) {
     auto PossibleRoles = ChannelRoleMap.equal_range(Role);
@@ -129,7 +109,17 @@ DelayLineEventFormation::DelayLineEventFormation(
       }
     }
   };
+  
+  // Apply roles
   DoChannelRoleMapping({0, 0}, ReadoutSettings.ADC1Channel1);
+  DoChannelRoleMapping({0, 1}, ReadoutSettings.ADC1Channel2);
+  DoChannelRoleMapping({0, 2}, ReadoutSettings.ADC1Channel3);
+  DoChannelRoleMapping({0, 3}, ReadoutSettings.ADC1Channel4);
+  
+  DoChannelRoleMapping({1, 0}, ReadoutSettings.ADC2Channel1);
+  DoChannelRoleMapping({1, 1}, ReadoutSettings.ADC2Channel2);
+  DoChannelRoleMapping({1, 2}, ReadoutSettings.ADC2Channel3);
+  DoChannelRoleMapping({1, 3}, ReadoutSettings.ADC2Channel4);
 }
 
 void DelayLineEventFormation::addPulse(const PulseParameters &Pulse) {

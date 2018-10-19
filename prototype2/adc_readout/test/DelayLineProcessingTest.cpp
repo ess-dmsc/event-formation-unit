@@ -14,7 +14,7 @@ class SampleRunAnalysis : public ::testing::Test {
 public:
   void SetUp() override {
     TestData.Data.resize(10, 0);
-    TestData.Identifier = {ChannelNr, SourceID};
+    TestData.Identifier = {SourceID, ChannelNr};
   }
   const unsigned short ChannelNr{42};
   const unsigned short SourceID{84};

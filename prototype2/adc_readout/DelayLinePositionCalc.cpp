@@ -7,6 +7,8 @@
 
 #include "DelayLinePositionCalc.h"
 #include <cstdlib>
+#include <vector>
+#include <cstdint>
 
 int ConstDelayLinePosition::getPosition() {
   return DelayLinePositionInterface::Origin;

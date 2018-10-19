@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "AdcParse.h"
+#include "ChannelID.h"
 #include "AdcTimeStamp.h"
 
 /// \brief Stores data about a pulse from the ADC system, including the source.

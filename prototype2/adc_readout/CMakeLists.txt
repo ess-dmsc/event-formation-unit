@@ -33,6 +33,7 @@ set(AdcReadoutBase_INC
     DelayLineProcessing.h
     DelayLinePositionCalc.h
     PulseParameters.h
+    ChannelID.h
     )
 
 

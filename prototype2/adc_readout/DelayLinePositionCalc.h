@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "AdcParse.h"
+#include "ChannelID.h"
 #include "PulseParameters.h"
 #include <cstdint>
 #include <cstdint>
@@ -20,14 +20,6 @@ struct AxisEvent {
   int Position{0};
   int Amplitude{0};
   std::uint64_t Timestamp{0};
-};
-
-struct ChannelIDHasher {
-  std::size_t operator()(const ChannelID &ID) const {
-    return std::hash<std::uint32_t>{}(
-        static_cast<uint32_t>(ID.ChannelNr) |
-        (static_cast<uint32_t>(ID.SourceID) << 16));
-  }
 };
 
 class DelayLinePositionInterface {
@@ -119,7 +111,7 @@ protected:
   /// \return Timestamp in nanoseconds since Unix EPOCH.
   std::uint64_t getTimestamp() override;
 
-  std::unordered_map<ChannelID, ChannelRole, ChannelIDHasher> RoleMap;
+  std::unordered_map<ChannelID, ChannelRole> RoleMap;
   std::unordered_map<ChannelRole, PulseParameters> PulseData;
   std::uint64_t EventTimeout{0};
 };
