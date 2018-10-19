@@ -64,7 +64,7 @@ public:
   /// registered to an axis.
   auto getNrOfDiscardedPulses() { return DiscardedDelayLinePulses; }
 
-private:
+protected:
   std::int64_t ProcessedDelayLinePulses{0};
   std::int64_t DiscardedDelayLinePulses{0};
   std::unique_ptr<DelayLinePositionInterface> XAxisCalc;
