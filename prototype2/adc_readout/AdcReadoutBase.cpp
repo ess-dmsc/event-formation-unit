@@ -37,11 +37,25 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
 }
 
 std::shared_ptr<Producer> AdcReadoutBase::getProducer() {
+  std::lock_guard<std::mutex> Guard(ProducerMutex);
   if (ProducerPtr == nullptr) {
-    ProducerPtr = std::shared_ptr<Producer>(
-        new Producer(GeneralSettings.KafkaBroker, GeneralSettings.KafkaTopic));
+    ProducerPtr = std::make_shared<Producer>(GeneralSettings.KafkaBroker,
+                                             GeneralSettings.KafkaTopic);
   }
   return ProducerPtr;
+}
+
+std::shared_ptr<DelayLineProducer> AdcReadoutBase::getDelayLineProducer() {
+  std::lock_guard<std::mutex> Guard(DelayLineProducerMutex);
+  if (DelayLineProducerPtr == nullptr) {
+    std::string UsedTopic = GeneralSettings.KafkaTopic;
+    if (not ReadoutSettings.DelayLineKafkaTopic.empty()) {
+      UsedTopic = ReadoutSettings.DelayLineKafkaTopic;
+    }
+    DelayLineProducerPtr = std::make_shared<DelayLineProducer>(
+        GeneralSettings.KafkaBroker, UsedTopic, ReadoutSettings);
+  }
+  return DelayLineProducerPtr;
 }
 
 void AdcReadoutBase::stopThreads() {
@@ -61,7 +75,9 @@ SamplingRun *AdcReadoutBase::GetDataModule(ChannelID const Identifier) {
     Detector::AddThreadFunction(processingFunc, ThreadName);
     auto &NewThread = Detector::Threads.at(Detector::Threads.size() - 1);
     NewThread.thread = std::thread(NewThread.func);
-    LOG(INIT, Sev::Debug, "Lazily launching processing thread for channel {} of ADC #{}.", Identifier.ChannelNr, Identifier.SourceID);
+    LOG(INIT, Sev::Debug,
+        "Lazily launching processing thread for channel {} of ADC #{}.",
+        Identifier.ChannelNr, Identifier.SourceID);
   }
   SpscBuffer::ElementPtr<SamplingRun> ReturnModule{nullptr};
   bool Success = DataModuleQueues.at(Identifier)->tryGetEmpty(ReturnModule);
@@ -144,19 +160,20 @@ void AdcReadoutBase::processingThread(Queue &DataModuleQueue) {
   std::vector<std::unique_ptr<AdcDataProcessor>> Processors;
 
   if (ReadoutSettings.PeakDetection) {
-    Processors.emplace_back(
-        std::make_unique<PeakFinder>(getProducer()));
+    Processors.emplace_back(std::make_unique<PeakFinder>(getProducer()));
   }
   if (ReadoutSettings.SerializeSamples) {
-    auto Processor = std::make_unique<SampleProcessing>(getProducer(), ReadoutSettings.Name);
+    auto Processor =
+        std::make_unique<SampleProcessing>(getProducer(), ReadoutSettings.Name);
     Processor->setTimeStampLocation(
-            TimeStampLocationMap.at(ReadoutSettings.TimeStampLocation));
+        TimeStampLocationMap.at(ReadoutSettings.TimeStampLocation));
     Processor->setMeanOfSamples(ReadoutSettings.TakeMeanOfNrOfSamples);
     Processor->setSerializeTimestamps(ReadoutSettings.SampleTimeStamp);
     Processors.emplace_back(std::move(Processor));
   }
   if (ReadoutSettings.DelayLineDetector) {
-    
+    Processors.emplace_back(
+        std::make_unique<DelayLineProcessing>(getDelayLineProducer()));
   }
 
   bool GotModule = false;

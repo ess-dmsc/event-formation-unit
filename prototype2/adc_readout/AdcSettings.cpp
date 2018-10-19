@@ -128,12 +128,13 @@ void SetCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings) {
                "the value of \"yaxis_offset\".")
       ->group("Delay Line Options")
       ->default_str("CONST");
-  
+
   parser
-  .add_option("--event_timeout", ReadoutSettings.EventTimeoutNS,
-           "The maximum amount of time between pulses before throwing away the event. Value is in nanoseconds (ns).")
-  ->group("Delay Line Options")
-  ->default_str("100");
+      .add_option("--event_timeout", ReadoutSettings.EventTimeoutNS,
+                  "The maximum amount of time between pulses before throwing "
+                  "away the event. Value is in nanoseconds (ns).")
+      ->group("Delay Line Options")
+      ->default_str("100");
 
   std::set<ChRole> RoleOptions;
   for (auto &Item : getRoleMapping()) {

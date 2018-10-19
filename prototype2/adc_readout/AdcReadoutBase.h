@@ -13,6 +13,7 @@
 #include "AdcParse.h"
 #include "AdcSettings.h"
 #include "CircularBuffer.h"
+#include "DelayLineProcessing.h"
 #include "SampleProcessing.h"
 #include <asio.hpp>
 #include <common/Detector.h>
@@ -58,6 +59,8 @@ protected:
   /// Used in order to simplify unit testing.
   virtual std::shared_ptr<Producer> getProducer();
 
+  virtual std::shared_ptr<DelayLineProducer> getDelayLineProducer();
+
   SamplingRun *GetDataModule(ChannelID const Identifier);
   bool QueueUpDataModule(SamplingRun *Data);
 
@@ -86,10 +89,13 @@ protected:
     std::int64_t processing_packets_lost = -1; // This should be -1
   } AdcStats;
 
-  std::shared_ptr<Producer> ProducerPtr;
+  std::shared_ptr<Producer> ProducerPtr{nullptr};
+  std::shared_ptr<DelayLineProducer> DelayLineProducerPtr{nullptr};
   AdcSettings &ReadoutSettings;
   BaseSettings GeneralSettings;
   const int MessageQueueSize = 100;
   std::shared_ptr<asio::io_service> Service;
   asio::io_service::work Worker;
+  std::mutex ProducerMutex;
+  std::mutex DelayLineProducerMutex;
 };
