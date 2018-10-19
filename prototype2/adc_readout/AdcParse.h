@@ -79,11 +79,13 @@ struct SamplingRun {
   void reset() {
     Data.clear();
     OversamplingFactor = 1;
+    Channel = 0;
     TimeStamp.Seconds = 0;
     TimeStamp.SecondsFrac = 0;
     Identifier.ChannelNr = 0;
     Identifier.SourceID = 0;
   }
+  std::uint16_t Channel;
   ChannelID Identifier;
   std::uint16_t OversamplingFactor{1};
   std::vector<std::uint16_t> Data;
@@ -177,8 +179,7 @@ public:
   /// value is passed on together with the parsed data.
   PacketParser(
       std::function<bool(SamplingRun *)> ModuleHandler,
-      std::function<SamplingRun *(ChannelID Identifier)> ModuleProducer,
-      std::uint16_t SourceID);
+      std::function<SamplingRun *(int Channel)> ModuleProducer);
   /// \brief Parses a packet of binary data.
   /// \param[in] Packet Raw data, straight from the socket.
   /// \return Some general information about the packet.
@@ -195,8 +196,7 @@ protected:
 
 private:
   std::function<bool(SamplingRun *)> HandleModule;
-  std::function<SamplingRun *(ChannelID Identifier)> ProduceModule;
-  std::uint16_t Source;
+  std::function<SamplingRun *(int Channel)> ProduceModule;
 };
 
 /// \brief Parses the header of a packet. Called by parsePacket().
