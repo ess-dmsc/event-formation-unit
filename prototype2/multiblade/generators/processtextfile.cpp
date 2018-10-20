@@ -13,7 +13,6 @@
 #include <tclap/CmdLine.h>
 
 #include "generators/TextFile.h"
-#include "common/DumpEventBuilderInfo.h"
 #include "common/EventBuilder.h"
 // GCOVR_EXCL_START
 int main(int argc, const char **argv) {
@@ -128,8 +127,7 @@ int main(int argc, const char **argv) {
 
   output.close();
 
-  Multiblade::DumpEventBuilderInfo info;
-  info.print(p);
+  p.print();
 
   return 0;
 }

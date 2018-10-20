@@ -16,7 +16,6 @@
 #include <chrono>
 
 #include "generators/TextFile.h"
-#include "common/DumpEventBuilderInfo.h"
 #include "common/EventBuilder.h"
 
 // GCOVR_EXCL_START
@@ -105,8 +104,7 @@ int main(int argc, const char **argv) {
   auto acc_time = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
   auto ttime = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t0);
 
-  Multiblade::DumpEventBuilderInfo info;
-  info.print(p);
+  p.print();
 
   long npoints = entries.size() * npasses;
 

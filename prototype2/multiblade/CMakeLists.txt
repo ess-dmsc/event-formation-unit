@@ -10,7 +10,6 @@ set(caen_common_inc
   caen/Readout.cpp
   caen/DataParser.h
   common/EventBuilder.h
-  common/DumpEventBuilderInfo.h
   common/Config.h
   )
 set(caen_common_src
@@ -20,7 +19,6 @@ set(caen_common_src
   caen/Readout.h
   caen/DataParser.cpp
   common/EventBuilder.cpp
-  common/DumpEventBuilderInfo.cpp
   common/Config.cpp
   )
 
@@ -56,13 +54,11 @@ if(TCLAP_FOUND)
   set(mbprocesstextfile_INC
     common/EventBuilder.h
     generators/TextFile.h
-    common/DumpEventBuilderInfo.h
     )
   set(mbprocesstextfile_SRC
     generators/processtextfile.cpp
     generators/TextFile.cpp
     common/EventBuilder.cpp
-    common/DumpEventBuilderInfo.cpp
     )
 
   create_executable(mbprocesstextfile)
@@ -72,12 +68,10 @@ if(TCLAP_FOUND)
   set(mbprofiling_INC
     generators/TextFile.h
     common/EventBuilder.h
-    common/DumpEventBuilderInfo.h
     )
   set(mbprofiling_SRC generators/profiling.cpp
     generators/TextFile.cpp
     common/EventBuilder.cpp
-    common/DumpEventBuilderInfo.cpp
     )
   create_executable(mbprofiling)
 else()
@@ -116,7 +110,6 @@ create_test_executable(MBDataParserTest)
 set(MBEventBuilderTest_INC ${test_INC} )
 set(MBEventBuilderTest_SRC
   common/EventBuilder.cpp
-  common/DumpEventBuilderInfo.cpp
   test/EventBuilderCounterTest.cpp
   )
 create_test_executable(MBEventBuilderTest)

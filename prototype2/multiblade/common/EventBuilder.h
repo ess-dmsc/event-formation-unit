@@ -191,6 +191,9 @@ public:
   /// Reset debugging and monitoring counters
   void resetCounters();
 
+  /// Call this to wite the information to stdout
+  void print() const;
+
 private:
   // Configuration variables
 
@@ -281,6 +284,16 @@ private:
   struct {
     uint64_t readouts_discarded{0};
   } Stats;
+
+  /// \name Prints information of all processed clusters/events
+  /// This print-out calls several function.
+  //@{
+  static void printClusterAbsolute(const std::array<uint64_t, 6>&, std::string text);
+  static void printClusterPercentage(const std::array<uint64_t, 6>&, std::string text);
+  //@}
+
+  /// Summs the contents of a std::array of uint64_t with dimension 6
+  static uint64_t sumArray(const std::array<uint64_t, 6>& array);
 };
 
 }

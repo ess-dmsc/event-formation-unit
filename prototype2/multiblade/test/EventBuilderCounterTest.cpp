@@ -22,7 +22,6 @@
 #endif
 #pragma GCC diagnostic pop
 
-#include "common/DumpEventBuilderInfo.h"
 #include "TestData.h"
 #include "test/TestBase.h"
 
@@ -47,8 +46,7 @@ TEST_F(MBEventBuilderTest, Constructor) {
 TEST_F(MBEventBuilderTest, EventBuilderDump) {
   Multiblade::EventBuilder evbuilder;
   printf("This is NOT a test, just calling debug print functions\n");
-  Multiblade::DumpEventBuilderInfo evbdump;
-  evbdump.print(evbuilder);
+  evbuilder.print();
 }
 
 TEST_F(MBEventBuilderTest, CheckAdjacencyEmpty) {
