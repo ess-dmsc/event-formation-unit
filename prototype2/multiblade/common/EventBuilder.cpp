@@ -338,58 +338,58 @@ bool operator<(const point &a, const point &b) {
 
 void EventBuilder::print() const {
 
-  // clusterPoints(p);
+  fmt::memory_buffer out;
 
   uint64_t n2Dwireevents = sumArray(m_2D_wires);
   uint64_t n2Dstripevents = sumArray(m_2D_strips);
   uint64_t n1Dwireevents = sumArray(m_1D_wires);
   uint64_t n1Dstripevents = sumArray(m_1D_strips);
 
-  std::cout <<
-            fmt::format("\n"
-                        "Number of events recorded      : {:>10}\n"
-                        "Number of 2D events            : {:>10} (wire), {:>10} (strip). These two numbers must be identical.\n"
-                        "Number of 1D wire events       : {:>10}\n"
-                        "Number of 1D strip events      : {:>10}\n"
-                        "Total number of events         : {:>10}. Must match number of events recorded!\n",
-                        m_nevents,
-                        n2Dwireevents, n2Dstripevents,
-                        n1Dwireevents,
-                        n1Dstripevents,
-                        n2Dwireevents + n1Dwireevents + n1Dstripevents);
+  fmt::format_to(out, "\n"
+                      "Number of events recorded      : {:>10}\n"
+                      "Number of 2D events            : {:>10} (wire), {:>10} (strip). These two numbers must be identical.\n"
+                      "Number of 1D wire events       : {:>10}\n"
+                      "Number of 1D strip events      : {:>10}\n"
+                      "Total number of events         : {:>10}. Must match number of events recorded!\n",
+                 m_nevents,
+                 n2Dwireevents, n2Dstripevents,
+                 n1Dwireevents,
+                 n1Dstripevents,
+                 n2Dwireevents + n1Dwireevents + n1Dstripevents);
 
-  std::cout << "\n";
-
-  std::cout << fmt::format("{:^52}{:^60}\n", " ", "Events with channels per event");
-  std::cout << fmt::format("{:^52}", " ");
+  fmt::format_to(out, "\n"
+                 "{:^52}{:^60}\n"
+                 "{:^52}",
+                 " ", "Events with channels per event",
+                 " ");
   for (int i = 0; i < 6; i++)
-    std::cout << fmt::format("{:>10}", (i < 5 ? std::to_string(i + 1) : ">5"));
-  std::cout << "\n";
-  std::cout << fmt::format("{:^52}{:->60}\n", " ", "-");
+    fmt::format_to(out, "{:>10}", (i < 5 ? std::to_string(i + 1) : ">5"));
+  fmt::format_to(out, "\n"
+                 "{:^52}{:->60}\n",
+                 " ", "-");
+  fmt::format_to(out, "2D events (both wire and strip signals) : \n");
+  fmt::format_to(out, "{}",
+                 printClusterAbsolute(m_2D_wires,
+                       "Number of events with wires fired per event  : "));
+  fmt::format_to(out, "{}", printClusterAbsolute(m_2D_strips,
+                       "Number of events with strips fired per event : "));
+  fmt::format_to(out, "{}", printClusterPercentage(m_2D_wires,
+                         "Percentage of wires fired per event          : "));
+  fmt::format_to(out, "{}", printClusterPercentage(m_2D_strips,
+                         "Percentage of strips fired per event         : "));
 
-  std::cout << "2D events (both wire and strip signals) : \n";
-  printClusterAbsolute(m_2D_wires,
-                       "Number of events with wires fired per event  : ");
-  printClusterAbsolute(m_2D_strips,
-                       "Number of events with strips fired per event : ");
-  printClusterPercentage(m_2D_wires,
-                         "Percentage of wires fired per event          : ");
-  printClusterPercentage(m_2D_strips,
-                         "Percentage of strips fired per event         : ");
+  fmt::format_to(out, "1D wire events : \n");
+  fmt::format_to(out, "{}", printClusterAbsolute(m_1D_wires,
+                       "Number of events with wires fired per event  : "));
+  fmt::format_to(out, "{}", printClusterPercentage(m_1D_wires,
+                         "Percentage of wires fired per event          : "));
+  fmt::format_to(out, "1D strip events : \n");
+  fmt::format_to(out, "{}", printClusterAbsolute(m_1D_strips,
+                       "Number of events with strips fired per event : "));
+  fmt::format_to(out, "{}", printClusterPercentage(m_1D_strips,
+                         "Percentage of strips fired per event         : "));
 
-  std::cout << "1D wire events : \n";
-  printClusterAbsolute(m_1D_wires,
-                       "Number of events with wires fired per event  : ");
-  printClusterPercentage(m_1D_wires,
-                         "Percentage of wires fired per event          : ");
-  std::cout << "1D strip events : \n";
-  printClusterAbsolute(m_1D_strips,
-                       "Number of events with strips fired per event : ");
-  printClusterPercentage(m_1D_strips,
-                         "Percentage of strips fired per event         : ");
-
-  std::cout <<
-            fmt::format("\n"
+  fmt::format_to(out, "\n"
                         "Number of rejected clusters :\n"
                         "     Adacency : {:>10}\n"
                         "     Position : {:>10}\n",
@@ -401,30 +401,35 @@ void EventBuilder::print() const {
   uint64_t sum_strip =
       m_2D_strips[5] + m_1D_strips[5];
 
-  std::cout << fmt::format("\n"
+  fmt::format_to(out, "\n"
                            "Number of clusters with more than 5 points per wire and or strip : \n"
                            "     Wires  : {:>10}\n"
                            "     Strips : {:>10}\n",
                            sum_wire, sum_strip);
+
+  std::cout << fmt::to_string(out);
 }
 
-void EventBuilder::printClusterAbsolute(const std::array<uint64_t, 6>& array,
+std::string EventBuilder::printClusterAbsolute(const std::array<uint64_t, 6>& array,
                                                 std::string text) {
-
-  std::cout << "     " << text;
+  fmt::memory_buffer out;
+  fmt::format_to(out, "     {}", text);
   for (int i = 0; i < 6; i++)
-    std::cout << fmt::format("{:>10}", array[i]);
-  std::cout << "\n";
+    fmt::format_to(out, "{:>10}", array[i]);
+  fmt::format_to(out, "\n");
+  return fmt::to_string(out);
 }
 
-void EventBuilder::printClusterPercentage(const std::array<uint64_t, 6>& array,
+std::string EventBuilder::printClusterPercentage(const std::array<uint64_t, 6>& array,
                                                   std::string text) {
-  std::cout << "     " << text;
+  fmt::memory_buffer out;
+  fmt::format_to(out, "     {}", text);
   uint64_t sum = sumArray(array);
   //std::cout << std::fixed << std::setprecision(4);
   for (int i = 0; i < 6; i++)
-    std::cout << fmt::format("{:>10}", 1. * array[i] / sum * 100.);
-  std::cout << "\n";
+    fmt::format_to(out, "{:>10}", 1. * array[i] / sum * 100.);
+  fmt::format_to(out, "\n");
+  return fmt::to_string(out);
 }
 
 uint64_t EventBuilder::sumArray(const std::array<uint64_t, 6> &array) {

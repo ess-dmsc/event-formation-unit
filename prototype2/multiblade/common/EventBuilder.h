@@ -288,8 +288,8 @@ private:
   /// \name Prints information of all processed clusters/events
   /// This print-out calls several function.
   //@{
-  static void printClusterAbsolute(const std::array<uint64_t, 6>&, std::string text);
-  static void printClusterPercentage(const std::array<uint64_t, 6>&, std::string text);
+  static std::string printClusterAbsolute(const std::array<uint64_t, 6>&, std::string text);
+  static std::string printClusterPercentage(const std::array<uint64_t, 6>&, std::string text);
   //@}
 
   /// Summs the contents of a std::array of uint64_t with dimension 6
