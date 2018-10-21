@@ -100,6 +100,7 @@ set(MBEventBuilderBenchmarkTest_SRC
   )
 create_benchmark_executable(MBEventBuilderBenchmarkTest)
 if(GOOGLE_BENCHMARK)
+  find_package(fmt REQUIRED)
   target_link_libraries(MBEventBuilderBenchmarkTest PRIVATE fmt::fmt)
 endif()
 
