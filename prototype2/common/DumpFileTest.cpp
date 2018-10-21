@@ -154,7 +154,17 @@ TEST_F(DumpFileTest, ReadAll) {
   EXPECT_EQ(data.size(), 900);
 }
 
-/// \todo test flushing on destruction
+TEST_F(DumpFileTest, FlushOnClose) {
+  auto file_out = HitFile::create("dumpfile_test");
+  file_out->push(std::vector<Hit>(10, Hit()));
+  EXPECT_EQ(file_out->count(), 0);
+  file_out.reset();
+
+  std::vector<Hit> data;
+  HitFile::read("dumpfile_test", data);
+  EXPECT_EQ(data.size(), 10);
+}
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

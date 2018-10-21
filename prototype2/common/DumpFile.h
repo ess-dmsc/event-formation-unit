@@ -70,7 +70,8 @@ private:
 
 template<typename T>
 DumpFile<T>::~DumpFile() {
-  if (Data.size()) {
+  if (Data.size() && File.is_valid() &&
+      (File.intent() != hdf5::file::AccessFlags::READONLY)) {
     write();
   }
 }

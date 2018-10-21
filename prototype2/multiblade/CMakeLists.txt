@@ -80,7 +80,7 @@ else()
 endif()
 
 # Common include path for both tests
-set(test_INC clustering/EventBuilder.h test/TestData.h)
+set(test_INC clustering/EventBuilder.h clustering/TestData.h)
 
 # GOOGLE BENCHMARK
 set(MBDataParserBenchmarkTest_INC ${test_INC})
@@ -110,7 +110,7 @@ create_test_executable(MBDataParserTest)
 set(MBEventBuilderTest_INC ${test_INC} )
 set(MBEventBuilderTest_SRC
   clustering/EventBuilder.cpp
-  test/EventBuilderCounterTest.cpp
+  clustering/EventBuilderCounterTest.cpp
   )
 create_test_executable(MBEventBuilderTest)
 
@@ -118,7 +118,7 @@ create_test_executable(MBEventBuilderTest)
 # set(MBClusterTest_INC ${test_INC})
 # set(MBClusterTest_SRC
 #   clustering/EventBuilder.cpp
-#   test/EventBuilderClusteringTest.cpp
+#   clustering/EventBuilderClusteringTest.cpp
 #   )
 # create_test_executable(MBClusterTest)
 
