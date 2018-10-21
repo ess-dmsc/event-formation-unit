@@ -8,7 +8,7 @@
 
 #include <common/Log.h>
 #include <fstream>
-#include <multiblade/common/Config.h>
+#include <multiblade/caen/Config.h>
 #include <nlohmann/json.hpp>
 
 namespace Multiblade {

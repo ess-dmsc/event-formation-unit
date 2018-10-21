@@ -1,8 +1,8 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
 #include <common/DataSave.h>
-#include <multiblade/common/Config.h>
-#include <multiblade/common/ConfigTestData.h>
+#include <multiblade/caen/Config.h>
+#include <multiblade/caen/ConfigTestData.h>
 #include <test/TestBase.h>
 
 

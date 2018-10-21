@@ -26,7 +26,7 @@
 
 #include <caen/DataParser.h>
 
-#include <common/EventBuilder.h>
+#include <clustering/EventBuilder.h>
 
 #include <logical_geometry/ESSGeometry.h>
 

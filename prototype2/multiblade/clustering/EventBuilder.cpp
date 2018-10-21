@@ -5,7 +5,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <multiblade/common/EventBuilder.h>
+#include <multiblade/clustering/EventBuilder.h>
 #include <algorithm>
 #include <fmt/format.h>
 

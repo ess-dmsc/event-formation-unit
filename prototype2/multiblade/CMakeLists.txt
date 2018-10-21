@@ -9,8 +9,8 @@ set(caen_common_inc
   ../common/HistSerializer.h
   caen/Readout.cpp
   caen/DataParser.h
-  common/EventBuilder.h
-  common/Config.h
+  clustering/EventBuilder.h
+  caen/Config.h
   )
 set(caen_common_src
   MBCaenBase.cpp
@@ -18,8 +18,8 @@ set(caen_common_src
   ../common/HistSerializer.cpp
   caen/Readout.h
   caen/DataParser.cpp
-  common/EventBuilder.cpp
-  common/Config.cpp
+  clustering/EventBuilder.cpp
+  caen/Config.cpp
   )
 
 set(mbcaen_INC
@@ -52,13 +52,13 @@ find_package(TCLAP)
 if(TCLAP_FOUND)
   # Create an excecutable for the event-builder to process recorded data from a text-file.
   set(mbprocesstextfile_INC
-    common/EventBuilder.h
+    clustering/EventBuilder.h
     generators/TextFile.h
     )
   set(mbprocesstextfile_SRC
     generators/processtextfile.cpp
     generators/TextFile.cpp
-    common/EventBuilder.cpp
+    clustering/EventBuilder.cpp
     )
 
   create_executable(mbprocesstextfile)
@@ -67,11 +67,11 @@ if(TCLAP_FOUND)
   # Not really usefull unless built with -gp
   set(mbprofiling_INC
     generators/TextFile.h
-    common/EventBuilder.h
+    clustering/EventBuilder.h
     )
   set(mbprofiling_SRC generators/profiling.cpp
     generators/TextFile.cpp
-    common/EventBuilder.cpp
+    clustering/EventBuilder.cpp
     )
   create_executable(mbprofiling)
 else()
@@ -80,7 +80,7 @@ else()
 endif()
 
 # Common include path for both tests
-set(test_INC common/EventBuilder.h test/TestData.h)
+set(test_INC clustering/EventBuilder.h test/TestData.h)
 
 # GOOGLE BENCHMARK
 set(MBDataParserBenchmarkTest_INC ${test_INC})
@@ -95,8 +95,8 @@ endif()
 # GOOGLE BENCHMARK
 set(MBEventBuilderBenchmarkTest_INC ${test_INC})
 set(MBEventBuilderBenchmarkTest_SRC
-  common/EventBuilder.cpp
-  common/EventBuilderBenchmarkTest.cpp
+  clustering/EventBuilder.cpp
+  clustering/EventBuilderBenchmarkTest.cpp
   )
 create_benchmark_executable(MBEventBuilderBenchmarkTest)
 
@@ -109,7 +109,7 @@ create_test_executable(MBDataParserTest)
 # Create excecutable for the test of counters
 set(MBEventBuilderTest_INC ${test_INC} )
 set(MBEventBuilderTest_SRC
-  common/EventBuilder.cpp
+  clustering/EventBuilder.cpp
   test/EventBuilderCounterTest.cpp
   )
 create_test_executable(MBEventBuilderTest)
@@ -117,7 +117,7 @@ create_test_executable(MBEventBuilderTest)
 # Create excecutable for the test of clustering
 # set(MBClusterTest_INC ${test_INC})
 # set(MBClusterTest_SRC
-#   common/EventBuilder.cpp
+#   clustering/EventBuilder.cpp
 #   test/EventBuilderClusteringTest.cpp
 #   )
 # create_test_executable(MBClusterTest)
@@ -147,6 +147,6 @@ set(MB16DetectorTest_SRC caen/MB16DetectorTest.cpp)
 create_test_executable(MB16DetectorTest)
 
 #
-set(MBConfigTest_INC common/Config.h ../../prototype2/common/DataSave.h)
-set(MBConfigTest_SRC common/Config.cpp common/ConfigTest.cpp ../../prototype2/common/DataSave.cpp)
+set(MBConfigTest_INC caen/Config.h ../../prototype2/common/DataSave.h)
+set(MBConfigTest_SRC caen/Config.cpp caen/ConfigTest.cpp ../../prototype2/common/DataSave.cpp)
 create_test_executable(MBConfigTest)

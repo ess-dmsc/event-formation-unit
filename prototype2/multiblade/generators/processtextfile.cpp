@@ -13,7 +13,7 @@
 #include <tclap/CmdLine.h>
 
 #include "generators/TextFile.h"
-#include "common/EventBuilder.h"
+#include "clustering/EventBuilder.h"
 // GCOVR_EXCL_START
 int main(int argc, const char **argv) {
 

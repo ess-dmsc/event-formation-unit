@@ -15,7 +15,7 @@
 #pragma GCC diagnostic ignored "-Wmacro-redefined"
 #endif
 #define private public
-#include "common/EventBuilder.h"
+#include "clustering/EventBuilder.h"
 #ifdef private
 #undef private
 #define private private

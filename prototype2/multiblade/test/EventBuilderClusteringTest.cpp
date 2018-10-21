@@ -11,7 +11,7 @@
 
 /// \todo - no longer valid - new data format
 
-#include "mbcommon/EventBuilder.h"
+#include "mbclustering/EventBuilder.h"
 #include "MultiBladeTestData.h"
 #include "test/TestBase.h"
 

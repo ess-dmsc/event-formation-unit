@@ -12,7 +12,7 @@
 #include <common/Detector.h>
 #include <common/RingBuffer.h>
 #include <libs/include/SPSCFifo.h>
-#include <common/Config.h>
+#include <caen/Config.h>
 #include <prototype2/multiblade/caen/Readout.h>
 
 namespace Multiblade {
