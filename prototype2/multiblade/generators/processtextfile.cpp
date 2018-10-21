@@ -127,7 +127,7 @@ int main(int argc, const char **argv) {
 
   output.close();
 
-  p.print();
+  std::cout << p.print();
 
   return 0;
 }

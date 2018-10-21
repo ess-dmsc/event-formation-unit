@@ -45,8 +45,8 @@ TEST_F(MBEventBuilderTest, Constructor) {
 
 TEST_F(MBEventBuilderTest, EventBuilderDump) {
   Multiblade::EventBuilder evbuilder;
-  printf("This is NOT a test, just calling debug print functions\n");
-  evbuilder.print();
+  MESSAGE() << "This is NOT a test, just calling debug print functions\n";
+  MESSAGE() << evbuilder.print() << "\n";
 }
 
 TEST_F(MBEventBuilderTest, CheckAdjacencyEmpty) {

@@ -336,7 +336,7 @@ bool operator<(const point &a, const point &b) {
 }
 
 
-void EventBuilder::print() const {
+std::string  EventBuilder::print() const {
 
   fmt::memory_buffer out;
 
@@ -407,7 +407,7 @@ void EventBuilder::print() const {
                            "     Strips : {:>10}\n",
                            sum_wire, sum_strip);
 
-  std::cout << fmt::to_string(out);
+  return fmt::to_string(out);
 }
 
 std::string EventBuilder::printClusterAbsolute(const std::array<uint64_t, 6>& array,

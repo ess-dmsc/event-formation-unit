@@ -192,7 +192,7 @@ public:
   void resetCounters();
 
   /// Call this to wite the information to stdout
-  void print() const;
+  std::string print() const;
 
 private:
   // Configuration variables
