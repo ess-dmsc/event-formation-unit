@@ -99,6 +99,9 @@ set(MBEventBuilderBenchmarkTest_SRC
   clustering/EventBuilderBenchmarkTest.cpp
   )
 create_benchmark_executable(MBEventBuilderBenchmarkTest)
+if(GOOGLE_BENCHMARK)
+  target_link_libraries(MBEventBuilderBenchmarkTest PRIVATE fmt::fmt)
+endif()
 
 # Create excecutable for the test of geometry
 set(MBDataParserTest_INC caen/DataParser.h)
