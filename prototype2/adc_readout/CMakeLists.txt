@@ -52,6 +52,7 @@ set(AdcReadoutTest_SRC
     test/CLIArgumentsTest.cpp
     test/AdcTimeStampTest.cpp
     test/DelayLinePositionCalcTest.cpp
+    test/DelayLineEventFormationTest.cpp
     ${AdcReadoutBase_SRC}
     )
 
