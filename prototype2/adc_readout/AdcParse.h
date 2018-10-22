@@ -165,9 +165,8 @@ public:
   /// processed data into.
   /// \param[in] SourceID An integer used to identify the data source. This
   /// value is passed on together with the parsed data.
-  PacketParser(
-      std::function<bool(SamplingRun *)> ModuleHandler,
-      std::function<SamplingRun *(int Channel)> ModuleProducer);
+  PacketParser(std::function<bool(SamplingRun *)> ModuleHandler,
+               std::function<SamplingRun *(int Channel)> ModuleProducer);
   /// \brief Parses a packet of binary data.
   /// \param[in] Packet Raw data, straight from the socket.
   /// \return Some general information about the packet.

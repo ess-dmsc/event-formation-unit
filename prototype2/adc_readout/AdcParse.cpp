@@ -127,9 +127,9 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte) {
         Packet.Length) {
       throw ParserException(ParserException::Type::DATA_LENGTH);
     }
-    auto CurrentChannelID = ChannelID{Source, Header.Channel};
-    SamplingRun *CurrentDataModule =
-        ProduceModule(CurrentChannelID);
+    /// The zero below is a placeholder for future changes
+    auto CurrentChannelID = ChannelID{0, Header.Channel};
+    SamplingRun *CurrentDataModule = ProduceModule(Header.Channel);
     if (CurrentDataModule != nullptr) {
       CurrentDataModule->Data.resize(NrOfSamples);
       CurrentDataModule->Identifier = CurrentChannelID;

@@ -11,11 +11,11 @@
 
 #include "ChannelID.h"
 #include "PulseParameters.h"
+#include <cmath>
 #include <cstdint>
 #include <cstdint>
 #include <limits>
 #include <unordered_map>
-#include <cmath>
 
 struct AxisEvent {
   int Position{0};
@@ -32,11 +32,11 @@ public:
     Origin = NewOrigin;
     Slope = NewSlope;
   };
-  
+
   virtual std::pair<double, double> getCalibrationValues() {
     return {Origin, Slope};
   };
-  
+
   /// \brief Calculate event information based on available pulse data.
   ///
   /// Will remove existing pulse information on when calling.

@@ -21,16 +21,16 @@ struct ChannelID {
   bool operator<(ChannelID const &Other) const {
     const auto MaxNrOfChannels = 4;
     return ChannelNr + SourceID * MaxNrOfChannels <
-    Other.ChannelNr + Other.SourceID * MaxNrOfChannels;
+           Other.ChannelNr + Other.SourceID * MaxNrOfChannels;
   };
 };
 
 namespace std {
-  template<> struct hash<ChannelID> {
-    std::size_t operator()(const ChannelID &ID) const {
-      return std::hash<std::uint32_t>{}(
-                                        static_cast<uint32_t>(ID.ChannelNr) |
-                                        (static_cast<uint32_t>(ID.SourceID) << 16));
-    }
-  };
+template <> struct hash<ChannelID> {
+  std::size_t operator()(const ChannelID &ID) const {
+    return std::hash<std::uint32_t>{}(
+        static_cast<uint32_t>(ID.ChannelNr) |
+        (static_cast<uint32_t>(ID.SourceID) << 16));
+  }
+};
 }

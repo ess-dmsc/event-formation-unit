@@ -6,13 +6,14 @@
  */
 
 #include "../DelayLineEventFormation.h"
-#include <gtest/gtest.h>
 #include <common/Log.h>
+#include <gtest/gtest.h>
 #include <trompeloeil.hpp>
 
 class DelayLineEventFormationStandIn : public DelayLineEventFormation {
 public:
-  DelayLineEventFormationStandIn(AdcSettings const &ReadoutSettings) : DelayLineEventFormation(ReadoutSettings) {};
+  DelayLineEventFormationStandIn(AdcSettings const &ReadoutSettings)
+      : DelayLineEventFormation(ReadoutSettings){};
   using DelayLineEventFormation::PulseHandlerMap;
   using DelayLineEventFormation::XAxisCalc;
   using DelayLineEventFormation::YAxisCalc;
@@ -25,9 +26,7 @@ public:
     Log::SetMinimumSeverity(Severity::Critical);
     DefaultSettings = AdcSettings{};
   };
-  void TearDown() override {
-    Log::SetMinimumSeverity(Severity::Error);
-  };
+  void TearDown() override { Log::SetMinimumSeverity(Severity::Error); };
   AdcSettings DefaultSettings;
 };
 
@@ -36,11 +35,15 @@ TEST_F(FormationOfEventsInit, AxisInitTest1) {
   DefaultSettings.XAxis = AxisType::AMPLITUDE;
   DefaultSettings.YAxis = AxisType::TIME;
   DelayLineEventFormationStandIn Tester(DefaultSettings);
-  EXPECT_EQ(dynamic_cast<DelayLineTimePosCalc*>(Tester.XAxisCalc.get()), nullptr);
-  EXPECT_NE(dynamic_cast<DelayLineAmpPosCalc*>(Tester.XAxisCalc.get()), nullptr);
-  
-  EXPECT_EQ(dynamic_cast<DelayLineAmpPosCalc*>(Tester.YAxisCalc.get()), nullptr);
-  EXPECT_NE(dynamic_cast<DelayLineTimePosCalc*>(Tester.YAxisCalc.get()), nullptr);
+  EXPECT_EQ(dynamic_cast<DelayLineTimePosCalc *>(Tester.XAxisCalc.get()),
+            nullptr);
+  EXPECT_NE(dynamic_cast<DelayLineAmpPosCalc *>(Tester.XAxisCalc.get()),
+            nullptr);
+
+  EXPECT_EQ(dynamic_cast<DelayLineAmpPosCalc *>(Tester.YAxisCalc.get()),
+            nullptr);
+  EXPECT_NE(dynamic_cast<DelayLineTimePosCalc *>(Tester.YAxisCalc.get()),
+            nullptr);
 }
 
 TEST_F(FormationOfEventsInit, AxisInitTest2) {
@@ -48,11 +51,15 @@ TEST_F(FormationOfEventsInit, AxisInitTest2) {
   DefaultSettings.XAxis = AxisType::TIME;
   DefaultSettings.YAxis = AxisType::AMPLITUDE;
   DelayLineEventFormationStandIn Tester(DefaultSettings);
-  EXPECT_EQ(dynamic_cast<DelayLineAmpPosCalc*>(Tester.XAxisCalc.get()), nullptr);
-  EXPECT_NE(dynamic_cast<DelayLineTimePosCalc*>(Tester.XAxisCalc.get()), nullptr);
-  
-  EXPECT_EQ(dynamic_cast<DelayLineTimePosCalc*>(Tester.YAxisCalc.get()), nullptr);
-  EXPECT_NE(dynamic_cast<DelayLineAmpPosCalc*>(Tester.YAxisCalc.get()), nullptr);
+  EXPECT_EQ(dynamic_cast<DelayLineAmpPosCalc *>(Tester.XAxisCalc.get()),
+            nullptr);
+  EXPECT_NE(dynamic_cast<DelayLineTimePosCalc *>(Tester.XAxisCalc.get()),
+            nullptr);
+
+  EXPECT_EQ(dynamic_cast<DelayLineTimePosCalc *>(Tester.YAxisCalc.get()),
+            nullptr);
+  EXPECT_NE(dynamic_cast<DelayLineAmpPosCalc *>(Tester.YAxisCalc.get()),
+            nullptr);
 }
 
 TEST_F(FormationOfEventsInit, AxisInitTest3) {
@@ -60,11 +67,15 @@ TEST_F(FormationOfEventsInit, AxisInitTest3) {
   DefaultSettings.XAxis = AxisType::CONST;
   DefaultSettings.YAxis = AxisType(42);
   DelayLineEventFormationStandIn Tester(DefaultSettings);
-  EXPECT_EQ(dynamic_cast<DelayLineAmpPosCalc*>(Tester.XAxisCalc.get()), nullptr);
-  EXPECT_NE(dynamic_cast<ConstDelayLinePosition*>(Tester.XAxisCalc.get()), nullptr);
-  
-  EXPECT_EQ(dynamic_cast<DelayLineTimePosCalc*>(Tester.YAxisCalc.get()), nullptr);
-  EXPECT_NE(dynamic_cast<ConstDelayLinePosition*>(Tester.YAxisCalc.get()), nullptr);
+  EXPECT_EQ(dynamic_cast<DelayLineAmpPosCalc *>(Tester.XAxisCalc.get()),
+            nullptr);
+  EXPECT_NE(dynamic_cast<ConstDelayLinePosition *>(Tester.XAxisCalc.get()),
+            nullptr);
+
+  EXPECT_EQ(dynamic_cast<DelayLineTimePosCalc *>(Tester.YAxisCalc.get()),
+            nullptr);
+  EXPECT_NE(dynamic_cast<ConstDelayLinePosition *>(Tester.YAxisCalc.get()),
+            nullptr);
 }
 
 class DelayLineTestClass : public DelayLinePositionInterface {
@@ -87,7 +98,7 @@ TEST_F(FormationOfEventsInit, CalibrationTest) {
   auto YAxisCalib = Tester.YAxisCalc->getCalibrationValues();
   EXPECT_EQ(XAxisCalib.first, DefaultSettings.XAxisCalibOffset);
   EXPECT_EQ(XAxisCalib.second, DefaultSettings.XAxisCalibSlope);
-  
+
   EXPECT_EQ(YAxisCalib.first, DefaultSettings.YAxisCalibOffset);
   EXPECT_EQ(YAxisCalib.second, DefaultSettings.YAxisCalibSlope);
 }
@@ -245,50 +256,73 @@ public:
   DelayLineEventFormationStandIn UnderTest{DefaultSettings};
 };
 
-
 TEST_F(FormationOfEventsValid, ValidTestSuccess) {
-  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis*>(UnderTest.XAxisCalc.get()), isValid()).TIMES(1).RETURN(true);
-  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis*>(UnderTest.YAxisCalc.get()), isValid()).TIMES(1).RETURN(true);
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis *>(UnderTest.XAxisCalc.get()),
+               isValid())
+      .TIMES(1)
+      .RETURN(true);
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis *>(UnderTest.YAxisCalc.get()),
+               isValid())
+      .TIMES(1)
+      .RETURN(true);
   EXPECT_TRUE(UnderTest.hasValidEvent());
 }
 
 TEST_F(FormationOfEventsValid, ValidTestFail1) {
-  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis*>(UnderTest.XAxisCalc.get()), isValid()).TIMES(0,1).RETURN(false);
-  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis*>(UnderTest.YAxisCalc.get()), isValid()).TIMES(0,1).RETURN(true);
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis *>(UnderTest.XAxisCalc.get()),
+               isValid())
+      .TIMES(0, 1)
+      .RETURN(false);
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis *>(UnderTest.YAxisCalc.get()),
+               isValid())
+      .TIMES(0, 1)
+      .RETURN(true);
   EXPECT_FALSE(UnderTest.hasValidEvent());
 }
 
 TEST_F(FormationOfEventsValid, ValidTestFail2) {
-  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis*>(UnderTest.XAxisCalc.get()), isValid()).TIMES(0,1).RETURN(true);
-  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis*>(UnderTest.YAxisCalc.get()), isValid()).TIMES(0,1).RETURN(false);
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis *>(UnderTest.XAxisCalc.get()),
+               isValid())
+      .TIMES(0, 1)
+      .RETURN(true);
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis *>(UnderTest.YAxisCalc.get()),
+               isValid())
+      .TIMES(0, 1)
+      .RETURN(false);
   EXPECT_FALSE(UnderTest.hasValidEvent());
 }
 
 TEST_F(FormationOfEventsValid, ValidTestFail3) {
-  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis*>(UnderTest.XAxisCalc.get()), isValid()).TIMES(0,1).RETURN(false);
-  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis*>(UnderTest.YAxisCalc.get()), isValid()).TIMES(0,1).RETURN(false);
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis *>(UnderTest.XAxisCalc.get()),
+               isValid())
+      .TIMES(0, 1)
+      .RETURN(false);
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxis *>(UnderTest.YAxisCalc.get()),
+               isValid())
+      .TIMES(0, 1)
+      .RETURN(false);
   EXPECT_FALSE(UnderTest.hasValidEvent());
 }
 
 class MockDelayLineAmpAxis : public DelayLineAmpPosCalc {
 public:
-  MockDelayLineAmpAxis() : DelayLineAmpPosCalc(0) {};
+  MockDelayLineAmpAxis() : DelayLineAmpPosCalc(0){};
   MAKE_MOCK0(isValid, bool(), override);
   MAKE_MOCK0(getPosition, int(), override);
   MAKE_MOCK0(getAmplitude, int(), override);
   MAKE_MOCK0(getTimestamp, std::uint64_t(), override);
-  MAKE_MOCK1(addPulse, void(PulseParameters const&), override);
+  MAKE_MOCK1(addPulse, void(PulseParameters const &), override);
   MAKE_MOCK0(popEvent, AxisEvent(), override);
 };
 
 class MockDelayLineTimeAxis : public DelayLineTimePosCalc {
 public:
-  MockDelayLineTimeAxis() : DelayLineTimePosCalc(0) {};
+  MockDelayLineTimeAxis() : DelayLineTimePosCalc(0){};
   MAKE_MOCK0(isValid, bool(), override);
   MAKE_MOCK0(getPosition, int(), override);
   MAKE_MOCK0(getAmplitude, int(), override);
   MAKE_MOCK0(getTimestamp, std::uint64_t(), override);
-  MAKE_MOCK1(addPulse, void(PulseParameters const&), override);
+  MAKE_MOCK1(addPulse, void(PulseParameters const &), override);
   MAKE_MOCK0(popEvent, AxisEvent(), override);
 };
 
@@ -320,7 +354,9 @@ public:
 };
 
 TEST_F(FormationOfEvents, addPulseSuccess1) {
-  REQUIRE_CALL(*dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get()), addPulse(_)).TIMES(1);
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineAmpAxis *>(UnderTest.XAxisCalc.get()),
+               addPulse(_))
+      .TIMES(1);
   PulseParameters TestPulse;
   TestPulse.Identifier = {0, 0};
   UnderTest.addPulse(TestPulse);
@@ -329,7 +365,10 @@ TEST_F(FormationOfEvents, addPulseSuccess1) {
 }
 
 TEST_F(FormationOfEvents, addPulseSuccess2) {
-  REQUIRE_CALL(*dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get()), addPulse(_)).TIMES(1);
+  REQUIRE_CALL(
+      *dynamic_cast<MockDelayLineTimeAxis *>(UnderTest.YAxisCalc.get()),
+      addPulse(_))
+      .TIMES(1);
   PulseParameters TestPulse;
   TestPulse.Identifier = {0, 2};
   UnderTest.addPulse(TestPulse);
@@ -338,8 +377,13 @@ TEST_F(FormationOfEvents, addPulseSuccess2) {
 }
 
 TEST_F(FormationOfEvents, addPulseSuccess3) {
-  REQUIRE_CALL(*dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get()), addPulse(_)).TIMES(1);
-  REQUIRE_CALL(*dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get()), addPulse(_)).TIMES(1);
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineAmpAxis *>(UnderTest.XAxisCalc.get()),
+               addPulse(_))
+      .TIMES(1);
+  REQUIRE_CALL(
+      *dynamic_cast<MockDelayLineTimeAxis *>(UnderTest.YAxisCalc.get()),
+      addPulse(_))
+      .TIMES(1);
   PulseParameters TestPulse;
   TestPulse.Identifier = {0, 1};
   UnderTest.addPulse(TestPulse);
@@ -348,8 +392,10 @@ TEST_F(FormationOfEvents, addPulseSuccess3) {
 }
 
 TEST_F(FormationOfEvents, addPulseFailure) {
-  FORBID_CALL(*dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get()), addPulse(_));
-  FORBID_CALL(*dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get()), addPulse(_));
+  FORBID_CALL(*dynamic_cast<MockDelayLineAmpAxis *>(UnderTest.XAxisCalc.get()),
+              addPulse(_));
+  FORBID_CALL(*dynamic_cast<MockDelayLineTimeAxis *>(UnderTest.YAxisCalc.get()),
+              addPulse(_));
   PulseParameters TestPulse;
   TestPulse.Identifier = {0, 3};
   UnderTest.addPulse(TestPulse);
@@ -358,35 +404,43 @@ TEST_F(FormationOfEvents, addPulseFailure) {
 }
 
 TEST_F(FormationOfEvents, PopEventSuccess) {
-  auto XAxisPtr = dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get());
-  auto YAxisPtr = dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get());
+  auto XAxisPtr =
+      dynamic_cast<MockDelayLineAmpAxis *>(UnderTest.XAxisCalc.get());
+  auto YAxisPtr =
+      dynamic_cast<MockDelayLineTimeAxis *>(UnderTest.YAxisCalc.get());
   REQUIRE_CALL(*XAxisPtr, isValid()).TIMES(1).RETURN(true);
   REQUIRE_CALL(*YAxisPtr, isValid()).TIMES(1).RETURN(true);
-  
+
   REQUIRE_CALL(*XAxisPtr, popEvent()).TIMES(1).RETURN(AxisEvent{});
   REQUIRE_CALL(*YAxisPtr, popEvent()).TIMES(1).RETURN(AxisEvent{});
   UnderTest.popEvent();
 }
 
 TEST_F(FormationOfEvents, PopEventFailure1) {
-  auto XAxisPtr = dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get());
-  auto YAxisPtr = dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get());
+  auto XAxisPtr =
+      dynamic_cast<MockDelayLineAmpAxis *>(UnderTest.XAxisCalc.get());
+  auto YAxisPtr =
+      dynamic_cast<MockDelayLineTimeAxis *>(UnderTest.YAxisCalc.get());
   ALLOW_CALL(*XAxisPtr, isValid()).RETURN(false);
   ALLOW_CALL(*YAxisPtr, isValid()).RETURN(false);
   UnderTest.popEvent();
 }
 
 TEST_F(FormationOfEvents, PopEventFailure2) {
-  auto XAxisPtr = dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get());
-  auto YAxisPtr = dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get());
+  auto XAxisPtr =
+      dynamic_cast<MockDelayLineAmpAxis *>(UnderTest.XAxisCalc.get());
+  auto YAxisPtr =
+      dynamic_cast<MockDelayLineTimeAxis *>(UnderTest.YAxisCalc.get());
   ALLOW_CALL(*XAxisPtr, isValid()).RETURN(true);
   ALLOW_CALL(*YAxisPtr, isValid()).RETURN(false);
   UnderTest.popEvent();
 }
 
 TEST_F(FormationOfEvents, PopEventFailure3) {
-  auto XAxisPtr = dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get());
-  auto YAxisPtr = dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get());
+  auto XAxisPtr =
+      dynamic_cast<MockDelayLineAmpAxis *>(UnderTest.XAxisCalc.get());
+  auto YAxisPtr =
+      dynamic_cast<MockDelayLineTimeAxis *>(UnderTest.YAxisCalc.get());
   ALLOW_CALL(*XAxisPtr, isValid()).RETURN(false);
   ALLOW_CALL(*YAxisPtr, isValid()).RETURN(true);
   UnderTest.popEvent();

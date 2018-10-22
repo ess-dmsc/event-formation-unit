@@ -11,71 +11,88 @@
 
 using AxisType = AdcSettings::PositionSensingType;
 
-std::unique_ptr<DelayLinePositionInterface> createCalculator(AxisType CalcType, int Timeout) {
+std::unique_ptr<DelayLinePositionInterface> createCalculator(AxisType CalcType,
+                                                             int Timeout) {
   switch (CalcType) {
-    case AxisType::AMPLITUDE:
-      return
-      std::make_unique<DelayLineAmpPosCalc>(Timeout);
-      break;
-    case AxisType::TIME:
-      return
-      std::make_unique<DelayLineTimePosCalc>(Timeout);
-      break;
-    case AxisType::CONST: // Fall through
-    default:
-      break;
+  case AxisType::AMPLITUDE:
+    return std::make_unique<DelayLineAmpPosCalc>(Timeout);
+    break;
+  case AxisType::TIME:
+    return std::make_unique<DelayLineTimePosCalc>(Timeout);
+    break;
+  case AxisType::CONST: // Fall through
+  default:
+    break;
   }
   return std::make_unique<ConstDelayLinePosition>();
 }
 
 template <typename Type, typename PtrType>
 bool checkType(PtrType Ptr, std::string ErrorString) {
-  if (nullptr == dynamic_cast<Type*>(Ptr)) {
+  if (nullptr == dynamic_cast<Type *>(Ptr)) {
     LOG(INIT, Sev::Error, ErrorString);
     return false;
   }
   return true;
 }
 
-void DelayLineEventFormation::DoChannelRoleMapping(ChannelID ID, AdcSettings::ChannelRole Role) {
+void DelayLineEventFormation::DoChannelRoleMapping(
+    ChannelID ID, AdcSettings::ChannelRole Role) {
   std::string AmpError = "Tried to assign pulses from a channel to an axis "
-  "for amplitude (TAC) processing but the axis is "
-  "assigned another type of processing.";
-  auto IsAmpCheck = [AmpError](auto *Ptr) {return checkType<DelayLineAmpPosCalc>(Ptr, AmpError);};
+                         "for amplitude (TAC) processing but the axis is "
+                         "assigned another type of processing.";
+  auto IsAmpCheck = [AmpError](auto *Ptr) {
+    return checkType<DelayLineAmpPosCalc>(Ptr, AmpError);
+  };
   std::string TimeError = "Tried to assign pulses from a channel to an axis "
-  "for amplitude (TAC) processing but the axis is "
-  "assigned another type of processing.";
-  auto IsTimeCheck = [TimeError](auto *Ptr) {return checkType<DelayLineTimePosCalc>(Ptr, TimeError);};
+                          "for amplitude (TAC) processing but the axis is "
+                          "assigned another type of processing.";
+  auto IsTimeCheck = [TimeError](auto *Ptr) {
+    return checkType<DelayLineTimePosCalc>(Ptr, TimeError);
+  };
   std::string RefError = "Tried to assign pulses from a channel to an axis "
-  "for use as a time reference but the axis has "
-  "another type of processing.";
-  auto IsRefCheck = [RefError](auto *Ptr) {return checkType<DelayLinePosCalcInterface>(Ptr, RefError);};
-  
-  using RoleParams = std::tuple<DelayLinePosCalcInterface *,
-  DelayLinePosCalcInterface::ChannelRole,
-  std::function<bool(DelayLinePosCalcInterface *)>>;
+                         "for use as a time reference but the axis has "
+                         "another type of processing.";
+  auto IsRefCheck = [RefError](auto *Ptr) {
+    return checkType<DelayLinePosCalcInterface>(Ptr, RefError);
+  };
+
+  using RoleParams =
+      std::tuple<DelayLinePosCalcInterface *,
+                 DelayLinePosCalcInterface::ChannelRole,
+                 std::function<bool(DelayLinePosCalcInterface *)>>;
   std::multimap<AdcSettings::ChannelRole, RoleParams> ChannelRoleMap;
-  
-  auto addRole = [&ChannelRoleMap](auto Role, auto &AxisPtr, auto CAxisRole, auto CheckFunc) {
-    ChannelRoleMap.emplace(Role, RoleParams{dynamic_cast<DelayLinePosCalcInterface *>(AxisPtr.get()), CAxisRole, CheckFunc});
+
+  auto addRole = [&ChannelRoleMap](auto Role, auto &AxisPtr, auto CAxisRole,
+                                   auto CheckFunc) {
+    ChannelRoleMap.emplace(
+        Role,
+        RoleParams{dynamic_cast<DelayLinePosCalcInterface *>(AxisPtr.get()),
+                   CAxisRole, CheckFunc});
   };
   using ChannelRole = AdcSettings::ChannelRole;
   using AxisRole = DelayLinePosCalcInterface::ChannelRole;
-  
+
   // Add possible roles
-  addRole(ChannelRole::AMPLITUDE_X_AXIS_1, XAxisCalc, AxisRole::FIRST, IsAmpCheck);
-  addRole(ChannelRole::AMPLITUDE_X_AXIS_2, XAxisCalc, AxisRole::SECOND, IsAmpCheck);
-  addRole(ChannelRole::AMPLITUDE_Y_AXIS_1, YAxisCalc, AxisRole::FIRST, IsAmpCheck);
-  addRole(ChannelRole::AMPLITUDE_Y_AXIS_2, YAxisCalc, AxisRole::SECOND, IsAmpCheck);
-  
+  addRole(ChannelRole::AMPLITUDE_X_AXIS_1, XAxisCalc, AxisRole::FIRST,
+          IsAmpCheck);
+  addRole(ChannelRole::AMPLITUDE_X_AXIS_2, XAxisCalc, AxisRole::SECOND,
+          IsAmpCheck);
+  addRole(ChannelRole::AMPLITUDE_Y_AXIS_1, YAxisCalc, AxisRole::FIRST,
+          IsAmpCheck);
+  addRole(ChannelRole::AMPLITUDE_Y_AXIS_2, YAxisCalc, AxisRole::SECOND,
+          IsAmpCheck);
+
   addRole(ChannelRole::TIME_X_AXIS_1, XAxisCalc, AxisRole::FIRST, IsTimeCheck);
   addRole(ChannelRole::TIME_X_AXIS_2, XAxisCalc, AxisRole::SECOND, IsTimeCheck);
   addRole(ChannelRole::TIME_Y_AXIS_1, YAxisCalc, AxisRole::FIRST, IsTimeCheck);
   addRole(ChannelRole::TIME_Y_AXIS_2, YAxisCalc, AxisRole::SECOND, IsTimeCheck);
-  
-  addRole(ChannelRole::REFERENCE_TIME, XAxisCalc, AxisRole::REFERENCE, IsRefCheck);
-  addRole(ChannelRole::REFERENCE_TIME, YAxisCalc, AxisRole::REFERENCE, IsRefCheck);
-  
+
+  addRole(ChannelRole::REFERENCE_TIME, XAxisCalc, AxisRole::REFERENCE,
+          IsRefCheck);
+  addRole(ChannelRole::REFERENCE_TIME, YAxisCalc, AxisRole::REFERENCE,
+          IsRefCheck);
+
   auto PossibleRoles = ChannelRoleMap.equal_range(Role);
   for (auto CurrentRole = PossibleRoles.first;
        CurrentRole != PossibleRoles.second; ++CurrentRole) {
@@ -92,20 +109,22 @@ void DelayLineEventFormation::DoChannelRoleMapping(ChannelID ID, AdcSettings::Ch
 
 DelayLineEventFormation::DelayLineEventFormation(
     AdcSettings const &ReadoutSettings) {
-  XAxisCalc = createCalculator(ReadoutSettings.XAxis, ReadoutSettings.EventTimeoutNS);
+  XAxisCalc =
+      createCalculator(ReadoutSettings.XAxis, ReadoutSettings.EventTimeoutNS);
   XAxisCalc->setCalibrationValues(ReadoutSettings.XAxisCalibOffset,
                                   ReadoutSettings.XAxisCalibSlope);
 
-  YAxisCalc = createCalculator(ReadoutSettings.YAxis, ReadoutSettings.EventTimeoutNS);
+  YAxisCalc =
+      createCalculator(ReadoutSettings.YAxis, ReadoutSettings.EventTimeoutNS);
   YAxisCalc->setCalibrationValues(ReadoutSettings.YAxisCalibOffset,
                                   ReadoutSettings.YAxisCalibSlope);
-  
+
   // Apply roles
   DoChannelRoleMapping({0, 0}, ReadoutSettings.ADC1Channel1);
   DoChannelRoleMapping({0, 1}, ReadoutSettings.ADC1Channel2);
   DoChannelRoleMapping({0, 2}, ReadoutSettings.ADC1Channel3);
   DoChannelRoleMapping({0, 3}, ReadoutSettings.ADC1Channel4);
-  
+
   DoChannelRoleMapping({1, 0}, ReadoutSettings.ADC2Channel1);
   DoChannelRoleMapping({1, 1}, ReadoutSettings.ADC2Channel2);
   DoChannelRoleMapping({1, 2}, ReadoutSettings.ADC2Channel3);
