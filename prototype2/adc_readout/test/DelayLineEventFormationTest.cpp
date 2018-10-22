@@ -270,14 +270,26 @@ TEST_F(FormationOfEventsValid, ValidTestFail3) {
   EXPECT_FALSE(UnderTest.hasValidEvent());
 }
 
-class MockDelayLineAxisCalc : public DelayLinePosCalcInterface {
+class MockDelayLineAmpAxis : public DelayLineAmpPosCalc {
 public:
-  MockDelayLineAxisCalc() : DelayLinePosCalcInterface(0) {};
+  MockDelayLineAmpAxis() : DelayLineAmpPosCalc(0) {};
   MAKE_MOCK0(isValid, bool(), override);
   MAKE_MOCK0(getPosition, int(), override);
   MAKE_MOCK0(getAmplitude, int(), override);
   MAKE_MOCK0(getTimestamp, std::uint64_t(), override);
   MAKE_MOCK1(addPulse, void(PulseParameters const&), override);
+  MAKE_MOCK0(popEvent, AxisEvent(), override);
+};
+
+class MockDelayLineTimeAxis : public DelayLineTimePosCalc {
+public:
+  MockDelayLineTimeAxis() : DelayLineTimePosCalc(0) {};
+  MAKE_MOCK0(isValid, bool(), override);
+  MAKE_MOCK0(getPosition, int(), override);
+  MAKE_MOCK0(getAmplitude, int(), override);
+  MAKE_MOCK0(getTimestamp, std::uint64_t(), override);
+  MAKE_MOCK1(addPulse, void(PulseParameters const&), override);
+  MAKE_MOCK0(popEvent, AxisEvent(), override);
 };
 
 class FormationOfEvents : public ::testing::Test {
@@ -286,24 +298,96 @@ public:
     DefaultSettings = AdcSettings{};
     using AxisType = AdcSettings::PositionSensingType;
     DefaultSettings.XAxis = AxisType::AMPLITUDE;
-    DefaultSettings.YAxis = AxisType::AMPLITUDE;
+    DefaultSettings.YAxis = AxisType::TIME;
     DefaultSettings.ADC1Channel1 = AdcSettings::ChannelRole::AMPLITUDE_X_AXIS_1;
+    DefaultSettings.ADC1Channel2 = AdcSettings::ChannelRole::REFERENCE_TIME;
+    DefaultSettings.ADC1Channel3 = AdcSettings::ChannelRole::TIME_Y_AXIS_1;
     UnderTest = DelayLineEventFormationStandIn(DefaultSettings);
-    UnderTest.XAxisCalc = std::make_unique<MockDelayLineAxisCalc>();
-    UnderTest.YAxisCalc = std::make_unique<MockDelayLineAxisCalc>();
+    auto TempXAxisPtr = UnderTest.XAxisCalc.get();
+    auto TempYAxisPtr = UnderTest.YAxisCalc.get();
+    UnderTest.XAxisCalc = std::make_unique<MockDelayLineAmpAxis>();
+    UnderTest.YAxisCalc = std::make_unique<MockDelayLineTimeAxis>();
+    for (auto &Handler : UnderTest.PulseHandlerMap) {
+      if (Handler.second == TempXAxisPtr) {
+        Handler.second = UnderTest.XAxisCalc.get();
+      } else if (Handler.second == TempYAxisPtr) {
+        Handler.second = UnderTest.YAxisCalc.get();
+      }
+    }
   };
   AdcSettings DefaultSettings;
   DelayLineEventFormationStandIn UnderTest{DefaultSettings};
 };
 
-//TEST_F(FormationOfEvents, addPulseSuccess1) {
-////  using ChRole = AdcSettings::ChannelRole;
-////  auto TestRole = ChRole::AMPLITUDE_X_AXIS_1;
-////  UnderTest.DoChannelRoleMapping({0,0}, TestRole);
-//  REQUIRE_CALL(*dynamic_cast<MockDelayLineAxisCalc*>(UnderTest.XAxisCalc.get()), addPulse(_)).TIMES(1);
-//  PulseParameters TestPulse;
-//  TestPulse.Identifier = {0, 0};
-//  UnderTest.addPulse(TestPulse);
-//  EXPECT_EQ(UnderTest.getNrOfDiscardedPulses(), 0u);
-//  EXPECT_EQ(UnderTest.getNrOfProcessedPulses(), 1u);
-//}
+TEST_F(FormationOfEvents, addPulseSuccess1) {
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get()), addPulse(_)).TIMES(1);
+  PulseParameters TestPulse;
+  TestPulse.Identifier = {0, 0};
+  UnderTest.addPulse(TestPulse);
+  EXPECT_EQ(UnderTest.getNrOfDiscardedPulses(), 0u);
+  EXPECT_EQ(UnderTest.getNrOfProcessedPulses(), 1u);
+}
+
+TEST_F(FormationOfEvents, addPulseSuccess2) {
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get()), addPulse(_)).TIMES(1);
+  PulseParameters TestPulse;
+  TestPulse.Identifier = {0, 2};
+  UnderTest.addPulse(TestPulse);
+  EXPECT_EQ(UnderTest.getNrOfDiscardedPulses(), 0u);
+  EXPECT_EQ(UnderTest.getNrOfProcessedPulses(), 1u);
+}
+
+TEST_F(FormationOfEvents, addPulseSuccess3) {
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get()), addPulse(_)).TIMES(1);
+  REQUIRE_CALL(*dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get()), addPulse(_)).TIMES(1);
+  PulseParameters TestPulse;
+  TestPulse.Identifier = {0, 1};
+  UnderTest.addPulse(TestPulse);
+  EXPECT_EQ(UnderTest.getNrOfDiscardedPulses(), 0u);
+  EXPECT_EQ(UnderTest.getNrOfProcessedPulses(), 1u);
+}
+
+TEST_F(FormationOfEvents, addPulseFailure) {
+  FORBID_CALL(*dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get()), addPulse(_));
+  FORBID_CALL(*dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get()), addPulse(_));
+  PulseParameters TestPulse;
+  TestPulse.Identifier = {0, 3};
+  UnderTest.addPulse(TestPulse);
+  EXPECT_EQ(UnderTest.getNrOfDiscardedPulses(), 1u);
+  EXPECT_EQ(UnderTest.getNrOfProcessedPulses(), 0u);
+}
+
+TEST_F(FormationOfEvents, PopEventSuccess) {
+  auto XAxisPtr = dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get());
+  auto YAxisPtr = dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get());
+  REQUIRE_CALL(*XAxisPtr, isValid()).TIMES(1).RETURN(true);
+  REQUIRE_CALL(*YAxisPtr, isValid()).TIMES(1).RETURN(true);
+  
+  REQUIRE_CALL(*XAxisPtr, popEvent()).TIMES(1).RETURN(AxisEvent{});
+  REQUIRE_CALL(*YAxisPtr, popEvent()).TIMES(1).RETURN(AxisEvent{});
+  UnderTest.popEvent();
+}
+
+TEST_F(FormationOfEvents, PopEventFailure1) {
+  auto XAxisPtr = dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get());
+  auto YAxisPtr = dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get());
+  ALLOW_CALL(*XAxisPtr, isValid()).RETURN(false);
+  ALLOW_CALL(*YAxisPtr, isValid()).RETURN(false);
+  UnderTest.popEvent();
+}
+
+TEST_F(FormationOfEvents, PopEventFailure2) {
+  auto XAxisPtr = dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get());
+  auto YAxisPtr = dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get());
+  ALLOW_CALL(*XAxisPtr, isValid()).RETURN(true);
+  ALLOW_CALL(*YAxisPtr, isValid()).RETURN(false);
+  UnderTest.popEvent();
+}
+
+TEST_F(FormationOfEvents, PopEventFailure3) {
+  auto XAxisPtr = dynamic_cast<MockDelayLineAmpAxis*>(UnderTest.XAxisCalc.get());
+  auto YAxisPtr = dynamic_cast<MockDelayLineTimeAxis*>(UnderTest.YAxisCalc.get());
+  ALLOW_CALL(*XAxisPtr, isValid()).RETURN(false);
+  ALLOW_CALL(*YAxisPtr, isValid()).RETURN(true);
+  UnderTest.popEvent();
+}
