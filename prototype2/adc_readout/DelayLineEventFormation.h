@@ -65,9 +65,10 @@ public:
   auto getNrOfDiscardedPulses() { return DiscardedDelayLinePulses; }
 
 protected:
+  void DoChannelRoleMapping(ChannelID ID, AdcSettings::ChannelRole Role);
   std::int64_t ProcessedDelayLinePulses{0};
   std::int64_t DiscardedDelayLinePulses{0};
   std::unique_ptr<DelayLinePositionInterface> XAxisCalc;
   std::unique_ptr<DelayLinePositionInterface> YAxisCalc;
-  std::multimap<ChannelID, DelayLinePositionInterface *> PulseHandlerMap;
+  std::multimap<ChannelID, DelayLinePositionInterface*> PulseHandlerMap;
 };

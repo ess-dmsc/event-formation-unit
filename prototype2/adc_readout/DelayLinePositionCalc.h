@@ -31,6 +31,11 @@ public:
     Origin = NewOrigin;
     Slope = NewSlope;
   };
+  
+  virtual std::pair<double, double> getCalibrationValues() {
+    return {Origin, Slope};
+  };
+  
   /// \brief Calculate event information based on available pulse data.
   ///
   /// Will remove existing pulse information on when calling.
@@ -73,14 +78,14 @@ public:
   /// \param[in] Pulse The pulse to add to list of pulses.
   /// \note Calling this function with pulses that has the same ID will result
   /// in only the latter puse being stored.
-  void addPulse(PulseParameters const &Pulse);
+  virtual void addPulse(PulseParameters const &Pulse);
   /// \brief Tie a channel ID to a specific role.
   ///
   /// It is up to children of this class to determine if all required roles are
   /// filled.
   /// \param[in] ID The identifier of a channel.
   /// \param[in] Role The role of that channel.
-  void setChannelRole(ChannelID const &ID, ChannelRole const &Role);
+  virtual void setChannelRole(ChannelID const &ID, ChannelRole const &Role);
 
 protected:
   /// \brief Removes all pulse information submitted through addPuls().
