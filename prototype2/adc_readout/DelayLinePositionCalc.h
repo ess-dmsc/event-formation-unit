@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include "AdcParse.h"
+#include "ChannelID.h"
 #include "PulseParameters.h"
 #include <cstdint>
 #include <cstdint>
@@ -23,14 +23,6 @@ struct AxisEvent {
   std::uint64_t Timestamp{0};
 };
 
-struct ChannelIDHasher {
-  std::size_t operator()(const ChannelID &ID) const {
-    return std::hash<std::uint32_t>{}(
-        static_cast<uint32_t>(ID.ChannelNr) |
-        (static_cast<uint32_t>(ID.SourceID) << 16));
-  }
-};
-
 class DelayLinePositionInterface {
 public:
   DelayLinePositionInterface() = default;
@@ -40,6 +32,11 @@ public:
     Origin = NewOrigin;
     Slope = NewSlope;
   };
+  
+  virtual std::pair<double, double> getCalibrationValues() {
+    return {Origin, Slope};
+  };
+  
   /// \brief Calculate event information based on available pulse data.
   ///
   /// Will remove existing pulse information on when calling.
@@ -82,14 +79,14 @@ public:
   /// \param[in] Pulse The pulse to add to list of pulses.
   /// \note Calling this function with pulses that has the same ID will result
   /// in only the latter puse being stored.
-  void addPulse(PulseParameters const &Pulse);
+  virtual void addPulse(PulseParameters const &Pulse);
   /// \brief Tie a channel ID to a specific role.
   ///
   /// It is up to children of this class to determine if all required roles are
   /// filled.
   /// \param[in] ID The identifier of a channel.
   /// \param[in] Role The role of that channel.
-  void setChannelRole(ChannelID const &ID, ChannelRole const &Role);
+  virtual void setChannelRole(ChannelID const &ID, ChannelRole const &Role);
 
 protected:
   /// \brief Removes all pulse information submitted through addPuls().
@@ -120,7 +117,7 @@ protected:
   /// \return Timestamp in nanoseconds since Unix EPOCH.
   std::uint64_t getTimestamp() override;
 
-  std::unordered_map<ChannelID, ChannelRole, ChannelIDHasher> RoleMap;
+  std::unordered_map<ChannelID, ChannelRole> RoleMap;
   std::unordered_map<ChannelRole, PulseParameters> PulseData;
   std::uint64_t EventTimeout{0};
 };

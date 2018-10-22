@@ -24,6 +24,8 @@ set(AdcReadoutBase_INC
     AdcSettings.h
     AdcTimeStamp.h
     DelayLinePositionCalc.h
+    PulseParameters.h
+    ChannelID.h
     )
 
 
