@@ -30,8 +30,8 @@
 
 #include <logical_geometry/ESSGeometry.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 namespace Multiblade {
 
@@ -203,9 +203,9 @@ void CAENBase::processing_thread() {
         auto dataptr = eth_ringbuf->getDataBuffer(data_index);
         if (parser.parse(dataptr, datalen) < 0) {
           mystats.rx_error_bytes += parser.Stats.error_bytes;
-          mystats.rx_seq_errors += parser.Stats.seq_errors;
           continue;
         }
+        mystats.rx_seq_errors += parser.Stats.seq_errors;
 
         XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
                parser.MBHeader->numElements, parser.MBHeader->digitizerID);

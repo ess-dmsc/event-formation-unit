@@ -15,7 +15,7 @@ namespace Multiblade {
 
 /// \todo consider using the real values  and using
 /// htons() in the parser
-// 0x0102 (1.2) byteswapped
+// 0x0102 (1.3) byteswapped
 constexpr uint16_t Version = 0x0301;
 // 0x0100 byteswapped)
 constexpr uint16_t ElementType = 0x0001;
