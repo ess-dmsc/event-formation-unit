@@ -6,9 +6,9 @@
 class NMXReadoutTest : public TestBase {
 protected:
   virtual void SetUp() {
-    if (boost::filesystem::exists("readout_file_test.h5"))
+    if (boost::filesystem::exists("readout_file_test_00000.h5"))
     {
-      boost::filesystem::remove("readout_file_test.h5");
+      boost::filesystem::remove("readout_file_test_00000.h5");
     }
   }
   virtual void TearDown() {}
@@ -59,7 +59,7 @@ TEST_F(NMXReadoutTest, CompoundMapping) {
 
 TEST_F(NMXReadoutTest, CreateFile) {
   ReadoutFile::create("readout_file_test");
-  EXPECT_TRUE(hdf5::file::is_hdf5_file("readout_file_test.h5"));
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("readout_file_test_00000.h5"));
 }
 
 int main(int argc, char **argv) {

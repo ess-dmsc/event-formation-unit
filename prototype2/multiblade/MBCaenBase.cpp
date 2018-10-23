@@ -52,6 +52,8 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("input.rx_bytes", mystats.rx_bytes);
   Stats.create("input.fifo1_push_errors", mystats.fifo1_push_errors);
   Stats.create("processing.rx_readouts", mystats.rx_readouts);
+  Stats.create("processing.rx_error_bytes", mystats.rx_error_bytes);
+  Stats.create("processing.rx_seq_errors", mystats.rx_seq_errors);
   Stats.create("processing.rx_idle1", mystats.rx_idle1);
   Stats.create("processing.tx_bytes", mystats.tx_bytes);
   Stats.create("processing.rx_events", mystats.rx_events);
@@ -130,7 +132,7 @@ void CAENBase::processing_thread() {
   std::shared_ptr<ReadoutFile> dumpfile;
   if (!MBCAENSettings.FilePrefix.empty()) {
     dumpfile = ReadoutFile::create(
-        MBCAENSettings.FilePrefix + "mbcaen_" + timeString(), 100);
+        MBCAENSettings.FilePrefix + "-" + timeString());
   }
 
   ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
@@ -201,6 +203,7 @@ void CAENBase::processing_thread() {
         auto dataptr = eth_ringbuf->getDataBuffer(data_index);
         if (parser.parse(dataptr, datalen) < 0) {
           mystats.rx_error_bytes += parser.Stats.error_bytes;
+          mystats.rx_seq_errors += parser.Stats.seq_errors;
           continue;
         }
 

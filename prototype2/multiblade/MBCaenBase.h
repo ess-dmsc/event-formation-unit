@@ -53,6 +53,7 @@ protected:
     int64_t rx_idle1;
     int64_t rx_readouts;
     int64_t rx_error_bytes;
+    int64_t rx_seq_errors;
     int64_t tx_bytes;
     int64_t rx_events;
     int64_t geometry_errors;

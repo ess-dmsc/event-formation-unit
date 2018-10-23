@@ -47,6 +47,14 @@ int DataParser::parse(const char *buffer, unsigned int size) {
     return -error::EHEADER;
   }
 
+  if ((MBHeader->seqNum - PreviousSeqNum) != 1) {
+    XTRACE(DATA, WAR, "Sequence number inconsistency: current=%lu, previous=%lu",
+        MBHeader->seqNum, PreviousSeqNum);
+    Stats.seq_errors++;
+    // But we continue anyways
+  }
+  PreviousSeqNum = MBHeader->seqNum;
+
   auto expectedsize = sizeof(struct Header) + MBHeader->numElements * sizeof(struct ListElement422);
 
   if (size != expectedsize) {

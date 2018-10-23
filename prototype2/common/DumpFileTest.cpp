@@ -61,14 +61,14 @@ class DumpFileTest : public TestBase {
 protected:
   virtual void SetUp() {
     hdf5::error::Singleton::instance().auto_print(false);
-    if (boost::filesystem::exists("dumpfile_test.h5"))
+    if (boost::filesystem::exists("dumpfile_test_00000.h5"))
     {
-      boost::filesystem::remove("dumpfile_test.h5");
+      boost::filesystem::remove("dumpfile_test_00000.h5");
     }
 
-    if (boost::filesystem::exists("dumpfile_test_1.h5"))
+    if (boost::filesystem::exists("dumpfile_test_00001.h5"))
     {
-      boost::filesystem::remove("dumpfile_test_1.h5");
+      boost::filesystem::remove("dumpfile_test_00001.h5");
     }
   }
   virtual void TearDown() {}
@@ -76,12 +76,12 @@ protected:
 
 TEST_F(DumpFileTest, CreateFile) {
   HitFile::create("dumpfile_test");
-  EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test.h5"));
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00000.h5"));
 }
 
 TEST_F(DumpFileTest, OpenEmptyFile) {
   HitFile::create("dumpfile_test");
-  auto file = HitFile::open("dumpfile_test");
+  auto file = HitFile::open("dumpfile_test_00000");
   EXPECT_EQ(file->count(), 0);
 }
 
@@ -110,7 +110,7 @@ TEST_F(DumpFileTest, WrongVersion) {
   EXPECT_EQ(file->count(), 1000);
   file.reset();
 
-  EXPECT_ANY_THROW(Hit2File::open("dumpfile_test"));
+  EXPECT_ANY_THROW(Hit2File::open("dumpfile_test_00000"));
 }
 
 TEST_F(DumpFileTest, PushFileRotation) {
@@ -122,11 +122,11 @@ TEST_F(DumpFileTest, PushFileRotation) {
   file->push(std::vector<Hit>(3000, Hit()));
   EXPECT_EQ(file->count(), 4000);
 
-  EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test.h5"));
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00000.h5"));
 
-  EXPECT_FALSE(boost::filesystem::exists("dumpfile_test_1.h5"));
+  EXPECT_FALSE(boost::filesystem::exists("dumpfile_test_00001.h5"));
   file->push(std::vector<Hit>(300000, Hit()));
-  EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_1.h5"));
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("dumpfile_test_00001.h5"));
 }
 
 TEST_F(DumpFileTest, Read) {
@@ -134,7 +134,7 @@ TEST_F(DumpFileTest, Read) {
   file_out->push(std::vector<Hit>(900, Hit()));
   file_out.reset();
 
-  auto file = HitFile::open("dumpfile_test");
+  auto file = HitFile::open("dumpfile_test_00000");
   EXPECT_EQ(file->Data.size(), 0);
   file->readAt(0, 3);
   EXPECT_EQ(file->Data.size(), 3);
@@ -150,7 +150,7 @@ TEST_F(DumpFileTest, ReadAll) {
   file_out.reset();
 
   std::vector<Hit> data;
-  HitFile::read("dumpfile_test", data);
+  HitFile::read("dumpfile_test_00000", data);
   EXPECT_EQ(data.size(), 900);
 }
 
@@ -161,7 +161,7 @@ TEST_F(DumpFileTest, FlushOnClose) {
   file_out.reset();
 
   std::vector<Hit> data;
-  HitFile::read("dumpfile_test", data);
+  HitFile::read("dumpfile_test_00000", data);
   EXPECT_EQ(data.size(), 10);
 }
 
