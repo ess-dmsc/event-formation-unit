@@ -33,7 +33,7 @@ public:
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 500;
-  static const int eth_buffer_size = 1500; /// bytes
+  static const int eth_buffer_size = 9000; /// bytes
 
   static const int kafka_buffer_size = 124000; /// entries
 
