@@ -130,7 +130,7 @@ void CAENBase::processing_thread() {
   std::shared_ptr<ReadoutFile> dumpfile;
   if (!MBCAENSettings.FilePrefix.empty()) {
     dumpfile = ReadoutFile::create(
-        MBCAENSettings.FilePrefix + "mbcaen_" + timeString(), 100);
+        MBCAENSettings.FilePrefix + "-" + timeString());
   }
 
   ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
