@@ -229,7 +229,7 @@ void CAENBase::processing_thread() {
 
           /// \todo magic number? should be part of geometry class?
           if (dp.channel >= 32) {
-            histograms.binstrips(dp.channel, dp.adc, 0, 0);
+            histograms.binstrips(dp.channel - 32, dp.adc, 0, 0);
           } else {
             histograms.binstrips(0, 0, dp.channel, dp.adc);
           }
