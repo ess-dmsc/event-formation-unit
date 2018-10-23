@@ -10,6 +10,7 @@ set(AdcReadoutBase_SRC
     AdcSettings.cpp
     AdcTimeStamp.cpp
     DelayLinePositionCalc.cpp
+    DelayLineEventFormation.cpp
     )
 
 set(AdcReadoutBase_INC
@@ -24,6 +25,7 @@ set(AdcReadoutBase_INC
     AdcSettings.h
     AdcTimeStamp.h
     DelayLinePositionCalc.h
+    DelayLineEventFormation.h
     PulseParameters.h
     ChannelID.h
     )
