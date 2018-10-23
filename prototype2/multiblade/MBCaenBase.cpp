@@ -231,6 +231,8 @@ void CAENBase::processing_thread() {
           //       dp.digitizer, dp.local_time, dp.channel, dp.adc);
 
           /// \todo magic number? should be part of geometry class?
+          /// \todo do not bin 0-channels for the complementary space
+          /// \todo unfold channels among digitizers
           if (dp.channel >= 32) {
             histograms.binstrips(dp.channel - 32, dp.adc, 0, 0);
           } else {
