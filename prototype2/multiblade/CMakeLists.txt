@@ -7,7 +7,7 @@ set(caen_common_inc
   MBCaenBase.h
   ../common/Hists.h
   ../common/HistSerializer.h
-  caen/Readout.cpp
+  caen/Readout.h
   caen/DataParser.h
   clustering/EventBuilder.h
   caen/Config.h
@@ -16,7 +16,7 @@ set(caen_common_src
   MBCaenBase.cpp
   ../common/Hists.cpp
   ../common/HistSerializer.cpp
-  caen/Readout.h
+  caen/Readout.cpp
   caen/DataParser.cpp
   clustering/EventBuilder.cpp
   caen/Config.cpp
@@ -141,6 +141,7 @@ set(MBCAENBaseTest_SRC
   ${caen_common_src}
   ../../libs/source/Socket.cpp
   ../../libs/source/TSCTimer.cpp
+  ../../libs/source/Timer.cpp
   ../adc_readout/test/TestUDPServer.cpp
 )
 create_test_executable(MBCAENBaseTest)
