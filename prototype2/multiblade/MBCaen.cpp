@@ -19,6 +19,10 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
   parser.add_option("-f, --file", LocalMBCAENSettings.ConfigFile,
                     "Multi-Blade specific calibration (json) file")
                     ->group("MBCAEN");
+
+  parser.add_option("--h5filesplit", LocalMBCAENSettings.H5SplitTime,
+                    "Specify interval to split HDF5 files")
+                    ->group("MBCAEN");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};

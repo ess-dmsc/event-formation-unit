@@ -20,6 +20,7 @@ namespace Multiblade {
 struct CAENSettings {
   std::string FilePrefix{""};
   std::string ConfigFile{""};
+  uint32_t H5SplitTime{0}; // split files every N seconds (0 is inactive)
 };
 
 using namespace memory_sequential_consistent; // Lock free fifo

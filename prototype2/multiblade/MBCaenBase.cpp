@@ -160,11 +160,20 @@ void CAENBase::processing_thread() {
 
   unsigned int data_index;
   TSCTimer produce_timer;
+  Timer  h5flushtimer;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       // There is NO data in the FIFO - do stop checks and sleep a little
       mystats.rx_idle1++;
-      // Checking for exit
+
+      // if filedumping and requesting time splitting, check for rotation.
+      if (MBCAENSettings.H5SplitTime != 0 and (dumpfile)) {
+        if (h5flushtimer.timeus() >= MBCAENSettings.H5SplitTime * 1000000) {
+          dumpfile->rotate();
+          h5flushtimer.now();
+        }
+      }
+
       if (produce_timer.timetsc() >=
           EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
