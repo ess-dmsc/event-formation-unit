@@ -169,6 +169,9 @@ void CAENBase::processing_thread() {
       // if filedumping and requesting time splitting, check for rotation.
       if (MBCAENSettings.H5SplitTime != 0 and (dumpfile)) {
         if (h5flushtimer.timeus() >= MBCAENSettings.H5SplitTime * 1000000) {
+
+          /// \todo user should not need to call flush() - implicit in rotate() ?
+          dumpfile->flush();
           dumpfile->rotate();
           h5flushtimer.now();
         }
