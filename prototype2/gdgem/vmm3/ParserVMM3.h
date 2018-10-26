@@ -44,7 +44,7 @@ public:
 
   /// Data related to a single Hit
   struct VMM3Data {
-    uint64_t fecTimeStamp; /// 48 bits can change within a packet so must be here
+    uint64_t fecTimeStamp; /// 42 bits can change within a packet so must be here
     uint16_t bcid;         /// 12 bit - bcid after graydecode
     uint16_t adc;          /// 10 bit - adc value from vmm readout
     uint8_t tdc;           ///  8 bit - tdc value from vmm readout

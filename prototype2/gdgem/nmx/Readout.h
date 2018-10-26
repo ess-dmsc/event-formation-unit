@@ -39,33 +39,31 @@
 struct __attribute__ ((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "srs_hits"; }
-  static uint16_t FormatVersion() { return 0; }
+  static uint16_t FormatVersion() { return 1; }
 
   /// \todo consider reordering these to optimize
   /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
   uint8_t fec{0};
   uint8_t chip_id{0};
-  uint32_t bonus_timestamp{0};
-  uint32_t srs_timestamp{0};
+  uint64_t srs_timestamp{0};
   uint16_t channel{0};
   uint16_t bcid{0};
   uint16_t tdc{0};
   uint16_t adc{0};
   bool over_threshold{false};
-  float ChipTimeNs{0.0};
+  float chiptime{0.0};
   /// !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
   bool operator==(const Readout &other) const {
     return (
         (fec == other.fec) &&
             (chip_id == other.chip_id) &&
-            (bonus_timestamp == other.bonus_timestamp) &&
             (srs_timestamp == other.srs_timestamp) &&
             (channel == other.channel) &&
             (bcid == other.bcid) &&
             (tdc == other.tdc) && (adc == other.adc) &&
             (over_threshold == other.over_threshold) &&
-            (ChipTimeNs == other.ChipTimeNs)
+            (chiptime == other.chiptime)
     );
   }
 };
@@ -81,14 +79,13 @@ public:
     /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(fec);
     H5_COMPOUND_INSERT_MEMBER(chip_id);
-    H5_COMPOUND_INSERT_MEMBER(bonus_timestamp);
     H5_COMPOUND_INSERT_MEMBER(srs_timestamp);
     H5_COMPOUND_INSERT_MEMBER(channel);
     H5_COMPOUND_INSERT_MEMBER(bcid);
     H5_COMPOUND_INSERT_MEMBER(tdc);
     H5_COMPOUND_INSERT_MEMBER(adc);
     H5_COMPOUND_INSERT_MEMBER(over_threshold);
-    H5_COMPOUND_INSERT_MEMBER(ChipTimeNs);
+    H5_COMPOUND_INSERT_MEMBER(chiptime);
     H5_COMPOUND_RETURN;
   }
 };

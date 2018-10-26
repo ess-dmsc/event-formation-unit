@@ -69,11 +69,9 @@ void HitsQueue::subsequent_trigger(bool trig) {
 void HitsQueue::correct_trigger_data() {
   if (!subsequent_trigger_)
     return;
-
   // TODO Does this happen? Does it really mean do nothing?
   if (hitsNew.buffer.empty() || hitsOld.buffer.empty())
     return;
-
   double latestOld = hitsOld.buffer.rbegin()->time; // Latest of the old
   // oldest of the new + correct into time space of the old
   double timeNext = hitsNew.buffer.begin()->time + pTime.trigger_period_ns();

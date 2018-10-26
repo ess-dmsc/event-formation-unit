@@ -98,15 +98,15 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 
 	srsHeader.dataId = ntohl(srsHeaderPtr->dataId);
 	/// maybe add a protocol error counter here
-	if ((srsHeader.dataId & 0xffffff00) != 0x564d3200) {
+	if ((srsHeader.dataId & 0xffffff00) != 0x564d3300) {
 		XTRACE(PROCESS, WAR, "Unknown data");
 		stats.badFrames++;
 		stats.errors += size;
 		return 0;
 	}
 
-	parserData.fecId = srsHeader.dataId & 0xff;
-
+	
+	parserData.fecId = (srsHeader.dataId >> 4) & 0x0f;
 	srsHeader.udpTimeStamp = ntohl(srsHeaderPtr->udpTimeStamp);
 	srsHeader.offsetOverflow = ntohl(srsHeaderPtr->offsetOverflow);
 
