@@ -14,7 +14,7 @@ BuilderAPV::BuilderAPV(std::string dump_dir, bool dump_csv, bool dump_h5)
     vmmsave->tofile("# time, plane, strip, adc\n");
   if (dump_h5_) {
     hit_file_ = std::make_shared<HitFile>();
-    hit_file_->open_rw(dump_dir + "gdgem_apv2vmm_" + timeString() + ".h5");
+    hit_file_->open_rw(dump_dir + "gdgem_apv2vmm_" + timeString());
   }
 }
 

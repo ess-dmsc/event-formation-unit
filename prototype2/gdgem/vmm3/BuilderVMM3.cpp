@@ -33,7 +33,7 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 	}
 
 	if (dump_h5_) {
-		readout_file_ = ReadoutFile::create(dump_dir + "gdgem_vmm3_readouts_" + timeString() + ".h5", 100);
+		readout_file_ = ReadoutFile::create(dump_dir + "gdgem_vmm3_readouts_" + timeString(), 100);
 	}
 }
 

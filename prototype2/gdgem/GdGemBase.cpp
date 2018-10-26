@@ -188,20 +188,23 @@ void GdGemBase::processing_thread() {
     return;
   }
 
-  /// \todo rename all these to something more descrtiptive
-  Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
-  EV42Serializer flatbuffer(kafka_buffer_size, "nmx");
-  flatbuffer.setProducerCallback(
-      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
+  Producer event_producer(EFUSettings.KafkaBroker, "NMX_detector");
+  Producer monitor_producer(EFUSettings.KafkaBroker, "NMX_monitor");
 
-  Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
-  TrackSerializer trackfb(256, nmx_opts.track_sample_minhits,
+  EV42Serializer ev42serializer(kafka_buffer_size, "nmx");
+  ev42serializer.setProducerCallback(
+      std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
+
+
+  TrackSerializer track_serializer(256, nmx_opts.track_sample_minhits,
                           nmx_opts.time_config.target_resolution_ns());
-  Hists hists(Hit::strip_max_val, Hit::adc_max_val);
-  HistSerializer histfb(hists.needed_buffer_size());
-  histfb.set_callback(
-      std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
+  track_serializer.set_callback(
+      std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
+  Hists hists(Hit::strip_max_val, Hit::adc_max_val);
+  HistSerializer hist_serializer(hists.needed_buffer_size());
+  hist_serializer.set_callback(
+      std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
   ClusterMatcher matcher(nmx_opts.matcher_max_delta_time);
@@ -213,7 +216,7 @@ void GdGemBase::processing_thread() {
   uint32_t pixelid;
 
   unsigned int data_index;
-  int sample_next_track{0};
+  bool sample_next_track {nmx_opts.send_tracks};
   while (1) {
     // mystats.fifo_free = input2proc_fifo.free();
     if (!input2proc_fifo.pop(data_index)) {
@@ -270,7 +273,7 @@ void GdGemBase::processing_thread() {
 
             // TODO: Should it be here or outside of event.valid()?
             if (sample_next_track) {
-              sample_next_track = trackfb.add_track(event);
+              sample_next_track = !track_serializer.add_track(event);
             }
 
             XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
@@ -287,7 +290,7 @@ void GdGemBase::processing_thread() {
 
                 XTRACE(PROCESS, DEB, "time: %d, pixelid %d", time, pixelid);
 
-                mystats.tx_bytes += flatbuffer.addEvent(time, pixelid);
+                mystats.tx_bytes += ev42serializer.addEvent(time, pixelid);
                 mystats.clusters_events++;
               }
             } else { // Does not meet criteria
@@ -315,27 +318,20 @@ void GdGemBase::processing_thread() {
 
       sample_next_track = nmx_opts.send_tracks;
 
-      mystats.tx_bytes += flatbuffer.produce();
+      mystats.tx_bytes += ev42serializer.produce();
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
-      mystats.kafka_produce_fails = eventprod.stats.produce_fails;
-      mystats.kafka_ev_errors = eventprod.stats.ev_errors;
-      mystats.kafka_ev_others = eventprod.stats.ev_others;
-      mystats.kafka_dr_errors = eventprod.stats.dr_errors;
-      mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
-
-      char *txbuffer;
-      auto len = trackfb.serialize(&txbuffer);
-      if (len != 0) {
-        XTRACE(PROCESS, DEB, "Sending tracks with size %d", len);
-        monitorprod.produce(txbuffer, len);
-      }
+      mystats.kafka_produce_fails = event_producer.stats.produce_fails;
+      mystats.kafka_ev_errors = event_producer.stats.ev_errors;
+      mystats.kafka_ev_others = event_producer.stats.ev_others;
+      mystats.kafka_dr_errors = event_producer.stats.dr_errors;
+      mystats.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
 
       if (!hists.isEmpty()) {
         XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters ",
                hists.hit_count(), hists.cluster_count());
-        histfb.produce(hists);
+        hist_serializer.produce(hists);
         hists.clear();
       }
 
