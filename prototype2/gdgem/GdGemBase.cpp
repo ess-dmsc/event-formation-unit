@@ -188,6 +188,7 @@ void GdGemBase::processing_thread() {
     return;
   }
 
+  /// \todo rename all these to something more descrtiptive
   Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
   EV42Serializer flatbuffer(kafka_buffer_size, "nmx");
   flatbuffer.setProducerCallback(
@@ -306,9 +307,11 @@ void GdGemBase::processing_thread() {
       }
     }
 
-    // Checking for exit
-    if (report_timer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    // Flush on interval or exit
+    if ((not runThreads) || (report_timer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ)) {
+
+      /// \todo in case of exit, flush all clusters first
 
       sample_next_track = nmx_opts.send_tracks;
 
@@ -336,10 +339,8 @@ void GdGemBase::processing_thread() {
         hists.clear();
       }
 
+      // checking for exit
       if (not runThreads) {
-
-        // TODO flush all clusters?
-
         XTRACE(INPUT, ALW, "Stopping input thread.");
         /// \todo this is a hack to force ~BuilderSRS() call
         builder_.reset();
