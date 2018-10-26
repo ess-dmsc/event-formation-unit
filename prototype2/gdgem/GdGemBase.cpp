@@ -24,8 +24,8 @@
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 /** ----------------------------------------------------- */
 
@@ -270,12 +270,12 @@ void GdGemBase::processing_thread() {
             XTRACE(PROCESS, DEB, "event.good");
 
             mystats.clusters_xy++;
-
+	   
             // TODO: Should it be here or outside of event.valid()?
             if (sample_next_track) {
               sample_next_track = !track_serializer.add_track(event);
             }
-
+		
             XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
                    event.x.utpc_center_rounded(),
                    event.y.utpc_center_rounded());
@@ -283,11 +283,12 @@ void GdGemBase::processing_thread() {
             if (nmx_opts.filter.valid(event)) {
               pixelid = nmx_opts.geometry.pixel2D(
                   event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
+		
               if (!nmx_opts.geometry.valid_id(pixelid)) {
                 mystats.geom_errors++;
               } else {
                 time = static_cast<uint32_t>(event.utpc_time());
-
+ 		
                 XTRACE(PROCESS, DEB, "time: %d, pixelid %d", time, pixelid);
 
                 mystats.tx_bytes += ev42serializer.addEvent(time, pixelid);

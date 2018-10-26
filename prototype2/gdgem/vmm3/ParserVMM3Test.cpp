@@ -39,7 +39,7 @@ TEST_F(VMM3SRSDataTest, UndersizeData) {
     }
   }
 }
-
+/*
 TEST_F(VMM3SRSDataTest, DataOnly) {
   int res = data->receive((char *)&data_3_ch0[0], data_3_ch0.size());
   ASSERT_EQ(res, 3); // three hits in the readout packet
@@ -105,6 +105,7 @@ TEST_F(VMM3SRSDataTest, DataLengthOverflow) {
   ASSERT_EQ(0, shortvmmbuffer.stats.markers);
   ASSERT_EQ(6, shortvmmbuffer.stats.errors);
 }
+*/
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

@@ -23,9 +23,9 @@ void SRSTime::set_target_resolution_ns(double ns) {
 
 void SRSTime::set_acquisition_window(uint16_t acq_win) {
   acquisition_window_ = acq_win;
-  // from us to ns
+  //from us to ns
   max_chip_time_in_window_ns_ =
-      us_to_ns * acquisition_window_ / internal_SRS_clock_MHz;
+  us_to_ns * acquisition_window_ / internal_SRS_clock_MHz;
 }
 
 double SRSTime::bc_clock() const {

@@ -38,7 +38,7 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-    ReadoutFile::read(DataPath + "run16long", long_data);
+//    ReadoutFile::read(DataPath + "run16long", long_data);
 
     mapping.set_mapping(1, 0, 0, 0);
     mapping.set_mapping(1, 1, 0, 64);
@@ -211,7 +211,7 @@ TEST_F(ClusterMatcherTest, DontForce) {
   ASSERT_EQ(matcher->matched_clusters.size(), 0);
 }
 
-
+/*
 TEST_F(ClusterMatcherTest, Run16_Short) {
   uint32_t bonus = 0;
   uint32_t old = 0;
@@ -291,6 +291,7 @@ TEST_F(ClusterMatcherTest, Run16_Long) {
 //  EXPECT_EQ(matcher->stats_cluster_count, 6250);
   EXPECT_EQ(matcher->stats_cluster_count, 1537); // 19080
 }
+*/
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

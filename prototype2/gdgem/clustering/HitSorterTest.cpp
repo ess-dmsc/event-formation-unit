@@ -52,8 +52,8 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-    ReadoutFile::read(DataPath + "run16long", long_data);
-    ReadoutFile::read(DataPath + "run16full", super_long_data);
+//    ReadoutFile::read(DataPath + "run16long", long_data);
+//    ReadoutFile::read(DataPath + "run16full", super_long_data);
 
     mapping.set_mapping(1, 0, 0, 0);
     mapping.set_mapping(1, 1, 0, 64);
@@ -130,6 +130,7 @@ TEST_F(HitSorterTest, Constructor) {
   ASSERT_EQ(true, mock_y->empty());
 }
 
+/*
 TEST_F(HitSorterTest, Run16_Short) {
   uint32_t bonus = 0;
   uint32_t old = 0;
@@ -254,7 +255,7 @@ TEST_F(HitSorterTest, Mock_super_long_chrono) {
   EXPECT_EQ(610127, mock_y->all_hits.size());
   EXPECT_EQ(super_long_data.size(), (mock_x->all_hits.size() + mock_y->all_hits.size()));
 }
-
+*/
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

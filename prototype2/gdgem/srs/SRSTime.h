@@ -66,9 +66,9 @@ class SRSTime {
 private:
   double bc_clock_MHz_{40};              /// bc clock divisor
   double tac_slope_ns_{125};            /// tdc clock divisor
-  double trigger_resolution_ns_ {3.125}; /// resolution of trigger timestamp in ns
-  double target_resolution_ns_ {0.5}; /// target resolution for integer-valued timestamp
-  uint16_t acquisition_window_{4000}; /// unitless (divided later by MHz)
+  double trigger_resolution_ns_ {1.0}; /// resolution of trigger timestamp in ns
+  double target_resolution_ns_ {1.0}; /// target resolution for integer-valued timestamp
+  uint16_t acquisition_window_{4095}; /// unitless (divided later by MHz)
 
   //precalculated
   double max_chip_time_in_window_ns_{0};
