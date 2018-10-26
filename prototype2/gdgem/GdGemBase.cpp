@@ -194,7 +194,7 @@ void GdGemBase::processing_thread() {
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
   Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
-  TrackSerializer trackfb(384, nmx_opts.track_sample_minhits,
+  TrackSerializer trackfb(256, nmx_opts.track_sample_minhits,
                           nmx_opts.time_config.target_resolution_ns());
   Hists hists(Hit::strip_max_val, Hit::adc_max_val);
   HistSerializer histfb(hists.needed_buffer_size());
