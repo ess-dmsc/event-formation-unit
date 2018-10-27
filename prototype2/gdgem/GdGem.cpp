@@ -12,13 +12,16 @@
 
 static struct NMXSettings LocalNMXSettings;
 
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {
   parser.add_option("-f,--file", LocalNMXSettings.ConfigFile,
-                  "NMX (gdgem) specific config (json) file")
+                    "NMX (gdgem) specific config (json) file")
       ->group("NMX")->required();
   parser.add_option("--calibration", LocalNMXSettings.CalibrationFile,
-                  "NMX (gdgem) specific calibration (json) file")
+                    "NMX (gdgem) specific calibration (json) file")
       ->group("NMX");
+  parser.add_option("--dumptofile", LocalNMXSettings.fileprefix,
+                    "dump to specified file")
+      ->group("NMX")->configurable(true);
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};

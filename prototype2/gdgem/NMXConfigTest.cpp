@@ -32,8 +32,6 @@ bool cwdContains(const char * searchfor) {
 TEST_F(NMXConfigTest, ConstructorDefaults) {
   NMXConfig nmxconfig;
   ASSERT_EQ("VMM3", nmxconfig.builder_type);
-  ASSERT_FALSE(nmxconfig.dump_csv);
-  ASSERT_FALSE(nmxconfig.dump_h5);
   ASSERT_EQ(nmxconfig.calfile, nullptr);
 }
 
@@ -44,8 +42,6 @@ TEST_F(NMXConfigTest, NoConfigFile) {
   ASSERT_EQ("VMM3", nmxconfig.builder_type);
   // ASSERT_EQ(256, nmxconfig.geometry_x);
   // ASSERT_EQ(256, nmxconfig.geometry_y);
-  ASSERT_FALSE(nmxconfig.dump_csv);
-  ASSERT_FALSE(nmxconfig.dump_h5);
 }
 
 TEST_F(NMXConfigTest, DebugPrint) {

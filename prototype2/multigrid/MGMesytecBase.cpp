@@ -54,14 +54,14 @@ MGMesytecBase::MGMesytecBase(BaseSettings const &settings, struct MGMesytecSetti
   Stats.create("tx_bytes",             mystats.tx_bytes);
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { MGMesytecBase::mainThread(); };
-  Detector::AddThreadFunction(inputFunc, "main");
-
   XTRACE(INIT, INF, "Stream monitor data = %s",
-      (MGMesytecSettings.monitor ? "YES" : "no"));
+         (MGMesytecSettings.monitor ? "YES" : "no"));
   if (!MGMesytecSettings.fileprefix.empty())
     XTRACE(INIT, INF, "Dump h5 data in path: %s",
            MGMesytecSettings.fileprefix.c_str());
+
+  std::function<void()> inputFunc = [this]() { MGMesytecBase::mainThread(); };
+  Detector::AddThreadFunction(inputFunc, "main");
 }
 
 ///

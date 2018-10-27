@@ -91,6 +91,10 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
   Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
+  if (!NMXSettings.fileprefix.empty())
+    XTRACE(INIT, INF, "Dump h5 data in path: %s",
+           NMXSettings.fileprefix.c_str());
+
   std::function<void()> inputFunc = [this]() { GdGemBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
@@ -360,15 +364,16 @@ void GdGemBase::init_builder() {
       nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap,
       nmx_opts.clusterer_y.min_cluster_size);
 
-if (nmx_opts.builder_type == "VMM3") {
+  if (nmx_opts.builder_type == "VMM3") {
     XTRACE(INIT, DEB, "Using BuilderVMM3");
     builder_ = std::make_shared<BuilderVMM3>(
         nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
         nmx_opts.clusterer_x.hit_adc_threshold,
         nmx_opts.clusterer_x.max_time_gap,
         nmx_opts.clusterer_y.hit_adc_threshold,
-        nmx_opts.clusterer_y.max_time_gap, nmx_opts.dump_directory,
-        nmx_opts.dump_csv, nmx_opts.dump_h5, nmx_opts.calfile);
+        nmx_opts.clusterer_y.max_time_gap,
+        NMXSettings.fileprefix,
+        nmx_opts.calfile);
   } else {
     XTRACE(INIT, ALW, "Unrecognized builder type in config");
   }

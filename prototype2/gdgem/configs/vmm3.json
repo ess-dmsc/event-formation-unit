@@ -62,9 +62,5 @@
   "track_sample_minhits" : 6,
 
   "geometry_x" : 384,
-  "geometry_y" : 384,
-
-  "dump_csv" : false,
-  "dump_h5" : false,
-  "dump_directory" : ""
+  "geometry_y" : 384
 }
