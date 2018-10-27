@@ -31,7 +31,7 @@ TEST_F(SRSTimeTest, SettersGetters) {
 
 
 TEST_F(SRSTimeTest, Eval) {
-  EXPECT_EQ(time->target_resolution_ns(), 1.0);
+  EXPECT_EQ(time->target_resolution_ns(), 0.5);
 
   /// \todo should return 0.0 on zero input?
   MESSAGE() << "Warning - timestamp_ns() might not be what we want!\n";
@@ -39,7 +39,7 @@ TEST_F(SRSTimeTest, Eval) {
 
   /// \todo I think this should actually return 0.5 ?
   MESSAGE() << "Warning - timestamp() might not be correct\n";
-  EXPECT_EQ(time->timestamp(0, 0, 0, no_offset, unit_slope), 1);
+  EXPECT_EQ(time->timestamp(0, 0, 0, no_offset, unit_slope), 0);
 }
 
 TEST_F(SRSTimeTest, DebugString) {

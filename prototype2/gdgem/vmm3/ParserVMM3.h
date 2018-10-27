@@ -15,6 +15,7 @@
 #include <libs/include/BitMath.h>
 
 static const int maximumNumberVMM { 32 };
+static const int maximumNumberFECs { 16 };
 
 class VMM3SRSData {
 public:
@@ -37,7 +38,7 @@ public:
 
   /// Data common to all hits and markers, or other parser related data
   struct ParserData {
-    uint8_t fecId { 255 };
+    uint8_t fecId { 1 };
     uint32_t nextFrameCounter { 0 };
     bool fcIsInitialized { false };
   };
@@ -58,9 +59,9 @@ public:
   /// \brief create a data handler for VMM3 SRS data of fixed size Capacity
   /// \param maxelements The maximum number of readout elements
   VMM3SRSData(int maxelements) : maxHits(maxelements) {
-    markers = new struct VMM3Marker[maximumNumberVMM];
+    markers = new struct VMM3Marker[maximumNumberFECs*maximumNumberVMM];
     data = new struct VMM3Data[maxHits];
-    memset(markers, 0, sizeof(struct VMM3Marker) * maximumNumberVMM);
+    memset(markers, 0, sizeof(struct VMM3Marker) * maximumNumberFECs*maximumNumberVMM);
   }
 
   /// Delete allocated data, set pointers to nullptr

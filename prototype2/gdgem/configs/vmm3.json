@@ -3,23 +3,27 @@
 
   "time_config" :
   {
-    "tac_slope" : 60,
+    "tac_slope" : 100,
     "bc_clock" : 20,
-    "trigger_resolution" : 3.125,
-    "target_resolution" : 0.5,
-    "acquisition_window" : 4000
+    "trigger_resolution" : 1,
+    "target_resolution" : 1,
+    "acquisition_window" : 8191
   },
 
   "srs_mappings" :
   [
     {"fecID":1, "vmmID":0, "planeID":0, "strip_offset":0},
     {"fecID":1, "vmmID":1, "planeID":0, "strip_offset":64},
-    {"fecID":1, "vmmID":6, "planeID":0, "strip_offset":128},
-    {"fecID":1, "vmmID":7, "planeID":0, "strip_offset":192},
-    {"fecID":1, "vmmID":10, "planeID":1, "strip_offset":0},
-    {"fecID":1, "vmmID":11, "planeID":1, "strip_offset":64},
+    {"fecID":1, "vmmID":2, "planeID":1, "strip_offset":0},
+    {"fecID":1, "vmmID":3, "planeID":1, "strip_offset":64},
+    {"fecID":1, "vmmID":10, "planeID":0, "strip_offset":128},
+    {"fecID":1, "vmmID":11, "planeID":0, "strip_offset":192},
     {"fecID":1, "vmmID":14, "planeID":1, "strip_offset":128},
-    {"fecID":1, "vmmID":15, "planeID":1, "strip_offset":192}
+    {"fecID":1, "vmmID":15, "planeID":1, "strip_offset":192},
+    {"fecID":2, "vmmID":4, "planeID":0, "strip_offset":256},
+    {"fecID":2, "vmmID":5, "planeID":0, "strip_offset":320},
+    {"fecID":2, "vmmID":6, "planeID":1, "strip_offset":256},
+    {"fecID":2, "vmmID":7, "planeID":1, "strip_offset":320}
   ],
 
   "clusterer x" :
@@ -38,7 +42,7 @@
     "min_cluster_size" : 3
   },
 
-  "matcher_max_delta_time" : 200,
+  "matcher_max_delta_time" : 500,
 
   "analyze_weighted" : true,
   "analyze_max_timebins" : 3,
@@ -57,8 +61,8 @@
   "send_tracks" : true,
   "track_sample_minhits" : 6,
 
-  "geometry_x" : 256,
-  "geometry_y" : 256,
+  "geometry_x" : 384,
+  "geometry_y" : 384,
 
   "dump_csv" : false,
   "dump_h5" : false,

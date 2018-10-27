@@ -130,15 +130,13 @@ TEST_F(HitSorterTest, Constructor) {
   ASSERT_EQ(true, mock_y->empty());
 }
 
-/*
 TEST_F(HitSorterTest, Run16_Short) {
   uint32_t bonus = 0;
   uint32_t old = 0;
   for (auto readout : Run16) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     store_hit(readout);
   }
   EXPECT_EQ(bonus, 0);
@@ -156,8 +154,7 @@ TEST_F(HitSorterTest, Run16_Long) {
   for (auto readout : long_data) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     store_hit(readout);
   }
   EXPECT_EQ(bonus, 0);
@@ -176,8 +173,7 @@ TEST_F(HitSorterTest, Mock_short_chrono) {
   for (auto readout : Run16) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     store_hit(readout);
   }
 
@@ -202,6 +198,7 @@ TEST_F(HitSorterTest, Mock_short_chrono) {
 //  EXPECT_EQ(mock_y->stats_chrono_errors, 0);
 }
 
+/*
 TEST_F(HitSorterTest, Mock_long_chrono) {
   uint32_t bonus = 0;
   uint32_t old = 0;
@@ -209,7 +206,6 @@ TEST_F(HitSorterTest, Mock_long_chrono) {
     if (readout.srs_timestamp < old)
       bonus++;
     old = readout.srs_timestamp;
-    readout.bonus_timestamp = 0;
     store_hit(readout);
   }
   EXPECT_EQ(bonus, 0);
@@ -237,7 +233,6 @@ TEST_F(HitSorterTest, Mock_super_long_chrono) {
     if (readout.srs_timestamp < old)
       bonus++;
     old = readout.srs_timestamp;
-    readout.bonus_timestamp = 0;
     store_hit(readout);
   }
   EXPECT_EQ(bonus, 0);

@@ -28,8 +28,8 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 		vmd->adc = (data1 >> 12) & 0x3FF;
 		vmd->bcid = BitMath::gray2bin32(data1 & 0xFFF);
 
-		vmd->fecTimeStamp = markers[vmd->vmmid].fecTimeStamp;
-		if (markers[vmd->vmmid].fecTimeStamp > 0) {
+		vmd->fecTimeStamp = markers[(parserData.fecId-1)*maximumNumberVMM+vmd->vmmid].fecTimeStamp;
+		if (markers[(parserData.fecId-1)*maximumNumberVMM+vmd->vmmid].fecTimeStamp > 0) {
 			vmd->hasDataMarker = true;
 		}
 		return 1;
@@ -43,7 +43,7 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 				+ timestamp_lower_10bit;
 		XTRACE(PROCESS, DEB, "SRS Marker vmmid %d: timestamp lower 10bit %u, timestamp upper 32 bit %u, 42 bit timestamp %" 
 		       PRIu64 "",  vmmid, timestamp_lower_10bit, timestamp_upper_32bit,timestamp_42bit);
-		markers[vmmid].fecTimeStamp = timestamp_42bit;
+		markers[(parserData.fecId-1)*maximumNumberVMM+vmmid].fecTimeStamp = timestamp_42bit;
 
 		//XTRACE(PROCESS, DEB, "vmmid: %d", vmmid);
 		return 0;
@@ -107,6 +107,13 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 
 	
 	parserData.fecId = (srsHeader.dataId >> 4) & 0x0f;
+	if(parserData.fecId < 1 || parserData.fecId > 15)
+	{
+		XTRACE(PROCESS, WAR, "Invalid fecId: %u", parserData.fecId);
+		stats.badFrames++;
+		stats.errors += size;
+		return 0;
+	}
 	srsHeader.udpTimeStamp = ntohl(srsHeaderPtr->udpTimeStamp);
 	srsHeader.offsetOverflow = ntohl(srsHeaderPtr->offsetOverflow);
 

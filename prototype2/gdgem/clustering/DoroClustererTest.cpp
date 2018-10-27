@@ -71,15 +71,13 @@ protected:
 };
 
 // TODO: Test this without sorter!!! Use presorted data that we understand
-/*
 TEST_F(DoroClustererTest, Run16_line_110168_110323) {
   uint32_t bonus = 0;
   uint32_t old = 0;
   for (auto readout : Run16) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     store_hit(readout);
   }
 
@@ -98,8 +96,7 @@ TEST_F(DoroClustererTest, Run16_Long) {
   for (auto readout : long_data) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     store_hit(readout);
   }
   /// \todo counts have gone down after changing tdc calculations
@@ -110,7 +107,6 @@ TEST_F(DoroClustererTest, Run16_Long) {
   EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 7044); // down from 10226, ...
   EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 5837); // down from 12467, ...
 }
-*/
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
