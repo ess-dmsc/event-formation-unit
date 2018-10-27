@@ -218,8 +218,7 @@ TEST_F(ClusterMatcherTest, Run16_Short) {
   for (auto readout : Run16) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     store_hit(readout);
   }
   /// \todo I don't trust these numbers, they have decreased after
@@ -247,8 +246,7 @@ TEST_F(ClusterMatcherTest, Run16_Long_identical) {
   for (auto readout : long_data) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     sorter_y->insert(readout);
     sorter_x->insert(readout);
   }
@@ -274,8 +272,7 @@ TEST_F(ClusterMatcherTest, Run16_Long) {
   for (auto readout : long_data) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     store_hit(readout);
   }
   sorter_x->flush();

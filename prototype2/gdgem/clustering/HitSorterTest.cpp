@@ -136,8 +136,7 @@ TEST_F(HitSorterTest, Run16_Short) {
   for (auto readout : Run16) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     store_hit(readout);
   }
   EXPECT_EQ(bonus, 0);
@@ -155,8 +154,7 @@ TEST_F(HitSorterTest, Run16_Long) {
   for (auto readout : long_data) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     store_hit(readout);
   }
   EXPECT_EQ(bonus, 0);
@@ -175,8 +173,7 @@ TEST_F(HitSorterTest, Mock_short_chrono) {
   for (auto readout : Run16) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     store_hit(readout);
   }
 
@@ -208,7 +205,6 @@ TEST_F(HitSorterTest, Mock_long_chrono) {
     if (readout.srs_timestamp < old)
       bonus++;
     old = readout.srs_timestamp;
-    readout.bonus_timestamp = 0;
     store_hit(readout);
   }
   EXPECT_EQ(bonus, 0);
@@ -236,7 +232,6 @@ TEST_F(HitSorterTest, Mock_super_long_chrono) {
     if (readout.srs_timestamp < old)
       bonus++;
     old = readout.srs_timestamp;
-    readout.bonus_timestamp = 0;
     store_hit(readout);
   }
   EXPECT_EQ(bonus, 0);

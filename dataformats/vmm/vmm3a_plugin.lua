@@ -100,7 +100,6 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
 
 			if protolen >= 16 then
 				local hits = (protolen-16)/data_length_byte
-				pinfo.cols.info = string.format("FEC: %d, Hits: %3d", fecid, hits)
 				local hit_id = 0
 				local marker_id = 0
 				for i=1,hits do
@@ -194,7 +193,7 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
 						
 					end
 				end
-		  
+		  		pinfo.cols.info = string.format("FEC: %d, Hits: %3d, Markers: %3d", fecid, hit_id, marker_id)
 			end
 		elseif dataid == 0x564133 then
 			srshdr:add(buffer(4,4),"Data Id: No Data")
