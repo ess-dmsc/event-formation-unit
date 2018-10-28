@@ -70,10 +70,10 @@ protected:
     mapping.set_mapping(1, 14, 1, 128);
     mapping.set_mapping(1, 15, 1, 192);
 
-    mapping.set_mapping(1, 4, 0, 256);
-    mapping.set_mapping(1, 5, 0, 320);
-    mapping.set_mapping(1, 6, 1, 256);
-    mapping.set_mapping(1, 7, 1, 320);
+    mapping.set_mapping(2, 4, 0, 256);
+    mapping.set_mapping(2, 5, 0, 320);
+    mapping.set_mapping(2, 6, 1, 256);
+    mapping.set_mapping(2, 7, 1, 320);
 
     SRSTime srstime;
     srstime.set_bc_clock(20);
@@ -151,12 +151,44 @@ TEST_F(HitSorterTest, TinyData) {
   }
   EXPECT_EQ(overflows, 0);
 
-  EXPECT_EQ(103, sorter_x->stats_trigger_count);
-  EXPECT_EQ(0, sorter_y->stats_trigger_count);
+  EXPECT_EQ(80, sorter_x->stats_trigger_count);
+  EXPECT_EQ(28, sorter_y->stats_trigger_count);
 
-  EXPECT_EQ(2, sorter_x->stats_subsequent_triggers);
-  EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
+  EXPECT_EQ(0, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(1, sorter_y->stats_subsequent_triggers);
 }
+
+TEST_F(HitSorterTest, TinyChrono) {
+  uint32_t overflows = 0;
+  uint32_t old = 0;
+  for (auto readout : tiny) {
+    if (readout.srs_timestamp < old)
+      overflows++;
+    old = readout.srs_timestamp;
+    store_hit(readout);
+  }
+
+  EXPECT_EQ(0, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(1, sorter_y->stats_subsequent_triggers);
+
+  EXPECT_EQ(overflows, 0);
+
+  EXPECT_EQ(mock_x->stats_chrono_errors, 0);
+  EXPECT_EQ(mock_y->stats_chrono_errors, 0);
+
+  // flush, but must it be with trigger?
+  sorter_x->flush();
+  sorter_y->flush();
+
+  EXPECT_EQ(124, mock_x->all_hits.size());
+  EXPECT_EQ(37, mock_y->all_hits.size());
+  EXPECT_EQ(tiny.size(), (mock_x->all_hits.size() + mock_y->all_hits.size()));
+
+  //TODO: why is this failing?
+//  EXPECT_EQ(mock_x->stats_chrono_errors, 0);
+//  EXPECT_EQ(mock_y->stats_chrono_errors, 0);
+}
+
 
 TEST_F(HitSorterTest, SmallData) {
   uint32_t overflows = 0;
@@ -169,12 +201,13 @@ TEST_F(HitSorterTest, SmallData) {
   }
   EXPECT_EQ(overflows, 0);
 
-  EXPECT_EQ(703, sorter_x->stats_trigger_count);
-  EXPECT_EQ(62, sorter_y->stats_trigger_count);
+  EXPECT_EQ(582, sorter_x->stats_trigger_count);
+  EXPECT_EQ(177, sorter_y->stats_trigger_count);
 
-  EXPECT_EQ(22, sorter_x->stats_subsequent_triggers);
-  EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
+  EXPECT_EQ(15, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(7, sorter_y->stats_subsequent_triggers);
 }
+
 
 TEST_F(HitSorterTest, SmallChrono) {
   uint32_t overflows = 0;
@@ -186,26 +219,27 @@ TEST_F(HitSorterTest, SmallChrono) {
     store_hit(readout);
   }
 
-  EXPECT_EQ(22, sorter_x->stats_subsequent_triggers);
-  EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
+  EXPECT_EQ(15, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(7, sorter_y->stats_subsequent_triggers);
 
   EXPECT_EQ(overflows, 0);
 
   EXPECT_EQ(mock_x->stats_chrono_errors, 7);
-  EXPECT_EQ(mock_y->stats_chrono_errors, 0);
+  EXPECT_EQ(mock_y->stats_chrono_errors, 5);
 
   // flush, but must it be with trigger?
   sorter_x->flush();
   sorter_y->flush();
 
-  EXPECT_EQ(1510, mock_x->all_hits.size());
-  EXPECT_EQ(405, mock_y->all_hits.size());
+  EXPECT_EQ(1564, mock_x->all_hits.size());
+  EXPECT_EQ(351, mock_y->all_hits.size());
   EXPECT_EQ(small.size(), (mock_x->all_hits.size() + mock_y->all_hits.size()));
 
   //TODO: why is this failing?
 //  EXPECT_EQ(mock_x->stats_chrono_errors, 0);
 //  EXPECT_EQ(mock_y->stats_chrono_errors, 0);
 }
+
 
 TEST_F(HitSorterTest, MediumData) {
   uint32_t overflows = 0;
@@ -219,11 +253,11 @@ TEST_F(HitSorterTest, MediumData) {
   EXPECT_EQ(overflows, 7);
 
   // Need an intermediate-size dataset where this can be confirmed analytically
-  EXPECT_EQ(3491, sorter_x->stats_trigger_count);
-  EXPECT_EQ(888, sorter_y->stats_trigger_count);
+  EXPECT_EQ(3202, sorter_x->stats_trigger_count);
+  EXPECT_EQ(1887, sorter_y->stats_trigger_count);
 
-  EXPECT_EQ(1450, sorter_x->stats_subsequent_triggers);
-  EXPECT_EQ(667, sorter_y->stats_subsequent_triggers);
+  EXPECT_EQ(1429, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(1356, sorter_y->stats_subsequent_triggers);
 }
 
 
