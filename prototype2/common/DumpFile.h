@@ -10,6 +10,7 @@
 #include <vector>
 #include <memory>
 #include <common/Version.h>
+#include <fmt/format.h>
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
@@ -28,6 +29,8 @@
 template<typename T>
 class DumpFile {
 public:
+  ~DumpFile();
+
   static std::unique_ptr<DumpFile>
   create(const boost::filesystem::path &FilePath, size_t MaxMB = 0);
 
@@ -43,9 +46,14 @@ public:
   static void read(const boost::filesystem::path &FilePath,
       std::vector<T> &ExternalData);
 
-  std::vector<T> Data;
-
   static constexpr size_t ChunkSize{9000 / sizeof(T)};
+
+  boost::filesystem::path get_full_path() const;
+
+  void flush();
+  void rotate();
+
+  std::vector<T> Data;
 
 private:
   DumpFile(const boost::filesystem::path &file_path, size_t max_Mb);
@@ -61,10 +69,17 @@ private:
 
   void openRW();
   void openR();
-  boost::filesystem::path get_full_path() const;
 
   void write();
 };
+
+template<typename T>
+DumpFile<T>::~DumpFile() {
+  if (Data.size() && File.is_valid() &&
+      (File.intent() != hdf5::file::AccessFlags::READONLY)) {
+    flush();
+  }
+}
 
 template<typename T>
 DumpFile<T>::DumpFile(const boost::filesystem::path& file_path, size_t max_Mb) {
@@ -90,9 +105,7 @@ std::unique_ptr<DumpFile<T>> DumpFile<T>::open(const boost::filesystem::path& Fi
 template<typename T>
 boost::filesystem::path DumpFile<T>::get_full_path() const {
   auto Ret = PathBase;
-  if (SequenceNumber > 0)
-    Ret += "_" + std::to_string(SequenceNumber);
-  Ret += ".h5";
+  Ret += ("_" + fmt::format("{:0>5}", SequenceNumber) + ".h5");
   return Ret;
 }
 
@@ -114,10 +127,19 @@ void DumpFile<T>::openRW() {
 }
 
 template<typename T>
+void DumpFile<T>::rotate() {
+  SequenceNumber++;
+  openRW();
+}
+
+template<typename T>
 void DumpFile<T>::openR() {
   using namespace hdf5;
 
-  File = file::open(get_full_path(), file::AccessFlags::READONLY);
+  auto Path = PathBase;
+  Path += ".h5";
+
+  File = file::open(Path, file::AccessFlags::READONLY);
   DataSet = File.root().get_dataset(T::DatasetName());
   // if not initial version, expect it to be well formed
   if (T::FormatVersion() > 0) {
@@ -140,11 +162,12 @@ void DumpFile<T>::write() {
   Slab.block(0, Data.size());
   DataSet.extent({count() + Data.size()});
   DataSet.write(Data, Slab);
+}
 
-  if (MaxSize && (count() >= MaxSize)) {
-    SequenceNumber++;
-    openRW();
-  }
+template<typename T>
+void DumpFile<T>::flush() {
+  write();
+  Data.clear();
 }
 
 template<typename T>
@@ -166,8 +189,11 @@ template<typename T>
 void DumpFile<T>::push(const T& Hit) {
   Data.push_back(Hit);
   if (Data.size() >= ChunkSize) {
-    write();
-    Data.clear();
+    flush();
+
+    if (MaxSize && (count() >= MaxSize)) {
+      rotate();
+    }
   }
 }
 
@@ -175,7 +201,10 @@ template<typename T>
 void DumpFile<T>::push(const std::vector<T>& Hits) {
   Data.insert(Data.end(), Hits.begin(), Hits.end());
   if (Data.size() >= ChunkSize) {
-    write();
-    Data.clear();
+    flush();
+
+    if (MaxSize && (count() >= MaxSize)) {
+      rotate();
+    }
   }
 }

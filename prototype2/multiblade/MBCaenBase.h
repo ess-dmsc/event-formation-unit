@@ -12,25 +12,29 @@
 #include <common/Detector.h>
 #include <common/RingBuffer.h>
 #include <libs/include/SPSCFifo.h>
-#include <mbcommon/MBConfig.h>
+#include <caen/Config.h>
+#include <prototype2/multiblade/caen/Readout.h>
 
-struct MBCAENSettings {
+namespace Multiblade {
+
+struct CAENSettings {
   std::string FilePrefix{""};
   std::string ConfigFile{""};
+  uint32_t H5SplitTime{0}; // split files every N seconds (0 is inactive)
 };
 
 using namespace memory_sequential_consistent; // Lock free fifo
 
-class MBCAENBase : public Detector {
+class CAENBase : public Detector {
 public:
-  MBCAENBase(BaseSettings const &settings, struct MBCAENSettings & LocalMBCAENSettings);
-  ~MBCAENBase() { delete eth_ringbuf; }
+  CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAENSettings);
+  ~CAENBase() { delete eth_ringbuf; }
   void input_thread();
   void processing_thread();
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 500;
-  static const int eth_buffer_size = 1500; /// bytes
+  static const int eth_buffer_size = 9000; /// bytes
 
   static const int kafka_buffer_size = 124000; /// entries
 
@@ -50,6 +54,7 @@ protected:
     int64_t rx_idle1;
     int64_t rx_readouts;
     int64_t rx_error_bytes;
+    int64_t rx_seq_errors;
     int64_t tx_bytes;
     int64_t rx_events;
     int64_t geometry_errors;
@@ -62,6 +67,8 @@ protected:
     int64_t kafka_dr_noerrors;
   } __attribute__((aligned(64))) mystats;
 
-  struct MBCAENSettings MBCAENSettings;
-  MBConfig mb_opts;
+  struct CAENSettings MBCAENSettings;
+  Config mb_opts;
 };
+
+}

@@ -3,40 +3,48 @@ include_directories(.)
 #=============================================================================
 # Detector Pipeline Plugins
 #=============================================================================
-set(mbcaen_common_inc
+set(caen_common_inc
   MBCaenBase.h
   ../common/Hists.h
   ../common/HistSerializer.h
-  mbcaen/DataParser.h
-  mbcommon/MultiBladeEventBuilder.h
-  mbcommon/DumpEventBuilderInfo.h
-  mbcommon/MBConfig.h
+  caen/Readout.h
+  caen/DataParser.h
+  clustering/EventBuilder.h
+  caen/Config.h
   )
-set(mbcaen_common_src
+set(caen_common_src
   MBCaenBase.cpp
   ../common/Hists.cpp
   ../common/HistSerializer.cpp
-  mbcaen/DataParser.cpp
-  mbcommon/MultiBladeEventBuilder.cpp
-  mbcommon/DumpEventBuilderInfo.cpp
-  mbcommon/MBConfig.cpp
+  caen/Readout.cpp
+  caen/DataParser.cpp
+  clustering/EventBuilder.cpp
+  caen/Config.cpp
   )
 
 set(mbcaen_INC
-  ${mbcaen_common_inc}
+  ${caen_common_inc}
 )
 set(mbcaen_SRC
   MBCaen.cpp
-  ${mbcaen_common_src}
+  ${caen_common_src}
 )
 create_module(mbcaen)
 
+set(MBReadoutTest_SRC
+  caen/Readout.cpp
+  caen/ReadoutTest.cpp
+  )
+set(MBReadoutTest_INC
+  caen/Readout.h
+  )
+create_test_executable(MBReadoutTest SKIP_MEMGRIND)
 
 #=============================================================================
 # Build MB text 2 UDP
 #=============================================================================
-set(mbtext2udp_INC generators/MBArgs.h)
-set(mbtext2udp_SRC generators/mbtext2udp.cpp generators/MBArgs.cpp generators/TextFile.cpp)
+set(mbtext2udp_INC generators/Args.h)
+set(mbtext2udp_SRC generators/text2udp.cpp generators/Args.cpp generators/TextFile.cpp)
 create_executable(mbtext2udp)
 
 # Excecutables to build if TCLAP is installed
@@ -44,15 +52,13 @@ find_package(TCLAP)
 if(TCLAP_FOUND)
   # Create an excecutable for the event-builder to process recorded data from a text-file.
   set(mbprocesstextfile_INC
-    mbcommon/MultiBladeEventBuilder.h
+    clustering/EventBuilder.h
     generators/TextFile.h
-    mbcommon/DumpEventBuilderInfo.h
     )
   set(mbprocesstextfile_SRC
-    generators/mbprocesstextfile.cpp
+    generators/processtextfile.cpp
     generators/TextFile.cpp
-    mbcommon/MultiBladeEventBuilder.cpp
-    mbcommon/DumpEventBuilderInfo.cpp
+    clustering/EventBuilder.cpp
     )
 
   create_executable(mbprocesstextfile)
@@ -61,13 +67,11 @@ if(TCLAP_FOUND)
   # Not really usefull unless built with -gp
   set(mbprofiling_INC
     generators/TextFile.h
-    mbcommon/MultiBladeEventBuilder.h
-    mbcommon/DumpEventBuilderInfo.h
+    clustering/EventBuilder.h
     )
-  set(mbprofiling_SRC generators/mbprofiling.cpp
+  set(mbprofiling_SRC generators/profiling.cpp
     generators/TextFile.cpp
-    mbcommon/MultiBladeEventBuilder.cpp
-    mbcommon/DumpEventBuilderInfo.cpp
+    clustering/EventBuilder.cpp
     )
   create_executable(mbprofiling)
 else()
@@ -75,43 +79,50 @@ else()
   message(STATUS "*** Unable to compile mbprofiling as TCLAP was not found.")
 endif()
 
-# GOOGLE BENCHMARK
-set(DataParserBenchmarkTest_INC ${mbtest_INC})
-set(DataParserBenchmarkTest_SRC mbcaen/DataParser.cpp mbcaen/DataParserBenchmarkTest.cpp)
-create_benchmark_executable(DataParserBenchmarkTest)
+# Common include path for both tests
+set(test_INC clustering/EventBuilder.h clustering/TestData.h)
 
 # GOOGLE BENCHMARK
-set(MultiBladeEventBuilderBenchmarkTest_INC ${mbtest_INC})
-set(MultiBladeEventBuilderBenchmarkTest_SRC
-  mbcommon/MultiBladeEventBuilder.cpp
-  mbcommon/MultiBladeEventBuilderBenchmarkTest.cpp
+set(MBDataParserBenchmarkTest_INC ${test_INC})
+set(MBDataParserBenchmarkTest_SRC
+  caen/DataParser.cpp
+  caen/DataParserBenchmarkTest.cpp)
+create_benchmark_executable(MBDataParserBenchmarkTest)
+if(GOOGLE_BENCHMARK)
+  target_link_libraries(MBDataParserBenchmarkTest PRIVATE h5cpp)
+endif()
+
+# GOOGLE BENCHMARK
+set(MBEventBuilderBenchmarkTest_INC ${test_INC})
+set(MBEventBuilderBenchmarkTest_SRC
+  clustering/EventBuilder.cpp
+  clustering/EventBuilderBenchmarkTest.cpp
   )
-create_benchmark_executable(MultiBladeEventBuilderBenchmarkTest)
-
+create_benchmark_executable(MBEventBuilderBenchmarkTest)
+if(GOOGLE_BENCHMARK)
+  find_package(fmt REQUIRED)
+  target_link_libraries(MBEventBuilderBenchmarkTest PRIVATE fmt::fmt)
+endif()
 
 # Create excecutable for the test of geometry
-set(MBDataParserTest_INC mbcaen/DataParser.h)
-set(MBDataParserTest_SRC mbcaen/DataParser.cpp mbcaen/DataParserTest.cpp)
+set(MBDataParserTest_INC caen/DataParser.h)
+set(MBDataParserTest_SRC caen/DataParser.cpp caen/DataParserTest.cpp)
 create_test_executable(MBDataParserTest)
 
 
-# Common include path for both tests
-set(mbtest_INC mbcommon/MultiBladeEventBuilder.h mbtest/MultiBladeTestData.h)
-
 # Create excecutable for the test of counters
-set(MultiBladeEventBuilderTest_INC ${mbtest_INC} )
-set(MultiBladeEventBuilderTest_SRC
-  mbcommon/MultiBladeEventBuilder.cpp
-  mbcommon/DumpEventBuilderInfo.cpp
-  mbtest/MultiBladeEventBuilderCounterTest.cpp
+set(MBEventBuilderTest_INC ${test_INC} )
+set(MBEventBuilderTest_SRC
+  clustering/EventBuilder.cpp
+  clustering/EventBuilderCounterTest.cpp
   )
-create_test_executable(MultiBladeEventBuilderTest)
+create_test_executable(MBEventBuilderTest)
 
 # Create excecutable for the test of clustering
-# set(MBClusterTest_INC ${mbtest_INC})
+# set(MBClusterTest_INC ${test_INC})
 # set(MBClusterTest_SRC
-#   mbcommon/MultiBladeEventBuilder.cpp
-#   mbtest/MultiBladeEventBuilderClusteringTest.cpp
+#   clustering/EventBuilder.cpp
+#   clustering/EventBuilderClusteringTest.cpp
 #   )
 # create_test_executable(MBClusterTest)
 
@@ -120,26 +131,27 @@ create_test_executable(MultiBladeEventBuilderTest)
 #
 
 set(MBCAENBaseTest_INC
-  ${mbcaen_common_inc}
+  ${caen_common_inc}
   ../../libs/include/Socket.h
   ../../libs/include/TSCTimer.h
   ../adc_readout/test/TestUDPServer.h
 )
 set(MBCAENBaseTest_SRC
   MBCaenBaseTest.cpp
-  ${mbcaen_common_src}
+  ${caen_common_src}
   ../../libs/source/Socket.cpp
   ../../libs/source/TSCTimer.cpp
+  ../../libs/source/Timer.cpp
   ../adc_readout/test/TestUDPServer.cpp
 )
 create_test_executable(MBCAENBaseTest)
 
 # Create excecutable for the test of geometry
-set(MB16DetectorTest_INC mbcaen/MB16Detector.h)
-set(MB16DetectorTest_SRC mbcaen/MB16DetectorTest.cpp)
+set(MB16DetectorTest_INC caen/MB16Detector.h)
+set(MB16DetectorTest_SRC caen/MB16DetectorTest.cpp)
 create_test_executable(MB16DetectorTest)
 
 #
-set(MBConfigTest_INC mbcommon/MBConfig.h ../../prototype2/common/DataSave.h)
-set(MBConfigTest_SRC mbcommon/MBConfig.cpp mbcommon/MBConfigTest.cpp ../../prototype2/common/DataSave.cpp)
+set(MBConfigTest_INC caen/Config.h ../../prototype2/common/DataSave.h)
+set(MBConfigTest_SRC caen/Config.cpp caen/ConfigTest.cpp ../../prototype2/common/DataSave.cpp)
 create_test_executable(MBConfigTest)

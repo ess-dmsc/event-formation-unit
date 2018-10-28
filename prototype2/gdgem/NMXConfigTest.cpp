@@ -20,10 +20,10 @@ protected:
   virtual void TearDown() { }
 };
 
-
+/// \todo modernize this
 bool cwdContains(const char * searchfor) {
   char cwdname[1024];
-  getcwd(cwdname, sizeof(cwdname));
+  auto __attribute__((unused)) retval = getcwd(cwdname, sizeof(cwdname));
   auto rt = strstr(cwdname, searchfor);
   return (rt != NULL);
 }

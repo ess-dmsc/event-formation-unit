@@ -13,8 +13,7 @@
 #include <tclap/CmdLine.h>
 
 #include "generators/TextFile.h"
-#include "mbcommon/DumpEventBuilderInfo.h"
-#include "mbcommon/MultiBladeEventBuilder.h"
+#include "clustering/EventBuilder.h"
 // GCOVR_EXCL_START
 int main(int argc, const char **argv) {
 
@@ -87,12 +86,12 @@ int main(int argc, const char **argv) {
             << std::endl;
   std::cout << "\n";
 
-  MultiBladeEventBuilder p;
+  Multiblade::EventBuilder p;
   p.setUseWeightedAverage(weighted);
 
-  TextFile data(ifile);
+  Multiblade::TextFile data(ifile);
 
-  TextFile::Entry entry = {0, 0, 0, 0};
+  Multiblade::TextFile::Entry entry = {0, 0, 0, 0};
 
   uint events = 0;
 
@@ -102,7 +101,7 @@ int main(int argc, const char **argv) {
   while (true) {
     try {
       entry = data.nextEntry();
-    } catch (TextFile::eof &e) {
+    } catch (Multiblade::TextFile::eof &e) {
       std::cout << "End of file reached." << std::endl;
       break;
     }
@@ -121,15 +120,14 @@ int main(int argc, const char **argv) {
 
   p.lastPoint();
   // Repeated code ! Yes I know its bad, but this is just a test program for
-  // MultiBladeEventBuilder.
+  // EventBuilder.
   output << std::fixed << std::setprecision(8) << std::setw(11)
          << p.getWirePosition() << " " << p.getStripPosition() << " "
          << p.getTimeStamp() << "\n";
 
   output.close();
 
-  DumpEventBuilderInfo info;
-  info.print(p);
+  std::cout << p.print();
 
   return 0;
 }

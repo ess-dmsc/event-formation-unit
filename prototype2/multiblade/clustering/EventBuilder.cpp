@@ -5,21 +5,24 @@
 ///
 //===----------------------------------------------------------------------===//
 
+#include <multiblade/clustering/EventBuilder.h>
 #include <algorithm>
-#include <multiblade/mbcommon/MultiBladeEventBuilder.h>
+#include <fmt/format.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-MultiBladeEventBuilder::MultiBladeEventBuilder()
+namespace Multiblade {
+
+EventBuilder::EventBuilder()
     : m_wire_cluster(0), m_strip_cluster(0), m_time_stamp(0), m_cluster_clock(0),
       m_first_signal(true), m_nevents(0) {
   resetCounters();
 }
 
-bool MultiBladeEventBuilder::addDataPoint(const uint8_t &channel,
-                                          const uint16_t &ADC,
-                                          const uint32_t &clock) {
+bool EventBuilder::addDataPoint(const uint16_t &channel,
+                                const uint16_t &ADC,
+                                const uint32_t &clock) {
 
   XTRACE(PROCESS, DEB, "Data-point received (%d, %d, %d)",
          static_cast<uint>(channel), static_cast<uint>(ADC),
@@ -70,7 +73,7 @@ bool MultiBladeEventBuilder::addDataPoint(const uint8_t &channel,
   XTRACE(PROCESS, DEB, "Outside time-window [%u > %u]", clock_diff,
          m_time_window);
 
-  // MultiBladeEventBuilder the stored clusters. True is returned if all checks
+  // EventBuilder the stored clusters. True is returned if all checks
   // pass.
   bool position_determined = processClusters();
 
@@ -90,7 +93,7 @@ bool MultiBladeEventBuilder::addDataPoint(const uint8_t &channel,
   return position_determined;
 }
 
-bool MultiBladeEventBuilder::processClusters() {
+bool EventBuilder::processClusters() {
 
   // Currently removes clusters containing non-adjacent points.
   // Possible future modification could include formation of a new cluster.
@@ -129,7 +132,7 @@ bool MultiBladeEventBuilder::processClusters() {
   return true;
 }
 
-bool MultiBladeEventBuilder::pointsAdjacent() {
+bool EventBuilder::pointsAdjacent() {
 
   // Check if wire points are adjacent
   bool wires_adjacent = checkAdjacency(m_wire_cluster);
@@ -145,7 +148,7 @@ bool MultiBladeEventBuilder::pointsAdjacent() {
   return adjacent;
 }
 
-bool MultiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
+bool EventBuilder::checkAdjacency(std::vector<point> &cluster) {
 
   if (cluster.size() == 0) {
     return false;
@@ -198,11 +201,11 @@ bool MultiBladeEventBuilder::checkAdjacency(std::vector<point> &cluster) {
   return true;
 }
 
-double MultiBladeEventBuilder::calculatePosition(std::vector<point> &cluster) {
+double EventBuilder::calculatePosition(std::vector<point> &cluster) {
 
   if (m_use_weighted_average) {
-    uint64_t sum_numerator = 0;
-    uint64_t sum_denominator = 0;
+    uint64_t sum_numerator {0};
+    uint64_t sum_denominator {0};
     for (auto &it : cluster) {
       // printf("channel %d, adc: %d\n", it.channel, it.ADC);
       sum_numerator += it.channel * it.ADC;
@@ -210,10 +213,10 @@ double MultiBladeEventBuilder::calculatePosition(std::vector<point> &cluster) {
     }
     return (sum_denominator == 0 ? -1
                                  : static_cast<double>(sum_numerator) /
-                                       static_cast<double>(sum_denominator));
+            static_cast<double>(sum_denominator));
   } else {
-    uint8_t max_channel = 0;
-    uint64_t max_ADC = 0;
+    uint16_t max_channel {0};
+    uint16_t max_ADC {0};
     for (auto &it : cluster) {
       // printf("channel %d, adc: %d\n", it.channel, it.ADC);
       if (it.ADC > max_ADC) {
@@ -226,7 +229,7 @@ double MultiBladeEventBuilder::calculatePosition(std::vector<point> &cluster) {
   }
 }
 
-void MultiBladeEventBuilder::lastPoint() {
+void EventBuilder::lastPoint() {
 
   if (processClusters())
     m_nevents++;
@@ -241,7 +244,7 @@ void MultiBladeEventBuilder::lastPoint() {
   m_first_signal = true;
 }
 
-std::vector<double> MultiBladeEventBuilder::getPosition() {
+std::vector<double> EventBuilder::getPosition() {
   std::vector<double> coordinates(3);
   coordinates[0] = m_wire_pos;
   coordinates[1] = m_strip_pos;
@@ -250,7 +253,7 @@ std::vector<double> MultiBladeEventBuilder::getPosition() {
   return coordinates;
 }
 
-void MultiBladeEventBuilder::addPointToCluster(uint32_t channel, uint32_t ADC) {
+void EventBuilder::addPointToCluster(uint16_t channel, uint16_t ADC) {
 
   point point = {channel, ADC};
   if (channel < m_nwire_channels) {
@@ -262,7 +265,7 @@ void MultiBladeEventBuilder::addPointToCluster(uint32_t channel, uint32_t ADC) {
   }
 }
 
-void MultiBladeEventBuilder::resetCounters() {
+void EventBuilder::resetCounters() {
   m_nevents = 0;
   m_rejected_adjacency = 0;
   m_rejected_position = 0;
@@ -272,7 +275,7 @@ void MultiBladeEventBuilder::resetCounters() {
   m_1D_strips = {{0, 0, 0, 0, 0, 0}};
 }
 
-void MultiBladeEventBuilder::incrementCounters(
+void EventBuilder::incrementCounters(
     const std::vector<point> &m_wire_cluster,
     const std::vector<point> &m_strip_cluster) {
 
@@ -330,4 +333,111 @@ void MultiBladeEventBuilder::incrementCounters(
 
 bool operator<(const point &a, const point &b) {
   return (a.channel < b.channel);
+}
+
+
+std::string  EventBuilder::print() const {
+
+  fmt::memory_buffer out;
+
+  uint64_t n2Dwireevents = sumArray(m_2D_wires);
+  uint64_t n2Dstripevents = sumArray(m_2D_strips);
+  uint64_t n1Dwireevents = sumArray(m_1D_wires);
+  uint64_t n1Dstripevents = sumArray(m_1D_strips);
+
+  fmt::format_to(out, "\n"
+                      "Number of events recorded      : {:>10}\n"
+                      "Number of 2D events            : {:>10} (wire), {:>10} (strip). These two numbers must be identical.\n"
+                      "Number of 1D wire events       : {:>10}\n"
+                      "Number of 1D strip events      : {:>10}\n"
+                      "Total number of events         : {:>10}. Must match number of events recorded!\n",
+                 m_nevents,
+                 n2Dwireevents, n2Dstripevents,
+                 n1Dwireevents,
+                 n1Dstripevents,
+                 n2Dwireevents + n1Dwireevents + n1Dstripevents);
+
+  fmt::format_to(out, "\n"
+                 "{:^52}{:^60}\n"
+                 "{:^52}",
+                 " ", "Events with channels per event",
+                 " ");
+  for (int i = 0; i < 6; i++)
+    fmt::format_to(out, "{:>10}", (i < 5 ? std::to_string(i + 1) : ">5"));
+  fmt::format_to(out, "\n"
+                 "{:^52}{:->60}\n",
+                 " ", "-");
+  fmt::format_to(out, "2D events (both wire and strip signals) : \n");
+  fmt::format_to(out, "{}",
+                 printClusterAbsolute(m_2D_wires,
+                       "Number of events with wires fired per event  : "));
+  fmt::format_to(out, "{}", printClusterAbsolute(m_2D_strips,
+                       "Number of events with strips fired per event : "));
+  fmt::format_to(out, "{}", printClusterPercentage(m_2D_wires,
+                         "Percentage of wires fired per event          : "));
+  fmt::format_to(out, "{}", printClusterPercentage(m_2D_strips,
+                         "Percentage of strips fired per event         : "));
+
+  fmt::format_to(out, "1D wire events : \n");
+  fmt::format_to(out, "{}", printClusterAbsolute(m_1D_wires,
+                       "Number of events with wires fired per event  : "));
+  fmt::format_to(out, "{}", printClusterPercentage(m_1D_wires,
+                         "Percentage of wires fired per event          : "));
+  fmt::format_to(out, "1D strip events : \n");
+  fmt::format_to(out, "{}", printClusterAbsolute(m_1D_strips,
+                       "Number of events with strips fired per event : "));
+  fmt::format_to(out, "{}", printClusterPercentage(m_1D_strips,
+                         "Percentage of strips fired per event         : "));
+
+  fmt::format_to(out, "\n"
+                        "Number of rejected clusters :\n"
+                        "     Adacency : {:>10}\n"
+                        "     Position : {:>10}\n",
+                        m_rejected_adjacency,
+                        m_rejected_position);
+
+  uint64_t sum_wire =
+      m_2D_wires[5] + m_1D_wires[5];
+  uint64_t sum_strip =
+      m_2D_strips[5] + m_1D_strips[5];
+
+  fmt::format_to(out, "\n"
+                           "Number of clusters with more than 5 points per wire and or strip : \n"
+                           "     Wires  : {:>10}\n"
+                           "     Strips : {:>10}\n",
+                           sum_wire, sum_strip);
+
+  return fmt::to_string(out);
+}
+
+std::string EventBuilder::printClusterAbsolute(const std::array<uint64_t, 6>& array,
+                                                std::string text) {
+  fmt::memory_buffer out;
+  fmt::format_to(out, "     {}", text);
+  for (int i = 0; i < 6; i++)
+    fmt::format_to(out, "{:>10}", array[i]);
+  fmt::format_to(out, "\n");
+  return fmt::to_string(out);
+}
+
+std::string EventBuilder::printClusterPercentage(const std::array<uint64_t, 6>& array,
+                                                  std::string text) {
+  fmt::memory_buffer out;
+  fmt::format_to(out, "     {}", text);
+  uint64_t sum = sumArray(array);
+  //std::cout << std::fixed << std::setprecision(4);
+  for (int i = 0; i < 6; i++)
+    fmt::format_to(out, "{:>10}", 1. * array[i] / sum * 100.);
+  fmt::format_to(out, "\n");
+  return fmt::to_string(out);
+}
+
+uint64_t EventBuilder::sumArray(const std::array<uint64_t, 6> &array) {
+  uint64_t sum = 0;
+  for (uint i = 0; i < 6; i++) {
+    sum += array[i];
+  }
+  return sum;
+}
+
 }

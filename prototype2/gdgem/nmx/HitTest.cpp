@@ -10,9 +10,9 @@ protected:
   Hit hit;
   virtual void SetUp() {
     hdf5::error::Singleton::instance().auto_print(false);
-    if (boost::filesystem::exists("hit_file_test.h5"))
+    if (boost::filesystem::exists("hit_file_test_00000.h5"))
     {
-      boost::filesystem::remove("hit_file_test.h5");
+      boost::filesystem::remove("hit_file_test_00000.h5");
     }
   }
   virtual void TearDown() { }
@@ -49,7 +49,7 @@ TEST_F(NMXHitTest, CompoundMapping) {
 
 TEST_F(NMXHitTest, CreateFile) {
   HitFile::create("hit_file_test");
-  EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test.h5"));
+  EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test_00000.h5"));
 }
 
 int main(int argc, char **argv) {

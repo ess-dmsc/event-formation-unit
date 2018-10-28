@@ -12,12 +12,14 @@
 
 #pragma once
 
-class MBArgs {
+namespace Multiblade {
+
+class Args {
 public:
   /// \brief constructor for program arguments parsed via getopt_long()
   /// \param argc Argument count - typically taken from main()
   /// \param argv Argument array - typically taken from main()
-  MBArgs(int argc, char *argv[]);
+  Args(int argc, char *argv[]);
 
   std::string filename{}; ///< for single file streaming
   std::string outfile{};  ///< for single file streaming
@@ -36,3 +38,5 @@ public:
   unsigned int updint{1}; ///< update interval (seconds)
 };
 // GCOVR_EXCL_STOP
+
+}

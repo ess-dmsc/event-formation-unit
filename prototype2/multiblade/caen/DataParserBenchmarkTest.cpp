@@ -1,7 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <benchmark/benchmark.h>
-#include <multiblade/mbcaen/DataParser.h>
+#include <multiblade/caen/DataParser.h>
 #include <cstring>
 #include <unistd.h>
 
@@ -11,7 +11,7 @@
  * File:
  */
 
-DataParser mbdata;
+Multiblade::DataParser mbdata;
 unsigned char databuffer[100000];
 
 static void Setup(__attribute__((unused)) benchmark::State &state) {
