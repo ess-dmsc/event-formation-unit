@@ -31,7 +31,7 @@ public:
   void setMinimumMTU(int mtu) { minimumMtu = mtu; }
 
   /// Gleaned from MacOS and CentOS and deemed ignore worthy
-  std::vector<std::string> defaultIgnoredInterfaces = {"ppp0", "docker", "ov-"};
+  std::vector<std::string> defaultIgnoredInterfaces = {"ppp0", "docker", "ov-", "wlp4s0"};
 
 private:
   /// Check a single interface

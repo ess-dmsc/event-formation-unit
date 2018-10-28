@@ -24,8 +24,8 @@
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 /** ----------------------------------------------------- */
 
@@ -342,7 +342,7 @@ void GdGemBase::processing_thread() {
 
       // checking for exit
       if (not runThreads) {
-        XTRACE(INPUT, ALW, "Stopping input thread.");
+        XTRACE(INPUT, ALW, "Stopping processing thread.");
         /// \todo this is a hack to force ~BuilderSRS() call
         builder_.reset();
         delete builder_.get(); /**< \todo see above */
