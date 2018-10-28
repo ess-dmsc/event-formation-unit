@@ -8,6 +8,8 @@
 
 #include "TextFile.h"
 
+namespace Multiblade {
+
 TextFile::TextFile(std::string fileName) {
   file.open(fileName);
   file.exceptions(std::ifstream::failbit | std::ifstream::badbit);
@@ -78,3 +80,5 @@ size_t TextFile::nextChunk(TextFile::Entry *buf, size_t size) {
   return i * sizeof(Entry);
 }
 // GCOVR_EXCL_STOP
+
+}

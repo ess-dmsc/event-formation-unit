@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Test data to use with unit testing of MultiBladeEventBuilder.
+/// \brief Test data to use with unit testing of EventBuilder.
 ///
 /// \author Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
 /// e-mail: soegaard@nbi.dk

@@ -9,11 +9,13 @@
 #include <getopt.h>
 #include <stdlib.h>
 
-#include <generators/MBArgs.h>
+#include <generators/Args.h>
 
 // GCOVR_EXCL_START
 
-MBArgs::MBArgs(int argc, char *argv[]) {
+namespace Multiblade {
+
+Args::Args(int argc, char *argv[]) {
 
   int c;
 
@@ -43,39 +45,28 @@ MBArgs::MBArgs(int argc, char *argv[]) {
     case 0:
       if (long_options[option_index].flag != 0)
         break;
-    case 'a':
-      txPkt = atoi(optarg);
+    case 'a':txPkt = atoi(optarg);
       break;
-    case 'd':
-      buflen = atoi(optarg);
+    case 'd':buflen = atoi(optarg);
       break;
-    case 'f':
-      filename.assign(optarg);
+    case 'f':filename.assign(optarg);
       break;
-    case 'o':
-      outfile.assign(optarg);
+    case 'o':outfile.assign(optarg);
       break;
-    case 'i':
-      dest_ip.assign(optarg);
+    case 'i':dest_ip.assign(optarg);
       break;
-    case 'n':
-      dppkg = atoi(optarg);
+    case 'n':dppkg = atoi(optarg);
       break;
-    case 'p':
-      port = atoi(optarg);
+    case 'p':port = atoi(optarg);
       break;
-    case 's':
-      txGB = atoi(optarg);
+    case 's':txGB = atoi(optarg);
       break;
-    case 'u':
-      updint = atoi(optarg);
+    case 'u':updint = atoi(optarg);
       break;
-    case 'x':
-      sndbuf = atoi(optarg);
+    case 'x':sndbuf = atoi(optarg);
       break;
     case 'h':
-    default:
-      printf("Usage: bulkdatagen [OPTIONS] \n");
+    default:printf("Usage: bulkdatagen [OPTIONS] \n");
       printf(" --filename -f name     read data from single file \n");
       printf(" --outfile -o name      write image to file \n");
       printf(" --size -s size         size in GB of transmitted data \n");
@@ -107,3 +98,4 @@ MBArgs::MBArgs(int argc, char *argv[]) {
   printf("  update interval:        %us\n", updint);
 }
 // GCOVR_EXCL_STOP
+}

@@ -16,7 +16,7 @@
 #include <common/HistSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
-#include <common/DataSave.h>
+#include <common/TimeString.h>
 #include <unistd.h>
 
 #include <libs/include/SPSCFifo.h>
@@ -24,14 +24,16 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 
-#include <mbcaen/DataParser.h>
+#include <caen/DataParser.h>
 
-#include <mbcommon/MultiBladeEventBuilder.h>
+#include <clustering/EventBuilder.h>
 
 #include <logical_geometry/ESSGeometry.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
+
+namespace Multiblade {
 
 using namespace memory_sequential_consistent; // Lock free fifo
 
@@ -40,21 +42,23 @@ const char *classname = "Multiblade detector with CAEN readout";
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 
-MBCAENBase::MBCAENBase(BaseSettings const &settings, struct MBCAENSettings & LocalMBCAENSettings)
+CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAENSettings)
     : Detector("MBCAEN", settings), MBCAENSettings(LocalMBCAENSettings) {
   Stats.setPrefix("efu.mbcaen");
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("input.rx_packets",                mystats.rx_packets);
-  Stats.create("input.rx_bytes",                  mystats.rx_bytes);
-  Stats.create("input.fifo1_push_errors",         mystats.fifo1_push_errors);
-  Stats.create("processing.rx_readouts",          mystats.rx_readouts);
-  Stats.create("processing.rx_idle1",             mystats.rx_idle1);
-  Stats.create("processing.tx_bytes",             mystats.tx_bytes);
-  Stats.create("processing.rx_events",            mystats.rx_events);
-  Stats.create("processing.rx_geometry_errors",   mystats.geometry_errors);
-  Stats.create("processing.fifo_seq_errors",      mystats.fifo_seq_errors);
+  Stats.create("input.rx_packets", mystats.rx_packets);
+  Stats.create("input.rx_bytes", mystats.rx_bytes);
+  Stats.create("input.fifo1_push_errors", mystats.fifo1_push_errors);
+  Stats.create("processing.rx_readouts", mystats.rx_readouts);
+  Stats.create("processing.rx_error_bytes", mystats.rx_error_bytes);
+  Stats.create("processing.rx_seq_errors", mystats.rx_seq_errors);
+  Stats.create("processing.rx_idle1", mystats.rx_idle1);
+  Stats.create("processing.tx_bytes", mystats.tx_bytes);
+  Stats.create("processing.rx_events", mystats.rx_events);
+  Stats.create("processing.rx_geometry_errors", mystats.geometry_errors);
+  Stats.create("processing.fifo_seq_errors", mystats.fifo_seq_errors);
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
   Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
@@ -63,11 +67,11 @@ MBCAENBase::MBCAENBase(BaseSettings const &settings, struct MBCAENSettings & Loc
   Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { MBCAENBase::input_thread(); };
+  std::function<void()> inputFunc = [this]() { CAENBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    MBCAENBase::processing_thread();
+    CAENBase::processing_thread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
@@ -77,19 +81,19 @@ MBCAENBase::MBCAENBase(BaseSettings const &settings, struct MBCAENSettings & Loc
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
   assert(eth_ringbuf != 0);
 
-  mb_opts = MBConfig(MBCAENSettings.ConfigFile);
+  mb_opts = Config(MBCAENSettings.ConfigFile);
   assert(mb_opts.getDetector() != nullptr);
 }
 
-void MBCAENBase::input_thread() {
+void CAENBase::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
-  UDPReceiver mbdata(local);
-  // mbdata.buflen(opts->buflen);
-  mbdata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
-  mbdata.printBufferSizes();
-  mbdata.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
+  UDPReceiver receiver(local);
+  // receiver.buflen(opts->buflen);
+  receiver.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  receiver.printBufferSizes();
+  receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
   int rdsize;
   for (;;) {
@@ -97,8 +101,8 @@ void MBCAENBase::input_thread() {
 
     /** this is the processing step */
     eth_ringbuf->setDataLength(eth_index, 0);
-    if ((rdsize = mbdata.receive(eth_ringbuf->getDataBuffer(eth_index),
-                                 eth_ringbuf->getMaxBufSize())) > 0) {
+    if ((rdsize = receiver.receive(eth_ringbuf->getDataBuffer(eth_index),
+                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
       XTRACE(PROCESS, DEB, "Received an udp packet of length %d bytes",
              rdsize);
@@ -120,17 +124,15 @@ void MBCAENBase::input_thread() {
   }
 }
 
-void MBCAENBase::processing_thread() {
+void CAENBase::processing_thread() {
   const uint32_t ncass = 6;
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
 
-  std::shared_ptr<DataSave> mbdatasave;
-  bool dumptofile = !MBCAENSettings.FilePrefix.empty();
-  if (dumptofile)
-  {
-    mbdatasave = std::make_shared<DataSave>(MBCAENSettings.FilePrefix + "_multiblade_", 100000000);
-    mbdatasave->tofile("# time, digitizer, channel, adc\n");
+  std::shared_ptr<ReadoutFile> dumpfile;
+  if (!MBCAENSettings.FilePrefix.empty()) {
+    dumpfile = ReadoutFile::create(
+        MBCAENSettings.FilePrefix + "-" + timeString());
   }
 
   ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
@@ -146,30 +148,43 @@ void MBCAENBase::processing_thread() {
   histfb.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 
-  MultiBladeEventBuilder builder[ncass];
+  EventBuilder builder[ncass];
   for (uint32_t i = 0; i < ncass; i++) {
     builder[i].setNumberOfWireChannels(nwires);
     builder[i].setNumberOfStripChannels(nstrips);
   }
 
-  DataParser mbdata;
+  DataParser parser;
   auto digitisers = mb_opts.getDigitisers();
   MB16Detector mb16(digitisers);
 
   unsigned int data_index;
   TSCTimer produce_timer;
+  Timer  h5flushtimer;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       // There is NO data in the FIFO - do stop checks and sleep a little
       mystats.rx_idle1++;
-      // Checking for exit
+
+      // if filedumping and requesting time splitting, check for rotation.
+      if (MBCAENSettings.H5SplitTime != 0 and (dumpfile)) {
+        if (h5flushtimer.timeus() >= MBCAENSettings.H5SplitTime * 1000000) {
+
+          /// \todo user should not need to call flush() - implicit in rotate() ?
+          dumpfile->flush();
+          dumpfile->rotate();
+          h5flushtimer.now();
+        }
+      }
+
       if (produce_timer.timetsc() >=
           EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
         mystats.tx_bytes += flatbuffer.produce();
 
         if (!histograms.isEmpty()) {
-          XTRACE(PROCESS, INF, "Sending histogram for %zu readouts", histograms.hit_count());
+          XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
+              histograms.hit_count());
           histfb.produce(histograms);
           histograms.clear();
         }
@@ -196,54 +211,60 @@ void MBCAENBase::processing_thread() {
       if (datalen == 0) {
         mystats.fifo_seq_errors++;
       } else {
+        /// \todo use the Buffer<T> class here and in parser
         auto dataptr = eth_ringbuf->getDataBuffer(data_index);
-        if (mbdata.parse(dataptr, datalen) < 0) {
-          mystats.rx_error_bytes += mbdata.Stats.error_bytes;
+        if (parser.parse(dataptr, datalen) < 0) {
+          mystats.rx_error_bytes += parser.Stats.error_bytes;
+          continue;
+        }
+        mystats.rx_seq_errors += parser.Stats.seq_errors;
+
+        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
+               parser.MBHeader->numElements, parser.MBHeader->digitizerID);
+
+        mystats.rx_readouts += parser.MBHeader->numElements;
+
+        if (dumpfile) {
+          dumpfile->push(parser.readouts);
+          XTRACE(DATA, DEB, "Pushed %d readouts to dumpfile",
+                 parser.readouts.size());
+        }
+
+        /// \todo why can't I use mb_opts.detector->cassette()
+        auto cassette = mb16.cassette(parser.MBHeader->digitizerID);
+        if (cassette < 0) {
+          XTRACE(DATA, WAR, "Invalid digitizerId: %d",
+                 parser.MBHeader->digitizerID);
           continue;
         }
 
-        mystats.rx_readouts += mbdata.MBHeader->numElements;
+        for (const auto &dp : parser.readouts) {
+          // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d",
+          //       dp.digitizer, dp.local_time, dp.channel, dp.adc);
 
-        auto digitizerId = mbdata.MBHeader->digitizerID;
-        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d\n", mbdata.MBHeader->numElements, digitizerId);
-        for (uint i = 0; i < mbdata.MBHeader->numElements; i++) {
-
-          auto dp = mbdata.MBData[i];
-          // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d\n",
-          //       digitizerId, dp.localTime, dp.channel, dp.adcValue);
-
-          /// \todo why can't I use mb_opts.detector->cassette()
-          auto cassette = mb16.cassette(digitizerId);
-
-          if (cassette < 0) {
-            XTRACE(DATA, WAR, "Invalid digitizerId: %d\n", digitizerId);
-
-            break;
-          }
-
-          if (dumptofile) {
-            mbdatasave->tofile("%d,%d,%d,%d\n", dp.localTime, digitizerId, dp.channel, dp.adcValue);
-          }
-
+          /// \todo magic number? should be part of geometry class?
+          /// \todo do not bin 0-channels for the complementary space
+          /// \todo unfold channels among digitizers
           if (dp.channel >= 32) {
-            histograms.binstrips(dp.channel, dp.adcValue, 0, 0);
+            histograms.binstrips(dp.channel - 32, dp.adc, 0, 0);
           } else {
-            histograms.binstrips(0, 0, dp.channel, dp.adcValue);
+            histograms.binstrips(0, 0, dp.channel, dp.adc);
           }
 
-          if (builder[cassette].addDataPoint(dp.channel, dp.adcValue, dp.localTime)) {
+          if (builder[cassette].addDataPoint(dp.channel, dp.adc, dp.local_time)) {
 
+            /// \todo magic number? should be part of geometry class?
             auto xcoord = builder[cassette].getStripPosition() - 32; // pos 32 - 63
             auto ycoord = cassette * nwires +
-                          builder[cassette].getWirePosition(); // pos 0 - 31
+                builder[cassette].getWirePosition(); // pos 0 - 31
 
             uint32_t pixel_id = essgeom.pixel2D(xcoord, ycoord);
 
             XTRACE(PROCESS, DEB,
-                   "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d\n",
-                   digitizerId, (int)xcoord, (int)ycoord,
-                   (int)builder[cassette].getWirePosition(),
-                   (int)builder[cassette].getStripPosition(), pixel_id);
+                   "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d",
+                   dp.digitizer, (int) xcoord, (int) ycoord,
+                   (int) builder[cassette].getWirePosition(),
+                   (int) builder[cassette].getStripPosition(), pixel_id);
 
             if (pixel_id == 0) {
               mystats.geometry_errors++;
@@ -253,8 +274,12 @@ void MBCAENBase::processing_thread() {
               mystats.rx_events++;
             }
           }
+          /// \todo we need to also flush leftover clusters in case of loop termination
+
         }
       }
     }
   }
+}
+
 }

@@ -11,6 +11,8 @@
 #include <cstdio>
 #include <vector>
 
+namespace Multiblade {
+
 class MB16Detector {
 public:
 
@@ -34,3 +36,5 @@ public:
 private:
   std::vector<struct MB16Detector::Digitiser> & Digitisers;
 };
+
+}
