@@ -37,8 +37,10 @@ public:
 
 class HitSorterTest : public TestBase {
 protected:
-  std::vector<Readout> long_data;
-  std::vector<Readout> super_long_data;
+  std::vector<Readout> tiny;
+  std::vector<Readout> small;
+  std::vector<Readout> medium;
+  std::vector<Readout> large;
 
   uint16_t pADCThreshold = 0;
   double pMaxTimeGap = 200;
@@ -52,8 +54,10 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-//    ReadoutFile::read(DataPath + "run16long", long_data);
-//    ReadoutFile::read(DataPath + "run16full", super_long_data);
+//    ReadoutFile::read(DataPath + "tiny", tiny);
+    ReadoutFile::read(DataPath + "small", small);
+    ReadoutFile::read(DataPath + "medium", medium);
+    ReadoutFile::read(DataPath + "medium", large);
 
     mapping.set_mapping(1, 0, 0, 0);
     mapping.set_mapping(1, 1, 0, 64);
@@ -130,10 +134,10 @@ TEST_F(HitSorterTest, Constructor) {
   ASSERT_EQ(true, mock_y->empty());
 }
 
-TEST_F(HitSorterTest, Run16_Short) {
+TEST_F(HitSorterTest, TinyData) {
   uint32_t bonus = 0;
   uint32_t old = 0;
-  for (auto readout : Run16) {
+  for (auto readout : tiny) {
     if (readout.srs_timestamp < old)
       bonus++;
     old = readout.srs_timestamp+bonus;
@@ -148,6 +152,25 @@ TEST_F(HitSorterTest, Run16_Short) {
   EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
 }
 
+
+//TEST_F(HitSorterTest, Small) {
+//  uint32_t bonus = 0;
+//  uint32_t old = 0;
+//  for (auto readout : small) {
+//    if (readout.srs_timestamp < old)
+//      bonus++;
+//    old = readout.srs_timestamp+bonus;
+//    store_hit(readout);
+//  }
+//  EXPECT_EQ(bonus, 0);
+//
+//  EXPECT_EQ(2, sorter_x->stats_trigger_count);
+//  EXPECT_EQ(2, sorter_y->stats_trigger_count);
+//
+//  EXPECT_EQ(0, sorter_x->stats_subsequent_triggers);
+//  EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
+//}
+/*
 TEST_F(HitSorterTest, Run16_Long) {
   uint32_t bonus = 0;
   uint32_t old = 0;
@@ -197,6 +220,7 @@ TEST_F(HitSorterTest, Mock_short_chrono) {
 //  EXPECT_EQ(mock_x->stats_chrono_errors, 0);
 //  EXPECT_EQ(mock_y->stats_chrono_errors, 0);
 }
+*/
 
 /*
 TEST_F(HitSorterTest, Mock_long_chrono) {
