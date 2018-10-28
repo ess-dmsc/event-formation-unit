@@ -226,9 +226,9 @@ void MBCAENBase::processing_thread() {
           }
 
           if (dp.channel >= 32) {
-            histograms.binstrips(dp.channel, dp.adcValue, 0, 0);
+            histograms.bin_x(dp.channel, dp.adcValue);
           } else {
-            histograms.binstrips(0, 0, dp.channel, dp.adcValue);
+            histograms.bin_y(dp.channel, dp.adcValue);
           }
 
           if (builder[cassette].addDataPoint(dp.channel, dp.adcValue, dp.localTime)) {

@@ -46,9 +46,13 @@ void Hists::clear() {
   cluster_count_ = 0;
 }
 
-void Hists::binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16_t yadc) {
+void Hists::bin_x(uint16_t xstrip, uint16_t xadc) {
   x_strips_hist[xstrip]++;
   x_adc_hist[xadc]++;
+  hit_count_++;
+}
+
+void Hists::bin_y(uint16_t ystrip, uint16_t yadc) {
   y_strips_hist[ystrip]++;
   y_adc_hist[yadc]++;
   hit_count_++;

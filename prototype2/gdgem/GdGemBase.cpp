@@ -24,8 +24,8 @@
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 /** ----------------------------------------------------- */
 
@@ -171,9 +171,9 @@ void bin(Hists& hists, const Event &e)
 void bin(Hists& hists, const Hit &e)
 {
   if (e.plane_id == 0) {
-    hists.binstrips(e.strip, e.adc, 0, 0);
+    hists.bin_x(e.strip, e.adc);
   } else if (e.plane_id == 1) {
-    hists.binstrips(0, 0, e.strip, e.adc);
+    hists.bin_y(e.strip, e.adc);
   }
 }
 

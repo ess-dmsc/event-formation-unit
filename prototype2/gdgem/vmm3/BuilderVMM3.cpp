@@ -28,7 +28,7 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 	sorter_y.clusterer = clusterer_y;
 
 	if (!dump_dir.empty()) {
-		readout_file_ = ReadoutFile::create(dump_dir + "gdgem_readouts_" + timeString(), 100);
+		readout_file_ = ReadoutFile::create(dump_dir + "gdgem_readouts_" + timeString(), 1000);
 	}
 }
 

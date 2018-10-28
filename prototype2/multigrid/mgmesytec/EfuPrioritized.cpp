@@ -42,14 +42,14 @@ size_t EfuPrioritized::ingest(const std::vector<Hit> &hits) {
       if (raw1)
         raw1->addEntry(1, mappings.wire(h.bus, h.channel), h.total_time, h.adc);
       if (hists)
-        hists->binstrips(mappings.wire(h.bus, h.channel), h.adc, 0, 0);
+        hists->bin_x(mappings.wire(h.bus, h.channel), h.adc);
       wires.push_back(h);
     }
     else if (mappings.isGrid(h.bus, h.channel)) {
       if (raw1)
         raw1->addEntry(2, mappings.grid(h.bus, h.channel), h.total_time, h.adc);
       if (hists)
-        hists->binstrips(0, 0, mappings.grid(h.bus, h.channel), h.adc);
+        hists->bin_y(mappings.grid(h.bus, h.channel), h.adc);
       grids.push_back(h);
     }
   }
