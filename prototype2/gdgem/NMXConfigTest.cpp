@@ -37,6 +37,22 @@ TEST_F(NMXConfigTest, ConstructorDefaults) {
   ASSERT_EQ(nmxconfig.calfile, nullptr);
 }
 
+TEST_F(NMXConfigTest, EventFilter) {
+  EventFilter filter;
+  Event e; // use empty Event
+  filter.enforce_lower_uncertainty_limit = false;
+  filter.enforce_minimum_hits = false;
+  ASSERT_TRUE(filter.valid(e));
+
+  filter.enforce_lower_uncertainty_limit = false;
+  filter.enforce_minimum_hits = true;
+  ASSERT_FALSE(filter.valid(e));
+
+  /// \todo test this behaviour
+  // filter.enforce_lower_uncertainty_limit = true;
+  // filter.enforce_minimum_hits = false;
+  // ASSERT_FALSE(filter.valid(e));
+}
 
 
 TEST_F(NMXConfigTest, NoConfigFile) {
@@ -51,13 +67,15 @@ TEST_F(NMXConfigTest, NoConfigFile) {
 TEST_F(NMXConfigTest, DebugPrint) {
   MESSAGE() << "This is Not a test, but simply exercises the debug print code" << "\n";
   NMXConfig nmxconfig;
+  nmxconfig.filter.enforce_lower_uncertainty_limit = true;
+  nmxconfig.filter.enforce_minimum_hits = true;
   auto str = nmxconfig.debug();
   MESSAGE() << str << "\n";
 }
 
 TEST_F(NMXConfigTest, JsonConfig) {
   NMXConfig nmxconfig(pathprefix + "../prototype2/gdgem/configs/vmm3.json", nocalibration);
-  ASSERT_EQ(100, nmxconfig.time_config.tac_slope()); // Parsed from json
+  ASSERT_EQ(60, nmxconfig.time_config.tac_slope()); // Parsed from json
   ASSERT_EQ(20, nmxconfig.time_config.bc_clock());
 }
 

@@ -93,6 +93,12 @@ protected:
 
 };
 
+TEST_F(ClusterMatcherTest, MergeNoClusters) {
+  ClusterList c;
+  MESSAGE() << "This it NOT a test, as novalidation occurs (cant access private fields)\n";
+  matcher->merge(0, c);
+}
+
 TEST_F(ClusterMatcherTest, OneX) {
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 0, 200));
   matcher->match_end(true);

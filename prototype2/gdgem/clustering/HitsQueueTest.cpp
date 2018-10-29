@@ -71,7 +71,7 @@ TEST_F(HitsQueueTest, Run16_with_trigger) {
   EXPECT_EQ(queue->hits().size(), 0);
 }
 
-// TODO: some checks disabled, this is not stricly chronological!!!
+/// \todo some checks disabled, this is not stricly chronological!!!
 
 TEST_F(HitsQueueTest, Run16_chronological_no_trigger) {
   for (auto hit : Run16) {

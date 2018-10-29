@@ -9,10 +9,7 @@ set(library_SRC
 set(library_INC
   include/Socket.h
   include/Timer.h
-  include/Counter.h
   include/TSCTimer.h
-  include/Counter.h
-  include/StatCounter.h
   )
 
 add_library(eventlib

@@ -34,6 +34,8 @@ struct EventFilter {
   uint32_t minimum_hits{6};
   size_t minimum_hits_dropped{0};
 
+
+  /// \todo bug? uncertainty takes precedence if both enforce options are true
   bool valid(Event& event)
   {
     if (enforce_lower_uncertainty_limit &&

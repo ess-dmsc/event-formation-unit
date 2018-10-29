@@ -19,7 +19,7 @@ public:
 
   void match_end(bool force);
 
-  // TODO: match in other ways -- mass, overlap?
+  /// \todo match in other ways -- mass, overlap?
 
   size_t stats_cluster_count {0};
 
