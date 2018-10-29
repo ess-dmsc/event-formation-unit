@@ -57,6 +57,7 @@ TEST_F(GdGemBaseTest, GetCalibrationCmd) {
 }
 
 
+#if 0
 TEST_F(GdGemBaseTest, DataReceive) {
   GdGemBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
@@ -69,8 +70,8 @@ TEST_F(GdGemBaseTest, DataReceive) {
   EXPECT_EQ(Readout.mystats.rx_packets, 1);
   EXPECT_EQ(Readout.mystats.readouts, 53);
   EXPECT_EQ(Readout.mystats.readouts_error_bytes, 0);
-
 }
+#endif
 
 int main(int argc, char **argv) {
   std::string filename{"vmm3.json"};
