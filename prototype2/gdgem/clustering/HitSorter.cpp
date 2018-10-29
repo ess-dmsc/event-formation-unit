@@ -21,7 +21,6 @@ HitSorter::HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
 }
 
 bool HitSorter::requires_analysis(double triggerTimestamp_ns) {
-
   if (old_trigger_timestamp_ns_ != triggerTimestamp_ns) {
     stats_trigger_count++;
 
@@ -41,7 +40,7 @@ bool HitSorter::requires_analysis(double triggerTimestamp_ns) {
 void HitSorter::insert(const Readout &readout) {
 
   double triggerTimestamp_ns =
-      pTime.trigger_timestamp_ns(readout.srs_timestamp + readout.bonus_timestamp);
+      pTime.trigger_timestamp_ns(readout.srs_timestamp);
 
   if (requires_analysis(triggerTimestamp_ns)) {
     XTRACE(PROCESS, DEB, "analysis required");
@@ -51,8 +50,9 @@ void HitSorter::insert(const Readout &readout) {
 
   /// \todo Move this check to parser?
   if (readout.over_threshold || (readout.adc >= pADCThreshold)) {
+
     hits.store(pChips.get_plane(readout), pChips.get_strip(readout), readout.adc,
-               readout.ChipTimeNs, triggerTimestamp_ns);
+               readout.chiptime, triggerTimestamp_ns);
     /// \todo who adds chipTime + trigger time? queue?
   }
 }

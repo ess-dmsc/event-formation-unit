@@ -24,8 +24,8 @@
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 /** ----------------------------------------------------- */
 
@@ -279,6 +279,7 @@ void GdGemBase::processing_thread() {
             if (nmx_opts.filter.valid(event)) {
               pixelid = nmx_opts.geometry.pixel2D(
                   event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
+
               if (!nmx_opts.geometry.valid_id(pixelid)) {
                 mystats.geom_errors++;
               } else {
@@ -324,7 +325,9 @@ void GdGemBase::processing_thread() {
 
       char *txbuffer;
       auto len = trackfb.serialize(&txbuffer);
+
       if (len != 0) {
+
         XTRACE(PROCESS, DEB, "Sending tracks with size %d", len);
         monitorprod.produce(txbuffer, len);
       }

@@ -5,8 +5,9 @@
 #include <common/TimeString.h>
 
 #include <common/Trace.h>
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 		SRSMappings geometry_interpreter, std::shared_ptr<AbstractClusterer> x,
@@ -28,12 +29,12 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 
 	if (dump_csv_) {
 		vmmsave->tofile(
-				"# udp timestamp, frame counter, fec timestamp, offset, complete time, fecid, vmmid, channel, "
-						"bcid, tdc, adc, overthreshold\n");
+				"# udp_timestamp, frame_counter, fec_timestamp_ns, offset, fecid, vmmid, channel, "
+						"bcid, tdc, adc, overthreshold, chiptime_ns\n");
 	}
 
 	if (dump_h5_) {
-		readout_file_ = ReadoutFile::create(dump_dir + "gdgem_vmm3_readouts_" + timeString() + ".h5", 100);
+		readout_file_ = ReadoutFile::create(dump_dir + "gdgem_vmm3_readouts_" + timeString(), 100);
 	}
 }
 
@@ -52,9 +53,8 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 
 	uint32_t udp_timestamp_ns = parser_.srsHeader.udpTimeStamp
 			* time_intepreter_.internal_clock_period_ns();
-	//field fec id starts at 0
-	/// \todo need to establish whether fec id start at 0 or 1
-	readout.fec = parser_.parserData.fecId + 1; // \todo validte this!
+	//field fec id starts at 1
+	readout.fec = parser_.parserData.fecId; 
 	for (unsigned int i = 0; i < parser_.stats.hits; i++) {
 		auto &d = parser_.data[i];
 		if (d.hasDataMarker) {
@@ -69,10 +69,8 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 			readout.adc = d.adc;
 			readout.over_threshold = (d.overThreshold != 0);
 			auto calib = calfile_->getCalibration(readout.fec, readout.chip_id, readout.channel);
-			readout.ChipTimeNs = time_intepreter_.chip_time_ns(d.bcid, d.tdc, calib.offset, calib.slope);
-
-			double complete_timestamp_ns = readout.srs_timestamp + readout.ChipTimeNs;
-
+			readout.chiptime = time_intepreter_.chip_time_ns(d.bcid, d.tdc, calib.offset, calib.slope);
+			 
 			XTRACE(PROCESS, DEB,
 					"srs/vmm timestamp: srs: 0x%08x, bc: 0x%08x, tdc: 0x%08x",
 					readout.srs_timestamp, d.bcid, d.tdc);
@@ -85,6 +83,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 					sorter_y.insert(readout);
 				}	else {
 					sorter_x.insert(readout);
+					
 				}
 			} else {
 				geom_errors++;
@@ -98,13 +97,12 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 			}
 
 			if (dump_csv_) {
-				vmmsave->tofile(
-						" %u, %u, %u, %u, %f, %u, %u, %u, %u, %u, %u, %u\n",
+				uint64_t fec_time_ns = d.fecTimeStamp * time_intepreter_.internal_clock_period_ns();
+				vmmsave->tofile(" %u, %u, %llu, %u, %u, %u, %u, %u, %u, %u, %u, %f\n",
 						udp_timestamp_ns, parser_.srsHeader.frameCounter,
-						readout.srs_timestamp, d.triggerOffset,
-						complete_timestamp_ns, readout.fec, readout.chip_id,
+						fec_time_ns, d.triggerOffset,readout.fec, readout.chip_id,
 						readout.channel, readout.bcid, readout.tdc, readout.adc,
-						readout.over_threshold);
+						readout.over_threshold, readout.chiptime);
 			}
 		} else {
 			XTRACE(PROCESS, DEB, "No data marker in hit (increment counter?)");

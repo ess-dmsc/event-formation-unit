@@ -8,11 +8,13 @@
 
 #include <common/Log.h>
 #include <fstream>
-#include <multiblade/mbcommon/MBConfig.h>
+#include <multiblade/caen/Config.h>
 #include <nlohmann/json.hpp>
 
+namespace Multiblade {
+
 ///
-MBConfig::MBConfig(std::string jsonfile) : ConfigFile(jsonfile) {
+Config::Config(std::string jsonfile) : ConfigFile(jsonfile) {
 
   loadConfigFile();
 
@@ -21,7 +23,7 @@ MBConfig::MBConfig(std::string jsonfile) : ConfigFile(jsonfile) {
   }
 
   if (Instrument == InstrumentGeometry::Estia) {
-    Detector = std::make_shared< MB16Detector>(Digitisers);
+    Detector = std::make_shared<MB16Detector>(Digitisers);
   } else if (Instrument == InstrumentGeometry::Freia) {
     Detector = std::make_shared<MB16Detector>(Digitisers); /// \todo add parameters for Freia
   }
@@ -30,7 +32,7 @@ MBConfig::MBConfig(std::string jsonfile) : ConfigFile(jsonfile) {
 }
 
 ///
-void MBConfig::loadConfigFile() {
+void Config::loadConfigFile() {
   nlohmann::json root;
 
   if (ConfigFile.empty()) {
@@ -41,7 +43,7 @@ void MBConfig::loadConfigFile() {
   LOG(INIT, Sev::Info, "JSON config - loading configuration from file {}", ConfigFile);
   std::ifstream t(ConfigFile);
   std::string jsonstring((std::istreambuf_iterator<char>(t)),
-                  std::istreambuf_iterator<char>());
+                         std::istreambuf_iterator<char>());
 
   try {
     root = nlohmann::json::parse(jsonstring);
@@ -50,14 +52,14 @@ void MBConfig::loadConfigFile() {
     LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}", ConfigFile);
     return;
   }
-    /// extract config parameters below
+  /// extract config parameters below
 
   try {
     auto instr = root["InstrumentGeometry"].get<std::string>();
 
     if (instr.compare("Estia") == 0) {
       Instrument = InstrumentGeometry::Estia;
-    } else if (instr.compare("Freia") == 0 ) {
+    } else if (instr.compare("Freia") == 0) {
       Instrument = InstrumentGeometry::Freia;
     } else {
       LOG(INIT, Sev::Warning, "JSON config - error: Unknown instrument specified, using default (Estia)");
@@ -94,4 +96,6 @@ void MBConfig::loadConfigFile() {
   }
 
   IsConfigLoaded = true;
+}
+
 }

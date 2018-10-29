@@ -78,8 +78,7 @@ TEST_F(DoroClustererTest, Run16_line_110168_110323) {
   for (auto readout : Run16) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     store_hit(readout);
   }
 
@@ -98,8 +97,7 @@ TEST_F(DoroClustererTest, Run16_Long) {
   for (auto readout : long_data) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp;
-    readout.bonus_timestamp = bonus;
+    old = readout.srs_timestamp+bonus;
     store_hit(readout);
   }
   /// \todo counts have gone down after changing tdc calculations

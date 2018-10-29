@@ -103,9 +103,7 @@ def docker_build(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd ${project}/build
         make --version
-        make -j4 VERBOSE=OFF
-        make -j4 unit_tests VERBOSE=OFF
-        make -j4 benchmark
+        make all unit_tests benchmark -j4
         cd ../utils/udpredirect
         make
     \""""
@@ -298,7 +296,8 @@ node('docker') {
 
         stage("Static analysis") {
             try {
-                sh "cloc --by-file --xml --out=cloc.xml ."
+                sh "find . --name '*TestData.h' > cloc_exclude"
+                sh "cloc --exclude-list-file=cloc_exclude --by-file --xml --out=cloc.xml ."
                 sh "xsltproc jenkins/cloc2sloccount.xsl cloc.xml > sloccount.sc"
                 sloccountPublish encoding: '', pattern: ''
             } catch (e) {

@@ -9,6 +9,7 @@ set(AdcReadoutBase_SRC
     SampleProcessing.cpp
     AdcSettings.cpp
     AdcTimeStamp.cpp
+    DelayLinePositionCalc.cpp
     )
 
 set(AdcReadoutBase_INC
@@ -22,6 +23,7 @@ set(AdcReadoutBase_INC
     SampleProcessing.h
     AdcSettings.h
     AdcTimeStamp.h
+    DelayLinePositionCalc.h
     )
 
 
@@ -47,6 +49,7 @@ set(AdcReadoutTest_SRC
     test/SampleProcessingTest.cpp
     test/CLIArgumentsTest.cpp
     test/AdcTimeStampTest.cpp
+    test/DelayLinePositionCalcTest.cpp
     ${AdcReadoutBase_SRC}
     )
 

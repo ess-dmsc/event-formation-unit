@@ -57,7 +57,7 @@ struct NMXConfig {
   NMXConfig() { }
   NMXConfig(std::string configfile, std::string calibrationfile);
 
-  std::string builder_type{"VMM2"};
+  std::string builder_type{"VMM3"};
 
   // VMM calibration
   std::shared_ptr<CalibrationFile> calfile;

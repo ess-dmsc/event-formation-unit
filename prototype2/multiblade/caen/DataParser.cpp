@@ -13,16 +13,19 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <mbcaen/DataParser.h>
+#include <caen/DataParser.h>
 #include <memory>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
+
+namespace Multiblade {
 
 int DataParser::parse(const char *buffer, unsigned int size) {
 
+  readouts.clear();
   MBHeader = nullptr;
-  MBData = nullptr;
+  Data = nullptr;
   memset(&Stats, 0, sizeof(struct Stats));
 
   auto headerlen = sizeof(struct Header);
@@ -35,14 +38,24 @@ int DataParser::parse(const char *buffer, unsigned int size) {
   MBHeader = (struct Header *)buffer;
 
   if (MBHeader->version != Version) {
-    XTRACE(DATA, WAR, "Unsupported data version: 0x%04x (expected 0x04%x)\n", MBHeader->version, Version);
+    XTRACE(DATA, WAR, "Unsupported data version: 0x%04x (expected 0x%04x)", MBHeader->version, Version);
+    Stats.error_bytes += size;
     return -error::EHEADER;
   }
 
   if (MBHeader->elementType != ElementType) {
-    XTRACE(DATA, WAR, "Unsupported data type: 0x%04x (expected 0x04%x)\n", MBHeader->elementType, ElementType);
+    XTRACE(DATA, WAR, "Unsupported data type: 0x%04x (expected 0x%04x)", MBHeader->elementType, ElementType);
+    Stats.error_bytes += size;
     return -error::EHEADER;
   }
+
+  if ((MBHeader->seqNum - PreviousSeqNum) != 1) {
+    XTRACE(DATA, WAR, "Sequence number inconsistency: current=%lu, previous=%lu",
+        MBHeader->seqNum, PreviousSeqNum);
+    Stats.seq_errors++;
+    // But we continue anyways
+  }
+  PreviousSeqNum = MBHeader->seqNum;
 
   auto expectedsize = sizeof(struct Header) + MBHeader->numElements * sizeof(struct ListElement422);
 
@@ -52,7 +65,21 @@ int DataParser::parse(const char *buffer, unsigned int size) {
     return -error::ESIZE;
   }
 
-  MBData = (struct ListElement422 *)(buffer + sizeof(struct Header));
+  Data = (struct ListElement422 *)(buffer + sizeof(struct Header));
+
+  prototype.global_time = MBHeader->globalTime;
+  prototype.digitizer = MBHeader->digitizerID;
+  readouts.resize(MBHeader->numElements, prototype);
+  for (size_t i=0; i < MBHeader->numElements; ++i) {
+    auto& r = readouts[i];
+    const auto& d = Data[i];
+    r.local_time = d.localTime;
+    r.channel = d.channel;
+    r.adc = d.adcValue;
+    //XTRACE(DATA, DEB, "readout %s", r.debug().c_str());
+  }
 
   return MBHeader->numElements;
+}
+
 }

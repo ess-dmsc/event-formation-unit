@@ -16,8 +16,7 @@
 #include <chrono>
 
 #include "generators/TextFile.h"
-#include "mbcommon/DumpEventBuilderInfo.h"
-#include "mbcommon/MultiBladeEventBuilder.h"
+#include "clustering/EventBuilder.h"
 
 // GCOVR_EXCL_START
 
@@ -61,18 +60,18 @@ int main(int argc, const char **argv) {
             << std::endl;
   std::cout << "\n";
 
-  MultiBladeEventBuilder p;
+  Multiblade::EventBuilder p;
   p.setUseWeightedAverage(false);
 
   typedef std::chrono::high_resolution_clock Clock;
 
   auto t0 = Clock::now();
 
-  TextFile data(ifile);
-  std::vector<TextFile::Entry> entries;
+  Multiblade::TextFile data(ifile);
+  std::vector<Multiblade::TextFile::Entry> entries;
   try {
     entries = data.rest();
-  } catch (TextFile::eof e) {
+  } catch (Multiblade::TextFile::eof e) {
     std::cout << "End of file reached." << std::endl;
     return 0;
   }
@@ -105,8 +104,7 @@ int main(int argc, const char **argv) {
   auto acc_time = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t1);
   auto ttime = std::chrono::duration_cast<std::chrono::nanoseconds>(t2 - t0);
 
-  DumpEventBuilderInfo info;
-  info.print(p);
+  std::cout << p.print();
 
   long npoints = entries.size() * npasses;
 

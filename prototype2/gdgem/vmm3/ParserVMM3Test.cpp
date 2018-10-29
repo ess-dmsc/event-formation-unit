@@ -24,7 +24,7 @@ protected:
 TEST_F(VMM3SRSDataTest, Constructor) {
   ASSERT_TRUE(data->data != nullptr);
   assertfields(0, 0, 0);
-  for (int i = 0; i < 32; i++) {
+  for (int i = 0; i < maximumNumberVMM*maximumNumberFECs; i++) {
     ASSERT_EQ(data->markers[i].fecTimeStamp, 0U);
   }
 }
@@ -34,7 +34,7 @@ TEST_F(VMM3SRSDataTest, UndersizeData) {
     int res = data->receive((char *)&data_3_ch0[0], dataLength);
     ASSERT_EQ(res, 0);
     assertfields(0, 0, dataLength);
-    for (int i = 0; i < 32; i++) {
+    for (int i = 0; i < maximumNumberVMM*maximumNumberFECs; i++) {
       ASSERT_EQ(data->markers[i].fecTimeStamp, 0U);
     }
   }
@@ -44,7 +44,7 @@ TEST_F(VMM3SRSDataTest, DataOnly) {
   int res = data->receive((char *)&data_3_ch0[0], data_3_ch0.size());
   ASSERT_EQ(res, 3); // three hits in the readout packet
   assertfields(3, 0, 0);
-  for (int i = 0; i < 32; i++) {
+  for (int i = 0; i < maximumNumberVMM*maximumNumberFECs; i++) {
     ASSERT_EQ(data->markers[i].fecTimeStamp, 0U);
   }
 }

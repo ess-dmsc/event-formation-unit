@@ -34,10 +34,12 @@
 
 #include <common/Trace.h>
 
-/// Struct containing channel number and ADC-value for a singe strip or wire.
+namespace Multiblade {
+
+/// Struct containing channel number and ADC-value for a single strip or wire.
 struct point {
-  uint32_t channel; ///< Number of either wire or strip channel
-  uint32_t ADC;     ///< Value of the signal from the corresponding channel
+  uint16_t channel; ///< Number of either wire or strip channel
+  uint16_t ADC;     ///< Value of the signal from the corresponding channel
 };
 
 /// Overloaded < operator. Required when we need to sort the data points for
@@ -48,14 +50,14 @@ struct point {
 /// \return bool
 bool operator<(const point &a, const point &b);
 
-class MultiBladeEventBuilder {
+class EventBuilder {
 
 public:
   /// Constructor
-  MultiBladeEventBuilder();
+  EventBuilder();
 
   /// Destructor
-  ~MultiBladeEventBuilder() = default;
+  ~EventBuilder() = default;
 
   /// Data-points from one multi-blade detector cassette consists of a channel
   /// number, a signal value from the
@@ -73,7 +75,7 @@ public:
   /// \param ADC Signal value
   /// \param clock Clock-cycle number
   /// \return True when the cluster/event is complete, false otherwise
-  bool addDataPoint(const uint8_t &channel, const uint16_t &ADC,
+  bool addDataPoint(const uint16_t &channel, const uint16_t &ADC,
                     const uint32_t &clock);
 
   /// Call this function when last point of the run has been received and the
@@ -142,7 +144,7 @@ public:
   /// channels will be considered invalid.
   ///
   /// \param nchannels
-  void setNumberOfWireChannels(uint8_t nchannels) {
+  void setNumberOfWireChannels(uint16_t nchannels) {
     m_nwire_channels = nchannels;
   }
 
@@ -151,7 +153,7 @@ public:
   /// channels will be considered invalid.
   ///
   /// param nchannels
-  void setNumberOfStripChannels(uint8_t nchannels) {
+  void setNumberOfStripChannels(uint16_t nchannels) {
     m_nstrip_channels = nchannels;
   }
 
@@ -189,6 +191,9 @@ public:
   /// Reset debugging and monitoring counters
   void resetCounters();
 
+  /// Call this to wite the information to stdout
+  std::string print() const;
+
 private:
   // Configuration variables
 
@@ -197,9 +202,9 @@ private:
   /// Time window for a single cluster. In number of clock-cycles
   uint32_t m_time_window{400};
   /// Number of wire channels
-  uint8_t m_nwire_channels{32};
+  uint16_t m_nwire_channels{32};
   /// Number of strip channels
-  uint8_t m_nstrip_channels{32};
+  uint16_t m_nstrip_channels{32};
   /// Whether to use wieghted average or not when calculation position
   bool m_use_weighted_average{true};
 
@@ -226,14 +231,14 @@ private:
       m_rejected_adjacency; /// Number of events rejected due to adjacency
   uint64_t m_rejected_position; /// Number of events rejected due to position
   std::array<uint64_t, 6> m_2D_wires; ///< 2D clusters. Number of wires fired.
-                                      ///>5 wires -> element 6
+  ///>5 wires -> element 6
   std::array<uint64_t, 6>
       m_2D_strips; ///< 2D clusters. Number of strips fired. >5 strips -> element 6
   std::array<uint64_t, 6> m_1D_wires; ///< 1D clusters. Number of wires fired.
-                                      /// >5 wires -> element 6
+  /// >5 wires -> element 6
   std::array<uint64_t, 6>
       m_1D_strips; ///< 1D clusters. Number of strips fired. >5 strips ->
-                   ///    element 6
+  ///    element 6
 
   // Private member functions
 
@@ -241,7 +246,7 @@ private:
   ///
   /// \param channel Channel number
   /// \param ADC Signal value
-  void addPointToCluster(uint32_t channel, uint32_t ADC);
+  void addPointToCluster(uint16_t channel, uint16_t ADC);
 
   /// This function is called once a cluster is formed
   bool processClusters();
@@ -276,8 +281,19 @@ private:
   void incrementCounters(const std::vector<point> &m_wire_cluster,
                          const std::vector<point> &m_strip_cluster);
 
-
   struct {
     uint64_t readouts_discarded{0};
   } Stats;
+
+  /// \name Prints information of all processed clusters/events
+  /// This print-out calls several function.
+  //@{
+  static std::string printClusterAbsolute(const std::array<uint64_t, 6>&, std::string text);
+  static std::string printClusterPercentage(const std::array<uint64_t, 6>&, std::string text);
+  //@}
+
+  /// Summs the contents of a std::array of uint64_t with dimension 6
+  static uint64_t sumArray(const std::array<uint64_t, 6>& array);
 };
+
+}
