@@ -130,6 +130,14 @@ create_test_executable(MBEventBuilderTest)
 # MJC Unit tests below
 #
 
+set(MBCAENGeometryTest_INC
+  caen/MBGeometry.h
+)
+set(MBCAENGeometryTest_SRC
+  caen/MBGeometryTest.cpp
+)
+create_test_executable(MBCAENGeometryTest)
+
 set(MBCAENBaseTest_INC
   ${caen_common_inc}
   ../../libs/include/Socket.h
