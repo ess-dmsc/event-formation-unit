@@ -24,13 +24,11 @@ create_test_executable(ClusterTest)
 set(ClusteringBase_SRC
   Cluster.cpp
   Hit.cpp
-#  Matcher.cpp
   )
 set(ClusteringBase_INC
   Cluster.h
   Hit.h
   AbstractClusterer.h
-#  Matcher.h
   )
 
 set(GapClustererTest_SRC
@@ -43,17 +41,3 @@ set(GapClustererTest_INC
 create_test_executable(GapClustererTest SKIP_MEMGRIND)
 target_compile_definitions(GapClustererTest
   PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
-
-#set(MatcherTest_SRC
-#  ${ClusteringBase_SRC}
-#  Matcher.cpp
-#  GapClusterer.cpp
-#  MatcherTest.cpp)
-#set(MatcherTest_INC
-#  Matcher.h
-#  GapClusterer.h
-#  ${ClusteringBase_INC})
-#create_test_executable(MatcherTest SKIP_MEMGRIND)
-#target_compile_definitions(MatcherTest
-#  PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
-
