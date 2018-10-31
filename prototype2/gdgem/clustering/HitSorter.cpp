@@ -38,7 +38,7 @@ bool HitSorter::requires_analysis(double triggerTimestamp_ns) {
 }
 
 void HitSorter::insert(const Readout &readout) {
-	
+
   double triggerTimestamp_ns =
       pTime.trigger_timestamp_ns(readout.srs_timestamp);
 
@@ -48,18 +48,18 @@ void HitSorter::insert(const Readout &readout) {
   }
   old_trigger_timestamp_ns_ = triggerTimestamp_ns;
 
-  // TODO: Move this check to parser?
+  /// \todo Move this check to parser?
   if (readout.over_threshold || (readout.adc >= pADCThreshold)) {
 
     hits.store(pChips.get_plane(readout), pChips.get_strip(readout), readout.adc,
                readout.chiptime, triggerTimestamp_ns);
-    // TODO: who adds chipTime + trigger time? queue?
+    /// \todo who adds chipTime + trigger time? queue?
   }
 }
 
 void HitSorter::flush() {
   //flush both buffers in queue
-  // TODO: subsequent trigger? How do we know?
+  /// \todo subsequent trigger? How do we know?
   analyze();
   analyze();
 }

@@ -5,93 +5,18 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <cinttypes>
-#include <common/Detector.h>
-#include <common/EFUArgs.h>
+#include <sonde/SoNDeBase.h>
 #include <common/EV42Serializer.h>
 #include <common/Producer.h>
-#include <common/RingBuffer.h>
 #include <common/Trace.h>
-#include <cstring>
-#include <fcntl.h>
-#include <iostream>
-#include <libs/include/SPSCFifo.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
-#include <libs/include/Timer.h>
-#include <memory>
 #include <sonde/ideas/Data.h>
-#include <stdio.h>
-#include <unistd.h>
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+SONDEIDEABase::SONDEIDEABase(BaseSettings const &settings, struct SoNDeSettings & localSettings)
+     : Detector("SoNDe detector using IDEA readout", settings),
+       SoNDeSettings(localSettings) {
 
-using namespace memory_sequential_consistent; // Lock free fifo
-
-const char *classname = "SoNDe detector using IDEA readout";
-
-const int TSC_MHZ = 2900; // MJC's workstation - not reliable
-
-/** ----------------------------------------------------- */
-
-class SONDEIDEA : public Detector {
-public:
-  explicit SONDEIDEA(BaseSettings settings);
-  ~SONDEIDEA() { printf("sonde destructor called\n"); }
-
-  void input_thread();
-  void processing_thread();
-
-  const char *detectorname();
-
-  /** \todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 20000;
-  static const int eth_buffer_size = 9000;
-  static const int kafka_buffer_size = 124000; /**< events */
-
-private:
-  /** Shared between input_thread and processing_thread*/
-  CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
-  RingBuffer<eth_buffer_size> *eth_ringbuf;
-
-  NewStats ns{"efu.sonde."}; //
-
-  struct {
-    // Input Counters
-    int64_t rx_packets;
-    int64_t rx_bytes;
-    int64_t fifo_push_errors;
-    int64_t pad[5]; // cppcheck-suppress unusedStructMember
-
-    // Processing and Output counters
-    int64_t rx_idle1;
-    int64_t rx_events;
-    int64_t rx_geometry_errors;
-    int64_t tx_bytes;
-    int64_t rx_seq_errors;
-    int64_t fifo_synch_errors;
-    // Kafka stats below are common to all detectors
-    int64_t kafka_produce_fails;
-    int64_t kafka_ev_errors;
-    int64_t kafka_ev_others;
-    int64_t kafka_dr_errors;
-    int64_t kafka_dr_noerrors;
-  } ALIGN(64) mystats;
-};
-
-struct DetectorSettingsStruct {
-  std::string fileprefix{""};
-} DetectorSettings;
-
-void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
-  parser.add_option("--dumptofile", DetectorSettings.fileprefix,
-                    "dump to specified file")->group("Sonde");
-}
-
-PopulateCLIParser PopulateParser{SetCLIArguments};
-
-SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDEA readout", settings) {
   Stats.setPrefix("efu.sonde");
 
   XTRACE(INIT, ALW, "Adding stats");
@@ -99,7 +24,6 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDE
   Stats.create("input.rx_packets",                mystats.rx_packets);
   Stats.create("input.rx_bytes",                  mystats.rx_bytes);
   Stats.create("input.dropped",                   mystats.fifo_push_errors);
-  Stats.create("input.rx_seq_errors",             mystats.rx_seq_errors);
   Stats.create("processing.idle",                 mystats.rx_idle1);
   Stats.create("processing.rx_events",            mystats.rx_events);
   Stats.create("processing.rx_geometry_errors",   mystats.rx_geometry_errors);
@@ -112,11 +36,11 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDE
   Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
   Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
-  std::function<void()> inputFunc = [this]() { SONDEIDEA::input_thread(); };
+  std::function<void()> inputFunc = [this]() { SONDEIDEABase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    SONDEIDEA::processing_thread();
+    SONDEIDEABase::processing_thread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
@@ -127,9 +51,7 @@ SONDEIDEA::SONDEIDEA(BaseSettings settings) : Detector("SoNDe detector using IDE
   assert(eth_ringbuf != 0);
 }
 
-const char *SONDEIDEA::detectorname() { return classname; }
-
-void SONDEIDEA::input_thread() {
+void SONDEIDEABase::input_thread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
@@ -165,10 +87,10 @@ void SONDEIDEA::input_thread() {
   }
 }
 
-void SONDEIDEA::processing_thread() {
+void SONDEIDEABase::processing_thread() {
   SoNDeGeometry geometry;
 
-  IDEASData ideasdata(&geometry, DetectorSettings.fileprefix);
+  IDEASData ideasdata(&geometry, SoNDeSettings.fileprefix);
   EV42Serializer flatbuffer(kafka_buffer_size, "SONDE");
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
   flatbuffer.setProducerCallback(
@@ -180,6 +102,20 @@ void SONDEIDEA::processing_thread() {
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
       mystats.rx_idle1++;
+
+      if (produce_timer.timetsc() >=
+          EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+        mystats.tx_bytes += flatbuffer.produce();
+
+        /// Kafka stats update - common to all detectors
+        /// don't increment as producer keeps absolute count
+        mystats.kafka_produce_fails = eventprod.stats.produce_fails;
+        mystats.kafka_ev_errors = eventprod.stats.ev_errors;
+        mystats.kafka_ev_others = eventprod.stats.ev_others;
+        mystats.kafka_dr_errors = eventprod.stats.dr_errors;
+        mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
+        produce_timer.now();
+      }
       usleep(10);
 
     } else {
@@ -203,20 +139,6 @@ void SONDEIDEA::processing_thread() {
                                                     ideasdata.data[i].pixel_id);
           }
         }
-
-        if (produce_timer.timetsc() >=
-            EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
-          mystats.tx_bytes += flatbuffer.produce();
-
-          /// Kafka stats update - common to all detectors
-          /// don't increment as producer keeps absolute count
-          mystats.kafka_produce_fails = eventprod.stats.produce_fails;
-          mystats.kafka_ev_errors = eventprod.stats.ev_errors;
-          mystats.kafka_ev_others = eventprod.stats.ev_others;
-          mystats.kafka_dr_errors = eventprod.stats.dr_errors;
-          mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
-          produce_timer.now();
-        }
       }
     }
     if (not runThreads) {
@@ -225,7 +147,3 @@ void SONDEIDEA::processing_thread() {
     }
   }
 }
-
-/** ----------------------------------------------------- */
-
-DetectorFactory<SONDEIDEA> Factory;

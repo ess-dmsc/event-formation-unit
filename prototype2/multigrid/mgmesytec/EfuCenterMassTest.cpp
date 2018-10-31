@@ -60,6 +60,32 @@ TEST_F(EfuCenterMassTest, WireAndGrid) {
   EXPECT_EQ(efu.z(), efu.mappings.z(wire_hit.bus, wire_hit.channel));
 }
 
+TEST_F(EfuCenterMassTest, HitVectorIngest) {
+  Hit hit1, hit2;
+  hit1.channel = 10;
+  hit1.adc = 10;
+  hit2.channel = 20;
+  hit2.adc = 20;
+  std::vector<Hit> hits = {hit1, hit2};
+
+  auto ingested = efu.ingest(hits);
+  EXPECT_EQ(ingested, 2);
+
+  hit1.external_trigger = 7; // Just need != 0 in this test
+  hits = {hit1, hit2};
+  ingested = efu.ingest(hits);
+  EXPECT_EQ(ingested, 1);
+}
+
+TEST_F(EfuCenterMassTest, HitIngestInvalidMappings) {
+  Hit hit1;
+  hit1.channel = 10;
+  hit1.adc = 10;
+  hit1.bus = 199; // some invalid bus number
+  auto result = efu.ingest(hit1);
+  EXPECT_FALSE(result);
+}
+
 TEST_F(EfuCenterMassTest, HighestAdcWire) {
   Hit hit1;
   hit1.channel = 10;

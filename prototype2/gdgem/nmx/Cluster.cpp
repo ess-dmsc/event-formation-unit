@@ -18,7 +18,7 @@ void Cluster::insert_hit(const Hit &e) {
   }
 
   // If plane identities don't match, invalidate
-  // TODO: this needs more testing
+  /// \todo this needs more testing
   if (plane_id != e.plane_id) {
     plane_id = -1;
   }
@@ -57,7 +57,7 @@ double Cluster::time_center() const {
   return time_mass / adc_sum;
 }
 
-// TODO: make work with doubles (or not, if we decimate timestamps?)
+/// \todo make work with doubles (or not, if we decimate timestamps?)
 void Cluster::analyze(bool weighted, uint16_t max_timebins,
                       uint16_t max_timedif) {
   if (entries.empty()) {
@@ -137,7 +137,7 @@ void Cluster::merge(Cluster &other) {
   strip_end = std::max(strip_end, other.strip_end);
 }
 
-// TODO: Unit tests for this
+/// \todo Unit tests for this
 double Cluster::time_overlap(const Cluster &other) const {
   auto latest_start = std::max(other.time_start, time_start);
   auto earliest_end = std::min(other.time_end, time_end);
@@ -147,8 +147,8 @@ double Cluster::time_overlap(const Cluster &other) const {
   return earliest_end - latest_start;
 }
 
-// TODO: Precision of comparisons
-// TODO: Comments or helper methods
+/// \todo Precision of comparisons
+/// \todo Comments or helper methods
 bool Cluster::time_touch(const Cluster &other) const {
   if ((other.time_start == other.time_end) &&
       (time_start < other.time_end) && (other.time_end < time_end)) {

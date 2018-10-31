@@ -43,6 +43,8 @@ public:
                               unsigned int chNo);
 
 private:
+  void resetCalibration();
+
   Calibration Calibrations[MAX_FEC][MAX_VMM][MAX_CH];
 
   /// Default correction

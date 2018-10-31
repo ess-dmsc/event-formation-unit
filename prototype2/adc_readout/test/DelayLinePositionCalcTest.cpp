@@ -7,8 +7,8 @@
 
 #include "../AdcReadoutConstants.h"
 #include "../DelayLinePositionCalc.h"
-#include <gtest/gtest.h>
 #include <cmath>
+#include <gtest/gtest.h>
 
 class ConstDelayLinePositionStandIn : public ConstDelayLinePosition {
 public:

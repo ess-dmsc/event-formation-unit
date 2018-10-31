@@ -109,6 +109,15 @@ set(EV42SerializerTest_INC
   Producer.h)
 create_test_executable(EV42SerializerTest)
 
+set(HistsTest_INC
+  Hists.h
+)
+set(HistsTest_SRC
+  HistsTest.cpp
+  Hists.cpp
+)
+create_test_executable(HistsTest)
+
 set(NewStatsTest_SRC
   NewStatsTest.cpp
   NewStats.cpp)

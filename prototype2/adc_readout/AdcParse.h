@@ -11,6 +11,7 @@
 
 #include "AdcBufferElements.h"
 #include "AdcTimeStamp.h"
+#include "ChannelID.h"
 #include <exception>
 #include <functional>
 #include <netinet/in.h>
@@ -47,19 +48,6 @@ public:
 private:
   Type ParserErrorType;
   std::string Error;
-};
-
-struct ChannelID {
-  std::uint16_t ChannelNr{0};
-  std::uint16_t SourceID{0};
-  bool operator==(ChannelID const &Other) const {
-    return Other.ChannelNr == ChannelNr and Other.SourceID == SourceID;
-  };
-  bool operator<(ChannelID const &Other) const {
-    const auto MaxNrOfChannels = 4;
-    return ChannelNr + SourceID * MaxNrOfChannels <
-           Other.ChannelNr + Other.SourceID * MaxNrOfChannels;
-  };
 };
 
 /// \brief Data stored in this struct represents a (properly parsed) sampling
@@ -177,9 +165,8 @@ public:
   /// processed data into.
   /// \param[in] SourceID An integer used to identify the data source. This
   /// value is passed on together with the parsed data.
-  PacketParser(
-      std::function<bool(SamplingRun *)> ModuleHandler,
-      std::function<SamplingRun *(int Channel)> ModuleProducer);
+  PacketParser(std::function<bool(SamplingRun *)> ModuleHandler,
+               std::function<SamplingRun *(int Channel)> ModuleProducer);
   /// \brief Parses a packet of binary data.
   /// \param[in] Packet Raw data, straight from the socket.
   /// \return Some general information about the packet.

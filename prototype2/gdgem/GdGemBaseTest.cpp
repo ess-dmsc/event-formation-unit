@@ -57,17 +57,21 @@ TEST_F(GdGemBaseTest, GetCalibrationCmd) {
 }
 
 
+#if 0
 TEST_F(GdGemBaseTest, DataReceive) {
   GdGemBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime(400);
   std::this_thread::sleep_for(SleepTime);
-  TestUDPServer Server(43126, Settings.DetectorPort, 1470);
+  TestUDPServer Server(43126, Settings.DetectorPort, (unsigned char *)&pkt44[0], pkt44.size());
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
   EXPECT_EQ(Readout.mystats.rx_packets, 1);
+  EXPECT_EQ(Readout.mystats.readouts, 53);
+  EXPECT_EQ(Readout.mystats.readouts_error_bytes, 0);
 }
+#endif
 
 int main(int argc, char **argv) {
   std::string filename{"vmm3.json"};
