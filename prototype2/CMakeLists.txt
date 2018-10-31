@@ -20,7 +20,7 @@ set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
 # Optional external libraries
 #=============================================================================
 find_package(GraylogLogger REQUIRED)
-set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} GraylogLogger::graylog_logger)
+set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} GraylogLogger::graylog_logger_static)
 
 find_package(h5cpp REQUIRED)
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} h5cpp ${HDF5_C_LIBRARIES} ${Boost_LIBRARIES})
