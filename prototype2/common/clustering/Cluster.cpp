@@ -1,9 +1,9 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/clustering/Cluster.h>
+#include <fmt/format.h>
 #include <cmath>
 #include <set>
-#include <sstream>
 #include <algorithm>
 
 #include <common/Trace.h>
@@ -109,10 +109,9 @@ bool Cluster::time_touch(const Cluster &other) const {
 }
 
 std::string Cluster::debug() const {
-  std::stringstream ss;
-  ss << "    T=(" << time_start << "-" << time_end << ")"
-     << " integral=" << weight_sum << "\n";
+  return fmt::format("plane={} time=({},{}) space=({},{}) weight={} entries[{}]",
+                     plane, time_start, time_end, coord_start, coord_end, weight_sum,
+                     entries.size());
   //  for (const auto& e : entries)
   //    ss << e.debug() << "\n";
-  return ss.str();
 }

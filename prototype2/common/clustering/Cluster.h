@@ -3,16 +3,13 @@
 ///
 /// \file
 ///
-/// \brief Classes for NMX event formation
+/// \brief Cluster: container of hits, aware of its bounds and weight
 ///
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
 #include <common/clustering/Hit.h>
-#include <limits>
-#include <list>
-#include <vector>
 
 struct Cluster {
 

@@ -28,7 +28,7 @@
 ///
 /// \file
 ///
-/// \brief Hit struct for NMX event formation
+/// \brief Hit struct for general clustering solution
 ///
 //===----------------------------------------------------------------------===//
 
