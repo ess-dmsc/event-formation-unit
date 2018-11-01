@@ -66,8 +66,10 @@ const char *ParserException::what() const noexcept {
 
 PacketParser::PacketParser(
     std::function<bool(SamplingRun *)> ModuleHandler,
-    std::function<SamplingRun *(int Channel)> ModuleProducer)
-    : HandleModule(ModuleHandler), ProduceModule(ModuleProducer) {}
+    std::function<SamplingRun *(ChannelID Identifier)> ModuleProducer,
+    std::uint16_t SourceID)
+    : HandleModule(ModuleHandler), ProduceModule(ModuleProducer),
+      Source(SourceID) {}
 
 PacketInfo PacketParser::parsePacket(const InData &Packet) {
   HeaderInfo Header = parseHeader(Packet);
@@ -127,13 +129,11 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte) {
         Packet.Length) {
       throw ParserException(ParserException::Type::DATA_LENGTH);
     }
-    /// The zero below is a placeholder for future changes
-    auto CurrentChannelID = ChannelID{0, Header.Channel};
-    SamplingRun *CurrentDataModule = ProduceModule(Header.Channel);
+    auto CurrentChannelID = ChannelID{Source, Header.Channel};
+    SamplingRun *CurrentDataModule = ProduceModule(CurrentChannelID);
     if (CurrentDataModule != nullptr) {
       CurrentDataModule->Data.resize(NrOfSamples);
       CurrentDataModule->Identifier = CurrentChannelID;
-      CurrentDataModule->Channel = Header.Channel;
       CurrentDataModule->TimeStamp = Header.TimeStamp;
       CurrentDataModule->OversamplingFactor = Header.Oversampling;
       auto ElementPointer = reinterpret_cast<const std::uint16_t *>(
