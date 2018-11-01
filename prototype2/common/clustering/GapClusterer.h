@@ -11,15 +11,18 @@
 
 class GapClusterer : public AbstractClusterer {
 public:
-  GapClusterer(uint64_t maxTimeGap, uint16_t maxStripGap, size_t minClusterSize);
+  GapClusterer(uint64_t TimeGap, uint16_t CoordGap, size_t ClusterSize);
   ~GapClusterer() {}
 
   void cluster(const HitContainer &hits) override;
+  void flush() override;
 
 private:
-  uint64_t pMaxTimeGap;
-  uint16_t pMaxStripGap;
-  size_t pMinClusterSize;
+  uint64_t MaxTimeGap;
+  uint16_t MaxCoordGap;
+  size_t MinClusterSize;
+
+  HitContainer CurrentTimeCluster;
 
   void cluster_by_time(const HitContainer &oldHits);
   void cluster_by_coordinate(HitContainer &cluster);

@@ -21,6 +21,7 @@ public:
   virtual ~AbstractClusterer() {}
 
   virtual void cluster(const HitContainer &hits) = 0;
+  virtual void flush() = 0;
 
   bool empty() const
   {

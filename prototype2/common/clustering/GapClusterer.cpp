@@ -12,31 +12,29 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-GapClusterer::GapClusterer(uint64_t maxTimeGap, uint16_t maxStripGap, size_t minClusterSize)
-    : AbstractClusterer(), pMaxTimeGap(maxTimeGap), pMaxStripGap(maxStripGap), pMinClusterSize(minClusterSize) {
+GapClusterer::GapClusterer(uint64_t TimeGap, uint16_t CoordGap, size_t ClusterSize)
+    : AbstractClusterer(), MaxTimeGap(TimeGap), MaxCoordGap(CoordGap), MinClusterSize(ClusterSize) {
 }
 
 void GapClusterer::cluster(const HitContainer &hits) {
   cluster_by_time(hits);
 }
 
-void GapClusterer::cluster_by_time(const HitContainer &hits) {
-  HitContainer cluster;
+void GapClusterer::flush() {
+  cluster_by_coordinate(CurrentTimeCluster);
+  CurrentTimeCluster.clear();
+}
 
+void GapClusterer::cluster_by_time(const HitContainer &hits) {
   for (const auto &hit : hits) {
     // Stash cluster if time gap to next hit is too large
-    if (!cluster.empty() &&
-        (hit.time - cluster.back().time) > pMaxTimeGap) {
-      cluster_by_coordinate(cluster);
-      cluster.clear();
+    if (!CurrentTimeCluster.empty() &&
+        (hit.time - CurrentTimeCluster.back().time) > MaxTimeGap) {
+      flush();
     }
 
     // Insert in either case
-    cluster.emplace_back(hit);
-  }
-
-  if (!cluster.empty()) {
-    cluster_by_coordinate(cluster);
+    CurrentTimeCluster.emplace_back(hit);
   }
 }
 
@@ -52,7 +50,7 @@ void GapClusterer::cluster_by_coordinate(HitContainer &hits) {
   for (auto &hit : hits) {
     // Stash cluster if coordinate gap to next hit is too large
     if (!cluster.empty() &&
-        (hit.coordinate - cluster.coord_end) > (pMaxStripGap + 1)) {
+        (hit.coordinate - cluster.coord_end) > MaxCoordGap) {
       stash_cluster(cluster);
       cluster = Cluster();
     }
@@ -66,7 +64,7 @@ void GapClusterer::cluster_by_coordinate(HitContainer &hits) {
 }
 //====================================================================================================================
 void GapClusterer::stash_cluster(Cluster &cluster) {
-  if (cluster.entries.size() < pMinClusterSize)
+  if (cluster.entries.size() < MinClusterSize)
     return;
 
   DTRACE(DEB, "******** VALID ********");
