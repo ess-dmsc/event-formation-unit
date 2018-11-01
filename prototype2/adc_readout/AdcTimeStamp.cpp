@@ -42,3 +42,7 @@ RawTimeStamp::GetOffsetTimeStamp(const std::int32_t &SampleOffset) const {
   }
   return {Seconds + SecondsChange, static_cast<uint32_t>(NewSecondsFrac)};
 }
+
+bool RawTimeStamp::operator==(const RawTimeStamp &Other) const {
+  return Other.Seconds == Seconds and Other.SecondsFrac == SecondsFrac;
+}
