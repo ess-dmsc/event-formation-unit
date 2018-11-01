@@ -13,6 +13,19 @@ set(MBEventTest_INC
   )
 create_test_executable(MBEventTest)
 
+set(MBMatcherTest_SRC
+  ../../common/clustering/Cluster.cpp
+  MatcherTest.cpp
+  Event.cpp
+  Matcher.cpp
+  )
+set(MBMatcherTest_INC
+  ../../common/clustering/Cluster.h
+  Event.h
+  Matcher.h
+  )
+create_test_executable(MBMatcherTest)
+
 # GOOGLE BENCHMARK
 set(MBEventBuilderBenchmarkTest_INC
   EventBuilder.h

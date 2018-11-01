@@ -16,7 +16,7 @@
 
 namespace Multiblade {
 
-Matcher::Matcher(double maxDeltaTime) : pMaxDeltaTime(maxDeltaTime) {
+Matcher::Matcher(uint64_t maxDeltaTime) : pMaxDeltaTime(maxDeltaTime) {
 }
 
 bool Matcher::ready_to_be_matched(double time) const {
@@ -26,7 +26,9 @@ bool Matcher::ready_to_be_matched(double time) const {
 }
 
 double Matcher::delta_end(const Event &event, const Cluster &cluster) const {
-  return std::abs(event.time_end() - cluster.time_end);
+  if (event.time_end() > cluster.time_end)
+    return event.time_end() - cluster.time_end;
+  return cluster.time_end - event.time_end();
 }
 
 bool Matcher::belongs_end(const Event &event, const Cluster &cluster) const {

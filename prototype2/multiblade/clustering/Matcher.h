@@ -8,6 +8,7 @@
 #pragma once
 
 #include <common/clustering/GapClusterer.h>
+#include <multiblade/clustering/Event.h>
 #include <memory>
 #include <deque>
 
@@ -15,7 +16,7 @@ namespace Multiblade {
 
 class Matcher {
 public:
-  explicit Matcher(double maxDeltaTime);
+  explicit Matcher(uint64_t maxDeltaTime);
 
   void merge(uint8_t plane, ClusterList &c);
 
@@ -30,15 +31,15 @@ public:
   std::deque<Event> matched_clusters;
 
 private:
-  double pMaxDeltaTime{0};
+  uint64_t pMaxDeltaTime{0};
 
   bool ready_to_be_matched(double time) const;
 
   double delta_end(const Event &event, const Cluster &cluster) const;
   bool belongs_end(const Event &event, const Cluster &cluster) const;
 
-  double latest_x{0};
-  double latest_y{0};
+  uint64_t latest_x{0};
+  uint64_t latest_y{0};
 };
 
 }
