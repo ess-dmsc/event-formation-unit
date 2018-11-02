@@ -252,11 +252,11 @@ void CAENBase::processing_thread() {
           /// \todo unfold channels among digitizers
           if (dp.channel < nwires) {
             //wires
-            histograms.binstrips(0, 0, dp.channel, dp.adc);
+            histograms.bin_y(dp.channel, dp.adc);
             //wire_hits.push_back({dp.local_time, 0, dp.channel, dp.adc});
           } else {
             //strips
-            histograms.binstrips((dp.channel - nwires), dp.adc, 0, 0);
+            histograms.bin_x((dp.channel - nwires), dp.adc);
             //strip_hits.push_back({dp.local_time, 1, dp.channel, dp.adc});
           }
 

@@ -91,6 +91,10 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
   Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
+  if (!NMXSettings.fileprefix.empty())
+    XTRACE(INIT, INF, "Dump h5 data in path: %s",
+           NMXSettings.fileprefix.c_str());
+
   std::function<void()> inputFunc = [this]() { GdGemBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
@@ -167,9 +171,9 @@ void bin(Hists& hists, const Event &e)
 void bin(Hists& hists, const Hit &e)
 {
   if (e.plane_id == 0) {
-    hists.binstrips(e.strip, e.adc, 0, 0);
+    hists.bin_x(e.strip, e.adc);
   } else if (e.plane_id == 1) {
-    hists.binstrips(0, 0, e.strip, e.adc);
+    hists.bin_y(e.strip, e.adc);
   }
 }
 
@@ -188,19 +192,23 @@ void GdGemBase::processing_thread() {
     return;
   }
 
-  Producer eventprod(EFUSettings.KafkaBroker, "NMX_detector");
-  EV42Serializer flatbuffer(kafka_buffer_size, "nmx");
-  flatbuffer.setProducerCallback(
-      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
+  Producer event_producer(EFUSettings.KafkaBroker, "NMX_detector");
+  Producer monitor_producer(EFUSettings.KafkaBroker, "NMX_monitor");
 
-  Producer monitorprod(EFUSettings.KafkaBroker, "NMX_monitor");
-  TrackSerializer trackfb(256, nmx_opts.track_sample_minhits,
+  EV42Serializer ev42serializer(kafka_buffer_size, "nmx");
+  ev42serializer.setProducerCallback(
+      std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
+
+
+  TrackSerializer track_serializer(256, nmx_opts.track_sample_minhits,
                           nmx_opts.time_config.target_resolution_ns());
-  Hists hists(Hit::strip_max_val, Hit::adc_max_val);
-  HistSerializer histfb(hists.needed_buffer_size());
-  histfb.set_callback(
-      std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
+  track_serializer.set_callback(
+      std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
+  Hists hists(Hit::strip_max_val, Hit::adc_max_val);
+  HistSerializer hist_serializer(hists.needed_buffer_size());
+  hist_serializer.set_callback(
+      std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
   ClusterMatcher matcher(nmx_opts.matcher_max_delta_time);
@@ -212,7 +220,7 @@ void GdGemBase::processing_thread() {
   uint32_t pixelid;
 
   unsigned int data_index;
-  int sample_next_track{0};
+  bool sample_next_track {nmx_opts.send_tracks};
   while (1) {
     // mystats.fifo_free = input2proc_fifo.free();
     if (!input2proc_fifo.pop(data_index)) {
@@ -269,7 +277,7 @@ void GdGemBase::processing_thread() {
 
             /// \todo Should it be here or outside of event.valid()?
             if (sample_next_track) {
-              sample_next_track = trackfb.add_track(event);
+              sample_next_track = !track_serializer.add_track(event);
             }
 
             XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
@@ -287,7 +295,7 @@ void GdGemBase::processing_thread() {
 
                 XTRACE(PROCESS, DEB, "time: %d, pixelid %d", time, pixelid);
 
-                mystats.tx_bytes += flatbuffer.addEvent(time, pixelid);
+                mystats.tx_bytes += ev42serializer.addEvent(time, pixelid);
                 mystats.clusters_events++;
               }
             } else { // Does not meet criteria
@@ -307,43 +315,34 @@ void GdGemBase::processing_thread() {
       }
     }
 
-    // Checking for exit
-    if (report_timer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    // Flush on interval or exit
+    if ((not runThreads) || (report_timer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ)) {
+
+      /// \todo in case of exit, flush all clusters first
 
       sample_next_track = nmx_opts.send_tracks;
 
-      mystats.tx_bytes += flatbuffer.produce();
+      mystats.tx_bytes += ev42serializer.produce();
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
-      mystats.kafka_produce_fails = eventprod.stats.produce_fails;
-      mystats.kafka_ev_errors = eventprod.stats.ev_errors;
-      mystats.kafka_ev_others = eventprod.stats.ev_others;
-      mystats.kafka_dr_errors = eventprod.stats.dr_errors;
-      mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
-
-      char *txbuffer;
-      auto len = trackfb.serialize(&txbuffer);
-
-      if (len != 0) {
-
-        XTRACE(PROCESS, DEB, "Sending tracks with size %d", len);
-        monitorprod.produce(txbuffer, len);
-      }
+      mystats.kafka_produce_fails = event_producer.stats.produce_fails;
+      mystats.kafka_ev_errors = event_producer.stats.ev_errors;
+      mystats.kafka_ev_others = event_producer.stats.ev_others;
+      mystats.kafka_dr_errors = event_producer.stats.dr_errors;
+      mystats.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
 
       if (!hists.isEmpty()) {
         XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters ",
                hists.hit_count(), hists.cluster_count());
-        histfb.produce(hists);
+        hist_serializer.produce(hists);
         hists.clear();
       }
 
+      // checking for exit
       if (not runThreads) {
-
-        // TODO flush all clusters?
-
-        XTRACE(INPUT, ALW, "Stopping input thread.");
+        XTRACE(INPUT, ALW, "Stopping processing thread.");
         /// \todo this is a hack to force ~BuilderSRS() call
         builder_.reset();
         delete builder_.get(); /**< \todo see above */
@@ -365,15 +364,16 @@ void GdGemBase::init_builder() {
       nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap,
       nmx_opts.clusterer_y.min_cluster_size);
 
-if (nmx_opts.builder_type == "VMM3") {
+  if (nmx_opts.builder_type == "VMM3") {
     XTRACE(INIT, DEB, "Using BuilderVMM3");
     builder_ = std::make_shared<BuilderVMM3>(
         nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
         nmx_opts.clusterer_x.hit_adc_threshold,
         nmx_opts.clusterer_x.max_time_gap,
         nmx_opts.clusterer_y.hit_adc_threshold,
-        nmx_opts.clusterer_y.max_time_gap, nmx_opts.dump_directory,
-        nmx_opts.dump_csv, nmx_opts.dump_h5, nmx_opts.calfile);
+        nmx_opts.clusterer_y.max_time_gap,
+        NMXSettings.fileprefix,
+        nmx_opts.calfile);
   } else {
     XTRACE(INIT, ALW, "Unrecognized builder type in config");
   }

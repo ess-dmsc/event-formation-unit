@@ -26,7 +26,8 @@ struct DelayLineEvent {
   std::uint64_t Timestamp;
 };
 
-/// \brief Simple class
+/// \brief Class for setting up position calculation, passing pulses to the
+/// correct calculator and extracting valid events.
 class DelayLineEventFormation {
 public:
   /// \brief Constructor sets up the event formation based on the supplied
@@ -59,9 +60,14 @@ public:
 
   /// \brief Get the number of processed pulses, i.e. pulses from channels
   /// registered to an axis.
+  /// \note Does not guarantee that all the pulses (the return value) were used
+  /// in the creation of an event.
   auto getNrOfProcessedPulses() { return ProcessedDelayLinePulses; }
-  /// \brief Get the number of discarded pulses, i.e. pulses from channels not
+  
+  /// \brief Get the number of discarded pulses, i.e. pulses from channels NOT
   /// registered to an axis.
+  /// \note Does not guarantee that all the pulses (the return value) were used
+  /// in the creation of an event.
   auto getNrOfDiscardedPulses() { return DiscardedDelayLinePulses; }
 
 protected:

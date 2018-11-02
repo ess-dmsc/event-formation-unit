@@ -47,13 +47,11 @@ int main(int argc, char *argv[]) {
           printf("Sent %" PRIu64 " packets\n", totpackets);
           packets = 0;
           break;
-          // printf("Sent %" PRIu64 " packets, exiting...\n", packets);
-          // pcap.printstats();
-          // exit(0);
         }
       }
     }
-
+    if (!opts.loop)
+      pcap.printstats();
   } while (opts.loop);
   // pcap.printstats();
   printf("Sent %" PRIu64 " packets\n", totpackets);

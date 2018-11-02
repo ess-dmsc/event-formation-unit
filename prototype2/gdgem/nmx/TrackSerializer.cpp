@@ -20,16 +20,18 @@ TrackSerializer::TrackSerializer(size_t maxarraylength, size_t minhits, double t
   builder.Clear();
 }
 
-TrackSerializer::~TrackSerializer() {}
+void TrackSerializer::set_callback(ProducerCallback cb) {
+  producer_callback = cb;
+}
 
-int TrackSerializer::add_track(const Event &event) {
+bool TrackSerializer::add_track(const Event &event) {
   if ((event.x.entries.size() < minhits_) ||
       (event.y.entries.size() < minhits_)) {
-    return 1;
+    return false;
   }
 
   if ((event.x.entries.size() > maxlen) || (event.y.entries.size() > maxlen)) {
-    return 1;
+    return false;
   }
 
   time_offset = event.time_start();
@@ -51,13 +53,18 @@ int TrackSerializer::add_track(const Event &event) {
   xpos = event.x.utpc_center;
   ypos = event.y.utpc_center;
 
-  return 0;
+  if (producer_callback) {
+    auto buffer = serialize();
+    producer_callback(buffer);
+    return (0 != buffer.size);
+  }
+
+  return true;
 }
 
-int TrackSerializer::serialize(char **buffer) {
+Buffer<uint8_t> TrackSerializer::serialize() {
   if ((xtrack.size() == 0) || (ytrack.size() == 0)) {
-    *buffer = 0;
-    return 0;
+    return Buffer<uint8_t>();
   }
 
   auto xtrackvec = builder.CreateVector(xtrack);
@@ -67,10 +74,11 @@ int TrackSerializer::serialize(char **buffer) {
   auto msg =
       CreateMonitorMessage(builder, 0, DataField::GEMTrack, dataoff.Union());
   builder.Finish(msg);
-  *buffer = (char *) builder.GetBufferPointer();
   xtrack.clear();
   ytrack.clear();
-  auto buffersize = builder.GetSize();
+  Buffer<uint8_t> ret(builder.GetBufferPointer(), builder.GetSize());
+
   builder.Clear();
-  return buffersize;
+
+  return ret;
 }

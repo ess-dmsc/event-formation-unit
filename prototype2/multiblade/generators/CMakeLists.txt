@@ -10,13 +10,13 @@ find_package(TCLAP)
 if(TCLAP_FOUND)
   # Create an excecutable for the event-builder to process recorded data from a text-file.
   set(mbprocesstextfile_INC
-    clustering/EventBuilder.h
+    ../clustering/EventBuilder.h
     TextFile.h
     )
   set(mbprocesstextfile_SRC
     processtextfile.cpp
     TextFile.cpp
-    clustering/EventBuilder.cpp
+    ../clustering/EventBuilder.cpp
     )
 
   create_executable(mbprocesstextfile)
@@ -25,11 +25,11 @@ if(TCLAP_FOUND)
   # Not really usefull unless built with -gp
   set(mbprofiling_INC
     TextFile.h
-    clustering/EventBuilder.h
+    ../clustering/EventBuilder.h
     )
   set(mbprofiling_SRC profiling.cpp
     TextFile.cpp
-    clustering/EventBuilder.cpp
+    ../clustering/EventBuilder.cpp
     )
   create_executable(mbprofiling)
 else()

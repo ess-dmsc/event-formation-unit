@@ -13,7 +13,6 @@
 #include "PulseParameters.h"
 #include <cmath>
 #include <cstdint>
-#include <cstdint>
 #include <limits>
 #include <unordered_map>
 
