@@ -65,4 +65,4 @@ struct AdcSettings {
   ChannelRole ADC2Channel4 = {ChannelRole::NONE};
 };
 
-void SetCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings);
+void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings);

@@ -64,7 +64,7 @@ protected:
   SamplingRun *GetDataModule(ChannelID const Identifier);
   bool QueueUpDataModule(SamplingRun *Data);
 
-  std::map<ChannelID, std::unique_ptr<Queue>> DataModuleQueues;
+  std::map<ChannelID, std::unique_ptr<Queue>> DataModuleQueues{};
 
   /// \brief Used to keeps track of the global counter provided by the ADC
   /// hardware in order to figure out if a packet has been lost.
@@ -92,7 +92,7 @@ protected:
   std::shared_ptr<Producer> ProducerPtr{nullptr};
   std::shared_ptr<DelayLineProducer> DelayLineProducerPtr{nullptr};
   AdcSettings &ReadoutSettings;
-  BaseSettings GeneralSettings;
+  BaseSettings GeneralSettings{};
   const int MessageQueueSize = 100;
   std::shared_ptr<asio::io_service> Service;
   asio::io_service::work Worker;

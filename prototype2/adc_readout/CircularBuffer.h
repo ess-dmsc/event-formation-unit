@@ -41,10 +41,6 @@ public:
     for (int i = 0; i < Elements; i++) {
       EmptyQueue.enqueue(ElementPtr<DataType>(&DataBuffer[i]));
     }
-#ifndef NDEBUG
-    ProducerElemPtr = nullptr;
-    ConsumerElemPtr = nullptr;
-#endif
   }
   /// \brief Get empty element that can then be used to store data.
   /// \param[out] Element The pointer to the element.
@@ -53,9 +49,8 @@ public:
   bool tryGetEmpty(ElementPtr<DataType> &Element) {
     bool Success = EmptyQueue.try_dequeue(Element);
 #ifndef NDEBUG
-    if (Success and ProducerElemPtr != nullptr) {
-      assert(false);
-    } else {
+    if (Success) {
+      assert(ProducerElemPtr == nullptr);
       ProducerElemPtr = Element;
     }
 #endif
@@ -73,9 +68,8 @@ public:
   bool waitGetEmpty(ElementPtr<DataType> &Element, std::int64_t TimeoutUSecs) {
     bool Success = EmptyQueue.wait_dequeue_timed(Element, TimeoutUSecs);
 #ifndef NDEBUG
-    if (Success and ProducerElemPtr != nullptr) {
-      assert(false);
-    } else {
+    if (Success) {
+      assert(ProducerElemPtr == nullptr);
       ProducerElemPtr = Element;
     }
 #endif
@@ -94,9 +88,8 @@ public:
     bool Success =
         DataQueue.try_enqueue(std::forward<ElementPtr<DataType>>(Element));
 #ifndef NDEBUG
-    if (Success and ProducerElemPtr != TempPtr) {
-      assert(false);
-    } else {
+    if (Success) {
+      assert(ProducerElemPtr == TempPtr);
       ProducerElemPtr = nullptr;
     }
 #endif
@@ -111,9 +104,8 @@ public:
   bool tryGetData(ElementPtr<DataType> &Element) {
     bool Success = DataQueue.try_dequeue(Element);
 #ifndef NDEBUG
-    if (Success and ConsumerElemPtr != nullptr) {
-      assert(false);
-    } else {
+    if (Success) {
+      assert(ConsumerElemPtr == nullptr);
       ConsumerElemPtr = Element;
     }
 #endif
@@ -130,9 +122,8 @@ public:
   bool waitGetData(ElementPtr<DataType> &Element, std::int64_t TimeoutUSecs) {
     bool Success = DataQueue.wait_dequeue_timed(Element, TimeoutUSecs);
 #ifndef NDEBUG
-    if (Success and ConsumerElemPtr != nullptr) {
-      assert(false);
-    } else {
+    if (Success) {
+      assert(ConsumerElemPtr == nullptr);
       ConsumerElemPtr = Element;
     }
 #endif
@@ -151,9 +142,8 @@ public:
     bool Success =
         EmptyQueue.try_enqueue(std::forward<ElementPtr<DataType>>(Element));
 #ifndef NDEBUG
-    if (Success and ConsumerElemPtr != TempPtr) {
-      assert(false);
-    } else {
+    if (Success) {
+      assert(ConsumerElemPtr == TempPtr);
       ConsumerElemPtr = nullptr;
     }
 #endif
@@ -162,8 +152,8 @@ public:
   // End consumer
 private:
 #ifndef NDEBUG
-  DataType *ProducerElemPtr;
-  DataType *ConsumerElemPtr;
+  DataType *ProducerElemPtr{nullptr};
+  DataType *ConsumerElemPtr{nullptr};
 #endif
   std::unique_ptr<DataType[]> DataBuffer;
   Queue<DataType> DataQueue;
