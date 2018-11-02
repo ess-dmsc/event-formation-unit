@@ -12,6 +12,7 @@
 #include "UDPClient.h"
 #include <common/Log.h>
 #include <memory>
+#include <iostream>
 
 AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
                                AdcSettings &ReadoutSettings)
@@ -153,7 +154,12 @@ void AdcReadoutBase::inputThread() {
           this->packetFunction(Packet, Parser2);
         }));
   }
-  Service->run();
+  try {
+    Service->run();
+  } catch (std::out_of_range &E) {
+    std::cout << "inputThread(): Got out of range: " << E.what() << std::endl;
+    throw E;
+  }
 }
 
 void AdcReadoutBase::processingThread(Queue &DataModuleQueue) {
@@ -178,21 +184,26 @@ void AdcReadoutBase::processingThread(Queue &DataModuleQueue) {
 
   bool GotModule = false;
   DataModulePtr Data = nullptr;
-  const std::int64_t TimeoutUSecs = 1000000;
-  while (Detector::runThreads) {
-    GotModule = DataModuleQueue.waitGetData(Data, TimeoutUSecs);
-    if (GotModule) {
-      try {
-        for (auto &Processor : Processors) {
-          (*Processor).processData(*Data);
+  const std::int64_t TimeoutUSecs = 20000;
+  try {
+    while (Detector::runThreads) {
+      GotModule = DataModuleQueue.waitGetData(Data, TimeoutUSecs);
+      if (GotModule) {
+        try {
+          for (auto &Processor : Processors) {
+            (*Processor).processData(*Data);
+          }
+        } catch (ParserException &e) {
+          ++AdcStats.parser_errors;
         }
-      } catch (ParserException &e) {
-        ++AdcStats.parser_errors;
-      }
-      while (not DataModuleQueue.tryPutEmpty(std::move(Data)) and
-             Detector::runThreads) {
-        // Do nothing
+        while (not DataModuleQueue.tryPutEmpty(std::move(Data)) and
+               Detector::runThreads) {
+          // Do nothing
+        }
       }
     }
+  } catch (std::out_of_range &E) {
+    std::cout << "processingThread(): Got out of range: " << E.what() << std::endl;
+    throw E;
   }
 }

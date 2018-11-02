@@ -97,9 +97,9 @@ TEST_F(AdcReadoutTest, SingleDataPacket) {
   LoadPacketFile("test_packet_1.dat");
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
                        PacketSize);
-  std::this_thread::sleep_for(SleepTime);
+  std::this_thread::sleep_for(20ms);
   Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
+  std::this_thread::sleep_for(20ms);
   Readout.stopThreads();
   EXPECT_EQ(Readout.AdcStats.input_bytes_received, 1470);
   EXPECT_EQ(Readout.AdcStats.parser_packets_total, 1);
