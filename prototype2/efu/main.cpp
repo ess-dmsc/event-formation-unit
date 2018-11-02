@@ -17,22 +17,22 @@
 
 #define ONE_SECOND_US 1000000U
 
-std::string ConsoleFormatter(const LogMessage &Msg) {
+std::string ConsoleFormatter(const Log::LogMessage &Msg) {
   static const std::vector<std::string> SevToString{"EMG", "ALR", "CRI", "ERR", "WAR", "NOTE", "INF", "DEB"};
   std::string FileName;
   std::int64_t LineNr = -1;
-  for (auto &CField : Msg.additionalFields) {
+  for (auto &CField : Msg.AdditionalFields) {
     if (CField.first == "file") {
       FileName = CField.second.strVal;
     } else if (CField.first == "line") {
       LineNr = CField.second.intVal;
     }
   }
-  return fmt::format("{:5}{:21}{:5} - {}", SevToString.at(int(Msg.severity)), FileName, LineNr, Msg.message);
+  return fmt::format("{:5}{:21}{:5} - {}", SevToString.at(int(Msg.SeverityLevel)), FileName, LineNr, Msg.MessageString);
 }
 
 void EmptyGraylogMessageQueue() {
-  std::vector<LogHandler_P> GraylogHandlers(Log::GetHandlers());
+  std::vector<Log::LogHandler_P> GraylogHandlers(Log::GetHandlers());
   if (not GraylogHandlers.empty()) {
     int WaitLoops = 25;
     auto SleepTime = std::chrono::milliseconds(20);
@@ -41,7 +41,7 @@ void EmptyGraylogMessageQueue() {
       std::this_thread::sleep_for(SleepTime);
       ContinueLoop = false;
       for (auto &Ptr : GraylogHandlers) {
-        if (Ptr->MessagesQueued()) {
+        if (not Ptr->emptyQueue()) {
           ContinueLoop = true;
         }
       }
@@ -68,13 +68,13 @@ int main(int argc, char *argv[]) {
     // Set-up logging before we start doing important stuff
     Log::RemoveAllHandlers();
 
-    auto CI = new ConsoleInterface();
-    CI->SetMessageStringCreatorFunction(ConsoleFormatter);
+    auto CI = new Log::ConsoleInterface();
+    CI->setMessageStringCreatorFunction(ConsoleFormatter);
     Log::AddLogHandler(CI);
 
-    Log::SetMinimumSeverity(Severity(efu_args.getLogLevel()));
+    Log::SetMinimumSeverity(Log::Severity(efu_args.getLogLevel()));
     if (efu_args.getLogFileName().size() > 0) {
-      Log::AddLogHandler(new FileInterface(efu_args.getLogFileName()));
+      Log::AddLogHandler(new Log::FileInterface(efu_args.getLogFileName()));
     }
 
     loader.loadPlugin(efu_args.getDetectorName());
@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
     }
     GLConfig = efu_args.getGraylogSettings();
     if (not GLConfig.address.empty()) {
-      Log::AddLogHandler(new GraylogInterface(GLConfig.address, GLConfig.port));
+      Log::AddLogHandler(new Log::GraylogInterface(GLConfig.address, GLConfig.port));
     }
     efu_args.printSettings();
     DetectorSettings = efu_args.getBaseSettings();

@@ -36,6 +36,8 @@ struct RawTimeStamp {
     SecondsFrac = ntohl(SecondsFrac);
   }
 
+  bool operator==(RawTimeStamp const &Other) const;
+
   /// \brief Calculate the raw timestamp based on sample offset.
   /// Adds or subtracts the specified number of clock cycles (samples).
   /// Correctly wraps around the fractional seconds if so required to get the
