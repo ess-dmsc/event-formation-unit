@@ -16,10 +16,12 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-class SoNDeGeometry {
+namespace Sonde {
+
+class Geometry {
 public:
   /// \brief Create a SoNDe Geometry based on number of columns, grid
-  SoNDeGeometry() {}
+  Geometry() {}
 
   /// \brief returns the maximum available pixelid for this geometry
   int getmaxpixelid() { return essgeometry.max_pixel(); }
@@ -59,7 +61,7 @@ public:
       y = 7 - y;
     }
 
-    int pixelid = essgeometry.pixel2D(x,y);
+    int pixelid = essgeometry.pixel2D(x, y);
     XTRACE(PROCESS, DEB, "coordinates: x %d, y %d, pixel_id: %d", x, y,
            pixelid);
     return pixelid;
@@ -67,3 +69,5 @@ public:
 private:
   ESSGeometry essgeometry{8, 8, 1, 1}; /// 1x1 module has 8x8 pixels
 };
+
+}

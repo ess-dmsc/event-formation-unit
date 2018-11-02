@@ -88,9 +88,9 @@ void SONDEIDEABase::input_thread() {
 }
 
 void SONDEIDEABase::processing_thread() {
-  SoNDeGeometry geometry;
+  Sonde::Geometry geometry;
 
-  IDEASData ideasdata(&geometry, SoNDeSettings.fileprefix);
+  Sonde::IDEASData ideasdata(&geometry, SoNDeSettings.fileprefix);
   EV42Serializer flatbuffer(kafka_buffer_size, "SONDE");
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
   flatbuffer.setProducerCallback(
