@@ -12,6 +12,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 HitsQueue::HitsQueue(SRSTime Time, double maxTimeGap)
     : pTime(Time), pMaxTimeGap(maxTimeGap) {}
 
@@ -22,7 +24,7 @@ const HitContainer &HitsQueue::hits() const {
 /// \todo sort out Hit constr
 void HitsQueue::store(uint8_t plane, uint16_t strip, uint16_t adc,
                       double chipTime, double trigger_time) {
-  HitBuffer* b = &hitsOld;
+  HitBuffer *b = &hitsOld;
   if (chipTime < pTime.max_chip_time_in_window_ns()) {
     b = &hitsNew;
   }
@@ -34,7 +36,6 @@ void HitsQueue::store(uint8_t plane, uint16_t strip, uint16_t adc,
   e.strip = strip;
   e.time = chipTime;
 }
-
 
 void HitsQueue::sort_and_correct() {
   /// \todo What are the sizes of (number of elements) in hitsOld and hitsNew?
@@ -57,8 +58,7 @@ void HitsQueue::sort_and_correct() {
     hitsNew.buffer.clear();
   }
 
-
-  for (auto& h : hitsOut.buffer)
+  for (auto &h : hitsOut.buffer)
     h.time += hitsOut.trigger_time;
 }
 
@@ -114,4 +114,6 @@ void HitsQueue::correct_trigger_data() {
             });
 
   // TODO if al hits were transferred, flag edge as possibly invalid
+}
+
 }

@@ -8,6 +8,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 void Event::insert_hit(const Hit &e) {
   if (e.plane_id == 1) { /**< \todo deal with multiple panels */
     y.insert_hit(e);
@@ -16,8 +18,7 @@ void Event::insert_hit(const Hit &e) {
   }
 }
 
-void Event::merge(Cluster& cluster)
-{
+void Event::merge(Cluster &cluster) {
   if (cluster.plane_id == 1) { /**< \todo deal with multiple panels */
     y.merge(cluster);
   } else if (cluster.plane_id == 0) {
@@ -25,13 +26,11 @@ void Event::merge(Cluster& cluster)
   }
 }
 
-bool Event::empty() const
-{
+bool Event::empty() const {
   return x.entries.empty() && y.entries.empty();
 }
 
-double Event::time_end() const
-{
+double Event::time_end() const {
   if (x.entries.empty())
     return y.time_end;
   if (y.entries.empty())
@@ -39,8 +38,7 @@ double Event::time_end() const
   return std::max(x.time_end, y.time_end);
 }
 
-double Event::time_start() const
-{
+double Event::time_start() const {
   if (x.entries.empty())
     return y.time_start;
   if (y.entries.empty())
@@ -48,13 +46,11 @@ double Event::time_start() const
   return std::min(x.time_start, y.time_start);
 }
 
-double Event::time_span() const
-{
+double Event::time_span() const {
   return (time_end() - time_start());
 }
 
-double Event::time_overlap(const Cluster& other) const
-{
+double Event::time_overlap(const Cluster &other) const {
   auto latest_start = std::max(other.time_start, time_start());
   auto earliest_end = std::min(other.time_end, time_end());
   if (latest_start > earliest_end)
@@ -62,8 +58,7 @@ double Event::time_overlap(const Cluster& other) const
   return (earliest_end - latest_start);
 }
 
-bool Event::time_overlap_thresh(const Cluster& other, double thresh) const
-{
+bool Event::time_overlap_thresh(const Cluster &other, double thresh) const {
   auto ovr = time_overlap(other);
   return (((ovr / other.time_span()) + (ovr / time_span())) > thresh);
 }
@@ -84,18 +79,15 @@ void Event::analyze(bool weighted, int16_t max_timebins,
   }
 }
 
-bool Event::valid() const
-{
+bool Event::valid() const {
   return valid_;
 }
 
-bool Event::meets_lower_criterion(int16_t max_lu) const
-{
+bool Event::meets_lower_criterion(int16_t max_lu) const {
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }
 
-double Event::utpc_time() const
-{
+double Event::utpc_time() const {
   return utpc_time_;
 }
 
@@ -126,4 +118,6 @@ void Event::debug2() {
     }
     printf("\n");
   }
+}
+
 }

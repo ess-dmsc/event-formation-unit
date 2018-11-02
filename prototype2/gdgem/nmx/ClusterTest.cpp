@@ -6,6 +6,8 @@
 #include <test/TestBase.h>
 #include <unistd.h>
 
+using namespace Gem;
+
 class ClusterTest : public TestBase {
 protected:
   Hit e;

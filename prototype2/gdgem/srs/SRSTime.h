@@ -15,14 +15,16 @@
 
 /// \todo Split away chip timing class
 
-class SRSTime {
-  static constexpr double us_to_ns {1000};
-  static constexpr double internal_SRS_clock_MHz {40};
-  static constexpr double internal_SRS_clock_period_ns {25};
-  static constexpr double bc_range {4095};
-  static constexpr double tdc_range {255};
+namespace Gem {
 
-  public:
+class SRSTime {
+  static constexpr double us_to_ns{1000};
+  static constexpr double internal_SRS_clock_MHz{40};
+  static constexpr double internal_SRS_clock_period_ns{25};
+  static constexpr double bc_range{4095};
+  static constexpr double tdc_range{255};
+
+public:
   // setters  TODO reflect units
   void set_bc_clock(double bc_clock);
   void set_tac_slope(double tac_slope);
@@ -66,8 +68,8 @@ class SRSTime {
 private:
   double bc_clock_MHz_{20};              /// bc clock divisor
   double tac_slope_ns_{100};            /// tdc clock divisor
-  double trigger_resolution_ns_ {1.0}; /// resolution of trigger timestamp in ns
-  double target_resolution_ns_ {0.5}; /// target resolution for integer-valued timestamp
+  double trigger_resolution_ns_{1.0}; /// resolution of trigger timestamp in ns
+  double target_resolution_ns_{0.5}; /// target resolution for integer-valued timestamp
   uint16_t acquisition_window_{4095}; /// unitless (divided later by MHz)
 
   //precalculated
@@ -75,3 +77,5 @@ private:
   double tdc_factor_{1};
   double bc_factor_{1};
 };
+
+}

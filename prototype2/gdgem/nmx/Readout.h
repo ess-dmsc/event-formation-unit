@@ -36,6 +36,8 @@
 
 #include <common/DumpFile.h>
 
+namespace Gem {
+
 struct __attribute__ ((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "srs_hits"; }
@@ -68,13 +70,15 @@ struct __attribute__ ((packed)) Readout {
   }
 };
 
+}
+
 namespace hdf5 {
 
 namespace datatype {
 template<>
-class TypeTrait<Readout> {
+class TypeTrait<Gem::Readout> {
 public:
-  H5_COMPOUND_DEFINE_TYPE(Readout) {
+  H5_COMPOUND_DEFINE_TYPE(Gem::Readout) {
     H5_COMPOUND_INIT;
     /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(fec);
@@ -93,4 +97,8 @@ public:
 
 }
 
+namespace Gem {
+
 using ReadoutFile = DumpFile<Readout>;
+
+}

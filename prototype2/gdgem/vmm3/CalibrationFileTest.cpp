@@ -6,6 +6,8 @@
 #include <test/TestBase.h>
 #include <vector>
 
+using namespace Gem;
+
 class CalibrationFileTest : public TestBase {
 protected:
   // virtual void SetUp() {  }

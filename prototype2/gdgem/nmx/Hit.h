@@ -37,6 +37,8 @@
 #include <limits>
 #include <common/DumpFile.h>
 
+namespace Gem {
+
 struct __attribute__ ((packed)) Hit {
   /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "gdgem_hits"; }
@@ -57,13 +59,15 @@ struct __attribute__ ((packed)) Hit {
   static constexpr decltype(adc) adc_max_val{std::numeric_limits<decltype(adc)>::max()};
 };
 
+}
+
 namespace hdf5 {
 
 namespace datatype {
 template<>
-class TypeTrait<Hit> {
+class TypeTrait<Gem::Hit> {
 public:
-  H5_COMPOUND_DEFINE_TYPE(Hit) {
+  H5_COMPOUND_DEFINE_TYPE(Gem::Hit) {
     H5_COMPOUND_INIT;
     /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(time);
@@ -77,4 +81,8 @@ public:
 
 }
 
+namespace Gem {
+
 using HitFile = DumpFile<Hit>;
+
+}

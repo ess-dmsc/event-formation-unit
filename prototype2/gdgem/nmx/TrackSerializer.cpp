@@ -14,6 +14,8 @@
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
+namespace Gem {
+
 TrackSerializer::TrackSerializer(size_t maxarraylength, size_t minhits, double target_res)
     : builder(maxarraylength * EV_SIZE * 2 + BUF_STATIC_SIZE + 256),
       maxlen(maxarraylength), minhits_(minhits), target_resolution_(target_res) {
@@ -81,4 +83,6 @@ Buffer<uint8_t> TrackSerializer::serialize() {
   builder.Clear();
 
   return ret;
+}
+
 }

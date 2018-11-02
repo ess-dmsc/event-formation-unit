@@ -10,6 +10,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 void Cluster::insert_hit(const Hit &e) {
   if (entries.empty()) {
     plane_id = e.plane_id;
@@ -33,8 +35,7 @@ void Cluster::insert_hit(const Hit &e) {
   strip_end = std::max(strip_end, e.strip);
 }
 
-bool Cluster::empty() const
-{
+bool Cluster::empty() const {
   return entries.empty();
 }
 
@@ -65,9 +66,9 @@ void Cluster::analyze(bool weighted, uint16_t max_timebins,
   }
 
   std::sort(entries.begin(), entries.end(),
-      [](const Hit &c1, const Hit &c2) {
-    return c1.time < c2.time;
-  });
+            [](const Hit &c1, const Hit &c2) {
+              return c1.time < c2.time;
+            });
 
   double center_sum{0};
   double center_count{0};
@@ -125,8 +126,8 @@ void Cluster::merge(Cluster &other) {
     return;
   }
 
-  entries.reserve( entries.size() + other.entries.size() ); // preallocate memory
-  entries.insert( entries.end(), other.entries.begin(), other.entries.end() );
+  entries.reserve(entries.size() + other.entries.size()); // preallocate memory
+  entries.insert(entries.end(), other.entries.begin(), other.entries.end());
 
   adc_sum += other.adc_sum;
   strip_mass += other.strip_mass;
@@ -171,4 +172,6 @@ std::string Cluster::debug() const {
   //  for (const auto& e : entries)
   //    ss << e.debug() << "\n";
   return ss.str();
+}
+
 }

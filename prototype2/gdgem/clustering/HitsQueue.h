@@ -10,11 +10,12 @@
 #include <gdgem/clustering/HitContainer.h>
 #include <gdgem/srs/SRSTime.h>
 
+namespace Gem {
+
 class HitsQueue {
 private:
-  struct HitBuffer
-  {
-    double trigger_time {0};
+  struct HitBuffer {
+    double trigger_time{0};
     HitContainer buffer;
   };
 
@@ -27,7 +28,7 @@ public:
   void sort_and_correct();
   void subsequent_trigger(bool);
 
-  const HitContainer& hits() const;
+  const HitContainer &hits() const;
 
 private:
   // tripple buffer
@@ -39,8 +40,10 @@ private:
   HitBuffer hitsOut;
 
   SRSTime pTime;
-  double pMaxTimeGap {200};
+  double pMaxTimeGap{200};
   bool subsequent_trigger_{false};
 
   void correct_trigger_data();
 };
+
+}
