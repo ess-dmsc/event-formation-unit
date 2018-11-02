@@ -13,6 +13,7 @@
 
 /// \brief ADC readout (and processing) specific settings.
 struct AdcSettings {
+  AdcSettings() = default;
   bool SerializeSamples{false};
   bool PeakDetection{false};
   bool DelayLineDetector{false};

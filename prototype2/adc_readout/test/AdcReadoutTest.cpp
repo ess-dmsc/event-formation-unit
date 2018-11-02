@@ -92,19 +92,24 @@ TEST_F(AdcReadoutTest, SingleIdlePacket) {
 }
 
 TEST_F(AdcReadoutTest, SingleDataPacket) {
-  AdcReadoutStandIn Readout(Settings, ReadoutSettings);
-  Readout.startThreads();
-  LoadPacketFile("test_packet_1.dat");
-  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
-                       PacketSize);
-  std::this_thread::sleep_for(20ms);
-  Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(20ms);
-  Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 1470);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_total, 1);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_data, 1);
-  EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
+  try {
+    AdcReadoutStandIn Readout(Settings, ReadoutSettings);
+    Readout.startThreads();
+    LoadPacketFile("test_packet_1.dat");
+    TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+                         PacketSize);
+    std::this_thread::sleep_for(20ms);
+    Server.startPacketTransmission(1, 100);
+    std::this_thread::sleep_for(20ms);
+    Readout.stopThreads();
+    EXPECT_EQ(Readout.AdcStats.input_bytes_received, 1470);
+    EXPECT_EQ(Readout.AdcStats.parser_packets_total, 1);
+    EXPECT_EQ(Readout.AdcStats.parser_packets_data, 1);
+    EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
+  } catch (std::out_of_range &E) {
+    std::cout << "SingleDataPacket(): Got exception, what: " << E.what() << std::endl;
+    throw E;
+  }
 }
 
 TEST_F(AdcReadoutTest, LazyThreadLaunching) {
