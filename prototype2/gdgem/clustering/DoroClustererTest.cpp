@@ -109,7 +109,6 @@ TEST_F(DoroClustererTest, Run16_Long) {
   EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 5837); // down from 12467, ...
 }
 
-
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

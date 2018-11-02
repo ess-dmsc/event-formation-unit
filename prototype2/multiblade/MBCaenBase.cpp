@@ -246,9 +246,9 @@ void CAENBase::processing_thread() {
           /// \todo do not bin 0-channels for the complementary space
           /// \todo unfold channels among digitizers
           if (dp.channel >= 32) {
-            histograms.binstrips(dp.channel - 32, dp.adc, 0, 0);
+            histograms.bin_x(dp.channel - 32, dp.adc);
           } else {
-            histograms.binstrips(0, 0, dp.channel, dp.adc);
+            histograms.bin_y(dp.channel, dp.adc);
           }
 
           if (builder[cassette].addDataPoint(dp.channel, dp.adc, dp.local_time)) {

@@ -13,8 +13,8 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 		SRSMappings geometry_interpreter, std::shared_ptr<AbstractClusterer> x,
 		std::shared_ptr<AbstractClusterer> y, uint16_t adc_threshold_x,
 		double max_time_gap_x, uint16_t adc_threshold_y, double max_time_gap_y,
-		std::string dump_dir, bool dump_csv, bool dump_h5, std::shared_ptr<CalibrationFile> calfile) :
-		AbstractBuilder(x, y, dump_dir, dump_csv, dump_h5), parser_(1500), time_intepreter_(
+		std::string dump_dir, std::shared_ptr<CalibrationFile> calfile) :
+		AbstractBuilder(x, y), parser_(1500), time_intepreter_(
 				time_intepreter), geometry_interpreter_(geometry_interpreter), sorter_x(
 				time_intepreter_, geometry_interpreter_, adc_threshold_x,
 				max_time_gap_x), sorter_y(time_intepreter_,
@@ -27,14 +27,8 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 	sorter_x.clusterer = clusterer_x;
 	sorter_y.clusterer = clusterer_y;
 
-	if (dump_csv_) {
-		vmmsave->tofile(
-				"# udp_timestamp, frame_counter, fec_timestamp_ns, offset, fecid, vmmid, channel, "
-						"bcid, tdc, adc, overthreshold, chiptime_ns\n");
-	}
-
-	if (dump_h5_) {
-		readout_file_ = ReadoutFile::create(dump_dir + "gdgem_vmm3_readouts_" + timeString(), 100);
+	if (!dump_dir.empty()) {
+		readout_file_ = ReadoutFile::create(dump_dir + "gdgem_readouts_" + timeString(), 1000);
 	}
 }
 
@@ -51,8 +45,9 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
   XTRACE(PROCESS, DEB, "HITS after parse: %d", parser_.stats.hits);
 
 
-	uint32_t udp_timestamp_ns = parser_.srsHeader.udpTimeStamp
-			* time_intepreter_.internal_clock_period_ns();
+//	uint32_t udp_timestamp_ns = parser_.srsHeader.udpTimeStamp
+//			* time_intepreter_.internal_clock_period_ns();
+
 	//field fec id starts at 1
 	readout.fec = parser_.parserData.fecId; 
 	for (unsigned int i = 0; i < parser_.stats.hits; i++) {
@@ -92,18 +87,10 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 						readout.fec, readout.chip_id);
 			}
 
-			if (dump_h5_) {
+			if (readout_file_) {
 				readout_file_->push(readout);
 			}
 
-			if (dump_csv_) {
-				uint64_t fec_time_ns = d.fecTimeStamp * time_intepreter_.internal_clock_period_ns();
-				vmmsave->tofile(" %u, %u, %llu, %u, %u, %u, %u, %u, %u, %u, %u, %f\n",
-						udp_timestamp_ns, parser_.srsHeader.frameCounter,
-						fec_time_ns, d.triggerOffset,readout.fec, readout.chip_id,
-						readout.channel, readout.bcid, readout.tdc, readout.adc,
-						readout.over_threshold, readout.chiptime);
-			}
 		} else {
 			XTRACE(PROCESS, DEB, "No data marker in hit (increment counter?)");
 		}

@@ -17,6 +17,7 @@
 struct NMXSettings {
   std::string ConfigFile;
   std::string CalibrationFile;
+  std::string fileprefix{""};
 };
 
 using namespace memory_sequential_consistent; // Lock free fifo

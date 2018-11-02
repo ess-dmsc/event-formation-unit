@@ -10,7 +10,6 @@
 #pragma once
 
 #include <gdgem/clustering/AbstractClusterer.h>
-#include <common/DataSave.h>
 #include <memory>
 
 class AbstractBuilder {
@@ -35,11 +34,10 @@ public:
     uint32_t good_frames{0}; /// added in ParserVMM3
   };
 
-  AbstractBuilder(std::string dump_dir, bool dump_csv, bool dump_h5);
+  AbstractBuilder() {}
 
   AbstractBuilder(std::shared_ptr<AbstractClusterer> x,
-                  std::shared_ptr<AbstractClusterer> y,
-                  std::string dump_dir, bool dump_csv, bool dump_h5);
+                  std::shared_ptr<AbstractClusterer> y);
 
 
   virtual ~AbstractBuilder() {}
@@ -49,11 +47,4 @@ public:
 
   std::shared_ptr<AbstractClusterer> clusterer_y;
   std::shared_ptr<AbstractClusterer> clusterer_x;
-
-protected:
-  bool dump_csv_{false};
-  bool dump_h5_{false};
-
-  // CSV
-  std::shared_ptr<DataSave> vmmsave;
 };

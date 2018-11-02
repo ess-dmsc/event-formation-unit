@@ -67,7 +67,7 @@ bool EfuMaximum::ingest(const Hit &hit) {
     if (raw1)
       raw1->addEntry(1, mappings.wire(hit.bus, hit.channel), hit.total_time, adc);
     if (hists)
-      hists->binstrips(mappings.wire(hit.bus, hit.channel), adc, 0, 0);
+      hists->bin_x(mappings.wire(hit.bus, hit.channel), adc);
     return true;
   } else if (mappings.isGrid(hit.bus, hit.channel)) {
     if (adc >= GridAdcMax) {
@@ -79,7 +79,7 @@ bool EfuMaximum::ingest(const Hit &hit) {
     if (raw1)
       raw1->addEntry(2, mappings.grid(hit.bus, hit.channel), hit.total_time, adc);
     if (hists)
-      hists->binstrips(0, 0, mappings.grid(hit.bus, hit.channel), adc);
+      hists->bin_y(mappings.grid(hit.bus, hit.channel), adc);
     return true;
   }
   return false;

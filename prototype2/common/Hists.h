@@ -33,7 +33,8 @@ public:
   /// \brief clears histograms
   void clear();
 
-  void binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16_t yadc);
+  void bin_x(uint16_t xstrip, uint16_t xadc);
+  void bin_y(uint16_t xstrip, uint16_t xadc);
   void bincluster(uint32_t sum);
 
   bool isEmpty() const;

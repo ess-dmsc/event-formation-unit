@@ -90,8 +90,4 @@ struct NMXConfig {
   ESSGeometry geometry;
 
   std::string debug() const;
-
-  bool dump_csv{false};
-  bool dump_h5{false};
-  std::string dump_directory{};
 };
