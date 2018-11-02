@@ -91,7 +91,7 @@ TEST_F(AdcReadoutTest, SingleIdlePacket) {
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
 }
 
-TEST_F(AdcReadoutTest, SingleDataPacket) {
+TEST_F(AdcReadoutTest, DISABLED_SingleDataPacket) {
   try {
     AdcReadoutStandIn Readout(Settings, ReadoutSettings);
     Readout.startThreads();
