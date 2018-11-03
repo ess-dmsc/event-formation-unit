@@ -15,7 +15,7 @@
 #include <iostream>
 
 AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
-                               AdcSettings &ReadoutSettings)
+                               AdcSettings const &ReadoutSettings)
     : Detector("AdcReadout", Settings), ReadoutSettings(ReadoutSettings),
       GeneralSettings(Settings), Service(std::make_shared<asio::io_service>()),
       Worker(*Service.get()) {
