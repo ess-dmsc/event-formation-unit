@@ -22,15 +22,17 @@ public:
   /// \brief adds hit to cluster, accumulates mass and recalculates bounds
   ///        no validation is enforced, duplicates possible
   ///        no particular time or spatial ordering is expected
-  ///        plane must match, else setting cluster's plane to -1
+  ///        hits should have non 0-weight if center of mass is to be meaningful
+  ///        invalidates plane if planes don't match, but still adds it
   /// \param hit to be added
   void insert_hit(const Hit &hit);
 
   /// \brief merges another cluster into this one
   ///        moves the hits from the other cluster, rendering it empty
-  ///        invalidates plane if planes don't match
   ///        recalculates bounds and aggregates sums
+  ///        invalidates plane if planes don't match, but still merges
   /// \param other cluster to be merged
+  /// \post other cluster is cleared
   void merge(Cluster &other);
 
   /// \brief clears hits and resets calculated values
@@ -42,7 +44,7 @@ public:
   /// \returns true if cluster contains hits and all are on the same plane
   bool valid() const;
 
-  /// \returns returns plane of all hits in cluster, -1 if not all the same
+  /// \returns returns plane of all hits in cluster, -1 if not all on same plane
   int16_t plane() const;
 
   /// \returns number of hits in cluster
@@ -68,11 +70,13 @@ public:
   /// \returns pre-calculated sum of each hit's weight*coord
   double coord_mass() const;
   /// \returns center of mass in the coordinate dimension
+  ///          can be NaN if weight sum is zero
   double coord_center() const;
 
   /// \returns pre-calculated sum of each hit's weight*time
   double time_mass() const;
   /// \returns center of mass in the time dimension
+  ///          can be NaN if weight sum is zero
   double time_center() const;
 
   /// \brief calculates the overlapping time span of two clusters
@@ -80,8 +84,9 @@ public:
   /// \returns overlapping time span inclusive of end points
   uint64_t time_overlap(const Cluster &other) const;
 
-  /// \returns string describing cluster bounds and weights (but not hits)
-  std::string debug() const;
+  /// \returns string describing cluster bounds and weights
+  /// \param verbose also print hits
+  std::string debug(bool verbose = false) const;
 
 private:
   int16_t plane_{-1}; ///< plane identity of cluster, -1 for invalid

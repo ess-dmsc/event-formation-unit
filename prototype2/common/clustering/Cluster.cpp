@@ -60,6 +60,7 @@ void Cluster::merge(Cluster &other) {
   time_end_ = std::max(time_end_, other.time_end_);
   coord_start_ = std::min(coord_start_, other.coord_start_);
   coord_end_ = std::max(coord_end_, other.coord_end_);
+  other.clear();
 }
 
 void Cluster::clear() {
@@ -147,10 +148,15 @@ uint64_t Cluster::time_overlap(const Cluster &other) const {
   return (earliest_end - latest_start) + uint16_t(1);
 }
 
-std::string Cluster::debug() const {
-  return fmt::format("plane={} time=({},{}) space=({},{}) weight={} entries[{}]",
-                     plane_, time_start_, time_end_, coord_start_, coord_end_, weight_sum_,
-                     hits.size());
-  //  for (const auto& e : entries)
-  //    ss << e.debug() << "\n";
+std::string Cluster::debug(bool verbose) const {
+  if (!verbose) {
+    return fmt::format("plane={} time=({},{}) space=({},{}) weight={} entries[{}]",
+                       plane_, time_start_, time_end_, coord_start_, coord_end_, weight_sum_,
+                       hits.size());
+  }
+  auto ret = debug(false) + "\n";
+  for (const auto &h : hits) {
+    ret += " " + h.debug() + "\n";
+  }
+  return ret;
 }
