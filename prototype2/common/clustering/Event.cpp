@@ -8,8 +8,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-namespace Multiblade {
-
 void Event::insert_hit(const Hit &e) {
   if (e.plane == 1) { /**< \todo deal with multiple panels */
     y.insert_hit(e);
@@ -68,6 +66,4 @@ std::string Event::debug() const {
   ss << "  X:\n" << x.debug();
   ss << "  Y:\n" << y.debug();
   return ss.str();
-}
-
 }

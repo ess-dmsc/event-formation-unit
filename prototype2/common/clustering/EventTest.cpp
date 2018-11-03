@@ -9,7 +9,7 @@
 class EventTest : public TestBase {
 protected:
   Hit e;
-  Multiblade::Event event;
+  Event event;
   virtual void SetUp() {  }
   virtual void TearDown() {  }
 };

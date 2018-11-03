@@ -4,6 +4,9 @@
 /// \file
 ///
 /// \brief Cluster: container of hits, aware of its bounds and weight
+///         hits can be added, but not removed coordinates and timestamps
+///         are treated as having an uncertainty of 1 when evaluating dimensions
+///
 ///
 //===----------------------------------------------------------------------===//
 
@@ -16,50 +19,81 @@ protected:
   std::vector<Hit> hits;
 
 public:
-  /// \brief adds hit to event's plane
-  /// \param hit to be added, need not be in any particular order
+  /// \brief adds hit to cluster, accumulates mass and recalculates bounds
+  ///        no validation is enforced, duplicates possible
+  ///        no particular time or spatial ordering is expected
+  ///        plane must match, else setting cluster's plane to -1
+  /// \param hit to be added
   void insert_hit(const Hit &hit);
 
+  /// \brief merges another cluster into this one
+  ///        moves the hits from the other cluster, rendering it empty
+  ///        invalidates plane if planes don't match
+  ///        recalculates bounds and aggregates sums
+  /// \param other cluster to be merged
+  void merge(Cluster &other);
+
+  /// \brief clears hits and resets calculated values
+  void clear();
+
+  /// \returns true if cluster contains no hits
   bool empty() const;
+
+  /// \returns true if cluster contains hits and all are on the same plane
   bool valid() const;
+
+  /// \returns returns plane of all hits in cluster, -1 if not all the same
   int16_t plane() const;
+
+  /// \returns number of hits in cluster
   size_t hit_count() const;
 
-  /// calculated as hits are added
+  /// \returns lowest coordinate, undefined in case of empty cluster
   uint16_t coord_start() const;
+  /// \returns highest coordinate, undefined in case of empty cluster
   uint16_t coord_end() const;
+  /// \returns coordinate span, 0 in case of empty cluster
   uint16_t coord_span() const;
 
+  /// \returns earliest timestamp, undefined in case of empty cluster
   uint64_t time_start() const;
+  /// \returns latest timestamp, undefined in case of empty cluster
   uint64_t time_end() const;
+  /// \returns time span, 0 in case of empty cluster
   uint64_t time_span() const;
 
+  /// \returns pre-calculated sum of each hit's weight
   double weight_sum() const;
 
+  /// \returns pre-calculated sum of each hit's weight*coord
   double coord_mass() const;
+  /// \returns center of mass in the coordinate dimension
   double coord_center() const;
 
+  /// \returns pre-calculated sum of each hit's weight*time
   double time_mass() const;
+  /// \returns center of mass in the time dimension
   double time_center() const;
 
-  void merge(Cluster &other);
-  double time_overlap(const Cluster &other) const;
-  bool time_touch(const Cluster &other) const;
+  /// \brief calculates the overlapping time span of two clusters
+  /// \param other cluster to be compared
+  /// \returns overlapping time span inclusive of end points
+  uint64_t time_overlap(const Cluster &other) const;
 
-  /// \brief prints values for debug purposes
+  /// \returns string describing cluster bounds and weights (but not hits)
   std::string debug() const;
 
 private:
-  int16_t plane_{-1};
+  int16_t plane_{-1}; ///< plane identity of cluster, -1 for invalid
 
-  uint16_t coord_start_{0};
-  uint16_t coord_end_{0};
+  uint16_t coord_start_;
+  uint16_t coord_end_;
 
-  uint64_t time_start_{0};
-  uint64_t time_end_{0};
+  uint64_t time_start_;
+  uint64_t time_end_;
 
   double weight_sum_{0.0};
-  double coord_mass_{0.0};   /// sum of coord*weight
-  double time_mass_{0.0};   /// sum of time*weight
+  double coord_mass_{0.0};   ///< sum of coord*weight
+  double time_mass_{0.0};   ///< sum of time*weight
 
 };

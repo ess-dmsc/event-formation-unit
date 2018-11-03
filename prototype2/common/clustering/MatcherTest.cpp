@@ -10,8 +10,6 @@
 
 #define UNUSED __attribute__((unused))
 
-using namespace Multiblade;
-
 class ClusterMatcherTest : public TestBase {
 protected:
   uint16_t pADCThreshold = 0;

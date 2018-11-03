@@ -12,8 +12,6 @@
 #include <memory>
 #include <deque>
 
-namespace Multiblade {
-
 class Matcher {
 public:
   explicit Matcher(uint64_t maxDeltaTime);
@@ -41,5 +39,3 @@ private:
   uint64_t latest_x{0};
   uint64_t latest_y{0};
 };
-
-}

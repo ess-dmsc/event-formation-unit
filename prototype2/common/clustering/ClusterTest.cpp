@@ -15,68 +15,56 @@ protected:
 };
 
 TEST_F(ClusterTest, Insert) {
-  Hit e;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.hit_count(), 1);
-  e.coordinate = 2;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.hit_count(), 2);
-  e.coordinate = 3;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.hit_count(), 3);
 }
 
-
 TEST_F(ClusterTest, AdcSum) {
-  cluster.insert_hit(e);
+  cluster.insert_hit({0,0,0,0});
   EXPECT_EQ(cluster.weight_sum(), 0);
-  e.weight = 2;
-  cluster.insert_hit(e);
+  cluster.insert_hit({0,0,0,2});
   EXPECT_EQ(cluster.weight_sum(), 2);
-  e.weight = 40;
-  cluster.insert_hit(e);
+  cluster.insert_hit({0,0,0,40});
   EXPECT_EQ(cluster.weight_sum(), 42);
 }
 
 TEST_F(ClusterTest, TimeSpan) {
   EXPECT_EQ(cluster.time_span(), 0);
 
-  e.time = 10;
-  cluster.insert_hit(e);
+  cluster.insert_hit({10,0,0,0});
   EXPECT_EQ(cluster.time_start(), 10);
   EXPECT_EQ(cluster.time_end(), 10);
-  EXPECT_EQ(cluster.time_span(), 0);
+  EXPECT_EQ(cluster.time_span(), 1);
 
-  e.time = 20;
-  cluster.insert_hit(e);
+  cluster.insert_hit({20,0,0,0});
   EXPECT_EQ(cluster.time_start(), 10);
   EXPECT_EQ(cluster.time_end(), 20);
-  EXPECT_EQ(cluster.time_span(), 10);
+  EXPECT_EQ(cluster.time_span(), 11);
 
-  e.time = 5;
-  cluster.insert_hit(e);
+  cluster.insert_hit({5,0,0,0});
   EXPECT_EQ(cluster.time_start(), 5);
   EXPECT_EQ(cluster.time_end(), 20);
-  EXPECT_EQ(cluster.time_span(), 15);
+  EXPECT_EQ(cluster.time_span(), 16);
 }
 
 TEST_F(ClusterTest, StripSpan) {
   EXPECT_EQ(cluster.coord_span(), 0);
 
-  e.coordinate = 0;
-  cluster.insert_hit(e);
+  cluster.insert_hit({0,0,0,0});
   EXPECT_EQ(cluster.coord_start(), 0);
   EXPECT_EQ(cluster.coord_end(), 0);
   EXPECT_EQ(cluster.coord_span(), 1);
 
-  e.coordinate = 10;
-  cluster.insert_hit(e);
+  cluster.insert_hit({0,0,10,0});
   EXPECT_EQ(cluster.coord_start(), 0);
   EXPECT_EQ(cluster.coord_end(), 10);
   EXPECT_EQ(cluster.coord_span(), 11);
 
-  e.coordinate = 41;
-  cluster.insert_hit(e);
+  cluster.insert_hit({0,0,41,0});
   EXPECT_EQ(cluster.coord_start(), 0);
   EXPECT_EQ(cluster.coord_end(), 41);
   EXPECT_EQ(cluster.coord_span(), 42);
@@ -87,15 +75,11 @@ TEST_F(ClusterTest, TimeMass) {
   EXPECT_EQ(cluster.time_mass(), 0);
   EXPECT_TRUE(std::isnan(cluster.time_center()));
 
-  e.weight = 2;
-  e.time = 10;
-  cluster.insert_hit(e);
+  cluster.insert_hit({10,0,0,2});
   EXPECT_EQ(cluster.time_mass(), 20);
   EXPECT_EQ(cluster.time_center(), 10);
 
-  e.weight = 8;
-  e.time = 0;
-  cluster.insert_hit(e);
+  cluster.insert_hit({0,0,0,8});
   EXPECT_EQ(cluster.time_mass(), 20);
   EXPECT_EQ(cluster.time_center(), 2);
 }
@@ -104,63 +88,60 @@ TEST_F(ClusterTest, TimeStrips) {
   EXPECT_EQ(cluster.coord_mass(), 0);
   EXPECT_TRUE(std::isnan(cluster.coord_center()));
 
-  e.weight = 2;
-  e.coordinate = 10;
-  cluster.insert_hit(e);
+  cluster.insert_hit({0,0,10,2});
   EXPECT_EQ(cluster.coord_mass(), 20);
   EXPECT_EQ(cluster.coord_center(), 10);
 
-  e.weight = 8;
-  e.coordinate = 0;
-  cluster.insert_hit(e);
+  cluster.insert_hit({0,0,0,8});
   EXPECT_EQ(cluster.coord_mass(), 20);
   EXPECT_EQ(cluster.coord_center(), 2);
 }
 
-TEST_F(ClusterTest, TimeNoOverlap) {
+TEST_F(ClusterTest, TimeOverlapNoOverlap) {
   Cluster cluster2;
   EXPECT_EQ(cluster.time_overlap(cluster2), 0);
+  EXPECT_EQ(cluster2.time_overlap(cluster), 0);
 
-  // this is degenerate case
-  e.time = 3;
-  cluster2.insert_hit(e);
-  e.time = 6;
-  cluster.insert_hit(e);
-  e.time = 0;
-  cluster.insert_hit(e);
+  cluster.insert_hit({0, 0, 0, 0});
+  cluster.insert_hit({5, 0, 0, 0});
+  cluster2.insert_hit({6,0,0,0});
+  cluster2.insert_hit({12,0,0,0});
   EXPECT_EQ(cluster.time_overlap(cluster2), 0);
-  EXPECT_TRUE(cluster.time_touch(cluster2));
+  EXPECT_EQ(cluster2.time_overlap(cluster), 0);
+}
 
-  // these are adjacent
-  cluster2 = Cluster();
-  e.time = 6;
-  cluster2.insert_hit(e);
-  e.time = 12;
-  cluster2.insert_hit(e);
-  EXPECT_EQ(cluster.time_overlap(cluster2), 0);
-  EXPECT_TRUE(cluster.time_touch(cluster2));
+TEST_F(ClusterTest, TimeOverlapInternalPoint) {
+  Cluster cluster2;
+  cluster2.insert_hit({3, 0, 0, 0});
+  cluster.insert_hit({0, 0, 0, 0});
+  cluster.insert_hit({6, 0, 0, 0});
+  EXPECT_EQ(cluster.time_overlap(cluster2), 1);
+}
+
+TEST_F(ClusterTest, TimeOverlapTouchEdge) {
+  Cluster cluster2;
+  cluster.insert_hit({0, 0, 0, 0});
+  cluster.insert_hit({6, 0, 0, 0});
+  cluster2.insert_hit({6,0,0,0});
+  cluster2.insert_hit({12,0,0,0});
+  EXPECT_EQ(cluster.time_overlap(cluster2), 1);
 }
 
 TEST_F(ClusterTest, Overlap) {
   Cluster cluster2;
 
-  e.time = 0;
-  cluster.insert_hit(e);
-  e.time = 7;
-  cluster.insert_hit(e);
+  cluster.insert_hit({0,0,0,0});
+  cluster.insert_hit({7,0,0,0});
   EXPECT_EQ(cluster.time_overlap(cluster2), 0);
 
-  e.time = 12;
-  cluster2.insert_hit(e);
+  cluster2.insert_hit({12,0,0,0});
   EXPECT_EQ(cluster.time_overlap(cluster2), 0);
 
-  e.time = 6;
-  cluster2.insert_hit(e);
-  EXPECT_EQ(cluster.time_overlap(cluster2), 1);
-
-  e.time = 5;
-  cluster2.insert_hit(e);
+  cluster2.insert_hit({6,0,0,0});
   EXPECT_EQ(cluster.time_overlap(cluster2), 2);
+
+  cluster2.insert_hit({5,0,0,0});
+  EXPECT_EQ(cluster.time_overlap(cluster2), 3);
 }
 
 TEST_F(ClusterTest, MergeEmpty) {
@@ -190,28 +171,19 @@ TEST_F(ClusterTest, MergeToEmpty) {
 
 
 TEST_F(ClusterTest, Merge) {
-  e.weight = 1;
-
-  e.coordinate = 5;
-  e.time = 0;
-  cluster.insert_hit(e);
-  e.time = 7;
-  cluster.insert_hit(e);
+  cluster.insert_hit({0,0,5,1});
+  cluster.insert_hit({7,0,5,1});
 
   Cluster cluster2;
-  e.coordinate = 15;
-  e.time = 12;
-  cluster2.insert_hit(e);
-  e.time = 6;
-  cluster2.insert_hit(e);
-  e.time = 5;
-  cluster2.insert_hit(e);
+  cluster2.insert_hit({12,0,15,1});
+  cluster2.insert_hit({6,0,15,1});
+  cluster2.insert_hit({5,0,15,1});
 
   /// \todo old cluster stats should be reset
   cluster.merge(cluster2);
 
   EXPECT_EQ(cluster.hit_count(), 5);
-  EXPECT_EQ(cluster.time_span(), 12);
+  EXPECT_EQ(cluster.time_span(), 13);
   EXPECT_EQ(cluster.coord_span(), 11);
   EXPECT_EQ(cluster.weight_sum(), 5);
 }

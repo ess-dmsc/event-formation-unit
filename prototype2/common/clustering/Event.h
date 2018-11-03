@@ -14,8 +14,6 @@
 #include <list>
 #include <string>
 
-namespace Multiblade {
-
 class Event {
 public:
   Cluster x, y; /// tracks in x and y planes
@@ -37,5 +35,3 @@ public:
   /// \brief prints values for debug purposes
   std::string debug() const;
 };
-
-}

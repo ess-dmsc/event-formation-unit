@@ -14,8 +14,6 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-namespace Multiblade {
-
 Matcher::Matcher(uint64_t maxDeltaTime) : pMaxDeltaTime(maxDeltaTime) {
 }
 
@@ -77,6 +75,4 @@ void Matcher::match_end(bool force) {
     matched_clusters.emplace_back(std::move(evt));
     stats_cluster_count++;
   }
-}
-
 }
