@@ -20,7 +20,7 @@ images = [
         'name': 'essdmscdm/centos7-build-node:3.2.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
-/*    ],
+    ],
     'centos7': [
         'name': 'essdmscdm/centos7-build-node:3.2.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash -e',
@@ -34,7 +34,7 @@ images = [
     'fedora25': [
         'name': 'essdmscdm/fedora25-build-node:2.0.0',
         'sh'  : 'bash -e',
-        'cmake_flags': ''*/
+        'cmake_flags': ''
     ]
 ]
 
@@ -312,7 +312,7 @@ node('docker') {
         def image_key = x
         builders[image_key] = get_pipeline(image_key)
     }
-/*    builders['macOS'] = get_macos_pipeline()*/
+    builders['macOS'] = get_macos_pipeline()
 
     try {
         parallel builders
