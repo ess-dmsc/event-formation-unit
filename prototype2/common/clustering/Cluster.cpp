@@ -1,14 +1,14 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+//===----------------------------------------------------------------------===//
+///
+/// \file Cluster.cpp
+/// \brief Cluster class implementation
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/clustering/Cluster.h>
 #include <fmt/format.h>
 #include <cmath>
-#include <set>
-#include <algorithm>
-
-#include <common/Trace.h>
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
 
 void Cluster::insert_hit(const Hit &e) {
   if (hits.empty()) {

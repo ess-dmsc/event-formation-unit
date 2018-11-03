@@ -1,7 +1,8 @@
-/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+/** Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file **/
 //===----------------------------------------------------------------------===//
 ///
-/// \file
+/// \file GapClusterer.h
+/// \brief GapClusterer class definition
 ///
 //===----------------------------------------------------------------------===//
 
@@ -9,22 +10,36 @@
 
 #include <common/clustering/AbstractClusterer.h>
 
+/// \class GapClusterer GapClusterer.h
+/// \brief Clusterer for hits in one plane, discriminating clusters
+///         based on predefined gaps in time and space. Supplied hits must be
+///         chronologically sorted within supplied containers and between
+///         subsequent instances thereof. Clustering is first performed in time,
+///         and then in space.
+
 class GapClusterer : public AbstractClusterer {
 public:
-  GapClusterer(uint64_t TimeGap, uint16_t CoordGap, size_t ClusterSize);
-  ~GapClusterer() {}
+  /// \brief GapClusterer constructor
+  /// \param max_time_gap maximum difference in time between hits such that
+  ///        they would be considered part of the same cluster
+  /// \param max_coord_gap maximum difference in coordinates between hits such
+  ///        that they would be considered part of the same cluster
+  GapClusterer(uint64_t max_time_gap, uint16_t max_coord_gap);
 
+  /// \brief ingest new hits and potentially perform clustering
+  /// \param hits container of hits to be processed. Hits must be chronologically
+  ///        sorted within the container and between subsequent calls.
   void cluster(const HitContainer &hits) override;
+
+  /// \brief complete clustering for any outstanding data
   void flush() override;
 
 private:
-  uint64_t MaxTimeGap;
-  uint16_t MaxCoordGap;
-  size_t MinClusterSize;
+  uint64_t max_time_gap_;
+  uint16_t max_coord_gap_;
 
-  HitContainer CurrentTimeCluster;
+  HitContainer current_time_cluster_; ///< kept in memory until time gap encountered
 
-  void cluster_by_time(const HitContainer &oldHits);
-  void cluster_by_coordinate(HitContainer &cluster);
-  void stash_cluster(Cluster &plane);
+  /// \brief helper function to clusters hits in current_time_cluster_
+  void cluster_by_coordinate();
 };

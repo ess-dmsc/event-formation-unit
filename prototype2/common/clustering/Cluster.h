@@ -1,18 +1,20 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+/** Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file **/
 //===----------------------------------------------------------------------===//
 ///
-/// \file
-///
-/// \brief Cluster: container of hits, aware of its bounds and weight
-///         hits can be added, but not removed coordinates and timestamps
-///         are treated as having an uncertainty of 1 when evaluating dimensions
-///
+/// \file Cluster.h
+/// \brief Cluster class definition
 ///
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
 #include <common/clustering/Hit.h>
+
+/// \class Cluster Cluster.h
+/// \brief A container of hits, aware of its plane, bounds and weight.
+///        Hits can be added, but not removed. Coordinates and timestamps
+///        are treated as having an uncertainty of 1 when evaluating dimensions,
+///        thus including the endpoints.
 
 class Cluster {
 protected:
@@ -89,7 +91,7 @@ public:
   std::string debug(bool verbose = false) const;
 
 private:
-  int16_t plane_{-1}; ///< plane identity of cluster, -1 for invalid
+  int16_t plane_{-1};      ///< plane identity of cluster, -1 for invalid
 
   uint16_t coord_start_;
   uint16_t coord_end_;
@@ -98,7 +100,7 @@ private:
   uint64_t time_end_;
 
   double weight_sum_{0.0};
-  double coord_mass_{0.0};   ///< sum of coord*weight
-  double time_mass_{0.0};   ///< sum of time*weight
+  double coord_mass_{0.0}; ///< sum of coord*weight
+  double time_mass_{0.0};  ///< sum of time*weight
 
 };

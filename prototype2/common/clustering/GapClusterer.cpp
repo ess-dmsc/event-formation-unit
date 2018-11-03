@@ -1,73 +1,59 @@
-/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+/** Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file **/
 //===----------------------------------------------------------------------===//
 ///
-/// \file
+/// \file GapClusterer.cpp
+/// \brief GapClusterer class implementation
 ///
 //===----------------------------------------------------------------------===//
 
 #include <common/clustering/GapClusterer.h>
 #include <algorithm>
 
-#include <common/Trace.h>
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
-
-GapClusterer::GapClusterer(uint64_t TimeGap, uint16_t CoordGap, size_t ClusterSize)
-    : AbstractClusterer(), MaxTimeGap(TimeGap), MaxCoordGap(CoordGap), MinClusterSize(ClusterSize) {
-}
+GapClusterer::GapClusterer(uint64_t max_time_gap, uint16_t max_coord_gap)
+    : AbstractClusterer()
+    , max_time_gap_(max_time_gap)
+    , max_coord_gap_(max_coord_gap) {}
 
 void GapClusterer::cluster(const HitContainer &hits) {
-  cluster_by_time(hits);
-}
+  //It is assumed that hits are sorted in time
 
-void GapClusterer::flush() {
-  cluster_by_coordinate(CurrentTimeCluster);
-  CurrentTimeCluster.clear();
-}
-
-void GapClusterer::cluster_by_time(const HitContainer &hits) {
   for (const auto &hit : hits) {
     // Stash cluster if time gap to next hit is too large
-    if (!CurrentTimeCluster.empty() &&
-        (hit.time - CurrentTimeCluster.back().time) > MaxTimeGap) {
+    if (!current_time_cluster_.empty() &&
+        (hit.time - current_time_cluster_.back().time) > max_time_gap_) {
       flush();
     }
 
     // Insert in either case
-    CurrentTimeCluster.emplace_back(hit);
+    current_time_cluster_.emplace_back(hit);
   }
 }
 
-//====================================================================================================================
-void GapClusterer::cluster_by_coordinate(HitContainer &hits) {
-  Cluster cluster;
+void GapClusterer::flush() {
+  cluster_by_coordinate();
+  current_time_cluster_.clear();
+}
 
-  std::sort(hits.begin(), hits.end(),
+void GapClusterer::cluster_by_coordinate() {
+  // First, sort in terms of coordinate
+  std::sort(current_time_cluster_.begin(), current_time_cluster_.end(),
             [](const Hit &e1, const Hit &e2) {
               return e1.coordinate < e2.coordinate;
             });
 
-  for (auto &hit : hits) {
+  Cluster cluster;
+  for (auto &hit : current_time_cluster_) {
     // Stash cluster if coordinate gap to next hit is too large
     if (!cluster.empty() &&
-        (hit.coordinate - cluster.coord_end()) > MaxCoordGap) {
+        (hit.coordinate - cluster.coord_end()) > max_coord_gap_) {
       stash_cluster(cluster);
-      cluster = Cluster();
+      cluster.clear();
     }
 
     // insert in either case
     cluster.insert_hit(hit);
   }
 
-  // At the end of the clustering, attempt to stash any leftovers
+  // Attempt to stash any leftovers
   stash_cluster(cluster);
-}
-//====================================================================================================================
-void GapClusterer::stash_cluster(Cluster &cluster) {
-  if (cluster.hit_count() < MinClusterSize)
-    return;
-
-  DTRACE(DEB, "******** VALID ********");
-  clusters.emplace_back(std::move(cluster));
-  stats_cluster_count++;
 }
