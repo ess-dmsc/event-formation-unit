@@ -19,31 +19,31 @@ void Event::insert_hit(const Hit &e) {
 }
 
 void Event::merge(Cluster &cluster) {
-  if (cluster.plane == 1) { /**< \todo deal with multiple panels */
+  if (cluster.plane() == 1) { /**< \todo deal with multiple panels */
     y.merge(cluster);
-  } else if (cluster.plane == 0) {
+  } else if (cluster.plane() == 0) {
     x.merge(cluster);
   }
 }
 
 bool Event::empty() const {
-  return x.entries.empty() && y.entries.empty();
+  return x.empty() && y.empty();
 }
 
 uint64_t Event::time_end() const {
-  if (x.entries.empty())
-    return y.time_end;
-  if (y.entries.empty())
-    return x.time_end;
-  return std::max(x.time_end, y.time_end);
+  if (x.empty())
+    return y.time_end();
+  if (y.empty())
+    return x.time_end();
+  return std::max(x.time_end(), y.time_end());
 }
 
 uint64_t Event::time_start() const {
-  if (x.entries.empty())
-    return y.time_start;
-  if (y.entries.empty())
-    return x.time_start;
-  return std::min(x.time_start, y.time_start);
+  if (x.empty())
+    return y.time_start();
+  if (y.empty())
+    return x.time_start();
+  return std::min(x.time_start(), y.time_start());
 }
 
 uint64_t Event::time_span() const {
@@ -51,8 +51,8 @@ uint64_t Event::time_span() const {
 }
 
 uint64_t Event::time_overlap(const Cluster &other) const {
-  auto latest_start = std::max(other.time_start, time_start());
-  auto earliest_end = std::min(other.time_end, time_end());
+  auto latest_start = std::max(other.time_start(), time_start());
+  auto earliest_end = std::min(other.time_end(), time_end());
   if (latest_start > earliest_end)
     return 0;
   return (earliest_end - latest_start);

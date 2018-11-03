@@ -8,12 +8,11 @@
 #pragma once
 
 #include <list>
+#include <deque>
 #include <common/clustering/Cluster.h>
 
 using HitContainer = std::vector<Hit>;
-
-/// \todo pick a faster data structure
-using ClusterList = std::list<Cluster>;
+using ClusterContainer = std::list<Cluster>;
 
 class AbstractClusterer {
 public:
@@ -28,7 +27,6 @@ public:
     return clusters.empty();
   }
 
-  uint8_t plane{0};
-  size_t stats_cluster_count{0};
-  ClusterList clusters;
+  ClusterContainer clusters; ///< clustered hits
+  size_t stats_cluster_count{0}; ///< cumulative number of clusters produced
 };

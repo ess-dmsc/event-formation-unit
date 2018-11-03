@@ -17,25 +17,25 @@ protected:
 TEST_F(ClusterTest, Insert) {
   Hit e;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.entries.size(), 1);
+  EXPECT_EQ(cluster.hit_count(), 1);
   e.coordinate = 2;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.entries.size(), 2);
+  EXPECT_EQ(cluster.hit_count(), 2);
   e.coordinate = 3;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.entries.size(), 3);
+  EXPECT_EQ(cluster.hit_count(), 3);
 }
 
 
 TEST_F(ClusterTest, AdcSum) {
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.weight_sum, 0);
+  EXPECT_EQ(cluster.weight_sum(), 0);
   e.weight = 2;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.weight_sum, 2);
+  EXPECT_EQ(cluster.weight_sum(), 2);
   e.weight = 40;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.weight_sum, 42);
+  EXPECT_EQ(cluster.weight_sum(), 42);
 }
 
 TEST_F(ClusterTest, TimeSpan) {
@@ -43,20 +43,20 @@ TEST_F(ClusterTest, TimeSpan) {
 
   e.time = 10;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.time_start, 10);
-  EXPECT_EQ(cluster.time_end, 10);
+  EXPECT_EQ(cluster.time_start(), 10);
+  EXPECT_EQ(cluster.time_end(), 10);
   EXPECT_EQ(cluster.time_span(), 0);
 
   e.time = 20;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.time_start, 10);
-  EXPECT_EQ(cluster.time_end, 20);
+  EXPECT_EQ(cluster.time_start(), 10);
+  EXPECT_EQ(cluster.time_end(), 20);
   EXPECT_EQ(cluster.time_span(), 10);
 
   e.time = 5;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.time_start, 5);
-  EXPECT_EQ(cluster.time_end, 20);
+  EXPECT_EQ(cluster.time_start(), 5);
+  EXPECT_EQ(cluster.time_end(), 20);
   EXPECT_EQ(cluster.time_span(), 15);
 }
 
@@ -65,55 +65,55 @@ TEST_F(ClusterTest, StripSpan) {
 
   e.coordinate = 0;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.coord_start, 0);
-  EXPECT_EQ(cluster.coord_end, 0);
+  EXPECT_EQ(cluster.coord_start(), 0);
+  EXPECT_EQ(cluster.coord_end(), 0);
   EXPECT_EQ(cluster.coord_span(), 1);
 
   e.coordinate = 10;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.coord_start, 0);
-  EXPECT_EQ(cluster.coord_end, 10);
+  EXPECT_EQ(cluster.coord_start(), 0);
+  EXPECT_EQ(cluster.coord_end(), 10);
   EXPECT_EQ(cluster.coord_span(), 11);
 
   e.coordinate = 41;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.coord_start, 0);
-  EXPECT_EQ(cluster.coord_end, 41);
+  EXPECT_EQ(cluster.coord_start(), 0);
+  EXPECT_EQ(cluster.coord_end(), 41);
   EXPECT_EQ(cluster.coord_span(), 42);
 }
 
 // 0-weight-valued hits will be a problem
 TEST_F(ClusterTest, TimeMass) {
-  EXPECT_EQ(cluster.time_mass, 0);
+  EXPECT_EQ(cluster.time_mass(), 0);
   EXPECT_TRUE(std::isnan(cluster.time_center()));
 
   e.weight = 2;
   e.time = 10;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.time_mass, 20);
+  EXPECT_EQ(cluster.time_mass(), 20);
   EXPECT_EQ(cluster.time_center(), 10);
 
   e.weight = 8;
   e.time = 0;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.time_mass, 20);
+  EXPECT_EQ(cluster.time_mass(), 20);
   EXPECT_EQ(cluster.time_center(), 2);
 }
 
 TEST_F(ClusterTest, TimeStrips) {
-  EXPECT_EQ(cluster.coord_mass, 0);
+  EXPECT_EQ(cluster.coord_mass(), 0);
   EXPECT_TRUE(std::isnan(cluster.coord_center()));
 
   e.weight = 2;
   e.coordinate = 10;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.coord_mass, 20);
+  EXPECT_EQ(cluster.coord_mass(), 20);
   EXPECT_EQ(cluster.coord_center(), 10);
 
   e.weight = 8;
   e.coordinate = 0;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.coord_mass, 20);
+  EXPECT_EQ(cluster.coord_mass(), 20);
   EXPECT_EQ(cluster.coord_center(), 2);
 }
 
@@ -171,8 +171,8 @@ TEST_F(ClusterTest, MergeEmpty) {
   Cluster cluster2;
   cluster.merge(cluster2);
 
-  EXPECT_EQ(cluster.entries.size(), 3);
-  EXPECT_EQ(cluster2.entries.size(), 0);
+  EXPECT_EQ(cluster.hit_count(), 3);
+  EXPECT_EQ(cluster2.hit_count(), 0);
 }
 
 TEST_F(ClusterTest, MergeToEmpty) {
@@ -184,8 +184,8 @@ TEST_F(ClusterTest, MergeToEmpty) {
   /// \todo old cluster stats should be reset
   cluster.merge(cluster2);
 
-  EXPECT_EQ(cluster.entries.size(), 3);
-  EXPECT_EQ(cluster2.entries.size(), 0);
+  EXPECT_EQ(cluster.hit_count(), 3);
+  EXPECT_EQ(cluster2.hit_count(), 0);
 }
 
 
@@ -210,10 +210,10 @@ TEST_F(ClusterTest, Merge) {
   /// \todo old cluster stats should be reset
   cluster.merge(cluster2);
 
-  EXPECT_EQ(cluster.entries.size(), 5);
+  EXPECT_EQ(cluster.hit_count(), 5);
   EXPECT_EQ(cluster.time_span(), 12);
   EXPECT_EQ(cluster.coord_span(), 11);
-  EXPECT_EQ(cluster.weight_sum, 5);
+  EXPECT_EQ(cluster.weight_sum(), 5);
 }
 
 /// \todo cluster plane identity tests

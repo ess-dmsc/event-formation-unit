@@ -16,10 +16,10 @@ protected:
 
 TEST_F(EventTest, Insert) {
   event.insert_hit(e);
-  EXPECT_EQ(event.x.entries.size(), 1);
+  EXPECT_EQ(event.x.hit_count(), 1);
   e.plane = 1;
   event.insert_hit(e);
-  EXPECT_EQ(event.y.entries.size(), 1);
+  EXPECT_EQ(event.y.hit_count(), 1);
 }
 
 TEST_F(EventTest, Empty) {
@@ -35,8 +35,8 @@ TEST_F(EventTest, Merge) {
   x.insert_hit(e);
   event.merge(x);
   EXPECT_FALSE(event.empty());
-  EXPECT_EQ(x.entries.size(), 0);
-  EXPECT_EQ(event.x.entries.size(), 2);
+  EXPECT_EQ(x.hit_count(), 0);
+  EXPECT_EQ(event.x.hit_count(), 2);
 }
 
 TEST_F(EventTest, MergeTwice) {
@@ -46,13 +46,13 @@ TEST_F(EventTest, MergeTwice) {
   x.insert_hit(e);
   x.insert_hit(e);
   event.merge(x);
-  EXPECT_EQ(event.x.entries.size(), 2);
+  EXPECT_EQ(event.x.hit_count(), 2);
 
   x.insert_hit(e);
   x.insert_hit(e);
   x.insert_hit(e);
   event.merge(x);
-  EXPECT_EQ(event.x.entries.size(), 5);
+  EXPECT_EQ(event.x.hit_count(), 5);
 }
 
 TEST_F(EventTest, MergeXY) {
@@ -68,8 +68,8 @@ TEST_F(EventTest, MergeXY) {
   y.insert_hit(e);
   y.insert_hit(e);
   event.merge(y);
-  EXPECT_EQ(event.x.entries.size(), 2);
-  EXPECT_EQ(event.y.entries.size(), 3);
+  EXPECT_EQ(event.x.hit_count(), 2);
+  EXPECT_EQ(event.y.hit_count(), 3);
 }
 
 TEST_F(EventTest, TimeSpan) {
@@ -97,7 +97,7 @@ TEST_F(EventTest, InsertInvalid) {
   event.insert_hit(e);
   e.plane = 2;
   event.insert_hit(e);
-  EXPECT_EQ(2, event.x.entries.size() + event.y.entries.size());
+  EXPECT_EQ(2, event.x.hit_count() + event.y.hit_count());
 }
 
 TEST_F(EventTest, DebugPrint) {

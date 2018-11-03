@@ -50,7 +50,7 @@ void GapClusterer::cluster_by_coordinate(HitContainer &hits) {
   for (auto &hit : hits) {
     // Stash cluster if coordinate gap to next hit is too large
     if (!cluster.empty() &&
-        (hit.coordinate - cluster.coord_end) > MaxCoordGap) {
+        (hit.coordinate - cluster.coord_end()) > MaxCoordGap) {
       stash_cluster(cluster);
       cluster = Cluster();
     }
@@ -64,7 +64,7 @@ void GapClusterer::cluster_by_coordinate(HitContainer &hits) {
 }
 //====================================================================================================================
 void GapClusterer::stash_cluster(Cluster &cluster) {
-  if (cluster.entries.size() < MinClusterSize)
+  if (cluster.hit_count() < MinClusterSize)
     return;
 
   DTRACE(DEB, "******** VALID ********");
