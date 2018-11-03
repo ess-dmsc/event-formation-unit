@@ -8,7 +8,7 @@
 #pragma once
 
 #include <common/clustering/GapClusterer.h>
-#include <multiblade/clustering/Event.h>
+#include <common/clustering/Event.h>
 #include <memory>
 #include <deque>
 

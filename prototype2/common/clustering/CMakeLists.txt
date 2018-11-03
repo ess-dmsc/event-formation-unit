@@ -21,23 +21,46 @@ set(EventTest_INC
   )
 create_test_executable(ClusterTest)
 
-set(ClusteringBase_SRC
+set(GapClustererTest_SRC
   Cluster.cpp
   Hit.cpp
+  GapClusterer.cpp
+  GapClustererTest.cpp
   )
-set(ClusteringBase_INC
+set(GapClustererTest_INC
+  GapClusterer.h
   Cluster.h
   Hit.h
   AbstractClusterer.h
   )
+create_test_executable(GapClustererTest)
 
-set(GapClustererTest_SRC
-  ${ClusteringBase_SRC}
-  GapClusterer.cpp
-  GapClustererTest.cpp)
-set(GapClustererTest_INC
-  GapClusterer.h
-  ${ClusteringBase_INC})
-create_test_executable(GapClustererTest SKIP_MEMGRIND)
-target_compile_definitions(GapClustererTest
-  PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
+set(EventTest_SRC
+  Cluster.cpp
+  Hit.cpp
+  EventTest.cpp
+  Event.cpp
+  )
+set(EventTest_INC
+  Cluster.h
+  Hit.h
+  AbstractClusterer.h
+  Event.h
+  )
+create_test_executable(EventTest)
+
+set(MatcherTest_SRC
+  Cluster.cpp
+  Hit.cpp
+  MatcherTest.cpp
+  Event.cpp
+  Matcher.cpp
+  )
+set(MatcherTest_INC
+  Cluster.h
+  Hit.h
+  AbstractClusterer.h
+  Event.h
+  Matcher.h
+  )
+create_test_executable(MatcherTest)

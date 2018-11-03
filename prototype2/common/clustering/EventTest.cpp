@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <cmath>
-#include <multiblade/clustering/Event.h>
+#include <common/clustering/Event.h>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>

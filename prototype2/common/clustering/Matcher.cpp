@@ -5,7 +5,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <multiblade/clustering/Matcher.h>
+#include <common/clustering/Matcher.h>
 
 #include <cmath>
 #include <algorithm>

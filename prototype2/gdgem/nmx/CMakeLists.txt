@@ -29,17 +29,17 @@ set(NMXEventTest_INC
     )
 create_test_executable(NMXClusterTest)
 
-set(EventTest_SRC
+set(NMXEventTest_SRC
     EventTest.cpp
     Cluster.cpp
     Event.cpp
     )
-set(EventTest_INC
+set(NMXEventTest_INC
     Hit.h
     Cluster.h
     Event.h
     )
-create_test_executable(EventTest)
+create_test_executable(NMXEventTest)
 
 set(HistSerializerTest_SRC
     ../../common/Hists.cpp
