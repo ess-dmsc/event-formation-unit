@@ -8,7 +8,6 @@ set(efu_common_SRC
   clustering/GapClusterer.h
   clustering/Event.h
   clustering/Hit.h
-  clustering/Matcher.h
   EV42Serializer.cpp
   NewStats.cpp
   Producer.cpp
@@ -22,7 +21,6 @@ set(efu_common_INC
   clustering/GapClusterer.cpp
   clustering/Hit.cpp
   clustering/Event.cpp
-  clustering/Matcher.h
   ../../libs/include/gccintel.h
   DetectorModuleRegister.h
   Detector.h
