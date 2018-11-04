@@ -13,11 +13,11 @@
 Event::Event(uint8_t plane1, uint8_t plane2)
     : plane1_(plane1), plane2_(plane2) {}
 
-void Event::insert_hit(const Hit &e) {
+void Event::insert(const Hit &e) {
   if (e.plane == plane1_) {
-    c1.insert_hit(e);
+    c1.insert(e);
   } else if (e.plane == plane2_) {
-    c2.insert_hit(e);
+    c2.insert(e);
   }
 }
 
@@ -27,6 +27,11 @@ void Event::merge(Cluster &cluster) {
   } else if (cluster.plane() == plane2_) {
     c2.merge(cluster);
   }
+}
+
+void Event::clear() {
+  c1.clear();
+  c2.clear();
 }
 
 bool Event::empty() const {

@@ -14,9 +14,7 @@ public:
   explicit Matcher(uint64_t maxDeltaTime);
 
   void insert(uint8_t plane, ClusterContainer &c) override;
-  void flush() override;
-
-  void match_end(bool force);
+  void match(bool flush) override;
 
   ClusterContainer unmatched_clusters;
 private:
@@ -24,7 +22,7 @@ private:
 
   bool ready_to_be_matched(double time) const;
 
-  double delta_end(const Event &event, const Cluster &cluster) const;
+  uint64_t delta_end(const Event &event, const Cluster &cluster) const;
   bool belongs_end(const Event &event, const Cluster &cluster) const;
 
   uint64_t latest_x{0};

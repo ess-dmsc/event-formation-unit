@@ -10,7 +10,7 @@
 #include <fmt/format.h>
 #include <cmath>
 
-void Cluster::insert_hit(const Hit &e) {
+void Cluster::insert(const Hit &e) {
   if (hits.empty()) {
     plane_ = e.plane;
     time_start_ = time_end_ = e.time;

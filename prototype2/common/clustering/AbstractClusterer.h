@@ -17,7 +17,7 @@ using HitContainer = std::vector<Hit>;
 using ClusterContainer = std::list<Cluster>;
 
 /// \class AbstractClusterer AbstractClusterer.h
-/// \brief AbstractClusterer declares the interface for a clusterer class.
+/// \brief AbstractClusterer declares the interface for a clusterer class
 ///         that should group hits into clusters. Provides base functionality
 ///         for storage of clusters and stats counter. Other pre- and
 ///         post-conditions are left to the discretion of a specific
@@ -25,10 +25,12 @@ using ClusterContainer = std::list<Cluster>;
 
 class AbstractClusterer {
 public:
-  AbstractClusterer() {}
-  virtual ~AbstractClusterer() {}
+  AbstractClusterer() = default;
+  virtual ~AbstractClusterer() = default;
 
-  /// \brief ingest new hits and potentially perform some clustering
+  // \todo insert one hit at a time
+
+  /// \brief inserts new hits and potentially performs some clustering
   virtual void cluster(const HitContainer &hits) = 0;
 
   /// \brief complete clustering for any outstanding data

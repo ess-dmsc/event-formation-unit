@@ -27,7 +27,7 @@ public:
   ///        hits should have non 0-weight if center of mass is to be meaningful
   ///        invalidates plane if planes don't match, but still adds it
   /// \param hit to be added
-  void insert_hit(const Hit &hit);
+  void insert(const Hit &hit);
 
   /// \brief merges another cluster into this one
   ///        moves the hits from the other cluster, rendering it empty

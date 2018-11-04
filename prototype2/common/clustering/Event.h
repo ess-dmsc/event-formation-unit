@@ -19,6 +19,10 @@
 class Event {
 public:
   Event() {}
+
+  /// \brief Event constructor, selecting planes
+  /// \param plane1 id of first plane selected for event
+  /// \param plane1 id of second plane selected for event
   Event(uint8_t plane1, uint8_t plane2);
 
   uint8_t plane1_ {0};
@@ -28,8 +32,10 @@ public:
   Cluster c2; ///< cluster in dimension 2
 
   /// \brief adds hit to event
+  ///        Inserts hit into the appropriate plane.
+  ///        If plane is not of two selected planes, nothing is done.
   /// \param hit to be added
-  void insert_hit(const Hit &e);
+  void insert(const Hit &e);
 
   /// \brief merges a cluster into event.
   ///        Merges the cluster into the appropriate plane.
@@ -37,6 +43,9 @@ public:
   /// \param cluster to be merged
   /// \post if plane is accepted, merged cluster is cleared
   void merge(Cluster &cluster);
+
+  /// \brief clears both dimensions
+  void clear();
 
   /// \returns true if event contains no hits
   bool empty() const;

@@ -51,7 +51,7 @@ void GapClusterer::cluster_by_coordinate() {
     }
 
     // insert in either case
-    cluster.insert_hit(hit);
+    cluster.insert(hit);
   }
 
   // Attempt to stash any leftovers

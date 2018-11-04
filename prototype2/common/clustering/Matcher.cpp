@@ -23,7 +23,7 @@ bool Matcher::ready_to_be_matched(double time) const {
       (std::min(latest_x, latest_y) - time) > (pMaxDeltaTime * 3));
 }
 
-double Matcher::delta_end(const Event &event, const Cluster &cluster) const {
+uint64_t Matcher::delta_end(const Event &event, const Cluster &cluster) const {
   if (event.time_end() > cluster.time_end())
     return event.time_end() - cluster.time_end();
   return cluster.time_end() - event.time_end();
@@ -45,11 +45,7 @@ void Matcher::insert(uint8_t plane, ClusterContainer &c) {
   unmatched_clusters.splice(unmatched_clusters.end(), c);
 }
 
-void Matcher::flush() {
-  match_end(true);
-}
-
-void Matcher::match_end(bool force) {
+void Matcher::match(bool force) {
   /// \todo is it already sorted?
   unmatched_clusters.sort([](const Cluster &c1, const Cluster &c2) {
     return c1.time_end() < c2.time_end();
@@ -65,8 +61,7 @@ void Matcher::match_end(bool force) {
       break;
 
     if (!evt.empty() && !belongs_end(evt, *n)) {
-      matched_clusters.emplace_back(std::move(evt));
-      stats_cluster_count++;
+      stash_event(evt);
       evt = Event();
     }
 
@@ -76,7 +71,6 @@ void Matcher::match_end(bool force) {
 
   // If anything is left, stash it
   if (!evt.empty()) {
-    matched_clusters.emplace_back(std::move(evt));
-    stats_cluster_count++;
+    stash_event(evt);
   }
 }
