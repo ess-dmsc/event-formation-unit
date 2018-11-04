@@ -1,69 +1,73 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+//===----------------------------------------------------------------------===//
+///
+/// \file Event.cpp
+/// \brief Event class implementation
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/clustering/Event.h>
+#include <fmt/format.h>
 #include <cmath>
-#include <sstream>
 
-#include <common/Trace.h>
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+Event::Event(uint8_t plane1, uint8_t plane2)
+    : plane1_(plane1), plane2_(plane2) {}
 
 void Event::insert_hit(const Hit &e) {
-  if (e.plane == 1) { /**< \todo deal with multiple panels */
-    y.insert_hit(e);
-  } else if (e.plane == 0) {
-    x.insert_hit(e);
+  if (e.plane == plane1_) {
+    c1.insert_hit(e);
+  } else if (e.plane == plane2_) {
+    c2.insert_hit(e);
   }
 }
 
 void Event::merge(Cluster &cluster) {
-  if (cluster.plane() == 1) { /**< \todo deal with multiple panels */
-    y.merge(cluster);
-  } else if (cluster.plane() == 0) {
-    x.merge(cluster);
+  if (cluster.plane() == plane1_) {
+    c1.merge(cluster);
+  } else if (cluster.plane() == plane2_) {
+    c2.merge(cluster);
   }
 }
 
 bool Event::empty() const {
-  return x.empty() && y.empty();
+  return c1.empty() && c2.empty();
 }
 
 uint64_t Event::time_end() const {
-  if (x.empty())
-    return y.time_end();
-  if (y.empty())
-    return x.time_end();
-  return std::max(x.time_end(), y.time_end());
+  if (c1.empty())
+    return c2.time_end();
+  if (c2.empty())
+    return c1.time_end();
+  return std::max(c1.time_end(), c2.time_end());
 }
 
 uint64_t Event::time_start() const {
-  if (x.empty())
-    return y.time_start();
-  if (y.empty())
-    return x.time_start();
-  return std::min(x.time_start(), y.time_start());
+  if (c1.empty())
+    return c2.time_start();
+  if (c2.empty())
+    return c1.time_start();
+  return std::min(c1.time_start(), c2.time_start());
 }
 
 uint64_t Event::time_span() const {
-  return (time_end() - time_start());
+  if (empty())
+    return 0;
+  return (time_end() - time_start()) + uint16_t(1);
 }
 
 uint64_t Event::time_overlap(const Cluster &other) const {
+  if (empty() || other.empty())
+    return 0;
   auto latest_start = std::max(other.time_start(), time_start());
   auto earliest_end = std::min(other.time_end(), time_end());
-  if (latest_start > earliest_end)
+  if (latest_start > earliest_end) {
     return 0;
-  return (earliest_end - latest_start);
+  }
+  return (earliest_end - latest_start) + uint16_t(1);
 }
 
-bool Event::time_overlap_thresh(const Cluster &other, double thresh) const {
-  double ovr = time_overlap(other);
-  return (((ovr / other.time_span()) + (ovr / time_span())) > thresh);
-}
-
-std::string Event::debug() const {
-  std::stringstream ss;
-  ss << "  X:\n" << x.debug();
-  ss << "  Y:\n" << y.debug();
-  return ss.str();
+std::string Event::debug(bool verbose) const {
+  return fmt::format("Event planes({},{}):\n  {}\n  {}\n",
+                     plane1_, plane2_,
+                     c1.debug(verbose), c2.debug(verbose));
 }

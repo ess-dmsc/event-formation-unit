@@ -259,8 +259,8 @@ TEST_F(ClusterTest, PrintDebug) {
   cluster.insert_hit({7, 0, 5, 1});
 
   MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "SIMPLE: " << cluster.debug() << "\n";
-  MESSAGE() << "VERBOSE: " << cluster.debug(true) << "\n";
+  MESSAGE() << "SIMPLE:\n" << cluster.debug() << "\n";
+  MESSAGE() << "VERBOSE:\n" << cluster.debug(true) << "\n";
 }
 
 int main(int argc, char **argv) {

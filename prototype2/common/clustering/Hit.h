@@ -26,7 +26,7 @@
 ///
 /// If you cannot ensure the above, consult someone who can.
 ///
-/// \file
+/// \file Hit.h
 ///
 /// \brief Hit struct for general clustering solution
 ///
@@ -41,15 +41,14 @@ struct __attribute__ ((packed)) Hit {
   static std::string DatasetName() { return "efu_hits"; }
   static uint16_t FormatVersion() { return 0; }
 
-  /// \todo consider reordering these to optimize
   /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
   uint64_t time{0};
   uint8_t plane{0};
   uint16_t coordinate{0};
   uint16_t weight{0};
-  // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
+  /// !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
-  // \brief prints values for debug purposes
+  /// \brief prints values for debug purposes
   std::string debug() const;
 };
 

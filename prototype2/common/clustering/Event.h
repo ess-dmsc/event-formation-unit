@@ -1,37 +1,59 @@
 /* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
-/// \file
-///
-/// \brief Classes for NMX event formation
+/// \file Event.h
+/// \brief Event class definition
 ///
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
 #include <common/clustering/Cluster.h>
-#include <limits>
-#include <list>
-#include <string>
+
+/// \class Event Event.h
+/// \brief A pairing of clusters in two dimensions, aware of its time bounds.
+///        Hits can be added, but not removed. Clusters can be merged but not
+///        removed. Timestamps are treated as having an uncertainty of 1 when
+///        evaluating dimensions, thus including the endpoints.
 
 class Event {
 public:
-  Cluster x, y; /// tracks in x and y planes
+  Event() {}
+  Event(uint8_t plane1, uint8_t plane2);
+
+  uint8_t plane1_ {0};
+  uint8_t plane2_ {1};
+
+  Cluster c1; ///< cluster in dimension 1
+  Cluster c2; ///< cluster in dimension 2
 
   /// \brief adds hit to event
   /// \param hit to be added
   void insert_hit(const Hit &e);
 
+  /// \brief merges a cluster into event.
+  ///        Merges the cluster into the appropriate plane.
+  ///        If plane is not of two selected planes, nothing is done.
+  /// \param cluster to be merged
+  /// \post if plane is accepted, merged cluster is cleared
   void merge(Cluster &cluster);
 
+  /// \returns true if event contains no hits
   bool empty() const;
 
-  uint64_t time_end() const;
+  /// \returns earliest timestamp, undefined in case of empty event
   uint64_t time_start() const;
+  /// \returns latest timestamp, undefined in case of empty event
+  uint64_t time_end() const;
+  /// \returns time span, 0 in case of empty event
   uint64_t time_span() const;
-  uint64_t time_overlap(const Cluster &other) const;
-  bool time_overlap_thresh(const Cluster &other, double thresh) const;
 
-  /// \brief prints values for debug purposes
-  std::string debug() const;
+  /// \brief calculates the overlapping time span of event and cluster
+  /// \param other cluster to be compared
+  /// \returns overlapping time span inclusive of end points
+  uint64_t time_overlap(const Cluster &other) const;
+
+  /// \returns string describing event bounds and weights
+  /// \param verbose also print hits
+  std::string debug(bool verbose = false) const;
 };

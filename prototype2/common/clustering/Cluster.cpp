@@ -156,7 +156,7 @@ std::string Cluster::debug(bool verbose) const {
   }
   auto ret = debug(false) + "\n";
   for (const auto &h : hits) {
-    ret += " " + h.debug() + "\n";
+    ret += "   " + h.debug() + "\n";
   }
   return ret;
 }
