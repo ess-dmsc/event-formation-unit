@@ -32,7 +32,7 @@ void EndMatcher::match(bool force) {
     return c1.time_end() < c2.time_end();
   });
 
-  Event evt;
+  Event evt{plane1_, plane2_};
   while (!unmatched_clusters_.empty()) {
 
     auto cluster = unmatched_clusters_.begin();

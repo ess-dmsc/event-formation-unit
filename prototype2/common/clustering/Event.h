@@ -22,7 +22,7 @@ public:
 
   /// \brief Event constructor, selecting planes
   /// \param plane1 id of first plane selected for event
-  /// \param plane1 id of second plane selected for event
+  /// \param plane2 id of second plane selected for event
   Event(uint8_t plane1, uint8_t plane2);
 
   uint8_t plane1_ {0};

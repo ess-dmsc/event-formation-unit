@@ -47,7 +47,7 @@ public:
 protected:
 
   /// \brief moves cluster into clusters container, increments counter
-  /// \param cluster to be moved
+  /// \param cluster to be stashed
   void stash_cluster(Cluster &cluster) {
     clusters.emplace_back(std::move(cluster));
     stats_cluster_count++;

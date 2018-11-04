@@ -10,12 +10,18 @@
 #include <cmath>
 #include <algorithm>
 
+OverlapMatcher::OverlapMatcher(uint64_t latency)
+    : AbstractMatcher(latency) {}
+
+OverlapMatcher::OverlapMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2)
+    : AbstractMatcher(latency, plane1, plane2) {}
+
 void OverlapMatcher::match(bool flush) {
   unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-    return c1.time_end() < c2.time_end();
+    return c1.time_start() < c2.time_start();
   });
 
-  Event evt;
+  Event evt{plane1_, plane2_};
   while (!unmatched_clusters_.empty()) {
 
     auto cluster = unmatched_clusters_.begin();

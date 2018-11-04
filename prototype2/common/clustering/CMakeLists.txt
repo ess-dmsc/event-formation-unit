@@ -49,7 +49,24 @@ set(EventTest_INC
   )
 create_test_executable(EventTest)
 
+set(AbstractMatcherTest_SRC
+  AbstractMatcher.cpp
+  Cluster.cpp
+  Hit.cpp
+  Event.cpp
+  AbstractMatcherTest.cpp
+  )
+set(AbstractMatcherTest_INC
+  AbstractClusterer.h
+  AbstractMatcher.h
+  Cluster.h
+  Hit.h
+  Event.h
+  )
+create_test_executable(AbstractMatcherTest)
+
 set(EndMatcherTest_SRC
+  AbstractMatcher.cpp
   Cluster.cpp
   Hit.cpp
   Event.cpp
@@ -67,6 +84,7 @@ set(EndMatcherTest_INC
 create_test_executable(EndMatcherTest)
 
 set(OverlapMatcherTest_SRC
+  AbstractMatcher.cpp
   Cluster.cpp
   Hit.cpp
   Event.cpp

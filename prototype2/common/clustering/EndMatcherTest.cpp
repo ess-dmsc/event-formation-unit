@@ -29,22 +29,22 @@ TEST_F(EndMatcherTest, OneX) {
   x.push_back(mock_cluster(0, 0, 10, 0, 200));
   matcher.insert(0, x);
   matcher.match(true);
-  ASSERT_EQ(matcher.stats_cluster_count, 1);
-  ASSERT_EQ(matcher.matched_clusters.size(), 1);
-  EXPECT_EQ(matcher.matched_clusters.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_clusters.front().c1.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_clusters.front().c2.hit_count(), 0);
+  EXPECT_EQ(matcher.stats_event_count, 1);
+  EXPECT_EQ(matcher.matched_events.size(), 1);
+  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
+  EXPECT_EQ(matcher.matched_events.front().c1.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.front().c2.hit_count(), 0);
 }
 
 TEST_F(EndMatcherTest, OneY) {
   y.push_back(mock_cluster(1, 0, 10, 0, 200));
   matcher.insert(1, y);
   matcher.match(true);
-  ASSERT_EQ(matcher.stats_cluster_count, 1);
-  ASSERT_EQ(matcher.matched_clusters.size(), 1);
-  EXPECT_EQ(matcher.matched_clusters.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_clusters.front().c1.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_clusters.front().c2.hit_count(), 122);
+  EXPECT_EQ(matcher.stats_event_count, 1);
+  EXPECT_EQ(matcher.matched_events.size(), 1);
+  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
+  EXPECT_EQ(matcher.matched_events.front().c1.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.front().c2.hit_count(), 122);
 }
 
 TEST_F(EndMatcherTest, TwoX) {
@@ -52,14 +52,14 @@ TEST_F(EndMatcherTest, TwoX) {
   x.push_back(mock_cluster(0, 0, 10, 500, 700));
   matcher.insert(0, x);
   matcher.match(true);
-  ASSERT_EQ(matcher.stats_cluster_count, 2);
-  ASSERT_EQ(matcher.matched_clusters.size(), 2);
-  EXPECT_EQ(matcher.matched_clusters.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_clusters.back().time_span(), 201);
-  EXPECT_EQ(matcher.matched_clusters.front().c1.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_clusters.front().c2.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_clusters.back().c1.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_clusters.back().c2.hit_count(), 0);
+  EXPECT_EQ(matcher.stats_event_count, 2);
+  EXPECT_EQ(matcher.matched_events.size(), 2);
+  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
+  EXPECT_EQ(matcher.matched_events.back().time_span(), 201);
+  EXPECT_EQ(matcher.matched_events.front().c1.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.front().c2.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.back().c1.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.back().c2.hit_count(), 0);
 }
 
 TEST_F(EndMatcherTest, TwoY) {
@@ -67,14 +67,14 @@ TEST_F(EndMatcherTest, TwoY) {
   y.push_back(mock_cluster(1, 0, 10, 500, 700));
   matcher.insert(1, y);
   matcher.match(true);
-  ASSERT_EQ(matcher.stats_cluster_count, 2);
-  ASSERT_EQ(matcher.matched_clusters.size(), 2);
-  EXPECT_EQ(matcher.matched_clusters.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_clusters.back().time_span(), 201);
-  EXPECT_EQ(matcher.matched_clusters.front().c1.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_clusters.front().c2.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_clusters.back().c1.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_clusters.back().c2.hit_count(), 122);
+  EXPECT_EQ(matcher.stats_event_count, 2);
+  EXPECT_EQ(matcher.matched_events.size(), 2);
+  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
+  EXPECT_EQ(matcher.matched_events.back().time_span(), 201);
+  EXPECT_EQ(matcher.matched_events.front().c1.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.front().c2.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.back().c1.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.back().c2.hit_count(), 122);
 }
 
 TEST_F(EndMatcherTest, OneXOneY) {
@@ -83,14 +83,14 @@ TEST_F(EndMatcherTest, OneXOneY) {
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
-  ASSERT_EQ(matcher.stats_cluster_count, 2);
-  ASSERT_EQ(matcher.matched_clusters.size(), 2);
-  EXPECT_EQ(matcher.matched_clusters.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_clusters.back().time_span(), 201);
-  EXPECT_EQ(matcher.matched_clusters.front().c1.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_clusters.front().c2.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_clusters.back().c1.hit_count(), 0);
-  EXPECT_EQ(matcher.matched_clusters.back().c2.hit_count(), 122);
+  EXPECT_EQ(matcher.stats_event_count, 2);
+  EXPECT_EQ(matcher.matched_events.size(), 2);
+  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
+  EXPECT_EQ(matcher.matched_events.back().time_span(), 201);
+  EXPECT_EQ(matcher.matched_events.front().c1.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.front().c2.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.back().c1.hit_count(), 0);
+  EXPECT_EQ(matcher.matched_events.back().c2.hit_count(), 122);
 }
 
 TEST_F(EndMatcherTest, OneXY) {
@@ -99,11 +99,11 @@ TEST_F(EndMatcherTest, OneXY) {
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
-  ASSERT_EQ(matcher.stats_cluster_count, 1);
-  ASSERT_EQ(matcher.matched_clusters.size(), 1);
-  EXPECT_EQ(matcher.matched_clusters.front().time_span(), 201);
-  EXPECT_EQ(matcher.matched_clusters.front().c1.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_clusters.front().c2.hit_count(), 122);
+  EXPECT_EQ(matcher.stats_event_count, 1);
+  EXPECT_EQ(matcher.matched_events.size(), 1);
+  EXPECT_EQ(matcher.matched_events.front().time_span(), 201);
+  EXPECT_EQ(matcher.matched_events.front().c1.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.front().c2.hit_count(), 122);
 }
 
 TEST_F(EndMatcherTest, TwoXY) {
@@ -114,14 +114,14 @@ TEST_F(EndMatcherTest, TwoXY) {
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
-  ASSERT_EQ(matcher.stats_cluster_count, 2);
-  ASSERT_EQ(matcher.matched_clusters.size(), 2);
-  EXPECT_EQ(matcher.matched_clusters.front().time_span(), 301);
-  EXPECT_EQ(matcher.matched_clusters.back().time_span(), 251);
-  EXPECT_EQ(matcher.matched_clusters.front().c1.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_clusters.front().c2.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_clusters.back().c1.hit_count(), 122);
-  EXPECT_EQ(matcher.matched_clusters.back().c2.hit_count(), 122);
+  EXPECT_EQ(matcher.stats_event_count, 2);
+  EXPECT_EQ(matcher.matched_events.size(), 2);
+  EXPECT_EQ(matcher.matched_events.front().time_span(), 301);
+  EXPECT_EQ(matcher.matched_events.back().time_span(), 251);
+  EXPECT_EQ(matcher.matched_events.front().c1.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.front().c2.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.back().c1.hit_count(), 122);
+  EXPECT_EQ(matcher.matched_events.back().c2.hit_count(), 122);
 }
 
 TEST_F(EndMatcherTest, JustIntside) {
@@ -130,7 +130,7 @@ TEST_F(EndMatcherTest, JustIntside) {
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
-  ASSERT_EQ(matcher.matched_clusters.size(), 1);
+  EXPECT_EQ(matcher.matched_events.size(), 1);
 }
 
 TEST_F(EndMatcherTest, JustOutside) {
@@ -139,7 +139,7 @@ TEST_F(EndMatcherTest, JustOutside) {
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(true);
-  ASSERT_EQ(matcher.matched_clusters.size(), 2);
+  EXPECT_EQ(matcher.matched_events.size(), 2);
 }
 
 TEST_F(EndMatcherTest, DontForce) {
@@ -148,22 +148,22 @@ TEST_F(EndMatcherTest, DontForce) {
   matcher.insert(0, x);
   matcher.insert(1, y);
   matcher.match(false);
-  ASSERT_EQ(matcher.matched_clusters.size(), 0);
+  EXPECT_EQ(matcher.matched_events.size(), 0);
 
   x.push_back(mock_cluster(0, 0, 10, 800, 1000));
   matcher.insert(0, x);
   matcher.match(false);
-  ASSERT_EQ(matcher.matched_clusters.size(), 0);
+  EXPECT_EQ(matcher.matched_events.size(), 0);
 
   y.push_back(mock_cluster(1, 0, 10, 900, 1000));
   matcher.insert(1, y);
   matcher.match(false);
-  ASSERT_EQ(matcher.matched_clusters.size(), 0);
+  EXPECT_EQ(matcher.matched_events.size(), 0);
 
   x.push_back(mock_cluster(0, 0, 10, 1000, 1200));
   matcher.insert(0, x);
   matcher.match(false);
-  ASSERT_EQ(matcher.matched_clusters.size(), 1);
+  EXPECT_EQ(matcher.matched_events.size(), 1);
 }
 
 int main(int argc, char **argv) {
