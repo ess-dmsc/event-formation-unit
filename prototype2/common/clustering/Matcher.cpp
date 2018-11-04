@@ -33,7 +33,7 @@ bool Matcher::belongs_end(const Event &event, const Cluster &cluster) const {
   return (delta_end(event, cluster) <= pMaxDeltaTime);
 }
 
-void Matcher::merge(uint8_t plane, ClusterContainer &c) {
+void Matcher::insert(uint8_t plane, ClusterContainer &c) {
   if (c.empty()) {
     return;
   }
@@ -43,6 +43,10 @@ void Matcher::merge(uint8_t plane, ClusterContainer &c) {
     latest_x = std::max(latest_x, c.back().time_start());
   }
   unmatched_clusters.splice(unmatched_clusters.end(), c);
+}
+
+void Matcher::flush() {
+  match_end(true);
 }
 
 void Matcher::match_end(bool force) {

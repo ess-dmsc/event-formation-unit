@@ -108,7 +108,7 @@ TEST_F(EventTest, TimeSpan) {
 }
 
 TEST_F(EventTest, IgnoreInvalidPlane) {
-  event = Event(1,3);
+  event = Event(1, 3);
 
   event.insert_hit({0, 0, 0, 0});
   event.insert_hit({5, 1, 0, 0});
@@ -117,9 +117,54 @@ TEST_F(EventTest, IgnoreInvalidPlane) {
   EXPECT_EQ(event.time_span(), 46);
 }
 
+TEST_F(EventTest, TimeOverlapNoOverlap) {
+  Cluster cluster;
+  EXPECT_EQ(event.time_overlap(cluster), 0);
+
+  event.insert_hit({0, 0, 0, 0});
+  event.insert_hit({5, 0, 0, 0});
+  cluster.insert_hit({6, 0, 0, 0});
+  cluster.insert_hit({12, 0, 0, 0});
+  EXPECT_EQ(event.time_overlap(cluster), 0);
+}
+
+TEST_F(EventTest, TimeOverlapInternalPoint) {
+  Cluster cluster;
+  cluster.insert_hit({3, 0, 0, 0});
+  event.insert_hit({0, 0, 0, 0});
+  event.insert_hit({6, 0, 0, 0});
+  EXPECT_EQ(event.time_overlap(cluster), 1);
+}
+
+TEST_F(EventTest, TimeOverlapTouchEdge) {
+  Cluster cluster;
+  event.insert_hit({0, 0, 0, 0});
+  event.insert_hit({6, 0, 0, 0});
+  cluster.insert_hit({6, 0, 0, 0});
+  cluster.insert_hit({12, 0, 0, 0});
+  EXPECT_EQ(event.time_overlap(cluster), 1);
+}
+
+TEST_F(EventTest, Overlap) {
+  Cluster cluster;
+
+  event.insert_hit({0, 0, 0, 0});
+  event.insert_hit({7, 0, 0, 0});
+  EXPECT_EQ(event.time_overlap(cluster), 0);
+
+  cluster.insert_hit({12, 0, 0, 0});
+  EXPECT_EQ(event.time_overlap(cluster), 0);
+
+  cluster.insert_hit({6, 0, 0, 0});
+  EXPECT_EQ(event.time_overlap(cluster), 2);
+
+  cluster.insert_hit({5, 0, 0, 0});
+  EXPECT_EQ(event.time_overlap(cluster), 3);
+}
+
 TEST_F(EventTest, DebugPrint) {
-  event.insert_hit({7,0,5,1});
-  event.insert_hit({0,1,5,1});
+  event.insert_hit({7, 0, 5, 1});
+  event.insert_hit({0, 1, 5, 1});
 
   MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
   MESSAGE() << "SIMPLE:\n" << event.debug() << "\n";

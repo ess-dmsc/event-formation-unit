@@ -53,7 +53,7 @@ protected:
 TEST_F(ClusterMatcherTest, MergeNoClusters) {
   ClusterContainer c;
   MESSAGE() << "This it NOT a test, as novalidation occurs (cant access private fields)\n";
-  matcher->merge(0, c);
+  matcher->insert(0, c);
 }
 
 TEST_F(ClusterMatcherTest, OneX) {

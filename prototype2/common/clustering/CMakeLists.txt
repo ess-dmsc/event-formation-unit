@@ -60,6 +60,7 @@ set(MatcherTest_INC
   Cluster.h
   Hit.h
   AbstractClusterer.h
+  AbstractMatcher.h
   Event.h
   Matcher.h
   )

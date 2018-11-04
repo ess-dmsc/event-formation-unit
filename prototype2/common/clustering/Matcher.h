@@ -7,27 +7,18 @@
 
 #pragma once
 
-#include <common/clustering/GapClusterer.h>
-#include <common/clustering/Event.h>
-#include <memory>
-#include <deque>
+#include <common/clustering/AbstractMatcher.h>
 
-class Matcher {
+class Matcher : public AbstractMatcher {
 public:
   explicit Matcher(uint64_t maxDeltaTime);
 
-  void merge(uint8_t plane, ClusterContainer &c);
+  void insert(uint8_t plane, ClusterContainer &c) override;
+  void flush() override;
 
   void match_end(bool force);
 
-  /// \todo match in other ways -- mass, overlap?
-
-  size_t stats_cluster_count{0};
-
   ClusterContainer unmatched_clusters;
-
-  std::deque<Event> matched_clusters;
-
 private:
   uint64_t pMaxDeltaTime{0};
 

@@ -122,7 +122,7 @@ TEST_F(ClusterTest, TimeMass) {
   EXPECT_EQ(cluster.time_center(), 2);
 }
 
-TEST_F(ClusterTest, TimeStrips) {
+TEST_F(ClusterTest, CoordsMass) {
   EXPECT_EQ(cluster.coord_mass(), 0);
   EXPECT_TRUE(std::isnan(cluster.coord_center()));
 
