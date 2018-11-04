@@ -21,13 +21,26 @@
 
 class AbstractMatcher {
 public:
-  AbstractMatcher() = default;
+  AbstractMatcher(uint64_t latency)
+      : latency_(latency) {}
+  AbstractMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2)
+      : latency_(latency), plane1_(plane1), plane2_(plane2) {}
   virtual ~AbstractMatcher() = default;
 
   /// \brief insert new clusters, queueing them up for matching
   /// \param plane identified plane of all clusters in container
   /// \param other container of clusters in one plane
-  virtual void insert(uint8_t plane, ClusterContainer &c) = 0;
+  void insert(uint8_t plane, ClusterContainer &c) {
+    if (c.empty()) {
+      return;
+    }
+    if (plane == plane1_) {
+      latest_x_ = std::max(latest_x_, c.back().time_start());
+    } else if (plane == plane2_) {
+      latest_y_ = std::max(latest_y_, c.back().time_start());
+    }
+    unmatched_clusters_.splice(unmatched_clusters_.end(), c);
+  }
 
   /// \brief match queued up clusters into events
   /// \param flush if all queued clusters should be matched regardless of
@@ -38,9 +51,23 @@ public:
   size_t stats_cluster_count{0};
   /// \todo discarded, other counters?
 protected:
+  uint64_t latency_{0};
+  uint8_t plane1_{0};
+  uint8_t plane2_{1};
+
+  ClusterContainer unmatched_clusters_;
+  uint64_t latest_x_{0};
+  uint64_t latest_y_{0};
+
+
   void stash_event(Event& event) {
     matched_clusters.emplace_back(std::move(event));
     stats_cluster_count++;
+  }
+
+  bool ready_to_be_matched(const Cluster& cluster) const {
+    return ((unmatched_clusters_.size() > 2) &&
+        (std::min(latest_x_, latest_y_) - cluster.time_end()) > latency_);
   }
 
 };

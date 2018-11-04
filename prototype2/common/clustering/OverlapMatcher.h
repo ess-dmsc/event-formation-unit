@@ -11,20 +11,10 @@
 
 class OverlapMatcher : public AbstractMatcher {
 public:
-  OverlapMatcher(uint64_t latency);
-  OverlapMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2);
+  OverlapMatcher(uint64_t latency)
+      : AbstractMatcher(latency) {}
+  OverlapMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2)
+      : AbstractMatcher(latency, plane1, plane2) {}
 
-  void insert(uint8_t plane, ClusterContainer &c) override;
   void match(bool flush) override;
-
-private:
-  uint64_t latency_{0};
-  uint8_t plane1_{0};
-  uint8_t plane2_{1};
-
-  ClusterContainer unmatched_clusters_;
-  uint64_t latest_x_{0};
-  uint64_t latest_y_{0};
-
-  bool ready_to_be_matched(double time) const;
 };
