@@ -13,6 +13,14 @@
 Event::Event(uint8_t plane1, uint8_t plane2)
     : plane1_(plane1), plane2_(plane2) {}
 
+uint8_t Event::plane1() const {
+  return plane1_;
+}
+
+uint8_t Event::plane2() const {
+  return plane2_;
+}
+
 void Event::insert(const Hit &e) {
   if (e.plane == plane1_) {
     c1.insert(e);

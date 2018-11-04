@@ -26,7 +26,13 @@ public:
   ///        that they would be considered part of the same cluster
   GapClusterer(uint64_t max_time_gap, uint16_t max_coord_gap);
 
-  /// \brief ingest new hits and potentially perform clustering
+  /// \brief insert new hit and perform clustering
+  /// \param hit to be added to cluster. Hits must be chronological between
+  ///         subsequent calls. It may be more efficient to use:
+  /// \sa GapClusterer::cluster
+  void insert(const Hit &hit) override;
+
+  /// \brief insert new hits and perform clustering
   /// \param hits container of hits to be processed. Hits must be chronologically
   ///        sorted within the container and between subsequent calls.
   void cluster(const HitContainer &hits) override;

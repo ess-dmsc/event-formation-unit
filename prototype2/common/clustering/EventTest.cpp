@@ -11,6 +11,12 @@ protected:
   Event event;
 };
 
+TEST_F(EventTest, Planes) {
+  event = Event(3,7);
+  EXPECT_EQ(event.plane1(), 3);
+  EXPECT_EQ(event.plane2(), 7);
+}
+
 TEST_F(EventTest, Insert) {
   event.insert({0, 0, 0, 0});
   EXPECT_EQ(event.c1.hit_count(), 1);

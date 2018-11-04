@@ -1,7 +1,7 @@
 /* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
-//===----------------------------------------------------------------------===//
 ///
-/// \file
+/// \file EndMatcher.h
+/// \brief EndMatcher class implementation
 ///
 //===----------------------------------------------------------------------===//
 

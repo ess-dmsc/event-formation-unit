@@ -28,7 +28,8 @@ public:
   AbstractClusterer() = default;
   virtual ~AbstractClusterer() = default;
 
-  // \todo insert one hit at a time
+  /// \brief inserts new hit and potentially performs some clustering
+  virtual void insert(const Hit &hit) = 0;
 
   /// \brief inserts new hits and potentially performs some clustering
   virtual void cluster(const HitContainer &hits) = 0;

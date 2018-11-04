@@ -1,7 +1,8 @@
 /* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
-/// \file
+/// \file OverlapMatcher.h
+/// \brief OverlapMatcher class implementation
 ///
 //===----------------------------------------------------------------------===//
 

@@ -17,19 +17,26 @@
 ///        evaluating dimensions, thus including the endpoints.
 
 class Event {
+private:
+  uint8_t plane1_ {0};
+  uint8_t plane2_ {1};
+
 public:
-  Event() {}
+  Cluster c1; ///< cluster in dimension 1
+  Cluster c2; ///< cluster in dimension 2
+
+  /// \brief Event default constructor, planes default to 0 and 1
+  Event() = default;
 
   /// \brief Event constructor, selecting planes
   /// \param plane1 id of first plane selected for event
   /// \param plane2 id of second plane selected for event
   Event(uint8_t plane1, uint8_t plane2);
 
-  uint8_t plane1_ {0};
-  uint8_t plane2_ {1};
-
-  Cluster c1; ///< cluster in dimension 1
-  Cluster c2; ///< cluster in dimension 2
+  /// \returns id of first plane selected for event
+  uint8_t plane1() const;
+  /// \returns id of second plane selected for event
+  uint8_t plane2() const;
 
   /// \brief adds hit to event
   ///        Inserts hit into the appropriate plane.

@@ -10,22 +10,24 @@
 #include <algorithm>
 
 GapClusterer::GapClusterer(uint64_t max_time_gap, uint16_t max_coord_gap)
-    : AbstractClusterer()
-    , max_time_gap_(max_time_gap)
-    , max_coord_gap_(max_coord_gap) {}
+    : AbstractClusterer(), max_time_gap_(max_time_gap), max_coord_gap_(max_coord_gap) {}
+
+void GapClusterer::insert(const Hit &hit) {
+  // Stash cluster if time gap to next hit is too large
+  if (!current_time_cluster_.empty() &&
+      (hit.time - current_time_cluster_.back().time) > max_time_gap_) {
+    flush();
+  }
+
+  // Insert in either case
+  current_time_cluster_.emplace_back(hit);
+}
 
 void GapClusterer::cluster(const HitContainer &hits) {
   //It is assumed that hits are sorted in time
 
   for (const auto &hit : hits) {
-    // Stash cluster if time gap to next hit is too large
-    if (!current_time_cluster_.empty() &&
-        (hit.time - current_time_cluster_.back().time) > max_time_gap_) {
-      flush();
-    }
-
-    // Insert in either case
-    current_time_cluster_.emplace_back(hit);
+    insert(hit);
   }
 }
 

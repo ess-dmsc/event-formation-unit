@@ -18,9 +18,9 @@ void Cluster::insert(const Hit &e) {
   }
 
   // If plane identities don't match, invalidate
-  /// \todo this needs more testing
   if (plane_ != e.plane) {
     plane_ = -1;
+    // For now it's decided to not discard everything in this case
     // clear();
   }
 
@@ -47,6 +47,7 @@ void Cluster::merge(Cluster &other) {
   // If plane identities don't match, invalidate
   if (other.plane_ != plane_) {
     plane_ = -1;
+    // For now it's decided to not discard everything in this case
     // clear();
   }
 
