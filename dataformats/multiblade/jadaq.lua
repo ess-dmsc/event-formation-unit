@@ -27,6 +27,7 @@ function jadaq_proto.dissector(buffer,pinfo,tree)
     local hits = buffer(22, 2):le_uint()
     local vermaj = buffer(24, 1):le_uint()
     local vermin = buffer(25, 1):le_uint()
+    local seqno = buffer(26, 4):le_uint()
 
     local jadaqhdr = tree:add(jadaq_proto,buffer(),
     string.format("JADAQ digitizer: %d, hits: %d", digit, hits))
@@ -39,6 +40,7 @@ function jadaq_proto.dissector(buffer,pinfo,tree)
     jadaqhdr:add(buffer(20, 2), "element id " .. elemid)
     jadaqhdr:add(buffer(22, 2), "number of elements " .. hits)
     jadaqhdr:add(buffer(24, 2), "version " .. vermaj .. "." .. vermin)
+    jadaqhdr:add(buffer(26, 4), "sequence number " .. seqno )
 
     pinfo.cols.info = string.format("digitizer: %3d, hits: %3d", digit, hits)
 
