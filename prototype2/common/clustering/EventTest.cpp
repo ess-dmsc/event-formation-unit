@@ -20,7 +20,7 @@ TEST_F(EventTest, Planes) {
 TEST_F(EventTest, Insert) {
   event.insert({0, 0, 0, 0});
   EXPECT_EQ(event.c1.hit_count(), 1);
-  event.insert({0, 1, 0, 0});
+  event.insert({0, 0, 0, 1});
   EXPECT_EQ(event.c2.hit_count(), 1);
 }
 
@@ -68,9 +68,9 @@ TEST_F(EventTest, MergeXY) {
   x.insert({0, 0, 0, 0});
   event.merge(x);
 
-  y.insert({0, 1, 0, 0});
-  y.insert({0, 1, 0, 0});
-  y.insert({0, 1, 0, 0});
+  y.insert({0, 0, 0, 1});
+  y.insert({0, 0, 0, 1});
+  y.insert({0, 0, 0, 1});
   event.merge(y);
   EXPECT_EQ(event.c1.hit_count(), 2);
   EXPECT_EQ(event.c2.hit_count(), 3);
@@ -95,8 +95,8 @@ TEST_F(EventTest, TimeSpanXOnly) {
 TEST_F(EventTest, TimeSpanYOnly) {
   Cluster y;
 
-  y.insert({5, 1, 0, 0});
-  y.insert({1, 1, 0, 0});
+  y.insert({5, 0, 0, 1});
+  y.insert({1, 0, 0, 1});
   event.merge(y);
   EXPECT_EQ(event.time_end(), 5);
   EXPECT_EQ(event.time_start(), 1);
@@ -110,8 +110,8 @@ TEST_F(EventTest, TimeSpan) {
   x.insert({7, 0, 0, 0});
   event.merge(x);
 
-  y.insert({5, 1, 0, 0});
-  y.insert({1, 1, 0, 0});
+  y.insert({5, 0, 0, 1});
+  y.insert({1, 0, 0, 1});
   event.merge(y);
   EXPECT_EQ(event.time_end(), 7);
   EXPECT_EQ(event.time_start(), 1);
@@ -122,9 +122,9 @@ TEST_F(EventTest, IgnoreInvalidPlane) {
   event = Event(1, 3);
 
   event.insert({0, 0, 0, 0});
-  event.insert({5, 1, 0, 0});
-  event.insert({10, 2, 0, 0});
-  event.insert({50, 3, 0, 0});
+  event.insert({5, 0, 0, 1});
+  event.insert({10, 0, 0, 2});
+  event.insert({50, 0, 0, 3});
   EXPECT_EQ(event.time_span(), 46);
 }
 
@@ -174,8 +174,8 @@ TEST_F(EventTest, Overlap) {
 }
 
 TEST_F(EventTest, DebugPrint) {
-  event.insert({7, 0, 5, 1});
-  event.insert({0, 1, 5, 1});
+  event.insert({7, 5, 1, 0});
+  event.insert({0, 5, 1, 1});
 
   MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
   MESSAGE() << "SIMPLE:\n" << event.debug() << "\n";

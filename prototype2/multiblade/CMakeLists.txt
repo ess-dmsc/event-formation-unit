@@ -50,4 +50,3 @@ create_test_executable(MBCAENBaseTest)
 
 add_subdirectory(caen)
 add_subdirectory(clustering)
-add_subdirectory(generators)

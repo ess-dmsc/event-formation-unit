@@ -37,14 +37,14 @@ TEST_F(HitTest, CompoundMapping) {
   EXPECT_EQ(ct.field_name(0), "time");
   EXPECT_EQ(ct[0], hdf5::datatype::create<uint64_t >());
 
-  EXPECT_EQ(ct.field_name(1), "plane");
-  EXPECT_EQ(ct[1], hdf5::datatype::create<uint8_t>());
+  EXPECT_EQ(ct.field_name(1), "coordinate");
+  EXPECT_EQ(ct[1], hdf5::datatype::create<uint16_t>());
 
-  EXPECT_EQ(ct.field_name(2), "coordinate");
+  EXPECT_EQ(ct.field_name(2), "weight");
   EXPECT_EQ(ct[2], hdf5::datatype::create<uint16_t>());
 
-  EXPECT_EQ(ct.field_name(3), "weight");
-  EXPECT_EQ(ct[3], hdf5::datatype::create<uint16_t>());
+  EXPECT_EQ(ct.field_name(3), "plane");
+  EXPECT_EQ(ct[3], hdf5::datatype::create<uint8_t>());
 }
 
 TEST_F(HitTest, CreateFile) {

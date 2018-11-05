@@ -43,9 +43,9 @@ struct __attribute__ ((packed)) Hit {
 
   /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
   uint64_t time{0};
-  uint8_t plane{0};
   uint16_t coordinate{0};
   uint16_t weight{0};
+  uint8_t plane{0};
   /// !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
   /// \brief prints values for debug purposes
@@ -62,9 +62,9 @@ public:
     H5_COMPOUND_INIT;
     /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(time);
-    H5_COMPOUND_INSERT_MEMBER(plane);
     H5_COMPOUND_INSERT_MEMBER(coordinate);
     H5_COMPOUND_INSERT_MEMBER(weight);
+    H5_COMPOUND_INSERT_MEMBER(plane);
     H5_COMPOUND_RETURN;
   }
 };
