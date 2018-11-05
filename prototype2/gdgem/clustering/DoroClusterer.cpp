@@ -66,7 +66,7 @@ void DoroClusterer::cluster_by_strip(HitContainer &hits) {
 }
 //====================================================================================================================
 void DoroClusterer::stash_cluster(Cluster &cluster) {
-  if (cluster.entries.size() < pMinClusterSize)
+  if (cluster.hits.size() < pMinClusterSize)
     return;
 
   DTRACE(DEB, "******** VALID ********");

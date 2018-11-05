@@ -11,7 +11,7 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 void Cluster::insert_hit(const Hit &e) {
-  if (entries.empty()) {
+  if (hits.empty()) {
     plane_id = e.plane_id;
     time_start = time_end = e.time;
     strip_start = strip_end = e.strip;
@@ -23,7 +23,7 @@ void Cluster::insert_hit(const Hit &e) {
     plane_id = -1;
   }
 
-  entries.push_back(e);
+  hits.push_back(e);
   adc_sum += e.adc;
   strip_mass += e.adc * e.strip;
   time_mass += e.adc * e.time;
@@ -35,7 +35,7 @@ void Cluster::insert_hit(const Hit &e) {
 
 bool Cluster::empty() const
 {
-  return entries.empty();
+  return hits.empty();
 }
 
 double Cluster::time_span() const {
@@ -43,7 +43,7 @@ double Cluster::time_span() const {
 }
 
 uint16_t Cluster::strip_span() const {
-  if (entries.empty()) {
+  if (hits.empty()) {
     return 0;
   }
   return (strip_end - strip_start) + 1u;
@@ -60,11 +60,11 @@ double Cluster::time_center() const {
 /// \todo make work with doubles (or not, if we decimate timestamps?)
 void Cluster::analyze(bool weighted, uint16_t max_timebins,
                       uint16_t max_timedif) {
-  if (entries.empty()) {
+  if (hits.empty()) {
     return;
   }
 
-  std::sort(entries.begin(), entries.end(),
+  std::sort(hits.begin(), hits.end(),
       [](const Hit &c1, const Hit &c2) {
     return c1.time < c2.time;
   });
@@ -77,7 +77,7 @@ void Cluster::analyze(bool weighted, uint16_t max_timebins,
   int16_t uspan_max = std::numeric_limits<int16_t>::min();
   double earliest = std::min(time_start, time_end - static_cast<double>(max_timedif));
   std::set<double> timebins;
-  for (auto it = entries.rbegin(); it != entries.rend(); ++it) {
+  for (auto it = hits.rbegin(); it != hits.rend(); ++it) {
     auto e = *it;
     if (e.time == time_end) {
       if (weighted) {
@@ -112,11 +112,11 @@ uint32_t Cluster::utpc_center_rounded() const {
 }
 
 void Cluster::merge(Cluster &other) {
-  if (other.entries.empty()) {
+  if (other.hits.empty()) {
     return;
   }
 
-  if (entries.empty()) {
+  if (hits.empty()) {
     *this = std::move(other);
     return;
   }
@@ -125,8 +125,8 @@ void Cluster::merge(Cluster &other) {
     return;
   }
 
-  entries.reserve( entries.size() + other.entries.size() ); // preallocate memory
-  entries.insert( entries.end(), other.entries.begin(), other.entries.end() );
+  hits.reserve( hits.size() + other.hits.size() ); // preallocate memory
+  hits.insert( hits.end(), other.hits.begin(), other.hits.end() );
 
   adc_sum += other.adc_sum;
   strip_mass += other.strip_mass;

@@ -17,6 +17,9 @@
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
+
+#include <common/clustering/GapClusterer.h>
+
 #include <unistd.h>
 
 #include <libs/include/SPSCFifo.h>
@@ -125,9 +128,11 @@ void CAENBase::input_thread() {
 }
 
 void CAENBase::processing_thread() {
+  HitContainer wire_hits, strip_hits;
+
   const uint32_t ncass = 6;
-  uint8_t nwires = 32;
-  uint8_t nstrips = 32;
+  uint16_t nwires = 32;
+  uint16_t nstrips = 32;
 
   std::shared_ptr<ReadoutFile> dumpfile;
   if (!MBCAENSettings.FilePrefix.empty()) {
@@ -245,10 +250,14 @@ void CAENBase::processing_thread() {
           /// \todo magic number? should be part of geometry class?
           /// \todo do not bin 0-channels for the complementary space
           /// \todo unfold channels among digitizers
-          if (dp.channel >= 32) {
-            histograms.bin_x(dp.channel - 32, dp.adc);
-          } else {
+          if (dp.channel < nwires) {
+            //wires
             histograms.bin_y(dp.channel, dp.adc);
+            //wire_hits.push_back({dp.local_time, 0, dp.channel, dp.adc});
+          } else {
+            //strips
+            histograms.bin_x((dp.channel - nwires), dp.adc);
+            //strip_hits.push_back({dp.local_time, 1, dp.channel, dp.adc});
           }
 
           if (builder[cassette].addDataPoint(dp.channel, dp.adc, dp.local_time)) {
@@ -277,6 +286,10 @@ void CAENBase::processing_thread() {
           /// \todo we need to also flush leftover clusters in case of loop termination
 
         }
+
+
+        // \todo match clusters here
+
       }
     }
   }

@@ -44,8 +44,8 @@ struct EventFilter {
       return false;
     }
     if (enforce_minimum_hits &&
-            ((event.x.entries.size() < minimum_hits) ||
-                (event.y.entries.size() < minimum_hits))) {
+            ((event.x.hits.size() < minimum_hits) ||
+                (event.y.hits.size() < minimum_hits))) {
       minimum_hits_dropped++;
       return false;
     }
