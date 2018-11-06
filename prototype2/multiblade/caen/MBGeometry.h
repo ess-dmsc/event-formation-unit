@@ -19,6 +19,8 @@ public:
   MBGeometry(uint16_t cassettes, uint16_t wires, uint16_t strips)
      : NCassettes(cassettes), NWires(wires), NStrips(strips) {
        setConfigurationFreia();
+       MaxWireCh = NWires - 1;
+       MaxStripCh = NWires + NStrips - 1;
      };
 
   void setConfigurationFreia() {
@@ -26,6 +28,7 @@ public:
     yMultiplier = NStrips;
     MaxX = NStrips - 1;
     MaxY = NCassettes * NWires - 1;
+
   }
   void setConfigurationEstia() {
     Freia = false;
@@ -52,45 +55,56 @@ public:
 
   // Wires have channels from 0 to NWires -1
   bool isWire(uint16_t channel) {
-    return (channel < NWires);
+    return (channel <= MaxWireCh);
   }
 
   // Strips have channels from NWires to NWires + NStrips - 1
   bool isStrip(uint16_t channel) {
-    return ( (not isWire(channel)) and (channel < NWires + NStrips) );
+    return ( (not isWire(channel)) and (channel <= MaxStripCh) );
   }
 
 
-  uint32_t getx(uint16_t cassette, uint16_t wire_channel, uint16_t strip_channel) {
-    if ( (not isWire(wire_channel)) or (not isStrip(strip_channel)) ) {
-      return 0;
+  uint32_t getx(uint16_t cassette, uint16_t wire_ch, uint16_t strip_ch) {
+    if ( (not isWire(wire_ch)) or (not isStrip(strip_ch)) ) {
+      return 0xffffffff; // will produce invalid geometry
+    }
+
+    if (MB18) {
+      // Swap odd even
+      wire_ch  = wire_ch  ^ 1;
+      strip_ch = strip_ch ^ 1;
     }
 
     if (Freia) {
-      return NWires + NStrips - strip_channel - 1;
+      return strip_ch - NWires; // or MaxWireCh + 1, same thing
     } else { // Estia
       if (MB18) {
-        return cassette * NWires + NWires - 1  - (wire_channel ^ 1);
+        return cassette * NWires + 31 - wire_ch;
       } else { // MB16
-        return cassette * NWires + wire_channel;
+        return cassette * NWires + wire_ch;
       }
     }
   }
 
+  uint32_t gety(uint16_t cassette, uint16_t wire_ch, uint16_t strip_ch) {
+    if ( (not isWire(wire_ch)) or (not isStrip(strip_ch)) ) {
+      return 0xffffffff; // will produce invalid geometry
+    }
 
-  uint32_t gety(uint16_t cassette, uint16_t wire_channel, uint16_t strip_channel) {
-    if ( (not isWire(wire_channel)) or (not isStrip(strip_channel)) ) {
-      return 0;
+    if (MB18) {
+      // Swap odd even
+      wire_ch  = wire_ch  ^ 1;
+      strip_ch = strip_ch ^ 1;
     }
 
     if (Freia) {
       if (MB18) {
-        return cassette * NWires + NWires - 1 - (wire_channel ^ 1);
+        return cassette * NWires + wire_ch;
       } else { // MB16
-        return cassette * NWires + wire_channel;
+        return cassette * NWires + (31 - wire_ch);
       }
     } else { // Estia
-      return strip_channel - 32;
+      return strip_ch - NWires; // or MaxWireCh + 1, same thing
     }
   }
 
@@ -101,7 +115,9 @@ public:
 
     uint16_t NCassettes;
     uint16_t NWires; // per cassette
+    uint16_t MaxWireCh;
     uint16_t NStrips; // per cassette
+    uint16_t MaxStripCh;
 
     uint16_t yMultiplier;
     uint16_t MaxX;
