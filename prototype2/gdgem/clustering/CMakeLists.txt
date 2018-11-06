@@ -4,51 +4,55 @@
 
 # Clustering
 
-get_filename_component(TEST_DATA_PATH "test_data/run16long.h5" DIRECTORY)
+get_filename_component(TEST_DATA_PATH "test_data/a00001.h5" DIRECTORY)
 
 set(ClusteringBase_SRC
-    ../nmx/Event.cpp
-    ../nmx/Cluster.cpp
-    ../nmx/Hit.cpp
-    ../srs/SRSTime.cpp
-    ../srs/SRSMappings.cpp
-    HitsQueue.cpp
-    HitSorter.cpp
-    ClusterMatcher.cpp
-    )
+  ../NMXConfig.cpp
+  ../nmx/Event.cpp
+  ../nmx/Cluster.cpp
+  ../nmx/Hit.cpp
+  ../srs/SRSTime.cpp
+  ../srs/SRSMappings.cpp
+  ../vmm3/CalibrationFile.cpp
+  HitsQueue.cpp
+  HitSorter.cpp
+  ClusterMatcher.cpp
+  )
 set(ClusteringBase_INC
-    ../nmx/Event.h
-    ../nmx/Readout.h
-    ../nmx/Cluster.h
-    ../nmx/Hit.h
-    ../nmx/Readout.h
-    ../srs/SRSTime.h
-    ../srs/SRSMappings.h
-    HitContainer.h
-    HitsQueue.h
-    HitSorter.h
-    AbstractClusterer.h
-    ClusterMatcher.h
-    TestDataShort.h
-    )
+  ../NMXConfig.h
+  ../nmx/Event.h
+  ../nmx/Readout.h
+  ../nmx/Cluster.h
+  ../nmx/Hit.h
+  ../nmx/Readout.h
+  ../srs/SRSTime.h
+  ../srs/SRSMappings.h
+  ../vmm3/CalibrationFile.h
+  HitContainer.h
+  HitsQueue.h
+  HitSorter.h
+  AbstractClusterer.h
+  ClusterMatcher.h
+  TestDataShort.h
+  )
 
 set(srs_converter_SRC
-    ${ClusteringBase_SRC}
-    test_data/srs_converter.cpp)
+  ${ClusteringBase_SRC}
+  old_formats/srs_converter.cpp)
 set(srs_converter_INC
-  test_data/OldReadoutFile.h
-    ${ClusteringBase_INC})
+  old_formats/OldReadoutFile.h
+  ${ClusteringBase_INC})
 #create_executable(srs_converter)
 
 message(STATUS "WARNING DISABLED HitsQueueTest - remember to re-enable")
-# set(HitsQueueTest_SRC
-#     ${ClusteringBase_SRC}
-#     HitsQueueTest.cpp)
-# set(HitsQueueTest_INC
-#     ${ClusteringBase_INC})
-# create_test_executable(HitsQueueTest SKIP_MEMGRIND)
-# target_compile_definitions(HitsQueueTest
-#     PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
+set(HitsQueueTest_SRC
+  ${ClusteringBase_SRC}
+  HitsQueueTest.cpp)
+set(HitsQueueTest_INC
+  ${ClusteringBase_INC})
+create_test_executable(HitsQueueTest SKIP_MEMGRIND)
+target_compile_definitions(HitsQueueTest
+  PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
 
 message(STATUS "WARNING DISABLED HitSorterTest - remember to re-enable")

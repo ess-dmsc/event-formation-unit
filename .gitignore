@@ -21,3 +21,7 @@ doxygen/
 CMakeLists.txt.user
 .idea/
 .idea
+
+#large test files
+a10000.h5
+a01000.h5

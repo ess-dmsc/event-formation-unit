@@ -4,94 +4,103 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <gdgem/clustering/HitsQueue.h>
+#include <gdgem/NMXConfig.h>
 #include <test/TestBase.h>
 #include <functional>
 
-#include <gdgem/clustering/TestDataShort.h>
+//#include <gdgem/clustering/TestDataShort.h>
 #include <gdgem/nmx/Readout.h>
-
-constexpr float no_offset = 0.0;
-constexpr float unit_slope = 1.0;
 
 #define UNUSED __attribute__((unused))
 
 class HitsQueueTest : public TestBase {
 protected:
-  std::vector<Readout> long_data;
+  NMXConfig opts;
+  std::string DataPath;
+  std::vector<Readout> readouts;
 
-  // Maximum time difference between hits in time sorted cluster (x or y)
-  double pMaxTimeGap = 200;
-  std::shared_ptr<HitsQueue> queue;
-  SRSTime srstime;
+  std::shared_ptr<HitsQueue> p0;
+  std::shared_ptr<HitsQueue> p1;
 
   virtual void SetUp() {
-    std::string DataPath = TEST_DATA_PATH;
-//    ReadoutFile::read(DataPath + "run16long", long_data);
+    DataPath = TEST_DATA_PATH;
+    opts = NMXConfig(DataPath + "config.json", "");
 
-    srstime.set_bc_clock(20);
-    srstime.set_tac_slope(60);
-    srstime.set_trigger_resolution_ns(3.125);
-    srstime.set_acquisition_window(4000);
-
-    queue = std::make_shared<HitsQueue>(srstime, pMaxTimeGap);
+    p0 = std::make_shared<HitsQueue>(opts.time_config, opts.clusterer_x.max_time_gap);
+    p1 = std::make_shared<HitsQueue>(opts.time_config, opts.clusterer_y.max_time_gap);
   }
 
   virtual void TearDown() {
   }
 };
 
-TEST_F(HitsQueueTest, Run16_no_trigger) {
-  for (auto hit : Run16) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
-    queue->store(0,0,0,chiptime);
-  }
-  EXPECT_EQ(queue->hits().size(), 0);
-  queue->sort_and_correct();
-  EXPECT_EQ(queue->hits().size(), 106);
-  queue->sort_and_correct();
-  EXPECT_EQ(queue->hits().size(), 50);
-  queue->sort_and_correct();
-  EXPECT_EQ(queue->hits().size(), 0);
+TEST_F(HitsQueueTest, PrintConfig) {
+  MESSAGE() << "Test data config:\n" << opts.debug() << "\n";
 }
 
-TEST_F(HitsQueueTest, Run16_with_trigger) {
-  for (auto hit : Run16) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
-    queue->store(0,0,0,chiptime);
+TEST_F(HitsQueueTest, a1_notrigger) {
+  ReadoutFile::read(DataPath + "a00001", readouts);
+
+  for (const auto &r : readouts) {
+    auto plane = opts.srs_mappings.get_plane(r);
+    EXPECT_EQ(plane, 0);
+    p0->store(plane, opts.srs_mappings.get_strip(r),
+              r.adc, r.chiptime, r.srs_timestamp);
+
   }
-  EXPECT_EQ(queue->hits().size(), 0);
-  queue->subsequent_trigger(true);
-  queue->sort_and_correct();
-  EXPECT_EQ(queue->hits().size(), 123);
-  queue->subsequent_trigger(true);
-  queue->sort_and_correct();
-  EXPECT_EQ(queue->hits().size(), 33);
-  queue->subsequent_trigger(true);
-  queue->sort_and_correct();
-  EXPECT_EQ(queue->hits().size(), 0);
+  EXPECT_EQ(p0->hits().size(), 0);
+  p0->sort_and_correct();
+  EXPECT_EQ(p0->hits().size(), 0);
+  p0->sort_and_correct();
+  EXPECT_EQ(p0->hits().size(), 144);
+  p0->sort_and_correct();
+  EXPECT_EQ(p0->hits().size(), 0);
 }
+
+TEST_F(HitsQueueTest, a1_trigger) {
+  ReadoutFile::read(DataPath + "a00001", readouts);
+
+  for (const auto &r : readouts) {
+    auto plane = opts.srs_mappings.get_plane(r);
+    EXPECT_EQ(plane, 0);
+    p0->store(plane, opts.srs_mappings.get_strip(r),
+              r.adc, r.chiptime, r.srs_timestamp);
+
+  }
+  EXPECT_EQ(p0->hits().size(), 0);
+  p0->subsequent_trigger(true);
+  p0->sort_and_correct();
+  EXPECT_EQ(p0->hits().size(), 0);
+  p0->subsequent_trigger(true);
+  p0->sort_and_correct();
+  EXPECT_EQ(p0->hits().size(), 144);
+  p0->subsequent_trigger(true);
+  p0->sort_and_correct();
+  EXPECT_EQ(p0->hits().size(), 0);
+}
+
 
 /// \todo some checks disabled, this is not stricly chronological!!!
 
-TEST_F(HitsQueueTest, Run16_chronological_no_trigger) {
-  for (auto hit : Run16) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
-    queue->store(0,0,0,chiptime);
-  }
-
-  double prevtime{0};
-
-  queue->sort_and_correct();
-  while(queue->hits().size()) {
-//    EXPECT_GE(queue->hits().front().time, prevtime);
-    prevtime = queue->hits().front().time;
-    for (const auto &e : queue->hits()) {
-      EXPECT_GE(e.time, prevtime);
-      prevtime = e.time;
-    }
-    queue->sort_and_correct();
-  };
-}
+//TEST_F(HitsQueueTest, Run16_chronological_no_trigger) {
+//  for (auto hit : Run16) {
+//    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
+//    queue->store(0,0,0,chiptime);
+//  }
+//
+//  double prevtime{0};
+//
+//  queue->sort_and_correct();
+//  while(queue->hits().size()) {
+////    EXPECT_GE(queue->hits().front().time, prevtime);
+//    prevtime = queue->hits().front().time;
+//    for (const auto &e : queue->hits()) {
+//      EXPECT_GE(e.time, prevtime);
+//      prevtime = e.time;
+//    }
+//    queue->sort_and_correct();
+//  };
+//}
 
 //TEST_F(HitsQueueTest, Run16_chronological_with_trigger) {
 //  for (auto hit : Run16) {
@@ -115,47 +124,47 @@ TEST_F(HitsQueueTest, Run16_chronological_no_trigger) {
 //  };
 //}
 
-TEST_F(HitsQueueTest, Long_chronological_no_trigger) {
-  for (auto hit : long_data) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
-    queue->store(0,0,0,chiptime);
-  }
-
-  double prevtime{0};
-
-  queue->sort_and_correct();
-  while(queue->hits().size()) {
-//    EXPECT_GE(queue->hits().front().time, prevtime);
-    prevtime = queue->hits().front().time;
-    for (const auto &e : queue->hits()) {
-      EXPECT_GE(e.time, prevtime);
-      prevtime = e.time;
-    }
-    queue->sort_and_correct();
-  };
-}
-
-TEST_F(HitsQueueTest, Long_chronological_with_trigger) {
-  for (auto hit : long_data) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
-    queue->store(0,0,0,chiptime);
-  }
-
-  double prevtime{0};
-
-  queue->subsequent_trigger(true);
-  queue->sort_and_correct();
-  while(queue->hits().size()) {
-    EXPECT_GE(queue->hits().front().time, prevtime);
-    prevtime = queue->hits().front().time;
-    for (const auto &e : queue->hits()) {
+//TEST_F(HitsQueueTest, Long_chronological_no_trigger) {
+//  for (auto hit : long_data) {
+//    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
+//    queue->store(0,0,0,chiptime);
+//  }
+//
+//  double prevtime{0};
+//
+//  queue->sort_and_correct();
+//  while(queue->hits().size()) {
+////    EXPECT_GE(queue->hits().front().time, prevtime);
+//    prevtime = queue->hits().front().time;
+//    for (const auto &e : queue->hits()) {
 //      EXPECT_GE(e.time, prevtime);
-      prevtime = e.time;
-    }
-    queue->subsequent_trigger(true);
-    queue->sort_and_correct();
-  };
-}
+//      prevtime = e.time;
+//    }
+//    queue->sort_and_correct();
+//  };
+//}
+//
+//TEST_F(HitsQueueTest, Long_chronological_with_trigger) {
+//  for (auto hit : long_data) {
+//    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
+//    queue->store(0,0,0,chiptime);
+//  }
+//
+//  double prevtime{0};
+//
+//  queue->subsequent_trigger(true);
+//  queue->sort_and_correct();
+//  while(queue->hits().size()) {
+//    EXPECT_GE(queue->hits().front().time, prevtime);
+//    prevtime = queue->hits().front().time;
+//    for (const auto &e : queue->hits()) {
+////      EXPECT_GE(e.time, prevtime);
+//      prevtime = e.time;
+//    }
+//    queue->subsequent_trigger(true);
+//    queue->sort_and_correct();
+//  };
+//}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
