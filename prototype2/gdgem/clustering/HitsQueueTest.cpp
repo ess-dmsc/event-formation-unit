@@ -8,10 +8,7 @@
 #include <test/TestBase.h>
 #include <functional>
 
-//#include <gdgem/clustering/TestDataShort.h>
 #include <gdgem/nmx/Readout.h>
-
-#define UNUSED __attribute__((unused))
 
 class HitsQueueTest : public TestBase {
 protected:
