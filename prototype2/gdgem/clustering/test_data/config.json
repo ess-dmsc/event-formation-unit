@@ -14,8 +14,8 @@
   [
     {"fecID":1, "vmmID":0, "planeID":0, "strip_offset":0},
     {"fecID":1, "vmmID":1, "planeID":0, "strip_offset":64},
-    {"fecID":1, "vmmID":14, "planeID":1, "strip_offset":0},
-    {"fecID":1, "vmmID":15, "planeID":1, "strip_offset":64}
+    {"fecID":2, "vmmID":14, "planeID":1, "strip_offset":0},
+    {"fecID":2, "vmmID":15, "planeID":1, "strip_offset":64}
   ],
 
   "clusterer x" :
