@@ -9,9 +9,9 @@
 
 #pragma once
 
-#include <readerwriterqueue/readerwriterqueue.h>
 #include <cassert>
 #include <memory>
+#include <readerwriterqueue/readerwriterqueue.h>
 
 namespace SpscBuffer {
 

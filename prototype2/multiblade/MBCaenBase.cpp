@@ -17,6 +17,9 @@
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
+
+#include <common/clustering/GapClusterer.h>
+
 #include <unistd.h>
 
 #include <libs/include/SPSCFifo.h>
@@ -126,6 +129,8 @@ void CAENBase::input_thread() {
 }
 
 void CAENBase::processing_thread() {
+  HitContainer wire_hits, strip_hits;
+
   const uint32_t ncass = 6;
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
@@ -271,14 +276,17 @@ void CAENBase::processing_thread() {
           uint16_t __attribute__((unused)) coord; // \todo invalidate ?
           int plane = mbgeom.getPlane(dp.channel);
 
+          // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d",
+          //       dp.digitizer, dp.local_time, dp.channel, dp.adc);
+
           if ( plane == 0) {
             coord = mbgeom.getx(0, dp.channel);
-            histograms.binstrips(mbgeom.getx(cassette, dp.channel), dp.adc, 0, 0);
+            histograms.bin_x(mbgeom.getx(cassette, dp.channel), dp.adc);
           }
 
           if (plane == 1) {
             coord = mbgeom.gety(0, dp.channel);
-            histograms.binstrips(0, 0, mbgeom.gety(cassette, dp.channel), dp.adc);
+            histograms.bin_y(mbgeom.gety(cassette, dp.channel), dp.adc);
           }
              //builder[cassette].addDataPoint(plane, coord, dp.adc, dp.local_time);
         }
@@ -308,6 +316,7 @@ void CAENBase::processing_thread() {
         time++;
         pixel_id++;
         /// \todo we need to also flush leftover clusters in case of loop termination
+        // \todo match clusters here
       }
     }
   }

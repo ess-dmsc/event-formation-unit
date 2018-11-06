@@ -47,7 +47,7 @@ set(pipeline_common_inc
     vmm3/CalibrationFile.h # also works for VMM2
 )
 
-set(gdgem_SRC GdGemReadout.cpp ${GdGemBase_SRC} ${pipeline_common_source})
+set(gdgem_SRC GdGem.cpp ${GdGemBase_SRC} ${pipeline_common_source})
 set(gdgem_INC ${pipeline_common_inc})
 create_module(gdgem)
 

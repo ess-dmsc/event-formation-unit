@@ -57,7 +57,7 @@ public:
   static const int MaxPacketSize = 10000;
   std::uint8_t BufferPtr[MaxPacketSize];
   int PacketSize;
-  std::chrono::duration<std::int64_t, std::milli> InitSleepTime {300};
+  std::chrono::duration<std::int64_t, std::milli> InitSleepTime{300};
   std::chrono::duration<std::int64_t, std::milli> SleepTime{200};
 
   void LoadPacketFile(std::string FileName) {
