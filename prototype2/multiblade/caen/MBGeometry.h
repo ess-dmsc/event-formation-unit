@@ -62,7 +62,7 @@ public:
     if ( (x > MaxX) or (y > MaxY) ) {
       return 0;
     }
-    return y * yMultiplier + x + 1;
+    return y * yMultiplier + x + uint32_t(1);
   }
 
   // Wires have channels from 0 to NWires -1
@@ -79,7 +79,7 @@ public:
     return isStrip(channel) ^ Freia; // 0 is x, 1 is y
   }
 
-  uint32_t getx(uint16_t cassette, uint16_t ch) {
+  uint16_t getx(uint16_t cassette, uint16_t ch) {
     if (MB18) {
       // Swap odd even
       ch = ch ^ 1;
@@ -89,14 +89,14 @@ public:
       return ch - NWires; // or MaxWireCh + 1, same thing
     } else { // Estia
       if (MB18) {
-        return cassette * NWires + 31 - ch;
+        return cassette * NWires + uint16_t(31) - ch;
       } else { // MB16
         return cassette * NWires + ch;
       }
     }
   }
 
-  uint32_t gety(uint16_t cassette, uint16_t ch) {
+  uint16_t gety(uint16_t cassette, uint16_t ch) {
       if (MB18) {
       // Swap odd even
       ch = ch ^ 1;
@@ -106,7 +106,7 @@ public:
       if (MB18) {
         return cassette * NWires + ch;
       } else { // MB16
-        return cassette * NWires + (31 - ch);
+        return cassette * NWires + (uint16_t(31) - ch);
       }
     } else { // Estia
       return ch - NWires; // or MaxWireCh + 1, same thing

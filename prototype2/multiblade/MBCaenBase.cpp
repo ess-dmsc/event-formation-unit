@@ -131,6 +131,7 @@ void CAENBase::input_thread() {
 void CAENBase::processing_thread() {
   HitContainer wire_hits, strip_hits;
 
+  /// \todo magic numbers, move these to json config?
   const uint32_t ncass = 6;
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
@@ -188,137 +189,136 @@ void CAENBase::processing_thread() {
   auto digitisers = mb_opts.getDigitisers();
   DigitizerMapping mb1618(digitisers);
 
-
   unsigned int data_index;
   TSCTimer produce_timer;
-  Timer  h5flushtimer;
-  while (1) {
-    if ((input2proc_fifo.pop(data_index)) == false) {
-      // There is NO data in the FIFO - do stop checks and sleep a little
-      mystats.rx_idle1++;
-
-      // if filedumping and requesting time splitting, check for rotation.
-      if (MBCAENSettings.H5SplitTime != 0 and (dumpfile)) {
-        if (h5flushtimer.timeus() >= MBCAENSettings.H5SplitTime * 1000000) {
-
-          /// \todo user should not need to call flush() - implicit in rotate() ?
-          dumpfile->flush();
-          dumpfile->rotate();
-          h5flushtimer.now();
-        }
-      }
-
-      if (produce_timer.timetsc() >=
-          EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
-
-        mystats.tx_bytes += flatbuffer.produce();
-
-        if (!histograms.isEmpty()) {
-          XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
-              histograms.hit_count());
-          histfb.produce(histograms);
-          histograms.clear();
-        }
-
-        /// Kafka stats update - common to all detectors
-        /// don't increment as producer keeps absolute count
-        mystats.kafka_produce_fails = eventprod.stats.produce_fails;
-        mystats.kafka_ev_errors = eventprod.stats.ev_errors;
-        mystats.kafka_ev_others = eventprod.stats.ev_others;
-        mystats.kafka_dr_errors = eventprod.stats.dr_errors;
-        mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
-
-        if (not runThreads) {
-          XTRACE(INPUT, ALW, "Stopping processing thread.");
-          return;
-        }
-
-        produce_timer.now();
-      }
-      usleep(10);
-
-    } else { // There is data in the FIFO - do processing
+  Timer h5flushtimer;
+  while (true) {
+    if (input2proc_fifo.pop(data_index)) { // There is data in the FIFO - do processing
       auto datalen = eth_ringbuf->getDataLength(data_index);
       if (datalen == 0) {
         mystats.fifo_seq_errors++;
+        continue;
+      }
+
+      /// \todo use the Buffer<T> class here and in parser
+      auto dataptr = eth_ringbuf->getDataBuffer(data_index);
+      if (parser.parse(dataptr, datalen) < 0) {
+        mystats.rx_error_bytes += parser.Stats.error_bytes;
+        continue;
+      }
+      mystats.rx_seq_errors += parser.Stats.seq_errors;
+
+      XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
+             parser.MBHeader->numElements, parser.MBHeader->digitizerID);
+
+      mystats.rx_readouts += parser.MBHeader->numElements;
+
+      if (dumpfile) {
+        dumpfile->push(parser.readouts);
+      }
+
+      /// \todo why can't I use mb_opts.detector->cassette()
+      auto cassette = mb1618.cassette(parser.MBHeader->digitizerID);
+      if (cassette < 0) {
+        XTRACE(DATA, WAR, "Invalid digitizerId: %d",
+               parser.MBHeader->digitizerID);
+        continue;
+      }
+
+      for (const auto &dp : parser.readouts) {
+        // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d",
+        //       dp.digitizer, dp.local_time, dp.channel, dp.adc);
+
+        // \todo should there not be a function in mbgeom for validating this?
+        assert(dp.channel < nwires + nstrips);
+
+        uint16_t __attribute__((unused)) coord; // \todo invalidate ?
+        int plane = mbgeom.getPlane(dp.channel);
+
+        if (plane == 0) {
+          coord = mbgeom.getx(0, dp.channel);
+          histograms.bin_x(mbgeom.getx(cassette, dp.channel), dp.adc);
+        }
+
+        if (plane == 1) {
+          coord = mbgeom.gety(0, dp.channel);
+          histograms.bin_y(mbgeom.gety(cassette, dp.channel), dp.adc);
+        }
+        //builder[cassette].addDataPoint(plane, coord, dp.adc, dp.local_time);
+      }
+      // \todo match clusters here
+      // calculate local x and y
+      // localx = event.x();
+      // localy = event.y();
+      // time = event.time();
+
+      // \todo use essgeom
+      //pixel = mbgeom.getPixel(cassette, localx, localy);
+
+      static uint32_t time = 0;
+      static uint32_t pixel_id = 1;
+
+      if (pixel_id == 0) {
+        mystats.geometry_errors++;
       } else {
-        /// \todo use the Buffer<T> class here and in parser
-        auto dataptr = eth_ringbuf->getDataBuffer(data_index);
-        if (parser.parse(dataptr, datalen) < 0) {
-          mystats.rx_error_bytes += parser.Stats.error_bytes;
-          continue;
-        }
-        mystats.rx_seq_errors += parser.Stats.seq_errors;
-
-        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
-               parser.MBHeader->numElements, parser.MBHeader->digitizerID);
-
-        mystats.rx_readouts += parser.MBHeader->numElements;
-
-        if (dumpfile) {
-          dumpfile->push(parser.readouts);
-          XTRACE(DATA, DEB, "Pushed %d readouts to dumpfile",
-                 parser.readouts.size());
-        }
-
-        /// \todo why can't I use mb_opts.detector->cassette()
-        auto cassette = mb1618.cassette(parser.MBHeader->digitizerID);
-        if (cassette < 0) {
-          XTRACE(DATA, WAR, "Invalid digitizerId: %d",
-                 parser.MBHeader->digitizerID);
-          continue;
-        }
-
-        for (const auto &dp : parser.readouts) {
-
-          assert(dp.channel < nwires + nstrips);
-
-          uint16_t __attribute__((unused)) coord; // \todo invalidate ?
-          int plane = mbgeom.getPlane(dp.channel);
-
-          // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d",
-          //       dp.digitizer, dp.local_time, dp.channel, dp.adc);
-
-          if ( plane == 0) {
-            coord = mbgeom.getx(0, dp.channel);
-            histograms.bin_x(mbgeom.getx(cassette, dp.channel), dp.adc);
-          }
-
-          if (plane == 1) {
-            coord = mbgeom.gety(0, dp.channel);
-            histograms.bin_y(mbgeom.gety(cassette, dp.channel), dp.adc);
-          }
-             //builder[cassette].addDataPoint(plane, coord, dp.adc, dp.local_time);
-        }
-        // calculate local x and y
-        // localx = event.x();
-        // localy = event.y();
-        // time = event.time();
-
-        //pixel = mbgeom.getPixel(cassette, localx, localy);
-        // or maybe use essgeom ?
-
-        static uint32_t time = 0;
-        static uint32_t pixel_id = 1;
-
-        if (pixel_id == 0) {
-          mystats.geometry_errors++;
+        uint32_t pixel;
+        if (time % 10000 == 0) {
+          pixel = 6144;
         } else {
-          uint32_t pixel;
-          if (time % 10000 == 0) {
-            pixel = 6144;
-          } else {
-            pixel = pixel_id % 700;
-          }
-          mystats.tx_bytes += flatbuffer.addEvent(time, pixel);
-          mystats.rx_events++;
+          pixel = pixel_id % 700;
         }
-        time++;
-        pixel_id++;
-        /// \todo we need to also flush leftover clusters in case of loop termination
-        // \todo match clusters here
+        mystats.tx_bytes += flatbuffer.addEvent(time, pixel);
+        mystats.rx_events++;
+      }
+      time++;
+      pixel_id++;
+
+    } else {
+      // There is NO data in the FIFO - do stop checks and sleep a little
+      mystats.rx_idle1++;
+      usleep(10);
+    }
+
+    // if filedumping and requesting time splitting, check for rotation.
+    if (MBCAENSettings.H5SplitTime != 0 and (dumpfile)) {
+      if (h5flushtimer.timeus() >= MBCAENSettings.H5SplitTime * 1000000) {
+
+        /// \todo user should not need to call flush() - implicit in rotate() ?
+        dumpfile->flush();
+        dumpfile->rotate();
+        h5flushtimer.now();
       }
     }
+
+    if (produce_timer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+
+      mystats.tx_bytes += flatbuffer.produce();
+
+      if (!histograms.isEmpty()) {
+        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
+               histograms.hit_count());
+        histfb.produce(histograms);
+        histograms.clear();
+      }
+
+      /// Kafka stats update - common to all detectors
+      /// don't increment as producer keeps absolute count
+      mystats.kafka_produce_fails = eventprod.stats.produce_fails;
+      mystats.kafka_ev_errors = eventprod.stats.ev_errors;
+      mystats.kafka_ev_others = eventprod.stats.ev_others;
+      mystats.kafka_dr_errors = eventprod.stats.dr_errors;
+      mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
+
+      produce_timer.now();
+    }
+
+    if (not runThreads) {
+      // \todo flush everything here
+      XTRACE(INPUT, ALW, "Stopping processing thread.");
+      return;
+    }
+
   }
 }
 
