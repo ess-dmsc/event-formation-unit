@@ -23,9 +23,10 @@ Config::Config(std::string jsonfile) : ConfigFile(jsonfile) {
   }
 
   if (Instrument == InstrumentGeometry::Estia) {
-    Detector = std::make_shared<MB16Detector>(Digitisers);
+    Detector = std::make_shared<DigitizerMapping>(Digitisers);
+
   } else if (Instrument == InstrumentGeometry::Freia) {
-    Detector = std::make_shared<MB16Detector>(Digitisers); /// \todo add parameters for Freia
+    Detector = std::make_shared<DigitizerMapping>(Digitisers); /// \todo add parameters for Freia
   }
 
   assert(Detector != nullptr);
@@ -70,10 +71,27 @@ void Config::loadConfigFile() {
     return;
   }
 
+    try {
+      auto instr = root["Detector"].get<std::string>();
+
+      if (instr.compare("MB18") == 0) {
+        DetectorType = DetectorType::MB18;
+      } else if (instr.compare("MB16") == 0) {
+        DetectorType = DetectorType::MB16;
+      } else {
+        LOG(INIT, Sev::Warning, "JSON config - error: Unknown detector specified");
+        return;
+      }
+    }
+    catch (...) {
+      LOG(INIT, Sev::Error, "JSON config - error: parser error for Detector type");
+      return;
+    }
+
   try {
     auto digitisers = root["DigitizerConfig"];
     for (auto &digitiser : digitisers) {
-      struct MB16Detector::Digitiser digit;
+      struct DigitizerMapping::Digitiser digit;
       digit.index = digitiser["index"].get<unsigned int>();
       digit.digid = digitiser["id"].get<unsigned int>();
       Digitisers.push_back(digit);

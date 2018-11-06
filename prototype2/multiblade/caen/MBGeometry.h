@@ -40,11 +40,23 @@ public:
   bool isFreia() { return Freia; }
   bool isEstia() { return not isFreia(); }
 
-  void setMB18() { MB18 = true; }
-  void setMB16() { MB18 = false; }
-  bool isMB18() { return MB18; }
-  bool isMB16() { return not isMB18(); }
+  void setDetectorMB18() { MB18 = true; }
+  void setDetectorMB16() { MB18 = false; }
+  bool isDetectorMB18() { return MB18; }
+  bool isDetectorMB16() { return not isDetectorMB18(); }
 
+
+  uint32_t getPixel(uint16_t cassette, uint16_t localx, uint16_t localy) {
+    uint16_t globalx, globaly;
+    if (Freia) {
+      globalx = localx;
+      globaly = cassette * NWires + localy;
+    } else {
+      globalx = cassette * NWires + localx;
+      globaly = localy;
+    }
+    return getPixel(globalx, globaly);
+  }
 
   uint32_t getPixel(uint16_t x, uint16_t y) {
     if ( (x > MaxX) or (y > MaxY) ) {
@@ -63,48 +75,41 @@ public:
     return ( (not isWire(channel)) and (channel <= MaxStripCh) );
   }
 
+  int getPlane(uint16_t channel) {
+    return isStrip(channel) ^ Freia; // 0 is x, 1 is y
+  }
 
-  uint32_t getx(uint16_t cassette, uint16_t wire_ch, uint16_t strip_ch) {
-    if ( (not isWire(wire_ch)) or (not isStrip(strip_ch)) ) {
-      return 0xffffffff; // will produce invalid geometry
-    }
-
+  uint32_t getx(uint16_t cassette, uint16_t ch) {
     if (MB18) {
       // Swap odd even
-      wire_ch  = wire_ch  ^ 1;
-      strip_ch = strip_ch ^ 1;
+      ch = ch ^ 1;
     }
 
     if (Freia) {
-      return strip_ch - NWires; // or MaxWireCh + 1, same thing
+      return ch - NWires; // or MaxWireCh + 1, same thing
     } else { // Estia
       if (MB18) {
-        return cassette * NWires + 31 - wire_ch;
+        return cassette * NWires + 31 - ch;
       } else { // MB16
-        return cassette * NWires + wire_ch;
+        return cassette * NWires + ch;
       }
     }
   }
 
-  uint32_t gety(uint16_t cassette, uint16_t wire_ch, uint16_t strip_ch) {
-    if ( (not isWire(wire_ch)) or (not isStrip(strip_ch)) ) {
-      return 0xffffffff; // will produce invalid geometry
-    }
-
-    if (MB18) {
+  uint32_t gety(uint16_t cassette, uint16_t ch) {
+      if (MB18) {
       // Swap odd even
-      wire_ch  = wire_ch  ^ 1;
-      strip_ch = strip_ch ^ 1;
+      ch = ch ^ 1;
     }
 
     if (Freia) {
       if (MB18) {
-        return cassette * NWires + wire_ch;
+        return cassette * NWires + ch;
       } else { // MB16
-        return cassette * NWires + (31 - wire_ch);
+        return cassette * NWires + (31 - ch);
       }
     } else { // Estia
-      return strip_ch - NWires; // or MaxWireCh + 1, same thing
+      return ch - NWires; // or MaxWireCh + 1, same thing
     }
   }
 

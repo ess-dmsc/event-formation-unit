@@ -154,10 +154,10 @@ set(MBCAENBaseTest_SRC
 )
 create_test_executable(MBCAENBaseTest)
 
-# Create excecutable for the test of geometry
-set(MB16DetectorTest_INC caen/MB16Detector.h)
-set(MB16DetectorTest_SRC caen/MB16DetectorTest.cpp)
-create_test_executable(MB16DetectorTest)
+# Create excecutable for the test of digitizer mapping
+set(DigitizerMappingTest_INC caen/DigitizerMapping.h)
+set(DigitizerMappingTest_SRC caen/DigitizerMappingTest.cpp)
+create_test_executable(DigitizerMappingTest)
 
 #
 set(MBConfigTest_INC caen/Config.h ../../prototype2/common/DataSave.h)

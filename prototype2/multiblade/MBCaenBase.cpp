@@ -29,6 +29,7 @@
 #include <clustering/EventBuilder.h>
 
 #include <logical_geometry/ESSGeometry.h>
+#include <caen/MBGeometry.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -104,7 +105,7 @@ void CAENBase::input_thread() {
     if ((rdsize = receiver.receive(eth_ringbuf->getDataBuffer(eth_index),
                                    eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-      XTRACE(PROCESS, DEB, "Received an udp packet of length %d bytes",
+      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
              rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
@@ -128,6 +129,32 @@ void CAENBase::processing_thread() {
   const uint32_t ncass = 6;
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
+  std::string topic{""};
+  std::string monitor{""};
+
+  MBGeometry mbgeom(ncass, nwires, nstrips);
+  ESSGeometry *essgeom;
+  if (mb_opts.getInstrument() == Config::InstrumentGeometry::Estia) {
+    XTRACE(PROCESS, ALW, "Setting instrument configuration to Estia");
+    mbgeom.setConfigurationEstia();
+    essgeom = new ESSGeometry(nstrips, ncass * nwires, 1, 1);
+    topic = "ESTIA_detector";
+    monitor = "ESTIA_monitor";
+  } else {
+    mbgeom.setConfigurationFreia();
+    XTRACE(PROCESS, ALW, "Setting instrument configuration to Freia");
+    essgeom = new ESSGeometry(ncass * nwires, nstrips, 1, 1);
+    topic = "FREIA_detector";
+    monitor = "FREIA_monitor";
+  }
+
+  if (mb_opts.getDetectorType() == Config::DetectorType::MB18) {
+    XTRACE(PROCESS, ALW, "Setting detector to MB18");
+    mbgeom.setDetectorMB18();
+  } else {
+    XTRACE(PROCESS, ALW, "Setting detector to MB16");
+    mbgeom.setDetectorMB16();
+  }
 
   std::shared_ptr<ReadoutFile> dumpfile;
   if (!MBCAENSettings.FilePrefix.empty()) {
@@ -135,15 +162,13 @@ void CAENBase::processing_thread() {
         MBCAENSettings.FilePrefix + "-" + timeString());
   }
 
-  ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
-
   EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
-  Producer eventprod(EFUSettings.KafkaBroker, "MB_detector");
+  Producer eventprod(EFUSettings.KafkaBroker, topic);
   flatbuffer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
-  Hists histograms(std::max(nwires, nstrips), 65535);
-  Producer monitorprod(EFUSettings.KafkaBroker, "MB_monitor");
+  Hists histograms(std::max(ncass * nwires, ncass * nstrips), 65535);
+  Producer monitorprod(EFUSettings.KafkaBroker, monitor);
   HistSerializer histfb(histograms.needed_buffer_size());
   histfb.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
@@ -156,7 +181,8 @@ void CAENBase::processing_thread() {
 
   DataParser parser;
   auto digitisers = mb_opts.getDigitisers();
-  MB16Detector mb16(digitisers);
+  DigitizerMapping mb1618(digitisers);
+
 
   unsigned int data_index;
   TSCTimer produce_timer;
@@ -231,7 +257,7 @@ void CAENBase::processing_thread() {
         }
 
         /// \todo why can't I use mb_opts.detector->cassette()
-        auto cassette = mb16.cassette(parser.MBHeader->digitizerID);
+        auto cassette = mb1618.cassette(parser.MBHeader->digitizerID);
         if (cassette < 0) {
           XTRACE(DATA, WAR, "Invalid digitizerId: %d",
                  parser.MBHeader->digitizerID);
@@ -239,44 +265,47 @@ void CAENBase::processing_thread() {
         }
 
         for (const auto &dp : parser.readouts) {
-          // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d",
-          //       dp.digitizer, dp.local_time, dp.channel, dp.adc);
 
-          /// \todo magic number? should be part of geometry class?
-          /// \todo do not bin 0-channels for the complementary space
-          /// \todo unfold channels among digitizers
-          if (dp.channel >= 32) {
-            histograms.binstrips(dp.channel - 32, dp.adc, 0, 0);
-          } else {
-            histograms.binstrips(0, 0, dp.channel, dp.adc);
+          assert(dp.channel < nwires + nstrips);
+
+          uint16_t coord; // \todo invalidate ?
+          int plane = mbgeom.getPlane(dp.channel);
+
+          if ( plane == 0) {
+            coord = mbgeom.getx(0, dp.channel);
+            histograms.binstrips(mbgeom.getx(cassette, dp.channel), dp.adc, 0, 0);
           }
 
-          if (builder[cassette].addDataPoint(dp.channel, dp.adc, dp.local_time)) {
-
-            /// \todo magic number? should be part of geometry class?
-            auto xcoord = builder[cassette].getStripPosition() - 32; // pos 32 - 63
-            auto ycoord = cassette * nwires +
-                builder[cassette].getWirePosition(); // pos 0 - 31
-
-            uint32_t pixel_id = essgeom.pixel2D(xcoord, ycoord);
-
-            XTRACE(PROCESS, DEB,
-                   "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d",
-                   dp.digitizer, (int) xcoord, (int) ycoord,
-                   (int) builder[cassette].getWirePosition(),
-                   (int) builder[cassette].getStripPosition(), pixel_id);
-
-            if (pixel_id == 0) {
-              mystats.geometry_errors++;
-            } else {
-              mystats.tx_bytes += flatbuffer.addEvent(
-                  builder[cassette].getTimeStamp(), pixel_id);
-              mystats.rx_events++;
-            }
+          if (plane == 1) {
+            coord = mbgeom.gety(0, dp.channel);
+            histograms.binstrips(0, 0, mbgeom.gety(cassette, dp.channel), dp.adc);
           }
-          /// \todo we need to also flush leftover clusters in case of loop termination
-
+             //builder[cassette].addDataPoint(plane, coord, dp.adc, dp.local_time);
         }
+        // calculate local x and y
+        // localx = event.x();
+        // localy = event.y();
+        // time = event.time();
+
+        //pixel = mbgeom.getPixel(cassette, localx, localy);
+        static uint32_t time = 0;
+        static uint32_t pixel_id = 1;
+
+        if (pixel_id == 0) {
+          mystats.geometry_errors++;
+        } else {
+          uint32_t pixel;
+          if (time % 10000 == 0) {
+            pixel = 6144;
+          } else {
+            pixel = pixel_id % 700;
+          }
+          mystats.tx_bytes += flatbuffer.addEvent(time, pixel);
+          mystats.rx_events++;
+        }
+        time++;
+        pixel_id++;
+        /// \todo we need to also flush leftover clusters in case of loop termination
       }
     }
   }

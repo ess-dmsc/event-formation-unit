@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <caen/MB16Detector.h>
+#include <caen/DigitizerMapping.h>
 #include <memory>
 #include <string>
 #include <vector>
@@ -19,6 +19,7 @@ namespace Multiblade {
 class Config {
 public:
   enum class InstrumentGeometry { Estia, Freia };
+  enum class DetectorType { MB16, MB18 };
 
   ///
   Config() = default;
@@ -33,8 +34,8 @@ public:
   /// \brief getter fcn for private member variable
   std::string getConfigFile() { return ConfigFile; }
 
-  /// \brief getter fcn for private member variable
-  std::shared_ptr<MB16Detector> getDetector() { return Detector; }
+  // /// \brief getter fcn for private member variable
+  // std::shared_ptr<DigitizerMapping> getDetector() { return Digitizers; }
 
   /// \brief getter fcn for private member variable
   uint32_t getTimeTickNS() { return TimeTickNS; }
@@ -43,6 +44,8 @@ public:
   auto getDigitisers() { return Digitisers; }
 
   InstrumentGeometry getInstrument() { return Instrument; }
+
+  DetectorType getDetectorType() { return DetectorType; }
 
 private:
   /// \brief helper function to load and parse json file
@@ -55,17 +58,20 @@ private:
   std::string ConfigFile{""};
 
   /// Specify the digital geometry
-  std::shared_ptr<MB16Detector> Detector;
+  std::shared_ptr<DigitizerMapping> Detector;
 
   /// Specify the instrument geometry
   InstrumentGeometry Instrument{InstrumentGeometry::Estia};
+
+  ///
+  DetectorType DetectorType{DetectorType::MB18};
 
   /// local readout timestamp resolution
   uint32_t TimeTickNS{16};
 
   /// for now just hold a vector of the digitisers, \todo later
   /// incorporate in the digital geometry
-  std::vector<struct MB16Detector::Digitiser> Digitisers;
+  std::vector<struct DigitizerMapping::Digitiser> Digitisers;
 };
 
 }

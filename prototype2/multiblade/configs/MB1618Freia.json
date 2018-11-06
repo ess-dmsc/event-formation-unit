@@ -1,5 +1,7 @@
 
 {
+  "Detector": "MB18",
+
   "InstrumentGeometry": "Freia",
 
   "DigitizerConfig" : [
