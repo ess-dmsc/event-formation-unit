@@ -8,8 +8,10 @@
 #include <string>
 #include <multiblade/caen/DataParserTestData.h>
 
- std::string mb16json = R"(
+ std::string mb18estiajson = R"(
  {
+   "Detector": "MB18",
+
    "InstrumentGeometry": "Estia",
 
    "DigitizerConfig" : [
@@ -42,7 +44,7 @@ public:
 class CAENBaseTest : public ::testing::Test {
 public:
   virtual void SetUp() {
-    LocalSettings.ConfigFile = "MB16.json";
+    LocalSettings.ConfigFile = "MB18Estia.json";
     Settings.DetectorRxBufferSize = 100000;
     Settings.MinimumMTU = 1500;
   }
@@ -73,8 +75,8 @@ TEST_F(CAENBaseTest, DataReceive) {
 }
 
 int main(int argc, char **argv) {
-  std::string filename{"MB16.json"};
-  DataSave tempfile(filename, (void *)mb16json.c_str(), mb16json.size());
+  std::string filename{"MB18Estia.json"};
+  DataSave tempfile(filename, (void *)mb18estiajson.c_str(), mb18estiajson.size());
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

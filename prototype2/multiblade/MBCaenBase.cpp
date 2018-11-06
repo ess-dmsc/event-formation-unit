@@ -83,7 +83,7 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   assert(eth_ringbuf != 0);
 
   mb_opts = Config(MBCAENSettings.ConfigFile);
-  assert(mb_opts.getDetector() != nullptr);
+  assert(mb_opts.getDigitizers() != nullptr);
 }
 
 void CAENBase::input_thread() {

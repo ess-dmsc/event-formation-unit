@@ -35,7 +35,7 @@ public:
   std::string getConfigFile() { return ConfigFile; }
 
   // /// \brief getter fcn for private member variable
-  // std::shared_ptr<DigitizerMapping> getDetector() { return Digitizers; }
+  std::shared_ptr<DigitizerMapping> getDigitizers() { return Detector; }
 
   /// \brief getter fcn for private member variable
   uint32_t getTimeTickNS() { return TimeTickNS; }

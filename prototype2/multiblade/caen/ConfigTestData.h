@@ -41,6 +41,8 @@ std::string invaliddigitiser = R"(
 
 std::string instrumentfreia = R"(
   {
+    "Detector": "MB18",
+
     "InstrumentGeometry": "Freia",
 
     "DigitizerConfig" : [
@@ -75,6 +77,8 @@ std::string invalidinstrument = R"(
 
 std::string unknowninstrument = R"(
   {
+    "Detector": "MB18",
+
     "InstrumentGeometry": "VakseViggo",
 
     "DigitizerConfig" : [
@@ -92,6 +96,8 @@ std::string unknowninstrument = R"(
 
 std::string validconfig = R"(
   {
+    "Detector": "MB18",
+
     "InstrumentGeometry": "Estia",
 
     "DigitizerConfig" : [
