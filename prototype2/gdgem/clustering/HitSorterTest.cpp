@@ -8,9 +8,7 @@
 #include <test/TestBase.h>
 #include <functional>
 
-#include <gdgem/clustering/TestDataShort.h>
 #include <gdgem/nmx/Readout.h>
-
 
 class MockClusterer : public AbstractClusterer {
 public:

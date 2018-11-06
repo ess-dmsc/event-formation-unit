@@ -44,7 +44,6 @@ set(srs_converter_INC
   ${ClusteringBase_INC})
 #create_executable(srs_converter)
 
-message(STATUS "WARNING DISABLED HitsQueueTest - remember to re-enable")
 set(HitsQueueTest_SRC
   ${ClusteringBase_SRC}
   HitsQueueTest.cpp)
@@ -54,41 +53,38 @@ create_test_executable(HitsQueueTest SKIP_MEMGRIND)
 target_compile_definitions(HitsQueueTest
   PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
-message(STATUS "WARNING DISABLED HitSorterTest - remember to re-enable")
- set(HitSorterTest_SRC
-     ${ClusteringBase_SRC}
-     HitSorterTest.cpp)
- set(HitSorterTest_INC
-     ${ClusteringBase_INC})
- create_test_executable(HitSorterTest SKIP_MEMGRIND)
- target_compile_definitions(HitSorterTest
-     PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
+set(HitSorterTest_SRC
+  ${ClusteringBase_SRC}
+  HitSorterTest.cpp)
+set(HitSorterTest_INC
+  ${ClusteringBase_INC})
+create_test_executable(HitSorterTest SKIP_MEMGRIND)
+target_compile_definitions(HitSorterTest
+  PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
-message(STATUS "WARNING DISABLED DoroClustererTest - remember to re-enable")
-# set(DoroClustererTest_SRC
-#     ${ClusteringBase_SRC}
-#     DoroClusterer.cpp
-#     DoroClustererTest.cpp)
-# set(DoroClustererTest_INC
-#     DoroClusterer.h
-#     ${ClusteringBase_INC})
-# create_test_executable(DoroClustererTest SKIP_MEMGRIND)
-# target_compile_definitions(DoroClustererTest
-#     PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
+set(DoroClustererTest_SRC
+  ${ClusteringBase_SRC}
+  DoroClusterer.cpp
+  DoroClustererTest.cpp)
+set(DoroClustererTest_INC
+  DoroClusterer.h
+  ${ClusteringBase_INC})
+create_test_executable(DoroClustererTest SKIP_MEMGRIND)
+target_compile_definitions(DoroClustererTest
+  PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
-message(STATUS "WARNING DISABLED ClusterMatcherTest - remember to re-enable")
-# set(ClusterMatcherTest_SRC
-#     ${ClusteringBase_SRC}
-#     ClusterMatcher.cpp
-#     DoroClusterer.cpp
-#     ClusterMatcherTest.cpp)
-# set(ClusterMatcherTest_INC
-#     ClusterMatcher.h
-#     DoroClusterer.h
-#     ${ClusteringBase_INC})
-# create_test_executable(ClusterMatcherTest SKIP_MEMGRIND)
-# target_compile_definitions(ClusterMatcherTest
-#     PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
+set(ClusterMatcherTest_SRC
+  ${ClusteringBase_SRC}
+  ClusterMatcher.cpp
+  DoroClusterer.cpp
+  ClusterMatcherTest.cpp)
+set(ClusterMatcherTest_INC
+  ClusterMatcher.h
+  DoroClusterer.h
+  ${ClusteringBase_INC})
+create_test_executable(ClusterMatcherTest SKIP_MEMGRIND)
+target_compile_definitions(ClusterMatcherTest
+  PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
 
 ## GOOGLE BENCHMARK
 message(STATUS "!!! *** Skipping NMXClustererBenchmarkTest - does not link ***")

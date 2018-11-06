@@ -8,71 +8,53 @@
 #include <gdgem/clustering/ClusterMatcher.h>
 #include <test/TestBase.h>
 #include <functional>
+#include <gdgem/NMXConfig.h>
 
-#include <gdgem/clustering/TestDataShort.h>
 #include <gdgem/nmx/Readout.h>
-
-#define UNUSED __attribute__((unused))
 
 class ClusterMatcherTest : public TestBase {
 protected:
-  std::vector<Readout> long_data;
-
-  uint16_t pADCThreshold = 0;
-  size_t pMinClusterSize = 3;
-  // Maximum time difference between hits in time sorted cluster (x or y)
-  double pMaxTimeGap = 200;
-  // Maximum number of missing strips in strip sorted cluster (x or y)
-  uint16_t pMaxStripGap = 2;
-  //Maximum cluster time difference between matching clusters in x and y
-  //Cluster time is either calculated with center-of-mass or uTPC method
-  double pDeltaTimePlanes = 200;
-  // Maximum time span for total cluster (x or y)
-  // double pDeltaTimeSpan = 500;
-
-  SRSMappings mapping;
+  NMXConfig opts;
+  std::string DataPath;
+  std::vector<Readout> readouts;
 
   std::shared_ptr<ClusterMatcher> matcher;
   std::shared_ptr<HitSorter> sorter_x;
   std::shared_ptr<HitSorter> sorter_y;
 
   virtual void SetUp() {
-    std::string DataPath = TEST_DATA_PATH;
-//    ReadoutFile::read(DataPath + "run16long", long_data);
+    DataPath = TEST_DATA_PATH;
+    opts = NMXConfig(DataPath + "config.json", "");
 
-    mapping.set_mapping(1, 0, 0, 0);
-    mapping.set_mapping(1, 1, 0, 64);
-    mapping.set_mapping(1, 6, 0, 128);
-    mapping.set_mapping(1, 7, 0, 192);
+    matcher = std::make_shared<ClusterMatcher>(opts.matcher_max_delta_time);
 
-    mapping.set_mapping(1, 10, 1, 0);
-    mapping.set_mapping(1, 11, 1, 64);
-    mapping.set_mapping(1, 14, 1, 128);
-    mapping.set_mapping(1, 15, 1, 192);
+    sorter_x = std::make_shared<HitSorter>(opts.time_config, opts.srs_mappings,
+                                           opts.clusterer_x.hit_adc_threshold,
+                                           opts.clusterer_x.max_time_gap);
+    sorter_y = std::make_shared<HitSorter>(opts.time_config, opts.srs_mappings,
+                                           opts.clusterer_y.hit_adc_threshold,
+                                           opts.clusterer_y.max_time_gap);
 
-    SRSTime srstime;
-    srstime.set_bc_clock(20);
-    srstime.set_tac_slope(60);
-    srstime.set_trigger_resolution_ns(3.125);
-    srstime.set_acquisition_window(4000);
-
-    matcher = std::make_shared<ClusterMatcher>(pDeltaTimePlanes);
-    sorter_x = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
-    sorter_y = std::make_shared<HitSorter>(srstime, mapping, pADCThreshold, pMaxTimeGap);
-    sorter_x->clusterer = std::make_shared<DoroClusterer>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
-    sorter_y->clusterer = std::make_shared<DoroClusterer>(pMaxTimeGap, pMaxStripGap, pMinClusterSize);
+    sorter_x->clusterer = std::make_shared<DoroClusterer>(opts.clusterer_x.max_time_gap,
+                                                          opts.clusterer_x.max_strip_gap,
+                                                          opts.clusterer_x.min_cluster_size);
+    sorter_y->clusterer = std::make_shared<DoroClusterer>(opts.clusterer_y.max_time_gap,
+                                                          opts.clusterer_y.max_strip_gap,
+                                                          opts.clusterer_y.min_cluster_size);
   }
 
   virtual void TearDown() {
   }
 
-  void store_hit(const Readout& readout)
-  {
-    uint8_t planeID = mapping.get_plane(readout);
-    if (planeID == 1) {
-      sorter_y->insert(readout);
-    } else {
+  void store_hit(const Readout &readout) {
+    uint8_t plane = opts.srs_mappings.get_plane(readout);
+    EXPECT_LT(plane, 2) << "fec:" << int(readout.fec)
+                        << " chip:" << int(readout.chip_id) << "\n";
+    if (plane == 0) {
       sorter_x->insert(readout);
+    }
+    if (plane == 1) {
+      sorter_y->insert(readout);
     }
   }
 
@@ -93,20 +75,14 @@ protected:
 
 };
 
-TEST_F(ClusterMatcherTest, MergeNoClusters) {
-  ClusterList c;
-  MESSAGE() << "This it NOT a test, as novalidation occurs (cant access private fields)\n";
-  matcher->merge(0, c);
-}
-
 TEST_F(ClusterMatcherTest, OneX) {
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 0, 200));
   matcher->match_end(true);
   ASSERT_EQ(matcher->stats_cluster_count, 1);
   ASSERT_EQ(matcher->matched_clusters.size(), 1);
   EXPECT_EQ(matcher->matched_clusters.front().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.front().x.entries.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.front().y.entries.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 0);
 }
 
 TEST_F(ClusterMatcherTest, OneY) {
@@ -115,185 +91,245 @@ TEST_F(ClusterMatcherTest, OneY) {
   ASSERT_EQ(matcher->stats_cluster_count, 1);
   ASSERT_EQ(matcher->matched_clusters.size(), 1);
   EXPECT_EQ(matcher->matched_clusters.front().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.front().x.entries.size(), 0);
-  EXPECT_EQ(matcher->matched_clusters.front().y.entries.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 122);
 }
 
 TEST_F(ClusterMatcherTest, TwoX) {
   matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 0, 200));
-  matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 500, 700));
+  matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 700, 900));
   matcher->match_end(true);
   ASSERT_EQ(matcher->stats_cluster_count, 2);
   ASSERT_EQ(matcher->matched_clusters.size(), 2);
   EXPECT_EQ(matcher->matched_clusters.front().time_span(), 200);
   EXPECT_EQ(matcher->matched_clusters.back().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.front().x.entries.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.front().y.entries.size(), 0);
-  EXPECT_EQ(matcher->matched_clusters.back().x.entries.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.back().y.entries.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.back().x.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.back().y.hits.size(), 0);
 }
 
 TEST_F(ClusterMatcherTest, TwoY) {
-  matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 0, 200));
-  matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 500, 700));
+  matcher->unmatched_clusters.push_back(mock_cluster(1, 0, 10, 0, 200));
+  matcher->unmatched_clusters.push_back(mock_cluster(1, 0, 10, 700, 900));
   matcher->match_end(true);
   ASSERT_EQ(matcher->stats_cluster_count, 2);
   ASSERT_EQ(matcher->matched_clusters.size(), 2);
   EXPECT_EQ(matcher->matched_clusters.front().time_span(), 200);
   EXPECT_EQ(matcher->matched_clusters.back().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.front().x.entries.size(), 0);
-  EXPECT_EQ(matcher->matched_clusters.front().y.entries.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.back().x.entries.size(), 0);
-  EXPECT_EQ(matcher->matched_clusters.back().y.entries.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.back().x.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.back().y.hits.size(), 122);
 }
 
 TEST_F(ClusterMatcherTest, OneXOneY) {
-  matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 0, 200));
-  matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 500, 700));
+  matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 0, 200));
+  matcher->unmatched_clusters.push_back(mock_cluster(1, 0, 10, 700, 900));
   matcher->match_end(true);
   ASSERT_EQ(matcher->stats_cluster_count, 2);
   ASSERT_EQ(matcher->matched_clusters.size(), 2);
   EXPECT_EQ(matcher->matched_clusters.front().time_span(), 200);
   EXPECT_EQ(matcher->matched_clusters.back().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.front().x.entries.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.front().y.entries.size(), 0);
-  EXPECT_EQ(matcher->matched_clusters.back().x.entries.size(), 0);
-  EXPECT_EQ(matcher->matched_clusters.back().y.entries.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.back().x.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.back().y.hits.size(), 122);
 }
 
 TEST_F(ClusterMatcherTest, OneXY) {
-  matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 0, 200));
-  matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 0, 200));
+  matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 0, 200));
+  matcher->unmatched_clusters.push_back(mock_cluster(1, 0, 10, 0, 200));
   matcher->match_end(true);
   ASSERT_EQ(matcher->stats_cluster_count, 1);
   ASSERT_EQ(matcher->matched_clusters.size(), 1);
   EXPECT_EQ(matcher->matched_clusters.front().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.front().x.entries.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.front().y.entries.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 122);
 }
 
 TEST_F(ClusterMatcherTest, TwoXY) {
-  matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 0, 200));
-  matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 1, 300));
-  matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 600, 800));
-  matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 650, 850));
+  matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 0, 200));
+  matcher->unmatched_clusters.push_back(mock_cluster(1, 0, 10, 1, 300));
+  matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 700, 900));
+  matcher->unmatched_clusters.push_back(mock_cluster(1, 0, 10, 750, 950));
   matcher->match_end(true);
   ASSERT_EQ(matcher->stats_cluster_count, 2);
   ASSERT_EQ(matcher->matched_clusters.size(), 2);
   EXPECT_EQ(matcher->matched_clusters.front().time_span(), 300);
   EXPECT_EQ(matcher->matched_clusters.back().time_span(), 250);
-  EXPECT_EQ(matcher->matched_clusters.front().x.entries.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.front().y.entries.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.back().x.entries.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.back().y.entries.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.back().x.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.back().y.hits.size(), 122);
 }
 
 TEST_F(ClusterMatcherTest, JustIntside) {
-  matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 0, 200));
-  matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 200, 400));
+  matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 0, 200));
+  matcher->unmatched_clusters.push_back(mock_cluster(1, 0, 10, 200, 400));
   matcher->match_end(true);
   ASSERT_EQ(matcher->matched_clusters.size(), 1);
 }
 
 TEST_F(ClusterMatcherTest, JustOutside) {
-  matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 0, 200));
-  matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 200, 401));
+  matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 0, 200));
+  matcher->unmatched_clusters.push_back(mock_cluster(1, 0, 10, 200, 701));
   matcher->match_end(true);
   ASSERT_EQ(matcher->matched_clusters.size(), 2);
 }
 
 TEST_F(ClusterMatcherTest, DontForce) {
-  matcher->unmatched_clusters.push_back(mock_cluster(0, 0,10, 0, 200));
-  matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 200, 401));
+  matcher->unmatched_clusters.push_back(mock_cluster(0, 0, 10, 0, 200));
+  matcher->unmatched_clusters.push_back(mock_cluster(1, 0, 10, 200, 401));
   matcher->match_end(false);
   ASSERT_EQ(matcher->matched_clusters.size(), 0);
 
-  matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 800, 1000));
+  matcher->unmatched_clusters.push_back(mock_cluster(1, 0, 10, 800, 1000));
   matcher->match_end(false);
   ASSERT_EQ(matcher->matched_clusters.size(), 0);
 
-  matcher->unmatched_clusters.push_back(mock_cluster(1, 0,10, 900, 1000));
+  matcher->unmatched_clusters.push_back(mock_cluster(1, 0, 10, 900, 1000));
   matcher->match_end(false);
   ASSERT_EQ(matcher->matched_clusters.size(), 0);
 }
 
-TEST_F(ClusterMatcherTest, Run16_Short) {
-  uint32_t bonus = 0;
-  uint32_t old = 0;
-  for (auto readout : Run16) {
+// \todo push events in various buffer sizes and produce same results
+
+TEST_F(ClusterMatcherTest, a1) {
+  ReadoutFile::read(DataPath + "a00001", readouts);
+  EXPECT_EQ(readouts.size(), 144);
+
+  uint64_t bonus = 0;
+  uint64_t old = 0;
+  for (auto readout : readouts) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp+bonus;
+    old = readout.srs_timestamp;
+    /// \todo this hack should not be necessary!
+    readout.srs_timestamp += (bonus << 42);
     store_hit(readout);
   }
-  /// \todo I don't trust these numbers, they have decreased after
-  /// changing tdc calculations
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 0); //down from 3
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 0); // down from 4
+
+  /// \todo I don't trust these results anymore, please validate
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 16);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 0);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(false);
-  EXPECT_EQ(matcher->stats_cluster_count, 0); // down from 1
+  EXPECT_EQ(matcher->stats_cluster_count, 0);
 
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 7); //
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 6); // down from 11
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 20);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 0);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 2); // down from 6
+  EXPECT_EQ(matcher->stats_cluster_count, 14);
 }
 
-TEST_F(ClusterMatcherTest, Run16_Long_identical) {
-  uint32_t bonus = 0;
-  uint32_t old = 0;
-  for (auto readout : long_data) {
+TEST_F(ClusterMatcherTest, a1_identical) {
+  ReadoutFile::read(DataPath + "a00001", readouts);
+  EXPECT_EQ(readouts.size(), 144);
+
+  uint64_t bonus = 0;
+  uint64_t old = 0;
+  for (auto readout : readouts) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp+bonus;
+    old = readout.srs_timestamp;
+    /// \todo this hack should not be necessary!
+    readout.srs_timestamp += (bonus << 42);
     sorter_y->insert(readout);
     sorter_x->insert(readout);
   }
 
-  sorter_x->flush();
-  sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->clusters.size(), 8167); // 20293
-  EXPECT_EQ(sorter_y->clusterer->clusters.size(), 8167); // 20293
-
-  matcher = std::make_shared<ClusterMatcher>(0);
+  /// \todo I don't trust these results anymore, please validate
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 16);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 16);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
+  matcher->match_end(false);
+  EXPECT_EQ(matcher->stats_cluster_count, 11);
 
-  EXPECT_EQ(matcher->unmatched_clusters.size(), 16334); // 40586
-
+  sorter_x->flush();
+  sorter_y->flush();
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 20);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 20);
+  matcher->merge(0, sorter_x->clusterer->clusters);
+  matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 1450); // 16954
+  EXPECT_EQ(matcher->stats_cluster_count, 14);
 }
 
-TEST_F(ClusterMatcherTest, Run16_Long) {
-  uint32_t bonus = 0;
-  uint32_t old = 0;
-  for (auto readout : long_data) {
+TEST_F(ClusterMatcherTest, a10) {
+  ReadoutFile::read(DataPath + "a00010", readouts);
+  EXPECT_EQ(readouts.size(), 920);
+
+  uint64_t bonus = 0;
+  uint64_t old = 0;
+  for (auto readout : readouts) {
     if (readout.srs_timestamp < old)
       bonus++;
-    old = readout.srs_timestamp+bonus;
+    old = readout.srs_timestamp;
+    /// \todo this hack should not be necessary!
+    readout.srs_timestamp += (bonus << 42);
     store_hit(readout);
   }
-  sorter_x->flush();
-  sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 7044); /// 10226
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 5837); // 12467
 
-  matcher = std::make_shared<ClusterMatcher>(10);
+  /// \todo I don't trust these results anymore, please validate
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 94);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 66);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
-  EXPECT_EQ(matcher->unmatched_clusters.size(), 12881); // 22693
+  matcher->match_end(false);
+  EXPECT_EQ(matcher->stats_cluster_count, 116);
+
+  sorter_x->flush();
+  sorter_y->flush();
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 96);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 68);
+  matcher->merge(0, sorter_x->clusterer->clusters);
+  matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(true);
-//  EXPECT_EQ(matcher->stats_cluster_count, 6250);
-  EXPECT_EQ(matcher->stats_cluster_count, 1537); // 19080
+  EXPECT_EQ(matcher->stats_cluster_count, 128);
 }
 
+TEST_F(ClusterMatcherTest, a100) {
+  ReadoutFile::read(DataPath + "a00100", readouts);
+  EXPECT_EQ(readouts.size(), 126590);
+
+  uint64_t bonus = 0;
+  uint64_t old = 0;
+  for (auto readout : readouts) {
+    if (readout.srs_timestamp < old)
+      bonus++;
+    old = readout.srs_timestamp;
+    /// \todo this hack should not be necessary!
+    readout.srs_timestamp += (bonus << 42);
+    store_hit(readout);
+  }
+
+  /// \todo I don't trust these results anymore, please validate
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 18986);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9727);
+  matcher->merge(0, sorter_x->clusterer->clusters);
+  matcher->merge(1, sorter_y->clusterer->clusters);
+  matcher->match_end(false);
+  EXPECT_EQ(matcher->stats_cluster_count, 24806);
+
+  sorter_x->flush();
+  sorter_y->flush();
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 18991);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9731);
+  matcher->merge(0, sorter_x->clusterer->clusters);
+  matcher->merge(1, sorter_y->clusterer->clusters);
+  matcher->match_end(true);
+  EXPECT_EQ(matcher->stats_cluster_count, 25094);
+}
+
+
+// \todo test how many have both planes
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
