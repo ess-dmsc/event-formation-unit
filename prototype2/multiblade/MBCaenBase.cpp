@@ -133,7 +133,7 @@ void CAENBase::processing_thread() {
   std::string monitor{""};
 
   MBGeometry mbgeom(ncass, nwires, nstrips);
-  ESSGeometry *essgeom;
+  ESSGeometry __attribute__((unused)) *essgeom;
   if (mb_opts.getInstrument() == Config::InstrumentGeometry::Estia) {
     XTRACE(PROCESS, ALW, "Setting instrument configuration to Estia");
     mbgeom.setConfigurationEstia();
@@ -268,7 +268,7 @@ void CAENBase::processing_thread() {
 
           assert(dp.channel < nwires + nstrips);
 
-          uint16_t coord; // \todo invalidate ?
+          uint16_t __attribute__((unused)) coord; // \todo invalidate ?
           int plane = mbgeom.getPlane(dp.channel);
 
           if ( plane == 0) {
@@ -288,6 +288,8 @@ void CAENBase::processing_thread() {
         // time = event.time();
 
         //pixel = mbgeom.getPixel(cassette, localx, localy);
+        // or maybe use essgeom ?
+
         static uint32_t time = 0;
         static uint32_t pixel_id = 1;
 
