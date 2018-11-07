@@ -54,6 +54,7 @@ std::string instrumentfreia = R"(
       { "index" : 5, "id" :  34 }
     ],
 
+    "cassettes": 6,
     "wires": 32,
     "strips": 32,
 
@@ -93,6 +94,7 @@ std::string unknowninstrument = R"(
       { "index" : 5, "id" :  34 }
     ],
 
+    "cassettes": 6,
     "wires": 32,
     "strips": 32,
 
@@ -115,6 +117,7 @@ std::string validconfig = R"(
       { "index" : 5, "id" :  34 }
     ],
 
+    "cassettes": 6, 
     "wires": 32,
     "strips": 32,
 

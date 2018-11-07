@@ -23,6 +23,7 @@
      { "index" : 5, "id" :  34 }
    ],
 
+   "cassettes": 6,
    "wires":  32,
    "strips": 32,
 

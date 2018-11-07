@@ -73,10 +73,11 @@ void Config::loadConfigFile() {
       return;
     }
 
+    NCass = root["cassettes"].get<unsigned int>();
     NWires  = root["wires"].get<unsigned int>();
     NStrips = root["strips"].get<unsigned int>();
 
-    if ((NWires == 0) or (NStrips == 0)) {
+    if ((NWires == 0) or (NStrips == 0) or (NCass == 0)) {
       LOG(INIT, Sev::Warning, "JSON config - error: Unknown detector specified");
       return;
     }

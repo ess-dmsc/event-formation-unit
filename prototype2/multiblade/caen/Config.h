@@ -73,6 +73,7 @@ private:
   /// incorporate in the digital geometry
   std::vector<struct DigitizerMapping::Digitiser> Digitisers;
 
+  uint16_t NCass{0};
   uint16_t NWires{0};
   uint16_t NStrips{0};
 };
