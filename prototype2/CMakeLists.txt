@@ -52,7 +52,7 @@ add_subdirectory(tools)
 # Add it last.
 add_subdirectory(efu)
 
-get_filename_component(MB_CFG_FILE "multiblade/configs/MB1618Estia.json" ABSOLUTE)
+get_filename_component(MB_CFG_FILE "multiblade/configs/MB18Estia.json" ABSOLUTE)
 get_filename_component(GDGEM_CFG_FILE "gdgem/configs/vmm3.json" ABSOLUTE)
 add_custom_target(copycfgs
 COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/configs
@@ -65,7 +65,7 @@ COMMENT "Copying json configuration files to ${PROJECT_BINARY_DIR}/configs"
 add_custom_target(runefu
     COMMAND efu "-d" "../modules/mgmesytec" "-f" "nocfgfile" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/sonde" "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
-    COMMAND efu "-d" "../modules/mbcaen" "-f" "../configs/MB1618Estia.json"  "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
+    COMMAND efu "-d" "../modules/mbcaen" "-f" "../configs/MB18Estia.json"  "-s" "1" "--dumptofile" "deleteme_" "-u" "1500"
     COMMAND efu "-d" "../modules/AdcReadout" "-s" "1" "-u" "1500"
     COMMAND efu "-d" "../modules/udp" "-s" "1" "-u" "1500"
     COMMAND efu "-d" "../modules/gdgem" "-f" "../configs/vmm3.json" "-s" "2" "-u" "1500"
