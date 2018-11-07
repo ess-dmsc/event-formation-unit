@@ -3,27 +3,26 @@ include_directories(.)
 #=============================================================================
 # Required external libraries
 #=============================================================================
-set(EFU_COMMON_LIBS ${CMAKE_DL_LIBS})
 
 find_package(Threads REQUIRED)
-set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
-  ${CMAKE_THREAD_LIBS_INIT}
-  )
-
 find_package(LibRDKafka REQUIRED)
-set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS}
+find_package(fmt REQUIRED)
+find_package(GraylogLogger REQUIRED)
+find_package(h5cpp REQUIRED)
+
+set(EFU_COMMON_LIBS
+  ${CMAKE_DL_LIBS}
+  ${CMAKE_THREAD_LIBS_INIT}
   ${LibRDKafka_LIBRARIES}
   ${LibRDKafka_C_LIBRARIES}
+  ${HDF5_C_LIBRARIES}
+  ${Boost_LIBRARIES}
+  GraylogLogger::graylog_logger_static
+  fmt::fmt
+  h5cpp
   )
 
-#=============================================================================
-# Optional external libraries
-#=============================================================================
-find_package(GraylogLogger REQUIRED)
-set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} GraylogLogger::graylog_logger_static)
-
-find_package(h5cpp REQUIRED)
-set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} h5cpp ${HDF5_C_LIBRARIES} ${Boost_LIBRARIES})
+set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
 
 #=============================================================================
 # Dependencies common to EFU and plugins
@@ -71,5 +70,3 @@ add_custom_target(runefu
     COMMAND efu "-d" "../modules/gdgem" "-f" "../configs/vmm3.json" "-s" "2" "-u" "1500"
     DEPENDS copycfgs efu mgmesytec gdgem sonde mbcaen udp AdcReadout
     )
-
-set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
