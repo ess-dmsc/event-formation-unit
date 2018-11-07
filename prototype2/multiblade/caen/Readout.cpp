@@ -6,8 +6,8 @@
 namespace Multiblade {
 
 std::string Readout::debug() const {
-  return fmt::format("GTime={} digitizer={} ltime={} chan={} adc={}",
-      global_time, digitizer, local_time, channel, adc);
+  return fmt::format("GTime={} ltime={} digitizer={} chan={} adc={}",
+      global_time, local_time, digitizer, channel, adc);
 }
 
 }

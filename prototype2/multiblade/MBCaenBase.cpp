@@ -18,8 +18,6 @@
 #include <common/Trace.h>
 #include <common/TimeString.h>
 
-#include <common/clustering/GapClusterer.h>
-
 #include <unistd.h>
 
 #include <libs/include/SPSCFifo.h>
@@ -29,13 +27,13 @@
 
 #include <caen/DataParser.h>
 
-#include <clustering/EventBuilder.h>
+#include <clustering/EventBuilder2.h>
 
 #include <logical_geometry/ESSGeometry.h>
 #include <caen/MBGeometry.h>
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Multiblade {
 
@@ -108,8 +106,8 @@ void CAENBase::input_thread() {
     if ((rdsize = receiver.receive(eth_ringbuf->getDataBuffer(eth_index),
                                    eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
-             rdsize);
+//      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
+//             rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
@@ -129,10 +127,8 @@ void CAENBase::input_thread() {
 }
 
 void CAENBase::processing_thread() {
-  HitContainer wire_hits, strip_hits;
-
   /// \todo magic numbers, move these to json config?
-  const uint32_t ncass = 6;
+  const uint32_t ncass = 6; // \todo this is likely the same as number of digitizers in json
   uint8_t nwires = 32;
   uint8_t nstrips = 32;
   std::string topic{""};
@@ -179,10 +175,10 @@ void CAENBase::processing_thread() {
   histfb.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 
-  EventBuilder builder[ncass];
-  for (uint32_t i = 0; i < ncass; i++) {
-    builder[i].setNumberOfWireChannels(nwires);
-    builder[i].setNumberOfStripChannels(nstrips);
+  std::vector<DigitizerQueue> queues;
+  queues.resize(ncass);
+  for (uint16_t i = 0; i < ncass; ++i) {
+    queues[i].id = i;
   }
 
   DataParser parser;
@@ -226,14 +222,14 @@ void CAENBase::processing_thread() {
       }
 
       for (const auto &dp : parser.readouts) {
-        // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d",
-        //       dp.digitizer, dp.local_time, dp.channel, dp.adc);
-
         // \todo should there not be a function in mbgeom for validating this?
         assert(dp.channel < nwires + nstrips);
 
         uint16_t __attribute__((unused)) coord; // \todo invalidate ?
-        int plane = mbgeom.getPlane(dp.channel);
+        uint8_t plane = mbgeom.getPlane(dp.channel);
+
+        // \todo same as above, geometry should validate this
+        assert(plane < 2);
 
         if (plane == 0) {
           coord = mbgeom.getx(0, dp.channel);
@@ -244,7 +240,13 @@ void CAENBase::processing_thread() {
           coord = mbgeom.gety(0, dp.channel);
           histograms.bin_y(mbgeom.gety(cassette, dp.channel), dp.adc);
         }
-        //builder[cassette].addDataPoint(plane, coord, dp.adc, dp.local_time);
+        XTRACE(DATA, DEB, "Readout (%s) -> cassette=%d plane=%d coord=%d",
+               dp.debug().c_str(), cassette, plane, coord);
+
+//        XTRACE(DATA, DEB, "%s",
+//               dp.debug().c_str());
+
+        queues[cassette].insert(dp);
       }
       // \todo match clusters here
       // calculate local x and y
@@ -296,8 +298,8 @@ void CAENBase::processing_thread() {
       mystats.tx_bytes += flatbuffer.produce();
 
       if (!histograms.isEmpty()) {
-        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
-               histograms.hit_count());
+//        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
+//               histograms.hit_count());
         histfb.produce(histograms);
         histograms.clear();
       }

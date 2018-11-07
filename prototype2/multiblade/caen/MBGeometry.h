@@ -75,7 +75,7 @@ public:
     return ( (not isWire(channel)) and (channel <= MaxStripCh) );
   }
 
-  int getPlane(uint16_t channel) {
+  uint8_t getPlane(uint16_t channel) {
     return isStrip(channel) ^ Freia; // 0 is x, 1 is y
   }
 
