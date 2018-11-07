@@ -72,6 +72,9 @@ private:
   /// for now just hold a vector of the digitisers, \todo later
   /// incorporate in the digital geometry
   std::vector<struct DigitizerMapping::Digitiser> Digitisers;
+
+  uint16_t NWires{0};
+  uint16_t NStrips{0};
 };
 
 }

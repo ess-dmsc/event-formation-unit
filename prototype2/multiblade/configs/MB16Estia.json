@@ -13,5 +13,8 @@
     { "index" : 5, "id" : 137 }
   ],
 
+  "wires": 32,
+  "strips": 32,
+
   "TimeTickNS": 16
 }

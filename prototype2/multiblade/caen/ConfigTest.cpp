@@ -57,9 +57,7 @@ TEST_F(ConfigTest, UnknownInstrument) {
   std::string filename{"deleteme_unknowninstrument.json"};
   DataSave tempfile(filename, (void *)unknowninstrument.c_str(), unknowninstrument.size());
   Multiblade::Config mbconf;
-  mbconf = Multiblade::Config(filename);
-  ASSERT_TRUE(mbconf.isConfigLoaded());
-  ASSERT_EQ(mbconf.getInstrument(), Multiblade::Config::InstrumentGeometry::Estia);
+  ASSERT_THROW(mbconf = Multiblade::Config(filename), std::runtime_error);
 }
 
 TEST_F(ConfigTest, InstrumentFreia) {

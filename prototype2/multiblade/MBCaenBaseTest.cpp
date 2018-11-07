@@ -23,6 +23,9 @@
      { "index" : 5, "id" :  34 }
    ],
 
+   "wires":  32,
+   "strips": 32,
+
    "TimeTickNS": 16
  }
 )";

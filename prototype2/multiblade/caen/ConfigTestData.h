@@ -54,6 +54,9 @@ std::string instrumentfreia = R"(
       { "index" : 5, "id" :  34 }
     ],
 
+    "wires": 32,
+    "strips": 32,
+
     "TimeTickNS": 17
   }
 )";
@@ -90,6 +93,9 @@ std::string unknowninstrument = R"(
       { "index" : 5, "id" :  34 }
     ],
 
+    "wires": 32,
+    "strips": 32,
+
     "TimeTickNS": 17
   }
 )";
@@ -108,6 +114,9 @@ std::string validconfig = R"(
       { "index" : 4, "id" :  33 },
       { "index" : 5, "id" :  34 }
     ],
+
+    "wires": 32,
+    "strips": 32,
 
     "TimeTickNS": 17
   }
