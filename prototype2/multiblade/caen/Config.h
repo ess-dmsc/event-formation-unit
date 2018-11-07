@@ -47,6 +47,10 @@ public:
 
   DetectorType getDetectorType() { return DetectorType; }
 
+  uint16_t getWires() const { return NWires; }
+  uint16_t getStrips() const { return NStrips; }
+  uint16_t getCassettes() const { return NCass; }
+
 private:
   /// \brief helper function to load and parse json file
   void loadConfigFile();

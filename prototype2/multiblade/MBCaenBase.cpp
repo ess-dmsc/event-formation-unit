@@ -17,6 +17,7 @@
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
+#include <common/TestImage.h>
 
 #include <unistd.h>
 
@@ -33,7 +34,7 @@
 #include <caen/MBGeometry.h>
 
 #undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#define TRC_LEVEL TRC_L_WAR
 
 namespace Multiblade {
 
@@ -127,25 +128,24 @@ void CAENBase::input_thread() {
 }
 
 void CAENBase::processing_thread() {
-  /// \todo magic numbers, move these to json config?
-  const uint32_t ncass = 6; // \todo this is likely the same as number of digitizers in json
-  uint8_t nwires = 32;
-  uint8_t nstrips = 32;
+  const uint16_t ncass = mb_opts.getCassettes();
+  const uint16_t nwires = mb_opts.getWires();
+  const uint16_t nstrips = mb_opts.getStrips();
   std::string topic{""};
   std::string monitor{""};
 
   MBGeometry mbgeom(ncass, nwires, nstrips);
-  ESSGeometry __attribute__((unused)) *essgeom;
+  ESSGeometry *essgeom;
   if (mb_opts.getInstrument() == Config::InstrumentGeometry::Estia) {
     XTRACE(PROCESS, ALW, "Setting instrument configuration to Estia");
     mbgeom.setConfigurationEstia();
-    essgeom = new ESSGeometry(nstrips, ncass * nwires, 1, 1);
+    essgeom = new ESSGeometry(ncass * nwires, nstrips, 1, 1);
     topic = "ESTIA_detector";
     monitor = "ESTIA_monitor";
   } else {
     mbgeom.setConfigurationFreia();
     XTRACE(PROCESS, ALW, "Setting instrument configuration to Freia");
-    essgeom = new ESSGeometry(ncass * nwires, nstrips, 1, 1);
+    essgeom = new ESSGeometry(nstrips, ncass * nwires, 1, 1);
     topic = "FREIA_detector";
     monitor = "FREIA_monitor";
   }
@@ -258,22 +258,15 @@ void CAENBase::processing_thread() {
       //pixel = mbgeom.getPixel(cassette, localx, localy);
 
       static uint32_t time = 0;
-      static uint32_t pixel_id = 1;
+      auto pixel_id = TestImage2D(time, essgeom);
 
       if (pixel_id == 0) {
-        mystats.geometry_errors++;
+         mystats.geometry_errors++;
       } else {
-        uint32_t pixel;
-        if (time % 10000 == 0) {
-          pixel = 6144;
-        } else {
-          pixel = pixel_id % 700;
-        }
-        mystats.tx_bytes += flatbuffer.addEvent(time, pixel);
+        mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
         mystats.rx_events++;
       }
       time++;
-      pixel_id++;
 
     } else {
       // There is NO data in the FIFO - do stop checks and sleep a little
@@ -320,7 +313,6 @@ void CAENBase::processing_thread() {
       XTRACE(INPUT, ALW, "Stopping processing thread.");
       return;
     }
-
   }
 }
 
