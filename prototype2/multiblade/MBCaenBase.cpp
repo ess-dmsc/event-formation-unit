@@ -129,9 +129,9 @@ void CAENBase::input_thread() {
 
 void CAENBase::processing_thread() {
   // \todo get from opts?
-  bool time_span_filter = true;
-  bool filter_multiplicity = true;
-  bool filter_multiplicity2 = true;
+  bool time_span_filter = false;
+  bool filter_multiplicity = false;
+  bool filter_multiplicity2 = false;
 
   const uint16_t ncass = mb_opts.getCassettes();
   const uint16_t nwires = mb_opts.getWires();
@@ -253,29 +253,32 @@ void CAENBase::processing_thread() {
         if (!e.both_planes())
           continue;
 
-        if (time_span_filter) {
-          if (e.time_span() > 313) {
-            continue;
-          }
+        // \todo parametrize maximum time span - in opts?
+        if (time_span_filter && (e.time_span() > 313)) {
+          // \todo add counter
+          continue;
         }
 
         // \todo are these always wires && strips respectively?
-        if (filter_multiplicity) {
-          if ((e.c1.hit_count() > 5) || (e.c2.hit_count() > 10))
-            continue;
+        if (filter_multiplicity &&
+            ((e.c1.hit_count() > 5) || (e.c2.hit_count() > 10))) {
+          // \todo add counter
+          continue;
         }
-        if (filter_multiplicity2) {
-          if ((e.c1.hit_count() > 3) || (e.c2.hit_count() > 4))
-            continue;
+        if (filter_multiplicity2 &&
+            ((e.c1.hit_count() > 3) || (e.c2.hit_count() > 4))) {
+          // \todo add counter
+          continue;
         }
 
         XTRACE(DATA, DEB, "Event\n %s", e.debug(true).c_str());
-        // calculate local x and y
-//        auto localx = static_cast<uint16_t>(std::round(e.c1.coord_center()));
-//        auto localy = static_cast<uint16_t>(std::round(e.c2.coord_center()));
+        // calculate local x and y using center of mass
+        auto localx = static_cast<uint16_t>(std::round(e.c1.coord_center()));
+        auto localy = static_cast<uint16_t>(std::round(e.c2.coord_center()));
 
-        auto localx = (e.c1.coord_start() + e.c1.coord_end()) / 2;
-        auto localy = (e.c2.coord_start() + e.c2.coord_end()) / 2;
+        // calculate local x and y using center of span
+//        auto localx = (e.c1.coord_start() + e.c1.coord_end()) / 2;
+//        auto localy = (e.c2.coord_start() + e.c2.coord_end()) / 2;
 
         // \todo improve this
         auto time = e.time_start();
