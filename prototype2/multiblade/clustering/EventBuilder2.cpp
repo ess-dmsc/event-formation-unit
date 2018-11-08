@@ -12,7 +12,7 @@
 #include <common/Trace.h>
 
 #undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#define TRC_LEVEL TRC_L_WAR
 
 namespace Multiblade {
 
@@ -29,6 +29,7 @@ void EventBuilder2::insert(Hit hit) {
 }
 
 void EventBuilder2::flush() {
+  matcher.matched_events.clear();
 
   std::sort(p0.begin(), p0.end(),
             [](const Hit &e1, const Hit &e2) {

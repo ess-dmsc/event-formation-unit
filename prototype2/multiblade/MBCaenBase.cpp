@@ -274,17 +274,17 @@ void CAENBase::processing_thread() {
 
         XTRACE(DATA, DEB, "Event\n %s", e.debug(true).c_str());
         // calculate local x and y using center of mass
-        auto localx = static_cast<uint16_t>(std::round(e.c1.coord_center()));
-        auto localy = static_cast<uint16_t>(std::round(e.c2.coord_center()));
+        auto x = static_cast<uint16_t>(std::round(e.c1.coord_center()));
+        auto y = static_cast<uint16_t>(std::round(e.c2.coord_center()));
 
         // calculate local x and y using center of span
-//        auto localx = (e.c1.coord_start() + e.c1.coord_end()) / 2;
-//        auto localy = (e.c2.coord_start() + e.c2.coord_end()) / 2;
+//        auto x = (e.c1.coord_start() + e.c1.coord_end()) / 2;
+//        auto y = (e.c2.coord_start() + e.c2.coord_end()) / 2;
 
         // \todo improve this
         auto time = e.time_start();
-        // \todo use essgeom
-        auto pixel_id = essgeom.pixel2D(localx, localy);
+        auto pixel_id = essgeom.pixel2D(x, y);
+        //auto pixel_id = udder.getPixel(essgeom):
         if (pixel_id == 0) {
           mystats.geometry_errors++;
         } else {
@@ -292,21 +292,6 @@ void CAENBase::processing_thread() {
           mystats.rx_events++;
         }
       }
-      builders[cassette].matcher.matched_events.clear();
-
-
-#if 0
-      static uint32_t time = 0;
-      auto pixel_id = TestImage2D(&essgeom);
-
-      if (pixel_id == 0) {
-        mystats.geometry_errors++;
-      } else {
-        mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
-        mystats.rx_events++;
-      }
-      time++;
-#endif
 
     } else {
       // There is NO data in the FIFO - do stop checks and sleep a little
