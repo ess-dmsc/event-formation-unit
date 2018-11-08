@@ -155,9 +155,9 @@ std::string Cluster::debug(bool verbose) const {
                        plane_, time_start_, time_end_, coord_start_, coord_end_, weight_sum_,
                        hits.size());
   }
-  auto ret = debug(false) + "\n";
+  auto ret = debug(false);
   for (const auto &h : hits) {
-    ret += "   " + h.debug() + "\n";
+    ret += "\n   " + h.debug();
   }
   return ret;
 }

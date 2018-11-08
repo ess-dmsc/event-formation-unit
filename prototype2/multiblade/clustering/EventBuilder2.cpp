@@ -9,37 +9,52 @@
 #include <algorithm>
 #include <fmt/format.h>
 
+#include <common/Trace.h>
+
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB
 
 namespace Multiblade {
 
-void HitQueue::insert(Readout hit) {
-  if (readouts.size() && (readouts.back().local_time > hit.local_time)) {
-    XTRACE(DATA, DEB, "*** queue[%d-%d] time overflow: %s > %s",
-           id, id + 3,
-           readouts.back().debug().c_str(),
-           hit.debug().c_str());
+void EventBuilder2::insert(Hit hit) {
+  if (hit.plane == 0) {
+    p0.push_back(hit);
   }
-  readouts.push_back(hit);
+  else if (hit.plane == 1) {
+    p1.push_back(hit);
+  }
+  else {
+    XTRACE(DATA, WAR, "bad plane %s", hit.debug().c_str());
+  }
 }
 
-DigitizerQueue::DigitizerQueue() {
-  groups.resize(8);
-  for (uint16_t i = 0; i < 8; ++i)
-    groups[i].id = i * 8;
+void EventBuilder2::flush() {
+
+  std::sort(p0.begin(), p0.end(),
+            [](const Hit &e1, const Hit &e2) {
+              return e1.coordinate < e2.coordinate;
+            });
+  c0.cluster(p0);
+  c0.flush();
+
+  std::sort(p1.begin(), p1.end(),
+            [](const Hit &e1, const Hit &e2) {
+              return e1.coordinate < e2.coordinate;
+            });
+  c1.cluster(p1);
+  c1.flush();
+
+  matcher.insert(0, c0.clusters);
+  matcher.insert(1, c1.clusters);
+  matcher.match(true);
+
+  clear();
 }
 
-void DigitizerQueue::insert(Readout hit) {
-  size_t idx = hit.channel / uint16_t(8);
-  auto &readouts = groups[idx].readouts;
-  if (readouts.size() && (readouts.back().local_time > hit.local_time)) {
-    XTRACE(DATA, DEB, "*** queue[%d:%d-%d] time overflow: %s > %s",
-           id, 8 * idx, 8 * idx + 7,
-           readouts.back().debug().c_str(),
-           hit.debug().c_str());
-  }
-  readouts.push_back(hit);
+void EventBuilder2::clear() {
+  p0.clear();
+  p1.clear();
 }
+
 
 }

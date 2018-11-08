@@ -34,7 +34,7 @@
 #include <caen/MBGeometry.h>
 
 #undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Multiblade {
 
@@ -128,6 +128,10 @@ void CAENBase::input_thread() {
 }
 
 void CAENBase::processing_thread() {
+  // \todo get from opts?
+  bool filter_multiplicity = true;
+  bool filter_multiplicity2 = true;
+
   const uint16_t ncass = mb_opts.getCassettes();
   const uint16_t nwires = mb_opts.getWires();
   const uint16_t nstrips = mb_opts.getStrips();
@@ -135,17 +139,17 @@ void CAENBase::processing_thread() {
   std::string monitor{""};
 
   MBGeometry mbgeom(ncass, nwires, nstrips);
-  ESSGeometry *essgeom;
+  ESSGeometry essgeom;
   if (mb_opts.getInstrument() == Config::InstrumentGeometry::Estia) {
     XTRACE(PROCESS, ALW, "Setting instrument configuration to Estia");
     mbgeom.setConfigurationEstia();
-    essgeom = new ESSGeometry(ncass * nwires, nstrips, 1, 1);
+    essgeom = ESSGeometry(ncass * nwires, nstrips, 1, 1);
     topic = "ESTIA_detector";
     monitor = "ESTIA_monitor";
   } else {
     mbgeom.setConfigurationFreia();
     XTRACE(PROCESS, ALW, "Setting instrument configuration to Freia");
-    essgeom = new ESSGeometry(nstrips, ncass * nwires, 1, 1);
+    essgeom = ESSGeometry(nstrips, ncass * nwires, 1, 1);
     topic = "FREIA_detector";
     monitor = "FREIA_monitor";
   }
@@ -175,11 +179,7 @@ void CAENBase::processing_thread() {
   histfb.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 
-  std::vector<DigitizerQueue> queues;
-  queues.resize(ncass);
-  for (uint16_t i = 0; i < ncass; ++i) {
-    queues[i].id = i;
-  }
+  std::vector<EventBuilder2> builders(ncass);
 
   DataParser parser;
   auto digitisers = mb_opts.getDigitisers();
@@ -232,41 +232,68 @@ void CAENBase::processing_thread() {
         assert(plane < 2);
 
         if (plane == 0) {
-          coord = mbgeom.getx(0, dp.channel);
-          histograms.bin_x(mbgeom.getx(cassette, dp.channel), dp.adc);
+          coord = mbgeom.getx(cassette, dp.channel);
+          histograms.bin_x(coord, dp.adc);
         }
 
         if (plane == 1) {
-          coord = mbgeom.gety(0, dp.channel);
-          histograms.bin_y(mbgeom.gety(cassette, dp.channel), dp.adc);
+          coord = mbgeom.gety(cassette, dp.channel);
+          histograms.bin_y(coord, dp.adc);
         }
+
+        builders[cassette].insert({dp.local_time, coord, dp.adc, plane});
+
         XTRACE(DATA, DEB, "Readout (%s) -> cassette=%d plane=%d coord=%d",
                dp.debug().c_str(), cassette, plane, coord);
-
-//        XTRACE(DATA, DEB, "%s",
-//               dp.debug().c_str());
-
-        queues[cassette].insert(dp);
       }
-      // \todo match clusters here
-      // calculate local x and y
-      // localx = event.x();
-      // localy = event.y();
-      // time = event.time();
 
-      // \todo use essgeom
-      //pixel = mbgeom.getPixel(cassette, localx, localy);
+      builders[cassette].flush();
+      for (const auto &e : builders[cassette].matcher.matched_events) {
+        if (!e.both_planes())
+          continue;
 
+        // \todo are these always wires && strips respectively?
+        if (filter_multiplicity) {
+          if ((e.c1.hit_count() > 5) || (e.c2.hit_count() > 10))
+            continue;
+        }
+        if (filter_multiplicity2) {
+          if ((e.c1.hit_count() > 3) || (e.c2.hit_count() > 4))
+            continue;
+        }
+
+        XTRACE(DATA, DEB, "Event\n %s", e.debug(true).c_str());
+        // calculate local x and y
+//        auto localx = static_cast<uint16_t>(std::round(e.c1.coord_center()));
+//        auto localy = static_cast<uint16_t>(std::round(e.c2.coord_center()));
+
+        auto localx = (e.c1.coord_start() + e.c1.coord_end()) / 2;
+        auto localy = (e.c2.coord_start() + e.c2.coord_end()) / 2;
+
+        // \todo improve this
+        auto time = e.time_start();
+        // \todo use essgeom
+        auto pixel_id = essgeom.pixel2D(localx, localy);
+        if (pixel_id == 0) {
+          mystats.geometry_errors++;
+        } else {
+          mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
+          mystats.rx_events++;
+        }
+      }
+
+#if 0
       static uint32_t time = 0;
-      auto pixel_id = TestImage2D(time, essgeom);
+      auto pixel_id = TestImage2D(time, &essgeom);
 
       if (pixel_id == 0) {
-         mystats.geometry_errors++;
+        mystats.geometry_errors++;
       } else {
         mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
         mystats.rx_events++;
       }
       time++;
+#endif
 
     } else {
       // There is NO data in the FIFO - do stop checks and sleep a little

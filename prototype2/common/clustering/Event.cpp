@@ -46,6 +46,10 @@ bool Event::empty() const {
   return c1.empty() && c2.empty();
 }
 
+bool Event::both_planes() const {
+  return !c1.empty() && !c2.empty();
+}
+
 uint64_t Event::time_end() const {
   if (c1.empty())
     return c2.time_end();
@@ -80,7 +84,12 @@ uint64_t Event::time_overlap(const Cluster &other) const {
 }
 
 std::string Event::debug(bool verbose) const {
-  return fmt::format("Event planes({},{}):\n  {}\n  {}\n",
-                     plane1_, plane2_,
-                     c1.debug(verbose), c2.debug(verbose));
+  auto ret = fmt::format("Event planes({},{}):",
+                     plane1_, plane2_);
+  if (!c1.empty())
+    ret += "\n  " + c1.debug(verbose);
+  if (!c2.empty())
+    ret += "\n  " + c2.debug(verbose);
+
+  return ret;
 }

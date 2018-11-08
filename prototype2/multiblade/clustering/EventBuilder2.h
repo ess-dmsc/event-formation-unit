@@ -2,37 +2,34 @@
 
 #pragma once
 
-#include <common/clustering/Hit.h>
-#include <common/Trace.h>
 #include <multiblade/caen/Readout.h>
+
+#include <common/clustering/Hit.h>
+#include <common/clustering/GapClusterer.h>
+#include <common/clustering/OverlapMatcher.h>
 
 #include <vector>
 #include <deque>
 
 namespace Multiblade {
 
-class HitQueue {
+class EventBuilder2 {
 public:
-  HitQueue() = default;
+  EventBuilder2() = default;
 
   // \todo pass by rvalue?
-  void insert(Readout hit);
+  void insert(Hit hit);
 
-  std::deque<Readout> readouts;
+  void flush();
 
-  uint16_t id{0};
+  void clear();
+
+  std::vector<Hit> p0, p1;
+
+  GapClusterer c0{313,0}, c1{313,0};
+
+  OverlapMatcher matcher{1600};
 };
 
-class DigitizerQueue {
-public:
-  DigitizerQueue();
-
-  // \todo pass by rvalue?
-  void insert(Readout hit);
-
-  std::vector<HitQueue> groups;
-
-  uint16_t id{0};
-};
 
 }

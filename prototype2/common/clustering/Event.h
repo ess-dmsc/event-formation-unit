@@ -57,6 +57,9 @@ public:
   /// \returns true if event contains no hits
   bool empty() const;
 
+  /// \returns true if event has both valid planes
+  bool both_planes() const;
+
   /// \returns earliest timestamp, undefined in case of empty event
   uint64_t time_start() const;
   /// \returns latest timestamp, undefined in case of empty event
