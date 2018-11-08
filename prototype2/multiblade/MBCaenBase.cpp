@@ -17,7 +17,7 @@
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
-#include <common/TestImage.h>
+#include <common/TestImageUdder.h>
 
 #include <unistd.h>
 
@@ -33,8 +33,8 @@
 #include <logical_geometry/ESSGeometry.h>
 #include <caen/MBGeometry.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_WAR
 
 namespace Multiblade {
 
@@ -186,6 +186,7 @@ void CAENBase::processing_thread() {
   auto digitisers = mb_opts.getDigitisers();
   DigitizerMapping mb1618(digitisers);
 
+  Udder udder;
   unsigned int data_index;
   TSCTimer produce_timer;
   Timer h5flushtimer;
@@ -296,7 +297,7 @@ void CAENBase::processing_thread() {
 
 #if 0
       static uint32_t time = 0;
-      auto pixel_id = TestImage2D(time, &essgeom);
+      auto pixel_id = TestImage2D(&essgeom);
 
       if (pixel_id == 0) {
         mystats.geometry_errors++;
