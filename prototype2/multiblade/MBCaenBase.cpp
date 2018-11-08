@@ -33,8 +33,8 @@
 #include <logical_geometry/ESSGeometry.h>
 #include <caen/MBGeometry.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_WAR
 
 namespace Multiblade {
 
@@ -273,8 +273,8 @@ void CAENBase::processing_thread() {
 
         XTRACE(DATA, DEB, "Event\n %s", e.debug(true).c_str());
         // calculate local x and y using center of mass
-        auto localx = static_cast<uint16_t>(std::round(e.c1.coord_center()));
-        auto localy = static_cast<uint16_t>(std::round(e.c2.coord_center()));
+        auto x = static_cast<uint16_t>(std::round(e.c1.coord_center()));
+        auto y = static_cast<uint16_t>(std::round(e.c2.coord_center()));
 
         // calculate local x and y using center of span
 //        auto localx = (e.c1.coord_start() + e.c1.coord_end()) / 2;
@@ -282,8 +282,7 @@ void CAENBase::processing_thread() {
 
         // \todo improve this
         auto time = e.time_start();
-        // \todo use essgeom
-        auto pixel_id = essgeom.pixel2D(localx, localy);
+        auto pixel_id = essgeom.pixel2D(x, y);
         if (pixel_id == 0) {
           mystats.geometry_errors++;
         } else {
@@ -291,7 +290,6 @@ void CAENBase::processing_thread() {
           mystats.rx_events++;
         }
       }
-      builders[cassette].matcher.matched_events.clear();
 
 
 #if 0
