@@ -129,6 +129,7 @@ void CAENBase::input_thread() {
 
 void CAENBase::processing_thread() {
   // \todo get from opts?
+  bool time_span_filter = true;
   bool filter_multiplicity = true;
   bool filter_multiplicity2 = true;
 
@@ -252,6 +253,12 @@ void CAENBase::processing_thread() {
         if (!e.both_planes())
           continue;
 
+        if (time_span_filter) {
+          if (e.time_span() > 313) {
+            continue;
+          }
+        }
+
         // \todo are these always wires && strips respectively?
         if (filter_multiplicity) {
           if ((e.c1.hit_count() > 5) || (e.c2.hit_count() > 10))
@@ -281,6 +288,8 @@ void CAENBase::processing_thread() {
           mystats.rx_events++;
         }
       }
+      builders[cassette].matcher.matched_events.clear();
+
 
 #if 0
       static uint32_t time = 0;

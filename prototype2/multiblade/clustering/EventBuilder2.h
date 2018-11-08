@@ -26,7 +26,7 @@ public:
 
   std::vector<Hit> p0, p1;
 
-  GapClusterer c0{313,0}, c1{313,0};
+  GapClusterer c0{300,0}, c1{300,0};
 
   OverlapMatcher matcher{1600};
 };

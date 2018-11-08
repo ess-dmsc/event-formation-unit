@@ -32,14 +32,14 @@ void EventBuilder2::flush() {
 
   std::sort(p0.begin(), p0.end(),
             [](const Hit &e1, const Hit &e2) {
-              return e1.coordinate < e2.coordinate;
+              return e1.time < e2.time;
             });
   c0.cluster(p0);
   c0.flush();
 
   std::sort(p1.begin(), p1.end(),
             [](const Hit &e1, const Hit &e2) {
-              return e1.coordinate < e2.coordinate;
+              return e1.time < e2.time;
             });
   c1.cluster(p1);
   c1.flush();
