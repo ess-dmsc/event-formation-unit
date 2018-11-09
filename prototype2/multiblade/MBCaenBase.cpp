@@ -261,13 +261,14 @@ void CAENBase::processing_thread() {
         }
 
         uint8_t plane = mbgeom.getPlane(dp.channel);
+        uint16_t global_ch = mbgeom.getGlobalChannel(cassette, dp.channel);
         uint16_t coord;
         if (plane == 0) {
           coord = mbgeom.getx(cassette, dp.channel);
-          histograms.bin_x(coord, dp.adc);
+          histograms.bin_x(global_ch, dp.adc);
         } else  if (plane == 1) {
           coord = mbgeom.gety(cassette, dp.channel);
-          histograms.bin_y(coord, dp.adc);
+          histograms.bin_y(global_ch, dp.adc);
         } else {
           mystats.readouts_invalid_plane++;
           continue;

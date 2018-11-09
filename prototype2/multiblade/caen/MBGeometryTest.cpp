@@ -211,6 +211,16 @@ TEST_F(MBGeometryTest, GetPlane) {
   ASSERT_EQ(geometry.getPlane(nw + ns - 1), 0);
 }
 
+TEST_F(MBGeometryTest, GetGlobelChannel) {
+  MBGeometry geometry(ncass, nw, ns);
+  geometry.setConfigurationEstia();
+  ASSERT_EQ(geometry.getGlobalChannel(0, 0), 0);
+  ASSERT_EQ(geometry.getGlobalChannel(0, nw - 1), nw - 1);
+  ASSERT_EQ(geometry.getGlobalChannel(0, 0), 0);
+  ASSERT_EQ(geometry.getGlobalChannel(0, nw), 0);
+  ASSERT_EQ(geometry.getGlobalChannel(0, nw + ns - 1), ns - 1);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

@@ -36,6 +36,14 @@ public:
     MaxY = NStrips - 1;
   }
 
+  uint16_t getGlobalChannel(uint16_t cassette, uint16_t channel) {
+    if (isWire(channel)) {
+      return NWires * cassette + channel;
+    } else {
+      return NStrips * cassette + (channel - NWires);
+    }
+  }
+
   bool isFreia() { return Freia; }
   bool isEstia() { return not isFreia(); }
   bool isValidCh(uint16_t ch) { return ch <= MaxStripCh; }
