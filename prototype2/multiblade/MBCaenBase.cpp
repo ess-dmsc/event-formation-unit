@@ -4,7 +4,6 @@
 /// \file
 /// Implementation of the detector pipeline plugin for MUlti-Blade
 /// detectors.
-/// Contributor: Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
 //===----------------------------------------------------------------------===//
 
 #include "MBCaenBase.h"
