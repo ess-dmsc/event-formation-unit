@@ -194,6 +194,23 @@ TEST_F(MBGeometryTest, YPositionsEstia) {
   }
 }
 
+TEST_F(MBGeometryTest, GetPlane) {
+  MBGeometry geometry(ncass, nw, ns);
+  geometry.setConfigurationEstia();
+  MESSAGE() << "For Estia wire channels are X plane\n";
+  ASSERT_EQ(geometry.getPlane(0), 0);
+  ASSERT_EQ(geometry.getPlane(nw - 1), 0);
+  ASSERT_EQ(geometry.getPlane(nw), 1);
+  ASSERT_EQ(geometry.getPlane(nw + ns - 1), 1);
+
+  geometry.setConfigurationFreia();
+  MESSAGE() << "For Estia wire channels are Y plane\n";
+  ASSERT_EQ(geometry.getPlane(0), 1);
+  ASSERT_EQ(geometry.getPlane(nw - 1), 1);
+  ASSERT_EQ(geometry.getPlane(nw), 0);
+  ASSERT_EQ(geometry.getPlane(nw + ns - 1), 0);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

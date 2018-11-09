@@ -78,7 +78,7 @@ void Config::loadConfigFile() {
     NStrips = root["strips"].get<unsigned int>();
 
     if ((NWires == 0) or (NStrips == 0) or (NCass == 0)) {
-      LOG(INIT, Sev::Warning, "JSON config - error: Unknown detector specified");
+      LOG(INIT, Sev::Warning, "JSON config - error: invalid geometry");
       return;
     }
 

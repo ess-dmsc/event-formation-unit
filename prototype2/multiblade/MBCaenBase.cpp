@@ -51,23 +51,34 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("input.rx_packets", mystats.rx_packets);
-  Stats.create("input.rx_bytes", mystats.rx_bytes);
-  Stats.create("input.fifo1_push_errors", mystats.fifo1_push_errors);
-  Stats.create("processing.rx_readouts", mystats.rx_readouts);
-  Stats.create("processing.rx_error_bytes", mystats.rx_error_bytes);
-  Stats.create("processing.rx_seq_errors", mystats.rx_seq_errors);
-  Stats.create("processing.rx_idle1", mystats.rx_idle1);
-  Stats.create("processing.tx_bytes", mystats.tx_bytes);
-  Stats.create("processing.rx_events", mystats.rx_events);
-  Stats.create("processing.rx_geometry_errors", mystats.geometry_errors);
-  Stats.create("processing.fifo_seq_errors", mystats.fifo_seq_errors);
+  Stats.create("receive.packets", mystats.rx_packets);
+  Stats.create("receive.bytes", mystats.rx_bytes);
+  Stats.create("receive.dropped", mystats.fifo1_push_errors);
+
+  Stats.create("readouts.count", mystats.rx_readouts);
+  Stats.create("readouts.invalid_ch", mystats.readouts_invalid_ch);
+  Stats.create("readouts.invalid_plane", mystats.readouts_invalid_plane);
+  Stats.create("readouts.error_bytes", mystats.readouts_error_bytes);
+  Stats.create("readouts.seq_errors", mystats.readouts_seq_errors);
+
+  Stats.create("thread.processing_idle", mystats.rx_idle1);
+
+  Stats.create("events.count", mystats.events);
+  Stats.create("events.udder", mystats.events_udder);
+  Stats.create("events.geometry_errors", mystats.geometry_errors);
+  Stats.create("events.no_coincidence", mystats.events_no_coincidence);
+  Stats.create("filters.max_time_span", mystats.filters_max_time_span);
+  Stats.create("filters.max_multi1", mystats.filters_max_multi1);
+  Stats.create("filters.max_multi2", mystats.filters_max_multi2);
+
+  Stats.create("transmit.bytes", mystats.tx_bytes);
+
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
-  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
-  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
-  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
-  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
+  Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka.ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka.ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka.dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka.dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { CAENBase::input_thread(); };
@@ -186,7 +197,26 @@ void CAENBase::processing_thread() {
   auto digitisers = mb_opts.getDigitisers();
   DigitizerMapping mb1618(digitisers);
 
-  Udder udder;
+
+  if (EFUSettings.TestImage) {
+    XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
+    Udder udder;
+    uint32_t time = 0;
+    while (true) {
+      if (not runThreads) {
+        // \todo flush everything here
+        XTRACE(INPUT, ALW, "Stopping processing thread.");
+        return;
+      }
+      auto pixel_id = udder.getPixel(192, 32, &essgeom);
+      mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
+      mystats.events_udder++;
+      usleep(10);
+      time++;
+    }
+  }
+
+
   unsigned int data_index;
   TSCTimer produce_timer;
   Timer h5flushtimer;
@@ -194,17 +224,17 @@ void CAENBase::processing_thread() {
     if (input2proc_fifo.pop(data_index)) { // There is data in the FIFO - do processing
       auto datalen = eth_ringbuf->getDataLength(data_index);
       if (datalen == 0) {
-        mystats.fifo_seq_errors++;
+        mystats.readouts_seq_errors++;
         continue;
       }
 
       /// \todo use the Buffer<T> class here and in parser
       auto dataptr = eth_ringbuf->getDataBuffer(data_index);
       if (parser.parse(dataptr, datalen) < 0) {
-        mystats.rx_error_bytes += parser.Stats.error_bytes;
+        mystats.readouts_error_bytes += parser.Stats.error_bytes;
         continue;
       }
-      mystats.rx_seq_errors += parser.Stats.seq_errors;
+      mystats.readouts_seq_errors += parser.Stats.seq_errors;
 
       XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
              parser.MBHeader->numElements, parser.MBHeader->digitizerID);
@@ -224,23 +254,23 @@ void CAENBase::processing_thread() {
       }
 
       for (const auto &dp : parser.readouts) {
-        // \todo should there not be a function in mbgeom for validating this?
-        assert(dp.channel < nwires + nstrips);
 
-        uint16_t __attribute__((unused)) coord; // \todo invalidate ?
+        if (not mbgeom.isValidCh(dp.channel)) {
+          mystats.readouts_invalid_ch++;
+          continue;
+        }
+
         uint8_t plane = mbgeom.getPlane(dp.channel);
-
-        // \todo same as above, geometry should validate this
-        assert(plane < 2);
-
+        uint16_t coord;
         if (plane == 0) {
           coord = mbgeom.getx(cassette, dp.channel);
           histograms.bin_x(coord, dp.adc);
-        }
-
-        if (plane == 1) {
+        } else  if (plane == 1) {
           coord = mbgeom.gety(cassette, dp.channel);
           histograms.bin_y(coord, dp.adc);
+        } else {
+          mystats.readouts_invalid_plane++;
+          continue;
         }
 
         builders[cassette].insert({dp.local_time, coord, dp.adc, plane});
@@ -251,24 +281,26 @@ void CAENBase::processing_thread() {
 
       builders[cassette].flush();
       for (const auto &e : builders[cassette].matcher.matched_events) {
-        if (!e.both_planes())
+        if (!e.both_planes()) {
+          mystats.events_no_coincidence++;
           continue;
+        }
 
         // \todo parametrize maximum time span - in opts?
         if (time_span_filter && (e.time_span() > 313)) {
-          // \todo add counter
+          mystats.filters_max_time_span++;
           continue;
         }
 
         // \todo are these always wires && strips respectively?
         if (filter_multiplicity &&
             ((e.c1.hit_count() > 5) || (e.c2.hit_count() > 10))) {
-          // \todo add counter
+          mystats.filters_max_multi1++;
           continue;
         }
         if (filter_multiplicity2 &&
             ((e.c1.hit_count() > 3) || (e.c2.hit_count() > 4))) {
-          // \todo add counter
+          mystats.filters_max_multi2++;
           continue;
         }
 
@@ -284,12 +316,11 @@ void CAENBase::processing_thread() {
         // \todo improve this
         auto time = e.time_start();
         auto pixel_id = essgeom.pixel2D(x, y);
-        //auto pixel_id = udder.getPixel(essgeom):
         if (pixel_id == 0) {
           mystats.geometry_errors++;
         } else {
           mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
-          mystats.rx_events++;
+          mystats.events++;
         }
       }
 

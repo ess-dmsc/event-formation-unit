@@ -28,7 +28,6 @@ public:
     yMultiplier = NStrips;
     MaxX = NStrips - 1;
     MaxY = NCassettes * NWires - 1;
-
   }
   void setConfigurationEstia() {
     Freia = false;
@@ -39,12 +38,14 @@ public:
 
   bool isFreia() { return Freia; }
   bool isEstia() { return not isFreia(); }
-
-  void setDetectorMB18() { MB18 = true; }
-  void setDetectorMB16() { MB18 = false; }
+  bool isValidCh(uint16_t ch) { return ch <= MaxStripCh; }
+  bool isWire(uint16_t channel) { return (channel <= MaxWireCh); }
+  bool isStrip(uint16_t channel) {
+    return ( (not isWire(channel)) and (channel <= MaxStripCh) ); }
   bool isDetectorMB18() { return MB18; }
   bool isDetectorMB16() { return not isDetectorMB18(); }
-
+  void setDetectorMB18() { MB18 = true; }
+  void setDetectorMB16() { MB18 = false; }
 
   uint32_t getPixel(uint16_t cassette, uint16_t localx, uint16_t localy) {
     uint16_t globalx, globaly;
@@ -62,17 +63,7 @@ public:
     if ( (x > MaxX) or (y > MaxY) ) {
       return 0;
     }
-    return y * yMultiplier + x + uint32_t(1);
-  }
-
-  // Wires have channels from 0 to NWires -1
-  bool isWire(uint16_t channel) {
-    return (channel <= MaxWireCh);
-  }
-
-  // Strips have channels from NWires to NWires + NStrips - 1
-  bool isStrip(uint16_t channel) {
-    return ( (not isWire(channel)) and (channel <= MaxStripCh) );
+    return y * yMultiplier + x + 1U;
   }
 
   uint8_t getPlane(uint16_t channel) {

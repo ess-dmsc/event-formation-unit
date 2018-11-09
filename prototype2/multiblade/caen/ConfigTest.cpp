@@ -60,6 +60,13 @@ TEST_F(ConfigTest, UnknownInstrument) {
   ASSERT_THROW(mbconf = Multiblade::Config(filename), std::runtime_error);
 }
 
+TEST_F(ConfigTest, InvalidGeometry) {
+  std::string filename{"deleteme_invalidgeometry.json"};
+  DataSave tempfile(filename, (void *)invalidgeometry.c_str(), invalidgeometry.size());
+  Multiblade::Config mbconf;
+  ASSERT_THROW(mbconf = Multiblade::Config(filename), std::runtime_error);
+}
+
 TEST_F(ConfigTest, InstrumentFreia) {
   std::string filename{"deleteme_instrumentfreia.json"};
   DataSave tempfile(filename, (void *)instrumentfreia.c_str(), instrumentfreia.size());
