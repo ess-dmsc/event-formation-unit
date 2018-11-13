@@ -17,7 +17,7 @@ void PeakFinder::processData(SamplingRun const &Data) {
   auto Result = FindPeak(Data.Data);
   std::uint64_t PeakTimeStamp =
       Data.TimeStamp.GetOffsetTimeStamp(Result.MaxLocation).GetTimeStampNS();
-  SendData(PeakTimeStamp, Result.Max, Data.Channel);
+  SendData(PeakTimeStamp, Result.Max, Data.Identifier.ChannelNr);
 }
 
 void PeakFinder::SendData(const std::uint64_t &TimeStamp,

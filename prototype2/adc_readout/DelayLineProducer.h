@@ -57,6 +57,6 @@ protected:
   AdcSettings Settings;
   std::thread PulseProcessingThread;
   std::mutex PulseMutex;
-  std::queue<PulseParameters> PulseQueue;
+  std::queue<PulseParameters> PulseQueue{};
   std::atomic_bool RunThread{true};
 };
