@@ -11,6 +11,7 @@
 
 #include "AdcTimeStamp.h"
 #include "ChannelID.h"
+#include "SamplingRun.h"
 
 /// \brief Stores data about a pulse from the ADC system, including the source.
 struct PulseParameters {
@@ -28,3 +29,10 @@ struct PulseParameters {
   /// Timestamp where line goes above threshold
   RawTimeStamp ThresholdTimestamp;
 };
+
+/// \brief Implements the data extraction information as  pure function.
+///
+/// \param[in] SampleRun A vector of samples to find the peak in.
+/// \param[in] Threshold
+/// \return The results of the peak finding algorithm.
+PulseParameters analyseSampleRun(SamplingRun const &Run, double Threshold);

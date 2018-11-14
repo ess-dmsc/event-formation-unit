@@ -37,11 +37,11 @@ bool DelayLinePosCalcInterface::isValid() {
   }
   std::vector<std::uint64_t> Timestamps;
   for (auto &Pulse : PulseData) {
-    Timestamps.emplace_back(Pulse.second.PeakTimestamp.GetTimeStampNS());
+    Timestamps.emplace_back(Pulse.second.ThresholdTimestamp.GetTimeStampNS());
   }
   std::sort(Timestamps.begin(), Timestamps.end());
   return Timestamps.front() != 0 and
-      Timestamps.back() - Timestamps.front() <= EventTimeout;
+         Timestamps.back() - Timestamps.front() <= EventTimeout;
 }
 
 void DelayLinePosCalcInterface::reset() { PulseData.clear(); }
@@ -50,11 +50,11 @@ std::uint64_t DelayLinePosCalcInterface::getTimestamp() {
   auto Pulse =
       PulseData.find(DelayLinePosCalcInterface::ChannelRole::REFERENCE);
   if (Pulse != PulseData.end()) {
-    return Pulse->second.PeakTimestamp.GetTimeStampNS();
+    return Pulse->second.ThresholdTimestamp.GetTimeStampNS();
   }
   Pulse = PulseData.find(DelayLinePosCalcInterface::ChannelRole::FIRST);
   if (Pulse != PulseData.end()) {
-    return Pulse->second.PeakTimestamp.GetTimeStampNS();
+    return Pulse->second.ThresholdTimestamp.GetTimeStampNS();
   }
   return 0;
 }
@@ -83,9 +83,8 @@ int DelayLineAmpPosCalc::getPosition() {
   using Role = DelayLinePosCalcInterface::ChannelRole;
   if (PulseData.find(DelayLinePosCalcInterface::ChannelRole::SECOND) !=
       PulseData.end()) {
-    return applyCalibration((PulseData[Role::FIRST].PeakAmplitude +
-                             PulseData[Role::SECOND].PeakAmplitude) /
-                            2.0);
+    return applyCalibration(PulseData[Role::FIRST].PeakAmplitude -
+                            PulseData[Role::SECOND].PeakAmplitude);
   }
   return applyCalibration(PulseData[Role::FIRST].PeakAmplitude);
 }

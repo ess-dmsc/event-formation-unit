@@ -160,7 +160,8 @@ void AdcReadoutBase::processingThread(Queue &DataModuleQueue) {
   std::vector<std::unique_ptr<AdcDataProcessor>> Processors;
 
   if (ReadoutSettings.PeakDetection) {
-    Processors.emplace_back(std::make_unique<PeakFinder>(getProducer()));
+    Processors.emplace_back(
+        std::make_unique<PeakFinder>(getProducer(), ReadoutSettings.Name));
   }
   if (ReadoutSettings.SerializeSamples) {
     auto Processor =
@@ -172,8 +173,8 @@ void AdcReadoutBase::processingThread(Queue &DataModuleQueue) {
     Processors.emplace_back(std::move(Processor));
   }
   if (ReadoutSettings.DelayLineDetector) {
-    Processors.emplace_back(
-        std::make_unique<DelayLineProcessing>(getDelayLineProducer()));
+    Processors.emplace_back(std::make_unique<DelayLineProcessing>(
+        getDelayLineProducer(), ReadoutSettings.Threshold));
   }
 
   bool GotModule = false;

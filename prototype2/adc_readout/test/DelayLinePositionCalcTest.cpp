@@ -77,7 +77,7 @@ TEST_F(DelayLinePosInterface, ValidationFail4) {
 
 TEST_F(DelayLinePosInterface, ValidationFail5) {
   Tester.setChannelRole({0, 0}, DelayLinePosCalcInterface::ChannelRole::FIRST);
-  TestPulse.PeakTimestamp = {0, 0};
+  TestPulse.ThresholdTimestamp = {0, 0};
   Tester.addPulse(TestPulse);
   EXPECT_FALSE(Tester.isValid());
 }
@@ -86,10 +86,10 @@ TEST_F(DelayLinePosInterface, ValidationFail6) {
   Tester.setChannelRole({0, 0}, DelayLinePosCalcInterface::ChannelRole::FIRST);
   Tester.setChannelRole({0, 1}, DelayLinePosCalcInterface::ChannelRole::SECOND);
   TestPulse.Identifier = ChannelID{0, 0};
-  TestPulse.PeakTimestamp = {1, 0};
+  TestPulse.ThresholdTimestamp = {1, 0};
   Tester.addPulse(TestPulse);
   TestPulse.Identifier = ChannelID{0, 1};
-  TestPulse.PeakTimestamp = {0, 0};
+  TestPulse.ThresholdTimestamp = {0, 0};
   Tester.addPulse(TestPulse);
   EXPECT_FALSE(Tester.isValid());
 }
@@ -98,10 +98,11 @@ TEST_F(DelayLinePosInterface, ValidationFail7) {
   Tester.setChannelRole({0, 0}, DelayLinePosCalcInterface::ChannelRole::FIRST);
   Tester.setChannelRole({0, 1}, DelayLinePosCalcInterface::ChannelRole::SECOND);
   TestPulse.Identifier = ChannelID{0, 0};
-  TestPulse.PeakTimestamp = {1, 0};
+  TestPulse.ThresholdTimestamp = {1, 0};
   Tester.addPulse(TestPulse);
   TestPulse.Identifier = ChannelID{0, 1};
-  TestPulse.PeakTimestamp = {1, static_cast<unsigned int>(TestTimeout + 1)};
+  TestPulse.ThresholdTimestamp = {1,
+                                  static_cast<unsigned int>(TestTimeout + 1)};
   Tester.addPulse(TestPulse);
   EXPECT_FALSE(Tester.isValid());
 }
@@ -166,7 +167,7 @@ TEST_F(DelayLinePosInterface, GetTimestamp1) {
 TEST_F(DelayLinePosInterface, GetTimestamp2) {
   Tester.setChannelRole({0, 0}, DelayLinePosCalcInterface::ChannelRole::FIRST);
   TestPulse.Identifier = ChannelID{0, 0};
-  TestPulse.PeakTimestamp = {1, 1};
+  TestPulse.ThresholdTimestamp = {1, 1};
   Tester.addPulse(TestPulse);
   EXPECT_EQ(Tester.getTimestamp(), 1000000023u);
 }
@@ -175,7 +176,7 @@ TEST_F(DelayLinePosInterface, GetTimestamp3) {
   Tester.setChannelRole({0, 0},
                         DelayLinePosCalcInterface::ChannelRole::REFERENCE);
   TestPulse.Identifier = ChannelID{0, 0};
-  TestPulse.PeakTimestamp = {1, 1};
+  TestPulse.ThresholdTimestamp = {1, 1};
   Tester.addPulse(TestPulse);
   EXPECT_EQ(Tester.getTimestamp(), 1000000023u);
 }
@@ -317,13 +318,13 @@ TEST_F(DelayLineAmpCalc, CalibrationTest2) {
   Tester.setChannelRole({0, 1}, DelayLinePosCalcInterface::ChannelRole::SECOND);
   TestPulse.Identifier = ChannelID{0, 0};
   auto TestValue = 42;
-  TestPulse.PeakAmplitude = TestValue;
+  TestPulse.PeakAmplitude = TestValue + 1;
   Tester.addPulse(TestPulse);
 
   TestPulse.Identifier = ChannelID{0, 1};
   TestPulse.PeakAmplitude = TestValue;
   Tester.addPulse(TestPulse);
-  auto CurrentPosition = TestValue;
+  auto CurrentPosition = 1;
   auto TestOffset = 5.5;
   auto TestSlope = 123.4;
   auto ExpectedNewValue = std::lround(TestOffset + CurrentPosition * TestSlope);
@@ -343,7 +344,7 @@ TEST_F(DelayLineAmpCalc, DoubleEndCalc) {
   auto TestValue2 = 10;
   TestPulse.PeakAmplitude = TestValue2;
   Tester.addPulse(TestPulse);
-  EXPECT_EQ(Tester.getPosition(), std::lround((TestValue1 + TestValue2) / 2.0));
+  EXPECT_EQ(Tester.getPosition(), std::lround(TestValue1 - TestValue2));
 }
 
 TEST_F(DelayLineAmpCalc, AmplitudeTest1) {

@@ -19,14 +19,12 @@ class DelayLineProcessing : public AdcDataProcessor {
 public:
   /// \param[in] Prod A shared pointer to the Kafka producer that handles data
   /// production.
-  DelayLineProcessing(std::shared_ptr<DelayLineProducer> Prod);
+  DelayLineProcessing(std::shared_ptr<DelayLineProducer> Prod,
+                      double const Threshold);
 
   /// \brief Extract data of importance from sampling run.
   virtual void processData(SamplingRun const &Data) override;
-};
 
-/// \brief Implements the data extraction information as  pure function.
-///
-/// \param[in] SampleRun A vector of samples to find the peak in.
-/// \return The results of the peak finding algorithm.
-PulseParameters analyseSampleRun(SamplingRun const &Run);
+private:
+  const double TimestampThreshold;
+};

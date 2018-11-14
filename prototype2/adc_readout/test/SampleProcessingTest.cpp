@@ -151,8 +151,10 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
   auto Verifier = flatbuffers::Verifier(&TempBuffer[0], BytesCopied);
   ASSERT_TRUE(VerifySampleEnvironmentDataBuffer(Verifier));
   auto SampleData = GetSampleEnvironmentData(&TempBuffer[0]);
-  EXPECT_EQ(SampleData->Name()->str(),
-            Name + "_" + std::to_string(TempModule.Identifier.ChannelNr));
+  auto ExpectedName = Name + "_Adc" +
+                      std::to_string(TempModule.Identifier.SourceID) + "_Ch" +
+                      std::to_string(TempModule.Identifier.ChannelNr);
+  EXPECT_EQ(SampleData->Name()->str(), ExpectedName);
   EXPECT_EQ(SampleData->PacketTimestamp(),
             TempModule.TimeStamp.GetTimeStampNS());
   EXPECT_NEAR(SampleData->TimeDelta(),
@@ -193,8 +195,10 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
   auto Verifier = flatbuffers::Verifier(&TempBuffer[0], BytesCopied);
   ASSERT_TRUE(VerifySampleEnvironmentDataBuffer(Verifier));
   auto SampleData = GetSampleEnvironmentData(&TempBuffer[0]);
-  EXPECT_EQ(SampleData->Name()->str(),
-            Name + "_" + std::to_string(TempModule.Identifier.ChannelNr));
+  auto ExpectedName = Name + "_Adc" +
+                      std::to_string(TempModule.Identifier.SourceID) + "_Ch" +
+                      std::to_string(TempModule.Identifier.ChannelNr);
+  EXPECT_EQ(SampleData->Name()->str(), ExpectedName);
   EXPECT_EQ(SampleData->PacketTimestamp(),
             TempModule.TimeStamp.GetTimeStampNS());
   EXPECT_NEAR(SampleData->TimeDelta(),

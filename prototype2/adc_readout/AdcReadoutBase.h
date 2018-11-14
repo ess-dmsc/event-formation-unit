@@ -30,7 +30,8 @@ class AdcReadoutBase : public Detector {
 public:
   /// \param Settings EFU base command line settings.
   /// \param ReadoutSettings AdcReadout specific settings.
-  AdcReadoutBase(BaseSettings const &Settings, AdcSettings const &ReadoutSettings);
+  AdcReadoutBase(BaseSettings const &Settings,
+                 AdcSettings const &ReadoutSettings);
   AdcReadoutBase(const AdcReadoutBase &) = delete;
   AdcReadoutBase(const AdcReadoutBase &&) = delete;
   AdcReadoutBase &operator=(const AdcReadoutBase &) = delete;

@@ -48,6 +48,7 @@ TEST_F(DelayLineProducerTest, AddedValidPulse) {
   TestPulse.Identifier.ChannelNr = 0;
   TestPulse.Identifier.SourceID = 0;
   TestPulse.PeakTimestamp = {123456, 0};
+  TestPulse.ThresholdTimestamp = {123456, 0};
   TestProducer->addPulse(TestPulse);
   std::this_thread::sleep_for(50ms);
 }

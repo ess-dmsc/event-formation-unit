@@ -29,7 +29,7 @@ struct ProcessedSamples {
   ProcessedSamples() = default;
   ProcessedSamples(size_t NrOfSamples)
       : Samples(NrOfSamples), TimeStamps(NrOfSamples) {}
-  int Channel;
+  ChannelID Identifier;
   std::uint64_t TimeStamp;
   double TimeDelta;
   std::vector<std::uint16_t> Samples;
