@@ -238,6 +238,9 @@ void CAENBase::processing_thread() {
       XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
              parser.MBHeader->numElements, parser.MBHeader->digitizerID);
 
+      uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+      flatbuffer.pulseTime(efu_time);
+
       mystats.rx_readouts += parser.MBHeader->numElements;
 
       if (dumpfile) {
