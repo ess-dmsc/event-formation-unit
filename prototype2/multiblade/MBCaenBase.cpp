@@ -207,7 +207,7 @@ void CAENBase::processing_thread() {
         XTRACE(INPUT, ALW, "Stopping processing thread.");
         return;
       }
-      auto pixel_id = udder.getPixel(192, 32, &essgeom);
+      auto pixel_id = udder.getPixel(essgeom.nx(), essgeom.ny(), &essgeom);
       mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
       mystats.events_udder++;
       usleep(10);
