@@ -23,10 +23,10 @@ public:
 class FormationOfEventsInit : public ::testing::Test {
 public:
   void SetUp() override {
-    Log::SetMinimumSeverity(Severity::Critical);
+    Log::SetMinimumSeverity(Log::Severity::Critical);
     DefaultSettings = AdcSettings{};
   };
-  void TearDown() override { Log::SetMinimumSeverity(Severity::Error); };
+  void TearDown() override { Log::SetMinimumSeverity(Log::Severity::Error); };
   AdcSettings DefaultSettings;
 };
 
