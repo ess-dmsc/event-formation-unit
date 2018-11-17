@@ -266,6 +266,10 @@ void CAENBase::processing_thread() {
         uint16_t global_ch = mbgeom.getGlobalChannel(cassette, dp.channel);
         uint16_t coord;
         if (plane == 0) {
+          if (global_ch == 30) {
+            mystats.readouts_invalid_ch++;
+            continue;
+          }
           coord = mbgeom.getx(cassette, dp.channel);
           histograms.bin_x(global_ch, dp.adc);
         } else  if (plane == 1) {

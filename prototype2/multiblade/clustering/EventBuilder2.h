@@ -27,10 +27,10 @@ public:
   std::vector<Hit> p0, p1;
 
   // \todo parametrize
-  GapClusterer c0{300,0}, c1{300,0};
+  GapClusterer c0{125,0}, c1{125,0};
 
   // \todo parametrize
-  OverlapMatcher matcher{1600};
+  OverlapMatcher matcher{200};
 };
 
 
