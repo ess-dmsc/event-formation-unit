@@ -11,8 +11,8 @@
 
 #include <common/Trace.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_WAR
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Multiblade {
 
@@ -24,7 +24,7 @@ void EventBuilder2::insert(Hit hit) {
     p1.push_back(hit);
   }
   else {
-    XTRACE(DATA, WAR, "bad plane %s", hit.debug().c_str());
+    XTRACE(CLUSTER, WAR, "bad plane %s", hit.debug().c_str());
   }
 }
 

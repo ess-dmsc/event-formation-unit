@@ -7,8 +7,12 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/clustering/Event.h>
+#include <common/Trace.h>
 #include <fmt/format.h>
 #include <cmath>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 Event::Event(uint8_t plane1, uint8_t plane2)
     : plane1_(plane1), plane2_(plane2) {}
@@ -35,6 +39,7 @@ void Event::merge(Cluster &cluster) {
   } else if (cluster.plane() == plane2_) {
     c2.merge(cluster);
   }
+  XTRACE(EVENT, DEB, "merge() c1 size %u. c2 size %u", c1.hit_count(), c2.hit_count());
 }
 
 void Event::clear() {
@@ -73,13 +78,19 @@ uint64_t Event::time_span() const {
 }
 
 uint64_t Event::time_overlap(const Cluster &other) const {
-  if (empty() || other.empty())
-    return 0;
-  auto latest_start = std::max(other.time_start(), time_start());
-  auto earliest_end = std::min(other.time_end(), time_end());
-  if (latest_start > earliest_end) {
+  if (empty() || other.empty()) {
     return 0;
   }
+  auto latest_start = std::max(other.time_start(), time_start());
+  auto earliest_end = std::min(other.time_end(), time_end());
+
+  /// \todo replace 126 with some parameter
+  /// \bug hardcoded value
+  if (latest_start > earliest_end + 125) {
+    XTRACE(EVENT, DEB, "no time overlap");
+    return 0;
+  }
+  /// \todo should not rather return a boolean ?
   return (earliest_end - latest_start) + uint16_t(1);
 }
 

@@ -52,6 +52,8 @@ protected:
 
     // Processing Counters
     int64_t events_udder;
+    int64_t readouts_monitor; // \todo so far hardcoded
+    int64_t readouts_invalid_adc;
     int64_t readouts_invalid_ch;
     int64_t readouts_invalid_plane;
     int64_t filters_max_time_span;
@@ -59,6 +61,7 @@ protected:
     int64_t filters_max_multi2;
     int64_t rx_idle1;
     int64_t rx_readouts;
+    int64_t readouts_ok;
     int64_t readouts_error_bytes;
     int64_t readouts_seq_errors;
     int64_t tx_bytes;

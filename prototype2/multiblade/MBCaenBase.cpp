@@ -33,7 +33,7 @@
 #include <caen/MBGeometry.h>
 
 // #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_WAR
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Multiblade {
 
@@ -55,8 +55,12 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("receive.dropped", mystats.fifo1_push_errors);
 
   Stats.create("readouts.count", mystats.rx_readouts);
+  Stats.create("readouts.count_valid", mystats.readouts_ok);
   Stats.create("readouts.invalid_ch", mystats.readouts_invalid_ch);
+  Stats.create("readouts.invalid_adc", mystats.readouts_invalid_adc);
   Stats.create("readouts.invalid_plane", mystats.readouts_invalid_plane);
+  Stats.create("readouts.monitor", mystats.readouts_monitor);
+
   Stats.create("readouts.error_bytes", mystats.readouts_error_bytes);
   Stats.create("readouts.seq_errors", mystats.readouts_seq_errors);
 
@@ -138,11 +142,6 @@ void CAENBase::input_thread() {
 }
 
 void CAENBase::processing_thread() {
-  // \todo get from opts?
-  bool time_span_filter = false;
-  bool filter_multiplicity = false;
-  bool filter_multiplicity2 = false;
-
   const uint16_t ncass = mb_opts.getCassettes();
   const uint16_t nwires = mb_opts.getWires();
   const uint16_t nstrips = mb_opts.getStrips();
@@ -175,8 +174,7 @@ void CAENBase::processing_thread() {
 
   std::shared_ptr<ReadoutFile> dumpfile;
   if (!MBCAENSettings.FilePrefix.empty()) {
-    dumpfile = ReadoutFile::create(
-        MBCAENSettings.FilePrefix + "-" + timeString());
+    dumpfile = ReadoutFile::create(MBCAENSettings.FilePrefix + "-" + timeString());
   }
 
   EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
@@ -262,12 +260,17 @@ void CAENBase::processing_thread() {
           continue;
         }
 
+        if (dp.adc > mb_opts.max_valid_adc) {
+          mystats.readouts_invalid_adc++;
+          continue;
+        }
+
         uint8_t plane = mbgeom.getPlane(dp.channel);
         uint16_t global_ch = mbgeom.getGlobalChannel(cassette, dp.channel);
         uint16_t coord;
         if (plane == 0) {
           if (global_ch == 30) {
-            mystats.readouts_invalid_ch++;
+            mystats.readouts_monitor++;
             continue;
           }
           coord = mbgeom.getx(cassette, dp.channel);
@@ -279,6 +282,10 @@ void CAENBase::processing_thread() {
           mystats.readouts_invalid_plane++;
           continue;
         }
+
+        mystats.readouts_ok++;
+
+        XTRACE(DATA, DEB, "time %lu, channel %u, adc %u", dp.local_time, dp.channel, dp.adc);
 
         builders[cassette].insert({dp.local_time, coord, dp.adc, plane});
 
@@ -294,22 +301,22 @@ void CAENBase::processing_thread() {
         }
 
         // \todo parametrize maximum time span - in opts?
-        if (time_span_filter && (e.time_span() > 313)) {
+        if (mb_opts.filter_time_span && (e.time_span() > mb_opts.filter_time_span_value)) {
           mystats.filters_max_time_span++;
           continue;
         }
 
-        // \todo are these always wires && strips respectively?
-        if (filter_multiplicity &&
-            ((e.c1.hit_count() > 5) || (e.c2.hit_count() > 10))) {
-          mystats.filters_max_multi1++;
-          continue;
-        }
-        if (filter_multiplicity2 &&
-            ((e.c1.hit_count() > 3) || (e.c2.hit_count() > 4))) {
-          mystats.filters_max_multi2++;
-          continue;
-        }
+        // // \todo are these always wires && strips respectively?
+        // if (filter_multiplicity &&
+        //     ((e.c1.hit_count() > 5) || (e.c2.hit_count() > 10))) {
+        //   mystats.filters_max_multi1++;
+        //   continue;
+        // }
+        // if (filter_multiplicity2 &&
+        //     ((e.c1.hit_count() > 3) || (e.c2.hit_count() > 4))) {
+        //   mystats.filters_max_multi2++;
+        //   continue;
+        // }
 
         XTRACE(DATA, DEB, "Event\n %s", e.debug(true).c_str());
         // calculate local x and y using center of mass

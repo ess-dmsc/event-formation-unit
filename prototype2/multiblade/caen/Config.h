@@ -51,6 +51,17 @@ public:
   uint16_t getStrips() const { return NStrips; }
   uint16_t getCassettes() const { return NCass; }
 
+  bool filter_time_span{false};
+  uint32_t filter_time_span_value{125};
+
+  bool filter_multiplicity_x{false};
+  uint32_t filter_multiplicity_x_value{10};
+
+  bool filter_multiplicity_y{false};
+  uint32_t filter_multiplicity_y_value{4};
+
+  int max_valid_adc{65534};
+
 private:
   /// \brief helper function to load and parse json file
   void loadConfigFile();
@@ -72,6 +83,8 @@ private:
 
   /// local readout timestamp resolution
   uint32_t TimeTickNS{16};
+
+
 
   /// for now just hold a vector of the digitisers, \todo later
   /// incorporate in the digital geometry
