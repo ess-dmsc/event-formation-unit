@@ -27,7 +27,7 @@ void OverlapMatcher::match(bool flush) {
 
   XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u", unmatched_clusters_.size());
 
-  Event evt{plane1_, plane2_};
+  Event evt{plane1_, plane2_, latency_};
   while (!unmatched_clusters_.empty()) {
 
     auto cluster = unmatched_clusters_.begin();

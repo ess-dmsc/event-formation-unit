@@ -14,8 +14,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-Event::Event(uint8_t plane1, uint8_t plane2)
-    : plane1_(plane1), plane2_(plane2) {}
+Event::Event(uint8_t plane1, uint8_t plane2, uint64_t overlap_time)
+    : plane1_(plane1), plane2_(plane2), max_time_(overlap_time) {}
 
 uint8_t Event::plane1() const {
   return plane1_;
@@ -86,7 +86,7 @@ uint64_t Event::time_overlap(const Cluster &other) const {
 
   /// \todo replace 126 with some parameter
   /// \bug hardcoded value
-  if (latest_start > earliest_end + 125) {
+  if (latest_start > earliest_end + max_time_) {
     XTRACE(EVENT, DEB, "no time overlap");
     return 0;
   }

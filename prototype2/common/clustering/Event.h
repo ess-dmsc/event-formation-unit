@@ -21,6 +21,8 @@ private:
   uint8_t plane1_ {0};
   uint8_t plane2_ {1};
 
+  uint16_t max_time_{0};
+
 public:
   Cluster c1; ///< cluster in dimension 1
   Cluster c2; ///< cluster in dimension 2
@@ -31,7 +33,7 @@ public:
   /// \brief Event constructor, selecting planes
   /// \param plane1 id of first plane selected for event
   /// \param plane2 id of second plane selected for event
-  Event(uint8_t plane1, uint8_t plane2);
+  Event(uint8_t plane1, uint8_t plane2, uint64_t max_time);
 
   /// \returns id of first plane selected for event
   uint8_t plane1() const;
