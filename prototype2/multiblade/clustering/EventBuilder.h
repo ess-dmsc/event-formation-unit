@@ -11,7 +11,7 @@
 #include <vector>
 #include <deque>
 
-static const uint64_t latency{0};
+static const uint64_t latency{125};
 static const uint64_t coordgap{1};
 static const uint64_t timegap{125}; // 2us @ 16ns/tick (2000/16)
 

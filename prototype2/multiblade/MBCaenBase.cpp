@@ -318,7 +318,7 @@ void CAENBase::processing_thread() {
         //   continue;
         // }
 
-        XTRACE(DATA, DEB, "Event\n %s", e.debug(true).c_str());
+        XTRACE(EVENT, DEB, "Event\n %s", e.debug(true).c_str());
         // calculate local x and y using center of mass
         auto x = static_cast<uint16_t>(std::round(e.c1.coord_center()));
         auto y = static_cast<uint16_t>(std::round(e.c2.coord_center()));
@@ -328,8 +328,10 @@ void CAENBase::processing_thread() {
 //        auto y = (e.c2.coord_start() + e.c2.coord_end()) / 2;
 
         // \todo improve this
-        auto time = e.time_start();
+        auto time = e.time_start() * 16 ; // TOF in ns
         auto pixel_id = essgeom.pixel2D(x, y);
+        XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
+
         if (pixel_id == 0) {
           mystats.geometry_errors++;
         } else {
