@@ -286,9 +286,6 @@ def get_macos_pipeline()
 }
 
 node('docker') {
-    // Delete workspace when build is done
-    cleanWs()
-
     dir("${project}_code") {
 
         stage('Checkout') {
@@ -323,5 +320,9 @@ node('docker') {
         parallel builders
     } catch (e) {
         failure_function(e, 'Job failed')
+        throw e
+    } finally {
+        // Delete workspace when build is done
+        cleanWs()
     }
 }
