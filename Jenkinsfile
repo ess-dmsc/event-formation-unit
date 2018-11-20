@@ -68,6 +68,9 @@ def Object get_container(image_key) {
 
 def docker_copy_code(image_key) {
     def custom_sh = images[image_key]['sh']
+    dir("${project}") {
+        checkout scm
+    }
     sh "docker cp ${project}_code ${container_name(image_key)}:/home/jenkins/${project}"
     sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
                         chown -R jenkins.jenkins /home/jenkins/${project}
@@ -222,34 +225,36 @@ def docker_archive(image_key) {
 def get_pipeline(image_key)
 {
     return {
-        stage("${image_key}") {
-            try {
-                def container = get_container(image_key)
+        node('docker') {
+            stage("${image_key}") {
+                try {
+                    def container = get_container(image_key)
 
-                docker_copy_code(image_key)
-                if (image_key != clangformat_os) {
-                  docker_dependencies(image_key)
-                  docker_cmake(image_key, images[image_key]['cmake_flags'])
-                  docker_build(image_key)
-                }
+                    docker_copy_code(image_key)
+                    if (image_key != clangformat_os) {
+                      docker_dependencies(image_key)
+                      docker_cmake(image_key, images[image_key]['cmake_flags'])
+                      docker_build(image_key)
+                    }
 
-                if (image_key == coverage_on) {
-                    docker_tests_coverage(image_key)
-                } else if (image_key != clangformat_os) {
-                  docker_tests(image_key)
-                }
+                    if (image_key == coverage_on) {
+                        docker_tests_coverage(image_key)
+                    } else if (image_key != clangformat_os) {
+                      docker_tests(image_key)
+                    }
 
-                if (image_key == archive_what) {
-                    docker_archive(image_key)
-                }
+                    if (image_key == archive_what) {
+                        docker_archive(image_key)
+                    }
 
-                if (image_key == clangformat_os) {
-                    docker_cppcheck(image_key)
-                    step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
+                    if (image_key == clangformat_os) {
+                        docker_cppcheck(image_key)
+                        step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
+                    }
+                } finally {
+                    sh "docker stop ${container_name(image_key)}"
+                    sh "docker rm -f ${container_name(image_key)}"
                 }
-            } finally {
-                sh "docker stop ${container_name(image_key)}"
-                sh "docker rm -f ${container_name(image_key)}"
             }
         }
     }
@@ -280,7 +285,7 @@ def get_macos_pipeline()
     }
 }
 
-node('docker') {
+node {
     // Delete workspace when build is done
     cleanWs()
 
