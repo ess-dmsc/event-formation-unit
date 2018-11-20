@@ -13,6 +13,7 @@
 
 /// \brief ADC readout (and processing) specific settings.
 struct AdcSettings {
+  AdcSettings() = default;
   bool SerializeSamples{false};
   bool PeakDetection{false};
   bool DelayLineDetector{false};
@@ -64,4 +65,4 @@ struct AdcSettings {
   ChannelRole ADC2Channel4 = {ChannelRole::NONE};
 };
 
-void SetCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings);
+void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings);

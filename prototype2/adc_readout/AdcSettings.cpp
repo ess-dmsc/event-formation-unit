@@ -9,15 +9,15 @@
 #include "AdcReadoutConstants.h"
 
 using PosType = AdcSettings::PositionSensingType;
-std::istream &operator>>(std::istream &in, PosType &level);
-std::ostream &operator<<(std::ostream &in, const PosType &level);
+std::istream &operator>>(std::istream &In, PosType &Type);
+std::ostream &operator<<(std::ostream &In, const PosType &Type);
 
 using ChRole = AdcSettings::ChannelRole;
-std::istream &operator>>(std::istream &in, ChRole &level);
-std::ostream &operator<<(std::ostream &in, const ChRole &level);
+std::istream &operator>>(std::istream &In, ChRole &Role);
+std::ostream &operator<<(std::ostream &In, const ChRole &Role);
 std::map<std::string, ChRole> getRoleMapping();
 
-void SetCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings) {
+void setCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings) {
   parser
       .add_flag("--serialize_samples", ReadoutSettings.SerializeSamples,
                 "Serialize sample data and send to Kafka broker.")
@@ -191,38 +191,38 @@ std::map<std::string, PosType> getTypeMapping() {
           {"TIME", PosType::TIME}};
 }
 
-std::istream &operator>>(std::istream &in, PosType &Type) {
+std::istream &operator>>(std::istream &In, PosType &Type) {
   std::map<std::string, PosType> TypeMap = getTypeMapping();
   std::string InString;
-  in >> InString;
+  In >> InString;
 
   Type = TypeMap.at(InString);
-  return in;
+  return In;
 }
 
-std::ostream &operator<<(std::ostream &in, const PosType &Type) {
+std::ostream &operator<<(std::ostream &In, const PosType &Type) {
   std::map<PosType, std::string> TypeMap;
   for (auto &Item : getTypeMapping()) {
     TypeMap[Item.second] = Item.first;
   }
-  return in << TypeMap.at(Type);
+  return In << TypeMap.at(Type);
 }
 
-std::istream &operator>>(std::istream &in, ChRole &Role) {
+std::istream &operator>>(std::istream &In, ChRole &Role) {
   std::map<std::string, ChRole> RoleMap = getRoleMapping();
   std::string InString;
-  in >> InString;
+  In >> InString;
 
   Role = RoleMap.at(InString);
-  return in;
+  return In;
 }
 
-std::ostream &operator<<(std::ostream &in, const ChRole &Role) {
+std::ostream &operator<<(std::ostream &In, const ChRole &Role) {
   std::map<ChRole, std::string> RoleMap;
   for (auto &Item : getRoleMapping()) {
     RoleMap[Item.second] = Item.first;
   }
-  return in << RoleMap.at(Role);
+  return In << RoleMap.at(Role);
 }
 
 std::map<std::string, ChRole> getRoleMapping() {

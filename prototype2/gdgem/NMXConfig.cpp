@@ -85,10 +85,6 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   geometry.ny(root["geometry_y"].get<int>());
   geometry.nz(1);
   geometry.np(1);
-
-  dump_csv = root["dump_csv"].get<bool>();
-  dump_h5 = root["dump_h5"].get<bool>();
-  dump_directory = root["dump_directory"].get<std::string>();
 }
 
 std::string NMXConfig::debug() const {
@@ -142,9 +138,5 @@ std::string NMXConfig::debug() const {
   ss << "  geometry_x = " << geometry.nx() << "\n";
   ss << "  geometry_y = " << geometry.ny() << "\n";
 
-  ss << "  Dump csv = " << (dump_csv ? "YES" : "no") << "\n";
-  ss << "  Dump h5 = " << (dump_h5 ? "YES" : "no") << "\n";
-  if (dump_csv || dump_h5)
-    ss << "  dump_directory = " << dump_directory << "\n";
   return ss.str();
 }

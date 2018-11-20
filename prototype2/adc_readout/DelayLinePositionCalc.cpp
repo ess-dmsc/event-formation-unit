@@ -6,8 +6,9 @@
  */
 
 #include "DelayLinePositionCalc.h"
-#include <cstdlib>
 #include <algorithm>
+#include <cstdint>
+#include <cstdlib>
 #include <vector>
 
 int ConstDelayLinePosition::getPosition() {
@@ -39,11 +40,8 @@ bool DelayLinePosCalcInterface::isValid() {
     Timestamps.emplace_back(Pulse.second.PeakTimestamp.GetTimeStampNS());
   }
   std::sort(Timestamps.begin(), Timestamps.end());
-  if (Timestamps.front() == 0 or
-      Timestamps.back() - Timestamps.front() > EventTimeout) {
-    return false;
-  }
-  return true;
+  return Timestamps.front() != 0 and
+      Timestamps.back() - Timestamps.front() <= EventTimeout;
 }
 
 void DelayLinePosCalcInterface::reset() { PulseData.clear(); }

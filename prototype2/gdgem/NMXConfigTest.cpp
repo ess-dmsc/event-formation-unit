@@ -32,8 +32,6 @@ bool cwdContains(const char * searchfor) {
 TEST_F(NMXConfigTest, ConstructorDefaults) {
   NMXConfig nmxconfig;
   ASSERT_EQ("VMM3", nmxconfig.builder_type);
-  ASSERT_FALSE(nmxconfig.dump_csv);
-  ASSERT_FALSE(nmxconfig.dump_h5);
   ASSERT_EQ(nmxconfig.calfile, nullptr);
 }
 
@@ -60,8 +58,6 @@ TEST_F(NMXConfigTest, NoConfigFile) {
   ASSERT_EQ("VMM3", nmxconfig.builder_type);
   // ASSERT_EQ(256, nmxconfig.geometry_x);
   // ASSERT_EQ(256, nmxconfig.geometry_y);
-  ASSERT_FALSE(nmxconfig.dump_csv);
-  ASSERT_FALSE(nmxconfig.dump_h5);
 }
 
 TEST_F(NMXConfigTest, DebugPrint) {
@@ -75,7 +71,7 @@ TEST_F(NMXConfigTest, DebugPrint) {
 
 TEST_F(NMXConfigTest, JsonConfig) {
   NMXConfig nmxconfig(pathprefix + "../prototype2/gdgem/configs/vmm3.json", nocalibration);
-  ASSERT_EQ(60, nmxconfig.time_config.tac_slope()); // Parsed from json
+  ASSERT_EQ(100, nmxconfig.time_config.tac_slope()); // Parsed from json
   ASSERT_EQ(20, nmxconfig.time_config.bc_clock());
 }
 

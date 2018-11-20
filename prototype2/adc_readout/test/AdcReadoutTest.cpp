@@ -8,23 +8,11 @@
 #include "../AdcReadoutBase.h"
 #include "TestUDPServer.h"
 #include <gtest/gtest.h>
-#include <random>
 #include <trompeloeil.hpp>
-
-std::uint16_t GetPortNumber() {
-  static std::uint16_t CurrentPortNumber = 0;
-  if (0 == CurrentPortNumber) {
-    std::random_device Device;
-    std::mt19937 Generator(Device());
-    std::uniform_int_distribution<std::uint16_t> Distribution(2048, 60000);
-    CurrentPortNumber = Distribution(Generator);
-  }
-  return ++CurrentPortNumber;
-}
 
 class AdcReadoutStandIn : public AdcReadoutBase {
 public:
-  AdcReadoutStandIn(BaseSettings Settings, AdcSettings ReadoutSettings)
+  AdcReadoutStandIn(BaseSettings const &Settings, AdcSettings const &ReadoutSettings)
       : AdcReadoutBase(Settings, ReadoutSettings){};
   ~AdcReadoutStandIn() = default;
   using Detector::Threads;
@@ -45,11 +33,15 @@ public:
   }
 };
 
+using namespace std::chrono_literals;
+
 class AdcReadoutTest : public ::testing::Test {
 public:
   virtual void SetUp() {
-    Settings.DetectorAddress = "127.0.0.1";
+    Settings.DetectorAddress = "0.0.0.0";
     Settings.DetectorPort = GetPortNumber();
+    ReadoutSettings.AltDetectorInterface = "0.0.0.0";
+    ReadoutSettings.AltDetectorPort = GetPortNumber();
   }
   BaseSettings Settings;
   AdcSettings ReadoutSettings;
@@ -57,8 +49,6 @@ public:
   static const int MaxPacketSize = 10000;
   std::uint8_t BufferPtr[MaxPacketSize];
   int PacketSize;
-  std::chrono::duration<std::int64_t, std::milli> InitSleepTime {300};
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{200};
 
   void LoadPacketFile(std::string FileName) {
     std::string PacketPath = TEST_PACKET_PATH;
@@ -70,13 +60,14 @@ public:
     PacketFile.read(reinterpret_cast<char *>(&BufferPtr), PacketSize);
     ASSERT_TRUE(PacketFile.good());
   };
+  std::chrono::duration<std::int64_t, std::milli> SleepTime{50ms};
 };
 
 TEST_F(AdcReadoutTest, SinglePacketStats) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
-  std::this_thread::sleep_for(InitSleepTime);
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, 1470);
+  std::this_thread::sleep_for(SleepTime);
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
@@ -87,10 +78,10 @@ TEST_F(AdcReadoutTest, SinglePacketStats) {
 TEST_F(AdcReadoutTest, SingleIdlePacket) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
-  std::this_thread::sleep_for(InitSleepTime);
   LoadPacketFile("test_packet_idle.dat");
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
                        PacketSize);
+  std::this_thread::sleep_for(SleepTime);
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
@@ -103,12 +94,12 @@ TEST_F(AdcReadoutTest, SingleIdlePacket) {
 TEST_F(AdcReadoutTest, SingleDataPacket) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
-  std::this_thread::sleep_for(InitSleepTime);
   LoadPacketFile("test_packet_1.dat");
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
                        PacketSize);
+  std::this_thread::sleep_for(20ms);
   Server.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
+  std::this_thread::sleep_for(20ms);
   Readout.stopThreads();
   EXPECT_EQ(Readout.AdcStats.input_bytes_received, 1470);
   EXPECT_EQ(Readout.AdcStats.parser_packets_total, 1);
@@ -116,13 +107,44 @@ TEST_F(AdcReadoutTest, SingleDataPacket) {
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
 }
 
-TEST_F(AdcReadoutTest, GlobalCounterError) {
+TEST_F(AdcReadoutTest, LazyThreadLaunching) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
-  std::this_thread::sleep_for(InitSleepTime);
+  EXPECT_EQ(Readout.Threads.size(), 1u);
   LoadPacketFile("test_packet_1.dat");
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
                        PacketSize);
+  std::this_thread::sleep_for(SleepTime);
+  Server.startPacketTransmission(1, 100);
+  std::this_thread::sleep_for(SleepTime);
+  EXPECT_EQ(Readout.Threads.size(), 2u);
+  Readout.stopThreads();
+}
+
+TEST_F(AdcReadoutTest, DoubleReceiveTest) {
+  AdcReadoutStandIn Readout(Settings, ReadoutSettings);
+  Readout.startThreads();
+  LoadPacketFile("test_packet_1.dat");
+  TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+                        PacketSize);
+  TestUDPServer Server2(GetPortNumber(), ReadoutSettings.AltDetectorPort,
+                        BufferPtr, PacketSize);
+  std::this_thread::sleep_for(SleepTime);
+  Server1.startPacketTransmission(1, 100);
+  Server2.startPacketTransmission(1, 100);
+  std::this_thread::sleep_for(SleepTime);
+  EXPECT_EQ(Readout.Threads.size(), 3u);
+  EXPECT_EQ(Readout.AdcStats.parser_packets_total, 2);
+  Readout.stopThreads();
+}
+
+TEST_F(AdcReadoutTest, GlobalCounterError) {
+  AdcReadoutStandIn Readout(Settings, ReadoutSettings);
+  Readout.startThreads();
+  LoadPacketFile("test_packet_1.dat");
+  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+                       PacketSize);
+  std::this_thread::sleep_for(SleepTime);
   Server.startPacketTransmission(2, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
@@ -135,11 +157,9 @@ TEST_F(AdcReadoutTest, GlobalCounterError) {
 
 TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
-  Readout.Threads.at(0).thread = std::thread(Readout.Threads.at(0).func);
-  Readout.Threads.at(1).thread = std::thread(Readout.Threads.at(1).func);
-  std::this_thread::sleep_for(InitSleepTime);
+  Readout.startThreads();
   LoadPacketFile("test_packet_1.dat");
-  std::chrono::duration<std::int64_t, std::milli> SleepTime(50);
+  std::this_thread::sleep_for(SleepTime);
   auto PacketHeadPointer = reinterpret_cast<PacketHeader *>(BufferPtr);
   {
     TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort, BufferPtr,
@@ -185,12 +205,12 @@ public:
 TEST_F(AdcReadoutSimpleTest, StartProcessingThreads) {
   AdcReadoutMock Readout(Settings, ReadoutSettings);
   REQUIRE_CALL(Readout, inputThread()).TIMES(1);
-  REQUIRE_CALL(Readout, processingThread(_)).TIMES(4);
+  REQUIRE_CALL(Readout, processingThread(_)).TIMES(0);
   Readout.startThreads();
   Readout.stopThreads();
 }
 
 TEST_F(AdcReadoutSimpleTest, DataQueues) {
   AdcReadoutMock Readout(Settings, ReadoutSettings);
-  EXPECT_EQ(Readout.DataModuleQueues.size(), 4u);
+  EXPECT_EQ(Readout.DataModuleQueues.size(), 0u);
 }
