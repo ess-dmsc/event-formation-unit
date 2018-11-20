@@ -285,7 +285,7 @@ def get_macos_pipeline()
     }
 }
 
-node {
+node('docker') {
     // Delete workspace when build is done
     cleanWs()
 
