@@ -1,6 +1,6 @@
 project = "event-formation-unit"
 coverage_on = "centos7"
-clangformat_os = "fedora25"
+clangformat_os = "debian9"
 archive_what = "centos7-release"
 
 // Set number of old builds to keep.
@@ -17,12 +17,12 @@ archive_what = "centos7-release"
 
 images = [
     'centos7-release': [
-        'name': 'essdmscdm/centos7-build-node:3.2.0',
+        'name': 'essdmscdm/centos7-build-node:3.4.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
     ],
     'centos7': [
-        'name': 'essdmscdm/centos7-build-node:3.2.0',
+        'name': 'essdmscdm/centos7-build-node:3.4.0',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCOV=ON'
     ],
@@ -31,8 +31,8 @@ images = [
         'sh': 'bash -e',
         'cmake_flags': ''
     ],
-    'fedora25': [
-        'name': 'essdmscdm/fedora25-build-node:2.0.0',
+    'debian9': [
+        'name': 'essdmscdm/debian9-build-node:2.4.0',
         'sh'  : 'bash -e',
         'cmake_flags': ''
     ]
