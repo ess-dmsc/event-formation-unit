@@ -36,8 +36,8 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 	} else {
 		/// Marker
 		uint8_t vmmid = (data2 >> 10) & 0x1F;
-		uint32_t timestamp_lower_10bit = data2 & 0x03FF;
-		uint32_t timestamp_upper_32bit = data1;
+		uint64_t timestamp_lower_10bit = data2 & 0x03FF;
+		uint64_t timestamp_upper_32bit = data1;
 
 		uint64_t timestamp_42bit = (timestamp_upper_32bit << 10)
 				+ timestamp_lower_10bit;
