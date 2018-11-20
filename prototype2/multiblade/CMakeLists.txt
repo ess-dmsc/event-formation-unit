@@ -10,7 +10,7 @@ set(caen_common_inc
   ../common/HistSerializer.h
   caen/Readout.h
   caen/DataParser.h
-  clustering/EventBuilder2.h
+  clustering/EventBuilder.h
   caen/Config.h
   )
 set(caen_common_src
@@ -20,7 +20,7 @@ set(caen_common_src
   ../common/HistSerializer.cpp
   caen/Readout.cpp
   caen/DataParser.cpp
-  clustering/EventBuilder2.cpp
+  clustering/EventBuilder.cpp
   caen/Config.cpp
   )
 
@@ -51,4 +51,3 @@ set(MBCAENBaseTest_SRC
 create_test_executable(MBCAENBaseTest)
 
 add_subdirectory(caen)
-add_subdirectory(clustering)

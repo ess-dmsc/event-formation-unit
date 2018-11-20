@@ -21,8 +21,6 @@ private:
   uint8_t plane1_ {0};
   uint8_t plane2_ {1};
 
-  uint16_t max_time_{0};
-
 public:
   Cluster c1; ///< cluster in dimension 1
   Cluster c2; ///< cluster in dimension 2
@@ -33,7 +31,7 @@ public:
   /// \brief Event constructor, selecting planes
   /// \param plane1 id of first plane selected for event
   /// \param plane2 id of second plane selected for event
-  Event(uint8_t plane1, uint8_t plane2, uint64_t max_time);
+  Event(uint8_t plane1, uint8_t plane2);
 
   /// \returns id of first plane selected for event
   uint8_t plane1() const;
@@ -73,6 +71,13 @@ public:
   /// \param other cluster to be compared
   /// \returns overlapping time span inclusive of end points
   uint64_t time_overlap(const Cluster &other) const;
+
+  /// \brief calculates the overlapping time span of event and cluster
+  /// allowing for a (small) time gap
+  /// \param other cluster to be compared
+  /// \param timegap allowed time gap
+  /// \returns overlapping time span inclusive of end points
+  uint64_t time_overlap(const Cluster &other, uint64_t timegap) const;
 
   /// \returns string describing event bounds and weights
   /// \param verbose also print hits

@@ -6,16 +6,20 @@
 
 #include <common/clustering/Hit.h>
 #include <common/clustering/GapClusterer.h>
-#include <common/clustering/OverlapMatcher.h>
+#include <common/clustering/GapMatcher.h>
 
 #include <vector>
 #include <deque>
 
+static const uint64_t latency{0};
+static const uint64_t coordgap{1};
+static const uint64_t timegap{125}; // 2us @ 16ns/tick (2000/16)
+
 namespace Multiblade {
 
-class EventBuilder2 {
+class EventBuilder {
 public:
-  EventBuilder2() = default;
+  EventBuilder() = default;
 
   // \todo pass by rvalue?
   void insert(Hit hit);
@@ -27,11 +31,10 @@ public:
   std::vector<Hit> p0, p1;
 
   // \todo parametrize
-  GapClusterer c0{125,0}, c1{125,0}; // 2us @ 16ns/tick (2000/16)
+  GapClusterer c0{timegap, coordgap}, c1{timegap, coordgap};
 
   // \todo parametrize
-  OverlapMatcher matcher{125}; // 2us @ 16ns/tick (2000/16)
+  GapMatcher matcher{latency, timegap};
 };
-
 
 }

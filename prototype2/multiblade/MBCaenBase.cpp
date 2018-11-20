@@ -27,7 +27,7 @@
 
 #include <caen/DataParser.h>
 
-#include <clustering/EventBuilder2.h>
+#include <clustering/EventBuilder.h>
 
 #include <logical_geometry/ESSGeometry.h>
 #include <caen/MBGeometry.h>
@@ -188,7 +188,7 @@ void CAENBase::processing_thread() {
   histfb.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 
-  std::vector<EventBuilder2> builders(ncass);
+  std::vector<EventBuilder> builders(ncass);
 
   DataParser parser;
   auto digitisers = mb_opts.getDigitisers();

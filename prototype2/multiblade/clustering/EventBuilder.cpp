@@ -5,7 +5,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <multiblade/clustering/EventBuilder2.h>
+#include <multiblade/clustering/EventBuilder.h>
 #include <algorithm>
 #include <fmt/format.h>
 
@@ -16,7 +16,7 @@
 
 namespace Multiblade {
 
-void EventBuilder2::insert(Hit hit) {
+void EventBuilder::insert(Hit hit) {
   if (hit.plane == 0) {
     p0.push_back(hit);
   }
@@ -28,7 +28,7 @@ void EventBuilder2::insert(Hit hit) {
   }
 }
 
-void EventBuilder2::flush() {
+void EventBuilder::flush() {
   matcher.matched_events.clear();
 
   std::sort(p0.begin(), p0.end(),
@@ -52,7 +52,7 @@ void EventBuilder2::flush() {
   clear();
 }
 
-void EventBuilder2::clear() {
+void EventBuilder::clear() {
   p0.clear();
   p1.clear();
 }

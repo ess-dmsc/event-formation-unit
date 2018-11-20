@@ -14,8 +14,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-Event::Event(uint8_t plane1, uint8_t plane2, uint64_t overlap_time)
-    : plane1_(plane1), plane2_(plane2), max_time_(overlap_time) {}
+Event::Event(uint8_t plane1, uint8_t plane2)
+    : plane1_(plane1), plane2_(plane2) {}
 
 uint8_t Event::plane1() const {
   return plane1_;
@@ -84,15 +84,29 @@ uint64_t Event::time_overlap(const Cluster &other) const {
   auto latest_start = std::max(other.time_start(), time_start());
   auto earliest_end = std::min(other.time_end(), time_end());
 
-  /// \todo replace 126 with some parameter
-  /// \bug hardcoded value
-  if (latest_start > earliest_end + max_time_) {
+  if (latest_start > earliest_end) {
     XTRACE(EVENT, DEB, "no time overlap");
     return 0;
   }
   /// \todo should not rather return a boolean ?
   return (earliest_end - latest_start) + uint16_t(1);
 }
+
+uint64_t Event::time_overlap(const Cluster &other, uint64_t timegap) const {
+  if (empty() || other.empty()) {
+    return 0;
+  }
+  auto latest_start = std::max(other.time_start(), time_start());
+  auto earliest_end = std::min(other.time_end(), time_end());
+
+  if (latest_start > earliest_end + timegap) {
+    XTRACE(EVENT, DEB, "no time overlap");
+    return 0;
+  }
+
+  return (earliest_end + timegap - latest_start) + uint16_t(1);
+}
+
 
 std::string Event::debug(bool verbose) const {
   auto ret = fmt::format("Event planes({},{}):",
