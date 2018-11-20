@@ -25,4 +25,6 @@ librdkafka:shared=True
 [imports]
 lib, * -> ./lib
 lib64, * -> ./lib
+filesystem/lib, * -> ./lib
+system/lib, * -> ./lib
 ., LICENSE* -> ./licenses @ folder=True, ignore_case=True
