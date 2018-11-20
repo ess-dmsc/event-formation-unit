@@ -68,7 +68,7 @@ def Object get_container(image_key) {
 
 def docker_copy_code(image_key) {
     def custom_sh = images[image_key]['sh']
-    dir("${project}") {
+    dir("${project}_code") {
         checkout scm
     }
     sh "docker cp ${project}_code ${container_name(image_key)}:/home/jenkins/${project}"
