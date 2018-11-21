@@ -90,6 +90,19 @@ def docker_dependencies(image_key) {
     \""""
 }
 
+def docker_dl_ref_data(image_key) {
+    def conan_remote = "ess-dmsc-local"
+    def custom_sh = images[image_key]['sh']
+    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
+        mkdir ${project}/data
+        cd ${project}/data
+        wget http://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download
+        ls -al
+        unzip download -d .
+        ls -al
+    \""""
+}
+
 def docker_cmake(image_key, xtra_flags) {
     def custom_sh = images[image_key]['sh']
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
@@ -97,7 +110,7 @@ def docker_cmake(image_key, xtra_flags) {
         cd build
         . ./activate_run.sh
         cmake --version
-        cmake -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
+        cmake -DREFDATA=../data -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
     \""""
 }
 
@@ -233,6 +246,7 @@ def get_pipeline(image_key)
                     docker_copy_code(image_key)
                     if (image_key != clangformat_os) {
                       docker_dependencies(image_key)
+                      docker_dl_ref_data(image_key)
                       docker_cmake(image_key, images[image_key]['cmake_flags'])
                       docker_build(image_key)
                     }
@@ -317,11 +331,11 @@ node('docker') {
 
     def builders = [:]
 
-    //for (x in images.keySet()) {
-    //    def image_key = x
-    //    builders[image_key] = get_pipeline(image_key)
-    //}
-    builders['macOS'] = get_macos_pipeline()
+    for (x in images.keySet()) {
+        def image_key = x
+        builders[image_key] = get_pipeline(image_key)
+    }
+    //builders['macOS'] = get_macos_pipeline()
 
     try {
         parallel builders
