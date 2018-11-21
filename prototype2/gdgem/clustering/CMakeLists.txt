@@ -4,7 +4,7 @@
 
 # Clustering
 
-get_filename_component(TEST_DATA_PATH "test_data/a00001.h5" DIRECTORY)
+set(TEST_DATA_PATH "${REFDATA}/gdgem/2018_11")
 
 set(ClusteringBase_SRC
   ../NMXConfig.cpp
@@ -51,7 +51,7 @@ set(HitsQueueTest_INC
   ${ClusteringBase_INC})
 create_test_executable(HitsQueueTest SKIP_MEMGRIND)
 target_compile_definitions(HitsQueueTest
-  PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
+  PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
 
 set(HitSorterTest_SRC
   ${ClusteringBase_SRC}
@@ -60,7 +60,7 @@ set(HitSorterTest_INC
   ${ClusteringBase_INC})
 create_test_executable(HitSorterTest SKIP_MEMGRIND)
 target_compile_definitions(HitSorterTest
-  PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
+  PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
 
 set(DoroClustererTest_SRC
   ${ClusteringBase_SRC}
@@ -71,7 +71,7 @@ set(DoroClustererTest_INC
   ${ClusteringBase_INC})
 create_test_executable(DoroClustererTest SKIP_MEMGRIND)
 target_compile_definitions(DoroClustererTest
-  PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
+  PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
 
 set(ClusterMatcherTest_SRC
   ${ClusteringBase_SRC}
@@ -84,7 +84,7 @@ set(ClusterMatcherTest_INC
   ${ClusteringBase_INC})
 create_test_executable(ClusterMatcherTest SKIP_MEMGRIND)
 target_compile_definitions(ClusterMatcherTest
-  PRIVATE TEST_DATA_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_DATA_PATH}/")
+  PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
 
 ## GOOGLE BENCHMARK
 message(STATUS "!!! *** Skipping NMXClustererBenchmarkTest - does not link ***")

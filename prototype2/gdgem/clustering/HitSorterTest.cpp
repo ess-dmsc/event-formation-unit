@@ -46,7 +46,7 @@ protected:
 
   virtual void SetUp() {
     DataPath = TEST_DATA_PATH;
-    opts = NMXConfig(DataPath + "config.json", "");
+    opts = NMXConfig(DataPath + "/config.json", "");
 
     mock_x = std::make_shared<MockClusterer>();
     mock_y = std::make_shared<MockClusterer>();
@@ -87,7 +87,7 @@ TEST_F(HitSorterTest, Constructor) {
 }
 
 TEST_F(HitSorterTest, a1) {
-  ReadoutFile::read(DataPath + "a00001", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   EXPECT_EQ(readouts.size(), 144);
 
   uint32_t overflows = 0;
@@ -108,7 +108,7 @@ TEST_F(HitSorterTest, a1) {
 }
 
 TEST_F(HitSorterTest, a1_chrono) {
-  ReadoutFile::read(DataPath + "a00001", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   EXPECT_EQ(readouts.size(), 144);
 
   uint32_t overflows = 0;
@@ -141,7 +141,7 @@ TEST_F(HitSorterTest, a1_chrono) {
 }
 
 TEST_F(HitSorterTest, a10) {
-  ReadoutFile::read(DataPath + "a00010", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   EXPECT_EQ(readouts.size(), 920);
 
   uint32_t overflows = 0;
@@ -152,17 +152,17 @@ TEST_F(HitSorterTest, a10) {
     old = readout.srs_timestamp;
     store_hit(readout);
   }
-  EXPECT_EQ(overflows, 6);
+  EXPECT_EQ(overflows, 5);
 
   EXPECT_EQ(74, sorter_x->stats_trigger_count);
   EXPECT_EQ(58, sorter_y->stats_trigger_count);
 
-  EXPECT_EQ(1, sorter_x->stats_subsequent_triggers);
-  EXPECT_EQ(1, sorter_y->stats_subsequent_triggers);
+  EXPECT_EQ(0, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
 }
 
 TEST_F(HitSorterTest, a10_chrono) {
-  ReadoutFile::read(DataPath + "a00010", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   EXPECT_EQ(readouts.size(), 920);
 
   uint32_t overflows = 0;
@@ -174,13 +174,13 @@ TEST_F(HitSorterTest, a10_chrono) {
     store_hit(readout);
   }
 
-  EXPECT_EQ(1, sorter_x->stats_subsequent_triggers);
-  EXPECT_EQ(1, sorter_y->stats_subsequent_triggers);
+  EXPECT_EQ(0, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
 
-  EXPECT_EQ(overflows, 6);
+  EXPECT_EQ(overflows, 5);
 
-  EXPECT_EQ(mock_x->stats_chrono_errors, 1);
-  EXPECT_EQ(mock_y->stats_chrono_errors, 1);
+  EXPECT_EQ(mock_x->stats_chrono_errors, 0);
+  EXPECT_EQ(mock_y->stats_chrono_errors, 0);
 
   // flush, but must it be with trigger?
   sorter_x->flush();
@@ -190,12 +190,12 @@ TEST_F(HitSorterTest, a10_chrono) {
   EXPECT_EQ(362, mock_y->all_hits.size());
   EXPECT_EQ(readouts.size(), (mock_x->all_hits.size() + mock_y->all_hits.size()));
 
-  EXPECT_EQ(mock_x->stats_chrono_errors, 1);
-  EXPECT_EQ(mock_y->stats_chrono_errors, 1);
+  EXPECT_EQ(mock_x->stats_chrono_errors, 0);
+  EXPECT_EQ(mock_y->stats_chrono_errors, 0);
 }
 
 TEST_F(HitSorterTest, a100) {
-  ReadoutFile::read(DataPath + "a00100", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
   EXPECT_EQ(readouts.size(), 126590);
 
   uint32_t overflows = 0;
@@ -206,17 +206,17 @@ TEST_F(HitSorterTest, a100) {
     old = readout.srs_timestamp;
     store_hit(readout);
   }
-  EXPECT_EQ(overflows, 69);
+  EXPECT_EQ(overflows, 68);
 
   EXPECT_EQ(3974, sorter_x->stats_trigger_count);
   EXPECT_EQ(3469, sorter_y->stats_trigger_count);
 
-  EXPECT_EQ(3560, sorter_x->stats_subsequent_triggers);
-  EXPECT_EQ(2889, sorter_y->stats_subsequent_triggers);
+  EXPECT_EQ(3559, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(2888, sorter_y->stats_subsequent_triggers);
 }
 
 TEST_F(HitSorterTest, a100_chrono) {
-  ReadoutFile::read(DataPath + "a00100", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
   EXPECT_EQ(readouts.size(), 126590);
 
   uint32_t overflows = 0;
@@ -228,13 +228,13 @@ TEST_F(HitSorterTest, a100_chrono) {
     store_hit(readout);
   }
 
-  EXPECT_EQ(3560, sorter_x->stats_subsequent_triggers);
-  EXPECT_EQ(2889, sorter_y->stats_subsequent_triggers);
+  EXPECT_EQ(3559, sorter_x->stats_subsequent_triggers);
+  EXPECT_EQ(2888, sorter_y->stats_subsequent_triggers);
 
-  EXPECT_EQ(overflows, 69);
+  EXPECT_EQ(overflows, 68);
 
-  EXPECT_EQ(mock_x->stats_chrono_errors, 1);
-  EXPECT_EQ(mock_y->stats_chrono_errors, 1);
+  EXPECT_EQ(mock_x->stats_chrono_errors, 0);
+  EXPECT_EQ(mock_y->stats_chrono_errors, 0);
 
   // flush, but must it be with trigger?
   sorter_x->flush();
@@ -244,8 +244,8 @@ TEST_F(HitSorterTest, a100_chrono) {
   EXPECT_EQ(42428, mock_y->all_hits.size());
   EXPECT_EQ(readouts.size(), (mock_x->all_hits.size() + mock_y->all_hits.size()));
 
-  EXPECT_EQ(mock_x->stats_chrono_errors, 1);
-  EXPECT_EQ(mock_y->stats_chrono_errors, 1);
+  EXPECT_EQ(mock_x->stats_chrono_errors, 0);
+  EXPECT_EQ(mock_y->stats_chrono_errors, 0);
 }
 
 

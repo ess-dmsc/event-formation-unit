@@ -21,7 +21,7 @@ protected:
 
   virtual void SetUp() {
     DataPath = TEST_DATA_PATH;
-    opts = NMXConfig(DataPath + "config.json", "");
+    opts = NMXConfig(DataPath + "/config.json", "");
 
     p0 = std::make_shared<HitsQueue>(opts.time_config, opts.clusterer_x.max_time_gap);
     p1 = std::make_shared<HitsQueue>(opts.time_config, opts.clusterer_y.max_time_gap);
@@ -36,7 +36,7 @@ TEST_F(HitsQueueTest, PrintConfig) {
 }
 
 TEST_F(HitsQueueTest, a1_notrigger) {
-  ReadoutFile::read(DataPath + "a00001", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   EXPECT_EQ(readouts.size(), 144);
 
   for (const auto &r : readouts) {
@@ -56,7 +56,7 @@ TEST_F(HitsQueueTest, a1_notrigger) {
 }
 
 TEST_F(HitsQueueTest, a1_trigger) {
-  ReadoutFile::read(DataPath + "a00001", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   EXPECT_EQ(readouts.size(), 144);
 
   for (const auto &r : readouts) {
@@ -79,7 +79,7 @@ TEST_F(HitsQueueTest, a1_trigger) {
 }
 
 TEST_F(HitsQueueTest, a1_chronological_no_trigger) {
-  ReadoutFile::read(DataPath + "a00001", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   EXPECT_EQ(readouts.size(), 144);
 
   for (const auto &r : readouts) {
@@ -105,7 +105,7 @@ TEST_F(HitsQueueTest, a1_chronological_no_trigger) {
 }
 
 TEST_F(HitsQueueTest, a10_notrigger) {
-  ReadoutFile::read(DataPath + "a00010", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   EXPECT_EQ(readouts.size(), 920);
 
   for (const auto &r : readouts) {
@@ -137,7 +137,7 @@ TEST_F(HitsQueueTest, a10_notrigger) {
 
 
 TEST_F(HitsQueueTest, a10_trigger) {
-  ReadoutFile::read(DataPath + "a00010", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   EXPECT_EQ(readouts.size(), 920);
 
   for (const auto &r : readouts) {
@@ -174,7 +174,7 @@ TEST_F(HitsQueueTest, a10_trigger) {
 }
 
 TEST_F(HitsQueueTest, a10_chronological_no_trigger) {
-  ReadoutFile::read(DataPath + "a00010", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   EXPECT_EQ(readouts.size(), 920);
 
   for (const auto &r : readouts) {
@@ -219,7 +219,7 @@ TEST_F(HitsQueueTest, a10_chronological_no_trigger) {
 }
 
 TEST_F(HitsQueueTest, a100_notrigger) {
-  ReadoutFile::read(DataPath + "a00100", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
   EXPECT_EQ(readouts.size(), 126590);
 
   for (const auto &r : readouts) {
@@ -250,7 +250,7 @@ TEST_F(HitsQueueTest, a100_notrigger) {
 }
 
 TEST_F(HitsQueueTest, a100_trigger) {
-  ReadoutFile::read(DataPath + "a00100", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
   EXPECT_EQ(readouts.size(), 126590);
 
   for (const auto &r : readouts) {
@@ -287,7 +287,7 @@ TEST_F(HitsQueueTest, a100_trigger) {
 }
 
 TEST_F(HitsQueueTest, a100_chronological_no_trigger) {
-  ReadoutFile::read(DataPath + "a00100", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
   EXPECT_EQ(readouts.size(), 126590);
 
   for (const auto &r : readouts) {
