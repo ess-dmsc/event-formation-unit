@@ -26,22 +26,25 @@ void Event::merge(Cluster &cluster) {
   }
 }
 
-bool Event::empty() const {
-  return x.entries.empty() && y.entries.empty();
+bool Event::empty() const
+{
+  return x.hits.empty() && y.hits.empty();
 }
 
-double Event::time_end() const {
-  if (x.entries.empty())
+double Event::time_end() const
+{
+  if (x.hits.empty())
     return y.time_end;
-  if (y.entries.empty())
+  if (y.hits.empty())
     return x.time_end;
   return std::max(x.time_end, y.time_end);
 }
 
-double Event::time_start() const {
-  if (x.entries.empty())
+double Event::time_start() const
+{
+  if (x.hits.empty())
     return y.time_start;
-  if (y.entries.empty())
+  if (y.hits.empty())
     return x.time_start;
   return std::min(x.time_start, y.time_start);
 }
@@ -66,14 +69,14 @@ bool Event::time_overlap_thresh(const Cluster &other, double thresh) const {
 void Event::analyze(bool weighted, int16_t max_timebins,
                     int16_t max_timedif) {
   XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu",
-         x.entries.size(), y.entries.size());
-  if (x.entries.size()) {
+         x.hits.size(), y.hits.size());
+  if (x.hits.size()) {
     x.analyze(weighted, max_timebins, max_timedif);
   }
-  if (y.entries.size()) {
+  if (y.hits.size()) {
     y.analyze(weighted, max_timebins, max_timedif);
   }
-  valid_ = x.entries.size() && y.entries.size();
+  valid_ = x.hits.size() && y.hits.size();
   if (valid_) {
     utpc_time_ = std::max(x.time_end, y.time_end);
   }
@@ -104,16 +107,16 @@ std::string Event::debug() const {
 }
 
 void Event::debug2() {
-  if (x.entries.size()) {
+  if (x.hits.size()) {
     printf("x strips: ");
-    for (auto xstrips : x.entries) {
+    for (auto xstrips : x.hits) {
       printf("%d ", xstrips.strip);
     }
     printf("\n");
   }
-  if (y.entries.size()) {
+  if (y.hits.size()) {
     printf("y strips: ");
-    for (auto ystrips : y.entries) {
+    for (auto ystrips : y.hits) {
       printf("%d ", ystrips.strip);
     }
     printf("\n");

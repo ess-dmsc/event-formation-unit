@@ -11,8 +11,8 @@
 
 static AdcSettings LocalAdcSettings;
 
-void CLIArguments(CLI::App &parser) {
-  SetCLIArguments(parser, LocalAdcSettings);
+void CLIArguments(CLI::App &Parser) {
+  setCLIArguments(Parser, LocalAdcSettings);
 }
 
 PopulateCLIParser PopulateParser{CLIArguments};

@@ -10,7 +10,7 @@
 
 class CLITesting : public ::testing::Test {
 public:
-  virtual void SetUp() { SetCLIArguments(TestApp, ReadoutSettings); }
+  virtual void SetUp() { setCLIArguments(TestApp, ReadoutSettings); }
   AdcSettings ReadoutSettings;
   CLI::App TestApp;
 };

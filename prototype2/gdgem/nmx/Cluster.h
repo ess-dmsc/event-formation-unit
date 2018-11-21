@@ -24,7 +24,7 @@ struct Cluster {
   /// \param hit to be added
   void insert_hit(const Hit &hit);
 
-  std::vector<Hit> entries;
+  std::vector<Hit> hits;
   bool empty() const;
 
   /// calculated as hits are added

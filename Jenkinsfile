@@ -1,6 +1,6 @@
 project = "event-formation-unit"
 coverage_on = "centos7"
-clangformat_os = "fedora25"
+clangformat_os = "debian9"
 archive_what = "centos7-release"
 
 // Set number of old builds to keep.
@@ -17,22 +17,22 @@ archive_what = "centos7-release"
 
 images = [
     'centos7-release': [
-        'name': 'essdmscdm/centos7-build-node:3.2.0',
+        'name': 'essdmscdm/centos7-build-node:3.5.1',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
     ],
     'centos7': [
-        'name': 'essdmscdm/centos7-build-node:3.2.0',
+        'name': 'essdmscdm/centos7-build-node:3.5.1',
         'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCOV=ON'
     ],
     'ubuntu1804': [
-        'name': 'essdmscdm/ubuntu18.04-build-node:1.2.0',
+        'name': 'essdmscdm/ubuntu18.04-build-node:1.3.1',
         'sh': 'bash -e',
         'cmake_flags': ''
     ],
-    'fedora25': [
-        'name': 'essdmscdm/fedora25-build-node:2.0.0',
+    'debian9': [
+        'name': 'essdmscdm/debian9-build-node:2.5.1',
         'sh'  : 'bash -e',
         'cmake_flags': ''
     ]
@@ -68,6 +68,9 @@ def Object get_container(image_key) {
 
 def docker_copy_code(image_key) {
     def custom_sh = images[image_key]['sh']
+    dir("${project}_code") {
+        checkout scm
+    }
     sh "docker cp ${project}_code ${container_name(image_key)}:/home/jenkins/${project}"
     sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
                         chown -R jenkins.jenkins /home/jenkins/${project}
@@ -222,34 +225,36 @@ def docker_archive(image_key) {
 def get_pipeline(image_key)
 {
     return {
-        stage("${image_key}") {
-            try {
-                def container = get_container(image_key)
+        node('docker') {
+            stage("${image_key}") {
+                try {
+                    def container = get_container(image_key)
 
-                docker_copy_code(image_key)
-                if (image_key != clangformat_os) {
-                  docker_dependencies(image_key)
-                  docker_cmake(image_key, images[image_key]['cmake_flags'])
-                  docker_build(image_key)
-                }
+                    docker_copy_code(image_key)
+                    if (image_key != clangformat_os) {
+                      docker_dependencies(image_key)
+                      docker_cmake(image_key, images[image_key]['cmake_flags'])
+                      docker_build(image_key)
+                    }
 
-                if (image_key == coverage_on) {
-                    docker_tests_coverage(image_key)
-                } else if (image_key != clangformat_os) {
-                  docker_tests(image_key)
-                }
+                    if (image_key == coverage_on) {
+                        docker_tests_coverage(image_key)
+                    } else if (image_key != clangformat_os) {
+                      docker_tests(image_key)
+                    }
 
-                if (image_key == archive_what) {
-                    docker_archive(image_key)
-                }
+                    if (image_key == archive_what) {
+                        docker_archive(image_key)
+                    }
 
-                if (image_key == clangformat_os) {
-                    docker_cppcheck(image_key)
-                    step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
+                    if (image_key == clangformat_os) {
+                        docker_cppcheck(image_key)
+                        step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
+                    }
+                } finally {
+                    sh "docker stop ${container_name(image_key)}"
+                    sh "docker rm -f ${container_name(image_key)}"
                 }
-            } finally {
-                sh "docker stop ${container_name(image_key)}"
-                sh "docker rm -f ${container_name(image_key)}"
             }
         }
     }
@@ -281,9 +286,6 @@ def get_macos_pipeline()
 }
 
 node('docker') {
-    // Delete workspace when build is done
-    cleanWs()
-
     dir("${project}_code") {
 
         stage('Checkout') {
@@ -318,5 +320,9 @@ node('docker') {
         parallel builders
     } catch (e) {
         failure_function(e, 'Job failed')
+        throw e
+    } finally {
+        // Delete workspace when build is done
+        cleanWs()
     }
 }

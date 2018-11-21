@@ -180,7 +180,7 @@ void bin(Hists& hists, const Gem::Hit &e)
 void bin_hists(Hists& hists, const std::list<Gem::Cluster>& cl)
 {
   for (const auto& cluster : cl)
-    for (const auto& e : cluster.entries)
+    for (const auto& e : cluster.hits)
       bin(hists, e);
 }
 
@@ -302,13 +302,13 @@ void GdGemBase::processing_thread() {
               /** \todo increments counters when failing this */
             }
           } else { /// no valid event
-            if (event.x.entries.size() != 0) {
+            if (event.x.hits.size() != 0) {
               mystats.clusters_x++;
             } else {
               mystats.clusters_y++;
             }
             mystats.readouts_discarded +=
-                event.x.entries.size() + event.y.entries.size();
+                event.x.hits.size() + event.y.hits.size();
             mystats.clusters_discarded++;
           }
         }
