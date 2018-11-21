@@ -110,7 +110,7 @@ def docker_cmake(image_key, xtra_flags) {
         cd build
         . ./activate_run.sh
         cmake --version
-        cmake -DREFDATA=../data -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
+        cmake -DREFDATA=../data/EFU_reference -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
     \""""
 }
 
@@ -295,7 +295,7 @@ def get_macos_pipeline()
 
                 dir("${project}/build") {
                     sh "conan install --build=outdated .."
-                    sh "cmake -DREFDATA=../data -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
+                    sh "cmake -DREFDATA=../data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
                     sh "make -j4"
                     sh "make -j4 unit_tests"
                     sh "make runtest"
