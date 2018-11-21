@@ -24,7 +24,7 @@ protected:
 
   virtual void SetUp() {
     DataPath = TEST_DATA_PATH;
-    opts = NMXConfig(DataPath + "config.json", "");
+    opts = NMXConfig(DataPath + "/config.json", "");
 
     matcher = std::make_shared<ClusterMatcher>(opts.matcher_max_delta_time);
 
@@ -196,7 +196,7 @@ TEST_F(ClusterMatcherTest, DontForce) {
 // \todo push events in various buffer sizes and produce same results
 
 TEST_F(ClusterMatcherTest, a1) {
-  ReadoutFile::read(DataPath + "a00001", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   EXPECT_EQ(readouts.size(), 144);
 
   uint64_t bonus = 0;
@@ -229,7 +229,7 @@ TEST_F(ClusterMatcherTest, a1) {
 }
 
 TEST_F(ClusterMatcherTest, a1_identical) {
-  ReadoutFile::read(DataPath + "a00001", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   EXPECT_EQ(readouts.size(), 144);
 
   uint64_t bonus = 0;
@@ -263,7 +263,7 @@ TEST_F(ClusterMatcherTest, a1_identical) {
 }
 
 TEST_F(ClusterMatcherTest, a10) {
-  ReadoutFile::read(DataPath + "a00010", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   EXPECT_EQ(readouts.size(), 920);
 
   uint64_t bonus = 0;
@@ -296,7 +296,7 @@ TEST_F(ClusterMatcherTest, a10) {
 }
 
 TEST_F(ClusterMatcherTest, a100) {
-  ReadoutFile::read(DataPath + "a00100", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
   EXPECT_EQ(readouts.size(), 126590);
 
   uint64_t bonus = 0;

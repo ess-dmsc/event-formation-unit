@@ -22,7 +22,7 @@ protected:
 
   virtual void SetUp() {
     DataPath = TEST_DATA_PATH;
-    opts = NMXConfig(DataPath + "config.json", "");
+    opts = NMXConfig(DataPath + "/config.json", "");
 
     sorter_x = std::make_shared<HitSorter>(opts.time_config, opts.srs_mappings,
                                            opts.clusterer_x.hit_adc_threshold,
@@ -57,7 +57,7 @@ protected:
 };
 
 TEST_F(DoroClustererTest, a1) {
-  ReadoutFile::read(DataPath + "a00001", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   EXPECT_EQ(readouts.size(), 144);
 
   uint64_t bonus = 0;
@@ -81,7 +81,7 @@ TEST_F(DoroClustererTest, a1) {
 }
 
 TEST_F(DoroClustererTest, a10) {
-  ReadoutFile::read(DataPath + "a00010", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   EXPECT_EQ(readouts.size(), 920);
 
   uint64_t bonus = 0;
@@ -105,7 +105,7 @@ TEST_F(DoroClustererTest, a10) {
 }
 
 TEST_F(DoroClustererTest, a100) {
-  ReadoutFile::read(DataPath + "a00100", readouts);
+  ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
   EXPECT_EQ(readouts.size(), 126590);
 
   uint64_t bonus = 0;
