@@ -272,9 +272,16 @@ def get_macos_pipeline()
                     checkout scm
                 }
 
+                dir("${project}/data") {
+                    sh "wget http://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download"
+                    sh "ls -al"
+                    sh "unzip download -d ."
+                    sh "ls -al"
+                }
+
                 dir("${project}/build") {
                     sh "conan install --build=outdated .."
-                    sh "cmake -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
+                    sh "cmake -DREFDATA=../data -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
                     sh "make -j4"
                     sh "make -j4 unit_tests"
                     sh "make runtest"
@@ -310,10 +317,10 @@ node('docker') {
 
     def builders = [:]
 
-    for (x in images.keySet()) {
-        def image_key = x
-        builders[image_key] = get_pipeline(image_key)
-    }
+    //for (x in images.keySet()) {
+    //    def image_key = x
+    //    builders[image_key] = get_pipeline(image_key)
+    //}
     builders['macOS'] = get_macos_pipeline()
 
     try {

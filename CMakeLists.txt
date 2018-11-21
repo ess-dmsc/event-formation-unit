@@ -112,7 +112,7 @@ add_custom_target(hints
   COMMAND echo "CMake hints"
   COMMAND echo "--------------------------------------------------------------------------------"
   COMMAND echo "Enable code coverage:                   cmake -DCOV=ON"
-  COMMAND echo "Specify root for reference data:        cmake -REFDATA=/home/username/refdata"
+  COMMAND echo "Specify root for reference data:        cmake -DREFDATA=/home/username/refdata"
   COMMAND echo "Enable profiling with google perftools  cmake -DGPERF=ON"
   COMMAND echo "Specify a build string:                 cmake -DBUILDSTR=v1.2.3"
   COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug"
