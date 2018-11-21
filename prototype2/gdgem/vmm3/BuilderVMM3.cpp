@@ -39,7 +39,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 		XTRACE(PROCESS, DEB, "NO HITS after parse");
 		auto & stats = parser_.stats;
 		return AbstractBuilder::ResultStats(stats.hits, stats.errors,
-				geom_errors, stats.lostFrames, stats.badFrames,
+				geom_errors, stats.rxSeqErrors, stats.badFrames,
 				stats.goodFrames);
 	}
   XTRACE(PROCESS, DEB, "HITS after parse: %d", parser_.stats.hits);
@@ -49,7 +49,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 //			* time_intepreter_.internal_clock_period_ns();
 
 	//field fec id starts at 1
-	readout.fec = parser_.parserData.fecId; 
+	readout.fec = parser_.parserData.fecId;
 	for (unsigned int i = 0; i < parser_.stats.hits; i++) {
 		auto &d = parser_.data[i];
 		if (d.hasDataMarker) {
@@ -65,7 +65,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 			readout.over_threshold = (d.overThreshold != 0);
 			auto calib = calfile_->getCalibration(readout.fec, readout.chip_id, readout.channel);
 			readout.chiptime = time_intepreter_.chip_time_ns(d.bcid, d.tdc, calib.offset, calib.slope);
-			 
+
 			XTRACE(PROCESS, DEB,
 					"srs/vmm timestamp: srs: 0x%08x, bc: 0x%08x, tdc: 0x%08x",
 					readout.srs_timestamp, d.bcid, d.tdc);
@@ -78,7 +78,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 					sorter_y.insert(readout);
 				}	else {
 					sorter_x.insert(readout);
-					
+
 				}
 			} else {
 				geom_errors++;
@@ -98,5 +98,5 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 
 	auto & stats = parser_.stats;
 	return AbstractBuilder::ResultStats(stats.hits, stats.errors, geom_errors,
-			stats.lostFrames, stats.badFrames, stats.goodFrames);
+			stats.rxSeqErrors, stats.badFrames, stats.goodFrames);
 }

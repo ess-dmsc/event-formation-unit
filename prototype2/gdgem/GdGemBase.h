@@ -70,7 +70,7 @@ protected:
     int64_t clusters_discarded;
     int64_t tx_bytes;
     int64_t fifo_seq_errors;
-    int64_t lost_frames;
+    int64_t rx_seq_errors;
     int64_t bad_frames;
     int64_t good_frames;
     // Kafka stats below are common to all detectors

@@ -40,7 +40,6 @@ public:
   struct ParserData {
     uint8_t fecId { 1 };
     uint32_t nextFrameCounter { 0 };
-    bool fcIsInitialized { false };
   };
 
   /// Data related to a single Hit
@@ -99,7 +98,7 @@ public:
     uint32_t hits { 0 };        /// number of hits
     uint32_t markers { 0 };    ///  number of markers
     uint32_t errors { 0 };      /// bytes of invalid data
-    uint32_t lostFrames { 0 };  /// gaps in frame counter values
+    uint32_t rxSeqErrors { 0 };  /// gaps in frame counter values
     uint32_t badFrames { 0 };   /// frames failing parsing
     uint32_t goodFrames { 0 };  /// frames passing parsing
   } stats;
