@@ -96,7 +96,7 @@ def docker_dl_ref_data(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         mkdir ${project}/data
         cd ${project}/data
-        wget http://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download
+        curl http://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download
         ls -al
         unzip download -d .
         ls -al
@@ -287,7 +287,7 @@ def get_macos_pipeline()
                 }
 
                 dir("${project}/data") {
-                    sh "wget http://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download"
+                    sh "curl http://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download"
                     sh "ls -al"
                     sh "unzip download -d ."
                     sh "ls -al"
@@ -335,7 +335,7 @@ node('docker') {
         def image_key = x
         builders[image_key] = get_pipeline(image_key)
     }
-    //builders['macOS'] = get_macos_pipeline()
+    builders['macOS'] = get_macos_pipeline()
 
     try {
         parallel builders
