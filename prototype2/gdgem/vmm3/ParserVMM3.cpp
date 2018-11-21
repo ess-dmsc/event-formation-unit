@@ -41,7 +41,7 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 
 		uint64_t timestamp_42bit = (timestamp_upper_32bit << 10)
 				+ timestamp_lower_10bit;
-		XTRACE(PROCESS, DEB, "SRS Marker vmmid %d: timestamp lower 10bit %u, timestamp upper 32 bit %u, 42 bit timestamp %" 
+		XTRACE(PROCESS, DEB, "SRS Marker vmmid %d: timestamp lower 10bit %u, timestamp upper 32 bit %u, 42 bit timestamp %"
 		       PRIu64 "",  vmmid, timestamp_lower_10bit, timestamp_upper_32bit,timestamp_42bit);
 		markers[(parserData.fecId-1)*maximumNumberVMM+vmmid].fecTimeStamp = timestamp_42bit;
 
@@ -69,24 +69,9 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 		return -1;
 	}
 
-	if (parserData.fcIsInitialized == true) {
-		///
-		int64_t fcDiff = srsHeader.frameCounter
-				- parserData.nextFrameCounter;
-		if (fcDiff < 0) {
-			fcDiff += 0xffffffff;
-		}
-		if (fcDiff) {
-			//printf("FC: curr: %d, expect: %d, diff: %" PRId64 "\n", srsHeader.frameCounter,
-			//		parserData.nextFrameCounter, fcDiff);
-			stats.lostFrames += fcDiff; /// \todo test
-			parserData.nextFrameCounter = srsHeader.frameCounter + 1;
-		} else {
-			parserData.nextFrameCounter++;
-		}
-	} else {
-		parserData.nextFrameCounter = srsHeader.frameCounter + 1;
-		parserData.fcIsInitialized = true;
+  if (parserData.nextFrameCounter != srsHeader.frameCounter) {
+		stats.rxSeqErrors++;
+		parserData.nextFrameCounter = srsHeader.frameCounter;
 	}
 
 	if (size < SRSHeaderSize + HitAndMarkerSize) {
@@ -105,7 +90,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 		return 0;
 	}
 
-	
+
 	parserData.fecId = (srsHeader.dataId >> 4) & 0x0f;
 	if(parserData.fecId < 1 || parserData.fecId > 15)
 	{

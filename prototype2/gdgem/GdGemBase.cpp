@@ -79,7 +79,7 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
   Stats.create("fifo_seq_errors", mystats.fifo_seq_errors);
   Stats.create("unclustered", mystats.unclustered);
   Stats.create("geom_errors", mystats.geom_errors);
-  Stats.create("lost_frames", mystats.lost_frames);
+  Stats.create("lost_frames", mystats.rx_seq_errors);
   Stats.create("bad_frames", mystats.bad_frames);
   Stats.create("good_frames", mystats.good_frames);
   Stats.create("tx_bytes", mystats.tx_bytes);
@@ -238,7 +238,7 @@ void GdGemBase::processing_thread() {
         mystats.readouts += stats.valid_hits;
         mystats.readouts_error_bytes +=
             stats.error_bytes; // From srs data parser
-        mystats.lost_frames += stats.lost_frames;
+        mystats.rx_seq_errors += stats.lost_frames;
         mystats.bad_frames += stats.bad_frames;
         mystats.good_frames += stats.good_frames;
 
