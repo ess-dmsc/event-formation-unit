@@ -75,6 +75,10 @@ def docker_copy_code(image_key) {
     sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
                         chown -R jenkins.jenkins /home/jenkins/${project}
                         \""""
+    sh "docker cp ${project}_refdata ${container_name(image_key)}:/home/jenkins/refdata"
+    sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
+                        chown -R jenkins.jenkins /home/jenkins/refdata
+                        \""""
 }
 
 def docker_dependencies(image_key) {
@@ -110,7 +114,7 @@ def docker_cmake(image_key, xtra_flags) {
         cd build
         . ./activate_run.sh
         cmake --version
-        cmake -DREFDATA=../data/EFU_reference -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
+        cmake -DREFDATA=/home/jenkins/refdata/EFU_reference -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
     \""""
 }
 
@@ -246,7 +250,6 @@ def get_pipeline(image_key)
                     docker_copy_code(image_key)
                     if (image_key != clangformat_os) {
                       docker_dependencies(image_key)
-                      docker_dl_ref_data(image_key)
                       docker_cmake(image_key, images[image_key]['cmake_flags'])
                       docker_build(image_key)
                     }
@@ -282,6 +285,8 @@ def get_macos_pipeline()
             // Delete workspace when build is done
                 cleanWs()
 
+                abs_dir = pwd()
+
                 dir("${project}") {
                     checkout scm
                 }
@@ -295,7 +300,7 @@ def get_macos_pipeline()
 
                 dir("${project}/build") {
                     sh "conan install --build=outdated .."
-                    sh "cmake -DREFDATA=../data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
+                    sh "cmake -DREFDATA=${abs_dir}/${project}/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
                     sh "make -j4"
                     sh "make -j4 unit_tests"
                     sh "make runtest"
@@ -327,6 +332,19 @@ node('docker') {
                 failure_function(e, 'Static analysis failed')
             }
         }
+    }
+
+    dir("${project}_refdata") {
+            stage('GetRefData') {
+                try {
+                    sh "curl -O https://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download"
+                    sh "ls -al"
+                    sh "unzip download -d ."
+                    sh "ls -al"
+                } catch (e) {
+                    failure_function(e, 'Getting reference data failed')
+                }
+            }
     }
 
     def builders = [:]
