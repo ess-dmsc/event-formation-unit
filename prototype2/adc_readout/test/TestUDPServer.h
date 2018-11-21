@@ -22,6 +22,8 @@
 
 typedef std::shared_ptr<asio::ip::udp::socket> SocketPtr;
 
+std::uint16_t GetPortNumber();
+
 class TestUDPServer {
 public:
   TestUDPServer(std::uint16_t SrcPort, std::uint16_t DstPort, int PacketSize);
