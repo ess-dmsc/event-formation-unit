@@ -77,8 +77,8 @@ def docker_copy_code(image_key) {
                         \""""
 
     dir("${project}_refdata") {
-        sh "curl -O https://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download"
-        sh "unzip download -d ."
+        sh "curl https://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download > refdata.zip"
+        sh "unzip -o refdata.zip -d ."
     }
 
     sh "docker cp ${project}_refdata ${container_name(image_key)}:/home/jenkins/refdata"
@@ -284,16 +284,14 @@ def get_macos_pipeline()
                     checkout scm
                 }
 
-                dir("${project}/data") {
-                    sh "curl -O https://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download"
-                    sh "ls -al"
-                    sh "unzip download -d ."
-                    sh "ls -al"
+                dir("${project}/refdata") {
+                    sh "curl https://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download > refdata.zip"
+                    sh "unzip -o refdata.zip -d ."
                 }
 
                 dir("${project}/build") {
                     sh "conan install --build=outdated .."
-                    sh "cmake -DREFDATA=${abs_dir}/${project}/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
+                    sh "cmake -DREFDATA=${abs_dir}/${project}/refdata/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
                     sh "make -j4"
                     sh "make -j4 unit_tests"
                     sh "make runtest"
