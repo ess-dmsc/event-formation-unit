@@ -75,6 +75,12 @@ def docker_copy_code(image_key) {
     sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
                         chown -R jenkins.jenkins /home/jenkins/${project}
                         \""""
+
+    dir("${project}_refdata") {
+        sh "curl -O https://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download"
+        sh "unzip download -d ."
+    }
+
     sh "docker cp ${project}_refdata ${container_name(image_key)}:/home/jenkins/refdata"
     sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
                         chown -R jenkins.jenkins /home/jenkins/refdata
@@ -91,19 +97,6 @@ def docker_dependencies(image_key) {
             --insert 0 \
             ${conan_remote} ${local_conan_server}
         conan install --build=outdated ..
-    \""""
-}
-
-def docker_dl_ref_data(image_key) {
-    def conan_remote = "ess-dmsc-local"
-    def custom_sh = images[image_key]['sh']
-    sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
-        mkdir ${project}/data
-        cd ${project}/data
-        curl -O https://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download
-        ls -al
-        unzip download -d .
-        ls -al
     \""""
 }
 
@@ -332,19 +325,6 @@ node('docker') {
                 failure_function(e, 'Static analysis failed')
             }
         }
-    }
-
-    dir("${project}_refdata") {
-            stage('GetRefData') {
-                try {
-                    sh "curl -O https://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download"
-                    sh "ls -al"
-                    sh "unzip download -d ."
-                    sh "ls -al"
-                } catch (e) {
-                    failure_function(e, 'Getting reference data failed')
-                }
-            }
     }
 
     def builders = [:]
