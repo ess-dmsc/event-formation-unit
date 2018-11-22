@@ -12,8 +12,8 @@
 #include <deque>
 
 static const uint64_t latency{125}; // 2us @ 16ns/tick (2000/16)
-static const uint64_t coordgap{1};
-static const uint64_t timegap{70};
+static const uint64_t coordgap{1};  // allow no gaps between channels
+static const uint64_t timegap{70};  // expect hits in a plane to be at least this close
 
 namespace Multiblade {
 
