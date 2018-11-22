@@ -62,6 +62,9 @@ public:
 
   int max_valid_adc{65534};
 
+  /// local readout timestamp resolution
+  uint32_t TimeTickNS{16};
+
 private:
   /// \brief helper function to load and parse json file
   void loadConfigFile();
@@ -80,11 +83,6 @@ private:
 
   ///
   DetectorType DetectorType{DetectorType::MB18};
-
-  /// local readout timestamp resolution
-  uint32_t TimeTickNS{16};
-
-
 
   /// for now just hold a vector of the digitisers, \todo later
   /// incorporate in the digital geometry

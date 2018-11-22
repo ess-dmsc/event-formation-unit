@@ -328,7 +328,7 @@ void CAENBase::processing_thread() {
 //        auto y = (e.c2.coord_start() + e.c2.coord_end()) / 2;
 
         // \todo improve this
-        auto time = e.time_start() * 16 ; // TOF in ns
+        auto time = e.time_start() * mb_opts.TimeTickNS; // TOF in ns
         auto pixel_id = essgeom.pixel2D(x, y);
         XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
 

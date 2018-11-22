@@ -51,6 +51,7 @@ GapMatcher::GapMatcher(uint64_t latency, uint64_t time_gap)
   // If anything is left, stash it
   // \todo maybe only on flush? otherwise return to queue?
   if (!evt.empty()) {
+    XTRACE(CLUSTER, DEB, "stash event");
     stash_event(evt);
   }
 }
