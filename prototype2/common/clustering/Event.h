@@ -72,12 +72,10 @@ public:
   /// \returns overlapping time span inclusive of end points
   uint64_t time_overlap(const Cluster &other) const;
 
-  /// \brief calculates the overlapping time span of event and cluster
-  /// allowing for a (small) time gap
+  /// \brief calculates the time gap of event and cluster
   /// \param other cluster to be compared
-  /// \param timegap allowed time gap
-  /// \returns overlapping time span inclusive of end points
-  uint64_t time_overlap(const Cluster &other, uint64_t timegap) const;
+  /// \returns time gap
+  uint64_t time_gap(const Cluster &other) const;
 
   /// \returns string describing event bounds and weights
   /// \param verbose also print hits

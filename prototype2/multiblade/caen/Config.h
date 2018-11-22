@@ -51,7 +51,7 @@ public:
   uint16_t getStrips() const { return NStrips; }
   uint16_t getCassettes() const { return NCass; }
 
-  bool filter_time_span{false};
+  bool filter_time_span{true};
   uint32_t filter_time_span_value{125};
 
   bool filter_multiplicity_x{false};

@@ -86,6 +86,11 @@ public:
   /// \returns overlapping time span inclusive of end points
   uint64_t time_overlap(const Cluster &other) const;
 
+  /// \brief calculates the time gap of two clusters
+  /// \param other cluster to be compared
+  /// \returns time gap between clusters
+  uint64_t time_gap(const Cluster &other) const;
+
   /// \returns string describing cluster bounds and weights
   /// \param verbose also print hits
   std::string debug(bool verbose = false) const;

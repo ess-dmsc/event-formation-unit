@@ -70,6 +70,7 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("events.udder", mystats.events_udder);
   Stats.create("events.geometry_errors", mystats.geometry_errors);
   Stats.create("events.no_coincidence", mystats.events_no_coincidence);
+  Stats.create("events.not_adjacent", mystats.events_not_adjacent);
   Stats.create("filters.max_time_span", mystats.filters_max_time_span);
   Stats.create("filters.max_multi1", mystats.filters_max_multi1);
   Stats.create("filters.max_multi2", mystats.filters_max_multi2);
@@ -295,14 +296,23 @@ void CAENBase::processing_thread() {
 
       builders[cassette].flush();
       for (const auto &e : builders[cassette].matcher.matched_events) {
+
         if (!e.both_planes()) {
+          XTRACE(EVENT, INF, "Event No Coincidence %s", e.debug(true).c_str());
           mystats.events_no_coincidence++;
           continue;
         }
 
         // \todo parametrize maximum time span - in opts?
         if (mb_opts.filter_time_span && (e.time_span() > mb_opts.filter_time_span_value)) {
+          XTRACE(EVENT, INF, "Event filter time_span %s", e.debug(true).c_str());
           mystats.filters_max_time_span++;
+          continue;
+        }
+
+        if ((e.c1.coord_span() > e.c1.hit_count()) && (e.c2.coord_span() > e.c2.hit_count())) {
+          XTRACE(EVENT, INF, "Event Chs not adjacent %s", e.debug(true).c_str());
+          mystats.events_not_adjacent++;
           continue;
         }
 
@@ -318,7 +328,7 @@ void CAENBase::processing_thread() {
         //   continue;
         // }
 
-        XTRACE(EVENT, DEB, "Event\n %s", e.debug(true).c_str());
+        XTRACE(EVENT, INF, "Event Valid\n %s", e.debug(true).c_str());
         // calculate local x and y using center of mass
         auto x = static_cast<uint16_t>(std::round(e.c1.coord_center()));
         auto y = static_cast<uint16_t>(std::round(e.c2.coord_center()));

@@ -92,19 +92,19 @@ uint64_t Event::time_overlap(const Cluster &other) const {
   return (earliest_end - latest_start) + uint16_t(1);
 }
 
-uint64_t Event::time_overlap(const Cluster &other, uint64_t timegap) const {
+uint64_t Event::time_gap(const Cluster &other) const {
   if (empty() || other.empty()) {
-    return 0;
+    return 0; // \todo should this happen?
   }
   auto latest_start = std::max(other.time_start(), time_start());
   auto earliest_end = std::min(other.time_end(), time_end());
 
-  if (latest_start > earliest_end + timegap) {
-    XTRACE(EVENT, DEB, "no time overlap");
+  if (latest_start <= earliest_end) {
+    XTRACE(EVENT, DEB, "no time gap");
     return 0;
   }
-
-  return (earliest_end + timegap - latest_start) + uint16_t(1);
+  /// \todo should not rather return a boolean ?
+  return (latest_start - earliest_end);
 }
 
 

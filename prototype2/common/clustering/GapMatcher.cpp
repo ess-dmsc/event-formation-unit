@@ -38,8 +38,8 @@ GapMatcher::GapMatcher(uint64_t latency, uint64_t time_gap)
         break;
       }
 
-      if (!evt.empty() && !evt.time_overlap(*cluster, allowed_time_gap_)) {
-        XTRACE(CLUSTER, DEB, "no time overlap");
+      if (!evt.empty() && (evt.time_gap(*cluster) > allowed_time_gap_)) {
+        XTRACE(CLUSTER, DEB, "time gap too large");
         stash_event(evt);
         evt.clear();
       }

@@ -67,6 +67,7 @@ protected:
     int64_t tx_bytes;
     int64_t events;
     int64_t events_no_coincidence;
+    int64_t events_not_adjacent;
     int64_t geometry_errors;
     // Kafka stats below are common to all detectors
     int64_t kafka_produce_fails;
