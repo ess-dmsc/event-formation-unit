@@ -275,14 +275,14 @@ def get_macos_pipeline()
                     checkout scm
                 }
 
-                dir("${project}/refdata") {
-                    sh "curl https://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download > refdata.zip"
-                    sh "unzip -o refdata.zip -d ."
-                }
+                //dir("${project}/refdata") {
+                //    sh "curl https://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download > refdata.zip"
+                //    sh "unzip -o refdata.zip -d ."
+                //}
 
                 dir("${project}/build") {
                     sh "conan install --build=outdated .."
-                    sh "cmake -DREFDATA=${abs_dir}/${project}/refdata/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
+                    sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
                     sh "make -j4"
                     sh "make -j4 unit_tests"
                     sh "make runtest"
