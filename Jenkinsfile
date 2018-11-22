@@ -62,6 +62,7 @@ def Object get_container(image_key) {
         --env http_proxy=${env.http_proxy} \
         --env https_proxy=${env.https_proxy} \
         --env local_conan_server=${env.local_conan_server} \
+        --mount=type=bind,src=/home/jenkins/data,dst=/home/jenkins/refdata,readonly \
         ")
     return container
 }
@@ -74,16 +75,6 @@ def docker_copy_code(image_key) {
     sh "docker cp ${project}_code ${container_name(image_key)}:/home/jenkins/${project}"
     sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
                         chown -R jenkins.jenkins /home/jenkins/${project}
-                        \""""
-
-    dir("${project}_refdata") {
-        sh "curl https://project.esss.dk/owncloud/index.php/s/UBXtdOhCW7WwSup/download > refdata.zip"
-        sh "unzip -o refdata.zip -d ."
-    }
-
-    sh "docker cp ${project}_refdata ${container_name(image_key)}:/home/jenkins/refdata"
-    sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
-                        chown -R jenkins.jenkins /home/jenkins/refdata
                         \""""
 }
 
