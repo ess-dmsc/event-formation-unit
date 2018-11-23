@@ -7,9 +7,11 @@
 #include <sonde/ideas/TestData.h>
 #include <test/TestBase.h>
 
+using namespace Sonde;
+
 class IDEASDataTest : public TestBase {
 protected:
-  SoNDeGeometry geometry;
+  Geometry geometry;
   IDEASData *readout;
   virtual void SetUp() {
     readout = new IDEASData(&geometry);

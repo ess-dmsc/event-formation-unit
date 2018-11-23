@@ -12,6 +12,10 @@
 
 #include <gdgem/nmx/Readout.h>
 
+#define UNUSED __attribute__((unused))
+
+using namespace Gem;
+
 class ClusterMatcherTest : public TestBase {
 protected:
   NMXConfig opts;

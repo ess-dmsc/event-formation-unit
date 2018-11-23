@@ -10,6 +10,8 @@ const unsigned int NB_ENTRIES = 256;
 const unsigned int BASE_OVERHEAD = 128;
 const unsigned int ENTRY_OVERHEAD = 16;
 
+using namespace Gem;
+
 class TrackSerializerTest : public TestBase {
 protected:
   Hit e;

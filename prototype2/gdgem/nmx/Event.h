@@ -14,6 +14,8 @@
 #include <list>
 #include <string>
 
+namespace Gem {
+
 class Event {
 public:
   Cluster x, y; /// tracks in x and y planes
@@ -22,17 +24,15 @@ public:
   /// \param hit to be added
   void insert_hit(const Hit &e);
 
-  void merge(Cluster& cluster);
+  void merge(Cluster &cluster);
 
   bool empty() const;
-
 
   double time_end() const;
   double time_start() const;
   double time_span() const;
-  double time_overlap(const Cluster& other) const;
-  bool time_overlap_thresh(const Cluster& other, double thresh) const;
-
+  double time_overlap(const Cluster &other) const;
+  bool time_overlap_thresh(const Cluster &other, double thresh) const;
 
   /// \brief analyzes particle track
   /// \param weighted determine entry strip using weighted average
@@ -59,3 +59,5 @@ private:
   bool valid_{false};   /// event has valid entry strips in both planes
   double utpc_time_{0}; /// start of event timestamp (earlier of 2 planes)
 };
+
+}

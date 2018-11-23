@@ -9,8 +9,12 @@
 
 #include <common/Trace.h>
 
+namespace Gem {
+
 AbstractBuilder::AbstractBuilder(std::shared_ptr<AbstractClusterer> x,
                                  std::shared_ptr<AbstractClusterer> y) {
   clusterer_x = x;
   clusterer_y = y;
+}
+
 }

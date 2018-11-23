@@ -10,6 +10,8 @@
 #undef TRC_LEVEL
 #define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 
   calfile = std::make_shared<CalibrationFile>(calibrationfile);
@@ -18,7 +20,7 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 
   std::ifstream t(configfile);
   std::string jsonstring((std::istreambuf_iterator<char>(t)),
-                  std::istreambuf_iterator<char>());
+                         std::istreambuf_iterator<char>());
 
   try {
     root = nlohmann::json::parse(jsonstring);
@@ -74,7 +76,6 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   filter.enforce_minimum_hits = f["enforce_minimum_hits"].get<bool>();
   filter.minimum_hits = f["minimum_hits"].get<int>();
 
-
   hit_histograms = root["hit_histograms"].get<bool>();
   track_sample_minhits = root["track_sample_minhits"].get<int>();
   cluster_adc_downshift = root["cluster_adc_downshift"].get<int>();
@@ -102,13 +103,13 @@ std::string NMXConfig::debug() const {
   ss << "  Clusterer-X:\n";
   ss << "    hit_adc_threshold = " << clusterer_x.hit_adc_threshold << "\n";
   ss << "    max_time_gap = " << clusterer_x.max_time_gap << "\n";
-  ss << "    max_strip_gap = " << clusterer_x.max_strip_gap<< "\n";
+  ss << "    max_strip_gap = " << clusterer_x.max_strip_gap << "\n";
   ss << "    min_cluster_size = " << clusterer_x.min_cluster_size << "\n";
 
   ss << "  Clusterer-Y:\n";
   ss << "    hit_adc_threshold = " << clusterer_y.hit_adc_threshold << "\n";
   ss << "    max_time_gap = " << clusterer_y.max_time_gap << "\n";
-  ss << "    max_strip_gap = " << clusterer_y.max_strip_gap<< "\n";
+  ss << "    max_strip_gap = " << clusterer_y.max_strip_gap << "\n";
   ss << "    min_cluster_size = " << clusterer_y.min_cluster_size << "\n";
 
   ss << "  Matcher\n    max_delta_time = " << matcher_max_delta_time << "\n";
@@ -139,4 +140,6 @@ std::string NMXConfig::debug() const {
   ss << "  geometry_y = " << geometry.ny() << "\n";
 
   return ss.str();
+}
+
 }

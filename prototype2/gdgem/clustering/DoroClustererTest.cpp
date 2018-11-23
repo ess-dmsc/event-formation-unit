@@ -11,6 +11,12 @@
 #include <gdgem/NMXConfig.h>
 #include <functional>
 
+#include <gdgem/clustering/TestDataShort.h>
+
+#define UNUSED __attribute__((unused))
+
+using namespace Gem;
+
 class DoroClustererTest : public TestBase {
 protected:
   NMXConfig opts;

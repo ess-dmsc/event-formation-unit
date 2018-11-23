@@ -11,6 +11,8 @@
 
 #include <string>
 
+namespace Gem {
+
 class CalibrationFile {
 public:
   static constexpr int MAX_FEC = 40;
@@ -53,3 +55,5 @@ private:
   /// Slope zero indicates an error
   Calibration ErrCorr = {0.0, 0.0};
 };
+
+}

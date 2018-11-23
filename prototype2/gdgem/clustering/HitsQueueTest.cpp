@@ -10,6 +10,13 @@
 
 #include <gdgem/nmx/Readout.h>
 
+constexpr float no_offset = 0.0;
+constexpr float unit_slope = 1.0;
+
+#define UNUSED __attribute__((unused))
+
+using namespace Gem;
+
 class HitsQueueTest : public TestBase {
 protected:
   NMXConfig opts;
@@ -135,7 +142,6 @@ TEST_F(HitsQueueTest, a10_notrigger) {
   EXPECT_EQ(p1->hits().size(), 0);
 }
 
-
 TEST_F(HitsQueueTest, a10_trigger) {
   ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   EXPECT_EQ(readouts.size(), 920);
@@ -190,8 +196,8 @@ TEST_F(HitsQueueTest, a10_chronological_no_trigger) {
   }
 
   double prevtime{0};
-  size_t count {0};
-  while(count < 558) {
+  size_t count{0};
+  while (count < 558) {
     p0->sort_and_correct();
     if (p0->hits().size()) {
       EXPECT_GE(p0->hits().front().time, prevtime);
@@ -205,7 +211,7 @@ TEST_F(HitsQueueTest, a10_chronological_no_trigger) {
 
   prevtime = 0;
   count = 0;
-  while(count < 362) {
+  while (count < 362) {
     p1->sort_and_correct();
     if (p1->hits().size()) {
       EXPECT_GE(p1->hits().front().time, prevtime);
@@ -303,8 +309,8 @@ TEST_F(HitsQueueTest, a100_chronological_no_trigger) {
   }
 
   double prevtime{0};
-  size_t count {0};
-  while(count < 84162) {
+  size_t count{0};
+  while (count < 84162) {
     p0->sort_and_correct();
     if (p0->hits().size()) {
       EXPECT_GE(p0->hits().front().time, prevtime);
@@ -318,7 +324,7 @@ TEST_F(HitsQueueTest, a100_chronological_no_trigger) {
 
   prevtime = 0;
   count = 0;
-  while(count < 42428) {
+  while (count < 42428) {
     p1->sort_and_correct();
     if (p1->hits().size()) {
       EXPECT_GE(p1->hits().front().time, prevtime);
@@ -330,6 +336,7 @@ TEST_F(HitsQueueTest, a100_chronological_no_trigger) {
     }
   }
 }
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

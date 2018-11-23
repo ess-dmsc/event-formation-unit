@@ -13,16 +13,18 @@
 #include <gdgem/nmx/Readout.h>
 #include <memory>
 
+namespace Gem {
+
 class HitSorter {
 public:
   HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold, double maxTimeGap);
 
-  void insert(const Readout& readout);
+  void insert(const Readout &readout);
   void flush();
 
   // Statistics counters
-  size_t stats_trigger_count {0};
-  size_t stats_subsequent_triggers {0};
+  size_t stats_trigger_count{0};
+  size_t stats_subsequent_triggers{0};
 
   std::shared_ptr<AbstractClusterer> clusterer;
 
@@ -35,9 +37,11 @@ private:
   HitContainer buffer;
 
   // This is in play for triggering the actual clustering
-  double old_trigger_timestamp_ns_ {0};
+  double old_trigger_timestamp_ns_{0};
 
   bool requires_analysis(double triggerTimestamp_ns);
 
   void analyze();
 };
+
+}

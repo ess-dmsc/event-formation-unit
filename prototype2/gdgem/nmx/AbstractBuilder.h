@@ -12,6 +12,8 @@
 #include <gdgem/clustering/AbstractClusterer.h>
 #include <memory>
 
+namespace Gem {
+
 class AbstractBuilder {
 public:
   struct ResultStats {
@@ -22,9 +24,8 @@ public:
     /// ParserVMM3 returns more stat data
     ResultStats(uint32_t hits, uint32_t err, uint32_t geom_err,
                 uint32_t lost_frames, uint32_t bad_frames, uint32_t good_frames)
-        : valid_hits(hits), error_bytes(err), geom_errors(geom_err)
-        , lost_frames(lost_frames), bad_frames(bad_frames)
-        , good_frames(good_frames) {}
+        : valid_hits(hits), error_bytes(err), geom_errors(geom_err), lost_frames(lost_frames), bad_frames(bad_frames),
+          good_frames(good_frames) {}
 
     uint32_t valid_hits{0};
     uint32_t error_bytes{0};
@@ -39,7 +40,6 @@ public:
   AbstractBuilder(std::shared_ptr<AbstractClusterer> x,
                   std::shared_ptr<AbstractClusterer> y);
 
-
   virtual ~AbstractBuilder() {}
 
   /// \todo Martin document
@@ -48,3 +48,5 @@ public:
   std::shared_ptr<AbstractClusterer> clusterer_y;
   std::shared_ptr<AbstractClusterer> clusterer_x;
 };
+
+}

@@ -9,6 +9,8 @@
 
 #include <gdgem/clustering/AbstractClusterer.h>
 
+namespace Gem {
+
 class DoroClusterer : public AbstractClusterer {
 public:
   DoroClusterer(double maxTimeGap, uint16_t maxStripGap, size_t minClusterSize);
@@ -25,3 +27,5 @@ private:
   void cluster_by_strip(HitContainer &cluster);
   void stash_cluster(Cluster &plane);
 };
+
+}

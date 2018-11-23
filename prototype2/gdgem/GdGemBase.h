@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief GdGem detector base plugin interface definition
+/// \brief Gem detector base plugin interface definition
 ///
 //===----------------------------------------------------------------------===//
 #pragma once
@@ -82,8 +82,8 @@ protected:
   } __attribute__((aligned(64))) mystats;
 
   struct NMXSettings NMXSettings;
-  NMXConfig nmx_opts;
+  Gem::NMXConfig nmx_opts;
 
-  std::shared_ptr<AbstractBuilder> builder_{nullptr};
+  std::shared_ptr<Gem::AbstractBuilder> builder_{nullptr};
   void init_builder();
 };

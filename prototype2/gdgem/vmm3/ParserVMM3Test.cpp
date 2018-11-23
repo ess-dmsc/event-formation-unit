@@ -5,6 +5,7 @@
 #include <test/TestBase.h>
 #include <vector>
 
+using namespace Gem;
 
 class VMM3SRSDataTest : public TestBase {
 
