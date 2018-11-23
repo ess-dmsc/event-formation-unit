@@ -13,7 +13,7 @@
 
 namespace Multiblade {
 
-class MB16Detector {
+class DigitizerMapping {
 public:
 
   struct Digitiser {
@@ -21,7 +21,7 @@ public:
     int digid; // digitiser id
   };
 
-  MB16Detector(std::vector<struct MB16Detector::Digitiser> & digitisers) : Digitisers(digitisers) { };
+  DigitizerMapping(std::vector<struct DigitizerMapping::Digitiser> & digitisers) : Digitisers(digitisers) { };
 
   /// \brief mapping between digitiser ids (serial numbers) and physical order
   inline int cassette(int digid) {
@@ -32,9 +32,11 @@ public:
     }
     return -1;
   }
-  
+
 private:
-  std::vector<struct MB16Detector::Digitiser> & Digitisers;
+  std::vector<struct DigitizerMapping::Digitiser> & Digitisers;
+
+
 };
 
 }

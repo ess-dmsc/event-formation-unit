@@ -25,13 +25,21 @@ set(MBDataParserTest_SRC
   DataParserTest.cpp)
 create_test_executable(MBDataParserTest)
 
+# Create excecutable for the test of digitizer mapping
+set(DigitizerMappingTest_INC
+  DigitizerMapping.h)
+set(DigitizerMappingTest_SRC
+  DigitizerMappingTest.cpp)
+create_test_executable(DigitizerMappingTest)
 
 # Create excecutable for the test of geometry
-set(MB16DetectorTest_INC MB16Detector.h)
-set(MB16DetectorTest_SRC MB16DetectorTest.cpp)
-create_test_executable(MB16DetectorTest)
+set(MBGeometryTest_INC
+  MBGeometry.h)
+set(MBGeometryTest_SRC
+  MBGeometryTest.cpp)
+create_test_executable(MBGeometryTest)
 
-#
+# Create excecutable for test of configuration
 set(MBConfigTest_INC
   ../../../prototype2/common/DataSave.h
   Config.h)

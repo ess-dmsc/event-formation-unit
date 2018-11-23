@@ -37,6 +37,7 @@ struct BaseSettings {
   std::uint64_t UpdateIntervalSec    = {1};
   std::uint32_t StopAfterSec         = {0xffffffffU};
   std::uint16_t MinimumMTU           = {9000};
+  bool          TestImage            = {false};
 };
 // clang-format on
 

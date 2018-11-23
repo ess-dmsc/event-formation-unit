@@ -51,14 +51,24 @@ protected:
     int64_t pad[5]; // cppcheck-suppress unusedStructMember
 
     // Processing Counters
+    int64_t events_udder;
+    int64_t readouts_monitor; // \todo so far hardcoded
+    int64_t readouts_invalid_adc;
+    int64_t readouts_invalid_ch;
+    int64_t readouts_invalid_plane;
+    int64_t filters_max_time_span;
+    int64_t filters_max_multi1;
+    int64_t filters_max_multi2;
     int64_t rx_idle1;
     int64_t rx_readouts;
-    int64_t rx_error_bytes;
-    int64_t rx_seq_errors;
+    int64_t readouts_ok;
+    int64_t readouts_error_bytes;
+    int64_t readouts_seq_errors;
     int64_t tx_bytes;
-    int64_t rx_events;
+    int64_t events;
+    int64_t events_no_coincidence;
+    int64_t events_not_adjacent;
     int64_t geometry_errors;
-    int64_t fifo_seq_errors;
     // Kafka stats below are common to all detectors
     int64_t kafka_produce_fails;
     int64_t kafka_ev_errors;

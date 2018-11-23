@@ -57,6 +57,9 @@ public:
   /// \returns true if event contains no hits
   bool empty() const;
 
+  /// \returns true if event has both valid planes
+  bool both_planes() const;
+
   /// \returns earliest timestamp, undefined in case of empty event
   uint64_t time_start() const;
   /// \returns latest timestamp, undefined in case of empty event
@@ -68,6 +71,11 @@ public:
   /// \param other cluster to be compared
   /// \returns overlapping time span inclusive of end points
   uint64_t time_overlap(const Cluster &other) const;
+
+  /// \brief calculates the time gap of event and cluster
+  /// \param other cluster to be compared
+  /// \returns time gap
+  uint64_t time_gap(const Cluster &other) const;
 
   /// \returns string describing event bounds and weights
   /// \param verbose also print hits

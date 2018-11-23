@@ -8,6 +8,10 @@
 
 #include <common/clustering/GapClusterer.h>
 #include <algorithm>
+#include <common/Trace.h>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 GapClusterer::GapClusterer(uint64_t max_time_gap, uint16_t max_coord_gap)
     : AbstractClusterer(), max_time_gap_(max_time_gap), max_coord_gap_(max_coord_gap) {}
@@ -16,10 +20,12 @@ void GapClusterer::insert(const Hit &hit) {
   // Stash cluster if time gap to next hit is too large
   if (!current_time_cluster_.empty() &&
       (hit.time - current_time_cluster_.back().time) > max_time_gap_) {
+        XTRACE(CLUSTER, DEB, "timegap > %lu, hit: %lu, current: %lu", max_time_gap_, hit.time, current_time_cluster_.back().time);
     flush();
   }
 
   // Insert in either case
+  XTRACE(CLUSTER, DEB, "insert plane %d, time %u, coord %u, weight %u", hit.plane, hit.time, hit.coordinate, hit.weight);
   current_time_cluster_.emplace_back(hit);
 }
 
@@ -44,10 +50,17 @@ void GapClusterer::cluster_by_coordinate() {
             });
 
   Cluster cluster;
+  XTRACE(CLUSTER, DEB, "first coord %u, last coord %u",
+         current_time_cluster_.front().coordinate,
+         current_time_cluster_.back().coordinate);
+
   for (auto &hit : current_time_cluster_) {
     // Stash cluster if coordinate gap to next hit is too large
+    XTRACE(CLUSTER, DEB, "hit coord %u, cluster coord end %u", hit.coordinate, cluster.coord_end());
+
     if (!cluster.empty() &&
         (hit.coordinate - cluster.coord_end()) > max_coord_gap_) {
+      // XTRACE(CLUSTER, DEB, "Stashing cluster");
       stash_cluster(cluster);
       cluster.clear();
     }

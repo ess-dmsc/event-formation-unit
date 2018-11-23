@@ -48,6 +48,9 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-u,--min_mtu", EFUSettings.MinimumMTU, "Minimum value of MTU for all active interfaces")
       ->group("EFU Options")->default_str("9000");
 
+  CLIParser.add_flag("--udder", EFUSettings.TestImage, "Generate a test image")
+      ->group("EFU Options");
+
   std::string DetectorDescription{"Detector name"};
   std::map<std::string, DetectorModuleSetup> StaticDetModules =
       DetectorModuleRegistration::getFactories();
