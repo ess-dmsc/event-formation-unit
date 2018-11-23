@@ -10,11 +10,6 @@
 
 #include <gdgem/nmx/Readout.h>
 
-constexpr float no_offset = 0.0;
-constexpr float unit_slope = 1.0;
-
-#define UNUSED __attribute__((unused))
-
 using namespace Gem;
 
 class HitsQueueTest : public TestBase {

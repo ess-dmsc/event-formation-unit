@@ -13,8 +13,6 @@
 
 #include <gdgem/clustering/TestDataShort.h>
 
-#define UNUSED __attribute__((unused))
-
 using namespace Gem;
 
 class DoroClustererTest : public TestBase {

@@ -10,8 +10,6 @@
 
 #include <gdgem/nmx/Readout.h>
 
-#define UNUSED __attribute__((unused))
-
 using namespace Gem;
 
 class MockClusterer : public AbstractClusterer {
