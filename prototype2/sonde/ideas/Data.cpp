@@ -9,6 +9,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Sonde {
+
 int IDEASData::parse_buffer(const char *buffer, int size) {
   samples = 0;
   events = 0;
@@ -24,7 +26,7 @@ int IDEASData::parse_buffer(const char *buffer, int size) {
     return -IDEASData::EBADSIZE;
   }
 
-  struct Header *hdr = (struct Header *)buffer;
+  struct Header *hdr = (struct Header *) buffer;
 
   int version = (ntohs(hdr->id) & 0xe000) >> 13;
   if (version != 0) {
@@ -51,9 +53,9 @@ int IDEASData::parse_buffer(const char *buffer, int size) {
          hdr_count);
   XTRACE(PROCESS, DEB, "time: 0x%08x, size: 0x%04x", hdr_hdrtime, hdr_length);
 
-  if (hdr_length + (int)sizeof(struct Header) != size) {
+  if (hdr_length + (int) sizeof(struct Header) != size) {
     XTRACE(PROCESS, WAR, "Packet length mismatch: udp: %d, parsed: %d", size,
-           hdr_length + (int)sizeof(struct Header));
+           hdr_length + (int) sizeof(struct Header));
     return -IDEASData::EHEADER;
   }
 
@@ -78,7 +80,7 @@ int IDEASData::parse_buffer(const char *buffer, int size) {
 int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
   static const int BYTES_PER_ENTRY = 5;
   /**< \todo add check for minimum size */
-  uint8_t *datap = (uint8_t *)(buffer);
+  uint8_t *datap = (uint8_t *) (buffer);
   int nentries = *datap;
   XTRACE(PROCESS, DEB, "Number of readout events in packet: %d", nentries);
 
@@ -90,8 +92,8 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
   }
 
   for (int i = 0; i < nentries; i++) {
-    auto timep = (uint32_t *)(datap + i * BYTES_PER_ENTRY + 1);
-    auto aschp = (uint8_t *)(datap + i * BYTES_PER_ENTRY + 5);
+    auto timep = (uint32_t *) (datap + i * BYTES_PER_ENTRY + 1);
+    auto aschp = (uint8_t *) (datap + i * BYTES_PER_ENTRY + 5);
     uint32_t time = ntohl(*timep);
     uint8_t asch = *aschp; // ASIC (2b) and CHANNEL (6b)
 
@@ -101,7 +103,7 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
       data[events].pixel_id = static_cast<uint32_t>(pixelid);
       if (dumptofile) {
         eventdata->tofile("%d, %u, %d, %d, %d\n", hdr_count, hdr_hdrtime,
-                         hdr_sysno, asch >> 6, asch & 0x3f);
+                          hdr_sysno, asch >> 6, asch & 0x3f);
       }
       XTRACE(PROCESS, INF, "event: %d, time: 0x%08x, pixel: %d", i, time,
              data[events].pixel_id);
@@ -120,7 +122,7 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
 int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
   static const int BYTES_PER_ENTRY = 2;
   /** \todo check minimum header length */
-  int nentries = ntohs(*(uint16_t *)(buffer + 5));
+  int nentries = ntohs(*(uint16_t *) (buffer + 5));
   XTRACE(PROCESS, DEB, "Number of readout events in packet: %d", nentries);
 
   if (nentries * BYTES_PER_ENTRY + 7 != hdr_length) {
@@ -128,10 +130,10 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
            nentries, nentries * BYTES_PER_ENTRY + 5, hdr_length);
     return -IDEASData::EHEADER;
   }
-  int asic = *(uint8_t *)(buffer);
-  int trigger_type = *(uint8_t *)(buffer + 1);
-  int channel = *(uint8_t *)(buffer + 2);
-  int hold_delay = ntohs(*(uint16_t *)(buffer + 3));
+  int asic = *(uint8_t *) (buffer);
+  int trigger_type = *(uint8_t *) (buffer + 1);
+  int channel = *(uint8_t *) (buffer + 2);
+  int hold_delay = ntohs(*(uint16_t *) (buffer + 3));
   XTRACE(PROCESS, DEB,
          "asic: %d, channel: %d, trigger type: %d, hold delay: %d", asic,
          channel, trigger_type, hold_delay);
@@ -145,12 +147,12 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
 
   for (int i = 0; i < nentries; i++) {
     samples++;
-    uint16_t sample = ntohs(*(uint16_t *)(buffer + i * 2 + 7));
+    uint16_t sample = ntohs(*(uint16_t *) (buffer + i * 2 + 7));
     XTRACE(PROCESS, INF, "sample %3d: 0x%x (%d)", i, sample, sample);
 
     if (dumptofile) {
       sephdata->tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, trigger_type,
-                      hold_delay, asic, channel, sample);
+                       hold_delay, asic, channel, sample);
     }
   }
 
@@ -167,8 +169,8 @@ int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
     return -IDEASData::EBADSIZE;
   }
 
-  int N = *(uint8_t *)buffer;               /**< number of events            */
-  int M = ntohs(*(uint16_t *)(buffer + 1)); /**< number of samples per event */
+  int N = *(uint8_t *) buffer;               /**< number of events            */
+  int M = ntohs(*(uint16_t *) (buffer + 1)); /**< number of samples per event */
   XTRACE(PROCESS, DEB, "Readout events: %d, samples per event %d", N, M);
 
   int expect_len = (4 + BYTES_PER_SAMPLE * M) * N + 3;
@@ -180,15 +182,15 @@ int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
 
   for (int n = 0; n < N; n++) {
     auto evoff = buffer + 3 + (4 + BYTES_PER_SAMPLE * M) * n; // Event offset
-    uint32_t evtime = ntohl(*(uint32_t *)(evoff));
+    uint32_t evtime = ntohl(*(uint32_t *) (evoff));
     for (int m = 0; m < M; m++) {
       samples++;
       // events++; //Careful, data array will be parsed
       int sampleoffset = BYTES_PER_SAMPLE * m;
-      int trigger_type = *(uint8_t *)(evoff + sampleoffset + 4);
-      int asic = *(uint8_t *)(evoff + sampleoffset + 5);
-      int channel = *(uint8_t *)(evoff + sampleoffset + 6);
-      int sample = ntohs(*(uint16_t *)(evoff + sampleoffset + 7));
+      int trigger_type = *(uint8_t *) (evoff + sampleoffset + 4);
+      int asic = *(uint8_t *) (evoff + sampleoffset + 5);
+      int channel = *(uint8_t *) (evoff + sampleoffset + 6);
+      int sample = ntohs(*(uint16_t *) (evoff + sampleoffset + 7));
 
       int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asic, channel);
       if (pixelid >= 1) {
@@ -200,10 +202,12 @@ int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
              trigger_type, asic, channel, sample);
       if (dumptofile) {
         mephdata->tofile("%d, %u, %d, %d, %d, %d\n", hdr_count, evtime,
-                        trigger_type, asic, channel, sample);
+                         trigger_type, asic, channel, sample);
       }
     }
   }
 
   return events;
+}
+
 }

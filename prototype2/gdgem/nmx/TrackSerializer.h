@@ -14,6 +14,8 @@
 #include <gdgem/nmx/Event.h>
 #include <common/Producer.h>
 
+namespace Gem {
+
 class TrackSerializer {
 public:
   /// \todo document
@@ -35,7 +37,7 @@ private:
   flatbuffers::FlatBufferBuilder builder;
   size_t maxlen{0};
   size_t minhits_{0};
-  double target_resolution_ {1};
+  double target_resolution_{1};
 
   double time_offset{0};
   std::vector<flatbuffers::Offset<pos>> xtrack;
@@ -43,3 +45,5 @@ private:
   double xpos{-1};
   double ypos{-1};
 };
+
+}

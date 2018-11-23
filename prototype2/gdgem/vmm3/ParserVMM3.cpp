@@ -10,6 +10,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 
 	XTRACE(PROCESS, DEB, "data1: 0x%08x, data2: 0x%04x", data1, data2);
@@ -28,8 +30,8 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 		vmd->adc = (data1 >> 12) & 0x3FF;
 		vmd->bcid = BitMath::gray2bin32(data1 & 0xFFF);
 
-		vmd->fecTimeStamp = markers[(parserData.fecId-1)*maximumNumberVMM+vmd->vmmid].fecTimeStamp;
-		if (markers[(parserData.fecId-1)*maximumNumberVMM+vmd->vmmid].fecTimeStamp > 0) {
+		vmd->fecTimeStamp = markers[(parserData.fecId - 1) * maximumNumberVMM + vmd->vmmid].fecTimeStamp;
+		if (markers[(parserData.fecId - 1) * maximumNumberVMM + vmd->vmmid].fecTimeStamp > 0) {
 			vmd->hasDataMarker = true;
 		}
 		return 1;
@@ -41,9 +43,16 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
 
 		uint64_t timestamp_42bit = (timestamp_upper_32bit << 10)
 				+ timestamp_lower_10bit;
-		XTRACE(PROCESS, DEB, "SRS Marker vmmid %d: timestamp lower 10bit %u, timestamp upper 32 bit %u, 42 bit timestamp %" 
-		       PRIu64 "",  vmmid, timestamp_lower_10bit, timestamp_upper_32bit,timestamp_42bit);
-		markers[(parserData.fecId-1)*maximumNumberVMM+vmmid].fecTimeStamp = timestamp_42bit;
+		XTRACE(PROCESS,
+			   DEB,
+			   "SRS Marker vmmid %d: timestamp lower 10bit %u, timestamp upper 32 bit %u, 42 bit timestamp %"
+					   PRIu64
+					   "",
+			   vmmid,
+			   timestamp_lower_10bit,
+			   timestamp_upper_32bit,
+			   timestamp_42bit);
+		markers[(parserData.fecId - 1) * maximumNumberVMM + vmmid].fecTimeStamp = timestamp_42bit;
 
 		//XTRACE(PROCESS, DEB, "vmmid: %d", vmmid);
 		return 0;
@@ -105,10 +114,8 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 		return 0;
 	}
 
-	
 	parserData.fecId = (srsHeader.dataId >> 4) & 0x0f;
-	if(parserData.fecId < 1 || parserData.fecId > 15)
-	{
+	if (parserData.fecId < 1 || parserData.fecId > 15) {
 		XTRACE(PROCESS, WAR, "Invalid fecId: %u", parserData.fecId);
 		stats.badFrames++;
 		stats.errors += size;
@@ -156,4 +163,6 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 	stats.goodFrames++;
 
 	return stats.hits;
+}
+
 }

@@ -20,14 +20,14 @@ constexpr float nons = 0.0;
   bool over_threshold{false};
   float chiptime{0.0};
 // Scrambled FrameCounter
-std::vector<Readout> err_fc_error
+std::vector<Gem::Readout> err_fc_error
 {//              *
 	{ 1,  7, 255783212+236388352,  7, 4094, 202, 109, true, nons},
 	{ 1,  1, 255783211+ 236388352, 34, 839, 96, 93, true, nons},
 };
 
 // 'scrambled' (0) values occasionally seen
-std::vector<Readout> err_bcid_tdc_error
+std::vector<Gem::Readout> err_bcid_tdc_error
 { //                                 *  * X
 	{ 1,  0, 255783208+ 236388352, 18, 0, 0, 574, true, nons},
 	{ 1,  0, 255783208+ 236388352, 19, 0, 0, 400, true, nons},
@@ -37,7 +37,7 @@ std::vector<Readout> err_bcid_tdc_error
 };
 
 // Scrambled trigger time
-std::vector<Readout> err_triggertime_error
+std::vector<Gem::Readout> err_triggertime_error
 {
 	{ 1, 14, 255783214+ 236453888, 41, 4094, 161, 191, true, nons},
 	{ 1, 14, 255783214+ 236453888, 42, 4094, 193, 106, true, nons},
@@ -46,7 +46,7 @@ std::vector<Readout> err_triggertime_error
 };
 
 
-std::vector<Readout> Run16
+std::vector<Gem::Readout> Run16
 {
 { 1,  0, 255783208+ 236388352,  7, 839, 178, 176, true, nons},
 { 1,  0, 255783208+ 236388352,  8, 839, 224, 352, true, nons},

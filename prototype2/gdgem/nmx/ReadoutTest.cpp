@@ -3,6 +3,8 @@
 #include <gdgem/nmx/Readout.h>
 #include <test/TestBase.h>
 
+using namespace Gem;
+
 class NMXReadoutTest : public TestBase {
 protected:
   virtual void SetUp() {

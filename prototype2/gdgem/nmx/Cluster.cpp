@@ -10,6 +10,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 void Cluster::insert_hit(const Hit &e) {
   if (hits.empty()) {
     plane_id = e.plane_id;
@@ -171,4 +173,6 @@ std::string Cluster::debug() const {
   //  for (const auto& e : entries)
   //    ss << e.debug() << "\n";
   return ss.str();
+}
+
 }

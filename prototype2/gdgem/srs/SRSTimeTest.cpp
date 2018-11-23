@@ -5,6 +5,8 @@
 #include <test/TestBase.h>
 #include <unistd.h>
 
+using namespace Gem;
+
 constexpr float no_offset = 0.0;
 constexpr float unit_slope = 1.0;
 

@@ -11,6 +11,8 @@
 #include <gdgem/clustering/TestDataLong.h>
 #include <test/TestBase.h>
 
+using namespace Gem;
+
 static void Doit(benchmark::State &state) {
 	SRSMappings mapping;
 

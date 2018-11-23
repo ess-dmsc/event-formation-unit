@@ -5,14 +5,14 @@
 #include <iostream>
 
 ReaderHits::ReaderHits(std::string filename) {
-  file = HitFile::open(filename);
+  file = Gem::HitFile::open(filename);
   total_ = file->count();
   current_ = 0;
 }
 
 size_t ReaderHits::read(char *buf) {
-  size_t size = HitFile::ChunkSize;
-  if ((current_ + HitFile::ChunkSize) > total_)
+  size_t size = Gem::HitFile::ChunkSize;
+  if ((current_ + Gem::HitFile::ChunkSize) > total_)
   {
     size = total_ - current_;
   }
@@ -20,7 +20,7 @@ size_t ReaderHits::read(char *buf) {
   if (size > 0) {
     try {
       file->readAt(current_, size);
-      memcpy(buf, file->Data.data(), sizeof(Hit) * size);
+      memcpy(buf, file->Data.data(), sizeof(Gem::Hit) * size);
     } catch (std::exception &e) {
       std::cout << "<ReaderHits> failed to read slab ("
                 << current_ << ", " << (current_ + size) << ")"
@@ -30,6 +30,6 @@ size_t ReaderHits::read(char *buf) {
   }
 
   current_ += size;
-  return sizeof(Hit) * size;
+  return sizeof(Gem::Hit) * size;
 }
 // GCOVR_EXCL_STOP

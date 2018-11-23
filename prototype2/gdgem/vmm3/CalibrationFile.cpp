@@ -18,6 +18,8 @@ using json = nlohmann::json;
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 /// \brief clear the calibration array
 CalibrationFile::CalibrationFile() {
   resetCalibration();
@@ -105,10 +107,12 @@ CalibrationFile::getCalibration(unsigned int fecId, unsigned int vmmId,
 }
 
 void CalibrationFile::resetCalibration() {
-  constexpr size_t NumberEntries = (size_t)(sizeof(Calibrations) / sizeof(Calibration));
+  constexpr size_t NumberEntries = (size_t) (sizeof(Calibrations) / sizeof(Calibration));
   static_assert(sizeof(Calibration) == 8, "struct packing issue");
   static_assert(NumberEntries == MAX_FEC * MAX_VMM * MAX_CH, "calibration table size mismatch");
   for (size_t i = 0; i < NumberEntries; i++) {
-    ((Calibration *)Calibrations)[i] = NoCorr;
+    ((Calibration *) Calibrations)[i] = NoCorr;
   }
+}
+
 }

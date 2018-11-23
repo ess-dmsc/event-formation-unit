@@ -21,6 +21,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 class BuilderVMM3 : public AbstractBuilder {
 public:
   BuilderVMM3(SRSTime time_intepreter, SRSMappings geometry_interpreter,
@@ -49,3 +51,5 @@ private:
   uint8_t plane;
   uint32_t geom_errors;
 };
+
+}

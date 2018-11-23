@@ -5,6 +5,8 @@
 #include <test/TestBase.h>
 #include <unistd.h>
 
+using namespace Gem;
+
 class NMXHitTest : public TestBase {
 protected:
   Hit hit;

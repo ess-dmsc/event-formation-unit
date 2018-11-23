@@ -12,6 +12,8 @@ std::string pathprefix{""};
 
 std::string nocalibration{""};
 
+using namespace Gem;
+
 class NMXConfigTest : public TestBase {
 protected:
   virtual void SetUp() {

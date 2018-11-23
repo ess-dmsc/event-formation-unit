@@ -15,6 +15,8 @@ constexpr float unit_slope = 1.0;
 
 #define UNUSED __attribute__((unused))
 
+using namespace Gem;
+
 class HitsQueueTest : public TestBase {
 protected:
   std::vector<Readout> long_data;

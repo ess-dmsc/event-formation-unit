@@ -14,6 +14,8 @@
 
 #define UNUSED __attribute__((unused))
 
+using namespace Gem;
+
 class DoroClustererTest : public TestBase {
 protected:
   std::vector<Readout> long_data;

@@ -12,6 +12,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 HitSorter::HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
                      double maxTimeGap) :
     pTime(time), pChips(chips),
@@ -68,4 +70,6 @@ void HitSorter::analyze() {
   hits.sort_and_correct();
   if (clusterer)
     clusterer->cluster(hits.hits());
+}
+
 }

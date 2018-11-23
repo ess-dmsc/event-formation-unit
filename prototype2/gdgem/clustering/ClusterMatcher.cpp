@@ -14,6 +14,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 ClusterMatcher::ClusterMatcher(double maxDeltaTime) : pMaxDeltaTime(maxDeltaTime) {
 }
 
@@ -73,4 +75,6 @@ void ClusterMatcher::match_end(bool force) {
     matched_clusters.emplace_back(std::move(evt));
     stats_cluster_count++;
   }
+}
+
 }

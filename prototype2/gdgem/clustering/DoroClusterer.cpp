@@ -12,6 +12,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 DoroClusterer::DoroClusterer(double maxTimeGap, uint16_t maxStripGap, size_t minClusterSize)
     : AbstractClusterer(), pMaxTimeGap(maxTimeGap), pMaxStripGap(maxStripGap), pMinClusterSize(minClusterSize) {
 }
@@ -72,4 +74,6 @@ void DoroClusterer::stash_cluster(Cluster &cluster) {
   DTRACE(DEB, "******** VALID ********");
   clusters.emplace_back(std::move(cluster));
   stats_cluster_count++;
+}
+
 }

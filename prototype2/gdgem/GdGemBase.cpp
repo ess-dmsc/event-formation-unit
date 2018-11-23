@@ -60,7 +60,7 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
   Stats.setPrefix("efu.nmx");
 
   XTRACE(PROCESS, ALW, "NMX Config file: %s", NMXSettings.ConfigFile.c_str());
-  nmx_opts = NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
+  nmx_opts = Gem::NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
@@ -162,13 +162,13 @@ void GdGemBase::input_thread() {
   }
 }
 
-void bin(Hists& hists, const Event &e)
+void bin(Hists& hists, const Gem::Event &e)
 {
   uint32_t sum = e.x.adc_sum + e.y.adc_sum;
   hists.bincluster(sum);
 }
 
-void bin(Hists& hists, const Hit &e)
+void bin(Hists& hists, const Gem::Hit &e)
 {
   if (e.plane_id == 0) {
     hists.bin_x(e.strip, e.adc);
@@ -177,7 +177,7 @@ void bin(Hists& hists, const Hit &e)
   }
 }
 
-void bin_hists(Hists& hists, const std::list<Cluster>& cl)
+void bin_hists(Hists& hists, const std::list<Gem::Cluster>& cl)
 {
   for (const auto& cluster : cl)
     for (const auto& e : cluster.hits)
@@ -200,22 +200,22 @@ void GdGemBase::processing_thread() {
       std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 
 
-  TrackSerializer track_serializer(256, nmx_opts.track_sample_minhits,
+  Gem::TrackSerializer track_serializer(256, nmx_opts.track_sample_minhits,
                           nmx_opts.time_config.target_resolution_ns());
   track_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
-  Hists hists(Hit::strip_max_val, Hit::adc_max_val);
+  Hists hists(Gem::Hit::strip_max_val, Gem::Hit::adc_max_val);
   HistSerializer hist_serializer(hists.needed_buffer_size());
   hist_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
-  ClusterMatcher matcher(nmx_opts.matcher_max_delta_time);
+  Gem::ClusterMatcher matcher(nmx_opts.matcher_max_delta_time);
 
   TSCTimer global_time, report_timer;
 
-  Event event;
+  Gem::Event event;
   uint32_t time;
   uint32_t pixelid;
 
@@ -357,16 +357,16 @@ void GdGemBase::processing_thread() {
 void GdGemBase::init_builder() {
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
-  auto clusx = std::make_shared<DoroClusterer>(
+  auto clusx = std::make_shared<Gem::DoroClusterer>(
       nmx_opts.clusterer_x.max_time_gap, nmx_opts.clusterer_x.max_strip_gap,
       nmx_opts.clusterer_x.min_cluster_size);
-  auto clusy = std::make_shared<DoroClusterer>(
+  auto clusy = std::make_shared<Gem::DoroClusterer>(
       nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap,
       nmx_opts.clusterer_y.min_cluster_size);
 
   if (nmx_opts.builder_type == "VMM3") {
     XTRACE(INIT, DEB, "Using BuilderVMM3");
-    builder_ = std::make_shared<BuilderVMM3>(
+    builder_ = std::make_shared<Gem::BuilderVMM3>(
         nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
         nmx_opts.clusterer_x.hit_adc_threshold,
         nmx_opts.clusterer_x.max_time_gap,
