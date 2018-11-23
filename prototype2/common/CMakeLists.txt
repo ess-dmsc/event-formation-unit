@@ -4,10 +4,13 @@
 
 set(efu_common_SRC
   clustering/AbstractClusterer.h
+  clustering/AbstractMatcher.h
   clustering/Cluster.h
   clustering/GapClusterer.h
   clustering/Event.h
   clustering/Hit.h
+  clustering/OverlapMatcher.h
+  clustering/GapMatcher.h
   EV42Serializer.cpp
   NewStats.cpp
   Producer.cpp
@@ -17,10 +20,13 @@ set(efu_common_SRC
   )
 
 set(efu_common_INC
+  clustering/AbstractMatcher.cpp
   clustering/Cluster.cpp
   clustering/GapClusterer.cpp
   clustering/Hit.cpp
   clustering/Event.cpp
+  clustering/OverlapMatcher.cpp
+  clustering/GapMatcher.cpp
   ../../libs/include/gccintel.h
   DetectorModuleRegister.h
   Detector.h
@@ -39,7 +45,6 @@ set(efu_common_INC
 add_subdirectory(clustering)
 
 find_package(CLI11 REQUIRED)
-find_package(fmt REQUIRED)
 
 add_library(efu_common STATIC
   ${efu_common_SRC}
@@ -53,8 +58,7 @@ endif()
 
 enable_coverage(efu_common)
 
-target_link_libraries(efu_common PUBLIC ${EFU_COMMON_LIBS} fmt::fmt)
-
+target_link_libraries(efu_common PUBLIC ${EFU_COMMON_LIBS})
 
 #=============================================================================
 # Tests

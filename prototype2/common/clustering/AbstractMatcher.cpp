@@ -7,6 +7,10 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/clustering/AbstractMatcher.h>
+#include <common/Trace.h>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 AbstractMatcher::AbstractMatcher(uint64_t latency)
     : latency_(latency) {}
@@ -33,9 +37,8 @@ void AbstractMatcher::stash_event(Event &event) {
 }
 
 bool AbstractMatcher::ready_to_be_matched(const Cluster &cluster) const {
+  XTRACE(CLUSTER, DEB, "latest_x %u, latest_y %u, cl time end %u", latest_x_, latest_y_, cluster.time_end());
   auto latest = std::min(latest_x_, latest_y_);
   return (latest > cluster.time_end()) &&
       ((std::min(latest_x_, latest_y_) - cluster.time_end()) > latency_);
 }
-
-

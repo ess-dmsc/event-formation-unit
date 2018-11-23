@@ -7,8 +7,12 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/clustering/Event.h>
+#include <common/Trace.h>
 #include <fmt/format.h>
 #include <cmath>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 Event::Event(uint8_t plane1, uint8_t plane2)
     : plane1_(plane1), plane2_(plane2) {}
@@ -35,6 +39,7 @@ void Event::merge(Cluster &cluster) {
   } else if (cluster.plane() == plane2_) {
     c2.merge(cluster);
   }
+  XTRACE(EVENT, DEB, "merge() c1 size %u. c2 size %u", c1.hit_count(), c2.hit_count());
 }
 
 void Event::clear() {
@@ -44,6 +49,10 @@ void Event::clear() {
 
 bool Event::empty() const {
   return c1.empty() && c2.empty();
+}
+
+bool Event::both_planes() const {
+  return !c1.empty() && !c2.empty();
 }
 
 uint64_t Event::time_end() const {
@@ -69,18 +78,43 @@ uint64_t Event::time_span() const {
 }
 
 uint64_t Event::time_overlap(const Cluster &other) const {
-  if (empty() || other.empty())
-    return 0;
-  auto latest_start = std::max(other.time_start(), time_start());
-  auto earliest_end = std::min(other.time_end(), time_end());
-  if (latest_start > earliest_end) {
+  if (empty() || other.empty()) {
     return 0;
   }
+  auto latest_start = std::max(other.time_start(), time_start());
+  auto earliest_end = std::min(other.time_end(), time_end());
+
+  if (latest_start > earliest_end) {
+    XTRACE(EVENT, DEB, "no time overlap");
+    return 0;
+  }
+  /// \todo should not rather return a boolean ?
   return (earliest_end - latest_start) + uint16_t(1);
 }
 
+uint64_t Event::time_gap(const Cluster &other) const {
+  if (empty() || other.empty()) {
+    return 0; // \todo should this happen?
+  }
+  auto latest_start = std::max(other.time_start(), time_start());
+  auto earliest_end = std::min(other.time_end(), time_end());
+
+  if (latest_start <= earliest_end) {
+    XTRACE(EVENT, DEB, "no time gap");
+    return 0;
+  }
+  /// \todo should not rather return a boolean ?
+  return (latest_start - earliest_end);
+}
+
+
 std::string Event::debug(bool verbose) const {
-  return fmt::format("Event planes({},{}):\n  {}\n  {}\n",
-                     plane1_, plane2_,
-                     c1.debug(verbose), c2.debug(verbose));
+  auto ret = fmt::format("Event planes({},{}):",
+                     plane1_, plane2_);
+  if (!c1.empty())
+    ret += "\n  " + c1.debug(verbose);
+  if (!c2.empty())
+    ret += "\n  " + c2.debug(verbose);
+
+  return ret;
 }

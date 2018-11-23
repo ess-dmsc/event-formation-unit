@@ -4,7 +4,6 @@
 /// \file
 /// Implementation of the detector pipeline plugin for MUlti-Blade
 /// detectors.
-/// Contributor: Carsten Søgaard, Niels Bohr Institute, University of Copenhagen
 //===----------------------------------------------------------------------===//
 
 #include "MBCaenBase.h"
@@ -17,8 +16,7 @@
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
-
-#include <common/clustering/GapClusterer.h>
+#include <common/TestImageUdder.h>
 
 #include <unistd.h>
 
@@ -32,9 +30,10 @@
 #include <clustering/EventBuilder.h>
 
 #include <logical_geometry/ESSGeometry.h>
+#include <caen/MBGeometry.h>
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Multiblade {
 
@@ -51,23 +50,39 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("input.rx_packets", mystats.rx_packets);
-  Stats.create("input.rx_bytes", mystats.rx_bytes);
-  Stats.create("input.fifo1_push_errors", mystats.fifo1_push_errors);
-  Stats.create("processing.rx_readouts", mystats.rx_readouts);
-  Stats.create("processing.rx_error_bytes", mystats.rx_error_bytes);
-  Stats.create("processing.rx_seq_errors", mystats.rx_seq_errors);
-  Stats.create("processing.rx_idle1", mystats.rx_idle1);
-  Stats.create("processing.tx_bytes", mystats.tx_bytes);
-  Stats.create("processing.rx_events", mystats.rx_events);
-  Stats.create("processing.rx_geometry_errors", mystats.geometry_errors);
-  Stats.create("processing.fifo_seq_errors", mystats.fifo_seq_errors);
+  Stats.create("receive.packets", mystats.rx_packets);
+  Stats.create("receive.bytes", mystats.rx_bytes);
+  Stats.create("receive.dropped", mystats.fifo1_push_errors);
+
+  Stats.create("readouts.count", mystats.rx_readouts);
+  Stats.create("readouts.count_valid", mystats.readouts_ok);
+  Stats.create("readouts.invalid_ch", mystats.readouts_invalid_ch);
+  Stats.create("readouts.invalid_adc", mystats.readouts_invalid_adc);
+  Stats.create("readouts.invalid_plane", mystats.readouts_invalid_plane);
+  Stats.create("readouts.monitor", mystats.readouts_monitor);
+
+  Stats.create("readouts.error_bytes", mystats.readouts_error_bytes);
+  Stats.create("readouts.seq_errors", mystats.readouts_seq_errors);
+
+  Stats.create("thread.processing_idle", mystats.rx_idle1);
+
+  Stats.create("events.count", mystats.events);
+  Stats.create("events.udder", mystats.events_udder);
+  Stats.create("events.geometry_errors", mystats.geometry_errors);
+  Stats.create("events.no_coincidence", mystats.events_no_coincidence);
+  Stats.create("events.not_adjacent", mystats.events_not_adjacent);
+  Stats.create("filters.max_time_span", mystats.filters_max_time_span);
+  Stats.create("filters.max_multi1", mystats.filters_max_multi1);
+  Stats.create("filters.max_multi2", mystats.filters_max_multi2);
+
+  Stats.create("transmit.bytes", mystats.tx_bytes);
+
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
-  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
-  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
-  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
-  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
+  Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka.ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka.ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka.dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka.dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { CAENBase::input_thread(); };
@@ -85,7 +100,7 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   assert(eth_ringbuf != 0);
 
   mb_opts = Config(MBCAENSettings.ConfigFile);
-  assert(mb_opts.getDetector() != nullptr);
+  assert(mb_opts.getDigitizers() != nullptr);
 }
 
 void CAENBase::input_thread() {
@@ -107,8 +122,8 @@ void CAENBase::input_thread() {
     if ((rdsize = receiver.receive(eth_ringbuf->getDataBuffer(eth_index),
                                    eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-      XTRACE(PROCESS, DEB, "Received an udp packet of length %d bytes",
-             rdsize);
+//      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
+//             rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
@@ -128,169 +143,257 @@ void CAENBase::input_thread() {
 }
 
 void CAENBase::processing_thread() {
-  HitContainer wire_hits, strip_hits;
+  const uint16_t ncass = mb_opts.getCassettes();
+  const uint16_t nwires = mb_opts.getWires();
+  const uint16_t nstrips = mb_opts.getStrips();
+  std::string topic{""};
+  std::string monitor{""};
 
-  const uint32_t ncass = 6;
-  uint16_t nwires = 32;
-  uint16_t nstrips = 32;
+  MBGeometry mbgeom(ncass, nwires, nstrips);
+  ESSGeometry essgeom;
+  if (mb_opts.getInstrument() == Config::InstrumentGeometry::Estia) {
+    XTRACE(PROCESS, ALW, "Setting instrument configuration to Estia");
+    mbgeom.setConfigurationEstia();
+    essgeom = ESSGeometry(ncass * nwires, nstrips, 1, 1);
+    topic = "ESTIA_detector";
+    monitor = "ESTIA_monitor";
+  } else {
+    mbgeom.setConfigurationFreia();
+    XTRACE(PROCESS, ALW, "Setting instrument configuration to Freia");
+    essgeom = ESSGeometry(nstrips, ncass * nwires, 1, 1);
+    topic = "FREIA_detector";
+    monitor = "FREIA_monitor";
+  }
+
+  if (mb_opts.getDetectorType() == Config::DetectorType::MB18) {
+    XTRACE(PROCESS, ALW, "Setting detector to MB18");
+    mbgeom.setDetectorMB18();
+  } else {
+    XTRACE(PROCESS, ALW, "Setting detector to MB16");
+    mbgeom.setDetectorMB16();
+  }
 
   std::shared_ptr<ReadoutFile> dumpfile;
   if (!MBCAENSettings.FilePrefix.empty()) {
-    dumpfile = ReadoutFile::create(
-        MBCAENSettings.FilePrefix + "-" + timeString());
+    dumpfile = ReadoutFile::create(MBCAENSettings.FilePrefix + "-" + timeString());
   }
 
-  ESSGeometry essgeom(nstrips, ncass * nwires, 1, 1);
-
   EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
-  Producer eventprod(EFUSettings.KafkaBroker, "MB_detector");
+  Producer eventprod(EFUSettings.KafkaBroker, topic);
   flatbuffer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
-  Hists histograms(std::max(nwires, nstrips), 65535);
-  Producer monitorprod(EFUSettings.KafkaBroker, "MB_monitor");
+  Hists histograms(std::max(ncass * nwires, ncass * nstrips), 65535);
+  Producer monitorprod(EFUSettings.KafkaBroker, monitor);
   HistSerializer histfb(histograms.needed_buffer_size());
   histfb.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 
-  EventBuilder builder[ncass];
-  for (uint32_t i = 0; i < ncass; i++) {
-    builder[i].setNumberOfWireChannels(nwires);
-    builder[i].setNumberOfStripChannels(nstrips);
-  }
+  std::vector<EventBuilder> builders(ncass);
 
   DataParser parser;
   auto digitisers = mb_opts.getDigitisers();
-  MB16Detector mb16(digitisers);
+  DigitizerMapping mb1618(digitisers);
+
+
+  if (EFUSettings.TestImage) {
+    XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
+    Udder udder;
+    uint32_t time = 0;
+    while (true) {
+      if (not runThreads) {
+        // \todo flush everything here
+        XTRACE(INPUT, ALW, "Stopping processing thread.");
+        return;
+      }
+      auto pixel_id = udder.getPixel(essgeom.nx(), essgeom.ny(), &essgeom);
+      mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
+      mystats.events_udder++;
+      usleep(10);
+      time++;
+    }
+  }
+
 
   unsigned int data_index;
   TSCTimer produce_timer;
-  Timer  h5flushtimer;
-  while (1) {
-    if ((input2proc_fifo.pop(data_index)) == false) {
-      // There is NO data in the FIFO - do stop checks and sleep a little
-      mystats.rx_idle1++;
-
-      // if filedumping and requesting time splitting, check for rotation.
-      if (MBCAENSettings.H5SplitTime != 0 and (dumpfile)) {
-        if (h5flushtimer.timeus() >= MBCAENSettings.H5SplitTime * 1000000) {
-
-          /// \todo user should not need to call flush() - implicit in rotate() ?
-          dumpfile->flush();
-          dumpfile->rotate();
-          h5flushtimer.now();
-        }
-      }
-
-      if (produce_timer.timetsc() >=
-          EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
-
-        mystats.tx_bytes += flatbuffer.produce();
-
-        if (!histograms.isEmpty()) {
-          XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
-              histograms.hit_count());
-          histfb.produce(histograms);
-          histograms.clear();
-        }
-
-        /// Kafka stats update - common to all detectors
-        /// don't increment as producer keeps absolute count
-        mystats.kafka_produce_fails = eventprod.stats.produce_fails;
-        mystats.kafka_ev_errors = eventprod.stats.ev_errors;
-        mystats.kafka_ev_others = eventprod.stats.ev_others;
-        mystats.kafka_dr_errors = eventprod.stats.dr_errors;
-        mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
-
-        if (not runThreads) {
-          XTRACE(INPUT, ALW, "Stopping processing thread.");
-          return;
-        }
-
-        produce_timer.now();
-      }
-      usleep(10);
-
-    } else { // There is data in the FIFO - do processing
+  Timer h5flushtimer;
+  while (true) {
+    if (input2proc_fifo.pop(data_index)) { // There is data in the FIFO - do processing
       auto datalen = eth_ringbuf->getDataLength(data_index);
       if (datalen == 0) {
-        mystats.fifo_seq_errors++;
-      } else {
-        /// \todo use the Buffer<T> class here and in parser
-        auto dataptr = eth_ringbuf->getDataBuffer(data_index);
-        if (parser.parse(dataptr, datalen) < 0) {
-          mystats.rx_error_bytes += parser.Stats.error_bytes;
-          continue;
-        }
-        mystats.rx_seq_errors += parser.Stats.seq_errors;
-
-        XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
-               parser.MBHeader->numElements, parser.MBHeader->digitizerID);
-
-        mystats.rx_readouts += parser.MBHeader->numElements;
-
-        if (dumpfile) {
-          dumpfile->push(parser.readouts);
-          XTRACE(DATA, DEB, "Pushed %d readouts to dumpfile",
-                 parser.readouts.size());
-        }
-
-        /// \todo why can't I use mb_opts.detector->cassette()
-        auto cassette = mb16.cassette(parser.MBHeader->digitizerID);
-        if (cassette < 0) {
-          XTRACE(DATA, WAR, "Invalid digitizerId: %d",
-                 parser.MBHeader->digitizerID);
-          continue;
-        }
-
-        for (const auto &dp : parser.readouts) {
-          // XTRACE(DATA, DEB, "digitizer: %d, time: %d, channel: %d, adc: %d",
-          //       dp.digitizer, dp.local_time, dp.channel, dp.adc);
-
-          /// \todo magic number? should be part of geometry class?
-          /// \todo do not bin 0-channels for the complementary space
-          /// \todo unfold channels among digitizers
-          if (dp.channel < nwires) {
-            //wires
-            histograms.bin_y(dp.channel, dp.adc);
-            //wire_hits.push_back({dp.local_time, 0, dp.channel, dp.adc});
-          } else {
-            //strips
-            histograms.bin_x((dp.channel - nwires), dp.adc);
-            //strip_hits.push_back({dp.local_time, 1, dp.channel, dp.adc});
-          }
-
-          if (builder[cassette].addDataPoint(dp.channel, dp.adc, dp.local_time)) {
-
-            /// \todo magic number? should be part of geometry class?
-            auto xcoord = builder[cassette].getStripPosition() - 32; // pos 32 - 63
-            auto ycoord = cassette * nwires +
-                builder[cassette].getWirePosition(); // pos 0 - 31
-
-            uint32_t pixel_id = essgeom.pixel2D(xcoord, ycoord);
-
-            XTRACE(PROCESS, DEB,
-                   "digi: %d, wire: %d, strip: %d, x: %d, y:%d, pixel_id: %d",
-                   dp.digitizer, (int) xcoord, (int) ycoord,
-                   (int) builder[cassette].getWirePosition(),
-                   (int) builder[cassette].getStripPosition(), pixel_id);
-
-            if (pixel_id == 0) {
-              mystats.geometry_errors++;
-            } else {
-              mystats.tx_bytes += flatbuffer.addEvent(
-                  builder[cassette].getTimeStamp(), pixel_id);
-              mystats.rx_events++;
-            }
-          }
-          /// \todo we need to also flush leftover clusters in case of loop termination
-
-        }
-
-
-        // \todo match clusters here
-
+        mystats.readouts_seq_errors++;
+        continue;
       }
+
+      /// \todo use the Buffer<T> class here and in parser
+      auto dataptr = eth_ringbuf->getDataBuffer(data_index);
+      if (parser.parse(dataptr, datalen) < 0) {
+        mystats.readouts_error_bytes += parser.Stats.error_bytes;
+        continue;
+      }
+      mystats.readouts_seq_errors += parser.Stats.seq_errors;
+
+      XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
+             parser.MBHeader->numElements, parser.MBHeader->digitizerID);
+
+      uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+      flatbuffer.pulseTime(efu_time);
+
+      mystats.rx_readouts += parser.MBHeader->numElements;
+
+      if (dumpfile) {
+        dumpfile->push(parser.readouts);
+      }
+
+      /// \todo why can't I use mb_opts.detector->cassette()
+      auto cassette = mb1618.cassette(parser.MBHeader->digitizerID);
+      if (cassette < 0) {
+        XTRACE(DATA, WAR, "Invalid digitizerId: %d",
+               parser.MBHeader->digitizerID);
+        continue;
+      }
+
+      for (const auto &dp : parser.readouts) {
+
+        if (not mbgeom.isValidCh(dp.channel)) {
+          mystats.readouts_invalid_ch++;
+          continue;
+        }
+
+        if (dp.adc > mb_opts.max_valid_adc) {
+          mystats.readouts_invalid_adc++;
+          continue;
+        }
+
+        uint8_t plane = mbgeom.getPlane(dp.channel);
+        uint16_t global_ch = mbgeom.getGlobalChannel(cassette, dp.channel);
+        uint16_t coord;
+        if (plane == 0) {
+          if (global_ch == 30) {
+            mystats.readouts_monitor++;
+            continue;
+          }
+          coord = mbgeom.getx(cassette, dp.channel);
+          histograms.bin_x(global_ch, dp.adc);
+        } else  if (plane == 1) {
+          coord = mbgeom.gety(cassette, dp.channel);
+          histograms.bin_y(global_ch, dp.adc);
+        } else {
+          mystats.readouts_invalid_plane++;
+          continue;
+        }
+
+        mystats.readouts_ok++;
+
+        XTRACE(DATA, DEB, "time %lu, channel %u, adc %u", dp.local_time, dp.channel, dp.adc);
+
+        builders[cassette].insert({dp.local_time, coord, dp.adc, plane});
+
+        XTRACE(DATA, DEB, "Readout (%s) -> cassette=%d plane=%d coord=%d",
+               dp.debug().c_str(), cassette, plane, coord);
+      }
+
+      builders[cassette].flush();
+      for (const auto &e : builders[cassette].matcher.matched_events) {
+
+        if (!e.both_planes()) {
+          XTRACE(EVENT, INF, "Event No Coincidence %s", e.debug(true).c_str());
+          mystats.events_no_coincidence++;
+          continue;
+        }
+
+        // \todo parametrize maximum time span - in opts?
+        if (mb_opts.filter_time_span && (e.time_span() > mb_opts.filter_time_span_value)) {
+          XTRACE(EVENT, INF, "Event filter time_span %s", e.debug(true).c_str());
+          mystats.filters_max_time_span++;
+          continue;
+        }
+
+        if ((e.c1.coord_span() > e.c1.hit_count()) && (e.c2.coord_span() > e.c2.hit_count())) {
+          XTRACE(EVENT, INF, "Event Chs not adjacent %s", e.debug(true).c_str());
+          mystats.events_not_adjacent++;
+          continue;
+        }
+
+        // // \todo are these always wires && strips respectively?
+        // if (filter_multiplicity &&
+        //     ((e.c1.hit_count() > 5) || (e.c2.hit_count() > 10))) {
+        //   mystats.filters_max_multi1++;
+        //   continue;
+        // }
+        // if (filter_multiplicity2 &&
+        //     ((e.c1.hit_count() > 3) || (e.c2.hit_count() > 4))) {
+        //   mystats.filters_max_multi2++;
+        //   continue;
+        // }
+
+        XTRACE(EVENT, INF, "Event Valid\n %s", e.debug(true).c_str());
+        // calculate local x and y using center of mass
+        auto x = static_cast<uint16_t>(std::round(e.c1.coord_center()));
+        auto y = static_cast<uint16_t>(std::round(e.c2.coord_center()));
+
+        // calculate local x and y using center of span
+//        auto x = (e.c1.coord_start() + e.c1.coord_end()) / 2;
+//        auto y = (e.c2.coord_start() + e.c2.coord_end()) / 2;
+
+        // \todo improve this
+        auto time = e.time_start() * mb_opts.TimeTickNS; // TOF in ns
+        auto pixel_id = essgeom.pixel2D(x, y);
+        XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
+
+        if (pixel_id == 0) {
+          mystats.geometry_errors++;
+        } else {
+          mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
+          mystats.events++;
+        }
+      }
+
+    } else {
+      // There is NO data in the FIFO - do stop checks and sleep a little
+      mystats.rx_idle1++;
+      usleep(10);
+    }
+
+    // if filedumping and requesting time splitting, check for rotation.
+    if (MBCAENSettings.H5SplitTime != 0 and (dumpfile)) {
+      if (h5flushtimer.timeus() >= MBCAENSettings.H5SplitTime * 1000000) {
+
+        /// \todo user should not need to call flush() - implicit in rotate() ?
+        dumpfile->flush();
+        dumpfile->rotate();
+        h5flushtimer.now();
+      }
+    }
+
+    if (produce_timer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+
+      mystats.tx_bytes += flatbuffer.produce();
+
+      if (!histograms.isEmpty()) {
+//        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
+//               histograms.hit_count());
+        histfb.produce(histograms);
+        histograms.clear();
+      }
+
+      /// Kafka stats update - common to all detectors
+      /// don't increment as producer keeps absolute count
+      mystats.kafka_produce_fails = eventprod.stats.produce_fails;
+      mystats.kafka_ev_errors = eventprod.stats.ev_errors;
+      mystats.kafka_ev_others = eventprod.stats.ev_others;
+      mystats.kafka_dr_errors = eventprod.stats.dr_errors;
+      mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
+
+      produce_timer.now();
+    }
+
+    if (not runThreads) {
+      // \todo flush everything here
+      XTRACE(INPUT, ALW, "Stopping processing thread.");
+      return;
     }
   }
 }

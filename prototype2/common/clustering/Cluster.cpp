@@ -149,15 +149,26 @@ uint64_t Cluster::time_overlap(const Cluster &other) const {
   return (earliest_end - latest_start) + uint16_t(1);
 }
 
+uint64_t Cluster::time_gap(const Cluster &other) const {
+  if (empty() || other.empty())
+    return 0; // \todo should this happen?
+  auto latest_start = std::max(other.time_start_, time_start_);
+  auto earliest_end = std::min(other.time_end_, time_end_);
+  if (latest_start <= earliest_end) {
+    return 0;
+  }
+  return (latest_start - earliest_end);
+}
+
 std::string Cluster::debug(bool verbose) const {
   if (!verbose) {
     return fmt::format("plane={} time=({},{}) space=({},{}) weight={} entries[{}]",
                        plane_, time_start_, time_end_, coord_start_, coord_end_, weight_sum_,
                        hits.size());
   }
-  auto ret = debug(false) + "\n";
+  auto ret = debug(false);
   for (const auto &h : hits) {
-    ret += "   " + h.debug() + "\n";
+    ret += "\n   " + h.debug();
   }
   return ret;
 }
