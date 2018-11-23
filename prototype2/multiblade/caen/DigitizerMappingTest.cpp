@@ -1,17 +1,17 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multiblade/caen/MB16Detector.h>
+#include <multiblade/caen/DigitizerMapping.h>
 #include <test/TestBase.h>
 
-class MB16DetectorTest : public TestBase {};
+class DigitizerMappingTest : public TestBase {};
 
-std::vector<struct Multiblade::MB16Detector::Digitiser> digits {
+std::vector<struct Multiblade::DigitizerMapping::Digitiser> digits {
   {0, 137} , {1, 143}, {2, 142}, {3, 31}, {4, 33}, {5, 34}
 };
 
 /** Test cases below */
-TEST_F(MB16DetectorTest, CassetteValid) {
-  Multiblade::MB16Detector mbg(digits);
+TEST_F(DigitizerMappingTest, CassetteValid) {
+  Multiblade::DigitizerMapping mbg(digits);
 
   ASSERT_EQ(0, mbg.cassette(137));
   ASSERT_EQ(1, mbg.cassette(143));
@@ -21,8 +21,8 @@ TEST_F(MB16DetectorTest, CassetteValid) {
   ASSERT_EQ(5, mbg.cassette(34));
 }
 
-TEST_F(MB16DetectorTest, CassetteInValid) {
-  Multiblade::MB16Detector mbg(digits);
+TEST_F(DigitizerMappingTest, CassetteInValid) {
+  Multiblade::DigitizerMapping mbg(digits);
 
   ASSERT_EQ(-1, mbg.cassette(-1));
   ASSERT_EQ(-1, mbg.cassette(0));

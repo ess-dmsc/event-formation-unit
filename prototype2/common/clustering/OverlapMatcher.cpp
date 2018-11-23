@@ -7,9 +7,12 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/clustering/OverlapMatcher.h>
-
+#include <common/Trace.h>
 #include <cmath>
 #include <algorithm>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 OverlapMatcher::OverlapMatcher(uint64_t latency)
     : AbstractMatcher(latency) {}
@@ -22,15 +25,20 @@ void OverlapMatcher::match(bool flush) {
     return c1.time_start() < c2.time_start();
   });
 
+  XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u", unmatched_clusters_.size());
+
   Event evt{plane1_, plane2_};
   while (!unmatched_clusters_.empty()) {
 
     auto cluster = unmatched_clusters_.begin();
 
-    if (!flush && !ready_to_be_matched(*cluster))
+    if (!flush && !ready_to_be_matched(*cluster)) {
+      XTRACE(CLUSTER, DEB, "not ready to be matched");
       break;
+    }
 
     if (!evt.empty() && !evt.time_overlap(*cluster)) {
+      XTRACE(CLUSTER, DEB, "no time overlap");
       stash_event(evt);
       evt.clear();
     }

@@ -100,3 +100,21 @@ set(OverlapMatcherTest_INC
   OverlapMatcher.h
   )
 create_test_executable(OverlapMatcherTest)
+
+set(GapMatcherTest_SRC
+  AbstractMatcher.cpp
+  Cluster.cpp
+  Hit.cpp
+  Event.cpp
+  GapMatcher.cpp
+  GapMatcherTest.cpp
+  )
+set(GapMatcherTest_INC
+  AbstractClusterer.h
+  AbstractMatcher.h
+  Cluster.h
+  Hit.h
+  Event.h
+  GapMatcher.h
+  )
+create_test_executable(GapMatcherTest)

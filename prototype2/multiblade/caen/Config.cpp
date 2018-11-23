@@ -23,9 +23,10 @@ Config::Config(std::string jsonfile) : ConfigFile(jsonfile) {
   }
 
   if (Instrument == InstrumentGeometry::Estia) {
-    Detector = std::make_shared<MB16Detector>(Digitisers);
+    Detector = std::make_shared<DigitizerMapping>(Digitisers);
+
   } else if (Instrument == InstrumentGeometry::Freia) {
-    Detector = std::make_shared<MB16Detector>(Digitisers); /// \todo add parameters for Freia
+    Detector = std::make_shared<DigitizerMapping>(Digitisers); /// \todo add parameters for Freia
   }
 
   assert(Detector != nullptr);
@@ -47,14 +48,9 @@ void Config::loadConfigFile() {
 
   try {
     root = nlohmann::json::parse(jsonstring);
-  }
-  catch (...) {
-    LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}", ConfigFile);
-    return;
-  }
+
   /// extract config parameters below
 
-  try {
     auto instr = root["InstrumentGeometry"].get<std::string>();
 
     if (instr.compare("Estia") == 0) {
@@ -62,36 +58,44 @@ void Config::loadConfigFile() {
     } else if (instr.compare("Freia") == 0) {
       Instrument = InstrumentGeometry::Freia;
     } else {
-      LOG(INIT, Sev::Warning, "JSON config - error: Unknown instrument specified, using default (Estia)");
+      LOG(INIT, Sev::Error, "JSON config - error: Unknown instrument specified");
+      return;
     }
-  }
-  catch (...) {
-    LOG(INIT, Sev::Error, "JSON config - error: parser error for InstrumentGeometry");
-    return;
-  }
 
-  try {
+    auto det = root["Detector"].get<std::string>();
+
+    if (det.compare("MB18") == 0) {
+      DetectorType = DetectorType::MB18;
+    } else if (det.compare("MB16") == 0) {
+      DetectorType = DetectorType::MB16;
+    } else {
+      LOG(INIT, Sev::Warning, "JSON config - error: Unknown detector specified");
+      return;
+    }
+
+    NCass = root["cassettes"].get<unsigned int>();
+    NWires  = root["wires"].get<unsigned int>();
+    NStrips = root["strips"].get<unsigned int>();
+
+    if ((NWires == 0) or (NStrips == 0) or (NCass == 0)) {
+      LOG(INIT, Sev::Warning, "JSON config - error: invalid geometry");
+      return;
+    }
+
     auto digitisers = root["DigitizerConfig"];
     for (auto &digitiser : digitisers) {
-      struct MB16Detector::Digitiser digit;
+      struct DigitizerMapping::Digitiser digit;
       digit.index = digitiser["index"].get<unsigned int>();
       digit.digid = digitiser["id"].get<unsigned int>();
       Digitisers.push_back(digit);
       LOG(INIT, Sev::Info, "JSON config - Digitiser {}, offset {}", digit.digid, digit.index);
     }
-  }
-  catch (...) {
-    Digitisers.clear();
-    LOG(INIT, Sev::Error, "JSON config error: parser error for DigitizerConfig");
-    return;
-  }
 
-  try {
     TimeTickNS = root["TimeTickNS"].get<uint32_t>();
     assert(TimeTickNS != 0);
   }
   catch (...) {
-    LOG(INIT, Sev::Error, "JSON config error: parser error for TimeTickNS");
+    LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}", ConfigFile);
     return;
   }
 
