@@ -2,6 +2,8 @@
 
 #include <cassert>
 #include <common/DataSave.h>
+#include <common/TimeString.h>
+
 #include <prototype2/common/Log.h>
 
 //#undef TRC_LEVEL
@@ -33,14 +35,7 @@ DataSave::DataSave(std::string filename) : filename_prefix(filename) {
 DataSave::DataSave(std::string name, uint64_t maxlen)
     : filename_prefix(name), maxfilesize(maxlen) {
 
-  char cStartTime[50];
-  time_t rawtime;
-  struct tm *timeinfo;
-  time(&rawtime);
-  timeinfo = localtime(&rawtime);
-
-  strftime(cStartTime, 50, "%Y%m%d-%H%M%S", timeinfo);
-  startTime = cStartTime;
+  startTime = timeString();
   createfile();
 }
 

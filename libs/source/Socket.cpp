@@ -28,23 +28,13 @@ Socket::Socket(Socket::type stype) {
 }
 
 int Socket::setBufferSizes(int sndbuf, int rcvbuf) {
-  int ok{true};
-  int res{0};
   if (sndbuf) {
-    if ((res = setSockOpt(SO_SNDBUF, &sndbuf, sizeof(sndbuf))) < 0) {
-      ok = false;
-    }
+    setSockOpt(SO_SNDBUF, &sndbuf, sizeof(sndbuf));
   }
   if (rcvbuf) {
-    if ((res = setSockOpt(SO_RCVBUF, &rcvbuf, sizeof(rcvbuf))) < 0) {
-      ok = false;
-    }
+    setSockOpt(SO_RCVBUF, &rcvbuf, sizeof(rcvbuf));
   }
-  if (!ok) {
-    return -1;
-  } else {
-    return 0;
-  }
+  return 0; // setsockopt for SO_SND/RCVBUFon Linux cannot fail.
 }
 
 void Socket::getBufferSizes(int & sendBuffer, int & receiveBuffer) {
@@ -149,7 +139,7 @@ int Socket::send(void *buffer, int len) {
 }
 
 /** */
-int Socket::receive(void *buffer, int buflen) {
+ssize_t Socket::receive(void *buffer, int buflen) {
   socklen_t slen = 0;
   // try to receive some data, this is a blocking call
   return recvfrom(SocketFileDescriptor, buffer, buflen, 0, (struct sockaddr *)&remoteSockAddr, &slen);

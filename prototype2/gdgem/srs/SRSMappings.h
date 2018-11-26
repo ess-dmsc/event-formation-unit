@@ -19,6 +19,8 @@
 #define NMX_INVALID_GEOM_ID ((uint16_t)(int16_t)(-1))
 #define NMX_INVALID_PLANE_ID ((uint8_t)(int8_t)(-1))
 
+namespace Gem {
+
 class SRSMappings {
 public:
   //// \brief define mappings for sequence of chips in one plane
@@ -36,9 +38,9 @@ public:
   void set_mapping(uint16_t fecID, uint16_t vmmID, uint8_t planeID,
                    uint16_t strip_offset);
 
-  uint16_t get_strip(const Readout& readout) const;
+  uint16_t get_strip(const Readout &readout) const;
 
-  uint8_t get_plane(const Readout& readout) const;
+  uint8_t get_plane(const Readout &readout) const;
 
   /// \brief prints out configuration
   std::string debug() const;
@@ -47,3 +49,5 @@ private:
   std::vector<std::vector<uint16_t>> offsets_; /// strip number mappings
   std::vector<std::vector<uint8_t>> planes_;   /// planeID mappings
 };
+
+}

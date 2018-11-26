@@ -2,19 +2,19 @@
 
 #include <common/Hists.h>
 #include <string.h>
+#include <math.h>
 
-// static
+size_t Hists::strip_hist_size() { return strip_max_val + 1; }
 
-size_t NMXHists::strip_hist_size() { return Hit::strip_max_val + 1; }
+size_t Hists::adc_hist_size() { return adc_max_val + 1; }
 
-size_t NMXHists::adc_hist_size() { return Hit::adc_max_val + 1; }
-
-size_t NMXHists::needed_buffer_size() {
+size_t Hists::needed_buffer_size() {
   return elem_size *
-         (strip_hist_size() * 2 + adc_hist_size() * 3 + 1 /*bin_width*/);
+      (strip_hist_size() * 2 + adc_hist_size() * 3 + 1 /*bin_width*/);
 }
 
-NMXHists::NMXHists() {
+Hists::Hists(size_t strip_max, size_t adc_max)
+    : strip_max_val(strip_max), adc_max_val(adc_max) {
   x_strips_hist.resize(strip_hist_size(), 0);
   y_strips_hist.resize(strip_hist_size(), 0);
   x_adc_hist.resize(adc_hist_size(), 0);
@@ -22,21 +22,21 @@ NMXHists::NMXHists() {
   cluster_adc_hist.resize(adc_hist_size(), 0);
 }
 
-void NMXHists::set_cluster_adc_downshift(uint32_t bits) {
+void Hists::set_cluster_adc_downshift(uint32_t bits) {
   if (bits > 32)
     bits = 32;
   downshift_ = bits;
 }
 
-bool NMXHists::isEmpty() const { return !(hit_count_ || cluster_count_); }
+bool Hists::isEmpty() const { return !(hit_count_ || cluster_count_); }
 
-size_t NMXHists::hit_count() const { return hit_count_; }
+size_t Hists::hit_count() const { return hit_count_; }
 
-size_t NMXHists::cluster_count() const { return cluster_count_; }
+size_t Hists::cluster_count() const { return cluster_count_; }
 
-uint32_t NMXHists::bin_width() const { return pow(2, downshift_); }
+uint32_t Hists::bin_width() const { return pow(2, downshift_); }
 
-void NMXHists::clear() {
+void Hists::clear() {
   std::fill(x_strips_hist.begin(), x_strips_hist.end(), 0);
   std::fill(y_strips_hist.begin(), y_strips_hist.end(), 0);
   std::fill(x_adc_hist.begin(), x_adc_hist.end(), 0);
@@ -46,38 +46,22 @@ void NMXHists::clear() {
   cluster_count_ = 0;
 }
 
-void NMXHists::bin_hists(const std::list<Cluster>& cl)
-{
-  for (const auto& cluster : cl)
-    for (const auto& e : cluster.entries)
-      bin(e);
-}
-
-void NMXHists::bin(const Hit &e) {
-  if (e.plane_id == 0) {
-    x_strips_hist[e.strip]++;
-    x_adc_hist[e.adc]++;
-  } else if (e.plane_id == 1) {
-    y_strips_hist[e.strip]++;
-    y_adc_hist[e.adc]++;
-  } else
-    return;
+void Hists::bin_x(uint16_t xstrip, uint16_t xadc) {
+  x_strips_hist[xstrip]++;
+  x_adc_hist[xadc]++;
   hit_count_++;
 }
 
-// To be used for multigrid also - consider refactoring and moving elsewhere
-void NMXHists::binstrips(uint16_t xstrip, uint16_t xadc, uint16_t ystrip, uint16_t yadc) {
-    x_strips_hist[xstrip]++;
-    x_adc_hist[xadc]++;
-    y_strips_hist[ystrip]++;
-    y_adc_hist[yadc]++;
-    hit_count_++;
+void Hists::bin_y(uint16_t ystrip, uint16_t yadc) {
+  y_strips_hist[ystrip]++;
+  y_adc_hist[yadc]++;
+  hit_count_++;
 }
 
-void NMXHists::bin(const Event &e) {
-  uint32_t sum = e.x.adc_sum + e.y.adc_sum;
-  if (!sum)
+void Hists::bincluster(uint32_t sum) {
+  if (!sum) {
     return;
+  }
   cluster_adc_hist[static_cast<uint16_t>(sum >> downshift_)]++;
   cluster_count_++;
 }

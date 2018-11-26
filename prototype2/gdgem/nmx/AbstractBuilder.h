@@ -10,8 +10,9 @@
 #pragma once
 
 #include <gdgem/clustering/AbstractClusterer.h>
-#include <common/DataSave.h>
 #include <memory>
+
+namespace Gem {
 
 class AbstractBuilder {
 public:
@@ -23,9 +24,8 @@ public:
     /// ParserVMM3 returns more stat data
     ResultStats(uint32_t hits, uint32_t err, uint32_t geom_err,
                 uint32_t lost_frames, uint32_t bad_frames, uint32_t good_frames)
-        : valid_hits(hits), error_bytes(err), geom_errors(geom_err)
-        , lost_frames(lost_frames), bad_frames(bad_frames)
-        , good_frames(good_frames) {}
+        : valid_hits(hits), error_bytes(err), geom_errors(geom_err), lost_frames(lost_frames), bad_frames(bad_frames),
+          good_frames(good_frames) {}
 
     uint32_t valid_hits{0};
     uint32_t error_bytes{0};
@@ -35,12 +35,10 @@ public:
     uint32_t good_frames{0}; /// added in ParserVMM3
   };
 
-  AbstractBuilder(std::string dump_dir, bool dump_csv, bool dump_h5);
+  AbstractBuilder() {}
 
   AbstractBuilder(std::shared_ptr<AbstractClusterer> x,
-                  std::shared_ptr<AbstractClusterer> y,
-                  std::string dump_dir, bool dump_csv, bool dump_h5);
-
+                  std::shared_ptr<AbstractClusterer> y);
 
   virtual ~AbstractBuilder() {}
 
@@ -49,13 +47,6 @@ public:
 
   std::shared_ptr<AbstractClusterer> clusterer_y;
   std::shared_ptr<AbstractClusterer> clusterer_x;
-
-protected:
-  bool dump_csv_{false};
-  bool dump_h5_{false};
-
-  // CSV
-  std::shared_ptr<DataSave> vmmsave;
-
-  static std::string time_str();
 };
+
+}

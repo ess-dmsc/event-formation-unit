@@ -16,11 +16,13 @@
 #include <memory>
 #include <string>
 
+namespace Gem {
+
 struct ClustererConfig {
-  uint16_t hit_adc_threshold {0};
-  uint16_t max_strip_gap {2};
-  double max_time_gap {200};
-  size_t min_cluster_size {3};
+  uint16_t hit_adc_threshold{0};
+  uint16_t max_strip_gap{2};
+  double max_time_gap{200};
+  size_t min_cluster_size{3};
 };
 
 struct EventFilter {
@@ -29,33 +31,32 @@ struct EventFilter {
   int16_t lower_uncertainty_limit{6};
   size_t lower_uncertainty_dropped{0};
 
-
   bool enforce_minimum_hits{false};
   uint32_t minimum_hits{6};
   size_t minimum_hits_dropped{0};
 
-  bool valid(Event& event)
-  {
+  /// \todo bug? uncertainty takes precedence if both enforce options are true
+  bool valid(Event &event) {
     if (enforce_lower_uncertainty_limit &&
         !event.meets_lower_criterion(lower_uncertainty_limit)) {
       lower_uncertainty_dropped++;
       return false;
     }
     if (enforce_minimum_hits &&
-            ((event.x.entries.size() < minimum_hits) ||
-                (event.y.entries.size() < minimum_hits))) {
+            ((event.x.hits.size() < minimum_hits) ||
+                (event.y.hits.size() < minimum_hits))) {
       minimum_hits_dropped++;
       return false;
     }
-    return  true;
+    return true;
   }
 };
 
 struct NMXConfig {
-  NMXConfig() { }
+  NMXConfig() {}
   NMXConfig(std::string configfile, std::string calibrationfile);
 
-  std::string builder_type{"VMM2"};
+  std::string builder_type{"VMM3"};
 
   // VMM calibration
   std::shared_ptr<CalibrationFile> calfile;
@@ -79,17 +80,15 @@ struct NMXConfig {
   EventFilter filter;
 
   // Monitor
-  bool hit_histograms {false};
+  bool hit_histograms{false};
   uint32_t cluster_adc_downshift{6};
-  bool send_tracks {false};
+  bool send_tracks{false};
   size_t track_sample_minhits{6};
 
   // Event formation
   ESSGeometry geometry;
 
   std::string debug() const;
-
-  bool dump_csv{false};
-  bool dump_h5{false};
-  std::string dump_directory{};
 };
+
+}

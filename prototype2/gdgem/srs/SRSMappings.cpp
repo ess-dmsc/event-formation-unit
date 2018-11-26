@@ -3,6 +3,8 @@
 #include <gdgem/srs/SRSMappings.h>
 #include <sstream>
 
+namespace Gem {
+
 // This is done only once, when starting EFU
 void SRSMappings::define_plane(
     uint8_t planeID,
@@ -32,7 +34,7 @@ void SRSMappings::set_mapping(uint16_t fecID, uint16_t vmmID, uint8_t planeID,
   planes_[fecID][vmmID] = planeID;
 }
 
-uint16_t SRSMappings::get_strip(const Readout& readout) const {
+uint16_t SRSMappings::get_strip(const Readout &readout) const {
   if (readout.fec >= offsets_.size())
     return NMX_INVALID_GEOM_ID;
   const auto &fec = offsets_[readout.fec];
@@ -44,7 +46,7 @@ uint16_t SRSMappings::get_strip(const Readout& readout) const {
   return NMX_INVALID_GEOM_ID;
 }
 
-uint8_t SRSMappings::get_plane(const Readout& readout) const {
+uint8_t SRSMappings::get_plane(const Readout &readout) const {
   if (readout.fec >= planes_.size())
     return NMX_INVALID_PLANE_ID;
   const auto &fec = planes_[readout.fec];
@@ -66,4 +68,6 @@ std::string SRSMappings::debug() const {
     }
   }
   return ss.str();
+}
+
 }

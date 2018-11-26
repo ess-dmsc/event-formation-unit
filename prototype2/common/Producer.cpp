@@ -66,6 +66,7 @@ Producer::Producer(std::string broker, std::string topicstr) :
   setConfig("fetch.message.max.bytes", "10000000");
   setConfig("message.copy.max.bytes", "10000000");
   setConfig("queue.buffering.max.ms", "100");
+  setConfig("api.version.request", "true");
 
   if (conf->set("event_cb", this, kafkaErrstr) != RdKafka::Conf::CONF_OK) {
     LOG(KAFKA, Sev::Error, "Kafka: unable to set event_cb");
@@ -97,13 +98,13 @@ Producer::~Producer() {
 }
 
 /** called to actually send data to Kafka cluster */
-int Producer::produce(char *buffer, int length) {
+int Producer::produce(void *buffer, size_t bytes) {
   if (producer == nullptr || topic == nullptr) {
     return RdKafka::ERR_UNKNOWN;
   }
-  RdKafka::ErrorCode resp = producer->produce(
-      topic, -1, RdKafka::Producer::RK_MSG_COPY /* Copy payload */, buffer,
-      length, NULL, NULL);
+  int64_t timestamp = time(NULL)*1000;
+  RdKafka::ErrorCode resp = producer->produce(topicString, -1, RdKafka::Producer::RK_MSG_COPY , 
+             buffer, bytes, NULL, 0, timestamp, NULL);
 
   producer->poll(0);
   if (resp != RdKafka::ERR_NO_ERROR) {

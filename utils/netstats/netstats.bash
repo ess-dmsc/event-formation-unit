@@ -29,6 +29,12 @@ e1000e)
   PATT_NICERR=rx_no_buffer_count
   PATT_NICRX=rx_packets
   ;;
+iwlwifi)
+  # Ubuntu + driver e1000e
+  echo iwlwifi found - OK
+  PATT_NICERR=rx_dropped
+  PATT_NICRX=rx_packets
+  ;;
 igb)
   # Ubuntu + igb
   echo igb found - STATS NOT VERIFIED
@@ -40,7 +46,7 @@ tg3)
   # Ubuntu + tg3
   echo tg3 found - STATS NOT VERIFIED
   # potentially rx_dropped instead
-  PATT_NICERR=rx_discard
+  PATT_NICERR=rx_discards
   PATT_NICRX=rx_ucast_packets
   ;;
 *)

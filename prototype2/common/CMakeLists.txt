@@ -3,27 +3,48 @@
 #=============================================================================
 
 set(efu_common_SRC
-  FBSerializer.cpp
+  clustering/AbstractClusterer.h
+  clustering/AbstractMatcher.h
+  clustering/Cluster.h
+  clustering/GapClusterer.h
+  clustering/Event.h
+  clustering/Hit.h
+  clustering/OverlapMatcher.h
+  clustering/GapMatcher.h
+  EV42Serializer.cpp
   NewStats.cpp
   Producer.cpp
   DataSave.cpp
   DetectorModuleRegister.cpp
+  TimeString.cpp
   )
+
 set(efu_common_INC
+  clustering/AbstractMatcher.cpp
+  clustering/Cluster.cpp
+  clustering/GapClusterer.cpp
+  clustering/Hit.cpp
+  clustering/Event.cpp
+  clustering/OverlapMatcher.cpp
+  clustering/GapMatcher.cpp
   ../../libs/include/gccintel.h
   DetectorModuleRegister.h
   Detector.h
   EFUArgs.h
-  FBSerializer.h
+  EV42Serializer.h
+  Buffer.h
   NewStats.h
   Producer.h
   Trace.h
   Log.h
   DataSave.h
+  DumpFile.h
+  TimeString.h
   )
 
+add_subdirectory(clustering)
+
 find_package(CLI11 REQUIRED)
-find_package(fmt REQUIRED)
 
 add_library(efu_common STATIC
   ${efu_common_SRC}
@@ -37,8 +58,7 @@ endif()
 
 enable_coverage(efu_common)
 
-target_link_libraries(efu_common PUBLIC ${EFU_COMMON_LIBS} fmt::fmt)
-
+target_link_libraries(efu_common PUBLIC ${EFU_COMMON_LIBS})
 
 #=============================================================================
 # Tests
@@ -55,12 +75,28 @@ else()
   message(STATUS "*** Skipping ProducerTest - requires gcc/linux")
 endif()
 
+set(BufferTest_SRC
+  BufferTest.cpp)
+set(BufferTest_INC
+  Buffer.h)
+create_test_executable(BufferTest)
+
 set(DataSaveTest_SRC
     DataSaveTest.cpp
-    DataSave.cpp)
+    DataSave.cpp
+    TimeString.cpp)
 set(DataSaveTest_INC
-    DataSave.h)
+    DataSave.h
+    TimeString.h)
 create_test_executable(DataSaveTest)
+
+set(DumpFileTest_SRC
+  DumpFileTest.cpp
+  TimeString.cpp)
+set(DumpFileTest_INC
+  DumpFile.h
+  TimeString.h)
+create_test_executable(DumpFileTest)
 
 set(DetectorTest_SRC
   DetectorTest.cpp
@@ -79,14 +115,23 @@ set(EFUArgsTest_INC
   EFUArgs.h)
 create_test_executable(EFUArgsTest)
 
-set(FBSerializerTest_SRC
-  FBSerializerTest.cpp
-  FBSerializer.cpp
+set(EV42SerializerTest_SRC
+  EV42SerializerTest.cpp
+  EV42Serializer.cpp
   Producer.cpp)
-set(FBSerializerTest_INC
-  FBSerializer.h
+set(EV42SerializerTest_INC
+  EV42Serializer.h
   Producer.h)
-create_test_executable(FBSerializerTest)
+create_test_executable(EV42SerializerTest)
+
+set(HistsTest_INC
+  Hists.h
+)
+set(HistsTest_SRC
+  HistsTest.cpp
+  Hists.cpp
+)
+create_test_executable(HistsTest)
 
 set(NewStatsTest_SRC
   NewStatsTest.cpp

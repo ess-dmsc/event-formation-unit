@@ -12,6 +12,9 @@
 #include "mo01_nmx_generated.h"
 
 #include <gdgem/nmx/Event.h>
+#include <common/Producer.h>
+
+namespace Gem {
 
 class TrackSerializer {
 public:
@@ -19,20 +22,22 @@ public:
   TrackSerializer(size_t maxarraylength,
                   size_t minhits, double target_res);
 
-  /// \todo document
-  ~TrackSerializer();
+  void set_callback(ProducerCallback cb);
 
   /// \todo document
-  int add_track(const Event &event);
+  /// \returns success
+  bool add_track(const Event &event);
 
   /// \todo document
-  int serialize(char **buffer);
+  Buffer<uint8_t> serialize();
 
 private:
+  ProducerCallback producer_callback;
+
   flatbuffers::FlatBufferBuilder builder;
   size_t maxlen{0};
   size_t minhits_{0};
-  double target_resolution_ {1};
+  double target_resolution_{1};
 
   double time_offset{0};
   std::vector<flatbuffers::Offset<pos>> xtrack;
@@ -40,3 +45,5 @@ private:
   double xpos{-1};
   double ypos{-1};
 };
+
+}

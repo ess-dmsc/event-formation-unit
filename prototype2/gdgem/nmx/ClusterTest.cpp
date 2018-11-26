@@ -6,6 +6,8 @@
 #include <test/TestBase.h>
 #include <unistd.h>
 
+using namespace Gem;
+
 class ClusterTest : public TestBase {
 protected:
   Hit e;
@@ -17,13 +19,13 @@ protected:
 TEST_F(ClusterTest, Insert) {
   Hit e;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.entries.size(), 1);
+  EXPECT_EQ(cluster.hits.size(), 1);
   e.strip = 2;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.entries.size(), 2);
+  EXPECT_EQ(cluster.hits.size(), 2);
   e.strip = 3;
   cluster.insert_hit(e);
-  EXPECT_EQ(cluster.entries.size(), 3);
+  EXPECT_EQ(cluster.hits.size(), 3);
 }
 
 
@@ -168,8 +170,8 @@ TEST_F(ClusterTest, MergeEmpty) {
   Cluster cluster2;
   cluster.merge(cluster2);
 
-  EXPECT_EQ(cluster.entries.size(), 3);
-  EXPECT_EQ(cluster2.entries.size(), 0);
+  EXPECT_EQ(cluster.hits.size(), 3);
+  EXPECT_EQ(cluster2.hits.size(), 0);
 }
 
 TEST_F(ClusterTest, MergeToEmpty) {
@@ -178,11 +180,11 @@ TEST_F(ClusterTest, MergeToEmpty) {
   cluster2.insert_hit(e);
   cluster2.insert_hit(e);
 
-  // TODO: old cluster stats should be reset
+  /// \todo old cluster stats should be reset
   cluster.merge(cluster2);
 
-  EXPECT_EQ(cluster.entries.size(), 3);
-  EXPECT_EQ(cluster2.entries.size(), 0);
+  EXPECT_EQ(cluster.hits.size(), 3);
+  EXPECT_EQ(cluster2.hits.size(), 0);
 }
 
 
@@ -204,10 +206,10 @@ TEST_F(ClusterTest, Merge) {
   e.time = 5;
   cluster2.insert_hit(e);
 
-  // TODO: old cluster stats should be reset
+  /// \todo old cluster stats should be reset
   cluster.merge(cluster2);
 
-  EXPECT_EQ(cluster.entries.size(), 5);
+  EXPECT_EQ(cluster.hits.size(), 5);
   EXPECT_EQ(cluster.time_span(), 12);
   EXPECT_EQ(cluster.strip_span(), 11);
   EXPECT_EQ(cluster.adc_sum, 5);
@@ -234,7 +236,7 @@ TEST_F(ClusterTest, AnalyzeAverage) {
   e.adc = 4;
   cluster.insert_hit(e);
   cluster.analyze(false, 1, 1);
-  EXPECT_EQ(cluster.entries.size(), 3);
+  EXPECT_EQ(cluster.hits.size(), 3);
   EXPECT_EQ(cluster.utpc_center, 1);
   cluster.analyze(true, 1, 1);
   EXPECT_EQ(cluster.utpc_center, 1.2);
@@ -277,7 +279,7 @@ TEST_F(ClusterTest, AnalyzeUncert) {
   EXPECT_EQ(cluster.utpc_center_rounded(), 17);
 }
 
-// TODO: cluster plane identity tests
+/// \todo cluster plane identity tests
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

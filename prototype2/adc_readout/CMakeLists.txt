@@ -9,6 +9,11 @@ set(AdcReadoutBase_SRC
     SampleProcessing.cpp
     AdcSettings.cpp
     AdcTimeStamp.cpp
+    UDPClient.cpp
+    DelayLineProducer.cpp
+    DelayLineEventFormation.cpp
+    DelayLineProcessing.cpp
+    DelayLinePositionCalc.cpp
     )
 
 set(AdcReadoutBase_INC
@@ -22,6 +27,13 @@ set(AdcReadoutBase_INC
     SampleProcessing.h
     AdcSettings.h
     AdcTimeStamp.h
+    UDPClient.h
+    DelayLineProducer.h
+    DelayLineEventFormation.h
+    DelayLineProcessing.h
+    DelayLinePositionCalc.h
+    PulseParameters.h
+    ChannelID.h
     )
 
 
@@ -47,6 +59,11 @@ set(AdcReadoutTest_SRC
     test/SampleProcessingTest.cpp
     test/CLIArgumentsTest.cpp
     test/AdcTimeStampTest.cpp
+    test/UDPClientTest.cpp
+    test/DelayLineProducerTest.cpp
+    test/DelayLineEventFormationTest.cpp
+    test/DelayLineProcessingTest.cpp
+    test/DelayLinePositionCalcTest.cpp
     ${AdcReadoutBase_SRC}
     )
 

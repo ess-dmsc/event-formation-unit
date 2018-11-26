@@ -31,11 +31,6 @@ protected:
 
   virtual void TearDown() {}
 
-  void assertcapture(const char *expected_output) {
-    std::string captured_output = testing::internal::GetCapturedStdout();
-    ASSERT_TRUE(captured_output.find(expected_output) != std::string::npos);
-  };
-
   std::shared_ptr<Detector> det;
   void *dummyargs; // Used for calling thread functions
 };

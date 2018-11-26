@@ -9,7 +9,13 @@
 
 #pragma once
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <librdkafka/rdkafkacpp.h>
+#pragma GCC diagnostic pop
+
+#include <common/Buffer.h>
+#include <functional>
 
 
 ///
@@ -17,7 +23,15 @@ class ProducerBase {
 public:
   ProducerBase() = default;
   virtual ~ProducerBase() = default;
-  virtual int produce(char *buffer, int length) = 0;
+
+  // \todo deprecate this function in favor of encapsulated buffer
+  virtual int produce(void* buffer, size_t bytes) = 0;
+
+  template<typename T>
+  inline void produce2(const Buffer<T>& buffer)
+  {
+    this->produce(buffer.address, buffer.bytes());
+  }
 };
 
 class Producer : public ProducerBase, public RdKafka::EventCb {
@@ -31,10 +45,11 @@ public:
   /// \brief cleans up by deleting allocated structures
   ~Producer();
 
-  /// \brief Function called to send data to a broker
-  /// \param buffer Pointer to char buffer containing data to be tx'ed
-  /// \param length Size of buffer data in bytes
-  int produce(char *buffer, int length) override;
+  /** \brief Function called to send data to a broker
+   *  @param buffer Pointer to char buffer containing data to be tx'ed
+   *  @param length Size of buffer data in bytes
+   */
+  int produce(void* buffer, size_t bytes) override;
 
   /// \brief set kafka configuration and check result
   void setConfig(std::string configName, std::string configValue);
@@ -68,3 +83,5 @@ private:
   RdKafka::Topic *topic{0};
   RdKafka::Producer *producer{0};
 };
+
+using ProducerCallback = std::function<void(Buffer<uint8_t>)>;

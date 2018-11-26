@@ -8,9 +8,14 @@
 #include <functional>
 
 #include <gdgem/clustering/TestDataShort.h>
-#include <gdgem/nmx/ReadoutFile.h>
+#include <gdgem/nmx/Readout.h>
+
+constexpr float no_offset = 0.0;
+constexpr float unit_slope = 1.0;
 
 #define UNUSED __attribute__((unused))
+
+using namespace Gem;
 
 class HitsQueueTest : public TestBase {
 protected:
@@ -23,7 +28,7 @@ protected:
 
   virtual void SetUp() {
     std::string DataPath = TEST_DATA_PATH;
-    ReadoutFile::read(DataPath + "run16long.h5", long_data);
+//    ReadoutFile::read(DataPath + "run16long", long_data);
 
     srstime.set_bc_clock(20);
     srstime.set_tac_slope(60);
@@ -39,7 +44,7 @@ protected:
 
 TEST_F(HitsQueueTest, Run16_no_trigger) {
   for (auto hit : Run16) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc);
+    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
     queue->store(0,0,0,chiptime);
   }
   EXPECT_EQ(queue->hits().size(), 0);
@@ -53,7 +58,7 @@ TEST_F(HitsQueueTest, Run16_no_trigger) {
 
 TEST_F(HitsQueueTest, Run16_with_trigger) {
   for (auto hit : Run16) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc);
+    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
     queue->store(0,0,0,chiptime);
   }
   EXPECT_EQ(queue->hits().size(), 0);
@@ -68,11 +73,11 @@ TEST_F(HitsQueueTest, Run16_with_trigger) {
   EXPECT_EQ(queue->hits().size(), 0);
 }
 
-// TODO: some checks disabled, this is not stricly chronological!!!
+/// \todo some checks disabled, this is not stricly chronological!!!
 
 TEST_F(HitsQueueTest, Run16_chronological_no_trigger) {
   for (auto hit : Run16) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc);
+    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
     queue->store(0,0,0,chiptime);
   }
 
@@ -114,7 +119,7 @@ TEST_F(HitsQueueTest, Run16_chronological_no_trigger) {
 
 TEST_F(HitsQueueTest, Long_chronological_no_trigger) {
   for (auto hit : long_data) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc);
+    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
     queue->store(0,0,0,chiptime);
   }
 
@@ -134,7 +139,7 @@ TEST_F(HitsQueueTest, Long_chronological_no_trigger) {
 
 TEST_F(HitsQueueTest, Long_chronological_with_trigger) {
   for (auto hit : long_data) {
-    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc);
+    auto chiptime = srstime.chip_time_ns(hit.bcid, hit.tdc, no_offset, unit_slope);
     queue->store(0,0,0,chiptime);
   }
 

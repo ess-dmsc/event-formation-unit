@@ -15,13 +15,16 @@
 #include <libs/include/BitMath.h>
 
 static const int maximumNumberVMM { 32 };
+static const int maximumNumberFECs { 16 };
+
+namespace Gem {
 
 class VMM3SRSData {
 public:
-	// bytes
-  static const int SRSHeaderSize { 16 };
-  static const int HitAndMarkerSize { 6 };
-  static const int Data1Size { 4 };
+  // bytes
+  static const int SRSHeaderSize{16};
+  static const int HitAndMarkerSize{6};
+  static const int Data1Size{4};
 
   ///< Do NOT rearrange fields, used for casting to data pointer
   struct SRSHdr {
@@ -37,14 +40,14 @@ public:
 
   /// Data common to all hits and markers, or other parser related data
   struct ParserData {
-    uint8_t fecId { 255 };
-    uint32_t nextFrameCounter { 0 };
-    bool fcIsInitialized { false };
+    uint8_t fecId{1};
+    uint32_t nextFrameCounter{0};
+    bool fcIsInitialized{false};
   };
 
   /// Data related to a single Hit
   struct VMM3Data {
-    uint64_t fecTimeStamp; /// 48 bits can change within a packet so must be here
+    uint64_t fecTimeStamp; /// 42 bits can change within a packet so must be here
     uint16_t bcid;         /// 12 bit - bcid after graydecode
     uint16_t adc;          /// 10 bit - adc value from vmm readout
     uint8_t tdc;           ///  8 bit - tdc value from vmm readout
@@ -53,14 +56,14 @@ public:
     uint8_t vmmid;         ///  5 bit - asic identifier - unique id per fec 0 - 15
     uint8_t triggerOffset; ///  5 bit
     bool hasDataMarker;    ///
-};
+  };
 
   /// \brief create a data handler for VMM3 SRS data of fixed size Capacity
   /// \param maxelements The maximum number of readout elements
   VMM3SRSData(int maxelements) : maxHits(maxelements) {
-    markers = new struct VMM3Marker[maximumNumberVMM];
+    markers = new struct VMM3Marker[maximumNumberFECs * maximumNumberVMM];
     data = new struct VMM3Data[maxHits];
-    memset(markers, 0, sizeof(struct VMM3Marker) * maximumNumberVMM);
+    memset(markers, 0, sizeof(struct VMM3Marker) * maximumNumberFECs * maximumNumberVMM);
   }
 
   /// Delete allocated data, set pointers to nullptr
@@ -85,23 +88,25 @@ public:
   struct SRSHdr srsHeader;
 
   /// holds all readout data in a packet (up to max_elems)
-  struct VMM3Data *data { nullptr };
+  struct VMM3Data *data{nullptr};
 
   /// See description above
   struct ParserData parserData;
 
   /// holds time bases for all vmms in a readout
-  struct VMM3Marker *markers { nullptr };
+  struct VMM3Marker *markers{nullptr};
 
   // Stat counters: Results of the data parsing
   struct {
-    uint32_t hits { 0 };        /// number of hits
-    uint32_t markers { 0 };    ///  number of markers
-    uint32_t errors { 0 };      /// bytes of invalid data
-    uint32_t lostFrames { 0 };  /// gaps in frame counter values
-    uint32_t badFrames { 0 };   /// frames failing parsing
-    uint32_t goodFrames { 0 };  /// frames passing parsing
+    uint32_t hits{0};        /// number of hits
+    uint32_t markers{0};    ///  number of markers
+    uint32_t errors{0};      /// bytes of invalid data
+    uint32_t lostFrames{0};  /// gaps in frame counter values
+    uint32_t badFrames{0};   /// frames failing parsing
+    uint32_t goodFrames{0};  /// frames passing parsing
   } stats;
 
-  uint32_t maxHits { 0 };       /// Maximum capacity of data array
+  uint32_t maxHits{0};       /// Maximum capacity of data array
 };
+
+}

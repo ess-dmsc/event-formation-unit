@@ -12,6 +12,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 HitSorter::HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
                      double maxTimeGap) :
     pTime(time), pChips(chips),
@@ -21,7 +23,6 @@ HitSorter::HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
 }
 
 bool HitSorter::requires_analysis(double triggerTimestamp_ns) {
-
   if (old_trigger_timestamp_ns_ != triggerTimestamp_ns) {
     stats_trigger_count++;
 
@@ -41,7 +42,7 @@ bool HitSorter::requires_analysis(double triggerTimestamp_ns) {
 void HitSorter::insert(const Readout &readout) {
 
   double triggerTimestamp_ns =
-      pTime.trigger_timestamp_ns(readout.srs_timestamp + readout.bonus_timestamp);
+      pTime.trigger_timestamp_ns(readout.srs_timestamp);
 
   if (requires_analysis(triggerTimestamp_ns)) {
     XTRACE(PROCESS, DEB, "analysis required");
@@ -49,18 +50,18 @@ void HitSorter::insert(const Readout &readout) {
   }
   old_trigger_timestamp_ns_ = triggerTimestamp_ns;
 
-  // TODO: Move this check to parser?
+  /// \todo Move this check to parser?
   if (readout.over_threshold || (readout.adc >= pADCThreshold)) {
+
     hits.store(pChips.get_plane(readout), pChips.get_strip(readout), readout.adc,
-               pTime.chip_time_ns(readout.bcid, readout.tdc),
-               triggerTimestamp_ns);
-    // TODO: who adds chipTime + trigger time? queue?
+               readout.chiptime, triggerTimestamp_ns);
+    /// \todo who adds chipTime + trigger time? queue?
   }
 }
 
 void HitSorter::flush() {
   //flush both buffers in queue
-  // TODO: subsequent trigger? How do we know?
+  /// \todo subsequent trigger? How do we know?
   analyze();
   analyze();
 }
@@ -69,4 +70,6 @@ void HitSorter::analyze() {
   hits.sort_and_correct();
   if (clusterer)
     clusterer->cluster(hits.hits());
+}
+
 }

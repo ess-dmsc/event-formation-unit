@@ -14,11 +14,13 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 ClusterMatcher::ClusterMatcher(double maxDeltaTime) : pMaxDeltaTime(maxDeltaTime) {
 }
 
 bool ClusterMatcher::ready_to_be_matched(double time) const {
-  // TODO Parametrize threshold
+  /// \todo Parametrize threshold
   return ((unmatched_clusters.size() > 2) &&
       (std::min(latest_x, latest_y) - time) > (pMaxDeltaTime * 3));
 }
@@ -44,7 +46,7 @@ void ClusterMatcher::merge(uint8_t plane, ClusterList &c) {
 }
 
 void ClusterMatcher::match_end(bool force) {
-  // TODO: is it already sorted?
+  /// \todo is it already sorted?
   unmatched_clusters.sort([](const Cluster &c1, const Cluster &c2) {
     return c1.time_end < c2.time_end;
   });
@@ -73,4 +75,6 @@ void ClusterMatcher::match_end(bool force) {
     matched_clusters.emplace_back(std::move(evt));
     stats_cluster_count++;
   }
+}
+
 }

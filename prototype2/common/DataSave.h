@@ -14,6 +14,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#pragma once
+
 class DataSave {
 public:
   /// \brief write buffer to file

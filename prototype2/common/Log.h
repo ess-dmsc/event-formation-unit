@@ -16,21 +16,11 @@
 
 #pragma GCC system_header
 
-enum class Sev : int {
-  Emergency = 0,
-  Alert = 1,
-  Critical = 2,
-  Error = 3,
-  Warning = 4,
-  Notice = 5,
-  Info = 6,
-  Debug = 7,
-};
+using Sev = Log::Severity;
 
 inline int SevToInt(Sev Level) { // Force the use of the correct type
   return static_cast<int>(Level);
 }
-
 
 #define LOG(Group, Severity, Format, ...)   \
   ((TRC_MASK & TRC_G_##Group)               \

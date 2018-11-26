@@ -10,35 +10,35 @@
 #pragma once
 
 #include "mo01_nmx_generated.h"
-#include <common/Producer.h>
+#include "Producer.h"
+#include <functional>
 
 class ReadoutSerializer {
 public:
   /// \brief Create the ReadoutSerializer
   /// \param maxentries the number of readout tuples to buffer before sending to Kafka
-  /// \param producer Kafka producer to use for publishing the readout data
-  ReadoutSerializer(size_t maxentries, Producer &producer);
+  ReadoutSerializer(size_t maxentries);
 
-  /// \brief empty destructor
-  ~ReadoutSerializer();
+  void set_callback(ProducerCallback cb);
 
   /// \brief function to add a readout tuple to an array for later publishing to Kafka
   /// \param plane arbitrary data multiplexer (x, y, module, rack, ...)
   /// \param channel datasource identifier (strip, wire, grid, ...)
   /// \param time timestamp
   /// \param adc digitizer adc value (charge, voltage, ...)
-  int addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc);
+  size_t addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc);
 
   /// \brief publish data to Kafka broker and clear internal counters
-  int produce();
+  size_t produce();
 
   /// \brief return the number of queues samples
   size_t getNumEntries(){return entries;};
 
 private:
+  ProducerCallback producer_callback;
+
   size_t maxlen{0}; ///< maximum number of entries in array
   flatbuffers::FlatBufferBuilder builder; ///< google flatbuffer builder
-  Producer &producer; ///< wrapper for Kafka producer
 
   // Will be used to create MONHit
   size_t entries{0}; ///< current number of queues entries

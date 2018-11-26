@@ -6,10 +6,11 @@
 /// \brief Wrapper class for reading VMM data from HDF5 files
 ///
 //===----------------------------------------------------------------------===//
+// GCOVR_EXCL_START
 
 #pragma once
 
-#include <gdgem/nmx/HitFile.h>
+#include <gdgem/nmx/Hit.h>
 
 class ReaderHits {
 public:
@@ -20,8 +21,9 @@ public:
   size_t read(char *buf);
 
 private:
-  HitFile file;
+  std::shared_ptr<Gem::HitFile> file;
 
   size_t total_{0};
   size_t current_{0};
 };
+// GCOVR_EXCL_STOP

@@ -10,4 +10,8 @@
 #include <vector>
 #include <gdgem/nmx/Hit.h>
 
+namespace Gem {
+
 using HitContainer = std::vector<Hit>;
+
+}

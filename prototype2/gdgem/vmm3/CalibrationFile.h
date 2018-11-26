@@ -11,6 +11,8 @@
 
 #include <string>
 
+namespace Gem {
+
 class CalibrationFile {
 public:
   static constexpr int MAX_FEC = 40;
@@ -43,6 +45,8 @@ public:
                               unsigned int chNo);
 
 private:
+  void resetCalibration();
+
   Calibration Calibrations[MAX_FEC][MAX_VMM][MAX_CH];
 
   /// Default correction
@@ -51,3 +55,5 @@ private:
   /// Slope zero indicates an error
   Calibration ErrCorr = {0.0, 0.0};
 };
+
+}

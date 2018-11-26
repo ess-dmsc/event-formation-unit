@@ -2,57 +2,44 @@
 # Tests
 #=============================================================================
 
-set(ReadoutFileTest_SRC
-    ReadoutFileTest.cpp
-    ReadoutFile.cpp
+set(NMXReadoutTest_SRC
+    ReadoutTest.cpp
     )
-set(ReadoutFileTest_INC
-    ReadoutFile.h
+set(NMXReadoutTest_INC
     Readout.h
     )
-create_test_executable(ReadoutFileTest SKIP_MEMGRIND)
+create_test_executable(NMXReadoutTest SKIP_MEMGRIND)
 
-set(HitTest_SRC
+set(NMXHitTest_SRC
     HitTest.cpp
     Hit.cpp
     )
-set(HitTest_INC
+set(NMXHitTest_INC
     Hit.h
     )
-create_test_executable(HitTest)
+create_test_executable(NMXHitTest SKIP_MEMGRIND)
 
-set(HitFileTest_SRC
-    HitFileTest.cpp
-    HitFile.cpp
-    Hit.cpp
-    )
-set(HitFileTest_INC
-    HitFile.h
-    Hit.h
-    )
-create_test_executable(HitFileTest SKIP_MEMGRIND)
-
-set(ClusterTest_SRC
+set(NMXClusterTest_SRC
     ClusterTest.cpp
     Cluster.cpp
     )
-set(EventTest_INC
+set(NMXEventTest_INC
     Hit.h
     Cluster.h
     )
-create_test_executable(ClusterTest)
+create_test_executable(NMXClusterTest)
 
-set(EventTest_SRC
+set(NMXEventTest_SRC
     EventTest.cpp
     Cluster.cpp
     Event.cpp
     )
-set(EventTest_INC
+set(NMXEventTest_INC
     Hit.h
     Cluster.h
     Event.h
     )
-create_test_executable(EventTest)
+create_test_executable(NMXEventTest)
 
 set(HistSerializerTest_SRC
     ../../common/Hists.cpp

@@ -14,15 +14,17 @@
 #include <list>
 #include <vector>
 
+namespace Gem {
+
 struct Cluster {
 
-  int16_t plane_id {-1};
+  int16_t plane_id{-1};
 
   /// \brief adds hit to event's plane
   /// \param hit to be added
   void insert_hit(const Hit &hit);
 
-  std::vector<Hit> entries;
+  std::vector<Hit> hits;
   bool empty() const;
 
   /// calculated as hits are added
@@ -42,11 +44,9 @@ struct Cluster {
   double time_mass{0.0};   /// sum of time*adc
   double time_center() const;
 
-
-
-  void merge(Cluster& other);
-  double time_overlap(const Cluster& other) const;
-  bool time_touch(const Cluster& other) const;
+  void merge(Cluster &other);
+  double time_overlap(const Cluster &other) const;
+  bool time_touch(const Cluster &other) const;
 
   /// \brief analyzes particle track
   /// \param weighted determine entry strip using weighted average
@@ -64,8 +64,9 @@ struct Cluster {
   /// \brief returns calculated and rounded entry strip number for pixid
   uint32_t utpc_center_rounded() const;
 
-
   /// \brief prints values for debug purposes
   std::string debug() const;
 
 };
+
+}

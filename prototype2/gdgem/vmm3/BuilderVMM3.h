@@ -13,7 +13,7 @@
 #include <gdgem/srs/SRSTime.h>
 #include <gdgem/vmm3/ParserVMM3.h>
 #include <gdgem/vmm3/CalibrationFile.h>
-#include <gdgem/nmx/ReadoutFile.h>
+#include <gdgem/nmx/Readout.h>
 
 #include <gdgem/clustering/HitSorter.h>
 
@@ -21,13 +21,15 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 class BuilderVMM3 : public AbstractBuilder {
 public:
   BuilderVMM3(SRSTime time_intepreter, SRSMappings geometry_interpreter,
               std::shared_ptr<AbstractClusterer> x, std::shared_ptr<AbstractClusterer> y,
               uint16_t adc_threshold_x, double max_time_gap_x,
               uint16_t adc_threshold_y, double max_time_gap_y,
-              std::string dump_dir, bool dump_csv, bool dump_h5, std::shared_ptr<CalibrationFile> calfile);
+              std::string dump_dir, std::shared_ptr<CalibrationFile> calfile);
 
   ~BuilderVMM3() { XTRACE(INIT, DEB, "BuilderVMM2 destructor called"); }
 
@@ -49,3 +51,5 @@ private:
   uint8_t plane;
   uint32_t geom_errors;
 };
+
+}

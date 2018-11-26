@@ -34,10 +34,10 @@ public:
   std::vector<std::string> IgnoredInterfaces = {"ppp0", "docker", "ov-"};
 
   /// \brief
-  bool checkDiskSpace(std::vector<std::string> checkdirs);
+  // bool checkDiskSpace(std::vector<std::string> checkdirs);
 
   /// \brief
-  std::vector<std::string> DirectoriesToCheck = {".", "/"};
+  // std::vector<std::string> DirectoriesToCheck = {".", "/"};
 
 private:
   /// Check a single interface
@@ -51,10 +51,10 @@ private:
   int MinimumMtu{ 9000 };
 
   /// \todo change arbitrary value to something better?
-  const uint64_t MinDiskAvailable = 30 * 1000 * 1000 * 1000ULL;
+  // const uint64_t MinDiskAvailable = 30 * 1000 * 1000 * 1000ULL;
 
   /// \todo change arbitrary value to something better?
-  const float MinDiskPercentFree = 50.0;
+  // const float MinDiskPercentFree = 50.0;
 
 
 };

@@ -12,6 +12,8 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 HitsQueue::HitsQueue(SRSTime Time, double maxTimeGap)
     : pTime(Time), pMaxTimeGap(maxTimeGap) {}
 
@@ -19,10 +21,10 @@ const HitContainer &HitsQueue::hits() const {
   return hitsOut.buffer;
 }
 
-// TODO: sort out Hit constr
+/// \todo sort out Hit constr
 void HitsQueue::store(uint8_t plane, uint16_t strip, uint16_t adc,
                       double chipTime, double trigger_time) {
-  HitBuffer* b = &hitsOld;
+  HitBuffer *b = &hitsOld;
   if (chipTime < pTime.max_chip_time_in_window_ns()) {
     b = &hitsNew;
   }
@@ -35,10 +37,9 @@ void HitsQueue::store(uint8_t plane, uint16_t strip, uint16_t adc,
   e.time = chipTime;
 }
 
-
 void HitsQueue::sort_and_correct() {
-  // TODO: What are the sizes of (number of elements) in hitsOld and hitsNew?
-  // TODO: This might be relevant to the type of sorting that should be used.
+  /// \todo What are the sizes of (number of elements) in hitsOld and hitsNew?
+  /// \todo This might be relevant to the type of sorting that should be used.
   std::sort(hitsOld.buffer.begin(), hitsOld.buffer.end(),
             [](const Hit &e1, const Hit &e2) {
               return e1.time < e2.time;
@@ -57,8 +58,7 @@ void HitsQueue::sort_and_correct() {
     hitsNew.buffer.clear();
   }
 
-
-  for (auto& h : hitsOut.buffer)
+  for (auto &h : hitsOut.buffer)
     h.time += hitsOut.trigger_time;
 }
 
@@ -69,11 +69,9 @@ void HitsQueue::subsequent_trigger(bool trig) {
 void HitsQueue::correct_trigger_data() {
   if (!subsequent_trigger_)
     return;
-
   // TODO Does this happen? Does it really mean do nothing?
   if (hitsNew.buffer.empty() || hitsOld.buffer.empty())
     return;
-
   double latestOld = hitsOld.buffer.rbegin()->time; // Latest of the old
   // oldest of the new + correct into time space of the old
   double timeNext = hitsNew.buffer.begin()->time + pTime.trigger_period_ns();
@@ -116,4 +114,6 @@ void HitsQueue::correct_trigger_data() {
             });
 
   // TODO if al hits were transferred, flag edge as possibly invalid
+}
+
 }

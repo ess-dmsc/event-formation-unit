@@ -10,11 +10,12 @@
 #include <gdgem/clustering/HitContainer.h>
 #include <gdgem/srs/SRSTime.h>
 
+namespace Gem {
+
 class HitsQueue {
 private:
-  struct HitBuffer
-  {
-    double trigger_time {0};
+  struct HitBuffer {
+    double trigger_time{0};
     HitContainer buffer;
   };
 
@@ -23,24 +24,26 @@ public:
   void store(uint8_t plane, uint16_t strip, uint16_t adc,
              double chipTime, double trigger_time = 0);
 
-  // TODO: add a flush flag here
+  /// \todo add a flush flag here
   void sort_and_correct();
   void subsequent_trigger(bool);
 
-  const HitContainer& hits() const;
+  const HitContainer &hits() const;
 
 private:
   // tripple buffer
 
-  // TODO: trigger_timestamp must be added
+  /// \todo trigger_timestamp must be added
 
   HitBuffer hitsOld;
   HitBuffer hitsNew;
   HitBuffer hitsOut;
 
   SRSTime pTime;
-  double pMaxTimeGap {200};
+  double pMaxTimeGap{200};
   bool subsequent_trigger_{false};
 
   void correct_trigger_data();
 };
+
+}

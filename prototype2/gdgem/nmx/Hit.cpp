@@ -3,6 +3,8 @@
 #include <gdgem/nmx/Hit.h>
 #include <sstream>
 
+namespace Gem {
+
 std::string Hit::debug() const {
   std::stringstream ss;
   //  ss << " time=" << (time >> 36) << ":" << (time & 0xFFFFFFFF);
@@ -11,4 +13,6 @@ std::string Hit::debug() const {
   ss << " time=" << time;
   ss << " plane=" << plane_id << " strip=" << strip << " adc=" << adc;
   return ss.str();
+}
+
 }

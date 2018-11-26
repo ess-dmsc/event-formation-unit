@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <gdgem/generators/BuilderHits.h>
+#include <common/TimeString.h>
 #include <cstring>
 
 #include <common/Trace.h>
@@ -14,7 +15,7 @@ BuilderHits::BuilderHits(std::string dump_dir, bool dump_csv, bool dump_h5)
     vmmsave->tofile("# time, plane, strip, adc\n");
   if (dump_h5_) {
     hit_file_ = std::make_shared<HitFile>();
-    hit_file_->open_rw(dump_dir + "gdgem_hits_" + time_str() + ".h5");
+    hit_file_->open_rw(dump_dir + "gdgem_hits_" + timeString());
   }
 }
 

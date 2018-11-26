@@ -4,11 +4,24 @@
  *
  *  \brief Code for testing the ADC UDP functionality.
  */
+// GCOVR_EXCL_START
 
 #include "TestUDPServer.h"
 #include <ciso646>
 #include <functional>
 #include <iostream>
+#include <random>
+
+std::uint16_t GetPortNumber() {
+  static std::uint16_t CurrentPortNumber = 0;
+  if (0 == CurrentPortNumber) {
+    std::random_device Device;
+    std::mt19937 Generator(Device());
+    std::uniform_int_distribution<std::uint16_t> Distribution(2048, 60000);
+    CurrentPortNumber = Distribution(Generator);
+  }
+  return ++CurrentPortNumber;
+}
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wreorder"
@@ -45,7 +58,9 @@ void TestUDPServer::startPacketTransmission(int TotalPackets, int PacketGapNS) {
 
 TestUDPServer::~TestUDPServer() {
   Service.stop();
-  AsioThread.join();
+  if (AsioThread.joinable()) {
+    AsioThread.join();
+  }
   Socket.close();
 }
 
@@ -98,3 +113,4 @@ void TestUDPServer::handleNewPacket(const asio::error_code &Err) {
                                      std::placeholders::_1));
   }
 }
+// GCOVR_EXCL_STOP

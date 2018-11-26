@@ -11,7 +11,9 @@
 #include <gdgem/clustering/HitContainer.h>
 #include <gdgem/nmx/Event.h>
 
-// TODO: pick a faster data structure
+namespace Gem {
+
+/// \todo pick a faster data structure
 using ClusterList = std::list<Cluster>;
 
 class AbstractClusterer {
@@ -21,8 +23,7 @@ public:
 
   virtual void cluster(const HitContainer &hits) = 0;
 
-  bool empty() const
-  {
+  bool empty() const {
     return clusters.empty();
   }
 
@@ -30,3 +31,5 @@ public:
   size_t stats_cluster_count{0};
   ClusterList clusters;
 };
+
+}

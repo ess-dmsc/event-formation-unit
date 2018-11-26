@@ -18,7 +18,7 @@ SamplingRun getTestModule() {
   Module.TimeStamp.Seconds = 42;
   Module.TimeStamp.SecondsFrac = 65;
   Module.OversamplingFactor = 1;
-  Module.Channel = 3;
+  Module.Identifier.ChannelNr = 3;
   Module.Data.push_back(1);
   Module.Data.push_back(15);
   Module.Data.push_back(128);
@@ -46,7 +46,7 @@ public:
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 class ProducerStandIn : public ProducerBase {
 public:
-  MAKE_MOCK2(produce, int(char *, int), override);
+  MAKE_MOCK2(produce, int(void *, size_t), override);
 };
 #pragma GCC diagnostic pop
 
@@ -54,7 +54,7 @@ TEST(SampleProcessing, NoSamples) {
   std::shared_ptr<ProducerStandIn> TestProducer(new ProducerStandIn());
   SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   SamplingRun TempModule;
-  TempModule.Channel = 1;
+  TempModule.Identifier.ChannelNr = 1;
   TestProcessor.processData(TempModule);
   FORBID_CALL(*TestProducer.get(), produce(_, _));
 }
@@ -118,7 +118,7 @@ TEST(SampleProcessing, SerialisationProduceCallTest) {
       .TIMES(1)
       .LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(TestProducer.get()),
-               produce(ANY(char *), ANY(int)))
+               produce(ANY(void *), ANY(size_t)))
       .TIMES(1)
       .RETURN(0);
   auto TempModule = getTestModule();
@@ -138,7 +138,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
       .TIMES(1)
       .LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(TestProducer.get()),
-               produce(ANY(char *), ANY(int)))
+               produce(ANY(void *), ANY(size_t)))
       .TIMES(1)
       .RETURN(0)
       .LR_SIDE_EFFECT(
@@ -152,13 +152,13 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
   ASSERT_TRUE(VerifySampleEnvironmentDataBuffer(Verifier));
   auto SampleData = GetSampleEnvironmentData(&TempBuffer[0]);
   EXPECT_EQ(SampleData->Name()->str(),
-            Name + "_" + std::to_string(TempModule.Channel));
+            Name + "_" + std::to_string(TempModule.Identifier.ChannelNr));
   EXPECT_EQ(SampleData->PacketTimestamp(),
             TempModule.TimeStamp.GetTimeStampNS());
   EXPECT_NEAR(SampleData->TimeDelta(),
               (1e9 * TempModule.OversamplingFactor) / AdcTimerCounterMax, 0.05);
   EXPECT_EQ(SampleData->TimestampLocation(), Location::End);
-  EXPECT_EQ(SampleData->Channel(), TempModule.Channel);
+  EXPECT_EQ(SampleData->Channel(), TempModule.Identifier.ChannelNr);
   EXPECT_TRUE(SampleData->MessageCounter() == 0);
   EXPECT_EQ(SampleData->Values()->size(), TempModule.Data.size());
   EXPECT_EQ(flatbuffers::IsFieldPresent(SampleData,
@@ -180,7 +180,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
       .TIMES(1)
       .LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(TestProducer.get()),
-               produce(ANY(char *), ANY(int)))
+               produce(ANY(void *), ANY(size_t)))
       .TIMES(1)
       .RETURN(0)
       .LR_SIDE_EFFECT(
@@ -194,13 +194,13 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
   ASSERT_TRUE(VerifySampleEnvironmentDataBuffer(Verifier));
   auto SampleData = GetSampleEnvironmentData(&TempBuffer[0]);
   EXPECT_EQ(SampleData->Name()->str(),
-            Name + "_" + std::to_string(TempModule.Channel));
+            Name + "_" + std::to_string(TempModule.Identifier.ChannelNr));
   EXPECT_EQ(SampleData->PacketTimestamp(),
             TempModule.TimeStamp.GetTimeStampNS());
   EXPECT_NEAR(SampleData->TimeDelta(),
               (1e9 * TempModule.OversamplingFactor) / AdcTimerCounterMax, 0.05);
   EXPECT_EQ(SampleData->TimestampLocation(), Location::End);
-  EXPECT_EQ(SampleData->Channel(), TempModule.Channel);
+  EXPECT_EQ(SampleData->Channel(), TempModule.Identifier.ChannelNr);
   EXPECT_TRUE(SampleData->MessageCounter() == 0);
   EXPECT_EQ(SampleData->Values()->size(), TempModule.Data.size());
   ASSERT_EQ(flatbuffers::IsFieldPresent(SampleData,
@@ -217,7 +217,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest2) {
   SampleProcessingStandIn TestProcessor(TestProducer, Name);
   TestProcessor.setTimeStampLocation(TimeStampLocation::End);
   unsigned int MessageCounter = 0;
-  auto TestMessage = [&MessageCounter](char *DataPtr, int Bytes) {
+  auto TestMessage = [&MessageCounter](void *DataPtr, int Bytes) {
     auto SampleData = GetSampleEnvironmentData(DataPtr);
     EXPECT_EQ(SampleData->MessageCounter(), MessageCounter);
     MessageCounter++;
@@ -226,7 +226,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest2) {
       .TIMES(2)
       .LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(TestProducer.get()),
-               produce(ANY(char *), ANY(int)))
+               produce(ANY(void *), ANY(size_t)))
       .TIMES(2)
       .RETURN(0)
       .LR_SIDE_EFFECT(TestMessage(_1, _2));

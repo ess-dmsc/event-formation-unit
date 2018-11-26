@@ -18,16 +18,11 @@ using json = nlohmann::json;
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+namespace Gem {
+
 /// \brief clear the calibration array
 CalibrationFile::CalibrationFile() {
-  constexpr size_t NumberEntries = (size_t)(sizeof(Calibrations) / sizeof(Calibration));
-
-  static_assert(sizeof(Calibration) == 8, "struct packing issue");
-  static_assert(NumberEntries == MAX_FEC * MAX_VMM * MAX_CH, "calibration table size mismatch");
-
-  for (size_t i = 0; i < NumberEntries; i++) {
-    ((Calibration *)Calibrations)[i] = NoCorr;
-  }
+  resetCalibration();
 }
 
 /// \brief load calibration from file
@@ -52,8 +47,8 @@ void CalibrationFile::loadCalibration(std::string jsonstring) {
   try {
     Root = nlohmann::json::parse(jsonstring);
   } catch (...) {
-    LOG(INIT, Sev::Warning, "Invalid Json file: {}", jsonstring);
-    return;
+    LOG(INIT, Sev::Warning, "Invalid Json: {}", jsonstring);
+    throw std::runtime_error("Invalid Json in calibration file.");
   }
 
   try {
@@ -71,7 +66,7 @@ void CalibrationFile::loadCalibration(std::string jsonstring) {
         LOG(INIT, Sev::Warning,
             "Invalid channel configuration, skipping for fec {} and vmm {}",
             fecid, vmmid);
-        continue;
+        throw std::runtime_error("Invalid slope and array lengths in calibration file.");
       }
 
       for (unsigned int j = 0; j < offsets.size(); j++) {
@@ -82,6 +77,7 @@ void CalibrationFile::loadCalibration(std::string jsonstring) {
   }
   catch (const std::exception &exc) {
     LOG(INIT, Sev::Error, "JSON config - invalid json: {}", exc.what());
+    throw std::runtime_error("Invalid json in calibration file field.");
   }
 }
 
@@ -101,11 +97,22 @@ bool CalibrationFile::addCalibration(unsigned int fecId, unsigned int vmmId,
 CalibrationFile::Calibration &
 CalibrationFile::getCalibration(unsigned int fecId, unsigned int vmmId,
                                 unsigned int chNo) {
+
   if ((fecId >= MAX_FEC) or (vmmId >= MAX_VMM) or (chNo >= MAX_CH)) {
     XTRACE(INIT, DEB, "invalid offsets: fec: %d, vmm: %d, ch:%d\n", fecId,
            vmmId, chNo);
     return ErrCorr;
   }
-
   return Calibrations[fecId][vmmId][chNo];
+}
+
+void CalibrationFile::resetCalibration() {
+  constexpr size_t NumberEntries = (size_t) (sizeof(Calibrations) / sizeof(Calibration));
+  static_assert(sizeof(Calibration) == 8, "struct packing issue");
+  static_assert(NumberEntries == MAX_FEC * MAX_VMM * MAX_CH, "calibration table size mismatch");
+  for (size_t i = 0; i < NumberEntries; i++) {
+    ((Calibration *) Calibrations)[i] = NoCorr;
+  }
+}
+
 }
