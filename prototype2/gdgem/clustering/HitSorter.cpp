@@ -25,14 +25,6 @@ HitSorter::HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
 bool HitSorter::requires_analysis(double triggerTimestamp_ns) {
   if (old_trigger_timestamp_ns_ != triggerTimestamp_ns) {
     stats_trigger_count++;
-
-    double delta_trigger_ns = triggerTimestamp_ns - old_trigger_timestamp_ns_;
-
-    bool subs = (delta_trigger_ns <= pTime.trigger_period_ns());
-    if (subs)
-      stats_subsequent_triggers++;
-    hits.subsequent_trigger(subs);
-
     return true;
   }
 

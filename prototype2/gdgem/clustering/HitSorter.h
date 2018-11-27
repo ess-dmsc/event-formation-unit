@@ -24,7 +24,6 @@ public:
 
   // Statistics counters
   size_t stats_trigger_count{0};
-  size_t stats_subsequent_triggers{0};
 
   std::shared_ptr<AbstractClusterer> clusterer;
 

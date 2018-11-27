@@ -95,14 +95,9 @@ protected:
     EXPECT_EQ(overflows_y, 0);
   }
 
-  void test_stats(size_t triggers_x, size_t triggers_y, bool test_subs) {
+  void test_stats(size_t triggers_x, size_t triggers_y) {
     EXPECT_EQ(triggers_x, sorter_x->stats_trigger_count);
     EXPECT_EQ(triggers_y, sorter_y->stats_trigger_count);
-
-    if (test_subs) {
-      EXPECT_EQ(0, sorter_x->stats_subsequent_triggers);
-      EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
-    }
 
     EXPECT_EQ(0, mock_x->stats_chrono_errors);
     EXPECT_EQ(0, mock_y->stats_chrono_errors);
@@ -114,8 +109,6 @@ protected:
 TEST_F(HitSorterTest, Constructor) {
   ASSERT_EQ(0, sorter_x->stats_trigger_count);
   ASSERT_EQ(0, sorter_y->stats_trigger_count);
-  ASSERT_EQ(0, sorter_x->stats_subsequent_triggers);
-  ASSERT_EQ(0, sorter_y->stats_subsequent_triggers);
   ASSERT_EQ(true, mock_x->empty());
   ASSERT_EQ(true, mock_y->empty());
 }
@@ -125,7 +118,7 @@ TEST_F(HitSorterTest, a1) {
   EXPECT_EQ(readouts.size(), 144);
 
   add_readouts();
-  test_stats(15, 0, true);
+  test_stats(15, 0);
 }
 
 TEST_F(HitSorterTest, a1_chrono) {
@@ -133,13 +126,13 @@ TEST_F(HitSorterTest, a1_chrono) {
   EXPECT_EQ(readouts.size(), 144);
 
   add_readouts();
-  test_stats(15, 0, true);
+  test_stats(15, 0);
 
   // flush, but must it be with trigger?
   sorter_x->flush();
   sorter_y->flush();
 
-  test_stats(15, 0, true);
+  test_stats(15, 0);
 
   EXPECT_EQ(144, mock_x->all_hits.size());
   EXPECT_EQ(0, mock_y->all_hits.size());
@@ -154,9 +147,6 @@ TEST_F(HitSorterTest, a10) {
 
   EXPECT_EQ(74, sorter_x->stats_trigger_count);
   EXPECT_EQ(58, sorter_y->stats_trigger_count);
-
-  EXPECT_EQ(0, sorter_x->stats_subsequent_triggers);
-  EXPECT_EQ(0, sorter_y->stats_subsequent_triggers);
 }
 
 TEST_F(HitSorterTest, a10_chrono) {
@@ -164,13 +154,13 @@ TEST_F(HitSorterTest, a10_chrono) {
   EXPECT_EQ(readouts.size(), 920);
 
   add_readouts();
-  test_stats(74, 58, true);
+  test_stats(74, 58);
 
   // flush, but must it be with trigger?
   sorter_x->flush();
   sorter_y->flush();
 
-  test_stats(74, 58, true);
+  test_stats(74, 58);
 
   EXPECT_EQ(558, mock_x->all_hits.size());
   EXPECT_EQ(362, mock_y->all_hits.size());
@@ -183,7 +173,7 @@ TEST_F(HitSorterTest, a100) {
 
   add_readouts();
 
-  test_stats(3974, 3469, false);
+  test_stats(3974, 3469);
 
 }
 
@@ -193,13 +183,13 @@ TEST_F(HitSorterTest, a100_chrono) {
 
   add_readouts();
 
-  test_stats(3974, 3469, false);
+  test_stats(3974, 3469);
 
   // flush, but must it be with trigger?
   sorter_x->flush();
   sorter_y->flush();
 
-  test_stats(3974, 3469, false);
+  test_stats(3974, 3469);
 
   EXPECT_EQ(84162, mock_x->all_hits.size());
   EXPECT_EQ(42428, mock_y->all_hits.size());

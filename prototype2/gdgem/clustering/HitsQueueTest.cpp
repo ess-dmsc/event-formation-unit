@@ -48,32 +48,20 @@ protected:
     }
   }
 
-  void regular_test(size_t expected_x, size_t expected_y, bool subs_trigger) {
+  void regular_test(size_t expected_x, size_t expected_y) {
     EXPECT_EQ(readouts.size(), expected_x + expected_y);
     add_readouts();
 
     EXPECT_EQ(p0->hits().size(), 0);
     EXPECT_EQ(p1->hits().size(), 0);
-    if (subs_trigger) {
-      p0->subsequent_trigger(true);
-      p1->subsequent_trigger(true);
-    }
     p0->sort_and_correct();
     p1->sort_and_correct();
     EXPECT_EQ(p0->hits().size(), 0);
     EXPECT_EQ(p1->hits().size(), 0);
-    if (subs_trigger) {
-      p0->subsequent_trigger(true);
-      p1->subsequent_trigger(true);
-    }
     p0->sort_and_correct();
     p1->sort_and_correct();
     EXPECT_EQ(p0->hits().size(), expected_x);
     EXPECT_EQ(p1->hits().size(), expected_y);
-    if (subs_trigger) {
-      p0->subsequent_trigger(true);
-      p1->subsequent_trigger(true);
-    }
     p0->sort_and_correct();
     p1->sort_and_correct();
     EXPECT_EQ(p0->hits().size(), 0);
@@ -122,12 +110,7 @@ TEST_F(HitsQueueTest, PrintConfig) {
 
 TEST_F(HitsQueueTest, a1_notrigger) {
   ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
-  regular_test(144,0, false);
-}
-
-TEST_F(HitsQueueTest, a1_trigger) {
-  ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
-  regular_test(144,0, true);
+  regular_test(144,0);
 }
 
 TEST_F(HitsQueueTest, a1_chronological_no_trigger) {
@@ -140,12 +123,7 @@ TEST_F(HitsQueueTest, a1_chronological_no_trigger) {
 TEST_F(HitsQueueTest, a10_notrigger)
 {
   ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
-  regular_test(558, 362, false);
-}
-
-TEST_F(HitsQueueTest, a10_trigger) {
-  ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
-  regular_test(558, 362, true);
+  regular_test(558, 362);
 }
 
 TEST_F(HitsQueueTest, a10_chronological_no_trigger) {
@@ -157,12 +135,7 @@ TEST_F(HitsQueueTest, a10_chronological_no_trigger) {
 
 TEST_F(HitsQueueTest, a100_notrigger) {
   ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
-  regular_test(84162, 42428, false);
-}
-
-TEST_F(HitsQueueTest, a100_trigger) {
-  ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
-  regular_test(84162, 42428, true);
+  regular_test(84162, 42428);
 }
 
 TEST_F(HitsQueueTest, a100_chronological_no_trigger) {
