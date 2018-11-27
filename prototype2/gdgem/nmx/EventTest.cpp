@@ -18,10 +18,10 @@ protected:
 
 TEST_F(EventTest, Insert) {
   event.insert_hit(e);
-  EXPECT_EQ(event.x.hits.size(), 1);
+  EXPECT_EQ(event.x.hit_count(), 1);
   e.plane = 1;
   event.insert_hit(e);
-  EXPECT_EQ(event.y.hits.size(), 1);
+  EXPECT_EQ(event.y.hit_count(), 1);
 }
 
 TEST_F(EventTest, Empty) {
@@ -31,60 +31,60 @@ TEST_F(EventTest, Empty) {
 }
 
 TEST_F(EventTest, Merge) {
-  Cluster x;
+  UtpcCluster x;
   e.plane = 0;
-  x.insert_hit(e);
-  x.insert_hit(e);
+  x.insert(e);
+  x.insert(e);
   event.merge(x);
   EXPECT_FALSE(event.empty());
-  EXPECT_EQ(x.hits.size(), 0);
-  EXPECT_EQ(event.x.hits.size(), 2);
+  EXPECT_EQ(event.x.hit_count(), 2);
 }
 
 TEST_F(EventTest, MergeTwice) {
-  Cluster x;
+  UtpcCluster x;
   e.plane = 0;
 
-  x.insert_hit(e);
-  x.insert_hit(e);
+  x.insert(e);
+  x.insert(e);
   event.merge(x);
-  EXPECT_EQ(event.x.hits.size(), 2);
+  EXPECT_EQ(event.x.hit_count(), 2);
 
-  x.insert_hit(e);
-  x.insert_hit(e);
-  x.insert_hit(e);
+  x.clear();
+  x.insert(e);
+  x.insert(e);
+  x.insert(e);
   event.merge(x);
-  EXPECT_EQ(event.x.hits.size(), 5);
+  EXPECT_EQ(event.x.hit_count(), 5);
 }
 
 TEST_F(EventTest, MergeXY) {
-  Cluster x, y;
+  UtpcCluster x, y;
 
   e.plane = 0;
-  x.insert_hit(e);
-  x.insert_hit(e);
+  x.insert(e);
+  x.insert(e);
   event.merge(x);
 
   e.plane = 1;
-  y.insert_hit(e);
-  y.insert_hit(e);
-  y.insert_hit(e);
+  y.insert(e);
+  y.insert(e);
+  y.insert(e);
   event.merge(y);
-  EXPECT_EQ(event.x.hits.size(), 2);
-  EXPECT_EQ(event.y.hits.size(), 3);
+  EXPECT_EQ(event.x.hit_count(), 2);
+  EXPECT_EQ(event.y.hit_count(), 3);
 }
 
 TEST_F(EventTest, TimeSpan) {
-  Cluster x, y;
+  UtpcCluster x, y;
 
   e.plane = 0;
-  e.time = 3; x.insert_hit(e);
-  e.time = 7; x.insert_hit(e);
+  e.time = 3; x.insert(e);
+  e.time = 7; x.insert(e);
   event.merge(x);
 
   e.plane = 1;
-  e.time = 5; y.insert_hit(e);
-  e.time = 1; y.insert_hit(e);
+  e.time = 5; y.insert(e);
+  e.time = 1; y.insert(e);
   event.merge(y);
   EXPECT_EQ(event.time_end(), 7);
   EXPECT_EQ(event.time_start(), 1);
@@ -120,7 +120,7 @@ TEST_F(EventTest, InsertInvalid) {
   event.insert_hit(e);
   e.plane = 2;
   event.insert_hit(e);
-  EXPECT_EQ(2, event.x.hits.size() + event.y.hits.size());
+  EXPECT_EQ(2, event.x.hit_count() + event.y.hit_count());
 }
 
 TEST_F(EventTest, DebugPrint) {

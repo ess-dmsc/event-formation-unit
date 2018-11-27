@@ -34,8 +34,8 @@ private:
 
   bool ready_to_be_matched(uint64_t time) const;
 
-  uint64_t delta_end(const Event &event, const Cluster &cluster) const;
-  bool belongs_end(const Event &event, const Cluster &cluster) const;
+  uint64_t delta_end(const Event &event, const UtpcCluster &cluster) const;
+  bool belongs_end(const Event &event, const UtpcCluster &cluster) const;
 
   uint64_t latest_x{0};
   uint64_t latest_y{0};

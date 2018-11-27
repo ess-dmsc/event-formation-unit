@@ -18,21 +18,21 @@ namespace Gem {
 
 class Event {
 public:
-  Cluster x, y; /// tracks in x and y planes
+  UtpcCluster x, y; /// tracks in x and y planes
 
   /// \brief adds hit to event
   /// \param hit to be added
   void insert_hit(const Hit &e);
 
-  void merge(Cluster &cluster);
+  void merge(UtpcCluster &cluster);
 
   bool empty() const;
 
   uint64_t time_end() const;
   uint64_t time_start() const;
   uint64_t time_span() const;
-  uint64_t time_overlap(const Cluster &other) const;
-  bool time_overlap_thresh(const Cluster &other, uint64_t thresh) const;
+  uint64_t time_overlap(const UtpcCluster &other) const;
+  bool time_overlap_thresh(const UtpcCluster &other, uint64_t thresh) const;
 
   /// \brief analyzes particle track
   /// \param weighted determine entry strip using weighted average

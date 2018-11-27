@@ -17,10 +17,13 @@
 ///        thus including the endpoints.
 
 class Cluster {
-protected:
+public:  // \TODO should be protected!
   std::vector<Hit> hits;
 
 public:
+  Cluster() = default;
+  virtual ~Cluster() = default;
+
   /// \brief adds hit to cluster, accumulates mass and recalculates bounds
   ///        no validation is enforced, duplicates possible
   ///        no particular time or spatial ordering is expected
@@ -93,7 +96,7 @@ public:
 
   /// \returns string describing cluster bounds and weights
   /// \param verbose also print hits
-  std::string debug(bool verbose = false) const;
+  virtual std::string debug(bool verbose = false) const;
 
 private:
   int16_t plane_{-1};      ///< plane identity of cluster, -1 for invalid

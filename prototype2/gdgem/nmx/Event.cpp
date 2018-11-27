@@ -12,56 +12,56 @@ namespace Gem {
 
 void Event::insert_hit(const Hit &e) {
   if (e.plane == 1) { /**< \todo deal with multiple panels */
-    y.insert_hit(e);
+    y.insert(e);
   } else if (e.plane == 0) {
-    x.insert_hit(e);
+    x.insert(e);
   }
 }
 
-void Event::merge(Cluster &cluster) {
-  if (cluster.plane_id == 1) { /**< \todo deal with multiple panels */
+void Event::merge(UtpcCluster &cluster) {
+  if (cluster.plane() == 1) { /**< \todo deal with multiple panels */
     y.merge(cluster);
-  } else if (cluster.plane_id == 0) {
+  } else if (cluster.plane() == 0) {
     x.merge(cluster);
   }
 }
 
 bool Event::empty() const
 {
-  return x.hits.empty() && y.hits.empty();
+  return x.empty() && y.empty();
 }
 
 uint64_t Event::time_end() const
 {
-  if (x.hits.empty())
-    return y.time_end;
-  if (y.hits.empty())
-    return x.time_end;
-  return std::max(x.time_end, y.time_end);
+  if (x.empty())
+    return y.time_end();
+  if (y.empty())
+    return x.time_end();
+  return std::max(x.time_end(), y.time_end());
 }
 
 uint64_t Event::time_start() const
 {
-  if (x.hits.empty())
-    return y.time_start;
-  if (y.hits.empty())
-    return x.time_start;
-  return std::min(x.time_start, y.time_start);
+  if (x.empty())
+    return y.time_start();
+  if (y.empty())
+    return x.time_start();
+  return std::min(x.time_start(), y.time_start());
 }
 
 uint64_t Event::time_span() const {
   return (time_end() - time_start());
 }
 
-uint64_t Event::time_overlap(const Cluster &other) const {
-  auto latest_start = std::max(other.time_start, time_start());
-  auto earliest_end = std::min(other.time_end, time_end());
+uint64_t Event::time_overlap(const UtpcCluster &other) const {
+  auto latest_start = std::max(other.time_start(), time_start());
+  auto earliest_end = std::min(other.time_end(), time_end());
   if (latest_start > earliest_end)
     return 0;
   return (earliest_end - latest_start);
 }
 
-bool Event::time_overlap_thresh(const Cluster &other, uint64_t thresh) const {
+bool Event::time_overlap_thresh(const UtpcCluster &other, uint64_t thresh) const {
   auto ovr = time_overlap(other);
   return (((ovr / other.time_span()) + (ovr / time_span())) > thresh);
 }
@@ -69,16 +69,16 @@ bool Event::time_overlap_thresh(const Cluster &other, uint64_t thresh) const {
 void Event::analyze(bool weighted, int16_t max_timebins,
                     int16_t max_timedif) {
   XTRACE(PROCESS, DEB, "x.entries.size(): %lu, y.entries.size(): %lu",
-         x.hits.size(), y.hits.size());
-  if (x.hits.size()) {
+         x.hit_count(), y.hit_count());
+  if (x.hit_count()) {
     x.analyze(weighted, max_timebins, max_timedif);
   }
-  if (y.hits.size()) {
+  if (y.hit_count()) {
     y.analyze(weighted, max_timebins, max_timedif);
   }
-  valid_ = x.hits.size() && y.hits.size();
+  valid_ = x.hit_count() && y.hit_count();
   if (valid_) {
-    utpc_time_ = std::max(x.time_end, y.time_end);
+    utpc_time_ = std::max(x.time_end(), y.time_end());
   }
 }
 
@@ -107,20 +107,8 @@ std::string Event::debug() const {
 }
 
 void Event::debug2() {
-  if (x.hits.size()) {
-    printf("x strips: ");
-    for (auto xstrips : x.hits) {
-      printf("%d ", xstrips.coordinate);
-    }
-    printf("\n");
-  }
-  if (y.hits.size()) {
-    printf("y strips: ");
-    for (auto ystrips : y.hits) {
-      printf("%d ", ystrips.coordinate);
-    }
-    printf("\n");
-  }
+  printf("x strips: %s", x.debug(true).c_str());
+  printf("y strips: %s", y.debug(true).c_str());
 }
 
 }

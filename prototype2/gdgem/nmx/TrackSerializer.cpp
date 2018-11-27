@@ -27,12 +27,12 @@ void TrackSerializer::set_callback(ProducerCallback cb) {
 }
 
 bool TrackSerializer::add_track(const Event &event) {
-  if ((event.x.hits.size() < minhits_) ||
-      (event.y.hits.size() < minhits_)) {
+  if ((event.x.hit_count() < minhits_) ||
+      (event.y.hit_count() < minhits_)) {
     return false;
   }
 
-  if ((event.x.hits.size() > maxlen) || (event.y.hits.size() > maxlen)) {
+  if ((event.x.hit_count() > maxlen) || (event.y.hit_count() > maxlen)) {
     return false;
   }
 

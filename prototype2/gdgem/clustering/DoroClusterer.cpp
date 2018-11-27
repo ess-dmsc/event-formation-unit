@@ -44,7 +44,7 @@ void DoroClusterer::cluster_by_time(const HitContainer &hits) {
 
 //====================================================================================================================
 void DoroClusterer::cluster_by_strip(HitContainer &hits) {
-  Cluster cluster;
+  UtpcCluster cluster;
 
   std::sort(hits.begin(), hits.end(),
             [](const Hit &e1, const Hit &e2) {
@@ -54,20 +54,20 @@ void DoroClusterer::cluster_by_strip(HitContainer &hits) {
   for (auto &hit : hits) {
     // Stash cluster if strip gap to next hit is too large
     if (!cluster.empty() &&
-        (hit.coordinate - cluster.strip_end) > (pMaxStripGap + 1)) {
+        (hit.coordinate - cluster.coord_end()) > (pMaxStripGap + 1)) {
       stash_cluster(cluster);
-      cluster = Cluster();
+      cluster = UtpcCluster();
     }
 
     // insert in either case
-    cluster.insert_hit(hit);
+    cluster.insert(hit);
   }
 
   // At the end of the clustering, attempt to stash any leftovers
   stash_cluster(cluster);
 }
 //====================================================================================================================
-void DoroClusterer::stash_cluster(Cluster &cluster) {
+void DoroClusterer::stash_cluster(UtpcCluster &cluster) {
   if (cluster.hits.size() < pMinClusterSize)
     return;
 

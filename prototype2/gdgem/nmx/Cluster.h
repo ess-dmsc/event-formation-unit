@@ -10,43 +10,16 @@
 #pragma once
 
 #include <common/clustering/Hit.h>
+#include <common/clustering/Cluster.h>
 #include <limits>
 #include <list>
 #include <vector>
 
 namespace Gem {
 
-struct Cluster {
-
-  int16_t plane_id{-1};
-
-  /// \brief adds hit to event's plane
-  /// \param hit to be added
-  void insert_hit(const Hit &hit);
-
-  std::vector<Hit> hits;
-  bool empty() const;
-
-  /// calculated as hits are added
-  uint16_t strip_start{0};
-  uint16_t strip_end{0};
-  uint16_t strip_span() const;
-
-  uint64_t time_start{0};
-  uint64_t time_end{0};
-  uint64_t time_span() const;
-
-  double adc_sum{0.0};
-
-  double strip_mass{0.0};   /// sum of strip*adc
-  double strip_center() const;
-
-  double time_mass{0.0};   /// sum of time*adc
-  double time_center() const;
-
-  void merge(Cluster &other);
-  uint64_t time_overlap(const Cluster &other) const;
-  bool time_touch(const Cluster &other) const;
+class UtpcCluster : public Cluster {
+ public:
+  UtpcCluster() = default;
 
   /// \brief analyzes particle track
   /// \param weighted determine entry strip using weighted average
@@ -65,8 +38,7 @@ struct Cluster {
   uint32_t utpc_center_rounded() const;
 
   /// \brief prints values for debug purposes
-  std::string debug() const;
-
+  std::string debug(bool verbose = false) const override;
 };
 
 }

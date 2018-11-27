@@ -12,55 +12,8 @@
 
 namespace Gem {
 
-void Cluster::insert_hit(const Hit &e) {
-  if (hits.empty()) {
-    plane_id = e.plane;
-    time_start = time_end = e.time;
-    strip_start = strip_end = e.coordinate;
-  }
-
-  // If plane identities don't match, invalidate
-  /// \todo this needs more testing
-  if (plane_id != e.plane) {
-    plane_id = -1;
-  }
-
-  hits.push_back(e);
-  adc_sum += e.weight;
-  strip_mass += e.weight * e.coordinate;
-  time_mass += e.weight * e.time;
-  time_start = std::min(time_start, e.time);
-  time_end = std::max(time_end, e.time);
-  strip_start = std::min(strip_start, e.coordinate);
-  strip_end = std::max(strip_end, e.coordinate);
-}
-
-bool Cluster::empty() const
-{
-  return hits.empty();
-}
-
-uint64_t Cluster::time_span() const {
-  return time_end - time_start;
-}
-
-uint16_t Cluster::strip_span() const {
-  if (hits.empty()) {
-    return 0;
-  }
-  return (strip_end - strip_start) + 1u;
-}
-
-double Cluster::strip_center() const {
-  return strip_mass / adc_sum;
-}
-
-double Cluster::time_center() const {
-  return time_mass / adc_sum;
-}
-
 /// \todo make work with doubles (or not, if we decimate timestamps?)
-void Cluster::analyze(bool weighted, uint16_t max_timebins,
+void UtpcCluster::analyze(bool weighted, uint16_t max_timebins,
                       uint16_t max_timedif) {
   if (hits.empty()) {
     return;
@@ -77,11 +30,11 @@ void Cluster::analyze(bool weighted, uint16_t max_timebins,
   int16_t lspan_max = std::numeric_limits<int16_t>::min();
   int16_t uspan_min = std::numeric_limits<int16_t>::max();
   int16_t uspan_max = std::numeric_limits<int16_t>::min();
-  uint64_t earliest = std::min(time_start, time_end - static_cast<uint64_t>(max_timedif));
+  uint64_t earliest = std::min(time_start(), time_end() - static_cast<uint64_t>(max_timedif));
   std::set<uint64_t> timebins;
   for (auto it = hits.rbegin(); it != hits.rend(); ++it) {
     auto e = *it;
-    if (e.time == time_end) {
+    if (e.time == time_end()) {
       if (weighted) {
         center_sum += (e.coordinate * e.weight);
         center_count += e.weight;
@@ -109,70 +62,14 @@ void Cluster::analyze(bool weighted, uint16_t max_timebins,
   uncert_upper = uspan_max - uspan_min + 1;
 }
 
-uint32_t Cluster::utpc_center_rounded() const {
+uint32_t UtpcCluster::utpc_center_rounded() const {
   return static_cast<uint32_t>(std::round(utpc_center));
 }
 
-void Cluster::merge(Cluster &other) {
-  if (other.hits.empty()) {
-    return;
-  }
-
-  if (hits.empty()) {
-    *this = std::move(other);
-    return;
-  }
-
-  if (other.plane_id != plane_id) {
-    return;
-  }
-
-  hits.reserve( hits.size() + other.hits.size() ); // preallocate memory
-  hits.insert( hits.end(), other.hits.begin(), other.hits.end() );
-
-  adc_sum += other.adc_sum;
-  strip_mass += other.strip_mass;
-  time_mass += other.time_mass;
-  time_start = std::min(time_start, other.time_start);
-  time_end = std::max(time_end, other.time_end);
-  strip_start = std::min(strip_start, other.strip_start);
-  strip_end = std::max(strip_end, other.strip_end);
-}
-
-/// \todo Unit tests for this
-uint64_t Cluster::time_overlap(const Cluster &other) const {
-  auto latest_start = std::max(other.time_start, time_start);
-  auto earliest_end = std::min(other.time_end, time_end);
-  if (latest_start > earliest_end) {
-    return 0;
-  }
-  return earliest_end - latest_start;
-}
-
-/// \todo Precision of comparisons
-/// \todo Comments or helper methods
-bool Cluster::time_touch(const Cluster &other) const {
-  if ((other.time_start == other.time_end) &&
-      (time_start < other.time_end) && (other.time_end < time_end)) {
-    return true;
-  }
-  if ((time_start == time_end) &&
-      (other.time_start < time_end) && (time_end < other.time_end)) {
-    return true;
-  }
-  return ((time_start == other.time_end) ||
-      (time_end == other.time_start));
-}
-
-std::string Cluster::debug() const {
+std::string UtpcCluster::debug(bool verbose) const {
   std::stringstream ss;
-  ss << "    C=" << utpc_center << " +-" << uncert_lower << " (+-" << uncert_upper
-     << ")\n";
-  ss << "    T=(" << time_start << "-" << time_end << ")"
-     << " integral=" << adc_sum << "\n";
-  //  for (const auto& e : entries)
-  //    ss << e.debug() << "\n";
-  return ss.str();
+  ss << "Utpc_center=" << utpc_center << " +-" << uncert_lower << " (+-" << uncert_upper << ") ";
+  return ss.str() + Cluster::debug(verbose);
 }
 
 }

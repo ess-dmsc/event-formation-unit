@@ -76,18 +76,18 @@ protected:
     }
   }
 
-  Cluster mock_cluster(uint8_t plane, uint16_t strip_start, uint16_t strip_end,
+  UtpcCluster mock_cluster(uint8_t plane, uint16_t strip_start, uint16_t strip_end,
                        double time_start, double time_end) {
-    Cluster ret;
+    UtpcCluster ret;
     Hit e;
     e.plane = plane;
     e.weight = 1;
     double time_step = (time_end - time_start) / 10.0;
     for (e.time = time_start; e.time <= time_end; e.time += time_step)
       for (e.coordinate = strip_start; e.coordinate <= strip_end; ++e.coordinate)
-        ret.insert_hit(e);
+        ret.insert(e);
     e.time = time_end;
-    ret.insert_hit(e);
+    ret.insert(e);
     return ret;
   }
 

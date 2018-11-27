@@ -14,7 +14,7 @@
 namespace Gem {
 
 /// \todo pick a faster data structure
-using ClusterList = std::list<Cluster>;
+using ClusterList = std::list<UtpcCluster>;
 
 class AbstractClusterer {
 public:

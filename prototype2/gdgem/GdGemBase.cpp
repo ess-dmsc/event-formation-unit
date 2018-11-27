@@ -164,7 +164,7 @@ void GdGemBase::input_thread() {
 
 void bin(Hists& hists, const Gem::Event &e)
 {
-  uint32_t sum = e.x.adc_sum + e.y.adc_sum;
+  auto sum = e.x.weight_sum() + e.y.weight_sum();
   hists.bincluster(sum);
 }
 
@@ -177,7 +177,7 @@ void bin(Hists& hists, const Hit &e)
   }
 }
 
-void bin_hists(Hists& hists, const std::list<Gem::Cluster>& cl)
+void bin_hists(Hists& hists, const std::list<Gem::UtpcCluster>& cl)
 {
   for (const auto& cluster : cl)
     for (const auto& e : cluster.hits)
@@ -303,13 +303,13 @@ void GdGemBase::processing_thread() {
               /** \todo increments counters when failing this */
             }
           } else { /// no valid event
-            if (event.x.hits.size() != 0) {
+            if (event.x.hit_count() != 0) {
               mystats.clusters_x++;
             } else {
               mystats.clusters_y++;
             }
             mystats.readouts_discarded +=
-                event.x.hits.size() + event.y.hits.size();
+                event.x.hit_count() + event.y.hit_count();
             mystats.clusters_discarded++;
           }
         }
