@@ -17,40 +17,31 @@ namespace Gem {
 HitSorter::HitSorter(SRSTime time, SRSMappings chips, uint16_t ADCThreshold,
                      double maxTimeGap) :
     pTime(time), pChips(chips),
-    pADCThreshold(ADCThreshold),
-    hits(pTime, maxTimeGap) {
+    pADCThreshold(ADCThreshold) {
+  (void) maxTimeGap;
 
-}
-
-bool HitSorter::requires_analysis(double triggerTimestamp_ns) {
-  if (old_trigger_timestamp_ns_ != triggerTimestamp_ns) {
-    stats_trigger_count++;
-    return true;
-  }
-
-  return false;
 }
 
 void HitSorter::insert(const Readout &readout) {
 
-  double triggerTimestamp_ns =
-      pTime.trigger_timestamp_ns(readout.srs_timestamp);
-
-//  if (requires_analysis(triggerTimestamp_ns)) {
-//    XTRACE(PROCESS, DEB, "analysis required");
-//    analyze();
-//  }
-
-  if (old_trigger_timestamp_ns_ != triggerTimestamp_ns) {
+  if (old_trigger_timestamp_ != readout.srs_timestamp) {
     stats_trigger_count++;
   }
-  old_trigger_timestamp_ns_ = triggerTimestamp_ns;
+  old_trigger_timestamp_ = readout.srs_timestamp;
 
   /// \todo Move this check to parser?
   if (readout.over_threshold || (readout.adc >= pADCThreshold)) {
 
-    hits.store(pChips.get_plane(readout), pChips.get_strip(readout), readout.adc,
-               readout.chiptime, triggerTimestamp_ns);
+//    hits.store(pChips.get_plane(readout), pChips.get_strip(readout), readout.adc,
+//               readout.chiptime, triggerTimestamp_ns);
+
+    buffer.push_back(Hit());
+    auto &e = buffer.back();
+    e.plane_id = pChips.get_plane(readout);
+    e.adc = readout.adc;
+    e.strip = pChips.get_strip(readout);
+    e.time = readout.srs_timestamp + readout.chiptime;
+
     /// \todo who adds chipTime + trigger time? queue?
   }
 }
@@ -62,10 +53,15 @@ void HitSorter::flush() {
 }
 
 void HitSorter::analyze() {
-  hits.sort_and_correct();
+
+  std::sort(buffer.begin(), buffer.end(),
+            [](const Hit &e1, const Hit &e2) {
+              return e1.time < e2.time;
+            });
+
   if (clusterer)
-    clusterer->cluster(hits.hits());
-  hits.clear();
+    clusterer->cluster(buffer);
+  buffer.clear();
 }
 
 }

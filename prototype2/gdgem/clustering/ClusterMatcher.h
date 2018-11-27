@@ -15,7 +15,7 @@ namespace Gem {
 
 class ClusterMatcher {
 public:
-  explicit ClusterMatcher(double maxDeltaTime);
+  explicit ClusterMatcher(uint64_t maxDeltaTime);
 
   void merge(uint8_t plane, ClusterList &c);
 
@@ -32,13 +32,13 @@ public:
 private:
   double pMaxDeltaTime{0};
 
-  bool ready_to_be_matched(double time) const;
+  bool ready_to_be_matched(uint64_t time) const;
 
-  double delta_end(const Event &event, const Cluster &cluster) const;
+  uint64_t delta_end(const Event &event, const Cluster &cluster) const;
   bool belongs_end(const Event &event, const Cluster &cluster) const;
 
-  double latest_x{0};
-  double latest_y{0};
+  uint64_t latest_x{0};
+  uint64_t latest_y{0};
 };
 
 }

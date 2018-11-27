@@ -37,7 +37,7 @@ TEST_F(NMXHitTest, CompoundMapping) {
   auto ct = hdf5::datatype::Compound(t);
 
   EXPECT_EQ(ct.field_name(0), "time");
-  EXPECT_EQ(ct[0], hdf5::datatype::create<double>());
+  EXPECT_EQ(ct[0], hdf5::datatype::create<uint64_t>());
 
   EXPECT_EQ(ct.field_name(1), "plane_id");
   EXPECT_EQ(ct[1], hdf5::datatype::create<uint8_t>());

@@ -31,7 +31,7 @@ bool Event::empty() const
   return x.hits.empty() && y.hits.empty();
 }
 
-double Event::time_end() const
+uint64_t Event::time_end() const
 {
   if (x.hits.empty())
     return y.time_end;
@@ -40,7 +40,7 @@ double Event::time_end() const
   return std::max(x.time_end, y.time_end);
 }
 
-double Event::time_start() const
+uint64_t Event::time_start() const
 {
   if (x.hits.empty())
     return y.time_start;
@@ -49,11 +49,11 @@ double Event::time_start() const
   return std::min(x.time_start, y.time_start);
 }
 
-double Event::time_span() const {
+uint64_t Event::time_span() const {
   return (time_end() - time_start());
 }
 
-double Event::time_overlap(const Cluster &other) const {
+uint64_t Event::time_overlap(const Cluster &other) const {
   auto latest_start = std::max(other.time_start, time_start());
   auto earliest_end = std::min(other.time_end, time_end());
   if (latest_start > earliest_end)
@@ -61,7 +61,7 @@ double Event::time_overlap(const Cluster &other) const {
   return (earliest_end - latest_start);
 }
 
-bool Event::time_overlap_thresh(const Cluster &other, double thresh) const {
+bool Event::time_overlap_thresh(const Cluster &other, uint64_t thresh) const {
   auto ovr = time_overlap(other);
   return (((ovr / other.time_span()) + (ovr / time_span())) > thresh);
 }
@@ -90,7 +90,7 @@ bool Event::meets_lower_criterion(int16_t max_lu) const {
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }
 
-double Event::utpc_time() const {
+uint64_t Event::utpc_time() const {
   return utpc_time_;
 }
 

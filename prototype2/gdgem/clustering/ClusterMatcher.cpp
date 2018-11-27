@@ -16,17 +16,20 @@
 
 namespace Gem {
 
-ClusterMatcher::ClusterMatcher(double maxDeltaTime) : pMaxDeltaTime(maxDeltaTime) {
+ClusterMatcher::ClusterMatcher(uint64_t maxDeltaTime) : pMaxDeltaTime(maxDeltaTime) {
 }
 
-bool ClusterMatcher::ready_to_be_matched(double time) const {
+bool ClusterMatcher::ready_to_be_matched(uint64_t time) const {
   /// \todo Parametrize threshold
   return ((unmatched_clusters.size() > 2) &&
       (std::min(latest_x, latest_y) - time) > (pMaxDeltaTime * 3));
 }
 
-double ClusterMatcher::delta_end(const Event &event, const Cluster &cluster) const {
-  return std::abs(event.time_end() - cluster.time_end);
+uint64_t ClusterMatcher::delta_end(const Event &event, const Cluster &cluster) const {
+  if (event.time_end() > cluster.time_end)
+    return event.time_end() - cluster.time_end;
+  else
+    return cluster.time_end - event.time_end();
 }
 
 bool ClusterMatcher::belongs_end(const Event &event, const Cluster &cluster) const {

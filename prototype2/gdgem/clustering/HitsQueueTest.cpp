@@ -100,37 +100,37 @@ TEST_F(HitsQueueTest, PrintConfig) {
   MESSAGE() << "Test data config:\n" << opts.debug() << "\n";
 }
 
-TEST_F(HitsQueueTest, a1_notrigger) {
+TEST_F(HitsQueueTest, a1) {
   ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   regular_test(144,0);
 }
 
-TEST_F(HitsQueueTest, a1_chronological_no_trigger) {
+TEST_F(HitsQueueTest, a1_chronological) {
   ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   add_readouts();
   chronological_test_x(144);
   chronological_test_y(0);
 }
 
-TEST_F(HitsQueueTest, a10_notrigger)
+TEST_F(HitsQueueTest, a10)
 {
   ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   regular_test(558, 362);
 }
 
-TEST_F(HitsQueueTest, a10_chronological_no_trigger) {
+TEST_F(HitsQueueTest, a10_chronological) {
   ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   add_readouts();
   chronological_test_x(558);
   chronological_test_y(362);
 }
 
-TEST_F(HitsQueueTest, a100_notrigger) {
+TEST_F(HitsQueueTest, a100) {
   ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
   regular_test(84162, 42428);
 }
 
-TEST_F(HitsQueueTest, a100_chronological_no_trigger) {
+TEST_F(HitsQueueTest, a100_chronological) {
   ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
   add_readouts();
   chronological_test_x(84162);

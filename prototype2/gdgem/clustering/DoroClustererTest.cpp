@@ -102,8 +102,8 @@ TEST_F(DoroClustererTest, a100) {
   sorter_y->analyze();
 
   /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 19003);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9734);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 18710);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9732);
 }
 
 int main(int argc, char **argv) {

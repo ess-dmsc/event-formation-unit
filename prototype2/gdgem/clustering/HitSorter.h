@@ -29,18 +29,15 @@ public:
 
   void analyze();
 
+  HitContainer buffer;
+
  private:
   SRSTime pTime;
   SRSMappings pChips;
   uint16_t pADCThreshold;
-  HitsQueue hits;
-
-  HitContainer buffer;
 
   // This is in play for triggering the actual clustering
-  double old_trigger_timestamp_ns_{0};
-
-  bool requires_analysis(double triggerTimestamp_ns);
+  uint64_t old_trigger_timestamp_{0};
 };
 
 }

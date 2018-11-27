@@ -46,7 +46,7 @@ struct __attribute__ ((packed)) Hit {
 
   /// \todo consider reordering these to optimize
   /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
-  double time{0};
+  uint64_t time{0};
   uint8_t plane_id{0};
   uint16_t strip{0};
   uint16_t adc{0};

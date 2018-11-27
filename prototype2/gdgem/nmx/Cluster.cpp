@@ -40,7 +40,7 @@ bool Cluster::empty() const
   return hits.empty();
 }
 
-double Cluster::time_span() const {
+uint64_t Cluster::time_span() const {
   return time_end - time_start;
 }
 
@@ -77,8 +77,8 @@ void Cluster::analyze(bool weighted, uint16_t max_timebins,
   int16_t lspan_max = std::numeric_limits<int16_t>::min();
   int16_t uspan_min = std::numeric_limits<int16_t>::max();
   int16_t uspan_max = std::numeric_limits<int16_t>::min();
-  double earliest = std::min(time_start, time_end - static_cast<double>(max_timedif));
-  std::set<double> timebins;
+  uint64_t earliest = std::min(time_start, time_end - static_cast<uint64_t>(max_timedif));
+  std::set<uint64_t> timebins;
   for (auto it = hits.rbegin(); it != hits.rend(); ++it) {
     auto e = *it;
     if (e.time == time_end) {
@@ -140,7 +140,7 @@ void Cluster::merge(Cluster &other) {
 }
 
 /// \todo Unit tests for this
-double Cluster::time_overlap(const Cluster &other) const {
+uint64_t Cluster::time_overlap(const Cluster &other) const {
   auto latest_start = std::max(other.time_start, time_start);
   auto earliest_end = std::min(other.time_end, time_end);
   if (latest_start > earliest_end) {

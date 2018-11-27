@@ -32,9 +32,9 @@ struct Cluster {
   uint16_t strip_end{0};
   uint16_t strip_span() const;
 
-  double time_start{0};
-  double time_end{0};
-  double time_span() const;
+  uint64_t time_start{0};
+  uint64_t time_end{0};
+  uint64_t time_span() const;
 
   double adc_sum{0.0};
 
@@ -45,7 +45,7 @@ struct Cluster {
   double time_center() const;
 
   void merge(Cluster &other);
-  double time_overlap(const Cluster &other) const;
+  uint64_t time_overlap(const Cluster &other) const;
   bool time_touch(const Cluster &other) const;
 
   /// \brief analyzes particle track

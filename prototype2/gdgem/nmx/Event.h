@@ -28,11 +28,11 @@ public:
 
   bool empty() const;
 
-  double time_end() const;
-  double time_start() const;
-  double time_span() const;
-  double time_overlap(const Cluster &other) const;
-  bool time_overlap_thresh(const Cluster &other, double thresh) const;
+  uint64_t time_end() const;
+  uint64_t time_start() const;
+  uint64_t time_span() const;
+  uint64_t time_overlap(const Cluster &other) const;
+  bool time_overlap_thresh(const Cluster &other, uint64_t thresh) const;
 
   /// \brief analyzes particle track
   /// \param weighted determine entry strip using weighted average
@@ -46,7 +46,7 @@ public:
   bool valid() const;
 
   /// \brief returns timestamp for start of event (earlier of 2 planes)
-  double utpc_time() const;
+  uint64_t utpc_time() const;
 
   /// \brief indicates if both dimensions meet lower uncertainty criterion
   bool meets_lower_criterion(int16_t max_lu) const;
@@ -57,7 +57,7 @@ public:
 
 private:
   bool valid_{false};   /// event has valid entry strips in both planes
-  double utpc_time_{0}; /// start of event timestamp (earlier of 2 planes)
+  uint64_t utpc_time_{0}; /// start of event timestamp (earlier of 2 planes)
 };
 
 }
