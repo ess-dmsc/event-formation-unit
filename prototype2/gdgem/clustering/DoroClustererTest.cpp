@@ -46,34 +46,29 @@ protected:
   virtual void TearDown() {
   }
 
-  void store_hit(const Readout& readout)
-  {
-    uint8_t plane = opts.srs_mappings.get_plane(readout);
-    EXPECT_LT(plane, 2) << "fec:" << int(readout.fec)
-                        << " chip:" << int(readout.chip_id) << "\n";
-    if (plane == 0) {
-      sorter_x->insert(readout);
-    }
-    if (plane == 1) {
-      sorter_y->insert(readout);
+  void add_readouts() {
+    for (const auto& readout : readouts) {
+      auto plane = opts.srs_mappings.get_plane(readout);
+      EXPECT_LT(plane, 2) << "BAD PLANE"
+                          << " fec:" << int(readout.fec)
+                          << " chip:" << int(readout.chip_id) << "\n";
+
+      if (plane == 0) {
+        sorter_x->insert(readout);
+      }
+      if (plane == 1) {
+        sorter_y->insert(readout);
+      }
     }
   }
+
 };
 
 TEST_F(DoroClustererTest, a1) {
   ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   EXPECT_EQ(readouts.size(), 144);
 
-  uint64_t bonus = 0;
-  uint64_t old = 0;
-  for (auto readout : readouts) {
-    if (readout.srs_timestamp < old)
-      bonus++;
-    old = readout.srs_timestamp;
-    /// \todo this hack should not be necessary!
-    readout.srs_timestamp += (bonus << 42);
-    store_hit(readout);
-  }
+  add_readouts();
 
   /// \todo I don't trust these results anymore, please validate
   EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 16);
@@ -88,16 +83,7 @@ TEST_F(DoroClustererTest, a10) {
   ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   EXPECT_EQ(readouts.size(), 920);
 
-  uint64_t bonus = 0;
-  uint64_t old = 0;
-  for (auto readout : readouts) {
-    if (readout.srs_timestamp < old)
-      bonus++;
-    old = readout.srs_timestamp;
-    /// \todo this hack should not be necessary!
-    readout.srs_timestamp += (bonus << 42);
-    store_hit(readout);
-  }
+  add_readouts();
 
   /// \todo I don't trust these results anymore, please validate
   EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 94);
@@ -112,24 +98,15 @@ TEST_F(DoroClustererTest, a100) {
   ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
   EXPECT_EQ(readouts.size(), 126590);
 
-  uint64_t bonus = 0;
-  uint64_t old = 0;
-  for (auto readout : readouts) {
-    if (readout.srs_timestamp < old)
-      bonus++;
-    old = readout.srs_timestamp;
-    /// \todo this hack should not be necessary!
-    readout.srs_timestamp += (bonus << 42);
-    store_hit(readout);
-  }
+  add_readouts();
 
   /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 18986);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9727);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 18998);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9730);
   sorter_x->flush();
   sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 18991);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9731);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 19003);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9734);
 }
 
 int main(int argc, char **argv) {
