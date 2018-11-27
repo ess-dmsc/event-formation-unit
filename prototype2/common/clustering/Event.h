@@ -44,6 +44,8 @@ public:
   /// \param hit to be added
   void insert(const Hit &e);
 
+  // \todo hit_count() const
+
   /// \brief merges a cluster into event.
   ///        Merges the cluster into the appropriate plane.
   ///        If plane is not of two selected planes, nothing is done.

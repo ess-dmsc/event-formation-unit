@@ -162,9 +162,9 @@ void GdGemBase::input_thread() {
   }
 }
 
-void bin(Hists& hists, const Gem::Event &e)
+void bin(Hists& hists, const Event &e)
 {
-  auto sum = e.x.weight_sum() + e.y.weight_sum();
+  auto sum = e.c1.weight_sum() + e.c2.weight_sum();
   hists.bincluster(sum);
 }
 
@@ -177,7 +177,7 @@ void bin(Hists& hists, const Hit &e)
   }
 }
 
-void bin_hists(Hists& hists, const std::list<Gem::UtpcCluster>& cl)
+void bin_hists(Hists& hists, const std::list<Cluster>& cl)
 {
   for (const auto& cluster : cl)
     for (const auto& e : cluster.hits)
@@ -216,7 +216,12 @@ void GdGemBase::processing_thread() {
 
   TSCTimer global_time, report_timer;
 
-  Gem::Event event;
+  Gem::utpcAnalyzer utpc_analyzer(nmx_opts.analyze_weighted,
+                                  nmx_opts.analyze_max_timebins,
+                                  nmx_opts.analyze_max_timedif);
+  Gem::utpcResults utpc_x, utpc_y;
+
+  Event event;
   uint32_t time;
   uint32_t pixelid;
 
@@ -263,36 +268,36 @@ void GdGemBase::processing_thread() {
 
           // mystats.unclustered = clusterer.unclustered();
 
-          event.analyze(nmx_opts.analyze_weighted,
-                        nmx_opts.analyze_max_timebins,
-                        nmx_opts.analyze_max_timedif);
+          utpc_x = utpc_analyzer.analyze(event.c1);
+          utpc_y = utpc_analyzer.analyze(event.c2);
 
           if (nmx_opts.hit_histograms) {
             bin(hists, event);
           }
 
-          if (event.valid()) {
+          if (event.both_planes()) {
             XTRACE(PROCESS, DEB, "event.good");
 
             mystats.clusters_xy++;
 
             /// \todo Should it be here or outside of event.valid()?
             if (sample_next_track) {
-              sample_next_track = !track_serializer.add_track(event);
+              sample_next_track = !track_serializer.add_track(event,
+                  utpc_x.utpc_center, utpc_y.utpc_center);
             }
 
             XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
-                   event.x.utpc_center_rounded(),
-                   event.y.utpc_center_rounded());
+                   utpc_x.utpc_center_rounded(),
+                   utpc_y.utpc_center_rounded());
 
-            if (nmx_opts.filter.valid(event)) {
+            if (nmx_opts.filter.valid(event, utpc_x, utpc_y)) {
               pixelid = nmx_opts.geometry.pixel2D(
-                  event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
+                  utpc_x.utpc_center_rounded(), utpc_y.utpc_center_rounded());
 
               if (!nmx_opts.geometry.valid_id(pixelid)) {
                 mystats.geom_errors++;
               } else {
-                time = static_cast<uint32_t>(event.utpc_time());
+                time = static_cast<uint32_t>(utpc_analyzer.utpc_time(event.c1, event.c2));
 
                 XTRACE(PROCESS, DEB, "time: %d, pixelid %d", time, pixelid);
 
@@ -303,13 +308,13 @@ void GdGemBase::processing_thread() {
               /** \todo increments counters when failing this */
             }
           } else { /// no valid event
-            if (event.x.hit_count() != 0) {
+            if (event.c1.hit_count() != 0) {
               mystats.clusters_x++;
             } else {
               mystats.clusters_y++;
             }
             mystats.readouts_discarded +=
-                event.x.hit_count() + event.y.hit_count();
+                event.c1.hit_count() + event.c2.hit_count();
             mystats.clusters_discarded++;
           }
         }

@@ -6,9 +6,9 @@ set(pipeline_common_source
     GdGemBase.cpp
     NMXConfig.cpp
     nmx/Cluster.cpp
-    nmx/Event.cpp
     ../common/clustering/Hit.cpp
     ../common/clustering/Cluster.cpp
+    ../common/clustering/Event.cpp
     ../common/Hists.cpp
     ../common/HistSerializer.cpp
     nmx/TrackSerializer.cpp
@@ -28,9 +28,9 @@ set(pipeline_common_inc
     GdGemBase.h
     NMXConfig.h
     nmx/Cluster.h
-    nmx/Event.h
     ../common/clustering/Hit.h
     ../common/clustering/Cluster.h
+    ../common/clustering/Event.cpp
     ../common/Hists.h
     nmx/Readout.h
     ../common/HistSerializer.h
@@ -56,8 +56,21 @@ create_module(gdgem)
 #
 # Unit Tests
 #
-set(NMXConfigTest_INC NMXConfig.h srs/SRSTime.h srs/SRSMappings.h vmm3/CalibrationFile.cpp)
-set(NMXConfigTest_SRC NMXConfigTest.cpp NMXConfig.cpp srs/SRSTime.cpp srs/SRSMappings.cpp vmm3/CalibrationFile.cpp nmx/Event.cpp nmx/Cluster.cpp)
+set(NMXConfigTest_INC
+  NMXConfig.h
+  srs/SRSTime.h
+  srs/SRSMappings.h
+  vmm3/CalibrationFile.cpp
+  )
+set(NMXConfigTest_SRC
+  NMXConfigTest.cpp
+  NMXConfig.cpp
+  srs/SRSTime.cpp
+  srs/SRSMappings.cpp
+  vmm3/CalibrationFile.cpp
+  nmx/Cluster.cpp
+  ../common/clustering/Event.cpp
+  )
 create_test_executable(NMXConfigTest)
 
 set(GdGemBaseTest_INC

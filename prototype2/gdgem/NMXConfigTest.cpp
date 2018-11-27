@@ -42,11 +42,11 @@ TEST_F(NMXConfigTest, EventFilter) {
   Event e; // use empty Event
   filter.enforce_lower_uncertainty_limit = false;
   filter.enforce_minimum_hits = false;
-  ASSERT_TRUE(filter.valid(e));
+  ASSERT_TRUE(filter.valid(e, utpcResults(), utpcResults()));
 
   filter.enforce_lower_uncertainty_limit = false;
   filter.enforce_minimum_hits = true;
-  ASSERT_FALSE(filter.valid(e));
+  ASSERT_FALSE(filter.valid(e, utpcResults(), utpcResults()));
 
   /// \todo test this behaviour
   // filter.enforce_lower_uncertainty_limit = true;

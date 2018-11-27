@@ -11,7 +11,8 @@
 #include <logical_geometry/ESSGeometry.h>
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
-#include <gdgem/nmx/Event.h>
+#include <common/clustering/Event.h>
+#include <gdgem/nmx/Cluster.h>
 #include <gdgem/vmm3/CalibrationFile.h>
 #include <memory>
 #include <string>
@@ -36,15 +37,15 @@ struct EventFilter {
   size_t minimum_hits_dropped{0};
 
   /// \todo bug? uncertainty takes precedence if both enforce options are true
-  bool valid(Event &event) {
+  bool valid(Event &event, const utpcResults& x, const utpcResults& y) {
     if (enforce_lower_uncertainty_limit &&
-        !event.meets_lower_criterion(lower_uncertainty_limit)) {
+        !utpcAnalyzer::meets_lower_criterion(x, y, lower_uncertainty_limit)) {
       lower_uncertainty_dropped++;
       return false;
     }
     if (enforce_minimum_hits &&
-            ((event.x.hit_count() < minimum_hits) ||
-                (event.y.hit_count() < minimum_hits))) {
+            ((event.c1.hit_count() < minimum_hits) ||
+                (event.c2.hit_count() < minimum_hits))) {
       minimum_hits_dropped++;
       return false;
     }

@@ -25,14 +25,14 @@ bool ClusterMatcher::ready_to_be_matched(uint64_t time) const {
       (std::min(latest_x, latest_y) - time) > (pMaxDeltaTime * 3));
 }
 
-uint64_t ClusterMatcher::delta_end(const Event &event, const UtpcCluster &cluster) const {
+uint64_t ClusterMatcher::delta_end(const Event &event, const Cluster &cluster) const {
   if (event.time_end() > cluster.time_end())
     return event.time_end() - cluster.time_end();
   else
     return cluster.time_end() - event.time_end();
 }
 
-bool ClusterMatcher::belongs_end(const Event &event, const UtpcCluster &cluster) const {
+bool ClusterMatcher::belongs_end(const Event &event, const Cluster &cluster) const {
   return (delta_end(event, cluster) <= pMaxDeltaTime);
 }
 
@@ -50,7 +50,7 @@ void ClusterMatcher::merge(uint8_t plane, ClusterList &c) {
 
 void ClusterMatcher::match_end(bool force) {
   /// \todo is it already sorted?
-  unmatched_clusters.sort([](const UtpcCluster &c1, const UtpcCluster &c2) {
+  unmatched_clusters.sort([](const Cluster &c1, const Cluster &c2) {
     return c1.time_end() < c2.time_end();
   });
 

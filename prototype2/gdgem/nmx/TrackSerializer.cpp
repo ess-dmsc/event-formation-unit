@@ -26,34 +26,34 @@ void TrackSerializer::set_callback(ProducerCallback cb) {
   producer_callback = cb;
 }
 
-bool TrackSerializer::add_track(const Event &event) {
-  if ((event.x.hit_count() < minhits_) ||
-      (event.y.hit_count() < minhits_)) {
+bool TrackSerializer::add_track(const Event &event, double utpc_x, double utpc_y) {
+  if ((event.c1.hit_count() < minhits_) ||
+      (event.c2.hit_count() < minhits_)) {
     return false;
   }
 
-  if ((event.x.hit_count() > maxlen) || (event.y.hit_count() > maxlen)) {
+  if ((event.c1.hit_count() > maxlen) || (event.c2.hit_count() > maxlen)) {
     return false;
   }
 
   time_offset = event.time_start();
 
-  for (auto &evx : event.x.hits) {
+  for (auto &evx : event.c1.hits) {
     xtrack.push_back(
         Createpos(builder,
                   static_cast<uint16_t>((evx.time - time_offset) * target_resolution_),
                   evx.coordinate, evx.weight));
   }
 
-  for (auto &evy : event.y.hits) {
+  for (auto &evy : event.c2.hits) {
     ytrack.push_back(
         Createpos(builder,
                   static_cast<uint16_t>((evy.time - time_offset) * target_resolution_),
                   evy.coordinate, evy.weight));
   }
 
-  xpos = event.x.utpc_center;
-  ypos = event.y.utpc_center;
+  xpos = utpc_x;
+  ypos = utpc_y;
 
   if (producer_callback) {
     auto buffer = serialize();

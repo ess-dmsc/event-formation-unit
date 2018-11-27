@@ -11,7 +11,7 @@
 
 #include "mo01_nmx_generated.h"
 
-#include <gdgem/nmx/Event.h>
+#include <common/clustering/Event.h>
 #include <common/Producer.h>
 
 namespace Gem {
@@ -26,7 +26,7 @@ public:
 
   /// \todo document
   /// \returns success
-  bool add_track(const Event &event);
+  bool add_track(const Event &event, double utpc_x, double utpc_y);
 
   /// \todo document
   Buffer<uint8_t> serialize();

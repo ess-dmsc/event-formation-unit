@@ -76,9 +76,9 @@ protected:
     }
   }
 
-  UtpcCluster mock_cluster(uint8_t plane, uint16_t strip_start, uint16_t strip_end,
+  Cluster mock_cluster(uint8_t plane, uint16_t strip_start, uint16_t strip_end,
                        double time_start, double time_end) {
-    UtpcCluster ret;
+    Cluster ret;
     Hit e;
     e.plane = plane;
     e.weight = 1;
@@ -98,9 +98,9 @@ TEST_F(ClusterMatcherTest, OneX) {
   matcher->match_end(true);
   EXPECT_EQ(matcher->stats_cluster_count, 1);
   EXPECT_EQ(matcher->matched_clusters.size(), 1);
-  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 201);
+  EXPECT_EQ(matcher->matched_clusters.front().c1.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().c2.hits.size(), 0);
 }
 
 TEST_F(ClusterMatcherTest, OneY) {
@@ -108,9 +108,9 @@ TEST_F(ClusterMatcherTest, OneY) {
   matcher->match_end(true);
   EXPECT_EQ(matcher->stats_cluster_count, 1);
   EXPECT_EQ(matcher->matched_clusters.size(), 1);
-  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 0);
-  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 201);
+  EXPECT_EQ(matcher->matched_clusters.front().c1.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.front().c2.hits.size(), 122);
 }
 
 TEST_F(ClusterMatcherTest, TwoX) {
@@ -119,12 +119,12 @@ TEST_F(ClusterMatcherTest, TwoX) {
   matcher->match_end(true);
   EXPECT_EQ(matcher->stats_cluster_count, 2);
   EXPECT_EQ(matcher->matched_clusters.size(), 2);
-  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.back().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 0);
-  EXPECT_EQ(matcher->matched_clusters.back().x.hits.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.back().y.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 201);
+  EXPECT_EQ(matcher->matched_clusters.back().time_span(), 201);
+  EXPECT_EQ(matcher->matched_clusters.front().c1.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().c2.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.back().c1.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.back().c2.hits.size(), 0);
 }
 
 TEST_F(ClusterMatcherTest, TwoY) {
@@ -133,12 +133,12 @@ TEST_F(ClusterMatcherTest, TwoY) {
   matcher->match_end(true);
   EXPECT_EQ(matcher->stats_cluster_count, 2);
   EXPECT_EQ(matcher->matched_clusters.size(), 2);
-  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.back().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 0);
-  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.back().x.hits.size(), 0);
-  EXPECT_EQ(matcher->matched_clusters.back().y.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 201);
+  EXPECT_EQ(matcher->matched_clusters.back().time_span(), 201);
+  EXPECT_EQ(matcher->matched_clusters.front().c1.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.front().c2.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.back().c1.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.back().c2.hits.size(), 122);
 }
 
 TEST_F(ClusterMatcherTest, OneXOneY) {
@@ -147,12 +147,12 @@ TEST_F(ClusterMatcherTest, OneXOneY) {
   matcher->match_end(true);
   EXPECT_EQ(matcher->stats_cluster_count, 2);
   EXPECT_EQ(matcher->matched_clusters.size(), 2);
-  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.back().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 0);
-  EXPECT_EQ(matcher->matched_clusters.back().x.hits.size(), 0);
-  EXPECT_EQ(matcher->matched_clusters.back().y.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 201);
+  EXPECT_EQ(matcher->matched_clusters.back().time_span(), 201);
+  EXPECT_EQ(matcher->matched_clusters.front().c1.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().c2.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.back().c1.hits.size(), 0);
+  EXPECT_EQ(matcher->matched_clusters.back().c2.hits.size(), 122);
 }
 
 TEST_F(ClusterMatcherTest, OneXY) {
@@ -161,9 +161,9 @@ TEST_F(ClusterMatcherTest, OneXY) {
   matcher->match_end(true);
   EXPECT_EQ(matcher->stats_cluster_count, 1);
   EXPECT_EQ(matcher->matched_clusters.size(), 1);
-  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 200);
-  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 201);
+  EXPECT_EQ(matcher->matched_clusters.front().c1.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().c2.hits.size(), 122);
 }
 
 TEST_F(ClusterMatcherTest, TwoXY) {
@@ -174,12 +174,12 @@ TEST_F(ClusterMatcherTest, TwoXY) {
   matcher->match_end(true);
   EXPECT_EQ(matcher->stats_cluster_count, 2);
   EXPECT_EQ(matcher->matched_clusters.size(), 2);
-  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 300);
-  EXPECT_EQ(matcher->matched_clusters.back().time_span(), 250);
-  EXPECT_EQ(matcher->matched_clusters.front().x.hits.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.front().y.hits.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.back().x.hits.size(), 122);
-  EXPECT_EQ(matcher->matched_clusters.back().y.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().time_span(), 301);
+  EXPECT_EQ(matcher->matched_clusters.back().time_span(), 251);
+  EXPECT_EQ(matcher->matched_clusters.front().c1.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.front().c2.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.back().c1.hits.size(), 122);
+  EXPECT_EQ(matcher->matched_clusters.back().c2.hits.size(), 122);
 }
 
 TEST_F(ClusterMatcherTest, JustIntside) {

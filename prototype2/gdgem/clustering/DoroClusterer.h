@@ -25,7 +25,7 @@ private:
 
   void cluster_by_time(const HitContainer &oldHits);
   void cluster_by_strip(HitContainer &cluster);
-  void stash_cluster(UtpcCluster &plane);
+  void stash_cluster(Cluster &plane);
 };
 
 }

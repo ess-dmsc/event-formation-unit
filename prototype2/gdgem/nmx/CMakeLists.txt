@@ -20,18 +20,6 @@ set(NMXEventTest_INC
   )
 create_test_executable(NMXClusterTest)
 
-set(NMXEventTest_SRC
-  EventTest.cpp
-  Cluster.cpp
-  Event.cpp
-  )
-set(NMXEventTest_INC
-  ../../common/clustering/Hit.h
-  Cluster.h
-  Event.h
-  )
-create_test_executable(NMXEventTest)
-
 set(HistSerializerTest_SRC
   ../../common/Hists.cpp
   ../../common/HistSerializerTest.cpp
@@ -47,14 +35,14 @@ create_test_executable(HistSerializerTest)
 
 set(TrackSerializerTest_SRC
   ../../common/clustering/Hit.cpp
+  ../../common/clustering/Event.cpp
   Cluster.cpp
-  Event.cpp
   TrackSerializerTest.cpp
   TrackSerializer.cpp
   )
 set(TrackSerializerTest_INC
   ../../common/clustering/Hit.h
-  Event.h
+  ../../common/clustering/Event.h
   Cluster.h
   TrackSerializer.h
   )

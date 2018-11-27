@@ -8,7 +8,6 @@ set(TEST_DATA_PATH "${REFDATA}/gdgem/2018_11")
 
 set(ClusteringBase_SRC
   ../NMXConfig.cpp
-  ../nmx/Event.cpp
   ../nmx/Cluster.cpp
   ../../common/clustering/Hit.cpp
   ../srs/SRSTime.cpp
@@ -20,7 +19,6 @@ set(ClusteringBase_SRC
   )
 set(ClusteringBase_INC
   ../NMXConfig.h
-  ../nmx/Event.h
   ../nmx/Readout.h
   ../nmx/Cluster.h
   ../../common/clustering/Hit.h

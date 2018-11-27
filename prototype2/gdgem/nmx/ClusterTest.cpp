@@ -11,15 +11,14 @@ using namespace Gem;
 class ClusterTest : public TestBase {
 protected:
   Hit e;
-  UtpcCluster cluster;
+  Cluster cluster;
   virtual void SetUp() { }
   virtual void TearDown() { }
 };
 
 TEST_F(ClusterTest, AnalyzeInvalid) {
-  EXPECT_TRUE(std::isnan(cluster.utpc_center));
-  cluster.analyze(false, 2, 2);
-  EXPECT_TRUE(std::isnan(cluster.utpc_center));
+  auto result = utpcAnalyzer(false, 2, 2).analyze(cluster);
+  EXPECT_TRUE(std::isnan(result.utpc_center));
 }
 
 TEST_F(ClusterTest, AnalyzeAverage) {
@@ -27,20 +26,20 @@ TEST_F(ClusterTest, AnalyzeAverage) {
   e.coordinate = 0;
   e.weight = 2;
   cluster.insert(e);
-  cluster.analyze(false, 1, 1);
-  EXPECT_EQ(cluster.utpc_center, 0);
+  auto result = utpcAnalyzer(false, 1, 1).analyze(cluster);
+  EXPECT_EQ(result.utpc_center, 0);
   e.coordinate = 1;
   e.weight = 4;
   cluster.insert(e);
   e.coordinate = 2;
   e.weight = 4;
   cluster.insert(e);
-  cluster.analyze(false, 1, 1);
+  result = utpcAnalyzer(false, 1, 1).analyze(cluster);
   EXPECT_EQ(cluster.hit_count(), 3);
-  EXPECT_EQ(cluster.utpc_center, 1);
-  cluster.analyze(true, 1, 1);
-  EXPECT_EQ(cluster.utpc_center, 1.2);
-  EXPECT_EQ(cluster.utpc_center_rounded(), 1);
+  EXPECT_EQ(result.utpc_center, 1);
+  result = utpcAnalyzer(true, 1, 1).analyze(cluster);
+  EXPECT_EQ(result.utpc_center, 1.2);
+  EXPECT_EQ(result.utpc_center_rounded(), 1);
 }
 
 TEST_F(ClusterTest, AnalyzeUncert) {
@@ -53,30 +52,30 @@ TEST_F(ClusterTest, AnalyzeUncert) {
   e.time = e.coordinate = 2;
   cluster.insert(e);
 
-  cluster.analyze(true, 1, 1);
-  EXPECT_EQ(cluster.utpc_center, 2);
-  EXPECT_EQ(cluster.uncert_lower, 1);
-  EXPECT_EQ(cluster.uncert_upper, 1);
+  auto result = utpcAnalyzer(true, 1, 1).analyze(cluster);
+  EXPECT_EQ(result.utpc_center, 2);
+  EXPECT_EQ(result.uncert_lower, 1);
+  EXPECT_EQ(result.uncert_upper, 1);
 
-  cluster.analyze(true, 2, 2);
-  EXPECT_EQ(cluster.utpc_center, 2);
-  EXPECT_EQ(cluster.uncert_lower, 1);
-  EXPECT_EQ(cluster.uncert_upper, 2);
+  result = utpcAnalyzer(true, 2, 2).analyze(cluster);
+  EXPECT_EQ(result.utpc_center, 2);
+  EXPECT_EQ(result.uncert_lower, 1);
+  EXPECT_EQ(result.uncert_upper, 2);
 
   e.coordinate = 31;
   cluster.insert(e);
-  cluster.analyze(true, 2, 2);
-  EXPECT_EQ(cluster.utpc_center, 16.5);
-  EXPECT_EQ(cluster.uncert_lower, 30);
-  EXPECT_EQ(cluster.uncert_upper, 31);
+  result = utpcAnalyzer(true, 2, 2).analyze(cluster);
+  EXPECT_EQ(result.utpc_center, 16.5);
+  EXPECT_EQ(result.uncert_lower, 30);
+  EXPECT_EQ(result.uncert_upper, 31);
 
-  cluster.analyze(true, 5, 5);
-  EXPECT_EQ(cluster.utpc_center, 16.5);
-  EXPECT_EQ(cluster.uncert_lower, 30);
-  EXPECT_EQ(cluster.uncert_upper, 32);
+  result = utpcAnalyzer(true, 5, 5).analyze(cluster);
+  EXPECT_EQ(result.utpc_center, 16.5);
+  EXPECT_EQ(result.uncert_lower, 30);
+  EXPECT_EQ(result.uncert_upper, 32);
 
-  EXPECT_EQ(cluster.utpc_center, 16.5);
-  EXPECT_EQ(cluster.utpc_center_rounded(), 17);
+  EXPECT_EQ(result.utpc_center, 16.5);
+  EXPECT_EQ(result.utpc_center_rounded(), 17);
 }
 
 /// \todo cluster plane identity tests

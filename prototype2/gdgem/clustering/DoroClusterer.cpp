@@ -44,7 +44,7 @@ void DoroClusterer::cluster_by_time(const HitContainer &hits) {
 
 //====================================================================================================================
 void DoroClusterer::cluster_by_strip(HitContainer &hits) {
-  UtpcCluster cluster;
+  Cluster cluster;
 
   std::sort(hits.begin(), hits.end(),
             [](const Hit &e1, const Hit &e2) {
@@ -56,7 +56,7 @@ void DoroClusterer::cluster_by_strip(HitContainer &hits) {
     if (!cluster.empty() &&
         (hit.coordinate - cluster.coord_end()) > (pMaxStripGap + 1)) {
       stash_cluster(cluster);
-      cluster = UtpcCluster();
+      cluster = Cluster();
     }
 
     // insert in either case
@@ -67,7 +67,7 @@ void DoroClusterer::cluster_by_strip(HitContainer &hits) {
   stash_cluster(cluster);
 }
 //====================================================================================================================
-void DoroClusterer::stash_cluster(UtpcCluster &cluster) {
+void DoroClusterer::stash_cluster(Cluster &cluster) {
   if (cluster.hits.size() < pMinClusterSize)
     return;
 

@@ -16,6 +16,8 @@ protected:
   virtual void TearDown() {  }
 };
 
+// \todo reuse only the utpc tests
+
 TEST_F(EventTest, Insert) {
   event.insert_hit(e);
   EXPECT_EQ(event.x.hit_count(), 1);
@@ -31,7 +33,7 @@ TEST_F(EventTest, Empty) {
 }
 
 TEST_F(EventTest, Merge) {
-  UtpcCluster x;
+  Cluster x;
   e.plane = 0;
   x.insert(e);
   x.insert(e);
@@ -41,7 +43,7 @@ TEST_F(EventTest, Merge) {
 }
 
 TEST_F(EventTest, MergeTwice) {
-  UtpcCluster x;
+  Cluster x;
   e.plane = 0;
 
   x.insert(e);
@@ -58,7 +60,7 @@ TEST_F(EventTest, MergeTwice) {
 }
 
 TEST_F(EventTest, MergeXY) {
-  UtpcCluster x, y;
+  Cluster x, y;
 
   e.plane = 0;
   x.insert(e);
@@ -75,7 +77,7 @@ TEST_F(EventTest, MergeXY) {
 }
 
 TEST_F(EventTest, TimeSpan) {
-  UtpcCluster x, y;
+  Cluster x, y;
 
   e.plane = 0;
   e.time = 3; x.insert(e);
@@ -94,14 +96,18 @@ TEST_F(EventTest, TimeSpan) {
 
 TEST_F(EventTest, AnalyzeBadY) {
   event.insert_hit(e);
-  event.analyze(true, 5, 5);
+//  auto result_x = utpcAnalyzer(true, 5, 5).analyze(event.x);
+//  auto result_y = utpcAnalyzer(true, 5, 5).analyze(event.y);
+
   EXPECT_FALSE(event.valid());
 }
 
 TEST_F(EventTest, AnalyzeBadX) {
   e.plane = 1;
   event.insert_hit(e);
-  event.analyze(true, 5, 5);
+//  auto result_x = utpcAnalyzer(true, 5, 5).analyze(event.x);
+//  auto result_y = utpcAnalyzer(true, 5, 5).analyze(event.y);
+
   EXPECT_FALSE(event.valid());
 }
 
@@ -109,7 +115,9 @@ TEST_F(EventTest, AnalyzeGood) {
   event.insert_hit(e);
   e.plane = 1;
   event.insert_hit(e);
-  event.analyze(true, 5, 5);
+//  auto result_x = utpcAnalyzer(true, 5, 5).analyze(event.x);
+//  auto result_y = utpcAnalyzer(true, 5, 5).analyze(event.y);
+
   EXPECT_TRUE(event.valid());
 }
 
@@ -128,7 +136,10 @@ TEST_F(EventTest, DebugPrint) {
   event.insert_hit(e);
   e.plane = 1;
   event.insert_hit(e);
-  event.analyze(true, 5, 5);
+
+//  auto result_x = utpcAnalyzer(true, 5, 5).analyze(event.x);
+//  auto result_y = utpcAnalyzer(true, 5, 5).analyze(event.y);
+
   auto debugstr = event.debug();
   MESSAGE() << debugstr << "\n";
 }
