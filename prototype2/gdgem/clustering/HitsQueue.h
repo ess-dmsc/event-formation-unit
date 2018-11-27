@@ -23,11 +23,11 @@ public:
 
   const HitContainer &hits() const;
 
+  void clear();
+
 private:
   // tripple buffer
 
-  HitContainer hitsOld;
-  HitContainer hitsNew;
   HitContainer hitsOut;
 
   SRSTime pTime;

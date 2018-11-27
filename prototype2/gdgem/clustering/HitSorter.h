@@ -27,7 +27,9 @@ public:
 
   std::shared_ptr<AbstractClusterer> clusterer;
 
-private:
+  void analyze();
+
+ private:
   SRSTime pTime;
   SRSMappings pChips;
   uint16_t pADCThreshold;
@@ -39,8 +41,6 @@ private:
   double old_trigger_timestamp_ns_{0};
 
   bool requires_analysis(double triggerTimestamp_ns);
-
-  void analyze();
 };
 
 }

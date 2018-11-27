@@ -36,9 +36,13 @@ void HitSorter::insert(const Readout &readout) {
   double triggerTimestamp_ns =
       pTime.trigger_timestamp_ns(readout.srs_timestamp);
 
-  if (requires_analysis(triggerTimestamp_ns)) {
-    XTRACE(PROCESS, DEB, "analysis required");
-    analyze();
+//  if (requires_analysis(triggerTimestamp_ns)) {
+//    XTRACE(PROCESS, DEB, "analysis required");
+//    analyze();
+//  }
+
+  if (old_trigger_timestamp_ns_ != triggerTimestamp_ns) {
+    stats_trigger_count++;
   }
   old_trigger_timestamp_ns_ = triggerTimestamp_ns;
 
@@ -55,13 +59,13 @@ void HitSorter::flush() {
   //flush both buffers in queue
   /// \todo subsequent trigger? How do we know?
   analyze();
-  analyze();
 }
 
 void HitSorter::analyze() {
   hits.sort_and_correct();
   if (clusterer)
     clusterer->cluster(hits.hits());
+  hits.clear();
 }
 
 }

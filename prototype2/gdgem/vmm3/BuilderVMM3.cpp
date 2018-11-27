@@ -98,6 +98,9 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
     }
   }
 
+  sorter_x.analyze();
+  sorter_y.analyze();
+
   auto &stats = parser_.stats;
   return AbstractBuilder::ResultStats(stats.hits, stats.errors, geom_errors,
                                       stats.rxSeqErrors, stats.badFrames, stats.goodFrames);

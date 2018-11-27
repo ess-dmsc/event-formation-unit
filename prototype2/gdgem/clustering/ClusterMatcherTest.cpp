@@ -60,6 +60,22 @@ protected:
     }
   }
 
+  void add_readouts() {
+    for (const auto& readout : readouts) {
+      auto plane = opts.srs_mappings.get_plane(readout);
+      EXPECT_LT(plane, 2) << "BAD PLANE"
+                          << " fec:" << int(readout.fec)
+                          << " chip:" << int(readout.chip_id) << "\n";
+
+      if (plane == 0) {
+        sorter_x->insert(readout);
+      }
+      if (plane == 1) {
+        sorter_y->insert(readout);
+      }
+    }
+  }
+
   Cluster mock_cluster(uint8_t plane, uint16_t strip_start, uint16_t strip_end,
                        double time_start, double time_end) {
     Cluster ret;
@@ -201,63 +217,14 @@ TEST_F(ClusterMatcherTest, a1) {
   ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   EXPECT_EQ(readouts.size(), 144);
 
-  uint64_t bonus = 0;
-  uint64_t old = 0;
-  for (auto readout : readouts) {
-    if (readout.srs_timestamp < old)
-      bonus++;
-    old = readout.srs_timestamp;
-    /// \todo this hack should not be necessary!
-    readout.srs_timestamp += (bonus << 42);
-    store_hit(readout);
-  }
+  add_readouts();
+
+  sorter_x->analyze();
+  sorter_y->analyze();
 
   /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 16);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 0);
-  matcher->merge(0, sorter_x->clusterer->clusters);
-  matcher->merge(1, sorter_y->clusterer->clusters);
-  matcher->match_end(false);
-  EXPECT_EQ(matcher->stats_cluster_count, 0);
-
-  sorter_x->flush();
-  sorter_y->flush();
   EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 20);
   EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 0);
-  matcher->merge(0, sorter_x->clusterer->clusters);
-  matcher->merge(1, sorter_y->clusterer->clusters);
-  matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 14);
-}
-
-TEST_F(ClusterMatcherTest, a1_identical) {
-  ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
-  EXPECT_EQ(readouts.size(), 144);
-
-  uint64_t bonus = 0;
-  uint64_t old = 0;
-  for (auto readout : readouts) {
-    if (readout.srs_timestamp < old)
-      bonus++;
-    old = readout.srs_timestamp;
-    /// \todo this hack should not be necessary!
-    readout.srs_timestamp += (bonus << 42);
-    sorter_y->insert(readout);
-    sorter_x->insert(readout);
-  }
-
-  /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 16);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 16);
-  matcher->merge(0, sorter_x->clusterer->clusters);
-  matcher->merge(1, sorter_y->clusterer->clusters);
-  matcher->match_end(false);
-  EXPECT_EQ(matcher->stats_cluster_count, 11);
-
-  sorter_x->flush();
-  sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 20);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 20);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(true);
@@ -268,66 +235,36 @@ TEST_F(ClusterMatcherTest, a10) {
   ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   EXPECT_EQ(readouts.size(), 920);
 
-  uint64_t bonus = 0;
-  uint64_t old = 0;
-  for (auto readout : readouts) {
-    if (readout.srs_timestamp < old)
-      bonus++;
-    old = readout.srs_timestamp;
-    /// \todo this hack should not be necessary!
-    readout.srs_timestamp += (bonus << 42);
-    store_hit(readout);
-  }
+  add_readouts();
+
+  sorter_x->analyze();
+  sorter_y->analyze();
 
   /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 94);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 66);
-  matcher->merge(0, sorter_x->clusterer->clusters);
-  matcher->merge(1, sorter_y->clusterer->clusters);
-  matcher->match_end(false);
-  EXPECT_EQ(matcher->stats_cluster_count, 116);
-
-  sorter_x->flush();
-  sorter_y->flush();
   EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 96);
   EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 68);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 128);
+  EXPECT_EQ(matcher->stats_cluster_count, 98);
 }
 
 TEST_F(ClusterMatcherTest, a100) {
   ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
   EXPECT_EQ(readouts.size(), 126590);
 
-  uint64_t bonus = 0;
-  uint64_t old = 0;
-  for (auto readout : readouts) {
-    if (readout.srs_timestamp < old)
-      bonus++;
-    old = readout.srs_timestamp;
-    /// \todo this hack should not be necessary!
-    readout.srs_timestamp += (bonus << 42);
-    store_hit(readout);
-  }
+  add_readouts();
+
+  sorter_x->analyze();
+  sorter_y->analyze();
 
   /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 18986);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9727);
-  matcher->merge(0, sorter_x->clusterer->clusters);
-  matcher->merge(1, sorter_y->clusterer->clusters);
-  matcher->match_end(false);
-  EXPECT_EQ(matcher->stats_cluster_count, 24806);
-
-  sorter_x->flush();
-  sorter_y->flush();
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 18991);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9731);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 19003);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9734);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 25094);
+  EXPECT_EQ(matcher->stats_cluster_count, 19855);
 }
 
 

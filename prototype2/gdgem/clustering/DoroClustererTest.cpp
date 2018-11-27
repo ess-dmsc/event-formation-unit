@@ -70,11 +70,10 @@ TEST_F(DoroClustererTest, a1) {
 
   add_readouts();
 
+  sorter_x->analyze();
+  sorter_y->analyze();
+
   /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 16);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 0);
-  sorter_x->flush();
-  sorter_y->flush();
   EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 20);
   EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 0);
 }
@@ -85,11 +84,10 @@ TEST_F(DoroClustererTest, a10) {
 
   add_readouts();
 
+  sorter_x->analyze();
+  sorter_y->analyze();
+
   /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 94);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 66);
-  sorter_x->flush();
-  sorter_y->flush();
   EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 96);
   EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 68);
 }
@@ -100,11 +98,10 @@ TEST_F(DoroClustererTest, a100) {
 
   add_readouts();
 
+  sorter_x->analyze();
+  sorter_y->analyze();
+
   /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 18998);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9730);
-  sorter_x->flush();
-  sorter_y->flush();
   EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 19003);
   EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9734);
 }

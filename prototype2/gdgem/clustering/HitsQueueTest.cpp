@@ -52,18 +52,10 @@ protected:
     EXPECT_EQ(readouts.size(), expected_x + expected_y);
     add_readouts();
 
-    EXPECT_EQ(p0->hits().size(), 0);
-    EXPECT_EQ(p1->hits().size(), 0);
-    p0->sort_and_correct();
-    p1->sort_and_correct();
-    EXPECT_EQ(p0->hits().size(), 0);
-    EXPECT_EQ(p1->hits().size(), 0);
-    p0->sort_and_correct();
-    p1->sort_and_correct();
     EXPECT_EQ(p0->hits().size(), expected_x);
     EXPECT_EQ(p1->hits().size(), expected_y);
-    p0->sort_and_correct();
-    p1->sort_and_correct();
+    p0->clear();
+    p1->clear();
     EXPECT_EQ(p0->hits().size(), 0);
     EXPECT_EQ(p1->hits().size(), 0);
   }
