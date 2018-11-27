@@ -19,7 +19,7 @@ protected:
 TEST_F(EventTest, Insert) {
   event.insert_hit(e);
   EXPECT_EQ(event.x.hits.size(), 1);
-  e.plane_id = 1;
+  e.plane = 1;
   event.insert_hit(e);
   EXPECT_EQ(event.y.hits.size(), 1);
 }
@@ -32,7 +32,7 @@ TEST_F(EventTest, Empty) {
 
 TEST_F(EventTest, Merge) {
   Cluster x;
-  e.plane_id = 0;
+  e.plane = 0;
   x.insert_hit(e);
   x.insert_hit(e);
   event.merge(x);
@@ -43,7 +43,7 @@ TEST_F(EventTest, Merge) {
 
 TEST_F(EventTest, MergeTwice) {
   Cluster x;
-  e.plane_id = 0;
+  e.plane = 0;
 
   x.insert_hit(e);
   x.insert_hit(e);
@@ -60,12 +60,12 @@ TEST_F(EventTest, MergeTwice) {
 TEST_F(EventTest, MergeXY) {
   Cluster x, y;
 
-  e.plane_id = 0;
+  e.plane = 0;
   x.insert_hit(e);
   x.insert_hit(e);
   event.merge(x);
 
-  e.plane_id = 1;
+  e.plane = 1;
   y.insert_hit(e);
   y.insert_hit(e);
   y.insert_hit(e);
@@ -77,12 +77,12 @@ TEST_F(EventTest, MergeXY) {
 TEST_F(EventTest, TimeSpan) {
   Cluster x, y;
 
-  e.plane_id = 0;
+  e.plane = 0;
   e.time = 3; x.insert_hit(e);
   e.time = 7; x.insert_hit(e);
   event.merge(x);
 
-  e.plane_id = 1;
+  e.plane = 1;
   e.time = 5; y.insert_hit(e);
   e.time = 1; y.insert_hit(e);
   event.merge(y);
@@ -99,7 +99,7 @@ TEST_F(EventTest, AnalyzeBadY) {
 }
 
 TEST_F(EventTest, AnalyzeBadX) {
-  e.plane_id = 1;
+  e.plane = 1;
   event.insert_hit(e);
   event.analyze(true, 5, 5);
   EXPECT_FALSE(event.valid());
@@ -107,18 +107,18 @@ TEST_F(EventTest, AnalyzeBadX) {
 
 TEST_F(EventTest, AnalyzeGood) {
   event.insert_hit(e);
-  e.plane_id = 1;
+  e.plane = 1;
   event.insert_hit(e);
   event.analyze(true, 5, 5);
   EXPECT_TRUE(event.valid());
 }
 
 TEST_F(EventTest, InsertInvalid) {
-  e.plane_id = 0;
+  e.plane = 0;
   event.insert_hit(e);
-  e.plane_id = 1;
+  e.plane = 1;
   event.insert_hit(e);
-  e.plane_id = 2;
+  e.plane = 2;
   event.insert_hit(e);
   EXPECT_EQ(2, event.x.hits.size() + event.y.hits.size());
 }
@@ -126,7 +126,7 @@ TEST_F(EventTest, InsertInvalid) {
 TEST_F(EventTest, DebugPrint) {
   MESSAGE() << "This is not a test, just calling debug print function\n";
   event.insert_hit(e);
-  e.plane_id = 1;
+  e.plane = 1;
   event.insert_hit(e);
   event.analyze(true, 5, 5);
   auto debugstr = event.debug();

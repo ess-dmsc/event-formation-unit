@@ -11,9 +11,9 @@
 namespace Gem {
 
 void Event::insert_hit(const Hit &e) {
-  if (e.plane_id == 1) { /**< \todo deal with multiple panels */
+  if (e.plane == 1) { /**< \todo deal with multiple panels */
     y.insert_hit(e);
-  } else if (e.plane_id == 0) {
+  } else if (e.plane == 0) {
     x.insert_hit(e);
   }
 }
@@ -110,14 +110,14 @@ void Event::debug2() {
   if (x.hits.size()) {
     printf("x strips: ");
     for (auto xstrips : x.hits) {
-      printf("%d ", xstrips.strip);
+      printf("%d ", xstrips.coordinate);
     }
     printf("\n");
   }
   if (y.hits.size()) {
     printf("y strips: ");
     for (auto ystrips : y.hits) {
-      printf("%d ", ystrips.strip);
+      printf("%d ", ystrips.coordinate);
     }
     printf("\n");
   }

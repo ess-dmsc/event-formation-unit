@@ -10,7 +10,7 @@ set(ClusteringBase_SRC
   ../NMXConfig.cpp
   ../nmx/Event.cpp
   ../nmx/Cluster.cpp
-  ../nmx/Hit.cpp
+  ../../common/clustering/Hit.cpp
   ../srs/SRSTime.cpp
   ../srs/SRSMappings.cpp
   ../vmm3/CalibrationFile.cpp
@@ -23,7 +23,7 @@ set(ClusteringBase_INC
   ../nmx/Event.h
   ../nmx/Readout.h
   ../nmx/Cluster.h
-  ../nmx/Hit.h
+  ../../common/clustering/Hit.h
   ../nmx/Readout.h
   ../srs/SRSTime.h
   ../srs/SRSMappings.h

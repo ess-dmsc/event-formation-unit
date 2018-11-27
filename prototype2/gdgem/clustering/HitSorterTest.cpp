@@ -95,28 +95,6 @@ protected:
     EXPECT_EQ(overflows_y, 0);
   }
 
-  void chronological_test_x() {
-    uint64_t prevtime{0};
-    size_t count{0};
-    for (const auto& e : sorter_x->buffer)
-    {
-      EXPECT_GE(e.time, prevtime);
-      prevtime = e.time;
-      count++;
-    }
-  }
-
-  void chronological_test_y() {
-    uint64_t prevtime{0};
-    size_t count{0};
-    for (const auto& e : sorter_y->buffer)
-    {
-      EXPECT_GE(e.time, prevtime);
-      prevtime = e.time;
-      count++;
-    }
-  }
-
   void test_stats(size_t triggers_x, size_t triggers_y) {
     EXPECT_EQ(triggers_x, sorter_x->stats_trigger_count);
     EXPECT_EQ(triggers_y, sorter_y->stats_trigger_count);
@@ -141,8 +119,6 @@ TEST_F(HitSorterTest, a1) {
 
   add_readouts();
   test_stats(15, 0);
-  chronological_test_x();
-  chronological_test_y();
 }
 
 TEST_F(HitSorterTest, a1_chrono) {
@@ -168,8 +144,6 @@ TEST_F(HitSorterTest, a10) {
   EXPECT_EQ(readouts.size(), 920);
 
   add_readouts();
-  chronological_test_x();
-  chronological_test_y();
 
   EXPECT_EQ(74, sorter_x->stats_trigger_count);
   EXPECT_EQ(58, sorter_y->stats_trigger_count);
@@ -201,9 +175,6 @@ TEST_F(HitSorterTest, a100) {
   add_readouts();
 
   test_stats(3974, 3469);
-
-//  chronological_test_x();
-//  chronological_test_y();
 }
 
 TEST_F(HitSorterTest, a100_chrono) {

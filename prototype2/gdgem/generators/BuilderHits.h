@@ -9,8 +9,8 @@
 
 #pragma once
 
+#include <common/clustering/Hit.h>
 #include <gdgem/nmx/AbstractBuilder.h>
-#include <gdgem/nmx/Hit.h>
 
 class BuilderHits : public AbstractBuilder {
 public:

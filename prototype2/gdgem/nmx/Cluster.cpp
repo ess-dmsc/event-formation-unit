@@ -14,25 +14,25 @@ namespace Gem {
 
 void Cluster::insert_hit(const Hit &e) {
   if (hits.empty()) {
-    plane_id = e.plane_id;
+    plane_id = e.plane;
     time_start = time_end = e.time;
-    strip_start = strip_end = e.strip;
+    strip_start = strip_end = e.coordinate;
   }
 
   // If plane identities don't match, invalidate
   /// \todo this needs more testing
-  if (plane_id != e.plane_id) {
+  if (plane_id != e.plane) {
     plane_id = -1;
   }
 
   hits.push_back(e);
-  adc_sum += e.adc;
-  strip_mass += e.adc * e.strip;
-  time_mass += e.adc * e.time;
+  adc_sum += e.weight;
+  strip_mass += e.weight * e.coordinate;
+  time_mass += e.weight * e.time;
   time_start = std::min(time_start, e.time);
   time_end = std::max(time_end, e.time);
-  strip_start = std::min(strip_start, e.strip);
-  strip_end = std::max(strip_end, e.strip);
+  strip_start = std::min(strip_start, e.coordinate);
+  strip_end = std::max(strip_end, e.coordinate);
 }
 
 bool Cluster::empty() const
@@ -83,19 +83,19 @@ void Cluster::analyze(bool weighted, uint16_t max_timebins,
     auto e = *it;
     if (e.time == time_end) {
       if (weighted) {
-        center_sum += (e.strip * e.adc);
-        center_count += e.adc;
+        center_sum += (e.coordinate * e.weight);
+        center_count += e.weight;
       } else {
-        center_sum += e.strip;
+        center_sum += e.coordinate;
         center_count++;
       }
-      lspan_min = std::min(lspan_min, static_cast<int16_t>(e.strip));
-      lspan_max = std::max(lspan_max, static_cast<int16_t>(e.strip));
+      lspan_min = std::min(lspan_min, static_cast<int16_t>(e.coordinate));
+      lspan_max = std::max(lspan_max, static_cast<int16_t>(e.coordinate));
     }
     if ((e.time >= earliest) && ((max_timebins > timebins.size()) || (timebins.count(e.time)))) {
       timebins.insert(e.time);
-      uspan_min = std::min(uspan_min, static_cast<int16_t>(e.strip));
-      uspan_max = std::max(uspan_max, static_cast<int16_t>(e.strip));
+      uspan_min = std::min(uspan_min, static_cast<int16_t>(e.coordinate));
+      uspan_max = std::max(uspan_max, static_cast<int16_t>(e.coordinate));
     } else {
       break;
     }

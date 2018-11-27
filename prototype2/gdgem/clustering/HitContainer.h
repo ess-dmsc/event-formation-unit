@@ -8,7 +8,7 @@
 #pragma once
 
 #include <vector>
-#include <gdgem/nmx/Hit.h>
+#include <common/clustering/Hit.h>
 
 namespace Gem {
 

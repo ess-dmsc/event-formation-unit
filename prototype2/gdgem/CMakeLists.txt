@@ -7,7 +7,7 @@ set(pipeline_common_source
     NMXConfig.cpp
     nmx/Cluster.cpp
     nmx/Event.cpp
-    nmx/Hit.cpp
+    ../common/clustering/Hit.cpp
     ../common/Hists.cpp
     ../common/HistSerializer.cpp
     nmx/TrackSerializer.cpp
@@ -28,7 +28,7 @@ set(pipeline_common_inc
     NMXConfig.h
     nmx/Cluster.h
     nmx/Event.h
-    nmx/Hit.h
+  ../common/clustering/Hit.h
     ../common/Hists.h
     nmx/Readout.h
     ../common/HistSerializer.h

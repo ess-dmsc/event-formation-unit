@@ -20,10 +20,10 @@ TEST_F(ClusterTest, Insert) {
   Hit e;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.hits.size(), 1);
-  e.strip = 2;
+  e.coordinate = 2;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.hits.size(), 2);
-  e.strip = 3;
+  e.coordinate = 3;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.hits.size(), 3);
 }
@@ -32,10 +32,10 @@ TEST_F(ClusterTest, Insert) {
 TEST_F(ClusterTest, AdcSum) {
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.adc_sum, 0);
-  e.adc = 2;
+  e.weight = 2;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.adc_sum, 2);
-  e.adc = 40;
+  e.weight = 40;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.adc_sum, 42);
 }
@@ -65,19 +65,19 @@ TEST_F(ClusterTest, TimeSpan) {
 TEST_F(ClusterTest, StripSpan) {
   EXPECT_EQ(cluster.strip_span(), 0);
 
-  e.strip = 0;
+  e.coordinate = 0;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.strip_start, 0);
   EXPECT_EQ(cluster.strip_end, 0);
   EXPECT_EQ(cluster.strip_span(), 1);
 
-  e.strip = 10;
+  e.coordinate = 10;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.strip_start, 0);
   EXPECT_EQ(cluster.strip_end, 10);
   EXPECT_EQ(cluster.strip_span(), 11);
 
-  e.strip = 41;
+  e.coordinate = 41;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.strip_start, 0);
   EXPECT_EQ(cluster.strip_end, 41);
@@ -89,13 +89,13 @@ TEST_F(ClusterTest, TimeMass) {
   EXPECT_EQ(cluster.time_mass, 0);
   EXPECT_TRUE(std::isnan(cluster.time_center()));
 
-  e.adc = 2;
+  e.weight = 2;
   e.time = 10;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.time_mass, 20);
   EXPECT_EQ(cluster.time_center(), 10);
 
-  e.adc = 8;
+  e.weight = 8;
   e.time = 0;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.time_mass, 20);
@@ -106,14 +106,14 @@ TEST_F(ClusterTest, TimeStrips) {
   EXPECT_EQ(cluster.strip_mass, 0);
   EXPECT_TRUE(std::isnan(cluster.strip_center()));
 
-  e.adc = 2;
-  e.strip = 10;
+  e.weight = 2;
+  e.coordinate = 10;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.strip_mass, 20);
   EXPECT_EQ(cluster.strip_center(), 10);
 
-  e.adc = 8;
-  e.strip = 0;
+  e.weight = 8;
+  e.coordinate = 0;
   cluster.insert_hit(e);
   EXPECT_EQ(cluster.strip_mass, 20);
   EXPECT_EQ(cluster.strip_center(), 2);
@@ -189,16 +189,16 @@ TEST_F(ClusterTest, MergeToEmpty) {
 
 
 TEST_F(ClusterTest, Merge) {
-  e.adc = 1;
+  e.weight = 1;
 
-  e.strip = 5;
+  e.coordinate = 5;
   e.time = 0;
   cluster.insert_hit(e);
   e.time = 7;
   cluster.insert_hit(e);
 
   Cluster cluster2;
-  e.strip = 15;
+  e.coordinate = 15;
   e.time = 12;
   cluster2.insert_hit(e);
   e.time = 6;
@@ -224,16 +224,16 @@ TEST_F(ClusterTest, AnalyzeInvalid) {
 
 TEST_F(ClusterTest, AnalyzeAverage) {
   Hit e;
-  e.strip = 0;
-  e.adc = 2;
+  e.coordinate = 0;
+  e.weight = 2;
   cluster.insert_hit(e);
   cluster.analyze(false, 1, 1);
   EXPECT_EQ(cluster.utpc_center, 0);
-  e.strip = 1;
-  e.adc = 4;
+  e.coordinate = 1;
+  e.weight = 4;
   cluster.insert_hit(e);
-  e.strip = 2;
-  e.adc = 4;
+  e.coordinate = 2;
+  e.weight = 4;
   cluster.insert_hit(e);
   cluster.analyze(false, 1, 1);
   EXPECT_EQ(cluster.hits.size(), 3);
@@ -244,13 +244,13 @@ TEST_F(ClusterTest, AnalyzeAverage) {
 }
 
 TEST_F(ClusterTest, AnalyzeUncert) {
-  e.adc = 1;
+  e.weight = 1;
 
-  e.time = e.strip = 0;
+  e.time = e.coordinate = 0;
   cluster.insert_hit(e);
-  e.time = e.strip = 1;
+  e.time = e.coordinate = 1;
   cluster.insert_hit(e);
-  e.time = e.strip = 2;
+  e.time = e.coordinate = 2;
   cluster.insert_hit(e);
 
   cluster.analyze(true, 1, 1);
@@ -263,7 +263,7 @@ TEST_F(ClusterTest, AnalyzeUncert) {
   EXPECT_EQ(cluster.uncert_lower, 1);
   EXPECT_EQ(cluster.uncert_upper, 2);
 
-  e.strip = 31;
+  e.coordinate = 31;
   cluster.insert_hit(e);
   cluster.analyze(true, 2, 2);
   EXPECT_EQ(cluster.utpc_center, 16.5);

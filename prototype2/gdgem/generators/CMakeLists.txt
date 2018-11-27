@@ -3,13 +3,13 @@
 #=============================================================================
 
 set(nmxgen_hits_SRC
-    ../nmx/Hit.cpp
+  ../../common/clustering/Hit.cpp
     nmxgen_hits.cpp
     ReaderHits.cpp
     NMXArgs.cpp
     )
 set(nmxgen_hits_INC
-    ../nmx/Hit.h
+  ../../common/clustering/Hit.h
     ReaderHits.h
     NMXArgs.h
     )

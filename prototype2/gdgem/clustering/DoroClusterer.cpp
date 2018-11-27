@@ -48,13 +48,13 @@ void DoroClusterer::cluster_by_strip(HitContainer &hits) {
 
   std::sort(hits.begin(), hits.end(),
             [](const Hit &e1, const Hit &e2) {
-              return e1.strip < e2.strip;
+              return e1.coordinate < e2.coordinate;
             });
 
   for (auto &hit : hits) {
     // Stash cluster if strip gap to next hit is too large
     if (!cluster.empty() &&
-        (hit.strip - cluster.strip_end) > (pMaxStripGap + 1)) {
+        (hit.coordinate - cluster.strip_end) > (pMaxStripGap + 1)) {
       stash_cluster(cluster);
       cluster = Cluster();
     }

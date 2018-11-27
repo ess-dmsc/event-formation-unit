@@ -37,11 +37,10 @@ void HitSorter::insert(const Readout &readout) {
 
     buffer.push_back(Hit());
     auto &e = buffer.back();
-    e.plane_id = pChips.get_plane(readout);
-    e.adc = readout.adc;
-    e.strip = pChips.get_strip(readout);
-    e.time = readout.srs_timestamp + readout.chiptime;
-
+    e.plane = pChips.get_plane(readout);
+    e.weight = readout.adc;
+    e.coordinate = pChips.get_strip(readout);
+    e.time = readout.srs_timestamp + static_cast<uint64_t>(readout.chiptime);
     /// \todo who adds chipTime + trigger time? queue?
   }
 }

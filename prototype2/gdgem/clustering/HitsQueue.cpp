@@ -14,8 +14,8 @@
 
 namespace Gem {
 
-HitsQueue::HitsQueue(SRSTime Time, double maxTimeGap)
-    : pTime(Time), pMaxTimeGap(maxTimeGap) {}
+HitsQueue::HitsQueue(SRSTime Time)
+    : pTime(Time) {}
 
 const HitContainer &HitsQueue::hits() const {
   return hitsOut;
@@ -23,13 +23,13 @@ const HitContainer &HitsQueue::hits() const {
 
 /// \todo sort out Hit constr
 void HitsQueue::store(uint8_t plane, uint16_t strip, uint16_t adc,
-                      double chipTime, double trigger_time) {
+                      float chipTime, uint64_t trigger_time) {
   hitsOut.push_back(Hit());
   auto &e = hitsOut.back();
-  e.plane_id = plane;
-  e.adc = adc;
-  e.strip = strip;
-  e.time = chipTime + trigger_time;
+  e.plane = plane;
+  e.weight = adc;
+  e.coordinate = strip;
+  e.time = trigger_time  + static_cast<uint64_t>(chipTime);
 }
 
 void HitsQueue::sort_and_correct() {

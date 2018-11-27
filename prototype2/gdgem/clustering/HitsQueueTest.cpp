@@ -25,8 +25,8 @@ protected:
     DataPath = TEST_DATA_PATH;
     opts = NMXConfig(DataPath + "/config.json", "");
 
-    p0 = std::make_shared<HitsQueue>(opts.time_config, opts.clusterer_x.max_time_gap);
-    p1 = std::make_shared<HitsQueue>(opts.time_config, opts.clusterer_y.max_time_gap);
+    p0 = std::make_shared<HitsQueue>(opts.time_config);
+    p1 = std::make_shared<HitsQueue>(opts.time_config);
   }
 
   virtual void TearDown() {

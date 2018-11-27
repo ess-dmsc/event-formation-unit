@@ -42,14 +42,14 @@ bool TrackSerializer::add_track(const Event &event) {
     xtrack.push_back(
         Createpos(builder,
                   static_cast<uint16_t>((evx.time - time_offset) * target_resolution_),
-                  evx.strip, evx.adc));
+                  evx.coordinate, evx.weight));
   }
 
   for (auto &evy : event.y.hits) {
     ytrack.push_back(
         Createpos(builder,
                   static_cast<uint16_t>((evy.time - time_offset) * target_resolution_),
-                  evy.strip, evy.adc));
+                  evy.coordinate, evy.weight));
   }
 
   xpos = event.x.utpc_center;

@@ -2,7 +2,6 @@
 
 #include <cstring>
 #include <gdgem/nmx/Event.h>
-#include <gdgem/nmx/Hit.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <test/TestBase.h>
 
@@ -20,15 +19,15 @@ protected:
 
   void addxandy(uint16_t xs, uint16_t xt, uint16_t xa, uint16_t ys, uint16_t yt,
                 uint16_t ya) {
-    e.strip = xs;
+    e.coordinate = xs;
     e.time = xt;
-    e.adc = xa;
-    e.plane_id = 0;
+    e.weight = xa;
+    e.plane = 0;
     event.insert_hit(e);
-    e.strip = ys;
+    e.coordinate = ys;
     e.time = yt;
-    e.adc = ya;
-    e.plane_id = 1;
+    e.weight = ya;
+    e.plane = 1;
     event.insert_hit(e);
   }
 };

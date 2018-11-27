@@ -168,12 +168,12 @@ void bin(Hists& hists, const Gem::Event &e)
   hists.bincluster(sum);
 }
 
-void bin(Hists& hists, const Gem::Hit &e)
+void bin(Hists& hists, const Hit &e)
 {
-  if (e.plane_id == 0) {
-    hists.bin_x(e.strip, e.adc);
-  } else if (e.plane_id == 1) {
-    hists.bin_y(e.strip, e.adc);
+  if (e.plane == 0) {
+    hists.bin_x(e.coordinate, e.weight);
+  } else if (e.plane == 1) {
+    hists.bin_y(e.coordinate, e.weight);
   }
 }
 
@@ -205,7 +205,8 @@ void GdGemBase::processing_thread() {
   track_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
-  Hists hists(Gem::Hit::strip_max_val, Gem::Hit::adc_max_val);
+  Hists hists(std::numeric_limits<uint16_t>::max(),
+      std::numeric_limits<uint16_t>::max());
   HistSerializer hist_serializer(hists.needed_buffer_size());
   hist_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));

@@ -80,11 +80,11 @@ protected:
                        double time_start, double time_end) {
     Cluster ret;
     Hit e;
-    e.plane_id = plane;
-    e.adc = 1;
+    e.plane = plane;
+    e.weight = 1;
     double time_step = (time_end - time_start) / 10.0;
     for (e.time = time_start; e.time <= time_end; e.time += time_step)
-      for (e.strip = strip_start; e.strip <= strip_end; ++e.strip)
+      for (e.coordinate = strip_start; e.coordinate <= strip_end; ++e.coordinate)
         ret.insert_hit(e);
     e.time = time_end;
     ret.insert_hit(e);
@@ -259,12 +259,12 @@ TEST_F(ClusterMatcherTest, a100) {
   sorter_y->analyze();
 
   /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 18710);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9732);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 19003);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9737);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 16212);
+  EXPECT_EQ(matcher->stats_cluster_count, 19856);
 }
 
 
