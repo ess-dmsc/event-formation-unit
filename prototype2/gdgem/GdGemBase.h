@@ -98,13 +98,13 @@ protected:
 
   std::shared_ptr<Gem::utpcAnalyzer> utpc_analyzer_;
   Gem::utpcResults utpc_x_, utpc_y_;
-  Event event_;
   uint32_t time_;
   uint32_t pixelid_;
 
   bool sample_next_track_ {false};
 
   void apply_configuration();
+  void cluster_plane(HitContainer& hits, std::shared_ptr<AbstractClusterer> clusterer, bool flush);
   void perform_clustering(bool flush);
   void process_events(EV42Serializer&, Gem::TrackSerializer&);
 };

@@ -219,43 +219,34 @@ void GdGemBase::apply_configuration() {
   sample_next_track_ = nmx_opts.send_tracks;
 }
 
+void GdGemBase::cluster_plane(HitContainer &hits,
+                              std::shared_ptr<AbstractClusterer> clusterer, bool flush) {
+  std::sort(hits.begin(), hits.end(),
+            [](const Hit &e1, const Hit &e2) {
+              return e1.time < e2.time;
+            });
+  clusterer->cluster(hits);
+  hits.clear();
+  if (flush) {
+    clusterer->flush();
+  }
+  if (nmx_opts.hit_histograms) {
+    bin_hists(hists_, clusterer->clusters);
+  }
+  if (!clusterer->empty()) {
+    matcher_->insert(0, clusterer->clusters);
+  }
+}
+
 void GdGemBase::perform_clustering(bool flush) {
-  // \todo we can parallelize this (split in 2)
+  // \todo we can parallelize this (per plane)
 
   if (builder_->hit_buffer_x.size()) {
-    std::sort(builder_->hit_buffer_x.begin(), builder_->hit_buffer_x.end(),
-              [](const Hit &e1, const Hit &e2) {
-                return e1.time < e2.time;
-              });
-    clusterer_x_->cluster(builder_->hit_buffer_x);
-    builder_->hit_buffer_x.clear();
-    if (flush) {
-      clusterer_x_->flush();
-    }
-    if (nmx_opts.hit_histograms) {
-      bin_hists(hists_, clusterer_x_->clusters);
-    }
-    if (!clusterer_x_->empty()) {
-      matcher_->insert(0, clusterer_x_->clusters);
-    }
+    cluster_plane(builder_->hit_buffer_x, clusterer_x_, flush);
   }
 
   if (builder_->hit_buffer_y.size()) {
-    std::sort(builder_->hit_buffer_y.begin(), builder_->hit_buffer_y.end(),
-              [](const Hit &e1, const Hit &e2) {
-                return e1.time < e2.time;
-              });
-    clusterer_y_->cluster(builder_->hit_buffer_y);
-    builder_->hit_buffer_y.clear();
-    if (flush) {
-      clusterer_y_->flush();
-    }
-    if (nmx_opts.hit_histograms) {
-      bin_hists(hists_, clusterer_y_->clusters);
-    }
-    if (!clusterer_y_->empty()) {
-      matcher_->insert(1, clusterer_y_->clusters);
-    }
+    cluster_plane(builder_->hit_buffer_y, clusterer_y_, flush);
   }
 
   // \todo but we cannot parallelize this, this is the critical path
@@ -269,30 +260,27 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
   //       as each iteration is completely independent, other than
   //       everything going to the same serializers
 
-  while (!matcher_->matched_events.empty()) {
-    // printf("MATCHED_CLUSTERS\n");
+  for (auto& event : matcher_->matched_events) {
     XTRACE(PROCESS, DEB, "event_ready()");
-    event_ = matcher_->matched_events.front();
-    matcher_->matched_events.pop_front();
 
     // mystats.unclustered = clusterer.unclustered();
 
-    utpc_x_ = utpc_analyzer_->analyze(event_.c1);
-    utpc_y_ = utpc_analyzer_->analyze(event_.c2);
+    utpc_x_ = utpc_analyzer_->analyze(event.c1);
+    utpc_y_ = utpc_analyzer_->analyze(event.c2);
 
     if (nmx_opts.hit_histograms) {
-      bin(hists_, event_);
+      bin(hists_, event);
     }
 
-    if (event_.both_planes()) {
+    if (event.both_planes()) {
       XTRACE(PROCESS, DEB, "event_.good");
 
       mystats.clusters_xy++;
 
       /// \todo Should it be here or outside of event_.valid()?
       if (sample_next_track_) {
-        XTRACE(PROCESS, DEB, "Serializing track: %s\n", event_.debug(true).c_str());
-        sample_next_track_ = !track_serializer.add_track(event_,
+        XTRACE(PROCESS, DEB, "Serializing track: %s\n", event.debug(true).c_str());
+        sample_next_track_ = !track_serializer.add_track(event,
                                                         utpc_x_.utpc_center,
                                                         utpc_y_.utpc_center);
       }
@@ -301,14 +289,14 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
              utpc_x_.utpc_center_rounded(),
              utpc_y_.utpc_center_rounded());
 
-      if (nmx_opts.filter.valid(event_, utpc_x_, utpc_y_)) {
+      if (nmx_opts.filter.valid(event, utpc_x_, utpc_y_)) {
         pixelid_ = nmx_opts.geometry.pixel2D(
             utpc_x_.utpc_center_rounded(), utpc_y_.utpc_center_rounded());
 
         if (!nmx_opts.geometry.valid_id(pixelid_)) {
           mystats.geom_errors++;
         } else {
-          time_ = static_cast<uint32_t>(utpc_analyzer_->utpc_time(event_.c1, event_.c2));
+          time_ = static_cast<uint32_t>(utpc_analyzer_->utpc_time(event.c1, event.c2));
 
           XTRACE(PROCESS, DEB, "time_: %d, pixelid_ %d", time_, pixelid_);
 
@@ -319,15 +307,17 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
         /** \todo increments counters when failing this */
       }
     } else { /// no valid event_
-      if (event_.c1.hit_count() != 0) {
+      if (event.c1.hit_count() != 0) {
         mystats.clusters_x++;
       } else {
         mystats.clusters_y++;
       }
-      mystats.readouts_discarded += event_.total_hit_count();
+      mystats.readouts_discarded += event.total_hit_count();
       mystats.clusters_discarded++;
     }
   }
+
+  matcher_->matched_events.clear();
 }
 
 
