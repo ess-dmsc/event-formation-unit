@@ -249,23 +249,41 @@ void GdGemBase::processing_thread() {
         mystats.bad_frames += stats.bad_frames;
         mystats.good_frames += stats.good_frames;
 
+        if (builder_->hit_buffer_x.size()) {
+          std::sort(builder_->hit_buffer_x.begin(), builder_->hit_buffer_x.end(),
+                    [](const Hit &e1, const Hit &e2) {
+                      return e1.time < e2.time;
+                    });
+          clusterer_x_->cluster(builder_->hit_buffer_x);
+          builder_->hit_buffer_x.clear();
+        }
+
+        if (builder_->hit_buffer_y.size()) {
+          std::sort(builder_->hit_buffer_y.begin(), builder_->hit_buffer_y.end(),
+                    [](const Hit &e1, const Hit &e2) {
+                      return e1.time < e2.time;
+                    });
+          clusterer_y_->cluster(builder_->hit_buffer_y);
+          builder_->hit_buffer_y.clear();
+        }
+
         if (nmx_opts.hit_histograms) {
-          bin_hists(hists, builder_->clusterer_x->clusters);
-          bin_hists(hists, builder_->clusterer_y->clusters);
+          bin_hists(hists, clusterer_x_->clusters);
+          bin_hists(hists, clusterer_y_->clusters);
         }
 
-        if (!builder_->clusterer_x->empty() &&
-            !builder_->clusterer_y->empty()) {
-          matcher.insert(0, builder_->clusterer_x->clusters);
-          matcher.insert(1, builder_->clusterer_y->clusters);
+        if (!clusterer_x_->empty() &&
+            !clusterer_y_->empty()) {
+          matcher_->insert(0, clusterer_x_->clusters);
+          matcher_->insert(1, clusterer_y_->clusters);
         }
-        matcher.match(false);
+        matcher_->match(false);
 
-        while (!matcher.matched_events.empty()) {
+        while (!matcher_->matched_events.empty()) {
           // printf("MATCHED_CLUSTERS\n");
           XTRACE(PROCESS, DEB, "event_ready()");
-          event = matcher.matched_events.front();
-          matcher.matched_events.pop_front();
+          event = matcher_->matched_events.front();
+          matcher_->matched_events.pop_front();
 
           // mystats.unclustered = clusterer.unclustered();
 
@@ -363,24 +381,25 @@ void GdGemBase::processing_thread() {
 void GdGemBase::init_builder() {
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
-  auto clusx = std::make_shared<GapClusterer>(
-      nmx_opts.clusterer_x.max_time_gap, nmx_opts.clusterer_x.max_strip_gap);
-//      , nmx_opts.clusterer_x.min_cluster_size);
-  auto clusy = std::make_shared<GapClusterer>(
-      nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap);
-//      , nmx_opts.clusterer_y.min_cluster_size);
-
   if (nmx_opts.builder_type == "VMM3") {
     XTRACE(INIT, DEB, "Using BuilderVMM3");
     builder_ = std::make_shared<Gem::BuilderVMM3>(
-        nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
+        nmx_opts.time_config, nmx_opts.srs_mappings,
         nmx_opts.clusterer_x.hit_adc_threshold,
-        nmx_opts.clusterer_x.max_time_gap,
-        nmx_opts.clusterer_y.hit_adc_threshold,
-        nmx_opts.clusterer_y.max_time_gap,
         NMXSettings.fileprefix,
         nmx_opts.calfile);
+
   } else {
     XTRACE(INIT, ALW, "Unrecognized builder type in config");
   }
+
+  clusterer_x_ = std::make_shared<GapClusterer>(
+      nmx_opts.clusterer_x.max_time_gap, nmx_opts.clusterer_x.max_strip_gap);
+  clusterer_y_ = std::make_shared<GapClusterer>(
+      nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap);
+
+  matcher_ = std::make_shared<GapMatcher>(
+      nmx_opts.time_config.acquisition_window()*5,
+      nmx_opts.matcher_max_delta_time);
+
 }

@@ -10,15 +10,15 @@ set(NMXReadoutTest_INC
   )
 create_test_executable(NMXReadoutTest SKIP_MEMGRIND)
 
-set(NMXClusterTest_SRC
-  ClusterTest.cpp
-  Cluster.cpp
+set(NMXuTPCTest_SRC
+  uTPCTest.cpp
+  uTPC.cpp
   )
 set(NMXEventTest_INC
   ../../common/clustering/Hit.h
-  Cluster.h
+  uTPC.h
   )
-create_test_executable(NMXClusterTest)
+create_test_executable(NMXuTPCTest)
 
 set(HistSerializerTest_SRC
   ../../common/Hists.cpp
@@ -36,14 +36,14 @@ create_test_executable(HistSerializerTest)
 set(TrackSerializerTest_SRC
   ../../common/clustering/Hit.cpp
   ../../common/clustering/Event.cpp
-  Cluster.cpp
+  uTPC.cpp
   TrackSerializerTest.cpp
   TrackSerializer.cpp
   )
 set(TrackSerializerTest_INC
   ../../common/clustering/Hit.h
   ../../common/clustering/Event.h
-  Cluster.h
+  uTPC.h
   TrackSerializer.h
   )
 create_test_executable(TrackSerializerTest)

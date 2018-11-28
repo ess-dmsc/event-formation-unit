@@ -12,22 +12,16 @@
 namespace Gem {
 
 BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
-                         SRSMappings geometry_interpreter, std::shared_ptr<AbstractClusterer> x,
-                         std::shared_ptr<AbstractClusterer> y, uint16_t adc_threshold_x,
-                         double max_time_gap_x, uint16_t adc_threshold_y, double max_time_gap_y,
-                         std::string dump_dir, std::shared_ptr<CalibrationFile> calfile) :
-    AbstractBuilder(x, y), parser_(1500), time_intepreter_(
-    time_intepreter), geometry_interpreter_(geometry_interpreter), sorter_x(
-    time_intepreter_, geometry_interpreter_, adc_threshold_x,
-    max_time_gap_x), sorter_y(time_intepreter_,
-                              geometry_interpreter_, adc_threshold_y, max_time_gap_y) {
-
+                         SRSMappings geometry_interpreter,
+                         uint16_t adc_threshold,
+                         std::string dump_dir,
+                         std::shared_ptr<CalibrationFile> calfile)
+                         : parser_(1500)
+                         , time_intepreter_(time_intepreter)
+                         , geometry_interpreter_(geometry_interpreter)
+                         , adc_threshold_ (adc_threshold) {
   assert(calfile != nullptr);
   calfile_ = calfile;
-  clusterer_x = x;
-  clusterer_y = y;
-  sorter_x.clusterer = clusterer_x;
-  sorter_y.clusterer = clusterer_y;
 
   if (!dump_dir.empty()) {
     readout_file_ = ReadoutFile::create(dump_dir + "gdgem_readouts_" + timeString(), 1000);
@@ -36,12 +30,14 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 
 AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size) {
   geom_errors = 0;
+  below_adc_threshold = 0;
   parser_.receive(buf, size);
   if (!parser_.stats.hits) {
     XTRACE(PROCESS, DEB, "NO HITS after parse");
     auto &stats = parser_.stats;
     return AbstractBuilder::ResultStats(stats.hits, stats.errors,
-                                        geom_errors, stats.rxSeqErrors, stats.badFrames,
+                                        geom_errors, below_adc_threshold,
+                                        stats.rxSeqErrors, stats.badFrames,
                                         stats.goodFrames);
   }
   XTRACE(PROCESS, DEB, "HITS after parse: %d", parser_.stats.hits);
@@ -74,23 +70,41 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
       XTRACE(PROCESS, DEB, "srs/vmm chip: %d, channel: %d",
              readout.chip_id, d.chno);
 
-      plane = geometry_interpreter_.get_plane(readout);
-      if (plane != NMX_INVALID_PLANE_ID) {
-        if (plane) {
-          sorter_y.insert(readout);
-        } else {
-          sorter_x.insert(readout);
-
-        }
-      } else {
-        geom_errors++;
-
-        XTRACE(PROCESS, DEB, "Bad SRS mapping --  fec: %d, chip: %d",
-               readout.fec, readout.chip_id);
-      }
-
       if (readout_file_) {
         readout_file_->push(readout);
+      }
+
+      hit.plane = geometry_interpreter_.get_plane(readout);
+      hit.coordinate = geometry_interpreter_.get_strip(readout);
+      hit.weight = readout.adc;
+      hit.time = readout.srs_timestamp + static_cast<uint64_t>(readout.chiptime);
+
+      if ((hit.plane != 0) && (hit.plane != 1)) {
+        geom_errors++;
+        XTRACE(PROCESS, DEB, "Bad SRS mapping (1) --  fec: %d, chip: %d",
+               readout.fec, readout.chip_id);
+        continue;
+      }
+
+      if (hit.coordinate == NMX_INVALID_GEOM_ID) {
+        geom_errors++;
+        XTRACE(PROCESS, DEB, "Bad SRS mapping (2) --  fec: %d, chip: %d",
+               readout.fec, readout.chip_id);
+        continue;
+      }
+
+      if (!readout.over_threshold && (readout.adc < adc_threshold_)) {
+        below_adc_threshold++;
+        XTRACE(PROCESS, DEB, "Below ADC threshold  adc: %d", readout.adc);
+        continue;
+      }
+
+      if (hit.plane == 1) {
+        hit_buffer_y.emplace_back(hit);
+      }
+
+      if (hit.plane == 0) {
+        hit_buffer_x.emplace_back(hit);
       }
 
     } else {
@@ -98,12 +112,13 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
     }
   }
 
-  sorter_x.analyze();
-  sorter_y.analyze();
-
   auto &stats = parser_.stats;
-  return AbstractBuilder::ResultStats(stats.hits, stats.errors, geom_errors,
-                                      stats.rxSeqErrors, stats.badFrames, stats.goodFrames);
+  return AbstractBuilder::ResultStats(stats.hits, stats.errors,
+                                      geom_errors,
+                                      below_adc_threshold,
+                                      stats.rxSeqErrors,
+                                      stats.badFrames,
+                                      stats.goodFrames);
 }
 
 }

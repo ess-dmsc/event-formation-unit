@@ -13,11 +13,13 @@
 #include <gdgem/nmx/AbstractBuilder.h>
 #include <gdgem/NMXConfig.h>
 #include <libs/include/SPSCFifo.h>
+#include <common/clustering/AbstractClusterer.h>
+#include <common/clustering/AbstractMatcher.h>
 
 struct NMXSettings {
   std::string ConfigFile;
   std::string CalibrationFile;
-  std::string fileprefix{""};
+  std::string fileprefix;
 };
 
 using namespace memory_sequential_consistent; // Lock free fifo
@@ -84,6 +86,10 @@ protected:
   struct NMXSettings NMXSettings;
   Gem::NMXConfig nmx_opts;
 
-  std::shared_ptr<Gem::AbstractBuilder> builder_{nullptr};
+  std::shared_ptr<Gem::AbstractBuilder> builder_;
+  std::shared_ptr<AbstractClusterer> clusterer_x_;
+  std::shared_ptr<AbstractClusterer> clusterer_y_;
+  std::shared_ptr<AbstractMatcher> matcher_;
+
   void init_builder();
 };

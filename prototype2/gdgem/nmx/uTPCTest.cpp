@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/Cluster.h>
+#include <gdgem/nmx/uTPC.h>
 #include <cmath>
 #include <string>
 #include <test/TestBase.h>

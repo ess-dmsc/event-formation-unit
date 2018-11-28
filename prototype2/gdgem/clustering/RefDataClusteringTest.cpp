@@ -1,8 +1,8 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <gdgem/nmx/Readout.h>
-#include <gdgem/clustering/HitSorter.h>
 #include <common/clustering/GapClusterer.h>
+#include <common/clustering/GapMatcher.h>
 
 #include <memory>
 #include <stdio.h>
@@ -13,6 +13,48 @@
 
 using namespace Gem;
 
+// \todo validate that there are no srs_time overflows
+
+class HitSorter {
+ public:
+  HitSorter(SRSTime time, SRSMappings chips) :
+      pTime(time), pChips(chips)
+  {}
+
+  void insert(const Readout &readout) {
+    buffer.push_back(Hit());
+    auto &e = buffer.back();
+    e.plane = pChips.get_plane(readout);
+    e.weight = readout.adc;
+    e.coordinate = pChips.get_strip(readout);
+    e.time = readout.srs_timestamp + static_cast<uint64_t>(readout.chiptime);
+  }
+
+  void analyze() {
+    std::sort(buffer.begin(), buffer.end(),
+              [](const Hit &e1, const Hit &e2) {
+                return e1.time < e2.time;
+              });
+    if (clusterer)
+      clusterer->cluster(buffer);
+    buffer.clear();
+  }
+
+  void flush() {
+    analyze();
+    if (clusterer)
+      clusterer->flush();
+  }
+
+  std::shared_ptr<AbstractClusterer> clusterer;
+
+  HitContainer buffer;
+
+ private:
+  SRSTime pTime;
+  SRSMappings pChips;
+};
+
 class DoroClustererTest : public TestBase {
 protected:
   NMXConfig opts;
@@ -22,18 +64,16 @@ protected:
   std::shared_ptr<HitSorter> sorter_x;
   std::shared_ptr<HitSorter> sorter_y;
 
+  std::shared_ptr<AbstractMatcher> matcher;
+
   virtual void SetUp() {
     DataPath = TEST_DATA_PATH;
     opts = NMXConfig(DataPath + "/config.json", "");
 
     sorter_x =
-        std::make_shared<HitSorter>(opts.time_config, opts.srs_mappings,
-                                    opts.clusterer_x.hit_adc_threshold,
-                                    opts.clusterer_x.max_time_gap);
+        std::make_shared<HitSorter>(opts.time_config, opts.srs_mappings);
     sorter_y =
-        std::make_shared<HitSorter>(opts.time_config, opts.srs_mappings,
-                                    opts.clusterer_y.hit_adc_threshold,
-                                    opts.clusterer_y.max_time_gap);
+        std::make_shared<HitSorter>(opts.time_config, opts.srs_mappings);
 
     sorter_x->clusterer =
         std::make_shared<GapClusterer>(opts.clusterer_x.max_time_gap,
@@ -41,6 +81,10 @@ protected:
     sorter_y->clusterer =
         std::make_shared<GapClusterer>(opts.clusterer_y.max_time_gap,
                                        opts.clusterer_y.max_strip_gap);
+
+    matcher = std::make_shared<GapMatcher>(
+        opts.time_config.acquisition_window()*5,
+        opts.matcher_max_delta_time);
   }
 
   virtual void TearDown() {
@@ -60,6 +104,12 @@ protected:
         sorter_y->insert(readout);
       }
     }
+  }
+
+  void planes_test(size_t expected_x, size_t expected_y) {
+    EXPECT_EQ(readouts.size(), expected_x + expected_y);
+    EXPECT_EQ(sorter_x->buffer.size(), expected_x);
+    EXPECT_EQ(sorter_y->buffer.size(), expected_y);
   }
 
   void test_plane(std::shared_ptr<AbstractClusterer> clusterer,
@@ -90,11 +140,19 @@ TEST_F(DoroClustererTest, a1) {
 
   add_readouts();
 
+  planes_test(144, 0);
+
   sorter_x->flush();
   sorter_y->flush();
 
   test_plane(sorter_x->clusterer, 22, 20, opts.clusterer_x.min_cluster_size);
   test_plane(sorter_y->clusterer, 0, 0, opts.clusterer_y.min_cluster_size);
+
+  matcher->insert(0, sorter_x->clusterer->clusters);
+  matcher->insert(1, sorter_y->clusterer->clusters);
+  matcher->match(true);
+  EXPECT_EQ(matcher->stats_event_count, 15);
+  EXPECT_EQ(matcher->matched_events.size(), 15);
 }
 
 TEST_F(DoroClustererTest, a10) {
@@ -103,11 +161,23 @@ TEST_F(DoroClustererTest, a10) {
 
   add_readouts();
 
+  planes_test(558, 362);
+
   sorter_x->flush();
   sorter_y->flush();
 
   test_plane(sorter_x->clusterer, 100, 96, opts.clusterer_x.min_cluster_size);
   test_plane(sorter_y->clusterer, 73, 68, opts.clusterer_y.min_cluster_size);
+
+  matcher->insert(0, sorter_x->clusterer->clusters);
+  matcher->insert(1, sorter_y->clusterer->clusters);
+  matcher->match(true);
+  EXPECT_EQ(matcher->stats_event_count, 101);
+  EXPECT_EQ(matcher->matched_events.size(), 101);
+
+//  for (const auto& e : matcher->matched_events) {
+//    MESSAGE() << e.visualize(3) << "\n";
+//  }
 }
 
 TEST_F(DoroClustererTest, a100) {
@@ -116,11 +186,19 @@ TEST_F(DoroClustererTest, a100) {
 
   add_readouts();
 
+  planes_test(84162, 42428);
+
   sorter_x->flush();
   sorter_y->flush();
 
   test_plane(sorter_x->clusterer, 19565, 19003, opts.clusterer_x.min_cluster_size);
   test_plane(sorter_y->clusterer, 10312, 9737, opts.clusterer_y.min_cluster_size);
+
+  matcher->insert(0, sorter_x->clusterer->clusters);
+  matcher->insert(1, sorter_y->clusterer->clusters);
+  matcher->match(true);
+  EXPECT_EQ(matcher->stats_event_count, 20224);
+  EXPECT_EQ(matcher->matched_events.size(), 20224);
 }
 
 int main(int argc, char **argv) {

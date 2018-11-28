@@ -12,7 +12,7 @@
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
 #include <common/clustering/Event.h>
-#include <gdgem/nmx/Cluster.h>
+#include <gdgem/nmx/uTPC.h>
 #include <gdgem/vmm3/CalibrationFile.h>
 #include <memory>
 #include <string>
