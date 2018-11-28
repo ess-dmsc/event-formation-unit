@@ -36,7 +36,7 @@ bool ClusterMatcher::belongs_end(const Event &event, const Cluster &cluster) con
   return (delta_end(event, cluster) <= pMaxDeltaTime);
 }
 
-void ClusterMatcher::merge(uint8_t plane, ClusterList &c) {
+void ClusterMatcher::merge(uint8_t plane, ClusterContainer &c) {
   if (c.empty()) {
     return;
   }

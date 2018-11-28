@@ -3,7 +3,6 @@
 #include <memory>
 #include <stdio.h>
 #include <unistd.h>
-#include <gdgem/clustering/HitsQueue.h>
 #include <gdgem/NMXConfig.h>
 #include <test/TestBase.h>
 #include <functional>
@@ -11,6 +10,35 @@
 #include <gdgem/nmx/Readout.h>
 
 using namespace Gem;
+
+class HitsQueue {
+ public:
+  HitsQueue(SRSTime Time)
+      : pTime(Time) {}
+
+  void store(uint8_t plane, uint16_t strip, uint16_t adc,
+             float chipTime, uint64_t trigger_time) {
+    hits.push_back(Hit());
+    auto &e = hits.back();
+    e.plane = plane;
+    e.weight = adc;
+    e.coordinate = strip;
+    e.time = trigger_time  + static_cast<uint64_t>(chipTime);
+  }
+
+  void sort_and_correct() {
+    std::sort(hits.begin(), hits.end(),
+              [](const Hit &e1, const Hit &e2) {
+                return e1.time < e2.time;
+              });
+  }
+
+  std::vector<Hit> hits;
+
+ private:
+  SRSTime pTime;
+};
+
 
 class HitsQueueTest : public TestBase {
 protected:
@@ -52,12 +80,8 @@ protected:
     EXPECT_EQ(readouts.size(), expected_x + expected_y);
     add_readouts();
 
-    EXPECT_EQ(p0->hits().size(), expected_x);
-    EXPECT_EQ(p1->hits().size(), expected_y);
-    p0->clear();
-    p1->clear();
-    EXPECT_EQ(p0->hits().size(), 0);
-    EXPECT_EQ(p1->hits().size(), 0);
+    EXPECT_EQ(p0->hits.size(), expected_x);
+    EXPECT_EQ(p1->hits.size(), expected_y);
   }
 
   void chronological_test_x(size_t expected_size)
@@ -66,10 +90,10 @@ protected:
     size_t count{0};
     while (count < expected_size) {
       p0->sort_and_correct();
-      if (p0->hits().size()) {
-        EXPECT_GE(p0->hits().front().time, prevtime);
+      if (p0->hits.size()) {
+        EXPECT_GE(p0->hits.front().time, prevtime);
       }
-      for (const auto &e : p0->hits()) {
+      for (const auto &e : p0->hits) {
         EXPECT_GE(e.time, prevtime);
         prevtime = e.time;
         count++;
@@ -83,10 +107,10 @@ protected:
     size_t count{0};
     while (count < expected_size) {
       p1->sort_and_correct();
-      if (p1->hits().size()) {
-        EXPECT_GE(p1->hits().front().time, prevtime);
+      if (p1->hits.size()) {
+        EXPECT_GE(p1->hits.front().time, prevtime);
       }
-      for (const auto &e : p1->hits()) {
+      for (const auto &e : p1->hits) {
         EXPECT_GE(e.time, prevtime);
         prevtime = e.time;
         count++;

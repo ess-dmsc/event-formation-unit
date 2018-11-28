@@ -7,8 +7,8 @@
 
 #pragma once
 
-#include <gdgem/clustering/AbstractClusterer.h>
-#include <gdgem/clustering/HitsQueue.h>
+#include <common/clustering/AbstractClusterer.h>
+#include <gdgem/srs/SRSTime.h>
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/nmx/Readout.h>
 #include <memory>

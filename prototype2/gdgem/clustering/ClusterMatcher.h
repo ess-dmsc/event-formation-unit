@@ -7,8 +7,9 @@
 
 #pragma once
 
+#include <common/clustering/AbstractClusterer.h>
+#include <common/clustering/Event.h>
 #include <memory>
-#include <gdgem/clustering/AbstractClusterer.h>
 #include <deque>
 
 namespace Gem {
@@ -17,7 +18,7 @@ class ClusterMatcher {
 public:
   explicit ClusterMatcher(uint64_t maxDeltaTime);
 
-  void merge(uint8_t plane, ClusterList &c);
+  void merge(uint8_t plane, ClusterContainer &c);
 
   void match_end(bool force);
 
@@ -25,7 +26,7 @@ public:
 
   size_t stats_cluster_count{0};
 
-  ClusterList unmatched_clusters;
+  ClusterContainer unmatched_clusters;
 
   std::deque<Event> matched_clusters;
 

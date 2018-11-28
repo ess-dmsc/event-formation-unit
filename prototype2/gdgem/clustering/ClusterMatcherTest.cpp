@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <gdgem/clustering/HitSorter.h>
-#include <gdgem/clustering/DoroClusterer.h>
+#include <common/clustering/GapClusterer.h>
 #include <gdgem/clustering/ClusterMatcher.h>
 #include <test/TestBase.h>
 #include <functional>
@@ -37,12 +37,12 @@ protected:
                                            opts.clusterer_y.hit_adc_threshold,
                                            opts.clusterer_y.max_time_gap);
 
-    sorter_x->clusterer = std::make_shared<DoroClusterer>(opts.clusterer_x.max_time_gap,
-                                                          opts.clusterer_x.max_strip_gap,
-                                                          opts.clusterer_x.min_cluster_size);
-    sorter_y->clusterer = std::make_shared<DoroClusterer>(opts.clusterer_y.max_time_gap,
-                                                          opts.clusterer_y.max_strip_gap,
-                                                          opts.clusterer_y.min_cluster_size);
+    sorter_x->clusterer = std::make_shared<GapClusterer>(opts.clusterer_x.max_time_gap,
+                                                          opts.clusterer_x.max_strip_gap);
+//                                                          , opts.clusterer_x.min_cluster_size);
+    sorter_y->clusterer = std::make_shared<GapClusterer>(opts.clusterer_y.max_time_gap,
+                                                          opts.clusterer_y.max_strip_gap);
+//                                                          , opts.clusterer_y.min_cluster_size);
   }
 
   virtual void TearDown() {
@@ -219,16 +219,17 @@ TEST_F(ClusterMatcherTest, a1) {
 
   add_readouts();
 
-  sorter_x->analyze();
-  sorter_y->analyze();
+  sorter_x->flush();
+  sorter_y->flush();
 
   /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 20);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 22);
   EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 0);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 14);
+  EXPECT_EQ(matcher->stats_cluster_count, 15);
+  EXPECT_EQ(matcher->matched_clusters.size(), 15);
 }
 
 TEST_F(ClusterMatcherTest, a10) {
@@ -237,16 +238,17 @@ TEST_F(ClusterMatcherTest, a10) {
 
   add_readouts();
 
-  sorter_x->analyze();
-  sorter_y->analyze();
+  sorter_x->flush();
+  sorter_y->flush();
 
   /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 96);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 68);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 100);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 73);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 98);
+  EXPECT_EQ(matcher->stats_cluster_count, 101);
+  EXPECT_EQ(matcher->matched_clusters.size(), 101);
 }
 
 TEST_F(ClusterMatcherTest, a100) {
@@ -255,18 +257,18 @@ TEST_F(ClusterMatcherTest, a100) {
 
   add_readouts();
 
-  sorter_x->analyze();
-  sorter_y->analyze();
+  sorter_x->flush();
+  sorter_y->flush();
 
   /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 19003);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9737);
+  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 19565);
+  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 10312);
   matcher->merge(0, sorter_x->clusterer->clusters);
   matcher->merge(1, sorter_y->clusterer->clusters);
   matcher->match_end(true);
-  EXPECT_EQ(matcher->stats_cluster_count, 19856);
+  EXPECT_EQ(matcher->stats_cluster_count, 20255);
+  EXPECT_EQ(matcher->matched_clusters.size(), 20255);
 }
-
 
 // \todo test how many have both planes
 

@@ -10,7 +10,7 @@
 #include "GdGemBase.h"
 
 #include <gdgem/clustering/ClusterMatcher.h>
-#include <gdgem/clustering/DoroClusterer.h>
+#include <common/clustering/GapClusterer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/vmm3/BuilderVMM3.h>
 #include <common/EV42Serializer.h>
@@ -363,12 +363,12 @@ void GdGemBase::processing_thread() {
 void GdGemBase::init_builder() {
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
-  auto clusx = std::make_shared<Gem::DoroClusterer>(
-      nmx_opts.clusterer_x.max_time_gap, nmx_opts.clusterer_x.max_strip_gap,
-      nmx_opts.clusterer_x.min_cluster_size);
-  auto clusy = std::make_shared<Gem::DoroClusterer>(
-      nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap,
-      nmx_opts.clusterer_y.min_cluster_size);
+  auto clusx = std::make_shared<GapClusterer>(
+      nmx_opts.clusterer_x.max_time_gap, nmx_opts.clusterer_x.max_strip_gap);
+//      , nmx_opts.clusterer_x.min_cluster_size);
+  auto clusy = std::make_shared<GapClusterer>(
+      nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap);
+//      , nmx_opts.clusterer_y.min_cluster_size);
 
   if (nmx_opts.builder_type == "VMM3") {
     XTRACE(INIT, DEB, "Using BuilderVMM3");

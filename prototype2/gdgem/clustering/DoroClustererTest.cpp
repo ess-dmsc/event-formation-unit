@@ -2,7 +2,7 @@
 
 #include <gdgem/nmx/Readout.h>
 #include <gdgem/clustering/HitSorter.h>
-#include <gdgem/clustering/DoroClusterer.h>
+#include <common/clustering/GapClusterer.h>
 
 #include <memory>
 #include <stdio.h>
@@ -35,12 +35,12 @@ protected:
                                            opts.clusterer_y.hit_adc_threshold,
                                            opts.clusterer_y.max_time_gap);
 
-    sorter_x->clusterer = std::make_shared<DoroClusterer>(opts.clusterer_x.max_time_gap,
-                                                          opts.clusterer_x.max_strip_gap,
-                                                          opts.clusterer_x.min_cluster_size);
-    sorter_y->clusterer = std::make_shared<DoroClusterer>(opts.clusterer_y.max_time_gap,
-                                                          opts.clusterer_y.max_strip_gap,
-                                                          opts.clusterer_y.min_cluster_size);
+    sorter_x->clusterer =
+        std::make_shared<GapClusterer>(opts.clusterer_x.max_time_gap,
+            opts.clusterer_x.max_strip_gap);
+    sorter_y->clusterer =
+        std::make_shared<GapClusterer>(opts.clusterer_y.max_time_gap,
+            opts.clusterer_y.max_strip_gap);
   }
 
   virtual void TearDown() {
@@ -62,7 +62,26 @@ protected:
     }
   }
 
+  void test_plane(std::shared_ptr<AbstractClusterer> clusterer,
+                  size_t expected_total,
+                  size_t expected_filtered,
+                  size_t min_cluster_size) {
+    EXPECT_EQ(clusterer->stats_cluster_count, expected_total);
+    size_t count_x{0};
+    for (const auto& c : clusterer->clusters)
+    {
+//      MESSAGE() << c.debug(true) << "\n";
+      if (c.hit_count() >= min_cluster_size)
+        count_x++;
+    }
+    EXPECT_EQ(count_x, expected_filtered);
+  }
+
 };
+
+TEST_F(DoroClustererTest, PrintConfig) {
+  MESSAGE() << "Test data config:\n" << opts.debug() << "\n";
+}
 
 TEST_F(DoroClustererTest, a1) {
   ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
@@ -70,12 +89,11 @@ TEST_F(DoroClustererTest, a1) {
 
   add_readouts();
 
-  sorter_x->analyze();
-  sorter_y->analyze();
+  sorter_x->flush();
+  sorter_y->flush();
 
-  /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 20);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 0);
+  test_plane(sorter_x->clusterer, 22, 20, opts.clusterer_x.min_cluster_size);
+  test_plane(sorter_y->clusterer, 0, 0, opts.clusterer_y.min_cluster_size);
 }
 
 TEST_F(DoroClustererTest, a10) {
@@ -84,12 +102,11 @@ TEST_F(DoroClustererTest, a10) {
 
   add_readouts();
 
-  sorter_x->analyze();
-  sorter_y->analyze();
+  sorter_x->flush();
+  sorter_y->flush();
 
-  /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 96);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 68);
+  test_plane(sorter_x->clusterer, 100, 96, opts.clusterer_x.min_cluster_size);
+  test_plane(sorter_y->clusterer, 73, 68, opts.clusterer_y.min_cluster_size);
 }
 
 TEST_F(DoroClustererTest, a100) {
@@ -98,12 +115,11 @@ TEST_F(DoroClustererTest, a100) {
 
   add_readouts();
 
-  sorter_x->analyze();
-  sorter_y->analyze();
+  sorter_x->flush();
+  sorter_y->flush();
 
-  /// \todo I don't trust these results anymore, please validate
-  EXPECT_EQ(sorter_x->clusterer->stats_cluster_count, 19003);
-  EXPECT_EQ(sorter_y->clusterer->stats_cluster_count, 9737);
+  test_plane(sorter_x->clusterer, 19565, 19003, opts.clusterer_x.min_cluster_size);
+  test_plane(sorter_y->clusterer, 10312, 9737, opts.clusterer_y.min_cluster_size);
 }
 
 int main(int argc, char **argv) {

@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <gdgem/clustering/AbstractClusterer.h>
+#include <common/clustering/AbstractClusterer.h>
 #include <memory>
 
 namespace Gem {

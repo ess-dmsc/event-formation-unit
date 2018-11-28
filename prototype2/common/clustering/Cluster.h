@@ -98,6 +98,8 @@ public:
   /// \param verbose also print hits
   virtual std::string debug(bool verbose = false) const;
 
+  // \todo "visualize" track in text graphics
+
 private:
   int16_t plane_{-1};      ///< plane identity of cluster, -1 for invalid
 

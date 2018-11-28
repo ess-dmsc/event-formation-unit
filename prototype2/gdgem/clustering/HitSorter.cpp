@@ -29,11 +29,8 @@ void HitSorter::insert(const Readout &readout) {
   }
   old_trigger_timestamp_ = readout.srs_timestamp;
 
-  /// \todo Move this check to parser?
+  /// \todo Move this check to parser or builder?
   if (readout.over_threshold || (readout.adc >= pADCThreshold)) {
-
-//    hits.store(pChips.get_plane(readout), pChips.get_strip(readout), readout.adc,
-//               readout.chiptime, triggerTimestamp_ns);
 
     buffer.push_back(Hit());
     auto &e = buffer.back();
@@ -41,14 +38,13 @@ void HitSorter::insert(const Readout &readout) {
     e.weight = readout.adc;
     e.coordinate = pChips.get_strip(readout);
     e.time = readout.srs_timestamp + static_cast<uint64_t>(readout.chiptime);
-    /// \todo who adds chipTime + trigger time? queue?
   }
 }
 
 void HitSorter::flush() {
-  //flush both buffers in queue
-  /// \todo subsequent trigger? How do we know?
   analyze();
+  if (clusterer)
+    clusterer->flush();
 }
 
 void HitSorter::analyze() {

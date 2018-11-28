@@ -1,7 +1,7 @@
 /** Copyright (C) 2016-2018 European Spallation Source ERIC */
 
 #include <gdgem/vmm3/BuilderVMM3.h>
-#include <gdgem/clustering/DoroClusterer.h>
+#include <common/clustering/GapClusterer.h>
 #include <common/TimeString.h>
 
 #include <common/Trace.h>

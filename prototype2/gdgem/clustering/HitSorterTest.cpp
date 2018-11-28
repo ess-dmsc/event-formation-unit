@@ -17,16 +17,21 @@ public:
   MockClusterer() {}
   virtual ~MockClusterer() {}
 
+  void insert(const Hit &hit) override {
+    if (hit.time < prev_time_)
+      stats_chrono_errors++;
+    prev_time_ = hit.time;
+    all_hits.emplace_back(hit);
+  }
+
   void cluster(const HitContainer &hits) override
   {
-    for (const auto& h :hits)
-    {
-      if (h.time < prev_time_)
-        stats_chrono_errors++;
-      prev_time_ = h.time;
+    for (const auto &hit : hits) {
+      insert(hit);
     }
-    all_hits.insert(all_hits.end(), hits.begin(), hits.end());
   }
+
+  void flush() override {}
 
   HitContainer all_hits;
   size_t stats_chrono_errors {0};
