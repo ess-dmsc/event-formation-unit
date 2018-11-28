@@ -233,8 +233,9 @@ void GdGemBase::cluster_plane(HitContainer &hits,
   if (nmx_opts.hit_histograms) {
     bin_hists(hists_, clusterer->clusters);
   }
-  if (!clusterer->empty()) {
-    matcher_->insert(0, clusterer->clusters);
+  if (!clusterer->clusters.empty()) {
+    XTRACE(PROCESS, DEB, "merging clusters {}", clusterer->clusters.size());
+    matcher_->insert(clusterer->clusters.front().plane(), clusterer->clusters);
   }
 }
 
@@ -242,10 +243,12 @@ void GdGemBase::perform_clustering(bool flush) {
   // \todo we can parallelize this (per plane)
 
   if (builder_->hit_buffer_x.size()) {
+    XTRACE(PROCESS, DEB, "clustering x hits {}", builder_->hit_buffer_x.size());
     cluster_plane(builder_->hit_buffer_x, clusterer_x_, flush);
   }
 
   if (builder_->hit_buffer_y.size()) {
+    XTRACE(PROCESS, DEB, "clustering y hits {}", builder_->hit_buffer_y.size());
     cluster_plane(builder_->hit_buffer_y, clusterer_y_, flush);
   }
 
