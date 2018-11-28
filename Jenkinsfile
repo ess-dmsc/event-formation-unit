@@ -255,6 +255,7 @@ def get_pipeline(image_key)
                 } finally {
                     sh "docker stop ${container_name(image_key)}"
                     sh "docker rm -f ${container_name(image_key)}"
+                    cleanWs()
                 }
             }
         }
