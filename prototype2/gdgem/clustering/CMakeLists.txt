@@ -25,7 +25,6 @@ set(ClusteringBase_INC
   ../srs/SRSMappings.h
   ../vmm3/CalibrationFile.h
   HitSorter.h
-  TestDataShort.h
   )
 
 set(srs_converter_SRC
@@ -36,13 +35,13 @@ set(srs_converter_INC
   ${ClusteringBase_INC})
 #create_executable(srs_converter)
 
-set(HitsQueueTest_SRC
+set(NMXRefDataValidation_SRC
   ${ClusteringBase_SRC}
-  HitsQueueTest.cpp)
-set(HitsQueueTest_INC
+  RefDataValidationTest.cpp)
+set(NMXRefDataValidation_INC
   ${ClusteringBase_INC})
-create_test_executable(HitsQueueTest SKIP_MEMGRIND)
-target_compile_definitions(HitsQueueTest
+create_test_executable(NMXRefDataValidation SKIP_MEMGRIND)
+target_compile_definitions(NMXRefDataValidation
   PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
 
 set(HitSorterTest_SRC
@@ -54,28 +53,28 @@ create_test_executable(HitSorterTest SKIP_MEMGRIND)
 target_compile_definitions(HitSorterTest
   PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
 
-set(DoroClustererTest_SRC
+set(NMXRefDataClusteringTest_SRC
   ${ClusteringBase_SRC}
   ../../common/clustering/GapClusterer.cpp
-  DoroClustererTest.cpp)
-set(DoroClustererTest_INC
+  RefDataClusteringTest.cpp)
+set(NMXRefDataClusteringTest_INC
   ../../common/clustering/GapClusterer.h
   ${ClusteringBase_INC})
-create_test_executable(DoroClustererTest SKIP_MEMGRIND)
-target_compile_definitions(DoroClustererTest
+create_test_executable(NMXRefDataClusteringTest SKIP_MEMGRIND)
+target_compile_definitions(NMXRefDataClusteringTest
   PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
 
-set(ClusterMatcherTest_SRC
+set(NMXRefDataMatchingTest_SRC
   ${ClusteringBase_SRC}
   ../../common/clustering/GapMatcher.cpp
   ../../common/clustering/GapClusterer.cpp
-  ClusterMatcherTest.cpp)
-set(ClusterMatcherTest_INC
+  RefDataMatchingTest.cpp)
+set(NMXRefDataMatchingTest_INC
   ../../common/clustering/GapMatcher.h
   ../../common/clustering/GapClusterer.h
   ${ClusteringBase_INC})
-create_test_executable(ClusterMatcherTest SKIP_MEMGRIND)
-target_compile_definitions(ClusterMatcherTest
+create_test_executable(NMXRefDataMatchingTest SKIP_MEMGRIND)
+target_compile_definitions(NMXRefDataMatchingTest
   PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
 
 ## GOOGLE BENCHMARK

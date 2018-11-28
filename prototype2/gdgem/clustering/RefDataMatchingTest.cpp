@@ -32,19 +32,21 @@ protected:
         opts.time_config.acquisition_window()*5,
         opts.matcher_max_delta_time);
 
-    sorter_x = std::make_shared<HitSorter>(opts.time_config, opts.srs_mappings,
-                                           opts.clusterer_x.hit_adc_threshold,
-                                           opts.clusterer_x.max_time_gap);
-    sorter_y = std::make_shared<HitSorter>(opts.time_config, opts.srs_mappings,
-                                           opts.clusterer_y.hit_adc_threshold,
-                                           opts.clusterer_y.max_time_gap);
+    sorter_x =
+        std::make_shared<HitSorter>(opts.time_config, opts.srs_mappings,
+                                    opts.clusterer_x.hit_adc_threshold,
+                                    opts.clusterer_x.max_time_gap);
+    sorter_y =
+        std::make_shared<HitSorter>(opts.time_config, opts.srs_mappings,
+                                    opts.clusterer_y.hit_adc_threshold,
+                                    opts.clusterer_y.max_time_gap);
 
-    sorter_x->clusterer = std::make_shared<GapClusterer>(opts.clusterer_x.max_time_gap,
-                                                          opts.clusterer_x.max_strip_gap);
-//                                                          , opts.clusterer_x.min_cluster_size);
-    sorter_y->clusterer = std::make_shared<GapClusterer>(opts.clusterer_y.max_time_gap,
-                                                          opts.clusterer_y.max_strip_gap);
-//                                                          , opts.clusterer_y.min_cluster_size);
+    sorter_x->clusterer =
+        std::make_shared<GapClusterer>(opts.clusterer_x.max_time_gap,
+                                       opts.clusterer_x.max_strip_gap);
+    sorter_y->clusterer =
+        std::make_shared<GapClusterer>(opts.clusterer_y.max_time_gap,
+                                       opts.clusterer_y.max_strip_gap);
   }
 
   virtual void TearDown() {
