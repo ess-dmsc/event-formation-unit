@@ -1,8 +1,11 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <cinttypes>
-#include <common/Trace.h>
 #include <gdgem/nmx/TrackSerializer.h>
+
+#include <common/Trace.h>
+
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 #define EV_ELEMSIZE sizeof(uint16_t)
 #define EV_SIZE (3 * EV_ELEMSIZE)
@@ -10,6 +13,7 @@
 #define TIME_OFFSET_SIZE sizeof(uint64_t)
 
 #define BUF_STATIC_SIZE (2 * POS_SIZE + TIME_OFFSET_SIZE)
+
 
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
@@ -57,6 +61,7 @@ bool TrackSerializer::add_track(const Event &event, double utpc_x, double utpc_y
 
   if (producer_callback) {
     auto buffer = serialize();
+    XTRACE(PROCESS, INF, "Producing track as buffer size: %d", buffer.size);
     producer_callback(buffer);
     return (0 != buffer.size);
   }

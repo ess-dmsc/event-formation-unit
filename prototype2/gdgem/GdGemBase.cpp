@@ -286,6 +286,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
       /// \todo Should it be here or outside of event_.valid()?
       if (sample_next_track_) {
+        XTRACE(PROCESS, DEB, "Serializing track: %s\n", event_.debug(true).c_str());
         sample_next_track_ = !track_serializer.add_track(event_,
                                                         utpc_x_.utpc_center,
                                                         utpc_y_.utpc_center);
