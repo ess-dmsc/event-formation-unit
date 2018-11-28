@@ -15,6 +15,9 @@
 #include <libs/include/SPSCFifo.h>
 #include <common/clustering/AbstractClusterer.h>
 #include <common/clustering/AbstractMatcher.h>
+#include <common/Hists.h>
+#include <common/EV42Serializer.h>
+#include <gdgem/nmx/TrackSerializer.h>
 
 struct NMXSettings {
   std::string ConfigFile;
@@ -90,6 +93,18 @@ protected:
   std::shared_ptr<AbstractClusterer> clusterer_x_;
   std::shared_ptr<AbstractClusterer> clusterer_y_;
   std::shared_ptr<AbstractMatcher> matcher_;
+  Hists hists_{std::numeric_limits<uint16_t>::max(),
+               std::numeric_limits<uint16_t>::max()};
 
-  void init_builder();
+  std::shared_ptr<Gem::utpcAnalyzer> utpc_analyzer_;
+  Gem::utpcResults utpc_x_, utpc_y_;
+  Event event_;
+  uint32_t time_;
+  uint32_t pixelid_;
+
+  bool sample_next_track_ {false};
+
+  void apply_configuration();
+  void perform_clustering(bool flush);
+  void process_events(EV42Serializer&, Gem::TrackSerializer&);
 };

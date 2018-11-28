@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// plugin for gdgem detector data reception, parsing and event formation
+/// plugin for gdgem detector data reception, parsing and event_ formation
 ///
 //===----------------------------------------------------------------------===//
 
@@ -185,200 +185,7 @@ void bin_hists(Hists& hists, const std::list<Cluster>& cl)
 }
 
 
-void GdGemBase::processing_thread() {
-  init_builder();
-  if (!builder_) {
-    XTRACE(PROCESS, ERR, "No builder specified, exiting thread");
-    return;
-  }
-
-  Producer event_producer(EFUSettings.KafkaBroker, "NMX_detector");
-  Producer monitor_producer(EFUSettings.KafkaBroker, "NMX_monitor");
-
-  EV42Serializer ev42serializer(kafka_buffer_size, "nmx");
-  ev42serializer.setProducerCallback(
-      std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
-
-
-  Gem::TrackSerializer track_serializer(256, nmx_opts.track_sample_minhits,
-                          nmx_opts.time_config.target_resolution_ns());
-  track_serializer.set_callback(
-      std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
-
-  Hists hists(std::numeric_limits<uint16_t>::max(),
-      std::numeric_limits<uint16_t>::max());
-  HistSerializer hist_serializer(hists.needed_buffer_size());
-  hist_serializer.set_callback(
-      std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
-  hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
-
-  GapMatcher matcher(nmx_opts.time_config.acquisition_window()*5,
-      nmx_opts.matcher_max_delta_time);
-
-  TSCTimer global_time, report_timer;
-
-  Gem::utpcAnalyzer utpc_analyzer(nmx_opts.analyze_weighted,
-                                  nmx_opts.analyze_max_timebins,
-                                  nmx_opts.analyze_max_timedif);
-  Gem::utpcResults utpc_x, utpc_y;
-
-  Event event;
-  uint32_t time;
-  uint32_t pixelid;
-
-  unsigned int data_index;
-  bool sample_next_track {nmx_opts.send_tracks};
-  while (1) {
-    // mystats.fifo_free = input2proc_fifo.free();
-    if (!input2proc_fifo.pop(data_index)) {
-      mystats.processing_idle++;
-      usleep(1);
-    } else {
-      auto len = eth_ringbuf->getDataLength(data_index);
-      if (len == 0) {
-        mystats.fifo_seq_errors++;
-      } else {
-        // printf("received packet with length %d\n", len);
-        auto stats = builder_->process_buffer(
-            eth_ringbuf->getDataBuffer(data_index), len);
-
-        mystats.readouts += stats.valid_hits;
-        mystats.readouts_error_bytes +=
-            stats.error_bytes; // From srs data parser
-        mystats.rx_seq_errors += stats.lost_frames;
-        mystats.bad_frames += stats.bad_frames;
-        mystats.good_frames += stats.good_frames;
-
-        if (builder_->hit_buffer_x.size()) {
-          std::sort(builder_->hit_buffer_x.begin(), builder_->hit_buffer_x.end(),
-                    [](const Hit &e1, const Hit &e2) {
-                      return e1.time < e2.time;
-                    });
-          clusterer_x_->cluster(builder_->hit_buffer_x);
-          builder_->hit_buffer_x.clear();
-        }
-
-        if (builder_->hit_buffer_y.size()) {
-          std::sort(builder_->hit_buffer_y.begin(), builder_->hit_buffer_y.end(),
-                    [](const Hit &e1, const Hit &e2) {
-                      return e1.time < e2.time;
-                    });
-          clusterer_y_->cluster(builder_->hit_buffer_y);
-          builder_->hit_buffer_y.clear();
-        }
-
-        if (nmx_opts.hit_histograms) {
-          bin_hists(hists, clusterer_x_->clusters);
-          bin_hists(hists, clusterer_y_->clusters);
-        }
-
-        if (!clusterer_x_->empty() &&
-            !clusterer_y_->empty()) {
-          matcher_->insert(0, clusterer_x_->clusters);
-          matcher_->insert(1, clusterer_y_->clusters);
-        }
-        matcher_->match(false);
-
-        while (!matcher_->matched_events.empty()) {
-          // printf("MATCHED_CLUSTERS\n");
-          XTRACE(PROCESS, DEB, "event_ready()");
-          event = matcher_->matched_events.front();
-          matcher_->matched_events.pop_front();
-
-          // mystats.unclustered = clusterer.unclustered();
-
-          utpc_x = utpc_analyzer.analyze(event.c1);
-          utpc_y = utpc_analyzer.analyze(event.c2);
-
-          if (nmx_opts.hit_histograms) {
-            bin(hists, event);
-          }
-
-          if (event.both_planes()) {
-            XTRACE(PROCESS, DEB, "event.good");
-
-            mystats.clusters_xy++;
-
-            /// \todo Should it be here or outside of event.valid()?
-            if (sample_next_track) {
-              sample_next_track = !track_serializer.add_track(event,
-                  utpc_x.utpc_center, utpc_y.utpc_center);
-            }
-
-            XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
-                   utpc_x.utpc_center_rounded(),
-                   utpc_y.utpc_center_rounded());
-
-            if (nmx_opts.filter.valid(event, utpc_x, utpc_y)) {
-              pixelid = nmx_opts.geometry.pixel2D(
-                  utpc_x.utpc_center_rounded(), utpc_y.utpc_center_rounded());
-
-              if (!nmx_opts.geometry.valid_id(pixelid)) {
-                mystats.geom_errors++;
-              } else {
-                time = static_cast<uint32_t>(utpc_analyzer.utpc_time(event.c1, event.c2));
-
-                XTRACE(PROCESS, DEB, "time: %d, pixelid %d", time, pixelid);
-
-                mystats.tx_bytes += ev42serializer.addEvent(time, pixelid);
-                mystats.clusters_events++;
-              }
-            } else { // Does not meet criteria
-              /** \todo increments counters when failing this */
-            }
-          } else { /// no valid event
-            if (event.c1.hit_count() != 0) {
-              mystats.clusters_x++;
-            } else {
-              mystats.clusters_y++;
-            }
-            mystats.readouts_discarded += event.total_hit_count();
-            mystats.clusters_discarded++;
-          }
-        }
-      }
-    }
-
-    // Flush on interval or exit
-    if ((not runThreads) || (report_timer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ)) {
-
-      /// \todo in case of exit, flush all clusters first
-
-      sample_next_track = nmx_opts.send_tracks;
-
-      mystats.tx_bytes += ev42serializer.produce();
-
-      /// Kafka stats update - common to all detectors
-      /// don't increment as producer keeps absolute count
-      mystats.kafka_produce_fails = event_producer.stats.produce_fails;
-      mystats.kafka_ev_errors = event_producer.stats.ev_errors;
-      mystats.kafka_ev_others = event_producer.stats.ev_others;
-      mystats.kafka_dr_errors = event_producer.stats.dr_errors;
-      mystats.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
-
-      if (!hists.isEmpty()) {
-        XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters ",
-               hists.hit_count(), hists.cluster_count());
-        hist_serializer.produce(hists);
-        hists.clear();
-      }
-
-      // checking for exit
-      if (not runThreads) {
-        XTRACE(INPUT, ALW, "Stopping processing thread.");
-        /// \todo this is a hack to force ~BuilderSRS() call
-        builder_.reset();
-        delete builder_.get(); /**< \todo see above */
-        return;
-      }
-
-      report_timer.now();
-    }
-  }
-}
-
-void GdGemBase::init_builder() {
+void GdGemBase::apply_configuration() {
   XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
 
   if (nmx_opts.builder_type == "VMM3") {
@@ -402,4 +209,216 @@ void GdGemBase::init_builder() {
       nmx_opts.time_config.acquisition_window()*5,
       nmx_opts.matcher_max_delta_time);
 
+  hists_.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
+
+  utpc_analyzer_ = std::make_shared<Gem::utpcAnalyzer>(
+      nmx_opts.analyze_weighted,
+      nmx_opts.analyze_max_timebins,
+      nmx_opts.analyze_max_timedif);
+
+  sample_next_track_ = nmx_opts.send_tracks;
 }
+
+void GdGemBase::perform_clustering(bool flush) {
+  if (builder_->hit_buffer_x.size()) {
+    std::sort(builder_->hit_buffer_x.begin(), builder_->hit_buffer_x.end(),
+              [](const Hit &e1, const Hit &e2) {
+                return e1.time < e2.time;
+              });
+    clusterer_x_->cluster(builder_->hit_buffer_x);
+    builder_->hit_buffer_x.clear();
+  }
+
+  if (builder_->hit_buffer_y.size()) {
+    std::sort(builder_->hit_buffer_y.begin(), builder_->hit_buffer_y.end(),
+              [](const Hit &e1, const Hit &e2) {
+                return e1.time < e2.time;
+              });
+    clusterer_y_->cluster(builder_->hit_buffer_y);
+    builder_->hit_buffer_y.clear();
+  }
+
+  if (flush) {
+    clusterer_x_->flush();
+    clusterer_y_->flush();
+  }
+
+  if (nmx_opts.hit_histograms) {
+    bin_hists(hists_, clusterer_x_->clusters);
+    bin_hists(hists_, clusterer_y_->clusters);
+  }
+
+  if (!flush && clusterer_x_->empty() && clusterer_y_->empty())
+    return;
+
+  if (!clusterer_x_->empty()) {
+    matcher_->insert(0, clusterer_x_->clusters);
+  }
+
+  if (!clusterer_y_->empty()) {
+    matcher_->insert(1, clusterer_y_->clusters);
+  }
+
+  matcher_->match(flush);
+}
+
+void GdGemBase::process_events(EV42Serializer& event_serializer,
+    Gem::TrackSerializer& track_serializer) {
+  while (!matcher_->matched_events.empty()) {
+    // printf("MATCHED_CLUSTERS\n");
+    XTRACE(PROCESS, DEB, "event_ready()");
+    event_ = matcher_->matched_events.front();
+    matcher_->matched_events.pop_front();
+
+    // mystats.unclustered = clusterer.unclustered();
+
+    utpc_x_ = utpc_analyzer_->analyze(event_.c1);
+    utpc_y_ = utpc_analyzer_->analyze(event_.c2);
+
+    if (nmx_opts.hit_histograms) {
+      bin(hists_, event_);
+    }
+
+    if (event_.both_planes()) {
+      XTRACE(PROCESS, DEB, "event_.good");
+
+      mystats.clusters_xy++;
+
+      /// \todo Should it be here or outside of event_.valid()?
+      if (sample_next_track_) {
+        sample_next_track_ = !track_serializer.add_track(event_,
+                                                        utpc_x_.utpc_center,
+                                                        utpc_y_.utpc_center);
+      }
+
+      XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
+             utpc_x_.utpc_center_rounded(),
+             utpc_y_.utpc_center_rounded());
+
+      if (nmx_opts.filter.valid(event_, utpc_x_, utpc_y_)) {
+        pixelid_ = nmx_opts.geometry.pixel2D(
+            utpc_x_.utpc_center_rounded(), utpc_y_.utpc_center_rounded());
+
+        if (!nmx_opts.geometry.valid_id(pixelid_)) {
+          mystats.geom_errors++;
+        } else {
+          time_ = static_cast<uint32_t>(utpc_analyzer_->utpc_time(event_.c1, event_.c2));
+
+          XTRACE(PROCESS, DEB, "time_: %d, pixelid_ %d", time_, pixelid_);
+
+          mystats.tx_bytes += event_serializer.addEvent(time_, pixelid_);
+          mystats.clusters_events++;
+        }
+      } else { // Does not meet criteria
+        /** \todo increments counters when failing this */
+      }
+    } else { /// no valid event_
+      if (event_.c1.hit_count() != 0) {
+        mystats.clusters_x++;
+      } else {
+        mystats.clusters_y++;
+      }
+      mystats.readouts_discarded += event_.total_hit_count();
+      mystats.clusters_discarded++;
+    }
+  }
+}
+
+
+void GdGemBase::processing_thread() {
+  apply_configuration();
+  if (!builder_) {
+    XTRACE(PROCESS, ERR, "No builder specified, exiting thread");
+    return;
+  }
+
+  Producer event_producer(EFUSettings.KafkaBroker, "NMX_detector");
+  Producer monitor_producer(EFUSettings.KafkaBroker, "NMX_monitor");
+
+  EV42Serializer ev42serializer(kafka_buffer_size, "nmx");
+  ev42serializer.setProducerCallback(
+      std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
+
+  Gem::TrackSerializer track_serializer(256, nmx_opts.track_sample_minhits,
+                                        nmx_opts.time_config.target_resolution_ns());
+  track_serializer.set_callback(
+      std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
+
+  HistSerializer hist_serializer(hists_.needed_buffer_size());
+  hist_serializer.set_callback(
+      std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
+
+  TSCTimer global_time, report_timer;
+
+
+  unsigned int data_index;
+  while (1) {
+    // mystats.fifo_free = input2proc_fifo.free();
+    if (!input2proc_fifo.pop(data_index)) {
+      mystats.processing_idle++;
+      usleep(1);
+    } else {
+      auto len = eth_ringbuf->getDataLength(data_index);
+      if (len == 0) {
+        mystats.fifo_seq_errors++;
+      } else {
+        // printf("received packet with length %d\n", len);
+        auto stats = builder_->process_buffer(
+            eth_ringbuf->getDataBuffer(data_index), len);
+
+        mystats.readouts += stats.valid_hits;
+        mystats.readouts_error_bytes +=
+            stats.error_bytes; // From srs data parser
+        mystats.rx_seq_errors += stats.lost_frames;
+        mystats.bad_frames += stats.bad_frames;
+        mystats.good_frames += stats.good_frames;
+
+        // do not flush
+        perform_clustering(false);
+        process_events(ev42serializer, track_serializer);
+      }
+    }
+
+    // Flush on interval or exit
+    if ((not runThreads) || (report_timer.timetsc() >=
+        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ)) {
+
+      if (not runThreads) {
+        // flush everything first
+        perform_clustering(true);
+        process_events(ev42serializer, track_serializer);
+      }
+
+      sample_next_track_ = nmx_opts.send_tracks;
+
+      mystats.tx_bytes += ev42serializer.produce();
+
+      /// Kafka stats update - common to all detectors
+      /// don't increment as producer keeps absolute count
+      mystats.kafka_produce_fails = event_producer.stats.produce_fails;
+      mystats.kafka_ev_errors = event_producer.stats.ev_errors;
+      mystats.kafka_ev_others = event_producer.stats.ev_others;
+      mystats.kafka_dr_errors = event_producer.stats.dr_errors;
+      mystats.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
+
+      if (!hists_.isEmpty()) {
+        XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters ",
+               hists_.hit_count(), hists_.cluster_count());
+        hist_serializer.produce(hists_);
+        hists_.clear();
+      }
+
+      // checking for exit
+      if (not runThreads) {
+        XTRACE(INPUT, ALW, "Stopping processing thread.");
+        /// \todo this is a hack to force ~BuilderSRS() call
+        builder_.reset();
+        delete builder_.get(); /**< \todo see above */
+        return;
+      }
+
+      report_timer.now();
+    }
+  }
+}
+
