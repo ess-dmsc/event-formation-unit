@@ -45,8 +45,8 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("--log_file", LogFileName, "Write log messages to file.")
   ->group("EFU Options");
 
-  // CLIParser.add_flag("--nohwcheck", EFUSettings.NoHwCheck, "Perform HW check or not")
-  //     ->group("EFU Options");
+  CLIParser.add_flag("--nohwcheck", EFUSettings.NoHwCheck, "Perform HW check or not")
+      ->group("EFU Options");
 
   CLIParser.add_flag("--udder", EFUSettings.TestImage, "Generate a test image")
       ->group("EFU Options");
