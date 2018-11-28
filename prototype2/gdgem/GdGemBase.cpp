@@ -220,6 +220,8 @@ void GdGemBase::apply_configuration() {
 }
 
 void GdGemBase::perform_clustering(bool flush) {
+  // \todo we can parallelize this (split in 2)
+
   if (builder_->hit_buffer_x.size()) {
     std::sort(builder_->hit_buffer_x.begin(), builder_->hit_buffer_x.end(),
               [](const Hit &e1, const Hit &e2) {
@@ -227,6 +229,15 @@ void GdGemBase::perform_clustering(bool flush) {
               });
     clusterer_x_->cluster(builder_->hit_buffer_x);
     builder_->hit_buffer_x.clear();
+    if (flush) {
+      clusterer_x_->flush();
+    }
+    if (nmx_opts.hit_histograms) {
+      bin_hists(hists_, clusterer_x_->clusters);
+    }
+    if (!clusterer_x_->empty()) {
+      matcher_->insert(0, clusterer_x_->clusters);
+    }
   }
 
   if (builder_->hit_buffer_y.size()) {
@@ -236,34 +247,28 @@ void GdGemBase::perform_clustering(bool flush) {
               });
     clusterer_y_->cluster(builder_->hit_buffer_y);
     builder_->hit_buffer_y.clear();
+    if (flush) {
+      clusterer_y_->flush();
+    }
+    if (nmx_opts.hit_histograms) {
+      bin_hists(hists_, clusterer_y_->clusters);
+    }
+    if (!clusterer_y_->empty()) {
+      matcher_->insert(1, clusterer_y_->clusters);
+    }
   }
 
-  if (flush) {
-    clusterer_x_->flush();
-    clusterer_y_->flush();
-  }
-
-  if (nmx_opts.hit_histograms) {
-    bin_hists(hists_, clusterer_x_->clusters);
-    bin_hists(hists_, clusterer_y_->clusters);
-  }
-
-  if (!flush && clusterer_x_->empty() && clusterer_y_->empty())
-    return;
-
-  if (!clusterer_x_->empty()) {
-    matcher_->insert(0, clusterer_x_->clusters);
-  }
-
-  if (!clusterer_y_->empty()) {
-    matcher_->insert(1, clusterer_y_->clusters);
-  }
-
+  // \todo but we cannot parallelize this, this is the critical path
   matcher_->match(flush);
 }
 
 void GdGemBase::process_events(EV42Serializer& event_serializer,
     Gem::TrackSerializer& track_serializer) {
+
+  // \todo we can potentially infinitely parallelize this
+  //       as each iteration is completely independent, other than
+  //       everything going to the same serializers
+
   while (!matcher_->matched_events.empty()) {
     // printf("MATCHED_CLUSTERS\n");
     XTRACE(PROCESS, DEB, "event_ready()");
