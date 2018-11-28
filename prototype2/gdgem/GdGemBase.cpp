@@ -314,8 +314,7 @@ void GdGemBase::processing_thread() {
             } else {
               mystats.clusters_y++;
             }
-            mystats.readouts_discarded +=
-                event.c1.hit_count() + event.c2.hit_count();
+            mystats.readouts_discarded += event.total_hit_count();
             mystats.clusters_discarded++;
           }
         }

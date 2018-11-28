@@ -98,7 +98,9 @@ public:
   /// \param verbose also print hits
   virtual std::string debug(bool verbose = false) const;
 
-  // \todo "visualize" track in text graphics
+  /// \returns visualizes cluster with "text graphics"
+  virtual std::string visualize(uint8_t downsample_time = 0,
+                                uint8_t downsample_coords = 0) const;
 
 private:
   int16_t plane_{-1};      ///< plane identity of cluster, -1 for invalid

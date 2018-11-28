@@ -128,7 +128,7 @@ TEST_F(EventTest, InsertInvalid) {
   event.insert_hit(e);
   e.plane = 2;
   event.insert_hit(e);
-  EXPECT_EQ(2, event.x.hit_count() + event.y.hit_count());
+  EXPECT_EQ(2, event.total_hit_count());
 }
 
 TEST_F(EventTest, DebugPrint) {

@@ -33,6 +33,10 @@ void Event::insert(const Hit &e) {
   }
 }
 
+size_t Event::total_hit_count() const {
+  return c1.hit_count() + c2.hit_count();
+}
+
 void Event::merge(Cluster &cluster) {
   if (cluster.plane() == plane1_) {
     c1.merge(cluster);
@@ -88,7 +92,6 @@ uint64_t Event::time_overlap(const Cluster &other) const {
     XTRACE(EVENT, DEB, "no time overlap");
     return 0;
   }
-  /// \todo should not rather return a boolean ?
   return (earliest_end - latest_start) + uint16_t(1);
 }
 
@@ -103,7 +106,6 @@ uint64_t Event::time_gap(const Cluster &other) const {
     XTRACE(EVENT, DEB, "no time gap");
     return 0;
   }
-  /// \todo should not rather return a boolean ?
   return (latest_start - earliest_end);
 }
 
@@ -118,3 +120,15 @@ std::string Event::debug(bool verbose) const {
 
   return ret;
 }
+
+std::string Event::visualize(uint8_t downsample_time,
+                             uint8_t downsample_coords) const {
+  auto ret = fmt::format("Event planes({},{}):",
+                         plane1_, plane2_);
+  if (!c1.empty())
+    ret += "\n  " + c1.visualize(downsample_time, downsample_coords);
+  if (!c2.empty())
+    ret += "\n  " + c2.visualize(downsample_time, downsample_coords);
+  return ret;
+}
+

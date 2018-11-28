@@ -71,6 +71,7 @@ protected:
     for (const auto& c : clusterer->clusters)
     {
 //      MESSAGE() << c.debug(true) << "\n";
+//      MESSAGE() << c.visualize(2) << "\n";
       if (c.hit_count() >= min_cluster_size)
         count_x++;
     }

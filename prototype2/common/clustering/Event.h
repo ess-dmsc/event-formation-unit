@@ -44,7 +44,8 @@ public:
   /// \param hit to be added
   void insert(const Hit &e);
 
-  // \todo hit_count() const
+  /// \returns total hit count in both constituent clusters
+  size_t total_hit_count() const;
 
   /// \brief merges a cluster into event.
   ///        Merges the cluster into the appropriate plane.
@@ -82,4 +83,9 @@ public:
   /// \returns string describing event bounds and weights
   /// \param verbose also print hits
   std::string debug(bool verbose = false) const;
+
+  /// \returns visualizes both clusters with "text graphics"
+  virtual std::string visualize(uint8_t downsample_time = 0,
+                                uint8_t downsample_coords = 0) const;
+
 };

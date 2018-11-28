@@ -107,6 +107,10 @@ TEST_F(ClusterMatcherTest, a10) {
   matcher->match(true);
   EXPECT_EQ(matcher->stats_event_count, 101);
   EXPECT_EQ(matcher->matched_events.size(), 101);
+
+//  for (const auto& e : matcher->matched_events) {
+//    MESSAGE() << e.visualize(3) << "\n";
+//  }
 }
 
 TEST_F(ClusterMatcherTest, a100) {
