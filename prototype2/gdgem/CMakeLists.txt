@@ -10,12 +10,12 @@ set(pipeline_common_source
     ../common/clustering/Cluster.cpp
     ../common/clustering/Event.cpp
     ../common/clustering/GapClusterer.cpp
+    ../common/clustering/GapMatcher.cpp
     ../common/Hists.cpp
     ../common/HistSerializer.cpp
     nmx/TrackSerializer.cpp
     nmx/AbstractBuilder.cpp
     clustering/HitSorter.cpp
-    clustering/ClusterMatcher.cpp
     srs/SRSMappings.cpp
     srs/SRSTime.cpp
     vmm3/ParserVMM3.cpp
@@ -31,6 +31,7 @@ set(pipeline_common_inc
     ../common/clustering/Cluster.h
     ../common/clustering/Event.h
     ../common/clustering/GapClusterer.h
+    ../common/clustering/GapMatcher.h
     ../common/clustering/AbstractClusterer.h
     ../common/Hists.h
     nmx/Readout.h
@@ -38,7 +39,6 @@ set(pipeline_common_inc
     nmx/TrackSerializer.h
     nmx/AbstractBuilder.h
     clustering/HitSorter.h
-    clustering/ClusterMatcher.h
     srs/SRSMappings.h
     srs/SRSTime.h
     vmm3/ParserVMM3.h

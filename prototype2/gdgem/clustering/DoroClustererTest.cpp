@@ -11,8 +11,6 @@
 #include <gdgem/NMXConfig.h>
 #include <functional>
 
-#include <gdgem/clustering/TestDataShort.h>
-
 using namespace Gem;
 
 class DoroClustererTest : public TestBase {

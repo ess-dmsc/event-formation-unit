@@ -9,7 +9,7 @@
 
 #include "GdGemBase.h"
 
-#include <gdgem/clustering/ClusterMatcher.h>
+#include <common/clustering/GapMatcher.h>
 #include <common/clustering/GapClusterer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/vmm3/BuilderVMM3.h>
@@ -212,7 +212,8 @@ void GdGemBase::processing_thread() {
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
   hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
-  Gem::ClusterMatcher matcher(nmx_opts.matcher_max_delta_time);
+  GapMatcher matcher(nmx_opts.time_config.acquisition_window()*5,
+      nmx_opts.matcher_max_delta_time);
 
   TSCTimer global_time, report_timer;
 
@@ -255,16 +256,16 @@ void GdGemBase::processing_thread() {
 
         if (!builder_->clusterer_x->empty() &&
             !builder_->clusterer_y->empty()) {
-          matcher.merge(0, builder_->clusterer_x->clusters);
-          matcher.merge(1, builder_->clusterer_y->clusters);
+          matcher.insert(0, builder_->clusterer_x->clusters);
+          matcher.insert(1, builder_->clusterer_y->clusters);
         }
-        matcher.match_end(false);
+        matcher.match(false);
 
-        while (!matcher.matched_clusters.empty()) {
+        while (!matcher.matched_events.empty()) {
           // printf("MATCHED_CLUSTERS\n");
           XTRACE(PROCESS, DEB, "event_ready()");
-          event = matcher.matched_clusters.front();
-          matcher.matched_clusters.pop_front();
+          event = matcher.matched_events.front();
+          matcher.matched_events.pop_front();
 
           // mystats.unclustered = clusterer.unclustered();
 

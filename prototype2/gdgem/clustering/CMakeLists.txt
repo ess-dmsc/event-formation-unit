@@ -14,7 +14,6 @@ set(ClusteringBase_SRC
   ../srs/SRSMappings.cpp
   ../vmm3/CalibrationFile.cpp
   HitSorter.cpp
-  ClusterMatcher.cpp
   )
 set(ClusteringBase_INC
   ../NMXConfig.h
@@ -26,7 +25,6 @@ set(ClusteringBase_INC
   ../srs/SRSMappings.h
   ../vmm3/CalibrationFile.h
   HitSorter.h
-  ClusterMatcher.h
   TestDataShort.h
   )
 
@@ -69,11 +67,11 @@ target_compile_definitions(DoroClustererTest
 
 set(ClusterMatcherTest_SRC
   ${ClusteringBase_SRC}
-  ClusterMatcher.cpp
+  ../../common/clustering/GapMatcher.cpp
   ../../common/clustering/GapClusterer.cpp
   ClusterMatcherTest.cpp)
 set(ClusterMatcherTest_INC
-  ClusterMatcher.h
+  ../../common/clustering/GapMatcher.h
   ../../common/clustering/GapClusterer.h
   ${ClusteringBase_INC})
 create_test_executable(ClusterMatcherTest SKIP_MEMGRIND)
