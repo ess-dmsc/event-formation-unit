@@ -21,7 +21,7 @@ public:
   size_t read(char *buf);
 
 private:
-  std::shared_ptr<Multiblade::Readout> file;
+  std::shared_ptr<Multiblade::ReadoutFile> file;
 
   size_t total_{0};
   size_t current_{0};
