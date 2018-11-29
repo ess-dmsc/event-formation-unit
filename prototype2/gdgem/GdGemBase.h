@@ -43,9 +43,9 @@ public:
 protected:
 
   /** \todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 2000;
-  static const int eth_buffer_size = 9000;
-  static const int kafka_buffer_size = 12400;
+  static constexpr int eth_buffer_max_entries {2000};
+  static constexpr int eth_buffer_size {9000};
+  static constexpr int kafka_buffer_size {12400};
 
 
   /** Shared between input_thread and processing_thread*/

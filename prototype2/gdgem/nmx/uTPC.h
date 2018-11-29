@@ -31,6 +31,8 @@ struct utpcResults {
   utpcResultsPlane x, y;
   uint64_t time {0};
   bool good {false};
+
+  std::string debug() const;
 };
 
 class utpcAnalyzer {

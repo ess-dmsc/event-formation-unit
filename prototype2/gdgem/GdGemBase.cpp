@@ -24,8 +24,11 @@
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
+
+//#undef TRC_MASK
+//#define TRC_MASK 0
 
 /** ----------------------------------------------------- */
 
@@ -43,7 +46,7 @@ int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
   int asic = atoi(cmdargs.at(2).c_str());
   int channel = atoi(cmdargs.at(3).c_str());
   auto calib = nmx_opts.calfile->getCalibration(fec, asic, channel);
-  if ((abs(calib.offset) <= 1e-6) and (abs(calib.slope) <= 1e-6)) {
+  if ((std::abs(calib.offset) <= 1e-6) and (std::abs(calib.slope) <= 1e-6)) {
     *obytes =
         snprintf(output, SERVER_BUFFER_SIZE, "<error> no calibration exist");
     return -Parser::EBADARGS;
@@ -59,10 +62,10 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
        Detector("NMX", settings), NMXSettings(LocalSettings) {
   Stats.setPrefix("efu.nmx");
 
-  XTRACE(PROCESS, ALW, "NMX Config file: %s", NMXSettings.ConfigFile.c_str());
+  LOG(INIT, Sev::Info, "NMX Config file: {}", NMXSettings.ConfigFile);
   nmx_opts = Gem::NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
 
-  XTRACE(INIT, ALW, "Adding stats");
+  LOG(INIT, Sev::Info, "Adding stats");
   // clang-format off
   Stats.create("rx_packets", mystats.rx_packets);
   Stats.create("rx_bytes", mystats.rx_bytes);
@@ -92,8 +95,8 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
   // clang-format on
 
   if (!NMXSettings.fileprefix.empty())
-    XTRACE(INIT, INF, "Dump h5 data in path: %s",
-           NMXSettings.fileprefix.c_str());
+    LOG(INIT, Sev::Info, "Dump h5 data in path: {}",
+           NMXSettings.fileprefix);
 
   std::function<void()> inputFunc = [this]() { GdGemBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
@@ -107,8 +110,8 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
                        return GdGemBase::getCalibration(cmdargs, output, obytes);
                      });
 
-  XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d",
-         eth_buffer_max_entries, eth_buffer_size);
+//  LOG(INIT, Sev::Info, "Creating {} NMX Rx ringbuffers of size {}",
+//         eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(
       eth_buffer_max_entries + 11); /**< \todo testing workaround */
   assert(eth_ringbuf != 0);
@@ -124,7 +127,7 @@ void GdGemBase::input_thread() {
   nmxdata.setBufferSizes(0 /*use default */, EFUSettings.DetectorRxBufferSize);
   nmxdata.getBufferSizes(txBuffer, rxBuffer);
   if (rxBuffer < EFUSettings.DetectorRxBufferSize) {
-    XTRACE(INIT, ERR, "Receive buffer sizes too small, wanted %d, got %d",
+    LOG(INIT, Sev::Error, "Receive buffer sizes too small, wanted {}, got {}",
            EFUSettings.DetectorRxBufferSize, rxBuffer);
     return;
   }
@@ -142,7 +145,7 @@ void GdGemBase::input_thread() {
     if ((rdsize = nmxdata.receive(eth_ringbuf->getDataBuffer(eth_index),
                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-//      XTRACE(INPUT, DEB, "rdsize: %d", rdsize);
+      LOG(INPUT, Sev::Debug, "rdsize: {}", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
@@ -156,7 +159,7 @@ void GdGemBase::input_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.");
+      LOG(INPUT, Sev::Info, "Stopping input thread.");
       return;
     }
   }
@@ -186,10 +189,10 @@ void bin_hists(Hists& hists, const std::list<Cluster>& cl)
 
 
 void GdGemBase::apply_configuration() {
-  XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
+  LOG(INIT, Sev::Info, "NMXConfig:\n{}", nmx_opts.debug());
 
   if (nmx_opts.builder_type == "VMM3") {
-    XTRACE(INIT, DEB, "Using BuilderVMM3");
+    LOG(INIT, Sev::Info, "Using BuilderVMM3");
     builder_ = std::make_shared<Gem::BuilderVMM3>(
         nmx_opts.time_config, nmx_opts.srs_mappings,
         nmx_opts.clusterer_x.hit_adc_threshold,
@@ -197,7 +200,7 @@ void GdGemBase::apply_configuration() {
         nmx_opts.calfile);
 
   } else {
-    XTRACE(INIT, ALW, "Unrecognized builder type in config");
+    LOG(INIT, Sev::Error, "Unrecognized builder type in config");
   }
 
   clusterer_x_ = std::make_shared<GapClusterer>(
@@ -234,7 +237,7 @@ void GdGemBase::cluster_plane(HitContainer &hits,
     bin_hists(hists_, clusterer->clusters);
   }
   if (!clusterer->clusters.empty()) {
-//    XTRACE(PROCESS, DEB, "merging clusters {}", clusterer->clusters.size());
+    LOG(PROCESS, Sev::Debug, "merging clusters {}", clusterer->clusters.size());
     matcher_->insert(clusterer->clusters.front().plane(), clusterer->clusters);
   }
 }
@@ -243,12 +246,12 @@ void GdGemBase::perform_clustering(bool flush) {
   // \todo we can parallelize this (per plane)
 
   if (builder_->hit_buffer_x.size()) {
-//    XTRACE(PROCESS, DEB, "clustering x hits {}", builder_->hit_buffer_x.size());
+    LOG(PROCESS, Sev::Debug, "merging x clusters {}", builder_->hit_buffer_x.size());
     cluster_plane(builder_->hit_buffer_x, clusterer_x_, flush);
   }
 
   if (builder_->hit_buffer_y.size()) {
-//    XTRACE(PROCESS, DEB, "clustering y hits {}", builder_->hit_buffer_y.size());
+    LOG(PROCESS, Sev::Debug, "merging y clusters {}", builder_->hit_buffer_y.size());
     cluster_plane(builder_->hit_buffer_y, clusterer_y_, flush);
   }
 
@@ -271,8 +274,6 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
   for (auto& event : matcher_->matched_events)
   {
-//    XTRACE(PROCESS, DEB, "processing event");
-
     // mystats.unclustered = clusterer.unclustered();
 
     if (nmx_opts.hit_histograms)
@@ -292,6 +293,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
       }
       mystats.readouts_discarded += event.total_hit_count();
       mystats.clusters_discarded++;
+//      LOG(PROCESS, Sev::Debug, "unpaired event discarded {}", event.debug());
       continue;
     }
 
@@ -299,22 +301,20 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     utpc_ = utpc_analyzer_->analyze(event);
 
-//    XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
-//           utpc_x_.utpc_center_rounded(),
-//           utpc_y_.utpc_center_rounded());
-
     /// Sample only tracks that are good in both planes
     if (sample_next_track_)
     {
-//      XTRACE(PROCESS, DEB, "Serializing track: %s\n", event.debug(true).c_str());
+      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.debug(true));
       sample_next_track_ = !track_serializer.add_track(event,
                                                        utpc_.x.utpc_center,
                                                        utpc_.y.utpc_center);
     }
 
-    if (!nmx_opts.filter.valid(event, utpc_))
+    if (!utpc_.good || !nmx_opts.filter.valid(event, utpc_))
     { // Does not meet criteria
       /** \todo increments counters when failing this */
+      LOG(PROCESS, Sev::Debug, "filtered event discarded utpc={}, {}",
+          utpc_.debug(), event.debug());
       continue;
     }
 
@@ -328,7 +328,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     }
 
     if (utpc_.time < previous_full_time_) {
-      XTRACE(PROCESS, WAR, "Event time sequence error: %zu < %zu",
+      LOG(PROCESS, Sev::Error, "Event time sequence error: {} < {}",
              utpc_.time, previous_full_time_);
     }
     previous_full_time_ = utpc_.time;
@@ -342,10 +342,11 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
       if (event_serializer.eventCount())
         mystats.tx_bytes += event_serializer.produce();
       event_serializer.pulseTime(recent_pulse_time_);
-//      XTRACE(PROCESS, DEB, "New offset time selected: %zu", recent_pulse_time_);
+      LOG(PROCESS, Sev::Debug, "New offset time selected: {}", recent_pulse_time_);
     }
 
-//    XTRACE(PROCESS, DEB, "time:%zu, pixel:%d", truncated_time_, pixelid_);
+    LOG(PROCESS, Sev::Debug, "Event: time={}, pixel={} from {}",
+        truncated_time_, pixelid_, utpc_.debug());
 
     mystats.tx_bytes += event_serializer.addEvent(
         static_cast<uint32_t>(truncated_time_), pixelid_);
@@ -358,7 +359,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 void GdGemBase::processing_thread() {
   apply_configuration();
   if (!builder_) {
-    XTRACE(PROCESS, ERR, "No builder specified, exiting thread");
+    LOG(PROCESS, Sev::Error, "No builder specified, exiting thread");
     return;
   }
 
@@ -392,7 +393,6 @@ void GdGemBase::processing_thread() {
       if (len == 0) {
         mystats.fifo_seq_errors++;
       } else {
-        // printf("received packet with length %d\n", len);
         auto stats = builder_->process_buffer(
             eth_ringbuf->getDataBuffer(data_index), len);
 
@@ -432,7 +432,7 @@ void GdGemBase::processing_thread() {
       mystats.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
 
       if (!hists_.isEmpty()) {
-        XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters ",
+        LOG(PROCESS, Sev::Debug, "Sending histogram for {} hits and {} clusters ",
                hists_.hit_count(), hists_.cluster_count());
         hist_serializer.produce(hists_);
         hists_.clear();
@@ -440,7 +440,7 @@ void GdGemBase::processing_thread() {
 
       // checking for exit
       if (not runThreads) {
-        XTRACE(INPUT, ALW, "Stopping processing thread.");
+        LOG(PROCESS, Sev::Info, "Stopping processing thread.");
         /// \todo this is a hack to force ~BuilderSRS() call
         builder_.reset();
         delete builder_.get(); /**< \todo see above */

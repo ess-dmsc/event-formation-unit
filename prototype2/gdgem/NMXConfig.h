@@ -20,6 +20,7 @@
 namespace Gem {
 
 struct ClustererConfig {
+  // \todo simplify this
   uint16_t hit_adc_threshold{0};
   uint16_t max_strip_gap{2};
   double max_time_gap{200};

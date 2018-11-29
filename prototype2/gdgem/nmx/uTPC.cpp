@@ -10,6 +10,10 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+#include <common/Log.h>
+#undef TRC_MASK
+#define TRC_MASK 0
+
 namespace Gem {
 
 uint32_t utpcResultsPlane::utpc_center_rounded() const {
@@ -17,9 +21,11 @@ uint32_t utpcResultsPlane::utpc_center_rounded() const {
 }
 
 std::string utpcResultsPlane::debug() const {
-  std::stringstream ss;
-  ss << "Utpc_center=" << utpc_center << " +-" << uncert_lower << " (+-" << uncert_upper << ") ";
-  return ss.str();
+  return fmt::format("{}(lu={},uu={})", utpc_center, uncert_lower, uncert_upper);
+}
+
+std::string utpcResults::debug() const {
+  return fmt::format("x={}, y={}, t={}", x.debug(), y.debug(), time);
 }
 
 
@@ -73,8 +79,9 @@ utpcResultsPlane utpcAnalyzer::analyze(Cluster& cluster) const {
     }
   }
 
-  XTRACE(PROCESS, DEB, "center_sum=%f center_count=%f", center_sum,
-         center_count);
+  LOG(PROCESS, Sev::Debug, "uTPC center_sum={} center_count={}",
+      center_sum,
+      center_count);
 
   ret.utpc_center = center_sum / center_count;
   ret.uncert_lower = lspan_max - lspan_min + int16_t(1);

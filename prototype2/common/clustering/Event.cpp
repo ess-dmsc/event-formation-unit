@@ -111,8 +111,9 @@ uint64_t Event::time_gap(const Cluster &other) const {
 
 
 std::string Event::debug(bool verbose) const {
-  auto ret = fmt::format("Event planes({},{}):",
-                     plane1_, plane2_);
+  auto ret = fmt::format("Event planes({}{},{}{}):",
+                     plane1_, (c1.empty() ? "" : "*"),
+                     plane2_, (c2.empty() ? "" : "*"));
   if (!c1.empty())
     ret += "\n  " + c1.debug(verbose);
   if (!c2.empty())
