@@ -5,9 +5,12 @@
 #include <common/TimeString.h>
 
 #include <common/Trace.h>
-
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
+
+#include <common/Log.h>
+#undef TRC_MASK
+#define TRC_MASK 0
 
 namespace Gem {
 
@@ -33,15 +36,14 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
   below_adc_threshold = 0;
   parser_.receive(buf, size);
   if (!parser_.stats.hits) {
-    XTRACE(PROCESS, DEB, "NO HITS after parse");
+    LOG(PROCESS, Sev::Debug, "No readouts after parse");
     auto &stats = parser_.stats;
     return AbstractBuilder::ResultStats(stats.hits, stats.errors,
                                         geom_errors, below_adc_threshold,
                                         stats.rxSeqErrors, stats.badFrames,
                                         stats.goodFrames);
   }
-  XTRACE(PROCESS, DEB, "HITS after parse: %d", parser_.stats.hits);
-
+  LOG(PROCESS, Sev::Debug, "Readouts after parse: {}", parser_.stats.hits);
 
 //	uint32_t udp_timestamp_ns = parser_.srsHeader.udpTimeStamp
 //			* time_intepreter_.internal_clock_period_ns();
@@ -51,9 +53,11 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
   for (unsigned int i = 0; i < parser_.stats.hits; i++) {
     auto &d = parser_.data[i];
     if (d.hasDataMarker) {
-      readout.srs_timestamp = d.fecTimeStamp
-          * time_intepreter_.internal_clock_period_ns()
-          + d.triggerOffset * time_intepreter_.trigger_period_ns();
+      // \todo should these be functions of SRSTime?
+      readout.srs_timestamp = static_cast<uint64_t>(
+              d.fecTimeStamp * time_intepreter_.internal_clock_period_ns()
+              + d.triggerOffset * time_intepreter_.trigger_period_ns()
+              );
 
       readout.chip_id = d.vmmid;
       readout.channel = d.chno;
@@ -62,6 +66,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
       readout.adc = d.adc;
       readout.over_threshold = (d.overThreshold != 0);
       auto calib = calfile_->getCalibration(readout.fec, readout.chip_id, readout.channel);
+      // \todo does this really need to be a floating point value?
       readout.chiptime = time_intepreter_.chip_time_ns(d.bcid, d.tdc, calib.offset, calib.slope);
 
       XTRACE(PROCESS, DEB,
@@ -81,25 +86,34 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
 
       if ((hit.plane != 0) && (hit.plane != 1)) {
         geom_errors++;
-        XTRACE(PROCESS, DEB, "Bad SRS mapping (1) --  fec: %d, chip: %d",
+        LOG(PROCESS, Sev::Debug, "Bad SRS mapping (plane) -- fec={}, chip={}",
                readout.fec, readout.chip_id);
         continue;
       }
 
       if (hit.coordinate == NMX_INVALID_GEOM_ID) {
         geom_errors++;
-        XTRACE(PROCESS, DEB, "Bad SRS mapping (2) --  fec: %d, chip: %d",
-               readout.fec, readout.chip_id);
+        LOG(PROCESS, Sev::Debug, "Bad SRS mapping (coordinate) -- fec={}, chip={}",
+            readout.fec, readout.chip_id);
         continue;
       }
 
-      if (!readout.over_threshold && (readout.adc < adc_threshold_)) {
+      if (!readout.over_threshold && (hit.weight < adc_threshold_)) {
+        // \todo make a counter for this in the pipeline
         below_adc_threshold++;
-        XTRACE(PROCESS, DEB, "Below ADC threshold  adc: %d", readout.adc);
+        LOG(PROCESS, Sev::Debug, "Below ADC threshold  adc={}", hit.weight);
         continue;
       }
 
-      // \todo what if adc == 0? this will affect weighted average
+
+      if (hit.weight == 0) {
+//        LOG(PROCESS, Sev::Warning,
+//            "Accepted readout with adc=0, may distort uTPC results, hit={}",
+//            hit.debug());
+        // \todo What to do? Cannot be 0 for CoM in uTPC. Reject?
+        hit.weight = 1;
+      }
+
 
       if (hit.plane == 1) {
         hit_buffer_y.emplace_back(hit);
@@ -110,7 +124,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
       }
 
     } else {
-      XTRACE(PROCESS, DEB, "No data marker in hit (increment counter?)");
+      LOG(PROCESS, Sev::Warning, "No data marker in hit (increment counter?)");
     }
   }
 

@@ -26,20 +26,18 @@
     {"fecID":2, "vmmID":7, "planeID":1, "strip_offset":320}
   ],
 
+  "adc_threshold" : 0,
+
   "clusterer x" :
   {
-    "hit_adc_threshold" : 0,
     "max_strip_gap" : 2,
-    "max_time_gap" : 200,
-    "min_cluster_size" : 3
+    "max_time_gap" : 200
   },
 
   "clusterer y" :
   {
-    "hit_adc_threshold" : 0,
     "max_strip_gap" : 2,
-    "max_time_gap" : 200,
-    "min_cluster_size" : 3
+    "max_time_gap" : 200
   },
 
   "matcher_max_delta_time" : 500,

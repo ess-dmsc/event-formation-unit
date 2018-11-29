@@ -50,6 +50,9 @@ create_module(gdgem)
 #
 # Unit Tests
 #
+
+get_filename_component(TEST_JSON_PATH "configs/vmm3.json" DIRECTORY)
+
 set(NMXConfigTest_INC
   NMXConfig.h
   nmx/uTPC.h
@@ -67,6 +70,8 @@ set(NMXConfigTest_SRC
   ../common/clustering/Event.cpp
   )
 create_test_executable(NMXConfigTest)
+target_compile_definitions(NMXConfigTest
+  PRIVATE TEST_JSON_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_JSON_PATH}/")
 
 set(GdGemBaseTest_INC
   ${pipeline_common_inc}
@@ -80,6 +85,8 @@ set(GdGemBaseTest_SRC
   ../../libs/source/TSCTimer.cpp
   ../adc_readout/test/TestUDPServer.cpp)
 create_test_executable(GdGemBaseTest)
+target_compile_definitions(GdGemBaseTest
+  PRIVATE TEST_JSON_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_JSON_PATH}/")
 
 #=============================================================================
 # Component tests

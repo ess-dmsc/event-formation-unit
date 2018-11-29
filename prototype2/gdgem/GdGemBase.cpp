@@ -15,22 +15,24 @@
 #include <gdgem/vmm3/BuilderVMM3.h>
 #include <common/EV42Serializer.h>
 #include <common/HistSerializer.h>
-#include <common/Log.h>
 #include <common/Producer.h>
-#include <common/Trace.h>
 #include <efu/Server.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 
-const int TSC_MHZ = 2900; // MJC's workstation - not reliable
-
+#include <common/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+#include <common/Log.h>
 //#undef TRC_MASK
 //#define TRC_MASK 0
 
-/** ----------------------------------------------------- */
+// \todo MJC's workstation - not reliable
+static constexpr int TSC_MHZ {2900};
+
+static constexpr uint64_t max_pulse_window_ns {5000000};
+//static constexpr uint64_t max_pulse_window_ns {std::numeric_limits<uint32_t>::max()};
 
 int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
                         char *output,
@@ -195,7 +197,7 @@ void GdGemBase::apply_configuration() {
     LOG(INIT, Sev::Info, "Using BuilderVMM3");
     builder_ = std::make_shared<Gem::BuilderVMM3>(
         nmx_opts.time_config, nmx_opts.srs_mappings,
-        nmx_opts.clusterer_x.hit_adc_threshold,
+        nmx_opts.adc_threshold,
         NMXSettings.fileprefix,
         nmx_opts.calfile);
 
@@ -237,7 +239,9 @@ void GdGemBase::cluster_plane(HitContainer &hits,
     bin_hists(hists_, clusterer->clusters);
   }
   if (!clusterer->clusters.empty()) {
-    LOG(PROCESS, Sev::Debug, "merging clusters {}", clusterer->clusters.size());
+//    LOG(PROCESS, Sev::Debug, "Adding {} clusters to matcher for plane {}",
+//        clusterer->clusters.size(),
+//        clusterer->clusters.front().plane());
     matcher_->insert(clusterer->clusters.front().plane(), clusterer->clusters);
   }
 }
@@ -246,12 +250,12 @@ void GdGemBase::perform_clustering(bool flush) {
   // \todo we can parallelize this (per plane)
 
   if (builder_->hit_buffer_x.size()) {
-    LOG(PROCESS, Sev::Debug, "merging x clusters {}", builder_->hit_buffer_x.size());
+//    LOG(PROCESS, Sev::Debug, "Clustering x, hit_count={}", builder_->hit_buffer_x.size());
     cluster_plane(builder_->hit_buffer_x, clusterer_x_, flush);
   }
 
   if (builder_->hit_buffer_y.size()) {
-    LOG(PROCESS, Sev::Debug, "merging y clusters {}", builder_->hit_buffer_y.size());
+//    LOG(PROCESS, Sev::Debug, "Clustering y, hit_count={}", builder_->hit_buffer_y.size());
     cluster_plane(builder_->hit_buffer_y, clusterer_y_, flush);
   }
 
@@ -310,9 +314,17 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
                                                        utpc_.y.utpc_center);
     }
 
-    if (!utpc_.good || !nmx_opts.filter.valid(event, utpc_))
-    { // Does not meet criteria
-      /** \todo increments counters when failing this */
+    if (!utpc_.good)
+    {
+      // \todo make a counter for this
+      LOG(PROCESS, Sev::Debug, "Bad uTPC discarded ={}, {}",
+          utpc_.debug(), event.debug(true));
+      continue;
+    }
+
+    if (!nmx_opts.filter.valid(event, utpc_))
+    {
+      // \todo make a counter for this
       LOG(PROCESS, Sev::Debug, "filtered event discarded utpc={}, {}",
           utpc_.debug(), event.debug());
       continue;
@@ -334,8 +346,9 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     previous_full_time_ = utpc_.time;
 
     truncated_time_ = utpc_.time - recent_pulse_time_;
+    // \todo try different limits
     if (!have_pulse_time_ ||
-        (truncated_time_ > std::numeric_limits<uint32_t>::max())) {
+        (truncated_time_ > max_pulse_window_ns)) {
       have_pulse_time_ = true;
       recent_pulse_time_ = utpc_.time;
       truncated_time_ = 0;
@@ -345,8 +358,8 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
       LOG(PROCESS, Sev::Debug, "New offset time selected: {}", recent_pulse_time_);
     }
 
-    LOG(PROCESS, Sev::Debug, "Event: time={}, pixel={} from {}",
-        truncated_time_, pixelid_, utpc_.debug());
+//    LOG(PROCESS, Sev::Debug, "Good event: time={}, pixel={} from {}",
+//        truncated_time_, pixelid_, utpc_.debug());
 
     mystats.tx_bytes += event_serializer.addEvent(
         static_cast<uint32_t>(truncated_time_), pixelid_);
@@ -370,8 +383,7 @@ void GdGemBase::processing_thread() {
   ev42serializer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 
-  Gem::TrackSerializer track_serializer(256, nmx_opts.track_sample_minhits,
-                                        nmx_opts.time_config.target_resolution_ns());
+  Gem::TrackSerializer track_serializer(256, nmx_opts.track_sample_minhits, 1);
   track_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 

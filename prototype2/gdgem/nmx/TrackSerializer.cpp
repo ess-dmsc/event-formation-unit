@@ -31,6 +31,8 @@ void TrackSerializer::set_callback(ProducerCallback cb) {
 }
 
 bool TrackSerializer::add_track(const Event &event, double utpc_x, double utpc_y) {
+
+  // \todo should this check be done here or outside the class?
   if ((event.c1.hit_count() < minhits_) ||
       (event.c2.hit_count() < minhits_)) {
     return false;

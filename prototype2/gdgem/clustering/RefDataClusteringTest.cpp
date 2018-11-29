@@ -13,7 +13,7 @@
 
 using namespace Gem;
 
-// \todo validate that there are no srs_time overflows
+static constexpr size_t min_cluster_size {3};
 
 class HitSorter {
  public:
@@ -28,9 +28,12 @@ class HitSorter {
     e.weight = readout.adc;
     e.coordinate = pChips.get_strip(readout);
     e.time = readout.srs_timestamp + static_cast<uint64_t>(readout.chiptime);
+    if (readout.srs_timestamp < prev_srs_time)
+      srs_overflows++;
+    prev_srs_time = readout.srs_timestamp;
   }
 
-  void analyze() {
+  void flush() {
     std::sort(buffer.begin(), buffer.end(),
               [](const Hit &e1, const Hit &e2) {
                 return e1.time < e2.time;
@@ -38,10 +41,6 @@ class HitSorter {
     if (clusterer)
       clusterer->cluster(buffer);
     buffer.clear();
-  }
-
-  void flush() {
-    analyze();
     if (clusterer)
       clusterer->flush();
   }
@@ -49,6 +48,8 @@ class HitSorter {
   std::shared_ptr<AbstractClusterer> clusterer;
 
   HitContainer buffer;
+  uint64_t prev_srs_time {0};
+  size_t srs_overflows{0};
 
  private:
   SRSTime pTime;
@@ -145,8 +146,11 @@ TEST_F(DoroClustererTest, a1) {
   sorter_x->flush();
   sorter_y->flush();
 
-  test_plane(sorter_x->clusterer, 22, 20, opts.clusterer_x.min_cluster_size);
-  test_plane(sorter_y->clusterer, 0, 0, opts.clusterer_y.min_cluster_size);
+  EXPECT_EQ(sorter_x->srs_overflows, 0);
+  EXPECT_EQ(sorter_y->srs_overflows, 0);
+
+  test_plane(sorter_x->clusterer, 22, 20, min_cluster_size);
+  test_plane(sorter_y->clusterer, 0, 0, min_cluster_size);
 
   matcher->insert(0, sorter_x->clusterer->clusters);
   matcher->insert(1, sorter_y->clusterer->clusters);
@@ -166,8 +170,11 @@ TEST_F(DoroClustererTest, a10) {
   sorter_x->flush();
   sorter_y->flush();
 
-  test_plane(sorter_x->clusterer, 100, 96, opts.clusterer_x.min_cluster_size);
-  test_plane(sorter_y->clusterer, 73, 68, opts.clusterer_y.min_cluster_size);
+  EXPECT_EQ(sorter_x->srs_overflows, 0);
+  EXPECT_EQ(sorter_y->srs_overflows, 0);
+
+  test_plane(sorter_x->clusterer, 100, 96, min_cluster_size);
+  test_plane(sorter_y->clusterer, 73, 68, min_cluster_size);
 
   matcher->insert(0, sorter_x->clusterer->clusters);
   matcher->insert(1, sorter_y->clusterer->clusters);
@@ -191,8 +198,11 @@ TEST_F(DoroClustererTest, a100) {
   sorter_x->flush();
   sorter_y->flush();
 
-  test_plane(sorter_x->clusterer, 19565, 19003, opts.clusterer_x.min_cluster_size);
-  test_plane(sorter_y->clusterer, 10312, 9737, opts.clusterer_y.min_cluster_size);
+  EXPECT_EQ(sorter_x->srs_overflows, 0);
+  EXPECT_EQ(sorter_y->srs_overflows, 0);
+
+  test_plane(sorter_x->clusterer, 19565, 19003, min_cluster_size);
+  test_plane(sorter_y->clusterer, 10312, 9737, min_cluster_size);
 
   matcher->insert(0, sorter_x->clusterer->clusters);
   matcher->insert(1, sorter_y->clusterer->clusters);

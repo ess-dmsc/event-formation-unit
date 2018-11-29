@@ -61,7 +61,7 @@ static void Doit(benchmark::State &state) {
 				break;
 			}
 		}
-		//ASSERT_TRUE(nmxdata.getNumClustersX() < 3);
+		//EXPECT_TRUE(nmxdata.getNumClustersX() < 3);
 		//printf("getNumClustersX(): %d\n", nmxdata.getNumClustersX());
 		items += Run16_Long.size(); // 156 hits in the Run16_line_110168_110323 dataset
 	}

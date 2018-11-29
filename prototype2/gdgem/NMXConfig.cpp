@@ -35,11 +35,10 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   if ((builder_type == "VMM2") || (builder_type == "VMM3")) {
     /**< \todo get from slow control? */
     auto tc = root["time_config"];
-    time_config.set_tac_slope(tc["tac_slope"].get<int>());
-    time_config.set_bc_clock(tc["bc_clock"].get<int>());
-    time_config.set_trigger_resolution_ns(tc["trigger_resolution"].get<double>());
-    time_config.set_target_resolution_ns(tc["target_resolution"].get<double>());
-    time_config.set_acquisition_window(tc["acquisition_window"].get<unsigned int>());
+    time_config.tac_slope_ns(tc["tac_slope"].get<int>());
+    time_config.bc_clock_MHz(tc["bc_clock"].get<int>());
+    time_config.trigger_resolution_ns(tc["trigger_resolution"].get<double>());
+    time_config.acquisition_window(tc["acquisition_window"].get<unsigned int>());
 
     auto sm = root["srs_mappings"];
     for (unsigned int index = 0; index < sm.size(); index++) {
@@ -51,17 +50,15 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
     }
   }
 
+  adc_threshold = root["adc_threshold"].get<unsigned int>();
+
   auto cx = root["clusterer x"];
-  clusterer_x.hit_adc_threshold = cx["hit_adc_threshold"].get<unsigned int>();
   clusterer_x.max_strip_gap = cx["max_strip_gap"].get<unsigned int>();
   clusterer_x.max_time_gap = cx["max_time_gap"].get<double>();
-  clusterer_x.min_cluster_size = cx["min_cluster_size"].get<size_t>();
 
   auto cy = root["clusterer y"];
-  clusterer_y.hit_adc_threshold = cy["hit_adc_threshold"].get<unsigned int>();
   clusterer_y.max_strip_gap = cy["max_strip_gap"].get<unsigned int>();
   clusterer_y.max_time_gap = cy["max_time_gap"].get<double>();
-  clusterer_y.min_cluster_size = cy["min_cluster_size"].get<size_t>();
 
   matcher_max_delta_time = root["matcher_max_delta_time"].get<double>();
 
@@ -100,17 +97,15 @@ std::string NMXConfig::debug() const {
     ss << "  Chip geometry:\n" << srs_mappings.debug();
   }
 
+  ss << "\n  adc_threshold = " << adc_threshold << "\n\n";
+
   ss << "  Clusterer-X:\n";
-  ss << "    hit_adc_threshold = " << clusterer_x.hit_adc_threshold << "\n";
   ss << "    max_time_gap = " << clusterer_x.max_time_gap << "\n";
   ss << "    max_strip_gap = " << clusterer_x.max_strip_gap << "\n";
-  ss << "    min_cluster_size = " << clusterer_x.min_cluster_size << "\n";
 
   ss << "  Clusterer-Y:\n";
-  ss << "    hit_adc_threshold = " << clusterer_y.hit_adc_threshold << "\n";
   ss << "    max_time_gap = " << clusterer_y.max_time_gap << "\n";
   ss << "    max_strip_gap = " << clusterer_y.max_strip_gap << "\n";
-  ss << "    min_cluster_size = " << clusterer_y.min_cluster_size << "\n";
 
   ss << "  Matcher\n    max_delta_time = " << matcher_max_delta_time << "\n";
 

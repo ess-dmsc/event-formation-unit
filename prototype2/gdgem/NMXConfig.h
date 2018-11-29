@@ -20,11 +20,8 @@
 namespace Gem {
 
 struct ClustererConfig {
-  // \todo simplify this
-  uint16_t hit_adc_threshold{0};
   uint16_t max_strip_gap{2};
   double max_time_gap{200};
-  size_t min_cluster_size{3};
 };
 
 struct EventFilter {
@@ -58,7 +55,7 @@ struct NMXConfig {
   NMXConfig() {}
   NMXConfig(std::string configfile, std::string calibrationfile);
 
-  std::string builder_type{"VMM3"};
+  std::string builder_type;
 
   // VMM calibration
   std::shared_ptr<CalibrationFile> calfile;
@@ -66,6 +63,8 @@ struct NMXConfig {
   // SRS only
   SRSTime time_config;
   SRSMappings srs_mappings;
+
+  uint16_t adc_threshold{0};
 
   ClustererConfig clusterer_x;
   ClustererConfig clusterer_y;

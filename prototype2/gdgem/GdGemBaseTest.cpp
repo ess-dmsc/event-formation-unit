@@ -23,7 +23,7 @@ public:
 class GdGemBaseTest : public TestBase {
 public:
   virtual void SetUp() {
-    LocalSettings.ConfigFile = "vmm3.json";
+    LocalSettings.ConfigFile = TEST_JSON_PATH "vmm3.json";
     Settings.DetectorRxBufferSize = 100000;
     Settings.MinimumMTU = 1500;
   }
@@ -45,15 +45,15 @@ TEST_F(GdGemBaseTest, GetCalibrationCmd) {
   char Output[OutputSize];
   std::vector<std::string> badcmdlen = {"NMX_GET_CALIB"};
   int res = Readout.getCalibration(badcmdlen, Output, &OutputBytes);
-  ASSERT_TRUE(res < 0);
+  EXPECT_TRUE(res < 0);
 
   std::vector<std::string> badcmdarg = {"NMX_GET_CALIB", "700", "0", "0"};
   res = Readout.getCalibration(badcmdarg, Output, &OutputBytes);
-  ASSERT_TRUE(res < 0);
+  EXPECT_TRUE(res < 0);
 
   std::vector<std::string> goodcmd = {"NMX_GET_CALIB", "0", "0", "0"};
   res = Readout.getCalibration(goodcmd, Output, &OutputBytes);
-  ASSERT_EQ(res, 0);
+  EXPECT_EQ(res, 0);
 }
 
 
@@ -74,9 +74,6 @@ TEST_F(GdGemBaseTest, DataReceive) {
 #endif
 
 int main(int argc, char **argv) {
-  std::string filename{"vmm3.json"};
-  DataSave tempfile(filename, (void *)vmm3json.c_str(), vmm3json.size());
-
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

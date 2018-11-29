@@ -53,6 +53,7 @@ void OverlapMatcher::match(bool flush) {
       stash_event(evt);
     } else {
       // Else return to queue
+      // \todo this needs explicit testing
       if (!evt.c1.empty())
         unmatched_clusters_.push_front(evt.c1);
       if (!evt.c2.empty())
