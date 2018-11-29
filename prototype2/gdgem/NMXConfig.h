@@ -37,9 +37,9 @@ struct EventFilter {
   size_t minimum_hits_dropped{0};
 
   /// \todo bug? uncertainty takes precedence if both enforce options are true
-  bool valid(Event &event, const utpcResults& x, const utpcResults& y) {
+  bool valid(Event &event, const utpcResults& utpc) {
     if (enforce_lower_uncertainty_limit &&
-        !utpcAnalyzer::meets_lower_criterion(x, y, lower_uncertainty_limit)) {
+        !utpcAnalyzer::meets_lower_criterion(utpc.x, utpc.y, lower_uncertainty_limit)) {
       lower_uncertainty_dropped++;
       return false;
     }

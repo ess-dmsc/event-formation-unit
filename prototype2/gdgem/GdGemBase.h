@@ -97,16 +97,14 @@ protected:
                std::numeric_limits<uint16_t>::max()};
 
   std::shared_ptr<Gem::utpcAnalyzer> utpc_analyzer_;
-  Gem::utpcResults utpc_x_, utpc_y_;
-
-  uint64_t full_time_;
-  uint64_t truncated_time_;
-  uint32_t pixelid_;
-
-  bool have_pulse_time_{false};
-  uint64_t recent_pulse_time_{0};
+  Gem::utpcResults utpc_;
 
   uint64_t previous_full_time_{0};
+  uint64_t recent_pulse_time_{0};
+  bool have_pulse_time_{false};
+
+  uint64_t truncated_time_;
+  uint32_t pixelid_;
 
   bool sample_next_track_ {false};
 

@@ -9,15 +9,13 @@
 
 #pragma once
 
-#include <common/clustering/Hit.h>
-#include <common/clustering/Cluster.h>
+#include <common/clustering/Event.h>
 #include <limits>
-#include <list>
-#include <vector>
 
-namespace Gem {
+namespace Gem
+{
 
-struct utpcResults {
+struct utpcResultsPlane {
   double utpc_center{std::numeric_limits<double>::quiet_NaN()}; // entry strip
   int16_t uncert_lower{-1}; /// strip span of hits in latest timebin
   int16_t uncert_upper{-1}; /// strip span of hits in latest few timebins
@@ -29,24 +27,33 @@ struct utpcResults {
   std::string debug() const;
 };
 
+struct utpcResults {
+  utpcResultsPlane x, y;
+  uint64_t time {0};
+  bool good {false};
+};
+
 class utpcAnalyzer {
  public:
-  utpcAnalyzer(bool weighted, uint16_t max_timebins, uint16_t max_timedif);
-
-  /// \brief analyzes particle track
   /// \param weighted determine entry strip using weighted average
   /// \param max_timebins maximum number of timebins to consider for upper
   /// uncertainty
   /// \param max_timedif maximum span of timebins to consider for upper
   /// uncertainty
-  utpcResults analyze(Cluster&) const;
+  utpcAnalyzer(bool weighted, uint16_t max_timebins, uint16_t max_timedif);
+
+  /// \brief analyzes particle track in one plane
+  utpcResultsPlane analyze(Cluster&) const;
+
+  /// \brief analyzes particle track in both planes
+  utpcResults analyze(Event&) const;
 
   /// \brief returns timestamp for start of event (earlier of 2 planes)
-  static uint64_t utpc_time(const Cluster& x, const Cluster& y);
+  static uint64_t utpc_time(const Event& e);
 
   /// \brief indicates if both dimensions meet lower uncertainty criterion
-  static bool meets_lower_criterion(const utpcResults& x, const utpcResults& y,
-      int16_t max_lu);
+  static bool meets_lower_criterion(const utpcResultsPlane& x,
+                                    const utpcResultsPlane& y, int16_t max_lu);
 
  private:
   bool weighted_{true};

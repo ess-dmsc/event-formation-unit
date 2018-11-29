@@ -297,8 +297,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     mystats.clusters_xy++;
 
-    utpc_x_ = utpc_analyzer_->analyze(event.c1);
-    utpc_y_ = utpc_analyzer_->analyze(event.c2);
+    utpc_ = utpc_analyzer_->analyze(event);
 
 //    XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
 //           utpc_x_.utpc_center_rounded(),
@@ -309,18 +308,18 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     {
 //      XTRACE(PROCESS, DEB, "Serializing track: %s\n", event.debug(true).c_str());
       sample_next_track_ = !track_serializer.add_track(event,
-                                                       utpc_x_.utpc_center,
-                                                       utpc_y_.utpc_center);
+                                                       utpc_.x.utpc_center,
+                                                       utpc_.y.utpc_center);
     }
 
-    if (!nmx_opts.filter.valid(event, utpc_x_, utpc_y_))
+    if (!nmx_opts.filter.valid(event, utpc_))
     { // Does not meet criteria
       /** \todo increments counters when failing this */
       continue;
     }
 
     pixelid_ = nmx_opts.geometry.pixel2D(
-        utpc_x_.utpc_center_rounded(), utpc_y_.utpc_center_rounded());
+        utpc_.x.utpc_center_rounded(), utpc_.y.utpc_center_rounded());
 
     if (!nmx_opts.geometry.valid_id(pixelid_))
     {
@@ -328,21 +327,20 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
       continue;
     }
 
-    full_time_ = utpc_analyzer_->utpc_time(event.c1, event.c2);
-
-    if (full_time_ < previous_full_time_) {
+    if (utpc_.time < previous_full_time_) {
       XTRACE(PROCESS, WAR, "Event time sequence error: %zu < %zu",
-          full_time_, previous_full_time_);
+             utpc_.time, previous_full_time_);
     }
-    previous_full_time_ = full_time_;
+    previous_full_time_ = utpc_.time;
 
-    truncated_time_ = full_time_ - recent_pulse_time_;
-    if (!have_pulse_time_ || (truncated_time_ > std::numeric_limits<uint32_t>::max())) {
+    truncated_time_ = utpc_.time - recent_pulse_time_;
+    if (!have_pulse_time_ ||
+        (truncated_time_ > std::numeric_limits<uint32_t>::max())) {
       have_pulse_time_ = true;
+      recent_pulse_time_ = utpc_.time;
+      truncated_time_ = 0;
       if (event_serializer.eventCount())
         mystats.tx_bytes += event_serializer.produce();
-      recent_pulse_time_ = full_time_;
-      truncated_time_ = 0;
       event_serializer.pulseTime(recent_pulse_time_);
 //      XTRACE(PROCESS, DEB, "New offset time selected: %zu", recent_pulse_time_);
     }

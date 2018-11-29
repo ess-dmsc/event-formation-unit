@@ -78,6 +78,8 @@ TEST_F(ClusterTest, AnalyzeUncert) {
   EXPECT_EQ(result.utpc_center_rounded(), 17);
 }
 
+// \todo more & better tests of this required
+
 /// \todo cluster plane identity tests
 
 int main(int argc, char **argv) {

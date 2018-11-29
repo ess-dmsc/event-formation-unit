@@ -12,11 +12,11 @@
 
 namespace Gem {
 
-uint32_t utpcResults::utpc_center_rounded() const {
+uint32_t utpcResultsPlane::utpc_center_rounded() const {
   return static_cast<uint32_t>(std::round(utpc_center));
 }
 
-std::string utpcResults::debug() const {
+std::string utpcResultsPlane::debug() const {
   std::stringstream ss;
   ss << "Utpc_center=" << utpc_center << " +-" << uncert_lower << " (+-" << uncert_upper << ") ";
   return ss.str();
@@ -30,8 +30,8 @@ utpcAnalyzer::utpcAnalyzer(bool weighted, uint16_t max_timebins, uint16_t max_ti
 {}
 
 /// \todo make work with doubles (or not, if we decimate timestamps?)
-utpcResults utpcAnalyzer::analyze(Cluster& cluster) const {
-  utpcResults ret;
+utpcResultsPlane utpcAnalyzer::analyze(Cluster& cluster) const {
+  utpcResultsPlane ret;
 
   if (cluster.hits.empty()) {
     return ret;
@@ -77,16 +77,26 @@ utpcResults utpcAnalyzer::analyze(Cluster& cluster) const {
          center_count);
 
   ret.utpc_center = center_sum / center_count;
-  ret.uncert_lower = lspan_max - lspan_min + 1;
-  ret.uncert_upper = uspan_max - uspan_min + 1;
+  ret.uncert_lower = lspan_max - lspan_min + int16_t(1);
+  ret.uncert_upper = uspan_max - uspan_min + int16_t(1);
   return ret;
 }
 
-uint64_t utpcAnalyzer::utpc_time(const Cluster& x, const Cluster& y) {
-  return std::max(x.time_end(), y.time_end());
+utpcResults utpcAnalyzer::analyze(Event& event) const {
+  utpcResults ret;
+  ret.x = analyze(event.c1);
+  ret.y = analyze(event.c2);
+  ret.good = std::isfinite(ret.x.utpc_center) && std::isfinite(ret.y.utpc_center);
+  ret.time = utpc_time(event);
+  return ret;
 }
 
-bool utpcAnalyzer::meets_lower_criterion(const utpcResults& x, const utpcResults& y,
+uint64_t utpcAnalyzer::utpc_time(const Event& e) {
+  // \todo is this what we want?
+  return std::max(e.c1.time_end(), e.c2.time_end());
+}
+
+bool utpcAnalyzer::meets_lower_criterion(const utpcResultsPlane& x, const utpcResultsPlane& y,
                                   int16_t max_lu) {
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }

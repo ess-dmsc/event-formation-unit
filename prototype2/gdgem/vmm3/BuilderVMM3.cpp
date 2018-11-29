@@ -99,6 +99,8 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
         continue;
       }
 
+      // \todo what if adc == 0? this will affect weighted average
+
       if (hit.plane == 1) {
         hit_buffer_y.emplace_back(hit);
       }
