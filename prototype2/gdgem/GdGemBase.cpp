@@ -24,8 +24,8 @@
 
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 /** ----------------------------------------------------- */
 
@@ -142,7 +142,7 @@ void GdGemBase::input_thread() {
     if ((rdsize = nmxdata.receive(eth_ringbuf->getDataBuffer(eth_index),
                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-      XTRACE(INPUT, DEB, "rdsize: %d", rdsize);
+//      XTRACE(INPUT, DEB, "rdsize: %d", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
@@ -234,7 +234,7 @@ void GdGemBase::cluster_plane(HitContainer &hits,
     bin_hists(hists_, clusterer->clusters);
   }
   if (!clusterer->clusters.empty()) {
-    XTRACE(PROCESS, DEB, "merging clusters {}", clusterer->clusters.size());
+//    XTRACE(PROCESS, DEB, "merging clusters {}", clusterer->clusters.size());
     matcher_->insert(clusterer->clusters.front().plane(), clusterer->clusters);
   }
 }
@@ -243,12 +243,12 @@ void GdGemBase::perform_clustering(bool flush) {
   // \todo we can parallelize this (per plane)
 
   if (builder_->hit_buffer_x.size()) {
-    XTRACE(PROCESS, DEB, "clustering x hits {}", builder_->hit_buffer_x.size());
+//    XTRACE(PROCESS, DEB, "clustering x hits {}", builder_->hit_buffer_x.size());
     cluster_plane(builder_->hit_buffer_x, clusterer_x_, flush);
   }
 
   if (builder_->hit_buffer_y.size()) {
-    XTRACE(PROCESS, DEB, "clustering y hits {}", builder_->hit_buffer_y.size());
+//    XTRACE(PROCESS, DEB, "clustering y hits {}", builder_->hit_buffer_y.size());
     cluster_plane(builder_->hit_buffer_y, clusterer_y_, flush);
   }
 
@@ -257,69 +257,102 @@ void GdGemBase::perform_clustering(bool flush) {
 }
 
 void GdGemBase::process_events(EV42Serializer& event_serializer,
-    Gem::TrackSerializer& track_serializer) {
+                               Gem::TrackSerializer& track_serializer) {
+
+  // This may be required if you start seeing "Event time sequence error" messages
+//  std::sort(matcher_->matched_events.begin(), matcher_->matched_events.end(),
+//            [](const Event &e1, const Event &e2) {
+//              return e1.time_end() < e2.time_end();
+//            });
 
   // \todo we can potentially infinitely parallelize this
   //       as each iteration is completely independent, other than
   //       everything going to the same serializers
 
-  for (auto& event : matcher_->matched_events) {
-    XTRACE(PROCESS, DEB, "event_ready()");
+  for (auto& event : matcher_->matched_events)
+  {
+//    XTRACE(PROCESS, DEB, "processing event");
 
     // mystats.unclustered = clusterer.unclustered();
 
-    utpc_x_ = utpc_analyzer_->analyze(event.c1);
-    utpc_y_ = utpc_analyzer_->analyze(event.c2);
-
-    if (nmx_opts.hit_histograms) {
+    if (nmx_opts.hit_histograms)
+    {
       bin(hists_, event);
     }
 
-    if (event.both_planes()) {
-      XTRACE(PROCESS, DEB, "event_.good");
-
-      mystats.clusters_xy++;
-
-      /// \todo Should it be here or outside of event_.valid()?
-      if (sample_next_track_) {
-        XTRACE(PROCESS, DEB, "Serializing track: %s\n", event.debug(true).c_str());
-        sample_next_track_ = !track_serializer.add_track(event,
-                                                        utpc_x_.utpc_center,
-                                                        utpc_y_.utpc_center);
-      }
-
-      XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
-             utpc_x_.utpc_center_rounded(),
-             utpc_y_.utpc_center_rounded());
-
-      if (nmx_opts.filter.valid(event, utpc_x_, utpc_y_)) {
-        pixelid_ = nmx_opts.geometry.pixel2D(
-            utpc_x_.utpc_center_rounded(), utpc_y_.utpc_center_rounded());
-
-        if (!nmx_opts.geometry.valid_id(pixelid_)) {
-          mystats.geom_errors++;
-        } else {
-          time_ = static_cast<uint32_t>(utpc_analyzer_->utpc_time(event.c1, event.c2));
-
-          XTRACE(PROCESS, DEB, "time_: %d, pixelid_ %d", time_, pixelid_);
-
-          mystats.tx_bytes += event_serializer.addEvent(time_, pixelid_);
-          mystats.clusters_events++;
-        }
-      } else { // Does not meet criteria
-        /** \todo increments counters when failing this */
-      }
-    } else { /// no valid event_
-      if (event.c1.hit_count() != 0) {
+    if (!event.both_planes())
+    {
+      if (event.c1.hit_count() != 0)
+      {
         mystats.clusters_x++;
-      } else {
+      }
+      else
+      {
         mystats.clusters_y++;
       }
       mystats.readouts_discarded += event.total_hit_count();
       mystats.clusters_discarded++;
+      continue;
     }
-  }
 
+    mystats.clusters_xy++;
+
+    utpc_x_ = utpc_analyzer_->analyze(event.c1);
+    utpc_y_ = utpc_analyzer_->analyze(event.c2);
+
+//    XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
+//           utpc_x_.utpc_center_rounded(),
+//           utpc_y_.utpc_center_rounded());
+
+    /// Sample only tracks that are good in both planes
+    if (sample_next_track_)
+    {
+//      XTRACE(PROCESS, DEB, "Serializing track: %s\n", event.debug(true).c_str());
+      sample_next_track_ = !track_serializer.add_track(event,
+                                                       utpc_x_.utpc_center,
+                                                       utpc_y_.utpc_center);
+    }
+
+    if (!nmx_opts.filter.valid(event, utpc_x_, utpc_y_))
+    { // Does not meet criteria
+      /** \todo increments counters when failing this */
+      continue;
+    }
+
+    pixelid_ = nmx_opts.geometry.pixel2D(
+        utpc_x_.utpc_center_rounded(), utpc_y_.utpc_center_rounded());
+
+    if (!nmx_opts.geometry.valid_id(pixelid_))
+    {
+      mystats.geom_errors++;
+      continue;
+    }
+
+    full_time_ = utpc_analyzer_->utpc_time(event.c1, event.c2);
+
+    if (full_time_ < previous_full_time_) {
+      XTRACE(PROCESS, WAR, "Event time sequence error: %zu < %zu",
+          full_time_, previous_full_time_);
+    }
+    previous_full_time_ = full_time_;
+
+    truncated_time_ = full_time_ - recent_pulse_time_;
+    if (!have_pulse_time_ || (truncated_time_ > std::numeric_limits<uint32_t>::max())) {
+      have_pulse_time_ = true;
+      if (event_serializer.eventCount())
+        mystats.tx_bytes += event_serializer.produce();
+      recent_pulse_time_ = full_time_;
+      truncated_time_ = 0;
+      event_serializer.pulseTime(recent_pulse_time_);
+//      XTRACE(PROCESS, DEB, "New offset time selected: %zu", recent_pulse_time_);
+    }
+
+//    XTRACE(PROCESS, DEB, "time:%zu, pixel:%d", truncated_time_, pixelid_);
+
+    mystats.tx_bytes += event_serializer.addEvent(
+        static_cast<uint32_t>(truncated_time_), pixelid_);
+    mystats.clusters_events++;
+  }
   matcher_->matched_events.clear();
 }
 
