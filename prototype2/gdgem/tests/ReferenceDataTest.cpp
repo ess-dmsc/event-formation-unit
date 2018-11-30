@@ -59,7 +59,7 @@ class HitSorter {
   SRSMappings pChips;
 };
 
-class DoroClustererTest : public TestBase {
+class ReferenceDataTest : public TestBase {
 protected:
   NMXConfig opts;
   std::string DataPath;
@@ -134,11 +134,11 @@ protected:
 
 };
 
-TEST_F(DoroClustererTest, PrintConfig) {
+TEST_F(ReferenceDataTest, PrintConfig) {
   MESSAGE() << "Test data config:\n" << opts.debug() << "\n";
 }
 
-TEST_F(DoroClustererTest, a1) {
+TEST_F(ReferenceDataTest, a1) {
   ReadoutFile::read(DataPath + "/readouts/a00001", readouts);
   EXPECT_EQ(readouts.size(), 144);
 
@@ -165,7 +165,7 @@ TEST_F(DoroClustererTest, a1) {
   EXPECT_EQ(matcher->matched_events.size(), 15);
 }
 
-TEST_F(DoroClustererTest, a10) {
+TEST_F(ReferenceDataTest, a10) {
   ReadoutFile::read(DataPath + "/readouts/a00010", readouts);
   EXPECT_EQ(readouts.size(), 920);
 
@@ -196,7 +196,7 @@ TEST_F(DoroClustererTest, a10) {
 //  }
 }
 
-TEST_F(DoroClustererTest, a100) {
+TEST_F(ReferenceDataTest, a100) {
   ReadoutFile::read(DataPath + "/readouts/a00100", readouts);
   EXPECT_EQ(readouts.size(), 126590);
 
@@ -223,7 +223,7 @@ TEST_F(DoroClustererTest, a100) {
   EXPECT_EQ(matcher->matched_events.size(), 20224);
 }
 
-TEST_F(DoroClustererTest, a1000) {
+TEST_F(ReferenceDataTest, a1000) {
   ReadoutFile::read(DataPath + "/readouts/a01000", readouts);
   EXPECT_EQ(readouts.size(), 1416666);
 
@@ -251,7 +251,7 @@ TEST_F(DoroClustererTest, a1000) {
   EXPECT_EQ(matcher->matched_events.size(), 226491);
 }
 
-TEST_F(DoroClustererTest, a10000) {
+TEST_F(ReferenceDataTest, a10000) {
   ReadoutFile::read(DataPath + "/readouts/a10000", readouts);
   EXPECT_EQ(readouts.size(), 14293164);
 

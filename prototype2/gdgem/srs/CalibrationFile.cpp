@@ -10,7 +10,7 @@
 #include <common/Log.h>
 #include <common/Trace.h>
 #include <fstream>
-#include <gdgem/vmm3/CalibrationFile.h>
+#include <gdgem/srs/CalibrationFile.h>
 #include <nlohmann/json.hpp>
 
 using json = nlohmann::json;

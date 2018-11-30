@@ -2,8 +2,6 @@
 # Tests
 #=============================================================================
 
-# Clustering
-
 set(TEST_DATA_PATH "${REFDATA}/gdgem/2018_11")
 
 set(ClusteringBase_SRC
@@ -11,7 +9,7 @@ set(ClusteringBase_SRC
   ../../common/clustering/Hit.cpp
   ../srs/SRSTime.cpp
   ../srs/SRSMappings.cpp
-  ../vmm3/CalibrationFile.cpp
+  ../srs/CalibrationFile.cpp
   )
 set(ClusteringBase_INC
   ../NMXConfig.h
@@ -20,26 +18,18 @@ set(ClusteringBase_INC
   ../nmx/Readout.h
   ../srs/SRSTime.h
   ../srs/SRSMappings.h
-  ../vmm3/CalibrationFile.h
+  ../srs/CalibrationFile.h
   )
 
-set(srs_converter_SRC
-  ${ClusteringBase_SRC}
-  old_formats/srs_converter.cpp)
-set(srs_converter_INC
-  old_formats/OldReadoutFile.h
-  ${ClusteringBase_INC})
-#create_executable(srs_converter)
-
-set(NMXRefDataClusteringTest_SRC
+set(NMXReferenceDataTest_SRC
   ${ClusteringBase_SRC}
   ../../common/clustering/GapClusterer.cpp
-  RefDataClusteringTest.cpp)
-set(NMXRefDataClusteringTest_INC
+  ReferenceDataTest.cpp)
+set(NMXReferenceDataTest_INC
   ../../common/clustering/GapClusterer.h
   ${ClusteringBase_INC})
-create_test_executable(NMXRefDataClusteringTest SKIP_MEMGRIND)
-target_compile_definitions(NMXRefDataClusteringTest
+create_test_executable(NMXReferenceDataTest SKIP_MEMGRIND)
+target_compile_definitions(NMXReferenceDataTest
   PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
 
 ## GOOGLE BENCHMARK
@@ -50,7 +40,3 @@ message(STATUS "!!! *** Skipping NMXClustererBenchmarkTest - does not link ***")
 # set(NMXClustererBenchmarkTest_INC
 #     ${ClusteringBase_INC})
 # create_benchmark_executable(NMXClustererBenchmarkTest)
-
-set(GrayCodeBenchmarkTest_INC ../../../libs/include/BitMath.h)
-set(GrayCodeBenchmarkTest_SRC GrayCodeBenchmarkTest.cpp)
-create_benchmark_executable(GrayCodeBenchmarkTest)

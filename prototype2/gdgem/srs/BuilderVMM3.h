@@ -11,8 +11,8 @@
 #include <gdgem/nmx/AbstractBuilder.h>
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
-#include <gdgem/vmm3/ParserVMM3.h>
-#include <gdgem/vmm3/CalibrationFile.h>
+#include <gdgem/srs/ParserVMM3.h>
+#include <gdgem/srs/CalibrationFile.h>
 #include <gdgem/nmx/Readout.h>
 
 #include <common/Trace.h>

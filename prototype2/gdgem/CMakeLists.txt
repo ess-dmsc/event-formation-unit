@@ -16,9 +16,9 @@ set(pipeline_common_source
   nmx/TrackSerializer.cpp
   srs/SRSMappings.cpp
   srs/SRSTime.cpp
-  vmm3/ParserVMM3.cpp
-  vmm3/BuilderVMM3.cpp
-  vmm3/CalibrationFile.cpp  # Also works for VMM2
+  srs/ParserVMM3.cpp
+  srs/BuilderVMM3.cpp
+  srs/CalibrationFile.cpp  # Also works for VMM2
   )
 
 set(pipeline_common_inc
@@ -38,9 +38,9 @@ set(pipeline_common_inc
   nmx/AbstractBuilder.h
   srs/SRSMappings.h
   srs/SRSTime.h
-  vmm3/ParserVMM3.h
-  vmm3/BuilderVMM3.h
-  vmm3/CalibrationFile.h # also works for VMM2
+  srs/ParserVMM3.h
+  srs/BuilderVMM3.h
+  srs/CalibrationFile.h # also works for VMM2
   )
 
 set(gdgem_SRC GdGem.cpp ${GdGemBase_SRC} ${pipeline_common_source})
@@ -58,14 +58,14 @@ set(NMXConfigTest_INC
   nmx/uTPC.h
   srs/SRSTime.h
   srs/SRSMappings.h
-  vmm3/CalibrationFile.cpp
+  srs/CalibrationFile.cpp
   )
 set(NMXConfigTest_SRC
   NMXConfigTest.cpp
   NMXConfig.cpp
   srs/SRSTime.cpp
   srs/SRSMappings.cpp
-  vmm3/CalibrationFile.cpp
+  srs/CalibrationFile.cpp
   nmx/uTPC.cpp
   ../common/clustering/Event.cpp
   )
@@ -92,9 +92,7 @@ target_compile_definitions(GdGemBaseTest
 # Component tests
 #=============================================================================
 
-
 add_subdirectory(nmx)
 add_subdirectory(srs)
-add_subdirectory(vmm3)
-add_subdirectory(clustering)
+add_subdirectory(tests)
 add_subdirectory(generators)

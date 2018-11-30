@@ -47,3 +47,13 @@ set(TrackSerializerTest_INC
   TrackSerializer.h
   )
 create_test_executable(TrackSerializerTest)
+
+# Old Readout format conversion
+
+set(srs_converter_SRC
+  ${ClusteringBase_SRC}
+  old_formats/srs_converter.cpp)
+set(srs_converter_INC
+  old_formats/OldReadoutFile.h
+  ${ClusteringBase_INC})
+#create_executable(srs_converter)

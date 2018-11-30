@@ -12,7 +12,7 @@
 #include <common/clustering/GapMatcher.h>
 #include <common/clustering/GapClusterer.h>
 #include <gdgem/nmx/TrackSerializer.h>
-#include <gdgem/vmm3/BuilderVMM3.h>
+#include <gdgem/srs/BuilderVMM3.h>
 #include <common/EV42Serializer.h>
 #include <common/HistSerializer.h>
 #include <common/Producer.h>

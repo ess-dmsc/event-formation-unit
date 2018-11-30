@@ -1,7 +1,7 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
-#include <gdgem/vmm3/CalibrationFile.h>
-#include <gdgem/vmm3/CalibrationFileTestData.h>
+#include <gdgem/srs/CalibrationFile.h>
+#include <gdgem/srs/CalibrationFileTestData.h>
 #include <prototype2/common/DataSave.h>
 #include <test/TestBase.h>
 #include <vector>

@@ -1,6 +1,6 @@
 /** Copyright (C) 2016-2018 European Spallation Source ERIC */
 
-#include <gdgem/vmm3/BuilderVMM3.h>
+#include <gdgem/srs/BuilderVMM3.h>
 #include <common/clustering/GapClusterer.h>
 #include <common/TimeString.h>
 
