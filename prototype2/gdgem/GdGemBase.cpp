@@ -29,7 +29,7 @@
 //#define TRC_MASK 0
 
 // \todo MJC's workstation - not reliable
-static constexpr int TSC_MHZ {2900};
+static constexpr int TscMHz {2900};
 
 static constexpr uint64_t max_pulse_window_ns {5000000};
 //static constexpr uint64_t max_pulse_window_ns {std::numeric_limits<uint32_t>::max()};
@@ -138,7 +138,7 @@ void GdGemBase::input_thread() {
 
   TSCTimer report_timer;
   for (;;) {
-    int rdsize;
+    ssize_t rdsize {0};
     unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */
@@ -147,12 +147,12 @@ void GdGemBase::input_thread() {
     if ((rdsize = nmxdata.receive(eth_ringbuf->getDataBuffer(eth_index),
                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-      LOG(INPUT, Sev::Debug, "rdsize: {}", rdsize);
+//      LOG(INPUT, Sev::Debug, "rdsize: {}", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
       // mystats.fifo_free = input2proc_fifo.free();
-      if (input2proc_fifo.push(eth_index) == false) {
+      if (!input2proc_fifo.push(eth_index)) {
         mystats.fifo_push_errors++;
       } else {
         eth_ringbuf->getNextBuffer();
@@ -170,7 +170,7 @@ void GdGemBase::input_thread() {
 void bin(Hists& hists, const Event &e)
 {
   auto sum = e.c1.weight_sum() + e.c2.weight_sum();
-  hists.bincluster(sum);
+  hists.bincluster(static_cast<uint32_t>(sum));
 }
 
 void bin(Hists& hists, const Hit &e)
@@ -280,11 +280,6 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
   {
     // mystats.unclustered = clusterer.unclustered();
 
-    if (nmx_opts.hit_histograms)
-    {
-      bin(hists_, event);
-    }
-
     if (!event.both_planes())
     {
       if (event.c1.hit_count() != 0)
@@ -337,6 +332,12 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     {
       mystats.geom_errors++;
       continue;
+    }
+
+    // Histogram cluster ADC only for valid events
+    if (nmx_opts.hit_histograms)
+    {
+      bin(hists_, event);
     }
 
     if (utpc_.time < previous_full_time_) {
@@ -423,7 +424,7 @@ void GdGemBase::processing_thread() {
 
     // Flush on interval or exit
     if ((not runThreads) || (report_timer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ)) {
+        EFUSettings.UpdateIntervalSec * 1000000 * TscMHz)) {
 
       if (not runThreads) {
         // flush everything first

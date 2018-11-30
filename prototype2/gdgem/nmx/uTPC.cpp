@@ -35,7 +35,6 @@ utpcAnalyzer::utpcAnalyzer(bool weighted, uint16_t max_timebins, uint16_t max_ti
 , max_timedif_(max_timedif)
 {}
 
-/// \todo make work with doubles (or not, if we decimate timestamps?)
 utpcResultsPlane utpcAnalyzer::analyze(Cluster& cluster) const {
   utpcResultsPlane ret;
 

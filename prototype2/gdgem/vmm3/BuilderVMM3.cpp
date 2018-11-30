@@ -87,6 +87,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
       hit.time = readout.srs_timestamp + static_cast<uint64_t>(readout.chiptime);
 
       if ((hit.plane != 0) && (hit.plane != 1)) {
+        // \todo make a counter for this in the pipeline, this is digital geometry
         geom_errors++;
         LOG(PROCESS, Sev::Debug, "Bad SRS mapping (plane) -- fec={}, chip={}",
                readout.fec, readout.chip_id);
@@ -94,6 +95,7 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
       }
 
       if (hit.coordinate == NMX_INVALID_GEOM_ID) {
+        // \todo make a counter for this in the pipeline, this is digital geometry
         geom_errors++;
         LOG(PROCESS, Sev::Debug, "Bad SRS mapping (coordinate) -- fec={}, chip={}",
             readout.fec, readout.chip_id);

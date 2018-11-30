@@ -104,7 +104,7 @@ void SONDEIDEABase::processing_thread() {
       mystats.rx_idle1++;
 
       if (produce_timer.timetsc() >=
-          EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+          EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {
         mystats.tx_bytes += flatbuffer.produce();
 
         /// Kafka stats update - common to all detectors

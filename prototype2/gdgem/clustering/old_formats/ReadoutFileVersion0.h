@@ -11,7 +11,6 @@
 #include <string>
 #include <common/DumpFile.h>
 
-// \todo initialize values to 0?
 struct OldReadout
 {
   uint8_t fec;
