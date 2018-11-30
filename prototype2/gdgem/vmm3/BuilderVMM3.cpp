@@ -54,10 +54,10 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
     auto &d = parser_.data[i];
     if (d.hasDataMarker) {
       // \todo should these be functions of SRSTime?
-      readout.srs_timestamp = static_cast<uint64_t>(
-              d.fecTimeStamp * time_intepreter_.internal_clock_period_ns()
-              + d.triggerOffset * time_intepreter_.trigger_period_ns()
-              );
+      readout.srs_timestamp = (
+          static_cast<uint64_t>(d.fecTimeStamp) * static_cast<uint64_t>(time_intepreter_.internal_clock_period_ns())
+              + static_cast<uint64_t>(d.triggerOffset) * static_cast<uint64_t>(time_intepreter_.trigger_period_ns())
+      );
 
       readout.chip_id = d.vmmid;
       readout.channel = d.chno;
@@ -68,6 +68,8 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
       auto calib = calfile_->getCalibration(readout.fec, readout.chip_id, readout.channel);
       // \todo does this really need to be a floating point value?
       readout.chiptime = time_intepreter_.chip_time_ns(d.bcid, d.tdc, calib.offset, calib.slope);
+
+      // \todo what if chiptime is negative?
 
       XTRACE(PROCESS, DEB,
              "srs/vmm timestamp: srs: 0x%08x, bc: 0x%08x, tdc: 0x%08x",

@@ -31,6 +31,8 @@ class HitSorter {
     if (readout.srs_timestamp < prev_srs_time)
       srs_overflows++;
     prev_srs_time = readout.srs_timestamp;
+    if (readout.chiptime < 0)
+      negative_chip_times++;
   }
 
   void flush() {
@@ -50,6 +52,7 @@ class HitSorter {
   HitContainer buffer;
   uint64_t prev_srs_time {0};
   size_t srs_overflows{0};
+  size_t negative_chip_times{0};
 
  private:
   SRSTime pTime;
@@ -149,6 +152,9 @@ TEST_F(DoroClustererTest, a1) {
   EXPECT_EQ(sorter_x->srs_overflows, 0);
   EXPECT_EQ(sorter_y->srs_overflows, 0);
 
+  EXPECT_EQ(sorter_x->negative_chip_times, 0);
+  EXPECT_EQ(sorter_y->negative_chip_times, 0);
+
   test_plane(sorter_x->clusterer, 22, 20, min_cluster_size);
   test_plane(sorter_y->clusterer, 0, 0, min_cluster_size);
 
@@ -172,6 +178,9 @@ TEST_F(DoroClustererTest, a10) {
 
   EXPECT_EQ(sorter_x->srs_overflows, 0);
   EXPECT_EQ(sorter_y->srs_overflows, 0);
+
+  EXPECT_EQ(sorter_x->negative_chip_times, 0);
+  EXPECT_EQ(sorter_y->negative_chip_times, 0);
 
   test_plane(sorter_x->clusterer, 100, 96, min_cluster_size);
   test_plane(sorter_y->clusterer, 73, 68, min_cluster_size);
@@ -201,6 +210,9 @@ TEST_F(DoroClustererTest, a100) {
   EXPECT_EQ(sorter_x->srs_overflows, 0);
   EXPECT_EQ(sorter_y->srs_overflows, 0);
 
+  EXPECT_EQ(sorter_x->negative_chip_times, 12);
+  EXPECT_EQ(sorter_y->negative_chip_times, 0);
+
   test_plane(sorter_x->clusterer, 19565, 19003, min_cluster_size);
   test_plane(sorter_y->clusterer, 10312, 9737, min_cluster_size);
 
@@ -209,6 +221,61 @@ TEST_F(DoroClustererTest, a100) {
   matcher->match(true);
   EXPECT_EQ(matcher->stats_event_count, 20224);
   EXPECT_EQ(matcher->matched_events.size(), 20224);
+}
+
+TEST_F(DoroClustererTest, a1000) {
+  ReadoutFile::read(DataPath + "/readouts/a01000", readouts);
+  EXPECT_EQ(readouts.size(), 1416666);
+
+  add_readouts();
+
+  planes_test(934684, 481982);
+
+  sorter_x->flush();
+  sorter_y->flush();
+
+  EXPECT_EQ(sorter_x->srs_overflows, 0);
+  EXPECT_EQ(sorter_y->srs_overflows, 0);
+
+  EXPECT_EQ(sorter_x->negative_chip_times, 59);
+  EXPECT_EQ(sorter_y->negative_chip_times, 43);
+
+
+  test_plane(sorter_x->clusterer, 217126, 211247, min_cluster_size);
+  test_plane(sorter_y->clusterer, 116771, 109826, min_cluster_size);
+
+  matcher->insert(0, sorter_x->clusterer->clusters);
+  matcher->insert(1, sorter_y->clusterer->clusters);
+  matcher->match(true);
+  EXPECT_EQ(matcher->stats_event_count, 226491);
+  EXPECT_EQ(matcher->matched_events.size(), 226491);
+}
+
+TEST_F(DoroClustererTest, a10000) {
+  ReadoutFile::read(DataPath + "/readouts/a10000", readouts);
+  EXPECT_EQ(readouts.size(), 14293164);
+
+  add_readouts();
+
+  planes_test(9423281, 4869883);
+
+  sorter_x->flush();
+  sorter_y->flush();
+
+  EXPECT_EQ(sorter_x->srs_overflows, 0);
+  EXPECT_EQ(sorter_y->srs_overflows, 0);
+
+  EXPECT_EQ(sorter_x->negative_chip_times, 665);
+  EXPECT_EQ(sorter_y->negative_chip_times, 281);
+
+  test_plane(sorter_x->clusterer, 2183659, 2125209, min_cluster_size);
+  test_plane(sorter_y->clusterer, 1179938, 1111857, min_cluster_size);
+
+  matcher->insert(0, sorter_x->clusterer->clusters);
+  matcher->insert(1, sorter_y->clusterer->clusters);
+  matcher->match(true);
+  EXPECT_EQ(matcher->stats_event_count, 2285514);
+  EXPECT_EQ(matcher->matched_events.size(), 2285514);
 }
 
 int main(int argc, char **argv) {
