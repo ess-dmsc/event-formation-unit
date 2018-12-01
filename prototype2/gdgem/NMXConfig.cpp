@@ -124,7 +124,7 @@ std::string NMXConfig::debug() const {
   if (filter.enforce_minimum_hits)
     ss << "    minimum_hits = " << filter.minimum_hits << "\n";
 
-  ss << "  Histogram hits = " << (hit_histograms ? "YES" : "no") << "\n";
+  ss << "  Histogram readouts = " << (hit_histograms ? "YES" : "no") << "\n";
   if (hit_histograms)
     ss << "    cluster_adc_downshift = " << cluster_adc_downshift << "\n";
   ss << "  Send tracks = " << (send_tracks ? "YES" : "no") << "\n";

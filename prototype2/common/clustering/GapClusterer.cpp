@@ -30,7 +30,7 @@ void GapClusterer::insert(const Hit &hit) {
 }
 
 void GapClusterer::cluster(const HitContainer &hits) {
-  //It is assumed that hits are sorted in time
+  //It is assumed that readouts are sorted in time
 
   for (const auto &hit : hits) {
     insert(hit);

@@ -21,7 +21,7 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
                          std::shared_ptr<CalibrationFile> calfile)
                          : parser_(1500)
                          , time_intepreter_(time_intepreter)
-                         , geometry_interpreter_(geometry_interpreter)
+                         , digital_geometry_(geometry_interpreter)
                          , adc_threshold_ (adc_threshold) {
   assert(calfile != nullptr);
   calfile_ = calfile;
@@ -31,26 +31,27 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
   }
 }
 
-AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size) {
-  geom_errors = 0;
-  below_adc_threshold = 0;
+void BuilderVMM3::process_buffer(char *buf, size_t size) {
   parser_.receive(buf, size);
-  if (!parser_.stats.hits) {
+  const auto &parser_stats = parser_.stats;
+  stats.parser_lost_frames += parser_stats.rxSeqErrors;
+  stats.parser_bad_frames += parser_stats.badFrames;
+  stats.parser_good_frames += parser_stats.goodFrames;
+  stats.parser_error_bytes += parser_stats.errors;
+  stats.parser_readouts += parser_stats.readouts;
+
+  if (!parser_.stats.readouts) {
     LOG(PROCESS, Sev::Debug, "No readouts after parse");
-    auto &stats = parser_.stats;
-    return AbstractBuilder::ResultStats(stats.hits, stats.errors,
-                                        geom_errors, below_adc_threshold,
-                                        stats.rxSeqErrors, stats.badFrames,
-                                        stats.goodFrames);
+    return;
   }
-  LOG(PROCESS, Sev::Debug, "Readouts after parse: {}", parser_.stats.hits);
+  LOG(PROCESS, Sev::Debug, "Readouts after parse: {}", parser_.stats.readouts);
 
 //	uint32_t udp_timestamp_ns = parser_.srsHeader.udpTimeStamp
 //			* time_intepreter_.internal_clock_period_ns();
 
   //field fec id starts at 1
   readout.fec = parser_.parserData.fecId;
-  for (unsigned int i = 0; i < parser_.stats.hits; i++) {
+  for (unsigned int i = 0; i < parser_.stats.readouts; i++) {
     auto &d = parser_.data[i];
     if (d.hasDataMarker) {
       // \todo should these be functions of SRSTime?
@@ -81,30 +82,27 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
         readout_file_->push(readout);
       }
 
-      hit.plane = geometry_interpreter_.get_plane(readout);
-      hit.coordinate = geometry_interpreter_.get_strip(readout);
+      hit.plane = digital_geometry_.get_plane(readout);
+      hit.coordinate = digital_geometry_.get_strip(readout);
       hit.weight = readout.adc;
       hit.time = readout.srs_timestamp + static_cast<uint64_t>(readout.chiptime);
 
       if ((hit.plane != 0) && (hit.plane != 1)) {
-        // \todo make a counter for this in the pipeline, this is digital geometry
-        geom_errors++;
+        stats.geom_errors++;
         LOG(PROCESS, Sev::Debug, "Bad SRS mapping (plane) -- fec={}, chip={}",
                readout.fec, readout.chip_id);
         continue;
       }
 
       if (hit.coordinate == NMX_INVALID_GEOM_ID) {
-        // \todo make a counter for this in the pipeline, this is digital geometry
-        geom_errors++;
+        stats.geom_errors++;
         LOG(PROCESS, Sev::Debug, "Bad SRS mapping (coordinate) -- fec={}, chip={}",
             readout.fec, readout.chip_id);
         continue;
       }
 
       if (!readout.over_threshold && (hit.weight < adc_threshold_)) {
-        // \todo make a counter for this in the pipeline
-        below_adc_threshold++;
+        stats.adc_rejects++;
         LOG(PROCESS, Sev::Debug, "Below ADC threshold  adc={}", hit.weight);
         continue;
       }
@@ -132,13 +130,6 @@ AbstractBuilder::ResultStats BuilderVMM3::process_buffer(char *buf, size_t size)
     }
   }
 
-  auto &stats = parser_.stats;
-  return AbstractBuilder::ResultStats(stats.hits, stats.errors,
-                                      geom_errors,
-                                      below_adc_threshold,
-                                      stats.rxSeqErrors,
-                                      stats.badFrames,
-                                      stats.goodFrames);
 }
 
 }

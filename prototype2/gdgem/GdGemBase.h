@@ -59,25 +59,41 @@ protected:
     int64_t rx_packets;
     int64_t rx_bytes;
     int64_t fifo_push_errors;
+    // \todo Morten: explain. What is going on here?
     int64_t pad_a[5]; // cppcheck-suppress unusedStructMember
 
-    // Processing Counters
-    int64_t readouts;
-    int64_t readouts_discarded;
-    int64_t readouts_error_bytes;
+    // Processing thread
     int64_t processing_idle;
-    int64_t unclustered;
-    int64_t geom_errors;
-    int64_t clusters_x;
-    int64_t clusters_y;
-    int64_t clusters_xy;
-    int64_t clusters_events;
-    int64_t clusters_discarded;
-    int64_t tx_bytes;
     int64_t fifo_seq_errors;
-    int64_t rx_seq_errors;
+
+    // Parser stats
+    int64_t lost_frames;
     int64_t bad_frames;
     int64_t good_frames;
+    int64_t readouts_error_bytes;
+    int64_t readouts_total;
+
+    // Builder Counters
+    int64_t readouts_bad_geometry;
+    int64_t readouts_bad_adc;
+    int64_t readouts_good;
+
+    // Clustering
+    int64_t clusters_total;
+    int64_t clusters_x_only;
+    int64_t clusters_y_only;
+    int64_t clusters_xy;
+
+    // Analysis
+    int64_t events_bad_utpc;
+    int64_t events_filter_rejects;
+    int64_t events_geom_errors;
+    int64_t events_good;
+    int64_t readouts_in_good_events;
+
+    // Producer
+    int64_t tx_bytes;
+
     // Kafka stats below are common to all detectors
     int64_t kafka_produce_fails;
     int64_t kafka_ev_errors;

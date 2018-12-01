@@ -117,7 +117,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
   int readoutIndex = 0;
   while (datalen >= HitAndMarkerSize) {
     //XTRACE(PROCESS, DEB, "readoutIndex: %d, datalen %d, elems: %u",
-    //		readoutIndex, datalen, stats.hits);
+    //		readoutIndex, datalen, stats.readouts);
     auto Data1Offset = SRSHeaderSize + HitAndMarkerSize * readoutIndex;
     auto Data2Offset = Data1Offset + Data1Size;
     uint32_t data1 = htonl(*(uint32_t *) &buffer[Data1Offset]);
@@ -125,7 +125,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 
     int res = parse(data1, data2, &data[dataIndex]);
     if (res == 1) { // This was data
-      stats.hits++;
+      stats.readouts++;
       dataIndex++;
     } else {
       stats.markers++;
@@ -133,7 +133,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
     readoutIndex++;
 
     datalen -= 6;
-    if (stats.hits == maxHits && datalen > 0) {
+    if (stats.readouts == maxHits && datalen > 0) {
       XTRACE(PROCESS, INF, "Data overflow, skipping %d bytes", datalen);
       stats.errors += datalen;
       break;
@@ -141,7 +141,7 @@ int VMM3SRSData::receive(const char *buffer, int size) {
   }
   stats.goodFrames++;
 
-  return stats.hits;
+  return stats.readouts;
 }
 
 }

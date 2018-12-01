@@ -99,10 +99,10 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
 
 
 			if protolen >= 16 then
-				local hits = (protolen-16)/data_length_byte
+				local readouts = (protolen-16)/data_length_byte
 				local hit_id = 0
 				local marker_id = 0
-				for i=1,hits do
+				for i=1,readouts do
 		 
 					local d1 = buffer(16 + (i-1)*data_length_byte, 4)
 					local d2 = buffer(20 + (i-1)*data_length_byte, 2)

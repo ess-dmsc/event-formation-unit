@@ -30,13 +30,13 @@ public:
   ~BuilderVMM3() { XTRACE(INIT, DEB, "BuilderVMM3 destructor called"); }
 
   /// \todo Martin document
-  ResultStats process_buffer(char *buf, size_t size) override;
+  void process_buffer(char *buf, size_t size) override;
 
  private:
   std::shared_ptr<CalibrationFile> calfile_;
   VMM3SRSData parser_;
   SRSTime time_intepreter_;
-  SRSMappings geometry_interpreter_;
+  SRSMappings digital_geometry_;
 
   uint16_t adc_threshold_ {0};
 
@@ -45,9 +45,6 @@ public:
   // preallocated and reused
   Readout readout;
   Hit hit;
-
-  uint32_t geom_errors {0};
-  uint32_t below_adc_threshold {0};
 };
 
 }

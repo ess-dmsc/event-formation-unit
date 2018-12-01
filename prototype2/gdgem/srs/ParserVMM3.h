@@ -34,6 +34,7 @@ public:
     uint32_t offsetOverflow; /// offset overflow in last frame (1 bit per VMM)
   };
 
+  // \todo no need for this struct
   struct VMM3Marker {
     uint64_t fecTimeStamp;   /// 42 bit
   };
@@ -73,6 +74,7 @@ public:
     markers = nullptr;
   }
 
+  // \todo use Buffer<char>
   /// \brief reveive readouts from a binary payload buffer, return number of
   /// data elements
   int receive(const char *buffer, int size);
@@ -97,7 +99,7 @@ public:
 
   // Stat counters: Results of the data parsing
   struct {
-    uint32_t hits{0};        /// number of hits
+    uint32_t readouts{0};        /// number of hits
     uint32_t markers{0};    ///  number of markers
     uint32_t errors{0};      /// bytes of invalid data
     uint32_t rxSeqErrors{0};  /// gaps in frame counter values

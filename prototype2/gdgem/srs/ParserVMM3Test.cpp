@@ -15,7 +15,7 @@ protected:
   virtual void TearDown() { delete data; }
 
   void assertfields(unsigned int hits, unsigned int markers, unsigned int errors) {
-    EXPECT_EQ(data->stats.hits, hits);
+    EXPECT_EQ(data->stats.readouts, hits);
     EXPECT_EQ(data->stats.markers, markers);
     EXPECT_EQ(data->stats.errors, errors);
   }
@@ -43,7 +43,7 @@ TEST_F(VMM3SRSDataTest, UndersizeData) {
 
 TEST_F(VMM3SRSDataTest, DataOnly) {
   int res = data->receive((char *)&data_3_ch0[0], data_3_ch0.size());
-  EXPECT_EQ(res, 3); // three hits in the readout packet
+  EXPECT_EQ(res, 3); // three readouts in the readout packet
   assertfields(3, 0, 0);
   for (int i = 0; i < maximumNumberVMM*maximumNumberFECs; i++) {
     EXPECT_EQ(data->markers[i].fecTimeStamp, 0U);
@@ -62,7 +62,7 @@ TEST_F(VMM3SRSDataTest, MarkerOnly) {
 
 TEST_F(VMM3SRSDataTest, MarkerAndData) {
   int res = data->receive((char *)&marker_3_data_3[0], marker_3_data_3.size());
-  EXPECT_EQ(res, 3); // three hits in the readout packet
+  EXPECT_EQ(res, 3); // three readouts in the readout packet
   assertfields(3, 3, 0);
   for (int i = 0; i < 3; i++) {
     int vmmid = i + 1; // see test data
@@ -72,7 +72,7 @@ TEST_F(VMM3SRSDataTest, MarkerAndData) {
 
 TEST_F(VMM3SRSDataTest, MarkerAndDataMixed) {
   int res = data->receive((char *)&marker_data_mixed_3[0], marker_data_mixed_3.size());
-  EXPECT_EQ(res, 3); // three hits in the readout packet
+  EXPECT_EQ(res, 3); // three readouts in the readout packet
   assertfields(3, 3, 0);
   for (int i = 0; i < 3; i++) {
     int vmmid = i + 1; // see test data
@@ -102,7 +102,7 @@ TEST_F(VMM3SRSDataTest, DataLengthOverflow) {
   VMM3SRSData shortvmmbuffer(2);
   int res = shortvmmbuffer.receive((char *)& data_3_ch0[0],  data_3_ch0.size());
   EXPECT_EQ(res, 2);
-  EXPECT_EQ(2, shortvmmbuffer.stats.hits);
+  EXPECT_EQ(2, shortvmmbuffer.stats.readouts);
   EXPECT_EQ(0, shortvmmbuffer.stats.markers);
   EXPECT_EQ(6, shortvmmbuffer.stats.errors);
 }

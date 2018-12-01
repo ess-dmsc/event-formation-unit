@@ -68,9 +68,9 @@ function srsvmm_proto.dissector(buffer,pinfo,tree)
 
 
       if protolen >= 12 then
-        local hits = (protolen-12)/8
-        pinfo.cols.info = string.format("VMM: %d, Hits: %3d", vmmid, hits)
-        for i=1,hits do
+        local readouts = (protolen-12)/8
+        pinfo.cols.info = string.format("VMM: %d, Hits: %3d", vmmid, readouts)
+        for i=1,readouts do
           local d1 = buffer(12 + (i-1)*8, 4)
           local d2 = buffer(16 + (i-1)*8, 4)
           local d1rev = reversebits(d1)

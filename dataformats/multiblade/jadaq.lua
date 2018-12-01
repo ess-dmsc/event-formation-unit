@@ -24,13 +24,13 @@ function jadaq_proto.dissector(buffer,pinfo,tree)
     local time64 = Int64.new(time_lo, time_hi)
     local digit = buffer(16, 4):le_uint()
     local elemid = buffer(20, 2):le_uint()
-    local hits = buffer(22, 2):le_uint()
+    local readouts = buffer(22, 2):le_uint()
     local vermaj = buffer(24, 1):le_uint()
     local vermin = buffer(25, 1):le_uint()
     local seqno = buffer(26, 4):le_uint()
 
     local jadaqhdr = tree:add(jadaq_proto,buffer(),
-    string.format("JADAQ digitizer: %d, hits: %d", digit, hits))
+    string.format("JADAQ digitizer: %d, readouts: %d", digit, readouts))
 
     jadaqhdr:add(buffer( 0, 8),
     string.format("runid: %08x%08x", run_hi, run_lo))
@@ -38,13 +38,13 @@ function jadaq_proto.dissector(buffer,pinfo,tree)
     string.format("time: %08x%08x (%d)", time_hi, time_lo, (time64):tonumber()))
     jadaqhdr:add(buffer(16, 4), "digitizer " .. digit)
     jadaqhdr:add(buffer(20, 2), "element id " .. elemid)
-    jadaqhdr:add(buffer(22, 2), "number of elements " .. hits)
+    jadaqhdr:add(buffer(22, 2), "number of elements " .. readouts)
     jadaqhdr:add(buffer(24, 2), "version " .. vermaj .. "." .. vermin)
     jadaqhdr:add(buffer(26, 4), "sequence number " .. seqno )
 
-    pinfo.cols.info = string.format("digitizer: %3d, hits: %3d", digit, hits)
+    pinfo.cols.info = string.format("digitizer: %3d, readouts: %3d", digit, readouts)
 
-    for i=1,hits do
+    for i=1,readouts do
       local offset = 32 + (i - 1) * data_length_byte
       local time =    buffer(offset    , 4):le_uint()
       local channel = buffer(offset + 4, 2):le_uint()

@@ -72,21 +72,34 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
   Stats.create("rx_packets", mystats.rx_packets);
   Stats.create("rx_bytes", mystats.rx_bytes);
   Stats.create("i2pfifo_dropped", mystats.fifo_push_errors);
-  Stats.create("readouts", mystats.readouts);
-  Stats.create("readouts_error_bytes", mystats.readouts_error_bytes);
-  Stats.create("readouts_discarded", mystats.readouts_discarded);
-  Stats.create("clusters_discarded", mystats.clusters_discarded);
-  Stats.create("clusters_events", mystats.clusters_events);
-  Stats.create("clusters_x", mystats.clusters_x);
-  Stats.create("clusters_y", mystats.clusters_y);
-  Stats.create("clusters_xy", mystats.clusters_xy);
+
   Stats.create("processing_idle", mystats.processing_idle);
   Stats.create("fifo_seq_errors", mystats.fifo_seq_errors);
-  Stats.create("unclustered", mystats.unclustered);
-  Stats.create("geom_errors", mystats.geom_errors);
-  Stats.create("lost_frames", mystats.rx_seq_errors);
+
+  // Parser
+  Stats.create("lost_frames", mystats.lost_frames);
   Stats.create("bad_frames", mystats.bad_frames);
   Stats.create("good_frames", mystats.good_frames);
+  Stats.create("readouts_error_bytes", mystats.readouts_error_bytes);
+  Stats.create("readouts_total", mystats.readouts_total);
+
+  // Builder
+  Stats.create("readouts_bad_geometry", mystats.readouts_bad_geometry);
+  Stats.create("readouts_bad_adc", mystats.readouts_bad_adc);
+  Stats.create("readouts_good", mystats.readouts_good);
+
+  // Clustering
+  Stats.create("clusters_total", mystats.clusters_total);
+  Stats.create("clusters_x_only", mystats.clusters_x_only);
+  Stats.create("clusters_y_only", mystats.clusters_y_only);
+  Stats.create("clusters_xy", mystats.clusters_xy);
+
+  Stats.create("events_bad_utpc", mystats.events_bad_utpc);
+  Stats.create("events_filter_rejects", mystats.events_filter_rejects);
+  Stats.create("events_geom_errors", mystats.events_geom_errors);
+  Stats.create("events_good", mystats.events_good);
+  Stats.create("readouts_in_good_events", mystats.readouts_in_good_events);
+
   Stats.create("tx_bytes", mystats.tx_bytes);
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
@@ -276,22 +289,16 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
   //       as each iteration is completely independent, other than
   //       everything going to the same serializers
 
+  mystats.clusters_x_only  += matcher_->matched_events.size();
   for (auto& event : matcher_->matched_events)
   {
-    // mystats.unclustered = clusterer.unclustered();
-
-    if (!event.both_planes())
-    {
-      if (event.c1.hit_count() != 0)
-      {
-        mystats.clusters_x++;
+    if (!event.both_planes()) {
+      if (event.c1.hit_count() != 0) {
+        mystats.clusters_x_only++;
       }
-      else
-      {
-        mystats.clusters_y++;
+      else {
+        mystats.clusters_y_only++;
       }
-      mystats.readouts_discarded += event.total_hit_count();
-      mystats.clusters_discarded++;
 //      LOG(PROCESS, Sev::Debug, "unpaired event discarded {}", event.debug());
       continue;
     }
@@ -311,17 +318,17 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     if (!utpc_.good)
     {
-      // \todo make a counter for this
       LOG(PROCESS, Sev::Debug, "Bad uTPC discarded ={}, {}",
           utpc_.debug(), event.debug(true));
+      mystats.events_bad_utpc++;
       continue;
     }
 
     if (!nmx_opts.filter.valid(event, utpc_))
     {
-      // \todo make a counter for this
       LOG(PROCESS, Sev::Debug, "filtered event discarded utpc={}, {}",
           utpc_.debug(), event.debug());
+      mystats.events_filter_rejects++;
       continue;
     }
 
@@ -330,7 +337,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     if (!nmx_opts.geometry.valid_id(pixelid_))
     {
-      mystats.geom_errors++;
+      mystats.events_geom_errors++;
       continue;
     }
 
@@ -364,7 +371,8 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     mystats.tx_bytes += event_serializer.addEvent(
         static_cast<uint32_t>(truncated_time_), pixelid_);
-    mystats.clusters_events++;
+    mystats.events_good++;
+    mystats.readouts_in_good_events += event.total_hit_count();
   }
   matcher_->matched_events.clear();
 }
@@ -396,7 +404,7 @@ void GdGemBase::processing_thread() {
 
 
   unsigned int data_index;
-  while (1) {
+  while (true) {
     // mystats.fifo_free = input2proc_fifo.free();
     if (!input2proc_fifo.pop(data_index)) {
       mystats.processing_idle++;
@@ -406,15 +414,22 @@ void GdGemBase::processing_thread() {
       if (len == 0) {
         mystats.fifo_seq_errors++;
       } else {
-        auto stats = builder_->process_buffer(
+        builder_->process_buffer(
             eth_ringbuf->getDataBuffer(data_index), len);
 
-        mystats.readouts += stats.valid_hits;
-        mystats.readouts_error_bytes +=
-            stats.error_bytes; // From srs data parser
-        mystats.rx_seq_errors += stats.lost_frames;
-        mystats.bad_frames += stats.bad_frames;
-        mystats.good_frames += stats.good_frames;
+        // parser stats
+        mystats.lost_frames = builder_->stats.parser_lost_frames;
+        mystats.bad_frames = builder_->stats.parser_bad_frames;
+        mystats.good_frames = builder_->stats.parser_good_frames;
+        mystats.readouts_error_bytes = builder_->stats.parser_error_bytes;
+        mystats.readouts_total = builder_->stats.parser_readouts;
+
+        // builder stats
+        mystats.readouts_bad_geometry = builder_->stats.geom_errors;
+        mystats.readouts_bad_adc = builder_->stats.adc_rejects;
+        mystats.readouts_good = builder_->hit_buffer_x.size()
+            + builder_->hit_buffer_y.size();
+
 
         // do not flush
         perform_clustering(false);
@@ -445,7 +460,7 @@ void GdGemBase::processing_thread() {
       mystats.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
 
       if (!hists_.isEmpty()) {
-        LOG(PROCESS, Sev::Debug, "Sending histogram for {} hits and {} clusters ",
+        LOG(PROCESS, Sev::Debug, "Sending histogram for {} readouts and {} clusters ",
                hists_.hit_count(), hists_.cluster_count());
         hist_serializer.produce(hists_);
         hists_.clear();
@@ -454,6 +469,7 @@ void GdGemBase::processing_thread() {
       // checking for exit
       if (not runThreads) {
         LOG(PROCESS, Sev::Info, "Stopping processing thread.");
+        // \todo why is this necessary? looks very wrong
         /// \todo this is a hack to force ~BuilderSRS() call
         builder_.reset();
         delete builder_.get(); /**< \todo see above */
