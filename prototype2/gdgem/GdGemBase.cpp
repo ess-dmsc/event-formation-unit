@@ -31,8 +31,8 @@
 // \todo MJC's workstation - not reliable
 static constexpr int TscMHz {2900};
 
-static constexpr uint64_t max_pulse_window_ns {5000000};
-//static constexpr uint64_t max_pulse_window_ns {std::numeric_limits<uint32_t>::max()};
+// Emulating ESS 17Hz pulse
+static constexpr uint64_t max_pulse_window_ns {1000000000 / 17};
 
 int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
                         char *output,

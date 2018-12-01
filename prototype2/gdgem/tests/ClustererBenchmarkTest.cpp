@@ -1,69 +1,106 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
 #include <benchmark/benchmark.h>
-#include <vector>
-#include <stdio.h>
-#include <unistd.h>
-#include <gdgem/srs/SRSMappings.h>
-#include <gdgem/srs/SRSTime.h>
-#include <gdgem/clustering/NMXClusterer.h>
-//#include <gdgem/clustering/TestData.h>
-#include <gdgem/clustering/TestDataLong.h>
+#include <gdgem/NMXConfig.h>
 #include <test/TestBase.h>
+
+#include <gdgem/nmx/Readout.h>
+#include <common/clustering/GapClusterer.h>
+#include <common/clustering/GapMatcher.h>
 
 using namespace Gem;
 
+class HitSorter {
+public:
+  HitSorter(SRSTime time, SRSMappings chips) :
+      pTime(time), pChips(chips)
+  {}
+
+  void insert(const Readout &readout) {
+    buffer.push_back(Hit());
+    auto &e = buffer.back();
+    e.plane = pChips.get_plane(readout);
+    e.weight = readout.adc;
+    e.coordinate = pChips.get_strip(readout);
+    e.time = readout.srs_timestamp + static_cast<uint64_t>(readout.chiptime);
+    if (readout.srs_timestamp < prev_srs_time)
+      srs_overflows++;
+    prev_srs_time = readout.srs_timestamp;
+    if (readout.chiptime < 0)
+      negative_chip_times++;
+  }
+
+  void flush() {
+    std::sort(buffer.begin(), buffer.end(),
+              [](const Hit &e1, const Hit &e2) {
+                return e1.time < e2.time;
+              });
+    if (clusterer)
+      clusterer->cluster(buffer);
+    buffer.clear();
+    if (clusterer)
+      clusterer->flush();
+  }
+
+  std::shared_ptr<AbstractClusterer> clusterer;
+
+  HitContainer buffer;
+  uint64_t prev_srs_time {0};
+  size_t srs_overflows{0};
+  size_t negative_chip_times{0};
+
+private:
+  SRSTime pTime;
+  SRSMappings pChips;
+};
+
 static void Doit(benchmark::State &state) {
-	SRSMappings mapping;
+	std::string DataPath = TEST_DATA_PATH;
+  auto opts = NMXConfig(DataPath + "/config.json", "");
 
-	mapping.set_mapping(1, 0, 0, 0);
-	mapping.set_mapping(1, 1, 0, 64);
-	mapping.set_mapping(1, 6, 0, 128);
-	mapping.set_mapping(1, 7, 0, 192);
+    HitSorter sorter_x(opts.time_config, opts.srs_mappings);
+  HitSorter sorter_y(opts.time_config, opts.srs_mappings);
 
-	mapping.set_mapping(1, 10, 1, 0);
-	mapping.set_mapping(1, 11, 1, 64);
-	mapping.set_mapping(1, 14, 1, 128);
-	mapping.set_mapping(1, 15, 1, 192);
+  sorter_x.clusterer =
+      std::make_shared<GapClusterer>(opts.clusterer_x.max_time_gap,
+                                     opts.clusterer_x.max_strip_gap);
+  sorter_y.clusterer =
+      std::make_shared<GapClusterer>(opts.clusterer_y.max_time_gap,
+                                     opts.clusterer_y.max_strip_gap);
 
-	SRSTime srstime;
-	srstime.set_bc_clock(20);
-	srstime.set_tac_slope(60);
-	srstime.set_trigger_resolution(3.125);
-
-	int pAcqWin = 4000;
-	int pADCThreshold = 0;
-	int pMinClusterSize = 3;
-	//Maximum time difference between strips in time sorted cluster (x or y)
-	float pDeltaTimeHits = 200;
-	//Number of missing strips in strip sorted cluster (x or y)
-	int pDeltaStripHits = 2;
-	//Maximum time span for total cluster (x or y)
-	float pDeltaTimeSpan = 500;
-	//Maximum cluster time difference between matching clusters in x and y
-	//Cluster time is either calculated with center-of-mass or uTPC method
-	float pDeltaTimePlanes = 200;
-
-	uint32_t items = 0;
+  GapMatcher matcher (opts.time_config.acquisition_window()*5,
+      opts.matcher_max_delta_time);
 
 
-	NMXClusterer nmxdata(srstime, mapping, pAcqWin, pADCThreshold,
-			pMinClusterSize, pDeltaTimeHits, pDeltaStripHits, pDeltaTimeSpan,
-			pDeltaTimePlanes);
+  std::vector<Readout> readouts;
+  ReadoutFile::read(DataPath + "/readouts/a10000", readouts);
+
+
+  uint32_t items = 0;
+
 	for (auto _ : state) {
-		for (auto hit : Run16_Long) {
-			int result = nmxdata.AnalyzeHits(hit.srs_timestamp,
-					hit.frame_counter, hit.fec, hit.chip_id, hit.channel,
-					hit.bcid, hit.tdc, hit.adc, hit.over_threshold);
-
-			if (result == -1) {
-				printf("result == -1\n");
-				break;
-			}
+		for (const auto& readout : readouts) {
+      auto plane = opts.srs_mappings.get_plane(readout);
+      if (plane == 0) {
+        sorter_x.insert(readout);
+      }
+      if (plane == 1) {
+        sorter_y.insert(readout);
+      }
 		}
-		//EXPECT_TRUE(nmxdata.getNumClustersX() < 3);
-		//printf("getNumClustersX(): %d\n", nmxdata.getNumClustersX());
-		items += Run16_Long.size(); // 156 hits in the Run16_line_110168_110323 dataset
+
+    sorter_x.flush();
+    sorter_y.flush();
+
+    matcher.insert(0, sorter_x.clusterer->clusters);
+    matcher.insert(1, sorter_y.clusterer->clusters);
+    matcher.match(true);
+    matcher.matched_events.clear();
+
+		// number of readouts
+		items += readouts.size();
+
+		// number of clusters from matcher?
 	}
 	// state.SetComplexityN(state.range(0));
 	//state.SetBytesProcessed(state.iterations() * state.range(0));
