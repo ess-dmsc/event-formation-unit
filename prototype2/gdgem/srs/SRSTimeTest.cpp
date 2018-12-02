@@ -7,8 +7,8 @@
 
 using namespace Gem;
 
-constexpr float no_offset = 0.0;
-constexpr float unit_slope = 1.0;
+constexpr float no_offset {0.0};
+constexpr float unit_slope {1.0};
 
 class SRSTimeTest : public TestBase {
 protected:

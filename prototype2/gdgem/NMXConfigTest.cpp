@@ -17,6 +17,8 @@ protected:
   std::string TestJsonPath {TEST_JSON_PATH};
 };
 
+// \todo improve everything about this
+
 /** Test cases below */
 TEST_F(NMXConfigTest, ConstructorDefaults) {
   NMXConfig nmxconfig;

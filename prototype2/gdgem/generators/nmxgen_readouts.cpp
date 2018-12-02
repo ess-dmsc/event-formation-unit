@@ -14,7 +14,7 @@
 #include <libs/include/Socket.h>
 #include <unistd.h>
 // GCOVR_EXCL_START
-static constexpr int TscMHz = 2900;
+static constexpr int TscMHz {2900};
 
 int main(int argc, char *argv[]) {
   NMXArgs opts(argc, argv);

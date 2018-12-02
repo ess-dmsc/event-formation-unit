@@ -15,9 +15,9 @@ namespace Gem {
 
 class CalibrationFile {
 public:
-  static constexpr int MAX_FEC = 40;
-  static constexpr int MAX_VMM = 16;
-  static constexpr int MAX_CH = 64;
+  static constexpr int MAX_FEC {40};
+  static constexpr int MAX_VMM {16};
+  static constexpr int MAX_CH  {64};
 
   /// \todo check whether packing is necessary, static assert assert?
   typedef struct {

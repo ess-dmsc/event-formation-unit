@@ -38,6 +38,8 @@ TEST_F(GdGemBaseTest, Constructor) {
   EXPECT_EQ(Readout.mystats.rx_packets, 0);
 }
 
+// \todo this needs to be redone using the reference binary
+
 TEST_F(GdGemBaseTest, GetCalibrationCmd) {
   GdGemBaseStandIn Readout(Settings, LocalSettings);
   const int OutputSize = 1000;
@@ -45,11 +47,11 @@ TEST_F(GdGemBaseTest, GetCalibrationCmd) {
   char Output[OutputSize];
   std::vector<std::string> badcmdlen = {"NMX_GET_CALIB"};
   int res = Readout.getCalibration(badcmdlen, Output, &OutputBytes);
-  EXPECT_TRUE(res < 0);
+  EXPECT_LT(res, 0);
 
   std::vector<std::string> badcmdarg = {"NMX_GET_CALIB", "700", "0", "0"};
   res = Readout.getCalibration(badcmdarg, Output, &OutputBytes);
-  EXPECT_TRUE(res < 0);
+  EXPECT_LT(res, 0);
 
   std::vector<std::string> goodcmd = {"NMX_GET_CALIB", "0", "0", "0"};
   res = Readout.getCalibration(goodcmd, Output, &OutputBytes);

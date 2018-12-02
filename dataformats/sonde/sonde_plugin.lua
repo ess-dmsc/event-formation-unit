@@ -136,11 +136,11 @@ function sonde_data.dissector(buffer,pinfo,tree)
   header:add(buffer(8,2), string.format("Data length: %d", datalen))
 
   if type == 0xd6 then
-    local readouts = ((protolen-10) - 1)/5
+    local hits = ((protolen-10) - 1)/5
     pinfo.cols.info = string.format("Version: %d, system: %d, %s",
             bit.rshift(versys,6), bit.band(versys, 0x3f), cmd[type])
 
-    for i=1,readouts do
+    for i=1,hits do
       local ts =  buffer(11 + (i-1)*5, 4):uint()
       local asch = buffer(15 + (i-1)*5, 1):uint()
       local hit = header:add(buffer(11 + (i-1)*5, 5),
