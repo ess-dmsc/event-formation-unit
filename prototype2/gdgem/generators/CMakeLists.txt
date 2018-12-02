@@ -14,3 +14,16 @@ set(nmxgen_hits_INC
     NMXArgs.h
     )
 create_executable(nmxgen_hits)
+
+set(nmxgen_readouts_SRC
+  ../../common/clustering/Hit.cpp
+  nmxgen_readouts.cpp
+  ReaderReadouts.cpp
+  NMXArgs.cpp
+  )
+set(nmxgen_readouts_INC
+  ../../common/clustering/Hit.h
+  ReaderReadouts.h
+  NMXArgs.h
+  )
+create_executable(nmxgen_readouts)

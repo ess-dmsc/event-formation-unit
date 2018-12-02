@@ -33,22 +33,26 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   builder_type = root["builder_type"].get<std::string>();
 
   /**< \todo get from slow control? */
-  auto tc = root["time_config"];
-  time_config.tac_slope_ns(tc["tac_slope"].get<int>());
-  time_config.bc_clock_MHz(tc["bc_clock"].get<int>());
-  time_config.trigger_resolution_ns(tc["trigger_resolution"].get<double>());
-  time_config.acquisition_window(tc["acquisition_window"].get<unsigned int>());
-
-  auto sm = root["srs_mappings"];
-  for (unsigned int index = 0; index < sm.size(); index++) {
-    auto fecID = sm[index]["fecID"].get<int>();
-    auto vmmID = sm[index]["vmmID"].get<int>();
-    auto planeID = sm[index]["planeID"].get<int>();
-    auto strip_offset = sm[index]["strip_offset"].get<int>();
-    srs_mappings.set_mapping(fecID, vmmID, planeID, strip_offset);
+  if (builder_type == "VMM3") {
+    auto tc = root["time_config"];
+    time_config.tac_slope_ns(tc["tac_slope"].get<int>());
+    time_config.bc_clock_MHz(tc["bc_clock"].get<int>());
+    time_config.trigger_resolution_ns(tc["trigger_resolution"].get<double>());
+    time_config.acquisition_window(tc["acquisition_window"].get<unsigned int>());
   }
 
-  adc_threshold = root["adc_threshold"].get<unsigned int>();
+  if (builder_type != "Hits") {
+    auto sm = root["srs_mappings"];
+    for (unsigned int index = 0; index < sm.size(); index++) {
+      auto fecID = sm[index]["fecID"].get<int>();
+      auto vmmID = sm[index]["vmmID"].get<int>();
+      auto planeID = sm[index]["planeID"].get<int>();
+      auto strip_offset = sm[index]["strip_offset"].get<int>();
+      srs_mappings.set_mapping(fecID, vmmID, planeID, strip_offset);
+    }
+
+    adc_threshold = root["adc_threshold"].get<unsigned int>();
+  }
 
   auto cx = root["clusterer x"];
   clusterer_x.max_strip_gap = cx["max_strip_gap"].get<unsigned int>();
@@ -84,18 +88,22 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 }
 
 std::string NMXConfig::debug() const {
+  // \todo use fmt
   std::stringstream ss;
   ss << "  ==========================================\n";
   ss << "  ========       builder: "
      << builder_type
      << "      ========\n";
   ss << "  ==========================================\n";
-  if ((builder_type == "VMM2") || (builder_type == "VMM3")) {
+  if (builder_type == "VMM3") {
     ss << "  Time config:\n" << time_config.debug();
-    ss << "  Chip geometry:\n" << srs_mappings.debug();
+  }
+  if (builder_type != "Hits") {
+    ss << "  Digital geometry:\n" << srs_mappings.debug();
+    ss << "\n  adc_threshold = " << adc_threshold << "\n";
   }
 
-  ss << "\n  adc_threshold = " << adc_threshold << "\n\n";
+  ss << "\n";
 
   ss << "  Clusterer-X:\n";
   ss << "    max_time_gap = " << clusterer_x.max_time_gap << "\n";

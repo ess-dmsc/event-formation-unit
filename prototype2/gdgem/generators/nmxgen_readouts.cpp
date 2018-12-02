@@ -10,7 +10,7 @@
 #include <libs/include/Timer.h>
 
 #include <gdgem/generators/NMXArgs.h>
-#include <gdgem/generators/ReaderHits.h>
+#include <gdgem/generators/ReaderReadouts.h>
 #include <libs/include/Socket.h>
 #include <unistd.h>
 // GCOVR_EXCL_START
@@ -34,7 +34,7 @@ int main(int argc, char *argv[]) {
   DataSource.setBufferSizes(opts.sndbuf, 0);
   DataSource.printBufferSizes();
 
-  ReaderHits file(opts.filename);
+  Gem::ReaderReadouts file(opts.filename);
 
   int readsz;
 
