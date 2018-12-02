@@ -19,6 +19,8 @@ set(pipeline_common_source
   srs/ParserVMM3.cpp
   srs/BuilderVMM3.cpp
   srs/CalibrationFile.cpp  # Also works for VMM2
+  generators/BuilderReadouts.cpp
+  generators/BuilderHits.cpp
   )
 
 set(pipeline_common_inc
@@ -41,6 +43,8 @@ set(pipeline_common_inc
   srs/ParserVMM3.h
   srs/BuilderVMM3.h
   srs/CalibrationFile.h # also works for VMM2
+  generators/BuilderReadouts.h
+  generators/BuilderHits.h
   )
 
 set(gdgem_SRC GdGem.cpp ${GdGemBase_SRC} ${pipeline_common_source})

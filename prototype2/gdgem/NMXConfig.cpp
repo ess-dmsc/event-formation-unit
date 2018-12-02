@@ -32,22 +32,20 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 
   builder_type = root["builder_type"].get<std::string>();
 
-  if ((builder_type == "VMM2") || (builder_type == "VMM3")) {
-    /**< \todo get from slow control? */
-    auto tc = root["time_config"];
-    time_config.tac_slope_ns(tc["tac_slope"].get<int>());
-    time_config.bc_clock_MHz(tc["bc_clock"].get<int>());
-    time_config.trigger_resolution_ns(tc["trigger_resolution"].get<double>());
-    time_config.acquisition_window(tc["acquisition_window"].get<unsigned int>());
+  /**< \todo get from slow control? */
+  auto tc = root["time_config"];
+  time_config.tac_slope_ns(tc["tac_slope"].get<int>());
+  time_config.bc_clock_MHz(tc["bc_clock"].get<int>());
+  time_config.trigger_resolution_ns(tc["trigger_resolution"].get<double>());
+  time_config.acquisition_window(tc["acquisition_window"].get<unsigned int>());
 
-    auto sm = root["srs_mappings"];
-    for (unsigned int index = 0; index < sm.size(); index++) {
-      auto fecID = sm[index]["fecID"].get<int>();
-      auto vmmID = sm[index]["vmmID"].get<int>();
-      auto planeID = sm[index]["planeID"].get<int>();
-      auto strip_offset = sm[index]["strip_offset"].get<int>();
-      srs_mappings.set_mapping(fecID, vmmID, planeID, strip_offset);
-    }
+  auto sm = root["srs_mappings"];
+  for (unsigned int index = 0; index < sm.size(); index++) {
+    auto fecID = sm[index]["fecID"].get<int>();
+    auto vmmID = sm[index]["vmmID"].get<int>();
+    auto planeID = sm[index]["planeID"].get<int>();
+    auto strip_offset = sm[index]["strip_offset"].get<int>();
+    srs_mappings.set_mapping(fecID, vmmID, planeID, strip_offset);
   }
 
   adc_threshold = root["adc_threshold"].get<unsigned int>();
@@ -63,24 +61,24 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   matcher_max_delta_time = root["matcher_max_delta_time"].get<double>();
 
   analyze_weighted = root["analyze_weighted"].get<bool>();
-  analyze_max_timebins = root["analyze_max_timebins"].get<int>();
-  analyze_max_timedif = root["analyze_max_timedif"].get<int>();
+  analyze_max_timebins = root["analyze_max_timebins"].get<unsigned int>();
+  analyze_max_timedif = root["analyze_max_timedif"].get<unsigned int>();
 
   auto f = root["filters"];
   filter.enforce_lower_uncertainty_limit =
       f["enforce_lower_uncertainty_limit"].get<bool>();
-  filter.lower_uncertainty_limit = f["lower_uncertainty_limit"].get<int>();
+  filter.lower_uncertainty_limit = f["lower_uncertainty_limit"].get<unsigned int>();
   filter.enforce_minimum_hits = f["enforce_minimum_hits"].get<bool>();
-  filter.minimum_hits = f["minimum_hits"].get<int>();
+  filter.minimum_hits = f["minimum_hits"].get<unsigned int>();
 
   hit_histograms = root["hit_histograms"].get<bool>();
-  track_sample_minhits = root["track_sample_minhits"].get<int>();
-  cluster_adc_downshift = root["cluster_adc_downshift"].get<int>();
+  track_sample_minhits = root["track_sample_minhits"].get<unsigned int>();
+  cluster_adc_downshift = root["cluster_adc_downshift"].get<unsigned int>();
   send_tracks = root["send_tracks"].get<bool>();
 
   // \todo deduce geometry from SRS mappings?
-  geometry.nx(root["geometry_x"].get<int>());
-  geometry.ny(root["geometry_y"].get<int>());
+  geometry.nx(root["geometry_x"].get<unsigned int>());
+  geometry.ny(root["geometry_y"].get<unsigned int>());
   geometry.nz(1);
   geometry.np(1);
 }

@@ -52,7 +52,7 @@ struct EventFilter {
 };
 
 struct NMXConfig {
-  NMXConfig() {}
+  NMXConfig() = default;
   NMXConfig(std::string configfile, std::string calibrationfile);
 
   std::string builder_type;

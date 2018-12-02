@@ -9,21 +9,30 @@
 
 #pragma once
 
-#include <common/clustering/Hit.h>
 #include <gdgem/nmx/AbstractBuilder.h>
+#include <gdgem/nmx/Readout.h>
+#include <common/clustering/Hit.h>
+#include <gdgem/srs/SRSMappings.h>
 
 namespace Gem {
 
-class BuilderHits : public AbstractBuilder {
+class BuilderReadouts : public AbstractBuilder {
 public:
-  BuilderHits();
+  BuilderReadouts(SRSMappings digital_geometry, uint16_t adc_threshold, std::string dump_dir);
 
   /// \todo Martin document
+  // \todo use Buffer<char>
   void process_buffer(char *buf, size_t size) override;
 
 private:
+  // from params
+  std::shared_ptr<HitFile> hit_file_; //dumpfile
+  SRSMappings digital_geometry_;
+  uint16_t adc_threshold_ {0};
+
   // preallocated
-  std::vector<Hit> converted_data;
+  std::vector<Readout> converted_data;
+  Hit hit;
 };
 
 }

@@ -15,13 +15,13 @@
 namespace Gem {
 
 BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
-                         SRSMappings geometry_interpreter,
+                         SRSMappings digital_geometry,
                          uint16_t adc_threshold,
                          std::string dump_dir,
                          std::shared_ptr<CalibrationFile> calfile)
                          : parser_(1500)
                          , time_intepreter_(time_intepreter)
-                         , digital_geometry_(geometry_interpreter)
+                         , digital_geometry_(digital_geometry)
                          , adc_threshold_ (adc_threshold) {
   assert(calfile != nullptr);
   calfile_ = calfile;

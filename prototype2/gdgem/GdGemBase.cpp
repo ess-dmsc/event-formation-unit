@@ -13,6 +13,8 @@
 #include <common/clustering/GapClusterer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/srs/BuilderVMM3.h>
+#include <gdgem/generators/BuilderHits.h>
+#include <gdgem/generators/BuilderReadouts.h>
 #include <common/EV42Serializer.h>
 #include <common/HistSerializer.h>
 #include <common/Producer.h>
@@ -214,6 +216,16 @@ void GdGemBase::apply_configuration() {
         NMXSettings.fileprefix,
         nmx_opts.calfile);
 
+  } else if (nmx_opts.builder_type == "Readouts") {
+    LOG(INIT, Sev::Info, "Using BuilderReadouts");
+    builder_ = std::make_shared<Gem::BuilderReadouts>(
+        nmx_opts.srs_mappings,
+        nmx_opts.adc_threshold,
+        NMXSettings.fileprefix);
+
+  } else if (nmx_opts.builder_type == "Hits") {
+    LOG(INIT, Sev::Info, "Using BuilderHits");
+    builder_ = std::make_shared<Gem::BuilderHits>();
   } else {
     LOG(INIT, Sev::Error, "Unrecognized builder type in config");
   }

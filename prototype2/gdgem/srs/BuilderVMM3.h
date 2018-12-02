@@ -23,7 +23,7 @@ namespace Gem {
 
 class BuilderVMM3 : public AbstractBuilder {
 public:
-  BuilderVMM3(SRSTime time_intepreter, SRSMappings geometry_interpreter,
+  BuilderVMM3(SRSTime time_intepreter, SRSMappings digital_geometry,
               uint16_t adc_threshold, std::string dump_dir,
               std::shared_ptr<CalibrationFile> calfile);
 
