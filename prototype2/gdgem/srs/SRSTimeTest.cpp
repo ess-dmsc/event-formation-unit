@@ -24,15 +24,14 @@ TEST_F(SRSTimeTest, SettersGetters) {
   EXPECT_EQ(time.tac_slope_ns(), 21.0);
   EXPECT_EQ(time.trigger_resolution_ns(), 7.0);
   EXPECT_EQ(time.acquisition_window(), 1234);
-  EXPECT_EQ(time.internal_clock_period_ns(), 25);
 }
 
 
 TEST_F(SRSTimeTest, Eval) {
 
   /// \todo should return 0.0 on zero input?
-  MESSAGE() << "Warning - timestamp_ns() might not be what we want!\n";
-  EXPECT_EQ(time.timestamp_ns(0, 0, 0, no_offset, unit_slope), 1);
+//  MESSAGE() << "Warning - timestamp_ns() might not be what we want!\n";
+//  EXPECT_EQ(time.timestamp_ns(0, 0, 0, no_offset, unit_slope), 1);
 
 }
 

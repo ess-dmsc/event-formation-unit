@@ -301,7 +301,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
   //       as each iteration is completely independent, other than
   //       everything going to the same serializers
 
-  mystats.clusters_x_only  += matcher_->matched_events.size();
+  mystats.clusters_total  += matcher_->matched_events.size();
   for (auto& event : matcher_->matched_events)
   {
     if (!event.both_planes()) {
@@ -439,8 +439,8 @@ void GdGemBase::processing_thread() {
         // builder stats
         mystats.readouts_bad_geometry = builder_->stats.geom_errors;
         mystats.readouts_bad_adc = builder_->stats.adc_rejects;
-        mystats.readouts_good = builder_->hit_buffer_x.size()
-            + builder_->hit_buffer_y.size();
+        mystats.readouts_good += (builder_->hit_buffer_x.size()
+            + builder_->hit_buffer_y.size());
 
 
         // do not flush

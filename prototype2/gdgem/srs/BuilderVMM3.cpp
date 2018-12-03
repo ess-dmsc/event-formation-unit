@@ -56,8 +56,8 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
     if (d.hasDataMarker) {
       // \todo should these be functions of SRSTime?
       readout.srs_timestamp = (
-          static_cast<uint64_t>(d.fecTimeStamp) * static_cast<uint64_t>(time_intepreter_.internal_clock_period_ns())
-              + static_cast<uint64_t>(d.triggerOffset) * static_cast<uint64_t>(time_intepreter_.trigger_period_ns())
+          static_cast<uint64_t>(d.fecTimeStamp) * SRSTime::internal_SRS_clock_period_ns
+              + static_cast<uint64_t>(d.triggerOffset) * time_intepreter_.trigger_period_ns()
       );
 
       readout.chip_id = d.vmmid;
@@ -68,7 +68,8 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
       readout.over_threshold = (d.overThreshold != 0);
       auto calib = calfile_->getCalibration(readout.fec, readout.chip_id, readout.channel);
       // \todo does this really need to be a floating point value?
-      readout.chiptime = time_intepreter_.chip_time_ns(d.bcid, d.tdc, calib.offset, calib.slope);
+      readout.chiptime = static_cast<float>(time_intepreter_.chip_time_ns(d.bcid, d.tdc,
+          calib.offset, calib.slope));
 
       // \todo what if chiptime is negative?
 
@@ -85,7 +86,11 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
       hit.plane = digital_geometry_.get_plane(readout);
       hit.coordinate = digital_geometry_.get_strip(readout);
       hit.weight = readout.adc;
-      hit.time = readout.srs_timestamp + static_cast<uint64_t>(readout.chiptime);
+      hit.time = readout.srs_timestamp;
+      if (readout.chiptime >= 0)
+        hit.time += static_cast<uint64_t>(readout.chiptime);
+      else
+        hit.time -= static_cast<uint64_t>(-readout.chiptime);
 
       if ((hit.plane != 0) && (hit.plane != 1)) {
         stats.geom_errors++;
