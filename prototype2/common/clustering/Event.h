@@ -28,6 +28,8 @@ public:
   /// \brief Event default constructor, planes default to 0 and 1
   Event() = default;
 
+  virtual ~Event() = default;
+
   /// \brief Event constructor, selecting planes
   /// \param plane1 id of first plane selected for event
   /// \param plane2 id of second plane selected for event
