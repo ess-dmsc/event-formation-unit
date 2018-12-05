@@ -7,6 +7,10 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
+#include <common/Log.h>
+//#undef TRC_MASK
+//#define TRC_MASK 0
+
 #define EV_ELEMSIZE sizeof(uint16_t)
 #define EV_SIZE (3 * EV_ELEMSIZE)
 #define POS_SIZE sizeof(double)
@@ -20,9 +24,10 @@ static_assert(FLATBUFFERS_LITTLEENDIAN,
 
 namespace Gem {
 
-TrackSerializer::TrackSerializer(size_t maxarraylength, size_t minhits, double target_res)
-    : builder(maxarraylength * EV_SIZE * 2 + BUF_STATIC_SIZE + 256),
-      maxlen(maxarraylength), minhits_(minhits), target_resolution_(target_res) {
+TrackSerializer::TrackSerializer(size_t maxarraylength, double target_res)
+    : maxlen(maxarraylength)
+    , builder(maxlen * EV_SIZE * 2 + BUF_STATIC_SIZE + 256)
+    , target_resolution_(target_res) {
   builder.Clear();
 }
 
@@ -31,12 +36,6 @@ void TrackSerializer::set_callback(ProducerCallback cb) {
 }
 
 bool TrackSerializer::add_track(const Event &event, double utpc_x, double utpc_y) {
-
-  // \todo should this check be done here or outside the class?
-  if ((event.c1.hit_count() < minhits_) ||
-      (event.c2.hit_count() < minhits_)) {
-    return false;
-  }
 
   if ((event.c1.hit_count() > maxlen) || (event.c2.hit_count() > maxlen)) {
     return false;
@@ -72,7 +71,7 @@ bool TrackSerializer::add_track(const Event &event, double utpc_x, double utpc_y
 }
 
 Buffer<uint8_t> TrackSerializer::serialize() {
-  if ((xtrack.size() == 0) || (ytrack.size() == 0)) {
+  if ((xtrack.size() == 0) && (ytrack.size() == 0)) {
     return Buffer<uint8_t>();
   }
 

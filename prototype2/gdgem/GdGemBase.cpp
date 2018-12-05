@@ -317,7 +317,8 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     utpc_ = utpc_analyzer_->analyze(event);
 
     /// Sample only tracks that are good in both planes
-    if (sample_next_track_)
+    if (sample_next_track_
+        && (event.total_hit_count() >= nmx_opts.track_sample_minhits))
     {
 //      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.debug(true));
       sample_next_track_ = !track_serializer.add_track(event,
@@ -403,7 +404,7 @@ void GdGemBase::processing_thread() {
   ev42serializer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 
-  Gem::TrackSerializer track_serializer(256, nmx_opts.track_sample_minhits, 1);
+  Gem::TrackSerializer track_serializer(256, 1);
   track_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
@@ -411,7 +412,7 @@ void GdGemBase::processing_thread() {
   hist_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
-  Gem::TrackSerializer raw_serializer(2000, 0, 1);
+  Gem::TrackSerializer raw_serializer(1500, 1);
   raw_serializer.set_callback(
           std::bind(&Producer::produce2<uint8_t>, &hits_producer, std::placeholders::_1));
 
