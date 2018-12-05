@@ -8,7 +8,7 @@
 #include <string.h>
 
 //#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+//#define TRC_LEVEL TRC_L_WAR
 
 namespace Gem {
 
@@ -73,8 +73,9 @@ int VMM3SRSData::receive(const char *buffer, int size) {
   }
 
   if (parserData.nextFrameCounter != srsHeader.frameCounter) {
+    XTRACE(PROCESS, WAR, "FC error %u != %u", parserData.nextFrameCounter, srsHeader.frameCounter);
     stats.rxSeqErrors++;
-    parserData.nextFrameCounter = srsHeader.frameCounter;
+    parserData.nextFrameCounter = srsHeader.frameCounter + 1;
   }
 
   if (size < SRSHeaderSize + HitAndMarkerSize) {

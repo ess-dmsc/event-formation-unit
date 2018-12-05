@@ -54,37 +54,42 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
     adc_threshold = root["adc_threshold"].get<unsigned int>();
   }
 
-  auto cx = root["clusterer x"];
-  clusterer_x.max_strip_gap = cx["max_strip_gap"].get<unsigned int>();
-  clusterer_x.max_time_gap = cx["max_time_gap"].get<double>();
-
-  auto cy = root["clusterer y"];
-  clusterer_y.max_strip_gap = cy["max_strip_gap"].get<unsigned int>();
-  clusterer_y.max_time_gap = cy["max_time_gap"].get<double>();
-
-  matcher_max_delta_time = root["matcher_max_delta_time"].get<double>();
-
-  analyze_weighted = root["analyze_weighted"].get<bool>();
-  analyze_max_timebins = root["analyze_max_timebins"].get<unsigned int>();
-  analyze_max_timedif = root["analyze_max_timedif"].get<unsigned int>();
-
-  auto f = root["filters"];
-  filter.enforce_lower_uncertainty_limit =
-      f["enforce_lower_uncertainty_limit"].get<bool>();
-  filter.lower_uncertainty_limit = f["lower_uncertainty_limit"].get<unsigned int>();
-  filter.enforce_minimum_hits = f["enforce_minimum_hits"].get<bool>();
-  filter.minimum_hits = f["minimum_hits"].get<unsigned int>();
-
   hit_histograms = root["hit_histograms"].get<bool>();
-  track_sample_minhits = root["track_sample_minhits"].get<unsigned int>();
-  cluster_adc_downshift = root["cluster_adc_downshift"].get<unsigned int>();
-  send_tracks = root["send_tracks"].get<bool>();
 
-  // \todo deduce geometry from SRS mappings?
-  geometry.nx(root["geometry_x"].get<unsigned int>());
-  geometry.ny(root["geometry_y"].get<unsigned int>());
-  geometry.nz(1);
-  geometry.np(1);
+  perform_clustering = root["perform_clustering"].get<bool>();
+
+  if (perform_clustering) {
+    auto cx = root["clusterer x"];
+    clusterer_x.max_strip_gap = cx["max_strip_gap"].get<unsigned int>();
+    clusterer_x.max_time_gap = cx["max_time_gap"].get<double>();
+
+    auto cy = root["clusterer y"];
+    clusterer_y.max_strip_gap = cy["max_strip_gap"].get<unsigned int>();
+    clusterer_y.max_time_gap = cy["max_time_gap"].get<double>();
+
+    matcher_max_delta_time = root["matcher_max_delta_time"].get<double>();
+
+    analyze_weighted = root["analyze_weighted"].get<bool>();
+    analyze_max_timebins = root["analyze_max_timebins"].get<unsigned int>();
+    analyze_max_timedif = root["analyze_max_timedif"].get<unsigned int>();
+
+    auto f = root["filters"];
+    filter.enforce_lower_uncertainty_limit =
+            f["enforce_lower_uncertainty_limit"].get<bool>();
+    filter.lower_uncertainty_limit = f["lower_uncertainty_limit"].get<unsigned int>();
+    filter.enforce_minimum_hits = f["enforce_minimum_hits"].get<bool>();
+    filter.minimum_hits = f["minimum_hits"].get<unsigned int>();
+
+    track_sample_minhits = root["track_sample_minhits"].get<unsigned int>();
+    cluster_adc_downshift = root["cluster_adc_downshift"].get<unsigned int>();
+    send_tracks = root["send_tracks"].get<bool>();
+
+    // \todo deduce geometry from SRS mappings?
+    geometry.nx(root["geometry_x"].get<unsigned int>());
+    geometry.ny(root["geometry_y"].get<unsigned int>());
+    geometry.nz(1);
+    geometry.np(1);
+  }
 }
 
 std::string NMXConfig::debug() const {
@@ -103,42 +108,51 @@ std::string NMXConfig::debug() const {
     ss << "\n  adc_threshold = " << adc_threshold << "\n";
   }
 
+  ss << "  Histogram hits = " << (hit_histograms ? "YES" : "no") << "\n";
+
   ss << "\n";
 
-  ss << "  Clusterer-X:\n";
-  ss << "    max_time_gap = " << clusterer_x.max_time_gap << "\n";
-  ss << "    max_strip_gap = " << clusterer_x.max_strip_gap << "\n";
+  ss << "  Perform clustering = " << (perform_clustering ? "YES" : "no") << "\n";
 
-  ss << "  Clusterer-Y:\n";
-  ss << "    max_time_gap = " << clusterer_y.max_time_gap << "\n";
-  ss << "    max_strip_gap = " << clusterer_y.max_strip_gap << "\n";
+  if (perform_clustering) {
+    ss << "  Clusterer-X:\n";
+    ss << "    max_time_gap = " << clusterer_x.max_time_gap << "\n";
+    ss << "    max_strip_gap = " << clusterer_x.max_strip_gap << "\n";
 
-  ss << "  Matcher\n    max_delta_time = " << matcher_max_delta_time << "\n";
+    ss << "  Clusterer-Y:\n";
+    ss << "    max_time_gap = " << clusterer_y.max_time_gap << "\n";
+    ss << "    max_strip_gap = " << clusterer_y.max_strip_gap << "\n";
 
-  ss << "  Event analysis\n";
-  ss << "    weighted = " << (analyze_weighted ? "true" : "false") << "\n";
-  ss << "    max_timebins = " << analyze_max_timebins << "\n";
-  ss << "    max_timedif = " << analyze_max_timedif << "\n";
+    ss << "  Matcher\n    max_delta_time = " << matcher_max_delta_time << "\n";
 
-  ss << "  Filters:\n";
-  ss << "    enforce_lower_uncertainty_limit = "
-     << (filter.enforce_lower_uncertainty_limit ? "YES" : "no") << "\n";
-  if (filter.enforce_lower_uncertainty_limit)
-    ss << "    lower_uncertainty_limit = " << filter.lower_uncertainty_limit << "\n";
-  ss << "    enforce_minimum_hits = "
-     << (filter.enforce_minimum_hits ? "YES" : "no") << "\n";
-  if (filter.enforce_minimum_hits)
-    ss << "    minimum_hits = " << filter.minimum_hits << "\n";
+    ss << "  Event analysis\n";
+    ss << "    weighted = " << (analyze_weighted ? "true" : "false") << "\n";
+    ss << "    max_timebins = " << analyze_max_timebins << "\n";
+    ss << "    max_timedif = " << analyze_max_timedif << "\n";
 
-  ss << "  Histogram hits = " << (hit_histograms ? "YES" : "no") << "\n";
-  if (hit_histograms)
-    ss << "    cluster_adc_downshift = " << cluster_adc_downshift << "\n";
-  ss << "  Send tracks = " << (send_tracks ? "YES" : "no") << "\n";
-  if (send_tracks)
-    ss << "    sample_minhits = " << track_sample_minhits << "\n";
+    ss << "  Filters:\n";
+    ss << "    enforce_lower_uncertainty_limit = "
+       << (filter.enforce_lower_uncertainty_limit ? "YES" : "no") << "\n";
+    if (filter.enforce_lower_uncertainty_limit)
+      ss << "    lower_uncertainty_limit = " << filter.lower_uncertainty_limit << "\n";
+    ss << "    enforce_minimum_hits = "
+       << (filter.enforce_minimum_hits ? "YES" : "no") << "\n";
+    if (filter.enforce_minimum_hits)
+      ss << "    minimum_hits = " << filter.minimum_hits << "\n";
 
-  ss << "  geometry_x = " << geometry.nx() << "\n";
-  ss << "  geometry_y = " << geometry.ny() << "\n";
+    if (hit_histograms)
+      ss << "    cluster_adc_downshift = " << cluster_adc_downshift << "\n";
+    ss << "  Send tracks = " << (send_tracks ? "YES" : "no") << "\n";
+    if (send_tracks)
+      ss << "    sample_minhits = " << track_sample_minhits << "\n";
+
+    ss << "  geometry_x = " << geometry.nx() << "\n";
+    ss << "  geometry_y = " << geometry.ny() << "\n";
+  }
+
+  if (calfile) {
+      ss << "\nVMM Calibrations:\n" + calfile->debug();
+  }
 
   return ss.str();
 }

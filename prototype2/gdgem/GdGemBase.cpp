@@ -395,6 +395,7 @@ void GdGemBase::processing_thread() {
   if (!builder_) {
     LOG(PROCESS, Sev::Error, "No builder specified, exiting thread");
     return;
+    // \todo this only exits this thread, but EFU continues running
   }
 
   Producer event_producer(EFUSettings.KafkaBroker, "NMX_detector");
@@ -442,10 +443,18 @@ void GdGemBase::processing_thread() {
         mystats.readouts_good += (builder_->hit_buffer_x.size()
             + builder_->hit_buffer_y.size());
 
-
-        // do not flush
-        perform_clustering(false);
-        process_events(ev42serializer, track_serializer);
+        if (nmx_opts.perform_clustering) {
+          // do not flush
+          perform_clustering(false);
+          process_events(ev42serializer, track_serializer);
+        } else {
+            for (const auto& e : builder_->hit_buffer_x)
+                bin(hists_, e);
+            for (const auto& e : builder_->hit_buffer_y)
+                bin(hists_, e);
+            builder_->hit_buffer_x.clear();
+            builder_->hit_buffer_y.clear();
+        }
       }
     }
 
@@ -453,7 +462,7 @@ void GdGemBase::processing_thread() {
     if ((not runThreads) || (report_timer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TscMHz)) {
 
-      if (not runThreads) {
+      if (not runThreads && nmx_opts.perform_clustering) {
         // flush everything first
         perform_clustering(true);
         process_events(ev42serializer, track_serializer);

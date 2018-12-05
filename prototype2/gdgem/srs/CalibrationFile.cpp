@@ -20,11 +20,6 @@ using json = nlohmann::json;
 
 namespace Gem {
 
-/// \brief clear the calibration array
-CalibrationFile::CalibrationFile() {
-  resetCalibration();
-}
-
 /// \brief load calibration from file
 CalibrationFile::CalibrationFile(std::string jsonfile) : CalibrationFile() {
 
@@ -54,8 +49,8 @@ void CalibrationFile::loadCalibration(std::string jsonstring) {
   try {
     auto VmmCals = Root["vmm_calibration"];
     for (auto &vmmcal : VmmCals) {
-      auto fecid = vmmcal["fecID"].get<unsigned int>();
-      auto vmmid = vmmcal["vmmID"].get<unsigned int>();
+      auto fecid = vmmcal["fecID"].get<size_t>();
+      auto vmmid = vmmcal["vmmID"].get<size_t>();
       auto offsets = vmmcal["offsets"];
       auto slopes = vmmcal["slopes"];
 
@@ -69,9 +64,8 @@ void CalibrationFile::loadCalibration(std::string jsonstring) {
         throw std::runtime_error("Invalid slope and array lengths in calibration file.");
       }
 
-      for (unsigned int j = 0; j < offsets.size(); j++) {
-        Calibrations[fecid][vmmid][j].offset = offsets[j].get<float>();
-        Calibrations[fecid][vmmid][j].slope = slopes[j].get<float>();
+      for (size_t j = 0; j < offsets.size(); j++) {
+        addCalibration(fecid, vmmid, j, offsets[j].get<float>(), slopes[j].get<float>());
       }
     }
   }
@@ -81,38 +75,53 @@ void CalibrationFile::loadCalibration(std::string jsonstring) {
   }
 }
 
-bool CalibrationFile::addCalibration(unsigned int fecId, unsigned int vmmId,
-                                     unsigned int chNo, float offset,
+void CalibrationFile::addCalibration(size_t fecId, size_t vmmId,
+                                     size_t chNo, float offset,
                                      float slope) {
-  if ((fecId >= MAX_FEC) or (vmmId >= MAX_VMM) or (chNo >= MAX_CH)) {
-    XTRACE(INIT, DEB, "invalid offsets: fec: %d, vmm: %d, ch:%d\n", fecId,
-           vmmId, chNo);
-    return false;
-  }
-  Calibrations[fecId][vmmId][chNo].slope = slope;
-  Calibrations[fecId][vmmId][chNo].offset = offset;
-  return true;
+  if (fecId >= Calibrations.size())
+    Calibrations.resize(fecId + 1);
+  auto& fec = Calibrations[fecId];
+  if (vmmId >= fec.size())
+    fec.resize(vmmId + 1);
+  auto& vmm = fec[vmmId];
+  if (chNo >= vmm.size())
+    vmm.resize(chNo + 1);
+
+  vmm[chNo] = {offset, slope};
 }
 
-CalibrationFile::Calibration &
-CalibrationFile::getCalibration(unsigned int fecId, unsigned int vmmId,
-                                unsigned int chNo) {
+Calibration CalibrationFile::getCalibration(size_t fecId, size_t vmmId,
+                                size_t chNo) const {
 
-  if ((fecId >= MAX_FEC) or (vmmId >= MAX_VMM) or (chNo >= MAX_CH)) {
-    XTRACE(INIT, DEB, "invalid offsets: fec: %d, vmm: %d, ch:%d\n", fecId,
-           vmmId, chNo);
-    return ErrCorr;
-  }
-  return Calibrations[fecId][vmmId][chNo];
+  if (fecId >= Calibrations.size())
+    return {};
+  const auto& fec = Calibrations[fecId];
+  if (vmmId >= fec.size())
+    return {};
+  const auto& vmm = fec[vmmId];
+  if (chNo >= vmm.size())
+    return {};
+  return vmm[chNo];
 }
 
-void CalibrationFile::resetCalibration() {
-  constexpr size_t NumberEntries = (size_t) (sizeof(Calibrations) / sizeof(Calibration));
-  static_assert(sizeof(Calibration) == 8, "struct packing issue");
-  static_assert(NumberEntries == MAX_FEC * MAX_VMM * MAX_CH, "calibration table size mismatch");
-  for (size_t i = 0; i < NumberEntries; i++) {
-    ((Calibration *) Calibrations)[i] = NoCorr;
+std::string CalibrationFile::debug() const {
+  std::string ret;
+  for (size_t fecID = 0; fecID < Calibrations.size(); ++fecID) {
+    ret += fmt::format("  FEC={}\n", fecID);
+    const auto& fec = Calibrations[fecID];
+    for (size_t vmmID = 0; vmmID < fec.size(); ++vmmID) {
+      ret += fmt::format("    vmm={}     ", vmmID);
+      const auto &vmm = fec[vmmID];
+      for (size_t chipNo = 0; chipNo< vmm.size(); ++chipNo) {
+        const auto &cal = vmm[chipNo];
+        ret += fmt::format("[{}]{}+{}x ", chipNo, cal.offset, cal.slope);
+      }
+      ret += "\n";
+    }
+    ret += "\n";
   }
+  return ret;
 }
+
 
 }

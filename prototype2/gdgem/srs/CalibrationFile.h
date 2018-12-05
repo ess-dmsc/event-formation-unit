@@ -10,50 +10,50 @@
 #pragma once
 
 #include <string>
+#include <vector>
 
 namespace Gem {
 
+/// \todo check whether packing is necessary, static assert assert?
+struct Calibration {
+  float offset {0.0};
+  float slope {1.0};
+};
+
 class CalibrationFile {
 public:
-  static constexpr int MAX_FEC {40};
-  static constexpr int MAX_VMM {16};
-  static constexpr int MAX_CH  {64};
-
-  /// \todo check whether packing is necessary, static assert assert?
-  typedef struct {
-    float offset;
-    float slope;
-  } Calibration;
+    static constexpr size_t MAX_FEC {40};
+    static constexpr size_t MAX_VMM {16};
+    static constexpr size_t MAX_CH  {64};
 
   /// \brief create default calibration (0.0 offset 1.0 slope)
-  CalibrationFile();
+  CalibrationFile() = default;
 
   /// \brief load calibration from json file
-  CalibrationFile(std::string filename);
+  explicit CalibrationFile(std::string filename);
 
   /// \brief loads calibration from json string
   void loadCalibration(std::string calibration);
 
   /// \brief Generate fast mappings from IDs to indexes
-  bool addCalibration(unsigned int fecId, unsigned int vmmId, unsigned int chNo,
+  void addCalibration(size_t fecId, size_t vmmId, size_t chNo,
                       float offset, float slope);
 
   /// \brief get calibration data for (fec, vmm, channel)
   /// \todo check how vmm3 data is supplied, maybe getting an array for a given
   /// (fec, vmm) is better?
-  Calibration &getCalibration(unsigned int fecId, unsigned int vmmId,
-                              unsigned int chNo);
+  Calibration getCalibration(size_t fecId, size_t vmmId, size_t chNo) const;
+
+  std::string debug() const;
 
 private:
-  void resetCalibration();
-
-  Calibration Calibrations[MAX_FEC][MAX_VMM][MAX_CH];
+  std::vector<std::vector<std::vector<Calibration>>> Calibrations;
 
   /// Default correction
-  Calibration NoCorr = {0.0, 1.0};
+  Calibration NoCorr {0.0, 1.0};
 
   /// Slope zero indicates an error
-  Calibration ErrCorr = {0.0, 0.0};
+  Calibration ErrCorr {0.0, 0.0};
 };
 
 }
