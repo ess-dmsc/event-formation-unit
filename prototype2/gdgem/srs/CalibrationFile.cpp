@@ -90,17 +90,16 @@ void CalibrationFile::addCalibration(size_t fecId, size_t vmmId,
   vmm[chNo] = {offset, slope};
 }
 
-Calibration CalibrationFile::getCalibration(size_t fecId, size_t vmmId,
+const Calibration& CalibrationFile::getCalibration(size_t fecId, size_t vmmId,
                                 size_t chNo) const {
-
   if (fecId >= Calibrations.size())
-    return {};
+    return NoCorr;
   const auto& fec = Calibrations[fecId];
   if (vmmId >= fec.size())
-    return {};
+    return NoCorr;
   const auto& vmm = fec[vmmId];
   if (chNo >= vmm.size())
-    return {};
+    return NoCorr;
   return vmm[chNo];
 }
 

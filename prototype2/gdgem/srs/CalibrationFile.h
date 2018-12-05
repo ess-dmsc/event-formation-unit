@@ -42,7 +42,7 @@ public:
   /// \brief get calibration data for (fec, vmm, channel)
   /// \todo check how vmm3 data is supplied, maybe getting an array for a given
   /// (fec, vmm) is better?
-  Calibration getCalibration(size_t fecId, size_t vmmId, size_t chNo) const;
+  const Calibration& getCalibration(size_t fecId, size_t vmmId, size_t chNo) const;
 
   std::string debug() const;
 

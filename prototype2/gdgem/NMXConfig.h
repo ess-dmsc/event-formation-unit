@@ -67,6 +67,7 @@ struct NMXConfig {
   uint16_t adc_threshold{0};
 
   bool perform_clustering {true};
+  bool send_raw_hits {false};
 
   ClustererConfig clusterer_x;
   ClustererConfig clusterer_y;

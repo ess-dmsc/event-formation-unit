@@ -58,6 +58,8 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 
   perform_clustering = root["perform_clustering"].get<bool>();
 
+  send_raw_hits = root["send_raw_hits"].get<bool>();
+
   if (perform_clustering) {
     auto cx = root["clusterer x"];
     clusterer_x.max_strip_gap = cx["max_strip_gap"].get<unsigned int>();
@@ -109,6 +111,7 @@ std::string NMXConfig::debug() const {
   }
 
   ss << "  Histogram hits = " << (hit_histograms ? "YES" : "no") << "\n";
+  ss << "  Send raw hits = " << (send_raw_hits ? "YES" : "no") << "\n";
 
   ss << "\n";
 

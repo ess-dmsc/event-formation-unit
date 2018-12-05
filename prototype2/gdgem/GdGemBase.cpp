@@ -260,9 +260,6 @@ void GdGemBase::cluster_plane(HitContainer &hits,
   if (flush) {
     clusterer->flush();
   }
-  if (nmx_opts.hit_histograms) {
-    bin_hists(hists_, clusterer->clusters);
-  }
   if (!clusterer->clusters.empty()) {
 //    LOG(PROCESS, Sev::Debug, "Adding {} clusters to matcher for plane {}",
 //        clusterer->clusters.size(),
@@ -322,7 +319,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     /// Sample only tracks that are good in both planes
     if (sample_next_track_)
     {
-      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.debug(true));
+//      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.debug(true));
       sample_next_track_ = !track_serializer.add_track(event,
                                                        utpc_.x.utpc_center,
                                                        utpc_.y.utpc_center);
@@ -375,7 +372,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
       if (event_serializer.eventCount())
         mystats.tx_bytes += event_serializer.produce();
       event_serializer.pulseTime(recent_pulse_time_);
-      LOG(PROCESS, Sev::Debug, "New offset time selected: {}", recent_pulse_time_);
+//      LOG(PROCESS, Sev::Debug, "New offset time selected: {}", recent_pulse_time_);
     }
 
 //    LOG(PROCESS, Sev::Debug, "Good event: time={}, pixel={} from {}",
@@ -400,6 +397,7 @@ void GdGemBase::processing_thread() {
 
   Producer event_producer(EFUSettings.KafkaBroker, "NMX_detector");
   Producer monitor_producer(EFUSettings.KafkaBroker, "NMX_monitor");
+  Producer hits_producer(EFUSettings.KafkaBroker, "NMX_hits");
 
   EV42Serializer ev42serializer(kafka_buffer_size, "nmx");
   ev42serializer.setProducerCallback(
@@ -412,6 +410,10 @@ void GdGemBase::processing_thread() {
   HistSerializer hist_serializer(hists_.needed_buffer_size());
   hist_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
+
+  Gem::TrackSerializer raw_serializer(2000, 0, 1);
+  raw_serializer.set_callback(
+          std::bind(&Producer::produce2<uint8_t>, &hits_producer, std::placeholders::_1));
 
   TSCTimer global_time, report_timer;
 
@@ -443,17 +445,44 @@ void GdGemBase::processing_thread() {
         mystats.readouts_good += (builder_->hit_buffer_x.size()
             + builder_->hit_buffer_y.size());
 
+        if (builder_->hit_buffer_x.size() > highest_hits_in_buffer_) {
+          highest_hits_in_buffer_ = builder_->hit_buffer_x.size();
+          LOG(PROCESS, Sev::Debug, "New highest hit number: {}", highest_hits_in_buffer_);
+        }
+
+        if (builder_->hit_buffer_y.size() > highest_hits_in_buffer_) {
+          highest_hits_in_buffer_ = builder_->hit_buffer_y.size();
+          LOG(PROCESS, Sev::Debug, "New highest hit number: {}", highest_hits_in_buffer_);
+        }
+
+        if (nmx_opts.send_raw_hits) {
+          Event dummy_event;
+          for (const auto& e : builder_->hit_buffer_x) {
+            dummy_event.c1.insert(e);
+          }
+          for (const auto& e : builder_->hit_buffer_y) {
+            dummy_event.c2.insert(e);
+          }
+          LOG(PROCESS, Sev::Debug, "Sending raw data: {}", dummy_event.total_hit_count());
+          raw_serializer.add_track(dummy_event, 0, 0);
+        }
+
+        if (nmx_opts.hit_histograms) {
+          for (const auto& e : builder_->hit_buffer_x) {
+            bin(hists_, e);
+          }
+          for (const auto& e : builder_->hit_buffer_y) {
+            bin(hists_, e);
+          }
+        }
+
         if (nmx_opts.perform_clustering) {
           // do not flush
           perform_clustering(false);
           process_events(ev42serializer, track_serializer);
         } else {
-            for (const auto& e : builder_->hit_buffer_x)
-                bin(hists_, e);
-            for (const auto& e : builder_->hit_buffer_y)
-                bin(hists_, e);
-            builder_->hit_buffer_x.clear();
-            builder_->hit_buffer_y.clear();
+          builder_->hit_buffer_x.clear();
+          builder_->hit_buffer_y.clear();
         }
       }
     }
