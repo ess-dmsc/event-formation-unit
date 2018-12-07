@@ -247,8 +247,8 @@ TEST_F(ReferenceDataTest, a1000) {
   matcher->insert(0, sorter_x->clusterer->clusters);
   matcher->insert(1, sorter_y->clusterer->clusters);
   matcher->match(true);
-  EXPECT_EQ(matcher->stats_event_count, 226491);
-  EXPECT_EQ(matcher->matched_events.size(), 226491);
+  EXPECT_EQ(matcher->stats_event_count, 226492);
+  EXPECT_EQ(matcher->matched_events.size(), 226492);
 }
 
 TEST_F(ReferenceDataTest, a10000) {
@@ -269,13 +269,13 @@ TEST_F(ReferenceDataTest, a10000) {
   EXPECT_EQ(sorter_y->negative_chip_times, 281);
 
   test_plane(sorter_x->clusterer, 2183659, 2125209, min_cluster_size);
-  test_plane(sorter_y->clusterer, 1179938, 1111857, min_cluster_size);
+  test_plane(sorter_y->clusterer, 1179939, 1111856, min_cluster_size);
 
   matcher->insert(0, sorter_x->clusterer->clusters);
   matcher->insert(1, sorter_y->clusterer->clusters);
   matcher->match(true);
-  EXPECT_EQ(matcher->stats_event_count, 2285514);
-  EXPECT_EQ(matcher->matched_events.size(), 2285514);
+  EXPECT_EQ(matcher->stats_event_count, 2285519);
+  EXPECT_EQ(matcher->matched_events.size(), 2285519);
 }
 
 int main(int argc, char **argv) {
