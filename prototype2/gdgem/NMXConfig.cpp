@@ -1,14 +1,12 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <common/Trace.h>
 #include <gdgem/NMXConfig.h>
-
 #include <nlohmann/json.hpp>
 #include <fstream>
-#include <sstream>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+#include <common/Trace.h>
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 namespace Gem {
 
@@ -86,7 +84,8 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
     cluster_adc_downshift = root["cluster_adc_downshift"].get<unsigned int>();
     send_tracks = root["send_tracks"].get<bool>();
 
-    // \todo deduce geometry from SRS mappings?
+    // \todo deduce geometry from SRS mappings eventually
+    //       this is better for now, while prototyping
     geometry.nx(root["geometry_x"].get<unsigned int>());
     geometry.ny(root["geometry_y"].get<unsigned int>());
     geometry.nz(1);
@@ -95,69 +94,80 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 }
 
 std::string NMXConfig::debug() const {
-  // \todo use fmt
-  std::stringstream ss;
-  ss << "  ==========================================\n";
-  ss << "  ========       builder: "
-     << builder_type
-     << "      ========\n";
-  ss << "  ==========================================\n";
+  std::string ret;
+  ret += fmt::format("{:=^50}\n", "");
+  ret += fmt::format("{:=^50}\n", fmt::format("{:^12}", builder_type));
+  ret += fmt::format("{:=^50}\n", "");
+
   if (builder_type == "VMM3") {
-    ss << "  Time config:\n" << time_config.debug();
+    if (calfile) {
+      ret += "VMM Calibrations:" + calfile->debug() + "\n";
+    }
   }
   if (builder_type != "Hits") {
-    ss << "  Digital geometry:\n" << srs_mappings.debug();
-    ss << "\n  adc_threshold = " << adc_threshold << "\n";
+    ret += "Time config:\n" + time_config.debug();
+    ret += "Digital geometry:\n" + srs_mappings.debug();
+    ret += fmt::format("adc_threshold = {}\n", adc_threshold);
   }
 
-  ss << "  Histogram hits = " << (hit_histograms ? "YES" : "no") << "\n";
-  ss << "  Send raw hits = " << (send_raw_hits ? "YES" : "no") << "\n";
+  ret += "\n";
 
-  ss << "\n";
+  ret += fmt::format("Send raw hits = {}\n", (send_raw_hits ? "YES" : "no"));
 
-  ss << "  Perform clustering = " << (perform_clustering ? "YES" : "no") << "\n";
+  ret += "\n";
+
+  ret += fmt::format("Histogram hits = {}\n", (hit_histograms ? "YES" : "no"));
+  if (hit_histograms && perform_clustering) {
+    ret += fmt::format("  cluster_adc_downshift = {} (bits)\n",
+                       cluster_adc_downshift);
+  }
+
+  ret += "\n";
+
+  ret += fmt::format("Perform clustering = {}\n", (perform_clustering ? "YES" : "no"));
 
   if (perform_clustering) {
-    ss << "  Clusterer-X:\n";
-    ss << "    max_time_gap = " << clusterer_x.max_time_gap << "\n";
-    ss << "    max_strip_gap = " << clusterer_x.max_strip_gap << "\n";
+    ret += "  Clusterer-X:\n";
+    ret += fmt::format("    max_time_gap = {}\n", clusterer_x.max_time_gap);
+    ret += fmt::format("    max_strip_gap = {}\n", clusterer_x.max_strip_gap);
 
-    ss << "  Clusterer-Y:\n";
-    ss << "    max_time_gap = " << clusterer_y.max_time_gap << "\n";
-    ss << "    max_strip_gap = " << clusterer_y.max_strip_gap << "\n";
+    ret += "  Clusterer-Y:\n";
+    ret += fmt::format("    max_time_gap = {}\n", clusterer_y.max_time_gap);
+    ret += fmt::format("    max_strip_gap = {}\n", clusterer_y.max_strip_gap);
 
-    ss << "  Matcher\n    max_delta_time = " << matcher_max_delta_time << "\n";
+    ret += fmt::format("  Matcher\n    max_delta_time = {}\n",
+        matcher_max_delta_time);
+    ret += fmt::format("  Send tracks = {}\n", (send_tracks ? "YES" : "no"));
+    if (send_tracks) {
+      ret += fmt::format("    sample_minhits = {}\n", track_sample_minhits);
+    }
 
-    ss << "  Event analysis\n";
-    ss << "    weighted = " << (analyze_weighted ? "true" : "false") << "\n";
-    ss << "    max_timebins = " << analyze_max_timebins << "\n";
-    ss << "    max_timedif = " << analyze_max_timedif << "\n";
+    ret += "\n";
 
-    ss << "  Filters:\n";
-    ss << "    enforce_lower_uncertainty_limit = "
-       << (filter.enforce_lower_uncertainty_limit ? "YES" : "no") << "\n";
-    if (filter.enforce_lower_uncertainty_limit)
-      ss << "    lower_uncertainty_limit = " << filter.lower_uncertainty_limit << "\n";
-    ss << "    enforce_minimum_hits = "
-       << (filter.enforce_minimum_hits ? "YES" : "no") << "\n";
-    if (filter.enforce_minimum_hits)
-      ss << "    minimum_hits = " << filter.minimum_hits << "\n";
+    ret += "Event analysis\n";
+    ret += fmt::format("  weighted = {}\n", (analyze_weighted ? "YES" : "no"));
+    ret += fmt::format("  max_timebins = {}\n", analyze_max_timebins);
+    ret += fmt::format("  max_timedif = {}\n", analyze_max_timedif);
 
-    if (hit_histograms)
-      ss << "    cluster_adc_downshift = " << cluster_adc_downshift << "\n";
-    ss << "  Send tracks = " << (send_tracks ? "YES" : "no") << "\n";
-    if (send_tracks)
-      ss << "    sample_minhits = " << track_sample_minhits << "\n";
+    ret += "  Filters:\n";
+    ret += fmt::format("    enforce_lower_uncertainty_limit = {}\n",
+        (filter.enforce_lower_uncertainty_limit ? "YES" : "no"));
+    if (filter.enforce_lower_uncertainty_limit) {
+      ret += fmt::format("    lower_uncertainty_limit = {}\n",
+          filter.lower_uncertainty_limit);
+    }
+    ret += fmt::format("    enforce_minimum_hits = {}\n",
+        (filter.enforce_minimum_hits ? "YES" : "no"));
+    if (filter.enforce_minimum_hits) {
+      ret += fmt::format("    minimum_hits = {}\n",
+          filter.minimum_hits);
+    }
 
-    ss << "  geometry_x = " << geometry.nx() << "\n";
-    ss << "  geometry_y = " << geometry.ny() << "\n";
+    ret += fmt::format("  geometry_x = {}\n", geometry.nx());
+    ret += fmt::format("  geometry_y = {}\n", geometry.ny());
   }
 
-  if (calfile) {
-      ss << "\nVMM Calibrations:\n" + calfile->debug();
-  }
-
-  return ss.str();
+  return ret;
 }
 
 }

@@ -106,18 +106,26 @@ const Calibration& CalibrationFile::getCalibration(size_t fecId, size_t vmmId,
 std::string CalibrationFile::debug() const {
   std::string ret;
   for (size_t fecID = 0; fecID < Calibrations.size(); ++fecID) {
-    ret += fmt::format("  FEC={}\n", fecID);
     const auto& fec = Calibrations[fecID];
+    if (!fec.empty()) {
+      ret += fmt::format("\n  FEC={}", fecID);
+    }
     for (size_t vmmID = 0; vmmID < fec.size(); ++vmmID) {
-      ret += fmt::format("    vmm={}     ", vmmID);
       const auto &vmm = fec[vmmID];
+      if (!vmm.empty()) {
+        ret += fmt::format("\n{:>8}{:<10}", "vmm=", vmmID);
+      }
       for (size_t chipNo = 0; chipNo< vmm.size(); ++chipNo) {
         const auto &cal = vmm[chipNo];
-        ret += fmt::format("[{}]{}+{}x ", chipNo, cal.offset, cal.slope);
+        if ((chipNo % 8) == 0)
+          ret += fmt::format("{:<7}", "\n");
+        ret +=
+            fmt::format("{:<5}", fmt::format("[{}]", chipNo)) +
+            fmt::format("{:>7}", cal.offset) +
+                ((cal.slope >= 0.0) ? " +" : " -") +
+            fmt::format("{:>5}x    ", std::abs(cal.slope));
       }
-      ret += "\n";
     }
-    ret += "\n";
   }
   return ret;
 }

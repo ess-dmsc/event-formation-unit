@@ -32,21 +32,15 @@ protected:
 };
 
 TEST_F(TrackSerializerTest, Constructor) {
-  TrackSerializer tser(2560, 0, 1);
+  TrackSerializer tser(2560, 1);
   auto buffer = tser.serialize();
   EXPECT_EQ(buffer.size, 0);
   EXPECT_EQ(buffer.address, nullptr);
 }
 
-TEST_F(TrackSerializerTest, AddTrackTooFewHits) {
-  int entries = NB_ENTRIES;
-  TrackSerializer tser(entries, 1, 1);
-  EXPECT_FALSE(tser.add_track(event, 0.0, 0.0));
-}
-
 TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
   int entries = NB_ENTRIES;
-  TrackSerializer tser(entries, 0, 1);
+  TrackSerializer tser(entries, 1);
   for (int i = 0; i < entries + 1; i++) {
     addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
@@ -55,7 +49,7 @@ TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
 
 TEST_F(TrackSerializerTest, Serialize) {
   unsigned int entries = NB_ENTRIES;
-  TrackSerializer tser(entries, 0, 1);
+  TrackSerializer tser(entries, 1);
   for (unsigned int i = 0; i < entries; i++) {
     addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
@@ -71,7 +65,7 @@ TEST_F(TrackSerializerTest, DeSerialize) {
   unsigned int entries = NB_ENTRIES;
   unsigned int entry_size = 4 * 3; // Three uint32_t's
 
-  TrackSerializer tser(entries, 0, 1);
+  TrackSerializer tser(entries, 1);
   for (unsigned int i = 0; i < entries; i++) {
     addxandy(i, 0x1111, 0x2222, 100 + i, 0x3333, 0x4444);
   }
@@ -110,7 +104,7 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
     EXPECT_FALSE(event.c1.hits.size());
     EXPECT_FALSE(event.c2.hits.size());
 
-    TrackSerializer tser(entries, 0, 1);
+    TrackSerializer tser(entries, 1);
     for (unsigned int i = 0; i < entries; i++) {
       addxandy(i, i * 2, i * 3 + 1, entries - i, i * 2 + 0x1000,
                i * 3 + 0x2000);
@@ -153,7 +147,7 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
   unsigned int entries = 256;
   unsigned int entry_size = 4 * 3; // Three uint32_t's
   MESSAGE() << "Reusing the same TrackSerializer object\n";
-  TrackSerializer tser(entries, 0, 1);
+  TrackSerializer tser(entries, 1);
   for (unsigned int i = 1; i <= 1000; i *= 2) {
     event.c1.hits.clear();
     event.c2.hits.clear();

@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <gdgem/srs/SRSTime.h>
-#include <sstream>
+#include <fmt/format.h>
 
 namespace Gem {
 
@@ -64,12 +64,16 @@ double SRSTime::chip_time_ns(uint16_t bc, uint16_t tdc, float offset, float slop
 }
 
 std::string SRSTime::debug() const {
-  std::stringstream ss;
+  std::string ret;
+
   // \todo does this reflect the function above?
-  ss << "    Chip time = (bc+1)*1000/" << bc_clock_MHz_ << " - tdc*" << tac_slope_ns_ << "/255 (ns)\n";
-  ss << "    Trigger time = " << trigger_resolution_ns_ << "*trigger (ns)\n";
-  ss << "    Maximum chip time in window = " << max_chip_time_in_window_ns_ << " (ns)\n";
-  return ss.str();
+
+  ret += fmt::format("  Chip time = {} * bc + ({} - {}*tdc - cal_offset) * cal_slope\n",
+      bc_factor_, bc_factor_, tdc_factor_);
+  ret += fmt::format("  Trigger time = {}*trigger (ns)\n", trigger_resolution_ns_);
+  ret += fmt::format("  Maximum chip time in window = {} (ns)\n", max_chip_time_in_window_ns_);
+
+  return ret;
 }
 
 }
