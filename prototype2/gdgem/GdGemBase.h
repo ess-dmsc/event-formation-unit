@@ -124,8 +124,6 @@ protected:
 
   bool sample_next_track_ {false};
 
-  size_t highest_hits_in_buffer_ {0};
-
   void apply_configuration();
   void cluster_plane(HitContainer& hits, std::shared_ptr<AbstractClusterer> clusterer, bool flush);
   void perform_clustering(bool flush);

@@ -209,7 +209,6 @@ void GdGemBase::apply_configuration() {
   LOG(INIT, Sev::Info, "NMXConfig:\n{}", nmx_opts.debug());
 
   if (nmx_opts.builder_type == "VMM3") {
-    LOG(INIT, Sev::Info, "Using BuilderVMM3");
     builder_ = std::make_shared<Gem::BuilderVMM3>(
         nmx_opts.time_config, nmx_opts.srs_mappings,
         nmx_opts.adc_threshold,
@@ -217,14 +216,12 @@ void GdGemBase::apply_configuration() {
         nmx_opts.calfile);
 
   } else if (nmx_opts.builder_type == "Readouts") {
-    LOG(INIT, Sev::Info, "Using BuilderReadouts");
     builder_ = std::make_shared<Gem::BuilderReadouts>(
         nmx_opts.srs_mappings,
         nmx_opts.adc_threshold,
         NMXSettings.fileprefix);
 
   } else if (nmx_opts.builder_type == "Hits") {
-    LOG(INIT, Sev::Info, "Using BuilderHits");
     builder_ = std::make_shared<Gem::BuilderHits>();
   } else {
     LOG(INIT, Sev::Error, "Unrecognized builder type in config");
@@ -272,12 +269,10 @@ void GdGemBase::perform_clustering(bool flush) {
   // \todo we can parallelize this (per plane)
 
   if (builder_->hit_buffer_x.size()) {
-//    LOG(PROCESS, Sev::Debug, "Clustering x, hit_count={}", builder_->hit_buffer_x.size());
     cluster_plane(builder_->hit_buffer_x, clusterer_x_, flush);
   }
 
   if (builder_->hit_buffer_y.size()) {
-//    LOG(PROCESS, Sev::Debug, "Clustering y, hit_count={}", builder_->hit_buffer_y.size());
     cluster_plane(builder_->hit_buffer_y, clusterer_y_, flush);
   }
 
@@ -308,7 +303,6 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
       else {
         mystats.clusters_y_only++;
       }
-//      LOG(PROCESS, Sev::Debug, "unpaired event discarded {}", event.debug());
       continue;
     }
 
@@ -328,16 +322,12 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     if (!utpc_.good)
     {
-      LOG(PROCESS, Sev::Debug, "Bad uTPC discarded ={}, {}",
-          utpc_.debug(), event.debug(true));
       mystats.events_bad_utpc++;
       continue;
     }
 
     if (!nmx_opts.filter.valid(event, utpc_))
     {
-      LOG(PROCESS, Sev::Debug, "filtered event discarded utpc={}, {}",
-          utpc_.debug(), event.debug());
       mystats.events_filter_rejects++;
       continue;
     }
@@ -418,7 +408,6 @@ void GdGemBase::processing_thread() {
 
   TSCTimer global_time, report_timer;
 
-
   unsigned int data_index;
   while (true) {
     // mystats.fifo_free = input2proc_fifo.free();
@@ -446,16 +435,6 @@ void GdGemBase::processing_thread() {
         mystats.readouts_good += (builder_->hit_buffer_x.size()
             + builder_->hit_buffer_y.size());
 
-        if (builder_->hit_buffer_x.size() > highest_hits_in_buffer_) {
-          highest_hits_in_buffer_ = builder_->hit_buffer_x.size();
-          LOG(PROCESS, Sev::Debug, "New highest hit number: {}", highest_hits_in_buffer_);
-        }
-
-        if (builder_->hit_buffer_y.size() > highest_hits_in_buffer_) {
-          highest_hits_in_buffer_ = builder_->hit_buffer_y.size();
-          LOG(PROCESS, Sev::Debug, "New highest hit number: {}", highest_hits_in_buffer_);
-        }
-
         if (nmx_opts.send_raw_hits) {
           Event dummy_event;
           for (const auto& e : builder_->hit_buffer_x) {
@@ -464,7 +443,7 @@ void GdGemBase::processing_thread() {
           for (const auto& e : builder_->hit_buffer_y) {
             dummy_event.c2.insert(e);
           }
-          LOG(PROCESS, Sev::Debug, "Sending raw data: {}", dummy_event.total_hit_count());
+          //LOG(PROCESS, Sev::Debug, "Sending raw data: {}", dummy_event.total_hit_count());
           raw_serializer.add_track(dummy_event, 0, 0);
         }
 
