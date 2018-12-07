@@ -51,9 +51,6 @@ private:
 
   /// Default correction
   Calibration NoCorr {0.0, 1.0};
-
-  /// Slope zero indicates an error
-  Calibration ErrCorr {0.0, 0.0};
 };
 
 }

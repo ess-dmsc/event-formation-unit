@@ -35,7 +35,12 @@ void BuilderReadouts::process_buffer(char *buf, size_t size) {
     hit.plane = digital_geometry_.get_plane(readout);
     hit.coordinate = digital_geometry_.get_strip(readout);
     hit.weight = readout.adc;
-    hit.time = readout.srs_timestamp + static_cast<uint64_t>(readout.chiptime);
+    hit.time = readout.srs_timestamp;
+
+    if (readout.chiptime >= 0)
+      hit.time += static_cast<uint64_t>(readout.chiptime);
+    else
+      hit.time -= static_cast<uint64_t>(-readout.chiptime);
 
     if ((hit.plane != 0) && (hit.plane != 1)) {
       stats.geom_errors++;
