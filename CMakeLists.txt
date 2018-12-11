@@ -51,8 +51,9 @@ include(${EXTRA_MODULES_DIR}/Benchmarks.cmake)
 include(${EXTRA_MODULES_DIR}/Profiling.cmake)
 include(${EXTRA_MODULES_DIR}/Memcheck.cmake)
 setup_memcheck(${CMAKE_BINARY_DIR}/memcheck_res)
-SET(REFDATA "$ENV{HOME}/ownCloud/DM/data/EFU_reference"
+set(REFDATA "$ENV{HOME}/ownCloud/DM/data/EFU_reference"
   CACHE STRING "Reference data root directory")
+message(STATUS "Reference data root directory: ${REFDATA}")
 
 #=============================================================================
 # The code

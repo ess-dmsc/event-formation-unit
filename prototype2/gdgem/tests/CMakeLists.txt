@@ -19,35 +19,43 @@ set(ClusteringBase_INC
   ../srs/CalibrationFile.h
   )
 
-set(NMXReferenceDataTest_SRC
-  ${ClusteringBase_SRC}
-  ReferenceDataTest.cpp)
-set(NMXReferenceDataTest_INC
-  ${ClusteringBase_INC})
-create_test_executable(NMXReferenceDataTest SKIP_MEMGRIND)
-target_compile_definitions(NMXReferenceDataTest
-  PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
+if(EXISTS ${TEST_DATA_PATH})
 
-## GOOGLE BENCHMARK
-set(NMXClustererBenchmarkTest_SRC
-  ${ClusteringBase_SRC}
-  ClustererBenchmarkTest.cpp
-  ../../common/clustering/AbstractMatcher.cpp
-  ../../common/clustering/Hit.cpp
-  ../../common/clustering/Cluster.cpp
-  ../../common/clustering/Event.cpp
-  ../../common/clustering/GapClusterer.cpp
-  ../../common/clustering/GapMatcher.cpp
-  )
-set(NMXClustererBenchmarkTest_INC
-  ${ClusteringBase_INC})
-create_benchmark_executable(NMXClustererBenchmarkTest)
-if(GOOGLE_BENCHMARK)
-  target_compile_definitions(NMXClustererBenchmarkTest
+  set(NMXReferenceDataTest_SRC
+    ${ClusteringBase_SRC}
+    ReferenceDataTest.cpp)
+  set(NMXReferenceDataTest_INC
+    ${ClusteringBase_INC})
+  create_test_executable(NMXReferenceDataTest SKIP_MEMGRIND)
+  target_compile_definitions(NMXReferenceDataTest
     PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
-  target_link_libraries(NMXClustererBenchmarkTest
-    GraylogLogger::graylog_logger_static
-    fmt::fmt
-    h5cpp
+
+  ## GOOGLE BENCHMARK
+  set(NMXClustererBenchmarkTest_SRC
+    ${ClusteringBase_SRC}
+    ClustererBenchmarkTest.cpp
+    ../../common/clustering/AbstractMatcher.cpp
+    ../../common/clustering/Hit.cpp
+    ../../common/clustering/Cluster.cpp
+    ../../common/clustering/Event.cpp
+    ../../common/clustering/GapClusterer.cpp
+    ../../common/clustering/GapMatcher.cpp
     )
+  set(NMXClustererBenchmarkTest_INC
+    ${ClusteringBase_INC})
+  create_benchmark_executable(NMXClustererBenchmarkTest)
+  if(GOOGLE_BENCHMARK)
+    target_compile_definitions(NMXClustererBenchmarkTest
+      PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
+    target_link_libraries(NMXClustererBenchmarkTest
+      GraylogLogger::graylog_logger_static
+      fmt::fmt
+      h5cpp
+      )
+  endif()
+
+else()
+
+  message(WARNING "*** No gdgem reference data found. Skipping relevant tests.")
+
 endif()
