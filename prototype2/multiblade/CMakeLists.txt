@@ -51,3 +51,4 @@ set(MBCAENBaseTest_SRC
 create_test_executable(MBCAENBaseTest)
 
 add_subdirectory(caen)
+add_subdirectory(generators)

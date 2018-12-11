@@ -25,7 +25,7 @@ public:
   virtual void SetUp() {
     LocalSettings.ConfigFile = TEST_JSON_PATH "vmm3.json";
     Settings.DetectorRxBufferSize = 100000;
-    Settings.MinimumMTU = 1500;
+    Settings.NoHwCheck = true;
   }
   virtual void TearDown() {}
 
