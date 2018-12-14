@@ -38,6 +38,10 @@ void GapClusterer::cluster(const HitContainer &hits) {
 }
 
 void GapClusterer::flush() {
+  // \todo test this logic branch
+  if (current_time_cluster_.empty()) {
+    return;
+  }
   cluster_by_coordinate();
   current_time_cluster_.clear();
 }

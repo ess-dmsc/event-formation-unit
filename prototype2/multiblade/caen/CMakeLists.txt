@@ -14,7 +14,7 @@ set(MBDataParserBenchmarkTest_SRC
   DataParserBenchmarkTest.cpp)
 create_benchmark_executable(MBDataParserBenchmarkTest)
 if(GOOGLE_BENCHMARK)
-  target_link_libraries(MBDataParserBenchmarkTest PRIVATE h5cpp)
+  target_link_libraries(MBDataParserBenchmarkTest h5cpp)
 endif()
 
 # Create excecutable for the test of geometry

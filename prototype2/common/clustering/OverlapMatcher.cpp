@@ -47,9 +47,17 @@ void OverlapMatcher::match(bool flush) {
     unmatched_clusters_.pop_front();
   }
 
-  // If anything is left, stash it
-  // \todo maybe only on flush? otherwise return to queue?
   if (!evt.empty()) {
-    stash_event(evt);
+    if (flush) {
+      // If flushing, stash it
+      stash_event(evt);
+    } else {
+      // Else return to queue
+      // \todo this needs explicit testing
+      if (!evt.c1.empty())
+        unmatched_clusters_.push_front(evt.c1);
+      if (!evt.c2.empty())
+        unmatched_clusters_.push_front(evt.c2);
+    }
   }
 }

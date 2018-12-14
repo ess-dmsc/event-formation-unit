@@ -3,31 +3,38 @@
 ///
 /// \file
 ///
-/// plugin for gdgem detector data reception, parsing and event formation
+/// plugin for gdgem detector data reception, parsing and event_ formation
 ///
 //===----------------------------------------------------------------------===//
 
 #include "GdGemBase.h"
 
-#include <gdgem/clustering/ClusterMatcher.h>
-#include <gdgem/clustering/DoroClusterer.h>
+#include <common/clustering/GapMatcher.h>
+#include <common/clustering/GapClusterer.h>
 #include <gdgem/nmx/TrackSerializer.h>
-#include <gdgem/vmm3/BuilderVMM3.h>
+#include <gdgem/srs/BuilderVMM3.h>
+#include <gdgem/generators/BuilderHits.h>
+#include <gdgem/generators/BuilderReadouts.h>
 #include <common/EV42Serializer.h>
 #include <common/HistSerializer.h>
-#include <common/Log.h>
 #include <common/Producer.h>
-#include <common/Trace.h>
 #include <efu/Server.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 
-const int TSC_MHZ = 2900; // MJC's workstation - not reliable
-
+#include <common/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-/** ----------------------------------------------------- */
+#include <common/Log.h>
+//#undef TRC_MASK
+//#define TRC_MASK 0
+
+// \todo MJC's workstation - not reliable
+static constexpr int TscMHz {2900};
+
+// Emulating ESS 17Hz pulse
+static constexpr uint64_t max_pulse_window_ns {1000000000 / 17};
 
 int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
                         char *output,
@@ -43,7 +50,7 @@ int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
   int asic = atoi(cmdargs.at(2).c_str());
   int channel = atoi(cmdargs.at(3).c_str());
   auto calib = nmx_opts.calfile->getCalibration(fec, asic, channel);
-  if ((abs(calib.offset) <= 1e-6) and (abs(calib.slope) <= 1e-6)) {
+  if ((std::abs(calib.offset) <= 1e-6) and (std::abs(calib.slope) <= 1e-6)) {
     *obytes =
         snprintf(output, SERVER_BUFFER_SIZE, "<error> no calibration exist");
     return -Parser::EBADARGS;
@@ -59,29 +66,43 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
        Detector("NMX", settings), NMXSettings(LocalSettings) {
   Stats.setPrefix("efu.nmx");
 
-  XTRACE(PROCESS, ALW, "NMX Config file: %s", NMXSettings.ConfigFile.c_str());
+  LOG(INIT, Sev::Info, "NMX Config file: {}", NMXSettings.ConfigFile);
   nmx_opts = Gem::NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
 
-  XTRACE(INIT, ALW, "Adding stats");
+  LOG(INIT, Sev::Info, "Adding stats");
   // clang-format off
   Stats.create("rx_packets", mystats.rx_packets);
   Stats.create("rx_bytes", mystats.rx_bytes);
   Stats.create("i2pfifo_dropped", mystats.fifo_push_errors);
-  Stats.create("readouts", mystats.readouts);
-  Stats.create("readouts_error_bytes", mystats.readouts_error_bytes);
-  Stats.create("readouts_discarded", mystats.readouts_discarded);
-  Stats.create("clusters_discarded", mystats.clusters_discarded);
-  Stats.create("clusters_events", mystats.clusters_events);
-  Stats.create("clusters_x", mystats.clusters_x);
-  Stats.create("clusters_y", mystats.clusters_y);
-  Stats.create("clusters_xy", mystats.clusters_xy);
+
   Stats.create("processing_idle", mystats.processing_idle);
   Stats.create("fifo_seq_errors", mystats.fifo_seq_errors);
-  Stats.create("unclustered", mystats.unclustered);
-  Stats.create("geom_errors", mystats.geom_errors);
-  Stats.create("lost_frames", mystats.lost_frames);
+
+  // Parser
+  Stats.create("fc_seq_errors", mystats.fc_seq_errors);
   Stats.create("bad_frames", mystats.bad_frames);
   Stats.create("good_frames", mystats.good_frames);
+  Stats.create("readouts_error_bytes", mystats.readouts_error_bytes);
+  Stats.create("readouts_total", mystats.readouts_total);
+
+  // Builder
+  Stats.create("readouts_bad_geometry", mystats.readouts_bad_geometry);
+  Stats.create("readouts_bad_adc", mystats.readouts_bad_adc);
+  Stats.create("readouts_adc_zero", mystats.readouts_adc_zero);
+  Stats.create("readouts_good", mystats.readouts_good);
+
+  // Clustering
+  Stats.create("clusters_total", mystats.clusters_total);
+  Stats.create("clusters_x_only", mystats.clusters_x_only);
+  Stats.create("clusters_y_only", mystats.clusters_y_only);
+  Stats.create("clusters_xy", mystats.clusters_xy);
+
+  Stats.create("events_bad_utpc", mystats.events_bad_utpc);
+  Stats.create("events_filter_rejects", mystats.events_filter_rejects);
+  Stats.create("events_geom_errors", mystats.events_geom_errors);
+  Stats.create("events_good", mystats.events_good);
+  Stats.create("readouts_in_good_events", mystats.readouts_in_good_events);
+
   Stats.create("tx_bytes", mystats.tx_bytes);
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
@@ -92,8 +113,8 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
   // clang-format on
 
   if (!NMXSettings.fileprefix.empty())
-    XTRACE(INIT, INF, "Dump h5 data in path: %s",
-           NMXSettings.fileprefix.c_str());
+    LOG(INIT, Sev::Info, "Dump h5 data in path: {}",
+           NMXSettings.fileprefix);
 
   std::function<void()> inputFunc = [this]() { GdGemBase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
@@ -107,8 +128,8 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
                        return GdGemBase::getCalibration(cmdargs, output, obytes);
                      });
 
-  XTRACE(INIT, ALW, "Creating %d NMX Rx ringbuffers of size %d",
-         eth_buffer_max_entries, eth_buffer_size);
+//  LOG(INIT, Sev::Info, "Creating {} NMX Rx ringbuffers of size {}",
+//         eth_buffer_max_entries, eth_buffer_size);
   eth_ringbuf = new RingBuffer<eth_buffer_size>(
       eth_buffer_max_entries + 11); /**< \todo testing workaround */
   assert(eth_ringbuf != 0);
@@ -124,7 +145,7 @@ void GdGemBase::input_thread() {
   nmxdata.setBufferSizes(0 /*use default */, EFUSettings.DetectorRxBufferSize);
   nmxdata.getBufferSizes(txBuffer, rxBuffer);
   if (rxBuffer < EFUSettings.DetectorRxBufferSize) {
-    XTRACE(INIT, ERR, "Receive buffer sizes too small, wanted %d, got %d",
+    LOG(INIT, Sev::Error, "Receive buffer sizes too small, wanted {}, got {}",
            EFUSettings.DetectorRxBufferSize, rxBuffer);
     return;
   }
@@ -133,7 +154,7 @@ void GdGemBase::input_thread() {
 
   TSCTimer report_timer;
   for (;;) {
-    int rdsize;
+    ssize_t rdsize {0};
     unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */
@@ -142,12 +163,12 @@ void GdGemBase::input_thread() {
     if ((rdsize = nmxdata.receive(eth_ringbuf->getDataBuffer(eth_index),
                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-      XTRACE(INPUT, DEB, "rdsize: %d", rdsize);
+//      LOG(INPUT, Sev::Debug, "rdsize: {}", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
       // mystats.fifo_free = input2proc_fifo.free();
-      if (input2proc_fifo.push(eth_index) == false) {
+      if (!input2proc_fifo.push(eth_index)) {
         mystats.fifo_push_errors++;
       } else {
         eth_ringbuf->getNextBuffer();
@@ -156,28 +177,28 @@ void GdGemBase::input_thread() {
 
     // Checking for exit
     if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.");
+      LOG(INPUT, Sev::Info, "Stopping input thread.");
       return;
     }
   }
 }
 
-void bin(Hists& hists, const Gem::Event &e)
+void bin(Hists& hists, const Event &e)
 {
-  uint32_t sum = e.x.adc_sum + e.y.adc_sum;
-  hists.bincluster(sum);
+  auto sum = e.c1.weight_sum() + e.c2.weight_sum();
+  hists.bincluster(static_cast<uint32_t>(sum));
 }
 
-void bin(Hists& hists, const Gem::Hit &e)
+void bin(Hists& hists, const Hit &e)
 {
-  if (e.plane_id == 0) {
-    hists.bin_x(e.strip, e.adc);
-  } else if (e.plane_id == 1) {
-    hists.bin_y(e.strip, e.adc);
+  if (e.plane == 0) {
+    hists.bin_x(e.coordinate, e.weight);
+  } else if (e.plane == 1) {
+    hists.bin_y(e.coordinate, e.weight);
   }
 }
 
-void bin_hists(Hists& hists, const std::list<Gem::Cluster>& cl)
+void bin_hists(Hists& hists, const std::list<Cluster>& cl)
 {
   for (const auto& cluster : cl)
     for (const auto& e : cluster.hits)
@@ -185,43 +206,211 @@ void bin_hists(Hists& hists, const std::list<Gem::Cluster>& cl)
 }
 
 
+void GdGemBase::apply_configuration() {
+  LOG(INIT, Sev::Info, "NMXConfig:\n{}", nmx_opts.debug());
+
+  if (nmx_opts.builder_type == "VMM3") {
+    builder_ = std::make_shared<Gem::BuilderVMM3>(
+        nmx_opts.time_config, nmx_opts.srs_mappings,
+        nmx_opts.adc_threshold,
+        NMXSettings.fileprefix,
+        nmx_opts.calfile);
+
+  } else if (nmx_opts.builder_type == "Readouts") {
+    builder_ = std::make_shared<Gem::BuilderReadouts>(
+        nmx_opts.srs_mappings,
+        nmx_opts.adc_threshold,
+        NMXSettings.fileprefix);
+
+  } else if (nmx_opts.builder_type == "Hits") {
+    builder_ = std::make_shared<Gem::BuilderHits>();
+  } else {
+    LOG(INIT, Sev::Error, "Unrecognized builder type in config");
+  }
+
+  clusterer_x_ = std::make_shared<GapClusterer>(
+      nmx_opts.clusterer_x.max_time_gap, nmx_opts.clusterer_x.max_strip_gap);
+  clusterer_y_ = std::make_shared<GapClusterer>(
+      nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap);
+
+  matcher_ = std::make_shared<GapMatcher>(
+      nmx_opts.time_config.acquisition_window()*5,
+      nmx_opts.matcher_max_delta_time);
+
+  hists_.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
+
+  utpc_analyzer_ = std::make_shared<Gem::utpcAnalyzer>(
+      nmx_opts.analyze_weighted,
+      nmx_opts.analyze_max_timebins,
+      nmx_opts.analyze_max_timedif);
+
+  sample_next_track_ = nmx_opts.send_tracks;
+}
+
+void GdGemBase::cluster_plane(HitContainer &hits,
+                              std::shared_ptr<AbstractClusterer> clusterer, bool flush) {
+  std::sort(hits.begin(), hits.end(),
+            [](const Hit &e1, const Hit &e2) {
+              return e1.time < e2.time;
+            });
+  clusterer->cluster(hits);
+  hits.clear();
+  if (flush) {
+    clusterer->flush();
+  }
+  if (!clusterer->clusters.empty()) {
+//    LOG(PROCESS, Sev::Debug, "Adding {} clusters to matcher for plane {}",
+//        clusterer->clusters.size(),
+//        clusterer->clusters.front().plane());
+    matcher_->insert(clusterer->clusters.front().plane(), clusterer->clusters);
+  }
+}
+
+void GdGemBase::perform_clustering(bool flush) {
+  // \todo we can parallelize this (per plane)
+
+  if (builder_->hit_buffer_x.size()) {
+    cluster_plane(builder_->hit_buffer_x, clusterer_x_, flush);
+  }
+
+  if (builder_->hit_buffer_y.size()) {
+    cluster_plane(builder_->hit_buffer_y, clusterer_y_, flush);
+  }
+
+  // \todo but we cannot parallelize this, this is the critical path
+  matcher_->match(flush);
+}
+
+void GdGemBase::process_events(EV42Serializer& event_serializer,
+                               Gem::TrackSerializer& track_serializer) {
+
+  // This may be required if you start seeing "Event time sequence error" messages
+//  std::sort(matcher_->matched_events.begin(), matcher_->matched_events.end(),
+//            [](const Event &e1, const Event &e2) {
+//              return e1.time_end() < e2.time_end();
+//            });
+
+  // \todo we can potentially infinitely parallelize this
+  //       as each iteration is completely independent, other than
+  //       everything going to the same serializers
+
+  mystats.clusters_total  += matcher_->matched_events.size();
+  for (auto& event : matcher_->matched_events)
+  {
+    if (!event.both_planes()) {
+      if (event.c1.hit_count() != 0) {
+        mystats.clusters_x_only++;
+      }
+      else {
+        mystats.clusters_y_only++;
+      }
+      continue;
+    }
+
+    mystats.clusters_xy++;
+
+    utpc_ = utpc_analyzer_->analyze(event);
+
+    /// Sample only tracks that are good in both planes
+    if (sample_next_track_
+        && (event.total_hit_count() >= nmx_opts.track_sample_minhits))
+    {
+//      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.debug(true));
+      sample_next_track_ = !track_serializer.add_track(event,
+                                                       utpc_.x.utpc_center,
+                                                       utpc_.y.utpc_center);
+    }
+
+    if (!utpc_.good)
+    {
+      mystats.events_bad_utpc++;
+      continue;
+    }
+
+    if (!nmx_opts.filter.valid(event, utpc_))
+    {
+      mystats.events_filter_rejects++;
+      continue;
+    }
+
+    pixelid_ = nmx_opts.geometry.pixel2D(
+        utpc_.x.utpc_center_rounded(), utpc_.y.utpc_center_rounded());
+
+    if (!nmx_opts.geometry.valid_id(pixelid_))
+    {
+      mystats.events_geom_errors++;
+      continue;
+    }
+
+    // Histogram cluster ADC only for valid events
+    if (nmx_opts.hit_histograms)
+    {
+      bin(hists_, event);
+    }
+
+    if (utpc_.time < previous_full_time_) {
+      LOG(PROCESS, Sev::Error, "Event time sequence error: {} < {}",
+             utpc_.time, previous_full_time_);
+    }
+    previous_full_time_ = utpc_.time;
+
+    truncated_time_ = utpc_.time - recent_pulse_time_;
+    // \todo try different limits
+    if (!have_pulse_time_ ||
+        (truncated_time_ > max_pulse_window_ns)) {
+      have_pulse_time_ = true;
+      recent_pulse_time_ = utpc_.time;
+      truncated_time_ = 0;
+      if (event_serializer.eventCount())
+        mystats.tx_bytes += event_serializer.produce();
+      event_serializer.pulseTime(recent_pulse_time_);
+//      LOG(PROCESS, Sev::Debug, "New offset time selected: {}", recent_pulse_time_);
+    }
+
+//    LOG(PROCESS, Sev::Debug, "Good event: time={}, pixel={} from {}",
+//        truncated_time_, pixelid_, utpc_.debug());
+
+    mystats.tx_bytes += event_serializer.addEvent(
+        static_cast<uint32_t>(truncated_time_), pixelid_);
+    mystats.events_good++;
+    mystats.readouts_in_good_events += event.total_hit_count();
+  }
+  matcher_->matched_events.clear();
+}
+
+
 void GdGemBase::processing_thread() {
-  init_builder();
+  apply_configuration();
   if (!builder_) {
-    XTRACE(PROCESS, ERR, "No builder specified, exiting thread");
+    LOG(PROCESS, Sev::Error, "No builder specified, exiting thread");
     return;
+    // \todo this only exits this thread, but EFU continues running
   }
 
   Producer event_producer(EFUSettings.KafkaBroker, "NMX_detector");
   Producer monitor_producer(EFUSettings.KafkaBroker, "NMX_monitor");
+  Producer hits_producer(EFUSettings.KafkaBroker, "NMX_hits");
 
   EV42Serializer ev42serializer(kafka_buffer_size, "nmx");
   ev42serializer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 
-
-  Gem::TrackSerializer track_serializer(256, nmx_opts.track_sample_minhits,
-                          nmx_opts.time_config.target_resolution_ns());
+  Gem::TrackSerializer track_serializer(256, 1);
   track_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
-  Hists hists(Gem::Hit::strip_max_val, Gem::Hit::adc_max_val);
-  HistSerializer hist_serializer(hists.needed_buffer_size());
+  HistSerializer hist_serializer(hists_.needed_buffer_size());
   hist_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
-  hists.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
-  Gem::ClusterMatcher matcher(nmx_opts.matcher_max_delta_time);
+  Gem::TrackSerializer raw_serializer(1500, 1);
+  raw_serializer.set_callback(
+          std::bind(&Producer::produce2<uint8_t>, &hits_producer, std::placeholders::_1));
 
   TSCTimer global_time, report_timer;
 
-  Gem::Event event;
-  uint32_t time;
-  uint32_t pixelid;
-
   unsigned int data_index;
-  bool sample_next_track {nmx_opts.send_tracks};
-  while (1) {
+  while (true) {
     // mystats.fifo_free = input2proc_fifo.free();
     if (!input2proc_fifo.pop(data_index)) {
       mystats.processing_idle++;
@@ -231,97 +420,66 @@ void GdGemBase::processing_thread() {
       if (len == 0) {
         mystats.fifo_seq_errors++;
       } else {
-        // printf("received packet with length %d\n", len);
-        auto stats = builder_->process_buffer(
+        builder_->process_buffer(
             eth_ringbuf->getDataBuffer(data_index), len);
 
-        mystats.readouts += stats.valid_hits;
-        mystats.readouts_error_bytes +=
-            stats.error_bytes; // From srs data parser
-        mystats.lost_frames += stats.lost_frames;
-        mystats.bad_frames += stats.bad_frames;
-        mystats.good_frames += stats.good_frames;
+        // parser stats
+        mystats.fc_seq_errors = builder_->stats.parser_fc_seq_errors;
+        mystats.bad_frames = builder_->stats.parser_bad_frames;
+        mystats.good_frames = builder_->stats.parser_good_frames;
+        mystats.readouts_error_bytes = builder_->stats.parser_error_bytes;
+        mystats.readouts_total = builder_->stats.parser_readouts;
+
+        // builder stats
+        mystats.readouts_bad_geometry = builder_->stats.geom_errors;
+        mystats.readouts_bad_adc = builder_->stats.adc_rejects;
+        mystats.readouts_adc_zero = builder_->stats.adc_zero;
+        mystats.readouts_good += (builder_->hit_buffer_x.size()
+            + builder_->hit_buffer_y.size());
+
+        if (nmx_opts.send_raw_hits) {
+          Event dummy_event;
+          for (const auto& e : builder_->hit_buffer_x) {
+            dummy_event.c1.insert(e);
+          }
+          for (const auto& e : builder_->hit_buffer_y) {
+            dummy_event.c2.insert(e);
+          }
+          //LOG(PROCESS, Sev::Debug, "Sending raw data: {}", dummy_event.total_hit_count());
+          raw_serializer.add_track(dummy_event, 0, 0);
+        }
 
         if (nmx_opts.hit_histograms) {
-          bin_hists(hists, builder_->clusterer_x->clusters);
-          bin_hists(hists, builder_->clusterer_y->clusters);
+          for (const auto& e : builder_->hit_buffer_x) {
+            bin(hists_, e);
+          }
+          for (const auto& e : builder_->hit_buffer_y) {
+            bin(hists_, e);
+          }
         }
 
-        if (!builder_->clusterer_x->empty() &&
-            !builder_->clusterer_y->empty()) {
-          matcher.merge(0, builder_->clusterer_x->clusters);
-          matcher.merge(1, builder_->clusterer_y->clusters);
-        }
-        matcher.match_end(false);
-
-        while (!matcher.matched_clusters.empty()) {
-          // printf("MATCHED_CLUSTERS\n");
-          XTRACE(PROCESS, DEB, "event_ready()");
-          event = matcher.matched_clusters.front();
-          matcher.matched_clusters.pop_front();
-
-          // mystats.unclustered = clusterer.unclustered();
-
-          event.analyze(nmx_opts.analyze_weighted,
-                        nmx_opts.analyze_max_timebins,
-                        nmx_opts.analyze_max_timedif);
-
-          if (nmx_opts.hit_histograms) {
-            bin(hists, event);
-          }
-
-          if (event.valid()) {
-            XTRACE(PROCESS, DEB, "event.good");
-
-            mystats.clusters_xy++;
-
-            /// \todo Should it be here or outside of event.valid()?
-            if (sample_next_track) {
-              sample_next_track = !track_serializer.add_track(event);
-            }
-
-            XTRACE(PROCESS, DEB, "x.center: %d, y.center %d",
-                   event.x.utpc_center_rounded(),
-                   event.y.utpc_center_rounded());
-
-            if (nmx_opts.filter.valid(event)) {
-              pixelid = nmx_opts.geometry.pixel2D(
-                  event.x.utpc_center_rounded(), event.y.utpc_center_rounded());
-
-              if (!nmx_opts.geometry.valid_id(pixelid)) {
-                mystats.geom_errors++;
-              } else {
-                time = static_cast<uint32_t>(event.utpc_time());
-
-                XTRACE(PROCESS, DEB, "time: %d, pixelid %d", time, pixelid);
-
-                mystats.tx_bytes += ev42serializer.addEvent(time, pixelid);
-                mystats.clusters_events++;
-              }
-            } else { // Does not meet criteria
-              /** \todo increments counters when failing this */
-            }
-          } else { /// no valid event
-            if (event.x.hits.size() != 0) {
-              mystats.clusters_x++;
-            } else {
-              mystats.clusters_y++;
-            }
-            mystats.readouts_discarded +=
-                event.x.hits.size() + event.y.hits.size();
-            mystats.clusters_discarded++;
-          }
+        if (nmx_opts.perform_clustering) {
+          // do not flush
+          perform_clustering(false);
+          process_events(ev42serializer, track_serializer);
+        } else {
+          builder_->hit_buffer_x.clear();
+          builder_->hit_buffer_y.clear();
         }
       }
     }
 
     // Flush on interval or exit
     if ((not runThreads) || (report_timer.timetsc() >=
-        EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ)) {
+        EFUSettings.UpdateIntervalSec * 1000000 * TscMHz)) {
 
-      /// \todo in case of exit, flush all clusters first
+      if (not runThreads && nmx_opts.perform_clustering) {
+        // flush everything first
+        perform_clustering(true);
+        process_events(ev42serializer, track_serializer);
+      }
 
-      sample_next_track = nmx_opts.send_tracks;
+      sample_next_track_ = nmx_opts.send_tracks;
 
       mystats.tx_bytes += ev42serializer.produce();
 
@@ -333,16 +491,17 @@ void GdGemBase::processing_thread() {
       mystats.kafka_dr_errors = event_producer.stats.dr_errors;
       mystats.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
 
-      if (!hists.isEmpty()) {
-        XTRACE(PROCESS, DEB, "Sending histogram for %zu hits and %zu clusters ",
-               hists.hit_count(), hists.cluster_count());
-        hist_serializer.produce(hists);
-        hists.clear();
+      if (!hists_.isEmpty()) {
+        LOG(PROCESS, Sev::Debug, "Sending histogram for {} readouts and {} clusters ",
+               hists_.hit_count(), hists_.cluster_count());
+        hist_serializer.produce(hists_);
+        hists_.clear();
       }
 
       // checking for exit
       if (not runThreads) {
-        XTRACE(INPUT, ALW, "Stopping processing thread.");
+        LOG(PROCESS, Sev::Info, "Stopping processing thread.");
+        // \todo why is this necessary? looks very wrong
         /// \todo this is a hack to force ~BuilderSRS() call
         builder_.reset();
         delete builder_.get(); /**< \todo see above */
@@ -351,30 +510,5 @@ void GdGemBase::processing_thread() {
 
       report_timer.now();
     }
-  }
-}
-
-void GdGemBase::init_builder() {
-  XTRACE(INIT, ALW, "NMXConfig:\n%s", nmx_opts.debug().c_str());
-
-  auto clusx = std::make_shared<Gem::DoroClusterer>(
-      nmx_opts.clusterer_x.max_time_gap, nmx_opts.clusterer_x.max_strip_gap,
-      nmx_opts.clusterer_x.min_cluster_size);
-  auto clusy = std::make_shared<Gem::DoroClusterer>(
-      nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap,
-      nmx_opts.clusterer_y.min_cluster_size);
-
-  if (nmx_opts.builder_type == "VMM3") {
-    XTRACE(INIT, DEB, "Using BuilderVMM3");
-    builder_ = std::make_shared<Gem::BuilderVMM3>(
-        nmx_opts.time_config, nmx_opts.srs_mappings, clusx, clusy,
-        nmx_opts.clusterer_x.hit_adc_threshold,
-        nmx_opts.clusterer_x.max_time_gap,
-        nmx_opts.clusterer_y.hit_adc_threshold,
-        nmx_opts.clusterer_y.max_time_gap,
-        NMXSettings.fileprefix,
-        nmx_opts.calfile);
-  } else {
-    XTRACE(INIT, ALW, "Unrecognized builder type in config");
   }
 }

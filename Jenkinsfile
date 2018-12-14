@@ -62,6 +62,7 @@ def Object get_container(image_key) {
         --env http_proxy=${env.http_proxy} \
         --env https_proxy=${env.https_proxy} \
         --env local_conan_server=${env.local_conan_server} \
+        --mount=type=bind,src=/home/jenkins/data,dst=/home/jenkins/refdata,readonly \
         ")
     return container
 }
@@ -97,7 +98,7 @@ def docker_cmake(image_key, xtra_flags) {
         cd build
         . ./activate_run.sh
         cmake --version
-        cmake -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
+        cmake -DREFDATA=/home/jenkins/refdata/EFU_reference -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
     \""""
 }
 
@@ -270,13 +271,15 @@ def get_macos_pipeline()
             // Delete workspace when build is done
                 cleanWs()
 
+                abs_dir = pwd()
+
                 dir("${project}") {
                     checkout scm
                 }
 
                 dir("${project}/build") {
                     sh "conan install --build=outdated .."
-                    sh "cmake -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
+                    sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
                     sh "make -j4"
                     sh "make -j4 unit_tests"
                     sh "make runtest"

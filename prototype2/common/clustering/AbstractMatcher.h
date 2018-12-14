@@ -53,7 +53,7 @@ public:
   ///        latency considerations
   virtual void match(bool flush) = 0;
 
-  std::deque<Event> matched_events;
+  std::vector<Event> matched_events;
   size_t stats_event_count{0}; ///< cumulative number of matched events
   // \todo discarded, other counters?
 

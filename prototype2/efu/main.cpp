@@ -15,10 +15,10 @@
 #include <unistd.h> // sleep()
 #include <vector>
 
-#define ONE_SECOND_US 1000000U
+static constexpr uint64_t MicrosecondsPerSecond {1000000};
 
 std::string ConsoleFormatter(const Log::LogMessage &Msg) {
-  static const std::vector<std::string> SevToString{"EMG", "ALR", "CRI", "ERR", "WAR", "NOTE", "INF", "DEB"};
+  static const std::vector<std::string> SevToString{"EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
   std::string FileName;
   std::int64_t LineNr = -1;
   for (auto &CField : Msg.AdditionalFields) {
@@ -28,7 +28,29 @@ std::string ConsoleFormatter(const Log::LogMessage &Msg) {
       LineNr = CField.second.intVal;
     }
   }
-  return fmt::format("{:5}{:21}{:5} - {}", SevToString.at(int(Msg.SeverityLevel)), FileName, LineNr, Msg.MessageString);
+  return fmt::format("{:5}{:21}{:5} - {}",
+      SevToString.at(static_cast<size_t>(Msg.SeverityLevel)), FileName, LineNr,
+      Msg.MessageString);
+}
+
+
+std::string FileFormatter(const Log::LogMessage &Msg) {
+  std::time_t cTime = std::chrono::system_clock::to_time_t(Msg.Timestamp);
+  char timeBuffer[50];
+  size_t bytes = std::strftime(timeBuffer, 50, "%F %T", std::localtime(&cTime));
+  static const std::vector<std::string> SevToString{"EMG", "ALR", "CRIT", "ERR", "WAR", "NOTE", "INFO", "DEB"};
+  std::string FileName;
+  std::int64_t LineNr = -1;
+  for (auto &CField : Msg.AdditionalFields) {
+    if (CField.first == "file") {
+      FileName = CField.second.strVal;
+    } else if (CField.first == "line") {
+      LineNr = CField.second.intVal;
+    }
+  }
+  return fmt::format("{} {:5}{:21}:{:<5} - {}", std::string(timeBuffer, bytes),
+      SevToString.at(static_cast<size_t>(Msg.SeverityLevel)), FileName, LineNr,
+      Msg.MessageString);
 }
 
 void EmptyGraylogMessageQueue() {
@@ -73,8 +95,10 @@ int main(int argc, char *argv[]) {
     Log::AddLogHandler(CI);
 
     Log::SetMinimumSeverity(Log::Severity(efu_args.getLogLevel()));
-    if (efu_args.getLogFileName().size() > 0) {
-      Log::AddLogHandler(new Log::FileInterface(efu_args.getLogFileName()));
+    if (!efu_args.getLogFileName().empty()) {
+      auto FI = new Log::FileInterface(efu_args.getLogFileName());
+      FI->setMessageStringCreatorFunction(FileFormatter);
+      Log::AddLogHandler(FI);
     }
 
     loader.loadPlugin(efu_args.getDetectorName());
@@ -157,7 +181,7 @@ int main(int argc, char *argv[]) {
 
   while (true) {
     //Do not allow immediate exits
-    if (RunTimer.timeus() >= (uint64_t)ONE_SECOND_US / 10) {
+    if (RunTimer.timeus() >= MicrosecondsPerSecond / 10) {
       if (keep_running == 0) {
         LOG(MAIN, Sev::Info, "Application stop, Exiting...");
         detector->stopThreads();
@@ -167,14 +191,14 @@ int main(int argc, char *argv[]) {
     }
 
     if (RunTimer.timeus() >=
-        DetectorSettings.StopAfterSec * (uint64_t)ONE_SECOND_US) {
+        DetectorSettings.StopAfterSec * MicrosecondsPerSecond) {
       LOG(MAIN, Sev::Info, "Application timeout, Exiting...");
       detector->stopThreads();
       sleep(1);
       break;
     }
 
-    if (livestats.timeus() >= ONE_SECOND_US && detector != nullptr) {
+    if ((livestats.timeus() >= MicrosecondsPerSecond) && detector != nullptr) {
       metrics.publish(detector);
       livestats.now();
     }

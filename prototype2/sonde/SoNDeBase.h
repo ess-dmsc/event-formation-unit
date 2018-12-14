@@ -22,7 +22,7 @@ struct SoNDeSettings {
 
 using namespace memory_sequential_consistent; // Lock free fifo
 
-const int TSC_MHZ = 2900; // MJC's workstation - not reliable
+static constexpr int TscMHz{2900}; // MJC's workstation - not reliable
 
 /** ----------------------------------------------------- */
 
