@@ -1,8 +1,3 @@
-
-# Where does this really need to go ???
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/calib_data
-  DESTINATION ${CMAKE_BINARY_DIR}/prototype2)
-
 #=============================================================================
 # Detector Pipeline Plugins
 #=============================================================================
