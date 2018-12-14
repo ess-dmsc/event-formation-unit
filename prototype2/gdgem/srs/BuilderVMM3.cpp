@@ -34,20 +34,17 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 void BuilderVMM3::process_buffer(char *buf, size_t size) {
   parser_.receive(buf, size);
   const auto &parser_stats = parser_.stats;
-  stats.parser_lost_frames += parser_stats.rxSeqErrors;
+  stats.parser_fc_seq_errors += parser_stats.rxSeqErrors;
   stats.parser_bad_frames += parser_stats.badFrames;
   stats.parser_good_frames += parser_stats.goodFrames;
   stats.parser_error_bytes += parser_stats.errors;
   stats.parser_readouts += parser_stats.readouts;
 
   if (!parser_.stats.readouts) {
-    LOG(PROCESS, Sev::Debug, "No readouts after parse");
+    XTRACE(PROCESS, DEB, "No readouts after parse");
     return;
   }
-  LOG(PROCESS, Sev::Debug, "Readouts after parse: {}", parser_.stats.readouts);
-
-//	uint32_t udp_timestamp_ns = parser_.srsHeader.udpTimeStamp
-//			* time_intepreter_.internal_clock_period_ns();
+  XTRACE(PROCESS, DEB, "Readouts after parse: %u", parser_.stats.readouts);
 
   //field fec id starts at 1
   readout.fec = parser_.parserData.fecId;
@@ -94,30 +91,30 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
 
       if ((hit.plane != 0) && (hit.plane != 1)) {
         stats.geom_errors++;
-        LOG(PROCESS, Sev::Debug, "Bad SRS mapping (plane) -- fec={}, chip={}",
+        XTRACE(PROCESS, DEB, "Bad SRS mapping (plane) -- fec=%d, chip=%d",
                readout.fec, readout.chip_id);
         continue;
       }
 
       if (hit.coordinate == NMX_INVALID_GEOM_ID) {
         stats.geom_errors++;
-        LOG(PROCESS, Sev::Debug, "Bad SRS mapping (coordinate) -- fec={}, chip={}",
+        XTRACE(PROCESS, DEB, "Bad SRS mapping (coordinate) -- fec=%d, chip=%d",
             readout.fec, readout.chip_id);
         continue;
       }
 
       if (!readout.over_threshold && (hit.weight < adc_threshold_)) {
         stats.adc_rejects++;
-        LOG(PROCESS, Sev::Debug, "Below ADC threshold  adc={}", hit.weight);
+        XTRACE(PROCESS, DEB, "Below ADC threshold  adc=%d", hit.weight);
         continue;
       }
 
 
       if (hit.weight == 0) {
-//        LOG(PROCESS, Sev::Warning,
-//            "Accepted readout with adc=0, may distort uTPC results, hit={}",
-//            hit.debug());
+        XTRACE(PROCESS, WAR,
+            "Accepted readout with adc=0, may distort uTPC results, hit=%s", hit.debug().c_str());
         // \todo What to do? Cannot be 0 for CoM in uTPC. Reject?
+        stats.adc_zero++;
         hit.weight = 1;
       }
 

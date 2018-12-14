@@ -67,7 +67,7 @@ protected:
     int64_t fifo_seq_errors;
 
     // Parser stats
-    int64_t lost_frames;
+    int64_t fc_seq_errors;
     int64_t bad_frames;
     int64_t good_frames;
     int64_t readouts_error_bytes;
@@ -76,6 +76,7 @@ protected:
     // Builder Counters
     int64_t readouts_bad_geometry;
     int64_t readouts_bad_adc;
+    int64_t readouts_adc_zero;
     int64_t readouts_good;
 
     // Clustering

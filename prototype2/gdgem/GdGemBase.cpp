@@ -79,7 +79,7 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
   Stats.create("fifo_seq_errors", mystats.fifo_seq_errors);
 
   // Parser
-  Stats.create("lost_frames", mystats.lost_frames);
+  Stats.create("fc_seq_errors", mystats.fc_seq_errors);
   Stats.create("bad_frames", mystats.bad_frames);
   Stats.create("good_frames", mystats.good_frames);
   Stats.create("readouts_error_bytes", mystats.readouts_error_bytes);
@@ -88,6 +88,7 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
   // Builder
   Stats.create("readouts_bad_geometry", mystats.readouts_bad_geometry);
   Stats.create("readouts_bad_adc", mystats.readouts_bad_adc);
+  Stats.create("readouts_adc_zero", mystats.readouts_adc_zero);
   Stats.create("readouts_good", mystats.readouts_good);
 
   // Clustering
@@ -423,7 +424,7 @@ void GdGemBase::processing_thread() {
             eth_ringbuf->getDataBuffer(data_index), len);
 
         // parser stats
-        mystats.lost_frames = builder_->stats.parser_lost_frames;
+        mystats.fc_seq_errors = builder_->stats.parser_fc_seq_errors;
         mystats.bad_frames = builder_->stats.parser_bad_frames;
         mystats.good_frames = builder_->stats.parser_good_frames;
         mystats.readouts_error_bytes = builder_->stats.parser_error_bytes;
@@ -432,6 +433,7 @@ void GdGemBase::processing_thread() {
         // builder stats
         mystats.readouts_bad_geometry = builder_->stats.geom_errors;
         mystats.readouts_bad_adc = builder_->stats.adc_rejects;
+        mystats.readouts_adc_zero = builder_->stats.adc_zero;
         mystats.readouts_good += (builder_->hit_buffer_x.size()
             + builder_->hit_buffer_y.size());
 
@@ -510,4 +512,3 @@ void GdGemBase::processing_thread() {
     }
   }
 }
-
