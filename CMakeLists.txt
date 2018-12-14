@@ -62,7 +62,7 @@ include_directories(.)
 include(Utilities.cmake)
 add_subdirectory(libs)
 add_subdirectory(prototype2)
-add_subdirectory(udp)
+add_subdirectory(utils/udp)
 
 #=============================================================================
 # Finalize tests
