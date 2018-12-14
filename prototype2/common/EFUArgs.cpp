@@ -45,8 +45,8 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("--log_file", LogFileName, "Write log messages to file.")
   ->group("EFU Options");
 
-  CLIParser.add_option("-u,--min_mtu", EFUSettings.MinimumMTU, "Minimum value of MTU for all active interfaces")
-      ->group("EFU Options")->default_str("9000");
+  CLIParser.add_flag("--nohwcheck", EFUSettings.NoHwCheck, "Perform HW check or not")
+      ->group("EFU Options");
 
   CLIParser.add_flag("--udder", EFUSettings.TestImage, "Generate a test image")
       ->group("EFU Options");
@@ -167,7 +167,7 @@ void EFUArgs::printSettings() {
   LOG(INIT, Sev::Info, "  Detector:                 {}",    DetectorName);
   LOG(INIT, Sev::Info, "  Rx UDP Socket:            {}:{}",
          EFUSettings.DetectorAddress, EFUSettings.DetectorPort);
-  LOG(INIT, Sev::Info, "  Minimum required MTU      {}", EFUSettings.MinimumMTU);
+  LOG(INIT, Sev::Info, "  Perform HW checks         {}", !EFUSettings.NoHwCheck);
   LOG(INIT, Sev::Info, "  Kafka broker:             {}", EFUSettings.KafkaBroker);
   LOG(INIT, Sev::Info, "  Log IP:                   {}", GraylogConfig.address);
   LOG(INIT, Sev::Info, "  Graphite TCP socket:      {}:{}",

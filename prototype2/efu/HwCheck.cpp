@@ -10,11 +10,13 @@
 #include <efu/HwCheck.h>
 #include <arpa/inet.h>
 #include <common/Log.h>
+#include <cinttypes>
 #include <cstring>
 #include <ifaddrs.h>
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <sys/socket.h>
+#include <sys/statvfs.h>
 #include <sys/types.h>
 #include <unistd.h>
 
@@ -83,8 +85,33 @@ bool HwCheck::checkMTU(const char * interface) {
   LOG(INIT, Sev::Info, "MTU of {} is {}", interface, ifr.ifr_mtu);
   close(s);
 
-  return ifr.ifr_mtu >= minimumMtu;
+  return ifr.ifr_mtu >= MinimumMtu;
 }
+
+
+// bool HwCheck::checkDiskSpace(std::vector<std::string> directories) {
+//    bool ok = true;
+//    for (auto file : directories) {
+//      struct statvfs fsstats;
+//      int ret = statvfs(file.c_str(), &fsstats);
+//      if (ret < 0) {
+//        LOG(INIT, Sev::Info, "Diskcheck ignoring file/dir {}", file);
+//        continue;;
+//     }
+//
+//     std::string passfail = "passed";
+//     uint64_t bytes_avail = fsstats.f_frsize * fsstats.f_bavail;
+//     float percent_avail = fsstats.f_blocks == 0 ?
+//            0.0 :(fsstats.f_bavail * 100.0) / fsstats.f_blocks;
+//     if ( (bytes_avail < MinDiskAvailable) or (percent_avail < MinDiskPercentFree) ) {
+//       ok = false;
+//       passfail = "failed";
+//     }
+//     LOG(INIT, Sev::Warning, "Diskcheck {} for {}: available: {}B ({}%)", passfail, file, bytes_avail, percent_avail);
+//   }
+//
+//   return ok;
+// }
 
 
 /// Display interface name and family (including symbolic
