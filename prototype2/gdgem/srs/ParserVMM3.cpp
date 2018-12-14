@@ -67,7 +67,6 @@ int VMM3SRSData::receive(const char *buffer, int size) {
   if (srsHeader.frameCounter == 0xfafafafa) {
     //XTRACE(PROCESS, INF, "End of Frame");
     stats.badFrames++;
-    //printf("bad frames I: %d\n", stats.bad_frames);
     stats.errors += size;
     return -1;
   }
@@ -75,8 +74,8 @@ int VMM3SRSData::receive(const char *buffer, int size) {
   if (parserData.nextFrameCounter != srsHeader.frameCounter) {
     XTRACE(PROCESS, WAR, "FC error %u != %u", parserData.nextFrameCounter, srsHeader.frameCounter);
     stats.rxSeqErrors++;
-    parserData.nextFrameCounter = srsHeader.frameCounter + 1;
   }
+  parserData.nextFrameCounter = srsHeader.frameCounter + 1;
 
   if (size < SRSHeaderSize + HitAndMarkerSize) {
     XTRACE(PROCESS, WAR, "Undersize data");
