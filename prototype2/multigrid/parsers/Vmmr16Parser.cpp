@@ -1,6 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <multigrid/mgmesytec/Vmmr16Parser.h>
+#include <multigrid/parsers/Vmmr16Parser.h>
 
 #include <common/Trace.h>
 // #undef TRC_LEVEL

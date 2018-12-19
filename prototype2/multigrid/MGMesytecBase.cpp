@@ -18,7 +18,8 @@
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
-#include <multigrid/mgmesytec/Sis3153Parser.h>
+#include <multigrid/parsers/Sis3153Parser.h>
+
 #include <multigrid/mgmesytec/SequoiaGeometry.h>
 //#include <multigrid/mgmesytec/MG24Geometry.h>
 
@@ -26,11 +27,16 @@
 #include <multigrid/mgmesytec/EfuCenterMass.h>
 #include <multigrid/mgmesytec/EfuPrioritized.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#include <common/Trace.h>
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
-const int TscMHz = 2900; // Not accurate, do not rely solely on this
+#include <common/Log.h>
+//#undef TRC_MASK
+//#define TRC_MASK 0
 
+// \todo MJC's workstation - not reliable
+static constexpr int TscMHz {2900};
 
 MGMesytecBase::MGMesytecBase(BaseSettings const &settings, struct MGMesytecSettings & LocalSettings)
        : Detector("CSPEC", settings), MGMesytecSettings(LocalSettings) {
@@ -113,7 +119,7 @@ void MGMesytecBase::mainThread() {
   sis3153parser.buffers.reserve(1000);
 
   uint8_t buffer[eth_buffer_size];
-  int ReadSize {0};
+  ssize_t ReadSize {0};
   TSCTimer report_timer;
   for (;;) {
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {

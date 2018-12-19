@@ -7,9 +7,11 @@
 
 #include <common/DataSave.h>
 #include <multigrid/MGMesytecBase.h>
-#include <multigrid/mgmesytec/TestData.h>
 #include <../prototype2/adc_readout/test/TestUDPServer.h>
 #include <test/TestBase.h>
+
+// \todo use reference data
+#include <multigrid/parsers/TestData.h>
 
 std::string mgconfigjson = R"(
   {

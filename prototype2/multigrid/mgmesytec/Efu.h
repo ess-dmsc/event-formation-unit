@@ -11,7 +11,7 @@
 #include <memory>
 #include <common/Hists.h>
 #include <common/ReadoutSerializer.h>
-#include <multigrid/mgmesytec/Hit.h>
+#include <multigrid/parsers/Hit.h>
 #include <multigrid/mgmesytec/SequoiaGeometry.h>
 
 namespace Multigrid {

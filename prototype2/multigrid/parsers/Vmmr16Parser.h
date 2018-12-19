@@ -9,7 +9,7 @@
 
 #pragma once
 #include <common/Buffer.h>
-#include <multigrid/mgmesytec/Hit.h>
+#include <multigrid/parsers/Hit.h>
 #include <vector>
 
 namespace Multigrid {

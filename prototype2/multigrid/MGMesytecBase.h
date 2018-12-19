@@ -14,9 +14,8 @@
 #include <common/Log.h>
 #include <common/ReadoutSerializer.h>
 #include <multigrid/MgConfig.h>
-#include <multigrid/mgmesytec/Vmmr16Parser.h>
+#include <multigrid/parsers/Vmmr16Parser.h>
 #include <multigrid/mgmesytec/Efu.h>
-#include <multigrid/mgmesytec/Hit.h>
 
 struct MGMesytecSettings {
   std::string ConfigFile;
@@ -89,10 +88,10 @@ public:
   void mainThread();
 
   /// Some hardcoded constants
-  static constexpr int eth_buffer_size = 9000;          /// used for experimentation
-  const int kafka_buffer_size = 1000000;     /// -||-
-  const int readout_entries = 100000;        /// number of raw readout entries
-  const int one_tenth_second_usecs = 100000; ///
+  static constexpr int eth_buffer_size {9000};          /// used for experimentation
+  static constexpr size_t kafka_buffer_size {1000000};  /// -||-
+  static constexpr size_t readout_entries {100000};     /// number of raw readout entries
+  static constexpr int one_tenth_second_usecs {100000}; ///
 
 protected:
 

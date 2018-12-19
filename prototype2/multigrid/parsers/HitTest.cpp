@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multigrid/mgmesytec/Hit.h>
+#include <multigrid/parsers/Hit.h>
 #include <test/TestBase.h>
 
 using namespace Multigrid;
