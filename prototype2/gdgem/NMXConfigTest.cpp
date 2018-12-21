@@ -1,12 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <algorithm>
-#include <common/DataSave.h>
-#include <cstring>
 #include <gdgem/NMXConfig.h>
-#include <memory>
 #include <test/TestBase.h>
-#include <unistd.h>
 
 std::string nocalibration{""};
 

@@ -53,6 +53,8 @@ add_subdirectory(geometry)
 add_subdirectory(mgmesytec)
 add_subdirectory(reduction)
 
+get_filename_component(TEST_JSON_PATH "configs/ILL_mappings.json" DIRECTORY)
+
 set(MgConfigTest_SRC
   MgConfig.cpp
   MgConfigTest.cpp
@@ -63,6 +65,8 @@ set(MgConfigTest_INC
   ../../prototype2/common/DataSave.h
   )
 create_test_executable(MgConfigTest)
+target_compile_definitions(MgConfigTest
+  PRIVATE TEST_JSON_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_JSON_PATH}/")
 
 set(MGMesytecBaseTest_INC
   ${mgmesytec_common_inc}

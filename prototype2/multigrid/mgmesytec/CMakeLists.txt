@@ -33,21 +33,28 @@ set(Vmmr16ParserTest_INC
   )
 create_test_executable(Vmmr16ParserTest)
 
-set(MesytecBuilderTest_SRC
-  MesytecBuilder.cpp
-  MesytecBuilderTest.cpp
-  Vmmr16Parser.cpp
-  Sis3153Parser.cpp
-  MesytecReadout.cpp
-  )
-set(MesytecBuilderTest_INC
-  MesytecBuilder.h
-  ../../common/Buffer.h
-  Sis3153Parser.h
-  Vmmr16Parser.h
-  MesytecReadout.h
-  TestData.h
-  ../geometry/SequoiaGeometry.h
-  )
-create_test_executable(MesytecBuilderTest)
+set(TEST_DATA_PATH "${REFDATA}/multigrid/2018_03_30")
+if(EXISTS ${TEST_DATA_PATH})
+  set(MesytecBuilderTest_SRC
+    MesytecBuilder.cpp
+    MesytecBuilderTest.cpp
+    Vmmr16Parser.cpp
+    Sis3153Parser.cpp
+    MesytecReadout.cpp
+    )
+  set(MesytecBuilderTest_INC
+    MesytecBuilder.h
+    ../../common/Buffer.h
+    Sis3153Parser.h
+    Vmmr16Parser.h
+    MesytecReadout.h
+    TestData.h
+    ../geometry/SequoiaGeometry.h
+    )
+  create_test_executable(MesytecBuilderTest)
+  target_compile_definitions(MesytecBuilderTest
+    PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
+else()
+  message(WARNING "*** No gdgem reference data found. Skipping relevant tests.")
+endif()
 
