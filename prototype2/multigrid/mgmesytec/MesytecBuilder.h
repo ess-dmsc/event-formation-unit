@@ -15,7 +15,7 @@ public:
   Sis3153Parser sis3153parser;
   VMMR16Parser vmmr16Parser;
 
-  std::shared_ptr<Multigrid::HitFile> dumpfile;
+  std::shared_ptr<MesytecReadoutFile> dumpfile;
 
   SequoiaGeometry digital_geometry;
 

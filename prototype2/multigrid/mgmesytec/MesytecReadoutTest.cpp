@@ -67,7 +67,7 @@ TEST_F(MGHitTest, CompoundMapping) {
 }
 
 TEST_F(MGHitTest, CreateFile) {
-  HitFile::create("hit_file_test");
+  MesytecReadoutFile::create("hit_file_test");
   EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test_00000.h5"));
 }
 

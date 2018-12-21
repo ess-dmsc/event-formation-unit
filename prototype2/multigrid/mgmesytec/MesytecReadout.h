@@ -91,6 +91,6 @@ public:
 
 namespace Multigrid {
 
-using HitFile = DumpFile<MesytecReadout>;
+using MesytecReadoutFile = DumpFile<MesytecReadout>;
 
 }

@@ -127,5 +127,5 @@ protected:
   Multigrid::VMMR16Parser vmmr16Parser;
 
   std::shared_ptr<Multigrid::Efu> mgEfu;
-  std::shared_ptr<Multigrid::HitFile> dumpfile;
+  std::shared_ptr<Multigrid::MesytecReadoutFile> dumpfile;
 };

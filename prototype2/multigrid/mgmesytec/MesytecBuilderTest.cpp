@@ -85,35 +85,10 @@ TEST_F(MesytecBuilderTest, ParseRecordedWSDataMultipleTriggers) {
   EXPECT_EQ(builder.ConvertedData.size(), 54);
 }
 
-TEST_F(MesytecBuilderTest, PCap1) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
-
-  ReaderPcap pcap(TEST_DATA_PATH "wireshark/mgmesytec_00001_20180830170213.pcapng");
-
-  uint8_t buffer[10000];
-  int rdsize;
-  size_t packets {0};
-  while ((rdsize = pcap.read((char *)&buffer, sizeof(buffer))) != -1) {
-    if (rdsize == 0) {
-      continue; // non udp data
-    }
-    builder.parse(Buffer<uint8_t>(buffer, rdsize));
-    packets++;
-  }
-
-  EXPECT_EQ(packets, 25);
-  EXPECT_EQ(builder.stats_discarded_bytes, 3784);
-  EXPECT_EQ(builder.stats_trigger_count, 0);
-  EXPECT_EQ(builder.stats_readout_filter_rejects, 0);
-  EXPECT_EQ(builder.stats_digital_geom_errors, 0);
-
-  EXPECT_EQ(builder.ConvertedData.size(), 0);
-}
-
 TEST_F(MesytecBuilderTest, PCap2) {
   load_config(TEST_DATA_PATH "Sequoia_mappings.json");
 
-  ReaderPcap pcap(TEST_DATA_PATH "wireshark/2018_03_30_Si_WHITE_1att_mvmeCrash.pcapng");
+  ReaderPcap pcap(TEST_DATA_PATH "wireshark/Si_WHITE_1att_mvmeCrash.pcapng");
 
   uint8_t buffer[10000];
   int rdsize;
@@ -138,7 +113,7 @@ TEST_F(MesytecBuilderTest, PCap2) {
 TEST_F(MesytecBuilderTest, PCap3) {
   load_config(TEST_DATA_PATH "Sequoia_mappings.json");
 
-  ReaderPcap pcap(TEST_DATA_PATH "wireshark/2018_03_30_endOfHFSeries_mvmeCrash.pcapng");
+  ReaderPcap pcap(TEST_DATA_PATH "wireshark/endOfHFSeries_mvmeCrash.pcapng");
 
   uint8_t buffer[10000];
   int rdsize;

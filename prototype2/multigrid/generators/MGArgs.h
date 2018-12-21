@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Command line argument parser for cspecgen
+/// \brief Command line argument parser for nmxgen
 ///
 //===----------------------------------------------------------------------===//
 // GCOVR_EXCL_START
@@ -12,23 +12,24 @@
 
 #include <string>
 
-class JsonArgs {
+class NMXArgs {
 public:
   /// \brief constructor for program arguments parsed via getopt_long()
   /// \param argc Argument count - typically taken from main()
   /// \param argv Argument array - typically taken from main()
-  JsonArgs(int argc, char *argv[]);
+  NMXArgs(int argc, char *argv[]);
 
-  std::string basedir{};          ///< basedir for all files
-  std::string runfile{};          ///< read data from file
-  std::string runspecification{}; ///< use this run definition
+  std::string filename{}; ///< for single file streaming
+
+  unsigned int txGB{10}; ///< total transmit size (GB)
+  uint64_t txPkt{0xffffffffffffffff};
 
   std::string dest_ip{"127.0.0.1"}; ///< destination ip address
   int port{9000};                   ///< destination udp port
   int buflen{9000};                 ///< Tx buffer size
   int sndbuf{1000000};              ///< kernel sndbuf size
 
-  int speed_level{0};
+  int throttle{0};   ///< actually a sleep() counter
 
   unsigned int updint{1}; ///< update interval (seconds)
 };

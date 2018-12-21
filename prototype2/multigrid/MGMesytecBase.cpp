@@ -94,7 +94,7 @@ void MGMesytecBase::init_config()
 
   if (!MGMesytecSettings.FilePrefix.empty())
   {
-    dumpfile = Multigrid::HitFile::create(
+    dumpfile = Multigrid::MesytecReadoutFile::create(
         MGMesytecSettings.FilePrefix + "mgmesytec_" + timeString(), 100);
   }
   vmmr16Parser.spoof_high_time(mg_config.spoof_high_time);

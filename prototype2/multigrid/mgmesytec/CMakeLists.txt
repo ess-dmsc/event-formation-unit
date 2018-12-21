@@ -33,7 +33,7 @@ set(Vmmr16ParserTest_INC
   )
 create_test_executable(Vmmr16ParserTest)
 
-set(TEST_DATA_PATH "${REFDATA}/multigrid/2018_03_30")
+set(TEST_DATA_PATH "${REFDATA}/multigrid/2018_08_30")
 if(EXISTS ${TEST_DATA_PATH})
   set(MesytecBuilderTest_SRC
     MesytecBuilder.cpp

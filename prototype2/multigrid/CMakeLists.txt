@@ -54,6 +54,7 @@ set(TEST_JSON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${TEST_JSON_PATH}/")
 
 add_subdirectory(geometry)
 add_subdirectory(mgmesytec)
+add_subdirectory(generators)
 add_subdirectory(reduction)
 
 set(MgConfigTest_SRC
