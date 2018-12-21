@@ -8,7 +8,8 @@
 #pragma once
 
 #include <logical_geometry/ESSGeometry.h>
-#include <multigrid/mgmesytec/SequoiaGeometry.h>
+#include <multigrid/geometry/SequoiaGeometry.h>
+#include <string>
 
 namespace Multigrid {
 

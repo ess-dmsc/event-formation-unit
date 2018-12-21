@@ -1,8 +1,3 @@
-
-# Where does this really need to go ???
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/calib_data
-  DESTINATION ${CMAKE_BINARY_DIR}/prototype2)
-
 #=============================================================================
 # Detector Pipeline Plugins
 #=============================================================================
@@ -13,12 +8,12 @@ set(mgmesytec_common_src
   ../common/Hists.cpp
   ../common/HistSerializer.cpp
   ../common/ReadoutSerializer.cpp
-  parsers/Vmmr16Parser.cpp
-  parsers/Sis3153Parser.cpp
-  parsers/Hit.cpp
-  mgmesytec/EfuMaximum.cpp
-  mgmesytec/EfuCenterMass.cpp
-  mgmesytec/EfuPrioritized.cpp
+  mgmesytec/Vmmr16Parser.cpp
+  mgmesytec/Sis3153Parser.cpp
+  mgmesytec/MesytecReadout.cpp
+  reduction/EfuMaximum.cpp
+  reduction/EfuCenterMass.cpp
+  reduction/EfuPrioritized.cpp
   MgConfig.cpp
   MGMesytecBase.cpp
   )
@@ -26,15 +21,16 @@ set(mgmesytec_common_inc
   ../common/Hists.h
   ../common/HistSerializer.h
   ../common/ReadoutSerializer.h
-  parsers/Vmmr16Parser.h
-  parsers/Sis3153Parser.h
-  parsers/Hit.h
-  mgmesytec/Efu.h
-  mgmesytec/EfuMaximum.h
-  mgmesytec/EfuCenterMass.h
-  mgmesytec/EfuPrioritized.h
-  mgmesytec/SequoiaGeometry.h
-  mgmesytec/BusGeometry.h
+  geometry/SequoiaGeometry.h
+  geometry/BusGeometry.h
+  mgmesytec/Vmmr16Parser.h
+  mgmesytec/Sis3153Parser.h
+  mgmesytec/MesytecReadout.h
+  reduction/Efu.h
+  reduction/EfuMaximum.h
+  reduction/EfuCenterMass.h
+  reduction/EfuPrioritized.h
+  AbstractBuilder.h
   MGMesytecBase.h
   MgConfig.h
   )
@@ -53,8 +49,9 @@ create_module(mgmesytec)
 # Tests
 #=============================================================================
 
-add_subdirectory(parsers)
+add_subdirectory(geometry)
 add_subdirectory(mgmesytec)
+add_subdirectory(reduction)
 
 set(MgConfigTest_SRC
   MgConfig.cpp

@@ -14,13 +14,13 @@
 #include <common/Log.h>
 #include <common/ReadoutSerializer.h>
 #include <multigrid/MgConfig.h>
-#include <multigrid/parsers/Vmmr16Parser.h>
-#include <multigrid/mgmesytec/Efu.h>
+#include <multigrid/mgmesytec/Vmmr16Parser.h>
+#include <multigrid/reduction/Efu.h>
 
 struct MGMesytecSettings {
   std::string ConfigFile;
   bool monitor{false};
-  std::string fileprefix{""};
+  std::string FilePrefix;
 };
 
 struct Monitor

@@ -18,7 +18,7 @@ void SetCLIArguments(CLI::App & parser) {
                     required()->configurable(true);
   parser.add_flag("--monitor", LocalMGMesytecSettings.monitor,
                   "stream monitor data")->group("MGMesytec")->configurable(true)->default_val("true");
-  parser.add_option("--dumptofile", LocalMGMesytecSettings.fileprefix,
+  parser.add_option("--dumptofile", LocalMGMesytecSettings.FilePrefix,
                     "dump to specified file")->group("MGMesytec")->configurable(true);
 }
 

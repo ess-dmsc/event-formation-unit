@@ -1,82 +1,53 @@
-set(MG24GeometryTest_SRC
-  MG24GeometryTest.cpp
+set(MGHitTest_SRC
+  MesytecReadoutTest.cpp
+  MesytecReadout.cpp
   )
-set(MG24GeometryTest_INC
-  MG24Geometry.h
+set(MGHitTest_INC
+  MesytecReadout.h
   )
-create_test_executable(MG24GeometryTest)
+create_test_executable(MGHitTest SKIP_MEMGRIND)
 
-set(FilterTest_SRC
-  FilterTest.cpp
+set(Sis3153ParserTest_SRC
+  Sis3153ParserTest.cpp
+  Sis3153Parser.cpp
   )
-set(FilterTest_INC
-  Filter.h
+set(Sis3153ParserTest_INC
+  ../../common/Buffer.h
+  Sis3153Parser.h
+  TestData.h
   )
-create_test_executable(FilterTest)
+create_test_executable(Sis3153ParserTest)
 
-set(BusGeometryTest_SRC
-  BusGeometryTest.cpp
+set(Vmmr16ParserTest_SRC
+  Vmmr16ParserTest.cpp
+  Vmmr16Parser.cpp
+  Sis3153Parser.cpp
+  MesytecReadout.cpp
   )
-set(BusGeometryTest_INC
-  BusGeometry.h
+set(Vmmr16ParserTest_INC
+  ../../common/Buffer.h
+  Sis3153Parser.h
+  Vmmr16Parser.h
+  MesytecReadout.h
+  TestData.h
   )
-create_test_executable(BusGeometryTest)
+create_test_executable(Vmmr16ParserTest)
 
-set(SequoiaGeometryTest_SRC
-  SequoiaGeometryTest.cpp
+set(MesytecBuilderTest_SRC
+  MesytecBuilder.cpp
+  MesytecBuilderTest.cpp
+  Vmmr16Parser.cpp
+  Sis3153Parser.cpp
+  MesytecReadout.cpp
   )
-set(SequoiaGeometryTest_INC
-  SequoiaGeometry.h
+set(MesytecBuilderTest_INC
+  MesytecBuilder.h
+  ../../common/Buffer.h
+  Sis3153Parser.h
+  Vmmr16Parser.h
+  MesytecReadout.h
+  TestData.h
+  ../geometry/SequoiaGeometry.h
   )
-create_test_executable(SequoiaGeometryTest)
+create_test_executable(MesytecBuilderTest)
 
-set(EfuMaximumTest_SRC
-  ../../common/Hists.cpp
-  ../../common/ReadoutSerializer.cpp
-  ../parsers/Hit.cpp
-  EfuMaximumTest.cpp
-  EfuMaximum.cpp
-  )
-set(EfuMaximumTest_INC
-  ../../common/Hists.h
-  ../../common/ReadoutSerializer.h
-  ../parsers/Hit.h
-  Efu.h
-  EfuMaximum.h
-  SequoiaGeometry.h
-  )
-create_test_executable(EfuMaximumTest)
-
-set(EfuCenterMassTest_SRC
-  ../../common/Hists.cpp
-  ../../common/ReadoutSerializer.cpp
-  ../parsers/Hit.cpp
-  EfuCenterMassTest.cpp
-  EfuCenterMass.cpp
-  )
-set(EfuCenterMassTest_INC
-  ../../common/Hists.h
-  ../../common/ReadoutSerializer.h
-  ../parsers/Hit.h
-  Efu.h
-  EfuCenterMass.h
-  SequoiaGeometry.h
-  )
-create_test_executable(EfuCenterMassTest)
-
-set(EfuPrioritizedTest_SRC
-  ../../common/Hists.cpp
-  ../../common/ReadoutSerializer.cpp
-  ../parsers/Hit.cpp
-  EfuPrioritizedTest.cpp
-  EfuPrioritized.cpp
-  )
-set(EfuPrioritizedTest_INC
-  ../../common/Hists.h
-  ../../common/ReadoutSerializer.h
-  ../parsers/Hit.h
-  Efu.h
-  EfuCenterMass.h
-  SequoiaGeometry.h
-  )
-create_test_executable(EfuPrioritizedTest)

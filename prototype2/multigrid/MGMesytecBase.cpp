@@ -18,14 +18,14 @@
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
-#include <multigrid/parsers/Sis3153Parser.h>
+#include <multigrid/mgmesytec/Sis3153Parser.h>
 
-#include <multigrid/mgmesytec/SequoiaGeometry.h>
-//#include <multigrid/mgmesytec/MG24Geometry.h>
+#include <multigrid/geometry/SequoiaGeometry.h>
+//#include <multigrid/geometry/MG24Geometry.h>
 
-#include <multigrid/mgmesytec/EfuMaximum.h>
-#include <multigrid/mgmesytec/EfuCenterMass.h>
-#include <multigrid/mgmesytec/EfuPrioritized.h>
+#include <multigrid/reduction/EfuMaximum.h>
+#include <multigrid/reduction/EfuCenterMass.h>
+#include <multigrid/reduction/EfuPrioritized.h>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL
@@ -62,9 +62,9 @@ MGMesytecBase::MGMesytecBase(BaseSettings const &settings, struct MGMesytecSetti
 
   XTRACE(INIT, INF, "Stream monitor data = %s",
          (MGMesytecSettings.monitor ? "YES" : "no"));
-  if (!MGMesytecSettings.fileprefix.empty())
+  if (!MGMesytecSettings.FilePrefix.empty())
     XTRACE(INIT, INF, "Dump h5 data in path: %s",
-           MGMesytecSettings.fileprefix.c_str());
+           MGMesytecSettings.FilePrefix.c_str());
 
   std::function<void()> inputFunc = [this]() { MGMesytecBase::mainThread(); };
   Detector::AddThreadFunction(inputFunc, "main");
@@ -92,10 +92,10 @@ void MGMesytecBase::init_config()
   mgEfu->hists = monitor.hists;
   mgEfu->raw1 = monitor.readouts;
 
-  if (!MGMesytecSettings.fileprefix.empty())
+  if (!MGMesytecSettings.FilePrefix.empty())
   {
     dumpfile = Multigrid::HitFile::create(
-        MGMesytecSettings.fileprefix + "mgmesytec_" + timeString(), 100);
+        MGMesytecSettings.FilePrefix + "mgmesytec_" + timeString(), 100);
   }
   vmmr16Parser.spoof_high_time(mg_config.spoof_high_time);
 }
