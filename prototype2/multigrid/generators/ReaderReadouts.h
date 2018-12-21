@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <multigrid/mgmesytec/MesytecReadout.h>
+#include <multigrid/mesytec/Readout.h>
 
 namespace Multigrid {
 
@@ -22,8 +22,11 @@ public:
   /// \todo document
   size_t read(char *buf);
 
+  size_t total() const { return total_; }
+  size_t current() const { return current_; }
+
 private:
-  std::shared_ptr<MesytecReadoutFile> file;
+  std::shared_ptr<ReadoutFile> file;
 
   size_t total_{0};
   size_t current_{0};

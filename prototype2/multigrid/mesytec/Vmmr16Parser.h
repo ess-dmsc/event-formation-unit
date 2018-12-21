@@ -9,7 +9,7 @@
 
 #pragma once
 #include <common/Buffer.h>
-#include <multigrid/mgmesytec/MesytecReadout.h>
+#include <multigrid/mesytec/Readout.h>
 #include <vector>
 
 namespace Multigrid {
@@ -28,11 +28,11 @@ public:
   uint64_t time() const;
   bool externalTrigger() const;
 
-  std::vector<MesytecReadout> converted_data;
+  std::vector<Readout> converted_data;
 
 private:
 
-  MesytecReadout hit;
+  Readout hit;
 
   size_t trigger_count_{0};
   uint32_t high_time_{0};

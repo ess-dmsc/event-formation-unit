@@ -18,7 +18,7 @@
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
-#include <multigrid/mgmesytec/Sis3153Parser.h>
+#include <multigrid/mesytec/Sis3153Parser.h>
 
 #include <multigrid/geometry/SequoiaGeometry.h>
 //#include <multigrid/geometry/MG24Geometry.h>
@@ -94,7 +94,7 @@ void MGMesytecBase::init_config()
 
   if (!MGMesytecSettings.FilePrefix.empty())
   {
-    dumpfile = Multigrid::MesytecReadoutFile::create(
+    dumpfile = Multigrid::ReadoutFile::create(
         MGMesytecSettings.FilePrefix + "mgmesytec_" + timeString(), 100);
   }
   vmmr16Parser.spoof_high_time(mg_config.spoof_high_time);

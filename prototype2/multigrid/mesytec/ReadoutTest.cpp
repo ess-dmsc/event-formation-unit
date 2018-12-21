@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multigrid/mgmesytec/MesytecReadout.h>
+#include <multigrid/mesytec/Readout.h>
 #include <test/TestBase.h>
 
 using namespace Multigrid;
@@ -18,7 +18,7 @@ protected:
 };
 
 TEST_F(MGHitTest, PrintsSelf) {
-  MesytecReadout h;
+  Readout h;
   EXPECT_FALSE(h.debug().empty());
   // Don't really care about particular contents here
 }
@@ -28,7 +28,7 @@ TEST_F(MGHitTest, CompoundMapping) {
   // you have broken dumpfile compatibility, and you should
   // bump FormatVersion for the struct
 
-  auto t = hdf5::datatype::create<MesytecReadout>();
+  auto t = hdf5::datatype::create<Readout>();
 
   EXPECT_EQ(t.number_of_fields(), 10ul);
   EXPECT_EQ(t.get_class(), hdf5::datatype::Class::COMPOUND);
@@ -67,7 +67,7 @@ TEST_F(MGHitTest, CompoundMapping) {
 }
 
 TEST_F(MGHitTest, CreateFile) {
-  MesytecReadoutFile::create("hit_file_test");
+  ReadoutFile::create("hit_file_test");
   EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test_00000.h5"));
 }
 

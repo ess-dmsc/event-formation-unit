@@ -24,11 +24,11 @@ uint64_t EfuPrioritized::time() const {
   return time_;
 }
 
-size_t EfuPrioritized::ingest(const std::vector<MesytecReadout> &hits) {
+size_t EfuPrioritized::ingest(const std::vector<Readout> &hits) {
   this->reset();
 
-  std::vector<MesytecReadout> wires;
-  std::vector<MesytecReadout> grids;
+  std::vector<Readout> wires;
+  std::vector<Readout> grids;
 
   for (auto h : hits) {
     time_ = std::max(h.total_time, time_);

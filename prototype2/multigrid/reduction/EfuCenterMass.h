@@ -18,10 +18,10 @@ public:
   EfuCenterMass() = default;
   ~EfuCenterMass() = default;
 
-  size_t ingest(const std::vector<MesytecReadout>& hits) override;
+  size_t ingest(const std::vector<Readout>& hits) override;
 
   void reset();
-  bool ingest(const MesytecReadout& hit);
+  bool ingest(const Readout& hit);
   bool event_good() const override;
 
   uint32_t x() const override;

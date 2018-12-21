@@ -1,14 +1,14 @@
 set(EfuMaximumTest_SRC
   ../../common/Hists.cpp
   ../../common/ReadoutSerializer.cpp
-  ../mgmesytec/MesytecReadout.cpp
+  ../mesytec/Readout.cpp
   EfuMaximumTest.cpp
   EfuMaximum.cpp
   )
 set(EfuMaximumTest_INC
   ../../common/Hists.h
   ../../common/ReadoutSerializer.h
-  ../mgmesytec/MesytecReadout.h
+  ../mesytec/Readout.h
   ../geometry/SequoiaGeometry.h
   Efu.h
   EfuMaximum.h
@@ -18,14 +18,14 @@ create_test_executable(EfuMaximumTest)
 set(EfuCenterMassTest_SRC
   ../../common/Hists.cpp
   ../../common/ReadoutSerializer.cpp
-  ../mgmesytec/MesytecReadout.cpp
+  ../mesytec/Readout.cpp
   EfuCenterMassTest.cpp
   EfuCenterMass.cpp
   )
 set(EfuCenterMassTest_INC
   ../../common/Hists.h
   ../../common/ReadoutSerializer.h
-  ../mgmesytec/MesytecReadout.h
+  ../mesytec/Readout.h
   ../geometry/SequoiaGeometry.h
   Efu.h
   EfuCenterMass.h
@@ -35,14 +35,14 @@ create_test_executable(EfuCenterMassTest)
 set(EfuPrioritizedTest_SRC
   ../../common/Hists.cpp
   ../../common/ReadoutSerializer.cpp
-  ../mgmesytec/MesytecReadout.cpp
+  ../mesytec/Readout.cpp
   EfuPrioritizedTest.cpp
   EfuPrioritized.cpp
   )
 set(EfuPrioritizedTest_INC
   ../../common/Hists.h
   ../../common/ReadoutSerializer.h
-  ../mgmesytec/MesytecReadout.h
+  ../mesytec/Readout.h
   ../geometry/SequoiaGeometry.h
   Efu.h
   EfuCenterMass.h

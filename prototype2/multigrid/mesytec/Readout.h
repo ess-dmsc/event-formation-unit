@@ -38,7 +38,7 @@
 
 namespace Multigrid {
 
-struct __attribute__ ((packed)) MesytecReadout {
+struct __attribute__ ((packed)) Readout {
   /// \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "mgmesytec_hits"; }
   static uint16_t FormatVersion() { return 0; }
@@ -67,9 +67,9 @@ namespace hdf5 {
 
 namespace datatype {
 template<>
-class TypeTrait<Multigrid::MesytecReadout> {
+class TypeTrait<Multigrid::Readout> {
 public:
-  H5_COMPOUND_DEFINE_TYPE(Multigrid::MesytecReadout) {
+  H5_COMPOUND_DEFINE_TYPE(Multigrid::Readout) {
     H5_COMPOUND_INIT;
     /// Make sure ALL member variables are inserted
     H5_COMPOUND_INSERT_MEMBER(trigger_count);
@@ -91,6 +91,6 @@ public:
 
 namespace Multigrid {
 
-using MesytecReadoutFile = DumpFile<MesytecReadout>;
+using ReadoutFile = DumpFile<Readout>;
 
 }

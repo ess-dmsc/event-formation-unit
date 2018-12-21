@@ -8,7 +8,7 @@
 
 namespace Multigrid {
 
-size_t EfuMaximum::ingest(const std::vector<MesytecReadout> &hits) {
+size_t EfuMaximum::ingest(const std::vector<Readout> &hits) {
   this->reset();
 
   size_t ret{0};
@@ -47,7 +47,7 @@ uint64_t EfuMaximum::time() const {
   return time_;
 }
 
-bool EfuMaximum::ingest(const MesytecReadout &hit) {
+bool EfuMaximum::ingest(const Readout &hit) {
   auto adc = mappings.rescale(hit.bus, hit.channel, hit.adc);
 
   if (!mappings.is_valid(hit.bus, hit.channel, adc))

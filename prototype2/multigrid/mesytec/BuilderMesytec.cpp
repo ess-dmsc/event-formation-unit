@@ -1,6 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <multigrid/mgmesytec/MesytecBuilder.h>
+#include <multigrid/mesytec/BuilderMesytec.h>
 
 #include <common/Trace.h>
 // #undef TRC_LEVEL
@@ -8,7 +8,7 @@
 
 namespace Multigrid {
 
-void MesytecBuilder::parse(Buffer<uint8_t> buffer) {
+void BuilderMesytec::parse(Buffer<uint8_t> buffer) {
 
 
   stats_discarded_bytes += sis3153parser.parse(Buffer<uint8_t>(buffer));

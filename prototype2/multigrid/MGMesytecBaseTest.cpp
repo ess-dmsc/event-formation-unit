@@ -11,7 +11,7 @@
 #include <test/TestBase.h>
 
 // \todo use reference data
-#include <multigrid/mgmesytec/TestData.h>
+#include <multigrid/mesytec/TestData.h>
 
 std::string mgconfigjson = R"(
   {

@@ -11,7 +11,7 @@
 #include <memory>
 #include <common/Hists.h>
 #include <common/ReadoutSerializer.h>
-#include <multigrid/mgmesytec/MesytecReadout.h>
+#include <multigrid/mesytec/Readout.h>
 #include <multigrid/geometry/SequoiaGeometry.h>
 
 namespace Multigrid {
@@ -27,7 +27,7 @@ public:
   std::shared_ptr<ReadoutSerializer> raw1;
   std::shared_ptr<ReadoutSerializer> raw2;
 
-  virtual size_t ingest(const std::vector<MesytecReadout> &hits) = 0;
+  virtual size_t ingest(const std::vector<Readout> &hits) = 0;
   virtual bool event_good() const = 0;
 
   virtual uint32_t x() const = 0;

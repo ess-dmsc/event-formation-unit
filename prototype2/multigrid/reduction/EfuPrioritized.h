@@ -18,7 +18,7 @@ public:
   EfuPrioritized() = default;
   ~EfuPrioritized() = default;
 
-  size_t ingest(const std::vector<MesytecReadout>& hits) override;
+  size_t ingest(const std::vector<Readout>& hits) override;
 
   void reset();
   bool event_good() const override;

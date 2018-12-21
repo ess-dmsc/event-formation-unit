@@ -24,7 +24,7 @@ uint64_t EfuCenterMass::time() const {
   return time_;
 }
 
-size_t EfuCenterMass::ingest(const std::vector<MesytecReadout> &hits) {
+size_t EfuCenterMass::ingest(const std::vector<Readout> &hits) {
   this->reset();
 
   size_t ret{0};
@@ -53,7 +53,7 @@ void EfuCenterMass::reset() {
 
 // \todo pick only a few data points
 
-bool EfuCenterMass::ingest(const MesytecReadout &hit) {
+bool EfuCenterMass::ingest(const Readout &hit) {
   auto adc = mappings.rescale(hit.bus, hit.channel, hit.adc);
 
   if (!mappings.is_valid(hit.bus, hit.channel, adc))

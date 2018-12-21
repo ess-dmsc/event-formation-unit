@@ -20,7 +20,7 @@ TEST_F(EfuMaximumTest, DefaultConstructed) {
 }
 
 TEST_F(EfuMaximumTest, WireOnly) {
-  MesytecReadout wire_hit;
+  Readout wire_hit;
   wire_hit.channel = 7;
   EXPECT_TRUE(efu.mappings.isWire(wire_hit.bus, wire_hit.channel));
   efu.ingest(wire_hit);
@@ -30,7 +30,7 @@ TEST_F(EfuMaximumTest, WireOnly) {
 }
 
 TEST_F(EfuMaximumTest, GridOnly) {
-  MesytecReadout grid_hit;
+  Readout grid_hit;
   grid_hit.channel = 90;
   EXPECT_TRUE(efu.mappings.isGrid(grid_hit.bus, grid_hit.channel));
   efu.ingest(grid_hit);
@@ -39,12 +39,12 @@ TEST_F(EfuMaximumTest, GridOnly) {
 }
 
 TEST_F(EfuMaximumTest, WireAndGrid) {
-  MesytecReadout wire_hit;
+  Readout wire_hit;
   wire_hit.channel = 7;
   EXPECT_TRUE(efu.mappings.isWire(wire_hit.bus, wire_hit.channel));
   efu.ingest(wire_hit);
 
-  MesytecReadout grid_hit;
+  Readout grid_hit;
   grid_hit.channel = 90;
   EXPECT_TRUE(efu.mappings.isGrid(grid_hit.bus, grid_hit.channel));
   efu.ingest(grid_hit);
@@ -57,19 +57,19 @@ TEST_F(EfuMaximumTest, WireAndGrid) {
 }
 
 TEST_F(EfuMaximumTest, HighestAdcWire) {
-  MesytecReadout hit1;
+  Readout hit1;
   hit1.channel = 7;
   efu.ingest(hit1);
   EXPECT_EQ(efu.x(), efu.mappings.x(hit1.bus, hit1.channel));
 
-  MesytecReadout hit2;
+  Readout hit2;
   hit2.channel = 9;
   hit2.adc = 16;
   efu.ingest(hit2);
   EXPECT_EQ(efu.x(), efu.mappings.x(hit2.bus, hit2.channel));
 
 
-  MesytecReadout hit3;
+  Readout hit3;
   hit3.channel = 50;
   hit3.adc = 8;
   efu.ingest(hit3);
@@ -77,19 +77,19 @@ TEST_F(EfuMaximumTest, HighestAdcWire) {
 }
 
 TEST_F(EfuMaximumTest, HighestAdcGrid) {
-  MesytecReadout hit1;
+  Readout hit1;
   hit1.channel = 97;
   efu.ingest(hit1);
   EXPECT_EQ(efu.y(), efu.mappings.y(hit1.bus, hit1.channel));
 
-  MesytecReadout hit2;
+  Readout hit2;
   hit2.channel = 99;
   hit2.adc = 16;
   efu.ingest(hit2);
   EXPECT_EQ(efu.y(), efu.mappings.y(hit2.bus, hit2.channel));
 
 
-  MesytecReadout hit3;
+  Readout hit3;
   hit3.channel = 99;
   hit3.adc = 8;
   efu.ingest(hit3);

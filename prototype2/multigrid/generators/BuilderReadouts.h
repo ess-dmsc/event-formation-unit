@@ -2,14 +2,14 @@
 
 #pragma once
 #include <multigrid/AbstractBuilder.h>
-#include <multigrid/mgmesytec/MesytecReadout.h>
+#include <multigrid/mesytec/Readout.h>
 #include <multigrid/geometry/SequoiaGeometry.h>
 
 namespace Multigrid {
 
-class ReadoutBuilder : public AbstractBuilder {
+class BuilderReadouts : public AbstractBuilder {
 public:
-  ReadoutBuilder();
+  BuilderReadouts();
 
   void parse(Buffer<uint8_t> buffer) override;
 
@@ -18,7 +18,7 @@ public:
   SequoiaGeometry digital_geometry;
 
 private:
-  std::vector<MesytecReadout> converted_data;
+  std::vector<Readout> converted_data;
 
   Hit hit;
 };

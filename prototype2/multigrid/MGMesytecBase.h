@@ -14,7 +14,7 @@
 #include <common/Log.h>
 #include <common/ReadoutSerializer.h>
 #include <multigrid/MgConfig.h>
-#include <multigrid/mgmesytec/Vmmr16Parser.h>
+#include <multigrid/mesytec/Vmmr16Parser.h>
 #include <multigrid/reduction/Efu.h>
 
 struct MGMesytecSettings {
@@ -127,5 +127,5 @@ protected:
   Multigrid::VMMR16Parser vmmr16Parser;
 
   std::shared_ptr<Multigrid::Efu> mgEfu;
-  std::shared_ptr<Multigrid::MesytecReadoutFile> dumpfile;
+  std::shared_ptr<Multigrid::ReadoutFile> dumpfile;
 };

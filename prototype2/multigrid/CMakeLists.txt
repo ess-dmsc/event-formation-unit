@@ -8,9 +8,9 @@ set(mgmesytec_common_src
   ../common/Hists.cpp
   ../common/HistSerializer.cpp
   ../common/ReadoutSerializer.cpp
-  mgmesytec/Vmmr16Parser.cpp
-  mgmesytec/Sis3153Parser.cpp
-  mgmesytec/MesytecReadout.cpp
+  mesytec/Vmmr16Parser.cpp
+  mesytec/Sis3153Parser.cpp
+  mesytec/Readout.cpp
   reduction/EfuMaximum.cpp
   reduction/EfuCenterMass.cpp
   reduction/EfuPrioritized.cpp
@@ -23,9 +23,9 @@ set(mgmesytec_common_inc
   ../common/ReadoutSerializer.h
   geometry/SequoiaGeometry.h
   geometry/BusGeometry.h
-  mgmesytec/Vmmr16Parser.h
-  mgmesytec/Sis3153Parser.h
-  mgmesytec/MesytecReadout.h
+  mesytec/Vmmr16Parser.h
+  mesytec/Sis3153Parser.h
+  mesytec/Readout.h
   reduction/Efu.h
   reduction/EfuMaximum.h
   reduction/EfuCenterMass.h
@@ -53,7 +53,7 @@ get_filename_component(TEST_JSON_PATH "configs/ILL_mappings.json" DIRECTORY)
 set(TEST_JSON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${TEST_JSON_PATH}/")
 
 add_subdirectory(geometry)
-add_subdirectory(mgmesytec)
+add_subdirectory(mesytec)
 add_subdirectory(generators)
 add_subdirectory(reduction)
 

@@ -1,8 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multigrid/mgmesytec/Sis3153Parser.h>
-#include <multigrid/mgmesytec/Vmmr16Parser.h>
-#include <multigrid/mgmesytec/TestData.h>
+#include <multigrid/mesytec/Sis3153Parser.h>
+#include <multigrid/mesytec/Vmmr16Parser.h>
+#include <multigrid/mesytec/TestData.h>
 #include <test/TestBase.h>
 
 using namespace Multigrid;

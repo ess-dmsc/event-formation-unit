@@ -1,6 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <multigrid/mgmesytec/Sis3153Parser.h>
+#include <multigrid/mesytec/Sis3153Parser.h>
 #include <netinet/in.h>
 
 #include <common/Trace.h>

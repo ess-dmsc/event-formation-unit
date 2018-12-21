@@ -1,6 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <multigrid/mgmesytec/Vmmr16Parser.h>
+#include <multigrid/mesytec/Vmmr16Parser.h>
 
 #include <common/Trace.h>
 // #undef TRC_LEVEL
@@ -72,7 +72,7 @@ size_t VMMR16Parser::parse(Buffer<uint32_t> buffer) {
 
   converted_data.clear();
   external_trigger_ = false;
-  hit = MesytecReadout();
+  hit = Readout();
 
   trigger_count_++;
   hit.trigger_count = trigger_count_;

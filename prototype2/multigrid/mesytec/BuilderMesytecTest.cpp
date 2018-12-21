@@ -1,16 +1,16 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multigrid/mgmesytec/MesytecBuilder.h>
-#include <multigrid/mgmesytec/TestData.h>
+#include <multigrid/mesytec/BuilderMesytec.h>
+#include <multigrid/mesytec/TestData.h>
 #include <multigrid/MgConfig.h>
 #include <tools/ReaderPcap.h>
 #include <test/TestBase.h>
 
 using namespace Multigrid;
 
-class MesytecBuilderTest : public TestBase {
+class BuilderMesytecTest : public TestBase {
 protected:
-  MesytecBuilder builder;
+  BuilderMesytec builder;
   virtual void SetUp() {
   }
   virtual void TearDown() {
@@ -25,7 +25,7 @@ protected:
 
 // \todo use reference config and data
 
-TEST_F(MesytecBuilderTest, ErrNoTimeStamp) {
+TEST_F(BuilderMesytecTest, ErrNoTimeStamp) {
   load_config(TEST_JSON_PATH "ILL_mappings.json");
   builder.parse(err_no_timestamp);
 
@@ -37,7 +37,7 @@ TEST_F(MesytecBuilderTest, ErrNoTimeStamp) {
   EXPECT_EQ(builder.ConvertedData.size(), 0);
 }
 
-TEST_F(MesytecBuilderTest, ParseRecordedWSData) {
+TEST_F(BuilderMesytecTest, ParseRecordedWSData) {
   load_config(TEST_JSON_PATH "ILL_mappings.json");
   builder.parse(ws1);
 
@@ -49,7 +49,7 @@ TEST_F(MesytecBuilderTest, ParseRecordedWSData) {
   EXPECT_EQ(builder.ConvertedData.size(), 120);
 }
 
-TEST_F(MesytecBuilderTest, ParseRecordedWSDataII) {
+TEST_F(BuilderMesytecTest, ParseRecordedWSDataII) {
   load_config(TEST_JSON_PATH "ILL_mappings.json");
   builder.parse(ws2);
 
@@ -61,7 +61,7 @@ TEST_F(MesytecBuilderTest, ParseRecordedWSDataII) {
   EXPECT_EQ(builder.ConvertedData.size(), 240);
 }
 
-TEST_F(MesytecBuilderTest, ParseRecordedWSDataIII) {
+TEST_F(BuilderMesytecTest, ParseRecordedWSDataIII) {
   load_config(TEST_JSON_PATH "ILL_mappings.json");
   builder.parse(ws3);
 
@@ -73,7 +73,7 @@ TEST_F(MesytecBuilderTest, ParseRecordedWSDataIII) {
   EXPECT_EQ(builder.ConvertedData.size(), 240);
 }
 
-TEST_F(MesytecBuilderTest, ParseRecordedWSDataMultipleTriggers) {
+TEST_F(BuilderMesytecTest, ParseRecordedWSDataMultipleTriggers) {
   load_config(TEST_JSON_PATH "ILL_mappings.json");
   builder.parse(ws4);
 
@@ -85,7 +85,7 @@ TEST_F(MesytecBuilderTest, ParseRecordedWSDataMultipleTriggers) {
   EXPECT_EQ(builder.ConvertedData.size(), 54);
 }
 
-TEST_F(MesytecBuilderTest, PCap2) {
+TEST_F(BuilderMesytecTest, PCap2) {
   load_config(TEST_DATA_PATH "Sequoia_mappings.json");
 
   ReaderPcap pcap(TEST_DATA_PATH "wireshark/Si_WHITE_1att_mvmeCrash.pcapng");
@@ -110,7 +110,7 @@ TEST_F(MesytecBuilderTest, PCap2) {
   EXPECT_EQ(builder.ConvertedData.size(), 0);
 }
 
-TEST_F(MesytecBuilderTest, PCap3) {
+TEST_F(BuilderMesytecTest, PCap3) {
   load_config(TEST_DATA_PATH "Sequoia_mappings.json");
 
   ReaderPcap pcap(TEST_DATA_PATH "wireshark/endOfHFSeries_mvmeCrash.pcapng");

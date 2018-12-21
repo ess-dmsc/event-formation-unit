@@ -8,7 +8,7 @@ using namespace Multigrid;
 class EfuPrioritizedTest : public TestBase {
 protected:
   EfuPrioritized efu;
-  std::vector<MesytecReadout> hits;
+  std::vector<Readout> hits;
   virtual void SetUp() {
     efu.mappings.add_bus(BusGeometry());
   }
@@ -21,7 +21,7 @@ TEST_F(EfuPrioritizedTest, DefaultConstructed) {
 }
 
 TEST_F(EfuPrioritizedTest, WireOnly) {
-  MesytecReadout wire_hit;
+  Readout wire_hit;
   wire_hit.adc = 10;
   wire_hit.channel = 7;
   EXPECT_TRUE(efu.mappings.isWire(wire_hit.bus, wire_hit.channel));
@@ -33,7 +33,7 @@ TEST_F(EfuPrioritizedTest, WireOnly) {
 }
 
 TEST_F(EfuPrioritizedTest, GridOnly) {
-  MesytecReadout grid_hit;
+  Readout grid_hit;
   grid_hit.adc = 10;
   grid_hit.channel = 90;
   EXPECT_TRUE(efu.mappings.isGrid(grid_hit.bus, grid_hit.channel));
@@ -44,13 +44,13 @@ TEST_F(EfuPrioritizedTest, GridOnly) {
 }
 
 TEST_F(EfuPrioritizedTest, WireAndGrid) {
-  MesytecReadout wire_hit;
+  Readout wire_hit;
   wire_hit.adc = 10;
   wire_hit.channel = 7;
   EXPECT_TRUE(efu.mappings.isWire(wire_hit.bus, wire_hit.channel));
   hits.push_back(wire_hit);
 
-  MesytecReadout grid_hit;
+  Readout grid_hit;
   grid_hit.adc = 10;
   grid_hit.channel = 90;
   EXPECT_TRUE(efu.mappings.isGrid(grid_hit.bus, grid_hit.channel));
@@ -66,21 +66,21 @@ TEST_F(EfuPrioritizedTest, WireAndGrid) {
 }
 
 TEST_F(EfuPrioritizedTest, HighestAdcWire) {
-  MesytecReadout hit1;
+  Readout hit1;
   hit1.channel = 10;
   hit1.adc = 10;
   hits.push_back(hit1);
   efu.ingest(hits);
   EXPECT_EQ(efu.x(), efu.mappings.x(hit1.bus, hit1.channel));
 
-  MesytecReadout hit2;
+  Readout hit2;
   hit2.channel = 25;
   hit2.adc = 5;
   hits.push_back(hit2);
   efu.ingest(hits);
   EXPECT_EQ(efu.x(), 0);
 
-  MesytecReadout hit3;
+  Readout hit3;
   hit3.channel = 50;
   hit3.adc = 20;
   hits.push_back(hit3);
@@ -89,14 +89,14 @@ TEST_F(EfuPrioritizedTest, HighestAdcWire) {
 }
 
 TEST_F(EfuPrioritizedTest, HighestAdcGrid) {
-  MesytecReadout hit1;
+  Readout hit1;
   hit1.adc = 10;
   hit1.channel = 90;
   hits.push_back(hit1);
   efu.ingest(hits);
   EXPECT_EQ(efu.y(), efu.mappings.y(hit1.bus, hit1.channel));
 
-  MesytecReadout hit2;
+  Readout hit2;
   hit2.adc = 10;
   hit2.channel = 100;
   hits.push_back(hit2);
@@ -104,7 +104,7 @@ TEST_F(EfuPrioritizedTest, HighestAdcGrid) {
   EXPECT_EQ(efu.y(), 15);
 
 
-  MesytecReadout hit3;
+  Readout hit3;
   hit3.adc = 20;
   hit3.channel = 110;
   hits.push_back(hit3);

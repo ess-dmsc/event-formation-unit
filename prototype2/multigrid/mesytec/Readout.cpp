@@ -1,11 +1,11 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multigrid/mgmesytec/MesytecReadout.h>
+#include <multigrid/mesytec/Readout.h>
 #include <sstream>
 
 namespace Multigrid {
 
-std::string MesytecReadout::debug() const {
+std::string Readout::debug() const {
   // \todo use fmt
   std::stringstream ss;
   ss << " trigger_count=" << trigger_count;

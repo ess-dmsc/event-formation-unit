@@ -1,9 +1,9 @@
 set(MGHitTest_SRC
-  MesytecReadoutTest.cpp
-  MesytecReadout.cpp
+  ReadoutTest.cpp
+  Readout.cpp
   )
 set(MGHitTest_INC
-  MesytecReadout.h
+  Readout.h
   )
 create_test_executable(MGHitTest SKIP_MEMGRIND)
 
@@ -22,46 +22,46 @@ set(Vmmr16ParserTest_SRC
   Vmmr16ParserTest.cpp
   Vmmr16Parser.cpp
   Sis3153Parser.cpp
-  MesytecReadout.cpp
+  Readout.cpp
   )
 set(Vmmr16ParserTest_INC
   ../../common/Buffer.h
   Sis3153Parser.h
   Vmmr16Parser.h
-  MesytecReadout.h
+  Readout.h
   TestData.h
   )
 create_test_executable(Vmmr16ParserTest)
 
 set(TEST_DATA_PATH "${REFDATA}/multigrid/2018_08_30")
 if(EXISTS ${TEST_DATA_PATH})
-  set(MesytecBuilderTest_SRC
-    MesytecBuilder.cpp
-    MesytecBuilderTest.cpp
+  set(BuilderMesytecTest_SRC
+    BuilderMesytec.cpp
+    BuilderMesytecTest.cpp
     Vmmr16Parser.cpp
     Sis3153Parser.cpp
-    MesytecReadout.cpp
+    Readout.cpp
     ../../tools/ReaderPcap.cpp
     ../MgConfig.cpp
     )
-  set(MesytecBuilderTest_INC
-    MesytecBuilder.h
+  set(BuilderMesytecTest_INC
+    BuilderMesytec.h
     ../../common/Buffer.h
     Sis3153Parser.h
     Vmmr16Parser.h
-    MesytecReadout.h
+    Readout.h
     TestData.h
     ../geometry/SequoiaGeometry.h
     ../../tools/ReaderPcap.h
     ../MgConfig.h
     )
-  set(MesytecBuilderTest_LIB
+  set(BuilderMesytecTest_LIB
     ${PCAP_LIBRARY}
     )
-  create_test_executable(MesytecBuilderTest)
-  target_compile_definitions(MesytecBuilderTest
+  create_test_executable(BuilderMesytecTest)
+  target_compile_definitions(BuilderMesytecTest
     PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}/")
-  target_compile_definitions(MesytecBuilderTest
+  target_compile_definitions(BuilderMesytecTest
     PRIVATE TEST_JSON_PATH="${TEST_JSON_PATH}/")
 else()
   message(WARNING "*** No multigrid reference data found. Skipping relevant tests.")
