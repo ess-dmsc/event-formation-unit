@@ -9,6 +9,7 @@ find_package(LibRDKafka REQUIRED)
 find_package(fmt REQUIRED)
 find_package(GraylogLogger REQUIRED)
 find_package(h5cpp REQUIRED)
+find_package(PCAP REQUIRED)
 
 set(EFU_COMMON_LIBS
   ${CMAKE_DL_LIBS}

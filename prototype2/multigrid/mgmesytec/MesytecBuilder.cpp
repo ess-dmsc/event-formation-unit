@@ -28,27 +28,38 @@ void MesytecBuilder::parse(Buffer<uint8_t> buffer) {
 
     }
 
+    stats_trigger_count = vmmr16Parser.trigger_count();
+
     for (const auto& r : vmmr16Parser.converted_data) {
-      if (!digital_geometry.is_valid(r.bus, r.channel, r.adc))
-        continue;
       if (digital_geometry.isWire(r.bus, r.channel)) {
-        hit.plane = 0;
-        hit.coordinate = digital_geometry.wire(r.bus, r.channel);
         hit.weight = digital_geometry.rescale(r.bus, r.channel, r.adc);
+        if (!digital_geometry.is_valid(r.bus, r.channel, hit.weight)) {
+          stats_readout_filter_rejects++;
+          continue;
+        }
+        hit.coordinate = digital_geometry.wire(r.bus, r.channel);
+        hit.plane = 0;
       }
       else if (digital_geometry.isGrid(r.bus, r.channel)) {
-        hit.plane = 1;
-        hit.coordinate = digital_geometry.grid(r.bus, r.channel);
         hit.weight = digital_geometry.rescale(r.bus, r.channel, r.adc);
+        if (!digital_geometry.is_valid(r.bus, r.channel, hit.weight)) {
+          stats_readout_filter_rejects++;
+          continue;
+        }
+        hit.coordinate = digital_geometry.grid(r.bus, r.channel);
+        hit.plane = 1;
       }
-
-      if (r.external_trigger) {
+      else if (r.external_trigger) {
         hit.plane = 99;
         hit.coordinate = 0;
         hit.weight = 0;
       }
-      hit.time = r.total_time;
+      else {
+        stats_digital_geom_errors++;
+        continue;
+      }
 
+      hit.time = r.total_time;
       ConvertedData.push_back(hit);
     }
 

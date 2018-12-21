@@ -41,6 +41,8 @@ if(EXISTS ${TEST_DATA_PATH})
     Vmmr16Parser.cpp
     Sis3153Parser.cpp
     MesytecReadout.cpp
+    ../../tools/ReaderPcap.cpp
+    ../MgConfig.cpp
     )
   set(MesytecBuilderTest_INC
     MesytecBuilder.h
@@ -50,11 +52,18 @@ if(EXISTS ${TEST_DATA_PATH})
     MesytecReadout.h
     TestData.h
     ../geometry/SequoiaGeometry.h
+    ../../tools/ReaderPcap.h
+    ../MgConfig.h
+    )
+  set(MesytecBuilderTest_LIB
+    ${PCAP_LIBRARY}
     )
   create_test_executable(MesytecBuilderTest)
   target_compile_definitions(MesytecBuilderTest
-    PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}")
+    PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}/")
+  target_compile_definitions(MesytecBuilderTest
+    PRIVATE TEST_JSON_PATH="${TEST_JSON_PATH}/")
 else()
-  message(WARNING "*** No gdgem reference data found. Skipping relevant tests.")
+  message(WARNING "*** No multigrid reference data found. Skipping relevant tests.")
 endif()
 
