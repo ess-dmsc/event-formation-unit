@@ -74,3 +74,17 @@ set(EfuPrioritizedTest_INC
   EfuCenterMass.h
   )
 create_test_executable(EfuPrioritizedTest)
+
+set(MGEventAnalysisTest_SRC
+  ../../common/clustering/Hit.cpp
+  ../../common/clustering/Event.cpp
+  EventAnalysisTest.cpp
+  EventAnalysis.cpp
+  )
+set(MGEventAnalysisTest_INC
+  ../../common/clustering/Hit.h
+  ../../common/clustering/Event.h
+  ../geometry/SequoiaGeometry.h
+  EventAnalysis.h
+  )
+create_test_executable(MGEventAnalysisTest)
