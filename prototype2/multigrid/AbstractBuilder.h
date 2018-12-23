@@ -9,6 +9,10 @@ namespace Multigrid {
 
 class AbstractBuilder {
 public:
+  static constexpr uint8_t wire_plane {0};
+  static constexpr uint8_t grid_plane {1};
+  static constexpr uint8_t external_trigger_plane {99};
+
   virtual void parse(Buffer<uint8_t> buffer) = 0;
 
   std::vector<Hit> ConvertedData;

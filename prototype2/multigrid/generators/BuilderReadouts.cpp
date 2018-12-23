@@ -24,7 +24,7 @@ void BuilderReadouts::parse(Buffer<uint8_t> buffer) {
 
   for (const auto &r : converted_data) {
     if (r.external_trigger) {
-      hit.plane = 99;
+      hit.plane = external_trigger_plane;
       hit.coordinate = 0;
       hit.weight = 0;
     } else if (digital_geometry.isWire(r.bus, r.channel)) {
@@ -34,7 +34,7 @@ void BuilderReadouts::parse(Buffer<uint8_t> buffer) {
         continue;
       }
       hit.coordinate = digital_geometry.wire(r.bus, r.channel);
-      hit.plane = 0;
+      hit.plane = wire_plane;
     } else if (digital_geometry.isGrid(r.bus, r.channel)) {
       hit.weight = digital_geometry.rescale(r.bus, r.channel, r.adc);
       if (!digital_geometry.is_valid(r.bus, r.channel, hit.weight)) {
@@ -42,7 +42,7 @@ void BuilderReadouts::parse(Buffer<uint8_t> buffer) {
         continue;
       }
       hit.coordinate = digital_geometry.grid(r.bus, r.channel);
-      hit.plane = 1;
+      hit.plane = grid_plane;
     } else {
       XTRACE(PROCESS, DEB, "Bad geometry %s", r.debug().c_str());
       stats_digital_geom_errors++;

@@ -19,7 +19,6 @@ create_executable(mggen_readouts)
 
 set(TEST_DATA_PATH "${REFDATA}/multigrid/2018_09_03")
 if(EXISTS ${TEST_DATA_PATH})
-
   set(MGBuilderReadoutsTest_SRC
     BuilderReadouts.cpp
     BuilderReadoutsTest.cpp
@@ -35,14 +34,9 @@ if(EXISTS ${TEST_DATA_PATH})
     ../geometry/SequoiaGeometry.h
     ../MgConfig.h
     )
-  set(MGBuilderReadoutsTest_LIB
-    ${PCAP_LIBRARY}
-    )
   create_test_executable(MGBuilderReadoutsTest)
   target_compile_definitions(MGBuilderReadoutsTest
     PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}/")
-  target_compile_definitions(MGBuilderReadoutsTest
-    PRIVATE TEST_JSON_PATH="${TEST_JSON_PATH}/")
 else()
   message(WARNING "*** No multigrid reference data found. Skipping BuilderReadouts tests.")
 endif()
