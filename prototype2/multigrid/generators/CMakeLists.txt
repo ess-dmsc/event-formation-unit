@@ -2,20 +2,20 @@
 # Raw evenlet generator (h5)
 #=============================================================================
 
-#set(mggen_readouts_SRC
-#  ../../common/clustering/Hit.cpp
-#  mggen_readouts.cpp
-#  ../mesytec/Readout.cpp
-#  ReaderReadouts.cpp
-#  MGArgs.cpp
-#  )
-#set(mggen_readouts_INC
-#  ../../common/clustering/Hit.h
-#  ../mesytec/Readout.h
-#  ReaderReadouts.h
-#  MGArgs.h
-#  )
-#create_executable(mggen_readouts)
+set(mggen_readouts_SRC
+  ../../common/clustering/Hit.cpp
+  mggen_readouts.cpp
+  ../mesytec/Readout.cpp
+  ReaderReadouts.cpp
+  MGArgs.cpp
+  )
+set(mggen_readouts_INC
+  ../../common/clustering/Hit.h
+  ../mesytec/Readout.h
+  ReaderReadouts.h
+  MGArgs.h
+  )
+create_executable(mggen_readouts)
 
 set(TEST_DATA_PATH "${REFDATA}/multigrid/2018_09_03")
 if(EXISTS ${TEST_DATA_PATH})

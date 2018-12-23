@@ -20,18 +20,18 @@ void BuilderMesytec::parse(Buffer<uint8_t> buffer) {
     if (vmmr16Parser.converted_data.empty())
       continue;
 
+    stats_trigger_count = vmmr16Parser.trigger_count();
+
     if (dumpfile) {
       dumpfile->push(vmmr16Parser.converted_data);
     }
 
-    if (vmmr16Parser.externalTrigger()) {
-
-    }
-
-    stats_trigger_count = vmmr16Parser.trigger_count();
-
     for (const auto& r : vmmr16Parser.converted_data) {
-      if (digital_geometry.isWire(r.bus, r.channel)) {
+      if (r.external_trigger) {
+        hit.plane = 99;
+        hit.coordinate = 0;
+        hit.weight = 0;
+      } else if (digital_geometry.isWire(r.bus, r.channel)) {
         hit.weight = digital_geometry.rescale(r.bus, r.channel, r.adc);
         if (!digital_geometry.is_valid(r.bus, r.channel, hit.weight)) {
           stats_readout_filter_rejects++;
@@ -39,8 +39,7 @@ void BuilderMesytec::parse(Buffer<uint8_t> buffer) {
         }
         hit.coordinate = digital_geometry.wire(r.bus, r.channel);
         hit.plane = 0;
-      }
-      else if (digital_geometry.isGrid(r.bus, r.channel)) {
+      } else if (digital_geometry.isGrid(r.bus, r.channel)) {
         hit.weight = digital_geometry.rescale(r.bus, r.channel, r.adc);
         if (!digital_geometry.is_valid(r.bus, r.channel, hit.weight)) {
           stats_readout_filter_rejects++;
@@ -48,13 +47,8 @@ void BuilderMesytec::parse(Buffer<uint8_t> buffer) {
         }
         hit.coordinate = digital_geometry.grid(r.bus, r.channel);
         hit.plane = 1;
-      }
-      else if (r.external_trigger) {
-        hit.plane = 99;
-        hit.coordinate = 0;
-        hit.weight = 0;
-      }
-      else {
+      } else {
+        XTRACE(PROCESS, DEB, "Bad geometry %s", r.debug().c_str());
         stats_digital_geom_errors++;
         continue;
       }

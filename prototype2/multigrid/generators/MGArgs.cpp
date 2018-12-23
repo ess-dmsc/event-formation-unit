@@ -3,11 +3,11 @@
 #include <cinttypes>
 #include <cstdio>
 #include <cstdlib>
-#include <gdgem/generators/NMXArgs.h>
+#include <multigrid/generators/MGArgs.h>
 #include <getopt.h>
 #include <unistd.h>
 // GCOVR_EXCL_START
-NMXArgs::NMXArgs(int argc, char *argv[]) {
+MGArgs::MGArgs(int argc, char *argv[]) {
 
   int c;
   while (1) {

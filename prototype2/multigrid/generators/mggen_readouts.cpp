@@ -1,25 +1,20 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <cassert>
-#include <cinttypes>
-#include <cstdio>
-#include <cstdlib>
-#include <cstring>
-
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 
-#include <gdgem/generators/NMXArgs.h>
-#include <gdgem/generators/ReaderReadouts.h>
+#include <multigrid/generators/MGArgs.h>
+#include <multigrid/generators/ReaderReadouts.h>
 #include <libs/include/Socket.h>
-#include <unistd.h>
 // GCOVR_EXCL_START
 static constexpr int TscMHz {2900};
 
 int main(int argc, char *argv[]) {
-  NMXArgs opts(argc, argv);
+  MGArgs opts(argc, argv);
+
+  // \todo use CLI11
   if (opts.filename.empty())
-    return 1;
+    return (EXIT_FAILURE);
 
   hdf5::error::Singleton::instance().auto_print(false);
   //  hdf5::error::auto_print(false);
@@ -34,9 +29,9 @@ int main(int argc, char *argv[]) {
   DataSource.setBufferSizes(opts.sndbuf, 0);
   DataSource.printBufferSizes();
 
-  Gem::ReaderReadouts file(opts.filename);
+  Multigrid::ReaderReadouts file(opts.filename);
 
-  int readsz;
+  size_t readsz;
 
   uint64_t tx_total = 0;
   uint64_t txp_total = 0;
@@ -46,18 +41,10 @@ int main(int argc, char *argv[]) {
   TSCTimer report_timer;
   Timer us_clock;
 
-  for (;;) {
-    readsz = file.read(buffer);
-    if (readsz > 0) {
-      DataSource.send(buffer, readsz);
-      tx += readsz;
-      txp++;
-    } else {
-      std::cout << "Sent " << tx_total + tx << " bytes"
-                << " in " << txp_total + txp << " packets." << std::endl;
-      std::cout << "done" << std::endl;
-      exit(0);
-    }
+  while ((readsz = file.read(buffer)) > 0) {
+    DataSource.send(buffer, readsz);
+    tx += readsz;
+    txp++;
 
     if (unlikely((report_timer.timetsc() / TscMHz) >= opts.updint * 1000000)) {
       auto usecs = us_clock.timeus();
@@ -75,6 +62,10 @@ int main(int argc, char *argv[]) {
     usleep(opts.throttle * 1000);
   }
 
-  return 0;
+  std::cout << "Sent " << tx_total + tx << " bytes"
+            << " in " << txp_total + txp << " packets." << std::endl;
+  std::cout << "done" << std::endl;
+
+  return (EXIT_SUCCESS);
 }
 // GCOVR_EXCL_STOP

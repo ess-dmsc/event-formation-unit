@@ -44,12 +44,17 @@ void BuilderReadouts::parse(Buffer<uint8_t> buffer) {
       hit.coordinate = digital_geometry.grid(r.bus, r.channel);
       hit.plane = 1;
     } else {
+      XTRACE(PROCESS, DEB, "Bad geometry %s", r.debug().c_str());
       stats_digital_geom_errors++;
       continue;
     }
 
     hit.time = r.total_time;
     ConvertedData.push_back(hit);
+  }
+
+  if (dumpfile) {
+    dumpfile->push(ConvertedData);
   }
 
 }

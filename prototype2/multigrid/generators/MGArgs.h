@@ -12,12 +12,12 @@
 
 #include <string>
 
-class NMXArgs {
+class MGArgs {
 public:
   /// \brief constructor for program arguments parsed via getopt_long()
   /// \param argc Argument count - typically taken from main()
   /// \param argv Argument array - typically taken from main()
-  NMXArgs(int argc, char *argv[]);
+  MGArgs(int argc, char *argv[]);
 
   std::string filename{}; ///< for single file streaming
 

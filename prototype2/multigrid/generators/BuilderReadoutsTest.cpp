@@ -10,10 +10,10 @@ using namespace Multigrid;
 class BuilderReadoutsTest : public TestBase {
 protected:
   BuilderReadouts builder;
-  size_t packets {0};
-  size_t readouts {0};
-  size_t external_triggers {0};
-  size_t time_errors {0};
+  size_t packets{0};
+  size_t readouts{0};
+  size_t external_triggers{0};
+  size_t time_errors{0};
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
 
   virtual void SetUp() {
@@ -21,39 +21,39 @@ protected:
   virtual void TearDown() {
   }
 
-  void load_config(const std::string& jsonfile) {
+  void load_config(const std::string &jsonfile) {
     Multigrid::Config config(jsonfile);
     builder.digital_geometry = config.mappings;
-    MESSAGE() << "Digital geometry: " << builder.digital_geometry.debug() << "\n";
+    //MESSAGE() << "Digital geometry: " << builder.digital_geometry.debug() << "\n";
   }
 
-  void feed_file(const std::string& filename) {
+  void feed_file(const std::string &filename) {
     ReaderReadouts reader(filename);
 
     readouts = reader.total();
-    
+
     uint8_t buffer[9000];
     size_t readsz;
 
-    for (;;) {
-      readsz = reader.read((char*)&buffer);
-      if (readsz > 0) {
-        packets++;
-        builder.parse(Buffer<uint8_t>(buffer, readsz));
-      } else {
-        break;
-      }
+    while ((readsz = reader.read((char *) &buffer)) > 0) {
+      packets++;
+      builder.parse(Buffer<uint8_t>(buffer, readsz));
     }
   }
 
-  void inspect_converted_data()
-  {
+  void inspect_converted_data() {
     uint64_t RecentPulseTime{0};
 
     uint64_t prev_time{0};
-    for (const auto& h : builder.ConvertedData){
+    for (size_t i=0; i < builder.ConvertedData.size(); ++i) {
 
-//      MESSAGE() << h.debug() << "\n";
+      const auto &h = builder.ConvertedData[i];
+
+      if (prev_time > h.time) {
+        time_errors++;
+//        MESSAGE() << "Timing error [" << i << "]: " << prev_time << " > " << h.time << "\n";
+      }
+      prev_time = h.time;
 
       if (h.plane == 99) {
         external_triggers++;
@@ -63,19 +63,32 @@ protected:
           ShortestPulsePeriod = std::min(ShortestPulsePeriod, PulsePeriod);
         }
         RecentPulseTime = h.time;
+      }
 
-        continue;
-      }
-      if (prev_time > h.time) {
-        time_errors++;
-        MESSAGE() << "Timing error: " << prev_time << " > " << h.time << "\n";
-      }
-      prev_time = h.time;
+//      if ((i > 80000) && (i < 85000)) {
+//        MESSAGE() << h.debug() << "\n";
+//      }
+
     }
 
   }
 };
 
+// OBSERVATIONS
+//
+// Timing errors appear to be happening in two cases:
+//     A) Leftover readouts from previous run that have not been flushed
+//          in either the Mesytec or the SIS electronics
+//     B) Particularly large buffers / uncleared buffers in case of what
+//          we have been referring to as the "bus glitch".
+//
+// Geometry errors are legitimate -- channels are outside the range of where
+//    we expect to see valid data. These cases appear similar to the "bus glitch",
+//    since we see all channels firing.
+//
+// CONSEQUENCES FOR PIPELINE
+//    Timing errors: check for these and flush cluseters when this happens
+//    Geometry errors: do nothing, such readouts are alrady discarded in builder
 
 TEST_F(BuilderReadoutsTest, t00004) {
   load_config(TEST_DATA_PATH "Sequoia_mappings.json");
@@ -130,7 +143,7 @@ TEST_F(BuilderReadoutsTest, t00311) {
 
   EXPECT_EQ(builder.ConvertedData.size(), 84352);
   EXPECT_EQ(builder.ConvertedData.size() + builder.stats_digital_geom_errors,
-      readouts);
+            readouts);
 
   inspect_converted_data();
   EXPECT_EQ(external_triggers, 975);
