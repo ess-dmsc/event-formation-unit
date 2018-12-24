@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/uTPC.h>
+#include <multigrid/reduction/EventAnalysis.h>
 #include <cmath>
 #include <set>
 #include <sstream>
@@ -14,97 +14,90 @@
 #undef TRC_MASK
 #define TRC_MASK 0
 
-namespace Gem {
+namespace Multigrid {
 
-uint32_t utpcResultsPlane::utpc_center_rounded() const {
-  return static_cast<uint32_t>(std::round(utpc_center));
-}
-
-std::string utpcResultsPlane::debug() const {
-  return fmt::format("{}(lu={},uu={})", utpc_center, uncert_lower, uncert_upper);
-}
-
-std::string utpcResults::debug() const {
-  return fmt::format("x={}, y={}, t={}", x.debug(), y.debug(), time);
+std::string NeutronPosition::debug() const {
+  return fmt::format("x={}, y={}, z={}, t={}", x, y, z, time);
 }
 
 
-utpcAnalyzer::utpcAnalyzer(bool weighted, uint16_t max_timebins, uint16_t max_timedif)
+mgAnalyzer::mgAnalyzer(bool weighted)
 : weighted_(weighted)
-, max_timebins_(max_timebins)
-, max_timedif_(max_timedif)
 {}
 
-utpcResultsPlane utpcAnalyzer::analyze(Cluster& cluster) const {
-  utpcResultsPlane ret;
 
-  if (cluster.hits.empty()) {
+NeutronPosition mgAnalyzer::analyze(Event& event) const {
+  NeutronPosition ret;
+
+  if (event.empty()) {
     return ret;
   }
 
-  std::sort(cluster.hits.begin(), cluster.hits.end(),
-      [](const Hit &c1, const Hit &c2) {
-    return c1.time < c2.time;
-  });
+  if (!event.c1.empty())
+  {
+    uint64_t xmass {0};
+    uint64_t zmass {0};
+    uint64_t xsum {0};
+    uint64_t zsum {0};
 
-  double center_sum{0};
-  double center_count{0};
-  int16_t lspan_min = std::numeric_limits<int16_t>::max();
-  int16_t lspan_max = std::numeric_limits<int16_t>::min();
-  int16_t uspan_min = std::numeric_limits<int16_t>::max();
-  int16_t uspan_max = std::numeric_limits<int16_t>::min();
-  uint64_t earliest = std::min(cluster.time_start(), cluster.time_end()
-  - static_cast<uint64_t>(max_timedif_));
-  std::set<uint64_t> timebins;
-  for (auto it = cluster.hits.rbegin(); it != cluster.hits.rend(); ++it) {
-    auto e = *it;
-    if (e.time == cluster.time_end()) {
+    std::sort(event.c1.hits.begin(), event.c1.hits.end(),
+              [](const Hit &c1, const Hit &c2) {
+                return c1.weight < c2.weight;
+              });
+
+    uint16_t highest_adc = event.c1.hits.front().weight;
+    for (const auto &h : event.c1.hits) {
+      if (h.weight != highest_adc)
+        break;
+      //used_readouts++;
       if (weighted_) {
-        center_sum += (e.coordinate * e.weight);
-        center_count += e.weight;
-      } else {
-        center_sum += e.coordinate;
-        center_count++;
+        xmass += mappings.x(h.bus, h.channel) * h.weight;
+        zmass += mappings.z(h.bus, h.channel) * h.weight;
+        xsum += h.weight;
+        zsum += h.weight;
       }
-      lspan_min = std::min(lspan_min, static_cast<int16_t>(e.coordinate));
-      lspan_max = std::max(lspan_max, static_cast<int16_t>(e.coordinate));
+      else {
+        xmass += mappings.x(h.bus, h.channel);
+        zmass += mappings.z(h.bus, h.channel);
+        xsum++;
+        zsum++;
+      }
     }
-    if ((e.time >= earliest) && ((max_timebins_ > timebins.size()) || (timebins.count(e.time)))) {
-      timebins.insert(e.time);
-      uspan_min = std::min(uspan_min, static_cast<int16_t>(e.coordinate));
-      uspan_max = std::max(uspan_max, static_cast<int16_t>(e.coordinate));
-    } else {
-      break;
-    }
+
+    ret.x = xmass / xsum;
+    ret.z = zmass / zsum;
   }
 
-  LOG(PROCESS, Sev::Debug, "uTPC center_sum={} center_count={}",
-      center_sum,
-      center_count);
+  if (!event.c2.empty()) {
 
-  ret.utpc_center = center_sum / center_count;
-  ret.uncert_lower = lspan_max - lspan_min + int16_t(1);
-  ret.uncert_upper = uspan_max - uspan_min + int16_t(1);
+    uint64_t ymass {0};
+    uint64_t ysum {0};
+
+    std::sort(event.c2.hits.begin(), event.c2.hits.end(),
+              [](const Hit &c1, const Hit &c2) {
+                return c1.weight < c2.weight;
+              });
+
+    uint16_t highest_adc = event.c2.hits.front().weight;
+    for (const auto &h : event.c2.hits) {
+      if (h.weight != highest_adc)
+        break;
+      //used_readouts++;
+      if (weighted_) {
+        ymass += mappings.y(h.bus, h.channel) * h.weight;
+        ysum += h.weight;
+      } else {
+        ymass += mappings.y(h.bus, h.channel);
+        ysum++;
+      }
+    }
+
+    ret.y = ymass / ysum;
+  }
+
+  ret.time = event.time_start();
+  ret.good = std::isfinite(ret.x) && std::isfinite(ret.y) && std::isfinite(ret.z);
   return ret;
-}
-
-utpcResults utpcAnalyzer::analyze(Event& event) const {
-  utpcResults ret;
-  ret.x = analyze(event.c1);
-  ret.y = analyze(event.c2);
-  ret.good = std::isfinite(ret.x.utpc_center) && std::isfinite(ret.y.utpc_center);
-  ret.time = utpc_time(event);
-  return ret;
-}
-
-uint64_t utpcAnalyzer::utpc_time(const Event& e) {
-  // \todo is this what we want?
-  return std::max(e.c1.time_end(), e.c2.time_end());
-}
-
-bool utpcAnalyzer::meets_lower_criterion(const utpcResultsPlane& x, const utpcResultsPlane& y,
-                                  int16_t max_lu) {
-  return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }
 
 

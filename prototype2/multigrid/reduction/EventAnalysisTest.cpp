@@ -1,12 +1,12 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/uTPC.h>
+#include <multigrid/reduction/EventAnalysis.h>
 #include <cmath>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>
 
-using namespace Gem;
+using namespace Multigrid;
 
 class uTPCTest : public TestBase {
 protected:
