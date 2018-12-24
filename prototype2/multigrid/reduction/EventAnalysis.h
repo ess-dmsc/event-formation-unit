@@ -22,9 +22,10 @@ struct NeutronPosition {
 
 class mgAnalyzer {
  public:
-  mgAnalyzer(bool weighted);
-
   NeutronPosition analyze(Event&) const;
+
+  void weighted(bool w);
+  bool weighted() const;
 
   SequoiaGeometry mappings;
 

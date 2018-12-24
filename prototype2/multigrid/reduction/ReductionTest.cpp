@@ -1,5 +1,34 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+// OBSERVATIONS
+//
+// Pulse times (external triggers):
+//    Occasionally repeated (delta=0), though no decreases are observed.
+//
+// Events:
+//    Time difference is occasionally (rarely) negative. This appears to happen
+//      because of leftover data from previous run.
+//    Time span is always 1, as prescribed in clustering setup.
+//    Wire multiplicity is close to 1, except when it is 80,
+//      which happens in cases of all wires firing (bus glitch).
+//    Wire span shows some expected variation. It is often 80, again indicative
+//      of the "bus glitch". It is occasionally above 80, i.e. spanning multiple
+//      busses, indicative of coincidence across busses.
+//    Grid multiplicity is generally in the range of 1-7. It is often 40, which
+//      is indicative of "bus glitch".
+//    Grid span - same as wire span, except 40 in case of glitch
+//
+// CONSEQUENCES FOR PIPELINE
+//    Anticipate repeated pulse times.
+//    Discard out-of-sequence events. Expect to discard a lot at the beginning
+//      of run.
+//    Filter events with higher multiplicities and spans in either dimension.
+//    Clustering across buses is a "mistake" and ideally should be avoided, but
+//      this likely requires more complexity (multiple clusterers and additional
+//      plane mappings), which will not be needed in the final VMM-based setup, so
+//      we should not bother mitigating this. Simply reject those events.
+
+
 #include <multigrid/reduction/Reduction.h>
 #include <multigrid/generators/BuilderReadouts.h>
 #include <multigrid/generators/ReaderReadouts.h>
@@ -8,6 +37,7 @@
 
 using namespace Multigrid;
 
+// \todo factor this out to some file under common
 class SimpleHist1D {
 public:
   std::vector<size_t> hist;
@@ -32,7 +62,6 @@ public:
     if (hist.empty())
       return {};
 
-    std::stringstream ss;
     size_t vmax{hist[0]};
     size_t start{0}, end{0};
     bool print{false};
@@ -51,8 +80,10 @@ public:
     std::string largesti = fmt::format("{}", end);
     std::string pad = "{:<" + fmt::format("{}", largesti.size()) + "}";
 
+    // \todo parametrize this
     size_t nstars{60};
 
+    std::stringstream ss;
     for (size_t i = start; i <= end; i++) {
       auto val = hist[i];
       if (!non_empty_only || (val > 0))
@@ -60,7 +91,6 @@ public:
            << fmt::format("{:<62}", std::string((nstars * val) / vmax, '*'))
            << val << "\n";
     }
-
     return ss.str();
   }
 };
@@ -74,6 +104,7 @@ protected:
   Reduction reduction;
 
   virtual void SetUp() {
+    load_config(TEST_DATA_PATH "Sequoia_mappings.json");
   }
   virtual void TearDown() {
   }
@@ -181,8 +212,6 @@ protected:
 };
 
 TEST_F(ReductionTest, t00004) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
-
   feed_file(TEST_DATA_PATH "readouts/154482");
 
   EXPECT_EQ(ingested_hits, 1088);
@@ -200,8 +229,6 @@ TEST_F(ReductionTest, t00004) {
 }
 
 TEST_F(ReductionTest, t00033) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
-
   feed_file(TEST_DATA_PATH "readouts/154493");
 
   EXPECT_EQ(ingested_hits, 8724);
@@ -219,8 +246,6 @@ TEST_F(ReductionTest, t00033) {
 }
 
 TEST_F(ReductionTest, t00311) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
-
   feed_file(TEST_DATA_PATH "readouts/154492");
 
   EXPECT_EQ(ingested_hits, 84352);
@@ -238,8 +263,6 @@ TEST_F(ReductionTest, t00311) {
 }
 
 TEST_F(ReductionTest, t03710) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
-
   feed_file(TEST_DATA_PATH "readouts/154478");
 
   EXPECT_EQ(ingested_hits, 948716);
@@ -257,8 +280,6 @@ TEST_F(ReductionTest, t03710) {
 }
 
 TEST_F(ReductionTest, t10392) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
-
   feed_file(TEST_DATA_PATH "readouts/154484");
 
   EXPECT_EQ(ingested_hits, 2656636);
@@ -271,7 +292,7 @@ TEST_F(ReductionTest, t10392) {
   EXPECT_EQ(reduction.matcher.matched_events.size(), 48574);
 
   inspect_pulse_data();
-  inspect_event_data();
+  inspect_event_data(true);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 

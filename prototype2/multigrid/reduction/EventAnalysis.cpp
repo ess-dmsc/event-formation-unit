@@ -20,25 +20,27 @@ std::string NeutronPosition::debug() const {
   return fmt::format("x={}, y={}, z={}, t={}", x, y, z, time);
 }
 
+void mgAnalyzer::weighted(bool w) {
+  weighted_ = w;
+}
 
-mgAnalyzer::mgAnalyzer(bool weighted)
-: weighted_(weighted)
-{}
+bool mgAnalyzer::weighted() const {
+  return weighted_;
+}
 
 
-NeutronPosition mgAnalyzer::analyze(Event& event) const {
+NeutronPosition mgAnalyzer::analyze(Event &event) const {
   NeutronPosition ret;
 
   if (event.empty()) {
     return ret;
   }
 
-  if (!event.c1.empty())
-  {
-    uint64_t xmass {0};
-    uint64_t zmass {0};
-    uint64_t xsum {0};
-    uint64_t zsum {0};
+  if (!event.c1.empty()) {
+    double xmass{0};
+    double zmass{0};
+    double xsum{0};
+    double zsum{0};
 
     std::sort(event.c1.hits.begin(), event.c1.hits.end(),
               [](const Hit &c1, const Hit &c2) {
@@ -51,14 +53,13 @@ NeutronPosition mgAnalyzer::analyze(Event& event) const {
         break;
       //used_readouts++;
       if (weighted_) {
-        xmass += mappings.x(h.bus, h.channel) * h.weight;
-        zmass += mappings.z(h.bus, h.channel) * h.weight;
+        xmass += mappings.x_from_wire(h.coordinate) * h.weight;
+        zmass += mappings.z_from_wire(h.coordinate) * h.weight;
         xsum += h.weight;
         zsum += h.weight;
-      }
-      else {
-        xmass += mappings.x(h.bus, h.channel);
-        zmass += mappings.z(h.bus, h.channel);
+      } else {
+        xmass += mappings.x_from_wire(h.coordinate);
+        zmass += mappings.z_from_wire(h.coordinate);
         xsum++;
         zsum++;
       }
@@ -70,8 +71,8 @@ NeutronPosition mgAnalyzer::analyze(Event& event) const {
 
   if (!event.c2.empty()) {
 
-    uint64_t ymass {0};
-    uint64_t ysum {0};
+    double ymass{0};
+    double ysum{0};
 
     std::sort(event.c2.hits.begin(), event.c2.hits.end(),
               [](const Hit &c1, const Hit &c2) {
@@ -84,10 +85,10 @@ NeutronPosition mgAnalyzer::analyze(Event& event) const {
         break;
       //used_readouts++;
       if (weighted_) {
-        ymass += mappings.y(h.bus, h.channel) * h.weight;
+        ymass += mappings.y_from_grid(h.coordinate) * h.weight;
         ysum += h.weight;
       } else {
-        ymass += mappings.y(h.bus, h.channel);
+        ymass += mappings.y_from_grid(h.coordinate);
         ysum++;
       }
     }
@@ -96,10 +97,11 @@ NeutronPosition mgAnalyzer::analyze(Event& event) const {
   }
 
   ret.time = event.time_start();
-  ret.good = std::isfinite(ret.x) && std::isfinite(ret.y) && std::isfinite(ret.z);
+  ret.good =
+      std::isfinite(ret.x) && (ret.x >= 0) &&
+          std::isfinite(ret.y) && (ret.y >= 0) &&
+          std::isfinite(ret.z) && (ret.z >= 0);
   return ret;
 }
-
-
 
 }

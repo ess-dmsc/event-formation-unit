@@ -56,7 +56,7 @@ public:
     if (isWire(bus, channel)) {
       return buses[bus].geometry.rescale_wire(channel, adc);
     } else if (isGrid(bus, channel)) {
-      const auto& b = buses[bus].geometry;
+      const auto &b = buses[bus].geometry;
       return b.rescale_grid(b.grid(channel), adc);
     }
     return adc;
@@ -68,7 +68,7 @@ public:
     if (isWire(bus, channel)) {
       return buses[bus].geometry.valid_wire(channel, adc);
     } else if (isGrid(bus, channel)) {
-      const auto& b = buses[bus].geometry;
+      const auto &b = buses[bus].geometry;
       return b.valid_grid(b.grid(channel), adc);
     }
     return false;
@@ -128,6 +128,29 @@ public:
   inline uint32_t z(uint8_t bus, uint16_t channel) const {
     const auto &b = buses[bus];
     return b.z_offset + b.geometry.z(channel);
+  }
+
+  inline uint32_t x_from_wire(uint16_t w) const {
+    auto b = buses.begin();
+    while (w < b->wire_offset)
+      ++b;
+    return b->geometry.x_from_wire(w - b->wire_offset);
+  }
+
+  /** @brief return the y coordinate of the detector */
+  inline uint32_t y_from_grid(uint16_t g) const {
+    auto b = buses.begin();
+    while (g < b->grid_offset)
+      ++b;
+    return b->geometry.y_from_grid(g - b->grid_offset);
+  }
+
+  /** @brief return the z coordinate of the detector */
+  inline uint32_t z_from_wire(uint16_t w) const {
+    auto b = buses.begin();
+    while (w < b->wire_offset)
+      ++b;
+    return b->geometry.z_from_wire(w - b->wire_offset);
   }
 
   /** @brief return the x coordinate of the detector */

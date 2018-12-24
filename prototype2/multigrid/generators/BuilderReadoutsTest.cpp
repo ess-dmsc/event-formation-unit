@@ -1,5 +1,21 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+// OBSERVATIONS
+//
+// Timing errors appear to be happening in two cases:
+//     A) Leftover readouts from previous run that have not been flushed
+//          in either the Mesytec or the SIS electronics
+//     B) Particularly large buffers / uncleared buffers in case of what
+//          we have been referring to as the "bus glitch".
+//
+// Geometry errors are legitimate -- channels are outside the range of where
+//    we expect to see valid data. These cases appear similar to the "bus glitch",
+//    since we see all channels firing.
+//
+// CONSEQUENCES FOR PIPELINE
+//    Timing errors: check for these and flush cluseters when this happens
+//    Geometry errors: do nothing, such readouts are alrady discarded in builder
+
 #include <multigrid/generators/BuilderReadouts.h>
 #include <multigrid/generators/ReaderReadouts.h>
 #include <multigrid/MgConfig.h>
@@ -17,6 +33,7 @@ protected:
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
 
   virtual void SetUp() {
+    load_config(TEST_DATA_PATH "Sequoia_mappings.json");
   }
   virtual void TearDown() {
   }
@@ -74,25 +91,7 @@ protected:
   }
 };
 
-// OBSERVATIONS
-//
-// Timing errors appear to be happening in two cases:
-//     A) Leftover readouts from previous run that have not been flushed
-//          in either the Mesytec or the SIS electronics
-//     B) Particularly large buffers / uncleared buffers in case of what
-//          we have been referring to as the "bus glitch".
-//
-// Geometry errors are legitimate -- channels are outside the range of where
-//    we expect to see valid data. These cases appear similar to the "bus glitch",
-//    since we see all channels firing.
-//
-// CONSEQUENCES FOR PIPELINE
-//    Timing errors: check for these and flush cluseters when this happens
-//    Geometry errors: do nothing, such readouts are alrady discarded in builder
-
 TEST_F(BuilderReadoutsTest, t00004) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
-
   feed_file(TEST_DATA_PATH "readouts/154482");
 
   EXPECT_EQ(packets, 4);
@@ -111,8 +110,6 @@ TEST_F(BuilderReadoutsTest, t00004) {
 }
 
 TEST_F(BuilderReadoutsTest, t00033) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
-
   feed_file(TEST_DATA_PATH "readouts/154493");
 
   EXPECT_EQ(packets, 33);
@@ -131,8 +128,6 @@ TEST_F(BuilderReadoutsTest, t00033) {
 }
 
 TEST_F(BuilderReadoutsTest, t00311) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
-
   feed_file(TEST_DATA_PATH "readouts/154492");
 
   EXPECT_EQ(packets, 311);
@@ -152,8 +147,6 @@ TEST_F(BuilderReadoutsTest, t00311) {
 }
 
 TEST_F(BuilderReadoutsTest, t03710) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
-
   feed_file(TEST_DATA_PATH "readouts/154478");
 
   EXPECT_EQ(packets, 3710);
@@ -173,8 +166,6 @@ TEST_F(BuilderReadoutsTest, t03710) {
 }
 
 TEST_F(BuilderReadoutsTest, t10392) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
-
   feed_file(TEST_DATA_PATH "readouts/154484");
 
   EXPECT_EQ(packets, 10392);
