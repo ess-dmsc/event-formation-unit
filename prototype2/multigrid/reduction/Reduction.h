@@ -18,6 +18,7 @@ public:
   size_t stats_invalid_planes{0};
   size_t stats_time_seq_errors{0};
 
+  // \todo encapsulate this properly
   GapClusterer wire_clusters {0,1};
   GapClusterer grid_clusters {0,1};
   GapMatcher matcher {300000, 1};

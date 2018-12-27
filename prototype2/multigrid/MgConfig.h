@@ -7,9 +7,11 @@
 
 #pragma once
 
+#include <multigrid/AbstractBuilder.h>
+#include <multigrid/reduction/Reduction.h>
+#include <multigrid/reduction/EventAnalysis.h>
 #include <logical_geometry/ESSGeometry.h>
-#include <multigrid/geometry/SequoiaGeometry.h>
-#include <string>
+#include <memory>
 
 namespace Multigrid {
 
@@ -17,11 +19,9 @@ struct Config {
   Config() {}
   Config(std::string jsonfile);
 
-  bool spoof_high_time{false};
-
-  SequoiaGeometry mappings;
-
-  std::string reduction_strategy;
+  std::shared_ptr<AbstractBuilder> builder;
+  Reduction reduction;
+  mgAnalyzer analyzer;
 
   // Event formation
   ESSGeometry geometry;

@@ -44,7 +44,7 @@ NeutronPosition mgAnalyzer::analyze(Event &event) const {
 
     std::sort(event.c1.hits.begin(), event.c1.hits.end(),
               [](const Hit &c1, const Hit &c2) {
-                return c1.weight < c2.weight;
+                return c1.weight > c2.weight;
               });
 
     uint16_t highest_adc = event.c1.hits.front().weight;
@@ -76,7 +76,7 @@ NeutronPosition mgAnalyzer::analyze(Event &event) const {
 
     std::sort(event.c2.hits.begin(), event.c2.hits.end(),
               [](const Hit &c1, const Hit &c2) {
-                return c1.weight < c2.weight;
+                return c1.weight > c2.weight;
               });
 
     uint16_t highest_adc = event.c2.hits.front().weight;

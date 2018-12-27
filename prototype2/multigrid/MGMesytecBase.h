@@ -99,8 +99,7 @@ protected:
     // Input Counters
     int64_t rx_packets {0};
     int64_t rx_bytes {0};
-    int64_t sis_discarded_bytes {0};
-    int64_t vmmr_discarded_bytes {0};
+    int64_t discarded_bytes {0};
     int64_t triggers {0};
     int64_t bus_glitches {0};
     int64_t bad_triggers {0};
@@ -120,12 +119,14 @@ protected:
   Monitor monitor;
 
   bool HavePulseTime{false};
-  uint64_t RecentPulseTime{0};
+//  uint64_t RecentPulseTime{0};
+
+  std::list<Multigrid::NeutronPosition> neutrons;
 
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
 
-  Multigrid::VMMR16Parser vmmr16Parser;
+//  Multigrid::VMMR16Parser vmmr16Parser;
 
-  std::shared_ptr<Multigrid::Efu> mgEfu;
-  std::shared_ptr<Multigrid::ReadoutFile> dumpfile;
+//  std::shared_ptr<Multigrid::Efu> mgEfu;
+//  std::shared_ptr<Multigrid::ReadoutFile> dumpfile;
 };

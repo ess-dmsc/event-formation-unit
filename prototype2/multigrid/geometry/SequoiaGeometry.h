@@ -15,8 +15,8 @@
 #include <vector>
 
 #include <common/Trace.h>
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 namespace Multigrid {
 
@@ -132,25 +132,26 @@ public:
 
   inline uint32_t x_from_wire(uint16_t w) const {
     auto b = buses.begin();
-    while (w < b->wire_offset)
+    while (w >= (b->wire_offset + b->geometry.max_wire()))
       ++b;
-    return b->geometry.x_from_wire(w - b->wire_offset);
+    return b->x_offset + b->geometry.x_from_wire(w - b->wire_offset);
   }
 
   /** @brief return the y coordinate of the detector */
   inline uint32_t y_from_grid(uint16_t g) const {
     auto b = buses.begin();
-    while (g < b->grid_offset)
+    while (g >= (b->grid_offset + b->geometry.max_grid())) {
       ++b;
-    return b->geometry.y_from_grid(g - b->grid_offset);
+    }
+    return b->y_offset + b->geometry.y_from_grid(g - b->grid_offset);
   }
 
   /** @brief return the z coordinate of the detector */
   inline uint32_t z_from_wire(uint16_t w) const {
     auto b = buses.begin();
-    while (w < b->wire_offset)
+    while (w >= (b->wire_offset + b->geometry.max_wire()))
       ++b;
-    return b->geometry.z_from_wire(w - b->wire_offset);
+    return b->z_offset + b->geometry.z_from_wire(w - b->wire_offset);
   }
 
   /** @brief return the x coordinate of the detector */

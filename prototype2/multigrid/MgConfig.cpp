@@ -4,6 +4,8 @@
 
 #include <fstream>
 #include <sstream>
+#include <multigrid/generators/BuilderReadouts.h>
+#include <multigrid/mesytec/BuilderMesytec.h>
 
 #include <nlohmann/json.hpp>
 
@@ -24,14 +26,21 @@ Config::Config(std::string jsonfile) {
     return;
   }
 
-  spoof_high_time = root["spoof_high_time"];
-
+  SequoiaGeometry mappings;
   auto m = root["geometry_mappings"];
   for (unsigned int i = 0; i < m.size(); i++) {
     mappings.add_bus(m[i]);
   }
 
-  reduction_strategy = root["reduction_strategy"];
+  auto rbuilder = std::make_shared<BuilderReadouts>();
+  rbuilder->digital_geometry = mappings;
+
+  builder = rbuilder;
+
+  analyzer.weighted(true);
+  analyzer.mappings = mappings;
+
+  //spoof_high_time = root["spoof_high_time"];
 
   // deduced geometry from MG mappings
   geometry.nx(mappings.max_x());
@@ -46,12 +55,12 @@ std::string Config::debug() const {
   ss << "  ========       multigrid mesytec       ========\n";
   ss << "  ===============================================\n";
 
-  ss << "  Spoof high time = " << (spoof_high_time ? "YES" : "no") << "\n";
-
+//  ss << "  Spoof high time = " << (spoof_high_time ? "YES" : "no") << "\n";
+//
   ss << "  Geometry mappings:\n";
-  ss << mappings.debug("  ") << "\n";
+  ss << analyzer.mappings.debug("  ") << "\n";
 
-  ss << "  Event reduction strategy: " << reduction_strategy << "\n";
+//  ss << "  Event reduction strategy: " << reduction_strategy << "\n";
 
   ss << "  geometry_x = " << geometry.nx() << "\n";
   ss << "  geometry_y = " << geometry.ny() << "\n";

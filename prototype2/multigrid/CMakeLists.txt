@@ -11,6 +11,9 @@ set(mgmesytec_common_src
   mesytec/Vmmr16Parser.cpp
   mesytec/Sis3153Parser.cpp
   mesytec/Readout.cpp
+  generators/BuilderReadouts.cpp
+  reduction/Reduction.cpp
+  reduction/EventAnalysis.cpp
   reduction/EfuMaximum.cpp
   reduction/EfuCenterMass.cpp
   reduction/EfuPrioritized.cpp
@@ -26,6 +29,9 @@ set(mgmesytec_common_inc
   mesytec/Vmmr16Parser.h
   mesytec/Sis3153Parser.h
   mesytec/Readout.h
+  generators/BuilderReadouts.h
+  reduction/Reduction.h
+  reduction/EventAnalysis.h
   reduction/Efu.h
   reduction/EfuMaximum.h
   reduction/EfuCenterMass.h
