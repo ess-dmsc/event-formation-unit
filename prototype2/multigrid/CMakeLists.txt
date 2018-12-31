@@ -8,13 +8,14 @@ set(mgmesytec_common_src
   ../common/Hists.cpp
   ../common/HistSerializer.cpp
   ../common/ReadoutSerializer.cpp
+  mesytec/BuilderMesytec.cpp
   mesytec/Vmmr16Parser.cpp
   mesytec/Sis3153Parser.cpp
   mesytec/Readout.cpp
   generators/BuilderReadouts.cpp
   reduction/Reduction.cpp
   reduction/EventAnalysis.cpp
-  MgConfig.cpp
+  Config.cpp
   )
 set(mgmesytec_common_inc
   ../common/Hists.h
@@ -22,6 +23,7 @@ set(mgmesytec_common_inc
   ../common/ReadoutSerializer.h
   geometry/SequoiaGeometry.h
   geometry/BusGeometry.h
+  mesytec/BuilderMesytec.h
   mesytec/Vmmr16Parser.h
   mesytec/Sis3153Parser.h
   mesytec/Readout.h
@@ -29,17 +31,17 @@ set(mgmesytec_common_inc
   reduction/Reduction.h
   reduction/EventAnalysis.h
   AbstractBuilder.h
-  MgConfig.h
+  Config.h
   )
 
 set(mgmesytec_INC
-  MGMesytecBase.h
+  MultigridBase.h
   ${mgmesytec_common_inc}
 )
 
 set(mgmesytec_SRC
-  MGMesytec.cpp
-  MGMesytecBase.cpp
+  Multigrid.cpp
+  MultigridBase.cpp
   ${mgmesytec_common_src}
 )
 create_module(mgmesytec)
@@ -57,30 +59,32 @@ add_subdirectory(mesytec)
 add_subdirectory(generators)
 add_subdirectory(reduction)
 
-set(MgConfigTest_SRC
+set(MGConfigTest_SRC
   ${mgmesytec_common_src}
-  MgConfigTest.cpp
+  ConfigTest.cpp
   )
-set(MgConfigTest_INC
+set(MGConfigTest_INC
   ${mgmesytec_common_inc}
   )
-create_test_executable(MgConfigTest)
-target_compile_definitions(MgConfigTest
+create_test_executable(MGConfigTest)
+target_compile_definitions(MGConfigTest
   PRIVATE TEST_JSON_PATH="${TEST_JSON_PATH}")
 
-set(MGMesytecBaseTest_INC
+set(MultigridBaseTest_INC
   ${mgmesytec_common_inc}
-  MGMesytecBase.h
+  MultigridBase.h
   ../../libs/include/Socket.h
   ../../libs/include/TSCTimer.h
   ../adc_readout/test/TestUDPServer.h
 )
-set(MGMesytecBaseTest_SRC
+set(MultigridBaseTest_SRC
   ${mgmesytec_common_src}
-  MGMesytecBase.cpp
-  MGMesytecBaseTest.cpp
+  MultigridBase.cpp
+  MultigridBaseTest.cpp
   ../../libs/source/Socket.cpp
   ../../libs/source/TSCTimer.cpp
   ../adc_readout/test/TestUDPServer.cpp
 )
-create_test_executable(MGMesytecBaseTest)
+create_test_executable(MultigridBaseTest)
+target_compile_definitions(MultigridBaseTest
+  PRIVATE TEST_JSON_PATH="${TEST_JSON_PATH}")

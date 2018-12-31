@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief MGMesytec detector base plugin interface definition
+/// \brief Multigrid detector base plugin interface definition
 ///
 //===----------------------------------------------------------------------===//
 #pragma once
@@ -13,16 +13,17 @@
 #include <common/HistSerializer.h>
 #include <common/Log.h>
 #include <common/ReadoutSerializer.h>
-#include <multigrid/MgConfig.h>
+#include <common/EV42Serializer.h>
+#include <multigrid/Config.h>
 
-struct MGMesytecSettings {
+struct MultigridSettings {
   std::string ConfigFile;
-  bool monitor{false};
   std::string FilePrefix;
+  // \todo move this to json
+  bool monitor{false};
 };
 
-struct Monitor
-{
+struct Monitor {
   std::shared_ptr<Hists> hists;
   std::shared_ptr<ReadoutSerializer> readouts;
 
@@ -70,52 +71,52 @@ struct Monitor
   ~Monitor() { close(); }
 
 private:
-  bool enabled_ {false};
+  bool enabled_{false};
 
   std::shared_ptr<Producer> producer;
   std::shared_ptr<HistSerializer> histfb;
 };
 
-
-
 ///
-class MGMesytecBase : public Detector {
+class MultigridBase : public Detector {
 public:
-  MGMesytecBase(BaseSettings const &settings, struct MGMesytecSettings &LocalMGMesytecSettings);
-  ~MGMesytecBase() = default;
+  MultigridBase(BaseSettings const &settings, struct MultigridSettings &LocalMultigridSettings);
+  ~MultigridBase() = default;
   void mainThread();
 
   /// Some hardcoded constants
-  static constexpr int eth_buffer_size {9000};          /// used for experimentation
-  static constexpr size_t kafka_buffer_size {1000000};  /// -||-
-  static constexpr size_t readout_entries {100000};     /// number of raw readout entries
-  static constexpr int one_tenth_second_usecs {100000}; ///
+  static constexpr int eth_buffer_size{9000};          /// used for experimentation
+  static constexpr size_t kafka_buffer_size{1000000};  /// -||-
+  static constexpr size_t readout_entries{100000};     /// number of raw readout entries
+  static constexpr int one_tenth_second_usecs{100000}; ///
 
 protected:
 
   struct {
     // Input Counters
-    int64_t rx_packets {0};
-    int64_t rx_bytes {0};
-    int64_t discarded_bytes {0};
-    int64_t triggers {0};
-    int64_t bus_glitches {0};
-    int64_t bad_triggers {0};
-    int64_t readouts {0};
-    int64_t readouts_discarded {0};
-    int64_t readouts_culled {0};
-    int64_t geometry_errors {0};
-    int64_t timing_errors {0};
-    int64_t events {0};
-    int64_t tx_bytes {0};
+    int64_t rx_packets{0};
+    int64_t rx_bytes{0};
+    int64_t discarded_bytes{0};
+    int64_t triggers{0};
+    int64_t bus_glitches{0};
+    int64_t bad_triggers{0};
+    int64_t readouts{0};
+    int64_t readouts_discarded{0};
+    int64_t readouts_culled{0};
+    int64_t geometry_errors{0};
+    int64_t timing_errors{0};
+    int64_t events{0};
+    int64_t tx_bytes{0};
   } __attribute__((aligned(64))) mystats;
 
-  void init_config();
-
-  struct MGMesytecSettings MGMesytecSettings;
+  MultigridSettings ModuleSettings;
   Multigrid::Config mg_config;
   Monitor monitor;
 
   bool HavePulseTime{false};
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
+
+  void init_config();
+  void process_events(EV42Serializer &ev42serializer);
+
 };

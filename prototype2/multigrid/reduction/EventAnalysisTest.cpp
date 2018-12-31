@@ -12,7 +12,7 @@ class uTPCTest : public TestBase {
 protected:
   Hit hit;
   Event event;
-  mgAnalyzer analyzer;
+  EventAnalyzer analyzer;
   virtual void SetUp() {
     analyzer.mappings.add_bus(BusGeometry());
   }

@@ -806,7 +806,7 @@ std::vector<uint8_t >  ws4 // from mb24_multiple_triggers pkt 1
 };
 
 
-/// For MGMesytecBaseTest - reduced readouts randomly to achieve
+/// For MultigridBaseTest - reduced readouts randomly to achieve
 /// zero glitches
 std::vector<uint8_t >  ws2_short // from data_capture_I - pkt 282
 {

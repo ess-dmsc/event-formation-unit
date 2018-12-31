@@ -20,7 +20,7 @@ struct NeutronPosition {
   std::string debug() const;
 };
 
-class mgAnalyzer {
+class EventAnalyzer {
  public:
   NeutronPosition analyze(Event&) const;
 

@@ -44,7 +44,7 @@ if(EXISTS ${TEST_DATA_PATH})
     Readout.cpp
     ../../tools/ReaderPcap.cpp
     ../reduction/EventAnalysis.cpp
-    ../MgConfig.cpp
+    ../Config.cpp
     )
   set(BuilderMesytecTest_INC
     BuilderMesytec.h
@@ -55,7 +55,7 @@ if(EXISTS ${TEST_DATA_PATH})
     TestData.h
     ../geometry/SequoiaGeometry.h
     ../../tools/ReaderPcap.h
-    ../MgConfig.h
+    ../Config.h
     )
   set(BuilderMesytecTest_LIB
     ${PCAP_LIBRARY}

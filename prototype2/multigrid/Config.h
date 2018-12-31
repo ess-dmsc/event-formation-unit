@@ -21,7 +21,7 @@ struct Config {
 
   std::shared_ptr<AbstractBuilder> builder;
   Reduction reduction;
-  mgAnalyzer analyzer;
+  EventAnalyzer analyzer;
 
   // Event formation
   ESSGeometry geometry;

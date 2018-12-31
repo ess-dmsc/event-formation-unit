@@ -1,6 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <multigrid/MgConfig.h>
+#include <multigrid/Config.h>
 
 #include <fstream>
 #include <sstream>
@@ -27,20 +27,25 @@ Config::Config(std::string jsonfile) {
   }
 
   SequoiaGeometry mappings;
-  auto m = root["geometry_mappings"];
+  auto m = root["mappings"];
   for (unsigned int i = 0; i < m.size(); i++) {
     mappings.add_bus(m[i]);
   }
 
-  auto rbuilder = std::make_shared<BuilderReadouts>();
-  rbuilder->digital_geometry = mappings;
+  auto br = root["builder"];
+  if (br["type"] == "mesytec") {
+    auto mbuilder = std::make_shared<BuilderMesytec>();
+    mbuilder->digital_geometry = mappings;
+    mbuilder->vmmr16Parser.spoof_high_time(br["spoof_high_time"]);
+    builder = mbuilder;
+  } else if (br["type"] == "readouts") {
+    auto rbuilder = std::make_shared<BuilderReadouts>();
+    rbuilder->digital_geometry = mappings;
+    builder = rbuilder;
+  }
 
-  builder = rbuilder;
-
-  analyzer.weighted(true);
+  analyzer.weighted(root["weighted"]);
   analyzer.mappings = mappings;
-
-  //spoof_high_time = root["spoof_high_time"];
 
   // deduced geometry from MG mappings
   geometry.nx(mappings.max_x());
@@ -52,7 +57,7 @@ Config::Config(std::string jsonfile) {
 std::string Config::debug() const {
   std::stringstream ss;
   ss << "  ===============================================\n";
-  ss << "  ========       multigrid mesytec       ========\n";
+  ss << "  ========           MultiGrid           ========\n";
   ss << "  ===============================================\n";
 
 //  ss << "  Spoof high time = " << (spoof_high_time ? "YES" : "no") << "\n";
@@ -60,7 +65,8 @@ std::string Config::debug() const {
   ss << "  Geometry mappings:\n";
   ss << analyzer.mappings.debug("  ") << "\n";
 
-//  ss << "  Event reduction strategy: " << reduction_strategy << "\n";
+  ss << "  Event position using weighted average: "
+     << (analyzer.weighted() ? "YES" : "no") << "\n";
 
   ss << "  geometry_x = " << geometry.nx() << "\n";
   ss << "  geometry_y = " << geometry.ny() << "\n";

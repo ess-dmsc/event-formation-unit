@@ -32,7 +32,7 @@
 #include <multigrid/reduction/Reduction.h>
 #include <multigrid/generators/BuilderReadouts.h>
 #include <multigrid/generators/ReaderReadouts.h>
-#include <multigrid/MgConfig.h>
+#include <multigrid/Config.h>
 #include <test/TestBase.h>
 
 using namespace Multigrid;

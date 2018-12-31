@@ -20,16 +20,16 @@ std::string NeutronPosition::debug() const {
   return fmt::format("x={}, y={}, z={}, t={}", x, y, z, time);
 }
 
-void mgAnalyzer::weighted(bool w) {
+void EventAnalyzer::weighted(bool w) {
   weighted_ = w;
 }
 
-bool mgAnalyzer::weighted() const {
+bool EventAnalyzer::weighted() const {
   return weighted_;
 }
 
 
-NeutronPosition mgAnalyzer::analyze(Event &event) const {
+NeutronPosition EventAnalyzer::analyze(Event &event) const {
   NeutronPosition ret;
 
   if (event.empty()) {

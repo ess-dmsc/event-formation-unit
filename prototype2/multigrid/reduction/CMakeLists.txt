@@ -5,8 +5,11 @@ if(EXISTS ${TEST_DATA_PATH})
     ReductionTest.cpp
     ../generators/BuilderReadouts.cpp
     ../generators/ReaderReadouts.cpp
+    ../mesytec/BuilderMesytec.cpp
+    ../mesytec/Sis3153Parser.cpp
+    ../mesytec/Vmmr16Parser.cpp
     ../mesytec/Readout.cpp
-    ../MgConfig.cpp
+    ../Config.cpp
     EventAnalysis.cpp
     )
   set(MGReductionTest_INC
@@ -14,9 +17,12 @@ if(EXISTS ${TEST_DATA_PATH})
     ../generators/BuilderReadouts.h
     ../generators/ReaderReadouts.h
     ../../common/Buffer.h
+    ../mesytec/BuilderMesytec.h
+    ../mesytec/Sis3153Parser.h
+    ../mesytec/Vmmr16Parser.h
     ../mesytec/Readout.h
     ../geometry/SequoiaGeometry.h
-    ../MgConfig.h
+    ../Config.h
     EventAnalysis.h
     )
   create_test_executable(MGReductionTest)

@@ -23,17 +23,23 @@ if(EXISTS ${TEST_DATA_PATH})
     BuilderReadouts.cpp
     BuilderReadoutsTest.cpp
     ReaderReadouts.cpp
+    ../mesytec/BuilderMesytec.cpp
+    ../mesytec/Sis3153Parser.cpp
+    ../mesytec/Vmmr16Parser.cpp
     ../mesytec/Readout.cpp
     ../reduction/EventAnalysis.cpp
-    ../MgConfig.cpp
+    ../Config.cpp
     )
   set(MGBuilderReadoutsTest_INC
     BuilderReadouts.h
     ReaderReadouts.h
     ../../common/Buffer.h
+    ../mesytec/BuilderMesytec.h
+    ../mesytec/Sis3153Parser.h
+    ../mesytec/Vmmr16Parser.h
     ../mesytec/Readout.h
     ../geometry/SequoiaGeometry.h
-    ../MgConfig.h
+    ../Config.h
     )
   create_test_executable(MGBuilderReadoutsTest)
   target_compile_definitions(MGBuilderReadoutsTest

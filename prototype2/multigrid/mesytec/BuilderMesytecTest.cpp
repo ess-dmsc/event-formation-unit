@@ -2,7 +2,7 @@
 
 #include <multigrid/mesytec/BuilderMesytec.h>
 #include <multigrid/mesytec/TestData.h>
-#include <multigrid/MgConfig.h>
+#include <multigrid/Config.h>
 #include <tools/ReaderPcap.h>
 #include <test/TestBase.h>
 

@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multigrid/MgConfig.h>
+#include <multigrid/Config.h>
 #include <test/TestBase.h>
 
 class MGConfigTest : public TestBase {
