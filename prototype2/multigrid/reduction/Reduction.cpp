@@ -20,7 +20,7 @@ void Reduction::ingest(HitContainer& hits) {
     previous_time_ = h.time;
 
     if (h.plane == AbstractBuilder::external_trigger_plane) {
-      pulse_times.push_back(h.time);
+      pulse_times.push_back(h);
     }
     else if (h.plane == AbstractBuilder::wire_plane) {
       wire_clusters.insert(h);
@@ -43,6 +43,7 @@ void Reduction::perform_clustering(bool flush) {
   }
   matcher.insert(AbstractBuilder::wire_plane, wire_clusters.clusters);
   matcher.insert(AbstractBuilder::grid_plane, grid_clusters.clusters);
+  matcher.insert_pulses(pulse_times);
   matcher.match(flush);
 }
 

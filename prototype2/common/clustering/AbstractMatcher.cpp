@@ -31,17 +31,18 @@ void AbstractMatcher::insert(uint8_t plane, ClusterContainer &c) {
   unmatched_clusters_.splice(unmatched_clusters_.end(), c);
 }
 
-void AbstractMatcher::insert_pulses(const HitContainer &hits) {
+void AbstractMatcher::insert_pulses(HitContainer &hits) {
   if (hits.empty())
     return;
   track_pulses_ = true;
-  for (auto h : hits) {
+  for (auto& h : hits) {
     h.plane = pulse_plane_;
     Cluster c;
     c.insert(h);
     unmatched_clusters_.push_back(c);
     latest_pulse_ = std::max(latest_pulse_, h.time);
   }
+  hits.clear();
 }
 
 

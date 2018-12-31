@@ -99,6 +99,8 @@ class ReductionTest : public TestBase {
 protected:
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
   size_t ingested_hits{0};
+  size_t pulse_times{0};
+  size_t neutron_events{0};
 
   BuilderReadouts builder;
   Reduction reduction;
@@ -135,19 +137,23 @@ protected:
     uint64_t RecentPulseTime{0};
 
     SimpleHist1D pulse_positive_diff, pulse_negative_diff;
-    for (const auto &pt : reduction.pulse_times) {
+    for (const auto &e : reduction.matcher.matched_events) {
+      if (e.plane1() != AbstractBuilder::external_trigger_plane)
+        continue;
+
       if (HavePulseTime) {
-        if (pt >= RecentPulseTime) {
-          pulse_positive_diff.bin(pt - RecentPulseTime);
-          auto PulsePeriod = pt - RecentPulseTime;
+        if (e.time_start() >= RecentPulseTime) {
+          pulse_positive_diff.bin(e.time_start() - RecentPulseTime);
+          auto PulsePeriod = e.time_start() - RecentPulseTime;
           ShortestPulsePeriod = std::min(ShortestPulsePeriod, PulsePeriod);
         }
-        if (pt < RecentPulseTime) {
-          pulse_negative_diff.bin(RecentPulseTime - pt);
+        if (e.time_start() < RecentPulseTime) {
+          pulse_negative_diff.bin(RecentPulseTime - e.time_start());
         }
       }
-      RecentPulseTime = pt;
+      RecentPulseTime = e.time_start();
       HavePulseTime = true;
+      pulse_times++;
     }
 
     if (verbose) {
@@ -169,6 +175,11 @@ protected:
     SimpleHist1D event_positive_diff, event_negative_diff;
     SimpleHist1D wire_multiplicity, wire_span, grid_mltiplicity, grid_span, time_span;
     for (const auto &e : reduction.matcher.matched_events) {
+      if (e.plane1() == AbstractBuilder::external_trigger_plane)
+        continue;
+
+      neutron_events++;
+
       time_span.bin(e.time_span());
       wire_multiplicity.bin(e.c1.hit_count());
       wire_span.bin(e.c1.coord_span());
@@ -216,13 +227,13 @@ TEST_F(ReductionTest, t00004) {
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
   EXPECT_EQ(reduction.stats_time_seq_errors, 0);
 
-  EXPECT_EQ(reduction.pulse_times.size(), 467);
   EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 164);
   EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 184);
-  EXPECT_EQ(reduction.matcher.matched_events.size(), 182);
 
   inspect_pulse_data();
   inspect_event_data();
+  EXPECT_EQ(pulse_times, 467);
+  EXPECT_EQ(neutron_events, 182);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 
@@ -233,13 +244,13 @@ TEST_F(ReductionTest, t00033) {
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
   EXPECT_EQ(reduction.stats_time_seq_errors, 1);
 
-  EXPECT_EQ(reduction.pulse_times.size(), 2555);
   EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 1737);
   EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 1934);
-  EXPECT_EQ(reduction.matcher.matched_events.size(), 1821);
 
   inspect_pulse_data();
   inspect_event_data();
+  EXPECT_EQ(pulse_times, 2555);
+  EXPECT_EQ(neutron_events, 1822);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 
@@ -250,13 +261,13 @@ TEST_F(ReductionTest, t00311) {
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
   EXPECT_EQ(reduction.stats_time_seq_errors, 35);
 
-  EXPECT_EQ(reduction.pulse_times.size(), 975);
   EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 23369);
   EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 26086);
-  EXPECT_EQ(reduction.matcher.matched_events.size(), 20461);
 
   inspect_pulse_data();
   inspect_event_data();
+  EXPECT_EQ(pulse_times, 975);
+  EXPECT_EQ(neutron_events, 20461);
   EXPECT_EQ(ShortestPulsePeriod, 0);
 }
 
@@ -267,13 +278,13 @@ TEST_F(ReductionTest, t03710) {
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
   EXPECT_EQ(reduction.stats_time_seq_errors, 35);
 
-  EXPECT_EQ(reduction.pulse_times.size(), 312);
   EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 21130);
   EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 20926);
-  EXPECT_EQ(reduction.matcher.matched_events.size(), 19324);
 
   inspect_pulse_data();
   inspect_event_data();
+  EXPECT_EQ(pulse_times, 312);
+  EXPECT_EQ(neutron_events, 19288);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 
@@ -284,13 +295,13 @@ TEST_F(ReductionTest, t10392) {
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
   EXPECT_EQ(reduction.stats_time_seq_errors, 1);
 
-  EXPECT_EQ(reduction.pulse_times.size(), 300);
   EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 53924);
   EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 56093);
-  EXPECT_EQ(reduction.matcher.matched_events.size(), 48574);
 
   inspect_pulse_data();
-  inspect_event_data(true);
+  inspect_event_data();
+  EXPECT_EQ(pulse_times, 300);
+  EXPECT_EQ(neutron_events, 48548);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 

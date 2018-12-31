@@ -49,10 +49,11 @@ GapMatcher::GapMatcher(uint64_t latency, uint64_t time_gap)
         pulse_evt.merge(*cluster);
         stash_event(pulse_evt);
         pulse_evt.clear();
-        continue;
+      }
+      else {
+        evt.merge(*cluster);
       }
 
-      evt.merge(*cluster);
       unmatched_clusters_.pop_front();
     }
 

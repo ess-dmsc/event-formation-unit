@@ -118,5 +118,4 @@ protected:
 
   bool HavePulseTime{false};
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
-  std::list<Multigrid::NeutronPosition> neutrons;
 };

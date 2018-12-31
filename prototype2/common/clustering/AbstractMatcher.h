@@ -48,7 +48,7 @@ public:
   void insert(uint8_t plane, ClusterContainer &c);
 
   // \todo document this
-  void insert_pulses(const HitContainer &hits);
+  void insert_pulses(HitContainer &hits);
 
   /// \brief match queued up clusters into events
   ///         To be implemented in derived classes.
