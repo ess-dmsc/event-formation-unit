@@ -36,12 +36,14 @@ create_test_executable(Vmmr16ParserTest)
 set(TEST_DATA_PATH "${REFDATA}/multigrid/2018_08_30")
 if(EXISTS ${TEST_DATA_PATH})
   set(BuilderMesytecTest_SRC
+    ../generators/BuilderReadouts.cpp
     BuilderMesytec.cpp
     BuilderMesytecTest.cpp
     Vmmr16Parser.cpp
     Sis3153Parser.cpp
     Readout.cpp
     ../../tools/ReaderPcap.cpp
+    ../reduction/EventAnalysis.cpp
     ../MgConfig.cpp
     )
   set(BuilderMesytecTest_INC

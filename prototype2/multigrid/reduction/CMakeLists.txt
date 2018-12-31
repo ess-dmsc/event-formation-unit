@@ -7,6 +7,7 @@ if(EXISTS ${TEST_DATA_PATH})
     ../generators/ReaderReadouts.cpp
     ../mesytec/Readout.cpp
     ../MgConfig.cpp
+    EventAnalysis.cpp
     )
   set(MGReductionTest_INC
     Reduction.h
@@ -16,6 +17,7 @@ if(EXISTS ${TEST_DATA_PATH})
     ../mesytec/Readout.h
     ../geometry/SequoiaGeometry.h
     ../MgConfig.h
+    EventAnalysis.h
     )
   create_test_executable(MGReductionTest)
   target_compile_definitions(MGReductionTest
@@ -23,57 +25,6 @@ if(EXISTS ${TEST_DATA_PATH})
 else()
   message(WARNING "*** No multigrid reference data found. Skipping MGReduction tests.")
 endif()
-
-set(EfuMaximumTest_SRC
-  ../../common/Hists.cpp
-  ../../common/ReadoutSerializer.cpp
-  ../mesytec/Readout.cpp
-  EfuMaximumTest.cpp
-  EfuMaximum.cpp
-  )
-set(EfuMaximumTest_INC
-  ../../common/Hists.h
-  ../../common/ReadoutSerializer.h
-  ../mesytec/Readout.h
-  ../geometry/SequoiaGeometry.h
-  Efu.h
-  EfuMaximum.h
-  )
-create_test_executable(EfuMaximumTest)
-
-set(EfuCenterMassTest_SRC
-  ../../common/Hists.cpp
-  ../../common/ReadoutSerializer.cpp
-  ../mesytec/Readout.cpp
-  EfuCenterMassTest.cpp
-  EfuCenterMass.cpp
-  )
-set(EfuCenterMassTest_INC
-  ../../common/Hists.h
-  ../../common/ReadoutSerializer.h
-  ../mesytec/Readout.h
-  ../geometry/SequoiaGeometry.h
-  Efu.h
-  EfuCenterMass.h
-  )
-create_test_executable(EfuCenterMassTest)
-
-set(EfuPrioritizedTest_SRC
-  ../../common/Hists.cpp
-  ../../common/ReadoutSerializer.cpp
-  ../mesytec/Readout.cpp
-  EfuPrioritizedTest.cpp
-  EfuPrioritized.cpp
-  )
-set(EfuPrioritizedTest_INC
-  ../../common/Hists.h
-  ../../common/ReadoutSerializer.h
-  ../mesytec/Readout.h
-  ../geometry/SequoiaGeometry.h
-  Efu.h
-  EfuCenterMass.h
-  )
-create_test_executable(EfuPrioritizedTest)
 
 set(MGEventAnalysisTest_SRC
   ../../common/clustering/Hit.cpp

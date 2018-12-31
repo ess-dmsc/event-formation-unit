@@ -9,7 +9,7 @@
 
 namespace Multigrid {
 
-void Reduction::ingest(const HitContainer& hits) {
+void Reduction::ingest(HitContainer& hits) {
   for (const auto& h : hits) {
 
     // We must do this because of patterns observed in BuilderReadoutTest
@@ -33,6 +33,7 @@ void Reduction::ingest(const HitContainer& hits) {
       stats_invalid_planes++;
     }
   }
+  hits.clear();
 }
 
 void Reduction::perform_clustering(bool flush) {

@@ -14,8 +14,6 @@
 #include <common/Log.h>
 #include <common/ReadoutSerializer.h>
 #include <multigrid/MgConfig.h>
-#include <multigrid/mesytec/Vmmr16Parser.h>
-#include <multigrid/reduction/Efu.h>
 
 struct MGMesytecSettings {
   std::string ConfigFile;
@@ -119,14 +117,6 @@ protected:
   Monitor monitor;
 
   bool HavePulseTime{false};
-//  uint64_t RecentPulseTime{0};
-
-  std::list<Multigrid::NeutronPosition> neutrons;
-
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
-
-//  Multigrid::VMMR16Parser vmmr16Parser;
-
-//  std::shared_ptr<Multigrid::Efu> mgEfu;
-//  std::shared_ptr<Multigrid::ReadoutFile> dumpfile;
+  std::list<Multigrid::NeutronPosition> neutrons;
 };

@@ -14,11 +14,7 @@ set(mgmesytec_common_src
   generators/BuilderReadouts.cpp
   reduction/Reduction.cpp
   reduction/EventAnalysis.cpp
-  reduction/EfuMaximum.cpp
-  reduction/EfuCenterMass.cpp
-  reduction/EfuPrioritized.cpp
   MgConfig.cpp
-  MGMesytecBase.cpp
   )
 set(mgmesytec_common_inc
   ../common/Hists.h
@@ -32,20 +28,18 @@ set(mgmesytec_common_inc
   generators/BuilderReadouts.h
   reduction/Reduction.h
   reduction/EventAnalysis.h
-  reduction/Efu.h
-  reduction/EfuMaximum.h
-  reduction/EfuCenterMass.h
-  reduction/EfuPrioritized.h
   AbstractBuilder.h
-  MGMesytecBase.h
   MgConfig.h
   )
 
 set(mgmesytec_INC
+  MGMesytecBase.h
   ${mgmesytec_common_inc}
 )
+
 set(mgmesytec_SRC
   MGMesytec.cpp
+  MGMesytecBase.cpp
   ${mgmesytec_common_src}
 )
 create_module(mgmesytec)
@@ -64,13 +58,11 @@ add_subdirectory(generators)
 add_subdirectory(reduction)
 
 set(MgConfigTest_SRC
-  MgConfig.cpp
+  ${mgmesytec_common_src}
   MgConfigTest.cpp
-  ../../prototype2/common/DataSave.cpp
   )
 set(MgConfigTest_INC
-  MgConfig.h
-  ../../prototype2/common/DataSave.h
+  ${mgmesytec_common_inc}
   )
 create_test_executable(MgConfigTest)
 target_compile_definitions(MgConfigTest
@@ -78,12 +70,14 @@ target_compile_definitions(MgConfigTest
 
 set(MGMesytecBaseTest_INC
   ${mgmesytec_common_inc}
+  MGMesytecBase.h
   ../../libs/include/Socket.h
   ../../libs/include/TSCTimer.h
   ../adc_readout/test/TestUDPServer.h
 )
 set(MGMesytecBaseTest_SRC
   ${mgmesytec_common_src}
+  MGMesytecBase.cpp
   MGMesytecBaseTest.cpp
   ../../libs/source/Socket.cpp
   ../../libs/source/TSCTimer.cpp

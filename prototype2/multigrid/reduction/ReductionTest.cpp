@@ -123,11 +123,9 @@ protected:
 
     while ((readsz = reader.read((char *) &buffer)) > 0) {
       builder.parse(Buffer<uint8_t>(buffer, readsz));
+      ingested_hits += builder.ConvertedData.size();
       reduction.ingest(builder.ConvertedData);
       reduction.perform_clustering(false);
-
-      ingested_hits += builder.ConvertedData.size();
-      builder.ConvertedData.clear();
     }
     reduction.perform_clustering(true);
   }

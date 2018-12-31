@@ -18,8 +18,8 @@ protected:
 
   void load_config(std::string jsonfile) {
     Multigrid::Config config(jsonfile);
-    builder.digital_geometry = config.mappings;
-    builder.vmmr16Parser.spoof_high_time(config.spoof_high_time);
+    builder.digital_geometry = config.analyzer.mappings;
+    builder.vmmr16Parser.spoof_high_time(false); // \todo parametrize
   }
 };
 

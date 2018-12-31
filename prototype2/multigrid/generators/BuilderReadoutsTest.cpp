@@ -40,7 +40,7 @@ protected:
 
   void load_config(const std::string &jsonfile) {
     Multigrid::Config config(jsonfile);
-    builder.digital_geometry = config.reduction.mappings;
+    builder.digital_geometry = config.analyzer.mappings;
     //MESSAGE() << "Digital geometry: " << builder.digital_geometry.debug() << "\n";
   }
 

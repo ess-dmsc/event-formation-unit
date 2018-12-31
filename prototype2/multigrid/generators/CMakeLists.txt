@@ -24,6 +24,7 @@ if(EXISTS ${TEST_DATA_PATH})
     BuilderReadoutsTest.cpp
     ReaderReadouts.cpp
     ../mesytec/Readout.cpp
+    ../reduction/EventAnalysis.cpp
     ../MgConfig.cpp
     )
   set(MGBuilderReadoutsTest_INC

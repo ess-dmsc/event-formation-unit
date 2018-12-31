@@ -19,12 +19,7 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 
-#include <multigrid/geometry/SequoiaGeometry.h>
 //#include <multigrid/geometry/MG24Geometry.h>
-
-#include <multigrid/reduction/EfuMaximum.h>
-#include <multigrid/reduction/EfuCenterMass.h>
-#include <multigrid/reduction/EfuPrioritized.h>
 
 #include <common/Trace.h>
 #undef TRC_LEVEL
@@ -137,7 +132,6 @@ void MGMesytecBase::mainThread() {
       if (!mg_config.builder->ConvertedData.empty()) {
 
         mg_config.reduction.ingest(mg_config.builder->ConvertedData);
-        mg_config.builder->ConvertedData.clear(); // \todo this should be automatic w ingest
         mg_config.reduction.perform_clustering(false);
         // \todo more stats
 
