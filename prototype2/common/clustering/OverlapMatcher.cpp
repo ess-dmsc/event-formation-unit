@@ -28,6 +28,7 @@ void OverlapMatcher::match(bool flush) {
   XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u", unmatched_clusters_.size());
 
   Event evt{plane1_, plane2_};
+  Event pulse_evt{pulse_plane_, pulse_plane_};
   while (!unmatched_clusters_.empty()) {
 
     auto cluster = unmatched_clusters_.begin();
@@ -41,6 +42,13 @@ void OverlapMatcher::match(bool flush) {
       XTRACE(CLUSTER, DEB, "no time overlap");
       stash_event(evt);
       evt.clear();
+    }
+
+    if (cluster->plane() == pulse_plane_) {
+      pulse_evt.merge(*cluster);
+      stash_event(pulse_evt);
+      pulse_evt.clear();
+      continue;
     }
 
     evt.merge(*cluster);

@@ -47,6 +47,9 @@ public:
   ///         clusters can arrive with end_time>=(T-latency).
   void insert(uint8_t plane, ClusterContainer &c);
 
+  // \todo document this
+  void insert_pulses(const HitContainer &hits);
+
   /// \brief match queued up clusters into events
   ///         To be implemented in derived classes.
   /// \param flush if all queued clusters should be matched regardless of
@@ -61,10 +64,14 @@ protected:
   uint64_t latency_{0}; ///< time gap for a cluster to be considered for matching
   uint8_t plane1_{0};
   uint8_t plane2_{1};
+  uint8_t pulse_plane_{99}; // \todo parametrize this
 
   ClusterContainer unmatched_clusters_;
   uint64_t latest_x_{0};
   uint64_t latest_y_{0};
+  uint64_t latest_pulse_{0};
+
+  bool track_pulses_{false};
 
   /// \brief Moves event into events container; increments counter.
   /// \param event to be stashed
