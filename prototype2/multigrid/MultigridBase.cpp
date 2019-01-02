@@ -144,9 +144,6 @@ void MultigridBase::mainThread() {
   Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
   ev42serializer.setProducerCallback(std::bind(&Producer::produce2<uint8_t>, &EventProducer, std::placeholders::_1));
 
-//  Multigrid::Sis3153Parser sis3153parser;
-//  sis3153parser.buffers.reserve(1000);
-
   ev42serializer.pulseTime(0);
 
   uint8_t buffer[eth_buffer_size];
@@ -166,6 +163,17 @@ void MultigridBase::mainThread() {
 
       if (!mg_config.builder->ConvertedData.empty()) {
         mystats.readouts += mg_config.builder->ConvertedData.size();
+
+        for (const auto& hit : mg_config.builder->ConvertedData) {
+          if (monitor.readouts)
+            monitor.readouts->addEntry(hit.plane + 1, hit.coordinate, hit.time, hit.weight);
+          if (monitor.hists) {
+            if (hit.plane == 0)
+              monitor.hists->bin_x(hit.coordinate, hit.weight);
+            else if (hit.plane == 1)
+              monitor.hists->bin_y(hit.coordinate, hit.weight);
+          }
+        }
 
         mg_config.reduction.ingest(mg_config.builder->ConvertedData);
         mg_config.reduction.perform_clustering(false);

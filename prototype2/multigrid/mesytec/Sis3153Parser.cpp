@@ -11,8 +11,8 @@ namespace Multigrid {
 
 // clang-format off
 // sis3153 and mesytec data types from
-// Struck: mvme-src-0.9.2-281-g1c4c24c.tar
-// Struck: Ethernet UDP Addendum revision 107
+//    Struck: mvme-src-0.9.2-281-g1c4c24c.tar
+//    Struck: Ethernet UDP Addendum revision 107
 enum SisType : uint32_t {
   BeginReadout = 0xbb000000,
   EndReadout   = 0xee000000
@@ -28,6 +28,10 @@ static constexpr uint32_t LengthMask    {0x0000ffff};
 // clang-format on
 
 // \todo get rid of magic numbers
+
+Sis3153Parser::Sis3153Parser() {
+  buffers.reserve(1000);
+}
 
 size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
 

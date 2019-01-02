@@ -257,51 +257,51 @@ TEST_F(ReductionTest, t00033) {
 TEST_F(ReductionTest, t00311) {
   feed_file(TEST_DATA_PATH "readouts/154492");
 
-  EXPECT_EQ(ingested_hits, 84352);
+  EXPECT_EQ(ingested_hits, 84232);
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
-  EXPECT_EQ(reduction.stats_time_seq_errors, 35);
+  EXPECT_EQ(reduction.stats_time_seq_errors, 34);
 
-  EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 23369);
-  EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 26086);
+  EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 23368);
+  EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 26085);
 
   inspect_pulse_data();
   inspect_event_data();
   EXPECT_EQ(pulse_times, 975);
-  EXPECT_EQ(neutron_events, 20461);
+  EXPECT_EQ(neutron_events, 20460);
   EXPECT_EQ(ShortestPulsePeriod, 0);
 }
 
 TEST_F(ReductionTest, t03710) {
   feed_file(TEST_DATA_PATH "readouts/154478");
 
-  EXPECT_EQ(ingested_hits, 948716);
+  EXPECT_EQ(ingested_hits, 55666);
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
-  EXPECT_EQ(reduction.stats_time_seq_errors, 35);
+  EXPECT_EQ(reduction.stats_time_seq_errors, 0);
 
-  EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 21130);
-  EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 20926);
+  EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 16755);
+  EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 16370);
 
   inspect_pulse_data();
   inspect_event_data();
   EXPECT_EQ(pulse_times, 312);
-  EXPECT_EQ(neutron_events, 19288);
+  EXPECT_EQ(neutron_events, 14341);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 
 TEST_F(ReductionTest, t10392) {
   feed_file(TEST_DATA_PATH "readouts/154484");
 
-  EXPECT_EQ(ingested_hits, 2656636);
+  EXPECT_EQ(ingested_hits, 178941);
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
   EXPECT_EQ(reduction.stats_time_seq_errors, 1);
 
-  EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 53924);
-  EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 56093);
+  EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 51947);
+  EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 51344);
 
   inspect_pulse_data();
   inspect_event_data();
   EXPECT_EQ(pulse_times, 300);
-  EXPECT_EQ(neutron_events, 48548);
+  EXPECT_EQ(neutron_events, 41813);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 

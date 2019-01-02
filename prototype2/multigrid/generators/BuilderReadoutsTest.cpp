@@ -133,16 +133,18 @@ TEST_F(BuilderReadoutsTest, t00311) {
   EXPECT_EQ(packets, 311);
   EXPECT_EQ(builder.stats_discarded_bytes, 0);
   EXPECT_EQ(builder.stats_trigger_count, 0);
-  EXPECT_EQ(builder.stats_readout_filter_rejects, 0);
+  EXPECT_EQ(builder.stats_readout_filter_rejects, 120);
   EXPECT_EQ(builder.stats_digital_geom_errors, 8);
 
-  EXPECT_EQ(builder.ConvertedData.size(), 84352);
-  EXPECT_EQ(builder.ConvertedData.size() + builder.stats_digital_geom_errors,
-            readouts);
+  EXPECT_EQ(builder.ConvertedData.size(), 84232);
+  EXPECT_EQ(readouts,
+            builder.ConvertedData.size()
+                + builder.stats_digital_geom_errors
+                + builder.stats_readout_filter_rejects);
 
   inspect_converted_data();
   EXPECT_EQ(external_triggers, 975);
-  EXPECT_EQ(time_errors, 35);
+  EXPECT_EQ(time_errors, 34);
   EXPECT_EQ(ShortestPulsePeriod, 0);
 }
 
@@ -152,16 +154,18 @@ TEST_F(BuilderReadoutsTest, t03710) {
   EXPECT_EQ(packets, 3710);
   EXPECT_EQ(builder.stats_discarded_bytes, 0);
   EXPECT_EQ(builder.stats_trigger_count, 0);
-  EXPECT_EQ(builder.stats_readout_filter_rejects, 0);
+  EXPECT_EQ(builder.stats_readout_filter_rejects, 893050);
   EXPECT_EQ(builder.stats_digital_geom_errors, 60280);
 
-  EXPECT_EQ(builder.ConvertedData.size(), 948716);
-  EXPECT_EQ(builder.ConvertedData.size() + builder.stats_digital_geom_errors,
-            readouts);
+  EXPECT_EQ(builder.ConvertedData.size(), 55666);
+  EXPECT_EQ(readouts,
+            builder.ConvertedData.size()
+                + builder.stats_digital_geom_errors
+                + builder.stats_readout_filter_rejects);
 
   inspect_converted_data();
   EXPECT_EQ(external_triggers, 312);
-  EXPECT_EQ(time_errors, 35);
+  EXPECT_EQ(time_errors, 0);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 
@@ -171,12 +175,14 @@ TEST_F(BuilderReadoutsTest, t10392) {
   EXPECT_EQ(packets, 10392);
   EXPECT_EQ(builder.stats_discarded_bytes, 0);
   EXPECT_EQ(builder.stats_trigger_count, 0);
-  EXPECT_EQ(builder.stats_readout_filter_rejects, 0);
+  EXPECT_EQ(builder.stats_readout_filter_rejects, 2477695);
   EXPECT_EQ(builder.stats_digital_geom_errors, 169752);
 
-  EXPECT_EQ(builder.ConvertedData.size(), 2656636);
-  EXPECT_EQ(builder.ConvertedData.size() + builder.stats_digital_geom_errors,
-            readouts);
+  EXPECT_EQ(builder.ConvertedData.size(), 178941);
+  EXPECT_EQ(readouts,
+            builder.ConvertedData.size()
+                + builder.stats_digital_geom_errors
+                + builder.stats_readout_filter_rejects);
 
   inspect_converted_data();
   EXPECT_EQ(external_triggers, 300);

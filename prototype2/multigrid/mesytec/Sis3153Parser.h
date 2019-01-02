@@ -15,6 +15,8 @@ namespace Multigrid {
 
 class Sis3153Parser {
 public:
+  Sis3153Parser();
+
   /// \brief parse a binary payload, return number of bytes discarded
   size_t parse(Buffer<uint8_t> buffer);
 

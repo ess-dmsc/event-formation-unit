@@ -4,7 +4,7 @@
 
 # Two-thread implementation of Multi Grid demonstrator detector
 # for Mesytec Readout
-set(mgmesytec_common_src
+set(multigrid_common_src
   ../common/Hists.cpp
   ../common/HistSerializer.cpp
   ../common/ReadoutSerializer.cpp
@@ -17,7 +17,7 @@ set(mgmesytec_common_src
   reduction/EventAnalysis.cpp
   Config.cpp
   )
-set(mgmesytec_common_inc
+set(multigrid_common_inc
   ../common/Hists.h
   ../common/HistSerializer.h
   ../common/ReadoutSerializer.h
@@ -34,17 +34,17 @@ set(mgmesytec_common_inc
   Config.h
   )
 
-set(mgmesytec_INC
+set(multigrid_INC
   MultigridBase.h
-  ${mgmesytec_common_inc}
+  ${multigrid_common_inc}
 )
 
-set(mgmesytec_SRC
+set(multigrid_SRC
   Multigrid.cpp
   MultigridBase.cpp
-  ${mgmesytec_common_src}
+  ${multigrid_common_src}
 )
-create_module(mgmesytec)
+create_module(multigrid)
 
 
 #=============================================================================
@@ -60,25 +60,25 @@ add_subdirectory(generators)
 add_subdirectory(reduction)
 
 set(MGConfigTest_SRC
-  ${mgmesytec_common_src}
+  ${multigrid_common_src}
   ConfigTest.cpp
   )
 set(MGConfigTest_INC
-  ${mgmesytec_common_inc}
+  ${multigrid_common_inc}
   )
 create_test_executable(MGConfigTest)
 target_compile_definitions(MGConfigTest
   PRIVATE TEST_JSON_PATH="${TEST_JSON_PATH}")
 
 set(MultigridBaseTest_INC
-  ${mgmesytec_common_inc}
+  ${multigrid_common_inc}
   MultigridBase.h
   ../../libs/include/Socket.h
   ../../libs/include/TSCTimer.h
   ../adc_readout/test/TestUDPServer.h
 )
 set(MultigridBaseTest_SRC
-  ${mgmesytec_common_src}
+  ${multigrid_common_src}
   MultigridBase.cpp
   MultigridBaseTest.cpp
   ../../libs/source/Socket.cpp
