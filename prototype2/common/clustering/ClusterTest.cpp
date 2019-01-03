@@ -205,9 +205,6 @@ TEST_F(ClusterTest, MergeToEmpty) {
   EXPECT_EQ(cluster.hit_count(), 3);
   EXPECT_EQ(cluster.plane(), 0);
   EXPECT_TRUE(cluster.valid());
-
-  EXPECT_EQ(cluster2.hit_count(), 0);
-  EXPECT_FALSE(cluster2.valid());
 }
 
 TEST_F(ClusterTest, Merge2Valid) {

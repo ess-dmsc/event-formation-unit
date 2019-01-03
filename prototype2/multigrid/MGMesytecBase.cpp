@@ -29,7 +29,7 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-const int TSC_MHZ = 2900; // Not accurate, do not rely solely on this
+const int TscMHz = 2900; // Not accurate, do not rely solely on this
 
 
 MGMesytecBase::MGMesytecBase(BaseSettings const &settings, struct MGMesytecSettings & LocalSettings)
@@ -187,7 +187,7 @@ void MGMesytecBase::mainThread() {
     }
 
     // Force periodic flushing
-    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+    if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {
       mystats.tx_bytes += ev42serializer.produce();
       monitor.produce();
       report_timer.now();

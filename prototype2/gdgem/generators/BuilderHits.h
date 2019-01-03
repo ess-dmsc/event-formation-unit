@@ -9,19 +9,21 @@
 
 #pragma once
 
+#include <common/clustering/Hit.h>
 #include <gdgem/nmx/AbstractBuilder.h>
-#include <gdgem/nmx/Hit.h>
+
+namespace Gem {
 
 class BuilderHits : public AbstractBuilder {
 public:
-  BuilderHits(std::string dump_dir, bool dump_csv, bool dump_h5);
+  BuilderHits();
 
   /// \todo Martin document
-  ResultStats process_buffer(char *buf, size_t size) override;
+  void process_buffer(char *buf, size_t size) override;
 
 private:
-  static constexpr size_t psize{sizeof(Hit)};
-
-  std::shared_ptr<HitFile> hit_file_;
+  // preallocated
   std::vector<Hit> converted_data;
 };
+
+}

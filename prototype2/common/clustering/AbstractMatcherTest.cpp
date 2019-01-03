@@ -153,14 +153,12 @@ TEST_F(AbstractMatcherTest, Stash) {
   matcher.stash_event(e);
   EXPECT_EQ(matcher.matched_events.size(), 1);
   EXPECT_EQ(matcher.stats_event_count, 1);
-  EXPECT_TRUE(e.empty());
 
 
   matcher.matched_events.clear();
   matcher.stash_event(e);
   EXPECT_EQ(matcher.matched_events.size(), 1);
   EXPECT_EQ(matcher.stats_event_count, 2);
-  EXPECT_TRUE(e.empty());
 }
 
 

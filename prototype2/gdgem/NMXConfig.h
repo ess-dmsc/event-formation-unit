@@ -11,18 +11,17 @@
 #include <logical_geometry/ESSGeometry.h>
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
-#include <gdgem/nmx/Event.h>
-#include <gdgem/vmm3/CalibrationFile.h>
+#include <common/clustering/Event.h>
+#include <gdgem/nmx/uTPC.h>
+#include <gdgem/srs/CalibrationFile.h>
 #include <memory>
 #include <string>
 
 namespace Gem {
 
 struct ClustererConfig {
-  uint16_t hit_adc_threshold{0};
   uint16_t max_strip_gap{2};
   double max_time_gap{200};
-  size_t min_cluster_size{3};
 };
 
 struct EventFilter {
@@ -36,15 +35,15 @@ struct EventFilter {
   size_t minimum_hits_dropped{0};
 
   /// \todo bug? uncertainty takes precedence if both enforce options are true
-  bool valid(Event &event) {
+  bool valid(Event &event, const utpcResults& utpc) {
     if (enforce_lower_uncertainty_limit &&
-        !event.meets_lower_criterion(lower_uncertainty_limit)) {
+        !utpcAnalyzer::meets_lower_criterion(utpc.x, utpc.y, lower_uncertainty_limit)) {
       lower_uncertainty_dropped++;
       return false;
     }
     if (enforce_minimum_hits &&
-            ((event.x.hits.size() < minimum_hits) ||
-                (event.y.hits.size() < minimum_hits))) {
+            ((event.c1.hit_count() < minimum_hits) ||
+                (event.c2.hit_count() < minimum_hits))) {
       minimum_hits_dropped++;
       return false;
     }
@@ -53,10 +52,10 @@ struct EventFilter {
 };
 
 struct NMXConfig {
-  NMXConfig() {}
+  NMXConfig() = default;
   NMXConfig(std::string configfile, std::string calibrationfile);
 
-  std::string builder_type{"VMM3"};
+  std::string builder_type;
 
   // VMM calibration
   std::shared_ptr<CalibrationFile> calfile;
@@ -64,6 +63,11 @@ struct NMXConfig {
   // SRS only
   SRSTime time_config;
   SRSMappings srs_mappings;
+
+  uint16_t adc_threshold{0};
+
+  bool perform_clustering {true};
+  bool send_raw_hits {false};
 
   ClustererConfig clusterer_x;
   ClustererConfig clusterer_y;

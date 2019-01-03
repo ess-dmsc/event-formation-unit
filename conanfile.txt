@@ -2,7 +2,7 @@
 asio/1.12.0@bincrafters/stable
 cli11/1.6.0@bincrafters/stable
 fmt/5.2.0@bincrafters/stable
-graylog-logger/1.1.1-dm1@ess-dmsc/stable
+graylog-logger/1.1.2-dm1@ess-dmsc/stable
 gtest/3121b20-dm3@ess-dmsc/stable
 google-benchmark/4c2af07-dm3@ess-dmsc/stable
 h5cpp/0.1.0@ess-dmsc/testing

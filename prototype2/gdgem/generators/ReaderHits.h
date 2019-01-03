@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <gdgem/nmx/Hit.h>
+#include <common/clustering/Hit.h>
 
 class ReaderHits {
 public:
@@ -21,7 +21,7 @@ public:
   size_t read(char *buf);
 
 private:
-  std::shared_ptr<Gem::HitFile> file;
+  std::shared_ptr<HitFile> file;
 
   size_t total_{0};
   size_t current_{0};

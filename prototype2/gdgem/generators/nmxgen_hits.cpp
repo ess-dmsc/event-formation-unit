@@ -14,7 +14,7 @@
 #include <libs/include/Socket.h>
 #include <unistd.h>
 // GCOVR_EXCL_START
-const int TSC_MHZ = 2900;
+static constexpr int TscMHz {2900};
 
 int main(int argc, char *argv[]) {
   NMXArgs opts(argc, argv);
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
       exit(0);
     }
 
-    if (unlikely((report_timer.timetsc() / TSC_MHZ) >= opts.updint * 1000000)) {
+    if (unlikely((report_timer.timetsc() / TscMHz) >= opts.updint * 1000000)) {
       auto usecs = us_clock.timeus();
       tx_total += tx;
       txp_total += txp;

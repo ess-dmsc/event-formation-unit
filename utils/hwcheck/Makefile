@@ -1,7 +1,8 @@
 
+CFLAGS=--std=c++11
 
 all:
-	g++ diskspace.cpp -o diskspace
+	g++ $(CFLAGS) diskspace.cpp -o diskspace
 
 clean:
 	rm -f diskspace

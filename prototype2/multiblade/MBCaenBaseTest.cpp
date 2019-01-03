@@ -50,7 +50,7 @@ public:
   virtual void SetUp() {
     LocalSettings.ConfigFile = "MB18Estia.json";
     Settings.DetectorRxBufferSize = 100000;
-    Settings.MinimumMTU = 1500;
+    Settings.NoHwCheck = true;
   }
   virtual void TearDown() {}
 

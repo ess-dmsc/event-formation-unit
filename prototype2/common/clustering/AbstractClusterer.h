@@ -14,6 +14,7 @@
 
 using HitContainer = std::vector<Hit>;
 
+// \todo replace by deque, or....?
 using ClusterContainer = std::list<Cluster>;
 
 /// \class AbstractClusterer AbstractClusterer.h
