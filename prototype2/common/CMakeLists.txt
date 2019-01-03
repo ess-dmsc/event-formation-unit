@@ -11,6 +11,7 @@ set(efu_common_SRC
   clustering/Hit.h
   clustering/OverlapMatcher.h
   clustering/GapMatcher.h
+  DynamicHist.cpp
   EV42Serializer.cpp
   NewStats.cpp
   Producer.cpp
@@ -28,6 +29,7 @@ set(efu_common_INC
   clustering/OverlapMatcher.cpp
   clustering/GapMatcher.cpp
   ../../libs/include/gccintel.h
+  DynamicHist.h
   DetectorModuleRegister.h
   Detector.h
   EFUArgs.h

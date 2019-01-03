@@ -14,6 +14,7 @@ public:
   static constexpr uint8_t external_trigger_plane {99};
 
   virtual void parse(Buffer<uint8_t> buffer) = 0;
+  virtual std::string debug() const = 0;
 
   std::vector<Hit> ConvertedData;
 

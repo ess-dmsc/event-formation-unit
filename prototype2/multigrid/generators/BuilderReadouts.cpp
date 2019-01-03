@@ -1,6 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <multigrid/generators/BuilderReadouts.h>
+#include <common/TimeString.h>
 
 #include <common/Trace.h>
 // #undef TRC_LEVEL
@@ -8,8 +9,25 @@
 
 namespace Multigrid {
 
-BuilderReadouts::BuilderReadouts() {
-  converted_data.reserve(9000 / sizeof(Readout));
+BuilderReadouts::BuilderReadouts(const SequoiaGeometry &geometry,
+                                 std::string dump_dir)
+    : digital_geometry_(geometry) {
+  if (!dump_dir.empty()) {
+    dumpfile_ = HitFile::create(dump_dir + "multigrid_hits_" + timeString(), 100);
+  }
+  parsed_data_.reserve(9000 / sizeof(Readout));
+}
+
+std::string BuilderReadouts::debug() const {
+  std::stringstream ss;
+  ss << "  ======================================================\n";
+  ss << "  ========           Readouts Builder           ========\n";
+  ss << "  ======================================================\n";
+
+  ss << "  Geometry mappings:\n";
+  ss << digital_geometry_.debug("  ") << "\n";
+
+  return ss.str();
 }
 
 void BuilderReadouts::parse(Buffer<uint8_t> buffer) {
@@ -17,44 +35,44 @@ void BuilderReadouts::parse(Buffer<uint8_t> buffer) {
   size_t count = std::min(buffer.size / sizeof(Readout),
                           size_t(9000 / sizeof(Readout)));
 
-  converted_data.resize(count);
-  memcpy(converted_data.data(), buffer.address, count * sizeof(Readout));
+  parsed_data_.resize(count);
+  memcpy(parsed_data_.data(), buffer.address, count * sizeof(Readout));
 
   //stats_trigger_count = vmmr16Parser.trigger_count();
 
-  for (const auto &r : converted_data) {
+  for (const auto &r : parsed_data_) {
     if (r.external_trigger) {
-      hit.plane = external_trigger_plane;
-      hit.coordinate = 0;
-      hit.weight = 0;
-    } else if (digital_geometry.isWire(r.bus, r.channel)) {
-      hit.weight = digital_geometry.rescale(r.bus, r.channel, r.adc);
-      if (!digital_geometry.is_valid(r.bus, r.channel, hit.weight)) {
+      hit_.plane = external_trigger_plane;
+      hit_.coordinate = 0;
+      hit_.weight = 0;
+    } else if (digital_geometry_.isWire(r.bus, r.channel)) {
+      hit_.weight = digital_geometry_.rescale(r.bus, r.channel, r.adc);
+      if (!digital_geometry_.is_valid(r.bus, r.channel, hit_.weight)) {
         stats_readout_filter_rejects++;
         continue;
       }
-      hit.coordinate = digital_geometry.wire(r.bus, r.channel);
-      hit.plane = wire_plane;
-    } else if (digital_geometry.isGrid(r.bus, r.channel)) {
-      hit.weight = digital_geometry.rescale(r.bus, r.channel, r.adc);
-      if (!digital_geometry.is_valid(r.bus, r.channel, hit.weight)) {
+      hit_.coordinate = digital_geometry_.wire(r.bus, r.channel);
+      hit_.plane = wire_plane;
+    } else if (digital_geometry_.isGrid(r.bus, r.channel)) {
+      hit_.weight = digital_geometry_.rescale(r.bus, r.channel, r.adc);
+      if (!digital_geometry_.is_valid(r.bus, r.channel, hit_.weight)) {
         stats_readout_filter_rejects++;
         continue;
       }
-      hit.coordinate = digital_geometry.grid(r.bus, r.channel);
-      hit.plane = grid_plane;
+      hit_.coordinate = digital_geometry_.grid(r.bus, r.channel);
+      hit_.plane = grid_plane;
     } else {
       XTRACE(PROCESS, DEB, "Bad geometry %s", r.debug().c_str());
       stats_digital_geom_errors++;
       continue;
     }
 
-    hit.time = r.total_time;
-    ConvertedData.push_back(hit);
+    hit_.time = r.total_time;
+    ConvertedData.push_back(hit_);
   }
 
-  if (dumpfile) {
-    dumpfile->push(ConvertedData);
+  if (dumpfile_) {
+    dumpfile_->push(ConvertedData);
   }
 
 }

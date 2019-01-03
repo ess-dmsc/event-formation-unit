@@ -33,76 +33,20 @@
 #include <multigrid/generators/BuilderReadouts.h>
 #include <multigrid/generators/ReaderReadouts.h>
 #include <multigrid/Config.h>
+#include <common/DynamicHist.h>
 #include <test/TestBase.h>
 
 using namespace Multigrid;
 
-// \todo factor this out to some file under common
-class SimpleHist1D {
-public:
-  std::vector<size_t> hist;
-  void bin(size_t i) {
-    if (hist.size() <= i)
-      hist.resize(i + 1, 0);
-    hist[i]++;
-  }
-
-  bool empty() const {
-    return hist.empty();
-  }
-
-  std::string debug() const {
-    std::stringstream ss;
-    for (size_t i = 0; i < hist.size(); ++i)
-      ss << "[" << i << "]=" << hist[i];
-    return ss.str();
-  }
-
-  std::string visualize(bool non_empty_only = false) const {
-    if (hist.empty())
-      return {};
-
-    size_t vmax{hist[0]};
-    size_t start{0}, end{0};
-    bool print{false};
-    for (uint32_t i = 0; i < hist.size(); i++) {
-      const auto &val = hist[i];
-      vmax = std::max(vmax, val);
-      if (val > 0) {
-        end = i;
-        if (!print) {
-          start = i;
-          print = true;
-        }
-      }
-    }
-
-    std::string largesti = fmt::format("{}", end);
-    std::string pad = "{:<" + fmt::format("{}", largesti.size()) + "}";
-
-    // \todo parametrize this
-    size_t nstars{60};
-
-    std::stringstream ss;
-    for (size_t i = start; i <= end; i++) {
-      auto val = hist[i];
-      if (!non_empty_only || (val > 0))
-        ss << fmt::format(pad, i) << ": "
-           << fmt::format("{:<62}", std::string((nstars * val) / vmax, '*'))
-           << val << "\n";
-    }
-    return ss.str();
-  }
-};
-
 class ReductionTest : public TestBase {
 protected:
+  Multigrid::Config config;
+
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
   size_t ingested_hits{0};
   size_t pulse_times{0};
   size_t neutron_events{0};
 
-  BuilderReadouts builder;
   Reduction reduction;
 
   virtual void SetUp() {
@@ -112,9 +56,9 @@ protected:
   }
 
   void load_config(const std::string &jsonfile) {
-    Multigrid::Config config(jsonfile);
-    builder.digital_geometry = config.analyzer.mappings;
-    //MESSAGE() << "Digital geometry: " << builder.digital_geometry.debug() << "\n";
+    config = Multigrid::Config(jsonfile);
+    config.builder = std::make_shared<BuilderReadouts>(config.analyzer.mappings);
+    //MESSAGE() << "Digital geometry: " << config.builder->digital_geometry.debug() << "\n";
   }
 
   void feed_file(const std::string &filename) {
@@ -124,9 +68,9 @@ protected:
     size_t readsz;
 
     while ((readsz = reader.read((char *) &buffer)) > 0) {
-      builder.parse(Buffer<uint8_t>(buffer, readsz));
-      ingested_hits += builder.ConvertedData.size();
-      reduction.ingest(builder.ConvertedData);
+      config.builder->parse(Buffer<uint8_t>(buffer, readsz));
+      ingested_hits += config.builder->ConvertedData.size();
+      reduction.ingest(config.builder->ConvertedData);
       reduction.perform_clustering(false);
     }
     reduction.perform_clustering(true);
@@ -136,7 +80,7 @@ protected:
     bool HavePulseTime{false};
     uint64_t RecentPulseTime{0};
 
-    SimpleHist1D pulse_positive_diff, pulse_negative_diff;
+    DynamicHist pulse_positive_diff, pulse_negative_diff;
     for (const auto &e : reduction.matcher.matched_events) {
       if (e.plane1() != AbstractBuilder::external_trigger_plane)
         continue;
@@ -172,8 +116,8 @@ protected:
     bool HaveTime{false};
     uint64_t RecentTime{0};
 
-    SimpleHist1D event_positive_diff, event_negative_diff;
-    SimpleHist1D wire_multiplicity, wire_span, grid_mltiplicity, grid_span, time_span;
+    DynamicHist event_positive_diff, event_negative_diff;
+    DynamicHist wire_multiplicity, wire_span, grid_mltiplicity, grid_span, time_span;
     for (const auto &e : reduction.matcher.matched_events) {
       if (e.plane1() == AbstractBuilder::external_trigger_plane)
         continue;

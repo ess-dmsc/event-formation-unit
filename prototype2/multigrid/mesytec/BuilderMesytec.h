@@ -10,17 +10,23 @@ namespace Multigrid {
 
 class BuilderMesytec : public AbstractBuilder {
 public:
+  BuilderMesytec(const SequoiaGeometry& geometry, bool spoof_time,
+      std::string dump_dir = "");
+
   void parse(Buffer<uint8_t> buffer) override;
 
-  Sis3153Parser sis3153parser;
-  VMMR16Parser vmmr16Parser;
+  std::string debug() const override;
 
-  std::shared_ptr<ReadoutFile> dumpfile;
-
-  SequoiaGeometry digital_geometry;
 
 private:
-  Hit hit;
+  std::shared_ptr<ReadoutFile> dumpfile_;
+  SequoiaGeometry digital_geometry_;
+
+  Sis3153Parser sis3153parser_;
+  VMMR16Parser vmmr16Parser_;
+
+  // preallocated
+  Hit hit_;
 };
 
 }

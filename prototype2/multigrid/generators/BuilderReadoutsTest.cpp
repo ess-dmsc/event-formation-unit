@@ -25,7 +25,8 @@ using namespace Multigrid;
 
 class BuilderReadoutsTest : public TestBase {
 protected:
-  BuilderReadouts builder;
+  Multigrid::Config config;
+
   size_t packets{0};
   size_t readouts{0};
   size_t external_triggers{0};
@@ -39,9 +40,9 @@ protected:
   }
 
   void load_config(const std::string &jsonfile) {
-    Multigrid::Config config(jsonfile);
-    builder.digital_geometry = config.analyzer.mappings;
-    //MESSAGE() << "Digital geometry: " << builder.digital_geometry.debug() << "\n";
+    config = Multigrid::Config(jsonfile);
+    config.builder = std::make_shared<BuilderReadouts>(config.analyzer.mappings);
+    //MESSAGE() << "Digital geometry: " << config.builder->digital_geometry.debug() << "\n";
   }
 
   void feed_file(const std::string &filename) {
@@ -54,7 +55,7 @@ protected:
 
     while ((readsz = reader.read((char *) &buffer)) > 0) {
       packets++;
-      builder.parse(Buffer<uint8_t>(buffer, readsz));
+      config.builder->parse(Buffer<uint8_t>(buffer, readsz));
     }
   }
 
@@ -62,9 +63,9 @@ protected:
     uint64_t RecentPulseTime{0};
 
     uint64_t prev_time{0};
-    for (size_t i=0; i < builder.ConvertedData.size(); ++i) {
+    for (size_t i=0; i < config.builder->ConvertedData.size(); ++i) {
 
-      const auto &h = builder.ConvertedData[i];
+      const auto &h = config.builder->ConvertedData[i];
 
       if (prev_time > h.time) {
         time_errors++;
@@ -95,13 +96,13 @@ TEST_F(BuilderReadoutsTest, t00004) {
   feed_file(TEST_DATA_PATH "readouts/154482");
 
   EXPECT_EQ(packets, 4);
-  EXPECT_EQ(builder.stats_discarded_bytes, 0);
-  EXPECT_EQ(builder.stats_trigger_count, 0);
-  EXPECT_EQ(builder.stats_readout_filter_rejects, 0);
-  EXPECT_EQ(builder.stats_digital_geom_errors, 0);
+  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
+  EXPECT_EQ(config.builder->stats_trigger_count, 0);
+  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
+  EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
 
-  EXPECT_EQ(builder.ConvertedData.size(), 1088);
-  EXPECT_EQ(builder.ConvertedData.size(), readouts);
+  EXPECT_EQ(config.builder->ConvertedData.size(), 1088);
+  EXPECT_EQ(config.builder->ConvertedData.size(), readouts);
 
   inspect_converted_data();
   EXPECT_EQ(external_triggers, 467);
@@ -113,13 +114,13 @@ TEST_F(BuilderReadoutsTest, t00033) {
   feed_file(TEST_DATA_PATH "readouts/154493");
 
   EXPECT_EQ(packets, 33);
-  EXPECT_EQ(builder.stats_discarded_bytes, 0);
-  EXPECT_EQ(builder.stats_trigger_count, 0);
-  EXPECT_EQ(builder.stats_readout_filter_rejects, 0);
-  EXPECT_EQ(builder.stats_digital_geom_errors, 0);
+  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
+  EXPECT_EQ(config.builder->stats_trigger_count, 0);
+  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
+  EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
 
-  EXPECT_EQ(builder.ConvertedData.size(), 8724);
-  EXPECT_EQ(builder.ConvertedData.size(), readouts);
+  EXPECT_EQ(config.builder->ConvertedData.size(), 8724);
+  EXPECT_EQ(config.builder->ConvertedData.size(), readouts);
 
   inspect_converted_data();
   EXPECT_EQ(external_triggers, 2555);
@@ -131,16 +132,16 @@ TEST_F(BuilderReadoutsTest, t00311) {
   feed_file(TEST_DATA_PATH "readouts/154492");
 
   EXPECT_EQ(packets, 311);
-  EXPECT_EQ(builder.stats_discarded_bytes, 0);
-  EXPECT_EQ(builder.stats_trigger_count, 0);
-  EXPECT_EQ(builder.stats_readout_filter_rejects, 120);
-  EXPECT_EQ(builder.stats_digital_geom_errors, 8);
+  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
+  EXPECT_EQ(config.builder->stats_trigger_count, 0);
+  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 120);
+  EXPECT_EQ(config.builder->stats_digital_geom_errors, 8);
 
-  EXPECT_EQ(builder.ConvertedData.size(), 84232);
+  EXPECT_EQ(config.builder->ConvertedData.size(), 84232);
   EXPECT_EQ(readouts,
-            builder.ConvertedData.size()
-                + builder.stats_digital_geom_errors
-                + builder.stats_readout_filter_rejects);
+            config.builder->ConvertedData.size()
+                + config.builder->stats_digital_geom_errors
+                + config.builder->stats_readout_filter_rejects);
 
   inspect_converted_data();
   EXPECT_EQ(external_triggers, 975);
@@ -152,16 +153,16 @@ TEST_F(BuilderReadoutsTest, t03710) {
   feed_file(TEST_DATA_PATH "readouts/154478");
 
   EXPECT_EQ(packets, 3710);
-  EXPECT_EQ(builder.stats_discarded_bytes, 0);
-  EXPECT_EQ(builder.stats_trigger_count, 0);
-  EXPECT_EQ(builder.stats_readout_filter_rejects, 893050);
-  EXPECT_EQ(builder.stats_digital_geom_errors, 60280);
+  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
+  EXPECT_EQ(config.builder->stats_trigger_count, 0);
+  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 893050);
+  EXPECT_EQ(config.builder->stats_digital_geom_errors, 60280);
 
-  EXPECT_EQ(builder.ConvertedData.size(), 55666);
+  EXPECT_EQ(config.builder->ConvertedData.size(), 55666);
   EXPECT_EQ(readouts,
-            builder.ConvertedData.size()
-                + builder.stats_digital_geom_errors
-                + builder.stats_readout_filter_rejects);
+            config.builder->ConvertedData.size()
+                + config.builder->stats_digital_geom_errors
+                + config.builder->stats_readout_filter_rejects);
 
   inspect_converted_data();
   EXPECT_EQ(external_triggers, 312);
@@ -173,16 +174,16 @@ TEST_F(BuilderReadoutsTest, t10392) {
   feed_file(TEST_DATA_PATH "readouts/154484");
 
   EXPECT_EQ(packets, 10392);
-  EXPECT_EQ(builder.stats_discarded_bytes, 0);
-  EXPECT_EQ(builder.stats_trigger_count, 0);
-  EXPECT_EQ(builder.stats_readout_filter_rejects, 2477695);
-  EXPECT_EQ(builder.stats_digital_geom_errors, 169752);
+  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
+  EXPECT_EQ(config.builder->stats_trigger_count, 0);
+  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 2477695);
+  EXPECT_EQ(config.builder->stats_digital_geom_errors, 169752);
 
-  EXPECT_EQ(builder.ConvertedData.size(), 178941);
+  EXPECT_EQ(config.builder->ConvertedData.size(), 178941);
   EXPECT_EQ(readouts,
-            builder.ConvertedData.size()
-                + builder.stats_digital_geom_errors
-                + builder.stats_readout_filter_rejects);
+            config.builder->ConvertedData.size()
+                + config.builder->stats_digital_geom_errors
+                + config.builder->stats_readout_filter_rejects);
 
   inspect_converted_data();
   EXPECT_EQ(external_triggers, 300);

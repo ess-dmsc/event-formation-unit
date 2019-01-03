@@ -9,18 +9,20 @@ namespace Multigrid {
 
 class BuilderReadouts : public AbstractBuilder {
 public:
-  BuilderReadouts();
+  BuilderReadouts(const SequoiaGeometry& geometry, std::string dump_dir = "");
 
   void parse(Buffer<uint8_t> buffer) override;
 
-  std::shared_ptr<HitFile> dumpfile;
+  std::string debug() const override;
 
-  SequoiaGeometry digital_geometry;
 
 private:
-  std::vector<Readout> converted_data;
+  std::shared_ptr<HitFile> dumpfile_;
+  SequoiaGeometry digital_geometry_;
 
-  Hit hit;
+  std::vector<Readout> parsed_data_;
+
+  Hit hit_;
 };
 
 }

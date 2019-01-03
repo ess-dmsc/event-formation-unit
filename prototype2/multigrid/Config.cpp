@@ -13,7 +13,7 @@
 
 namespace Multigrid {
 
-Config::Config(std::string jsonfile) {
+Config::Config(std::string jsonfile, std::string dump_path) {
   nlohmann::json root;
   try {
     std::ifstream t(jsonfile);
@@ -26,22 +26,15 @@ Config::Config(std::string jsonfile) {
     return;
   }
 
-  SequoiaGeometry mappings;
-  auto m = root["mappings"];
-  for (unsigned int i = 0; i < m.size(); i++) {
-    mappings.add_bus(m[i]);
-  }
+  SequoiaGeometry mappings{root["mappings"]};
 
   auto br = root["builder"];
   if (br["type"] == "mesytec") {
-    auto mbuilder = std::make_shared<BuilderMesytec>();
-    mbuilder->digital_geometry = mappings;
-    mbuilder->vmmr16Parser.spoof_high_time(br["spoof_high_time"]);
-    builder = mbuilder;
+    builder = std::make_shared<BuilderMesytec>(mappings,
+                                               br["spoof_high_time"],
+                                               dump_path);
   } else if (br["type"] == "readouts") {
-    auto rbuilder = std::make_shared<BuilderReadouts>();
-    rbuilder->digital_geometry = mappings;
-    builder = rbuilder;
+    builder = std::make_shared<BuilderReadouts>(mappings, dump_path);
   }
 
   analyzer.weighted(root["weighted"]);
@@ -56,14 +49,10 @@ Config::Config(std::string jsonfile) {
 
 std::string Config::debug() const {
   std::stringstream ss;
-  ss << "  ===============================================\n";
-  ss << "  ========           MultiGrid           ========\n";
-  ss << "  ===============================================\n";
-
-//  ss << "  Spoof high time = " << (spoof_high_time ? "YES" : "no") << "\n";
-//
-  ss << "  Geometry mappings:\n";
-  ss << analyzer.mappings.debug("  ") << "\n";
+  if (builder)
+    ss << builder->debug();
+  else
+    ss << "  ========           No Builder :(           ========\n";
 
   ss << "  Event position using weighted average: "
      << (analyzer.weighted() ? "YES" : "no") << "\n";

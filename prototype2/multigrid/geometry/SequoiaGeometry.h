@@ -194,7 +194,12 @@ public:
 
     return ss.str();
   }
-
 };
+
+inline void from_json(const nlohmann::json &j, SequoiaGeometry &g) {
+  for (unsigned int i = 0; i < j.size(); i++) {
+    g.add_bus(j[i]);
+  }
+}
 
 }
