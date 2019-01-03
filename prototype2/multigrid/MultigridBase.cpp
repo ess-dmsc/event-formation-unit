@@ -41,16 +41,22 @@ MultigridBase::MultigridBase(BaseSettings const &settings,
   // clang-format off
   Stats.create("rx_packets", mystats.rx_packets);
   Stats.create("rx_bytes", mystats.rx_bytes);
-  Stats.create("rx_discarded_bytes", mystats.discarded_bytes);
-  Stats.create("triggers", mystats.triggers);
-  Stats.create("bus_glitches", mystats.bus_glitches);
-  Stats.create("bad_triggers", mystats.bad_triggers);
-  Stats.create("readouts", mystats.readouts);
-  Stats.create("readouts_discarded", mystats.readouts_discarded);
-  Stats.create("readouts_culled", mystats.readouts_culled);
-  Stats.create("geometry_errors", mystats.geometry_errors);
-  Stats.create("timing_errors", mystats.timing_errors);
-  Stats.create("events", mystats.events);
+  Stats.create("rx_discarded_bytes", mystats.parser_discarded_bytes);
+  Stats.create("parser_triggers", mystats.parser_triggers);
+  Stats.create("builder_glitch_rejects", mystats.builder_glitch_rejects);
+  Stats.create("builder_filter_rejects", mystats.builder_filter_rejects);
+  Stats.create("builder_geometry_errors", mystats.builder_geometry_errors);
+  Stats.create("hits_total", mystats.hits_total);
+  Stats.create("hits_time_seq_err", mystats.hits_time_seq_err);
+  Stats.create("hits_bad_plane", mystats.hits_bad_plane);
+  Stats.create("hits_used", mystats.hits_used);
+  Stats.create("wire_clusters", mystats.wire_clusters);
+  Stats.create("grid_clusters", mystats.grid_clusters);
+  Stats.create("events_total", mystats.events_total);
+  Stats.create("events_bad", mystats.events_bad);
+  Stats.create("events_geometry_err", mystats.events_geometry_err);
+  Stats.create("events_time_err", mystats.events_time_err);
+  Stats.create("tx_events", mystats.tx_events);
   Stats.create("tx_bytes", mystats.tx_bytes);
   // clang-format on
 
@@ -84,6 +90,7 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
   for (auto &event : mg_config.reduction.matcher.matched_events) {
 
     if (event.plane1() == Multigrid::AbstractBuilder::external_trigger_plane) {
+      mystats.pulses++;
       if (HavePulseTime) {
         uint64_t PulsePeriod = event.time_start() - ev42serializer.pulseTime();
         ShortestPulsePeriod = std::min(ShortestPulsePeriod, PulsePeriod);
@@ -98,8 +105,13 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
 //                   ev42serializer.pulseTime(), ShortestPulsePeriod);
     } else {
       auto neutron = mg_config.analyzer.analyze(event);
-      if (!neutron.good)
+
+      mystats.events_total++;
+      mystats.hits_used = mg_config.analyzer.stats_used_hits;
+      if (!neutron.good) {
+        mystats.events_bad++;
         continue;
+      }
       //            XTRACE(PROCESS, DEB, "Neutron: %s ", neutron.debug().c_str());
       uint32_t pixel = mg_config.geometry.pixel3D(
           static_cast<uint32_t>(std::round(neutron.x)),
@@ -110,17 +122,16 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
 //            XTRACE(PROCESS, DEB, "Event: pixel: %d, time: %d ", pixel, time);
       if (pixel == 0) {
         XTRACE(PROCESS, DEB, "Event geom error");
-        mystats.geometry_errors++;
-      } else if (neutron.time < ev42serializer.pulseTime()) {
+        mystats.events_geometry_err++;
+      } else if (!HavePulseTime || (neutron.time < ev42serializer.pulseTime())) {
         XTRACE(PROCESS, DEB, "Event before pulse");
-        mystats.timing_errors++;
+        mystats.events_time_err++;
       } else if (time > (1.00004 * ShortestPulsePeriod)) {
         XTRACE(PROCESS, DEB, "Event out of pulse range");
-        mystats.timing_errors++;
+        mystats.events_time_err++;
       } else {
-//            mystats.readouts_culled += (parsed_readouts - mgEfu->used_readouts);
 //              XTRACE(PROCESS, DEB, "Event good");
-        mystats.events++;
+        mystats.tx_events++;
         mystats.tx_bytes += ev42serializer.addEvent(time, pixel);
       }
     }
@@ -157,12 +168,14 @@ void MultigridBase::mainThread() {
 
       mg_config.builder->parse(Buffer<uint8_t>(buffer, static_cast<size_t>(ReadSize)));
 
-      mystats.discarded_bytes = mg_config.builder->stats_discarded_bytes;
-      mystats.triggers = mg_config.builder->stats_trigger_count;
-      // \todo more stats
+      mystats.parser_discarded_bytes = mg_config.builder->stats_discarded_bytes;
+      mystats.parser_triggers = mg_config.builder->stats_trigger_count;
+      mystats.builder_glitch_rejects = mg_config.builder->stats_bus_glitch_rejects;
+      mystats.builder_filter_rejects = mg_config.builder->stats_readout_filter_rejects;
+      mystats.builder_geometry_errors = mg_config.builder->stats_digital_geom_errors;
 
       if (!mg_config.builder->ConvertedData.empty()) {
-        mystats.readouts += mg_config.builder->ConvertedData.size();
+        mystats.hits_total += mg_config.builder->ConvertedData.size();
 
         for (const auto& hit : mg_config.builder->ConvertedData) {
           if (monitor.readouts)
@@ -174,11 +187,13 @@ void MultigridBase::mainThread() {
               monitor.hists->bin_y(hit.coordinate, hit.weight);
           }
         }
-
         mg_config.reduction.ingest(mg_config.builder->ConvertedData);
-        mg_config.reduction.perform_clustering(false);
-        // \todo more stats
 
+        mg_config.reduction.perform_clustering(false);
+        mystats.hits_time_seq_err = mg_config.reduction.stats_time_seq_errors;
+        mystats.hits_bad_plane = mg_config.reduction.stats_invalid_planes;
+        mystats.wire_clusters = mg_config.reduction.stats_wire_clusters;
+        mystats.grid_clusters = mg_config.reduction.stats_grid_clusters;
         process_events(ev42serializer);
       }
     }
@@ -194,8 +209,14 @@ void MultigridBase::mainThread() {
     if (not runThreads) {
       LOG(PROCESS, Sev::Info, "Stopping processing thread.");
       // flush anything that remains
+
       mg_config.reduction.perform_clustering(true);
+      mystats.hits_time_seq_err = mg_config.reduction.stats_time_seq_errors;
+      mystats.hits_bad_plane = mg_config.reduction.stats_invalid_planes;
+      mystats.wire_clusters = mg_config.reduction.stats_wire_clusters;
+      mystats.grid_clusters = mg_config.reduction.stats_grid_clusters;
       process_events(ev42serializer);
+
       mystats.tx_bytes += ev42serializer.produce();
       monitor.produce();
       return;

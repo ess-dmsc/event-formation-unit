@@ -96,16 +96,23 @@ protected:
     // Input Counters
     int64_t rx_packets{0};
     int64_t rx_bytes{0};
-    int64_t discarded_bytes{0};
-    int64_t triggers{0};
-    int64_t bus_glitches{0};
-    int64_t bad_triggers{0};
-    int64_t readouts{0};
-    int64_t readouts_discarded{0};
-    int64_t readouts_culled{0};
-    int64_t geometry_errors{0};
-    int64_t timing_errors{0};
-    int64_t events{0};
+    int64_t parser_discarded_bytes{0};
+    int64_t parser_triggers{0};
+    int64_t builder_glitch_rejects{0};
+    int64_t builder_filter_rejects{0};
+    int64_t builder_geometry_errors{0};
+    int64_t hits_total{0};
+    int64_t hits_time_seq_err{0};
+    int64_t hits_bad_plane{0};
+    int64_t hits_used{0};
+    int64_t pulses{0};
+    int64_t wire_clusters{0};
+    int64_t grid_clusters{0};
+    int64_t events_total{0};
+    int64_t events_bad{0};
+    int64_t events_geometry_err{0};
+    int64_t events_time_err{0};
+    int64_t tx_events{0};
     int64_t tx_bytes{0};
   } __attribute__((aligned(64))) mystats;
 

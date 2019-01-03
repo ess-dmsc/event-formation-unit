@@ -41,10 +41,16 @@ void BuilderMesytec::parse(Buffer<uint8_t> buffer) {
 
     stats_discarded_bytes += vmmr16Parser_.parse(b);
 
+    stats_trigger_count = vmmr16Parser_.trigger_count();
+
     if (vmmr16Parser_.converted_data.empty())
       continue;
 
-    stats_trigger_count = vmmr16Parser_.trigger_count();
+    // \todo make optional and parametrize threshold
+    if (vmmr16Parser_.converted_data.size() > 40) {
+      stats_bus_glitch_rejects += vmmr16Parser_.converted_data.size();
+      continue;
+    }
 
     if (dumpfile_) {
       dumpfile_->push(vmmr16Parser_.converted_data);

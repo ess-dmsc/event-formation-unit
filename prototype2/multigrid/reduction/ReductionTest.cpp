@@ -171,8 +171,8 @@ TEST_F(ReductionTest, t00004) {
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
   EXPECT_EQ(reduction.stats_time_seq_errors, 0);
 
-  EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 164);
-  EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 184);
+  EXPECT_EQ(reduction.stats_wire_clusters, 164);
+  EXPECT_EQ(reduction.stats_grid_clusters, 184);
 
   inspect_pulse_data();
   inspect_event_data();
@@ -188,8 +188,8 @@ TEST_F(ReductionTest, t00033) {
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
   EXPECT_EQ(reduction.stats_time_seq_errors, 1);
 
-  EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 1737);
-  EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 1934);
+  EXPECT_EQ(reduction.stats_wire_clusters, 1737);
+  EXPECT_EQ(reduction.stats_grid_clusters, 1934);
 
   inspect_pulse_data();
   inspect_event_data();
@@ -205,8 +205,8 @@ TEST_F(ReductionTest, t00311) {
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
   EXPECT_EQ(reduction.stats_time_seq_errors, 34);
 
-  EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 23368);
-  EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 26085);
+  EXPECT_EQ(reduction.stats_wire_clusters, 23368);
+  EXPECT_EQ(reduction.stats_grid_clusters, 26085);
 
   inspect_pulse_data();
   inspect_event_data();
@@ -222,8 +222,8 @@ TEST_F(ReductionTest, t03710) {
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
   EXPECT_EQ(reduction.stats_time_seq_errors, 0);
 
-  EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 16755);
-  EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 16370);
+  EXPECT_EQ(reduction.stats_wire_clusters, 16755);
+  EXPECT_EQ(reduction.stats_grid_clusters, 16370);
 
   inspect_pulse_data();
   inspect_event_data();
@@ -239,8 +239,8 @@ TEST_F(ReductionTest, t10392) {
   EXPECT_EQ(reduction.stats_invalid_planes, 0);
   EXPECT_EQ(reduction.stats_time_seq_errors, 1);
 
-  EXPECT_EQ(reduction.wire_clusters.stats_cluster_count, 51947);
-  EXPECT_EQ(reduction.grid_clusters.stats_cluster_count, 51344);
+  EXPECT_EQ(reduction.stats_wire_clusters, 51947);
+  EXPECT_EQ(reduction.stats_grid_clusters, 51344);
 
   inspect_pulse_data();
   inspect_event_data();

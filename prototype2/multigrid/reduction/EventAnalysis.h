@@ -21,12 +21,13 @@ struct NeutronPosition {
 
 class EventAnalyzer {
 public:
-  NeutronPosition analyze(Event &) const;
+  NeutronPosition analyze(Event &);
 
   void weighted(bool w);
   bool weighted() const;
 
   SequoiaGeometry mappings;
+  size_t stats_used_hits {0};
 
 private:
   bool weighted_{true};

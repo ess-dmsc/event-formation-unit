@@ -21,3 +21,4 @@ doxygen/
 CMakeLists.txt.user
 .idea/
 .idea
+.atom*

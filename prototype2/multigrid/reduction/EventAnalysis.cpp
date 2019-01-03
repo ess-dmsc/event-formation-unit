@@ -28,7 +28,7 @@ bool EventAnalyzer::weighted() const {
   return weighted_;
 }
 
-NeutronPosition EventAnalyzer::analyze(Event &event) const {
+NeutronPosition EventAnalyzer::analyze(Event &event) {
   NeutronPosition ret;
 
   if (event.empty()) {
@@ -50,7 +50,7 @@ NeutronPosition EventAnalyzer::analyze(Event &event) const {
     for (const auto &h : event.c1.hits) {
       if (h.weight != highest_adc)
         break;
-      //used_readouts++;
+      stats_used_hits++;
       if (weighted_) {
         xmass += mappings.x_from_wire(h.coordinate) * h.weight;
         zmass += mappings.z_from_wire(h.coordinate) * h.weight;
@@ -82,7 +82,7 @@ NeutronPosition EventAnalyzer::analyze(Event &event) const {
     for (const auto &h : event.c2.hits) {
       if (h.weight != highest_adc)
         break;
-      //used_readouts++;
+      stats_used_hits++;
       if (weighted_) {
         ymass += mappings.y_from_grid(h.coordinate) * h.weight;
         ysum += h.weight;

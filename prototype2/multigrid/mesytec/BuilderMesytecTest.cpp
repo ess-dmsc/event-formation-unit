@@ -22,14 +22,13 @@ protected:
   }
 };
 
-// \todo use reference config and data
-
 TEST_F(BuilderMesytecTest, ErrNoTimeStamp) {
   load_config(TEST_JSON_PATH "ILL_mappings.json");
   config.builder->parse(err_no_timestamp);
 
   EXPECT_EQ(config.builder->stats_discarded_bytes, 528);
-  EXPECT_EQ(config.builder->stats_trigger_count, 0);
+  EXPECT_EQ(config.builder->stats_trigger_count, 1);
+  EXPECT_EQ(config.builder->stats_bus_glitch_rejects, 0);
   EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
   EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
 
@@ -42,10 +41,11 @@ TEST_F(BuilderMesytecTest, ParseRecordedWSData) {
 
   EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
   EXPECT_EQ(config.builder->stats_trigger_count, 1);
+  EXPECT_EQ(config.builder->stats_bus_glitch_rejects, 128);
   EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
-  EXPECT_EQ(config.builder->stats_digital_geom_errors, 8);
+  EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
 
-  EXPECT_EQ(config.builder->ConvertedData.size(), 120);
+  EXPECT_EQ(config.builder->ConvertedData.size(), 0);
 }
 
 TEST_F(BuilderMesytecTest, ParseRecordedWSDataII) {
@@ -54,10 +54,11 @@ TEST_F(BuilderMesytecTest, ParseRecordedWSDataII) {
 
   EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
   EXPECT_EQ(config.builder->stats_trigger_count, 2);
+  EXPECT_EQ(config.builder->stats_bus_glitch_rejects, 256);
   EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
-  EXPECT_EQ(config.builder->stats_digital_geom_errors, 16);
+  EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
 
-  EXPECT_EQ(config.builder->ConvertedData.size(), 240);
+  EXPECT_EQ(config.builder->ConvertedData.size(), 0);
 }
 
 TEST_F(BuilderMesytecTest, ParseRecordedWSDataIII) {
@@ -66,10 +67,11 @@ TEST_F(BuilderMesytecTest, ParseRecordedWSDataIII) {
 
   EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
   EXPECT_EQ(config.builder->stats_trigger_count, 4);
+  EXPECT_EQ(config.builder->stats_bus_glitch_rejects, 256);
   EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
-  EXPECT_EQ(config.builder->stats_digital_geom_errors, 16);
+  EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
 
-  EXPECT_EQ(config.builder->ConvertedData.size(), 240);
+  EXPECT_EQ(config.builder->ConvertedData.size(), 0);
 }
 
 TEST_F(BuilderMesytecTest, ParseRecordedWSDataMultipleTriggers) {
@@ -77,7 +79,8 @@ TEST_F(BuilderMesytecTest, ParseRecordedWSDataMultipleTriggers) {
   config.builder->parse(ws4);
 
   EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
-  EXPECT_EQ(config.builder->stats_trigger_count, 34);
+  EXPECT_EQ(config.builder->stats_trigger_count, 36);
+  EXPECT_EQ(config.builder->stats_bus_glitch_rejects, 0);
   EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
   EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
 
@@ -103,6 +106,7 @@ TEST_F(BuilderMesytecTest, PCap2) {
   EXPECT_EQ(packets, 25);
   EXPECT_EQ(config.builder->stats_discarded_bytes, 3784);
   EXPECT_EQ(config.builder->stats_trigger_count, 0);
+  EXPECT_EQ(config.builder->stats_bus_glitch_rejects, 0);
   EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
   EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
 
@@ -128,6 +132,7 @@ TEST_F(BuilderMesytecTest, PCap3) {
   EXPECT_EQ(packets, 102);
   EXPECT_EQ(config.builder->stats_discarded_bytes, 12047);
   EXPECT_EQ(config.builder->stats_trigger_count, 0);
+  EXPECT_EQ(config.builder->stats_bus_glitch_rejects, 0);
   EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
   EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
 

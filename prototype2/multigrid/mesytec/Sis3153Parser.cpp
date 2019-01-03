@@ -60,7 +60,6 @@ size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
     auto length32 = ntohs(static_cast<uint16_t>((buf32[0] >> 8) & LengthMask));
     XTRACE(DATA, DEB, "sis3153 datawords %d", length32);
     buf32++;
-    /// \todo Check for size mismatch
 
     // Header2?
     if ((buf32[0] & TypeMask) != SisType::BeginReadout) {
@@ -71,11 +70,9 @@ size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
     buf32++;
 
     length32 -= 3;
-    buffers.emplace_back(Buffer<uint32_t>(buf32.address, length32));
+    Buffer<uint32_t> sub_buffer(buf32.address, length32);
 
     buf32 += length32;
-
-    // \todo more graceful recovery from these error conditions, preserving some data
 
     if (buf32[0] != EndDataCookie) {
       XTRACE(DATA, WAR, "Protocol mismatch, end-of-data cookie missing");
@@ -88,6 +85,8 @@ size_t Sis3153Parser::parse(Buffer<uint8_t> buffer) {
       return buf32.bytes();
     }
     buf32++;
+
+    buffers.emplace_back(sub_buffer);
   }
 
   return 0;

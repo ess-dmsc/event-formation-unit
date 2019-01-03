@@ -35,7 +35,7 @@ TEST_F(Sis3153ParserTest, ErrNoSisReadoutHeader) {
 TEST_F(Sis3153ParserTest, ErrNoSisReadoutTrailer) {
   auto res = sis.parse(err_no_sis_readout_trailer);
   EXPECT_EQ(res, 4);
-  EXPECT_EQ(sis.buffers.size(), 1);
+  EXPECT_EQ(sis.buffers.size(), 0);
 }
 
 TEST_F(Sis3153ParserTest, ErrNoTimeStamp) {
@@ -47,7 +47,7 @@ TEST_F(Sis3153ParserTest, ErrNoTimeStamp) {
 TEST_F(Sis3153ParserTest, ErrNoEndDataCookie) {
   auto res = sis.parse(err_no_end_data_cookie);
   EXPECT_EQ(res, 8);
-  EXPECT_EQ(sis.buffers.size(), 1);
+  EXPECT_EQ(sis.buffers.size(), 0);
 }
 
 TEST_F(Sis3153ParserTest, ErrPktShort) {

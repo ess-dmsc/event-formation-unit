@@ -37,6 +37,8 @@ void Reduction::perform_clustering(bool flush) {
     wire_clusters.flush();
     grid_clusters.flush();
   }
+  stats_wire_clusters = wire_clusters.stats_cluster_count;
+  stats_grid_clusters = grid_clusters.stats_cluster_count;
   matcher.insert(AbstractBuilder::wire_plane, wire_clusters.clusters);
   matcher.insert(AbstractBuilder::grid_plane, grid_clusters.clusters);
   matcher.insert_pulses(pulse_times);

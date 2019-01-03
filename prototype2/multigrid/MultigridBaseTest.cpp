@@ -11,6 +11,7 @@
 
 // \todo use reference data
 #include <multigrid/mesytec/TestData.h>
+#include "MultigridBase.h"
 
 class MultigridBaseStandIn : public MultigridBase {
 public:
@@ -37,8 +38,8 @@ public:
 TEST_F(MultigridBaseTest, Constructor) {
   MultigridBaseStandIn Readout(Settings, LocalSettings);
   EXPECT_EQ(Readout.mystats.rx_packets, 0);
-  EXPECT_EQ(Readout.mystats.triggers, 0);
-  EXPECT_EQ(Readout.mystats.readouts, 0);
+  EXPECT_EQ(Readout.mystats.rx_bytes, 0);
+  EXPECT_EQ(Readout.mystats.tx_bytes, 0);
 }
 
 
@@ -55,9 +56,24 @@ TEST_F(MultigridBaseTest, DataReceive) {
   Readout.stopThreads();
   EXPECT_EQ(Readout.mystats.rx_packets, 1);
   EXPECT_EQ(Readout.mystats.rx_bytes, ws4.size());
-  EXPECT_EQ(Readout.mystats.readouts, 54); //
-  EXPECT_EQ(Readout.mystats.events, 23);
-  EXPECT_EQ(Readout.mystats.bus_glitches, 0);
+  EXPECT_EQ(Readout.mystats.parser_discarded_bytes, 0);
+  EXPECT_EQ(Readout.mystats.parser_triggers, 36);
+  EXPECT_EQ(Readout.mystats.builder_glitch_rejects, 0);
+  EXPECT_EQ(Readout.mystats.builder_filter_rejects, 0);
+  EXPECT_EQ(Readout.mystats.builder_geometry_errors, 0);
+  EXPECT_EQ(Readout.mystats.hits_total, 54);
+  EXPECT_EQ(Readout.mystats.hits_bad_plane, 0);
+  EXPECT_EQ(Readout.mystats.hits_time_seq_err, 0);
+  EXPECT_EQ(Readout.mystats.hits_used, 46);
+  EXPECT_EQ(Readout.mystats.pulses, 0);
+  EXPECT_EQ(Readout.mystats.wire_clusters, 24);
+  EXPECT_EQ(Readout.mystats.grid_clusters, 26);
+  EXPECT_EQ(Readout.mystats.events_total, 23);
+  EXPECT_EQ(Readout.mystats.events_bad, 0);
+  EXPECT_EQ(Readout.mystats.events_geometry_err, 0);
+  EXPECT_EQ(Readout.mystats.events_time_err, 23);
+  EXPECT_EQ(Readout.mystats.tx_events, 0);
+  EXPECT_EQ(Readout.mystats.tx_bytes, 0);
 }
 
 int main(int argc, char **argv) {
