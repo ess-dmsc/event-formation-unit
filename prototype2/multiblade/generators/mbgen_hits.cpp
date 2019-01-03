@@ -29,28 +29,29 @@ const int TSC_MHZ = 2900;
 
 class TxBuffer {
 public:
-  char * getBuffer() { return buffer; }
+  char * getBuffer() { return Buffer; }
 
   int getSize() { return DataLength; }
 
   bool addData(uint32_t time, uint16_t channel, uint16_t adc) {
     //printf("add data %u, %u, %u\n", time, channel, adc);
     Entries++;
-    auto hp = (Multiblade::DataParser::Header *)buffer;
+    auto hp = (Multiblade::DataParser::Header *)Buffer;
     hp->numElements = Entries;
 
     auto dataoffset = 32 + (8 * (Entries -1));
-    auto dp = (Multiblade::DataParser::ListElement422 *)(buffer + dataoffset);
+    auto dp = (Multiblade::DataParser::ListElement422 *)(Buffer + dataoffset);
     dp->localTime = time;
     dp->channel = channel;
     dp->adcValue = adc;
     DataLength += 8;
+    TotalBytes += 8;
     return true;
   }
 
   bool newPacket(uint64_t global_time, uint32_t digitizer) {
-    auto hp = (Multiblade::DataParser::Header *)buffer;
-    memset(buffer, 0, sizeof(buffer));
+    auto hp = (Multiblade::DataParser::Header *)Buffer;
+    memset(Buffer, 0, 32); // clear header
     hp->globalTime = global_time;
     hp->digitizerID = digitizer;
     hp->elementType = Multiblade::ElementType;
@@ -58,15 +59,20 @@ public:
     hp->seqNum = SequenceNumber;
     Entries = 0;
     DataLength = 32;
+    TotalBytes += DataLength;
+    TotalPackets++;
     SequenceNumber++;
     return true;
   }
-private:
 
+  uint64_t TotalPackets{0};
+  uint64_t TotalBytes{0};
+private:
   int SequenceNumber{0};
   int DataLength{0};
   int Entries{0};
-  char buffer[9000];
+  char Buffer[9000];
+
 };
 
 int main(int argc, char *argv[]) {
@@ -76,15 +82,16 @@ int main(int argc, char *argv[]) {
   app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
   app.add_option("-a, --packets", Settings.NumberOfPackets, "Number of packets to send");
   app.add_option("-t, --throttle", Settings.SpeedThrottle, "Speed throttle (0 is fastest, larger is slower)");
-
   CLI11_PARSE(app, argc, argv);
 
-  if (Settings.FileName.empty())
+  if (Settings.FileName.empty()) {
+    printf("No input file specified, exiting.\n");
     return 1;
+  }
 
   hdf5::error::Singleton::instance().auto_print(false);
 
-  char buffer[9000];
+  char RxBuffer[9000];
   TxBuffer txbuffer;
 
   const int B1M = 1000000;
@@ -96,9 +103,6 @@ int main(int argc, char *argv[]) {
   ReaderHits file(Settings.FileName);
 
   int readsz;
-
-  uint64_t tx_total = 0;
-  uint64_t txp_total = 0;
   uint64_t tx = 0;
   uint64_t txp = 0;
 
@@ -107,49 +111,36 @@ int main(int argc, char *argv[]) {
 
   uint64_t curr_timestamp = 0;
   uint32_t curr_digitizer = 0;
+
   for (;;) {
-    if (Settings.NumberOfPackets != 0 && txp_total >= Settings.NumberOfPackets) {
-      printf("Max packet reached, exiting...\n");
+    readsz = file.read(RxBuffer);
+    if (readsz <= 0) {
       break;
     }
 
-    readsz = file.read(buffer);
-    if (readsz > 0) {
-      auto entries = readsz / sizeof(Multiblade::Readout);
-      //printf("\nbuffer contains %lu entries\n", entries);
+    auto entries = readsz / sizeof(Multiblade::Readout);
+    auto mrp = (Multiblade::Readout *)RxBuffer;
 
-      auto mrp = (Multiblade::Readout *)buffer;
-      for (unsigned int i = 0; i < entries; i++) {
-
-        if (curr_timestamp != mrp->global_time or curr_digitizer != mrp->digitizer) {
-          auto currBufSize = txbuffer.getSize();
-          if (currBufSize > 0) {
-            if (Settings.NumberOfPackets != 0 && txp_total >= Settings.NumberOfPackets) {
-              break;
-            }
-            //printf("Sending packet with size %d\n", currBufSize);
-            DataSource.send(txbuffer.getBuffer(), currBufSize);
-            tx += currBufSize;
-            txp++;
-            tx_total += currBufSize;
-            txp_total++;
+    for (unsigned int i = 0; i < entries; i++) {
+      if (curr_timestamp != mrp->global_time or curr_digitizer != mrp->digitizer) {
+        auto currBufSize = txbuffer.getSize();
+        if (currBufSize > 0) {
+          if (Settings.NumberOfPackets != 0 && txbuffer.TotalPackets >= Settings.NumberOfPackets) {
+            break;
           }
-
-          curr_timestamp = mrp->global_time;
-          curr_digitizer = mrp->digitizer;
-          txbuffer.newPacket(curr_timestamp, curr_digitizer);
+          //printf("Sending packet with size %d\n", currBufSize);
+          DataSource.send(txbuffer.getBuffer(), currBufSize);
+          tx += currBufSize;
+          txp++;
         }
 
-        txbuffer.addData(mrp->local_time, mrp->channel, mrp->adc);
-        mrp++;
+        curr_timestamp = mrp->global_time;
+        curr_digitizer = mrp->digitizer;
+        txbuffer.newPacket(curr_timestamp, curr_digitizer);
       }
 
-
-    } else {
-      std::cout << "Sent " << tx_total << " bytes"
-                << " in " << txp_total << " packets." << std::endl;
-      std::cout << "done" << std::endl;
-      exit(0);
+      txbuffer.addData(mrp->local_time, mrp->channel, mrp->adc);
+      mrp++;
     }
 
     if (unlikely((report_timer.timetsc() / TSC_MHZ) >= 1 * 1000000)) {
@@ -158,14 +149,28 @@ int main(int argc, char *argv[]) {
       printf("Tx rate: %8.2f Mbps (%.2f pps), tx %5" PRIu64
              " MB (total: %7" PRIu64 " MB) %" PRIu64 " usecs\n",
              tx * 8.0 / usecs, txp * 1000000.0 / usecs, tx / B1M,
-             tx_total / B1M, usecs);
+             txbuffer.TotalBytes / B1M, usecs);
       tx = 0;
       txp = 0;
       us_clock.now();
       report_timer.now();
     }
-    usleep(Settings.SpeedThrottle * 1000);
+    usleep(Settings.SpeedThrottle * 100);
   }
+
+  // Flush last packet if packet limit has not already been reached
+  if (not (Settings.NumberOfPackets != 0 && txbuffer.TotalPackets >= Settings.NumberOfPackets)) {
+    auto currBufSize = txbuffer.getSize();
+    if (currBufSize > 0) {
+      printf("Sending last packet with size %d\n", currBufSize);
+      DataSource.send(txbuffer.getBuffer(), currBufSize);
+    }
+  }
+
+  std::cout << "Sent " << txbuffer.TotalBytes << " bytes"
+            << " in " << txbuffer.TotalPackets << " packets." << std::endl;
+  std::cout << "done" << std::endl;
+
   return 0;
 }
 // GCOVR_EXCL_STOP
