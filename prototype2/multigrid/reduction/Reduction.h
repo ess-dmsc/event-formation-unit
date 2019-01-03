@@ -9,7 +9,7 @@ namespace Multigrid {
 class Reduction {
 public:
 
-  void ingest(HitContainer& hits);
+  void ingest(HitContainer &hits);
 
   void perform_clustering(bool flush);
 
@@ -17,12 +17,12 @@ public:
   size_t stats_time_seq_errors{0};
 
   // \todo encapsulate this properly
-  GapClusterer wire_clusters {0,1};
-  GapClusterer grid_clusters {0,1};
+  GapClusterer wire_clusters{0, 1};
+  GapClusterer grid_clusters{0, 1};
   HitContainer pulse_times;
   // Just greater than shortest pulse period of 266662 ticks
   // Will have to be adjusted for other experimental setups
-  GapMatcher matcher {300000, 1};
+  GapMatcher matcher{300000, 1};
 
 private:
   uint64_t previous_time_{0};

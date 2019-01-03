@@ -15,14 +15,17 @@ public:
 
   std::string debug() const override;
 
+protected:
+  void build(const std::vector<Readout>& readouts);
+
+  // preallocated
+  Hit hit_;
 
 private:
   std::shared_ptr<HitFile> dumpfile_;
   SequoiaGeometry digital_geometry_;
 
   std::vector<Readout> parsed_data_;
-
-  Hit hit_;
 };
 
 }

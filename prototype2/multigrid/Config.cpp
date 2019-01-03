@@ -4,7 +4,7 @@
 
 #include <fstream>
 #include <sstream>
-#include <multigrid/generators/BuilderReadouts.h>
+#include <multigrid/mesytec/BuilderReadouts.h>
 #include <multigrid/mesytec/BuilderMesytec.h>
 
 #include <nlohmann/json.hpp>

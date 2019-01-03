@@ -12,7 +12,7 @@ set(multigrid_common_src
   mesytec/Vmmr16Parser.cpp
   mesytec/Sis3153Parser.cpp
   mesytec/Readout.cpp
-  generators/BuilderReadouts.cpp
+  mesytec/BuilderReadouts.cpp
   reduction/Reduction.cpp
   reduction/EventAnalysis.cpp
   Config.cpp
@@ -27,7 +27,7 @@ set(multigrid_common_inc
   mesytec/Vmmr16Parser.h
   mesytec/Sis3153Parser.h
   mesytec/Readout.h
-  generators/BuilderReadouts.h
+  mesytec/BuilderReadouts.h
   reduction/Reduction.h
   reduction/EventAnalysis.h
   AbstractBuilder.h

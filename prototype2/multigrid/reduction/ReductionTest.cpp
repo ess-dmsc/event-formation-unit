@@ -30,7 +30,7 @@
 
 
 #include <multigrid/reduction/Reduction.h>
-#include <multigrid/generators/BuilderReadouts.h>
+#include <multigrid/mesytec/BuilderReadouts.h>
 #include <multigrid/generators/ReaderReadouts.h>
 #include <multigrid/Config.h>
 #include <common/DynamicHist.h>

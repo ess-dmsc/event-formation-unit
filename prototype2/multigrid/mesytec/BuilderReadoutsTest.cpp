@@ -16,7 +16,7 @@
 //    Timing errors: check for these and flush cluseters when this happens
 //    Geometry errors: do nothing, such readouts are alrady discarded in builder
 
-#include <multigrid/generators/BuilderReadouts.h>
+//#include <multigrid/mesytec/BuilderReadouts.h>
 #include <multigrid/generators/ReaderReadouts.h>
 #include <multigrid/Config.h>
 #include <test/TestBase.h>
@@ -41,7 +41,7 @@ protected:
 
   void load_config(const std::string &jsonfile) {
     config = Multigrid::Config(jsonfile);
-    config.builder = std::make_shared<BuilderReadouts>(config.analyzer.mappings);
+//    config.builder = std::make_shared<BuilderReadouts>(config.analyzer.mappings);
     //MESSAGE() << "Digital geometry: " << config.builder->digital_geometry.debug() << "\n";
   }
 

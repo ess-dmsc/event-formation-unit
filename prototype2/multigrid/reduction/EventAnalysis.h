@@ -6,30 +6,29 @@
 #include <multigrid/geometry/SequoiaGeometry.h>
 #include <limits>
 
-namespace Multigrid
-{
+namespace Multigrid {
 
 struct NeutronPosition {
   double x{std::numeric_limits<double>::quiet_NaN()};
   double y{std::numeric_limits<double>::quiet_NaN()};
   double z{std::numeric_limits<double>::quiet_NaN()};
 
-  uint64_t time {0};
-  bool good {false};
+  uint64_t time{0};
+  bool good{false};
 
   std::string debug() const;
 };
 
 class EventAnalyzer {
- public:
-  NeutronPosition analyze(Event&) const;
+public:
+  NeutronPosition analyze(Event &) const;
 
   void weighted(bool w);
   bool weighted() const;
 
   SequoiaGeometry mappings;
 
- private:
+private:
   bool weighted_{true};
 };
 

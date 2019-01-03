@@ -28,7 +28,6 @@ bool EventAnalyzer::weighted() const {
   return weighted_;
 }
 
-
 NeutronPosition EventAnalyzer::analyze(Event &event) const {
   NeutronPosition ret;
 

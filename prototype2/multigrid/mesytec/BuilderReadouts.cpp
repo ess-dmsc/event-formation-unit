@@ -1,6 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <multigrid/generators/BuilderReadouts.h>
+#include <multigrid/mesytec/BuilderReadouts.h>
 #include <common/TimeString.h>
 
 #include <common/Trace.h>
@@ -40,7 +40,15 @@ void BuilderReadouts::parse(Buffer<uint8_t> buffer) {
 
   //stats_trigger_count = vmmr16Parser.trigger_count();
 
-  for (const auto &r : parsed_data_) {
+  build(parsed_data_);
+
+  if (dumpfile_) {
+    dumpfile_->push(ConvertedData);
+  }
+}
+
+void BuilderReadouts::build(const std::vector<Readout>& readouts) {
+  for (const auto &r : readouts) {
     if (r.external_trigger) {
       hit_.plane = external_trigger_plane;
       hit_.coordinate = 0;
@@ -70,11 +78,7 @@ void BuilderReadouts::parse(Buffer<uint8_t> buffer) {
     hit_.time = r.total_time;
     ConvertedData.push_back(hit_);
   }
-
-  if (dumpfile_) {
-    dumpfile_->push(ConvertedData);
-  }
-
 }
+
 
 }

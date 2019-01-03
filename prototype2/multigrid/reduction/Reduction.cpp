@@ -9,8 +9,8 @@
 
 namespace Multigrid {
 
-void Reduction::ingest(HitContainer& hits) {
-  for (const auto& h : hits) {
+void Reduction::ingest(HitContainer &hits) {
+  for (const auto &h : hits) {
 
     // We must do this because of patterns observed in BuilderReadoutTest
     if (previous_time_ > h.time) {
@@ -21,15 +21,11 @@ void Reduction::ingest(HitContainer& hits) {
 
     if (h.plane == AbstractBuilder::external_trigger_plane) {
       pulse_times.push_back(h);
-    }
-    else if (h.plane == AbstractBuilder::wire_plane) {
+    } else if (h.plane == AbstractBuilder::wire_plane) {
       wire_clusters.insert(h);
-    }
-    else if (h.plane == AbstractBuilder::grid_plane) {
+    } else if (h.plane == AbstractBuilder::grid_plane) {
       grid_clusters.insert(h);
-    }
-    else
-    {
+    } else {
       stats_invalid_planes++;
     }
   }
