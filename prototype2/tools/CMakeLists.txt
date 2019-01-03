@@ -2,7 +2,7 @@
 # PCAP generator
 #=============================================================================
 
-find_package(PCAP)
+find_package(PCAP REQUIRED)
 if(PCAP_FOUND)
   set(udpgen_pcap_SRC
       udpgen_pcap.cpp
