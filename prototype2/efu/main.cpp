@@ -1,5 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <cstdlib>
 #include <common/EFUArgs.h>
 #include <common/StatPublisher.h>
 #include <common/Log.h>
@@ -10,6 +11,7 @@
 #include <efu/Loader.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
+#include <iostream>
 #include <libs/include/Timer.h>
 #include <libs/include/gccintel.h>
 #include <unistd.h> // sleep()
@@ -73,7 +75,7 @@ void EmptyGraylogMessageQueue() {
 }
 
 /** Load detector, launch pipeline threads, then sleep until timeout or break */
-int main(int argc, char *argv[]) {
+int app_main(int argc, char *argv[]) {
   BaseSettings DetectorSettings;
   std::vector<ThreadCoreAffinitySetting> AffinitySettings;
   std::shared_ptr<Detector> detector;
@@ -215,4 +217,15 @@ int main(int argc, char *argv[]) {
 
   EmptyGraylogMessageQueue();
   return 0;
+}
+
+
+int main(int argc, char * argv[]) {
+  try {
+    app_main(argc, argv);
+    return EXIT_SUCCESS;
+  } catch (const std::exception &e) {
+    std::cerr << e.what();
+    return EXIT_FAILURE;
+  }
 }
