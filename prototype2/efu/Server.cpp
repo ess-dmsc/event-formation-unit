@@ -7,7 +7,6 @@
 
 //#include <algorithm>
 #include <arpa/inet.h>
-#include <cassert>
 #include <cinttypes>
 #include <common/Log.h>
 #include <cstdio>
@@ -27,8 +26,6 @@ Server::Server(int port, Parser &parse) : ServerPort(port), CommandParser(parse)
   for (auto &client : ClientFd) {
     client = -1;
   }
-  assert(ClientFd[0] == -1);
-  assert(ClientFd[SERVER_MAX_CLIENTS -1] == -1);
 
   Timeout.tv_sec = 0;  /// Timeout for select()
   Timeout.tv_usec = 1000;
@@ -51,10 +48,16 @@ void Server::serverOpen() {
   int __attribute__((unused)) ret;
 
   ServerFd = socket(AF_INET, SOCK_STREAM, 0);
-  assert(ServerFd >= 0);
+  if (ServerFd < 0) {
+    LOG(IPC, Sev::Error, "Unable to create tcp socket");
+    throw std::runtime_error("socket() failed");
+  }
 
   ret = setsockopt(ServerFd, SOL_SOCKET, SO_REUSEADDR, &SocketOptionOn, sizeof(SocketOptionOn));
-  assert(ret >= 0);
+  if (ret < 0) {
+    LOG(IPC, Sev::Error, "setsockopt() failed");
+    throw std::runtime_error("setsockopt() failed");
+  }
 
   std::fill_n((char *)&socket_address, sizeof(socket_address), 0);
   socket_address.sin_family = AF_INET;
@@ -62,19 +65,27 @@ void Server::serverOpen() {
   socket_address.sin_port = htons(ServerPort);
 
   ret = bind(ServerFd, (struct sockaddr *)&socket_address, sizeof(socket_address));
-  assert(ret >= 0);
+  if (ret < 0) {
+    LOG(IPC, Sev::Error, "tcp port {} is already in use", ServerPort);
+    throw std::runtime_error("tcp port already in use");
+  }
 
   ret = listen(ServerFd, SERVER_MAX_BACKLOG);
-  assert(ret >= 0);
+  if (ret < 0) {
+    LOG(IPC, Sev::Error, "listen() failed");
+    throw std::runtime_error("listen() failed");
+  }
 }
 
 void Server::serverClose(int socket) {
   LOG(IPC, Sev::Info, "Closing socket fd {}", socket);
 
   auto client = std::find(ClientFd.begin(), ClientFd.end(), socket);
-  assert(client != ClientFd.end());
+  if (client == ClientFd.end()) {
+    LOG(IPC, Sev::Error, "internal error socket {} not active but attempted closed", socket);
+    throw std::runtime_error("serverClose() internal error");
+  }
   *client = -1;
-
   close(socket);
 }
 
@@ -120,7 +131,8 @@ void Server::serverPoll() {
       LOG(IPC, Sev::Info, "Accept new connection, socket {}", newsock);
       *freefd = newsock;
       if (*freefd < 0 && errno != EWOULDBLOCK) {
-        assert(1 == 0);
+        LOG(IPC, Sev::Error, "serverPoll() - internal error");
+        throw std::runtime_error("serverPoll() - internal error");
       }
       LOG(IPC, Sev::Info, "New cilent socket: {}", *freefd);
       #ifdef SYSTEM_NAME_DARWIN
@@ -130,8 +142,8 @@ void Server::serverPoll() {
         if (ret != 0) {
             LOG(IPC, Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
             perror("setsockopt():");
+            throw std::runtime_error("setsockopt() failed");
         }
-        assert(ret == 0);
       #endif
     }
   }
@@ -158,7 +170,10 @@ void Server::serverPoll() {
       LOG(IPC, Sev::Debug, "Received {} bytes on socket {}", bytes, sd);
       IBuffer.bytes = bytes;
       TotalBytesReceived += bytes;
-      assert(IBuffer.bytes <= SERVER_BUFFER_SIZE);
+      if (IBuffer.bytes > SERVER_BUFFER_SIZE) {
+        LOG(IPC, Sev::Error, "recv() datasize mismatch");
+        throw std::runtime_error("recv() datasize mismatch");
+      }
 
       // Parse and generate reply
       if (CommandParser.parse((char *)IBuffer.buffer, IBuffer.bytes, (char *)OBuffer.buffer,
