@@ -11,6 +11,9 @@ protected:
 };
 
 /** Test cases below */
+
+// \todo do proper tests
+
 TEST_F(MGConfigTest, ConstructorDefaults) {
   Multigrid::Config mgconfig;
 //  ASSERT_FALSE(mgconfig.spoof_high_time);

@@ -22,5 +22,7 @@
     "spoof_high_time": false
   },
 
+  "max_wire_hits" : 1,
+  "max_grid_hits" : 5,
   "weighted" : true
 }

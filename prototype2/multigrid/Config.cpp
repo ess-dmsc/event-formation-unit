@@ -37,6 +37,9 @@ Config::Config(std::string jsonfile, std::string dump_path) {
     builder = std::make_shared<BuilderReadouts>(mappings, dump_path);
   }
 
+  max_wire_hits = root["max_wire_hits"];
+  max_grid_hits = root["max_grid_hits"];
+
   analyzer.weighted(root["weighted"]);
   analyzer.mappings = mappings;
 

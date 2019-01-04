@@ -21,6 +21,10 @@ struct Config {
 
   std::shared_ptr<AbstractBuilder> builder;
   Reduction reduction;
+
+  size_t max_wire_hits {12};
+  size_t max_grid_hits {12};
+
   EventAnalyzer analyzer;
 
   // Event formation

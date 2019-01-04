@@ -53,6 +53,7 @@ MultigridBase::MultigridBase(BaseSettings const &settings,
   Stats.create("wire_clusters", mystats.wire_clusters);
   Stats.create("grid_clusters", mystats.grid_clusters);
   Stats.create("events_total", mystats.events_total);
+  Stats.create("events_multiplicity_rejects", mystats.events_multiplicity_rejects);
   Stats.create("events_bad", mystats.events_bad);
   Stats.create("events_geometry_err", mystats.events_geometry_err);
   Stats.create("events_time_err", mystats.events_time_err);
@@ -91,6 +92,7 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
 
     if (event.plane1() == Multigrid::AbstractBuilder::external_trigger_plane) {
       mystats.pulses++;
+
       if (HavePulseTime) {
         uint64_t PulsePeriod = event.time_start() - ev42serializer.pulseTime();
         ShortestPulsePeriod = std::min(ShortestPulsePeriod, PulsePeriod);
@@ -104,10 +106,18 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
 //            XTRACE(PROCESS, DEB, "New pulse time: %u   shortest pulse period: %u",
 //                   ev42serializer.pulseTime(), ShortestPulsePeriod);
     } else {
-      auto neutron = mg_config.analyzer.analyze(event);
-
       mystats.events_total++;
+
+      if ((event.c1.hit_count() > mg_config.max_wire_hits) ||
+          (event.c2.hit_count() > mg_config.max_grid_hits))
+      {
+        mystats.events_multiplicity_rejects++;
+        continue;
+      }
+
+      auto neutron = mg_config.analyzer.analyze(event);
       mystats.hits_used = mg_config.analyzer.stats_used_hits;
+
       if (!neutron.good) {
         mystats.events_bad++;
         continue;

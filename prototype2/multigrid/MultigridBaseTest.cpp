@@ -64,14 +64,15 @@ TEST_F(MultigridBaseTest, DataReceive) {
   EXPECT_EQ(Readout.mystats.hits_total, 54);
   EXPECT_EQ(Readout.mystats.hits_bad_plane, 0);
   EXPECT_EQ(Readout.mystats.hits_time_seq_err, 0);
-  EXPECT_EQ(Readout.mystats.hits_used, 46);
+  EXPECT_EQ(Readout.mystats.hits_used, 44);
   EXPECT_EQ(Readout.mystats.pulses, 0);
   EXPECT_EQ(Readout.mystats.wire_clusters, 24);
   EXPECT_EQ(Readout.mystats.grid_clusters, 26);
   EXPECT_EQ(Readout.mystats.events_total, 23);
+  EXPECT_EQ(Readout.mystats.events_multiplicity_rejects, 1);
   EXPECT_EQ(Readout.mystats.events_bad, 0);
   EXPECT_EQ(Readout.mystats.events_geometry_err, 0);
-  EXPECT_EQ(Readout.mystats.events_time_err, 23);
+  EXPECT_EQ(Readout.mystats.events_time_err, 22);
   EXPECT_EQ(Readout.mystats.tx_events, 0);
   EXPECT_EQ(Readout.mystats.tx_bytes, 0);
 }

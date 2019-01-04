@@ -109,6 +109,7 @@ protected:
     int64_t wire_clusters{0};
     int64_t grid_clusters{0};
     int64_t events_total{0};
+    int64_t events_multiplicity_rejects{0};
     int64_t events_bad{0};
     int64_t events_geometry_err{0};
     int64_t events_time_err{0};
