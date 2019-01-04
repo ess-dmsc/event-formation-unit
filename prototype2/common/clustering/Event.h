@@ -28,6 +28,8 @@ public:
   /// \brief Event default constructor, planes default to 0 and 1
   Event() = default;
 
+  virtual ~Event() = default;
+
   /// \brief Event constructor, selecting planes
   /// \param plane1 id of first plane selected for event
   /// \param plane2 id of second plane selected for event
@@ -44,6 +46,9 @@ public:
   /// \param hit to be added
   void insert(const Hit &e);
 
+  /// \returns total hit count in both constituent clusters
+  size_t total_hit_count() const;
+
   /// \brief merges a cluster into event.
   ///        Merges the cluster into the appropriate plane.
   ///        If plane is not of two selected planes, nothing is done.
@@ -57,6 +62,9 @@ public:
   /// \returns true if event contains no hits
   bool empty() const;
 
+  /// \returns true if event has both valid planes
+  bool both_planes() const;
+
   /// \returns earliest timestamp, undefined in case of empty event
   uint64_t time_start() const;
   /// \returns latest timestamp, undefined in case of empty event
@@ -69,7 +77,17 @@ public:
   /// \returns overlapping time span inclusive of end points
   uint64_t time_overlap(const Cluster &other) const;
 
+  /// \brief calculates the time gap of event and cluster
+  /// \param other cluster to be compared
+  /// \returns time gap
+  uint64_t time_gap(const Cluster &other) const;
+
   /// \returns string describing event bounds and weights
   /// \param verbose also print hits
   std::string debug(bool verbose = false) const;
+
+  /// \returns visualizes both clusters with "text graphics"
+  virtual std::string visualize(uint8_t downsample_time = 0,
+                                uint8_t downsample_coords = 0) const;
+
 };

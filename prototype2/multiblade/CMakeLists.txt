@@ -5,6 +5,7 @@ include_directories(.)
 #=============================================================================
 set(caen_common_inc
   MBCaenBase.h
+  ../common/clustering/Hit.h
   ../common/Hists.h
   ../common/HistSerializer.h
   caen/Readout.h
@@ -14,6 +15,7 @@ set(caen_common_inc
   )
 set(caen_common_src
   MBCaenBase.cpp
+  ../common/clustering/Hit.cpp
   ../common/Hists.cpp
   ../common/HistSerializer.cpp
   caen/Readout.cpp
@@ -31,7 +33,7 @@ set(mbcaen_SRC
 )
 create_module(mbcaen)
 
-
+# Pipeline test
 set(MBCAENBaseTest_INC
   ${caen_common_inc}
   ../../libs/include/Socket.h
@@ -49,4 +51,4 @@ set(MBCAENBaseTest_SRC
 create_test_executable(MBCAENBaseTest)
 
 add_subdirectory(caen)
-add_subdirectory(clustering)
+add_subdirectory(generators)

@@ -8,31 +8,22 @@
 #include <test/TestBase.h>
 #include <unistd.h>
 
-std::string pathprefix{""};
-
 std::string nocalibration{""};
+
+using namespace Gem;
 
 class NMXConfigTest : public TestBase {
 protected:
-  virtual void SetUp() {
-  }
-
-  virtual void TearDown() { }
+  std::string TestJsonPath {TEST_JSON_PATH};
 };
 
-/// \todo modernize this
-bool cwdContains(const char * searchfor) {
-  char cwdname[1024];
-  auto __attribute__((unused)) retval = getcwd(cwdname, sizeof(cwdname));
-  auto rt = strstr(cwdname, searchfor);
-  return (rt != NULL);
-}
+// \todo improve everything about this
 
 /** Test cases below */
 TEST_F(NMXConfigTest, ConstructorDefaults) {
   NMXConfig nmxconfig;
-  ASSERT_EQ("VMM3", nmxconfig.builder_type);
-  ASSERT_EQ(nmxconfig.calfile, nullptr);
+  EXPECT_TRUE(nmxconfig.builder_type.empty());
+  EXPECT_EQ(nmxconfig.calfile, nullptr);
 }
 
 TEST_F(NMXConfigTest, EventFilter) {
@@ -40,24 +31,22 @@ TEST_F(NMXConfigTest, EventFilter) {
   Event e; // use empty Event
   filter.enforce_lower_uncertainty_limit = false;
   filter.enforce_minimum_hits = false;
-  ASSERT_TRUE(filter.valid(e));
+  EXPECT_TRUE(filter.valid(e, utpcResults()));
 
   filter.enforce_lower_uncertainty_limit = false;
   filter.enforce_minimum_hits = true;
-  ASSERT_FALSE(filter.valid(e));
+  EXPECT_FALSE(filter.valid(e, utpcResults()));
 
   /// \todo test this behaviour
   // filter.enforce_lower_uncertainty_limit = true;
   // filter.enforce_minimum_hits = false;
-  // ASSERT_FALSE(filter.valid(e));
+  // EXPECT_FALSE(filter.valid(e));
 }
 
 
 TEST_F(NMXConfigTest, NoConfigFile) {
   NMXConfig nmxconfig("file_does_not_exist", nocalibration);
-  ASSERT_EQ("VMM3", nmxconfig.builder_type);
-  // ASSERT_EQ(256, nmxconfig.geometry_x);
-  // ASSERT_EQ(256, nmxconfig.geometry_y);
+  EXPECT_TRUE(nmxconfig.builder_type.empty());
 }
 
 TEST_F(NMXConfigTest, DebugPrint) {
@@ -70,18 +59,15 @@ TEST_F(NMXConfigTest, DebugPrint) {
 }
 
 TEST_F(NMXConfigTest, JsonConfig) {
-  NMXConfig nmxconfig(pathprefix + "../prototype2/gdgem/configs/vmm3.json", nocalibration);
-  ASSERT_EQ(100, nmxconfig.time_config.tac_slope()); // Parsed from json
-  ASSERT_EQ(20, nmxconfig.time_config.bc_clock());
+  NMXConfig nmxconfig(TestJsonPath + "vmm3.json", nocalibration);
+  EXPECT_EQ(100, nmxconfig.time_config.tac_slope_ns()); // Parsed from json
+  EXPECT_EQ(20, nmxconfig.time_config.bc_clock_MHz());
+  EXPECT_EQ(384, nmxconfig.geometry.nx());
+  EXPECT_EQ(384, nmxconfig.geometry.ny());
+  EXPECT_EQ(500, nmxconfig.matcher_max_delta_time);
 }
 
 int main(int argc, char **argv) {
-  // Assume root is build/ directory - for running manually
-  // but check for VM builds of Linux and MacOS
-  if (cwdContains("build/prototype2")) { //Linux
-  // Assume we're in prototype2/build/prototype2/gdgem
-    pathprefix = "../../../build/";
-  }
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -21,6 +21,8 @@ const unsigned int TRC_G_CMD     = 0x00000040U;
 const unsigned int TRC_G_DATA    = 0x00000080U;
 const unsigned int TRC_G_KAFKA   = 0x00000100U;
 const unsigned int TRC_G_UTILS   = 0x00000200U;
+const unsigned int TRC_G_CLUSTER = 0x00000400U;
+const unsigned int TRC_G_EVENT   = 0x00000800U;
 
 /// Add trace masks below, bitwise or of grouops
 

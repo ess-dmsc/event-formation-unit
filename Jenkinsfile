@@ -62,12 +62,16 @@ def Object get_container(image_key) {
         --env http_proxy=${env.http_proxy} \
         --env https_proxy=${env.https_proxy} \
         --env local_conan_server=${env.local_conan_server} \
+        --mount=type=bind,src=/home/jenkins/data,dst=/home/jenkins/refdata,readonly \
         ")
     return container
 }
 
 def docker_copy_code(image_key) {
     def custom_sh = images[image_key]['sh']
+    dir("${project}_code") {
+        checkout scm
+    }
     sh "docker cp ${project}_code ${container_name(image_key)}:/home/jenkins/${project}"
     sh """docker exec --user root ${container_name(image_key)} ${custom_sh} -c \"
                         chown -R jenkins.jenkins /home/jenkins/${project}
@@ -94,7 +98,7 @@ def docker_cmake(image_key, xtra_flags) {
         cd build
         . ./activate_run.sh
         cmake --version
-        cmake -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
+        cmake -DREFDATA=/home/jenkins/refdata/EFU_reference -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
     \""""
 }
 
@@ -198,12 +202,10 @@ def docker_archive(image_key) {
                         cp -r ${project}/utils/efushell archive/event-formation-unit/util
                         mkdir archive/event-formation-unit/configs
                         cp -r ${project}/prototype2/multiblade/configs/* archive/event-formation-unit/configs/
+                        cp -r ${project}/prototype2/multigrid/configs/* archive/event-formation-unit/configs/
                         cp -r ${project}/prototype2/gdgem/configs/* archive/event-formation-unit/configs/
                         cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
-                        cp -r ${project}/utils/hwcheck archive/event-formation-unit/util/
-                        cp -r ${project}/monitors/* archive/event-formation-unit/util
                         mkdir archive/event-formation-unit/data
-                        cp -r ${project}/prototype2/multigrid/calib_data/* archive/event-formation-unit/data
                         cd archive
                         tar czvf event-formation-unit-centos7.tar.gz event-formation-unit
 
@@ -222,34 +224,37 @@ def docker_archive(image_key) {
 def get_pipeline(image_key)
 {
     return {
-        stage("${image_key}") {
-            try {
-                def container = get_container(image_key)
+        node('docker') {
+            stage("${image_key}") {
+                try {
+                    def container = get_container(image_key)
 
-                docker_copy_code(image_key)
-                if (image_key != clangformat_os) {
-                  docker_dependencies(image_key)
-                  docker_cmake(image_key, images[image_key]['cmake_flags'])
-                  docker_build(image_key)
-                }
+                    docker_copy_code(image_key)
+                    if (image_key != clangformat_os) {
+                      docker_dependencies(image_key)
+                      docker_cmake(image_key, images[image_key]['cmake_flags'])
+                      docker_build(image_key)
+                    }
 
-                if (image_key == coverage_on) {
-                    docker_tests_coverage(image_key)
-                } else if (image_key != clangformat_os) {
-                  docker_tests(image_key)
-                }
+                    if (image_key == coverage_on) {
+                        docker_tests_coverage(image_key)
+                    } else if (image_key != clangformat_os) {
+                      docker_tests(image_key)
+                    }
 
-                if (image_key == archive_what) {
-                    docker_archive(image_key)
-                }
+                    if (image_key == archive_what) {
+                        docker_archive(image_key)
+                    }
 
-                if (image_key == clangformat_os) {
-                    docker_cppcheck(image_key)
-                    step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
+                    if (image_key == clangformat_os) {
+                        docker_cppcheck(image_key)
+                        step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
+                    }
+                } finally {
+                    sh "docker stop ${container_name(image_key)}"
+                    sh "docker rm -f ${container_name(image_key)}"
+                    cleanWs()
                 }
-            } finally {
-                sh "docker stop ${container_name(image_key)}"
-                sh "docker rm -f ${container_name(image_key)}"
             }
         }
     }
@@ -263,13 +268,15 @@ def get_macos_pipeline()
             // Delete workspace when build is done
                 cleanWs()
 
+                abs_dir = pwd()
+
                 dir("${project}") {
                     checkout scm
                 }
 
                 dir("${project}/build") {
                     sh "conan install --build=outdated .."
-                    sh "cmake -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
+                    sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
                     sh "make -j4"
                     sh "make -j4 unit_tests"
                     sh "make runtest"
@@ -281,9 +288,6 @@ def get_macos_pipeline()
 }
 
 node('docker') {
-    // Delete workspace when build is done
-    cleanWs()
-
     dir("${project}_code") {
 
         stage('Checkout') {
@@ -318,5 +322,9 @@ node('docker') {
         parallel builders
     } catch (e) {
         failure_function(e, 'Job failed')
+        throw e
+    } finally {
+        // Delete workspace when build is done
+        cleanWs()
     }
 }

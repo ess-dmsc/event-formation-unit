@@ -10,6 +10,10 @@
 #include <fmt/format.h>
 #include <cmath>
 
+#define ASCII_grayscale94 " .`:,;'_^\"></-!~=)(|j?}{][ti+l7v1%yrfcJ32uIC$zwo96sngaT5qpkYVOL40&mG8*xhedbZUSAQPFDXWK#RNEHBM@"
+#define ASCII_grayscale70 " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
+#define ASCII_grayscale10 " .:-=+*#%@"
+
 void Cluster::insert(const Hit &e) {
   if (hits.empty()) {
     plane_ = e.plane;
@@ -149,15 +153,61 @@ uint64_t Cluster::time_overlap(const Cluster &other) const {
   return (earliest_end - latest_start) + uint16_t(1);
 }
 
+uint64_t Cluster::time_gap(const Cluster &other) const {
+  if (empty() || other.empty())
+    return 0; // \todo should this happen?
+  auto latest_start = std::max(other.time_start_, time_start_);
+  auto earliest_end = std::min(other.time_end_, time_end_);
+  if (latest_start <= earliest_end) {
+    return 0;
+  }
+  return (latest_start - earliest_end);
+}
+
 std::string Cluster::debug(bool verbose) const {
   if (!verbose) {
-    return fmt::format("plane={} time=({},{}) space=({},{}) weight={} entries[{}]",
-                       plane_, time_start_, time_end_, coord_start_, coord_end_, weight_sum_,
+    return fmt::format("plane={} time=({},{})={} space=({},{})={} weight={} entries[{}]",
+                       plane_,
+                       time_start_, time_end_, time_span(),
+                       coord_start_, coord_end_, coord_span(),
+                       weight_sum_,
                        hits.size());
   }
-  auto ret = debug(false) + "\n";
+  auto ret = debug(false);
   for (const auto &h : hits) {
-    ret += "   " + h.debug() + "\n";
+    ret += "\n   " + h.debug();
   }
   return ret;
 }
+
+std::string Cluster::visualize(uint8_t downsample_time,
+                               uint8_t downsample_coords) const {
+
+  auto t_span = ((time_end_ - time_start_) >> downsample_time) + 1;
+  auto c_span = ((coord_end_ - coord_start_) >> downsample_coords) + 1;
+
+  std::vector<std::vector<uint16_t>> matrix;
+  matrix.resize(t_span, std::vector<uint16_t>(c_span, 0));
+  uint16_t max_weight = 0;
+  for (const auto &h : hits) {
+    auto t = (h.time - time_start_) >> downsample_time;
+    auto c = (h.coordinate - coord_start_) >> downsample_coords;
+    matrix[t][c] += h.weight;
+    max_weight = std::max(max_weight, matrix[t][c]);
+  }
+
+  std::string representation(ASCII_grayscale94);
+  auto ret = debug(false) + "\n";
+  for (const auto& row : matrix) {
+    for (const auto& element : row) {
+      if (element)
+        ret += representation[93 * element / max_weight];
+      else
+        ret += " ";
+
+    }
+    ret += "\n";
+  }
+  return ret;
+}
+

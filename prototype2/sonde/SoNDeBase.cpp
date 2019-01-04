@@ -30,11 +30,11 @@ SONDEIDEABase::SONDEIDEABase(BaseSettings const &settings, struct SoNDeSettings 
   Stats.create("processing.rx_seq_errors",        mystats.rx_seq_errors);
   Stats.create("output.tx_bytes",                 mystats.tx_bytes);
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
-  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
-  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
-  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
-  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
+  Stats.create("kafka_produce_fails",             mystats.kafka_produce_fails);
+  Stats.create("kafka_ev_errors",                 mystats.kafka_ev_errors);
+  Stats.create("kafka_ev_others",                 mystats.kafka_ev_others);
+  Stats.create("kafka_dr_errors",                 mystats.kafka_dr_errors);
+  Stats.create("kafka_dr_others",                 mystats.kafka_dr_noerrors);
   // clang-format on
   std::function<void()> inputFunc = [this]() { SONDEIDEABase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
@@ -88,9 +88,9 @@ void SONDEIDEABase::input_thread() {
 }
 
 void SONDEIDEABase::processing_thread() {
-  SoNDeGeometry geometry;
+  Sonde::Geometry geometry;
 
-  IDEASData ideasdata(&geometry, SoNDeSettings.fileprefix);
+  Sonde::IDEASData ideasdata(&geometry, SoNDeSettings.fileprefix);
   EV42Serializer flatbuffer(kafka_buffer_size, "SONDE");
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
   flatbuffer.setProducerCallback(
@@ -104,7 +104,7 @@ void SONDEIDEABase::processing_thread() {
       mystats.rx_idle1++;
 
       if (produce_timer.timetsc() >=
-          EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
+          EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {
         mystats.tx_bytes += flatbuffer.produce();
 
         /// Kafka stats update - common to all detectors

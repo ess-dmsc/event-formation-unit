@@ -51,6 +51,9 @@ include(${EXTRA_MODULES_DIR}/Benchmarks.cmake)
 include(${EXTRA_MODULES_DIR}/Profiling.cmake)
 include(${EXTRA_MODULES_DIR}/Memcheck.cmake)
 setup_memcheck(${CMAKE_BINARY_DIR}/memcheck_res)
+set(REFDATA "$ENV{HOME}/ownCloud/DM/data/EFU_reference"
+  CACHE STRING "Reference data root directory")
+message(STATUS "Reference data root directory: ${REFDATA}")
 
 #=============================================================================
 # The code
@@ -59,7 +62,7 @@ include_directories(.)
 include(Utilities.cmake)
 add_subdirectory(libs)
 add_subdirectory(prototype2)
-add_subdirectory(udp)
+add_subdirectory(utils/udp)
 
 #=============================================================================
 # Finalize tests
@@ -110,6 +113,7 @@ add_custom_target(hints
   COMMAND echo "CMake hints"
   COMMAND echo "--------------------------------------------------------------------------------"
   COMMAND echo "Enable code coverage:                   cmake -DCOV=ON"
+  COMMAND echo "Specify root for reference data:        cmake -DREFDATA=/home/username/refdata"
   COMMAND echo "Enable profiling with google perftools  cmake -DGPERF=ON"
   COMMAND echo "Specify a build string:                 cmake -DBUILDSTR=v1.2.3"
   COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug"

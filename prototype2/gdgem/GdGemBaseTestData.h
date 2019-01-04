@@ -3,6 +3,8 @@
 
 #include <string>
 
+// \todo get rid of this file; use binary reference data instead
+
 std::string vmm3json = R"(
 {
   "builder_type" : "VMM3",

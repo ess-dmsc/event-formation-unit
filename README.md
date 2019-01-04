@@ -1,4 +1,4 @@
-# Event Formation Unit 
+# Event Formation Unit
 
 [![DOI](https://zenodo.org/badge/80731668.svg)](https://zenodo.org/badge/latestdoi/80731668)
 
@@ -66,7 +66,7 @@ Note that regardless of the method used, a C++ compiler which supports C++11 is 
 By using Conan, all dependencies are downloaded and compiled (if required) automatically. You will need to have the following installed:
 
 * [**Conan**](https://conan.io) The conan script has to be available in the current ``$PATH``. Note also that this has only been tested with version 1.0.4 of conan.
-* [**CMake**](https://cmake.org) At least CMake version 2.8.12 is required. Some packages that requires more recent versions of CMake will download this as a dependency. 
+* [**CMake**](https://cmake.org) At least CMake version 2.8.12 is required. Some packages that requires more recent versions of CMake will download this as a dependency.
 * [**bash**](https://www.gnu.org/software/bash/) For properly setting paths to the conan provided dependencies.
 
 For conan to know where the dependencies can be downloaded from, package repositories must be added by running the following commands:
@@ -77,7 +77,6 @@ For conan to know where the dependencies can be downloaded from, package reposit
 Note also that for additional functionality you might want to install the following dependencies:
 
 * [**libpcap**](http://www.tcpdump.org)
-* [**TCLAP**](http://tclap.sourceforge.net)
 * [**Valgrind**](http://valgrind.org) For doing memory usage (and other) tests.
 * **lcov/gcov/gcovr** Required to generate coverage reports.
 

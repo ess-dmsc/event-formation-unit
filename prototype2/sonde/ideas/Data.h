@@ -17,6 +17,8 @@
 #include <sonde/Geometry.h>
 #include <memory>
 
+namespace Sonde {
+
 class IDEASData {
 public:
   // Error codes, returned as negative numbers
@@ -38,7 +40,7 @@ public:
   } __attribute__((packed));
 
   /// \todo document
-  IDEASData(SoNDeGeometry *geom, std::string fileprefix = "")
+  IDEASData(Geometry *geom, std::string fileprefix = "")
       : sondegeometry(geom) {
     dumptofile = !fileprefix.empty();
     if (dumptofile) {
@@ -76,7 +78,7 @@ public:
   uint64_t ctr_outof_sequence{0};
 
 private:
-  SoNDeGeometry *sondegeometry{nullptr};
+  Geometry *sondegeometry{nullptr};
   int next_seq_no{0}; /// Used to count lost packets, assumes we start at 0
 
   /// Protocol header fields
@@ -92,3 +94,5 @@ private:
   std::shared_ptr<DataSave>(sephdata);
   std::shared_ptr<DataSave>(eventdata);
 };
+
+}

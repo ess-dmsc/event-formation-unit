@@ -43,7 +43,6 @@ TEST_F(EventTest, Merge) {
   x.insert({0, 0, 0, 0});
   event.merge(x);
   EXPECT_FALSE(event.empty());
-  EXPECT_EQ(x.hit_count(), 0);
   EXPECT_EQ(event.c1.hit_count(), 2);
 }
 
@@ -54,6 +53,7 @@ TEST_F(EventTest, MergeTwice) {
   event.merge(x);
   EXPECT_EQ(event.c1.hit_count(), 2);
 
+  x.clear();
   x.insert({0, 0, 0, 0});
   x.insert({0, 0, 0, 0});
   x.insert({0, 0, 0, 0});

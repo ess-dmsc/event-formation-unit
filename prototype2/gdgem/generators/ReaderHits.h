@@ -10,7 +10,7 @@
 
 #pragma once
 
-#include <gdgem/nmx/Hit.h>
+#include <common/clustering/Hit.h>
 
 class ReaderHits {
 public:
