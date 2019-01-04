@@ -21,6 +21,7 @@ public:
 
   void set_callback(ProducerCallback cb);
 
+  // \todo use generic Hit struct
   /// \brief function to add a readout tuple to an array for later publishing to Kafka
   /// \param plane arbitrary data multiplexer (x, y, module, rack, ...)
   /// \param channel datasource identifier (strip, wire, grid, ...)

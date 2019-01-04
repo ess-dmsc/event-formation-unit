@@ -9,14 +9,14 @@
 
 #include <string>
 
-std::string InvalidJson = R"(
+std::string TestData_InvalidJson = R"(
   I am the egg man
   They are the egg men
   I am the walrus
   Goo goo g'joob
 )";
 
-std::string InvalidJsonField = R"(
+std::string TestData_InvalidJsonField = R"(
 {
   "vmm_calibration" :
   [
@@ -45,7 +45,7 @@ std::string InvalidJsonField = R"(
   ]
 })";
 
-std::string DummyCal = R"(
+std::string TestData_DummyCal = R"(
 {
   "vmm_calibration" :
   [
@@ -75,7 +75,7 @@ std::string DummyCal = R"(
 })";
 
 
-std::string ErrSizeMismatch = R"(
+std::string TestData_ErrSizeMismatch = R"(
 {
   "vmm_calibration" :
   [
