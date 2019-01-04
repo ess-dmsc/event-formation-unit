@@ -44,7 +44,7 @@ set(multigrid_SRC
   MultigridBase.cpp
   ${multigrid_common_src}
 )
-create_module(multigrid)
+create_module(mgmesytec)
 
 
 #=============================================================================

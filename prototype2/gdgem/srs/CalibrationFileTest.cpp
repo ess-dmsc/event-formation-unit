@@ -2,6 +2,7 @@
 
 #include <gdgem/srs/CalibrationFile.h>
 #include <gdgem/srs/CalibrationFileTestData.h>
+#include <prototype2/common/DataSave.h>
 #include <test/TestBase.h>
 #include <vector>
 
@@ -53,17 +54,17 @@ TEST_F(CalibrationFileTest, AddCalibration) {
 
 TEST_F(CalibrationFileTest, LoadCalibrationInvalidJsonFile) {
   CalibrationFile cf;
-  EXPECT_THROW(cf.loadCalibration(InvalidJson), std::runtime_error);
+  EXPECT_THROW(cf.loadCalibration(TestData_InvalidJson), std::runtime_error);
 }
 
 TEST_F(CalibrationFileTest, LoadCalibrationInvalidOffsetField) {
   CalibrationFile cf;
-  EXPECT_THROW(cf.loadCalibration(InvalidJson), std::runtime_error);
+  EXPECT_THROW(cf.loadCalibration(TestData_InvalidJson), std::runtime_error);
 }
 
 TEST_F(CalibrationFileTest, LoadCalibration) {
   CalibrationFile cf;
-  cf.loadCalibration(DummyCal);
+  cf.loadCalibration(TestData_DummyCal);
   auto cal = cf.getCalibration(1, 0, 0);
   EXPECT_FLOAT_EQ(cal.offset, 10.0);
   EXPECT_FLOAT_EQ(cal.slope, 1010.0);
@@ -83,26 +84,24 @@ TEST_F(CalibrationFileTest, LoadCalibration) {
 
 TEST_F(CalibrationFileTest, LoadCalibrationSizeMismatch) {
   CalibrationFile cf;
-  EXPECT_THROW(cf.loadCalibration(ErrSizeMismatch), std::runtime_error);
+  EXPECT_THROW(cf.loadCalibration(TestData_ErrSizeMismatch), std::runtime_error);
 }
 
-// \todo reenable this? If it's needed?
-// @mjc this makes no sense to me and I have no idea how this is supposed
-//  to even work. I have disabled it. Include an actual file somewhere
-//  or make it obvious how it is supposed to be generated.
+// Saves a json string (DummyCal) as a valid calibration file. Then loads it
+// and verifies that the values have been applied correctly
+TEST_F(CalibrationFileTest, LoadCalibrationFile) {
+ std::string filename = "deleteme.json";
+ DataSave tempfile(filename, (void *)TestData_DummyCal.c_str(), TestData_DummyCal.size());
+ CalibrationFile cf(filename);
 
-//TEST_F(CalibrationFileTest, LoadCalibrationFile) {
-//  std::string filename = "deleteme.json";
-//  CalibrationFile cf(filename);
-//
-//  auto cal = cf.getCalibration(1, 0, 0);
-//  EXPECT_FLOAT_EQ(cal.offset, 10.0);
-//  EXPECT_FLOAT_EQ(cal.slope, 1010.0);
-//
-//  cal = cf.getCalibration(1, 0, 63);
-//  EXPECT_FLOAT_EQ(cal.offset, 10.7);
-//  EXPECT_FLOAT_EQ(cal.slope, 1010.7);
-//}
+ auto cal = cf.getCalibration(1, 0, 0);
+ EXPECT_FLOAT_EQ(cal.offset, 10.0);
+ EXPECT_FLOAT_EQ(cal.slope, 1010.0);
+
+ cal = cf.getCalibration(1, 0, 63);
+ EXPECT_FLOAT_EQ(cal.offset, 10.7);
+ EXPECT_FLOAT_EQ(cal.slope, 1010.7);
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

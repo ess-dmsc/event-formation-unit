@@ -15,6 +15,7 @@ public:
 
   virtual void parse(Buffer<uint8_t> buffer) = 0;
   virtual std::string debug() const = 0;
+  virtual ~AbstractBuilder() = default;
 
   std::vector<Hit> ConvertedData;
 
