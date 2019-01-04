@@ -68,8 +68,8 @@ PacketParser::PacketParser(
     std::function<bool(SamplingRun *)> ModuleHandler,
     std::function<SamplingRun *(ChannelID Identifier)> ModuleProducer,
     std::uint16_t SourceID)
-    : HandleModule(ModuleHandler), ProduceModule(ModuleProducer),
-      Source(SourceID) {}
+    : HandleModule(std::move(ModuleHandler)),
+      ProduceModule(std::move(ModuleProducer)), Source(SourceID) {}
 
 PacketInfo PacketParser::parsePacket(const InData &Packet) {
   HeaderInfo Header = parseHeader(Packet);

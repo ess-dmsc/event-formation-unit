@@ -54,7 +54,8 @@ protected:
   /// \brief The function that executes the code for parsing and processing the
   /// sample data.
   /// This function will return when Detector::runThreads is set to false.
-  virtual void processingThread(Queue &DataModuleQueue);
+  virtual void processingThread(Queue &DataModuleQueue,
+                                std::shared_ptr<std::int64_t> EventCounter);
 
   /// \brief Does on demand instatiation of Kafka producer.
   /// Used in order to simplify unit testing.
@@ -82,7 +83,6 @@ protected:
     std::int64_t current_ts_alt_sec = 0;
     std::int64_t input_bytes_received = 0;
     std::int64_t parser_errors = 0;
-    std::int64_t parser_unknown_channel = 0;
     std::int64_t parser_packets_total = 0;
     std::int64_t parser_packets_idle = 0;
     std::int64_t parser_packets_data = 0;

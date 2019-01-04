@@ -15,6 +15,7 @@
 #include "PulseParameters.h"
 #include <atomic>
 #include <common/Producer.h>
+#include <logical_geometry/ESSGeometry.h>
 #include <mutex>
 #include <queue>
 #include <thread>
@@ -43,6 +44,8 @@ public:
   /// \param[in] Pulse Pulse parameters of the registered pulse.
   void addPulse(PulseParameters const Pulse);
 
+  std::int64_t &getNrOfEvents() { return EventCounter; }
+
 protected:
   /// \brief Serialize the event produced by one or more pulses.
   /// \param[in] Event Holds postion, timestamp and amplitude of event. For some
@@ -60,4 +63,5 @@ protected:
   std::mutex PulseMutex;
   std::queue<PulseParameters> PulseQueue{};
   std::atomic_bool RunThread{true};
+  ESSGeometry essgeometry{65536, 65536, 1, 1};
 };

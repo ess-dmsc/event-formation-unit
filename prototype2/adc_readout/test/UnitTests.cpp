@@ -22,7 +22,7 @@ void reporter<specialized>::send(severity s, char const *file,
   }
   ADD_FAILURE_AT(file, line) << msg;
 }
-}
+} // namespace trompeloeil
 
 int main(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);

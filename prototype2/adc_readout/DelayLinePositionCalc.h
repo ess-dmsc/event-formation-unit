@@ -72,12 +72,12 @@ protected:
 class DelayLinePosCalcInterface : public DelayLinePositionInterface {
 public:
   enum class ChannelRole { FIRST, SECOND, REFERENCE };
-  DelayLinePosCalcInterface(std::uint64_t Timeout);
+  explicit DelayLinePosCalcInterface(std::uint64_t Timeout);
   /// \brief Add a pulse to the list of available pulses for event processing.
   ///
   /// \param[in] Pulse The pulse to add to list of pulses.
   /// \note Calling this function with pulses that has the same ID will result
-  /// in only the latter puse being stored.
+  /// in only the latter pulse being stored.
   virtual void addPulse(PulseParameters const &Pulse);
   /// \brief Tie a channel ID to a specific role.
   ///
@@ -123,7 +123,7 @@ protected:
 
 class DelayLineAmpPosCalc : public DelayLinePosCalcInterface {
 public:
-  DelayLineAmpPosCalc(std::uint64_t Timeout);
+  explicit DelayLineAmpPosCalc(std::uint64_t Timeout);
 
 protected:
   /// \brief Calculate position of event along one axis based on the amplitude
@@ -154,7 +154,7 @@ protected:
 
 class DelayLineTimePosCalc : public DelayLinePosCalcInterface {
 public:
-  DelayLineTimePosCalc(std::uint64_t Timeout);
+  explicit DelayLineTimePosCalc(std::uint64_t Timeout);
 
 protected:
   /// \brief Calculate position in detector along one axis based on timestamp of

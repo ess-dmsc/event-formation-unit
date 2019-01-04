@@ -12,7 +12,7 @@
 
 class DelayLineEventFormationStandIn : public DelayLineEventFormation {
 public:
-  DelayLineEventFormationStandIn(AdcSettings const &ReadoutSettings)
+  explicit DelayLineEventFormationStandIn(AdcSettings const &ReadoutSettings)
       : DelayLineEventFormation(ReadoutSettings){};
   using DelayLineEventFormation::PulseHandlerMap;
   using DelayLineEventFormation::XAxisCalc;

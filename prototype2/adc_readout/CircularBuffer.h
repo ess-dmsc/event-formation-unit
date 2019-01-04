@@ -35,7 +35,7 @@ using Queue = moodycamel::BlockingReaderWriterQueue<ElementPtr<DataType>>;
 template <class DataType> class CircularBuffer {
 public:
   /// \param[in] Elements Number of elements in the buffer/queue.
-  CircularBuffer(std::int32_t Elements)
+  explicit CircularBuffer(std::int32_t Elements)
       : DataBuffer(new DataType[Elements]), DataQueue(Elements),
         EmptyQueue(Elements) {
     for (int i = 0; i < Elements; i++) {

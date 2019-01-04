@@ -90,8 +90,8 @@ void ChannelProcessing::reset() {
 }
 
 SampleProcessing::SampleProcessing(std::shared_ptr<ProducerBase> Prod,
-                                   std::string const &Name)
-    : AdcDataProcessor(std::move(Prod)), AdcName(Name) {}
+                                   std::string Name)
+    : AdcDataProcessor(std::move(Prod)), AdcName(std::move(Name)) {}
 
 void SampleProcessing::setMeanOfSamples(int NrOfSamples) {
   MeanOfNrOfSamples = NrOfSamples;
@@ -124,7 +124,7 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
 
   auto FBName = builder.CreateString(
       AdcName + "_Adc" + std::to_string(Data.Identifier.SourceID) + "_Ch" +
-      std::to_string(Data.Identifier.ChannelNr));
+      std::to_string(Data.Identifier.ChannelNr) + "_waveform");
   SampleEnvironmentDataBuilder MessageBuilder(builder);
   MessageBuilder.add_Name(FBName);
   MessageBuilder.add_Values(FBSampleData);

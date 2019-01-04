@@ -17,7 +17,7 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
                                AdcSettings const &ReadoutSettings)
     : Detector("AdcReadout", Settings), ReadoutSettings(ReadoutSettings),
       GeneralSettings(Settings), Service(std::make_shared<asio::io_service>()),
-      Worker(*Service.get()) {
+      Worker(*Service) {
   // Note: Must call this->inputThread() instead of
   // AdcReadoutBase::inputThread() for the unit tests to work
   std::function<void()> inputFunc = [this]() { this->inputThread(); };
@@ -26,7 +26,6 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
   Stats.setPrefix("adc_readout" + ReadoutSettings.GrafanaNameSuffix);
   Stats.create("input.bytes.received", AdcStats.input_bytes_received);
   Stats.create("parser.errors", AdcStats.parser_errors);
-  Stats.create("parser.unknown_channel", AdcStats.parser_unknown_channel);
   Stats.create("parser.packets.total", AdcStats.parser_packets_total);
   Stats.create("parser.packets.idle", AdcStats.parser_packets_idle);
   Stats.create("parser.packets.data", AdcStats.parser_packets_data);
@@ -54,6 +53,7 @@ std::shared_ptr<DelayLineProducer> AdcReadoutBase::getDelayLineProducer() {
     }
     DelayLineProducerPtr = std::make_shared<DelayLineProducer>(
         GeneralSettings.KafkaBroker, UsedTopic, ReadoutSettings);
+    Stats.create("events.delay_line", DelayLineProducerPtr->getNrOfEvents());
   }
   return DelayLineProducerPtr;
 }
@@ -69,8 +69,15 @@ SamplingRun *AdcReadoutBase::GetDataModule(ChannelID const Identifier) {
         std::make_pair(Identifier, std::make_unique<Queue>(MessageQueueSize)));
     auto ProcessingID = DataModuleQueues.size() - 1;
     auto ThreadName = "processing_" + std::to_string(ProcessingID);
-    std::function<void()> processingFunc = [this, ThreadName, Identifier]() {
-      this->processingThread(*this->DataModuleQueues.at(Identifier));
+    auto TempEventCounter = std::make_shared<std::int64_t>();
+    *TempEventCounter = 0;
+    Stats.create("events.adc" + std::to_string(Identifier.SourceID) + "_ch" +
+                     std::to_string(Identifier.ChannelNr),
+                 (*TempEventCounter));
+    std::function<void()> processingFunc = [this, ThreadName, Identifier,
+                                            TempEventCounter]() {
+      this->processingThread(*this->DataModuleQueues.at(Identifier),
+                             TempEventCounter);
     };
     Detector::AddThreadFunction(processingFunc, ThreadName);
     auto &NewThread = Detector::Threads.at(Detector::Threads.size() - 1);
@@ -156,7 +163,8 @@ void AdcReadoutBase::inputThread() {
   Service->run();
 }
 
-void AdcReadoutBase::processingThread(Queue &DataModuleQueue) {
+void AdcReadoutBase::processingThread(
+    Queue &DataModuleQueue, std::shared_ptr<std::int64_t> EventCounter) {
   std::vector<std::unique_ptr<AdcDataProcessor>> Processors;
 
   if (ReadoutSettings.PeakDetection) {
@@ -177,16 +185,16 @@ void AdcReadoutBase::processingThread(Queue &DataModuleQueue) {
         getDelayLineProducer(), ReadoutSettings.Threshold));
   }
 
-  bool GotModule = false;
   DataModulePtr Data = nullptr;
   const std::int64_t TimeoutUSecs = 20000;
   while (Detector::runThreads) {
-    GotModule = DataModuleQueue.waitGetData(Data, TimeoutUSecs);
+    auto GotModule = DataModuleQueue.waitGetData(Data, TimeoutUSecs);
     if (GotModule) {
       try {
         for (auto &Processor : Processors) {
           (*Processor).processData(*Data);
         }
+        ++(*EventCounter);
       } catch (ParserException &e) {
         ++AdcStats.parser_errors;
       }
