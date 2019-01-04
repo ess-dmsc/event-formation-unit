@@ -79,17 +79,18 @@ void Socket::setLocalSocket(const char *ipaddr, int port) {
 
   int ret = inet_aton(ipaddr, &localSockAddr.sin_addr);
   if (ret == 0) {
-    std::cout << "invalid ip address " << ipaddr << std::endl;
+    LOG(IPC, Sev::Error, "invalid ip address {}", ipaddr);
+    throw std::runtime_error("setLocalSocket() - invalid ip");
   }
   assert(ret != 0);
 
   // bind socket to port
   ret = bind(SocketFileDescriptor, (struct sockaddr *)&localSockAddr, sizeof(localSockAddr));
   if (ret != 0) {
-    std::cout << "bind failed - is port " << port << " already in use?"
-              << std::endl;
+    LOG(IPC, Sev::Error, "bind failed - is port  {} already in use?", port);
+    //throw std::runtime_error("setLocalSocket() - bind() failed");
   }
-  assert(ret == 0);
+  assert (ret == 0);
 }
 
 void Socket::setRemoteSocket(const char *ipaddr, int port) {
@@ -102,7 +103,8 @@ void Socket::setRemoteSocket(const char *ipaddr, int port) {
 
   int ret = inet_aton(ipaddr, &remoteSockAddr.sin_addr);
   if (ret == 0) {
-    std::cout << "invalid ip address " << ipaddr << std::endl;
+    LOG(IPC, Sev::Error, "invalid ip address {}", ipaddr);
+    throw std::runtime_error("setRemoteSocket() - invalid ip");
   }
   assert(ret != 0);
 }
