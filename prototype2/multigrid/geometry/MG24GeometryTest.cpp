@@ -26,6 +26,8 @@ TEST_F(MG24DetectorTest, IsWireIsGrid) {
   EXPECT_FALSE(mgdet.isGrid(128));
 }
 
+// \todo these tests are more confusing than the implementation being tested
+
 TEST_F(MG24DetectorTest, XZCoordinatesVariantA) {
   Multigrid::MG24GeometryA mgdet;
   mgdet.max_channel(128);
@@ -65,6 +67,8 @@ TEST_F(MG24DetectorTest, YCoordinatesVariantA) {
     EXPECT_EQ(channel - 80 , mgdet.y(channel));
   }
 }
+
+// \todo tests for VariantB
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

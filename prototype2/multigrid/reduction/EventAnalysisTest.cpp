@@ -8,7 +8,7 @@
 
 using namespace Multigrid;
 
-class uTPCTest : public TestBase {
+class EventAnalysisTest : public TestBase {
 protected:
   Hit hit;
   Event event;
@@ -19,12 +19,12 @@ protected:
   virtual void TearDown() { }
 };
 
-TEST_F(uTPCTest, AnalyzeInvalid) {
+TEST_F(EventAnalysisTest, AnalyzeInvalid) {
   auto result = analyzer.analyze(event);
   EXPECT_FALSE(result.good);
 }
 
-TEST_F(uTPCTest, AnalyzeBadY) {
+TEST_F(EventAnalysisTest, AnalyzeBadY) {
   hit.weight = 1;
   event.insert(hit);
   auto result = analyzer.analyze(event);
@@ -32,14 +32,14 @@ TEST_F(uTPCTest, AnalyzeBadY) {
   EXPECT_FALSE(result.good);
 }
 
-TEST_F(uTPCTest, AnalyzeBadX) {
+TEST_F(EventAnalysisTest, AnalyzeBadX) {
   hit.plane = 1;
   event.insert(hit);
   auto result = analyzer.analyze(event);
   EXPECT_FALSE(result.good);
 }
 
-TEST_F(uTPCTest, AnalyzeGood) {
+TEST_F(EventAnalysisTest, AnalyzeGood) {
   hit.weight = 1;
   event.insert(hit);
   hit.plane = 1;
@@ -48,7 +48,7 @@ TEST_F(uTPCTest, AnalyzeGood) {
   EXPECT_TRUE(result.good);
 }
 
-TEST_F(uTPCTest, InsertInvalid) {
+TEST_F(EventAnalysisTest, InsertInvalid) {
   hit.weight = 1;
   hit.plane = 0;
   event.insert(hit);
@@ -59,7 +59,7 @@ TEST_F(uTPCTest, InsertInvalid) {
   EXPECT_EQ(2, event.total_hit_count());
 }
 
-TEST_F(uTPCTest, DebugPrint) {
+TEST_F(EventAnalysisTest, DebugPrint) {
   MESSAGE() << "This is not a test, just calling debug print function\n";
   auto result = analyzer.analyze(event);
   MESSAGE() << result.debug() << "\n";

@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Multigrid electronics Handles mappings between (digitizere, channels) and (x,y,z) coordinates
+/// \brief Handles mappings between (digitizers, channels) and (x,y,z) coordinates
 ///
 /// This currently (18/1 2018) is compatible with MG.24, MG.24.T and MG.CNCS
 /// detector demonstrators although not all channels may be in use
@@ -19,6 +19,10 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Multigrid {
+
+// \todo this requires more work, very likely need to reimplement these fns:
+//        wire(), x_from_wire(), z_from_wire(),
+//        and must test that reverse mapping from global wire works
 
 class MG24Geometry : public BusGeometry {
 
