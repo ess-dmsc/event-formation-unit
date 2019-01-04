@@ -1,17 +1,28 @@
 set(AdcSimulator_SRC
   AdcSimulator.cpp
-  UDPServer.cpp
-  PacketGenerator.cpp
+  ContinousSamplingTimer.cpp
+  DataPacket.cpp
+  FPGASim.cpp
+  PoissonDelay.cpp
+  SampleRunGenerator.cpp
+  SamplingTimer.cpp
 )
 
 set(AdcSimulator_INC
-  UDPServer.h
-  PacketGenerator.h
+  AmpEventDelay.h
+  ContinousSamplingTimer.h
+  DataPacket.h
+  FPGASim.h
+  PoissonDelay.h
+  SampleRunGenerator.h
+  SamplingTimer.h
 )
 
 find_package(Threads REQUIRED)
 
 add_executable(AdcSimulator EXCLUDE_FROM_ALL ${AdcSimulator_SRC} ${AdcSimulator_INC})
+set_target_properties(AdcSimulator PROPERTIES
+  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
 target_include_directories(AdcSimulator PRIVATE ${ASIO_INCLUDE_DIR} "../" "../../common/")
 

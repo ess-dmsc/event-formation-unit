@@ -28,7 +28,7 @@ std::unique_ptr<DelayLinePositionInterface> createCalculator(AxisType CalcType,
 }
 
 template <typename Type, typename PtrType>
-bool checkType(PtrType Ptr, std::string ErrorString) {
+bool checkType(PtrType Ptr, std::string const &ErrorString) {
   if (nullptr == dynamic_cast<Type *>(Ptr)) {
     LOG(INIT, Sev::Error, ErrorString);
     return false;
@@ -108,14 +108,14 @@ void DelayLineEventFormation::DoChannelRoleMapping(
 }
 
 DelayLineEventFormation::DelayLineEventFormation(
-    AdcSettings const &ReadoutSettings) {
-  XAxisCalc =
-      createCalculator(ReadoutSettings.XAxis, ReadoutSettings.EventTimeoutNS);
+    AdcSettings const &ReadoutSettings)
+    : XAxisCalc(createCalculator(ReadoutSettings.XAxis,
+                                 ReadoutSettings.EventTimeoutNS)),
+      YAxisCalc(createCalculator(ReadoutSettings.YAxis,
+                                 ReadoutSettings.EventTimeoutNS)) {
   XAxisCalc->setCalibrationValues(ReadoutSettings.XAxisCalibOffset,
                                   ReadoutSettings.XAxisCalibSlope);
 
-  YAxisCalc =
-      createCalculator(ReadoutSettings.YAxis, ReadoutSettings.EventTimeoutNS);
   YAxisCalc->setCalibrationValues(ReadoutSettings.YAxisCalibOffset,
                                   ReadoutSettings.YAxisCalibSlope);
 

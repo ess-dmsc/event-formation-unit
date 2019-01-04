@@ -11,7 +11,7 @@
 
 class AdcParsing : public ::testing::Test {
 public:
-  virtual void SetUp() {
+  void SetUp() override {
     std::string PacketPath = TEST_PACKET_PATH;
     std::ifstream PacketFile(PacketPath + "test_packet_1.dat",
                              std::ios::binary);
@@ -25,7 +25,7 @@ public:
 
 class AdcParsingAlt : public ::testing::Test {
 public:
-  virtual void SetUp() {
+  void SetUp() override {
     std::string PacketPath = TEST_PACKET_PATH;
     std::ifstream PacketFile(PacketPath + "test_packet_2.dat",
                              std::ios::binary);
@@ -42,7 +42,7 @@ public:
 
 class AdcParsingIdle : public ::testing::Test {
 public:
-  virtual void SetUp() {
+  void SetUp() override {
     std::string PacketPath = TEST_PACKET_PATH;
     std::ifstream PacketFile(PacketPath + "test_packet_idle.dat",
                              std::ios::binary);
@@ -59,7 +59,7 @@ public:
 
 class AdcParsingDataFail : public ::testing::Test {
 public:
-  virtual void SetUp() {
+  void SetUp() override {
     std::string PacketPath = TEST_PACKET_PATH;
     std::ifstream PacketFile(PacketPath + "test_packet_2.dat",
                              std::ios::binary);
@@ -72,9 +72,9 @@ public:
         reinterpret_cast<DataHeader *>(Packet.Data + sizeof(PacketHeader));
     BEEFCAFE = Packet.Data + 1470 - 8;
   }
-  std::uint8_t *BEEFCAFE;
-  PacketHeader *Header;
-  DataHeader *DataHead;
+  std::uint8_t *BEEFCAFE{nullptr};
+  PacketHeader *Header{nullptr};
+  DataHeader *DataHead{nullptr};
   InData Packet;
 };
 
@@ -85,7 +85,7 @@ TEST_F(AdcParsing, ParseCorrectHeader) {
   EXPECT_GT(Header.DataStart, 0);
 }
 
-SamplingRun *GetModule(ChannelID) {
+SamplingRun *GetModule(ChannelID /*unused*/) {
   static SamplingRun TestModule(10);
   return &TestModule;
 }
@@ -96,7 +96,8 @@ public:
       std::function<bool(SamplingRun *)> ModuleHandler,
       std::function<SamplingRun *(ChannelID Identifier)> ModuleProducer,
       std::uint16_t SourceID)
-      : PacketParser(ModuleHandler, ModuleProducer, SourceID) {}
+      : PacketParser(std::move(ModuleHandler), std::move(ModuleProducer),
+                     SourceID) {}
   using PacketParser::parseData;
 };
 
@@ -232,7 +233,7 @@ TEST(AdcHeadParse, IdleHeadTest) {
 
 TEST(AdcHeadParse, IdleDataTest) {
   InData Packet;
-  std::uint32_t *IdleData = reinterpret_cast<std::uint32_t *>(Packet.Data);
+  auto IdleData = reinterpret_cast<std::uint32_t *>(Packet.Data);
   const std::uint32_t TimeStampValue = 0xFF;
   const std::uint32_t TimeStampValueFrac = 0xFFFF0000;
   IdleData[0] = htonl(TimeStampValue);
@@ -246,7 +247,7 @@ TEST(AdcHeadParse, IdleDataTest) {
 
 TEST(AdcHeadParse, IdleDataFailTest) {
   InData Packet;
-  std::uint32_t *IdleData = reinterpret_cast<std::uint32_t *>(Packet.Data);
+  auto IdleData = reinterpret_cast<std::uint32_t *>(Packet.Data);
   const std::uint32_t TimeStampValue = 0xFF;
   const std::uint32_t TimeStampValueFrac = 0xFFFF0000;
   IdleData[0] = TimeStampValue;
@@ -288,7 +289,7 @@ TEST(ExceptionTypes, IncorrectExceptionType) {
 TEST(AdcHeadParse, UnknownHeadTest) {
   InData Packet;
   Packet.Length = sizeof(PacketHeader);
-  PacketHeader *HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
+  auto HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
   HeaderPointer->PacketType = 0x6666;
   HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader) - 2);
   EXPECT_THROW(parseHeader(Packet), ParserException);
@@ -297,7 +298,7 @@ TEST(AdcHeadParse, UnknownHeadTest) {
 TEST(AdcHeadParse, ShortPacketFailure) {
   InData Packet;
   Packet.Length = sizeof(PacketHeader) - 2;
-  PacketHeader *HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
+  auto HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
   HeaderPointer->PacketType = 0x1111;
   HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader) - 4);
   EXPECT_THROW(parseHeader(Packet), ParserException);
@@ -306,7 +307,7 @@ TEST(AdcHeadParse, ShortPacketFailure) {
 TEST(AdcHeadParse, WrongReadoutLengthFailure) {
   InData Packet;
   Packet.Length = sizeof(PacketHeader);
-  PacketHeader *HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
+  auto HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
   HeaderPointer->PacketType = 0x1111;
   HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader));
   EXPECT_THROW(parseHeader(Packet), ParserException);
@@ -314,30 +315,30 @@ TEST(AdcHeadParse, WrongReadoutLengthFailure) {
 
 struct FakeDataStruct {
   DataHeader Data;
-  std::uint16_t TestData[2];
-  std::uint32_t Trailer;
+  std::uint16_t TestData[2]{0, 0};
+  std::uint32_t Trailer{0};
 };
 
 class AdcDataParsing : public ::testing::Test {
 public:
-  virtual void SetUp() {
+  void SetUp() override {
     Packet.Length = sizeof(FakeDataStruct) * 2;
     DataPointer = reinterpret_cast<FakeDataStruct *>(Packet.Data);
-    DataPointer[0].Data.MagicValue = htons(0xABCD);
+    DataPointer[0].Data.MagicValue = htons(0xABCDu);
     DataPointer[0].Data.Length = htons(24);
-    DataPointer[0].Trailer = htonl(0xBEEFCAFE);
-    DataPointer[0].Data.TimeStamp.SecondsFrac = htonl(0x0000FFFF);
-    DataPointer[0].Data.TimeStamp.Seconds = htonl(0xAAAA0000);
-    DataPointer[0].Data.Channel = htons(0xAA00);
-    DataPointer[0].TestData[0] = htons(0xFF00);
-    DataPointer[0].TestData[1] = htons(0x00FF);
+    DataPointer[0].Trailer = htonl(0xBEEFCAFEu);
+    DataPointer[0].Data.TimeStamp.SecondsFrac = htonl(0x0000FFFFu);
+    DataPointer[0].Data.TimeStamp.Seconds = htonl(0xAAAA0000u);
+    DataPointer[0].Data.Channel = htons(0xAA00u);
+    DataPointer[0].TestData[0] = htons(0xFF00u);
+    DataPointer[0].TestData[1] = htons(0x00FFu);
 
-    DataPointer[1].Data.MagicValue = htons(0xABCD);
-    DataPointer[1].Trailer = htonl(0xBEEFCAFE);
+    DataPointer[1].Data.MagicValue = htons(0xABCDu);
+    DataPointer[1].Trailer = htonl(0xBEEFCAFEu);
     DataPointer[1].Data.Length = htons(24);
   }
   InData Packet;
-  FakeDataStruct *DataPointer;
+  FakeDataStruct *DataPointer{nullptr};
 };
 
 TEST_F(AdcDataParsing, FakeDataTest) {
@@ -399,16 +400,15 @@ struct FillerDataStruct1 {
 
 class AdcFillerParsing1 : public ::testing::Test {
 public:
-  virtual void SetUp() {
+  void SetUp() override {
     Packet.Length = sizeof(FillerDataStruct1);
     FillerPointer = reinterpret_cast<FillerDataStruct1 *>(Packet.Data);
-    for (auto &Fill : FillerPointer->FillerBytes) {
-      Fill = 0x55;
-    }
-    FillerPointer->Trailer = htonl(0xFEEDF00D);
+    std::fill(std::begin(FillerPointer->FillerBytes),
+              std::end(FillerPointer->FillerBytes), 0x55);
+    FillerPointer->Trailer = htonl(0xFEEDF00Du);
   }
   InData Packet;
-  FillerDataStruct1 *FillerPointer;
+  FillerDataStruct1 *FillerPointer{nullptr};
 };
 
 TEST_F(AdcFillerParsing1, FakeFillerTest) {
@@ -429,16 +429,15 @@ TEST_F(AdcFillerParsing1, IncorrectFiller) {
 
 class AdcFillerParsing2 : public ::testing::Test {
 public:
-  virtual void SetUp() {
+  void SetUp() override {
     Packet.Length = sizeof(FillerDataStruct1) - 1;
     FillerPointer = reinterpret_cast<FillerDataStruct1 *>(Packet.Data);
-    for (auto &Fill : FillerPointer->FillerBytes) {
-      Fill = 0x55;
-    }
-    FillerPointer->Trailer = htonl(0xFEEDF00D);
+    std::fill(std::begin(FillerPointer->FillerBytes),
+              std::end(FillerPointer->FillerBytes), 0x55);
+    FillerPointer->Trailer = htonl(0xFEEDF00Du);
   }
   InData Packet;
-  FillerDataStruct1 *FillerPointer;
+  FillerDataStruct1 *FillerPointer{nullptr};
 };
 
 TEST_F(AdcFillerParsing2, IncorrectFillerLength) {

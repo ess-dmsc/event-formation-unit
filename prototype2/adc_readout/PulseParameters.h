@@ -28,6 +28,8 @@ struct PulseParameters {
   RawTimeStamp PeakTimestamp;
   /// Timestamp where line goes above threshold
   RawTimeStamp ThresholdTimestamp;
+  /// Threshold timestamp as ns
+  std::uint64_t ThresholdTimestampNS{0};
 };
 
 /// \brief Implements the data extraction information as  pure function.
@@ -35,4 +37,4 @@ struct PulseParameters {
 /// \param[in] SampleRun A vector of samples to find the peak in.
 /// \param[in] Threshold
 /// \return The results of the peak finding algorithm.
-PulseParameters analyseSampleRun(SamplingRun const &Run, double Threshold);
+PulseParameters analyseSampleRun(SamplingRun const &Run, double ThresholdLevel);

@@ -15,14 +15,14 @@ public:
   AdcReadoutStandIn(BaseSettings const &Settings,
                     AdcSettings const &ReadoutSettings)
       : AdcReadoutBase(Settings, ReadoutSettings){};
-  ~AdcReadoutStandIn() = default;
+  ~AdcReadoutStandIn() override = default;
   using Detector::Threads;
   using AdcReadoutBase::AdcStats;
   using AdcReadoutBase::DataModuleQueues;
   static const int MaxPacketSize = 2048;
   std::uint8_t BufferPtr[MaxPacketSize];
-  int PacketSize;
-  void LoadPacketFile(std::string FileName) {
+  int PacketSize{0};
+  void LoadPacketFile(std::string const &FileName) {
     std::string PacketPath = TEST_PACKET_PATH;
     std::ifstream PacketFile(PacketPath + FileName, std::ios::binary);
     ASSERT_TRUE(PacketFile.good());
@@ -38,7 +38,7 @@ using namespace std::chrono_literals;
 
 class AdcReadoutTest : public ::testing::Test {
 public:
-  virtual void SetUp() {
+  void SetUp() override {
     Settings.DetectorAddress = "0.0.0.0";
     Settings.DetectorPort = GetPortNumber();
     ReadoutSettings.AltDetectorInterface = "0.0.0.0";
@@ -49,9 +49,9 @@ public:
 
   static const int MaxPacketSize = 10000;
   std::uint8_t BufferPtr[MaxPacketSize];
-  int PacketSize;
+  int PacketSize{0};
 
-  void LoadPacketFile(std::string FileName) {
+  void LoadPacketFile(std::string const &FileName) {
     std::string PacketPath = TEST_PACKET_PATH;
     std::ifstream PacketFile(PacketPath + FileName, std::ios::binary);
     ASSERT_TRUE(PacketFile.good());
@@ -189,12 +189,14 @@ using trompeloeil::_;
 
 class AdcReadoutMock : public AdcReadoutBase {
 public:
-  AdcReadoutMock(BaseSettings Settings, AdcSettings ReadoutSettings)
+  AdcReadoutMock(BaseSettings const &Settings,
+                 AdcSettings const &ReadoutSettings)
       : AdcReadoutBase(Settings, ReadoutSettings){};
   using Detector::Threads;
   using AdcReadoutBase::DataModuleQueues;
   MAKE_MOCK0(inputThread, void(), override);
-  MAKE_MOCK1(processingThread, void(Queue &), override);
+  MAKE_MOCK2(processingThread, void(Queue &, std::shared_ptr<std::int64_t>),
+             override);
 };
 
 class AdcReadoutSimpleTest : public ::testing::Test {
@@ -206,7 +208,7 @@ public:
 TEST_F(AdcReadoutSimpleTest, StartProcessingThreads) {
   AdcReadoutMock Readout(Settings, ReadoutSettings);
   REQUIRE_CALL(Readout, inputThread()).TIMES(1);
-  REQUIRE_CALL(Readout, processingThread(_)).TIMES(0);
+  REQUIRE_CALL(Readout, processingThread(_, _)).TIMES(0);
   Readout.startThreads();
   Readout.stopThreads();
 }

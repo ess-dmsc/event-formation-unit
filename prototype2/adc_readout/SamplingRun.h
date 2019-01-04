@@ -17,11 +17,13 @@
 /// run.
 struct SamplingRun {
   SamplingRun() = default;
-  SamplingRun(size_t ReserveElements) noexcept : Data(ReserveElements) {
+  explicit SamplingRun(size_t ReserveElements) noexcept
+      : Data(ReserveElements) {
     Data.clear();
   }
   ~SamplingRun() = default;
-  SamplingRun(const SamplingRun &&Other)
+  SamplingRun(SamplingRun const &) = default;
+  explicit SamplingRun(const SamplingRun &&Other)
       : TimeStamp(Other.TimeStamp), Identifier(Other.Identifier),
         OversamplingFactor(Other.OversamplingFactor),
         Data(std::move(Other.Data)) {}
@@ -35,7 +37,7 @@ struct SamplingRun {
     Identifier.ChannelNr = 0;
     Identifier.SourceID = 0;
   }
-  ChannelID Identifier;
+  ChannelID Identifier{0, 0};
   std::uint16_t OversamplingFactor{1};
   std::vector<std::uint16_t> Data;
 };

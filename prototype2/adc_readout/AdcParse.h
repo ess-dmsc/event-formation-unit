@@ -39,10 +39,10 @@ public:
   };
   /// \brief Sets the (parsing) error type to Type::UNKNOWN.
   /// \param[in] ErrorStr The string describing the exception.
-  ParserException(std::string const &ErrorStr);
+  explicit ParserException(std::string const &ErrorStr);
   /// \brief Sets the parsing error to the give type.
   /// \param[in] ErrorType The parser error type.
-  ParserException(Type ErrorType);
+  explicit ParserException(Type ErrorType);
   virtual const char *what() const noexcept override;
   Type getErrorType() const;
 
@@ -53,7 +53,7 @@ private:
 
 class ModuleProcessingException : public std::runtime_error {
 public:
-  ModuleProcessingException(SamplingRun *Data)
+  explicit ModuleProcessingException(SamplingRun *Data)
       : std::runtime_error("Unable to processe data module"),
         UnproccesedData(Data) {}
   SamplingRun *UnproccesedData;

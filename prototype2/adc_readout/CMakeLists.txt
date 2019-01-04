@@ -63,7 +63,7 @@ set(AdcReadoutTest_SRC
     test/UDPClientTest.cpp
     test/DelayLineProducerTest.cpp
     test/DelayLineEventFormationTest.cpp
-    test/DelayLineProcessingTest.cpp
+    test/PulseProcessingTest.cpp
     test/DelayLinePositionCalcTest.cpp
     ${AdcReadoutBase_SRC}
     )
