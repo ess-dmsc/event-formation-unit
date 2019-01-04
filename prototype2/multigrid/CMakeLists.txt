@@ -34,12 +34,12 @@ set(multigrid_common_inc
   Config.h
   )
 
-set(multigrid_INC
+set(mgmesytec_INC
   MultigridBase.h
   ${multigrid_common_inc}
 )
 
-set(multigrid_SRC
+set(mgmesytec_SRC
   Multigrid.cpp
   MultigridBase.cpp
   ${multigrid_common_src}
