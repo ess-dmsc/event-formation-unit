@@ -27,6 +27,8 @@ struct AdcSettings {
   std::string AltDetectorInterface = {"0.0.0.0"};
   std::uint16_t AltDetectorPort = {0};
 
+  double Threshold{0.1};
+
   double XAxisCalibOffset = {0.0};
   double XAxisCalibSlope = {1.0};
   double YAxisCalibOffset = {0.0};

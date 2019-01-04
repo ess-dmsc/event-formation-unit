@@ -31,6 +31,9 @@ double CalcTimeStampDelta(int OversamplingFactor) {
 
 ProcessedSamples ChannelProcessing::processModule(const SamplingRun &Samples) {
   int FinalOversamplingFactor = MeanOfNrOfSamples * Samples.OversamplingFactor;
+  if (FinalOversamplingFactor == 0) {
+    FinalOversamplingFactor = 1;
+  }
   size_t SampleIndex{0};
   size_t TotalNumberOfSamples =
       (Samples.Data.size() + NrOfSamplesSummed) / MeanOfNrOfSamples;
@@ -68,7 +71,7 @@ ProcessedSamples ChannelProcessing::processModule(const SamplingRun &Samples) {
   if (not ReturnSamples.TimeStamps.empty()) {
     ReturnSamples.TimeStamp = ReturnSamples.TimeStamps[0];
   }
-  ReturnSamples.Channel = Samples.Identifier.ChannelNr;
+  ReturnSamples.Identifier = Samples.Identifier;
   return ReturnSamples;
 }
 
@@ -119,15 +122,16 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
     FBTimeStamps = builder.CreateVector(Data.TimeStamps);
   }
 
-  auto FBName =
-      builder.CreateString(AdcName + "_" + std::to_string(Data.Channel));
+  auto FBName = builder.CreateString(
+      AdcName + "_Adc" + std::to_string(Data.Identifier.SourceID) + "_Ch" +
+      std::to_string(Data.Identifier.ChannelNr));
   SampleEnvironmentDataBuilder MessageBuilder(builder);
   MessageBuilder.add_Name(FBName);
   MessageBuilder.add_Values(FBSampleData);
   if (SampleTimestamps) {
     MessageBuilder.add_Timestamps(FBTimeStamps);
   }
-  MessageBuilder.add_Channel(Data.Channel);
+  MessageBuilder.add_Channel(Data.Identifier.ChannelNr);
   MessageBuilder.add_PacketTimestamp(Data.TimeStamp);
   MessageBuilder.add_TimeDelta(Data.TimeDelta);
 

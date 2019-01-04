@@ -32,7 +32,7 @@ images = [
         'cmake_flags': ''
     ],
     'debian9': [
-        'name': 'essdmscdm/debian9-build-node:2.5.1',
+        'name': 'essdmscdm/debian9-build-node:2.5.2',
         'sh'  : 'bash -e',
         'cmake_flags': ''
     ]

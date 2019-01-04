@@ -12,7 +12,8 @@
 
 class AdcReadoutStandIn : public AdcReadoutBase {
 public:
-  AdcReadoutStandIn(BaseSettings const &Settings, AdcSettings const &ReadoutSettings)
+  AdcReadoutStandIn(BaseSettings const &Settings,
+                    AdcSettings const &ReadoutSettings)
       : AdcReadoutBase(Settings, ReadoutSettings){};
   ~AdcReadoutStandIn() = default;
   using Detector::Threads;

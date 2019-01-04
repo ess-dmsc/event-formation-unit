@@ -28,6 +28,10 @@ void setCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings) {
                 "value along with its time-stamp to he Kafka broker.")
       ->group("ADC Readout Options");
   parser
+      .add_flag("--delayline_efu", ReadoutSettings.DelayLineDetector,
+                "Enable event formation of delay line pulse data.")
+      ->group("ADC Readout Options");
+  parser
       .add_option("--name", ReadoutSettings.Name,
                   "Name of the source of the data as made available on the "
                   "Kafka broker.")
@@ -78,7 +82,8 @@ void setCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings) {
                   "The Kafka topic to which the delay line event data should be"
                   " transmitted. Ignored if delay line processing is not "
                   "enabled. If empty string, use the default setting.")
-      ->group("Sampling Options");
+      ->group("Sampling Options")
+      ->default_str("delayline_detector");
   parser
       .add_option(
           "--alt_detector_interface", ReadoutSettings.AltDetectorInterface,
@@ -140,6 +145,13 @@ void setCLIArguments(CLI::App &parser, AdcSettings &ReadoutSettings) {
   for (auto &Item : getRoleMapping()) {
     RoleOptions.emplace(Item.second);
   }
+
+  parser
+      .add_option("--threshold", ReadoutSettings.Threshold,
+                  "Set threshold timestamp to the sample where this value "
+                  "(relative to the maximum value) is exceeded.")
+      ->group("Delay Line Options")
+      ->default_str("0.1");
 
   parser
       .add_set("--adc1_ch1_role", ReadoutSettings.ADC1Channel1,

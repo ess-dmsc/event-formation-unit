@@ -35,21 +35,22 @@ public:
   /// position calculation.
   DelayLineProducer(std::string Broker, std::string Topic,
                     AdcSettings EfuSettings);
-  
+
   /// \brief Stop processing thread and deallocate resources.
   ~DelayLineProducer();
-  
+
   /// \brief Add pulse to queue for processing by the processing thread.
   /// \param[in] Pulse Pulse parameters of the registered pulse.
   void addPulse(PulseParameters const Pulse);
+
 protected:
   /// \brief Serialize the event produced by one or more pulses.
   /// \param[in] Event Holds postion, timestamp and amplitude of event. For some
   /// types of event, the amplitude is meaningless.
   virtual void serializeAndSendEvent(DelayLineEvent const &Event);
-  
+
   std::int64_t EventCounter{0};
-  
+
   /// \brief Processing thread. Does not return unless
   /// DelayLineProducer::RunThread is set to false.
   void pulseProcessingFunction();
