@@ -15,7 +15,7 @@
 #include <string>
 #include <algorithm>
 
-using std::string_literals::operator""s;
+using namespace std::literals::string_literals;
 
 EFUArgs::EFUArgs() {
   // clang-format off
