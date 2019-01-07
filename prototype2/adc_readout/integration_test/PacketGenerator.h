@@ -37,7 +37,7 @@ struct DataHeaderSim : public DataHeader {
 
 class PacketGenerator {
 public:
-  PacketGenerator(std::uint16_t OversamplingFactor);
+  explicit PacketGenerator(std::uint16_t OversamplingFactor);
 
   PacketInfo GeneratePacket(std::uint32_t TS_Sec, double SecFrac, std::uint16_t ChannelNr);
 private:

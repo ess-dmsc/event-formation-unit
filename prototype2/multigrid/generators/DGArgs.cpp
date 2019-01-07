@@ -10,8 +10,6 @@
 // GCOVR_EXCL_START
 
 DGArgs::DGArgs(int argc, char *argv[]) {
-
-  int c;
   while (1) {
     static struct option long_options[] = {
         {"filename", required_argument, 0, 'f'},
@@ -30,7 +28,7 @@ DGArgs::DGArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:d:f:i:n:p:r:s:t:u:hx", long_options,
+    int c = getopt_long(argc, argv, "a:d:f:i:n:p:r:s:t:u:hx", long_options,
                     &option_index);
 
     if (c == -1)

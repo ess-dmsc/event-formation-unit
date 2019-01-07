@@ -44,14 +44,14 @@ public:
     }
   }
 
-  bool isFreia() { return Freia; }
-  bool isEstia() { return not isFreia(); }
-  bool isValidCh(uint16_t ch) { return ch <= MaxStripCh; }
-  bool isWire(uint16_t channel) { return (channel <= MaxWireCh); }
-  bool isStrip(uint16_t channel) {
+  bool isFreia() const { return Freia; }
+  bool isEstia() const { return not isFreia(); }
+  bool isValidCh(uint16_t ch) const { return ch <= MaxStripCh; }
+  bool isWire(uint16_t channel) const { return (channel <= MaxWireCh); }
+  bool isStrip(uint16_t channel) const {
     return ( (not isWire(channel)) and (channel <= MaxStripCh) ); }
-  bool isDetectorMB18() { return MB18; }
-  bool isDetectorMB16() { return not isDetectorMB18(); }
+  bool isDetectorMB18() const { return MB18; }
+  bool isDetectorMB16() const { return not isDetectorMB18(); }
   void setDetectorMB18() { MB18 = true; }
   void setDetectorMB16() { MB18 = false; }
 
@@ -67,18 +67,18 @@ public:
     return getPixel(globalx, globaly);
   }
 
-  uint32_t getPixel(uint16_t x, uint16_t y) {
+  uint32_t getPixel(uint16_t x, uint16_t y) const {
     if ( (x > MaxX) or (y > MaxY) ) {
       return 0;
     }
     return y * yMultiplier + x + 1U;
   }
 
-  uint8_t getPlane(uint16_t channel) {
+  uint8_t getPlane(uint16_t channel) const {
     return isStrip(channel) ^ Freia; // 0 is x, 1 is y
   }
 
-  uint16_t getx(uint16_t cassette, uint16_t ch) {
+  uint16_t getx(uint16_t cassette, uint16_t ch) const {
     if (MB18) {
       // Swap odd even
       ch = ch ^ 1;
@@ -95,7 +95,7 @@ public:
     }
   }
 
-  uint16_t gety(uint16_t cassette, uint16_t ch) {
+  uint16_t gety(uint16_t cassette, uint16_t ch) const {
       if (MB18) {
       // Swap odd even
       ch = ch ^ 1;

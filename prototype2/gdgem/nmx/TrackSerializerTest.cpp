@@ -151,9 +151,9 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
   for (unsigned int i = 1; i <= 1000; i *= 2) {
     event.c1.hits.clear();
     event.c2.hits.clear();
-    for (unsigned int i = 0; i < entries; i++) {
-      addxandy(i, i * 2, i * 3 + 1, entries - i, i * 2 + 0x1000,
-               i * 3 + 0x2000);
+    for (unsigned int j = 0; j < entries; j++) {
+      addxandy(j, j * 2, j * 3 + 1, entries - j, j * 2 + 0x1000,
+               j * 3 + 0x2000);
     }
     EXPECT_TRUE(tser.add_track(event, 0.0, 0.0));
     auto buffer = tser.serialize();
@@ -176,13 +176,13 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
     EXPECT_EQ(xdat->size(), entries);
     EXPECT_EQ(ydat->size(), entries);
 
-    for (unsigned int i = 0; i < entries; i++) {
-      EXPECT_EQ((*xdat)[i]->strip(), i);
-      EXPECT_EQ((*xdat)[i]->time(), i * 2);
-      EXPECT_EQ((*xdat)[i]->adc(), i * 3 + 1);
-      EXPECT_EQ((*ydat)[i]->strip(), entries - i);
-      EXPECT_EQ((*ydat)[i]->time(), i * 2 + 0x1000);
-      EXPECT_EQ((*ydat)[i]->adc(), i * 3 + 0x2000);
+    for (unsigned int k = 0; k < entries; k++) {
+      EXPECT_EQ((*xdat)[k]->strip(), k);
+      EXPECT_EQ((*xdat)[k]->time(), k * 2);
+      EXPECT_EQ((*xdat)[k]->adc(), k * 3 + 1);
+      EXPECT_EQ((*ydat)[k]->strip(), entries - k);
+      EXPECT_EQ((*ydat)[k]->time(), k * 2 + 0x1000);
+      EXPECT_EQ((*ydat)[k]->adc(), k * 3 + 0x2000);
     }
   }
 }

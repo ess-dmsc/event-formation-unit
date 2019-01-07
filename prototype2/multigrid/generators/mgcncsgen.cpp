@@ -17,7 +17,6 @@ int main(int argc, char *argv[]) {
   DGArgs opts(argc, argv); // Parse command line opts
 
   char buffer[9000];
-  unsigned int seqno = 1;
 
   const int B1M = 1000000;
   Socket::Endpoint local("0.0.0.0", 0);
@@ -59,7 +58,6 @@ int main(int argc, char *argv[]) {
     if (wrsize > 0) {
       tx += wrsize;
       txp++;
-      seqno++;
     } else {
       std::cout << "unable to send" << std::endl;
     }

@@ -8,6 +8,7 @@
 #include "../AdcReadoutBase.h"
 #include "TestUDPServer.h"
 #include <gtest/gtest.h>
+#include <array>
 #include <trompeloeil.hpp>
 
 class AdcReadoutStandIn : public AdcReadoutBase {
@@ -20,7 +21,8 @@ public:
   using AdcReadoutBase::AdcStats;
   using AdcReadoutBase::DataModuleQueues;
   static const int MaxPacketSize = 2048;
-  std::uint8_t BufferPtr[MaxPacketSize];
+
+  std::array<std::uint8_t, MaxPacketSize> BufferPtr;
   int PacketSize{0};
   void LoadPacketFile(std::string const &FileName) {
     std::string PacketPath = TEST_PACKET_PATH;
@@ -29,7 +31,7 @@ public:
     PacketFile.seekg(0, std::ios::end);
     PacketSize = PacketFile.tellg();
     PacketFile.seekg(0, std::ios::beg);
-    PacketFile.read(reinterpret_cast<char *>(&BufferPtr), PacketSize);
+    PacketFile.read(reinterpret_cast<char *>(BufferPtr.data()), PacketSize);
     ASSERT_TRUE(PacketFile.good());
   }
 };
@@ -46,9 +48,8 @@ public:
   }
   BaseSettings Settings;
   AdcSettings ReadoutSettings;
-
   static const int MaxPacketSize = 10000;
-  std::uint8_t BufferPtr[MaxPacketSize];
+  std::array<std::uint8_t, MaxPacketSize> BufferPtr;
   int PacketSize{0};
 
   void LoadPacketFile(std::string const &FileName) {
@@ -58,7 +59,7 @@ public:
     PacketFile.seekg(0, std::ios::end);
     PacketSize = PacketFile.tellg();
     PacketFile.seekg(0, std::ios::beg);
-    PacketFile.read(reinterpret_cast<char *>(&BufferPtr), PacketSize);
+    PacketFile.read(reinterpret_cast<char *>(BufferPtr.data()), PacketSize);
     ASSERT_TRUE(PacketFile.good());
   };
   std::chrono::duration<std::int64_t, std::milli> SleepTime{50ms};
@@ -80,7 +81,7 @@ TEST_F(AdcReadoutTest, SingleIdlePacket) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_idle.dat");
-  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
                        PacketSize);
   std::this_thread::sleep_for(SleepTime);
   Server.startPacketTransmission(1, 100);
@@ -96,7 +97,7 @@ TEST_F(AdcReadoutTest, SingleDataPacket) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_1.dat");
-  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
                        PacketSize);
   std::this_thread::sleep_for(20ms);
   Server.startPacketTransmission(1, 100);
@@ -113,7 +114,7 @@ TEST_F(AdcReadoutTest, LazyThreadLaunching) {
   Readout.startThreads();
   EXPECT_EQ(Readout.Threads.size(), 1u);
   LoadPacketFile("test_packet_1.dat");
-  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
                        PacketSize);
   std::this_thread::sleep_for(SleepTime);
   Server.startPacketTransmission(1, 100);
@@ -126,10 +127,10 @@ TEST_F(AdcReadoutTest, DoubleReceiveTest) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_1.dat");
-  TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+  TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
                         PacketSize);
   TestUDPServer Server2(GetPortNumber(), ReadoutSettings.AltDetectorPort,
-                        BufferPtr, PacketSize);
+                        BufferPtr.data(), PacketSize);
   std::this_thread::sleep_for(SleepTime);
   Server1.startPacketTransmission(1, 100);
   Server2.startPacketTransmission(1, 100);
@@ -143,7 +144,7 @@ TEST_F(AdcReadoutTest, GlobalCounterError) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_1.dat");
-  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
                        PacketSize);
   std::this_thread::sleep_for(SleepTime);
   Server.startPacketTransmission(2, 100);
@@ -161,9 +162,9 @@ TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
   Readout.startThreads();
   LoadPacketFile("test_packet_1.dat");
   std::this_thread::sleep_for(SleepTime);
-  auto PacketHeadPointer = reinterpret_cast<PacketHeader *>(BufferPtr);
+  auto PacketHeadPointer = reinterpret_cast<PacketHeader *>(BufferPtr.data());
   {
-    TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+    TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
                           PacketSize);
     Server1.startPacketTransmission(1, 100);
     std::this_thread::sleep_for(SleepTime);
@@ -172,7 +173,7 @@ TEST_F(AdcReadoutTest, GlobalCounterCorrect) {
   PacketHeadPointer->GlobalCount++;
   PacketHeadPointer->fixEndian();
   {
-    TestUDPServer Server2(GetPortNumber(), Settings.DetectorPort, BufferPtr,
+    TestUDPServer Server2(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
                           PacketSize);
     Server2.startPacketTransmission(1, 100);
     std::this_thread::sleep_for(SleepTime);

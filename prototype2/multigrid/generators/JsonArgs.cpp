@@ -11,7 +11,6 @@
 
 JsonArgs::JsonArgs(int argc, char *argv[]) {
 
-  int c;
   while (1) {
     static struct option long_options[] = {
         {"basedir", required_argument, 0, 'b'},
@@ -29,7 +28,7 @@ JsonArgs::JsonArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:b:d:f:i:j:n:p:r:s:t:u:hx", long_options,
+    int c = getopt_long(argc, argv, "a:b:d:f:i:j:n:p:r:s:t:u:hx", long_options,
                     &option_index);
 
     if (c == -1)

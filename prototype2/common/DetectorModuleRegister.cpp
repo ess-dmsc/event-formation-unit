@@ -24,7 +24,7 @@ DetectorModuleSetup &find(std::string const &DetectorModuleName) {
   return FoundModule->second;
 }
 
-void addDetectorModule(std::string DetectorModuleName, DetectorModuleSetup Module) {
+void addDetectorModule(std::string const &DetectorModuleName, DetectorModuleSetup Module) {
   auto &Modules = getFactories();
   if (Modules.find(DetectorModuleName) != Modules.end()) {
     throw std::runtime_error("Detector module is already in list of modules.");

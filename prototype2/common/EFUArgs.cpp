@@ -13,6 +13,9 @@
 #include <fstream>
 #include <regex>
 #include <string>
+#include <algorithm>
+
+using std::string_literals::operator""s;
 
 EFUArgs::EFUArgs() {
   // clang-format off
@@ -55,11 +58,11 @@ EFUArgs::EFUArgs() {
   std::map<std::string, DetectorModuleSetup> StaticDetModules =
       DetectorModuleRegistration::getFactories();
   if (not StaticDetModules.empty()) {
-    DetectorDescription += " (Known modules:";
-    for (auto &Item : StaticDetModules) {
-      DetectorDescription += " " + Item.first;
-    }
-    DetectorDescription += ")";
+    auto GetModuleName = [](std::string &A, auto const &B) {
+      return std::move(A) + " " + B.first;
+    };
+    auto TempString = std::accumulate(StaticDetModules.begin(), StaticDetModules.end(), " (Known modules:"s, GetModuleName);
+    DetectorDescription += TempString + ")";
   }
   DetectorOption = CLIParser.add_option("-d,--det", DetectorName, DetectorDescription)
       ->group("EFU Options")->required();

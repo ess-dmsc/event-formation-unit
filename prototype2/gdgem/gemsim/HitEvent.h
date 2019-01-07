@@ -18,7 +18,7 @@ public:
   HitEvent(int strip, int adc, double t)
      : Event(t), strip_(strip), adc_(adc)  { }
 
-  void execute(Simulator * sim) {
+  void execute(Simulator * sim) override {
     if (strip_ > 1280) {
       printf("%.10f hit     ystrip %5d, adc %5d\n", time, strip_ - 1280, adc_);
     } else {

@@ -113,9 +113,9 @@ void MGMesytecBase::mainThread() {
   sis3153parser.buffers.reserve(1000);
 
   uint8_t buffer[eth_buffer_size];
-  int ReadSize {0};
   TSCTimer report_timer;
   for (;;) {
+    int ReadSize {0};
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += ReadSize;

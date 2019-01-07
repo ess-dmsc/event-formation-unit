@@ -9,8 +9,8 @@
 
 #define UNUSED __attribute__((unused))
 
-static int dummy_command(std::vector<std::string> UNUSED cmdargs,
-                         char UNUSED *output, unsigned int UNUSED *obytes) {
+static int dummy_command(std::vector<std::string>,
+                         char*, unsigned int*) {
   return 0;
 }
 
