@@ -45,12 +45,12 @@ Contains detector pipeline plugins for a number of prototype detectors:
 * multigrid - mgcncs.so and mgcncs2.so
 * SoNDe - sone.so
 
-Also contains data-generators, some reading data from file other from Wireshark captures,
-some generating constant data.
-* mgcncsgen - generate constant data to grid 1 and wire 113 (front, top, left pixel)
-* mgcncsgenfile - reads from (binary) file and sends data to EFU
-* mgcncsgenjson - reads from file runs specified in json file
-* gennmfpcap - reads data from Wireshark and sends it to EFU (not GEM specific)
+Also contains code data generators which can be used for testing purposes. Examples are
+* tools/udpgen_pcap - reads data from Wireshark and sends it to EFU (not GEM specific)
+* gdgem/generators/nmxgen_hits
+* gdgem/generators/nmxgen_readouts
+* multiblade/generators/mbgen_hits
+
 
 ## udp
 udp is built automatically by prototype2.

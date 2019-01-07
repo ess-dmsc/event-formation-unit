@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
       std::cout << "Sent " << tx_total + tx << " bytes"
                 << " in " << txp_total + txp << " packets." << std::endl;
       std::cout << "done" << std::endl;
-      exit(0);
+      return 0;
     }
 
     if (unlikely((report_timer.timetsc() / TscMHz) >= opts.updint * 1000000)) {

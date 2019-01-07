@@ -75,7 +75,7 @@ void EmptyGraylogMessageQueue() {
 }
 
 /** Load detector, launch pipeline threads, then sleep until timeout or break */
-int app_main(int argc, char *argv[]) {
+int main(int argc, char *argv[]) {
   BaseSettings DetectorSettings;
   std::vector<ThreadCoreAffinitySetting> AffinitySettings;
   std::shared_ptr<Detector> detector;
@@ -217,15 +217,4 @@ int app_main(int argc, char *argv[]) {
 
   EmptyGraylogMessageQueue();
   return 0;
-}
-
-
-int main(int argc, char * argv[]) {
-  try {
-    app_main(argc, argv);
-    return EXIT_SUCCESS;
-  } catch (const std::exception &e) {
-    std::cerr << e.what();
-    return EXIT_FAILURE;
-  }
 }
