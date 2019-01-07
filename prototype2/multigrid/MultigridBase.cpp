@@ -32,8 +32,7 @@
 // \todo MJC's workstation - not reliable
 static constexpr int TscMHz{2900};
 
-MultigridBase::MultigridBase(BaseSettings const &settings,
-                             struct MultigridSettings &LocalSettings)
+MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings const &LocalSettings)
     : Detector("CSPEC", settings), ModuleSettings(LocalSettings) {
   Stats.setPrefix("efu.mgmesytec");
 
