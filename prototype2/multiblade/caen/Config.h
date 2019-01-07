@@ -46,7 +46,7 @@ public:
   InstrumentGeometry getInstrument() const { return Instrument; }
 
   DetectorType getDetectorType() const { return DetectorType; }
-,
+
   uint16_t getWires() const { return NWires; }
   uint16_t getStrips() const { return NStrips; }
   uint16_t getCassettes() const { return NCass; }
