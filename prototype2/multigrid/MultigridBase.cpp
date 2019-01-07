@@ -168,9 +168,9 @@ void MultigridBase::mainThread() {
   ev42serializer.pulseTime(0);
 
   uint8_t buffer[eth_buffer_size];
-  ssize_t ReadSize{0};
   TSCTimer report_timer;
   while (true) {
+    ssize_t ReadSize{0};
     if ((ReadSize = cspecdata.receive(buffer, eth_buffer_size)) > 0) {
       mystats.rx_packets++;
       mystats.rx_bytes += ReadSize;

@@ -36,7 +36,7 @@ public:
     MaxY = NStrips - 1;
   }
 
-  uint16_t getGlobalChannel(uint16_t cassette, uint16_t channel) {
+  uint16_t getGlobalChannel(uint16_t cassette, uint16_t channel) const {
     if (isWire(channel)) {
       return NWires * cassette + channel;
     } else {
@@ -55,7 +55,7 @@ public:
   void setDetectorMB18() { MB18 = true; }
   void setDetectorMB16() { MB18 = false; }
 
-  uint32_t getPixel(uint16_t cassette, uint16_t localx, uint16_t localy) {
+  uint32_t getPixel(uint16_t cassette, uint16_t localx, uint16_t localy) const {
     uint16_t globalx, globaly;
     if (Freia) {
       globalx = localx;

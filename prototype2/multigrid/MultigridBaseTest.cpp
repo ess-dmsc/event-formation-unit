@@ -15,7 +15,7 @@
 
 class MultigridBaseStandIn : public MultigridBase {
 public:
-  MultigridBaseStandIn(BaseSettings Settings, struct MultigridSettings ReadoutSettings)
+  MultigridBaseStandIn(BaseSettings Settings, MultigridSettings const &ReadoutSettings)
       : MultigridBase(Settings, ReadoutSettings){};
   ~MultigridBaseStandIn() = default;
   using Detector::Threads;
