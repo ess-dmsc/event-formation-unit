@@ -23,7 +23,7 @@ Socket::Socket(Socket::type stype) {
 
   if ((SocketFileDescriptor = socket(AF_INET, type, proto)) == -1) {
     LOG(IPC, Sev::Error, "socket() failed");
-    exit(1);
+    throw std::runtime_error("system error - socket() failed");
   }
 }
 
@@ -61,7 +61,6 @@ int Socket::setNOSIGPIPE() {
     int ret = setSockOpt(SO_NOSIGPIPE, &on, sizeof(on));
     if (ret != 0) {
         LOG(IPC, Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
-        perror("setsockopt():");
     }
     assert(ret ==0);
     return ret;
@@ -82,15 +81,13 @@ void Socket::setLocalSocket(const char *ipaddr, int port) {
     LOG(IPC, Sev::Error, "invalid ip address {}", ipaddr);
     throw std::runtime_error("setLocalSocket() - invalid ip");
   }
-  assert(ret != 0);
 
   // bind socket to port
   ret = bind(SocketFileDescriptor, (struct sockaddr *)&localSockAddr, sizeof(localSockAddr));
   if (ret != 0) {
     LOG(IPC, Sev::Error, "bind failed - is port  {} already in use?", port);
-    //throw std::runtime_error("setLocalSocket() - bind() failed");
+    throw std::runtime_error("setLocalSocket() - bind() failed");
   }
-  assert (ret == 0);
 }
 
 void Socket::setRemoteSocket(const char *ipaddr, int port) {
@@ -106,7 +103,6 @@ void Socket::setRemoteSocket(const char *ipaddr, int port) {
     LOG(IPC, Sev::Error, "invalid ip address {}", ipaddr);
     throw std::runtime_error("setRemoteSocket() - invalid ip");
   }
-  assert(ret != 0);
 }
 
 int Socket::connectToRemote() {
@@ -117,9 +113,10 @@ int Socket::connectToRemote() {
   remoteSockAddr.sin_port = htons(RemotePort);
   int ret = inet_aton(RemoteIp, &remoteSockAddr.sin_addr);
   if (ret == 0) {
-    std::cout << "invalid ip address " << RemoteIp << std::endl;
+    LOG(IPC, Sev::Error, "invalid ip address {}", RemoteIp);
+    throw std::runtime_error("connectToRemote() - invalid ip");
   }
-  assert(ret != 0);
+
   ret = connect(SocketFileDescriptor, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
   if (ret < 0) {
     LOG(IPC, Sev::Error, "connect() to {}:{} failed", RemoteIp, RemotePort);
