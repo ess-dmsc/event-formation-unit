@@ -4,42 +4,45 @@
 
 # Two-thread implementation of Multi Grid demonstrator detector
 # for Mesytec Readout
-set(mgmesytec_common_src
-  MGMesytecBase.cpp
+set(multigrid_common_src
   ../common/Hists.cpp
   ../common/HistSerializer.cpp
   ../common/ReadoutSerializer.cpp
-  MgConfig.cpp
-  mgmesytec/EfuMaximum.cpp
-  mgmesytec/EfuCenterMass.cpp
-  mgmesytec/EfuPrioritized.cpp
-  mgmesytec/Vmmr16Parser.cpp
-  mgmesytec/Sis3153Parser.cpp
-  mgmesytec/Hit.cpp
+  mesytec/BuilderMesytec.cpp
+  mesytec/Vmmr16Parser.cpp
+  mesytec/Sis3153Parser.cpp
+  mesytec/Readout.cpp
+  mesytec/BuilderReadouts.cpp
+  reduction/Reduction.cpp
+  reduction/EventAnalysis.cpp
+  Config.cpp
   )
-set(mgmesytec_common_inc
-  MGMesytecBase.h
+set(multigrid_common_inc
   ../common/Hists.h
   ../common/HistSerializer.h
   ../common/ReadoutSerializer.h
-  MgConfig.h
-  mgmesytec/Efu.h
-  mgmesytec/EfuMaximum.h
-  mgmesytec/EfuCenterMass.h
-  mgmesytec/EfuPrioritized.h
-  mgmesytec/Vmmr16Parser.h
-  mgmesytec/Sis3153Parser.h
-  mgmesytec/Hit.h
-  mgmesytec/SequoiaGeometry.h
-  mgmesytec/BusGeometry.h
+  geometry/SequoiaGeometry.h
+  geometry/BusGeometry.h
+  mesytec/BuilderMesytec.h
+  mesytec/Vmmr16Parser.h
+  mesytec/Sis3153Parser.h
+  mesytec/Readout.h
+  mesytec/BuilderReadouts.h
+  reduction/Reduction.h
+  reduction/EventAnalysis.h
+  AbstractBuilder.h
+  Config.h
   )
 
 set(mgmesytec_INC
-  ${mgmesytec_common_inc}
+  MultigridBase.h
+  ${multigrid_common_inc}
 )
+
 set(mgmesytec_SRC
-  MGMesytec.cpp
-  ${mgmesytec_common_src}
+  Multigrid.cpp
+  MultigridBase.cpp
+  ${multigrid_common_src}
 )
 create_module(mgmesytec)
 
@@ -48,132 +51,40 @@ create_module(mgmesytec)
 # Tests
 #=============================================================================
 
-set(MGMesytecBaseTest_INC
-  ${mgmesytec_common_inc}
+get_filename_component(TEST_JSON_PATH "configs/ILL_mappings.json" DIRECTORY)
+set(TEST_JSON_PATH "${CMAKE_CURRENT_SOURCE_DIR}/${TEST_JSON_PATH}/")
+
+add_subdirectory(geometry)
+add_subdirectory(mesytec)
+add_subdirectory(generators)
+add_subdirectory(reduction)
+
+set(MGConfigTest_SRC
+  ${multigrid_common_src}
+  ConfigTest.cpp
+  )
+set(MGConfigTest_INC
+  ${multigrid_common_inc}
+  )
+create_test_executable(MGConfigTest)
+target_compile_definitions(MGConfigTest
+  PRIVATE TEST_JSON_PATH="${TEST_JSON_PATH}")
+
+set(MultigridBaseTest_INC
+  ${multigrid_common_inc}
+  MultigridBase.h
   ../../libs/include/Socket.h
   ../../libs/include/TSCTimer.h
   ../adc_readout/test/TestUDPServer.h
 )
-set(MGMesytecBaseTest_SRC
-  ${mgmesytec_common_src}
-  MGMesytecBaseTest.cpp
+set(MultigridBaseTest_SRC
+  ${multigrid_common_src}
+  MultigridBase.cpp
+  MultigridBaseTest.cpp
   ../../libs/source/Socket.cpp
   ../../libs/source/TSCTimer.cpp
   ../adc_readout/test/TestUDPServer.cpp
 )
-create_test_executable(MGMesytecBaseTest)
-
-set(MgConfigTest_SRC
-  MgConfig.cpp
-  MgConfigTest.cpp
-  ../../prototype2/common/DataSave.cpp
-)
-set(MgConfigTest_INC
-  MgConfig.h
-  ../../prototype2/common/DataSave.h
-)
-create_test_executable(MgConfigTest)
-
-set(MGHitTest_SRC
-  mgmesytec/HitTest.cpp
-  mgmesytec/Hit.cpp
-  )
-set(MGHitTest_INC
-  mgmesytec/Hit.h
-  )
-create_test_executable(MGHitTest SKIP_MEMGRIND)
-
-set(Sis3153ParserTest_SRC
-  mgmesytec/Sis3153ParserTest.cpp
-  mgmesytec/Sis3153Parser.cpp
-  )
-set(Sis3153ParserTest_INC
-  mgmesytec/Sis3153Parser.h
-  mgmesytec/TestData.h
-  ../common/Buffer.h
-  )
-create_test_executable(Sis3153ParserTest)
-
-set(Vmmr16ParserTest_SRC
-  mgmesytec/Vmmr16ParserTest.cpp
-  mgmesytec/Vmmr16Parser.cpp
-  mgmesytec/Sis3153Parser.cpp
-  mgmesytec/Hit.cpp
-  )
-set(Vmmr16ParserTest_INC
-  ../common/Buffer.h
-  mgmesytec/Sis3153Parser.h
-  mgmesytec/Vmmr16Parser.h
-  mgmesytec/Hit.h
-  mgmesytec/TestData.h
-  )
-create_test_executable(Vmmr16ParserTest)
-
-set(MG24GeometryTest_SRC
-  mgmesytec/MG24GeometryTest.cpp)
-set(MG24GeometryTest_INC
-  mgmesytec/MG24Geometry.h)
-create_test_executable(MG24GeometryTest)
-
-set(FilterTest_SRC
-  mgmesytec/FilterTest.cpp)
-set(FilterTest_INC
-  mgmesytec/Filter.h)
-create_test_executable(FilterTest)
-
-set(BusGeometryTest_SRC
-  mgmesytec/BusGeometryTest.cpp)
-set(BusGeometryTest_INC
-  mgmesytec/BusGeometry.h)
-create_test_executable(BusGeometryTest)
-
-set(SequoiaGeometryTest_SRC
-  mgmesytec/SequoiaGeometryTest.cpp)
-set(SequoiaGeometryTest_INC
-  mgmesytec/SequoiaGeometry.h)
-create_test_executable(SequoiaGeometryTest)
-
-set(EfuMaximumTest_SRC
-  mgmesytec/EfuMaximumTest.cpp
-  mgmesytec/EfuMaximum.cpp
-  mgmesytec/Hit.cpp
-  ../common/Hists.cpp
-  ../common/ReadoutSerializer.cpp)
-set(EfuMaximumTest_INC
-  mgmesytec/EfuMaximum.h
-  mgmesytec/Efu.h
-  mgmesytec/SequoiaGeometry.h
-  mgmesytec/Hit.h
-  ../common/Hists.h
-  ../common/ReadoutSerializer.h)
-create_test_executable(EfuMaximumTest)
-
-set(EfuCenterMassTest_SRC
-  mgmesytec/EfuCenterMassTest.cpp
-  mgmesytec/EfuCenterMass.cpp
-  mgmesytec/Hit.cpp
-  ../common/Hists.cpp
-  ../common/ReadoutSerializer.cpp)
-set(EfuCenterMassTest_INC
-  mgmesytec/EfuCenterMass.h
-  mgmesytec/Efu.h
-  mgmesytec/SequoiaGeometry.h
-  mgmesytec/Hit.h
-  ../common/Hists.h
-  ../common/ReadoutSerializer.h)
-create_test_executable(EfuCenterMassTest)
-
-set(EfuPrioritizedTest_SRC
-  mgmesytec/EfuPrioritizedTest.cpp
-  mgmesytec/EfuPrioritized.cpp
-  mgmesytec/Hit.cpp
-  ../common/Hists.cpp
-  ../common/ReadoutSerializer.cpp)
-set(EfuPrioritizedTest_INC
-  mgmesytec/EfuCenterMass.h
-  mgmesytec/Efu.h
-  mgmesytec/SequoiaGeometry.h
-  mgmesytec/Hit.h
-  ../common/Hists.h
-  ../common/ReadoutSerializer.h)
-create_test_executable(EfuPrioritizedTest)
+create_test_executable(MultigridBaseTest)
+target_compile_definitions(MultigridBaseTest
+  PRIVATE TEST_JSON_PATH="${TEST_JSON_PATH}")

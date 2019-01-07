@@ -31,6 +31,21 @@ void AbstractMatcher::insert(uint8_t plane, ClusterContainer &c) {
   unmatched_clusters_.splice(unmatched_clusters_.end(), c);
 }
 
+void AbstractMatcher::insert_pulses(HitContainer &hits) {
+  if (hits.empty())
+    return;
+  track_pulses_ = true;
+  for (auto& h : hits) {
+    h.plane = pulse_plane_;
+    Cluster c;
+    c.insert(h);
+    unmatched_clusters_.push_back(c);
+    latest_pulse_ = std::max(latest_pulse_, h.time);
+  }
+  hits.clear();
+}
+
+
 void AbstractMatcher::stash_event(Event &event) {
   matched_events.emplace_back(std::move(event));
   stats_event_count++;
@@ -38,7 +53,10 @@ void AbstractMatcher::stash_event(Event &event) {
 
 bool AbstractMatcher::ready_to_be_matched(const Cluster &cluster) const {
   XTRACE(CLUSTER, DEB, "latest_x %u, latest_y %u, cl time end %u", latest_x_, latest_y_, cluster.time_end());
+  // \todo print info on pulses
   auto latest = std::min(latest_x_, latest_y_);
+  if (track_pulses_)
+    latest = std::min(latest, latest_pulse_);
   return (latest > cluster.time_end()) &&
-      ((std::min(latest_x_, latest_y_) - cluster.time_end()) > latency_);
+      ((latest - cluster.time_end()) > latency_);
 }

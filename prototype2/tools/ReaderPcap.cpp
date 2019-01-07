@@ -62,8 +62,14 @@ int ReaderPcap::read(char *buffer, size_t bufferlen) {
 
   struct ip *ip = (struct ip *)&data[IPHDROFF];
 
-  assert(ip->ip_hl == 5); // IPv4 header length 20
-  assert(ip->ip_v == 4);
+  if(ip->ip_hl != 5) { // IPv4 header length 20
+    // \todo print something, or throw
+    return -1;
+  }
+  if(ip->ip_v != 4) {
+    // \todo print something, or throw
+    return -1;
+  }
 
   if (ip->ip_p != 0x11) { // Not UDP
     stats.ip_unkn++;

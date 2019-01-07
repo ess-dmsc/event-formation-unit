@@ -41,10 +41,8 @@ create_test_executable(MBGeometryTest)
 
 # Create excecutable for test of configuration
 set(MBConfigTest_INC
-  ../../../prototype2/common/DataSave.h
   Config.h)
 set(MBConfigTest_SRC
-  ../../../prototype2/common/DataSave.cpp
   Config.cpp
   ConfigTest.cpp)
 create_test_executable(MBConfigTest)
