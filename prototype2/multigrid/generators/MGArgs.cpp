@@ -7,9 +7,8 @@
 #include <getopt.h>
 #include <unistd.h>
 // GCOVR_EXCL_START
-MGArgs::MGArgs(int argc, char *argv[]) {
 
-  int c;
+MGArgs::MGArgs(int argc, char *argv[]) {
   while (1) {
     static struct option long_options[] = {
         {"filename", required_argument, 0, 'f'},
@@ -26,7 +25,7 @@ MGArgs::MGArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:d:f:i:p:s:t:u:hx", long_options,
+    int c = getopt_long(argc, argv, "a:d:f:i:p:s:t:u:hx", long_options,
                     &option_index);
 
     if (c == -1)

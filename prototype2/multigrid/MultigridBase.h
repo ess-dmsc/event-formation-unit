@@ -80,7 +80,7 @@ private:
 ///
 class MultigridBase : public Detector {
 public:
-  MultigridBase(BaseSettings const &settings, struct MultigridSettings &LocalMultigridSettings);
+  MultigridBase(BaseSettings const &settings, MultigridSettings const &LocalSettings);
   ~MultigridBase() = default;
   void mainThread();
 

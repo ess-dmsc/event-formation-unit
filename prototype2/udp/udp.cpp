@@ -20,7 +20,7 @@ const char *classname = "UDPRaw Detector";
 
 class UDPRaw : public Detector {
 public:
-  UDPRaw(BaseSettings settings);
+  explicit UDPRaw(BaseSettings settings);
 
   ~UDPRaw() { std::cout << "    UDPRaw destroyed" << std::endl; }
 

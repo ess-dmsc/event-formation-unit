@@ -21,9 +21,9 @@ public:
   std::priority_queue<Event*, std::vector<Event *, std::allocator<Event*> >,
                           Event::eventComparator> eventQueue;
 
-  Simulator() {};
+  Simulator() = default;
 
-  double now() {
+  double now() const {
     return time;
   }
 

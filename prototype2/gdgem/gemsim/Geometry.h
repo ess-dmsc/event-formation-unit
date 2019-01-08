@@ -42,11 +42,11 @@ public:
     return res;
   }
 
-  double getRandomX() {
+  double getRandomX() const {
       return (1.0 * width_ * (rand() % nx_) + 1)/nx_ - width_/2.0;
   }
 
-  double getRandomY() {
+  double getRandomY() const {
       return (1.0 * height_ * (rand() % ny_) + 1)/ny_ - height_/2.0;
   }
 

@@ -26,7 +26,7 @@ public:
       }
   };
 
-  Event(double event_time) : time(event_time) { }
+  explicit Event(double event_time) : time(event_time) { }
 
   virtual void execute(Simulator * sim) {
     printf("Generic event - time %f\n", time);

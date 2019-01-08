@@ -14,8 +14,6 @@ Loader::~Loader() {
   unloadPlugin();
 }
 
-Loader::Loader() {}
-
 void Loader::unloadPlugin() {
   ParserPopulator = nullptr;
   if (nullptr != handle) {
@@ -76,10 +74,7 @@ bool Loader::loadPlugin(const std::string lib) {
 }
 
 bool Loader::IsOk() {
-  if (nullptr == myFactory) {
-    return false;
-  }
-  return true;
+  return not (myFactory == nullptr);
 }
 
 std::shared_ptr<Detector> Loader::createDetector(BaseSettings settings) {

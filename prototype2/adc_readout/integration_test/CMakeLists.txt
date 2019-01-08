@@ -34,7 +34,3 @@ add_custom_command(
                 COMMAND ${CMAKE_COMMAND} -E copy
                 ${ADC_CONFIG_FILE}
                 "$<TARGET_FILE_DIR:efu>/")
-
-get_filename_component(DATA_TEMPLATE_PATH "DataPacketTemplate.dat" DIRECTORY)
-target_compile_definitions(AdcSimulator
-    PRIVATE DATA_TEMPLATE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${DATA_TEMPLATE_PATH}/")

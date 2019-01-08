@@ -36,8 +36,6 @@ int main(int argc, char *argv[]) {
 
   Gem::ReaderReadouts file(opts.filename);
 
-  int readsz;
-
   uint64_t tx_total = 0;
   uint64_t txp_total = 0;
   uint64_t tx = 0;
@@ -47,7 +45,7 @@ int main(int argc, char *argv[]) {
   Timer us_clock;
 
   for (;;) {
-    readsz = file.read(buffer);
+    int readsz = file.read(buffer);
     if (readsz > 0) {
       DataSource.send(buffer, readsz);
       tx += readsz;
