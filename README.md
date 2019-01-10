@@ -2,6 +2,8 @@
 
 [![DOI](https://zenodo.org/badge/80731668.svg)](https://zenodo.org/badge/latestdoi/80731668)
 
+This project implements processing of neutron detector event data into neturon events. Pipelines for processing of raw data from muligrid, muliblade, SONDE as well as a few other detectors have been implemented. Mostly implemented in C/C++.
+
 
 ## Directories
 The repository contains the following directories
