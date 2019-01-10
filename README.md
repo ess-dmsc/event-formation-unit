@@ -77,7 +77,7 @@ It is also possible to get a test coverage report if the required prerequisites 
 make coverage
 ```
 
-To run a mmeory leak test (using Valgrind), run:
+To run a memory leak test (using Valgrind), run:
 
 ```
 make valgrind
