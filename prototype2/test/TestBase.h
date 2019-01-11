@@ -34,3 +34,16 @@ protected:
   };
 #define MESSAGE Message
 };
+
+// //Minimal Code for adding a test
+// #include <test/TestBase.h>
+//
+// class MyNewTest : public TestBase {};
+//
+// TEST_F(MyNewTest, FirstTest) {
+// }
+//
+// int main(int argc, char **argv) {
+//   testing::InitGoogleTest(&argc, argv);
+//   return RUN_ALL_TESTS();
+// }
