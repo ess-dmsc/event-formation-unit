@@ -11,47 +11,19 @@ protected:
 
   Multiblade::EventBuilder builder;
 
-
-  // Create Hits for numberClusters clusters, for each cluster we
-  // generate 2 hits in x and 2 hits in y. All hits are separated
-  // in time and space: y-coords are offset from x-coords by 1
-  // just for the heck of it. Hits within a plane are separated by
-  // interCoordTimeGap and hits between planes are separated by
-  // interPlaneTimeGap. Finally clusters are separated by (timegap + 1)
-  void createHits(uint32_t numberClusters) {
-    uint64_t interCoordTimeGap = 5;
-    uint64_t interPlaneTimeGap = 70; // max for this test to pass
-
-    uint64_t t = 0;
-    for (uint32_t i = 0; i < numberClusters; i++) {
-      uint16_t coordStart = i % 32;
-      // x-plane Hits
-      builder.insert({t, coordStart    , hit_adc, plane_x});
-
-      t += interCoordTimeGap;
-      builder.insert({t, uint16_t(coordStart + 1), hit_adc, plane_x});
-
-      // y-plane Hits
-      t += interPlaneTimeGap;
-      builder.insert({t, uint16_t(coordStart + 1), hit_adc, plane_y});
-
-      t += interCoordTimeGap;
-      builder.insert({t, uint16_t(coordStart + 2), hit_adc, plane_y});
-
-      t+= timegap + 1;
-    }
-  }
+  #include "EventBuilderCommon.inc"
 };
 
 
 // Preparations for Google Benchmark tests
 TEST_F(EventBuilderTest, FirstTest) {
-  uint32_t N = 10;
-  createHits(N);
-  
+  uint32_t clusters = 10;
+  uint8_t hitsperplane = 6;
+  createHits(clusters, hitsperplane);
+
   builder.flush();
 
-  ASSERT_EQ(builder.matcher.matched_events.size(), N);
+  ASSERT_EQ(builder.matcher.matched_events.size(), clusters);
   for (auto & e : builder.matcher.matched_events) {
     ASSERT_TRUE(e.both_planes());
     auto x = e.c1.coord_center();
