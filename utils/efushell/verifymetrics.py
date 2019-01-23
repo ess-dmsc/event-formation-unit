@@ -31,7 +31,8 @@ if __name__ == '__main__':
             sys.exit(1)
         name = m[0]
         value = int(m[1])
-        if not metrics.compare_metric(name, value):
-            print("Validation failed for %s" % (name))
+        retval = metrics.return_metric(name)
+        if retval != value:
+            print("Validation failed for %s: expected %d, got %d" % (name, value, retval))
             sys.exit(1)
     print("OK")

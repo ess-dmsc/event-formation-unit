@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
       us_clock.now();
       report_timer.now();
     }
-    usleep(opts.throttle * 1000);
+    usleep(opts.throttle * 100);
   }
 
   std::cout << "Sent " << tx_total + tx << " bytes"
