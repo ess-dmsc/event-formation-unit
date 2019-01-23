@@ -1,6 +1,23 @@
 // THIS FUNCTION IS USED UNMODIFIED IN BOTH UNIT TEST
 // AND BENCHMARK TEST - DO NOT MODIFY OR MOVE
 
+
+#ifdef OVERLOAD
+static size_t news {0};
+static size_t deletes {0};
+
+void * operator new(size_t size) _THROW_BAD_ALLOC {
+  news++;
+  return malloc(size);
+}
+
+void operator delete(void * ptr) _NOEXCEPT {
+  deletes++;
+  free(ptr);
+}
+#endif
+
+
 // Create Hits for numberClusters clusters, for each cluster we
 // generate hitsPerPlane hits in x and hitsPerPlane hits in y. All hits are separated
 // in time and space: y-coords are offset from x-coords by 1

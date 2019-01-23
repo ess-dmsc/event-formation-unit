@@ -5,17 +5,22 @@
 #include <string>
 #include <unistd.h>
 
+//#define OVERLOAD
+
 Multiblade::EventBuilder builder;
 
-
 #include "EventBuilderCommon.inc"
-
 
 static void EventGenBM(benchmark::State &state) {
   uint32_t items = 0;
   double xsum = 0.0;
   double ysum = 0.0;
   uint32_t N = state.range(0) ;
+
+#ifdef OVERLOAD
+  news=0;
+  deletes=0;
+#endif
 
   for (auto _ : state) {
     createHits(N, 2);
@@ -32,6 +37,10 @@ static void EventGenBM(benchmark::State &state) {
   }
   state.SetItemsProcessed(items);
   printf("xsum %f, ysum %f\n", xsum, ysum);
+#ifdef OVERLOAD
+  printf("total allocs:   %zu\n", news);
+  printf("total dellocs: %zu\n", deletes);
+#endif
 }
 
 BENCHMARK(EventGenBM)->RangeMultiplier(2)->Range(64, 2<<12);
