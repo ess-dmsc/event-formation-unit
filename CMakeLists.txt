@@ -13,8 +13,6 @@ list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR}/modules)
 # Conan
 #=============================================================================
 
-if(CMAKE_BUILD_TYPE )
-
 SET(CONAN_PROFILE "default" CACHE STRING "Name of conan profile to use, uses default by default")
 SET(CONAN "AUTO" CACHE STRING "conan options AUTO (conan must be in path), MANUAL (expects conanbuildinfo.cmake in build directory) or DISABLE")
 if(${CONAN} MATCHES "AUTO")
