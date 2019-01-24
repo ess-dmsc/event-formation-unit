@@ -134,8 +134,8 @@ def docker_tests(image_key) {
     sh """docker exec ${container_name(image_key)} ${custom_sh} -c \"
         cd ${project}/build
         . ./activate_run.sh
-        make runtest
-        make runefu
+        LD_LIBRARY_PATH=\\\$LD_LIBRARY_PATH:\\\$(pwd)/lib make runtest
+        LD_LIBRARY_PATH=\\\$LD_LIBRARY_PATH:\\\$(pwd)/lib make runefu
     \""""
 }
 
