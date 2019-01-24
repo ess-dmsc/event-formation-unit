@@ -40,6 +40,7 @@ MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings con
   // clang-format off
   Stats.create("rx_packets", mystats.rx_packets);
   Stats.create("rx_bytes", mystats.rx_bytes);
+  Stats.create("readouts_total", mystats.readouts_total);
   Stats.create("rx_discarded_bytes", mystats.parser_discarded_bytes);
   Stats.create("parser_triggers", mystats.parser_triggers);
   Stats.create("builder_glitch_rejects", mystats.builder_glitch_rejects);
@@ -177,6 +178,7 @@ void MultigridBase::mainThread() {
 
       mg_config.builder->parse(Buffer<uint8_t>(buffer, static_cast<size_t>(ReadSize)));
 
+      mystats.readouts_total = mg_config.builder->stats_readouts_total;
       mystats.parser_discarded_bytes = mg_config.builder->stats_discarded_bytes;
       mystats.parser_triggers = mg_config.builder->stats_trigger_count;
       mystats.builder_glitch_rejects = mg_config.builder->stats_bus_glitch_rejects;

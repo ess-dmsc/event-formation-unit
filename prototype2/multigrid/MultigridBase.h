@@ -96,6 +96,7 @@ protected:
     // Input Counters
     int64_t rx_packets{0};
     int64_t rx_bytes{0};
+    int64_t readouts_total{0};
     int64_t parser_discarded_bytes{0};
     int64_t parser_triggers{0};
     int64_t builder_glitch_rejects{0};
