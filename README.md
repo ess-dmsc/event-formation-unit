@@ -1,9 +1,9 @@
 # Event Formation Unit
 [![License (2-Clause BSD)](https://img.shields.io/badge/license-BSD%202--Clause-blue.svg)](https://github.com/ess-dmsc/event-formation-unit/blob/master/LICENSE) [![DOI](https://zenodo.org/badge/80731668.svg)](https://zenodo.org/badge/latestdoi/80731668) [![Build Status](https://jenkins.esss.dk/dm/job/ess-dmsc/job/event-formation-unit/job/master/badge/icon)](https://jenkins.esss.dk/dm/job/ess-dmsc/job/event-formation-unit/job/master/)
 
-This project implements processing of neutron detector event data into neturon events. Pipelines for processing of raw data from muligrid, muliblade, SONDE as well as a few other detectors have been implemented. Mostly implemented in C/C++.
+This project implements processing of neutron detector event data into neturon events. Pipelines for processing of raw data from Gd-GEM, Muli-Grid, Multi-Blade, SoNDe as well as a few other detectors have been implemented. Mostly implemented in C/C++.
 
-A description of the contents of each directory in the root of the repository can be found in [doc/DIRECTORIES.md](doc/DIRECTORIES.md).
+A description of the contents of each directory in the root of the repository can be found in [documentation/DIRECTORIES.md](documentation/DIRECTORIES.md).
 
 ## Getting started
 
@@ -11,7 +11,7 @@ The [essdaq repository](https://github.com/ess-dmsc/essdaq) has scripts for auto
 
 ### Prerequisites
 
-To build and run this software the following dependencies are required. 
+To build and run this software the following dependencies are required.
 
 * [**Conan**](https://conan.io) The conan script has to be available in the current ``$PATH``.
 * [**CMake**](https://cmake.org) At least CMake version 2.8.12 is required. Some packages that requires more recent versions of CMake will download this as a dependency.
@@ -44,8 +44,6 @@ mkdir build
 
 cd build
 
-conan install .. --build=missing
-
 cmake ..
 
 make
@@ -64,7 +62,6 @@ conan install --build=outdated .. --settings compiler.libcxx=libstdc++11
 To run the unit tests for this project, run the following commands:
 
 ```
-make unit_tests
 make runtest
 ```
 
@@ -89,7 +86,7 @@ En example of the commands required to run an event formation pipeline (in this 
 ```
 make efu mbcaen
 cd bin
-./efu -d ../modules/mbcaen
+./efu -d ../modules/mbcaen -f configfile --nohwcheck
 ```
 
 Note you will need to provide a config file in the case of the *mbcaen* module as well.

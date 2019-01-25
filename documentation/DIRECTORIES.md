@@ -3,26 +3,14 @@ The repository contains the following directories
 
 Directory             | Function
 -------------         | -------------
-centos                | scripts to configure link bonding on CentOS
-cmake_modules         | cmake modules from third parties
-dataformats **        | sample detector data and data parsers (and unit tests)
+cmake                 | cmake modules including third parties
+documentation         | detailed documentation
 jenkins               | Continuous Integration scripts
 libs *                | utility classes and unit tests
-monitors              | schemas and python scripts for testing Kafka based monitors
-multicore_iperf_tests | testing tcp and udp performance across local cores (obsolete)
 prototype2 *          | the detector event processing pipeline (and unit tests)
-udp *                 | udp receive tests (bsd socket, probably obsolete)
-utils                 | misc helper scripts and programs
-
+utils                 | misc helper scripts and programs, notable efushell.py and efustats.py
 
 # Details
-
-## dataformats
-Contains a heterogenous bunch of tools for various purposes. For example:
-* lua script plugins for Wireshark for vmm and sonde data formats
-* python scripts for visualising processed multigrid data
-* python scripts for testing implementation of logical geometry for multigrid and sonde
-* C++ code for batch processing of multigrid data
 
 ## libs
 libs are built automatically by prototype2.
@@ -35,10 +23,10 @@ Library functions that can be used by other projects such as
 
 ## prototype2
 Contains detector pipeline plugins for a number of prototype detectors:
-* Gd-GEM for the NMX instrument - gdgem.so
-* Multiblade - mbcaen.so
-* multigrid - mgcncs.so and mgcncs2.so
-* SoNDe - sone.so
+* Gd-GEM - NMX instrument
+* Multi-Blade - Freia and Estia instruments
+* Multi-Grid - CSPEC, TREX, VOR instruments
+* SoNDe - 
 
 Also contains data-generators, some reading data from file other from Wireshark captures,
 some generating constant data.
@@ -46,8 +34,3 @@ some generating constant data.
 * mgcncsgenfile - reads from (binary) file and sends data to EFU
 * mgcncsgenjson - reads from file runs specified in json file
 * gennmfpcap - reads data from Wireshark and sends it to EFU (not GEM specific)
-
-## udp
-udp is built automatically by prototype2.
-
-Only used occasionally for basic udp rx and tx testing.
