@@ -5,11 +5,12 @@ import argparse, sys
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", metavar='ipaddr', help = "server ip address (default 127.0.0.1)", type = str, default = "127.0.0.1")
-    parser.add_argument("-p", metavar='port', help = "server tcp port (default 8888)", type = int, default = 8888)
+    parser.add_argument("-i", metavar='ipaddr', help = "server ip address (default 127.0.0.1)",
+                        type = str, default = "127.0.0.1")
+    parser.add_argument("-p", metavar='port', help = "server tcp port (default 8888)",
+                        type = int, default = 8888)
     parser.add_argument('metrics', metavar='metrics', nargs='+',
                         help='grafana metrics to be verified, examples: efu.rx_packets:1234 - strict match. efu.rx_packets:+1234 at least)')
-
     args = parser.parse_args()
 
     metrics = Metrics(args.i, args.p)

@@ -31,9 +31,3 @@ class Metrics:
             return self.metrics[name]
         except:
             return -1
-
-    def compare_metric(self, name, value):
-        try:
-            return self.metrics[name] == value
-        except:
-            return False
