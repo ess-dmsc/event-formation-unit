@@ -9,7 +9,7 @@ ARG https_proxy
 ARG local_conan_server
 
 RUN apt-get update -y && \
-    apt-get --no-install-recommends -y install build-essential git python-pip cmake tzdata vim  && \
+    apt-get --no-install-recommends -y install build-essential git python-pip cmake tzdata vim m4 && \
     apt-get -y autoremove && \
     apt-get clean all && \
     rm -rf /var/lib/apt/lists/*
@@ -36,3 +36,6 @@ RUN cd efu && conan install --build=outdated ../efu_src/conanfile.txt
 RUN cd efu && \
     cmake -DCONAN="MANUAL" ../efu_src && \
     make -j4
+
+COPY docker_launch.sh /
+CMD ["./docker_launch.sh"]
