@@ -30,7 +30,11 @@ RUN if [ ! -z "$local_conan_server" ]; then conan remote add --insert 0 ess-dmsc
 
 RUN mkdir efu
 
-COPY . efu_src
+COPY cmake efu_src/cmake
+COPY libs efu_src/libs
+COPY prototype2 efu_src/prototype2
+COPY utils efu_src/utils
+COPY CMakeLists.txt LICENSE README.md Utilities.cmake conanfile.txt efu_src/
 RUN cd efu && conan install --build=outdated ../efu_src/conanfile.txt
 
 RUN cd efu && \
