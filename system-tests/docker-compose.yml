@@ -16,6 +16,9 @@ services:
       KAFKA_BROKER_ID: 0
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.4 # Have to specify ip address, udpgen_pcap doesn't like using hostname to publish to
 
   zookeeper:
     image: zookeeper:3.4
@@ -27,8 +30,14 @@ services:
     environment:
       EXECUTABLE: efu
       OPT_ARGS: -d /efu/modules/mbcaen.so -f /MB18Freia.json --nohwcheck
+    hostname: efu
     volumes:
       - ./data/MB18Freia.json:/MB18Freia.json
+    ports:
+      - "8889:8888" # So can query efu stats on localhost:8889
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.5
 
   efu-udpgen:
     image: event-formation-unit:latest
@@ -36,6 +45,17 @@ services:
       - efu
     environment:
       EXECUTABLE: udpgen_pcap
-      OPT_ARGS: -f /ess2_ess_mask.pcap -t 200
+      OPT_ARGS: --filename /ess2_ess_mask.pcap --throttle 200 --ipaddr 10.5.0.5 --port 9000
     volumes:
       - ./data/ess2_ess_mask_truncated.pcap:/ess2_ess_mask.pcap
+    networks:
+      vpcbr:
+        ipv4_address: 10.5.0.6
+      
+networks:
+  vpcbr:
+    driver: bridge
+    ipam:
+     config:
+       - subnet: 10.5.0.0/16
+         gateway: 10.5.0.1
