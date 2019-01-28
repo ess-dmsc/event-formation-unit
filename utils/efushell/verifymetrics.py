@@ -3,7 +3,7 @@
 from EFUMetrics import Metrics
 import argparse, sys
 
-def verify_metrics(ip_address, port, test_metrics):
+def verify_metric(ip_address, port, test_metric):
     metrics = Metrics(ip_address, port)
     metrics.get_all_metrics(metrics.get_number_of_stats())
 
@@ -21,8 +21,7 @@ def verify_metrics(ip_address, port, test_metrics):
         retval = metrics.return_metric(name)
         res, op = f(retval, value)
 
-        if res == False:
-            yield name, op, value, retval
+        return res, name, op, value, retval
 
 
 if __name__ == '__main__':
@@ -35,7 +34,9 @@ if __name__ == '__main__':
                         help='grafana metrics to be verified, examples: efu.rx_packets:1234 - strict match. efu.rx_packets:+1234 at least)')
     args = parser.parse_args()
 
-    for name, op, value, retval in verify_metrics(args.i, args.p, args.metrics):
-        print("Validation failed for %s: expected %s %d, got %d" % (name, op, value, retval))
-        sys.exit(1)
+    for test_metric in args.metrics:
+        res, name, op, value, retval = verify_metric(args.i, args.p, test_metric)
+        if not res:
+            print("Validation failed for %s: expected %s %d, got %d" % (name, op, value, retval))
+            sys.exit(1)
     print("OK")
