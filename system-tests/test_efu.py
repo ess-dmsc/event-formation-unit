@@ -6,5 +6,4 @@ from verifymetrics import verify_metric
 
 def test_efu_received_all_sent_udp_packets(docker_compose):
     res, name, op, value, retval = verify_metric("localhost", "8889", "efu.mbcaen.receive.packets:2000")
-    print("Tested metric {}: expected {} {}, got {}".format(name, op, value, retval), flush=True)
-    assert res
+    assert res, "Tested metric {}: expected {} {}, got {}".format(name, op, value, retval)
