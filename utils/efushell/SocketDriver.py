@@ -26,12 +26,12 @@ class SimpleSocket:
 
     def SendCommand(self, cmd):
         self.access_semaphor.acquire()
-        self.sock.send(cmd + '\n')
+        self.sock.send('{}\n'.format(cmd).encode('utf-8'))
         self.access_semaphor.release()
 
     def Ask(self, cmd):
         self.access_semaphor.acquire()
-        self.sock.send(cmd + '\n')
-        reply = self.sock.recv(2048).strip('\n')
+        self.sock.send('{}\n'.format(cmd).encode('utf-8'))
+        reply = self.sock.recv(2048).strip(b'\n')
         self.access_semaphor.release()
         return reply
