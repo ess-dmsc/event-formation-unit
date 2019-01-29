@@ -79,7 +79,7 @@ To run a memory leak test (using Valgrind), run:
 make valgrind
 ```
 
-### [Running System tests (link)](https://github.com/ess-dmsc/event-formation-unit/blob/master/system-tests/README.md)
+### [Running System tests (link)](system-tests/README.md)
 
 ## Running the event formation application
 
