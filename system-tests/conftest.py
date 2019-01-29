@@ -7,7 +7,7 @@ import docker
 
 def wait_until_kafka_ready(docker_cmd, docker_options):
     print('Waiting for Kafka broker to be ready for system tests...')
-    conf = {'bootstrap.servers': 'localhost:9092',
+    conf = {'bootstrap.servers': 'localhost:9094',
             'api.version.request': True}
     producer = Producer(**conf)
     kafka_ready = False
