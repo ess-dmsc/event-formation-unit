@@ -50,7 +50,7 @@ services:
       - efu
     environment:
       EXECUTABLE: udpgen_pcap
-      OPT_ARGS: --filename /ess2_ess_mask.pcap --throttle 200 --ipaddr 10.5.0.5 --port 9000
+      OPT_ARGS: --filename /ess2_ess_mask.pcap --throttle 2000 --ipaddr 10.5.0.5 --port 9000
     volumes:
       - ./data/ess2_ess_mask_truncated.pcap:/ess2_ess_mask.pcap
     networks:
