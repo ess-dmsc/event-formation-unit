@@ -34,6 +34,7 @@ void Producer::setConfig(std::string name, std::string value) {
 void Producer::event_cb(RdKafka::Event &event) {
   switch (event.type()) {
      case RdKafka::Event::EVENT_ERROR:
+       LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR: {}", RdKafka::err2str(event.err()).c_str());
        XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR: %s\n", RdKafka::err2str(event.err()).c_str());
        stats.ev_errors++;
      break;
@@ -103,7 +104,7 @@ int Producer::produce(void *buffer, size_t bytes) {
     return RdKafka::ERR_UNKNOWN;
   }
   int64_t timestamp = time(NULL)*1000;
-  RdKafka::ErrorCode resp = producer->produce(topicString, -1, RdKafka::Producer::RK_MSG_COPY , 
+  RdKafka::ErrorCode resp = producer->produce(topicString, -1, RdKafka::Producer::RK_MSG_COPY ,
              buffer, bytes, NULL, 0, timestamp, NULL);
 
   producer->poll(0);
