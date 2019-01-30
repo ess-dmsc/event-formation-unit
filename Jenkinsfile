@@ -317,7 +317,6 @@ def get_system_tests_pipeline() {
                     }  // stage
                     stage("System tests: Archive") {
                         junit "system-tests/SystemTestsOutput.xml"
-                        archiveArtifacts "system-tests/logs/*.log"
                     }
                 }
             } // dir
