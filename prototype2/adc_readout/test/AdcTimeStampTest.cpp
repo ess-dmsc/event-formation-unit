@@ -9,6 +9,8 @@
 #include "../AdcTimeStamp.h"
 #include <cmath>
 #include <gtest/gtest.h>
+#include <ctime>
+#include <random>
 
 TEST(TimeStampCalcTest, CalcSeconds) {
   std::uint32_t Seconds{1};
@@ -90,4 +92,69 @@ TEST(TimeStampCalcTest, Sample6) {
   RawTimeStamp TS2{Sec - 1, AdcTimerCounterMax + SecFrac + SampleNr};
   EXPECT_EQ(TS1.GetOffsetTimeStamp(SampleNr).GetTimeStampNS(),
             TS2.GetTimeStampNS());
+}
+
+TEST(TimeStampCalcTest, EpochTime1) {
+  RawTimeStamp TS{5ull*1000000000ull};
+  EXPECT_EQ(TS.Seconds, 5u);
+  EXPECT_EQ(TS.SecondsFrac, 0u);
+}
+
+TEST(TimeStampCalcTest, EpochTime2) {
+  RawTimeStamp TS{5ull*1000000000ull + 5ull};
+  EXPECT_EQ(TS.Seconds, 5u);
+  EXPECT_EQ(TS.SecondsFrac, 0u);
+}
+
+TEST(TimeStampCalcTest, EpochTime3) {
+  RawTimeStamp TS{4ull*1000000000ull + 999999999ull};
+  EXPECT_EQ(TS.Seconds, 5u);
+  EXPECT_EQ(TS.SecondsFrac, 0u);
+}
+
+TEST(TimeStampCalcTest, EpochTime4) {
+  time_t UnixEpoch{0};
+  time(&UnixEpoch);
+  RawTimeStamp TS{UnixEpoch*1000000000ull};
+  EXPECT_EQ(TS.Seconds, UnixEpoch);
+  EXPECT_EQ(TS.SecondsFrac, 0u);
+}
+
+TEST(TimeStampCalcTest, EpochTime5) {
+  time_t UnixEpoch{0};
+  time(&UnixEpoch);
+  RawTimeStamp TS{UnixEpoch*1000000000ull + 5ull};
+  EXPECT_EQ(TS.Seconds, UnixEpoch);
+  EXPECT_EQ(TS.SecondsFrac, 0u);
+}
+
+TEST(TimeStampCalcTest, EpochTime6) {
+  time_t UnixEpoch{0};
+  time(&UnixEpoch);
+  RawTimeStamp TS{(UnixEpoch - 1)*1000000000ull + 999999999ull};
+  EXPECT_EQ(TS.Seconds, UnixEpoch);
+  EXPECT_EQ(TS.SecondsFrac, 0u);
+}
+
+TEST(TimeStampCalcTest, EpochTime7) {
+  time_t UnixEpoch{0};
+  time(&UnixEpoch);
+  RawTimeStamp TS{UnixEpoch*1000000000ull + 25ull};
+  EXPECT_EQ(TS.Seconds, UnixEpoch);
+  EXPECT_EQ(TS.SecondsFrac, 1u);
+}
+
+TEST(TimeStampCalcTest, EpochTime8) {
+  time_t UnixEpoch{0};
+  time(&UnixEpoch);
+
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(0, 1000000000);
+
+  for (int u = 0; u < 10000; ++u) {
+    std::uint64_t const TestTime = UnixEpoch * 1000000000ull + dis(gen);
+    RawTimeStamp TS{TestTime};
+    ASSERT_LT(std::abs(static_cast<int64_t>(TestTime) - static_cast<int64_t>(TS.GetTimeStampNS())), 12);
+  }
 }

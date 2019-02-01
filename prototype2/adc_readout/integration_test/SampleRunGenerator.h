@@ -22,7 +22,7 @@ public:
                                           RawTimeStamp const Time);
 
 private:
-  std::unique_ptr<std::uint8_t> Buffer;
+  std::unique_ptr<std::uint8_t[]> Buffer;
   DataHeader *HeaderPtr;
   std::uint16_t *SamplePtr;
   std::size_t NrOFSamples{50};

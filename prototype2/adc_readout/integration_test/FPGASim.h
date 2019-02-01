@@ -30,8 +30,11 @@ public:
           asio::io_service &Service);
   ~FPGASim() = default;
 
-  void addSamplingRun(void *DataPtr, size_t Bytes);
+  void addSamplingRun(void const * const DataPtr, size_t Bytes);
   int getNrOfRuns() const { return SamplingRuns; };
+  int getNrOfPackets() const {return PacketCount;};
+  int getNrOfSentPackets() const {return SentPackets;};
+  void packetIsSent() {++SentPackets;};
 
 private:
   int SamplingRuns{0};
@@ -64,7 +67,7 @@ private:
   asio::system_timer HeartbeatTimeout;
   asio::system_timer DataPacketTimeout;
   std::uint16_t PacketCount{0};
-
+  std::atomic_int SentPackets{0};
   std::unique_ptr<DataPacket> TransmitBuffer;
   std::unique_ptr<DataPacket> StandbyBuffer;
 
