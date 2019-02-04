@@ -8,6 +8,7 @@
 WaveformData::WaveformData(hdf5::node::Group const &Group) :
 CueIndex(Group, "cue_index"),
  CueTimestampZero(Group, "cue_timestamp_zero"), Waveform(Group, "raw_value") {
+   EndWaveformPos = CueIndex[1];
 }
 
 std::uint64_t WaveformData::getTimestamp() {
@@ -24,9 +25,9 @@ void WaveformData::nextWaveform() {
   }
   ++EventCounter;
   StartWaveformPos = EndWaveformPos;
-  EndWaveformPos = CueIndex[EventCounter];
+  EndWaveformPos = CueIndex[EventCounter + 1];
 }
 
 bool WaveformData::outOfData() const {
-  return CueIndex.size() <= static_cast<size_t>(EventCounter);
+  return CueIndex.size() <= static_cast<size_t>(EventCounter + 1);
 }

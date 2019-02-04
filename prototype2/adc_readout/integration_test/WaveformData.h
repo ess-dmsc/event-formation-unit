@@ -57,6 +57,7 @@ public:
     Selector.block(0, ChunkSize);
     DataBuffer.resize(ChunkSize + 10);
   }
+  
   T operator[](size_t Index) {
     if (Index >= UpperElement) {
       Selector.offset(0, UpperElement);
