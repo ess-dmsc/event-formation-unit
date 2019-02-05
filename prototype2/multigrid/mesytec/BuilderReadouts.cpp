@@ -48,6 +48,7 @@ void BuilderReadouts::parse(Buffer<uint8_t> buffer) {
 }
 
 void BuilderReadouts::build(const std::vector<Readout>& readouts) {
+  stats_readouts_total += readouts.size();
   for (const auto &r : readouts) {
     if (r.external_trigger) {
       hit_.plane = external_trigger_plane;

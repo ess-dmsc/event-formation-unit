@@ -1,5 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <CLI/CLI.hpp>
 #include <cassert>
 #include <cinttypes>
 #include <cstdio>
@@ -9,17 +10,39 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 
-#include <gdgem/generators/NMXArgs.h>
 #include <gdgem/generators/ReaderHits.h>
 #include <libs/include/Socket.h>
 #include <unistd.h>
 // GCOVR_EXCL_START
 static constexpr int TscMHz {2900};
 
+struct {
+  std::string FileName{""};
+  std::string IpAddress{"127.0.0.1"};
+  uint16_t UDPPort{9000};
+  uint64_t NumberOfPackets{0}; // 0 == all packets
+  uint64_t SpeedThrottle{0}; // 0 is fastest higher is slower
+  unsigned int UpdateIntervalSecs{1};
+  int UDPTxBufferSize{1000000};
+} Settings;
+
+CLI::App app{"Hits to UDP data generator for Gd-GEM"};
+
+
 int main(int argc, char *argv[]) {
-  NMXArgs opts(argc, argv);
-  if (opts.filename.empty())
-    return 1;
+
+    app.add_option("-f,--file", Settings.FileName, "Multiblade H5 file with raw readouts");
+    app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
+    app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
+    app.add_option("-a, --packets", Settings.NumberOfPackets, "Number of packets to send");
+    app.add_option("-t, --throttle", Settings.SpeedThrottle, "Speed throttle (0 is fastest, larger is slower)");
+    CLI11_PARSE(app, argc, argv);
+
+    if (Settings.FileName.empty()) {
+      printf("No input file specified, exiting.\n");
+      return 1;
+    }
+
 
   hdf5::error::Singleton::instance().auto_print(false);
   //  hdf5::error::auto_print(false);
@@ -28,49 +51,50 @@ int main(int argc, char *argv[]) {
 
   const int B1M = 1000000;
   Socket::Endpoint local("0.0.0.0", 0);
-  Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
+  Socket::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
 
   UDPTransmitter DataSource(local, remote);
-  DataSource.setBufferSizes(opts.sndbuf, 0);
+  DataSource.setBufferSizes(Settings.UDPTxBufferSize, 0);
   DataSource.printBufferSizes();
 
-  ReaderHits file(opts.filename);
+  ReaderHits file(Settings.FileName);
 
-  uint64_t tx_total = 0;
-  uint64_t txp_total = 0;
-  uint64_t tx = 0;
-  uint64_t txp = 0;
+  uint64_t Bytes{0};
+  uint64_t TotBytes{0};
+  uint64_t Packets{0};
+  uint64_t TotPackets{0};
 
-  TSCTimer report_timer;
-  Timer us_clock;
+  TSCTimer ReportTimer;
+  Timer USClock;
 
+  size_t SentPackets{0}; // counter to determine when to break
   for (;;) {
     int readsz = file.read(buffer);
-    if (readsz > 0) {
+    if (readsz > 0 && (Settings.NumberOfPackets == 0 || SentPackets < Settings.NumberOfPackets)) {
       DataSource.send(buffer, readsz);
-      tx += readsz;
-      txp++;
+      Bytes += readsz;
+      Packets++;
     } else {
-      std::cout << "Sent " << tx_total + tx << " bytes"
-                << " in " << txp_total + txp << " packets." << std::endl;
+      std::cout << "Sent " << TotBytes + Bytes << " bytes"
+                << " in " << TotPackets + Packets << " packets." << std::endl;
       std::cout << "done" << std::endl;
       exit(0);
     }
 
-    if (unlikely((report_timer.timetsc() / TscMHz) >= opts.updint * 1000000)) {
-      auto usecs = us_clock.timeus();
-      tx_total += tx;
-      txp_total += txp;
+    if (unlikely((ReportTimer.timetsc() / TscMHz) >= Settings.UpdateIntervalSecs * 1000000)) {
+      auto usecs = USClock.timeus();
+      TotBytes += Bytes;
+      TotPackets += Packets;
       printf("Tx rate: %8.2f Mbps (%.2f pps), tx %5" PRIu64
              " MB (total: %7" PRIu64 " MB) %" PRIu64 " usecs\n",
-             tx * 8.0 / usecs, txp * 1000000.0 / usecs, tx / B1M,
-             tx_total / B1M, usecs);
-      tx = 0;
-      txp = 0;
-      us_clock.now();
-      report_timer.now();
+             Bytes * 8.0 / usecs, Packets * 1000000.0 / usecs, Bytes / B1M,
+             TotBytes / B1M, usecs);
+      Bytes = 0;
+      Packets = 0;
+      USClock.now();
+      ReportTimer.now();
     }
-    usleep(opts.throttle * 1000);
+    usleep(Settings.SpeedThrottle * 1000);
   }
 
   return 0;

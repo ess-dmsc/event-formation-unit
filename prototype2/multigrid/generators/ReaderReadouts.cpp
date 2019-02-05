@@ -9,6 +9,9 @@ namespace Multigrid {
 ReaderReadouts::ReaderReadouts(std::string filename) {
   file = ReadoutFile::open(filename);
   total_ = file->count();
+  size_t size = ReadoutFile::ChunkSize;
+  printf("Chunksize: %zu entries\n", size);
+  printf("Readout size: %zu bytes\n", sizeof(Readout));
   current_ = 0;
 }
 
