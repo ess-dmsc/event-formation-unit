@@ -21,7 +21,7 @@ struct {
   std::string IpAddress{"127.0.0.1"};
   uint16_t UDPPort{9000};
   uint64_t NumberOfPackets{0}; // 0 == all packets
-  uint64_t SpeedThrottle{0}; // 0 is fastes higher is slower
+  uint64_t SpeedThrottle{0}; // 0 is fastest higher is slower
   unsigned int UpdateIntervalSecs{1};
   int UDPTxBufferSize{1000000};
 } Settings;
