@@ -19,6 +19,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include <fstream>
 
 /// \brief Kafka producer class intended only for delay line data production.
 /// Implements some glue logic and serialisation.
@@ -47,6 +48,12 @@ public:
   std::int64_t &getNrOfEvents() { return EventCounter; }
 
 protected:
+  std::string EventTimeFileName{"event_time.bin"};
+  std::string EventXPosFileName{"event_x_pos.bin"};
+  std::string EventYPosFileName{"event_y_pos.bin"};
+  std::fstream TimeStampFile{EventTimeFileName, std::ios::binary | std::ios::out};
+  std::fstream XPosFile{EventXPosFileName, std::ios::binary | std::ios::out};
+  std::fstream YPosFile{EventYPosFileName, std::ios::binary | std::ios::out};
   /// \brief Serialize the event produced by one or more pulses.
   /// \param[in] Event Holds postion, timestamp and amplitude of event. For some
   /// types of event, the amplitude is meaningless.

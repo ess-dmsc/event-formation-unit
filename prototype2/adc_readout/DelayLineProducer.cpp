@@ -53,6 +53,9 @@ void DelayLineProducer::pulseProcessingFunction() {
 }
 
 void DelayLineProducer::serializeAndSendEvent(const DelayLineEvent &Event) {
+  TimeStampFile.write((char*)&Event.Timestamp, sizeof(Event.Timestamp));
+  XPosFile.write((char*)&Event.X, sizeof(Event.X));
+  YPosFile.write((char*)&Event.Y, sizeof(Event.Y));
   flatbuffers::FlatBufferBuilder Builder;
   auto SourceName = Builder.CreateString("delay_line_detector");
   auto ToF_Vector = Builder.CreateVector(
