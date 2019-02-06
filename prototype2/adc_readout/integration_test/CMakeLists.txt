@@ -37,7 +37,7 @@ add_custom_command(
 
 set(AdcFileStreamer_SRC
         AdcFileStreamer.cpp
-        WaveformClass.cpp
+        WaveformData.cpp
         DataModulariser.cpp
         PoissonDelay.cpp
         FPGASim.cpp
@@ -46,7 +46,7 @@ set(AdcFileStreamer_SRC
         SamplingTimer.cpp)
 
 set(AdcFileStreamer_INC
-        WaveformClass.h
+        WaveformData.h
         DataModulariser.h
         PoissonDelay.h
         FPGASim.h
