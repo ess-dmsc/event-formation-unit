@@ -17,7 +17,7 @@ public:
   ReadoutEvent(int fec, int asic, int channel, int adc, double t)
      : Event(t), fec_(fec), asic_(asic), channel_(channel), adc_(adc)  { }
 
-  void execute(Simulator * sim) {
+  void execute(Simulator * sim) override {
     printf("%.10f readout fec %2d, asic: %1d, channel %2d, adc %5d\n",
         time, fec_, asic_, channel_, adc_);
   }

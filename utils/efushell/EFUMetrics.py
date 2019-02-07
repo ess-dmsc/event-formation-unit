@@ -26,8 +26,8 @@ class Metrics:
             value = int(res[2])
             self.metrics[name] = value
 
-    def compare_metric(self, name, value):
+    def return_metric(self, name):
         try:
-            return self.metrics[name] == value
+            return self.metrics[name]
         except:
-            return False
+            return -1

@@ -6,26 +6,27 @@
  */
 
 #include "PeakFinder.h"
+#include "PulseParameters.h"
 #include "ev42_events_generated.h"
 #include <cmath>
 #include <limits>
 
-PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod)
-    : AdcDataProcessor(std::move(Prod)) {}
+PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod, std::string SourceName)
+    : AdcDataProcessor(std::move(Prod)), Name(std::move(SourceName)) {}
 
 void PeakFinder::processData(SamplingRun const &Data) {
-  auto Result = FindPeak(Data.Data);
-  std::uint64_t PeakTimeStamp =
-      Data.TimeStamp.GetOffsetTimeStamp(Result.MaxLocation).GetTimeStampNS();
-  SendData(PeakTimeStamp, Result.Max, Data.Identifier.ChannelNr);
+  auto PulseInfo = analyseSampleRun(Data, 0.1);
+  std::uint64_t PeakTimeStamp = PulseInfo.PeakTimestamp.GetTimeStampNS();
+  sendData(PeakTimeStamp, PulseInfo.PeakAmplitude, Data.Identifier);
 }
 
-void PeakFinder::SendData(const std::uint64_t &TimeStamp,
+void PeakFinder::sendData(const std::uint64_t &TimeStamp,
                           const std::uint16_t &Amplitude,
-                          const std::uint16_t &Channel) {
+                          const ChannelID &Identifier) {
   flatbuffers::FlatBufferBuilder builder;
   auto SourceName =
-      builder.CreateString("adc_channel_" + std::to_string(Channel));
+      builder.CreateString(Name + "_Adc" + std::to_string(Identifier.SourceID) +
+                           "_Ch" + std::to_string(Identifier.ChannelNr));
   auto ToF_Vector = builder.CreateVector(std::vector<std::uint32_t>{0});
   auto AmplitudeVector =
       builder.CreateVector(std::vector<std::uint32_t>{Amplitude});
@@ -38,18 +39,4 @@ void PeakFinder::SendData(const std::uint64_t &TimeStamp,
   builder.Finish(EvBuilder.Finish(), EventMessageIdentifier());
   ProducerPtr->produce(reinterpret_cast<char *>(builder.GetBufferPointer()),
                        builder.GetSize());
-}
-
-ModuleAnalysisResult FindPeak(std::vector<std::uint16_t> const &SampleRun) {
-  ModuleAnalysisResult ReturnData{0, 0, 0};
-  std::int64_t Sum = 0;
-  for (std::size_t i = 0; i < SampleRun.size(); ++i) {
-    Sum += SampleRun[i];
-    if (SampleRun[i] > ReturnData.Max) {
-      ReturnData.Max = SampleRun[i];
-      ReturnData.MaxLocation = i;
-    }
-  }
-  ReturnData.Mean = Sum / SampleRun.size();
-  return ReturnData;
 }

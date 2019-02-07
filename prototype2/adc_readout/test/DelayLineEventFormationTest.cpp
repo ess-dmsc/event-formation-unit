@@ -12,7 +12,7 @@
 
 class DelayLineEventFormationStandIn : public DelayLineEventFormation {
 public:
-  DelayLineEventFormationStandIn(AdcSettings const &ReadoutSettings)
+  explicit DelayLineEventFormationStandIn(AdcSettings const &ReadoutSettings)
       : DelayLineEventFormation(ReadoutSettings){};
   using DelayLineEventFormation::PulseHandlerMap;
   using DelayLineEventFormation::XAxisCalc;
@@ -23,10 +23,10 @@ public:
 class FormationOfEventsInit : public ::testing::Test {
 public:
   void SetUp() override {
-    Log::SetMinimumSeverity(Sev::Critical);
+    Log::SetMinimumSeverity(Log::Severity::Critical);
     DefaultSettings = AdcSettings{};
   };
-  void TearDown() override { Log::SetMinimumSeverity(Sev::Error); };
+  void TearDown() override { Log::SetMinimumSeverity(Log::Severity::Error); };
   AdcSettings DefaultSettings;
 };
 

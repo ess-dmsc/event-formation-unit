@@ -29,23 +29,23 @@ public:
   explicit Config(std::string jsonfile);
 
   /// \brief getter fcn for private member variable
-  bool isConfigLoaded() { return IsConfigLoaded; }
+  bool isConfigLoaded() const { return IsConfigLoaded; }
 
   /// \brief getter fcn for private member variable
-  std::string getConfigFile() { return ConfigFile; }
+  std::string getConfigFile() const { return ConfigFile; }
 
   // /// \brief getter fcn for private member variable
-  std::shared_ptr<DigitizerMapping> getDigitizers() { return Detector; }
+  std::shared_ptr<DigitizerMapping> getDigitizers() const { return Detector; }
 
   /// \brief getter fcn for private member variable
-  uint32_t getTimeTickNS() { return TimeTickNS; }
+  uint32_t getTimeTickNS() const { return TimeTickNS; }
 
   /// \brief getter fcn for private member variable
-  auto getDigitisers() { return Digitisers; }
+  auto getDigitisers() const { return Digitisers; }
 
-  InstrumentGeometry getInstrument() { return Instrument; }
+  InstrumentGeometry getInstrument() const { return Instrument; }
 
-  DetectorType getDetectorType() { return DetectorType; }
+  DetectorType getDetectorType() const { return DetectorType; }
 
   uint16_t getWires() const { return NWires; }
   uint16_t getStrips() const { return NStrips; }

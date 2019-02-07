@@ -24,13 +24,15 @@ struct AdcSettings {
   std::string TimeStampLocation{"Middle"};
   std::string Name;
   std::string GrafanaNameSuffix;
-  std::string AltDetectorInterface = {"0.0.0.0"};
-  std::uint16_t AltDetectorPort = {0};
+  std::string AltDetectorInterface{"0.0.0.0"};
+  std::uint16_t AltDetectorPort{0};
 
-  double XAxisCalibOffset = {0.0};
-  double XAxisCalibSlope = {1.0};
-  double YAxisCalibOffset = {0.0};
-  double YAxisCalibSlope = {1.0};
+  double Threshold{0.1};
+
+  double XAxisCalibOffset{0.0};
+  double XAxisCalibSlope{1.0};
+  double YAxisCalibOffset{0.0};
+  double YAxisCalibSlope{1.0};
   unsigned int EventTimeoutNS;
 
   enum class PositionSensingType {
@@ -39,8 +41,8 @@ struct AdcSettings {
     CONST,
   };
 
-  PositionSensingType XAxis = {PositionSensingType::CONST};
-  PositionSensingType YAxis = {PositionSensingType::CONST};
+  PositionSensingType XAxis{PositionSensingType::CONST};
+  PositionSensingType YAxis{PositionSensingType::CONST};
 
   enum class ChannelRole {
     REFERENCE_TIME,
@@ -54,15 +56,15 @@ struct AdcSettings {
     TIME_Y_AXIS_2,
     NONE
   };
-  ChannelRole ADC1Channel1 = {ChannelRole::NONE};
-  ChannelRole ADC1Channel2 = {ChannelRole::NONE};
-  ChannelRole ADC1Channel3 = {ChannelRole::NONE};
-  ChannelRole ADC1Channel4 = {ChannelRole::NONE};
+  ChannelRole ADC1Channel1{ChannelRole::NONE};
+  ChannelRole ADC1Channel2{ChannelRole::NONE};
+  ChannelRole ADC1Channel3{ChannelRole::NONE};
+  ChannelRole ADC1Channel4{ChannelRole::NONE};
 
-  ChannelRole ADC2Channel1 = {ChannelRole::NONE};
-  ChannelRole ADC2Channel2 = {ChannelRole::NONE};
-  ChannelRole ADC2Channel3 = {ChannelRole::NONE};
-  ChannelRole ADC2Channel4 = {ChannelRole::NONE};
+  ChannelRole ADC2Channel1{ChannelRole::NONE};
+  ChannelRole ADC2Channel2{ChannelRole::NONE};
+  ChannelRole ADC2Channel3{ChannelRole::NONE};
+  ChannelRole ADC2Channel4{ChannelRole::NONE};
 };
 
 void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings);

@@ -13,7 +13,7 @@
 
 class TestDetector : public Detector {
 public:
-  TestDetector(UNUSED BaseSettings settings)
+  explicit TestDetector(BaseSettings settings)
       : Detector("no detector", settings) {
     std::cout << "TestDetector" << std::endl;
   };

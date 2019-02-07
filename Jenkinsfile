@@ -32,7 +32,7 @@ images = [
         'cmake_flags': ''
     ],
     'debian9': [
-        'name': 'essdmscdm/debian9-build-node:2.5.1',
+        'name': 'essdmscdm/debian9-build-node:2.5.2',
         'sh'  : 'bash -e',
         'cmake_flags': ''
     ]
@@ -45,8 +45,6 @@ def failure_function(exception_obj, failureMessage) {
     emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage + '\"\n\nCheck console output at $BUILD_URL to view the results.',
             recipientProviders: toEmails,
             subject: '${DEFAULT_SUBJECT}'
-    slackSend color: 'danger',
-            message: "${project}-${env.BRANCH_NAME}: " + failureMessage
     throw exception_obj
 }
 

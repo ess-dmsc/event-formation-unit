@@ -19,7 +19,7 @@ public:
   NeutronEvent(int nhits, double x, double y, double t)
       : Event(t), n_(nhits), x_(x), y_(y) {};
 
-void execute(Simulator * sim) {
+void execute(Simulator * sim) override {
   if (debug) {
     printf("%.10f neutron at (%7.2f, %7.2f)\n", time, x_, y_);
   }

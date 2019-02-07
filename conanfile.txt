@@ -6,7 +6,7 @@ fmt/5.2.0@bincrafters/stable
 google-benchmark/4c2af07-dm3@ess-dmsc/stable
 graylog-logger/1.1.2-dm1@ess-dmsc/stable
 gtest/3121b20-dm3@ess-dmsc/stable
-h5cpp/0.1.0@ess-dmsc/testing
+h5cpp/0.1.0-dm2@ess-dmsc/testing
 jsonformoderncpp/3.1.0@vthiery/stable
 libpcap/1.8.1@bincrafters/stable
 librdkafka/0.11.5@ess-dmsc/stable

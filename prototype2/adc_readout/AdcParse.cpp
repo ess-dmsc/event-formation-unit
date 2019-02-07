@@ -12,8 +12,8 @@
 #include <map>
 #include <netinet/in.h>
 
-static const std::uint16_t IDLE_PACKET{0x1111};
-static const std::uint16_t DATA_PACKET{0x2222};
+static const std::uint16_t DATA_PACKET{0x1111};
+static const std::uint16_t IDLE_PACKET{0x2222};
 static const std::uint32_t PACKET_TRAILER{0xFEEDF00D};
 static const std::uint16_t MODULE_HEADER{0xABCD};
 static const std::uint32_t MODULE_TRAILER{0xBEEFCAFE};
@@ -68,8 +68,8 @@ PacketParser::PacketParser(
     std::function<bool(SamplingRun *)> ModuleHandler,
     std::function<SamplingRun *(ChannelID Identifier)> ModuleProducer,
     std::uint16_t SourceID)
-    : HandleModule(ModuleHandler), ProduceModule(ModuleProducer),
-      Source(SourceID) {}
+    : HandleModule(std::move(ModuleHandler)),
+      ProduceModule(std::move(ModuleProducer)), Source(SourceID) {}
 
 PacketInfo PacketParser::parsePacket(const InData &Packet) {
   HeaderInfo Header = parseHeader(Packet);
@@ -96,9 +96,9 @@ HeaderInfo parseHeader(const InData &Packet) {
   PacketHeader Header(*HeaderRaw);
   Header.fixEndian();
   if (IDLE_PACKET == Header.PacketType) {
-    ReturnInfo.Type = PacketType::Data;
-  } else if (DATA_PACKET == Header.PacketType) {
     ReturnInfo.Type = PacketType::Idle;
+  } else if (DATA_PACKET == Header.PacketType) {
+    ReturnInfo.Type = PacketType::Data;
   } else {
     throw ParserException(ParserException::Type::HEADER_TYPE);
   }

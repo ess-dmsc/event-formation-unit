@@ -30,7 +30,7 @@ std::map<std::string, DetectorModuleSetup> &getFactories();
 
 /// \brief Add a new detector module.
 /// \throws std::runtime_error If DetectorModuleName already exists.
-void addDetectorModule(std::string DetectorModuleName, DetectorModuleSetup Module);
+void addDetectorModule(std::string const &DetectorModuleName, DetectorModuleSetup Module);
 
 /// \brief Find a detector module, given a key.
 /// \throws std::runtime_error If the key is not found.
@@ -47,7 +47,7 @@ public:
   ///
   /// \param[in] DetectorName The key (name) of the module.
   /// \param[in] CLIPopulator Function pointer (std::function<>) to a function which can populate the CLI interface with additional command line arguments. Can be nullptr.
-  explicit Registrar(std::string DetectorName,
+  explicit Registrar(std::string const &DetectorName,
                      std::function<void(CLI::App &)> CLIPopulator) {
     std::shared_ptr<DetectorFactoryBase> Factory(new DetectorFactory<Module>());
     addDetectorModule(DetectorName, DetectorModuleSetup(Factory, CLIPopulator));

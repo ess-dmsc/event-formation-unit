@@ -14,10 +14,8 @@ using namespace std::chrono_literals;
 
 class UDPClientTest : public ::testing::Test {
 public:
-  virtual void SetUp() override {
-    Service = std::make_shared<asio::io_service>();
-  }
-  virtual void TearDown() override {}
+  void SetUp() override { Service = std::make_shared<asio::io_service>(); }
+  void TearDown() override {}
   std::shared_ptr<asio::io_service> Service;
 };
 
@@ -62,10 +60,10 @@ TEST_F(UDPClientTest, MultipleUDPPackets) {
 
 class UDPClientStandIn : UDPClient {
 public:
-  UDPClientStandIn(std::shared_ptr<asio::io_service> IOService,
-                   std::string Interface, std::uint16_t Port,
+  UDPClientStandIn(std::shared_ptr<asio::io_service> const &IOService,
+                   std::string const &Interface, std::uint16_t Port,
                    std::function<void(InData const &Packet)> Handler)
-      : UDPClient(IOService, Interface, Port, Handler){};
+      : UDPClient(IOService, Interface, Port, std::move(Handler)){};
   using UDPClient::Socket;
 };
 

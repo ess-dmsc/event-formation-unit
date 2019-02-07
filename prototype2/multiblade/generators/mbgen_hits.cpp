@@ -29,9 +29,10 @@ const int TSC_MHZ = 2900;
 
 class TxBuffer {
 public:
+  TxBuffer() = default;
   char * getBuffer() { return Buffer; }
 
-  int getSize() { return DataLength; }
+  int getSize() const { return DataLength; }
 
   bool addData(uint32_t time, uint16_t channel, uint16_t adc) {
     //printf("add data %u, %u, %u\n", time, channel, adc);
@@ -102,7 +103,6 @@ int main(int argc, char *argv[]) {
 
   ReaderHits file(Settings.FileName);
 
-  int readsz;
   uint64_t tx = 0;
   uint64_t txp = 0;
 
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
   uint32_t curr_digitizer = 0;
 
   for (;;) {
-    readsz = file.read(RxBuffer);
+    int readsz = file.read(RxBuffer);
     if (readsz <= 0) {
       break;
     }

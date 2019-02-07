@@ -10,6 +10,7 @@
 #include "../SampleProcessing.h"
 #include "senv_data_generated.h"
 #include <array>
+#include <cstring>
 #include <gtest/gtest.h>
 #include <trompeloeil.hpp>
 
@@ -31,7 +32,7 @@ using trompeloeil::_;
 class SampleProcessingStandIn : public SampleProcessing {
 public:
   SampleProcessingStandIn(std::shared_ptr<ProducerBase> Prod, std::string Name)
-      : SampleProcessing(Prod, Name) {}
+      : SampleProcessing(std::move(Prod), std::move(Name)) {}
   using SampleProcessing::MeanOfNrOfSamples;
   using SampleProcessing::TSLocation;
   using SampleProcessing::ProcessingInstance;
@@ -51,16 +52,16 @@ public:
 #pragma GCC diagnostic pop
 
 TEST(SampleProcessing, NoSamples) {
-  std::shared_ptr<ProducerStandIn> TestProducer(new ProducerStandIn());
+  auto TestProducer = std::make_shared<ProducerStandIn>();
   SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   SamplingRun TempModule;
   TempModule.Identifier.ChannelNr = 1;
   TestProcessor.processData(TempModule);
-  FORBID_CALL(*TestProducer.get(), produce(_, _));
+  FORBID_CALL(*TestProducer, produce(_, _));
 }
 
 TEST(SampleProcessing, SetMeanOfChannels) {
-  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  auto TestProducer = std::make_shared<ProducerStandIn>();
   SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   int MeanOfSamplesValue = 10;
   TestProcessor.setMeanOfSamples(MeanOfSamplesValue);
@@ -70,7 +71,7 @@ TEST(SampleProcessing, SetMeanOfChannels) {
 }
 
 TEST(SampleProcessing, SetTimeStampLocation) {
-  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  auto TestProducer = std::make_shared<ProducerStandIn>();
   SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   TimeStampLocation UsedLocation = TimeStampLocation::End;
   TestProcessor.setTimeStampLocation(UsedLocation);
@@ -80,7 +81,7 @@ TEST(SampleProcessing, SetTimeStampLocation) {
 }
 
 TEST(SampleProcessing, ProcessCallTest) {
-  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  auto TestProducer = std::make_shared<ProducerStandIn>();
   SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   REQUIRE_CALL(TestProcessor, serializeAndTransmitData(ANY(ProcessedSamples)))
       .TIMES(1);
@@ -88,7 +89,7 @@ TEST(SampleProcessing, ProcessCallTest) {
 }
 
 TEST(SampleProcessing, ProcessFailCallTest) {
-  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  auto TestProducer = std::make_shared<ProducerStandIn>();
   SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   ProcessedSamples CallTest;
   FORBID_CALL(TestProcessor, serializeAndTransmitData(_));
@@ -98,7 +99,7 @@ TEST(SampleProcessing, ProcessFailCallTest) {
 }
 
 TEST(SampleProcessing, ProcessContentTest) {
-  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  auto TestProducer = std::make_shared<ProducerStandIn>();
   SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   ProcessedSamples CallTest;
   REQUIRE_CALL(TestProcessor, serializeAndTransmitData(_))
@@ -110,7 +111,7 @@ TEST(SampleProcessing, ProcessContentTest) {
 }
 
 TEST(SampleProcessing, SerialisationProduceCallTest) {
-  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  auto TestProducer = std::make_shared<ProducerStandIn>();
   SampleProcessingStandIn TestProcessor(TestProducer, "SomeName");
   ProcessedSamples CallTest;
   REQUIRE_CALL(TestProcessor, serializeAndTransmitData(_))
@@ -126,12 +127,12 @@ TEST(SampleProcessing, SerialisationProduceCallTest) {
 }
 
 TEST(SampleProcessing, SerialisationFlatbufferTest1) {
-  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  auto TestProducer = std::make_shared<ProducerStandIn>();
   std::string Name = "SomeTestName";
   SampleProcessingStandIn TestProcessor(TestProducer, Name);
   TestProcessor.setTimeStampLocation(TimeStampLocation::End);
   ProcessedSamples CallTest;
-  std::array<std::uint8_t, 4096> TempBuffer;
+  std::array<std::uint8_t, 4096> TempBuffer{};
   int BytesCopied = 0;
   REQUIRE_CALL(TestProcessor, serializeAndTransmitData(ANY(ProcessedSamples)))
       .LR_SIDE_EFFECT(CallTest = _1)
@@ -151,8 +152,10 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
   auto Verifier = flatbuffers::Verifier(&TempBuffer[0], BytesCopied);
   ASSERT_TRUE(VerifySampleEnvironmentDataBuffer(Verifier));
   auto SampleData = GetSampleEnvironmentData(&TempBuffer[0]);
-  EXPECT_EQ(SampleData->Name()->str(),
-            Name + "_" + std::to_string(TempModule.Identifier.ChannelNr));
+  auto ExpectedName =
+      Name + "_Adc" + std::to_string(TempModule.Identifier.SourceID) + "_Ch" +
+      std::to_string(TempModule.Identifier.ChannelNr) + "_waveform";
+  EXPECT_EQ(SampleData->Name()->str(), ExpectedName);
   EXPECT_EQ(SampleData->PacketTimestamp(),
             TempModule.TimeStamp.GetTimeStampNS());
   EXPECT_NEAR(SampleData->TimeDelta(),
@@ -167,13 +170,13 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
 }
 
 TEST(SampleProcessing, SerialisationFlatbufferTest3) {
-  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  auto TestProducer = std::make_shared<ProducerStandIn>();
   std::string Name = "SomeTestName";
   SampleProcessingStandIn TestProcessor(TestProducer, Name);
   TestProcessor.setTimeStampLocation(TimeStampLocation::End);
   TestProcessor.setSerializeTimestamps(true);
   ProcessedSamples CallTest;
-  std::array<std::uint8_t, 4096> TempBuffer;
+  std::array<std::uint8_t, 4096> TempBuffer{};
   int BytesCopied = 0;
   REQUIRE_CALL(TestProcessor, serializeAndTransmitData(ANY(ProcessedSamples)))
       .LR_SIDE_EFFECT(CallTest = _1)
@@ -193,8 +196,10 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
   auto Verifier = flatbuffers::Verifier(&TempBuffer[0], BytesCopied);
   ASSERT_TRUE(VerifySampleEnvironmentDataBuffer(Verifier));
   auto SampleData = GetSampleEnvironmentData(&TempBuffer[0]);
-  EXPECT_EQ(SampleData->Name()->str(),
-            Name + "_" + std::to_string(TempModule.Identifier.ChannelNr));
+  auto ExpectedName =
+      Name + "_Adc" + std::to_string(TempModule.Identifier.SourceID) + "_Ch" +
+      std::to_string(TempModule.Identifier.ChannelNr) + "_waveform";
+  EXPECT_EQ(SampleData->Name()->str(), ExpectedName);
   EXPECT_EQ(SampleData->PacketTimestamp(),
             TempModule.TimeStamp.GetTimeStampNS());
   EXPECT_NEAR(SampleData->TimeDelta(),
@@ -212,7 +217,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 TEST(SampleProcessing, SerialisationFlatbufferTest2) {
-  std::shared_ptr<ProducerBase> TestProducer(new ProducerStandIn());
+  auto TestProducer = std::make_shared<ProducerStandIn>();
   std::string Name = "SomeTestName";
   SampleProcessingStandIn TestProcessor(TestProducer, Name);
   TestProcessor.setTimeStampLocation(TimeStampLocation::End);
@@ -237,8 +242,8 @@ TEST(SampleProcessing, SerialisationFlatbufferTest2) {
 
 class ChannelProcessingTest : public ::testing::Test {
 public:
-  virtual void SetUp() override { Module = getTestModule(); }
-  virtual void TearDown() override { Module.Data.clear(); }
+  void SetUp() override { Module = getTestModule(); }
+  void TearDown() override { Module.Data.clear(); }
   SamplingRun Module;
 };
 

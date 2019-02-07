@@ -29,6 +29,7 @@ GapMatcher::GapMatcher(uint64_t latency, uint64_t time_gap)
     XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u", unmatched_clusters_.size());
 
     Event evt{plane1_, plane2_};
+    Event pulse_evt{pulse_plane_, pulse_plane_};
     while (!unmatched_clusters_.empty()) {
 
       auto cluster = unmatched_clusters_.begin();
@@ -44,7 +45,15 @@ GapMatcher::GapMatcher(uint64_t latency, uint64_t time_gap)
         evt.clear();
       }
 
-      evt.merge(*cluster);
+      if (cluster->plane() == pulse_plane_) {
+        pulse_evt.merge(*cluster);
+        stash_event(pulse_evt);
+        pulse_evt.clear();
+      }
+      else {
+        evt.merge(*cluster);
+      }
+
       unmatched_clusters_.pop_front();
     }
 

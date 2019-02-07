@@ -19,8 +19,8 @@ PopulateCLIParser PopulateParser{CLIArguments};
 
 class AdcReadout : public AdcReadoutBase {
 public:
-  explicit AdcReadout(BaseSettings Settings)
-      : AdcReadoutBase(std::move(Settings), LocalAdcSettings) {}
+  explicit AdcReadout(BaseSettings const &Settings)
+      : AdcReadoutBase(Settings, LocalAdcSettings) {}
 };
 
 DetectorFactory<AdcReadout> Factory;

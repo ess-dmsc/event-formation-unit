@@ -7,10 +7,11 @@
 
 #include "../AdcReadoutConstants.h"
 #include "../AdcTimeStamp.h"
+#include <cmath>
 #include <gtest/gtest.h>
 
 TEST(TimeStampCalcTest, CalcSeconds) {
-  std::uint32_t Seconds = 1;
+  std::uint32_t Seconds{1};
   RawTimeStamp TS{Seconds, 0};
   EXPECT_EQ(TS.GetTimeStampNS(),
             static_cast<std::uint64_t>(Seconds) * 1000000000);
@@ -19,9 +20,8 @@ TEST(TimeStampCalcTest, CalcSeconds) {
 TEST(TimeStampCalcTest, CalcNanoSec) {
   std::uint32_t SecondsFrac = 1;
   RawTimeStamp TS{0, SecondsFrac};
-  std::uint64_t TestTimeStamp =
-      (double(SecondsFrac) / static_cast<double>(AdcTimerCounterMax)) * 1e9 +
-      0.5;
+  std::uint64_t TestTimeStamp = std::llround(
+      (double(SecondsFrac) / static_cast<double>(AdcTimerCounterMax)) * 1e9);
   EXPECT_EQ(TS.GetTimeStampNS(), static_cast<std::uint64_t>(TestTimeStamp));
 }
 
