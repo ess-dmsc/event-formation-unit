@@ -11,7 +11,7 @@ protected:
 
   Multiblade::EventBuilder builder;
 
-  #include "EventBuilderCommon.inc"
+  #include "EventBuilderCommon.cpp"
 };
 
 

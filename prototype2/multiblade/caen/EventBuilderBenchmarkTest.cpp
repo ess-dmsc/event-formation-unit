@@ -9,7 +9,7 @@
 
 Multiblade::EventBuilder builder;
 
-#include "EventBuilderCommon.inc"
+#include "EventBuilderCommon.cpp"
 
 static void EventGenBM(benchmark::State &state) {
   uint32_t items = 0;
