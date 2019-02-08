@@ -75,27 +75,22 @@ int main(int argc, char *argv[]) {
   TSCTimer ReportTimer;
   Timer USClock;
 
-  size_t SentPackets{0}; // counter to determine when to break
   for (;;) {
-    if (Settings.NumberOfPackets == 0 || SentPackets < Settings.NumberOfPackets) {
-      int readsz = file.read(buffer);
-      int BytesToSend = readsz;
-      int BytesSent = 0;
+    int BytesToSend = file.read(buffer);
+    int BytesSent = 0;
+    if (BytesToSend > 0 && (Settings.NumberOfPackets == 0 || Packets < Settings.NumberOfPackets)) {
 
-      while (BytesToSend > 0 && (Settings.NumberOfPackets == 0 || SentPackets < Settings.NumberOfPackets)) {
+      while (BytesToSend > 0 && (Settings.NumberOfPackets == 0 || Packets < Settings.NumberOfPackets)) {
         int txsize = BytesToSend >= MaxTxSize ? MaxTxSize : BytesToSend;
-        printf("Sending %d bytes\n", txsize);
         DataSource.send(buffer + BytesSent, txsize);
+
         Bytes += txsize;
-        SentPackets++;
         Packets++;
         BytesSent += txsize;
         BytesToSend -= txsize;
       }
     } else {
-      std::cout << "Sent " << TotBytes + Bytes << " bytes"
-                << " in " << TotPackets + Packets << " packets." << std::endl;
-      std::cout << "done" << std::endl;
+      std::cout << fmt::format("Sent {} bytes in {} packets.\n", TotBytes + Bytes, TotPackets + Packets);
       exit(0);
     }
 
@@ -112,7 +107,7 @@ int main(int argc, char *argv[]) {
       USClock.now();
       ReportTimer.now();
     }
-    usleep(Settings.SpeedThrottle * 1000);
+    usleep(Settings.SpeedThrottle);
   }
 
   return (EXIT_SUCCESS);
