@@ -5,7 +5,14 @@ from confluent_kafka import Producer
 import docker
 
 
-def wait_until_kafka_ready(docker_cmd, docker_options):
+def pytest_addoption(parser):
+    parser.addoption("--pcap-file-path", type=str,
+                     help="Path of directory containing pcap file (ess2_ess_mask.pcap)", required=True)
+    parser.addoption("--json-file-path", type=str,
+                     help="Path of directory containing JSON file of detector details (MB18Freia.json)", required=True)
+
+
+def _wait_until_kafka_ready(docker_cmd, docker_options):
     print('Waiting for Kafka broker to be ready for system tests...')
     conf = {'bootstrap.servers': 'localhost:9094',
             'api.version.request': True}
@@ -50,7 +57,7 @@ common_options = {"--no-deps": False,
                   }
 
 
-def build_efu_image():
+def _build_efu_image():
     client = docker.from_env()
     print("Building EFU image", flush=True)
     build_args = {}
@@ -63,18 +70,18 @@ def build_efu_image():
         print(item, flush=True)
 
 
-def run_containers(cmd, options):
+def _run_containers(cmd, options):
     print("Running docker-compose up", flush=True)
     cmd.up(options)
     print("\nFinished docker-compose up\n", flush=True)
-    wait_until_kafka_ready(cmd, options)
+    _wait_until_kafka_ready(cmd, options)
 
 
-def build_and_run(options, request):
-    build_efu_image()
+def _build_and_run(options, request):
+    _build_efu_image()
     project = project_from_options(os.path.dirname(__file__), options)
     cmd = TopLevelCommand(project)
-    run_containers(cmd, options)
+    _run_containers(cmd, options)
 
     def fin():
         # Stop the containers then remove them and their volumes (--volumes option)
@@ -91,6 +98,28 @@ def build_and_run(options, request):
     request.addfinalizer(fin)
 
 
+def _remove_trailing_path_delimiter(path):
+    if path[-1] in ['/', '\\']:
+        path = path[:-1]
+    return path
+
+
+def _create_docker_compose_file(request):
+    """
+    Populate data directory fields in the docker-compose-template file and output
+    a usable docker-compose script
+    """
+    pcap_file = _remove_trailing_path_delimiter(request.config.getoption("--pcap-file-path"))
+    json_file = _remove_trailing_path_delimiter(request.config.getoption("--json-file-path"))
+
+    with open('docker-compose-template.yml', 'r+') as dc_template:
+        dc_content = dc_template.read()
+        dc_content = dc_content.replace("PCAP_DATA_PATH", pcap_file)
+        dc_content = dc_content.replace("JSON_DATA_PATH", json_file)
+        with open('docker-compose.yml', 'w+') as dc_new:
+            dc_new.write(dc_content)
+
+
 @pytest.fixture(scope="module")
 def docker_compose(request):
     """
@@ -98,7 +127,9 @@ def docker_compose(request):
     """
     print("Started preparing test environment...", flush=True)
 
+    _create_docker_compose_file(request)
+
     # Options must be given as long form
     options = common_options
     options["--file"] = ["docker-compose.yml"]
-    return build_and_run(options, request)
+    return _build_and_run(options, request)

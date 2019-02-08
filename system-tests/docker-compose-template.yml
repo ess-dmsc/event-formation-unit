@@ -37,7 +37,7 @@ services:
       OPT_ARGS: -d /efu/modules/mbcaen.so -f /MB18Freia.json -b kafka --nohwcheck
     hostname: efu
     volumes:
-      - ./data/MB18Freia.json:/MB18Freia.json
+      - JSON_DATA_PATH/MB18Freia.json:/MB18Freia.json
     ports:
       - "8889:8888" # So can query efu stats on localhost:8889
     networks:
@@ -52,11 +52,11 @@ services:
       EXECUTABLE: udpgen_pcap
       OPT_ARGS: --filename /ess2_ess_mask.pcap --throttle 2000 --ipaddr 10.5.0.5 --port 9000
     volumes:
-      - ./data/ess2_ess_mask_truncated.pcap:/ess2_ess_mask.pcap
+      - PCAP_DATA_PATH/ess2_ess_mask.pcap:/ess2_ess_mask.pcap
     networks:
       vpcbr:
         ipv4_address: 10.5.0.6
-      
+
 networks:
   vpcbr:
     driver: bridge
