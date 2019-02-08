@@ -72,7 +72,7 @@ protected:
 
   virtual void SetUp() {
     DataPath = TEST_DATA_PATH;
-    opts = NMXConfig(DataPath + "/config.json", "");
+    opts = NMXConfig(DataPath + "/readouts/config.json", "");
 
     sorter_x =
         std::make_shared<HitSorter>(opts.time_config, opts.srs_mappings);
