@@ -22,11 +22,19 @@ public:
   /// \todo document
   size_t read(char *buf);
 
+  ///
+  size_t getReadoutSize() const { return ReadoutSize;}
+
+  ///
+  size_t getChunkSize() const { return ChunkSize;}
+
 private:
   std::shared_ptr<ReadoutFile> file;
 
   size_t total_{0};
   size_t current_{0};
+  size_t ReadoutSize{0};
+  size_t ChunkSize{0};
 };
 
 }
