@@ -13,5 +13,5 @@ at `data/EFU_reference/multiblade/2018_11_22`.
 
 * Run the following from the `system-tests/` directory:
 ```
-pytest -s --pcap-file-path <PATH_TO_DIR_CONTAINING_PCAP_FILE> --json-file-path <PATH_TO_DIR_CONTAINING_JSON_FILE> .
+pytest -s ./ --pcap-file-path <PATH_TO_DIR_CONTAINING_PCAP_FILE> --json-file-path <PATH_TO_DIR_CONTAINING_JSON_FILE>
 ```
