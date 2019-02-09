@@ -8,7 +8,10 @@
 #include <libs/include/Socket.h>
 // GCOVR_EXCL_START
 
+// Non critical but somewhat arbitrary CPU clock speed guess
 static constexpr int TscMHz {2900};
+
+constexpr size_t RxBufferSize{9000};
 
 // Reader expects filenames without .h5 extension
 std::string remove_extension(const std::string& filename) {
@@ -28,10 +31,10 @@ struct {
   uint32_t UpdateIntervalSecs{1};
 } Settings;
 
-CLI::App app{"Readout to UDP data generator for Multi-Grid"};
+CLI::App app{"Readout to UDP data generator for Gd-GEM"};
 
 int main(int argc, char *argv[]) {
-  app.add_option("-f,--file", Settings.FileName, "Multiblade H5 file with raw readouts");
+  app.add_option("-f, --file", Settings.FileName, "Multiblade H5 file with raw readouts");
   app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
   app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
   app.add_option("-a, --packets", Settings.NumberOfPackets, "Number of packets to send");
@@ -41,13 +44,17 @@ int main(int argc, char *argv[]) {
 
   if (Settings.FileName.empty()) {
     printf("No input file specified, exiting.\n");
-    return 1;
+    return (EXIT_FAILURE);
+  }
+
+  if (Settings.MaxPacketSize > 9000) { // \todo Should be 8972
+    printf("Packet size too large (should be less than 8972)\n");
+    return (EXIT_FAILURE);
   }
 
   hdf5::error::Singleton::instance().auto_print(false);
-  //  hdf5::error::auto_print(false);
 
-  char buffer[9000];
+  char buffer[RxBufferSize];
 
   const int B1M = 1000000;
   Socket::Endpoint local("0.0.0.0", 0);
@@ -62,10 +69,11 @@ int main(int argc, char *argv[]) {
 
   size_t ReadoutSize = file.getReadoutSize();
   uint16_t MaxTxSize = ReadoutSize * file.getChunkSize();
+  assert(MaxTxSize <= RxBufferSize);
   if (Settings.MaxPacketSize != 0) {
     MaxTxSize = (Settings.MaxPacketSize/ReadoutSize) * ReadoutSize;
   }
-  printf("Sending packets with maximum %u bytes\n", MaxTxSize);
+  std::cout << fmt::format("Sending packets with maximum {} bytes\n", MaxTxSize);
 
   uint64_t Bytes{0};
   uint64_t TotBytes{0};
@@ -78,30 +86,32 @@ int main(int argc, char *argv[]) {
   for (;;) {
     int BytesToSend = file.read(buffer);
     int BytesSent = 0;
-    if (BytesToSend > 0 && (Settings.NumberOfPackets == 0 || Packets < Settings.NumberOfPackets)) {
 
-      while (BytesToSend > 0 && (Settings.NumberOfPackets == 0 || Packets < Settings.NumberOfPackets)) {
+    if (BytesToSend > 0 && (Settings.NumberOfPackets == 0 || TotPackets < Settings.NumberOfPackets)) {
+
+      while (BytesToSend > 0 && (Settings.NumberOfPackets == 0 || TotPackets < Settings.NumberOfPackets)) {
         int txsize = BytesToSend >= MaxTxSize ? MaxTxSize : BytesToSend;
         DataSource.send(buffer + BytesSent, txsize);
 
-        Bytes += txsize;
-        Packets++;
         BytesSent += txsize;
         BytesToSend -= txsize;
+        Bytes += txsize;  // Bytes is periodically cleared
+        Packets++; // Packets is periodically cleared
+        TotBytes += txsize;
+        TotPackets++;
       }
     } else {
-      std::cout << fmt::format("Sent {} bytes in {} packets.\n", TotBytes + Bytes, TotPackets + Packets);
-      exit(0);
+      std::cout << fmt::format("Sent {} bytes in {} packets.\n", TotBytes, TotPackets);
+      return (EXIT_SUCCESS);
     }
 
     if (unlikely((ReportTimer.timetsc() / TscMHz) >= Settings.UpdateIntervalSecs * 1000000)) {
       auto usecs = USClock.timeus();
-      TotBytes += Bytes;
-      TotPackets += Packets;
-      printf("Tx rate: %8.2f Mbps (%.2f pps), tx %5" PRIu64
-             " MB (total: %7" PRIu64 " MB) %" PRIu64 " usecs\n",
-             Bytes * 8.0 / usecs, Packets * 1000000.0 / usecs, Bytes / B1M,
-             TotBytes / B1M, usecs);
+      std::cout << fmt::format("Tx rate: {8.2f} Mbps ({.2f} pps), tx {5} MB (total: {7} MB) {} usecs\n",
+                          Bytes * 8.0 / usecs,
+                          Packets * 1000000.0 / usecs,
+                          Bytes / B1M,
+                          TotBytes / B1M, usecs);
       Bytes = 0;
       Packets = 0;
       USClock.now();
@@ -109,7 +119,5 @@ int main(int argc, char *argv[]) {
     }
     usleep(Settings.SpeedThrottle);
   }
-
-  return (EXIT_SUCCESS);
 }
 // GCOVR_EXCL_STOP
