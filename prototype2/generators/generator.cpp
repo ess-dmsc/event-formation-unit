@@ -121,11 +121,12 @@ int main(int argc, char *argv[]) {
 
     if (unlikely((ReportTimer.timetsc() / TscMHz) >= Settings.UpdateIntervalSecs * 1000000)) {
       auto usecs = USClock.timeus();
-      std::cout << fmt::format("Tx rate: {8.2f} Mbps ({.2f} pps), tx {5} MB (total: {7} MB) {} usecs\n",
+      std::cout << fmt::format("Tx rate: {:8.2f} Mbps ({:.2f} pps), tx {:5} MB (total: {:7} MB) {} usecs\n",
                           Bytes * 8.0 / usecs,
                           Packets * 1000000.0 / usecs,
                           Bytes / B1M,
-                          TotBytes / B1M, usecs);
+                          TotBytes / B1M,
+                          usecs);
       Bytes = 0;
       Packets = 0;
       USClock.now();
