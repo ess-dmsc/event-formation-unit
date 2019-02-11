@@ -4,7 +4,10 @@
 #include <libs/include/TSCTimer.h>
 #include <libs/include/Timer.h>
 
+#include <multigrid/generators/ReaderReadouts.h>
+#include <gdgem/generators/ReaderHits.h>
 #include <gdgem/generators/ReaderReadouts.h>
+
 #include <libs/include/Socket.h>
 // GCOVR_EXCL_START
 
@@ -65,7 +68,18 @@ int main(int argc, char *argv[]) {
   DataSource.printBufferSizes();
 
   Settings.FileName = remove_extension(Settings.FileName);
+
+  #ifdef GENERATOR_MULTIGRID_READOUTS
+  Multigrid::ReaderReadouts file(Settings.FileName);
+  #endif
+
+  #ifdef GENERATOR_GDGEM_READOUTS
   Gem::ReaderReadouts file(Settings.FileName);
+  #endif
+
+  #ifdef GENERATOR_GDGEM_HITS
+  Gem::ReaderHits file(Settings.FileName);
+  #endif
 
   size_t ReadoutSize = file.getReadoutSize();
   uint16_t MaxTxSize = ReadoutSize * file.getChunkSize();
