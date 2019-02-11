@@ -357,7 +357,9 @@ node('docker') {
     }
 
     try {
-        parallel builders
+        timeout(time: 1, unit: 'DAYS') {
+            parallel builders
+        }
     } catch (e) {
         failure_function(e, 'Job failed')
         throw e
