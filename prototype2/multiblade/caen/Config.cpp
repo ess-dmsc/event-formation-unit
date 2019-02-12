@@ -10,6 +10,7 @@
 #include <fstream>
 #include <multiblade/caen/Config.h>
 #include <nlohmann/json.hpp>
+#include <common/Trace.h>
 
 namespace Multiblade {
 
@@ -45,6 +46,11 @@ void Config::loadConfigFile() {
   std::ifstream t(ConfigFile);
   std::string jsonstring((std::istreambuf_iterator<char>(t)),
                          std::istreambuf_iterator<char>());
+
+  if (!t.good()) {
+    XTRACE(INIT, ERR, "Invalid Json file: %s", ConfigFile.c_str());
+    throw std::runtime_error("Caen config file error - requested file unavailable.");
+  }
 
   try {
     root = nlohmann::json::parse(jsonstring);

@@ -20,6 +20,11 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   std::string jsonstring((std::istreambuf_iterator<char>(t)),
                          std::istreambuf_iterator<char>());
 
+  if (!t.good()) {
+    XTRACE(INIT, ERR, fmt::format("Invalid Json file: {}", configfile).c_str());
+    throw std::runtime_error("NMXConfig error - requested file unavailable.");
+  }
+
   try {
     root = nlohmann::json::parse(jsonstring);
   }
