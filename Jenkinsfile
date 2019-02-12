@@ -258,33 +258,6 @@ def get_pipeline(image_key)
     }
 }
 
-def get_macos_pipeline()
-{
-    return {
-        stage("macOS") {
-            node ("macos") {
-            // Delete workspace when build is done
-                cleanWs()
-
-                abs_dir = pwd()
-
-                dir("${project}") {
-                    checkout scm
-                }
-
-                dir("${project}/build") {
-                    sh "conan install --build=outdated .."
-                    sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
-                    sh "make -j4"
-                    sh "make -j4 unit_tests"
-                    sh "make runtest"
-                    sh "make runefu"
-                }
-            }
-        }
-    }
-}
-
 node('docker') {
     dir("${project}_code") {
 
@@ -314,7 +287,6 @@ node('docker') {
         def image_key = x
         builders[image_key] = get_pipeline(image_key)
     }
-    builders['macOS'] = get_macos_pipeline()
 
     try {
         parallel builders
