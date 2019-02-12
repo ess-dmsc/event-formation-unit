@@ -357,7 +357,7 @@ node('docker') {
     }
 
     try {
-        timeout(time: 1, unit: 'DAYS') {
+        timeout(time: 2, unit: 'HOURS') {
             parallel builders
         }
     } catch (e) {
