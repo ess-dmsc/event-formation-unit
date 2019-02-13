@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
     if (argc!=3 && argc!=5) {
         printf("Usage: %s our-ip our-port send-to-ip send-to-port\n",argv[0]);
         printf("Usage: %s our-ip our-port             # echo mode\n",argv[0]);
-        return 1;
+        return (EXIT_FAILURE);
     }
 
     int os=socket(PF_INET, SOCK_DGRAM, IPPROTO_IP);
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 
     if( bind(os, (struct sockaddr *)&a, sizeof(a)) == -1) {
         printf("Can't bind our address (%s:%s)\n", argv[1], argv[2]);
-        return 1;
+        return (EXIT_FAILURE);
     }
 
     struct sockaddr_in destAddr;
@@ -69,5 +69,5 @@ int main(int argc, char *argv[]) {
             printf("sendto returns %d\n", m);
         }
     }
-    return 0;
+    return (EXIT_SUCCESS);
 }

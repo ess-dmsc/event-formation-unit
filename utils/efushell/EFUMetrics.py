@@ -11,7 +11,7 @@ class Metrics:
     def _get_efu_command(self, cmd):
         res = self.driver.Ask(cmd)
 
-        if res.find("Error") != -1:
+        if res.find(b"Error") != -1:
             print("Error getting EFU command")
             sys.exit(1)
         return res
@@ -21,8 +21,8 @@ class Metrics:
 
     def get_all_metrics(self, num_metrics):
         for i in range(1, num_metrics + 1):
-            res =  self._get_efu_command('STAT_GET ' + str(i)).split()
-            name = res[1]
+            res = self._get_efu_command('STAT_GET ' + str(i)).split()
+            name = res[1].decode('utf-8')
             value = int(res[2])
             self.metrics[name] = value
 

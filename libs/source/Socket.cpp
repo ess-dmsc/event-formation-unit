@@ -60,7 +60,8 @@ int Socket::setNOSIGPIPE() {
     int on = 1;
     int ret = setSockOpt(SO_NOSIGPIPE, &on, sizeof(on));
     if (ret != 0) {
-        LOG(IPC, Sev::Warning, "Cannot set SO_NOSIGPIPE for socket");
+        LOG(IPC, Sev::Warning,
+            fmt::format("Cannot set SO_NOSIGPIPE for socket: {}", strerror(ret)).c_str() );
     }
     assert(ret ==0);
     return ret;

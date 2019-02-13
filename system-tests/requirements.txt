@@ -1,0 +1,5 @@
+pytest>=3.4.2
+confluent-kafka==0.11.5
+docker-compose>=1.20.0
+docker>=3.4.1
+h5py>=2.8.0
