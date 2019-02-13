@@ -22,6 +22,10 @@ public:
   /// \todo document
   size_t read(char *buf);
 
+  /// To allow sending smaller packets
+  size_t getReadoutSize() const { return ReadoutSize; }
+  size_t getChunkSize() const { return ChunkSize; }
+
   size_t total() const { return total_; }
   size_t current() const { return current_; }
 
@@ -30,6 +34,8 @@ private:
 
   size_t total_{0};
   size_t current_{0};
+  size_t ReadoutSize{0};
+  size_t ChunkSize{0};
 };
 
 }
