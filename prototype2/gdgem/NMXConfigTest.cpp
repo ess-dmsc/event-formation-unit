@@ -40,8 +40,7 @@ TEST_F(NMXConfigTest, EventFilter) {
 
 
 TEST_F(NMXConfigTest, NoConfigFile) {
-  NMXConfig nmxconfig("file_does_not_exist", nocalibration);
-  EXPECT_TRUE(nmxconfig.builder_type.empty());
+  EXPECT_THROW(NMXConfig nmxconfig("file_does_not_exist", nocalibration);, std::runtime_error);
 }
 
 TEST_F(NMXConfigTest, DebugPrint) {

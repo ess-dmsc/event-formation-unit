@@ -94,10 +94,12 @@ protected:
   virtual void TearDown() {
   }
 
+
+/// Until MArtin returns, just use ASSERT
   void add_readouts() {
     for (const auto& readout : readouts) {
       auto plane = opts.srs_mappings.get_plane(readout);
-      EXPECT_LT(plane, 2) << "BAD PLANE"
+      ASSERT_LT(plane, 2) << "BAD PLANE"
                           << " fec:" << int(readout.fec)
                           << " chip:" << int(readout.chip_id) << "\n";
 

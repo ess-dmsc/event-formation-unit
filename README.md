@@ -79,6 +79,8 @@ To run a memory leak test (using Valgrind), run:
 make valgrind
 ```
 
+### [Running System tests (link)](system-tests/README.md)
+
 ## Running the event formation application
 
 En example of the commands required to run an event formation pipeline (in this case the *mbcaen* pipeline) follows:
