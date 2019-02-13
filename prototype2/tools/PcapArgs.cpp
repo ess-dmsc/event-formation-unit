@@ -8,7 +8,6 @@
 #include <unistd.h>
 // GCOVR_EXCL_START
 PcapArgs::PcapArgs(int argc, char *argv[]) {
-  int c;
   while (1) {
     static struct option long_options[] = {
         {"filename", required_argument, 0, 'f'},
@@ -23,7 +22,7 @@ PcapArgs::PcapArgs(int argc, char *argv[]) {
 
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:f:o:i:lp:t:h", long_options, &option_index);
+    int c = getopt_long(argc, argv, "a:f:o:i:lp:t:h", long_options, &option_index);
     if (c == -1)
       break;
     switch (c) {

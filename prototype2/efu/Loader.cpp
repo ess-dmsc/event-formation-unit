@@ -14,8 +14,6 @@ Loader::~Loader() {
   unloadPlugin();
 }
 
-Loader::Loader() {}
-
 void Loader::unloadPlugin() {
   ParserPopulator = nullptr;
   if (nullptr != handle) {
@@ -38,7 +36,9 @@ bool Loader::loadPlugin(const std::string lib) {
   std::vector<std::string> PossibleSuffixes{"", ".so", ".dll", ".dylib"};
 
   for (auto &CSuffix : PossibleSuffixes) {
-    std::string TestLibName = "./" + lib + CSuffix;
+    // allow both absolute and relative path
+    std::string Prefix = (lib[0] == '/') ? "" : "./";
+    std::string TestLibName = Prefix + lib + CSuffix;
     handle = dlopen(TestLibName.c_str(), RTLD_NOW);
     if (handle != nullptr) {
       LOG(INIT, Sev::Info, "Loaded library \"{}\".",
@@ -76,10 +76,7 @@ bool Loader::loadPlugin(const std::string lib) {
 }
 
 bool Loader::IsOk() {
-  if (nullptr == myFactory) {
-    return false;
-  }
-  return true;
+  return not (myFactory == nullptr);
 }
 
 std::shared_ptr<Detector> Loader::createDetector(BaseSettings settings) {

@@ -12,6 +12,7 @@
 #include "AdcBufferElements.h"
 #include "AdcTimeStamp.h"
 #include "ChannelID.h"
+#include "SamplingRun.h"
 #include <exception>
 #include <functional>
 #include <netinet/in.h>
@@ -38,10 +39,10 @@ public:
   };
   /// \brief Sets the (parsing) error type to Type::UNKNOWN.
   /// \param[in] ErrorStr The string describing the exception.
-  ParserException(std::string const &ErrorStr);
+  explicit ParserException(std::string const &ErrorStr);
   /// \brief Sets the parsing error to the give type.
   /// \param[in] ErrorType The parser error type.
-  ParserException(Type ErrorType);
+  explicit ParserException(Type ErrorType);
   virtual const char *what() const noexcept override;
   Type getErrorType() const;
 
@@ -50,36 +51,9 @@ private:
   std::string Error;
 };
 
-/// \brief Data stored in this struct represents a (properly parsed) sampling
-/// run.
-struct SamplingRun {
-  SamplingRun() = default;
-  SamplingRun(size_t ReserveElements) noexcept : Data(ReserveElements) {
-    Data.clear();
-  }
-  ~SamplingRun() = default;
-  SamplingRun(const SamplingRun &&Other)
-      : TimeStamp(Other.TimeStamp), Identifier(Other.Identifier),
-        OversamplingFactor(Other.OversamplingFactor),
-        Data(std::move(Other.Data)) {}
-  SamplingRun &operator=(const SamplingRun &) = default;
-  RawTimeStamp TimeStamp;
-  void reset() {
-    Data.clear();
-    OversamplingFactor = 1;
-    TimeStamp.Seconds = 0;
-    TimeStamp.SecondsFrac = 0;
-    Identifier.ChannelNr = 0;
-    Identifier.SourceID = 0;
-  }
-  ChannelID Identifier;
-  std::uint16_t OversamplingFactor{1};
-  std::vector<std::uint16_t> Data;
-};
-
 class ModuleProcessingException : public std::runtime_error {
 public:
-  ModuleProcessingException(SamplingRun *Data)
+  explicit ModuleProcessingException(SamplingRun *Data)
       : std::runtime_error("Unable to processe data module"),
         UnproccesedData(Data) {}
   SamplingRun *UnproccesedData;

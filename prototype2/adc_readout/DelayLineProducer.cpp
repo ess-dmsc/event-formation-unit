@@ -15,7 +15,8 @@ using namespace std::chrono_literals;
 
 DelayLineProducer::DelayLineProducer(std::string Broker, std::string Topic,
                                      AdcSettings EfuSettings)
-    : Producer(Broker, Topic), Settings(EfuSettings) {
+    : Producer(std::move(Broker), std::move(Topic)),
+      Settings(std::move(EfuSettings)) {
   PulseProcessingThread =
       std::thread(&DelayLineProducer::pulseProcessingFunction, this);
 }
@@ -56,7 +57,11 @@ void DelayLineProducer::serializeAndSendEvent(const DelayLineEvent &Event) {
   auto SourceName = Builder.CreateString("delay_line_detector");
   auto ToF_Vector = Builder.CreateVector(
       std::vector<std::uint32_t>{static_cast<unsigned int>(Event.Amplitude)});
-  std::uint32_t EventPosition = (Event.X << 16) + Event.Y;
+  std::uint32_t EventPosition = essgeometry.pixel2D(
+      static_cast<uint32_t>(Event.X), static_cast<uint32_t>(Event.Y));
+  if (EventPosition == 0) {
+    // \todo report geometry error to grafana and return?
+  }
   auto DetectorID_Vector =
       Builder.CreateVector(std::vector<std::uint32_t>{EventPosition});
   EventMessageBuilder EvBuilder(Builder);

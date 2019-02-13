@@ -16,8 +16,8 @@ using namespace std::chrono_literals;
 
 class DelayLineProducerStandIn : public DelayLineProducer {
 public:
-  DelayLineProducerStandIn(AdcSettings Settings)
-      : DelayLineProducer("no_broker", "no_topic", Settings) {}
+  explicit DelayLineProducerStandIn(AdcSettings Settings)
+      : DelayLineProducer("no_broker", "no_topic", std::move(Settings)) {}
   void bypassMockSerializeAndSendEvent(DelayLineEvent const &Evt) {
     DelayLineProducer::serializeAndSendEvent(Evt);
   }
@@ -47,7 +47,7 @@ TEST_F(DelayLineProducerTest, AddedValidPulse) {
   PulseParameters TestPulse;
   TestPulse.Identifier.ChannelNr = 0;
   TestPulse.Identifier.SourceID = 0;
-  TestPulse.PeakTimestamp = {123456, 0};
+  TestPulse.ThresholdTimestampNS = 12345;
   TestProducer->addPulse(TestPulse);
   std::this_thread::sleep_for(50ms);
 }
@@ -57,7 +57,6 @@ TEST_F(DelayLineProducerTest, AddedInvalidPulse) {
   PulseParameters TestPulse;
   TestPulse.Identifier.ChannelNr = 0;
   TestPulse.Identifier.SourceID = 1;
-  TestPulse.PeakTimestamp = {123456, 0};
   TestProducer->addPulse(TestPulse);
   std::this_thread::sleep_for(50ms);
 }
@@ -65,7 +64,7 @@ TEST_F(DelayLineProducerTest, AddedInvalidPulse) {
 TEST_F(DelayLineProducerTest, CallProduceTest) {
   REQUIRE_CALL(*TestProducer, produce(_, _)).TIMES(1).RETURN(0);
   ;
-  DelayLineEvent TestEvent;
+  DelayLineEvent TestEvent{};
   TestProducer->bypassMockSerializeAndSendEvent(TestEvent);
   std::this_thread::sleep_for(50ms);
 }
@@ -77,17 +76,16 @@ static std::uint64_t TestTimestamp = 987654321;
 
 bool dataHasExpectedContent(void *Ptr) {
   auto EventData = GetEventMessage(Ptr);
-  std::uint32_t DetectorIDValue = (TestXpos << 16) + TestYpos;
-  if (EventData->pulse_time() != TestTimestamp or
-      EventData->source_name()->str() != "delay_line_detector" or
-      EventData->message_id() != 0 or
-      EventData->pulse_time() != TestTimestamp or
-      EventData->detector_id()->size() != 1 or
-      EventData->detector_id()->operator[](0) != DetectorIDValue or
-      EventData->time_of_flight()->size() != 1 or
-      EventData->time_of_flight()->operator[](0) != TestAmplitude) {
-    return false;
-  }
+  std::uint32_t DetectorIDValue = (TestYpos << 16u) + TestXpos + 1u;
+  EXPECT_EQ(EventData->pulse_time(), TestTimestamp);
+  EXPECT_EQ(EventData->source_name()->str(),
+            std::string("delay_line_detector"));
+  EXPECT_EQ(EventData->message_id(), 0u);
+  EXPECT_EQ(EventData->pulse_time(), TestTimestamp);
+  EXPECT_EQ(EventData->detector_id()->size(), 1u);
+  EXPECT_EQ(EventData->detector_id()->Get(0), DetectorIDValue);
+  EXPECT_EQ(EventData->time_of_flight()->size(), 1u);
+  EXPECT_EQ(EventData->time_of_flight()->Get(0), TestAmplitude);
   return true;
 }
 
@@ -102,7 +100,7 @@ inline auto validFBEvent() {
 
 TEST_F(DelayLineProducerTest, CallProduceContentTest) {
   REQUIRE_CALL(*TestProducer, produce(validFBEvent(), _)).TIMES(1).RETURN(0);
-  DelayLineEvent TestEvent;
+  DelayLineEvent TestEvent{};
   TestEvent.X = TestXpos;
   TestEvent.Y = TestYpos;
   TestEvent.Amplitude = TestAmplitude;

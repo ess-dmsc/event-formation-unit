@@ -27,11 +27,11 @@ enum class TimeStampLocation {
 /// \brief Contains data that is to be serialized into a flatbuffer.
 struct ProcessedSamples {
   ProcessedSamples() = default;
-  ProcessedSamples(size_t NrOfSamples)
+  explicit ProcessedSamples(size_t NrOfSamples)
       : Samples(NrOfSamples), TimeStamps(NrOfSamples) {}
-  int Channel;
-  std::uint64_t TimeStamp;
-  double TimeDelta;
+  ChannelID Identifier{0, 0};
+  std::uint64_t TimeStamp{0};
+  double TimeDelta{0};
   std::vector<std::uint16_t> Samples;
   std::vector<std::uint64_t> TimeStamps;
 };
@@ -94,7 +94,7 @@ public:
   /// \param[in] Prod Shared pointer to Kafka producer instance.
   /// \param[in] Name Name of the data source. Used when setting the name of the
   /// source of the flatbuffer.
-  SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string const &Name);
+  SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string Name);
   ~SampleProcessing() = default;
 
   /// \brief Called to actually process, serialise and transmit the (already)

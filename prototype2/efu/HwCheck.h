@@ -31,7 +31,7 @@ public:
   void setMinimumMTU(int mtu) { MinimumMtu = mtu; }
 
   /// Gleaned from MacOS and CentOS and deemed ignore worthy
-  std::vector<std::string> IgnoredInterfaces = {"ppp0", "docker", "ov-"};
+  std::vector<std::string> IgnoredInterfaces = {"ppp0", "docker", "ov-", "virbr"};
 
   /// \brief
   // bool checkDiskSpace(std::vector<std::string> checkdirs);

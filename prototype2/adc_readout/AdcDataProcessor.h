@@ -18,7 +18,7 @@
 /// AdcDataProcessor::processPacket().
 class AdcDataProcessor {
 public:
-  AdcDataProcessor(std::shared_ptr<ProducerBase> Prod);
+  explicit AdcDataProcessor(std::shared_ptr<ProducerBase> Prod);
   virtual ~AdcDataProcessor() = default;
 
   /// \brief Pure virtual function that must be implemented in order to process

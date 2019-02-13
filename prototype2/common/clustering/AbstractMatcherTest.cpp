@@ -17,7 +17,7 @@
 
 class MockMatcher : public AbstractMatcher {
 public:
-  MockMatcher(uint64_t latency)
+  explicit MockMatcher(uint64_t latency)
       : AbstractMatcher(latency) {}
   MockMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2)
       : AbstractMatcher(latency, plane1, plane2) {}

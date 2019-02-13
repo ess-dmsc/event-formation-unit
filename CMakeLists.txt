@@ -19,13 +19,13 @@ if(${CONAN} MATCHES "AUTO")
   include(${CMAKE_MODULE_PATH}/conan.cmake)
   conan_cmake_run(CONANFILE conanfile.txt
       PROFILE ${CONAN_PROFILE}
-      BASIC_SETUP NO_OUTPUT_DIRS KEEP_RPATHS
+      BASIC_SETUP NO_OUTPUT_DIRS KEEP_RPATHS NO_IMPORTS
       BUILD_TYPE "None"
       BUILD outdated)
 elseif(${CONAN} MATCHES "MANUAL")
   if(EXISTS "${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
     include("${CMAKE_BINARY_DIR}/conanbuildinfo.cmake")
-    conan_basic_setup(NO_OUTPUT_DIRS SKIP_RPATH)
+    conan_basic_setup(NO_OUTPUT_DIRS KEEP_RPATHS)
   else()
     MESSAGE(FATAL_ERROR "CONAN set to MANUAL but no file named conanbuildinfo.cmake found in build directory")
   endif()
@@ -62,7 +62,7 @@ include_directories(.)
 include(Utilities.cmake)
 add_subdirectory(libs)
 add_subdirectory(prototype2)
-add_subdirectory(udp)
+add_subdirectory(utils/udp)
 
 #=============================================================================
 # Finalize tests

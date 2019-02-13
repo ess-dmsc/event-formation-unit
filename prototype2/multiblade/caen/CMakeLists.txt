@@ -41,10 +41,33 @@ create_test_executable(MBGeometryTest)
 
 # Create excecutable for test of configuration
 set(MBConfigTest_INC
-  ../../../prototype2/common/DataSave.h
   Config.h)
 set(MBConfigTest_SRC
-  ../../../prototype2/common/DataSave.cpp
   Config.cpp
   ConfigTest.cpp)
 create_test_executable(MBConfigTest)
+
+#
+# Tests relating to event building and benchmarks
+#
+
+# EventBuilderTest.cpp
+set(MBEventBuilderTest_INC
+  ../clustering/EventBuilder.h
+  )
+set(MBEventBuilderTest_SRC
+  ../clustering/EventBuilder.cpp
+  EventBuilderTest.cpp)
+create_test_executable(MBEventBuilderTest)
+
+
+# EventBuilderBenchmarkTest.cpp
+set(MBEventBuilderBenchmarkTest_INC
+  ../clustering/EventBuilder.h
+  ../../common/clustering/GapClusterer.h
+  ../../common/clustering/GapMatcher.h
+)
+set(MBEventBuilderBenchmarkTest_SRC
+  ../clustering/EventBuilder.cpp
+EventBuilderBenchmarkTest.cpp)
+create_benchmark_executable(MBEventBuilderBenchmarkTest)

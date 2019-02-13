@@ -9,6 +9,8 @@ namespace Gem {
 ReaderReadouts::ReaderReadouts(std::string filename) {
   file = ReadoutFile::open(filename);
   total_ = file->count();
+  ReadoutSize = sizeof(Readout);
+  ChunkSize = ReadoutFile::ChunkSize;
   current_ = 0;
 }
 
@@ -35,5 +37,4 @@ size_t ReaderReadouts::read(char *buf) {
 }
 
 }
-
 // GCOVR_EXCL_STOP

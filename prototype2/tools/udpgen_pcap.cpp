@@ -23,11 +23,11 @@ int main(int argc, char *argv[]) {
 
   std::string pcapfile(opts.filename);
 
-  int rdsize;
   uint64_t packets = 0;
   uint64_t totpackets = 0;
   int pcappackets = 0;
   do {
+    int rdsize;
     ReaderPcap pcap(pcapfile);
     while ((rdsize = pcap.read((char *)&buffer, sizeof(buffer))) != -1) {
       if (rdsize == 0) {

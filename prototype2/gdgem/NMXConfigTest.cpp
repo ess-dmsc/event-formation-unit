@@ -1,12 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <algorithm>
-#include <common/DataSave.h>
-#include <cstring>
 #include <gdgem/NMXConfig.h>
-#include <memory>
 #include <test/TestBase.h>
-#include <unistd.h>
 
 std::string nocalibration{""};
 
@@ -45,8 +40,7 @@ TEST_F(NMXConfigTest, EventFilter) {
 
 
 TEST_F(NMXConfigTest, NoConfigFile) {
-  NMXConfig nmxconfig("file_does_not_exist", nocalibration);
-  EXPECT_TRUE(nmxconfig.builder_type.empty());
+  EXPECT_THROW(NMXConfig nmxconfig("file_does_not_exist", nocalibration);, std::runtime_error);
 }
 
 TEST_F(NMXConfigTest, DebugPrint) {

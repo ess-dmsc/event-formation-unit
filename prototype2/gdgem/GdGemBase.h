@@ -29,7 +29,7 @@ using namespace memory_sequential_consistent; // Lock free fifo
 
 class GdGemBase : public Detector {
 public:
-  GdGemBase(BaseSettings const & settings, NMXSettings & LocalNMXSettings);
+  GdGemBase(BaseSettings const & settings, NMXSettings & LocalSettings);
   ~GdGemBase() {delete eth_ringbuf;}
 
 

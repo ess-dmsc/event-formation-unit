@@ -14,7 +14,8 @@
 #include <pthread.h>
 #endif
 
-using namespace SpscBuffer;
+using SpscBuffer::CircularBuffer;
+using SpscBuffer::ElementPtr;
 
 TEST(GetEmpty, GetSingle) {
   ElementPtr<int> SomePtr(nullptr);
@@ -72,7 +73,7 @@ TEST(PutElem, PutOne) {
   ElementPtr<int> SomePtr(nullptr);
   int Elements = 10;
   CircularBuffer<int> SomeBuffer(Elements);
-  SomeBuffer.tryGetEmpty(SomePtr);
+  ASSERT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
   EXPECT_TRUE(SomeBuffer.tryPutData(std::move(SomePtr)));
 }
 
@@ -82,7 +83,7 @@ TEST(PutElem, PutMultiple) {
                      // implementation of the queue
   CircularBuffer<int> SomeBuffer(Elements);
   for (int j = 0; j < Elements; j++) {
-    SomeBuffer.tryGetEmpty(SomePtr);
+    ASSERT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
     EXPECT_TRUE(SomeBuffer.tryPutData(std::move(SomePtr)));
   }
   int SomeValue = 5;
@@ -104,7 +105,7 @@ TEST(GetElem, GetOneSuccess) {
   int Elements = 15; // One less than a power of 2 value due to the
                      // implementation of the queue
   CircularBuffer<int> SomeBuffer(Elements);
-  SomeBuffer.tryGetEmpty(SomePtr);
+  ASSERT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
   SomeBuffer.tryPutData(std::move(SomePtr));
   EXPECT_TRUE(SomeBuffer.tryGetData(SomePtr));
   EXPECT_NE(SomePtr, nullptr);
@@ -116,7 +117,7 @@ TEST(GetElem, GetMultiple) {
                      // implementation of the queue
   CircularBuffer<int> SomeBuffer(Elements);
   for (int i = 0; i < Elements; i++) {
-    SomeBuffer.tryGetEmpty(SomePtr);
+    ASSERT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
     SomeBuffer.tryPutData(std::move(SomePtr));
   }
   for (int u = 0; u < Elements; u++) {
@@ -138,7 +139,7 @@ TEST(PutGetElem, One) {
   int Elements = 15; // One less than a power of 2 value due to the
                      // implementation of the queue
   CircularBuffer<int> SomeBuffer(Elements);
-  SomeBuffer.tryGetEmpty(SomePtr);
+  ASSERT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
   int *TempPtr = SomePtr;
   int SomeInt = Distribution(Generator);
   *SomePtr = SomeInt;
@@ -162,7 +163,7 @@ TEST(PutGetElem, Multiple) {
   for (int e = 0; e < Elements; e++) {
     int SomeInt = Distribution(Generator);
     Data.push_back(SomeInt);
-    EXPECT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
+    ASSERT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
     *SomePtr = SomeInt;
     DataPtr.push_back(SomePtr);
     SomeBuffer.tryPutData(std::move(SomePtr));
@@ -185,7 +186,7 @@ TEST(PutGetElem, EmptyReturn) {
   CircularBuffer<int> SomeBuffer(Elements);
 
   for (int e = 0; e < Elements; e++) {
-    EXPECT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
+    ASSERT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
     DataPtr.push_back(SomePtr);
     SomeBuffer.tryPutData(std::move(SomePtr));
   }
@@ -196,7 +197,7 @@ TEST(PutGetElem, EmptyReturn) {
   }
 
   for (int g = 0; g < Elements; g++) {
-    SomeBuffer.tryGetEmpty(SomePtr);
+    ASSERT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
     EXPECT_EQ(SomePtr, DataPtr[g]);
     SomeBuffer.tryPutData(std::move(SomePtr));
   }

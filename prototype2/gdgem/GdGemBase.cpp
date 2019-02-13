@@ -198,14 +198,6 @@ void bin(Hists& hists, const Hit &e)
   }
 }
 
-void bin_hists(Hists& hists, const std::list<Cluster>& cl)
-{
-  for (const auto& cluster : cl)
-    for (const auto& e : cluster.hits)
-      bin(hists, e);
-}
-
-
 void GdGemBase::apply_configuration() {
   LOG(INIT, Sev::Info, "NMXConfig:\n{}", nmx_opts.debug());
 

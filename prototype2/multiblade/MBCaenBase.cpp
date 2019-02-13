@@ -113,8 +113,8 @@ void CAENBase::input_thread() {
   receiver.printBufferSizes();
   receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
-  int rdsize;
   for (;;) {
+    int rdsize;
     unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */

@@ -25,7 +25,7 @@ UDPServer::~UDPServer() {
   Socket.close();
 }
 
-void UDPServer::handleWrite(const asio::error_code &Err, std::size_t __attribute__((unused)) BytesSent, BufferPtr Buffer) {
+void UDPServer::handleWrite(const asio::error_code &Err, std::size_t, BufferPtr Buffer) {
   if (Err) {
     ConnectionOk = false;
   }

@@ -39,10 +39,10 @@ TEST_F(RingBufferTest, CircularWrap) {
   char *first = buf.getDataBuffer(index); // Save for last
 
   for (int i = 0; i < N; i++) {
-    unsigned int index = buf.getDataIndex();
-    ASSERT_EQ(i, index);
+    unsigned int InnerIndex= buf.getDataIndex();
+    ASSERT_EQ(i, InnerIndex);
 
-    int *ip = (int *)buf.getDataBuffer(index);
+    int *ip = (int *)buf.getDataBuffer(InnerIndex);
     ASSERT_NE(ip, nullptr);
     ASSERT_EQ(i, buf.getDataIndex());
     *ip = N + i;
@@ -51,8 +51,8 @@ TEST_F(RingBufferTest, CircularWrap) {
   ASSERT_EQ(0, buf.getDataIndex());
 
   for (int i = 0; i < N; i++) {
-    unsigned int index = buf.getDataIndex();
-    int *ip = (int *)buf.getDataBuffer(index);
+    unsigned int InnerIndex = buf.getDataIndex();
+    int *ip = (int *)buf.getDataBuffer(InnerIndex);
     ASSERT_EQ(*ip, N + i);
     buf.getNextBuffer();
   }

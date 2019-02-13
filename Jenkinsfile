@@ -32,7 +32,7 @@ images = [
         'cmake_flags': ''
     ],
     'debian9': [
-        'name': 'essdmscdm/debian9-build-node:2.5.1',
+        'name': 'essdmscdm/debian9-build-node:2.5.2',
         'sh'  : 'bash -e',
         'cmake_flags': ''
     ]
@@ -45,8 +45,6 @@ def failure_function(exception_obj, failureMessage) {
     emailext body: '${DEFAULT_CONTENT}\n\"' + failureMessage + '\"\n\nCheck console output at $BUILD_URL to view the results.',
             recipientProviders: toEmails,
             subject: '${DEFAULT_SUBJECT}'
-    slackSend color: 'danger',
-            message: "${project}-${env.BRANCH_NAME}: " + failureMessage
     throw exception_obj
 }
 
@@ -205,10 +203,7 @@ def docker_archive(image_key) {
                         cp -r ${project}/prototype2/multigrid/configs/* archive/event-formation-unit/configs/
                         cp -r ${project}/prototype2/gdgem/configs/* archive/event-formation-unit/configs/
                         cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
-                        cp -r ${project}/utils/hwcheck archive/event-formation-unit/util/
-                        cp -r ${project}/monitors/* archive/event-formation-unit/util
                         mkdir archive/event-formation-unit/data
-                        cp -r ${project}/prototype2/multigrid/calib_data/* archive/event-formation-unit/data
                         cd archive
                         tar czvf event-formation-unit-centos7.tar.gz event-formation-unit
 
@@ -263,32 +258,42 @@ def get_pipeline(image_key)
     }
 }
 
-def get_macos_pipeline()
-{
+def get_system_tests_pipeline() {
     return {
-        stage("macOS") {
-            node ("macos") {
-            // Delete workspace when build is done
-                cleanWs()
-
-                abs_dir = pwd()
-
-                dir("${project}") {
-                    checkout scm
+        node('system-test') {
+            cleanWs()
+            dir("${project}") {
+                try{
+                    stage("System tests: Checkout") {
+                        checkout scm
+                    }  // stage
+                    stage("System tests: Install requirements") {
+                        sh """scl enable rh-python35 -- python -m pip install --user --upgrade pip
+                        scl enable rh-python35 -- python -m pip install --user -r system-tests/requirements.txt
+                        """
+                    }  // stage
+                    stage("System tests: Run") {
+                        sh """docker stop \$(docker ps -a -q) && docker rm \$(docker ps -a -q) || true
+                                                """
+			timeout(time: 30, activity: true){
+                            sh """cd system-tests/
+                            scl enable rh-python35 -- python -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22
+                            """
+			}
+                    }  // stage
+                }finally {
+		    stage("System tests: Cleanup") {
+                        sh """docker stop \$(docker ps -a -q) && docker rm \$(docker ps -a -q) || true
+                        """
+                    }  // stage
+                    stage("System tests: Archive") {
+                        junit "system-tests/SystemTestsOutput.xml"
+                    }
                 }
-
-                dir("${project}/build") {
-                    sh "conan install --build=outdated .."
-                    sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
-                    sh "make -j4"
-                    sh "make -j4 unit_tests"
-                    sh "make runtest"
-                    sh "make runefu"
-                }
-            }
-        }
-    }
-}
+            } // dir
+        }  // node
+    }  // return
+}  // def
 
 node('docker') {
     dir("${project}_code") {
@@ -319,10 +324,15 @@ node('docker') {
         def image_key = x
         builders[image_key] = get_pipeline(image_key)
     }
-    builders['macOS'] = get_macos_pipeline()
+
+    if ( env.CHANGE_ID ) {
+        builders['system tests'] = get_system_tests_pipeline()
+    }
 
     try {
-        parallel builders
+        timeout(time: 2, unit: 'HOURS') {
+            parallel builders
+        }
     } catch (e) {
         failure_function(e, 'Job failed')
         throw e

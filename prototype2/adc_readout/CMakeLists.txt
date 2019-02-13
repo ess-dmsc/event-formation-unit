@@ -14,6 +14,7 @@ set(AdcReadoutBase_SRC
     DelayLineEventFormation.cpp
     DelayLineProcessing.cpp
     DelayLinePositionCalc.cpp
+    PulseParameters.cpp
     )
 
 set(AdcReadoutBase_INC
@@ -33,6 +34,7 @@ set(AdcReadoutBase_INC
     DelayLineProcessing.h
     DelayLinePositionCalc.h
     PulseParameters.h
+    SamplingRun.h
     ChannelID.h
     )
 
@@ -54,7 +56,6 @@ set(AdcReadoutTest_SRC
     test/AdcReadoutTest.cpp
     test/AdcParseTest.cpp
     test/TestUDPServer.cpp
-    test/PeakFinderTest.cpp
     test/AdcDataProcessorTest.cpp
     test/SampleProcessingTest.cpp
     test/CLIArgumentsTest.cpp
@@ -62,7 +63,7 @@ set(AdcReadoutTest_SRC
     test/UDPClientTest.cpp
     test/DelayLineProducerTest.cpp
     test/DelayLineEventFormationTest.cpp
-    test/DelayLineProcessingTest.cpp
+    test/PulseProcessingTest.cpp
     test/DelayLinePositionCalcTest.cpp
     ${AdcReadoutBase_SRC}
     )

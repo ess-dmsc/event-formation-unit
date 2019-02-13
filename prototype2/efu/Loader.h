@@ -26,9 +26,7 @@ public:
 
   /// \brief Load instrument plugin from detector name
   /// \param name Instrument name - .so suffix will be added
-  Loader();
-
-  Loader(Detector *detector);
+  Loader() = default;
 
   bool loadPlugin(std::string lib);
   void unloadPlugin();

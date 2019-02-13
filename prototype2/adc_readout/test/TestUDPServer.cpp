@@ -8,6 +8,7 @@
 
 #include "TestUDPServer.h"
 #include <ciso646>
+#include <cstring>
 #include <functional>
 #include <iostream>
 #include <random>
@@ -29,18 +30,17 @@ TestUDPServer::TestUDPServer(std::uint16_t SrcPort, std::uint16_t DstPort,
                              int PacketSize)
     : Service(), SourcePort(SrcPort), DestinationPort(DstPort),
       Socket(Service, asio::ip::udp::endpoint(asio::ip::udp::v4(), SourcePort)),
-      Resolver(Service), PacketTimer(Service) {
-  BufferSize = PacketSize;
-  SendBuffer = std::unique_ptr<std::uint8_t[]>(new std::uint8_t[PacketSize]);
-}
+      Resolver(Service), BufferSize(PacketSize),
+      SendBuffer(std::make_unique<std::uint8_t[]>(PacketSize)),
+      PacketTimer(Service) {}
 
 TestUDPServer::TestUDPServer(std::uint16_t SrcPort, std::uint16_t DstPort,
                              std::uint8_t *DataPtr, size_t DataLength)
     : Service(), SourcePort(SrcPort), DestinationPort(DstPort),
       Socket(Service, asio::ip::udp::endpoint(asio::ip::udp::v4(), SrcPort)),
-      Resolver(Service), PacketTimer(Service) {
-  BufferSize = DataLength;
-  SendBuffer = std::unique_ptr<std::uint8_t[]>(new std::uint8_t[DataLength]);
+      Resolver(Service), BufferSize(DataLength),
+      SendBuffer(std::make_unique<std::uint8_t[]>(DataLength)),
+      PacketTimer(Service) {
   std::memcpy(SendBuffer.get(), DataPtr, DataLength);
 }
 #pragma GCC diagnostic pop

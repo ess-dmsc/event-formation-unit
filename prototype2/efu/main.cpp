@@ -1,5 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <cstdlib>
 #include <common/EFUArgs.h>
 #include <common/StatPublisher.h>
 #include <common/Log.h>
@@ -10,6 +11,7 @@
 #include <efu/Loader.h>
 #include <efu/Parser.h>
 #include <efu/Server.h>
+#include <iostream>
 #include <libs/include/Timer.h>
 #include <libs/include/gccintel.h>
 #include <unistd.h> // sleep()

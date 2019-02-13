@@ -27,7 +27,7 @@ public:
   UDPServer(std::uint16_t SrcPort, std::uint16_t DstPort);
   ~UDPServer();
 
-  bool IsOk() {return ConnectionOk;};
+  bool IsOk() const {return ConnectionOk;};
   bool TransmitPacket(const std::uint8_t *DataPtr, const std::uint32_t Size);
 private:
   std::atomic_bool ConnectionOk = {false};
@@ -39,7 +39,7 @@ private:
   asio::ip::udp::socket Socket;
   asio::ip::udp::resolver Resolver;
 
-  void handleWrite(const asio::error_code &err, std::size_t BytesSent, BufferPtr Buffer);
+  void handleWrite(const asio::error_code &Err, std::size_t, BufferPtr Buffer);
   void handleResolve(const asio::error_code &Err, asio::ip::udp::resolver::iterator EndpointIter);
   void handleConnect(const asio::error_code &Err, asio::ip::udp::resolver::iterator EndpointIter);
   void handlePacketTransmit(BufferPtr Buffer, const std::uint32_t Size);
