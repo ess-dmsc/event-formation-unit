@@ -28,27 +28,32 @@ public:
 public:
   Hists(size_t strip_max, size_t adc_max);
 
-  void set_cluster_adc_downshift(uint32_t bits);
+  void set_cluster_adc_downshift(uint8_t bits);
 
   /// \brief clears histograms
   void clear();
 
+  /// \brief assume range is good
   void bin_x(uint16_t xstrip, uint16_t xadc);
+
+  /// \brief assume range is good
   void bin_y(uint16_t xstrip, uint16_t xadc);
+
+  /// \brief assume range is good
   void bincluster(uint32_t sum);
 
   bool isEmpty() const;
   size_t hit_count() const;
   size_t cluster_count() const;
 
-  uint32_t bin_width() const;
+  size_t bin_width() const;
 
   size_t needed_buffer_size();
   size_t strip_hist_size();
   size_t adc_hist_size();
 
 private:
-  uint32_t downshift_{0};
+  uint8_t downshift_{0};
   size_t hit_count_{0};
   size_t cluster_count_{0};
 
