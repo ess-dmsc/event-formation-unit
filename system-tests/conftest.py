@@ -6,9 +6,16 @@ import docker
 
 
 def pytest_addoption(parser):
-    parser.addoption("--pcap-file-path", type=str,
+
+    def _is_valid_file(arg, filename):
+        if not os.path.isfile(os.path.join(arg, filename)):
+            raise Exception("The file {} does not exist at the given path {}".format(filename, arg))
+        else:
+            return arg
+
+    parser.addoption("--pcap-file-path", type=lambda x: _is_valid_file(x, "ess2_ess_mask.pcap"),
                      help="Path of directory containing pcap file (ess2_ess_mask.pcap)", required=True)
-    parser.addoption("--json-file-path", type=str,
+    parser.addoption("--json-file-path", type=lambda x: _is_valid_file(x, "MB18Freia.json"),
                      help="Path of directory containing JSON file of detector details (MB18Freia.json)", required=True)
 
 
