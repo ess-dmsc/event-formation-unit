@@ -44,15 +44,13 @@ public:
       : sondegeometry(geom) {
     dumptofile = !fileprefix.empty();
     if (dumptofile) {
-      mephdata = std::make_shared<DataSave>(fileprefix + "_single_ch_spec_", 100000000);
-      sephdata = std::make_shared<DataSave>(fileprefix + "_all_ch_spec_", 100000000);
-      eventdata = std::make_shared<DataSave>(fileprefix + "_TOF_", 100000000);
+      datafile = std::make_shared<DataSave>(fileprefix, 100000000);
 
-      mephdata->tofile(
-          "# hdr_count, evtime, trigger_type, asic, channel, sample\n");
-      sephdata->tofile("# hdr_hdrtime, trigger_type, hold_delay, triggering_asic, "
+      datafile->tofile(
+          "#mpeh: hdr_count, evtime, trigger_type, asic, channel, sample\n");
+      datafile->tofile("#seph: hdr_hdrtime, trigger_type, hold_delay, triggering_asic, "
                        "triggering_channel, sample\n");
-      eventdata->tofile("# hdr_count, hdr_hdrtime, hdr_sysno, asic, channel\n");
+      datafile->tofile("#tt: hdr_count, hdr_hdrtime, hdr_sysno, asic, channel\n");
     }
   }
 
@@ -90,9 +88,7 @@ private:
   int hdr_length{0};
 
   bool dumptofile{false};
-  std::shared_ptr<DataSave>(mephdata);
-  std::shared_ptr<DataSave>(sephdata);
-  std::shared_ptr<DataSave>(eventdata);
+  std::shared_ptr<DataSave>(datafile);
 };
 
 }
