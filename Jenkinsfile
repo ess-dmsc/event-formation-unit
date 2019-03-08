@@ -17,12 +17,12 @@ archive_what = "centos7-release"
 
 images = [
     'centos7-release': [
-        'name': 'essdmscdm/centos7-build-node:4.0.0',
+        'name': 'essdmscdm/centos7-build-node:4.1.0',
         'sh': '/usr/bin/scl enable devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
     ],
     'centos7': [
-        'name': 'essdmscdm/centos7-build-node:4.0.0',
+        'name': 'essdmscdm/centos7-build-node:4.1.0',
         'sh': '/usr/bin/scl enable devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCOV=ON'
     ],
