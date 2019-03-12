@@ -7,14 +7,18 @@
 
 #include <sonde/SoNDeBase.h>
 #include <common/EV42Serializer.h>
+#include <common/HistSerializer.h>
 #include <common/Producer.h>
 #include <common/Trace.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <sonde/ideas/Data.h>
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
+
 SONDEIDEABase::SONDEIDEABase(BaseSettings const &settings, struct SoNDeSettings & localSettings)
-     : Detector("SoNDe detector using IDEA readout", settings),
+     : Detector("SoNDe detector using IDEAS readout", settings),
        SoNDeSettings(localSettings) {
 
   Stats.setPrefix("efu.sonde");
@@ -26,6 +30,7 @@ SONDEIDEABase::SONDEIDEABase(BaseSettings const &settings, struct SoNDeSettings 
   Stats.create("input.dropped",                   mystats.fifo_push_errors);
   Stats.create("processing.idle",                 mystats.rx_idle1);
   Stats.create("processing.rx_events",            mystats.rx_events);
+  Stats.create("processing.fifo_errors",          mystats.fifo_synch_errors);
   Stats.create("processing.rx_geometry_errors",   mystats.rx_geometry_errors);
   Stats.create("processing.rx_seq_errors",        mystats.rx_seq_errors);
   Stats.create("output.tx_bytes",                 mystats.tx_bytes);
@@ -89,12 +94,20 @@ void SONDEIDEABase::input_thread() {
 
 void SONDEIDEABase::processing_thread() {
   Sonde::Geometry geometry;
-
   Sonde::IDEASData ideasdata(&geometry, SoNDeSettings.fileprefix);
+
   EV42Serializer flatbuffer(kafka_buffer_size, "SONDE");
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
   flatbuffer.setProducerCallback(
-      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
+    std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
+
+  constexpr uint16_t maxChannels{64};
+  constexpr uint16_t maxAdc{65535};
+  Hists histograms(maxChannels, maxAdc);
+  HistSerializer histfb(histograms.needed_buffer_size());
+  Producer monitorprod(EFUSettings.KafkaBroker, "SKADI_monitor");
+  histfb.set_callback(
+    std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 
   unsigned int data_index;
 
@@ -115,6 +128,13 @@ void SONDEIDEABase::processing_thread() {
         mystats.kafka_dr_errors = eventprod.stats.dr_errors;
         mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
         produce_timer.now();
+
+        if (!histograms.isEmpty()) {
+          XTRACE(PROCESS, DEB, "Sending histogram for %zu readouts",
+                 histograms.hit_count());
+          histfb.produce(histograms);
+          histograms.clear();
+        }
       }
       usleep(10);
 
@@ -133,6 +153,8 @@ void SONDEIDEABase::processing_thread() {
 
         if (events > 0) {
           for (int i = 0; i < events; i++) {
+            assert(ideasdata.data[i].pixel_id < maxChannels);
+            histograms.bin_x(ideasdata.data[i].pixel_id, 1000); /// \todo adc not available
             XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)",
                    i, ideasdata.data[i].time, ideasdata.data[i].pixel_id);
             mystats.tx_bytes += flatbuffer.addEvent(ideasdata.data[i].time,
