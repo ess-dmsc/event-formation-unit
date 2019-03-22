@@ -34,7 +34,7 @@ static constexpr int TscMHz{2900};
 
 MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings const &LocalSettings)
     : Detector("CSPEC", settings), ModuleSettings(LocalSettings) {
-  Stats.setPrefix("efu.mgmesytec");
+  Stats.setPrefix("efu.mgmesytec", EFUSettings.GraphiteRegion);
 
   LOG(INIT, Sev::Info, "Adding stats");
   // clang-format off

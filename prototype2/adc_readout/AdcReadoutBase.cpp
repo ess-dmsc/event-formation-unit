@@ -23,7 +23,7 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
   std::function<void()> inputFunc = [this]() { this->inputThread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
-  Stats.setPrefix("adc_readout" + ReadoutSettings.GrafanaNameSuffix);
+  Stats.setPrefix("adc_readout" + ReadoutSettings.GrafanaNameSuffix, "");
   Stats.create("input.bytes.received", AdcStats.input_bytes_received);
   Stats.create("parser.errors", AdcStats.parser_errors);
   Stats.create("parser.packets.total", AdcStats.parser_packets_total);

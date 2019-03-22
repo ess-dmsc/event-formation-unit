@@ -22,22 +22,23 @@
 // All settings should be initialized.
 // clang-format off
 struct BaseSettings {
-  std::string   DetectorPluginName   = {""};
-  std::string   DetectorAddress      = {"0.0.0.0"};
-  std::uint16_t DetectorPort         = {9000};
-  std::uint16_t CommandServerPort    = {8888};
-  std::int32_t  ReceiveMaxBytes      = {9000}; // Jumbo frame support
-  std::int32_t  DetectorRxBufferSize = {2000000};
-  std::int32_t  DetectorTxBufferSize = {200000};
-  std::string   KafkaBroker          = {"localhost:9092"};
-  std::string   GraphiteAddress      = {"127.0.0.1"};
-  std::uint16_t GraphitePort         = {2003};
-  std::string   KafkaTopic           = {""};
-  std::string   ConfigFile           = {""};
-  std::uint64_t UpdateIntervalSec    = {1};
-  std::uint32_t StopAfterSec         = {0xffffffffU};
-  bool NoHwCheck                     = {false};
-  bool          TestImage            = {false};
+  std::string   DetectorPluginName   {""};
+  std::string   DetectorAddress      {"0.0.0.0"};
+  std::uint16_t DetectorPort         {9000};
+  std::uint16_t CommandServerPort    {8888}; /// \todo make same as detector port
+  std::int32_t  ReceiveMaxBytes      {9000}; // Jumbo frame support
+  std::int32_t  DetectorRxBufferSize {2000000};
+  std::int32_t  DetectorTxBufferSize {200000};
+  std::string   KafkaBroker          {"localhost:9092"};
+  std::string   GraphiteRegion       {"1"};
+  std::string   GraphiteAddress      {"127.0.0.1"};
+  std::uint16_t GraphitePort         {2003};
+  std::string   KafkaTopic           {""};
+  std::string   ConfigFile           {""};
+  std::uint64_t UpdateIntervalSec    {1};
+  std::uint32_t StopAfterSec         {0xffffffffU};
+  bool          NoHwCheck            {false};
+  bool          TestImage            {false};
 };
 // clang-format on
 
@@ -52,7 +53,7 @@ public:
   using CommandFunction =
       std::function<int(std::vector<std::string>, char *, unsigned int *)>;
   using ThreadList = std::vector<ThreadInfo>;
-  Detector(std::string Name, BaseSettings settings) : EFUSettings(settings), Stats(Name), DetectorName(Name) {};
+  Detector(std::string Name, BaseSettings settings) : EFUSettings(settings), Stats(), DetectorName(Name) {};
 
   virtual ~Detector() = default;
 
@@ -65,9 +66,9 @@ public:
   /// \brief document
   virtual std::string &statname(size_t index) { return Stats.name(index); }
 
-  void setStatsPrefix(std::string NewStatsPrefix) {
-    Stats.setPrefix(NewStatsPrefix);
-  }
+  // void setStatsPrefix(std::string NewStatsPrefix) {
+  //   Stats.setPrefix(NewStatsPrefix);
+  // }
 
   virtual const char *detectorname() { return DetectorName.c_str(); }
 

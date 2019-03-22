@@ -74,6 +74,7 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-p,--port", EFUSettings.DetectorPort, "TCP/UDP receive port")
       ->group("EFU Options")->default_str("9000");
 
+  /// \todo maybe delete this option and use the -p port ?
   CLIParser.add_option("-m,--cmdport", EFUSettings.CommandServerPort,
                        "Command parser tcp port")
       ->group("EFU Options")->default_str("8888");
@@ -81,6 +82,10 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-g,--graphite", EFUSettings.GraphiteAddress,
                        "IP address of graphite metrics server")
       ->group("EFU Options")->default_str("127.0.0.1");
+
+  CLIParser.add_option("-r,--region", EFUSettings.GraphiteRegion,
+                       "name of detector region covered by this pipeline")
+      ->group("EFU Options")->default_str("region1");
 
   CLIParser.add_option("-o,--gport", EFUSettings.GraphitePort, "Graphite tcp port")
       ->group("EFU Options")->default_str("2003");

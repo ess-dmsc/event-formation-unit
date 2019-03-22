@@ -3,6 +3,7 @@
 #=============================================================================
 set(efu_SRC
   ../common/EFUArgs.cpp
+  ../common/NewStats.cpp
   ../common/StatPublisher.cpp
   ExitHandler.cpp
   HwCheck.cpp
@@ -14,6 +15,7 @@ set(efu_SRC
   )
 
 set(efu_INC
+  ../common/NewStats.h
   ../common/StatPublisher.h
   ExitHandler.h
   HwCheck.h

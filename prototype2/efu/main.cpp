@@ -83,6 +83,12 @@ int main(int argc, char *argv[]) {
   GraylogSettings GLConfig;
   Loader loader;
   HwCheck hwcheck;
+  Timer RunTimer;
+
+  int64_t upTime;
+  NewStats mainStats;
+  mainStats.create("efu.main.uptime", upTime);
+
 
   { //Make sure that the EFUArgs instance is deallocated before the detector plugin is
     EFUArgs efu_args;
@@ -179,7 +185,7 @@ int main(int argc, char *argv[]) {
   Parser cmdParser(detector, keep_running);
   Server cmdAPI(DetectorSettings.CommandServerPort, cmdParser);
 
-  Timer RunTimer, livestats;
+  Timer livestats;
 
   while (true) {
     //Do not allow immediate exits
@@ -201,7 +207,8 @@ int main(int argc, char *argv[]) {
     }
 
     if ((livestats.timeus() >= MicrosecondsPerSecond) && detector != nullptr) {
-      metrics.publish(detector);
+      upTime = (int64_t)RunTimer.timeus()/1000000;
+      metrics.publish(detector, mainStats);
       livestats.now();
     }
 

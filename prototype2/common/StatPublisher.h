@@ -10,6 +10,7 @@
 #pragma once
 
 #include <common/Detector.h>
+#include <common/NewStats.h>
 #include <libs/include/Socket.h>
 #include <libs/include/Timer.h>
 #include <string>
@@ -21,6 +22,9 @@ public:
 
   /// \brief Send detector metrics to Carbon/Graphite server
   void publish(std::shared_ptr<Detector> detector);
+
+  /// \brief Send detector metrics to Carbon/Graphite server given additional stats
+  void publish(std::shared_ptr<Detector> detector, NewStats & otherstats);
 
 
 private:

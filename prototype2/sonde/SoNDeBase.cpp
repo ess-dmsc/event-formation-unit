@@ -21,7 +21,7 @@ SONDEIDEABase::SONDEIDEABase(BaseSettings const &settings, struct SoNDeSettings 
      : Detector("SoNDe detector using IDEAS readout", settings),
        SoNDeSettings(localSettings) {
 
-  Stats.setPrefix("efu.sonde");
+  Stats.setPrefix("efu.sonde", EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off

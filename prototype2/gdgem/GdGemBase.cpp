@@ -64,7 +64,7 @@ int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
 
 GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSettings) :
        Detector("NMX", settings), NMXSettings(LocalSettings) {
-  Stats.setPrefix("efu.nmx");
+  Stats.setPrefix("efu.nmx", EFUSettings.GraphiteRegion);
 
   LOG(INIT, Sev::Info, "NMX Config file: {}", NMXSettings.ConfigFile);
   nmx_opts = Gem::NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
