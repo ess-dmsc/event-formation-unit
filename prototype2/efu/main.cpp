@@ -85,10 +85,6 @@ int main(int argc, char *argv[]) {
   HwCheck hwcheck;
   Timer RunTimer;
 
-  int64_t upTime;
-  NewStats mainStats;
-  mainStats.create("efu.main.uptime", upTime);
-
 
   { //Make sure that the EFUArgs instance is deallocated before the detector plugin is
     EFUArgs efu_args;
@@ -134,8 +130,6 @@ int main(int argc, char *argv[]) {
     AffinitySettings = efu_args.getThreadCoreAffinity();
     DetectorName = efu_args.getDetectorName();
   }
-
-
 
   int keep_running = 1;
 
@@ -207,8 +201,7 @@ int main(int argc, char *argv[]) {
     }
 
     if ((livestats.timeus() >= MicrosecondsPerSecond) && detector != nullptr) {
-      upTime = (int64_t)RunTimer.timeus()/1000000;
-      metrics.publish(detector, mainStats);
+      metrics.publish(detector);
       livestats.now();
     }
 

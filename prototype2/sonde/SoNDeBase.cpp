@@ -11,6 +11,7 @@
 #include <common/Producer.h>
 #include <common/Trace.h>
 #include <libs/include/Socket.h>
+#include <libs/include/Timer.h>
 #include <libs/include/TSCTimer.h>
 #include <sonde/ideas/Data.h>
 
@@ -25,21 +26,29 @@ SONDEIDEABase::SONDEIDEABase(BaseSettings const &settings, struct SoNDeSettings 
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("input.rx_packets",                mystats.rx_packets);
-  Stats.create("input.rx_bytes",                  mystats.rx_bytes);
-  Stats.create("input.dropped",                   mystats.fifo_push_errors);
-  Stats.create("processing.idle",                 mystats.rx_idle1);
-  Stats.create("processing.rx_events",            mystats.rx_events);
-  Stats.create("processing.fifo_errors",          mystats.fifo_synch_errors);
-  Stats.create("processing.rx_geometry_errors",   mystats.rx_geometry_errors);
-  Stats.create("processing.rx_seq_errors",        mystats.rx_seq_errors);
-  Stats.create("output.tx_bytes",                 mystats.tx_bytes);
-  /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka_produce_fails",             mystats.kafka_produce_fails);
-  Stats.create("kafka_ev_errors",                 mystats.kafka_ev_errors);
-  Stats.create("kafka_ev_others",                 mystats.kafka_ev_others);
-  Stats.create("kafka_dr_errors",                 mystats.kafka_dr_errors);
-  Stats.create("kafka_dr_others",                 mystats.kafka_dr_noerrors);
+  Stats.create("receive.packets",                 mystats.rx_packets);
+  Stats.create("receive.bytes",                   mystats.rx_bytes);
+  Stats.create("receive.dropped",                 mystats.fifo_push_errors);
+
+  Stats.create("readouts.seq_errors",             mystats.rx_seq_errors);
+
+  Stats.create("events.count",                    mystats.rx_events);
+  Stats.create("events.geometry_errors",          mystats.rx_geometry_errors);
+
+  Stats.create("transmit.bytes",                  mystats.tx_bytes);
+
+  Stats.create("thread.uptime",                   mystats.up_time);
+  Stats.create("thread.idle",                     mystats.rx_idle1);
+  Stats.create("thread.fifo_synch_errors",        mystats.fifo_synch_errors);
+
+  /// \todo Kafka stats are common to all detectors and could/should be moved
+  Stats.create("kafka.produce_fails",             mystats.kafka_produce_fails);
+  Stats.create("kafka.ev_errors",                 mystats.kafka_ev_errors);
+  Stats.create("kafka.ev_others",                 mystats.kafka_ev_others);
+  Stats.create("kafka.dr_errors",                 mystats.kafka_dr_errors);
+  Stats.create("kafka.dr_others",                 mystats.kafka_dr_noerrors);
+
+
   // clang-format on
   std::function<void()> inputFunc = [this]() { SONDEIDEABase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
@@ -111,6 +120,7 @@ void SONDEIDEABase::processing_thread() {
 
   unsigned int data_index;
 
+  Timer UpTime;
   TSCTimer produce_timer;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
@@ -119,6 +129,8 @@ void SONDEIDEABase::processing_thread() {
       if (produce_timer.timetsc() >=
           EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {
         mystats.tx_bytes += flatbuffer.produce();
+
+        mystats.up_time = (int64_t)UpTime.timeus()/1000000;
 
         /// Kafka stats update - common to all detectors
         /// don't increment as producer keeps absolute count

@@ -30,7 +30,7 @@ struct BaseSettings {
   std::int32_t  DetectorRxBufferSize {2000000};
   std::int32_t  DetectorTxBufferSize {200000};
   std::string   KafkaBroker          {"localhost:9092"};
-  std::string   GraphiteRegion       {"1"};
+  std::string   GraphiteRegion       {"0"};
   std::string   GraphiteAddress      {"127.0.0.1"};
   std::uint16_t GraphitePort         {2003};
   std::string   KafkaTopic           {""};

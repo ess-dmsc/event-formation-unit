@@ -24,7 +24,7 @@ public:
   void publish(std::shared_ptr<Detector> detector);
 
   /// \brief Send detector metrics to Carbon/Graphite server given additional stats
-  void publish(std::shared_ptr<Detector> detector, NewStats & otherstats);
+  ///void publish(std::shared_ptr<Detector> detector, NewStats & otherstats);
 
 
 private:

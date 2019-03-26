@@ -58,6 +58,7 @@ protected:
     int64_t tx_bytes;
     int64_t rx_seq_errors;
     int64_t fifo_synch_errors;
+    int64_t up_time;
     // Kafka stats below are common to all detectors
     int64_t kafka_produce_fails;
     int64_t kafka_ev_errors;
