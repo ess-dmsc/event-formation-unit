@@ -66,10 +66,6 @@ public:
   /// \brief document
   virtual std::string &statname(size_t index) { return Stats.name(index); }
 
-  // void setStatsPrefix(std::string NewStatsPrefix) {
-  //   Stats.setPrefix(NewStatsPrefix);
-  // }
-
   virtual const char *detectorname() { return DetectorName.c_str(); }
 
   virtual ThreadList &GetThreadInfo() { return Threads; };

@@ -74,7 +74,6 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-p,--port", EFUSettings.DetectorPort, "TCP/UDP receive port")
       ->group("EFU Options")->default_str("9000");
 
-  /// \todo maybe delete this option and use the -p port ?
   CLIParser.add_option("-m,--cmdport", EFUSettings.CommandServerPort,
                        "Command parser tcp port")
       ->group("EFU Options")->default_str("8888");
