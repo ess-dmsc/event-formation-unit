@@ -11,7 +11,6 @@
 #include <common/Producer.h>
 #include <common/Trace.h>
 #include <libs/include/Socket.h>
-#include <libs/include/Timer.h>
 #include <libs/include/TSCTimer.h>
 #include <sonde/ideas/Data.h>
 
@@ -22,7 +21,7 @@ SONDEIDEABase::SONDEIDEABase(BaseSettings const &settings, struct SoNDeSettings 
      : Detector("SoNDe detector using IDEAS readout", settings),
        SoNDeSettings(localSettings) {
 
-  Stats.setPrefix("efu.sonde", EFUSettings.GraphiteRegion);
+  Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
@@ -37,7 +36,6 @@ SONDEIDEABase::SONDEIDEABase(BaseSettings const &settings, struct SoNDeSettings 
 
   Stats.create("transmit.bytes",                  mystats.tx_bytes);
 
-  Stats.create("thread.uptime",                   mystats.up_time);
   Stats.create("thread.idle",                     mystats.rx_idle1);
   Stats.create("thread.fifo_synch_errors",        mystats.fifo_synch_errors);
 
@@ -120,7 +118,6 @@ void SONDEIDEABase::processing_thread() {
 
   unsigned int data_index;
 
-  Timer UpTime;
   TSCTimer produce_timer;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
@@ -129,8 +126,6 @@ void SONDEIDEABase::processing_thread() {
       if (produce_timer.timetsc() >=
           EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {
         mystats.tx_bytes += flatbuffer.produce();
-
-        mystats.up_time = (int64_t)UpTime.timeus()/1000000;
 
         /// Kafka stats update - common to all detectors
         /// don't increment as producer keeps absolute count

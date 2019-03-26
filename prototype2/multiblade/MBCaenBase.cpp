@@ -46,7 +46,8 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAENSettings)
     : Detector("MBCAEN", settings), MBCAENSettings(LocalMBCAENSettings) {
-  Stats.setPrefix("efu.mbcaen", EFUSettings.GraphiteRegion);
+
+  Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off

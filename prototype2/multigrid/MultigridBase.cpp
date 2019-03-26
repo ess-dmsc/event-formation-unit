@@ -34,7 +34,8 @@ static constexpr int TscMHz{2900};
 
 MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings const &LocalSettings)
     : Detector("CSPEC", settings), ModuleSettings(LocalSettings) {
-  Stats.setPrefix("efu.mgmesytec", EFUSettings.GraphiteRegion);
+
+  Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   LOG(INIT, Sev::Info, "Adding stats");
   // clang-format off
@@ -169,8 +170,8 @@ void MultigridBase::mainThread() {
   cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
 
   EV42Serializer ev42serializer(kafka_buffer_size, "multigrid");
-  Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  ev42serializer.setProducerCallback(std::bind(&Producer::produce2<uint8_t>, &EventProducer, std::placeholders::_1));
+  Producer event_producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
+  ev42serializer.setProducerCallback(std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 
   ev42serializer.pulseTime(0);
 

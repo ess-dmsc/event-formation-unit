@@ -22,7 +22,6 @@
 // All settings should be initialized.
 // clang-format off
 struct BaseSettings {
-  std::string   DetectorPluginName   {""};
   std::string   DetectorAddress      {"0.0.0.0"};
   std::uint16_t DetectorPort         {9000};
   std::uint16_t CommandServerPort    {8888}; /// \todo make same as detector port
@@ -30,6 +29,7 @@ struct BaseSettings {
   std::int32_t  DetectorRxBufferSize {2000000};
   std::int32_t  DetectorTxBufferSize {200000};
   std::string   KafkaBroker          {"localhost:9092"};
+  std::string   GraphitePrefix       {"efu.null"};
   std::string   GraphiteRegion       {"0"};
   std::string   GraphiteAddress      {"127.0.0.1"};
   std::uint16_t GraphitePort         {2003};

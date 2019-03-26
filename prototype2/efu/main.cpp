@@ -1,5 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <boost/filesystem.hpp>
 #include <cstdlib>
 #include <common/EFUArgs.h>
 #include <common/StatPublisher.h>
@@ -126,6 +127,12 @@ int main(int argc, char *argv[]) {
     }
     efu_args.printSettings();
     DetectorSettings = efu_args.getBaseSettings();
+
+    /// Automatically create the Graphite metric prefix from detector plugin name
+    /// remove leading path and trailing extension
+    auto p = boost::filesystem::path(efu_args.getDetectorName()).filename().stem().string();
+    DetectorSettings.GraphitePrefix = std::string("efu.") + p;
+
     detector = loader.createDetector(DetectorSettings);
     AffinitySettings = efu_args.getThreadCoreAffinity();
     DetectorName = efu_args.getDetectorName();
@@ -134,6 +141,11 @@ int main(int argc, char *argv[]) {
   int keep_running = 1;
 
   ExitHandler::InitExitHandler();
+
+  int64_t statUpTime{0};
+  NewStats mainStats;
+  mainStats.setPrefix(DetectorSettings.GraphitePrefix, DetectorSettings.GraphiteRegion);
+  mainStats.create("main.uptime", statUpTime);
 
   LOG(MAIN, Sev::Info, "Starting Event Formation Unit");
   LOG(MAIN, Sev::Info, "Event Formation Unit version: {}", efu_version());
@@ -176,7 +188,7 @@ int main(int argc, char *argv[]) {
 
   StatPublisher metrics(DetectorSettings.GraphiteAddress, DetectorSettings.GraphitePort);
 
-  Parser cmdParser(detector, keep_running);
+  Parser cmdParser(detector, mainStats, keep_running);
   Server cmdAPI(DetectorSettings.CommandServerPort, cmdParser);
 
   Timer livestats;
@@ -201,7 +213,8 @@ int main(int argc, char *argv[]) {
     }
 
     if ((livestats.timeus() >= MicrosecondsPerSecond) && detector != nullptr) {
-      metrics.publish(detector);
+      statUpTime = RunTimer.timeus()/1000000;
+      metrics.publish(detector, mainStats);
       livestats.now();
     }
 
