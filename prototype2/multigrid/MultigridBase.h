@@ -116,6 +116,12 @@ protected:
     int64_t events_time_err{0};
     int64_t tx_events{0};
     int64_t tx_bytes{0};
+    // Kafka stats below are common to all detectors
+    int64_t kafka_produce_fails{0};
+    int64_t kafka_ev_errors{0};
+    int64_t kafka_ev_others{0};
+    int64_t kafka_dr_errors{0};
+    int64_t kafka_dr_noerrors{0};
   } __attribute__((aligned(64))) mystats;
 
   MultigridSettings ModuleSettings;
