@@ -14,11 +14,15 @@
 #       is be used as the version string. Otherwise, the Git branch and commit
 #       are used to create the version string "<branch>-<commit>[-dirty]", where
 #       "-dirty" is appended if there are non-committed chages in the Git
-#       repository.
+#       repository. When the git branch and commit are used, the version
+#       component variables are all set to "0".
 #
 # Variables set by this module:
 #
 #   - VERSION_STRING: the version string defined according to the rules above.
+#   - MAJOR_VERSION: the major component of the version (X)
+#   - MINOR_VERSION: the minor component of the version (Y)
+#   - PATCH_VERSION: the patch component of the version (Z)
 #
 # External requirements:
 #
@@ -112,6 +116,9 @@ endfunction()
 macro(match_and_set_version_variables version)
   if("${version}" MATCHES "^(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)([-]rc[1-9][0-9]*)?$")
     set(VERSION_STRING ${version} PARENT_SCOPE)
+    set(MAJOR_VERSION "${CMAKE_MATCH_1}" PARENT_SCOPE)
+    set(MINOR_VERSION "${CMAKE_MATCH_2}" PARENT_SCOPE)
+    set(PATCH_VERSION "${CMAKE_MATCH_3}" PARENT_SCOPE)
   else()
     message(FATAL_ERROR "Version ${version} does not match format X.Y.Z[-rcW]")
   endif()
@@ -124,6 +131,9 @@ macro(set_version_variables_from_git_branch_and_commit)
   set_git_short_ref_variable()
   set_git_dirty_variable()
   set(VERSION_STRING "${GIT_BRANCH}-${GIT_SHORT_REF}${GIT_DIRTY}" PARENT_SCOPE)
+  set(MAJOR_VERSION "0" PARENT_SCOPE)
+  set(MINOR_VERSION "0" PARENT_SCOPE)
+  set(PATCH_VERSION "0" PARENT_SCOPE)
 endmacro()
 
 # Set version string variable to release version or Git branch and commit.
