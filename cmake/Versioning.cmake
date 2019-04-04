@@ -10,12 +10,13 @@
 #
 # Variables that change the behaviour of this module:
 #
-#   - RELEASE_VERSION: if defined, it must be a string of form "X.Y.Z[-rcW]" and
-#       is be used as the version string. Otherwise, the Git branch and commit
-#       are used to create the version string "<branch>-<commit>[-dirty]", where
-#       "-dirty" is appended if there are non-committed chages in the Git
-#       repository. When the git branch and commit are used, the version
-#       component variables are all set to "0".
+#   - RELEASE_VERSION: it must be a string of form "X.Y.Z[-rcW]", a false
+#     constant (e.g. an empty string) or undefined. If true, it is used as the
+#     version string; otherwise, the Git branch and commit are used to create
+#     the version string "<branch>-<commit>[-dirty]", where "-dirty" is appended
+#     if there are non-committed chages in the Git repository. When the git
+#     branch and commit are used, the version component variables are all set
+#     to "0".
 #
 # Variables set by this module:
 #
@@ -138,7 +139,7 @@ endmacro()
 
 # Set version string variable to release version or Git branch and commit.
 function(set_version)
-  if(DEFINED RELEASE_VERSION)
+  if(RELEASE_VERSION)
     match_and_set_version_variables("${RELEASE_VERSION}")
   else()
     set_version_variables_from_git_branch_and_commit()
