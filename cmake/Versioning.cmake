@@ -1,6 +1,12 @@
-# set_version()
+# Versioning.cmake
 #
-# Set version string variable to release version or Git branch and commit.
+# set_version()
+#   Set version string variable to release version or Git branch and commit.
+#
+# create_version_header(create_version_header)
+#   Replace version string in template file and output header file in current
+#   build folder. If you want to generate a new header file with an updated
+#   version string, you need to run CMake again.
 #
 # Variables that change the behaviour of this module:
 #
@@ -25,6 +31,14 @@
 #   "master" on commit "bc5b2c50e1fc8b1ce96607aa2f0d373900634389", with no
 #   non-committed changes to tracked files, VERSION_STRING will be set to
 #   "master-bc5b2c5".
+#
+#   # Call set_version in main CMakeLists.txt to define VERSION_STRING variable:
+#   set_version()
+#
+#   # Generate header file substituting "@VERSION_STRING@" with the value of the
+#   # variable in Version.h.in; the output file will be created in the current
+#   # build directory and will be named Version.h:
+#   create_version_header(Version.h.in)
 #
 
 # Set the GIT_BRANCH variable to the current Git branch.
@@ -112,7 +126,7 @@ macro(set_version_variables_from_git_branch_and_commit)
   set(VERSION_STRING "${GIT_BRANCH}-${GIT_SHORT_REF}${GIT_DIRTY}" PARENT_SCOPE)
 endmacro()
 
-# The public function to be called in the main CMakeLists.txt file.
+# Set version string variable to release version or Git branch and commit.
 function(set_version)
   if(DEFINED RELEASE_VERSION)
     match_and_set_version_variables("${RELEASE_VERSION}")
@@ -120,3 +134,14 @@ function(set_version)
     set_version_variables_from_git_branch_and_commit()
   endif()
 endfunction()
+
+# Replace version string in template file and output header file in current
+# build folder.
+macro(create_version_header version_template_file)
+  # Get file name without directory or longest extension.
+  get_filename_component(filename ${version_template_file} NAME_WE)
+  configure_file(
+    ${version_template_file}
+    ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
+  )
+endmacro()
