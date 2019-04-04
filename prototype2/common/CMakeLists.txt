@@ -160,7 +160,7 @@ create_test_executable(RingBufferTest)
 set(VersionTest_SRC
   VersionTest.cpp)
 set(VersionTest_INC
-  Version.h)
+  ${VERSION_INCLUDE_DIR}/common/Version.h)
 create_test_executable(VersionTest)
 
 set(ESSGeometryTest_SRC ESSGeometryTest.cpp)

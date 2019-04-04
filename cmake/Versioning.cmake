@@ -3,10 +3,10 @@
 # set_version()
 #   Set version string variable to release version or Git branch and commit.
 #
-# create_version_header(create_version_header)
-#   Replace version string in template file and output header file in current
-#   build folder. If you want to generate a new header file with an updated
-#   version string, you need to run CMake again.
+# create_version_header(create_version_header output_version_file)
+#   Replace version string in template file and create output header file. If
+#   you want to generate a new header file with an updated version string, you
+#   need to run CMake again.
 #
 # Variables that change the behaviour of this module:
 #
@@ -147,11 +147,6 @@ endfunction()
 
 # Replace version string in template file and output header file in current
 # build folder.
-macro(create_version_header version_template_file)
-  # Get file name without directory or longest extension.
-  get_filename_component(filename ${version_template_file} NAME_WE)
-  configure_file(
-    ${version_template_file}
-    ${CMAKE_CURRENT_BINARY_DIR}/${filename}.h
-  )
+macro(create_version_header version_template_file output_version_file)
+  configure_file(${version_template_file} ${output_version_file})
 endmacro()
