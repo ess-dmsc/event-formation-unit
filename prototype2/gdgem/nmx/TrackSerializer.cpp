@@ -75,13 +75,15 @@ Buffer<uint8_t> TrackSerializer::serialize() {
     return Buffer<uint8_t>();
   }
 
+  auto SourceNameOffset = builder.CreateString("dummy_source_name");
+
   auto xtrackvec = builder.CreateVector(xtrack);
   auto ytrackvec = builder.CreateVector(ytrack);
   auto dataoff =
       CreateGEMTrack(builder, time_offset, xtrackvec, ytrackvec, xpos, ypos);
   auto msg =
-      CreateMonitorMessage(builder, 0, DataField::GEMTrack, dataoff.Union());
-  builder.Finish(msg);
+      CreateMonitorMessage(builder, SourceNameOffset, DataField::GEMTrack, dataoff.Union());
+  FinishMonitorMessageBuffer(builder, msg);
   xtrack.clear();
   ytrack.clear();
   Buffer<uint8_t> ret(builder.GetBufferPointer(), builder.GetSize());

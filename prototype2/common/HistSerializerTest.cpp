@@ -57,6 +57,8 @@ TEST_F(HistSerializerTest, DeSerialize) {
     ASSERT_EQ((*xdat)[i], i);
     EXPECT_EQ((*ydat)[i], MAX_STRIP_VAL_TEST - i);
   }
+
+  EXPECT_EQ(std::string(&flatbuffer[4], 4), "mo01");
 }
 
 int main(int argc, char **argv) {

@@ -59,6 +59,9 @@ TEST_F(TrackSerializerTest, Serialize) {
   EXPECT_TRUE(buffer.size <
               entries * 2 * 12 + BASE_OVERHEAD + entries * ENTRY_OVERHEAD);
   EXPECT_NE(buffer.address, nullptr);
+
+  // Ensure header is there
+  EXPECT_EQ(std::string(reinterpret_cast<const char*>(&buffer[4]), 4), "mo01");
 }
 
 TEST_F(TrackSerializerTest, DeSerialize) {
@@ -91,6 +94,9 @@ TEST_F(TrackSerializerTest, DeSerialize) {
   auto ydat = track->ytrack();
   EXPECT_EQ(xdat->size(), entries);
   EXPECT_EQ(ydat->size(), entries);
+
+  // Ensure header is there
+  EXPECT_EQ(std::string(reinterpret_cast<const char*>(&buffer[4]), 4), "mo01");
 }
 
 TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
@@ -140,6 +146,9 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
       EXPECT_EQ((*ydat)[i]->time(), i * 2 + 0x1000);
       EXPECT_EQ((*ydat)[i]->adc(), i * 3 + 0x2000);
     }
+
+    // Ensure header is there
+    EXPECT_EQ(std::string(&flatbuffer[4], 4), "mo01");
   }
 }
 
@@ -184,6 +193,9 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
       EXPECT_EQ((*ydat)[k]->time(), k * 2 + 0x1000);
       EXPECT_EQ((*ydat)[k]->adc(), k * 3 + 0x2000);
     }
+
+    // Ensure header is there
+    EXPECT_EQ(std::string(&flatbuffer[4], 4), "mo01");
   }
 }
 

@@ -47,7 +47,7 @@ size_t HistSerializer::produce(const Hists &hists) {
   auto msg =
       CreateMonitorMessage(builder, 0, DataField::GEMHist, dataoff.Union());
 
-  builder.Finish(msg);
+  FinishMonitorMessageBuffer(builder, msg);
 
   Buffer<uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
 
