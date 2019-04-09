@@ -42,9 +42,11 @@ TEST_F(EV42SerializerTest, Serialize) {
   for (size_t i=0; i < ARRAYLENGTH; i++)
     fb.addEvent(i,i);
   auto buffer = fb.serialize();
-  ASSERT_TRUE(buffer.size >= ARRAYLENGTH * 8);
-  ASSERT_TRUE(buffer.size <= ARRAYLENGTH * 8 + 2048);
+  EXPECT_GE(buffer.size, ARRAYLENGTH * 8);
+  EXPECT_LE(buffer.size, ARRAYLENGTH * 8 + 2048);
   ASSERT_TRUE(buffer);
+
+  EXPECT_EQ(std::string(reinterpret_cast<const char*>(&buffer[4]), 4), "ev42");
 }
 
 TEST_F(EV42SerializerTest, SerDeserialize) {
@@ -53,11 +55,15 @@ TEST_F(EV42SerializerTest, SerDeserialize) {
   auto buffer = fb.serialize();
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
+
   auto events = GetEventMessage(flatbuffer);
+
   ASSERT_NE(events->message_id(), 1);
 
   memcpy(flatbuffer, buffer.address, buffer.size);
+  EXPECT_EQ(std::string(&flatbuffer[4], 4), "ev42");
   events = GetEventMessage(flatbuffer);
+  EXPECT_EQ(events->source_name()->str(), "nameless");
   ASSERT_EQ(events->message_id(), 1);
 }
 
@@ -67,11 +73,14 @@ TEST_F(EV42SerializerTest, SerPulseTime) {
   auto buffer = fb.serialize();
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
+
   auto events = GetEventMessage(flatbuffer);
   ASSERT_NE(events->pulse_time(), 12345);
 
   memcpy(flatbuffer, buffer.address, buffer.size);
+  EXPECT_EQ(std::string(&flatbuffer[4], 4), "ev42");
   events = GetEventMessage(flatbuffer);
+  EXPECT_EQ(events->source_name()->str(), "nameless");
   ASSERT_EQ(events->pulse_time(), 12345);
 }
 
@@ -86,9 +95,12 @@ TEST_F(EV42SerializerTest, DeserializeCheckData) {
   ASSERT_TRUE(buffer);
 
   memcpy(flatbuffer, buffer.address, buffer.size);
+  EXPECT_EQ(std::string(&flatbuffer[4], 4), "ev42");
+
   auto veri = flatbuffers::Verifier((uint8_t *)flatbuffer, buffer.size);
   ASSERT_TRUE(VerifyEventMessageBuffer(veri));
   auto events = GetEventMessage(flatbuffer);
+  EXPECT_EQ(events->source_name()->str(), "nameless");
 
   auto detvec = events->detector_id();
   EXPECT_EQ(detvec->size(), ARRAYLENGTH - 1);
@@ -100,6 +112,8 @@ TEST_F(EV42SerializerTest, DeserializeCheckData) {
     EXPECT_EQ((*timevec)[i], i);
     EXPECT_EQ((*detvec)[i], 200000 - i);
   }
+
+  EXPECT_EQ(events->source_name()->str(), "nameless");
 }
 
 TEST_F(EV42SerializerTest, AutoDeserialize) {
@@ -114,7 +128,7 @@ TEST_F(EV42SerializerTest, AutoDeserialize) {
   EXPECT_EQ(mp.NumberOfCalls, 0);
 
   auto len = fb.addEvent(time[ARRAYLENGTH - 1], pixel[ARRAYLENGTH - 1]);
-  ASSERT_TRUE(len > 0);
+  EXPECT_GT(len, 0);
   EXPECT_EQ(mp.NumberOfCalls, 1);
 }
 

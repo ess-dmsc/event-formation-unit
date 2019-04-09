@@ -17,7 +17,7 @@
 class HistSerializer {
 public:
   /** \todo document */
-  HistSerializer(size_t buffer_half_size);
+  HistSerializer(size_t buffer_half_size, std::string source_name);
 
   void set_callback(ProducerCallback cb);
 
@@ -28,6 +28,8 @@ private:
   ProducerCallback producer_callback;
 
   flatbuffers::FlatBufferBuilder builder;
+
+  std::string SourceName;
 
   uint8_t *xtrackptr{nullptr};
   uint8_t *ytrackptr{nullptr};
