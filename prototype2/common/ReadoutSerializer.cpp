@@ -11,9 +11,9 @@
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-ReadoutSerializer::ReadoutSerializer(size_t maxarraylength)
-    : maxlen(maxarraylength) {
-      builder.Clear();
+ReadoutSerializer::ReadoutSerializer(size_t maxarraylength, std::string source_name)
+    : maxlen(maxarraylength), SourceName(source_name) {
+  builder.Clear();
 }
 
 void ReadoutSerializer::set_callback(ProducerCallback cb) {
@@ -27,13 +27,17 @@ size_t ReadoutSerializer::produce() {
   if (entries == 0) {
     return 0;
   }
+
+  auto SourceNameOffset = builder.CreateString(SourceName);
+
   auto planevec = builder.CreateVector(planes);
   auto timevec = builder.CreateVector(times);
   auto channelvec = builder.CreateVector(channels);
   auto adcvec = builder.CreateVector(adcs);
 
   auto dataoff = CreateMONHit(builder, planevec, timevec, channelvec, adcvec);
-  auto msg = CreateMonitorMessage(builder, 0, DataField::MONHit, dataoff.Union());
+  auto msg = CreateMonitorMessage(builder, SourceNameOffset,
+                                  DataField::MONHit, dataoff.Union());
   FinishMonitorMessageBuffer(builder, msg);
 
   Buffer<uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());

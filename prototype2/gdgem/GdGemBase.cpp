@@ -388,15 +388,15 @@ void GdGemBase::processing_thread() {
   ev42serializer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 
-  Gem::TrackSerializer track_serializer(256, 1);
+  Gem::TrackSerializer track_serializer(256, 1, "nmx_tracks");
   track_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
-  HistSerializer hist_serializer(hists_.needed_buffer_size());
+  HistSerializer hist_serializer(hists_.needed_buffer_size(), "nmx");
   hist_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
-  Gem::TrackSerializer raw_serializer(1500, 1);
+  Gem::TrackSerializer raw_serializer(1500, 1, "nmx_hits");
   raw_serializer.set_callback(
           std::bind(&Producer::produce2<uint8_t>, &hits_producer, std::placeholders::_1));
 

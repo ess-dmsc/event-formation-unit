@@ -186,7 +186,7 @@ void CAENBase::processing_thread() {
 
   Hists histograms(std::max(ncass * nwires, ncass * nstrips), 65535);
   Producer monitorprod(EFUSettings.KafkaBroker, monitor);
-  HistSerializer histfb(histograms.needed_buffer_size());
+  HistSerializer histfb(histograms.needed_buffer_size(), "multiblade");
   histfb.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 

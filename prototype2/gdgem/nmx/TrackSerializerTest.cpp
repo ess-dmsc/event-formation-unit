@@ -32,7 +32,7 @@ protected:
 };
 
 TEST_F(TrackSerializerTest, Constructor) {
-  TrackSerializer tser(2560, 1);
+  TrackSerializer tser(2560, 1, "some_source");
   auto buffer = tser.serialize();
   EXPECT_EQ(buffer.size, 0);
   EXPECT_EQ(buffer.address, nullptr);
@@ -40,7 +40,7 @@ TEST_F(TrackSerializerTest, Constructor) {
 
 TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
   int entries = NB_ENTRIES;
-  TrackSerializer tser(entries, 1);
+  TrackSerializer tser(entries, 1, "some_source");
   for (int i = 0; i < entries + 1; i++) {
     addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
@@ -49,7 +49,7 @@ TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
 
 TEST_F(TrackSerializerTest, Serialize) {
   unsigned int entries = NB_ENTRIES;
-  TrackSerializer tser(entries, 1);
+  TrackSerializer tser(entries, 1, "some_source");
   for (unsigned int i = 0; i < entries; i++) {
     addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
@@ -68,7 +68,7 @@ TEST_F(TrackSerializerTest, DeSerialize) {
   unsigned int entries = NB_ENTRIES;
   unsigned int entry_size = 4 * 3; // Three uint32_t's
 
-  TrackSerializer tser(entries, 1);
+  TrackSerializer tser(entries, 1, "some_source");
   for (unsigned int i = 0; i < entries; i++) {
     addxandy(i, 0x1111, 0x2222, 100 + i, 0x3333, 0x4444);
   }
@@ -86,8 +86,8 @@ TEST_F(TrackSerializerTest, DeSerialize) {
   memcpy(flatbuffer, buffer.address, buffer.size);
 
   auto monitor = GetMonitorMessage(flatbuffer);
-  auto dtype = monitor->data_type();
-  EXPECT_EQ(dtype, DataField::GEMTrack);
+  EXPECT_EQ(monitor->source_name()->str(), "some_source");
+  EXPECT_EQ(monitor->data_type(), DataField::GEMTrack);
 
   auto track = static_cast<const GEMTrack *>(monitor->data());
   auto xdat = track->xtrack();
@@ -110,7 +110,7 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
     EXPECT_FALSE(event.c1.hits.size());
     EXPECT_FALSE(event.c2.hits.size());
 
-    TrackSerializer tser(entries, 1);
+    TrackSerializer tser(entries, 1, "some_source");
     for (unsigned int i = 0; i < entries; i++) {
       addxandy(i, i * 2, i * 3 + 1, entries - i, i * 2 + 0x1000,
                i * 3 + 0x2000);
@@ -129,8 +129,8 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
     memcpy(flatbuffer, buffer.address, buffer.size);
 
     auto monitor = GetMonitorMessage(flatbuffer);
-    auto dtype = monitor->data_type();
-    EXPECT_EQ(dtype, DataField::GEMTrack);
+    EXPECT_EQ(monitor->source_name()->str(), "some_source");
+    EXPECT_EQ(monitor->data_type(), DataField::GEMTrack);
 
     auto track = static_cast<const GEMTrack *>(monitor->data());
     auto xdat = track->xtrack();
@@ -156,7 +156,7 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
   unsigned int entries = 256;
   unsigned int entry_size = 4 * 3; // Three uint32_t's
   MESSAGE() << "Reusing the same TrackSerializer object\n";
-  TrackSerializer tser(entries, 1);
+  TrackSerializer tser(entries, 1, "some_source");
   for (unsigned int i = 1; i <= 1000; i *= 2) {
     event.c1.hits.clear();
     event.c2.hits.clear();
@@ -176,8 +176,8 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
     memcpy(flatbuffer, buffer.address, buffer.size);
 
     auto monitor = GetMonitorMessage(flatbuffer);
-    auto dtype = monitor->data_type();
-    EXPECT_EQ(dtype, DataField::GEMTrack);
+    EXPECT_EQ(monitor->source_name()->str(), "some_source");
+    EXPECT_EQ(monitor->data_type(), DataField::GEMTrack);
 
     auto track = static_cast<const GEMTrack *>(monitor->data());
     auto xdat = track->xtrack();

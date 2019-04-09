@@ -8,8 +8,9 @@
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-HistSerializer::HistSerializer(size_t buffer_half_size)
-    : builder(2 * buffer_half_size + 256) {}
+HistSerializer::HistSerializer(size_t buffer_half_size, std::string source_name)
+    : builder(2 * buffer_half_size + 256)
+    , SourceName (source_name) {}
 
 
 void HistSerializer::set_callback(ProducerCallback cb) {
@@ -44,8 +45,10 @@ size_t HistSerializer::produce(const Hists &hists) {
   auto dataoff = CreateGEMHist(builder, x_strip_off, y_strip_off, x_adc_off,
                                y_adc_off, clus_adc_off, hists.bin_width());
 
+  auto SourceNameOffset = builder.CreateString(SourceName);
+
   auto msg =
-      CreateMonitorMessage(builder, 0, DataField::GEMHist, dataoff.Union());
+      CreateMonitorMessage(builder, SourceNameOffset, DataField::GEMHist, dataoff.Union());
 
   FinishMonitorMessageBuffer(builder, msg);
 

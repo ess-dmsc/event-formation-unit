@@ -24,10 +24,11 @@ static_assert(FLATBUFFERS_LITTLEENDIAN,
 
 namespace Gem {
 
-TrackSerializer::TrackSerializer(size_t maxarraylength, double target_res)
+TrackSerializer::TrackSerializer(size_t maxarraylength, double target_res, std::string source_name)
     : maxlen(maxarraylength)
     , builder(maxlen * EV_SIZE * 2 + BUF_STATIC_SIZE + 256)
-    , target_resolution_(target_res) {
+    , target_resolution_(target_res)
+    , SourceName (source_name) {
   builder.Clear();
 }
 
@@ -75,7 +76,7 @@ Buffer<uint8_t> TrackSerializer::serialize() {
     return Buffer<uint8_t>();
   }
 
-  auto SourceNameOffset = builder.CreateString("dummy_source_name");
+  auto SourceNameOffset = builder.CreateString(SourceName);
 
   auto xtrackvec = builder.CreateVector(xtrack);
   auto ytrackvec = builder.CreateVector(ytrack);

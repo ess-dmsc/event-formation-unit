@@ -111,7 +111,7 @@ void SONDEIDEABase::processing_thread() {
   constexpr uint16_t maxChannels{64};
   constexpr uint16_t maxAdc{65535};
   Hists histograms(maxChannels, maxAdc);
-  HistSerializer histfb(histograms.needed_buffer_size());
+  HistSerializer histfb(histograms.needed_buffer_size(), "SONDE");
   Producer monitorprod(EFUSettings.KafkaBroker, "SKADI_monitor");
   histfb.set_callback(
     std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));

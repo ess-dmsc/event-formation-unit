@@ -28,10 +28,10 @@ struct Monitor {
   std::shared_ptr<ReadoutSerializer> readouts;
 
   void init(std::string broker, size_t max_readouts) {
-    readouts = std::make_shared<ReadoutSerializer>(max_readouts);
+    readouts = std::make_shared<ReadoutSerializer>(max_readouts, "multigrid");
     hists = std::make_shared<Hists>(std::numeric_limits<uint16_t>::max(),
                                     std::numeric_limits<uint16_t>::max());
-    histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size());
+    histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size(), "multigrid");
 
     producer = std::make_shared<Producer>(broker, "C-SPEC_monitor");
     readouts->set_callback(std::bind(&Producer::produce2<uint8_t>, producer.get(), std::placeholders::_1));
