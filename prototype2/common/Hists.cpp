@@ -22,7 +22,7 @@ Hists::Hists(size_t strip_max, size_t adc_max)
   cluster_adc_hist.resize(adc_hist_size(), 0);
 }
 
-void Hists::set_cluster_adc_downshift(uint32_t bits) {
+void Hists::set_cluster_adc_downshift(uint8_t bits) {
   if (bits > 32)
     bits = 32;
   downshift_ = bits;
@@ -34,7 +34,7 @@ size_t Hists::hit_count() const { return hit_count_; }
 
 size_t Hists::cluster_count() const { return cluster_count_; }
 
-uint32_t Hists::bin_width() const { return pow(2, downshift_); }
+size_t Hists::bin_width() const { return static_cast<size_t>(pow(2, downshift_)); }
 
 void Hists::clear() {
   std::fill(x_strips_hist.begin(), x_strips_hist.end(), 0);
@@ -62,6 +62,6 @@ void Hists::bincluster(uint32_t sum) {
   if (!sum) {
     return;
   }
-  cluster_adc_hist[static_cast<uint16_t>(sum >> downshift_)]++;
+  cluster_adc_hist[sum >> downshift_]++;
   cluster_count_++;
 }

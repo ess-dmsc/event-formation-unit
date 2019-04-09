@@ -102,7 +102,7 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
       data[events].time = time;
       data[events].pixel_id = static_cast<uint32_t>(pixelid);
       if (dumptofile) {
-        eventdata->tofile("%d, %u, %d, %d, %d\n", hdr_count, hdr_hdrtime,
+        datafile->tofile("%d, %u, %d, %d, %d\n", hdr_count, hdr_hdrtime,
                           hdr_sysno, asch >> 6, asch & 0x3f);
       }
       XTRACE(PROCESS, INF, "event: %d, time: 0x%08x, pixel: %d", i, time,
@@ -151,7 +151,7 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
     XTRACE(PROCESS, INF, "sample %3d: 0x%x (%d)", i, sample, sample);
 
     if (dumptofile) {
-      sephdata->tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, trigger_type,
+      datafile->tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, trigger_type,
                        hold_delay, asic, channel, sample);
     }
   }
@@ -201,7 +201,7 @@ int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
       XTRACE(PROCESS, INF, "time %x, tt %d, as %d, ch %d, sampl %x", evtime,
              trigger_type, asic, channel, sample);
       if (dumptofile) {
-        mephdata->tofile("%d, %u, %d, %d, %d, %d\n", hdr_count, evtime,
+        datafile->tofile("%d, %u, %d, %d, %d, %d\n", hdr_count, evtime,
                          trigger_type, asic, channel, sample);
       }
     }

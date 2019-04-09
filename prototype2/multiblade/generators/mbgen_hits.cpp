@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
 
   UDPTransmitter DataSource(local, remote);
 
-  ReaderHits file(Settings.FileName);
+  Multiblade::ReaderHits file(Settings.FileName);
 
   uint64_t tx = 0;
   uint64_t txp = 0;

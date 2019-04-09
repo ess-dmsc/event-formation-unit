@@ -4,16 +4,19 @@
 #include <gdgem/generators/ReaderHits.h>
 #include <iostream>
 
+namespace Gem {
+
 ReaderHits::ReaderHits(std::string filename) {
   file = HitFile::open(filename);
   total_ = file->count();
+  ReadoutSize = sizeof(Hit);
+  ChunkSize = HitFile::ChunkSize;
   current_ = 0;
 }
 
 size_t ReaderHits::read(char *buf) {
   size_t size = HitFile::ChunkSize;
-  if ((current_ + HitFile::ChunkSize) > total_)
-  {
+  if ((current_ + HitFile::ChunkSize) > total_) {
     size = total_ - current_;
   }
 
@@ -31,5 +34,7 @@ size_t ReaderHits::read(char *buf) {
 
   current_ += size;
   return sizeof(Hit) * size;
+}
+
 }
 // GCOVR_EXCL_STOP

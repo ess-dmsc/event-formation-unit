@@ -3,12 +3,6 @@
 #include <common/Log.h>
 #include <common/NewStats.h>
 
-NewStats::NewStats() {}
-
-NewStats::~NewStats() {}
-
-NewStats::NewStats(std::string pre) { setPrefix(pre); }
-
 int NewStats::create(std::string statname, int64_t &counter) {
   LOG(UTILS, Sev::Info, "Adding stat {}", statname);
   counter = 0;
@@ -39,14 +33,22 @@ int64_t NewStats::value(size_t index) {
   return stats.at(index - 1).counter;
 }
 
-void NewStats::setPrefix(std::string StatsPrefix) {
-  if (StatsPrefix.size() > 0) {
+void NewStats::setPrefix(std::string StatsPrefix, std::string StatsRegion) {
+    if (StatsPrefix.size() > 0) {
+    prefix = StatsPrefix;
     const char LastChar = StatsPrefix.back();
-    const char PointChar = '.';
+
     if (LastChar != PointChar) {
-      prefix = StatsPrefix + PointChar;
-      return;
+      prefix = prefix + PointChar;
     }
   }
-  prefix = StatsPrefix;
+
+  if (StatsRegion.size() > 0) {
+    prefix = prefix + StatsRegion;
+    const char LastChar = StatsRegion.back();
+
+    if (LastChar != PointChar) {
+      prefix = prefix + PointChar;
+    }
+  }
 }

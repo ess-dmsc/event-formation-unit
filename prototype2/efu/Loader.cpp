@@ -36,7 +36,9 @@ bool Loader::loadPlugin(const std::string lib) {
   std::vector<std::string> PossibleSuffixes{"", ".so", ".dll", ".dylib"};
 
   for (auto &CSuffix : PossibleSuffixes) {
-    std::string TestLibName = "./" + lib + CSuffix;
+    // allow both absolute and relative path
+    std::string Prefix = (lib[0] == '/') ? "" : "./";
+    std::string TestLibName = Prefix + lib + CSuffix;
     handle = dlopen(TestLibName.c_str(), RTLD_NOW);
     if (handle != nullptr) {
       LOG(INIT, Sev::Info, "Loaded library \"{}\".",

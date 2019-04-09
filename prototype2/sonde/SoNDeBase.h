@@ -44,8 +44,6 @@ protected:
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
-  NewStats ns{"efu.sonde."}; //
-
   struct {
     // Input Counters
     int64_t rx_packets;

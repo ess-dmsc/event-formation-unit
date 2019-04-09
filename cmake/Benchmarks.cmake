@@ -19,9 +19,11 @@ function(create_benchmark_executable exec_name)
     target_link_libraries(${exec_name}
       ${${exec_name}_LIB}
       ${link_libraries}
+      ${EFU_COMMON_LIBS}
       ${GTEST_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
-      -lbenchmark -lpthread)
+      -lbenchmark -lpthread efu_common)
+      
     set(benchmark_targets
       ${exec_name}
       ${benchmark_targets}

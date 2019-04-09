@@ -32,6 +32,10 @@ CalibrationFile::CalibrationFile(std::string jsonfile) : CalibrationFile() {
   std::ifstream t(jsonfile);
   std::string Jsonstring((std::istreambuf_iterator<char>(t)),
                          std::istreambuf_iterator<char>());
+  if (!t.good()) {
+    XTRACE(INIT, ERR, fmt::format("Invalid Json file: {}", jsonfile).c_str());
+    throw std::runtime_error("CalibrationFile error - requested file unavailable.");
+  }
 
   loadCalibration(Jsonstring);
 }

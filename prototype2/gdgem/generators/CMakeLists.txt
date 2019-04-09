@@ -2,28 +2,28 @@
 # Raw evenlet generator (h5)
 #=============================================================================
 
+#
 set(nmxgen_hits_SRC
   ../../common/clustering/Hit.cpp
-    nmxgen_hits.cpp
+  ../../generators/generator.cpp
     ReaderHits.cpp
-    NMXArgs.cpp
     )
 set(nmxgen_hits_INC
   ../../common/clustering/Hit.h
     ReaderHits.h
-    NMXArgs.h
     )
 create_executable(nmxgen_hits)
+target_compile_definitions(nmxgen_hits PUBLIC GENERATOR_GDGEM_HITS)
 
+#
 set(nmxgen_readouts_SRC
   ../../common/clustering/Hit.cpp
-  nmxgen_readouts.cpp
+  ../../generators/generator.cpp
   ReaderReadouts.cpp
-  NMXArgs.cpp
   )
 set(nmxgen_readouts_INC
   ../../common/clustering/Hit.h
   ReaderReadouts.h
-  NMXArgs.h
   )
 create_executable(nmxgen_readouts)
+target_compile_definitions(nmxgen_readouts PUBLIC GENERATOR_GDGEM_READOUTS)

@@ -17,22 +17,22 @@ archive_what = "centos7-release"
 
 images = [
     'centos7-release': [
-        'name': 'essdmscdm/centos7-build-node:3.5.1',
-        'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash -e',
+        'name': 'essdmscdm/centos7-build-node:4.1.0',
+        'sh': '/usr/bin/scl enable devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
     ],
     'centos7': [
-        'name': 'essdmscdm/centos7-build-node:3.5.1',
-        'sh': '/usr/bin/scl enable rh-python35 devtoolset-6 -- /bin/bash -e',
+        'name': 'essdmscdm/centos7-build-node:4.1.0',
+        'sh': '/usr/bin/scl enable devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCOV=ON'
     ],
     'ubuntu1804': [
-        'name': 'essdmscdm/ubuntu18.04-build-node:1.3.1',
+        'name': 'essdmscdm/ubuntu18.04-build-node:2.0.0',
         'sh': 'bash -e',
         'cmake_flags': ''
     ],
     'debian9': [
-        'name': 'essdmscdm/debian9-build-node:2.5.2',
+        'name': 'essdmscdm/debian9-build-node:3.0.0',
         'sh'  : 'bash -e',
         'cmake_flags': ''
     ]
@@ -258,32 +258,42 @@ def get_pipeline(image_key)
     }
 }
 
-def get_macos_pipeline()
-{
+def get_system_tests_pipeline() {
     return {
-        stage("macOS") {
-            node ("macos") {
-            // Delete workspace when build is done
-                cleanWs()
-
-                abs_dir = pwd()
-
-                dir("${project}") {
-                    checkout scm
+        node('system-test') {
+            cleanWs()
+            dir("${project}") {
+                try{
+                    stage("System tests: Checkout") {
+                        checkout scm
+                    }  // stage
+                    stage("System tests: Install requirements") {
+                        sh """scl enable rh-python35 -- python -m pip install --user --upgrade pip
+                        scl enable rh-python35 -- python -m pip install --user -r system-tests/requirements.txt
+                        """
+                    }  // stage
+                    stage("System tests: Run") {
+                        sh """docker stop \$(docker ps -a -q) && docker rm \$(docker ps -a -q) || true
+                                                """
+			timeout(time: 30, activity: true){
+                            sh """cd system-tests/
+                            scl enable rh-python35 -- python -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark
+                            """
+			}
+                    }  // stage
+                }finally {
+		    stage("System tests: Cleanup") {
+                        sh """docker stop \$(docker ps -a -q) && docker rm \$(docker ps -a -q) || true
+                        """
+                    }  // stage
+                    stage("System tests: Archive") {
+                        junit "system-tests/SystemTestsOutput.xml"
+                    }
                 }
-
-                dir("${project}/build") {
-                    sh "conan install --build=outdated .."
-                    sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
-                    sh "make -j4"
-                    sh "make -j4 unit_tests"
-                    sh "make runtest"
-                    sh "make runefu"
-                }
-            }
-        }
-    }
-}
+            } // dir
+        }  // node
+    }  // return
+}  // def
 
 node('docker') {
     dir("${project}_code") {
@@ -314,10 +324,15 @@ node('docker') {
         def image_key = x
         builders[image_key] = get_pipeline(image_key)
     }
-    builders['macOS'] = get_macos_pipeline()
+
+    if ( env.CHANGE_ID ) {
+        builders['system tests'] = get_system_tests_pipeline()
+    }
 
     try {
-        parallel builders
+        timeout(time: 2, unit: 'HOURS') {
+            parallel builders
+        }
     } catch (e) {
         failure_function(e, 'Job failed')
         throw e

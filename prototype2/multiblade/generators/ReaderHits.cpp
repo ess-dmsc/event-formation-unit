@@ -4,9 +4,13 @@
 #include <multiblade/generators/ReaderHits.h>
 #include <iostream>
 
+namespace Multiblade {
+
 ReaderHits::ReaderHits(std::string filename) {
   file = Multiblade::ReadoutFile::open(filename);
   total_ = file->count();
+  ReadoutSize = sizeof(Readout); /// \todo should be Hit ?
+  ChunkSize = ReadoutFile::ChunkSize;
   current_ = 0;
 }
 
@@ -31,5 +35,7 @@ size_t ReaderHits::read(char *buf) {
 
   current_ += size;
   return sizeof(Multiblade::Readout) * size;
+}
+
 }
 // GCOVR_EXCL_STOP

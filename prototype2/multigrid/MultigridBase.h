@@ -28,10 +28,10 @@ struct Monitor {
   std::shared_ptr<ReadoutSerializer> readouts;
 
   void init(std::string broker, size_t max_readouts) {
-    readouts = std::make_shared<ReadoutSerializer>(max_readouts);
+    readouts = std::make_shared<ReadoutSerializer>(max_readouts, "multigrid");
     hists = std::make_shared<Hists>(std::numeric_limits<uint16_t>::max(),
                                     std::numeric_limits<uint16_t>::max());
-    histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size());
+    histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size(), "multigrid");
 
     producer = std::make_shared<Producer>(broker, "C-SPEC_monitor");
     readouts->set_callback(std::bind(&Producer::produce2<uint8_t>, producer.get(), std::placeholders::_1));
@@ -116,6 +116,12 @@ protected:
     int64_t events_time_err{0};
     int64_t tx_events{0};
     int64_t tx_bytes{0};
+    // Kafka stats below are common to all detectors
+    int64_t kafka_produce_fails{0};
+    int64_t kafka_ev_errors{0};
+    int64_t kafka_ev_others{0};
+    int64_t kafka_dr_errors{0};
+    int64_t kafka_dr_noerrors{0};
   } __attribute__((aligned(64))) mystats;
 
   MultigridSettings ModuleSettings;

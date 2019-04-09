@@ -34,7 +34,8 @@ static constexpr int TscMHz{2900};
 
 MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings const &LocalSettings)
     : Detector("CSPEC", settings), ModuleSettings(LocalSettings) {
-  Stats.setPrefix("efu.mgmesytec");
+
+  Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   LOG(INIT, Sev::Info, "Adding stats");
   // clang-format off
@@ -59,6 +60,13 @@ MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings con
   Stats.create("events_time_err", mystats.events_time_err);
   Stats.create("tx_events", mystats.tx_events);
   Stats.create("tx_bytes", mystats.tx_bytes);
+
+  /// \todo below stats are common to all detectors and could/should be moved
+  Stats.create("kafka.produce_fails",             mystats.kafka_produce_fails);
+  Stats.create("kafka.ev_errors",                 mystats.kafka_ev_errors);
+  Stats.create("kafka.ev_others",                 mystats.kafka_ev_others);
+  Stats.create("kafka.dr_errors",                 mystats.kafka_dr_errors);
+  Stats.create("kafka.dr_others",                 mystats.kafka_dr_noerrors);
   // clang-format on
 
   LOG(INIT, Sev::Info, "Stream monitor data = {}",
@@ -162,8 +170,8 @@ void MultigridBase::mainThread() {
   cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
 
   EV42Serializer ev42serializer(kafka_buffer_size, "multigrid");
-  Producer EventProducer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  ev42serializer.setProducerCallback(std::bind(&Producer::produce2<uint8_t>, &EventProducer, std::placeholders::_1));
+  Producer event_producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
+  ev42serializer.setProducerCallback(std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 
   ev42serializer.pulseTime(0);
 
@@ -213,6 +221,15 @@ void MultigridBase::mainThread() {
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {
       mystats.tx_bytes += ev42serializer.produce();
       monitor.produce();
+
+      /// Kafka stats update - common to all detectors
+      /// don't increment as producer keeps absolute count
+      mystats.kafka_produce_fails = event_producer.stats.produce_fails;
+      mystats.kafka_ev_errors = event_producer.stats.ev_errors;
+      mystats.kafka_ev_others = event_producer.stats.ev_others;
+      mystats.kafka_dr_errors = event_producer.stats.dr_errors;
+      mystats.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
+
       report_timer.now();
     }
 

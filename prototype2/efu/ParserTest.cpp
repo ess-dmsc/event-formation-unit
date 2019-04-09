@@ -58,12 +58,13 @@ class ParserTest : public TestBase {
 protected:
   Parser *parser;
   EFUArgs efu_args;
+  NewStats stats;
   BaseSettings settings = efu_args.getBaseSettings();
   int keeprunning{1};
 
   virtual void SetUp() {
     auto detectorif = Factory.create(settings);
-    parser = new Parser(detectorif, keeprunning);
+    parser = new Parser(detectorif, stats, keeprunning);
   }
 
   virtual void TearDown() { delete parser; }
@@ -187,7 +188,8 @@ TEST_F(ParserTest, DuplicateCommands) {
 
 TEST_F(ParserTest, NullDetector) {
   int keeprunning{1};
-  Parser parser(nullptr, keeprunning); // No detector, no STAT_GET_COUNT command
+  NewStats stats;
+  Parser parser(nullptr, stats, keeprunning); // No detector, no STAT_GET_COUNT command
 
   const char *cmd = "STAT_GET_COUNT";
   std::memcpy(input, cmd, strlen(cmd));

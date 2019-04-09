@@ -7,34 +7,46 @@
 
 #include <sonde/SoNDeBase.h>
 #include <common/EV42Serializer.h>
+#include <common/HistSerializer.h>
 #include <common/Producer.h>
 #include <common/Trace.h>
 #include <libs/include/Socket.h>
 #include <libs/include/TSCTimer.h>
 #include <sonde/ideas/Data.h>
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
+
 SONDEIDEABase::SONDEIDEABase(BaseSettings const &settings, struct SoNDeSettings & localSettings)
-     : Detector("SoNDe detector using IDEA readout", settings),
+     : Detector("SoNDe detector using IDEAS readout", settings),
        SoNDeSettings(localSettings) {
 
-  Stats.setPrefix("efu.sonde");
+  Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("input.rx_packets",                mystats.rx_packets);
-  Stats.create("input.rx_bytes",                  mystats.rx_bytes);
-  Stats.create("input.dropped",                   mystats.fifo_push_errors);
-  Stats.create("processing.idle",                 mystats.rx_idle1);
-  Stats.create("processing.rx_events",            mystats.rx_events);
-  Stats.create("processing.rx_geometry_errors",   mystats.rx_geometry_errors);
-  Stats.create("processing.rx_seq_errors",        mystats.rx_seq_errors);
-  Stats.create("output.tx_bytes",                 mystats.tx_bytes);
-  /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka_produce_fails",             mystats.kafka_produce_fails);
-  Stats.create("kafka_ev_errors",                 mystats.kafka_ev_errors);
-  Stats.create("kafka_ev_others",                 mystats.kafka_ev_others);
-  Stats.create("kafka_dr_errors",                 mystats.kafka_dr_errors);
-  Stats.create("kafka_dr_others",                 mystats.kafka_dr_noerrors);
+  Stats.create("receive.packets",                 mystats.rx_packets);
+  Stats.create("receive.bytes",                   mystats.rx_bytes);
+  Stats.create("receive.dropped",                 mystats.fifo_push_errors);
+
+  Stats.create("readouts.seq_errors",             mystats.rx_seq_errors);
+
+  Stats.create("events.count",                    mystats.rx_events);
+  Stats.create("events.geometry_errors",          mystats.rx_geometry_errors);
+
+  Stats.create("transmit.bytes",                  mystats.tx_bytes);
+
+  Stats.create("thread.idle",                     mystats.rx_idle1);
+  Stats.create("thread.fifo_synch_errors",        mystats.fifo_synch_errors);
+
+  /// \todo Kafka stats are common to all detectors and could/should be moved
+  Stats.create("kafka.produce_fails",             mystats.kafka_produce_fails);
+  Stats.create("kafka.ev_errors",                 mystats.kafka_ev_errors);
+  Stats.create("kafka.ev_others",                 mystats.kafka_ev_others);
+  Stats.create("kafka.dr_errors",                 mystats.kafka_dr_errors);
+  Stats.create("kafka.dr_others",                 mystats.kafka_dr_noerrors);
+
+
   // clang-format on
   std::function<void()> inputFunc = [this]() { SONDEIDEABase::input_thread(); };
   Detector::AddThreadFunction(inputFunc, "input");
@@ -89,12 +101,20 @@ void SONDEIDEABase::input_thread() {
 
 void SONDEIDEABase::processing_thread() {
   Sonde::Geometry geometry;
-
   Sonde::IDEASData ideasdata(&geometry, SoNDeSettings.fileprefix);
+
   EV42Serializer flatbuffer(kafka_buffer_size, "SONDE");
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
   flatbuffer.setProducerCallback(
-      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
+    std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
+
+  constexpr uint16_t maxChannels{64};
+  constexpr uint16_t maxAdc{65535};
+  Hists histograms(maxChannels, maxAdc);
+  HistSerializer histfb(histograms.needed_buffer_size(), "SONDE");
+  Producer monitorprod(EFUSettings.KafkaBroker, "SKADI_monitor");
+  histfb.set_callback(
+    std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 
   unsigned int data_index;
 
@@ -115,6 +135,13 @@ void SONDEIDEABase::processing_thread() {
         mystats.kafka_dr_errors = eventprod.stats.dr_errors;
         mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
         produce_timer.now();
+
+        if (!histograms.isEmpty()) {
+          XTRACE(PROCESS, DEB, "Sending histogram for %zu readouts",
+                 histograms.hit_count());
+          histfb.produce(histograms);
+          histograms.clear();
+        }
       }
       usleep(10);
 
@@ -133,6 +160,8 @@ void SONDEIDEABase::processing_thread() {
 
         if (events > 0) {
           for (int i = 0; i < events; i++) {
+            assert(ideasdata.data[i].pixel_id < maxChannels);
+            histograms.bin_x(ideasdata.data[i].pixel_id, 1000); /// \todo adc not available
             XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)",
                    i, ideasdata.data[i].time, ideasdata.data[i].pixel_id);
             mystats.tx_bytes += flatbuffer.addEvent(ideasdata.data[i].time,

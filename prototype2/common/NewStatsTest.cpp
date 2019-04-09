@@ -38,7 +38,8 @@ TEST_F(NewStatsTest, CreateStat) {
 }
 
 TEST_F(NewStatsTest, CreateStatPrefix) {
-  NewStats stats("dmsc.efu.");
+  NewStats stats;
+  stats.setPrefix("dmsc.efu", "0");
   int64_t ctr1 = 765;
   int64_t ctr2 = 432;
 
@@ -46,11 +47,11 @@ TEST_F(NewStatsTest, CreateStatPrefix) {
 
   stats.create(std::string("stat1"), ctr1);
   ASSERT_EQ(1U, stats.size());
-  ASSERT_EQ("dmsc.efu.stat1", stats.name(1));
+  ASSERT_EQ("dmsc.efu.0.stat1", stats.name(1));
 
   stats.create(std::string("stat2"), ctr2);
   ASSERT_EQ(2U, stats.size());
-  ASSERT_EQ("dmsc.efu.stat2", stats.name(2));
+  ASSERT_EQ("dmsc.efu.0.stat2", stats.name(2));
 
   ASSERT_EQ("", stats.name(3));
 }
@@ -59,36 +60,28 @@ TEST_F(NewStatsTest, CreateStatPrefixWithDot) {
   NewStats stats;
   int64_t ctr1 = 765;
   std::string DotPrefix = "some_prefix.";
+  std::string Region = "0.";
   std::string SomeStat = "stat1";
-  stats.setPrefix(DotPrefix);
+  stats.setPrefix(DotPrefix, Region);
   stats.create(SomeStat, ctr1);
   ASSERT_EQ(1U, stats.size());
-  ASSERT_EQ(DotPrefix + SomeStat, stats.name(1));
+  ASSERT_EQ(DotPrefix + Region + SomeStat, stats.name(1));
 }
 
 TEST_F(NewStatsTest, CreateStatPrefixWitoutDot) {
   NewStats stats;
   int64_t ctr1 = 765;
   std::string DotPrefix = "some_prefix";
+  std::string Region = "0";
   std::string SomeStat = "stat1";
-  stats.setPrefix(DotPrefix);
+  stats.setPrefix(DotPrefix, "0");
   stats.create(SomeStat, ctr1);
   ASSERT_EQ(1U, stats.size());
-  ASSERT_EQ(DotPrefix + "." + SomeStat, stats.name(1));
-}
-
-TEST_F(NewStatsTest, ConstructorStatPrefixWitoutDot) {
-  std::string DotPrefix = "some_prefix";
-  NewStats stats(DotPrefix);
-  int64_t ctr1 = 765;
-  std::string SomeStat = "stat1";
-  stats.create(SomeStat, ctr1);
-  ASSERT_EQ(1U, stats.size());
-  ASSERT_EQ(DotPrefix + "." + SomeStat, stats.name(1));
+  ASSERT_EQ(DotPrefix + "." + Region + "." + SomeStat, stats.name(1));
 }
 
 TEST_F(NewStatsTest, DuplicateStatPrefix) {
-  NewStats stats("dmsc.efu.");
+  NewStats stats;
   int64_t ctr1;
   int64_t ctr2;
 

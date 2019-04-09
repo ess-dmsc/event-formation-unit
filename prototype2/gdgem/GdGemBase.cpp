@@ -64,7 +64,8 @@ int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
 
 GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSettings) :
        Detector("NMX", settings), NMXSettings(LocalSettings) {
-  Stats.setPrefix("efu.nmx");
+
+  Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   LOG(INIT, Sev::Info, "NMX Config file: {}", NMXSettings.ConfigFile);
   nmx_opts = Gem::NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
@@ -105,11 +106,11 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
 
   Stats.create("tx_bytes", mystats.tx_bytes);
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka_produce_fails", mystats.kafka_produce_fails);
-  Stats.create("kafka_ev_errors", mystats.kafka_ev_errors);
-  Stats.create("kafka_ev_others", mystats.kafka_ev_others);
-  Stats.create("kafka_dr_errors", mystats.kafka_dr_errors);
-  Stats.create("kafka_dr_others", mystats.kafka_dr_noerrors);
+  Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka.ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka.ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka.dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka.dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
   if (!NMXSettings.fileprefix.empty())
@@ -387,15 +388,15 @@ void GdGemBase::processing_thread() {
   ev42serializer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 
-  Gem::TrackSerializer track_serializer(256, 1);
+  Gem::TrackSerializer track_serializer(256, 1, "nmx_tracks");
   track_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
-  HistSerializer hist_serializer(hists_.needed_buffer_size());
+  HistSerializer hist_serializer(hists_.needed_buffer_size(), "nmx");
   hist_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
-  Gem::TrackSerializer raw_serializer(1500, 1);
+  Gem::TrackSerializer raw_serializer(1500, 1, "nmx_hits");
   raw_serializer.set_callback(
           std::bind(&Producer::produce2<uint8_t>, &hits_producer, std::placeholders::_1));
 
