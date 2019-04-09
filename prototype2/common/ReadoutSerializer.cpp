@@ -34,7 +34,7 @@ size_t ReadoutSerializer::produce() {
 
   auto dataoff = CreateMONHit(builder, planevec, timevec, channelvec, adcvec);
   auto msg = CreateMonitorMessage(builder, 0, DataField::MONHit, dataoff.Union());
-  builder.Finish(msg);
+  FinishMonitorMessageBuffer(builder, msg);
 
   Buffer<uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
   if (producer_callback) {
