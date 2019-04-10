@@ -117,7 +117,7 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
       ->group("Delay Line Options")
       ->default_str("0.0");
   Parser
-      .add_option("--yaxis_slope", ReadoutSettings.XAxisCalibSlope,
+      .add_option("--yaxis_slope", ReadoutSettings.YAxisCalibSlope,
                   "The slope multiplier of the y-axis postion value.")
       ->group("Delay Line Options")
       ->default_str("1.0");
