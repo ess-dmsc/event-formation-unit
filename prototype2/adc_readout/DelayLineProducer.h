@@ -70,5 +70,5 @@ protected:
   std::mutex PulseMutex;
   std::queue<PulseParameters> PulseQueue{};
   std::atomic_bool RunThread{true};
-  ESSGeometry essgeometry{65536, 65536, 1, 1};
+  ESSGeometry essgeometry{2048, 2048, 1, 1};
 };
