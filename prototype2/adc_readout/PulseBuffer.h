@@ -22,8 +22,8 @@ public:
   void addPulse(PulseParameters const &Pulse);
   bool hasValidPulses();
   std::vector<PulseParameters> getPulses();
-  auto getDiscardedPulses() {return DiscardedPulses;}
-  auto getInvalidPulses() {return InvalidPulses;}
+  auto getDiscardedPulses() const {return DiscardedPulses;}
+  auto getInvalidPulses() const {return InvalidPulses;}
 private:
   std::int64_t DiscardedPulses{0};
   std::int64_t InvalidPulses{0};

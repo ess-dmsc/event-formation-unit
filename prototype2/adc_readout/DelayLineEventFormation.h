@@ -42,7 +42,7 @@ public:
   /// \brief Handle a pulse.
   ///
   /// \param[in] Pulse The ADC pulse information to process.
-  void addPulse(PulseParameters const &Pulse);
+  void addPulse(PulseParameters const &NewPulse);
 
   /// \brief Does the class have a valid event.
   ///
@@ -69,7 +69,7 @@ public:
   /// registered to an axis.
   /// \note Does not guarantee that all the pulses (the return value) were used
   /// in the creation of an event.
-  auto getNrOfDiscardedPulses() const { return DiscardedDelayLinePulses; }
+  auto getNrOfDiscardedPulses() const { return DiscardedDelayLinePulses + Buffer.getDiscardedPulses(); }
 
 protected:
   void DoChannelRoleMapping(ChannelID ID, AdcSettings::ChannelRole Role);
@@ -78,5 +78,5 @@ protected:
   std::unique_ptr<DelayLinePositionInterface> XAxisCalc{nullptr};
   std::unique_ptr<DelayLinePositionInterface> YAxisCalc{nullptr};
   std::multimap<ChannelID, DelayLinePositionInterface *> PulseHandlerMap{};
-  PulseBuffer Pulses;
+  PulseBuffer Buffer;
 };
