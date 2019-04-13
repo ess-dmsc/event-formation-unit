@@ -15,6 +15,7 @@ set(AdcReadoutBase_SRC
     DelayLineProcessing.cpp
     DelayLinePositionCalc.cpp
     PulseParameters.cpp
+    PulseBuffer.cpp
     )
 
 set(AdcReadoutBase_INC
@@ -36,6 +37,7 @@ set(AdcReadoutBase_INC
     PulseParameters.h
     SamplingRun.h
     ChannelID.h
+    PulseBuffer.h
     )
 
 
@@ -65,6 +67,7 @@ set(AdcReadoutTest_SRC
     test/DelayLineEventFormationTest.cpp
     test/PulseProcessingTest.cpp
     test/DelayLinePositionCalcTest.cpp
+    test/PulseBufferTest.cpp
     ${AdcReadoutBase_SRC}
     )
 

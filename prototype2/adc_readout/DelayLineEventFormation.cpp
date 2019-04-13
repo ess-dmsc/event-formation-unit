@@ -62,7 +62,7 @@ void DelayLineEventFormation::DoChannelRoleMapping(
                  DelayLinePosCalcInterface::ChannelRole,
                  std::function<bool(DelayLinePosCalcInterface *)>>;
   std::multimap<AdcSettings::ChannelRole, RoleParams> ChannelRoleMap;
-
+  
   auto addRole = [&ChannelRoleMap](auto Role, auto &AxisPtr, auto CAxisRole,
                                    auto CheckFunc) {
     ChannelRoleMap.emplace(
@@ -112,7 +112,7 @@ DelayLineEventFormation::DelayLineEventFormation(
     : XAxisCalc(createCalculator(ReadoutSettings.XAxis,
                                  ReadoutSettings.EventTimeoutNS)),
       YAxisCalc(createCalculator(ReadoutSettings.YAxis,
-                                 ReadoutSettings.EventTimeoutNS)) {
+                                 ReadoutSettings.EventTimeoutNS)), Pulses(ReadoutSettings.EventTimeoutNS) {
   XAxisCalc->setCalibrationValues(ReadoutSettings.XAxisCalibOffset,
                                   ReadoutSettings.XAxisCalibSlope);
 

@@ -16,6 +16,7 @@
 #include <limits>
 #include <map>
 #include <memory>
+#include "PulseBuffer.h"
 
 /// \brief The event information extracted from one or several pulses from the
 /// ADC system.
@@ -77,4 +78,5 @@ protected:
   std::unique_ptr<DelayLinePositionInterface> XAxisCalc{nullptr};
   std::unique_ptr<DelayLinePositionInterface> YAxisCalc{nullptr};
   std::multimap<ChannelID, DelayLinePositionInterface *> PulseHandlerMap{};
+  PulseBuffer Pulses;
 };
