@@ -24,7 +24,7 @@ public:
       : AdcReadoutBase(Settings, LocalAdcSettings) {}
 };
 
-// DetectorFactory<AdcReadout> Factory;
+DetectorFactory<AdcReadout> Factory;
 
- DetectorModuleRegistration::Registrar<AdcReadout> Register("AdcReadout",
-                                                           CLIArguments);
+//DetectorModuleRegistration::Registrar<AdcReadout> Register("AdcReadout",
+//                                                           CLIArguments);
