@@ -7,6 +7,7 @@
 
 #include "PulseBuffer.h"
 #include <limits>
+#include <algorithm>
 
 PulseBuffer::PulseBuffer(std::uint64_t TimeoutNS, size_t BufferSize) : Timeout(TimeoutNS), MaxPulses(BufferSize) {
   
