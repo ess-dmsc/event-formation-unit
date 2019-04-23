@@ -1,7 +1,7 @@
 find_package(ASIO REQUIRED)
 find_package(Trompeloeil REQUIRED)
 
-set(AdcReadoutBase_SRC
+set(AdcReadout_SRC
     AdcReadoutBase.cpp
     AdcParse.cpp
     PeakFinder.cpp
@@ -18,7 +18,7 @@ set(AdcReadoutBase_SRC
     PulseBuffer.cpp
     )
 
-set(AdcReadoutBase_INC
+set(AdcReadout_INC
     AdcReadoutConstants.h
     AdcReadoutBase.h
     AdcParse.h
@@ -38,16 +38,6 @@ set(AdcReadoutBase_INC
     SamplingRun.h
     ChannelID.h
     PulseBuffer.h
-    )
-
-
-set(AdcReadout_SRC
-    AdcReadout.cpp
-    ${AdcReadoutBase_SRC}
-    )
-
-set(AdcReadout_INC
-    ${AdcReadoutBase_INC}
     )
 
 create_object_module(AdcReadout)
