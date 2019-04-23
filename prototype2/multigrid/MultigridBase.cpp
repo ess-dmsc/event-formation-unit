@@ -173,7 +173,7 @@ void MultigridBase::mainThread() {
   Producer event_producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
 
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic warning "-Wdeprecated-declarations"
   ev42serializer.setProducerCallback(std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 #pragma GCC diagnostic pop
   

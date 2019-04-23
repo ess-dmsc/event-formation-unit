@@ -38,7 +38,7 @@ void PeakFinder::sendData(const std::uint64_t &TimeStamp,
   EvBuilder.add_detector_id(AmplitudeVector);
   builder.Finish(EvBuilder.Finish(), EventMessageIdentifier());
   #pragma GCC diagnostic push
-  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+  #pragma GCC diagnostic warning "-Wdeprecated-declarations"
   ProducerPtr->produce(reinterpret_cast<char *>(builder.GetBufferPointer()),
                        builder.GetSize());
   #pragma GCC diagnostic pop

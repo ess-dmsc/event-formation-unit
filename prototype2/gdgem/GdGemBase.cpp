@@ -386,7 +386,7 @@ void GdGemBase::processing_thread() {
 
   EV42Serializer ev42serializer(kafka_buffer_size, "nmx");
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#pragma GCC diagnostic warning "-Wdeprecated-declarations"
   ev42serializer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 
