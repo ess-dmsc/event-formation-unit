@@ -17,22 +17,22 @@ archive_what = "centos7-release"
 
 images = [
     'centos7-release': [
-        'name': 'essdmscdm/centos7-build-node:4.1.0',
+        'name': 'essdmscdm/centos7-build-node:4.3.0',
         'sh': '/usr/bin/scl enable devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON'
     ],
     'centos7': [
-        'name': 'essdmscdm/centos7-build-node:4.1.0',
+        'name': 'essdmscdm/centos7-build-node:4.3.0',
         'sh': '/usr/bin/scl enable devtoolset-6 -- /bin/bash -e',
         'cmake_flags': '-DCOV=ON'
     ],
     'ubuntu1804': [
-        'name': 'essdmscdm/ubuntu18.04-build-node:2.0.0',
+        'name': 'essdmscdm/ubuntu18.04-build-node:2.1.0',
         'sh': 'bash -e',
         'cmake_flags': ''
     ],
     'debian9': [
-        'name': 'essdmscdm/debian9-build-node:3.0.0',
+        'name': 'essdmscdm/debian9-build-node:3.1.0',
         'sh'  : 'bash -e',
         'cmake_flags': ''
     ]
@@ -268,8 +268,8 @@ def get_system_tests_pipeline() {
                         checkout scm
                     }  // stage
                     stage("System tests: Install requirements") {
-                        sh """scl enable rh-python35 -- python -m pip install --user --upgrade pip
-                        scl enable rh-python35 -- python -m pip install --user -r system-tests/requirements.txt
+                        sh """scl enable rh-python36 -- python -m pip install --user --upgrade pip
+                        scl enable rh-python36 -- python -m pip install --user -r system-tests/requirements.txt
                         """
                     }  // stage
                     stage("System tests: Run") {
@@ -277,7 +277,7 @@ def get_system_tests_pipeline() {
                                                 """
 			timeout(time: 30, activity: true){
                             sh """cd system-tests/
-                            scl enable rh-python35 -- python -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark
+                            scl enable rh-python36 -- python -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark
                             """
 			}
                     }  // stage
