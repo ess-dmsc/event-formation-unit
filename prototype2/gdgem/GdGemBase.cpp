@@ -385,6 +385,8 @@ void GdGemBase::processing_thread() {
   Producer hits_producer(EFUSettings.KafkaBroker, "NMX_hits");
 
   EV42Serializer ev42serializer(kafka_buffer_size, "nmx");
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wdeprecated-declarations"
   ev42serializer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 
@@ -399,7 +401,7 @@ void GdGemBase::processing_thread() {
   Gem::TrackSerializer raw_serializer(1500, 1, "nmx_hits");
   raw_serializer.set_callback(
           std::bind(&Producer::produce2<uint8_t>, &hits_producer, std::placeholders::_1));
-
+#pragma GCC diagnostic pop
   TSCTimer global_time, report_timer;
 
   unsigned int data_index;

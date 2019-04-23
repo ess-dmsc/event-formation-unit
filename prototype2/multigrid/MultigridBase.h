@@ -34,8 +34,11 @@ struct Monitor {
     histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size(), "multigrid");
 
     producer = std::make_shared<Producer>(broker, "C-SPEC_monitor");
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wdeprecated-declarations"
     readouts->set_callback(std::bind(&Producer::produce2<uint8_t>, producer.get(), std::placeholders::_1));
     histfb->set_callback(std::bind(&Producer::produce2<uint8_t>, producer.get(), std::placeholders::_1));
+#pragma GCC diagnostic pop
     enabled_ = true;
   }
 
