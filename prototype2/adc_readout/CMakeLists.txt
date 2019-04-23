@@ -70,6 +70,7 @@ set(AdcReadoutTest_LIB
     AdcReadout
     )
 
+list(APPEND AdcReadoutTest_SRC ${EFU_MODULES})
 create_test_executable(AdcReadoutTest SKIP_MEMGRIND)
 target_include_directories(AdcReadoutTest PRIVATE ${Trompeloeil_INCLUDE_DIR})
 

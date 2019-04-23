@@ -26,7 +26,7 @@ set(efu_INC
   )
 
 
-set(efu_LIB ${EFU_MODULES})
+list(APPEND efu_SRC ${EFU_MODULES})
 create_executable(efu)
 if (NOT "${efu_LIB}" STREQUAL "")
   add_dependencies(efu ${EFU_DEPENDENCIES})
