@@ -33,7 +33,10 @@ public:
   [[deprecated("Due to problematic use of system time.")]]
   inline void produce2(const Buffer<T> &buffer)
   {
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     this->produce(buffer.address, buffer.bytes());
+#pragma GCC diagnostic pop
   }
   
   
