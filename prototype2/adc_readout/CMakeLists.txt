@@ -50,7 +50,7 @@ set(AdcReadout_INC
     ${AdcReadoutBase_INC}
     )
 
-create_module(AdcReadout)
+create_object_module(AdcReadout)
 
 set(AdcReadoutTest_SRC
     test/UnitTests.cpp
@@ -68,16 +68,15 @@ set(AdcReadoutTest_SRC
     test/PulseProcessingTest.cpp
     test/DelayLinePositionCalcTest.cpp
     test/PulseBufferTest.cpp
-    ${AdcReadoutBase_SRC}
     )
 
 set(AdcReadoutTest_INC
     test/TestUDPServer.h
-    ${AdcReadoutBase_INC}
     )
 
 set(AdcReadoutTest_LIB
     eventlib
+    AdcReadout
     )
 
 create_test_executable(AdcReadoutTest SKIP_MEMGRIND)
