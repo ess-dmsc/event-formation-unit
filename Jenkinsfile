@@ -268,7 +268,7 @@ def get_system_tests_pipeline() {
                         checkout scm
                     }  // stage
                     stage("System tests: Install requirements") {
-                        sh """scl enable rh-python36 -- python -m pip install --user --upgrade pip
+                        sh """python3.6 -m pip install --user --upgrade pip
                         python3.6 -m pip install --user -r system-tests/requirements.txt
                         """
                     }  // stage
