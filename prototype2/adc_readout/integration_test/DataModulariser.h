@@ -8,7 +8,7 @@
 #include <utility>
 #include <memory>
 #include "../AdcParse.h"
-#include "../span.hpp"
+#include <span.hpp>
 
 class DataModulariser {
 public:

@@ -9,7 +9,7 @@
 #include <h5cpp/property/dataset_access.hpp>
 #include <h5cpp/property/property_class.hpp>
 #include <vector>
-#include "../span.hpp"
+#include <span.hpp>
 
 namespace hdf5 {
   namespace datatype {
