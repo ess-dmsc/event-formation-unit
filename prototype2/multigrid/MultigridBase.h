@@ -35,7 +35,7 @@ struct Monitor {
 
     producer = std::make_shared<Producer>(broker, "C-SPEC_monitor");
 #pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
     readouts->set_callback(std::bind(&Producer::produce2<uint8_t>, producer.get(), std::placeholders::_1));
     histfb->set_callback(std::bind(&Producer::produce2<uint8_t>, producer.get(), std::placeholders::_1));
 #pragma GCC diagnostic pop

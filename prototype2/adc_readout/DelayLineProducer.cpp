@@ -72,7 +72,7 @@ void DelayLineProducer::serializeAndSendEvent(const DelayLineEvent &Event) {
   EvBuilder.add_detector_id(DetectorID_Vector);
   Builder.Finish(EvBuilder.Finish(), EventMessageIdentifier());
   #pragma GCC diagnostic push
-  #pragma GCC diagnostic warning "-Wdeprecated-declarations"
+  #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
   produce(reinterpret_cast<char *>(Builder.GetBufferPointer()),
           Builder.GetSize());
   #pragma GCC diagnostic pop

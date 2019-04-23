@@ -106,7 +106,7 @@ void SONDEIDEABase::processing_thread() {
   EV42Serializer flatbuffer(kafka_buffer_size, "SONDE");
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
 #pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
 
   flatbuffer.setProducerCallback(
     std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
