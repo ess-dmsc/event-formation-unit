@@ -16,6 +16,8 @@
 
 #include <common/Buffer.h>
 #include <functional>
+#include "span.hpp"
+#include <memory>
 
 ///
 class ProducerBase {
@@ -29,9 +31,20 @@ public:
   
   template<typename T>
   [[deprecated("Due to problematic use of system time.")]]
-  inline void produce2(const Buffer<T>& buffer)
+  inline void produce2(const Buffer<T> &buffer)
   {
     this->produce(buffer.address, buffer.bytes());
+  }
+  
+  
+  virtual int produce(const nonstd::span<const std::uint8_t> &Buffer, std::int64_t MessageTimestampMS) = 0;
+  
+  /// \brief Send data to Kafka broker on previously set topic.
+  ///\param Buffer Reference to a buffer 
+  template<typename T>
+  int produce(const nonstd::span<const T> &Buffer, std::int64_t MessageTimestampMS)
+  {
+    return produce({Buffer.data(), Buffer.size_bytes()}, MessageTimestampMS);
   }
 };
 
@@ -41,27 +54,24 @@ public:
   /// \param broker 'URL' specifying host and port, example "127.0.0.1:9009"
   /// \param topicstr Name of Kafka topic according to agreement, example
   /// "T-REX_detectors"
-  Producer(std::string broker, std::string topicstr);
+  Producer(std::string Broker, std::string topicstr);
 
   /// \brief cleans up by deleting allocated structures
-  ~Producer();
+  ~Producer() = default;
 
   /** \brief Function called to send data to a broker
    *  @param buffer Pointer to char buffer containing data to be tx'ed
    *  @param length Size of buffer data in bytes
    */
   [[deprecated("Due to problematic use of system time.")]]
-  int produce(void* buffer, size_t bytes) override;
+  int produce(void* buffer, size_t bytes) override {
+    return produce({reinterpret_cast<const std::uint8_t*>(buffer), static_cast<ssize_t>(bytes)}, time(nullptr) * 1000l);
+  };
+  
+  int produce(const nonstd::span<const std::uint8_t> &Buffer, std::int64_t MessageTimestampMS) override;
 
   /// \brief set kafka configuration and check result
-  void setConfig(std::string configName, std::string configValue);
-
-  /// \brief check kafka configuration result
-  void checkConfig(RdKafka::Conf::ConfResult configResult);
-
-
-  /// \brief Kafka callback function for delivery reports
-  //void dr_cb(RdKafka::Message &message) override;
+  void setConfig(std::string Key, std::string Value);
 
   /// \brief Kafka callback function for events
   void event_cb(RdKafka::Event &event) override;
@@ -78,12 +88,12 @@ public:
   } stats = {};
 
 private:
-  std::string kafkaErrstr;
-  std::string topicString;
-  RdKafka::Conf *conf{0};
-  RdKafka::Conf *tconf{0};
-  RdKafka::Topic *topic{0};
-  RdKafka::Producer *producer{0};
+  std::string ErrorMessage;
+  std::string TopicName;
+  std::unique_ptr<RdKafka::Conf> Config;
+  std::unique_ptr<RdKafka::Conf> TopicConfig;
+  std::unique_ptr<RdKafka::Topic> KafkaTopic;
+  std::unique_ptr<RdKafka::Producer> KafkaProducer;
 };
 
 using ProducerCallback = std::function<void(Buffer<uint8_t>)>;
