@@ -2,6 +2,7 @@ find_package(ASIO REQUIRED)
 find_package(Trompeloeil REQUIRED)
 
 set(AdcReadout_SRC
+    AdcReadout.cpp
     AdcReadoutBase.cpp
     AdcParse.cpp
     PeakFinder.cpp

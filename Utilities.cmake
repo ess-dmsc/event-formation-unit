@@ -33,8 +33,12 @@ function(create_object_module module_name)
   add_library(${module_name} OBJECT
     ${${module_name}_SRC}
     ${${module_name}_INC})
-  set(EFU_MODULES ${EFU_MODULES} $<TARGET_OBJECTS:${module_name}> CACHE INTERNAL "EFU_MODULES")
-  set(EFU_DEPENDENCIES ${EFU_DEPENDENCIES} ${module_name} CACHE INTERNAL "EFU_DEPENDENCIES")
+  list(APPEND EFU_MODULES $<TARGET_OBJECTS:${module_name}>)
+  list(REMOVE_DUPLICATES EFU_MODULES)
+  set(EFU_MODULES ${EFU_MODULES} CACHE INTERNAL "EFU_MODULES")
+  list(APPEND EFU_DEPENDENCIES ${module_name})
+  list(REMOVE_DUPLICATES EFU_DEPENDENCIES)
+  set(EFU_DEPENDENCIES ${EFU_DEPENDENCIES} CACHE INTERNAL "EFU_DEPENDENCIES")
 endfunction(create_object_module)
 
 #=============================================================================
