@@ -26,11 +26,11 @@ public:
   virtual ~ProducerBase() = default;
 
   // \todo deprecate this function in favor of encapsulated buffer
-//  [[deprecated("Due to problematic use of system time.")]]
+  [[deprecated("Due to problematic use of system time.")]]
   virtual int produce(void* buffer, size_t bytes) = 0;
   
   template<typename T>
-//  [[deprecated("Due to problematic use of system time.")]]
+  [[deprecated("Due to problematic use of system time.")]]
   inline void produce2(const Buffer<T> &buffer)
   {
     this->produce(buffer.address, buffer.bytes());
@@ -63,7 +63,7 @@ public:
    *  @param buffer Pointer to char buffer containing data to be tx'ed
    *  @param length Size of buffer data in bytes
    */
-//  [[deprecated("Due to problematic use of system time.")]]
+  [[deprecated("Due to problematic use of system time.")]]
   int produce(void* buffer, size_t bytes) override {
     return produce({reinterpret_cast<const std::uint8_t*>(buffer), static_cast<ssize_t>(bytes)}, time(nullptr) * 1000l);
   };

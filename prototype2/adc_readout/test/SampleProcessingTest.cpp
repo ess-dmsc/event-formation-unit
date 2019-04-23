@@ -48,6 +48,7 @@ public:
 class ProducerStandIn : public ProducerBase {
 public:
   MAKE_MOCK2(produce, int(void *, size_t), override);
+  MAKE_MOCK2(produce, int(const nonstd::span<const std::uint8_t>&, std::int64_t), override);
 };
 #pragma GCC diagnostic pop
 
@@ -57,7 +58,7 @@ TEST(SampleProcessing, NoSamples) {
   SamplingRun TempModule;
   TempModule.Identifier.ChannelNr = 1;
   TestProcessor.processData(TempModule);
-  FORBID_CALL(*TestProducer, produce(_, _));
+  FORBID_CALL(*TestProducer, produce(_, ANY(std::int64_t)));
 }
 
 TEST(SampleProcessing, SetMeanOfChannels) {
