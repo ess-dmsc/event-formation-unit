@@ -54,3 +54,10 @@ public:
   };
 };
 } // namespace DetectorModuleRegistration
+
+#define COMBINE1(X,Y) X##Y
+#define COMBINE(X,Y) COMBINE1(X,Y)
+#define STRINGIFY1(s) STRINGIFY(s)
+#define STRINGIFY(s) #s
+
+#define REGISTER_MODULE(Module, CLIFunc) DetectorModuleRegistration::Registrar<Module> COMBINE(Module, __LINE__)(STRINGIFY(Module), CLIFunc)
