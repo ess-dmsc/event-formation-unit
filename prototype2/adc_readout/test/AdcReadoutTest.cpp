@@ -134,7 +134,7 @@ TEST_F(AdcReadoutTest, DoubleReceiveTest) {
   std::this_thread::sleep_for(SleepTime);
   Server1.startPacketTransmission(1, 100);
   Server2.startPacketTransmission(1, 100);
-  std::this_thread::sleep_for(SleepTime);
+  std::this_thread::sleep_for(SleepTime * 2);
   EXPECT_EQ(Readout.Threads.size(), 3u);
   EXPECT_EQ(Readout.AdcStats.parser_packets_total, 2);
   Readout.stopThreads();
