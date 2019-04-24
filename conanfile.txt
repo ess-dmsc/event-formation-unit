@@ -4,7 +4,7 @@ cli11/1.6.0@bincrafters/stable
 cmake_installer/3.10.0@conan/stable
 fmt/5.2.0@bincrafters/stable
 google-benchmark/1.4.1-dm2@ess-dmsc/testing
-graylog-logger/1.1.2-dm1@ess-dmsc/stable
+graylog-logger/1.1.5@ess-dmsc/stable
 gtest/3121b20-dm3@ess-dmsc/stable
 h5cpp/0.1.2@ess-dmsc/testing
 jsonformoderncpp/3.1.0@vthiery/stable
