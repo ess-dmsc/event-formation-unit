@@ -5,112 +5,49 @@
 #include <dlfcn.h>
 #include <librdkafka/rdkafkacpp.h>
 #include <test/TestBase.h>
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-int fail = -1; // Dont fail
+#include "KafkaMocks.h"
 
-// Create pointers to the retuned objects
-typedef RdKafka::Conf *(*pcreate)(RdKafka::Conf::ConfType);
-typedef RdKafka::Producer *(*pcreateprod)(RdKafka::Conf *, std::string &);
-typedef RdKafka::Topic *(*pcreatetopic)(RdKafka::Handle *, std::string const &,
-                                        RdKafka::Conf *, std::string &);
+#include <trompeloeil.hpp>
 
-/**Attmpt to load primary and alternatively secondary symbols using dlsym()
- * Created to cover different compilations of librdkafka (old and new abis)
- * Used for forcing external functions to fail for unit testing purposes
- * exit if none of the symbols can be loaded.
-**/
-void * loadsyms(const char * primary, const char * secondary) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
+using trompeloeil::_;
 
-  void * vpsym = dlsym(RTLD_NEXT, primary);
-
-  if (vpsym == NULL) {
-    printf("Could not load primary symbol: %s\n", primary);
-    printf("Trying secondary...\n");
-
-    dlerror();
-    vpsym = dlsym(RTLD_NEXT, secondary);
-    if (vpsym == NULL) {
-      printf("Could not load secondary symbol: %s\n", secondary);
-      printf("Error stubbing kafka functions\n");
-      exit(1);
+namespace trompeloeil {
+  template <>
+  void reporter<specialized>::send(severity s, char const *file,
+                                   unsigned long line, const char *msg) {
+    if (s == severity::fatal) {
+      std::ostringstream os;
+      if (line != 0U) {
+        os << file << ':' << line << '\n';
+      }
+      throw expectation_violation(os.str() + msg);
     }
+    ADD_FAILURE_AT(file, line) << msg;
   }
-#pragma GCC diagnostic pop
-  return vpsym;
-}
+} // namespace trompeloeil
 
-
-/** Intercept RdKafka::Conf::create() */
-RdKafka::Conf *RdKafka::Conf::create(ConfType type) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-  pcreate real_create = (pcreate)loadsyms(
-      "_ZN7RdKafka4Conf6createENS0_8ConfTypeE",
-      "_ZN7RdKafka4Conf6createENS0_8ConfTypeE"); // nm -C
-#pragma GCC diagnostic pop
-
-  if (fail != -1 && type == fail) {
-    printf("Forcing RdKafka::Conf::create() to fail\n");
-    return nullptr;
-  } else {
-    return real_create(type);
-  }
-}
-
-
-/** Intercept RdKafka::Producer::create() */
-RdKafka::Producer *RdKafka::Producer::create(RdKafka::Conf *type,
-                                             std::string &str) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-  pcreateprod real_create = (pcreateprod)loadsyms(
-      "_ZN7RdKafka8Producer6createEPNS_4ConfERSs",
-      "_ZN7RdKafka8Producer6createEPNS_4ConfERNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEE"); // nm -C librdkafka.a
-#pragma GCC diagnostic pop
-
-  if (fail == 777) {
-    printf("Forcing RdKafka::Producer::create() to fail\n");
-    return nullptr;
-  } else {
-    return real_create(type, str);
-  }
-}
-
-
-/** Intercept RdKafka::Topic::create() */
-RdKafka::Topic *RdKafka::Topic::create(RdKafka::Handle *handle,
-                                       std::string const &topic,
-                                       RdKafka::Conf *conf, std::string &str) {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-  pcreatetopic real_create = (pcreatetopic)loadsyms(
-      "_ZN7RdKafka5Topic6createEPNS_6HandleERKSsPNS_4ConfERSs",
-      "_ZN7RdKafka5Topic6createEPNS_6HandleERKNSt7__cxx1112basic_stringIcSt11char_traitsIcESaIcEEEPNS_4ConfERS8_");
-#pragma GCC diagnostic pop
-
-  if (fail == 888) {
-    printf("Forcing RdKafka::Topic::create() to fail\n");
-    return nullptr;
-  } else {
-    return real_create(handle, topic, conf, str);
-  }
-}
-
-//
-// Google test code below
-//
+class ProducerStandIn : public Producer {
+public:
+  ProducerStandIn(std::string Broker, std::string Topic) : Producer(Broker, Topic) {}
+  using Producer::Config;
+  using Producer::TopicConfig;
+  using Producer::KafkaTopic;
+  using Producer::KafkaProducer;
+};
 
 class ProducerTest : public TestBase {
-  virtual void SetUp() { fail = -1; }
+  virtual void SetUp() {}
   virtual void TearDown() {}
 };
 
 TEST_F(ProducerTest, ConstructorOK) {
-  Producer prod{"nobroker", "notopic"};
-  int ret = prod.produce(0, 0);
+  ProducerStandIn prod{"nobroker", "notopic"};
+  std::vector<unsigned char> DataBuffer(10);
+  int ret = prod.produce(DataBuffer, time(nullptr) * 1000);
+  ASSERT_NE(prod.Config, nullptr);
+  ASSERT_NE(prod.TopicConfig, nullptr);
+  ASSERT_NE(prod.KafkaTopic, nullptr);
+  ASSERT_NE(prod.KafkaProducer, nullptr);
   ASSERT_EQ(ret, RdKafka::ERR_NO_ERROR);
   ASSERT_EQ(prod.stats.dr_errors, 0);
   ASSERT_EQ(prod.stats.dr_noerrors, 0);
@@ -119,38 +56,55 @@ TEST_F(ProducerTest, ConstructorOK) {
   ASSERT_EQ(prod.stats.produce_fails, 0);
 }
 
-TEST_F(ProducerTest, CreateConfGlobalFail) {
-  fail = RdKafka::Conf::CONF_GLOBAL;
-  Producer prod{"nobroker", "notopic"};
-  int ret = prod.produce(0, 0);
+TEST_F(ProducerTest, CreateConfFail1) {
+  ProducerStandIn prod{"nobroker", "notopic"};
+  prod.KafkaProducer.reset(nullptr);
+  std::array<uint8_t, 10> Data;
+  int ret = prod.produce(Data, 10);
   ASSERT_EQ(ret, RdKafka::ERR_UNKNOWN);
 }
 
-TEST_F(ProducerTest, CreateConfTopicFail) {
-  fail = RdKafka::Conf::CONF_TOPIC;
-  Producer prod{"nobroker", "notopic"};
-  int ret = prod.produce(0, 0);
+TEST_F(ProducerTest, CreateConfFail2) {
+  ProducerStandIn prod{"nobroker", "notopic"};
+  prod.KafkaTopic.reset(nullptr);
+  std::array<uint8_t, 10> Data;
+  int ret = prod.produce(Data, 10);
   ASSERT_EQ(ret, RdKafka::ERR_UNKNOWN);
-}
-
-TEST_F(ProducerTest, CreateProducerFail) {
-  fail = 777;
-  Producer prod{"nobroker", "notopic"};
-  int ret = prod.produce(0, 0);
-  ASSERT_EQ(ret, RdKafka::ERR_UNKNOWN);
-}
-
-TEST_F(ProducerTest, CreateTopicFail) {
-  fail = 888;
-  Producer prod{"nobroker", "notopic"};
-  int ret = prod.produce(0, 0);
-  ASSERT_EQ(ret, RdKafka::ERR_UNKNOWN);
-
 }
 
 TEST_F(ProducerTest, ProducerFail) {
+  ProducerStandIn prod{"nobroker", "notopic"};
+  auto *TempProducer = new MockProducer;
+  RdKafka::ErrorCode ReturnValue = RdKafka::ERR__STATE;
+  REQUIRE_CALL(*TempProducer, produce(_, _, _, _, _, _, _, _, _)).TIMES(1).RETURN(ReturnValue);
+  REQUIRE_CALL(*TempProducer, poll(_)).TIMES(1).RETURN(0);
+  prod.KafkaProducer.reset(TempProducer);
+  std::uint8_t SomeData[20];
+  ASSERT_EQ(prod.stats.produce_fails, 0);
+  int ret = prod.produce(SomeData, 999);
+  ASSERT_EQ(ret, ReturnValue);
+  ASSERT_EQ(prod.stats.produce_fails, 1);
+}
+
+TEST_F(ProducerTest, ProducerSuccess) {
+  ProducerStandIn prod{"nobroker", "notopic"};
+  auto *TempProducer = new MockProducer;
+  RdKafka::ErrorCode ReturnValue = RdKafka::ERR_NO_ERROR;
+  REQUIRE_CALL(*TempProducer, produce(_, _, _, _, _, _, _, _, _)).TIMES(1).RETURN(ReturnValue);
+  REQUIRE_CALL(*TempProducer, poll(_)).TIMES(1).RETURN(0);
+  prod.KafkaProducer.reset(TempProducer);
+  int NrOfBytes{200};
+  auto SomeData = std::make_unique<unsigned char[]>(NrOfBytes);
+  ASSERT_EQ(prod.stats.produce_fails, 0);
+  int ret = prod.produce({SomeData.get(), NrOfBytes}, 999);
+  ASSERT_EQ(ret, ReturnValue);
+  ASSERT_EQ(prod.stats.produce_fails, 0);
+}
+
+TEST_F(ProducerTest, ProducerFailDueToSize) {
   Producer prod{"nobroker", "notopic"};
-  int ret = prod.produce((char *)10000, 100000000);
+  auto DataPtr = std::make_unique<unsigned char>();
+  int ret = prod.produce({DataPtr.get(), 100000000}, 1);
   ASSERT_EQ(ret, RdKafka::ERR_MSG_SIZE_TOO_LARGE);
 }
 
@@ -158,5 +112,3 @@ int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
-
-#pragma GCC diagnostic pop

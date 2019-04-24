@@ -66,17 +66,18 @@ target_link_libraries(efu_common PUBLIC ${EFU_COMMON_LIBS})
 # Tests
 #=============================================================================
 
-if(${CMAKE_COMPILER_IS_GNUCXX})
-  set(ProducerTest_SRC
-    ProducerTest.cpp
-    Producer.cpp)
-  set(ProducerTest_INC
-    Producer.h)
-  create_test_executable(ProducerTest)
-else()
-  message(STATUS "*** Skipping ProducerTest - requires gcc/linux")
-endif()
+find_package(Trompeloeil REQUIRED)
 
+set(ProducerTest_SRC
+  ProducerTest.cpp
+  Producer.cpp)
+set(ProducerTest_INC
+  Producer.h
+  KafkaMocks.h
+)
+create_test_executable(ProducerTest)
+target_include_directories(ProducerTest PRIVATE ${Trompeloeil_INCLUDE_DIR})
+  
 set(BufferTest_SRC
   BufferTest.cpp)
 set(BufferTest_INC

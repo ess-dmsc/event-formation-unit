@@ -24,31 +24,13 @@ class ProducerBase {
 public:
   ProducerBase() = default;
   virtual ~ProducerBase() = default;
-
-  // \todo deprecate this function in favor of encapsulated buffer
-  [[deprecated("Due to problematic use of system time.")]]
-  virtual int produce(void* buffer, size_t bytes) = 0;
-  
-  template<typename T>
-  [[deprecated("Due to problematic use of system time.")]]
-  inline void produce2(const Buffer<T> &buffer)
-  {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-    this->produce(buffer.address, buffer.bytes());
-#pragma GCC diagnostic pop
-  }
-  
-  
-  virtual int produce(const nonstd::span<const std::uint8_t> &Buffer, std::int64_t MessageTimestampMS) = 0;
   
   /// \brief Send data to Kafka broker on previously set topic.
+  /// Will accept a buffer of (almost) arbitrary type. See unit tests for examples.
   /// \param Buffer Reference to a buffer
-  template<typename T>
-  int produce(const nonstd::span<const T> &Buffer, std::int64_t MessageTimestampMS)
-  {
-    return produce({Buffer.data(), Buffer.size_bytes()}, MessageTimestampMS);
-  }
+  /// \param MessageTimestampMS Timestamp of message in milliseconds since UNIX epoch
+  /// \return Returns 0 on success, another value on failure.
+  virtual int produce(nonstd::span<const std::uint8_t> Buffer, std::int64_t MessageTimestampMS) = 0;
 };
 
 class Producer : public ProducerBase, public RdKafka::EventCb {
@@ -62,16 +44,7 @@ public:
   /// \brief cleans up by deleting allocated structures
   ~Producer() = default;
 
-  /** \brief Function called to send data to a broker
-   *  @param buffer Pointer to char buffer containing data to be tx'ed
-   *  @param length Size of buffer data in bytes
-   */
-  [[deprecated("Due to problematic use of system time.")]]
-  int produce(void* buffer, size_t bytes) override {
-    return produce({reinterpret_cast<const std::uint8_t*>(buffer), static_cast<ssize_t>(bytes)}, time(nullptr) * 1000l);
-  };
-  
-  int produce(const nonstd::span<const std::uint8_t> &Buffer, std::int64_t MessageTimestampMS) override;
+  int produce(nonstd::span<const std::uint8_t> Buffer, std::int64_t MessageTimestampMS) override;
 
   /// \brief set kafka configuration and check result
   void setConfig(std::string Key, std::string Value);
@@ -90,7 +63,7 @@ public:
     uint64_t produce_fails;
   } stats = {};
 
-private:
+protected:
   std::string ErrorMessage;
   std::string TopicName;
   std::unique_ptr<RdKafka::Conf> Config;
