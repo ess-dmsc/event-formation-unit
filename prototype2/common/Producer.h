@@ -31,6 +31,14 @@ public:
   /// \param MessageTimestampMS Timestamp of message in milliseconds since UNIX epoch
   /// \return Returns 0 on success, another value on failure.
   virtual int produce(nonstd::span<const std::uint8_t> Buffer, std::int64_t MessageTimestampMS) = 0;
+  
+  template<typename T>
+  [[deprecated("Due to problematic use of system time.")]]
+  inline void produce2(const Buffer<T> &buffer)
+  {
+    this->produce({buffer.address, int(buffer.bytes())}, time(nullptr) * 1000);
+  }
+
 };
 
 class Producer : public ProducerBase, public RdKafka::EventCb {

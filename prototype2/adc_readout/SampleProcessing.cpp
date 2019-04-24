@@ -139,9 +139,7 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
   MessageBuilder.add_TimestampLocation(
       Location(TimeLocSerialisationMap.at(TSLocation)));
   builder.Finish(MessageBuilder.Finish(), SampleEnvironmentDataIdentifier());
-  #pragma GCC diagnostic push
-  #pragma GCC diagnostic warning "-Wdeprecated-declarations"
-  ProducerPtr->produce(reinterpret_cast<char *>(builder.GetBufferPointer()),
-                       builder.GetSize());
-  #pragma GCC diagnostic pop
+  #pragma message("Use of Producer::produce() must be corrected to not use system time.")
+  ProducerPtr->produce({builder.GetBufferPointer(),
+    builder.GetSize()}, time(nullptr) * 1000);
 }
