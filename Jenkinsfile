@@ -268,8 +268,8 @@ def get_system_tests_pipeline() {
                         checkout scm
                     }  // stage
                     stage("System tests: Install requirements") {
-                        sh """scl enable rh-python35 -- python -m pip install --user --upgrade pip
-                        scl enable rh-python35 -- python -m pip install --user -r system-tests/requirements.txt
+                        sh """python3.6 -m pip install --user --upgrade pip
+                        python3.6 -m pip install --user -r system-tests/requirements.txt
                         """
                     }  // stage
                     stage("System tests: Run") {
@@ -277,7 +277,7 @@ def get_system_tests_pipeline() {
                                                 """
 			timeout(time: 30, activity: true){
                             sh """cd system-tests/
-                            scl enable rh-python35 -- python -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark
+                            python3.6 -m pytest -s --junitxml=./SystemTestsOutput.xml ./ --pcap-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark --json-file-path /home/jenkins/data/EFU_reference/multiblade/2018_11_22/wireshark
                             """
 			}
                     }  // stage
