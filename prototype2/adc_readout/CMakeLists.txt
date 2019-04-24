@@ -67,10 +67,9 @@ set(AdcReadoutTest_INC
 
 set(AdcReadoutTest_LIB
     eventlib
-    AdcReadout
     )
 
-list(APPEND AdcReadoutTest_SRC ${EFU_MODULES})
+list(APPEND AdcReadoutTest_SRC $<TARGET_OBJECTS:AdcReadout>)
 create_test_executable(AdcReadoutTest SKIP_MEMGRIND)
 target_include_directories(AdcReadoutTest PRIVATE ${Trompeloeil_INCLUDE_DIR})
 
