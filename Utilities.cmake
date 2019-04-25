@@ -9,8 +9,7 @@ function(create_module module_name)
   set_target_properties(${module_name} PROPERTIES SUFFIX ".so")
   target_link_libraries(${module_name} efu
     ${${module_name}_LIB}
-    ${EFU_COMMON_LIBS}
-    eventlib)
+  ${EFU_COMMON_LIBS})
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${module_name} "-Wl,--no-as-needed")
   endif()
