@@ -18,5 +18,3 @@ add_library(eventlib OBJECT
   )
 
 add_subdirectory(test)
-
-enable_coverage(eventlib)
