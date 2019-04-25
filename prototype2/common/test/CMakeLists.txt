@@ -1,9 +1,10 @@
-
+find_package(Trompeloeil REQUIRED)
 set(ProducerTest_SRC
 ProducerTest.cpp)
 set(ProducerTest_INC
 KafkaMocks.h)
 create_test_executable(ProducerTest)
+target_include_directories(ProducerTest PRIVATE ${Trompeloeil_INCLUDE_DIR})
 
 
 set(BufferTest_SRC
