@@ -30,16 +30,11 @@ create_module(mbcaen)
 # Pipeline test
 set(MBCAENBaseTest_INC
   ${caen_common_inc}
-  ../../libs/include/Socket.h
-  ../../libs/include/TSCTimer.h
   ../adc_readout/test/TestUDPServer.h
 )
 set(MBCAENBaseTest_SRC
   MBCaenBaseTest.cpp
   ${caen_common_src}
-  ../../libs/source/Socket.cpp
-  ../../libs/source/TSCTimer.cpp
-  ../../libs/source/Timer.cpp
   ../adc_readout/test/TestUDPServer.cpp
 )
 create_test_executable(MBCAENBaseTest)

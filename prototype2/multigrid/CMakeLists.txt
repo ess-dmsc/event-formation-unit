@@ -67,16 +67,12 @@ target_compile_definitions(MGConfigTest
 set(MultigridBaseTest_INC
   ${multigrid_common_inc}
   MultigridBase.h
-  ../../libs/include/Socket.h
-  ../../libs/include/TSCTimer.h
   ../adc_readout/test/TestUDPServer.h
 )
 set(MultigridBaseTest_SRC
   ${multigrid_common_src}
   MultigridBase.cpp
   MultigridBaseTest.cpp
-  ../../libs/source/Socket.cpp
-  ../../libs/source/TSCTimer.cpp
   ../adc_readout/test/TestUDPServer.cpp
 )
 create_test_executable(MultigridBaseTest)

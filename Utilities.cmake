@@ -84,7 +84,7 @@ function(create_test_executable)
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    ${GTEST_LIBRARIES} efu_common)
+    ${GTEST_LIBRARIES} eventlib efu_common)
 
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${exec_name} "-Wl,--no-as-needed")

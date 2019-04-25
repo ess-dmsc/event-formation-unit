@@ -63,14 +63,10 @@ target_compile_definitions(NMXConfigTest
 
 set(GdGemBaseTest_INC
   ${pipeline_common_inc}
-  ../../libs/include/Socket.h
-  ../../libs/include/TSCTimer.h
   ../adc_readout/test/TestUDPServer.h)
 set(GdGemBaseTest_SRC
   GdGemBaseTest.cpp
   ${pipeline_common_source}
-  ../../libs/source/Socket.cpp
-  ../../libs/source/TSCTimer.cpp
   ../adc_readout/test/TestUDPServer.cpp)
 create_test_executable(GdGemBaseTest)
 target_compile_definitions(GdGemBaseTest

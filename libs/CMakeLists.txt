@@ -1,5 +1,3 @@
-include_directories(..)
-
 set(library_SRC
   source/Socket.cpp
   source/Timer.cpp
@@ -11,10 +9,14 @@ set(library_INC
   include/Timer.h
   include/TSCTimer.h
   )
+  
+include_directories(../)
 
 add_library(eventlib
   ${library_SRC}
   ${library_INC}
   )
+
+add_subdirectory(test)
 
 enable_coverage(eventlib)

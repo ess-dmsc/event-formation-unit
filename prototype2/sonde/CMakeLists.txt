@@ -34,14 +34,10 @@ create_module(sonde)
 
 set(SoNDeBaseTest_INC
   ${sonde_common_inc}
-  ../../libs/include/Socket.h
-  ../../libs/include/TSCTimer.h
 )
 set(SoNDeBaseTest_SRC
   SoNDeBaseTest.cpp
   ${sonde_common_src}
-  ../../libs/source/Socket.cpp
-  ../../libs/source/TSCTimer.cpp
   ../adc_readout/test/TestUDPServer.cpp
 )
 create_test_executable(SoNDeBaseTest)
