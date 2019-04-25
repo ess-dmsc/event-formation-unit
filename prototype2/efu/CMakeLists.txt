@@ -2,9 +2,6 @@
 # Event Formation Unit
 #=============================================================================
 set(efu_SRC
-  ../common/EFUArgs.cpp
-  ../common/NewStats.cpp
-  ../common/StatPublisher.cpp
   ExitHandler.cpp
   HwCheck.cpp
   Launcher.cpp
@@ -15,8 +12,6 @@ set(efu_SRC
   )
 
 set(efu_INC
-  ../common/NewStats.h
-  ../common/StatPublisher.h
   ExitHandler.h
   HwCheck.h
   Launcher.h
@@ -45,31 +40,30 @@ add_custom_command(TARGET efu POST_BUILD
 set(ServerTest_INC
     Server.h
     Parser.h
-    ../common/EFUArgs.h
     )
 set(ServerTest_SRC
     Server.cpp
     ServerTest.cpp
-    Parser.cpp
-    ../common/EFUArgs.cpp)
+  Parser.cpp
+)
 create_test_executable(ServerTest)
 
 
 
 set(ParserTestLibrary_SRC
-  ParserTest.cpp
-  ../common/NewStats.cpp)
+ParserTest.cpp
+)
 set(ParserTestLibrary_INC
-  ../common/NewStats.h)
+)
 add_library(ParserTestLibrary STATIC
   ${ParserTestLibrary_SRC})
 
 set(ParserTest_SRC
   Parser.cpp
-  ../common/EFUArgs.cpp)
+)
 set(ParserTest_INC
   Parser.h
-  ../common/EFUArgs.h)
+)
 set(ParserTest_LIB
   ParserTestLibrary)
 create_test_executable(ParserTest)

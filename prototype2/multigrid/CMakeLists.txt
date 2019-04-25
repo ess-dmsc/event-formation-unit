@@ -5,9 +5,6 @@
 # Two-thread implementation of Multi Grid demonstrator detector
 # for Mesytec Readout
 set(multigrid_common_src
-  ../common/Hists.cpp
-  ../common/HistSerializer.cpp
-  ../common/ReadoutSerializer.cpp
   mesytec/BuilderMesytec.cpp
   mesytec/Vmmr16Parser.cpp
   mesytec/Sis3153Parser.cpp
@@ -18,9 +15,6 @@ set(multigrid_common_src
   Config.cpp
   )
 set(multigrid_common_inc
-  ../common/Hists.h
-  ../common/HistSerializer.h
-  ../common/ReadoutSerializer.h
   geometry/SequoiaGeometry.h
   geometry/BusGeometry.h
   mesytec/BuilderMesytec.h

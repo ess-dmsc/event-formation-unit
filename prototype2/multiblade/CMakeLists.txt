@@ -5,9 +5,6 @@ include_directories(.)
 #=============================================================================
 set(caen_common_inc
   MBCaenBase.h
-  ../common/clustering/Hit.h
-  ../common/Hists.h
-  ../common/HistSerializer.h
   caen/Readout.h
   caen/DataParser.h
   clustering/EventBuilder.h
@@ -15,9 +12,6 @@ set(caen_common_inc
   )
 set(caen_common_src
   MBCaenBase.cpp
-  ../common/clustering/Hit.cpp
-  ../common/Hists.cpp
-  ../common/HistSerializer.cpp
   caen/Readout.cpp
   caen/DataParser.cpp
   clustering/EventBuilder.cpp

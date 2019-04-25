@@ -2,14 +2,10 @@
 # Detector Pipeline Plugins
 #=============================================================================
 set(sonde_common_inc
-  ../common/Hists.h
-  ../common/HistSerializer.h
   SoNDeBase.h
   ideas/Data.h
 )
 set(sonde_common_src
-  ../common/Hists.cpp
-  ../common/HistSerializer.cpp
   SoNDeBase.cpp
   ideas/Data.cpp
 )

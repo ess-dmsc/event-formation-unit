@@ -1,10 +1,10 @@
-if(${CMAKE_COMPILER_IS_GNUCXX})
-  set(ProducerTest_SRC
-  ProducerTest.cpp)
-  create_test_executable(ProducerTest)
-else()
-  message(STATUS "*** Skipping ProducerTest - requires gcc/linux")
-endif()
+
+set(ProducerTest_SRC
+ProducerTest.cpp)
+set(ProducerTest_INC
+KafkaMocks.h)
+create_test_executable(ProducerTest)
+
 
 set(BufferTest_SRC
   BufferTest.cpp)
