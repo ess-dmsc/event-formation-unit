@@ -59,7 +59,7 @@ endif()
 
 enable_coverage(efu_common)
 
-target_link_libraries(efu_common PUBLIC ${EFU_COMMON_LIBS})
+target_link_libraries(efu_common PUBLIC ${EFU_COMMON_LIBS} eventlib)
 
 #=============================================================================
 # Tests
