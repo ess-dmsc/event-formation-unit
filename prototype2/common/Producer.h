@@ -14,9 +14,9 @@
 #include <librdkafka/rdkafkacpp.h>
 #pragma GCC diagnostic pop
 
+#include "span.hpp"
 #include <common/Buffer.h>
 #include <functional>
-#include "span.hpp"
 #include <memory>
 
 ///
@@ -24,21 +24,22 @@ class ProducerBase {
 public:
   ProducerBase() = default;
   virtual ~ProducerBase() = default;
-  
+
   /// \brief Send data to Kafka broker on previously set topic.
-  /// Will accept a buffer of (almost) arbitrary type. See unit tests for examples.
+  /// Will accept a buffer of (almost) arbitrary type. See unit tests for
+  /// examples.
   /// \param Buffer Reference to a buffer
-  /// \param MessageTimestampMS Timestamp of message in milliseconds since UNIX epoch
+  /// \param MessageTimestampMS Timestamp of message in milliseconds since UNIX
+  /// epoch
   /// \return Returns 0 on success, another value on failure.
-  virtual int produce(nonstd::span<const std::uint8_t> Buffer, std::int64_t MessageTimestampMS) = 0;
-  
-  template<typename T>
-  [[deprecated("Due to problematic use of system time.")]]
-  inline void produce2(const Buffer<T> &buffer)
-  {
+  virtual int produce(nonstd::span<const std::uint8_t> Buffer,
+                      std::int64_t MessageTimestampMS) = 0;
+
+  template <typename T>
+  [[deprecated("Due to problematic use of system time.")]] inline void
+  produce2(const Buffer<T> &buffer) {
     this->produce({buffer.address, int(buffer.bytes())}, time(nullptr) * 1000);
   }
-
 };
 
 class Producer : public ProducerBase, public RdKafka::EventCb {
@@ -52,7 +53,8 @@ public:
   /// \brief cleans up by deleting allocated structures
   ~Producer() = default;
 
-  int produce(nonstd::span<const std::uint8_t> Buffer, std::int64_t MessageTimestampMS) override;
+  int produce(nonstd::span<const std::uint8_t> Buffer,
+              std::int64_t MessageTimestampMS) override;
 
   /// \brief set kafka configuration and check result
   void setConfig(std::string Key, std::string Value);

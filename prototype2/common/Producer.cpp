@@ -1,8 +1,8 @@
 /** Copyright (C) 2016 - 2018 European Spallation Source ERIC */
 
 #include <cassert>
-#include <common/Producer.h>
 #include <common/Log.h>
+#include <common/Producer.h>
 #include <common/Trace.h>
 #include <libs/include/gccintel.h>
 
@@ -16,27 +16,31 @@ void Producer::setConfig(std::string Key, std::string Value) {
   if (configResult != RdKafka::Conf::CONF_OK) {
     LOG(KAFKA, Sev::Error, "Kafka Unable to set config {} to {}", Key, Value);
   }
-  assert(configResult == RdKafka::Conf::CONF_OK); // compiles away in release build
+  assert(configResult ==
+         RdKafka::Conf::CONF_OK); // compiles away in release build
 }
 
 ///
 void Producer::event_cb(RdKafka::Event &event) {
   switch (event.type()) {
-     case RdKafka::Event::EVENT_ERROR:
-       LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR: {}", RdKafka::err2str(event.err()).c_str());
-       XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR: %s\n", RdKafka::err2str(event.err()).c_str());
-       stats.ev_errors++;
-     break;
-     default:
-       XTRACE(KAFKA, INF, "RdKafka::Event:: %d: %s\n", event.type(), RdKafka::err2str(event.err()).c_str());
-       stats.ev_others++;
-     break;
+  case RdKafka::Event::EVENT_ERROR:
+    LOG(KAFKA, Sev::Warning, "Rdkafka::Event::EVENT_ERROR: {}",
+        RdKafka::err2str(event.err()).c_str());
+    XTRACE(KAFKA, WAR, "Rdkafka::Event::EVENT_ERROR: %s\n",
+           RdKafka::err2str(event.err()).c_str());
+    stats.ev_errors++;
+    break;
+  default:
+    XTRACE(KAFKA, INF, "RdKafka::Event:: %d: %s\n", event.type(),
+           RdKafka::err2str(event.err()).c_str());
+    stats.ev_others++;
+    break;
   }
 }
 
 ///
-Producer::Producer(std::string Broker, std::string Topic) :
-  ProducerBase(), TopicName(Topic) {
+Producer::Producer(std::string Broker, std::string Topic)
+    : ProducerBase(), TopicName(Topic) {
 
   Config.reset(RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL));
   TopicConfig.reset(RdKafka::Conf::create(RdKafka::Conf::CONF_TOPIC));
@@ -72,7 +76,8 @@ Producer::Producer(std::string Broker, std::string Topic) :
     return;
   }
 
-  KafkaTopic.reset(RdKafka::Topic::create(KafkaProducer.get(), TopicName, TopicConfig.get(), ErrorMessage));
+  KafkaTopic.reset(RdKafka::Topic::create(KafkaProducer.get(), TopicName,
+                                          TopicConfig.get(), ErrorMessage));
   if (!KafkaTopic) {
     LOG(KAFKA, Sev::Error, "Failed to create topic: {}", ErrorMessage);
     return;
@@ -80,13 +85,16 @@ Producer::Producer(std::string Broker, std::string Topic) :
 }
 
 /** called to actually send data to Kafka cluster */
-int Producer::produce(nonstd::span<const std::uint8_t> Buffer, std::int64_t MessageTimestampMS) {
+int Producer::produce(nonstd::span<const std::uint8_t> Buffer,
+                      std::int64_t MessageTimestampMS) {
   if (KafkaProducer == nullptr || KafkaTopic == nullptr) {
     return RdKafka::ERR_UNKNOWN;
   }
-  
-  RdKafka::ErrorCode resp = KafkaProducer->produce(TopicName, -1, RdKafka::Producer::RK_MSG_COPY ,
-                                              const_cast<std::uint8_t*>(Buffer.data()), Buffer.size_bytes(), NULL, 0, MessageTimestampMS, NULL);
+
+  RdKafka::ErrorCode resp = KafkaProducer->produce(
+      TopicName, -1, RdKafka::Producer::RK_MSG_COPY,
+      const_cast<std::uint8_t *>(Buffer.data()), Buffer.size_bytes(), NULL, 0,
+      MessageTimestampMS, NULL);
 
   KafkaProducer->poll(0);
   if (resp != RdKafka::ERR_NO_ERROR) {

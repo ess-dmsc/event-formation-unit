@@ -1,34 +1,35 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include "KafkaMocks.h"
 #include <common/Producer.h>
 #include <cstring>
 #include <dlfcn.h>
 #include <librdkafka/rdkafkacpp.h>
 #include <test/TestBase.h>
-#include "KafkaMocks.h"
 
 #include <trompeloeil.hpp>
 
 using trompeloeil::_;
 
 namespace trompeloeil {
-  template <>
-  void reporter<specialized>::send(severity s, char const *file,
-                                   unsigned long line, const char *msg) {
-    if (s == severity::fatal) {
-      std::ostringstream os;
-      if (line != 0U) {
-        os << file << ':' << line << '\n';
-      }
-      throw expectation_violation(os.str() + msg);
+template <>
+void reporter<specialized>::send(severity s, char const *file,
+                                 unsigned long line, const char *msg) {
+  if (s == severity::fatal) {
+    std::ostringstream os;
+    if (line != 0U) {
+      os << file << ':' << line << '\n';
     }
-    ADD_FAILURE_AT(file, line) << msg;
+    throw expectation_violation(os.str() + msg);
   }
+  ADD_FAILURE_AT(file, line) << msg;
+}
 } // namespace trompeloeil
 
 class ProducerStandIn : public Producer {
 public:
-  ProducerStandIn(std::string Broker, std::string Topic) : Producer(Broker, Topic) {}
+  ProducerStandIn(std::string Broker, std::string Topic)
+      : Producer(Broker, Topic) {}
   using Producer::Config;
   using Producer::TopicConfig;
   using Producer::KafkaTopic;
@@ -76,7 +77,9 @@ TEST_F(ProducerTest, ProducerFail) {
   ProducerStandIn prod{"nobroker", "notopic"};
   auto *TempProducer = new MockProducer;
   RdKafka::ErrorCode ReturnValue = RdKafka::ERR__STATE;
-  REQUIRE_CALL(*TempProducer, produce(_, _, _, _, _, _, _, _, _)).TIMES(1).RETURN(ReturnValue);
+  REQUIRE_CALL(*TempProducer, produce(_, _, _, _, _, _, _, _, _))
+      .TIMES(1)
+      .RETURN(ReturnValue);
   REQUIRE_CALL(*TempProducer, poll(_)).TIMES(1).RETURN(0);
   prod.KafkaProducer.reset(TempProducer);
   std::uint8_t SomeData[20];
@@ -90,7 +93,9 @@ TEST_F(ProducerTest, ProducerSuccess) {
   ProducerStandIn prod{"nobroker", "notopic"};
   auto *TempProducer = new MockProducer;
   RdKafka::ErrorCode ReturnValue = RdKafka::ERR_NO_ERROR;
-  REQUIRE_CALL(*TempProducer, produce(_, _, _, _, _, _, _, _, _)).TIMES(1).RETURN(ReturnValue);
+  REQUIRE_CALL(*TempProducer, produce(_, _, _, _, _, _, _, _, _))
+      .TIMES(1)
+      .RETURN(ReturnValue);
   REQUIRE_CALL(*TempProducer, poll(_)).TIMES(1).RETURN(0);
   prod.KafkaProducer.reset(TempProducer);
   int NrOfBytes{200};
