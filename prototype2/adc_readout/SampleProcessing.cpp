@@ -139,6 +139,7 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
   MessageBuilder.add_TimestampLocation(
       Location(TimeLocSerialisationMap.at(TSLocation)));
   builder.Finish(MessageBuilder.Finish(), SampleEnvironmentDataIdentifier());
-  ProducerPtr->produce(reinterpret_cast<char *>(builder.GetBufferPointer()),
-                       builder.GetSize());
+  #pragma message("Use of Producer::produce() must be corrected to not use system time.")
+  ProducerPtr->produce({builder.GetBufferPointer(),
+    builder.GetSize()}, time(nullptr) * 1000);
 }
