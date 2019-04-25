@@ -15,7 +15,6 @@ set(NMXuTPCTest_SRC
   uTPC.cpp
   )
 set(NMXEventTest_INC
-  ../../common/clustering/Hit.h
   uTPC.h
   )
 create_test_executable(NMXuTPCTest)

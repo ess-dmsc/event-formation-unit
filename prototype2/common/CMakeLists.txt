@@ -2,65 +2,54 @@
 # Common functionality for all detector plugins
 #=============================================================================
 
+add_subdirectory(clustering)
+
 set(efu_common_SRC
-  clustering/AbstractMatcher.cpp
-  clustering/Cluster.cpp
-  clustering/GapClusterer.cpp
-  clustering/Hit.cpp
-  clustering/Event.cpp
-  clustering/OverlapMatcher.cpp
-  clustering/GapMatcher.cpp
-  DynamicHist.cpp
-  EV42Serializer.cpp
-  EFUArgs.cpp
-  NewStats.cpp
-  Producer.cpp
   DataSave.cpp
   DetectorModuleRegister.cpp
-  TimeString.cpp
-  HistSerializer.cpp
+  DynamicHist.cpp
+  EFUArgs.cpp
+  EV42Serializer.cpp
   Hists.cpp
+  HistSerializer.cpp
+  NewStats.cpp
+  Producer.cpp
   ReadoutSerializer.cpp
   StatPublisher.cpp
+  TimeString.cpp
   )
 
 set(efu_common_INC
-  clustering/AbstractClusterer.h
-  clustering/AbstractMatcher.h
-  clustering/Cluster.h
-  clustering/GapClusterer.h
-  clustering/Event.h
-  clustering/Hit.h
-  clustering/OverlapMatcher.h
-  clustering/GapMatcher.h
-  ../../libs/include/gccintel.h
-  DynamicHist.h
-  DetectorModuleRegister.h
+  Buffer.h
+  DataSave.h
   Detector.h
+  DetectorModuleRegister.h
+  DumpFile.h
+  DynamicHist.h
   EFUArgs.h
   EV42Serializer.h
-  Buffer.h
-  NewStats.h
-  Producer.h
-  Trace.h
-  Log.h
-  DataSave.h
-  DumpFile.h
-  TimeString.h
   Hists.h
   HistSerializer.h
+  Log.h
+  NewStats.h
+  Producer.h
   ReadoutSerializer.h
   RingBuffer.h
   StatPublisher.h
+  Trace.h
+  TraceGroups.h
+  version_num.h
+  Version.h
+  TimeString.h
+  ../../libs/include/gccintel.h
   )
-
-#add_subdirectory(clustering)
 
 find_package(CLI11 REQUIRED)
 
 add_library(efu_common STATIC
   ${efu_common_SRC}
-  ${efu_common_INC})
+  ${efu_common_INC}
+  $<TARGET_OBJECTS:ClusteringObj>)
 
 target_include_directories(efu_common PUBLIC ${CLI11_INCLUDE_DIR})
 
