@@ -12,12 +12,10 @@ set(library_INC
   
 include_directories(../)
 
-add_library(eventlib STATIC
+add_library(eventlib
   ${library_SRC}
   ${library_INC}
   )
-
-set_target_properties(eventlib PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 add_subdirectory(test)
 
