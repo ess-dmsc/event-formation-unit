@@ -62,7 +62,7 @@ public:
     PacketFile.read(reinterpret_cast<char *>(BufferPtr.data()), PacketSize);
     ASSERT_TRUE(PacketFile.good());
   };
-  std::chrono::duration<std::int64_t, std::milli> SleepTime{50ms};
+  std::chrono::duration<std::int64_t, std::milli> SleepTime{100ms};
 };
 
 TEST_F(AdcReadoutTest, SinglePacketStats) {
