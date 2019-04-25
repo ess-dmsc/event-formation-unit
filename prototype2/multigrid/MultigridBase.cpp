@@ -171,8 +171,12 @@ void MultigridBase::mainThread() {
 
   EV42Serializer ev42serializer(kafka_buffer_size, "multigrid");
   Producer event_producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
-  ev42serializer.setProducerCallback(std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wdeprecated-declarations"
+  ev42serializer.setProducerCallback(std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
+#pragma GCC diagnostic pop
+  
   ev42serializer.pulseTime(0);
 
   uint8_t buffer[eth_buffer_size];

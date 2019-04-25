@@ -181,6 +181,8 @@ void CAENBase::processing_thread() {
 
   EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
   Producer eventprod(EFUSettings.KafkaBroker, topic);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wdeprecated-declarations"
   flatbuffer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
@@ -189,7 +191,7 @@ void CAENBase::processing_thread() {
   HistSerializer histfb(histograms.needed_buffer_size(), "multiblade");
   histfb.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
-
+#pragma GCC diagnostic pop
   std::vector<EventBuilder> builders(ncass);
 
   DataParser parser;
