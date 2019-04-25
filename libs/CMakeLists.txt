@@ -12,7 +12,7 @@ set(library_INC
   
 include_directories(../)
 
-add_library(eventlib
+add_library(eventlib OBJECT
   ${library_SRC}
   ${library_INC}
   )

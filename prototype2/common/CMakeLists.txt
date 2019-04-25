@@ -49,7 +49,8 @@ find_package(CLI11 REQUIRED)
 add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC}
-  $<TARGET_OBJECTS:ClusteringObj>)
+  $<TARGET_OBJECTS:ClusteringObj>
+  $<TARGET_OBJECTS:eventlib>)
 
 target_include_directories(efu_common PUBLIC ${CLI11_INCLUDE_DIR})
 
@@ -59,7 +60,7 @@ endif()
 
 enable_coverage(efu_common)
 
-target_link_libraries(efu_common PUBLIC ${EFU_COMMON_LIBS} eventlib)
+target_link_libraries(efu_common PUBLIC ${EFU_COMMON_LIBS})
 
 #=============================================================================
 # Tests
