@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <iostream>
-#include <libs/include/Socket.h>
+#include <common/Socket.h>
 #include <prototype2/common/Log.h>
 #include <prototype2/common/Trace.h>
 

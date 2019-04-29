@@ -60,7 +60,6 @@ message(STATUS "Reference data root directory: ${REFDATA}")
 #=============================================================================
 include_directories(.)
 include(Utilities.cmake)
-add_subdirectory(libs)
 add_subdirectory(prototype2)
 add_subdirectory(utils/udp)
 

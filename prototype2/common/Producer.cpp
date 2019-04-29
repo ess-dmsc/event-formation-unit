@@ -4,7 +4,7 @@
 #include <common/Log.h>
 #include <common/Producer.h>
 #include <common/Trace.h>
-#include <libs/include/gccintel.h>
+#include <common/gccintel.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB

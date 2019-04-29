@@ -15,11 +15,15 @@ set(efu_common_SRC
   NewStats.cpp
   Producer.cpp
   ReadoutSerializer.cpp
+  Socket.cpp
   StatPublisher.cpp
+  Timer.cpp
   TimeString.cpp
+  TSCTimer.cpp
   )
 
 set(efu_common_INC
+  BitMath.h
   Buffer.h
   DataSave.h
   Detector.h
@@ -28,6 +32,7 @@ set(efu_common_INC
   DynamicHist.h
   EFUArgs.h
   EV42Serializer.h
+  gccintel.h
   Hists.h
   HistSerializer.h
   Log.h
@@ -35,13 +40,16 @@ set(efu_common_INC
   Producer.h
   ReadoutSerializer.h
   RingBuffer.h
+  Socket.h
   StatPublisher.h
+  TestImageUdder.h
+  Timer.h
+  TimeString.h
   Trace.h
   TraceGroups.h
+  TSCTimer.h
   version_num.h
   Version.h
-  TimeString.h
-  ../../libs/include/gccintel.h
   )
 
 find_package(CLI11 REQUIRED)
@@ -49,8 +57,7 @@ find_package(CLI11 REQUIRED)
 add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC}
-  $<TARGET_OBJECTS:ClusteringObj>
-  $<TARGET_OBJECTS:eventlib>)
+  $<TARGET_OBJECTS:ClusteringObj>)
 
 target_include_directories(efu_common PUBLIC ${CLI11_INCLUDE_DIR})
 

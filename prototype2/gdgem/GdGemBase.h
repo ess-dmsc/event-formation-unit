@@ -12,7 +12,7 @@
 #include <common/RingBuffer.h>
 #include <gdgem/nmx/AbstractBuilder.h>
 #include <gdgem/NMXConfig.h>
-#include <libs/include/SPSCFifo.h>
+#include <common/SPSCFifo.h>
 #include <common/clustering/AbstractClusterer.h>
 #include <common/clustering/AbstractMatcher.h>
 #include <common/Hists.h>

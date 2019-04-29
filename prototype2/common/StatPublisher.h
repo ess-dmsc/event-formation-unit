@@ -11,8 +11,8 @@
 
 #include <common/Detector.h>
 #include <common/NewStats.h>
-#include <libs/include/Socket.h>
-#include <libs/include/Timer.h>
+#include <common/Socket.h>
+#include <common/Timer.h>
 #include <string>
 
 class StatPublisher {

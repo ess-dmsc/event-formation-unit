@@ -14,9 +14,9 @@
 #include <efu/Parser.h>
 #include <efu/Server.h>
 
-#include <libs/include/Socket.h>
-#include <libs/include/TSCTimer.h>
-#include <libs/include/Timer.h>
+#include <common/Socket.h>
+#include <common/TSCTimer.h>
+#include <common/Timer.h>
 
 //#include <multigrid/geometry/MG24Geometry.h>
 

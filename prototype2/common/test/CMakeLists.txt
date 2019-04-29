@@ -65,6 +65,16 @@ set(HistSerializerTest_SRC
   )
 create_test_executable(HistSerializerTest)
 
+set(BitMathTest_SRC
+  BitMathTest.cpp
+)
+create_test_executable(BitMathTest)
+  
+set(SocketTest_SRC
+  SocketTest.cpp
+)
+create_test_executable(SocketTest)
+
 # GOOGLE BENCHMARKS
 set(ESSGeometryBenchmarkTest_SRC ESSGeometryBenchmarkTest.cpp)
 create_benchmark_executable(ESSGeometryBenchmarkTest)

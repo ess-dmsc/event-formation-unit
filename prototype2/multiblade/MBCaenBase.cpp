@@ -20,10 +20,10 @@
 
 #include <unistd.h>
 
-#include <libs/include/SPSCFifo.h>
-#include <libs/include/Socket.h>
-#include <libs/include/TSCTimer.h>
-#include <libs/include/Timer.h>
+#include <common/SPSCFifo.h>
+#include <common/Socket.h>
+#include <common/TSCTimer.h>
+#include <common/Timer.h>
 
 #include <caen/DataParser.h>
 

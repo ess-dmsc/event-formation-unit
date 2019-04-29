@@ -10,8 +10,8 @@
 #include <common/HistSerializer.h>
 #include <common/Producer.h>
 #include <common/Trace.h>
-#include <libs/include/Socket.h>
-#include <libs/include/TSCTimer.h>
+#include <common/Socket.h>
+#include <common/TSCTimer.h>
 #include <sonde/ideas/Data.h>
 
 // #undef TRC_LEVEL
