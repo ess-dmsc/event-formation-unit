@@ -4,7 +4,7 @@
 #include <common/DataSave.h>
 #include <common/TimeString.h>
 
-#include <prototype2/common/Log.h>
+#include <common/Log.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB

@@ -4,8 +4,8 @@
 #include <cstring>
 #include <iostream>
 #include <common/Socket.h>
-#include <prototype2/common/Log.h>
-#include <prototype2/common/Trace.h>
+#include <common/Log.h>
+#include <common/Trace.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
