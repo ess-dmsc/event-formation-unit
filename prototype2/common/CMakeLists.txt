@@ -59,7 +59,7 @@ add_library(efu_common STATIC
   ${efu_common_INC}
   $<TARGET_OBJECTS:ClusteringObj>)
 
-target_include_directories(efu_common PUBLIC ${CLI11_INCLUDE_DIR})
+target_include_directories(efu_common PUBLIC ${CLI11_INCLUDE_DIR} ..)
 
 if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(efu_common "-Wl,--no-as-needed")
