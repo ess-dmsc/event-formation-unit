@@ -32,7 +32,7 @@ function(create_object_module module_name)
   add_library(${module_name} OBJECT
     ${${module_name}_SRC}
     ${${module_name}_INC})
-    enable_coverage(${module_name})
+    enable_coverage_flags(${module_name})
   set(EFU_MODULES ${EFU_MODULES} $<TARGET_OBJECTS:${module_name}> CACHE INTERNAL "EFU_MODULES")
   set(EFU_DEPENDENCIES ${EFU_DEPENDENCIES} ${module_name} CACHE INTERNAL "EFU_DEPENDENCIES")
 endfunction(create_object_module)

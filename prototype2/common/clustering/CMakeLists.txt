@@ -26,7 +26,7 @@ set(clustering_obj_INC
 )
 
 add_library(ClusteringObj OBJECT ${clustering_obj_SRC} ${clustering_obj_INC})
-enable_coverage(ClusteringObj)
+enable_coverage_flags(ClusteringObj)
 
 add_subdirectory(test)
 
