@@ -25,7 +25,7 @@ class TestBase : public ::testing::Test {
 protected:
   class Message : public std::stringstream {
   public:
-    ~Message() { //{cout << "[          ] " << str() << endl;}
+    virtual ~Message() { //{cout << "[          ] " << str() << endl;}
       testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN,
                                        "[          ] ");
       testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, "%s",

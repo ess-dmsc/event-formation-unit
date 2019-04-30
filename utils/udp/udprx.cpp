@@ -6,8 +6,8 @@
 #include <chrono>
 #include <inttypes.h>
 #include <iostream>
-#include <libs/include/Socket.h>
-#include <libs/include/Timer.h>
+#include <common/Socket.h>
+#include <common/Timer.h>
 #include <stdio.h>
 
 typedef std::chrono::high_resolution_clock Clock;

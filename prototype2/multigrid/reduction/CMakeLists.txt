@@ -21,7 +21,6 @@ if(EXISTS ${TEST_DATA_PATH})
     ../mesytec/Vmmr16Parser.h
     ../mesytec/Readout.h
     ../geometry/SequoiaGeometry.h
-    ../../common/Buffer.h
     ../Config.h
     EventAnalysis.h
     )
@@ -33,14 +32,10 @@ else()
 endif()
 
 set(MGEventAnalysisTest_SRC
-  ../../common/clustering/Hit.cpp
-  ../../common/clustering/Event.cpp
   EventAnalysisTest.cpp
   EventAnalysis.cpp
   )
 set(MGEventAnalysisTest_INC
-  ../../common/clustering/Hit.h
-  ../../common/clustering/Event.h
   ../geometry/SequoiaGeometry.h
   EventAnalysis.h
   )

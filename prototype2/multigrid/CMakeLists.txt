@@ -5,9 +5,6 @@
 # Two-thread implementation of Multi Grid demonstrator detector
 # for Mesytec Readout
 set(multigrid_common_src
-  ../common/Hists.cpp
-  ../common/HistSerializer.cpp
-  ../common/ReadoutSerializer.cpp
   mesytec/BuilderMesytec.cpp
   mesytec/Vmmr16Parser.cpp
   mesytec/Sis3153Parser.cpp
@@ -18,9 +15,6 @@ set(multigrid_common_src
   Config.cpp
   )
 set(multigrid_common_inc
-  ../common/Hists.h
-  ../common/HistSerializer.h
-  ../common/ReadoutSerializer.h
   geometry/SequoiaGeometry.h
   geometry/BusGeometry.h
   mesytec/BuilderMesytec.h
@@ -73,16 +67,12 @@ target_compile_definitions(MGConfigTest
 set(MultigridBaseTest_INC
   ${multigrid_common_inc}
   MultigridBase.h
-  ../../libs/include/Socket.h
-  ../../libs/include/TSCTimer.h
   ../adc_readout/test/TestUDPServer.h
 )
 set(MultigridBaseTest_SRC
   ${multigrid_common_src}
   MultigridBase.cpp
   MultigridBaseTest.cpp
-  ../../libs/source/Socket.cpp
-  ../../libs/source/TSCTimer.cpp
   ../adc_readout/test/TestUDPServer.cpp
 )
 create_test_executable(MultigridBaseTest)

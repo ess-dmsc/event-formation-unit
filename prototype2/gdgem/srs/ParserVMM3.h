@@ -12,7 +12,7 @@
 
 #include <cinttypes>
 #include <string.h>
-#include <libs/include/BitMath.h>
+#include <common/BitMath.h>
 
 static const int maximumNumberVMM{32};
 static const int maximumNumberFECs{16};

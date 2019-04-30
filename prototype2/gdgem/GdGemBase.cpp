@@ -19,8 +19,8 @@
 #include <common/HistSerializer.h>
 #include <common/Producer.h>
 #include <efu/Server.h>
-#include <libs/include/Socket.h>
-#include <libs/include/TSCTimer.h>
+#include <common/Socket.h>
+#include <common/TSCTimer.h>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL

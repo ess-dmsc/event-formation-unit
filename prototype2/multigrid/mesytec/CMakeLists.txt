@@ -12,7 +12,6 @@ set(Sis3153ParserTest_SRC
   Sis3153Parser.cpp
   )
 set(Sis3153ParserTest_INC
-  ../../common/Buffer.h
   Sis3153Parser.h
   TestData.h
   )
@@ -25,7 +24,6 @@ set(Vmmr16ParserTest_SRC
   Readout.cpp
   )
 set(Vmmr16ParserTest_INC
-  ../../common/Buffer.h
   Sis3153Parser.h
   Vmmr16Parser.h
   Readout.h
@@ -52,7 +50,6 @@ if(EXISTS ${TEST_DATA_PATH})
     Sis3153Parser.h
     Vmmr16Parser.h
     Readout.h
-    ../../common/Buffer.h
     ../geometry/SequoiaGeometry.h
     ../generators/ReaderReadouts.h
     ../Config.h
@@ -85,7 +82,6 @@ if(EXISTS ${TEST_DATA_PATH2})
     Readout.h
     TestData.h
     ../geometry/SequoiaGeometry.h
-    ../../common/Buffer.h
     ../../tools/ReaderPcap.h
     ../Config.h
     )

@@ -13,8 +13,8 @@
 #include <efu/Parser.h>
 #include <efu/Server.h>
 #include <iostream>
-#include <libs/include/Timer.h>
-#include <libs/include/gccintel.h>
+#include <common/Timer.h>
+#include <common/gccintel.h>
 #include <unistd.h> // sleep()
 #include <vector>
 

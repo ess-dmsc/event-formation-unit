@@ -1,6 +1,6 @@
 /** Copyright (C) 2016 European Spallation Source */
 
-#include <libs/include/TSCTimer.h>
+#include <common/TSCTimer.h>
 
 /** */
 TSCTimer::TSCTimer(void) { t1 = rdtsc(); }
