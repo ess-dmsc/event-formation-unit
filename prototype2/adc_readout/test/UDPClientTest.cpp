@@ -81,7 +81,7 @@ TEST_F(UDPClientTest, PortInUseError) {
       };
   UDPClientStandIn TestClient1(Service, "0.0.0.0", ListenOnPort, PacketHandler);
   Service->run_for(100ms);
-  EXPECT_TRUE(TestClient1.Socket.is_open());
+  EXPECT_TRUE(TestClient1.Socket.is_open()) << "Unable to open port "<< ListenOnPort << " for test.";
   UDPClientStandIn TestClient2(Service, "0.0.0.0", ListenOnPort, PacketHandler);
   Service->run_for(100ms);
   EXPECT_FALSE(TestClient2.Socket.is_open());
