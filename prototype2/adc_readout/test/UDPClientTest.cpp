@@ -19,7 +19,7 @@ public:
   std::shared_ptr<asio::io_service> Service;
 };
 
-TEST_F(UDPClientTest, SingleUDPPacket) {
+TEST_F(UDPClientTest, DISABLED_SingleUDPPacket) {
   int BytesToTransmit = 1470;
   std::uint16_t ListenOnPort = GetPortNumber();
   auto SendToPort = ListenOnPort;
@@ -38,7 +38,7 @@ TEST_F(UDPClientTest, SingleUDPPacket) {
   EXPECT_EQ(PacketsHandled, 1);
 }
 
-TEST_F(UDPClientTest, MultipleUDPPackets) {
+TEST_F(UDPClientTest, DISABLED_MultipleUDPPackets) {
   int BytesToTransmit = 1470;
   std::uint16_t ListenOnPort = GetPortNumber();
   auto SendToPort = ListenOnPort;
@@ -67,7 +67,7 @@ public:
   using UDPClient::Socket;
 };
 
-TEST_F(UDPClientTest, PortInUseError) {
+TEST_F(UDPClientTest, DISABLED_PortInUseError) {
   int BytesToTransmit = 1470;
   std::uint16_t ListenOnPort = GetPortNumber();
   auto SendToPort = ListenOnPort;
@@ -87,7 +87,7 @@ TEST_F(UDPClientTest, PortInUseError) {
   EXPECT_FALSE(TestClient2.Socket.is_open());
 }
 
-TEST_F(UDPClientTest, MultipleUDPPacketContent) {
+TEST_F(UDPClientTest, DISABLED_MultipleUDPPacketContent) {
   auto NrOfValues = 100u;
   std::vector<std::uint8_t> TestData(NrOfValues);
   for (std::size_t i = 0; i < TestData.size(); i++) {
