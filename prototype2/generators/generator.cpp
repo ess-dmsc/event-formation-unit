@@ -29,6 +29,7 @@ struct {
   uint16_t UDPPort{9000};
   uint64_t NumberOfPackets{0}; // 0 == all packets
   uint64_t SpeedThrottle{0}; // 0 is fastest higher is slower
+  uint64_t PktThrottle{0};
   uint16_t MaxPacketSize{0};
   uint32_t KernelTxBufferSize{1000000};
   uint32_t UpdateIntervalSecs{1};
@@ -43,6 +44,7 @@ int main(int argc, char *argv[]) {
   app.add_option("-a, --packets", Settings.NumberOfPackets, "Number of packets to send");
   app.add_option("-b, --bytes", Settings.MaxPacketSize, "Maximum number of bytes per packet");
   app.add_option("-t, --throttle", Settings.SpeedThrottle, "Speed throttle (0 is fastest, larger is slower)");
+  app.add_option("-s, --pkt_throttle", Settings.PktThrottle, "Extra usleep() after n packets");
   CLI11_PARSE(app, argc, argv);
 
   if (Settings.FileName.empty()) {
@@ -113,6 +115,9 @@ int main(int argc, char *argv[]) {
         Packets++; // Packets is periodically cleared
         TotBytes += txsize;
         TotPackets++;
+        if (TotPackets % Settings.PktThrottle == 0) {
+          usleep(10);
+        }
       }
     } else {
       std::cout << fmt::format("Sent {} bytes in {} packets.\n", TotBytes, TotPackets);
