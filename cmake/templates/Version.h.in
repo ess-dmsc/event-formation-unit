@@ -15,17 +15,6 @@
 #include <cstdio>
 #include <string>
 
-static_assert(EFU_VER_MAJ >= 0, "version number error");
-static_assert(EFU_VER_MIN >= 0, "version number error");
-static_assert(EFU_VER_BUILD >= 0, "version number error");
-static_assert(EFU_VER_MAJ < 1024, "version number error");
-static_assert(EFU_VER_MIN < 1024, "version number error");
-static_assert(EFU_VER_BUILD < 4096, "version number error");
-
-#define EFU_VERSION_NUM(maj, min, build) ((maj) << 22 | (min) << 12 | (build))
-
-#define EFU_VERSION EFU_VERSION_NUM(EFU_VER_MAJ, EFU_VER_MIN, EFU_VER_BUILD)
-
 inline static const std::string efu_version() {
   // The following line is executed only once on startup or on first call to
   // function

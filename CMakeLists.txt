@@ -11,9 +11,13 @@ list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR}/modules)
 # Versioning
 #=============================================================================
 include(${EXTRA_MODULES_DIR}/Versioning.cmake)
-file (STRINGS version.txt RELEASE_VERSION)
-#message(FATAL_ERROR ${RELEASE_VERSION})
-#set(RELEASE_VERSION )
+
+if(EXISTS "../version.txt")
+  file (STRINGS version.txt RELEASE_VERSION)
+else()
+  set(RELEASE_VERSION "")
+endif()
+
 set_version()
 set(event-formation-unit_VERSION_MAJOR "${MAJOR_VERSION}")
 set(event-formation-unit_VERSION_MINOR "${MINOR_VERSION}")
