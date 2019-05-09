@@ -48,8 +48,8 @@ set(efu_common_INC
   Trace.h
   TraceGroups.h
   TSCTimer.h
-  version_num.h
-  Version.h
+  ${VERSION_INCLUDE_DIR}/common/version_num.h
+  ${VERSION_INCLUDE_DIR}/common/Version.h
   )
 
 find_package(CLI11 REQUIRED)
