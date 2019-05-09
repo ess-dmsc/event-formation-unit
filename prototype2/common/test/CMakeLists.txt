@@ -53,12 +53,6 @@ set(RingBufferTest_SRC
   RingBufferTest.cpp)
 create_test_executable(RingBufferTest)
 
-set(VersionTest_SRC
-  VersionTest.cpp)
-set(VersionTest_INC
-  ${VERSION_INCLUDE_DIR}/common/Version.h)
-create_test_executable(VersionTest)
-
 set(ESSGeometryTest_SRC ESSGeometryTest.cpp)
 create_test_executable(ESSGeometryTest)
 
