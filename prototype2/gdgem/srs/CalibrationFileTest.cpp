@@ -2,7 +2,7 @@
 
 #include <gdgem/srs/CalibrationFile.h>
 #include <gdgem/srs/CalibrationFileTestData.h>
-#include <prototype2/common/DataSave.h>
+#include <common/DataSave.h>
 #include <test/TestBase.h>
 #include <vector>
 

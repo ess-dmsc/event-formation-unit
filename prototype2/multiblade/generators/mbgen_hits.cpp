@@ -6,9 +6,9 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
-#include <libs/include/TSCTimer.h>
-#include <libs/include/Timer.h>
-#include <libs/include/Socket.h>
+#include <common/TSCTimer.h>
+#include <common/Timer.h>
+#include <common/Socket.h>
 #include <multiblade/generators/ReaderHits.h>
 #include <multiblade/caen/DataParser.h>
 #include <unistd.h>

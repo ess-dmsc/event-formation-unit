@@ -11,7 +11,9 @@ list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR}/modules)
 # Versioning
 #=============================================================================
 include(${EXTRA_MODULES_DIR}/Versioning.cmake)
-set(RELEASE_VERSION IGNORE)
+file (STRINGS version.txt RELEASE_VERSION)
+#message(FATAL_ERROR ${RELEASE_VERSION})
+#set(RELEASE_VERSION )
 set_version()
 set(event-formation-unit_VERSION_MAJOR "${MAJOR_VERSION}")
 set(event-formation-unit_VERSION_MINOR "${MINOR_VERSION}")
@@ -75,8 +77,8 @@ message(STATUS "Reference data root directory: ${REFDATA}")
 # The code
 #=============================================================================
 include_directories(.)
+
 include(Utilities.cmake)
-add_subdirectory(libs)
 add_subdirectory(prototype2)
 add_subdirectory(utils/udp)
 

@@ -7,7 +7,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/Detector.h>
-#include <libs/include/Socket.h>
+#include <common/Socket.h>
 
 const char *classname = "Demo Detector";
 

@@ -15,13 +15,20 @@ StatPublisher::StatPublisher(std::string ip, int port) :IpAddress(ip), TCPPort(p
 }
 
 ///
-void StatPublisher::publish(std::shared_ptr<Detector> detector) {
+void StatPublisher::publish(std::shared_ptr<Detector> detector, NewStats& otherStats) {
   int unixtime = (int)time(NULL);
 
   if (StatDb->isValidSocket()) {
     for (int i = 1; i <= detector->statsize(); i++) {
       int len = snprintf(Buffer, BufferSize, "%s %" PRIu64 " %d\n", detector->statname(i).c_str(),
                   detector->statvalue(i), unixtime);
+      if (len > 0) {
+        StatDb->senddata(Buffer, len);
+      }
+    }
+    for (size_t i = 1; i <= otherStats.size(); i++) {
+      int len = snprintf(Buffer, BufferSize, "%s %" PRIu64 " %d\n", otherStats.name(i).c_str(),
+                  otherStats.value(i), unixtime);
       if (len > 0) {
         StatDb->senddata(Buffer, len);
       }

@@ -34,12 +34,6 @@ if(EXISTS ${TEST_DATA_PATH})
   set(NMXClustererBenchmarkTest_SRC
     ${ClusteringBase_SRC}
     ClustererBenchmarkTest.cpp
-    ../../common/clustering/AbstractMatcher.cpp
-    ../../common/clustering/Hit.cpp
-    ../../common/clustering/Cluster.cpp
-    ../../common/clustering/Event.cpp
-    ../../common/clustering/GapClusterer.cpp
-    ../../common/clustering/GapMatcher.cpp
     )
   set(NMXClustererBenchmarkTest_INC
     ${ClusteringBase_INC})

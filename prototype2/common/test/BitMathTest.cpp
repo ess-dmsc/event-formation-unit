@@ -1,7 +1,7 @@
 /** Copyright (C) 2018 European Spallation Source */
 
 #include <prototype2/test/TestBase.h>
-#include <libs/include/BitMath.h>
+#include <common/BitMath.h>
 
 struct pair16 {
   uint16_t input;

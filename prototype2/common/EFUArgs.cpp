@@ -82,6 +82,10 @@ EFUArgs::EFUArgs() {
                        "IP address of graphite metrics server")
       ->group("EFU Options")->default_str("127.0.0.1");
 
+  CLIParser.add_option("-r,--region", EFUSettings.GraphiteRegion,
+                       "name of detector region covered by this pipeline")
+      ->group("EFU Options")->default_str("region1");
+
   CLIParser.add_option("-o,--gport", EFUSettings.GraphitePort, "Graphite tcp port")
       ->group("EFU Options")->default_str("2003");
 

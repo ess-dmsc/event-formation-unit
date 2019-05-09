@@ -17,7 +17,7 @@ class ReadoutSerializer {
 public:
   /// \brief Create the ReadoutSerializer
   /// \param maxentries the number of readout tuples to buffer before sending to Kafka
-  ReadoutSerializer(size_t maxentries);
+  ReadoutSerializer(size_t maxentries, std::string source_name);
 
   void set_callback(ProducerCallback cb);
 
@@ -40,6 +40,8 @@ private:
 
   size_t maxlen{0}; ///< maximum number of entries in array
   flatbuffers::FlatBufferBuilder builder; ///< google flatbuffer builder
+
+  std::string SourceName;
 
   // Will be used to create MONHit
   size_t entries{0}; ///< current number of queues entries

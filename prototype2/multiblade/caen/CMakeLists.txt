@@ -64,8 +64,6 @@ create_test_executable(MBEventBuilderTest)
 # EventBuilderBenchmarkTest.cpp
 set(MBEventBuilderBenchmarkTest_INC
   ../clustering/EventBuilder.h
-  ../../common/clustering/GapClusterer.h
-  ../../common/clustering/GapMatcher.h
 )
 set(MBEventBuilderBenchmarkTest_SRC
   ../clustering/EventBuilder.cpp
