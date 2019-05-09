@@ -2,7 +2,8 @@
 #
 # set_version()
 #   Set version string variable to value X.Y.Z defined in the file VERSION or
-#   Git branch and commit if that file does not exist.
+#   Git branch and commit if that file does not exist. If no VERSION file or Git
+#   information are present, the version is set to "dev".
 #
 # create_version_header(create_version_header output_version_file)
 #   Replace version string in template file and create output header file. If
@@ -35,6 +36,25 @@
 #   # build directory and will be named Version.h:
 #   create_version_header(Version.h.in)
 #
+
+# Set the DIRECTORY_IS_GIT_REPO variable
+function(is_directory_git_repo)
+  execute_process(
+    COMMAND           "${GIT_EXECUTABLE}" status
+    WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+    RESULT_VARIABLE   git_result
+    OUTPUT_VARIABLE   git_output
+    ERROR_VARIABLE    git_error
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_STRIP_TRAILING_WHITESPACE
+  )
+
+  if(git_result EQUAL 0)
+    set(DIRECTORY_IS_GIT_REPO TRUE PARENT_SCOPE)
+  else()
+    set(DIRECTORY_IS_GIT_REPO FALSE PARENT_SCOPE)
+  endif()
+endfunction()
 
 # Set the GIT_BRANCH variable to the current Git branch.
 function(set_git_branch_variable)
@@ -117,7 +137,6 @@ endmacro()
 
 # Set VERSION_STRING to "<branch>-<commit>[-dirty]".
 macro(set_version_variables_from_git_branch_and_commit)
-  find_package(Git REQUIRED)
   set_git_branch_variable()
   set_git_short_ref_variable()
   set_git_dirty_variable()
@@ -127,13 +146,32 @@ macro(set_version_variables_from_git_branch_and_commit)
   set(PATCH_VERSION "0" PARENT_SCOPE)
 endmacro()
 
-# Set version string variable to release version or Git branch and commit.
+# Set VERSION_STRING to "dev".
+macro(set_version_variables_to_constant_string)
+  set(VERSION_STRING "dev" PARENT_SCOPE)
+  set(MAJOR_VERSION "0" PARENT_SCOPE)
+  set(MINOR_VERSION "0" PARENT_SCOPE)
+  set(PATCH_VERSION "0" PARENT_SCOPE)
+endmacro()
+
+# Set version string variable to release version, Git branch and commit or
+# constant string.
 function(set_version)
   if(EXISTS "${CMAKE_CURRENT_LIST_DIR}/VERSION")
     file(STRINGS "${CMAKE_CURRENT_LIST_DIR}/VERSION" RELEASE_VERSION)
     match_and_set_version_variables("${RELEASE_VERSION}")
   else()
-    set_version_variables_from_git_branch_and_commit()
+    find_package(Git)
+    if(GIT_FOUND)
+      is_directory_git_repo()
+      if(DIRECTORY_IS_GIT_REPO)
+        set_version_variables_from_git_branch_and_commit()
+      else()
+        set_version_variables_to_constant_string()
+      endif()
+    else()
+      set_version_variables_to_constant_string()
+    endif()
   endif()
 endfunction()
 
