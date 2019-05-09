@@ -11,24 +11,34 @@ class ReadoutSerializerTest : public TestBase {
 
 protected:
   static const int arraysize = 10000; // max entries
-  static const int fboverhead = 82;   // found by experimentation
+  static const int fboverhead = 106;   // found by experimentation, now with header!
   static const int entrysize = 10;    // three u16 + one u32
+
+  char flatbuffer[1024 * 1024 * 5];
+
+
+public:
+  void copy_buffer(Buffer<uint8_t> b)
+  {
+    memcpy(flatbuffer, b.address, b.size);
+  }
+
 };
 
 TEST_F(ReadoutSerializerTest, Constructor) {
-  ReadoutSerializer serializer(arraysize);
+  ReadoutSerializer serializer(arraysize, "some_source");
   ASSERT_EQ(0, serializer.getNumEntries());
 }
 
 TEST_F(ReadoutSerializerTest, ProduceEmpty) {
-  ReadoutSerializer serializer(arraysize);
+  ReadoutSerializer serializer(arraysize, "some_source");
   ASSERT_EQ(0, serializer.getNumEntries());
   auto res = serializer.produce();
   ASSERT_EQ(res, 0);
 }
 
 TEST_F(ReadoutSerializerTest, AddEntries) {
-  ReadoutSerializer serializer(arraysize);
+  ReadoutSerializer serializer(arraysize, "some_source");
   ASSERT_EQ(0, serializer.getNumEntries());
   for (int i = 1; i < arraysize; i++) {
     int res = serializer.addEntry(0,0,0,0);
@@ -42,26 +52,34 @@ TEST_F(ReadoutSerializerTest, AddEntries) {
 
 TEST_F(ReadoutSerializerTest, ManualProduce) {
   for (int maxlen = 10; maxlen < 1000; maxlen++) {
-    ReadoutSerializer serializer(maxlen);
+    ReadoutSerializer serializer(maxlen, "some_source");
+    serializer.set_callback(std::bind(&ReadoutSerializerTest::copy_buffer,
+        this, std::placeholders::_1));
+
     ASSERT_EQ(0, serializer.getNumEntries());
     int res = serializer.addEntry(0,0,0,0);
     ASSERT_EQ(res, 0);
     res = serializer.produce();
-    ASSERT_TRUE(res > 0);
-    ASSERT_TRUE(res <= maxlen*entrysize + fboverhead);
+    EXPECT_EQ(std::string(&flatbuffer[4], 4), "mo01");
+    ASSERT_GT(res, 0);
+    ASSERT_LE(res, maxlen*entrysize + fboverhead);
+
+    auto deserialized = GetMonitorMessage(flatbuffer);
+    EXPECT_EQ(deserialized->source_name()->str(), "some_source");
+    EXPECT_EQ(deserialized->data_type(), DataField::MONHit);
   }
 }
 
 TEST_F(ReadoutSerializerTest, CheckSmallSizes) {
   for (int maxlen = 10; maxlen < 1000; maxlen++) {
-    ReadoutSerializer serializer(maxlen);
+    ReadoutSerializer serializer(maxlen, "some_source");
     for (int i = 1; i < maxlen; i++) {
       int res = serializer.addEntry(0,0,0,0);
       ASSERT_EQ(res, 0);
     }
     int res = serializer.addEntry(0,0,0,0);
-    ASSERT_TRUE(res > 0);
-    ASSERT_TRUE(res <= maxlen*entrysize + fboverhead);
+    ASSERT_GT(res, 0);
+    ASSERT_LE(res, maxlen*entrysize + fboverhead);
   }
 }
 

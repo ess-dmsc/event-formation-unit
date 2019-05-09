@@ -37,6 +37,7 @@ void PeakFinder::sendData(const std::uint64_t &TimeStamp,
   EvBuilder.add_time_of_flight(ToF_Vector);
   EvBuilder.add_detector_id(AmplitudeVector);
   builder.Finish(EvBuilder.Finish(), EventMessageIdentifier());
-  ProducerPtr->produce(reinterpret_cast<char *>(builder.GetBufferPointer()),
-                       builder.GetSize());
+#pragma message("Use of Producer::produce() must be corrected to not use system time.")
+  ProducerPtr->produce({builder.GetBufferPointer(),
+                       builder.GetSize()}, time(nullptr) * 1000);
 }

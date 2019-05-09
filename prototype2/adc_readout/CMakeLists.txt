@@ -73,10 +73,6 @@ set(AdcReadoutTest_INC
     ${AdcReadoutBase_INC}
     )
 
-set(AdcReadoutTest_LIB
-    eventlib
-    )
-
 create_test_executable(AdcReadoutTest SKIP_MEMGRIND)
 target_include_directories(AdcReadoutTest PRIVATE ${Trompeloeil_INCLUDE_DIR})
 

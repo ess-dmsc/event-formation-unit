@@ -34,8 +34,6 @@ add_subdirectory(common)
 
 add_subdirectory(readout)
 
-include(UnitTests.cmake) # This has only libs unit tests now ???
-
 #=============================================================================
 # Plugins
 #=============================================================================

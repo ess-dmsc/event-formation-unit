@@ -11,7 +11,7 @@
 #include <cinttypes>
 #include <common/Detector.h>
 #include <common/RingBuffer.h>
-#include <libs/include/SPSCFifo.h>
+#include <common/SPSCFifo.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -43,8 +43,6 @@ protected:
   /** Shared between input_thread and processing_thread*/
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
-
-  NewStats ns{"efu.sonde."}; //
 
   struct {
     // Input Counters

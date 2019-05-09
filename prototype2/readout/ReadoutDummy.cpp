@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/Trace.h>
-#include <libs/include/gccintel.h> // UNUSED macros
+#include <common/gccintel.h> // UNUSED macros
 #include <readout/ReadoutDummy.h>
 
 int ReadoutDummy::parse(const char *buffer, uint32_t size) {

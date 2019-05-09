@@ -1,14 +1,14 @@
 /** Copyright (C) 2016 - 2019 European Spallation Source ERIC */
 
 #include <CLI/CLI.hpp>
-#include <libs/include/TSCTimer.h>
-#include <libs/include/Timer.h>
+#include <common/TSCTimer.h>
+#include <common/Timer.h>
 
 #include <multigrid/generators/ReaderReadouts.h>
 #include <gdgem/generators/ReaderHits.h>
 #include <gdgem/generators/ReaderReadouts.h>
 
-#include <libs/include/Socket.h>
+#include <common/Socket.h>
 // GCOVR_EXCL_START
 
 // Non critical but somewhat arbitrary CPU clock speed guess

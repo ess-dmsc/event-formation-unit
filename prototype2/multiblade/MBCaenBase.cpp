@@ -20,10 +20,10 @@
 
 #include <unistd.h>
 
-#include <libs/include/SPSCFifo.h>
-#include <libs/include/Socket.h>
-#include <libs/include/TSCTimer.h>
-#include <libs/include/Timer.h>
+#include <common/SPSCFifo.h>
+#include <common/Socket.h>
+#include <common/TSCTimer.h>
+#include <common/Timer.h>
 
 #include <caen/DataParser.h>
 
@@ -46,7 +46,8 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAENSettings)
     : Detector("MBCAEN", settings), MBCAENSettings(LocalMBCAENSettings) {
-  Stats.setPrefix("efu.mbcaen");
+
+  Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
@@ -180,15 +181,17 @@ void CAENBase::processing_thread() {
 
   EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
   Producer eventprod(EFUSettings.KafkaBroker, topic);
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wdeprecated-declarations"
   flatbuffer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
 
   Hists histograms(std::max(ncass * nwires, ncass * nstrips), 65535);
   Producer monitorprod(EFUSettings.KafkaBroker, monitor);
-  HistSerializer histfb(histograms.needed_buffer_size());
+  HistSerializer histfb(histograms.needed_buffer_size(), "multiblade");
   histfb.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
-
+#pragma GCC diagnostic pop
   std::vector<EventBuilder> builders(ncass);
 
   DataParser parser;

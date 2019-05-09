@@ -2,7 +2,7 @@
 
 #include <common/EV42Serializer.h>
 #include "ev42_events_generated.h"
-#include <libs/include/gccintel.h>
+#include <common/gccintel.h>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL

@@ -10,8 +10,9 @@
 #pragma once
 
 #include <common/Detector.h>
-#include <libs/include/Socket.h>
-#include <libs/include/Timer.h>
+#include <common/NewStats.h>
+#include <common/Socket.h>
+#include <common/Timer.h>
 #include <string>
 
 class StatPublisher {
@@ -19,8 +20,8 @@ public:
   /// \brief Connect to a Carbon/Graphite server bu ip address and tcp port
   StatPublisher(std::string ip, int port);
 
-  /// \brief Send detector metrics to Carbon/Graphite server
-  void publish(std::shared_ptr<Detector> detector);
+  /// \brief Send detector metrics to Carbon/Graphite server given additional stats
+  void publish(std::shared_ptr<Detector> detector, NewStats & otherstats);
 
 
 private:

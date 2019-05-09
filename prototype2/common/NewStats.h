@@ -25,13 +25,10 @@ public:
 class NewStats {
 public:
   /// \brief null constructor
-  NewStats();
-
-  /// \brief constructor with prefix added
-  NewStats(std::string prefix);
+  NewStats() = default;
 
   /// \brief destructor deletes stats list
-  ~NewStats();
+  ~NewStats() = default;
 
   /// \brief creates a 'stat' entry with name and addres for counter
   /// duplicates are not allowed.
@@ -46,10 +43,13 @@ public:
   /// \brief return value of stat based on index
   int64_t value(size_t index);
 
-  void setPrefix(std::string StatsPrefix);
+  /// \brief create grafana metric prefix by concatenation of strings
+  /// PointChar will be added to the end
+  void setPrefix(std::string StatsPrefix, std::string StatsRegion);
 
 private:
   std::string prefix{""};       ///< prepend to all stat names
   std::vector<StatTuple> stats; ///< holds all registered stats
   std::string nostat{""}; ///< used to return when stats are not available
+  const char PointChar = '.';
 };

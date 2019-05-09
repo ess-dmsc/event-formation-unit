@@ -9,8 +9,7 @@ function(create_module module_name)
   set_target_properties(${module_name} PROPERTIES SUFFIX ".so")
   target_link_libraries(${module_name} efu
     ${${module_name}_LIB}
-    ${EFU_COMMON_LIBS}
-    eventlib)
+  ${EFU_COMMON_LIBS})
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${module_name} "-Wl,--no-as-needed")
   endif()
@@ -33,6 +32,7 @@ function(create_object_module module_name)
   add_library(${module_name} OBJECT
     ${${module_name}_SRC}
     ${${module_name}_INC})
+    enable_coverage_flags(${module_name})
   set(EFU_MODULES ${EFU_MODULES} $<TARGET_OBJECTS:${module_name}> CACHE INTERNAL "EFU_MODULES")
   set(EFU_DEPENDENCIES ${EFU_DEPENDENCIES} ${module_name} CACHE INTERNAL "EFU_DEPENDENCIES")
 endfunction(create_object_module)
@@ -48,7 +48,7 @@ function(create_executable exec_name)
   target_link_libraries(${exec_name}
     PUBLIC ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    eventlib efu_common)
+    efu_common)
 
   if (GPERF)
     target_link_libraries(${exec_name} ${GPERFTOOLS_PROFILER})
@@ -120,5 +120,5 @@ function(create_integration_test_executable exec_name)
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    eventlib efu_common)
+    efu_common)
 endfunction(create_integration_test_executable)

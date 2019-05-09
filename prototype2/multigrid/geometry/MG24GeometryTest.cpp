@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <libs/include/TSCTimer.h>
+#include <common/TSCTimer.h>
 #include <multigrid/geometry/MG24Geometry.h>
 #include <test/TestBase.h>
 

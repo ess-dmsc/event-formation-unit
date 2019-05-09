@@ -7,12 +7,7 @@
 #pragma GCC diagnostic ignored "-Wkeyword-macro"
 #pragma GCC diagnostic ignored "-Wmacro-redefined"
 #endif
-#define protected public
 #include <common/clustering/AbstractMatcher.h>
-#ifdef protected
-#undef protected
-#define protected protected
-#endif
 #pragma GCC diagnostic pop
 
 class MockMatcher : public AbstractMatcher {
@@ -23,6 +18,14 @@ public:
       : AbstractMatcher(latency, plane1, plane2) {}
 
   void match(bool) override {}
+  using AbstractMatcher::latency_;
+  using AbstractMatcher::plane1_;
+  using AbstractMatcher::plane2_;
+  using AbstractMatcher::latest_x_;
+  using AbstractMatcher::latest_y_;
+  using AbstractMatcher::unmatched_clusters_;
+  using AbstractMatcher::ready_to_be_matched;
+  using AbstractMatcher::stash_event;
 };
 
 class AbstractMatcherTest : public TestBase {

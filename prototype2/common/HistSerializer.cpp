@@ -1,15 +1,16 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <common/HistSerializer.h>
-#include <libs/include/gccintel.h>
+#include <common/gccintel.h>
 
 #include <common/Trace.h>
 
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-HistSerializer::HistSerializer(size_t buffer_half_size)
-    : builder(2 * buffer_half_size + 256) {}
+HistSerializer::HistSerializer(size_t buffer_half_size, std::string source_name)
+    : builder(2 * buffer_half_size + 256)
+    , SourceName (source_name) {}
 
 
 void HistSerializer::set_callback(ProducerCallback cb) {
@@ -44,10 +45,12 @@ size_t HistSerializer::produce(const Hists &hists) {
   auto dataoff = CreateGEMHist(builder, x_strip_off, y_strip_off, x_adc_off,
                                y_adc_off, clus_adc_off, hists.bin_width());
 
-  auto msg =
-      CreateMonitorMessage(builder, 0, DataField::GEMHist, dataoff.Union());
+  auto SourceNameOffset = builder.CreateString(SourceName);
 
-  builder.Finish(msg);
+  auto msg =
+      CreateMonitorMessage(builder, SourceNameOffset, DataField::GEMHist, dataoff.Union());
+
+  FinishMonitorMessageBuffer(builder, msg);
 
   Buffer<uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
 

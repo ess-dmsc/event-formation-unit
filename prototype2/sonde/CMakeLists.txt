@@ -2,14 +2,10 @@
 # Detector Pipeline Plugins
 #=============================================================================
 set(sonde_common_inc
-  ../common/Hists.h
-  ../common/HistSerializer.h
   SoNDeBase.h
   ideas/Data.h
 )
 set(sonde_common_src
-  ../common/Hists.cpp
-  ../common/HistSerializer.cpp
   SoNDeBase.cpp
   ideas/Data.cpp
 )
@@ -38,14 +34,10 @@ create_module(sonde)
 
 set(SoNDeBaseTest_INC
   ${sonde_common_inc}
-  ../../libs/include/Socket.h
-  ../../libs/include/TSCTimer.h
 )
 set(SoNDeBaseTest_SRC
   SoNDeBaseTest.cpp
   ${sonde_common_src}
-  ../../libs/source/Socket.cpp
-  ../../libs/source/TSCTimer.cpp
   ../adc_readout/test/TestUDPServer.cpp
 )
 create_test_executable(SoNDeBaseTest)

@@ -1,7 +1,7 @@
 /** Copyright (C) 2018 European Spallation Source */
 
 #include <prototype2/test/TestBase.h>
-#include <libs/include/Socket.h>
+#include <common/Socket.h>
 
 
 class SocketTest : public ::testing::Test {
