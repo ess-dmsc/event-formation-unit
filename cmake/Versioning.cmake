@@ -1,43 +1,59 @@
 # Versioning.cmake
 #
-# set_version()
-#   Set version string variable to value X.Y.Z defined in the file VERSION or
-#   Git branch and commit if that file does not exist. If no VERSION file or Git
-#   information are present, the version is set to "dev".
+# Automated version string and variable definition and substitution based on the
+# ECDC versioning scheme.
 #
-# create_version_header(create_version_header output_version_file)
-#   Replace version string in template file and create output header file. If
-#   you want to generate a new header file with an updated version string, you
-#   must run CMake again.
+# The version string is set according to the algorithm below:
+#
+#   if VERSION file with string X.Y.Z is present:
+#     VERSION_STRING = "X.Y.Z"
+#   else if Git is present and directory is a Git repository:
+#     VERSION_STRING = "<branch>-<commit>[-dirty]"
+#   else:
+#     VERSION_STRING = "dev"
+#
+# The version variables are set to the components "X", "Y" and "Z" if the
+# version string is "X.Y.Z". If the version string does not have that form, all
+# version variables are set to "0".
+#
+# Functions and macros exported by this module:
+#
+#   set_version() [function]
+#     Set version string variable according to the algorithm described above.
+#
+#   create_version_header(version_template_file output_version_file) [macro]
+#     Replace version string in template file, creating output file. To generate
+#     a new header file with an updated version string, CMake must be run again.
 #
 # Variables set by this module:
 #
-#   - VERSION_STRING: the version string defined according to the rules above.
-#   - MAJOR_VERSION: the major component of the version (X) or 0 if not defined.
-#   - MINOR_VERSION: the minor component of the version (Y) or 0 if not defined.
-#   - PATCH_VERSION: the patch component of the version (Z) or 0 if not defined.
+#   VERSION_STRING: the version string defined according to the algorithm above.
+#   MAJOR_VERSION: the major component of the version (X) or 0 if not defined.
+#   MINOR_VERSION: the minor component of the version (Y) or 0 if not defined.
+#   PATCH_VERSION: the patch component of the version (Z) or 0 if not defined.
 #
 # External requirements:
 #
-#   - Git (if the file VERSION does not exist)
+#   Git (if the file VERSION does not exist).
 #
-# Examples:
+# Example usage:
 #
-#   If the content of VERSION is "1.2.3", VERSION_STRING will be set to "1.2.3".
-#   If that file does not exist and the current Git branch is "master" on commit
-#   "bc5b2c50e1fc8b1ce96607aa2f0d373900634389", with no non-committed changes to
-#   tracked files, VERSION_STRING will be set to "master-bc5b2c5".
+#   # If the content of VERSION is "1.2.3", VERSION_STRING will be set to
+#   # "1.2.3". If that file does not exist and the current Git branch is
+#   # master on commit bc5b2c50e1fc8b1ce96607aa2f0d373900634389, with no
+#   # non-committed changes to tracked files, VERSION_STRING will be set to
+#   # "master-bc5b2c5".
 #
 #   # Call set_version in the main CMakeLists.txt file to define VERSION_STRING:
 #   set_version()
 #
-#   # Generate header file substituting "@VERSION_STRING@" with the value of the
-#   # variable in Version.h.in; the output file will be created in the current
-#   # build directory and will be named Version.h:
-#   create_version_header(Version.h.in)
+#   # Generate header file ${CMAKE_BINARY_DIR}/version/Version.h substituting
+#   # "@VERSION_STRING@" with the value of the variable in Version.h.in:
+#   create_version_header(Version.h.in ${CMAKE_BINARY_DIR}/version/Version.h)
 #
 
-# Set the DIRECTORY_IS_GIT_REPO variable
+# Set the DIRECTORY_IS_GIT_REPO variable if current directory is a Git
+# repository.
 function(is_directory_git_repo)
   execute_process(
     COMMAND           "${GIT_EXECUTABLE}" status
@@ -123,7 +139,8 @@ function(set_git_dirty_variable)
   endif()
 endfunction()
 
-# Set VERSION_STRING if the argument has the form "X.Y.Z".
+# Set VERSION_STRING if the argument has the form "X.Y.Z" and version variables
+# to the value of the components.
 macro(match_and_set_version_variables version)
   if("${version}" MATCHES "^(0|[1-9][0-9]*)[.](0|[1-9][0-9]*)[.](0|[1-9][0-9]*)$")
     set(VERSION_STRING ${version} PARENT_SCOPE)
@@ -135,7 +152,8 @@ macro(match_and_set_version_variables version)
   endif()
 endmacro()
 
-# Set VERSION_STRING to "<branch>-<commit>[-dirty]".
+# Set VERSION_STRING to "<branch>-<commit>[-dirty]" and all version variables
+# to "0".
 macro(set_version_variables_from_git_branch_and_commit)
   set_git_branch_variable()
   set_git_short_ref_variable()
