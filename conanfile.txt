@@ -1,15 +1,14 @@
 [requires]
 asio/1.12.0@bincrafters/stable
 cli11/1.6.0@bincrafters/stable
-cmake_installer/3.10.0@conan/stable
 fmt/5.2.0@bincrafters/stable
 google-benchmark/1.4.1-dm2@ess-dmsc/testing
-graylog-logger/1.1.2-dm1@ess-dmsc/stable
+graylog-logger/1.1.5-dm1@ess-dmsc/stable
 gtest/3121b20-dm3@ess-dmsc/stable
 h5cpp/0.1.2@ess-dmsc/testing
 jsonformoderncpp/3.1.0@vthiery/stable
 libpcap/1.8.1@bincrafters/stable
-librdkafka/0.11.5@ess-dmsc/stable
+librdkafka/0.11.5-dm2@ess-dmsc/stable
 logical-geometry/09097f2@ess-dmsc/stable
 readerwriterqueue/07e22ec@ess-dmsc/stable
 streaming-data-types/c45d2ec@ess-dmsc/stable
