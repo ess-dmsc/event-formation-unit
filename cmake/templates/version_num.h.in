@@ -7,8 +7,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#define EFU_VER_MAJ 0
+#define EFU_VER_MAJ @MAJOR_VERSION@
 
-#define EFU_VER_MIN 1
+#define EFU_VER_MIN @MINOR_VERSION@
 
-#define EFU_VER_BUILD 1
+#define EFU_VER_BUILD @PATCH_VERSION@

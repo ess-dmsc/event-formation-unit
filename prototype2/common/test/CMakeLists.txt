@@ -53,10 +53,6 @@ set(RingBufferTest_SRC
   RingBufferTest.cpp)
 create_test_executable(RingBufferTest)
 
-set(VersionTest_SRC
-  VersionTest.cpp)
-create_test_executable(VersionTest)
-
 set(ESSGeometryTest_SRC ESSGeometryTest.cpp)
 create_test_executable(ESSGeometryTest)
 
@@ -69,7 +65,7 @@ set(BitMathTest_SRC
   BitMathTest.cpp
 )
 create_test_executable(BitMathTest)
-  
+
 set(SocketTest_SRC
   SocketTest.cpp
 )
