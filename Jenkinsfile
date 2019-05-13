@@ -266,6 +266,9 @@ def get_macos_pipeline()
             // Delete workspace when build is done
                 cleanWs()
 
+                // temporary until all our repos have moved to using official flatbuffers conan package
+                sh "conan remove -f FlatBuffers/*"
+
                 abs_dir = pwd()
 
                 dir("${project}") {

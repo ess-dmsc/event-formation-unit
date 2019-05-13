@@ -9,7 +9,7 @@ ARG https_proxy
 ARG local_conan_server
 
 RUN apt-get update -y && \
-    apt-get --no-install-recommends -y install build-essential git python-pip cmake tzdata vim m4 && \
+    apt-get --no-install-recommends -y install build-essential git python-pip cmake tzdata vim m4 flex && \
     apt-get -y autoremove && \
     apt-get clean all && \
     rm -rf /var/lib/apt/lists/*
