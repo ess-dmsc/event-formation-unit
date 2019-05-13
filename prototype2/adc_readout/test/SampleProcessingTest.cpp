@@ -141,7 +141,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
       .RETURN(0)
       .LR_SIDE_EFFECT(
           std::memcpy(reinterpret_cast<void *>(&TempBuffer[0]), reinterpret_cast<const void*>(_1.data()), _1.size_bytes());
-          BytesCopied = _2;);
+          BytesCopied = _1.size_bytes(););
   auto TempModule = getTestModule();
   TestProcessor.processData(TempModule);
 
@@ -185,7 +185,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
       .RETURN(0)
       .LR_SIDE_EFFECT(
           std::memcpy(reinterpret_cast<void *>(&TempBuffer[0]), reinterpret_cast<const void*>(_1.data()), _1.size_bytes());
-          BytesCopied = _2;);
+          BytesCopied = _1.size_bytes(););
   auto TempModule = getTestModule();
   TestProcessor.processData(TempModule);
 
