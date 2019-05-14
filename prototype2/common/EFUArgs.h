@@ -34,6 +34,8 @@ public:
 
   void printHelp();
 
+  void printVersion();
+
   void printSettings();
 
   std::string getDetectorName() { return DetectorName; };
@@ -42,7 +44,7 @@ public:
   std::vector<ThreadCoreAffinitySetting> getThreadCoreAffinity() {
     return ThreadAffinity;
   };
-  
+
   int getLogLevel() {return LogMessageLevel;};
   std::string getLogFileName() {return LogFileName;};
 
@@ -59,6 +61,7 @@ private:
   std::string DetectorName;
   std::string LogFileName;
 
+  bool PrintVersion{false};
   std::vector<ThreadCoreAffinitySetting> ThreadAffinity;
   CLI::Option *DetectorOption;
   CLI::Option *HelpOption;

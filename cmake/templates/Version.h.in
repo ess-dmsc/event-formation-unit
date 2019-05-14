@@ -1,0 +1,27 @@
+/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief API for getting and comparing version numbers
+///
+//===----------------------------------------------------------------------===//
+
+#define STRINGIFY(x) #x
+#define EFU_STR(x) STRINGIFY(x)
+
+#include <cassert>
+#include <common/version_num.h>
+#include <cstdio>
+#include <string>
+
+inline static const std::string efu_version() {
+  // The following line is executed only once on startup or on first call to
+  // function
+  const static std::string version = "@VERSION_STRING@";
+  return version;
+}
+
+static inline const std::string efu_buildstr() {
+  return std::string(EFU_STR(BUILDSTR));
+}

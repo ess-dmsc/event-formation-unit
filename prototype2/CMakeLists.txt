@@ -1,4 +1,5 @@
 include_directories(.)
+include_directories(${VERSION_INCLUDE_DIR})
 
 #=============================================================================
 # Required external libraries

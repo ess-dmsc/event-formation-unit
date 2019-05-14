@@ -225,7 +225,7 @@ TEST_F(ReferenceDataTest, a100) {
   EXPECT_EQ(matcher->matched_events.size(), 20224);
 }
 
-TEST_F(ReferenceDataTest, a1000) {
+TEST_F(ReferenceDataTest, DISABLED_a1000) {
   ReadoutFile::read(DataPath + "/readouts/a01000", readouts);
   EXPECT_EQ(readouts.size(), 1416666);
 
@@ -253,7 +253,7 @@ TEST_F(ReferenceDataTest, a1000) {
   EXPECT_EQ(matcher->matched_events.size(), 226492);
 }
 
-TEST_F(ReferenceDataTest, a10000) {
+TEST_F(ReferenceDataTest, DISABLED_a10000) {
   ReadoutFile::read(DataPath + "/readouts/a10000", readouts);
   EXPECT_EQ(readouts.size(), 14293164);
 
