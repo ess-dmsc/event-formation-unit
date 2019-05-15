@@ -115,8 +115,11 @@ int main(int argc, char *argv[]) {
         Packets++; // Packets is periodically cleared
         TotBytes += txsize;
         TotPackets++;
-        if (TotPackets % Settings.PktThrottle == 0) {
-          usleep(10);
+
+        if (Settings.PktThrottle) {
+          if (TotPackets % Settings.PktThrottle == 0) {
+            usleep(10);
+          }
         }
       }
     } else {
