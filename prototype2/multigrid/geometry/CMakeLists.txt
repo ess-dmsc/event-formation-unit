@@ -1,11 +1,3 @@
-set(MG24GeometryTest_SRC
-  MG24GeometryTest.cpp
-  )
-set(MG24GeometryTest_INC
-  MG24Geometry.h
-  )
-create_test_executable(MG24GeometryTest)
-
 set(FilterTest_SRC
   FilterTest.cpp
   )
@@ -14,18 +6,41 @@ set(FilterTest_INC
   )
 create_test_executable(FilterTest)
 
-set(BusGeometryTest_SRC
-  BusGeometryTest.cpp
+set(MGSeqGeometryTest_SRC
+  MGSeqGeometryTest.cpp
+  MGSeqGeometry.cpp
+  ModuleGeometry.cpp
   )
-set(BusGeometryTest_INC
-  BusGeometry.h
+set(MGSeqGeometryTest_INC
+  ModuleGeometry.h
+  MGSeqGeometry.h
+  Filter.h
   )
-create_test_executable(BusGeometryTest)
+create_test_executable(MGSeqGeometryTest)
 
-set(SequoiaGeometryTest_SRC
-  SequoiaGeometryTest.cpp
+set(MG24GeometryTest_SRC
+  MG24GeometryTest.cpp
+  MGSeqGeometry.cpp
+  ModuleGeometry.cpp
   )
-set(SequoiaGeometryTest_INC
-  SequoiaGeometry.h
+set(MG24GeometryTest_INC
+  ModuleGeometry.h
+  MG24Geometry.h
+  MGSeqGeometry.h
+  Filter.h
   )
-create_test_executable(SequoiaGeometryTest)
+create_test_executable(MG24GeometryTest)
+
+set(DigitalGeometryTest_SRC
+  DigitalGeometryTest.cpp
+  DigitalGeometry.cpp
+  MGSeqGeometry.cpp
+  ModuleGeometry.cpp
+  )
+set(DigitalGeometryTest_INC
+  ModuleGeometry.h
+  DigitalGeometry.h
+  MGSeqGeometry.h
+  Filter.h
+  )
+create_test_executable(DigitalGeometryTest)

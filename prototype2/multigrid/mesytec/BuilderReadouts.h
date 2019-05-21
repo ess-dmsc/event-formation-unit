@@ -3,13 +3,13 @@
 #pragma once
 #include <multigrid/AbstractBuilder.h>
 #include <multigrid/mesytec/Readout.h>
-#include <multigrid/geometry/SequoiaGeometry.h>
+#include <multigrid/geometry/DigitalGeometry.h>
 
 namespace Multigrid {
 
 class BuilderReadouts : public AbstractBuilder {
 public:
-  BuilderReadouts(const SequoiaGeometry& geometry, std::string dump_dir = "");
+  BuilderReadouts(const DigitalGeometry& geometry, std::string dump_dir = "");
 
   void parse(Buffer<uint8_t> buffer) override;
 
@@ -23,7 +23,7 @@ protected:
 
 private:
   std::shared_ptr<HitFile> dumpfile_;
-  SequoiaGeometry digital_geometry_;
+  DigitalGeometry digital_geometry_;
 
   std::vector<Readout> parsed_data_;
 };

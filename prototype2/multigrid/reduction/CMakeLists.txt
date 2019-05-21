@@ -1,8 +1,25 @@
+set(MGEventAnalysisTest_SRC
+  ../geometry/DigitalGeometry.cpp
+  ../geometry/MGSeqGeometry.cpp
+  ../geometry/ModuleGeometry.cpp
+  EventAnalysisTest.cpp
+  EventAnalysis.cpp
+  )
+set(MGEventAnalysisTest_INC
+  ../geometry/DigitalGeometry.h
+  ../geometry/MGSeqGeometry.h
+  ../geometry/ModuleGeometry.h
+  ../geometry/Filter.h
+  EventAnalysis.h
+  )
+create_test_executable(MGEventAnalysisTest)
+
 set(TEST_DATA_PATH "${REFDATA}/multigrid/2018_09_03")
 if(EXISTS ${TEST_DATA_PATH})
   set(MGReductionTest_SRC
-    Reduction.cpp
-    ReductionTest.cpp
+    ../geometry/ModuleGeometry.cpp
+    ../geometry/DigitalGeometry.cpp
+    ../geometry/MGSeqGeometry.cpp
     ../generators/ReaderReadouts.cpp
     ../mesytec/BuilderReadouts.cpp
     ../mesytec/BuilderMesytec.cpp
@@ -10,6 +27,8 @@ if(EXISTS ${TEST_DATA_PATH})
     ../mesytec/Vmmr16Parser.cpp
     ../mesytec/Readout.cpp
     ../Config.cpp
+    Reduction.cpp
+    ReductionTest.cpp
     EventAnalysis.cpp
     )
   set(MGReductionTest_INC
@@ -20,7 +39,10 @@ if(EXISTS ${TEST_DATA_PATH})
     ../mesytec/Sis3153Parser.h
     ../mesytec/Vmmr16Parser.h
     ../mesytec/Readout.h
-    ../geometry/SequoiaGeometry.h
+    ../geometry/ModuleGeometry.h
+    ../geometry/DigitalGeometry.h
+    ../geometry/MGSeqGeometry.h
+    ../geometry/Filter.h
     ../Config.h
     EventAnalysis.h
     )
@@ -30,13 +52,3 @@ if(EXISTS ${TEST_DATA_PATH})
 else()
   message(WARNING "*** No multigrid reference data found. Skipping MGReduction tests.")
 endif()
-
-set(MGEventAnalysisTest_SRC
-  EventAnalysisTest.cpp
-  EventAnalysis.cpp
-  )
-set(MGEventAnalysisTest_INC
-  ../geometry/SequoiaGeometry.h
-  EventAnalysis.h
-  )
-create_test_executable(MGEventAnalysisTest)

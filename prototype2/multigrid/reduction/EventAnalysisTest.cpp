@@ -14,7 +14,7 @@ protected:
   Event event;
   EventAnalyzer analyzer;
   virtual void SetUp() {
-    analyzer.mappings.add_bus(BusGeometry());
+    analyzer.mappings.add_bus(MGSeqGeometry());
   }
   virtual void TearDown() { }
 };

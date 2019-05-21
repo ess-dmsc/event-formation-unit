@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <multigrid/geometry/BusGeometry.h>
+#include <multigrid/geometry/MGSeqGeometry.h>
 
 #include <common/Trace.h>
 // #undef TRC_LEVEL
@@ -24,12 +24,13 @@ namespace Multigrid {
 //        wire(), x_from_wire(), z_from_wire(),
 //        and must test that reverse mapping from global wire works
 
-class MG24Geometry : public BusGeometry {
+class MG24Geometry : public MGSeqGeometry {
 
 public:
 
   /** @brief returns wire */
-  uint32_t x(uint16_t channel) const override {
+  uint32_t x(uint8_t VMM, uint16_t channel) const override {
+    (void) VMM;
     if (swap_wires_) {
       swap(channel);
     }
@@ -46,7 +47,8 @@ class MG24GeometryA : public MG24Geometry {
 public:
 
   /** \brief return the z coordinate of the detector */
-  uint32_t z(uint16_t channel) const override {
+  uint32_t z(uint8_t VMM, uint16_t channel) const override {
+    (void) VMM;
     if (swap_wires_) {
       swap(channel);
     }
@@ -63,7 +65,8 @@ class MG24GeometryB : public MG24Geometry {
 public:
 
   /** \brief return the z coordinate of the detector */
-  uint32_t z(uint16_t channel) const override {
+  uint32_t z(uint8_t VMM, uint16_t channel) const override {
+    (void) VMM;
     if (swap_wires_) {
       swap(channel);
     }

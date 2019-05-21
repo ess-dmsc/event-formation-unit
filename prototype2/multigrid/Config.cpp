@@ -31,7 +31,7 @@ Config::Config(std::string jsonfile, std::string dump_path) {
     return;
   }
 
-  SequoiaGeometry mappings{root["mappings"]};
+  DigitalGeometry mappings{root["mappings"]};
 
   auto br = root["builder"];
   if (br["type"] == "mesytec") {

@@ -40,6 +40,9 @@ if(EXISTS ${TEST_DATA_PATH})
     Sis3153Parser.cpp
     Vmmr16Parser.cpp
     Readout.cpp
+    ../geometry/DigitalGeometry.cpp
+    ../geometry/MGSeqGeometry.cpp
+    ../geometry/ModuleGeometry.cpp
     ../reduction/EventAnalysis.cpp
     ../generators/ReaderReadouts.cpp
     ../Config.cpp
@@ -50,7 +53,10 @@ if(EXISTS ${TEST_DATA_PATH})
     Sis3153Parser.h
     Vmmr16Parser.h
     Readout.h
-    ../geometry/SequoiaGeometry.h
+    ../geometry/ModuleGeometry.h
+    ../geometry/DigitalGeometry.h
+    ../geometry/MGSeqGeometry.h
+    ../geometry/Filter.h
     ../generators/ReaderReadouts.h
     ../Config.h
     )
@@ -71,6 +77,9 @@ if(EXISTS ${TEST_DATA_PATH2})
     Vmmr16Parser.cpp
     Sis3153Parser.cpp
     Readout.cpp
+    ../geometry/DigitalGeometry.cpp
+    ../geometry/MGSeqGeometry.cpp
+    ../geometry/ModuleGeometry.cpp
     ../../tools/ReaderPcap.cpp
     ../reduction/EventAnalysis.cpp
     ../Config.cpp
@@ -81,7 +90,10 @@ if(EXISTS ${TEST_DATA_PATH2})
     Vmmr16Parser.h
     Readout.h
     TestData.h
-    ../geometry/SequoiaGeometry.h
+    ../geometry/ModuleGeometry.h
+    ../geometry/DigitalGeometry.h
+    ../geometry/MGSeqGeometry.h
+    ../geometry/Filter.h
     ../../tools/ReaderPcap.h
     ../Config.h
     )

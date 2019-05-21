@@ -13,17 +13,17 @@ TEST_F(MG24DetectorTest, IsWireIsGrid) {
   mgdet.max_channel(128);
 
   for (int i = 0; i <= 79; i++) {
-    EXPECT_TRUE(mgdet.isWire(i));
-    EXPECT_FALSE(mgdet.isGrid(i));
+    EXPECT_TRUE(mgdet.isWire(0, i));
+    EXPECT_FALSE(mgdet.isGrid(0, i));
   }
 
   for (int i = 80; i <= 127; i++) {
-    EXPECT_FALSE(mgdet.isWire(i)) << " bad wire eval at " << i;
-    EXPECT_TRUE(mgdet.isGrid(i)) << " bad wire eval at " << i;
+    EXPECT_FALSE(mgdet.isWire(0, i)) << " bad wire eval at " << i;
+    EXPECT_TRUE(mgdet.isGrid(0, i)) << " bad wire eval at " << i;
   }
 
-  EXPECT_FALSE(mgdet.isWire(128));
-  EXPECT_FALSE(mgdet.isGrid(128));
+  EXPECT_FALSE(mgdet.isWire(0, 128));
+  EXPECT_FALSE(mgdet.isGrid(0, 128));
 }
 
 // \todo these tests are more confusing than the implementation being tested
@@ -39,10 +39,10 @@ TEST_F(MG24DetectorTest, XZCoordinatesVariantA) {
               << " to " << (xoffset * 16 + 15) << "\n";
     for (int zoffset = 0; zoffset < 16; zoffset++) {
       int channel = xoffset * 16 + zoffset;
-      EXPECT_EQ(xoffset, mgdet.x(channel))
+      EXPECT_EQ(xoffset, mgdet.x(0, channel))
               << " bad eval xof=" << xoffset << " zof="
               << zoffset << " chan=" << channel;
-      EXPECT_EQ(zoffset, mgdet.z(channel))
+      EXPECT_EQ(zoffset, mgdet.z(0, channel))
               << " bad eval xof=" << xoffset << " zof="
               << zoffset << " chan=" << channel;
     }
@@ -53,8 +53,8 @@ TEST_F(MG24DetectorTest, XZCoordinatesVariantA) {
     for (int zoffset = 0; zoffset < 4; zoffset++) {
       int channel = 64 + xoffset * 4 + zoffset;
       //MESSAGE() << "channel: " << channel << "\n";
-      EXPECT_EQ(xoffset, mgdet.x(channel));
-      EXPECT_EQ(16 + zoffset, mgdet.z(channel));
+      EXPECT_EQ(xoffset, mgdet.x(0, channel));
+      EXPECT_EQ(16 + zoffset, mgdet.z(0, channel));
     }
   }
 }
@@ -64,7 +64,7 @@ TEST_F(MG24DetectorTest, YCoordinatesVariantA) {
   mgdet.max_channel(127);
 
   for (int channel = 80; channel < 127; channel++) {
-    EXPECT_EQ(channel - 80 , mgdet.y(channel));
+    EXPECT_EQ(channel - 80 , mgdet.y(0, channel));
   }
 }
 

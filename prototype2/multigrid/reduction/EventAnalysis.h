@@ -3,7 +3,7 @@
 #pragma once
 
 #include <common/clustering/Event.h>
-#include <multigrid/geometry/SequoiaGeometry.h>
+#include <multigrid/geometry/DigitalGeometry.h>
 #include <limits>
 
 namespace Multigrid {
@@ -26,7 +26,7 @@ public:
   void weighted(bool w);
   bool weighted() const;
 
-  SequoiaGeometry mappings;
+  DigitalGeometry mappings;
   size_t stats_used_hits {0};
 
 private:
