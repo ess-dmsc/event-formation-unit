@@ -96,7 +96,7 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
         continue;
       }
 
-      if (hit.coordinate == NMX_INVALID_GEOM_ID) {
+      if (hit.coordinate == SRSMappings::InvalidCoord) {
         stats.geom_errors++;
         XTRACE(PROCESS, DEB, "Bad SRS mapping (coordinate) -- fec=%d, chip=%d",
             readout.fec, readout.chip_id);
