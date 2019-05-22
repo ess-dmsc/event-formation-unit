@@ -66,20 +66,19 @@ public:
 
   virtual uint32_t x_from_wire(uint16_t w) const = 0;
 
-  /** @brief return the x coordinate of the detector */
-  virtual uint32_t x(uint8_t VMM, uint16_t channel) const = 0;
-
   virtual uint32_t y_from_grid(uint16_t g) const = 0;
-
-  /** @brief return the y coordinate of the detector */
-  virtual uint32_t y(uint8_t VMM, uint16_t channel) const = 0;
 
   virtual uint32_t z_from_wire(uint16_t w) const = 0;
 
+  // The following should be deprecated
+  /** @brief return the x coordinate of the detector */
+  virtual uint32_t x(uint8_t VMM, uint16_t channel) const;
+  /** @brief return the y coordinate of the detector */
+  virtual uint32_t y(uint8_t VMM, uint16_t channel) const;
   /** @brief return the z coordinate of the detector */
-  virtual uint32_t z(uint8_t VMM, uint16_t channel) const = 0;
+  virtual uint32_t z(uint8_t VMM, uint16_t channel) const;
 
-  virtual std::string debug(std::string prefix = "") const;
+  virtual std::string debug(std::string prefix) const;
 };
 
 void from_json(const nlohmann::json &j, ModuleGeometry &g);

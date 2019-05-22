@@ -8,16 +8,9 @@ using namespace Multigrid;
 class MGSeqGeometryTest : public TestBase {
 protected:
   MGSeqGeometry geo;
-  Filter f;
-  virtual void SetUp() {
-    f.minimum = 3;
-    f.maximum = 7;
-    f.rescale_factor = 0.5;
-  }
-  virtual void TearDown() {
-  }
+  virtual void SetUp() {}
+  virtual void TearDown() {}
 };
-
 
 TEST_F(MGSeqGeometryTest, DefaultConstructedValues) {
   EXPECT_EQ(geo.max_channel(), 120);
@@ -195,64 +188,12 @@ TEST_F(MGSeqGeometryTest, FlippedZ) {
   EXPECT_EQ(geo.z(0, 39), 0);
 }
 
-TEST_F(MGSeqGeometryTest, OneWireFilter) {
-  geo.override_wire_filter(5, f);
-
-  EXPECT_EQ(geo.rescale_wire(4, 2), 2);
-  EXPECT_TRUE(geo.valid_wire(4,10));
-
-  EXPECT_EQ(geo.rescale_wire(5, 2), 1);
-  EXPECT_FALSE(geo.valid_wire(5,10));
-
-  EXPECT_EQ(geo.rescale_wire(6, 2), 2);
-  EXPECT_TRUE(geo.valid_wire(6,10));
-}
-
-TEST_F(MGSeqGeometryTest, BlanketWireFilter) {
-  geo.set_wire_filters(f);
-
-  EXPECT_EQ(geo.rescale_wire(1, 2), 1);
-  EXPECT_FALSE(geo.valid_wire(1,10));
-
-  EXPECT_EQ(geo.rescale_wire(5, 2), 1);
-  EXPECT_FALSE(geo.valid_wire(5,10));
-
-  EXPECT_EQ(geo.rescale_wire(70, 2), 1);
-  EXPECT_FALSE(geo.valid_wire(70,10));
-}
-
-TEST_F(MGSeqGeometryTest, OneGridFilter) {
-  geo.override_grid_filter(5, f);
-
-  EXPECT_EQ(geo.rescale_grid(4, 2), 2);
-  EXPECT_TRUE(geo.valid_grid(4,10));
-
-  EXPECT_EQ(geo.rescale_grid(5, 2), 1);
-  EXPECT_FALSE(geo.valid_grid(5,10));
-
-  EXPECT_EQ(geo.rescale_grid(6, 2), 2);
-  EXPECT_TRUE(geo.valid_grid(6,10));
-}
-
-TEST_F(MGSeqGeometryTest, BlanketGridFilter) {
-  geo.set_grid_filters(f);
-
-  EXPECT_EQ(geo.rescale_grid(1, 2), 1);
-  EXPECT_FALSE(geo.valid_grid(1,10));
-
-  EXPECT_EQ(geo.rescale_grid(5, 2), 1);
-  EXPECT_FALSE(geo.valid_grid(5,10));
-
-  EXPECT_EQ(geo.rescale_grid(30, 2), 1);
-  EXPECT_FALSE(geo.valid_grid(30,10));
-}
-
 TEST_F(MGSeqGeometryTest, PrintsSelf) {
   geo.swap_wires(true);
   geo.swap_grids(true);
   geo.flipped_x(true);
   geo.flipped_z(true);
-  EXPECT_FALSE(geo.debug().empty());
+  EXPECT_FALSE(geo.debug({}).empty());
 }
 
 TEST_F(MGSeqGeometryTest, FromJsonThrows) {
@@ -305,7 +246,6 @@ TEST_F(MGSeqGeometryTest, FromJson) {
 
   // \todo test correct parsing
 }
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

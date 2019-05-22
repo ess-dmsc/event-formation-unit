@@ -6,6 +6,16 @@ set(FilterTest_INC
   )
 create_test_executable(FilterTest)
 
+set(ModuleGeometryTest_SRC
+  ModuleGeometryTest.cpp
+  ModuleGeometry.cpp
+  )
+set(ModuleGeometryTest_INC
+  ModuleGeometry.h
+  Filter.h
+  )
+create_test_executable(ModuleGeometryTest)
+
 set(MGSeqGeometryTest_SRC
   MGSeqGeometryTest.cpp
   MGSeqGeometry.cpp

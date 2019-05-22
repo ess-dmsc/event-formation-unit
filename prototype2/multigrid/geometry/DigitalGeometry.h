@@ -11,7 +11,7 @@
 
 #pragma once
 
-#include <multigrid/geometry/MGSeqGeometry.h>
+#include <multigrid/geometry/ModuleGeometry.h>
 
 namespace Multigrid {
 
@@ -24,14 +24,15 @@ private:
     uint32_t y_offset{0};
     uint32_t z_offset{0};
 
-    MGSeqGeometry geometry;
+    std::shared_ptr<ModuleGeometry> geometry;
   };
 
   std::vector<BusDefinitionStruct> buses;
 
 public:
 
-  void add_bus(MGSeqGeometry geom);
+
+  void add_bus(std::shared_ptr<ModuleGeometry> geom);
 
   uint16_t rescale(uint8_t FEC, uint8_t VMM, uint16_t channel, uint16_t adc) const;
 

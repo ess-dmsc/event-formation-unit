@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <multigrid/reduction/EventAnalysis.h>
-#include <cmath>
+#include <multigrid/geometry/MGSeqGeometry.h>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>
@@ -14,7 +14,7 @@ protected:
   Event event;
   EventAnalyzer analyzer;
   virtual void SetUp() {
-    analyzer.mappings.add_bus(MGSeqGeometry());
+    analyzer.mappings.add_bus(std::make_shared<MGSeqGeometry>());
   }
   virtual void TearDown() { }
 };

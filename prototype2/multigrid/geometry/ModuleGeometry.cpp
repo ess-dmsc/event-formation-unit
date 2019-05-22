@@ -39,13 +39,13 @@ bool ModuleGeometry::valid_grid(uint16_t grid, uint16_t adc) const {
 }
 
 void ModuleGeometry::set_wire_filters(Filter mgf) {
-  wire_filters_.resize(max_wire());
+  wire_filters_.resize(this->max_wire() + 1u);
   for (auto &f : wire_filters_)
     f = mgf;
 }
 
 void ModuleGeometry::set_grid_filters(Filter mgf) {
-  grid_filters_.resize(max_grid());
+  grid_filters_.resize(this->max_grid() + 1u);
   for (auto &f : grid_filters_)
     f = mgf;
 }
@@ -60,6 +60,18 @@ void ModuleGeometry::override_grid_filter(uint16_t n, Filter mgf) {
   if (grid_filters_.size() <= n)
     grid_filters_.resize(n + 1);
   grid_filters_[n] = mgf;
+}
+
+uint32_t ModuleGeometry::x(uint8_t VMM, uint16_t channel) const {
+  return x_from_wire(this->wire(VMM, channel));
+}
+
+uint32_t ModuleGeometry::y(uint8_t VMM, uint16_t channel) const {
+  return y_from_grid(this->grid(VMM, channel));
+}
+
+uint32_t ModuleGeometry::z(uint8_t VMM, uint16_t channel) const {
+  return z_from_wire(this->wire(VMM, channel));
 }
 
 std::string ModuleGeometry::debug(std::string prefix) const {
@@ -102,8 +114,8 @@ void from_json(const nlohmann::json &j, ModuleGeometry &g) {
       g.set_wire_filters(wf["blanket"]);
     if (wf.count("exceptions")) {
       auto wfe = wf["exceptions"];
-      for (unsigned int j = 0; j < wfe.size(); j++) {
-        g.override_wire_filter(wfe[j]["idx"], wfe[j]);
+      for (auto k = 0u; k < wfe.size(); k++) {
+        g.override_wire_filter(wfe[k]["idx"], wfe[k]);
       }
     }
   }
@@ -114,8 +126,8 @@ void from_json(const nlohmann::json &j, ModuleGeometry &g) {
       g.set_grid_filters(gf["blanket"]);
     if (gf.count("exceptions")) {
       auto gfe = gf["exceptions"];
-      for (unsigned int j = 0; j < gfe.size(); j++) {
-        g.override_grid_filter(gfe[j]["idx"], gfe[j]);
+      for (auto k = 0u; k < gfe.size(); k++) {
+        g.override_grid_filter(gfe[k]["idx"], gfe[k]);
       }
     }
   }

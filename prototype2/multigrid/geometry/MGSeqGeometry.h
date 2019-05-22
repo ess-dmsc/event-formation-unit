@@ -43,33 +43,24 @@ public:
   uint16_t max_z() const override;
 
   /** @brief identifies which channels are wires, from drawing by Anton */
-  bool isWire(uint8_t VMM, uint16_t channel) const;
+  bool isWire(uint8_t VMM, uint16_t channel) const override;
 
   /** @brief identifies which channels are grids, from drawing by Anton */
-  bool isGrid(uint8_t VMM, uint16_t channel) const;
+  bool isGrid(uint8_t VMM, uint16_t channel) const override;
 
   /** @brief returns wire */
-  uint16_t wire(uint8_t VMM, uint16_t channel) const;
+  uint16_t wire(uint8_t VMM, uint16_t channel) const override;
 
   /** @brief returns grid */
-  uint16_t grid(uint8_t VMM, uint16_t channel) const;
+  uint16_t grid(uint8_t VMM, uint16_t channel) const override;
 
-  uint32_t x_from_wire(uint16_t w) const;
+  uint32_t x_from_wire(uint16_t w) const override;
 
-  /** @brief return the x coordinate of the detector */
-  uint32_t x(uint8_t VMM, uint16_t channel) const;
+  uint32_t y_from_grid(uint16_t g) const override;
 
-  uint32_t y_from_grid(uint16_t g) const;
+  uint32_t z_from_wire(uint16_t w) const override;
 
-  /** @brief return the y coordinate of the detector */
-  uint32_t y(uint8_t VMM, uint16_t channel) const;
-
-  uint32_t z_from_wire(uint16_t w) const;
-
-  /** @brief return the z coordinate of the detector */
-  uint32_t z(uint8_t VMM, uint16_t channel) const;
-
-  std::string debug(std::string prefix = "") const override;
+  std::string debug(std::string prefix) const override;
 
 protected:
   static void swap(uint16_t &channel);

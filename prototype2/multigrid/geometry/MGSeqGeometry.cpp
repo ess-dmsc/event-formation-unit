@@ -124,16 +124,8 @@ uint32_t MGSeqGeometry::x_from_wire(uint16_t w) const {
   }
 }
 
-uint32_t MGSeqGeometry::x(uint8_t VMM, uint16_t channel) const {
-  return x_from_wire(this->wire(VMM, channel));
-}
-
 uint32_t MGSeqGeometry::y_from_grid(uint16_t g) const {
   return g;
-}
-
-uint32_t MGSeqGeometry::y(uint8_t VMM, uint16_t channel) const {
-  return y_from_grid(grid(VMM, channel));
 }
 
 uint32_t MGSeqGeometry::z_from_wire(uint16_t w) const {
@@ -142,10 +134,6 @@ uint32_t MGSeqGeometry::z_from_wire(uint16_t w) const {
   } else {
     return w % max_z_;
   }
-}
-
-uint32_t MGSeqGeometry::z(uint8_t VMM, uint16_t channel) const {
-  return z_from_wire(wire(VMM, channel));
 }
 
 std::string MGSeqGeometry::debug(std::string prefix) const {
