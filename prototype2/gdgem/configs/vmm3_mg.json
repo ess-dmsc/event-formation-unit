@@ -10,26 +10,145 @@
     "acquisition_window" : 8191
   },
 
-  "srs_mappings" :
+  "granular_mappings" :
   [
-    {"fecID":1, "vmmID":0, "planeID":0, "strip_offset":0},
-    {"fecID":1, "vmmID":1, "planeID":0, "strip_offset":64},
-    {"fecID":1, "vmmID":2, "planeID":1, "strip_offset":0},
-    {"fecID":1, "vmmID":3, "planeID":1, "strip_offset":64},
-    {"fecID":1, "vmmID":10, "planeID":0, "strip_offset":128},
-    {"fecID":1, "vmmID":11, "planeID":0, "strip_offset":192},
-    {"fecID":1, "vmmID":14, "planeID":1, "strip_offset":128},
-    {"fecID":1, "vmmID":15, "planeID":1, "strip_offset":192},
-    {"fecID":2, "vmmID":4, "planeID":0, "strip_offset":256},
-    {"fecID":2, "vmmID":5, "planeID":0, "strip_offset":320},
-    {"fecID":2, "vmmID":6, "planeID":1, "strip_offset":256},
-    {"fecID":2, "vmmID":7, "planeID":1, "strip_offset":320}
+    {"fecID":2, "vmmID":2, "planeID": 0,
+      "channels":
+      [
+        {"channel":47, "coord":1},
+        {"channel":45, "coord":2},
+        {"channel":43,  "coord":3},
+        {"channel":41, "coord":4},
+        {"channel":39, "coord":5},
+        {"channel":37, "coord":16},
+        {"channel":35, "coord":15},
+        {"channel":33, "coord":14},
+        {"channel":31, "coord":13},
+        {"channel":29, "coord":12},
+        {"channel":27, "coord":10},
+        {"channel":25, "coord":11},
+        {"channel":23, "coord":9},
+        {"channel":21, "coord":8},
+        {"channel":19, "coord":7},
+        {"channel":17, "coord":6}
+      ]
+    },
+
+    {"fecID":2, "vmmID":3, "planeID": 1,
+      "channels":
+      [
+        {"channel":47, "coord":75},
+        {"channel":45, "coord":74},
+        {"channel":43, "coord":73},
+        {"channel":41, "coord":72},
+        {"channel":39, "coord":71},
+        {"channel":37, "coord":70},
+        {"channel":35, "coord":69},
+        {"channel":33, "coord":68},
+        {"channel":31, "coord":67},
+        {"channel":29, "coord":66},
+        {"channel":27, "coord":65},
+        {"channel":25, "coord":76},
+        {"channel":23, "coord":77},
+        {"channel":21, "coord":78},
+        {"channel":19, "coord":79},
+        {"channel":17, "coord":80}
+      ]
+    },
+
+    {"fecID":2, "vmmID":4, "planeID":1,
+      "channels":
+      [
+        {"channel":47, "coord":33},
+        {"channel":45, "coord":34},
+        {"channel":43, "coord":35},
+        {"channel":41, "coord":36},
+        {"channel":39, "coord":37},
+        {"channel":37, "coord":48},
+        {"channel":35, "coord":47},
+        {"channel":33, "coord":46},
+        {"channel":31, "coord":45},
+        {"channel":29, "coord":44},
+        {"channel":27, "coord":42},
+        {"channel":25, "coord":43},
+        {"channel":23, "coord":41},
+        {"channel":21, "coord":40},
+        {"channel":19, "coord":39},
+        {"channel":17, "coord":38}
+      ]
+    },
+
+    {"fecID":2, "vmmID":4, "planeID":1,
+      "channels":
+      [
+        {"channel":46, "coord":32},
+        {"channel":44, "coord":31},
+        {"channel":42, "coord":30},
+        {"channel":40, "coord":29},
+        {"channel":38, "coord":28},
+        {"channel":36, "coord":17},
+        {"channel":34, "coord":18},
+        {"channel":32, "coord":19},
+        {"channel":30, "coord":20},
+        {"channel":28, "coord":22},
+        {"channel":26, "coord":21},
+        {"channel":24, "coord":24},
+        {"channel":22, "coord":23},
+        {"channel":20, "coord":25},
+        {"channel":18, "coord":26},
+        {"channel":16, "coord":27}
+      ]
+    },
+
+    {"fecID":2, "vmmID":5, "planeID":1,
+      "channels":
+      [
+        {"channel":47, "coord":11},
+        {"channel":45, "coord":10},
+        {"channel":43, "coord":9},
+        {"channel":41, "coord":8},
+        {"channel":39, "coord":7},
+        {"channel":37, "coord":6},
+        {"channel":35, "coord":5},
+        {"channel":33, "coord":4},
+        {"channel":31, "coord":3},
+        {"channel":29, "coord":2},
+        {"channel":27, "coord":1},
+        {"channel":25, "coord":12},
+        {"channel":23, "coord":13},
+        {"channel":21, "coord":14},
+        {"channel":19, "coord":15},
+        {"channel":17, "coord":16}
+      ]
+    },
+
+    {"fecID":2, "vmmID":5, "planeID":1,
+      "channels":
+      [
+        {"channel":46, "coord":54},
+        {"channel":44, "coord":55},
+        {"channel":42, "coord":56},
+        {"channel":40, "coord":58},
+        {"channel":38, "coord":57},
+        {"channel":36, "coord":60},
+        {"channel":34, "coord":59},
+        {"channel":32, "coord":61},
+        {"channel":30, "coord":62},
+        {"channel":28, "coord":63},
+        {"channel":26, "coord":64},
+        {"channel":24, "coord":53},
+        {"channel":22, "coord":52},
+        {"channel":20, "coord":51},
+        {"channel":18, "coord":50},
+        {"channel":16, "coord":49}
+      ]
+    }
   ],
 
   "adc_threshold" : 0,
   "hit_histograms" : true,
   "send_raw_hits" : false,
-  "perform_clustering" : true,
+  "perform_clustering" : false,
 
   "clusterer x" :
   {

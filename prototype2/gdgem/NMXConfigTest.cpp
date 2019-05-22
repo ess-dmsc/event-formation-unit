@@ -61,6 +61,11 @@ TEST_F(NMXConfigTest, JsonConfig) {
   EXPECT_EQ(500, nmxconfig.matcher_max_delta_time);
 }
 
+TEST_F(NMXConfigTest, JsonConfigMG) {
+  NMXConfig nmxconfig(TestJsonPath + "vmm3_mg.json", nocalibration);
+  MESSAGE() << "\n" << nmxconfig.debug() << "\n";
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

@@ -45,13 +45,34 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   }
 
   if (builder_type != "Hits") {
-    auto sm = root["srs_mappings"];
-    for (unsigned int index = 0; index < sm.size(); index++) {
-      auto fecID = sm[index]["fecID"].get<int>();
-      auto vmmID = sm[index]["vmmID"].get<int>();
-      auto planeID = sm[index]["planeID"].get<int>();
-      auto strip_offset = sm[index]["strip_offset"].get<int>();
-      srs_mappings.set_mapping(fecID, vmmID, planeID, strip_offset);
+    if (root.count("srs_mappings"))
+    {
+      auto sm = root["srs_mappings"];
+      for (unsigned int index = 0; index < sm.size(); index++) {
+        auto fecID = sm[index]["fecID"].get<int>();
+        auto vmmID = sm[index]["vmmID"].get<int>();
+        auto planeID = sm[index]["planeID"].get<int>();
+        auto strip_offset = sm[index]["strip_offset"].get<int>();
+        srs_mappings.set_mapping(fecID, vmmID, planeID, strip_offset);
+      }
+    }
+
+    if (root.count("granular_mappings"))
+    {
+      auto sm = root["granular_mappings"];
+      for (unsigned int index = 0; index < sm.size(); index++) {
+        auto item = sm[index];
+        auto fecID = item["fecID"].get<int>();
+        auto vmmID = item["vmmID"].get<int>();
+        auto planeID = item["planeID"].get<int>();
+
+        auto channels = item["channels"];
+        for (auto mi = 0u; mi < channels.size(); mi++) {
+          auto channel = channels[mi]["channel"].get<int>();
+          auto coord = channels[mi]["coord"].get<int>();
+          srs_mappings.set_mapping(fecID, vmmID, channel, planeID, coord);
+        }
+      }
     }
 
     adc_threshold = root["adc_threshold"].get<unsigned int>();

@@ -79,16 +79,19 @@ std::string SRSMappings::debug() const {
     const auto &fec = mappings_[i];
     for (size_t j = 0; j < fec.size(); ++j) {
       const auto &vmm = fec[j];
-      ss << "    (FEC=" << i << ",VMM=" << j << ") --> ( ";
+      ss << "    (FEC=" << i << ",VMM=" << j << "):";
       for (size_t k = 0; k < vmm.size(); ++k) {
+        if ((k % 16) == 0)
+          ss << "\n      ";
+        ss << k << ":";
         const auto &m = vmm[k];
         if ((m.plane == InvalidPlane) || (m.coordinate == InvalidCoord))
           ss << "x ";
         else
           ss << static_cast<int32_t>(m.plane)
-             << ":" << static_cast<int32_t>(m.coordinate) << " ";
+             << "/" << static_cast<int32_t>(m.coordinate) << " ";
       }
-      ss << " )\n";
+      ss << "\n";
     }
   }
   return ss.str();
