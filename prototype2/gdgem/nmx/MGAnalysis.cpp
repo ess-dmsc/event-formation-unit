@@ -110,18 +110,45 @@ MultiDimResult MGAnalyzer::analyze(Event& event) const {
   }
 
   if (!event.c1.empty()) {
+
+    double ymass{0};
+    double ysum{0};
+
+    std::sort(event.c1.hits.begin(), event.c1.hits.end(),
+              [](const Hit &c2, const Hit &c1) {
+                return c2.weight > c1.weight;
+              });
+
+    uint16_t highest_adc = event.c1.hits.front().weight;
+    for (const auto &h : event.c1.hits) {
+      if (h.weight != highest_adc)
+        break;
+      stats_used_hits++;
+      if (weighted_) {
+        ymass += y_from_grid(h.coordinate) * h.weight;
+        ysum += h.weight;
+      } else {
+        ymass += y_from_grid(h.coordinate);
+        ysum++;
+      }
+    }
+
+    ret.y.center = ymass / ysum;
+  }
+
+  if (!event.c2.empty()) {
     double xmass{0};
     double zmass{0};
     double xsum{0};
     double zsum{0};
 
-    std::sort(event.c1.hits.begin(), event.c1.hits.end(),
-              [](const Hit &c1, const Hit &c2) {
-                return c1.weight > c2.weight;
+    std::sort(event.c2.hits.begin(), event.c2.hits.end(),
+              [](const Hit &c2, const Hit &c1) {
+                return c2.weight > c1.weight;
               });
 
-    uint16_t highest_adc = event.c1.hits.front().weight;
-    for (const auto &h : event.c1.hits) {
+    uint16_t highest_adc = event.c2.hits.front().weight;
+    for (const auto &h : event.c2.hits) {
       if (h.weight != highest_adc)
         break;
       stats_used_hits++;
@@ -140,33 +167,6 @@ MultiDimResult MGAnalyzer::analyze(Event& event) const {
 
     ret.x.center = xmass / xsum;
     ret.z.center = zmass / zsum;
-  }
-
-  if (!event.c2.empty()) {
-
-    double ymass{0};
-    double ysum{0};
-
-    std::sort(event.c2.hits.begin(), event.c2.hits.end(),
-              [](const Hit &c1, const Hit &c2) {
-                return c1.weight > c2.weight;
-              });
-
-    uint16_t highest_adc = event.c2.hits.front().weight;
-    for (const auto &h : event.c2.hits) {
-      if (h.weight != highest_adc)
-        break;
-      stats_used_hits++;
-      if (weighted_) {
-        ymass += y_from_grid(h.coordinate) * h.weight;
-        ysum += h.weight;
-      } else {
-        ymass += y_from_grid(h.coordinate);
-        ysum++;
-      }
-    }
-
-    ret.y.center = ymass / ysum;
   }
 
   ret.time = event.time_start();

@@ -59,6 +59,7 @@ TEST_F(NMXConfigTest, JsonConfig) {
   EXPECT_EQ(384, nmxconfig.geometry.nx());
   EXPECT_EQ(384, nmxconfig.geometry.ny());
   EXPECT_EQ(500, nmxconfig.matcher_max_delta_time);
+  MESSAGE() << "\n" << nmxconfig.debug() << "\n";
 }
 
 TEST_F(NMXConfigTest, JsonConfigMG) {
