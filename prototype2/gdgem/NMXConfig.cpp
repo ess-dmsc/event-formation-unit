@@ -115,7 +115,7 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 
     if (root.count("analyzer") && (root["analyzer"] == "MG"))
     {
-      auto MGA = std::make_shared<Gem::EventAnalyzer>();
+      auto MGA = std::make_shared<Gem::MGAnalyzer>();
       MGA->weighted(root["analyze_weighted"].get<bool>());
       geometry.nx(MGA->max_x());
       geometry.ny(MGA->max_y());

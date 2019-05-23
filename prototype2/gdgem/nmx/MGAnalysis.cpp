@@ -16,75 +16,75 @@
 
 namespace Gem {
 
-void EventAnalyzer::weighted(bool w) {
+void MGAnalyzer::weighted(bool w) {
   weighted_ = w;
 }
 
-bool EventAnalyzer::weighted() const {
+bool MGAnalyzer::weighted() const {
   return weighted_;
 }
 
 
-void EventAnalyzer::max_wire(uint16_t w) {
+void MGAnalyzer::max_wire(uint16_t w) {
   max_wire_ = w;
 }
 
-void EventAnalyzer::max_z(uint16_t w) {
+void MGAnalyzer::max_z(uint16_t w) {
   max_z_ = w;
 }
 
-void EventAnalyzer::flipped_x(bool f) {
+void MGAnalyzer::flipped_x(bool f) {
   flipped_x_ = f;
 }
 
-void EventAnalyzer::flipped_z(bool f) {
+void MGAnalyzer::flipped_z(bool f) {
   flipped_z_ = f;
 }
 
 
-bool EventAnalyzer::flipped_x() const {
+bool MGAnalyzer::flipped_x() const {
   return flipped_x_;
 }
 
-bool EventAnalyzer::flipped_z() const {
+bool MGAnalyzer::flipped_z() const {
   return flipped_z_;
 }
 
-uint32_t EventAnalyzer::max_x() const {
+uint32_t MGAnalyzer::max_x() const {
   return max_wire() / max_z();
 }
 
-uint32_t EventAnalyzer::max_y() const {
+uint32_t MGAnalyzer::max_y() const {
   return max_grid();
 }
 
-uint16_t EventAnalyzer::max_z() const {
+uint16_t MGAnalyzer::max_z() const {
   return max_z_;
 }
 
-uint16_t EventAnalyzer::max_wire() const {
+uint16_t MGAnalyzer::max_wire() const {
   return max_wire_;
 }
 
-uint16_t EventAnalyzer::max_grid() const {
+uint16_t MGAnalyzer::max_grid() const {
   return max_grid_;
 }
 
-uint32_t EventAnalyzer::x_from_wire(uint16_t w) const {
+uint32_t MGAnalyzer::x_from_wire(uint16_t w) const {
   uint32_t ret = w / max_z();
   return flipped_x() ? (max_x() - 1u - ret) : ret;
 }
 
-uint32_t EventAnalyzer::y_from_grid(uint16_t g) const {
+uint32_t MGAnalyzer::y_from_grid(uint16_t g) const {
   return g;
 }
 
-uint32_t EventAnalyzer::z_from_wire(uint16_t w) const {
+uint32_t MGAnalyzer::z_from_wire(uint16_t w) const {
   uint32_t ret = w % max_z();
   return flipped_z() ? (max_z() - 1u - ret) : ret;
 }
 
-std::string EventAnalyzer::debug() const {
+std::string MGAnalyzer::debug() const {
   std::string ret;
 
   ret += "MG analysis\n";
@@ -102,7 +102,7 @@ std::string EventAnalyzer::debug() const {
   return ret;
 }
 
-MultiDimResult EventAnalyzer::analyze(Event& event) const {
+MultiDimResult MGAnalyzer::analyze(Event& event) const {
   MultiDimResult ret;
 
   if (event.empty()) {

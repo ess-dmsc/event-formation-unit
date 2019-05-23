@@ -11,7 +11,7 @@ class EventAnalysisTest : public TestBase {
 protected:
   Hit hit;
   Event event;
-  EventAnalyzer analyzer;
+  MGAnalyzer analyzer;
   virtual void SetUp() {}
   virtual void TearDown() { }
 };

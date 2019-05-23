@@ -7,7 +7,7 @@
 namespace Gem {
 
 // \todo rename this
-class EventAnalyzer : public AbstractAnalyzer {
+class MGAnalyzer : public AbstractAnalyzer {
 public:
   MultiDimResult analyze(Event&) const override;
   std::string debug() const override;

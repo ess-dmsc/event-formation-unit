@@ -297,7 +297,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     mystats.clusters_xy++;
 
-    utpc_ = nmx_opts.analyzer_->analyze(event);
+    neutron_event_ = nmx_opts.analyzer_->analyze(event);
 
     /// Sample only tracks that are good in both planes
     if (sample_next_track_
@@ -305,24 +305,32 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     {
 //      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.debug(true));
       sample_next_track_ = !track_serializer.add_track(event,
-                                                       utpc_.x.center,
-                                                       utpc_.y.center);
+                                                       neutron_event_.x.center,
+                                                       neutron_event_.y.center);
     }
 
-    if (!utpc_.good)
+    if (!neutron_event_.good)
     {
       mystats.events_bad_utpc++;
       continue;
     }
 
-    if (!nmx_opts.filter.valid(event, utpc_))
+    if (!nmx_opts.filter.valid(event, neutron_event_))
     {
       mystats.events_filter_rejects++;
       continue;
     }
 
-    pixelid_ = nmx_opts.geometry.pixel2D(
-        utpc_.x.center_rounded(), utpc_.y.center_rounded());
+    // \todo this logic is a hack to accomodate MG
+    if (nmx_opts.geometry.nz() > 1) {
+      pixelid_ = nmx_opts.geometry.pixel3D(
+          neutron_event_.x.center_rounded(),
+          neutron_event_.y.center_rounded(),
+          neutron_event_.z.center_rounded());
+    } else {
+      pixelid_ = nmx_opts.geometry.pixel2D(
+          neutron_event_.x.center_rounded(), neutron_event_.y.center_rounded());
+    }
 
     if (!nmx_opts.geometry.valid_id(pixelid_))
     {
@@ -336,18 +344,18 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
       bin(hists_, event);
     }
 
-    if (utpc_.time < previous_full_time_) {
+    if (neutron_event_.time < previous_full_time_) {
       LOG(PROCESS, Sev::Error, "Event time sequence error: {} < {}",
-             utpc_.time, previous_full_time_);
+             neutron_event_.time, previous_full_time_);
     }
-    previous_full_time_ = utpc_.time;
+    previous_full_time_ = neutron_event_.time;
 
-    truncated_time_ = utpc_.time - recent_pulse_time_;
+    truncated_time_ = neutron_event_.time - recent_pulse_time_;
     // \todo try different limits
     if (!have_pulse_time_ ||
         (truncated_time_ > max_pulse_window_ns)) {
       have_pulse_time_ = true;
-      recent_pulse_time_ = utpc_.time;
+      recent_pulse_time_ = neutron_event_.time;
       truncated_time_ = 0;
       if (event_serializer.eventCount())
         mystats.tx_bytes += event_serializer.produce();
@@ -356,7 +364,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     }
 
 //    LOG(PROCESS, Sev::Debug, "Good event: time={}, pixel={} from {}",
-//        truncated_time_, pixelid_, utpc_.debug());
+//        truncated_time_, pixelid_, neutron_event_.debug());
 
     mystats.tx_bytes += event_serializer.addEvent(
         static_cast<uint32_t>(truncated_time_), pixelid_);

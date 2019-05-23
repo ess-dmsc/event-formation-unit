@@ -148,7 +148,7 @@
   "adc_threshold" : 0,
   "hit_histograms" : true,
   "send_raw_hits" : false,
-  "perform_clustering" : false,
+  "perform_clustering" : true,
 
   "clusterer x" :
   {
