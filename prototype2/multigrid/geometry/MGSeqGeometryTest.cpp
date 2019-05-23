@@ -198,7 +198,7 @@ TEST_F(MGSeqGeometryTest, PrintsSelf) {
 
 TEST_F(MGSeqGeometryTest, FromJsonThrows) {
   nlohmann::json j;
-  j["max_channel"] = "nonsense";
+  j["max_wire"] = "nonsense";
   EXPECT_ANY_THROW((geo = j));
 }
 

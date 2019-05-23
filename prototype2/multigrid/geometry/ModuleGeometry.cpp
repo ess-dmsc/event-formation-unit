@@ -62,8 +62,78 @@ void ModuleGeometry::override_grid_filter(uint16_t n, Filter mgf) {
   grid_filters_[n] = mgf;
 }
 
+void ModuleGeometry::max_grid(uint16_t g)
+{
+  max_grid_ = g;
+}
+
+void ModuleGeometry::max_wire(uint16_t w) {
+  max_wire_ = w;
+}
+
+void ModuleGeometry::max_z(uint16_t w) {
+  max_z_ = w;
+}
+
+void ModuleGeometry::flipped_x(bool f) {
+  flipped_x_ = f;
+}
+
+void ModuleGeometry::flipped_z(bool f) {
+  flipped_z_ = f;
+}
+
+
+bool ModuleGeometry::flipped_x() const {
+  return flipped_x_;
+}
+
+bool ModuleGeometry::flipped_z() const {
+  return flipped_z_;
+}
+
+uint32_t ModuleGeometry::max_x() const {
+  return max_wire() / max_z();
+}
+
+uint32_t ModuleGeometry::max_y() const {
+  return max_grid();
+}
+
+uint16_t ModuleGeometry::max_z() const {
+  return max_z_;
+}
+
+uint16_t ModuleGeometry::max_wire() const {
+  return max_wire_;
+}
+
+uint16_t ModuleGeometry::max_grid() const {
+  return max_grid_;
+}
+
+uint32_t ModuleGeometry::x_from_wire(uint16_t w) const {
+  uint32_t ret = w / max_z();
+  return flipped_x() ? (max_x() - 1u - ret) : ret;
+}
+
+uint32_t ModuleGeometry::y_from_grid(uint16_t g) const {
+  return g;
+}
+
+uint32_t ModuleGeometry::z_from_wire(uint16_t w) const {
+  uint32_t ret = w % max_z();
+  return flipped_z() ? (max_z() - 1u - ret) : ret;
+}
+
+
 std::string ModuleGeometry::debug(std::string prefix) const {
   std::stringstream ss;
+
+  if (flipped_x_)
+    ss << prefix << "(flipped in X)\n";
+  if (flipped_z_)
+    ss << prefix << "(flipped in Z)\n";
 
   std::stringstream wfilters;
   bool validwf{false};
@@ -95,6 +165,11 @@ std::string ModuleGeometry::debug(std::string prefix) const {
 }
 
 void from_json(const nlohmann::json &j, ModuleGeometry &g) {
+
+  if (j.count("flipped_x"))
+    g.flipped_x(j["flipped_x"]);
+  if (j.count("flipped_z"))
+    g.flipped_z(j["flipped_z"]);
 
   if (j.count("wire_filters")) {
     auto wf = j["wire_filters"];

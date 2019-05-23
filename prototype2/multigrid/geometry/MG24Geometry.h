@@ -31,15 +31,11 @@ public:
   uint32_t x_from_wire(uint16_t w) const override {
     uint32_t ret;
     if (w < 64) {
-      ret = w / max_z_;
+      ret = w / max_z();
     } else {
-      ret = (w - 64) * 4 / max_z_;
+      ret = (w - 64) * 4 / max_z();
     }
-
-    if (flipped_x_) {
-      return max_x() - 1u - ret;
-    }
-    return ret;
+    return flipped_x() ? (max_x() - 1u - ret) : ret;
   }
 };
 
@@ -50,14 +46,11 @@ public:
   uint32_t z_from_wire(uint16_t w) const override {
     uint32_t ret;
     if (w < 64) {
-      ret = w % max_z_;
+      ret = w % max_z();
     } else {
-      ret = ((w - 64) % 4) + max_z_;
+      ret = ((w - 64) % 4) + max_z();
     }
-    if (flipped_z_) {
-      return max_z() - 1u - ret;
-    }
-    return ret;
+    return flipped_z() ? (max_z() - 1u - ret) : ret;
   }
 };
 
@@ -69,14 +62,11 @@ public:
   uint32_t z_from_wire(uint16_t w) const override {
     uint32_t ret;
     if (w < 64) {
-      ret = max_z_ - 1u - (w % max_z_);
+      ret = max_z() - 1u - (w % max_z());
     } else {
-      ret = 3 - ((w - 64) % 4) + max_z_;
+      ret = 3 - ((w - 64) % 4) + max_z();
     }
-    if (flipped_z_) {
-      return max_z() - 1u - ret;
-    }
-    return ret;
+    return flipped_z() ? (max_z() - 1u - ret) : ret;
   }
 };
 

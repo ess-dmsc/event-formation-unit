@@ -22,25 +22,13 @@ public:
   // Configuration
   void swap_wires(bool s);
   void swap_grids(bool s);
-  void max_wire(uint16_t g);
   void max_channel(uint16_t g);
-  void max_z(uint16_t w);
-  void flipped_x(bool f);
-  void flipped_z(bool f);
   bool swap_wires() const;
   bool swap_grids() const;
-  bool flipped_x() const;
-  bool flipped_z() const;
 
   // Implementation
 
   uint16_t max_channel() const override;
-  uint16_t max_wire() const override;
-  uint16_t max_grid() const override;
-
-  uint32_t max_x() const override;
-  uint32_t max_y() const override;
-  uint16_t max_z() const override;
 
   /** @brief identifies which channels are wires, from drawing by Anton */
   bool isWire(uint8_t VMM, uint16_t channel) const override;
@@ -54,23 +42,12 @@ public:
   /** @brief returns grid */
   uint16_t grid(uint8_t VMM, uint16_t channel) const override;
 
-  uint32_t x_from_wire(uint16_t w) const override;
-
-  uint32_t y_from_grid(uint16_t g) const override;
-
-  uint32_t z_from_wire(uint16_t w) const override;
-
   std::string debug(std::string prefix) const override;
 
 protected:
   static void swap(uint16_t &channel);
 
   uint16_t max_channel_{120};
-  uint16_t max_wire_{80};
-  uint16_t max_z_{20};
-
-  bool flipped_x_{false};
-  bool flipped_z_{false};
 
   bool swap_wires_{false};
   bool swap_grids_{false};

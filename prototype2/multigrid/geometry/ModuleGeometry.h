@@ -40,13 +40,27 @@ public:
 
   void override_grid_filter(uint16_t n, Filter mgf);
 
-  virtual uint16_t max_channel() const = 0;
-  virtual uint16_t max_wire() const = 0;
-  virtual uint16_t max_grid() const = 0;
+  // Configuration
+  void max_grid(uint16_t g);
+  void max_wire(uint16_t w);
+  void max_z(uint16_t w);
+  void flipped_x(bool f);
+  void flipped_z(bool f);
+  bool flipped_x() const;
+  bool flipped_z() const;
 
-  virtual uint32_t max_x() const = 0;
-  virtual uint32_t max_y() const = 0;
-  virtual uint16_t max_z() const = 0;
+  uint16_t max_wire() const;
+  uint16_t max_grid() const;
+
+  uint32_t max_x() const;
+  uint32_t max_y() const;
+  uint16_t max_z() const;
+
+  virtual uint32_t x_from_wire(uint16_t w) const;
+  virtual uint32_t y_from_grid(uint16_t g) const;
+  virtual uint32_t z_from_wire(uint16_t w) const;
+
+  virtual uint16_t max_channel() const = 0;
 
   /** @brief identifies which channels are wires, from drawing by Anton */
   virtual bool isWire(uint8_t VMM, uint16_t channel) const = 0;
@@ -60,13 +74,16 @@ public:
   /** @brief returns grid */
   virtual uint16_t grid(uint8_t VMM, uint16_t channel) const = 0;
 
-  virtual uint32_t x_from_wire(uint16_t w) const = 0;
-
-  virtual uint32_t y_from_grid(uint16_t g) const = 0;
-
-  virtual uint32_t z_from_wire(uint16_t w) const = 0;
-
   virtual std::string debug(std::string prefix) const;
+
+private:
+  uint16_t max_grid_{40};
+  uint16_t max_wire_{80};
+  uint16_t max_z_{20};
+
+  bool flipped_x_{false};
+  bool flipped_z_{false};
+
 };
 
 void from_json(const nlohmann::json &j, ModuleGeometry &g);
