@@ -62,31 +62,13 @@ public:
     return 0;
   }
 
-  uint32_t x(uint8_t VMM, uint16_t channel) const override {
-    (void) VMM;
-    (void) channel;
-    return 0;
-  }
-
   uint32_t y_from_grid(uint16_t g) const override {
     (void) g;
     return 0;
   }
 
-  uint32_t y(uint8_t VMM, uint16_t channel) const override {
-    (void) VMM;
-    (void) channel;
-    return 0;
-  }
-
   uint32_t z_from_wire(uint16_t w) const override {
     (void) w;
-    return 0;
-  }
-
-  uint32_t z(uint8_t VMM, uint16_t channel) const override {
-    (void) VMM;
-    (void) channel;
     return 0;
   }
 };

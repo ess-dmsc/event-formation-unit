@@ -20,8 +20,7 @@
 
 namespace Multigrid {
 
-// \todo this requires more work, very likely need to reimplement these fns:
-//        wire(), x_from_wire(), z_from_wire(),
+// \todo this requires more work, very likely need to reimplement wire()
 //        and must test that reverse mapping from global wire works
 
 class MG24Geometry : public MGSeqGeometry {
@@ -29,17 +28,18 @@ class MG24Geometry : public MGSeqGeometry {
 public:
 
   /** @brief returns wire */
-  uint32_t x(uint8_t VMM, uint16_t channel) const override {
-    (void) VMM;
-    if (swap_wires_) {
-      swap(channel);
-    }
-    if (channel < 64) {
-      return channel / max_z_;
+  uint32_t x_from_wire(uint16_t w) const override {
+    uint32_t ret;
+    if (w < 64) {
+      ret = w / max_z_;
     } else {
-      return (channel - 64) * 4 / max_z_;
+      ret = (w - 64) * 4 / max_z_;
     }
-    // does not respect x-flipping
+
+    if (flipped_x_) {
+      return max_x() - 1u - ret;
+    }
+    return ret;
   }
 };
 
@@ -47,16 +47,17 @@ class MG24GeometryA : public MG24Geometry {
 public:
 
   /** \brief return the z coordinate of the detector */
-  uint32_t z(uint8_t VMM, uint16_t channel) const override {
-    (void) VMM;
-    if (swap_wires_) {
-      swap(channel);
-    }
-    if (channel < 64) {
-      return (channel) % max_z_;
+  uint32_t z_from_wire(uint16_t w) const override {
+    uint32_t ret;
+    if (w < 64) {
+      ret = w % max_z_;
     } else {
-      return ((channel - 64) % 4) + max_z_;
+      ret = ((w - 64) % 4) + max_z_;
     }
+    if (flipped_z_) {
+      return max_z() - 1u - ret;
+    }
+    return ret;
   }
 };
 
@@ -65,16 +66,17 @@ class MG24GeometryB : public MG24Geometry {
 public:
 
   /** \brief return the z coordinate of the detector */
-  uint32_t z(uint8_t VMM, uint16_t channel) const override {
-    (void) VMM;
-    if (swap_wires_) {
-      swap(channel);
-    }
-    if (channel < 64) {
-      return max_z_ - 1 - (channel) % max_z_;
+  uint32_t z_from_wire(uint16_t w) const override {
+    uint32_t ret;
+    if (w < 64) {
+      ret = max_z_ - 1u - (w % max_z_);
     } else {
-      return 3 - ((channel - 64) % 4) + max_z_;
+      ret = 3 - ((w - 64) % 4) + max_z_;
     }
+    if (flipped_z_) {
+      return max_z() - 1u - ret;
+    }
+    return ret;
   }
 };
 

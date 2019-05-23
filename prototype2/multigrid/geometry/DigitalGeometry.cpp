@@ -97,24 +97,6 @@ uint16_t DigitalGeometry::max_grid() const {
   return b.grid_offset + b.geometry->max_grid();
 }
 
-/** @brief return the x coordinate of the detector */
-uint32_t DigitalGeometry::x(uint8_t FEC, uint8_t VMM, uint16_t channel) const {
-  const auto &b = buses[FEC];
-  return b.x_offset + b.geometry->x(VMM, channel);
-}
-
-/** @brief return the y coordinate of the detector */
-uint32_t DigitalGeometry::y(uint8_t FEC, uint8_t VMM, uint16_t channel) const {
-  const auto &b = buses[FEC];
-  return b.y_offset + b.geometry->y(VMM, channel);
-}
-
-/** @brief return the z coordinate of the detector */
-uint32_t DigitalGeometry::z(uint8_t FEC, uint8_t VMM, uint16_t channel) const {
-  const auto &b = buses[FEC];
-  return b.z_offset + b.geometry->z(VMM, channel);
-}
-
 uint32_t DigitalGeometry::x_from_wire(uint16_t w) const {
   auto b = buses.begin();
   while (w >= (b->wire_offset + b->geometry->max_wire()))

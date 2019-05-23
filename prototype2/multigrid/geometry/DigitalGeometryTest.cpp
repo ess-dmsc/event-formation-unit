@@ -55,8 +55,8 @@ TEST_F(DigitalGeometryTest, OneBus) {
     EXPECT_FALSE(geo.isWire(1, 0, i));
     EXPECT_FALSE(geo.isGrid(0, 0, i));
     EXPECT_FALSE(geo.isGrid(1, 0, i));
-    EXPECT_EQ(geo.x(0, 0, i), bus->x(0, i));
-    EXPECT_EQ(geo.z(0, 0, i), bus->z(0, i));
+    EXPECT_EQ(geo.x_from_wire(geo.wire(0, 0, i)), bus->x_from_wire(bus->wire(0, i)));
+    EXPECT_EQ(geo.z_from_wire(geo.wire(0, 0, i)), bus->z_from_wire(bus->wire(0, i)));
     EXPECT_EQ(geo.wire(0, 0, i), bus->wire(0, i));
   }
 
@@ -65,7 +65,7 @@ TEST_F(DigitalGeometryTest, OneBus) {
     EXPECT_FALSE(geo.isWire(1, 0, i));
     EXPECT_TRUE(geo.isGrid(0, 0, i));
     EXPECT_FALSE(geo.isGrid(1, 0, i));
-    EXPECT_EQ(geo.y(0, 0, i), bus->y(0, i));
+    EXPECT_EQ(geo.y_from_grid(geo.grid(0, 0, i)), bus->y_from_grid(bus->grid(0, i)));
     EXPECT_EQ(geo.grid(0, 0, i), bus->grid(0, i));
   }
 
@@ -96,18 +96,18 @@ TEST_F(DigitalGeometryTest, TwoBuses) {
     EXPECT_FALSE(geo.isGrid(1, 0, i));
     EXPECT_FALSE(geo.isGrid(2, 0, i));
 
-    EXPECT_EQ(geo.x(0, 0, i), bus->x(0, i));
-    EXPECT_EQ(geo.z(0, 0, i), bus->z(0, i));
+    EXPECT_EQ(geo.x_from_wire(geo.wire(0, 0, i)), bus->x_from_wire(bus->wire(0, i)));
+    EXPECT_EQ(geo.z_from_wire(geo.wire(0, 0, i)), bus->z_from_wire(bus->wire(0, i)));
     EXPECT_EQ(geo.wire(0, 0, i), bus->wire(0, i));
     EXPECT_EQ(geo.wire(1, 0, i), bus->wire(0, i) + bus->max_wire());
 
-    EXPECT_EQ(geo.x(1, 0, i), bus->x(0, i) + bus->max_x());
-    EXPECT_EQ(geo.z(1, 0, i), bus->z(0, i));
+    EXPECT_EQ(geo.x_from_wire(geo.wire(1, 0, i)), bus->x_from_wire(bus->wire(0, i)) + bus->max_x());
+    EXPECT_EQ(geo.z_from_wire(geo.wire(1, 0, i)), bus->z_from_wire(bus->wire(0, i)));
     EXPECT_EQ(geo.wire(1, 0, i), bus->wire(0, i) + bus->max_wire());
-    EXPECT_EQ(geo.x_from_wire(geo.wire(0, 0, i)), geo.x(0, 0, i));
-    EXPECT_EQ(geo.x_from_wire(geo.wire(1, 0, i)), geo.x(1, 0, i));
-    EXPECT_EQ(geo.z_from_wire(geo.wire(0, 0, i)), geo.z(0, 0, i));
-    EXPECT_EQ(geo.z_from_wire(geo.wire(1, 0, i)), geo.z(1, 0, i));
+    EXPECT_EQ(geo.x_from_wire(geo.wire(0, 0, i)), geo.x_from_wire(geo.wire(0, 0, i)));
+    EXPECT_EQ(geo.x_from_wire(geo.wire(1, 0, i)), geo.x_from_wire(geo.wire(1, 0, i)));
+    EXPECT_EQ(geo.z_from_wire(geo.wire(0, 0, i)), geo.z_from_wire(geo.wire(0, 0, i)));
+    EXPECT_EQ(geo.z_from_wire(geo.wire(1, 0, i)), geo.z_from_wire(geo.wire(1, 0, i)));
   }
 
   for (int i = 80; i <= 119; i++) {
@@ -120,10 +120,10 @@ TEST_F(DigitalGeometryTest, TwoBuses) {
 
     EXPECT_EQ(geo.grid(0, 0, i), bus->grid(0, i));
     EXPECT_EQ(geo.grid(1, 0, i), bus->grid(0, i) + bus->max_grid());
-    EXPECT_EQ(geo.y(0, 0, i), bus->y(0, i));
-    EXPECT_EQ(geo.y(1, 0, i), bus->y(0, i));
-    EXPECT_EQ(geo.y_from_grid(geo.grid(0, 0, i)), geo.y(0, 0, i));
-    EXPECT_EQ(geo.y_from_grid(geo.grid(1, 0, i)), geo.y(1, 0, i));
+    EXPECT_EQ(geo.y_from_grid(geo.grid(0, 0, i)), bus->y_from_grid(bus->grid(0, i)));
+    EXPECT_EQ(geo.y_from_grid(geo.grid(1, 0, i)), bus->y_from_grid(bus->grid(0, i)));
+    EXPECT_EQ(geo.y_from_grid(geo.grid(0, 0, i)), geo.y_from_grid(geo.grid(0, 0, i)));
+    EXPECT_EQ(geo.y_from_grid(geo.grid(1, 0, i)), geo.y_from_grid(geo.grid(1, 0, i)));
   }
 
   EXPECT_FALSE(geo.isWire(0, 0, 128));

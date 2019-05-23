@@ -62,18 +62,6 @@ void ModuleGeometry::override_grid_filter(uint16_t n, Filter mgf) {
   grid_filters_[n] = mgf;
 }
 
-uint32_t ModuleGeometry::x(uint8_t VMM, uint16_t channel) const {
-  return x_from_wire(this->wire(VMM, channel));
-}
-
-uint32_t ModuleGeometry::y(uint8_t VMM, uint16_t channel) const {
-  return y_from_grid(this->grid(VMM, channel));
-}
-
-uint32_t ModuleGeometry::z(uint8_t VMM, uint16_t channel) const {
-  return z_from_wire(this->wire(VMM, channel));
-}
-
 std::string ModuleGeometry::debug(std::string prefix) const {
   std::stringstream ss;
 

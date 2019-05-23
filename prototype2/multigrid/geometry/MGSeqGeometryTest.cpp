@@ -102,12 +102,12 @@ TEST_F(MGSeqGeometryTest, GetX) {
   EXPECT_EQ(geo.x_from_wire(60), 3);
   EXPECT_EQ(geo.x_from_wire(79), 3);
 
-  EXPECT_EQ(geo.x(0, 0), 0);
-  EXPECT_EQ(geo.x(0, 19), 0);
-  EXPECT_EQ(geo.x(0, 20), 1);
-  EXPECT_EQ(geo.x(0, 39), 1);
-  EXPECT_EQ(geo.x(0, 60), 3);
-  EXPECT_EQ(geo.x(0, 79), 3);
+  EXPECT_EQ(geo.x_from_wire(geo.wire(0, 0)), 0);
+  EXPECT_EQ(geo.x_from_wire(geo.wire(0, 19)), 0);
+  EXPECT_EQ(geo.x_from_wire(geo.wire(0, 20)), 1);
+  EXPECT_EQ(geo.x_from_wire(geo.wire(0, 39)), 1);
+  EXPECT_EQ(geo.x_from_wire(geo.wire(0, 60)), 3);
+  EXPECT_EQ(geo.x_from_wire(geo.wire(0, 79)), 3);
 }
 
 TEST_F(MGSeqGeometryTest, FlippedX) {
@@ -124,12 +124,12 @@ TEST_F(MGSeqGeometryTest, FlippedX) {
   EXPECT_EQ(geo.x_from_wire(60), 0);
   EXPECT_EQ(geo.x_from_wire(79), 0);
 
-  EXPECT_EQ(geo.x(0, 0), 3);
-  EXPECT_EQ(geo.x(0, 19), 3);
-  EXPECT_EQ(geo.x(0, 20), 2);
-  EXPECT_EQ(geo.x(0, 39), 2);
-  EXPECT_EQ(geo.x(0, 60), 0);
-  EXPECT_EQ(geo.x(0, 79), 0);
+  EXPECT_EQ(geo.x_from_wire(geo.wire(0, 0)), 3);
+  EXPECT_EQ(geo.x_from_wire(geo.wire(0, 19)), 3);
+  EXPECT_EQ(geo.x_from_wire(geo.wire(0, 20)), 2);
+  EXPECT_EQ(geo.x_from_wire(geo.wire(0, 39)), 2);
+  EXPECT_EQ(geo.x_from_wire(geo.wire(0, 60)), 0);
+  EXPECT_EQ(geo.x_from_wire(geo.wire(0, 79)), 0);
 }
 
 TEST_F(MGSeqGeometryTest, GetY) {
@@ -144,10 +144,10 @@ TEST_F(MGSeqGeometryTest, GetY) {
   EXPECT_EQ(geo.y_from_grid(38), 38);
   EXPECT_EQ(geo.y_from_grid(39), 39);
 
-  EXPECT_EQ(geo.y(0, 80), 0);
-  EXPECT_EQ(geo.y(0, 81), 1);
-  EXPECT_EQ(geo.y(0, 118), 38);
-  EXPECT_EQ(geo.y(0, 119), 39);
+  EXPECT_EQ(geo.y_from_grid(geo.grid(0, 80)), 0);
+  EXPECT_EQ(geo.y_from_grid(geo.grid(0, 81)), 1);
+  EXPECT_EQ(geo.y_from_grid(geo.grid(0, 118)), 38);
+  EXPECT_EQ(geo.y_from_grid(geo.grid(0, 119)), 39);
 }
 
 TEST_F(MGSeqGeometryTest, GetZ) {
@@ -162,11 +162,11 @@ TEST_F(MGSeqGeometryTest, GetZ) {
   EXPECT_EQ(geo.z_from_wire(20), 0);
   EXPECT_EQ(geo.z_from_wire(39), 9);
 
-  EXPECT_EQ(geo.z(0, 0), 0);
-  EXPECT_EQ(geo.z(0, 2), 2);
-  EXPECT_EQ(geo.z(0, 19), 9);
-  EXPECT_EQ(geo.z(0, 20), 0);
-  EXPECT_EQ(geo.z(0, 39), 9);
+  EXPECT_EQ(geo.z_from_wire(geo.wire(0, 0)), 0);
+  EXPECT_EQ(geo.z_from_wire(geo.wire(0, 2)), 2);
+  EXPECT_EQ(geo.z_from_wire(geo.wire(0, 19)), 9);
+  EXPECT_EQ(geo.z_from_wire(geo.wire(0, 20)), 0);
+  EXPECT_EQ(geo.z_from_wire(geo.wire(0, 39)), 9);
 }
 
 TEST_F(MGSeqGeometryTest, FlippedZ) {
@@ -181,11 +181,11 @@ TEST_F(MGSeqGeometryTest, FlippedZ) {
   EXPECT_EQ(geo.z_from_wire(20), 19);
   EXPECT_EQ(geo.z_from_wire(39), 0);
 
-  EXPECT_EQ(geo.z(0, 0), 19);
-  EXPECT_EQ(geo.z(0, 2), 17);
-  EXPECT_EQ(geo.z(0, 19), 0);
-  EXPECT_EQ(geo.z(0, 20), 19);
-  EXPECT_EQ(geo.z(0, 39), 0);
+  EXPECT_EQ(geo.z_from_wire(geo.wire(0, 0)), 19);
+  EXPECT_EQ(geo.z_from_wire(geo.wire(0, 2)), 17);
+  EXPECT_EQ(geo.z_from_wire(geo.wire(0, 19)), 0);
+  EXPECT_EQ(geo.z_from_wire(geo.wire(0, 20)), 19);
+  EXPECT_EQ(geo.z_from_wire(geo.wire(0, 39)), 0);
 }
 
 TEST_F(MGSeqGeometryTest, PrintsSelf) {

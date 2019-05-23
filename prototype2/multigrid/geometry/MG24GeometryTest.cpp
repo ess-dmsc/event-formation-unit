@@ -39,10 +39,10 @@ TEST_F(MG24DetectorTest, XZCoordinatesVariantA) {
               << " to " << (xoffset * 16 + 15) << "\n";
     for (int zoffset = 0; zoffset < 16; zoffset++) {
       int channel = xoffset * 16 + zoffset;
-      EXPECT_EQ(xoffset, mgdet.x(0, channel))
+      EXPECT_EQ(xoffset, mgdet.x_from_wire(mgdet.wire(0, channel)))
               << " bad eval xof=" << xoffset << " zof="
               << zoffset << " chan=" << channel;
-      EXPECT_EQ(zoffset, mgdet.z(0, channel))
+      EXPECT_EQ(zoffset, mgdet.z_from_wire(mgdet.wire(0, channel)))
               << " bad eval xof=" << xoffset << " zof="
               << zoffset << " chan=" << channel;
     }
@@ -53,8 +53,8 @@ TEST_F(MG24DetectorTest, XZCoordinatesVariantA) {
     for (int zoffset = 0; zoffset < 4; zoffset++) {
       int channel = 64 + xoffset * 4 + zoffset;
       //MESSAGE() << "channel: " << channel << "\n";
-      EXPECT_EQ(xoffset, mgdet.x(0, channel));
-      EXPECT_EQ(16 + zoffset, mgdet.z(0, channel));
+      EXPECT_EQ(xoffset, mgdet.x_from_wire(mgdet.wire(0, channel)));
+      EXPECT_EQ(16 + zoffset, mgdet.z_from_wire(mgdet.wire(0, channel)));
     }
   }
 }
@@ -64,7 +64,7 @@ TEST_F(MG24DetectorTest, YCoordinatesVariantA) {
   mgdet.max_channel(127);
 
   for (int channel = 80; channel < 127; channel++) {
-    EXPECT_EQ(channel - 80 , mgdet.y(0, channel));
+    EXPECT_EQ(channel - 80 , mgdet.y_from_grid(mgdet.grid(0, channel)));
   }
 }
 

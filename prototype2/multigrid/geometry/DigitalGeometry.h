@@ -51,15 +51,6 @@ public:
 
   uint16_t max_grid() const;
 
-  /** @brief return the x coordinate of the detector */
-  uint32_t x(uint8_t FEC, uint8_t VMM, uint16_t channel) const;
-
-  /** @brief return the y coordinate of the detector */
-  uint32_t y(uint8_t FEC, uint8_t VMM, uint16_t channel) const;
-
-  /** @brief return the z coordinate of the detector */
-  uint32_t z(uint8_t FEC, uint8_t VMM, uint16_t channel) const;
-
   uint32_t x_from_wire(uint16_t w) const ;
 
   /** @brief return the y coordinate of the detector */
