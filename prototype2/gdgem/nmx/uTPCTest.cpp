@@ -19,7 +19,7 @@ protected:
 
 TEST_F(uTPCTest, AnalyzeInvalid) {
   auto result = utpcAnalyzer(false, 2, 2).analyze(cluster);
-  EXPECT_TRUE(std::isnan(result.utpc_center));
+  EXPECT_TRUE(std::isnan(result.center));
 }
 
 TEST_F(uTPCTest, AnalyzeAverage) {
@@ -28,7 +28,7 @@ TEST_F(uTPCTest, AnalyzeAverage) {
   hit.weight = 2;
   cluster.insert(hit);
   auto result = utpcAnalyzer(false, 1, 1).analyze(cluster);
-  EXPECT_EQ(result.utpc_center, 0);
+  EXPECT_EQ(result.center, 0);
   hit.coordinate = 1;
   hit.weight = 4;
   cluster.insert(hit);
@@ -37,10 +37,10 @@ TEST_F(uTPCTest, AnalyzeAverage) {
   cluster.insert(hit);
   result = utpcAnalyzer(false, 1, 1).analyze(cluster);
   EXPECT_EQ(cluster.hit_count(), 3);
-  EXPECT_EQ(result.utpc_center, 1);
+  EXPECT_EQ(result.center, 1);
   result = utpcAnalyzer(true, 1, 1).analyze(cluster);
-  EXPECT_EQ(result.utpc_center, 1.2);
-  EXPECT_EQ(result.utpc_center_rounded(), 1);
+  EXPECT_EQ(result.center, 1.2);
+  EXPECT_EQ(result.center_rounded(), 1);
 }
 
 TEST_F(uTPCTest, AnalyzeUncert) {
@@ -54,29 +54,29 @@ TEST_F(uTPCTest, AnalyzeUncert) {
   cluster.insert(hit);
 
   auto result = utpcAnalyzer(true, 1, 1).analyze(cluster);
-  EXPECT_EQ(result.utpc_center, 2);
+  EXPECT_EQ(result.center, 2);
   EXPECT_EQ(result.uncert_lower, 1);
   EXPECT_EQ(result.uncert_upper, 1);
 
   result = utpcAnalyzer(true, 2, 2).analyze(cluster);
-  EXPECT_EQ(result.utpc_center, 2);
+  EXPECT_EQ(result.center, 2);
   EXPECT_EQ(result.uncert_lower, 1);
   EXPECT_EQ(result.uncert_upper, 2);
 
   hit.coordinate = 31;
   cluster.insert(hit);
   result = utpcAnalyzer(true, 2, 2).analyze(cluster);
-  EXPECT_EQ(result.utpc_center, 16.5);
+  EXPECT_EQ(result.center, 16.5);
   EXPECT_EQ(result.uncert_lower, 30);
   EXPECT_EQ(result.uncert_upper, 31);
 
   result = utpcAnalyzer(true, 5, 5).analyze(cluster);
-  EXPECT_EQ(result.utpc_center, 16.5);
+  EXPECT_EQ(result.center, 16.5);
   EXPECT_EQ(result.uncert_lower, 30);
   EXPECT_EQ(result.uncert_upper, 32);
 
-  EXPECT_EQ(result.utpc_center, 16.5);
-  EXPECT_EQ(result.utpc_center_rounded(), 17);
+  EXPECT_EQ(result.center, 16.5);
+  EXPECT_EQ(result.center_rounded(), 17);
 }
 
 TEST_F(uTPCTest, AnalyzeBadY) {

@@ -9,33 +9,12 @@
 
 #pragma once
 
-#include <common/clustering/Event.h>
-#include <limits>
+#include <gdgem/nmx/AbstractAnalyzer.h>
 
 namespace Gem
 {
 
-struct utpcResultsPlane {
-  double utpc_center{std::numeric_limits<double>::quiet_NaN()}; // entry strip
-  int16_t uncert_lower{-1}; /// strip span of hits in latest timebin
-  int16_t uncert_upper{-1}; /// strip span of hits in latest few timebins
-
-  /// \brief returns calculated and rounded entry strip number for pixid
-  uint32_t utpc_center_rounded() const;
-
-  /// \brief prints values for debug purposes
-  std::string debug() const;
-};
-
-struct utpcResults {
-  utpcResultsPlane x, y;
-  uint64_t time {0};
-  bool good {false};
-
-  std::string debug() const;
-};
-
-class utpcAnalyzer {
+class utpcAnalyzer : public AbstractAnalyzer {
  public:
   /// \param weighted determine entry strip using weighted average
   /// \param max_timebins maximum number of timebins to consider for upper
@@ -45,17 +24,19 @@ class utpcAnalyzer {
   utpcAnalyzer(bool weighted, uint16_t max_timebins, uint16_t max_timedif);
 
   /// \brief analyzes particle track in one plane
-  utpcResultsPlane analyze(Cluster&) const;
+  CoordResult analyze(Cluster&) const;
 
   /// \brief analyzes particle track in both planes
-  utpcResults analyze(Event&) const;
+  MultiDimResult analyze(Event&) const override;
+
+  std::string debug() const override;
 
   /// \brief returns timestamp for start of event (earlier of 2 planes)
   static uint64_t utpc_time(const Event& e);
 
   /// \brief indicates if both dimensions meet lower uncertainty criterion
-  static bool meets_lower_criterion(const utpcResultsPlane& x,
-                                    const utpcResultsPlane& y, int16_t max_lu);
+  static bool meets_lower_criterion(const CoordResult& x,
+                                    const CoordResult& y, int16_t max_lu);
 
  private:
   bool weighted_{true};

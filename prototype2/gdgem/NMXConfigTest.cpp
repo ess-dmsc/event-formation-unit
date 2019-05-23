@@ -26,11 +26,11 @@ TEST_F(NMXConfigTest, EventFilter) {
   Event e; // use empty Event
   filter.enforce_lower_uncertainty_limit = false;
   filter.enforce_minimum_hits = false;
-  EXPECT_TRUE(filter.valid(e, utpcResults()));
+  EXPECT_TRUE(filter.valid(e, MultiDimResult()));
 
   filter.enforce_lower_uncertainty_limit = false;
   filter.enforce_minimum_hits = true;
-  EXPECT_FALSE(filter.valid(e, utpcResults()));
+  EXPECT_FALSE(filter.valid(e, MultiDimResult()));
 
   /// \todo test this behaviour
   // filter.enforce_lower_uncertainty_limit = true;

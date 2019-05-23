@@ -232,11 +232,6 @@ void GdGemBase::apply_configuration() {
 
   hists_.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
-  utpc_analyzer_ = std::make_shared<Gem::utpcAnalyzer>(
-      nmx_opts.analyze_weighted,
-      nmx_opts.analyze_max_timebins,
-      nmx_opts.analyze_max_timedif);
-
   sample_next_track_ = nmx_opts.send_tracks;
 }
 
@@ -302,7 +297,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     mystats.clusters_xy++;
 
-    utpc_ = utpc_analyzer_->analyze(event);
+    utpc_ = nmx_opts.analyzer_->analyze(event);
 
     /// Sample only tracks that are good in both planes
     if (sample_next_track_
@@ -310,8 +305,8 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     {
 //      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.debug(true));
       sample_next_track_ = !track_serializer.add_track(event,
-                                                       utpc_.x.utpc_center,
-                                                       utpc_.y.utpc_center);
+                                                       utpc_.x.center,
+                                                       utpc_.y.center);
     }
 
     if (!utpc_.good)
@@ -327,7 +322,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     }
 
     pixelid_ = nmx_opts.geometry.pixel2D(
-        utpc_.x.utpc_center_rounded(), utpc_.y.utpc_center_rounded());
+        utpc_.x.center_rounded(), utpc_.y.center_rounded());
 
     if (!nmx_opts.geometry.valid_id(pixelid_))
     {

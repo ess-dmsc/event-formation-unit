@@ -12,7 +12,7 @@
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
 #include <common/clustering/Event.h>
-#include <gdgem/nmx/uTPC.h>
+#include <gdgem/nmx/AbstractAnalyzer.h>
 #include <gdgem/srs/CalibrationFile.h>
 #include <memory>
 #include <string>
@@ -34,21 +34,7 @@ struct EventFilter {
   uint32_t minimum_hits{6};
   size_t minimum_hits_dropped{0};
 
-  /// \todo bug? uncertainty takes precedence if both enforce options are true
-  bool valid(Event &event, const utpcResults& utpc) {
-    if (enforce_lower_uncertainty_limit &&
-        !utpcAnalyzer::meets_lower_criterion(utpc.x, utpc.y, lower_uncertainty_limit)) {
-      lower_uncertainty_dropped++;
-      return false;
-    }
-    if (enforce_minimum_hits &&
-            ((event.c1.hit_count() < minimum_hits) ||
-                (event.c2.hit_count() < minimum_hits))) {
-      minimum_hits_dropped++;
-      return false;
-    }
-    return true;
-  }
+  bool valid(Event &event, const MultiDimResult& utpc);
 };
 
 struct NMXConfig {
@@ -76,9 +62,7 @@ struct NMXConfig {
   double matcher_max_delta_time{200};
 
   // analysis
-  bool analyze_weighted{true};
-  int16_t analyze_max_timebins{3};
-  int16_t analyze_max_timedif{7};
+  std::shared_ptr<Gem::AbstractAnalyzer> analyzer_;
 
   // filtering
   EventFilter filter;

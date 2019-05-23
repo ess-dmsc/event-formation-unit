@@ -10,16 +10,36 @@ set(NMXReadoutTest_INC
   )
 create_test_executable(NMXReadoutTest SKIP_MEMGRIND)
 
+set(AbstractAnalyzerTest_SRC
+  AbstractAnalyzerTest.cpp
+  AbstractAnalyzer.cpp
+  )
+set(AbstractAnalyzerTest_INC
+  AbstractAnalyzer.h
+  )
+create_test_executable(AbstractAnalyzerTest)
+
 set(NMXuTPCTest_SRC
   uTPCTest.cpp
   uTPC.cpp
+  AbstractAnalyzer.cpp
   )
 set(NMXEventTest_INC
   uTPC.h
+  AbstractAnalyzer.h
   )
 create_test_executable(NMXuTPCTest)
 
-
+set(MGAnalysisTest_SRC
+  MGAnalysisTest.cpp
+  MGAnalysis.cpp
+  AbstractAnalyzer.cpp
+  )
+set(MGAnalysisTest_INC
+  MGAnalysis.h
+  AbstractAnalyzer.h
+  )
+create_test_executable(MGAnalysisTest)
 
 set(TrackSerializerTest_SRC
   uTPC.cpp

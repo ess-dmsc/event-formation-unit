@@ -1,6 +1,8 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <gdgem/NMXConfig.h>
+#include <gdgem/nmx/uTPC.h>
+#include <gdgem/nmx/MGAnalysis.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
 
@@ -9,6 +11,22 @@
 //#define TRC_LEVEL TRC_L_DEB
 
 namespace Gem {
+
+/// \todo bug? uncertainty takes precedence if both enforce options are true
+bool EventFilter::valid(Event &event, const MultiDimResult& utpc) {
+  if (enforce_lower_uncertainty_limit &&
+      !utpcAnalyzer::meets_lower_criterion(utpc.x, utpc.y, lower_uncertainty_limit)) {
+    lower_uncertainty_dropped++;
+    return false;
+  }
+  if (enforce_minimum_hits &&
+      ((event.c1.hit_count() < minimum_hits) ||
+          (event.c2.hit_count() < minimum_hits))) {
+    minimum_hits_dropped++;
+    return false;
+  }
+  return true;
+}
 
 NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 
@@ -95,9 +113,35 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 
     matcher_max_delta_time = root["matcher_max_delta_time"].get<double>();
 
-    analyze_weighted = root["analyze_weighted"].get<bool>();
-    analyze_max_timebins = root["analyze_max_timebins"].get<unsigned int>();
-    analyze_max_timedif = root["analyze_max_timedif"].get<unsigned int>();
+    if (root.count("analyzer") && (root["analyzer"] == "MG"))
+    {
+      auto MGA = std::make_shared<Gem::EventAnalyzer>();
+      MGA->weighted(root["analyze_weighted"].get<bool>());
+      geometry.nx(MGA->max_x());
+      geometry.ny(MGA->max_y());
+      geometry.nz(MGA->max_z());
+      geometry.np(1);
+
+      analyzer_ = MGA;
+    }
+    else
+    {
+      bool analyze_weighted = root["analyze_weighted"].get<bool>();
+      int16_t analyze_max_timebins = root["analyze_max_timebins"].get<unsigned int>();
+      int16_t analyze_max_timedif = root["analyze_max_timedif"].get<unsigned int>();
+
+      analyzer_ = std::make_shared<Gem::utpcAnalyzer>(
+          analyze_weighted,
+          analyze_max_timebins,
+          analyze_max_timedif);
+
+      // \todo deduce geometry from SRS mappings eventually
+      //       this is better for now, while prototyping
+      geometry.nx(root["geometry_x"].get<unsigned int>());
+      geometry.ny(root["geometry_y"].get<unsigned int>());
+      geometry.nz(1);
+      geometry.np(1);
+    }
 
     auto f = root["filters"];
     filter.enforce_lower_uncertainty_limit =
@@ -109,13 +153,6 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
     track_sample_minhits = root["track_sample_minhits"].get<unsigned int>();
     cluster_adc_downshift = root["cluster_adc_downshift"].get<unsigned int>();
     send_tracks = root["send_tracks"].get<bool>();
-
-    // \todo deduce geometry from SRS mappings eventually
-    //       this is better for now, while prototyping
-    geometry.nx(root["geometry_x"].get<unsigned int>());
-    geometry.ny(root["geometry_y"].get<unsigned int>());
-    geometry.nz(1);
-    geometry.np(1);
   }
 }
 
@@ -170,10 +207,10 @@ std::string NMXConfig::debug() const {
 
     ret += "\n";
 
-    ret += "Event analysis\n";
-    ret += fmt::format("  weighted = {}\n", (analyze_weighted ? "YES" : "no"));
-    ret += fmt::format("  max_timebins = {}\n", analyze_max_timebins);
-    ret += fmt::format("  max_timedif = {}\n", analyze_max_timedif);
+    if (!analyzer_)
+      ret += "Invalid analyzer\n";
+    else
+      ret += analyzer_->debug();
 
     ret += "  Filters:\n";
     ret += fmt::format("    enforce_lower_uncertainty_limit = {}\n",
@@ -191,6 +228,8 @@ std::string NMXConfig::debug() const {
 
     ret += fmt::format("  geometry_x = {}\n", geometry.nx());
     ret += fmt::format("  geometry_y = {}\n", geometry.ny());
+    ret += fmt::format("  geometry_z = {}\n", geometry.nz());
+    ret += fmt::format("  geometry_p = {}\n", geometry.np());
   }
 
   return ret;
