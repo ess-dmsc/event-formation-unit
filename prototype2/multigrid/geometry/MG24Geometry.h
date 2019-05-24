@@ -20,53 +20,53 @@
 
 namespace Multigrid {
 
-// \todo this requires more work, very likely need to reimplement wire()
-//        and must test that reverse mapping from global wire works
-
-class MG24Geometry : public MGSeqGeometry {
-
+class MG24GeometryA : public MGSeqGeometry {
 public:
-
-  /** @brief returns wire */
-  uint32_t x_from_wire(uint16_t w) const override {
-    uint32_t ret;
-    if (w < 64) {
-      ret = w / max_z();
+  uint16_t wire(uint8_t VMM, uint16_t channel) const override {
+    if (channel < 16) {
+      return MGSeqGeometry::wire(VMM, channel);
+    } else if (channel < 32){
+      return MGSeqGeometry::wire(VMM, channel + 4);
+    } else if (channel < 48){
+      return MGSeqGeometry::wire(VMM, channel + 8);
+    } else if (channel < 64){
+      return MGSeqGeometry::wire(VMM, channel + 12);
+    } else if (channel < 68){
+      return MGSeqGeometry::wire(VMM, channel - 48);
+    } else if (channel < 72){
+      return MGSeqGeometry::wire(VMM, channel - 32);
+    } else if (channel < 76){
+      return MGSeqGeometry::wire(VMM, channel - 16);
     } else {
-      ret = (w - 64) * 4 / max_z();
+      return MGSeqGeometry::wire(VMM, channel);
     }
-    return flipped_x() ? (max_x() - 1u - ret) : ret;
-  }
-};
-
-class MG24GeometryA : public MG24Geometry {
-public:
-
-  /** \brief return the z coordinate of the detector */
-  uint32_t z_from_wire(uint16_t w) const override {
-    uint32_t ret;
-    if (w < 64) {
-      ret = w % max_z();
-    } else {
-      ret = ((w - 64) % 4) + max_z();
-    }
-    return flipped_z() ? (max_z() - 1u - ret) : ret;
   }
 };
 
 // Equivalent of what was previously module_select
-class MG24GeometryB : public MG24Geometry {
+class MG24GeometryB : public MGSeqGeometry {
 public:
-
   /** \brief return the z coordinate of the detector */
-  uint32_t z_from_wire(uint16_t w) const override {
-    uint32_t ret;
-    if (w < 64) {
-      ret = max_z() - 1u - (w % max_z());
+
+  // \todo this is wrong, need to draw a diagram for this module like for SRS tests
+  uint16_t wire(uint8_t VMM, uint16_t channel) const override {
+    if (channel < 16) {
+      return MGSeqGeometry::wire(VMM, channel);
+    } else if (channel < 32){
+      return MGSeqGeometry::wire(VMM, channel + 4);
+    } else if (channel < 48){
+      return MGSeqGeometry::wire(VMM, channel + 8);
+    } else if (channel < 64){
+      return MGSeqGeometry::wire(VMM, channel + 12);
+    } else if (channel < 68){
+      return MGSeqGeometry::wire(VMM, channel - 48);
+    } else if (channel < 72){
+      return MGSeqGeometry::wire(VMM, channel - 32);
+    } else if (channel < 76){
+      return MGSeqGeometry::wire(VMM, channel - 16);
     } else {
-      ret = 3 - ((w - 64) % 4) + max_z();
+      return MGSeqGeometry::wire(VMM, channel);
     }
-    return flipped_z() ? (max_z() - 1u - ret) : ret;
   }
 };
 

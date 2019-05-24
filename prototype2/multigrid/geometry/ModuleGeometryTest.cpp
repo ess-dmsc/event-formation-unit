@@ -36,21 +36,6 @@ public:
     (void) channel;
     return 0;
   }
-
-  uint32_t x_from_wire(uint16_t w) const override {
-    (void) w;
-    return 0;
-  }
-
-  uint32_t y_from_grid(uint16_t g) const override {
-    (void) g;
-    return 0;
-  }
-
-  uint32_t z_from_wire(uint16_t w) const override {
-    (void) w;
-    return 0;
-  }
 };
 
 class ModuleGeometryTest : public TestBase {

@@ -9,7 +9,7 @@ class MG24DetectorTest : public TestBase {};
 /** Test cases below */
 
 TEST_F(MG24DetectorTest, IsWireIsGrid) {
-  Multigrid::MG24Geometry mgdet;
+  Multigrid::MG24GeometryA mgdet;
   mgdet.max_channel(128);
 
   for (int i = 0; i <= 79; i++) {
@@ -27,12 +27,9 @@ TEST_F(MG24DetectorTest, IsWireIsGrid) {
 }
 
 // \todo these tests are more confusing than the implementation being tested
-
 TEST_F(MG24DetectorTest, XZCoordinatesVariantA) {
   Multigrid::MG24GeometryA mgdet;
   mgdet.max_channel(128);
-  mgdet.max_z(16);
-  mgdet.swap_wires(false);
 
   for (int xoffset = 0; xoffset < 4; xoffset++) {
     MESSAGE() << "Lower wires: " << xoffset * 16
@@ -67,6 +64,29 @@ TEST_F(MG24DetectorTest, YCoordinatesVariantA) {
     EXPECT_EQ(channel - 80 , mgdet.y_from_grid(mgdet.grid(0, channel)));
   }
 }
+
+// This is disabled by default
+
+//TEST_F(MG24DetectorTest, ManualInspectionVariantA) {
+//  Multigrid::MG24GeometryA mgdet;
+//  mgdet.max_channel(128);
+//
+//  for (uint16_t channel = 0; channel <= 127; channel++) {
+//    if (mgdet.isGrid(0, channel))
+//      MESSAGE() << "chan=" << channel << "  ->  grid:"
+//                << mgdet.grid(0, channel)
+//                << " y:" << mgdet.y_from_grid(mgdet.grid(0, channel))
+//                << "\n";
+//    else if (mgdet.isWire(0, channel))
+//      MESSAGE() << "chan=" << channel << "  ->  wire:"
+//                << mgdet.wire(0, channel)
+//                << " x:" << mgdet.x_from_wire(mgdet.wire(0, channel))
+//                << " z:" << mgdet.z_from_wire(mgdet.wire(0, channel))
+//                << "\n";
+//    else
+//      MESSAGE() << "chan=" << channel << "  ->  ERROR\n";
+//  }
+//}
 
 // \todo tests for VariantB
 
