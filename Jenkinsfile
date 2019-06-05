@@ -206,8 +206,9 @@ def get_macos_pipeline()
             // Delete workspace when build is done
                 cleanWs()
 
-                // temporary until all our repos have moved to using official flatbuffers conan package
+                // temporary until all our repos have moved to using official flatbuffers and CLI11 conan packages
                 sh "conan remove -f FlatBuffers/*"
+                sh "conan remove -f cli11/*"
 
                 abs_dir = pwd()
 
