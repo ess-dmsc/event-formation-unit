@@ -51,6 +51,8 @@ builders = pipeline_builder.createBuilders { container ->
     if (container.key != clangformat_os) {
         pipeline_builder.stage("${container.key}: get dependencies") {
             container.sh """
+                mkdir ${project}
+                cd ${project}
                 mkdir build
                 cd build
                 conan remote add --insert 0 ess-dmsc-local ${local_conan_server}
