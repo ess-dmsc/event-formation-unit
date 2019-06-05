@@ -61,19 +61,18 @@ builders = pipeline_builder.createBuilders { container ->
         
         
         pipeline_builder.stage("${container.key}: configure") {
-        def xtra_flags = ""
-        if (container.key == coverage_on) {
-            xtra_flags = "DCOV=ON"
-        } else if (container.key == archive_what) {
-            xtra_flags = "-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON"
-        }
-        container.sh """
-            cd ${project}
-            cd build
-            . ./activate_run.sh
-            cmake --version
-            cmake -DREFDATA=/home/jenkins/refdata/EFU_reference -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
-        """
+            def xtra_flags = ""
+            if (container.key == coverage_on) {
+                xtra_flags = "-DCOV=ON"
+            } else if (container.key == archive_what) {
+                xtra_flags = "-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON"
+            }
+            container.sh """
+                cd ${project}/build
+                . ./activate_run.sh
+                cmake --version
+                cmake -DREFDATA=/home/jenkins/refdata/EFU_reference -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
+            """
         }  // stage
         
         pipeline_builder.stage("${container.key}: build") {
@@ -88,7 +87,7 @@ builders = pipeline_builder.createBuilders { container ->
     }
     
     if (container.key == clangformat_os) {
-    pipeline_builder.stage("${container.key}: cppcheck") {
+        pipeline_builder.stage("${container.key}: cppcheck") {
         try {
                 def test_output = "cppcheck.txt"
                 container.sh """
