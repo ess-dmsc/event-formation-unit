@@ -60,7 +60,7 @@ builders = pipeline_builder.createBuilders { container ->
         
         pipeline_builder.stage("${container.key}: configure") {
         def xtra_flags = ""
-        if container.key == coverage_on {
+        if (container.key == coverage_on) {
             xtra_flags = "DCOV=ON"
         } else if (container.key == archive_what) {
             xtra_flags = "-DCMAKE_BUILD_TYPE=Release -DCMAKE_SKIP_BUILD_RPATH=ON"
