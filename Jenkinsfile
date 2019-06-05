@@ -51,7 +51,6 @@ builders = pipeline_builder.createBuilders { container ->
     if (container.key != clangformat_os) {
         pipeline_builder.stage("${container.key}: get dependencies") {
             container.sh """
-                mkdir ${project}
                 cd ${project}
                 mkdir build
                 cd build
