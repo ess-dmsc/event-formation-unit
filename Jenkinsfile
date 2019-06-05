@@ -163,8 +163,8 @@ builders = pipeline_builder.createBuilders { container ->
         }  // stage
     }
     
-    if (container.key == archive_what)
-        def docker_archive(image_key) {
+    if (container.key == archive_what) {
+        pipeline_builder.stage("${container.key}: archive") {
             container.sh """
                                 mkdir -p archive/event-formation-unit
                                 cp -r ${project}/build/bin archive/event-formation-unit
