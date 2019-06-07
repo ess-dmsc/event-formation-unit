@@ -155,7 +155,7 @@ builders = pipeline_builder.createBuilders { container ->
         }  // stage
     } else if (container.key != clangformat_os) {
         pipeline_builder.stage("${container.key}: tests") {
-            sh """
+            container.sh """
                 cd ${project}/build
                 . ./activate_run.sh
                 make runtest
