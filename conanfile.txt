@@ -1,6 +1,6 @@
 [requires]
-asio/1.12.0@bincrafters/stable
-cli11/1.6.0@bincrafters/stable
+asio/1.13.0@bincrafters/stable
+CLI11/1.8.0@cliutils/stable 
 fmt/5.2.0@bincrafters/stable
 google-benchmark/1.4.1-dm2@ess-dmsc/testing
 graylog-logger/1.1.5-dm1@ess-dmsc/stable
@@ -11,7 +11,7 @@ libpcap/1.8.1@bincrafters/stable
 librdkafka/0.11.5-dm2@ess-dmsc/stable
 logical-geometry/09097f2@ess-dmsc/stable
 readerwriterqueue/07e22ec@ess-dmsc/stable
-streaming-data-types/c45d2ec@ess-dmsc/stable
+streaming-data-types/fb4d847@ess-dmsc/stable
 trompeloeil/v31@ess-dmsc/stable
 
 [generators]
