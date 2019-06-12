@@ -14,6 +14,8 @@ set(pipeline_common_source
   srs/ParserVMM3.cpp
   srs/BuilderVMM3.cpp
   srs/CalibrationFile.cpp  # Also works for VMM2
+  ../multigrid/geometry/ModuleGeometry.cpp
+  ../multigrid/geometry/Filter.cpp
   generators/BuilderReadouts.cpp
   generators/BuilderHits.cpp
   )
@@ -32,6 +34,8 @@ set(pipeline_common_inc
   srs/ParserVMM3.h
   srs/BuilderVMM3.h
   srs/CalibrationFile.h # also works for VMM2
+  ../multigrid/geometry/ModuleGeometry.h
+  ../multigrid/geometry/Filter.h
   generators/BuilderReadouts.h
   generators/BuilderHits.h
   )
@@ -54,6 +58,8 @@ set(NMXConfigTest_INC
   srs/SRSTime.h
   srs/SRSMappings.h
   srs/CalibrationFile.cpp
+  ../multigrid/geometry/ModuleGeometry.cpp
+  ../multigrid/geometry/Filter.cpp
   )
 set(NMXConfigTest_SRC
   NMXConfigTest.cpp
@@ -61,6 +67,8 @@ set(NMXConfigTest_SRC
   srs/SRSTime.cpp
   srs/SRSMappings.cpp
   srs/CalibrationFile.cpp
+  ../multigrid/geometry/ModuleGeometry.h
+  ../multigrid/geometry/Filter.h
   nmx/AbstractAnalyzer.cpp
   nmx/uTPC.cpp
   nmx/MGAnalysis.cpp

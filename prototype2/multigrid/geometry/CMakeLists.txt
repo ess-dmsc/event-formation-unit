@@ -1,5 +1,6 @@
 set(FilterTest_SRC
   FilterTest.cpp
+  Filter.cpp
   )
 set(FilterTest_INC
   Filter.h
@@ -9,6 +10,7 @@ create_test_executable(FilterTest)
 set(ModuleGeometryTest_SRC
   ModuleGeometryTest.cpp
   ModuleGeometry.cpp
+  Filter.cpp
   )
 set(ModuleGeometryTest_INC
   ModuleGeometry.h
@@ -20,6 +22,7 @@ set(MGSeqGeometryTest_SRC
   MGSeqGeometryTest.cpp
   MGSeqGeometry.cpp
   ModuleGeometry.cpp
+  Filter.cpp
   )
 set(MGSeqGeometryTest_INC
   ModuleGeometry.h
@@ -32,6 +35,7 @@ set(MG24GeometryTest_SRC
   MG24GeometryTest.cpp
   MGSeqGeometry.cpp
   ModuleGeometry.cpp
+  Filter.cpp
   )
 set(MG24GeometryTest_INC
   ModuleGeometry.h
@@ -46,6 +50,7 @@ set(DigitalGeometryTest_SRC
   DigitalGeometry.cpp
   MGSeqGeometry.cpp
   ModuleGeometry.cpp
+  Filter.cpp
   )
 set(DigitalGeometryTest_INC
   ModuleGeometry.h

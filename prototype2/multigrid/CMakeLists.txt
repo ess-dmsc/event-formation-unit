@@ -5,6 +5,7 @@
 # Two-thread implementation of Multi Grid demonstrator detector
 # for Mesytec Readout
 set(multigrid_common_src
+  geometry/Filter.cpp
   geometry/DigitalGeometry.cpp
   geometry/MGSeqGeometry.cpp
   geometry/ModuleGeometry.cpp
@@ -18,6 +19,7 @@ set(multigrid_common_src
   Config.cpp
   )
 set(multigrid_common_inc
+  geometry/Filter.h
   geometry/DigitalGeometry.h
   geometry/MGSeqGeometry.h
   geometry/ModuleGeometry.h

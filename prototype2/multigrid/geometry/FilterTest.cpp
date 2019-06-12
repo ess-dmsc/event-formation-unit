@@ -8,6 +8,7 @@ using namespace Multigrid;
 class FilterTest : public TestBase {
 protected:
   Filter f;
+  FilterSet fs;
   virtual void SetUp() {
   }
   virtual void TearDown() {
@@ -73,6 +74,58 @@ TEST_F(FilterTest, FromJson) {
   EXPECT_EQ(f.rescale_factor, 0.5);
 }
 
+TEST_F(FilterTest, OneWireFilter) {
+  f.minimum = 3;
+  f.maximum = 7;
+  f.rescale_factor = 0.5;
+  fs.override_filter(5, f);
+
+  EXPECT_EQ(fs.rescale(4, 2), 2);
+  EXPECT_TRUE(fs.valid(4, 10));
+
+  EXPECT_EQ(fs.rescale(5, 2), 1);
+  EXPECT_FALSE(fs.valid(5, 10));
+
+  EXPECT_EQ(fs.rescale(6, 2), 2);
+  EXPECT_TRUE(fs.valid(6, 10));
+}
+
+TEST_F(FilterTest, BlanketWireFilter) {
+  f.minimum = 3;
+  f.maximum = 7;
+  f.rescale_factor = 0.5;
+  fs.set_filters(100, f);
+
+  EXPECT_EQ(fs.rescale(1, 2), 1);
+  EXPECT_FALSE(fs.valid(1, 10));
+
+  EXPECT_EQ(fs.rescale(5, 2), 1);
+  EXPECT_FALSE(fs.valid(5, 10));
+
+  EXPECT_EQ(fs.rescale(70, 2), 1);
+  EXPECT_FALSE(fs.valid(70, 10));
+}
+
+TEST_F(FilterTest, SetFromJson) {
+  nlohmann::json j;
+
+  auto j1 = j["blanket"];
+  j1["count"] = 10;
+  j1["min"] = 3;
+  j1["max"] = 7;
+  j1["rescale"] = 0.5;
+
+  nlohmann::json j2;
+  j2["idx"] = 5;
+  j2["min"] = 3;
+  j2["max"] = 7;
+  j2["rescale"] = 0.5;
+  j["exceptions"].push_back(j2);
+
+  fs = j;
+
+  // \todo test correct parsing
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

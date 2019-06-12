@@ -34,10 +34,14 @@ set(MGAnalysisTest_SRC
   MGAnalysisTest.cpp
   MGAnalysis.cpp
   AbstractAnalyzer.cpp
+  ../../multigrid/geometry/ModuleGeometry.cpp
+  ../../multigrid/geometry/Filter.cpp
   )
 set(MGAnalysisTest_INC
   MGAnalysis.h
   AbstractAnalyzer.h
+  ../../multigrid/geometry/ModuleGeometry.h
+  ../../multigrid/geometry/Filter.h
   )
 create_test_executable(MGAnalysisTest)
 

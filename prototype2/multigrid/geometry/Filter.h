@@ -10,8 +10,6 @@
 #pragma once
 #include <cinttypes>
 #include <string>
-#include <sstream>
-
 #include <limits>
 
 #include <nlohmann/json.hpp>
@@ -23,39 +21,35 @@ struct Filter {
   uint16_t maximum{std::numeric_limits<uint16_t>::max()};
   double rescale_factor{1.0};
 
-  inline bool trivial() const {
-    return ((rescale_factor == 1.0)
-        && (minimum == 0)
-        && (maximum == std::numeric_limits<uint16_t>::max()));
-  }
+  bool trivial() const;
 
-  inline uint16_t rescale(uint16_t adc) const {
-    return static_cast<uint16_t>(std::round(adc * rescale_factor));
-  }
+  uint16_t rescale(uint16_t adc) const;
 
-  inline bool valid(uint16_t adc) const {
-    return ((minimum <= adc) && (adc <= maximum));
-  }
+  bool valid(uint16_t adc) const;
 
-  std::string debug() const {
-    std::stringstream ss;
-    if (minimum != 0)
-      ss << "min=" << minimum << "  ";
-    if (maximum != std::numeric_limits<uint16_t>::max())
-      ss << "max=" << maximum << "  ";
-    if (rescale_factor != 1.0)
-      ss << "rescale=" << rescale_factor << "  ";
-    return ss.str();
-  }
+  std::string debug() const;
 };
 
-inline void from_json(const nlohmann::json &j, Filter &f) {
-  if (j.count("min"))
-    f.minimum = j["min"];
-  if (j.count("max"))
-    f.maximum = j["max"];
-  if (j.count("rescale"))
-    f.rescale_factor = j["rescale"];
-}
+void from_json(const nlohmann::json &j, Filter &f);
+
+class FilterSet {
+protected:
+  std::vector<Filter> filters_;
+
+public:
+  uint16_t rescale(uint16_t coord, uint16_t adc) const;
+
+  bool valid(uint16_t coord, uint16_t adc) const;
+
+  void set_filters(size_t channels, Filter mgf);
+
+  void override_filter(uint16_t coord, Filter mgf);
+
+  std::string debug(std::string prefix) const;
+};
+
+void from_json(const nlohmann::json &j, FilterSet &g);
 
 }
+
+

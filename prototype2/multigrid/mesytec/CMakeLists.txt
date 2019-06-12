@@ -40,6 +40,7 @@ if(EXISTS ${TEST_DATA_PATH})
     Sis3153Parser.cpp
     Vmmr16Parser.cpp
     Readout.cpp
+    ../geometry/Filter.cpp
     ../geometry/DigitalGeometry.cpp
     ../geometry/MGSeqGeometry.cpp
     ../geometry/ModuleGeometry.cpp
@@ -77,6 +78,7 @@ if(EXISTS ${TEST_DATA_PATH2})
     Vmmr16Parser.cpp
     Sis3153Parser.cpp
     Readout.cpp
+    ../geometry/Filter.cpp
     ../geometry/DigitalGeometry.cpp
     ../geometry/MGSeqGeometry.cpp
     ../geometry/ModuleGeometry.cpp

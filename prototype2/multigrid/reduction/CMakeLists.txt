@@ -2,6 +2,7 @@ set(MGEventAnalysisTest_SRC
   ../geometry/DigitalGeometry.cpp
   ../geometry/MGSeqGeometry.cpp
   ../geometry/ModuleGeometry.cpp
+  ../geometry/Filter.cpp
   EventAnalysisTest.cpp
   EventAnalysis.cpp
   )
@@ -17,6 +18,7 @@ create_test_executable(MGEventAnalysisTest)
 set(TEST_DATA_PATH "${REFDATA}/multigrid/2018_09_03")
 if(EXISTS ${TEST_DATA_PATH})
   set(MGReductionTest_SRC
+    ../geometry/Filter.cpp
     ../geometry/ModuleGeometry.cpp
     ../geometry/DigitalGeometry.cpp
     ../geometry/MGSeqGeometry.cpp

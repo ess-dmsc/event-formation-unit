@@ -24,80 +24,14 @@ bool MGAnalyzer::weighted() const {
   return weighted_;
 }
 
-
-void MGAnalyzer::max_wire(uint16_t w) {
-  max_wire_ = w;
-}
-
-void MGAnalyzer::max_z(uint16_t w) {
-  max_z_ = w;
-}
-
-void MGAnalyzer::flipped_x(bool f) {
-  flipped_x_ = f;
-}
-
-void MGAnalyzer::flipped_z(bool f) {
-  flipped_z_ = f;
-}
-
-
-bool MGAnalyzer::flipped_x() const {
-  return flipped_x_;
-}
-
-bool MGAnalyzer::flipped_z() const {
-  return flipped_z_;
-}
-
-uint32_t MGAnalyzer::max_x() const {
-  return max_wire() / max_z();
-}
-
-uint32_t MGAnalyzer::max_y() const {
-  return max_grid();
-}
-
-uint16_t MGAnalyzer::max_z() const {
-  return max_z_;
-}
-
-uint16_t MGAnalyzer::max_wire() const {
-  return max_wire_;
-}
-
-uint16_t MGAnalyzer::max_grid() const {
-  return max_grid_;
-}
-
-uint32_t MGAnalyzer::x_from_wire(uint16_t w) const {
-  uint32_t ret = w / max_z();
-  return flipped_x() ? (max_x() - 1u - ret) : ret;
-}
-
-uint32_t MGAnalyzer::y_from_grid(uint16_t g) const {
-  return g;
-}
-
-uint32_t MGAnalyzer::z_from_wire(uint16_t w) const {
-  uint32_t ret = w % max_z();
-  return flipped_z() ? (max_z() - 1u - ret) : ret;
-}
-
 std::string MGAnalyzer::debug() const {
   std::string ret;
 
   ret += "MG analysis\n";
 
-  ret += fmt::format("  size [{},{},{}]\n",
-                     max_x(), max_y(), max_z());
-
   ret += fmt::format("  weighted = {}\n", (weighted_ ? "YES" : "no"));
 
-  if (flipped_x_)
-    ret += "  (flipped in X)\n";
-  if (flipped_z_)
-    ret += "  (flipped in Z)\n";
+  ret += geometry_.debug("  ");
 
   return ret;
 }
@@ -125,10 +59,10 @@ MultiDimResult MGAnalyzer::analyze(Event& event) const {
         break;
       stats_used_hits++;
       if (weighted_) {
-        ymass += y_from_grid(h.coordinate) * h.weight;
+        ymass += geometry_.y_from_grid(h.coordinate) * h.weight;
         ysum += h.weight;
       } else {
-        ymass += y_from_grid(h.coordinate);
+        ymass += geometry_.y_from_grid(h.coordinate);
         ysum++;
       }
     }
@@ -153,13 +87,13 @@ MultiDimResult MGAnalyzer::analyze(Event& event) const {
         break;
       stats_used_hits++;
       if (weighted_) {
-        xmass += x_from_wire(h.coordinate) * h.weight;
-        zmass += z_from_wire(h.coordinate) * h.weight;
+        xmass += geometry_.x_from_wire(h.coordinate) * h.weight;
+        zmass += geometry_.z_from_wire(h.coordinate) * h.weight;
         xsum += h.weight;
         zsum += h.weight;
       } else {
-        xmass += x_from_wire(h.coordinate);
-        zmass += z_from_wire(h.coordinate);
+        xmass += geometry_.x_from_wire(h.coordinate);
+        zmass += geometry_.z_from_wire(h.coordinate);
         xsum++;
         zsum++;
       }
