@@ -22,7 +22,7 @@ RUN pip install --upgrade pip==9.0.3 && pip install setuptools && \
 RUN conan profile new default
 
 # Replace the default profile and remotes with the ones from our Ubuntu build node
-ADD "https://raw.githubusercontent.com/ess-dmsc/docker-ubuntu18.04-build-node/master/files/remotes.json" "/root/.conan/remotes.json"
+RUN conan config install http://github.com/ess-dmsc/conan-configuration.git
 ADD "https://raw.githubusercontent.com/ess-dmsc/docker-ubuntu18.04-build-node/master/files/default_profile" "/root/.conan/profiles/default"
 
 # Add local Conan server if one is defined in the environment
