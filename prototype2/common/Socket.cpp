@@ -99,7 +99,7 @@ void Socket::setLocalSocket(const char *ipaddr, int port) {
   int ret = inet_aton(ipaddr, &localSockAddr.sin_addr);
   if (ret == 0) {
     std::string msg;
-    msg::format("setLocalSocket() - invalid ip address {}, ipaddr);
+    msg = fmt::format("setLocalSocket() - invalid ip address {}", ipaddr);
     LOG(IPC, Sev::Error, msg);
     throw std::runtime_error(msg);
   }
@@ -108,7 +108,7 @@ void Socket::setLocalSocket(const char *ipaddr, int port) {
   ret = bind(SocketFileDescriptor, (struct sockaddr *)&localSockAddr, sizeof(localSockAddr));
   if (ret != 0) {
     std::string msg;
-    msg::format("setLocalSocket(): bind failed, is port {} already in use?", port);
+    msg = fmt::format("setLocalSocket(): bind failed, is port {} already in use?", port);
     LOG(IPC, Sev::Error, msg);
     throw std::runtime_error(msg);
   }
