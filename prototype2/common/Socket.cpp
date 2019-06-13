@@ -17,6 +17,25 @@
 #define SEND_FLAGS 0
 #endif
 
+
+bool Socket::isValidIp(std::string ipAddress) {
+  struct sockaddr_in sa;
+  int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
+  return result != 0;
+}
+
+std::string Socket::getHostByName(std::string &name) {
+  struct hostent * hp = gethostbyname(name.c_str());
+  if (hp == NULL) {
+    std::string ret;
+    ret = fmt::format("Unable to resolve hostname {}", name);
+    throw std::runtime_error(ret);
+  } else { // Just return the first entry
+    auto res = inet_ntoa(*(struct in_addr*)(hp->h_addr_list[0]));
+    return res;
+  }
+}
+
 Socket::Socket(Socket::type stype) {
   auto type = (stype == Socket::type::UDP) ? SOCK_DGRAM : SOCK_STREAM;
   auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
@@ -79,15 +98,19 @@ void Socket::setLocalSocket(const char *ipaddr, int port) {
 
   int ret = inet_aton(ipaddr, &localSockAddr.sin_addr);
   if (ret == 0) {
-    LOG(IPC, Sev::Error, "invalid ip address {}", ipaddr);
-    throw std::runtime_error("setLocalSocket() - invalid ip");
+    std::string msg;
+    msg::format("setLocalSocket() - invalid ip address {}, ipaddr);
+    LOG(IPC, Sev::Error, msg);
+    throw std::runtime_error(msg);
   }
 
   // bind socket to port
   ret = bind(SocketFileDescriptor, (struct sockaddr *)&localSockAddr, sizeof(localSockAddr));
   if (ret != 0) {
-    LOG(IPC, Sev::Error, "bind failed - is port  {} already in use?", port);
-    throw std::runtime_error("setLocalSocket() - bind() failed");
+    std::string msg;
+    msg::format("setLocalSocket(): bind failed, is port {} already in use?", port);
+    LOG(IPC, Sev::Error, msg);
+    throw std::runtime_error(msg);
   }
 }
 

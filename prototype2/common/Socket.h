@@ -13,6 +13,7 @@
 #include <cassert>
 #include <cinttypes>
 #include <sys/socket.h>
+#include <netinet/ip.h>
 
 /// BSD Socket abstractions for TCP and UDP transmitters and receivers
 class Socket {
@@ -27,6 +28,16 @@ public:
     Endpoint(const char *ip_address, uint16_t port_number)
         : ipaddr(ip_address), port(port_number) {}
   };
+
+  /// \brief Is this a dotted quad ip address?
+  /// Valid addresses must be of the form 'a.b.d.c' where
+  /// a-d can range from 0 to 255
+  static bool isValidIp(std::string ipAddress);
+
+  /// \brief Return dotted quad by resolving hostname
+  /// Essentially a wrapper for gethostbyname() returning
+  /// the first entry in the ip address table
+  static std::string getHostByName(std::string &name);
 
   /// Create a socker abstraction of type UDP or TCP
   Socket(Socket::type type);
