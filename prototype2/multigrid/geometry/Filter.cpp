@@ -71,35 +71,33 @@ void FilterSet::override_filter(uint16_t n, Filter mgf) {
 }
 
 std::string FilterSet::debug(std::string prefix) const {
-  std::stringstream ss;
-
-  std::stringstream wfilters;
   bool validwf{false};
+  std::stringstream wfilters;
   for (size_t i = 0; i < filters_.size(); i++) {
     const auto &f = filters_[i];
     if (!f.trivial()) {
-      wfilters << prefix << "  [" << i << "]  " << f.debug() << "\n";
+      wfilters << prefix << "[" << i << "]  " << f.debug() << "\n";
       validwf = true;
     }
   }
+
   if (validwf) {
-    ss << prefix << "Filters:\n" << wfilters.str();
+    return wfilters.str();
   }
 
-  return ss.str();
+  return {};
 }
 
 void from_json(const nlohmann::json &j, FilterSet &g) {
-
-  if (j.count("filters")) {
-    auto wf = j["filters"];
-    if (wf.count("blanket"))
-      g.set_filters(wf["blanket"]["count"], wf["blanket"]);
-    if (wf.count("exceptions")) {
-      auto wfe = wf["exceptions"];
-      for (auto k = 0u; k < wfe.size(); k++) {
-        g.override_filter(wfe[k]["idx"], wfe[k]);
-      }
+  if (j.count("blanket"))
+  {
+    auto b = j["blanket"];
+    g.set_filters(b["count"], b);
+  }
+  if (j.count("exceptions")) {
+    auto wfe = j["exceptions"];
+    for (auto k = 0u; k < wfe.size(); k++) {
+      g.override_filter(wfe[k]["idx"], wfe[k]);
     }
   }
 }

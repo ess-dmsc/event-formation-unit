@@ -93,83 +93,19 @@ std::string ModuleLogicalGeometry::debug(std::string prefix) const {
   return ret;
 }
 
-uint16_t ModuleGeometry::rescale_wire(uint16_t wire, uint16_t adc) const {
-  if (wire >= wire_filters_.size())
-    return adc;
-  return wire_filters_[wire].rescale(adc);
-}
-
-uint16_t ModuleGeometry::rescale_grid(uint16_t grid, uint16_t adc) const {
-  if (grid >= grid_filters_.size())
-    return adc;
-  return grid_filters_[grid].rescale(adc);
-}
-
-bool ModuleGeometry::valid_wire(uint16_t wire, uint16_t adc) const {
-  if (wire >= wire_filters_.size())
-    return true;
-  return wire_filters_[wire].valid(adc);
-}
-
-bool ModuleGeometry::valid_grid(uint16_t grid, uint16_t adc) const {
-  if (grid >= grid_filters_.size())
-    return true;
-  return grid_filters_[grid].valid(adc);
-}
-
-void ModuleGeometry::set_wire_filters(Filter mgf) {
-  wire_filters_.resize(this->max_wire() + 1u);
-  for (auto &f : wire_filters_)
-    f = mgf;
-}
-
-void ModuleGeometry::set_grid_filters(Filter mgf) {
-  grid_filters_.resize(this->max_grid() + 1u);
-  for (auto &f : grid_filters_)
-    f = mgf;
-}
-
-void ModuleGeometry::override_wire_filter(uint16_t n, Filter mgf) {
-  if (wire_filters_.size() <= n)
-    wire_filters_.resize(n + 1);
-  wire_filters_[n] = mgf;
-}
-
-void ModuleGeometry::override_grid_filter(uint16_t n, Filter mgf) {
-  if (grid_filters_.size() <= n)
-    grid_filters_.resize(n + 1);
-  grid_filters_[n] = mgf;
-}
-
 std::string ModuleGeometry::debug(std::string prefix) const {
   std::stringstream ss;
 
   ss << ModuleLogicalGeometry::debug(prefix);
 
-  std::stringstream wfilters;
-  bool validwf{false};
-  for (size_t i = 0; i < wire_filters_.size(); i++) {
-    const auto &f = wire_filters_[i];
-    if (!f.trivial()) {
-      wfilters << prefix << "  [" << i << "]  " << f.debug() << "\n";
-      validwf = true;
-    }
-  }
-  if (validwf) {
-    ss << prefix << "Wire filters:\n" << wfilters.str();
+  auto wf = wire_filters.debug(prefix + "  ");
+  if (!wf.empty()) {
+    ss << prefix << "Wire filters:\n" << wf;
   }
 
-  std::stringstream gfilters;
-  bool validgf{false};
-  for (size_t i = 0; i < grid_filters_.size(); i++) {
-    const auto &f = grid_filters_[i];
-    if (!f.trivial()) {
-      gfilters << prefix << "  [" << i << "]  " << f.debug() << "\n";
-      validgf = true;
-    }
-  }
-  if (validgf) {
-    ss << prefix << "Grid filters:\n" << gfilters.str();
+  auto gf = grid_filters.debug(prefix + "  ");
+  if (!gf.empty()) {
+    ss << prefix << "Grid filters:\n" << gf;
   }
 
   return ss.str();
@@ -183,27 +119,11 @@ void from_json(const nlohmann::json &j, ModuleGeometry &g) {
     g.flipped_z(j["flipped_z"]);
 
   if (j.count("wire_filters")) {
-    auto wf = j["wire_filters"];
-    if (wf.count("blanket"))
-      g.set_wire_filters(wf["blanket"]);
-    if (wf.count("exceptions")) {
-      auto wfe = wf["exceptions"];
-      for (auto k = 0u; k < wfe.size(); k++) {
-        g.override_wire_filter(wfe[k]["idx"], wfe[k]);
-      }
-    }
+    g.wire_filters = j["wire_filters"];
   }
 
   if (j.count("grid_filters")) {
-    auto gf = j["grid_filters"];
-    if (gf.count("blanket"))
-      g.set_grid_filters(gf["blanket"]);
-    if (gf.count("exceptions")) {
-      auto gfe = gf["exceptions"];
-      for (auto k = 0u; k < gfe.size(); k++) {
-        g.override_grid_filter(gfe[k]["idx"], gfe[k]);
-      }
-    }
+    g.grid_filters = j["grid_filters"];
   }
 
 }

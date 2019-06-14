@@ -50,28 +50,11 @@ private:
 };
 
 class ModuleGeometry : public ModuleLogicalGeometry {
-protected:
-  std::vector<Filter> wire_filters_;
-  std::vector<Filter> grid_filters_;
-
 public:
+  FilterSet wire_filters;
+  FilterSet grid_filters;
+
   virtual ~ModuleGeometry() = default;
-
-  uint16_t rescale_wire(uint16_t wire, uint16_t adc) const;
-
-  uint16_t rescale_grid(uint16_t grid, uint16_t adc) const;
-
-  bool valid_wire(uint16_t wire, uint16_t adc) const;
-
-  bool valid_grid(uint16_t grid, uint16_t adc) const;
-
-  void set_wire_filters(Filter mgf);
-
-  void set_grid_filters(Filter mgf);
-
-  void override_wire_filter(uint16_t n, Filter mgf);
-
-  void override_grid_filter(uint16_t n, Filter mgf);
 
   virtual uint16_t max_channel() const = 0;
 

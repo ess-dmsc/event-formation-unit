@@ -94,6 +94,7 @@ std::string MGSeqGeometry::debug(std::string prefix) const {
 }
 
 void from_json(const nlohmann::json &j, MGSeqGeometry &g) {
+
   g.max_wire(j["max_wire"]);
   g.max_channel(j["max_channel"]);
   g.max_z(j["max_z"]);
@@ -102,35 +103,21 @@ void from_json(const nlohmann::json &j, MGSeqGeometry &g) {
     g.swap_wires(j["swap_wires"]);
   if (j.count("swap_grids"))
     g.swap_grids(j["swap_grids"]);
+
+  // same as for ModuleGeometry, could refactor?
+
   if (j.count("flipped_x"))
     g.flipped_x(j["flipped_x"]);
   if (j.count("flipped_z"))
     g.flipped_z(j["flipped_z"]);
 
   if (j.count("wire_filters")) {
-    auto wf = j["wire_filters"];
-    if (wf.count("blanket"))
-      g.set_wire_filters(wf["blanket"]);
-    if (wf.count("exceptions")) {
-      auto wfe = wf["exceptions"];
-      for (unsigned int j = 0; j < wfe.size(); j++) {
-        g.override_wire_filter(wfe[j]["idx"], wfe[j]);
-      }
-    }
+    g.wire_filters = j["wire_filters"];
   }
 
   if (j.count("grid_filters")) {
-    auto gf = j["grid_filters"];
-    if (gf.count("blanket"))
-      g.set_grid_filters(gf["blanket"]);
-    if (gf.count("exceptions")) {
-      auto gfe = gf["exceptions"];
-      for (unsigned int j = 0; j < gfe.size(); j++) {
-        g.override_grid_filter(gfe[j]["idx"], gfe[j]);
-      }
-    }
+    g.grid_filters = j["grid_filters"];
   }
-
 }
 
 }

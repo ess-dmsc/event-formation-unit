@@ -4,7 +4,7 @@
     {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true},
     {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true,
       "grid_filters":{
-        "blanket":{"min":0, "max":65535, "rescale":1.0},
+        "blanket":{"count": 120, "min":0, "max":65535, "rescale":1.0},
         "exceptions":[
           {"idx":26, "rescale":1.5},
           {"idx":28, "rescale":1.5},

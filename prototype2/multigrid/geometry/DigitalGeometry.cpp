@@ -36,12 +36,11 @@ void DigitalGeometry::add_bus(std::shared_ptr<ModuleGeometry> geom) {
 uint16_t DigitalGeometry::rescale(uint8_t FEC, uint8_t VMM, uint16_t channel, uint16_t adc) const {
   if (FEC >= buses.size())
     return adc;
+  const auto &b = buses[FEC].geometry;
   if (isWire(FEC, VMM, channel)) {
-    const auto &b = buses[FEC].geometry;
-    return b->rescale_wire(b->wire(VMM, channel), adc);
+    return b->wire_filters.rescale(b->wire(VMM, channel), adc);
   } else if (isGrid(FEC, VMM, channel)) {
-    const auto &b = buses[FEC].geometry;
-    return b->rescale_grid(b->grid(VMM, channel), adc);
+    return b->grid_filters.rescale(b->grid(VMM, channel), adc);
   }
   return adc;
 }
@@ -49,12 +48,11 @@ uint16_t DigitalGeometry::rescale(uint8_t FEC, uint8_t VMM, uint16_t channel, ui
 bool DigitalGeometry::is_valid(uint8_t FEC, uint8_t VMM, uint16_t channel, uint16_t adc) const {
   if (FEC >= buses.size())
     return false;
+  const auto &b = buses[FEC].geometry;
   if (isWire(FEC, VMM, channel)) {
-    const auto &b = buses[FEC].geometry;
-    return b->valid_wire(b->wire(VMM, channel), adc);
+    return b->wire_filters.valid(b->wire(VMM, channel), adc);
   } else if (isGrid(FEC, VMM, channel)) {
-    const auto &b = buses[FEC].geometry;
-    return b->valid_grid(b->grid(VMM, channel), adc);
+    return b->grid_filters.valid(b->grid(VMM, channel), adc);
   }
   return false;
 }

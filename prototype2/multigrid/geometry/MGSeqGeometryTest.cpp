@@ -226,10 +226,12 @@ TEST_F(MGSeqGeometryTest, FromJson) {
   j["flipped_x"] = true;
   j["flipped_z"] = true;
 
-  auto j1 = j["wire_filters"]["blanket"];
-  j1["min"] = 3;
-  j1["max"] = 7;
-  j1["rescale"] = 0.5;
+  nlohmann::json b;
+  b["min"] = 3;
+  b["max"] = 7;
+  b["rescale"] = 0.5;
+  b["count"] = 10;
+  j["wire_filters"]["blanket"] = b;
 
   nlohmann::json j2;
   j2["idx"] = 5;

@@ -74,7 +74,7 @@ TEST_F(FilterTest, FromJson) {
   EXPECT_EQ(f.rescale_factor, 0.5);
 }
 
-TEST_F(FilterTest, OneWireFilter) {
+TEST_F(FilterTest, OneFilter) {
   f.minimum = 3;
   f.maximum = 7;
   f.rescale_factor = 0.5;
@@ -90,7 +90,7 @@ TEST_F(FilterTest, OneWireFilter) {
   EXPECT_TRUE(fs.valid(6, 10));
 }
 
-TEST_F(FilterTest, BlanketWireFilter) {
+TEST_F(FilterTest, BlanketFilter) {
   f.minimum = 3;
   f.maximum = 7;
   f.rescale_factor = 0.5;
@@ -109,11 +109,12 @@ TEST_F(FilterTest, BlanketWireFilter) {
 TEST_F(FilterTest, SetFromJson) {
   nlohmann::json j;
 
-  auto j1 = j["blanket"];
+  nlohmann::json j1;
   j1["count"] = 10;
   j1["min"] = 3;
   j1["max"] = 7;
   j1["rescale"] = 0.5;
+  j["blanket"] = j1;
 
   nlohmann::json j2;
   j2["idx"] = 5;

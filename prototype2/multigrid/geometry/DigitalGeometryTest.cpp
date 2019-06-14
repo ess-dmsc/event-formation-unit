@@ -143,8 +143,8 @@ TEST_F(DigitalGeometryTest, Filters) {
   f.rescale_factor = 0.5;
 
   auto bus2 = std::make_shared<MGSeqGeometry>();
-  bus2->override_wire_filter(5, f);
-  bus2->override_grid_filter(10, f);
+  bus2->wire_filters.override_filter(5, f);
+  bus2->grid_filters.override_filter(10, f);
   geo.add_bus(bus2);
 
   EXPECT_EQ(geo.rescale(0, 0, 5, 10), 10);

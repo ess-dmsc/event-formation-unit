@@ -51,71 +51,23 @@ protected:
   }
 };
 
-TEST_F(ModuleGeometryTest, OneWireFilter) {
-  geo.override_wire_filter(5, f);
-
-  EXPECT_EQ(geo.rescale_wire(4, 2), 2);
-  EXPECT_TRUE(geo.valid_wire(4, 10));
-
-  EXPECT_EQ(geo.rescale_wire(5, 2), 1);
-  EXPECT_FALSE(geo.valid_wire(5, 10));
-
-  EXPECT_EQ(geo.rescale_wire(6, 2), 2);
-  EXPECT_TRUE(geo.valid_wire(6, 10));
-}
-
-TEST_F(ModuleGeometryTest, BlanketWireFilter) {
-  geo.set_wire_filters(f);
-
-  EXPECT_EQ(geo.rescale_wire(1, 2), 1);
-  EXPECT_FALSE(geo.valid_wire(1, 10));
-
-  EXPECT_EQ(geo.rescale_wire(5, 2), 1);
-  EXPECT_FALSE(geo.valid_wire(5, 10));
-
-  EXPECT_EQ(geo.rescale_wire(70, 2), 1);
-  EXPECT_FALSE(geo.valid_wire(70, 10));
-}
-
-TEST_F(ModuleGeometryTest, OneGridFilter) {
-  geo.override_grid_filter(5, f);
-
-  EXPECT_EQ(geo.rescale_grid(4, 2), 2);
-  EXPECT_TRUE(geo.valid_grid(4, 10));
-
-  EXPECT_EQ(geo.rescale_grid(5, 2), 1);
-  EXPECT_FALSE(geo.valid_grid(5, 10));
-
-  EXPECT_EQ(geo.rescale_grid(6, 2), 2);
-  EXPECT_TRUE(geo.valid_grid(6, 10));
-}
-
-TEST_F(ModuleGeometryTest, BlanketGridFilter) {
-  geo.set_grid_filters(f);
-
-  EXPECT_EQ(geo.rescale_grid(1, 2), 1);
-  EXPECT_FALSE(geo.valid_grid(1, 10));
-
-  EXPECT_EQ(geo.rescale_grid(5, 2), 1);
-  EXPECT_FALSE(geo.valid_grid(5, 10));
-
-  EXPECT_EQ(geo.rescale_grid(30, 2), 1);
-  EXPECT_FALSE(geo.valid_grid(30, 10));
-}
+// \todo proper tests
 
 TEST_F(ModuleGeometryTest, PrintsSelf) {
-  geo.set_wire_filters(f);
-  geo.set_grid_filters(f);
+  geo.wire_filters.set_filters(1, f);
+  geo.grid_filters.set_filters(1, f);
   EXPECT_FALSE(geo.debug({}).empty());
 }
 
 TEST_F(ModuleGeometryTest, FromJson) {
   nlohmann::json j;
 
-  auto j1 = j["wire_filters"]["blanket"];
-  j1["min"] = 3;
-  j1["max"] = 7;
-  j1["rescale"] = 0.5;
+  nlohmann::json b;
+  b["min"] = 3;
+  b["max"] = 7;
+  b["rescale"] = 0.5;
+  b["count"] = 10;
+  j["wire_filters"]["blanket"] = b;
 
   nlohmann::json j2;
   j2["idx"] = 5;
