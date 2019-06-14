@@ -32,6 +32,7 @@ std::string Socket::getHostByName(std::string &name) {
     throw std::runtime_error(ret);
   } else { // Just return the first entry
     auto res = inet_ntoa(*(struct in_addr*)(hp->h_addr_list[0]));
+    LOG(IPC, Sev::Info, "Hostname resolved to {}", res);
     return res;
   }
 }
@@ -89,14 +90,14 @@ int Socket::setNOSIGPIPE() {
 #endif
 }
 
-void Socket::setLocalSocket(const char *ipaddr, int port) {
+void Socket::setLocalSocket(const std::string ipaddr, int port) {
   // zero out the structures
   struct sockaddr_in localSockAddr;
   std::memset((char *)&localSockAddr, 0, sizeof(localSockAddr));
   localSockAddr.sin_family = AF_INET;
   localSockAddr.sin_port = htons(port);
 
-  int ret = inet_aton(ipaddr, &localSockAddr.sin_addr);
+  int ret = inet_aton(ipaddr.c_str(), &localSockAddr.sin_addr);
   if (ret == 0) {
     std::string msg;
     msg = fmt::format("setLocalSocket() - invalid ip address {}", ipaddr);
@@ -114,7 +115,7 @@ void Socket::setLocalSocket(const char *ipaddr, int port) {
   }
 }
 
-void Socket::setRemoteSocket(const char *ipaddr, int port) {
+void Socket::setRemoteSocket(const std::string ipaddr, int port) {
   RemoteIp = ipaddr;
   RemotePort = port;
   // zero out the structures
@@ -122,7 +123,7 @@ void Socket::setRemoteSocket(const char *ipaddr, int port) {
   remoteSockAddr.sin_family = AF_INET;
   remoteSockAddr.sin_port = htons(port);
 
-  int ret = inet_aton(ipaddr, &remoteSockAddr.sin_addr);
+  int ret = inet_aton(ipaddr.c_str(), &remoteSockAddr.sin_addr);
   if (ret == 0) {
     LOG(IPC, Sev::Error, "invalid ip address {}", ipaddr);
     throw std::runtime_error("setRemoteSocket() - invalid ip");
@@ -135,7 +136,7 @@ int Socket::connectToRemote() {
   std::memset((char *)&remoteSockAddr, 0, sizeof(remoteSockAddr));
   remoteSockAddr.sin_family = AF_INET;
   remoteSockAddr.sin_port = htons(RemotePort);
-  int ret = inet_aton(RemoteIp, &remoteSockAddr.sin_addr);
+  int ret = inet_aton(RemoteIp.c_str(), &remoteSockAddr.sin_addr);
   if (ret == 0) {
     LOG(IPC, Sev::Error, "invalid ip address {}", RemoteIp);
     throw std::runtime_error("connectToRemote() - invalid ip");
@@ -199,7 +200,7 @@ bool Socket::isValidSocket() {
 ///
 ///
 ///
-TCPTransmitter::TCPTransmitter(const char *ipaddr, int port) : Socket(Socket::type::TCP) {
+TCPTransmitter::TCPTransmitter(const std::string ipaddr, int port) : Socket(Socket::type::TCP) {
   setRemoteSocket(ipaddr, port);
   setNOSIGPIPE();
   connectToRemote();

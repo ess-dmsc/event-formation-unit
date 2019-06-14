@@ -23,9 +23,9 @@ public:
 
   class Endpoint {
   public:
-    const char *ipaddr;
+    const std::string ipaddr;
     uint16_t port;
-    Endpoint(const char *ip_address, uint16_t port_number)
+    Endpoint(const std::string ip_address, uint16_t port_number)
         : ipaddr(ip_address), port(port_number) {}
   };
 
@@ -58,10 +58,10 @@ public:
   int setNOSIGPIPE();
 
   /// Specify ip address of interface to receive data on and port number to listen on
-  void setLocalSocket(const char *ipaddr, int port);
+  void setLocalSocket(const std::string ipaddr, int port);
 
   /// Specify ip address and port number of remote end
-  void setRemoteSocket(const char *ipaddr, int port);
+  void setRemoteSocket(const std::string ipaddr, int port);
 
   /// Connect (TCP only) to remote endpoint
   int connectToRemote();
@@ -72,12 +72,12 @@ public:
   /// Send data in buffer with specified length
   int send(void *dataBuffer, int dataLength);
 
-  /// \brief To check is data can be transmitted or received
+  /// \brief To check if data can be transmitted or received
   bool isValidSocket();
 
 private:
   int SocketFileDescriptor{-1};
-  const char * RemoteIp;
+  std::string RemoteIp;
   int RemotePort;
   struct sockaddr_in remoteSockAddr;
 
@@ -108,7 +108,7 @@ public:
 class TCPTransmitter : public Socket {
 public:
   ///
-  TCPTransmitter(const char *ip, int port);
+  TCPTransmitter(const std::string ip, int port);
 
   ///
   int senddata(char *buffer, int len);
