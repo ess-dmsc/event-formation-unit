@@ -17,7 +17,7 @@
 
 class StatPublisher {
 public:
-  /// \brief Connect to a Carbon/Graphite server bu ip address and tcp port
+  /// \brief Connect to a Carbon/Graphite server by ip address/hostname and tcp port
   StatPublisher(std::string ip, int port);
 
   /// \brief Send detector metrics to Carbon/Graphite server given additional stats
