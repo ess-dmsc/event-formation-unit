@@ -25,7 +25,7 @@ bool Socket::isValidIp(std::string ipAddress) {
 }
 
 std::string Socket::getHostByName(std::string &name) {
-  struct hostent * hp = gethostbyname(name.c_str());
+  hostent * hp = gethostbyname(name.c_str());
   if (hp == nullptr) {
     std::string ret;
     ret = fmt::format("Unable to resolve hostname {}", name);
