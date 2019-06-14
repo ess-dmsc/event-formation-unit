@@ -19,21 +19,18 @@
 
 
 bool Socket::isValidIp(std::string ipAddress) {
-  struct sockaddr_in sa;
-  int result = inet_pton(AF_INET, ipAddress.c_str(), &(sa.sin_addr));
-  return result != 0;
+  struct sockaddr_in SockAddr;
+  return inet_pton(AF_INET, ipAddress.c_str(), &(SockAddr.sin_addr)) != 0;
 }
 
 std::string Socket::getHostByName(std::string &name) {
-  hostent * hp = gethostbyname(name.c_str());
-  if (hp == nullptr) {
-    std::string ret;
-    ret = fmt::format("Unable to resolve hostname {}", name);
-    throw std::runtime_error(ret);
+  hostent * HostEntry = gethostbyname(name.c_str());
+  if (HostEntry == nullptr) {
+    throw std::runtime_error(fmt::format("Unable to resolve hostname {}", name));
   } else { // Just return the first entry
-    auto res = inet_ntoa(*(struct in_addr*)(hp->h_addr_list[0]));
-    LOG(IPC, Sev::Info, "Hostname resolved to {}", res);
-    return res;
+    auto IpAddress = inet_ntoa(*reinterpret_cast<in_addr*>(HostEntry->h_addr_list[0]));
+    LOG(IPC, Sev::Info, "Hostname resolved to {}", IpAddress);
+    return IpAddress;
   }
 }
 
@@ -99,19 +96,17 @@ void Socket::setLocalSocket(const std::string ipaddr, int port) {
 
   int ret = inet_aton(ipaddr.c_str(), &localSockAddr.sin_addr);
   if (ret == 0) {
-    std::string msg;
-    msg = fmt::format("setLocalSocket() - invalid ip address {}", ipaddr);
-    LOG(IPC, Sev::Error, msg);
-    throw std::runtime_error(msg);
+    auto Msg = fmt::format("setLocalSocket() - invalid ip address {}", ipaddr);
+    LOG(IPC, Sev::Error, Msg);
+    throw std::runtime_error(Msg);
   }
 
   // bind socket to port
   ret = bind(SocketFileDescriptor, (struct sockaddr *)&localSockAddr, sizeof(localSockAddr));
   if (ret != 0) {
-    std::string msg;
-    msg = fmt::format("setLocalSocket(): bind failed, is port {} already in use?", port);
-    LOG(IPC, Sev::Error, msg);
-    throw std::runtime_error(msg);
+    auto Msg = fmt::format("setLocalSocket(): bind failed, is port {} already in use?", port);
+    LOG(IPC, Sev::Error, Msg);
+    throw std::runtime_error(Msg);
   }
 }
 
@@ -125,8 +120,9 @@ void Socket::setRemoteSocket(const std::string ipaddr, int port) {
 
   int ret = inet_aton(ipaddr.c_str(), &remoteSockAddr.sin_addr);
   if (ret == 0) {
-    LOG(IPC, Sev::Error, "invalid ip address {}", ipaddr);
-    throw std::runtime_error("setRemoteSocket() - invalid ip");
+    auto Msg = fmt::format("etRemoteSocket(): invalid ip address {}", ipaddr);
+    LOG(IPC, Sev::Error, Msg);
+    throw std::runtime_error(Msg);
   }
 }
 
