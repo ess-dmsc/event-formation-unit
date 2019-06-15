@@ -8,11 +8,7 @@
  */
 
 #pragma once
-#include <multigrid/geometry/ModuleGeometry.h>
-
-#include <cinttypes>
-#include <string>
-#include <vector>
+#include <multigrid/geometry/ModuleChannelMappings.h>
 
 namespace Multigrid {
 

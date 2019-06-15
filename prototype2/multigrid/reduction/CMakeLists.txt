@@ -1,4 +1,5 @@
 set(MGEventAnalysisTest_SRC
+  ../geometry/ModuleChannelMappings.cpp
   ../geometry/DigitalGeometry.cpp
   ../geometry/MGSeqGeometry.cpp
   ../geometry/ModuleGeometry.cpp
@@ -7,6 +8,7 @@ set(MGEventAnalysisTest_SRC
   EventAnalysis.cpp
   )
 set(MGEventAnalysisTest_INC
+  ../geometry/ModuleChannelMappings.h
   ../geometry/DigitalGeometry.h
   ../geometry/MGSeqGeometry.h
   ../geometry/ModuleGeometry.h
@@ -19,6 +21,7 @@ set(TEST_DATA_PATH "${REFDATA}/multigrid/2018_09_03")
 if(EXISTS ${TEST_DATA_PATH})
   set(MGReductionTest_SRC
     ../geometry/Filter.cpp
+    ../geometry/ModuleChannelMappings.cpp
     ../geometry/ModuleGeometry.cpp
     ../geometry/DigitalGeometry.cpp
     ../geometry/MGSeqGeometry.cpp
@@ -41,6 +44,7 @@ if(EXISTS ${TEST_DATA_PATH})
     ../mesytec/Sis3153Parser.h
     ../mesytec/Vmmr16Parser.h
     ../mesytec/Readout.h
+    ../geometry/ModuleChannelMappings.h
     ../geometry/ModuleGeometry.h
     ../geometry/DigitalGeometry.h
     ../geometry/MGSeqGeometry.h

@@ -12,6 +12,7 @@
 #pragma once
 
 #include <multigrid/geometry/ModuleGeometry.h>
+#include <multigrid/geometry/ModuleChannelMappings.h>
 
 namespace Multigrid {
 

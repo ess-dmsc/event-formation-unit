@@ -8,11 +8,10 @@
  */
 
 #pragma once
-#include <multigrid/geometry/Filter.h>
 
 #include <cinttypes>
 #include <string>
-#include <vector>
+#include <nlohmann/json.hpp>
 
 namespace Multigrid {
 
@@ -50,33 +49,6 @@ private:
 };
 
 void from_json(const nlohmann::json &j, ModuleLogicalGeometry &g);
-
-
-class ModuleChannelMappings {
-public:
-  FilterSet wire_filters;
-  FilterSet grid_filters;
-
-  virtual ~ModuleChannelMappings() = default;
-
-  virtual uint16_t max_channel() const = 0;
-
-  /** @brief identifies which channels are wires, from drawing by Anton */
-  virtual bool isWire(uint8_t VMM, uint16_t channel) const = 0;
-
-  /** @brief identifies which channels are grids, from drawing by Anton */
-  virtual bool isGrid(uint8_t VMM, uint16_t channel) const = 0;
-
-  /** @brief returns wire */
-  virtual uint16_t wire(uint8_t VMM, uint16_t channel) const = 0;
-
-  /** @brief returns grid */
-  virtual uint16_t grid(uint8_t VMM, uint16_t channel) const = 0;
-
-  virtual std::string debug(std::string prefix) const;
-};
-
-void from_json(const nlohmann::json &j, ModuleChannelMappings &g);
 
 }
 

@@ -9,6 +9,7 @@ set(multigrid_common_src
   geometry/DigitalGeometry.cpp
   geometry/MGSeqGeometry.cpp
   geometry/ModuleGeometry.cpp
+  geometry/ModuleChannelMappings.cpp
   mesytec/BuilderMesytec.cpp
   mesytec/Vmmr16Parser.cpp
   mesytec/Sis3153Parser.cpp
@@ -23,6 +24,7 @@ set(multigrid_common_inc
   geometry/DigitalGeometry.h
   geometry/MGSeqGeometry.h
   geometry/ModuleGeometry.h
+  geometry/ModuleChannelMappings.h
   mesytec/BuilderMesytec.h
   mesytec/Vmmr16Parser.h
   mesytec/Sis3153Parser.h

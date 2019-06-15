@@ -44,6 +44,7 @@ if(EXISTS ${TEST_DATA_PATH})
     ../geometry/DigitalGeometry.cpp
     ../geometry/MGSeqGeometry.cpp
     ../geometry/ModuleGeometry.cpp
+    ../geometry/ModuleChannelMappings.cpp
     ../reduction/EventAnalysis.cpp
     ../generators/ReaderReadouts.cpp
     ../Config.cpp
@@ -58,6 +59,7 @@ if(EXISTS ${TEST_DATA_PATH})
     ../geometry/DigitalGeometry.h
     ../geometry/MGSeqGeometry.h
     ../geometry/Filter.h
+    ../geometry/ModuleChannelMappings.h
     ../generators/ReaderReadouts.h
     ../Config.h
     )
@@ -82,6 +84,7 @@ if(EXISTS ${TEST_DATA_PATH2})
     ../geometry/DigitalGeometry.cpp
     ../geometry/MGSeqGeometry.cpp
     ../geometry/ModuleGeometry.cpp
+    ../geometry/ModuleChannelMappings.cpp
     ../../tools/ReaderPcap.cpp
     ../reduction/EventAnalysis.cpp
     ../Config.cpp
@@ -95,6 +98,7 @@ if(EXISTS ${TEST_DATA_PATH2})
     ../geometry/ModuleGeometry.h
     ../geometry/DigitalGeometry.h
     ../geometry/MGSeqGeometry.h
+    ../geometry/ModuleChannelMappings.h
     ../geometry/Filter.h
     ../../tools/ReaderPcap.h
     ../Config.h
