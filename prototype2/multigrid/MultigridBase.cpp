@@ -18,7 +18,7 @@
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
 
-//#include <multigrid/geometry/MG24Geometry.h>
+//#include <multigrid/channel_mappings/MG24Geometry.h>
 
 #include <common/Trace.h>
 #undef TRC_LEVEL

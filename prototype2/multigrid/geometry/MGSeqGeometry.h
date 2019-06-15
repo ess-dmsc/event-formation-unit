@@ -16,7 +16,7 @@
 
 namespace Multigrid {
 
-class MGSeqGeometry : public ModuleGeometry {
+class MGSeqGeometry : public ModuleChannelMappings {
 public:
 
   // Configuration
@@ -25,6 +25,9 @@ public:
   void max_channel(uint16_t g);
   bool swap_wires() const;
   bool swap_grids() const;
+
+  void max_wire(uint16_t w);
+  uint16_t max_wire() const;
 
   // Implementation
 
@@ -48,6 +51,7 @@ protected:
   static void swap(uint16_t &channel);
 
   uint16_t max_channel_{120};
+  uint16_t max_wire_{80};
 
   bool swap_wires_{false};
   bool swap_grids_{false};

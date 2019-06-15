@@ -48,7 +48,7 @@ Config::Config(std::string jsonfile, std::string dump_path) {
   analyzer.weighted(root["weighted"]);
   analyzer.mappings = mappings;
 
-  // deduced geometry from MG mappings
+  // deduced channel_mappings from MG mappings
   geometry.nx(mappings.max_x());
   geometry.ny(mappings.max_y());
   geometry.nz(mappings.max_z());

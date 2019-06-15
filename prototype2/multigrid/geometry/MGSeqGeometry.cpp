@@ -22,6 +22,14 @@ void MGSeqGeometry::swap(uint16_t &channel) {
   }
 }
 
+void MGSeqGeometry::max_wire(uint16_t w) {
+  max_wire_ = w;
+}
+
+uint16_t MGSeqGeometry::max_wire() const {
+  return max_wire_;
+}
+
 void MGSeqGeometry::swap_wires(bool s) {
   swap_wires_ = s;
 }
@@ -32,7 +40,6 @@ void MGSeqGeometry::swap_grids(bool s) {
 
 void MGSeqGeometry::max_channel(uint16_t g) {
   max_channel_ = g;
-  max_grid(g - max_wire());
 }
 
 bool MGSeqGeometry::swap_wires() const {
@@ -86,30 +93,22 @@ std::string MGSeqGeometry::debug(std::string prefix) const {
     ss << "(swapped grids)";
   ss << "\n";
 
-  ss << prefix << "size [" << max_x() << "," << max_y() << "," << max_z() << "]\n";
-
-  ss << ModuleGeometry::debug(prefix);
+  ss << ModuleChannelMappings::debug(prefix);
 
   return ss.str();
 }
 
 void from_json(const nlohmann::json &j, MGSeqGeometry &g) {
 
-  g.max_wire(j["max_wire"]);
   g.max_channel(j["max_channel"]);
-  g.max_z(j["max_z"]);
+  g.max_wire(j["max_wire"]);
 
   if (j.count("swap_wires"))
     g.swap_wires(j["swap_wires"]);
   if (j.count("swap_grids"))
     g.swap_grids(j["swap_grids"]);
 
-  // same as for ModuleGeometry, could refactor?
-
-  if (j.count("flipped_x"))
-    g.flipped_x(j["flipped_x"]);
-  if (j.count("flipped_z"))
-    g.flipped_z(j["flipped_z"]);
+  // same as for ModuleChannelMappings, could refactor?
 
   if (j.count("wire_filters")) {
     g.wire_filters = j["wire_filters"];

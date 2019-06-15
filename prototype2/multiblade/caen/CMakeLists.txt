@@ -17,7 +17,7 @@ if(GOOGLE_BENCHMARK)
   target_link_libraries(MBDataParserBenchmarkTest h5cpp)
 endif()
 
-# Create excecutable for the test of geometry
+# Create excecutable for the test of channel_mappings
 set(MBDataParserTest_INC
   DataParser.h)
 set(MBDataParserTest_SRC
@@ -32,7 +32,7 @@ set(DigitizerMappingTest_SRC
   DigitizerMappingTest.cpp)
 create_test_executable(DigitizerMappingTest)
 
-# Create excecutable for the test of geometry
+# Create excecutable for the test of channel_mappings
 set(MBGeometryTest_INC
   MBGeometry.h)
 set(MBGeometryTest_SRC

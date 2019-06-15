@@ -60,7 +60,7 @@ void DelayLineProducer::serializeAndSendEvent(const DelayLineEvent &Event) {
   std::uint32_t EventPosition = essgeometry.pixel2D(
       static_cast<uint32_t>(Event.X), static_cast<uint32_t>(Event.Y));
   if (EventPosition == 0) {
-    // \todo report geometry error to grafana and return?
+    // \todo report channel_mappings error to grafana and return?
   }
   auto DetectorID_Vector =
       Builder.CreateVector(std::vector<std::uint32_t>{EventPosition});

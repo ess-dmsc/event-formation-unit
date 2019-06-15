@@ -49,12 +49,15 @@ private:
   bool flipped_z_{false};
 };
 
-class ModuleGeometry : public ModuleLogicalGeometry {
+void from_json(const nlohmann::json &j, ModuleLogicalGeometry &g);
+
+
+class ModuleChannelMappings {
 public:
   FilterSet wire_filters;
   FilterSet grid_filters;
 
-  virtual ~ModuleGeometry() = default;
+  virtual ~ModuleChannelMappings() = default;
 
   virtual uint16_t max_channel() const = 0;
 
@@ -70,10 +73,10 @@ public:
   /** @brief returns grid */
   virtual uint16_t grid(uint8_t VMM, uint16_t channel) const = 0;
 
-  std::string debug(std::string prefix) const override;
+  virtual std::string debug(std::string prefix) const;
 };
 
-void from_json(const nlohmann::json &j, ModuleGeometry &g);
+void from_json(const nlohmann::json &j, ModuleChannelMappings &g);
 
 }
 

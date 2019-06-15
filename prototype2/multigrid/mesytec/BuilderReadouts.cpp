@@ -71,7 +71,7 @@ void BuilderReadouts::build(const std::vector<Readout>& readouts) {
       hit_.coordinate = digital_geometry_.grid(r.bus, 0, r.channel);
       hit_.plane = grid_plane;
     } else {
-      XTRACE(PROCESS, DEB, "Bad geometry %s", r.debug().c_str());
+      XTRACE(PROCESS, DEB, "Bad channel_mappings %s", r.debug().c_str());
       stats_digital_geom_errors++;
       continue;
     }

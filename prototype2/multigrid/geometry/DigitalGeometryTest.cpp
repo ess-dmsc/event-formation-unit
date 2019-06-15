@@ -10,12 +10,12 @@ using namespace Multigrid;
 class DigitalGeometryTest : public TestBase {
 protected:
   DigitalGeometry geo;
-  std::shared_ptr<MGSeqGeometry> bus;
+  BusDefinitionStruct bus;
 
-  virtual void SetUp() {
-    bus = std::make_shared<MGSeqGeometry>();
+  void SetUp() override {
+    bus.channel_mappings = std::make_shared<MGSeqGeometry>();
   }
-  virtual void TearDown() {
+  void TearDown() override {
   }
 };
 
@@ -55,9 +55,11 @@ TEST_F(DigitalGeometryTest, OneBus) {
     EXPECT_FALSE(geo.isWire(1, 0, i));
     EXPECT_FALSE(geo.isGrid(0, 0, i));
     EXPECT_FALSE(geo.isGrid(1, 0, i));
-    EXPECT_EQ(geo.x_from_wire(geo.wire(0, 0, i)), bus->x_from_wire(bus->wire(0, i)));
-    EXPECT_EQ(geo.z_from_wire(geo.wire(0, 0, i)), bus->z_from_wire(bus->wire(0, i)));
-    EXPECT_EQ(geo.wire(0, 0, i), bus->wire(0, i));
+    EXPECT_EQ(geo.x_from_wire(geo.wire(0, 0, i)),
+              bus.logical_geometry.x_from_wire(bus.channel_mappings->wire(0, i)));
+    EXPECT_EQ(geo.z_from_wire(geo.wire(0, 0, i)),
+              bus.logical_geometry.z_from_wire(bus.channel_mappings->wire(0, i)));
+    EXPECT_EQ(geo.wire(0, 0, i), bus.channel_mappings->wire(0, i));
   }
 
   for (int i = 80; i <= 119; i++) {
@@ -65,8 +67,9 @@ TEST_F(DigitalGeometryTest, OneBus) {
     EXPECT_FALSE(geo.isWire(1, 0, i));
     EXPECT_TRUE(geo.isGrid(0, 0, i));
     EXPECT_FALSE(geo.isGrid(1, 0, i));
-    EXPECT_EQ(geo.y_from_grid(geo.grid(0, 0, i)), bus->y_from_grid(bus->grid(0, i)));
-    EXPECT_EQ(geo.grid(0, 0, i), bus->grid(0, i));
+    EXPECT_EQ(geo.y_from_grid(geo.grid(0, 0, i)),
+              bus.logical_geometry.y_from_grid(bus.channel_mappings->grid(0, i)));
+    EXPECT_EQ(geo.grid(0, 0, i), bus.channel_mappings->grid(0, i));
   }
 
   EXPECT_FALSE(geo.isWire(0, 0, 128));
@@ -96,18 +99,30 @@ TEST_F(DigitalGeometryTest, TwoBuses) {
     EXPECT_FALSE(geo.isGrid(1, 0, i));
     EXPECT_FALSE(geo.isGrid(2, 0, i));
 
-    EXPECT_EQ(geo.x_from_wire(geo.wire(0, 0, i)), bus->x_from_wire(bus->wire(0, i)));
-    EXPECT_EQ(geo.z_from_wire(geo.wire(0, 0, i)), bus->z_from_wire(bus->wire(0, i)));
-    EXPECT_EQ(geo.wire(0, 0, i), bus->wire(0, i));
-    EXPECT_EQ(geo.wire(1, 0, i), bus->wire(0, i) + bus->max_wire());
+    EXPECT_EQ(geo.x_from_wire(geo.wire(0, 0, i)),
+              bus.logical_geometry.x_from_wire(bus.channel_mappings->wire(0, i)));
+    EXPECT_EQ(geo.z_from_wire(geo.wire(0, 0, i)),
+              bus.logical_geometry.z_from_wire(bus.channel_mappings->wire(0, i)));
+    EXPECT_EQ(geo.wire(0, 0, i),
+              bus.channel_mappings->wire(0, i));
+    EXPECT_EQ(geo.wire(1, 0, i),
+              bus.channel_mappings->wire(0, i) + bus.logical_geometry.max_wire());
 
-    EXPECT_EQ(geo.x_from_wire(geo.wire(1, 0, i)), bus->x_from_wire(bus->wire(0, i)) + bus->max_x());
-    EXPECT_EQ(geo.z_from_wire(geo.wire(1, 0, i)), bus->z_from_wire(bus->wire(0, i)));
-    EXPECT_EQ(geo.wire(1, 0, i), bus->wire(0, i) + bus->max_wire());
-    EXPECT_EQ(geo.x_from_wire(geo.wire(0, 0, i)), geo.x_from_wire(geo.wire(0, 0, i)));
-    EXPECT_EQ(geo.x_from_wire(geo.wire(1, 0, i)), geo.x_from_wire(geo.wire(1, 0, i)));
-    EXPECT_EQ(geo.z_from_wire(geo.wire(0, 0, i)), geo.z_from_wire(geo.wire(0, 0, i)));
-    EXPECT_EQ(geo.z_from_wire(geo.wire(1, 0, i)), geo.z_from_wire(geo.wire(1, 0, i)));
+    EXPECT_EQ(geo.x_from_wire(geo.wire(1, 0, i)),
+              bus.logical_geometry.x_from_wire(bus.channel_mappings->wire(0, i))
+              + bus.logical_geometry.max_x());
+    EXPECT_EQ(geo.z_from_wire(geo.wire(1, 0, i)),
+              bus.logical_geometry.z_from_wire(bus.channel_mappings->wire(0, i)));
+    EXPECT_EQ(geo.wire(1, 0, i),
+              bus.channel_mappings->wire(0, i) + bus.logical_geometry.max_wire());
+    EXPECT_EQ(geo.x_from_wire(geo.wire(0, 0, i)),
+              geo.x_from_wire(geo.wire(0, 0, i)));
+    EXPECT_EQ(geo.x_from_wire(geo.wire(1, 0, i)),
+              geo.x_from_wire(geo.wire(1, 0, i)));
+    EXPECT_EQ(geo.z_from_wire(geo.wire(0, 0, i)),
+              geo.z_from_wire(geo.wire(0, 0, i)));
+    EXPECT_EQ(geo.z_from_wire(geo.wire(1, 0, i)),
+              geo.z_from_wire(geo.wire(1, 0, i)));
   }
 
   for (int i = 80; i <= 119; i++) {
@@ -118,12 +133,17 @@ TEST_F(DigitalGeometryTest, TwoBuses) {
     EXPECT_TRUE(geo.isGrid(1, 0, i));
     EXPECT_FALSE(geo.isGrid(2, 0, i));
 
-    EXPECT_EQ(geo.grid(0, 0, i), bus->grid(0, i));
-    EXPECT_EQ(geo.grid(1, 0, i), bus->grid(0, i) + bus->max_grid());
-    EXPECT_EQ(geo.y_from_grid(geo.grid(0, 0, i)), bus->y_from_grid(bus->grid(0, i)));
-    EXPECT_EQ(geo.y_from_grid(geo.grid(1, 0, i)), bus->y_from_grid(bus->grid(0, i)));
-    EXPECT_EQ(geo.y_from_grid(geo.grid(0, 0, i)), geo.y_from_grid(geo.grid(0, 0, i)));
-    EXPECT_EQ(geo.y_from_grid(geo.grid(1, 0, i)), geo.y_from_grid(geo.grid(1, 0, i)));
+    EXPECT_EQ(geo.grid(0, 0, i), bus.channel_mappings->grid(0, i));
+    EXPECT_EQ(geo.grid(1, 0, i),
+              bus.channel_mappings->grid(0, i) + bus.logical_geometry.max_grid());
+    EXPECT_EQ(geo.y_from_grid(geo.grid(0, 0, i)),
+              bus.logical_geometry.y_from_grid(bus.channel_mappings->grid(0, i)));
+    EXPECT_EQ(geo.y_from_grid(geo.grid(1, 0, i)),
+              bus.logical_geometry.y_from_grid(bus.channel_mappings->grid(0, i)));
+    EXPECT_EQ(geo.y_from_grid(geo.grid(0, 0, i)),
+              geo.y_from_grid(geo.grid(0, 0, i)));
+    EXPECT_EQ(geo.y_from_grid(geo.grid(1, 0, i)),
+              geo.y_from_grid(geo.grid(1, 0, i)));
   }
 
   EXPECT_FALSE(geo.isWire(0, 0, 128));
@@ -136,15 +156,15 @@ TEST_F(DigitalGeometryTest, Filters) {
 
   geo.add_bus(bus);
 
-
   Filter f;
   f.minimum = 3;
   f.maximum = 7;
   f.rescale_factor = 0.5;
 
-  auto bus2 = std::make_shared<MGSeqGeometry>();
-  bus2->wire_filters.override_filter(5, f);
-  bus2->grid_filters.override_filter(10, f);
+  BusDefinitionStruct bus2;
+  bus2.channel_mappings = std::make_shared<MGSeqGeometry>();
+  bus2.channel_mappings->wire_filters.override_filter(5, f);
+  bus2.channel_mappings->grid_filters.override_filter(10, f);
   geo.add_bus(bus2);
 
   EXPECT_EQ(geo.rescale(0, 0, 5, 10), 10);

@@ -34,7 +34,6 @@ void ModuleLogicalGeometry::flipped_z(bool f) {
   flipped_z_ = f;
 }
 
-
 bool ModuleLogicalGeometry::flipped_x() const {
   return flipped_x_;
 }
@@ -81,9 +80,10 @@ std::string ModuleLogicalGeometry::debug(std::string prefix) const {
   std::string ret;
 
   ret += prefix + "ModuleLogicalGeometry\n";
-
+  ret += prefix + fmt::format("  wires: {},  grids: {}\n",
+                              max_wire(), max_grid());
   ret += prefix + fmt::format("  size [{},{},{}]\n",
-                     max_x(), max_y(), max_z());
+                              max_x(), max_y(), max_z());
 
   if (flipped_x_)
     ret += prefix + "  (flipped in X)\n";
@@ -93,10 +93,22 @@ std::string ModuleLogicalGeometry::debug(std::string prefix) const {
   return ret;
 }
 
-std::string ModuleGeometry::debug(std::string prefix) const {
-  std::stringstream ss;
+void from_json(const nlohmann::json &j, ModuleLogicalGeometry &g) {
+  if (j.count("max_grid"))
+    g.max_grid(j["max_grid"]);
+  if (j.count("max_wire"))
+    g.max_wire(j["max_wire"]);
+  if (j.count("max_z"))
+    g.max_z(j["max_z"]);
 
-  ss << ModuleLogicalGeometry::debug(prefix);
+  if (j.count("flipped_x"))
+    g.flipped_x(j["flipped_x"]);
+  if (j.count("flipped_z"))
+    g.flipped_z(j["flipped_z"]);
+}
+
+std::string ModuleChannelMappings::debug(std::string prefix) const {
+  std::stringstream ss;
 
   auto wf = wire_filters.debug(prefix + "  ");
   if (!wf.empty()) {
@@ -111,13 +123,7 @@ std::string ModuleGeometry::debug(std::string prefix) const {
   return ss.str();
 }
 
-void from_json(const nlohmann::json &j, ModuleGeometry &g) {
-
-  if (j.count("flipped_x"))
-    g.flipped_x(j["flipped_x"]);
-  if (j.count("flipped_z"))
-    g.flipped_z(j["flipped_z"]);
-
+void from_json(const nlohmann::json &j, ModuleChannelMappings &g) {
   if (j.count("wire_filters")) {
     g.wire_filters = j["wire_filters"];
   }

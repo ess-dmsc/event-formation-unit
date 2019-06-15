@@ -135,7 +135,7 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
           analyze_max_timebins,
           analyze_max_timedif);
 
-      // \todo deduce geometry from SRS mappings eventually
+      // \todo deduce channel_mappings from SRS mappings eventually
       //       this is better for now, while prototyping
       geometry.nx(root["geometry_x"].get<unsigned int>());
       geometry.ny(root["geometry_y"].get<unsigned int>());
@@ -169,7 +169,7 @@ std::string NMXConfig::debug() const {
   }
   if (builder_type != "Hits") {
     ret += "Time config:\n" + time_config.debug();
-    ret += "Digital geometry:\n" + srs_mappings.debug();
+    ret += "Digital channel_mappings:\n" + srs_mappings.debug();
     ret += fmt::format("adc_threshold = {}\n", adc_threshold);
   }
 

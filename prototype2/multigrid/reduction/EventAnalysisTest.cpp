@@ -13,10 +13,12 @@ protected:
   Hit hit;
   Event event;
   EventAnalyzer analyzer;
-  virtual void SetUp() {
-    analyzer.mappings.add_bus(std::make_shared<MGSeqGeometry>());
+  void SetUp() override {
+    BusDefinitionStruct bus;
+    bus.channel_mappings = std::make_shared<MGSeqGeometry>();
+    analyzer.mappings.add_bus(bus);
   }
-  virtual void TearDown() { }
+  void TearDown() override { }
 };
 
 TEST_F(EventAnalysisTest, AnalyzeInvalid) {

@@ -58,7 +58,7 @@ protected:
   void load_config(const std::string &jsonfile) {
     config = Multigrid::Config(jsonfile);
     config.builder = std::make_shared<BuilderReadouts>(config.analyzer.mappings);
-    //MESSAGE() << "Digital geometry: " << config.builder->digital_geometry.debug() << "\n";
+    //MESSAGE() << "Digital channel_mappings: " << config.builder->digital_geometry.debug() << "\n";
   }
 
   void feed_file(const std::string &filename) {
