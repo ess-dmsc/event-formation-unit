@@ -12,7 +12,7 @@
 
 #pragma once
 
-#include <multigrid/geometry/MGSeqGeometry.h>
+#include <multigrid/geometry/MGSeqMappings.h>
 
 #include <common/Trace.h>
 // #undef TRC_LEVEL
@@ -20,52 +20,52 @@
 
 namespace Multigrid {
 
-class MG24GeometryA : public MGSeqGeometry {
+class MG24MappingsA : public MGSeqMappings {
 public:
-  uint16_t wire(uint8_t VMM, uint16_t channel) const override {
+  uint16_t wire(uint16_t channel) const override {
     if (channel < 16) {
-      return MGSeqGeometry::wire(VMM, channel);
+      return MGSeqMappings::wire(channel);
     } else if (channel < 32){
-      return MGSeqGeometry::wire(VMM, channel + 4);
+      return MGSeqMappings::wire(channel + 4);
     } else if (channel < 48){
-      return MGSeqGeometry::wire(VMM, channel + 8);
+      return MGSeqMappings::wire(channel + 8);
     } else if (channel < 64){
-      return MGSeqGeometry::wire(VMM, channel + 12);
+      return MGSeqMappings::wire(channel + 12);
     } else if (channel < 68){
-      return MGSeqGeometry::wire(VMM, channel - 48);
+      return MGSeqMappings::wire(channel - 48);
     } else if (channel < 72){
-      return MGSeqGeometry::wire(VMM, channel - 32);
+      return MGSeqMappings::wire(channel - 32);
     } else if (channel < 76){
-      return MGSeqGeometry::wire(VMM, channel - 16);
+      return MGSeqMappings::wire(channel - 16);
     } else {
-      return MGSeqGeometry::wire(VMM, channel);
+      return MGSeqMappings::wire(channel);
     }
   }
 };
 
 // Equivalent of what was previously module_select
-class MG24GeometryB : public MGSeqGeometry {
+class MG24MappingsB : public MGSeqMappings {
 public:
   /** \brief return the z coordinate of the detector */
 
   // \todo this is wrong, need to draw a diagram for this module like for SRS tests
-  uint16_t wire(uint8_t VMM, uint16_t channel) const override {
+  uint16_t wire(uint16_t channel) const override {
     if (channel < 16) {
-      return MGSeqGeometry::wire(VMM, channel);
+      return MGSeqMappings::wire(channel);
     } else if (channel < 32){
-      return MGSeqGeometry::wire(VMM, channel + 4);
+      return MGSeqMappings::wire(channel + 4);
     } else if (channel < 48){
-      return MGSeqGeometry::wire(VMM, channel + 8);
+      return MGSeqMappings::wire(channel + 8);
     } else if (channel < 64){
-      return MGSeqGeometry::wire(VMM, channel + 12);
+      return MGSeqMappings::wire(channel + 12);
     } else if (channel < 68){
-      return MGSeqGeometry::wire(VMM, channel - 48);
+      return MGSeqMappings::wire(channel - 48);
     } else if (channel < 72){
-      return MGSeqGeometry::wire(VMM, channel - 32);
+      return MGSeqMappings::wire(channel - 32);
     } else if (channel < 76){
-      return MGSeqGeometry::wire(VMM, channel - 16);
+      return MGSeqMappings::wire(channel - 16);
     } else {
-      return MGSeqGeometry::wire(VMM, channel);
+      return MGSeqMappings::wire(channel);
     }
   }
 };

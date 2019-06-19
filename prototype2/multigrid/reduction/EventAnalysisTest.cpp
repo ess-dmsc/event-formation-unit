@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <multigrid/reduction/EventAnalysis.h>
-#include <multigrid/geometry/MGSeqGeometry.h>
+#include <multigrid/geometry/MGSeqMappings.h>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>
@@ -15,7 +15,7 @@ protected:
   EventAnalyzer analyzer;
   void SetUp() override {
     BusDefinitionStruct bus;
-    bus.channel_mappings = std::make_shared<MGSeqGeometry>();
+    bus.channel_mappings = std::make_shared<MGSeqMappings>();
     analyzer.mappings.add_bus(bus);
   }
   void TearDown() override { }

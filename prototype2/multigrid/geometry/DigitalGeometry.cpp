@@ -11,7 +11,7 @@
 
 #include <multigrid/geometry/DigitalGeometry.h>
 
-#include <multigrid/geometry/MGSeqGeometry.h>
+#include <multigrid/geometry/MGSeqMappings.h>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL
@@ -35,7 +35,7 @@ std::string BusDefinitionStruct::debug(std::string prefix) const {
 }
 
 void from_json(const nlohmann::json &j, BusDefinitionStruct &g) {
-  auto geom = std::make_shared<MGSeqGeometry>();
+  auto geom = std::make_shared<MGSeqMappings>();
   (*geom) = j;
   g.channel_mappings = geom;
   g.logical_geometry.max_grid(geom->max_channel() - geom->max_wire());
@@ -52,52 +52,52 @@ void DigitalGeometry::add_bus(BusDefinitionStruct geom) {
   buses.push_back(geom);
 }
 
-uint16_t DigitalGeometry::rescale(uint8_t FEC, uint8_t VMM, uint16_t channel, uint16_t adc) const {
-  if (FEC >= buses.size())
+uint16_t DigitalGeometry::rescale(uint8_t bus, uint16_t channel, uint16_t adc) const {
+  if (bus >= buses.size())
     return adc;
-  const auto &b = buses[FEC].channel_mappings;
-  if (isWire(FEC, VMM, channel)) {
-    return b->wire_filters.rescale(b->wire(VMM, channel), adc);
-  } else if (isGrid(FEC, VMM, channel)) {
-    return b->grid_filters.rescale(b->grid(VMM, channel), adc);
+  const auto &b = buses[bus].channel_mappings;
+  if (isWire(bus, channel)) {
+    return b->wire_filters.rescale(b->wire(channel), adc);
+  } else if (isGrid(bus, channel)) {
+    return b->grid_filters.rescale(b->grid(channel), adc);
   }
   return adc;
 }
 
-bool DigitalGeometry::is_valid(uint8_t FEC, uint8_t VMM, uint16_t channel, uint16_t adc) const {
-  if (FEC >= buses.size())
+bool DigitalGeometry::is_valid(uint8_t bus, uint16_t channel, uint16_t adc) const {
+  if (bus >= buses.size())
     return false;
-  const auto &b = buses[FEC].channel_mappings;
-  if (isWire(FEC, VMM, channel)) {
-    return b->wire_filters.valid(b->wire(VMM, channel), adc);
-  } else if (isGrid(FEC, VMM, channel)) {
-    return b->grid_filters.valid(b->grid(VMM, channel), adc);
+  const auto &b = buses[bus].channel_mappings;
+  if (isWire(bus, channel)) {
+    return b->wire_filters.valid(b->wire(channel), adc);
+  } else if (isGrid(bus, channel)) {
+    return b->grid_filters.valid(b->grid(channel), adc);
   }
   return false;
 }
 
 /** @brief identifies which channels are wires, from drawing by Anton */
-bool DigitalGeometry::isWire(uint8_t FEC, uint8_t VMM, uint16_t channel) const {
-  if (FEC >= buses.size())
+bool DigitalGeometry::isWire(uint8_t bus, uint16_t channel) const {
+  if (bus >= buses.size())
     return false;
-  return buses[FEC].channel_mappings->isWire(VMM, channel);
+  return buses[bus].channel_mappings->isWire(channel);
 }
 
 /** @brief identifies which channels are grids, from drawing by Anton */
-bool DigitalGeometry::isGrid(uint8_t FEC, uint8_t VMM, uint16_t channel) const {
-  if (FEC >= buses.size())
+bool DigitalGeometry::isGrid(uint8_t bus, uint16_t channel) const {
+  if (bus >= buses.size())
     return false;
-  return buses[FEC].channel_mappings->isGrid(VMM, channel);
+  return buses[bus].channel_mappings->isGrid(channel);
 }
 
-uint16_t DigitalGeometry::wire(uint8_t FEC, uint8_t VMM, uint16_t channel) const {
-  const auto &b = buses[FEC];
-  return b.wire_offset + b.channel_mappings->wire(VMM, channel);
+uint16_t DigitalGeometry::wire(uint8_t bus, uint16_t channel) const {
+  const auto &b = buses[bus];
+  return b.wire_offset + b.channel_mappings->wire(channel);
 }
 
-uint16_t DigitalGeometry::grid(uint8_t FEC, uint8_t VMM, uint16_t channel) const {
-  const auto &b = buses[FEC];
-  return b.grid_offset + b.channel_mappings->grid(VMM, channel);
+uint16_t DigitalGeometry::grid(uint8_t bus, uint16_t channel) const {
+  const auto &b = buses[bus];
+  return b.grid_offset + b.channel_mappings->grid(channel);
 }
 
 uint16_t DigitalGeometry::max_wire() const {
@@ -166,7 +166,7 @@ std::string DigitalGeometry::debug(std::string prefix) const {
   std::stringstream ss;
 
   for (size_t i = 0; i < buses.size(); i++) {
-    ss << prefix << "  FEC#" << i << "   " << buses[i].debug(prefix);
+    ss << prefix << "  bus#" << i << "   " << buses[i].debug(prefix);
   }
 
   return ss.str();

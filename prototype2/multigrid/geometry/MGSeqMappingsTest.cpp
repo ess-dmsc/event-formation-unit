@@ -1,96 +1,96 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multigrid/geometry/MGSeqGeometry.h>
+#include <multigrid/geometry/MGSeqMappings.h>
 #include <test/TestBase.h>
 
 using namespace Multigrid;
 
-class MGSeqGeometryTest : public TestBase {
+class MGSeqMappingsTest : public TestBase {
 protected:
-  MGSeqGeometry mappings;
+  MGSeqMappings mappings;
   void SetUp() override {}
   void TearDown() override {}
 };
 
-TEST_F(MGSeqGeometryTest, DefaultConstructedValues) {
+TEST_F(MGSeqMappingsTest, DefaultConstructedValues) {
   EXPECT_EQ(mappings.max_channel(), 120);
   EXPECT_EQ(mappings.max_wire(), 80);
   EXPECT_FALSE(mappings.swap_wires());
   EXPECT_FALSE(mappings.swap_grids());
 }
 
-TEST_F(MGSeqGeometryTest, WireLimits) {
+TEST_F(MGSeqMappingsTest, WireLimits) {
   mappings.max_wire(40);
   EXPECT_EQ(mappings.max_wire(), 40);
-  EXPECT_TRUE(mappings.isWire(0, 0));
-  EXPECT_TRUE(mappings.isWire(0, 2));
-  EXPECT_TRUE(mappings.isWire(0, 39));
-  EXPECT_FALSE(mappings.isWire(0, 40));
-  EXPECT_FALSE(mappings.isWire(0, 7000));
+  EXPECT_TRUE(mappings.isWire(0));
+  EXPECT_TRUE(mappings.isWire(2));
+  EXPECT_TRUE(mappings.isWire(39));
+  EXPECT_FALSE(mappings.isWire(40));
+  EXPECT_FALSE(mappings.isWire(7000));
 }
 
-TEST_F(MGSeqGeometryTest, GridLimits) {
+TEST_F(MGSeqMappingsTest, GridLimits) {
   mappings.max_channel(100);
   EXPECT_EQ(mappings.max_channel(), 100);
-  EXPECT_FALSE(mappings.isGrid(0, 0));
-  EXPECT_FALSE(mappings.isGrid(0, 79));
-  EXPECT_TRUE(mappings.isGrid(0, 80));
-  EXPECT_TRUE(mappings.isGrid(0, 99));
-  EXPECT_FALSE(mappings.isGrid(0, 100));
-  EXPECT_FALSE(mappings.isWire(0, 100));
+  EXPECT_FALSE(mappings.isGrid(0));
+  EXPECT_FALSE(mappings.isGrid(79));
+  EXPECT_TRUE(mappings.isGrid(80));
+  EXPECT_TRUE(mappings.isGrid(99));
+  EXPECT_FALSE(mappings.isGrid(100));
+  EXPECT_FALSE(mappings.isWire(100));
 }
 
-TEST_F(MGSeqGeometryTest, GetWire) {
+TEST_F(MGSeqMappingsTest, GetWire) {
   mappings.max_wire(40);
   EXPECT_EQ(mappings.max_wire(), 40);
-  EXPECT_EQ(mappings.wire(0, 0), 0);
-  EXPECT_EQ(mappings.wire(0, 2), 2);
-  EXPECT_EQ(mappings.wire(0, 39), 39);
+  EXPECT_EQ(mappings.wire(0), 0);
+  EXPECT_EQ(mappings.wire(2), 2);
+  EXPECT_EQ(mappings.wire(39), 39);
 
   // undefined for out of bounds
 }
 
-TEST_F(MGSeqGeometryTest, SwapWires) {
+TEST_F(MGSeqMappingsTest, SwapWires) {
   mappings.swap_wires(true);
   EXPECT_TRUE(mappings.swap_wires());
   EXPECT_EQ(mappings.max_wire(), 80);
 
-  EXPECT_EQ(mappings.wire(0, 0), 1);
-  EXPECT_EQ(mappings.wire(0, 1), 0);
-  EXPECT_EQ(mappings.wire(0, 39), 38);
-  EXPECT_EQ(mappings.wire(0, 38), 39);
+  EXPECT_EQ(mappings.wire(0), 1);
+  EXPECT_EQ(mappings.wire(1), 0);
+  EXPECT_EQ(mappings.wire(39), 38);
+  EXPECT_EQ(mappings.wire(38), 39);
 
   // undefined for out of bounds
 }
 
-TEST_F(MGSeqGeometryTest, GetGrid) {
+TEST_F(MGSeqMappingsTest, GetGrid) {
   mappings.max_channel(100);
-  EXPECT_EQ(mappings.grid(0, 80), 0);
-  EXPECT_EQ(mappings.grid(0, 99), 19);
+  EXPECT_EQ(mappings.grid(80), 0);
+  EXPECT_EQ(mappings.grid(99), 19);
 
   // undefined for out of bounds
 }
 
-TEST_F(MGSeqGeometryTest, SwapGrids) {
+TEST_F(MGSeqMappingsTest, SwapGrids) {
   mappings.swap_grids(true);
   EXPECT_TRUE(mappings.swap_grids());
   EXPECT_EQ(mappings.max_channel(), 120);
 
-  EXPECT_EQ(mappings.grid(0, 80), 1);
-  EXPECT_EQ(mappings.grid(0, 81), 0);
-  EXPECT_EQ(mappings.grid(0, 98), 19);
-  EXPECT_EQ(mappings.grid(0, 99), 18);
+  EXPECT_EQ(mappings.grid(80), 1);
+  EXPECT_EQ(mappings.grid(81), 0);
+  EXPECT_EQ(mappings.grid(98), 19);
+  EXPECT_EQ(mappings.grid(99), 18);
 
   // undefined for out of bounds
 }
 
-TEST_F(MGSeqGeometryTest, PrintsSelf) {
+TEST_F(MGSeqMappingsTest, PrintsSelf) {
   mappings.swap_wires(true);
   mappings.swap_grids(true);
   EXPECT_FALSE(mappings.debug({}).empty());
 }
 
-TEST_F(MGSeqGeometryTest, FromJsonMinimal) {
+TEST_F(MGSeqMappingsTest, FromJsonMinimal) {
   nlohmann::json j;
   j["max_channel"] = 100;
   j["max_wire"] = 50;
@@ -102,7 +102,7 @@ TEST_F(MGSeqGeometryTest, FromJsonMinimal) {
 //  EXPECT_EQ(mappings.max_z(), 5);
 }
 
-TEST_F(MGSeqGeometryTest, FromJson) {
+TEST_F(MGSeqMappingsTest, FromJson) {
   nlohmann::json j;
   j["max_channel"] = 100;
   j["max_wire"] = 50;

@@ -32,12 +32,12 @@ public:
   uint32_t max_y() const;
   uint16_t max_z() const;
 
-  virtual uint32_t x_from_wire(uint16_t w) const;
-  virtual uint32_t y_from_grid(uint16_t g) const;
-  virtual uint32_t z_from_wire(uint16_t w) const;
+  uint32_t x_from_wire(uint16_t w) const;
+  uint32_t y_from_grid(uint16_t g) const;
+  uint32_t z_from_wire(uint16_t w) const;
 
   // \todo default arg
-  virtual std::string debug(std::string prefix) const;
+  std::string debug(std::string prefix) const;
 
 private:
   uint16_t max_grid_{40};

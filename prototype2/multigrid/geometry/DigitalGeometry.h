@@ -12,7 +12,7 @@
 #pragma once
 
 #include <multigrid/geometry/ModuleGeometry.h>
-#include <multigrid/geometry/ModuleChannelMappings.h>
+#include <multigrid/geometry/ChannelMappings.h>
 
 namespace Multigrid {
 
@@ -25,7 +25,7 @@ struct BusDefinitionStruct {
 
   ModuleLogicalGeometry logical_geometry;
 
-  std::shared_ptr<ModuleChannelMappings> channel_mappings;
+  std::shared_ptr<ChannelMappings> channel_mappings;
 
   std::string debug(std::string prefix = "") const;
 };
@@ -41,18 +41,18 @@ public:
 
   void add_bus(BusDefinitionStruct geom);
 
-  uint16_t rescale(uint8_t FEC, uint8_t VMM, uint16_t channel, uint16_t adc) const;
+  uint16_t rescale(uint8_t bus, uint16_t channel, uint16_t adc) const;
 
-  bool is_valid(uint8_t FEC, uint8_t VMM, uint16_t channel, uint16_t adc) const;
+  bool is_valid(uint8_t bus, uint16_t channel, uint16_t adc) const;
 
   /** @brief identifies which channels are wires, from drawing by Anton */
-  bool isWire(uint8_t FEC, uint8_t VMM, uint16_t channel) const;
+  bool isWire(uint8_t bus, uint16_t channel) const;
   /** @brief identifies which channels are grids, from drawing by Anton */
-  bool isGrid(uint8_t FEC, uint8_t VMM, uint16_t channel) const;
+  bool isGrid(uint8_t bus, uint16_t channel) const;
 
-  uint16_t wire(uint8_t FEC, uint8_t VMM, uint16_t channel) const;
+  uint16_t wire(uint8_t bus, uint16_t channel) const;
 
-  uint16_t grid(uint8_t FEC, uint8_t VMM, uint16_t channel) const;
+  uint16_t grid(uint8_t bus, uint16_t channel) const;
 
   uint16_t max_wire() const;
 

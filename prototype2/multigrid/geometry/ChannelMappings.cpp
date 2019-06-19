@@ -7,14 +7,14 @@
  *
  */
 
-#include <multigrid/geometry/ModuleChannelMappings.h>
+#include <multigrid/geometry/ChannelMappings.h>
 
 #include <fmt/format.h>
 #include <sstream>
 
 namespace Multigrid {
 
-std::string ModuleChannelMappings::debug(std::string prefix) const {
+std::string ChannelMappings::debug(std::string prefix) const {
   std::stringstream ss;
 
   auto wf = wire_filters.debug(prefix + "  ");
@@ -30,7 +30,7 @@ std::string ModuleChannelMappings::debug(std::string prefix) const {
   return ss.str();
 }
 
-void from_json(const nlohmann::json &j, ModuleChannelMappings &g) {
+void from_json(const nlohmann::json &j, ChannelMappings &g) {
   if (j.count("wire_filters")) {
     g.wire_filters = j["wire_filters"];
   }

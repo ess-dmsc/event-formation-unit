@@ -8,11 +8,11 @@
  */
 
 #pragma once
-#include <multigrid/geometry/ModuleChannelMappings.h>
+#include <multigrid/geometry/ChannelMappings.h>
 
 namespace Multigrid {
 
-class MGSeqGeometry : public ModuleChannelMappings {
+class MGSeqMappings : public ChannelMappings {
 public:
 
   // Configuration
@@ -30,16 +30,16 @@ public:
   uint16_t max_channel() const override;
 
   /** @brief identifies which channels are wires, from drawing by Anton */
-  bool isWire(uint8_t VMM, uint16_t channel) const override;
+  bool isWire(uint16_t channel) const override;
 
   /** @brief identifies which channels are grids, from drawing by Anton */
-  bool isGrid(uint8_t VMM, uint16_t channel) const override;
+  bool isGrid(uint16_t channel) const override;
 
   /** @brief returns wire */
-  uint16_t wire(uint8_t VMM, uint16_t channel) const override;
+  uint16_t wire(uint16_t channel) const override;
 
   /** @brief returns grid */
-  uint16_t grid(uint8_t VMM, uint16_t channel) const override;
+  uint16_t grid(uint16_t channel) const override;
 
   std::string debug(std::string prefix) const override;
 
@@ -53,7 +53,7 @@ protected:
   bool swap_grids_{false};
 };
 
-void from_json(const nlohmann::json &j, MGSeqGeometry &g);
+void from_json(const nlohmann::json &j, MGSeqMappings &g);
 
 }
 

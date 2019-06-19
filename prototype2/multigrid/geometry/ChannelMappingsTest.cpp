@@ -1,11 +1,11 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <multigrid/geometry/ModuleChannelMappings.h>
+#include <multigrid/geometry/ChannelMappings.h>
 #include <test/TestBase.h>
 
 using namespace Multigrid;
 
-class MockMappings : public ModuleChannelMappings {
+class MockMappings : public ChannelMappings {
 public:
   // Implementation
 
@@ -13,26 +13,22 @@ public:
     return 0;
   }
 
-  bool isWire(uint8_t VMM, uint16_t channel) const override {
-    (void) VMM;
+  bool isWire(uint16_t channel) const override {
     (void) channel;
     return true;
   }
 
-  bool isGrid(uint8_t VMM, uint16_t channel) const override {
-    (void) VMM;
+  bool isGrid(uint16_t channel) const override {
     (void) channel;
     return true;
   }
 
-  uint16_t wire(uint8_t VMM, uint16_t channel) const override {
-    (void) VMM;
+  uint16_t wire(uint16_t channel) const override {
     (void) channel;
     return 0;
   }
 
-  uint16_t grid(uint8_t VMM, uint16_t channel) const override {
-    (void) VMM;
+  uint16_t grid(uint16_t channel) const override {
     (void) channel;
     return 0;
   }

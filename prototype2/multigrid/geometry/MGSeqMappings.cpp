@@ -7,14 +7,14 @@
  *
  */
 
-#include <multigrid/geometry/MGSeqGeometry.h>
+#include <multigrid/geometry/MGSeqMappings.h>
 
 #include <sstream>
 #include <limits>
 
 namespace Multigrid {
 
-void MGSeqGeometry::swap(uint16_t &channel) {
+void MGSeqMappings::swap(uint16_t &channel) {
   if (channel % 2 == 0) {
     channel += 1;
   } else {
@@ -22,65 +22,61 @@ void MGSeqGeometry::swap(uint16_t &channel) {
   }
 }
 
-void MGSeqGeometry::max_wire(uint16_t w) {
+void MGSeqMappings::max_wire(uint16_t w) {
   max_wire_ = w;
 }
 
-uint16_t MGSeqGeometry::max_wire() const {
+uint16_t MGSeqMappings::max_wire() const {
   return max_wire_;
 }
 
-void MGSeqGeometry::swap_wires(bool s) {
+void MGSeqMappings::swap_wires(bool s) {
   swap_wires_ = s;
 }
 
-void MGSeqGeometry::swap_grids(bool s) {
+void MGSeqMappings::swap_grids(bool s) {
   swap_grids_ = s;
 }
 
-void MGSeqGeometry::max_channel(uint16_t g) {
+void MGSeqMappings::max_channel(uint16_t g) {
   max_channel_ = g;
 }
 
-bool MGSeqGeometry::swap_wires() const {
+bool MGSeqMappings::swap_wires() const {
   return swap_wires_;
 }
 
-bool MGSeqGeometry::swap_grids() const {
+bool MGSeqMappings::swap_grids() const {
   return swap_grids_;
 }
 
-uint16_t MGSeqGeometry::max_channel() const {
+uint16_t MGSeqMappings::max_channel() const {
   return max_channel_;
 }
 
-bool MGSeqGeometry::isWire(uint8_t VMM, uint16_t channel) const {
-  (void) VMM;
+bool MGSeqMappings::isWire(uint16_t channel) const {
   return (channel < max_wire());
 }
 
-bool MGSeqGeometry::isGrid(uint8_t VMM, uint16_t channel) const {
-  (void) VMM;
+bool MGSeqMappings::isGrid(uint16_t channel) const {
   return (channel >= max_wire()) && (channel < max_channel_);
 }
 
-uint16_t MGSeqGeometry::wire(uint8_t VMM, uint16_t channel) const {
-  (void) VMM;
+uint16_t MGSeqMappings::wire(uint16_t channel) const {
   if (swap_wires_) {
     swap(channel);
   }
   return channel;
 }
 
-uint16_t MGSeqGeometry::grid(uint8_t VMM, uint16_t channel) const {
-  (void) VMM;
+uint16_t MGSeqMappings::grid(uint16_t channel) const {
   if (swap_grids_) {
     swap(channel);
   }
   return channel - max_wire();
 }
 
-std::string MGSeqGeometry::debug(std::string prefix) const {
+std::string MGSeqMappings::debug(std::string prefix) const {
   std::stringstream ss;
 
   ss << prefix << "wires=chan[0," << (max_wire() - 1) << "] ";
@@ -93,12 +89,12 @@ std::string MGSeqGeometry::debug(std::string prefix) const {
     ss << "(swapped grids)";
   ss << "\n";
 
-  ss << ModuleChannelMappings::debug(prefix);
+  ss << ChannelMappings::debug(prefix);
 
   return ss.str();
 }
 
-void from_json(const nlohmann::json &j, MGSeqGeometry &g) {
+void from_json(const nlohmann::json &j, MGSeqMappings &g) {
 
   g.max_channel(j["max_channel"]);
   g.max_wire(j["max_wire"]);
@@ -108,7 +104,7 @@ void from_json(const nlohmann::json &j, MGSeqGeometry &g) {
   if (j.count("swap_grids"))
     g.swap_grids(j["swap_grids"]);
 
-  // same as for ModuleChannelMappings, could refactor?
+  // same as for ChannelMappings, could refactor?
 
   if (j.count("wire_filters")) {
     g.wire_filters = j["wire_filters"];

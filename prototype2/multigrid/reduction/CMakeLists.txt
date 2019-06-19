@@ -1,16 +1,16 @@
 set(MGEventAnalysisTest_SRC
-  ../geometry/ModuleChannelMappings.cpp
+  ../geometry/ChannelMappings.cpp
   ../geometry/DigitalGeometry.cpp
-  ../geometry/MGSeqGeometry.cpp
+  ../geometry/MGSeqMappings.cpp
   ../geometry/ModuleGeometry.cpp
   ../geometry/Filter.cpp
   EventAnalysisTest.cpp
   EventAnalysis.cpp
   )
 set(MGEventAnalysisTest_INC
-  ../geometry/ModuleChannelMappings.h
+  ../geometry/ChannelMappings.h
   ../geometry/DigitalGeometry.h
-  ../geometry/MGSeqGeometry.h
+  ../geometry/MGSeqMappings.h
   ../geometry/ModuleGeometry.h
   ../geometry/Filter.h
   EventAnalysis.h
@@ -21,10 +21,10 @@ set(TEST_DATA_PATH "${REFDATA}/multigrid/2018_09_03")
 if(EXISTS ${TEST_DATA_PATH})
   set(MGReductionTest_SRC
     ../geometry/Filter.cpp
-    ../geometry/ModuleChannelMappings.cpp
+    ../geometry/ChannelMappings.cpp
     ../geometry/ModuleGeometry.cpp
     ../geometry/DigitalGeometry.cpp
-    ../geometry/MGSeqGeometry.cpp
+    ../geometry/MGSeqMappings.cpp
     ../generators/ReaderReadouts.cpp
     ../mesytec/BuilderReadouts.cpp
     ../mesytec/BuilderMesytec.cpp
@@ -44,10 +44,10 @@ if(EXISTS ${TEST_DATA_PATH})
     ../mesytec/Sis3153Parser.h
     ../mesytec/Vmmr16Parser.h
     ../mesytec/Readout.h
-    ../geometry/ModuleChannelMappings.h
+    ../geometry/ChannelMappings.h
     ../geometry/ModuleGeometry.h
     ../geometry/DigitalGeometry.h
-    ../geometry/MGSeqGeometry.h
+    ../geometry/MGSeqMappings.h
     ../geometry/Filter.h
     ../Config.h
     EventAnalysis.h

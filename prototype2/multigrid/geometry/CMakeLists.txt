@@ -16,59 +16,59 @@ set(ModuleGeometryTest_INC
   )
 create_test_executable(ModuleGeometryTest)
 
-set(ModuleChannelMappingsTest_SRC
-  ModuleChannelMappingsTest.cpp
-  ModuleChannelMappings.cpp
+set(ChannelMappingsTest_SRC
+  ChannelMappingsTest.cpp
+  ChannelMappings.cpp
   Filter.cpp
   )
-set(ModuleChannelMappingsTest_INC
-  ModuleChannelMappings.h
+set(ChannelMappingsTest_INC
+  ChannelMappings.h
   Filter.h
   )
-create_test_executable(ModuleChannelMappingsTest)
+create_test_executable(ChannelMappingsTest)
 
-set(MGSeqGeometryTest_SRC
-  MGSeqGeometryTest.cpp
-  MGSeqGeometry.cpp
-  ModuleChannelMappings.cpp
+set(MGSeqMappingsTest_SRC
+  MGSeqMappingsTest.cpp
+  MGSeqMappings.cpp
+  ChannelMappings.cpp
   Filter.cpp
   )
-set(MGSeqGeometryTest_INC
-  ModuleChannelMappings.h
-  MGSeqGeometry.h
+set(MGSeqMappingsTest_INC
+  ChannelMappings.h
+  MGSeqMappings.h
   Filter.h
   )
-create_test_executable(MGSeqGeometryTest)
+create_test_executable(MGSeqMappingsTest)
 
-set(MG24GeometryTest_SRC
-  MG24GeometryTest.cpp
-  MGSeqGeometry.cpp
-  ModuleChannelMappings.cpp
+set(MG24MappingsTest_SRC
+  MG24MappingsTest.cpp
+  MGSeqMappings.cpp
+  ChannelMappings.cpp
   ModuleGeometry.cpp
   Filter.cpp
   )
-set(MG24GeometryTest_INC
-  ModuleChannelMappings.h
-  MG24Geometry.h
-  MGSeqGeometry.h
+set(MG24MappingsTest_INC
+  ChannelMappings.h
+  MG24Mappings.h
+  MGSeqMappings.h
   ModuleGeometry.h
   Filter.h
   )
-create_test_executable(MG24GeometryTest)
+create_test_executable(MG24MappingsTest)
 
 set(DigitalGeometryTest_SRC
-  ModuleChannelMappings.cpp
+  ChannelMappings.cpp
   DigitalGeometryTest.cpp
   DigitalGeometry.cpp
-  MGSeqGeometry.cpp
+  MGSeqMappings.cpp
   ModuleGeometry.cpp
   Filter.cpp
   )
 set(DigitalGeometryTest_INC
-  ModuleChannelMappings.h
+  ChannelMappings.h
   ModuleGeometry.h
   DigitalGeometry.h
-  MGSeqGeometry.h
+  MGSeqMappings.h
   Filter.h
   )
 create_test_executable(DigitalGeometryTest)
