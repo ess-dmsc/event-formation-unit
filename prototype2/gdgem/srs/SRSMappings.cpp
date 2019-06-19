@@ -51,25 +51,25 @@ void SRSMappings::set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t channel,
 
 uint8_t SRSMappings::get_plane(const Readout &readout) const {
   if (readout.fec >= mappings_.size())
-    return InvalidPlane;
+    return Hit::InvalidPlane;
   const auto &fec = mappings_[readout.fec];
   if (readout.chip_id >= fec.size())
-    return InvalidPlane;
+    return Hit::InvalidPlane;
   const auto &vmm = fec[readout.chip_id];
   if (readout.channel >= vmm.size())
-    return InvalidPlane;
+    return Hit::InvalidPlane;
   return vmm[readout.channel].plane;
 }
 
 uint16_t SRSMappings::get_strip(const Readout &readout) const {
   if (readout.fec >= mappings_.size())
-    return InvalidCoord;
+    return Hit::InvalidCoord;
   const auto &fec = mappings_[readout.fec];
   if (readout.chip_id >= fec.size())
-    return InvalidCoord;
+    return Hit::InvalidCoord;
   const auto &vmm = fec[readout.chip_id];
   if (readout.channel >= vmm.size())
-    return InvalidCoord;
+    return Hit::InvalidCoord;
   return vmm[readout.channel].coordinate;
 }
 
@@ -85,7 +85,7 @@ std::string SRSMappings::debug() const {
           ss << "\n      ";
         ss << k << ":";
         const auto &m = vmm[k];
-        if ((m.plane == InvalidPlane) || (m.coordinate == InvalidCoord))
+        if ((m.plane == Hit::InvalidPlane) || (m.coordinate == Hit::InvalidCoord))
           ss << "x ";
         else
           ss << static_cast<int32_t>(m.plane)

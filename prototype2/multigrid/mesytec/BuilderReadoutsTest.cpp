@@ -70,7 +70,9 @@ protected:
       }
       prev_time = h.time;
 
-      if (h.plane == 99) {
+      // \todo external_trigger_plane is depracated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
+      if ((h.plane == Multigrid::AbstractBuilder::external_trigger_plane) ||
+          (h.plane == Hit::PulsePlane)) {
         external_triggers++;
 
         if (RecentPulseTime) {

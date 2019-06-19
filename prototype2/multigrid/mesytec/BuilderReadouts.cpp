@@ -51,7 +51,7 @@ void BuilderReadouts::build(const std::vector<Readout>& readouts) {
   stats_readouts_total += readouts.size();
   for (const auto &r : readouts) {
     if (r.external_trigger) {
-      hit_.plane = external_trigger_plane;
+      hit_.plane = Hit::PulsePlane;
       hit_.coordinate = 0;
       hit_.weight = 0;
     } else if (digital_geometry_.isWire(r.bus, r.channel)) {

@@ -11,6 +11,12 @@ class AbstractBuilder {
 public:
   static constexpr uint8_t wire_plane {0};
   static constexpr uint8_t grid_plane {1};
+
+  // \todo Depracated. Use Hit::PulsePlane instead, which should be =254,
+  //       as defined in static constexpr in common/clustering Hit.h
+  //       Some of the h5 files might still be using 99 for the pulse plane, so
+  //       either convert those files or at least document this well after the EFU
+  //       moves on to other reference data sets for this pipeline. @MartinShetty
   static constexpr uint8_t external_trigger_plane {99};
 
   virtual void parse(Buffer<uint8_t> buffer) = 0;

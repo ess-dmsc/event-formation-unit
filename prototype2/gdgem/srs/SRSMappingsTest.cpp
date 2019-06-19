@@ -14,8 +14,8 @@ protected:
   uint16_t bad_plane;
   uint16_t bad_coord;
   virtual void SetUp() {
-    bad_plane = SRSMappings::InvalidPlane;
-    bad_coord = SRSMappings::InvalidCoord;
+    bad_plane = Hit::InvalidPlane;
+    bad_coord = Hit::InvalidCoord;
   }
   virtual void TearDown() {  }
 };

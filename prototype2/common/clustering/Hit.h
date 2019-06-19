@@ -35,6 +35,7 @@
 #pragma once
 
 #include <common/DumpFile.h>
+//#include <limits>
 
 struct __attribute__ ((packed)) Hit {
   /// \todo use constexpr string_view when c++17 arrives
@@ -50,6 +51,10 @@ struct __attribute__ ((packed)) Hit {
 
   /// \brief prints values for debug purposes
   std::string debug() const;
+
+  static constexpr uint16_t InvalidCoord {std::numeric_limits<uint16_t>::max()};
+  static constexpr uint8_t InvalidPlane {std::numeric_limits<uint8_t>::max()};
+  static constexpr uint8_t PulsePlane {std::numeric_limits<uint8_t>::max() - 1};
 };
 
 namespace hdf5 {

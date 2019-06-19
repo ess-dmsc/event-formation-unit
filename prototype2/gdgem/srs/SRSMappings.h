@@ -10,10 +10,8 @@
 #pragma once
 
 #include <gdgem/nmx/Readout.h>
-#include <list>
-#include <string>
+#include <common/clustering/Hit.h>
 #include <vector>
-#include <limits>
 
 namespace Gem {
 
@@ -21,8 +19,6 @@ class SRSMappings {
 public:
   static constexpr size_t MaxChannelsInVMM {64};
   static constexpr size_t MaxChipsInFEC {16};
-  static constexpr uint16_t InvalidCoord {std::numeric_limits<uint16_t>::max()};
-  static constexpr uint8_t InvalidPlane {std::numeric_limits<uint8_t>::max()};
 
   //// \brief define mappings for sequence of chips in one plane
   /// \param planeID ID of plane (edge of panel) being defined
@@ -52,8 +48,8 @@ public:
 private:
   struct MappingResult
   {
-    uint8_t plane {InvalidPlane};
-    uint16_t coordinate {InvalidCoord};
+    uint8_t plane {Hit::InvalidPlane};
+    uint16_t coordinate {Hit::InvalidCoord};
   };
 
   using ChipMappings = std::vector<MappingResult>;

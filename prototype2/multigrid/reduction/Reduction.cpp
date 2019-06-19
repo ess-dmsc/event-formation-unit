@@ -19,7 +19,9 @@ void Reduction::ingest(HitContainer &hits) {
     }
     previous_time_ = h.time;
 
-    if (h.plane == AbstractBuilder::external_trigger_plane) {
+    // \todo external_trigger_plane is depracated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
+    if ((h.plane == AbstractBuilder::external_trigger_plane) ||
+        (h.plane == Hit::PulsePlane)) {
       pulse_times.push_back(h);
     } else if (h.plane == AbstractBuilder::wire_plane) {
       wire_clusters.insert(h);

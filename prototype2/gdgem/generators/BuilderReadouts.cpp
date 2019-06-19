@@ -49,7 +49,7 @@ void BuilderReadouts::process_buffer(char *buf, size_t size) {
       continue;
     }
 
-    if (hit.coordinate == SRSMappings::InvalidCoord) {
+    if (hit.coordinate == Hit::InvalidCoord) {
       stats.geom_errors++;
       LOG(PROCESS, Sev::Debug, "Bad SRS mapping (coordinate) -- fec={}, chip={}",
           readout.fec, readout.chip_id);
