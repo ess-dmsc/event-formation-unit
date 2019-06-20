@@ -11,6 +11,9 @@
 
 ///
 StatPublisher::StatPublisher(std::string ip, int port) :IpAddress(ip), TCPPort(port) {
+  if (not Socket::isValidIp(IpAddress)) {
+    IpAddress = Socket::getHostByName(IpAddress);
+  }
   StatDb.reset(new TCPTransmitter(IpAddress.c_str(), TCPPort));
 }
 
