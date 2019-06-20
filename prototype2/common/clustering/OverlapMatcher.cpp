@@ -14,12 +14,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-OverlapMatcher::OverlapMatcher(uint64_t latency)
-    : AbstractMatcher(latency) {}
-
-OverlapMatcher::OverlapMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2)
-    : AbstractMatcher(latency, plane1, plane2) {}
-
 void OverlapMatcher::match(bool flush) {
   unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
     return c1.time_start() < c2.time_start();

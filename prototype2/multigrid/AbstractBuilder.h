@@ -13,7 +13,7 @@ public:
   static constexpr uint8_t wire_plane {0};
   static constexpr uint8_t grid_plane {1};
 
-  // \todo Depracated. Use Hit::PulsePlane instead, which should be =254,
+  // \todo deprecated. Use Hit::PulsePlane instead, which should be =254,
   //       as defined in static constexpr in common/clustering Hit.h
   //       Some of the h5 files might still be using 99 for the pulse plane, so
   //       either convert those files or at least document this well after the EFU

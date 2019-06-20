@@ -16,13 +16,8 @@
 
 class OverlapMatcher : public AbstractMatcher {
 public:
-  /// \brief OverlapMatcher constructor
-  /// \sa AbstractMatcher
-  OverlapMatcher(uint64_t latency);
-
-  /// \brief OverlapMatcher constructor
-  /// \sa AbstractMatcher
-  OverlapMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2);
+  // Inherit constructor
+  using AbstractMatcher::AbstractMatcher;
 
   /// \brief Match queued up clusters into events.
   ///         Clusters that overlap in time are joined into events.

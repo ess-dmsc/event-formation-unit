@@ -46,6 +46,33 @@ public:
   ClusterContainer clusters;     ///< clustered hits
   size_t stats_cluster_count{0}; ///< cumulative number of clusters produced
 
+  /// \brief convenience function for sorting Hits by increasing time
+  static inline void time_order_hits(HitContainer& hits)
+  {
+    std::sort(hits.begin(), hits.end(),
+              [](const Hit &e1, const Hit &e2) {
+                return e1.time < e2.time;
+              });
+  }
+
+  /// \brief convenience function for sorting Hits by increasing coordinate
+  static inline void coord_order_hits(HitContainer& hits)
+  {
+    std::sort(hits.begin(), hits.end(),
+              [](const Hit &e1, const Hit &e2) {
+                return e1.coordinate < e2.coordinate;
+              });
+  }
+
+  /// \brief convenience function for sorting Hits by decreasing weight
+  static inline void weight_order_hits(HitContainer& hits)
+  {
+    std::sort(hits.begin(), hits.end(),
+              [](const Hit &e1, const Hit &e2) {
+                return e1.weight > e2.weight;
+              });
+  }
+
 protected:
 
   /// \brief moves cluster into clusters container, increments counter

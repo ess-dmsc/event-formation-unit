@@ -31,10 +31,7 @@ public:
   }
 
   void flush() {
-    std::sort(buffer.begin(), buffer.end(),
-              [](const Hit &e1, const Hit &e2) {
-                return e1.time < e2.time;
-              });
+    AbstractClusterer::time_order_hits(buffer);
     if (clusterer)
       clusterer->cluster(buffer);
     buffer.clear();

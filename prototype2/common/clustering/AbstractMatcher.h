@@ -21,19 +21,19 @@
 
 class AbstractMatcher {
 public:
+  std::vector<Event> matched_events;
+  size_t stats_event_count{0}; ///< cumulative number of matched events
+  // \todo discarded, other counters?
+
+public:
   /// \brief AbstractMatcher constructor
   /// \param latency Minimum time gap to latest cluster for a cluster to be
   ///         considered for matching. Of the latest clusters in both planes,
   ///         the earlier one will be considered for this comparison.
   /// \param plane1 id of first plane selected for matching
   /// \param plane2 id of second plane selected for matching
-  AbstractMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2);
-
-  /// \brief AbstractMatcher constructor
-  /// \param latency Minimum time gap to latest cluster for a cluster to be
-  ///         considered for matching. Of the latest clusters in both planes,
-  ///         the earlier one will be considered for this comparison.
-  AbstractMatcher(uint64_t latency);
+  /// \param pulse_plane id of plane selected for periodic pulse/chopper events
+  AbstractMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2, uint8_t pulse_plane);
 
   virtual ~AbstractMatcher() = default;
 
@@ -41,13 +41,15 @@ public:
 
   /// \brief insert new clusters, queueing them up for matching
   /// \param plane identified plane of all clusters in container
-  /// \param other container of clusters in one plane. Clusters must be
+  /// \param clusters container of clusters in one plane. Clusters must be
   ///         chronological to the extent at the latency guarantee holds, i.e.
   ///         if container contains an cluster with start_time=T, then no
   ///         clusters can arrive with end_time>=(T-latency).
-  void insert(uint8_t plane, ClusterContainer &c);
+  void insert(uint8_t plane, ClusterContainer &clusters);
 
   // \todo document this
+  // \todo perhaps queue up pulses outside of matcher? Especially if we have multiple matchers
+  //       for different detector modules or panels
   void insert_pulses(HitContainer &hits);
 
   /// \brief match queued up clusters into events
@@ -56,15 +58,13 @@ public:
   ///        latency considerations
   virtual void match(bool flush) = 0;
 
-  std::vector<Event> matched_events;
-  size_t stats_event_count{0}; ///< cumulative number of matched events
-  // \todo discarded, other counters?
+  // \todo virtual std::string debug(std::string prepend) const;
 
 protected:
   uint64_t latency_{0}; ///< time gap for a cluster to be considered for matching
   uint8_t plane1_{0};
   uint8_t plane2_{1};
-  uint8_t pulse_plane_{99}; // \todo parametrize this
+  uint8_t pulse_plane_{Hit::PulsePlane};
 
   ClusterContainer unmatched_clusters_;
   uint64_t latest_x_{0};
@@ -75,12 +75,12 @@ protected:
 
   /// \brief Moves event into events container; increments counter.
   /// \param event to be stashed
-  void stash_event(Event& event);
+  void stash_event(Event &event);
 
   /// \brief Determines if cluster is ready to be matched. Compares the end time of
   ///         submitted cluster to the start time of the latest cluster in queue.
   ///         Of the latest clusters in both planes, the earlier one will be
   ///         considered. Uses the latency criterion as threshold.
   /// \param cluster to be considered for matching
-  bool ready_to_be_matched(const Cluster& cluster) const;
+  bool ready_to_be_matched(const Cluster &cluster) const;
 };

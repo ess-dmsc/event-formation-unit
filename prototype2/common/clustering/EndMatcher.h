@@ -16,16 +16,11 @@
 
 class EndMatcher : public AbstractMatcher {
 public:
-  /// \brief EndMatcher constructor
-  /// \param max_delta_time how close clusters' end times must be to merge
-  /// \sa AbstractMatcher
-  EndMatcher(uint64_t max_delta_time, uint64_t latency);
-  
-  /// \brief EndMatcher constructor
-  /// \param max_delta_time how close clusters' end times must be to merge
-  /// \sa AbstractMatcher
-  EndMatcher(uint64_t max_delta_time, uint64_t latency,
-             uint8_t plane1, uint8_t plane2);
+  // Inherit constructor
+  using AbstractMatcher::AbstractMatcher;
+
+  // \todo document this
+  void set_max_delta_time(uint64_t max_delta_time);
 
   /// \brief Match queued up clusters into events.
   ///         Clusters with end times within max_delta_time are joined.

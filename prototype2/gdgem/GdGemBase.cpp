@@ -226,9 +226,13 @@ void GdGemBase::apply_configuration() {
   clusterer_y_ = std::make_shared<GapClusterer>(
       nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap);
 
-  matcher_ = std::make_shared<GapMatcher>(
-      nmx_opts.time_config.acquisition_window()*5,
-      nmx_opts.matcher_max_delta_time);
+  auto pulse_plane = Hit::PulsePlane;
+  auto matcher = std::make_shared<GapMatcher>(
+      nmx_opts.time_config.acquisition_window()*5, 0, 1, pulse_plane);
+
+  matcher->set_minimum_time_gap(nmx_opts.matcher_max_delta_time);
+
+  matcher_ = matcher;
 
   hists_.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
@@ -237,10 +241,7 @@ void GdGemBase::apply_configuration() {
 
 void GdGemBase::cluster_plane(HitContainer &hits,
                               std::shared_ptr<AbstractClusterer> clusterer, bool flush) {
-  std::sort(hits.begin(), hits.end(),
-            [](const Hit &e1, const Hit &e2) {
-              return e1.time < e2.time;
-            });
+  AbstractClusterer::time_order_hits(hits);
   clusterer->cluster(hits);
   hits.clear();
   if (flush) {

@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <gdgem/nmx/MGAnalysis.h>
+#include <common/clustering/AbstractClusterer.h>
 #include <cmath>
 #include <set>
 #include <sstream>
@@ -48,10 +49,7 @@ MultiDimResult MGAnalyzer::analyze(Event& event) const {
     double ymass{0};
     double ysum{0};
 
-    std::sort(event.c1.hits.begin(), event.c1.hits.end(),
-              [](const Hit &c2, const Hit &c1) {
-                return c2.weight > c1.weight;
-              });
+    AbstractClusterer::weight_order_hits(event.c1.hits);
 
     uint16_t highest_adc = event.c1.hits.front().weight;
     for (const auto &h : event.c1.hits) {
@@ -76,10 +74,7 @@ MultiDimResult MGAnalyzer::analyze(Event& event) const {
     double xsum{0};
     double zsum{0};
 
-    std::sort(event.c2.hits.begin(), event.c2.hits.end(),
-              [](const Hit &c2, const Hit &c1) {
-                return c2.weight > c1.weight;
-              });
+    AbstractClusterer::weight_order_hits(event.c2.hits);
 
     uint16_t highest_adc = event.c2.hits.front().weight;
     for (const auto &h : event.c2.hits) {

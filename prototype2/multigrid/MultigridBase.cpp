@@ -98,7 +98,7 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
 
   for (auto &event : mg_config.reduction.matcher.matched_events) {
 
-    // \todo external_trigger_plane is depracated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
+    // \todo external_trigger_plane is deprecated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
     if ((event.plane1() == Multigrid::AbstractBuilder::external_trigger_plane) ||
         (event.plane1() == Hit::PulsePlane)) {
       mystats.pulses++;

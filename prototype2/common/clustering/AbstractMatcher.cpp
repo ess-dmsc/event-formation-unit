@@ -12,23 +12,21 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-AbstractMatcher::AbstractMatcher(uint64_t latency)
-    : latency_(latency) {}
-AbstractMatcher::AbstractMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2)
-    : latency_(latency), plane1_(plane1), plane2_(plane2) {}
+AbstractMatcher::AbstractMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2, uint8_t pulse_plane)
+    : latency_(latency), plane1_(plane1), plane2_(plane2), pulse_plane_(pulse_plane) {}
 
-void AbstractMatcher::insert(uint8_t plane, ClusterContainer &c) {
-  if (c.empty()) {
+void AbstractMatcher::insert(uint8_t plane, ClusterContainer &clusters) {
+  if (clusters.empty()) {
     return;
   }
   if (plane == plane1_) {
-    latest_x_ = std::max(latest_x_, c.back().time_start());
+    latest_x_ = std::max(latest_x_, clusters.back().time_start());
   } else if (plane == plane2_) {
-    latest_y_ = std::max(latest_y_, c.back().time_start());
+    latest_y_ = std::max(latest_y_, clusters.back().time_start());
   } else {
     return;
   }
-  unmatched_clusters_.splice(unmatched_clusters_.end(), c);
+  unmatched_clusters_.splice(unmatched_clusters_.end(), clusters);
 }
 
 void AbstractMatcher::insert_pulses(HitContainer &hits) {

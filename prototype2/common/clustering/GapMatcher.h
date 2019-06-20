@@ -1,8 +1,8 @@
 /* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
-/// \file OverlapMatcher.h
-/// \brief OverlapMatcher class definition
+/// \file GapMatcher.h
+/// \brief GapMatcher class definition
 ///
 //===----------------------------------------------------------------------===//
 
@@ -10,21 +10,21 @@
 
 #include <common/clustering/AbstractMatcher.h>
 
-/// \class OverlapMatcher OverlapMatcher.h
+/// \class GapMatcher GapMatcher.h
 /// \brief Matcher implementation that joins clusters into events
 ///         if they overlap in time.
 
 class GapMatcher : public AbstractMatcher {
-private:
-  uint64_t allowed_time_gap_{0};
 public:
-  /// \brief OverlapMatcher constructor
-  /// \sa AbstractMatcher
-  GapMatcher(uint64_t latency, uint64_t time_gap);
+  // Inherit constructor
+  using AbstractMatcher::AbstractMatcher;
 
-  /// \brief OverlapMatcher constructor
+  // \todo document this
+  void set_minimum_time_gap(uint64_t minimum_time_gap);
+  
+  /// \brief GapMatcher constructor
   /// \sa AbstractMatcher
-  /// OverlapMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2);
+  /// GapMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2);
 
   /// \brief Match queued up clusters into events.
   ///         Clusters that overlap in time are joined into events.
@@ -32,4 +32,6 @@ public:
   /// \param flush if all queued clusters should be matched regardless of
   ///        latency considerations
   void match(bool flush) override;
+private:
+  uint64_t minimum_time_gap_{0};
 };

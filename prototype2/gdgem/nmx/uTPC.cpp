@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <gdgem/nmx/uTPC.h>
+#include <common/clustering/AbstractClusterer.h>
 #include <cmath>
 #include <set>
 #include <sstream>
@@ -26,10 +27,7 @@ CoordResult utpcAnalyzer::analyze(Cluster &cluster) const {
     return ret;
   }
 
-  std::sort(cluster.hits.begin(), cluster.hits.end(),
-            [](const Hit &c1, const Hit &c2) {
-              return c1.time < c2.time;
-            });
+  AbstractClusterer::time_order_hits(cluster.hits);
 
   double center_sum{0};
   double center_count{0};

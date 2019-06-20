@@ -13,14 +13,14 @@ protected:
 };
 
 TEST_F(GapMatcherTest, Constructor) {
-  GapMatcher matcher(125, 70);
+  GapMatcher matcher(125, 0, 1, 255);
+  matcher.set_minimum_time_gap(70);
+
   ASSERT_EQ(matcher.stats_event_count, 0);
   ASSERT_EQ(matcher.matched_events.size(), 0);
 
   matcher.match(true); // ever called with false?
 }
-
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

@@ -70,7 +70,7 @@ protected:
       }
       prev_time = h.time;
 
-      // \todo external_trigger_plane is depracated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
+      // \todo external_trigger_plane is deprecated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
       if ((h.plane == Multigrid::AbstractBuilder::external_trigger_plane) ||
           (h.plane == Hit::PulsePlane)) {
         external_triggers++;

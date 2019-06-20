@@ -1,8 +1,8 @@
 /* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
-/// \file OverlapMatcher.h
-/// \brief OverlapMatcher class implementation
+/// \file GapMatcher.h
+/// \brief GapMatcher class implementation
 ///
 //===----------------------------------------------------------------------===//
 
@@ -14,48 +14,44 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-GapMatcher::GapMatcher(uint64_t latency, uint64_t time_gap)
-    : AbstractMatcher(latency), allowed_time_gap_(time_gap) {}
+void GapMatcher::set_minimum_time_gap(uint64_t minimum_time_gap) {
+  minimum_time_gap_ = minimum_time_gap;
+}
 
-// OverlapMatcher::OverlapMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2)
-//     : AbstractMatcher(latency, plane1, plane2) {}
+void GapMatcher::match(bool flush) {
+  unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
+    return c1.time_start() < c2.time_start();
+  });
 
+  XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u", unmatched_clusters_.size());
 
-  void GapMatcher::match(bool flush) {
-    unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-      return c1.time_start() < c2.time_start();
-    });
+  Event evt{plane1_, plane2_};
+  Event pulse_evt{pulse_plane_, pulse_plane_};
+  while (!unmatched_clusters_.empty()) {
 
-    XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u", unmatched_clusters_.size());
+    auto cluster = unmatched_clusters_.begin();
 
-    Event evt{plane1_, plane2_};
-    Event pulse_evt{pulse_plane_, pulse_plane_};
-    while (!unmatched_clusters_.empty()) {
-
-      auto cluster = unmatched_clusters_.begin();
-
-      if (!flush && !ready_to_be_matched(*cluster)) {
-        XTRACE(CLUSTER, DEB, "not ready to be matched");
-        break;
-      }
-
-      if (!evt.empty() && (evt.time_gap(*cluster) > allowed_time_gap_)) {
-        XTRACE(CLUSTER, DEB, "time gap too large");
-        stash_event(evt);
-        evt.clear();
-      }
-
-      if (cluster->plane() == pulse_plane_) {
-        pulse_evt.merge(*cluster);
-        stash_event(pulse_evt);
-        pulse_evt.clear();
-      }
-      else {
-        evt.merge(*cluster);
-      }
-
-      unmatched_clusters_.pop_front();
+    if (!flush && !ready_to_be_matched(*cluster)) {
+      XTRACE(CLUSTER, DEB, "not ready to be matched");
+      break;
     }
+
+    if (!evt.empty() && (evt.time_gap(*cluster) > minimum_time_gap_)) {
+      XTRACE(CLUSTER, DEB, "time gap too large");
+      stash_event(evt);
+      evt.clear();
+    }
+
+    if (cluster->plane() == pulse_plane_) {
+      pulse_evt.merge(*cluster);
+      stash_event(pulse_evt);
+      pulse_evt.clear();
+    } else {
+      evt.merge(*cluster);
+    }
+
+    unmatched_clusters_.pop_front();
+  }
 
   if (!evt.empty()) {
     if (flush) {

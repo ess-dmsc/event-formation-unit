@@ -6,7 +6,7 @@
 class OverlapMatcherTest : public TestBase {
 protected:
   ClusterContainer x, y;
-  OverlapMatcher matcher{600, 0, 1};
+  OverlapMatcher matcher{600, 0, 1, 255};
 
   void add_cluster(ClusterContainer &ret, uint8_t plane,
                    uint16_t coord_start, uint16_t coord_end, uint16_t coord_step,

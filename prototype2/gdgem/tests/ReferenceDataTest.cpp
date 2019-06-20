@@ -36,10 +36,8 @@ class HitSorter {
   }
 
   void flush() {
-    std::sort(buffer.begin(), buffer.end(),
-              [](const Hit &e1, const Hit &e2) {
-                return e1.time < e2.time;
-              });
+    AbstractClusterer::time_order_hits(buffer);
+
     if (clusterer)
       clusterer->cluster(buffer);
     buffer.clear();
@@ -70,7 +68,7 @@ protected:
 
   std::shared_ptr<AbstractMatcher> matcher;
 
-  virtual void SetUp() {
+  void SetUp() override {
     DataPath = TEST_DATA_PATH;
     opts = NMXConfig(DataPath + "/readouts/config.json", "");
 
@@ -86,12 +84,14 @@ protected:
         std::make_shared<GapClusterer>(opts.clusterer_y.max_time_gap,
                                        opts.clusterer_y.max_strip_gap);
 
-    matcher = std::make_shared<GapMatcher>(
-        opts.time_config.acquisition_window()*5,
-        opts.matcher_max_delta_time);
+    auto pulse_plane = Hit::PulsePlane;
+    auto gap_matcher = std::make_shared<GapMatcher>(
+        opts.time_config.acquisition_window()*5, 0, 1, pulse_plane);
+    gap_matcher->set_minimum_time_gap(opts.matcher_max_delta_time);
+    matcher = gap_matcher;
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
   }
 
 

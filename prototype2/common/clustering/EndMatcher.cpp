@@ -10,12 +10,9 @@
 #include <cmath>
 #include <algorithm>
 
-EndMatcher::EndMatcher(uint64_t max_delta_time, uint64_t latency)
-    : AbstractMatcher(latency), max_delta_time_(max_delta_time) {}
-
-EndMatcher::EndMatcher(uint64_t max_delta_time, uint64_t latency,
-                       uint8_t plane1, uint8_t plane2)
-    : AbstractMatcher(latency, plane1, plane2), max_delta_time_(max_delta_time) {}
+void EndMatcher::set_max_delta_time(uint64_t max_delta_time) {
+  max_delta_time_ = max_delta_time;
+}
 
 uint64_t EndMatcher::delta_end(const Event &event, const Cluster &cluster) const {
   if (event.time_end() > cluster.time_end())

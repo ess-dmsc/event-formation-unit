@@ -9,6 +9,10 @@
 
 namespace Multigrid {
 
+Reduction::Reduction() {
+  matcher.set_minimum_time_gap(1);
+}
+
 void Reduction::ingest(HitContainer &hits) {
   for (const auto &h : hits) {
 
@@ -19,7 +23,7 @@ void Reduction::ingest(HitContainer &hits) {
     }
     previous_time_ = h.time;
 
-    // \todo external_trigger_plane is depracated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
+    // \todo external_trigger_plane is deprecated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
     if ((h.plane == AbstractBuilder::external_trigger_plane) ||
         (h.plane == Hit::PulsePlane)) {
       pulse_times.push_back(h);

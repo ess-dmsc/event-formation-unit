@@ -48,10 +48,7 @@ void GapClusterer::flush() {
 
 void GapClusterer::cluster_by_coordinate() {
   // First, sort in terms of coordinate
-  std::sort(current_time_cluster_.begin(), current_time_cluster_.end(),
-            [](const Hit &e1, const Hit &e2) {
-              return e1.coordinate < e2.coordinate;
-            });
+  AbstractClusterer::coord_order_hits(current_time_cluster_);
 
   Cluster cluster;
   XTRACE(CLUSTER, DEB, "first coord %u, last coord %u",

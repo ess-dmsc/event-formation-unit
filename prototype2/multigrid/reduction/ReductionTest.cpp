@@ -82,7 +82,7 @@ protected:
 
     DynamicHist pulse_positive_diff, pulse_negative_diff;
     for (const auto &e : reduction.matcher.matched_events) {
-      // \todo external_trigger_plane is depracated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
+      // \todo external_trigger_plane is deprecated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
       if ((e.plane1() != AbstractBuilder::external_trigger_plane) &&
           (e.plane1() != Hit::PulsePlane)) {
         continue;
@@ -122,7 +122,7 @@ protected:
     DynamicHist event_positive_diff, event_negative_diff;
     DynamicHist wire_multiplicity, wire_span, grid_mltiplicity, grid_span, time_span;
     for (const auto &e : reduction.matcher.matched_events) {
-      // \todo external_trigger_plane is depracated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
+      // \todo external_trigger_plane is deprecated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
       if ((e.plane1() == AbstractBuilder::external_trigger_plane) ||
           (e.plane1() == Hit::PulsePlane)) {
         continue;

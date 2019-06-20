@@ -1,6 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <multigrid/reduction/EventAnalysis.h>
+#include <common/clustering/AbstractClusterer.h>
 #include <cmath>
 #include <set>
 #include <sstream>
@@ -41,10 +42,7 @@ NeutronPosition EventAnalyzer::analyze(Event &event) {
     double xsum{0};
     double zsum{0};
 
-    std::sort(event.c1.hits.begin(), event.c1.hits.end(),
-              [](const Hit &c1, const Hit &c2) {
-                return c1.weight > c2.weight;
-              });
+    AbstractClusterer::time_order_hits(event.c1.hits);
 
     uint16_t highest_adc = event.c1.hits.front().weight;
     for (const auto &h : event.c1.hits) {
@@ -73,10 +71,7 @@ NeutronPosition EventAnalyzer::analyze(Event &event) {
     double ymass{0};
     double ysum{0};
 
-    std::sort(event.c2.hits.begin(), event.c2.hits.end(),
-              [](const Hit &c1, const Hit &c2) {
-                return c1.weight > c2.weight;
-              });
+    AbstractClusterer::time_order_hits(event.c2.hits);
 
     uint16_t highest_adc = event.c2.hits.front().weight;
     for (const auto &h : event.c2.hits) {

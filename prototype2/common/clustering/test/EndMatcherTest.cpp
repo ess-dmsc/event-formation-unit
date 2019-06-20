@@ -6,7 +6,11 @@
 class EndMatcherTest : public TestBase {
 protected:
   ClusterContainer x, y;
-  EndMatcher matcher{200, 600, 0, 1};
+  EndMatcher matcher{600, 0, 1, 255};
+
+  void SetUp() override {
+    matcher.set_max_delta_time(200);
+  }
 
   Cluster mock_cluster(uint8_t plane, uint16_t strip_start, uint16_t strip_end,
                        uint64_t time_start, uint64_t time_end) {

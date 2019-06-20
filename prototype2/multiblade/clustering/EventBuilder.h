@@ -11,15 +11,16 @@
 #include <vector>
 #include <deque>
 
-static const uint64_t latency{125}; // 2us @ 16ns/tick (2000/16)
-static const uint64_t coordgap{1};  // allow no gaps between channels
-static const uint64_t timegap{70};  // expect readouts in a plane to be at least this close
+// \todo put these into namespace scope
+static constexpr uint64_t latency{125}; // 2us @ 16ns/tick (2000/16)
+static constexpr uint64_t coordgap{1};  // allow no gaps between channels
+static constexpr uint64_t timegap{70};  // expect readouts in a plane to be at least this close
 
 namespace Multiblade {
 
 class EventBuilder {
 public:
-  EventBuilder() = default;
+  EventBuilder();
 
   // \todo pass by rvalue?
   void insert(Hit hit);
@@ -34,7 +35,7 @@ public:
   GapClusterer c0{timegap, coordgap}, c1{timegap, coordgap};
 
   // \todo parametrize
-  GapMatcher matcher{latency, timegap};
+  GapMatcher matcher{latency, 0, 1, Hit::PulsePlane};
 };
 
 }

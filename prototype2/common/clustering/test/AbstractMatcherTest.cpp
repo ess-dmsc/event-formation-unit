@@ -12,10 +12,7 @@
 
 class MockMatcher : public AbstractMatcher {
 public:
-  explicit MockMatcher(uint64_t latency)
-      : AbstractMatcher(latency) {}
-  MockMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2)
-      : AbstractMatcher(latency, plane1, plane2) {}
+  using AbstractMatcher::AbstractMatcher;
 
   void match(bool) override {}
   using AbstractMatcher::latency_;
@@ -47,21 +44,14 @@ protected:
 };
 
 TEST_F(AbstractMatcherTest, Construction1) {
-  MockMatcher matcher(100, 3, 7);
+  MockMatcher matcher(100, 3, 7, 255);
   EXPECT_EQ(matcher.latency_, 100);
   EXPECT_EQ(matcher.plane1_, 3);
   EXPECT_EQ(matcher.plane2_, 7);
 }
 
-TEST_F(AbstractMatcherTest, Construction2) {
-  MockMatcher matcher(100);
-  EXPECT_EQ(matcher.latency_, 100);
-  EXPECT_EQ(matcher.plane1_, 0);
-  EXPECT_EQ(matcher.plane2_, 1);
-}
-
 TEST_F(AbstractMatcherTest, InsertingMovesData) {
-  MockMatcher matcher(100);
+  MockMatcher matcher(100, 0, 1, 255);
 
   add_cluster(x, 0, 0, 10, 1, 0, 200, 10);
   matcher.insert(0, x);
@@ -70,7 +60,7 @@ TEST_F(AbstractMatcherTest, InsertingMovesData) {
 }
 
 TEST_F(AbstractMatcherTest, AcceptXY) {
-  MockMatcher matcher(100);
+  MockMatcher matcher(100, 0, 1, 255);
 
   add_cluster(x, 0, 0, 10, 1, 100, 200, 10);
   matcher.insert(0, x);
@@ -88,7 +78,7 @@ TEST_F(AbstractMatcherTest, AcceptXY) {
 }
 
 TEST_F(AbstractMatcherTest, AcceptOtherPlanes) {
-  MockMatcher matcher(100, 3, 4);
+  MockMatcher matcher(100, 3, 4, 255);
 
   add_cluster(x, 3, 0, 10, 1, 100, 200, 10);
   matcher.insert(3, x);
@@ -106,7 +96,7 @@ TEST_F(AbstractMatcherTest, AcceptOtherPlanes) {
 }
 
 TEST_F(AbstractMatcherTest, RejectUnselectedPlanes) {
-  MockMatcher matcher(100, 3, 4);
+  MockMatcher matcher(100, 3, 4, 255);
 
   add_cluster(x, 7, 0, 10, 1, 100, 200, 10);
   matcher.insert(7, x);
@@ -124,7 +114,7 @@ TEST_F(AbstractMatcherTest, RejectUnselectedPlanes) {
 }
 
 TEST_F(AbstractMatcherTest, Ready) {
-  MockMatcher matcher(100);
+  MockMatcher matcher(100, 0, 1, 255);
 
   Cluster c;
   c.insert({0,0,0,0});
@@ -147,7 +137,7 @@ TEST_F(AbstractMatcherTest, Ready) {
 }
 
 TEST_F(AbstractMatcherTest, Stash) {
-  MockMatcher matcher(100);
+  MockMatcher matcher(100, 0, 1, 255);
 
   Event e;
   e.insert({0,0,0,0});

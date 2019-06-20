@@ -8,6 +8,7 @@ namespace Multigrid {
 
 class Reduction {
 public:
+  Reduction();
 
   void ingest(HitContainer &hits);
 
@@ -20,7 +21,7 @@ public:
 
   // Just greater than shortest pulse period of 266662 ticks
   // Will have to be adjusted for other experimental setups
-  GapMatcher matcher{300000, 1};
+  GapMatcher matcher{300000, 0, 1, Hit::PulsePlane};
 
 private:
   GapClusterer wire_clusters{0, 1};
