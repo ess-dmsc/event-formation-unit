@@ -14,6 +14,29 @@
 
 namespace Multigrid {
 
+bool ChannelMappings::map(Hit &hit, uint16_t channel, uint16_t adc) const {
+  if (this->isWire(channel)) {
+    hit.coordinate = this->wire(channel);
+    hit.plane = wire_plane;
+    hit.weight = wire_filters.rescale(hit.coordinate, adc);
+    if (!wire_filters.valid(hit.coordinate, hit.weight)) {
+      return false;
+    }
+  } else if (this->isGrid(channel)) {
+    hit.coordinate = this->grid(channel);
+    hit.plane = grid_plane;
+    hit.weight = grid_filters.rescale(hit.coordinate, adc);
+    if (!grid_filters.valid(hit.coordinate, hit.weight)) {
+      return false;
+    }
+  } else {
+    hit.plane = Hit::InvalidPlane;
+    hit.coordinate = Hit::InvalidCoord;
+    return false;
+  }
+  return true;
+}
+
 std::string ChannelMappings::debug(std::string prefix) const {
   std::stringstream ss;
 

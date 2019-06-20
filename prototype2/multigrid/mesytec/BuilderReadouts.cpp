@@ -47,32 +47,27 @@ void BuilderReadouts::parse(Buffer<uint8_t> buffer) {
   }
 }
 
-void BuilderReadouts::build(const std::vector<Readout>& readouts) {
+void BuilderReadouts::build(const std::vector<Readout> &readouts) {
   stats_readouts_total += readouts.size();
   for (const auto &r : readouts) {
     if (r.external_trigger) {
       hit_.plane = Hit::PulsePlane;
-      hit_.coordinate = 0;
+      hit_.coordinate = Hit::InvalidCoord;
       hit_.weight = 0;
-    } else if (digital_geometry_.isWire(r.bus, r.channel)) {
-      hit_.weight = digital_geometry_.rescale(r.bus, r.channel, r.adc);
-      if (!digital_geometry_.is_valid(r.bus, r.channel, hit_.weight)) {
-        stats_readout_filter_rejects++;
-        continue;
-      }
-      hit_.coordinate = digital_geometry_.wire(r.bus, r.channel);
-      hit_.plane = wire_plane;
-    } else if (digital_geometry_.isGrid(r.bus, r.channel)) {
-      hit_.weight = digital_geometry_.rescale(r.bus, r.channel, r.adc);
-      if (!digital_geometry_.is_valid(r.bus, r.channel, hit_.weight)) {
-        stats_readout_filter_rejects++;
-        continue;
-      }
-      hit_.coordinate = digital_geometry_.grid(r.bus, r.channel);
-      hit_.plane = grid_plane;
-    } else {
+      hit_.time = r.total_time;
+      ConvertedData.push_back(hit_);
+      continue;
+    }
+
+    bool good = digital_geometry_.map(hit_, r.bus, r.channel, r.adc);
+    if (hit_.plane == Hit::InvalidPlane) {
       XTRACE(PROCESS, DEB, "Bad channel_mappings %s", r.debug().c_str());
       stats_digital_geom_errors++;
+      continue;
+    }
+
+    if (!good) {
+      stats_readout_filter_rejects++;
       continue;
     }
 

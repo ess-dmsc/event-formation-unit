@@ -8,18 +8,25 @@
  */
 
 #pragma once
+#include <common/clustering/Hit.h>
 #include <multigrid/geometry/Filter.h>
 
 namespace Multigrid {
 
 class ChannelMappings {
 public:
+  static constexpr uint8_t wire_plane {0};
+  static constexpr uint8_t grid_plane {1};
+
   FilterSet wire_filters;
   FilterSet grid_filters;
 
   virtual ~ChannelMappings() = default;
 
   virtual uint16_t max_channel() const = 0;
+
+  // \todo document this
+  bool map(Hit& hit, uint16_t channel, uint16_t adc) const;
 
   /** @brief identifies which channels are wires, from drawing by Anton */
   virtual bool isWire(uint16_t channel) const = 0;
