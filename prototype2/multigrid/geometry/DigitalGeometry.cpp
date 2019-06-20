@@ -60,12 +60,29 @@ bool DigitalGeometry::map(Hit &hit, uint8_t bus, uint16_t channel, uint16_t adc)
   }
   const auto &b = buses[bus];
   bool ret = b.channel_mappings->map(hit, channel, adc);
+
+  // \todo remove this, use absolutify
   if (hit.plane == ChannelMappings::wire_plane)
     hit.coordinate += b.wire_offset;
   else if (hit.plane == ChannelMappings::grid_plane)
     hit.coordinate += b.grid_offset;
   return ret;
 }
+
+Hit DigitalGeometry::absolutify(const Hit& original) const
+{
+  Hit transformed = original;
+  transformed.plane = original.plane % 2;
+  const auto &b = buses[original.plane / 2];
+  if (transformed.plane == ChannelMappings::wire_plane)
+    transformed.coordinate += b.wire_offset;
+  else if (transformed.plane == ChannelMappings::grid_plane)
+    transformed.coordinate += b.grid_offset;
+
+  // \todo return transformed
+  return original;
+}
+
 
 uint16_t DigitalGeometry::max_wire() const {
   if (buses.empty())

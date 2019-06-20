@@ -202,15 +202,22 @@ void MultigridBase::mainThread() {
       if (!mg_config.builder->ConvertedData.empty()) {
         mystats.hits_total += mg_config.builder->ConvertedData.size();
 
-        for (const auto& hit : mg_config.builder->ConvertedData) {
-          if (monitor.readouts)
-            monitor.readouts->addEntry(hit.plane + 1, hit.coordinate, hit.time, hit.weight);
-          if (monitor.hists) {
-            if (hit.plane == 0)
-              monitor.hists->bin_x(hit.coordinate, hit.weight);
-            else if (hit.plane == 1)
-              monitor.hists->bin_y(hit.coordinate, hit.weight);
+        if (monitor.readouts || monitor.hists)
+        {
+          Hit transformed;
+          for (const auto& hit : mg_config.builder->ConvertedData) {
+            transformed = mg_config.analyzer.mappings.absolutify(hit);
+            if (monitor.readouts)
+              monitor.readouts->addEntry(transformed.plane + 1, transformed.coordinate,
+                                         transformed.time, transformed.weight);
+            if (monitor.hists) {
+              if (transformed.plane == Multigrid::ChannelMappings::wire_plane)
+                monitor.hists->bin_x(transformed.coordinate, transformed.weight);
+              else if (transformed.plane == Multigrid::ChannelMappings::grid_plane)
+                monitor.hists->bin_y(transformed.coordinate, transformed.weight);
+            }
           }
+
         }
         mg_config.reduction.ingest(mg_config.builder->ConvertedData);
 

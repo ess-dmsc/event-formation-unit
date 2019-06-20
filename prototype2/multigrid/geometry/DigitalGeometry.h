@@ -41,13 +41,18 @@ public:
   void add_bus(BusDefinitionStruct geom);
 
   // \todo document this
-  bool map(Hit& hit, uint8_t bus, uint16_t channel, uint16_t adc) const;
+  bool map(Hit& hit, uint8_t bus, uint16_t channel, uint16_t adhc) const;
+
+  // \todo document this
+  // plane becomes 0 or 1, regardless of module
+  // coord becomes total grid/wire number
+  Hit absolutify(const Hit& original) const;
 
   uint16_t max_wire() const;
 
   uint16_t max_grid() const;
 
-  uint32_t x_from_wire(uint16_t w) const ;
+  uint32_t x_from_wire(uint16_t w) const;
 
   /** @brief return the y coordinate of the detector */
   uint32_t y_from_grid(uint16_t g) const;
