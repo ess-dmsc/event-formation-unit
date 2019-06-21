@@ -9,9 +9,9 @@ using namespace Multigrid;
 class Sis3153ParserTest : public TestBase {
 protected:
   Sis3153Parser sis;
-  virtual void SetUp() {
+  void SetUp() override {
   }
-  virtual void TearDown() {
+  void TearDown() override {
   }
 };
 

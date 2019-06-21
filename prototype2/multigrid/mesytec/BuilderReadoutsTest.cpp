@@ -32,10 +32,10 @@ protected:
   size_t time_errors{0};
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
 
-  virtual void SetUp() {
+  void SetUp() override {
     load_config(TEST_DATA_PATH "Sequoia_mappings.json");
   }
-  virtual void TearDown() {
+  void TearDown() override {
   }
 
   void load_config(const std::string &jsonfile) {

@@ -5,8 +5,8 @@
 
 class MGConfigTest : public TestBase {
 protected:
-  virtual void SetUp() { }
-  virtual void TearDown() { }
+  void SetUp() override { }
+  void TearDown() override { }
   std::string TestJsonPath {TEST_JSON_PATH};
 };
 

@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <gdgem/nmx/AbstractAnalyzer.h>
+#include <common/analysis/AbstractAnalyzer.h>
 #include <multigrid/geometry/ModuleGeometry.h>
 
 namespace Gem {

@@ -13,11 +13,11 @@ class IDEASDataTest : public TestBase {
 protected:
   Geometry geometry;
   IDEASData *readout;
-  virtual void SetUp() {
+  void SetUp() override {
     readout = new IDEASData(&geometry);
     memset(readout->data, 0, sizeof(readout->data));
   }
-  virtual void TearDown() {
+  void TearDown() override {
     delete readout;
   }
 };

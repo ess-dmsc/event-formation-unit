@@ -24,12 +24,12 @@ public:
 
 class MultigridBaseTest : public TestBase {
 public:
-  virtual void SetUp() {
+  void SetUp() override {
     LocalSettings.ConfigFile = TEST_JSON_PATH "ILL_mappings.json";
     Settings.DetectorRxBufferSize = 100000;
     Settings.NoHwCheck = true;
   }
-  virtual void TearDown() {}
+  void TearDown() override {}
 
   BaseSettings Settings;
   MultigridSettings LocalSettings;

@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/AbstractAnalyzer.h>
+#include <common/analysis/AbstractAnalyzer.h>
 #include <cmath>
 #include <string>
 #include <test/TestBase.h>
@@ -13,8 +13,8 @@ protected:
   Hit hit;
   Cluster cluster;
   Event event;
-  virtual void SetUp() { }
-  virtual void TearDown() { }
+  void SetUp() override { }
+  void TearDown() override { }
 };
 
 // \todo tests needed

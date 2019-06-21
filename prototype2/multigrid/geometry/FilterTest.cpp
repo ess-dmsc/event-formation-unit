@@ -9,9 +9,9 @@ class FilterTest : public TestBase {
 protected:
   Filter f;
   FilterSet fs;
-  virtual void SetUp() {
+  void SetUp() override {
   }
-  virtual void TearDown() {
+  void TearDown() override {
   }
 };
 

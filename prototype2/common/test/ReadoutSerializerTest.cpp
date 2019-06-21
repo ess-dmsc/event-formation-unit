@@ -5,9 +5,9 @@
 #include <test/TestBase.h>
 
 class ReadoutSerializerTest : public TestBase {
-  virtual void SetUp() {  }
+  void SetUp() override {  }
 
-  virtual void TearDown() {  }
+  void TearDown() override {  }
 
 protected:
   static const int arraysize = 10000; // max entries

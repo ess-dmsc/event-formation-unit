@@ -13,11 +13,11 @@ protected:
   Readout r;
   uint16_t bad_plane;
   uint16_t bad_coord;
-  virtual void SetUp() {
+  void SetUp() override {
     bad_plane = Hit::InvalidPlane;
     bad_coord = Hit::InvalidCoord;
   }
-  virtual void TearDown() {  }
+  void TearDown() override {  }
 };
 
 TEST_F(SRSMappingsTest, GoodMapping) {

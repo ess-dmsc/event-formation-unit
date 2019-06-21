@@ -1,8 +1,8 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <gdgem/NMXConfig.h>
-#include <gdgem/nmx/uTPC.h>
-#include <gdgem/nmx/MGAnalysis.h>
+#include <common/analysis/uTPC.h>
+#include <common/analysis/MGAnalysis.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
 

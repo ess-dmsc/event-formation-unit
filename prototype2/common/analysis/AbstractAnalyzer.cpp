@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/AbstractAnalyzer.h>
+#include <common/analysis/AbstractAnalyzer.h>
 #include <cmath>
 #include <set>
 #include <sstream>

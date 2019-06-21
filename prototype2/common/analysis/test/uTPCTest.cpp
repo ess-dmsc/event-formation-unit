@@ -1,10 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/uTPC.h>
-#include <cmath>
-#include <string>
 #include <test/TestBase.h>
-#include <unistd.h>
+
+#include <common/analysis/uTPC.h>
 
 using namespace Gem;
 
@@ -13,8 +11,8 @@ protected:
   Hit hit;
   Cluster cluster;
   Event event;
-  virtual void SetUp() { }
-  virtual void TearDown() { }
+  void SetUp() override { }
+  void TearDown() override { }
 };
 
 TEST_F(uTPCTest, AnalyzeInvalid) {

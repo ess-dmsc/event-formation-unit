@@ -11,9 +11,9 @@ class Vmmr16ParserTest : public TestBase {
 protected:
   Sis3153Parser sis;
   VMMR16Parser vmmr;
-  virtual void SetUp() {
+  void SetUp() override {
   }
-  virtual void TearDown() {
+  void TearDown() override {
   }
 };
 

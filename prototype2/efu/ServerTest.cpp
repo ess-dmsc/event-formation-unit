@@ -65,12 +65,12 @@ protected:
   BaseSettings settings = efu_args.getBaseSettings();
   Parser * parser;
   NewStats stats;
-  virtual void SetUp() {
+  void SetUp() override {
       auto detectorif = Factory.create(settings);
       parser = new Parser(detectorif, stats, keep_running);
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
     delete parser;
   }
 };

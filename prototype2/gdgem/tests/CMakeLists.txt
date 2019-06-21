@@ -6,9 +6,6 @@ set(TEST_DATA_PATH "${REFDATA}/gdgem/2018_11")
 
 set(ClusteringBase_SRC
   ../NMXConfig.cpp
-  ../nmx/AbstractAnalyzer.cpp
-  ../nmx/uTPC.cpp
-  ../nmx/MGAnalysis.cpp
   ../srs/SRSTime.cpp
   ../srs/SRSMappings.cpp
   ../srs/CalibrationFile.cpp
@@ -17,9 +14,6 @@ set(ClusteringBase_SRC
   )
 set(ClusteringBase_INC
   ../NMXConfig.h
-  ../nmx/AbstractAnalyzer.h
-  ../nmx/uTPC.h
-  ../nmx/MGAnalysis.h
   ../nmx/Readout.h
   ../srs/SRSTime.h
   ../srs/SRSMappings.h

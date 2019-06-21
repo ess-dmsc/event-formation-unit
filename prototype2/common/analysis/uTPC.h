@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <gdgem/nmx/AbstractAnalyzer.h>
+#include <common/analysis/AbstractAnalyzer.h>
 
 namespace Gem
 {

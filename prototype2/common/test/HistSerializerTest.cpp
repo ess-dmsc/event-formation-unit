@@ -8,14 +8,14 @@
 #define MAX_STRIP_VAL_TEST 5000
 
 class HistSerializerTest : public TestBase {
-  virtual void SetUp() {
+  void SetUp() override {
     for (size_t i = 0; i < hists.x_strips_hist.size(); i++) {
       hists.x_strips_hist[i] = i;
       hists.y_strips_hist[i] = MAX_STRIP_VAL_TEST - i;
     }
   }
 
-  virtual void TearDown() {}
+  void TearDown() override {}
 
 protected:
 

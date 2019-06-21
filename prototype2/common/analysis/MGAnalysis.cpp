@@ -1,11 +1,9 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/MGAnalysis.h>
+#include <common/analysis/MGAnalysis.h>
 #include <common/clustering/AbstractClusterer.h>
 #include <cmath>
 #include <set>
-#include <sstream>
-#include <algorithm>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL

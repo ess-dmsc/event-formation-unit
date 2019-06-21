@@ -1,9 +1,8 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/MGAnalysis.h>
-#include <string>
 #include <test/TestBase.h>
-#include <unistd.h>
+
+#include <common/analysis/MGAnalysis.h>
 
 using namespace Gem;
 
@@ -12,8 +11,8 @@ protected:
   Hit hit;
   Event event;
   MGAnalyzer analyzer;
-  virtual void SetUp() {}
-  virtual void TearDown() { }
+  void SetUp() override {}
+  void TearDown() override {}
 };
 
 TEST_F(EventAnalysisTest, AnalyzeInvalid) {

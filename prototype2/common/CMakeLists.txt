@@ -3,6 +3,7 @@
 #=============================================================================
 
 add_subdirectory(clustering)
+add_subdirectory(analysis)
 
 set(efu_common_SRC
   DataSave.cpp
@@ -57,7 +58,8 @@ find_package(CLI11 REQUIRED)
 add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC}
-  $<TARGET_OBJECTS:ClusteringObj>)
+  $<TARGET_OBJECTS:ClusteringObj>
+  $<TARGET_OBJECTS:AnalysisObj>)
 
 target_include_directories(efu_common PUBLIC ${CLI11_INCLUDE_DIR} ..)
 

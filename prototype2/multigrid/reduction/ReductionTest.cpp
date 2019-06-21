@@ -49,10 +49,10 @@ protected:
 
   Reduction reduction;
 
-  virtual void SetUp() {
+  void SetUp() override {
     load_config(TEST_DATA_PATH "Sequoia_mappings.json");
   }
-  virtual void TearDown() {
+  void TearDown() override {
   }
 
   void load_config(const std::string &jsonfile) {

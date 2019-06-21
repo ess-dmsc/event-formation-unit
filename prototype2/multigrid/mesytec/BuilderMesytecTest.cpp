@@ -12,9 +12,9 @@ class BuilderMesytecTest : public TestBase {
 protected:
   Multigrid::Config config;
   
-  virtual void SetUp() {
+  void SetUp() override {
   }
-  virtual void TearDown() {
+  void TearDown() override {
   }
 
   void load_config(std::string jsonfile) {

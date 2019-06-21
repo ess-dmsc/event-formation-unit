@@ -1,11 +1,9 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/uTPC.h>
 #include <common/clustering/AbstractClusterer.h>
+#include <common/analysis/uTPC.h>
 #include <cmath>
 #include <set>
-#include <sstream>
-#include <algorithm>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL

@@ -11,8 +11,7 @@
 #include <logical_geometry/ESSGeometry.h>
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
-#include <common/clustering/Event.h>
-#include <gdgem/nmx/AbstractAnalyzer.h>
+#include <common/analysis/AbstractAnalyzer.h>
 #include <gdgem/srs/CalibrationFile.h>
 #include <memory>
 #include <string>
