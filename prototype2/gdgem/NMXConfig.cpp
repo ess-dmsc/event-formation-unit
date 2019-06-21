@@ -1,8 +1,8 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <gdgem/NMXConfig.h>
-#include <common/analysis/uTPC.h>
-#include <common/analysis/MGAnalysis.h>
+#include <common/analysis/UtpcAnalyzer.h>
+#include <common/analysis/MgAnalyzer.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
 
@@ -13,7 +13,7 @@
 namespace Gem {
 
 /// \todo bug? uncertainty takes precedence if both enforce options are true
-bool EventFilter::valid(Event &event, const MultiDimResult& utpc) {
+bool EventFilter::valid(Event &event, const ReducedEvent& utpc) {
   if (enforce_lower_uncertainty_limit &&
       !utpcAnalyzer::meets_lower_criterion(utpc.x, utpc.y, lower_uncertainty_limit)) {
     lower_uncertainty_dropped++;
@@ -115,7 +115,7 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 
     if (root.count("analyzer") && (root["analyzer"] == "MG"))
     {
-      auto MGA = std::make_shared<Gem::MGAnalyzer>();
+      auto MGA = std::make_shared<MGAnalyzer>();
       MGA->weighted(root["analyze_weighted"].get<bool>());
       geometry.nx(MGA->geometry_.max_x());
       geometry.ny(MGA->geometry_.max_y());
@@ -130,7 +130,7 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
       int16_t analyze_max_timebins = root["analyze_max_timebins"].get<unsigned int>();
       int16_t analyze_max_timedif = root["analyze_max_timedif"].get<unsigned int>();
 
-      analyzer_ = std::make_shared<Gem::utpcAnalyzer>(
+      analyzer_ = std::make_shared<utpcAnalyzer>(
           analyze_weighted,
           analyze_max_timebins,
           analyze_max_timedif);

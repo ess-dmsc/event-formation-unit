@@ -6,7 +6,7 @@
 #include <test/TestBase.h>
 #include <unistd.h>
 
-class AbstractAnalyzerTest : public TestBase {
+class ReducedEventTest : public TestBase {
 protected:
   Hit hit;
   Cluster cluster;

@@ -113,7 +113,7 @@ protected:
   Hists hists_{std::numeric_limits<uint16_t>::max(),
                std::numeric_limits<uint16_t>::max()};
 
-  Gem::MultiDimResult neutron_event_;
+  ReducedEvent neutron_event_;
 
   uint64_t previous_full_time_{0};
   uint64_t recent_pulse_time_{0};

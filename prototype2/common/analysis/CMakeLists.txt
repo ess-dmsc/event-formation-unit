@@ -3,15 +3,17 @@
 #=============================================================================
 
 set(analysis_obj_SRC
+  ReducedEvent.cpp
   AbstractAnalyzer.cpp
-  MGAnalysis.cpp
-  uTPC.cpp
+  MgAnalyzer.cpp
+  UtpcAnalyzer.cpp
 )
 
 set(analysis_obj_INC
+  ReducedEvent.h
   AbstractAnalyzer.h
-  MGAnalysis.h
-  uTPC.h
+  MgAnalyzer.h
+  UtpcAnalyzer.h
 )
 
 add_library(AnalysisObj OBJECT ${analysis_obj_SRC} ${analysis_obj_INC})

@@ -33,7 +33,7 @@ struct EventFilter {
   uint32_t minimum_hits{6};
   size_t minimum_hits_dropped{0};
 
-  bool valid(Event &event, const MultiDimResult& utpc);
+  bool valid(Event &event, const ReducedEvent& utpc);
 };
 
 struct NMXConfig {
@@ -61,7 +61,7 @@ struct NMXConfig {
   double matcher_max_delta_time{200};
 
   // analysis
-  std::shared_ptr<Gem::AbstractAnalyzer> analyzer_;
+  std::shared_ptr<AbstractAnalyzer> analyzer_;
 
   // filtering
   EventFilter filter;

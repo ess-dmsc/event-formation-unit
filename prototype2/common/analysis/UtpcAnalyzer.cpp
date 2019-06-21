@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
+#include <common/analysis/UtpcAnalyzer.h>
 #include <common/clustering/AbstractClusterer.h>
-#include <common/analysis/uTPC.h>
 #include <cmath>
 #include <set>
 
@@ -13,13 +13,11 @@
 #undef TRC_MASK
 #define TRC_MASK 0
 
-namespace Gem {
-
 utpcAnalyzer::utpcAnalyzer(bool weighted, uint16_t max_timebins, uint16_t max_timedif)
     : weighted_(weighted), max_timebins_(max_timebins), max_timedif_(max_timedif) {}
 
-CoordResult utpcAnalyzer::analyze(Cluster &cluster) const {
-  CoordResult ret;
+ReducedHit utpcAnalyzer::analyze(Cluster &cluster) const {
+  ReducedHit ret;
 
   if (cluster.hits.empty()) {
     return ret;
@@ -68,8 +66,8 @@ CoordResult utpcAnalyzer::analyze(Cluster &cluster) const {
   return ret;
 }
 
-MultiDimResult utpcAnalyzer::analyze(Event &event) const {
-  MultiDimResult ret;
+ReducedEvent utpcAnalyzer::analyze(Event &event) const {
+  ReducedEvent ret;
   ret.x = analyze(event.c1);
   ret.y = analyze(event.c2);
   ret.good = std::isfinite(ret.x.center) && std::isfinite(ret.y.center);
@@ -82,7 +80,7 @@ uint64_t utpcAnalyzer::utpc_time(const Event &e) {
   return std::max(e.c1.time_end(), e.c2.time_end());
 }
 
-bool utpcAnalyzer::meets_lower_criterion(const CoordResult &x, const CoordResult &y,
+bool utpcAnalyzer::meets_lower_criterion(const ReducedHit &x, const ReducedHit &y,
                                          int16_t max_lu) {
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }
@@ -95,6 +93,4 @@ std::string utpcAnalyzer::debug() const {
   ret += fmt::format("  max_timedif = {}\n", max_timedif_);
 
   return ret;
-}
-
 }

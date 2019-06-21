@@ -2,11 +2,9 @@
 
 #include <test/TestBase.h>
 
-#include <common/analysis/MGAnalysis.h>
+#include <common/analysis/MgAnalyzer.h>
 
-using namespace Gem;
-
-class EventAnalysisTest : public TestBase {
+class MgAnalyzerTest : public TestBase {
 protected:
   Hit hit;
   Event event;
@@ -15,12 +13,12 @@ protected:
   void TearDown() override {}
 };
 
-TEST_F(EventAnalysisTest, AnalyzeInvalid) {
+TEST_F(MgAnalyzerTest, AnalyzeInvalid) {
   auto result = analyzer.analyze(event);
   EXPECT_FALSE(result.good);
 }
 
-TEST_F(EventAnalysisTest, AnalyzeBadY) {
+TEST_F(MgAnalyzerTest, AnalyzeBadY) {
   hit.weight = 1;
   event.insert(hit);
   auto result = analyzer.analyze(event);
@@ -28,14 +26,14 @@ TEST_F(EventAnalysisTest, AnalyzeBadY) {
   EXPECT_FALSE(result.good);
 }
 
-TEST_F(EventAnalysisTest, AnalyzeBadX) {
+TEST_F(MgAnalyzerTest, AnalyzeBadX) {
   hit.plane = 1;
   event.insert(hit);
   auto result = analyzer.analyze(event);
   EXPECT_FALSE(result.good);
 }
 
-TEST_F(EventAnalysisTest, AnalyzeGood) {
+TEST_F(MgAnalyzerTest, AnalyzeGood) {
   hit.weight = 1;
   event.insert(hit);
   hit.plane = 1;
@@ -44,7 +42,7 @@ TEST_F(EventAnalysisTest, AnalyzeGood) {
   EXPECT_TRUE(result.good);
 }
 
-TEST_F(EventAnalysisTest, InsertInvalid) {
+TEST_F(MgAnalyzerTest, InsertInvalid) {
   hit.weight = 1;
   hit.plane = 0;
   event.insert(hit);
@@ -55,7 +53,7 @@ TEST_F(EventAnalysisTest, InsertInvalid) {
   EXPECT_EQ(2, event.total_hit_count());
 }
 
-TEST_F(EventAnalysisTest, DebugPrint) {
+TEST_F(MgAnalyzerTest, DebugPrint) {
   MESSAGE() << "This is not a test, just calling debug print function\n";
   auto result = analyzer.analyze(event);
   MESSAGE() << result.debug() << "\n";

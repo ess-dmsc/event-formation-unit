@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/analysis/MGAnalysis.h>
+#include <common/analysis/MgAnalyzer.h>
 #include <common/clustering/AbstractClusterer.h>
 #include <cmath>
 #include <set>
@@ -12,8 +12,6 @@
 #include <common/Log.h>
 #undef TRC_MASK
 #define TRC_MASK 0
-
-namespace Gem {
 
 void MGAnalyzer::weighted(bool w) {
   weighted_ = w;
@@ -35,8 +33,8 @@ std::string MGAnalyzer::debug() const {
   return ret;
 }
 
-MultiDimResult MGAnalyzer::analyze(Event& event) const {
-  MultiDimResult ret;
+ReducedEvent MGAnalyzer::analyze(Event& event) const {
+  ReducedEvent ret;
 
   if (event.empty()) {
     return ret;
@@ -102,6 +100,4 @@ MultiDimResult MGAnalyzer::analyze(Event& event) const {
           std::isfinite(ret.y.center) && (ret.y.center >= 0) &&
           std::isfinite(ret.z.center) && (ret.z.center >= 0);
   return ret;
-}
-
 }

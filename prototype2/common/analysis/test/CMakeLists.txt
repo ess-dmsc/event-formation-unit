@@ -2,20 +2,25 @@
 # Tests
 #=============================================================================
 
+set(ReducedEventTest_SRC
+  ReducedEventTest.cpp
+  )
+create_test_executable(ReducedEventTest)
+
 set(AbstractAnalyzerTest_SRC
   AbstractAnalyzerTest.cpp
   )
 create_test_executable(AbstractAnalyzerTest)
 
-set(uTPCTest_SRC
-  uTPCTest.cpp
+set(UtpcAnalyzerTest_SRC
+  UtpcAnalyzerTest.cpp
   )
-create_test_executable(uTPCTest)
+create_test_executable(UtpcAnalyzerTest)
 
 #todo make abstract geometry class, non MG-specific?
-set(MGAnalysisTest_SRC
-  MGAnalysisTest.cpp
+set(MgAnalyzerTest_SRC
+  MgAnalyzerTest.cpp
   ../../../multigrid/geometry/ModuleGeometry.cpp
   ../../../multigrid/geometry/Filter.cpp
   )
-create_test_executable(MGAnalysisTest)
+create_test_executable(MgAnalyzerTest)

@@ -2,11 +2,9 @@
 
 #include <test/TestBase.h>
 
-#include <common/analysis/uTPC.h>
+#include <common/analysis/UtpcAnalyzer.h>
 
-using namespace Gem;
-
-class uTPCTest : public TestBase {
+class UtpcAnalyzerTest : public TestBase {
 protected:
   Hit hit;
   Cluster cluster;
@@ -15,12 +13,12 @@ protected:
   void TearDown() override { }
 };
 
-TEST_F(uTPCTest, AnalyzeInvalid) {
+TEST_F(UtpcAnalyzerTest, AnalyzeInvalid) {
   auto result = utpcAnalyzer(false, 2, 2).analyze(cluster);
   EXPECT_TRUE(std::isnan(result.center));
 }
 
-TEST_F(uTPCTest, AnalyzeAverage) {
+TEST_F(UtpcAnalyzerTest, AnalyzeAverage) {
   Hit hit;
   hit.coordinate = 0;
   hit.weight = 2;
@@ -41,7 +39,7 @@ TEST_F(uTPCTest, AnalyzeAverage) {
   EXPECT_EQ(result.center_rounded(), 1);
 }
 
-TEST_F(uTPCTest, AnalyzeUncert) {
+TEST_F(UtpcAnalyzerTest, AnalyzeUncert) {
   hit.weight = 1;
 
   hit.time = hit.coordinate = 0;
@@ -77,7 +75,7 @@ TEST_F(uTPCTest, AnalyzeUncert) {
   EXPECT_EQ(result.center_rounded(), 17);
 }
 
-TEST_F(uTPCTest, AnalyzeBadY) {
+TEST_F(UtpcAnalyzerTest, AnalyzeBadY) {
   hit.weight = 1;
   event.insert(hit);
   auto result = utpcAnalyzer(true, 5, 5).analyze(event);
@@ -85,14 +83,14 @@ TEST_F(uTPCTest, AnalyzeBadY) {
   EXPECT_FALSE(result.good);
 }
 
-TEST_F(uTPCTest, AnalyzeBadX) {
+TEST_F(UtpcAnalyzerTest, AnalyzeBadX) {
   hit.plane = 1;
   event.insert(hit);
   auto result = utpcAnalyzer(true, 5, 5).analyze(event);
   EXPECT_FALSE(result.good);
 }
 
-TEST_F(uTPCTest, AnalyzeGood) {
+TEST_F(UtpcAnalyzerTest, AnalyzeGood) {
   hit.weight = 1;
   event.insert(hit);
   hit.plane = 1;
@@ -101,7 +99,7 @@ TEST_F(uTPCTest, AnalyzeGood) {
   EXPECT_TRUE(result.good);
 }
 
-TEST_F(uTPCTest, InsertInvalid) {
+TEST_F(UtpcAnalyzerTest, InsertInvalid) {
   hit.weight = 1;
   hit.plane = 0;
   event.insert(hit);
@@ -112,7 +110,7 @@ TEST_F(uTPCTest, InsertInvalid) {
   EXPECT_EQ(2, event.total_hit_count());
 }
 
-TEST_F(uTPCTest, DebugPrint) {
+TEST_F(UtpcAnalyzerTest, DebugPrint) {
   MESSAGE() << "This is not a test, just calling debug print function\n";
   auto result = utpcAnalyzer(true, 5, 5).analyze(event);
   MESSAGE() << result.debug() << "\n";
