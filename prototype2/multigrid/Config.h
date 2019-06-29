@@ -16,8 +16,8 @@
 namespace Multigrid {
 
 struct Config {
-  Config() {}
-  Config(std::string jsonfile, std::string dump_path = "");
+  Config() = default;
+  explicit Config(std::string jsonfile, std::string dump_path = "");
 
   std::shared_ptr<AbstractBuilder> builder;
   Reduction reduction;

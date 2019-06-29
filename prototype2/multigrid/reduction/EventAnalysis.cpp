@@ -2,10 +2,6 @@
 
 #include <multigrid/reduction/EventAnalysis.h>
 #include <common/clustering/AbstractClusterer.h>
-#include <cmath>
-#include <set>
-#include <sstream>
-#include <algorithm>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL
@@ -17,10 +13,6 @@
 
 namespace Multigrid {
 
-std::string NeutronPosition::debug() const {
-  return fmt::format("x={}, y={}, z={}, t={}", x, y, z, time);
-}
-
 void EventAnalyzer::weighted(bool w) {
   weighted_ = w;
 }
@@ -29,8 +21,8 @@ bool EventAnalyzer::weighted() const {
   return weighted_;
 }
 
-NeutronPosition EventAnalyzer::analyze(Event &event) {
-  NeutronPosition ret;
+ReducedEvent EventAnalyzer::analyze(Event &event) {
+  ReducedEvent ret;
 
   if (event.empty()) {
     return ret;
@@ -62,8 +54,8 @@ NeutronPosition EventAnalyzer::analyze(Event &event) {
       }
     }
 
-    ret.x = xmass / xsum;
-    ret.z = zmass / zsum;
+    ret.x.center = xmass / xsum;
+    ret.z.center = zmass / zsum;
   }
 
   if (!event.c2.empty()) {
@@ -87,14 +79,14 @@ NeutronPosition EventAnalyzer::analyze(Event &event) {
       }
     }
 
-    ret.y = ymass / ysum;
+    ret.y.center = ymass / ysum;
   }
 
   ret.time = event.time_start();
   ret.good =
-      std::isfinite(ret.x) && (ret.x >= 0) &&
-          std::isfinite(ret.y) && (ret.y >= 0) &&
-          std::isfinite(ret.z) && (ret.z >= 0);
+      std::isfinite(ret.x.center) && (ret.x.center >= 0) &&
+          std::isfinite(ret.y.center) && (ret.y.center >= 0) &&
+          std::isfinite(ret.z.center) && (ret.z.center >= 0);
   return ret;
 }
 

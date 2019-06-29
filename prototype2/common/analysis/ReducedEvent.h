@@ -14,6 +14,7 @@
 #include <limits>
 
 struct ReducedHit {
+  uint64_t time; /// < time of cluster (implementation-dependent)
   double average_time{std::numeric_limits<double>::quiet_NaN()}; /// < average time of hits
   double center{std::numeric_limits<double>::quiet_NaN()}; /// < average coordinate of hits
   int16_t uncert_lower{-1}; /// < span of averaged hit coordinates
@@ -33,6 +34,9 @@ struct ReducedEvent {
 
   uint64_t time {0};
   bool good {false};
+
+  /// \returns hits used across all dimensions
+  size_t hits_used() const;
 
   std::string debug() const;
 };

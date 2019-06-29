@@ -134,10 +134,10 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
       }
       //            XTRACE(PROCESS, DEB, "Neutron: %s ", neutron.debug().c_str());
       uint32_t pixel = mg_config.geometry.pixel3D(
-          static_cast<uint32_t>(std::round(neutron.x)),
-          static_cast<uint32_t>(std::round(neutron.y)),
-          static_cast<uint32_t>(std::round(neutron.z))
-      );
+          neutron.x.center_rounded(),
+          neutron.y.center_rounded(),
+          neutron.z.center_rounded()
+          );
       auto time = static_cast<uint32_t>(neutron.time - ev42serializer.pulseTime());
 //            XTRACE(PROCESS, DEB, "Event: pixel: %d, time: %d ", pixel, time);
       if (pixel == 0) {
