@@ -57,7 +57,7 @@ protected:
 
   void load_config(const std::string &jsonfile) {
     config = Multigrid::Config(jsonfile);
-    config.builder = std::make_shared<BuilderReadouts>(config.analyzer.mappings);
+    config.builder = std::make_shared<BuilderReadouts>(config.analyzer.mappings.mapping());
     //MESSAGE() << "Digital channel_mappings: " << config.builder->digital_geometry.debug() << "\n";
   }
 
@@ -67,10 +67,16 @@ protected:
     uint8_t buffer[9000];
     size_t readsz;
 
+    auto mappings = config.analyzer.mappings.mapping();
     while ((readsz = reader.read((char *) &buffer)) > 0) {
       config.builder->parse(Buffer<uint8_t>(buffer, readsz));
       ingested_hits += config.builder->ConvertedData.size();
-      reduction.ingest(config.builder->ConvertedData);
+      // manual ingest with hit absolutification
+      for (const auto& h : config.builder->ConvertedData) {
+        reduction.ingest(mappings.absolutify(h));
+      }
+      config.builder->ConvertedData.clear();
+
       reduction.perform_clustering(false);
     }
     reduction.perform_clustering(true);
@@ -82,9 +88,7 @@ protected:
 
     DynamicHist pulse_positive_diff, pulse_negative_diff;
     for (const auto &e : reduction.matcher.matched_events) {
-      // \todo external_trigger_plane is deprecated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
-      if ((e.plane1() != AbstractBuilder::external_trigger_plane) &&
-          (e.plane1() != Hit::PulsePlane)) {
+      if (e.plane1() != Hit::PulsePlane) {
         continue;
       }
 
@@ -122,9 +126,7 @@ protected:
     DynamicHist event_positive_diff, event_negative_diff;
     DynamicHist wire_multiplicity, wire_span, grid_mltiplicity, grid_span, time_span;
     for (const auto &e : reduction.matcher.matched_events) {
-      // \todo external_trigger_plane is deprecated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
-      if ((e.plane1() == AbstractBuilder::external_trigger_plane) ||
-          (e.plane1() == Hit::PulsePlane)) {
+      if (e.plane1() == Hit::PulsePlane) {
         continue;
       }
 

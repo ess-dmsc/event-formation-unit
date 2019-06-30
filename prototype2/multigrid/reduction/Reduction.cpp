@@ -15,28 +15,31 @@ Reduction::Reduction() {
 
 void Reduction::ingest(HitContainer &hits) {
   for (const auto &h : hits) {
-
-    // We must do this because of patterns observed in BuilderReadoutTest
-    if (previous_time_ > h.time) {
-      stats_time_seq_errors++;
-      perform_clustering(true);
-    }
-    previous_time_ = h.time;
-
-    // \todo external_trigger_plane is deprecated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
-    if ((h.plane == AbstractBuilder::external_trigger_plane) ||
-        (h.plane == Hit::PulsePlane)) {
-      pulse_times.push_back(h);
-    } else if (h.plane == AbstractBuilder::wire_plane) {
-      wire_clusters.insert(h);
-    } else if (h.plane == AbstractBuilder::grid_plane) {
-      grid_clusters.insert(h);
-    } else {
-      stats_invalid_planes++;
-    }
+    ingest(h);
   }
   hits.clear();
 }
+
+void Reduction::ingest(const Hit& h)
+{
+  // We must do this because of patterns observed in BuilderReadoutTest
+  if (previous_time_ > h.time) {
+    stats_time_seq_errors++;
+    perform_clustering(true);
+  }
+  previous_time_ = h.time;
+
+  if (h.plane == Hit::PulsePlane) {
+    pulse_times.push_back(h);
+  } else if (h.plane == AbstractBuilder::wire_plane) {
+    wire_clusters.insert(h);
+  } else if (h.plane == AbstractBuilder::grid_plane) {
+    grid_clusters.insert(h);
+  } else {
+    stats_invalid_planes++;
+  }
+}
+
 
 void Reduction::perform_clustering(bool flush) {
   if (flush) {

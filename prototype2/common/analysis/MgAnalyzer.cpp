@@ -2,8 +2,6 @@
 
 #include <common/analysis/MgAnalyzer.h>
 #include <common/clustering/AbstractClusterer.h>
-#include <cmath>
-#include <set>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL
@@ -23,13 +21,9 @@ bool MGAnalyzer::weighted() const {
 
 std::string MGAnalyzer::debug() const {
   std::string ret;
-
   ret += "MG analysis\n";
-
   ret += fmt::format("  weighted = {}\n", (weighted_ ? "YES" : "no"));
-
   ret += geometry_.debug("  ");
-
   return ret;
 }
 
@@ -40,6 +34,7 @@ ReducedEvent MGAnalyzer::analyze(Event& event) const {
     return ret;
   }
 
+  // grid
   if (!event.c1.empty()) {
 
     double ymass{0};
@@ -51,6 +46,7 @@ ReducedEvent MGAnalyzer::analyze(Event& event) const {
     for (const auto &h : event.c1.hits) {
       if (h.weight != highest_adc)
         break;
+      ret.y.hits_used++;
       stats_used_hits++;
       if (weighted_) {
         ymass += geometry_.y_from_grid(h.coordinate) * h.weight;
@@ -64,6 +60,7 @@ ReducedEvent MGAnalyzer::analyze(Event& event) const {
     ret.y.center = ymass / ysum;
   }
 
+  // wire
   if (!event.c2.empty()) {
     double xmass{0};
     double zmass{0};
@@ -76,6 +73,8 @@ ReducedEvent MGAnalyzer::analyze(Event& event) const {
     for (const auto &h : event.c2.hits) {
       if (h.weight != highest_adc)
         break;
+      ret.x.hits_used++;
+      ret.z.hits_used++;
       stats_used_hits++;
       if (weighted_) {
         xmass += geometry_.x_from_wire(h.coordinate) * h.weight;
@@ -95,9 +94,7 @@ ReducedEvent MGAnalyzer::analyze(Event& event) const {
   }
 
   ret.time = event.time_start();
-  ret.good =
-      std::isfinite(ret.x.center) && (ret.x.center >= 0) &&
-          std::isfinite(ret.y.center) && (ret.y.center >= 0) &&
-          std::isfinite(ret.z.center) && (ret.z.center >= 0);
+  ret.good = ret.x.is_center_good() && ret.y.is_center_good() && ret.z.is_center_good();
+  ret.module = event.c1.plane() / 2;
   return ret;
 }

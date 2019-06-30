@@ -47,7 +47,7 @@ public:
 
   std::string debug(std::string prefix = "") const;
 
-private:
+//private:
   std::vector<ModuleMapping> buses;
 };
 
@@ -92,7 +92,7 @@ public:
 
   std::string debug(std::string prefix = "") const;
 
-private:
+//private:
   std::vector<ModuleGeometry> buses;
 };
 
@@ -118,30 +118,22 @@ void from_json(const nlohmann::json &j, BusDefinitionStruct &g);
 
 class DigitalGeometry {
 private:
-  std::vector<BusDefinitionStruct> buses;
+  std::vector<ModuleMapping> mappings;
+
+  std::vector<ModuleGeometry> geometries;
+
+  std::vector<BusDefinitionStruct> buses2;
 
 public:
 
   void add_bus(BusDefinitionStruct geom);
 
-  // \todo document this
-  bool map(Hit& hit, uint8_t bus, uint16_t channel, uint16_t adhc) const;
+  DetectorMapping mapping() const;
+  DetectorGeometry geometry() const;
 
-  // \todo document this
-  // plane becomes 0 or 1, regardless of module
-  // coord becomes total grid/wire number
-  Hit absolutify(const Hit& original) const;
-
-  uint16_t max_wire() const;
-
-  uint16_t max_grid() const;
-
+  // \todo get rid of these
   uint32_t x_from_wire(uint16_t w) const;
-
-  /** @brief return the y coordinate of the detector */
   uint32_t y_from_grid(uint16_t g) const;
-
-  /** @brief return the z coordinate of the detector */
   uint32_t z_from_wire(uint16_t w) const;
 
   /** @brief return the x coordinate of the detector */

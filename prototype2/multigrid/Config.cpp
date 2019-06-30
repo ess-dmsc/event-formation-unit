@@ -35,11 +35,11 @@ Config::Config(std::string jsonfile, std::string dump_path) {
 
   auto br = root["builder"];
   if (br["type"] == "mesytec") {
-    builder = std::make_shared<BuilderMesytec>(mappings,
+    builder = std::make_shared<BuilderMesytec>(mappings.mapping(),
                                                br["spoof_high_time"],
                                                dump_path);
   } else if (br["type"] == "readouts") {
-    builder = std::make_shared<BuilderReadouts>(mappings, dump_path);
+    builder = std::make_shared<BuilderReadouts>(mappings.mapping(), dump_path);
   }
 
   max_wire_hits = root["max_wire_hits"];

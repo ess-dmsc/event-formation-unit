@@ -98,9 +98,7 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
 
   for (auto &event : mg_config.reduction.matcher.matched_events) {
 
-    // \todo external_trigger_plane is deprecated. Use Hit::PulsePlane instead. See notes in AbstractBuilder.h
-    if ((event.plane1() == Multigrid::AbstractBuilder::external_trigger_plane) ||
-        (event.plane1() == Hit::PulsePlane)) {
+    if (event.plane1() == Hit::PulsePlane) {
       mystats.pulses++;
 
       if (HavePulseTime) {
@@ -202,11 +200,13 @@ void MultigridBase::mainThread() {
       if (!mg_config.builder->ConvertedData.empty()) {
         mystats.hits_total += mg_config.builder->ConvertedData.size();
 
+        auto mappings = mg_config.analyzer.mappings.mapping();
+
         if (monitor.readouts || monitor.hists)
         {
           Hit transformed;
           for (const auto& hit : mg_config.builder->ConvertedData) {
-            transformed = mg_config.analyzer.mappings.absolutify(hit);
+            transformed = mappings.absolutify(hit);
             if (monitor.readouts)
               monitor.readouts->addEntry(transformed.plane + 1, transformed.coordinate,
                                          transformed.time, transformed.weight);
@@ -219,7 +219,13 @@ void MultigridBase::mainThread() {
           }
 
         }
-        mg_config.reduction.ingest(mg_config.builder->ConvertedData);
+        // manual ingest with hit absolutification
+        for (const auto& h : mg_config.builder->ConvertedData) {
+          mg_config.reduction.ingest(mappings.absolutify(h));
+        }
+        mg_config.builder->ConvertedData.clear();
+
+//        mg_config.reduction.ingest(mg_config.builder->ConvertedData);
 
         mg_config.reduction.perform_clustering(false);
         mystats.hits_time_seq_err = mg_config.reduction.stats_time_seq_errors;

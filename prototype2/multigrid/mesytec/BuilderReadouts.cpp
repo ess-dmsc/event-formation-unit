@@ -9,7 +9,7 @@
 
 namespace Multigrid {
 
-BuilderReadouts::BuilderReadouts(const DigitalGeometry &geometry,
+BuilderReadouts::BuilderReadouts(const DetectorMapping &geometry,
                                  std::string dump_dir)
     : digital_geometry_(geometry) {
   if (!dump_dir.empty()) {
@@ -24,7 +24,7 @@ std::string BuilderReadouts::debug() const {
   ss << "  ========           Readouts Builder           ========\n";
   ss << "  ======================================================\n";
 
-  ss << "  Geometry mappings:\n";
+  ss << "  Mappings:\n";
   ss << digital_geometry_.debug("  ") << "\n";
 
   return ss.str();

@@ -12,6 +12,8 @@ public:
 
   void ingest(HitContainer &hits);
 
+  void ingest(const Hit& hit);
+
   void perform_clustering(bool flush);
 
   size_t stats_invalid_planes{0};

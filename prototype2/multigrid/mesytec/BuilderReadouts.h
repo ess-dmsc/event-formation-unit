@@ -9,7 +9,7 @@ namespace Multigrid {
 
 class BuilderReadouts : public AbstractBuilder {
 public:
-  BuilderReadouts(const DigitalGeometry& geometry, std::string dump_dir = "");
+  BuilderReadouts(const DetectorMapping& geometry, std::string dump_dir = "");
 
   void parse(Buffer<uint8_t> buffer) override;
 
@@ -23,7 +23,7 @@ protected:
 
 private:
   std::shared_ptr<HitFile> dumpfile_;
-  DigitalGeometry digital_geometry_;
+  DetectorMapping digital_geometry_;
 
   std::vector<Readout> parsed_data_;
 };

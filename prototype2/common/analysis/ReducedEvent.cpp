@@ -7,6 +7,10 @@ uint32_t ReducedHit::center_rounded() const {
   return static_cast<uint32_t>(std::round(center));
 }
 
+bool ReducedHit::is_center_good() const {
+  return std::isfinite(center) && (center >= 0);
+}
+
 std::string ReducedHit::debug() const {
   return fmt::format("{}(lu={},uu={}) t={}(~{}) *{}",
       center, uncert_lower, uncert_upper, average_time, time, hits_used);
