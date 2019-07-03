@@ -38,11 +38,6 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
       ->group("ADC Readout Options")
       ->default_str("AdcDemonstrator");
   Parser
-      .add_option("--stats_suffix", ReadoutSettings.GrafanaNameSuffix,
-                  "Grafana root name suffix, used for the stats.")
-      ->group("ADC Readout Options")
-      ->default_str("");
-  Parser
       .add_flag("--sample_timestamp", ReadoutSettings.SampleTimeStamp,
                 "Provide a timestamp with every single ADC sample. Note: this "
                 "drastically increases the bandwidth requirements.")
@@ -122,7 +117,7 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
       ->group("Delay Line Options")
       ->default_str("0.0");
   Parser
-      .add_option("--yaxis_slope", ReadoutSettings.XAxisCalibSlope,
+      .add_option("--yaxis_slope", ReadoutSettings.YAxisCalibSlope,
                   "The slope multiplier of the y-axis postion value.")
       ->group("Delay Line Options")
       ->default_str("1.0");

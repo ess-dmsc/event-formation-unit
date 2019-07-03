@@ -62,7 +62,7 @@ void DelayLineEventFormation::DoChannelRoleMapping(
                  DelayLinePosCalcInterface::ChannelRole,
                  std::function<bool(DelayLinePosCalcInterface *)>>;
   std::multimap<AdcSettings::ChannelRole, RoleParams> ChannelRoleMap;
-
+  
   auto addRole = [&ChannelRoleMap](auto Role, auto &AxisPtr, auto CAxisRole,
                                    auto CheckFunc) {
     ChannelRoleMap.emplace(
@@ -101,6 +101,7 @@ void DelayLineEventFormation::DoChannelRoleMapping(
     auto AxisRole = std::get<1>(RoleParams);
     auto AxisCheckFunction = std::get<2>(RoleParams);
     if (AxisCheckFunction(AxisPointer)) {
+      Buffer.addChannel(ID);
       AxisPointer->setChannelRole(ID, AxisRole);
       PulseHandlerMap.emplace(ID, AxisPointer);
     }
@@ -112,7 +113,7 @@ DelayLineEventFormation::DelayLineEventFormation(
     : XAxisCalc(createCalculator(ReadoutSettings.XAxis,
                                  ReadoutSettings.EventTimeoutNS)),
       YAxisCalc(createCalculator(ReadoutSettings.YAxis,
-                                 ReadoutSettings.EventTimeoutNS)) {
+                                 ReadoutSettings.EventTimeoutNS)), Buffer(ReadoutSettings.EventTimeoutNS) {
   XAxisCalc->setCalibrationValues(ReadoutSettings.XAxisCalibOffset,
                                   ReadoutSettings.XAxisCalibSlope);
 
@@ -131,24 +132,36 @@ DelayLineEventFormation::DelayLineEventFormation(
   DoChannelRoleMapping({1, 3}, ReadoutSettings.ADC2Channel4);
 }
 
-void DelayLineEventFormation::addPulse(const PulseParameters &Pulse) {
-  auto PossiblePulseHandlers = PulseHandlerMap.equal_range(Pulse.Identifier);
+void DelayLineEventFormation::addPulse(const PulseParameters &NewPulse) {
+  auto PossiblePulseHandlers = PulseHandlerMap.equal_range(NewPulse.Identifier);
   if (PossiblePulseHandlers.first == PulseHandlerMap.end()) {
     ++DiscardedDelayLinePulses;
     return;
   }
   ++ProcessedDelayLinePulses;
-  for (auto CurrentHandler = PossiblePulseHandlers.first;
-       CurrentHandler != PossiblePulseHandlers.second; ++CurrentHandler) {
-    if (auto Calculator =
+  Buffer.addPulse(NewPulse);
+  if (Buffer.hasValidPulses()) {
+    auto CPulses = Buffer.getPulses();
+    for (auto &CPulse : CPulses) {
+      PossiblePulseHandlers = PulseHandlerMap.equal_range(CPulse.Identifier);
+      for (auto CurrentHandler = PossiblePulseHandlers.first;
+           CurrentHandler != PossiblePulseHandlers.second; ++CurrentHandler) {
+        if (auto Calculator =
             dynamic_cast<DelayLinePosCalcInterface *>(CurrentHandler->second)) {
-      Calculator->addPulse(Pulse);
+          Calculator->addPulse(CPulse);
+        }
+      }
+    }
+    if (not hasValidEvent()) {
+      std::cout << "Problem!" << std::endl;
     }
   }
 }
 
 bool DelayLineEventFormation::hasValidEvent() {
-  return XAxisCalc->isValid() and YAxisCalc->isValid();
+  auto a = XAxisCalc->isValid();
+  auto b = YAxisCalc->isValid();
+  return a and b;
 }
 
 DelayLineEvent DelayLineEventFormation::popEvent() {

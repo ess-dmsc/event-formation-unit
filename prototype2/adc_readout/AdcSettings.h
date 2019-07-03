@@ -23,7 +23,6 @@ struct AdcSettings {
   std::string DelayLineKafkaTopic;
   std::string TimeStampLocation{"Middle"};
   std::string Name;
-  std::string GrafanaNameSuffix;
   std::string AltDetectorInterface{"0.0.0.0"};
   std::uint16_t AltDetectorPort{0};
 

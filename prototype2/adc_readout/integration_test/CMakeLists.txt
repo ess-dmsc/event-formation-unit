@@ -34,3 +34,30 @@ add_custom_command(
                 COMMAND ${CMAKE_COMMAND} -E copy
                 ${ADC_CONFIG_FILE}
                 "$<TARGET_FILE_DIR:efu>/")
+
+set(AdcFileStreamer_SRC
+        AdcFileStreamer.cpp
+        WaveformData.cpp
+        DataModulariser.cpp
+        PoissonDelay.cpp
+        FPGASim.cpp
+        DataPacket.cpp
+        ../AdcTimeStamp.cpp
+        SamplingTimer.cpp)
+
+set(AdcFileStreamer_INC
+        WaveformData.h
+        DataModulariser.h
+        PoissonDelay.h
+        FPGASim.h
+        DataPacket.h
+        ../AdcTimeStamp.h
+        SamplingTimer.h)
+
+add_executable(AdcFileStreamer EXCLUDE_FROM_ALL ${AdcFileStreamer_SRC} ${AdcFileStreamer_INC})
+set_target_properties(AdcFileStreamer PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
+target_include_directories(AdcFileStreamer PRIVATE ${ASIO_INCLUDE_DIR} "../" "../../common/")
+
+target_link_libraries(AdcFileStreamer ${CMAKE_THREAD_LIBS_INIT} ${EFU_COMMON_LIBS})
