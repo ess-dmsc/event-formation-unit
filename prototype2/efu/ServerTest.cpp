@@ -7,7 +7,7 @@
 #include <test/TestBase.h>
 #include <thread>
 
-uint16_t ServerPort = 8888;
+uint16_t ServerPort = 8889;
 
 constexpr int mask_close = 0x0001;
 constexpr int mask_connect = 0x0002;
