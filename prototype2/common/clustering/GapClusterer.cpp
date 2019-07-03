@@ -7,7 +7,6 @@
 //===----------------------------------------------------------------------===//
 
 #include <common/clustering/GapClusterer.h>
-#include <algorithm>
 #include <common/Trace.h>
 
 // #undef TRC_LEVEL
@@ -17,14 +16,14 @@ GapClusterer::GapClusterer(uint64_t max_time_gap, uint16_t max_coord_gap)
     : AbstractClusterer(), max_time_gap_(max_time_gap), max_coord_gap_(max_coord_gap) {}
 
 void GapClusterer::insert(const Hit &hit) {
-  // Stash cluster if time gap to next hit is too large
+  // Process time-cluster if time gap to next hit is large enough
   if (!current_time_cluster_.empty() &&
       (hit.time - current_time_cluster_.back().time) > max_time_gap_) {
         XTRACE(CLUSTER, DEB, "timegap > %lu, hit: %lu, current: %lu", max_time_gap_, hit.time, current_time_cluster_.back().time);
     flush();
   }
 
-  // Insert in either case
+  // Insert hit in either case
   XTRACE(CLUSTER, DEB, "insert plane %d, time %u, coord %u, weight %u", hit.plane, hit.time, hit.coordinate, hit.weight);
   current_time_cluster_.emplace_back(hit);
 }
@@ -70,6 +69,6 @@ void GapClusterer::cluster_by_coordinate() {
     cluster.insert(hit);
   }
 
-  // Attempt to stash any leftovers
+  // Stash any leftovers
   stash_cluster(cluster);
 }
