@@ -108,6 +108,7 @@ the detected particicle position.
 An `Event` object has a predefined plane identities:
 * plane1
 * plane2
+
 It also contains the two clusters in each respective plane:
 * cluster1
 * cluster2

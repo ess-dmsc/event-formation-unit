@@ -61,7 +61,7 @@ void BuilderReadouts::build(const std::vector<Readout> &readouts) {
 
     bool good = digital_geometry_.map(hit_, r.bus, r.channel, r.adc);
     if (hit_.plane == Hit::InvalidPlane) {
-      XTRACE(PROCESS, DEB, "Bad channel_mappings %s", r.debug().c_str());
+      XTRACE(PROCESS, DEB, "Bad mappings for %s", r.debug().c_str());
       stats_digital_geom_errors++;
       continue;
     }
