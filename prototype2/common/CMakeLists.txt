@@ -3,7 +3,7 @@
 #=============================================================================
 
 add_subdirectory(clustering)
-add_subdirectory(analysis)
+add_subdirectory(reduction)
 
 set(efu_common_SRC
   DataSave.cpp

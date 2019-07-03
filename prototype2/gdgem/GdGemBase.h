@@ -125,7 +125,7 @@ protected:
   bool sample_next_track_ {false};
 
   void apply_configuration();
-  void cluster_plane(HitContainer& hits, std::shared_ptr<AbstractClusterer> clusterer, bool flush);
+  void cluster_plane(HitVector& hits, std::shared_ptr<AbstractClusterer> clusterer, bool flush);
   void perform_clustering(bool flush);
   void process_events(EV42Serializer&, Gem::TrackSerializer&);
 };

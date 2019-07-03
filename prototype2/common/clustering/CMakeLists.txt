@@ -22,6 +22,7 @@ set(clustering_obj_INC
   GapClusterer.h
   GapMatcher.h
   Hit.h
+  HitVector.h
   OverlapMatcher.h
 )
 

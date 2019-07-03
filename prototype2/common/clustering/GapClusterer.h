@@ -35,16 +35,16 @@ public:
   /// \brief insert new hits and perform clustering
   /// \param hits container of hits to be processed. Hits must be chronologically
   ///        sorted within the container and between subsequent calls.
-  void cluster(const HitContainer &hits) override;
+  void cluster(const HitVector &hits) override;
 
-  /// \brief complete clustering for any outstanding data
+  /// \brief complete clustering for any remaining hits
   void flush() override;
 
 private:
   uint64_t max_time_gap_;
   uint16_t max_coord_gap_;
 
-  HitContainer current_time_cluster_; ///< kept in memory until time gap encountered
+  HitVector current_time_cluster_; ///< kept in memory until time gap encountered
 
   /// \brief helper function to clusters hits in current_time_cluster_
   void cluster_by_coordinate();

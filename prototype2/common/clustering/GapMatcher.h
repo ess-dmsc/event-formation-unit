@@ -12,26 +12,26 @@
 
 /// \class GapMatcher GapMatcher.h
 /// \brief Matcher implementation that joins clusters into events
-///         if they overlap in time.
+///         if time gaps between them are sufficiently small.
 
 class GapMatcher : public AbstractMatcher {
 public:
   // Inherit constructor
   using AbstractMatcher::AbstractMatcher;
 
-  // \todo document this
+  /// \brief sets the minimum time gap criterion
+  /// \param minimum_time_gap minimum time gap between subsequent clusters for them
+  ///         to be disambiguated into separate events. If time gap is smaller,
+  ///         the clusters are merged into one event.
   void set_minimum_time_gap(uint64_t minimum_time_gap);
   
-  /// \brief GapMatcher constructor
-  /// \sa AbstractMatcher
-  /// GapMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2);
-
   /// \brief Match queued up clusters into events.
-  ///         Clusters that overlap in time are joined into events.
-  /// clusters separated bu no more than allowed_gap_
+  ///         Clusters that either overlap in time or have time gaps that are smaller than
+  ///         the minimum time gap are joined into events.
   /// \param flush if all queued clusters should be matched regardless of
-  ///        latency considerations
+  ///        latency considerations.
   void match(bool flush) override;
+
 private:
   uint64_t minimum_time_gap_{0};
 };

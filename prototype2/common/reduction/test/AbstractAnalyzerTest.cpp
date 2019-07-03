@@ -1,12 +1,12 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/analysis/AbstractAnalyzer.h>
+#include <common/reduction/AbstractAnalyzer.h>
 #include <cmath>
 #include <string>
 #include <test/TestBase.h>
 #include <unistd.h>
 
-class ReducedEventTest : public TestBase {
+class AbstractAnalyzerTest : public TestBase {
 protected:
   Hit hit;
   Cluster cluster;

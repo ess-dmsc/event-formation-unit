@@ -29,7 +29,7 @@ void GapClusterer::insert(const Hit &hit) {
   current_time_cluster_.emplace_back(hit);
 }
 
-void GapClusterer::cluster(const HitContainer &hits) {
+void GapClusterer::cluster(const HitVector &hits) {
   //It is assumed that hits are sorted in time
 
   for (const auto &hit : hits) {
@@ -48,7 +48,7 @@ void GapClusterer::flush() {
 
 void GapClusterer::cluster_by_coordinate() {
   // First, sort in terms of coordinate
-  AbstractClusterer::coord_order_hits(current_time_cluster_);
+  sort_by_increasing_coordinate(current_time_cluster_);
 
   Cluster cluster;
   XTRACE(CLUSTER, DEB, "first coord %u, last coord %u",

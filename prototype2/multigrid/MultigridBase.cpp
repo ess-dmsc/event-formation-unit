@@ -116,8 +116,8 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
     } else {
       mystats.events_total++;
 
-      if ((event.c1.hit_count() > mg_config.max_wire_hits) ||
-          (event.c2.hit_count() > mg_config.max_grid_hits))
+      if ((event.cluster1.hit_count() > mg_config.max_wire_hits) ||
+          (event.cluster2.hit_count() > mg_config.max_grid_hits))
       {
         mystats.events_multiplicity_rejects++;
         continue;

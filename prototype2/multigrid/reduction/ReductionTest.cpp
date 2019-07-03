@@ -133,10 +133,10 @@ protected:
       neutron_events++;
 
       time_span.bin(e.time_span());
-      wire_multiplicity.bin(e.c1.hit_count());
-      wire_span.bin(e.c1.coord_span());
-      grid_mltiplicity.bin(e.c2.hit_count());
-      grid_span.bin(e.c2.coord_span());
+      wire_multiplicity.bin(e.cluster1.hit_count());
+      wire_span.bin(e.cluster1.coord_span());
+      grid_mltiplicity.bin(e.cluster2.hit_count());
+      grid_span.bin(e.cluster2.coord_span());
 
       if (HaveTime) {
         auto t = e.time_start();

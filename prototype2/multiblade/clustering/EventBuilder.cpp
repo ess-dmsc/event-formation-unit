@@ -35,11 +35,11 @@ void EventBuilder::insert(Hit hit) {
 void EventBuilder::flush() {
   matcher.matched_events.clear();
 
-  AbstractClusterer::time_order_hits(p0);
+  sort_chronologically(p0);
   c0.cluster(p0);
   c0.flush();
 
-  AbstractClusterer::time_order_hits(p1);
+  sort_chronologically(p1);
   c1.cluster(p1);
   c1.flush();
 

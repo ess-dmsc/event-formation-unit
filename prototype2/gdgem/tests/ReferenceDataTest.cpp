@@ -36,7 +36,7 @@ class HitSorter {
   }
 
   void flush() {
-    AbstractClusterer::time_order_hits(buffer);
+    sort_chronologically(buffer);
 
     if (clusterer)
       clusterer->cluster(buffer);
@@ -47,7 +47,7 @@ class HitSorter {
 
   std::shared_ptr<AbstractClusterer> clusterer;
 
-  HitContainer buffer;
+  HitVector buffer;
   uint64_t prev_srs_time {0};
   size_t srs_overflows{0};
   size_t negative_chip_times{0};

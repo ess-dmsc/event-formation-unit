@@ -13,7 +13,7 @@ Reduction::Reduction() {
   matcher.set_minimum_time_gap(1);
 }
 
-void Reduction::ingest(HitContainer &hits) {
+void Reduction::ingest(HitVector &hits) {
   for (const auto &h : hits) {
     ingest(h);
   }

@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/analysis/MgAnalyzer.h>
+#include <common/reduction/MgAnalyzer.h>
 #include <common/clustering/AbstractClusterer.h>
 
 #include <common/Trace.h>
@@ -35,15 +35,15 @@ ReducedEvent MGAnalyzer::analyze(Event& event) const {
   }
 
   // grid
-  if (!event.c1.empty()) {
+  if (!event.cluster1.empty()) {
 
     double ymass{0};
     double ysum{0};
 
-    AbstractClusterer::weight_order_hits(event.c1.hits);
+    sort_by_decreasing_weight(event.cluster1.hits);
 
-    uint16_t highest_adc = event.c1.hits.front().weight;
-    for (const auto &h : event.c1.hits) {
+    uint16_t highest_adc = event.cluster1.hits.front().weight;
+    for (const auto &h : event.cluster1.hits) {
       if (h.weight != highest_adc)
         break;
       ret.y.hits_used++;
@@ -61,16 +61,16 @@ ReducedEvent MGAnalyzer::analyze(Event& event) const {
   }
 
   // wire
-  if (!event.c2.empty()) {
+  if (!event.cluster2.empty()) {
     double xmass{0};
     double zmass{0};
     double xsum{0};
     double zsum{0};
 
-    AbstractClusterer::weight_order_hits(event.c2.hits);
+    sort_by_decreasing_weight(event.cluster2.hits);
 
-    uint16_t highest_adc = event.c2.hits.front().weight;
-    for (const auto &h : event.c2.hits) {
+    uint16_t highest_adc = event.cluster2.hits.front().weight;
+    for (const auto &h : event.cluster2.hits) {
       if (h.weight != highest_adc)
         break;
       ret.x.hits_used++;
@@ -95,6 +95,6 @@ ReducedEvent MGAnalyzer::analyze(Event& event) const {
 
   ret.time = event.time_start();
   ret.good = ret.x.is_center_good() && ret.y.is_center_good() && ret.z.is_center_good();
-  ret.module = event.c1.plane() / 2;
+  ret.module = event.cluster1.plane() / 2;
   return ret;
 }

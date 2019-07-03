@@ -2,7 +2,7 @@
 
 #include <test/TestBase.h>
 
-#include <common/analysis/UtpcAnalyzer.h>
+#include <common/reduction/UtpcAnalyzer.h>
 
 class UtpcAnalyzerTest : public TestBase {
 protected:

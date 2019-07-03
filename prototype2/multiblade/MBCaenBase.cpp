@@ -313,7 +313,7 @@ void CAENBase::processing_thread() {
           continue;
         }
 
-        if ((e.c1.coord_span() > e.c1.hit_count()) && (e.c2.coord_span() > e.c2.hit_count())) {
+        if ((e.cluster1.coord_span() > e.cluster1.hit_count()) && (e.cluster2.coord_span() > e.cluster2.hit_count())) {
           XTRACE(EVENT, INF, "Event Chs not adjacent %s", e.debug(true).c_str());
           mystats.events_not_adjacent++;
           continue;
@@ -321,24 +321,24 @@ void CAENBase::processing_thread() {
 
         // // \todo are these always wires && strips respectively?
         // if (filter_multiplicity &&
-        //     ((e.c1.hit_count() > 5) || (e.c2.hit_count() > 10))) {
+        //     ((e.cluster1.hit_count() > 5) || (e.cluster2.hit_count() > 10))) {
         //   mystats.filters_max_multi1++;
         //   continue;
         // }
         // if (filter_multiplicity2 &&
-        //     ((e.c1.hit_count() > 3) || (e.c2.hit_count() > 4))) {
+        //     ((e.cluster1.hit_count() > 3) || (e.cluster2.hit_count() > 4))) {
         //   mystats.filters_max_multi2++;
         //   continue;
         // }
 
         XTRACE(EVENT, INF, "Event Valid\n %s", e.debug(true).c_str());
         // calculate local x and y using center of mass
-        auto x = static_cast<uint16_t>(std::round(e.c1.coord_center()));
-        auto y = static_cast<uint16_t>(std::round(e.c2.coord_center()));
+        auto x = static_cast<uint16_t>(std::round(e.cluster1.coord_center()));
+        auto y = static_cast<uint16_t>(std::round(e.cluster2.coord_center()));
 
         // calculate local x and y using center of span
-//        auto x = (e.c1.coord_start() + e.c1.coord_end()) / 2;
-//        auto y = (e.c2.coord_start() + e.c2.coord_end()) / 2;
+//        auto x = (e.cluster1.coord_start() + e.cluster1.coord_end()) / 2;
+//        auto y = (e.cluster2.coord_start() + e.cluster2.coord_end()) / 2;
 
         // \todo improve this
         auto time = e.time_start() * mb_opts.TimeTickNS; // TOF in ns

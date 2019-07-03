@@ -3,7 +3,7 @@
 #pragma once
 
 #include <common/clustering/Event.h>
-#include <common/analysis/ReducedEvent.h>
+#include <common/reduction/ReducedEvent.h>
 #include <multigrid/geometry/DigitalGeometry.h>
 #include <limits>
 

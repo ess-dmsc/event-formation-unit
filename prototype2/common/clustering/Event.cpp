@@ -27,52 +27,52 @@ uint8_t Event::plane2() const {
 
 void Event::insert(const Hit &e) {
   if (e.plane == plane1_) {
-    c1.insert(e);
+    cluster1.insert(e);
   } else if (e.plane == plane2_) {
-    c2.insert(e);
+    cluster2.insert(e);
   }
 }
 
 size_t Event::total_hit_count() const {
-  return c1.hit_count() + c2.hit_count();
+  return cluster1.hit_count() + cluster2.hit_count();
 }
 
 void Event::merge(Cluster &cluster) {
   if (cluster.plane() == plane1_) {
-    c1.merge(cluster);
+    cluster1.merge(cluster);
   } else if (cluster.plane() == plane2_) {
-    c2.merge(cluster);
+    cluster2.merge(cluster);
   }
-  XTRACE(EVENT, DEB, "merge() c1 size %u. c2 size %u", c1.hit_count(), c2.hit_count());
+  XTRACE(EVENT, DEB, "merge() cluster1 size %u. cluster2 size %u", cluster1.hit_count(), cluster2.hit_count());
 }
 
 void Event::clear() {
-  c1.clear();
-  c2.clear();
+  cluster1.clear();
+  cluster2.clear();
 }
 
 bool Event::empty() const {
-  return c1.empty() && c2.empty();
+  return cluster1.empty() && cluster2.empty();
 }
 
 bool Event::both_planes() const {
-  return !c1.empty() && !c2.empty();
+  return !cluster1.empty() && !cluster2.empty();
 }
 
 uint64_t Event::time_end() const {
-  if (c1.empty())
-    return c2.time_end();
-  if (c2.empty())
-    return c1.time_end();
-  return std::max(c1.time_end(), c2.time_end());
+  if (cluster1.empty())
+    return cluster2.time_end();
+  if (cluster2.empty())
+    return cluster1.time_end();
+  return std::max(cluster1.time_end(), cluster2.time_end());
 }
 
 uint64_t Event::time_start() const {
-  if (c1.empty())
-    return c2.time_start();
-  if (c2.empty())
-    return c1.time_start();
-  return std::min(c1.time_start(), c2.time_start());
+  if (cluster1.empty())
+    return cluster2.time_start();
+  if (cluster2.empty())
+    return cluster1.time_start();
+  return std::min(cluster1.time_start(), cluster2.time_start());
 }
 
 uint64_t Event::time_span() const {
@@ -112,12 +112,12 @@ uint64_t Event::time_gap(const Cluster &other) const {
 
 std::string Event::debug(bool verbose) const {
   auto ret = fmt::format("Event planes({}{},{}{}):",
-                     plane1_, (c1.empty() ? "" : "*"),
-                     plane2_, (c2.empty() ? "" : "*"));
-  if (!c1.empty())
-    ret += "\n  " + c1.debug(verbose);
-  if (!c2.empty())
-    ret += "\n  " + c2.debug(verbose);
+                     plane1_, (cluster1.empty() ? "" : "*"),
+                     plane2_, (cluster2.empty() ? "" : "*"));
+  if (!cluster1.empty())
+    ret += "\n  " + cluster1.debug(verbose);
+  if (!cluster2.empty())
+    ret += "\n  " + cluster2.debug(verbose);
 
   return ret;
 }
@@ -126,10 +126,10 @@ std::string Event::visualize(uint8_t downsample_time,
                              uint8_t downsample_coords) const {
   auto ret = fmt::format("Event planes({},{}):",
                          plane1_, plane2_);
-  if (!c1.empty())
-    ret += "\n  " + c1.visualize(downsample_time, downsample_coords);
-  if (!c2.empty())
-    ret += "\n  " + c2.visualize(downsample_time, downsample_coords);
+  if (!cluster1.empty())
+    ret += "\n  " + cluster1.visualize(downsample_time, downsample_coords);
+  if (!cluster2.empty())
+    ret += "\n  " + cluster2.visualize(downsample_time, downsample_coords);
   return ret;
 }
 

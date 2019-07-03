@@ -26,8 +26,8 @@ TEST_F(EventBuilderTest, FirstTest) {
   ASSERT_EQ(builder.matcher.matched_events.size(), clusters);
   for (auto & e : builder.matcher.matched_events) {
     ASSERT_TRUE(e.both_planes());
-    auto x = e.c1.coord_center();
-    auto y = e.c2.coord_center();
+    auto x = e.cluster1.coord_center();
+    auto y = e.cluster2.coord_center();
     MESSAGE() << "(x,y) = (" << x << ", " << y << ")\n";
     ASSERT_FLOAT_EQ(x + 1.0 ,y);
   }

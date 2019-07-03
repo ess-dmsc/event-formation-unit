@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <common/clustering/Hit.h>
+#include <common/clustering/HitVector.h>
 
 /// \class Cluster Cluster.h
 /// \brief A container of hits, aware of its plane, bounds and weight.
@@ -17,8 +17,11 @@
 ///        thus including the endpoints.
 
 class Cluster {
-public:  // \TODO should be protected!
-  std::vector<Hit> hits;
+public:
+  // \todo should be protected?
+  /// \note This variable is left public, because event reduction/analysis strategies
+  ///       must be able to sort hits in their preferred way without copying the contents
+  HitVector hits;
 
 public:
   Cluster() = default;
@@ -49,8 +52,9 @@ public:
   /// \returns true if cluster contains hits and all are on the same plane
   bool valid() const;
 
-  /// \returns returns plane of all hits in cluster, -1 if not all on same plane
-  int16_t plane() const;
+  /// \returns returns plane of all hits in cluster, can be Hit::InvalidPlane if
+  ///         not all hits belong to the same plane
+  uint8_t plane() const;
 
   /// \returns number of hits in cluster
   size_t hit_count() const;
@@ -96,14 +100,15 @@ public:
 
   /// \returns string describing cluster bounds and weights
   /// \param verbose also print hits
-  virtual std::string debug(bool verbose = false) const;
+  std::string debug(bool verbose = false) const;
 
   /// \returns visualizes cluster with "text graphics"
-  virtual std::string visualize(uint8_t downsample_time = 0,
-                                uint8_t downsample_coords = 0) const;
+  std::string visualize(uint8_t downsample_time = 0,
+                        uint8_t downsample_coords = 0) const;
 
 private:
-  int16_t plane_{-1};      ///< plane identity of cluster, -1 for invalid
+  // \todo uint8 might not be enough, if detectors have more independent modules/segments
+  uint8_t plane_{Hit::InvalidPlane};  ///< plane identity of cluster
 
   uint16_t coord_start_;
   uint16_t coord_end_;
@@ -111,7 +116,7 @@ private:
   uint64_t time_start_;
   uint64_t time_end_;
 
-  double weight_sum_{0.0};
+  double weight_sum_{0.0}; ///< sum of weight
   double coord_mass_{0.0}; ///< sum of coord*weight
   double time_mass_{0.0};  ///< sum of time*weight
 

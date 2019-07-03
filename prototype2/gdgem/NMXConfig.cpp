@@ -1,8 +1,8 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <gdgem/NMXConfig.h>
-#include <common/analysis/UtpcAnalyzer.h>
-#include <common/analysis/MgAnalyzer.h>
+#include <common/reduction/UtpcAnalyzer.h>
+#include <common/reduction/MgAnalyzer.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
 
@@ -20,8 +20,8 @@ bool EventFilter::valid(Event &event, const ReducedEvent& utpc) {
     return false;
   }
   if (enforce_minimum_hits &&
-      ((event.c1.hit_count() < minimum_hits) ||
-          (event.c2.hit_count() < minimum_hits))) {
+      ((event.cluster1.hit_count() < minimum_hits) ||
+          (event.cluster2.hit_count() < minimum_hits))) {
     minimum_hits_dropped++;
     return false;
   }

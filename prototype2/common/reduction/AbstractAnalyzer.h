@@ -10,7 +10,7 @@
 #pragma once
 
 #include <common/clustering/Event.h>
-#include <common/analysis/ReducedEvent.h>
+#include <common/reduction/ReducedEvent.h>
 
 class AbstractAnalyzer {
  public:

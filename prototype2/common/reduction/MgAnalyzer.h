@@ -2,7 +2,7 @@
 
 #pragma once
 
-#include <common/analysis/AbstractAnalyzer.h>
+#include <common/reduction/AbstractAnalyzer.h>
 #include <multigrid/geometry/ModuleGeometry.h>
 
 class MGAnalyzer : public AbstractAnalyzer {

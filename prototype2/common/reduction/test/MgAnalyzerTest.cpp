@@ -2,7 +2,7 @@
 
 #include <test/TestBase.h>
 
-#include <common/analysis/MgAnalyzer.h>
+#include <common/reduction/MgAnalyzer.h>
 
 class MgAnalyzerTest : public TestBase {
 protected:

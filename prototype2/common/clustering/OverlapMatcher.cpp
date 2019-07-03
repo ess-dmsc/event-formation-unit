@@ -57,10 +57,10 @@ void OverlapMatcher::match(bool flush) {
     } else {
       // Else return to queue
       // \todo this needs explicit testing
-      if (!evt.c1.empty())
-        unmatched_clusters_.push_front(evt.c1);
-      if (!evt.c2.empty())
-        unmatched_clusters_.push_front(evt.c2);
+      if (!evt.cluster1.empty())
+        unmatched_clusters_.push_front(evt.cluster1);
+      if (!evt.cluster2.empty())
+        unmatched_clusters_.push_front(evt.cluster2);
     }
   }
 }

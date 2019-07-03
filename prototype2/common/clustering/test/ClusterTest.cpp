@@ -9,12 +9,13 @@
 class ClusterTest : public TestBase {
 protected:
   Cluster cluster;
+  uint8_t invalid_plane {Hit::InvalidPlane};
 };
 
 TEST_F(ClusterTest, DefaultConstructed) {
   EXPECT_TRUE(cluster.empty());
   EXPECT_FALSE(cluster.valid());
-  EXPECT_EQ(cluster.plane(), -1);
+  EXPECT_EQ(cluster.plane(), invalid_plane);
   EXPECT_EQ(cluster.hit_count(), 0);
   EXPECT_EQ(cluster.coord_span(), 0);
   EXPECT_EQ(cluster.time_span(), 0);
@@ -35,7 +36,7 @@ TEST_F(ClusterTest, PlaneInvalidated) {
   cluster.insert({0, 0, 0, 2});
   EXPECT_FALSE(cluster.empty());
   EXPECT_FALSE(cluster.valid());
-  EXPECT_EQ(cluster.plane(), -1);
+  EXPECT_EQ(cluster.plane(), invalid_plane);
 }
 
 TEST_F(ClusterTest, InsertRepeatedly) {
@@ -62,7 +63,7 @@ TEST_F(ClusterTest, Clear) {
   cluster.clear();
   EXPECT_TRUE(cluster.empty());
   EXPECT_FALSE(cluster.valid());
-  EXPECT_EQ(cluster.plane(), -1);
+  EXPECT_EQ(cluster.plane(), invalid_plane);
   EXPECT_EQ(cluster.hit_count(), 0);
   EXPECT_EQ(cluster.coord_span(), 0);
   EXPECT_EQ(cluster.time_span(), 0);
@@ -244,7 +245,7 @@ TEST_F(ClusterTest, MergeMismatchedPlanes) {
   EXPECT_EQ(cluster.time_span(), 13);
   EXPECT_EQ(cluster.coord_span(), 11);
   EXPECT_EQ(cluster.weight_sum(), 5);
-  EXPECT_EQ(cluster.plane(), -1);
+  EXPECT_EQ(cluster.plane(), invalid_plane);
   EXPECT_FALSE(cluster.valid());
 
   EXPECT_EQ(cluster2.hit_count(), 0);

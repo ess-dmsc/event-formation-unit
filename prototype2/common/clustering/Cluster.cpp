@@ -23,7 +23,7 @@ void Cluster::insert(const Hit &e) {
 
   // If plane identities don't match, invalidate
   if (plane_ != e.plane) {
-    plane_ = -1;
+    plane_ = Hit::InvalidPlane;
     // For now it's decided to not discard everything in this case
     // clear();
   }
@@ -50,7 +50,7 @@ void Cluster::merge(Cluster &other) {
 
   // If plane identities don't match, invalidate
   if (other.plane_ != plane_) {
-    plane_ = -1;
+    plane_ = Hit::InvalidPlane;
     // For now it's decided to not discard everything in this case
     // clear();
   }
@@ -70,7 +70,7 @@ void Cluster::merge(Cluster &other) {
 
 void Cluster::clear() {
   hits.clear();
-  plane_ = -1;
+  plane_ = Hit::InvalidPlane;
   weight_sum_ = 0.0;
   coord_mass_ = 0.0;
   time_mass_ = 0.0;
@@ -81,10 +81,10 @@ bool Cluster::empty() const {
 }
 
 bool Cluster::valid() const {
-  return !hits.empty() && (plane_ >= 0);
+  return !hits.empty() && (plane_ != Hit::InvalidPlane);
 }
 
-int16_t Cluster::plane() const {
+uint8_t Cluster::plane() const {
   return plane_;
 }
 
@@ -104,7 +104,7 @@ uint16_t Cluster::coord_span() const {
   if (hits.empty()) {
     return 0;
   }
-  return (coord_end_ - coord_start_) + uint16_t(1);
+  return (coord_end_ - coord_start_) + 1ul;
 }
 
 uint64_t Cluster::time_start() const {
@@ -119,7 +119,7 @@ uint64_t Cluster::time_span() const {
   if (hits.empty()) {
     return 0;
   }
-  return (time_end_ - time_start_) + uint64_t(1);
+  return (time_end_ - time_start_) + 1ul;
 }
 
 double Cluster::weight_sum() const {
@@ -150,7 +150,7 @@ uint64_t Cluster::time_overlap(const Cluster &other) const {
   if (latest_start > earliest_end) {
     return 0;
   }
-  return (earliest_end - latest_start) + uint16_t(1);
+  return (earliest_end - latest_start) + 1u;
 }
 
 uint64_t Cluster::time_gap(const Cluster &other) const {
@@ -183,8 +183,8 @@ std::string Cluster::debug(bool verbose) const {
 std::string Cluster::visualize(uint8_t downsample_time,
                                uint8_t downsample_coords) const {
 
-  auto t_span = ((time_end_ - time_start_) >> downsample_time) + 1;
-  auto c_span = ((coord_end_ - coord_start_) >> downsample_coords) + 1;
+  auto t_span = ((time_end_ - time_start_) >> downsample_time) + 1u;
+  auto c_span = ((coord_end_ - coord_start_) >> downsample_coords) + 1u;
 
   std::vector<std::vector<uint16_t>> matrix;
   matrix.resize(t_span, std::vector<uint16_t>(c_span, 0));

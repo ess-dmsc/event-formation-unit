@@ -186,7 +186,7 @@ void GdGemBase::input_thread() {
 
 void bin(Hists& hists, const Event &e)
 {
-  auto sum = e.c1.weight_sum() + e.c2.weight_sum();
+  auto sum = e.cluster1.weight_sum() + e.cluster2.weight_sum();
   hists.bincluster(static_cast<uint32_t>(sum));
 }
 
@@ -239,9 +239,9 @@ void GdGemBase::apply_configuration() {
   sample_next_track_ = nmx_opts.send_tracks;
 }
 
-void GdGemBase::cluster_plane(HitContainer &hits,
+void GdGemBase::cluster_plane(HitVector &hits,
                               std::shared_ptr<AbstractClusterer> clusterer, bool flush) {
-  AbstractClusterer::time_order_hits(hits);
+  sort_chronologically(hits);
   clusterer->cluster(hits);
   hits.clear();
   if (flush) {
@@ -287,7 +287,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
   for (auto& event : matcher_->matched_events)
   {
     if (!event.both_planes()) {
-      if (event.c1.hit_count() != 0) {
+      if (event.cluster1.hit_count() != 0) {
         mystats.clusters_x_only++;
       }
       else {
@@ -439,10 +439,10 @@ void GdGemBase::processing_thread() {
         if (nmx_opts.send_raw_hits) {
           Event dummy_event;
           for (const auto& e : builder_->hit_buffer_x) {
-            dummy_event.c1.insert(e);
+            dummy_event.cluster1.insert(e);
           }
           for (const auto& e : builder_->hit_buffer_y) {
-            dummy_event.c2.insert(e);
+            dummy_event.cluster2.insert(e);
           }
           //LOG(PROCESS, Sev::Debug, "Sending raw data: {}", dummy_event.total_hit_count());
           raw_serializer.add_track(dummy_event, 0, 0);

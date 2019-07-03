@@ -28,16 +28,16 @@ ReducedEvent EventAnalyzer::analyze(Event &event) {
     return ret;
   }
 
-  if (!event.c1.empty()) {
+  if (!event.cluster1.empty()) {
     double xmass{0};
     double zmass{0};
     double xsum{0};
     double zsum{0};
 
-    AbstractClusterer::time_order_hits(event.c1.hits);
+    sort_chronologically(event.cluster1.hits);
 
-    uint16_t highest_adc = event.c1.hits.front().weight;
-    for (const auto &h : event.c1.hits) {
+    uint16_t highest_adc = event.cluster1.hits.front().weight;
+    for (const auto &h : event.cluster1.hits) {
       if (h.weight != highest_adc)
         break;
       stats_used_hits++;
@@ -58,15 +58,15 @@ ReducedEvent EventAnalyzer::analyze(Event &event) {
     ret.z.center = zmass / zsum;
   }
 
-  if (!event.c2.empty()) {
+  if (!event.cluster2.empty()) {
 
     double ymass{0};
     double ysum{0};
 
-    AbstractClusterer::time_order_hits(event.c2.hits);
+    sort_chronologically(event.cluster2.hits);
 
-    uint16_t highest_adc = event.c2.hits.front().weight;
-    for (const auto &h : event.c2.hits) {
+    uint16_t highest_adc = event.cluster2.hits.front().weight;
+    for (const auto &h : event.cluster2.hits) {
       if (h.weight != highest_adc)
         break;
       stats_used_hits++;

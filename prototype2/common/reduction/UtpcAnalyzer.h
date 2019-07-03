@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <common/analysis/AbstractAnalyzer.h>
+#include <common/reduction/AbstractAnalyzer.h>
 
 class utpcAnalyzer : public AbstractAnalyzer {
  public:

@@ -17,23 +17,20 @@
 ///        evaluating dimensions, thus including the endpoints.
 
 class Event {
-private:
-  uint8_t plane1_ {0};
-  uint8_t plane2_ {1};
+public:
+  Cluster cluster1; ///< cluster in dimension 1
+  Cluster cluster2; ///< cluster in dimension 2
 
 public:
-  Cluster c1; ///< cluster in dimension 1
-  Cluster c2; ///< cluster in dimension 2
+  /// \brief Event constructor, selecting planes
+  /// \param plane1 id of first plane selected for event
+  /// \param plane2 id of second plane selected for event
+  Event(uint8_t plane1, uint8_t plane2);
 
   /// \brief Event default constructor, planes default to 0 and 1
   Event() = default;
 
   virtual ~Event() = default;
-
-  /// \brief Event constructor, selecting planes
-  /// \param plane1 id of first plane selected for event
-  /// \param plane2 id of second plane selected for event
-  Event(uint8_t plane1, uint8_t plane2);
 
   /// \returns id of first plane selected for event
   uint8_t plane1() const;
@@ -89,5 +86,9 @@ public:
   /// \returns visualizes both clusters with "text graphics"
   virtual std::string visualize(uint8_t downsample_time = 0,
                                 uint8_t downsample_coords = 0) const;
+
+private:
+  uint8_t plane1_ {0};
+  uint8_t plane2_ {1};
 
 };

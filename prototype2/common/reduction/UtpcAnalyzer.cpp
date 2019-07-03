@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/analysis/UtpcAnalyzer.h>
+#include <common/reduction/UtpcAnalyzer.h>
 #include <common/clustering/AbstractClusterer.h>
 #include <cmath>
 #include <set>
@@ -23,7 +23,7 @@ ReducedHit utpcAnalyzer::analyze(Cluster &cluster) const {
     return ret;
   }
 
-  AbstractClusterer::time_order_hits(cluster.hits);
+  sort_chronologically(cluster.hits);
 
   double center_sum{0};
   double center_count{0};
@@ -68,8 +68,8 @@ ReducedHit utpcAnalyzer::analyze(Cluster &cluster) const {
 
 ReducedEvent utpcAnalyzer::analyze(Event &event) const {
   ReducedEvent ret;
-  ret.x = analyze(event.c1);
-  ret.y = analyze(event.c2);
+  ret.x = analyze(event.cluster1);
+  ret.y = analyze(event.cluster2);
   ret.good = std::isfinite(ret.x.center) && std::isfinite(ret.y.center);
   ret.time = utpc_time(event);
   return ret;
@@ -77,7 +77,7 @@ ReducedEvent utpcAnalyzer::analyze(Event &event) const {
 
 uint64_t utpcAnalyzer::utpc_time(const Event &e) {
   // \todo is this what we want?
-  return std::max(e.c1.time_end(), e.c2.time_end());
+  return std::max(e.cluster1.time_end(), e.cluster2.time_end());
 }
 
 bool utpcAnalyzer::meets_lower_criterion(const ReducedHit &x, const ReducedHit &y,

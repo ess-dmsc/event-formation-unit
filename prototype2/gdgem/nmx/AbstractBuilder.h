@@ -35,8 +35,8 @@ public:
   // \todo use Buffer<char>
   virtual void process_buffer(char *buf, size_t size) = 0;
 
-  HitContainer hit_buffer_x;
-  HitContainer hit_buffer_y;
+  HitVector hit_buffer_x;
+  HitVector hit_buffer_y;
 
   ResultStats stats;
 };

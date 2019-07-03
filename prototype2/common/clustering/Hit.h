@@ -35,10 +35,10 @@
 #pragma once
 
 #include <common/DumpFile.h>
-//#include <limits>
+#include <limits>
 
 struct __attribute__ ((packed)) Hit {
-  /// \todo use constexpr string_view when c++17 arrives
+  // \todo use constexpr string_view when c++17 arrives
   static std::string DatasetName() { return "efu_hits"; }
   static uint16_t FormatVersion() { return 0; }
 
@@ -46,6 +46,7 @@ struct __attribute__ ((packed)) Hit {
   uint64_t time{0};
   uint16_t coordinate{0};
   uint16_t weight{0};
+  // \todo uint8 might not be enough, if detectors have more independent modules/segments
   uint8_t plane{0};
   /// !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 

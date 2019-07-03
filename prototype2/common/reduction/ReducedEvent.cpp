@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/analysis/ReducedEvent.h>
+#include <common/reduction/ReducedEvent.h>
 #include <fmt/format.h>
 
 uint32_t ReducedHit::center_rounded() const {

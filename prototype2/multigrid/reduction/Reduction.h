@@ -3,6 +3,7 @@
 #pragma once
 #include <common/clustering/GapClusterer.h>
 #include <common/clustering/GapMatcher.h>
+#include <common/reduction/MgAnalyzer.h>
 
 namespace Multigrid {
 
@@ -10,7 +11,7 @@ class Reduction {
 public:
   Reduction();
 
-  void ingest(HitContainer &hits);
+  void ingest(HitVector &hits);
 
   void ingest(const Hit& hit);
 
@@ -28,7 +29,7 @@ public:
 private:
   GapClusterer wire_clusters{0, 1};
   GapClusterer grid_clusters{0, 1};
-  HitContainer pulse_times;
+  HitVector pulse_times;
 
   uint64_t previous_time_{0};
 };
