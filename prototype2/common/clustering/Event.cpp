@@ -78,7 +78,7 @@ uint64_t Event::time_start() const {
 uint64_t Event::time_span() const {
   if (empty())
     return 0;
-  return (time_end() - time_start()) + uint16_t(1);
+  return (time_end() - time_start()) + 1ul;
 }
 
 uint64_t Event::time_overlap(const Cluster &other) const {
@@ -92,7 +92,7 @@ uint64_t Event::time_overlap(const Cluster &other) const {
     XTRACE(EVENT, DEB, "no time overlap");
     return 0;
   }
-  return (earliest_end - latest_start) + uint16_t(1);
+  return (earliest_end - latest_start) + 1ul;
 }
 
 uint64_t Event::time_gap(const Cluster &other) const {
