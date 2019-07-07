@@ -24,3 +24,8 @@ set(MgAnalyzerTest_SRC
   ../../../multigrid/geometry/Filter.cpp
   )
 create_test_executable(MgAnalyzerTest)
+
+set(ChronoMergerTest_SRC
+  ChronoMergerTest.cpp
+  )
+create_test_executable(ChronoMergerTest)

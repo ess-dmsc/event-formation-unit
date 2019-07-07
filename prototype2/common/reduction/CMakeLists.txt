@@ -7,6 +7,7 @@ set(analysis_obj_SRC
   AbstractAnalyzer.cpp
   MgAnalyzer.cpp
   UtpcAnalyzer.cpp
+  ChronoMerger.cpp
 )
 
 set(analysis_obj_INC
@@ -14,6 +15,7 @@ set(analysis_obj_INC
   AbstractAnalyzer.h
   MgAnalyzer.h
   UtpcAnalyzer.h
+  ChronoMerger.h
 )
 
 add_library(AnalysisObj OBJECT ${analysis_obj_SRC} ${analysis_obj_INC})
