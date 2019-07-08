@@ -226,9 +226,8 @@ void GdGemBase::apply_configuration() {
   clusterer_y_ = std::make_shared<GapClusterer>(
       nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap);
 
-  auto pulse_plane = Hit::PulsePlane;
   auto matcher = std::make_shared<GapMatcher>(
-      nmx_opts.time_config.acquisition_window()*5, 0, 1, pulse_plane);
+      nmx_opts.time_config.acquisition_window()*5, 0, 1);
 
   matcher->set_minimum_time_gap(nmx_opts.matcher_max_delta_time);
 

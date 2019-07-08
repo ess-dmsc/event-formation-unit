@@ -6,7 +6,7 @@
 class EndMatcherTest : public TestBase {
 protected:
   ClusterContainer x, y;
-  EndMatcher matcher{600, 0, 1, 255};
+  EndMatcher matcher{600, 0, 1};
 
   void SetUp() override {
     matcher.set_max_delta_time(200);

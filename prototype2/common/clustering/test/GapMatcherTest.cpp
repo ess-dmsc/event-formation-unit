@@ -13,7 +13,7 @@ protected:
 };
 
 TEST_F(GapMatcherTest, Constructor) {
-  GapMatcher matcher(125, 0, 1, 255);
+  GapMatcher matcher(125, 0, 1);
   matcher.set_minimum_time_gap(70);
 
   ASSERT_EQ(matcher.stats_event_count, 0);

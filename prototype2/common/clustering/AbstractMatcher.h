@@ -33,8 +33,7 @@ public:
   ///         the earlier one will be considered for this comparison.
   /// \param plane1 id of first plane selected for matching
   /// \param plane2 id of second plane selected for matching
-  /// \param pulse_plane id of plane selected for periodic pulse/chopper events
-  AbstractMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2, uint8_t pulse_plane);
+  AbstractMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2);
 
   virtual ~AbstractMatcher() = default;
 
@@ -61,14 +60,6 @@ public:
   ///        subsequent clusters can arrive with end_time>=(T-latency).
   void insert(uint8_t plane, ClusterContainer &clusters);
 
-  /// \brief Inserts pulse events as clusters belonging to the pulse plane
-  /// \param pulses Hits indicating pulse times.
-  /// \post If pulses vector is not empty, latest pulse-time is henceforth
-  ///       compared against latency when releasing clusters for matching.
-  // \todo perhaps queue up pulses outside of matcher? Especially if we have multiple matchers
-  //       for different detector modules or panels
-  void insert_pulses(HitVector &pulses);
-
   /// \brief match queued up clusters into events
   ///         To be implemented in derived classes.
   /// \param flush if all queued clusters should be matched regardless of
@@ -82,14 +73,10 @@ protected:
   uint64_t latency_{0}; ///< time gap for a cluster to be considered for matching
   uint8_t plane1_{0};
   uint8_t plane2_{1};
-  uint8_t pulse_plane_{Hit::PulsePlane};
 
   ClusterContainer unmatched_clusters_;
   uint64_t latest_x_{0};
   uint64_t latest_y_{0};
-
-  bool tracking_pulses_{false}; /// < set to true if pulses are being tracked
-  uint64_t latest_pulse_{0};
 
   /// \brief Moves event into events container; increments counter.
   /// \param event to be stashed
@@ -98,8 +85,8 @@ protected:
   /// \brief Determines if cluster is ready to be matched, using maximum latency
   ///         as time-out threshold. Compares the end time of submitted cluster to
   ///         the start time of the latest cluster in queue. Of the latest clusters
-  ///         in both planes (and latest of pulses, if pulses are being tracked),
-  ///         the earlier one will be considered. Uses the latency criterion as threshold.
+  ///         in both planes, the earlier one will be considered. Uses the latency
+  //          criterion as threshold.
   /// \param cluster to be considered for matching
   bool ready_to_be_matched(const Cluster &cluster) const;
 };

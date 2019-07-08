@@ -30,7 +30,6 @@ void Reduction::ingest(const Hit &h) {
 
   if (h.plane == Hit::PulsePlane) {
     merger.insert(0, {h.time, 0});
-    //pulse_times.push_back(h);
   } else if (h.plane == AbstractBuilder::wire_plane) {
     wire_clusters.insert(h);
   } else if (h.plane == AbstractBuilder::grid_plane) {

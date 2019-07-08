@@ -35,7 +35,7 @@ public:
   GapClusterer c0{timegap, coordgap}, c1{timegap, coordgap};
 
   // \todo parametrize
-  GapMatcher matcher{latency, 0, 1, Hit::PulsePlane};
+  GapMatcher matcher{latency, 0, 1};
 };
 
 }

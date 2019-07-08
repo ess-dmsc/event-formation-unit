@@ -84,9 +84,8 @@ protected:
         std::make_shared<GapClusterer>(opts.clusterer_y.max_time_gap,
                                        opts.clusterer_y.max_strip_gap);
 
-    auto pulse_plane = Hit::PulsePlane;
     auto gap_matcher = std::make_shared<GapMatcher>(
-        opts.time_config.acquisition_window()*5, 0, 1, pulse_plane);
+        opts.time_config.acquisition_window()*5, 0, 1);
     gap_matcher->set_minimum_time_gap(opts.matcher_max_delta_time);
     matcher = gap_matcher;
   }

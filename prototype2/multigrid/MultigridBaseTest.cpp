@@ -69,7 +69,7 @@ TEST_F(MultigridBaseTest, DataReceive) {
   EXPECT_EQ(Readout.mystats.wire_clusters, 24);
   EXPECT_EQ(Readout.mystats.grid_clusters, 26);
   EXPECT_EQ(Readout.mystats.events_total, 23);
-  EXPECT_EQ(Readout.mystats.events_multiplicity_rejects, 0);
+  EXPECT_EQ(Readout.mystats.events_multiplicity_rejects, 1);
   EXPECT_EQ(Readout.mystats.events_bad, 0);
   EXPECT_EQ(Readout.mystats.events_geometry_err, 0);
   EXPECT_EQ(Readout.mystats.events_time_err, 22);

@@ -37,8 +37,7 @@ coincidence with our cluster, and therefore we cannot release it.
 
 The way `ready_to_be_matched` approaches this question is by selecting the earliest (least advanced
 in time) point from the relevand planes, and then uses this as the comparison point for the
-latency check. If pulse times are being considered, then it also includes the latest pulse time
-in this selection, i.e. selects the earliest of the three "planes" (in the broad sense) in question.
+latency check.
 
 ### Plane identities
 Recall that the `Event` class can merge any `Clusters` so long as they belong to one of the relevant
@@ -57,7 +56,6 @@ parameters already known:
 * maximum latency of readout system
 * plane ID for the first relevant plane
 * plane ID for the second relevant plane
-* plane ID for the (optional) pulse events
 
 Since clustering on a single plane is expected to have happened in one of the `Clusterer`
 implementations, it is also very likely that clusters from a single plane will arrive in bulk
@@ -80,6 +78,7 @@ unintended consequences for the matcher implementations. The matching pipeline m
 from proceeding until the relevant clusterer releases its data.
 
 ### Shortcomings:
+(TODO: this section is to be moved elsewhere)
 The presence of pulse-time complicates things, and the need to keep track of it in the matcher makes
 implementations more complex than they would otherwise have to be. It is highly likely
 that this class is not the right place to keep track of the pulse time. Particle events and pulse
@@ -114,9 +113,6 @@ At the end of the loop, it may be that there was something accumulated in the ca
 it has not met the criteria for release. In which case it is disassembeled and it's constituent
 clusters are put back on the front of the queue of unmatched clusters.
 
-Some additional logic ensures that requests to flush are satisfied and that pulse-type events
-are also appropriately released without merging them with multi-dimensional clusters.
-
 # GapMatcher
 This implementation merges clusters without requiring a strict time overlap. So long as two
 clusters are within a certain small time-gap of each other, they are considered to be
@@ -137,8 +133,3 @@ of particular interest.
 
 Implementation wise it is a similar story to the above. Some convenience functions have been
 provided to encapsule the necessary time-end comparisons.
-
-### Shortcomings
-This implementation does not make special arrangements for pulse events. Currently GdGem
-does not have or require pulse time in the stream, so it is probably ok. But also in the long term
-this should be solved elsewhere (see `AbstractMatcher` above).

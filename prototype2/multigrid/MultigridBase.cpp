@@ -90,7 +90,12 @@ void MultigridBase::init_config() {
 
 void MultigridBase::process_events(EV42Serializer &ev42serializer) {
 
+  mystats.hits_time_seq_err = mg_config.reduction.stats_time_seq_errors;
+  mystats.hits_bad_plane = mg_config.reduction.stats_invalid_planes;
+  mystats.wire_clusters = mg_config.reduction.stats_wire_clusters;
+  mystats.grid_clusters = mg_config.reduction.stats_grid_clusters;
   mystats.events_total = mg_config.reduction.stats_events_total;
+  mystats.events_multiplicity_rejects = mg_config.reduction.stats_events_multiplicity_rejects;
   mystats.hits_used = mg_config.reduction.stats_hits_used;
   mystats.events_bad = mg_config.reduction.stats_events_bad;
   mystats.events_geometry_err = mg_config.reduction.stats_events_geometry_err;
@@ -203,10 +208,6 @@ void MultigridBase::mainThread() {
 //        mg_config.reduction.ingest(mg_config.builder->ConvertedData);
 
         mg_config.reduction.perform_clustering(false);
-        mystats.hits_time_seq_err = mg_config.reduction.stats_time_seq_errors;
-        mystats.hits_bad_plane = mg_config.reduction.stats_invalid_planes;
-        mystats.wire_clusters = mg_config.reduction.stats_wire_clusters;
-        mystats.grid_clusters = mg_config.reduction.stats_grid_clusters;
         process_events(ev42serializer);
       }
     }
@@ -233,10 +234,6 @@ void MultigridBase::mainThread() {
       // flush anything that remains
 
       mg_config.reduction.perform_clustering(true);
-      mystats.hits_time_seq_err = mg_config.reduction.stats_time_seq_errors;
-      mystats.hits_bad_plane = mg_config.reduction.stats_invalid_planes;
-      mystats.wire_clusters = mg_config.reduction.stats_wire_clusters;
-      mystats.grid_clusters = mg_config.reduction.stats_grid_clusters;
       process_events(ev42serializer);
 
       mystats.tx_bytes += ev42serializer.produce();

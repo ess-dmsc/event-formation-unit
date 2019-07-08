@@ -12,8 +12,8 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-AbstractMatcher::AbstractMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2, uint8_t pulse_plane)
-    : latency_(latency), plane1_(plane1), plane2_(plane2), pulse_plane_(pulse_plane) {}
+AbstractMatcher::AbstractMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2)
+    : latency_(latency), plane1_(plane1), plane2_(plane2) {}
 
 void AbstractMatcher::insert(const Cluster &cluster) {
   if (cluster.plane() == plane1_) {
@@ -47,20 +47,6 @@ void AbstractMatcher::insert(uint8_t plane, ClusterContainer &clusters) {
   unmatched_clusters_.splice(unmatched_clusters_.end(), clusters);
 }
 
-void AbstractMatcher::insert_pulses(HitVector &pulses) {
-  if (pulses.empty())
-    return;
-  tracking_pulses_ = true;
-  for (auto &h : pulses) {
-    h.plane = pulse_plane_;
-    Cluster c;
-    c.insert(h);
-    unmatched_clusters_.push_back(c);
-    latest_pulse_ = std::max(latest_pulse_, h.time);
-  }
-  pulses.clear();
-}
-
 void AbstractMatcher::stash_event(Event &event) {
   matched_events.emplace_back(std::move(event));
   stats_event_count++;
@@ -69,10 +55,7 @@ void AbstractMatcher::stash_event(Event &event) {
 bool AbstractMatcher::ready_to_be_matched(const Cluster &cluster) const {
   XTRACE(CLUSTER, DEB,
       "latest_x %u, latest_y %u, cl time end %u", latest_x_, latest_y_, cluster.time_end());
-  // \todo print info on pulses
   auto latest = std::min(latest_x_, latest_y_);
-  if (tracking_pulses_)
-    latest = std::min(latest, latest_pulse_);
   return (latest > cluster.time_end()) &&
       ((latest - cluster.time_end()) > latency_);
 }

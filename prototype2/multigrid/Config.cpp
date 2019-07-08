@@ -65,7 +65,8 @@ std::string Config::debug() const {
   ss << "  Event position using weighted average: "
      << (reduction.analyzer.weighted() ? "YES" : "no") << "\n";
 
-  // \todo multiplicity filter
+  ss << "  max_wire_hits = " << reduction.max_wire_hits << "\n";
+  ss << "  max_grid_hits = " << reduction.max_grid_hits << "\n";
 
   ss << "  geometry_x = " << reduction.geometry.nx() << "\n";
   ss << "  geometry_y = " << reduction.geometry.ny() << "\n";

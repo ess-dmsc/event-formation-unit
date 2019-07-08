@@ -44,11 +44,10 @@ public:
 private:
   GapClusterer wire_clusters{0, 1};
   GapClusterer grid_clusters{0, 1};
-//  HitVector pulse_times;
 
   // Just greater than shortest pulse period of 266662 ticks
   // Will have to be adjusted for other experimental setups
-  GapMatcher matcher{300000, 0, 1, Hit::PulsePlane};
+  GapMatcher matcher{300000, 0, 1};
 
   uint64_t previous_time_{0};
 };
