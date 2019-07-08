@@ -89,59 +89,34 @@ void MultigridBase::init_config() {
 }
 
 void MultigridBase::process_events(EV42Serializer &ev42serializer) {
-  std::sort(mg_config.reduction.matcher.matched_events.begin(),
-            mg_config.reduction.matcher.matched_events.end(),
-            [](const Event &e1,
-               const Event &e2) {
-              return e1.time_start() < e2.time_start();
-            });
 
-  for (auto &event : mg_config.reduction.matcher.matched_events) {
+  mystats.events_total = mg_config.reduction.stats_events_total;
+  mystats.hits_used = mg_config.reduction.stats_hits_used;
+  mystats.events_bad = mg_config.reduction.stats_events_bad;
+  mystats.events_geometry_err = mg_config.reduction.stats_events_geometry_err;
 
-    if (event.plane1() == Hit::PulsePlane) {
+  for (auto &event : mg_config.reduction.out_queue) {
+
+    if (event.pixel_id == 0) {
       mystats.pulses++;
 
       if (HavePulseTime) {
-        uint64_t PulsePeriod = event.time_start() - ev42serializer.pulseTime();
+        uint64_t PulsePeriod = event.time - ev42serializer.pulseTime();
         ShortestPulsePeriod = std::min(ShortestPulsePeriod, PulsePeriod);
       }
       HavePulseTime = true;
 
       if (ev42serializer.eventCount())
         mystats.tx_bytes += ev42serializer.produce();
-      ev42serializer.pulseTime(event.time_start());
+      ev42serializer.pulseTime(event.time);
 
 //            XTRACE(PROCESS, DEB, "New pulse time: %u   shortest pulse period: %u",
 //                   ev42serializer.pulseTime(), ShortestPulsePeriod);
     } else {
-      mystats.events_total++;
 
-      if ((event.cluster1.hit_count() > mg_config.max_wire_hits) ||
-          (event.cluster2.hit_count() > mg_config.max_grid_hits))
-      {
-        mystats.events_multiplicity_rejects++;
-        continue;
-      }
-
-      auto neutron = mg_config.analyzer.analyze(event);
-      mystats.hits_used = mg_config.analyzer.stats_used_hits;
-
-      if (!neutron.good) {
-        mystats.events_bad++;
-        continue;
-      }
-      //            XTRACE(PROCESS, DEB, "Neutron: %s ", neutron.debug().c_str());
-      uint32_t pixel = mg_config.geometry.pixel3D(
-          neutron.x.center_rounded(),
-          neutron.y.center_rounded(),
-          neutron.z.center_rounded()
-          );
-      auto time = static_cast<uint32_t>(neutron.time - ev42serializer.pulseTime());
+      auto time = static_cast<uint32_t>(event.time - ev42serializer.pulseTime());
 //            XTRACE(PROCESS, DEB, "Event: pixel: %d, time: %d ", pixel, time);
-      if (pixel == 0) {
-        XTRACE(PROCESS, DEB, "Event geom error");
-        mystats.events_geometry_err++;
-      } else if (!HavePulseTime || (neutron.time < ev42serializer.pulseTime())) {
+      if (!HavePulseTime || (event.time < ev42serializer.pulseTime())) {
         XTRACE(PROCESS, DEB, "Event before pulse");
         mystats.events_time_err++;
       } else if (time > (1.00004 * ShortestPulsePeriod)) {
@@ -150,11 +125,11 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
       } else {
 //              XTRACE(PROCESS, DEB, "Event good");
         mystats.tx_events++;
-        mystats.tx_bytes += ev42serializer.addEvent(time, pixel);
+        mystats.tx_bytes += ev42serializer.addEvent(time, event.pixel_id);
       }
     }
   }
-  mg_config.reduction.matcher.matched_events.clear();
+  mg_config.reduction.out_queue.clear();
 }
 
 void MultigridBase::mainThread() {
@@ -200,7 +175,7 @@ void MultigridBase::mainThread() {
       if (!mg_config.builder->ConvertedData.empty()) {
         mystats.hits_total += mg_config.builder->ConvertedData.size();
 
-        auto mappings = mg_config.analyzer.mappings.mapping();
+        auto mappings = mg_config.reduction.analyzer.mappings.mapping();
 
         if (monitor.readouts || monitor.hists)
         {

@@ -45,9 +45,7 @@ protected:
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
   size_t ingested_hits{0};
   size_t pulse_times{0};
-  size_t neutron_events{0};
-
-  Reduction reduction;
+  size_t good_events{0};
 
   void SetUp() override {
     load_config(TEST_DATA_PATH "Sequoia_mappings.json");
@@ -57,7 +55,7 @@ protected:
 
   void load_config(const std::string &jsonfile) {
     config = Multigrid::Config(jsonfile);
-    config.builder = std::make_shared<BuilderReadouts>(config.analyzer.mappings.mapping());
+    config.builder = std::make_shared<BuilderReadouts>(config.reduction.analyzer.mappings.mapping());
     //MESSAGE() << "Digital geometry: " << config.builder->digital_geometry.debug() << "\n";
   }
 
@@ -67,19 +65,19 @@ protected:
     uint8_t buffer[9000];
     size_t readsz;
 
-    auto mappings = config.analyzer.mappings.mapping();
+    auto mappings = config.reduction.analyzer.mappings.mapping();
     while ((readsz = reader.read((char *) &buffer)) > 0) {
       config.builder->parse(Buffer<uint8_t>(buffer, readsz));
       ingested_hits += config.builder->ConvertedData.size();
       // manual ingest with hit absolutification
-      for (const auto& h : config.builder->ConvertedData) {
-        reduction.ingest(mappings.absolutify(h));
+      for (const auto &h : config.builder->ConvertedData) {
+        config.reduction.ingest(mappings.absolutify(h));
       }
       config.builder->ConvertedData.clear();
 
-      reduction.perform_clustering(false);
+      config.reduction.perform_clustering(false);
     }
-    reduction.perform_clustering(true);
+    config.reduction.perform_clustering(true);
   }
 
   void inspect_pulse_data(bool verbose = false) {
@@ -87,22 +85,22 @@ protected:
     uint64_t RecentPulseTime{0};
 
     DynamicHist pulse_positive_diff, pulse_negative_diff;
-    for (const auto &e : reduction.matcher.matched_events) {
-      if (e.plane1() != Hit::PulsePlane) {
+    for (const auto &e : config.reduction.out_queue) {
+      if (e.pixel_id != 0) {
         continue;
       }
 
       if (HavePulseTime) {
-        if (e.time_start() >= RecentPulseTime) {
-          pulse_positive_diff.bin(e.time_start() - RecentPulseTime);
-          auto PulsePeriod = e.time_start() - RecentPulseTime;
+        if (e.time >= RecentPulseTime) {
+          pulse_positive_diff.bin(e.time - RecentPulseTime);
+          auto PulsePeriod = e.time - RecentPulseTime;
           ShortestPulsePeriod = std::min(ShortestPulsePeriod, PulsePeriod);
         }
-        if (e.time_start() < RecentPulseTime) {
-          pulse_negative_diff.bin(RecentPulseTime - e.time_start());
+        if (e.time < RecentPulseTime) {
+          pulse_negative_diff.bin(RecentPulseTime - e.time);
         }
       }
-      RecentPulseTime = e.time_start();
+      RecentPulseTime = e.time;
       HavePulseTime = true;
       pulse_times++;
     }
@@ -125,21 +123,21 @@ protected:
 
     DynamicHist event_positive_diff, event_negative_diff;
     DynamicHist wire_multiplicity, wire_span, grid_mltiplicity, grid_span, time_span;
-    for (const auto &e : reduction.matcher.matched_events) {
-      if (e.plane1() == Hit::PulsePlane) {
+    for (const auto &e : config.reduction.out_queue) {
+      if (e.pixel_id == 0) {
         continue;
       }
 
-      neutron_events++;
+      good_events++;
 
-      time_span.bin(e.time_span());
-      wire_multiplicity.bin(e.cluster1.hit_count());
-      wire_span.bin(e.cluster1.coord_span());
-      grid_mltiplicity.bin(e.cluster2.hit_count());
-      grid_span.bin(e.cluster2.coord_span());
+//      time_span.bin(e.time_span());
+//      wire_multiplicity.bin(e.cluster1.hit_count());
+//      wire_span.bin(e.cluster1.coord_span());
+//      grid_mltiplicity.bin(e.cluster2.hit_count());
+//      grid_span.bin(e.cluster2.coord_span());
 
       if (HaveTime) {
-        auto t = e.time_start();
+        auto t = e.time;
         if (t >= RecentTime) {
           event_positive_diff.bin(t - RecentTime);
         }
@@ -147,7 +145,7 @@ protected:
           event_negative_diff.bin(RecentTime - t);
         }
       }
-      RecentTime = e.time_start();
+      RecentTime = e.time;
       HaveTime = true;
     }
 
@@ -176,16 +174,24 @@ TEST_F(ReductionTest, t00004) {
   feed_file(TEST_DATA_PATH "readouts/154482");
 
   EXPECT_EQ(ingested_hits, 1088);
-  EXPECT_EQ(reduction.stats_invalid_planes, 0);
-  EXPECT_EQ(reduction.stats_time_seq_errors, 0);
+  EXPECT_EQ(config.reduction.stats_invalid_planes, 0);
+  EXPECT_EQ(config.reduction.stats_time_seq_errors, 0);
 
-  EXPECT_EQ(reduction.stats_wire_clusters, 164);
-  EXPECT_EQ(reduction.stats_grid_clusters, 184);
+  EXPECT_EQ(config.reduction.stats_wire_clusters, 164);
+  EXPECT_EQ(config.reduction.stats_grid_clusters, 184);
+  EXPECT_EQ(config.reduction.stats_events_total, 182);
+  EXPECT_EQ(config.reduction.stats_events_multiplicity_rejects, 13);
+  EXPECT_EQ(config.reduction.stats_hits_used, 302);
+  EXPECT_EQ(config.reduction.stats_events_bad, 36);
+  EXPECT_EQ(config.reduction.stats_events_geometry_err, 0);
 
   inspect_pulse_data();
   inspect_event_data();
   EXPECT_EQ(pulse_times, 467);
-  EXPECT_EQ(neutron_events, 182);
+  EXPECT_EQ(good_events, 133);
+  EXPECT_EQ(good_events + config.reduction.stats_events_multiplicity_rejects
+                + config.reduction.stats_events_bad,
+            config.reduction.stats_events_total);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 
@@ -193,16 +199,25 @@ TEST_F(ReductionTest, t00033) {
   feed_file(TEST_DATA_PATH "readouts/154493");
 
   EXPECT_EQ(ingested_hits, 8724);
-  EXPECT_EQ(reduction.stats_invalid_planes, 0);
-  EXPECT_EQ(reduction.stats_time_seq_errors, 1);
+  EXPECT_EQ(config.reduction.stats_invalid_planes, 0);
+  EXPECT_EQ(config.reduction.stats_time_seq_errors, 1);
 
-  EXPECT_EQ(reduction.stats_wire_clusters, 1737);
-  EXPECT_EQ(reduction.stats_grid_clusters, 1934);
+  EXPECT_EQ(config.reduction.stats_wire_clusters, 1737);
+  EXPECT_EQ(config.reduction.stats_grid_clusters, 1934);
+  EXPECT_EQ(config.reduction.stats_events_total, 1821);
+  EXPECT_EQ(config.reduction.stats_events_multiplicity_rejects, 109);
+  EXPECT_EQ(config.reduction.stats_hits_used, 3184);
+  EXPECT_EQ(config.reduction.stats_events_bad, 240);
+  EXPECT_EQ(config.reduction.stats_events_geometry_err, 0);
+
 
   inspect_pulse_data();
   inspect_event_data();
   EXPECT_EQ(pulse_times, 2555);
-  EXPECT_EQ(neutron_events, 1822);
+  EXPECT_EQ(good_events, 1472);
+  EXPECT_EQ(good_events + config.reduction.stats_events_multiplicity_rejects
+                + config.reduction.stats_events_bad,
+            config.reduction.stats_events_total);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 
@@ -210,16 +225,25 @@ TEST_F(ReductionTest, t00311) {
   feed_file(TEST_DATA_PATH "readouts/154492");
 
   EXPECT_EQ(ingested_hits, 84232);
-  EXPECT_EQ(reduction.stats_invalid_planes, 0);
-  EXPECT_EQ(reduction.stats_time_seq_errors, 34);
+  EXPECT_EQ(config.reduction.stats_invalid_planes, 0);
+  EXPECT_EQ(config.reduction.stats_time_seq_errors, 34);
 
-  EXPECT_EQ(reduction.stats_wire_clusters, 23368);
-  EXPECT_EQ(reduction.stats_grid_clusters, 26085);
+  EXPECT_EQ(config.reduction.stats_wire_clusters, 23368);
+  EXPECT_EQ(config.reduction.stats_grid_clusters, 26085);
+
+  EXPECT_EQ(config.reduction.stats_events_total, 20460);
+  EXPECT_EQ(config.reduction.stats_events_multiplicity_rejects, 3074);
+  EXPECT_EQ(config.reduction.stats_hits_used, 34745);
+  EXPECT_EQ(config.reduction.stats_events_bad, 81);
+  EXPECT_EQ(config.reduction.stats_events_geometry_err, 0);
 
   inspect_pulse_data();
   inspect_event_data();
   EXPECT_EQ(pulse_times, 975);
-  EXPECT_EQ(neutron_events, 20460);
+  EXPECT_EQ(good_events, 17305);
+  EXPECT_EQ(good_events + config.reduction.stats_events_multiplicity_rejects
+                + config.reduction.stats_events_bad,
+            config.reduction.stats_events_total);
   EXPECT_EQ(ShortestPulsePeriod, 0);
 }
 
@@ -227,16 +251,25 @@ TEST_F(ReductionTest, t03710) {
   feed_file(TEST_DATA_PATH "readouts/154478");
 
   EXPECT_EQ(ingested_hits, 55666);
-  EXPECT_EQ(reduction.stats_invalid_planes, 0);
-  EXPECT_EQ(reduction.stats_time_seq_errors, 0);
+  EXPECT_EQ(config.reduction.stats_invalid_planes, 0);
+  EXPECT_EQ(config.reduction.stats_time_seq_errors, 0);
 
-  EXPECT_EQ(reduction.stats_wire_clusters, 16755);
-  EXPECT_EQ(reduction.stats_grid_clusters, 16370);
+  EXPECT_EQ(config.reduction.stats_wire_clusters, 16755);
+  EXPECT_EQ(config.reduction.stats_grid_clusters, 16370);
+
+  EXPECT_EQ(config.reduction.stats_events_total, 14341);
+  EXPECT_EQ(config.reduction.stats_events_multiplicity_rejects, 2120);
+  EXPECT_EQ(config.reduction.stats_hits_used, 23827);
+  EXPECT_EQ(config.reduction.stats_events_bad, 627);
+  EXPECT_EQ(config.reduction.stats_events_geometry_err, 0);
 
   inspect_pulse_data();
   inspect_event_data();
   EXPECT_EQ(pulse_times, 312);
-  EXPECT_EQ(neutron_events, 14341);
+  EXPECT_EQ(good_events, 11594);
+  EXPECT_EQ(good_events + config.reduction.stats_events_multiplicity_rejects
+                + config.reduction.stats_events_bad,
+            config.reduction.stats_events_total);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 
@@ -244,16 +277,25 @@ TEST_F(ReductionTest, t10392) {
   feed_file(TEST_DATA_PATH "readouts/154484");
 
   EXPECT_EQ(ingested_hits, 178941);
-  EXPECT_EQ(reduction.stats_invalid_planes, 0);
-  EXPECT_EQ(reduction.stats_time_seq_errors, 1);
+  EXPECT_EQ(config.reduction.stats_invalid_planes, 0);
+  EXPECT_EQ(config.reduction.stats_time_seq_errors, 1);
 
-  EXPECT_EQ(reduction.stats_wire_clusters, 51947);
-  EXPECT_EQ(reduction.stats_grid_clusters, 51344);
+  EXPECT_EQ(config.reduction.stats_wire_clusters, 51947);
+  EXPECT_EQ(config.reduction.stats_grid_clusters, 51344);
+
+  EXPECT_EQ(config.reduction.stats_events_total, 41823);
+  EXPECT_EQ(config.reduction.stats_events_multiplicity_rejects, 9513);
+  EXPECT_EQ(config.reduction.stats_hits_used, 64239);
+  EXPECT_EQ(config.reduction.stats_events_bad, 410);
+  EXPECT_EQ(config.reduction.stats_events_geometry_err, 0);
 
   inspect_pulse_data();
   inspect_event_data();
   EXPECT_EQ(pulse_times, 300);
-  EXPECT_EQ(neutron_events, 41813);
+  EXPECT_EQ(good_events, 31900);
+  EXPECT_EQ(good_events + config.reduction.stats_events_multiplicity_rejects
+                + config.reduction.stats_events_bad,
+            config.reduction.stats_events_total);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 

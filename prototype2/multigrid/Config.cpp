@@ -42,17 +42,17 @@ Config::Config(std::string jsonfile, std::string dump_path) {
     builder = std::make_shared<BuilderReadouts>(mappings.mapping(), dump_path);
   }
 
-  max_wire_hits = root["max_wire_hits"];
-  max_grid_hits = root["max_grid_hits"];
+  reduction.max_wire_hits = root["max_wire_hits"];
+  reduction.max_grid_hits = root["max_grid_hits"];
 
-  analyzer.weighted(root["weighted"]);
-  analyzer.mappings = mappings;
+  reduction.analyzer.weighted(root["weighted"]);
+  reduction.analyzer.mappings = mappings;
 
   // deduced geometry from MG mappings
-  geometry.nx(mappings.max_x());
-  geometry.ny(mappings.max_y());
-  geometry.nz(mappings.max_z());
-  geometry.np(1);
+  reduction.geometry.nx(mappings.max_x());
+  reduction.geometry.ny(mappings.max_y());
+  reduction.geometry.nz(mappings.max_z());
+  reduction.geometry.np(1);
 }
 
 std::string Config::debug() const {
@@ -63,11 +63,13 @@ std::string Config::debug() const {
     ss << "  ========           No Builder :(           ========\n";
 
   ss << "  Event position using weighted average: "
-     << (analyzer.weighted() ? "YES" : "no") << "\n";
+     << (reduction.analyzer.weighted() ? "YES" : "no") << "\n";
 
-  ss << "  geometry_x = " << geometry.nx() << "\n";
-  ss << "  geometry_y = " << geometry.ny() << "\n";
-  ss << "  geometry_z = " << geometry.nz() << "\n";
+  // \todo multiplicity filter
+
+  ss << "  geometry_x = " << reduction.geometry.nx() << "\n";
+  ss << "  geometry_y = " << reduction.geometry.ny() << "\n";
+  ss << "  geometry_z = " << reduction.geometry.nz() << "\n";
 
   return ss.str();
 }
