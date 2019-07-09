@@ -9,22 +9,33 @@
 #include "AdcReadoutConstants.h"
 #include <cmath>
 
+const static std::uint64_t NSecMultiplier = 1000000000;
+
+RawTimeStamp::RawTimeStamp(std::uint64_t NSec) : Seconds(NSec / NSecMultiplier) {
+  auto NanoSecPart = NSec % NSecMultiplier;
+  SecondsFrac = std::lround(NanoSecPart / SampleLengthNS);
+  if (SecondsFrac == AdcTimerCounterMax) {
+    ++Seconds;
+    SecondsFrac = 0;
+  }
+}
+
 std::uint64_t RawTimeStamp::GetTimeStampNS() const {
   auto NanoSec = static_cast<std::uint64_t>(
       std::llround(static_cast<double>(SecondsFrac) /
                    static_cast<double>(AdcTimerCounterMax) * 1e9));
   return static_cast<std::uint64_t>(
-      static_cast<std::uint64_t>(Seconds) * 1000000000 + NanoSec);
+      static_cast<std::uint64_t>(Seconds) * NSecMultiplier + NanoSec);
 }
 
 // Note: This function might be significantly slower than CalcTimeStamp() for
 // some cases.
 std::uint64_t RawTimeStamp::GetTimeStampNSFast() const {
-  const std::uint64_t Multiplier = 100000000000;
+
   std::uint64_t NanoSec =
-      (((SecondsFrac * Multiplier) / (AdcTimerCounterMax)) + 50) / 100;
+      (((SecondsFrac * 100000000000) / (AdcTimerCounterMax)) + 50) / 100;
   return static_cast<std::uint64_t>(
-      static_cast<std::uint64_t>(Seconds) * 1000000000 + NanoSec);
+      static_cast<std::uint64_t>(Seconds) * 100000000000 + NanoSec);
 }
 
 RawTimeStamp

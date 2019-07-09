@@ -54,3 +54,9 @@ public:
   };
 };
 } // namespace DetectorModuleRegistration
+
+#define COMBINE1(X,Y) X##Y
+#define COMBINE(X,Y) COMBINE1(X,Y)
+#define MAKE_STRING(s) #s
+
+#define REGISTER_MODULE(Module, CLIFunc) DetectorModuleRegistration::Registrar<Module> COMBINE(Module, __LINE__)(MAKE_STRING(Module), CLIFunc)
