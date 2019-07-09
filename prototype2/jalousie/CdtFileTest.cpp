@@ -12,7 +12,9 @@ protected:
 };
 
 TEST_F(CdtFileTest, DoSomething) {
-
+  CdtFile file(TEST_DATA_PATH "noise.bin");
+  EXPECT_EQ(file.stats.events_found, 249773);
+  EXPECT_EQ(file.stats.pulses_found, 5812);
 }
 
 int main(int argc, char **argv) {

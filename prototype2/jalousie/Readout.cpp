@@ -2,7 +2,6 @@
 
 #include <jalousie/Readout.h>
 #include <fmt/format.h>
-#include <sstream>
 
 namespace Jalousie {
 

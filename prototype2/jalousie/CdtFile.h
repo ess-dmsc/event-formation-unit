@@ -26,7 +26,8 @@ public:
   std::vector<Readout> Data;
 
   struct stats_t {
-    uint64_t rx_pkt;
+    uint64_t events_found;
+    uint64_t pulses_found;
   } stats;
 
 private:
