@@ -7,14 +7,14 @@ using namespace Jalousie;
 
 class JalReadoutTest : public TestBase {
 protected:
-  virtual void SetUp() {
+  void SetUp() override {
     hdf5::error::Singleton::instance().auto_print(false);
     if (boost::filesystem::exists("hit_file_test_00000.h5"))
     {
       boost::filesystem::remove("hit_file_test_00000.h5");
     }
   }
-  virtual void TearDown() {}
+  void TearDown() override {}
 };
 
 TEST_F(JalReadoutTest, PrintsSelf) {
@@ -55,6 +55,8 @@ TEST_F(JalReadoutTest, CreateFile) {
   ReadoutFile::create("hit_file_test");
   EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test_00000.h5"));
 }
+
+// \todo write random data and read it, confirm that it is the same
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
