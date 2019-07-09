@@ -17,3 +17,20 @@ set(CdtFileTest_INC
   Readout.h
   )
 create_test_executable(CdtFileTest)
+
+
+set(jalousie_common_inc
+  JalousieBase.h
+  )
+set(jalousie_common_src
+  JalousieBase.cpp
+  )
+
+set(jalousie_INC
+  ${jalousie_common_inc}
+)
+set(jalousie_SRC
+  Jalousie.cpp
+  ${jalousie_common_src}
+)
+create_module(jalousie)
