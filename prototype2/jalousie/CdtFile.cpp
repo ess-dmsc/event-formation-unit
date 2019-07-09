@@ -61,7 +61,7 @@ CdtFile::CdtFile(const boost::filesystem::path &FilePath) {
   readouts_expected = survey_results.chopper_pulses + survey_results.events_found;
 }
 
-size_t CdtFile::count() const {
+size_t CdtFile::total() const {
   return readouts_expected;
 }
 
@@ -72,6 +72,12 @@ size_t CdtFile::read() {
       Data.push_back(readout);
   }
   return Data.size();
+}
+
+size_t CdtFile::read(char *buffer) {
+  auto size = read();
+  memcpy(buffer, Data.data(), sizeof(Readout) * size);
+  return sizeof(Readout) * size;
 }
 
 bool CdtFile::read_one() {
