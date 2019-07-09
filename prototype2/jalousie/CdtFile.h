@@ -16,26 +16,30 @@ class CdtFile {
 public:
   CdtFile(const boost::filesystem::path &FilePath);
 
-//  size_t count() const;
+  size_t count() const;
 
-//  void readAt(size_t Index, size_t Count);
   size_t read();
 
   static constexpr size_t ChunkSize{9000 / sizeof(Readout)};
 
   std::vector<Readout> Data;
 
-  struct stats_t {
-    uint64_t events_found;
-    uint64_t pulses_found;
-  } stats;
+  struct survey_results_t {
+    size_t unidentified_board {0};
+    size_t events_found {0};
+    size_t metadata_found {0};
+    size_t adc_found {0};
+    size_t board_blocks {0};
+    size_t chopper_pulses {0};
+  } survey_results;
 
 private:
-  size_t MaxSize{0};
+  size_t readouts_expected {0};
   std::ifstream file_;
-
-  void surveyFile();
-
+  bool have_board {false};
+  uint64_t data{0};
+  Readout readout;
+  bool read_one();
 };
 
 }
