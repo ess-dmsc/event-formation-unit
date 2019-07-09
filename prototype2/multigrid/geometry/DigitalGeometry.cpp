@@ -63,11 +63,11 @@ Hit DetectorMapping::absolutify(const Hit &original) const {
     return original;
 
   Hit transformed = original;
-  transformed.plane = original.plane % 2;
+  auto plane = original.plane % 2;
   const auto &b = buses[original.plane / 2];
-  if (transformed.plane == ChannelMappings::wire_plane)
+  if (plane == ChannelMappings::wire_plane)
     transformed.coordinate += b.wire_offset;
-  else if (transformed.plane == ChannelMappings::grid_plane)
+  else if (plane == ChannelMappings::grid_plane)
     transformed.coordinate += b.grid_offset;
 
   return transformed;

@@ -90,15 +90,15 @@ void MultigridBase::init_config() {
 
 void MultigridBase::process_events(EV42Serializer &ev42serializer) {
 
-  mystats.hits_time_seq_err = mg_config.reduction.stats_time_seq_errors;
-  mystats.hits_bad_plane = mg_config.reduction.stats_invalid_planes;
-  mystats.wire_clusters = mg_config.reduction.stats_wire_clusters;
-  mystats.grid_clusters = mg_config.reduction.stats_grid_clusters;
-  mystats.events_total = mg_config.reduction.stats_events_total;
-  mystats.events_multiplicity_rejects = mg_config.reduction.stats_events_multiplicity_rejects;
-  mystats.hits_used = mg_config.reduction.stats_hits_used;
-  mystats.events_bad = mg_config.reduction.stats_events_bad;
-  mystats.events_geometry_err = mg_config.reduction.stats_events_geometry_err;
+  mystats.hits_time_seq_err = mg_config.reduction.stats.time_seq_errors;
+  mystats.hits_bad_plane = mg_config.reduction.stats.invalid_planes;
+  mystats.wire_clusters = mg_config.reduction.stats.wire_clusters;
+  mystats.grid_clusters = mg_config.reduction.stats.grid_clusters;
+  mystats.events_total = mg_config.reduction.stats.events_total;
+  mystats.events_multiplicity_rejects = mg_config.reduction.stats.events_multiplicity_rejects;
+  mystats.hits_used = mg_config.reduction.stats.hits_used;
+  mystats.events_bad = mg_config.reduction.stats.events_bad;
+  mystats.events_geometry_err = mg_config.reduction.stats.events_geometry_err;
 
   for (auto &event : mg_config.reduction.out_queue) {
 
@@ -160,6 +160,10 @@ void MultigridBase::mainThread() {
   ev42serializer.pulseTime(0);
 
   uint8_t buffer[eth_buffer_size];
+
+  // For absolutifying hit coordinates. Should get rid of this eventually...
+  auto mappings = mg_config.reduction.pipelines.front().analyzer.mappings.mapping();
+
   TSCTimer report_timer;
   while (true) {
     ssize_t ReadSize{0};
@@ -180,20 +184,18 @@ void MultigridBase::mainThread() {
       if (!mg_config.builder->ConvertedData.empty()) {
         mystats.hits_total += mg_config.builder->ConvertedData.size();
 
-        auto mappings = mg_config.reduction.analyzer.mappings.mapping();
-
         if (monitor.readouts || monitor.hists)
         {
           Hit transformed;
           for (const auto& hit : mg_config.builder->ConvertedData) {
             transformed = mappings.absolutify(hit);
             if (monitor.readouts)
-              monitor.readouts->addEntry(transformed.plane + 1, transformed.coordinate,
+              monitor.readouts->addEntry((transformed.plane % 2) + 1, transformed.coordinate,
                                          transformed.time, transformed.weight);
             if (monitor.hists) {
-              if (transformed.plane == Multigrid::ChannelMappings::wire_plane)
+              if ((transformed.plane % 2) == Multigrid::ChannelMappings::wire_plane)
                 monitor.hists->bin_x(transformed.coordinate, transformed.weight);
-              else if (transformed.plane == Multigrid::ChannelMappings::grid_plane)
+              else if ((transformed.plane % 2) == Multigrid::ChannelMappings::grid_plane)
                 monitor.hists->bin_y(transformed.coordinate, transformed.weight);
             }
           }
@@ -207,7 +209,7 @@ void MultigridBase::mainThread() {
 
 //        mg_config.reduction.ingest(mg_config.builder->ConvertedData);
 
-        mg_config.reduction.perform_clustering(false);
+        mg_config.reduction.process_queues(false);
         process_events(ev42serializer);
       }
     }
@@ -233,7 +235,7 @@ void MultigridBase::mainThread() {
       LOG(PROCESS, Sev::Info, "Stopping processing thread.");
       // flush anything that remains
 
-      mg_config.reduction.perform_clustering(true);
+      mg_config.reduction.process_queues(true);
       process_events(ev42serializer);
 
       mystats.tx_bytes += ev42serializer.produce();

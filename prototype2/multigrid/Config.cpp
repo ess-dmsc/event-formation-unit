@@ -23,7 +23,6 @@ Config::Config(std::string jsonfile, std::string dump_path) {
       throw std::runtime_error("Multi-Grid config file error - requested file unavailable.");
     }
 
-
     root = nlohmann::json::parse(str);
   }
   catch (...) {
@@ -42,17 +41,27 @@ Config::Config(std::string jsonfile, std::string dump_path) {
     builder = std::make_shared<BuilderReadouts>(mappings.mapping(), dump_path);
   }
 
-  reduction.max_wire_hits = root["max_wire_hits"];
-  reduction.max_grid_hits = root["max_grid_hits"];
+  ModulePipeline pipeline;
 
-  reduction.analyzer.weighted(root["weighted"]);
-  reduction.analyzer.mappings = mappings;
+  pipeline.max_wire_hits = root["max_wire_hits"];
+  pipeline.max_grid_hits = root["max_grid_hits"];
+
+  pipeline.analyzer.weighted(root["weighted"]);
+  pipeline.analyzer.mappings = mappings;
 
   // deduced geometry from MG mappings
-  reduction.geometry.nx(mappings.max_x());
-  reduction.geometry.ny(mappings.max_y());
-  reduction.geometry.nz(mappings.max_z());
-  reduction.geometry.np(1);
+  pipeline.geometry.nx(mappings.max_x());
+  pipeline.geometry.ny(mappings.max_y());
+  pipeline.geometry.nz(mappings.max_z());
+  pipeline.geometry.np(1);
+
+  reduction.pipelines.resize(pipeline.analyzer.mappings.geometry().buses.size(),
+                             pipeline);
+
+  for (size_t i = 0; i < reduction.pipelines.size(); ++i) {
+    reduction.pipelines[i].matcher = GapMatcher(sequoia_maximum_latency,
+                                                i, i + 1);
+  }
 }
 
 std::string Config::debug() const {
@@ -62,16 +71,11 @@ std::string Config::debug() const {
   else
     ss << "  ========           No Builder :(           ========\n";
 
-  ss << "  Event position using weighted average: "
-     << (reduction.analyzer.weighted() ? "YES" : "no") << "\n";
-
-  ss << "  max_wire_hits = " << reduction.max_wire_hits << "\n";
-  ss << "  max_grid_hits = " << reduction.max_grid_hits << "\n";
-
-  ss << "  geometry_x = " << reduction.geometry.nx() << "\n";
-  ss << "  geometry_y = " << reduction.geometry.ny() << "\n";
-  ss << "  geometry_z = " << reduction.geometry.nz() << "\n";
-
+  for (size_t i = 0; i < reduction.pipelines.size(); ++i) {
+    ss << "  Module[" << i << "]\n";
+    ss << reduction.pipelines[i].debug("  ");
+    ss << "\n";
+  }
   return ss.str();
 }
 

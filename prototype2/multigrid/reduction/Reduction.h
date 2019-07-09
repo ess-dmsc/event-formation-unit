@@ -10,25 +10,44 @@
 
 namespace Multigrid {
 
-class Reduction {
+// Just greater than shortest pulse period of 266662 ticks
+// Will have to be adjusted for other experimental setups
+static constexpr uint64_t sequoia_maximum_latency {300000};
+
+struct EventProcessingStats {
+  size_t invalid_planes{0};
+  size_t time_seq_errors{0};
+  size_t wire_clusters{0};
+  size_t grid_clusters{0};
+  size_t events_total{0};
+  size_t events_multiplicity_rejects{0};
+  size_t hits_used{0};
+  size_t events_bad{0};
+  size_t events_geometry_err{0};
+
+  void clear();
+  EventProcessingStats& operator +=(const EventProcessingStats& other);
+};
+
+class ModulePipeline {
 public:
-  Reduction();
-
-  void ingest(HitVector &hits);
-
+  ModulePipeline();
   void ingest(const Hit& hit);
+  void process_events(bool flush);
+  std::string debug(std::string prepend) const;
 
-  void perform_clustering(bool flush);
+  std::list<NeutronEvent> out_queue;
 
-  size_t stats_invalid_planes{0};
-  size_t stats_time_seq_errors{0};
-  size_t stats_wire_clusters{0};
-  size_t stats_grid_clusters{0};
-  size_t stats_events_total{0};
-  size_t stats_events_multiplicity_rejects{0};
-  size_t stats_hits_used{0};
-  size_t stats_events_bad{0};
-  size_t stats_events_geometry_err{0};
+  EventProcessingStats stats;
+
+//private:
+
+  GapClusterer wire_clusters{0, 1};
+  GapClusterer grid_clusters{0, 1};
+
+  // Just greater than shortest pulse period of 266662 ticks
+  // Will have to be adjusted for other experimental setups
+  GapMatcher matcher{sequoia_maximum_latency, 0, 1};
 
   size_t max_wire_hits {12};
   size_t max_grid_hits {12};
@@ -37,19 +56,28 @@ public:
 
   ESSGeometry geometry;
 
-  ChronoMerger merger{300000, 2};
+private:
+  uint64_t previous_time_{0};
+
+};
+
+class Reduction {
+public:
+  Reduction();
+  void ingest(HitVector &hits);
+  void ingest(const Hit& hit);
+  void process_queues(bool flush);
+  // \todo std::string debug() const;
+
+  std::vector<ModulePipeline> pipelines;
+  EventProcessingStats stats;
+
+  ChronoMerger merger{sequoia_maximum_latency, 2};
 
   std::list<NeutronEvent> out_queue;
 
 private:
-  GapClusterer wire_clusters{0, 1};
-  GapClusterer grid_clusters{0, 1};
 
-  // Just greater than shortest pulse period of 266662 ticks
-  // Will have to be adjusted for other experimental setups
-  GapMatcher matcher{300000, 0, 1};
-
-  uint64_t previous_time_{0};
 };
 
 }
