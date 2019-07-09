@@ -28,7 +28,7 @@
 ///
 /// \file
 ///
-/// \brief Hit struct for Multigrid event formation
+/// \brief Hit struct for Jalousie event formation
 ///
 //===----------------------------------------------------------------------===//
 
@@ -51,6 +51,8 @@ struct __attribute__ ((packed)) Readout {
   uint8_t anode{0};
   uint8_t cathode{0};
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
+
+  static constexpr uint32_t chopper_sub_id {std::numeric_limits<uint8_t>::max()};
 
   // \brief prints values for debug purposes
   std::string debug() const;
