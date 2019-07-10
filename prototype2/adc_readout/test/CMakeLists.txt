@@ -17,6 +17,7 @@ set(AdcReadoutTest_SRC
     PulseProcessingTest.cpp
     DelayLinePositionCalcTest.cpp
     PulseBufferTest.cpp
+    EventSerializerTest.cpp
     )
 
 set(AdcReadoutTest_INC

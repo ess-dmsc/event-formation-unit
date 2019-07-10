@@ -17,6 +17,7 @@ set(AdcReadout_SRC
     DelayLinePositionCalc.cpp
     PulseParameters.cpp
     PulseBuffer.cpp
+    EventSerializer.cpp
     )
 
 set(AdcReadout_INC
@@ -39,6 +40,7 @@ set(AdcReadout_INC
     SamplingRun.h
     ChannelID.h
     PulseBuffer.h
+    EventSerializer.h
     )
 
 create_object_module(AdcReadout)
