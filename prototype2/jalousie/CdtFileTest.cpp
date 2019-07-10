@@ -27,7 +27,7 @@ TEST_F(CdtFileTest, OutputMatchesSurvey) {
   while( file.read() ) {
     count += file.Data.size();
   }
-  EXPECT_EQ(count, file.count());
+  EXPECT_EQ(count, file.total());
 }
 
 TEST_F(CdtFileTest, PrintOneSample) {

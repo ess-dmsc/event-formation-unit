@@ -16,11 +16,12 @@ class CdtFile {
 public:
   CdtFile(const boost::filesystem::path &FilePath);
 
-  size_t count() const;
-
+  size_t total() const;
   size_t read();
+  size_t read(char *buffer);
 
-  static constexpr size_t ChunkSize{9000 / sizeof(Readout)};
+  size_t getReadoutSize() const { return ReadoutSize; }
+  size_t getChunkSize() const { return ChunkSize; }
 
   std::vector<Readout> Data;
 
@@ -34,6 +35,9 @@ public:
   } survey_results;
 
 private:
+  size_t ReadoutSize{sizeof(Readout)};
+  size_t ChunkSize{9000 / sizeof(Readout)};
+
   size_t readouts_expected {0};
   std::ifstream file_;
   bool have_board {false};
