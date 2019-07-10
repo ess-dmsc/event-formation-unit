@@ -33,4 +33,4 @@ template <> struct hash<ChannelID> {
         (static_cast<uint32_t>(ID.SourceID) << 16));
   }
 };
-}
+} // namespace std

@@ -12,8 +12,8 @@
 #include "ChannelID.h"
 #include "PulseParameters.h"
 #include <cstdint>
-#include <queue>
 #include <map>
+#include <queue>
 
 class PulseBuffer {
 public:
@@ -22,8 +22,9 @@ public:
   void addPulse(PulseParameters const &Pulse);
   bool hasValidPulses();
   std::vector<PulseParameters> getPulses();
-  auto getDiscardedPulses() const {return DiscardedPulses;}
-  auto getInvalidPulses() const {return InvalidPulses;}
+  auto getDiscardedPulses() const { return DiscardedPulses; }
+  auto getInvalidPulses() const { return InvalidPulses; }
+
 private:
   std::int64_t DiscardedPulses{0};
   std::int64_t InvalidPulses{0};
@@ -31,5 +32,5 @@ private:
   size_t MaxPulses;
   using PulseQueue = std::queue<PulseParameters>;
   std::map<ChannelID, PulseQueue> Pulses;
-  std::vector<PulseQueue*> QueueList;
+  std::vector<PulseQueue *> QueueList;
 };

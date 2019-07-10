@@ -11,12 +11,12 @@
 
 #include "AdcSettings.h"
 #include "DelayLinePositionCalc.h"
+#include "PulseBuffer.h"
 #include "PulseParameters.h"
 #include <cstdint>
 #include <limits>
 #include <map>
 #include <memory>
-#include "PulseBuffer.h"
 
 /// \brief The event information extracted from one or several pulses from the
 /// ADC system.
@@ -69,7 +69,9 @@ public:
   /// registered to an axis.
   /// \note Does not guarantee that all the pulses (the return value) were used
   /// in the creation of an event.
-  auto getNrOfDiscardedPulses() const { return DiscardedDelayLinePulses + Buffer.getDiscardedPulses(); }
+  auto getNrOfDiscardedPulses() const {
+    return DiscardedDelayLinePulses + Buffer.getDiscardedPulses();
+  }
 
 protected:
   void DoChannelRoleMapping(ChannelID ID, AdcSettings::ChannelRole Role);

@@ -4,52 +4,53 @@
 
 #pragma once
 
-#include <string>
 #include <h5cpp/hdf5.hpp>
 #include <h5cpp/property/dataset_access.hpp>
 #include <h5cpp/property/property_class.hpp>
-#include <vector>
 #include <span.hpp>
+#include <string>
+#include <vector>
 
 namespace hdf5 {
-  namespace datatype {
-    /// Required for h5cpp to write data provided using ArrayAdapter.
-    template <typename T> class TypeTrait<nonstd::span<T>> {
-    public:
-      using Type = nonstd::span<T>;
-      using TypeClass = typename TypeTrait<T>::TypeClass;
-      static TypeClass create(const Type & = Type()) {
-        return TypeTrait<T>::create();
-      }
-    };
-  } // namespace datatype
-  namespace dataspace {
-    
-    /// Required for h5cpp to write data provided using ArrayAdapter.
-    template <typename T> class TypeTrait<nonstd::span<T>> {
-    public:
-      using DataspaceType = Simple;
-      
-      static DataspaceType create(const nonstd::span<T> &value) {
-        return Simple(hdf5::Dimensions{static_cast<unsigned long long>(value.size())},
-                      hdf5::Dimensions{static_cast<unsigned long long>(value.size())});
-      }
-      
-      static void *ptr(nonstd::span<T> &data) {
-        return reinterpret_cast<void *>(data.data());
-      }
-      
-      static const void *cptr(const nonstd::span<T> &data) {
-        return reinterpret_cast<const void *>(data.data());
-      }
-    };
-  } // namspace dataspace
+namespace datatype {
+/// Required for h5cpp to write data provided using ArrayAdapter.
+template <typename T> class TypeTrait<nonstd::span<T>> {
+public:
+  using Type = nonstd::span<T>;
+  using TypeClass = typename TypeTrait<T>::TypeClass;
+  static TypeClass create(const Type & = Type()) {
+    return TypeTrait<T>::create();
+  }
+};
+} // namespace datatype
+namespace dataspace {
+
+/// Required for h5cpp to write data provided using ArrayAdapter.
+template <typename T> class TypeTrait<nonstd::span<T>> {
+public:
+  using DataspaceType = Simple;
+
+  static DataspaceType create(const nonstd::span<T> &value) {
+    return Simple(
+        hdf5::Dimensions{static_cast<unsigned long long>(value.size())},
+        hdf5::Dimensions{static_cast<unsigned long long>(value.size())});
+  }
+
+  static void *ptr(nonstd::span<T> &data) {
+    return reinterpret_cast<void *>(data.data());
+  }
+
+  static const void *cptr(const nonstd::span<T> &data) {
+    return reinterpret_cast<const void *>(data.data());
+  }
+};
+} // namespace dataspace
 } // namespace hdf5
 
-template<typename T>
-class DatasetReader {
+template <typename T> class DatasetReader {
 public:
-  DatasetReader(hdf5::node::Group const &Group, std::string const &Path) : Data(Group.get_dataset(Path)) {
+  DatasetReader(hdf5::node::Group const &Group, std::string const &Path)
+      : Data(Group.get_dataset(Path)) {
     auto CreationList = Data.creation_list();
     auto ChunkDims = CreationList.chunk();
     Size = Data.dataspace().size();
@@ -57,7 +58,7 @@ public:
     Selector.block(0, ChunkSize);
     DataBuffer.resize(ChunkSize + 10);
   }
-  
+
   T operator[](size_t Index) {
     if (Index >= UpperElement) {
       Selector.offset(0, UpperElement);
@@ -86,13 +87,15 @@ public:
       CurrentLowerPos = Start;
       UpperElement = Start + UsedBlockSize;
     }
-    return nonstd::span<T>(DataBuffer.data() + (Start - CurrentLowerPos), End - Start);
+    return nonstd::span<T>(DataBuffer.data() + (Start - CurrentLowerPos),
+                           End - Start);
   }
-  size_t size() const {return Size;};
+  size_t size() const { return Size; };
+
 private:
   std::vector<T> DataBuffer;
   hdf5::node::Dataset Data;
-  hdf5::dataspace::Hyperslab Selector{{0},{1},{1},{1}};
+  hdf5::dataspace::Hyperslab Selector{{0}, {1}, {1}, {1}};
   size_t Size{0};
   size_t CurrentLowerPos{0};
   size_t UpperElement{0};
@@ -106,6 +109,7 @@ public:
   nonstd::span<uint16_t> getWaveform();
   void nextWaveform();
   bool outOfData() const;
+
 private:
   DatasetReader<std::uint32_t> CueIndex;
   DatasetReader<std::uint64_t> CueTimestampZero;
@@ -113,5 +117,5 @@ private:
   hssize_t EventCounter{0};
   size_t StartWaveformPos{0};
   size_t EndWaveformPos{0};
-  hdf5::dataspace::Hyperslab DataSelection{{0},{1},{1},{1}};
+  hdf5::dataspace::Hyperslab DataSelection{{0}, {1}, {1}, {1}};
 };

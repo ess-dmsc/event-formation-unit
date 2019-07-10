@@ -139,6 +139,6 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
   MessageBuilder.add_TimestampLocation(
       Location(TimeLocSerialisationMap.at(TSLocation)));
   builder.Finish(MessageBuilder.Finish(), SampleEnvironmentDataIdentifier());
-  ProducerPtr->produce({builder.GetBufferPointer(),
-    builder.GetSize()}, Data.TimeStamp / 1000000);
+  ProducerPtr->produce({builder.GetBufferPointer(), builder.GetSize()},
+                       Data.TimeStamp / 1000000);
 }

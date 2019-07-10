@@ -30,11 +30,11 @@ public:
           asio::io_service &Service);
   ~FPGASim() = default;
 
-  void addSamplingRun(void const * const DataPtr, size_t Bytes);
+  void addSamplingRun(void const *const DataPtr, size_t Bytes);
   int getNrOfRuns() const { return SamplingRuns; };
-  int getNrOfPackets() const {return PacketCount;};
-  int getNrOfSentPackets() const {return SentPackets;};
-  void packetIsSent() {++SentPackets;};
+  int getNrOfPackets() const { return PacketCount; };
+  int getNrOfSentPackets() const { return SentPackets; };
+  void packetIsSent() { ++SentPackets; };
 
 private:
   int SamplingRuns{0};

@@ -15,7 +15,7 @@ DataPacket::DataPacket(size_t MaxPacketSize)
   HeaderPtr->PacketType = 0x1111;
 }
 
-bool DataPacket::addSamplingRun(void const * const DataPtr, size_t Bytes) {
+bool DataPacket::addSamplingRun(void const *const DataPtr, size_t Bytes) {
   if (Size + Bytes + 4 > MaxSize) {
     return false;
   }

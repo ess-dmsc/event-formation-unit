@@ -5,10 +5,11 @@
 #include "WaveformData.h"
 #include <iostream>
 
-WaveformData::WaveformData(hdf5::node::Group const &Group) :
-CueIndex(Group, "cue_index"),
- CueTimestampZero(Group, "cue_timestamp_zero"), Waveform(Group, "raw_value") {
-   EndWaveformPos = CueIndex[1];
+WaveformData::WaveformData(hdf5::node::Group const &Group)
+    : CueIndex(Group, "cue_index"),
+      CueTimestampZero(Group, "cue_timestamp_zero"),
+      Waveform(Group, "raw_value") {
+  EndWaveformPos = CueIndex[1];
 }
 
 std::uint64_t WaveformData::getTimestamp() {

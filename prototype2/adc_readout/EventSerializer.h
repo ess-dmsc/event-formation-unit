@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include <common/Producer.h>
-#include <string>
 #include <chrono>
+#include <common/Producer.h>
 #include <memory>
-#include <thread>
 #include <readerwriterqueue/readerwriterqueue.h>
+#include <string>
+#include <thread>
 
 struct EventData {
   std::uint64_t Timestamp{0};
@@ -25,9 +25,12 @@ using Queue = moodycamel::ReaderWriterQueue<std::unique_ptr<EventData>>;
 
 class EventSerializer {
 public:
-  EventSerializer(std::string SourceName, size_t BufferSize, std::chrono::milliseconds TransmitTimeout, ProducerBase *KafkaProducer);
+  EventSerializer(std::string SourceName, size_t BufferSize,
+                  std::chrono::milliseconds TransmitTimeout,
+                  ProducerBase *KafkaProducer);
   virtual ~EventSerializer();
   void addEvent(std::unique_ptr<EventData> Event);
+
 private:
   void serialiseFunction();
   bool RunThread{true};

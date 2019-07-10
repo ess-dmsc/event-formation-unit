@@ -5,8 +5,8 @@
  *  \brief Unit tests delay line position calc code.
  */
 
-#include "../AdcReadoutConstants.h"
 #include "../DelayLinePositionCalc.h"
+#include "../AdcReadoutConstants.h"
 #include <cmath>
 #include <gtest/gtest.h>
 
@@ -29,9 +29,9 @@ public:
   explicit DelayLinePosInterfaceStandIn(int Timeout)
       : DelayLinePosCalcInterface(Timeout){};
   using DelayLinePosCalcInterface::getPosition;
+  using DelayLinePosCalcInterface::getTimestamp;
   using DelayLinePosCalcInterface::isValid;
   using DelayLinePosCalcInterface::reset;
-  using DelayLinePosCalcInterface::getTimestamp;
   int getAmplitude() override { return 0; };
 };
 
@@ -212,11 +212,11 @@ class DelayLineAmpPosCalcStandIn : public DelayLineAmpPosCalc {
 public:
   explicit DelayLineAmpPosCalcStandIn(int Timeout)
       : DelayLineAmpPosCalc(Timeout){};
+  using DelayLineAmpPosCalc::getAmplitude;
   using DelayLineAmpPosCalc::getPosition;
+  using DelayLineAmpPosCalc::getTimestamp;
   using DelayLineAmpPosCalc::isValid;
   using DelayLineAmpPosCalc::reset;
-  using DelayLineAmpPosCalc::getTimestamp;
-  using DelayLineAmpPosCalc::getAmplitude;
 };
 
 class DelayLineAmpCalc : public ::testing::Test {
@@ -357,11 +357,11 @@ class DelayLineTimePosCalcStandIn : public DelayLineTimePosCalc {
 public:
   explicit DelayLineTimePosCalcStandIn(int Timeout)
       : DelayLineTimePosCalc(Timeout){};
+  using DelayLineTimePosCalc::getAmplitude;
   using DelayLineTimePosCalc::getPosition;
+  using DelayLineTimePosCalc::getTimestamp;
   using DelayLineTimePosCalc::isValid;
   using DelayLineTimePosCalc::reset;
-  using DelayLineTimePosCalc::getTimestamp;
-  using DelayLineTimePosCalc::getAmplitude;
 };
 
 class DelayLineTimeCalc : public ::testing::Test {

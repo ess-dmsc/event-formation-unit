@@ -5,11 +5,11 @@
  *  \brief Testing of time stamp calculations.
  */
 
-#include "../AdcReadoutConstants.h"
 #include "../AdcTimeStamp.h"
+#include "../AdcReadoutConstants.h"
 #include <cmath>
-#include <gtest/gtest.h>
 #include <ctime>
+#include <gtest/gtest.h>
 #include <random>
 
 TEST(TimeStampCalcTest, CalcSeconds) {
@@ -95,19 +95,19 @@ TEST(TimeStampCalcTest, Sample6) {
 }
 
 TEST(TimeStampCalcTest, EpochTime1) {
-  RawTimeStamp TS{5ull*1000000000ull};
+  RawTimeStamp TS{5ull * 1000000000ull};
   EXPECT_EQ(TS.Seconds, 5u);
   EXPECT_EQ(TS.SecondsFrac, 0u);
 }
 
 TEST(TimeStampCalcTest, EpochTime2) {
-  RawTimeStamp TS{5ull*1000000000ull + 5ull};
+  RawTimeStamp TS{5ull * 1000000000ull + 5ull};
   EXPECT_EQ(TS.Seconds, 5u);
   EXPECT_EQ(TS.SecondsFrac, 0u);
 }
 
 TEST(TimeStampCalcTest, EpochTime3) {
-  RawTimeStamp TS{4ull*1000000000ull + 999999999ull};
+  RawTimeStamp TS{4ull * 1000000000ull + 999999999ull};
   EXPECT_EQ(TS.Seconds, 5u);
   EXPECT_EQ(TS.SecondsFrac, 0u);
 }
@@ -115,7 +115,7 @@ TEST(TimeStampCalcTest, EpochTime3) {
 TEST(TimeStampCalcTest, EpochTime4) {
   time_t UnixEpoch{0};
   time(&UnixEpoch);
-  RawTimeStamp TS{UnixEpoch*1000000000ull};
+  RawTimeStamp TS{UnixEpoch * 1000000000ull};
   EXPECT_EQ(TS.Seconds, UnixEpoch);
   EXPECT_EQ(TS.SecondsFrac, 0u);
 }
@@ -123,7 +123,7 @@ TEST(TimeStampCalcTest, EpochTime4) {
 TEST(TimeStampCalcTest, EpochTime5) {
   time_t UnixEpoch{0};
   time(&UnixEpoch);
-  RawTimeStamp TS{UnixEpoch*1000000000ull + 5ull};
+  RawTimeStamp TS{UnixEpoch * 1000000000ull + 5ull};
   EXPECT_EQ(TS.Seconds, UnixEpoch);
   EXPECT_EQ(TS.SecondsFrac, 0u);
 }
@@ -131,7 +131,7 @@ TEST(TimeStampCalcTest, EpochTime5) {
 TEST(TimeStampCalcTest, EpochTime6) {
   time_t UnixEpoch{0};
   time(&UnixEpoch);
-  RawTimeStamp TS{(UnixEpoch - 1)*1000000000ull + 999999999ull};
+  RawTimeStamp TS{(UnixEpoch - 1) * 1000000000ull + 999999999ull};
   EXPECT_EQ(TS.Seconds, UnixEpoch);
   EXPECT_EQ(TS.SecondsFrac, 0u);
 }
@@ -139,7 +139,7 @@ TEST(TimeStampCalcTest, EpochTime6) {
 TEST(TimeStampCalcTest, EpochTime7) {
   time_t UnixEpoch{0};
   time(&UnixEpoch);
-  RawTimeStamp TS{UnixEpoch*1000000000ull + 25ull};
+  RawTimeStamp TS{UnixEpoch * 1000000000ull + 25ull};
   EXPECT_EQ(TS.Seconds, UnixEpoch);
   EXPECT_EQ(TS.SecondsFrac, 1u);
 }
@@ -155,6 +155,8 @@ TEST(TimeStampCalcTest, EpochTime8) {
   for (int u = 0; u < 10000; ++u) {
     std::uint64_t const TestTime = UnixEpoch * 1000000000ull + dis(gen);
     RawTimeStamp TS{TestTime};
-    ASSERT_LT(std::abs(static_cast<int64_t>(TestTime) - static_cast<int64_t>(TS.GetTimeStampNS())), 12);
+    ASSERT_LT(std::abs(static_cast<int64_t>(TestTime) -
+                       static_cast<int64_t>(TS.GetTimeStampNS())),
+              12);
   }
 }

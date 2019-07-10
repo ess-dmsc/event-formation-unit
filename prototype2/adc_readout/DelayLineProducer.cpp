@@ -15,7 +15,8 @@ using namespace std::chrono_literals;
 DelayLineProducer::DelayLineProducer(std::string Broker, std::string Topic,
                                      AdcSettings EfuSettings)
     : Producer(std::move(Broker), std::move(Topic)),
-      Settings(std::move(EfuSettings)), Serializer("delay_line_detector", 200, 200ms, this) {
+      Settings(std::move(EfuSettings)),
+      Serializer("delay_line_detector", 200, 200ms, this) {
   PulseProcessingThread =
       std::thread(&DelayLineProducer::pulseProcessingFunction, this);
 }
@@ -55,7 +56,9 @@ void DelayLineProducer::serializeAndSendEvent(const DelayLineEvent &Event) {
   std::uint32_t EventPosition = essgeometry.pixel2D(
       static_cast<uint32_t>(Event.X), static_cast<uint32_t>(Event.Y));
   ++EventCounter;
-  Serializer.addEvent(std::unique_ptr<EventData>(new EventData{Event.Timestamp, EventPosition, static_cast<std::uint32_t>(Event.Amplitude), 0, 0, 0, 0}));
+  Serializer.addEvent(std::unique_ptr<EventData>(
+      new EventData{Event.Timestamp, EventPosition,
+                    static_cast<std::uint32_t>(Event.Amplitude), 0, 0, 0, 0}));
 }
 
 DelayLineProducer::~DelayLineProducer() {

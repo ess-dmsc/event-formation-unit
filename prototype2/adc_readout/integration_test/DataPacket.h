@@ -14,7 +14,7 @@
 class DataPacket {
 public:
   explicit DataPacket(size_t MaxPacketSize);
-  bool addSamplingRun(void const * const DataPtr, size_t Bytes);
+  bool addSamplingRun(void const *const DataPtr, size_t Bytes);
   std::pair<size_t, size_t> getBufferSizes() {
     return std::make_pair(Size, MaxSize);
   };

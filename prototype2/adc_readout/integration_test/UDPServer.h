@@ -14,9 +14,9 @@
 #include <asio.hpp>
 #pragma GCC diagnostic pop
 
-#include <thread>
 #include <atomic>
 #include <map>
+#include <thread>
 
 typedef std::shared_ptr<asio::ip::udp::socket> SocketPtr;
 typedef std::unique_ptr<asio::io_service::work> WorkPtr;
@@ -27,8 +27,9 @@ public:
   UDPServer(std::uint16_t SrcPort, std::uint16_t DstPort);
   ~UDPServer();
 
-  bool IsOk() const {return ConnectionOk;};
+  bool IsOk() const { return ConnectionOk; };
   bool TransmitPacket(const std::uint8_t *DataPtr, const std::uint32_t Size);
+
 private:
   std::atomic_bool ConnectionOk = {false};
   std::atomic<std::int64_t> PacketsSent = {0};
@@ -40,7 +41,9 @@ private:
   asio::ip::udp::resolver Resolver;
 
   void handleWrite(const asio::error_code &Err, std::size_t, BufferPtr Buffer);
-  void handleResolve(const asio::error_code &Err, asio::ip::udp::resolver::iterator EndpointIter);
-  void handleConnect(const asio::error_code &Err, asio::ip::udp::resolver::iterator EndpointIter);
+  void handleResolve(const asio::error_code &Err,
+                     asio::ip::udp::resolver::iterator EndpointIter);
+  void handleConnect(const asio::error_code &Err,
+                     asio::ip::udp::resolver::iterator EndpointIter);
   void handlePacketTransmit(BufferPtr Buffer, const std::uint32_t Size);
 };

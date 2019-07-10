@@ -11,7 +11,8 @@
 
 const static std::uint64_t NSecMultiplier = 1000000000;
 
-RawTimeStamp::RawTimeStamp(std::uint64_t NSec) : Seconds(NSec / NSecMultiplier) {
+RawTimeStamp::RawTimeStamp(std::uint64_t NSec)
+    : Seconds(NSec / NSecMultiplier) {
   auto NanoSecPart = NSec % NSecMultiplier;
   SecondsFrac = std::lround(NanoSecPart / SampleLengthNS);
   if (SecondsFrac == AdcTimerCounterMax) {

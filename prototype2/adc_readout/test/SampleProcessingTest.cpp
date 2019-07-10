@@ -6,8 +6,8 @@
  * individual samples).
  */
 
-#include "../AdcReadoutConstants.h"
 #include "../SampleProcessing.h"
+#include "../AdcReadoutConstants.h"
 #include "senv_data_generated.h"
 #include <array>
 #include <cstring>
@@ -34,8 +34,8 @@ public:
   SampleProcessingStandIn(std::shared_ptr<ProducerBase> Prod, std::string Name)
       : SampleProcessing(std::move(Prod), std::move(Name)) {}
   using SampleProcessing::MeanOfNrOfSamples;
-  using SampleProcessing::TSLocation;
   using SampleProcessing::ProcessingInstance;
+  using SampleProcessing::TSLocation;
   void serializeAndTransmitAlt(ProcessedSamples const &Data) {
     SampleProcessing::serializeAndTransmitData(Data);
   };
@@ -47,7 +47,8 @@ public:
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 class ProducerStandIn : public ProducerBase {
 public:
-  MAKE_MOCK2(produce, int(nonstd::span<const std::uint8_t>, std::int64_t), override);
+  MAKE_MOCK2(produce, int(nonstd::span<const std::uint8_t>, std::int64_t),
+             override);
 };
 #pragma GCC diagnostic pop
 
@@ -119,7 +120,7 @@ TEST(SampleProcessing, SerialisationProduceCallTest) {
       .TIMES(1)
       .LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(TestProducer.get()),
-               produce(_,_))
+               produce(_, _))
       .TIMES(1)
       .RETURN(0);
   auto TempModule = getTestModule();
@@ -139,12 +140,13 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
       .TIMES(1)
       .LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(TestProducer.get()),
-               produce(_,_))
+               produce(_, _))
       .TIMES(1)
       .RETURN(0)
-      .LR_SIDE_EFFECT(
-          std::memcpy(reinterpret_cast<void *>(&TempBuffer[0]), reinterpret_cast<const void*>(_1.data()), _1.size_bytes());
-          BytesCopied = _1.size_bytes(););
+      .LR_SIDE_EFFECT(std::memcpy(reinterpret_cast<void *>(&TempBuffer[0]),
+                                  reinterpret_cast<const void *>(_1.data()),
+                                  _1.size_bytes());
+                      BytesCopied = _1.size_bytes(););
   auto TempModule = getTestModule();
   TestProcessor.processData(TempModule);
 
@@ -183,12 +185,13 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
       .TIMES(1)
       .LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(TestProducer.get()),
-               produce(_,_))
+               produce(_, _))
       .TIMES(1)
       .RETURN(0)
-      .LR_SIDE_EFFECT(
-          std::memcpy(reinterpret_cast<void *>(&TempBuffer[0]), reinterpret_cast<const void*>(_1.data()), _1.size_bytes());
-          BytesCopied = _1.size_bytes(););
+      .LR_SIDE_EFFECT(std::memcpy(reinterpret_cast<void *>(&TempBuffer[0]),
+                                  reinterpret_cast<const void *>(_1.data()),
+                                  _1.size_bytes());
+                      BytesCopied = _1.size_bytes(););
   auto TempModule = getTestModule();
   TestProcessor.processData(TempModule);
 
@@ -223,7 +226,8 @@ TEST(SampleProcessing, SerialisationFlatbufferTest2) {
   TestProcessor.setTimeStampLocation(TimeStampLocation::End);
   unsigned int MessageCounter = 0;
   auto TestMessage = [&MessageCounter](auto Data) {
-    auto SampleData = GetSampleEnvironmentData(reinterpret_cast<const void*>(Data.data()));
+    auto SampleData =
+        GetSampleEnvironmentData(reinterpret_cast<const void *>(Data.data()));
     EXPECT_EQ(SampleData->MessageCounter(), MessageCounter);
     MessageCounter++;
   };
@@ -231,7 +235,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest2) {
       .TIMES(2)
       .LR_SIDE_EFFECT(TestProcessor.serializeAndTransmitAlt(_1));
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(TestProducer.get()),
-               produce(_,_))
+               produce(_, _))
       .TIMES(2)
       .RETURN(0)
       .LR_SIDE_EFFECT(TestMessage(_1));

@@ -3,14 +3,16 @@
 //
 
 #include "EventSerializer.h"
-#include <flatbuffers/flatbuffers.h>
-#include <ev42_events_generated.h>
 #include <dtdb_adc_pulse_debug_generated.h>
+#include <ev42_events_generated.h>
+#include <flatbuffers/flatbuffers.h>
 #include <vector>
 
 EventSerializer::EventSerializer(std::string SourceName, size_t BufferSize,
                                  std::chrono::milliseconds TransmitTimeout,
-                                 ProducerBase *KafkaProducer) : Name(SourceName), Timeout(TransmitTimeout), EventBufferSize(BufferSize), Producer(KafkaProducer) {
+                                 ProducerBase *KafkaProducer)
+    : Name(SourceName), Timeout(TransmitTimeout), EventBufferSize(BufferSize),
+      Producer(KafkaProducer) {
   SerializeThread = std::thread(&EventSerializer::serialiseFunction, this);
 }
 
@@ -27,15 +29,16 @@ void EventSerializer::addEvent(std::unique_ptr<EventData> Event) {
 
 struct FBVector {
   FBVector(flatbuffers::FlatBufferBuilder &Builder, size_t MaxEvents) {
-    Offset = Builder.CreateUninitializedVector(MaxEvents, sizeof(std::uint32_t), &DataPtr);
-    Data = nonstd::span<std::uint32_t>(reinterpret_cast<std::uint32_t*>(DataPtr), MaxEvents);
+    Offset = Builder.CreateUninitializedVector(MaxEvents, sizeof(std::uint32_t),
+                                               &DataPtr);
+    Data = nonstd::span<std::uint32_t>(
+        reinterpret_cast<std::uint32_t *>(DataPtr), MaxEvents);
     SizePtr = reinterpret_cast<flatbuffers::uoffset_t *>(
-                  const_cast<std::uint8_t *>(DataPtr)) - 1;
+                  const_cast<std::uint8_t *>(DataPtr)) -
+              1;
     *SizePtr = 0;
   }
-  void clear() {
-    *SizePtr = 0;
-  }
+  void clear() { *SizePtr = 0; }
   void push_back(std::uint32_t Value) {
     Data[*SizePtr] = Value;
     (*SizePtr)++;
@@ -59,9 +62,12 @@ void EventSerializer::serialiseFunction() {
   auto ThresholdTime = FBVector(Builder, EventBufferSize);
   auto PeakTime = FBVector(Builder, EventBufferSize);
 
-
-  auto AdcPulseDebugOffset = CreateAdcPulseDebug(Builder, Amplitude.Offset, PeakArea.Offset, Background.Offset, ThresholdTime.Offset, PeakTime.Offset);
-  auto FBMessage = CreateEventMessage(Builder, SourceNameOffset, 1, 1, TimeOffset.Offset, EventId.Offset, FacilityData::AdcPulseDebug, AdcPulseDebugOffset.Union());
+  auto AdcPulseDebugOffset = CreateAdcPulseDebug(
+      Builder, Amplitude.Offset, PeakArea.Offset, Background.Offset,
+      ThresholdTime.Offset, PeakTime.Offset);
+  auto FBMessage = CreateEventMessage(
+      Builder, SourceNameOffset, 1, 1, TimeOffset.Offset, EventId.Offset,
+      FacilityData::AdcPulseDebug, AdcPulseDebugOffset.Union());
   FinishEventMessageBuffer(Builder, FBMessage);
   auto EventMessage = GetMutableEventMessage(Builder.GetBufferPointer());
 
@@ -73,7 +79,8 @@ void EventSerializer::serialiseFunction() {
   auto ProduceFB = [&]() {
     EventMessage->mutate_message_id(MessageId++);
     EventMessage->mutate_pulse_time(CurrentRefTime);
-    Producer->produce({Builder.GetBufferPointer(), Builder.GetSize()}, CurrentRefTime / 1000000);
+    Producer->produce({Builder.GetBufferPointer(), Builder.GetSize()},
+                      CurrentRefTime / 1000000);
     NumberOfEvents = 0;
     TimeOffset.clear();
     EventId.clear();
@@ -90,19 +97,23 @@ void EventSerializer::serialiseFunction() {
         if (NewEvent->PeakTime != 0 and NewEvent->PeakTime < CurrentRefTime) {
           CurrentRefTime = NewEvent->PeakTime;
         }
-        if (NewEvent->ThresholdTime != 0 and NewEvent->ThresholdTime < CurrentRefTime) {
+        if (NewEvent->ThresholdTime != 0 and
+            NewEvent->ThresholdTime < CurrentRefTime) {
           CurrentRefTime = NewEvent->ThresholdTime;
         }
         FirstEventTime = std::chrono::system_clock::now();
       }
-      TimeOffset.push_back(static_cast<std::uint32_t>(NewEvent->Timestamp - CurrentRefTime));
+      TimeOffset.push_back(
+          static_cast<std::uint32_t>(NewEvent->Timestamp - CurrentRefTime));
       if (NewEvent->ThresholdTime > 0) {
-        ThresholdTime.push_back(static_cast<std::uint32_t>(NewEvent->ThresholdTime - CurrentRefTime));
+        ThresholdTime.push_back(static_cast<std::uint32_t>(
+            NewEvent->ThresholdTime - CurrentRefTime));
       } else {
         ThresholdTime.push_back(0);
       }
-      if (NewEvent->PeakTime> 0) {
-        PeakTime.push_back(static_cast<std::uint32_t>(NewEvent->PeakTime - CurrentRefTime));
+      if (NewEvent->PeakTime > 0) {
+        PeakTime.push_back(
+            static_cast<std::uint32_t>(NewEvent->PeakTime - CurrentRefTime));
       } else {
         PeakTime.push_back(0);
       }
@@ -117,7 +128,8 @@ void EventSerializer::serialiseFunction() {
       }
     }
     std::this_thread::sleep_for(20ms);
-    if (NumberOfEvents > 0 and std::chrono::system_clock::now() > FirstEventTime + Timeout) {
+    if (NumberOfEvents > 0 and
+        std::chrono::system_clock::now() > FirstEventTime + Timeout) {
       ProduceFB();
     }
   } while (RunThread);

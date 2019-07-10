@@ -6,29 +6,30 @@
  */
 
 #include "PulseBuffer.h"
-#include <limits>
 #include <algorithm>
+#include <limits>
 
-PulseBuffer::PulseBuffer(std::uint64_t TimeoutNS, size_t BufferSize) : Timeout(TimeoutNS), MaxPulses(BufferSize) {
-  
-}
+PulseBuffer::PulseBuffer(std::uint64_t TimeoutNS, size_t BufferSize)
+    : Timeout(TimeoutNS), MaxPulses(BufferSize) {}
 
 bool PulseBuffer::hasValidPulses() {
   if (Pulses.empty()) {
     return true;
   }
   while (true) {
-    if (std::any_of(Pulses.begin(), Pulses.end(), [](auto const &Item){
-      return Item.second.empty();
-    })) {
+    if (std::any_of(Pulses.begin(), Pulses.end(),
+                    [](auto const &Item) { return Item.second.empty(); })) {
       return false;
     }
-    std::sort(QueueList.begin(), QueueList.end(), [](auto const &A, auto const &B){
-      return A->front().ThresholdTimestampNS < B->front().ThresholdTimestampNS;
-    });
+    std::sort(QueueList.begin(), QueueList.end(),
+              [](auto const &A, auto const &B) {
+                return A->front().ThresholdTimestampNS <
+                       B->front().ThresholdTimestampNS;
+              });
     auto EndEvent = (*(QueueList.end() - 1))->front();
     auto BeginEvent = (*QueueList.begin())->front();
-    if ((EndEvent.ThresholdTimestampNS - BeginEvent.ThresholdTimestampNS) > Timeout) {
+    if ((EndEvent.ThresholdTimestampNS - BeginEvent.ThresholdTimestampNS) >
+        Timeout) {
       (*QueueList.begin())->pop();
       ++DiscardedPulses;
     } else {
@@ -65,4 +66,3 @@ std::vector<PulseParameters> PulseBuffer::getPulses() {
   }
   return ReturnVector;
 }
-

@@ -17,8 +17,7 @@ PulseParameters createPulse(ChannelID ID, std::int64_t Timestamp) {
 
 class PulseBufferTest : public ::testing::Test {
 public:
-  void SetUp() override {
-  }
+  void SetUp() override {}
   const std::uint64_t Timeout = 1000;
   PulseBuffer TestBuffer{Timeout};
   std::uint64_t BaseTimeStamp{123456789};
@@ -30,7 +29,7 @@ TEST_F(PulseBufferTest, EnoughPulses0) {
 
 TEST_F(PulseBufferTest, EnoughPulses1) {
   TestBuffer.addChannel({0, 0});
-  TestBuffer.addPulse(createPulse({0,0}, BaseTimeStamp));
+  TestBuffer.addPulse(createPulse({0, 0}, BaseTimeStamp));
   EXPECT_TRUE(TestBuffer.hasValidPulses());
 }
 
@@ -145,7 +144,7 @@ TEST_F(PulseBufferTest, ExpectedPulses) {
   TestBuffer.addPulse(createPulse({0, 0}, BaseTimeStamp + Timeout * 5.5));
   EXPECT_TRUE(TestBuffer.hasValidPulses());
   auto Result = TestBuffer.getPulses();
-  std::sort(Result.begin(), Result.end(), [](auto A, auto B){
+  std::sort(Result.begin(), Result.end(), [](auto A, auto B) {
     return A.ThresholdTimestampNS > B.ThresholdTimestampNS;
   });
   ASSERT_EQ(Result.size(), 2u);

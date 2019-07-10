@@ -17,7 +17,8 @@
 struct RawTimeStamp {
   RawTimeStamp() = default;
 
-  /// \brief Create a raw timestamp from a timestamp in nanoseconds since Unix epoch.
+  /// \brief Create a raw timestamp from a timestamp in nanoseconds since Unix
+  /// epoch.
   explicit RawTimeStamp(std::uint64_t NSec);
 
   /// \brief Create a raw timestamp from a timing system timestamp.

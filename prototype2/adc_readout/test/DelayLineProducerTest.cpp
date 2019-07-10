@@ -22,7 +22,8 @@ public:
     DelayLineProducer::serializeAndSendEvent(Evt);
   }
   MAKE_MOCK1(serializeAndSendEvent, void(DelayLineEvent const &), override);
-  MAKE_MOCK2(produce, int(nonstd::span<const std::uint8_t>, std::int64_t), override);
+  MAKE_MOCK2(produce, int(nonstd::span<const std::uint8_t>, std::int64_t),
+             override);
 };
 
 class DelayLineProducerTest : public ::testing::Test {
@@ -91,7 +92,10 @@ bool dataHasExpectedContent(const void *Ptr) {
 
 inline auto validFBEvent() {
   return trompeloeil::make_matcher<nonstd::span<const std::uint8_t>>(
-      [](nonstd::span<const std::uint8_t> Data) { return dataHasExpectedContent(reinterpret_cast<const void*>(Data.data())); },
+      [](nonstd::span<const std::uint8_t> Data) {
+        return dataHasExpectedContent(
+            reinterpret_cast<const void *>(Data.data()));
+      },
       [](std::ostream &Stream) {
         Stream
             << "Serialized buffer contents does not match expected contents.";

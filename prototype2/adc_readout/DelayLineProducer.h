@@ -12,6 +12,7 @@
 #include "AdcSettings.h"
 #include "AdcTimeStamp.h"
 #include "DelayLineEventFormation.h"
+#include "EventSerializer.h"
 #include "PulseParameters.h"
 #include <atomic>
 #include <common/Producer.h>
@@ -19,7 +20,6 @@
 #include <mutex>
 #include <queue>
 #include <thread>
-#include "EventSerializer.h"
 
 /// \brief Kafka producer class intended only for delay line data production.
 /// Implements some glue logic and serialisation.

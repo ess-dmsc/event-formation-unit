@@ -131,14 +131,12 @@ void FPGASim::transmitHeartbeat() {
 }
 
 void FPGASim::transmitPacket(const void *DataPtr, const size_t Size) {
-  auto TransmitHandlerGlue = [this](auto &, auto) {
-    this->packetIsSent();
-  };
+  auto TransmitHandlerGlue = [this](auto &, auto) { this->packetIsSent(); };
 
   Socket.async_send(asio::buffer(DataPtr, Size), TransmitHandlerGlue);
 }
 
-void FPGASim::addSamplingRun(void const * const DataPtr, size_t Bytes) {
+void FPGASim::addSamplingRun(void const *const DataPtr, size_t Bytes) {
   auto Success = StandbyBuffer->addSamplingRun(DataPtr, Bytes);
   auto BufferSizes = StandbyBuffer->getBufferSizes();
   if (not Success or BufferSizes.second - BufferSizes.first < 20) {

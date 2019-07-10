@@ -62,7 +62,7 @@ void DelayLineEventFormation::DoChannelRoleMapping(
                  DelayLinePosCalcInterface::ChannelRole,
                  std::function<bool(DelayLinePosCalcInterface *)>>;
   std::multimap<AdcSettings::ChannelRole, RoleParams> ChannelRoleMap;
-  
+
   auto addRole = [&ChannelRoleMap](auto Role, auto &AxisPtr, auto CAxisRole,
                                    auto CheckFunc) {
     ChannelRoleMap.emplace(
@@ -113,7 +113,8 @@ DelayLineEventFormation::DelayLineEventFormation(
     : XAxisCalc(createCalculator(ReadoutSettings.XAxis,
                                  ReadoutSettings.EventTimeoutNS)),
       YAxisCalc(createCalculator(ReadoutSettings.YAxis,
-                                 ReadoutSettings.EventTimeoutNS)), Buffer(ReadoutSettings.EventTimeoutNS) {
+                                 ReadoutSettings.EventTimeoutNS)),
+      Buffer(ReadoutSettings.EventTimeoutNS) {
   XAxisCalc->setCalibrationValues(ReadoutSettings.XAxisCalibOffset,
                                   ReadoutSettings.XAxisCalibSlope);
 
@@ -146,8 +147,8 @@ void DelayLineEventFormation::addPulse(const PulseParameters &NewPulse) {
       PossiblePulseHandlers = PulseHandlerMap.equal_range(CPulse.Identifier);
       for (auto CurrentHandler = PossiblePulseHandlers.first;
            CurrentHandler != PossiblePulseHandlers.second; ++CurrentHandler) {
-        if (auto Calculator =
-            dynamic_cast<DelayLinePosCalcInterface *>(CurrentHandler->second)) {
+        if (auto Calculator = dynamic_cast<DelayLinePosCalcInterface *>(
+                CurrentHandler->second)) {
           Calculator->addPulse(CPulse);
         }
       }

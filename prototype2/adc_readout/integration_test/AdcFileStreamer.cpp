@@ -1,13 +1,13 @@
 /** Copyright (C) 2019 European Spallation Source ERIC */
 
-#include <string>
-#include <vector>
+#include "DataModulariser.h"
+#include "FPGASim.h"
+#include "PoissonDelay.h"
+#include "WaveformData.h"
 #include <CLI/CLI.hpp>
 #include <h5cpp/hdf5.hpp>
-#include "WaveformData.h"
-#include "FPGASim.h"
-#include "DataModulariser.h"
-#include "PoissonDelay.h"
+#include <string>
+#include <vector>
 
 bool RunLoop = true;
 
@@ -30,60 +30,67 @@ void addCLIOptions(CLI::App &Parser, StreamSettings &Settings) {
                   "Address to which the data should be transmitted.")
       ->default_str("localhost");
   Parser
-      .add_option(
-          "--port", Settings.Port,
-          "UDP port to which the data should be transmitted.")
+      .add_option("--port", Settings.Port,
+                  "UDP port to which the data should be transmitted.")
       ->default_str("65535");
   Parser
-      .add_option(
-          "--event_rate", Settings.EventRate,
-          "Events (waveforms) transmitted per second.")
+      .add_option("--event_rate", Settings.EventRate,
+                  "Events (waveforms) transmitted per second.")
       ->default_str("1000");
   Parser
       .add_option("--data_file", Settings.NeXuSFile,
-                  "Path to (NeXus) file to be used as a data source.")->required(true);
+                  "Path to (NeXus) file to be used as a data source.")
+      ->required(true);
   Parser
       .add_option("--nexus_path", Settings.WaveformPath,
-                  "Path to group that has the waveform data. E.g. \"/entry/waveform_channel_\"")->required(true);
+                  "Path to group that has the waveform data. E.g. "
+                  "\"/entry/waveform_channel_\"")
+      ->required(true);
 }
 
 class FileSampler {
 public:
   FileSampler(std::string const &FileName, std::string const &NexusPath) {
-    InFile = hdf5::file::open(FileName,hdf5::file::AccessFlags::READONLY);
+    InFile = hdf5::file::open(FileName, hdf5::file::AccessFlags::READONLY);
     RootNode = InFile.root();
     for (int i = 0; i < 4; i++) {
       auto Group = RootNode.get_group(NexusPath + std::to_string(i));
       Channels.emplace_back(Group);
     }
     for (auto &Ch : Channels) {
-      CurrentTimestamp.emplace_back(std::make_pair(CurrentTimestamp.size(), Ch.getTimestamp()));
+      CurrentTimestamp.emplace_back(
+          std::make_pair(CurrentTimestamp.size(), Ch.getTimestamp()));
     }
   }
-  std::pair<void const * const, std::size_t> generate() {
-    auto MinimumTs = std::min_element(CurrentTimestamp.begin(), CurrentTimestamp.end(), [](auto const &A, auto const &B) {
-        return A.second < B.second;
-    });
+  std::pair<void const *const, std::size_t> generate() {
+    auto MinimumTs = std::min_element(
+        CurrentTimestamp.begin(), CurrentTimestamp.end(),
+        [](auto const &A, auto const &B) { return A.second < B.second; });
     auto &CurrentChannel = Channels.at(MinimumTs->first);
     if (CurrentChannel.outOfData()) {
       RunLoop = false;
       return {nullptr, 0};
     }
-    auto TempPair = Modulariser.modularise(CurrentChannel.getWaveform(), CurrentChannel.getTimestamp(), MinimumTs->first);
+    auto TempPair =
+        Modulariser.modularise(CurrentChannel.getWaveform(),
+                               CurrentChannel.getTimestamp(), MinimumTs->first);
     CurrentChannel.nextWaveform();
     MinimumTs->second = CurrentChannel.getTimestamp();
     return TempPair;
   }
+
 private:
   hdf5::file::File InFile;
   hdf5::node::Group RootNode;
   std::vector<WaveformData> Channels;
-  std::vector<std::pair<int,std::uint64_t>> CurrentTimestamp;
+  std::vector<std::pair<int, std::uint64_t>> CurrentTimestamp;
   DataModulariser Modulariser;
 };
 
-auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr, StreamSettings &Settings) {
-  auto SampleGen = std::make_shared<FileSampler>(Settings.NeXuSFile, Settings.WaveformPath);
+auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr,
+                        StreamSettings &Settings) {
+  auto SampleGen =
+      std::make_shared<FileSampler>(Settings.NeXuSFile, Settings.WaveformPath);
   auto Glue = [Settings, SampleGen, FPGAPtr](RawTimeStamp const &) {
     auto SampleRun = SampleGen->generate();
     FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second);
@@ -130,9 +137,10 @@ int main(const int argc, char *argv[]) {
   asio::io_service::work Worker(Service);
 
   auto AdcBox = std::make_shared<FPGASim>(UsedSettings.EFUAddress,
-                                           UsedSettings.Port, Service);
+                                          UsedSettings.Port, Service);
 
-  std::shared_ptr<SamplingTimer> DataTimer = SetUpContGenerator(Service, AdcBox.get(), UsedSettings);
+  std::shared_ptr<SamplingTimer> DataTimer =
+      SetUpContGenerator(Service, AdcBox.get(), UsedSettings);
   DataTimer->start();
 
   auto PrintStats = [&AdcBox]() {
