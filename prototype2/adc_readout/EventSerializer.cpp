@@ -11,7 +11,7 @@
 EventSerializer::EventSerializer(std::string SourceName, size_t BufferSize,
                                  std::chrono::milliseconds TransmitTimeout,
                                  ProducerBase *KafkaProducer)
-    : Name(SourceName), Timeout(TransmitTimeout), EventBufferSize(BufferSize),
+    : Name(std::move(SourceName)), Timeout(TransmitTimeout), EventBufferSize(BufferSize),
       Producer(KafkaProducer) {
   SerializeThread = std::thread(&EventSerializer::serialiseFunction, this);
 }
@@ -43,10 +43,10 @@ struct FBVector {
     Data[*SizePtr] = Value;
     (*SizePtr)++;
   }
-  flatbuffers::uoffset_t Offset;
-  std::uint8_t *DataPtr;
+  flatbuffers::uoffset_t Offset{0};
+  std::uint8_t *DataPtr{nullptr};
   nonstd::span<std::uint32_t> Data;
-  flatbuffers::uoffset_t *SizePtr;
+  flatbuffers::uoffset_t *SizePtr{nullptr};
 };
 
 using std::chrono_literals::operator""ms;
