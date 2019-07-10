@@ -46,6 +46,7 @@ protected:
     // Processing Counters
     int64_t processing_idle;
     int64_t fifo_seq_errors;
+    int64_t readout_count;
     int64_t geometry_errors;
     int64_t events;
     int64_t tx_bytes;

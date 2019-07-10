@@ -6,8 +6,8 @@
 /// detectors.
 //===----------------------------------------------------------------------===//
 
-#include "JalousieBase.h"
-
+#include <jalousie/JalousieBase.h>
+#include <jalousie/Readout.h>
 #include <cinttypes>
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
@@ -50,6 +50,15 @@ JalousieBase::JalousieBase(BaseSettings const &settings)
   Stats.create("receive.packets", mystats.rx_packets);
   Stats.create("receive.bytes", mystats.rx_bytes);
   Stats.create("receive.dropped", mystats.fifo_push_errors);
+
+  Stats.create("readouts.count", mystats.readout_count);
+
+  Stats.create("events.count", mystats.events);
+  Stats.create("events.geometry_errors", mystats.geometry_errors);
+  Stats.create("transmit.bytes", mystats.tx_bytes);
+
+  Stats.create("thread.seq_errors", mystats.fifo_seq_errors);
+  Stats.create("thread.processing_idle", mystats.processing_idle);
 
     /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
@@ -117,7 +126,7 @@ void JalousieBase::processing_thread() {
   std::string topic{""};
   std::string monitor{""};
 
-  ESSGeometry essgeom;
+  ESSGeometry essgeom(1, 1, 1, 1); // TODO
   topic = "DREAM_detector";
   monitor = "DREAM_monitor";
 
@@ -147,36 +156,32 @@ void JalousieBase::processing_thread() {
         continue;
       }
 
-      // TODO add parser
-      //auto dataptr = eth_ringbuf->getDataBuffer(data_index);
-      // if (parser.parse(dataptr, datalen) < 0) {
-      //   mystats.readouts_error_bytes += parser.Stats.error_bytes;
-      //   continue;
-      // }
+      auto dataptr = eth_ringbuf->getDataBuffer(data_index);
+      assert(datalen % sizeof(Jalousie::Readout) == 0);
 
-      // XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
-      //        parser.MBHeader->numElements, parser.MBHeader->digitizerID);
+      for (size_t i = 0; i < datalen / sizeof(Jalousie::Readout); i++) {
+        auto rdout = (Jalousie::Readout *)dataptr;
+        printf("time %llu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
+           rdout->time, rdout->board, rdout->sub_id, rdout->anode, rdout->cathode);
+        dataptr += sizeof(Jalousie::Readout);
+        mystats.readout_count++;
 
-      uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      flatbuffer.pulseTime(efu_time);
 
-      // iterate over readouts
-        // calculate x, y
-        // add time, pixel
-        // auto time =
-        // auto pixel_id =
+        uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+        flatbuffer.pulseTime(efu_time);
+
+        uint64_t time = 0;
+        auto pixel_id = 1;
         //XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
 
-      auto pixel_id = 1;
+        if (pixel_id == 0) {
+          mystats.geometry_errors++;
+        } else {
 
-      if (pixel_id == 0) {
-        mystats.geometry_errors++;
-      } else {
-        uint64_t time = 0;
-        mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
-        mystats.events++;
+          mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
+          mystats.events++;
+        }
       }
-
     } else {
       // There is NO data in the FIFO - do stop checks and sleep a little
       mystats.processing_idle++;
