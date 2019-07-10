@@ -52,7 +52,7 @@ struct FBVector {
 using namespace std::chrono_literals;
 
 void EventSerializer::serialiseFunction() {
-  flatbuffers::FlatBufferBuilder Builder;
+  flatbuffers::FlatBufferBuilder Builder(sizeof(std::uint32_t) * EventBufferSize * 8 + 2048);
   auto SourceNameOffset = Builder.CreateString(Name);
   auto TimeOffset = FBVector(Builder, EventBufferSize);
   auto EventId = FBVector(Builder, EventBufferSize);

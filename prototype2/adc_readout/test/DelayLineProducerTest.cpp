@@ -24,6 +24,7 @@ public:
   MAKE_MOCK1(serializeAndSendEvent, void(DelayLineEvent const &), override);
   MAKE_MOCK2(produce, int(nonstd::span<const std::uint8_t>, std::int64_t),
              override);
+  using DelayLineProducer::Serializer;
 };
 
 class DelayLineProducerTest : public ::testing::Test {
@@ -66,6 +67,7 @@ TEST_F(DelayLineProducerTest, CallProduceTest) {
   REQUIRE_CALL(*TestProducer, produce(_, _)).TIMES(1).RETURN(0);
   ;
   DelayLineEvent TestEvent{};
+  TestProducer->Serializer.setTransmitTimeout(1ms);
   TestProducer->bypassMockSerializeAndSendEvent(TestEvent);
   std::this_thread::sleep_for(50ms);
 }
@@ -75,8 +77,8 @@ static std::uint16_t TestYpos = 1468;
 static std::uint32_t TestAmplitude = 135792;
 static std::uint64_t TestTimestamp = 987654321;
 
-bool dataHasExpectedContent(const void *Ptr) {
-  auto EventData = GetEventMessage(Ptr);
+bool dataHasExpectedContent(nonstd::span<const std::uint8_t> Data) {
+  auto EventData = GetEventMessage(Data.data());
   std::uint32_t DetectorIDValue = (TestYpos << 16u) + TestXpos + 1u;
   EXPECT_EQ(EventData->pulse_time(), TestTimestamp);
   EXPECT_EQ(EventData->source_name()->str(),
@@ -86,24 +88,16 @@ bool dataHasExpectedContent(const void *Ptr) {
   EXPECT_EQ(EventData->detector_id()->size(), 1u);
   EXPECT_EQ(EventData->detector_id()->Get(0), DetectorIDValue);
   EXPECT_EQ(EventData->time_of_flight()->size(), 1u);
-  EXPECT_EQ(EventData->time_of_flight()->Get(0), TestAmplitude);
+  EXPECT_EQ(EventData->time_of_flight()->Get(0), 0u);
+  auto AdcData = EventData->facility_specific_data_as_AdcPulseDebug();
+  EXPECT_EQ(AdcData->amplitude()->size(), 1u);
+  EXPECT_EQ(AdcData->amplitude()->Get(0), TestAmplitude);
   return true;
 }
 
-inline auto validFBEvent() {
-  return trompeloeil::make_matcher<nonstd::span<const std::uint8_t>>(
-      [](nonstd::span<const std::uint8_t> Data) {
-        return dataHasExpectedContent(
-            reinterpret_cast<const void *>(Data.data()));
-      },
-      [](std::ostream &Stream) {
-        Stream
-            << "Serialized buffer contents does not match expected contents.";
-      });
-}
-
 TEST_F(DelayLineProducerTest, CallProduceContentTest) {
-  REQUIRE_CALL(*TestProducer, produce(validFBEvent(), _)).TIMES(1).RETURN(0);
+  REQUIRE_CALL(*TestProducer, produce(_, _)).WITH(dataHasExpectedContent(_1)).TIMES(1).RETURN(0);
+  TestProducer->Serializer.setTransmitTimeout(1ms);
   DelayLineEvent TestEvent{};
   TestEvent.X = TestXpos;
   TestEvent.Y = TestYpos;

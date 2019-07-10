@@ -30,6 +30,9 @@ public:
                   ProducerBase *KafkaProducer);
   virtual ~EventSerializer();
   void addEvent(std::unique_ptr<EventData> Event);
+  void setTransmitTimeout(std::chrono::milliseconds TransmitTimeout) {
+    Timeout = TransmitTimeout;
+  }
 
 private:
   void serialiseFunction();
