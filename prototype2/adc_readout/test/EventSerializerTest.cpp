@@ -114,7 +114,7 @@ TEST_F(EventSerialisationTest, ProduceFlatbuffer_2) {
   }
 }
 
-using std::chrono_literals::operator""ms;
+using namespace std::chrono_literals;
 
 TEST_F(EventSerialisationTest, ProduceFlatbuffer_3) {
   bool CallDone = false;

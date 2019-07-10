@@ -10,7 +10,7 @@
 #include <cmath>
 #include <limits>
 
-using std::chrono_literals::operator""ms;
+using namespace std::chrono_literals;
 
 PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod, std::string SourceName)
     : AdcDataProcessor(std::move(Prod)), Name(std::move(SourceName)) {}

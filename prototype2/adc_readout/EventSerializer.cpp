@@ -49,7 +49,7 @@ struct FBVector {
   flatbuffers::uoffset_t *SizePtr{nullptr};
 };
 
-using std::chrono_literals::operator""ms;
+using namespace std::chrono_literals;
 
 void EventSerializer::serialiseFunction() {
   flatbuffers::FlatBufferBuilder Builder;
