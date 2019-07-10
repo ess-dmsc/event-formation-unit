@@ -5,7 +5,10 @@
 #include <sstream>
 #include <multigrid/mesytec/BuilderReadouts.h>
 #include <multigrid/mesytec/BuilderMesytec.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wc++17-extensions"
 #include <nlohmann/json.hpp>
+#pragma GCC diagnostic pop
 #include <common/Log.h>
 #include <common/Trace.h>
 

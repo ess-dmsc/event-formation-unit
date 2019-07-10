@@ -14,7 +14,10 @@
 
 #include <limits>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic warning "-Wc++17-extensions"
 #include <nlohmann/json.hpp>
+#pragma GCC diagnostic pop
 
 namespace Multigrid {
 
