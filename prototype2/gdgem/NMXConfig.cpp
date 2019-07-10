@@ -2,7 +2,7 @@
 
 #include <gdgem/NMXConfig.h>
 #pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wc++17-extensions"
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <nlohmann/json.hpp>
 #pragma GCC diagnostic pop
 #include <fstream>
