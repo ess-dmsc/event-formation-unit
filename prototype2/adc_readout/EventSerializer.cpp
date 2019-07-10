@@ -10,7 +10,7 @@
 
 EventSerializer::EventSerializer(std::string SourceName, size_t BufferSize,
                                  std::chrono::milliseconds TransmitTimeout,
-                                 std::shared_ptr<ProducerBase> KafkaProducer, bool DebugMode) : Name(SourceName), Timeout(TransmitTimeout), EventBufferSize(BufferSize), Producer(KafkaProducer), Debug(DebugMode) {
+                                 ProducerBase *KafkaProducer) : Name(SourceName), Timeout(TransmitTimeout), EventBufferSize(BufferSize), Producer(KafkaProducer) {
   SerializeThread = std::thread(&EventSerializer::serialiseFunction, this);
 }
 
@@ -121,4 +121,7 @@ void EventSerializer::serialiseFunction() {
       ProduceFB();
     }
   } while (RunThread);
+  if (NumberOfEvents > 0) {
+    ProduceFB();
+  }
 }

@@ -10,6 +10,8 @@
 #pragma once
 
 #include "AdcDataProcessor.h"
+#include "EventSerializer.h"
+#include <map>
 
 /// \brief Finds a peak in a sample run and serialises its maximum value and
 /// timestamp.
@@ -24,12 +26,6 @@ public:
   virtual void processData(SamplingRun const &Data) override;
 
 private:
-  /// \brief Implements serialisation and transmission of the peak data.
-  /// Currently uses the EventMessage flatbuffer schema for serialisation. This
-  /// is not a good fit for the analysed data and another schema should probably
-  /// be used.
-  void sendData(const std::uint64_t &TimeStamp, const std::uint16_t &Amplitude,
-                const ChannelID &Identifier);
-  std::uint64_t EventCounter{0};
   std::string Name;
+  std::map<ChannelID, std::unique_ptr<EventSerializer>> Serialisers;
 };

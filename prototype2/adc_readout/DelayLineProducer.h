@@ -19,6 +19,7 @@
 #include <mutex>
 #include <queue>
 #include <thread>
+#include "EventSerializer.h"
 
 /// \brief Kafka producer class intended only for delay line data production.
 /// Implements some glue logic and serialisation.
@@ -64,4 +65,5 @@ protected:
   std::queue<PulseParameters> PulseQueue{};
   std::atomic_bool RunThread{true};
   ESSGeometry essgeometry{65536, 65536, 1, 1};
+  EventSerializer Serializer;
 };

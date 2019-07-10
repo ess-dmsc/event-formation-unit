@@ -7,9 +7,10 @@
 
 #include "PeakFinder.h"
 #include "PulseParameters.h"
-#include "ev42_events_generated.h"
 #include <cmath>
 #include <limits>
+
+using std::chrono_literals::operator""ms;
 
 PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod, std::string SourceName)
     : AdcDataProcessor(std::move(Prod)), Name(std::move(SourceName)) {}
@@ -17,27 +18,10 @@ PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod, std::string SourceName)
 void PeakFinder::processData(SamplingRun const &Data) {
   auto PulseInfo = analyseSampleRun(Data, 0.1);
   std::uint64_t PeakTimeStamp = PulseInfo.PeakTimestamp.GetTimeStampNS();
-  sendData(PeakTimeStamp, PulseInfo.PeakAmplitude, Data.Identifier);
-}
 
-void PeakFinder::sendData(const std::uint64_t &TimeStamp,
-                          const std::uint16_t &Amplitude,
-                          const ChannelID &Identifier) {
-  flatbuffers::FlatBufferBuilder builder;
-  auto SourceName =
-      builder.CreateString(Name + "_Adc" + std::to_string(Identifier.SourceID) +
-                           "_Ch" + std::to_string(Identifier.ChannelNr));
-  auto ToF_Vector = builder.CreateVector(std::vector<std::uint32_t>{0});
-  auto AmplitudeVector =
-      builder.CreateVector(std::vector<std::uint32_t>{Amplitude});
-  EventMessageBuilder EvBuilder(builder);
-  EvBuilder.add_source_name(SourceName);
-  EvBuilder.add_message_id(EventCounter++);
-  EvBuilder.add_pulse_time(TimeStamp);
-  EvBuilder.add_time_of_flight(ToF_Vector);
-  EvBuilder.add_detector_id(AmplitudeVector);
-  builder.Finish(EvBuilder.Finish(), EventMessageIdentifier());
-#pragma message("Use of Producer::produce() must be corrected to not use system time.")
-  ProducerPtr->produce({builder.GetBufferPointer(),
-                       builder.GetSize()}, time(nullptr) * 1000);
+  if (Serialisers.find(Data.Identifier) == Serialisers.end()) {
+    Serialisers[Data.Identifier] = std::make_unique<EventSerializer>(Name + "_Adc" + std::to_string(Data.Identifier.SourceID) +
+                                                                     "_Ch" + std::to_string(Data.Identifier.ChannelNr), 100, 50ms, ProducerPtr.get());
+  }
+  Serialisers[Data.Identifier]->addEvent(std::unique_ptr<EventData>(new EventData{PeakTimeStamp, 1, static_cast<std::uint32_t>(PulseInfo.PeakAmplitude), static_cast<std::uint32_t>(PulseInfo.PeakArea), static_cast<std::uint32_t>(PulseInfo.BackgroundLevel), PulseInfo.ThresholdTimestamp.GetTimeStampNS(), PeakTimeStamp}));
 }

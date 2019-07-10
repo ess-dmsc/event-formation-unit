@@ -25,7 +25,7 @@ using Queue = moodycamel::ReaderWriterQueue<std::unique_ptr<EventData>>;
 
 class EventSerializer {
 public:
-  EventSerializer(std::string SourceName, size_t BufferSize, std::chrono::milliseconds TransmitTimeout, std::shared_ptr<ProducerBase> KafkaProducer, bool DebugMode = true);
+  EventSerializer(std::string SourceName, size_t BufferSize, std::chrono::milliseconds TransmitTimeout, ProducerBase *KafkaProducer);
   virtual ~EventSerializer();
   void addEvent(std::unique_ptr<EventData> Event);
 private:
@@ -34,8 +34,7 @@ private:
   std::string Name;
   std::chrono::milliseconds Timeout;
   size_t EventBufferSize;
-  std::shared_ptr<ProducerBase> Producer;
-  bool Debug;
+  ProducerBase *Producer;
   std::thread SerializeThread;
   Queue EventQueue;
 };

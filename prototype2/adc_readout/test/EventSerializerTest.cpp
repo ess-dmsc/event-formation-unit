@@ -24,15 +24,15 @@ public:
 class EventSerialisationTest : public ::testing::Test {
 public:
   void SetUp() override {
-    Producer = std::dynamic_pointer_cast<ProducerBase>(std::make_shared<ProducerStandIn>());
+    Producer = std::make_unique<ProducerStandIn>();
   }
-  std::shared_ptr<ProducerBase> Producer;
+  std::unique_ptr<ProducerBase> Producer;
 };
 
 TEST_F(EventSerialisationTest, ProduceFlatbuffer_1) {
-  REQUIRE_CALL(*std::dynamic_pointer_cast<ProducerStandIn>(Producer), produce(_, _)).TIMES(1).RETURN(0);
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn*>(Producer.get()), produce(_, _)).TIMES(1).RETURN(0);
   {
-    EventSerializer Serializer("SomeName", 1, 50ms, Producer);
+    EventSerializer Serializer("SomeName", 1, 50ms, dynamic_cast<ProducerBase*>(Producer.get()));
     Serializer.addEvent(std::make_unique<EventData>());
   }
 }
@@ -101,9 +101,9 @@ bool checkFlatbuffer2(nonstd::span<const std::uint8_t> Buffer,
 }
 
 TEST_F(EventSerialisationTest, ProduceFlatbuffer_2) {
-  REQUIRE_CALL(*std::dynamic_pointer_cast<ProducerStandIn>(Producer), produce(_, _)).WITH(checkFlatbuffer1(_1, _2)).TIMES(1).RETURN(0);
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn*>(Producer.get()), produce(_, _)).WITH(checkFlatbuffer1(_1, _2)).TIMES(1).RETURN(0);
   {
-    EventSerializer Serializer("SomeName", 1, 50ms, Producer);
+    EventSerializer Serializer("SomeName", 1, 50ms, dynamic_cast<ProducerBase*>(Producer.get()));
     Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000000, 2, 3, 4, 5, 6000000, 7000000}));
   }
 }
@@ -112,9 +112,9 @@ using std::chrono_literals::operator""ms;
 
 TEST_F(EventSerialisationTest, ProduceFlatbuffer_3) {
   bool CallDone = false;
-  REQUIRE_CALL(*std::dynamic_pointer_cast<ProducerStandIn>(Producer), produce(_, _)).WITH(checkFlatbuffer1(_1, _2)).TIMES(1).RETURN(0).LR_SIDE_EFFECT(CallDone = true;);
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn*>(Producer.get()), produce(_, _)).WITH(checkFlatbuffer1(_1, _2)).TIMES(1).RETURN(0).LR_SIDE_EFFECT(CallDone = true;);
   {
-    EventSerializer Serializer("SomeName", 2, 60ms, Producer);
+    EventSerializer Serializer("SomeName", 2, 60ms, dynamic_cast<ProducerBase*>(Producer.get()));
     Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000000, 2, 3, 4, 5, 6000000, 7000000}));
     std::this_thread::sleep_for(20ms);
     EXPECT_FALSE(CallDone);
@@ -124,13 +124,38 @@ TEST_F(EventSerialisationTest, ProduceFlatbuffer_3) {
 }
 
 TEST_F(EventSerialisationTest, ProduceFlatbuffer_4) {
-  REQUIRE_CALL(*std::dynamic_pointer_cast<ProducerStandIn>(Producer), produce(_, _)).WITH(checkFlatbuffer2(_1, _2)).TIMES(2).RETURN(0);
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn*>(Producer.get()), produce(_, _)).WITH(checkFlatbuffer2(_1, _2)).TIMES(2).RETURN(0);
   {
-    EventSerializer Serializer("SomeName", 2, 60ms, Producer);
+    EventSerializer Serializer("SomeName", 2, 60ms, dynamic_cast<ProducerBase*>(Producer.get()));
+    Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000000, 2, 3, 4, 5, 6000000, 7000000}));
+    Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000001, 2, 3, 4, 5, 6000000, 7000000}));
+    Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000002, 2, 3, 4, 5, 6000000, 7000000}));
+    Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000003, 2, 3, 4, 5, 6000000, 7000000}));
+  }
+}
+
+TEST_F(EventSerialisationTest, ProduceFlatbuffer_5) {
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn*>(Producer.get()), produce(_, _)).TIMES(3).RETURN(0);
+  {
+    EventSerializer Serializer("SomeName", 2, 60ms, dynamic_cast<ProducerBase*>(Producer.get()));
     Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000000, 2, 3, 4, 5, 6000000, 7000000}));
     Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000001, 2, 3, 4, 5, 6000000, 7000000}));
     Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000002, 2, 3, 4, 5, 6000000, 7000000}));
     Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000003, 2, 3, 4, 5, 6000000, 7000000}));
     Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000004, 2, 3, 4, 5, 6000000, 7000000}));
+  }
+}
+
+bool checkFlatbuffer3(nonstd::span<const std::uint8_t> Buffer) {
+  auto Verifier = flatbuffers::Verifier(Buffer.data(), Buffer.size());
+  return VerifyEventMessageBuffer(Verifier);
+}
+
+TEST_F(EventSerialisationTest, ProduceFlatbuffer_6) {
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn*>(Producer.get()), produce(_, _)).WITH(checkFlatbuffer3(_1)).TIMES(1).RETURN(0);
+  {
+    EventSerializer Serializer("SomeName", 2, 60ms, dynamic_cast<ProducerBase*>(Producer.get()));
+    Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000000, 2, 3, 4, 5, 6000000, 7000000}));
+    Serializer.addEvent(std::unique_ptr<EventData>(new EventData{1000001, 2, 3, 4, 5, 6000000, 7000000}));
   }
 }
