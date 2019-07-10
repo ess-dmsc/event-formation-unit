@@ -15,28 +15,28 @@ const uint64_t kNeutronDataType{uint64_t(0x0) << 62};
 const uint64_t kMetaDataType{uint64_t(0x2) << 62};
 const uint64_t kAdcDataType{uint64_t(0x3) << 62};
 
-const uint64_t kMetaDataIndex0{uint64_t(0x0) << 58};
-const uint64_t kMetaDataIndex1{uint64_t(0x1) << 58};
-const uint64_t kMetaDataIndex2{uint64_t(0x2) << 58};
-const uint64_t kMetaDataIndex3{uint64_t(0x3) << 58};
-const uint64_t kMetaDataIndex4{uint64_t(0x4) << 58};
-const uint64_t kMetaDataIndex5{uint64_t(0x5) << 58};
-const uint64_t kMetaDataIndex6{uint64_t(0x6) << 58};
-const uint64_t kMetaDataIndex7{uint64_t(0x7) << 58};
-const uint64_t kMetaDataIndex8{uint64_t(0x8) << 58};
+// const uint64_t kMetaDataIndex0{uint64_t(0x0) << 58};
+// const uint64_t kMetaDataIndex1{uint64_t(0x1) << 58};
+// const uint64_t kMetaDataIndex2{uint64_t(0x2) << 58};
+// const uint64_t kMetaDataIndex3{uint64_t(0x3) << 58};
+// const uint64_t kMetaDataIndex4{uint64_t(0x4) << 58};
+// const uint64_t kMetaDataIndex5{uint64_t(0x5) << 58};
+// const uint64_t kMetaDataIndex6{uint64_t(0x6) << 58};
+// const uint64_t kMetaDataIndex7{uint64_t(0x7) << 58};
+// const uint64_t kMetaDataIndex8{uint64_t(0x8) << 58};
 
 const uint64_t kMetaDataMask{uint64_t(0xF) << 54};
 const uint64_t kMetaDataSubIndex0{uint64_t(0x0) << 54};
 const uint64_t kMetaDataSubIndex1{uint64_t(0x1) << 54};
-const uint64_t kMetaDataSubIndex2{uint64_t(0x2) << 54};
-const uint64_t kMetaDataSubIndex3{uint64_t(0x3) << 54};
-const uint64_t kMetaDataSubIndex4{uint64_t(0x4) << 54};
-const uint64_t kMetaDataSubIndex5{uint64_t(0x5) << 54};
-const uint64_t kMetaDataSubIndex6{uint64_t(0x6) << 54};
-const uint64_t kMetaDataSubIndex7{uint64_t(0x7) << 54};
-const uint64_t kMetaDataSubIndex8{uint64_t(0x8) << 54};
-const uint64_t kMetaDataSubIndex9{uint64_t(0x9) << 54};
-const uint64_t kMetaDataSubIndex10{uint64_t(0xA) << 54};
+// const uint64_t kMetaDataSubIndex2{uint64_t(0x2) << 54};
+// const uint64_t kMetaDataSubIndex3{uint64_t(0x3) << 54};
+// const uint64_t kMetaDataSubIndex4{uint64_t(0x4) << 54};
+// const uint64_t kMetaDataSubIndex5{uint64_t(0x5) << 54};
+// const uint64_t kMetaDataSubIndex6{uint64_t(0x6) << 54};
+// const uint64_t kMetaDataSubIndex7{uint64_t(0x7) << 54};
+// const uint64_t kMetaDataSubIndex8{uint64_t(0x8) << 54};
+// const uint64_t kMetaDataSubIndex9{uint64_t(0x9) << 54};
+// const uint64_t kMetaDataSubIndex10{uint64_t(0xA) << 54};
 
 CdtFile::CdtFile(const boost::filesystem::path &FilePath) {
   Data.reserve(ChunkSize);

@@ -68,3 +68,5 @@ set(jalousie_SRC
   ${jalousie_common_src}
   )
 create_module(jalousie)
+
+add_subdirectory(generators)

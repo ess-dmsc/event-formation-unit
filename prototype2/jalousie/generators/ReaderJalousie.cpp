@@ -92,24 +92,25 @@ int ReaderJalousie::read(char *buffer, size_t bufferlen) {
   if (not HeaderRead) {
     int header[8];
     fread(header,8*sizeof(int),1,FilePtr);
+    HeaderRead = true;
   }
 
+  size_t Size = 0;
+  int Readouts = 0;
   auto bp = buffer;
   size_t remaining = bufferlen;
-  size_t buffered = 0;
-  int count = 0;
+  int res;
   while (remaining >= sizeof(Jalousie::Readout)) {
-     int res = getNextReadout(bp);
-     if (res == 0) {
+     if ((res = getNextReadout(bp)) == 0) {
        return -1;
      }
-     count++;
+     Readouts++;
      bp += sizeof(Jalousie::Readout);
      remaining -= sizeof(Jalousie::Readout);
-     buffered += sizeof(Jalousie::Readout);
+     Size += sizeof(Jalousie::Readout);
   }
-  printf("Returning %d readouts, total size: %zu\n", count, buffered);
-  return buffered;
+  printf("Returning %d readouts, total size: %zu\n", Readouts, Size);
+  return Size;
 }
 
 
