@@ -51,6 +51,7 @@ protected:
     int64_t chopper_pulses;
 
     int64_t geometry_errors;
+    int64_t timing_errors;
     int64_t events;
     int64_t tx_bytes;
 

@@ -14,10 +14,11 @@ using namespace Jalousie;
 
 class BuilderReadoutsTest : public TestBase {
 protected:
-  uint32_t board0 {1416697};
-  uint32_t board1 {1416799};
-  uint32_t board2 {1416964};
-  uint32_t board3 {1418045};
+  // From bottom to top
+  uint32_t board0 {1418045}; // SUMO3
+  uint32_t board1 {1416964}; // SUMO4
+  uint32_t board2 {1416799}; // SUMO5
+  uint32_t board3 {1416697}; // SUMO6
 
   BuilderReadouts builder;
 
@@ -229,8 +230,47 @@ TEST_F(BuilderReadoutsTest, background_board0) {
   EXPECT_EQ(max_cathode, 127);
 }
 
+TEST_F(BuilderReadoutsTest, background_board1) {
+  feed_file(TEST_DATA_PATH "background_900V900V_20190709_.bin");
 
+  inspect_converted_data(board1);
 
+  EXPECT_EQ(chopper_events, 10373);
+  EXPECT_EQ(neutron_events, 1021296);
+  EXPECT_EQ(time_errors, 17);
+  EXPECT_EQ(ShortestPulsePeriod, 41172);
+  EXPECT_EQ(LongestPulsePeriod, 744050);
+  EXPECT_EQ(max_anode, 63);
+  EXPECT_EQ(max_cathode, 63);
+}
+
+TEST_F(BuilderReadoutsTest, background_board2) {
+  feed_file(TEST_DATA_PATH "background_900V900V_20190709_.bin");
+
+  inspect_converted_data(board2);
+
+  EXPECT_EQ(chopper_events, 11095);
+  EXPECT_EQ(neutron_events, 1100051);
+  EXPECT_EQ(time_errors, 14);
+  EXPECT_EQ(ShortestPulsePeriod, 41632);
+  EXPECT_EQ(LongestPulsePeriod, 1364085);
+  EXPECT_EQ(max_anode, 63);
+  EXPECT_EQ(max_cathode, 63);
+}
+
+TEST_F(BuilderReadoutsTest, background_board3) {
+  feed_file(TEST_DATA_PATH "background_900V900V_20190709_.bin");
+
+  inspect_converted_data(board3);
+
+  EXPECT_EQ(chopper_events, 10124);
+  EXPECT_EQ(neutron_events, 1546431);
+  EXPECT_EQ(time_errors, 21);
+  EXPECT_EQ(ShortestPulsePeriod, 41323);
+  EXPECT_EQ(LongestPulsePeriod, 868060);
+  EXPECT_EQ(max_anode, 63);
+  EXPECT_EQ(max_cathode, 63);
+}
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
 

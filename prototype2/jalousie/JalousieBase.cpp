@@ -59,6 +59,7 @@ JalousieBase::JalousieBase(BaseSettings const &settings)
 
   Stats.create("events.count", mystats.events);
   Stats.create("events.geometry_errors", mystats.geometry_errors);
+  Stats.create("events.timing_errors", mystats.timing_errors);
   Stats.create("transmit.bytes", mystats.tx_bytes);
 
   Stats.create("thread.seq_errors", mystats.fifo_seq_errors);
@@ -161,6 +162,8 @@ void JalousieBase::processing_thread() {
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 #pragma GCC diagnostic pop
 
+  uint64_t previous_time{0}; /// < for timing error checks
+
   unsigned int data_index;
   TSCTimer produce_timer;
   Timer h5flushtimer;
@@ -209,15 +212,20 @@ void JalousieBase::processing_thread() {
 
       while (merger.ready()) {
         auto event = merger.pop_earliest();
+        if (previous_time > event.time)
+          mystats.timing_errors++;
+        previous_time = event.time;
 
-        // case of chopper pulse
         if (event.pixel_id == 0) {
+          // case of chopper pulse
           if (flatbuffer.eventCount()) {
             mystats.tx_bytes += flatbuffer.produce();
           }
           flatbuffer.pulseTime(event.time);
         } else {
-          mystats.tx_bytes += flatbuffer.addEvent(event.time, event.pixel_id);
+          // regular neutron event
+          uint32_t event_time = event.time - flatbuffer.pulseTime();
+          mystats.tx_bytes += flatbuffer.addEvent(event_time, event.pixel_id);
         }
       }
 
@@ -255,15 +263,20 @@ void JalousieBase::processing_thread() {
       merger.sort();
       while (!merger.empty()) {
         auto event = merger.pop_earliest();
+        if (previous_time > event.time)
+          mystats.timing_errors++;
+        previous_time = event.time;
 
-        // case of chopper pulse
         if (event.pixel_id == 0) {
+          // chopper pulse
           if (flatbuffer.eventCount()) {
             mystats.tx_bytes += flatbuffer.produce();
           }
           flatbuffer.pulseTime(event.time);
         } else {
-          mystats.tx_bytes += flatbuffer.addEvent(event.time, event.pixel_id);
+          // regular neutron event
+          uint32_t event_time = event.time - flatbuffer.pulseTime();
+          mystats.tx_bytes += flatbuffer.addEvent(event_time, event.pixel_id);
         }
       }
 
