@@ -34,6 +34,7 @@ TEST_F(EventSerialisationTest, ProduceFlatbuffer_1) {
     EventSerializer Serializer("SomeName", 1, 50ms,
                                dynamic_cast<ProducerBase *>(Producer.get()));
     Serializer.addEvent(std::make_unique<EventData>());
+    std::this_thread::sleep_for(10ms);
   }
 }
 
@@ -111,6 +112,7 @@ TEST_F(EventSerialisationTest, ProduceFlatbuffer_2) {
                                dynamic_cast<ProducerBase *>(Producer.get()));
     Serializer.addEvent(std::unique_ptr<EventData>(
         new EventData{1000000, 2, 3, 4, 5, 6000000, 7000000}));
+    std::this_thread::sleep_for(10ms);
   }
 }
 
@@ -151,6 +153,7 @@ TEST_F(EventSerialisationTest, ProduceFlatbuffer_4) {
         new EventData{1000002, 2, 3, 4, 5, 6000000, 7000000}));
     Serializer.addEvent(std::unique_ptr<EventData>(
         new EventData{1000003, 2, 3, 4, 5, 6000000, 7000000}));
+    std::this_thread::sleep_for(10ms);
   }
 }
 
@@ -171,6 +174,7 @@ TEST_F(EventSerialisationTest, ProduceFlatbuffer_5) {
         new EventData{1000003, 2, 3, 4, 5, 6000000, 7000000}));
     Serializer.addEvent(std::unique_ptr<EventData>(
         new EventData{1000004, 2, 3, 4, 5, 6000000, 7000000}));
+    std::this_thread::sleep_for(10ms);
   }
 }
 
@@ -191,5 +195,6 @@ TEST_F(EventSerialisationTest, ProduceFlatbuffer_6) {
         new EventData{1000000, 2, 3, 4, 5, 6000000, 7000000}));
     Serializer.addEvent(std::unique_ptr<EventData>(
         new EventData{1000001, 2, 3, 4, 5, 6000000, 7000000}));
+    std::this_thread::sleep_for(10ms);
   }
 }
