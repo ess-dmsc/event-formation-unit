@@ -9,17 +9,17 @@ create_test_executable(JalReadoutTest SKIP_MEMGRIND)
 
 set(TEST_DATA_PATH "${REFDATA}/jalousie/2019_07")
 if(EXISTS ${TEST_DATA_PATH})
-  set(CdtFileTest_SRC
+  set(JalCdtFileTest_SRC
     CdtFileTest.cpp
     CdtFile.cpp
     Readout.cpp
     )
-  set(CdtFileTest_INC
+  set(JalCdtFileTest_INC
     CdtFile.h
     Readout.h
     )
-  create_test_executable(CdtFileTest)
-  target_compile_definitions(CdtFileTest
+  create_test_executable(JalCdtFileTest)
+  target_compile_definitions(JalCdtFileTest
     PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}/")
 
   set(JalBuilderReadoutsTest_SRC
@@ -36,9 +36,21 @@ if(EXISTS ${TEST_DATA_PATH})
   create_test_executable(JalBuilderReadoutsTest)
   target_compile_definitions(JalBuilderReadoutsTest
     PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}/")
+
+  set(JalSumoMappingsTest_SRC
+    SumoMappingsTest.cpp
+    SumoMappings.cpp
+    )
+  set(JalSumoMappingsTest_INC
+    SumoMappings.h
+    )
+  create_test_executable(JalSumoMappingsTest)
+  target_compile_definitions(JalSumoMappingsTest
+    PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}/")
 else()
-  message(WARNING "*** No Jalousie reference data found. Skipping CdtFileTest.")
+  message(WARNING "*** No Jalousie reference data found. Skipping JalCdtFileTest.")
   message(WARNING "*** No Jalousie reference data found. Skipping JalBuilderReadoutsTest.")
+  message(WARNING "*** No Jalousie reference data found. Skipping JalSumoMappingsTest.")
 endif()
 
 set(udpgen_jalousie_SRC

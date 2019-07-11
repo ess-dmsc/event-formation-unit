@@ -136,10 +136,10 @@ void JalousieBase::processing_thread() {
   // \todo manual for now, make this part of config file
   std::vector<size_t> board_mappings;
   board_mappings.resize(1418046, std::numeric_limits<size_t>::max());
-  board_mappings[1416697] = 0;
-  board_mappings[1416799] = 1;
-  board_mappings[1416964] = 2;
-  board_mappings[1418045] = 3;
+  board_mappings[1418045] = 0;
+  board_mappings[1416964] = 1;
+  board_mappings[1416799] = 2;
+  board_mappings[1416697] = 3;
 
   static constexpr uint64_t v20_maximum_pulse_period {10416684};
   ChronoMerger merger(v20_maximum_pulse_period * 3, 4);

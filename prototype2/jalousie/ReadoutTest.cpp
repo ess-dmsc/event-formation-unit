@@ -5,7 +5,7 @@
 
 using namespace Jalousie;
 
-class JalReadoutTest : public TestBase {
+class JalSumoMappingsTest : public TestBase {
 protected:
   void SetUp() override {
     hdf5::error::Singleton::instance().auto_print(false);
@@ -17,13 +17,13 @@ protected:
   void TearDown() override {}
 };
 
-TEST_F(JalReadoutTest, PrintsSelf) {
+TEST_F(JalSumoMappingsTest, PrintsSelf) {
   Readout h;
   EXPECT_FALSE(h.debug().empty());
   // Don't really care about particular contents here
 }
 
-TEST_F(JalReadoutTest, CompoundMapping) {
+TEST_F(JalSumoMappingsTest, CompoundMapping) {
   // If you are forced to change anything here,
   // you have broken dumpfile compatibility, and you should
   // bump FormatVersion for the struct
@@ -51,7 +51,7 @@ TEST_F(JalReadoutTest, CompoundMapping) {
   EXPECT_EQ(ct[4], hdf5::datatype::create<uint8_t>());
 }
 
-TEST_F(JalReadoutTest, CreateFile) {
+TEST_F(JalSumoMappingsTest, CreateFile) {
   ReadoutFile::create("hit_file_test");
   EXPECT_TRUE(hdf5::file::is_hdf5_file("hit_file_test_00000.h5"));
 }
