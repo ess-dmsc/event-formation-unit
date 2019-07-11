@@ -20,7 +20,7 @@ using namespace memory_sequential_consistent; // Lock free fifo
 
 class JalousieBase : public Detector {
 public:
-  JalousieBase(BaseSettings const &settings);
+  explicit JalousieBase(BaseSettings const &settings);
   ~JalousieBase() { delete eth_ringbuf; }
   void input_thread();
   void processing_thread();
@@ -47,6 +47,9 @@ protected:
     int64_t processing_idle;
     int64_t fifo_seq_errors;
     int64_t readout_count;
+    int64_t bad_module_id;
+    int64_t chopper_pulses;
+
     int64_t geometry_errors;
     int64_t events;
     int64_t tx_bytes;

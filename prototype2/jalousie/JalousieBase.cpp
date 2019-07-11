@@ -26,6 +26,8 @@
 #include <common/Timer.h>
 
 #include <logical_geometry/ESSGeometry.h>
+#include <common/reduction/ChronoMerger.h>
+#include "JalousieBase.h"
 
 
 // #undef TRC_LEVEL
@@ -52,6 +54,8 @@ JalousieBase::JalousieBase(BaseSettings const &settings)
   Stats.create("receive.dropped", mystats.fifo_push_errors);
 
   Stats.create("readouts.count", mystats.readout_count);
+  Stats.create("readouts.bad_module_id", mystats.bad_module_id);
+  Stats.create("readouts.chopper_pulses", mystats.chopper_pulses);
 
   Stats.create("events.count", mystats.events);
   Stats.create("events.geometry_errors", mystats.geometry_errors);
@@ -126,7 +130,19 @@ void JalousieBase::processing_thread() {
   std::string topic{""};
   std::string monitor{""};
 
-  ESSGeometry essgeom(1, 1, 1, 1); // TODO
+  ESSGeometry essgeom(64, 128, 1, 4);
+
+  // \todo manual for now, make this part of config file
+  std::vector<size_t> board_mappings;
+  board_mappings.resize(1418046, std::numeric_limits<size_t>::max());
+  board_mappings[1416697] = 0;
+  board_mappings[1416799] = 1;
+  board_mappings[1416964] = 2;
+  board_mappings[1418045] = 3;
+
+  static constexpr uint64_t v20_maximum_pulse_period {10416684};
+  ChronoMerger merger(v20_maximum_pulse_period * 3, 4);
+
   topic = "DREAM_detector";
   monitor = "DREAM_monitor";
 
@@ -161,27 +177,50 @@ void JalousieBase::processing_thread() {
 
       for (size_t i = 0; i < datalen / sizeof(Jalousie::Readout); i++) {
         auto rdout = (Jalousie::Readout *)dataptr;
-        printf("time %lu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
-           rdout->time, rdout->board, rdout->sub_id, rdout->anode, rdout->cathode);
+//        printf("time %lu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
+//           rdout->time, rdout->board, rdout->sub_id, rdout->anode, rdout->cathode);
         dataptr += sizeof(Jalousie::Readout);
         mystats.readout_count++;
 
+        size_t module = board_mappings[rdout->board];
 
-        uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-        flatbuffer.pulseTime(efu_time);
+        if (module == std::numeric_limits<size_t>::max())
+        {
+          mystats.bad_module_id++;
+          continue;
+        }
 
-        uint64_t time = 0;
-        auto pixel_id = 1;
-        //XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
-
-        if (pixel_id == 0) {
-          mystats.geometry_errors++;
-        } else {
-
-          mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
-          mystats.events++;
+        if (rdout->sub_id == Readout::chopper_sub_id) {
+          mystats.chopper_pulses++;
+          merger.insert(module, {rdout->time, 0});
+        }
+        else {
+          auto pixel_id = essgeom.pixelMP2D(rdout->anode, rdout->cathode, module);
+          if (pixel_id == 0) {
+            mystats.geometry_errors++;
+          } else {
+            merger.insert(module, {rdout->time, pixel_id});
+            mystats.events++;
+          }
         }
       }
+
+      merger.sort();
+
+      while (merger.ready()) {
+        auto event = merger.pop_earliest();
+
+        // case of chopper pulse
+        if (event.pixel_id == 0) {
+          if (flatbuffer.eventCount()) {
+            mystats.tx_bytes += flatbuffer.produce();
+          }
+          flatbuffer.pulseTime(event.time);
+        } else {
+          mystats.tx_bytes += flatbuffer.addEvent(event.time, event.pixel_id);
+        }
+      }
+
     } else {
       // There is NO data in the FIFO - do stop checks and sleep a little
       mystats.processing_idle++;
@@ -212,7 +251,22 @@ void JalousieBase::processing_thread() {
     }
 
     if (not runThreads) {
-      // \todo flush everything here
+
+      merger.sort();
+      while (!merger.empty()) {
+        auto event = merger.pop_earliest();
+
+        // case of chopper pulse
+        if (event.pixel_id == 0) {
+          if (flatbuffer.eventCount()) {
+            mystats.tx_bytes += flatbuffer.produce();
+          }
+          flatbuffer.pulseTime(event.time);
+        } else {
+          mystats.tx_bytes += flatbuffer.addEvent(event.time, event.pixel_id);
+        }
+      }
+
       XTRACE(INPUT, ALW, "Stopping processing thread.");
       return;
     }

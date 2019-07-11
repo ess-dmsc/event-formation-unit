@@ -18,10 +18,13 @@ static constexpr int TscMHz {2900};
 constexpr size_t RxBufferSize{9000};
 
 // Reader expects filenames without .h5 extension
-std::string remove_extension(const std::string& filename) {
-    size_t lastdot = filename.find_last_of(".");
-    if (lastdot == std::string::npos) return filename;
+std::string remove_extension(const std::string &filename) {
+  size_t lastdot = filename.find_last_of(".");
+  if (lastdot == std::string::npos)
+    return filename;
+  if (filename.substr(lastdot, 3) == ".h5")
     return filename.substr(0, lastdot);
+  return filename;
 }
 
 struct {

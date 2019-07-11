@@ -7,7 +7,7 @@ set(JalReadoutTest_INC
   )
 create_test_executable(JalReadoutTest SKIP_MEMGRIND)
 
-set(TEST_DATA_PATH "${REFDATA}/jalousie/2019_07_05")
+set(TEST_DATA_PATH "${REFDATA}/jalousie/2019_07")
 if(EXISTS ${TEST_DATA_PATH})
   set(CdtFileTest_SRC
     CdtFileTest.cpp

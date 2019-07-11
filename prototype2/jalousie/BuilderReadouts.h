@@ -15,10 +15,8 @@ public:
   std::vector<Readout> parsed_data;
 
 protected:
-
   // preallocated
   Readout readout_;
-
 };
 
 }
