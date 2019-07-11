@@ -26,7 +26,7 @@ struct {
 CLI::App app{"Jalousie file to UDP data generator"};
 
 int main(int argc, char *argv[]) {
-  app.add_option("-f, --file", Settings.FileName, "Multiblade H5 file with raw readouts");
+  app.add_option("-f, --file", Settings.FileName, "Jalousie H5 file with raw readouts");
   app.add_option("-i, --ip", Settings.IpAddress, "Destination IP address");
   app.add_option("-p, --port", Settings.UDPPort, "Destination UDP port");
   app.add_option("-a, --packets", Settings.NumberOfPackets, "Number of packets to send");

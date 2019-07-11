@@ -4,7 +4,7 @@
 ///
 /// \file
 ///
-/// \brief Jaloisie detector base plugin interface definition
+/// \brief Jalousie detector base plugin interface definition
 ///
 //===----------------------------------------------------------------------===//
 #pragma once

@@ -2,7 +2,7 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// Implementation of the detector pipeline plugin for MUlti-Blade
+/// Implementation of the detector pipeline plugin for Jalousie
 /// detectors.
 //===----------------------------------------------------------------------===//
 
@@ -76,7 +76,7 @@ JalousieBase::JalousieBase(BaseSettings const &settings)
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
-  XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d",
+  XTRACE(INIT, ALW, "Creating %d Jalousie Rx ringbuffers of size %d",
          eth_buffer_max_entries, eth_buffer_size);
   /// \todo the number 11 is a workaround
   eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
@@ -130,7 +130,7 @@ void JalousieBase::processing_thread() {
   topic = "DREAM_detector";
   monitor = "DREAM_monitor";
 
-  EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
+  EV42Serializer flatbuffer(kafka_buffer_size, "DREAM_detector");
   Producer eventprod(EFUSettings.KafkaBroker, topic);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic warning "-Wdeprecated-declarations"
@@ -161,7 +161,7 @@ void JalousieBase::processing_thread() {
 
       for (size_t i = 0; i < datalen / sizeof(Jalousie::Readout); i++) {
         auto rdout = (Jalousie::Readout *)dataptr;
-        printf("time %llu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
+        printf("time %lu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
            rdout->time, rdout->board, rdout->sub_id, rdout->anode, rdout->cathode);
         dataptr += sizeof(Jalousie::Readout);
         mystats.readout_count++;

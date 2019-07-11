@@ -37,8 +37,8 @@ if(EXISTS ${TEST_DATA_PATH})
   target_compile_definitions(JalBuilderReadoutsTest
     PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}/")
 else()
-  message(WARNING "*** No jalousie reference data found. Skipping CdtFileTest.")
-  message(WARNING "*** No multigrid reference data found. Skipping JalBuilderReadoutsTest.")
+  message(WARNING "*** No Jalousie reference data found. Skipping CdtFileTest.")
+  message(WARNING "*** No Jalousie reference data found. Skipping JalBuilderReadoutsTest.")
 endif()
 
 set(udpgen_jalousie_SRC
