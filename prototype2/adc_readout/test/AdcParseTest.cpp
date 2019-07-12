@@ -229,7 +229,7 @@ TEST(AdcHeadParse, IdleHeadTest) {
   Packet.Length = sizeof(PacketHeader);
   PacketHeader *HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
   HeaderPointer->PacketType = 0x2222;
-  HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader) - 2);
+  HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader));
   HeaderInfo Header;
   EXPECT_NO_THROW(Header = parseHeader(Packet));
   EXPECT_EQ(Header.Type, PacketType::Idle);
@@ -313,7 +313,7 @@ TEST(AdcHeadParse, WrongReadoutLengthFailure) {
   Packet.Length = sizeof(PacketHeader);
   auto HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
   HeaderPointer->PacketType = 0x1111;
-  HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader));
+  HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader)) + 54;
   EXPECT_THROW(parseHeader(Packet), ParserException);
 }
 
