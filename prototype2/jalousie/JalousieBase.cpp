@@ -8,17 +8,13 @@
 
 #include <jalousie/JalousieBase.h>
 #include <jalousie/Readout.h>
-#include <cinttypes>
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
 #include <common/Producer.h>
 #include <common/HistSerializer.h>
 #include <common/RingBuffer.h>
-#include <common/Trace.h>
 #include <common/TimeString.h>
 #include <common/TestImageUdder.h>
-
-#include <unistd.h>
 
 #include <common/SPSCFifo.h>
 #include <common/Socket.h>
@@ -29,9 +25,13 @@
 #include <common/reduction/ChronoMerger.h>
 #include "JalousieBase.h"
 
-
+#include <common/Trace.h>
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
+
+#include <common/Log.h>
+//#undef TRC_MASK
+//#define TRC_MASK 0
 
 namespace Jalousie {
 
@@ -42,8 +42,8 @@ const char *classname = "Jalousie detector";
 const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 
-JalousieBase::JalousieBase(BaseSettings const &settings)
-    : Detector("JALOUSIE", settings) {
+JalousieBase::JalousieBase(BaseSettings const &settings, CLISettings const &LocalSettings)
+    : Detector("JALOUSIE", settings), ModuleSettings(LocalSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -128,21 +128,14 @@ void JalousieBase::input_thread() {
 }
 
 void JalousieBase::processing_thread() {
+  LOG(INIT, Sev::Info, "Jalousie Config file: {}", ModuleSettings.ConfigFile);
+  config = Config(ModuleSettings.ConfigFile);
+  LOG(INIT, Sev::Info, "Jalousie Config\n{}", config.debug());
+
+  constexpr size_t invalid_board_mapping {std::numeric_limits<size_t>::max()};
+
   std::string topic{""};
   std::string monitor{""};
-
-  ESSGeometry essgeom(64, 128, 1, 4);
-
-  // \todo manual for now, make this part of config file
-  std::vector<size_t> board_mappings;
-  board_mappings.resize(1418046, std::numeric_limits<size_t>::max());
-  board_mappings[1418045] = 0;
-  board_mappings[1416964] = 1;
-  board_mappings[1416799] = 2;
-  board_mappings[1416697] = 3;
-
-  static constexpr uint64_t v20_maximum_pulse_period {10416684};
-  ChronoMerger merger(v20_maximum_pulse_period * 3, 4);
 
   topic = "DREAM_detector";
   monitor = "DREAM_monitor";
@@ -185,9 +178,9 @@ void JalousieBase::processing_thread() {
         dataptr += sizeof(Jalousie::Readout);
         mystats.readout_count++;
 
-        size_t module = board_mappings[rdout->board];
+        size_t module = config.board_mappings[rdout->board];
 
-        if (module == std::numeric_limits<size_t>::max())
+        if (module == invalid_board_mapping)
         {
           mystats.bad_module_id++;
           continue;
@@ -195,23 +188,23 @@ void JalousieBase::processing_thread() {
 
         if (rdout->sub_id == Readout::chopper_sub_id) {
           mystats.chopper_pulses++;
-          merger.insert(module, {rdout->time, 0});
+          config.merger.insert(module, {rdout->time, 0});
         }
         else {
-          auto pixel_id = essgeom.pixelMP2D(rdout->anode, rdout->cathode, module);
+          auto pixel_id = config.geometry.pixelMP2D(rdout->anode, rdout->cathode, module);
           if (pixel_id == 0) {
             mystats.geometry_errors++;
           } else {
-            merger.insert(module, {rdout->time, pixel_id});
+            config.merger.insert(module, {rdout->time, pixel_id});
             mystats.events++;
           }
         }
       }
 
-      merger.sort();
+      config.merger.sort();
 
-      while (merger.ready()) {
-        auto event = merger.pop_earliest();
+      while (config.merger.ready()) {
+        auto event = config.merger.pop_earliest();
         if (previous_time > event.time)
           mystats.timing_errors++;
         previous_time = event.time;
@@ -260,9 +253,9 @@ void JalousieBase::processing_thread() {
 
     if (not runThreads) {
 
-      merger.sort();
-      while (!merger.empty()) {
-        auto event = merger.pop_earliest();
+      config.merger.sort();
+      while (!config.merger.empty()) {
+        auto event = config.merger.pop_earliest();
         if (previous_time > event.time)
           mystats.timing_errors++;
         previous_time = event.time;

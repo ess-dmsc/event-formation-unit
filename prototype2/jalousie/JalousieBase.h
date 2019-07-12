@@ -12,15 +12,20 @@
 #include <common/Detector.h>
 #include <common/RingBuffer.h>
 #include <common/SPSCFifo.h>
+#include <jalousie/Config.h>
 
 
 namespace Jalousie {
+
+struct CLISettings {
+  std::string ConfigFile;
+};
 
 using namespace memory_sequential_consistent; // Lock free fifo
 
 class JalousieBase : public Detector {
 public:
-  explicit JalousieBase(BaseSettings const &settings);
+  explicit JalousieBase(BaseSettings const &settings, CLISettings const &LocalSettings);
   ~JalousieBase() { delete eth_ringbuf; }
   void input_thread();
   void processing_thread();
@@ -62,6 +67,9 @@ protected:
     int64_t kafka_dr_errors;
     int64_t kafka_dr_noerrors;
   } __attribute__((aligned(64))) mystats;
+
+  CLISettings ModuleSettings;
+  Config config;
 };
 
 }

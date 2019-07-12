@@ -47,6 +47,19 @@ if(EXISTS ${TEST_DATA_PATH})
   create_test_executable(JalSumoMappingsTest)
   target_compile_definitions(JalSumoMappingsTest
     PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}/")
+
+  set(JalConfigTest_SRC
+    ConfigTest.cpp
+    Config.cpp
+    SumoMappings.cpp
+    )
+  set(JalConfigTest_INC
+    Config.h
+    SumoMappings.h
+    )
+  create_test_executable(JalConfigTest)
+  target_compile_definitions(JalConfigTest
+    PRIVATE TEST_DATA_PATH="${TEST_DATA_PATH}/")
 else()
   message(WARNING "*** No Jalousie reference data found. Skipping JalCdtFileTest.")
   message(WARNING "*** No Jalousie reference data found. Skipping JalBuilderReadoutsTest.")
@@ -66,16 +79,23 @@ create_executable(udpgen_jalousie)
 target_compile_definitions(udpgen_jalousie PUBLIC GENERATOR_JALOUSIE_CDT)
 
 set(jalousie_common_inc
-  JalousieBase.h
+  Config.h
+  Readout.h
+  SumoMappings.h
+  rapidcsv.h
   )
 set(jalousie_common_src
-  JalousieBase.cpp
+  Config.cpp
+  Readout.cpp
+  SumoMappings.cpp
   )
 
 set(jalousie_INC
+  JalousieBase.h
   ${jalousie_common_inc}
   )
 set(jalousie_SRC
+  JalousieBase.cpp
   Jalousie.cpp
   ${jalousie_common_src}
   )
