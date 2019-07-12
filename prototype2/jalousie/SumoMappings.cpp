@@ -57,10 +57,14 @@ void SumoMappings::add_mapping(uint8_t anode, uint8_t cathode, SumoCoordinates c
 
 SumoMappings::SumoCoordinates SumoMappings::map(uint8_t anode, uint8_t cathode) const {
   if (table_.size() <= anode)
-    return kInvalidCoordinates;
+    return {SumoCoordinates::kInvalidCoord,
+            SumoCoordinates::kInvalidCoord,
+            SumoCoordinates::kInvalidCoord};
   const auto &anode_line = table_[anode];
   if (anode_line.size() <= cathode)
-    return kInvalidCoordinates;
+    return {SumoCoordinates::kInvalidCoord,
+            SumoCoordinates::kInvalidCoord,
+            SumoCoordinates::kInvalidCoord};
   return anode_line[cathode];
 }
 

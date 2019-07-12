@@ -9,9 +9,7 @@
 #include <jalousie/JalousieBase.h>
 #include <jalousie/Readout.h>
 #include <common/EFUArgs.h>
-#include <common/EV42Serializer.h>
 #include <common/Producer.h>
-#include <common/HistSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/TimeString.h>
 #include <common/TestImageUdder.h>
@@ -20,10 +18,6 @@
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
-
-#include <logical_geometry/ESSGeometry.h>
-#include <common/reduction/ChronoMerger.h>
-#include "JalousieBase.h"
 
 #include <common/Trace.h>
 // #undef TRC_LEVEL
@@ -127,39 +121,85 @@ void JalousieBase::input_thread() {
   }
 }
 
+void JalousieBase::convert_and_queue_event(const Readout& readout) {
+  constexpr size_t invalid_board_mapping {std::numeric_limits<size_t>::max()};
+
+  size_t module = config.board_mappings[readout.board];
+
+  if (module == invalid_board_mapping)
+  {
+    mystats.bad_module_id++;
+    return;
+  }
+
+  if (readout.sub_id == Readout::chopper_sub_id) {
+    mystats.chopper_pulses++;
+    config.merger.insert(module, {readout.time, 0});
+  }
+  else {
+    auto pixel_id = config.geometry.pixelMP2D(readout.anode, readout.cathode, module);
+    if (pixel_id == 0) {
+      mystats.geometry_errors++;
+    } else {
+      config.merger.insert(module, {readout.time, pixel_id});
+      mystats.events++;
+    }
+  }
+}
+
+
+void JalousieBase::process_one_event(EV42Serializer& serializer) {
+  auto event = config.merger.pop_earliest();
+  if (previous_time > event.time)
+    mystats.timing_errors++;
+  previous_time = event.time;
+
+  if (event.pixel_id == 0) {
+    // chopper pulse
+    if (serializer.eventCount()) {
+      mystats.tx_bytes += serializer.produce();
+    }
+    serializer.pulseTime(event.time);
+  } else {
+    // regular neutron event
+    uint32_t event_time = event.time - serializer.pulseTime();
+    mystats.tx_bytes += serializer.addEvent(event_time, event.pixel_id);
+  }
+}
+
+void JalousieBase::force_produce_and_update_kafka_stats(
+    EV42Serializer& serializer,
+    Producer& producer) {
+  mystats.tx_bytes += serializer.produce();
+  /// Kafka stats update - common to all detectors
+  /// don't increment as producer keeps absolute count
+  mystats.kafka_produce_fails = producer.stats.produce_fails;
+  mystats.kafka_ev_errors = producer.stats.ev_errors;
+  mystats.kafka_ev_others = producer.stats.ev_others;
+  mystats.kafka_dr_errors = producer.stats.dr_errors;
+  mystats.kafka_dr_noerrors = producer.stats.dr_noerrors;
+}
+
+
 void JalousieBase::processing_thread() {
   LOG(INIT, Sev::Info, "Jalousie Config file: {}", ModuleSettings.ConfigFile);
   config = Config(ModuleSettings.ConfigFile);
   LOG(INIT, Sev::Info, "Jalousie Config\n{}", config.debug());
 
-  constexpr size_t invalid_board_mapping {std::numeric_limits<size_t>::max()};
-
   std::string topic{""};
-  std::string monitor{""};
 
   topic = "DREAM_detector";
-  monitor = "DREAM_monitor";
 
-  EV42Serializer flatbuffer(kafka_buffer_size, "DREAM_detector");
-  Producer eventprod(EFUSettings.KafkaBroker, topic);
+  EV42Serializer ev42Serializer(kafka_buffer_size, "DREAM_detector");
+  Producer producer(EFUSettings.KafkaBroker, topic);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic warning "-Wdeprecated-declarations"
-  flatbuffer.setProducerCallback(
-      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
-
-  // TODO
-  Hists histograms(65535, 65535);
-  Producer monitorprod(EFUSettings.KafkaBroker, monitor);
-  HistSerializer histfb(histograms.needed_buffer_size(), "jalousie");
-  histfb.set_callback(
-      std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
+  ev42Serializer.setProducerCallback(
+      std::bind(&Producer::produce2<uint8_t>, &producer, std::placeholders::_1));
 #pragma GCC diagnostic pop
-
-  uint64_t previous_time{0}; /// < for timing error checks
 
   unsigned int data_index;
   TSCTimer produce_timer;
-  Timer h5flushtimer;
   while (true) {
     if (input2proc_fifo.pop(data_index)) { // There is data in the FIFO - do processing
       auto datalen = eth_ringbuf->getDataLength(data_index);
@@ -171,108 +211,42 @@ void JalousieBase::processing_thread() {
       auto dataptr = eth_ringbuf->getDataBuffer(data_index);
       assert(datalen % sizeof(Jalousie::Readout) == 0);
 
+      /// Parse and convert readouts to events
       for (size_t i = 0; i < datalen / sizeof(Jalousie::Readout); i++) {
-        auto rdout = (Jalousie::Readout *)dataptr;
+        auto readout = (Jalousie::Readout *)dataptr;
 //        printf("time %lu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
-//           rdout->time, rdout->board, rdout->sub_id, rdout->anode, rdout->cathode);
+//           readout->time, readout->board, readout->sub_id, readout->anode, readout->cathode);
         dataptr += sizeof(Jalousie::Readout);
         mystats.readout_count++;
-
-        size_t module = config.board_mappings[rdout->board];
-
-        if (module == invalid_board_mapping)
-        {
-          mystats.bad_module_id++;
-          continue;
-        }
-
-        if (rdout->sub_id == Readout::chopper_sub_id) {
-          mystats.chopper_pulses++;
-          config.merger.insert(module, {rdout->time, 0});
-        }
-        else {
-          auto pixel_id = config.geometry.pixelMP2D(rdout->anode, rdout->cathode, module);
-          if (pixel_id == 0) {
-            mystats.geometry_errors++;
-          } else {
-            config.merger.insert(module, {rdout->time, pixel_id});
-            mystats.events++;
-          }
-        }
+        convert_and_queue_event(*readout);
       }
 
+      /// Send out events that pass max latency check
       config.merger.sort();
-
       while (config.merger.ready()) {
-        auto event = config.merger.pop_earliest();
-        if (previous_time > event.time)
-          mystats.timing_errors++;
-        previous_time = event.time;
-
-        if (event.pixel_id == 0) {
-          // case of chopper pulse
-          if (flatbuffer.eventCount()) {
-            mystats.tx_bytes += flatbuffer.produce();
-          }
-          flatbuffer.pulseTime(event.time);
-        } else {
-          // regular neutron event
-          uint32_t event_time = event.time - flatbuffer.pulseTime();
-          mystats.tx_bytes += flatbuffer.addEvent(event_time, event.pixel_id);
-        }
+        process_one_event(ev42Serializer);
       }
 
     } else {
-      // There is NO data in the FIFO - do stop checks and sleep a little
+      /// There is NO data in the FIFO - do stop checks and sleep a little
       mystats.processing_idle++;
       usleep(10);
     }
 
+    /// Periodic producing regardless of rates
     if (produce_timer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
-
-      mystats.tx_bytes += flatbuffer.produce();
-
-      if (!histograms.isEmpty()) {
-//        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
-//               histograms.hit_count());
-        histfb.produce(histograms);
-        histograms.clear();
-      }
-
-      /// Kafka stats update - common to all detectors
-      /// don't increment as producer keeps absolute count
-      mystats.kafka_produce_fails = eventprod.stats.produce_fails;
-      mystats.kafka_ev_errors = eventprod.stats.ev_errors;
-      mystats.kafka_ev_others = eventprod.stats.ev_others;
-      mystats.kafka_dr_errors = eventprod.stats.dr_errors;
-      mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
-
+      force_produce_and_update_kafka_stats(ev42Serializer, producer);
       produce_timer.now();
     }
 
     if (not runThreads) {
-
+      /// Send out all events, regardless of max latency criterion
       config.merger.sort();
       while (!config.merger.empty()) {
-        auto event = config.merger.pop_earliest();
-        if (previous_time > event.time)
-          mystats.timing_errors++;
-        previous_time = event.time;
-
-        if (event.pixel_id == 0) {
-          // chopper pulse
-          if (flatbuffer.eventCount()) {
-            mystats.tx_bytes += flatbuffer.produce();
-          }
-          flatbuffer.pulseTime(event.time);
-        } else {
-          // regular neutron event
-          uint32_t event_time = event.time - flatbuffer.pulseTime();
-          mystats.tx_bytes += flatbuffer.addEvent(event_time, event.pixel_id);
-        }
+        process_one_event(ev42Serializer);
       }
-
+      force_produce_and_update_kafka_stats(ev42Serializer, producer);
       XTRACE(INPUT, ALW, "Stopping processing thread.");
       return;
     }

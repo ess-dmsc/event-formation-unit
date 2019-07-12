@@ -13,7 +13,7 @@
 #include <common/RingBuffer.h>
 #include <common/SPSCFifo.h>
 #include <jalousie/Config.h>
-
+#include <common/EV42Serializer.h>
 
 namespace Jalousie {
 
@@ -70,6 +70,11 @@ protected:
 
   CLISettings ModuleSettings;
   Config config;
+  uint64_t previous_time{0}; /// < for timing error checks
+
+  void convert_and_queue_event(const Readout& readout);
+  void process_one_event(EV42Serializer& serializer);
+  void force_produce_and_update_kafka_stats(EV42Serializer& serializer, Producer& producer);
 };
 
 }
