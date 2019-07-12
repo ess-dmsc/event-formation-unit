@@ -16,9 +16,13 @@ public:
     std::ifstream PacketFile(PacketPath + "test_packet_1.dat",
                              std::ios::binary);
     ASSERT_TRUE(PacketFile.good());
-    PacketFile.read(reinterpret_cast<char *>(&Packet.Data), 1470);
+    PacketFile.seekg(0, std::ios::end);
+    size_t FileSize = PacketFile.tellg();
+    PacketFile.seekg(0, std::ios::beg);
     ASSERT_TRUE(PacketFile.good());
-    Packet.Length = 1470;
+    PacketFile.read(reinterpret_cast<char *>(&Packet.Data), FileSize );
+    ASSERT_TRUE(PacketFile.good());
+    Packet.Length = FileSize ;
   }
   InData Packet;
 };

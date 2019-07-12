@@ -68,10 +68,6 @@ protected:
 
   std::map<ChannelID, std::unique_ptr<Queue>> DataModuleQueues{};
 
-  /// \brief Used to keeps track of the global counter provided by the ADC
-  /// hardware in order to figure out if a packet has been lost.
-  std::uint16_t LastGlobalCount{0};
-
   std::map<std::string, TimeStampLocation> TimeStampLocationMap{
       {"Start", TimeStampLocation::Start},
       {"Middle", TimeStampLocation::Middle},

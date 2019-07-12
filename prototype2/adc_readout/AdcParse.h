@@ -64,7 +64,6 @@ enum class PacketType { Idle, Data, Unknown };
 
 /// \brief Parsed data containing 0 or more data modules form sampling runs.
 struct PacketInfo {
-  std::uint16_t GlobalCount;
   std::uint16_t ReadoutCount;
   PacketType Type = PacketType::Unknown;
 };
@@ -72,7 +71,6 @@ struct PacketInfo {
 /// \brief Returned by the header parser.
 struct HeaderInfo {
   PacketType Type = PacketType::Unknown;
-  std::uint16_t GlobalCount;
   std::uint16_t ReadoutCount;
   std::int32_t DataStart = 0;
 };
@@ -91,13 +89,11 @@ struct IdleInfo {
 #pragma pack(push, 2)
 /// \brief Used by the header parser to map types to the binary data.
 struct PacketHeader {
-  std::uint16_t GlobalCount;
   std::uint16_t PacketType;
   std::uint16_t ReadoutLength;
   std::uint16_t ReadoutCount;
   std::uint16_t Reserved;
   void fixEndian() {
-    GlobalCount = ntohs(GlobalCount);
     PacketType = ntohs(PacketType);
     ReadoutLength = ntohs(ReadoutLength);
     ReadoutCount = ntohs(ReadoutCount);

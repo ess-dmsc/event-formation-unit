@@ -74,7 +74,6 @@ PacketParser::PacketParser(
 PacketInfo PacketParser::parsePacket(const InData &Packet) {
   HeaderInfo Header = parseHeader(Packet);
   PacketInfo ReturnData;
-  ReturnData.GlobalCount = Header.GlobalCount;
   ReturnData.ReadoutCount = Header.ReadoutCount;
   if (PacketType::Data == Header.Type) {
     size_t FillerStart = parseData(Packet, Header.DataStart);
@@ -103,9 +102,8 @@ HeaderInfo parseHeader(const InData &Packet) {
     throw ParserException(ParserException::Type::HEADER_TYPE);
   }
   ReturnInfo.DataStart = sizeof(PacketHeader);
-  ReturnInfo.GlobalCount = Header.GlobalCount;
   ReturnInfo.ReadoutCount = Header.ReadoutCount;
-  if (Packet.Length - 2 != Header.ReadoutLength) {
+  if (Packet.Length != Header.ReadoutLength) {
     throw ParserException(ParserException::Type::HEADER_LENGTH);
   }
   return ReturnInfo;

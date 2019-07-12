@@ -170,7 +170,6 @@ TEST_F(AdcReadoutTest, DISABLED_GlobalCounterCorrect) {
     std::this_thread::sleep_for(SleepTime);
   }
   PacketHeadPointer->fixEndian();
-  PacketHeadPointer->GlobalCount++;
   PacketHeadPointer->fixEndian();
   {
     TestUDPServer Server2(GetPortNumber(), Settings.DetectorPort,
