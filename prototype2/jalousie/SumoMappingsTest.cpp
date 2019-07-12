@@ -49,22 +49,22 @@ TEST_F(JalSumoMappingsTest, TestFile) {
 
 TEST_F(JalSumoMappingsTest, TestParsing3) {
   SumoMappings mappings(TEST_DATA_PATH "sumo_voxel_map_20190711.csv", 3);
-  MESSAGE() << "\n" << mappings.debug() << "\n";
+  MESSAGE() << "\n" << mappings.debug(false) << "\n";
 }
 
 TEST_F(JalSumoMappingsTest, TestParsing4) {
   SumoMappings mappings(TEST_DATA_PATH "sumo_voxel_map_20190711.csv", 4);
-  MESSAGE() << "\n" << mappings.debug() << "\n";
+  MESSAGE() << "\n" << mappings.debug(false) << "\n";
 }
 
 TEST_F(JalSumoMappingsTest, TestParsing5) {
   SumoMappings mappings(TEST_DATA_PATH "sumo_voxel_map_20190711.csv", 5);
-  MESSAGE() << "\n" << mappings.debug() << "\n";
+  MESSAGE() << "\n" << mappings.debug(false) << "\n";
 }
 
 TEST_F(JalSumoMappingsTest, TestParsing6) {
   SumoMappings mappings(TEST_DATA_PATH "sumo_voxel_map_20190711.csv", 6);
-  MESSAGE() << "\n" << mappings.debug() << "\n";
+  MESSAGE() << "\n" << mappings.debug(false) << "\n";
 }
 
 int main(int argc, char **argv) {

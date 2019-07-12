@@ -54,6 +54,7 @@ protected:
     int64_t readout_count;
     int64_t bad_module_id;
     int64_t chopper_pulses;
+    int64_t mapping_errors;
 
     int64_t geometry_errors;
     int64_t timing_errors;
@@ -72,8 +73,8 @@ protected:
   Config config;
   uint64_t previous_time{0}; /// < for timing error checks
 
-  void convert_and_queue_event(const Readout& readout);
-  void process_one_event(EV42Serializer& serializer);
+  void convert_and_enqueue_event(const Readout& readout);
+  void process_one_queued_event(EV42Serializer& serializer);
   void force_produce_and_update_kafka_stats(EV42Serializer& serializer, Producer& producer);
 };
 

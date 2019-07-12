@@ -24,6 +24,7 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 #include <common/Log.h>
+#include "JalousieBase.h"
 //#undef TRC_MASK
 //#define TRC_MASK 0
 
@@ -52,6 +53,7 @@ JalousieBase::JalousieBase(BaseSettings const &settings, CLISettings const &Loca
   Stats.create("readouts.chopper_pulses", mystats.chopper_pulses);
 
   Stats.create("events.count", mystats.events);
+  Stats.create("events.mapping_errors", mystats.mapping_errors);
   Stats.create("events.geometry_errors", mystats.geometry_errors);
   Stats.create("events.timing_errors", mystats.timing_errors);
   Stats.create("transmit.bytes", mystats.tx_bytes);
@@ -59,7 +61,7 @@ JalousieBase::JalousieBase(BaseSettings const &settings, CLISettings const &Loca
   Stats.create("thread.seq_errors", mystats.fifo_seq_errors);
   Stats.create("thread.processing_idle", mystats.processing_idle);
 
-    /// \todo below stats are common to all detectors and could/should be moved
+  /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
   Stats.create("kafka.ev_errors", mystats.kafka_ev_errors);
   Stats.create("kafka.ev_others", mystats.kafka_ev_others);
@@ -121,23 +123,36 @@ void JalousieBase::input_thread() {
   }
 }
 
-void JalousieBase::convert_and_queue_event(const Readout& readout) {
-  constexpr size_t invalid_board_mapping {std::numeric_limits<size_t>::max()};
+void JalousieBase::convert_and_enqueue_event(const Readout &readout) {
 
+  /// Must have valid board mapping to proceed
+  constexpr size_t invalid_board_mapping{std::numeric_limits<size_t>::max()};
   size_t module = config.board_mappings[readout.board];
-
-  if (module == invalid_board_mapping)
-  {
+  if (module == invalid_board_mapping) {
     mystats.bad_module_id++;
     return;
   }
 
   if (readout.sub_id == Readout::chopper_sub_id) {
+    /// If this is a pulse, then we queue this with pixel_id=0
     mystats.chopper_pulses++;
     config.merger.insert(module, {readout.time, 0});
-  }
-  else {
-    auto pixel_id = config.geometry.pixelMP2D(readout.anode, readout.cathode, module);
+  } else {
+    uint32_t pixel_id{0};
+    if (config.SUMO_mappings.size() > module) {
+      /// SUMO mappings appear to be available, let's use this for pixel id
+      SumoCoordinates c = config.SUMO_mappings[module].map(readout.anode, readout.cathode);
+      if (!c.is_valid()) {
+        mystats.mapping_errors++;
+        return;
+      }
+      pixel_id = config.geometry.pixelMP3D(c.wire_layer, c.wire, c.strip, module);
+    } else {
+      /// SUMO mappings are not available, naive map entire module onto plane
+      pixel_id = config.geometry.pixelMP2D(readout.anode, readout.cathode, module);
+    }
+
+    /// In this case, pixel_id cannot be 0, we must reject before queueing
     if (pixel_id == 0) {
       mystats.geometry_errors++;
     } else {
@@ -147,29 +162,29 @@ void JalousieBase::convert_and_queue_event(const Readout& readout) {
   }
 }
 
-
-void JalousieBase::process_one_event(EV42Serializer& serializer) {
+void JalousieBase::process_one_queued_event(EV42Serializer &serializer) {
   auto event = config.merger.pop_earliest();
   if (previous_time > event.time)
     mystats.timing_errors++;
   previous_time = event.time;
 
   if (event.pixel_id == 0) {
-    // chopper pulse
+    /// chopper pulse
     if (serializer.eventCount()) {
+      /// Flush any events if incrementing pulse
       mystats.tx_bytes += serializer.produce();
     }
     serializer.pulseTime(event.time);
-  } else {
-    // regular neutron event
+  } else {     /// regular neutron event
+    /// rebaste time in terms of most recent pulse
     uint32_t event_time = event.time - serializer.pulseTime();
     mystats.tx_bytes += serializer.addEvent(event_time, event.pixel_id);
   }
 }
 
 void JalousieBase::force_produce_and_update_kafka_stats(
-    EV42Serializer& serializer,
-    Producer& producer) {
+    EV42Serializer &serializer,
+    Producer &producer) {
   mystats.tx_bytes += serializer.produce();
   /// Kafka stats update - common to all detectors
   /// don't increment as producer keeps absolute count
@@ -179,7 +194,6 @@ void JalousieBase::force_produce_and_update_kafka_stats(
   mystats.kafka_dr_errors = producer.stats.dr_errors;
   mystats.kafka_dr_noerrors = producer.stats.dr_noerrors;
 }
-
 
 void JalousieBase::processing_thread() {
   LOG(INIT, Sev::Info, "Jalousie Config file: {}", ModuleSettings.ConfigFile);
@@ -213,18 +227,18 @@ void JalousieBase::processing_thread() {
 
       /// Parse and convert readouts to events
       for (size_t i = 0; i < datalen / sizeof(Jalousie::Readout); i++) {
-        auto readout = (Jalousie::Readout *)dataptr;
+        auto readout = (Jalousie::Readout *) dataptr;
 //        printf("time %lu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
 //           readout->time, readout->board, readout->sub_id, readout->anode, readout->cathode);
         dataptr += sizeof(Jalousie::Readout);
         mystats.readout_count++;
-        convert_and_queue_event(*readout);
+        convert_and_enqueue_event(*readout);
       }
 
       /// Send out events that pass max latency check
       config.merger.sort();
       while (config.merger.ready()) {
-        process_one_event(ev42Serializer);
+        process_one_queued_event(ev42Serializer);
       }
 
     } else {
@@ -244,7 +258,7 @@ void JalousieBase::processing_thread() {
       /// Send out all events, regardless of max latency criterion
       config.merger.sort();
       while (!config.merger.empty()) {
-        process_one_event(ev42Serializer);
+        process_one_queued_event(ev42Serializer);
       }
       force_produce_and_update_kafka_stats(ev42Serializer, producer);
       XTRACE(INPUT, ALW, "Stopping processing thread.");
