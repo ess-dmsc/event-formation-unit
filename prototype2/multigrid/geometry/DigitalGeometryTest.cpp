@@ -1,7 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 #include <multigrid/geometry/DigitalGeometry.h>
-#include <multigrid/geometry/PlaneMappings.h>
 #include <test/TestBase.h>
 
 using namespace Multigrid;
@@ -9,11 +8,7 @@ using namespace Multigrid;
 class DigitalGeometryTest : public TestBase {
 protected:
   DetectorGeometry geo;
-  ModuleLogicalGeometry bus, bus2;
-  uint8_t invalid_plane{Hit::InvalidPlane};
-  uint8_t wire_plane{Multigrid::wire_plane};
-  uint8_t grid_plane{Multigrid::grid_plane};
-  uint16_t invalid_coordinate{Hit::InvalidCoord};
+  ModuleGeometry bus, bus2;
 
   void SetUp() override {}
   void TearDown() override {}
@@ -38,12 +33,12 @@ TEST_F(DigitalGeometryTest, OneBus) {
   EXPECT_EQ(geo.max_y(), 40);
   EXPECT_EQ(geo.max_z(), 20);
 
-  for (int i = 0; i < bus.max_grid(); i++) {
+  for (int i = 0; i < bus.num_grids(); i++) {
     EXPECT_EQ(geo.y_from_grid(0, i), bus.y_from_grid(i));
     EXPECT_ANY_THROW(geo.y_from_grid(1, i));
   }
 
-  for (int i = 0; i < bus.max_wire(); i++) {
+  for (int i = 0; i < bus.num_wires(); i++) {
     EXPECT_EQ(geo.x_from_wire(0, i), bus.x_from_wire(i));
     EXPECT_ANY_THROW(geo.x_from_wire(1, i));
 
@@ -57,21 +52,23 @@ TEST_F(DigitalGeometryTest, TwoBuses) {
   // confirms that they are stacked in x only
 
   geo.add_bus(bus);
-  geo.add_bus(bus);
+
+  bus2.x_offset = bus.x_range();
+  geo.add_bus(bus2);
 
   EXPECT_EQ(geo.max_x(), 8);
   EXPECT_EQ(geo.max_y(), 40);
   EXPECT_EQ(geo.max_z(), 20);
 
-  for (int i = 0; i < bus.max_grid(); i++) {
+  for (int i = 0; i < bus.num_grids(); i++) {
     EXPECT_EQ(geo.y_from_grid(0, i), bus.y_from_grid(i));
     EXPECT_EQ(geo.y_from_grid(1, i), bus.y_from_grid(i));
     EXPECT_ANY_THROW(geo.y_from_grid(2, i));
   }
 
-  for (int i = 0; i < bus.max_wire(); i++) {
+  for (int i = 0; i < bus.num_wires(); i++) {
     EXPECT_EQ(geo.x_from_wire(0, i), bus.x_from_wire(i));
-    EXPECT_EQ(geo.x_from_wire(1, i), bus.x_from_wire(i) + bus.max_x());
+    EXPECT_EQ(geo.x_from_wire(1, i), bus.x_from_wire(i) + bus.x_range());
     EXPECT_ANY_THROW(geo.x_from_wire(2, i));
 
     EXPECT_EQ(geo.z_from_wire(0, i), bus.z_from_wire(i));
@@ -82,6 +79,8 @@ TEST_F(DigitalGeometryTest, TwoBuses) {
 
 TEST_F(DigitalGeometryTest, PrintsSelf) {
   geo.add_bus(bus);
+  bus2.x_offset = bus.x_range();
+  geo.add_bus(bus2);
   EXPECT_FALSE(geo.debug().empty());
   MESSAGE() << "\n" << geo.debug() << "\n";
 }

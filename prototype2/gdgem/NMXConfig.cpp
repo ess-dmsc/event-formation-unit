@@ -117,9 +117,9 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
     {
       auto MGA = std::make_shared<MGAnalyzer>();
       MGA->weighted(root["analyze_weighted"].get<bool>());
-      geometry.nx(MGA->geometry_.max_x());
-      geometry.ny(MGA->geometry_.max_y());
-      geometry.nz(MGA->geometry_.max_z());
+      geometry.nx(MGA->geometry_.x_range());
+      geometry.ny(MGA->geometry_.y_range());
+      geometry.nz(MGA->geometry_.z_range());
       geometry.np(1);
 
       analyzer_ = MGA;

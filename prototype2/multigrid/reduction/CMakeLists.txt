@@ -1,18 +1,10 @@
 set(MGEventAnalysisTest_SRC
-  ../geometry/ChannelMappings.cpp
-  ../geometry/DigitalGeometry.cpp
-  ../geometry/MGSeqMappings.cpp
   ../geometry/ModuleGeometry.cpp
-  ../geometry/Filter.cpp
   EventAnalysisTest.cpp
   EventAnalysis.cpp
   )
 set(MGEventAnalysisTest_INC
-  ../geometry/ChannelMappings.h
-  ../geometry/DigitalGeometry.h
-  ../geometry/MGSeqMappings.h
   ../geometry/ModuleGeometry.h
-  ../geometry/Filter.h
   EventAnalysis.h
   )
 create_test_executable(MGEventAnalysisTest)

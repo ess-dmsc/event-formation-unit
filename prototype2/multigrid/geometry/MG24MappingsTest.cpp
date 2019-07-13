@@ -6,7 +6,7 @@
 
 class MG24MappingsTest : public TestBase {
 protected:
-  Multigrid::ModuleLogicalGeometry geom;
+  Multigrid::ModuleGeometry geom;
   void SetUp() override {
   }
   void TearDown()  override {
@@ -18,7 +18,7 @@ protected:
 TEST_F(MG24MappingsTest, IsWireIsGrid) {
   Multigrid::MG24MappingsA mgdet;
   mgdet.max_channel(128);
-  geom.max_grid(mgdet.max_channel() - mgdet.max_wire());
+  geom.num_grids(mgdet.max_channel() - mgdet.max_wire());
 
   for (int i = 0; i <= 79; i++) {
     EXPECT_TRUE(mgdet.isWire(i));
@@ -38,7 +38,7 @@ TEST_F(MG24MappingsTest, IsWireIsGrid) {
 TEST_F(MG24MappingsTest, XZCoordinatesVariantA) {
   Multigrid::MG24MappingsA mgdet;
   mgdet.max_channel(128);
-  geom.max_grid(mgdet.max_channel() - mgdet.max_wire());
+  geom.num_grids(mgdet.max_channel() - mgdet.max_wire());
 
   for (int xoffset = 0; xoffset < 4; xoffset++) {
     MESSAGE() << "Lower wires: " << xoffset * 16
@@ -68,7 +68,7 @@ TEST_F(MG24MappingsTest, XZCoordinatesVariantA) {
 TEST_F(MG24MappingsTest, YCoordinatesVariantA) {
   Multigrid::MG24MappingsA mgdet;
   mgdet.max_channel(127);
-  geom.max_grid(mgdet.max_channel() - mgdet.max_wire());
+  geom.num_grids(mgdet.max_channel() - mgdet.max_wire());
 
   for (int channel = 80; channel < 127; channel++) {
     EXPECT_EQ(channel - 80 , geom.y_from_grid(mgdet.grid(channel)));

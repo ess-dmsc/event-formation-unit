@@ -16,7 +16,7 @@ public:
   void weighted(bool w);
   bool weighted() const;
 
-  DigitalGeometry mappings;
+  ModuleGeometry mappings;
   size_t stats_used_hits {0};
 
 private:

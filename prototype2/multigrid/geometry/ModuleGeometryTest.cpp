@@ -7,16 +7,16 @@ using namespace Multigrid;
 
 class ModuleGeometryTest : public TestBase {
 protected:
-  ModuleLogicalGeometry geo;
+  ModuleGeometry geo;
   void SetUp() override {}
   void TearDown()  override {}
 };
 
 
 TEST_F(ModuleGeometryTest, GetX) {
-  EXPECT_EQ(geo.max_wire(), 80);
-  EXPECT_EQ(geo.max_z(), 20);
-  EXPECT_EQ(geo.max_x(), 4);
+  EXPECT_EQ(geo.num_wires(), 80);
+  EXPECT_EQ(geo.z_range(), 20);
+  EXPECT_EQ(geo.x_range(), 4);
 
   EXPECT_EQ(geo.x_from_wire(0), 0);
   EXPECT_EQ(geo.x_from_wire(19), 0);
@@ -27,9 +27,9 @@ TEST_F(ModuleGeometryTest, GetX) {
 }
 
 TEST_F(ModuleGeometryTest, FlippedX) {
-  EXPECT_EQ(geo.max_wire(), 80);
-  EXPECT_EQ(geo.max_z(), 20);
-  EXPECT_EQ(geo.max_x(), 4);
+  EXPECT_EQ(geo.num_wires(), 80);
+  EXPECT_EQ(geo.z_range(), 20);
+  EXPECT_EQ(geo.x_range(), 4);
   geo.flipped_x(true);
 
   EXPECT_EQ(geo.x_from_wire(0), 3);
@@ -41,9 +41,9 @@ TEST_F(ModuleGeometryTest, FlippedX) {
 }
 
 TEST_F(ModuleGeometryTest, GetY) {
-  EXPECT_EQ(geo.max_wire(), 80);
-  EXPECT_EQ(geo.max_grid(), 40);
-  EXPECT_EQ(geo.max_y(), 40);
+  EXPECT_EQ(geo.num_wires(), 80);
+  EXPECT_EQ(geo.num_grids(), 40);
+  EXPECT_EQ(geo.y_range(), 40);
 
   EXPECT_EQ(geo.y_from_grid(0), 0);
   EXPECT_EQ(geo.y_from_grid(1), 1);
@@ -52,9 +52,9 @@ TEST_F(ModuleGeometryTest, GetY) {
 }
 
 TEST_F(ModuleGeometryTest, GetZ) {
-  EXPECT_EQ(geo.max_wire(), 80);
-  geo.max_z(10);
-  EXPECT_EQ(geo.max_x(), 8);
+  EXPECT_EQ(geo.num_wires(), 80);
+  geo.z_range(10);
+  EXPECT_EQ(geo.x_range(), 8);
 
   EXPECT_EQ(geo.z_from_wire(0), 0);
   EXPECT_EQ(geo.z_from_wire(2), 2);
@@ -64,8 +64,8 @@ TEST_F(ModuleGeometryTest, GetZ) {
 }
 
 TEST_F(ModuleGeometryTest, FlippedZ) {
-  EXPECT_EQ(geo.max_wire(), 80);
-  EXPECT_EQ(geo.max_z(), 20);
+  EXPECT_EQ(geo.num_wires(), 80);
+  EXPECT_EQ(geo.z_range(), 20);
   geo.flipped_z(true);
 
   EXPECT_EQ(geo.z_from_wire(0), 19);

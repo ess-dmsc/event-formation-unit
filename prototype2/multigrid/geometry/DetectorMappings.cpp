@@ -115,37 +115,4 @@ void from_json(const nlohmann::json &j, DetectorMapping &g) {
   }
 }
 
-/*
-void from_json(const nlohmann::json &j, BusDefinitionStruct &g) {
- auto geom = std::make_shared<MGSeqMappings>();
- (*geom) = j;
- g.channel_mappings = geom;
- g.logical_geometry.max_grid(geom->max_channel() - geom->max_wire());
-}
-
-void DigitalGeometry::add_bus(BusDefinitionStruct geom) {
- for (const auto &d : buses2) {
-   geom.wire_offset += d.logical_geometry.max_wire();
-   geom.grid_offset += d.logical_geometry.max_grid();
-   geom.x_offset += d.logical_geometry.max_x();
-   //g.y_offset += d.y_offset + d.channel_mappings.max_y();
-   //g.z_offset += d.z_offset + d.channel_mappings.max_z();
- }
- buses2.push_back(geom);
-
- ModuleMapping mm;
- mm.wire_offset = geom.wire_offset;
- mm.grid_offset = geom.grid_offset;
- mm.wires = geom.logical_geometry.max_wire();
- mm.grids = geom.logical_geometry.max_grid();
- mm.channel_mappings = geom.channel_mappings;
- mappings.push_back(mm);
-
- ModuleGeometry mg;
- mg.x_offset = geom.x_offset;
- mg.logical_geometry = geom.logical_geometry;
- geometries.push_back(mg);
-}
-*/
-
 }

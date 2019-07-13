@@ -28,6 +28,7 @@ ReducedEvent EventAnalyzer::analyze(Event &event) {
     return ret;
   }
 
+  /// Wires
   if (!event.cluster1.empty()) {
     double xmass{0};
     double zmass{0};
@@ -58,6 +59,7 @@ ReducedEvent EventAnalyzer::analyze(Event &event) {
     ret.z.center = zmass / zsum;
   }
 
+  /// Grids
   if (!event.cluster2.empty()) {
 
     double ymass{0};

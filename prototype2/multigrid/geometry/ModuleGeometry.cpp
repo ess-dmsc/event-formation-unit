@@ -14,76 +14,86 @@
 
 namespace Multigrid {
 
-void ModuleLogicalGeometry::max_grid(uint16_t g) {
-  max_grid_ = g;
+void ModuleGeometry::num_grids(uint16_t g) {
+  grids_ = g;
 }
 
-void ModuleLogicalGeometry::max_wire(uint16_t w) {
-  max_wire_ = w;
+void ModuleGeometry::num_wires(uint16_t w) {
+  wires_ = w;
+  x_range_ = wires_ / z_range_;
 }
 
-void ModuleLogicalGeometry::max_z(uint16_t w) {
-  max_z_ = w;
+void ModuleGeometry::z_range(uint32_t z) {
+  z_range_ = z;
+  x_range_ = wires_ / z_range_;
 }
 
-void ModuleLogicalGeometry::flipped_x(bool f) {
+void ModuleGeometry::flipped_x(bool f) {
   flipped_x_ = f;
 }
 
-void ModuleLogicalGeometry::flipped_z(bool f) {
+void ModuleGeometry::flipped_z(bool f) {
   flipped_z_ = f;
 }
 
-bool ModuleLogicalGeometry::flipped_x() const {
+bool ModuleGeometry::flipped_x() const {
   return flipped_x_;
 }
 
-bool ModuleLogicalGeometry::flipped_z() const {
+bool ModuleGeometry::flipped_z() const {
   return flipped_z_;
 }
 
-uint32_t ModuleLogicalGeometry::max_x() const {
-  return max_wire() / max_z();
+// \todo cache this result
+uint32_t ModuleGeometry::x_range() const {
+  return x_range_;
 }
 
-uint32_t ModuleLogicalGeometry::max_y() const {
-  return max_grid();
+uint32_t ModuleGeometry::y_range() const {
+  return num_grids();
 }
 
-uint16_t ModuleLogicalGeometry::max_z() const {
-  return max_z_;
+uint32_t ModuleGeometry::z_range() const {
+  return z_range_;
 }
 
-uint16_t ModuleLogicalGeometry::max_wire() const {
-  return max_wire_;
+uint16_t ModuleGeometry::num_wires() const {
+  return wires_;
 }
 
-uint16_t ModuleLogicalGeometry::max_grid() const {
-  return max_grid_;
+uint16_t ModuleGeometry::num_grids() const {
+  return grids_;
 }
 
-uint32_t ModuleLogicalGeometry::x_from_wire(uint16_t w) const {
-  uint32_t ret = w / max_z();
-  return flipped_x() ? (max_x() - 1u - ret) : ret;
+inline uint32_t flip(uint32_t val, uint32_t max) {
+  return max - val - 1u;
 }
 
-uint32_t ModuleLogicalGeometry::y_from_grid(uint16_t g) const {
-  return g;
+uint32_t ModuleGeometry::x_from_wire(uint16_t w) const {
+  uint32_t ret = w / z_range_;
+  return x_offset + (flipped_x() ? flip(ret, x_range_) : ret);
 }
 
-uint32_t ModuleLogicalGeometry::z_from_wire(uint16_t w) const {
-  uint32_t ret = w % max_z();
-  return flipped_z() ? (max_z() - 1u - ret) : ret;
+uint32_t ModuleGeometry::y_from_grid(uint16_t g) const {
+  return y_offset + g;
 }
 
-std::string ModuleLogicalGeometry::debug(std::string prefix) const {
+uint32_t ModuleGeometry::z_from_wire(uint16_t w) const {
+  uint32_t ret = w % z_range_;
+  return z_offset + (flipped_z() ? flip(ret, z_range_) : ret);
+}
+
+std::string ModuleGeometry::debug(std::string prefix) const {
   std::string ret;
 
-  ret += prefix + "ModuleLogicalGeometry\n";
   ret += prefix + fmt::format("  wires: {},  grids: {}\n",
-                              max_wire(), max_grid());
-  ret += prefix + fmt::format("  size [{},{},{}]\n",
-                              max_x(), max_y(), max_z());
+                              num_wires(), num_grids());
+
+  ret += prefix + fmt::format("  x[{},{}] y[{},{}] z[{},{}]\n",
+                              x_offset, x_offset + x_range() - 1u,
+                              y_offset, y_offset + y_range() - 1u,
+                              z_offset, z_offset + z_range() - 1u
+                              );
 
   if (flipped_x_)
     ret += prefix + "  (flipped in X)\n";
@@ -93,18 +103,25 @@ std::string ModuleLogicalGeometry::debug(std::string prefix) const {
   return ret;
 }
 
-void from_json(const nlohmann::json &j, ModuleLogicalGeometry &g) {
-  if (j.count("max_grid"))
-    g.max_grid(j["max_grid"]);
-  if (j.count("max_wire"))
-    g.max_wire(j["max_wire"]);
-  if (j.count("max_z"))
-    g.max_z(j["max_z"]);
+void from_json(const nlohmann::json &j, ModuleGeometry &g) {
+  if (j.count("num_grids"))
+    g.num_grids(j["num_grids"]);
+  if (j.count("num_wires"))
+    g.num_wires(j["num_wires"]);
+  if (j.count("z_range"))
+    g.z_range(j["z_range"]);
 
   if (j.count("flipped_x"))
     g.flipped_x(j["flipped_x"]);
   if (j.count("flipped_z"))
     g.flipped_z(j["flipped_z"]);
+
+  if (j.count("x_offset"))
+    g.x_offset = j["x_offset"];
+  if (j.count("y_offset"))
+    g.x_offset = j["y_offset"];
+  if (j.count("z_offset"))
+    g.x_offset = j["z_offset"];
 }
 
 }

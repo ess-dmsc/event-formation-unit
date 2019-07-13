@@ -15,22 +15,9 @@
 
 namespace Multigrid {
 
-struct ModuleGeometry {
-  uint32_t x_offset{0};
-  uint32_t y_offset{0};
-  uint32_t z_offset{0};
-
-  ModuleLogicalGeometry logical_geometry;
-
-  std::string debug(std::string prefix = "") const;
-};
-
-void from_json(const nlohmann::json &j, ModuleGeometry &g);
-
 class DetectorGeometry {
 public:
-
-  void add_bus(ModuleLogicalGeometry geom);
+  void add_bus(ModuleGeometry geom);
 
   /** @brief return the x coordinate of the detector */
   uint32_t x_from_wire(size_t module, uint16_t w) const;
@@ -52,7 +39,7 @@ public:
 
   std::string debug(std::string prefix = "") const;
 
-//private:
+private:
   std::vector<ModuleGeometry> buses;
 };
 

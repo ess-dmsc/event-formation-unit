@@ -18,7 +18,7 @@ public:
   // \todo parametrize planes
 
   // \todo make private?
-  Multigrid::ModuleLogicalGeometry geometry_;
+  Multigrid::ModuleGeometry geometry_;
 
 private:
   bool weighted_{true};
