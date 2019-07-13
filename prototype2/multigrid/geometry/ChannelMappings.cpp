@@ -8,8 +8,8 @@
  */
 
 #include <multigrid/geometry/ChannelMappings.h>
+#include <multigrid/geometry/PlaneMappings.h>
 
-#include <fmt/format.h>
 #include <sstream>
 
 namespace Multigrid {

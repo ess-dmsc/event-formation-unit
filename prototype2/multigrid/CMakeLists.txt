@@ -6,30 +6,34 @@
 # for Mesytec Readout
 set(multigrid_common_src
   geometry/Filter.cpp
-  geometry/DigitalGeometry.cpp
-  geometry/MGSeqMappings.cpp
-  geometry/ModuleGeometry.cpp
   geometry/ChannelMappings.cpp
-  mesytec/BuilderMesytec.cpp
-  mesytec/Vmmr16Parser.cpp
-  mesytec/Sis3153Parser.cpp
+  geometry/MGSeqMappings.cpp
+#  geometry/MG24Mappings.cpp
+  geometry/DetectorMappings.cpp
+  geometry/ModuleGeometry.cpp
+  geometry/DigitalGeometry.cpp
   mesytec/Readout.cpp
   mesytec/BuilderReadouts.cpp
+  mesytec/Vmmr16Parser.cpp
+  mesytec/Sis3153Parser.cpp
+  mesytec/BuilderMesytec.cpp
   reduction/Reduction.cpp
   reduction/EventAnalysis.cpp
   Config.cpp
   )
 set(multigrid_common_inc
   geometry/Filter.h
-  geometry/DigitalGeometry.h
-  geometry/MGSeqMappings.h
-  geometry/ModuleGeometry.h
   geometry/ChannelMappings.h
-  mesytec/BuilderMesytec.h
-  mesytec/Vmmr16Parser.h
-  mesytec/Sis3153Parser.h
+  geometry/MGSeqMappings.h
+  geometry/MG24Mappings.h
+  geometry/DetectorMappings.h
+  geometry/ModuleGeometry.h
+  geometry/DigitalGeometry.h
   mesytec/Readout.h
   mesytec/BuilderReadouts.h
+  mesytec/Vmmr16Parser.h
+  mesytec/Sis3153Parser.h
+  mesytec/BuilderMesytec.h
   reduction/Reduction.h
   reduction/EventAnalysis.h
   AbstractBuilder.h

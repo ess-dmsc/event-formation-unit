@@ -41,6 +41,10 @@ public:
       return MGSeqMappings::wire(channel);
     }
   }
+
+  std::string debug(std::string prefix) const override {
+    return "[MG24MappingsA]/" + MGSeqMappings::debug(prefix);
+  }
 };
 
 // Equivalent of what was previously module_select
@@ -67,6 +71,10 @@ public:
     } else {
       return MGSeqMappings::wire(channel);
     }
+  }
+
+  std::string debug(std::string prefix) const override {
+    return "[MG24MappingsB]/" + MGSeqMappings::debug(prefix);
   }
 };
 

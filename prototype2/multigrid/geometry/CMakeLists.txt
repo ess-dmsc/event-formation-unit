@@ -56,19 +56,28 @@ set(MG24MappingsTest_INC
   )
 create_test_executable(MG24MappingsTest)
 
-set(DigitalGeometryTest_SRC
+set(MGDetectorMappingsTest_SRC
+  DetectorMappingsTest.cpp
+  DetectorMappings.cpp
   ChannelMappings.cpp
-  DigitalGeometryTest.cpp
-  DigitalGeometry.cpp
   MGSeqMappings.cpp
-  ModuleGeometry.cpp
   Filter.cpp
   )
-set(DigitalGeometryTest_INC
+set(MGDetectorMappingsTest_INC
+  DetectorMappings.h
   ChannelMappings.h
-  ModuleGeometry.h
-  DigitalGeometry.h
   MGSeqMappings.h
   Filter.h
   )
-create_test_executable(DigitalGeometryTest)
+create_test_executable(MGDetectorMappingsTest)
+
+set(MGDigitalGeometryTest_SRC
+  DigitalGeometryTest.cpp
+  DigitalGeometry.cpp
+  ModuleGeometry.cpp
+  )
+set(MGDigitalGeometryTest_INC
+  ModuleGeometry.h
+  DigitalGeometry.h
+  )
+create_test_executable(MGDigitalGeometryTest)

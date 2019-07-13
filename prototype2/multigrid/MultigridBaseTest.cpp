@@ -6,12 +6,11 @@
  */
 
 #include <multigrid/MultigridBase.h>
-#include <../prototype2/adc_readout/test/TestUDPServer.h>
+#include <adc_readout/test/TestUDPServer.h>
 #include <test/TestBase.h>
 
 // \todo use reference data
 #include <multigrid/mesytec/TestData.h>
-#include "MultigridBase.h"
 
 class MultigridBaseStandIn : public MultigridBase {
 public:

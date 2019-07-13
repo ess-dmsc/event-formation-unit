@@ -10,7 +10,6 @@
 #include <multigrid/geometry/MGSeqMappings.h>
 
 #include <sstream>
-#include <limits>
 
 namespace Multigrid {
 
@@ -28,6 +27,10 @@ void MGSeqMappings::max_wire(uint16_t w) {
 
 uint16_t MGSeqMappings::max_wire() const {
   return max_wire_;
+}
+
+uint16_t MGSeqMappings::max_grid() const {
+  return max_channel_ - max_wire_;
 }
 
 void MGSeqMappings::swap_wires(bool s) {
@@ -79,14 +82,16 @@ uint16_t MGSeqMappings::grid(uint16_t channel) const {
 std::string MGSeqMappings::debug(std::string prefix) const {
   std::stringstream ss;
 
-  ss << prefix << "wires=chan[0," << (max_wire() - 1) << "] ";
+  ss << "[MGSeqMappings]\n";
+
+  ss << prefix << "wires=chan[0," << (max_wire() - 1) << "]";
   if (swap_wires_)
-    ss << "(swapped wires)";
+    ss << " (swapped)";
   ss << "\n";
 
-  ss << prefix << "grids=chan[" << max_wire() << "," << (max_channel_ - 1) << "] ";
+  ss << prefix << "grids=chan[" << max_wire() << "," << (max_channel_ - 1) << "]";
   if (swap_grids_)
-    ss << "(swapped grids)";
+    ss << " (swapped)";
   ss << "\n";
 
   ss << ChannelMappings::debug(prefix);

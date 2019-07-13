@@ -1,5 +1,6 @@
 {
-  "mappings": [
+  "mappings" :
+  [
     {
       "max_channel": 120,
       "max_wire": 80,
@@ -16,7 +17,17 @@
       "swap_wires": true,
       "swap_grids": false,
       "flipped_x": true,
-      "flipped_z": true
+      "flipped_z": true,
+      "grid_filters":{
+        "blanket":{"count": 120, "min":0, "max":65535, "rescale":1.0},
+        "exceptions":[
+          {"idx":26, "rescale":1.5},
+          {"idx":28, "rescale":1.5},
+          {"idx":29, "rescale":0.5},
+          {"idx":33, "rescale":1.5},
+          {"idx":34, "rescale":1.5}
+        ]
+      }
     },
     {
       "max_channel": 120,
@@ -28,11 +39,13 @@
       "flipped_z": true
     }
   ],
+
   "builder": {
     "type": "mesytec",
     "spoof_high_time": false
   },
-  "max_wire_hits": 1,
-  "max_grid_hits": 5,
-  "weighted": true
+
+  "max_wire_hits" : 1,
+  "max_grid_hits" : 5,
+  "weighted" : true
 }

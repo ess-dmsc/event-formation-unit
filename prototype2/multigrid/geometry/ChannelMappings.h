@@ -15,9 +15,6 @@ namespace Multigrid {
 
 class ChannelMappings {
 public:
-  static constexpr uint8_t wire_plane {0};
-  static constexpr uint8_t grid_plane {1};
-
   FilterSet wire_filters;
   FilterSet grid_filters;
 
@@ -28,17 +25,23 @@ public:
   // \todo document this
   bool map(Hit& hit, uint16_t channel, uint16_t adc) const;
 
-  /** @brief identifies which channels are wires, from drawing by Anton */
+  /** @brief identifies which channels are wires*/
   virtual bool isWire(uint16_t channel) const = 0;
 
-  /** @brief identifies which channels are grids, from drawing by Anton */
+  /** @brief identifies which channels are grids*/
   virtual bool isGrid(uint16_t channel) const = 0;
 
-  /** @brief returns wire */
+  /** @returns wire */
   virtual uint16_t wire(uint16_t channel) const = 0;
 
-  /** @brief returns grid */
+  /** @returns grid */
   virtual uint16_t grid(uint16_t channel) const = 0;
+
+  /** @returns maximum wire */
+  virtual uint16_t max_wire() const = 0;
+
+  /** @returns maximum grid */
+  virtual uint16_t max_grid() const = 0;
 
   virtual std::string debug(std::string prefix) const;
 };
