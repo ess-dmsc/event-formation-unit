@@ -69,7 +69,8 @@
           "num_grids": 40,
           "z_range": 20,
           "flipped_x": true,
-          "flipped_z": true
+          "flipped_z": true,
+          "x_offset" : 0
         },
         "analysis_weighted": true
       },

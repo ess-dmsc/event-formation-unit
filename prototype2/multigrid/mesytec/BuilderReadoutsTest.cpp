@@ -33,7 +33,7 @@ protected:
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
 
   void SetUp() override {
-    load_config(TEST_DATA_PATH "Sequoia_mappings.json");
+    load_config(TEST_DATA_PATH "Sequoia_mappings2.json");
   }
   void TearDown() override {
   }

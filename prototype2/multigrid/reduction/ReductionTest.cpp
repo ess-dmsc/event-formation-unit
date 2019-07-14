@@ -48,7 +48,7 @@ protected:
   size_t good_events{0};
 
   void SetUp() override {
-    load_config(TEST_DATA_PATH "Sequoia_mappings.json");
+    load_config(TEST_DATA_PATH "Sequoia_mappings2.json");
   }
   void TearDown() override {
   }
@@ -67,10 +67,7 @@ protected:
     while ((readsz = reader.read((char *) &buffer)) > 0) {
       config.builder->parse(Buffer<uint8_t>(buffer, readsz));
       ingested_hits += config.builder->ConvertedData.size();
-      // manual ingest with hit absolutification
-      for (const auto &h : config.builder->ConvertedData) {
-        config.reduction.ingest(config.mappings.absolutify(h));
-      }
+      config.reduction.ingest(config.builder->ConvertedData);
       config.builder->ConvertedData.clear();
 
       config.reduction.process_queues(false);

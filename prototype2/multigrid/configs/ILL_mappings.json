@@ -1,38 +1,69 @@
 {
   "mappings": [
     {
+      "type": "MG24A",
       "max_channel": 120,
       "max_wire": 80,
-      "max_z": 20,
       "swap_wires": true,
-      "swap_grids": false,
-      "flipped_x": true,
-      "flipped_z": true
+      "swap_grids": false
     },
     {
+      "type": "MG24A",
       "max_channel": 120,
       "max_wire": 80,
-      "max_z": 20,
       "swap_wires": true,
-      "swap_grids": false,
-      "flipped_x": true,
-      "flipped_z": true
+      "swap_grids": false
     },
     {
+      "type": "MG24A",
       "max_channel": 120,
       "max_wire": 80,
-      "max_z": 20,
       "swap_wires": true,
-      "swap_grids": false,
-      "flipped_x": true,
-      "flipped_z": true
+      "swap_grids": false
     }
   ],
   "builder": {
     "type": "mesytec",
     "spoof_high_time": false
   },
-  "max_wire_hits": 1,
-  "max_grid_hits": 5,
-  "weighted": true
+
+  "pipeline_config": {
+    "maximum_latency": 300000,
+    "max_wire_multiplicity": 1,
+    "max_grid_multiplicity": 5,
+    "modules": [
+      {
+        "digital_geometry": {
+          "mum_wires": 80,
+          "num_grids": 40,
+          "z_range": 20,
+          "flipped_x": true,
+          "flipped_z": true
+        },
+        "analysis_weighted": true
+      },
+      {
+        "digital_geometry": {
+          "mum_wires": 80,
+          "num_grids": 40,
+          "z_range": 20,
+          "flipped_x": true,
+          "flipped_z": true,
+          "x_offset" : 4
+        },
+        "analysis_weighted": true
+      },
+      {
+        "digital_geometry": {
+          "mum_wires": 80,
+          "num_grids": 40,
+          "z_range": 20,
+          "flipped_x": true,
+          "flipped_z": true,
+          "x_offset" : 8
+        },
+        "analysis_weighted": true
+      }
+    ]
+  }
 }

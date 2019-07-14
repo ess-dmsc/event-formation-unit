@@ -88,7 +88,7 @@ TEST_F(BuilderMesytecTest, ParseRecordedWSDataMultipleTriggers) {
 }
 
 TEST_F(BuilderMesytecTest, PCap2) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
+  load_config(TEST_DATA_PATH "Sequoia_mappings2.json");
 
   ReaderPcap pcap(TEST_DATA_PATH "wireshark/Si_WHITE_1att_mvmeCrash.pcapng");
 
@@ -104,17 +104,17 @@ TEST_F(BuilderMesytecTest, PCap2) {
   }
 
   EXPECT_EQ(packets, 25);
-  EXPECT_EQ(config.builder->stats_discarded_bytes, 3784);
+  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
   EXPECT_EQ(config.builder->stats_trigger_count, 0);
   EXPECT_EQ(config.builder->stats_bus_glitch_rejects, 0);
   EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
-  EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
+  EXPECT_EQ(config.builder->stats_digital_geom_errors, 8);
 
-  EXPECT_EQ(config.builder->ConvertedData.size(), 0);
+  EXPECT_EQ(config.builder->ConvertedData.size(), 94);
 }
 
 TEST_F(BuilderMesytecTest, PCap3) {
-  load_config(TEST_DATA_PATH "Sequoia_mappings.json");
+  load_config(TEST_DATA_PATH "Sequoia_mappings2.json");
 
   ReaderPcap pcap(TEST_DATA_PATH "wireshark/endOfHFSeries_mvmeCrash.pcapng");
 
@@ -130,13 +130,13 @@ TEST_F(BuilderMesytecTest, PCap3) {
   }
 
   EXPECT_EQ(packets, 102);
-  EXPECT_EQ(config.builder->stats_discarded_bytes, 12047);
+  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
   EXPECT_EQ(config.builder->stats_trigger_count, 0);
   EXPECT_EQ(config.builder->stats_bus_glitch_rejects, 0);
   EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
-  EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
+  EXPECT_EQ(config.builder->stats_digital_geom_errors, 59);
 
-  EXPECT_EQ(config.builder->ConvertedData.size(), 0);
+  EXPECT_EQ(config.builder->ConvertedData.size(), 254);
 }
 
 int main(int argc, char **argv) {
