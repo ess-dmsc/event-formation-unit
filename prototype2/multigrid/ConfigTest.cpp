@@ -16,6 +16,7 @@ protected:
 
 TEST_F(MGConfigTest, ConstructorDefaults) {
   Multigrid::Config mgconfig;
+  MESSAGE() << "\n" << mgconfig.debug() << "\n";
 //  ASSERT_FALSE(mgconfig.spoof_high_time);
 //  ASSERT_EQ(mgconfig.reduction_strategy, "");
 //  ASSERT_EQ(mgconfig.mappings.max_z(), 0);
@@ -25,7 +26,8 @@ TEST_F(MGConfigTest, ConstructorDefaults) {
 }
 
 TEST_F(MGConfigTest, ValidConfig) {
-  Multigrid::Config mgconfig(TestJsonPath + "ILL_mappings.json");
+  Multigrid::Config mgconfig(TestJsonPath + "example_config.json");
+  MESSAGE() << "\n" << mgconfig.debug() << "\n";
 //  ASSERT_TRUE(mgconfig.spoof_high_time);
 //  ASSERT_EQ(mgconfig.reduction_strategy, "maximum");
 //  ASSERT_EQ(mgconfig.mappings.max_z(), 20);

@@ -11,7 +11,7 @@ using namespace Multigrid;
 
 class DetectorMappingsTest : public TestBase {
 protected:
-  DetectorMapping mapping;
+  DetectorMappings mapping;
   std::shared_ptr<ChannelMappings> bus, bus2;
   Hit hit;
   uint8_t invalid_plane {Hit::InvalidPlane};

@@ -13,6 +13,14 @@ public:
     return 0;
   }
 
+  uint16_t max_wire() const override {
+    return 0;
+  }
+
+  uint16_t max_grid() const override {
+    return 0;
+  }
+
   bool isWire(uint16_t channel) const override {
     (void) channel;
     return true;

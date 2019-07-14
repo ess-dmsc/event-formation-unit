@@ -1,7 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <multigrid/reduction/Reduction.h>
-#include <multigrid/AbstractBuilder.h>
+#include <multigrid/geometry/PlaneMappings.h>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL
@@ -45,12 +45,12 @@ void ModulePipeline::ingest(const Hit &hit) {
   }
   previous_time_ = hit.time;
 
-  auto plane = hit.plane % 2;
+  auto plane = plane_in_module(hit.plane);
 
-  if (plane == AbstractBuilder::wire_plane) {
-    wire_clusters.insert(hit);
-  } else if (plane == AbstractBuilder::grid_plane) {
-    grid_clusters.insert(hit);
+  if (plane == wire_plane) {
+    wire_clusterer.insert(hit);
+  } else if (plane == grid_plane) {
+    grid_clusterer.insert(hit);
   } else {
     stats.invalid_planes++;
   }
@@ -58,15 +58,15 @@ void ModulePipeline::ingest(const Hit &hit) {
 
 void ModulePipeline::process_events(bool flush) {
   if (flush) {
-    wire_clusters.flush();
-    grid_clusters.flush();
+    wire_clusterer.flush();
+    grid_clusterer.flush();
   }
-  stats.wire_clusters = wire_clusters.stats_cluster_count;
-  stats.grid_clusters = grid_clusters.stats_cluster_count;
-  if (!wire_clusters.clusters.empty())
-    matcher.insert(wire_clusters.clusters.front().plane(), wire_clusters.clusters);
-  if (!grid_clusters.clusters.empty())
-    matcher.insert(grid_clusters.clusters.front().plane(), grid_clusters.clusters);
+  stats.wire_clusters = wire_clusterer.stats_cluster_count;
+  stats.grid_clusters = grid_clusterer.stats_cluster_count;
+  if (!wire_clusterer.clusters.empty())
+    matcher.insert(wire_clusterer.clusters.front().plane(), wire_clusterer.clusters);
+  if (!grid_clusterer.clusters.empty())
+    matcher.insert(grid_clusterer.clusters.front().plane(), grid_clusterer.clusters);
   matcher.match(flush);
 
   for (auto &event : matcher.matched_events) {
@@ -107,13 +107,14 @@ void ModulePipeline::process_events(bool flush) {
 
 std::string ModulePipeline::debug(std::string prepend) const {
   std::stringstream ss;
-  ss << prepend << "  Event position using weighted average: "
-     << (analyzer.weighted() ? "YES" : "no") << "\n";
+  // \todo clusterer configs
+  // \todo matcher config
   ss << prepend << "  max_wire_hits = " << max_wire_hits << "\n";
   ss << prepend << "  max_grid_hits = " << max_grid_hits << "\n";
-  ss << prepend << "  geometry_x = " << geometry.nx() << "\n";
-  ss << prepend << "  geometry_y = " << geometry.ny() << "\n";
-  ss << prepend << "  geometry_z = " << geometry.nz() << "\n";
+  ss << prepend << "  Event position using weighted average: "
+     << (analyzer.weighted() ? "YES" : "no") << "\n";
+  ss << prepend << "  Digital geometry:\n"
+     << analyzer.digital_geometry.debug(prepend + "  ");
   return ss.str();
 }
 
@@ -162,6 +163,85 @@ void Reduction::process_queues(bool flush) {
     while (!merger.empty())
       out_queue.push_back(merger.pop_earliest());
   }
+}
+
+uint32_t Reduction::max_x() const {
+  uint32_t ret{0};
+  for (const auto &b : pipelines)
+    ret = std::max(ret, b.analyzer.digital_geometry.x_offset
+        + b.analyzer.digital_geometry.x_range());
+  return ret;
+}
+
+uint32_t Reduction::max_y() const {
+  uint32_t ret{0};
+  for (const auto &b : pipelines)
+    ret = std::max(ret, b.analyzer.digital_geometry.y_offset
+        + b.analyzer.digital_geometry.y_range());
+  return ret;
+}
+
+uint32_t Reduction::max_z() const {
+  uint32_t ret{0};
+  for (const auto &b : pipelines)
+    ret = std::max(ret, b.analyzer.digital_geometry.z_offset
+        + b.analyzer.digital_geometry.z_range());
+  return ret;
+}
+
+std::string Reduction::debug(std::string prepend) const {
+  std::stringstream ss;
+
+  ss << "--== PIPELINE ==--\n";
+
+  for (size_t i = 0; i < pipelines.size(); ++i) {
+    ss << prepend + "  Module[" << i << "]\n";
+    ss << pipelines[i].debug(prepend + "  ");
+    ss << "\n";
+  }
+
+  if (!pipelines.empty()) {
+    const auto& p = pipelines.back();
+    ss << prepend << fmt::format("  Digital geometry_[{}, {}, {}, {}]\n",
+        p.geometry.nx(), p.geometry.ny(), p.geometry.nz(), p.geometry.np());
+  }
+
+  // \todo print merger info
+
+  return ss.str();
+}
+
+void from_json(const nlohmann::json &j, Reduction &g) {
+  uint64_t max_latency = j["maximum_latency"];
+  size_t max_wire_multiplicity = j["max_wire_multiplicity"];
+  size_t max_grid_multiplicity = j["max_grid_multiplicity"];
+
+  size_t module_count = 0;
+  for (const auto &jj : j["modules"]) {
+    ModulePipeline pipeline;
+
+    // \todo custom clusterer settings
+
+    pipeline.matcher = GapMatcher(max_latency,
+                                  2 * module_count,
+                                  2 * module_count + 1);
+
+    pipeline.max_wire_hits = max_wire_multiplicity;
+    pipeline.max_grid_hits = max_grid_multiplicity;
+
+    pipeline.analyzer.digital_geometry = jj["digital_geometry"];
+    pipeline.analyzer.weighted(jj["analysis_weighted"]);
+
+    g.pipelines.push_back(pipeline);
+  }
+
+  ESSGeometry logical_geometry(g.max_x(), g.max_y(), g.max_z(), 1);
+
+  for (auto &p : g.pipelines) {
+    p.geometry = logical_geometry;
+  }
+
+  g.merger = ChronoMerger(max_latency, g.pipelines.size());
 }
 
 }

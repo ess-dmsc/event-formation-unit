@@ -55,8 +55,6 @@ protected:
 
   void load_config(const std::string &jsonfile) {
     config = Multigrid::Config(jsonfile);
-    auto p = config.reduction.pipelines.front();
-    config.builder = std::make_shared<BuilderReadouts>(p.analyzer.mappings.mapping());
     MESSAGE() << "Config: " << config.debug() << "\n";
   }
 
@@ -66,13 +64,12 @@ protected:
     uint8_t buffer[9000];
     size_t readsz;
 
-    auto mappings = config.reduction.pipelines.front().analyzer.mappings.mapping();
     while ((readsz = reader.read((char *) &buffer)) > 0) {
       config.builder->parse(Buffer<uint8_t>(buffer, readsz));
       ingested_hits += config.builder->ConvertedData.size();
       // manual ingest with hit absolutification
       for (const auto &h : config.builder->ConvertedData) {
-        config.reduction.ingest(mappings.absolutify(h));
+        config.reduction.ingest(config.mappings.absolutify(h));
       }
       config.builder->ConvertedData.clear();
 

@@ -29,7 +29,7 @@ std::string ModuleMapping::debug(std::string prefix) const {
       + channel_mappings->debug(prefix + "  ");
 }
 
-void DetectorMapping::add_bus(std::shared_ptr<ChannelMappings> mappings) {
+void DetectorMappings::add_bus(std::shared_ptr<ChannelMappings> mappings) {
   ModuleMapping modmap;
   modmap.channel_mappings = mappings;
   for (const auto &d : buses) {
@@ -40,7 +40,7 @@ void DetectorMapping::add_bus(std::shared_ptr<ChannelMappings> mappings) {
   buses.push_back(modmap);
 }
 
-bool DetectorMapping::map(Hit &hit, uint8_t bus, uint16_t channel, uint16_t adc) const {
+bool DetectorMappings::map(Hit &hit, uint8_t bus, uint16_t channel, uint16_t adc) const {
   if (bus >= buses.size()) {
     hit.plane = Hit::InvalidPlane;
     hit.coordinate = Hit::InvalidCoord;
@@ -56,7 +56,7 @@ bool DetectorMapping::map(Hit &hit, uint8_t bus, uint16_t channel, uint16_t adc)
   return ret;
 }
 
-Hit DetectorMapping::absolutify(const Hit &original) const {
+Hit DetectorMappings::absolutify(const Hit &original) const {
   if ((original.plane == Hit::PulsePlane) || (original.plane == Hit::InvalidPlane))
     return original;
 
@@ -71,31 +71,31 @@ Hit DetectorMapping::absolutify(const Hit &original) const {
   return transformed;
 }
 
-uint16_t DetectorMapping::max_wire() const {
+uint16_t DetectorMappings::max_wire() const {
   if (buses.empty())
     return 0;
   const auto &b = buses.back();
   return b.wire_offset + b.channel_mappings->max_wire();
 }
 
-uint16_t DetectorMapping::max_grid() const {
+uint16_t DetectorMappings::max_grid() const {
   if (buses.empty())
     return 0;
   const auto &b = buses.back();
   return b.grid_offset + b.channel_mappings->max_grid();
 }
 
-std::string DetectorMapping::debug(std::string prefix) const {
+std::string DetectorMappings::debug(std::string prefix) const {
   std::stringstream ss;
 
   for (size_t i = 0; i < buses.size(); i++) {
-    ss << prefix << "  bus#" << i << "   " << buses[i].debug(prefix);
+    ss << prefix << "  bus#" << i << "   " << buses[i].debug(prefix + "  ");
   }
 
   return ss.str();
 }
 
-void from_json(const nlohmann::json &j, DetectorMapping &g) {
+void from_json(const nlohmann::json &j, DetectorMappings &g) {
   for (unsigned int i = 0; i < j.size(); i++) {
     nlohmann::json jj = j[i];
     std::string type = jj["type"];

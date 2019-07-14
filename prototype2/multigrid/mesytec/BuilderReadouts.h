@@ -3,13 +3,13 @@
 #pragma once
 #include <multigrid/AbstractBuilder.h>
 #include <multigrid/mesytec/Readout.h>
-#include <multigrid/geometry/DigitalGeometry.h>
+#include <multigrid/geometry/DetectorMappings.h>
 
 namespace Multigrid {
 
 class BuilderReadouts : public AbstractBuilder {
 public:
-  BuilderReadouts(const DetectorMapping& geometry, std::string dump_dir = "");
+  BuilderReadouts(const DetectorMappings& geometry, std::string dump_dir = "");
 
   void parse(Buffer<uint8_t> buffer) override;
 
@@ -23,7 +23,7 @@ protected:
 
 private:
   std::shared_ptr<HitFile> dumpfile_;
-  DetectorMapping digital_geometry_;
+  DetectorMappings mappings_;
 
   std::vector<Readout> parsed_data_;
 };

@@ -9,7 +9,7 @@
 
 namespace Multigrid {
 
-BuilderMesytec::BuilderMesytec(const DetectorMapping &geometry, bool spoof_time,
+BuilderMesytec::BuilderMesytec(const DetectorMappings &geometry, bool spoof_time,
                                std::string dump_dir)
     : BuilderReadouts(geometry) {
   vmmr16Parser_.spoof_high_time(spoof_time);

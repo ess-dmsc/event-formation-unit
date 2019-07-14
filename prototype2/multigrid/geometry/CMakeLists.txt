@@ -1,31 +1,31 @@
-set(FilterTest_SRC
+set(MGFilterTest_SRC
   FilterTest.cpp
   Filter.cpp
   )
-set(FilterTest_INC
+set(MGFilterTest_INC
   Filter.h
   )
-create_test_executable(FilterTest)
+create_test_executable(MGFilterTest)
 
-set(ModuleGeometryTest_SRC
+set(MGModuleGeometryTest_SRC
   ModuleGeometryTest.cpp
   ModuleGeometry.cpp
   )
-set(ModuleGeometryTest_INC
+set(MGModuleGeometryTest_INC
   ModuleGeometry.h
   )
-create_test_executable(ModuleGeometryTest)
+create_test_executable(MGModuleGeometryTest)
 
-set(ChannelMappingsTest_SRC
+set(MGChannelMappingsTest_SRC
   ChannelMappingsTest.cpp
   ChannelMappings.cpp
   Filter.cpp
   )
-set(ChannelMappingsTest_INC
+set(MGChannelMappingsTest_INC
   ChannelMappings.h
   Filter.h
   )
-create_test_executable(ChannelMappingsTest)
+create_test_executable(MGChannelMappingsTest)
 
 set(MGSeqMappingsTest_SRC
   MGSeqMappingsTest.cpp

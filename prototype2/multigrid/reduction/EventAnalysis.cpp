@@ -43,13 +43,13 @@ ReducedEvent EventAnalyzer::analyze(Event &event) {
         break;
       stats_used_hits++;
       if (weighted_) {
-        xmass += mappings.x_from_wire(h.coordinate) * h.weight;
-        zmass += mappings.z_from_wire(h.coordinate) * h.weight;
+        xmass += digital_geometry.x_from_wire(h.coordinate) * h.weight;
+        zmass += digital_geometry.z_from_wire(h.coordinate) * h.weight;
         xsum += h.weight;
         zsum += h.weight;
       } else {
-        xmass += mappings.x_from_wire(h.coordinate);
-        zmass += mappings.z_from_wire(h.coordinate);
+        xmass += digital_geometry.x_from_wire(h.coordinate);
+        zmass += digital_geometry.z_from_wire(h.coordinate);
         xsum++;
         zsum++;
       }
@@ -73,10 +73,10 @@ ReducedEvent EventAnalyzer::analyze(Event &event) {
         break;
       stats_used_hits++;
       if (weighted_) {
-        ymass += mappings.y_from_grid(h.coordinate) * h.weight;
+        ymass += digital_geometry.y_from_grid(h.coordinate) * h.weight;
         ysum += h.weight;
       } else {
-        ymass += mappings.y_from_grid(h.coordinate);
+        ymass += digital_geometry.y_from_grid(h.coordinate);
         ysum++;
       }
     }

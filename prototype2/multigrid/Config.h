@@ -8,6 +8,7 @@
 #pragma once
 
 #include <multigrid/AbstractBuilder.h>
+#include <multigrid/geometry/DetectorMappings.h>
 #include <multigrid/reduction/Reduction.h>
 #include <multigrid/reduction/EventAnalysis.h>
 #include <logical_geometry/ESSGeometry.h>
@@ -19,6 +20,7 @@ struct Config {
   Config() = default;
   explicit Config(std::string jsonfile, std::string dump_path = "");
 
+  DetectorMappings mappings;
   std::shared_ptr<AbstractBuilder> builder;
   Reduction reduction;
 

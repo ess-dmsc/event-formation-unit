@@ -14,6 +14,7 @@ if(EXISTS ${TEST_DATA_PATH})
   set(MGReductionTest_SRC
     ../geometry/Filter.cpp
     ../geometry/ChannelMappings.cpp
+    ../geometry/DetectorMappings.cpp
     ../geometry/ModuleGeometry.cpp
     ../geometry/DigitalGeometry.cpp
     ../geometry/MGSeqMappings.cpp
@@ -37,6 +38,7 @@ if(EXISTS ${TEST_DATA_PATH})
     ../mesytec/Vmmr16Parser.h
     ../mesytec/Readout.h
     ../geometry/ChannelMappings.h
+    ../geometry/DetectorMappings.h
     ../geometry/ModuleGeometry.h
     ../geometry/DigitalGeometry.h
     ../geometry/MGSeqMappings.h

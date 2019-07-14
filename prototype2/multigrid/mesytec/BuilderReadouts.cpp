@@ -9,9 +9,9 @@
 
 namespace Multigrid {
 
-BuilderReadouts::BuilderReadouts(const DetectorMapping &geometry,
+BuilderReadouts::BuilderReadouts(const DetectorMappings &geometry,
                                  std::string dump_dir)
-    : digital_geometry_(geometry) {
+    : mappings_(geometry) {
   if (!dump_dir.empty()) {
     dumpfile_ = HitFile::create(dump_dir + "multigrid_hits_" + timeString(), 100);
   }
@@ -25,7 +25,7 @@ std::string BuilderReadouts::debug() const {
   ss << "  ======================================================\n";
 
   ss << "  Mappings:\n";
-  ss << digital_geometry_.debug("  ") << "\n";
+  ss << mappings_.debug("  ") << "\n";
 
   return ss.str();
 }
@@ -59,7 +59,7 @@ void BuilderReadouts::build(const std::vector<Readout> &readouts) {
       continue;
     }
 
-    bool good = digital_geometry_.map(hit_, r.bus, r.channel, r.adc);
+    bool good = mappings_.map(hit_, r.bus, r.channel, r.adc);
     if (hit_.plane == Hit::InvalidPlane) {
       XTRACE(PROCESS, DEB, "Bad mappings for %s", r.debug().c_str());
       stats_digital_geom_errors++;

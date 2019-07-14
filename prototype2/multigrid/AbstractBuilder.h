@@ -9,10 +9,6 @@ namespace Multigrid {
 
 class AbstractBuilder {
 public:
-  // \todo get rid of these here, in ChannelMappings instead
-  static constexpr uint8_t wire_plane {0};
-  static constexpr uint8_t grid_plane {1};
-
   virtual void parse(Buffer<uint8_t> buffer) = 0;
   virtual std::string debug() const = 0;
   virtual ~AbstractBuilder() = default;

@@ -20,7 +20,7 @@ Config::Config(std::string jsonfile, std::string dump_path) {
 
     if (!t.good()) {
       XTRACE(INIT, ERR, "Invalid Json file: %s", jsonfile.c_str());
-      throw std::runtime_error("Multi-Grid config file error - requested file unavailable.");
+      throw std::runtime_error("Multigrid config file error - requested file unavailable.");
     }
 
     root = nlohmann::json::parse(str);
@@ -30,38 +30,19 @@ Config::Config(std::string jsonfile, std::string dump_path) {
     return;
   }
 
-  DigitalGeometry mappings{root["mappings"]};
+  if (root.count("mappings")) {
+    mappings = root["mappings"];
+  }
 
   auto br = root["builder"];
   if (br["type"] == "mesytec") {
-    builder = std::make_shared<BuilderMesytec>(mappings.mapping(),
-                                               br["spoof_high_time"],
-                                               dump_path);
+    builder = std::make_shared<BuilderMesytec>(mappings, br["spoof_high_time"], dump_path);
   } else if (br["type"] == "readouts") {
-    builder = std::make_shared<BuilderReadouts>(mappings.mapping(), dump_path);
+    builder = std::make_shared<BuilderReadouts>(mappings, dump_path);
   }
 
-  ModulePipeline pipeline;
-
-  pipeline.max_wire_hits = root["max_wire_hits"];
-  pipeline.max_grid_hits = root["max_grid_hits"];
-
-  pipeline.analyzer.weighted(root["weighted"]);
-  pipeline.analyzer.mappings = mappings;
-
-  // deduced geometry from MG mappings
-  pipeline.geometry.nx(mappings.max_x());
-  pipeline.geometry.ny(mappings.max_y());
-  pipeline.geometry.nz(mappings.max_z());
-  pipeline.geometry.np(1);
-
-  reduction.pipelines.resize(pipeline.analyzer.mappings.geometry().buses.size(),
-                             pipeline);
-
-  for (size_t i = 0; i < reduction.pipelines.size(); ++i) {
-    reduction.pipelines[i].matcher = GapMatcher(sequoia_maximum_latency,
-                                                i, i + 1);
-  }
+  if (root.count("pipeline_config"))
+    reduction = root["pipeline_config"];
 }
 
 std::string Config::debug() const {
@@ -71,11 +52,7 @@ std::string Config::debug() const {
   else
     ss << "  ========           No Builder :(           ========\n";
 
-  for (size_t i = 0; i < reduction.pipelines.size(); ++i) {
-    ss << "  Module[" << i << "]\n";
-    ss << reduction.pipelines[i].debug("  ");
-    ss << "\n";
-  }
+  ss << "  " << reduction.debug("  ");
   return ss.str();
 }
 

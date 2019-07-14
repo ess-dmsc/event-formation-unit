@@ -29,7 +29,7 @@ struct ModuleMapping {
   std::string debug(std::string prefix = "") const;
 };
 
-class DetectorMapping {
+class DetectorMappings {
 public:
   void add_bus(std::shared_ptr<ChannelMappings>);
 
@@ -51,6 +51,6 @@ public:
   std::vector<ModuleMapping> buses;
 };
 
-void from_json(const nlohmann::json &j, DetectorMapping &g);
+void from_json(const nlohmann::json &j, DetectorMappings &g);
 
 }

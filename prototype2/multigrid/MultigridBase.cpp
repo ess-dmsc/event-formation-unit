@@ -8,6 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <multigrid/MultigridBase.h>
+#include <multigrid/geometry/PlaneMappings.h>
 
 #include <common/Producer.h>
 #include <common/TimeString.h>
@@ -17,8 +18,6 @@
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
-
-//#include <multigrid/channel_mappings/MG24Mappings.h>
 
 #include <common/Trace.h>
 #undef TRC_LEVEL
@@ -162,8 +161,6 @@ void MultigridBase::mainThread() {
   uint8_t buffer[eth_buffer_size];
 
   // For absolutifying hit coordinates. Should get rid of this eventually...
-  auto mappings = mg_config.reduction.pipelines.front().analyzer.mappings.mapping();
-
   TSCTimer report_timer;
   while (true) {
     ssize_t ReadSize{0};
@@ -188,14 +185,14 @@ void MultigridBase::mainThread() {
         {
           Hit transformed;
           for (const auto& hit : mg_config.builder->ConvertedData) {
-            transformed = mappings.absolutify(hit);
+            transformed = mg_config.mappings.absolutify(hit);
             if (monitor.readouts)
               monitor.readouts->addEntry((transformed.plane % 2) + 1, transformed.coordinate,
                                          transformed.time, transformed.weight);
             if (monitor.hists) {
-              if ((transformed.plane % 2) == Multigrid::ChannelMappings::wire_plane)
+              if (hit.plane == Multigrid::wire_plane)
                 monitor.hists->bin_x(transformed.coordinate, transformed.weight);
-              else if ((transformed.plane % 2) == Multigrid::ChannelMappings::grid_plane)
+              else if (hit.plane == Multigrid::grid_plane)
                 monitor.hists->bin_y(transformed.coordinate, transformed.weight);
             }
           }
@@ -203,7 +200,7 @@ void MultigridBase::mainThread() {
         }
         // manual ingest with hit absolutification
         for (const auto& h : mg_config.builder->ConvertedData) {
-          mg_config.reduction.ingest(mappings.absolutify(h));
+          mg_config.reduction.ingest(mg_config.mappings.absolutify(h));
         }
         mg_config.builder->ConvertedData.clear();
 

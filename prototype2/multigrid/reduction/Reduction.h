@@ -42,11 +42,10 @@ public:
 
 //private:
 
-  GapClusterer wire_clusters{0, 1};
-  GapClusterer grid_clusters{0, 1};
+// \todo use GapClusterer2D
+  GapClusterer wire_clusterer{0, 1};
+  GapClusterer grid_clusterer{0, 1};
 
-  // Just greater than shortest pulse period of 266662 ticks
-  // Will have to be adjusted for other experimental setups
   GapMatcher matcher{sequoia_maximum_latency, 0, 1};
 
   size_t max_wire_hits {12};
@@ -61,13 +60,20 @@ private:
 
 };
 
+void from_json(const nlohmann::json &j, ModulePipeline &g);
+
+
 class Reduction {
 public:
   Reduction();
   void ingest(HitVector &hits);
   void ingest(const Hit& hit);
   void process_queues(bool flush);
-  // \todo std::string debug() const;
+  std::string debug(std::string prepend) const;
+
+  uint32_t max_x() const;
+  uint32_t max_y() const;
+  uint32_t max_z() const;
 
   std::vector<ModulePipeline> pipelines;
   EventProcessingStats stats;
@@ -79,5 +85,8 @@ public:
 private:
 
 };
+
+void from_json(const nlohmann::json &j, Reduction &g);
+
 
 }
