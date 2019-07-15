@@ -160,7 +160,6 @@ void MultigridBase::mainThread() {
 
   uint8_t buffer[eth_buffer_size];
 
-  // For absolutifying hit coordinates. Should get rid of this eventually...
   TSCTimer report_timer;
   while (true) {
     ssize_t ReadSize{0};
@@ -198,13 +197,7 @@ void MultigridBase::mainThread() {
           }
 
         }
-        // manual ingest with hit absolutification
-        for (const auto& h : mg_config.builder->ConvertedData) {
-          mg_config.reduction.ingest(mg_config.mappings.absolutify(h));
-        }
-        mg_config.builder->ConvertedData.clear();
-
-//        mg_config.reduction.ingest(mg_config.builder->ConvertedData);
+        mg_config.reduction.ingest(mg_config.builder->ConvertedData);
 
         mg_config.reduction.process_queues(false);
         process_events(ev42serializer);
@@ -231,6 +224,8 @@ void MultigridBase::mainThread() {
     if (not runThreads) {
       LOG(PROCESS, Sev::Info, "Stopping processing thread.");
       // flush anything that remains
+
+      LOG(PROCESS, Sev::Info, "Pipeline status\n" + mg_config.reduction.status("", false));
 
       mg_config.reduction.process_queues(true);
       process_events(ev42serializer);

@@ -15,6 +15,7 @@ namespace Multigrid {
 static constexpr uint64_t sequoia_maximum_latency {300000};
 
 struct EventProcessingStats {
+  size_t invalid_modules{0};
   size_t invalid_planes{0};
   size_t time_seq_errors{0};
   size_t wire_clusters{0};

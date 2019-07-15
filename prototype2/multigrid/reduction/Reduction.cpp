@@ -261,7 +261,7 @@ std::string Reduction::status(const std::string& prepend, bool verbose) const {
       }
     }
   }
-  ss << prepend << "Merger:\n" << merger.debug(prepend + "  ", true);
+  ss << prepend << "Merger:\n" << merger.debug(prepend + "  ", verbose);
 
   for (size_t i = 0; i < pipelines.size(); ++i) {
     ss << prepend + "Module[" << i << "]\n";
