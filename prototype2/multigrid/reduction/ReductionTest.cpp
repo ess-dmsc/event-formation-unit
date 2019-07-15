@@ -176,16 +176,16 @@ TEST_F(ReductionTest, t00004) {
 
   EXPECT_EQ(config.reduction.stats.wire_clusters, 164);
   EXPECT_EQ(config.reduction.stats.grid_clusters, 184);
-  EXPECT_EQ(config.reduction.stats.events_total, 182);
+  EXPECT_EQ(config.reduction.stats.events_total, 196);
   EXPECT_EQ(config.reduction.stats.events_multiplicity_rejects, 13);
-  EXPECT_EQ(config.reduction.stats.hits_used, 302);
-  EXPECT_EQ(config.reduction.stats.events_bad, 36);
+  EXPECT_EQ(config.reduction.stats.hits_used, 305);
+  EXPECT_EQ(config.reduction.stats.events_bad, 62);
   EXPECT_EQ(config.reduction.stats.events_geometry_err, 0);
 
   inspect_pulse_data();
   inspect_event_data();
   EXPECT_EQ(pulse_times, 467);
-  EXPECT_EQ(good_events, 133);
+  EXPECT_EQ(good_events, 121);
   EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
                 + config.reduction.stats.events_bad,
             config.reduction.stats.events_total);

@@ -31,7 +31,6 @@ struct ReducedHit {
 };
 
 struct ReducedEvent {
-  uint32_t module {0};
   ReducedHit x, y, z;
 
   uint64_t time {0};

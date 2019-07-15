@@ -11,12 +11,6 @@
 #include <iosfwd>
 
 #include <sstream>
-#include <fmt/format.h>
-
-std::string NeutronEvent::to_string() const {
-  return fmt::format("t:{:>20}  pix:{:>10}", time, pixel_id);
-}
-
 
 ChronoMerger::ChronoMerger(uint64_t maximum_latency, size_t modules)
     : maximum_latency_(maximum_latency) {

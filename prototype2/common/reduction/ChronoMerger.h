@@ -8,19 +8,10 @@
 
 #pragma once
 
-#include <cstdint>
+#include <common/reduction/NeutronEvent.h>
 #include <cstddef>
 #include <vector>
 #include <list>
-#include <string>
-
-// \todo move this to separate header
-struct NeutronEvent {
-  uint64_t time;
-  uint32_t pixel_id;
-
-  std::string to_string() const;
-};
 
 /// \class ChronoMerger ChronoMerger.h
 /// \brief

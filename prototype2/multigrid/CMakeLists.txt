@@ -16,8 +16,9 @@ set(multigrid_common_src
   mesytec/Vmmr16Parser.cpp
   mesytec/Sis3153Parser.cpp
   mesytec/BuilderMesytec.cpp
+  reduction/EventProcessingStats.cpp
+  reduction/ModulePipeline.cpp
   reduction/Reduction.cpp
-  reduction/EventAnalysis.cpp
   Config.cpp
   )
 set(multigrid_common_inc
@@ -32,8 +33,9 @@ set(multigrid_common_inc
   mesytec/Vmmr16Parser.h
   mesytec/Sis3153Parser.h
   mesytec/BuilderMesytec.h
+  reduction/EventProcessingStats.h
+  reduction/ModulePipeline.h
   reduction/Reduction.h
-  reduction/EventAnalysis.h
   AbstractBuilder.h
   Config.h
   )

@@ -45,8 +45,9 @@ if(EXISTS ${TEST_DATA_PATH})
     ../geometry/MGSeqMappings.cpp
     ../geometry/DetectorMappings.cpp
     ../geometry/ModuleGeometry.cpp
+    ../reduction/EventProcessingStats.cpp
+    ../reduction/ModulePipeline.cpp
     ../reduction/Reduction.cpp
-    ../reduction/EventAnalysis.cpp
     ../generators/ReaderReadouts.cpp
     ../Config.cpp
     )
@@ -64,8 +65,9 @@ if(EXISTS ${TEST_DATA_PATH})
     ../geometry/ModuleGeometry.h
     ../generators/ReaderReadouts.h
     ../Config.h
+    ../reduction/EventProcessingStats.h
+    ../reduction/ModulePipeline.h
     ../reduction/Reduction.h
-    ../reduction/EventAnalysis.h
     )
   create_test_executable(MGBuilderReadoutsTest)
   target_compile_definitions(MGBuilderReadoutsTest
@@ -90,7 +92,8 @@ if(EXISTS ${TEST_DATA_PATH2})
     ../geometry/DetectorMappings.cpp
     ../geometry/ModuleGeometry.cpp
     ../../tools/ReaderPcap.cpp
-    ../reduction/EventAnalysis.cpp
+    ../reduction/EventProcessingStats.cpp
+    ../reduction/ModulePipeline.cpp
     ../reduction/Reduction.cpp
     ../Config.cpp
     )
@@ -108,8 +111,9 @@ if(EXISTS ${TEST_DATA_PATH2})
     ../geometry/ModuleGeometry.h
     ../../tools/ReaderPcap.h
     ../Config.h
+    ../reduction/EventProcessingStats.h
+    ../reduction/ModulePipeline.h
     ../reduction/Reduction.h
-    ../reduction/EventAnalysis.h
     )
   set(MGBuilderMesytecTest_LIB
     ${PCAP_LIBRARY}

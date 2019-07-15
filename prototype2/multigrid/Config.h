@@ -10,8 +10,6 @@
 #include <multigrid/AbstractBuilder.h>
 #include <multigrid/geometry/DetectorMappings.h>
 #include <multigrid/reduction/Reduction.h>
-#include <multigrid/reduction/EventAnalysis.h>
-#include <logical_geometry/ESSGeometry.h>
 #include <memory>
 
 namespace Multigrid {

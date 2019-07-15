@@ -15,7 +15,7 @@ public:
 
   mutable size_t stats_used_hits{0};
 
-  // \todo parametrize planes
+  // \todo print debug
 
   // \todo make private?
   Multigrid::ModuleGeometry geometry_;

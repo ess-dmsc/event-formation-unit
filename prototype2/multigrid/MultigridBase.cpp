@@ -61,11 +61,11 @@ MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings con
   Stats.create("tx_bytes", mystats.tx_bytes);
 
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_fails",             mystats.kafka_produce_fails);
-  Stats.create("kafka.ev_errors",                 mystats.kafka_ev_errors);
-  Stats.create("kafka.ev_others",                 mystats.kafka_ev_others);
-  Stats.create("kafka.dr_errors",                 mystats.kafka_dr_errors);
-  Stats.create("kafka.dr_others",                 mystats.kafka_dr_noerrors);
+  Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka.ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka.ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka.dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka.dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
   LOG(INIT, Sev::Info, "Stream monitor data = {}",
@@ -155,7 +155,7 @@ void MultigridBase::mainThread() {
 #pragma GCC diagnostic warning "-Wdeprecated-declarations"
   ev42serializer.setProducerCallback(std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 #pragma GCC diagnostic pop
-  
+
   ev42serializer.pulseTime(0);
 
   uint8_t buffer[eth_buffer_size];
@@ -180,18 +180,18 @@ void MultigridBase::mainThread() {
       if (!mg_config.builder->ConvertedData.empty()) {
         mystats.hits_total += mg_config.builder->ConvertedData.size();
 
-        if (monitor.readouts || monitor.hists)
-        {
+        if (monitor.readouts || monitor.hists) {
           Hit transformed;
-          for (const auto& hit : mg_config.builder->ConvertedData) {
+          for (const auto &hit : mg_config.builder->ConvertedData) {
             transformed = mg_config.mappings.absolutify(hit);
             if (monitor.readouts)
-              monitor.readouts->addEntry((transformed.plane % 2) + 1, transformed.coordinate,
-                                         transformed.time, transformed.weight);
+              monitor.readouts->addEntry(transformed.plane + 1,
+                                         transformed.coordinate, transformed.time,
+                                         transformed.weight);
             if (monitor.hists) {
-              if (hit.plane == Multigrid::wire_plane)
+              if (transformed.plane == Multigrid::wire_plane)
                 monitor.hists->bin_x(transformed.coordinate, transformed.weight);
-              else if (hit.plane == Multigrid::grid_plane)
+              else if (transformed.plane == Multigrid::grid_plane)
                 monitor.hists->bin_y(transformed.coordinate, transformed.weight);
             }
           }

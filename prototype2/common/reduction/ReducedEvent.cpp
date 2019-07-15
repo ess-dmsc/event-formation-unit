@@ -17,8 +17,8 @@ std::string ReducedHit::debug() const {
 }
 
 std::string ReducedEvent::debug() const {
-  return fmt::format("m={} x=[{}], y=[{}], z=[{}], t={} {}",
-      module, x.debug(), y.debug(), z.debug(),
+  return fmt::format("x=[{}], y=[{}], z=[{}], t={} {}",
+      x.debug(), y.debug(), z.debug(),
       time, (good ? "good" : "bad"));
 }
 

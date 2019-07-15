@@ -7,6 +7,7 @@ set(analysis_obj_SRC
   AbstractAnalyzer.cpp
   MgAnalyzer.cpp
   UtpcAnalyzer.cpp
+  NeutronEvent.cpp
   ChronoMerger.cpp
 )
 
@@ -15,6 +16,7 @@ set(analysis_obj_INC
   AbstractAnalyzer.h
   MgAnalyzer.h
   UtpcAnalyzer.h
+  NeutronEvent.h
   ChronoMerger.h
 )
 
