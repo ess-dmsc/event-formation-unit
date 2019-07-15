@@ -28,8 +28,8 @@ static void EventGenBM(benchmark::State &state) {
     builder.flush();
 
     for (auto & e : builder.matcher.matched_events) {
-      auto x = e.cluster1.coord_center();
-      auto y = e.cluster2.coord_center();
+      auto x = e.ClusterA.coord_center();
+      auto y = e.ClusterB.coord_center();
       xsum += x;
       ysum += y;
     }
