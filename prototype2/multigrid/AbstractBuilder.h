@@ -2,8 +2,7 @@
 
 #pragma once
 #include <common/Buffer.h>
-#include <common/clustering/Hit.h>
-#include <vector>
+#include <common/reduction/HitVector.h>
 
 namespace Multigrid {
 
@@ -13,7 +12,7 @@ public:
   virtual std::string debug() const = 0;
   virtual ~AbstractBuilder() = default;
 
-  std::vector<Hit> ConvertedData;
+  HitVector ConvertedData;
 
   size_t stats_readouts_total {0};
   size_t stats_discarded_bytes {0};

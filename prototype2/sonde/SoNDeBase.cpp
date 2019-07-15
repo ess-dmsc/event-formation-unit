@@ -7,7 +7,7 @@
 
 #include <sonde/SoNDeBase.h>
 #include <common/EV42Serializer.h>
-#include <common/HistSerializer.h>
+#include <common/monitor/HistSerializer.h>
 #include <common/Producer.h>
 #include <common/Trace.h>
 #include <common/Socket.h>

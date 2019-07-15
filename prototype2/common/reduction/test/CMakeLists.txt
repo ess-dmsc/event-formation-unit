@@ -1,31 +1,21 @@
-#=============================================================================
-# Tests
-#=============================================================================
+set(HitTest_SRC
+  HitTest.cpp
+  )
+create_test_executable(HitTest SKIP_MEMGRIND)
+
+set(ClusterTest_SRC
+  ClusterTest.cpp
+  )
+create_test_executable(ClusterTest)
+
+set(EventTest_SRC
+  EventTest.cpp
+  )
+create_test_executable(EventTest)
 
 set(ReducedEventTest_SRC
   ReducedEventTest.cpp
   )
 create_test_executable(ReducedEventTest)
 
-set(AbstractAnalyzerTest_SRC
-  AbstractAnalyzerTest.cpp
-  )
-create_test_executable(AbstractAnalyzerTest)
-
-set(UtpcAnalyzerTest_SRC
-  UtpcAnalyzerTest.cpp
-  )
-create_test_executable(UtpcAnalyzerTest)
-
-#todo make abstract geometry class, non MG-specific?
-set(MgAnalyzerTest_SRC
-  MgAnalyzerTest.cpp
-  ../../../multigrid/geometry/ModuleGeometry.cpp
-  ../../../multigrid/geometry/Filter.cpp
-  )
-create_test_executable(MgAnalyzerTest)
-
-set(ChronoMergerTest_SRC
-  ChronoMergerTest.cpp
-  )
-create_test_executable(ChronoMergerTest)
+# \todo tests for NeutronEvent?

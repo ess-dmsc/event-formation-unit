@@ -1,15 +1,12 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/Readout.h>
-#include <common/clustering/GapClusterer.h>
-#include <common/clustering/GapMatcher.h>
+#include <test/TestBase.h>
+
+#include <common/reduction/clustering/GapClusterer.h>
+#include <common/reduction/matching/GapMatcher.h>
 
 #include <memory>
-#include <stdio.h>
-#include <unistd.h>
-#include <test/TestBase.h>
 #include <gdgem/NMXConfig.h>
-#include <functional>
 
 using namespace Gem;
 

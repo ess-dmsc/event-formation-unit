@@ -9,12 +9,13 @@
 #pragma once
 
 #include <common/Detector.h>
-#include <common/Hists.h>
-#include <common/HistSerializer.h>
-#include <common/Log.h>
-#include <common/ReadoutSerializer.h>
+#include <common/monitor/Hists.h>
+#include <common/monitor/HistSerializer.h>
+#include <common/monitor/ReadoutSerializer.h>
 #include <common/EV42Serializer.h>
 #include <multigrid/Config.h>
+
+#include <common/Log.h>
 
 struct MultigridSettings {
   std::string ConfigFile;

@@ -3,7 +3,7 @@
 #include <multigrid/reduction/ModulePipeline.h>
 #include <multigrid/mesytec/BuilderReadouts.h>
 #include <multigrid/generators/ReaderReadouts.h>
-#include <common/DynamicHist.h>
+#include <common/monitor/DynamicHist.h>
 #include <test/TestBase.h>
 
 using namespace Multigrid;

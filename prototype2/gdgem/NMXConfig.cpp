@@ -1,8 +1,8 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <gdgem/NMXConfig.h>
-#include <common/reduction/UtpcAnalyzer.h>
-#include <common/reduction/MgAnalyzer.h>
+#include <common/reduction/analysis/UtpcAnalyzer.h>
+#include <common/reduction/analysis/MgAnalyzer.h>
 #include <nlohmann/json.hpp>
 #include <fstream>
 

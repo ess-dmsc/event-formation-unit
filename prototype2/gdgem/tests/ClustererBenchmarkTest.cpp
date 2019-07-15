@@ -5,8 +5,8 @@
 #include <test/TestBase.h>
 
 #include <gdgem/nmx/Readout.h>
-#include <common/clustering/GapClusterer.h>
-#include <common/clustering/GapMatcher.h>
+#include <common/reduction/clustering/GapClusterer.h>
+#include <common/reduction/matching/GapMatcher.h>
 
 using namespace Gem;
 

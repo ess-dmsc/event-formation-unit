@@ -1,16 +1,12 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/reduction/AbstractAnalyzer.h>
-#include <cmath>
-#include <string>
+#include <common/reduction/ReducedEvent.h>
+
 #include <test/TestBase.h>
-#include <unistd.h>
 
 class ReducedEventTest : public TestBase {
 protected:
-  Hit hit;
-  Cluster cluster;
-  Event event;
+  ReducedEvent event;
   void SetUp() override { }
   void TearDown() override { }
 };

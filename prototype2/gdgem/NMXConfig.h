@@ -7,14 +7,12 @@
 
 #pragma once
 
-#include <cinttypes>
 #include <logical_geometry/ESSGeometry.h>
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
-#include <common/reduction/AbstractAnalyzer.h>
+#include <common/reduction/analysis/AbstractAnalyzer.h>
 #include <gdgem/srs/CalibrationFile.h>
 #include <memory>
-#include <string>
 
 namespace Gem {
 

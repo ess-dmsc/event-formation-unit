@@ -4,8 +4,9 @@
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
 
+#include <generators/ReaderHits.h>
+
 #include <multigrid/generators/ReaderReadouts.h>
-#include <gdgem/generators/ReaderHits.h>
 #include <gdgem/generators/ReaderReadouts.h>
 
 #include <common/Socket.h>
@@ -71,16 +72,16 @@ int main(int argc, char *argv[]) {
 
   Settings.FileName = remove_extension(Settings.FileName);
 
+  #ifdef GENERATOR_UDP_HITS
+  Gem::ReaderHits file(Settings.FileName);
+  #endif
+
   #ifdef GENERATOR_MULTIGRID_READOUTS
   Multigrid::ReaderReadouts file(Settings.FileName);
   #endif
 
   #ifdef GENERATOR_GDGEM_READOUTS
   Gem::ReaderReadouts file(Settings.FileName);
-  #endif
-
-  #ifdef GENERATOR_GDGEM_HITS
-  Gem::ReaderHits file(Settings.FileName);
   #endif
 
   size_t ReadoutSize = file.getReadoutSize();

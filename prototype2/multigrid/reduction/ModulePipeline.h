@@ -2,9 +2,9 @@
 
 #pragma once
 #include <multigrid/reduction/EventProcessingStats.h>
-#include <common/clustering/GapClusterer.h>
-#include <common/clustering/GapMatcher.h>
-#include <common/reduction/MgAnalyzer.h>
+#include <common/reduction/clustering/GapClusterer.h>
+#include <common/reduction/matching/GapMatcher.h>
+#include <common/reduction/analysis/MgAnalyzer.h>
 #include <common/reduction/NeutronEvent.h>
 #include <logical_geometry/ESSGeometry.h>
 

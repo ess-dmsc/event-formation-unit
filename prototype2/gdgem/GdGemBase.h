@@ -13,9 +13,9 @@
 #include <gdgem/nmx/AbstractBuilder.h>
 #include <gdgem/NMXConfig.h>
 #include <common/SPSCFifo.h>
-#include <common/clustering/AbstractClusterer.h>
-#include <common/clustering/AbstractMatcher.h>
-#include <common/Hists.h>
+#include <common/reduction/clustering/AbstractClusterer.h>
+#include <common/reduction/matching/AbstractMatcher.h>
+#include <common/monitor/Hists.h>
 #include <common/EV42Serializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 

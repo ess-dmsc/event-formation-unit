@@ -8,7 +8,7 @@
  */
 
 #pragma once
-#include <common/clustering/Hit.h>
+#include <common/reduction/Hit.h>
 #include <multigrid/geometry/Filter.h>
 
 namespace Multigrid {

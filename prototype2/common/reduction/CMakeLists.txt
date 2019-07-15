@@ -1,27 +1,39 @@
 #=============================================================================
-# Common functionality for all detector plugins
+# Classes for event reduction pipeline
 #=============================================================================
 
-set(analysis_obj_SRC
+add_subdirectory(clustering)
+add_subdirectory(matching)
+add_subdirectory(analysis)
+
+set(reduction_obj_SRC
+  Hit.cpp
+  Cluster.cpp
+  Event.cpp
   ReducedEvent.cpp
-  AbstractAnalyzer.cpp
-  MgAnalyzer.cpp
-  UtpcAnalyzer.cpp
   NeutronEvent.cpp
   ChronoMerger.cpp
 )
 
-set(analysis_obj_INC
+set(reduction_obj_INC
+  Hit.h
+  HitVector.h
+  Cluster.h
+  Event.h
   ReducedEvent.h
-  AbstractAnalyzer.h
-  MgAnalyzer.h
-  UtpcAnalyzer.h
   NeutronEvent.h
   ChronoMerger.h
 )
 
-add_library(AnalysisObj OBJECT ${analysis_obj_SRC} ${analysis_obj_INC})
-enable_coverage_flags(AnalysisObj)
+add_library(ReductionObj OBJECT
+  ${reduction_obj_SRC}
+  ${reduction_obj_INC}
+  )
+
+enable_coverage_flags(efu_reduction)
+
+#=============================================================================
+# Tests
+#=============================================================================
 
 add_subdirectory(test)
-

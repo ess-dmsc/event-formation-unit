@@ -10,7 +10,7 @@
 #pragma once
 
 #include <gdgem/nmx/Readout.h>
-#include <common/clustering/Hit.h>
+#include <common/reduction/Hit.h>
 #include <vector>
 
 namespace Gem {

@@ -4,7 +4,7 @@
  */
 
 #pragma once
-#include <common/clustering/Hit.h>
+#include <cinttypes>
 
 namespace Multigrid {
 

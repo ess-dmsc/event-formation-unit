@@ -9,14 +9,14 @@
 
 #include "GdGemBase.h"
 
-#include <common/clustering/GapMatcher.h>
-#include <common/clustering/GapClusterer.h>
+#include <common/reduction/matching/GapMatcher.h>
+#include <common/reduction/clustering/GapClusterer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/srs/BuilderVMM3.h>
 #include <gdgem/generators/BuilderHits.h>
 #include <gdgem/generators/BuilderReadouts.h>
 #include <common/EV42Serializer.h>
-#include <common/HistSerializer.h>
+#include <common/monitor/HistSerializer.h>
 #include <common/Producer.h>
 #include <efu/Server.h>
 #include <common/Socket.h>

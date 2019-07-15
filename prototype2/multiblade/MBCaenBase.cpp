@@ -12,7 +12,7 @@
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
 #include <common/Producer.h>
-#include <common/HistSerializer.h>
+#include <common/monitor/HistSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>

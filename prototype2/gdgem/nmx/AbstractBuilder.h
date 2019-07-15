@@ -9,8 +9,7 @@
 
 #pragma once
 
-#include <common/clustering/AbstractClusterer.h>
-#include <memory>
+#include <common/reduction/HitVector.h>
 
 namespace Gem {
 

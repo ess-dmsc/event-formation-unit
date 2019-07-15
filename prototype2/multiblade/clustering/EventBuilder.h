@@ -4,12 +4,8 @@
 
 #include <multiblade/caen/Readout.h>
 
-#include <common/clustering/Hit.h>
-#include <common/clustering/GapClusterer.h>
-#include <common/clustering/GapMatcher.h>
-
-#include <vector>
-#include <deque>
+#include <common/reduction/clustering/GapClusterer.h>
+#include <common/reduction/matching/GapMatcher.h>
 
 // \todo put these into namespace scope
 static constexpr uint64_t latency{125}; // 2us @ 16ns/tick (2000/16)
