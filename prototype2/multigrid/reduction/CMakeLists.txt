@@ -16,7 +16,6 @@ if(EXISTS ${TEST_DATA_PATH})
     ../geometry/ChannelMappings.cpp
     ../geometry/DetectorMappings.cpp
     ../geometry/ModuleGeometry.cpp
-    ../geometry/DigitalGeometry.cpp
     ../geometry/MGSeqMappings.cpp
     ../generators/ReaderReadouts.cpp
     ../mesytec/BuilderReadouts.cpp
@@ -40,7 +39,6 @@ if(EXISTS ${TEST_DATA_PATH})
     ../geometry/ChannelMappings.h
     ../geometry/DetectorMappings.h
     ../geometry/ModuleGeometry.h
-    ../geometry/DigitalGeometry.h
     ../geometry/MGSeqMappings.h
     ../geometry/Filter.h
     ../Config.h

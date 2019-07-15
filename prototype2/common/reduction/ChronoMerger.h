@@ -30,6 +30,8 @@ public:
   explicit ChronoMerger(uint64_t maximum_latency, size_t modules);
 
   void insert(size_t module, NeutronEvent event);
+  void insert(size_t module, std::list<NeutronEvent>& events);
+  void sync_up(size_t module1, size_t module2);
   void sort();
   void reset();
 

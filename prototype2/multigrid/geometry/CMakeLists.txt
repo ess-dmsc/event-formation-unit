@@ -70,14 +70,3 @@ set(MGDetectorMappingsTest_INC
   Filter.h
   )
 create_test_executable(MGDetectorMappingsTest)
-
-set(MGDigitalGeometryTest_SRC
-  DigitalGeometryTest.cpp
-  DigitalGeometry.cpp
-  ModuleGeometry.cpp
-  )
-set(MGDigitalGeometryTest_INC
-  ModuleGeometry.h
-  DigitalGeometry.h
-  )
-create_test_executable(MGDigitalGeometryTest)

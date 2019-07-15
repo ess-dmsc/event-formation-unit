@@ -16,7 +16,7 @@ GapClusterer::GapClusterer(uint64_t max_time_gap, uint16_t max_coord_gap)
     : AbstractClusterer(), max_time_gap_(max_time_gap), max_coord_gap_(max_coord_gap) {}
 
 void GapClusterer::insert(const Hit &hit) {
-  // Process time-cluster if time gap to next hit is large enough
+  /// Process time-cluster if time gap to next hit is large enough
   if (!current_time_cluster_.empty() &&
       (hit.time - current_time_cluster_.back().time) > max_time_gap_) {
     XTRACE(CLUSTER,
@@ -28,7 +28,7 @@ void GapClusterer::insert(const Hit &hit) {
     flush();
   }
 
-  // Insert hit in either case
+  /// Insert hit in either case
   XTRACE(CLUSTER,
          DEB,
          "insert plane %d, time %u, coord %u, weight %u",
@@ -40,8 +40,7 @@ void GapClusterer::insert(const Hit &hit) {
 }
 
 void GapClusterer::cluster(const HitVector &hits) {
-  //It is assumed that hits are sorted in time
-
+  ///It is assumed that hits are sorted in time
   for (const auto &hit : hits) {
     insert(hit);
   }
@@ -57,7 +56,7 @@ void GapClusterer::flush() {
 }
 
 void GapClusterer::cluster_by_coordinate() {
-  // First, sort in terms of coordinate
+  /// First, sort in terms of coordinate
   sort_by_increasing_coordinate(current_time_cluster_);
 
   Cluster cluster;
@@ -66,7 +65,7 @@ void GapClusterer::cluster_by_coordinate() {
          current_time_cluster_.back().coordinate);
 
   for (auto &hit : current_time_cluster_) {
-    // Stash cluster if coordinate gap to next hit is too large
+    /// Stash cluster if coordinate gap to next hit is too large
     XTRACE(CLUSTER, DEB, "hit coord %u, cluster coord end %u", hit.coordinate, cluster.coord_end());
 
     if (!cluster.empty() &&
@@ -76,12 +75,13 @@ void GapClusterer::cluster_by_coordinate() {
       cluster.clear();
     }
 
-    // insert in either case
+    /// insert in either case
     cluster.insert(hit);
   }
 
-  // Stash any leftovers
-  stash_cluster(cluster);
+  /// Stash any leftovers
+  if (!cluster.empty())
+    stash_cluster(cluster);
 }
 
 std::string GapClusterer::config(const std::string &prepend) const {

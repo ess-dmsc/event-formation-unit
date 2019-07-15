@@ -11,7 +11,6 @@ set(multigrid_common_src
 #  geometry/MG24Mappings.cpp
   geometry/DetectorMappings.cpp
   geometry/ModuleGeometry.cpp
-  geometry/DigitalGeometry.cpp
   mesytec/Readout.cpp
   mesytec/BuilderReadouts.cpp
   mesytec/Vmmr16Parser.cpp
@@ -28,7 +27,6 @@ set(multigrid_common_inc
   geometry/MG24Mappings.h
   geometry/DetectorMappings.h
   geometry/ModuleGeometry.h
-  geometry/DigitalGeometry.h
   mesytec/Readout.h
   mesytec/BuilderReadouts.h
   mesytec/Vmmr16Parser.h

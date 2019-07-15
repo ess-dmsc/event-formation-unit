@@ -13,7 +13,7 @@
 //      which happens in cases of all wires firing (bus glitch).
 //    Wire span shows some expected variation. It is often 80, again indicative
 //      of the "bus glitch". It is occasionally above 80, i.e. spanning multiple
-//      busses, indicative of coincidence across busses.
+//      buses, indicative of coincidence across buses.
 //    Grid multiplicity is generally in the range of 1-7. It is often 40, which
 //      is indicative of "bus glitch".
 //    Grid span - same as wire span, except 40 in case of glitch

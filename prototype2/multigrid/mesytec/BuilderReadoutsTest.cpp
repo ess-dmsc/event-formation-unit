@@ -88,105 +88,105 @@ protected:
 
   }
 };
-
-TEST_F(BuilderReadoutsTest, t00004) {
-  feed_file(TEST_DATA_PATH "readouts/154482");
-
-  EXPECT_EQ(packets, 4);
-  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
-  EXPECT_EQ(config.builder->stats_trigger_count, 0);
-  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
-  EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
-
-  EXPECT_EQ(config.builder->ConvertedData.size(), 1088);
-  EXPECT_EQ(config.builder->ConvertedData.size(), readouts);
-
-  inspect_converted_data();
-  EXPECT_EQ(external_triggers, 467);
-  EXPECT_EQ(time_errors, 0);
-  EXPECT_EQ(ShortestPulsePeriod, 266662);
-}
-
-TEST_F(BuilderReadoutsTest, t00033) {
-  feed_file(TEST_DATA_PATH "readouts/154493");
-
-  EXPECT_EQ(packets, 33);
-  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
-  EXPECT_EQ(config.builder->stats_trigger_count, 0);
-  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
-  EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
-
-  EXPECT_EQ(config.builder->ConvertedData.size(), 8724);
-  EXPECT_EQ(config.builder->ConvertedData.size(), readouts);
-
-  inspect_converted_data();
-  EXPECT_EQ(external_triggers, 2555);
-  EXPECT_EQ(time_errors, 1);
-  EXPECT_EQ(ShortestPulsePeriod, 266662);
-}
-
-TEST_F(BuilderReadoutsTest, t00311) {
-  feed_file(TEST_DATA_PATH "readouts/154492");
-
-  EXPECT_EQ(packets, 311);
-  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
-  EXPECT_EQ(config.builder->stats_trigger_count, 0);
-  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
-  EXPECT_EQ(config.builder->stats_digital_geom_errors, 8);
-
-  EXPECT_EQ(config.builder->ConvertedData.size(), 84352);
-  EXPECT_EQ(readouts,
-            config.builder->ConvertedData.size()
-                + config.builder->stats_digital_geom_errors
-                + config.builder->stats_readout_filter_rejects);
-
-  inspect_converted_data();
-  EXPECT_EQ(external_triggers, 975);
-  EXPECT_EQ(time_errors, 35);
-  EXPECT_EQ(ShortestPulsePeriod, 0);
-}
-
-TEST_F(BuilderReadoutsTest, t03710) {
-  feed_file(TEST_DATA_PATH "readouts/154478");
-
-  EXPECT_EQ(packets, 3710);
-  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
-  EXPECT_EQ(config.builder->stats_trigger_count, 0);
-  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
-  EXPECT_EQ(config.builder->stats_digital_geom_errors, 60280);
-
-  EXPECT_EQ(config.builder->ConvertedData.size(), 948716);
-  EXPECT_EQ(readouts,
-            config.builder->ConvertedData.size()
-                + config.builder->stats_digital_geom_errors
-                + config.builder->stats_readout_filter_rejects);
-
-  inspect_converted_data();
-  EXPECT_EQ(external_triggers, 312);
-  EXPECT_EQ(time_errors, 35);
-  EXPECT_EQ(ShortestPulsePeriod, 266662);
-}
-
-TEST_F(BuilderReadoutsTest, t10392) {
-  feed_file(TEST_DATA_PATH "readouts/154484");
-
-  EXPECT_EQ(packets, 10392);
-  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
-  EXPECT_EQ(config.builder->stats_trigger_count, 0);
-  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
-  EXPECT_EQ(config.builder->stats_digital_geom_errors, 169752);
-
-  EXPECT_EQ(config.builder->ConvertedData.size(), 2656636);
-  EXPECT_EQ(readouts,
-            config.builder->ConvertedData.size()
-                + config.builder->stats_digital_geom_errors
-                + config.builder->stats_readout_filter_rejects);
-
-  inspect_converted_data();
-  EXPECT_EQ(external_triggers, 300);
-  EXPECT_EQ(time_errors, 1);
-  EXPECT_EQ(ShortestPulsePeriod, 266662);
-}
+//
+//TEST_F(BuilderReadoutsTest, t00004) {
+//  feed_file(TEST_DATA_PATH "readouts/154482");
+//
+//  EXPECT_EQ(packets, 4);
+//  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
+//  EXPECT_EQ(config.builder->stats_trigger_count, 0);
+//  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
+//  EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
+//
+//  EXPECT_EQ(config.builder->ConvertedData.size(), 1088);
+//  EXPECT_EQ(config.builder->ConvertedData.size(), readouts);
+//
+//  inspect_converted_data();
+//  EXPECT_EQ(external_triggers, 467);
+//  EXPECT_EQ(time_errors, 0);
+//  EXPECT_EQ(ShortestPulsePeriod, 266662);
+//}
+//
+//TEST_F(BuilderReadoutsTest, t00033) {
+//  feed_file(TEST_DATA_PATH "readouts/154493");
+//
+//  EXPECT_EQ(packets, 33);
+//  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
+//  EXPECT_EQ(config.builder->stats_trigger_count, 0);
+//  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
+//  EXPECT_EQ(config.builder->stats_digital_geom_errors, 0);
+//
+//  EXPECT_EQ(config.builder->ConvertedData.size(), 8724);
+//  EXPECT_EQ(config.builder->ConvertedData.size(), readouts);
+//
+//  inspect_converted_data();
+//  EXPECT_EQ(external_triggers, 2555);
+//  EXPECT_EQ(time_errors, 1);
+//  EXPECT_EQ(ShortestPulsePeriod, 266662);
+//}
+//
+//TEST_F(BuilderReadoutsTest, t00311) {
+//  feed_file(TEST_DATA_PATH "readouts/154492");
+//
+//  EXPECT_EQ(packets, 311);
+//  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
+//  EXPECT_EQ(config.builder->stats_trigger_count, 0);
+//  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
+//  EXPECT_EQ(config.builder->stats_digital_geom_errors, 8);
+//
+//  EXPECT_EQ(config.builder->ConvertedData.size(), 84352);
+//  EXPECT_EQ(readouts,
+//            config.builder->ConvertedData.size()
+//                + config.builder->stats_digital_geom_errors
+//                + config.builder->stats_readout_filter_rejects);
+//
+//  inspect_converted_data();
+//  EXPECT_EQ(external_triggers, 975);
+//  EXPECT_EQ(time_errors, 35);
+//  EXPECT_EQ(ShortestPulsePeriod, 0);
+//}
+//
+//TEST_F(BuilderReadoutsTest, t03710) {
+//  feed_file(TEST_DATA_PATH "readouts/154478");
+//
+//  EXPECT_EQ(packets, 3710);
+//  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
+//  EXPECT_EQ(config.builder->stats_trigger_count, 0);
+//  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
+//  EXPECT_EQ(config.builder->stats_digital_geom_errors, 60280);
+//
+//  EXPECT_EQ(config.builder->ConvertedData.size(), 948716);
+//  EXPECT_EQ(readouts,
+//            config.builder->ConvertedData.size()
+//                + config.builder->stats_digital_geom_errors
+//                + config.builder->stats_readout_filter_rejects);
+//
+//  inspect_converted_data();
+//  EXPECT_EQ(external_triggers, 312);
+//  EXPECT_EQ(time_errors, 35);
+//  EXPECT_EQ(ShortestPulsePeriod, 266662);
+//}
+//
+//TEST_F(BuilderReadoutsTest, t10392) {
+//  feed_file(TEST_DATA_PATH "readouts/154484");
+//
+//  EXPECT_EQ(packets, 10392);
+//  EXPECT_EQ(config.builder->stats_discarded_bytes, 0);
+//  EXPECT_EQ(config.builder->stats_trigger_count, 0);
+//  EXPECT_EQ(config.builder->stats_readout_filter_rejects, 0);
+//  EXPECT_EQ(config.builder->stats_digital_geom_errors, 169752);
+//
+//  EXPECT_EQ(config.builder->ConvertedData.size(), 2656636);
+//  EXPECT_EQ(readouts,
+//            config.builder->ConvertedData.size()
+//                + config.builder->stats_digital_geom_errors
+//                + config.builder->stats_readout_filter_rejects);
+//
+//  inspect_converted_data();
+//  EXPECT_EQ(external_triggers, 300);
+//  EXPECT_EQ(time_errors, 1);
+//  EXPECT_EQ(ShortestPulsePeriod, 266662);
+//}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

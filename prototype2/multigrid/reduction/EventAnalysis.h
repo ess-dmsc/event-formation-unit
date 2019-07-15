@@ -4,7 +4,7 @@
 
 #include <common/clustering/Event.h>
 #include <common/reduction/ReducedEvent.h>
-#include <multigrid/geometry/DigitalGeometry.h>
+#include <multigrid/geometry/ModuleGeometry.h>
 #include <limits>
 
 namespace Multigrid {

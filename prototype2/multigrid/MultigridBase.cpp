@@ -222,7 +222,7 @@ void MultigridBase::mainThread() {
 
     // Checking for exit
     if (not runThreads) {
-      LOG(PROCESS, Sev::Info, "Stopping processing thread.");
+      LOG(PROCESS, Sev::Info, "Stop requested. Flushing queues.");
       // flush anything that remains
 
       LOG(PROCESS, Sev::Info, "Pipeline status\n" + mg_config.reduction.status("", false));
@@ -232,6 +232,7 @@ void MultigridBase::mainThread() {
 
       mystats.tx_bytes += ev42serializer.produce();
       monitor.produce();
+      LOG(PROCESS, Sev::Info, "Pipeline flushed. Stopping processing thread.");
       return;
     }
   }

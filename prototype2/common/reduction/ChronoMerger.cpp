@@ -28,6 +28,17 @@ void ChronoMerger::insert(size_t module, NeutronEvent event) {
   queue_.push_back(event);
 }
 
+void ChronoMerger::insert(size_t module, std::list<NeutronEvent>& events) {
+  for (const auto& event : events) {
+    latest_[module] = std::max(event.time, latest_.at(module));
+  }
+  queue_.splice(queue_.end(), events);
+}
+
+void ChronoMerger::sync_up(size_t module1, size_t module2) {
+  latest_[module1] = latest_[module2] = std::max(latest_[module1], latest_[module2]);
+}
+
 void ChronoMerger::sort() {
   queue_.sort([](const NeutronEvent &e1, const NeutronEvent &e2) {
     return e1.time < e2.time;

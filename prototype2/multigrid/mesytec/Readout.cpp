@@ -2,28 +2,27 @@
 
 #include <multigrid/mesytec/Readout.h>
 #include <sstream>
+#include <fmt/format.h>
 
 namespace Multigrid {
 
 std::string Readout::debug() const {
   // \todo use fmt
   std::stringstream ss;
-  ss << " trigger_count=" << trigger_count;
-  ss << " total_time=" << total_time;
-  ss << " external_trigger=" << (external_trigger ? "true" : "false");
-
-  if (!external_trigger) {
-    ss << " bus=" << static_cast<uint16_t>(bus);
-    ss << " channel=" << channel;
-    ss << " adc=" << adc;
+  ss << fmt::format("trigger={}  time={}", trigger_count, total_time);
+  if (external_trigger) {
+    ss << " external_trigger";
+  } else {
+    ss << fmt::format(" bus={} chan={} adc={}",
+                      static_cast<uint16_t>(bus), channel, adc);
   }
 
-  // \todo don't use this
-  ss << " high_time=" << high_time;
-  ss << " low_time=" << low_time;
-  ss << " time_diff=" << time_diff;
+/// these should no longer be of interest
+//  ss << " high_time=" << high_time;
+//  ss << " low_time=" << low_time;
+//  ss << " time_diff=" << time_diff;
 
-  // \todo use this
+  // \todo maybe use this at some point when readout makes use of it in some way...
   //ss << " module=" << static_cast<uint16_t>(module);
 
   return ss.str();

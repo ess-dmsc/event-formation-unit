@@ -183,9 +183,22 @@ void Reduction::process_queues(bool flush) {
     auto &p = pipelines[i];
     p.process_events(flush);
     stats += p.stats;
-    for (const auto &event : p.out_queue)
-      merger.insert(i, event);
-    p.out_queue.clear();
+    merger.insert(i, p.out_queue);
+  }
+
+  // \todo remove this hack!
+  if (pipelines.size() == 9) {
+    merger.sync_up(0,1);
+    merger.sync_up(0,2);
+    merger.sync_up(1,2);
+
+    merger.sync_up(3,4);
+    merger.sync_up(3,5);
+    merger.sync_up(4,5);
+
+    merger.sync_up(6,7);
+    merger.sync_up(6,8);
+    merger.sync_up(7,8);
   }
 
   merger.sort();
