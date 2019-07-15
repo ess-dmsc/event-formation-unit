@@ -55,7 +55,7 @@ protected:
 
   void load_config(const std::string &jsonfile) {
     config = Multigrid::Config(jsonfile);
-    MESSAGE() << "Config: " << config.debug() << "\n";
+    MESSAGE() << "Config:\n" << config.debug() << "\n";
   }
 
   void feed_file(const std::string &filename) {
@@ -158,7 +158,7 @@ protected:
       MESSAGE() << "Grid span:\n" << grid_span.visualize(true) << "\n";
     }
     //      if ((i > 80000) && (i < 85000)) {
-//        MESSAGE() << h.debug() << "\n";
+//        MESSAGE() << h.to_string() << "\n";
 //      }
 
   }
@@ -167,6 +167,8 @@ protected:
 
 TEST_F(ReductionTest, t00004) {
   feed_file(TEST_DATA_PATH "readouts/154482");
+
+  MESSAGE() << "Status:\n" << config.reduction.status("", false);
 
   EXPECT_EQ(ingested_hits, 1088);
   EXPECT_EQ(config.reduction.stats.invalid_planes, 0);
@@ -189,9 +191,11 @@ TEST_F(ReductionTest, t00004) {
             config.reduction.stats.events_total);
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
-//
+
 //TEST_F(ReductionTest, t00033) {
 //  feed_file(TEST_DATA_PATH "readouts/154493");
+//
+//  MESSAGE() << "Status:\n" << config.reduction.status("", false);
 //
 //  EXPECT_EQ(ingested_hits, 8724);
 //  EXPECT_EQ(config.reduction.stats.invalid_planes, 0);
@@ -215,9 +219,11 @@ TEST_F(ReductionTest, t00004) {
 //            config.reduction.stats.events_total);
 //  EXPECT_EQ(ShortestPulsePeriod, 266662);
 //}
-//
+
 //TEST_F(ReductionTest, t00311) {
 //  feed_file(TEST_DATA_PATH "readouts/154492");
+//
+//  MESSAGE() << "Status:\n" << config.reduction.status("", false);
 //
 //  EXPECT_EQ(ingested_hits, 84232);
 //  EXPECT_EQ(config.reduction.stats.invalid_planes, 0);
@@ -241,7 +247,7 @@ TEST_F(ReductionTest, t00004) {
 //            config.reduction.stats.events_total);
 //  EXPECT_EQ(ShortestPulsePeriod, 0);
 //}
-//
+
 //TEST_F(ReductionTest, t03710) {
 //  feed_file(TEST_DATA_PATH "readouts/154478");
 //
@@ -267,9 +273,11 @@ TEST_F(ReductionTest, t00004) {
 //            config.reduction.stats.events_total);
 //  EXPECT_EQ(ShortestPulsePeriod, 266662);
 //}
-//
+
 //TEST_F(ReductionTest, t10392) {
 //  feed_file(TEST_DATA_PATH "readouts/154484");
+//
+//  MESSAGE() << "Status:\n" << config.reduction.status("", false);
 //
 //  EXPECT_EQ(ingested_hits, 178941);
 //  EXPECT_EQ(config.reduction.stats.invalid_planes, 0);

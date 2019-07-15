@@ -2,14 +2,12 @@
 
 #include <common/clustering/GapMatcher.h>
 
-#include <memory>
-#include <stdio.h>
-#include <unistd.h>
 #include <test/TestBase.h>
-#include <functional>
 
 class GapMatcherTest : public TestBase {
 protected:
+  void SetUp() override { }
+  void TearDown() override { }
 };
 
 TEST_F(GapMatcherTest, Constructor) {
@@ -21,6 +19,16 @@ TEST_F(GapMatcherTest, Constructor) {
 
   matcher.match(true); // ever called with false?
 }
+
+TEST_F(GapMatcherTest, PrintConfig) {
+  GapMatcher matcher(125, 0, 1);
+  matcher.set_minimum_time_gap(70);
+
+  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
+  MESSAGE() << "CONFIG:\n" << matcher.config("  ");
+}
+
+// \todo do more tests
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

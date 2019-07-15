@@ -164,23 +164,25 @@ uint64_t Cluster::time_gap(const Cluster &other) const {
   return (latest_start - earliest_end);
 }
 
-std::string Cluster::debug(bool verbose) const {
-  if (!verbose) {
-    return fmt::format("plane={} time=({},{})={} space=({},{})={} weight={} entries[{}]",
-                       plane_,
-                       time_start_, time_end_, time_span(),
-                       coord_start_, coord_end_, coord_span(),
-                       weight_sum_,
-                       hits.size());
+std::string Cluster::to_string(const std::string &prepend, bool verbose) const {
+  std::stringstream ss;
+  ss << fmt::format("plane={} time=({},{})={} space=({},{})={} weight={} entries[{}]",
+                    plane_,
+                    time_start_, time_end_, time_span(),
+                    coord_start_, coord_end_, coord_span(),
+                    weight_sum_,
+                    hits.size());
+  if (verbose && !hits.empty()) {
+    ss << "\n";
+    for (const auto &h : hits) {
+      ss << prepend << "  " << h.to_string() << "\n";
+    }
   }
-  auto ret = debug(false);
-  for (const auto &h : hits) {
-    ret += "\n   " + h.debug();
-  }
-  return ret;
+  return ss.str();
 }
 
-std::string Cluster::visualize(uint8_t downsample_time,
+std::string Cluster::visualize(const std::string &prepend,
+                               uint8_t downsample_time,
                                uint8_t downsample_coords) const {
 
   auto t_span = ((time_end_ - time_start_) >> downsample_time) + 1u;
@@ -197,17 +199,17 @@ std::string Cluster::visualize(uint8_t downsample_time,
   }
 
   std::string representation(ASCII_grayscale94);
-  auto ret = debug(false) + "\n";
-  for (const auto& row : matrix) {
-    for (const auto& element : row) {
+  std::stringstream ss;
+  for (const auto &row : matrix) {
+    for (const auto &element : row) {
       if (element)
-        ret += representation[93 * element / max_weight];
+        ss << prepend << representation[93 * element / max_weight];
       else
-        ret += " ";
+        ss << " ";
 
     }
-    ret += "\n";
+    ss << "\n";
   }
-  return ret;
+  return ss.str();
 }
 

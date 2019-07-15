@@ -19,12 +19,23 @@ void GapClusterer::insert(const Hit &hit) {
   // Process time-cluster if time gap to next hit is large enough
   if (!current_time_cluster_.empty() &&
       (hit.time - current_time_cluster_.back().time) > max_time_gap_) {
-        XTRACE(CLUSTER, DEB, "timegap > %lu, hit: %lu, current: %lu", max_time_gap_, hit.time, current_time_cluster_.back().time);
+    XTRACE(CLUSTER,
+           DEB,
+           "timegap > %lu, hit: %lu, current: %lu",
+           max_time_gap_,
+           hit.time,
+           current_time_cluster_.back().time);
     flush();
   }
 
   // Insert hit in either case
-  XTRACE(CLUSTER, DEB, "insert plane %d, time %u, coord %u, weight %u", hit.plane, hit.time, hit.coordinate, hit.weight);
+  XTRACE(CLUSTER,
+         DEB,
+         "insert plane %d, time %u, coord %u, weight %u",
+         hit.plane,
+         hit.time,
+         hit.coordinate,
+         hit.weight);
   current_time_cluster_.emplace_back(hit);
 }
 
@@ -72,3 +83,20 @@ void GapClusterer::cluster_by_coordinate() {
   // Stash any leftovers
   stash_cluster(cluster);
 }
+
+std::string GapClusterer::config(const std::string &prepend) const {
+  std::stringstream ss;
+  ss << prepend << fmt::format("max_time_gap={}\n", max_time_gap_);
+  ss << prepend << fmt::format("max_coord_gap={}\n", max_coord_gap_);
+  return ss.str();
+}
+
+std::string GapClusterer::status(const std::string &prepend, bool verbose) const {
+  std::stringstream ss;
+  ss << AbstractClusterer::status(prepend, verbose);
+  if (!current_time_cluster_.empty())
+    ss << prepend << "Current time cluster:\n"
+       << to_string(current_time_cluster_, prepend + "  ") + "\n";
+  return ss.str();
+}
+

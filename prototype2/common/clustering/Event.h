@@ -18,8 +18,8 @@
 
 class Event {
 public:
-  Cluster cluster1; ///< cluster in dimension 1
-  Cluster cluster2; ///< cluster in dimension 2
+  Cluster ClusterA; ///< cluster in dimension A
+  Cluster ClusterB; ///< cluster in dimension B
 
 public:
   /// \brief Event constructor, selecting planes
@@ -30,12 +30,10 @@ public:
   /// \brief Event default constructor, planes default to 0 and 1
   Event() = default;
 
-  virtual ~Event() = default;
-
   /// \returns id of first plane selected for event
-  uint8_t plane1() const;
+  uint8_t PlaneA() const;
   /// \returns id of second plane selected for event
-  uint8_t plane2() const;
+  uint8_t PlaneB() const;
 
   /// \brief adds hit to event
   ///        Inserts hit into the appropriate plane.
@@ -81,14 +79,14 @@ public:
 
   /// \returns string describing event bounds and weights
   /// \param verbose also print hits
-  std::string debug(bool verbose = false) const;
+  std::string to_string(const std::string &prepend, bool verbose) const;
 
   /// \returns visualizes both clusters with "text graphics"
-  virtual std::string visualize(uint8_t downsample_time = 0,
-                                uint8_t downsample_coords = 0) const;
+  std::string visualize(const std::string &prepend,
+                        uint8_t downsample_time = 0,
+                        uint8_t downsample_coords = 0) const;
 
 private:
-  uint8_t plane1_ {0};
-  uint8_t plane2_ {1};
-
+  uint8_t PlaneA_{0};
+  uint8_t PlaneB_{1};
 };

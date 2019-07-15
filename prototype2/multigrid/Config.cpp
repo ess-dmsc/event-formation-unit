@@ -52,7 +52,7 @@ std::string Config::debug() const {
   else
     ss << "  ========           No Builder :(           ========\n";
 
-  ss << "  " << reduction.debug("  ");
+  ss << "  " << reduction.config("  ");
   return ss.str();
 }
 

@@ -10,7 +10,8 @@
 
 class GapClustererTest : public TestBase {
 protected:
-  void mock_cluster(HitVector &ret, uint16_t strip_start, uint16_t strip_end, uint16_t strip_step,
+  void mock_cluster(HitVector &ret,
+                    uint16_t strip_start, uint16_t strip_end, uint16_t strip_step,
                     uint64_t time_start, uint64_t time_end, uint64_t time_step) {
     Hit e;
     e.plane = 0;
@@ -140,6 +141,26 @@ TEST_F(GapClustererTest, JustOverFiveCoordGap) {
   EXPECT_EQ(gc.stats_cluster_count, 100);
   EXPECT_EQ(gc.clusters.size(), 100);
 }
+
+TEST_F(GapClustererTest, PrintConfig) {
+  GapClusterer gc(0, 5);
+
+  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
+  MESSAGE() << "Config:\n  " << gc.config("  ") << "\n";
+}
+
+TEST_F(GapClustererTest, PrintStatus) {
+  HitVector hc;
+  mock_cluster(hc, 1, 40, 4, 1, 3, 1);
+
+  GapClusterer gc(0, 5);
+  gc.cluster(hc);
+
+  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
+  MESSAGE() << "SIMPLE:\n" << gc.status("  ", false);
+  MESSAGE() << "VERBOSE:\n" << gc.status("  ", true);
+}
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

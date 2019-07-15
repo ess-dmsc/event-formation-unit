@@ -16,7 +16,7 @@
 
 class EndMatcher : public AbstractMatcher {
 public:
-  // Inherit constructor
+  /// Inherit constructor
   using AbstractMatcher::AbstractMatcher;
 
   // \todo document this
@@ -27,6 +27,9 @@ public:
   /// \param flush if all queued clusters should be matched regardless of
   ///        latency considerations
   void match(bool flush) override;
+
+  /// \brief print configuration of EndMatcher
+  std::string config(const std::string& prepend) const override;
 
 private:
   uint64_t max_delta_time_{0};

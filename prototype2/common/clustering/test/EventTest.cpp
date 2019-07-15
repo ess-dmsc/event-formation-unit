@@ -13,15 +13,15 @@ protected:
 
 TEST_F(EventTest, Planes) {
   event = Event(3,7);
-  EXPECT_EQ(event.plane1(), 3);
-  EXPECT_EQ(event.plane2(), 7);
+  EXPECT_EQ(event.PlaneA(), 3);
+  EXPECT_EQ(event.PlaneB(), 7);
 }
 
 TEST_F(EventTest, Insert) {
   event.insert({0, 0, 0, 0});
-  EXPECT_EQ(event.cluster1.hit_count(), 1);
+  EXPECT_EQ(event.ClusterA.hit_count(), 1);
   event.insert({0, 0, 0, 1});
-  EXPECT_EQ(event.cluster2.hit_count(), 1);
+  EXPECT_EQ(event.ClusterB.hit_count(), 1);
 }
 
 TEST_F(EventTest, Empty) {
@@ -43,7 +43,7 @@ TEST_F(EventTest, Merge) {
   x.insert({0, 0, 0, 0});
   event.merge(x);
   EXPECT_FALSE(event.empty());
-  EXPECT_EQ(event.cluster1.hit_count(), 2);
+  EXPECT_EQ(event.ClusterA.hit_count(), 2);
 }
 
 TEST_F(EventTest, MergeTwice) {
@@ -51,14 +51,14 @@ TEST_F(EventTest, MergeTwice) {
   x.insert({0, 0, 0, 0});
   x.insert({0, 0, 0, 0});
   event.merge(x);
-  EXPECT_EQ(event.cluster1.hit_count(), 2);
+  EXPECT_EQ(event.ClusterA.hit_count(), 2);
 
   x.clear();
   x.insert({0, 0, 0, 0});
   x.insert({0, 0, 0, 0});
   x.insert({0, 0, 0, 0});
   event.merge(x);
-  EXPECT_EQ(event.cluster1.hit_count(), 5);
+  EXPECT_EQ(event.ClusterA.hit_count(), 5);
 }
 
 TEST_F(EventTest, MergeXY) {
@@ -72,8 +72,8 @@ TEST_F(EventTest, MergeXY) {
   y.insert({0, 0, 0, 1});
   y.insert({0, 0, 0, 1});
   event.merge(y);
-  EXPECT_EQ(event.cluster1.hit_count(), 2);
-  EXPECT_EQ(event.cluster2.hit_count(), 3);
+  EXPECT_EQ(event.ClusterA.hit_count(), 2);
+  EXPECT_EQ(event.ClusterB.hit_count(), 3);
 }
 
 TEST_F(EventTest, TimeSpanEmpty) {
@@ -178,8 +178,9 @@ TEST_F(EventTest, DebugPrint) {
   event.insert({0, 5, 1, 1});
 
   MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "SIMPLE:\n" << event.debug() << "\n";
-  MESSAGE() << "VERBOSE:\n" << event.debug(true) << "\n";
+  MESSAGE() << "SIMPLE:\n  " << event.to_string("  ", false) << "\n";
+  MESSAGE() << "VERBOSE:\n  " << event.to_string("  ", true);
+  MESSAGE() << "VISUALIZE:\n  " << event.visualize("  ");
 }
 
 int main(int argc, char **argv) {

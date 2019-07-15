@@ -100,10 +100,11 @@ public:
 
   /// \returns string describing cluster bounds and weights
   /// \param verbose also print hits
-  std::string debug(bool verbose = false) const;
+  std::string to_string(const std::string &prepend, bool verbose) const;
 
   /// \returns visualizes cluster with "text graphics"
-  std::string visualize(uint8_t downsample_time = 0,
+  std::string visualize(const std::string &prepend,
+                        uint8_t downsample_time = 0,
                         uint8_t downsample_coords = 0) const;
 
 private:

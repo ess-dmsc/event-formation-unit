@@ -301,20 +301,20 @@ void CAENBase::processing_thread() {
       for (const auto &e : builders[cassette].matcher.matched_events) {
 
         if (!e.both_planes()) {
-          XTRACE(EVENT, INF, "Event No Coincidence %s", e.debug(true).c_str());
+          XTRACE(EVENT, INF, "Event No Coincidence %s", e.to_string({}, true).c_str());
           mystats.events_no_coincidence++;
           continue;
         }
 
         // \todo parametrize maximum time span - in opts?
         if (mb_opts.filter_time_span && (e.time_span() > mb_opts.filter_time_span_value)) {
-          XTRACE(EVENT, INF, "Event filter time_span %s", e.debug(true).c_str());
+          XTRACE(EVENT, INF, "Event filter time_span %s", e.to_string({}, true).c_str());
           mystats.filters_max_time_span++;
           continue;
         }
 
-        if ((e.cluster1.coord_span() > e.cluster1.hit_count()) && (e.cluster2.coord_span() > e.cluster2.hit_count())) {
-          XTRACE(EVENT, INF, "Event Chs not adjacent %s", e.debug(true).c_str());
+        if ((e.ClusterA.coord_span() > e.ClusterA.hit_count()) && (e.ClusterB.coord_span() > e.ClusterB.hit_count())) {
+          XTRACE(EVENT, INF, "Event Chs not adjacent %s", e.to_string({}, true).c_str());
           mystats.events_not_adjacent++;
           continue;
         }
@@ -331,10 +331,10 @@ void CAENBase::processing_thread() {
         //   continue;
         // }
 
-        XTRACE(EVENT, INF, "Event Valid\n %s", e.debug(true).c_str());
+        XTRACE(EVENT, INF, "Event Valid\n %s", e.to_string({}, true).c_str());
         // calculate local x and y using center of mass
-        auto x = static_cast<uint16_t>(std::round(e.cluster1.coord_center()));
-        auto y = static_cast<uint16_t>(std::round(e.cluster2.coord_center()));
+        auto x = static_cast<uint16_t>(std::round(e.ClusterA.coord_center()));
+        auto y = static_cast<uint16_t>(std::round(e.ClusterB.coord_center()));
 
         // calculate local x and y using center of span
 //        auto x = (e.cluster1.coord_start() + e.cluster1.coord_end()) / 2;

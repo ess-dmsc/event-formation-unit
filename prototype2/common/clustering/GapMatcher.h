@@ -16,7 +16,7 @@
 
 class GapMatcher : public AbstractMatcher {
 public:
-  // Inherit constructor
+  /// Inherits constructor
   using AbstractMatcher::AbstractMatcher;
 
   /// \brief sets the minimum time gap criterion
@@ -31,6 +31,9 @@ public:
   /// \param flush if all queued clusters should be matched regardless of
   ///        latency considerations.
   void match(bool flush) override;
+
+  /// \brief print configuration of GapMatcher
+  std::string config(const std::string& prepend) const override;
 
 private:
   uint64_t minimum_time_gap_{0};

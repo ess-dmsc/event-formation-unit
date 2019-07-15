@@ -12,14 +12,14 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-AbstractMatcher::AbstractMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2)
-    : latency_(latency), plane1_(plane1), plane2_(plane2) {}
+AbstractMatcher::AbstractMatcher(uint64_t maximum_latency, uint8_t planeA, uint8_t planeB)
+    : maximum_latency_(maximum_latency), PlaneA(planeA), PlaneB(planeB) {}
 
 void AbstractMatcher::insert(const Cluster &cluster) {
-  if (cluster.plane() == plane1_) {
-    latest_x_ = std::max(latest_x_, cluster.time_start());
-  } else if (cluster.plane() == plane2_) {
-    latest_y_ = std::max(latest_y_, cluster.time_start());
+  if (cluster.plane() == PlaneA) {
+    LatestA = std::max(LatestA, cluster.time_start());
+  } else if (cluster.plane() == PlaneB) {
+    LatestB = std::max(LatestB, cluster.time_start());
   } else {
     stats_rejected_clusters++;
     return;
@@ -36,10 +36,10 @@ void AbstractMatcher::insert(uint8_t plane, ClusterContainer &clusters) {
   if (clusters.empty()) {
     return;
   }
-  if (plane == plane1_) {
-    latest_x_ = std::max(latest_x_, clusters.back().time_start());
-  } else if (plane == plane2_) {
-    latest_y_ = std::max(latest_y_, clusters.back().time_start());
+  if (plane == PlaneA) {
+    LatestA = std::max(LatestA, clusters.back().time_start());
+  } else if (plane == PlaneB) {
+    LatestB = std::max(LatestB, clusters.back().time_start());
   } else {
     stats_rejected_clusters++;
     return;
@@ -54,9 +54,35 @@ void AbstractMatcher::stash_event(Event &event) {
 
 bool AbstractMatcher::ready_to_be_matched(const Cluster &cluster) const {
   XTRACE(CLUSTER, DEB,
-      "latest_x %u, latest_y %u, cl time end %u", latest_x_, latest_y_, cluster.time_end());
-  auto latest = std::min(latest_x_, latest_y_);
+         "latest_x %u, latest_y %u, cl time end %u", LatestA, LatestB, cluster.time_end());
+  auto latest = std::min(LatestA, LatestB);
   return (latest > cluster.time_end()) &&
-      ((latest - cluster.time_end()) > latency_);
+      ((latest - cluster.time_end()) > maximum_latency_);
+}
+
+std::string AbstractMatcher::config(const std::string &prepend) const {
+  std::stringstream ss;
+  ss << prepend << fmt::format("latency: {}\n", maximum_latency_);
+  ss << prepend << fmt::format("PlaneA: {}\n", PlaneA);
+  ss << prepend << fmt::format("PlaneB: {}\n", PlaneB);
+  return ss.str();
+}
+
+std::string AbstractMatcher::status(const std::string &prepend, bool verbose) const {
+  std::stringstream ss;
+  ss << prepend << fmt::format("stats_event_count: {}\n", stats_event_count);
+  ss << prepend << fmt::format("stats_rejected_clusters: {}\n", stats_rejected_clusters);
+  if (!matched_events.empty()) {
+    ss << prepend << "Matched events:\n";
+    // \todo factor this out
+    for (const auto &e : matched_events) {
+      ss << prepend << "  " << e.to_string(prepend + "  ", verbose) + "\n";
+    }
+  }
+  ss << prepend << fmt::format("latest in PlaneA: {}\n", LatestA);
+  ss << prepend << fmt::format("latest in PlaneB: {}\n", LatestB);
+  ss << prepend << "Unmatched clusters:\n"
+     << to_string(unmatched_clusters_, prepend + "  ", verbose);
+  return ss.str();
 }
 

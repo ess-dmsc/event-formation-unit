@@ -68,8 +68,8 @@ ReducedHit utpcAnalyzer::analyze(Cluster &cluster) const {
 
 ReducedEvent utpcAnalyzer::analyze(Event &event) const {
   ReducedEvent ret;
-  ret.x = analyze(event.cluster1);
-  ret.y = analyze(event.cluster2);
+  ret.x = analyze(event.ClusterA);
+  ret.y = analyze(event.ClusterB);
   ret.good = std::isfinite(ret.x.center) && std::isfinite(ret.y.center);
   ret.time = utpc_time(event);
   return ret;
@@ -77,7 +77,7 @@ ReducedEvent utpcAnalyzer::analyze(Event &event) const {
 
 uint64_t utpcAnalyzer::utpc_time(const Event &e) {
   // \todo is this what we want?
-  return std::max(e.cluster1.time_end(), e.cluster2.time_end());
+  return std::max(e.ClusterA.time_end(), e.ClusterB.time_end());
 }
 
 bool utpcAnalyzer::meets_lower_criterion(const ReducedHit &x, const ReducedHit &y,

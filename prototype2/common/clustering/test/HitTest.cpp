@@ -19,7 +19,7 @@ protected:
 };
 
 TEST_F(HitTest, Debug) {
-  EXPECT_FALSE(hit.debug().empty());
+  EXPECT_FALSE(hit.to_string().empty());
 }
 
 TEST_F(HitTest, CompoundMapping) {

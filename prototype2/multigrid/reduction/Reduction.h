@@ -27,6 +27,7 @@ struct EventProcessingStats {
 
   void clear();
   EventProcessingStats& operator +=(const EventProcessingStats& other);
+  std::string debug(std::string prepend) const;
 };
 
 class ModulePipeline {
@@ -34,7 +35,8 @@ public:
   ModulePipeline();
   void ingest(const Hit& hit);
   void process_events(bool flush);
-  std::string debug(std::string prepend) const;
+  std::string config(const std::string& prepend) const;
+  std::string status(const std::string& prepend, bool verbose) const;
 
   std::list<NeutronEvent> out_queue;
 
@@ -42,7 +44,7 @@ public:
 
 //private:
 
-// \todo use GapClusterer2D
+// \todo use GapClusterer2D for wires
   GapClusterer wire_clusterer{0, 1};
   GapClusterer grid_clusterer{0, 1};
 
@@ -69,7 +71,8 @@ public:
   void ingest(HitVector &hits);
   void ingest(const Hit& hit);
   void process_queues(bool flush);
-  std::string debug(std::string prepend) const;
+  std::string config(const std::string& prepend) const;
+  std::string status(const std::string& prepend, bool verbose) const;
 
   uint32_t max_x() const;
   uint32_t max_y() const;

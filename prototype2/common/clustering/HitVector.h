@@ -36,3 +36,13 @@ inline void sort_by_decreasing_weight(HitVector &hits) {
             });
 }
 
+/// \brief convenience function for printing vector of Hits
+inline std::string to_string(const HitVector& vec, const std::string& prepend) {
+  std::stringstream ss;
+  for (const auto& h : vec) {
+    ss << prepend << h.to_string() << "\n";
+  }
+  return ss.str();
+}
+
+// \todo tests for these

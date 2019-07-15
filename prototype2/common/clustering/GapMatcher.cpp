@@ -25,7 +25,7 @@ void GapMatcher::match(bool flush) {
 
   XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u", unmatched_clusters_.size());
 
-  Event evt{plane1_, plane2_};
+  Event evt{PlaneA, PlaneB};
   while (!unmatched_clusters_.empty()) {
 
     auto cluster = unmatched_clusters_.begin();
@@ -46,17 +46,26 @@ void GapMatcher::match(bool flush) {
     unmatched_clusters_.pop_front();
   }
 
+  /// If anything remains
   if (!evt.empty()) {
     if (flush) {
-      // If flushing, stash it
+      /// If flushing, stash it
       stash_event(evt);
     } else {
-      // Else return merged clusters to their respective queue
+      /// Else return merged clusters to their respective queue
       // \todo this needs explicit testing
-      if (!evt.cluster1.empty())
-        unmatched_clusters_.push_front(evt.cluster1);
-      if (!evt.cluster2.empty())
-        unmatched_clusters_.push_front(evt.cluster2);
+      if (!evt.ClusterA.empty())
+        unmatched_clusters_.push_front(evt.ClusterA);
+      if (!evt.ClusterB.empty())
+        unmatched_clusters_.push_front(evt.ClusterB);
     }
   }
 }
+
+std::string GapMatcher::config(const std::string& prepend) const {
+  std::stringstream ss;
+  ss << AbstractMatcher::config(prepend);
+  ss << prepend << fmt::format("minimum_time_gap: {}\n", minimum_time_gap_);
+  return ss.str();
+}
+

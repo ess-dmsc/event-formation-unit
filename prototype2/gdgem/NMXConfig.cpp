@@ -20,8 +20,8 @@ bool EventFilter::valid(Event &event, const ReducedEvent& utpc) {
     return false;
   }
   if (enforce_minimum_hits &&
-      ((event.cluster1.hit_count() < minimum_hits) ||
-          (event.cluster2.hit_count() < minimum_hits))) {
+      ((event.ClusterA.hit_count() < minimum_hits) ||
+          (event.ClusterB.hit_count() < minimum_hits))) {
     minimum_hits_dropped++;
     return false;
   }

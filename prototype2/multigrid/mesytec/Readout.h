@@ -57,7 +57,7 @@ struct __attribute__ ((packed)) Readout {
   uint16_t time_diff{0};
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
-  // \brief prints values for debug purposes
+  // \brief prints values for to_string purposes
   std::string debug() const;
 };
 

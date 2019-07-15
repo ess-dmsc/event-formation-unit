@@ -40,6 +40,12 @@ public:
   /// \brief complete clustering for any remaining hits
   void flush() override;
 
+  /// \brief print configuration of GapClusterer
+  std::string config(const std::string &prepend) const override;
+
+  /// \brief print current status of GapClusterer
+  std::string status(const std::string &prepend, bool verbose) const override;
+
 private:
   uint64_t max_time_gap_;
   uint16_t max_coord_gap_;

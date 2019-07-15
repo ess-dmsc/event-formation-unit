@@ -135,6 +135,24 @@ TEST_F(ChronoMergerTest, Reset) {
   EXPECT_EQ(merger.horizon(), 0);
 }
 
+
+TEST_F(ChronoMergerTest, Print) {
+  merger.insert(0, {3,0});
+  merger.insert(1, {4,0});
+  merger.insert(2, {5,0});
+  merger.insert(0, {104,0});
+  merger.insert(1, {105,0});
+  merger.insert(2, {106,0});
+  merger.insert(0, {105,0});
+  merger.insert(0, {106,0});
+  merger.insert(1, {106,0});
+  merger.sort();
+
+  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
+  MESSAGE() << "SIMPLE:\n" << merger.debug("  ", false);
+  MESSAGE() << "VERBOSE:\n" << merger.debug("  ", true);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

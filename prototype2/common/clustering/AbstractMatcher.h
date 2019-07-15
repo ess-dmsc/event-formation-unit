@@ -28,12 +28,12 @@ public:
 
 public:
   /// \brief AbstractMatcher constructor
-  /// \param latency Minimum time gap to latest cluster for a cluster to be
+  /// \param maximum_latency Minimum time gap to latest cluster for a cluster to be
   ///         considered for matching. Of the latest clusters in both planes,
   ///         the earlier one will be considered for this comparison.
-  /// \param plane1 id of first plane selected for matching
-  /// \param plane2 id of second plane selected for matching
-  AbstractMatcher(uint64_t latency, uint8_t plane1, uint8_t plane2);
+  /// \param planeA id of first plane selected for matching
+  /// \param planeB id of second plane selected for matching
+  AbstractMatcher(uint64_t maximum_latency, uint8_t planeA, uint8_t planeB);
 
   virtual ~AbstractMatcher() = default;
 
@@ -67,16 +67,20 @@ public:
   /// \note This is the main function to be implemented by inheriting classes
   virtual void match(bool flush) = 0;
 
-  // \todo virtual std::string debug(std::string prepend) const;
+  /// \brief print configuration of Matcher
+  virtual std::string config(const std::string &prepend) const;
+
+  /// \brief print current status of Matcher
+  virtual std::string status(const std::string &prepend, bool verbose) const;
 
 protected:
-  uint64_t latency_{0}; ///< time gap for a cluster to be considered for matching
-  uint8_t plane1_{0};
-  uint8_t plane2_{1};
+  uint64_t maximum_latency_{0}; ///< time gap for a cluster to be considered for matching
+  uint8_t PlaneA{0};
+  uint8_t PlaneB{1};
 
   ClusterContainer unmatched_clusters_;
-  uint64_t latest_x_{0};
-  uint64_t latest_y_{0};
+  uint64_t LatestA{0};
+  uint64_t LatestB{0};
 
   /// \brief Moves event into events container; increments counter.
   /// \param event to be stashed
@@ -86,7 +90,7 @@ protected:
   ///         as time-out threshold. Compares the end time of submitted cluster to
   ///         the start time of the latest cluster in queue. Of the latest clusters
   ///         in both planes, the earlier one will be considered. Uses the latency
-  //          criterion as threshold.
+  ///         criterion as threshold.
   /// \param cluster to be considered for matching
   bool ready_to_be_matched(const Cluster &cluster) const;
 };

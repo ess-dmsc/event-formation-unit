@@ -9,7 +9,7 @@
 #include <common/clustering/Hit.h>
 #include <fmt/format.h>
 
-std::string Hit::debug() const {
-  return fmt::format("time={} plane={} coord={} weight={}",
+std::string Hit::to_string() const {
+  return fmt::format("time={:>20}  plane={:>3}  coord={:>5}  weight={:>5}",
                      time, plane, coordinate, weight);
 }

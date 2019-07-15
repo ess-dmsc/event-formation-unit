@@ -28,7 +28,7 @@ void EventBuilder::insert(Hit hit) {
     p1.push_back(hit);
   }
   else {
-    XTRACE(CLUSTER, WAR, "bad plane %s", hit.debug().c_str());
+    XTRACE(CLUSTER, WAR, "bad plane %s", hit.to_string().c_str());
   }
 }
 

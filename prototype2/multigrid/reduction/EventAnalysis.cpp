@@ -29,16 +29,16 @@ ReducedEvent EventAnalyzer::analyze(Event &event) {
   }
 
   /// Wires
-  if (!event.cluster1.empty()) {
+  if (!event.ClusterA.empty()) {
     double xmass{0};
     double zmass{0};
     double xsum{0};
     double zsum{0};
 
-    sort_chronologically(event.cluster1.hits);
+    sort_chronologically(event.ClusterA.hits);
 
-    uint16_t highest_adc = event.cluster1.hits.front().weight;
-    for (const auto &h : event.cluster1.hits) {
+    uint16_t highest_adc = event.ClusterA.hits.front().weight;
+    for (const auto &h : event.ClusterA.hits) {
       if (h.weight != highest_adc)
         break;
       stats_used_hits++;
@@ -60,15 +60,15 @@ ReducedEvent EventAnalyzer::analyze(Event &event) {
   }
 
   /// Grids
-  if (!event.cluster2.empty()) {
+  if (!event.ClusterB.empty()) {
 
     double ymass{0};
     double ysum{0};
 
-    sort_chronologically(event.cluster2.hits);
+    sort_chronologically(event.ClusterB.hits);
 
-    uint16_t highest_adc = event.cluster2.hits.front().weight;
-    for (const auto &h : event.cluster2.hits) {
+    uint16_t highest_adc = event.ClusterB.hits.front().weight;
+    for (const auto &h : event.ClusterB.hits) {
       if (h.weight != highest_adc)
         break;
       stats_used_hits++;

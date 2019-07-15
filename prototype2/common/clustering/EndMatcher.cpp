@@ -24,17 +24,17 @@ bool EndMatcher::belongs_end(const Event &event, const Cluster &cluster) const {
   return (delta_end(event, cluster) <= max_delta_time_);
 }
 
-void EndMatcher::match(bool force) {
+void EndMatcher::match(bool flush) {
   unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
     return c1.time_end() < c2.time_end();
   });
 
-  Event evt{plane1_, plane2_};
+  Event evt{PlaneA, PlaneB};
   while (!unmatched_clusters_.empty()) {
 
     auto cluster = unmatched_clusters_.begin();
 
-    if (!force && !ready_to_be_matched(*cluster))
+    if (!flush && !ready_to_be_matched(*cluster))
       break;
 
     if (!evt.empty() && !belongs_end(evt, *cluster)) {
@@ -46,8 +46,25 @@ void EndMatcher::match(bool force) {
     unmatched_clusters_.pop_front();
   }
 
-  // If anything is left, stash it
+  /// If anything remains
   if (!evt.empty()) {
-    stash_event(evt);
+    if (flush) {
+      /// If flushing, stash it
+      stash_event(evt);
+    } else {
+      /// Else return merged clusters to their respective queue
+      // \todo this needs explicit testing
+      if (!evt.ClusterA.empty())
+        unmatched_clusters_.push_front(evt.ClusterA);
+      if (!evt.ClusterB.empty())
+        unmatched_clusters_.push_front(evt.ClusterB);
+    }
   }
+}
+
+std::string EndMatcher::config(const std::string& prepend) const {
+  std::stringstream ss;
+  ss << AbstractMatcher::config(prepend);
+  ss << prepend << fmt::format("max_delta_time: {}\n", max_delta_time_);
+  return ss.str();
 }

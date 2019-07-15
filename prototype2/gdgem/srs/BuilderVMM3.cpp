@@ -112,7 +112,7 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
 
       if (hit.weight == 0) {
         XTRACE(PROCESS, WAR,
-            "Accepted readout with adc=0, may distort uTPC results, hit=%s", hit.debug().c_str());
+            "Accepted readout with adc=0, may distort uTPC results, hit=%s", hit.to_string().c_str());
         // \todo What to do? Cannot be 0 for CoM in uTPC. Reject?
         stats.adc_zero++;
         hit.weight = 1;

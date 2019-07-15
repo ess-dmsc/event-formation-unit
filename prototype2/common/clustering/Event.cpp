@@ -15,64 +15,65 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 Event::Event(uint8_t plane1, uint8_t plane2)
-    : plane1_(plane1), plane2_(plane2) {}
+    : PlaneA_(plane1), PlaneB_(plane2) {}
 
-uint8_t Event::plane1() const {
-  return plane1_;
+uint8_t Event::PlaneA() const {
+  return PlaneA_;
 }
 
-uint8_t Event::plane2() const {
-  return plane2_;
+uint8_t Event::PlaneB() const {
+  return PlaneB_;
 }
 
 void Event::insert(const Hit &e) {
-  if (e.plane == plane1_) {
-    cluster1.insert(e);
-  } else if (e.plane == plane2_) {
-    cluster2.insert(e);
+  if (e.plane == PlaneA_) {
+    ClusterA.insert(e);
+  } else if (e.plane == PlaneB_) {
+    ClusterB.insert(e);
   }
 }
 
 size_t Event::total_hit_count() const {
-  return cluster1.hit_count() + cluster2.hit_count();
+  return ClusterA.hit_count() + ClusterB.hit_count();
 }
 
 void Event::merge(Cluster &cluster) {
-  if (cluster.plane() == plane1_) {
-    cluster1.merge(cluster);
-  } else if (cluster.plane() == plane2_) {
-    cluster2.merge(cluster);
+  if (cluster.plane() == PlaneA_) {
+    ClusterA.merge(cluster);
+  } else if (cluster.plane() == PlaneB_) {
+    ClusterB.merge(cluster);
   }
-  XTRACE(EVENT, DEB, "merge() cluster1 size %u. cluster2 size %u", cluster1.hit_count(), cluster2.hit_count());
+  XTRACE(EVENT, DEB, "merge() ClusterA size %u. ClusterB size %u",
+         ClusterA.hit_count(), ClusterB.hit_count());
 }
 
 void Event::clear() {
-  cluster1.clear();
-  cluster2.clear();
+  ClusterA.clear();
+  ClusterB.clear();
 }
 
 bool Event::empty() const {
-  return cluster1.empty() && cluster2.empty();
+  return ClusterA.empty() && ClusterB.empty();
 }
 
 bool Event::both_planes() const {
-  return !cluster1.empty() && !cluster2.empty();
+  return !ClusterA.empty() && !ClusterB.empty();
 }
 
 uint64_t Event::time_end() const {
-  if (cluster1.empty())
-    return cluster2.time_end();
-  if (cluster2.empty())
-    return cluster1.time_end();
-  return std::max(cluster1.time_end(), cluster2.time_end());
+  if (ClusterA.empty())
+    return ClusterB.time_end();
+  if (ClusterB.empty())
+    return ClusterA.time_end();
+  return std::max(ClusterA.time_end(), ClusterB.time_end());
 }
 
 uint64_t Event::time_start() const {
-  if (cluster1.empty())
-    return cluster2.time_start();
-  if (cluster2.empty())
-    return cluster1.time_start();
-  return std::min(cluster1.time_start(), cluster2.time_start());
+  if (ClusterA.empty())
+    return ClusterB.time_start();
+  if (ClusterB.empty())
+    return ClusterA.time_start();
+  return std::min(ClusterA.time_start(), ClusterB.time_start());
 }
 
 uint64_t Event::time_span() const {
@@ -97,7 +98,10 @@ uint64_t Event::time_overlap(const Cluster &other) const {
 
 uint64_t Event::time_gap(const Cluster &other) const {
   if (empty() || other.empty()) {
-    return 0; // \todo should this happen?
+    /// In case of two empty clusters time gap ought to be undefined or "inf"
+    /// Returning max value of the used type, but throwing an exception
+    /// could also be an option
+    return std::numeric_limits<uint64_t>::max();
   }
   auto latest_start = std::max(other.time_start(), time_start());
   auto earliest_end = std::min(other.time_end(), time_end());
@@ -109,27 +113,30 @@ uint64_t Event::time_gap(const Cluster &other) const {
   return (latest_start - earliest_end);
 }
 
-
-std::string Event::debug(bool verbose) const {
-  auto ret = fmt::format("Event planes({}{},{}{}):",
-                     plane1_, (cluster1.empty() ? "" : "*"),
-                     plane2_, (cluster2.empty() ? "" : "*"));
-  if (!cluster1.empty())
-    ret += "\n  " + cluster1.debug(verbose);
-  if (!cluster2.empty())
-    ret += "\n  " + cluster2.debug(verbose);
-
-  return ret;
+std::string Event::to_string(const std::string &prepend, bool verbose) const {
+  std::stringstream ss;
+  ss << fmt::format("Event planes({}{},{}{})",
+                    PlaneA_, (ClusterA.empty() ? "" : "*"),
+                    PlaneB_, (ClusterB.empty() ? "" : "*"));
+  if (!ClusterA.empty())
+    ss << "\n" << prepend << "  PlaneA:  "
+       << ClusterA.to_string(prepend + "  ", verbose);
+  if (!ClusterB.empty())
+    ss << "\n" << prepend << "  PlaneB:  "
+       << ClusterB.to_string(prepend + "  ", verbose);
+  return ss.str();
 }
 
-std::string Event::visualize(uint8_t downsample_time,
+std::string Event::visualize(const std::string &prepend,
+                             uint8_t downsample_time,
                              uint8_t downsample_coords) const {
-  auto ret = fmt::format("Event planes({},{}):",
-                         plane1_, plane2_);
-  if (!cluster1.empty())
-    ret += "\n  " + cluster1.visualize(downsample_time, downsample_coords);
-  if (!cluster2.empty())
-    ret += "\n  " + cluster2.visualize(downsample_time, downsample_coords);
-  return ret;
+  std::stringstream ss;
+  if (!ClusterA.empty())
+    ss << "\n" << prepend << "  PlaneA:\n"
+       << ClusterA.visualize(prepend + "  ", downsample_time, downsample_coords);
+  if (!ClusterB.empty())
+    ss << "\n" << prepend << "  PlaneB:\n"
+       << ClusterB.visualize(prepend + "  ", downsample_time, downsample_coords);
+  return ss.str();
 }
 

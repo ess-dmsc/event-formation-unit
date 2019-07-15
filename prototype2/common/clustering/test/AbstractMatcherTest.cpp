@@ -15,11 +15,11 @@ public:
   using AbstractMatcher::AbstractMatcher;
 
   void match(bool) override {}
-  using AbstractMatcher::latency_;
-  using AbstractMatcher::plane1_;
-  using AbstractMatcher::plane2_;
-  using AbstractMatcher::latest_x_;
-  using AbstractMatcher::latest_y_;
+  using AbstractMatcher::maximum_latency_;
+  using AbstractMatcher::PlaneA;
+  using AbstractMatcher::PlaneB;
+  using AbstractMatcher::LatestA;
+  using AbstractMatcher::LatestB;
   using AbstractMatcher::unmatched_clusters_;
   using AbstractMatcher::ready_to_be_matched;
   using AbstractMatcher::stash_event;
@@ -30,8 +30,8 @@ protected:
   ClusterContainer x, y;
 
   void add_cluster(ClusterContainer &ret, uint8_t plane,
-                    uint16_t coord_start, uint16_t coord_end, uint16_t coord_step,
-                    uint64_t time_start, uint64_t time_end, uint64_t time_step) {
+                   uint16_t coord_start, uint16_t coord_end, uint16_t coord_step,
+                   uint64_t time_start, uint64_t time_end, uint64_t time_step) {
     Cluster c;
     Hit e;
     e.plane = plane;
@@ -45,9 +45,9 @@ protected:
 
 TEST_F(AbstractMatcherTest, Construction1) {
   MockMatcher matcher(100, 3, 7);
-  EXPECT_EQ(matcher.latency_, 100);
-  EXPECT_EQ(matcher.plane1_, 3);
-  EXPECT_EQ(matcher.plane2_, 7);
+  EXPECT_EQ(matcher.maximum_latency_, 100);
+  EXPECT_EQ(matcher.PlaneA, 3);
+  EXPECT_EQ(matcher.PlaneB, 7);
 }
 
 TEST_F(AbstractMatcherTest, InsertingMovesData) {
@@ -66,15 +66,15 @@ TEST_F(AbstractMatcherTest, AcceptXY) {
   matcher.insert(0, x);
 
   EXPECT_EQ(matcher.unmatched_clusters_.size(), 1);
-  EXPECT_EQ(matcher.latest_x_, 100);
-  EXPECT_EQ(matcher.latest_y_, 0);
+  EXPECT_EQ(matcher.LatestA, 100);
+  EXPECT_EQ(matcher.LatestB, 0);
 
   add_cluster(y, 1, 0, 10, 1, 100, 200, 10);
   matcher.insert(1, y);
 
   EXPECT_EQ(matcher.unmatched_clusters_.size(), 2);
-  EXPECT_EQ(matcher.latest_x_, 100);
-  EXPECT_EQ(matcher.latest_y_, 100);
+  EXPECT_EQ(matcher.LatestA, 100);
+  EXPECT_EQ(matcher.LatestB, 100);
 }
 
 TEST_F(AbstractMatcherTest, AcceptOtherPlanes) {
@@ -84,15 +84,15 @@ TEST_F(AbstractMatcherTest, AcceptOtherPlanes) {
   matcher.insert(3, x);
 
   EXPECT_EQ(matcher.unmatched_clusters_.size(), 1);
-  EXPECT_EQ(matcher.latest_x_, 100);
-  EXPECT_EQ(matcher.latest_y_, 0);
+  EXPECT_EQ(matcher.LatestA, 100);
+  EXPECT_EQ(matcher.LatestB, 0);
 
   add_cluster(y, 4, 0, 10, 1, 100, 200, 10);
   matcher.insert(4, y);
 
   EXPECT_EQ(matcher.unmatched_clusters_.size(), 2);
-  EXPECT_EQ(matcher.latest_x_, 100);
-  EXPECT_EQ(matcher.latest_y_, 100);
+  EXPECT_EQ(matcher.LatestA, 100);
+  EXPECT_EQ(matcher.LatestB, 100);
 }
 
 TEST_F(AbstractMatcherTest, RejectUnselectedPlanes) {
@@ -102,37 +102,37 @@ TEST_F(AbstractMatcherTest, RejectUnselectedPlanes) {
   matcher.insert(7, x);
 
   EXPECT_EQ(matcher.unmatched_clusters_.size(), 0);
-  EXPECT_EQ(matcher.latest_x_, 0);
-  EXPECT_EQ(matcher.latest_y_, 0);
+  EXPECT_EQ(matcher.LatestA, 0);
+  EXPECT_EQ(matcher.LatestB, 0);
 
   add_cluster(y, 0, 0, 10, 1, 100, 200, 10);
   matcher.insert(0, y);
 
   EXPECT_EQ(matcher.unmatched_clusters_.size(), 0);
-  EXPECT_EQ(matcher.latest_x_, 0);
-  EXPECT_EQ(matcher.latest_y_, 0);
+  EXPECT_EQ(matcher.LatestA, 0);
+  EXPECT_EQ(matcher.LatestB, 0);
 }
 
 TEST_F(AbstractMatcherTest, Ready) {
   MockMatcher matcher(100, 0, 1);
 
   Cluster c;
-  c.insert({0,0,0,0});
+  c.insert({0, 0, 0, 0});
 
   EXPECT_FALSE(matcher.ready_to_be_matched(c));
 
-  matcher.latest_x_ = 99;
-  matcher.latest_y_ = 99;
+  matcher.LatestA = 99;
+  matcher.LatestB = 99;
   EXPECT_FALSE(matcher.ready_to_be_matched(c));
 
-  matcher.latest_x_ = 100;
-  matcher.latest_y_ = 100;
+  matcher.LatestA = 100;
+  matcher.LatestB = 100;
   EXPECT_FALSE(matcher.ready_to_be_matched(c));
 
-  matcher.latest_x_ = 101;
+  matcher.LatestA = 101;
   EXPECT_FALSE(matcher.ready_to_be_matched(c));
 
-  matcher.latest_y_ = 101;
+  matcher.LatestB = 101;
   EXPECT_TRUE(matcher.ready_to_be_matched(c));
 }
 
@@ -140,13 +140,12 @@ TEST_F(AbstractMatcherTest, Stash) {
   MockMatcher matcher(100, 0, 1);
 
   Event e;
-  e.insert({0,0,0,0});
-  e.insert({0,1,0,0});
+  e.insert({0, 0, 0, 0});
+  e.insert({0, 1, 0, 0});
 
   matcher.stash_event(e);
   EXPECT_EQ(matcher.matched_events.size(), 1);
   EXPECT_EQ(matcher.stats_event_count, 1);
-
 
   matcher.matched_events.clear();
   matcher.stash_event(e);
@@ -154,6 +153,22 @@ TEST_F(AbstractMatcherTest, Stash) {
   EXPECT_EQ(matcher.stats_event_count, 2);
 }
 
+TEST_F(AbstractMatcherTest, PrintConfigStatus) {
+  MockMatcher matcher(100, 3, 4);
+
+  add_cluster(x, 3, 0, 3, 1,
+              100, 120, 10);
+  matcher.insert(3, x);
+
+  add_cluster(y, 4, 0, 3, 1,
+              100, 120, 10);
+  matcher.insert(4, y);
+
+  MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
+  MESSAGE() << "CONFIG:\n" << matcher.config("  ");
+  MESSAGE() << "SIMPLE STATUS:\n" << matcher.status("  ", false);
+  MESSAGE() << "VERBOSE STATUS:\n" << matcher.status("  ", true);
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

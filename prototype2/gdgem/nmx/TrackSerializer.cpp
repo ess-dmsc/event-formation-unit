@@ -38,20 +38,20 @@ void TrackSerializer::set_callback(ProducerCallback cb) {
 
 bool TrackSerializer::add_track(const Event &event, double utpc_x, double utpc_y) {
 
-  if ((event.cluster1.hit_count() > maxlen) || (event.cluster2.hit_count() > maxlen)) {
+  if ((event.ClusterA.hit_count() > maxlen) || (event.ClusterB.hit_count() > maxlen)) {
     return false;
   }
 
   time_offset = event.time_start();
 
-  for (auto &evx : event.cluster1.hits) {
+  for (auto &evx : event.ClusterA.hits) {
     xtrack.push_back(
         Createpos(builder,
                   static_cast<uint16_t>((evx.time - time_offset) * target_resolution_),
                   evx.coordinate, evx.weight));
   }
 
-  for (auto &evy : event.cluster2.hits) {
+  for (auto &evy : event.ClusterB.hits) {
     ytrack.push_back(
         Createpos(builder,
                   static_cast<uint16_t>((evy.time - time_offset) * target_resolution_),

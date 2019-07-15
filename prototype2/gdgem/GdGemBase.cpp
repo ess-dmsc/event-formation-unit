@@ -186,7 +186,7 @@ void GdGemBase::input_thread() {
 
 void bin(Hists& hists, const Event &e)
 {
-  auto sum = e.cluster1.weight_sum() + e.cluster2.weight_sum();
+  auto sum = e.ClusterA.weight_sum() + e.ClusterB.weight_sum();
   hists.bincluster(static_cast<uint32_t>(sum));
 }
 
@@ -286,7 +286,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
   for (auto& event : matcher_->matched_events)
   {
     if (!event.both_planes()) {
-      if (event.cluster1.hit_count() != 0) {
+      if (event.ClusterA.hit_count() != 0) {
         mystats.clusters_x_only++;
       }
       else {
@@ -303,7 +303,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     if (sample_next_track_
         && (event.total_hit_count() >= nmx_opts.track_sample_minhits))
     {
-//      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.debug(true));
+//      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.to_string(true));
       sample_next_track_ = !track_serializer.add_track(event,
                                                        neutron_event_.x.center,
                                                        neutron_event_.y.center);
@@ -364,7 +364,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     }
 
 //    LOG(PROCESS, Sev::Debug, "Good event: time={}, pixel={} from {}",
-//        truncated_time_, pixelid_, neutron_event_.debug());
+//        truncated_time_, pixelid_, neutron_event_.to_string());
 
     mystats.tx_bytes += event_serializer.addEvent(
         static_cast<uint32_t>(truncated_time_), pixelid_);
@@ -438,10 +438,10 @@ void GdGemBase::processing_thread() {
         if (nmx_opts.send_raw_hits) {
           Event dummy_event;
           for (const auto& e : builder_->hit_buffer_x) {
-            dummy_event.cluster1.insert(e);
+            dummy_event.ClusterA.insert(e);
           }
           for (const auto& e : builder_->hit_buffer_y) {
-            dummy_event.cluster2.insert(e);
+            dummy_event.ClusterB.insert(e);
           }
           //LOG(PROCESS, Sev::Debug, "Sending raw data: {}", dummy_event.total_hit_count());
           raw_serializer.add_track(dummy_event, 0, 0);

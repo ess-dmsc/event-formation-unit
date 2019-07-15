@@ -34,6 +34,20 @@ EventProcessingStats &EventProcessingStats::operator+=(const EventProcessingStat
   return *this;
 }
 
+std::string EventProcessingStats::debug(std::string prepend) const {
+  std::stringstream ss;
+  ss << prepend << "invalid_planes: " << invalid_planes << "\n";
+  ss << prepend << "time_seq_errors: " << time_seq_errors << "\n";
+  ss << prepend << "wire_clusters: " << wire_clusters << "\n";
+  ss << prepend << "grid_clusters: " << grid_clusters << "\n";
+  ss << prepend << "events_total: " << events_total << "\n";
+  ss << prepend << "events_multiplicity_rejects: " << events_multiplicity_rejects << "\n";
+  ss << prepend << "hits_used: " << hits_used << "\n";
+  ss << prepend << "events_bad: " << events_bad << "\n";
+  ss << prepend << "events_geometry_err: " << events_geometry_err << "\n";
+  return ss.str();
+}
+
 ModulePipeline::ModulePipeline() {
   matcher.set_minimum_time_gap(1);
 }
@@ -73,8 +87,8 @@ void ModulePipeline::process_events(bool flush) {
 
     stats.events_total++;
 
-    if ((event.cluster1.hit_count() > max_wire_hits) ||
-        (event.cluster2.hit_count() > max_grid_hits)) {
+    if ((event.ClusterA.hit_count() > max_wire_hits) ||
+        (event.ClusterB.hit_count() > max_grid_hits)) {
       stats.events_multiplicity_rejects++;
       continue;
     }
@@ -86,7 +100,7 @@ void ModulePipeline::process_events(bool flush) {
       stats.events_bad++;
       continue;
     }
-    //            XTRACE(PROCESS, DEB, "Neutron: %s ", neutron.debug().c_str());
+    //            XTRACE(PROCESS, DEB, "Neutron: %s ", neutron.to_string().c_str());
     uint32_t pixel = geometry.pixel3D(
         neutron.x.center_rounded(),
         neutron.y.center_rounded(),
@@ -105,16 +119,36 @@ void ModulePipeline::process_events(bool flush) {
   matcher.matched_events.clear();
 }
 
-std::string ModulePipeline::debug(std::string prepend) const {
+std::string ModulePipeline::config(const std::string& prepend) const {
   std::stringstream ss;
-  // \todo clusterer configs
-  // \todo matcher config
-  ss << prepend << "  max_wire_hits = " << max_wire_hits << "\n";
-  ss << prepend << "  max_grid_hits = " << max_grid_hits << "\n";
-  ss << prepend << "  Event position using weighted average: "
+  ss << prepend << "Wire clusterer:\n" + wire_clusterer.config(prepend + "  ");
+  ss << prepend << "Grid clusterer:\n" + grid_clusterer.config(prepend + "  ");
+  ss << prepend << "Matcher:\n" + matcher.config(prepend + "  ");
+  ss << prepend << "max_wire_hits = " << max_wire_hits << "\n";
+  ss << prepend << "max_grid_hits = " << max_grid_hits << "\n";
+  ss << prepend << "Event position using weighted average: "
      << (analyzer.weighted() ? "YES" : "no") << "\n";
-  ss << prepend << "  Digital geometry:\n"
+  ss << prepend << "Digital geometry:\n"
      << analyzer.digital_geometry.debug(prepend + "  ");
+  return ss.str();
+}
+
+std::string ModulePipeline::status(const std::string& prepend, bool verbose) const {
+  std::stringstream ss;
+  ss << prepend << "Stats:\n" << stats.debug(prepend + "  ");
+  if (!out_queue.empty()) {
+    ss << prepend << fmt::format("Out queue [{}]\n", out_queue.size());
+    if (verbose) {
+      // \todo refactor
+      for (const auto &e : out_queue) {
+        ss << prepend << "  " << e.to_string() << "\n";
+      }
+    }
+  }
+  ss << prepend << "Previous time: " << previous_time_ << "\n";
+  ss << prepend << "Matcher:\n" + matcher.status(prepend + "  ", verbose);
+  ss << prepend << "Wire clusterer:\n" + wire_clusterer.status(prepend + "  ", verbose);
+  ss << prepend << "Grid clusterer:\n" + grid_clusterer.status(prepend + "  ", verbose);
   return ss.str();
 }
 
@@ -131,13 +165,13 @@ void Reduction::ingest(HitVector &hits) {
 
 void Reduction::ingest(const Hit &h) {
   if (h.plane == Hit::PulsePlane) {
-    merger.insert(0, {h.time, 0});
+    merger.insert(pipelines.size(), {h.time, 0});
 //  } else if (h.plane == AbstractBuilder::wire_plane) {
 //    pipeline.ingest(h);
 //  } else if (h.plane == AbstractBuilder::grid_plane) {
 //    pipeline.ingest(h);
   } else {
-    auto module = h.plane / 2;
+    auto module = module_from_plane(h.plane);
     pipelines[module].ingest(h);
 //    stats.invalid_planes++;
   }
@@ -150,7 +184,7 @@ void Reduction::process_queues(bool flush) {
     p.process_events(flush);
     stats += p.stats;
     for (const auto &event : p.out_queue)
-      merger.insert(i + 1, event);
+      merger.insert(i, event);
     p.out_queue.clear();
   }
 
@@ -189,24 +223,50 @@ uint32_t Reduction::max_z() const {
   return ret;
 }
 
-std::string Reduction::debug(std::string prepend) const {
+std::string Reduction::config(const std::string& prepend) const {
   std::stringstream ss;
 
-  ss << "--== PIPELINE ==--\n";
+  ss << "--== PIPELINE CONFIG ==--\n";
 
   for (size_t i = 0; i < pipelines.size(); ++i) {
     ss << prepend + "  Module[" << i << "]\n";
-    ss << pipelines[i].debug(prepend + "  ");
+    ss << pipelines[i].config(prepend + "  ");
     ss << "\n";
   }
 
   if (!pipelines.empty()) {
-    const auto& p = pipelines.back();
+    const auto &p = pipelines.back();
     ss << prepend << fmt::format("  Digital geometry_[{}, {}, {}, {}]\n",
-        p.geometry.nx(), p.geometry.ny(), p.geometry.nz(), p.geometry.np());
+                                 p.geometry.nx(), p.geometry.ny(), p.geometry.nz(), p.geometry.np());
   }
 
-  // \todo print merger info
+  ss << prepend << "Merger:\n" << merger.debug(prepend + "  ", false);
+
+  return ss.str();
+}
+
+std::string Reduction::status(const std::string& prepend, bool verbose) const {
+  std::stringstream ss;
+
+  ss << prepend << "--== PIPELINE STATUS ==--\n";
+
+  ss << prepend << "Stats:\n" << stats.debug(prepend + "  ");
+
+  if (!out_queue.empty()) {
+    ss << prepend << fmt::format("Out queue [{}]\n", out_queue.size());
+    if (verbose) {
+      // \todo refactor
+      for (const auto &e : out_queue) {
+        ss << prepend << "  " << e.to_string() << "\n";
+      }
+    }
+  }
+  ss << prepend << "Merger:\n" << merger.debug(prepend + "  ", true);
+
+  for (size_t i = 0; i < pipelines.size(); ++i) {
+    ss << prepend + "Module[" << i << "]\n";
+    ss << pipelines[i].status(prepend + "  ", verbose);
+  }
 
   return ss.str();
 }
@@ -233,6 +293,7 @@ void from_json(const nlohmann::json &j, Reduction &g) {
     pipeline.analyzer.weighted(jj["analysis_weighted"]);
 
     g.pipelines.push_back(pipeline);
+    module_count++;
   }
 
   ESSGeometry logical_geometry(g.max_x(), g.max_y(), g.max_z(), 1);
@@ -241,7 +302,7 @@ void from_json(const nlohmann::json &j, Reduction &g) {
     p.geometry = logical_geometry;
   }
 
-  g.merger = ChronoMerger(max_latency, g.pipelines.size());
+  g.merger = ChronoMerger(max_latency, g.pipelines.size() + 1);
 }
 
 }

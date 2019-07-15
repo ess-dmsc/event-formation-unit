@@ -257,9 +257,12 @@ TEST_F(ClusterTest, PrintDebug) {
   cluster.insert({7, 5, 1, 0});
 
   MESSAGE() << "NOT A UNIT TEST: please manually check output\n";
-  MESSAGE() << "SIMPLE:\n" << cluster.debug() << "\n";
-  MESSAGE() << "VERBOSE:\n" << cluster.debug(true) << "\n";
+  MESSAGE() << "SIMPLE:\n" << cluster.to_string("  ", false) << "\n";
+  MESSAGE() << "VERBOSE:\n" << cluster.to_string("  ", true);
+  MESSAGE() << "VISUALIZE:\n" << cluster.visualize("  ");
 }
+
+// \todo have functions for generation of randomized clusters
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

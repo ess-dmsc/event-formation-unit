@@ -8,6 +8,15 @@
 
 #include <common/reduction/ChronoMerger.h>
 #include <algorithm>
+#include <iosfwd>
+
+#include <sstream>
+#include <fmt/format.h>
+
+std::string NeutronEvent::to_string() const {
+  return fmt::format("t:{:>20}  pix:{:>10}", time, pixel_id);
+}
+
 
 ChronoMerger::ChronoMerger(uint64_t maximum_latency, size_t modules)
     : maximum_latency_(maximum_latency) {
@@ -59,4 +68,20 @@ bool ChronoMerger::ready() const {
   if (h < maximum_latency_)
     return false;
   return (earliest() < (h - maximum_latency_));
+}
+
+std::string ChronoMerger::debug(const std::string& prepend, bool verbose) const {
+  std::stringstream ss;
+  ss << prepend << "Maximum latency: " << maximum_latency_ << "\n";
+  ss << prepend << "Latest times:\n";
+  for (size_t i=0; i < latest_.size(); ++i) {
+    ss << prepend << "  [" << i << "]  " << latest_[i] << "\n";
+  }
+  if (verbose && !queue_.empty()) {
+    ss << prepend << "Queue:\n";
+    for (const auto& e : queue_) {
+      ss << prepend << "  " << e.to_string() << "\n";
+    }
+  }
+  return ss.str();
 }

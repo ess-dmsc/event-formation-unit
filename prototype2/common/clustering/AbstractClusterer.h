@@ -8,12 +8,19 @@
 
 #pragma once
 
-#include <list>
-#include <deque>
 #include <common/clustering/Cluster.h>
+#include <list>
+//#include <deque>
+
+// \todo the abstract class code needs tests
 
 // \todo replace by deque, or....?
 using ClusterContainer = std::list<Cluster>;
+
+/// \brief convenience function for printing a ClusterContainer
+std::string to_string(const ClusterContainer &container,
+                      const std::string &prepend,
+                      bool verbose);
 
 /// \class AbstractClusterer AbstractClusterer.h
 /// \brief AbstractClusterer declares the interface for a clusterer class
@@ -40,20 +47,20 @@ public:
   /// \brief complete clustering for any remaining hits
   virtual void flush() = 0;
 
+  /// \brief print configuration of Clusterer
+  virtual std::string config(const std::string &prepend) const = 0;
+
+  /// \brief print current status of Clusterer
+  virtual std::string status(const std::string &prepend, bool verbose) const;
+
   /// \brief convenience function
   /// \returns if cluster container is empty
-  bool empty() const
-  {
-    return clusters.empty();
-  }
+  bool empty() const;
 
 protected:
 
   /// \brief moves cluster into clusters container, increments counter
   /// \param cluster to be stashed
-  void stash_cluster(Cluster &cluster) {
-    clusters.emplace_back(std::move(cluster));
-    stats_cluster_count++;
-  }
+  void stash_cluster(Cluster &cluster);
 
 };

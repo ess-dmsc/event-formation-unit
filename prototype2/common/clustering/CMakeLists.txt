@@ -3,6 +3,7 @@
 #=============================================================================
 
 set(clustering_obj_SRC
+  AbstractClusterer.cpp
   AbstractMatcher.cpp
   Cluster.cpp
   EndMatcher.cpp
