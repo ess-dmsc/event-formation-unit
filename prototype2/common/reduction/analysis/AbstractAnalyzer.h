@@ -20,5 +20,5 @@ class AbstractAnalyzer {
   /// \brief analyzes cluster in both planes
   virtual ReducedEvent analyze(Event&) const = 0;
 
-  virtual std::string debug() const = 0;
+  virtual std::string debug(const std::string& prepend) const = 0;
 };

@@ -7,7 +7,7 @@
 
 #include <sonde/SoNDeBase.h>
 #include <common/EV42Serializer.h>
-#include <common/monitor/HistSerializer.h>
+#include <common/monitor/HistogramSerializer.h>
 #include <common/Producer.h>
 #include <common/Trace.h>
 #include <common/Socket.h>
@@ -114,7 +114,7 @@ void SONDEIDEABase::processing_thread() {
   constexpr uint16_t maxChannels{64};
   constexpr uint16_t maxAdc{65535};
   Hists histograms(maxChannels, maxAdc);
-  HistSerializer histfb(histograms.needed_buffer_size(), "SONDE");
+  HistogramSerializer histfb(histograms.needed_buffer_size(), "SONDE");
   Producer monitorprod(EFUSettings.KafkaBroker, "SKADI_monitor");
   histfb.set_callback(
     std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));

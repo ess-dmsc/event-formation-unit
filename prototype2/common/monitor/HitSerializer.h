@@ -14,11 +14,11 @@
 #include <common/Producer.h>
 #include <functional>
 
-class ReadoutSerializer {
+class HitSerializer {
 public:
-  /// \brief Create the ReadoutSerializer
+  /// \brief Create the HitSerializer
   /// \param maxentries the number of readout tuples to buffer before sending to Kafka
-  ReadoutSerializer(size_t maxentries, std::string source_name);
+  HitSerializer(size_t maxentries, std::string source_name);
 
   void set_callback(ProducerCallback cb);
 

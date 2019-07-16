@@ -3,17 +3,17 @@
 #=============================================================================
 
 set(monitor_obj_SRC
-  Hists.cpp
-  HistSerializer.cpp
+  Histogram.cpp
+  HistogramSerializer.cpp
   DynamicHist.cpp
-  ReadoutSerializer.cpp
+  HitSerializer.cpp
 )
 
 set(monitor_obj_INC
-  Hists.h
-  HistSerializer.h
+  Histogram.h
+  HistogramSerializer.h
   DynamicHist.h
-  ReadoutSerializer.h
+  HitSerializer.h
 )
 
 add_library(MonitorObj OBJECT
@@ -28,4 +28,3 @@ enable_coverage_flags(MonitorObj)
 #=============================================================================
 
 add_subdirectory(test)
-

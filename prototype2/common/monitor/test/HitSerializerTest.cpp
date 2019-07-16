@@ -1,9 +1,9 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
-#include <common/monitor/ReadoutSerializer.h>
+#include <common/monitor/HitSerializer.h>
 #include <test/TestBase.h>
 
-class ReadoutSerializerTest : public TestBase {
+class HitSerializerTest : public TestBase {
   void SetUp() override {  }
 
   void TearDown() override {  }
@@ -24,20 +24,20 @@ public:
 
 };
 
-TEST_F(ReadoutSerializerTest, Constructor) {
-  ReadoutSerializer serializer(arraysize, "some_source");
+TEST_F(HitSerializerTest, Constructor) {
+  HitSerializer serializer(arraysize, "some_source");
   ASSERT_EQ(0, serializer.getNumEntries());
 }
 
-TEST_F(ReadoutSerializerTest, ProduceEmpty) {
-  ReadoutSerializer serializer(arraysize, "some_source");
+TEST_F(HitSerializerTest, ProduceEmpty) {
+  HitSerializer serializer(arraysize, "some_source");
   ASSERT_EQ(0, serializer.getNumEntries());
   auto res = serializer.produce();
   ASSERT_EQ(res, 0);
 }
 
-TEST_F(ReadoutSerializerTest, AddEntries) {
-  ReadoutSerializer serializer(arraysize, "some_source");
+TEST_F(HitSerializerTest, AddEntries) {
+  HitSerializer serializer(arraysize, "some_source");
   ASSERT_EQ(0, serializer.getNumEntries());
   for (int i = 1; i < arraysize; i++) {
     int res = serializer.addEntry(0,0,0,0);
@@ -49,10 +49,10 @@ TEST_F(ReadoutSerializerTest, AddEntries) {
   ASSERT_EQ(res != 0, true);
 }
 
-TEST_F(ReadoutSerializerTest, ManualProduce) {
+TEST_F(HitSerializerTest, ManualProduce) {
   for (int maxlen = 10; maxlen < 1000; maxlen++) {
-    ReadoutSerializer serializer(maxlen, "some_source");
-    serializer.set_callback(std::bind(&ReadoutSerializerTest::copy_buffer,
+    HitSerializer serializer(maxlen, "some_source");
+    serializer.set_callback(std::bind(&HitSerializerTest::copy_buffer,
         this, std::placeholders::_1));
 
     ASSERT_EQ(0, serializer.getNumEntries());
@@ -69,9 +69,9 @@ TEST_F(ReadoutSerializerTest, ManualProduce) {
   }
 }
 
-TEST_F(ReadoutSerializerTest, CheckSmallSizes) {
+TEST_F(HitSerializerTest, CheckSmallSizes) {
   for (int maxlen = 10; maxlen < 1000; maxlen++) {
-    ReadoutSerializer serializer(maxlen, "some_source");
+    HitSerializer serializer(maxlen, "some_source");
     for (int i = 1; i < maxlen; i++) {
       int res = serializer.addEntry(0,0,0,0);
       ASSERT_EQ(res, 0);

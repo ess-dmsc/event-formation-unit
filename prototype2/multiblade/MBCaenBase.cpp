@@ -12,7 +12,7 @@
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
 #include <common/Producer.h>
-#include <common/monitor/HistSerializer.h>
+#include <common/monitor/HistogramSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
 #include <common/TimeString.h>
@@ -188,7 +188,7 @@ void CAENBase::processing_thread() {
 
   Hists histograms(std::max(ncass * nwires, ncass * nstrips), 65535);
   Producer monitorprod(EFUSettings.KafkaBroker, monitor);
-  HistSerializer histfb(histograms.needed_buffer_size(), "multiblade");
+  HistogramSerializer histfb(histograms.needed_buffer_size(), "multiblade");
   histfb.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
 #pragma GCC diagnostic pop

@@ -26,7 +26,7 @@ class utpcAnalyzer : public AbstractAnalyzer {
   /// \brief analyzes particle track in both planes
   ReducedEvent analyze(Event&) const override;
 
-  std::string debug() const override;
+  std::string debug(const std::string& prepend) const override;
 
   /// \brief returns timestamp for start of event (earlier of 2 planes)
   static uint64_t utpc_time(const Event& e);

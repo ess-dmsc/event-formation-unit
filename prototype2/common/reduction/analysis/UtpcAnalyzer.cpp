@@ -84,12 +84,11 @@ bool utpcAnalyzer::meets_lower_criterion(const ReducedHit &x, const ReducedHit &
   return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
 }
 
-std::string utpcAnalyzer::debug() const {
-  std::string ret;
-  ret += "uTPC analysis\n";
-  ret += fmt::format("  weighted = {}\n", (weighted_ ? "YES" : "no"));
-  ret += fmt::format("  max_timebins = {}\n", max_timebins_);
-  ret += fmt::format("  max_timedif = {}\n", max_timedif_);
-
-  return ret;
+std::string utpcAnalyzer::debug(const std::string& prepend) const {
+  std::stringstream ss;
+  ss << "uTPC analysis\n";
+  ss << prepend << fmt::format("  weighted = {}\n", (weighted_ ? "YES" : "no"));
+  ss << prepend << fmt::format("  max_timebins = {}\n", max_timebins_);
+  ss << prepend << fmt::format("  max_timedif = {}\n", max_timedif_);
+  return ss.str();
 }

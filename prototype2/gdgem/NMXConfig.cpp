@@ -117,9 +117,9 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
     {
       auto MGA = std::make_shared<MGAnalyzer>();
       MGA->weighted(root["analyze_weighted"].get<bool>());
-      geometry.nx(MGA->geometry_.x_range());
-      geometry.ny(MGA->geometry_.y_range());
-      geometry.nz(MGA->geometry_.z_range());
+      geometry.nx(MGA->geometry().x_range());
+      geometry.ny(MGA->geometry().y_range());
+      geometry.nz(MGA->geometry().z_range());
       geometry.np(1);
 
       analyzer_ = MGA;
@@ -210,7 +210,7 @@ std::string NMXConfig::debug() const {
     if (!analyzer_)
       ret += "Invalid analyzer\n";
     else
-      ret += analyzer_->debug();
+      ret += analyzer_->debug("  ");
 
     ret += "  Filters:\n";
     ret += fmt::format("    enforce_lower_uncertainty_limit = {}\n",
@@ -226,10 +226,8 @@ std::string NMXConfig::debug() const {
           filter.minimum_hits);
     }
 
-    ret += fmt::format("  geometry_x = {}\n", geometry.nx());
-    ret += fmt::format("  geometry_y = {}\n", geometry.ny());
-    ret += fmt::format("  geometry_z = {}\n", geometry.nz());
-    ret += fmt::format("  geometry_p = {}\n", geometry.np());
+    ret += fmt::format("  Digital geometry [{}, {}, {}, {}]\n",
+                       geometry.nx(), geometry.ny(), geometry.nz(), geometry.np());
   }
 
   return ret;

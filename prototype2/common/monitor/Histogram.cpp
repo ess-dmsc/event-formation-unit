@@ -1,6 +1,6 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <common/monitor/Hists.h>
+#include <common/monitor/Histogram.h>
 #include <cmath>
 
 size_t Hists::strip_hist_size() { return strip_max_val + 1; }

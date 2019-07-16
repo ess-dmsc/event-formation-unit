@@ -15,7 +15,7 @@
 #include <common/SPSCFifo.h>
 #include <common/reduction/clustering/AbstractClusterer.h>
 #include <common/reduction/matching/AbstractMatcher.h>
-#include <common/monitor/Hists.h>
+#include <common/monitor/Histogram.h>
 #include <common/EV42Serializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 

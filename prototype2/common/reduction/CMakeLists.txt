@@ -30,7 +30,7 @@ add_library(ReductionObj OBJECT
   ${reduction_obj_INC}
   )
 
-enable_coverage_flags(efu_reduction)
+enable_coverage_flags(ReductionObj)
 
 #=============================================================================
 # Tests

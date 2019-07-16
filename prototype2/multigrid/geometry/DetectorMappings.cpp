@@ -23,7 +23,8 @@
 namespace Multigrid {
 
 std::string ModuleMapping::debug(std::string prefix) const {
-  return fmt::format("grids[{}-{}] wires[{}-{}]",
+  return fmt::format("plan_offset={}  grids[{}-{}]  wires[{}-{}]",
+                     plane_offset,
                      grid_offset, (grid_offset + channel_mappings->max_grid()),
                      wire_offset, (wire_offset + channel_mappings->max_wire()))
       + channel_mappings->debug(prefix + "  ");

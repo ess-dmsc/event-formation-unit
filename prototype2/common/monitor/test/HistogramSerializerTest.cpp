@@ -1,12 +1,12 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/monitor/HistSerializer.h>
+#include <common/monitor/HistogramSerializer.h>
 
 #include <test/TestBase.h>
 
 #define MAX_STRIP_VAL_TEST 5000
 
-class HistSerializerTest : public TestBase {
+class HistogramSerializerTest : public TestBase {
   void SetUp() override {
     for (size_t i = 0; i < hists.x_strips_hist.size(); i++) {
       hists.x_strips_hist[i] = i;
@@ -29,15 +29,15 @@ public:
 
 };
 
-TEST_F(HistSerializerTest, Serialize) {
-  HistSerializer histfb(hists.needed_buffer_size(), "some_source");
+TEST_F(HistogramSerializerTest, Serialize) {
+  HistogramSerializer histfb(hists.needed_buffer_size(), "some_source");
   auto len = histfb.produce(hists);
   EXPECT_GE(len, hists.needed_buffer_size());
 }
 
-TEST_F(HistSerializerTest, DeSerialize) {
-  HistSerializer histfb(hists.needed_buffer_size(), "some_source");
-  histfb.set_callback(std::bind(&HistSerializerTest::copy_buffer,
+TEST_F(HistogramSerializerTest, DeSerialize) {
+  HistogramSerializer histfb(hists.needed_buffer_size(), "some_source");
+  histfb.set_callback(std::bind(&HistogramSerializerTest::copy_buffer,
       this, std::placeholders::_1));
 
   histfb.produce(hists);

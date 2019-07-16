@@ -1,7 +1,7 @@
 /** Copyright (C) 2018 European Spallation Source ERIC */
 
 #include <cinttypes>
-#include <common/monitor/ReadoutSerializer.h>
+#include <common/monitor/HitSerializer.h>
 #include <common/Trace.h>
 #include <common/gccintel.h>
 
@@ -11,19 +11,19 @@
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-ReadoutSerializer::ReadoutSerializer(size_t maxarraylength, std::string source_name)
+HitSerializer::HitSerializer(size_t maxarraylength, std::string source_name)
     : maxlen(maxarraylength), SourceName(source_name) {
   builder.Clear();
 }
 
-void ReadoutSerializer::set_callback(ProducerCallback cb) {
+void HitSerializer::set_callback(ProducerCallback cb) {
   producer_callback = cb;
 }
 
 // \todo labels for planes
 // \todo offset time
 
-size_t ReadoutSerializer::produce() {
+size_t HitSerializer::produce() {
   if (entries == 0) {
     return 0;
   }
@@ -55,7 +55,7 @@ size_t ReadoutSerializer::produce() {
   return buffer.size;
 }
 
-size_t ReadoutSerializer::addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc) {
+size_t HitSerializer::addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc) {
   planes.push_back(plane);
   channels.push_back(channel);
   times.push_back(time);

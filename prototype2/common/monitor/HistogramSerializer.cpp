@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/monitor/HistSerializer.h>
+#include <common/monitor/HistogramSerializer.h>
 #include <common/gccintel.h>
 
 #include <common/Trace.h>
@@ -8,16 +8,16 @@
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-HistSerializer::HistSerializer(size_t buffer_half_size, std::string source_name)
+HistogramSerializer::HistogramSerializer(size_t buffer_half_size, std::string source_name)
     : builder(2 * buffer_half_size + 256)
     , SourceName (source_name) {}
 
 
-void HistSerializer::set_callback(ProducerCallback cb) {
+void HistogramSerializer::set_callback(ProducerCallback cb) {
   producer_callback = cb;
 }
 
-size_t HistSerializer::produce(const Hists &hists) {
+size_t HistogramSerializer::produce(const Hists &hists) {
   builder.Clear();
   auto x_strip_off = builder.CreateUninitializedVector(
       hists.x_strips_hist.size(), hists.elem_size, &xtrackptr);

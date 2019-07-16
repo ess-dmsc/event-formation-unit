@@ -1,16 +1,14 @@
-set(HistsTest_SRC
-  HistsTest.cpp
+set(HistogramTest_SRC
+  HistogramTest.cpp
   )
-create_test_executable(HistsTest)
+create_test_executable(HistogramTest)
 
-set(HistSerializerTest_SRC
-  HistSerializerTest.cpp
+set(HistogramSerializerTest_SRC
+  HistogramSerializerTest.cpp
   )
-create_test_executable(HistSerializerTest)
+create_test_executable(HistogramSerializerTest)
 
-set(ReadoutSerializerTest_SRC
-  ReadoutSerializerTest.cpp
+set(HitSerializerTest_SRC
+  HitSerializerTest.cpp
   )
-create_test_executable(ReadoutSerializerTest)
-
-
+create_test_executable(HitSerializerTest)

@@ -9,9 +9,9 @@
 #pragma once
 
 #include <common/Detector.h>
-#include <common/monitor/Hists.h>
-#include <common/monitor/HistSerializer.h>
-#include <common/monitor/ReadoutSerializer.h>
+#include <common/monitor/Histogram.h>
+#include <common/monitor/HistogramSerializer.h>
+#include <common/monitor/HitSerializer.h>
 #include <common/EV42Serializer.h>
 #include <multigrid/Config.h>
 
@@ -26,13 +26,13 @@ struct MultigridSettings {
 
 struct Monitor {
   std::shared_ptr<Hists> hists;
-  std::shared_ptr<ReadoutSerializer> readouts;
+  std::shared_ptr<HitSerializer> readouts;
 
   void init(std::string broker, size_t max_readouts) {
-    readouts = std::make_shared<ReadoutSerializer>(max_readouts, "multigrid");
+    readouts = std::make_shared<HitSerializer>(max_readouts, "multigrid");
     hists = std::make_shared<Hists>(std::numeric_limits<uint16_t>::max(),
                                     std::numeric_limits<uint16_t>::max());
-    histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size(), "multigrid");
+    histfb = std::make_shared<HistogramSerializer>(hists->needed_buffer_size(), "multigrid");
 
     producer = std::make_shared<Producer>(broker, "C-SPEC_monitor");
 #pragma GCC diagnostic push
@@ -78,7 +78,7 @@ private:
   bool enabled_{false};
 
   std::shared_ptr<Producer> producer;
-  std::shared_ptr<HistSerializer> histfb;
+  std::shared_ptr<HistogramSerializer> histfb;
 };
 
 ///

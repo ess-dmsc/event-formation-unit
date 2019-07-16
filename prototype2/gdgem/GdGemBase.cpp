@@ -16,7 +16,7 @@
 #include <gdgem/generators/BuilderHits.h>
 #include <gdgem/generators/BuilderReadouts.h>
 #include <common/EV42Serializer.h>
-#include <common/monitor/HistSerializer.h>
+#include <common/monitor/HistogramSerializer.h>
 #include <common/Producer.h>
 #include <efu/Server.h>
 #include <common/Socket.h>
@@ -397,7 +397,7 @@ void GdGemBase::processing_thread() {
   track_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
-  HistSerializer hist_serializer(hists_.needed_buffer_size(), "nmx");
+  HistogramSerializer hist_serializer(hists_.needed_buffer_size(), "nmx");
   hist_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 

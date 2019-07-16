@@ -11,13 +11,13 @@
 
 #include "mo01_nmx_generated.h"
 
-#include <common/monitor/Hists.h>
+#include <common/monitor/Histogram.h>
 #include <common/Producer.h>
 
-class HistSerializer {
+class HistogramSerializer {
 public:
   /** \todo document */
-  HistSerializer(size_t buffer_half_size, std::string source_name);
+  HistogramSerializer(size_t buffer_half_size, std::string source_name);
 
   void set_callback(ProducerCallback cb);
 

@@ -2,6 +2,8 @@
 # Hit generator (h5)
 #=============================================================================
 
+# \todo ReaderHits needs unit tests?
+
 set(udpgen_hits_SRC
     generator.cpp
     ReaderHits.cpp

@@ -69,7 +69,8 @@ void ModulePipeline::process_events(bool flush) {
     );
 
     if (pixel == 0) {
-      XTRACE(PROCESS, DEB, "Event geometry error");
+      XTRACE(PROCESS, DEB, "Event geometry error for %s\n      %s",
+          neutron.debug().c_str(), event.to_string("      ", true).c_str());
       stats.events_geometry_err++;
       continue;
     }
@@ -87,11 +88,7 @@ std::string ModulePipeline::config(const std::string& prepend) const {
   ss << prepend << "Matcher:\n" + matcher.config(prepend + "  ");
   ss << prepend << "max_wire_hits = " << max_wire_hits << "\n";
   ss << prepend << "max_grid_hits = " << max_grid_hits << "\n";
-  // \todo refactor analyzer printing
-  ss << prepend << "Event position using weighted average: "
-     << (analyzer.weighted() ? "YES" : "no") << "\n";
-  ss << prepend << "Digital geometry:\n"
-     << analyzer.geometry_.debug(prepend + "  ");
+  ss << prepend << analyzer.debug(prepend + "  ");
   return ss.str();
 }
 

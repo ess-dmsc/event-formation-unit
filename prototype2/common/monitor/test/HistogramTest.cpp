@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/monitor/Hists.h>
+#include <common/monitor/Histogram.h>
 #include <test/TestBase.h>
 #include <cmath>
 

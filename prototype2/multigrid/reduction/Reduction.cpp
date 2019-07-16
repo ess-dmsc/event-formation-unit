@@ -41,17 +41,17 @@ void Reduction::process_queues(bool flush) {
 
   // \todo remove this hack!
   if (pipelines.size() == 9) {
-    merger.sync_up(0,1);
-    merger.sync_up(0,2);
-    merger.sync_up(1,2);
+    merger.sync_up(0, 1);
+    merger.sync_up(0, 2);
+    merger.sync_up(1, 2);
 
-    merger.sync_up(3,4);
-    merger.sync_up(3,5);
-    merger.sync_up(4,5);
+    merger.sync_up(3, 4);
+    merger.sync_up(3, 5);
+    merger.sync_up(4, 5);
 
-    merger.sync_up(6,7);
-    merger.sync_up(6,8);
-    merger.sync_up(7,8);
+    merger.sync_up(6, 7);
+    merger.sync_up(6, 8);
+    merger.sync_up(7, 8);
   }
 
   merger.sort();
@@ -68,28 +68,28 @@ void Reduction::process_queues(bool flush) {
 uint32_t Reduction::max_x() const {
   uint32_t ret{0};
   for (const auto &b : pipelines)
-    ret = std::max(ret, b.analyzer.geometry_.x_offset
-        + b.analyzer.geometry_.x_range());
+    ret = std::max(ret, b.analyzer.geometry().x_offset
+        + b.analyzer.geometry().x_range());
   return ret;
 }
 
 uint32_t Reduction::max_y() const {
   uint32_t ret{0};
   for (const auto &b : pipelines)
-    ret = std::max(ret, b.analyzer.geometry_.y_offset
-        + b.analyzer.geometry_.y_range());
+    ret = std::max(ret, b.analyzer.geometry().y_offset
+        + b.analyzer.geometry().y_range());
   return ret;
 }
 
 uint32_t Reduction::max_z() const {
   uint32_t ret{0};
   for (const auto &b : pipelines)
-    ret = std::max(ret, b.analyzer.geometry_.z_offset
-        + b.analyzer.geometry_.z_range());
+    ret = std::max(ret, b.analyzer.geometry().z_offset
+        + b.analyzer.geometry().z_range());
   return ret;
 }
 
-std::string Reduction::config(const std::string& prepend) const {
+std::string Reduction::config(const std::string &prepend) const {
   std::stringstream ss;
 
   ss << "--== PIPELINE CONFIG ==--\n";
@@ -102,8 +102,9 @@ std::string Reduction::config(const std::string& prepend) const {
 
   if (!pipelines.empty()) {
     const auto &p = pipelines.back();
-    ss << prepend << fmt::format("  Digital geometry_[{}, {}, {}, {}]\n",
-                                 p.geometry.nx(), p.geometry.ny(), p.geometry.nz(), p.geometry.np());
+    ss << prepend
+       << fmt::format("  Digital geometry [{}, {}, {}, {}]\n",
+                      p.geometry.nx(), p.geometry.ny(), p.geometry.nz(), p.geometry.np());
   }
 
   ss << prepend << "Merger:\n" << merger.debug(prepend + "  ", false);
@@ -111,11 +112,10 @@ std::string Reduction::config(const std::string& prepend) const {
   return ss.str();
 }
 
-std::string Reduction::status(const std::string& prepend, bool verbose) const {
+std::string Reduction::status(const std::string &prepend, bool verbose) const {
   std::stringstream ss;
 
   ss << prepend << "--== PIPELINE STATUS ==--\n";
-
   ss << prepend << "Stats:\n" << stats.debug(prepend + "  ");
 
   if (!out_queue.empty()) {
@@ -127,6 +127,7 @@ std::string Reduction::status(const std::string& prepend, bool verbose) const {
       }
     }
   }
+
   ss << prepend << "Merger:\n" << merger.debug(prepend + "  ", verbose);
 
   for (size_t i = 0; i < pipelines.size(); ++i) {
@@ -155,8 +156,8 @@ void from_json(const nlohmann::json &j, Reduction &g) {
     pipeline.max_wire_hits = max_wire_multiplicity;
     pipeline.max_grid_hits = max_grid_multiplicity;
 
-    pipeline.analyzer.geometry_ = jj["digital_geometry"];
     pipeline.analyzer.weighted(jj["analysis_weighted"]);
+    pipeline.analyzer.set_geometry(jj["digital_geometry"]);
 
     g.pipelines.push_back(pipeline);
     module_count++;

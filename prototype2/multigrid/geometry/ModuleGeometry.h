@@ -46,8 +46,8 @@ private:
   uint16_t grids_{40};
   uint16_t wires_{80};
   uint32_t z_range_{20};
-  
-  /// derived from z_range
+
+  /// cached value, derived from z_range
   uint32_t x_range_{4};
 
   bool flipped_x_{false};
