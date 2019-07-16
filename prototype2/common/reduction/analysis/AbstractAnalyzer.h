@@ -23,6 +23,10 @@ class AbstractAnalyzer {
   AbstractAnalyzer() = default;
   virtual ~AbstractAnalyzer() = default;
 
+  /// Assuming that only a subset of hits are used in determining particle position
+  /// this helps keep track of how many were actually selected for averaging.
+  mutable size_t stats_used_hits{0};
+
   /// \brief analyzes cluster in both planes
   virtual ReducedEvent analyze(Event&) const = 0;
 

@@ -154,8 +154,12 @@ uint64_t Cluster::time_overlap(const Cluster &other) const {
 }
 
 uint64_t Cluster::time_gap(const Cluster &other) const {
-  if (empty() || other.empty())
-    return 0; // \todo should this happen?
+  if (empty() || other.empty()) {
+    /// In case of two empty clusters time gap ought to be undefined or "inf"
+    /// Returning max value of the used type, but throwing an exception
+    /// could also be an option
+    return std::numeric_limits<uint64_t>::max();
+  }
   auto latest_start = std::max(other.time_start_, time_start_);
   auto earliest_end = std::min(other.time_end_, time_end_);
   if (latest_start <= earliest_end) {

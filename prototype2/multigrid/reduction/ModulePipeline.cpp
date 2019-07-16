@@ -48,8 +48,8 @@ void ModulePipeline::process_events(bool flush) {
 
     stats.events_total++;
 
-    if ((event.ClusterA.hit_count() > max_wire_hits) ||
-        (event.ClusterB.hit_count() > max_grid_hits)) {
+    if ((MGAnalyzer::WireCluster(event).hit_count() > max_wire_hits) ||
+        (MGAnalyzer::GridCluster(event).hit_count() > max_grid_hits)) {
       stats.events_multiplicity_rejects++;
       continue;
     }

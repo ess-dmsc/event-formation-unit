@@ -10,6 +10,8 @@
 
 #include <common/reduction/Hit.h>
 
+// \todo tests for these?
+
 using HitVector = std::vector<Hit>;
 
 /// \brief convenience function for sorting Hits by increasing time
@@ -44,5 +46,3 @@ inline std::string to_string(const HitVector& vec, const std::string& prepend) {
   }
   return ss.str();
 }
-
-// \todo tests for these?

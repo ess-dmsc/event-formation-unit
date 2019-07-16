@@ -82,7 +82,7 @@ std::string AbstractMatcher::status(const std::string &prepend, bool verbose) co
   ss << prepend << fmt::format("stats_rejected_clusters: {}\n", stats_rejected_clusters);
   if (!matched_events.empty()) {
     ss << prepend << "Matched events:\n";
-    // \todo factor this out
+    // \todo refactor: make function for this
     for (const auto &e : matched_events) {
       ss << prepend << "  " << e.to_string(prepend + "  ", verbose) + "\n";
     }

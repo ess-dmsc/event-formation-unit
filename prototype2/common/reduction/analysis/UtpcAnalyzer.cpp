@@ -32,10 +32,10 @@ ReducedHit utpcAnalyzer::analyze(Cluster &cluster) const {
 
   double center_sum{0};
   double center_count{0};
-  int16_t lspan_min = std::numeric_limits<int16_t>::max();
-  int16_t lspan_max = std::numeric_limits<int16_t>::min();
-  int16_t uspan_min = std::numeric_limits<int16_t>::max();
-  int16_t uspan_max = std::numeric_limits<int16_t>::min();
+  uint16_t lspan_min = std::numeric_limits<uint16_t>::max();
+  uint16_t lspan_max = std::numeric_limits<uint16_t>::min();
+  uint16_t uspan_min = std::numeric_limits<uint16_t>::max();
+  uint16_t uspan_max = std::numeric_limits<uint16_t>::min();
   uint64_t earliest = std::min(cluster.time_start(), cluster.time_end()
       - static_cast<uint64_t>(max_timedif_));
   std::set<uint64_t> timebins;
@@ -49,13 +49,15 @@ ReducedHit utpcAnalyzer::analyze(Cluster &cluster) const {
         center_sum += e.coordinate;
         center_count++;
       }
-      lspan_min = std::min(lspan_min, static_cast<int16_t>(e.coordinate));
-      lspan_max = std::max(lspan_max, static_cast<int16_t>(e.coordinate));
+      ret.hits_used++;
+      stats_used_hits++;
+      lspan_min = std::min(lspan_min, e.coordinate);
+      lspan_max = std::max(lspan_max, e.coordinate);
     }
     if ((e.time >= earliest) && ((max_timebins_ > timebins.size()) || (timebins.count(e.time)))) {
       timebins.insert(e.time);
-      uspan_min = std::min(uspan_min, static_cast<int16_t>(e.coordinate));
-      uspan_max = std::max(uspan_max, static_cast<int16_t>(e.coordinate));
+      uspan_min = std::min(uspan_min, e.coordinate);
+      uspan_max = std::max(uspan_max, e.coordinate);
     } else {
       break;
     }
@@ -66,8 +68,8 @@ ReducedHit utpcAnalyzer::analyze(Cluster &cluster) const {
       center_count);
 
   ret.center = center_sum / center_count;
-  ret.uncert_lower = lspan_max - lspan_min + int16_t(1);
-  ret.uncert_upper = uspan_max - uspan_min + int16_t(1);
+  ret.uncert_lower = lspan_max - lspan_min + 1;
+  ret.uncert_upper = uspan_max - uspan_min + 1;
   return ret;
 }
 

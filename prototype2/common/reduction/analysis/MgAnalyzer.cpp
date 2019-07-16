@@ -22,7 +22,7 @@ void MGAnalyzer::weighted(bool weighted) {
   weighted_ = weighted;
 }
 
-void MGAnalyzer::set_geometry(const Multigrid::ModuleGeometry& geom) {
+void MGAnalyzer::set_geometry(const Multigrid::ModuleGeometry &geom) {
   geometry_ = geom;
 }
 
@@ -30,7 +30,7 @@ Multigrid::ModuleGeometry MGAnalyzer::geometry() const {
   return geometry_;
 }
 
-std::string MGAnalyzer::debug(const std::string& prepend) const {
+std::string MGAnalyzer::debug(const std::string &prepend) const {
   std::stringstream ss;
   ss << "MG analysis\n";
   ss << prepend << fmt::format("  weighted = {}\n", (weighted_ ? "YES" : "no"));
@@ -45,10 +45,9 @@ ReducedEvent MGAnalyzer::analyze(Event &event) const {
     return ret;
   }
 
-  // \todo should be a safer way to identify which cluster is grids or wires
-  analyze_wires(event.ClusterA, ret.x, ret.z);
+  analyze_wires(WireCluster(event), ret.x, ret.z);
 
-  ret.y = analyze_grids(event.ClusterB);
+  ret.y = analyze_grids(GridCluster(event));
 
   ret.time = event.time_start();
   ret.good = ret.x.is_center_good() && ret.y.is_center_good() && ret.z.is_center_good();

@@ -14,7 +14,7 @@
 
 // \todo the abstract class code needs tests
 
-// \todo move out to separate header
+// \todo refactor: move out to separate header
 // \todo replace by deque, or....?
 using ClusterContainer = std::list<Cluster>;
 

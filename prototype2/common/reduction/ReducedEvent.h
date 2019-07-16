@@ -32,10 +32,10 @@ struct ReducedHit {
   double center{std::numeric_limits<double>::quiet_NaN()};
 
   /// span of averaged hit coordinates (narrower uncertainty estimate)
-  int16_t uncert_lower{-1};
+  int32_t uncert_lower{-1};
 
   /// span of relevant hit coordinates (broader uncertainty estimate)
-  int16_t uncert_upper{-1};
+  int32_t uncert_upper{-1};
 
   /// number of hits used in average
   size_t hits_used{0};

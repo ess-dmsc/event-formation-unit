@@ -40,7 +40,7 @@ class utpcAnalyzer : public AbstractAnalyzer {
   /// \brief returns timestamp for start of event (earlier of 2 planes)
   static uint64_t utpc_time(const Event& e);
 
-  // \todo move this out to some filter class
+  // \todo refactor: move this out to some filter class
   /// \brief indicates if both dimensions meet lower uncertainty criterion
   static bool meets_lower_criterion(const ReducedHit& x,
                                     const ReducedHit& y, int16_t max_lu);

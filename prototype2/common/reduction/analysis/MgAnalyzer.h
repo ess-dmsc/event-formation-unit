@@ -18,36 +18,50 @@
 ///        therefore a ModuleGeometry definition is needed to extract the two
 ///        coordinate components. Produces 3-dimensional events.
 
-// \todo document this better
-
 class MGAnalyzer : public AbstractAnalyzer {
 public:
+
+  ////////////////
+  /// Settings ///
+  ////////////////
+
   /// \param weighted if strategy should use weighted average for coordinate calculation
   void weighted(bool weighted);
 
   /// \param geom sets the ModuleGeometry definition for converting Wires to X and Z
-  void set_geometry(const Multigrid::ModuleGeometry& geom);
+  void set_geometry(const Multigrid::ModuleGeometry &geom);
 
   /// \returns current ModuleGeometry definition
   Multigrid::ModuleGeometry geometry() const;
 
+  //////////////////////
+  /// Implementation ///
+  //////////////////////
+
   /// \brief analyzes event in both planes
-  ReducedEvent analyze(Event&) const override;
-
-  /// \brief analyzes cluster as wires
-  void analyze_wires(Cluster& cluster, ReducedHit& x, ReducedHit& z) const;
-
-  /// \brief analyzes cluster as grids
-  ReducedHit analyze_grids(Cluster& cluster) const;
+  ReducedEvent analyze(Event &) const override;
 
   /// \brief prints info for debug purposes
-  std::string debug(const std::string& prepend) const override;
+  std::string debug(const std::string &prepend) const override;
 
-  mutable size_t stats_used_hits{0};
+  ///////////////////
+  /// Convenience ///
+  ///////////////////
+
+  inline static Cluster &WireCluster(Event &event) { return event.ClusterA; }
+
+  inline static Cluster &GridCluster(Event &event) { return event.ClusterB; }
+
+protected:
+  /// \brief analyzes cluster as wires
+  void analyze_wires(Cluster &cluster, ReducedHit &x, ReducedHit &z) const;
+
+  /// \brief analyzes cluster as grids
+  ReducedHit analyze_grids(Cluster &cluster) const;
 
 private:
   bool weighted_{true};
 
-  // \todo use pre-generated look-up table
+  // \todo refactor: use pre-generated look-up table
   Multigrid::ModuleGeometry geometry_;
 };
