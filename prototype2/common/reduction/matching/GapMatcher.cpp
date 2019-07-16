@@ -49,15 +49,9 @@ void GapMatcher::match(bool flush) {
   /// If anything remains
   if (!evt.empty()) {
     if (flush) {
-      /// If flushing, stash it
       stash_event(evt);
     } else {
-      /// Else return merged clusters to their respective queue
-      // \todo this needs explicit testing
-      if (!evt.ClusterA.empty())
-        unmatched_clusters_.push_front(evt.ClusterA);
-      if (!evt.ClusterB.empty())
-        unmatched_clusters_.push_front(evt.ClusterB);
+      requeue_clusters(evt);
     }
   }
 }

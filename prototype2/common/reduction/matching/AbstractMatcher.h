@@ -86,6 +86,11 @@ protected:
   /// \param event to be stashed
   void stash_event(Event &event);
 
+  /// \brief Puts the event's constituent clusters back onto their respective
+  ///         unmatched cluster queues.
+  /// \param event to be disassembled
+  void requeue_clusters(Event &event);
+
   /// \brief Determines if cluster is ready to be matched, using maximum latency
   ///         as time-out threshold. Compares the end time of submitted cluster to
   ///         the start time of the latest cluster in queue. Of the latest clusters

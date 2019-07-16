@@ -52,6 +52,14 @@ void AbstractMatcher::stash_event(Event &event) {
   stats_event_count++;
 }
 
+void AbstractMatcher::requeue_clusters(Event &event) {
+  // \todo this needs explicit testing
+  if (!event.ClusterA.empty())
+    unmatched_clusters_.emplace_front(std::move(event.ClusterA));
+  if (!event.ClusterB.empty())
+    unmatched_clusters_.emplace_front(std::move(event.ClusterB));
+}
+
 bool AbstractMatcher::ready_to_be_matched(const Cluster &cluster) const {
   XTRACE(CLUSTER, DEB,
          "latest_x %u, latest_y %u, cl time end %u", LatestA, LatestB, cluster.time_end());
