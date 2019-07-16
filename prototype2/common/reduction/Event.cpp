@@ -132,10 +132,10 @@ std::string Event::visualize(const std::string &prepend,
                              uint8_t downsample_coords) const {
   std::stringstream ss;
   if (!ClusterA.empty())
-    ss << "\n" << prepend << "  PlaneA:\n"
+    ss << prepend << "  PlaneA:\n"
        << ClusterA.visualize(prepend + "  ", downsample_time, downsample_coords);
   if (!ClusterB.empty())
-    ss << "\n" << prepend << "  PlaneB:\n"
+    ss << prepend << "  PlaneB:\n"
        << ClusterB.visualize(prepend + "  ", downsample_time, downsample_coords);
   return ss.str();
 }

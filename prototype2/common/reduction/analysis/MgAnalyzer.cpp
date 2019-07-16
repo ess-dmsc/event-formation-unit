@@ -1,4 +1,10 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+//===----------------------------------------------------------------------===//
+///
+/// \file MGAnalyzer.h
+/// \brief MGAnalyzer class implementation
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/reduction/analysis/MgAnalyzer.h>
 #include <common/reduction/ReducedEvent.h>
@@ -12,8 +18,8 @@
 #undef TRC_MASK
 #define TRC_MASK 0
 
-void MGAnalyzer::weighted(bool w) {
-  weighted_ = w;
+void MGAnalyzer::weighted(bool weighted) {
+  weighted_ = weighted;
 }
 
 void MGAnalyzer::set_geometry(const Multigrid::ModuleGeometry& geom) {

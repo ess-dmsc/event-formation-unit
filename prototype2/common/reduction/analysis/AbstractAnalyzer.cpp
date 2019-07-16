@@ -1,5 +1,11 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+//===----------------------------------------------------------------------===//
+///
+/// \file AbstractAnalyzer.h
+/// \brief AbstractAnalyzer class implementation
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/reduction/analysis/AbstractAnalyzer.h>
 
-// \todo put stuff here :)
+// \todo put stuff here, maybe? :)

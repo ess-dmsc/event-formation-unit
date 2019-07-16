@@ -1,4 +1,10 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+//===----------------------------------------------------------------------===//
+///
+/// \file ReducedEvent.h
+/// \brief ReducedHit and ReducedEvent class definitions
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/reduction/ReducedEvent.h>
 #include <fmt/format.h>
@@ -11,17 +17,13 @@ bool ReducedHit::is_center_good() const {
   return std::isfinite(center) && (center >= 0);
 }
 
-std::string ReducedHit::debug() const {
+std::string ReducedHit::to_string() const {
   return fmt::format("{}(lu={},uu={}) t={}(~{}) *{}",
-      center, uncert_lower, uncert_upper, average_time, time, hits_used);
+                     center, uncert_lower, uncert_upper, average_time, time, hits_used);
 }
 
-std::string ReducedEvent::debug() const {
-  return fmt::format("x=[{}], y=[{}], z=[{}], t={} {}",
-      x.debug(), y.debug(), z.debug(),
-      time, (good ? "good" : "bad"));
-}
-
-size_t ReducedEvent::hits_used() const {
-  return x.hits_used + y.hits_used + z.hits_used;
+std::string ReducedEvent::to_string() const {
+  return fmt::format("x=[{}]   y=[{}]   z=[{}]   t={}   {}",
+                     x.to_string(), y.to_string(), z.to_string(),
+                     time, (good ? "good" : "bad"));
 }

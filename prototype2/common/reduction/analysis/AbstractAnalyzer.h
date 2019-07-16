@@ -1,9 +1,8 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+/** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
 //===----------------------------------------------------------------------===//
 ///
-/// \file
-///
-/// \brief
+/// \file AbstractAnalyzer.h
+/// \brief AbstractAnalyzer class definition
 ///
 //===----------------------------------------------------------------------===//
 
@@ -11,6 +10,13 @@
 
 #include <common/reduction/Event.h>
 #include <common/reduction/ReducedEvent.h>
+
+/// \class AbstractAnalyzer AbstractAnalyzer.h
+/// \brief AbstractAnalyzer declares the interface for an event analyzer type
+///        that can take multi-dimensional Events and return a ReducedEvent
+///        summaries that provide the best estimated coordinates and time
+///        for a detected particle. Different strategies are to be implemented
+///        for various detector types, depending on the particular physics.
 
 class AbstractAnalyzer {
  public:
@@ -20,5 +26,6 @@ class AbstractAnalyzer {
   /// \brief analyzes cluster in both planes
   virtual ReducedEvent analyze(Event&) const = 0;
 
+  /// \brief prints info for debug purposes
   virtual std::string debug(const std::string& prepend) const = 0;
 };

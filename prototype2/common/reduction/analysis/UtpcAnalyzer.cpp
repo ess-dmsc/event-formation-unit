@@ -1,4 +1,10 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+//===----------------------------------------------------------------------===//
+///
+/// \file utpcAnalyzer.h
+/// \brief utpcAnalyzer class implementation
+///
+//===----------------------------------------------------------------------===//
 
 #include <common/reduction/analysis/UtpcAnalyzer.h>
 #include <cmath>

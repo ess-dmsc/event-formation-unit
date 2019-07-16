@@ -70,7 +70,7 @@ void ModulePipeline::process_events(bool flush) {
 
     if (pixel == 0) {
       XTRACE(PROCESS, DEB, "Event geometry error for %s\n      %s",
-          neutron.debug().c_str(), event.to_string("      ", true).c_str());
+             neutron.to_string().c_str(), event.to_string("      ", true).c_str());
       stats.events_geometry_err++;
       continue;
     }

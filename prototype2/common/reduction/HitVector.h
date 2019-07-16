@@ -45,4 +45,4 @@ inline std::string to_string(const HitVector& vec, const std::string& prepend) {
   return ss.str();
 }
 
-// \todo tests for these
+// \todo tests for these?

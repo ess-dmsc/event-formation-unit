@@ -113,7 +113,7 @@ TEST_F(UtpcAnalyzerTest, InsertInvalid) {
 TEST_F(UtpcAnalyzerTest, DebugPrint) {
   MESSAGE() << "This is not a test, just calling debug print function\n";
   auto result = utpcAnalyzer(true, 5, 5).analyze(event);
-  MESSAGE() << result.debug() << "\n";
+  MESSAGE() << result.to_string() << "\n";
 }
 
 // \todo more & better tests of this required

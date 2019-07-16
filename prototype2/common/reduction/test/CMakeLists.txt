@@ -18,4 +18,7 @@ set(ReducedEventTest_SRC
   )
 create_test_executable(ReducedEventTest)
 
-# \todo tests for NeutronEvent?
+set(ChronoMergerTest_SRC
+  ChronoMergerTest.cpp
+  )
+create_test_executable(ChronoMergerTest)
