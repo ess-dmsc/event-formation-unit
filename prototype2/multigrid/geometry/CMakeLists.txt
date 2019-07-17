@@ -1,72 +1,27 @@
-set(MGFilterTest_SRC
-  FilterTest.cpp
+#=============================================================================
+# Classes for Multi-grid geometry
+#=============================================================================
+
+set(mg_geometry_obj_SRC
   Filter.cpp
-  )
-set(MGFilterTest_INC
-  Filter.h
-  )
-create_test_executable(MGFilterTest)
-
-set(MGModuleGeometryTest_SRC
-  ModuleGeometryTest.cpp
-  ModuleGeometry.cpp
-  )
-set(MGModuleGeometryTest_INC
-  ModuleGeometry.h
-  )
-create_test_executable(MGModuleGeometryTest)
-
-set(MGChannelMappingsTest_SRC
-  ChannelMappingsTest.cpp
   ChannelMappings.cpp
-  Filter.cpp
-  )
-set(MGChannelMappingsTest_INC
-  ChannelMappings.h
-  Filter.h
-  )
-create_test_executable(MGChannelMappingsTest)
-
-set(MGSeqMappingsTest_SRC
-  MGSeqMappingsTest.cpp
   MGSeqMappings.cpp
-  ChannelMappings.cpp
-  Filter.cpp
-  )
-set(MGSeqMappingsTest_INC
-  ChannelMappings.h
-  MGSeqMappings.h
-  Filter.h
-  )
-create_test_executable(MGSeqMappingsTest)
-
-set(MG24MappingsTest_SRC
-  MG24MappingsTest.cpp
-  MGSeqMappings.cpp
-  ChannelMappings.cpp
-  ModuleGeometry.cpp
-  Filter.cpp
-  )
-set(MG24MappingsTest_INC
-  ChannelMappings.h
-  MG24Mappings.h
-  MGSeqMappings.h
-  ModuleGeometry.h
-  Filter.h
-  )
-create_test_executable(MG24MappingsTest)
-
-set(MGDetectorMappingsTest_SRC
-  DetectorMappingsTest.cpp
+#  MG24Mappings.cpp
   DetectorMappings.cpp
-  ChannelMappings.cpp
-  MGSeqMappings.cpp
-  Filter.cpp
   )
-set(MGDetectorMappingsTest_INC
-  DetectorMappings.h
+
+set(mg_geometry_obj_INC
+  Filter.h
   ChannelMappings.h
   MGSeqMappings.h
-  Filter.h
+  MG24Mappings.h
+  DetectorMappings.h
   )
-create_test_executable(MGDetectorMappingsTest)
+
+add_library(MgGeometry STATIC
+  ${mg_geometry_obj_SRC}
+  ${mg_geometry_obj_INC}
+  )
+
+enable_coverage_flags(MgGeometry)
+

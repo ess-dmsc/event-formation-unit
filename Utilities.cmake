@@ -4,17 +4,19 @@
 function(create_module module_name)
   add_library(${module_name} MODULE
     ${${module_name}_SRC}
-    ${${module_name}_INC})
+    ${${module_name}_INC}
+    )
   set_target_properties(${module_name} PROPERTIES PREFIX "")
   set_target_properties(${module_name} PROPERTIES SUFFIX ".so")
   target_link_libraries(${module_name} efu
     ${${module_name}_LIB}
-  ${EFU_COMMON_LIBS})
+    ${EFU_COMMON_LIBS}
+    )
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${module_name} "-Wl,--no-as-needed")
   endif()
 
-  if (GPERF)
+  if(GPERF)
     target_link_libraries(${module_name} ${GPERFTOOLS_PROFILER})
   endif()
 
@@ -32,7 +34,7 @@ function(create_object_module module_name)
   add_library(${module_name} OBJECT
     ${${module_name}_SRC}
     ${${module_name}_INC})
-    enable_coverage_flags(${module_name})
+  enable_coverage_flags(${module_name})
   set(EFU_MODULES ${EFU_MODULES} $<TARGET_OBJECTS:${module_name}> CACHE INTERNAL "EFU_MODULES")
   set(EFU_DEPENDENCIES ${EFU_DEPENDENCIES} ${module_name} CACHE INTERNAL "EFU_DEPENDENCIES")
 endfunction(create_object_module)
@@ -50,7 +52,7 @@ function(create_executable exec_name)
     ${EFU_COMMON_LIBS}
     efu_common)
 
-  if (GPERF)
+  if(GPERF)
     target_link_libraries(${exec_name} ${GPERFTOOLS_PROFILER})
   endif()
 

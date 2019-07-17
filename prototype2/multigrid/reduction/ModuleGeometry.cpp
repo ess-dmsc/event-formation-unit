@@ -7,7 +7,7 @@
  *
  */
 
-#include <multigrid/geometry/ModuleGeometry.h>
+#include <multigrid/reduction/ModuleGeometry.h>
 
 #include <fmt/format.h>
 #include <sstream>

@@ -55,7 +55,7 @@ protected:
 
   void load_config(const std::string &jsonfile) {
     config = Multigrid::Config(jsonfile);
-    MESSAGE() << "Config:\n" << config.debug() << "\n";
+//    MESSAGE() << "Config:\n" << config.debug() << "\n";
   }
 
   void feed_file(const std::string &filename) {
@@ -73,6 +73,8 @@ protected:
       config.reduction.process_queues(false);
     }
     config.reduction.process_queues(true);
+
+//    MESSAGE() << "Status:\n" << config.reduction.status("", false);
   }
 
   void inspect_pulse_data(bool verbose = false) {
@@ -168,8 +170,6 @@ protected:
 TEST_F(ReductionTest, t00004) {
   feed_file(TEST_DATA_PATH "readouts/154482");
 
-  MESSAGE() << "Status:\n" << config.reduction.status("", false);
-
   EXPECT_EQ(ingested_hits, 1088);
   EXPECT_EQ(config.reduction.stats.invalid_planes, 0);
   EXPECT_EQ(config.reduction.stats.time_seq_errors, 0);
@@ -192,115 +192,109 @@ TEST_F(ReductionTest, t00004) {
   EXPECT_EQ(ShortestPulsePeriod, 266662);
 }
 
-//TEST_F(ReductionTest, t00033) {
-//  feed_file(TEST_DATA_PATH "readouts/154493");
-//
-//  MESSAGE() << "Status:\n" << config.reduction.status("", false);
-//
-//  EXPECT_EQ(ingested_hits, 8724);
-//  EXPECT_EQ(config.reduction.stats.invalid_planes, 0);
-//  EXPECT_EQ(config.reduction.stats.time_seq_errors, 1);
-//
-//  EXPECT_EQ(config.reduction.stats.wire_clusters, 1737);
-//  EXPECT_EQ(config.reduction.stats.grid_clusters, 1934);
-//  EXPECT_EQ(config.reduction.stats.events_total, 1821);
-//  EXPECT_EQ(config.reduction.stats.events_multiplicity_rejects, 109);
-//  EXPECT_EQ(config.reduction.stats.hits_used, 3184);
-//  EXPECT_EQ(config.reduction.stats.events_bad, 240);
-//  EXPECT_EQ(config.reduction.stats.events_geometry_err, 0);
-//
-//
-//  inspect_pulse_data();
-//  inspect_event_data();
-//  EXPECT_EQ(pulse_times, 2555);
-//  EXPECT_EQ(good_events, 1472);
-//  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
-//                + config.reduction.stats.events_bad,
-//            config.reduction.stats.events_total);
-//  EXPECT_EQ(ShortestPulsePeriod, 266662);
-//}
+TEST_F(ReductionTest, t00033) {
+  feed_file(TEST_DATA_PATH "readouts/154493");
 
-//TEST_F(ReductionTest, t00311) {
-//  feed_file(TEST_DATA_PATH "readouts/154492");
-//
-//  MESSAGE() << "Status:\n" << config.reduction.status("", false);
-//
-//  EXPECT_EQ(ingested_hits, 84232);
-//  EXPECT_EQ(config.reduction.stats.invalid_planes, 0);
-//  EXPECT_EQ(config.reduction.stats.time_seq_errors, 34);
-//
-//  EXPECT_EQ(config.reduction.stats.wire_clusters, 23368);
-//  EXPECT_EQ(config.reduction.stats.grid_clusters, 26085);
-//
-//  EXPECT_EQ(config.reduction.stats.events_total, 20460);
-//  EXPECT_EQ(config.reduction.stats.events_multiplicity_rejects, 3074);
-//  EXPECT_EQ(config.reduction.stats.hits_used, 34745);
-//  EXPECT_EQ(config.reduction.stats.events_bad, 81);
-//  EXPECT_EQ(config.reduction.stats.events_geometry_err, 0);
-//
-//  inspect_pulse_data();
-//  inspect_event_data();
-//  EXPECT_EQ(pulse_times, 975);
-//  EXPECT_EQ(good_events, 17305);
-//  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
-//                + config.reduction.stats.events_bad,
-//            config.reduction.stats.events_total);
-//  EXPECT_EQ(ShortestPulsePeriod, 0);
-//}
+  EXPECT_EQ(ingested_hits, 8724);
+  EXPECT_EQ(config.reduction.stats.invalid_planes, 0);
+  EXPECT_EQ(config.reduction.stats.time_seq_errors, 2);
 
-//TEST_F(ReductionTest, t03710) {
-//  feed_file(TEST_DATA_PATH "readouts/154478");
-//
-//  EXPECT_EQ(ingested_hits, 55666);
-//  EXPECT_EQ(config.reduction.stats.invalid_planes, 0);
-//  EXPECT_EQ(config.reduction.stats.time_seq_errors, 0);
-//
-//  EXPECT_EQ(config.reduction.stats.wire_clusters, 16755);
-//  EXPECT_EQ(config.reduction.stats.grid_clusters, 16370);
-//
-//  EXPECT_EQ(config.reduction.stats.events_total, 14341);
-//  EXPECT_EQ(config.reduction.stats.events_multiplicity_rejects, 2120);
-//  EXPECT_EQ(config.reduction.stats.hits_used, 23827);
-//  EXPECT_EQ(config.reduction.stats.events_bad, 627);
-//  EXPECT_EQ(config.reduction.stats.events_geometry_err, 0);
-//
-//  inspect_pulse_data();
-//  inspect_event_data();
-//  EXPECT_EQ(pulse_times, 312);
-//  EXPECT_EQ(good_events, 11594);
-//  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
-//                + config.reduction.stats.events_bad,
-//            config.reduction.stats.events_total);
-//  EXPECT_EQ(ShortestPulsePeriod, 266662);
-//}
+  EXPECT_EQ(config.reduction.stats.wire_clusters, 1737);
+  EXPECT_EQ(config.reduction.stats.grid_clusters, 1934);
+  EXPECT_EQ(config.reduction.stats.events_total, 1932);
+  EXPECT_EQ(config.reduction.stats.events_multiplicity_rejects, 117);
+  EXPECT_EQ(config.reduction.stats.hits_used, 3197);
+  EXPECT_EQ(config.reduction.stats.events_bad, 438);
+  EXPECT_EQ(config.reduction.stats.events_geometry_err, 0);
 
-//TEST_F(ReductionTest, t10392) {
-//  feed_file(TEST_DATA_PATH "readouts/154484");
-//
-//  MESSAGE() << "Status:\n" << config.reduction.status("", false);
-//
-//  EXPECT_EQ(ingested_hits, 178941);
-//  EXPECT_EQ(config.reduction.stats.invalid_planes, 0);
-//  EXPECT_EQ(config.reduction.stats.time_seq_errors, 1);
-//
-//  EXPECT_EQ(config.reduction.stats.wire_clusters, 51947);
-//  EXPECT_EQ(config.reduction.stats.grid_clusters, 51344);
-//
-//  EXPECT_EQ(config.reduction.stats.events_total, 41823);
-//  EXPECT_EQ(config.reduction.stats.events_multiplicity_rejects, 9513);
-//  EXPECT_EQ(config.reduction.stats.hits_used, 64239);
-//  EXPECT_EQ(config.reduction.stats.events_bad, 410);
-//  EXPECT_EQ(config.reduction.stats.events_geometry_err, 0);
-//
-//  inspect_pulse_data();
-//  inspect_event_data();
-//  EXPECT_EQ(pulse_times, 300);
-//  EXPECT_EQ(good_events, 31900);
-//  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
-//                + config.reduction.stats.events_bad,
-//            config.reduction.stats.events_total);
-//  EXPECT_EQ(ShortestPulsePeriod, 266662);
-//}
+
+  inspect_pulse_data();
+  inspect_event_data();
+  EXPECT_EQ(pulse_times, 2555);
+  EXPECT_EQ(good_events, 1377);
+  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
+                + config.reduction.stats.events_bad,
+            config.reduction.stats.events_total);
+  EXPECT_EQ(ShortestPulsePeriod, 266662);
+}
+
+TEST_F(ReductionTest, t00311) {
+  feed_file(TEST_DATA_PATH "readouts/154492");
+
+  EXPECT_EQ(ingested_hits, 84232);
+  EXPECT_EQ(config.reduction.stats.invalid_planes, 0);
+  EXPECT_EQ(config.reduction.stats.time_seq_errors, 68);
+
+  EXPECT_EQ(config.reduction.stats.wire_clusters, 23334);
+  EXPECT_EQ(config.reduction.stats.grid_clusters, 26051);
+
+  EXPECT_EQ(config.reduction.stats.events_total, 20876);
+  EXPECT_EQ(config.reduction.stats.events_multiplicity_rejects, 2763);
+  EXPECT_EQ(config.reduction.stats.hits_used, 36144);
+  EXPECT_EQ(config.reduction.stats.events_bad, 127);
+  EXPECT_EQ(config.reduction.stats.events_geometry_err, 0);
+
+  inspect_pulse_data();
+  inspect_event_data();
+  EXPECT_EQ(pulse_times, 975);
+  EXPECT_EQ(good_events, 17986);
+  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
+                + config.reduction.stats.events_bad,
+            config.reduction.stats.events_total);
+  EXPECT_EQ(ShortestPulsePeriod, 0);
+}
+
+TEST_F(ReductionTest, t03710) {
+  feed_file(TEST_DATA_PATH "readouts/154478");
+
+  EXPECT_EQ(ingested_hits, 55666);
+  EXPECT_EQ(config.reduction.stats.invalid_planes, 0);
+  EXPECT_EQ(config.reduction.stats.time_seq_errors, 0);
+
+  EXPECT_EQ(config.reduction.stats.wire_clusters, 16755);
+  EXPECT_EQ(config.reduction.stats.grid_clusters, 16370);
+
+  EXPECT_EQ(config.reduction.stats.events_total, 15879);
+  EXPECT_EQ(config.reduction.stats.events_multiplicity_rejects, 1959);
+  EXPECT_EQ(config.reduction.stats.hits_used, 25085);
+  EXPECT_EQ(config.reduction.stats.events_bad, 2768);
+  EXPECT_EQ(config.reduction.stats.events_geometry_err, 0);
+
+  inspect_pulse_data();
+  inspect_event_data();
+  EXPECT_EQ(pulse_times, 312);
+  EXPECT_EQ(good_events, 11152);
+  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
+                + config.reduction.stats.events_bad,
+            config.reduction.stats.events_total);
+  EXPECT_EQ(ShortestPulsePeriod, 266662);
+}
+
+TEST_F(ReductionTest, t10392) {
+  feed_file(TEST_DATA_PATH "readouts/154484");
+
+  EXPECT_EQ(ingested_hits, 178941);
+  EXPECT_EQ(config.reduction.stats.invalid_planes, 0);
+  EXPECT_EQ(config.reduction.stats.time_seq_errors, 1);
+
+  EXPECT_EQ(config.reduction.stats.wire_clusters, 51950);
+  EXPECT_EQ(config.reduction.stats.grid_clusters, 51344);
+
+  EXPECT_EQ(config.reduction.stats.events_total, 43050);
+  EXPECT_EQ(config.reduction.stats.events_multiplicity_rejects, 8971);
+  EXPECT_EQ(config.reduction.stats.hits_used, 67455);
+  EXPECT_EQ(config.reduction.stats.events_bad, 740);
+  EXPECT_EQ(config.reduction.stats.events_geometry_err, 0);
+
+  inspect_pulse_data();
+  inspect_event_data();
+  EXPECT_EQ(pulse_times, 300);
+  EXPECT_EQ(good_events, 33339);
+  EXPECT_EQ(good_events + config.reduction.stats.events_multiplicity_rejects
+                + config.reduction.stats.events_bad,
+            config.reduction.stats.events_total);
+  EXPECT_EQ(ShortestPulsePeriod, 266662);
+}
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

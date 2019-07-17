@@ -8,7 +8,7 @@
 #pragma once
 
 #include <common/reduction/analysis/AbstractAnalyzer.h>
-#include <multigrid/geometry/ModuleGeometry.h>
+#include <multigrid/reduction/ModuleGeometry.h>
 
 /// \class MGAnalyzer MGAnalyzer.h
 /// \brief MGAnalyzer Implements a strategy for analyzing Multi-grid events.

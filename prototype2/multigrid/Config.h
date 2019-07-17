@@ -16,7 +16,7 @@ namespace Multigrid {
 
 struct Config {
   Config() = default;
-  explicit Config(std::string jsonfile, std::string dump_path = "");
+  explicit Config(const std::string& jsonfile, std::string dump_path = "");
 
   DetectorMappings mappings;
   std::shared_ptr<AbstractBuilder> builder;

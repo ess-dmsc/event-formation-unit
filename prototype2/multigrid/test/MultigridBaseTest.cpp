@@ -5,12 +5,13 @@
  *  \brief Unit tests.
  */
 
-#include <multigrid/MultigridBase.h>
-#include <adc_readout/test/TestUDPServer.h>
 #include <test/TestBase.h>
 
-// \todo use reference data
-#include <multigrid/mesytec/TestData.h>
+#include <multigrid/MultigridBase.h>
+#include <adc_readout/test/TestUDPServer.h>
+
+// \todo use reference data instead
+#include <multigrid/mesytec/test/TestData.h>
 
 class MultigridBaseStandIn : public MultigridBase {
 public:

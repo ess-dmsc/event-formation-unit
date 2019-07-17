@@ -11,7 +11,6 @@ create_test_executable(UtpcAnalyzerTest)
 #todo make abstract geometry class, non MG-specific?
 set(MgAnalyzerTest_SRC
   MgAnalyzerTest.cpp
-  ../../../../multigrid/geometry/ModuleGeometry.cpp
-  ../../../../multigrid/geometry/Filter.cpp
+  ../../../../multigrid/reduction/ModuleGeometry.cpp
   )
 create_test_executable(MgAnalyzerTest)

@@ -12,7 +12,7 @@
 
 /// \class utpcAnalyzer utpcAnalyzer.h
 /// \brief utpcAnalyzer Implements a micro-Time Projection Chamber (uTPC)
-///        strategy for the analysis of gas emission multiplier (GEM)
+///        strategy for the analysis of gas electron multiplier (GEM)
 ///        type of detectors. In general this means picking some "latest"
 ///        hits for each dimension, and averaging these. It also calculates
 ///        two uncertainties for this average. Produces 2-dimensional events.
