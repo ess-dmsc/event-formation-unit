@@ -78,13 +78,23 @@ MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings con
   Detector::AddThreadFunction(inputFunc, "main");
 }
 
-void MultigridBase::init_config() {
+bool MultigridBase::init_config() {
   LOG(INIT, Sev::Info, "MG Config file: {}", ModuleSettings.ConfigFile);
-  mg_config = Multigrid::Config(ModuleSettings.ConfigFile);
-  LOG(INIT, Sev::Info, "Multigrid Config\n{}", mg_config.debug());
+  try {
+    mg_config = Multigrid::Config(ModuleSettings.ConfigFile);
+  }
+  catch (...) {
+    LOG(INIT, Sev::Warning, "Invalid Json file: {}", ModuleSettings.ConfigFile);
+    return false;
+  }
 
-  if (ModuleSettings.monitor)
-    monitor.init(EFUSettings.KafkaBroker, readout_entries);
+  LOG(INIT, Sev::Info, "Multigrid Config\n{}", mg_config.debug());
+  if (ModuleSettings.monitor) {
+    monitor = Monitor(EFUSettings.KafkaBroker, "CSPEC", "multigrid");
+    monitor.init_hits(readout_entries);
+    monitor.init_histograms(std::numeric_limits<uint16_t>::max());
+  }
+  return true;
 }
 
 void MultigridBase::process_events(EV42Serializer &ev42serializer) {
@@ -137,9 +147,10 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
 }
 
 void MultigridBase::mainThread() {
-  init_config();
+  if (!init_config())
+    return;
 
-  /** Connection setup */
+  /// Connection setup
   Socket::Endpoint
       local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort); //Change name or add more comments
   XTRACE(INIT, DEB, "server: %s, port %d", EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
@@ -180,22 +191,21 @@ void MultigridBase::mainThread() {
       if (!mg_config.builder->ConvertedData.empty()) {
         mystats.hits_total += mg_config.builder->ConvertedData.size();
 
-        if (monitor.readouts || monitor.hists) {
+        if (monitor.hit_serializer || monitor.histograms) {
           Hit transformed;
           for (const auto &hit : mg_config.builder->ConvertedData) {
             transformed = mg_config.mappings.absolutify(hit);
-            if (monitor.readouts)
-              monitor.readouts->addEntry(transformed.plane + 1,
-                                         transformed.coordinate, transformed.time,
-                                         transformed.weight);
-            if (monitor.hists) {
+            if (monitor.hit_serializer)
+              monitor.hit_serializer->addEntry(transformed.plane + 1,
+                                               transformed.coordinate, transformed.time,
+                                               transformed.weight);
+            if (monitor.histograms) {
               if (transformed.plane == Multigrid::wire_plane)
-                monitor.hists->bin_x(transformed.coordinate, transformed.weight);
+                monitor.histograms->bin_x(transformed.coordinate, transformed.weight);
               else if (transformed.plane == Multigrid::grid_plane)
-                monitor.hists->bin_y(transformed.coordinate, transformed.weight);
+                monitor.histograms->bin_y(transformed.coordinate, transformed.weight);
             }
           }
-
         }
         mg_config.reduction.ingest(mg_config.builder->ConvertedData);
 
@@ -204,10 +214,10 @@ void MultigridBase::mainThread() {
       }
     }
 
-    // Force periodic flushing
+    /// Force periodic flushing
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {
       mystats.tx_bytes += ev42serializer.produce();
-      monitor.produce();
+      monitor.produce_now();
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
@@ -220,10 +230,10 @@ void MultigridBase::mainThread() {
       report_timer.now();
     }
 
-    // Checking for exit
+    /// Checking for exit
     if (not runThreads) {
       LOG(PROCESS, Sev::Info, "Stop requested. Flushing queues.");
-      // flush anything that remains
+      /// flush anything that remains
 
       LOG(PROCESS, Sev::Info, "Pipeline status\n" + mg_config.reduction.status("", false));
 
@@ -231,7 +241,7 @@ void MultigridBase::mainThread() {
       process_events(ev42serializer);
 
       mystats.tx_bytes += ev42serializer.produce();
-      monitor.produce();
+      monitor.produce_now();
       LOG(PROCESS, Sev::Info, "Pipeline flushed. Stopping processing thread.");
       return;
     }

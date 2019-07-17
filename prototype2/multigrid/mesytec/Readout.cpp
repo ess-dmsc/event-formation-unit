@@ -7,7 +7,6 @@
 namespace Multigrid {
 
 std::string Readout::debug() const {
-  // \todo use fmt
   std::stringstream ss;
   ss << fmt::format("trigger={}  time={}", trigger_count, total_time);
   if (external_trigger) {
