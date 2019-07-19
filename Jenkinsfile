@@ -19,12 +19,12 @@ archive_what = "centos7-release"
      ]
  ]]);
 
-container_build_nodes = [
-  'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7'),
-  'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7'),
-  'debian9': ContainerBuildNode.getDefaultContainerBuildNode('debian9'),
-  'ubuntu1804': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu1804')
-]
+// container_build_nodes = [
+//   'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7'),
+//   'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7'),
+//   'debian9': ContainerBuildNode.getDefaultContainerBuildNode('debian9'),
+//   'ubuntu1804': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu1804')
+// ]
 
 def failure_function(exception_obj, failureMessage) {
     def toEmails = [[$class: 'DevelopersRecipientProvider']]
@@ -279,6 +279,7 @@ node('docker') {
         stage("Static analysis") {
             try {
                 sh "find . -name '*TestData.h' > exclude_cloc"
+                sh "find . -name 'gcovr' > exclude_cloc"
                 sh "cloc --exclude-list-file=exclude_cloc --by-file --xml --out=cloc.xml ."
                 sh "xsltproc jenkins/cloc2sloccount.xsl cloc.xml > sloccount.sc"
                 sloccountPublish encoding: '', pattern: ''
