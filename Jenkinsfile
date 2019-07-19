@@ -279,6 +279,7 @@ node('docker') {
         stage("Static analysis") {
             try {
                 sh "find . -name '*TestData.h' > exclude_cloc"
+                sh "find . -name 'span.hpp' >> exclude_cloc"
                 sh "find . -name 'gcovr' >> exclude_cloc"
                 sh "cloc --exclude-list-file=exclude_cloc --by-file --xml --out=cloc.xml ."
                 sh "xsltproc jenkins/cloc2sloccount.xsl cloc.xml > sloccount.sc"
