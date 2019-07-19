@@ -9,7 +9,7 @@ h5cpp/0.1.2@ess-dmsc/testing
 jsonformoderncpp/3.1.0@vthiery/stable
 libpcap/1.8.1@bincrafters/stable
 librdkafka/0.11.5-dm2@ess-dmsc/stable
-logical-geometry/705ea61@ess-dmsc/testing
+logical-geometry/705ea61@ess-dmsc/stable
 readerwriterqueue/07e22ec@ess-dmsc/stable
 streaming-data-types/fb4d847@ess-dmsc/stable
 trompeloeil/v31@ess-dmsc/stable
