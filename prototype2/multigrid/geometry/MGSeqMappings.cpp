@@ -109,7 +109,7 @@ void from_json(const nlohmann::json &j, MGSeqMappings &g) {
   if (j.count("swap_grids"))
     g.swap_grids(j["swap_grids"]);
 
-  // same as for ChannelMappings, could refactor?
+  /// same as for ChannelMappings, could refactor?
 
   if (j.count("wire_filters")) {
     g.wire_filters = j["wire_filters"];

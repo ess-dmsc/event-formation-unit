@@ -39,7 +39,7 @@ void Reduction::process_queues(bool flush) {
     merger.insert(i, p.out_queue);
   }
 
-  // \todo remove this hack!
+  // \todo refactor: remove this hack!
   if (pipelines.size() == 9) {
     merger.sync_up(0, 1);
     merger.sync_up(0, 2);
@@ -103,8 +103,8 @@ std::string Reduction::config(const std::string &prepend) const {
   if (!pipelines.empty()) {
     const auto &p = pipelines.back();
     ss << prepend
-       << fmt::format("  Digital geometry [{}, {}, {}, {}]\n",
-                      p.geometry.nx(), p.geometry.ny(), p.geometry.nz(), p.geometry.np());
+       << fmt::format("  Logical geometry:  {}\n",
+                      p.geometry.to_string());
   }
 
   ss << prepend << "Merger:\n" << merger.debug(prepend + "  ", false);

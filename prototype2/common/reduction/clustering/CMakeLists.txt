@@ -5,11 +5,13 @@
 set(clustering_obj_SRC
   AbstractClusterer.cpp
   GapClusterer.cpp
+  GapClusterer2D.cpp
 )
 
 set(clustering_obj_INC
   AbstractClusterer.h
   GapClusterer.h
+  GapClusterer2D.h
 )
 
 add_library(ClusteringObj OBJECT

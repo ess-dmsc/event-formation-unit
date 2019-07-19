@@ -28,7 +28,7 @@ public:
 
 //private:
 
-// \todo use GapClusterer2D for wires
+// \todo refactor: use GapClusterer2D for wires
   GapClusterer wire_clusterer{0, 1};
   GapClusterer grid_clusterer{0, 1};
 
