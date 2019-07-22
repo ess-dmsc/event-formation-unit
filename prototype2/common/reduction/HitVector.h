@@ -1,16 +1,14 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
-//===----------------------------------------------------------------------===//
+/** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+///===--------------------------------------------------------------------===///
 ///
 /// \file HitVector.h
 /// \brief HitVector alias and convenience functions
 ///
-//===----------------------------------------------------------------------===//
+///===--------------------------------------------------------------------===///
 
 #pragma once
 
 #include <common/reduction/Hit.h>
-
-// \todo tests for these?
 
 using HitVector = std::vector<Hit>;
 
@@ -39,10 +37,8 @@ inline void sort_by_decreasing_weight(HitVector &hits) {
 }
 
 /// \brief convenience function for printing vector of Hits
-inline std::string to_string(const HitVector& vec, const std::string& prepend) {
-  std::stringstream ss;
-  for (const auto& h : vec) {
-    ss << prepend << h.to_string() << "\n";
-  }
-  return ss.str();
-}
+std::string to_string(const HitVector &vec, const std::string &prepend);
+
+/// \brief convenience function for printing vector of Hits
+std::string visualize(const HitVector &vec, const std::string &prepend,
+                      uint16_t max_columns = 0, size_t max_rows = 0);

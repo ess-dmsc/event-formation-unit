@@ -8,6 +8,7 @@ add_subdirectory(analysis)
 
 set(reduction_obj_SRC
   Hit.cpp
+  HitVector.cpp
   Cluster.cpp
   Event.cpp
   ReducedEvent.cpp

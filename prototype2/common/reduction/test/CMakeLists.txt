@@ -3,6 +3,11 @@ set(HitTest_SRC
   )
 create_test_executable(HitTest SKIP_MEMGRIND)
 
+set(HitVectorTest_SRC
+  HitVectorTest.cpp
+  )
+create_test_executable(HitVectorTest)
+
 set(ClusterTest_SRC
   ClusterTest.cpp
   )
