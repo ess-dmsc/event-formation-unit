@@ -226,8 +226,7 @@ std::string NMXConfig::debug() const {
           filter.minimum_hits);
     }
 
-    ret += fmt::format("  Digital geometry [{}, {}, {}, {}]\n",
-                       geometry.nx(), geometry.ny(), geometry.nz(), geometry.np());
+    ret += fmt::format("  Digital geometry:   {}\n", geometry.to_string());
   }
 
   return ret;

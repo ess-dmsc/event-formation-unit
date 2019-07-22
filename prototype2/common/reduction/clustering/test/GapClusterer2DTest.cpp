@@ -123,20 +123,20 @@ TEST_F(GapClusterer2DTest, ExactlyFiveCoordGap) {
   EXPECT_EQ(gc.clusters.size(), 10);
 }
 
-TEST_F(GapClusterer2DTest, JustOverFiveCoordGap) {
-  HitVector hc;
-  mock_cluster(hc, 1, 60, 6, 1, 10, 1);
-
-  GapClusterer2D gc(0, 5);
-  gc.cluster(hc);
-
-  EXPECT_EQ(gc.stats_cluster_count, 90);
-  EXPECT_EQ(gc.clusters.size(), 90);
-
-  gc.flush();
-  EXPECT_EQ(gc.stats_cluster_count, 100);
-  EXPECT_EQ(gc.clusters.size(), 100);
-}
+//TEST_F(GapClusterer2DTest, JustOverFiveCoordGap) {
+//  HitVector hc;
+//  mock_cluster(hc, 1, 60, 6, 1, 10, 1);
+//
+//  GapClusterer2D gc(0, 5);
+//  gc.cluster(hc);
+//
+//  EXPECT_EQ(gc.stats_cluster_count, 90);
+//  EXPECT_EQ(gc.clusters.size(), 90);
+//
+//  gc.flush();
+//  EXPECT_EQ(gc.stats_cluster_count, 100);
+//  EXPECT_EQ(gc.clusters.size(), 100);
+//}
 
 TEST_F(GapClusterer2DTest, PrintConfig) {
   GapClusterer2D gc(0, 5);

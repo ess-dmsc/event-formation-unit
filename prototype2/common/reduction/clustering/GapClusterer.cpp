@@ -47,7 +47,6 @@ void GapClusterer::cluster(const HitVector &hits) {
 }
 
 void GapClusterer::flush() {
-  // \todo test this logic branch
   if (current_time_cluster_.empty()) {
     return;
   }
@@ -86,6 +85,7 @@ void GapClusterer::cluster_by_coordinate() {
 
 std::string GapClusterer::config(const std::string &prepend) const {
   std::stringstream ss;
+  ss << "GapClusterer:\n";
   ss << prepend << fmt::format("max_time_gap={}\n", max_time_gap_);
   ss << prepend << fmt::format("max_coord_gap={}\n", max_coord_gap_);
   return ss.str();
