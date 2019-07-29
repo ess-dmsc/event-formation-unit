@@ -50,14 +50,14 @@ int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
   int asic = atoi(cmdargs.at(2).c_str());
   int channel = atoi(cmdargs.at(3).c_str());
   auto calib = nmx_opts.calfile->getCalibration(fec, asic, channel);
-  if ((std::abs(calib.offset) <= 1e-6) and (std::abs(calib.slope) <= 1e-6)) {
+  if ((std::abs(calib.adc_offset) <= 1e-6) and (std::abs(calib.adc_slope) <= 1e-6) and (std::abs(calib.time_offset) <= 1e-6) and (std::abs(calib.time_slope) <= 1e-6)) {
     *obytes =
         snprintf(output, SERVER_BUFFER_SIZE, "<error> no calibration exist");
     return -Parser::EBADARGS;
   }
 
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "%s offset: %f slope: %f",
-                     cmd.c_str(), calib.offset, calib.slope);
+  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "%s adc_offset: %f adc_slope: %f, time_offset: %f time_slope: %f",
+                     cmd.c_str(), calib.adc_offset, calib.adc_slope, calib.time_offset, calib.time_slope);
 
   return Parser::OK;
 }

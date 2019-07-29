@@ -55,21 +55,23 @@ void CalibrationFile::loadCalibration(std::string jsonstring) {
     for (auto &vmmcal : VmmCals) {
       auto fecid = vmmcal["fecID"].get<size_t>();
       auto vmmid = vmmcal["vmmID"].get<size_t>();
-      auto offsets = vmmcal["offsets"];
-      auto slopes = vmmcal["slopes"];
+      auto adc_offsets = vmmcal["adc_offsets"];
+      auto adc_slopes = vmmcal["adc_slopes"];
+      auto time_offsets = vmmcal["time_offsets"];
+      auto time_slopes = vmmcal["time_slopes"];
 
-      XTRACE(INIT, DEB, "fecid: %d, vmmid: %d, offsets(%d), slopes(%d)\n", fecid,
-             vmmid, offsets.size(), slopes.size());
+      XTRACE(INIT, DEB, "fecid: %d, vmmid: %d, adc_offsets(%d), adc_slopes(%d), time_offsets(%d), time_slopes(%d)\n", fecid,
+             vmmid, adc_offsets.size(), adc_slopes.size(), time_offsets.size(), time_slopes.size());
 
-      if ((slopes.size() != MAX_CH) or (offsets.size() != MAX_CH)) {
+      if ((adc_offsets.size() != MAX_CH) or (adc_slopes.size() != MAX_CH) or (time_offsets.size() != MAX_CH) or (time_slopes.size() != MAX_CH)) {
         LOG(INIT, Sev::Warning,
             "Invalid channel configuration, skipping for fec {} and vmm {}",
             fecid, vmmid);
-        throw std::runtime_error("Invalid slope and array lengths in calibration file.");
+        throw std::runtime_error("Invalid array lengths in calibration file.");
       }
 
-      for (size_t j = 0; j < offsets.size(); j++) {
-        addCalibration(fecid, vmmid, j, offsets[j].get<float>(), slopes[j].get<float>());
+      for (size_t j = 0; j < MAX_CH; j++) {
+        addCalibration(fecid, vmmid, j, adc_offsets[j].get<float>(), adc_slopes[j].get<float>(), time_offsets[j].get<float>(), time_slopes[j].get<float>());
       }
     }
   }
@@ -80,8 +82,9 @@ void CalibrationFile::loadCalibration(std::string jsonstring) {
 }
 
 void CalibrationFile::addCalibration(size_t fecId, size_t vmmId,
-                                     size_t chNo, float offset,
-                                     float slope) {
+                                     size_t chNo, float adc_offset,
+                                     float adc_slope, float time_offset,
+                                     float time_slope) {
   if (fecId >= Calibrations.size())
     Calibrations.resize(fecId + 1);
   auto& fec = Calibrations[fecId];
@@ -91,7 +94,7 @@ void CalibrationFile::addCalibration(size_t fecId, size_t vmmId,
   if (chNo >= vmm.size())
     vmm.resize(chNo + 1);
 
-  vmm[chNo] = {offset, slope};
+  vmm[chNo] = {adc_offset, adc_slope, time_offset, time_slope};
 }
 
 const Calibration& CalibrationFile::getCalibration(size_t fecId, size_t vmmId,
@@ -125,9 +128,9 @@ std::string CalibrationFile::debug() const {
           ret += fmt::format("{:<7}", "\n");
         ret +=
             fmt::format("{:<5}", fmt::format("[{}]", chipNo)) +
-            fmt::format("{:>7}", cal.offset) +
-                ((cal.slope >= 0.0) ? " +" : " -") +
-            fmt::format("{:>5}x    ", std::abs(cal.slope));
+            fmt::format("{:>7}", cal.adc_offset) +
+                ((cal.adc_slope >= 0.0) ? " +" : " -") +
+            fmt::format("{:>5}x    ", std::abs(cal.adc_slope));
       }
     }
   }
