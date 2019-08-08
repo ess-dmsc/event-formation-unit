@@ -64,7 +64,11 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   send_raw_hits = root["send_raw_hits"].get<bool>();
 
   if (perform_clustering) {
-    time_algorithm = root["time_algorithm"].get<std::string>();
+    if(jsonstring.find("time_algorithm") != std::string::npos)
+    {
+      time_algorithm = root["time_algorithm"].get<std::string>();
+    } 
+      
     auto cx = root["clusterer x"];
     clusterer_x.max_strip_gap = cx["max_strip_gap"].get<unsigned int>();
     clusterer_x.max_time_gap = cx["max_time_gap"].get<double>();
@@ -151,13 +155,11 @@ std::string NMXConfig::debug() const {
 
     ret += "\n";
 
-	if(time_algorithm)
-	{
-    	ret += "Event analysis\n";
-    	ret += fmt::format("  time_algorithm = {}\n", time_algorithm);
-    	//ret += fmt::format("  max_timebins = {}\n", analyze_max_timebins);
-    	//ret += fmt::format("  max_timedif = {}\n", analyze_max_timedif);
-    }
+	 	ret += "Event analysis\n";
+   	ret += fmt::format("  time_algorithm = {}\n", time_algorithm);
+   	//ret += fmt::format("  max_timebins = {}\n", analyze_max_timebins);
+   	//ret += fmt::format("  max_timedif = {}\n", analyze_max_timedif);
+  
     
     ret += "  Filters:\n";
     ret += fmt::format("    enforce_lower_uncertainty_limit = {}\n",
