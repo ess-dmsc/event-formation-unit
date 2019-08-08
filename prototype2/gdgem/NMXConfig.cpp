@@ -64,6 +64,7 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   send_raw_hits = root["send_raw_hits"].get<bool>();
 
   if (perform_clustering) {
+    time_algorithm = root["time_algorithm"].get<std::string>();
     auto cx = root["clusterer x"];
     clusterer_x.max_strip_gap = cx["max_strip_gap"].get<unsigned int>();
     clusterer_x.max_time_gap = cx["max_time_gap"].get<double>();
@@ -74,9 +75,10 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 
     matcher_max_delta_time = root["matcher_max_delta_time"].get<double>();
 
-    analyze_weighted = root["analyze_weighted"].get<bool>();
-    analyze_max_timebins = root["analyze_max_timebins"].get<unsigned int>();
-    analyze_max_timedif = root["analyze_max_timedif"].get<unsigned int>();
+    // parameter has been replaced by time_algorithm
+    //analyze_weighted = root["analyze_weighted"].get<bool>();
+    //analyze_max_timebins = root["analyze_max_timebins"].get<unsigned int>();
+    //analyze_max_timedif = root["analyze_max_timedif"].get<unsigned int>();
 
     auto f = root["filters"];
     filter.enforce_lower_uncertainty_limit =
@@ -150,9 +152,9 @@ std::string NMXConfig::debug() const {
     ret += "\n";
 
     ret += "Event analysis\n";
-    ret += fmt::format("  weighted = {}\n", (analyze_weighted ? "YES" : "no"));
-    ret += fmt::format("  max_timebins = {}\n", analyze_max_timebins);
-    ret += fmt::format("  max_timedif = {}\n", analyze_max_timedif);
+    ret += fmt::format("  time_algorithm = {}\n", time_algorithm);
+    //ret += fmt::format("  max_timebins = {}\n", analyze_max_timebins);
+    //ret += fmt::format("  max_timedif = {}\n", analyze_max_timedif);
 
     ret += "  Filters:\n";
     ret += fmt::format("    enforce_lower_uncertainty_limit = {}\n",

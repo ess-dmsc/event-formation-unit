@@ -4,6 +4,7 @@
 
 set(clustering_obj_SRC
   AbstractMatcher.cpp
+  CenterMatcher.cpp
   Cluster.cpp
   EndMatcher.cpp
   Event.cpp
@@ -16,6 +17,7 @@ set(clustering_obj_SRC
 set(clustering_obj_INC
   AbstractClusterer.h
   AbstractMatcher.h
+  CenterMatcher.h
   Cluster.h
   EndMatcher.h
   Event.h

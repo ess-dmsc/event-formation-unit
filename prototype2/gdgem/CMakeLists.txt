@@ -6,6 +6,7 @@ set(pipeline_common_source
   GdGemBase.cpp
   NMXConfig.cpp
   nmx/uTPC.cpp
+  nmx/EventAnalyzer.cpp
   nmx/TrackSerializer.cpp
   srs/SRSMappings.cpp
   srs/SRSTime.cpp
@@ -20,6 +21,7 @@ set(pipeline_common_inc
   GdGemBase.h
   NMXConfig.h
   nmx/uTPC.h
+  nmx/EventAnalyzer.h
   nmx/Readout.h
   nmx/TrackSerializer.h
   nmx/AbstractBuilder.h
@@ -45,6 +47,7 @@ get_filename_component(TEST_JSON_PATH "configs/vmm3.json" DIRECTORY)
 set(NMXConfigTest_INC
   NMXConfig.h
   nmx/uTPC.h
+  nmx/EventAnalyzer.h
   srs/SRSTime.h
   srs/SRSMappings.h
   srs/CalibrationFile.cpp
@@ -56,6 +59,7 @@ set(NMXConfigTest_SRC
   srs/SRSMappings.cpp
   srs/CalibrationFile.cpp
   nmx/uTPC.cpp
+  nmx/EventAnalyzer.cpp
   )
 create_test_executable(NMXConfigTest)
 target_compile_definitions(NMXConfigTest

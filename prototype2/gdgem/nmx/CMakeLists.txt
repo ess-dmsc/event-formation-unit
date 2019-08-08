@@ -19,16 +19,25 @@ set(NMXEventTest_INC
   )
 create_test_executable(NMXuTPCTest)
 
-
+set(NMXEventAnalyzerTest_SRC
+  EventAnalyzerTest.cpp
+  EventAnalyzer.cpp
+  )
+set(NMXEventAnalyzerTest_INC
+  EventAnalyzer.h
+  )
+create_test_executable(NMXEventAnalyzerTest)
 
 set(TrackSerializerTest_SRC
-  uTPC.cpp
+  EventAnalyzer.cpp
   TrackSerializerTest.cpp
   TrackSerializer.cpp
+  uTPC.cpp
   )
 set(TrackSerializerTest_INC
-  uTPC.h
+  EventAnalyzer.h
   TrackSerializer.h
+  uTPC.h
   )
 create_test_executable(TrackSerializerTest)
 

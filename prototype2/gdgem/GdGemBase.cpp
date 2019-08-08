@@ -9,6 +9,7 @@
 
 #include "GdGemBase.h"
 
+#include <common/clustering/CenterMatcher.h>
 #include <common/clustering/GapMatcher.h>
 #include <common/clustering/GapClusterer.h>
 #include <gdgem/nmx/TrackSerializer.h>
@@ -226,16 +227,14 @@ void GdGemBase::apply_configuration() {
   clusterer_y_ = std::make_shared<GapClusterer>(
       nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap);
 
-  matcher_ = std::make_shared<GapMatcher>(
+  matcher_ = std::make_shared<CenterMatcher>(
       nmx_opts.time_config.acquisition_window()*5,
-      nmx_opts.matcher_max_delta_time);
+      nmx_opts.matcher_max_delta_time,
+      nmx_opts.time_algorithm);
 
   hists_.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 
-  utpc_analyzer_ = std::make_shared<Gem::utpcAnalyzer>(
-      nmx_opts.analyze_weighted,
-      nmx_opts.analyze_max_timebins,
-      nmx_opts.analyze_max_timedif);
+  analyzer_ = std::make_shared<Gem::EventAnalyzer>(nmx_opts.time_algorithm);
 
   sample_next_track_ = nmx_opts.send_tracks;
 }
@@ -302,7 +301,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     mystats.clusters_xy++;
 
-    utpc_ = utpc_analyzer_->analyze(event);
+    results_ = analyzer_->analyze(event);
 
     /// Sample only tracks that are good in both planes
     if (sample_next_track_
@@ -310,24 +309,24 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     {
 //      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.debug(true));
       sample_next_track_ = !track_serializer.add_track(event,
-                                                       utpc_.x.utpc_center,
-                                                       utpc_.y.utpc_center);
+                                                       results_.x_.coord_,
+                                                       results_.y_.coord_);
     }
 
-    if (!utpc_.good)
+    if (!results_.good_)
     {
       mystats.events_bad_utpc++;
       continue;
     }
 
-    if (!nmx_opts.filter.valid(event, utpc_))
+    if (!nmx_opts.filter.valid(event, results_))
     {
       mystats.events_filter_rejects++;
       continue;
     }
 
     pixelid_ = nmx_opts.geometry.pixel2D(
-        utpc_.x.utpc_center_rounded(), utpc_.y.utpc_center_rounded());
+        results_.x_.coord_rounded(), results_.y_.coord_rounded());
 
     if (!nmx_opts.geometry.valid_id(pixelid_))
     {
@@ -341,18 +340,18 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
       bin(hists_, event);
     }
 
-    if (utpc_.time < previous_full_time_) {
+    if (results_.time_ < previous_full_time_) {
       LOG(PROCESS, Sev::Error, "Event time sequence error: {} < {}",
-             utpc_.time, previous_full_time_);
+             results_.time_, previous_full_time_);
     }
-    previous_full_time_ = utpc_.time;
+    previous_full_time_ = results_.time_;
 
-    truncated_time_ = utpc_.time - recent_pulse_time_;
+    truncated_time_ = results_.time_ - recent_pulse_time_;
     // \todo try different limits
     if (!have_pulse_time_ ||
         (truncated_time_ > max_pulse_window_ns)) {
       have_pulse_time_ = true;
-      recent_pulse_time_ = utpc_.time;
+      recent_pulse_time_ = results_.time_;
       truncated_time_ = 0;
       if (event_serializer.eventCount())
         mystats.tx_bytes += event_serializer.produce();

@@ -62,6 +62,12 @@ public:
   /// \returns true if event contains no hits
   bool empty() const;
 
+  /// \returns true if plane 1 contains no hits
+  bool empty1() const;
+
+  /// \returns true if plane 2 contains no hits
+  bool empty2() const;
+
   /// \returns true if event has both valid planes
   bool both_planes() const;
 

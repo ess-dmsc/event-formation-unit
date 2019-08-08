@@ -55,6 +55,14 @@ bool Event::empty() const {
   return c1.empty() && c2.empty();
 }
 
+bool Event::empty1() const {
+  return c1.empty();
+}
+
+bool Event::empty2() const {
+  return c2.empty();
+}
+
 bool Event::both_planes() const {
   return !c1.empty() && !c2.empty();
 }

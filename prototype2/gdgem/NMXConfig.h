@@ -12,7 +12,7 @@
 #include <gdgem/srs/SRSMappings.h>
 #include <gdgem/srs/SRSTime.h>
 #include <common/clustering/Event.h>
-#include <gdgem/nmx/uTPC.h>
+#include <gdgem/nmx/EventAnalyzer.h>
 #include <gdgem/srs/CalibrationFile.h>
 #include <memory>
 #include <string>
@@ -35,9 +35,9 @@ struct EventFilter {
   size_t minimum_hits_dropped{0};
 
   /// \todo bug? uncertainty takes precedence if both enforce options are true
-  bool valid(Event &event, const utpcResults& utpc) {
+  bool valid(Event &event, const Results& results) {
     if (enforce_lower_uncertainty_limit &&
-        !utpcAnalyzer::meets_lower_criterion(utpc.x, utpc.y, lower_uncertainty_limit)) {
+        !EventAnalyzer::meets_lower_criterion(results.x_, results.y_, lower_uncertainty_limit)) {
       lower_uncertainty_dropped++;
       return false;
     }
@@ -74,11 +74,13 @@ struct NMXConfig {
 
   //matcher
   double matcher_max_delta_time{200};
+  //Matcher algorithm, either center-of-mass, charge2, utpc, or utpc_weighted
+  std::string time_algorithm{"center-of-mass"};
 
   // analysis
-  bool analyze_weighted{true};
-  int16_t analyze_max_timebins{3};
-  int16_t analyze_max_timedif{7};
+  //bool analyze_weighted{true};
+  //int16_t analyze_max_timebins{3};
+  //int16_t analyze_max_timedif{7};
 
   // filtering
   EventFilter filter;

@@ -113,8 +113,8 @@ protected:
   Hists hists_{std::numeric_limits<uint16_t>::max(),
                std::numeric_limits<uint16_t>::max()};
 
-  std::shared_ptr<Gem::utpcAnalyzer> utpc_analyzer_;
-  Gem::utpcResults utpc_;
+  std::shared_ptr<Gem::EventAnalyzer> analyzer_;
+  Gem::Results results_;
 
   uint64_t previous_full_time_{0};
   uint64_t recent_pulse_time_{0};
