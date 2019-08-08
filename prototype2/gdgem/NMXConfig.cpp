@@ -151,11 +151,14 @@ std::string NMXConfig::debug() const {
 
     ret += "\n";
 
-    ret += "Event analysis\n";
-    ret += fmt::format("  time_algorithm = {}\n", time_algorithm);
-    //ret += fmt::format("  max_timebins = {}\n", analyze_max_timebins);
-    //ret += fmt::format("  max_timedif = {}\n", analyze_max_timedif);
-
+	if(time_algorithm)
+	{
+    	ret += "Event analysis\n";
+    	ret += fmt::format("  time_algorithm = {}\n", time_algorithm);
+    	//ret += fmt::format("  max_timebins = {}\n", analyze_max_timebins);
+    	//ret += fmt::format("  max_timedif = {}\n", analyze_max_timedif);
+    }
+    
     ret += "  Filters:\n";
     ret += fmt::format("    enforce_lower_uncertainty_limit = {}\n",
         (filter.enforce_lower_uncertainty_limit ? "YES" : "no"));
