@@ -125,7 +125,7 @@ protected:
     EXPECT_EQ(clusterer->stats_cluster_count, expected_total);
     size_t count_x{0};
 
-    int count_x = std::count_if(clusterer->clusters.begin(), clusterer->clusters.end(), [](Cluster c){return c.hit_count() >= min_cluster_size;});
+    count_x = std::count_if(clusterer->clusters.begin(), clusterer->clusters.end(), [=](Cluster c){return c.hit_count() >= min_cluster_size;});
     EXPECT_EQ(count_x, expected_filtered);
   }
 
