@@ -40,7 +40,6 @@ ResultsPlane EventAnalyzer::analyze(Cluster& cluster) const {
     return ret;
   }
 
-  ret.coord_ = cluster.coord_utpc(false);   
   if(time_algorithm_ == "center-of-mass") {
     ret.coord_ = cluster.coord_center();
     ret.time_ = cluster.time_center(); 
