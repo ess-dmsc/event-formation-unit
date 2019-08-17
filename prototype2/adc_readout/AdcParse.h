@@ -93,10 +93,12 @@ struct PacketHeader {
   std::uint16_t ReadoutLength;
   std::uint16_t ReadoutCount;
   std::uint16_t Reserved;
+  RawTimeStamp ReferenceTimeStamp;
   void fixEndian() {
     PacketType = ntohs(PacketType);
     ReadoutLength = ntohs(ReadoutLength);
     ReadoutCount = ntohs(ReadoutCount);
+    ReferenceTimeStamp.fixEndian();
   }
 } __attribute__((packed));
 
