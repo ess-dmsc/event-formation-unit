@@ -23,7 +23,7 @@ void PeakFinder::processData(SamplingRun const &Data) {
     Serialisers[Data.Identifier] = std::make_unique<EventSerializer>(
         Name + "_Adc" + std::to_string(Data.Identifier.SourceID) + "_Ch" +
             std::to_string(Data.Identifier.ChannelNr),
-        100, 50ms, ProducerPtr.get());
+        100, 50ms, ProducerPtr.get(), EventSerializer::TimestampMode::INDEPENDENT_EVENTS);
   }
   Serialisers[Data.Identifier]->addEvent(
       std::unique_ptr<EventData>(new EventData{

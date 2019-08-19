@@ -7,12 +7,13 @@
 #include <ev42_events_generated.h>
 #include <flatbuffers/flatbuffers.h>
 #include <vector>
+#include <limits>
 
 EventSerializer::EventSerializer(std::string SourceName, size_t BufferSize,
                                  std::chrono::milliseconds TransmitTimeout,
-                                 ProducerBase *KafkaProducer)
+                                 ProducerBase *KafkaProducer, TimestampMode Mode)
     : Name(std::move(SourceName)), Timeout(TransmitTimeout), EventBufferSize(BufferSize),
-      Producer(KafkaProducer) {
+      Producer(KafkaProducer), CMode(Mode) {
   SerializeThread = std::thread(&EventSerializer::serialiseFunction, this);
 }
 
@@ -25,6 +26,13 @@ EventSerializer::~EventSerializer() {
 
 void EventSerializer::addEvent(std::unique_ptr<EventData> Event) {
   EventQueue.enqueue(std::move(Event));
+}
+
+void EventSerializer::addReferenceTimestamp(std::uint64_t const Timestamp) {
+  if (CMode != TimestampMode::TIME_REFERENCED) {
+    return;
+  }
+  ReferenceTimeQueue.enqueue(Timestamp);
 }
 
 struct FBVector {
@@ -53,6 +61,7 @@ using namespace std::chrono_literals;
 
 void EventSerializer::serialiseFunction() {
   flatbuffers::FlatBufferBuilder Builder(sizeof(std::uint32_t) * EventBufferSize * 8 + 2048);
+  // We do not want the buffer to be too small or the vector offset addresses will become invalid when creating them.
   auto SourceNameOffset = Builder.CreateString(Name);
   auto TimeOffset = FBVector(Builder, EventBufferSize);
   auto EventId = FBVector(Builder, EventBufferSize);
@@ -92,6 +101,16 @@ void EventSerializer::serialiseFunction() {
   };
   do {
     while (EventQueue.try_dequeue(NewEvent)) {
+      if (NumberOfEvents != 0) {
+        if (NewEvent->Timestamp - CurrentRefTime > std::numeric_limits<std::uint32_t>::max()) {
+          ProduceFB();
+        } else if (NewEvent->ThresholdTime != 0 and NewEvent->ThresholdTime - CurrentRefTime > std::numeric_limits<std::uint32_t>::max()) {
+          ProduceFB();
+        } else if (NewEvent->PeakTime != 0 and NewEvent->PeakTime - CurrentRefTime > std::numeric_limits<std::uint32_t>::max()) {
+          ProduceFB();
+        }
+      }
+
       if (NumberOfEvents == 0) {
         CurrentRefTime = NewEvent->Timestamp;
         if (NewEvent->PeakTime != 0 and NewEvent->PeakTime < CurrentRefTime) {
@@ -101,7 +120,7 @@ void EventSerializer::serialiseFunction() {
             NewEvent->ThresholdTime < CurrentRefTime) {
           CurrentRefTime = NewEvent->ThresholdTime;
         }
-        FirstEventTime = std::chrono::system_clock::now();
+        FirstEventTime = getCurrentTime();
       }
       TimeOffset.push_back(
           static_cast<std::uint32_t>(NewEvent->Timestamp - CurrentRefTime));
@@ -127,9 +146,9 @@ void EventSerializer::serialiseFunction() {
         ProduceFB();
       }
     }
-    std::this_thread::sleep_for(20ms);
+    std::this_thread::sleep_for(5ms);
     if (NumberOfEvents > 0 and
-        std::chrono::system_clock::now() > FirstEventTime + Timeout) {
+        getCurrentTime() > FirstEventTime + Timeout) {
       ProduceFB();
     }
   } while (RunThread);
