@@ -14,6 +14,52 @@ using trompeloeil::_;
 
 using namespace std::chrono_literals;
 
+class EventDataTimestamps : public ::testing::Test {
+public:
+  EventData Event;
+  void setTimestamps(std::uint64_t EventTime, std::uint64_t ThresholdTime, std::uint64_t PeakTime) {
+    Event.Timestamp = EventTime;
+    Event.ThresholdTime = ThresholdTime;
+    Event.PeakTime = PeakTime;
+  }
+};
+
+TEST_F(EventDataTimestamps, MinMaxTime1) {
+  setTimestamps(10,20,30);
+  EXPECT_EQ(Event.minTimestamp(), 10u);
+  EXPECT_EQ(Event.maxTimestamp(), 30u);
+}
+
+TEST_F(EventDataTimestamps, MinMaxTime2) {
+  setTimestamps(10,20, 0);
+  EXPECT_EQ(Event.minTimestamp(), 10u);
+  EXPECT_EQ(Event.maxTimestamp(), 20u);
+}
+
+TEST_F(EventDataTimestamps, MinMaxTime3) {
+  setTimestamps(10, 0, 30);
+  EXPECT_EQ(Event.minTimestamp(), 10u);
+  EXPECT_EQ(Event.maxTimestamp(), 30u);
+}
+
+TEST_F(EventDataTimestamps, MinMaxTime4) {
+  setTimestamps(10, 0, 0);
+  EXPECT_EQ(Event.minTimestamp(), 10u);
+  EXPECT_EQ(Event.maxTimestamp(), 10u);
+}
+
+TEST_F(EventDataTimestamps, MinMaxTime5) {
+  setTimestamps(0, 0, 0);
+  EXPECT_EQ(Event.minTimestamp(), 0u);
+  EXPECT_EQ(Event.maxTimestamp(), 0u);
+}
+
+TEST_F(EventDataTimestamps, MinMaxTime6) {
+  setTimestamps(0, 20, 0);
+  EXPECT_EQ(Event.minTimestamp(), 0u);
+  EXPECT_EQ(Event.maxTimestamp(), 20u);
+}
+
 class ProducerStandIn : public ProducerBase {
 public:
   ProducerStandIn() = default;
@@ -42,7 +88,6 @@ class EventSerialisationIndependent : public ::testing::Test {
 public:
   void SetUp() override {
     Producer = std::make_unique<ProducerStandIn>();
-    SetUpSerializer(1);
   }
   void SetUpSerializer(int BufferSize) {
     Serializer = std::make_unique<SerializerStandIn>("SomeName", BufferSize, 60ms,
@@ -56,6 +101,7 @@ TEST_F(EventSerialisationIndependent, ProduceFlatbufferOnOneEvent) {
   REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(Producer.get()), produce(_, _))
       .TIMES(1)
       .RETURN(0);
+  SetUpSerializer(1);
   Serializer->addEvent(std::make_unique<EventData>());
   Serializer.reset();
 }
@@ -129,6 +175,7 @@ TEST_F(EventSerialisationIndependent, CheckFlatbufferContents) {
       .WITH(checkFlatbuffer1(_1, _2))
       .TIMES(1)
       .RETURN(0);
+  SetUpSerializer(1);
   Serializer->addEvent(std::unique_ptr<EventData>(
         new EventData{1000000, 2, 3, 4, 5, 6000000, 7000000}));
   Serializer.reset();
@@ -264,4 +311,95 @@ TEST_F(EventSerialisationIndependent, ProduceOneFlatbufferOnTwoEvents) {
       std::this_thread::sleep_for(10ms);
     }
     Serializer.reset();
+}
+
+class EventSerialisationReferenced : public ::testing::Test {
+public:
+  void SetUp() override {
+    Producer = std::make_unique<ProducerStandIn>();
+  }
+  void SetUpSerializer(int BufferSize) {
+    Serializer = std::make_unique<SerializerStandIn>("SomeName", BufferSize, 60ms,
+                                                     dynamic_cast<ProducerBase *>(Producer.get()), EventSerializer::TimestampMode::TIME_REFERENCED);
+  }
+  std::unique_ptr<ProducerBase> Producer;
+  std::unique_ptr<SerializerStandIn> Serializer;
+};
+
+TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventNoRef) {
+  std::uint64_t BaseTimestamp = 1000000;
+  auto checkFlatbufferTimestamp = [BaseTimestamp](auto Buffer) {
+    auto EventMessage = GetEventMessage(Buffer.data());
+    if (EventMessage->pulse_time() != BaseTimestamp) {
+      return false;
+    }
+    if (EventMessage->time_of_flight()->size() != 1) {
+      return false;
+    }
+    if (EventMessage->time_of_flight()->operator[](0) != 0) {
+      return false;
+    }
+    return true;
+  };
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(Producer.get()), produce(_, _))
+      .WITH(checkFlatbufferTimestamp(_1))
+      .TIMES(1)
+      .RETURN(0);
+  SetUpSerializer(1);
+  Serializer->addEvent(std::unique_ptr<EventData>(
+      new EventData{BaseTimestamp, 2, 3, 4, 5, BaseTimestamp + 1, BaseTimestamp + 2}));
+  Serializer.reset();
+}
+
+TEST_F(EventSerialisationReferenced, ProduceFlatbufferTwoEventsNoRef) {
+  std::uint64_t BaseTimestamp = 1000000;
+  auto checkFlatbufferTimestamp = [BaseTimestamp](auto Buffer) {
+    auto EventMessage = GetEventMessage(Buffer.data());
+    if (EventMessage->pulse_time() != BaseTimestamp) {
+      return false;
+    }
+    if (EventMessage->time_of_flight()->size() != 2) {
+      return false;
+    }
+    if (EventMessage->time_of_flight()->operator[](0) != 0) {
+      return false;
+    }
+    if (EventMessage->time_of_flight()->operator[](1) != 1000) {
+      return false;
+    }
+    return true;
+  };
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(Producer.get()), produce(_, _))
+      .WITH(checkFlatbufferTimestamp(_1))
+      .TIMES(1)
+      .RETURN(0);
+  SetUpSerializer(2);
+  for (int i = 0; i < 2; i++) {
+    Serializer->addEvent(std::unique_ptr<EventData>(
+        new EventData{BaseTimestamp + i * 1000, 2, 3, 4, 5, BaseTimestamp + i * 1000 + 1, BaseTimestamp + i * 1000 + 2}));
+  }
+  Serializer.reset();
+}
+
+TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventOneRef) {
+  std::uint64_t BaseTimestamp = 1000000;
+  auto checkFlatbufferTimestamp = [BaseTimestamp](auto Buffer) {
+    auto EventMessage = GetEventMessage(Buffer.data());
+    if (EventMessage->pulse_time() != BaseTimestamp) {
+      return false;
+    }
+    if (EventMessage->time_of_flight()->operator[](0) != 1000) {
+      return false;
+    }
+    return true;
+  };
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(Producer.get()), produce(_, _))
+      .WITH(checkFlatbufferTimestamp(_1))
+      .TIMES(1)
+      .RETURN(0);
+  SetUpSerializer(1);
+  Serializer->addReferenceTimestamp(BaseTimestamp);
+  Serializer->addEvent(std::unique_ptr<EventData>(
+        new EventData{BaseTimestamp + 1000, 2, 3, 4, 5, BaseTimestamp + 1000 + 1, BaseTimestamp + 1000 + 2}));
+  Serializer.reset();
 }

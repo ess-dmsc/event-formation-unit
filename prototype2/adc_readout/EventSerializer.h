@@ -19,6 +19,48 @@ struct EventData {
   std::uint32_t Background{0};
   std::uint64_t ThresholdTime{0};
   std::uint64_t PeakTime{0};
+  std::uint64_t minTimestamp() {
+    std::uint64_t ReturnValue = Timestamp;
+    if (ThresholdTime != 0 and ThresholdTime < ReturnValue) {
+      ReturnValue = ThresholdTime;
+    }
+    if (PeakTime != 0 and PeakTime < ReturnValue) {
+      ReturnValue = PeakTime;
+    }
+    return ReturnValue;
+  };
+  std::uint64_t maxTimestamp() {
+    std::uint64_t ReturnValue = Timestamp;
+    if (ThresholdTime != 0 and ThresholdTime > ReturnValue) {
+      ReturnValue = ThresholdTime;
+    }
+    if (PeakTime != 0 and PeakTime > ReturnValue) {
+      ReturnValue = PeakTime;
+    }
+    return ReturnValue;
+  };
+};
+
+/// \brief Simple event buffer that keeps track of events based on their timestamps
+class EventBuffer {
+public:
+  /// \brief Initializes the event buffer.
+  ///
+  /// \param BufferSize The maximum number events in the buffer.
+  EventBuffer(size_t BufferSize);
+  /// \brief Used for setting the reference timestamps for determining if the buffer should be culled/emptied.
+  ///
+  /// \param ReferenceTime Reference timestamp.
+  /// \param Timespan
+  void setReferenceTimes(std::uint64_t ReferenceTime, std::uint64_t Timespan);
+  void addEvent(std::unique_ptr<EventData[]> Event);
+  bool shouldCullEvents();
+  nonstd::span<EventData> getEvents(bool AllEvents);
+  void clearEvents(bool AllEvents);
+private:
+  std::unique_ptr<EventData[]> Events;
+  std::uint64_t RefTime;
+  std::uint64_t MaxOffsetTime;
 };
 
 using Queue = moodycamel::ReaderWriterQueue<std::unique_ptr<EventData>>;
@@ -36,8 +78,8 @@ public:
   /// serialization.
   /// \param[in] SourceName Used as the source name in the flatbuffer that is produced.
   /// \param[in] BufferSize The maximum number of events that is stored in the flatbuffer.
-  /// \param[in] TransmitTimeout If no event has been received in this many milliseconds, transmit (produce) the
-  /// flatbuffer anyway.
+  /// \param[in] TransmitTimeout If no event has been received in this many milliseconds (provided by the operating
+  /// system), transmit (produce) the flatbuffer anyway.
   /// \note The size (in bytes) of the flatbuffer that is produced will be the same regardless of the number of events
   /// that it actually contains.
   /// \param[in] KafkaProducer The Kafka producer that is used when a flatbuffer is done.
@@ -48,18 +90,18 @@ public:
   ///    - EventSerializer::addReferenceTimestamp() does nothing.
   ///    - A flatbuffer is produced when either:
   ///      - It is full.
-  ///      - TransmitTimout has passed since the first event.
+  ///      - TransmitTimeout has passed since the first event.
   ///      - The difference between the reference timestamp and the current event timestamp is greater than
   ///        std::numeric_limits<std::uint32_t>::max().
   ///  - TIME_REFERENCED
   ///    - Before the first call to EventSerializer::addReferenceTimestamp(), buffer BufferSize events and use the
   ///      timestamp of the first event as the reference time.
   ///    - Use the timestamp from EventSerializer::addReferenceTimestamp() as a reference timestamp.
-  ///    - If the time difference between the reference timestamp and the event timestamp is greater than
+  ///    - If the time difference between the last reference timestamp and the event timestamp is greater than
   ///      std::numeric_limits<std::uint32_t>::max(), use the event timestamp as the next reference.
   ///    - A flatbuffer is produced when either:
   ///      - It is full.
-  ///      - TransmitTimout has passed since the first event.
+  ///      - TransmitTimeout has passed since the first event.
   ///      - The difference between the reference timestamp and the current event timestamp is greater than
   ///        std::numeric_limits<std::uint32_t>::max().
   ///      - There is a new reference timestamp that is smaller than the last buffered or currently processed

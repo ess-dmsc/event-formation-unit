@@ -59,6 +59,13 @@ struct FBVector {
 
 using namespace std::chrono_literals;
 
+struct EventTimestamps {
+  std::uint64_t EventTimestamp;
+  std::uint64_t ThresholdTimestamp;
+  std::uint64_t PeakTimestamp;
+
+};
+
 void EventSerializer::serialiseFunction() {
   flatbuffers::FlatBufferBuilder Builder(sizeof(std::uint32_t) * EventBufferSize * 8 + 2048);
   // We do not want the buffer to be too small or the vector offset addresses will become invalid when creating them.
