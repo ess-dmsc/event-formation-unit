@@ -1,6 +1,11 @@
-//
-// Created by Jonas Nilsson on 2019-01-28.
-//
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Extract waveforms from hdf5-file.
+///
+//===----------------------------------------------------------------------===//
 
 #include "WaveformData.h"
 #include <iostream>

@@ -1,6 +1,11 @@
-//
-// Created by Jonas Nilsson on 2019-01-30.
-//
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Modularise sample data (header file).
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

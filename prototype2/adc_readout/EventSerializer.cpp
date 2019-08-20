@@ -1,7 +1,11 @@
-//
-// Created by Jonas Nilsson on 2019-07-09.
-//
-
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Serialize neutron events by putting them into a flatbuffer.
+///
+//===----------------------------------------------------------------------===//
 #include "EventSerializer.h"
 #include <dtdb_adc_pulse_debug_generated.h>
 #include <ev42_events_generated.h>

@@ -1,7 +1,11 @@
-//
-// Created by Jonas Nilsson on 2019-01-30.
-//
-
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Modularise sample runs.
+///
+//===----------------------------------------------------------------------===//
 #include "DataModulariser.h"
 
 DataModulariser::DataModulariser(std::size_t MaxSize)

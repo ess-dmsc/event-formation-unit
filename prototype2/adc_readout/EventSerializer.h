@@ -1,6 +1,12 @@
-//
-// Created by Jonas Nilsson on 2019-07-09.
-//
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Serialize neutron events by putting them into a flatbuffer
+///        (header file).
+///
+//===----------------------------------------------------------------------===//
 
 #pragma once
 

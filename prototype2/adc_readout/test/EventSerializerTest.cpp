@@ -1,6 +1,11 @@
-//
-// Created by Jonas Nilsson on 2019-07-09.
-//
+// Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file
+//===----------------------------------------------------------------------===//
+///
+/// \file
+///
+/// \brief Event serialisation unit tests.
+///
+//===----------------------------------------------------------------------===//
 
 #include "../EventSerializer.h"
 #include "ev42_events_generated.h"
