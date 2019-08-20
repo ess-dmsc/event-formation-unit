@@ -68,13 +68,16 @@ public:
     std::ifstream PacketFile(PacketPath + "test_packet_2.dat",
                              std::ios::binary);
     ASSERT_TRUE(PacketFile.good());
-    PacketFile.read(reinterpret_cast<char *>(&Packet.Data), 1470);
+    PacketFile.seekg(0, std::ios::end);
+    size_t FileSize = PacketFile.tellg();
+    PacketFile.seekg(0, std::ios::beg);
+    PacketFile.read(reinterpret_cast<char *>(&Packet.Data), FileSize);
     ASSERT_TRUE(PacketFile.good());
-    Packet.Length = 1470;
+    Packet.Length = FileSize;
     Header = reinterpret_cast<PacketHeader *>(Packet.Data);
     DataHead =
         reinterpret_cast<DataHeader *>(Packet.Data + sizeof(PacketHeader));
-    BEEFCAFE = Packet.Data + 1470 - 8;
+    BEEFCAFE = Packet.Data + FileSize - 8;
   }
   std::uint8_t *BEEFCAFE{nullptr};
   PacketHeader *Header{nullptr};
@@ -143,7 +146,7 @@ TEST_F(AdcParsing, ParseCorrectTrailer) {
 
 TEST_F(AdcParsingAlt, ParseCorrectPacket) {
   int NrOfModules{0};
-  int OversamplingFactor;
+  int OversamplingFactor{-1};
   std::function<bool(SamplingRun *)> ProccessingFunction(
       [&NrOfModules, &OversamplingFactor](SamplingRun *Module) {
         OversamplingFactor = Module->OversamplingFactor;
@@ -153,8 +156,8 @@ TEST_F(AdcParsingAlt, ParseCorrectPacket) {
   ParserStandIn Parser(ProccessingFunction, GetModule, 0);
   PacketInfo ParseResult;
   EXPECT_NO_THROW(ParseResult = Parser.parsePacket(Packet));
-  EXPECT_EQ(NrOfModules, 1);
-  EXPECT_EQ(OversamplingFactor, 4);
+  EXPECT_EQ(NrOfModules, 2);
+  EXPECT_EQ(OversamplingFactor, 1);
 }
 
 TEST_F(AdcParsing, ParseCorrectPacket) {
@@ -220,16 +223,15 @@ TEST_F(AdcParsingIdle, ParseCorrectIdlePacket) {
   PacketInfo ResultingData;
   EXPECT_NO_THROW(ResultingData = Parser.parsePacket(Packet));
   EXPECT_EQ(NrOfModules, 0);
-  // EXPECT_EQ(ResultingData.IdleTimeStamp.Seconds, 0xAAAA0000u);
-  // EXPECT_EQ(ResultingData.IdleTimeStamp.SecondsFrac, 0x0000AAAAu);
+  EXPECT_EQ(ResultingData.Type, PacketType::Idle);
 }
 
 TEST(AdcHeadParse, IdleHeadTest) {
   InData Packet;
-  Packet.Length = sizeof(PacketHeader);
+  Packet.Length = 28; //Current length of packet
   PacketHeader *HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
   HeaderPointer->PacketType = 0x2222;
-  HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader));
+  HeaderPointer->ReadoutLength = htons(20); // Currently a magic value
   HeaderInfo Header;
   EXPECT_NO_THROW(Header = parseHeader(Packet));
   EXPECT_EQ(Header.Type, PacketType::Idle);

@@ -8,11 +8,13 @@
 #include "DataPacket.h"
 #include <cstring>
 
+const std::uint32_t DATA_PACKET = 0x1111;
+
 DataPacket::DataPacket(size_t MaxPacketSize)
     : Buffer(std::make_unique<std::uint8_t[]>(MaxPacketSize)),
       HeaderPtr(reinterpret_cast<PacketHeader *>(Buffer.get())),
       Size(sizeof(PacketHeader)), MaxSize(MaxPacketSize) {
-  HeaderPtr->PacketType = 0x1111;
+  HeaderPtr->PacketType = DATA_PACKET;
 }
 
 bool DataPacket::addSamplingRun(void const *const DataPtr, size_t Bytes) {
@@ -31,7 +33,6 @@ std::pair<void *, size_t> DataPacket::getBuffer(std::uint16_t PacketCount,
   auto TempValue = htonl(0xFEEDF00Du);
   std::memcpy(TrailerPtr, &TempValue, sizeof(TempValue));
   Size += 4;
-  HeaderPtr->GlobalCount = htons(PacketCount);
   HeaderPtr->ReadoutCount = htons(ReadoutCount);
   HeaderPtr->ReadoutLength = htons(Size - 2);
 

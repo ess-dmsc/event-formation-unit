@@ -126,7 +126,6 @@ void FPGASim::handleHeartbeat(const asio::error_code &Error) {
 }
 
 void FPGASim::transmitHeartbeat() {
-  IdlePacket.Head.GlobalCount = ntohs(PacketCount++);
   transmitPacket(&IdlePacket, sizeof(IdlePacket));
 }
 

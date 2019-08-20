@@ -103,7 +103,7 @@ HeaderInfo parseHeader(const InData &Packet) {
   }
   ReturnInfo.DataStart = sizeof(PacketHeader);
   ReturnInfo.ReadoutCount = Header.ReadoutCount;
-  if (Packet.Length != Header.ReadoutLength) {
+  if (Packet.Length != Header.ReadoutLength + 8) {
     throw ParserException(ParserException::Type::HEADER_LENGTH);
   }
   return ReturnInfo;
