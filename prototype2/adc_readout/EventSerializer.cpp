@@ -22,7 +22,7 @@ EventSerializer::EventSerializer(std::string SourceName, size_t BufferSize,
 }
 
 EventSerializer::~EventSerializer() {
-  RunThread = false;
+  RunThread.store(false);
   if (SerializeThread.joinable()) {
     SerializeThread.join();
   }

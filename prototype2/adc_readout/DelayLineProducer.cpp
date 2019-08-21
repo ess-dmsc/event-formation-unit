@@ -62,7 +62,7 @@ void DelayLineProducer::serializeAndSendEvent(const DelayLineEvent &Event) {
 }
 
 DelayLineProducer::~DelayLineProducer() {
-  RunThread = false;
+  RunThread.store(false);
   if (PulseProcessingThread.joinable()) {
     PulseProcessingThread.join();
   }

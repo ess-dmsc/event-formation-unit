@@ -31,8 +31,8 @@ public:
   bool TransmitPacket(const std::uint8_t *DataPtr, const std::uint32_t Size);
 
 private:
-  std::atomic_bool ConnectionOk = {false};
-  std::atomic<std::int64_t> PacketsSent = {0};
+  std::atomic_bool ConnectionOk{false};
+  std::atomic<std::int64_t> PacketsSent{0};
   asio::io_service Service;
   WorkPtr Work;
   void threadFunction();

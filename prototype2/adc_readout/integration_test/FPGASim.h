@@ -34,14 +34,13 @@ public:
   int getNrOfRuns() const { return SamplingRuns; };
   int getNrOfPackets() const { return PacketCount; };
   int getNrOfSentPackets() const { return SentPackets; };
-  void packetIsSent() { ++SentPackets; };
+  void packetIsSent() { SentPackets.store(SentPackets + 1); };
 
 private:
   int SamplingRuns{0};
   const int MaxPacketSize{9000};
   std::string Address;
   std::uint16_t Port;
-  std::atomic<std::int64_t> PacketsSent = {0};
   asio::ip::udp::socket Socket;
   asio::ip::udp::resolver Resolver;
 

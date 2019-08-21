@@ -32,9 +32,9 @@ UDPServer::~UDPServer() {
 void UDPServer::handleWrite(const asio::error_code &Err, std::size_t,
                             BufferPtr Buffer) {
   if (Err) {
-    ConnectionOk = false;
+    ConnectionOk.store(false);
   }
-  ++PacketsSent;
+  PacketsSent.store(PacketsSent + 1);
   Buffer.reset();
 }
 
@@ -52,7 +52,7 @@ void UDPServer::handleResolve(const asio::error_code __attribute__((unused)) &
 void UDPServer::handleConnect(const asio::error_code &Err,
                               asio::ip::udp::resolver::iterator EndpointIter) {
   if (!Err) {
-    ConnectionOk = true;
+    ConnectionOk.store(true);
   } else if (EndpointIter != asio::ip::udp::resolver::iterator()) {
     Socket.close();
     asio::ip::udp::endpoint Endpoint = *EndpointIter;
