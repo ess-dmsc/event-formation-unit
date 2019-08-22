@@ -115,38 +115,17 @@ void EventSerializer::serialiseFunction() {
       if (NumberOfEvents != 0) {
         if (NewEvent->Timestamp - CurrentRefTime > std::numeric_limits<std::uint32_t>::max()) {
           ProduceFB();
-        } else if (NewEvent->ThresholdTime != 0 and NewEvent->ThresholdTime - CurrentRefTime > std::numeric_limits<std::uint32_t>::max()) {
-          ProduceFB();
-        } else if (NewEvent->PeakTime != 0 and NewEvent->PeakTime - CurrentRefTime > std::numeric_limits<std::uint32_t>::max()) {
-          ProduceFB();
         }
       }
 
       if (NumberOfEvents == 0) {
         CurrentRefTime = NewEvent->Timestamp;
-        if (NewEvent->PeakTime != 0 and NewEvent->PeakTime < CurrentRefTime) {
-          CurrentRefTime = NewEvent->PeakTime;
-        }
-        if (NewEvent->ThresholdTime != 0 and
-            NewEvent->ThresholdTime < CurrentRefTime) {
-          CurrentRefTime = NewEvent->ThresholdTime;
-        }
         FirstEventTime = getCurrentTime();
       }
       TimeOffset.push_back(
           static_cast<std::uint32_t>(NewEvent->Timestamp - CurrentRefTime));
-      if (NewEvent->ThresholdTime > 0) {
-        ThresholdTime.push_back(static_cast<std::uint32_t>(
-            NewEvent->ThresholdTime - CurrentRefTime));
-      } else {
-        ThresholdTime.push_back(0);
-      }
-      if (NewEvent->PeakTime > 0) {
-        PeakTime.push_back(
-            static_cast<std::uint32_t>(NewEvent->PeakTime - CurrentRefTime));
-      } else {
-        PeakTime.push_back(0);
-      }
+      ThresholdTime.push_back(NewEvent->ThresholdTime);
+      PeakTime.push_back(NewEvent->PeakTime);
       EventId.push_back(NewEvent->EventId);
       Amplitude.push_back(NewEvent->Amplitude);
       PeakArea.push_back(NewEvent->PeakArea);

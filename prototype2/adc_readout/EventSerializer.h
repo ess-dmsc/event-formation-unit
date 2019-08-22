@@ -16,58 +16,7 @@
 #include <readerwriterqueue/readerwriterqueue.h>
 #include <string>
 #include <thread>
-
-struct EventData {
-  std::uint64_t Timestamp{0};
-  std::uint32_t EventId{0};
-  std::uint32_t Amplitude{0};
-  std::uint32_t PeakArea{0};
-  std::uint32_t Background{0};
-  std::uint64_t ThresholdTime{0};
-  std::uint64_t PeakTime{0};
-  std::uint64_t minTimestamp() {
-    std::uint64_t ReturnValue = Timestamp;
-    if (ThresholdTime != 0 and ThresholdTime < ReturnValue) {
-      ReturnValue = ThresholdTime;
-    }
-    if (PeakTime != 0 and PeakTime < ReturnValue) {
-      ReturnValue = PeakTime;
-    }
-    return ReturnValue;
-  };
-  std::uint64_t maxTimestamp() {
-    std::uint64_t ReturnValue = Timestamp;
-    if (ThresholdTime != 0 and ThresholdTime > ReturnValue) {
-      ReturnValue = ThresholdTime;
-    }
-    if (PeakTime != 0 and PeakTime > ReturnValue) {
-      ReturnValue = PeakTime;
-    }
-    return ReturnValue;
-  };
-};
-
-/// \brief Simple event buffer that keeps track of events based on their timestamps
-class EventBuffer {
-public:
-  /// \brief Initializes the event buffer.
-  ///
-  /// \param BufferSize The maximum number events in the buffer.
-  EventBuffer(size_t BufferSize);
-  /// \brief Used for setting the reference timestamps for determining if the buffer should be culled/emptied.
-  ///
-  /// \param ReferenceTime Reference timestamp.
-  /// \param Timespan
-  void setReferenceTimes(std::uint64_t ReferenceTime, std::uint64_t Timespan);
-  void addEvent(std::unique_ptr<EventData[]> Event);
-  bool shouldCullEvents();
-  nonstd::span<EventData> getEvents(bool AllEvents);
-  void clearEvents(bool AllEvents);
-private:
-  std::unique_ptr<EventData[]> Events;
-  std::uint64_t RefTime;
-  std::uint64_t MaxOffsetTime;
-};
+#include "EventBuffer.h"
 
 using Queue = moodycamel::ReaderWriterQueue<std::unique_ptr<EventData>>;
 using TimestampQueue = moodycamel::ReaderWriterQueue<std::uint64_t>;
@@ -133,7 +82,7 @@ protected:
     return std::chrono::system_clock::now();
   };
   void serialiseFunction();
-  bool RunThread{true};
+  std::atomic_bool RunThread{true};
   std::string Name;
   std::chrono::milliseconds Timeout;
   size_t EventBufferSize;

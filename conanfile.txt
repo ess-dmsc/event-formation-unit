@@ -11,7 +11,7 @@ libpcap/1.8.1@bincrafters/stable
 librdkafka/0.11.5-dm2@ess-dmsc/stable
 logical-geometry/09097f2@ess-dmsc/stable
 readerwriterqueue/07e22ec@ess-dmsc/stable
-streaming-data-types/fb4d847@ess-dmsc/stable
+streaming-data-types/358b661@ess-dmsc/stable
 trompeloeil/v31@ess-dmsc/stable
 
 [generators]

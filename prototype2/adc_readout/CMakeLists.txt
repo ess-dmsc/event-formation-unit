@@ -18,6 +18,7 @@ set(AdcReadout_SRC
     PulseParameters.cpp
     PulseBuffer.cpp
     EventSerializer.cpp
+    EventBuffer.cpp
     )
 
 set(AdcReadout_INC
@@ -41,6 +42,8 @@ set(AdcReadout_INC
     ChannelID.h
     PulseBuffer.h
     EventSerializer.h
+    EventData.h
+    EventBuffer.h
     )
 
 create_object_module(AdcReadout)
