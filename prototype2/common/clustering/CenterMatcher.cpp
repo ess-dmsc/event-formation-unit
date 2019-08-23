@@ -80,7 +80,7 @@ CenterMatcher::CenterMatcher(uint64_t latency, uint64_t time_gap, std::string ti
             evt.clear();
           }
           
-          if (cluster->plane() == 1)
+          if (cluster->plane() == 0)
           {
             if(!evt.empty1())
             {
@@ -89,7 +89,7 @@ CenterMatcher::CenterMatcher(uint64_t latency, uint64_t time_gap, std::string ti
               evt.clear();
             }
           }
-          else 
+          else if (cluster->plane() == 1)
           {
             if(!evt.empty2())
             {
