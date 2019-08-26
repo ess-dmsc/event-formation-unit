@@ -1,4 +1,5 @@
 include_directories(.)
+include_directories(${VERSION_INCLUDE_DIR})
 
 #=============================================================================
 # Required external libraries
@@ -32,8 +33,6 @@ set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
 add_subdirectory(common)
 
 add_subdirectory(readout)
-
-include(UnitTests.cmake) # This has only libs unit tests now ???
 
 #=============================================================================
 # Plugins

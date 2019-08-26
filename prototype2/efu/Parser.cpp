@@ -17,8 +17,9 @@
 //=============================================================================
 static int stat_get_count(std::vector<std::string> cmdargs, char *output,
                           unsigned int *obytes,
-                          std::shared_ptr<Detector> detector) {
+                          std::shared_ptr<Detector> detector, NewStats stats) {
   auto nargs = cmdargs.size();
+
   LOG(CMD, Sev::Debug, "STAT_GET_COUNT");
   if (nargs != 1) {
     LOG(CMD, Sev::Warning, "STAT_GET_COUNT: wrong number of arguments");
@@ -26,14 +27,14 @@ static int stat_get_count(std::vector<std::string> cmdargs, char *output,
   }
 
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET_COUNT %d",
-                     detector->statsize());
+                     detector->statsize() + (int)stats.size());
 
   return Parser::OK;
 }
 
 //=============================================================================
 static int stat_get(std::vector<std::string> cmdargs, char *output,
-                    unsigned int *obytes, std::shared_ptr<Detector> detector) {
+                    unsigned int *obytes, std::shared_ptr<Detector> detector, NewStats stats) {
   auto nargs = cmdargs.size();
   LOG(CMD, Sev::Debug, "STAT_GET");
   if (nargs != 2) {
@@ -41,10 +42,18 @@ static int stat_get(std::vector<std::string> cmdargs, char *output,
     return -Parser::EBADARGS;
   }
   auto index = atoi(cmdargs.at(1).c_str());
-
-  std::string name = detector->statname(index);
-  int64_t value = detector->statvalue(index);
+  std::string name;
+  int64_t value;
+  if (index <= detector->statsize()) {
+    name = detector->statname(index);
+    value = detector->statvalue(index);
+  } else {
+    index = index - detector->statsize();
+    name = stats.name(index);
+    value = stats.value(index);
+  }
   LOG(CMD, Sev::Debug, "STAT_GET {} {}", name, value);
+
   *obytes = snprintf(output, SERVER_BUFFER_SIZE, "STAT_GET %s %" PRIi64,
                      name.c_str(), value);
 
@@ -143,7 +152,7 @@ static int efu_exit(std::vector<std::string> cmdargs, UNUSED char *output,
 
 /******************************************************************************/
 /******************************************************************************/
-Parser::Parser(std::shared_ptr<Detector> detector, int &keep_running) {
+Parser::Parser(std::shared_ptr<Detector> detector, NewStats &mainStats, int &keep_running) {
 
   registercmd("VERSION_GET", version_get);
 
@@ -167,13 +176,13 @@ Parser::Parser(std::shared_ptr<Detector> detector, int &keep_running) {
     return;
   }
 
-  registercmd("STAT_GET", [detector](std::vector<std::string> cmd, char *resp,
+  registercmd("STAT_GET", [detector, mainStats](std::vector<std::string> cmd, char *resp,
                                      unsigned int *nrChars) {
-    return stat_get(cmd, resp, nrChars, detector);
+    return stat_get(cmd, resp, nrChars, detector, mainStats);
   });
-  registercmd("STAT_GET_COUNT", [detector](std::vector<std::string> cmd,
+  registercmd("STAT_GET_COUNT", [detector, mainStats](std::vector<std::string> cmd,
                                            char *resp, unsigned int *nrChars) {
-    return stat_get_count(cmd, resp, nrChars, detector);
+    return stat_get_count(cmd, resp, nrChars, detector, mainStats);
   });
 
   registercmd("DETECTOR_INFO_GET",

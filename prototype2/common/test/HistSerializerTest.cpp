@@ -31,32 +31,34 @@ public:
 };
 
 TEST_F(HistSerializerTest, Serialize) {
-  HistSerializer histfb(hists.needed_buffer_size());
+  HistSerializer histfb(hists.needed_buffer_size(), "some_source");
   auto len = histfb.produce(hists);
-  ASSERT_TRUE(len >= hists.needed_buffer_size());
+  EXPECT_GE(len, hists.needed_buffer_size());
 }
 
 TEST_F(HistSerializerTest, DeSerialize) {
-  HistSerializer histfb(hists.needed_buffer_size());
+  HistSerializer histfb(hists.needed_buffer_size(), "some_source");
   histfb.set_callback(std::bind(&HistSerializerTest::copy_buffer,
       this, std::placeholders::_1));
 
   histfb.produce(hists);
+  EXPECT_EQ(std::string(&flatbuffer[4], 4), "mo01");
 
   auto monitor = GetMonitorMessage(flatbuffer);
-  auto dtype = monitor->data_type();
-  ASSERT_EQ(dtype, DataField::GEMHist);
+  EXPECT_EQ(monitor->source_name()->str(), "some_source");
+  EXPECT_EQ(monitor->data_type(), DataField::GEMHist);
 
   auto hist = static_cast<const GEMHist *>(monitor->data());
   auto xdat = hist->xstrips();
   auto ydat = hist->ystrips();
-  ASSERT_EQ(xdat->size(), hists.x_strips_hist.size());
-  ASSERT_EQ(ydat->size(), hists.y_strips_hist.size());
+  EXPECT_EQ(xdat->size(), hists.x_strips_hist.size());
+  EXPECT_EQ(ydat->size(), hists.y_strips_hist.size());
 
   for (size_t i = 0; i < hists.x_strips_hist.size(); i++) {
-    ASSERT_EQ((*xdat)[i], i);
+    EXPECT_EQ((*xdat)[i], i);
     EXPECT_EQ((*ydat)[i], MAX_STRIP_VAL_TEST - i);
   }
+
 }
 
 int main(int argc, char **argv) {

@@ -5,9 +5,9 @@
 #include <common/Detector.h>
 #include <common/EFUArgs.h>
 #include <iostream>
-#include <libs/include/Socket.h>
-#include <libs/include/TSCTimer.h>
-#include <libs/include/Timer.h>
+#include <common/Socket.h>
+#include <common/TSCTimer.h>
+#include <common/Timer.h>
 #include <memory>
 #include <stdio.h>
 #include <unistd.h>

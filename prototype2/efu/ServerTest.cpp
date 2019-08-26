@@ -7,7 +7,7 @@
 #include <test/TestBase.h>
 #include <thread>
 
-uint16_t ServerPort = 8888;
+uint16_t ServerPort = 8889;
 
 constexpr int mask_close = 0x0001;
 constexpr int mask_connect = 0x0002;
@@ -64,9 +64,10 @@ protected:
   EFUArgs efu_args;
   BaseSettings settings = efu_args.getBaseSettings();
   Parser * parser;
+  NewStats stats;
   virtual void SetUp() {
       auto detectorif = Factory.create(settings);
-      parser = new Parser(detectorif, keep_running);
+      parser = new Parser(detectorif, stats, keep_running);
   }
 
   virtual void TearDown() {

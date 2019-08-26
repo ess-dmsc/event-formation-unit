@@ -1,13 +1,29 @@
 cmake_minimum_required(VERSION 2.8.11 FATAL_ERROR)
 project("event-formation-unit")
-set(event-formation-unit_VERSION_MAJOR 1)
-set(event-formation-unit_VERSION_MINOR 0)
 
 #=============================================================================
 # Augment CMake with our custom scripts
 #=============================================================================
 set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR}/modules)
+
+#=============================================================================
+# Versioning
+#=============================================================================
+include(${EXTRA_MODULES_DIR}/Versioning.cmake)
+
+set_version()
+set(event-formation-unit_VERSION_MAJOR "${MAJOR_VERSION}")
+set(event-formation-unit_VERSION_MINOR "${MINOR_VERSION}")
+set(VERSION_INCLUDE_DIR ${CMAKE_BINARY_DIR}/version)
+create_version_header(
+  ${EXTRA_MODULES_DIR}/templates/version_num.h.in
+  ${VERSION_INCLUDE_DIR}/common/version_num.h
+)
+create_version_header(
+  ${EXTRA_MODULES_DIR}/templates/Version.h.in
+  ${VERSION_INCLUDE_DIR}/common/Version.h
+)
 
 #=============================================================================
 # Conan
@@ -59,8 +75,8 @@ message(STATUS "Reference data root directory: ${REFDATA}")
 # The code
 #=============================================================================
 include_directories(.)
+
 include(Utilities.cmake)
-add_subdirectory(libs)
 add_subdirectory(prototype2)
 add_subdirectory(utils/udp)
 

@@ -1,120 +1,32 @@
 #=============================================================================
-# Tests
+# Common functionality for all detector plugins
 #=============================================================================
 
-set(HitTest_SRC
-  HitTest.cpp
-  Hit.cpp
-  )
-set(HitTest_INC
-  Hit.h
-  )
-create_test_executable(HitTest SKIP_MEMGRIND)
-
-set(ClusterTest_SRC
-  ClusterTest.cpp
-  Cluster.cpp
-  )
-set(EventTest_INC
-  Hit.h
-  Cluster.h
-  )
-create_test_executable(ClusterTest)
-
-set(GapClustererTest_SRC
-  Cluster.cpp
-  Hit.cpp
-  GapClusterer.cpp
-  GapClustererTest.cpp
-  )
-set(GapClustererTest_INC
-  GapClusterer.h
-  Cluster.h
-  Hit.h
-  AbstractClusterer.h
-  )
-create_test_executable(GapClustererTest)
-
-set(EventTest_SRC
-  Cluster.cpp
-  Hit.cpp
-  EventTest.cpp
-  Event.cpp
-  )
-set(EventTest_INC
-  Cluster.h
-  Hit.h
-  AbstractClusterer.h
-  Event.h
-  )
-create_test_executable(EventTest)
-
-set(AbstractMatcherTest_SRC
+set(clustering_obj_SRC
   AbstractMatcher.cpp
   Cluster.cpp
-  Hit.cpp
-  Event.cpp
-  AbstractMatcherTest.cpp
-  )
-set(AbstractMatcherTest_INC
-  AbstractClusterer.h
-  AbstractMatcher.h
-  Cluster.h
-  Hit.h
-  Event.h
-  )
-create_test_executable(AbstractMatcherTest)
-
-set(EndMatcherTest_SRC
-  AbstractMatcher.cpp
-  Cluster.cpp
-  Hit.cpp
-  Event.cpp
   EndMatcher.cpp
-  EndMatcherTest.cpp
-  )
-set(EndMatcherTest_INC
-  AbstractClusterer.h
-  AbstractMatcher.h
-  Cluster.h
-  Hit.h
-  Event.h
-  EndMatcher.h
-  )
-create_test_executable(EndMatcherTest)
-
-set(OverlapMatcherTest_SRC
-  AbstractMatcher.cpp
-  Cluster.cpp
-  Hit.cpp
   Event.cpp
-  OverlapMatcher.cpp
-  OverlapMatcherTest.cpp
-  )
-set(OverlapMatcherTest_INC
-  AbstractClusterer.h
-  AbstractMatcher.h
-  Cluster.h
-  Hit.h
-  Event.h
-  OverlapMatcher.h
-  )
-create_test_executable(OverlapMatcherTest)
-
-set(GapMatcherTest_SRC
-  AbstractMatcher.cpp
-  Cluster.cpp
-  Hit.cpp
-  Event.cpp
+  GapClusterer.cpp
   GapMatcher.cpp
-  GapMatcherTest.cpp
-  )
-set(GapMatcherTest_INC
+  Hit.cpp
+  OverlapMatcher.cpp
+)
+
+set(clustering_obj_INC
   AbstractClusterer.h
   AbstractMatcher.h
   Cluster.h
-  Hit.h
+  EndMatcher.h
   Event.h
+  GapClusterer.h
   GapMatcher.h
-  )
-create_test_executable(GapMatcherTest)
+  Hit.h
+  OverlapMatcher.h
+)
+
+add_library(ClusteringObj OBJECT ${clustering_obj_SRC} ${clustering_obj_INC})
+enable_coverage_flags(ClusteringObj)
+
+add_subdirectory(test)
+

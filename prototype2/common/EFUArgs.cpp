@@ -8,6 +8,7 @@
 
 #include <common/DetectorModuleRegister.h>
 #include <common/EFUArgs.h>
+#include <common/Version.h>
 #include <common/Log.h>
 #include <cstdio>
 #include <fstream>
@@ -24,6 +25,9 @@ EFUArgs::EFUArgs() {
   CLIParser.get_formatter()->column_width(30);
 
   HelpOption = CLIParser.add_flag("-h,--help", "Print this help message and exit")
+      ->group("EFU Options")->configurable(false);
+
+  CLIParser.add_flag("--version", PrintVersion, "Print version and exit")
       ->group("EFU Options")->configurable(false);
 
   CLIParser.add_option("-a,--logip", GraylogConfig.address, "Graylog server IP address")
@@ -81,6 +85,10 @@ EFUArgs::EFUArgs() {
   CLIParser.add_option("-g,--graphite", EFUSettings.GraphiteAddress,
                        "IP address of graphite metrics server")
       ->group("EFU Options")->default_str("127.0.0.1");
+
+  CLIParser.add_option("-r,--region", EFUSettings.GraphiteRegion,
+                       "name of detector region covered by this pipeline")
+      ->group("EFU Options")->default_str("region1");
 
   CLIParser.add_option("-o,--gport", EFUSettings.GraphitePort, "Graphite tcp port")
       ->group("EFU Options")->default_str("2003");
@@ -189,7 +197,19 @@ void EFUArgs::printSettings() {
 
 void EFUArgs::printHelp() { std::cout << CLIParser.help(); }
 
+void EFUArgs::printVersion() { std::cout << efu_version() << '\n'; }
+
 EFUArgs::Status EFUArgs::parseFirstPass(const int argc, char *argv[]) {
+  try {
+    CLIParser.parse(argc, argv);
+  } catch (const CLI::ParseError &e) {
+    // Do nothing, as we only care about the version flag in this pass.
+  }
+  if (PrintVersion) {
+    printVersion();
+    return Status::EXIT;
+  }
+
   try {
     CLIParser.parse(argc, argv);
   } catch (const CLI::ParseError &e) {

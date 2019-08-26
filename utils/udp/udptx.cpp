@@ -4,9 +4,9 @@
 #include <Args.h>
 #include <cinttypes>
 #include <iostream>
-#include <libs/include/Socket.h>
-#include <libs/include/TSCTimer.h>
-#include <libs/include/Timer.h>
+#include <common/Socket.h>
+#include <common/TSCTimer.h>
+#include <common/Timer.h>
 #include <stdio.h>
 #include <unistd.h>
 

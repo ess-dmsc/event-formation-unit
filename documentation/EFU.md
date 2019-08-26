@@ -35,7 +35,7 @@ Four examples of already implemented detector interfaces, somewhat alike but als
 ### Data Interface
 The data interface of the EFU is completely open. Current detector implementations use UDP based on BSD Sockets. If using the provided Socket abstraction, a UDP receiver can be setup as follows
 
-    #include <libs/include/Socket.h>
+    #include <common/Socket.h>
     ...
     Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                        EFUSettings.DetectorPort);

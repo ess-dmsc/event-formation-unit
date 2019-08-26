@@ -9,7 +9,7 @@ ARG https_proxy
 ARG local_conan_server
 
 RUN apt-get update -y && \
-    apt-get --no-install-recommends -y install build-essential git python-pip cmake tzdata vim m4 && \
+    apt-get --no-install-recommends -y install build-essential git python-pip cmake tzdata vim m4 flex bison && \
     apt-get -y autoremove && \
     apt-get clean all && \
     rm -rf /var/lib/apt/lists/*
@@ -22,7 +22,7 @@ RUN pip install --upgrade pip==9.0.3 && pip install setuptools && \
 RUN conan profile new default
 
 # Replace the default profile and remotes with the ones from our Ubuntu build node
-ADD "https://raw.githubusercontent.com/ess-dmsc/docker-ubuntu18.04-build-node/master/files/registry.json" "/root/.conan/registry.json"
+RUN conan config install http://github.com/ess-dmsc/conan-configuration.git
 ADD "https://raw.githubusercontent.com/ess-dmsc/docker-ubuntu18.04-build-node/master/files/default_profile" "/root/.conan/profiles/default"
 
 # Add local Conan server if one is defined in the environment
@@ -35,7 +35,6 @@ COPY conanfile.txt efu_src/
 RUN cd efu && conan install --build=outdated ../efu_src/conanfile.txt
 
 COPY cmake efu_src/cmake
-COPY libs efu_src/libs
 COPY utils/udp efu_src/utils/udp
 COPY utils/udpredirect efu_src/utils/udpredirect
 COPY prototype2 efu_src/prototype2
