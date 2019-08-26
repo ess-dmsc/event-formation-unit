@@ -159,7 +159,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest1) {
       std::to_string(TempModule.Identifier.ChannelNr) + "_waveform";
   EXPECT_EQ(SampleData->Name()->str(), ExpectedName);
   EXPECT_EQ(SampleData->PacketTimestamp(),
-            TempModule.TimeStamp.GetTimeStampNS());
+            TempModule.TimeStamp.getTimeStampNS());
   EXPECT_NEAR(SampleData->TimeDelta(),
               (1e9 * TempModule.OversamplingFactor) / AdcTimerCounterMax, 0.05);
   EXPECT_EQ(SampleData->TimestampLocation(), Location::End);
@@ -204,7 +204,7 @@ TEST(SampleProcessing, SerialisationFlatbufferTest3) {
       std::to_string(TempModule.Identifier.ChannelNr) + "_waveform";
   EXPECT_EQ(SampleData->Name()->str(), ExpectedName);
   EXPECT_EQ(SampleData->PacketTimestamp(),
-            TempModule.TimeStamp.GetTimeStampNS());
+            TempModule.TimeStamp.getTimeStampNS());
   EXPECT_NEAR(SampleData->TimeDelta(),
               (1e9 * TempModule.OversamplingFactor) / AdcTimerCounterMax, 0.05);
   EXPECT_EQ(SampleData->TimestampLocation(), Location::End);
@@ -293,7 +293,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime1) {
   Processing.setTimeStampLocation(TimeStampLocation::Start);
   auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
-    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i).GetTimeStampNS(),
+    EXPECT_EQ(Module.TimeStamp.getOffsetTimeStamp(i).getTimeStampNS(),
               Result.TimeStamps.at(i));
   }
 }
@@ -304,7 +304,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime2) {
   Processing.setTimeStampLocation(TimeStampLocation::Start);
   auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
-    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 2).GetTimeStampNS(),
+    EXPECT_EQ(Module.TimeStamp.getOffsetTimeStamp(i * 2).getTimeStampNS(),
               Result.TimeStamps.at(i));
   }
 }
@@ -315,7 +315,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime3) {
   Processing.setTimeStampLocation(TimeStampLocation::End);
   auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
-    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 2 + 1).GetTimeStampNS(),
+    EXPECT_EQ(Module.TimeStamp.getOffsetTimeStamp(i * 2 + 1).getTimeStampNS(),
               Result.TimeStamps.at(i));
   }
 }
@@ -327,7 +327,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime4) {
   Processing.setTimeStampLocation(TimeStampLocation::Start);
   auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
-    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 4 - 3).GetTimeStampNS(),
+    EXPECT_EQ(Module.TimeStamp.getOffsetTimeStamp(i * 4 - 3).getTimeStampNS(),
               Result.TimeStamps.at(i));
   }
 }
@@ -339,7 +339,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime5) {
   Processing.setTimeStampLocation(TimeStampLocation::End);
   auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
-    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i * 4).GetTimeStampNS(),
+    EXPECT_EQ(Module.TimeStamp.getOffsetTimeStamp(i * 4).getTimeStampNS(),
               Result.TimeStamps.at(i));
   }
 }
@@ -352,7 +352,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime6) {
   auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
     EXPECT_EQ(
-        Module.TimeStamp.GetOffsetTimeStamp(i * 2 * 4 + 4).GetTimeStampNS(),
+        Module.TimeStamp.getOffsetTimeStamp(i * 2 * 4 + 4).getTimeStampNS(),
         Result.TimeStamps.at(i));
   }
 }
@@ -365,7 +365,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime7) {
   auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
     EXPECT_EQ(
-        Module.TimeStamp.GetOffsetTimeStamp(i * 2 * 4 - 3).GetTimeStampNS(),
+        Module.TimeStamp.getOffsetTimeStamp(i * 2 * 4 - 3).getTimeStampNS(),
         Result.TimeStamps.at(i));
   }
 }
@@ -378,9 +378,9 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime8) {
   auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
     std::uint64_t StartTS =
-        Module.TimeStamp.GetOffsetTimeStamp(i * 2 * 4 - 3).GetTimeStampNS();
+        Module.TimeStamp.getOffsetTimeStamp(i * 2 * 4 - 3).getTimeStampNS();
     std::uint64_t EndTS =
-        Module.TimeStamp.GetOffsetTimeStamp(i * 2 * 4 + 4).GetTimeStampNS();
+        Module.TimeStamp.getOffsetTimeStamp(i * 2 * 4 + 4).getTimeStampNS();
     EXPECT_EQ(StartTS + (EndTS - StartTS) / 2, Result.TimeStamps.at(i));
   }
 }
@@ -392,7 +392,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime9) {
   Processing.setTimeStampLocation(TimeStampLocation::Middle);
   auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
-    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i).GetTimeStampNS(),
+    EXPECT_EQ(Module.TimeStamp.getOffsetTimeStamp(i).getTimeStampNS(),
               Result.TimeStamps.at(i));
   }
 }
@@ -404,7 +404,7 @@ TEST_F(ChannelProcessingTest, OversamplingAndTime10) {
   Processing.setTimeStampLocation(TimeStampLocation::End);
   auto Result = Processing.processModule(Module);
   for (unsigned int i = 0; i < Result.TimeStamps.size(); i++) {
-    EXPECT_EQ(Module.TimeStamp.GetOffsetTimeStamp(i).GetTimeStampNS(),
+    EXPECT_EQ(Module.TimeStamp.getOffsetTimeStamp(i).getTimeStampNS(),
               Result.TimeStamps.at(i));
   }
 }
@@ -448,14 +448,14 @@ TEST(CalcTimeStamp, StartTest) {
   RawTimeStamp TS1{53, 500};
   RawTimeStamp TS2{53, 1000};
   EXPECT_EQ(CalcSampleTimeStamp(TS1, TS2, TimeStampLocation::Start),
-            TS1.GetTimeStampNS());
+            TS1.getTimeStampNS());
 }
 
 TEST(CalcTimeStamp, EndTest) {
   RawTimeStamp TS1{53, 500};
   RawTimeStamp TS2{53, 1000};
   EXPECT_EQ(CalcSampleTimeStamp(TS1, TS2, TimeStampLocation::End),
-            TS2.GetTimeStampNS());
+            TS2.getTimeStampNS());
 }
 
 TEST(CalcTimeStamp, MiddleTest1) {
@@ -463,32 +463,32 @@ TEST(CalcTimeStamp, MiddleTest1) {
   RawTimeStamp TSMid{53, 750};
   RawTimeStamp TS2{53, 1000};
   EXPECT_EQ(CalcSampleTimeStamp(TS1, TS2, TimeStampLocation::Middle),
-            TSMid.GetTimeStampNS());
+            TSMid.getTimeStampNS());
 }
 
 TEST(CalcTimeStamp, MiddleTest2) {
   RawTimeStamp TS{53, 0};
   RawTimeStamp TSMid{53, 0};
-  EXPECT_EQ(CalcSampleTimeStamp(TS.GetOffsetTimeStamp(-150),
-                                TS.GetOffsetTimeStamp(150),
+  EXPECT_EQ(CalcSampleTimeStamp(TS.getOffsetTimeStamp(-150),
+                                TS.getOffsetTimeStamp(150),
                                 TimeStampLocation::Middle),
-            TSMid.GetTimeStampNS());
+            TSMid.getTimeStampNS());
 }
 
 TEST(CalcTimeStamp, MiddleTest3) {
   RawTimeStamp TS{53, 1};
   RawTimeStamp TSMid{53, 1};
-  EXPECT_EQ(CalcSampleTimeStamp(TS.GetOffsetTimeStamp(-150),
-                                TS.GetOffsetTimeStamp(150),
+  EXPECT_EQ(CalcSampleTimeStamp(TS.getOffsetTimeStamp(-150),
+                                TS.getOffsetTimeStamp(150),
                                 TimeStampLocation::Middle),
-            TSMid.GetTimeStampNS());
+            TSMid.getTimeStampNS());
 }
 
 TEST(CalcTimeStamp, MiddleTest4) {
   RawTimeStamp TS{53, AdcTimerCounterMax - 5};
   RawTimeStamp TSMid{53, AdcTimerCounterMax - 5};
-  EXPECT_EQ(CalcSampleTimeStamp(TS.GetOffsetTimeStamp(-150),
-                                TS.GetOffsetTimeStamp(150),
+  EXPECT_EQ(CalcSampleTimeStamp(TS.getOffsetTimeStamp(-150),
+                                TS.getOffsetTimeStamp(150),
                                 TimeStampLocation::Middle),
-            TSMid.GetTimeStampNS());
+            TSMid.getTimeStampNS());
 }

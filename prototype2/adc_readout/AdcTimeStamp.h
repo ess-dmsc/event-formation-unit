@@ -25,7 +25,7 @@ struct RawTimeStamp {
   RawTimeStamp(std::uint32_t Sec, std::uint32_t SecFrac)
       : Seconds(Sec), SecondsFrac(SecFrac) {}
 
-  /// \brief Number of seconds since EPICS epoch (1980-01-01 00:00).
+  /// \brief Number of seconds since UNIX epoch (1980-01-01 00:00).
   /// This value is provided originally by the MRF hardware.
   /// \note The epoch might change in the future.
   std::uint32_t Seconds{0};
@@ -51,7 +51,7 @@ struct RawTimeStamp {
   /// \param[in] SampleOffset The number of samples that the time stamp should
   /// be offset. Can be negative and positive.
   /// \return The resulting new timestamp.
-  RawTimeStamp GetOffsetTimeStamp(const std::int32_t &SampleOffset) const;
+  RawTimeStamp getOffsetTimeStamp(const std::int32_t &SampleOffset) const;
 
   /// \brief Convert from raw timestamp (seconds plus fractional seconds) into
   /// nanoseconds since epoch.
@@ -59,7 +59,7 @@ struct RawTimeStamp {
   /// to be slower than RawTimeStamp::GetTimeStampNSFast() on machines with a
   /// slow floating point unit.
   /// \return Number of nanoseconds since epoch (currently EPICS epoch).
-  std::uint64_t GetTimeStampNS() const;
+  std::uint64_t getTimeStampNS() const;
 
   /// \brief Convert from raw timestamp (seconds plus fractional seconds) into
   /// nanoseconds since epoch.
@@ -67,5 +67,5 @@ struct RawTimeStamp {
   /// fast as or slower than RawTimeStamp::GetTimeStampNS() on CPUs that have a
   /// fast floating point unit.
   /// \return Number of nanoseconds since epoch (currently EPICS epoch).
-  std::uint64_t GetTimeStampNSFast() const;
+  std::uint64_t getTimeStampNSFast() const;
 } __attribute__((packed));

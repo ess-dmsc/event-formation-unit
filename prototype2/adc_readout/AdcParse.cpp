@@ -76,7 +76,8 @@ PacketInfo PacketParser::parsePacket(const InData &Packet) {
   PacketInfo ReturnData;
   ReturnData.ReadoutCount = Header.ReadoutCount;
   if (PacketType::Data == Header.Type) {
-    size_t FillerStart = parseData(Packet, Header.DataStart, Header.ReferenceTimestamp);
+    size_t FillerStart =
+        parseData(Packet, Header.DataStart, Header.ReferenceTimestamp);
     parseTrailer(Packet, FillerStart);
     ReturnData.Type = PacketType::Data;
   } else if (PacketType::Idle == Header.Type) {
@@ -110,7 +111,8 @@ HeaderInfo parseHeader(const InData &Packet) {
   return ReturnInfo;
 }
 
-size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte, RawTimeStamp const &ReferenceTimestamp) {
+size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte,
+                               RawTimeStamp const &ReferenceTimestamp) {
   while (StartByte + sizeof(DataHeader) < Packet.Length) {
     auto HeaderRaw =
         reinterpret_cast<const DataHeader *>(Packet.Data + StartByte);

@@ -16,7 +16,8 @@ DelayLineProducer::DelayLineProducer(std::string Broker, std::string Topic,
                                      AdcSettings EfuSettings)
     : Producer(std::move(Broker), std::move(Topic)),
       Settings(std::move(EfuSettings)),
-      Serializer("delay_line_detector", 200, 200ms, this, EventSerializer::TimestampMode::INDEPENDENT_EVENTS) {
+      Serializer("delay_line_detector", 200, 200ms, this,
+                 EventSerializer::TimestampMode::INDEPENDENT_EVENTS) {
   PulseProcessingThread =
       std::thread(&DelayLineProducer::pulseProcessingFunction, this);
 }
@@ -68,8 +69,9 @@ DelayLineProducer::~DelayLineProducer() {
   }
 }
 
-void DelayLineProducer::addReferenceTimestamp(RawTimeStamp const &ReferenceTimestamp) {
-  std::uint64_t TempRefTimeStamp = ReferenceTimestamp.GetTimeStampNS();
+void DelayLineProducer::addReferenceTimestamp(
+    RawTimeStamp const &ReferenceTimestamp) {
+  std::uint64_t TempRefTimeStamp = ReferenceTimestamp.getTimeStampNS();
   if (CurrentReferenceTimestamp != TempRefTimeStamp) {
     CurrentReferenceTimestamp = TempRefTimeStamp;
     Serializer.addReferenceTimestamp(CurrentReferenceTimestamp);

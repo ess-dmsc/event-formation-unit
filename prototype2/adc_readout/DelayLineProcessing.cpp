@@ -17,5 +17,6 @@ DelayLineProcessing::DelayLineProcessing(
 void DelayLineProcessing::processData(SamplingRun const &Data) {
   dynamic_cast<DelayLineProducer *>(ProducerPtr.get())
       ->addPulse(analyseSampleRun(Data, TimestampThreshold));
-  dynamic_cast<DelayLineProducer *>(ProducerPtr.get())->addReferenceTimestamp(Data.ReferenceTimestamp);
+  dynamic_cast<DelayLineProducer *>(ProducerPtr.get())
+      ->addReferenceTimestamp(Data.ReferenceTimestamp);
 }

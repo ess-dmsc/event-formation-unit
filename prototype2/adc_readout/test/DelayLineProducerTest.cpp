@@ -96,7 +96,10 @@ bool dataHasExpectedContent(nonstd::span<const std::uint8_t> Data) {
 }
 
 TEST_F(DelayLineProducerTest, CallProduceContentTest) {
-  REQUIRE_CALL(*TestProducer, produce(_, _)).WITH(dataHasExpectedContent(_1)).TIMES(1).RETURN(0);
+  REQUIRE_CALL(*TestProducer, produce(_, _))
+      .WITH(dataHasExpectedContent(_1))
+      .TIMES(1)
+      .RETURN(0);
   TestProducer->Serializer.setTransmitTimeout(1ms);
   DelayLineEvent TestEvent{};
   TestEvent.X = TestXpos;

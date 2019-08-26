@@ -22,8 +22,9 @@ struct EventData {
   std::uint64_t PeakTime{0};
 
   bool operator==(EventData const &Other) const {
-    return Timestamp == Other.Timestamp and EventId == Other.EventId and Amplitude == Other.Amplitude and
-           PeakArea == Other.PeakArea and Background == Other.Background and ThresholdTime == Other.ThresholdTime and
-           PeakTime == Other.PeakTime;
+    return Timestamp == Other.Timestamp and EventId == Other.EventId and
+           Amplitude == Other.Amplitude and PeakArea == Other.PeakArea and
+           Background == Other.Background and
+           ThresholdTime == Other.ThresholdTime and PeakTime == Other.PeakTime;
   }
 };

@@ -20,9 +20,9 @@ public:
     size_t FileSize = PacketFile.tellg();
     PacketFile.seekg(0, std::ios::beg);
     ASSERT_TRUE(PacketFile.good());
-    PacketFile.read(reinterpret_cast<char *>(&Packet.Data), FileSize );
+    PacketFile.read(reinterpret_cast<char *>(&Packet.Data), FileSize);
     ASSERT_TRUE(PacketFile.good());
-    Packet.Length = FileSize ;
+    Packet.Length = FileSize;
   }
   InData Packet;
 };
@@ -112,7 +112,7 @@ TEST_F(AdcParsing, ParseCorrectDataModule) {
   int NrOfModules{0};
   RawTimeStamp RefTimestamp;
   std::function<bool(SamplingRun *)> ProccessingFunction(
-      [&NrOfModules,&RefTimestamp](SamplingRun *Run) {
+      [&NrOfModules, &RefTimestamp](SamplingRun *Run) {
         NrOfModules++;
         RefTimestamp = Run->ReferenceTimestamp;
         return true;
@@ -122,7 +122,8 @@ TEST_F(AdcParsing, ParseCorrectDataModule) {
   HeaderInfo Header;
   EXPECT_NO_THROW(Header = parseHeader(Packet));
   if (Header.Type == PacketType::Data) {
-    size_t FillerStart = Parser.parseData(Packet, Header.DataStart, Header.ReferenceTimestamp);
+    size_t FillerStart =
+        Parser.parseData(Packet, Header.DataStart, Header.ReferenceTimestamp);
     EXPECT_EQ(NrOfModules, 1);
     EXPECT_NE(FillerStart, static_cast<size_t>(Header.DataStart));
     EXPECT_NE(FillerStart, 0u);
@@ -139,7 +140,8 @@ TEST_F(AdcParsing, ParseCorrectTrailer) {
   HeaderInfo Header;
   EXPECT_NO_THROW(Header = parseHeader(Packet));
   if (Header.Type == PacketType::Data) {
-    size_t FillerStart = Parser.parseData(Packet, Header.DataStart, Header.ReferenceTimestamp);
+    size_t FillerStart =
+        Parser.parseData(Packet, Header.DataStart, Header.ReferenceTimestamp);
     TrailerInfo Trailer = parseTrailer(Packet, FillerStart);
     EXPECT_EQ(Trailer.FillerBytes, Packet.Length - FillerStart - 4);
   } else {
@@ -231,7 +233,7 @@ TEST_F(AdcParsingIdle, ParseCorrectIdlePacket) {
 
 TEST(AdcHeadParse, IdleHeadTest) {
   InData Packet;
-  Packet.Length = 28; //Current length of packet
+  Packet.Length = 28; // Current length of packet
   PacketHeader *HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
   HeaderPointer->PacketType = 0x2222;
   HeaderPointer->ReadoutLength = htons(20); // Currently a magic value
@@ -367,7 +369,7 @@ TEST_F(AdcDataParsing, FakeDataTest) {
   std::uint16_t SourceIDUsed = 42;
   ParserStandIn Parser(ProccessingFunction, GetModule, SourceIDUsed);
 
-  EXPECT_NO_THROW(Parser.parseData(Packet, 0, {1,2}));
+  EXPECT_NO_THROW(Parser.parseData(Packet, 0, {1, 2}));
   EXPECT_EQ(NrOfModules, 2);
   EXPECT_EQ(ModulePtr.TimeStamp.SecondsFrac, 0x0000FFFFu);
   EXPECT_EQ(ModulePtr.TimeStamp.Seconds, 0xAAAA0000u);
@@ -376,7 +378,7 @@ TEST_F(AdcDataParsing, FakeDataTest) {
   EXPECT_EQ(ModulePtr.Data.size(), 2u);
   EXPECT_EQ(ModulePtr.Data[0], 0xFF00);
   EXPECT_EQ(ModulePtr.Data[1], 0x00FF);
-  EXPECT_EQ(ModulePtr.ReferenceTimestamp, RawTimeStamp(1,2));
+  EXPECT_EQ(ModulePtr.ReferenceTimestamp, RawTimeStamp(1, 2));
 }
 
 TEST_F(AdcDataParsing, MagicWordFail) {

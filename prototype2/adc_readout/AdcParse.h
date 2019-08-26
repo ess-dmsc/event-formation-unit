@@ -150,10 +150,12 @@ protected:
   /// \brief Parses the payload of a packet. Called by parsePacket().
   /// \param[in] Packet Raw data buffer.
   /// \param[in] StartByte The byte on which the payload starts.
-  /// \param[in] ReferenceTimestamp A reference timestamp as supplied with by the readout system.
+  /// \param[in] ReferenceTimestamp A reference timestamp as supplied with by
+  /// the readout system.
   /// \return The start of the filler/trailer in the array.
   /// \throw ParserException See exception type for possible parsing failures.
-  size_t parseData(const InData &Packet, std::uint32_t StartByte, RawTimeStamp const &ReferenceTimestamp);
+  size_t parseData(const InData &Packet, std::uint32_t StartByte,
+                   RawTimeStamp const &ReferenceTimestamp);
 
 private:
   std::function<bool(SamplingRun *)> HandleModule;

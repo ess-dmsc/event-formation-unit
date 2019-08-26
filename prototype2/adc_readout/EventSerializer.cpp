@@ -11,14 +11,15 @@
 #include <dtdb_adc_pulse_debug_generated.h>
 #include <ev42_events_generated.h>
 #include <flatbuffers/flatbuffers.h>
-#include <vector>
 #include <limits>
+#include <vector>
 
 EventSerializer::EventSerializer(std::string SourceName, size_t BufferSize,
                                  std::chrono::milliseconds TransmitTimeout,
-                                 ProducerBase *KafkaProducer, TimestampMode Mode)
-    : Name(std::move(SourceName)), Timeout(TransmitTimeout), EventBufferSize(BufferSize),
-      Producer(KafkaProducer), CMode(Mode) {
+                                 ProducerBase *KafkaProducer,
+                                 TimestampMode Mode)
+    : Name(std::move(SourceName)), Timeout(TransmitTimeout),
+      EventBufferSize(BufferSize), Producer(KafkaProducer), CMode(Mode) {
   SerializeThread = std::thread(&EventSerializer::serialiseFunction, this);
 }
 
@@ -65,8 +66,10 @@ struct FBVector {
 using namespace std::chrono_literals;
 
 void EventSerializer::serialiseFunction() {
-  flatbuffers::FlatBufferBuilder Builder(sizeof(std::uint32_t) * EventBufferSize * 8 + 2048);
-  // We do not want the buffer to be too small or the vector offset addresses will become invalid when creating them.
+  flatbuffers::FlatBufferBuilder Builder(
+      sizeof(std::uint32_t) * EventBufferSize * 8 + 2048);
+  // We do not want the buffer to be too small or the vector offset addresses
+  // will become invalid when creating them.
   auto SourceNameOffset = Builder.CreateString(Name);
   auto TimeOffset = FBVector(Builder, EventBufferSize);
   auto EventId = FBVector(Builder, EventBufferSize);
@@ -125,7 +128,8 @@ void EventSerializer::serialiseFunction() {
   };
   getReferenceTimestamps();
   auto CheckForRefTimeCounter{0};
-  auto const CheckForRefTimeCounterMax{100}; // Maybe do future adjustments based on profiling
+  auto const CheckForRefTimeCounterMax{
+      100}; // Maybe do future adjustments based on profiling
   do {
     CheckForRefTimeCounter = 0;
     while (EventQueue.try_dequeue(NewEvent)) {
@@ -146,17 +150,18 @@ void EventSerializer::serialiseFunction() {
         getReferenceTimestamps();
       }
     }
-    std::this_thread::sleep_for(1ms); // Maybe remove this wait in case we get a really high event rate
+    std::this_thread::sleep_for(
+        1ms); // Maybe remove this wait in case we get a really high event rate
     getReferenceTimestamps();
-    if (Events.size() > 0 and
-        getCurrentTime() > FirstEventTime + Timeout) {
+    if (Events.size() > 0 and getCurrentTime() > FirstEventTime + Timeout) {
       auto EventList = Events.getAllEvents();
       ProduceFB(EventList.first, EventList.second);
       Events.clearAllEvents();
     }
   } while (RunThread);
   if (Events.size() > 0) {
-    // Reference time is calculated by Events.getEvents() so we must call that function first.
+    // Reference time is calculated by Events.getEvents() so we must call that
+    // function first.
     auto EventList = Events.getEvents();
     if (EventList.first.empty()) {
       EventList = Events.getAllEvents();
@@ -165,16 +170,17 @@ void EventSerializer::serialiseFunction() {
   }
 }
 
-RefFilteredEventSerializer::RefFilteredEventSerializer(std::string SourceName, size_t BufferSize,
-                                                       std::chrono::milliseconds TransmitTimeout,
-                                                       ProducerBase *KafkaProducer,
-                                                       EventSerializer::TimestampMode Mode) : EventSerializer(std::move(SourceName), BufferSize, TransmitTimeout, KafkaProducer, Mode) {}
+RefFilteredEventSerializer::RefFilteredEventSerializer(
+    std::string SourceName, size_t BufferSize,
+    std::chrono::milliseconds TransmitTimeout, ProducerBase *KafkaProducer,
+    EventSerializer::TimestampMode Mode)
+    : EventSerializer(std::move(SourceName), BufferSize, TransmitTimeout,
+                      KafkaProducer, Mode) {}
 
-
-void RefFilteredEventSerializer::addReferenceTimestamp(std::uint64_t const Timestamp) {
+void RefFilteredEventSerializer::addReferenceTimestamp(
+    std::uint64_t const Timestamp) {
   if (Timestamp != CurrentReferenceTimestamp) {
     CurrentReferenceTimestamp = Timestamp;
     EventSerializer::addReferenceTimestamp(Timestamp);
   }
 }
-

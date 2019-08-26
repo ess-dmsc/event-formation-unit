@@ -5,13 +5,14 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <gtest/gtest.h>
 #include "../EventBuffer.h"
+#include <gtest/gtest.h>
 
 class EventBufferTest : public ::testing::Test {
 public:
   void SetUp() override {
-    TestEvent = std::unique_ptr<EventData>(new EventData{Timestamp, EventId, 1, 2, 3, ThreasholdTime, PeakTime});
+    TestEvent = std::unique_ptr<EventData>(
+        new EventData{Timestamp, EventId, 1, 2, 3, ThreasholdTime, PeakTime});
   }
   const std::uint64_t Timestamp{100};
   const std::uint32_t EventId{42};
@@ -84,15 +85,15 @@ TEST_F(EventBufferTest, ClearOnOneEvent) {
   EXPECT_EQ(UnderTest.getAllEvents().first.size(), 0u);
 }
 
-  TEST_F(EventBufferTest, ClearOnTwoEvents) {
-    EventBuffer UnderTest(2);
-    UnderTest.addEvent(TestEvent);
-    UnderTest.addEvent(TestEvent);
-    auto EventListSize = UnderTest.getEvents().first.size();
-    EXPECT_EQ(EventListSize, 2u);
-    UnderTest.cullEvents(EventListSize);
-    EXPECT_EQ(UnderTest.getEvents().first.size(), 0u);
-  }
+TEST_F(EventBufferTest, ClearOnTwoEvents) {
+  EventBuffer UnderTest(2);
+  UnderTest.addEvent(TestEvent);
+  UnderTest.addEvent(TestEvent);
+  auto EventListSize = UnderTest.getEvents().first.size();
+  EXPECT_EQ(EventListSize, 2u);
+  UnderTest.cullEvents(EventListSize);
+  EXPECT_EQ(UnderTest.getEvents().first.size(), 0u);
+}
 
 TEST_F(EventBufferTest, ShouldNotCullOnInsideTimeRange1) {
   EventBuffer UnderTest(3);
@@ -173,7 +174,6 @@ TEST_F(EventBufferTest, ShouldCullOnOutsideTimeRange4) {
   UnderTest.addReferenceTimestamp(10);
   EXPECT_TRUE(UnderTest.getEvents().first.size() > 0);
 }
-
 
 TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange1) {
   EventBuffer UnderTest(3);
@@ -437,5 +437,3 @@ TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents6) {
   ASSERT_EQ(Events.first.size(), 2u);
   EXPECT_EQ(Events.second, ReferenceTS + 5000);
 }
-
-

@@ -21,7 +21,7 @@ RawTimeStamp::RawTimeStamp(std::uint64_t NSec)
   }
 }
 
-std::uint64_t RawTimeStamp::GetTimeStampNS() const {
+std::uint64_t RawTimeStamp::getTimeStampNS() const {
   auto NanoSec = static_cast<std::uint64_t>(
       std::llround(static_cast<double>(SecondsFrac) /
                    static_cast<double>(AdcTimerCounterMax) * 1e9));
@@ -31,7 +31,7 @@ std::uint64_t RawTimeStamp::GetTimeStampNS() const {
 
 // Note: This function might be significantly slower than CalcTimeStamp() for
 // some cases.
-std::uint64_t RawTimeStamp::GetTimeStampNSFast() const {
+std::uint64_t RawTimeStamp::getTimeStampNSFast() const {
 
   std::uint64_t NanoSec =
       (((SecondsFrac * 100000000000) / (AdcTimerCounterMax)) + 50) / 100;
@@ -40,7 +40,7 @@ std::uint64_t RawTimeStamp::GetTimeStampNSFast() const {
 }
 
 RawTimeStamp
-RawTimeStamp::GetOffsetTimeStamp(const std::int32_t &SampleOffset) const {
+RawTimeStamp::getOffsetTimeStamp(const std::int32_t &SampleOffset) const {
   std::int32_t TempSecondsFrac = SecondsFrac + SampleOffset;
   std::int32_t RemainderSecondsFrac = TempSecondsFrac % AdcTimerCounterMax;
   std::int32_t NewSecondsFrac = RemainderSecondsFrac;
