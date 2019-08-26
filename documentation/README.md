@@ -1,6 +1,6 @@
 # Documentation
 
-A description of the contents of each directory in the root of the repository can be found in [documentation/DIRECTORIES.md](documentation/DIRECTORIES.md).
+A description of the contents of each directory in the root of the repository can be found in [DIRECTORIES.md](DIRECTORIES.md).
 
 ## Architecture
 Overview of the EFU architecture (detector agnostic)
