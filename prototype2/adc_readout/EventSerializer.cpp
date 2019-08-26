@@ -7,6 +7,7 @@
 ///
 //===----------------------------------------------------------------------===//
 #include "EventSerializer.h"
+#include "EventBuffer.h"
 #include <dtdb_adc_pulse_debug_generated.h>
 #include <ev42_events_generated.h>
 #include <flatbuffers/flatbuffers.h>
@@ -63,13 +64,6 @@ struct FBVector {
 
 using namespace std::chrono_literals;
 
-struct EventTimestamps {
-  std::uint64_t EventTimestamp;
-  std::uint64_t ThresholdTimestamp;
-  std::uint64_t PeakTimestamp;
-
-};
-
 void EventSerializer::serialiseFunction() {
   flatbuffers::FlatBufferBuilder Builder(sizeof(std::uint32_t) * EventBufferSize * 8 + 2048);
   // We do not want the buffer to be too small or the vector offset addresses will become invalid when creating them.
@@ -93,15 +87,28 @@ void EventSerializer::serialiseFunction() {
 
   std::unique_ptr<EventData> NewEvent;
   std::uint64_t MessageId{0};
-  std::uint32_t NumberOfEvents{0};
-  std::uint64_t CurrentRefTime{0};
   std::chrono::system_clock::time_point FirstEventTime;
-  auto ProduceFB = [&]() {
+  EventBuffer Events(EventBufferSize);
+  auto ProduceFB = [&](auto const &SendEvents, auto ReferenceTime) {
+    if (SendEvents.empty()) {
+      return;
+    }
     EventMessage->mutate_message_id(MessageId++);
-    EventMessage->mutate_pulse_time(CurrentRefTime);
+    EventMessage->mutate_pulse_time(ReferenceTime);
+
+    for (auto const &CEvent : SendEvents) {
+      TimeOffset.push_back(
+          static_cast<std::uint32_t>(CEvent.Timestamp - ReferenceTime));
+      ThresholdTime.push_back(CEvent.ThresholdTime);
+      PeakTime.push_back(CEvent.PeakTime);
+      EventId.push_back(CEvent.EventId);
+      Amplitude.push_back(CEvent.Amplitude);
+      PeakArea.push_back(CEvent.PeakArea);
+      Background.push_back(CEvent.Background);
+    }
+
     Producer->produce({Builder.GetBufferPointer(), Builder.GetSize()},
-                      CurrentRefTime / 1000000);
-    NumberOfEvents = 0;
+                      ReferenceTime / 1000000);
     TimeOffset.clear();
     EventId.clear();
     Amplitude.clear();
@@ -110,39 +117,50 @@ void EventSerializer::serialiseFunction() {
     ThresholdTime.clear();
     PeakTime.clear();
   };
+  auto getReferenceTimestamps = [&Events, this]() {
+    std::uint64_t TempRefTime{0};
+    while (this->ReferenceTimeQueue.try_dequeue(TempRefTime)) {
+      Events.addReferenceTimestamp(TempRefTime);
+    }
+  };
+  getReferenceTimestamps();
+  auto CheckForRefTimeCounter{0};
+  auto const CheckForRefTimeCounterMax{100}; // Maybe do future adjustments based on profiling
   do {
+    CheckForRefTimeCounter = 0;
     while (EventQueue.try_dequeue(NewEvent)) {
-      if (NumberOfEvents != 0) {
-        if (NewEvent->Timestamp - CurrentRefTime > std::numeric_limits<std::uint32_t>::max()) {
-          ProduceFB();
-        }
-      }
-
-      if (NumberOfEvents == 0) {
-        CurrentRefTime = NewEvent->Timestamp;
+      if (Events.size() == 0) {
         FirstEventTime = getCurrentTime();
       }
-      TimeOffset.push_back(
-          static_cast<std::uint32_t>(NewEvent->Timestamp - CurrentRefTime));
-      ThresholdTime.push_back(NewEvent->ThresholdTime);
-      PeakTime.push_back(NewEvent->PeakTime);
-      EventId.push_back(NewEvent->EventId);
-      Amplitude.push_back(NewEvent->Amplitude);
-      PeakArea.push_back(NewEvent->PeakArea);
-      Background.push_back(NewEvent->Background);
-
-      ++NumberOfEvents;
-      if (NumberOfEvents == EventBufferSize) {
-        ProduceFB();
+      Events.addEvent(NewEvent);
+      auto EventList = Events.getEvents();
+      if (not EventList.first.empty()) {
+        ProduceFB(EventList.first, EventList.second);
+        Events.cullEvents(EventList.first.size());
+        if (Events.size() > 0) {
+          FirstEventTime = getCurrentTime();
+        }
+      }
+      if (++CheckForRefTimeCounter >= CheckForRefTimeCounterMax) {
+        CheckForRefTimeCounter = 0;
+        getReferenceTimestamps();
       }
     }
-    std::this_thread::sleep_for(5ms);
-    if (NumberOfEvents > 0 and
+    std::this_thread::sleep_for(1ms); // Maybe remove this wait in case we get a really high event rate
+    getReferenceTimestamps();
+    if (Events.size() > 0 and
         getCurrentTime() > FirstEventTime + Timeout) {
-      ProduceFB();
+      auto EventList = Events.getAllEvents();
+      ProduceFB(EventList.first, EventList.second);
+      Events.clearAllEvents();
     }
   } while (RunThread);
-  if (NumberOfEvents > 0) {
-    ProduceFB();
+  if (Events.size() > 0) {
+    // Reference time is calculated by Events.getEvents() so we must call that function first.
+    auto EventList = Events.getEvents();
+    if (EventList.first.empty()) {
+      EventList = Events.getAllEvents();
+    }
+    ProduceFB(EventList.first, EventList.second);
   }
 }

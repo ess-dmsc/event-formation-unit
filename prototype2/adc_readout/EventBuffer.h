@@ -13,6 +13,9 @@
 #include <memory>
 #include <vector>
 #include <limits>
+#include <deque>
+
+using EventList = nonstd::span<EventData const>;
 
 /// \brief Simple event buffer that keeps track of events based on their timestamps
 class EventBuffer {
@@ -21,24 +24,22 @@ public:
   ///
   /// \param BufferSize The maximum number events in the buffer.
   EventBuffer(size_t BufferSize);
-  /// \brief Used for setting the reference timestamps for determining if the buffer should be culled/emptied.
-  ///
-  /// \param ReferenceTime Reference timestamp. If set to 0, uses the timestamp of the first event.
-  /// \param Timespan The accpetable timespan (offset from ref. time or first time stamp).
-  void setReferenceTimes(std::uint64_t ReferenceTime, std::uint64_t Timespan);
   /// \brief Add event to buffer.
   ///
   /// \param Event The event that should be added
   /// \return Returns true on success, false if buffer is already full.
   bool addEvent(std::unique_ptr<EventData> const &Event);
-  bool shouldCullEvents();
-  nonstd::span<EventData const> getEvents();
+  void addReferenceTimestamp(std::uint64_t NewReferenceTime);
+  void setTimespan(std::uint64_t NewTimespan) {MaxOffsetTime = NewTimespan;}
+  std::pair<EventList, std::uint64_t> getEvents();
   /// \brief Clear events from the buffer that fall within the range of ReferenceTime to ReferenceTime + Timespan
-  nonstd::span<EventData const> getAllEvents();
-  void clearEvents();
+  std::pair<EventList, std::uint64_t> getAllEvents() const;
+  void cullEvents(size_t NrOfEvents);
   void clearAllEvents();
+  size_t size() const { return Size;}
 private:
   std::vector<EventData> Events;
+  std::deque<std::uint64_t> ReferenceTimestamps;
   const size_t MaxSize;
   size_t Size{0};
   std::uint64_t RefTime{0};

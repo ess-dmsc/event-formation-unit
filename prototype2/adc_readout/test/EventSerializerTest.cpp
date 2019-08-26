@@ -15,6 +15,7 @@
 #include <gtest/gtest.h>
 #include <trompeloeil.hpp>
 #include <limits>
+#include <iostream>
 
 using trompeloeil::_;
 
@@ -341,25 +342,56 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferTwoEventsNoRef) {
   Serializer.reset();
 }
 
-//TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventOneRef) {
-//  std::uint64_t BaseTimestamp = 1000000;
-//  auto checkFlatbufferTimestamp = [BaseTimestamp](auto Buffer) {
-//    auto EventMessage = GetEventMessage(Buffer.data());
-//    if (EventMessage->pulse_time() != BaseTimestamp) {
-//      return false;
-//    }
-//    if (EventMessage->time_of_flight()->operator[](0) != 1000) {
-//      return false;
-//    }
-//    return true;
-//  };
-//  REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(Producer.get()), produce(_, _))
-//      .WITH(checkFlatbufferTimestamp(_1))
-//      .TIMES(1)
-//      .RETURN(0);
-//  SetUpSerializer(1);
-//  Serializer->addReferenceTimestamp(BaseTimestamp);
-//  Serializer->addEvent(std::unique_ptr<EventData>(
-//        new EventData{BaseTimestamp + 1000, 2, 3, 4, 5, BaseTimestamp + 1000 + 1, BaseTimestamp + 1000 + 2}));
-//  Serializer.reset();
-//}
+TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventOneRef) {
+  std::uint64_t BaseTimestamp = 1000000;
+  auto checkFlatbufferTimestamp = [BaseTimestamp](auto Buffer) {
+    auto EventMessage = GetEventMessage(Buffer.data());
+    if (EventMessage->pulse_time() != BaseTimestamp) {
+      return false;
+    }
+    if (EventMessage->time_of_flight()->operator[](0) != 1000) {
+      return false;
+    }
+    return true;
+  };
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(Producer.get()), produce(_, _))
+      .WITH(checkFlatbufferTimestamp(_1))
+      .TIMES(1)
+      .RETURN(0);
+  SetUpSerializer(1);
+  Serializer->addReferenceTimestamp(BaseTimestamp);
+  Serializer->addEvent(std::unique_ptr<EventData>(
+        new EventData{BaseTimestamp + 1000, 2, 3, 4, 5, BaseTimestamp + 1000 + 1, BaseTimestamp + 1000 + 2}));
+  Serializer.reset();
+}
+
+TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventTwoRefs) {
+  std::uint64_t BaseTimestamp = 1000000;
+  std::uint64_t TestOffsetValue = std::numeric_limits<std::uint32_t>::max() + 100ull;
+  auto TimesCalled{0};
+  auto checkFlatbufferTimestamp = [BaseTimestamp,&TimesCalled,TestOffsetValue](auto Buffer) {
+    ++TimesCalled;
+    auto EventMessage = GetEventMessage(Buffer.data());
+    if (TimesCalled == 1 and EventMessage->pulse_time() != BaseTimestamp) {
+      return false;
+    } else if (TimesCalled > 1 and EventMessage->pulse_time() != BaseTimestamp + TestOffsetValue) {
+      return false;
+    }
+    if (EventMessage->time_of_flight()->operator[](0) != 1000) {
+      return false;
+    }
+    return true;
+  };
+  REQUIRE_CALL(*dynamic_cast<ProducerStandIn *>(Producer.get()), produce(_, _))
+      .WITH(checkFlatbufferTimestamp(_1))
+      .TIMES(2)
+      .RETURN(0);
+  SetUpSerializer(1);
+  Serializer->addReferenceTimestamp(BaseTimestamp);
+  Serializer->addReferenceTimestamp(BaseTimestamp + TestOffsetValue);
+  Serializer->addEvent(std::unique_ptr<EventData>(
+      new EventData{BaseTimestamp + 1000, 2, 3, 4, 5, BaseTimestamp + 1000 + 1, BaseTimestamp + 1000 + 2}));
+  Serializer->addEvent(std::unique_ptr<EventData>(
+      new EventData{BaseTimestamp + 1000 + TestOffsetValue, 2, 3, 4, 5, BaseTimestamp + 1000 + 1, BaseTimestamp + 1000 + 2}));
+  Serializer.reset();
+}

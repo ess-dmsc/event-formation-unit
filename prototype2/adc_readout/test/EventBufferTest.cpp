@@ -24,8 +24,8 @@ TEST_F(EventBufferTest, AddOneEventSuccess) {
   EventBuffer UnderTest(1);
   EXPECT_TRUE(UnderTest.addEvent(TestEvent));
   auto BufferedEvents = UnderTest.getAllEvents();
-  EXPECT_EQ(BufferedEvents.size(), 1u);
-  auto CurrentEvent = BufferedEvents[0];
+  EXPECT_EQ(BufferedEvents.first.size(), 1u);
+  auto CurrentEvent = BufferedEvents.first[0];
   EXPECT_EQ(CurrentEvent, *TestEvent);
 }
 
@@ -37,26 +37,26 @@ TEST_F(EventBufferTest, AddTwoEventsFail) {
 
 TEST_F(EventBufferTest, DoNotCullEventsOnEmptyBuffer) {
   EventBuffer UnderTest(1);
-  EXPECT_FALSE(UnderTest.shouldCullEvents());
+  EXPECT_FALSE(UnderTest.getEvents().first.size() > 0);
 }
 
 TEST_F(EventBufferTest, DoNotCullEventsOnBufferNotFull) {
   EventBuffer UnderTest(2);
   UnderTest.addEvent(TestEvent);
-  EXPECT_FALSE(UnderTest.shouldCullEvents());
+  EXPECT_FALSE(UnderTest.getEvents().first.size() > 0);
 }
 
 TEST_F(EventBufferTest, DoCullEventsOnBufferFull1) {
   EventBuffer UnderTest(1);
   UnderTest.addEvent(TestEvent);
-  EXPECT_TRUE(UnderTest.shouldCullEvents());
+  EXPECT_TRUE(UnderTest.getEvents().first.size() > 0);
 }
 
 TEST_F(EventBufferTest, DoCullEventsOnBufferFull2) {
   EventBuffer UnderTest(2);
   UnderTest.addEvent(TestEvent);
   UnderTest.addEvent(TestEvent);
-  EXPECT_TRUE(UnderTest.shouldCullEvents());
+  EXPECT_TRUE(UnderTest.getEvents().first.size() > 0);
 }
 
 TEST_F(EventBufferTest, DoCullEventsOnBufferFull3) {
@@ -64,31 +64,34 @@ TEST_F(EventBufferTest, DoCullEventsOnBufferFull3) {
   UnderTest.addEvent(TestEvent);
   UnderTest.addEvent(TestEvent);
   UnderTest.addEvent(TestEvent);
-  EXPECT_TRUE(UnderTest.shouldCullEvents());
+  EXPECT_TRUE(UnderTest.getEvents().first.size() > 0);
 }
 
 TEST_F(EventBufferTest, ClearOnEmpty) {
   EventBuffer UnderTest(2);
-  EXPECT_EQ(UnderTest.getEvents().size(), 0u);
-  UnderTest.clearEvents();
-  EXPECT_EQ(UnderTest.getEvents().size(), 0u);
+  auto EventListSize = UnderTest.getEvents().first.size();
+  EXPECT_EQ(EventListSize, 0u);
+  UnderTest.cullEvents(EventListSize);
+  EXPECT_EQ(UnderTest.getEvents().first.size(), 0u);
 }
 
 TEST_F(EventBufferTest, ClearOnOneEvent) {
   EventBuffer UnderTest(2);
   UnderTest.addEvent(TestEvent);
-  EXPECT_EQ(UnderTest.getEvents().size(), 1u);
-  UnderTest.clearEvents();
-  EXPECT_EQ(UnderTest.getEvents().size(), 0u);
+  auto EventListSize = UnderTest.getEvents().first.size();
+  EXPECT_EQ(EventListSize, 0u);
+  UnderTest.clearAllEvents();
+  EXPECT_EQ(UnderTest.getAllEvents().first.size(), 0u);
 }
 
   TEST_F(EventBufferTest, ClearOnTwoEvents) {
     EventBuffer UnderTest(2);
     UnderTest.addEvent(TestEvent);
     UnderTest.addEvent(TestEvent);
-    EXPECT_EQ(UnderTest.getEvents().size(), 2u);
-    UnderTest.clearEvents();
-    EXPECT_EQ(UnderTest.getEvents().size(), 0u);
+    auto EventListSize = UnderTest.getEvents().first.size();
+    EXPECT_EQ(EventListSize, 2u);
+    UnderTest.cullEvents(EventListSize);
+    EXPECT_EQ(UnderTest.getEvents().first.size(), 0u);
   }
 
 TEST_F(EventBufferTest, ShouldNotCullOnInsideTimeRange1) {
@@ -96,7 +99,7 @@ TEST_F(EventBufferTest, ShouldNotCullOnInsideTimeRange1) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 1000;
   UnderTest.addEvent(TestEvent);
-  EXPECT_FALSE(UnderTest.shouldCullEvents());
+  EXPECT_FALSE(UnderTest.getEvents().first.size() > 0);
 }
 
 TEST_F(EventBufferTest, ShouldNotCullOnInsideTimeRange2) {
@@ -104,8 +107,8 @@ TEST_F(EventBufferTest, ShouldNotCullOnInsideTimeRange2) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 1000;
   UnderTest.addEvent(TestEvent);
-  UnderTest.setReferenceTimes(0, 2000);
-  EXPECT_FALSE(UnderTest.shouldCullEvents());
+  UnderTest.setTimespan(2000);
+  EXPECT_FALSE(UnderTest.getEvents().first.size() > 0);
 }
 
 TEST_F(EventBufferTest, ShouldNotCullOnInsideTimeRange3) {
@@ -113,8 +116,9 @@ TEST_F(EventBufferTest, ShouldNotCullOnInsideTimeRange3) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 1000;
   UnderTest.addEvent(TestEvent);
-  UnderTest.setReferenceTimes(90, 2000);
-  EXPECT_FALSE(UnderTest.shouldCullEvents());
+  UnderTest.addReferenceTimestamp(90);
+  UnderTest.setTimespan(2000);
+  EXPECT_FALSE(UnderTest.getEvents().first.size() > 0);
 }
 
 TEST_F(EventBufferTest, ShouldCullOnOutsideTimeRange1) {
@@ -122,8 +126,8 @@ TEST_F(EventBufferTest, ShouldCullOnOutsideTimeRange1) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 1000;
   UnderTest.addEvent(TestEvent);
-  UnderTest.setReferenceTimes(0, 999);
-  EXPECT_TRUE(UnderTest.shouldCullEvents());
+  UnderTest.setTimespan(999);
+  EXPECT_TRUE(UnderTest.getEvents().first.size() > 0);
 }
 
 TEST_F(EventBufferTest, ShouldCullOnOutsideTimeRange2) {
@@ -131,8 +135,9 @@ TEST_F(EventBufferTest, ShouldCullOnOutsideTimeRange2) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 1000;
   UnderTest.addEvent(TestEvent);
-  UnderTest.setReferenceTimes(99, 1000);
-  EXPECT_TRUE(UnderTest.shouldCullEvents());
+  UnderTest.addReferenceTimestamp(99);
+  UnderTest.setTimespan(1000);
+  EXPECT_TRUE(UnderTest.getEvents().first.size() > 0);
 }
 
 TEST_F(EventBufferTest, ShouldNotCullOnOutsideTimeRange) {
@@ -140,8 +145,9 @@ TEST_F(EventBufferTest, ShouldNotCullOnOutsideTimeRange) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 10;
   UnderTest.addEvent(TestEvent);
-  UnderTest.setReferenceTimes(10, 50);
-  EXPECT_FALSE(UnderTest.shouldCullEvents());
+  UnderTest.addReferenceTimestamp(10);
+  UnderTest.setTimespan(50);
+  EXPECT_FALSE(UnderTest.getEvents().first.size() > 0);
 }
 
 TEST_F(EventBufferTest, ShouldCullOnOutsideTimeRange3) {
@@ -151,8 +157,9 @@ TEST_F(EventBufferTest, ShouldCullOnOutsideTimeRange3) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 10;
   UnderTest.addEvent(TestEvent);
-  UnderTest.setReferenceTimes(10, 50);
-  EXPECT_TRUE(UnderTest.shouldCullEvents());
+  UnderTest.addReferenceTimestamp(10);
+  UnderTest.setTimespan(50);
+  EXPECT_TRUE(UnderTest.getEvents().first.size() > 0);
 }
 
 TEST_F(EventBufferTest, ShouldCullOnOutsideTimeRange4) {
@@ -162,8 +169,9 @@ TEST_F(EventBufferTest, ShouldCullOnOutsideTimeRange4) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 100;
   UnderTest.addEvent(TestEvent);
-  UnderTest.setReferenceTimes(10, 50);
-  EXPECT_TRUE(UnderTest.shouldCullEvents());
+  UnderTest.setTimespan(50);
+  UnderTest.addReferenceTimestamp(10);
+  EXPECT_TRUE(UnderTest.getEvents().first.size() > 0);
 }
 
 
@@ -175,14 +183,16 @@ TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange1) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp = TimeTwo;
   UnderTest.addEvent(TestEvent);
-  UnderTest.setReferenceTimes(0, 999);
-  ASSERT_EQ(UnderTest.getEvents().size(), 1u);
-  EXPECT_EQ(UnderTest.getEvents()[0].Timestamp, TimeOne);
-  UnderTest.clearEvents();
-  ASSERT_EQ(UnderTest.getEvents().size(), 1u);
-  EXPECT_EQ(UnderTest.getEvents()[0].Timestamp, TimeTwo);
-  UnderTest.clearEvents();
-  EXPECT_EQ(UnderTest.getEvents().size(), 0u);
+  UnderTest.setTimespan(999);
+  auto EventList = UnderTest.getEvents().first;
+  ASSERT_EQ(EventList.size(), 1u);
+  EXPECT_EQ(EventList[0].Timestamp, TimeOne);
+  UnderTest.cullEvents(EventList.size());
+  EventList = UnderTest.getAllEvents().first;
+  ASSERT_EQ(EventList.size(), 1u);
+  EXPECT_EQ(EventList[0].Timestamp, TimeTwo);
+  UnderTest.cullEvents(EventList.size());
+  EXPECT_EQ(UnderTest.getEvents().first.size(), 0u);
 }
 
 TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange2) {
@@ -193,14 +203,17 @@ TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange2) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp = TimeTwo;
   UnderTest.addEvent(TestEvent);
-  UnderTest.setReferenceTimes(99, 1000);
-  ASSERT_EQ(UnderTest.getEvents().size(), 1u);
-  EXPECT_EQ(UnderTest.getEvents()[0].Timestamp, TimeOne);
-  UnderTest.clearEvents();
-  ASSERT_EQ(UnderTest.getEvents().size(), 1u);
-  EXPECT_EQ(UnderTest.getEvents()[0].Timestamp, TimeTwo);
-  UnderTest.clearEvents();
-  EXPECT_EQ(UnderTest.getEvents().size(), 0u);
+  UnderTest.addReferenceTimestamp(99);
+  UnderTest.setTimespan(1000);
+  auto EventList = UnderTest.getEvents().first;
+  ASSERT_EQ(EventList.size(), 1u);
+  EXPECT_EQ(EventList[0].Timestamp, TimeOne);
+  UnderTest.cullEvents(EventList.size());
+  EventList = UnderTest.getAllEvents().first;
+  ASSERT_EQ(EventList.size(), 1u);
+  EXPECT_EQ(EventList[0].Timestamp, TimeTwo);
+  UnderTest.cullEvents(EventList.size());
+  EXPECT_EQ(UnderTest.getAllEvents().first.size(), 0u);
 }
 
 TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange3) {
@@ -210,13 +223,15 @@ TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange3) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 10;
   UnderTest.addEvent(TestEvent);
-  UnderTest.setReferenceTimes(10, 50);
-  ASSERT_EQ(UnderTest.getEvents().size(), 3u);
-  EXPECT_EQ(UnderTest.getEvents()[0].Timestamp, 100ul);
-  EXPECT_EQ(UnderTest.getEvents()[1].Timestamp, 110ul);
-  EXPECT_EQ(UnderTest.getEvents()[2].Timestamp, 120ul);
-  UnderTest.clearEvents();
-  EXPECT_EQ(UnderTest.getEvents().size(), 0u);
+  UnderTest.addReferenceTimestamp(10);
+  UnderTest.setTimespan(50);
+  auto EventList = UnderTest.getEvents().first;
+  ASSERT_EQ(EventList.size(), 3u);
+  EXPECT_EQ(EventList[0].Timestamp, 100ul);
+  EXPECT_EQ(EventList[1].Timestamp, 110ul);
+  EXPECT_EQ(EventList[2].Timestamp, 120ul);
+  UnderTest.cullEvents(EventList.size());
+  EXPECT_EQ(UnderTest.getEvents().first.size(), 0u);
 }
 
 TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange4) {
@@ -226,14 +241,49 @@ TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange4) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 10;
   UnderTest.addEvent(TestEvent);
-  UnderTest.setReferenceTimes(10, 15);
-  ASSERT_EQ(UnderTest.getEvents().size(), 2u);
-  EXPECT_EQ(UnderTest.getEvents()[0].Timestamp, 100ul);
-  EXPECT_EQ(UnderTest.getEvents()[1].Timestamp, 110ul);
-  UnderTest.clearEvents();
-  EXPECT_EQ(UnderTest.getEvents()[0].Timestamp, 120ul);
-  UnderTest.clearEvents();
-  EXPECT_EQ(UnderTest.getEvents().size(), 0u);
+  UnderTest.addReferenceTimestamp(10);
+  UnderTest.setTimespan(15);
+  auto EventList = UnderTest.getEvents().first;
+  ASSERT_EQ(EventList.size(), 2u);
+  EXPECT_EQ(EventList[0].Timestamp, 100ul);
+  EXPECT_EQ(EventList[1].Timestamp, 110ul);
+  UnderTest.cullEvents(EventList.size());
+  EventList = UnderTest.getAllEvents().first;
+  ASSERT_EQ(EventList.size(), 1u);
+  EXPECT_EQ(EventList[0].Timestamp, 120ul);
+  UnderTest.cullEvents(EventList.size());
+  EXPECT_EQ(UnderTest.getAllEvents().first.size(), 0u);
+}
+
+TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange5) {
+  EventBuffer UnderTest(4);
+  std::uint64_t const TimeOne{100};
+  std::uint64_t const TimeTwo{110};
+  std::uint64_t const TimeThree{120};
+  std::uint64_t const TimeFour{123};
+  TestEvent->Timestamp = TimeOne;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp = TimeTwo;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp = TimeThree;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp = TimeFour;
+  UnderTest.addEvent(TestEvent);
+  UnderTest.addReferenceTimestamp(TimeOne - 10);
+  UnderTest.addReferenceTimestamp(TimeOne + 7);
+  UnderTest.setTimespan(15);
+  auto CEventList = UnderTest.getEvents().first;
+  ASSERT_EQ(CEventList.size(), 1u);
+  EXPECT_EQ(CEventList[0].Timestamp, TimeOne);
+  UnderTest.cullEvents(CEventList.size());
+  CEventList = UnderTest.getEvents().first;
+  ASSERT_EQ(CEventList.size(), 2u);
+  EXPECT_EQ(CEventList[0].Timestamp, TimeTwo);
+  EXPECT_EQ(CEventList[1].Timestamp, TimeThree);
+  UnderTest.cullEvents(CEventList.size());
+  CEventList = UnderTest.getAllEvents().first;
+  ASSERT_EQ(CEventList.size(), 1u);
+  EXPECT_EQ(CEventList[0].Timestamp, TimeFour);
 }
 
 TEST_F(EventBufferTest, GetAllEvents1) {
@@ -243,10 +293,11 @@ TEST_F(EventBufferTest, GetAllEvents1) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 10;
   UnderTest.addEvent(TestEvent);
-  UnderTest.setReferenceTimes(10, 15);
-  ASSERT_EQ(UnderTest.getAllEvents().size(), 3u);
+  UnderTest.addReferenceTimestamp(10);
+  UnderTest.setTimespan(50);
+  ASSERT_EQ(UnderTest.getAllEvents().first.size(), 3u);
   UnderTest.clearAllEvents();
-  EXPECT_EQ(UnderTest.getAllEvents().size(), 0u);
+  EXPECT_EQ(UnderTest.getAllEvents().first.size(), 0u);
 }
 
 TEST_F(EventBufferTest, GetAllEvents2) {
@@ -254,7 +305,137 @@ TEST_F(EventBufferTest, GetAllEvents2) {
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 10;
   UnderTest.addEvent(TestEvent);
-  ASSERT_EQ(UnderTest.getAllEvents().size(), 2u);
+  ASSERT_EQ(UnderTest.getAllEvents().first.size(), 2u);
   UnderTest.clearAllEvents();
-  EXPECT_EQ(UnderTest.getAllEvents().size(), 0u);
+  EXPECT_EQ(UnderTest.getAllEvents().first.size(), 0u);
 }
+
+TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents1) {
+  EventBuffer UnderTest(2);
+  std::uint64_t ReferenceTS = 1000;
+  TestEvent->Timestamp = ReferenceTS + 100;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp += 500;
+  UnderTest.addEvent(TestEvent);
+  UnderTest.addReferenceTimestamp(ReferenceTS);
+  UnderTest.setTimespan(2000);
+  auto Events = UnderTest.getEvents();
+  EXPECT_EQ(Events.first.size(), 2u);
+  EXPECT_EQ(Events.second, ReferenceTS);
+}
+
+TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents2) {
+  EventBuffer UnderTest(2);
+  std::uint64_t ReferenceTS = 1000;
+  TestEvent->Timestamp = ReferenceTS + 100;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp += 5000;
+  UnderTest.addEvent(TestEvent);
+  UnderTest.addReferenceTimestamp(ReferenceTS);
+  UnderTest.setTimespan(2000);
+  auto Events = UnderTest.getEvents();
+  ASSERT_EQ(Events.first.size(), 1u);
+  EXPECT_EQ(Events.second, ReferenceTS);
+  UnderTest.cullEvents(Events.first.size());
+  ASSERT_EQ(UnderTest.getEvents().first.size(), 0u);
+  Events = UnderTest.getAllEvents();
+  ASSERT_EQ(Events.first.size(), 1u);
+  EXPECT_EQ(Events.second, ReferenceTS + 100 + 5000);
+}
+
+TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents3) {
+  EventBuffer UnderTest(2);
+  std::uint64_t ReferenceTS = 1000;
+  TestEvent->Timestamp = ReferenceTS + 3000;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp += 5000;
+  UnderTest.addEvent(TestEvent);
+  UnderTest.addReferenceTimestamp(ReferenceTS);
+  UnderTest.setTimespan(2000);
+  auto Events = UnderTest.getEvents();
+  ASSERT_EQ(Events.first.size(), 1u);
+  EXPECT_EQ(Events.second, ReferenceTS + 3000);
+  UnderTest.cullEvents(Events.first.size());
+  ASSERT_EQ(UnderTest.getEvents().first.size(), 0u);
+  Events = UnderTest.getAllEvents();
+  ASSERT_EQ(Events.first.size(), 1u);
+  EXPECT_EQ(Events.second, ReferenceTS + 3000 + 5000);
+}
+
+TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents4) {
+  EventBuffer UnderTest(2);
+  std::uint64_t ReferenceTS = 1000;
+  TestEvent->Timestamp = ReferenceTS + 5;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp += 5;
+  UnderTest.addEvent(TestEvent);
+  UnderTest.addReferenceTimestamp(ReferenceTS);
+  UnderTest.setTimespan(2000);
+  auto Events = UnderTest.getEvents();
+  ASSERT_EQ(Events.first.size(), 2u);
+  EXPECT_EQ(Events.second, ReferenceTS);
+  UnderTest.cullEvents(Events.first.size());
+
+  TestEvent->Timestamp += 5;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp += 5;
+  UnderTest.addEvent(TestEvent);
+
+  Events = UnderTest.getEvents();
+  ASSERT_EQ(Events.first.size(), 2u);
+  EXPECT_EQ(Events.second, ReferenceTS);
+}
+
+TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents5) {
+  EventBuffer UnderTest(2);
+  std::uint64_t ReferenceTS = 1000;
+  TestEvent->Timestamp = ReferenceTS;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp += 5;
+  UnderTest.addEvent(TestEvent);
+  UnderTest.addReferenceTimestamp(ReferenceTS);
+  UnderTest.addReferenceTimestamp(ReferenceTS + 5000);
+  UnderTest.setTimespan(2000);
+  auto Events = UnderTest.getEvents();
+  ASSERT_EQ(Events.first.size(), 2u);
+  EXPECT_EQ(Events.second, ReferenceTS);
+  UnderTest.cullEvents(Events.first.size());
+
+  TestEvent->Timestamp += 5100;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp += 5;
+  UnderTest.addEvent(TestEvent);
+
+  Events = UnderTest.getEvents();
+  ASSERT_EQ(Events.first.size(), 2u);
+  EXPECT_EQ(Events.second, ReferenceTS + 5000);
+}
+
+TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents6) {
+  EventBuffer UnderTest(2);
+  std::uint64_t ReferenceTS = 1000;
+  TestEvent->Timestamp = ReferenceTS;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp += 5;
+  UnderTest.addEvent(TestEvent);
+  UnderTest.addReferenceTimestamp(ReferenceTS);
+  UnderTest.addReferenceTimestamp(ReferenceTS + 5000000);
+  UnderTest.addReferenceTimestamp(ReferenceTS + 5000);
+  UnderTest.addReferenceTimestamp(ReferenceTS + 7000);
+  UnderTest.setTimespan(2000);
+  auto Events = UnderTest.getEvents();
+  ASSERT_EQ(Events.first.size(), 2u);
+  EXPECT_EQ(Events.second, ReferenceTS);
+  UnderTest.cullEvents(Events.first.size());
+
+  TestEvent->Timestamp += 5100;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp += 5;
+  UnderTest.addEvent(TestEvent);
+
+  Events = UnderTest.getEvents();
+  ASSERT_EQ(Events.first.size(), 2u);
+  EXPECT_EQ(Events.second, ReferenceTS + 5000);
+}
+
+
