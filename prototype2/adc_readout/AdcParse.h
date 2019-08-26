@@ -71,8 +71,9 @@ struct PacketInfo {
 /// \brief Returned by the header parser.
 struct HeaderInfo {
   PacketType Type = PacketType::Unknown;
-  std::uint16_t ReadoutCount;
-  std::int32_t DataStart = 0;
+  RawTimeStamp ReferenceTimestamp;
+  std::uint16_t ReadoutCount{0};
+  std::int32_t DataStart{0};
 };
 
 /// \brief Returned by the trailer parser.
@@ -149,9 +150,10 @@ protected:
   /// \brief Parses the payload of a packet. Called by parsePacket().
   /// \param[in] Packet Raw data buffer.
   /// \param[in] StartByte The byte on which the payload starts.
+  /// \param[in] ReferenceTimestamp A reference timestamp as supplied with by the readout system.
   /// \return The start of the filler/trailer in the array.
   /// \throw ParserException See exception type for possible parsing failures.
-  size_t parseData(const InData &Packet, std::uint32_t StartByte);
+  size_t parseData(const InData &Packet, std::uint32_t StartByte, RawTimeStamp const &ReferenceTimestamp);
 
 private:
   std::function<bool(SamplingRun *)> HandleModule;

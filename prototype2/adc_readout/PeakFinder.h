@@ -27,5 +27,5 @@ public:
 
 private:
   std::string Name;
-  std::map<ChannelID, std::unique_ptr<EventSerializer>> Serialisers;
+  std::map<ChannelID, std::unique_ptr<RefFilteredEventSerializer>> Serialisers;
 };

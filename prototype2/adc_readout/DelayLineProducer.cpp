@@ -67,3 +67,11 @@ DelayLineProducer::~DelayLineProducer() {
     PulseProcessingThread.join();
   }
 }
+
+void DelayLineProducer::addReferenceTimestamp(RawTimeStamp const &ReferenceTimestamp) {
+  std::uint64_t TempRefTimeStamp = ReferenceTimestamp.GetTimeStampNS();
+  if (CurrentReferenceTimestamp != TempRefTimeStamp) {
+    CurrentReferenceTimestamp = TempRefTimeStamp;
+    Serializer.addReferenceTimestamp(CurrentReferenceTimestamp);
+  }
+}

@@ -20,12 +20,14 @@ void PeakFinder::processData(SamplingRun const &Data) {
   std::uint64_t PeakTimeStamp = PulseInfo.PeakTimestamp.GetTimeStampNS();
 
   if (Serialisers.find(Data.Identifier) == Serialisers.end()) {
-    Serialisers[Data.Identifier] = std::make_unique<EventSerializer>(
+    Serialisers[Data.Identifier] = std::make_unique<RefFilteredEventSerializer>(
         Name + "_Adc" + std::to_string(Data.Identifier.SourceID) + "_Ch" +
             std::to_string(Data.Identifier.ChannelNr),
         100, 50ms, ProducerPtr.get(), EventSerializer::TimestampMode::INDEPENDENT_EVENTS);
   }
-  Serialisers[Data.Identifier]->addEvent(
+  auto &CurrentSerialiser = Serialisers[Data.Identifier];
+  CurrentSerialiser->addReferenceTimestamp(Data.ReferenceTimestamp.GetTimeStampNS());
+  CurrentSerialiser->addEvent(
       std::unique_ptr<EventData>(new EventData{
           PeakTimeStamp, 1, static_cast<std::uint32_t>(PulseInfo.PeakAmplitude),
           static_cast<std::uint32_t>(PulseInfo.PeakArea),

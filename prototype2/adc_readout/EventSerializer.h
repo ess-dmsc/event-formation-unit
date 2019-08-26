@@ -66,7 +66,7 @@ public:
                   ProducerBase *KafkaProducer, TimestampMode Mode);
   /// \brief Stops the thread and may for this reason take a long time before returning.
   virtual ~EventSerializer();
-  void addReferenceTimestamp(std::uint64_t const Timestamp);
+  virtual void addReferenceTimestamp(std::uint64_t const Timestamp);
   /// \brief Add new event to queue of events that will be processed.
   ///
   /// \param Event Struct of event data.
@@ -91,4 +91,15 @@ protected:
   Queue EventQueue;
   TimestampQueue ReferenceTimeQueue;
   const TimestampMode CMode;
+};
+
+class RefFilteredEventSerializer : public EventSerializer {
+public:
+  /// \brief See base class for documentation.
+  RefFilteredEventSerializer(std::string SourceName, size_t BufferSize,
+      std::chrono::milliseconds TransmitTimeout,
+  ProducerBase *KafkaProducer, TimestampMode Mode);
+  void addReferenceTimestamp(std::uint64_t const Timestamp) override;
+private:
+  std::uint64_t CurrentReferenceTimestamp{0};
 };

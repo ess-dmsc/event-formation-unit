@@ -164,3 +164,17 @@ void EventSerializer::serialiseFunction() {
     ProduceFB(EventList.first, EventList.second);
   }
 }
+
+RefFilteredEventSerializer::RefFilteredEventSerializer(std::string SourceName, size_t BufferSize,
+                                                       std::chrono::milliseconds TransmitTimeout,
+                                                       ProducerBase *KafkaProducer,
+                                                       EventSerializer::TimestampMode Mode) : EventSerializer(std::move(SourceName), BufferSize, TransmitTimeout, KafkaProducer, Mode) {}
+
+
+void RefFilteredEventSerializer::addReferenceTimestamp(std::uint64_t const Timestamp) {
+  if (Timestamp != CurrentReferenceTimestamp) {
+    CurrentReferenceTimestamp = Timestamp;
+    EventSerializer::addReferenceTimestamp(Timestamp);
+  }
+}
+

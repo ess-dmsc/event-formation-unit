@@ -45,7 +45,7 @@ protected:
 
   /// \brief Implements the thread doing the socket communication.
   /// This function will return when Detector::runThreads is set to false.
-  /// \note There is probably no performance benefit runnign this on a seperate
+  /// \note There is probably no performance benefit running this on a seperate
   /// thread.
   virtual void inputThread();
 

@@ -15,7 +15,6 @@
 #include <gtest/gtest.h>
 #include <trompeloeil.hpp>
 #include <limits>
-#include <iostream>
 
 using trompeloeil::_;
 

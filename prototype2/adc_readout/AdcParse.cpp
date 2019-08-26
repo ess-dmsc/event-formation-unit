@@ -76,7 +76,7 @@ PacketInfo PacketParser::parsePacket(const InData &Packet) {
   PacketInfo ReturnData;
   ReturnData.ReadoutCount = Header.ReadoutCount;
   if (PacketType::Data == Header.Type) {
-    size_t FillerStart = parseData(Packet, Header.DataStart);
+    size_t FillerStart = parseData(Packet, Header.DataStart, Header.ReferenceTimestamp);
     parseTrailer(Packet, FillerStart);
     ReturnData.Type = PacketType::Data;
   } else if (PacketType::Idle == Header.Type) {
@@ -103,13 +103,14 @@ HeaderInfo parseHeader(const InData &Packet) {
   }
   ReturnInfo.DataStart = sizeof(PacketHeader);
   ReturnInfo.ReadoutCount = Header.ReadoutCount;
+  ReturnInfo.ReferenceTimestamp = Header.ReferenceTimeStamp;
   if (Packet.Length != Header.ReadoutLength + 8) {
     throw ParserException(ParserException::Type::HEADER_LENGTH);
   }
   return ReturnInfo;
 }
 
-size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte) {
+size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte, RawTimeStamp const &ReferenceTimestamp) {
   while (StartByte + sizeof(DataHeader) < Packet.Length) {
     auto HeaderRaw =
         reinterpret_cast<const DataHeader *>(Packet.Data + StartByte);
@@ -133,6 +134,7 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte) {
       CurrentDataModule->Data.resize(NrOfSamples);
       CurrentDataModule->Identifier = CurrentChannelID;
       CurrentDataModule->TimeStamp = Header.TimeStamp;
+      CurrentDataModule->ReferenceTimestamp = ReferenceTimestamp;
       CurrentDataModule->OversamplingFactor = Header.Oversampling;
       auto ElementPointer = reinterpret_cast<const std::uint16_t *>(
           Packet.Data + StartByte + sizeof(DataHeader));
