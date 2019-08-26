@@ -7,6 +7,7 @@
 ///===--------------------------------------------------------------------===///
 
 #include <common/reduction/HitVector.h>
+#include <algorithm>
 
 #define ASCII_grayscale94 " .`:,;'_^\"></-!~=)(|j?}{][ti+l7v1%yrfcJ32uIC$zwo96sngaT5qpkYVOL40&mG8*xhedbZUSAQPFDXWK#RNEHBM@"
 #define ASCII_grayscale70 " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
@@ -43,7 +44,7 @@ std::string visualize(const HitVector &vec, const std::string &prepend,
 
   uint64_t time_bins = time_span;
   if (max_rows)
-    time_bins = std::min(time_span, max_rows);
+    time_bins = std::min(time_span, (uint64_t)max_rows);
 
   uint16_t coord_bins = coord_span;
   if (max_columns)
