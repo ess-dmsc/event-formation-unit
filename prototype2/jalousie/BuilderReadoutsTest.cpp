@@ -6,7 +6,7 @@
 #include <jalousie/CdtFile.h>
 #include <jalousie/BuilderReadouts.h>
 #include <test/TestBase.h>
-#include <common/DynamicHist.h>
+#include <common/monitor/DynamicHist.h>
 #include <set>
 
 using namespace Jalousie;
