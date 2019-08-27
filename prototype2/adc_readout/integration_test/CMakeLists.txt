@@ -26,7 +26,7 @@ set_target_properties(AdcSimulator PROPERTIES
 
 target_include_directories(AdcSimulator PRIVATE ${ASIO_INCLUDE_DIR} "../" "../../common/")
 
-target_link_libraries(AdcSimulator ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(AdcSimulator ${CMAKE_THREAD_LIBS_INIT} efu_common $<TARGET_OBJECTS:AdcReadout>)
 
 get_filename_component(ADC_CONFIG_FILE "AdcIntegrationTestConfig.ini" ABSOLUTE)
 add_custom_command(

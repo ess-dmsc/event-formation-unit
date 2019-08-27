@@ -30,13 +30,15 @@ public:
           asio::io_service &Service);
   ~FPGASim() = default;
 
-  void addSamplingRun(void const *const DataPtr, size_t Bytes);
+  void addSamplingRun(void const *const DataPtr, size_t Bytes, RawTimeStamp Timestamp);
   int getNrOfRuns() const { return SamplingRuns; };
   int getNrOfPackets() const { return PacketCount; };
   int getNrOfSentPackets() const { return SentPackets; };
   void packetIsSent() { SentPackets.store(SentPackets + 1); };
 
 private:
+  const std::uint64_t RefTimeDeltaNS{1000000000ull / 14ull};
+  std::uint64_t CurrentRefTimeNS{0};
   int SamplingRuns{0};
   const int MaxPacketSize{9000};
   std::string Address;
