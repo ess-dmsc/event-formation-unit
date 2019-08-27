@@ -9,7 +9,7 @@
 
 #pragma once
 
-#include <common/clustering/Hit.h>
+#include <common/reduction/Hit.h>
 #include <gdgem/nmx/AbstractBuilder.h>
 
 namespace Gem {

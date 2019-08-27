@@ -11,8 +11,8 @@ class VMM3SRSDataTest : public TestBase {
 
 protected:
   VMM3SRSData *data;
-  virtual void SetUp() { data = new VMM3SRSData(1125); }
-  virtual void TearDown() { delete data; }
+  void SetUp() override { data = new VMM3SRSData(1125); }
+  void TearDown() override { delete data; }
 
   void assertfields(unsigned int hits, unsigned int markers, unsigned int errors) {
     EXPECT_EQ(data->stats.readouts, hits);

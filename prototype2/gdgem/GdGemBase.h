@@ -13,9 +13,9 @@
 #include <gdgem/nmx/AbstractBuilder.h>
 #include <gdgem/NMXConfig.h>
 #include <common/SPSCFifo.h>
-#include <common/clustering/AbstractClusterer.h>
-#include <common/clustering/AbstractMatcher.h>
-#include <common/Hists.h>
+#include <common/reduction/clustering/AbstractClusterer.h>
+#include <common/reduction/matching/AbstractMatcher.h>
+#include <common/monitor/Histogram.h>
 #include <common/EV42Serializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 
@@ -113,8 +113,7 @@ protected:
   Hists hists_{std::numeric_limits<uint16_t>::max(),
                std::numeric_limits<uint16_t>::max()};
 
-  std::shared_ptr<Gem::utpcAnalyzer> utpc_analyzer_;
-  Gem::utpcResults utpc_;
+  ReducedEvent neutron_event_;
 
   uint64_t previous_full_time_{0};
   uint64_t recent_pulse_time_{0};
@@ -126,7 +125,7 @@ protected:
   bool sample_next_track_ {false};
 
   void apply_configuration();
-  void cluster_plane(HitContainer& hits, std::shared_ptr<AbstractClusterer> clusterer, bool flush);
+  void cluster_plane(HitVector& hits, std::shared_ptr<AbstractClusterer> clusterer, bool flush);
   void perform_clustering(bool flush);
   void process_events(EV42Serializer&, Gem::TrackSerializer&);
 };

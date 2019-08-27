@@ -11,7 +11,7 @@
 
 #include "mo01_nmx_generated.h"
 
-#include <common/clustering/Event.h>
+#include <common/reduction/Event.h>
 #include <common/Producer.h>
 
 namespace Gem {

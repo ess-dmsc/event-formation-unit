@@ -9,14 +9,14 @@
 
 #include "GdGemBase.h"
 
-#include <common/clustering/GapMatcher.h>
-#include <common/clustering/GapClusterer.h>
+#include <common/reduction/matching/GapMatcher.h>
+#include <common/reduction/clustering/GapClusterer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/srs/BuilderVMM3.h>
 #include <gdgem/generators/BuilderHits.h>
 #include <gdgem/generators/BuilderReadouts.h>
 #include <common/EV42Serializer.h>
-#include <common/HistSerializer.h>
+#include <common/monitor/HistogramSerializer.h>
 #include <common/Producer.h>
 #include <efu/Server.h>
 #include <common/Socket.h>
@@ -186,7 +186,7 @@ void GdGemBase::input_thread() {
 
 void bin(Hists& hists, const Event &e)
 {
-  auto sum = e.c1.weight_sum() + e.c2.weight_sum();
+  auto sum = e.ClusterA.weight_sum() + e.ClusterB.weight_sum();
   hists.bincluster(static_cast<uint32_t>(sum));
 }
 
@@ -226,26 +226,21 @@ void GdGemBase::apply_configuration() {
   clusterer_y_ = std::make_shared<GapClusterer>(
       nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap);
 
-  matcher_ = std::make_shared<GapMatcher>(
-      nmx_opts.time_config.acquisition_window()*5,
-      nmx_opts.matcher_max_delta_time);
+  auto matcher = std::make_shared<GapMatcher>(
+      nmx_opts.time_config.acquisition_window()*5, 0, 1);
+
+  matcher->set_minimum_time_gap(nmx_opts.matcher_max_delta_time);
+
+  matcher_ = matcher;
 
   hists_.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
-
-  utpc_analyzer_ = std::make_shared<Gem::utpcAnalyzer>(
-      nmx_opts.analyze_weighted,
-      nmx_opts.analyze_max_timebins,
-      nmx_opts.analyze_max_timedif);
 
   sample_next_track_ = nmx_opts.send_tracks;
 }
 
-void GdGemBase::cluster_plane(HitContainer &hits,
+void GdGemBase::cluster_plane(HitVector &hits,
                               std::shared_ptr<AbstractClusterer> clusterer, bool flush) {
-  std::sort(hits.begin(), hits.end(),
-            [](const Hit &e1, const Hit &e2) {
-              return e1.time < e2.time;
-            });
+  sort_chronologically(hits);
   clusterer->cluster(hits);
   hits.clear();
   if (flush) {
@@ -291,7 +286,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
   for (auto& event : matcher_->matched_events)
   {
     if (!event.both_planes()) {
-      if (event.c1.hit_count() != 0) {
+      if (event.ClusterA.hit_count() != 0) {
         mystats.clusters_x_only++;
       }
       else {
@@ -302,32 +297,40 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     mystats.clusters_xy++;
 
-    utpc_ = utpc_analyzer_->analyze(event);
+    neutron_event_ = nmx_opts.analyzer_->analyze(event);
 
     /// Sample only tracks that are good in both planes
     if (sample_next_track_
         && (event.total_hit_count() >= nmx_opts.track_sample_minhits))
     {
-//      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.debug(true));
+//      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.to_string(true));
       sample_next_track_ = !track_serializer.add_track(event,
-                                                       utpc_.x.utpc_center,
-                                                       utpc_.y.utpc_center);
+                                                       neutron_event_.x.center,
+                                                       neutron_event_.y.center);
     }
 
-    if (!utpc_.good)
+    if (!neutron_event_.good)
     {
       mystats.events_bad_utpc++;
       continue;
     }
 
-    if (!nmx_opts.filter.valid(event, utpc_))
+    if (!nmx_opts.filter.valid(event, neutron_event_))
     {
       mystats.events_filter_rejects++;
       continue;
     }
 
-    pixelid_ = nmx_opts.geometry.pixel2D(
-        utpc_.x.utpc_center_rounded(), utpc_.y.utpc_center_rounded());
+    // \todo this logic is a hack to accomodate MG
+    if (nmx_opts.geometry.nz() > 1) {
+      pixelid_ = nmx_opts.geometry.pixel3D(
+          neutron_event_.x.center_rounded(),
+          neutron_event_.y.center_rounded(),
+          neutron_event_.z.center_rounded());
+    } else {
+      pixelid_ = nmx_opts.geometry.pixel2D(
+          neutron_event_.x.center_rounded(), neutron_event_.y.center_rounded());
+    }
 
     if (!nmx_opts.geometry.valid_id(pixelid_))
     {
@@ -341,18 +344,18 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
       bin(hists_, event);
     }
 
-    if (utpc_.time < previous_full_time_) {
+    if (neutron_event_.time < previous_full_time_) {
       LOG(PROCESS, Sev::Error, "Event time sequence error: {} < {}",
-             utpc_.time, previous_full_time_);
+             neutron_event_.time, previous_full_time_);
     }
-    previous_full_time_ = utpc_.time;
+    previous_full_time_ = neutron_event_.time;
 
-    truncated_time_ = utpc_.time - recent_pulse_time_;
+    truncated_time_ = neutron_event_.time - recent_pulse_time_;
     // \todo try different limits
     if (!have_pulse_time_ ||
         (truncated_time_ > max_pulse_window_ns)) {
       have_pulse_time_ = true;
-      recent_pulse_time_ = utpc_.time;
+      recent_pulse_time_ = neutron_event_.time;
       truncated_time_ = 0;
       if (event_serializer.eventCount())
         mystats.tx_bytes += event_serializer.produce();
@@ -361,7 +364,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     }
 
 //    LOG(PROCESS, Sev::Debug, "Good event: time={}, pixel={} from {}",
-//        truncated_time_, pixelid_, utpc_.debug());
+//        truncated_time_, pixelid_, neutron_event_.to_string());
 
     mystats.tx_bytes += event_serializer.addEvent(
         static_cast<uint32_t>(truncated_time_), pixelid_);
@@ -394,7 +397,7 @@ void GdGemBase::processing_thread() {
   track_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
-  HistSerializer hist_serializer(hists_.needed_buffer_size(), "nmx");
+  HistogramSerializer hist_serializer(hists_.needed_buffer_size(), "nmx");
   hist_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
@@ -435,10 +438,10 @@ void GdGemBase::processing_thread() {
         if (nmx_opts.send_raw_hits) {
           Event dummy_event;
           for (const auto& e : builder_->hit_buffer_x) {
-            dummy_event.c1.insert(e);
+            dummy_event.ClusterA.insert(e);
           }
           for (const auto& e : builder_->hit_buffer_y) {
-            dummy_event.c2.insert(e);
+            dummy_event.ClusterB.insert(e);
           }
           //LOG(PROCESS, Sev::Debug, "Sending raw data: {}", dummy_event.total_hit_count());
           raw_serializer.add_track(dummy_event, 0, 0);

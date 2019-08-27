@@ -1,15 +1,12 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
-#include <gdgem/nmx/Readout.h>
-#include <common/clustering/GapClusterer.h>
-#include <common/clustering/GapMatcher.h>
+#include <test/TestBase.h>
+
+#include <common/reduction/clustering/GapClusterer.h>
+#include <common/reduction/matching/GapMatcher.h>
 
 #include <memory>
-#include <stdio.h>
-#include <unistd.h>
-#include <test/TestBase.h>
 #include <gdgem/NMXConfig.h>
-#include <functional>
 
 using namespace Gem;
 
@@ -36,10 +33,8 @@ class HitSorter {
   }
 
   void flush() {
-    std::sort(buffer.begin(), buffer.end(),
-              [](const Hit &e1, const Hit &e2) {
-                return e1.time < e2.time;
-              });
+    sort_chronologically(buffer);
+
     if (clusterer)
       clusterer->cluster(buffer);
     buffer.clear();
@@ -49,7 +44,7 @@ class HitSorter {
 
   std::shared_ptr<AbstractClusterer> clusterer;
 
-  HitContainer buffer;
+  HitVector buffer;
   uint64_t prev_srs_time {0};
   size_t srs_overflows{0};
   size_t negative_chip_times{0};
@@ -70,7 +65,7 @@ protected:
 
   std::shared_ptr<AbstractMatcher> matcher;
 
-  virtual void SetUp() {
+  void SetUp() override {
     DataPath = TEST_DATA_PATH;
     opts = NMXConfig(DataPath + "/readouts/config.json", "");
 
@@ -86,12 +81,13 @@ protected:
         std::make_shared<GapClusterer>(opts.clusterer_y.max_time_gap,
                                        opts.clusterer_y.max_strip_gap);
 
-    matcher = std::make_shared<GapMatcher>(
-        opts.time_config.acquisition_window()*5,
-        opts.matcher_max_delta_time);
+    auto gap_matcher = std::make_shared<GapMatcher>(
+        opts.time_config.acquisition_window()*5, 0, 1);
+    gap_matcher->set_minimum_time_gap(opts.matcher_max_delta_time);
+    matcher = gap_matcher;
   }
 
-  virtual void TearDown() {
+  void TearDown() override {
   }
 
 
@@ -126,7 +122,7 @@ protected:
     size_t count_x{0};
     for (const auto& c : clusterer->clusters)
     {
-//      MESSAGE() << c.debug(true) << "\n";
+//      MESSAGE() << c.to_string(true) << "\n";
 //      MESSAGE() << c.visualize(2) << "\n";
       if (c.hit_count() >= min_cluster_size)
         count_x++;

@@ -10,8 +10,8 @@ protected:
   uint16_t ncass{6};
   uint16_t nw{32};
   uint16_t ns{32};
-  virtual void SetUp() {}
-  virtual void TearDown() {}
+  void SetUp() override {}
+  void TearDown() override {}
 };
 
 TEST_F(MBGeometryTest, Constructor) {

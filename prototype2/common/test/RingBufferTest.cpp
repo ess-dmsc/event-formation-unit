@@ -5,8 +5,8 @@
 
 class RingBufferTest : public TestBase {
 protected:
-  virtual void SetUp() {}
-  virtual void TearDown() {}
+  void SetUp() override {}
+  void TearDown() override {}
 };
 
 /** Test cases below */

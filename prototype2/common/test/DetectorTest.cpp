@@ -23,9 +23,9 @@ DetectorFactory<TestDetector> Factory;
 class DetectorTest : public TestBase {
 protected:
   BaseSettings settings;
-  virtual void SetUp() { det = Factory.create(settings); }
+  void SetUp() override { det = Factory.create(settings); }
 
-  virtual void TearDown() {}
+  void TearDown() override {}
 
   std::shared_ptr<Detector> det;
   void *dummyargs; // Used for calling thread functions
@@ -61,13 +61,13 @@ TEST_F(DetectorTest, GetDetectorCommandFunctionsNoCommands) {
 
 class DetectorRegistration : public TestBase {
 protected:
-  virtual void SetUp() {
+  void SetUp() override {
     auto &Factories = DetectorModuleRegistration::getFactories();
     Factories.clear();
     EXPECT_EQ(Factories.size(), 0);
   }
 
-  virtual void TearDown() {}
+  void TearDown() override {}
 };
 
 TEST_F(DetectorRegistration, AddModule) {

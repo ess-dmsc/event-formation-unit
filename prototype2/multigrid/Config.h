@@ -8,27 +8,19 @@
 #pragma once
 
 #include <multigrid/AbstractBuilder.h>
+#include <multigrid/geometry/DetectorMappings.h>
 #include <multigrid/reduction/Reduction.h>
-#include <multigrid/reduction/EventAnalysis.h>
-#include <logical_geometry/ESSGeometry.h>
 #include <memory>
 
 namespace Multigrid {
 
 struct Config {
-  Config() {}
-  Config(std::string jsonfile, std::string dump_path = "");
+  Config() = default;
+  explicit Config(const std::string& jsonfile, std::string dump_path = "");
 
+  DetectorMappings mappings;
   std::shared_ptr<AbstractBuilder> builder;
   Reduction reduction;
-
-  size_t max_wire_hits {12};
-  size_t max_grid_hits {12};
-
-  EventAnalyzer analyzer;
-
-  // Event formation
-  ESSGeometry geometry;
 
   std::string debug() const;
 };

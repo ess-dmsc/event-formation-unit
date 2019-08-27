@@ -9,75 +9,15 @@
 #pragma once
 
 #include <common/Detector.h>
-#include <common/Hists.h>
-#include <common/HistSerializer.h>
-#include <common/Log.h>
-#include <common/ReadoutSerializer.h>
 #include <common/EV42Serializer.h>
 #include <multigrid/Config.h>
+#include <common/monitor/Monitor.h>
 
 struct MultigridSettings {
   std::string ConfigFile;
   std::string FilePrefix;
   // \todo move this to json
   bool monitor{false};
-};
-
-struct Monitor {
-  std::shared_ptr<Hists> hists;
-  std::shared_ptr<ReadoutSerializer> readouts;
-
-  void init(std::string broker, size_t max_readouts) {
-    readouts = std::make_shared<ReadoutSerializer>(max_readouts, "multigrid");
-    hists = std::make_shared<Hists>(std::numeric_limits<uint16_t>::max(),
-                                    std::numeric_limits<uint16_t>::max());
-    histfb = std::make_shared<HistSerializer>(hists->needed_buffer_size(), "multigrid");
-
-    producer = std::make_shared<Producer>(broker, "C-SPEC_monitor");
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-    readouts->set_callback(std::bind(&Producer::produce2<uint8_t>, producer.get(), std::placeholders::_1));
-    histfb->set_callback(std::bind(&Producer::produce2<uint8_t>, producer.get(), std::placeholders::_1));
-#pragma GCC diagnostic pop
-    enabled_ = true;
-  }
-
-  void close() {
-    enabled_ = false;
-    hists.reset();
-    readouts.reset();
-    histfb.reset();
-    producer.reset();
-  }
-
-  void produce() {
-    if (!enabled_)
-      return;
-
-    if (!hists->isEmpty()) {
-      LOG(PROCESS, Sev::Debug, "Flushing histograms for {} readouts", hists->hit_count());
-      histfb->produce(*hists);
-      hists->clear();
-    }
-
-    if (readouts->getNumEntries()) {
-      LOG(PROCESS, Sev::Debug, "Flushing readout data for {} readouts", readouts->getNumEntries());
-      readouts->produce();
-    }
-  }
-
-  bool enabled() const {
-    return enabled_;
-  }
-
-  Monitor() = default;
-  ~Monitor() { close(); }
-
-private:
-  bool enabled_{false};
-
-  std::shared_ptr<Producer> producer;
-  std::shared_ptr<HistSerializer> histfb;
 };
 
 ///
@@ -134,7 +74,7 @@ protected:
   bool HavePulseTime{false};
   uint64_t ShortestPulsePeriod{std::numeric_limits<uint64_t>::max()};
 
-  void init_config();
+  bool init_config();
   void process_events(EV42Serializer &ev42serializer);
 
 };

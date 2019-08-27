@@ -5,13 +5,13 @@
 set(pipeline_common_source
   GdGemBase.cpp
   NMXConfig.cpp
-  nmx/uTPC.cpp
   nmx/TrackSerializer.cpp
   srs/SRSMappings.cpp
   srs/SRSTime.cpp
   srs/ParserVMM3.cpp
   srs/BuilderVMM3.cpp
   srs/CalibrationFile.cpp  # Also works for VMM2
+  ../multigrid/reduction/ModuleGeometry.cpp
   generators/BuilderReadouts.cpp
   generators/BuilderHits.cpp
   )
@@ -19,7 +19,6 @@ set(pipeline_common_source
 set(pipeline_common_inc
   GdGemBase.h
   NMXConfig.h
-  nmx/uTPC.h
   nmx/Readout.h
   nmx/TrackSerializer.h
   nmx/AbstractBuilder.h
@@ -28,6 +27,7 @@ set(pipeline_common_inc
   srs/ParserVMM3.h
   srs/BuilderVMM3.h
   srs/CalibrationFile.h # also works for VMM2
+  ../multigrid/reduction/ModuleGeometry.h
   generators/BuilderReadouts.h
   generators/BuilderHits.h
   )
@@ -44,10 +44,10 @@ get_filename_component(TEST_JSON_PATH "configs/vmm3.json" DIRECTORY)
 
 set(NMXConfigTest_INC
   NMXConfig.h
-  nmx/uTPC.h
   srs/SRSTime.h
   srs/SRSMappings.h
   srs/CalibrationFile.cpp
+  ../multigrid/reduction/ModuleGeometry.cpp
   )
 set(NMXConfigTest_SRC
   NMXConfigTest.cpp
@@ -55,7 +55,7 @@ set(NMXConfigTest_SRC
   srs/SRSTime.cpp
   srs/SRSMappings.cpp
   srs/CalibrationFile.cpp
-  nmx/uTPC.cpp
+  ../multigrid/reduction/ModuleGeometry.h
   )
 create_test_executable(NMXConfigTest)
 target_compile_definitions(NMXConfigTest

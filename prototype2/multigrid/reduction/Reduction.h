@@ -1,33 +1,36 @@
 /** Copyright (C) 2016-2018 European Spallation Source */
 
 #pragma once
-#include <common/clustering/GapClusterer.h>
-#include <common/clustering/GapMatcher.h>
+#include <multigrid/reduction/ModulePipeline.h>
+#include <common/reduction/ChronoMerger.h>
 
 namespace Multigrid {
 
 class Reduction {
 public:
+  Reduction() = default;
+  void ingest(HitVector &hits);
+  void ingest(const Hit& hit);
+  void process_queues(bool flush);
+  std::string config(const std::string& prepend) const;
+  std::string status(const std::string& prepend, bool verbose) const;
 
-  void ingest(HitContainer &hits);
+  uint32_t max_x() const;
+  uint32_t max_y() const;
+  uint32_t max_z() const;
 
-  void perform_clustering(bool flush);
+  std::vector<ModulePipeline> pipelines;
+  EventProcessingStats stats;
 
-  size_t stats_invalid_planes{0};
-  size_t stats_time_seq_errors{0};
-  size_t stats_wire_clusters{0};
-  size_t stats_grid_clusters{0};
+  ChronoMerger merger{sequoia_maximum_latency, 2};
 
-  // Just greater than shortest pulse period of 266662 ticks
-  // Will have to be adjusted for other experimental setups
-  GapMatcher matcher{300000, 1};
+  std::list<NeutronEvent> out_queue;
 
 private:
-  GapClusterer wire_clusters{0, 1};
-  GapClusterer grid_clusters{0, 1};
-  HitContainer pulse_times;
 
-  uint64_t previous_time_{0};
 };
+
+void from_json(const nlohmann::json &j, Reduction &g);
+
 
 }

@@ -1,31 +1,27 @@
-set(MG24GeometryTest_SRC
-  MG24GeometryTest.cpp
-  )
-set(MG24GeometryTest_INC
-  MG24Geometry.h
-  )
-create_test_executable(MG24GeometryTest)
+#=============================================================================
+# Classes for Multi-grid geometry
+#=============================================================================
 
-set(FilterTest_SRC
-  FilterTest.cpp
+set(mg_geometry_obj_SRC
+  Filter.cpp
+  ChannelMappings.cpp
+  MGSeqMappings.cpp
+#  MG24Mappings.cpp
+  DetectorMappings.cpp
   )
-set(FilterTest_INC
+
+set(mg_geometry_obj_INC
   Filter.h
+  ChannelMappings.h
+  MGSeqMappings.h
+  MG24Mappings.h
+  DetectorMappings.h
   )
-create_test_executable(FilterTest)
 
-set(BusGeometryTest_SRC
-  BusGeometryTest.cpp
+add_library(MgGeometry STATIC
+  ${mg_geometry_obj_SRC}
+  ${mg_geometry_obj_INC}
   )
-set(BusGeometryTest_INC
-  BusGeometry.h
-  )
-create_test_executable(BusGeometryTest)
 
-set(SequoiaGeometryTest_SRC
-  SequoiaGeometryTest.cpp
-  )
-set(SequoiaGeometryTest_INC
-  SequoiaGeometry.h
-  )
-create_test_executable(SequoiaGeometryTest)
+enable_coverage_flags(MgGeometry)
+

@@ -8,6 +8,7 @@
 //===----------------------------------------------------------------------===//
 
 #include <multigrid/MultigridBase.h>
+#include <multigrid/geometry/PlaneMappings.h>
 
 #include <common/Producer.h>
 #include <common/TimeString.h>
@@ -17,8 +18,6 @@
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
-
-//#include <multigrid/geometry/MG24Geometry.h>
 
 #include <common/Trace.h>
 #undef TRC_LEVEL
@@ -62,11 +61,11 @@ MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings con
   Stats.create("tx_bytes", mystats.tx_bytes);
 
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_fails",             mystats.kafka_produce_fails);
-  Stats.create("kafka.ev_errors",                 mystats.kafka_ev_errors);
-  Stats.create("kafka.ev_others",                 mystats.kafka_ev_others);
-  Stats.create("kafka.dr_errors",                 mystats.kafka_dr_errors);
-  Stats.create("kafka.dr_others",                 mystats.kafka_dr_noerrors);
+  Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
+  Stats.create("kafka.ev_errors", mystats.kafka_ev_errors);
+  Stats.create("kafka.ev_others", mystats.kafka_ev_others);
+  Stats.create("kafka.dr_errors", mystats.kafka_dr_errors);
+  Stats.create("kafka.dr_others", mystats.kafka_dr_noerrors);
   // clang-format on
 
   LOG(INIT, Sev::Info, "Stream monitor data = {}",
@@ -79,69 +78,59 @@ MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings con
   Detector::AddThreadFunction(inputFunc, "main");
 }
 
-void MultigridBase::init_config() {
+bool MultigridBase::init_config() {
   LOG(INIT, Sev::Info, "MG Config file: {}", ModuleSettings.ConfigFile);
-  mg_config = Multigrid::Config(ModuleSettings.ConfigFile);
-  LOG(INIT, Sev::Info, "Multigrid Config\n{}", mg_config.debug());
+  try {
+    mg_config = Multigrid::Config(ModuleSettings.ConfigFile);
+  }
+  catch (...) {
+    LOG(INIT, Sev::Warning, "Invalid Json file: {}", ModuleSettings.ConfigFile);
+    return false;
+  }
 
-  if (ModuleSettings.monitor)
-    monitor.init(EFUSettings.KafkaBroker, readout_entries);
+  LOG(INIT, Sev::Info, "Multigrid Config\n{}", mg_config.debug());
+  if (ModuleSettings.monitor) {
+    monitor = Monitor(EFUSettings.KafkaBroker, "CSPEC", "multigrid");
+    monitor.init_hits(readout_entries);
+    monitor.init_histograms(std::numeric_limits<uint16_t>::max());
+  }
+  return true;
 }
 
 void MultigridBase::process_events(EV42Serializer &ev42serializer) {
-  std::sort(mg_config.reduction.matcher.matched_events.begin(),
-            mg_config.reduction.matcher.matched_events.end(),
-            [](const Event &e1,
-               const Event &e2) {
-              return e1.time_start() < e2.time_start();
-            });
 
-  for (auto &event : mg_config.reduction.matcher.matched_events) {
+  mystats.hits_time_seq_err = mg_config.reduction.stats.time_seq_errors;
+  mystats.hits_bad_plane = mg_config.reduction.stats.invalid_planes;
+  mystats.wire_clusters = mg_config.reduction.stats.wire_clusters;
+  mystats.grid_clusters = mg_config.reduction.stats.grid_clusters;
+  mystats.events_total = mg_config.reduction.stats.events_total;
+  mystats.events_multiplicity_rejects = mg_config.reduction.stats.events_multiplicity_rejects;
+  mystats.hits_used = mg_config.reduction.stats.hits_used;
+  mystats.events_bad = mg_config.reduction.stats.events_bad;
+  mystats.events_geometry_err = mg_config.reduction.stats.events_geometry_err;
 
-    if (event.plane1() == Multigrid::AbstractBuilder::external_trigger_plane) {
+  for (auto &event : mg_config.reduction.out_queue) {
+
+    if (event.pixel_id == 0) {
       mystats.pulses++;
 
       if (HavePulseTime) {
-        uint64_t PulsePeriod = event.time_start() - ev42serializer.pulseTime();
+        uint64_t PulsePeriod = event.time - ev42serializer.pulseTime();
         ShortestPulsePeriod = std::min(ShortestPulsePeriod, PulsePeriod);
       }
       HavePulseTime = true;
 
       if (ev42serializer.eventCount())
         mystats.tx_bytes += ev42serializer.produce();
-      ev42serializer.pulseTime(event.time_start());
+      ev42serializer.pulseTime(event.time);
 
 //            XTRACE(PROCESS, DEB, "New pulse time: %u   shortest pulse period: %u",
 //                   ev42serializer.pulseTime(), ShortestPulsePeriod);
     } else {
-      mystats.events_total++;
 
-      if ((event.c1.hit_count() > mg_config.max_wire_hits) ||
-          (event.c2.hit_count() > mg_config.max_grid_hits))
-      {
-        mystats.events_multiplicity_rejects++;
-        continue;
-      }
-
-      auto neutron = mg_config.analyzer.analyze(event);
-      mystats.hits_used = mg_config.analyzer.stats_used_hits;
-
-      if (!neutron.good) {
-        mystats.events_bad++;
-        continue;
-      }
-      //            XTRACE(PROCESS, DEB, "Neutron: %s ", neutron.debug().c_str());
-      uint32_t pixel = mg_config.geometry.pixel3D(
-          static_cast<uint32_t>(std::round(neutron.x)),
-          static_cast<uint32_t>(std::round(neutron.y)),
-          static_cast<uint32_t>(std::round(neutron.z))
-      );
-      auto time = static_cast<uint32_t>(neutron.time - ev42serializer.pulseTime());
+      auto time = static_cast<uint32_t>(event.time - ev42serializer.pulseTime());
 //            XTRACE(PROCESS, DEB, "Event: pixel: %d, time: %d ", pixel, time);
-      if (pixel == 0) {
-        XTRACE(PROCESS, DEB, "Event geom error");
-        mystats.events_geometry_err++;
-      } else if (!HavePulseTime || (neutron.time < ev42serializer.pulseTime())) {
+      if (!HavePulseTime || (event.time < ev42serializer.pulseTime())) {
         XTRACE(PROCESS, DEB, "Event before pulse");
         mystats.events_time_err++;
       } else if (time > (1.00004 * ShortestPulsePeriod)) {
@@ -150,17 +139,18 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
       } else {
 //              XTRACE(PROCESS, DEB, "Event good");
         mystats.tx_events++;
-        mystats.tx_bytes += ev42serializer.addEvent(time, pixel);
+        mystats.tx_bytes += ev42serializer.addEvent(time, event.pixel_id);
       }
     }
   }
-  mg_config.reduction.matcher.matched_events.clear();
+  mg_config.reduction.out_queue.clear();
 }
 
 void MultigridBase::mainThread() {
-  init_config();
+  if (!init_config())
+    return;
 
-  /** Connection setup */
+  /// Connection setup
   Socket::Endpoint
       local(EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort); //Change name or add more comments
   XTRACE(INIT, DEB, "server: %s, port %d", EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
@@ -176,10 +166,11 @@ void MultigridBase::mainThread() {
 #pragma GCC diagnostic warning "-Wdeprecated-declarations"
   ev42serializer.setProducerCallback(std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 #pragma GCC diagnostic pop
-  
+
   ev42serializer.pulseTime(0);
 
   uint8_t buffer[eth_buffer_size];
+
   TSCTimer report_timer;
   while (true) {
     ssize_t ReadSize{0};
@@ -200,31 +191,33 @@ void MultigridBase::mainThread() {
       if (!mg_config.builder->ConvertedData.empty()) {
         mystats.hits_total += mg_config.builder->ConvertedData.size();
 
-        for (const auto& hit : mg_config.builder->ConvertedData) {
-          if (monitor.readouts)
-            monitor.readouts->addEntry(hit.plane + 1, hit.coordinate, hit.time, hit.weight);
-          if (monitor.hists) {
-            if (hit.plane == 0)
-              monitor.hists->bin_x(hit.coordinate, hit.weight);
-            else if (hit.plane == 1)
-              monitor.hists->bin_y(hit.coordinate, hit.weight);
+        if (monitor.hit_serializer || monitor.histograms) {
+          Hit transformed;
+          for (const auto &hit : mg_config.builder->ConvertedData) {
+            transformed = mg_config.mappings.absolutify(hit);
+            if (monitor.hit_serializer)
+              monitor.hit_serializer->addEntry(transformed.plane + 1,
+                                               transformed.coordinate, transformed.time,
+                                               transformed.weight);
+            if (monitor.histograms) {
+              if (transformed.plane == Multigrid::wire_plane)
+                monitor.histograms->bin_x(transformed.coordinate, transformed.weight);
+              else if (transformed.plane == Multigrid::grid_plane)
+                monitor.histograms->bin_y(transformed.coordinate, transformed.weight);
+            }
           }
         }
         mg_config.reduction.ingest(mg_config.builder->ConvertedData);
 
-        mg_config.reduction.perform_clustering(false);
-        mystats.hits_time_seq_err = mg_config.reduction.stats_time_seq_errors;
-        mystats.hits_bad_plane = mg_config.reduction.stats_invalid_planes;
-        mystats.wire_clusters = mg_config.reduction.stats_wire_clusters;
-        mystats.grid_clusters = mg_config.reduction.stats_grid_clusters;
+        mg_config.reduction.process_queues(false);
         process_events(ev42serializer);
       }
     }
 
-    // Force periodic flushing
+    /// Force periodic flushing
     if (report_timer.timetsc() >= EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {
       mystats.tx_bytes += ev42serializer.produce();
-      monitor.produce();
+      monitor.produce_now();
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
@@ -237,20 +230,19 @@ void MultigridBase::mainThread() {
       report_timer.now();
     }
 
-    // Checking for exit
+    /// Checking for exit
     if (not runThreads) {
-      LOG(PROCESS, Sev::Info, "Stopping processing thread.");
-      // flush anything that remains
+      LOG(PROCESS, Sev::Info, "Stop requested. Flushing queues.");
+      /// flush anything that remains
 
-      mg_config.reduction.perform_clustering(true);
-      mystats.hits_time_seq_err = mg_config.reduction.stats_time_seq_errors;
-      mystats.hits_bad_plane = mg_config.reduction.stats_invalid_planes;
-      mystats.wire_clusters = mg_config.reduction.stats_wire_clusters;
-      mystats.grid_clusters = mg_config.reduction.stats_grid_clusters;
+      LOG(PROCESS, Sev::Info, "Pipeline status\n" + mg_config.reduction.status("", false));
+
+      mg_config.reduction.process_queues(true);
       process_events(ev42serializer);
 
       mystats.tx_bytes += ev42serializer.produce();
-      monitor.produce();
+      monitor.produce_now();
+      LOG(PROCESS, Sev::Info, "Pipeline flushed. Stopping processing thread.");
       return;
     }
   }

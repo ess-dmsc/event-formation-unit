@@ -1,4 +1,5 @@
-/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+/** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+
 //===----------------------------------------------------------------------===//
 ///
 /// \file ChronoMerger.h
@@ -9,6 +10,11 @@
 #include <common/reduction/ChronoMerger.h>
 #include <algorithm>
 
+#include <iosfwd>
+
+#include <sstream>
+
+
 ChronoMerger::ChronoMerger(uint64_t maximum_latency, size_t modules)
     : maximum_latency_(maximum_latency) {
   latest_.resize(modules, 0);
@@ -17,6 +23,17 @@ ChronoMerger::ChronoMerger(uint64_t maximum_latency, size_t modules)
 void ChronoMerger::insert(size_t module, NeutronEvent event) {
   latest_[module] = std::max(event.time, latest_.at(module));
   queue_.push_back(event);
+}
+
+void ChronoMerger::insert(size_t module, std::list<NeutronEvent>& events) {
+  for (const auto& event : events) {
+    latest_[module] = std::max(event.time, latest_.at(module));
+  }
+  queue_.splice(queue_.end(), events);
+}
+
+void ChronoMerger::sync_up(size_t module1, size_t module2) {
+  latest_[module1] = latest_[module2] = std::max(latest_[module1], latest_[module2]);
 }
 
 void ChronoMerger::sort() {
@@ -60,3 +77,20 @@ bool ChronoMerger::ready() const {
     return false;
   return (earliest() < (h - maximum_latency_));
 }
+
+std::string ChronoMerger::debug(const std::string& prepend, bool verbose) const {
+  std::stringstream ss;
+  ss << prepend << "Maximum latency: " << maximum_latency_ << "\n";
+  ss << prepend << "Latest times:\n";
+  for (size_t i=0; i < latest_.size(); ++i) {
+    ss << prepend << "  [" << i << "]  " << latest_[i] << "\n";
+  }
+  if (verbose && !queue_.empty()) {
+    ss << prepend << "Queue:\n";
+    for (const auto& e : queue_) {
+      ss << prepend << "  " << e.to_string() << "\n";
+    }
+  }
+  return ss.str();
+}
+

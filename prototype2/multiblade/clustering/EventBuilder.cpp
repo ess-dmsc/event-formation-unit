@@ -16,6 +16,10 @@
 
 namespace Multiblade {
 
+EventBuilder::EventBuilder() {
+  matcher.set_minimum_time_gap(timegap);
+}
+
 void EventBuilder::insert(Hit hit) {
   if (hit.plane == 0) {
     p0.push_back(hit);
@@ -24,24 +28,18 @@ void EventBuilder::insert(Hit hit) {
     p1.push_back(hit);
   }
   else {
-    XTRACE(CLUSTER, WAR, "bad plane %s", hit.debug().c_str());
+    XTRACE(CLUSTER, WAR, "bad plane %s", hit.to_string().c_str());
   }
 }
 
 void EventBuilder::flush() {
   matcher.matched_events.clear();
 
-  std::sort(p0.begin(), p0.end(),
-            [](const Hit &e1, const Hit &e2) {
-              return e1.time < e2.time;
-            });
+  sort_chronologically(p0);
   c0.cluster(p0);
   c0.flush();
 
-  std::sort(p1.begin(), p1.end(),
-            [](const Hit &e1, const Hit &e2) {
-              return e1.time < e2.time;
-            });
+  sort_chronologically(p1);
   c1.cluster(p1);
   c1.flush();
 

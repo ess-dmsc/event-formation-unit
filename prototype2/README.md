@@ -1,23 +1,17 @@
-### Starting the EFU
 
-To start the EFU with the __mgcncs2__ pipeline from the __build__ directory:
+## Directories
 
-`> ./bin/efu -d ./lib/mgcncs2`
-
-If the efu and detector plugins (.so files) are located in the __same__ directory:
-
-`> ./efu -d mgcncs2`
-
-There are quite a few additional command line options, but these ones are
-the most used
-
-Cmd option          | Description
--------------       | -------------
--p                  | UDP port for detector data
--g                  | IP address for Graphite (metrics) server
--b                  | Kafka broker "ipaddress:port"
--c                  | CPU core id for the first processing thread (-5 == ignore)
-
-To get further help
-
-`> ./efu -h`
+Directory             | Function
+-------------         | -------------
+adc_readout           | detector implementation
+gdgem                 | detector implementation
+multiblade            | detector implementation
+multigrid             | detector implementation
+sonde                 | detector implementation
+common                | common detector code
+readout               | common readout data parser
+efu                   | EFU main application code
+generators            | data generators - replays previously recorded data
+test                  | unit test utilities
+tools                 | replay of network (pcap) traffic
+udp                   | UDP receiver 'detector' - obsolete

@@ -37,8 +37,8 @@ public:
 };
 
 class ProducerTest : public TestBase {
-  virtual void SetUp() {}
-  virtual void TearDown() {}
+  void SetUp() override {}
+  void TearDown() override {}
 };
 
 TEST_F(ProducerTest, ConstructorOK) {

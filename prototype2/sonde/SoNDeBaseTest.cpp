@@ -21,12 +21,12 @@ public:
 
 class SoNDeBaseTest : public ::testing::Test {
 public:
-  virtual void SetUp() {
+  void SetUp() override {
     Settings.DetectorRxBufferSize = 100000;
     Settings.NoHwCheck = true;
     LocalSettings.fileprefix = "sonde_";
   }
-  virtual void TearDown() {}
+  void TearDown() override {}
 
   BaseSettings Settings;
   SoNDeSettings LocalSettings;
