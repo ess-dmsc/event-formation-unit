@@ -1,4 +1,5 @@
 /** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+
 //===----------------------------------------------------------------------===//
 ///
 /// \file ChronoMerger.h
@@ -8,9 +9,11 @@
 
 #include <common/reduction/ChronoMerger.h>
 #include <algorithm>
+
 #include <iosfwd>
 
 #include <sstream>
+
 
 ChronoMerger::ChronoMerger(uint64_t maximum_latency, size_t modules)
     : maximum_latency_(maximum_latency) {
@@ -90,3 +93,4 @@ std::string ChronoMerger::debug(const std::string& prepend, bool verbose) const 
   }
   return ss.str();
 }
+

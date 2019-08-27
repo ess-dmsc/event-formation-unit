@@ -1,4 +1,5 @@
 /** Copyright (C) 2019 European Spallation Source, ERIC. See LICENSE file **/
+
 //===----------------------------------------------------------------------===//
 ///
 /// \file ChronoMerger.h
@@ -9,6 +10,7 @@
 #pragma once
 
 #include <common/reduction/NeutronEvent.h>
+
 #include <cstddef>
 #include <vector>
 #include <list>

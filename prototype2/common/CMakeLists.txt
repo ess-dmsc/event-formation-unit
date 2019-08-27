@@ -51,6 +51,7 @@ find_package(CLI11 REQUIRED)
 add_library(efu_common STATIC
   ${efu_common_SRC}
   ${efu_common_INC}
+
   $<TARGET_OBJECTS:ReductionObj>
   $<TARGET_OBJECTS:ClusteringObj>
   $<TARGET_OBJECTS:MatchingObj>

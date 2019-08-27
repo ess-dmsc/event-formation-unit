@@ -13,6 +13,7 @@ set(reduction_obj_SRC
   Event.cpp
   ReducedEvent.cpp
   NeutronEvent.cpp
+
   ChronoMerger.cpp
 )
 
@@ -38,3 +39,4 @@ enable_coverage_flags(ReductionObj)
 #=============================================================================
 
 add_subdirectory(test)
+

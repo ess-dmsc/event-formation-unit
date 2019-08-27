@@ -8,6 +8,7 @@
 
 #include <multigrid/generators/ReaderReadouts.h>
 #include <gdgem/generators/ReaderReadouts.h>
+#include <jalousie/CdtFile.h>
 
 #include <common/Socket.h>
 // GCOVR_EXCL_START
@@ -18,10 +19,13 @@ static constexpr int TscMHz {2900};
 constexpr size_t RxBufferSize{9000};
 
 // Reader expects filenames without .h5 extension
-std::string remove_extension(const std::string& filename) {
-    size_t lastdot = filename.find_last_of(".");
-    if (lastdot == std::string::npos) return filename;
+std::string remove_extension(const std::string &filename) {
+  size_t lastdot = filename.find_last_of(".");
+  if (lastdot == std::string::npos)
+    return filename;
+  if (filename.substr(lastdot, 3) == ".h5")
     return filename.substr(0, lastdot);
+  return filename;
 }
 
 struct {
@@ -82,6 +86,14 @@ int main(int argc, char *argv[]) {
 
   #ifdef GENERATOR_GDGEM_READOUTS
   Gem::ReaderReadouts file(Settings.FileName);
+  #endif
+
+  #ifdef GENERATOR_GDGEM_HITS
+  Gem::ReaderHits file(Settings.FileName);
+  #endif
+
+  #ifdef GENERATOR_JALOUSIE_CDT
+  Jalousie::CdtFile file(Settings.FileName);
   #endif
 
   size_t ReadoutSize = file.getReadoutSize();
