@@ -135,14 +135,16 @@ void FPGASim::transmitPacket(const void *DataPtr, const size_t Size) {
   Socket.async_send(asio::buffer(DataPtr, Size), TransmitHandlerGlue);
 }
 
-void FPGASim::addSamplingRun(void const *const DataPtr, size_t Bytes, RawTimeStamp Timestamp) {
+void FPGASim::addSamplingRun(void const *const DataPtr, size_t Bytes,
+                             RawTimeStamp Timestamp) {
   if (CurrentRefTimeNS == 0) {
     CurrentRefTimeNS = Timestamp.getTimeStampNS();
   }
   while (Timestamp.getTimeStampNS() > CurrentRefTimeNS + RefTimeDeltaNS) {
     CurrentRefTimeNS += RefTimeDeltaNS;
   }
-  auto Success = StandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS);
+  auto Success =
+      StandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS);
   auto BufferSizes = StandbyBuffer->getBufferSizes();
   if (not Success or BufferSizes.second - BufferSizes.first < 20) {
     transmitStandbyBuffer();
