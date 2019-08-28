@@ -9,13 +9,7 @@
 #include "AdcReadoutConstants.h"
 
 using PosType = AdcSettings::PositionSensingType;
-std::istream &operator>>(std::istream &In, PosType &Type);
-std::ostream &operator<<(std::ostream &In, const PosType &Type);
-
 using ChRole = AdcSettings::ChannelRole;
-std::istream &operator>>(std::istream &In, ChRole &Role);
-std::ostream &operator<<(std::ostream &In, const ChRole &Role);
-std::map<std::string, ChRole> getRoleMapping();
 
 void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
   Parser
@@ -103,13 +97,19 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
                   "The slope multiplier of the x-axis postion value.")
       ->group("Delay Line Options")
       ->default_str("1.0");
+  std::vector<std::pair<std::string, PosType>> PosTypeMap{
+    {"AMP", PosType::AMPLITUDE},
+    {"AMPLITUDE", PosType::AMPLITUDE},
+    {"CONST", PosType::CONST},
+    {"TIME", PosType::TIME}
+  };
   Parser
-      .add_set("--xaxis_position_type", ReadoutSettings.XAxis,
-               {PosType::AMPLITUDE, PosType::TIME, PosType::CONST},
+      .add_option("--xaxis_position_type", ReadoutSettings.XAxis,
                "How to calculate the x-axis position. If set to \"CONST\", use "
-               "the value of \"xaxis_offset\".")
+                  "the value of \"xaxis_offset\".")->
+  transform(CLI::CheckedTransformer(PosTypeMap, CLI::ignore_case))
       ->group("Delay Line Options")
-      ->default_str("CONST");
+      ->default_val("CONST");
 
   Parser
       .add_option("--yaxis_offset", ReadoutSettings.YAxisCalibOffset,
@@ -122,12 +122,12 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
       ->group("Delay Line Options")
       ->default_str("1.0");
   Parser
-      .add_set("--yaxis_position_type", ReadoutSettings.YAxis,
-               {PosType::AMPLITUDE, PosType::TIME, PosType::CONST},
+      .add_option("--yaxis_position_type", ReadoutSettings.YAxis,
                "How to calculate the y-axis position. If set to \"CONST\", use "
-               "the value of \"yaxis_offset\".")
+               "the value of \"yaxis_offset\".")->
+  transform(CLI::CheckedTransformer(PosTypeMap, CLI::ignore_case))
       ->group("Delay Line Options")
-      ->default_str("CONST");
+      ->default_val("CONST");
 
   Parser
       .add_option("--event_timeout", ReadoutSettings.EventTimeoutNS,
@@ -136,111 +136,71 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
       ->group("Delay Line Options")
       ->default_str("100");
 
-  std::set<ChRole> RoleOptions;
-  for (auto &Item : getRoleMapping()) {
-    RoleOptions.emplace(Item.second);
-  }
-
   Parser
       .add_option("--threshold", ReadoutSettings.Threshold,
                   "Set threshold timestamp to the sample where this value "
                   "(relative to the maximum value) is exceeded.")
       ->group("Delay Line Options")
       ->default_str("0.1");
-
+  
+  std::vector<std::pair<std::string, ChRole>> ChRoleMap{
+    {"REF_TIME", ChRole::REFERENCE_TIME},
+    {"AMP_X_1", ChRole::AMPLITUDE_X_AXIS_1},
+    {"AMP_X_2", ChRole::AMPLITUDE_X_AXIS_2},
+    {"AMP_Y_1", ChRole::AMPLITUDE_Y_AXIS_1},
+    {"AMP_Y_2", ChRole::AMPLITUDE_Y_AXIS_2},
+    {"TIME_X_1", ChRole::TIME_X_AXIS_1},
+    {"TIME_X_2", ChRole::TIME_X_AXIS_2},
+    {"TIME_Y_1", ChRole::TIME_Y_AXIS_1},
+    {"TIME_Y_2", ChRole::TIME_Y_AXIS_2},
+    {"NONE", ChRole::NONE}
+  };
   Parser
-      .add_set("--adc1_ch1_role", ReadoutSettings.ADC1Channel1,
-               std::move(RoleOptions), "Set the role of an input-channel.")
+      .add_option("--adc1_ch1_role", ReadoutSettings.ADC1Channel1, "Set the role of an input-channel.")
       ->group("Delay Line Options")
+      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
-      .add_set("--adc1_ch2_role", ReadoutSettings.ADC1Channel2,
-               std::move(RoleOptions), "Set the role of an input-channel.")
+      .add_option("--adc1_ch2_role", ReadoutSettings.ADC1Channel2,
+               "Set the role of an input-channel.")
       ->group("Delay Line Options")
+      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
-      .add_set("--adc1_ch3_role", ReadoutSettings.ADC1Channel3,
-               std::move(RoleOptions), "Set the role of an input-channel.")
+      .add_option("--adc1_ch3_role", ReadoutSettings.ADC1Channel3,
+               "Set the role of an input-channel.")
       ->group("Delay Line Options")
+      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
-      .add_set("--adc1_ch4_role", ReadoutSettings.ADC1Channel4,
-               std::move(RoleOptions), "Set the role of an input-channel.")
+      .add_option("--adc1_ch4_role", ReadoutSettings.ADC1Channel4,
+               "Set the role of an input-channel.")
       ->group("Delay Line Options")
+      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
 
   Parser
-      .add_set("--adc2_ch1_role", ReadoutSettings.ADC2Channel1,
-               std::move(RoleOptions), "Set the role of an input-channel.")
+      .add_option("--adc2_ch1_role", ReadoutSettings.ADC2Channel1,
+               "Set the role of an input-channel.")
       ->group("Delay Line Options")
+      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
-      .add_set("--adc2_ch2_role", ReadoutSettings.ADC2Channel2,
-               std::move(RoleOptions), "Set the role of an input-channel.")
+      .add_option("--adc2_ch2_role", ReadoutSettings.ADC2Channel2,
+               "Set the role of an input-channel.")
       ->group("Delay Line Options")
+      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
-      .add_set("--adc2_ch3_role", ReadoutSettings.ADC2Channel3,
-               std::move(RoleOptions), "Set the role of an input-channel.")
+      .add_option("--adc2_ch3_role", ReadoutSettings.ADC2Channel3,
+               "Set the role of an input-channel.")
       ->group("Delay Line Options")
+      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
-      .add_set("--adc2_ch4_role", ReadoutSettings.ADC2Channel4,
-               std::move(RoleOptions), "Set the role of an input-channel.")
+      .add_option("--adc2_ch4_role", ReadoutSettings.ADC2Channel4,
+               "Set the role of an input-channel.")
       ->group("Delay Line Options")
+      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
-}
-
-std::map<std::string, PosType> getTypeMapping() {
-  return {{"AMP", PosType::AMPLITUDE},
-          {"AMPLITUDE", PosType::AMPLITUDE},
-          {"CONST", PosType::CONST},
-          {"TIME", PosType::TIME}};
-}
-
-std::istream &operator>>(std::istream &In, PosType &Type) {
-  std::map<std::string, PosType> TypeMap = getTypeMapping();
-  std::string InString;
-  In >> InString;
-
-  Type = TypeMap.at(InString);
-  return In;
-}
-
-std::ostream &operator<<(std::ostream &In, const PosType &Type) {
-  std::map<PosType, std::string> TypeMap;
-  for (auto &Item : getTypeMapping()) {
-    TypeMap[Item.second] = Item.first;
-  }
-  return In << TypeMap.at(Type);
-}
-
-std::istream &operator>>(std::istream &In, ChRole &Role) {
-  std::map<std::string, ChRole> RoleMap = getRoleMapping();
-  std::string InString;
-  In >> InString;
-
-  Role = RoleMap.at(InString);
-  return In;
-}
-
-std::ostream &operator<<(std::ostream &In, const ChRole &Role) {
-  std::map<ChRole, std::string> RoleMap;
-  for (auto &Item : getRoleMapping()) {
-    RoleMap[Item.second] = Item.first;
-  }
-  return In << RoleMap.at(Role);
-}
-
-std::map<std::string, ChRole> getRoleMapping() {
-  return {{"REF_TIME", ChRole::REFERENCE_TIME},
-          {"AMP_X_1", ChRole::AMPLITUDE_X_AXIS_1},
-          {"AMP_X_2", ChRole::AMPLITUDE_X_AXIS_2},
-          {"AMP_Y_1", ChRole::AMPLITUDE_Y_AXIS_1},
-          {"AMP_Y_2", ChRole::AMPLITUDE_Y_AXIS_2},
-          {"TIME_X_1", ChRole::TIME_X_AXIS_1},
-          {"TIME_X_2", ChRole::TIME_X_AXIS_2},
-          {"TIME_Y_1", ChRole::TIME_Y_AXIS_1},
-          {"TIME_Y_2", ChRole::TIME_Y_AXIS_2},
-          {"NONE", ChRole::NONE}};
 }
