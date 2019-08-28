@@ -2,7 +2,10 @@
 
 #include <jalousie/Config.h>
 #include <sstream>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <nlohmann/json.hpp>
+#pragma GCC diagnostic pop
 #include <common/Log.h>
 #include <common/Trace.h>
 
