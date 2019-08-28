@@ -49,7 +49,7 @@ void BuilderReadouts::process_buffer(char *buf, size_t size) {
       continue;
     }
 
-    if (hit.coordinate == NMX_INVALID_GEOM_ID) {
+    if (hit.coordinate == Hit::InvalidCoord) {
       stats.geom_errors++;
       LOG(PROCESS, Sev::Debug, "Bad SRS mapping (coordinate) -- fec={}, chip={}",
           readout.fec, readout.chip_id);
@@ -69,7 +69,7 @@ void BuilderReadouts::process_buffer(char *buf, size_t size) {
     if (hit.weight == 0) {
 //        LOG(PROCESS, Sev::Warning,
 //            "Accepted readout with adc=0, may distort uTPC results, hit={}",
-//            hit.debug());
+//            hit.to_string());
       // \todo What to do? Cannot be 0 for CoM in uTPC. Reject?
       hit.weight = 1;
     }

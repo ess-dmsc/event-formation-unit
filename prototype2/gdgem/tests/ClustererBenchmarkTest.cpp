@@ -5,8 +5,8 @@
 #include <test/TestBase.h>
 
 #include <gdgem/nmx/Readout.h>
-#include <common/clustering/GapClusterer.h>
-#include <common/clustering/GapMatcher.h>
+#include <common/reduction/clustering/GapClusterer.h>
+#include <common/reduction/matching/GapMatcher.h>
 
 using namespace Gem;
 
@@ -31,10 +31,7 @@ public:
   }
 
   void flush() {
-    std::sort(buffer.begin(), buffer.end(),
-              [](const Hit &e1, const Hit &e2) {
-                return e1.time < e2.time;
-              });
+    sort_chronologically(buffer);
     if (clusterer)
       clusterer->cluster(buffer);
     buffer.clear();
@@ -44,7 +41,7 @@ public:
 
   std::shared_ptr<AbstractClusterer> clusterer;
 
-  HitContainer buffer;
+  HitVector buffer;
   uint64_t prev_srs_time {0};
   size_t srs_overflows{0};
   size_t negative_chip_times{0};
@@ -68,9 +65,8 @@ static void Doit(benchmark::State &state) {
       std::make_shared<GapClusterer>(opts.clusterer_y.max_time_gap,
                                      opts.clusterer_y.max_strip_gap);
 
-  GapMatcher matcher (opts.time_config.acquisition_window()*5,
-      opts.matcher_max_delta_time);
-
+  GapMatcher matcher (opts.time_config.acquisition_window()*5, 0, 1);
+  matcher.set_minimum_time_gap(opts.matcher_max_delta_time);
 
   std::vector<Readout> readouts;
   ReadoutFile::read(DataPath + "/readouts/a10000", readouts);

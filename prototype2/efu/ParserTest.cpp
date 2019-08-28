@@ -62,12 +62,12 @@ protected:
   BaseSettings settings = efu_args.getBaseSettings();
   int keeprunning{1};
 
-  virtual void SetUp() {
+  void SetUp() override {
     auto detectorif = Factory.create(settings);
     parser = new Parser(detectorif, stats, keeprunning);
   }
 
-  virtual void TearDown() { delete parser; }
+  void TearDown() override { delete parser; }
 
   static const unsigned int buffer_size = 9000;
 

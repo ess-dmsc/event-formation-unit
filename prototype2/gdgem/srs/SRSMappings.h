@@ -10,19 +10,16 @@
 #pragma once
 
 #include <gdgem/nmx/Readout.h>
-#include <list>
-#include <string>
+#include <common/reduction/Hit.h>
 #include <vector>
-
-#define NMX_MAX_CHIPS 16
-#define NMX_CHIP_CHANNELS 64
-#define NMX_INVALID_GEOM_ID ((uint16_t)(int16_t)(-1))
-#define NMX_INVALID_PLANE_ID ((uint8_t)(int8_t)(-1))
 
 namespace Gem {
 
 class SRSMappings {
 public:
+  static constexpr size_t MaxChannelsInVMM {64};
+  static constexpr size_t MaxChipsInFEC {16};
+
   //// \brief define mappings for sequence of chips in one plane
   /// \param planeID ID of plane (edge of panel) being defined
   /// \param chips list of (FEC, VMM) pairs in the order of increasing strip
@@ -38,6 +35,9 @@ public:
   void set_mapping(uint16_t fecID, uint16_t vmmID, uint8_t planeID,
                    uint16_t strip_offset);
 
+  void set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t channel,
+                   uint8_t plane, uint16_t coord);
+
   uint16_t get_strip(const Readout &readout) const;
 
   uint8_t get_plane(const Readout &readout) const;
@@ -46,8 +46,16 @@ public:
   std::string debug() const;
 
 private:
-  std::vector<std::vector<uint16_t>> offsets_; /// strip number mappings
-  std::vector<std::vector<uint8_t>> planes_;   /// planeID mappings
+  struct MappingResult
+  {
+    uint8_t plane {Hit::InvalidPlane};
+    uint16_t coordinate {Hit::InvalidCoord};
+  };
+
+  using ChipMappings = std::vector<MappingResult>;
+  using FecMappings = std::vector<ChipMappings>;
+
+  std::vector<FecMappings> mappings_;
 };
 
 }

@@ -9,8 +9,8 @@ namespace Multigrid {
 
 class BuilderMesytec : public BuilderReadouts {
 public:
-  BuilderMesytec(const SequoiaGeometry& geometry, bool spoof_time,
-      std::string dump_dir = "");
+  BuilderMesytec(const DetectorMappings& geometry, bool spoof_time,
+                 std::string dump_dir = "");
 
   void parse(Buffer<uint8_t> buffer) override;
 

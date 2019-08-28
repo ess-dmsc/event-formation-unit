@@ -73,8 +73,8 @@ TEST_F(TrackSerializerTest, DeSerialize) {
     addxandy(i, 0x1111, 0x2222, 100 + i, 0x3333, 0x4444);
   }
   EXPECT_TRUE(tser.add_track(event, 0.0, 0.0));
-  EXPECT_EQ(event.c1.hits.size(), entries);
-  EXPECT_EQ(event.c2.hits.size(), entries);
+  EXPECT_EQ(event.ClusterA.hits.size(), entries);
+  EXPECT_EQ(event.ClusterB.hits.size(), entries);
 
   auto buffer = tser.serialize();
   EXPECT_TRUE(buffer.size > entries * entry_size * 2); //  x and y
@@ -102,13 +102,13 @@ TEST_F(TrackSerializerTest, DeSerialize) {
 TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
   MESSAGE() << "Allocating a TrackSerializer object on every iteration\n";
   for (unsigned int j = 2; j <= 1000; j *= 2) {
-    event.c1.hits.clear();
-    event.c2.hits.clear();
+    event.ClusterA.hits.clear();
+    event.ClusterB.hits.clear();
     unsigned int entries = j;
     unsigned int entry_size = 4 * 3; // Three uint32_t's
 
-    EXPECT_FALSE(event.c1.hits.size());
-    EXPECT_FALSE(event.c2.hits.size());
+    EXPECT_FALSE(event.ClusterA.hits.size());
+    EXPECT_FALSE(event.ClusterB.hits.size());
 
     TrackSerializer tser(entries, 1, "some_source");
     for (unsigned int i = 0; i < entries; i++) {
@@ -116,8 +116,8 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
                i * 3 + 0x2000);
     }
     EXPECT_TRUE(tser.add_track(event, 0.0, 0.0));
-    EXPECT_EQ(event.c1.hits.size(), entries);
-    EXPECT_EQ(event.c2.hits.size(), entries);
+    EXPECT_EQ(event.ClusterA.hits.size(), entries);
+    EXPECT_EQ(event.ClusterB.hits.size(), entries);
     auto buffer = tser.serialize();
     // MESSAGE() << "entries: " << entries << ", buffer size: " << buffer.size << ",
     // overhead: " << buffer.size - entries * entry_size * 2 << "\n";
@@ -158,8 +158,8 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
   MESSAGE() << "Reusing the same TrackSerializer object\n";
   TrackSerializer tser(entries, 1, "some_source");
   for (unsigned int i = 1; i <= 1000; i *= 2) {
-    event.c1.hits.clear();
-    event.c2.hits.clear();
+    event.ClusterA.hits.clear();
+    event.ClusterB.hits.clear();
     for (unsigned int j = 0; j < entries; j++) {
       addxandy(j, j * 2, j * 3 + 1, entries - j, j * 2 + 0x1000,
                j * 3 + 0x2000);

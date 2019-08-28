@@ -11,7 +11,6 @@
 
 #include <gdgem/nmx/AbstractBuilder.h>
 #include <gdgem/nmx/Readout.h>
-#include <common/clustering/Hit.h>
 #include <gdgem/srs/SRSMappings.h>
 
 namespace Gem {

@@ -1,7 +1,7 @@
 /** Copyright (C) 2016-2018 European Spallation Source ERIC */
 
 #include <gdgem/srs/BuilderVMM3.h>
-#include <common/clustering/GapClusterer.h>
+#include <common/reduction/clustering/GapClusterer.h>
 #include <common/TimeString.h>
 
 #include <common/Trace.h>
@@ -96,7 +96,7 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
         continue;
       }
 
-      if (hit.coordinate == NMX_INVALID_GEOM_ID) {
+      if (hit.coordinate == Hit::InvalidCoord) {
         stats.geom_errors++;
         XTRACE(PROCESS, DEB, "Bad SRS mapping (coordinate) -- fec=%d, chip=%d",
             readout.fec, readout.chip_id);
@@ -112,7 +112,7 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
 
       if (hit.weight == 0) {
         XTRACE(PROCESS, WAR,
-            "Accepted readout with adc=0, may distort uTPC results, hit=%s", hit.debug().c_str());
+            "Accepted readout with adc=0, may distort uTPC results, hit=%s", hit.to_string().c_str());
         // \todo What to do? Cannot be 0 for CoM in uTPC. Reject?
         stats.adc_zero++;
         hit.weight = 1;

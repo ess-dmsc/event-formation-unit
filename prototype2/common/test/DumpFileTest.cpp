@@ -59,7 +59,7 @@ using Hit2File = DumpFile<Hit2>;
 
 class DumpFileTest : public TestBase {
 protected:
-  virtual void SetUp() {
+  void SetUp() override {
     hdf5::error::Singleton::instance().auto_print(false);
     if (boost::filesystem::exists("dumpfile_test_00000.h5"))
     {
@@ -71,7 +71,7 @@ protected:
       boost::filesystem::remove("dumpfile_test_00001.h5");
     }
   }
-  virtual void TearDown() {}
+  void TearDown() override {}
 };
 
 TEST_F(DumpFileTest, CreateFile) {

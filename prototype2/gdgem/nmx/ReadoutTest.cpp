@@ -7,13 +7,13 @@ using namespace Gem;
 
 class NMXReadoutTest : public TestBase {
 protected:
-  virtual void SetUp() {
+  void SetUp() override {
     if (boost::filesystem::exists("readout_file_test_00000.h5"))
     {
       boost::filesystem::remove("readout_file_test_00000.h5");
     }
   }
-  virtual void TearDown() {}
+  void TearDown() override {}
 };
 
 TEST_F(NMXReadoutTest, CompoundMapping) {

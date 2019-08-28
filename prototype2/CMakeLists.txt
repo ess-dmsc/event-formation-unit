@@ -34,6 +34,8 @@ add_subdirectory(common)
 
 add_subdirectory(readout)
 
+add_subdirectory(generators)
+
 #=============================================================================
 # Plugins
 #=============================================================================
@@ -41,6 +43,7 @@ add_subdirectory(gdgem)
 add_subdirectory(multiblade)
 add_subdirectory(multigrid)
 add_subdirectory(sonde)
+add_subdirectory(jalousie)
 add_subdirectory(udp)
 add_subdirectory(adc_readout)
 add_subdirectory(tools)

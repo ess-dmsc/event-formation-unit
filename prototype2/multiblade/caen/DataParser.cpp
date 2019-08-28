@@ -76,7 +76,7 @@ int DataParser::parse(const char *buffer, unsigned int size) {
     r.local_time = d.localTime;
     r.channel = d.channel;
     r.adc = d.adcValue;
-    //XTRACE(DATA, DEB, "readout %s", r.debug().c_str());
+    //XTRACE(DATA, DEB, "readout %s", r.to_string().c_str());
   }
 
   return MBHeader->numElements;

@@ -3,7 +3,8 @@
 
 This project implements processing of neutron detector event data into neturon events. Pipelines for processing of raw data from Gd-GEM, Muli-Grid, Multi-Blade, SoNDe as well as a few other detectors have been implemented. Mostly implemented in C/C++.
 
-A description of the contents of each directory in the root of the repository can be found in [documentation/DIRECTORIES.md](documentation/DIRECTORIES.md).
+## Documentation
+For more details on the file structure, architecture, primitives see [documentation/README.md](documentation/README.md)
 
 ## Getting started
 

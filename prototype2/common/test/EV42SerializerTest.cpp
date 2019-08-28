@@ -22,14 +22,14 @@ struct MockProducer {
 };
 
 class EV42SerializerTest : public TestBase {
-  virtual void SetUp() {
+  void SetUp() override {
     for (int i = 0; i < 200000; i++) {
       time[i] = i;
       pixel[i] = 200000 - i;
     }
   }
 
-  virtual void TearDown() {}
+  void TearDown() override {}
 
 protected:
   char flatbuffer[1024 * 1024];

@@ -21,12 +21,12 @@ public:
 
 class GdGemBaseTest : public TestBase {
 public:
-  virtual void SetUp() {
+  void SetUp() override {
     LocalSettings.ConfigFile = TEST_JSON_PATH "vmm3.json";
     Settings.DetectorRxBufferSize = 100000;
     Settings.NoHwCheck = true;
   }
-  virtual void TearDown() {}
+  void TearDown() override {}
 
   BaseSettings Settings;
   NMXSettings LocalSettings;

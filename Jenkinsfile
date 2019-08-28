@@ -34,7 +34,7 @@ def failure_function(exception_obj, failureMessage) {
     throw exception_obj
 }
 
-pipeline_builder = new PipelineBuilder(this, container_build_nodes)
+pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/home/jenkins/data:/home/jenkins/refdata")
 pipeline_builder.activateEmailFailureNotifications()
 
 builders = pipeline_builder.createBuilders { container ->
@@ -47,7 +47,7 @@ builders = pipeline_builder.createBuilders { container ->
         container.copyTo(pipeline_builder.project, pipeline_builder.project)
     }  // stage
 
-    
+
     if (container.key != clangformat_os) {
         pipeline_builder.stage("${container.key}: get dependencies") {
             container.sh """
@@ -58,8 +58,8 @@ builders = pipeline_builder.createBuilders { container ->
                 conan install --build=outdated ..
             """
         }  // stage
-        
-        
+
+
         pipeline_builder.stage("${container.key}: configure") {
             def xtra_flags = ""
             if (container.key == coverage_on) {
@@ -74,7 +74,7 @@ builders = pipeline_builder.createBuilders { container ->
                 cmake -DREFDATA=/home/jenkins/refdata/EFU_reference -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
             """
         }  // stage
-        
+
         pipeline_builder.stage("${container.key}: build") {
             container.sh """
                 cd ${project}/build
@@ -85,7 +85,7 @@ builders = pipeline_builder.createBuilders { container ->
             """
         }  // stage
     }
-    
+
     if (container.key == clangformat_os) {
         pipeline_builder.stage("${container.key}: cppcheck") {
         try {
@@ -102,7 +102,7 @@ builders = pipeline_builder.createBuilders { container ->
         }  // stage
         step([$class: 'WarningsPublisher', parserConfigurations: [[parserName: 'Cppcheck Parser', pattern: "cppcheck.txt"]]])
     }
-       
+
     if (container.key == coverage_on) {
         pipeline_builder.stage("${container.key}: test coverage") {
             abs_dir = pwd()
@@ -163,7 +163,7 @@ builders = pipeline_builder.createBuilders { container ->
             """
         }  // stage
     }
-    
+
     if (container.key == archive_what) {
         pipeline_builder.stage("${container.key}: archive") {
             container.sh """
@@ -191,7 +191,7 @@ builders = pipeline_builder.createBuilders { container ->
                             """
             container.copyFrom("/home/jenkins/archive/event-formation-unit-centos7.tar.gz", '.')
             container.copyFrom("/home/jenkins/archive/BUILD_INFO", '.')
-            
+
             archiveArtifacts "event-formation-unit-centos7.tar.gz,BUILD_INFO"
         }
     }
@@ -279,6 +279,8 @@ node('docker') {
         stage("Static analysis") {
             try {
                 sh "find . -name '*TestData.h' > exclude_cloc"
+                sh "find . -name 'span.hpp' >> exclude_cloc"
+                sh "find . -name 'gcovr' >> exclude_cloc"
                 sh "cloc --exclude-list-file=exclude_cloc --by-file --xml --out=cloc.xml ."
                 sh "xsltproc jenkins/cloc2sloccount.xsl cloc.xml > sloccount.sc"
                 sloccountPublish encoding: '', pattern: ''

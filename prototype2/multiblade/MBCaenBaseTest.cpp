@@ -47,12 +47,12 @@ public:
 
 class CAENBaseTest : public ::testing::Test {
 public:
-  virtual void SetUp() {
+  void SetUp() override {
     LocalSettings.ConfigFile = "MB18Estia.json";
     Settings.DetectorRxBufferSize = 100000;
     Settings.NoHwCheck = true;
   }
-  virtual void TearDown() {}
+  void TearDown() override {}
 
   BaseSettings Settings;
   Multiblade::CAENSettings LocalSettings;

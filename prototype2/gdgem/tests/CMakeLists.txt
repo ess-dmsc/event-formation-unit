@@ -9,14 +9,15 @@ set(ClusteringBase_SRC
   ../srs/SRSTime.cpp
   ../srs/SRSMappings.cpp
   ../srs/CalibrationFile.cpp
+  ../../multigrid/reduction/ModuleGeometry.cpp
   )
 set(ClusteringBase_INC
   ../NMXConfig.h
   ../nmx/Readout.h
-  ../nmx/Readout.h
   ../srs/SRSTime.h
   ../srs/SRSMappings.h
   ../srs/CalibrationFile.h
+  ../../multigrid/reduction/ModuleGeometry.h
   )
 
 if(EXISTS ${TEST_DATA_PATH})

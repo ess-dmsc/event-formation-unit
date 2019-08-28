@@ -1,28 +1,69 @@
 {
-  "mappings" :
-  [
-    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true},
-    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true,
-      "grid_filters":{
-        "blanket":{"min":0, "max":65535, "rescale":1.0},
-        "exceptions":[
-          {"idx":26, "rescale":1.5},
-          {"idx":28, "rescale":1.5},
-          {"idx":29, "rescale":0.5},
-          {"idx":33, "rescale":1.5},
-          {"idx":34, "rescale":1.5}
-        ]
-      }
+  "mappings": [
+    {
+      "type": "MG24A",
+      "max_channel": 120,
+      "max_wire": 80,
+      "swap_wires": true,
+      "swap_grids": false
     },
-    {"max_channel":120, "max_wire":80, "max_z":20, "swap_wires":true, "swap_grids":false, "flipped_x":true, "flipped_z":true}
+    {
+      "type": "MG24A",
+      "max_channel": 120,
+      "max_wire": 80,
+      "swap_wires": true,
+      "swap_grids": false
+    },
+    {
+      "type": "MG24A",
+      "max_channel": 120,
+      "max_wire": 80,
+      "swap_wires": true,
+      "swap_grids": false
+    }
   ],
-
   "builder": {
     "type": "mesytec",
     "spoof_high_time": false
   },
 
-  "max_wire_hits" : 1,
-  "max_grid_hits" : 5,
-  "weighted" : true
+  "pipeline_config": {
+    "maximum_latency": 300000,
+    "max_wire_multiplicity": 1,
+    "max_grid_multiplicity": 5,
+    "modules": [
+      {
+        "digital_geometry": {
+          "mum_wires": 80,
+          "num_grids": 40,
+          "z_range": 20,
+          "flipped_x": true,
+          "flipped_z": true
+        },
+        "analysis_weighted": true
+      },
+      {
+        "digital_geometry": {
+          "mum_wires": 80,
+          "num_grids": 40,
+          "z_range": 20,
+          "flipped_x": true,
+          "flipped_z": true,
+          "x_offset" : 4
+        },
+        "analysis_weighted": true
+      },
+      {
+        "digital_geometry": {
+          "mum_wires": 80,
+          "num_grids": 40,
+          "z_range": 20,
+          "flipped_x": true,
+          "flipped_z": true,
+          "x_offset" : 8
+        },
+        "analysis_weighted": true
+      }
+    ]
+  }
 }

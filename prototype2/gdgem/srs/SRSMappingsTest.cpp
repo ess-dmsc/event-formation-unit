@@ -11,8 +11,13 @@ class SRSMappingsTest : public TestBase {
 protected:
   SRSMappings geometry;
   Readout r;
-  virtual void SetUp() {  }
-  virtual void TearDown() {  }
+  uint16_t bad_plane;
+  uint16_t bad_coord;
+  void SetUp() override {
+    bad_plane = Hit::InvalidPlane;
+    bad_coord = Hit::InvalidCoord;
+  }
+  void TearDown() override {  }
 };
 
 TEST_F(SRSMappingsTest, GoodMapping) {
@@ -29,8 +34,8 @@ TEST_F(SRSMappingsTest, BadMapping) {
   r.fec = 0;
   r.chip_id = 0;
   r.channel = 0;
-  EXPECT_EQ(geometry.get_plane(r), NMX_INVALID_PLANE_ID);
-  EXPECT_EQ(geometry.get_strip(r), NMX_INVALID_GEOM_ID);
+  EXPECT_EQ(geometry.get_plane(r), bad_plane);
+  EXPECT_EQ(geometry.get_strip(r), bad_coord);
 }
 
 TEST_F(SRSMappingsTest, BadFEC) {
@@ -38,8 +43,8 @@ TEST_F(SRSMappingsTest, BadFEC) {
   r.fec = 1;
   r.chip_id = 0;
   r.channel = 0;
-  EXPECT_EQ(geometry.get_plane(r), NMX_INVALID_PLANE_ID);
-  EXPECT_EQ(geometry.get_strip(r), NMX_INVALID_GEOM_ID);
+  EXPECT_EQ(geometry.get_plane(r), bad_plane);
+  EXPECT_EQ(geometry.get_strip(r), bad_coord);
 }
 
 TEST_F(SRSMappingsTest, BadVMM) {
@@ -48,11 +53,11 @@ TEST_F(SRSMappingsTest, BadVMM) {
   r.channel = 0;
 
   r.chip_id = 15;
-  EXPECT_EQ(geometry.get_plane(r), NMX_INVALID_PLANE_ID);
-  EXPECT_EQ(geometry.get_strip(r), NMX_INVALID_GEOM_ID);
+  EXPECT_EQ(geometry.get_plane(r), bad_plane);
+  EXPECT_EQ(geometry.get_strip(r), bad_coord);
   r.chip_id = 16;
-  EXPECT_EQ(geometry.get_plane(r), NMX_INVALID_PLANE_ID);
-  EXPECT_EQ(geometry.get_strip(r), NMX_INVALID_GEOM_ID);
+  EXPECT_EQ(geometry.get_plane(r), bad_plane);
+  EXPECT_EQ(geometry.get_strip(r), bad_coord);
 }
 
 TEST_F(SRSMappingsTest, PlaneDefinition) {
@@ -64,7 +69,7 @@ TEST_F(SRSMappingsTest, PlaneDefinition) {
   EXPECT_EQ(geometry.get_plane(r), 0);
   EXPECT_EQ(geometry.get_strip(r), 0);
   r.chip_id = 1;
-  EXPECT_EQ(geometry.get_strip(r), NMX_CHIP_CHANNELS);
+  EXPECT_EQ(geometry.get_strip(r), 64);
 }
 
 TEST_F(SRSMappingsTest, DebugString) {
