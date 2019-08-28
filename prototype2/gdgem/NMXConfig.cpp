@@ -30,7 +30,7 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   }
   catch (...) {
     XTRACE(INIT, WAR, "Invalid Json file: %s", configfile.c_str());
-    return;
+    throw std::runtime_error("NMXConfig error - Invalid Json file");
   }
 
   builder_type = root["builder_type"].get<std::string>();
