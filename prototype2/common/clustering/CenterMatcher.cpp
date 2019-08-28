@@ -79,7 +79,7 @@ CenterMatcher::CenterMatcher(uint64_t latency, uint64_t time_gap, std::string ti
             stash_event(evt);
             evt.clear();
           }
-          
+          //Plane 1 has value 0
           if (cluster->plane() == 0)
           {
             if(!evt.empty1())
@@ -89,6 +89,7 @@ CenterMatcher::CenterMatcher(uint64_t latency, uint64_t time_gap, std::string ti
               evt.clear();
             }
           }
+          //Plane 2 has value 1
           else if (cluster->plane() == 1)
           {
             if(!evt.empty2())
