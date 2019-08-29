@@ -1,4 +1,4 @@
-/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+// Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -64,7 +64,6 @@ enum class PacketType { Idle, Data, Unknown };
 
 /// \brief Parsed data containing 0 or more data modules form sampling runs.
 struct PacketInfo {
-  std::uint16_t GlobalCount;
   std::uint16_t ReadoutCount;
   PacketType Type = PacketType::Unknown;
 };
@@ -72,9 +71,9 @@ struct PacketInfo {
 /// \brief Returned by the header parser.
 struct HeaderInfo {
   PacketType Type = PacketType::Unknown;
-  std::uint16_t GlobalCount;
-  std::uint16_t ReadoutCount;
-  std::int32_t DataStart = 0;
+  RawTimeStamp ReferenceTimestamp;
+  std::uint16_t ReadoutCount{0};
+  std::int32_t DataStart{0};
 };
 
 /// \brief Returned by the trailer parser.
@@ -91,16 +90,16 @@ struct IdleInfo {
 #pragma pack(push, 2)
 /// \brief Used by the header parser to map types to the binary data.
 struct PacketHeader {
-  std::uint16_t GlobalCount;
   std::uint16_t PacketType;
   std::uint16_t ReadoutLength;
   std::uint16_t ReadoutCount;
   std::uint16_t Reserved;
+  RawTimeStamp ReferenceTimeStamp;
   void fixEndian() {
-    GlobalCount = ntohs(GlobalCount);
     PacketType = ntohs(PacketType);
     ReadoutLength = ntohs(ReadoutLength);
     ReadoutCount = ntohs(ReadoutCount);
+    ReferenceTimeStamp.fixEndian();
   }
 } __attribute__((packed));
 
@@ -151,9 +150,12 @@ protected:
   /// \brief Parses the payload of a packet. Called by parsePacket().
   /// \param[in] Packet Raw data buffer.
   /// \param[in] StartByte The byte on which the payload starts.
+  /// \param[in] ReferenceTimestamp A reference timestamp as supplied with by
+  /// the readout system.
   /// \return The start of the filler/trailer in the array.
   /// \throw ParserException See exception type for possible parsing failures.
-  size_t parseData(const InData &Packet, std::uint32_t StartByte);
+  size_t parseData(const InData &Packet, std::uint32_t StartByte,
+                   RawTimeStamp const &ReferenceTimestamp);
 
 private:
   std::function<bool(SamplingRun *)> HandleModule;

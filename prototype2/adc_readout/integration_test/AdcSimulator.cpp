@@ -16,7 +16,6 @@
 #include <chrono>
 #include <cmath>
 #include <csignal>
-#include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <random>
@@ -111,7 +110,7 @@ auto SetUpNoiseGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
       100, 50, 20, 1.0, Settings.at("offset"), BoxNr, ChNr);
   auto Glue = [Settings, SampleGen, FPGAPtr](RawTimeStamp const &Time) {
     auto SampleRun = SampleGen->generate(Settings.at("amplitude"), Time);
-    FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second);
+    FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, Time);
   };
   return std::make_shared<PoissonDelay>(Glue, Service, Settings.at("rate"));
 }
@@ -124,7 +123,7 @@ auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
       NrOfSamples, 50, 20, 1.0, Settings.at("offset"), BoxNr, ChNr);
   auto Glue = [Settings, SampleGen, FPGAPtr](RawTimeStamp const &Time) {
     auto SampleRun = SampleGen->generate(Settings.at("amplitude"), Time);
-    FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second);
+    FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, Time);
   };
   return std::make_shared<ContinousSamplingTimer>(Glue, Service, NrOfSamples,
                                                   OversamplingFactor);
@@ -156,9 +155,9 @@ auto SetUpAmpPosGenerator(asio::io_service &Service, FPGASim *FPGAPtr,
     auto Amplitudes = generateCircleAmplitudes();
     auto SampleRunX = XPosGen->generate(Amplitudes.first, Time);
     auto SampleRunY = YPosGen->generate(Amplitudes.second, Time);
-    FPGAPtr->addSamplingRun(SampleRunAnode.first, SampleRunAnode.second);
-    FPGAPtr->addSamplingRun(SampleRunX.first, SampleRunX.second);
-    FPGAPtr->addSamplingRun(SampleRunY.first, SampleRunY.second);
+    FPGAPtr->addSamplingRun(SampleRunAnode.first, SampleRunAnode.second, Time);
+    FPGAPtr->addSamplingRun(SampleRunX.first, SampleRunX.second, Time);
+    FPGAPtr->addSamplingRun(SampleRunY.first, SampleRunY.second, Time);
   };
   return std::make_shared<AmpEventDelay>(Glue, Service, EventRate);
 }

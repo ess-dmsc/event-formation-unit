@@ -29,6 +29,7 @@ struct SamplingRun {
         Data(std::move(Other.Data)) {}
   SamplingRun &operator=(const SamplingRun &) = default;
   RawTimeStamp TimeStamp;
+  RawTimeStamp ReferenceTimestamp;
   void reset() {
     Data.clear();
     OversamplingFactor = 1;

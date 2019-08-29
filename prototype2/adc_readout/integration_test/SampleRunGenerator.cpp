@@ -72,15 +72,16 @@ SampleRunGenerator::SampleRunGenerator(size_t Samples, double PeakPos,
   auto BeginIterator = PeakBuffer.begin() + BitPatternStart;
   auto EndIterator = BeginIterator + 16 * BitPatternMultiplier;
   int SampleCounter{0};
-  std::for_each(BeginIterator, EndIterator, [&SampleCounter,
-                                             BitPatternMultiplier,
-                                             BitPattern](auto &Sample) {
-    std::uint16_t BitTester = 0x8000 >> (SampleCounter / BitPatternMultiplier);
-    if (BitTester & BitPattern) {
-      Sample = 0.99;
-    }
-    ++SampleCounter;
-  });
+  std::for_each(
+      BeginIterator, EndIterator,
+      [&SampleCounter, BitPatternMultiplier, BitPattern](auto &Sample) {
+        std::uint16_t BitTester =
+            0x8000 >> (SampleCounter / BitPatternMultiplier);
+        if (BitTester & BitPattern) {
+          Sample = 0.99;
+        }
+        ++SampleCounter;
+      });
 }
 
 std::pair<void *, std::size_t>

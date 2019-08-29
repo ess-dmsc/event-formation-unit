@@ -30,15 +30,20 @@ public:
           asio::io_service &Service);
   ~FPGASim() = default;
 
-  void addSamplingRun(void *DataPtr, size_t Bytes);
+  void addSamplingRun(void const *const DataPtr, size_t Bytes,
+                      RawTimeStamp Timestamp);
   int getNrOfRuns() const { return SamplingRuns; };
+  int getNrOfPackets() const { return PacketCount; };
+  int getNrOfSentPackets() const { return SentPackets; };
+  void packetIsSent() { SentPackets.store(SentPackets + 1); };
 
 private:
+  const std::uint64_t RefTimeDeltaNS{1000000000ull / 14ull};
+  std::uint64_t CurrentRefTimeNS{0};
   int SamplingRuns{0};
   const int MaxPacketSize{9000};
   std::string Address;
   std::uint16_t Port;
-  std::atomic<std::int64_t> PacketsSent = {0};
   asio::ip::udp::socket Socket;
   asio::ip::udp::resolver Resolver;
 
@@ -64,7 +69,7 @@ private:
   asio::system_timer HeartbeatTimeout;
   asio::system_timer DataPacketTimeout;
   std::uint16_t PacketCount{0};
-
+  std::atomic_int SentPackets{0};
   std::unique_ptr<DataPacket> TransmitBuffer;
   std::unique_ptr<DataPacket> StandbyBuffer;
 

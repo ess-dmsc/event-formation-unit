@@ -11,9 +11,9 @@
 #include <cmath>
 
 using std::chrono::duration_cast;
-using std::chrono::seconds;
 using std::chrono::milliseconds;
 using std::chrono::nanoseconds;
+using std::chrono::seconds;
 using std::chrono::system_clock;
 
 SamplingTimer::SamplingTimer(std::function<void(RawTimeStamp const &)> OnTimer)

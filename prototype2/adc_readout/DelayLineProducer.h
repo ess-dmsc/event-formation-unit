@@ -12,6 +12,7 @@
 #include "AdcSettings.h"
 #include "AdcTimeStamp.h"
 #include "DelayLineEventFormation.h"
+#include "EventSerializer.h"
 #include "PulseParameters.h"
 #include <atomic>
 #include <common/Producer.h>
@@ -44,6 +45,8 @@ public:
   /// \param[in] Pulse Pulse parameters of the registered pulse.
   void addPulse(PulseParameters const Pulse);
 
+  void addReferenceTimestamp(RawTimeStamp const &ReferenceTimestamp);
+
   std::int64_t &getNrOfEvents() { return EventCounter; }
 
 protected:
@@ -64,4 +67,6 @@ protected:
   std::queue<PulseParameters> PulseQueue{};
   std::atomic_bool RunThread{true};
   ESSGeometry essgeometry{65536, 65536, 1, 1};
+  EventSerializer Serializer;
+  std::uint64_t CurrentReferenceTimestamp{0};
 };

@@ -10,9 +10,9 @@
 
 using std::chrono::duration;
 using std::chrono::duration_cast;
-using std::chrono::seconds;
 using std::chrono::milliseconds;
 using std::chrono::nanoseconds;
+using std::chrono::seconds;
 using std::chrono::system_clock;
 
 ContinousSamplingTimer::ContinousSamplingTimer(

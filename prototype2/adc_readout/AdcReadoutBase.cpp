@@ -23,7 +23,7 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
   std::function<void()> inputFunc = [this]() { this->inputThread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
-  Stats.setPrefix("adc_readout" + ReadoutSettings.GrafanaNameSuffix, GeneralSettings.GraphiteRegion);
+  Stats.setPrefix("adc_readout" + GeneralSettings.GraphiteRegion, "");
   Stats.create("input.bytes.received", AdcStats.input_bytes_received);
   Stats.create("parser.errors", AdcStats.parser_errors);
   Stats.create("parser.packets.total", AdcStats.parser_packets_total);
@@ -106,10 +106,6 @@ void AdcReadoutBase::packetFunction(InData const &Packet,
     try {
       try {
         auto PacketInfo = Parser.parsePacket(Packet);
-        if (PacketInfo.GlobalCount != ++LastGlobalCount) {
-          ++AdcStats.processing_packets_lost;
-          LastGlobalCount = PacketInfo.GlobalCount;
-        }
         ++AdcStats.parser_packets_total;
         if (PacketType::Data == PacketInfo.Type) {
           ++AdcStats.parser_packets_data;

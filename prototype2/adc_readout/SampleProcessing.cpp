@@ -13,8 +13,8 @@
 std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start,
                                   const RawTimeStamp &End,
                                   const TimeStampLocation Location) {
-  std::uint64_t StartNS = Start.GetTimeStampNS();
-  std::uint64_t EndNS = End.GetTimeStampNS();
+  std::uint64_t StartNS = Start.getTimeStampNS();
+  std::uint64_t EndNS = End.getTimeStampNS();
   if (TimeStampLocation::Start == Location) {
     return StartNS;
   }
@@ -53,7 +53,7 @@ ProcessedSamples ChannelProcessing::processModule(const SamplingRun &Samples) {
 
   for (size_t i = 0; i < Samples.Data.size(); i++) {
     if (0 == NrOfSamplesSummed) {
-      TimeStampOfFirstSample = Samples.TimeStamp.GetOffsetTimeStamp(
+      TimeStampOfFirstSample = Samples.TimeStamp.getOffsetTimeStamp(
           i * Samples.OversamplingFactor - (Samples.OversamplingFactor - 1));
     }
     SumOfSamples += Samples.Data[i];
@@ -62,7 +62,7 @@ ProcessedSamples ChannelProcessing::processModule(const SamplingRun &Samples) {
       ReturnSamples.Samples[SampleIndex] =
           SumOfSamples / FinalOversamplingFactor;
       ReturnSamples.TimeStamps[SampleIndex] =
-          TimeStampOfFirstSample.GetTimeStampNS() + TimeStampOffset;
+          TimeStampOfFirstSample.getTimeStampNS() + TimeStampOffset;
 
       ChannelProcessing::reset();
       ++SampleIndex;
@@ -139,7 +139,6 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
   MessageBuilder.add_TimestampLocation(
       Location(TimeLocSerialisationMap.at(TSLocation)));
   builder.Finish(MessageBuilder.Finish(), SampleEnvironmentDataIdentifier());
-  #pragma message("Use of Producer::produce() must be corrected to not use system time.")
-  ProducerPtr->produce({builder.GetBufferPointer(),
-    builder.GetSize()}, time(nullptr) * 1000);
+  ProducerPtr->produce({builder.GetBufferPointer(), builder.GetSize()},
+                       Data.TimeStamp / 1000000);
 }

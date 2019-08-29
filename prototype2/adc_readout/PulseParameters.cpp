@@ -43,14 +43,14 @@ PulseParameters analyseSampleRun(SamplingRun const &Run,
     if (Run.Data[i] - TempBackground > Result.PeakAmplitude) {
       PeakPosition = i;
       Result.PeakLevel = Run.Data[i];
-      Result.PeakTimestamp = Run.TimeStamp.GetOffsetTimeStamp(i);
+      Result.PeakTimestamp = Run.TimeStamp.getOffsetTimeStamp(i);
       Result.BackgroundLevel = TempBackground;
       Result.PeakAmplitude = Result.PeakLevel - Result.BackgroundLevel;
     }
   }
   if (Run.Data.size() == 1 or PeakPosition < 1) {
     Result.ThresholdTimestamp = Run.TimeStamp;
-    Result.ThresholdTimestampNS = Run.TimeStamp.GetTimeStampNS();
+    Result.ThresholdTimestampNS = Run.TimeStamp.getTimeStampNS();
     return Result;
   }
   for (auto i = 1u; i <= PeakPosition; ++i) {
@@ -64,11 +64,11 @@ PulseParameters analyseSampleRun(SamplingRun const &Run,
       auto ThresholdPosition = (i - 1) + ThresholdSubPosition;
       auto ActualThresholdPosition = ThresholdPosition * Run.OversamplingFactor;
       Result.ThresholdTimestamp =
-          Run.TimeStamp.GetOffsetTimeStamp(lround(ActualThresholdPosition));
+          Run.TimeStamp.getOffsetTimeStamp(lround(ActualThresholdPosition));
       auto TempNSTimestampCalc =
-          Run.TimeStamp.GetOffsetTimeStamp(int(ActualThresholdPosition));
+          Run.TimeStamp.getOffsetTimeStamp(int(ActualThresholdPosition));
       Result.ThresholdTimestampNS =
-          TempNSTimestampCalc.GetTimeStampNS() +
+          TempNSTimestampCalc.getTimeStampNS() +
           llround((ActualThresholdPosition - int(ActualThresholdPosition)) *
                   SampleLengthNS);
       break;

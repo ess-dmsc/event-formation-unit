@@ -8,14 +8,14 @@
 #include "AdcReadoutBase.h"
 #include "AdcSettings.h"
 #include <common/Detector.h>
+#include <common/DetectorModuleRegister.h>
 
+namespace AdcReadout {
 static AdcSettings LocalAdcSettings;
 
 void CLIArguments(CLI::App &Parser) {
   setCLIArguments(Parser, LocalAdcSettings);
 }
-
-PopulateCLIParser PopulateParser{CLIArguments};
 
 class AdcReadout : public AdcReadoutBase {
 public:
@@ -23,7 +23,5 @@ public:
       : AdcReadoutBase(Settings, LocalAdcSettings) {}
 };
 
-DetectorFactory<AdcReadout> Factory;
-
-// DetectorModuleRegistration::Registrar<AdcReadout> Register("AdcReadout",
-//                                                           CLIArguments);
+REGISTER_MODULE(AdcReadout, CLIArguments);
+} // namespace AdcReadout

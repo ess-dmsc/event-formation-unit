@@ -231,7 +231,7 @@ TEST_F(SampleRunAnalysis, TimestampTest1) {
         analyseSampleRun(TestData, ThresholdSelection(RandomGenerator));
     ASSERT_LT(std::abs(static_cast<std::int64_t>(Result.ThresholdTimestampNS) -
                        static_cast<std::int64_t>(
-                           Result.ThresholdTimestamp.GetTimeStampNS())),
+                           Result.ThresholdTimestamp.getTimeStampNS())),
               std::uint32_t(SampleLengthNS));
   }
 }

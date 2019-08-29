@@ -3,6 +3,8 @@
 ///
 /// \file
 ///
+/// \brief Header file for calculating the delay of an event.
+///
 //===----------------------------------------------------------------------===//
 
 #pragma once

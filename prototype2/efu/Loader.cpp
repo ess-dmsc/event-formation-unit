@@ -26,7 +26,7 @@ bool Loader::loadPlugin(const std::string lib) {
     auto &FoundModule = DetectorModuleRegistration::find(lib);
     ParserPopulator = FoundModule.CLISetup;
     myFactory = FoundModule.DetectorFactory.get();
-    LOG(INIT, Sev::Info, "Loaded statically linked detector module.");
+    LOG(INIT, Sev::Info, "Loaded statically linked detector module: " + lib);
     return true;
   } catch (std::runtime_error &Error) {
     LOG(INIT, Sev::Notice, "Unable to find statically linked detector module with "

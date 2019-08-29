@@ -7,8 +7,8 @@
 
 #include "../AdcReadoutBase.h"
 #include "TestUDPServer.h"
-#include <gtest/gtest.h>
 #include <array>
+#include <gtest/gtest.h>
 #include <trompeloeil.hpp>
 
 class AdcReadoutStandIn : public AdcReadoutBase {
@@ -17,9 +17,9 @@ public:
                     AdcSettings const &ReadoutSettings)
       : AdcReadoutBase(Settings, ReadoutSettings){};
   ~AdcReadoutStandIn() override = default;
-  using Detector::Threads;
   using AdcReadoutBase::AdcStats;
   using AdcReadoutBase::DataModuleQueues;
+  using Detector::Threads;
   static const int MaxPacketSize = 2048;
 
   std::array<std::uint8_t, MaxPacketSize> BufferPtr;
@@ -127,8 +127,8 @@ TEST_F(AdcReadoutTest, DISABLED_DoubleReceiveTest) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_1.dat");
-  TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
-                        PacketSize);
+  TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort,
+                        BufferPtr.data(), PacketSize);
   TestUDPServer Server2(GetPortNumber(), ReadoutSettings.AltDetectorPort,
                         BufferPtr.data(), PacketSize);
   std::this_thread::sleep_for(SleepTime);
@@ -164,17 +164,16 @@ TEST_F(AdcReadoutTest, DISABLED_GlobalCounterCorrect) {
   std::this_thread::sleep_for(SleepTime);
   auto PacketHeadPointer = reinterpret_cast<PacketHeader *>(BufferPtr.data());
   {
-    TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
-                          PacketSize);
+    TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort,
+                          BufferPtr.data(), PacketSize);
     Server1.startPacketTransmission(1, 100);
     std::this_thread::sleep_for(SleepTime);
   }
   PacketHeadPointer->fixEndian();
-  PacketHeadPointer->GlobalCount++;
   PacketHeadPointer->fixEndian();
   {
-    TestUDPServer Server2(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
-                          PacketSize);
+    TestUDPServer Server2(GetPortNumber(), Settings.DetectorPort,
+                          BufferPtr.data(), PacketSize);
     Server2.startPacketTransmission(1, 100);
     std::this_thread::sleep_for(SleepTime);
   }
@@ -193,8 +192,8 @@ public:
   AdcReadoutMock(BaseSettings const &Settings,
                  AdcSettings const &ReadoutSettings)
       : AdcReadoutBase(Settings, ReadoutSettings){};
-  using Detector::Threads;
   using AdcReadoutBase::DataModuleQueues;
+  using Detector::Threads;
   MAKE_MOCK0(inputThread, void(), override);
   MAKE_MOCK2(processingThread, void(Queue &, std::shared_ptr<std::int64_t>),
              override);

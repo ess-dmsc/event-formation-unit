@@ -3,15 +3,15 @@ asio/1.13.0@bincrafters/stable
 CLI11/1.8.0@cliutils/stable 
 fmt/5.2.0@bincrafters/stable
 google-benchmark/1.4.1-dm2@ess-dmsc/testing
-graylog-logger/1.1.5-dm1@ess-dmsc/stable
+graylog-logger/1.1.8-dm1@ess-dmsc/stable
 gtest/3121b20-dm3@ess-dmsc/stable
 h5cpp/0.1.2@ess-dmsc/testing
-jsonformoderncpp/3.1.0@vthiery/stable
+jsonformoderncpp/3.6.1@vthiery/stable
 libpcap/1.8.1@bincrafters/stable
 librdkafka/0.11.5-dm2@ess-dmsc/stable
 logical-geometry/705ea61@ess-dmsc/stable
 readerwriterqueue/07e22ec@ess-dmsc/stable
-streaming-data-types/fb4d847@ess-dmsc/stable
+streaming-data-types/358b661@ess-dmsc/stable
 trompeloeil/v31@ess-dmsc/stable
 
 [generators]

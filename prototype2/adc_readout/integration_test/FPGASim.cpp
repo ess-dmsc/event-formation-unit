@@ -126,24 +126,29 @@ void FPGASim::handleHeartbeat(const asio::error_code &Error) {
 }
 
 void FPGASim::transmitHeartbeat() {
-  IdlePacket.Head.GlobalCount = ntohs(PacketCount++);
   transmitPacket(&IdlePacket, sizeof(IdlePacket));
 }
 
 void FPGASim::transmitPacket(const void *DataPtr, const size_t Size) {
-  auto TransmitHandlerGlue = [](auto &, auto) {
-    // Do nothing
-  };
+  auto TransmitHandlerGlue = [this](auto &, auto) { this->packetIsSent(); };
 
   Socket.async_send(asio::buffer(DataPtr, Size), TransmitHandlerGlue);
 }
 
-void FPGASim::addSamplingRun(void *DataPtr, size_t Bytes) {
-  auto Success = StandbyBuffer->addSamplingRun(DataPtr, Bytes);
+void FPGASim::addSamplingRun(void const *const DataPtr, size_t Bytes,
+                             RawTimeStamp Timestamp) {
+  if (CurrentRefTimeNS == 0) {
+    CurrentRefTimeNS = Timestamp.getTimeStampNS();
+  }
+  while (Timestamp.getTimeStampNS() > CurrentRefTimeNS + RefTimeDeltaNS) {
+    CurrentRefTimeNS += RefTimeDeltaNS;
+  }
+  auto Success =
+      StandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS);
   auto BufferSizes = StandbyBuffer->getBufferSizes();
   if (not Success or BufferSizes.second - BufferSizes.first < 20) {
     transmitStandbyBuffer();
-    assert(StandbyBuffer->addSamplingRun(DataPtr, Bytes));
+    assert(StandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS));
   } else {
     startPacketTimer();
   }
@@ -161,7 +166,7 @@ void FPGASim::handlePacketTimeout(const asio::error_code &Error) {
 void FPGASim::transmitStandbyBuffer() {
   std::swap(TransmitBuffer, StandbyBuffer);
   StandbyBuffer->resetPacket();
-  auto DataInfo = TransmitBuffer->getBuffer(PacketCount, PacketCount);
+  auto DataInfo = TransmitBuffer->getBuffer(PacketCount);
   PacketCount++;
   transmitPacket(DataInfo.first, DataInfo.second);
 }

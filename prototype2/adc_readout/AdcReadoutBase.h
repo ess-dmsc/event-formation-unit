@@ -45,7 +45,7 @@ protected:
 
   /// \brief Implements the thread doing the socket communication.
   /// This function will return when Detector::runThreads is set to false.
-  /// \note There is probably no performance benefit runnign this on a seperate
+  /// \note There is probably no performance benefit running this on a seperate
   /// thread.
   virtual void inputThread();
 
@@ -67,10 +67,6 @@ protected:
   bool QueueUpDataModule(SamplingRun *Data);
 
   std::map<ChannelID, std::unique_ptr<Queue>> DataModuleQueues{};
-
-  /// \brief Used to keeps track of the global counter provided by the ADC
-  /// hardware in order to figure out if a packet has been lost.
-  std::uint16_t LastGlobalCount{0};
 
   std::map<std::string, TimeStampLocation> TimeStampLocationMap{
       {"Start", TimeStampLocation::Start},

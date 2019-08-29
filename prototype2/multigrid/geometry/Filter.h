@@ -12,7 +12,10 @@
 #include <string>
 #include <limits>
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <nlohmann/json.hpp>
+#pragma GCC diagnostic pop
 
 namespace Multigrid {
 

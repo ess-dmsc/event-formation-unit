@@ -1,6 +1,9 @@
 #pragma once
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <nlohmann/json.hpp>
+#pragma GCC diagnostic pop
 #include <fstream>
 
 inline nlohmann::json from_json_file(const std::string& fname)

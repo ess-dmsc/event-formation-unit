@@ -3,7 +3,10 @@
 #include <gdgem/NMXConfig.h>
 #include <common/reduction/analysis/UtpcAnalyzer.h>
 #include <common/reduction/analysis/MgAnalyzer.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <nlohmann/json.hpp>
+#pragma GCC diagnostic pop
 #include <fstream>
 
 #include <common/Trace.h>

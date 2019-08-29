@@ -9,7 +9,10 @@
 #include <common/Log.h>
 #include <fstream>
 #include <multiblade/caen/Config.h>
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <nlohmann/json.hpp>
+#pragma GCC diagnostic pop
 #include <common/Trace.h>
 
 namespace Multiblade {
