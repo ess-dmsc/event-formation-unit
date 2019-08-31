@@ -36,10 +36,10 @@ set(EV42SerializerTest_SRC
   )
 create_test_executable(EV42SerializerTest)
 
-set(NewStatsTest_SRC
-    StatsTest.cpp
+set(StatisticsTest_SRC
+    StatisticsTest.cpp
   )
-create_test_executable(NewStatsTest)
+create_test_executable(StatisticsTest)
 
 set(RingBufferTest_SRC
   RingBufferTest.cpp
