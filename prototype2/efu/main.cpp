@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
   ExitHandler::InitExitHandler();
 
   int64_t statUpTime{0};
-  NewStats mainStats;
+  Stats mainStats;
   mainStats.setPrefix(DetectorSettings.GraphitePrefix, DetectorSettings.GraphiteRegion);
   mainStats.create("main.uptime", statUpTime);
 

@@ -10,7 +10,7 @@
 #pragma once
 
 #include <common/Detector.h>
-#include <common/NewStats.h>
+#include <common/Stats.h>
 #include <common/Socket.h>
 #include <common/Timer.h>
 #include <string>
@@ -18,16 +18,13 @@
 class StatPublisher {
 public:
   /// \brief Connect to a Carbon/Graphite server by ip address/hostname and tcp port
-  StatPublisher(std::string ip, int port);
+  StatPublisher(std::string IP, int Port);
 
   /// \brief Send detector metrics to Carbon/Graphite server given additional stats
-  void publish(std::shared_ptr<Detector> detector, NewStats & otherstats);
+  void publish(std::shared_ptr<Detector> DetectorPtr, Stats & OtherStats);
 
 
 private:
-  static const int BufferSize = 1000;
-  char Buffer[BufferSize];
-
   /// \brief called when senddata() fails
   void handleReconnect();
 

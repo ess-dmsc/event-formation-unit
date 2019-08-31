@@ -8,9 +8,10 @@
 //
 #include <common/StatPublisher.h>
 #include <common/Log.h>
+#include <fmt/format.h>
 
 ///
-StatPublisher::StatPublisher(std::string ip, int port) :IpAddress(ip), TCPPort(port) {
+StatPublisher::StatPublisher(std::string IP, int Port) : IpAddress(IP), TCPPort(Port) {
   if (not Socket::isValidIp(IpAddress)) {
     IpAddress = Socket::getHostByName(IpAddress);
   }
@@ -18,23 +19,21 @@ StatPublisher::StatPublisher(std::string ip, int port) :IpAddress(ip), TCPPort(p
 }
 
 ///
-void StatPublisher::publish(std::shared_ptr<Detector> detector, NewStats& otherStats) {
+void StatPublisher::publish(std::shared_ptr<Detector> DetectorPtr, Stats& OtherStats) {
   int unixtime = (int)time(NULL);
 
   if (StatDb->isValidSocket()) {
-    for (int i = 1; i <= detector->statsize(); i++) {
-      int len = snprintf(Buffer, BufferSize, "%s %" PRIu64 " %d\n", detector->statname(i).c_str(),
-                  detector->statvalue(i), unixtime);
-      if (len > 0) {
-        StatDb->senddata(Buffer, len);
-      }
+    for (int i = 1; i <= DetectorPtr->statsize(); i++) {
+      auto StatString = fmt::format("{} {} {}\n", DetectorPtr->statname(i),
+                                    DetectorPtr->statvalue(i), unixtime);
+
+      StatDb->senddata(StatString.c_str(), StatString.size());
     }
-    for (size_t i = 1; i <= otherStats.size(); i++) {
-      int len = snprintf(Buffer, BufferSize, "%s %" PRIu64 " %d\n", otherStats.name(i).c_str(),
-                  otherStats.value(i), unixtime);
-      if (len > 0) {
-        StatDb->senddata(Buffer, len);
-      }
+    for (size_t i = 1; i <= OtherStats.size(); i++) {
+      auto StatString = fmt::format("{} {} {}\n", OtherStats.name(i),
+                                    OtherStats.value(i), unixtime);
+
+      StatDb->senddata(StatString.c_str(), StatString.size());
     }
   } else {
     handleReconnect();

@@ -10,7 +10,7 @@ set(efu_common_SRC
   DetectorModuleRegister.cpp
   EFUArgs.cpp
   EV42Serializer.cpp
-  NewStats.cpp
+    Stats.cpp
   Producer.cpp
   Socket.cpp
   StatPublisher.cpp
@@ -31,7 +31,7 @@ set(efu_common_INC
   JsonFile.h
   gccintel.h
   Log.h
-  NewStats.h
+    Stats.h
   Producer.h
   RingBuffer.h
   Socket.h

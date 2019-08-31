@@ -17,7 +17,7 @@
 //=============================================================================
 static int stat_get_count(std::vector<std::string> cmdargs, char *output,
                           unsigned int *obytes,
-                          std::shared_ptr<Detector> detector, NewStats stats) {
+                          std::shared_ptr<Detector> detector, Stats stats) {
   auto nargs = cmdargs.size();
 
   LOG(CMD, Sev::Debug, "STAT_GET_COUNT");
@@ -34,7 +34,7 @@ static int stat_get_count(std::vector<std::string> cmdargs, char *output,
 
 //=============================================================================
 static int stat_get(std::vector<std::string> cmdargs, char *output,
-                    unsigned int *obytes, std::shared_ptr<Detector> detector, NewStats stats) {
+                    unsigned int *obytes, std::shared_ptr<Detector> detector, Stats stats) {
   auto nargs = cmdargs.size();
   LOG(CMD, Sev::Debug, "STAT_GET");
   if (nargs != 2) {
@@ -152,7 +152,7 @@ static int efu_exit(std::vector<std::string> cmdargs, UNUSED char *output,
 
 /******************************************************************************/
 /******************************************************************************/
-Parser::Parser(std::shared_ptr<Detector> detector, NewStats &mainStats, int &keep_running) {
+Parser::Parser(std::shared_ptr<Detector> detector, Stats &mainStats, int &keep_running) {
 
   registercmd("VERSION_GET", version_get);
 

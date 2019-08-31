@@ -46,7 +46,7 @@ std::vector<std::string> check_detector_loaded {
 
 class TestDetector : public Detector {
 public:
-  explicit TestDetector(UNUSED BaseSettings settings) : Detector("No name", settings) {
+  explicit TestDetector(UNUSED BaseSettings settings) : Detector("No StatName", settings) {
     std::cout << "TestDetector" << std::endl;
   };
   ~TestDetector() { std::cout << "~TestDetector" << std::endl; };
@@ -58,7 +58,7 @@ class ParserTest : public TestBase {
 protected:
   Parser *parser;
   EFUArgs efu_args;
-  NewStats stats;
+  Stats stats;
   BaseSettings settings = efu_args.getBaseSettings();
   int keeprunning{1};
 
@@ -188,7 +188,7 @@ TEST_F(ParserTest, DuplicateCommands) {
 
 TEST_F(ParserTest, NullDetector) {
   int keeprunning{1};
-  NewStats stats;
+  Stats stats;
   Parser parser(nullptr, stats, keeprunning); // No detector, no STAT_GET_COUNT command
 
   const char *cmd = "STAT_GET_COUNT";

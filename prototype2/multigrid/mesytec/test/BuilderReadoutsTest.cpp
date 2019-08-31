@@ -119,7 +119,7 @@ TEST_F(BuilderReadoutsTest, t00004) {
   EXPECT_EQ(ShortestPulsePeriod, 266662);
   EXPECT_EQ(external_triggers, 467);
   EXPECT_EQ(invalid_plane, 0);
-  EXPECT_EQ(plane_counts.size(), 18);
+  ASSERT_EQ(plane_counts.size(), 18);
   EXPECT_EQ(plane_counts[0], 0);
   EXPECT_EQ(plane_counts[1], 0);
   EXPECT_EQ(plane_counts[2], 43);
@@ -157,7 +157,7 @@ TEST_F(BuilderReadoutsTest, t00033) {
   EXPECT_EQ(ShortestPulsePeriod, 266662);
   EXPECT_EQ(external_triggers, 2555);
   EXPECT_EQ(invalid_plane, 0);
-  EXPECT_EQ(plane_counts.size(), 18);
+  ASSERT_EQ(plane_counts.size(), 18);
   EXPECT_EQ(plane_counts[0], 0);
   EXPECT_EQ(plane_counts[1], 0);
   EXPECT_EQ(plane_counts[2], 249);
@@ -198,7 +198,7 @@ TEST_F(BuilderReadoutsTest, t00311) {
   EXPECT_EQ(ShortestPulsePeriod, 0);
   EXPECT_EQ(external_triggers, 975);
   EXPECT_EQ(invalid_plane, 0);
-  EXPECT_EQ(plane_counts.size(), 18);
+  ASSERT_EQ(plane_counts.size(), 18);
   EXPECT_EQ(plane_counts[0], 0);
   EXPECT_EQ(plane_counts[1], 0);
   EXPECT_EQ(plane_counts[2], 89);
@@ -239,7 +239,7 @@ TEST_F(BuilderReadoutsTest, t03710) {
   EXPECT_EQ(ShortestPulsePeriod, 266662);
   EXPECT_EQ(external_triggers, 312);
   EXPECT_EQ(invalid_plane, 0);
-  EXPECT_EQ(plane_counts.size(), 18);
+  ASSERT_EQ(plane_counts.size(), 18);
   EXPECT_EQ(plane_counts[0], 1061);
   EXPECT_EQ(plane_counts[1], 0);
   EXPECT_EQ(plane_counts[2], 1073);
@@ -280,7 +280,7 @@ TEST_F(BuilderReadoutsTest, t10392) {
   EXPECT_EQ(ShortestPulsePeriod, 266662);
   EXPECT_EQ(external_triggers, 300);
   EXPECT_EQ(invalid_plane, 0);
-  EXPECT_EQ(plane_counts.size(), 18);
+  ASSERT_EQ(plane_counts.size(), 18);
   EXPECT_EQ(plane_counts[0], 0);
   EXPECT_EQ(plane_counts[1], 0);
   EXPECT_EQ(plane_counts[2], 378);

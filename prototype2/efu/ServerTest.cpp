@@ -64,7 +64,7 @@ protected:
   EFUArgs efu_args;
   BaseSettings settings = efu_args.getBaseSettings();
   Parser * parser;
-  NewStats stats;
+  Stats stats;
   void SetUp() override {
       auto detectorif = Factory.create(settings);
       parser = new Parser(detectorif, stats, keep_running);

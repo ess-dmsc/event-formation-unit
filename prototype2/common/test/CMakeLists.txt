@@ -37,7 +37,7 @@ set(EV42SerializerTest_SRC
 create_test_executable(EV42SerializerTest)
 
 set(NewStatsTest_SRC
-  NewStatsTest.cpp
+    StatsTest.cpp
   )
 create_test_executable(NewStatsTest)
 

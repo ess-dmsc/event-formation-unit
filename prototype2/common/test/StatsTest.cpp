@@ -1,18 +1,18 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <common/NewStats.h>
+#include <common/Stats.h>
 #include <test/TestBase.h>
 
 class NewStatsTest : public TestBase {};
 
 TEST_F(NewStatsTest, Constructor) {
-  NewStats stats;
+  Stats stats;
   ASSERT_EQ(stats.size(), 0U);
   ASSERT_EQ("", stats.name(0));
 }
 
 TEST_F(NewStatsTest, ConstructorDynamic) {
-  auto stats = new NewStats();
+  auto stats = new Stats();
 
   ASSERT_EQ(stats->size(), 0U);
   ASSERT_EQ("", stats->name(0));
@@ -22,7 +22,7 @@ TEST_F(NewStatsTest, ConstructorDynamic) {
 }
 
 TEST_F(NewStatsTest, CreateStat) {
-  NewStats stats;
+  Stats stats;
   int64_t ctr1 = 765;
   int64_t ctr2 = 432;
 
@@ -38,7 +38,7 @@ TEST_F(NewStatsTest, CreateStat) {
 }
 
 TEST_F(NewStatsTest, CreateStatPrefix) {
-  NewStats stats;
+  Stats stats;
   stats.setPrefix("dmsc.efu", "0");
   int64_t ctr1 = 765;
   int64_t ctr2 = 432;
@@ -57,7 +57,7 @@ TEST_F(NewStatsTest, CreateStatPrefix) {
 }
 
 TEST_F(NewStatsTest, CreateStatPrefixWithDot) {
-  NewStats stats;
+  Stats stats;
   int64_t ctr1 = 765;
   std::string DotPrefix = "some_prefix.";
   std::string Region = "0.";
@@ -69,7 +69,7 @@ TEST_F(NewStatsTest, CreateStatPrefixWithDot) {
 }
 
 TEST_F(NewStatsTest, CreateStatPrefixWitoutDot) {
-  NewStats stats;
+  Stats stats;
   int64_t ctr1 = 765;
   std::string DotPrefix = "some_prefix";
   std::string Region = "0";
@@ -81,7 +81,7 @@ TEST_F(NewStatsTest, CreateStatPrefixWitoutDot) {
 }
 
 TEST_F(NewStatsTest, DuplicateStatPrefix) {
-  NewStats stats;
+  Stats stats;
   int64_t ctr1;
   int64_t ctr2;
 
@@ -101,7 +101,7 @@ TEST_F(NewStatsTest, DuplicateStatPrefix) {
 }
 
 TEST_F(NewStatsTest, DuplicateStat) {
-  NewStats stats;
+  Stats stats;
   int64_t ctr1;
   int64_t ctr2;
 
@@ -121,7 +121,7 @@ TEST_F(NewStatsTest, DuplicateStat) {
 }
 
 TEST_F(NewStatsTest, StatValue) {
-  NewStats stats;
+  Stats stats;
   int64_t ctr1 = 0;
 
   ASSERT_EQ(-1, stats.value(0));
