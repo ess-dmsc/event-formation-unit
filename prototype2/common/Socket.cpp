@@ -147,7 +147,7 @@ int Socket::connectToRemote() {
   return ret;
 }
 
-int Socket::send(void *buffer, int len) {
+int Socket::send(void const *buffer, int len) {
   XTRACE(IPC, DEB, "Socket::send(), length %d bytes", len);
   int ret =
       sendto(SocketFileDescriptor, buffer, len, SEND_FLAGS, (struct sockaddr *)&remoteSockAddr, sizeof(remoteSockAddr));
@@ -203,7 +203,7 @@ TCPTransmitter::TCPTransmitter(const std::string ipaddr, int port) : Socket(Sock
   connectToRemote();
 }
 
-int TCPTransmitter::senddata(char *buffer, int len) {
+int TCPTransmitter::senddata(char const *buffer, int len) {
   if (!isValidSocket()) {
     XTRACE(IPC, WAR, "No file descriptor for TCP transmitter");
     return -1;

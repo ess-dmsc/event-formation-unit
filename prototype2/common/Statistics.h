@@ -17,31 +17,32 @@
 class StatTuple {
 public:
   /// \brief holds a name, value pair defining a 'stat'
-  StatTuple(std::string n, const int64_t &ctr) : name(n), counter(ctr){};
-  std::string name;
-  const int64_t &counter;
+  StatTuple(std::string Name, const int64_t &Value)
+      : StatName(Name), StatValue(Value){};
+  std::string StatName;
+  const int64_t &StatValue;
 };
 
-class NewStats {
+class Statistics {
 public:
   /// \brief null constructor
-  NewStats() = default;
+  Statistics() = default;
 
   /// \brief destructor deletes stats list
-  ~NewStats() = default;
+  ~Statistics() = default;
 
-  /// \brief creates a 'stat' entry with name and addres for counter
+  /// \brief creates a 'stat' entry with name and address for counter
   /// duplicates are not allowed.
-  int create(std::string statname, int64_t &counter);
+  int create(std::string StatName, int64_t &Value);
 
   /// \brief returns the number of registered stats
   size_t size();
 
   /// \brief returns the name of stat based on index
-  std::string &name(size_t index);
+  std::string &name(size_t Index);
 
   /// \brief return value of stat based on index
-  int64_t value(size_t index);
+  int64_t value(size_t Index);
 
   /// \brief create grafana metric prefix by concatenation of strings
   /// PointChar will be added to the end
@@ -50,6 +51,6 @@ public:
 private:
   std::string prefix{""};       ///< prepend to all stat names
   std::vector<StatTuple> stats; ///< holds all registered stats
-  std::string nostat{""}; ///< used to return when stats are not available
+  std::string nostat{""};       ///< used to return when stats are not available
   const char PointChar = '.';
 };

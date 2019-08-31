@@ -6,11 +6,13 @@
 ///
 //===----------------------------------------------------------------------===//
 //
-#include <common/StatPublisher.h>
 #include <common/Log.h>
+#include <common/StatPublisher.h>
+#include <fmt/format.h>
 
 ///
-StatPublisher::StatPublisher(std::string ip, int port) :IpAddress(ip), TCPPort(port) {
+StatPublisher::StatPublisher(std::string IP, int Port)
+    : IpAddress(IP), TCPPort(Port) {
   if (not Socket::isValidIp(IpAddress)) {
     IpAddress = Socket::getHostByName(IpAddress);
   }
@@ -18,23 +20,22 @@ StatPublisher::StatPublisher(std::string ip, int port) :IpAddress(ip), TCPPort(p
 }
 
 ///
-void StatPublisher::publish(std::shared_ptr<Detector> detector, NewStats& otherStats) {
+void StatPublisher::publish(std::shared_ptr<Detector> DetectorPtr,
+                            Statistics &OtherStats) {
   int unixtime = (int)time(NULL);
 
   if (StatDb->isValidSocket()) {
-    for (int i = 1; i <= detector->statsize(); i++) {
-      int len = snprintf(Buffer, BufferSize, "%s %" PRIu64 " %d\n", detector->statname(i).c_str(),
-                  detector->statvalue(i), unixtime);
-      if (len > 0) {
-        StatDb->senddata(Buffer, len);
-      }
+    for (int i = 1; i <= DetectorPtr->statsize(); i++) {
+      auto StatString = fmt::format("{} {} {}\n", DetectorPtr->statname(i),
+                                    DetectorPtr->statvalue(i), unixtime);
+
+      StatDb->senddata(StatString.c_str(), StatString.size());
     }
-    for (size_t i = 1; i <= otherStats.size(); i++) {
-      int len = snprintf(Buffer, BufferSize, "%s %" PRIu64 " %d\n", otherStats.name(i).c_str(),
-                  otherStats.value(i), unixtime);
-      if (len > 0) {
-        StatDb->senddata(Buffer, len);
-      }
+    for (size_t i = 1; i <= OtherStats.size(); i++) {
+      auto StatString = fmt::format("{} {} {}\n", OtherStats.name(i),
+                                    OtherStats.value(i), unixtime);
+
+      StatDb->senddata(StatString.c_str(), StatString.size());
     }
   } else {
     handleReconnect();
@@ -43,18 +44,20 @@ void StatPublisher::publish(std::shared_ptr<Detector> detector, NewStats& otherS
 
 ///
 void StatPublisher::reconnectHelper() {
-    LOG(UTILS, Sev::Warning, "Carbon/Graphite reconnect attempt {}", Retries);
-    StatDb.reset(new TCPTransmitter(IpAddress.c_str(), TCPPort));
-    if (StatDb->isValidSocket()) {
-      LOG(UTILS, Sev::Info, "Carbon/Graphite connection re-established");
-      Retries = 1;
-    } else {
-      if (Retries == MaxReconnectAttempts) {
-        LOG(UTILS, Sev::Error, "Unable to restore Carbon/Graphite connection for {} seconds", MaxReconnectAttempts * ReconnectDelayUS / 1000000.0);
-      }
+  LOG(UTILS, Sev::Warning, "Carbon/Graphite reconnect attempt {}", Retries);
+  StatDb.reset(new TCPTransmitter(IpAddress.c_str(), TCPPort));
+  if (StatDb->isValidSocket()) {
+    LOG(UTILS, Sev::Info, "Carbon/Graphite connection re-established");
+    Retries = 1;
+  } else {
+    if (Retries == MaxReconnectAttempts) {
+      LOG(UTILS, Sev::Error,
+          "Unable to restore Carbon/Graphite connection for {} seconds",
+          MaxReconnectAttempts * ReconnectDelayUS / 1000000.0);
     }
-    ReconnectTime.now();
-    Retries++;
+  }
+  ReconnectTime.now();
+  Retries++;
 }
 
 ///
@@ -62,7 +65,7 @@ void StatPublisher::handleReconnect() {
   if (Retries == 1) { // Not started yet
     reconnectHelper();
   } else {
-    if ( ReconnectTime.timeus() < ReconnectDelayUS ) {
+    if (ReconnectTime.timeus() < ReconnectDelayUS) {
       return;
     }
     reconnectHelper();

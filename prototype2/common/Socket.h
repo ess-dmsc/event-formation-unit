@@ -70,7 +70,7 @@ public:
   ssize_t receive(void *receiveBuffer, int bufferSize);
 
   /// Send data in buffer with specified length
-  int send(void *dataBuffer, int dataLength);
+  int send(void const *dataBuffer, int dataLength);
 
   /// \brief To check if data can be transmitted or received
   bool isValidSocket();
@@ -111,5 +111,5 @@ public:
   TCPTransmitter(const std::string ip, int port);
 
   ///
-  int senddata(char *buffer, int len);
+  int senddata(char const *buffer, int len);
 };
