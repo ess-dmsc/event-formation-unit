@@ -2,27 +2,28 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// This file contains the declaration of the StatPublisher class for transmitting
-/// time series metrics to a Graphite/Carbon server over TCP
+/// This file contains the declaration of the StatPublisher class for
+/// transmitting time series metrics to a Graphite/Carbon server over TCP
 ///
 //===----------------------------------------------------------------------===//
 
 #pragma once
 
 #include <common/Detector.h>
-#include <common/Stats.h>
 #include <common/Socket.h>
+#include <common/Stats.h>
 #include <common/Timer.h>
 #include <string>
 
 class StatPublisher {
 public:
-  /// \brief Connect to a Carbon/Graphite server by ip address/hostname and tcp port
+  /// \brief Connect to a Carbon/Graphite server by ip address/hostname and tcp
+  /// port
   StatPublisher(std::string IP, int Port);
 
-  /// \brief Send detector metrics to Carbon/Graphite server given additional stats
-  void publish(std::shared_ptr<Detector> DetectorPtr, Stats & OtherStats);
-
+  /// \brief Send detector metrics to Carbon/Graphite server given additional
+  /// stats
+  void publish(std::shared_ptr<Detector> DetectorPtr, Stats &OtherStats);
 
 private:
   /// \brief called when senddata() fails

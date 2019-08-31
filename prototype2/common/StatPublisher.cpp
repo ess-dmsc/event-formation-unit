@@ -6,12 +6,13 @@
 ///
 //===----------------------------------------------------------------------===//
 //
-#include <common/StatPublisher.h>
 #include <common/Log.h>
+#include <common/StatPublisher.h>
 #include <fmt/format.h>
 
 ///
-StatPublisher::StatPublisher(std::string IP, int Port) : IpAddress(IP), TCPPort(Port) {
+StatPublisher::StatPublisher(std::string IP, int Port)
+    : IpAddress(IP), TCPPort(Port) {
   if (not Socket::isValidIp(IpAddress)) {
     IpAddress = Socket::getHostByName(IpAddress);
   }
@@ -19,7 +20,8 @@ StatPublisher::StatPublisher(std::string IP, int Port) : IpAddress(IP), TCPPort(
 }
 
 ///
-void StatPublisher::publish(std::shared_ptr<Detector> DetectorPtr, Stats& OtherStats) {
+void StatPublisher::publish(std::shared_ptr<Detector> DetectorPtr,
+                            Stats &OtherStats) {
   int unixtime = (int)time(NULL);
 
   if (StatDb->isValidSocket()) {
@@ -42,18 +44,20 @@ void StatPublisher::publish(std::shared_ptr<Detector> DetectorPtr, Stats& OtherS
 
 ///
 void StatPublisher::reconnectHelper() {
-    LOG(UTILS, Sev::Warning, "Carbon/Graphite reconnect attempt {}", Retries);
-    StatDb.reset(new TCPTransmitter(IpAddress.c_str(), TCPPort));
-    if (StatDb->isValidSocket()) {
-      LOG(UTILS, Sev::Info, "Carbon/Graphite connection re-established");
-      Retries = 1;
-    } else {
-      if (Retries == MaxReconnectAttempts) {
-        LOG(UTILS, Sev::Error, "Unable to restore Carbon/Graphite connection for {} seconds", MaxReconnectAttempts * ReconnectDelayUS / 1000000.0);
-      }
+  LOG(UTILS, Sev::Warning, "Carbon/Graphite reconnect attempt {}", Retries);
+  StatDb.reset(new TCPTransmitter(IpAddress.c_str(), TCPPort));
+  if (StatDb->isValidSocket()) {
+    LOG(UTILS, Sev::Info, "Carbon/Graphite connection re-established");
+    Retries = 1;
+  } else {
+    if (Retries == MaxReconnectAttempts) {
+      LOG(UTILS, Sev::Error,
+          "Unable to restore Carbon/Graphite connection for {} seconds",
+          MaxReconnectAttempts * ReconnectDelayUS / 1000000.0);
     }
-    ReconnectTime.now();
-    Retries++;
+  }
+  ReconnectTime.now();
+  Retries++;
 }
 
 ///
@@ -61,7 +65,7 @@ void StatPublisher::handleReconnect() {
   if (Retries == 1) { // Not started yet
     reconnectHelper();
   } else {
-    if ( ReconnectTime.timeus() < ReconnectDelayUS ) {
+    if (ReconnectTime.timeus() < ReconnectDelayUS) {
       return;
     }
     reconnectHelper();

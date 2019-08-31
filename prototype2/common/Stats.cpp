@@ -9,7 +9,8 @@ int Stats::create(std::string StatName, int64_t &Value) {
   auto pfname = prefix + StatName;
   for (auto s : stats) {
     if (s.StatName == pfname or &Value == &s.StatValue) {
-      LOG(UTILS, Sev::Error, "Duplicate StatName or Value address for {}", StatName);
+      LOG(UTILS, Sev::Error, "Duplicate StatName or Value address for {}",
+          StatName);
       return -1;
     }
   }
@@ -34,7 +35,7 @@ int64_t Stats::value(size_t Index) {
 }
 
 void Stats::setPrefix(std::string StatsPrefix, std::string StatsRegion) {
-    if (StatsPrefix.size() > 0) {
+  if (StatsPrefix.size() > 0) {
     prefix = StatsPrefix;
     const char LastChar = StatsPrefix.back();
 

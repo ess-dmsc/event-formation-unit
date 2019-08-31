@@ -17,7 +17,8 @@
 class StatTuple {
 public:
   /// \brief holds a name, value pair defining a 'stat'
-  StatTuple(std::string Name, const int64_t &Value) : StatName(Name), StatValue(Value){};
+  StatTuple(std::string Name, const int64_t &Value)
+      : StatName(Name), StatValue(Value){};
   std::string StatName;
   const int64_t &StatValue;
 };
@@ -50,6 +51,6 @@ public:
 private:
   std::string prefix{""};       ///< prepend to all stat names
   std::vector<StatTuple> stats; ///< holds all registered stats
-  std::string nostat{""}; ///< used to return when stats are not available
+  std::string nostat{""};       ///< used to return when stats are not available
   const char PointChar = '.';
 };
