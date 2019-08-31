@@ -11,7 +11,7 @@
 
 #include <CLI/CLI.hpp>
 #include <atomic>
-#include <common/Stats.h>
+#include <common/Statistics.h>
 #include <functional>
 #include <map>
 #include <memory>
@@ -101,7 +101,7 @@ protected:
   std::map<std::string, CommandFunction> DetectorCommands;
   std::atomic_bool runThreads{true};
   BaseSettings EFUSettings;
-  Stats Stats;
+  Statistics Stats;
 
 private:
   std::string DetectorName;

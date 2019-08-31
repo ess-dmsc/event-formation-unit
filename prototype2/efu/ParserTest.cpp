@@ -58,7 +58,7 @@ class ParserTest : public TestBase {
 protected:
   Parser *parser;
   EFUArgs efu_args;
-  Stats stats;
+  Statistics stats;
   BaseSettings settings = efu_args.getBaseSettings();
   int keeprunning{1};
 
@@ -188,7 +188,7 @@ TEST_F(ParserTest, DuplicateCommands) {
 
 TEST_F(ParserTest, NullDetector) {
   int keeprunning{1};
-  Stats stats;
+  Statistics stats;
   Parser parser(nullptr, stats, keeprunning); // No detector, no STAT_GET_COUNT command
 
   const char *cmd = "STAT_GET_COUNT";

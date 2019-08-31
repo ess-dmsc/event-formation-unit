@@ -11,7 +11,7 @@
 
 #include <common/Detector.h>
 #include <common/Socket.h>
-#include <common/Stats.h>
+#include <common/Statistics.h>
 #include <common/Timer.h>
 #include <string>
 
@@ -23,7 +23,7 @@ public:
 
   /// \brief Send detector metrics to Carbon/Graphite server given additional
   /// stats
-  void publish(std::shared_ptr<Detector> DetectorPtr, Stats &OtherStats);
+  void publish(std::shared_ptr<Detector> DetectorPtr, Statistics &OtherStats);
 
 private:
   /// \brief called when senddata() fails

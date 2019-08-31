@@ -23,13 +23,13 @@ public:
   const int64_t &StatValue;
 };
 
-class Stats {
+class Statistics {
 public:
   /// \brief null constructor
-  Stats() = default;
+  Statistics() = default;
 
   /// \brief destructor deletes stats list
-  ~Stats() = default;
+  ~Statistics() = default;
 
   /// \brief creates a 'stat' entry with name and address for counter
   /// duplicates are not allowed.

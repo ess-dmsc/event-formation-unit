@@ -21,7 +21,7 @@ StatPublisher::StatPublisher(std::string IP, int Port)
 
 ///
 void StatPublisher::publish(std::shared_ptr<Detector> DetectorPtr,
-                            Stats &OtherStats) {
+                            Statistics &OtherStats) {
   int unixtime = (int)time(NULL);
 
   if (StatDb->isValidSocket()) {
