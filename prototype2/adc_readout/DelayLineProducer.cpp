@@ -59,7 +59,7 @@ void DelayLineProducer::serializeAndSendEvent(const DelayLineEvent &Event) {
   ++EventCounter;
   Serializer.addEvent(std::unique_ptr<EventData>(
       new EventData{Event.Timestamp, EventPosition,
-                    static_cast<std::uint32_t>(Event.Amplitude), 0, 0, 0, 0}));
+                    static_cast<std::uint32_t>(Event.Amplitude), 0, 0, Event.Timestamp, 0}));
 }
 
 DelayLineProducer::~DelayLineProducer() {
