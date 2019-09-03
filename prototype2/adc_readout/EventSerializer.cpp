@@ -127,16 +127,13 @@ void EventSerializer::serialiseFunction() {
     }
   };
   getReferenceTimestamps();
-  auto CheckForRefTimeCounter{0};
-  auto const CheckForRefTimeCounterMax{
-      100}; // Maybe do future adjustments based on profiling
   do {
-    CheckForRefTimeCounter = 0;
     while (EventQueue.try_dequeue(NewEvent)) {
       if (Events.size() == 0) {
         FirstEventTime = getCurrentTime();
       }
       Events.addEvent(NewEvent);
+      getReferenceTimestamps();
       auto EventList = Events.getEvents();
       if (not EventList.first.empty()) {
         ProduceFB(EventList.first, EventList.second);
@@ -144,10 +141,6 @@ void EventSerializer::serialiseFunction() {
         if (Events.size() > 0) {
           FirstEventTime = getCurrentTime();
         }
-      }
-      if (++CheckForRefTimeCounter >= CheckForRefTimeCounterMax) {
-        CheckForRefTimeCounter = 0;
-        getReferenceTimestamps();
       }
     }
     std::this_thread::sleep_for(
