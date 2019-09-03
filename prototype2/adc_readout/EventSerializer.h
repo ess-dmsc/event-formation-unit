@@ -18,6 +18,7 @@
 #include "concurrentqueue.h"
 #include <string>
 #include <thread>
+#include <mutex>
 
 using Queue = moodycamel::ReaderWriterQueue<std::unique_ptr<EventData>>;
 using TimestampQueue = moodycamel::ConcurrentQueue<std::uint64_t>;
