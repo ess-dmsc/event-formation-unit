@@ -43,6 +43,7 @@ std::pair<EventList, std::uint64_t> EventBuffer::getEvents() {
       RefTime = ReferenceTimestamps[i - 1];
       ReferenceTimestamps.erase(ReferenceTimestamps.begin(),
                                 ReferenceTimestamps.begin() + i - 1);
+      break;
     }
   }
 
