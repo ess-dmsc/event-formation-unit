@@ -351,7 +351,7 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferTwoEventsNoRef) {
   Serializer.reset();
 }
 
-TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventOneRef) {
+TEST_F(EventSerialisationReferenced, DISABLED_ProduceFlatbufferOneEventOneRef) {
   std::uint64_t BaseTimestamp = 1000000;
   auto checkFlatbufferTimestamp = [BaseTimestamp](auto Buffer) {
     auto EventMessage = GetEventMessage(Buffer.data());
