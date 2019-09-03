@@ -15,11 +15,12 @@
 #include <common/Producer.h>
 #include <memory>
 #include <readerwriterqueue/readerwriterqueue.h>
+#include "concurrentqueue.h"
 #include <string>
 #include <thread>
 
 using Queue = moodycamel::ReaderWriterQueue<std::unique_ptr<EventData>>;
-using TimestampQueue = moodycamel::ReaderWriterQueue<std::uint64_t>;
+using TimestampQueue = moodycamel::ConcurrentQueue<std::uint64_t>;
 
 /// \brief Serializes events from a data source (event formation kernel).
 /// Transforms the timestamps of the events based on which mode it is operating
