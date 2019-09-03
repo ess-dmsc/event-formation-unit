@@ -189,7 +189,7 @@ TEST_F(EventSerialisationIndependent, ProduceFlatbufferOnTimestampOverflow1) {
       .WITH(checkFlatbufferTimeOverflow(_1, BaseTimestamp))
       .TIMES(2)
       .RETURN(0);
-  SetUpSerializer(2);
+  SetUpSerializer(3);
   Serializer->addEvent(std::unique_ptr<EventData>(new EventData{
       BaseTimestamp, 2, 3, 4, 5, BaseTimestamp + 1, BaseTimestamp + 2}));
   Serializer->addEvent(std::unique_ptr<EventData>(new EventData{

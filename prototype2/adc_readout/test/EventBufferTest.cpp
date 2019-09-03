@@ -235,7 +235,8 @@ TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange3) {
 }
 
 TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange4) {
-  EventBuffer UnderTest(3);
+  EventBuffer UnderTest(4);
+  TestEvent->Timestamp = 100;
   UnderTest.addEvent(TestEvent);
   TestEvent->Timestamp += 10;
   UnderTest.addEvent(TestEvent);
@@ -256,7 +257,7 @@ TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange4) {
 }
 
 TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange5) {
-  EventBuffer UnderTest(4);
+  EventBuffer UnderTest(5);
   std::uint64_t const TimeOne{100};
   std::uint64_t const TimeTwo{110};
   std::uint64_t const TimeThree{120};
@@ -325,7 +326,7 @@ TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents1) {
 }
 
 TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents2) {
-  EventBuffer UnderTest(2);
+  EventBuffer UnderTest(3);
   std::uint64_t ReferenceTS = 1000;
   TestEvent->Timestamp = ReferenceTS + 100;
   UnderTest.addEvent(TestEvent);
@@ -344,7 +345,7 @@ TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents2) {
 }
 
 TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents3) {
-  EventBuffer UnderTest(2);
+  EventBuffer UnderTest(3);
   std::uint64_t ReferenceTS = 1000;
   TestEvent->Timestamp = ReferenceTS + 3000;
   UnderTest.addEvent(TestEvent);

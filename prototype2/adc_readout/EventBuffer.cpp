@@ -28,7 +28,6 @@ void EventBuffer::cullEvents(size_t NrOfElements) {
 }
 
 std::pair<EventList, std::uint64_t> EventBuffer::getEvents() {
-  size_t ReturnSize{0};
   if (Size == 0) {
     return {};
   }
@@ -36,26 +35,38 @@ std::pair<EventList, std::uint64_t> EventBuffer::getEvents() {
   if (RefTime == 0 or RefTime + MaxOffsetTime < FirstEventTime) {
     RefTime = FirstEventTime;
   }
-
-  for (size_t i = ReferenceTimestamps.size(); i != 0; --i) {
+  for (size_t i = ReferenceTimestamps.size(); i > 0; --i) {
     if (ReferenceTimestamps[i - 1] < FirstEventTime and
         ReferenceTimestamps[i - 1] + MaxOffsetTime > FirstEventTime) {
       RefTime = ReferenceTimestamps[i - 1];
       ReferenceTimestamps.erase(ReferenceTimestamps.begin(),
-                                ReferenceTimestamps.begin() + i - 1);
+                                ReferenceTimestamps.begin() + i);
       break;
     }
   }
-
+  
+  while (not ReferenceTimestamps.empty() and ReferenceTimestamps.front() < FirstEventTime) {
+    ReferenceTimestamps.pop_front();
+  }
+  
+  if (MaxSize == Size) {
+    return {nonstd::span<EventData const>(Events.data(), Size), RefTime};
+  }
+  
+  size_t ReturnSize{0};
   for (auto Iter = Events.begin(); Iter != Events.begin() + Size; ++Iter) {
-    if (Iter->Timestamp > RefTime + MaxOffsetTime) {
-      return {nonstd::span<EventData const>(Events.data(), ReturnSize),
-              RefTime};
+    if (ReferenceTimestamps.empty()) {
+      if (Iter->Timestamp > (RefTime + MaxOffsetTime)) {
+        return {nonstd::span<EventData const>(Events.data(), ReturnSize),
+          RefTime};
+      }
+    } else {
+      if (Iter->Timestamp >= ReferenceTimestamps.front()) {
+        return {nonstd::span<EventData const>(Events.data(), ReturnSize),
+          RefTime};
+      }
     }
     ++ReturnSize;
-  }
-  if (ReturnSize == MaxSize) {
-    return {nonstd::span<EventData const>(Events.data(), ReturnSize), RefTime};
   }
   return {}; // If buffer is not full or we are not out of our time range, dont
              // return any events
@@ -73,7 +84,9 @@ void EventBuffer::clearAllEvents() { Size = 0; }
 void EventBuffer::addReferenceTimestamp(std::uint64_t NewReferenceTime) {
   if (RefTime == 0) {
     RefTime = NewReferenceTime;
-  } else {
+  } if (ReferenceTimestamps.empty())   {
+    ReferenceTimestamps.push_back(NewReferenceTime);
+  } else if (ReferenceTimestamps.back() != NewReferenceTime) {
     ReferenceTimestamps.push_back(NewReferenceTime);
   }
 }
