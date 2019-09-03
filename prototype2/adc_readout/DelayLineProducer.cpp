@@ -16,8 +16,8 @@ DelayLineProducer::DelayLineProducer(std::string Broker, std::string Topic,
                                      AdcSettings EfuSettings)
     : Producer(std::move(Broker), std::move(Topic)),
       Settings(std::move(EfuSettings)),
-      Serializer("delay_line_detector", 200, 200ms, this,
-                 EventSerializer::TimestampMode::INDEPENDENT_EVENTS) {
+      Serializer("delay_line_detector", 200, 500ms, this,
+                 EventSerializer::TimestampMode::TIME_REFERENCED) {
   PulseProcessingThread =
       std::thread(&DelayLineProducer::pulseProcessingFunction, this);
 }
