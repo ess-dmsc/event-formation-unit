@@ -126,5 +126,6 @@ public:
   void addReferenceTimestamp(std::uint64_t const Timestamp) override;
 
 private:
+  std::mutex RefTimeMutex;
   std::uint64_t CurrentReferenceTimestamp{0};
 };

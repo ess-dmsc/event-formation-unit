@@ -172,6 +172,7 @@ RefFilteredEventSerializer::RefFilteredEventSerializer(
 
 void RefFilteredEventSerializer::addReferenceTimestamp(
     std::uint64_t const Timestamp) {
+  std::lock_guard<std::mutex> Lock(RefTimeMutex);
   if (Timestamp != CurrentReferenceTimestamp) {
     CurrentReferenceTimestamp = Timestamp;
     EventSerializer::addReferenceTimestamp(Timestamp);

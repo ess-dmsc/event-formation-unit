@@ -67,6 +67,6 @@ protected:
   std::queue<PulseParameters> PulseQueue{};
   std::atomic_bool RunThread{true};
   ESSGeometry essgeometry{512, 512, 1, 1};
-  EventSerializer Serializer;
+  RefFilteredEventSerializer Serializer;
   std::uint64_t CurrentReferenceTimestamp{0};
 };
