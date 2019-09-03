@@ -72,14 +72,14 @@ TEST_F(DelayLineProducerTest, CallProduceTest) {
   std::this_thread::sleep_for(50ms);
 }
 
-static std::uint16_t TestXpos = 1234;
-static std::uint16_t TestYpos = 1468;
+static std::uint16_t TestXpos = 256;
+static std::uint16_t TestYpos = 500;
 static std::uint32_t TestAmplitude = 135792;
 static std::uint64_t TestTimestamp = 987654321;
 
 bool dataHasExpectedContent(nonstd::span<const std::uint8_t> Data) {
   auto EventData = GetEventMessage(Data.data());
-  std::uint32_t DetectorIDValue = (TestYpos << 16u) + TestXpos + 1u;
+  std::uint32_t DetectorIDValue = (TestYpos << 9u) + TestXpos + 1u;
   EXPECT_EQ(EventData->pulse_time(), TestTimestamp);
   EXPECT_EQ(EventData->source_name()->str(),
             std::string("delay_line_detector"));
