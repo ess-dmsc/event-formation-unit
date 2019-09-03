@@ -375,7 +375,7 @@ TEST_F(EventSerialisationReferenced, DISABLED_ProduceFlatbufferOneEventOneRef) {
   Serializer.reset();
 }
 
-TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventTwoRefs) {
+TEST_F(EventSerialisationReferenced, DISABLED_ProduceFlatbufferOneEventTwoRefs) {
   std::uint64_t BaseTimestamp = 1000000;
   std::uint64_t TestOffsetValue =
       std::numeric_limits<std::uint32_t>::max() + 100ull;
