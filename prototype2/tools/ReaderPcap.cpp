@@ -14,7 +14,7 @@
 
 // Protocol identifiers
 const int ETHERTYPE_ARP = 0x0806;
-#define ETHERTYPE_IPV4   0x0800
+const int ETHERTYPE_IPV4 = 0x0800;
 #define IPPROTO_UDP          17
 // Header and data location specifications
 #define ETHERTYPE_OFFSET     12
