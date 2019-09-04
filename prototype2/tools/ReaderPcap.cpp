@@ -72,7 +72,7 @@ int ReaderPcap::validatePacket(struct pcap_pkthdr *header, const unsigned char *
     return 0;
   }
 
-  struct ip *ip = (struct ip *)&data[IP_HEADR_OFFSET];
+  ip *ip = (ip *)&data[IP_HEADR_OFFSET];
 
   // IPv4 header length must be 20, ip version 4, ipproto must be UDP
   if ((ip->ip_hl != 5) or (ip->ip_v != 4) or (ip->ip_p != IPPROTO_UDP)) {
