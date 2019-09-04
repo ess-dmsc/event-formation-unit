@@ -85,7 +85,7 @@ int ReaderPcap::validatePacket(struct pcap_pkthdr *header, const unsigned char *
   assert(Stats.PacketsTotal == Stats.EtherTypeIpv4 + Stats.EtherTypeArp + Stats.EtherTypeUnknown);
   assert(Stats.EtherTypeIpv4 == Stats.IpProtoUDP + Stats.IpProtoUnknown);
 
-  struct udphdr *udp = (struct udphdr *)&data[UDP_HEADER_OFFSET];
+  udphdr *udp = (udphdr *)&data[UDP_HEADER_OFFSET];
   #ifndef __FAVOR_BSD // Why is __FAVOR_BSD not defined here?
   uint16_t UdpLen = htons(udp->len);
   #else
