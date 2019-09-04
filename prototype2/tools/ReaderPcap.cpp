@@ -27,7 +27,7 @@ const int UDP_DATA_OFFSET = 42;
 
 ReaderPcap::ReaderPcap(std::string filename)
   : FileName(filename) {
-  memset(&Stats, 0, sizeof(struct stats_t));
+  memset(&Stats, 0, sizeof(stats_t));
 }
 
 
