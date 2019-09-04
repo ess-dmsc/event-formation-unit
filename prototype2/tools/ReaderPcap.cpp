@@ -136,7 +136,7 @@ int ReaderPcap::getStats() {
 
   while (true) {
     int RetVal;
-    struct pcap_pkthdr *Header;
+    pcap_pkthdr *Header;
     const unsigned char *Data;
     if ((RetVal = pcap_next_ex(PcapHandle, &Header, &Data))  < 0) {
       break;
