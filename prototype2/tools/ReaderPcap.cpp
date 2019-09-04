@@ -48,7 +48,7 @@ int ReaderPcap::open() {
 }
 
 
-int ReaderPcap::validatePacket(struct pcap_pkthdr *header, const unsigned char *data) {
+int ReaderPcap::validatePacket(pcap_pkthdr *header, const unsigned char *data) {
   Stats.PacketsTotal++; /**< total packets in pcap file */
   Stats.BytesTotal += header->len;
 
