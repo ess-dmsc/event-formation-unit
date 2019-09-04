@@ -10,8 +10,8 @@ using namespace Gem;
 
 class CalibrationFileTest : public TestBase {
 protected:
-  // void SetUp() override {  }
-  // void TearDown() override {  }
+  // virtual void SetUp() {  }
+  // virtual void TearDown() {  }
 };
 
 /** Test cases below */
@@ -20,8 +20,10 @@ TEST_F(CalibrationFileTest, Constructor) {
   for (size_t fec = 0; fec < CalibrationFile::MAX_FEC; fec++) {
     for (size_t vmm = 0; vmm < CalibrationFile::MAX_VMM; vmm++) {
       for (size_t ch = 0; ch < CalibrationFile::MAX_CH; ch++) {
-        EXPECT_FLOAT_EQ(cf.getCalibration(fec, vmm, ch).slope, 1.0);
-        EXPECT_FLOAT_EQ(cf.getCalibration(fec, vmm, ch).offset, 0.0);
+        EXPECT_FLOAT_EQ(cf.getCalibration(fec, vmm, ch).adc_slope, 1.0);
+        EXPECT_FLOAT_EQ(cf.getCalibration(fec, vmm, ch).adc_offset, 0.0);
+        EXPECT_FLOAT_EQ(cf.getCalibration(fec, vmm, ch).time_slope, 1.0);
+        EXPECT_FLOAT_EQ(cf.getCalibration(fec, vmm, ch).time_offset, 0.0);
       }
     }
   }
@@ -33,7 +35,7 @@ TEST_F(CalibrationFileTest, AddCalibration) {
   for (size_t fec = 0; fec < CalibrationFile::MAX_FEC; fec++) {
     for (size_t vmm = 0; vmm < CalibrationFile::MAX_VMM; vmm++) {
       for (size_t ch = 0; ch < CalibrationFile::MAX_CH; ch++) {
-        cf.addCalibration(fec, vmm, ch, 3.14159 + i, 2.71828 - i);
+        cf.addCalibration(fec, vmm, ch, 3.14159 + i, 2.71828 - i,3.14159 - i, 2.71828 + i);
         i++;
       }
     }
@@ -44,8 +46,10 @@ TEST_F(CalibrationFileTest, AddCalibration) {
     for (size_t vmm = 0; vmm < CalibrationFile::MAX_VMM; vmm++) {
       for (size_t ch = 0; ch < CalibrationFile::MAX_CH; ch++) {
         auto calib = cf.getCalibration(fec, vmm, ch);
-        EXPECT_FLOAT_EQ(calib.offset, 3.14159 + i);
-        EXPECT_FLOAT_EQ(calib.slope, 2.71828 - i);
+        EXPECT_FLOAT_EQ(calib.adc_offset, 3.14159 + i);
+        EXPECT_FLOAT_EQ(calib.adc_slope, 2.71828 - i);
+        EXPECT_FLOAT_EQ(calib.time_offset, 3.14159 - i);
+        EXPECT_FLOAT_EQ(calib.time_slope, 2.71828 +i);
         i++;
       }
     }
@@ -66,20 +70,41 @@ TEST_F(CalibrationFileTest, LoadCalibration) {
   CalibrationFile cf;
   cf.loadCalibration(TestData_DummyCal);
   auto cal = cf.getCalibration(1, 0, 0);
-  EXPECT_FLOAT_EQ(cal.offset, 10.0);
-  EXPECT_FLOAT_EQ(cal.slope, 1010.0);
+  EXPECT_FLOAT_EQ(cal.adc_offset, 10.0);
+  EXPECT_FLOAT_EQ(cal.adc_slope, 1010.0);
 
   cal = cf.getCalibration(1, 0, 63);
-  EXPECT_FLOAT_EQ(cal.offset, 10.7);
-  EXPECT_FLOAT_EQ(cal.slope, 1010.7);
+  EXPECT_FLOAT_EQ(cal.time_offset, 10.7);
+  EXPECT_FLOAT_EQ(cal.time_slope, 1010.7);
 
   cal = cf.getCalibration(1, 15, 0);
-  EXPECT_FLOAT_EQ(cal.offset, 2.0);
-  EXPECT_FLOAT_EQ(cal.slope, 3.0);
+  EXPECT_FLOAT_EQ(cal.adc_offset, 2.0);
+  EXPECT_FLOAT_EQ(cal.adc_slope, 3.0);
 
   cal = cf.getCalibration(1, 15, 63);
-  EXPECT_FLOAT_EQ(cal.offset, 2.7);
-  EXPECT_FLOAT_EQ(cal.slope, 3.7);
+  EXPECT_FLOAT_EQ(cal.time_offset, 2.7);
+  EXPECT_FLOAT_EQ(cal.time_slope, 3.7);
+}
+
+
+TEST_F(CalibrationFileTest, LoadCalibrationSlowControl) {
+  CalibrationFile cf;
+  cf.loadCalibration(TestData_SlowControlJsonString);
+  auto cal = cf.getCalibration(1, 0, 0);
+  EXPECT_FLOAT_EQ(cal.adc_offset, 0.0);
+  EXPECT_FLOAT_EQ(cal.adc_slope, 1.0);
+
+  cal = cf.getCalibration(1, 0, 63);
+  EXPECT_FLOAT_EQ(cal.time_offset, 0.0);
+  EXPECT_FLOAT_EQ(cal.time_slope, 1.0);
+
+  cal = cf.getCalibration(1, 15, 0);
+  EXPECT_FLOAT_EQ(cal.adc_offset, 0.0);
+  EXPECT_FLOAT_EQ(cal.adc_slope, 1.0);
+
+  cal = cf.getCalibration(1, 15, 63);
+  EXPECT_FLOAT_EQ(cal.time_offset, 0.0);
+  EXPECT_FLOAT_EQ(cal.time_slope, 1.0);
 }
 
 TEST_F(CalibrationFileTest, LoadCalibrationSizeMismatch) {
@@ -95,12 +120,12 @@ TEST_F(CalibrationFileTest, LoadCalibrationFile) {
  CalibrationFile cf(filename);
 
  auto cal = cf.getCalibration(1, 0, 0);
- EXPECT_FLOAT_EQ(cal.offset, 10.0);
- EXPECT_FLOAT_EQ(cal.slope, 1010.0);
+ EXPECT_FLOAT_EQ(cal.adc_offset, 10.0);
+ EXPECT_FLOAT_EQ(cal.adc_slope, 1010.0);
 
  cal = cf.getCalibration(1, 0, 63);
- EXPECT_FLOAT_EQ(cal.offset, 10.7);
- EXPECT_FLOAT_EQ(cal.slope, 1010.7);
+ EXPECT_FLOAT_EQ(cal.time_offset, 10.7);
+ EXPECT_FLOAT_EQ(cal.time_slope, 1010.7);
 }
 
 int main(int argc, char **argv) {

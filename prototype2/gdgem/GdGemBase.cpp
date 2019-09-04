@@ -10,6 +10,7 @@
 #include "GdGemBase.h"
 
 #include <common/reduction/matching/GapMatcher.h>
+#include <common/reduction/matching/CenterMatcher.h>
 #include <common/reduction/clustering/GapClusterer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 #include <gdgem/srs/BuilderVMM3.h>
@@ -50,14 +51,14 @@ int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
   int asic = atoi(cmdargs.at(2).c_str());
   int channel = atoi(cmdargs.at(3).c_str());
   auto calib = nmx_opts.calfile->getCalibration(fec, asic, channel);
-  if ((std::abs(calib.offset) <= 1e-6) and (std::abs(calib.slope) <= 1e-6)) {
+  if ((std::abs(calib.adc_offset) <= 1e-6) and (std::abs(calib.adc_slope) <= 1e-6) and (std::abs(calib.time_offset) <= 1e-6) and (std::abs(calib.time_slope) <= 1e-6)) {
     *obytes =
         snprintf(output, SERVER_BUFFER_SIZE, "<error> no calibration exist");
     return -Parser::EBADARGS;
   }
 
-  *obytes = snprintf(output, SERVER_BUFFER_SIZE, "%s offset: %f slope: %f",
-                     cmd.c_str(), calib.offset, calib.slope);
+ *obytes = snprintf(output, SERVER_BUFFER_SIZE, "%s adc_offset: %f adc_slope: %f, time_offset: %f time_slope: %f",
+                     cmd.c_str(), calib.adc_offset, calib.adc_slope, calib.time_offset, calib.time_slope);
 
   return Parser::OK;
 }
@@ -226,12 +227,19 @@ void GdGemBase::apply_configuration() {
   clusterer_y_ = std::make_shared<GapClusterer>(
       nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap);
 
-  auto matcher = std::make_shared<GapMatcher>(
-      nmx_opts.time_config.acquisition_window()*5, 0, 1);
-
-  matcher->set_minimum_time_gap(nmx_opts.matcher_max_delta_time);
-
-  matcher_ = matcher;
+  if(nmx_opts.matcher_name == "CenterMatcher") {
+    auto matcher = std::make_shared<CenterMatcher>(
+        nmx_opts.time_config.acquisition_window()*5, 0, 1);
+    matcher->set_max_delta_time(nmx_opts.matcher_max_delta_time);
+    matcher->set_time_algorithm(nmx_opts.time_algorithm); 
+    matcher_ = matcher;
+  }
+  else {
+    auto matcher = std::make_shared<GapMatcher>(
+        nmx_opts.time_config.acquisition_window()*5, 0, 1);
+    matcher->set_minimum_time_gap(nmx_opts.matcher_max_delta_time);
+    matcher_ = matcher;
+  }
 
   hists_.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
 

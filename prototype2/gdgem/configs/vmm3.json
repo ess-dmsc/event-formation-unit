@@ -30,6 +30,8 @@
   "hit_histograms" : true,
   "send_raw_hits" : false,
   "perform_clustering" : true,
+  
+  "clusterer" : "GapClusterer",
 
   "clusterer x" :
   {
@@ -43,11 +45,12 @@
     "max_time_gap" : 200
   },
 
+  "matcher" : "CenterMatcher",
   "matcher_max_delta_time" : 500,
 
-  "analyze_weighted" : true,
-  "analyze_max_timebins" : 3,
-  "analyze_max_timedif" : 7,
+  "time_algorithm" : "center-of-mass",
+  "analyzer" : "EventAnalyzer",
+
 
   "filters" :
   {
@@ -64,3 +67,4 @@
   "geometry_x" : 384,
   "geometry_y" : 384
 }
+

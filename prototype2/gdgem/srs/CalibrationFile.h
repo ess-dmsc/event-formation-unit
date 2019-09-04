@@ -16,8 +16,10 @@ namespace Gem {
 
 /// \todo check whether packing is necessary, static assert assert?
 struct Calibration {
-  float offset {0.0};
-  float slope {1.0};
+  float adc_offset {0.0};
+  float adc_slope {1.0};
+  float time_offset {0.0};
+  float time_slope {1.0};
 };
 
 class CalibrationFile {
@@ -37,7 +39,8 @@ public:
 
   /// \brief Generate fast mappings from IDs to indexes
   void addCalibration(size_t fecId, size_t vmmId, size_t chNo,
-                      float offset, float slope);
+                      float adc_offset, float adc_slope, 
+                      float time_offset, float time_slope);
 
   /// \brief get calibration data for (fec, vmm, channel)
   /// \todo check how vmm3 data is supplied, maybe getting an array for a given
@@ -50,7 +53,7 @@ private:
   std::vector<std::vector<std::vector<Calibration>>> Calibrations;
 
   /// Default correction
-  Calibration NoCorr {0.0, 1.0};
+  Calibration NoCorr {0.0, 1.0, 0.0, 1.0};
 };
 
 }

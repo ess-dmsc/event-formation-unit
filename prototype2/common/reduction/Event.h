@@ -56,7 +56,7 @@ public:
 
   /// \returns true if event contains no hits
   bool empty() const;
-
+  
   /// \returns true if event has both valid planes
   bool both_planes() const;
 

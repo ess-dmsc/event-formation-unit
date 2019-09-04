@@ -76,6 +76,9 @@ public:
   /// \returns pre-calculated sum of each hit's weight
   double weight_sum() const;
 
+ /// \returns pre-calculated sum of each hit's weight squared
+  double weight2_sum() const;
+  
   /// \returns pre-calculated sum of each hit's weight*coord
   double coord_mass() const;
   /// \returns center of mass in the coordinate dimension
@@ -88,6 +91,28 @@ public:
   ///          can be NaN if weight sum is zero
   double time_center() const;
 
+  /// \returns pre-calculated sum of each hit's weight*weigtht*coord
+  double coord_mass2() const;
+  /// \returns center of masss quared in the coordinate dimension
+  ///          can be NaN if weight sum is zero
+  double coord_center2() const;
+
+  /// \returns pre-calculated sum of each hit's weight*weight*time
+  double time_mass2() const;
+  /// \returns center of mass squared in the time dimension
+  ///          can be NaN if weight sum is zero
+  double time_center2() const;
+
+ /// \returns utpc coordinate, optionally weighted with charge
+  double coord_utpc(bool weighted) const;
+  /// \returns utpc time, optionally weighted with charge 
+  double time_utpc(bool weighted) const;
+  
+  /// \returns minimum coordinate span
+  int16_t lspan_min() const;
+  /// \returns maximum coordinate span
+  int16_t lspan_max() const;
+  
   /// \brief calculates the overlapping time span of two clusters
   /// \param other cluster to be compared
   /// \returns overlapping time span inclusive of end points
@@ -120,5 +145,20 @@ private:
   double weight_sum_{0.0}; ///< sum of weight
   double coord_mass_{0.0}; ///< sum of coord*weight
   double time_mass_{0.0};  ///< sum of time*weight
+
+  double weight2_sum_{0.0};
+  double coord_mass2_{0.0}; ///< sum of coord*weight*weight
+  double time_mass2_{0.0};  ///< sum of time*weight*weight
+
+  double weight_utpc_sum_{0.0};///< sum of weights of coordinates that share latest time
+  double cnt_utpc_{0.0}; ////< cnt of coordinates that share latest time
+  double coord_utpc_{0.0}; ///< sum of coord for latest time
+  double coord_mass_utpc_{0.0}; ///< sum of coord*weight for latest time
+  double time_utpc_{0.0}; ///< sum of time for latest time
+  double time_mass_utpc_{0.0};  ///< sum of time*weight for latest times
+  
+  int16_t lspan_min_ {std::numeric_limits<int16_t>::max()};
+  int16_t lspan_max_ {std::numeric_limits<int16_t>::min()};
+
 
 };

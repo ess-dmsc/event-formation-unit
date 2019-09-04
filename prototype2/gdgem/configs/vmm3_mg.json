@@ -150,6 +150,7 @@
   "send_raw_hits" : false,
   "perform_clustering" : true,
 
+  "clusterer" : "GapClusterer",
   "clusterer x" :
   {
     "max_strip_gap" : 2,
@@ -161,10 +162,11 @@
     "max_strip_gap" : 2,
     "max_time_gap" : 200
   },
-
+  
+  "matcher" : "GapMatcher",
   "matcher_max_delta_time" : 500,
 
-  "analyzer" : "MG",
+  "analyzer" : "MGAnalyzer",
   "analyze_weighted" : true,
 
   "filters" :
@@ -179,3 +181,4 @@
   "send_tracks" : true,
   "track_sample_minhits" : 6
 }
+

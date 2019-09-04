@@ -1,6 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <gdgem/NMXConfig.h>
+#include <common/reduction/analysis/EventAnalyzer.h>
 #include <common/reduction/analysis/UtpcAnalyzer.h>
 #include <common/reduction/analysis/MgAnalyzer.h>
 #pragma GCC diagnostic push
@@ -50,8 +51,7 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
     root = nlohmann::json::parse(jsonstring);
   }
   catch (...) {
-    XTRACE(INIT, WAR, "Invalid Json file: %s", configfile.c_str());
-    return;
+    XTRACE(INIT, WAR, "Invalid Json file: %s", configfile.c_str());   	
   }
 
   builder_type = root["builder_type"].get<std::string>();
@@ -106,6 +106,12 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   send_raw_hits = root["send_raw_hits"].get<bool>();
 
   if (perform_clustering) {
+   if(root.count("time_algorithm")) {
+      time_algorithm = root["time_algorithm"].get<std::string>();
+    }
+	if(root.count("clusterer")) {
+      clusterer_name = root["clusterer"].get<std::string>();
+    }
     auto cx = root["clusterer x"];
     clusterer_x.max_strip_gap = cx["max_strip_gap"].get<unsigned int>();
     clusterer_x.max_time_gap = cx["max_time_gap"].get<double>();
@@ -114,30 +120,26 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
     clusterer_y.max_strip_gap = cy["max_strip_gap"].get<unsigned int>();
     clusterer_y.max_time_gap = cy["max_time_gap"].get<double>();
 
+    if(root.count("matcher")) {
+      matcher_name = root["matcher"].get<std::string>();
+    }
     matcher_max_delta_time = root["matcher_max_delta_time"].get<double>();
 
-    if (root.count("analyzer") && (root["analyzer"] == "MG"))
-    {
-      auto MGA = std::make_shared<MGAnalyzer>();
-      MGA->weighted(root["analyze_weighted"].get<bool>());
-      geometry.nx(MGA->geometry().x_range());
-      geometry.ny(MGA->geometry().y_range());
-      geometry.nz(MGA->geometry().z_range());
-      geometry.np(1);
+    if (root.count("analyzer")) {
+      analyzer_name = root["analyzer"];
+      if(root["analyzer"] == "MGAnalyzer") {
+        auto MGA = std::make_shared<MGAnalyzer>();
+        MGA->weighted(root["analyze_weighted"].get<bool>());
+        geometry.nx(MGA->geometry().x_range());
+        geometry.ny(MGA->geometry().y_range());
+        geometry.nz(MGA->geometry().z_range());
+        geometry.np(1);
 
-      analyzer_ = MGA;
+      	analyzer_ = MGA;
+      }
     }
-    else
-    {
-      bool analyze_weighted = root["analyze_weighted"].get<bool>();
-      int16_t analyze_max_timebins = root["analyze_max_timebins"].get<unsigned int>();
-      int16_t analyze_max_timedif = root["analyze_max_timedif"].get<unsigned int>();
-
-      analyzer_ = std::make_shared<utpcAnalyzer>(
-          analyze_weighted,
-          analyze_max_timebins,
-          analyze_max_timedif);
-
+    if(analyzer_name == "EventAnalyzer") {
+      analyzer_ = std::make_shared<EventAnalyzer>(time_algorithm);
       // \todo deduce geometry from SRS mappings eventually
       //       this is better for now, while prototyping
       geometry.nx(root["geometry_x"].get<unsigned int>());
@@ -145,7 +147,7 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
       geometry.nz(1);
       geometry.np(1);
     }
-
+    
     auto f = root["filters"];
     filter.enforce_lower_uncertainty_limit =
             f["enforce_lower_uncertainty_limit"].get<bool>();
