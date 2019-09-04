@@ -110,7 +110,7 @@ int ReaderPcap::read(char *buffer, size_t bufferlen) {
     return -1;
   }
 
-  struct pcap_pkthdr *Header;
+  pcap_pkthdr *Header;
   const unsigned char *Data;
   int ret = pcap_next_ex(PcapHandle, &Header, &Data);
   if (ret < 0) {
