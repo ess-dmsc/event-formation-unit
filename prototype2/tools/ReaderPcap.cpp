@@ -41,7 +41,7 @@ ReaderPcap::~ReaderPcap() {
 int ReaderPcap::open() {
   char errbuff[PCAP_ERRBUF_SIZE];
   PcapHandle = pcap_open_offline(FileName.c_str(), errbuff);
-  if (PcapHandle == NULL) {
+  if (PcapHandle == nullptr) {
     return -1;
   }
   return 0;
