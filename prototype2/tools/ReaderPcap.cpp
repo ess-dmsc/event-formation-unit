@@ -130,7 +130,7 @@ int ReaderPcap::read(char *buffer, size_t bufferlen) {
 
 
 int ReaderPcap::getStats() {
-  if (PcapHandle == NULL) {
+  if (PcapHandle == nullptr) {
     return -1;
   }
 
