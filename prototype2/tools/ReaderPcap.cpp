@@ -15,7 +15,7 @@
 // Protocol identifiers
 const int ETHERTYPE_ARP = 0x0806;
 const int ETHERTYPE_IPV4 = 0x0800;
-const int IPPROTO_UDP = 17;
+//const int IPPROTO_UDP = 17;
 // Header and data location specifications
 const int ETHERTYPE_OFFSET = 12;
 const int ETHERNET_HEADER_SIZE = 14;
@@ -72,7 +72,7 @@ int ReaderPcap::validatePacket(pcap_pkthdr *header, const unsigned char *data) {
     return 0;
   }
 
-  ip *ip = (ip *)&data[IP_HEADR_OFFSET];
+  struct ip *ip = (struct ip *)&data[IP_HEADR_OFFSET];
 
   // IPv4 header length must be 20, ip version 4, ipproto must be UDP
   if ((ip->ip_hl != 5) or (ip->ip_v != 4) or (ip->ip_p != IPPROTO_UDP)) {
@@ -94,7 +94,7 @@ int ReaderPcap::validatePacket(pcap_pkthdr *header, const unsigned char *data) {
   assert(UdpLen >= UDP_HEADER_SIZE);
 
   #if 0
-  printf("UDP Payload, Packet %" PRIu64 ", time: %d:%d seconds, size: %d bytes\n",
+  fmt::print("UDP Payload, Packet {}, time: {}:{} seconds, size: {} bytes\n",
        Stats.PacketsTotal, (int)header->ts.tv_sec, (int)header->ts.tv_usec,
        (int)header->len);
   printf("ip src->dest: 0x%08x:%d ->0x%08x:%d\n",
@@ -160,13 +160,13 @@ void ReaderPcap::printPacket(unsigned char *data, size_t len) {
 
 void ReaderPcap::printStats() {
   fmt::print("Total packets        {}\n", Stats.PacketsTotal);
-  printf("Truncated packets    %" PRIu64 "\n", Stats.PacketsTruncated);
-  printf("Ethertype IPv4       %" PRIu64 "\n", Stats.EtherTypeIpv4);
-  printf("  ipproto UDP        %" PRIu64 "\n", Stats.IpProtoUDP);
-  printf("  ipproto other      %" PRIu64 "\n", Stats.IpProtoUnknown);
-  printf("Ethertype unknown    %" PRIu64 "\n", Stats.EtherTypeUnknown);
-  printf("Ethertype ARP        %" PRIu64 "\n", Stats.EtherTypeArp);
-  printf("Total bytes          %" PRIu64 "\n", Stats.BytesTotal);
+  fmt::print("Truncated packets    {}\n", Stats.PacketsTruncated);
+  fmt::print("Ethertype IPv4       {}\n", Stats.EtherTypeIpv4);
+  fmt::print("  ipproto UDP        {}\n", Stats.IpProtoUDP);
+  fmt::print("  ipproto other      {}\n", Stats.IpProtoUnknown);
+  fmt::print("Ethertype unknown    {}\n", Stats.EtherTypeUnknown);
+  fmt::print("Ethertype ARP        {}\n", Stats.EtherTypeArp);
+  fmt::print("Total bytes          {}\n", Stats.BytesTotal);
 
 
 }

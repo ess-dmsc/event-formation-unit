@@ -55,7 +55,6 @@ public:
   } Stats;
 
 private:
-
   /// \brief checking consistency and updating stats
   /// \return 0 for non UDP, >0 udp payload length
   int validatePacket(pcap_pkthdr *header, const unsigned char *data);
