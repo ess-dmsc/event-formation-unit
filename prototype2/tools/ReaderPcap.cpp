@@ -21,7 +21,7 @@ const int ETHERTYPE_OFFSET = 12;
 const int ETHERNET_HEADER_SIZE = 14;
 const int IP_HEADR_OFFSET = 14;
 const int IP_HEADER_SIZE = 20;
-#define UDP_HEADER_OFFSET    34
+const int UDP_HEADER_OFFSET = 34;
 #define UDP_HEADER_SIZE       8
 #define UDP_DATA_OFFSET      42
 
