@@ -18,6 +18,7 @@ struct {
   uint64_t NumberOfPackets{0}; // 0 == all packets
   uint64_t SpeedThrottle{0}; // 0 is fastest higher is slower
   uint64_t PktThrottle{0}; // 0 is fastest
+  bool Read{false};
   bool Loop{false}; // Keep looping the same file forever
   // Not yet CLI settings
   uint64_t PcapOffset{0};
@@ -33,6 +34,7 @@ int main(int argc, char *argv[]) {
   app.add_option("-a, --packets", Settings.NumberOfPackets, "Number of packets to send");
   app.add_option("-t, --throttle", Settings.SpeedThrottle, "Speed throttle (0 is fastest, larger is slower)");
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle, "Extra usleep() after n packets");
+  app.add_flag("-r, --read_only", Settings.Read, "Read pcap file and return stats");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
   CLI11_PARSE(app, argc, argv);
   char buffer[10000];
@@ -46,12 +48,24 @@ int main(int argc, char *argv[]) {
 
   std::string pcapfile(Settings.FileName);
 
+  ReaderPcap pcap(pcapfile);
+  if (pcap.open() < 0) {
+    printf("Error opening file: %s\n", pcapfile.c_str());
+    return -1;
+  }
+
+  // Don't send UDP, just read through pcap file to get stats
+  if (Settings.Read) {
+    pcap.getStats();
+    pcap.printStats();
+    return 0;
+  }
+
   uint64_t packets = 0;
   uint64_t totpackets = 0;
   uint64_t pcappackets = 0;
   do {
     int rdsize;
-    ReaderPcap pcap(pcapfile);
     while ((rdsize = pcap.read((char *)&buffer, sizeof(buffer))) != -1) {
       if (rdsize == 0) {
         printf("read non udp data - ignoring\n");
@@ -79,7 +93,7 @@ int main(int argc, char *argv[]) {
       }
     }
     if (!Settings.Loop)
-      pcap.printstats();
+      pcap.printStats();
     printf("Sent %" PRIu64 " packets\n", totpackets);
   } while (Settings.Loop);
   // pcap.printstats();

@@ -8,103 +8,146 @@
 #include <tools/ReaderPcap.h>
 #include <netinet/ip.h>
 #include <netinet/udp.h>
+#include <fmt/format.h>
+
 // GCOVR_EXCL_START
 
-ReaderPcap::ReaderPcap(std::string filename) {
-  char errbuff[PCAP_ERRBUF_SIZE];
-  memset(&stats, 0, sizeof(struct stats_t));
+// Protocol identifiers
+#define ETHERTYPE_ARP    0x0806
+#define ETHERTYPE_IPV4   0x0800
+#define IPPROTO_UDP          17
+// Header and data location specifications
+#define ETHERTYPE_OFFSET     12
+#define ETHERNET_HEADER_SIZE 14
+#define IP_HEADR_OFFSET      14
+#define IP_HEADER_SIZE       20
+#define UDP_HEADER_OFFSET    34
+#define UDP_HEADER_SIZE       8
+#define UDP_DATA_OFFSET      42
 
-  pcap = pcap_open_offline(filename.c_str(), errbuff);
-  if (pcap == NULL) {
-    printf("cant open file %s\n", filename.c_str());
+ReaderPcap::ReaderPcap(std::string filename)
+  : FileName(filename) {
+  memset(&Stats, 0, sizeof(struct stats_t));
+}
+
+
+ReaderPcap::~ReaderPcap() {
+  if (PcapHandle != NULL ) {
+    pcap_close(PcapHandle);
   }
 }
 
-ReaderPcap::~ReaderPcap() { pcap_close(pcap); }
 
-int ReaderPcap::read(char *buffer, size_t bufferlen) {
-#define IPHDROFF 14
-#define UDPHDROFF 34
-#define UDPDATAOFF 42
-
-  if (pcap == NULL)
+int ReaderPcap::open() {
+  char errbuff[PCAP_ERRBUF_SIZE];
+  PcapHandle = pcap_open_offline(FileName.c_str(), errbuff);
+  if (PcapHandle == NULL) {
     return -1;
+  }
+  return 0;
+}
 
-  struct pcap_pkthdr *header;
-  const unsigned char *data;
 
-  int ret = pcap_next_ex(pcap, &header, &data);
-  if (ret < 0)
-    return -1;
-
-  stats.rx_pkt++; /**< total packets in pcap file */
-  stats.rx_bytes += header->len;
+int ReaderPcap::validatePacket(struct pcap_pkthdr *header, const unsigned char *data) {
+  Stats.PacketsTotal++; /**< total packets in pcap file */
+  Stats.BytesTotal += header->len;
 
   if (header->len != header->caplen) {
-    stats.rx_skipped++;
+    Stats.PacketsTruncated++;
     return 0;
   }
 
-  uint16_t type = ntohs(*(uint16_t *)&data[12]);
-
+  uint16_t type = ntohs(*(uint16_t *)&data[ETHERTYPE_OFFSET]);
   // printf("packet header len %d, type %x\n", header->len, type);
 
-  if (type == 0x0806)
-    stats.eth_arp++;
-  else if (type == 0x0800)
-    stats.eth_ipv4++;
-  else
-    stats.eth_unkn++;
+  if (type == ETHERTYPE_ARP) {
+    Stats.EtherTypeArp++;
+  } else if (type == ETHERTYPE_IPV4) {
+    Stats.EtherTypeIpv4++;
+  } else {
+    Stats.EtherTypeUnknown++;
+  }
 
-  if (type != 0x0800) {
+  if (type != ETHERTYPE_IPV4) { // must be ipv4
     return 0;
   }
 
-  struct ip *ip = (struct ip *)&data[IPHDROFF];
+  struct ip *ip = (struct ip *)&data[IP_HEADR_OFFSET];
 
-  if(ip->ip_hl != 5) { // IPv4 header length 20
-    // \todo print something, or throw
-    return -1;
-  }
-  if(ip->ip_v != 4) {
-    // \todo print something, or throw
-    return -1;
-  }
-
-  if (ip->ip_p != 0x11) { // Not UDP
-    stats.ip_unkn++;
+  // IPv4 header length must be 20, ip version 4, ipproto must be UDP
+  if ((ip->ip_hl != 5) or (ip->ip_v != 4) or (ip->ip_p != IPPROTO_UDP)) {
+    Stats.IpProtoUnknown++;
     return 0;
   }
+  Stats.IpProtoUDP++;
 
-  stats.ip_udp++;           // IPv4/UDP
-  assert(header->len > 42); // Eth + IP + UDP headers
-  assert(stats.rx_pkt == stats.eth_ipv4 + stats.eth_arp + stats.eth_unkn);
-  assert(stats.eth_ipv4 == stats.ip_udp + stats.ip_unkn);
+  assert(header->len > ETHERNET_HEADER_SIZE + IP_HEADER_SIZE + UDP_HEADER_SIZE);
+  assert(Stats.PacketsTotal == Stats.EtherTypeIpv4 + Stats.EtherTypeArp + Stats.EtherTypeUnknown);
+  assert(Stats.EtherTypeIpv4 == Stats.IpProtoUDP + Stats.IpProtoUnknown);
 
-  struct udphdr *udp = (struct udphdr *)&data[UDPHDROFF];
-#ifndef __FAVOR_BSD // Why is __FAVOR_BSD not defined here?
-  uint16_t udplen = htons(udp->len);
-#else
-  uint16_t udplen = htons(udp->uh_ulen);
-#endif
-  assert(udplen >= 8);
+  struct udphdr *udp = (struct udphdr *)&data[UDP_HEADER_OFFSET];
+  #ifndef __FAVOR_BSD // Why is __FAVOR_BSD not defined here?
+  uint16_t UdpLen = htons(udp->len);
+  #else
+  uint16_t UdpLen = htons(udp->uh_ulen);
+  #endif
+  assert(UdpLen >= UDP_HEADER_SIZE);
 
-#if 0
+  #if 0
   printf("UDP Payload, Packet %" PRIu64 ", time: %d:%d seconds, size: %d bytes\n",
-       stats.rx_pkt, (int)header->ts.tv_sec, (int)header->ts.tv_usec,
+       Stats.PacketsTotal, (int)header->ts.tv_sec, (int)header->ts.tv_usec,
        (int)header->len);
   printf("ip src->dest: 0x%08x:%d ->0x%08x:%d\n",
          ntohl(*(uint32_t*)&ip->ip_src), ntohs(udp->uh_sport),
          ntohl(*(uint32_t*)&ip->ip_dst), ntohs(udp->uh_dport));
-#endif
+  #endif
 
-  auto len = std::min((size_t)(udplen - 8), bufferlen);
-  std::memcpy(buffer, &data[UDPDATAOFF], len);
-
-  return len;
+  return UdpLen;
 }
 
-void ReaderPcap::printpacket(unsigned char *data, size_t len) {
+int ReaderPcap::read(char *buffer, size_t bufferlen) {
+  if (PcapHandle == nullptr) {
+    return -1;
+  }
+
+  struct pcap_pkthdr *Header;
+  const unsigned char *Data;
+  int ret = pcap_next_ex(PcapHandle, &Header, &Data);
+  if (ret < 0) {
+    return -1;
+  }
+
+  int UdpDataLength;
+  if ((UdpDataLength = validatePacket(Header, Data)) <= 0) {
+    return UdpDataLength;
+  }
+
+  auto DataLength = std::min((size_t)(UdpDataLength - UDP_HEADER_SIZE), bufferlen);
+  std::memcpy(buffer, &Data[UDP_DATA_OFFSET], DataLength);
+
+  return DataLength;
+}
+
+
+int ReaderPcap::getStats() {
+  if (PcapHandle == NULL) {
+    return -1;
+  }
+
+  while (true) {
+    int RetVal;
+    struct pcap_pkthdr *Header;
+    const unsigned char *Data;
+    if ((RetVal = pcap_next_ex(PcapHandle, &Header, &Data))  < 0) {
+      break;
+    }
+    validatePacket(Header, Data);
+  }
+  return 0;
+}
+
+
+void ReaderPcap::printPacket(unsigned char *data, size_t len) {
   for (unsigned int i = 0; i < len; i++) {
     if ((i % 16) == 0 && i != 0) {
       printf("\n");
@@ -114,14 +157,17 @@ void ReaderPcap::printpacket(unsigned char *data, size_t len) {
   printf("\n");
 }
 
-void ReaderPcap::printstats() {
-  printf("rx packets %" PRIu64 "\n", stats.rx_pkt);
-  printf("  unknown  %" PRIu64 "\n", stats.eth_unkn);
-  printf("  arp      %" PRIu64 "\n", stats.eth_arp);
-  printf("  ipv4     %" PRIu64 "\n", stats.eth_ipv4);
-  printf("    udp    %" PRIu64 "\n", stats.ip_udp);
-  printf("    other  %" PRIu64 "\n", stats.ip_unkn);
-  printf("rx short   %" PRIu64 "\n", stats.rx_skipped);
-  printf("rx bytes   %" PRIu64 "\n", stats.rx_bytes);
+
+void ReaderPcap::printStats() {
+  printf("Total packets        %" PRIu64 "\n", Stats.PacketsTotal);
+  printf("Truncated packets    %" PRIu64 "\n", Stats.PacketsTruncated);
+  printf("Ethertype IPv4       %" PRIu64 "\n", Stats.EtherTypeIpv4);
+  printf("  ipproto UDP        %" PRIu64 "\n", Stats.IpProtoUDP);
+  printf("  ipproto other      %" PRIu64 "\n", Stats.IpProtoUnknown);
+  printf("Ethertype unknown    %" PRIu64 "\n", Stats.EtherTypeUnknown);
+  printf("Ethertype ARP        %" PRIu64 "\n", Stats.EtherTypeArp);
+  printf("Total bytes          %" PRIu64 "\n", Stats.BytesTotal);
+
+
 }
 // GCOVR_EXCL_STOP
