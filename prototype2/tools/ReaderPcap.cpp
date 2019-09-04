@@ -18,7 +18,7 @@ const int ETHERTYPE_IPV4 = 0x0800;
 const int IPPROTO_UDP = 17;
 // Header and data location specifications
 const int ETHERTYPE_OFFSET = 12;
-#define ETHERNET_HEADER_SIZE 14
+const int ETHERNET_HEADER_SIZE = 14;
 #define IP_HEADR_OFFSET      14
 #define IP_HEADER_SIZE       20
 #define UDP_HEADER_OFFSET    34
