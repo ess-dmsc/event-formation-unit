@@ -159,7 +159,7 @@ void ReaderPcap::printPacket(unsigned char *data, size_t len) {
 
 
 void ReaderPcap::printStats() {
-  printf("Total packets        %" PRIu64 "\n", Stats.PacketsTotal);
+  fmt::print("Total packets        {}\n", Stats.PacketsTotal);
   printf("Truncated packets    %" PRIu64 "\n", Stats.PacketsTruncated);
   printf("Ethertype IPv4       %" PRIu64 "\n", Stats.EtherTypeIpv4);
   printf("  ipproto UDP        %" PRIu64 "\n", Stats.IpProtoUDP);
