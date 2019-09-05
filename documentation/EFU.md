@@ -14,7 +14,7 @@ describing the EFU and four prototype detector implementations is given in https
 The main function is responsible for parsing launch-time configuration parameters, performing system hardware checks, launching detector plugins, receiving and reacting to run-time commands, periodic publishing of statistics and the termination of the threads and the process itself.
 
 
-[prototype2/efu/main.cpp](https://github.com/ess-dmsc/event-formation-unit/blob/master/prototype2/efu/main.cpp)
+[src/efu/main.cpp](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/efu/main.cpp)
 
 
 ### Threads
@@ -22,10 +22,10 @@ The behaviour of the processing threads is completely determined by the author o
 
 Four examples of already implemented detector interfaces, somewhat alike but also differing are found here
 
-[Gd-GEM](https://github.com/ess-dmsc/event-formation-unit/blob/master/prototype2/gdgem/gdgem.cpp) <br>
-[Multi-Grid](https://github.com/ess-dmsc/event-formation-unit/blob/master/prototype2/multigrid/mgmesytec.cpp) <br>
-[Multi-Blade](https://github.com/ess-dmsc/event-formation-unit/blob/master/prototype2/multiblade/mbcaen.cpp) <br>
-[SoNDe](https://github.com/ess-dmsc/event-formation-unit/blob/master/prototype2/sonde/sonde.cpp)
+[Gd-GEM](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/gdgem/gdgem.cpp) <br>
+[Multi-Grid](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/multigrid/mgmesytec.cpp) <br>
+[Multi-Blade](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/multiblade/mbcaen.cpp) <br>
+[SoNDe](https://github.com/ess-dmsc/event-formation-unit/blob/master/src/sonde/sonde.cpp)
 
 
 ## Interfaces
@@ -78,8 +78,8 @@ The default behaviour is for the command server to listen on TCP port 8888, but 
 
 The CLI interface consists of a multi-client server and a command parser. Some commands are common and some are detector specific. The important files are
 
-*prototype2/efu/Server.cpp* <br>
-*prototype2/efu/Parser.cpp*
+*src/efu/Server.cpp* <br>
+*src/efu/Parser.cpp*
 
 #### Global commands
 Registering a new global command (Parse.cpp) consist of creating a parser for that command, and registering the function.
@@ -132,12 +132,12 @@ We recommend that stats are grouped in a struct or similar, but this is not a re
 
 Stats and stat publishing is defined in
 
-*prototype2/common/NewStats.cpp* <br>
-*prototype2/common/StatPublisher.cpp*
+*src/common/NewStats.cpp* <br>
+*src/common/StatPublisher.cpp*
 
 ### Detector Interfaces
 All detector implementations must conform to the Detector interface
-https://github.com/ess-dmsc/event-formation-unit/blob/master/prototype2/common/Detector.h
+https://github.com/ess-dmsc/event-formation-unit/blob/master/src/common/Detector.h
 
 A minimal viable detector plugin is shown in
 https://github.com/ess-dmsc/event-formation-unit/blob/master/doc/minimaldetector/minimaldetector.cpp
