@@ -175,9 +175,9 @@ builders = pipeline_builder.createBuilders { container ->
                                 mkdir archive/event-formation-unit/util
                                 cp -r ${project}/utils/efushell archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/configs
-                                cp -r ${project}/prototype2/multiblade/configs/* archive/event-formation-unit/configs/
-                                cp -r ${project}/prototype2/multigrid/configs/* archive/event-formation-unit/configs/
-                                cp -r ${project}/prototype2/gdgem/configs/* archive/event-formation-unit/configs/
+                                cp -r ${project}/src/multiblade/configs/* archive/event-formation-unit/configs/
+                                cp -r ${project}/src/multigrid/configs/* archive/event-formation-unit/configs/
+                                cp -r ${project}/src/gdgem/configs/* archive/event-formation-unit/configs/
                                 cp ${project}/utils/udpredirect/udpredirect archive/event-formation-unit/util
                                 mkdir archive/event-formation-unit/data
                                 cd archive

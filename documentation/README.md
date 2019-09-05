@@ -7,12 +7,12 @@ Overview of the EFU architecture (detector agnostic)
 [EFU.md](EFU.md)
 
 Running the EFU
-[Running](../prototype2/efu/efu.md)
+[Running](../src/efu/efu.md)
 
 
 ## Event formation processing primitives
-[Definitions and assumptions](../prototype2/common/reduction/primitives.md)
+[Definitions and assumptions](../src/common/reduction/primitives.md)
 
-[Clustering](../prototype2/common/reduction/clustering/clusterer.md)
+[Clustering](../src/common/reduction/clustering/clusterer.md)
 
-[Matching](../prototype2/common/reduction/matching/matcher.md)
+[Matching](../src/common/reduction/matching/matcher.md)

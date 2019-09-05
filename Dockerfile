@@ -37,7 +37,7 @@ RUN cd efu && conan install --build=outdated ../efu_src/conanfile.txt
 COPY cmake efu_src/cmake
 COPY utils/udp efu_src/utils/udp
 COPY utils/udpredirect efu_src/utils/udpredirect
-COPY prototype2 efu_src/prototype2
+COPY src efu_src/src
 COPY CMakeLists.txt LICENSE README.md Utilities.cmake efu_src/
 
 RUN cd efu && \
