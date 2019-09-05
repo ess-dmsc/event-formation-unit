@@ -65,8 +65,8 @@ void addCLIOptions(CLI::App &Parser, SimSettings &Settings) {
   };
   Parser
       .add_option("--mode", Settings.Mode,
-               "Set the simulation (data generation) mode.")
-               ->transform(CLI::CheckedTransformer(ModeMap, CLI::ignore_case))
+                  "Set the simulation (data generation) mode.")
+      ->transform(CLI::CheckedTransformer(ModeMap, CLI::ignore_case))
       ->default_str("continous");
 
   Parser

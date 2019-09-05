@@ -22,8 +22,7 @@ bool EventBuffer::addEvent(std::unique_ptr<EventData> const &Event) {
 }
 
 void EventBuffer::cullEvents(size_t NrOfEvents) {
-  std::move(Events.begin() + NrOfEvents, Events.begin() + Size,
-            Events.begin());
+  std::move(Events.begin() + NrOfEvents, Events.begin() + Size, Events.begin());
   Size = Size - NrOfEvents;
 }
 
@@ -44,26 +43,27 @@ std::pair<EventList, std::uint64_t> EventBuffer::getEvents() {
       break;
     }
   }
-  
-  while (not ReferenceTimestamps.empty() and ReferenceTimestamps.front() < FirstEventTime) {
+
+  while (not ReferenceTimestamps.empty() and
+         ReferenceTimestamps.front() < FirstEventTime) {
     ReferenceTimestamps.pop_front();
   }
-  
+
   if (MaxSize == Size) {
     return {nonstd::span<EventData const>(Events.data(), Size), RefTime};
   }
-  
+
   size_t ReturnSize{0};
   for (auto Iter = Events.begin(); Iter != Events.begin() + Size; ++Iter) {
     if (ReferenceTimestamps.empty()) {
       if (Iter->Timestamp > (RefTime + MaxOffsetTime)) {
         return {nonstd::span<EventData const>(Events.data(), ReturnSize),
-          RefTime};
+                RefTime};
       }
     } else {
       if (Iter->Timestamp >= ReferenceTimestamps.front()) {
         return {nonstd::span<EventData const>(Events.data(), ReturnSize),
-          RefTime};
+                RefTime};
       }
     }
     ++ReturnSize;
@@ -84,7 +84,8 @@ void EventBuffer::clearAllEvents() { Size = 0; }
 void EventBuffer::addReferenceTimestamp(std::uint64_t NewReferenceTime) {
   if (RefTime == 0) {
     RefTime = NewReferenceTime;
-  } if (ReferenceTimestamps.empty())   {
+  }
+  if (ReferenceTimestamps.empty()) {
     ReferenceTimestamps.push_back(NewReferenceTime);
   } else if (ReferenceTimestamps.back() != NewReferenceTime) {
     ReferenceTimestamps.push_back(NewReferenceTime);

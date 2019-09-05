@@ -13,12 +13,12 @@
 #include "EventBuffer.h"
 #include <chrono>
 #include <common/Producer.h>
-#include <memory>
-#include <readerwriterqueue/readerwriterqueue.h>
 #include <concurrentqueue/concurrentqueue.h>
+#include <memory>
+#include <mutex>
+#include <readerwriterqueue/readerwriterqueue.h>
 #include <string>
 #include <thread>
-#include <mutex>
 
 using Queue = moodycamel::ReaderWriterQueue<std::unique_ptr<EventData>>;
 using TimestampQueue = moodycamel::ConcurrentQueue<std::uint64_t>;
