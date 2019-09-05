@@ -21,10 +21,10 @@ bool EventBuffer::addEvent(std::unique_ptr<EventData> const &Event) {
   return true;
 }
 
-void EventBuffer::cullEvents(size_t NrOfElements) {
-  std::move(Events.begin() + NrOfElements, Events.begin() + Size,
+void EventBuffer::cullEvents(size_t NrOfEvents) {
+  std::move(Events.begin() + NrOfEvents, Events.begin() + Size,
             Events.begin());
-  Size = Size - NrOfElements;
+  Size = Size - NrOfEvents;
 }
 
 std::pair<EventList, std::uint64_t> EventBuffer::getEvents() {

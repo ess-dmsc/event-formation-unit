@@ -24,7 +24,7 @@ public:
   /// \brief Initializes the event buffer.
   ///
   /// \param BufferSize The maximum number events in the buffer.
-  EventBuffer(size_t BufferSize);
+  explicit EventBuffer(size_t BufferSize);
   /// \brief Add event to buffer.
   ///
   /// \param Event The event that should be added
