@@ -77,7 +77,7 @@ message(STATUS "Reference data root directory: ${REFDATA}")
 include_directories(.)
 
 include(Utilities.cmake)
-add_subdirectory(prototype2)
+add_subdirectory(src)
 add_subdirectory(utils/udp)
 
 #=============================================================================
@@ -96,7 +96,7 @@ add_custom_target(valgrind
 add_custom_target(benchmark
     DEPENDS ${benchmark_targets})
 add_custom_target(doxygen
-    COMMAND doxygen ../prototype2/doxyfile)
+    COMMAND doxygen ../src/doxyfile)
 
 #=============================================================================
 # Finalize coverage
