@@ -87,7 +87,7 @@ TEST_F(AdcReadoutTest, DISABLED_SingleIdlePacket) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 22);
+  EXPECT_EQ(Readout.AdcStats.input_bytes_received, PacketSize);
   EXPECT_EQ(Readout.AdcStats.parser_packets_total, 1);
   EXPECT_EQ(Readout.AdcStats.parser_packets_idle, 1);
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
@@ -103,7 +103,7 @@ TEST_F(AdcReadoutTest, DISABLED_SingleDataPacket) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(20ms);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 1470);
+  EXPECT_EQ(Readout.AdcStats.input_bytes_received, PacketSize);
   EXPECT_EQ(Readout.AdcStats.parser_packets_total, 1);
   EXPECT_EQ(Readout.AdcStats.parser_packets_data, 1);
   EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
@@ -150,7 +150,7 @@ TEST_F(AdcReadoutTest, DISABLED_GlobalCounterError) {
   Server.startPacketTransmission(2, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 2 * 1470);
+  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 2 * PacketSize);
   EXPECT_EQ(Readout.AdcStats.parser_packets_total, 2);
   EXPECT_EQ(Readout.AdcStats.parser_errors, 0);
   EXPECT_EQ(Readout.AdcStats.parser_packets_data, 2);
@@ -178,7 +178,7 @@ TEST_F(AdcReadoutTest, DISABLED_GlobalCounterCorrect) {
     std::this_thread::sleep_for(SleepTime);
   }
   Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 2 * 1470);
+  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 2 * PacketSize);
   EXPECT_EQ(Readout.AdcStats.parser_packets_total, 2);
   EXPECT_EQ(Readout.AdcStats.parser_errors, 0);
   EXPECT_EQ(Readout.AdcStats.parser_packets_data, 2);
