@@ -15,7 +15,7 @@
 #include <common/Producer.h>
 #include <memory>
 #include <readerwriterqueue/readerwriterqueue.h>
-#include "concurrentqueue.h"
+#include <concurrentqueue/concurrentqueue.h>
 #include <string>
 #include <thread>
 #include <mutex>
