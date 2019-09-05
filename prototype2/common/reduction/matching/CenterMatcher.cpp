@@ -8,8 +8,6 @@
 
 #include <common/reduction/matching/CenterMatcher.h>
 #include <common/Trace.h>
-// #include <cmath>
-// #include <algorithm>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -57,9 +55,7 @@
     while (!unmatched_clusters_.empty()) {
 
       auto cluster = unmatched_clusters_.begin();
-      //XTRACE(CLUSTER, DEB, "match(): cluster->plane() %d", (int)cluster->plane());
-	
-
+    
       if (!flush && !ready_to_be_matched(*cluster)) {
         XTRACE(CLUSTER, DEB, "not ready to be matched");
         break;
@@ -75,21 +71,13 @@
       if(!evt.empty()) {
           if (evt.time_gap(*cluster) > max_delta_time_) {
             XTRACE(CLUSTER, DEB, "time gap too large");
-            /*
-            if(!evt.ClusterA.empty()) {
-        	  XTRACE(CLUSTER, DEB, "stash plane 1 event");
-            }
-            else if(!evt.ClusterB.empty()) {
-              XTRACE(CLUSTER, DEB, "stash plane 2 event");
-            }
-            */
             stash_event(evt);
             evt.clear();
           }
           //Plane 1 has value 0
           if (cluster->plane() == 0) {
             if(!evt.ClusterA.empty()) {
-              //XTRACE(CLUSTER, DEB, "stash plane 1 event");
+              XTRACE(CLUSTER, DEB, "stash plane 1 event");
               stash_event(evt);
               evt.clear();
             }
@@ -97,7 +85,7 @@
           //Plane 2 has value 1
           else if (cluster->plane() == 1) {
             if(!evt.ClusterB.empty())  {
-              //XTRACE(CLUSTER, DEB, "stash plane 2 event");
+              XTRACE(CLUSTER, DEB, "stash plane 2 event");
               stash_event(evt);
               evt.clear();
             }
@@ -111,19 +99,7 @@
   if (!evt.empty()) {
     if (flush) {
       // If flushing, stash it
-      stash_event(evt);
-      /*
-      if(evt.both_planes()) {
-        XTRACE(CLUSTER, DEB, "stash complete plane1/2 event");
-      }
-      else if(!evt.ClusterA.empty()) {
-        XTRACE(CLUSTER, DEB, "stash plane 1 event");
-      }
-      else if(!evt.ClusterB.empty()) {
-        XTRACE(CLUSTER, DEB, "stash plane 2 event");
-      }
-      */
-       
+      stash_event(evt);       
     } else {
       // Else return to queue
       // \todo this needs explicit testing

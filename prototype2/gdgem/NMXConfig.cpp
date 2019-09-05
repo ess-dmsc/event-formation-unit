@@ -51,7 +51,8 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
     root = nlohmann::json::parse(jsonstring);
   }
   catch (...) {
-    XTRACE(INIT, WAR, "Invalid Json file: %s", configfile.c_str());   	
+    XTRACE(INIT, WAR, "Invalid Json file format: %s", configfile.c_str());   	
+    throw std::runtime_error("NMXConfig error - Invalid JSON file.");
   }
 
   builder_type = root["builder_type"].get<std::string>();
