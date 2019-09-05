@@ -9,8 +9,8 @@
 #include <common/reduction/matching/AbstractMatcher.h>
 #include <common/Trace.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
 
 AbstractMatcher::AbstractMatcher(uint64_t maximum_latency, uint8_t planeA, uint8_t planeB)
     : maximum_latency_(maximum_latency), PlaneA(planeA), PlaneB(planeB) {}
@@ -25,6 +25,7 @@ void AbstractMatcher::insert(const Cluster &cluster) {
     return;
   }
   unmatched_clusters_.push_back(cluster);
+  XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u", unmatched_clusters_.size());
 }
 
 void AbstractMatcher::insert(const ClusterContainer &clusters) {

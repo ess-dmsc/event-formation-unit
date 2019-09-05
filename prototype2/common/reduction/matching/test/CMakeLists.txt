@@ -17,3 +17,9 @@ set(EndMatcherTest_SRC
   EndMatcherTest.cpp
   )
 create_test_executable(EndMatcherTest)
+
+
+set(CenterMatcherTest_SRC
+  CenterMatcherTest.cpp
+  )
+create_test_executable(CenterMatcherTest)

@@ -30,10 +30,37 @@ void Cluster::insert(const Hit &e) {
 
   hits.push_back(e);
   weight_sum_ += e.weight;
+  weight2_sum_ += e.weight * e.weight;
   coord_mass_ += e.weight * e.coordinate;
+  coord_mass2_ += e.weight * e.weight * e.coordinate;
   time_mass_ += e.weight * e.time;
+  time_mass2_ += e.weight * e.weight * e.time;
   time_start_ = std::min(time_start_, e.time);
-  time_end_ = std::max(time_end_, e.time);
+  
+  if (e.time > time_end_)
+  {
+    time_end_ = e.time;
+    weight_utpc_sum_ = e.weight;
+    cnt_utpc_ = 1;
+    coord_utpc_ = e.coordinate;
+    time_utpc_ = e.time;
+    coord_mass_utpc_ = e.coordinate * e.weight;
+    time_mass_utpc_ = e.time * e.weight;
+    lspan_min_ = static_cast<int16_t>(e.coordinate);
+    lspan_max_ = static_cast<int16_t>(e.coordinate);
+  }
+  else if (e.time == time_end_)
+  {
+    weight_utpc_sum_ += e.weight;
+    cnt_utpc_++;
+    coord_utpc_ += e.coordinate;
+    time_utpc_ += e.time;
+    coord_mass_utpc_ += e.coordinate * e.weight;
+    time_mass_utpc_ += e.time * e.weight;
+    lspan_min_ = std::min(lspan_min_, static_cast<int16_t>(e.coordinate));
+    lspan_max_ = std::max(lspan_max_, static_cast<int16_t>(e.coordinate));
+  }
+    
   coord_start_ = std::min(coord_start_, e.coordinate);
   coord_end_ = std::max(coord_end_, e.coordinate);
 }
@@ -59,22 +86,30 @@ void Cluster::merge(Cluster &other) {
   hits.insert(hits.end(), other.hits.begin(), other.hits.end());
 
   weight_sum_ += other.weight_sum_;
+  weight2_sum_ += other.weight2_sum_;
   coord_mass_ += other.coord_mass_;
+  coord_mass2_ += other.coord_mass2_;
   time_mass_ += other.time_mass_;
+  time_mass2_ += other.time_mass2_;
   time_start_ = std::min(time_start_, other.time_start_);
   time_end_ = std::max(time_end_, other.time_end_);
   coord_start_ = std::min(coord_start_, other.coord_start_);
   coord_end_ = std::max(coord_end_, other.coord_end_);
   other.clear();
+
 }
 
 void Cluster::clear() {
   hits.clear();
   plane_ = Hit::InvalidPlane;
   weight_sum_ = 0.0;
+  weight2_sum_ = 0.0;
   coord_mass_ = 0.0;
   time_mass_ = 0.0;
+  coord_mass2_ = 0.0;
+  time_mass2_ = 0.0;
 }
+
 
 bool Cluster::empty() const {
   return hits.empty();
@@ -142,6 +177,46 @@ double Cluster::time_center() const {
   return time_mass_ / weight_sum_;
 }
 
+double Cluster::coord_mass2() const {
+  return coord_mass2_;
+}
+
+double Cluster::coord_center2() const {
+  return coord_mass2_ / weight2_sum_;
+}
+
+double Cluster::time_mass2() const {
+  return time_mass2_;
+}
+
+double Cluster::time_center2() const {
+  return time_mass2_ / weight2_sum_;
+}
+
+double Cluster::coord_utpc(bool weighted) const {
+  if (!weighted)
+  {
+    return coord_utpc_/cnt_utpc_;
+  }
+  return coord_mass_utpc_ / weight_utpc_sum_;
+}
+
+double Cluster::time_utpc(bool weighted) const {
+  if (!weighted)
+  {
+    return time_utpc_/cnt_utpc_;
+  }
+  return time_mass_utpc_ / weight_utpc_sum_;
+}
+
+int16_t Cluster::lspan_min() const {
+  return lspan_min_;
+}
+ 
+int16_t Cluster::lspan_max() const {
+  return lspan_max_;
+}
+  
 uint64_t Cluster::time_overlap(const Cluster &other) const {
   if (empty() || other.empty())
     return 0;

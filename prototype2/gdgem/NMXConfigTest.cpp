@@ -59,9 +59,13 @@ TEST_F(NMXConfigTest, JsonConfig) {
   EXPECT_EQ(384, nmxconfig.geometry.nx());
   EXPECT_EQ(384, nmxconfig.geometry.ny());
   EXPECT_EQ(500, nmxconfig.matcher_max_delta_time);
+  EXPECT_EQ("CenterMatcher", nmxconfig.matcher_name);
+  EXPECT_EQ("GapClusterer", nmxconfig.clusterer_name);
+  EXPECT_EQ("EventAnalyzer", nmxconfig.analyzer_name);
+  EXPECT_EQ("center-of-mass", nmxconfig.time_algorithm);
   MESSAGE() << "\n" << nmxconfig.debug() << "\n";
 }
-
+  
 TEST_F(NMXConfigTest, JsonConfigMG) {
   NMXConfig nmxconfig(TestJsonPath + "vmm3_mg.json", nocalibration);
   MESSAGE() << "\n" << nmxconfig.debug() << "\n";

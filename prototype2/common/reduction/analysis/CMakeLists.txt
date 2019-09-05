@@ -6,12 +6,14 @@ set(analysis_obj_SRC
   AbstractAnalyzer.cpp
   MgAnalyzer.cpp
   UtpcAnalyzer.cpp
+  EventAnalyzer.cpp
 )
 
 set(analysis_obj_INC
   AbstractAnalyzer.h
   MgAnalyzer.h
   UtpcAnalyzer.h
+  EventAnalyzer.h
 )
 
 add_library(AnalysisObj OBJECT

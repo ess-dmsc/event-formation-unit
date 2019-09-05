@@ -57,6 +57,17 @@ struct NMXConfig {
 
   //matcher
   double matcher_max_delta_time{200};
+  //Matcher algorithm, either center-of-mass, charge2, utpc, or utpc_weighted
+  std::string time_algorithm{"center-of-mass"};
+  
+  // Name of the event analyzer
+  std::string analyzer_name{"EventAnalyzer"};
+  
+  // Name of the matcher
+  std::string matcher_name{"CenterMatcher"};
+  
+  // Name of the clusterer
+  std::string clusterer_name{"GapClusterer"};
 
   // analysis
   std::shared_ptr<AbstractAnalyzer> analyzer_;

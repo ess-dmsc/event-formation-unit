@@ -7,6 +7,7 @@ set(matching_obj_SRC
   OverlapMatcher.cpp
   GapMatcher.cpp
   EndMatcher.cpp
+  CenterMatcher.cpp
 )
 
 set(matching_obj_INC
@@ -14,6 +15,7 @@ set(matching_obj_INC
   OverlapMatcher.h
   GapMatcher.h
   EndMatcher.h
+  CenterMatcher.h
 )
 
 add_library(MatchingObj OBJECT
