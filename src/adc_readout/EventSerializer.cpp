@@ -120,10 +120,14 @@ void EventSerializer::serialiseFunction() {
     ThresholdTime.clear();
     PeakTime.clear();
   };
-  auto getReferenceTimestamps = [&Events, this]() {
+  std::uint64_t LastAddedRefTimestamp{0};
+  auto getReferenceTimestamps = [&LastAddedRefTimestamp, &Events, this]() {
     std::uint64_t TempRefTime{0};
     while (this->ReferenceTimeQueue.try_dequeue(TempRefTime)) {
-      Events.addReferenceTimestamp(TempRefTime);
+      if (TempRefTime != LastAddedRefTimestamp) {
+        Events.addReferenceTimestamp(TempRefTime);
+        LastAddedRefTimestamp = TempRefTime;
+      }
     }
   };
   getReferenceTimestamps();
@@ -160,21 +164,5 @@ void EventSerializer::serialiseFunction() {
       EventList = Events.getAllEvents();
     }
     ProduceFB(EventList.first, EventList.second);
-  }
-}
-
-RefFilteredEventSerializer::RefFilteredEventSerializer(
-    std::string SourceName, size_t BufferSize,
-    std::chrono::milliseconds TransmitTimeout, ProducerBase *KafkaProducer,
-    EventSerializer::TimestampMode Mode)
-    : EventSerializer(std::move(SourceName), BufferSize, TransmitTimeout,
-                      KafkaProducer, Mode) {}
-
-void RefFilteredEventSerializer::addReferenceTimestamp(
-    std::uint64_t const Timestamp) {
-  std::lock_guard<std::mutex> Lock(RefTimeMutex);
-  if (Timestamp != CurrentReferenceTimestamp) {
-    CurrentReferenceTimestamp = Timestamp;
-    EventSerializer::addReferenceTimestamp(Timestamp);
   }
 }

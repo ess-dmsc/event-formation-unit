@@ -117,16 +117,3 @@ protected:
   TimestampQueue ReferenceTimeQueue;
   const TimestampMode CMode;
 };
-
-class RefFilteredEventSerializer : public EventSerializer {
-public:
-  /// \brief See base class for documentation.
-  RefFilteredEventSerializer(std::string SourceName, size_t BufferSize,
-                             std::chrono::milliseconds TransmitTimeout,
-                             ProducerBase *KafkaProducer, TimestampMode Mode);
-  void addReferenceTimestamp(std::uint64_t const Timestamp) override;
-
-private:
-  std::mutex RefTimeMutex;
-  std::uint64_t CurrentReferenceTimestamp{0};
-};
