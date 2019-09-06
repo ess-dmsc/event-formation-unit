@@ -202,18 +202,32 @@ void CAENBase::processing_thread() {
   if (EFUSettings.TestImage) {
     XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
     Udder udder;
-    uint32_t time = 0;
+    uint32_t time_of_flight = 0;
     while (true) {
       if (not runThreads) {
         // \todo flush everything here
         XTRACE(INPUT, ALW, "Stopping processing thread.");
         return;
       }
+
+      static int eventCount = 0;
+      if (eventCount == 0) {
+        uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+        flatbuffer.pulseTime(efu_time);
+      }
+
       auto pixel_id = udder.getPixel(essgeom.nx(), essgeom.ny(), &essgeom);
-      mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
+      auto tx_bytes = flatbuffer.addEvent(time_of_flight, pixel_id);
+      mystats.tx_bytes += tx_bytes;
       mystats.events_udder++;
-      usleep(10);
-      time++;
+      usleep(EFUSettings.TestImageUSleep);
+      time_of_flight++;
+
+      if (tx_bytes != 0) {
+        eventCount = 0;
+      } else {
+        eventCount++;
+      }
     }
   }
 
