@@ -6,6 +6,7 @@
 //===----------------------------------------------------------------------===//
 
 #include "EventBuffer.h"
+#include <algorithm>
 
 EventBuffer::EventBuffer(size_t BufferSize)
     : Events(BufferSize), MaxSize(BufferSize) {
@@ -85,9 +86,13 @@ void EventBuffer::addReferenceTimestamp(std::uint64_t NewReferenceTime) {
   if (RefTime == 0) {
     RefTime = NewReferenceTime;
   }
-  if (ReferenceTimestamps.empty()) {
-    ReferenceTimestamps.push_back(NewReferenceTime);
-  } else if (ReferenceTimestamps.back() != NewReferenceTime) {
-    ReferenceTimestamps.push_back(NewReferenceTime);
+  if (NewReferenceTime != RefTime) {
+    if (ReferenceTimestamps.empty()) {
+      ReferenceTimestamps.push_back(NewReferenceTime);
+    } else if (std::find(ReferenceTimestamps.begin(), ReferenceTimestamps.end(),
+                         NewReferenceTime) == ReferenceTimestamps.end()) {
+      ReferenceTimestamps.push_back(NewReferenceTime);
+      std::sort(ReferenceTimestamps.begin(), ReferenceTimestamps.end());
+    }
   }
 }
