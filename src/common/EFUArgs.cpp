@@ -177,7 +177,7 @@ bool EFUArgs::parseLogLevel(std::vector<std::string> LogLevelString) {
 
 void EFUArgs::printSettings() {
   // clang-format off
-  LOG(INIT, Sev::Info, "Starting event processing pipeline2 with main properties:");
+  LOG(INIT, Sev::Info, "Starting event processing pipeline with main properties:");
   LOG(INIT, Sev::Info, "  Detector:                 {}",    DetectorName);
   LOG(INIT, Sev::Info, "  Rx UDP Socket:            {}:{}",
          EFUSettings.DetectorAddress, EFUSettings.DetectorPort);

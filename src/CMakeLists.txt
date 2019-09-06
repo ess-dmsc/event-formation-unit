@@ -46,6 +46,7 @@ add_subdirectory(sonde)
 add_subdirectory(jalousie)
 add_subdirectory(udp)
 add_subdirectory(adc_readout)
+add_subdirectory(perfgen)
 add_subdirectory(tools)
 
 ##=============================================================================
