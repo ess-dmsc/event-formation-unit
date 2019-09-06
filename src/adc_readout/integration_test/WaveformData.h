@@ -64,7 +64,7 @@ public:
     DataBuffer.resize(ChunkSize + 10);
   }
 
-  T operator[](size_t Index) {
+  T operator[](size_t Index) const {
     if (Index >= UpperElement) {
       Selector.offset(0, UpperElement);
       auto UsedBlockSize = ChunkSize;

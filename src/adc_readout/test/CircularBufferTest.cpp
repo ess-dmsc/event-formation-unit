@@ -108,7 +108,7 @@ TEST(GetElem, GetOneSuccess) {
   CircularBuffer<int> SomeBuffer(Elements);
   ASSERT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
   SomeBuffer.tryPutData(std::move(SomePtr));
-  EXPECT_TRUE(SomeBuffer.tryGetData(SomePtr));
+  EXPECT_TRUE(SomeBuffer.tryGetData(SomeOtherPtr));
   EXPECT_NE(SomeOtherPtr, nullptr);
 }
 
