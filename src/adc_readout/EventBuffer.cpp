@@ -27,7 +27,7 @@ void EventBuffer::cullEvents(size_t NrOfEvents) {
   Size = Size - NrOfEvents;
 }
 
-std::pair<EventList, std::uint64_t> EventBuffer::getEvents() {
+std::pair<EventList, std::uint64_t> EventBuffer::getFrameEvents() {
   if (Size == 0) {
     return {};
   }
@@ -85,6 +85,7 @@ void EventBuffer::clearAllEvents() { Size = 0; }
 void EventBuffer::addReferenceTimestamp(std::uint64_t NewReferenceTime) {
   if (RefTime == 0) {
     RefTime = NewReferenceTime;
+    return;
   }
   if (NewReferenceTime != RefTime) {
     if (ReferenceTimestamps.empty()) {

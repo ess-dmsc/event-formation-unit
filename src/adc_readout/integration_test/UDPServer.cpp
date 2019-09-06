@@ -62,18 +62,6 @@ void UDPServer::handleConnect(const asio::error_code &Err,
   }
 }
 
-bool UDPServer::TransmitPacket(const std::uint8_t *DataPtr,
-                               const std::uint32_t Size) {
-  if (not ConnectionOk) {
-    return false;
-  }
-  BufferPtr Buffer(new std::uint8_t[Size],
-                   std::default_delete<std::uint8_t[]>());
-  std::memcpy(Buffer.get(), DataPtr, Size);
-  Service.post([=]() { handlePacketTransmit(Buffer, Size); });
-  return true;
-}
-
 void UDPServer::handlePacketTransmit(BufferPtr Buffer,
                                      const std::uint32_t Size) {
   Socket.async_send(asio::buffer(Buffer.get(), Size),

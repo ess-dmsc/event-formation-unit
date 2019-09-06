@@ -138,7 +138,7 @@ void EventSerializer::serialiseFunction() {
       }
       Events.addEvent(NewEvent);
       getReferenceTimestamps();
-      auto EventList = Events.getEvents();
+      auto EventList = Events.getFrameEvents();
       if (not EventList.first.empty()) {
         ProduceFB(EventList.first, EventList.second);
         Events.cullEvents(EventList.first.size());
@@ -159,7 +159,7 @@ void EventSerializer::serialiseFunction() {
   if (Events.size() > 0) {
     // Reference time is calculated by Events.getEvents() so we must call that
     // function first.
-    auto EventList = Events.getEvents();
+    auto EventList = Events.getFrameEvents();
     if (EventList.first.empty()) {
       EventList = Events.getAllEvents();
     }
