@@ -69,7 +69,8 @@ TEST_F(EventSerialisationIndependent, ProduceFlatbufferOnOneEvent) {
   Serializer->addEvent(std::make_unique<EventData>());
   do {
     std::this_thread::sleep_for(1ms);
-  } while (Serializer->EventQueue.size_approx() > 0 or Serializer->ReferenceTimeQueue.size_approx() > 0);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -162,7 +163,8 @@ TEST_F(EventSerialisationIndependent, CheckFlatbufferContents) {
       new EventData{1000000, 2, 3, 4, 5, 6000000, 7000000}));
   do {
     std::this_thread::sleep_for(1ms);
-  } while (Serializer->EventQueue.size_approx() > 0 or Serializer->ReferenceTimeQueue.size_approx() > 0);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -226,7 +228,8 @@ TEST_F(EventSerialisationIndependent, ProduceFlatbufferOnTimestampOverflow1) {
       SecondTimestamp, 2, 3, 4, 5, SecondTimestamp + 1, SecondTimestamp + 2}));
   do {
     std::this_thread::sleep_for(1ms);
-  } while (Serializer->EventQueue.size_approx() > 0 or Serializer->ReferenceTimeQueue.size_approx() > 0);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -268,7 +271,8 @@ TEST_F(EventSerialisationIndependent, ProduceTwoFlatbuffersWithFourEvents) {
   }
   do {
     std::this_thread::sleep_for(1ms);
-  } while (Serializer->EventQueue.size_approx() > 0 or Serializer->ReferenceTimeQueue.size_approx() > 0);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -285,7 +289,8 @@ TEST_F(EventSerialisationIndependent, ProduceThreeFlatbuffersOnFiveEvents) {
   }
   do {
     std::this_thread::sleep_for(1ms);
-  } while (Serializer->EventQueue.size_approx() > 0 or Serializer->ReferenceTimeQueue.size_approx() > 0);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -313,7 +318,8 @@ TEST_F(EventSerialisationIndependent, ProduceOneFlatbufferOnTwoEvents) {
   }
   do {
     std::this_thread::sleep_for(1ms);
-  } while (Serializer->EventQueue.size_approx() > 0 or Serializer->ReferenceTimeQueue.size_approx() > 0);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -354,7 +360,8 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventNoRef) {
       BaseTimestamp, 2, 3, 4, 5, BaseTimestamp + 1, BaseTimestamp + 2}));
   do {
     std::this_thread::sleep_for(1ms);
-  } while (Serializer->EventQueue.size_approx() > 0 or Serializer->ReferenceTimeQueue.size_approx() > 0);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -388,7 +395,8 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferTwoEventsNoRef) {
   }
   do {
     std::this_thread::sleep_for(1ms);
-  } while (Serializer->EventQueue.size_approx() > 0 or Serializer->ReferenceTimeQueue.size_approx() > 0);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -423,7 +431,8 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventOneRef) {
                     BaseTimestamp + 1000 + 2}));
   do {
     std::this_thread::sleep_for(1ms);
-  } while (Serializer->EventQueue.size_approx() > 0 or Serializer->ReferenceTimeQueue.size_approx() > 0);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -470,6 +479,7 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventTwoRefs) {
                     BaseTimestamp + 1000 + 1, BaseTimestamp + 1000 + 2}));
   do {
     std::this_thread::sleep_for(1ms);
-  } while (Serializer->EventQueue.size_approx() > 0 or Serializer->ReferenceTimeQueue.size_approx() > 0);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
