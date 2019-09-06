@@ -220,7 +220,11 @@ void CAENBase::processing_thread() {
       auto tx_bytes = flatbuffer.addEvent(time_of_flight, pixel_id);
       mystats.tx_bytes += tx_bytes;
       mystats.events_udder++;
-      usleep(EFUSettings.TestImageUSleep);
+
+      if (EFUSettings.TestImageUSleep != 0) {
+        usleep(EFUSettings.TestImageUSleep);
+      }
+
       time_of_flight++;
 
       if (tx_bytes != 0) {
