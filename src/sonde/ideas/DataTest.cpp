@@ -77,8 +77,8 @@ TEST_F(IDEASDataTest, OkThreeEvents) {
   ASSERT_EQ(readout->events, 3);
 
   for (int i = 0; i < res; i++) {
-    ASSERT_NE(0, readout->data[i].time);
-    ASSERT_NE(0, readout->data[i].pixel_id);
+    ASSERT_NE(0, readout->data[i].Time);
+    ASSERT_NE(0, readout->data[i].PixelId);
   }
 }
 

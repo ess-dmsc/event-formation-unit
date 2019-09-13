@@ -19,14 +19,17 @@
 
 namespace Sonde {
 
+const int MaxNumberOfEvents = 500;
+
 class IDEASData {
 public:
   // Error codes, returned as negative numbers
   enum error { OK = 0, EBUFFER, EBADSIZE, EHEADER, EUNSUPP };
 
   struct SoNDeData {
-    uint32_t time;
-    uint32_t pixel_id;
+    uint32_t Time;
+    uint32_t PixelId;
+    uint32_t Adc;
   };
 
   /// \note from IDEAS Readout and Control Packet Protocol Reference
@@ -68,12 +71,16 @@ public:
   /// \brief Section 2.4.3 page 12
   int parse_multi_event_pulse_height_data_packet(const char *buffer);
 
-  struct SoNDeData data[500];
+  struct SoNDeData data[MaxNumberOfEvents];
   unsigned int events{0};  ///< number of valid events
   unsigned int errors{0};  ///< number of geometry errors in readout
   unsigned int samples{0}; ///< number of samples in readout
 
   uint64_t ctr_outof_sequence{0};
+  uint64_t counterPacketTriggerTime{0};
+  uint64_t counterPacketSingleEventPulseHeight{0};
+  uint64_t counterPacketMultiEventPulseHeight{0};
+  uint64_t counterPacketUnsupported{0};
 
 private:
   Geometry *sondegeometry{nullptr};
