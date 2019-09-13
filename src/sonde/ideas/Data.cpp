@@ -100,21 +100,14 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
     auto aschp = (uint8_t *) (datap + i * BYTES_PER_ENTRY + 5);
     uint32_t time = ntohl(*timep);
     uint8_t asch = *aschp; // ASIC (2b) and CHANNEL (6b)
-    const uint16_t NoAdcProvided = 0x1;
 
     int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asch);
     if (pixelid >= 1) {
-      data[events].Time = time;
-      data[events].PixelId = static_cast<uint32_t>(pixelid);
-      data[events].Adc = NoAdcProvided; // there is no adc values in this data type
+      addEvent(time, pixelid, NoAdcProvided);
       if (dumptofile) {
         datafile->tofile("%d, %u, %d, %d, %d\n", hdr_count, hdr_hdrtime,
                           hdr_sysno, asch >> 6, asch & 0x3f);
       }
-      XTRACE(PROCESS, INF, "event: %d, time: 0x%08x, pixel: %d", i, time,
-             data[events].PixelId);
-      events++;
-      assert(events < Sonde::MaxNumberOfEvents);
     } else {
       XTRACE(PROCESS, WAR, "Geometry error in entry %d (asch %d)", i, asch);
       errors++;
@@ -147,9 +140,7 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
 
   int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asic, channel);
   if (pixelid >= 1) {
-    data[events].Time = hdr_hdrtime;
-    data[events].PixelId = static_cast<uint32_t>(pixelid);
-    events++;
+    addEvent(hdr_hdrtime, pixelid, Sonde::NoAdcProvided);
   }
 
   for (int i = 0; i < nentries; i++) {
@@ -166,9 +157,7 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
   return events;
 }
 
-/** Parse data according to IDEAS documentation
- * does not generate events, always return 0 \todo
- */
+/** Parse data according to IDEAS documentation */
 int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
   static const int BYTES_PER_SAMPLE = 5;
   if (hdr_length < 12) {
@@ -198,20 +187,15 @@ int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
       int trigger_type = *(uint8_t *) (evoff + sampleoffset + 4);
       int asic = *(uint8_t *) (evoff + sampleoffset + 5);
       int channel = *(uint8_t *) (evoff + sampleoffset + 6);
-      int sample = ntohs(*(uint16_t *) (evoff + sampleoffset + 7));
+      int adcvalue = ntohs(*(uint16_t *) (evoff + sampleoffset + 7));
 
       int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asic, channel);
       if (pixelid >= 1) {
-        data[events].Time = evtime;
-        data[events].PixelId = static_cast<uint32_t>(pixelid);
-        data[events].Adc = sample;
-        events++;
+        addEvent(evtime, pixelid, adcvalue);
       }
-      XTRACE(PROCESS, INF, "time %x, tt %d, as %d, ch %d, sampl %x", evtime,
-             trigger_type, asic, channel, sample);
       if (dumptofile) {
         datafile->tofile("%d, %u, %d, %d, %d, %d\n", hdr_count, evtime,
-                         trigger_type, asic, channel, sample);
+                         trigger_type, asic, channel, adcvalue);
       }
     }
   }

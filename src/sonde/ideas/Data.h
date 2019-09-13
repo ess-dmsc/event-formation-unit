@@ -20,6 +20,7 @@
 namespace Sonde {
 
 const int MaxNumberOfEvents = 500;
+const uint16_t NoAdcProvided = 0x1;
 
 class IDEASData {
 public:
@@ -70,6 +71,15 @@ public:
 
   /// \brief Section 2.4.3 page 12
   int parse_multi_event_pulse_height_data_packet(const char *buffer);
+
+  void addEvent(int time, int pixelid, int adc) {
+    assert(events < MaxNumberOfEvents);
+    XTRACE(PROCESS, INF, "event: %d, time: 0x%08x, pixel: %d, adc: %d", events, time, pixelid, adc);
+    data[events].Time = time;
+    data[events].PixelId = static_cast<uint32_t>(pixelid);
+    data[events].Adc = adc;
+    events++;
+  };
 
   struct SoNDeData data[MaxNumberOfEvents];
   unsigned int events{0};  ///< number of valid events
