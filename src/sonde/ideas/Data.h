@@ -16,6 +16,7 @@
 #include <common/DataSave.h>
 #include <sonde/Geometry.h>
 #include <memory>
+#include <cassert>
 
 namespace Sonde {
 
