@@ -62,6 +62,7 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("readouts.invalid_plane", mystats.readouts_invalid_plane);
   Stats.create("readouts.monitor", mystats.readouts_monitor);
 
+  Stats.create("readouts.error_version", mystats.readouts_error_version);
   Stats.create("readouts.error_bytes", mystats.readouts_error_bytes);
   Stats.create("readouts.seq_errors", mystats.readouts_seq_errors);
 
@@ -233,6 +234,7 @@ void CAENBase::processing_thread() {
       auto dataptr = eth_ringbuf->getDataBuffer(data_index);
       if (parser.parse(dataptr, datalen) < 0) {
         mystats.readouts_error_bytes += parser.Stats.error_bytes;
+        mystats.readouts_error_version += parser.Stats.error_version;
         continue;
       }
       mystats.readouts_seq_errors += parser.Stats.seq_errors;

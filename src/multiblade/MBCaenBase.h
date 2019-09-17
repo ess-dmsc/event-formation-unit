@@ -53,6 +53,7 @@ protected:
     // Processing Counters
     int64_t events_udder;
     int64_t readouts_monitor; // \todo so far hardcoded
+    int64_t readouts_error_version;
     int64_t readouts_invalid_adc;
     int64_t readouts_invalid_ch;
     int64_t readouts_invalid_plane;

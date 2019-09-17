@@ -39,7 +39,7 @@ int DataParser::parse(const char *buffer, unsigned int size) {
 
   if (MBHeader->version != Version) {
     XTRACE(DATA, WAR, "Unsupported data version: 0x%04x (expected 0x%04x)", MBHeader->version, Version);
-    Stats.error_bytes += size;
+    Stats.error_version++;
     return -error::EHEADER;
   }
 

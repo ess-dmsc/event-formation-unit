@@ -47,6 +47,7 @@ public:
   int parse(const char * /*void **/ buffer, unsigned int size);
 
   struct Stats {
+    uint64_t error_version{0};
     uint64_t error_bytes{0};
     uint64_t seq_errors{0};
   } Stats;
