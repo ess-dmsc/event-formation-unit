@@ -438,3 +438,92 @@ TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents6) {
   ASSERT_EQ(Events.first.size(), 2u);
   EXPECT_EQ(Events.second, ReferenceTS + 5000);
 }
+
+TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents7) {
+  EventBuffer UnderTest(100);
+  std::uint64_t ReferenceTS = 1000;
+  TestEvent->Timestamp = ReferenceTS + 5;
+  TestEvent->Amplitude = 1;
+  UnderTest.addEvent(TestEvent);
+  TestEvent->Timestamp = ReferenceTS + 10;
+  TestEvent->Amplitude = 2;
+  UnderTest.addEvent(TestEvent);
+  UnderTest.addReferenceTimestamp(ReferenceTS);
+  UnderTest.addReferenceTimestamp(ReferenceTS + 20);
+  UnderTest.addReferenceTimestamp(ReferenceTS + 15);
+  UnderTest.addReferenceTimestamp(ReferenceTS + 15);
+  UnderTest.addReferenceTimestamp(ReferenceTS + 20);
+
+
+
+  TestEvent->Timestamp = ReferenceTS + 25;
+  TestEvent->Amplitude = 3;
+  UnderTest.addEvent(TestEvent);
+
+  auto Events = UnderTest.getFrameEvents();
+  UnderTest.cullEvents(Events.first.size());
+  ASSERT_EQ(Events.first.size(), 2u);
+  EXPECT_EQ(Events.second, ReferenceTS);
+
+  UnderTest.addReferenceTimestamp(ReferenceTS + 15);
+  UnderTest.addReferenceTimestamp(ReferenceTS + 15);
+
+  UnderTest.addReferenceTimestamp(ReferenceTS + 40);
+  TestEvent->Timestamp = ReferenceTS + 50;
+  TestEvent->Amplitude = 4;
+  UnderTest.addEvent(TestEvent);
+
+  Events = UnderTest.getFrameEvents();
+  ASSERT_EQ(Events.first.size(), 1u);
+  EXPECT_EQ(Events.second, ReferenceTS + 20);
+}
+
+TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents8) {
+  ssize_t BufferSize{10};
+  EventBuffer UnderTest(BufferSize);
+  std::uint64_t const RefTimeInterval{5};
+  std::uint64_t CurrentRefTime{1};
+  std::uint64_t CurrentTime{1};
+  std::uint64_t const EventInterval{1};
+  for (int i = 0; i < 100; i++) {
+    CurrentTime += EventInterval;
+    if (CurrentTime > CurrentRefTime + RefTimeInterval) {
+      CurrentRefTime += RefTimeInterval;
+    }
+    TestEvent->Timestamp = CurrentTime;
+    UnderTest.addEvent(TestEvent);
+    UnderTest.addReferenceTimestamp(CurrentRefTime);
+    auto Events = UnderTest.getFrameEvents();
+    if (not Events.first.empty()) {
+      ASSERT_LE(Events.second, Events.first[0].Timestamp);
+      ASSERT_NE(BufferSize, Events.first.size());
+      ASSERT_LE((Events.first.end() - 1)->Timestamp, Events.second + RefTimeInterval);
+      UnderTest.cullEvents(Events.first.size());
+    }
+  }
+}
+
+TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents9) {
+  ssize_t BufferSize{20};
+  EventBuffer UnderTest(BufferSize);
+  std::uint64_t const RefTimeInterval{8};
+  std::uint64_t CurrentRefTime{9};
+  std::uint64_t CurrentTime{10};
+  std::uint64_t const EventInterval{1};
+  for (int i = 0; i < 100; i++) {
+    CurrentTime += EventInterval;
+    if (CurrentTime > CurrentRefTime + RefTimeInterval) {
+      CurrentRefTime += RefTimeInterval;
+    }
+    TestEvent->Timestamp = CurrentTime;
+    UnderTest.addEvent(TestEvent);
+    UnderTest.addReferenceTimestamp(CurrentRefTime - 3);
+    auto Events = UnderTest.getFrameEvents();
+    if (not Events.first.empty()) {
+      ASSERT_LE(Events.second, Events.first[0].Timestamp);
+      ASSERT_NE(BufferSize, Events.first.size());
+      ASSERT_LE((Events.first.end() - 1)->Timestamp, Events.second + RefTimeInterval);
+      UnderTest.cullEvents(Events.first.size());
+    }
+  }
+}

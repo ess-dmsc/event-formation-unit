@@ -31,23 +31,20 @@ std::pair<EventList, std::uint64_t> EventBuffer::getFrameEvents() {
   if (Size == 0) {
     return {};
   }
+  // If we are going outside of our MaxOffsetTime, do not use the current reference time.
   auto FirstEventTime = Events[0].Timestamp;
-  if (RefTime == 0 or RefTime + MaxOffsetTime < FirstEventTime) {
+  if (RefTime + MaxOffsetTime < FirstEventTime) {
     RefTime = FirstEventTime;
   }
+
   for (size_t i = ReferenceTimestamps.size(); i > 0; --i) {
-    if (ReferenceTimestamps[i - 1] < FirstEventTime and
+    if (ReferenceTimestamps[i - 1] <= FirstEventTime and
         ReferenceTimestamps[i - 1] + MaxOffsetTime > FirstEventTime) {
       RefTime = ReferenceTimestamps[i - 1];
       ReferenceTimestamps.erase(ReferenceTimestamps.begin(),
                                 ReferenceTimestamps.begin() + i);
       break;
     }
-  }
-
-  while (not ReferenceTimestamps.empty() and
-         ReferenceTimestamps.front() < FirstEventTime) {
-    ReferenceTimestamps.pop_front();
   }
 
   if (MaxSize == Size) {
