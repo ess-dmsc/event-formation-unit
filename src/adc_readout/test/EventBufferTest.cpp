@@ -244,7 +244,8 @@ TEST_F(EventBufferTest, GetEventsOnOutsideTimeRange4) {
   UnderTest.addEvent(TestEvent);
   UnderTest.addReferenceTimestamp(10);
   UnderTest.setTimespan(15);
-  auto EventList = UnderTest.getFrameEvents().first;
+  auto Events = UnderTest.getFrameEvents();
+  auto EventList = Events.first;
   ASSERT_EQ(EventList.size(), 2u);
   EXPECT_EQ(EventList[0].Timestamp, 100ul);
   EXPECT_EQ(EventList[1].Timestamp, 110ul);

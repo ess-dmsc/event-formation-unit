@@ -47,6 +47,12 @@ std::pair<EventList, std::uint64_t> EventBuffer::getFrameEvents() {
     }
   }
 
+  ReferenceTimestamps.erase(std::remove_if(ReferenceTimestamps.begin(),
+                                           ReferenceTimestamps.end(),
+                            [FirstEventTime](auto Time){return Time < FirstEventTime;}), ReferenceTimestamps.end());
+
+
+
   if (MaxSize == Size) {
     return {nonstd::span<EventData const>(Events.data(), Size), RefTime};
   }
@@ -80,10 +86,6 @@ std::pair<EventList, std::uint64_t> EventBuffer::getAllEvents() const {
 void EventBuffer::clearAllEvents() { Size = 0; }
 
 void EventBuffer::addReferenceTimestamp(std::uint64_t NewReferenceTime) {
-  if (RefTime == 0) {
-    RefTime = NewReferenceTime;
-    return;
-  }
   if (NewReferenceTime != RefTime) {
     if (ReferenceTimestamps.empty()) {
       ReferenceTimestamps.push_back(NewReferenceTime);
