@@ -123,7 +123,7 @@ void EventSerializer::serialiseFunction() {
   std::uint64_t LastAddedRefTimestamp{0};
   auto getReferenceTimestamps = [&LastAddedRefTimestamp, &Events, this]() {
     auto NumberOfIterations{0};
-    auto const MaxIterations{20};
+    auto const MaxIterations{40};
     std::uint64_t TempRefTime{0};
     while (this->ReferenceTimeQueue.try_dequeue(TempRefTime)) {
       if (TempRefTime != LastAddedRefTimestamp) {
