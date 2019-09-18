@@ -17,9 +17,9 @@
 EventSerializer::EventSerializer(std::string SourceName, size_t BufferSize,
                                  std::chrono::milliseconds TransmitTimeout,
                                  ProducerBase *KafkaProducer,
-                                 TimestampMode Mode)
+                                 TimestampMode Mode, OffsetTime UseOffset)
     : Name(std::move(SourceName)), Timeout(TransmitTimeout),
-      EventBufferSize(BufferSize), Producer(KafkaProducer), CMode(Mode) {
+      EventBufferSize(BufferSize), Producer(KafkaProducer), CMode(Mode), RefTimeOffset(UseOffset) {
   SerializeThread = std::thread(&EventSerializer::serialiseFunction, this);
 }
 
@@ -92,7 +92,7 @@ void EventSerializer::serialiseFunction() {
   std::uint64_t MessageId{0};
   std::chrono::system_clock::time_point FirstEventTime;
   EventBuffer Events(EventBufferSize);
-  auto ProduceFB = [&](auto const &SendEvents, auto ReferenceTime) {
+  auto ProduceFB = [&](auto const &SendEvents, auto const ReferenceTime) {
     if (SendEvents.empty()) {
       return;
     }
@@ -111,7 +111,7 @@ void EventSerializer::serialiseFunction() {
     }
 
     Producer->produce({Builder.GetBufferPointer(), Builder.GetSize()},
-                      ReferenceTime / 1000000);
+                      RefTimeOffset.calcTimestamp(ReferenceTime) / 1000000);
     TimeOffset.clear();
     EventId.clear();
     Amplitude.clear();

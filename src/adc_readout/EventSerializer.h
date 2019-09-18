@@ -11,6 +11,7 @@
 #pragma once
 
 #include "EventBuffer.h"
+#include "OffsetTime.h"
 #include <chrono>
 #include <common/Producer.h>
 #include <concurrentqueue/concurrentqueue.h>
@@ -83,7 +84,7 @@ public:
   ///        event timestamp.
   EventSerializer(std::string SourceName, size_t BufferSize,
                   std::chrono::milliseconds TransmitTimeout,
-                  ProducerBase *KafkaProducer, TimestampMode Mode);
+                  ProducerBase *KafkaProducer, TimestampMode Mode, OffsetTime UseOffset = OffsetTime::NONE);
   /// \brief Stops the thread and may for this reason take a long time before
   /// returning.
   virtual ~EventSerializer();
@@ -116,4 +117,5 @@ protected:
   Queue EventQueue;
   TimestampQueue ReferenceTimeQueue;
   const TimestampMode CMode;
+  OffsetTime RefTimeOffset;
 };
