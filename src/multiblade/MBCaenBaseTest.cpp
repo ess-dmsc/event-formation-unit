@@ -42,7 +42,7 @@ public:
       : Multiblade::CAENBase(Settings, ReadoutSettings){};
   ~CAENBaseStandIn() = default;
   using Detector::Threads;
-  using Multiblade::CAENBase::mystats;
+  using Multiblade::CAENBase::Counters;
 };
 
 class CAENBaseTest : public ::testing::Test {
@@ -60,7 +60,7 @@ public:
 
 TEST_F(CAENBaseTest, Constructor) {
   CAENBaseStandIn Readout(Settings, LocalSettings);
-  EXPECT_EQ(Readout.mystats.rx_packets, 0);
+  EXPECT_EQ(Readout.Counters.RxPackets, 0);
 }
 
 
@@ -73,9 +73,9 @@ TEST_F(CAENBaseTest, DataReceive) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.mystats.rx_packets, 1);
-  EXPECT_EQ(Readout.mystats.rx_bytes, pkt145701.size());
-  EXPECT_EQ(Readout.mystats.rx_readouts, 45); // number of readouts in pkt13_short
+  EXPECT_EQ(Readout.Counters.RxPackets, 1);
+  EXPECT_EQ(Readout.Counters.RxBytes, pkt145701.size());
+  EXPECT_EQ(Readout.Counters.ReadoutsCount, 45); // number of readouts in pkt13_short
 }
 
 int main(int argc, char **argv) {
