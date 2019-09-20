@@ -129,7 +129,7 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
   int HoldDelay = ntohs(dp->HoldDelay);
   XTRACE(PROCESS, DEB, "Number of readout events in packet: %d", NumberOfSamples);
 
-  if (NumberOfSamples * BYTES_PER_ENTRY + sizeof(SEPHHeader) != hdr_length) {
+  if (NumberOfSamples * BYTES_PER_ENTRY + (int)sizeof(SEPHHeader) != hdr_length) {
     XTRACE(PROCESS, WAR, "Data length error: events %d (len %d), got: %d",
            NumberOfSamples, NumberOfSamples * BYTES_PER_ENTRY + sizeof(SEPHHeader), hdr_length);
     return -IDEASData::EHEADER;
