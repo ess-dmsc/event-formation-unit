@@ -53,8 +53,8 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   // clang-format off
   Stats.create("receive.packets", Counters.RxPackets);
   Stats.create("receive.bytes", Counters.RxBytes);
-  Stats.create("receive.FifoPushErrors", Counters.FifoPushErrors);
-  Stats.create("receive.FifoSeqErrors", Counters.FifoSeqErrors);
+  Stats.create("receive.dropped", Counters.FifoPushErrors);
+  Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
   Stats.create("readouts.count", Counters.ReadoutsCount);
   Stats.create("readouts.count_valid", Counters.ReadoutsGood);
@@ -71,7 +71,7 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
 
   Stats.create("events.count", Counters.Events);
   Stats.create("events.udder", Counters.EventsUdder);
-  Stats.create("events.GeometryErrors", Counters.GeometryErrors);
+  Stats.create("events.geometry_errors", Counters.GeometryErrors);
   Stats.create("events.no_coincidence", Counters.EventsNoCoincidence);
   Stats.create("events.not_adjacent", Counters.EventsNotAdjacent);
   Stats.create("filters.max_time_span", Counters.FiltersMaxTimeSpan);
