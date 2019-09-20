@@ -6,8 +6,8 @@
 #include <cstring>
 #include <sonde/ideas/Data.h>
 
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Sonde {
 
@@ -121,36 +121,37 @@ int IDEASData::parse_trigger_time_data_packet(const char *buffer) {
  */
 int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
   static const int BYTES_PER_ENTRY = 2;
-  /** \todo check minimum header length */
-  int nentries = ntohs(*(uint16_t *) (buffer + 5));
-  XTRACE(PROCESS, DEB, "Number of readout events in packet: %d", nentries);
+  SEPHHeader * dp = (SEPHHeader*)(buffer);
+  /// \todo check minimum header length
 
-  if (nentries * BYTES_PER_ENTRY + 7 != hdr_length) {
+  /// use ntohs() ntohl() on multi-byte values
+  int NumberOfSamples = ntohs(dp->NumberOfSamples);
+  int HoldDelay = ntohs(dp->HoldDelay);
+  XTRACE(PROCESS, DEB, "Number of readout events in packet: %d", NumberOfSamples);
+
+  if (NumberOfSamples * BYTES_PER_ENTRY + sizeof(SEPHHeader) != hdr_length) {
     XTRACE(PROCESS, WAR, "Data length error: events %d (len %d), got: %d",
-           nentries, nentries * BYTES_PER_ENTRY + 5, hdr_length);
+           NumberOfSamples, NumberOfSamples * BYTES_PER_ENTRY + sizeof(SEPHHeader), hdr_length);
     return -IDEASData::EHEADER;
   }
-  int asic = *(uint8_t *) (buffer);
-  int trigger_type = *(uint8_t *) (buffer + 1);
-  int channel = *(uint8_t *) (buffer + 2);
-  int hold_delay = ntohs(*(uint16_t *) (buffer + 3));
-  XTRACE(PROCESS, DEB,
-         "asic: %d, channel: %d, trigger type: %d, hold delay: %d", asic,
-         channel, trigger_type, hold_delay);
 
-  int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asic, channel);
+  XTRACE(PROCESS, DEB,
+         "asic: %d, channel: %d, trigger type: %d, hold delay: %d", dp->SourceId,
+         dp->ChannelId, dp->TriggerType, HoldDelay);
+
+  int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, dp->SourceId, dp->ChannelId);
   if (pixelid >= 1) {
     addEvent(hdr_hdrtime, pixelid, Sonde::NoAdcProvided);
   }
 
-  for (int i = 0; i < nentries; i++) {
+  for (int i = 0; i < NumberOfSamples; i++) {
     samples++;
-    uint16_t sample = ntohs(*(uint16_t *) (buffer + i * 2 + 7));
+    uint16_t sample = ntohs(*(uint16_t *) (buffer + i * BYTES_PER_ENTRY + sizeof(SEPHHeader)));
     XTRACE(PROCESS, INF, "sample %3d: 0x%x (%d)", i, sample, sample);
 
     if (dumptofile) {
-      datafile->tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, trigger_type,
-                       hold_delay, asic, channel, sample);
+      datafile->tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, dp->TriggerType,
+                       dp->HoldDelay, dp->SourceId, dp->ChannelId, sample);
     }
   }
 
@@ -159,7 +160,7 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
 
 /** Parse data according to IDEAS documentation */
 int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
-  static const int BYTES_PER_SAMPLE = 5;
+  static const int BYTES_PER_SAMPLE = sizeof(MEPHData);
   if (hdr_length < 12) {
     XTRACE(PROCESS, WAR, "data packet too short for mpeh data");
     return -IDEASData::EBADSIZE;
@@ -167,13 +168,13 @@ int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
 
   int N = *(uint8_t *) buffer;               /**< number of events            */
   int M = ntohs(*(uint16_t *) (buffer + 1)); /**< number of samples per event */
-  //assert(M == 64); // Have no real data so this currently fails
+
   XTRACE(PROCESS, DEB, "Readout events: %d, samples per event %d", N, M);
 
-  int expect_len = (4 + BYTES_PER_SAMPLE * M) * N + 3;
-  if (expect_len > hdr_length) {
+  int ExpectedLength = (4 + BYTES_PER_SAMPLE * M) * N + 3;
+  if (ExpectedLength > hdr_length) {
     XTRACE(PROCESS, WAR, "Data length error: expected len %d, got: %d",
-           expect_len, hdr_length);
+           ExpectedLength, hdr_length);
     return -IDEASData::EHEADER;
   }
 
@@ -182,20 +183,16 @@ int IDEASData::parse_multi_event_pulse_height_data_packet(const char *buffer) {
     uint32_t evtime = ntohl(*(uint32_t *) (evoff));
     for (int m = 0; m < M; m++) {
       samples++;
-      // events++; //Careful, data array will be parsed
       int sampleoffset = BYTES_PER_SAMPLE * m;
-      int trigger_type = *(uint8_t *) (evoff + sampleoffset + 4);
-      int asic = *(uint8_t *) (evoff + sampleoffset + 5);
-      int channel = *(uint8_t *) (evoff + sampleoffset + 6);
-      int adcvalue = ntohs(*(uint16_t *) (evoff + sampleoffset + 7));
-
-      int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, asic, channel);
+      MEPHData * dp = (MEPHData*)(evoff + sampleoffset + 4);
+      uint16_t ADCValue = ntohs(dp->ADCValue);
+      int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, dp->ASIC, dp->Channel);
       if (pixelid >= 1) {
-        addEvent(evtime, pixelid, adcvalue);
+        addEvent(evtime, pixelid, ADCValue);
       }
       if (dumptofile) {
         datafile->tofile("%d, %u, %d, %d, %d, %d\n", hdr_count, evtime,
-                         trigger_type, asic, channel, adcvalue);
+                         dp->TriggerType, dp->ASIC, dp->Channel, ADCValue);
       }
     }
   }

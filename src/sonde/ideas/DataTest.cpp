@@ -92,8 +92,9 @@ TEST_F(IDEASDataTest, SEPHOkOneSample) {
 TEST_F(IDEASDataTest, SEPHOkThreeSamples) {
   int size = type_0xd5_seph_ok_3.size();
   int res = readout->parse_buffer((char *)&type_0xd5_seph_ok_3[0], size);
-  ASSERT_EQ(res, 1); // Should always return 0 events
+  ASSERT_EQ(res, 1); // Should always return 1 event
   ASSERT_EQ(readout->samples, 3);
+  ASSERT_EQ(readout->data[0].Adc, Sonde::NoAdcProvided);
 }
 
 TEST_F(IDEASDataTest, SEPHErrHdrLenMismatch) {
@@ -126,8 +127,15 @@ TEST_F(IDEASDataTest, MEPHOkOneSample) {
 TEST_F(IDEASDataTest, MEPHOkN3M1) {
   int size = type_0xd4_meph_ok_n3m1.size();
   int res = readout->parse_buffer((char *)&type_0xd4_meph_ok_n3m1[0], size);
-  ASSERT_EQ(res, 3); // Should always return 0 events
+  ASSERT_EQ(res, 3); // Should always return 3 events
+  // This also implicitly testes the data endianness
   ASSERT_EQ(readout->samples, 3);
+  ASSERT_EQ(readout->data[0].Time, 0x00000001);
+  ASSERT_EQ(readout->data[0].Adc, 0x1234);
+  ASSERT_EQ(readout->data[1].Time, 0x00000005);
+  ASSERT_EQ(readout->data[1].Adc, 0x5678);
+  ASSERT_EQ(readout->data[2].Time, 0x00000009);
+  ASSERT_EQ(readout->data[2].Adc, 0x9abc);
 }
 
 int main(int argc, char **argv) {

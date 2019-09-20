@@ -36,13 +36,37 @@ public:
 
   /// \note from IDEAS Readout and Control Packet Protocol Reference
   /// Ref: IDE-REP-Ref-V1.7 Date: 2017-05-23
-  /// Direction: System -> PC
+  /// from: Table 18: Multi-Event Pulse-Height Data Packet fields.
+  struct MEPHData {
+    uint8_t TriggerType;
+    uint8_t ASIC;
+    uint8_t Channel;
+    uint16_t ADCValue;
+  } __attribute__((packed));
+  static_assert(sizeof(MEPHData) == 5, "MEPHData struct is not packed");
+
+  /// \note from IDEAS Readout and Control Packet Protocol Reference
+  /// Ref: IDE-REP-Ref-V1.7 Date: 2017-05-23
+  /// from: Table 17: Single-Event Pulse-Height Data Packet fields.
+  struct SEPHHeader {
+    uint8_t SourceId;
+    uint8_t TriggerType;
+    uint8_t ChannelId;
+    uint16_t HoldDelay;
+    uint16_t NumberOfSamples;
+  } __attribute__((packed));
+  static_assert(sizeof(SEPHHeader) == 7, "SEPHHeader struct is not packed");
+
+  /// \note from IDEAS Readout and Control Packet Protocol Reference
+  /// Ref: IDE-REP-Ref-V1.7 Date: 2017-05-23
+  /// from: Table 3: Packet Header – System to PC packets.
   struct Header {
     uint16_t id;
     uint16_t pktseq;
     uint32_t timestamp;
     uint16_t length;
   } __attribute__((packed));
+  static_assert(sizeof(Header) == 10, "Header struct is not packed");
 
   /// \todo document
   IDEASData(Geometry *geom, std::string fileprefix = "")
