@@ -80,15 +80,13 @@ static std::uint64_t TestTimestamp = 987654321;
 bool dataHasExpectedContent(nonstd::span<const std::uint8_t> Data) {
   auto EventData = GetEventMessage(Data.data());
   std::uint32_t DetectorIDValue = (TestYpos << 9u) + TestXpos + 1u;
-  EXPECT_EQ(EventData->pulse_time(), TestTimestamp);
+  EXPECT_EQ(EventData->time_of_flight()->size(), 1u);
+  EXPECT_EQ(EventData->pulse_time() + EventData->time_of_flight()->Get(0), TestTimestamp);
   EXPECT_EQ(EventData->source_name()->str(),
             std::string("delay_line_detector"));
   EXPECT_EQ(EventData->message_id(), 0u);
-  EXPECT_EQ(EventData->pulse_time(), TestTimestamp);
   EXPECT_EQ(EventData->detector_id()->size(), 1u);
   EXPECT_EQ(EventData->detector_id()->Get(0), DetectorIDValue);
-  EXPECT_EQ(EventData->time_of_flight()->size(), 1u);
-  EXPECT_EQ(EventData->time_of_flight()->Get(0), 0u);
   auto AdcData = EventData->facility_specific_data_as_AdcPulseDebug();
   EXPECT_EQ(AdcData->amplitude()->size(), 1u);
   EXPECT_EQ(AdcData->amplitude()->Get(0), TestAmplitude);
