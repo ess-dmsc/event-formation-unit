@@ -18,6 +18,9 @@
 #include <memory>
 #include <cassert>
 
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
+
 namespace Sonde {
 
 const int MaxNumberOfEvents = 500;

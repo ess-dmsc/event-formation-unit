@@ -139,15 +139,14 @@ int IDEASData::parse_single_event_pulse_height_data_packet(const char *buffer) {
          "asic: %d, channel: %d, trigger type: %d, hold delay: %d", dp->SourceId,
          dp->ChannelId, dp->TriggerType, HoldDelay);
 
-  int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, dp->SourceId, dp->ChannelId);
-  if (pixelid >= 1) {
-    addEvent(hdr_hdrtime, pixelid, Sonde::NoAdcProvided);
-  }
-
   for (int i = 0; i < NumberOfSamples; i++) {
     samples++;
     uint16_t sample = ntohs(*(uint16_t *) (buffer + i * BYTES_PER_ENTRY + sizeof(SEPHHeader)));
-    XTRACE(PROCESS, INF, "sample %3d: 0x%x (%d)", i, sample, sample);
+
+    int pixelid = sondegeometry->getdetectorpixelid(hdr_sysno, i/16, i%16);
+    if (pixelid > 0) {
+      addEvent(hdr_hdrtime, pixelid, sample);
+    }
 
     if (dumptofile) {
       datafile->tofile("%u, %d, %d, %d, %d, %d\n", hdr_hdrtime, dp->TriggerType,

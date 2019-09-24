@@ -92,9 +92,11 @@ TEST_F(IDEASDataTest, SEPHOkOneSample) {
 TEST_F(IDEASDataTest, SEPHOkThreeSamples) {
   int size = type_0xd5_seph_ok_3.size();
   int res = readout->parse_buffer((char *)&type_0xd5_seph_ok_3[0], size);
-  ASSERT_EQ(res, 1); // Should always return 1 event
+  ASSERT_EQ(res, 3); // Currently returns one event per sample
   ASSERT_EQ(readout->samples, 3);
-  ASSERT_EQ(readout->data[0].Adc, Sonde::NoAdcProvided);
+  ASSERT_EQ(readout->data[0].Adc, 0x1234);
+  ASSERT_EQ(readout->data[1].Adc, 0x5678);
+  ASSERT_EQ(readout->data[2].Adc, 0x9abc);
 }
 
 TEST_F(IDEASDataTest, SEPHErrHdrLenMismatch) {
@@ -136,6 +138,18 @@ TEST_F(IDEASDataTest, MEPHOkN3M1) {
   ASSERT_EQ(readout->data[1].Adc, 0x5678);
   ASSERT_EQ(readout->data[2].Time, 0x00000009);
   ASSERT_EQ(readout->data[2].Adc, 0x9abc);
+}
+
+TEST_F(IDEASDataTest, SCRO_pkt) {
+  int size = scro_pkt.size();
+  int res = readout->parse_buffer((char *)&scro_pkt[0], size);
+  ASSERT_EQ(res, 150); // There is really only one event but 150 samples
+}
+
+TEST_F(IDEASDataTest, ACRO_pkt) {
+  int size = acro_pkt.size();
+  int res = readout->parse_buffer((char *)&acro_pkt[0], size);
+  ASSERT_EQ(res, 64); // There is really only one event but 1 sample per channel
 }
 
 int main(int argc, char **argv) {
