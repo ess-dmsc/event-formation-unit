@@ -22,7 +22,7 @@ public:
   static const Offset NONE = Offset::NONE;
   static const Offset TIME_POINT = Offset::TIME_POINT;
   OffsetTime(Offset Time, std::chrono::system_clock::time_point OffsetPoint = std::chrono::system_clock::now());
-  OffsetTime(std::chrono::system_clock::time_point OffsetPoint);
+  explicit OffsetTime(std::chrono::system_clock::time_point OffsetPoint);
   std::uint64_t calcTimestamp(std::uint64_t InputTime);
 private:
   Offset OffsetSetting{Offset::NONE};
