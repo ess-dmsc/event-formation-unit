@@ -53,6 +53,10 @@ protected:
 
     // Processing and Output counters
     int64_t rx_idle1;
+    int64_t rx_pkt_triggertime; 
+    int64_t rx_pkt_singleevent;
+    int64_t rx_pkt_multievent;
+    int64_t rx_pkt_unsupported;
     int64_t rx_events;
     int64_t rx_geometry_errors;
     int64_t tx_bytes;

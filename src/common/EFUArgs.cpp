@@ -58,6 +58,9 @@ EFUArgs::EFUArgs() {
   CLIParser.add_flag("--udder", EFUSettings.TestImage, "Generate a test image")
       ->group("EFU Options");
 
+  CLIParser.add_option("--udder_usleep", EFUSettings.TestImageUSleep, "usleep between udder pixels")
+      ->group("EFU Options")->default_str("10");
+
   std::string DetectorDescription{"Detector name"};
   std::map<std::string, DetectorModuleSetup> StaticDetModules =
       DetectorModuleRegistration::getFactories();
@@ -174,7 +177,7 @@ bool EFUArgs::parseLogLevel(std::vector<std::string> LogLevelString) {
 
 void EFUArgs::printSettings() {
   // clang-format off
-  LOG(INIT, Sev::Info, "Starting event processing pipeline2 with main properties:");
+  LOG(INIT, Sev::Info, "Starting event processing pipeline with main properties:");
   LOG(INIT, Sev::Info, "  Detector:                 {}",    DetectorName);
   LOG(INIT, Sev::Info, "  Rx UDP Socket:            {}:{}",
          EFUSettings.DetectorAddress, EFUSettings.DetectorPort);
