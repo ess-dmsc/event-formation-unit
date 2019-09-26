@@ -39,6 +39,7 @@ struct BaseSettings {
   std::uint32_t StopAfterSec         {0xffffffffU};
   bool          NoHwCheck            {false};
   bool          TestImage            {false};
+  std::uint32_t TestImageUSleep      {10};
 };
 // clang-format on
 
