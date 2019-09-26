@@ -219,7 +219,7 @@ void CAENBase::processing_thread() {
 
       auto pixel_id = udder.getPixel(essgeom.nx(), essgeom.ny(), &essgeom);
 
-      Counters.TxBytes += flatbuffer.addEvent(time, pixel_id);
+      Counters.TxBytes += flatbuffer.addEvent(time_of_flight, pixel_id);
       Counters.EventsUdder++;
 
       if (EFUSettings.TestImageUSleep != 0) {
