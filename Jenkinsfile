@@ -79,7 +79,7 @@ builders = pipeline_builder.createBuilders { container ->
             container.sh """
                 cd ${project}/build
                 make --version
-                make -j all unit_tests benchmark
+                make -j${pipeline_builder.numCpus} all unit_tests benchmark
                 cd ../utils/udpredirect
                 make
             """
@@ -111,9 +111,9 @@ builders = pipeline_builder.createBuilders { container ->
                 container.sh """
                         cd ${project}/build
                         . ./activate_run.sh
-                        make -j 4 runefu
+                        make -j${pipeline_builder.numCpus} runefu
                         make coverage
-                        echo skipping make -j valgrind
+                        echo skipping make -j${pipeline_builder.numCpus} valgrind
                     """
                 container.copyFrom("${project}", '.')
             } catch(e) {
