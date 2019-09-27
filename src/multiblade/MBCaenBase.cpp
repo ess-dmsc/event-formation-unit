@@ -51,39 +51,41 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("receive.packets", mystats.rx_packets);
-  Stats.create("receive.bytes", mystats.rx_bytes);
-  Stats.create("receive.dropped", mystats.fifo1_push_errors);
+  Stats.create("receive.packets", Counters.RxPackets);
+  Stats.create("receive.bytes", Counters.RxBytes);
+  Stats.create("receive.dropped", Counters.FifoPushErrors);
+  Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
-  Stats.create("readouts.count", mystats.rx_readouts);
-  Stats.create("readouts.count_valid", mystats.readouts_ok);
-  Stats.create("readouts.invalid_ch", mystats.readouts_invalid_ch);
-  Stats.create("readouts.invalid_adc", mystats.readouts_invalid_adc);
-  Stats.create("readouts.invalid_plane", mystats.readouts_invalid_plane);
-  Stats.create("readouts.monitor", mystats.readouts_monitor);
+  Stats.create("readouts.count", Counters.ReadoutsCount);
+  Stats.create("readouts.count_valid", Counters.ReadoutsGood);
+  Stats.create("readouts.invalid_ch", Counters.ReadoutsInvalidChannel);
+  Stats.create("readouts.invalid_adc", Counters.ReadoutsInvalidAdc);
+  Stats.create("readouts.invalid_plane", Counters.ReadoutsInvalidPlane);
+  Stats.create("readouts.monitor", Counters.ReadoutsMonitor);
 
-  Stats.create("readouts.error_bytes", mystats.readouts_error_bytes);
-  Stats.create("readouts.seq_errors", mystats.readouts_seq_errors);
+  Stats.create("readouts.error_version", Counters.ReadoutsErrorVersion);
+  Stats.create("readouts.error_bytes", Counters.ReadoutsErrorBytes);
+  Stats.create("readouts.seq_errors", Counters.ReadoutsSeqErrors);
 
-  Stats.create("thread.processing_idle", mystats.rx_idle1);
+  Stats.create("thread.processing_idle", Counters.RxIdle);
 
-  Stats.create("events.count", mystats.events);
-  Stats.create("events.udder", mystats.events_udder);
-  Stats.create("events.geometry_errors", mystats.geometry_errors);
-  Stats.create("events.no_coincidence", mystats.events_no_coincidence);
-  Stats.create("events.not_adjacent", mystats.events_not_adjacent);
-  Stats.create("filters.max_time_span", mystats.filters_max_time_span);
-  Stats.create("filters.max_multi1", mystats.filters_max_multi1);
-  Stats.create("filters.max_multi2", mystats.filters_max_multi2);
+  Stats.create("events.count", Counters.Events);
+  Stats.create("events.udder", Counters.EventsUdder);
+  Stats.create("events.geometry_errors", Counters.GeometryErrors);
+  Stats.create("events.no_coincidence", Counters.EventsNoCoincidence);
+  Stats.create("events.not_adjacent", Counters.EventsNotAdjacent);
+  Stats.create("filters.max_time_span", Counters.FiltersMaxTimeSpan);
+  Stats.create("filters.max_multi1", Counters.FiltersMaxMulti1);
+  Stats.create("filters.max_multi2", Counters.FiltersMaxMulti2);
 
-  Stats.create("transmit.bytes", mystats.tx_bytes);
+  Stats.create("transmit.bytes", Counters.TxBytes);
 
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
-  Stats.create("kafka.ev_errors", mystats.kafka_ev_errors);
-  Stats.create("kafka.ev_others", mystats.kafka_ev_others);
-  Stats.create("kafka.dr_errors", mystats.kafka_dr_errors);
-  Stats.create("kafka.dr_others", mystats.kafka_dr_noerrors);
+  Stats.create("kafka.produce_fails", Counters.kafka_produce_fails);
+  Stats.create("kafka.ev_errors", Counters.kafka_ev_errors);
+  Stats.create("kafka.ev_others", Counters.kafka_ev_others);
+  Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
+  Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { CAENBase::input_thread(); };
@@ -95,13 +97,13 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Detector::AddThreadFunction(processingFunc, "processing");
 
   XTRACE(INIT, ALW, "Creating %d Multiblade Rx ringbuffers of size %d",
-         eth_buffer_max_entries, eth_buffer_size);
+         EthernetBufferMaxEntries, EthernetBufferSize);
   /// \todo the number 11 is a workaround
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(eth_buffer_max_entries + 11);
-  assert(eth_ringbuf != 0);
+  EthernetRingbuffer = new RingBuffer<EthernetBufferSize>(EthernetBufferMaxEntries + 11);
+  assert(EthernetRingbuffer != 0);
 
-  mb_opts = Config(MBCAENSettings.ConfigFile);
-  assert(mb_opts.getDigitizers() != nullptr);
+  MultibladeConfig = Config(MBCAENSettings.ConfigFile);
+  assert(MultibladeConfig.getDigitizers() != nullptr);
 }
 
 void CAENBase::input_thread() {
@@ -116,22 +118,21 @@ void CAENBase::input_thread() {
 
   for (;;) {
     int rdsize;
-    unsigned int eth_index = eth_ringbuf->getDataIndex();
+    unsigned int eth_index = EthernetRingbuffer->getDataIndex();
 
     /** this is the processing step */
-    eth_ringbuf->setDataLength(eth_index, 0);
-    if ((rdsize = receiver.receive(eth_ringbuf->getDataBuffer(eth_index),
-                                   eth_ringbuf->getMaxBufSize())) > 0) {
-      eth_ringbuf->setDataLength(eth_index, rdsize);
-//      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
-//             rdsize);
-      mystats.rx_packets++;
-      mystats.rx_bytes += rdsize;
+    EthernetRingbuffer->setDataLength(eth_index, 0);
+    if ((rdsize = receiver.receive(EthernetRingbuffer->getDataBuffer(eth_index),
+                                   EthernetRingbuffer->getMaxBufSize())) > 0) {
+      EthernetRingbuffer->setDataLength(eth_index, rdsize);
+      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", rdsize);
+      Counters.RxPackets++;
+      Counters.RxBytes += rdsize;
 
-      if (input2proc_fifo.push(eth_index) == false) {
-        mystats.fifo1_push_errors++;
+      if (InputFifo.push(eth_index) == false) {
+        Counters.FifoPushErrors++;
       } else {
-        eth_ringbuf->getNextBuffer();
+        EthernetRingbuffer->getNextBuffer();
       }
     }
 
@@ -144,15 +145,15 @@ void CAENBase::input_thread() {
 }
 
 void CAENBase::processing_thread() {
-  const uint16_t ncass = mb_opts.getCassettes();
-  const uint16_t nwires = mb_opts.getWires();
-  const uint16_t nstrips = mb_opts.getStrips();
+  const uint16_t ncass = MultibladeConfig.getCassettes();
+  const uint16_t nwires = MultibladeConfig.getWires();
+  const uint16_t nstrips = MultibladeConfig.getStrips();
   std::string topic{""};
   std::string monitor{""};
 
   MBGeometry mbgeom(ncass, nwires, nstrips);
   ESSGeometry essgeom;
-  if (mb_opts.getInstrument() == Config::InstrumentGeometry::Estia) {
+  if (MultibladeConfig.getInstrument() == Config::InstrumentGeometry::Estia) {
     XTRACE(PROCESS, ALW, "Setting instrument configuration to Estia");
     mbgeom.setConfigurationEstia();
     essgeom = ESSGeometry(ncass * nwires, nstrips, 1, 1);
@@ -166,7 +167,7 @@ void CAENBase::processing_thread() {
     monitor = "FREIA_monitor";
   }
 
-  if (mb_opts.getDetectorType() == Config::DetectorType::MB18) {
+  if (MultibladeConfig.getDetectorType() == Config::DetectorType::MB18) {
     XTRACE(PROCESS, ALW, "Setting detector to MB18");
     mbgeom.setDetectorMB18();
   } else {
@@ -179,7 +180,7 @@ void CAENBase::processing_thread() {
     dumpfile = ReadoutFile::create(MBCAENSettings.FilePrefix + "-" + timeString());
   }
 
-  EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
+  EV42Serializer flatbuffer(KafkaBufferSize, "multiblade");
   Producer eventprod(EFUSettings.KafkaBroker, topic);
 #pragma GCC diagnostic push
 #pragma GCC diagnostic warning "-Wdeprecated-declarations"
@@ -195,7 +196,7 @@ void CAENBase::processing_thread() {
   std::vector<EventBuilder> builders(ncass);
 
   DataParser parser;
-  auto digitisers = mb_opts.getDigitisers();
+  auto digitisers = MultibladeConfig.getDigitisers();
   DigitizerMapping mb1618(digitisers);
 
 
@@ -217,9 +218,9 @@ void CAENBase::processing_thread() {
       }
 
       auto pixel_id = udder.getPixel(essgeom.nx(), essgeom.ny(), &essgeom);
-      auto tx_bytes = flatbuffer.addEvent(time_of_flight, pixel_id);
-      mystats.tx_bytes += tx_bytes;
-      mystats.events_udder++;
+
+      Counters.TxBytes += flatbuffer.addEvent(time_of_flight, pixel_id);
+      Counters.EventsUdder++;
 
       if (EFUSettings.TestImageUSleep != 0) {
         usleep(EFUSettings.TestImageUSleep);
@@ -227,7 +228,7 @@ void CAENBase::processing_thread() {
 
       time_of_flight++;
 
-      if (tx_bytes != 0) {
+      if (Counters.TxBytes != 0) {
         eventCount = 0;
       } else {
         eventCount++;
@@ -240,20 +241,21 @@ void CAENBase::processing_thread() {
   TSCTimer produce_timer;
   Timer h5flushtimer;
   while (true) {
-    if (input2proc_fifo.pop(data_index)) { // There is data in the FIFO - do processing
-      auto datalen = eth_ringbuf->getDataLength(data_index);
+    if (InputFifo.pop(data_index)) { // There is data in the FIFO - do processing
+      auto datalen = EthernetRingbuffer->getDataLength(data_index);
       if (datalen == 0) {
-        mystats.readouts_seq_errors++;
+        Counters.FifoSeqErrors++;
         continue;
       }
 
       /// \todo use the Buffer<T> class here and in parser
-      auto dataptr = eth_ringbuf->getDataBuffer(data_index);
+      auto dataptr = EthernetRingbuffer->getDataBuffer(data_index);
       if (parser.parse(dataptr, datalen) < 0) {
-        mystats.readouts_error_bytes += parser.Stats.error_bytes;
+        Counters.ReadoutsErrorBytes += parser.Stats.error_bytes;
+        Counters.ReadoutsErrorVersion += parser.Stats.error_version;
         continue;
       }
-      mystats.readouts_seq_errors += parser.Stats.seq_errors;
+      Counters.ReadoutsSeqErrors += parser.Stats.seq_errors;
 
       XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
              parser.MBHeader->numElements, parser.MBHeader->digitizerID);
@@ -261,13 +263,13 @@ void CAENBase::processing_thread() {
       uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
       flatbuffer.pulseTime(efu_time);
 
-      mystats.rx_readouts += parser.MBHeader->numElements;
+      Counters.ReadoutsCount += parser.MBHeader->numElements;
 
       if (dumpfile) {
         dumpfile->push(parser.readouts);
       }
 
-      /// \todo why can't I use mb_opts.detector->cassette()
+      /// \todo why can't I use MultibladeConfig.detector->cassette()
       auto cassette = mb1618.cassette(parser.MBHeader->digitizerID);
       if (cassette < 0) {
         XTRACE(DATA, WAR, "Invalid digitizerId: %d",
@@ -278,12 +280,12 @@ void CAENBase::processing_thread() {
       for (const auto &dp : parser.readouts) {
 
         if (not mbgeom.isValidCh(dp.channel)) {
-          mystats.readouts_invalid_ch++;
+          Counters.ReadoutsInvalidChannel++;
           continue;
         }
 
-        if (dp.adc > mb_opts.max_valid_adc) {
-          mystats.readouts_invalid_adc++;
+        if (dp.adc > MultibladeConfig.max_valid_adc) {
+          Counters.ReadoutsInvalidAdc++;
           continue;
         }
 
@@ -292,7 +294,7 @@ void CAENBase::processing_thread() {
         uint16_t coord;
         if (plane == 0) {
           if (global_ch == 30) {
-            mystats.readouts_monitor++;
+            Counters.ReadoutsMonitor++;
             continue;
           }
           coord = mbgeom.getx(cassette, dp.channel);
@@ -301,11 +303,11 @@ void CAENBase::processing_thread() {
           coord = mbgeom.gety(cassette, dp.channel);
           histograms.bin_y(global_ch, dp.adc);
         } else {
-          mystats.readouts_invalid_plane++;
+          Counters.ReadoutsInvalidPlane++;
           continue;
         }
 
-        mystats.readouts_ok++;
+        Counters.ReadoutsGood++;
 
         XTRACE(DATA, DEB, "time %lu, channel %u, adc %u", dp.local_time, dp.channel, dp.adc);
 
@@ -320,32 +322,32 @@ void CAENBase::processing_thread() {
 
         if (!e.both_planes()) {
           XTRACE(EVENT, INF, "Event No Coincidence %s", e.to_string({}, true).c_str());
-          mystats.events_no_coincidence++;
+          Counters.EventsNoCoincidence++;
           continue;
         }
 
         // \todo parametrize maximum time span - in opts?
-        if (mb_opts.filter_time_span && (e.time_span() > mb_opts.filter_time_span_value)) {
+        if (MultibladeConfig.filter_time_span && (e.time_span() > MultibladeConfig.filter_time_span_value)) {
           XTRACE(EVENT, INF, "Event filter time_span %s", e.to_string({}, true).c_str());
-          mystats.filters_max_time_span++;
+          Counters.FiltersMaxTimeSpan++;
           continue;
         }
 
         if ((e.ClusterA.coord_span() > e.ClusterA.hit_count()) && (e.ClusterB.coord_span() > e.ClusterB.hit_count())) {
           XTRACE(EVENT, INF, "Event Chs not adjacent %s", e.to_string({}, true).c_str());
-          mystats.events_not_adjacent++;
+          Counters.EventsNotAdjacent++;
           continue;
         }
 
         // // \todo are these always wires && strips respectively?
         // if (filter_multiplicity &&
         //     ((e.cluster1.hit_count() > 5) || (e.cluster2.hit_count() > 10))) {
-        //   mystats.filters_max_multi1++;
+        //   Counters.FiltersMaxMulti1++;
         //   continue;
         // }
         // if (filter_multiplicity2 &&
         //     ((e.cluster1.hit_count() > 3) || (e.cluster2.hit_count() > 4))) {
-        //   mystats.filters_max_multi2++;
+        //   Counters.FiltersMaxMulti2++;
         //   continue;
         // }
 
@@ -359,21 +361,21 @@ void CAENBase::processing_thread() {
 //        auto y = (e.cluster2.coord_start() + e.cluster2.coord_end()) / 2;
 
         // \todo improve this
-        auto time = e.time_start() * mb_opts.TimeTickNS; // TOF in ns
+        auto time = e.time_start() * MultibladeConfig.TimeTickNS; // TOF in ns
         auto pixel_id = essgeom.pixel2D(x, y);
         XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
 
         if (pixel_id == 0) {
-          mystats.geometry_errors++;
+          Counters.GeometryErrors++;
         } else {
-          mystats.tx_bytes += flatbuffer.addEvent(time, pixel_id);
-          mystats.events++;
+          Counters.TxBytes += flatbuffer.addEvent(time, pixel_id);
+          Counters.Events++;
         }
       }
 
     } else {
       // There is NO data in the FIFO - do stop checks and sleep a little
-      mystats.rx_idle1++;
+      Counters.RxIdle++;
       usleep(10);
     }
 
@@ -391,7 +393,7 @@ void CAENBase::processing_thread() {
     if (produce_timer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
-      mystats.tx_bytes += flatbuffer.produce();
+      Counters.TxBytes += flatbuffer.produce();
 
       if (!histograms.isEmpty()) {
 //        XTRACE(PROCESS, INF, "Sending histogram for %zu readouts",
@@ -402,11 +404,11 @@ void CAENBase::processing_thread() {
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
-      mystats.kafka_produce_fails = eventprod.stats.produce_fails;
-      mystats.kafka_ev_errors = eventprod.stats.ev_errors;
-      mystats.kafka_ev_others = eventprod.stats.ev_others;
-      mystats.kafka_dr_errors = eventprod.stats.dr_errors;
-      mystats.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
+      Counters.kafka_produce_fails = eventprod.stats.produce_fails;
+      Counters.kafka_ev_errors = eventprod.stats.ev_errors;
+      Counters.kafka_ev_others = eventprod.stats.ev_others;
+      Counters.kafka_dr_errors = eventprod.stats.dr_errors;
+      Counters.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
 
       produce_timer.now();
     }

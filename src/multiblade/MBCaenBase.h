@@ -1,4 +1,3 @@
-
 /* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
@@ -28,57 +27,58 @@ using namespace memory_sequential_consistent; // Lock free fifo
 class CAENBase : public Detector {
 public:
   CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAENSettings);
-  ~CAENBase() { delete eth_ringbuf; }
+  ~CAENBase() { delete EthernetRingbuffer; }
   void input_thread();
   void processing_thread();
 
   /** @todo figure out the right size  of the .._max_entries  */
-  static const int eth_buffer_max_entries = 500;
-  static const int eth_buffer_size = 9000; /// bytes
-
-  static const int kafka_buffer_size = 124000; /// entries
+  static const int EthernetBufferMaxEntries = 500;
+  static const int EthernetBufferSize = 9000; /// bytes
+  static const int KafkaBufferSize = 124000; /// entries ~ 1MB
 
 protected:
   /** Shared between input_thread and processing_thread*/
-  CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
-  RingBuffer<eth_buffer_size> *eth_ringbuf;
+  CircularFifo<unsigned int, EthernetBufferMaxEntries> InputFifo;
+  RingBuffer<EthernetBufferSize> *EthernetRingbuffer;
 
   struct {
-    // Input Counters
-    int64_t rx_packets;
-    int64_t rx_bytes;
-    int64_t fifo1_push_errors;
-    int64_t pad[5]; // cppcheck-suppress unusedStructMember
+    // Input Counters - accessed in input thread
+    int64_t RxPackets;
+    int64_t RxBytes;
+    int64_t FifoPushErrors;
+    int64_t PaddingFor64ByteAlignment[5]; // cppcheck-suppress unusedStructMember
 
-    // Processing Counters
-    int64_t events_udder;
-    int64_t readouts_monitor; // \todo so far hardcoded
-    int64_t readouts_invalid_adc;
-    int64_t readouts_invalid_ch;
-    int64_t readouts_invalid_plane;
-    int64_t filters_max_time_span;
-    int64_t filters_max_multi1;
-    int64_t filters_max_multi2;
-    int64_t rx_idle1;
-    int64_t rx_readouts;
-    int64_t readouts_ok;
-    int64_t readouts_error_bytes;
-    int64_t readouts_seq_errors;
-    int64_t tx_bytes;
-    int64_t events;
-    int64_t events_no_coincidence;
-    int64_t events_not_adjacent;
-    int64_t geometry_errors;
+    // Processing Counters - accessed in processing thread
+    int64_t FifoSeqErrors;
+    int64_t ReadoutsErrorVersion;
+    int64_t ReadoutsSeqErrors;
+    int64_t ReadoutsErrorBytes;
+    int64_t ReadoutsCount;
+    int64_t ReadoutsGood;
+    int64_t ReadoutsMonitor; /// \todo so far hardcoded
+    int64_t ReadoutsInvalidAdc;
+    int64_t ReadoutsInvalidChannel;
+    int64_t ReadoutsInvalidPlane;
+    int64_t FiltersMaxTimeSpan;
+    int64_t FiltersMaxMulti1;
+    int64_t FiltersMaxMulti2;
+    int64_t RxIdle;
+    int64_t Events;
+    int64_t EventsUdder;
+    int64_t EventsNoCoincidence;
+    int64_t EventsNotAdjacent;
+    int64_t GeometryErrors;
+    int64_t TxBytes;
     // Kafka stats below are common to all detectors
     int64_t kafka_produce_fails;
     int64_t kafka_ev_errors;
     int64_t kafka_ev_others;
     int64_t kafka_dr_errors;
     int64_t kafka_dr_noerrors;
-  } __attribute__((aligned(64))) mystats;
+  } __attribute__((aligned(64))) Counters;
 
-  struct CAENSettings MBCAENSettings;
-  Config mb_opts;
+  CAENSettings MBCAENSettings;
+  Config MultibladeConfig;
 };
 
 }

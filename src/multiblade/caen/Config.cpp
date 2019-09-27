@@ -42,7 +42,7 @@ void Config::loadConfigFile() {
 
   if (ConfigFile.empty()) {
     LOG(INIT, Sev::Info, "JSON config - no config file specified, using default configuration");
-    return;
+    throw std::runtime_error("No config file provided.");
   }
 
   LOG(INIT, Sev::Info, "JSON config - loading configuration from file {}", ConfigFile);

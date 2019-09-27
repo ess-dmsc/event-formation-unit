@@ -51,6 +51,7 @@ TEST_F(MultibladeDataTest, InvalidVersion) {
   Multiblade::DataParser mbdata;
   auto res = mbdata.parse((char *)&invalid_version[0], invalid_version.size());
   ASSERT_EQ(res, -Multiblade::DataParser::error::EHEADER);
+  ASSERT_EQ(1, mbdata.Stats.error_version);
 }
 
 TEST_F(MultibladeDataTest, InvalidType) {

@@ -16,8 +16,15 @@
 #include <common/DataSave.h>
 #include <sonde/Geometry.h>
 #include <memory>
+#include <cassert>
+
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Sonde {
+
+const int MaxNumberOfEvents = 500;
+const uint16_t NoAdcProvided = 0x1;
 
 class IDEASData {
 public:
@@ -25,19 +32,44 @@ public:
   enum error { OK = 0, EBUFFER, EBADSIZE, EHEADER, EUNSUPP };
 
   struct SoNDeData {
-    uint32_t time;
-    uint32_t pixel_id;
+    uint32_t Time;
+    uint32_t PixelId;
+    uint32_t Adc;
   };
 
   /// \note from IDEAS Readout and Control Packet Protocol Reference
   /// Ref: IDE-REP-Ref-V1.7 Date: 2017-05-23
-  /// Direction: System -> PC
+  /// from: Table 18: Multi-Event Pulse-Height Data Packet fields.
+  struct MEPHData {
+    uint8_t TriggerType;
+    uint8_t ASIC;
+    uint8_t Channel;
+    uint16_t ADCValue;
+  } __attribute__((packed));
+  static_assert(sizeof(MEPHData) == 5, "MEPHData struct is not packed");
+
+  /// \note from IDEAS Readout and Control Packet Protocol Reference
+  /// Ref: IDE-REP-Ref-V1.7 Date: 2017-05-23
+  /// from: Table 17: Single-Event Pulse-Height Data Packet fields.
+  struct SEPHHeader {
+    uint8_t SourceId;
+    uint8_t TriggerType;
+    uint8_t ChannelId;
+    uint16_t HoldDelay;
+    uint16_t NumberOfSamples;
+  } __attribute__((packed));
+  static_assert(sizeof(SEPHHeader) == 7, "SEPHHeader struct is not packed");
+
+  /// \note from IDEAS Readout and Control Packet Protocol Reference
+  /// Ref: IDE-REP-Ref-V1.7 Date: 2017-05-23
+  /// from: Table 3: Packet Header – System to PC packets.
   struct Header {
     uint16_t id;
     uint16_t pktseq;
     uint32_t timestamp;
     uint16_t length;
   } __attribute__((packed));
+  static_assert(sizeof(Header) == 10, "Header struct is not packed");
 
   /// \todo document
   IDEASData(Geometry *geom, std::string fileprefix = "")
@@ -68,12 +100,25 @@ public:
   /// \brief Section 2.4.3 page 12
   int parse_multi_event_pulse_height_data_packet(const char *buffer);
 
-  struct SoNDeData data[500];
+  void addEvent(int time, int pixelid, int adc) {
+    assert(events < MaxNumberOfEvents);
+    XTRACE(PROCESS, INF, "event: %d, time: 0x%08x, pixel: %d, adc: %d", events, time, pixelid, adc);
+    data[events].Time = time;
+    data[events].PixelId = static_cast<uint32_t>(pixelid);
+    data[events].Adc = adc;
+    events++;
+  };
+
+  struct SoNDeData data[MaxNumberOfEvents];
   unsigned int events{0};  ///< number of valid events
   unsigned int errors{0};  ///< number of geometry errors in readout
   unsigned int samples{0}; ///< number of samples in readout
 
   uint64_t ctr_outof_sequence{0};
+  uint64_t counterPacketTriggerTime{0};
+  uint64_t counterPacketSingleEventPulseHeight{0};
+  uint64_t counterPacketMultiEventPulseHeight{0};
+  uint64_t counterPacketUnsupported{0};
 
 private:
   Geometry *sondegeometry{nullptr};
