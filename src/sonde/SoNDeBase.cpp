@@ -172,7 +172,7 @@ void SONDEIDEABase::processing_thread() {
 
         if (events > 0) {
           for (int i = 0; i < events; i++) {
-            assert(ideasdata.data[i].PixelId < maxChannels);
+            assert(ideasdata.data[i].PixelId <= maxChannels);
             histograms.bin_x(ideasdata.data[i].PixelId, ideasdata.data[i].Adc);
             XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)",
                    i, ideasdata.data[i].Time, ideasdata.data[i].PixelId);
