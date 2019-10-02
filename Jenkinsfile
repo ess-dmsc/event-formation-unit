@@ -79,7 +79,7 @@ builders = pipeline_builder.createBuilders { container ->
             container.sh """
                 cd ${project}/build
                 make --version
-                make all unit_tests benchmark -j4
+                make -j${pipeline_builder.numCpus} all unit_tests benchmark
                 cd ../utils/udpredirect
                 make
             """
@@ -111,9 +111,9 @@ builders = pipeline_builder.createBuilders { container ->
                 container.sh """
                         cd ${project}/build
                         . ./activate_run.sh
-                        make -j 4 runefu
+                        make -j${pipeline_builder.numCpus} runefu
                         make coverage
-                        echo skipping make -j 4 valgrind
+                        echo skipping make -j${pipeline_builder.numCpus} valgrind
                     """
                 container.copyFrom("${project}", '.')
             } catch(e) {
@@ -218,8 +218,8 @@ def get_macos_pipeline()
                 dir("${project}/build") {
                     sh "conan install --build=outdated .."
                     sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
-                    sh "make -j4"
-                    sh "make -j4 unit_tests"
+                    sh "make -j${pipeline_builder.numCpus}"
+                    sh "make -j${pipeline_builder.numCpus} unit_tests"
                     sh "make runtest"
                     sh "make runefu"
                 }
