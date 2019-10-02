@@ -218,8 +218,8 @@ def get_macos_pipeline()
                 dir("${project}/build") {
                     sh "conan install --build=outdated .."
                     sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
-                    sh "make -j"
-                    sh "make -j unit_tests"
+                    sh "make -j${pipeline_builder.numCpus}"
+                    sh "make -j${pipeline_builder.numCpus} unit_tests"
                     sh "make runtest"
                     sh "make runefu"
                 }
