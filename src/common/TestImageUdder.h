@@ -20,10 +20,34 @@ public:
   const uint16_t ImageSize = ImageWidth * ImageHeight;
   static const std::vector<uint8_t> UdderImage;
 
-  static unsigned int PixelNumber;
-  unsigned int byte, bit, index;
+  // Loop through the image once and make a vector of pixel ids
+  void cachePixels(uint16_t w, uint16_t h, ESSGeometry * geom) {
+    uint32_t old = 0;
+    for (unsigned int i = 0; i < ImageWidth * ImageHeight; i++) {
+      auto pixel = getPixel(w, h, geom);
+      if (pixel < old) {
+        PixelsAreCached = true;
+        return; // we're done
+      }
+      if (pixel != 0) {
+        CachedPixels.push_back(pixel);
+      }
+      old = pixel;
+    }
+  }
+
 
   uint32_t getPixel(uint16_t w, uint16_t h, ESSGeometry * geom) {
+
+    if (PixelsAreCached) {
+      auto pixel = CachedPixels[CachedPixelIndex++];
+      if (CachedPixelIndex == CachedPixels.size()) {
+        CachedPixelIndex = 0;
+      }
+      return pixel;
+    }
+
+    unsigned int byte, bit, index;
     do {
       index = PixelNumber % ImageSize;
       byte = index / 8;
@@ -39,9 +63,21 @@ public:
     //printf("p: %u, i: %u, x: %u, y: %u, pix: %u\n", PixelNumber, index, x, y, pixel);
     return pixel;
   }
+
+
+  uint32_t getNumberOfCachedPixels() {
+    return CachedPixels.size();
+  }
+
+  bool isCached() { return PixelsAreCached; }
+
+  private:
+     unsigned int PixelNumber{0};
+     bool PixelsAreCached{false};
+     std::vector<uint32_t> CachedPixels;
+     uint32_t CachedPixelIndex{0};
 };
 
-unsigned int Udder::PixelNumber = 0;
 
 const std::vector<uint8_t> Udder::UdderImage = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
