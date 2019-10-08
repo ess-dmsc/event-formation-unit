@@ -13,11 +13,7 @@
 // GCOVR_EXCL_START
 
 // Protocol identifiers
-const int ETHERTYPE_ARP = 0x0806;
-const int ETHERTYPE_IPV4 = 0x0800;
-//const int IPPROTO_UDP = 17;
 // Header and data location specifications
-const int ETHERTYPE_OFFSET = 12;
 const int ETHERNET_HEADER_SIZE = 14;
 const int IP_HEADER_SIZE = 20;
 const int UDP_HEADER_SIZE = 8;
@@ -45,11 +41,17 @@ int ReaderPcap::open() {
   if (PcapHandle == nullptr) {
     return -1;
   }
+
+  if (pcap_compile(PcapHandle, &PcapFilter, FilterUdp, 1, PCAP_NETMASK_UNKNOWN) == -1) {
+    return -1;
+  }
+
   return 0;
 }
 
 
 int ReaderPcap::validatePacket(pcap_pkthdr *header, const unsigned char *data) {
+
   Stats.PacketsTotal++; /**< total packets in pcap file */
   Stats.BytesTotal += header->len;
 
@@ -58,33 +60,14 @@ int ReaderPcap::validatePacket(pcap_pkthdr *header, const unsigned char *data) {
     return 0;
   }
 
-  uint16_t type = ntohs(*(uint16_t *)&data[ETHERTYPE_OFFSET]);
-  // printf("packet header len %d, type %x\n", header->len, type);
-
-  if (type == ETHERTYPE_ARP) {
-    Stats.EtherTypeArp++;
-  } else if (type == ETHERTYPE_IPV4) {
-    Stats.EtherTypeIpv4++;
-  } else {
-    Stats.EtherTypeUnknown++;
-  }
-
-  if (type != ETHERTYPE_IPV4) { // must be ipv4
+  if (pcap_offline_filter(&PcapFilter, header, data) == 0) {
+    Stats.PacketsNoMatch++;
     return 0;
   }
 
-  struct ip *ip = (struct ip *)&data[IP_HEADR_OFFSET];
-
-  // IPv4 header length must be 20, ip version 4, ipproto must be UDP
-  if ((ip->ip_hl != 5) or (ip->ip_v != 4) or (ip->ip_p != IPPROTO_UDP)) {
-    Stats.IpProtoUnknown++;
-    return 0;
-  }
   Stats.IpProtoUDP++;
-
+  assert(Stats.PacketsTotal == Stats.PacketsTruncated+ Stats.PacketsNoMatch + Stats.IpProtoUDP);
   assert(header->len > ETHERNET_HEADER_SIZE + IP_HEADER_SIZE + UDP_HEADER_SIZE);
-  assert(Stats.PacketsTotal == Stats.EtherTypeIpv4 + Stats.EtherTypeArp + Stats.EtherTypeUnknown);
-  assert(Stats.EtherTypeIpv4 == Stats.IpProtoUDP + Stats.IpProtoUnknown);
 
   udphdr *udp = (udphdr *)&data[UDP_HEADER_OFFSET];
   #ifndef __FAVOR_BSD // Why is __FAVOR_BSD not defined here?
@@ -162,13 +145,8 @@ void ReaderPcap::printPacket(unsigned char *data, size_t len) {
 void ReaderPcap::printStats() {
   fmt::print("Total packets        {}\n", Stats.PacketsTotal);
   fmt::print("Truncated packets    {}\n", Stats.PacketsTruncated);
-  fmt::print("Ethertype IPv4       {}\n", Stats.EtherTypeIpv4);
   fmt::print("  ipproto UDP        {}\n", Stats.IpProtoUDP);
-  fmt::print("  ipproto other      {}\n", Stats.IpProtoUnknown);
-  fmt::print("Ethertype unknown    {}\n", Stats.EtherTypeUnknown);
-  fmt::print("Ethertype ARP        {}\n", Stats.EtherTypeArp);
+  fmt::print("  other              {}\n", Stats.PacketsNoMatch);
   fmt::print("Total bytes          {}\n", Stats.BytesTotal);
-
-
 }
 // GCOVR_EXCL_STOP
