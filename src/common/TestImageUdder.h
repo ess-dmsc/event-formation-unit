@@ -1,4 +1,4 @@
-/* Copyright (C) 2018 European Spallation Source, ERIC. See LICENSE file */
+/* Copyright (C) 2018, 2019 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -11,12 +11,13 @@
 #pragma once
 
 #include <logical_geometry/ESSGeometry.h>
+#include <cassert>
 #include <vector>
 
 class Udder {
 public:
-  const uint8_t ImageWidth = 184;
-  const uint8_t ImageHeight = 224;
+  const uint8_t ImageWidth = 184; /// < Must match the UdderImage vector
+  const uint8_t ImageHeight = 224; /// < Must match the UdderImage vector
   const uint16_t ImageSize = ImageWidth * ImageHeight;
   static const std::vector<uint8_t> UdderImage;
 
@@ -37,48 +38,58 @@ public:
   }
 
 
+  /// \brief return next pixel in the udder test image.
   uint32_t getPixel(uint16_t w, uint16_t h, ESSGeometry * geom) {
-
+    /// if pixels are cached we just pick the next pixel from the
+    /// CachedPixels vector and take care of wrap-around.
+    /// potentially generate different pixels than the non-cached version.
     if (PixelsAreCached) {
-      auto pixel = CachedPixels[CachedPixelIndex++];
+      auto Pixel = CachedPixels[CachedPixelIndex++];
+      /// < Handle rewind when reaching end of image
       if (CachedPixelIndex == CachedPixels.size()) {
         CachedPixelIndex = 0;
       }
-      return pixel;
+      return Pixel;
     }
 
-    unsigned int byte, bit, index;
+    /// If pixels are NOT cached we run through the image bit by bit until we
+    /// find the next 1-bit pixel. From this we calculate x and y coordinates
+    /// then we calculate pixelid using the specified logical geometry.
+    unsigned int Byte, Bit, Index;
     do {
-      index = PixelNumber % ImageSize;
-      byte = index / 8;
-      bit = 7 - index % 8;
-      assert( byte < ImageSize / 8 );
-      assert( bit < 8);
+      Index = PixelNumber % ImageSize;
+      Byte = Index / 8;
+      Bit = 7 - Index % 8;
+      assert( Byte < ImageSize / 8 );
+      assert( Bit < 8);
       PixelNumber++;
-    } while ((UdderImage[byte] & (1 << bit)) == 0x00);
+    } while ((UdderImage[Byte] & (1 << Bit)) == 0x00);
 
-    uint16_t x = 1.0 * w * (index % ImageWidth) / ImageWidth;
-    uint16_t y = 1.0 * h * (index / ImageWidth) / ImageHeight;
-    auto pixel = geom->pixel2D(x, y);
+    uint16_t x = 1.0 * w * (Index % ImageWidth) / ImageWidth;
+    uint16_t y = 1.0 * h * (Index / ImageWidth) / ImageHeight;
+    auto Pixel = geom->pixel2D(x, y);
     //printf("p: %u, i: %u, x: %u, y: %u, pix: %u\n", PixelNumber, index, x, y, pixel);
-    return pixel;
+    return Pixel;
   }
 
 
+  /// \brief How many pixels are there in the image
   uint32_t getNumberOfCachedPixels() {
     return CachedPixels.size();
   }
 
+  /// \brief report if we have cached the pixels or not
   bool isCached() { return PixelsAreCached; }
 
   private:
      unsigned int PixelNumber{0};
-     bool PixelsAreCached{false};
-     std::vector<uint32_t> CachedPixels;
+     bool PixelsAreCached{false}; /// < whether we have cached the image
+     std::vector<uint32_t> CachedPixels; /// < array of pixel ids calculated once and for all
      uint32_t CachedPixelIndex{0};
 };
 
 
+/// \brief binary udder image of dimensions 184 x 224 pixels with a 1-bit depth
 const std::vector<uint8_t> Udder::UdderImage = {
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x3f, 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x7f, 0xe0, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
