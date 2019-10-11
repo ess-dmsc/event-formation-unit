@@ -47,14 +47,14 @@ public:
     uint64_t PacketsTotal;
     uint64_t PacketsTruncated;
     uint64_t BytesTotal;
-    uint64_t EtherTypeIpv4;
-    uint64_t EtherTypeArp;
-    uint64_t EtherTypeUnknown;
+    uint64_t PacketsNoMatch;
     uint64_t IpProtoUDP;
-    uint64_t IpProtoUnknown;
   } Stats;
 
 private:
+  const char * FilterUdp = "ip and udp";
+  struct bpf_program PcapFilter;
+
   /// \brief checking consistency and updating stats
   /// \return 0 for non UDP, >0 udp payload length
   int validatePacket(pcap_pkthdr *header, const unsigned char *data);

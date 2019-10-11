@@ -68,7 +68,7 @@ make runtest
 
 ### Other tests
 
-It is also possible to get a test coverage report if the required prerequisites have been installed. To get the coverage report, run:
+It is also possible to get a test coverage report if the required prerequisites have been installed. To get the coverage report, run
 
 ```
 make coverage
