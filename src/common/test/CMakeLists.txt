@@ -61,6 +61,11 @@ set(SocketTest_SRC
   )
 create_test_executable(SocketTest)
 
+set(TestImageUdderTest_SRC
+  TestImageUdderTest.cpp
+  )
+create_test_executable(TestImageUdderTest)
+
 # GOOGLE BENCHMARKS
 set(ESSGeometryBenchmarkTest_SRC
   ESSGeometryBenchmarkTest.cpp
