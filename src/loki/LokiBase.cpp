@@ -40,7 +40,7 @@ const int TSC_MHZ = 2900; // MJC's workstation - not reliable
 
 
 LokiBase::LokiBase(BaseSettings const &settings, struct LokiSettings &LocalLokiSettings)
-    : Detector("Loki", settings), LokiSettings(LocalLokiSettings) {
+    : Detector("Loki", settings), LokiModuleSettings(LocalLokiSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
