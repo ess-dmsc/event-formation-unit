@@ -45,6 +45,7 @@ add_subdirectory(multigrid)
 add_subdirectory(sonde)
 add_subdirectory(jalousie)
 add_subdirectory(udp)
+add_subdirectory(loki)
 add_subdirectory(adc_readout)
 add_subdirectory(perfgen)
 add_subdirectory(tools)
@@ -70,6 +71,7 @@ add_custom_target(runefu
     COMMAND efu "-d" "../modules/sonde" "-s" "1" "--dumptofile" "deleteme_" "--nohwcheck"
     COMMAND efu "-d" "../modules/mbcaen" "-f" "../configs/MB18Estia.json"  "-s" "1" "--dumptofile" "deleteme_" "--nohwcheck"
     COMMAND efu "-d" "AdcReadout" "-s" "1" "--nohwcheck"
+    COMMAND efu "-d" "../modules/loki" "-s" "1" "--nohwcheck"
     COMMAND efu "-d" "../modules/udp" "-s" "1" "--nohwcheck"
     COMMAND efu "-d" "../modules/gdgem" "-f" "../configs/vmm3.json" "-s" "2" "--nohwcheck"
     DEPENDS copycfgs efu mgmesytec gdgem sonde mbcaen udp AdcReadout
