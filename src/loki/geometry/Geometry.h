@@ -24,21 +24,22 @@ public:
     : NX(nxTubes), NY(resolution), NZ(nzTubes), NS(nStraws){};
 
   /// \brief return the straw index from the four amplitudes
-  uint8_t getStrawId(uint16_t __attribute__((unused)) A, uint16_t __attribute__((unused)) B,
-  uint16_t __attribute__((unused)) C, uint16_t __attribute__((unused)) D) {
-    return 0;
+  uint8_t getStrawId(uint16_t A, uint16_t B, uint16_t C, uint16_t D) {
+    A = B + C + D; // NOT USED, temporary, just for compiler
+    return A * 0;
   }
 
   /// \brief return pixel id for the readout
   uint32_t getPixelId() {
-    return 0;
+    NX = NY + NZ + NS; // NOT USED, temporary, just for compiler
+    return NX * 0;
   }
 
 private:
-  uint16_t __attribute__((unused)) NX{0}; // x dimension
-  uint16_t __attribute__((unused)) NY{0}; // y dimention
-  uint16_t __attribute__((unused)) NZ{0}; // z dimension
-  uint16_t __attribute__((unused)) NS{0}; // straws
+  uint16_t NX{0}; // x dimension
+  uint16_t NY{0}; // y dimention
+  uint16_t NZ{0}; // z dimension
+  uint16_t NS{0}; // straws
 };
 
 } // namespace Loki
