@@ -25,7 +25,7 @@
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
 
-#include <logical_geometry/ESSGeometry.h>
+#include <loki/geometry/Geometry.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -128,7 +128,7 @@ void LokiBase::processing_thread() {
   const unsigned int NZTubes{4};
   const unsigned int NStraws{7};
   const unsigned int NYpos{512};
-  Loki::Geometry geometry(NXTubes, NZTubes, NStraws, NYpos);
+  Geometry geometry(NXTubes, NZTubes, NStraws, NYpos);
 
   EV42Serializer flatbuffer(KafkaBufferSize, "loki");
   Producer eventprod(EFUSettings.KafkaBroker, "LOKI_detector");
@@ -190,40 +190,22 @@ void LokiBase::processing_thread() {
 
       /// \todo use the Buffer<T> class here and in parser
       auto __attribute__((unused)) dataptr = EthernetRingbuffer->getDataBuffer(data_index);
-      // if (parser.parse(dataptr, datalen) < 0) {
-      //   Counters.ReadoutsErrorBytes += parser.Stats.error_bytes;
-      //   Counters.ReadoutsErrorVersion += parser.Stats.error_version;
-      //   continue;
-      // }
-      // Counters.ReadoutsSeqErrors += parser.Stats.seq_errors;
-      //
-      // XTRACE(DATA, DEB, "Received %d readouts from digitizer %d",
-      //        parser.MBHeader->numElements, parser.MBHeader->digitizerID);
+      /// \todo add parser
 
       uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
       flatbuffer.pulseTime(efu_time);
 
-      //Counters.ReadoutsCount += parser.MBHeader->numElements;
-
-      // if (dumpfile) {
-      //   dumpfile->push(parser.readouts);
-      // }
-
-      // for (const auto &dp : parser.readouts) {
-      //   Counters.ReadoutsGood++;
-      // }
-
-
-      //for (const auto &e : builders[cassette].matcher.matched_events) {
-        // calculate local x and y using center of mass
-        auto x = 0;
-        auto y = 0;
-        auto z = 0;
-
-        // \todo improve this
+      /// \todo traverse readouts
+      //for (...) {
+        // calculate strawid and ypos from four amplitudes
+        // possibly add fpgaid to the stew
+        auto tube = 0;
+        auto straw = 0;
+        auto ypos = 0;
         auto time = 0 ; // TOF in ns
-        auto pixel_id = essgeom.pixel3D(x, y, z);
-        XTRACE(EVENT, DEB, "time: %u, x %u, y %u, pixel %u", time, x, y, pixel_id);
+        auto pixel_id = geometry.getPixelId(tube, straw, ypos);
+        XTRACE(EVENT, DEB, "time: %u, tube %u, straw %u, ypos %u, pixel: %u",
+               time, tube, straw, ypos, pixel_id);
 
         if (pixel_id == 0) {
           Counters.GeometryErrors++;
