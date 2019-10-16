@@ -124,7 +124,11 @@ void LokiBase::input_thread() {
 }
 
 void LokiBase::processing_thread() {
-  ESSGeometry essgeom(56, 512, 4, 1);
+  const unsigned int NXTubes{8};
+  const unsigned int NZTubes{4};
+  const unsigned int NStraws{7};
+  const unsigned int NYpos{512};
+  Loki::Geometry geometry(NXTubes, NZTubes, NStraws, NYpos);
 
   EV42Serializer flatbuffer(KafkaBufferSize, "loki");
   Producer eventprod(EFUSettings.KafkaBroker, "LOKI_detector");
@@ -135,6 +139,7 @@ void LokiBase::processing_thread() {
 #pragma GCC diagnostic pop
 
   if (EFUSettings.TestImage) {
+    ESSGeometry essgeom(56, 512, 4, 1);
     XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
     Udder udder;
     udder.cachePixels(essgeom.nx(), essgeom.ny(), &essgeom);
