@@ -44,8 +44,6 @@ ReducedHit EventAnalyzer::analyze(Cluster& cluster) const {
     ret.time = cluster.time_utpc(true); 
   }
   
-  ret.uncert_lower = cluster.lspan_max() - cluster.lspan_min() + 1;
-  ret.uncert_upper = 0;
   return ret;
 }
 
@@ -57,12 +55,6 @@ ReducedEvent EventAnalyzer::analyze(Event& event) const {
   ret.time = std::min(ret.x.time, ret.y.time);
   return ret;
 }
-
-bool EventAnalyzer::meets_lower_criterion(const ReducedHit& x, const ReducedHit& y,
-                                  int16_t max_lu) {
-  return (x.uncert_lower < max_lu) && (y.uncert_lower < max_lu);
-}
-
 
 std::string EventAnalyzer::debug(const std::string& prepend) const {
   std::stringstream ss;

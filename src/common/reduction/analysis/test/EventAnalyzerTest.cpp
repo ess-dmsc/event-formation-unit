@@ -23,26 +23,26 @@ TEST_F(EventAnalyzerTest, AnalyzeInvalid) {
 }
 
 TEST_F(EventAnalyzerTest, AnalyzeAverage) {
+  cluster.clear();
   Hit hit;
   hit.coordinate = 0;
   hit.weight = 2;
+  hit.time = 2;
   cluster.insert(hit);
-  auto result = EventAnalyzer("utpc").analyze(cluster);
-  EXPECT_EQ(result.center, 0);
+  
   hit.coordinate = 1;
   hit.weight = 4;
+  hit.time = 0;
   cluster.insert(hit);
-  hit.coordinate = 2;
-  hit.weight = 4;
-  cluster.insert(hit);
-
-  result = EventAnalyzer("utpc").analyze(cluster);
-  EXPECT_EQ(cluster.hit_count(), 3);
-  EXPECT_EQ(result.center, 1);
+  
+  auto result = EventAnalyzer("utpc").analyze(cluster);
+  EXPECT_EQ(cluster.hit_count(), 2);
+  EXPECT_EQ(result.center, 0);
+  EXPECT_EQ(result.time, 2);
 
   result = EventAnalyzer("utpc_weighted").analyze(cluster);
-  EXPECT_EQ(result.center, 1.2);
-  EXPECT_EQ(result.center_rounded(), 1);
+  EXPECT_EQ(result.center, 0.8);
+  EXPECT_EQ(result.time, 0);  
 
   cluster.clear();
   hit.time = 1;
@@ -85,44 +85,16 @@ TEST_F(EventAnalyzerTest, AnalyzeAverage) {
   EXPECT_EQ(result.time, 3);
   
   result = EventAnalyzer("utpc").analyze(cluster);
-  EXPECT_EQ(result.center, 6);
+  EXPECT_EQ(result.center, 5);
   EXPECT_EQ(result.time, 5);
 
   result = EventAnalyzer("utpc_weighted").analyze(cluster);
-  EXPECT_EQ(result.center, 5.5);
-  EXPECT_EQ(result.time, 5);
-  
-
+  EXPECT_GT(result.center, 4.46);
+  EXPECT_LT(result.center, 4.47);
+  EXPECT_EQ(result.time, 4);
 }
 
-TEST_F(EventAnalyzerTest, AnalyzeUncert) {
-  hit.weight = 1;
 
-  hit.time = hit.coordinate = 0;
-  cluster.insert(hit);
-  hit.time = hit.coordinate = 1;
-  cluster.insert(hit);
-  hit.time = hit.coordinate = 2;
-  cluster.insert(hit);
-
-  auto result = EventAnalyzer("utpc_weighted").analyze(cluster);
-  EXPECT_EQ(result.center, 2);
-  EXPECT_EQ(result.uncert_lower, 1);
-
-
-  hit.coordinate = 31;
-  cluster.insert(hit);
-  result = EventAnalyzer("utpc_weighted").analyze(cluster);
-  EXPECT_EQ(result.center, 16.5);
-  EXPECT_EQ(result.uncert_lower, 30);
-
-  result = EventAnalyzer("utpc_weighted").analyze(cluster);
-  EXPECT_EQ(result.center, 16.5);
-  EXPECT_EQ(result.uncert_lower, 30);
-
-  EXPECT_EQ(result.center, 16.5);
-  EXPECT_EQ(result.center_rounded(), 17);
-}
 
 TEST_F(EventAnalyzerTest, AnalyzeBadY) {
   hit.weight = 1;

@@ -30,11 +30,7 @@ class EventAnalyzer : public AbstractAnalyzer {
    /// \brief prints info for debug purposes
   std::string debug(const std::string& prepend) const override;
   
-  /// \brief indicates if both dimensions meet lower uncertainty criterion
-  static bool meets_lower_criterion(const ReducedHit& x,
-                                    const ReducedHit& y, int16_t max_lu);
-
  private:
-  std::string time_algorithm_ = "utpc";
+  std::string time_algorithm_ = "utpc_weighted";
 };
 
