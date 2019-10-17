@@ -34,11 +34,15 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 void BuilderVMM3::process_buffer(char *buf, size_t size) {
   parser_.receive(buf, size);
   const auto &parser_stats = parser_.stats;
-  stats.parser_fc_seq_errors += parser_stats.rxSeqErrors;
+  stats.parser_frame_seq_errors += parser_stats.frame_seq_errors;
+  stats.parser_framecounter_overflows += parser_stats.framecounter_overflows;
   stats.parser_bad_frames += parser_stats.badFrames;
   stats.parser_good_frames += parser_stats.goodFrames;
   stats.parser_error_bytes += parser_stats.errors;
   stats.parser_readouts += parser_stats.readouts;
+  stats.parser_timestamp_seq_errors += parser_stats.timestamp_seq_errors;
+  stats.parser_timestamp_overflows += parser_stats.timestamp_overflows;
+  stats.parser_timestamp_lost_errors += parser_stats.timestamp_lost_errors;
 
   if (!parser_.stats.readouts) {
     XTRACE(PROCESS, DEB, "No readouts after parse");

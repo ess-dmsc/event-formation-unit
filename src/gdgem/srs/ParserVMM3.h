@@ -14,8 +14,8 @@
 #include <string.h>
 #include <common/BitMath.h>
 
-static const int maximumNumberVMM{32};
-static const int maximumNumberFECs{16};
+static const int maxVMMs{16};
+static const int maxFECs{16};
 
 namespace Gem {
 
@@ -37,6 +37,7 @@ public:
   // \todo no need for this struct
   struct VMM3Marker {
     uint64_t fecTimeStamp;   /// 42 bit
+    bool updatedInFrame = false;
   };
 
   /// Data common to all hits and markers, or other parser related data
@@ -61,9 +62,9 @@ public:
   /// \brief create a data handler for VMM3 SRS data of fixed size Capacity
   /// \param maxelements The maximum number of readout elements
   VMM3SRSData(int maxelements) : maxHits(maxelements) {
-    markers = new struct VMM3Marker[maximumNumberFECs * maximumNumberVMM];
+    markers = new struct VMM3Marker[maxFECs * maxVMMs];
     data = new struct VMM3Data[maxHits];
-    memset(markers, 0, sizeof(struct VMM3Marker) * maximumNumberFECs * maximumNumberVMM);
+    memset(markers, 0, sizeof(struct VMM3Marker) * maxFECs * maxVMMs);
   }
 
   /// Delete allocated data, set pointers to nullptr
@@ -102,7 +103,13 @@ public:
     uint32_t readouts{0};        /// number of hits
     uint32_t markers{0};    ///  number of markers
     uint32_t errors{0};      /// bytes of invalid data
-    uint32_t rxSeqErrors{0};  /// gaps in frame counter values
+    /// overflow value in header shows for which vmm a timestamp markers 
+    /// has been send in the previuous frame 
+    uint32_t timestamp_lost_errors{0};
+    uint32_t timestamp_seq_errors{0}; /// timestamp order error
+    uint32_t timestamp_overflows{0}; /// timestamp overflow
+    uint32_t frame_seq_errors{0};  /// gap of frame counter values or wrong order
+    uint32_t framecounter_overflows{0};  /// frame counter overflow
     uint32_t badFrames{0};   /// frames failing parsing
     uint32_t goodFrames{0};  /// frames passing parsing
   } stats;

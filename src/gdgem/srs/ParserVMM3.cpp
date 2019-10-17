@@ -30,8 +30,8 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
     vmd->adc = (data1 >> 12) & 0x3FF;
     vmd->bcid = BitMath::gray2bin32(data1 & 0xFFF);
 
-    vmd->fecTimeStamp = markers[(parserData.fecId - 1) * maximumNumberVMM + vmd->vmmid].fecTimeStamp;
-    if (markers[(parserData.fecId - 1) * maximumNumberVMM + vmd->vmmid].fecTimeStamp > 0) {
+    vmd->fecTimeStamp = markers[(parserData.fecId - 1) * maxVMMs + vmd->vmmid].fecTimeStamp;
+    if (markers[(parserData.fecId - 1) * maxVMMs + vmd->vmmid].fecTimeStamp > 0) {
       vmd->hasDataMarker = true;
     }
     return 1;
@@ -46,8 +46,18 @@ int VMM3SRSData::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd) {
     XTRACE(PROCESS, DEB, "SRS Marker vmmid %d: timestamp lower 10bit %u, timestamp upper 32 bit %u, 42 bit timestamp %"
         PRIu64
         "", vmmid, timestamp_lower_10bit, timestamp_upper_32bit, timestamp_42bit);
-    markers[(parserData.fecId - 1) * maximumNumberVMM + vmmid].fecTimeStamp = timestamp_42bit;
-
+    if(markers[(parserData.fecId - 1) * maxVMMs + vmmid].fecTimeStamp 
+    > timestamp_42bit) {
+      if (markers[(parserData.fecId - 1) * maxVMMs + vmmid].fecTimeStamp 
+      < 0x1FFFFFFF + timestamp_42bit) {
+        stats.timestamp_seq_errors++;
+      }
+      else {
+        stats.timestamp_overflows++;
+      }
+    } 
+    markers[(parserData.fecId - 1) * maxVMMs + vmmid].fecTimeStamp = timestamp_42bit;
+    markers[(parserData.fecId - 1) * maxVMMs + vmmid].updatedInFrame = true;
     //XTRACE(PROCESS, DEB, "vmmid: %d", vmmid);
     return 0;
   }
@@ -64,19 +74,30 @@ int VMM3SRSData::receive(const char *buffer, int size) {
 
   struct SRSHdr *srsHeaderPtr = (struct SRSHdr *) buffer;
   srsHeader.frameCounter = ntohl(srsHeaderPtr->frameCounter);
+  /*
+  Does not exist anymore
   if (srsHeader.frameCounter == 0xfafafafa) {
     //XTRACE(PROCESS, INF, "End of Frame");
     stats.badFrames++;
     stats.errors += size;
     return -1;
   }
+ */
 
   if (parserData.nextFrameCounter != srsHeader.frameCounter) {
+    stats.frame_seq_errors++;
     XTRACE(PROCESS, WAR, "FC error %u != %u", parserData.nextFrameCounter, srsHeader.frameCounter);
-    stats.rxSeqErrors++;
   }
-  parserData.nextFrameCounter = srsHeader.frameCounter + 1;
 
+  if(srsHeader.frameCounter < 0xFFFFFFFF) {
+    parserData.nextFrameCounter = srsHeader.frameCounter + 1;
+  }
+  else {
+    stats.framecounter_overflows++;
+    parserData.nextFrameCounter = 0;
+  }
+
+  
   if (size < SRSHeaderSize + HitAndMarkerSize) {
     XTRACE(PROCESS, WAR, "Undersize data");
     stats.badFrames++;
@@ -94,14 +115,23 @@ int VMM3SRSData::receive(const char *buffer, int size) {
   }
 
   parserData.fecId = (srsHeader.dataId >> 4) & 0x0f;
-  if (parserData.fecId < 1 || parserData.fecId > 15) {
+  if (parserData.fecId < 1 || parserData.fecId > 16) {
     XTRACE(PROCESS, WAR, "Invalid fecId: %u", parserData.fecId);
     stats.badFrames++;
     stats.errors += size;
     return 0;
   }
   srsHeader.udpTimeStamp = ntohl(srsHeaderPtr->udpTimeStamp);
+
   srsHeader.offsetOverflow = ntohl(srsHeaderPtr->offsetOverflow);
+  for(int id=0;id<maxVMMs;id++) {
+    bool timestampSent = 
+    static_cast<bool>((srsHeader.offsetOverflow >> id) & 0x00000001);
+    if(timestampSent != markers[(parserData.fecId - 1) * maxVMMs + id].updatedInFrame) {
+      stats.timestamp_lost_errors++;  
+    }
+    markers[(parserData.fecId - 1) * maxVMMs + id].updatedInFrame = false;
+  }
 
   auto datalen = size - SRSHeaderSize;
   if ((datalen % 6) != 0) {

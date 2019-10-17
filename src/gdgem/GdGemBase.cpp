@@ -81,7 +81,11 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
   Stats.create("fifo_seq_errors", mystats.fifo_seq_errors);
 
   // Parser
-  Stats.create("fc_seq_errors", mystats.fc_seq_errors);
+  Stats.create("frame_seq_errors", mystats.frame_seq_errors);
+  Stats.create("framecounter_overflows", mystats.framecounter_overflows);
+  Stats.create("timestamp_seq_errors", mystats.timestamp_seq_errors);
+  Stats.create("timestamp_lost_errors", mystats.timestamp_lost_errors);
+  Stats.create("timestamp_overflows", mystats.timestamp_overflows);
   Stats.create("bad_frames", mystats.bad_frames);
   Stats.create("good_frames", mystats.good_frames);
   Stats.create("readouts_error_bytes", mystats.readouts_error_bytes);
@@ -430,7 +434,13 @@ void GdGemBase::processing_thread() {
             eth_ringbuf->getDataBuffer(data_index), len);
 
         // parser stats
-        mystats.fc_seq_errors = builder_->stats.parser_fc_seq_errors;
+        //mystats.fc_seq_errors = builder_->stats.parser_frame_lost_error;
+        mystats.frame_seq_errors = builder_->stats.parser_frame_seq_errors;
+        mystats.framecounter_overflows = builder_->stats.parser_framecounter_overflows;
+        mystats.timestamp_seq_errors = builder_->stats.parser_timestamp_seq_errors;
+        mystats.timestamp_lost_errors = builder_->stats.parser_timestamp_lost_errors;
+        mystats.timestamp_overflows = builder_->stats.parser_timestamp_overflows;
+
         mystats.bad_frames = builder_->stats.parser_bad_frames;
         mystats.good_frames = builder_->stats.parser_good_frames;
         mystats.readouts_error_bytes = builder_->stats.parser_error_bytes;

@@ -52,8 +52,6 @@ protected:
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
-  // Careful also using this for other NMX pipeline
-
   struct {
     // Input Counters
     int64_t rx_packets;
@@ -67,7 +65,12 @@ protected:
     int64_t fifo_seq_errors;
 
     // Parser stats
-    int64_t fc_seq_errors;
+    //int64_t fc_seq_errors;
+    int64_t frame_seq_errors;
+    int64_t framecounter_overflows;
+    int64_t timestamp_lost_errors;
+    int64_t timestamp_seq_errors; 
+    int64_t timestamp_overflows;
     int64_t bad_frames;
     int64_t good_frames;
     int64_t readouts_error_bytes;

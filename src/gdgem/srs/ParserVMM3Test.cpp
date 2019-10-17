@@ -25,7 +25,7 @@ protected:
 TEST_F(VMM3SRSDataTest, Constructor) {
   EXPECT_TRUE(data->data != nullptr);
   assertfields(0, 0, 0);
-  for (int i = 0; i < maximumNumberVMM*maximumNumberFECs; i++) {
+  for (int i = 0; i < maxVMMs*maxFECs; i++) {
     EXPECT_EQ(data->markers[i].fecTimeStamp, 0U);
   }
 }
@@ -35,7 +35,7 @@ TEST_F(VMM3SRSDataTest, UndersizeData) {
     int res = data->receive((char *)&data_3_ch0[0], dataLength);
     EXPECT_EQ(res, 0);
     assertfields(0, 0, dataLength);
-    for (int i = 0; i < maximumNumberVMM*maximumNumberFECs; i++) {
+    for (int i = 0; i < maxVMMs*maxFECs; i++) {
       EXPECT_EQ(data->markers[i].fecTimeStamp, 0U);
     }
   }
@@ -45,7 +45,7 @@ TEST_F(VMM3SRSDataTest, DataOnly) {
   int res = data->receive((char *)&data_3_ch0[0], data_3_ch0.size());
   EXPECT_EQ(res, 3); // three readouts in the readout packet
   assertfields(3, 0, 0);
-  for (int i = 0; i < maximumNumberVMM*maximumNumberFECs; i++) {
+  for (int i = 0; i < maxVMMs*maxFECs; i++) {
     EXPECT_EQ(data->markers[i].fecTimeStamp, 0U);
   }
 }
@@ -59,6 +59,69 @@ TEST_F(VMM3SRSDataTest, MarkerOnly) {
     EXPECT_EQ(data->markers[vmmid].fecTimeStamp, i + 1);
   }
 }
+
+TEST_F(VMM3SRSDataTest, TimestampError) {
+  int res = data->receive((char *)&timestamp_error[0], timestamp_error.size());
+  EXPECT_EQ(res, 0);
+  EXPECT_EQ(0, data->stats.readouts);
+  EXPECT_EQ(9, data->stats.markers);
+  EXPECT_EQ(3, data->stats.timestamp_seq_errors);
+}
+
+TEST_F(VMM3SRSDataTest, TimestampOverflow) {
+  int res = data->receive((char *)&timestamp_overflow[0], timestamp_overflow.size());
+  EXPECT_EQ(res, 0);
+  EXPECT_EQ(0, data->stats.readouts);
+  EXPECT_EQ(9, data->stats.markers);
+  EXPECT_EQ(3, data->stats.timestamp_overflows);
+}
+
+TEST_F(VMM3SRSDataTest, TimestampLost) {
+  int res = data->receive((char *)&timestamp_lost1[0], timestamp_lost1.size());
+  EXPECT_EQ(res, 3);
+  EXPECT_EQ(3, data->stats.readouts);
+  EXPECT_EQ(0, data->stats.markers);
+  res = data->receive((char *)&timestamp_lost2[0], timestamp_lost2.size());
+  EXPECT_EQ(res, 0);
+  EXPECT_EQ(0, data->stats.readouts);
+  EXPECT_EQ(3, data->stats.markers);
+  EXPECT_EQ(8, data->stats.timestamp_lost_errors);
+}
+
+TEST_F(VMM3SRSDataTest, TimestampNotLost) {
+  int res = data->receive((char *)&timestamp_not_lost1[0], timestamp_not_lost1.size());
+  EXPECT_EQ(res, 0);
+  EXPECT_EQ(0, data->stats.readouts);
+  EXPECT_EQ(8, data->stats.markers);
+  res = data->receive((char *)&timestamp_not_lost2[0], timestamp_not_lost2.size());
+  EXPECT_EQ(res, 3);
+  EXPECT_EQ(3, data->stats.readouts);
+  EXPECT_EQ(0, data->stats.markers);
+  EXPECT_EQ(0, data->stats.timestamp_lost_errors);
+}
+
+TEST_F(VMM3SRSDataTest, FrameLostError) {
+  int res = data->receive((char *)&framecounter_error1[0], framecounter_error1.size());
+  EXPECT_EQ(res, 3);
+  res = data->receive((char *)&framecounter_error2[0], framecounter_error2.size());
+  EXPECT_EQ(res, 3);
+  EXPECT_EQ(1, data->stats.frame_seq_errors);
+}
+
+TEST_F(VMM3SRSDataTest, FrameOrderError1) {
+  int res = data->receive((char *)&framecounter_error2[0], framecounter_error2.size());
+  EXPECT_EQ(res, 3);
+  res = data->receive((char *)&framecounter_error1[0], framecounter_error1.size());
+  EXPECT_EQ(res, 3);
+  EXPECT_EQ(1, data->stats.frame_seq_errors);
+}
+
+TEST_F(VMM3SRSDataTest, FramecounterOverflow) {
+  int res = data->receive((char *)&framecounter_overflow[0], framecounter_overflow.size());
+  EXPECT_EQ(res, 3);
+  EXPECT_EQ(1, data->stats.framecounter_overflows);
+}
+
 
 TEST_F(VMM3SRSDataTest, MarkerAndData) {
   int res = data->receive((char *)&marker_3_data_3[0], marker_3_data_3.size());
