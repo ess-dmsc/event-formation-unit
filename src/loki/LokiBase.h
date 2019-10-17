@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief MBCAEN detector base plugin interface definition
+/// \brief LoKI detector base plugin interface definition
 ///
 //===----------------------------------------------------------------------===//
 #pragma once
@@ -22,7 +22,7 @@ using namespace memory_sequential_consistent; // Lock free fifo
 
 class LokiBase : public Detector {
 public:
-  LokiBase(BaseSettings const &settings, struct LokiSettings &LocalMBLokiSettings);
+  LokiBase(BaseSettings const &settings, struct LokiSettings &LocalLokiSettings);
   ~LokiBase() { delete EthernetRingbuffer; }
   void input_thread();
   void processing_thread();

@@ -157,8 +157,11 @@ void LokiBase::processing_thread() {
         flatbuffer.pulseTime(efu_time);
       }
 
-      auto pixel_id = udder.getPixel(essgeom.nx(), essgeom.ny(), &essgeom);
 
+      auto pixel_id = udder.getPixel(essgeom.nx(), essgeom.ny(), &essgeom);
+      Counters.TxBytes += flatbuffer.addEvent(time_of_flight, pixel_id);
+      Counters.EventsUdder++;
+      pixel_id += 512*56*3;
       Counters.TxBytes += flatbuffer.addEvent(time_of_flight, pixel_id);
       Counters.EventsUdder++;
 
