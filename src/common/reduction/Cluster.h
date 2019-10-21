@@ -108,11 +108,6 @@ public:
   /// \returns utpc time, optionally weighted with charge 
   double time_utpc(bool weighted) const;
   
-  /// \returns minimum coordinate span
-  int16_t lspan_min() const;
-  /// \returns maximum coordinate span
-  int16_t lspan_max() const;
-  
   /// \brief calculates the overlapping time span of two clusters
   /// \param other cluster to be compared
   /// \returns overlapping time span inclusive of end points
@@ -150,15 +145,9 @@ private:
   double coord_mass2_{0.0}; ///< sum of coord*weight*weight
   double time_mass2_{0.0};  ///< sum of time*weight*weight
 
-  double weight_utpc_sum_{0.0};///< sum of weights of coordinates that share latest time
-  double cnt_utpc_{0.0}; ////< cnt of coordinates that share latest time
   double coord_utpc_{0.0}; ///< sum of coord for latest time
-  double coord_mass_utpc_{0.0}; ///< sum of coord*weight for latest time
   double time_utpc_{0.0}; ///< sum of time for latest time
-  double time_mass_utpc_{0.0};  ///< sum of time*weight for latest times
   
-  int16_t lspan_min_ {std::numeric_limits<int16_t>::max()};
-  int16_t lspan_max_ {std::numeric_limits<int16_t>::min()};
-
+  int highest_time_idx = 0;
 
 };

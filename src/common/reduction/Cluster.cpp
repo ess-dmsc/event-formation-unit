@@ -17,8 +17,9 @@
 void Cluster::insert(const Hit &e) {
   if (hits.empty()) {
     plane_ = e.plane;
-    time_start_ = time_end_ = e.time;
-    coord_start_ = coord_end_ = e.coordinate;
+    time_start_ = time_end_ = time_utpc_ = e.time;
+    coord_start_ = coord_end_ = coord_utpc_ = e.coordinate;
+    highest_time_idx = 0;
   }
 
   // If plane identities don't match, invalidate
@@ -39,28 +40,12 @@ void Cluster::insert(const Hit &e) {
   
   if (e.time > time_end_)
   {
+    highest_time_idx = static_cast<int>(hits.size()-1);
     time_end_ = e.time;
-    weight_utpc_sum_ = e.weight;
-    cnt_utpc_ = 1;
     coord_utpc_ = e.coordinate;
     time_utpc_ = e.time;
-    coord_mass_utpc_ = e.coordinate * e.weight;
-    time_mass_utpc_ = e.time * e.weight;
-    lspan_min_ = static_cast<int16_t>(e.coordinate);
-    lspan_max_ = static_cast<int16_t>(e.coordinate);
   }
-  else if (e.time == time_end_)
-  {
-    weight_utpc_sum_ += e.weight;
-    cnt_utpc_++;
-    coord_utpc_ += e.coordinate;
-    time_utpc_ += e.time;
-    coord_mass_utpc_ += e.coordinate * e.weight;
-    time_mass_utpc_ += e.time * e.weight;
-    lspan_min_ = std::min(lspan_min_, static_cast<int16_t>(e.coordinate));
-    lspan_max_ = std::max(lspan_max_, static_cast<int16_t>(e.coordinate));
-  }
-    
+   
   coord_start_ = std::min(coord_start_, e.coordinate);
   coord_end_ = std::max(coord_end_, e.coordinate);
 }
@@ -196,27 +181,46 @@ double Cluster::time_center2() const {
 double Cluster::coord_utpc(bool weighted) const {
   if (!weighted)
   {
-    return coord_utpc_/cnt_utpc_;
+    return coord_utpc_;
   }
-  return coord_mass_utpc_ / weight_utpc_sum_;
+
+  double n1 = 0, n2 = 0, n3 = 0, w1 = 0, w2 = 0, w3 = 0;
+  
+  n2 = hits[highest_time_idx].coordinate;
+  w2 = hits[highest_time_idx].weight;
+  if(highest_time_idx > 0) {
+    n1 = hits[highest_time_idx-1].coordinate;
+    w1 = hits[highest_time_idx - 1].weight;
+  } 
+  if(highest_time_idx < static_cast<int>(hits.size() - 1)) {
+    n3 = hits[highest_time_idx+1].coordinate;
+    w3 = hits[highest_time_idx+1].weight;  
+  }
+  double pos = (n1*w1*w1 + n2*w2*w2 + n3*w3*w3) / (w1*w1 + w2*w2 + w3*w3);
+  return pos;
 }
 
 double Cluster::time_utpc(bool weighted) const {
   if (!weighted)
   {
-    return time_utpc_/cnt_utpc_;
+    return time_utpc_;
   }
-  return time_mass_utpc_ / weight_utpc_sum_;
+ double n1 = 0, n2 = 0, n3 = 0, w1 = 0, w2 = 0, w3 = 0;
+  
+  n2 = hits[highest_time_idx].time;
+  w2 = hits[highest_time_idx].weight;
+  if(highest_time_idx > 0) {
+    n1 = hits[highest_time_idx-1].time;
+    w1 = hits[highest_time_idx - 1].weight;
+  } 
+  if(highest_time_idx < static_cast<int>(hits.size() - 1)) {
+    n3 = hits[highest_time_idx+1].time;
+    w3 = hits[highest_time_idx+1].weight;  
+  }
+  double t = (n1*w1*w1 + n2*w2*w2 + n3*w3*w3) / (w1*w1 + w2*w2 + w3*w3);
+  return t;
 }
 
-int16_t Cluster::lspan_min() const {
-  return lspan_min_;
-}
- 
-int16_t Cluster::lspan_max() const {
-  return lspan_max_;
-}
-  
 uint64_t Cluster::time_overlap(const Cluster &other) const {
   if (empty() || other.empty())
     return 0;
