@@ -10,20 +10,25 @@
 ///
 //===----------------------------------------------------------------------===//
 
-
-
 #pragma once
+#include <cinttypes>
 
 namespace Loki {
-
 class HeliumTube {
 public:
-
-  void calcPositions(uint16_t ampA, uint16_t ampB, uint16_t ampC, uint16_t ampD) {
-    uint32_t StrawFrac1 = ampA + ampB;
-    uint32_t StrawFrac2 = ampC + ampD;
-    uint32_t PosFrac1 = ampA + ampD;
-    uint32_t Denominator = StrawFrac1 + StrawFrac2;
+  /// \brief The four amplitudes measured at certain points in the
+  /// Helium tube circuit diagram are used to identify the straw that
+  /// detected the neutron and also the position along the straw.
+  /// Both of these are calculated at the same time and the result
+  /// is stored in the two member variables (StrawId, PosId) if an
+  /// invalid input is given the output will be outside the valid
+  /// ranges.
+  void calcPositions(std::uint16_t AmplitudeA, std::uint16_t AmplitudeB,
+                    std::uint16_t AmplitudeC, std::uint16_t AmplitudeD) {
+    std::uint32_t StrawFrac1 = AmplitudeA + AmplitudeB;
+    std::uint32_t StrawFrac2 = AmplitudeC + AmplitudeD;
+    std::uint32_t PosFrac1 = AmplitudeA + AmplitudeD;
+    std::uint32_t Denominator = StrawFrac1 + StrawFrac2;
     if (Denominator == 0) {
       Stats.AmplitudeZero++;
       StrawId = NStraws;
@@ -38,16 +43,14 @@ public:
     uint64_t AmplitudeZero{0};
   } Stats;
 
-
 private:
-  const uint8_t NStraws{7};
-  const uint16_t NPos{512};
+  const std::uint8_t NStraws{7}; ///< number of straws supported
+  const std::uint16_t NPos{512}; ///< resolution of position
 
 public:
   /// holds latest calculated values for straw and position
-  /// they will hold out of range values if calculation fails
-  uint8_t StrawId{NStraws};
-  uint16_t PosId{NPos};
+  /// they will hold out -of-range values if calculation fails
+  std::uint8_t StrawId{NStraws};
+  std::uint16_t PosId{NPos};
 };
-
 } // nmaespace Loki

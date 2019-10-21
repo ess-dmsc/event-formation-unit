@@ -25,6 +25,7 @@ namespace Loki {
 /// \brief geometry class for Loki
 class Geometry {
 public:
+
   /// \brief geometry of a single nx x nz array of tubes
   /// \param nxTubes number of tubes in the x-direction
   /// \param nzTubes number of tubes in the z-direction
@@ -32,32 +33,35 @@ public:
   /// \param resolution number of coordinates in the y-direction
   Geometry(uint16_t nxTubes, uint16_t nzTubes, uint16_t nStraws, uint16_t resolution)
     : NX(nxTubes), NY(resolution), NZ(nzTubes), NS(nStraws){
-      essgeometry = ESSGeometry(NX*NS, NY, NZ, 1);
+      LokiGeometry = ESSGeometry(NX*NS, NY, NZ, 1);
       XTRACE(PROCESS, DEB, "NX %u, NS %u, NZ %u, NY %u", NX, NS, NZ, NY);
     };
 
-  /// tubeids from 0 - (NX - 1), strawids 0 - (NS - 1), ypos 0 - (NY - 1)
-  uint32_t getPixelId(uint8_t tubeid, uint8_t strawid, uint16_t ypos) {
-    if ((tubeid >= NX*NZ) or (strawid >= NS) or (ypos >= NY)) {
+  /// \brief convert (tube, straw, pos) to pixel using ESSGeometry
+  /// \param tubeid tubeid runs from 0 - (NX*NZ - 1)
+  /// \param strawid runs from 0 - (NS - 1)
+  /// \param ypos runs from 0 - (NY - 1)
+  /// \return 0 upon error, else Single Panel 3D PixelId
+  uint32_t getPixelId(uint8_t TubeId, uint8_t StrawId, uint16_t YPos) {
+    if ((TubeId >= NX*NZ) or (StrawId >= NS) or (YPos >= NY)) {
       XTRACE(PROCESS, WAR, "invalid encoding: tube %u straw %u pos %u",
-              tubeid, strawid, ypos);
+              TubeId, StrawId, YPos);
       return 0;
     }
 
-    uint32_t x = (NX - 1 - (tubeid / 4)) * NS + strawid;
-    uint32_t y = NY - 1 - ypos;
-    uint32_t z = tubeid % 4;
+    uint32_t x = (NX - 1 - (TubeId / 4)) * NS + StrawId;
+    uint32_t y = NY - 1 - YPos;
+    uint32_t z = TubeId % 4;
     XTRACE(PROCESS, DEB, "tube %u straw %u pos %u - x %u y %u z %u",
-            tubeid, strawid, ypos, x, y, z);
-    return essgeometry.pixel3D(x, y, z);
+            TubeId, StrawId, YPos, x, y, z);
+    return LokiGeometry.pixel3D(x, y, z);
   }
 
 private:
-  ESSGeometry essgeometry;
+  ESSGeometry LokiGeometry;
   uint16_t NX{0}; // x dimension
   uint16_t NY{0}; // y dimention
   uint16_t NZ{0}; // z dimension
   uint16_t NS{0}; // straws
 };
-
 } // namespace Loki
