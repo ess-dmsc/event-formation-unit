@@ -34,18 +34,13 @@
             return c1.time_center2() < c2.time_center2();
         });
     }  
-    else if(time_algorithm_ == "utpc") {
-        unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-            return c1.time_utpc(false) < c2.time_utpc(false);
-        });
-    }
-    //time_algorithm_ == "utpc-weighted"     
+    // time_algorithm_ == "utpc" or time_algorithm_ == "utpc-weighted"
     else {
         unmatched_clusters_.sort([](const Cluster &c1, const Cluster &c2) {
-            return c1.time_utpc(true) < c2.time_utpc(true);
+            return c1.time_end() < c2.time_end();
         });
     }
-      
+          
 
     XTRACE(CLUSTER, DEB, "match(): unmatched clusters %u", unmatched_clusters_.size());
 

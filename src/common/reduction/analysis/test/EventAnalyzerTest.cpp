@@ -42,7 +42,7 @@ TEST_F(EventAnalyzerTest, AnalyzeAverage) {
 
   result = EventAnalyzer("utpc_weighted").analyze(cluster);
   EXPECT_EQ(result.center, 0.8);
-  EXPECT_EQ(result.time, 0);  
+  EXPECT_EQ(result.time, 2);  
 
   cluster.clear();
   hit.time = 1;
@@ -80,18 +80,16 @@ TEST_F(EventAnalyzerTest, AnalyzeAverage) {
   EXPECT_EQ(result.time,3);
     
   result = EventAnalyzer("charge2").analyze(cluster);
-  EXPECT_GT(result.center,2.74);
-  EXPECT_LT(result.center,2.75);
+  ASSERT_NEAR(result.center, 2.74, 0.01);
   EXPECT_EQ(result.time, 3);
   
   result = EventAnalyzer("utpc").analyze(cluster);
-  EXPECT_EQ(result.center, 5);
+  EXPECT_EQ(result.center, 7);
   EXPECT_EQ(result.time, 5);
 
   result = EventAnalyzer("utpc_weighted").analyze(cluster);
-  EXPECT_GT(result.center, 4.46);
-  EXPECT_LT(result.center, 4.47);
-  EXPECT_EQ(result.time, 4);
+  EXPECT_EQ(result.center, 5.2);
+  EXPECT_EQ(result.time, 5);
 }
 
 

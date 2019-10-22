@@ -17,9 +17,10 @@
 void Cluster::insert(const Hit &e) {
   if (hits.empty()) {
     plane_ = e.plane;
-    time_start_ = time_end_ = time_utpc_ = e.time;
-    coord_start_ = coord_end_ = coord_utpc_ = e.coordinate;
-    highest_time_idx = 0;
+    time_start_ = time_end_ = e.time;
+    coord_start_ = coord_end_ = e.coordinate;
+    utpc_idx_min_ = 0;
+    utpc_idx_max_ = 0;
   }
 
   // If plane identities don't match, invalidate
@@ -38,12 +39,14 @@ void Cluster::insert(const Hit &e) {
   time_mass2_ += e.weight * e.weight * e.time;
   time_start_ = std::min(time_start_, e.time);
   
-  if (e.time > time_end_)
-  {
-    highest_time_idx = static_cast<int>(hits.size()-1);
+  //more than one hit with identical largest time in cluster
+  if (e.time == time_end_) {
+    utpc_idx_max_ = static_cast<int>(hits.size()-1);
+  }
+  else if (e.time > time_end_) {
+    utpc_idx_min_ = static_cast<int>(hits.size()-1);
+    utpc_idx_max_ = utpc_idx_min_;
     time_end_ = e.time;
-    coord_utpc_ = e.coordinate;
-    time_utpc_ = e.time;
   }
    
   coord_start_ = std::min(coord_start_, e.coordinate);
@@ -178,47 +181,49 @@ double Cluster::time_center2() const {
   return time_mass2_ / weight2_sum_;
 }
 
+
 double Cluster::coord_utpc(bool weighted) const {
-  if (!weighted)
-  {
-    return coord_utpc_;
+  int utpc_idx;
+  if(utpc_idx_min_ == utpc_idx_max_) {
+    utpc_idx = utpc_idx_max_;
   }
-
-  double n1 = 0, n2 = 0, n3 = 0, w1 = 0, w2 = 0, w3 = 0;
+  else {
+    if(utpc_idx_min_ < static_cast<int>(hits.size() - 1)-utpc_idx_max_) {
+      utpc_idx = utpc_idx_min_;
+    }
+    else if(utpc_idx_min_ > static_cast<int>(hits.size() - 1)-utpc_idx_max_) {
+      utpc_idx = utpc_idx_max_;
+    }
+    else {
+      if(hits[utpc_idx_min_].weight > hits[utpc_idx_max_].weight) {
+        utpc_idx = utpc_idx_min_;
+      } else {
+        utpc_idx = utpc_idx_max_;
+      }    
+    }
+  }
+ 
+  if (!weighted) {
+    return hits[utpc_idx].coordinate;
+  }
+  //utpc with center-of-mass: channels c and weights w 
+  double c1 = 0, c2 = 0, c3 = 0, w1 = 0, w2 = 0, w3 = 0;
   
-  n2 = hits[highest_time_idx].coordinate;
-  w2 = hits[highest_time_idx].weight;
-  if(highest_time_idx > 0) {
-    n1 = hits[highest_time_idx-1].coordinate;
-    w1 = hits[highest_time_idx - 1].weight;
-  } 
-  if(highest_time_idx < static_cast<int>(hits.size() - 1)) {
-    n3 = hits[highest_time_idx+1].coordinate;
-    w3 = hits[highest_time_idx+1].weight;  
+  //coordinate and weight of hit with largest time
+  c2 = hits[utpc_idx].coordinate;
+  w2 = hits[utpc_idx].weight;
+  //left neighbour of coordinate with largest time
+  if(utpc_idx > 0) {
+    c1 = hits[utpc_idx-1].coordinate;
+    w1 = hits[utpc_idx - 1].weight;
   }
-  double pos = (n1*w1*w1 + n2*w2*w2 + n3*w3*w3) / (w1*w1 + w2*w2 + w3*w3);
-  return pos;
-}
-
-double Cluster::time_utpc(bool weighted) const {
-  if (!weighted)
-  {
-    return time_utpc_;
+  //right neighbour of coordinate with largest time 
+  if(utpc_idx < static_cast<int>(hits.size() - 1)) {
+    c3 = hits[utpc_idx+1].coordinate;
+    w3 = hits[utpc_idx+1].weight;  
   }
- double n1 = 0, n2 = 0, n3 = 0, w1 = 0, w2 = 0, w3 = 0;
-  
-  n2 = hits[highest_time_idx].time;
-  w2 = hits[highest_time_idx].weight;
-  if(highest_time_idx > 0) {
-    n1 = hits[highest_time_idx-1].time;
-    w1 = hits[highest_time_idx - 1].weight;
-  } 
-  if(highest_time_idx < static_cast<int>(hits.size() - 1)) {
-    n3 = hits[highest_time_idx+1].time;
-    w3 = hits[highest_time_idx+1].weight;  
-  }
-  double t = (n1*w1*w1 + n2*w2*w2 + n3*w3*w3) / (w1*w1 + w2*w2 + w3*w3);
-  return t;
+  double pos_utpc = (c1*w1*w1 + c2*w2*w2 + c3*w3*w3) / (w1*w1 + w2*w2 + w3*w3);
+  return pos_utpc;
 }
 
 uint64_t Cluster::time_overlap(const Cluster &other) const {

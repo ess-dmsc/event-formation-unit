@@ -16,6 +16,12 @@ namespace Gem {
 
 /// \todo check whether packing is necessary, static assert assert?
 struct Calibration {
+  //Apple clang demands constructors for the struct
+  Calibration()= default;
+  Calibration(float adcOffset,float adcSlope,float timeOffset,float timeSlope):
+  	adc_offset(adcOffset), adc_slope(adcSlope), time_offset(timeOffset), time_slope(timeSlope) 
+  {}
+
   float adc_offset {0.0};
   float adc_slope {1.0};
   float time_offset {0.0};
@@ -30,7 +36,7 @@ public:
 
   /// \brief create default calibration (0.0 offset 1.0 slope)
   CalibrationFile() = default;
-
+  
   /// \brief load calibration from json file
   explicit CalibrationFile(std::string filename);
 
@@ -54,6 +60,7 @@ private:
 
   /// Default correction
   Calibration NoCorr {0.0, 1.0, 0.0, 1.0};
+  
 };
 
 }

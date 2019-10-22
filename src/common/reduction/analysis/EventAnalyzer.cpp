@@ -34,14 +34,13 @@ ReducedHit EventAnalyzer::analyze(Cluster& cluster) const {
     ret.center = cluster.coord_center2();   
     ret.time = cluster.time_center2(); 
   }  
-  else if(time_algorithm_ == "utpc") {
-    ret.center = cluster.coord_utpc(false);   
-    ret.time = cluster.time_utpc(false); 
-  }
-  // "utpc_weighted"
   else {
-    ret.center = cluster.coord_utpc(true); 
-    ret.time = cluster.time_utpc(true); 
+    if(time_algorithm_ == "utpc") {
+      ret.center = cluster.coord_utpc(false);  
+    } else {
+      ret.center = cluster.coord_utpc(true);  
+    } 
+    ret.time = cluster.time_end(); 
   }
   
   return ret;
