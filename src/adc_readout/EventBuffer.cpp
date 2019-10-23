@@ -31,7 +31,8 @@ std::pair<EventList, std::uint64_t> EventBuffer::getFrameEvents() {
   if (Size == 0) {
     return {};
   }
-  // If we are going outside of our MaxOffsetTime, do not use the current reference time.
+  // If we are going outside of our MaxOffsetTime, do not use the current
+  // reference time.
   auto FirstEventTime = Events[0].Timestamp;
   if (RefTime + MaxOffsetTime < FirstEventTime) {
     RefTime = FirstEventTime;
@@ -49,9 +50,10 @@ std::pair<EventList, std::uint64_t> EventBuffer::getFrameEvents() {
 
   ReferenceTimestamps.erase(std::remove_if(ReferenceTimestamps.begin(),
                                            ReferenceTimestamps.end(),
-                            [FirstEventTime](auto Time){return Time < FirstEventTime;}), ReferenceTimestamps.end());
-
-
+                                           [FirstEventTime](auto Time) {
+                                             return Time < FirstEventTime;
+                                           }),
+                            ReferenceTimestamps.end());
 
   if (MaxSize == Size) {
     return {nonstd::span<EventData const>(Events.data(), Size), RefTime};

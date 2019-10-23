@@ -455,8 +455,6 @@ TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents7) {
   UnderTest.addReferenceTimestamp(ReferenceTS + 15);
   UnderTest.addReferenceTimestamp(ReferenceTS + 20);
 
-
-
   TestEvent->Timestamp = ReferenceTS + 25;
   TestEvent->Amplitude = 3;
   UnderTest.addEvent(TestEvent);
@@ -498,7 +496,8 @@ TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents8) {
     if (not Events.first.empty()) {
       ASSERT_LE(Events.second, Events.first[0].Timestamp);
       ASSERT_NE(BufferSize, Events.first.size());
-      ASSERT_LE((Events.first.end() - 1)->Timestamp, Events.second + RefTimeInterval);
+      ASSERT_LE((Events.first.end() - 1)->Timestamp,
+                Events.second + RefTimeInterval);
       UnderTest.cullEvents(Events.first.size());
     }
   }
@@ -523,7 +522,8 @@ TEST_F(EventBufferTest, CheckReferenceTimeOnGetEvents9) {
     if (not Events.first.empty()) {
       ASSERT_LE(Events.second, Events.first[0].Timestamp);
       ASSERT_NE(BufferSize, Events.first.size());
-      ASSERT_LE((Events.first.end() - 1)->Timestamp, Events.second + RefTimeInterval);
+      ASSERT_LE((Events.first.end() - 1)->Timestamp,
+                Events.second + RefTimeInterval);
       UnderTest.cullEvents(Events.first.size());
     }
   }

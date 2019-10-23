@@ -13,17 +13,15 @@
 
 class OffsetTime {
 public:
-  enum class Offset {
-    NONE,
-    NOW,
-    TIME_POINT
-  };
+  enum class Offset { NONE, NOW, TIME_POINT };
   static const Offset NOW = Offset::NOW;
   static const Offset NONE = Offset::NONE;
   static const Offset TIME_POINT = Offset::TIME_POINT;
-  OffsetTime(Offset Time, std::chrono::system_clock::time_point OffsetPoint = std::chrono::system_clock::now());
+  OffsetTime(Offset Time, std::chrono::system_clock::time_point OffsetPoint =
+                              std::chrono::system_clock::now());
   explicit OffsetTime(std::chrono::system_clock::time_point OffsetPoint);
   std::uint64_t calcTimestamp(std::uint64_t InputTime);
+
 private:
   Offset OffsetSetting{Offset::NONE};
   std::uint64_t UsedOffset{0};

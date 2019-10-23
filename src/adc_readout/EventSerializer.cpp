@@ -19,7 +19,8 @@ EventSerializer::EventSerializer(std::string SourceName, size_t BufferSize,
                                  ProducerBase *KafkaProducer,
                                  TimestampMode Mode, OffsetTime UseOffset)
     : Name(std::move(SourceName)), Timeout(TransmitTimeout),
-      EventBufferSize(BufferSize), Producer(KafkaProducer), CMode(Mode), RefTimeOffset(UseOffset) {
+      EventBufferSize(BufferSize), Producer(KafkaProducer), CMode(Mode),
+      RefTimeOffset(UseOffset) {
   SerializeThread = std::thread(&EventSerializer::serialiseFunction, this);
 }
 

@@ -8,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "../OffsetTime.h"
-#include <gtest/gtest.h>
 #include <ctime>
+#include <gtest/gtest.h>
 
 TEST(OffsetTimeTest, NoOffset) {
   OffsetTime UnderTest(OffsetTime::NONE);
@@ -19,14 +19,18 @@ TEST(OffsetTimeTest, NoOffset) {
 TEST(OffsetTimeTest, OffsetToNow) {
   OffsetTime UnderTest(OffsetTime::NOW);
   auto Now = std::chrono::system_clock::now();
-  auto NowNS = std::chrono::duration_cast<std::chrono::nanoseconds>(Now.time_since_epoch()).count();
+  auto NowNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                   Now.time_since_epoch())
+                   .count();
   EXPECT_NEAR(UnderTest.calcTimestamp(123456789), NowNS, 1e8);
 }
 
 TEST(OffsetTimeTest, OffsetToTimePoint1) {
   OffsetTime UnderTest(OffsetTime::TIME_POINT);
   auto Now = std::chrono::system_clock::now();
-  auto NowNS = std::chrono::duration_cast<std::chrono::nanoseconds>(Now.time_since_epoch()).count();
+  auto NowNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                   Now.time_since_epoch())
+                   .count();
   EXPECT_NEAR(UnderTest.calcTimestamp(123456789), NowNS, 1e8);
 }
 
@@ -39,7 +43,9 @@ TEST(OffsetTimeTest, OffsetToTimePoint2) {
   auto TestTimePoint = std::chrono::system_clock::from_time_t(std::mktime(&t));
 
   OffsetTime UnderTest(OffsetTime::TIME_POINT, TestTimePoint);
-  auto TestNS = std::chrono::duration_cast<std::chrono::nanoseconds>(TestTimePoint.time_since_epoch()).count();
+  auto TestNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    TestTimePoint.time_since_epoch())
+                    .count();
   auto CalculatedTS = UnderTest.calcTimestamp(123456789);
   EXPECT_NEAR(CalculatedTS, TestNS, 1e8);
 }
@@ -53,7 +59,9 @@ TEST(OffsetTimeTest, OffsetToTimePoint3) {
   auto TestTimePoint = std::chrono::system_clock::from_time_t(std::mktime(&t));
 
   OffsetTime UnderTest(TestTimePoint);
-  auto TestNS = std::chrono::duration_cast<std::chrono::nanoseconds>(TestTimePoint.time_since_epoch()).count();
+  auto TestNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    TestTimePoint.time_since_epoch())
+                    .count();
   auto CalculatedTS = UnderTest.calcTimestamp(123456789);
   EXPECT_NEAR(CalculatedTS, TestNS, 1e8);
 }

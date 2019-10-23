@@ -37,7 +37,8 @@ public:
   /// \brief Get all events from the buffer.
   std::pair<EventList, std::uint64_t> getAllEvents() const;
   /// \brief Remove events from the buffer.
-  /// \param[in] NrOfEvents The nr of events from the start of the buffer to remove.
+  /// \param[in] NrOfEvents The nr of events from the start of the buffer to
+  /// remove.
   void cullEvents(size_t NrOfEvents);
   /// \brief Remove all events.
   void clearAllEvents();

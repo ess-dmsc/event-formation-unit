@@ -94,7 +94,8 @@ bool checkFlatbuffer1(nonstd::span<const std::uint8_t> Buffer,
   if (EventMessage->time_of_flight()->size() != 1) {
     return false;
   }
-  if (EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) != 1000000) {
+  if (EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) !=
+      1000000) {
     return false;
   }
   if (EventMessage->detector_id()->size() != 1) {
@@ -121,8 +122,10 @@ bool checkFlatbuffer2(nonstd::span<const std::uint8_t> Buffer,
   if (EventMessage->message_id() >= 2) {
     return false;
   }
-  if (EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) < 1000000 or
-      EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) > 1000000 + 1000 * 3) {
+  if (EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) <
+          1000000 or
+      EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) >
+          1000000 + 1000 * 3) {
     return false;
   }
   if (EventMessage->time_of_flight()->size() != 2) {
@@ -207,7 +210,9 @@ bool checkFlatbufferTimeOverflow(nonstd::span<const std::uint8_t> Buffer,
   static int NrOfCalls = 0;
   NrOfCalls++;
   if (NrOfCalls == 1) {
-    return EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) == BaseTimestamp;
+    return EventMessage->pulse_time() +
+               EventMessage->time_of_flight()->Get(0) ==
+           BaseTimestamp;
   }
   return EventMessage->pulse_time() ==
          BaseTimestamp + std::numeric_limits<std::uint32_t>::max() + 100;
@@ -340,7 +345,8 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventNoRef) {
   std::uint64_t BaseTimestamp = 1000000;
   auto checkFlatbufferTimestamp = [BaseTimestamp](auto Buffer) {
     auto EventMessage = GetEventMessage(Buffer.data());
-    if (EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) != BaseTimestamp) {
+    if (EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) !=
+        BaseTimestamp) {
       return false;
     }
     if (EventMessage->time_of_flight()->size() != 1) {
@@ -366,13 +372,16 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferTwoEventsNoRef) {
   std::uint64_t BaseTimestamp = 1000000;
   auto checkFlatbufferTimestamp = [BaseTimestamp](auto Buffer) {
     auto EventMessage = GetEventMessage(Buffer.data());
-    if (EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) != BaseTimestamp) {
+    if (EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) !=
+        BaseTimestamp) {
       return false;
     }
     if (EventMessage->time_of_flight()->size() != 2) {
       return false;
     }
-    if (EventMessage->time_of_flight()->Get(1) - EventMessage->time_of_flight()->Get(0) != 1000) {
+    if (EventMessage->time_of_flight()->Get(1) -
+            EventMessage->time_of_flight()->Get(0) !=
+        1000) {
       return false;
     }
     return true;
