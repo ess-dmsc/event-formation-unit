@@ -23,7 +23,7 @@ using namespace memory_sequential_consistent; // Lock free fifo
 class LokiBase : public Detector {
 public:
   LokiBase(BaseSettings const &settings, struct LokiSettings &LocalLokiSettings);
-  ~LokiBase() { delete EthernetRingbuffer; }
+  ~LokiBase() = default;
   void input_thread();
   void processing_thread();
 
@@ -35,7 +35,8 @@ public:
 protected:
   /** Shared between input_thread and processing_thread*/
   CircularFifo<unsigned int, EthernetBufferMaxEntries> InputFifo;
-  RingBuffer<EthernetBufferSize> *EthernetRingbuffer;
+  /// \todo the number 11 is a workaround
+  RingBuffer<EthernetBufferSize> EthernetRingbuffer{EthernetBufferMaxEntries + 11};
 
   struct {
     // Input Counters - accessed in input thread

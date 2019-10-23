@@ -80,9 +80,6 @@ LokiBase::LokiBase(BaseSettings const &settings, struct LokiSettings &LocalLokiS
 
   XTRACE(INIT, ALW, "Creating %d Loki Rx ringbuffers of size %d",
          EthernetBufferMaxEntries, EthernetBufferSize);
-  /// \todo the number 11 is a workaround
-  EthernetRingbuffer = new RingBuffer<EthernetBufferSize>(EthernetBufferMaxEntries + 11);
-  assert(EthernetRingbuffer != 0);
 }
 
 void LokiBase::input_thread() {
@@ -97,13 +94,13 @@ void LokiBase::input_thread() {
 
   for (;;) {
     int rdsize;
-    unsigned int eth_index = EthernetRingbuffer->getDataIndex();
+    unsigned int eth_index = EthernetRingbuffer.getDataIndex();
 
     /** this is the processing step */
-    EthernetRingbuffer->setDataLength(eth_index, 0);
-    if ((rdsize = receiver.receive(EthernetRingbuffer->getDataBuffer(eth_index),
-                                   EthernetRingbuffer->getMaxBufSize())) > 0) {
-      EthernetRingbuffer->setDataLength(eth_index, rdsize);
+    EthernetRingbuffer.setDataLength(eth_index, 0);
+    if ((rdsize = receiver.receive(EthernetRingbuffer.getDataBuffer(eth_index),
+                                   EthernetRingbuffer.getMaxBufSize())) > 0) {
+      EthernetRingbuffer.setDataLength(eth_index, rdsize);
       XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", rdsize);
       Counters.RxPackets++;
       Counters.RxBytes += rdsize;
@@ -111,7 +108,7 @@ void LokiBase::input_thread() {
       if (InputFifo.push(eth_index) == false) {
         Counters.FifoPushErrors++;
       } else {
-        EthernetRingbuffer->getNextBuffer();
+        EthernetRingbuffer.getNextBuffer();
       }
     }
 
@@ -185,14 +182,14 @@ void LokiBase::processing_thread() {
   Timer h5flushtimer;
   while (true) {
     if (InputFifo.pop(data_index)) { // There is data in the FIFO - do processing
-      auto datalen = EthernetRingbuffer->getDataLength(data_index);
+      auto datalen = EthernetRingbuffer.getDataLength(data_index);
       if (datalen == 0) {
         Counters.FifoSeqErrors++;
         continue;
       }
 
       /// \todo use the Buffer<T> class here and in parser
-      auto __attribute__((unused)) dataptr = EthernetRingbuffer->getDataBuffer(data_index);
+      auto __attribute__((unused)) dataptr = EthernetRingbuffer.getDataBuffer(data_index);
       /// \todo add parser
 
       uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970

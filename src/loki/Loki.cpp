@@ -10,7 +10,7 @@
 #include "LokiBase.h"
 #include <common/Detector.h>
 
-static struct Loki::LokiSettings LocalLokiSettings;
+static Loki::LokiSettings LocalLokiSettings;
 
 void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
 }
