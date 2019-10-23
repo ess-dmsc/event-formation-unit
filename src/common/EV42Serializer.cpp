@@ -18,8 +18,8 @@ static constexpr uint64_t FBMutablePlaceholder = 1;
 static_assert(FLATBUFFERS_LITTLEENDIAN,
               "Flatbuffers only tested on little endian systems");
 
-EV42Serializer::EV42Serializer(size_t MaxArrayLength, std::string SourceName)
-    : MaxEvents(MaxArrayLength), Builder_(MaxEvents * 8 + 256) {
+EV42Serializer::EV42Serializer(size_t MaxArrayLength, std::string SourceName, ProducerCallback Callback)
+    : MaxEvents(MaxArrayLength), Builder_(MaxEvents * 8 + 256), ProduceFunctor(Callback) {
 
   auto SourceNameOffset = Builder_.CreateString(SourceName);
   auto TimeOffset = Builder_.CreateUninitializedVector(MaxEvents, TimeSize, &TimePtr);
@@ -29,11 +29,9 @@ EV42Serializer::EV42Serializer(size_t MaxArrayLength, std::string SourceName)
       FBMutablePlaceholder, FBMutablePlaceholder, TimeOffset, PixelOffset);
   FinishEventMessageBuffer(Builder_, HeaderOffset);
 
-  Buffer_.address = Builder_.GetBufferPointer();
-  Buffer_.size = Builder_.GetSize();
-  assert(Buffer_);
+  Buffer_ = nonstd::span<const uint8_t >(Builder_.GetBufferPointer(), Builder_.GetSize());
 
-  EventMessage_ = const_cast<EventMessage *>(GetEventMessage(Buffer_.address));
+  EventMessage_ = const_cast<EventMessage *>(GetEventMessage(Builder_.GetBufferPointer()));
   TimeLengthPtr =
       reinterpret_cast<flatbuffers::uoffset_t *>(
           const_cast<std::uint8_t *>(EventMessage_->time_of_flight()->Data())) - 1;
@@ -49,7 +47,7 @@ void EV42Serializer::setProducerCallback(ProducerCallback Callback) {
   ProduceFunctor = Callback;
 }
 
-Buffer<uint8_t> EV42Serializer::serialize() {
+nonstd::span<const uint8_t> EV42Serializer::serialize() {
   if (EventCount > MaxEvents) {
     // \todo this should probably throw instead?
     return {};
@@ -70,8 +68,8 @@ size_t EV42Serializer::produce() {
     XTRACE(OUTPUT, DEB, "autoproduce %zu EventCount_ \n", EventCount);
     serialize();
     if (ProduceFunctor)
-      ProduceFunctor(Buffer_);
-    return Buffer_.bytes();
+      ProduceFunctor(Buffer_, EventMessage_->pulse_time());
+    return Buffer_.size_bytes();
   }
   return 0;
 }

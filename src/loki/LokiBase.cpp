@@ -127,13 +127,13 @@ void LokiBase::processing_thread() {
   const unsigned int NYpos{512};
   Geometry geometry(NXTubes, NZTubes, NStraws, NYpos);
 
-  EV42Serializer flatbuffer(KafkaBufferSize, "loki");
   Producer eventprod(EFUSettings.KafkaBroker, "LOKI_detector");
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-  flatbuffer.setProducerCallback(
-      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
-#pragma GCC diagnostic pop
+
+  auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
+    eventprod.produce(DataBuffer, Timestamp);
+  };
+
+  EV42Serializer flatbuffer(KafkaBufferSize, "loki", Produce);
 
   if (EFUSettings.TestImage) {
     ESSGeometry essgeom(56, 512, 4, 1);
