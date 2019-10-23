@@ -67,13 +67,13 @@ void PerfGenBase::processing_thread() {
     EFUSettings.KafkaTopic = "PERFGEN_detector";
   }
 
-  EV42Serializer flatbuffer(kafka_buffer_size, "multiblade");
   Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-  flatbuffer.setProducerCallback(
-      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
-#pragma GCC diagnostic pop
+
+  auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
+    eventprod.produce(DataBuffer, Timestamp);
+  };
+
+  EV42Serializer flatbuffer(kafka_buffer_size, "multiblade", Produce);
 
   if ( true ) {
     XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");

@@ -200,17 +200,13 @@ void JalousieBase::processing_thread() {
   config = Config(ModuleSettings.ConfigFile);
   LOG(INIT, Sev::Info, "Jalousie Config\n{}", config.debug());
 
-  std::string topic{""};
+  Producer EventProducer(EFUSettings.KafkaBroker, "DREAM_detector");
 
-  topic = "DREAM_detector";
+  auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
+    EventProducer.produce(DataBuffer, Timestamp);
+  };
 
-  EV42Serializer ev42Serializer(kafka_buffer_size, "DREAM_detector");
-  Producer producer(EFUSettings.KafkaBroker, topic);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-  ev42Serializer.setProducerCallback(
-      std::bind(&Producer::produce2<uint8_t>, &producer, std::placeholders::_1));
-#pragma GCC diagnostic pop
+  EV42Serializer ev42Serializer(kafka_buffer_size, "jalo", Produce);
 
   unsigned int data_index;
   TSCTimer produce_timer;
@@ -250,7 +246,7 @@ void JalousieBase::processing_thread() {
     /// Periodic producing regardless of rates
     if (produce_timer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
-      force_produce_and_update_kafka_stats(ev42Serializer, producer);
+      force_produce_and_update_kafka_stats(ev42Serializer, EventProducer);
       produce_timer.now();
     }
 
@@ -260,7 +256,7 @@ void JalousieBase::processing_thread() {
       while (!config.merger.empty()) {
         process_one_queued_event(ev42Serializer);
       }
-      force_produce_and_update_kafka_stats(ev42Serializer, producer);
+      force_produce_and_update_kafka_stats(ev42Serializer, EventProducer);
       XTRACE(INPUT, ALW, "Stopping processing thread.");
       return;
     }
