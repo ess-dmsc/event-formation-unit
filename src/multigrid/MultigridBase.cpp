@@ -80,13 +80,7 @@ MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings con
 
 bool MultigridBase::init_config() {
   LOG(INIT, Sev::Info, "MG Config file: {}", ModuleSettings.ConfigFile);
-  try {
-    mg_config = Multigrid::Config(ModuleSettings.ConfigFile);
-  }
-  catch (...) {
-    LOG(INIT, Sev::Warning, "Invalid Json file: {}", ModuleSettings.ConfigFile);
-    return false;
-  }
+  mg_config = Multigrid::Config(ModuleSettings.ConfigFile);
 
   LOG(INIT, Sev::Info, "Multigrid Config\n{}", mg_config.debug());
   if (ModuleSettings.monitor) {
