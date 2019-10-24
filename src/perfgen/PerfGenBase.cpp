@@ -56,61 +56,58 @@ PerfGenBase::PerfGenBase(BaseSettings const &settings, struct PerfGenSettings &L
   // clang-format on
 
   std::function<void()> processingFunc = [this]() {
-    PerfGenBase::processing_thread();
+    PerfGenBase::processingThread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 }
 
-void PerfGenBase::processing_thread() {
+void PerfGenBase::processingThread() {
 
   if (EFUSettings.KafkaTopic == "") {
     EFUSettings.KafkaTopic = "PERFGEN_detector";
   }
 
-  Producer eventprod(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
+  Producer EventProducer(EFUSettings.KafkaBroker, EFUSettings.KafkaTopic);
 
-  auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
-    eventprod.produce(DataBuffer, Timestamp);
+  auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
+    EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer flatbuffer(kafka_buffer_size, "multiblade", Produce);
+  EV42Serializer FlatBuffer(kafka_buffer_size, "multiblade", Produce);
 
-  if ( true ) {
-    XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
-    Udder udder;
-    uint32_t time_of_flight = 0;
-    while (true) {
-      if (not runThreads) {
-        // \todo flush everything here
-        XTRACE(INPUT, ALW, "Stopping processing thread.");
-        return;
-      }
+  ESSGeometry ESSGeom(64, 64, 1, 1);
 
-      static int eventCount = 0;
-      if (eventCount == 0) {
-        uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-        flatbuffer.pulseTime(efu_time);
-      }
+  XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
+  Udder UdderImage;
+  UdderImage.cachePixels(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
+  uint32_t TimeOfFlight = 0;
+  while (runThreads) {
+    static int EventCount = 0;
+    if (EventCount == 0) {
+      uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+      FlatBuffer.pulseTime(EfuTime);
+    }
 
-      ESSGeometry essgeom(64, 64, 1, 1);
-      auto pixel_id = udder.getPixel(essgeom.nx(), essgeom.ny(), &essgeom);
-      auto tx_bytes = flatbuffer.addEvent(time_of_flight, pixel_id);
-      mystats.tx_bytes += tx_bytes;
-      mystats.events_udder++;
+    auto PixelId = UdderImage.getPixel(ESSGeom.nx(), ESSGeom.ny(), &ESSGeom);
+    auto TxBytes = FlatBuffer.addEvent(TimeOfFlight, PixelId);
+    mystats.tx_bytes += TxBytes;
+    mystats.events_udder++;
 
-      if (EFUSettings.TestImageUSleep != 0) {
-        usleep(EFUSettings.TestImageUSleep);
-      }
+    if (EFUSettings.TestImageUSleep != 0) {
+      usleep(EFUSettings.TestImageUSleep);
+    }
 
-      time_of_flight++;
+    TimeOfFlight++;
 
-      if (tx_bytes != 0) {
-        eventCount = 0;
-      } else {
-        eventCount++;
-      }
+    if (TxBytes != 0) {
+      EventCount = 0;
+    } else {
+      EventCount++;
     }
   }
+  // \todo flush everything here
+  XTRACE(INPUT, ALW, "Stopping processing thread.");
+  return;
 }
 
 }
