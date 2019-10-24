@@ -102,13 +102,14 @@ TEST(GetElem, GetOneFail) {
 
 TEST(GetElem, GetOneSuccess) {
   ElementPtr<int> SomePtr(nullptr);
+  ElementPtr<int> SomeOtherPtr(nullptr);
   int Elements = 15; // One less than a power of 2 value due to the
                      // implementation of the queue
   CircularBuffer<int> SomeBuffer(Elements);
   ASSERT_TRUE(SomeBuffer.tryGetEmpty(SomePtr));
   SomeBuffer.tryPutData(std::move(SomePtr));
-  EXPECT_TRUE(SomeBuffer.tryGetData(SomePtr));
-  EXPECT_NE(SomePtr, nullptr);
+  EXPECT_TRUE(SomeBuffer.tryGetData(SomeOtherPtr));
+  EXPECT_NE(SomeOtherPtr, nullptr);
 }
 
 TEST(GetElem, GetMultiple) {

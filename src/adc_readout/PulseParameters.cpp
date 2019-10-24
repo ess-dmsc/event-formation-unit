@@ -39,12 +39,12 @@ PulseParameters analyseSampleRun(SamplingRun const &Run,
   auto PeakPosition = 0u;
   for (auto i = 0u; i < Run.Data.size(); i++) {
     auto TempBackground = BkgOffsetValue + std::round(i * BkgSlope);
-    Result.PeakArea += (Run.Data[i] - TempBackground);
+    Result.PeakArea += std::lround(Run.Data[i] - TempBackground);
     if (Run.Data[i] - TempBackground > Result.PeakAmplitude) {
       PeakPosition = i;
       Result.PeakLevel = Run.Data[i];
       Result.PeakTimestamp = Run.TimeStamp.getOffsetTimeStamp(i);
-      Result.BackgroundLevel = TempBackground;
+      Result.BackgroundLevel = std::lround(TempBackground);
       Result.PeakAmplitude = Result.PeakLevel - Result.BackgroundLevel;
     }
   }

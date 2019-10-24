@@ -19,6 +19,7 @@ set(AdcReadoutTest_SRC
     PulseBufferTest.cpp
     EventSerializerTest.cpp
     EventBufferTest.cpp
+    OffsetTimeTest.cpp
     )
 
 set(AdcReadoutTest_INC

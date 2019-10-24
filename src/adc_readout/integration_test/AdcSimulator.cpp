@@ -40,31 +40,6 @@ struct SimSettings {
   double NoiseRate{0.5};
 };
 
-std::map<std::string, RunMode> getRunMapping() {
-  return {
-      {"simple", RunMode::SIMPLE},
-      {"delay_line_time", RunMode::DELAY_LINE_TIME},
-      {"delay_line_amp", RunMode::DELAY_LINE_AMP},
-      {"continous", RunMode::CONTINOUS},
-  };
-}
-
-std::istream &operator>>(std::istream &In, RunMode &Mode) {
-  std::map<std::string, RunMode> RunMap = getRunMapping();
-  std::string InString;
-  In >> InString;
-  Mode = RunMap.at(InString);
-  return In;
-}
-
-std::ostream &operator<<(std::ostream &In, const RunMode &Mode) {
-  std::map<RunMode, std::string> RunMap;
-  for (auto &Item : getRunMapping()) {
-    RunMap[Item.second] = Item.first;
-  }
-  return In << RunMap.at(Mode);
-}
-
 void addCLIOptions(CLI::App &Parser, SimSettings &Settings) {
   Parser
       .add_option("--efu_addr", Settings.EFUAddress,
@@ -82,11 +57,16 @@ void addCLIOptions(CLI::App &Parser, SimSettings &Settings) {
       ->default_str("65534");
   Parser.add_flag("--two_fpgas", Settings.SecondFPGA,
                   "Simulate a second FPGA (data source).");
+  std::vector<std::pair<std::string, RunMode>> ModeMap{
+      {"simple", RunMode::SIMPLE},
+      {"delay_line_time", RunMode::DELAY_LINE_TIME},
+      {"delay_line_amp", RunMode::DELAY_LINE_AMP},
+      {"continous", RunMode::CONTINOUS},
+  };
   Parser
-      .add_set("--mode", Settings.Mode,
-               {RunMode::SIMPLE, RunMode::DELAY_LINE_TIME,
-                RunMode::DELAY_LINE_AMP, RunMode::CONTINOUS},
-               "Set the simulation (data generation) mode.")
+      .add_option("--mode", Settings.Mode,
+                  "Set the simulation (data generation) mode.")
+      ->transform(CLI::CheckedTransformer(ModeMap, CLI::ignore_case))
       ->default_str("continous");
 
   Parser

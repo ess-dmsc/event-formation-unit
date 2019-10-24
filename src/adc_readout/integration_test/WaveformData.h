@@ -64,7 +64,7 @@ public:
     DataBuffer.resize(ChunkSize + 10);
   }
 
-  T operator[](size_t Index) {
+  T operator[](size_t Index) const {
     if (Index >= UpperElement) {
       Selector.offset(0, UpperElement);
       auto UsedBlockSize = ChunkSize;
@@ -109,8 +109,8 @@ private:
 
 class WaveformData {
 public:
-  WaveformData(hdf5::node::Group const &Group);
-  std::uint64_t getTimestamp();
+  explicit WaveformData(hdf5::node::Group const &Group);
+  std::uint64_t getTimestamp() const;
   nonstd::span<uint16_t> getWaveform();
   void nextWaveform();
   bool outOfData() const;

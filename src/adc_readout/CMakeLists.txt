@@ -19,6 +19,7 @@ set(AdcReadout_SRC
     PulseBuffer.cpp
     EventSerializer.cpp
     EventBuffer.cpp
+    OffsetTime.cpp
     )
 
 set(AdcReadout_INC
@@ -44,6 +45,7 @@ set(AdcReadout_INC
     EventSerializer.h
     EventData.h
     EventBuffer.h
+    OffsetTime.h
     )
 
 create_object_module(AdcReadout)

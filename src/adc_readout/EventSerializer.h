@@ -11,15 +11,18 @@
 #pragma once
 
 #include "EventBuffer.h"
+#include "OffsetTime.h"
 #include <chrono>
 #include <common/Producer.h>
+#include <concurrentqueue/concurrentqueue.h>
 #include <memory>
+#include <mutex>
 #include <readerwriterqueue/readerwriterqueue.h>
 #include <string>
 #include <thread>
 
 using Queue = moodycamel::ReaderWriterQueue<std::unique_ptr<EventData>>;
-using TimestampQueue = moodycamel::ReaderWriterQueue<std::uint64_t>;
+using TimestampQueue = moodycamel::ConcurrentQueue<std::uint64_t>;
 
 /// \brief Serializes events from a data source (event formation kernel).
 /// Transforms the timestamps of the events based on which mode it is operating
@@ -81,7 +84,8 @@ public:
   ///        event timestamp.
   EventSerializer(std::string SourceName, size_t BufferSize,
                   std::chrono::milliseconds TransmitTimeout,
-                  ProducerBase *KafkaProducer, TimestampMode Mode);
+                  ProducerBase *KafkaProducer, TimestampMode Mode,
+                  OffsetTime UseOffset = OffsetTime::NONE);
   /// \brief Stops the thread and may for this reason take a long time before
   /// returning.
   virtual ~EventSerializer();
@@ -114,16 +118,5 @@ protected:
   Queue EventQueue;
   TimestampQueue ReferenceTimeQueue;
   const TimestampMode CMode;
-};
-
-class RefFilteredEventSerializer : public EventSerializer {
-public:
-  /// \brief See base class for documentation.
-  RefFilteredEventSerializer(std::string SourceName, size_t BufferSize,
-                             std::chrono::milliseconds TransmitTimeout,
-                             ProducerBase *KafkaProducer, TimestampMode Mode);
-  void addReferenceTimestamp(std::uint64_t const Timestamp) override;
-
-private:
-  std::uint64_t CurrentReferenceTimestamp{0};
+  OffsetTime RefTimeOffset;
 };

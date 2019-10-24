@@ -17,9 +17,10 @@
 EventSerializer::EventSerializer(std::string SourceName, size_t BufferSize,
                                  std::chrono::milliseconds TransmitTimeout,
                                  ProducerBase *KafkaProducer,
-                                 TimestampMode Mode)
+                                 TimestampMode Mode, OffsetTime UseOffset)
     : Name(std::move(SourceName)), Timeout(TransmitTimeout),
-      EventBufferSize(BufferSize), Producer(KafkaProducer), CMode(Mode) {
+      EventBufferSize(BufferSize), Producer(KafkaProducer), CMode(Mode),
+      RefTimeOffset(UseOffset) {
   SerializeThread = std::thread(&EventSerializer::serialiseFunction, this);
 }
 
@@ -92,7 +93,7 @@ void EventSerializer::serialiseFunction() {
   std::uint64_t MessageId{0};
   std::chrono::system_clock::time_point FirstEventTime;
   EventBuffer Events(EventBufferSize);
-  auto ProduceFB = [&](auto const &SendEvents, auto ReferenceTime) {
+  auto ProduceFB = [&](auto const &SendEvents, auto const ReferenceTime) {
     if (SendEvents.empty()) {
       return;
     }
@@ -111,7 +112,7 @@ void EventSerializer::serialiseFunction() {
     }
 
     Producer->produce({Builder.GetBufferPointer(), Builder.GetSize()},
-                      ReferenceTime / 1000000);
+                      RefTimeOffset.calcTimestamp(ReferenceTime) / 1000000);
     TimeOffset.clear();
     EventId.clear();
     Amplitude.clear();
@@ -120,34 +121,37 @@ void EventSerializer::serialiseFunction() {
     ThresholdTime.clear();
     PeakTime.clear();
   };
-  auto getReferenceTimestamps = [&Events, this]() {
+  std::uint64_t LastAddedRefTimestamp{0};
+  auto getReferenceTimestamps = [&LastAddedRefTimestamp, &Events, this]() {
+    auto NumberOfIterations{0};
+    auto const MaxIterations{40};
     std::uint64_t TempRefTime{0};
     while (this->ReferenceTimeQueue.try_dequeue(TempRefTime)) {
-      Events.addReferenceTimestamp(TempRefTime);
+      if (TempRefTime != LastAddedRefTimestamp) {
+        Events.addReferenceTimestamp(TempRefTime);
+        LastAddedRefTimestamp = TempRefTime;
+      }
+      ++NumberOfIterations;
+      if (NumberOfIterations > MaxIterations) {
+        break;
+      }
     }
   };
   getReferenceTimestamps();
-  auto CheckForRefTimeCounter{0};
-  auto const CheckForRefTimeCounterMax{
-      100}; // Maybe do future adjustments based on profiling
   do {
-    CheckForRefTimeCounter = 0;
     while (EventQueue.try_dequeue(NewEvent)) {
       if (Events.size() == 0) {
         FirstEventTime = getCurrentTime();
       }
       Events.addEvent(NewEvent);
-      auto EventList = Events.getEvents();
+      getReferenceTimestamps();
+      auto EventList = Events.getFrameEvents();
       if (not EventList.first.empty()) {
         ProduceFB(EventList.first, EventList.second);
         Events.cullEvents(EventList.first.size());
         if (Events.size() > 0) {
           FirstEventTime = getCurrentTime();
         }
-      }
-      if (++CheckForRefTimeCounter >= CheckForRefTimeCounterMax) {
-        CheckForRefTimeCounter = 0;
-        getReferenceTimestamps();
       }
     }
     std::this_thread::sleep_for(
@@ -162,25 +166,10 @@ void EventSerializer::serialiseFunction() {
   if (Events.size() > 0) {
     // Reference time is calculated by Events.getEvents() so we must call that
     // function first.
-    auto EventList = Events.getEvents();
+    auto EventList = Events.getFrameEvents();
     if (EventList.first.empty()) {
       EventList = Events.getAllEvents();
     }
     ProduceFB(EventList.first, EventList.second);
-  }
-}
-
-RefFilteredEventSerializer::RefFilteredEventSerializer(
-    std::string SourceName, size_t BufferSize,
-    std::chrono::milliseconds TransmitTimeout, ProducerBase *KafkaProducer,
-    EventSerializer::TimestampMode Mode)
-    : EventSerializer(std::move(SourceName), BufferSize, TransmitTimeout,
-                      KafkaProducer, Mode) {}
-
-void RefFilteredEventSerializer::addReferenceTimestamp(
-    std::uint64_t const Timestamp) {
-  if (Timestamp != CurrentReferenceTimestamp) {
-    CurrentReferenceTimestamp = Timestamp;
-    EventSerializer::addReferenceTimestamp(Timestamp);
   }
 }

@@ -39,6 +39,7 @@ public:
       : EventSerializer(std::move(SourceName), BufferSize, TransmitTimeout,
                         KafkaProducer, Mode) {}
   using EventSerializer::EventQueue;
+  using EventSerializer::ReferenceTimeQueue;
   std::chrono::system_clock::time_point getCurrentTime() const override {
     if (UseOtherCurrentTime) {
       return UsedCurrentTime;
@@ -66,42 +67,65 @@ TEST_F(EventSerialisationIndependent, ProduceFlatbufferOnOneEvent) {
       .RETURN(0);
   SetUpSerializer(1);
   Serializer->addEvent(std::make_unique<EventData>());
+  do {
+    std::this_thread::sleep_for(1ms);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
 bool checkFlatbuffer1(nonstd::span<const std::uint8_t> Buffer,
                       std::int64_t MessageTimestampMS) {
+  auto Verifier = flatbuffers::Verifier(Buffer.data(), Buffer.size());
+  if (not VerifyEventMessageBuffer(Verifier)) {
+    return false;
+  }
   auto EventMessage = GetEventMessage(Buffer.data());
+  auto AdcDebugData = EventMessage->facility_specific_data_as_AdcPulseDebug();
+  if (not AdcDebugData->Verify(Verifier)) {
+    return false;
+  }
   if (EventMessage->source_name()->str() != "SomeName") {
     return false;
   }
   if (EventMessage->message_id() != 0) {
     return false;
   }
-  if (EventMessage->pulse_time() != 1000000) {
+  if (EventMessage->time_of_flight()->size() != 1) {
     return false;
   }
-  if (EventMessage->time_of_flight()->size() != 1) {
+  if (EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) !=
+      1000000) {
     return false;
   }
   if (EventMessage->detector_id()->size() != 1) {
     return false;
   }
-  EXPECT_EQ(MessageTimestampMS, 1);
+  EXPECT_EQ(MessageTimestampMS, 0);
   return true;
 }
 
 bool checkFlatbuffer2(nonstd::span<const std::uint8_t> Buffer,
                       std::int64_t MessageTimestampMS) {
+  auto Verifier = flatbuffers::Verifier(Buffer.data(), Buffer.size());
+  if (not VerifyEventMessageBuffer(Verifier)) {
+    return false;
+  }
   auto EventMessage = GetEventMessage(Buffer.data());
+  auto AdcDebugData = EventMessage->facility_specific_data_as_AdcPulseDebug();
+  if (not AdcDebugData->Verify(Verifier)) {
+    return false;
+  }
   if (EventMessage->source_name()->str() != "SomeName") {
     return false;
   }
   if (EventMessage->message_id() >= 2) {
     return false;
   }
-  if (EventMessage->pulse_time() < 1000000 or
-      EventMessage->pulse_time() > 1000000 + 1000 * 3) {
+  if (EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) <
+          1000000 or
+      EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) >
+          1000000 + 1000 * 3) {
     return false;
   }
   if (EventMessage->time_of_flight()->size() != 2) {
@@ -110,7 +134,6 @@ bool checkFlatbuffer2(nonstd::span<const std::uint8_t> Buffer,
   if (EventMessage->detector_id()->size() != 2) {
     return false;
   }
-  auto AdcDebugData = EventMessage->facility_specific_data_as_AdcPulseDebug();
   if (AdcDebugData->amplitude()->size() != 2) {
     return false;
   }
@@ -129,7 +152,7 @@ bool checkFlatbuffer2(nonstd::span<const std::uint8_t> Buffer,
   if (EventMessage->detector_id()->size() != 2) {
     return false;
   }
-  EXPECT_EQ(MessageTimestampMS, 1);
+  EXPECT_EQ(MessageTimestampMS, 0);
   return true;
 }
 
@@ -141,6 +164,10 @@ TEST_F(EventSerialisationIndependent, CheckFlatbufferContents) {
   SetUpSerializer(1);
   Serializer->addEvent(std::unique_ptr<EventData>(
       new EventData{1000000, 2, 3, 4, 5, 6000000, 7000000}));
+  do {
+    std::this_thread::sleep_for(1ms);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -171,11 +198,21 @@ TEST_F(EventSerialisationIndependent, ProduceFlatbufferOnTimeout) {
 
 bool checkFlatbufferTimeOverflow(nonstd::span<const std::uint8_t> Buffer,
                                  std::uint64_t BaseTimestamp) {
+  auto Verifier = flatbuffers::Verifier(Buffer.data(), Buffer.size());
+  if (not VerifyEventMessageBuffer(Verifier)) {
+    return false;
+  }
   auto EventMessage = GetEventMessage(Buffer.data());
+  auto AdcDebugData = EventMessage->facility_specific_data_as_AdcPulseDebug();
+  if (not AdcDebugData->Verify(Verifier)) {
+    return false;
+  }
   static int NrOfCalls = 0;
   NrOfCalls++;
   if (NrOfCalls == 1) {
-    return EventMessage->pulse_time() == BaseTimestamp;
+    return EventMessage->pulse_time() +
+               EventMessage->time_of_flight()->Get(0) ==
+           BaseTimestamp;
   }
   return EventMessage->pulse_time() ==
          BaseTimestamp + std::numeric_limits<std::uint32_t>::max() + 100;
@@ -189,14 +226,15 @@ TEST_F(EventSerialisationIndependent, ProduceFlatbufferOnTimestampOverflow1) {
       .WITH(checkFlatbufferTimeOverflow(_1, BaseTimestamp))
       .TIMES(2)
       .RETURN(0);
-  SetUpSerializer(2);
+  SetUpSerializer(3);
   Serializer->addEvent(std::unique_ptr<EventData>(new EventData{
       BaseTimestamp, 2, 3, 4, 5, BaseTimestamp + 1, BaseTimestamp + 2}));
   Serializer->addEvent(std::unique_ptr<EventData>(new EventData{
       SecondTimestamp, 2, 3, 4, 5, SecondTimestamp + 1, SecondTimestamp + 2}));
-  while (Serializer->EventQueue.size_approx() > 0) {
-    std::this_thread::sleep_for(10ms);
-  }
+  do {
+    std::this_thread::sleep_for(1ms);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -236,9 +274,10 @@ TEST_F(EventSerialisationIndependent, ProduceTwoFlatbuffersWithFourEvents) {
         BaseTimestamp + i * 1000, 2, 3, 4, 5, BaseTimestamp + i * 1000 + 1,
         BaseTimestamp + i * 1000 + 2}));
   }
-  while (Serializer->EventQueue.size_approx() > 0) {
-    std::this_thread::sleep_for(10ms);
-  }
+  do {
+    std::this_thread::sleep_for(1ms);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -253,14 +292,20 @@ TEST_F(EventSerialisationIndependent, ProduceThreeFlatbuffersOnFiveEvents) {
         BaseTimestamp + i * 1000, 2, 3, 4, 5, BaseTimestamp + i * 1000 + 1,
         BaseTimestamp + i * 1000 + 2}));
   }
-  while (Serializer->EventQueue.size_approx() > 0) {
-    std::this_thread::sleep_for(10ms);
-  }
+  do {
+    std::this_thread::sleep_for(1ms);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
 bool checkFlatbuffer3(nonstd::span<const std::uint8_t> Buffer) {
   auto Verifier = flatbuffers::Verifier(Buffer.data(), Buffer.size());
+  auto EventMessage = GetEventMessage(Buffer.data());
+  auto AdcDebugData = EventMessage->facility_specific_data_as_AdcPulseDebug();
+  if (not AdcDebugData->Verify(Verifier)) {
+    return false;
+  }
   return VerifyEventMessageBuffer(Verifier);
 }
 
@@ -276,9 +321,10 @@ TEST_F(EventSerialisationIndependent, ProduceOneFlatbufferOnTwoEvents) {
         BaseTimestamp + i * 1000, 2, 3, 4, 5, BaseTimestamp + i * 1000 + 1,
         BaseTimestamp + i * 1000 + 2}));
   }
-  while (Serializer->EventQueue.size_approx() > 0) {
-    std::this_thread::sleep_for(10ms);
-  }
+  do {
+    std::this_thread::sleep_for(1ms);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -299,13 +345,11 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventNoRef) {
   std::uint64_t BaseTimestamp = 1000000;
   auto checkFlatbufferTimestamp = [BaseTimestamp](auto Buffer) {
     auto EventMessage = GetEventMessage(Buffer.data());
-    if (EventMessage->pulse_time() != BaseTimestamp) {
+    if (EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) !=
+        BaseTimestamp) {
       return false;
     }
     if (EventMessage->time_of_flight()->size() != 1) {
-      return false;
-    }
-    if (EventMessage->time_of_flight()->operator[](0) != 0) {
       return false;
     }
     return true;
@@ -317,6 +361,10 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventNoRef) {
   SetUpSerializer(1);
   Serializer->addEvent(std::unique_ptr<EventData>(new EventData{
       BaseTimestamp, 2, 3, 4, 5, BaseTimestamp + 1, BaseTimestamp + 2}));
+  do {
+    std::this_thread::sleep_for(1ms);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -324,16 +372,16 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferTwoEventsNoRef) {
   std::uint64_t BaseTimestamp = 1000000;
   auto checkFlatbufferTimestamp = [BaseTimestamp](auto Buffer) {
     auto EventMessage = GetEventMessage(Buffer.data());
-    if (EventMessage->pulse_time() != BaseTimestamp) {
+    if (EventMessage->pulse_time() + EventMessage->time_of_flight()->Get(0) !=
+        BaseTimestamp) {
       return false;
     }
     if (EventMessage->time_of_flight()->size() != 2) {
       return false;
     }
-    if (EventMessage->time_of_flight()->operator[](0) != 0) {
-      return false;
-    }
-    if (EventMessage->time_of_flight()->operator[](1) != 1000) {
+    if (EventMessage->time_of_flight()->Get(1) -
+            EventMessage->time_of_flight()->Get(0) !=
+        1000) {
       return false;
     }
     return true;
@@ -348,17 +396,29 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferTwoEventsNoRef) {
         BaseTimestamp + i * 1000, 2, 3, 4, 5, BaseTimestamp + i * 1000 + 1,
         BaseTimestamp + i * 1000 + 2}));
   }
+  do {
+    std::this_thread::sleep_for(1ms);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
 TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventOneRef) {
   std::uint64_t BaseTimestamp = 1000000;
   auto checkFlatbufferTimestamp = [BaseTimestamp](auto Buffer) {
+    auto Verifier = flatbuffers::Verifier(Buffer.data(), Buffer.size());
+    if (not VerifyEventMessageBuffer(Verifier)) {
+      return false;
+    }
     auto EventMessage = GetEventMessage(Buffer.data());
+    auto AdcDebugData = EventMessage->facility_specific_data_as_AdcPulseDebug();
+    if (not AdcDebugData->Verify(Verifier)) {
+      return false;
+    }
     if (EventMessage->pulse_time() != BaseTimestamp) {
       return false;
     }
-    if (EventMessage->time_of_flight()->operator[](0) != 1000) {
+    if (EventMessage->time_of_flight()->Get(0) != 1000) {
       return false;
     }
     return true;
@@ -372,6 +432,10 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventOneRef) {
   Serializer->addEvent(std::unique_ptr<EventData>(
       new EventData{BaseTimestamp + 1000, 2, 3, 4, 5, BaseTimestamp + 1000 + 1,
                     BaseTimestamp + 1000 + 2}));
+  do {
+    std::this_thread::sleep_for(1ms);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
 
@@ -383,14 +447,22 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventTwoRefs) {
   auto checkFlatbufferTimestamp = [BaseTimestamp, &TimesCalled,
                                    TestOffsetValue](auto Buffer) {
     ++TimesCalled;
+    auto Verifier = flatbuffers::Verifier(Buffer.data(), Buffer.size());
+    if (not VerifyEventMessageBuffer(Verifier)) {
+      return false;
+    }
     auto EventMessage = GetEventMessage(Buffer.data());
+    auto AdcDebugData = EventMessage->facility_specific_data_as_AdcPulseDebug();
+    if (not AdcDebugData->Verify(Verifier)) {
+      return false;
+    }
     if (TimesCalled == 1 and EventMessage->pulse_time() != BaseTimestamp) {
       return false;
     } else if (TimesCalled > 1 and
                EventMessage->pulse_time() != BaseTimestamp + TestOffsetValue) {
       return false;
     }
-    if (EventMessage->time_of_flight()->operator[](0) != 1000) {
+    if (EventMessage->time_of_flight()->Get(0) != 1000) {
       return false;
     }
     return true;
@@ -408,5 +480,9 @@ TEST_F(EventSerialisationReferenced, ProduceFlatbufferOneEventTwoRefs) {
   Serializer->addEvent(std::unique_ptr<EventData>(
       new EventData{BaseTimestamp + 1000 + TestOffsetValue, 2, 3, 4, 5,
                     BaseTimestamp + 1000 + 1, BaseTimestamp + 1000 + 2}));
+  do {
+    std::this_thread::sleep_for(1ms);
+  } while (Serializer->EventQueue.size_approx() > 0 or
+           Serializer->ReferenceTimeQueue.size_approx() > 0);
   Serializer.reset();
 }
