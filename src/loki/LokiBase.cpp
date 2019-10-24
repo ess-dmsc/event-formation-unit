@@ -36,11 +36,8 @@ using namespace memory_sequential_consistent; // Lock free fifo
 
 const char *classname = "Loki detector with ESS readout";
 
-const int TSC_MHZ = 2900; // MJC's workstation - not reliable
-
-
-LokiBase::LokiBase(BaseSettings const &settings, struct LokiSettings &LocalLokiSettings)
-    : Detector("Loki", settings), LokiModuleSettings(LocalLokiSettings) {
+LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiSettings)
+    : Detector("Loki", Settings), LokiModuleSettings(LocalLokiSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
@@ -70,11 +67,11 @@ LokiBase::LokiBase(BaseSettings const &settings, struct LokiSettings &LocalLokiS
   Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { LokiBase::input_thread(); };
+  std::function<void()> inputFunc = [this]() { LokiBase::inputThread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    LokiBase::processing_thread();
+    LokiBase::processingThread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
@@ -82,135 +79,131 @@ LokiBase::LokiBase(BaseSettings const &settings, struct LokiSettings &LocalLokiS
          EthernetBufferMaxEntries, EthernetBufferSize);
 }
 
-void LokiBase::input_thread() {
+void LokiBase::inputThread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
-  UDPReceiver receiver(local);
-  // receiver.buflen(opts->buflen);
-  receiver.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
-  receiver.printBufferSizes();
-  receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
-  for (;;) {
-    int rdsize;
-    unsigned int eth_index = EthernetRingbuffer.getDataIndex();
+  UDPReceiver dataReceiver(local);
+  dataReceiver.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  dataReceiver.printBufferSizes();
+  dataReceiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
-    /** this is the processing step */
-    EthernetRingbuffer.setDataLength(eth_index, 0);
-    if ((rdsize = receiver.receive(EthernetRingbuffer.getDataBuffer(eth_index),
+  while (runThreads) {
+    int readSize;
+    unsigned int rxBufferIndex = EthernetRingbuffer.getDataIndex();
+
+    EthernetRingbuffer.setDataLength(rxBufferIndex, 0);
+    if ((readSize = dataReceiver.receive(EthernetRingbuffer.getDataBuffer(rxBufferIndex),
                                    EthernetRingbuffer.getMaxBufSize())) > 0) {
-      EthernetRingbuffer.setDataLength(eth_index, rdsize);
-      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", rdsize);
+      EthernetRingbuffer.setDataLength(rxBufferIndex, readSize);
+      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
-      Counters.RxBytes += rdsize;
+      Counters.RxBytes += readSize;
 
-      if (InputFifo.push(eth_index) == false) {
+      if (InputFifo.push(rxBufferIndex) == false) {
         Counters.FifoPushErrors++;
       } else {
         EthernetRingbuffer.getNextBuffer();
       }
     }
-
-    // Checking for exit
-    if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.");
-      return;
-    }
   }
+  XTRACE(INPUT, ALW, "Stopping input thread.");
+  return;
 }
 
-void LokiBase::processing_thread() {
+/// \brief Generate an Udder test image in '3D' one image
+/// at z = 0 and one at z = 3
+void LokiBase::testImageUdder(EV42Serializer & FlatBuffer) {
+  ESSGeometry LoKIGeometry(56, 512, 4, 1);
+  XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
+  Udder udderImage;
+  udderImage.cachePixels(LoKIGeometry.nx(), LoKIGeometry.ny(), &LoKIGeometry);
+  uint32_t TimeOfFlight = 0;
+  while (runThreads) {
+    static int EventCount = 0;
+    if (EventCount == 0) {
+      uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+      FlatBuffer.pulseTime(EfuTime);
+    }
+
+    auto pixelId = udderImage.getPixel(LoKIGeometry.nx(), LoKIGeometry.ny(), &LoKIGeometry);
+    Counters.TxBytes += FlatBuffer.addEvent(TimeOfFlight, pixelId);
+    Counters.EventsUdder++;
+    pixelId += LoKIGeometry.ny()*LoKIGeometry.nx()*(LoKIGeometry.nz() - 1);
+    Counters.TxBytes += FlatBuffer.addEvent(TimeOfFlight, pixelId);
+    Counters.EventsUdder++;
+
+    if (EFUSettings.TestImageUSleep != 0) {
+      usleep(EFUSettings.TestImageUSleep);
+    }
+
+    TimeOfFlight++;
+
+    if (Counters.TxBytes != 0) {
+      EventCount = 0;
+    } else {
+      EventCount++;
+    }
+  }
+  // \todo flush everything here
+  XTRACE(INPUT, ALW, "Stopping processing thread.");
+  return;
+}
+
+/// \brief Normal processing thread
+void LokiBase::processingThread() {
   const unsigned int NXTubes{8};
   const unsigned int NZTubes{4};
   const unsigned int NStraws{7};
   const unsigned int NYpos{512};
   Geometry geometry(NXTubes, NZTubes, NStraws, NYpos);
 
-  Producer eventprod(EFUSettings.KafkaBroker, "LOKI_detector");
+  Producer EventProducer(EFUSettings.KafkaBroker, "LOKI_detector");
 
-  auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
-    eventprod.produce(DataBuffer, Timestamp);
+  auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
+    EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer flatbuffer(KafkaBufferSize, "loki", Produce);
+  EV42Serializer FlatBuffer(KafkaBufferSize, "loki", Produce);
 
   if (EFUSettings.TestImage) {
-    ESSGeometry essgeom(56, 512, 4, 1);
-    XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
-    Udder udder;
-    udder.cachePixels(essgeom.nx(), essgeom.ny(), &essgeom);
-    uint32_t time_of_flight = 0;
-    while (true) {
-      if (not runThreads) {
-        // \todo flush everything here
-        XTRACE(INPUT, ALW, "Stopping processing thread.");
-        return;
-      }
-
-      static int eventCount = 0;
-      if (eventCount == 0) {
-        uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-        flatbuffer.pulseTime(efu_time);
-      }
-
-
-      auto pixel_id = udder.getPixel(essgeom.nx(), essgeom.ny(), &essgeom);
-      Counters.TxBytes += flatbuffer.addEvent(time_of_flight, pixel_id);
-      Counters.EventsUdder++;
-      pixel_id += 512*56*3;
-      Counters.TxBytes += flatbuffer.addEvent(time_of_flight, pixel_id);
-      Counters.EventsUdder++;
-
-      if (EFUSettings.TestImageUSleep != 0) {
-        usleep(EFUSettings.TestImageUSleep);
-      }
-
-      time_of_flight++;
-
-      if (Counters.TxBytes != 0) {
-        eventCount = 0;
-      } else {
-        eventCount++;
-      }
-    }
+    return testImageUdder(FlatBuffer);
   }
 
-
-  unsigned int data_index;
-  TSCTimer produce_timer;
-  Timer h5flushtimer;
-  while (true) {
-    if (InputFifo.pop(data_index)) { // There is data in the FIFO - do processing
-      auto datalen = EthernetRingbuffer.getDataLength(data_index);
-      if (datalen == 0) {
+  unsigned int DataIndex;
+  TSCTimer ProduceTimer;
+  while (runThreads) {
+    if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
+      auto DataLen = EthernetRingbuffer.getDataLength(DataIndex);
+      if (DataLen == 0) {
         Counters.FifoSeqErrors++;
         continue;
       }
 
       /// \todo use the Buffer<T> class here and in parser
-      auto __attribute__((unused)) dataptr = EthernetRingbuffer.getDataBuffer(data_index);
+      auto __attribute__((unused)) DataPtr = EthernetRingbuffer.getDataBuffer(DataIndex);
       /// \todo add parser
 
-      uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      flatbuffer.pulseTime(efu_time);
+      uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+      FlatBuffer.pulseTime(EfuTime);
 
       /// \todo traverse readouts
       //for (...) {
         // calculate strawid and ypos from four amplitudes
         // possibly add fpgaid to the stew
-        auto tube = 0;
-        auto straw = 0;
-        auto ypos = 0;
-        auto time = 0 ; // TOF in ns
-        auto pixel_id = geometry.getPixelId(tube, straw, ypos);
+        auto Tube = 0;
+        auto Straw = 0;
+        auto YPos = 0;
+        auto Time = 0 ; // TOF in ns
+        auto PixelId = geometry.getPixelId(Tube, Straw, YPos);
         XTRACE(EVENT, DEB, "time: %u, tube %u, straw %u, ypos %u, pixel: %u",
-               time, tube, straw, ypos, pixel_id);
+               Time, Tube, Straw, YPos, PixelId);
 
-        if (pixel_id == 0) {
+        if (PixelId == 0) {
           Counters.GeometryErrors++;
         } else {
-          Counters.TxBytes += flatbuffer.addEvent(time, pixel_id);
+          Counters.TxBytes += FlatBuffer.addEvent(Time, PixelId);
           Counters.Events++;
         }
       //}
@@ -221,33 +214,24 @@ void LokiBase::processing_thread() {
       usleep(10);
     }
 
-    if (produce_timer.timetsc() >=
+    if (ProduceTimer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
 
-      Counters.TxBytes += flatbuffer.produce();
-
-      // if (!histograms.isEmpty()) {
-      //   histfb.produce(histograms);
-      //   histograms.clear();
-      // }
+      Counters.TxBytes += FlatBuffer.produce();
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
-      Counters.kafka_produce_fails = eventprod.stats.produce_fails;
-      Counters.kafka_ev_errors = eventprod.stats.ev_errors;
-      Counters.kafka_ev_others = eventprod.stats.ev_others;
-      Counters.kafka_dr_errors = eventprod.stats.dr_errors;
-      Counters.kafka_dr_noerrors = eventprod.stats.dr_noerrors;
+      Counters.kafka_produce_fails = EventProducer.stats.produce_fails;
+      Counters.kafka_ev_errors = EventProducer.stats.ev_errors;
+      Counters.kafka_ev_others = EventProducer.stats.ev_others;
+      Counters.kafka_dr_errors = EventProducer.stats.dr_errors;
+      Counters.kafka_dr_noerrors = EventProducer.stats.dr_noerrors;
 
-      produce_timer.now();
-    }
-
-    if (not runThreads) {
-      // \todo flush everything here
-      XTRACE(INPUT, ALW, "Stopping processing thread.");
-      return;
+      ProduceTimer.now();
     }
   }
+  // \todo flush everything here
+  XTRACE(INPUT, ALW, "Stopping processing thread.");
+  return;
 }
-
-}
+} // namespace

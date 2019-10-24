@@ -9,13 +9,14 @@
 #pragma once
 
 #include <common/Detector.h>
+#include <common/EV42Serializer.h>
 #include <common/RingBuffer.h>
 #include <common/SPSCFifo.h>
 
 namespace Loki {
 
 struct LokiSettings {
-  uint32_t unused;
+  uint32_t Unused;
 };
 
 using namespace memory_sequential_consistent; // Lock free fifo
@@ -24,13 +25,19 @@ class LokiBase : public Detector {
 public:
   LokiBase(BaseSettings const &settings, struct LokiSettings &LocalLokiSettings);
   ~LokiBase() = default;
-  void input_thread();
-  void processing_thread();
+  void inputThread();
+  void processingThread();
+  void testImageUdder(EV42Serializer& FlatBuffer);
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int EthernetBufferMaxEntries = 500;
   static const int EthernetBufferSize = 9000; /// bytes
   static const int KafkaBufferSize = 124000; /// entries ~ 1MB
+  // Ideally should match the CPU speed, bust at this varies across
+  // CPU versions we just select something in the 'middle'. This is
+  // used to get an approximate time for periodic housekeeping so
+  // it is not critical that this is precise.
+  const int TSC_MHZ = 2900;
 
 protected:
   /** Shared between input_thread and processing_thread*/
