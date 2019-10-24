@@ -156,6 +156,7 @@ void MultigridBase::mainThread() {
   XTRACE(INIT, DEB, "server: %s, port %d", EFUSettings.DetectorAddress.c_str(), EFUSettings.DetectorPort);
   UDPReceiver cspecdata(local);
   cspecdata.setBufferSizes(EFUSettings.DetectorTxBufferSize, EFUSettings.DetectorRxBufferSize);
+  cspecdata.checkRxBufferSizes(EFUSettings.DetectorRxBufferSize);
   cspecdata.printBufferSizes();
   cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
 

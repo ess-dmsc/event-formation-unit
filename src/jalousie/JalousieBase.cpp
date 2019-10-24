@@ -91,6 +91,7 @@ void JalousieBase::input_thread() {
   UDPReceiver receiver(local);
   // receiver.buflen(opts->buflen);
   receiver.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  receiver.checkRxBufferSizes(EFUSettings.DetectorRxBufferSize);
   receiver.printBufferSizes();
   receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
