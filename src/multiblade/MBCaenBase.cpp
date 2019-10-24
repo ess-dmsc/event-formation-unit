@@ -180,19 +180,22 @@ void CAENBase::processing_thread() {
     dumpfile = ReadoutFile::create(MBCAENSettings.FilePrefix + "-" + timeString());
   }
 
-  EV42Serializer flatbuffer(KafkaBufferSize, "multiblade");
   Producer eventprod(EFUSettings.KafkaBroker, topic);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-  flatbuffer.setProducerCallback(
-      std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
+  auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
+    eventprod.produce(DataBuffer, Timestamp);
+  };
+
+  EV42Serializer flatbuffer(KafkaBufferSize, "multiblade", Produce);
 
   Hists histograms(std::max(ncass * nwires, ncass * nstrips), 65535);
   Producer monitorprod(EFUSettings.KafkaBroker, monitor);
+
+  auto ProduceHist = [&monitorprod](auto DataBuffer, auto Timestamp) {
+    monitorprod.produce(DataBuffer, Timestamp);
+  };
   HistogramSerializer histfb(histograms.needed_buffer_size(), "multiblade");
-  histfb.set_callback(
-      std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
-#pragma GCC diagnostic pop
+  histfb.set_callback(ProduceHist);
+
   std::vector<EventBuilder> builders(ncass);
 
   DataParser parser;

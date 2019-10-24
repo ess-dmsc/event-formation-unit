@@ -23,20 +23,25 @@ void Monitor::init_histograms(size_t max_range) {
   hist_serializer = std::make_shared<HistogramSerializer>(
       histograms->needed_buffer_size(), source_name_);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-  hist_serializer->set_callback(std::bind(&Producer::produce2<uint8_t>, producer.get(), std::placeholders::_1));
-#pragma GCC diagnostic pop
+  auto ProducerPtr = producer.get();
+  auto Produce = [ProducerPtr](auto DataBuffer, auto Timestamp) {
+    ProducerPtr->produce(DataBuffer, Timestamp);
+  };
+
+
+  hist_serializer->set_callback(Produce);
 }
 
 void Monitor::init_hits(size_t max_readouts) {
   hit_serializer = std::make_shared<HitSerializer>(
       max_readouts, source_name_);
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-  hit_serializer->set_callback(std::bind(&Producer::produce2<uint8_t>, producer.get(), std::placeholders::_1));
-#pragma GCC diagnostic pop
+  auto ProducerPtr = producer.get();
+  auto Produce = [ProducerPtr](auto DataBuffer, auto Timestamp) {
+    ProducerPtr->produce(DataBuffer, Timestamp);
+  };
+
+  hit_serializer->set_callback(Produce);
 }
 
 void Monitor::close() {

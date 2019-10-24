@@ -40,9 +40,10 @@ size_t HitSerializer::produce() {
                                   DataField::MONHit, dataoff.Union());
   FinishMonitorMessageBuffer(builder, msg);
 
-  Buffer<uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
+  nonstd::span<const uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
   if (producer_callback) {
-    producer_callback(buffer);
+#pragma message("Producer::produce() in HistogramSerializer should be provided with a proper timestmap.")
+    producer_callback(buffer, time(nullptr) * 1000);
   }
 
   planes.clear();
@@ -52,7 +53,7 @@ size_t HitSerializer::produce() {
   entries = 0;
   builder.Clear();
 
-  return buffer.size;
+  return buffer.size_bytes();
 }
 
 size_t HitSerializer::addEntry(uint16_t plane, uint16_t channel, uint32_t time, uint16_t adc) {

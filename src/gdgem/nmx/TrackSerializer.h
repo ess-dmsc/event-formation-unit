@@ -28,7 +28,7 @@ public:
   bool add_track(const Event &event, double utpc_x, double utpc_y);
 
   /// \todo document
-  Buffer<uint8_t> serialize();
+  nonstd::span<uint8_t> serialize();
 
 private:
   size_t maxlen{0};

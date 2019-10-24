@@ -34,8 +34,8 @@ protected:
 TEST_F(TrackSerializerTest, Constructor) {
   TrackSerializer tser(2560, 1, "some_source");
   auto buffer = tser.serialize();
-  EXPECT_EQ(buffer.size, 0);
-  EXPECT_EQ(buffer.address, nullptr);
+  EXPECT_EQ(buffer.size_bytes(), 0);
+  EXPECT_EQ(buffer.data(), nullptr);
 }
 
 TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
@@ -55,10 +55,10 @@ TEST_F(TrackSerializerTest, Serialize) {
   }
   EXPECT_TRUE(tser.add_track(event, 0.0, 0.0));
   auto buffer = tser.serialize();
-  EXPECT_TRUE(buffer.size > entries * 2 * 12);
-  EXPECT_TRUE(buffer.size <
+  EXPECT_TRUE(buffer.size_bytes() > entries * 2 * 12);
+  EXPECT_TRUE(buffer.size_bytes() <
               entries * 2 * 12 + BASE_OVERHEAD + entries * ENTRY_OVERHEAD);
-  EXPECT_NE(buffer.address, nullptr);
+  EXPECT_NE(buffer.data(), nullptr);
 
   // Ensure header is there
   EXPECT_EQ(std::string(reinterpret_cast<const char*>(&buffer[4]), 4), "mo01");
@@ -77,13 +77,13 @@ TEST_F(TrackSerializerTest, DeSerialize) {
   EXPECT_EQ(event.ClusterB.hits.size(), entries);
 
   auto buffer = tser.serialize();
-  EXPECT_TRUE(buffer.size > entries * entry_size * 2); //  x and y
-  EXPECT_TRUE(buffer.size < entries * entry_size * 2 + BASE_OVERHEAD +
+  EXPECT_TRUE(buffer.size_bytes() > entries * entry_size * 2); //  x and y
+  EXPECT_TRUE(buffer.size_bytes() < entries * entry_size * 2 + BASE_OVERHEAD +
                         entries * ENTRY_OVERHEAD);
-  EXPECT_NE(buffer.address, nullptr);
+  EXPECT_NE(buffer.data(), nullptr);
 
   memset(flatbuffer, 0, sizeof(flatbuffer));
-  memcpy(flatbuffer, buffer.address, buffer.size);
+  memcpy(flatbuffer, buffer.data(), buffer.size_bytes());
 
   auto monitor = GetMonitorMessage(flatbuffer);
   EXPECT_EQ(monitor->source_name()->str(), "some_source");
@@ -119,14 +119,14 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
     EXPECT_EQ(event.ClusterA.hits.size(), entries);
     EXPECT_EQ(event.ClusterB.hits.size(), entries);
     auto buffer = tser.serialize();
-    // MESSAGE() << "entries: " << entries << ", buffer size: " << buffer.size << ",
-    // overhead: " << buffer.size - entries * entry_size * 2 << "\n";
-    EXPECT_TRUE(buffer.size > entries * entry_size * 2); //  x and y
-    EXPECT_TRUE(buffer.size < entries * entry_size * 2 + BASE_OVERHEAD +
+    // MESSAGE() << "entries: " << entries << ", buffer size: " << buffer.size_bytes() << ",
+    // overhead: " << buffer.size_bytes() - entries * entry_size * 2 << "\n";
+    EXPECT_TRUE(buffer.size_bytes() > entries * entry_size * 2); //  x and y
+    EXPECT_TRUE(buffer.size_bytes() < entries * entry_size * 2 + BASE_OVERHEAD +
                           entries * ENTRY_OVERHEAD);
-    EXPECT_NE(buffer.address, nullptr);
+    EXPECT_NE(buffer.data(), nullptr);
 
-    memcpy(flatbuffer, buffer.address, buffer.size);
+    memcpy(flatbuffer, buffer.data(), buffer.size_bytes());
 
     auto monitor = GetMonitorMessage(flatbuffer);
     EXPECT_EQ(monitor->source_name()->str(), "some_source");
@@ -166,14 +166,14 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
     }
     EXPECT_TRUE(tser.add_track(event, 0.0, 0.0));
     auto buffer = tser.serialize();
-    // MESSAGE() << "entries: " << entries << ", buffer size: " << buffer.size << ",
-    // overhead: " << buffer.size - entries * entry_size * 2 << "\n";
-    EXPECT_TRUE(buffer.size > entries * entry_size * 2); //  x and y
-    EXPECT_TRUE(buffer.size < entries * entry_size * 2 + BASE_OVERHEAD +
+    // MESSAGE() << "entries: " << entries << ", buffer size: " << buffer.size_bytes() << ",
+    // overhead: " << buffer.size_bytes() - entries * entry_size * 2 << "\n";
+    EXPECT_TRUE(buffer.size_bytes() > entries * entry_size * 2); //  x and y
+    EXPECT_TRUE(buffer.size_bytes() < entries * entry_size * 2 + BASE_OVERHEAD +
                           entries * ENTRY_OVERHEAD);
-    EXPECT_NE(buffer.address, nullptr);
+    EXPECT_NE(buffer.data(), nullptr);
 
-    memcpy(flatbuffer, buffer.address, buffer.size);
+    memcpy(flatbuffer, buffer.data(), buffer.size_bytes());
 
     auto monitor = GetMonitorMessage(flatbuffer);
     EXPECT_EQ(monitor->source_name()->str(), "some_source");

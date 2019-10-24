@@ -107,22 +107,24 @@ void SONDEIDEABase::processing_thread() {
   Sonde::Geometry geometry;
   Sonde::IDEASData ideasdata(&geometry, SoNDeSettings.fileprefix);
 
-  EV42Serializer flatbuffer(kafka_buffer_size, "SONDE");
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
+  auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
+    eventprod.produce(DataBuffer, Timestamp);
+  };
 
-  flatbuffer.setProducerCallback(
-    std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
+  EV42Serializer flatbuffer(kafka_buffer_size, "SONDE", Produce);
 
   constexpr uint16_t maxChannels{64};
   constexpr uint16_t maxAdc{65535};
   Hists histograms(maxChannels, maxAdc);
   HistogramSerializer histfb(histograms.needed_buffer_size(), "SONDE");
   Producer monitorprod(EFUSettings.KafkaBroker, "SKADI_monitor");
-  histfb.set_callback(
-    std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
-#pragma GCC diagnostic pop
+
+  auto ProduceHist = [&monitorprod](auto DataBuffer, auto Timestamp) {
+    monitorprod.produce(DataBuffer, Timestamp);
+  };
+
+  histfb.set_callback(ProduceHist);
   unsigned int data_index;
 
   TSCTimer produce_timer;
