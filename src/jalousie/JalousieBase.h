@@ -27,8 +27,8 @@ class JalousieBase : public Detector {
 public:
   explicit JalousieBase(BaseSettings const &settings, CLISettings const &LocalSettings);
   ~JalousieBase() { delete eth_ringbuf; }
-  void input_thread();
-  void processing_thread();
+  void inputThread();
+  void processingThread();
 
   /** @todo figure out the right size  of the .._max_entries  */
   static const int eth_buffer_max_entries = 500;
@@ -43,23 +43,23 @@ protected:
 
   struct {
     // Input Counters
-    int64_t rx_packets;
-    int64_t rx_bytes;
-    int64_t fifo_push_errors;
-    int64_t pad[5]; // cppcheck-suppress unusedStructMember
+    int64_t RxPackets;
+    int64_t RxBytes;
+    int64_t FifoPushErrors;
+    int64_t Padding[5]; // cppcheck-suppress unusedStructMember
 
     // Processing Counters
-    int64_t processing_idle;
-    int64_t fifo_seq_errors;
-    int64_t readout_count;
-    int64_t bad_module_id;
-    int64_t chopper_pulses;
-    int64_t mapping_errors;
+    int64_t ProcessingIdle;
+    int64_t FifoSeqErrors;
+    int64_t ReadoutCount;
+    int64_t BadModuleId;
+    int64_t ChopperPulses;
+    int64_t MappingErrors;
 
-    int64_t geometry_errors;
-    int64_t timing_errors;
-    int64_t events;
-    int64_t tx_bytes;
+    int64_t GeometryErrors;
+    int64_t TimingErrors;
+    int64_t Events;
+    int64_t TxBytes;
 
     // Kafka stats below are common to all detectors
     int64_t kafka_produce_fails;
@@ -67,7 +67,7 @@ protected:
     int64_t kafka_ev_others;
     int64_t kafka_dr_errors;
     int64_t kafka_dr_noerrors;
-  } __attribute__((aligned(64))) mystats;
+  } __attribute__((aligned(64))) Counters;
 
   CLISettings ModuleSettings;
   Config config;
