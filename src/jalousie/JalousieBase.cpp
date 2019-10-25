@@ -221,8 +221,8 @@ void JalousieBase::processingThread() {
       /// Parse and convert readouts to events
       for (size_t i = 0; i < datalen / sizeof(Jalousie::Readout); i++) {
         auto readout = (Jalousie::Readout *) dataptr;
-       printf("time %llu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
-          readout->time, readout->board, readout->sub_id, readout->anode, readout->cathode);
+       // printf("time %lu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
+       //    readout->time, readout->board, readout->sub_id, readout->anode, readout->cathode);
         dataptr += sizeof(Jalousie::Readout);
         Counters.ReadoutCount++;
         convert_and_enqueue_event(*readout);
