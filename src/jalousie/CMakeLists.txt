@@ -90,6 +90,7 @@ set(jalousie_common_src
   SumoMappings.cpp
   )
 
+#
 set(jalousie_INC
   JalousieBase.h
   ${jalousie_common_inc}
@@ -100,5 +101,14 @@ set(jalousie_SRC
   ${jalousie_common_src}
   )
 create_module(jalousie)
+
+#
+set(JalousieBaseTest_INC
+  ${jalousie_common_inc})
+set(JalousieBaseTest_SRC
+  JalousieBase.cpp
+  JalousieBaseTest.cpp
+${jalousie_common_src})
+create_test_executable(JalousieBaseTest)
 
 add_subdirectory(generators)
