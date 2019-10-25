@@ -139,18 +139,12 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
 
 void GdGemBase::input_thread() {
   /** Connection setup */
-  int rxBuffer, txBuffer;
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver nmxdata(local);
 
   nmxdata.setBufferSizes(0 /*use default */, EFUSettings.DetectorRxBufferSize);
-  nmxdata.getBufferSizes(txBuffer, rxBuffer);
-  if (rxBuffer < EFUSettings.DetectorRxBufferSize) {
-    LOG(INIT, Sev::Error, "Receive buffer sizes too small, wanted {}, got {}",
-           EFUSettings.DetectorRxBufferSize, rxBuffer);
-    return;
-  }
+  nmxdata.checkRxBufferSizes(EFUSettings.DetectorRxBufferSize);
   nmxdata.printBufferSizes();
   nmxdata.setRecvTimeout(0, 100000); /// secs, usecs
 
@@ -231,7 +225,7 @@ void GdGemBase::apply_configuration() {
     auto matcher = std::make_shared<CenterMatcher>(
         nmx_opts.time_config.acquisition_window()*5, 0, 1);
     matcher->set_max_delta_time(nmx_opts.matcher_max_delta_time);
-    matcher->set_time_algorithm(nmx_opts.time_algorithm); 
+    matcher->set_time_algorithm(nmx_opts.time_algorithm);
     matcher_ = matcher;
   }
   else {

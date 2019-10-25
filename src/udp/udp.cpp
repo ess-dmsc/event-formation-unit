@@ -46,6 +46,7 @@ void UDPRaw::input_thread() {
                          EFUSettings.DetectorPort);
   UDPReceiver raw(local);
   raw.setBufferSizes(4000000, 4000000);
+  raw.checkRxBufferSizes(4000000);
   raw.setRecvTimeout(0, 100000); /// secs, usecs 1/10 s
   raw.printBufferSizes();
 
