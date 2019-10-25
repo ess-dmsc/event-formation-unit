@@ -2,8 +2,8 @@
 
 #include <gdgem/srs/CalibrationFile.h>
 #include <gdgem/srs/CalibrationFileTestData.h>
-#include <common/DataSave.h>
 #include <test/TestBase.h>
+#include <test/SaveBuffer.h>
 #include <vector>
 
 using namespace Gem;
@@ -116,7 +116,7 @@ TEST_F(CalibrationFileTest, LoadCalibrationSizeMismatch) {
 // and verifies that the values have been applied correctly
 TEST_F(CalibrationFileTest, LoadCalibrationFile) {
  std::string filename = "deleteme.json";
- DataSave tempfile(filename, (void *)TestData_DummyCal.c_str(), TestData_DummyCal.size());
+ saveBuffer(filename, (void *)TestData_DummyCal.c_str(), TestData_DummyCal.size());
  CalibrationFile cf(filename);
 
  auto cal = cf.getCalibration(1, 0, 0);

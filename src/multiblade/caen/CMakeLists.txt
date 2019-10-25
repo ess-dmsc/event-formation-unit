@@ -41,10 +41,12 @@ create_test_executable(MBGeometryTest)
 
 # Create excecutable for test of configuration
 set(MBConfigTest_INC
-  Config.h)
+  Config.h
+  ../../test/SaveBuffer.h)
 set(MBConfigTest_SRC
   Config.cpp
-  ConfigTest.cpp)
+  ConfigTest.cpp
+../../test/SaveBuffer.cpp)
 create_test_executable(MBConfigTest)
 
 #

@@ -30,10 +30,12 @@ create_module(mbcaen)
 # Pipeline test
 set(MBCAENBaseTest_INC
   ${caen_common_inc}
+  ../test/SaveBuffer.h
   ../adc_readout/test/TestUDPServer.h
 )
 set(MBCAENBaseTest_SRC
   MBCaenBaseTest.cpp
+  ../test/SaveBuffer.cpp
   ${caen_common_src}
   ../adc_readout/test/TestUDPServer.cpp
 )

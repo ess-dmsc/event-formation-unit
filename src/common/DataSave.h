@@ -18,16 +18,6 @@
 
 class DataSave {
 public:
-  /// \brief write buffer to file
-  /// \param filename filename which can include path
-  /// \param data pointer to data buffere
-  /// \param datasize number of bytes to write
-  DataSave(std::string filename, void *data, uint64_t datasize);
-
-  /// \brief create file for later writing
-  /// \param filename filename which can include path
-  DataSave(std::string filename);
-
   /// \brief create file for later writing, specify max file size before
   /// splitting
   /// \param fileprefix can include path, filename will be generated

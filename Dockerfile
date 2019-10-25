@@ -33,7 +33,6 @@ RUN mkdir efu
 RUN mkdir efu_src
 COPY conanfile.txt efu_src/
 RUN cd efu && conan install --build=outdated ../efu_src/conanfile.txt
-
 COPY cmake efu_src/cmake
 COPY utils/udp efu_src/utils/udp
 COPY utils/udpredirect efu_src/utils/udpredirect

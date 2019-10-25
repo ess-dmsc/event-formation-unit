@@ -21,6 +21,10 @@ int getfilesize(std::string filename) {
 
 /** Test cases below */
 
+TEST_F(DataSaveTest, InvalidPath) {
+  EXPECT_THROW(DataSave data("/doesnt/exitst/myfile", 100000), std::runtime_error);
+}
+
 // Test that buffered write is working
 TEST_F(DataSaveTest, BufferedWrite) {
   DataSave data("BufferedWrite", 50000000);
