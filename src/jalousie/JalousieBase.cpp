@@ -20,8 +20,8 @@
 #include <common/Timer.h>
 
 #include <common/Trace.h>
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 #include <common/Log.h>
 #include "JalousieBase.h"
@@ -104,8 +104,8 @@ void JalousieBase::inputThread() {
     if ((ReadSize = receiver.receive(eth_ringbuf->getDataBuffer(eth_index),
                                    eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, ReadSize);
-//      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
-//             ReadSize);
+     XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
+            ReadSize);
       Counters.RxPackets++;
       Counters.RxBytes += ReadSize;
 
@@ -221,8 +221,8 @@ void JalousieBase::processingThread() {
       /// Parse and convert readouts to events
       for (size_t i = 0; i < datalen / sizeof(Jalousie::Readout); i++) {
         auto readout = (Jalousie::Readout *) dataptr;
-//        printf("time %lu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
-//           readout->time, readout->board, readout->sub_id, readout->anode, readout->cathode);
+       printf("time %llu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
+          readout->time, readout->board, readout->sub_id, readout->anode, readout->cathode);
         dataptr += sizeof(Jalousie::Readout);
         Counters.ReadoutCount++;
         convert_and_enqueue_event(*readout);

@@ -9,6 +9,8 @@
 
 #include <jalousie/JalousieBase.h>
 #include <../src/adc_readout/test/TestUDPServer.h>
+#include <jalousie/JalousieBaseTestData.h>
+#include <test/SaveBuffer.h>
 #include <test/TestBase.h>
 
 class JalousieBaseStandIn : public Jalousie::JalousieBase {
@@ -25,6 +27,7 @@ public:
   void SetUp() override {
     Settings.DetectorRxBufferSize = 100000;
     Settings.NoHwCheck = true;
+    LocalSettings.ConfigFile = TEST_JSON_PATH "v20_mappings.json";
   }
   void TearDown() override {}
 
@@ -42,16 +45,18 @@ TEST_F(JalousieBaseTest, DataReceive) {
   Jalousie.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime{400};
   std::this_thread::sleep_for(SleepTime);
-  //TestUDPServer Server(43126, Settings.DetectorPort, (unsigned char *)&pkt145701[0], pkt145701.size());
-  //Server.startPacketTransmission(1, 100);
+  TestUDPServer Server(43126, Settings.DetectorPort, (unsigned char *)&DummyJalousieData[0],
+    DummyJalousieData.size());
+  Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Jalousie.stopThreads();
-  EXPECT_EQ(Jalousie.Counters.RxPackets, 0);
-  //EXPECT_EQ(Readout.Counters.RxBytes, pkt145701.size());
-  //EXPECT_EQ(Readout.Counters.ReadoutsCount, 45); // number of readouts in pkt13_short
+  EXPECT_EQ(Jalousie.Counters.RxPackets, 1);
+  EXPECT_EQ(Jalousie.Counters.RxBytes, DummyJalousieData.size());
+  EXPECT_EQ(Jalousie.Counters.ReadoutCount, 1);
 }
 
 int main(int argc, char **argv) {
+
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

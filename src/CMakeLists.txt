@@ -59,12 +59,16 @@ add_subdirectory(efu)
 get_filename_component(MB_CFG_FILE "multiblade/configs/MB18Estia.json" ABSOLUTE)
 get_filename_component(MG_CFG_FILE "multigrid/configs/ILL_mappings.json" ABSOLUTE)
 get_filename_component(GDGEM_CFG_FILE "gdgem/configs/vmm3.json" ABSOLUTE)
+get_filename_component(JALOUSIE_CFG_FILE "jalousie/configs/v20_mappings.json" ABSOLUTE)
+get_filename_component(JALOUSIE_CSV_FILE "jalousie/configs/sumo_voxel_map_20190711.csv" ABSOLUTE)
 add_custom_target(copycfgs
 COMMAND ${CMAKE_COMMAND} -E make_directory ${PROJECT_BINARY_DIR}/configs
 COMMAND ${CMAKE_COMMAND} -E copy ${MG_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
 COMMAND ${CMAKE_COMMAND} -E copy ${MB_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
 COMMENT "Copying ${MB_CFG_FILE} to ${PROJECT_BINARY_DIR}/configs"
 COMMAND ${CMAKE_COMMAND} -E copy ${GDGEM_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+COMMAND ${CMAKE_COMMAND} -E copy ${JALOUSIE_CFG_FILE} ${PROJECT_BINARY_DIR}/configs/
+COMMAND ${CMAKE_COMMAND} -E copy ${JALOUSIE_CSV_FILE} ${PROJECT_BINARY_DIR}/configs/
 COMMENT "Copying json configuration files to ${PROJECT_BINARY_DIR}/configs"
 )
 
