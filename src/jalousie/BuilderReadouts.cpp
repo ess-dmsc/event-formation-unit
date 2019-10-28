@@ -9,6 +9,7 @@
 
 namespace Jalousie {
 
+// GCOVR_EXCL_START
 std::string BuilderReadouts::debug() const {
   std::stringstream ss;
   ss << "  ======================================================\n";
@@ -20,6 +21,7 @@ std::string BuilderReadouts::debug() const {
 
   return ss.str();
 }
+// GCOVR_EXCL_STOP
 
 void BuilderReadouts::parse(Buffer<uint8_t> buffer) {
 
