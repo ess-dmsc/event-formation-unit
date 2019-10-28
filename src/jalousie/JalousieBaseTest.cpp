@@ -52,7 +52,9 @@ TEST_F(JalousieBaseTest, DataReceive) {
   Jalousie.stopThreads();
   EXPECT_EQ(Jalousie.Counters.RxPackets, 1);
   EXPECT_EQ(Jalousie.Counters.RxBytes, DummyJalousieData.size());
-  EXPECT_EQ(Jalousie.Counters.ReadoutCount, 2);
+  EXPECT_EQ(Jalousie.Counters.ReadoutCount, 4);
+  EXPECT_EQ(Jalousie.Counters.BadModuleId, 1);
+  EXPECT_EQ(Jalousie.Counters.MappingErrors, 1);
 }
 
 int main(int argc, char **argv) {
