@@ -26,7 +26,7 @@ TEST_F(HwCheckTest, HwCheckPass) {
 TEST_F(HwCheckTest, HwCheckFail) {
   std::vector<std::string> IgnoredInterfaces {"0", "00"};
   HwCheck check;
-  check.setMinimumMTU(65535);
+  check.setMinimumMTU(6553500);
   bool pass = check.checkMTU(IgnoredInterfaces);
   ASSERT_FALSE(pass);
 }
