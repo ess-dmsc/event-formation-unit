@@ -16,11 +16,19 @@ protected:
 };
 
 /** Test cases below */
-TEST_F(HwCheckTest, ) {
+TEST_F(HwCheckTest, HwCheckPass) {
   std::vector<std::string> IgnoredInterfaces {"0", "00"};
   HwCheck check;
   bool pass = check.checkMTU(IgnoredInterfaces);
   ASSERT_TRUE(pass);
+}
+
+TEST_F(HwCheckTest, HwCheckFail) {
+  std::vector<std::string> IgnoredInterfaces {"0", "00"};
+  HwCheck check;
+  check.setMinimumMTU(65535);
+  bool pass = check.checkMTU(IgnoredInterfaces);
+  ASSERT_FALSE(pass);
 }
 
 int main(int argc, char **argv) {
