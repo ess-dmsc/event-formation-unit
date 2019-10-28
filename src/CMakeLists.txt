@@ -83,5 +83,6 @@ add_custom_target(runefu
     COMMAND efu "-d" "../modules/udp" "-s" "1" "--nohwcheck"
     COMMAND efu "-d" "../modules/gdgem" "-f" "../configs/vmm3.json" "-s" "2" "--nohwcheck"
     COMMAND efu "-d" "../modules/perfgen" "-s" "1" "--nohwcheck"
+    COMMAND efu "-d" "../modules/jalousie" "-f" "../configs/v20_mappings.json" "-s" "2" "--nohwcheck"
     DEPENDS copycfgs efu mgmesytec gdgem sonde mbcaen udp AdcReadout
     )

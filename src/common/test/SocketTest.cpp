@@ -44,6 +44,32 @@ TEST_F(SocketTest, ValidInvalidIp) {
   }
 }
 
+TEST_F(SocketTest, InetAtonInvalidIP) {
+  Socket tcpsocket(Socket::type::TCP);
+  ASSERT_THROW(tcpsocket.setLocalSocket("invalidipaddress", 9000), std::runtime_error);
+  ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", 22), std::runtime_error);
+  ASSERT_THROW(tcpsocket.setRemoteSocket("invalidipaddress", 9000), std::runtime_error);
+}
+
+TEST_F(SocketTest, PortInUse) {
+  Socket tcpsocket(Socket::type::TCP);
+  // ssh port is already in use on all platforms
+  ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", 22), std::runtime_error);
+}
+
+// getSockOpt is private
+TEST_F(SocketTest, InvalidGetSockOpt) {
+  Socket tcpsocket(Socket::type::TCP);
+  // force file descriptor (fd) to be set to -1 by failes send()
+  auto res = tcpsocket.send(nullptr, 0);
+  ASSERT_TRUE(res < 0);
+  // Then ask for buffer sizes for invalid fd
+  int TxBuffer, RxBuffer;
+  tcpsocket.getBufferSizes(TxBuffer, RxBuffer);
+  ASSERT_EQ(TxBuffer, -1);
+  ASSERT_EQ(RxBuffer, -1);
+}
+
 TEST_F(SocketTest, GetHostByName) {
   std::string name {"localhost"};
   auto res = Socket::getHostByName(name);
