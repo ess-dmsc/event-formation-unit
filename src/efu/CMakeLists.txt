@@ -30,36 +30,5 @@ add_custom_command(TARGET efu POST_BUILD
                 ${EFU_RUN_INSTRUCTIONS}
                 "$<TARGET_FILE_DIR:efu>/")
 
-#=============================================================================
-# EFU Tests
-#=============================================================================
-set(ServerTest_INC
-    Server.h
-    Parser.h
-    )
-set(ServerTest_SRC
-    Server.cpp
-    ServerTest.cpp
-  Parser.cpp
-)
-create_test_executable(ServerTest)
 
-
-
-set(ParserTestLibrary_SRC
-ParserTest.cpp
-)
-set(ParserTestLibrary_INC
-)
-add_library(ParserTestLibrary STATIC
-  ${ParserTestLibrary_SRC})
-
-set(ParserTest_SRC
-  Parser.cpp
-)
-set(ParserTest_INC
-  Parser.h
-)
-set(ParserTest_LIB
-  ParserTestLibrary)
-create_test_executable(ParserTest)
+add_subdirectory(test)
