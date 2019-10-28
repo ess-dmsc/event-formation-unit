@@ -64,7 +64,12 @@ TEST_F(JalSumoMappingsTest, TestParsing5) {
 
 TEST_F(JalSumoMappingsTest, TestParsing6) {
   SumoMappings mappings(TEST_DATA_PATH "sumo_voxel_map_20190711.csv", 6);
-  MESSAGE() << "\n" << mappings.debug(false) << "\n";
+  auto res1 = mappings.debug(false);
+  ASSERT_TRUE(res1.size() != 0);
+  MESSAGE() << "\n" << res1 << "\n";
+  auto res2 = mappings.debug(true);
+  ASSERT_TRUE(res2.size() != 0);
+  ASSERT_TRUE(res2.size() > res1.size());
 }
 
 int main(int argc, char **argv) {
