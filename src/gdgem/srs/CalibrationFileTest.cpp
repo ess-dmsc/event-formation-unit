@@ -128,6 +128,18 @@ TEST_F(CalibrationFileTest, LoadCalibrationFile) {
  EXPECT_FLOAT_EQ(cal.time_slope, 1010.7);
 }
 
+// No test, just checking that debug() doesn't crash
+TEST_F(CalibrationFileTest, NoTestDebug) {
+  CalibrationFile cf;
+  auto res = cf.debug();
+  ASSERT_TRUE(res.size() == 0);
+
+  std::string filename = "deleteme.json";
+  CalibrationFile cf2(filename);
+  res = cf2.debug();
+  ASSERT_TRUE(res.size() != 0);
+}
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

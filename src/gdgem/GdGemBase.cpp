@@ -159,7 +159,7 @@ void GdGemBase::input_thread() {
     if ((rdsize = nmxdata.receive(eth_ringbuf->getDataBuffer(eth_index),
                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-//      LOG(INPUT, Sev::Debug, "rdsize: {}", rdsize);
+      XTRACE(PROCESS, DEB, "rdsize: %zu", rdsize);
       mystats.rx_packets++;
       mystats.rx_bytes += rdsize;
 
@@ -411,7 +411,7 @@ void GdGemBase::processing_thread() {
 
   Gem::TrackSerializer raw_serializer(1500, 1, "nmx_hits");
   raw_serializer.set_callback(ProduceHits);
-  
+
   TSCTimer global_time, report_timer;
 
   unsigned int data_index;

@@ -53,8 +53,7 @@ TEST_F(GdGemBaseTest, GetCalibrationCmd) {
   EXPECT_EQ(res, 0);
 }
 
-
-#if 0
+/// \todo This needs a little more work, better test data
 TEST_F(GdGemBaseTest, DataReceive) {
   GdGemBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
@@ -65,10 +64,9 @@ TEST_F(GdGemBaseTest, DataReceive) {
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
   EXPECT_EQ(Readout.mystats.rx_packets, 1);
-  EXPECT_EQ(Readout.mystats.readouts, 53);
-  EXPECT_EQ(Readout.mystats.readouts_error_bytes, 0);
+  //EXPECT_EQ(Readout.mystats.readouts_total, 53);
+  //EXPECT_EQ(Readout.mystats.readouts_error_bytes, 0);
 }
-#endif
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
