@@ -3,34 +3,21 @@
 #include <cassert>
 #include <common/DataSave.h>
 #include <common/TimeString.h>
-
 #include <common/Log.h>
+#include <fmt/format.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-DataSave::DataSave(std::string filename, void *buffer, uint64_t datasize)
-    : filename_prefix(filename) {
 
-  if ((fd = open(filename_prefix.c_str(), flags, mode)) < 0) {
-    std::string msg = "DataSave: open(" + filename + ") failed";
-    perror(msg.c_str());
-  }
-
-  int ret;
-  if ((ret = write(fd, buffer, datasize)) < 0) {
-    std::string msg = "DataSave write(" + filename + ") failed";
-    perror(msg.c_str());
-  }
-}
-
-DataSave::DataSave(std::string filename) : filename_prefix(filename) {
-
-  if ((fd = open(filename_prefix.c_str(), flags, mode)) < 0) {
-    std::string msg = "DataSave: open(" + filename + ") failed";
-    perror(msg.c_str());
-  }
-}
+//
+// DataSave::DataSave(std::string filename) : filename_prefix(filename) {
+//
+//   if ((fd = open(filename_prefix.c_str(), flags, mode)) < 0) {
+//     std::string msg = "DataSave: open(" + filename + ") failed";
+//     perror(msg.c_str());
+//   }
+// }
 
 DataSave::DataSave(std::string name, uint64_t maxlen)
     : filename_prefix(name), maxfilesize(maxlen) {
@@ -113,8 +100,7 @@ void DataSave::createfile() {
                          std::to_string(sequence_number) + ".csv";
 
   if ((fd = open(fileName.c_str(), flags, mode)) < 0) {
-    std::string msg = "DataSave: open(" + fileName + ") failed";
-    perror(msg.c_str());
+    throw std::runtime_error(fmt::format("DataSave: open({}) failed", fileName));
   }
 
   sequence_number++;

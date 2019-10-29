@@ -1,4 +1,13 @@
-# todo DynamicHist tests
+
+
+set(DynamicHistTest_INC
+  ../DynamicHist.h
+)
+set(DynamicHistTest_SRC
+  ../DynamicHist.cpp
+  DynamicHistTest.cpp
+)
+create_test_executable(DynamicHistTest)
 
 set(HistogramTest_SRC
   HistogramTest.cpp

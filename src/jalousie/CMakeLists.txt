@@ -1,3 +1,7 @@
+
+get_filename_component(TEST_JSON_PATH "configs/v20_mappings.json" DIRECTORY)
+get_filename_component(TEST_CSV_PATH "configs/sumo_voxel_map_20190711.csv" DIRECTORY)
+
 set(JalReadoutTest_SRC
   ReadoutTest.cpp
   Readout.cpp
@@ -90,6 +94,7 @@ set(jalousie_common_src
   SumoMappings.cpp
   )
 
+#
 set(jalousie_INC
   JalousieBase.h
   ${jalousie_common_inc}
@@ -100,5 +105,22 @@ set(jalousie_SRC
   ${jalousie_common_src}
   )
 create_module(jalousie)
+
+#
+set(JalousieBaseTest_INC
+  ${jalousie_common_inc}
+  ../test/SaveBuffer.h
+  ../adc_readout/test/TestUDPServer.h)
+set(JalousieBaseTest_SRC
+  JalousieBase.cpp
+  JalousieBaseTest.cpp
+  ${jalousie_common_src}
+  ../test/SaveBuffer.cpp
+  ../adc_readout/test/TestUDPServer.cpp)
+create_test_executable(JalousieBaseTest)
+target_compile_definitions(JalousieBaseTest
+  PRIVATE TEST_JSON_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_JSON_PATH}/")
+target_compile_definitions(JalousieBaseTest
+PRIVATE TEST_CSV_PATH="${CMAKE_CURRENT_SOURCE_DIR}/${TEST_CSV_PATH}/")
 
 add_subdirectory(generators)

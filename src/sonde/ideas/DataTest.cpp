@@ -14,7 +14,7 @@ protected:
   Geometry geometry;
   IDEASData *readout;
   void SetUp() override {
-    readout = new IDEASData(&geometry);
+    readout = new IDEASData(&geometry, "deleteme_sonde_test_");
     memset(readout->data, 0, sizeof(readout->data));
   }
   void TearDown() override {

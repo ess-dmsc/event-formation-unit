@@ -31,7 +31,7 @@
  }
 )";
 
-#include <common/DataSave.h>
+#include <test/SaveBuffer.h>
 #include <multiblade/MBCaenBase.h>
 #include <../src/adc_readout/test/TestUDPServer.h>
 #include <test/TestBase.h>
@@ -80,7 +80,7 @@ TEST_F(CAENBaseTest, DataReceive) {
 
 int main(int argc, char **argv) {
   std::string filename{"MB18Estia.json"};
-  DataSave tempfile(filename, (void *)mb18estiajson.c_str(), mb18estiajson.size());
+  saveBuffer(filename, (void *)mb18estiajson.c_str(), mb18estiajson.size());
 
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();

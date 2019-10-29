@@ -10,7 +10,7 @@
  * rapidcsv is distributed under the BSD 3-Clause license, see LICENSE for details.
  *
  */
-
+// GCOVR_EXCL_START
 #pragma once
 
 #include <algorithm>
@@ -1166,3 +1166,4 @@ namespace rapidcsv
 #endif
   };
 }
+// GCOVR_EXCL_STOP
