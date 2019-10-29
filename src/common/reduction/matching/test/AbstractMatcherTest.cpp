@@ -45,6 +45,7 @@ protected:
 
 TEST_F(AbstractMatcherTest, Construction1) {
   MockMatcher matcher(100, 3, 7);
+  EXPECT_EQ(matcher.unmatched_clusters_.size(), 0);
   EXPECT_EQ(matcher.maximum_latency_, 100);
   EXPECT_EQ(matcher.PlaneA, 3);
   EXPECT_EQ(matcher.PlaneB, 7);
@@ -59,22 +60,54 @@ TEST_F(AbstractMatcherTest, InsertingMovesData) {
   EXPECT_TRUE(x.empty());
 }
 
+
 TEST_F(AbstractMatcherTest, AcceptXY) {
   MockMatcher matcher(100, 0, 1);
 
-  add_cluster(x, 0, 0, 10, 1, 100, 200, 10);
+  add_cluster(x, matcher.PlaneA, 0, 10, 1, 100, 200, 10);
   matcher.insert(0, x);
 
   EXPECT_EQ(matcher.unmatched_clusters_.size(), 1);
   EXPECT_EQ(matcher.LatestA, 100);
   EXPECT_EQ(matcher.LatestB, 0);
 
-  add_cluster(y, 1, 0, 10, 1, 100, 200, 10);
+  add_cluster(y, matcher.PlaneB, 0, 10, 1, 100, 200, 10);
   matcher.insert(1, y);
 
   EXPECT_EQ(matcher.unmatched_clusters_.size(), 2);
   EXPECT_EQ(matcher.LatestA, 100);
   EXPECT_EQ(matcher.LatestB, 100);
+}
+
+// Differs
+TEST_F(AbstractMatcherTest, AcceptXYImplicitPlane) {
+  MockMatcher matcher(100, 0, 1);
+
+  add_cluster(x, matcher.PlaneA, 0, 10, 1, 100, 200, 10);
+  matcher.insert(x);
+
+  EXPECT_EQ(matcher.unmatched_clusters_.size(), 1);
+  EXPECT_EQ(matcher.LatestA, 100);
+  EXPECT_EQ(matcher.LatestB, 0);
+
+  add_cluster(y, matcher.PlaneB, 0, 10, 1, 100, 200, 10);
+  matcher.insert(y);
+
+  EXPECT_EQ(matcher.unmatched_clusters_.size(), 2);
+  EXPECT_EQ(matcher.LatestA, 100);
+  EXPECT_EQ(matcher.LatestB, 100);
+}
+
+TEST_F(AbstractMatcherTest, AddClustersInvalidPlane) {
+  MockMatcher matcher(100, 0, 1);
+  const uint8_t InvalidPlane{8};
+
+  EXPECT_EQ(matcher.stats_rejected_clusters, 0);
+
+  add_cluster(x, InvalidPlane, 0, 10, 1, 100, 200, 10);
+  matcher.insert(x);
+
+  EXPECT_EQ(matcher.stats_rejected_clusters, 1);
 }
 
 TEST_F(AbstractMatcherTest, AcceptOtherPlanes) {
