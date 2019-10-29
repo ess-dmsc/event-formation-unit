@@ -23,9 +23,7 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 Server::Server(int port, Parser &parse) : ServerPort(port), CommandParser(parse) {
-  for (auto &client : ClientFd) {
-    client = -1;
-  }
+  std::fill(ClientFd.begin(), ClientFd.end(), -1);
 
   Timeout.tv_sec = 0;  /// Timeout for select()
   Timeout.tv_usec = 1000;
@@ -190,11 +188,6 @@ void Server::serverPoll() {
 }
 
 int Server::getNumClients() {
-  int clientcount = 0;
-  for (auto & client : ClientFd) {
-    if (client != -1) {
-      clientcount++;
-    }
-  }
-  return clientcount;
+  return std::count_if(ClientFd.begin(), ClientFd.end(),
+    [](int fd){return fd != -1;});
 }
