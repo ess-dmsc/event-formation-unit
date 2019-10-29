@@ -114,10 +114,9 @@ int main(int argc, char *argv[]) {
 
   for (;;) {
     int BytesToSend = file.read(buffer);
-    int BytesSent = 0;
 
     if (BytesToSend > 0 && (Settings.NumberOfPackets == 0 || TotPackets < Settings.NumberOfPackets)) {
-
+      int BytesSent = 0;
       while (BytesToSend > 0 && (Settings.NumberOfPackets == 0 || TotPackets < Settings.NumberOfPackets)) {
         int txsize = BytesToSend >= MaxTxSize ? MaxTxSize : BytesToSend;
         DataSource.send(buffer + BytesSent, txsize);
