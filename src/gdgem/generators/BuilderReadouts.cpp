@@ -5,12 +5,12 @@
 #include <cstring>
 
 #include <common/Trace.h>
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 #include <common/Log.h>
-#undef TRC_MASK
-#define TRC_MASK 0
+// #undef TRC_MASK
+// #define TRC_MASK 0
 
 namespace Gem {
 
@@ -36,6 +36,8 @@ void BuilderReadouts::process_buffer(char *buf, size_t size) {
     hit.coordinate = digital_geometry_.get_strip(readout);
     hit.weight = readout.adc;
     hit.time = readout.srs_timestamp;
+    XTRACE(DATA, DEB, "Readout: plane %u, coord %u, weight %u, time %u",
+            hit.plane, hit.coordinate, hit.weight, hit.time);
 
     if (readout.chiptime >= 0)
       hit.time += static_cast<uint64_t>(readout.chiptime);

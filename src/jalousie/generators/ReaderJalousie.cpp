@@ -74,39 +74,38 @@ int ReaderJalousie::getNextReadout(char * buffer) {
       return 0;
 }
 
-ReaderJalousie::ReaderJalousie(std::string filename) {
+ReaderJalousie::ReaderJalousie(std::string FileName) {
 
-  FilePtr = fopen(filename.c_str(), "rb");
+  FilePtr = fopen(FileName.c_str(), "rb");
   if (FilePtr == nullptr) {
-    printf("cant open file %s\n", filename.c_str());
+    printf("cant open file %s\n", FileName.c_str());
   }
 }
 
 ReaderJalousie::~ReaderJalousie() { fclose(FilePtr); }
 
-int ReaderJalousie::read(char *buffer, size_t bufferlen) {
+int ReaderJalousie::read(char *Buffer, size_t BufferLen) {
   if (FilePtr == nullptr) {
     return -1;
   }
 
   if (not HeaderRead) {
-    int header[8];
-    fread(header,8*sizeof(int),1,FilePtr);
+    int Header[8];
+    fread(Header, sizeof(Header), 1, FilePtr);
     HeaderRead = true;
   }
 
   size_t Size = 0;
   int Readouts = 0;
-  auto bp = buffer;
-  size_t remaining = bufferlen;
-  int res;
-  while (remaining >= sizeof(Jalousie::Readout)) {
-     if ((res = getNextReadout(bp)) == 0) {
+  auto BufPtr = Buffer;
+  size_t Remaining = BufferLen;
+  while (Remaining >= sizeof(Jalousie::Readout)) {
+     if (getNextReadout(BufPtr) == 0) {
        return -1;
      }
      Readouts++;
-     bp += sizeof(Jalousie::Readout);
-     remaining -= sizeof(Jalousie::Readout);
+     BufPtr += sizeof(Jalousie::Readout);
+     Remaining -= sizeof(Jalousie::Readout);
      Size += sizeof(Jalousie::Readout);
   }
   printf("Returning %d readouts, total size: %zu\n", Readouts, Size);

@@ -49,4 +49,3 @@ public:
 void from_json(const nlohmann::json &j, ChannelMappings &g);
 
 }
-

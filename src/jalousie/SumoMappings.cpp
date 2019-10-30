@@ -42,13 +42,12 @@ SumoMappings::SumoMappings(std::string file_name, uint8_t sumo_id) {
                          rapidcsv::SeparatorParams(';'));
   std::vector<int> line;
   SumoCoordinates coord;
-  int sumo_type;
   int anode;
   int cathode;
   for (size_t i = 0; i < doc.GetRowCount(); ++i) {
     line = doc.GetRow<int>(i);
 
-    sumo_type = line[0];
+    int sumo_type = line[0];
     if (sumo_type != sumo_id)
       continue;
 
