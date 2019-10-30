@@ -16,15 +16,25 @@ target_compile_definitions(nmxgen_readouts PUBLIC GENERATOR_GDGEM_READOUTS)
 #
 # Unit tests
 #
-# TODO BuilderReadoutsTest is maybe too generic, how about similar for
-# Multi-Blade ?
-set(BuilderReadoutsTest_INC
+set(BuilderGdGemReadoutsTest_INC
   BuilderReadouts.h
   ../srs/SRSMappings.h
   )
-set(BuilderReadoutsTest_SRC
+set(BuilderGdGemReadoutsTest_SRC
   BuilderReadouts.cpp
   BuilderReadoutsTest.cpp
   ../srs/SRSMappings.cpp
   )
-create_test_executable(BuilderReadoutsTest)
+create_test_executable(BuilderGdGemReadoutsTest)
+
+
+set(BuilderGdGemHitsTest_INC
+  BuilderHits.h
+  #../srs/SRSMappings.h
+  )
+set(BuilderGdGemHitsTest_SRC
+  BuilderHits.cpp
+  BuilderHitsTest.cpp
+  #../srs/SRSMappings.cpp
+  )
+create_test_executable(BuilderGdGemHitsTest)

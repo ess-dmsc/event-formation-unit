@@ -44,17 +44,11 @@ void BuilderReadouts::process_buffer(char *buf, size_t size) {
     else
       hit.time -= static_cast<uint64_t>(-readout.chiptime);
 
-    if ((hit.plane != 0) && (hit.plane != 1)) {
+    if (((hit.plane != 0) && (hit.plane != 1)) or (hit.coordinate == Hit::InvalidCoord)) {
       stats.geom_errors++;
-      LOG(PROCESS, Sev::Debug, "Bad SRS mapping (plane) -- fec={}, chip={}",
-          readout.fec, readout.chip_id);
-      continue;
-    }
-
-    if (hit.coordinate == Hit::InvalidCoord) {
-      stats.geom_errors++;
-      LOG(PROCESS, Sev::Debug, "Bad SRS mapping (coordinate) -- fec={}, chip={}",
-          readout.fec, readout.chip_id);
+      LOG(PROCESS, Sev::Debug,
+          "Bad SRS mapping (plane or coordinae) -- fec={}, chip={}, channel={}",
+          readout.fec, readout.chip_id, readout.channel);
       continue;
     }
 
