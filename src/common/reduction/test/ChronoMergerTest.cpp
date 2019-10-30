@@ -7,10 +7,11 @@ class ChronoMergerTest : public TestBase {
 protected:
   ChronoMerger merger{100, 3};
 
-  void add_events(size_t module, uint64_t time_start, uint64_t time_end) {
-    for (uint64_t t = time_start; t <= time_end; ++t)
-      merger.insert(module, {t, 0});
-  }
+  // So far unused - not deleting yet
+  // void add_events(size_t module, uint64_t time_start, uint64_t time_end) {
+  //   for (uint64_t t = time_start; t <= time_end; ++t)
+  //     merger.insert(module, {t, 0});
+  // }
 
   void SetUp() override { }
   void TearDown() override { }

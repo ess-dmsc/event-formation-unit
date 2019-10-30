@@ -23,7 +23,7 @@ using namespace memory_sequential_consistent; // Lock free fifo
 
 class LokiBase : public Detector {
 public:
-  LokiBase(BaseSettings const &settings, struct LokiSettings &LocalLokiSettings);
+  LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiSettings);
   ~LokiBase() = default;
   void inputThread();
   void processingThread();

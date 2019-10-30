@@ -87,7 +87,7 @@ TEST_F(SocketTest, GetHostByName) {
   auto res = Socket::getHostByName(name);
   ASSERT_TRUE(res == "127.0.0.1");
   for (auto ipaddr : ipOk) {
-    auto res = Socket::getHostByName(ipaddr);
+     res = Socket::getHostByName(ipaddr);
     ASSERT_TRUE(res == ipaddr);
   }
   // Checking weird case - not sure if this is right

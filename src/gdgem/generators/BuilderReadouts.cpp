@@ -5,12 +5,12 @@
 #include <cstring>
 
 #include <common/Trace.h>
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 #include <common/Log.h>
-#undef TRC_MASK
-#define TRC_MASK 0
+// #undef TRC_MASK
+// #define TRC_MASK 0
 
 namespace Gem {
 
@@ -36,23 +36,19 @@ void BuilderReadouts::process_buffer(char *buf, size_t size) {
     hit.coordinate = digital_geometry_.get_strip(readout);
     hit.weight = readout.adc;
     hit.time = readout.srs_timestamp;
+    XTRACE(DATA, DEB, "Readout: plane %u, coord %u, weight %u, time %u",
+            hit.plane, hit.coordinate, hit.weight, hit.time);
 
     if (readout.chiptime >= 0)
       hit.time += static_cast<uint64_t>(readout.chiptime);
     else
       hit.time -= static_cast<uint64_t>(-readout.chiptime);
 
-    if ((hit.plane != 0) && (hit.plane != 1)) {
+    if (((hit.plane != 0) && (hit.plane != 1)) or (hit.coordinate == Hit::InvalidCoord)) {
       stats.geom_errors++;
-      LOG(PROCESS, Sev::Debug, "Bad SRS mapping (plane) -- fec={}, chip={}",
-          readout.fec, readout.chip_id);
-      continue;
-    }
-
-    if (hit.coordinate == Hit::InvalidCoord) {
-      stats.geom_errors++;
-      LOG(PROCESS, Sev::Debug, "Bad SRS mapping (coordinate) -- fec={}, chip={}",
-          readout.fec, readout.chip_id);
+      LOG(PROCESS, Sev::Debug,
+          "Bad SRS mapping (plane or coordinae) -- fec={}, chip={}, channel={}",
+          readout.fec, readout.chip_id, readout.channel);
       continue;
     }
 

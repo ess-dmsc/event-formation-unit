@@ -94,4 +94,3 @@ std::string AbstractMatcher::status(const std::string &prepend, bool verbose) co
      << to_string(unmatched_clusters_, prepend + "  ", verbose);
   return ss.str();
 }
-

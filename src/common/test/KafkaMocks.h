@@ -16,6 +16,8 @@
 
 #include <trompeloeil.hpp>
 
+// GCOVR_EXCL_START
+
 class MockProducer : public RdKafka::Producer {
 public:
   MAKE_CONST_MOCK0(name, const std::string(), override);
@@ -114,7 +116,7 @@ public:
   MAKE_MOCK3(set, RdKafka::Conf::ConfResult(const std::string &,
                                               RdKafka::OffsetCommitCb *,
                                               std::string &), override);
-  
+
   MAKE_CONST_MOCK2(get, RdKafka::Conf::ConfResult(const std::string &,
                                                     std::string &), override);
   MAKE_CONST_MOCK1(get,
@@ -128,9 +130,10 @@ public:
   MAKE_CONST_MOCK1(get, RdKafka::Conf::ConfResult(RdKafka::RebalanceCb *&), override);
   MAKE_CONST_MOCK1(get,
                      RdKafka::Conf::ConfResult(RdKafka::OffsetCommitCb *&), override);
-  
+
   MAKE_MOCK3(set,
                RdKafka::Conf::ConfResult(const std::string &,
                                          RdKafka::ConsumeCb *, std::string &), override);
   MAKE_MOCK0(dump, std::list<std::string> *(), override);
 };
+// GCOVR_EXCL_STOP

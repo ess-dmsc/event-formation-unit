@@ -5,16 +5,16 @@
 
 int Statistics::create(std::string StatName, int64_t &Value) {
   LOG(UTILS, Sev::Info, "Adding stat {}", StatName);
-  Value = 0;
-  auto pfname = prefix + StatName;
+  Value = 0; // all counters are cleared
+  auto FullStatName = prefix + StatName;
   for (auto s : stats) {
-    if (s.StatName == pfname or &Value == &s.StatValue) {
+    if (s.StatName == FullStatName or &Value == &s.StatValue) {
       LOG(UTILS, Sev::Error, "Duplicate StatName or Value address for {}",
           StatName);
       return -1;
     }
   }
-  stats.push_back(StatTuple(pfname, Value));
+  stats.push_back(StatTuple(FullStatName, Value));
   return 0;
 }
 
