@@ -16,6 +16,30 @@ std::vector<uint8_t> OneReadout {
   0x00, 0x00, 0x00, 0x00, // chiptime (float?) 0.0
 };
 
+std::vector<uint8_t> OneReadoutY {
+  0x01, // fec 0
+  0x00, // chip 0
+  0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // time 2 LE
+  0x01, 0x00, // channel 1
+  0xbb, 0xaa, // bcid 0xaabb
+  0x01, 0x00, // tdc 0x01
+  0x23, 0x01, // adc 0x0123
+  0x00,       // over threshold (bool?) false
+  0x00, 0x00, 0x00, 0x00, // chiptime (float?) 0.0
+};
+
+std::vector<uint8_t> OneReadoutBadCoord {
+  0x00, // fec 0
+  0x00, // chip 0
+  0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // time 2 LE
+  0xff, 0xff, // channel 0xffff
+  0xbb, 0xaa, // bcid 0xaabb
+  0x01, 0x00, // tdc 0x01
+  0x23, 0x01, // adc 0x0123
+  0x00,       // over threshold (bool?) false
+  0x00, 0x00, 0x00, 0x00, // chiptime (float?) 0.0
+};
+
 std::vector<uint8_t> OneReadoutAdcUnderThreshold {
   0x00, // fec 0
   0x00, // chip 0
@@ -24,6 +48,18 @@ std::vector<uint8_t> OneReadoutAdcUnderThreshold {
   0xbb, 0xaa, // bcid 0xaabb
   0x01, 0x00, // tdc 0x01
   0x01, 0x00, // adc 0x0001
+  0x00,       // over threshold (bool?) false
+  0x00, 0x00, 0x00, 0x00, // chiptime (float?) 0.0
+};
+
+std::vector<uint8_t> OneReadoutBadPlane {
+  0x10, // fec 0
+  0x10, // chip 0
+  0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // time 2 LE
+  0x01, 0x00, // channel 1
+  0xbb, 0xaa, // bcid 0xaabb
+  0x01, 0x00, // tdc 0x01
+  0x23, 0x01, // adc 0x0123
   0x00,       // over threshold (bool?) false
   0x00, 0x00, 0x00, 0x00, // chiptime (float?) 0.0
 };
@@ -40,6 +76,9 @@ protected:
     // Define minimal mappings (copied from SRSMappingstest)
     // Fec 0, VMM 0, Plane 0, channel offset 0
     Mappings.set_mapping(0, 0, 0, 0);
+
+    // Fec 0, VMM 0, Plane 0, channel offset 0
+    Mappings.set_mapping(1, 0, 1, 0);
   }
   void TearDown() override {}
 };
@@ -50,14 +89,37 @@ protected:
 TEST_F(BuilderReadoutsTest, Constructor) {
   BuilderReadouts BR(Mappings, AdcThreshold, DumpDirectory);
   ASSERT_EQ(BR.stats.parser_readouts, 0);
+  ASSERT_EQ(BR.stats.geom_errors, 0);
+  ASSERT_EQ(BR.hit_buffer_x.size(), 0);
+  ASSERT_EQ(BR.hit_buffer_y.size(), 0);
 }
 
-TEST_F(BuilderReadoutsTest, ParseOneReadout) {
+TEST_F(BuilderReadoutsTest, BadPlane) {
+  BuilderReadouts BR(Mappings, AdcThreshold, DumpDirectory);
+  BR.process_buffer((char*)&OneReadoutBadPlane[0], OneReadoutBadPlane.size());
+  ASSERT_EQ(BR.stats.geom_errors, 1);
+}
+
+TEST_F(BuilderReadoutsTest, BadCoord) {
+  BuilderReadouts BR(Mappings, AdcThreshold, DumpDirectory);
+  BR.process_buffer((char*)&OneReadoutBadCoord[0], OneReadoutBadCoord.size());
+  ASSERT_EQ(BR.stats.geom_errors, 1);
+}
+
+TEST_F(BuilderReadoutsTest, ParseOneReadoutX) {
   BuilderReadouts BR(Mappings, AdcThreshold, DumpDirectory);
   BR.process_buffer((char*)&OneReadout[0], OneReadout.size());
   ASSERT_EQ(BR.stats.geom_errors, 0);
   ASSERT_EQ(BR.hit_buffer_x.size(), 1);
   ASSERT_EQ(BR.hit_buffer_y.size(), 0);
+}
+
+TEST_F(BuilderReadoutsTest, ParseOneReadoutY) {
+  BuilderReadouts BR(Mappings, AdcThreshold, DumpDirectory);
+  BR.process_buffer((char*)&OneReadoutY[0], OneReadoutY.size());
+  ASSERT_EQ(BR.stats.geom_errors, 0);
+  ASSERT_EQ(BR.hit_buffer_x.size(), 0);
+  ASSERT_EQ(BR.hit_buffer_y.size(), 1);
 }
 
 TEST_F(BuilderReadoutsTest, AdcUnderThreshold) {
