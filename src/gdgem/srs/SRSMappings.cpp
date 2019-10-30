@@ -58,7 +58,6 @@ uint8_t SRSMappings::get_plane(const Readout &readout) const {
   if (readout.chip_id >= fec.size())
     return Hit::InvalidPlane;
   const auto &vmm = fec[readout.chip_id];
-  printf("vmm.size() %lu\n", vmm.size());
   if (readout.channel >= vmm.size())
     return Hit::InvalidPlane;
   return vmm[readout.channel].plane;
