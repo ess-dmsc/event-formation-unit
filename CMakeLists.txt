@@ -88,7 +88,7 @@ add_subdirectory(utils/udp)
 
 add_custom_target(unit_tests
     DEPENDS ${unit_test_targets})
-add_custom_target(run-test
+add_custom_target(runtest
     COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
     DEPENDS unit_tests)
 add_custom_target(valgrind
