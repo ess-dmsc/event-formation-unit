@@ -6,56 +6,61 @@
 
 class ReadoutTest : public TestBase {
 protected:
+  Readout RdOut;
   char buffer[9000];
+  const int DataType{0x30};
   void SetUp() override { memset(buffer, 0, sizeof(buffer)); }
   void TearDown() override {}
 };
 
-TEST_F(ReadoutTest, InvalidBuffer) {
-  Readout readout;
-  ASSERT_EQ(readout.validate(0, 0), -Readout::EBUFFER);
+TEST_F(ReadoutTest, Constructor) {
+  ASSERT_EQ(RdOut.Stats.ErrorBuffer, 0);
+  ASSERT_EQ(RdOut.Stats.ErrorSize, 0);
+  ASSERT_EQ(RdOut.Stats.ErrorVersion, 0);
+  ASSERT_EQ(RdOut.Stats.ErrorTypeSubType, 0);
 }
 
-TEST_F(ReadoutTest, InvalidDataSize) {
-  Readout readout;
-  ASSERT_EQ(readout.validate(buffer, -5), -Readout::ESIZE);
-  for (auto i = 0; i < 64; i++) {
-    ASSERT_EQ(readout.validate(buffer, i), -Readout::ESIZE);
+// nullptr as buffer
+TEST_F(ReadoutTest, ErrorBuffer) {
+  auto Res = RdOut.validate(0, 100, DataType);
+  ASSERT_EQ(Res, -Readout::EBUFFER);
+  ASSERT_EQ(RdOut.Stats.ErrorBuffer, 1);
+}
+
+TEST_F(ReadoutTest, HeaderLTMin) {
+  auto Res = RdOut.validate((char *)&ErrCookie[0], 3, DataType);
+  ASSERT_EQ(Res, -Readout::ESIZE);
+  ASSERT_EQ(RdOut.Stats.ErrorSize, 1);
+}
+
+TEST_F(ReadoutTest, HeaderGTMax) {
+  auto Res = RdOut.validate((char *)&ErrCookie[0], 8973, DataType);
+  ASSERT_EQ(Res, -Readout::ESIZE);
+  ASSERT_EQ(RdOut.Stats.ErrorSize, 1);
+}
+
+TEST_F(ReadoutTest, ErrorCookie) {
+  auto Res = RdOut.validate((char *)&ErrCookie[0], ErrCookie.size(), DataType);
+  ASSERT_EQ(Res, -Readout::EHEADER);
+  ASSERT_EQ(RdOut.Stats.ErrorVersion, 1);
+}
+
+TEST_F(ReadoutTest, ErrorVersion) {
+  auto Res = RdOut.validate((char *)&ErrVersion[0], ErrVersion.size(), DataType);
+  ASSERT_EQ(Res, -Readout::EHEADER);
+  ASSERT_EQ(RdOut.Stats.ErrorVersion, 1);
+}
+
+TEST_F(ReadoutTest, OkVersion) {
+  unsigned int Errors{0};
+  for (unsigned int Size = 4; Size < OkVersion.size(); Size++) {
+    Errors++;
+    auto Res = RdOut.validate((char *)&OkVersion[0], Size, DataType);
+    ASSERT_EQ(Res, -Readout::ESIZE);
+    ASSERT_EQ(RdOut.Stats.ErrorSize, Errors);
   }
-}
-
-TEST_F(ReadoutTest, CheckPadding) {
-  Readout readout;
-  for (auto size = 65; size < 8960; size++) {
-    if (size % 64 != 0) {
-      ASSERT_EQ(readout.validate(buffer, size), -Readout::EPAD);
-    } else {
-      ASSERT_EQ(readout.validate(buffer, size), Readout::OK);
-    }
-  }
-}
-
-TEST_F(ReadoutTest, BasicParsing) {
-  Readout readout;
-  int size = ok_one_hit.size();
-  ASSERT_EQ(size, 64);
-
-  auto res = readout.validate((char *)&ok_one_hit[0], size);
-  ASSERT_EQ(res, 0);
-
-  ASSERT_EQ(readout.type, 1);
-  ASSERT_EQ(readout.seqno, 1);
-  ASSERT_EQ(readout.wordcount, 6);
-  ASSERT_EQ(readout.reserved, 0);
-}
-
-TEST_F(ReadoutTest, PktAndHeaderSizeMismatch) {
-  Readout readout;
-  int size = err_size_mismatch.size();
-  ASSERT_EQ(size, 64);
-
-  auto res = readout.validate((char *)&err_size_mismatch[0], size);
-  ASSERT_EQ(res, -Readout::EHDR);
+  auto Res = RdOut.validate((char *)&OkVersion[0], OkVersion.size(), DataType);
+  ASSERT_EQ(Res, Readout::OK);
 }
 
 int main(int argc, char **argv) {

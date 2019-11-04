@@ -9,38 +9,45 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-int Readout::validate(const char *buffer, uint32_t size) {
-  if (buffer == 0) {
+const unsigned int MaxUdpDataSize{8972};
+const unsigned int MinDataSize{4}; // just cookie and version
+
+int Readout::validate(const char *Buffer, uint32_t Size, uint8_t UNUSED Type) {
+  if (Buffer == nullptr) {
     XTRACE(PROCESS, WAR,
            "no buffer specified"); /**< \todo increment counter */
+    Stats.ErrorBuffer++;
     return -Readout::EBUFFER;
   }
 
-  if ((size < 64) || (size > 8960)) {
-    XTRACE(PROCESS, WAR, "Invalid data size (%u)", size);
+  if ((Size < MinDataSize) || (Size > MaxUdpDataSize)) {
+    XTRACE(PROCESS, WAR, "Invalid data size (%u)", Size);
+    Stats.ErrorSize++;
     return -Readout::ESIZE;
   }
 
-  if (size % 64 != 0) {
-    XTRACE(PROCESS, WAR,
-           "data size (%u) is not padded to multiple of 64 bytes", size);
-    return -Readout::EPAD;
+  uint32_t CookieVer = *(uint32_t *)Buffer;
+  // 'E', 'S', 'S', 0x00 - cookie + version 0
+  if (CookieVer != 0x00535345) { // 'ESS0' little endian
+    Stats.ErrorVersion++;
+    return -Readout::EHEADER;
   }
 
-  // Add more checks - checksum, and padding
-
-  auto hdrp = (struct Readout::Payload *)buffer;
-  type = hdrp->type;
-  wordcount = hdrp->wordcount;
-  seqno = hdrp->seqno;
-  reserved = hdrp->reserved;
-
-  if (size < sizeof(Readout::Payload) + wordcount * 2U + CKSUMSIZE) {
-    XTRACE(PROCESS, WAR,
-           "Data size mismatch: size received %lu, headers and data %d",
-           sizeof(Readout::Payload), CKSUMSIZE + wordcount * 2U);
-    return -Readout::EHDR;
+  // Now we can add more header size checks
+  if (Size < sizeof(Readout::PacketHeaderV0)) {
+    XTRACE(PROCESS, WAR, "Invalid data size for v0 (%u)", Size);
+    Stats.ErrorSize++;
+    return -Readout::ESIZE;
   }
 
-  return 0;
+  auto HeaderPtr = (Readout::PacketHeaderV0 *)Buffer;
+
+  if (HeaderPtr->TypeSubType != Type) {
+    XTRACE(PROCESS, WAR, "Unsupported data type for v0 (%u)", Type);
+    Stats.ErrorTypeSubType++;
+    return -Readout::EHEADER;
+  }
+
+
+  return Readout::OK;
 }
