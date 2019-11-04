@@ -73,49 +73,52 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
 
   LOG(INIT, Sev::Info, "Adding stats");
   // clang-format off
-  Stats.create("rx_packets", mystats.rx_packets);
-  Stats.create("rx_bytes", mystats.rx_bytes);
-  Stats.create("i2pfifo_dropped", mystats.fifo_push_errors);
+  Stats.create("rx_packets", stats_.rx_packets);
+  Stats.create("rx_bytes", stats_.rx_bytes);
+  Stats.create("i2pfifo_dropped", stats_.fifo_push_errors);
 
-  Stats.create("processing_idle", mystats.processing_idle);
-  Stats.create("fifo_seq_errors", mystats.fifo_seq_errors);
+  Stats.create("processing_idle", stats_.processing_idle);
+  Stats.create("fifo_seq_errors", stats_.fifo_seq_errors);
 
   // Parser
-  Stats.create("frame_seq_errors", mystats.frame_seq_errors);
-  Stats.create("framecounter_overflows", mystats.framecounter_overflows);
-  Stats.create("timestamp_seq_errors", mystats.timestamp_seq_errors);
-  Stats.create("timestamp_lost_errors", mystats.timestamp_lost_errors);
-  Stats.create("timestamp_overflows", mystats.timestamp_overflows);
-  Stats.create("bad_frames", mystats.bad_frames);
-  Stats.create("good_frames", mystats.good_frames);
-  Stats.create("readouts_error_bytes", mystats.readouts_error_bytes);
-  Stats.create("readouts_total", mystats.readouts_total);
+  Stats.create("parser_frame_seq_errors", stats_.parser_frame_seq_errors);
+  Stats.create("parser_frame_missing_errors", stats_.parser_frame_missing_errors);
+  Stats.create("parser_framecounter_overflows", stats_.parser_framecounter_overflows);
+  Stats.create("parser_timestamp_seq_errors", stats_.parser_timestamp_seq_errors);
+  Stats.create("parser_timestamp_lost_errors", stats_.parser_timestamp_lost_errors);
+  Stats.create("parser_timestamp_overflows", stats_.parser_timestamp_overflows);
+  Stats.create("parser_good_frames", stats_.parser_good_frames);
+  Stats.create("parser_bad_frames", stats_.parser_bad_frames);
+  Stats.create("parser_error_bytes", stats_.parser_error_bytes);
+  Stats.create("parser_markers", stats_.parser_markers);
+  Stats.create("parser_data", stats_.parser_data);
+  Stats.create("parser_total", stats_.parser_readouts);
 
   // Builder
-  Stats.create("readouts_bad_geometry", mystats.readouts_bad_geometry);
-  Stats.create("readouts_bad_adc", mystats.readouts_bad_adc);
-  Stats.create("readouts_adc_zero", mystats.readouts_adc_zero);
-  Stats.create("readouts_good", mystats.readouts_good);
+  Stats.create("hits_bad_geometry", stats_.hits_bad_geometry);
+  Stats.create("hits_bad_adc", stats_.hits_bad_adc);
+  Stats.create("hits_good", stats_.hits_good);
 
   // Clustering
-  Stats.create("clusters_total", mystats.clusters_total);
-  Stats.create("clusters_x_only", mystats.clusters_x_only);
-  Stats.create("clusters_y_only", mystats.clusters_y_only);
-  Stats.create("clusters_xy", mystats.clusters_xy);
+  Stats.create("clusters_total", stats_.clusters_total);
+  Stats.create("clusters_x_only", stats_.clusters_x_only);
+  Stats.create("clusters_y_only", stats_.clusters_y_only);
+  Stats.create("clusters_xy", stats_.clusters_xy);
 
-  Stats.create("events_bad_utpc", mystats.events_bad_utpc);
-  Stats.create("events_filter_rejects", mystats.events_filter_rejects);
-  Stats.create("events_geom_errors", mystats.events_geom_errors);
-  Stats.create("events_good", mystats.events_good);
-  Stats.create("readouts_in_good_events", mystats.readouts_in_good_events);
+  // Event Analysis  
+  Stats.create("events_good", stats_.events_good);
+  Stats.create("events_bad", stats_.events_bad);
+  Stats.create("events_filter_rejects", stats_.events_filter_rejects);
+  Stats.create("events_geom_errors", stats_.events_geom_errors);
+  Stats.create("events_good_hits", stats_.events_good_hits);
 
-  Stats.create("tx_bytes", mystats.tx_bytes);
+  Stats.create("tx_bytes", stats_.tx_bytes);
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
-  Stats.create("kafka.ev_errors", mystats.kafka_ev_errors);
-  Stats.create("kafka.ev_others", mystats.kafka_ev_others);
-  Stats.create("kafka.dr_errors", mystats.kafka_dr_errors);
-  Stats.create("kafka.dr_others", mystats.kafka_dr_noerrors);
+  Stats.create("kafka.produce_fails", stats_.kafka_produce_fails);
+  Stats.create("kafka.ev_errors", stats_.kafka_ev_errors);
+  Stats.create("kafka.ev_others", stats_.kafka_ev_others);
+  Stats.create("kafka.dr_errors", stats_.kafka_dr_errors);
+  Stats.create("kafka.dr_others", stats_.kafka_dr_noerrors);
   // clang-format on
 
   if (!NMXSettings.fileprefix.empty())
@@ -143,18 +146,12 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
 
 void GdGemBase::input_thread() {
   /** Connection setup */
-  int rxBuffer, txBuffer;
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver nmxdata(local);
 
   nmxdata.setBufferSizes(0 /*use default */, EFUSettings.DetectorRxBufferSize);
-  nmxdata.getBufferSizes(txBuffer, rxBuffer);
-  if (rxBuffer < EFUSettings.DetectorRxBufferSize) {
-    LOG(INIT, Sev::Error, "Receive buffer sizes too small, wanted {}, got {}",
-           EFUSettings.DetectorRxBufferSize, rxBuffer);
-    return;
-  }
+  nmxdata.checkRxBufferSizes(EFUSettings.DetectorRxBufferSize);
   nmxdata.printBufferSizes();
   nmxdata.setRecvTimeout(0, 100000); /// secs, usecs
 
@@ -170,12 +167,12 @@ void GdGemBase::input_thread() {
                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
 //      LOG(INPUT, Sev::Debug, "rdsize: {}", rdsize);
-      mystats.rx_packets++;
-      mystats.rx_bytes += rdsize;
+      stats_.rx_packets++;
+      stats_.rx_bytes += rdsize;
 
-      // mystats.fifo_free = input2proc_fifo.free();
+      // stats_.fifo_free = input2proc_fifo.free();
       if (!input2proc_fifo.push(eth_index)) {
-        mystats.fifo_push_errors++;
+        stats_.fifo_push_errors++;
       } else {
         eth_ringbuf->getNextBuffer();
       }
@@ -212,7 +209,7 @@ void GdGemBase::apply_configuration() {
         nmx_opts.time_config, nmx_opts.srs_mappings,
         nmx_opts.adc_threshold,
         NMXSettings.fileprefix,
-        nmx_opts.calfile);
+        nmx_opts.calfile, stats_, nmx_opts.enable_data_processing);
 
   } else if (nmx_opts.builder_type == "Readouts") {
     builder_ = std::make_shared<Gem::BuilderReadouts>(
@@ -294,20 +291,20 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
   //       as each iteration is completely independent, other than
   //       everything going to the same serializers
 
-  mystats.clusters_total  += matcher_->matched_events.size();
+  stats_.clusters_total  += matcher_->matched_events.size();
   for (auto& event : matcher_->matched_events)
   {
     if (!event.both_planes()) {
       if (event.ClusterA.hit_count() != 0) {
-        mystats.clusters_x_only++;
+        stats_.clusters_x_only++;
       }
       else {
-        mystats.clusters_y_only++;
+        stats_.clusters_y_only++;
       }
       continue;
     }
 
-    mystats.clusters_xy++;
+    stats_.clusters_xy++;
 
     neutron_event_ = nmx_opts.analyzer_->analyze(event);
 
@@ -323,13 +320,13 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     if (!neutron_event_.good)
     {
-      mystats.events_bad_utpc++;
+      stats_.events_bad++;
       continue;
     }
 
-    if (!nmx_opts.filter.valid(event, neutron_event_))
+    if (!nmx_opts.filter.valid(event))
     {
-      mystats.events_filter_rejects++;
+      stats_.events_filter_rejects++;
       continue;
     }
 
@@ -346,7 +343,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     if (!nmx_opts.geometry.valid_id(pixelid_))
     {
-      mystats.events_geom_errors++;
+      stats_.events_geom_errors++;
       continue;
     }
 
@@ -355,12 +352,15 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     {
       bin(hists_, event);
     }
-
+    //not needed, gives wrong results, since time order of clusters
+    //not guaranteed
+    /*
     if (neutron_event_.time < previous_full_time_) {
       LOG(PROCESS, Sev::Error, "Event time sequence error: {} < {}",
              neutron_event_.time, previous_full_time_);
     }
     previous_full_time_ = neutron_event_.time;
+    */
 
     truncated_time_ = neutron_event_.time - recent_pulse_time_;
     // \todo try different limits
@@ -370,7 +370,7 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
       recent_pulse_time_ = neutron_event_.time;
       truncated_time_ = 0;
       if (event_serializer.eventCount())
-        mystats.tx_bytes += event_serializer.produce();
+        stats_.tx_bytes += event_serializer.produce();
       event_serializer.pulseTime(recent_pulse_time_);
 //      LOG(PROCESS, Sev::Debug, "New offset time selected: {}", recent_pulse_time_);
     }
@@ -378,10 +378,10 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 //    LOG(PROCESS, Sev::Debug, "Good event: time={}, pixel={} from {}",
 //        truncated_time_, pixelid_, neutron_event_.to_string());
 
-    mystats.tx_bytes += event_serializer.addEvent(
+    stats_.tx_bytes += event_serializer.addEvent(
         static_cast<uint32_t>(truncated_time_), pixelid_);
-    mystats.events_good++;
-    mystats.readouts_in_good_events += event.total_hit_count();
+    stats_.events_good++;
+    stats_.events_good_hits += event.total_hit_count();
   }
   matcher_->matched_events.clear();
 }
@@ -405,7 +405,7 @@ void GdGemBase::processing_thread() {
   ev42serializer.setProducerCallback(
       std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
 
-  Gem::TrackSerializer track_serializer(256, 1, "nmx_tracks");
+  Gem::TrackSerializer track_serializer(256, "nmx_tracks");
   track_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
@@ -413,75 +413,75 @@ void GdGemBase::processing_thread() {
   hist_serializer.set_callback(
       std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
 
-  Gem::TrackSerializer raw_serializer(1500, 1, "nmx_hits");
+  Gem::TrackSerializer raw_serializer(1500, "nmx_hits");
   raw_serializer.set_callback(
           std::bind(&Producer::produce2<uint8_t>, &hits_producer, std::placeholders::_1));
 #pragma GCC diagnostic pop
   TSCTimer global_time, report_timer;
 
   unsigned int data_index;
+  int cnt = 0;
+  std::chrono::time_point<std::chrono::system_clock> timeEnd, timeStart;
+  timeStart = std::chrono::system_clock::now();
+  double avg = 0;
+  double total = 0;
+  int rep = 0;
   while (true) {
-    // mystats.fifo_free = input2proc_fifo.free();
+    // stats_.fifo_free = input2proc_fifo.free();
     if (!input2proc_fifo.pop(data_index)) {
-      mystats.processing_idle++;
+      stats_.processing_idle++;
       usleep(1);
     } else {
       auto len = eth_ringbuf->getDataLength(data_index);
       if (len == 0) {
-        mystats.fifo_seq_errors++;
+        stats_.fifo_seq_errors++;
       } else {
         builder_->process_buffer(
             eth_ringbuf->getDataBuffer(data_index), len);
-
-        // parser stats
-        //mystats.fc_seq_errors = builder_->stats.parser_frame_lost_error;
-        mystats.frame_seq_errors = builder_->stats.parser_frame_seq_errors;
-        mystats.framecounter_overflows = builder_->stats.parser_framecounter_overflows;
-        mystats.timestamp_seq_errors = builder_->stats.parser_timestamp_seq_errors;
-        mystats.timestamp_lost_errors = builder_->stats.parser_timestamp_lost_errors;
-        mystats.timestamp_overflows = builder_->stats.parser_timestamp_overflows;
-
-        mystats.bad_frames = builder_->stats.parser_bad_frames;
-        mystats.good_frames = builder_->stats.parser_good_frames;
-        mystats.readouts_error_bytes = builder_->stats.parser_error_bytes;
-        mystats.readouts_total = builder_->stats.parser_readouts;
-
-        // builder stats
-        mystats.readouts_bad_geometry = builder_->stats.geom_errors;
-        mystats.readouts_bad_adc = builder_->stats.adc_rejects;
-        mystats.readouts_adc_zero = builder_->stats.adc_zero;
-        mystats.readouts_good += (builder_->hit_buffer_x.size()
+        cnt++;
+        if(cnt == 10000) {
+          cnt = 0;
+          timeEnd = std::chrono::system_clock::now();
+          int ms = std::chrono::duration_cast < std::chrono::milliseconds > (timeEnd - timeStart).count();
+          rep++;
+          total += ms*0.001;
+          avg = total/rep;
+          std::cout << rep << ": 10000 x process_buffer " << ms*0.001 << " s, avg = " << avg << " ms\n";
+          timeStart = std::chrono::system_clock::now();
+        }
+        
+        if (nmx_opts.enable_data_processing) {
+          stats_.hits_good += (builder_->hit_buffer_x.size()
             + builder_->hit_buffer_y.size());
+          if (nmx_opts.send_raw_hits) {
+            Event dummy_event;
+            for (const auto& e : builder_->hit_buffer_x) {
+              dummy_event.ClusterA.insert(e);
+            }
+            for (const auto& e : builder_->hit_buffer_y) {
+              dummy_event.ClusterB.insert(e);
+            }
+            //LOG(PROCESS, Sev::Debug, "Sending raw data: {}", dummy_event.total_hit_count());
+            raw_serializer.add_track(dummy_event, 0, 0);
+          }
 
-        if (nmx_opts.send_raw_hits) {
-          Event dummy_event;
-          for (const auto& e : builder_->hit_buffer_x) {
-            dummy_event.ClusterA.insert(e);
+          if (nmx_opts.hit_histograms) {
+            for (const auto& e : builder_->hit_buffer_x) {
+              bin(hists_, e);
+            }
+            for (const auto& e : builder_->hit_buffer_y) {
+              bin(hists_, e);
+            }
           }
-          for (const auto& e : builder_->hit_buffer_y) {
-            dummy_event.ClusterB.insert(e);
-          }
-          //LOG(PROCESS, Sev::Debug, "Sending raw data: {}", dummy_event.total_hit_count());
-          raw_serializer.add_track(dummy_event, 0, 0);
-        }
 
-        if (nmx_opts.hit_histograms) {
-          for (const auto& e : builder_->hit_buffer_x) {
-            bin(hists_, e);
+          if (nmx_opts.perform_clustering) {
+            // do not flush
+            perform_clustering(false);
+            process_events(ev42serializer, track_serializer);
           }
-          for (const auto& e : builder_->hit_buffer_y) {
-            bin(hists_, e);
-          }
-        }
-
-        if (nmx_opts.perform_clustering) {
-          // do not flush
-          perform_clustering(false);
-          process_events(ev42serializer, track_serializer);
-        } else {
           builder_->hit_buffer_x.clear();
-          builder_->hit_buffer_y.clear();
-        }
+          builder_->hit_buffer_y.clear(); 
+        } 
       }
     }
 
@@ -497,15 +497,15 @@ void GdGemBase::processing_thread() {
 
       sample_next_track_ = nmx_opts.send_tracks;
 
-      mystats.tx_bytes += ev42serializer.produce();
+      stats_.tx_bytes += ev42serializer.produce();
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
-      mystats.kafka_produce_fails = event_producer.stats.produce_fails;
-      mystats.kafka_ev_errors = event_producer.stats.ev_errors;
-      mystats.kafka_ev_others = event_producer.stats.ev_others;
-      mystats.kafka_dr_errors = event_producer.stats.dr_errors;
-      mystats.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
+      stats_.kafka_produce_fails = event_producer.stats.produce_fails;
+      stats_.kafka_ev_errors = event_producer.stats.ev_errors;
+      stats_.kafka_ev_others = event_producer.stats.ev_others;
+      stats_.kafka_dr_errors = event_producer.stats.dr_errors;
+      stats_.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
 
       if (!hists_.isEmpty()) {
         LOG(PROCESS, Sev::Debug, "Sending histogram for {} readouts and {} clusters ",

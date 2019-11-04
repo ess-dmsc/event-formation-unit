@@ -65,6 +65,17 @@ void Socket::printBufferSizes(void) {
   LOG(IPC, Sev::Info, "Socket send buffer size: {}", getSockOpt(SO_SNDBUF));
 }
 
+void Socket::checkRxBufferSizes(std::int32_t MinRxBufferSize) {
+  int __attribute__((unused)) TxBufferSize;
+  int RxBufferSize;
+  getBufferSizes(TxBufferSize, RxBufferSize);
+  if (RxBufferSize < MinRxBufferSize) {
+    LOG(IPC, Sev::Warning,
+       fmt::format("receive buffer size error. expected >= {}, got {}",
+                   MinRxBufferSize, RxBufferSize));
+  }
+}
+
 int Socket::setRecvTimeout(int seconds, int usecs) {
   struct timeval timeout;
   timeout.tv_sec = seconds;

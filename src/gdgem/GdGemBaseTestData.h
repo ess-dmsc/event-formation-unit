@@ -12,10 +12,9 @@ std::string vmm3json = R"(
   "time_config" :
   {
     "tac_slope" : 60,
-    "bc_clock" : 20,
-    "trigger_resolution" : 3.125,
-    "target_resolution" : 0.5,
-    "acquisition_window" : 4000
+    "bc_clock" : 40,
+    "trigger_resolution" : 1.0,
+    "acquisition_window" : 4095
   },
 
   "srs_mappings" :
@@ -54,8 +53,6 @@ std::string vmm3json = R"(
 
   "filters" :
   {
-    "enforce_lower_uncertainty_limit" : false,
-    "lower_uncertainty_limit" : 6,
     "enforce_minimum_hits" : false,
     "minimum_hits" : 6
   },

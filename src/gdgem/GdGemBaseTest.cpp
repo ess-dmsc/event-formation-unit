@@ -16,7 +16,9 @@ public:
       : GdGemBase(Settings, ReadoutSettings){};
   ~GdGemBaseStandIn() = default;
   using Detector::Threads;
-  using GdGemBase::mystats;
+  //using GdGemBase::mystats;
+  //using Gem::NMXStats stats_;
+  using GdGemBase::stats_;
 };
 
 class GdGemBaseTest : public TestBase {
@@ -34,7 +36,7 @@ public:
 
 TEST_F(GdGemBaseTest, Constructor) {
   GdGemBaseStandIn Readout(Settings, LocalSettings);
-  EXPECT_EQ(Readout.mystats.rx_packets, 0);
+  EXPECT_EQ(Readout.stats_.rx_packets, 0);
 }
 
 // \todo this needs to be redone using the reference binary
@@ -64,9 +66,9 @@ TEST_F(GdGemBaseTest, DataReceive) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.mystats.rx_packets, 1);
-  EXPECT_EQ(Readout.mystats.readouts, 53);
-  EXPECT_EQ(Readout.mystats.readouts_error_bytes, 0);
+  EXPECT_EQ(Readout.stats_.rx_packets, 1);
+  EXPECT_EQ(Readout.stats_.readouts_data, 53);
+  EXPECT_EQ(Readout.stats_.readouts_error_bytes, 0);
 }
 #endif
 

@@ -1,28 +1,30 @@
 /** Copyright (C) 2016-2018 European Spallation Source ERIC */
 
 #include <gdgem/srs/BuilderVMM3.h>
+#include <gdgem/NMXStats.h>
 #include <common/reduction/clustering/GapClusterer.h>
 #include <common/TimeString.h>
 
 #include <common/Trace.h>
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 #include <common/Log.h>
 #undef TRC_MASK
-#define TRC_MASK 0
+#define TRC_MASK 1
 
 namespace Gem {
 
 BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
-                         SRSMappings digital_geometry,
+                         SRSMappings  digital_geometry,
                          uint16_t adc_threshold,
                          std::string dump_dir,
-                         std::shared_ptr<CalibrationFile> calfile)
-                         : parser_(1500)
-                         , time_intepreter_(time_intepreter)
+                         std::shared_ptr<CalibrationFile> calfile, NMXStats & stats, bool enable_data_processing)
+                         : time_intepreter_(time_intepreter)
                          , digital_geometry_(digital_geometry)
-                         , adc_threshold_ (adc_threshold) {
+                         , adc_threshold_ (adc_threshold)
+                         , stats_(stats),parser_(1500, stats,time_intepreter), data_processing_(enable_data_processing)
+                          {
   assert(calfile != nullptr);
   calfile_ = calfile;
 
@@ -31,28 +33,18 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
   }
 }
 
-void BuilderVMM3::process_buffer(char *buf, size_t size) {
-  parser_.receive(buf, size);
-  const auto &parser_stats = parser_.stats;
-  stats.parser_frame_seq_errors += parser_stats.frame_seq_errors;
-  stats.parser_framecounter_overflows += parser_stats.framecounter_overflows;
-  stats.parser_bad_frames += parser_stats.badFrames;
-  stats.parser_good_frames += parser_stats.goodFrames;
-  stats.parser_error_bytes += parser_stats.errors;
-  stats.parser_readouts += parser_stats.readouts;
-  stats.parser_timestamp_seq_errors += parser_stats.timestamp_seq_errors;
-  stats.parser_timestamp_overflows += parser_stats.timestamp_overflows;
-  stats.parser_timestamp_lost_errors += parser_stats.timestamp_lost_errors;
 
-  if (!parser_.stats.readouts) {
+void BuilderVMM3::process_buffer(char *buf, size_t size) {
+  int hits = parser_.receive(buf, size);
+  if (!hits) {  
     XTRACE(PROCESS, DEB, "No readouts after parse");
     return;
   }
-  XTRACE(PROCESS, DEB, "Readouts after parse: %u", parser_.stats.readouts);
+  XTRACE(PROCESS, DEB, "Readouts after parse: %d", hits);
 
   //field fec id starts at 1
-  readout.fec = parser_.parserData.fecId;
-  for (unsigned int i = 0; i < parser_.stats.readouts; i++) {
+  readout.fec = parser_.pd.fecId;
+  for (int i = 0; i < hits; i++) {
     auto &d = parser_.data[i];
     if (d.hasDataMarker) {
       // \todo should these be functions of SRSTime?
@@ -80,62 +72,55 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
       XTRACE(PROCESS, DEB, "srs/vmm chip: %d, channel: %d",
              readout.chip_id, d.chno);
 
+      
       if (readout_file_) {
         readout_file_->push(readout);
+      }  
+    
+      if(data_processing_) {
+        hit.plane = digital_geometry_.get_plane(readout);
+        hit.coordinate = digital_geometry_.get_strip(readout);
+        hit.weight = readout.adc;
+        hit.time = readout.srs_timestamp;
+        if (readout.chiptime >= 0)
+          hit.time += static_cast<uint64_t>(readout.chiptime);
+        else
+          hit.time -= static_cast<uint64_t>(-readout.chiptime);
+    
+
+        if ((hit.plane != 0) && (hit.plane != 1)) {
+          stats_.hits_bad_geometry++;
+          XTRACE(PROCESS, DEB, "Bad SRS mapping (plane) -- fec=%d, chip=%d",
+                readout.fec, readout.chip_id);
+          continue;
+        }
+
+        if (hit.coordinate == Hit::InvalidCoord) {
+          stats_.hits_bad_geometry++;
+          XTRACE(PROCESS, DEB, "Bad SRS mapping (coordinate) -- fec=%d, chip=%d",
+              readout.fec, readout.chip_id);
+          continue;
+        }
+
+        if (hit.weight == 0 || (!readout.over_threshold && hit.weight < adc_threshold_)) {
+          stats_.hits_bad_adc++;
+          XTRACE(PROCESS, DEB, "ADC=0 or ADC below threshold  adc=%d", hit.weight);
+          continue;
+        }
+
+        if (hit.plane == 1) {
+          hit_buffer_y.emplace_back(hit);
+        }
+
+        if (hit.plane == 0) {
+          hit_buffer_x.emplace_back(hit);
+        }
+
+      } else {
+        LOG(PROCESS, Sev::Warning, "No data marker in hit (increment counter?)");
       }
-
-      hit.plane = digital_geometry_.get_plane(readout);
-      hit.coordinate = digital_geometry_.get_strip(readout);
-      hit.weight = readout.adc;
-      hit.time = readout.srs_timestamp;
-      if (readout.chiptime >= 0)
-        hit.time += static_cast<uint64_t>(readout.chiptime);
-      else
-        hit.time -= static_cast<uint64_t>(-readout.chiptime);
-
-      if ((hit.plane != 0) && (hit.plane != 1)) {
-        stats.geom_errors++;
-        XTRACE(PROCESS, DEB, "Bad SRS mapping (plane) -- fec=%d, chip=%d",
-               readout.fec, readout.chip_id);
-        continue;
-      }
-
-      if (hit.coordinate == Hit::InvalidCoord) {
-        stats.geom_errors++;
-        XTRACE(PROCESS, DEB, "Bad SRS mapping (coordinate) -- fec=%d, chip=%d",
-            readout.fec, readout.chip_id);
-        continue;
-      }
-
-      if (!readout.over_threshold && (hit.weight < adc_threshold_)) {
-        stats.adc_rejects++;
-        XTRACE(PROCESS, DEB, "Below ADC threshold  adc=%d", hit.weight);
-        continue;
-      }
-
-
-      if (hit.weight == 0) {
-        XTRACE(PROCESS, WAR,
-            "Accepted readout with adc=0, may distort uTPC results, hit=%s", hit.to_string().c_str());
-        // \todo What to do? Cannot be 0 for CoM in uTPC. Reject?
-        stats.adc_zero++;
-        hit.weight = 1;
-      }
-
-
-      if (hit.plane == 1) {
-        hit_buffer_y.emplace_back(hit);
-      }
-
-      if (hit.plane == 0) {
-        hit_buffer_x.emplace_back(hit);
-      }
-
-    } else {
-      LOG(PROCESS, Sev::Warning, "No data marker in hit (increment counter?)");
     }
   }
-
 }
 
 }

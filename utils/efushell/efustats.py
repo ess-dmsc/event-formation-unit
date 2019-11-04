@@ -21,9 +21,9 @@ print("Available stats:")
 verify = ""
 for statnum in range(1, numstats + 1):
     res = metrics._get_efu_command("STAT_GET " + str(statnum))
-    verify = verify + res.split()[1] + ":" + res.split()[2] + " "
+    verify = verify + str(res.split()[1]) + ":" + str(res.split()[2]) + " "
+    res=str(res,'utf-8')
     print(res)
 
 if args.v:
-    print
-    print verify
+    print(verify)

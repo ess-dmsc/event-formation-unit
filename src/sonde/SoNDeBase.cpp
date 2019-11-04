@@ -69,6 +69,7 @@ void SONDEIDEABase::input_thread() {
                          EFUSettings.DetectorPort);
   UDPReceiver sondedata(local);
   sondedata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  sondedata.checkRxBufferSizes(EFUSettings.DetectorRxBufferSize);
   sondedata.printBufferSizes();
   sondedata.setRecvTimeout(0, 100000); // secs, usecs, 1/10 second
 

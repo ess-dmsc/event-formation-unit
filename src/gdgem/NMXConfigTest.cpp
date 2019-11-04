@@ -24,18 +24,11 @@ TEST_F(NMXConfigTest, ConstructorDefaults) {
 TEST_F(NMXConfigTest, EventFilter) {
   EventFilter filter;
   Event e; // use empty Event
-  filter.enforce_lower_uncertainty_limit = false;
   filter.enforce_minimum_hits = false;
-  EXPECT_TRUE(filter.valid(e, ReducedEvent()));
+  EXPECT_TRUE(filter.valid(e));
 
-  filter.enforce_lower_uncertainty_limit = false;
   filter.enforce_minimum_hits = true;
-  EXPECT_FALSE(filter.valid(e, ReducedEvent()));
-
-  /// \todo test this behaviour
-  // filter.enforce_lower_uncertainty_limit = true;
-  // filter.enforce_minimum_hits = false;
-  // EXPECT_FALSE(filter.valid(e));
+  EXPECT_FALSE(filter.valid(e));
 }
 
 
@@ -44,9 +37,8 @@ TEST_F(NMXConfigTest, NoConfigFile) {
 }
 
 TEST_F(NMXConfigTest, DebugPrint) {
-  MESSAGE() << "This is Not a test, but simply exercises the debug print code" << "\n";
+  MESSAGE() << "This is not a test, but simply exercises the debug print code" << "\n";
   NMXConfig nmxconfig;
-  nmxconfig.filter.enforce_lower_uncertainty_limit = true;
   nmxconfig.filter.enforce_minimum_hits = true;
   auto str = nmxconfig.debug();
   MESSAGE() << str << "\n";

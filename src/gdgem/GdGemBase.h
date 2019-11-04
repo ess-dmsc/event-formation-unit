@@ -11,6 +11,7 @@
 #include <common/Detector.h>
 #include <common/RingBuffer.h>
 #include <gdgem/nmx/AbstractBuilder.h>
+#include <gdgem/NMXStats.h>
 #include <gdgem/NMXConfig.h>
 #include <common/SPSCFifo.h>
 #include <common/reduction/clustering/AbstractClusterer.h>
@@ -52,60 +53,6 @@ protected:
   CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
   RingBuffer<eth_buffer_size> *eth_ringbuf;
 
-  struct {
-    // Input Counters
-    int64_t rx_packets;
-    int64_t rx_bytes;
-    int64_t fifo_push_errors;
-    // \todo Morten: explain. What is going on here?
-    int64_t pad_a[5]; // cppcheck-suppress unusedStructMember
-
-    // Processing thread
-    int64_t processing_idle;
-    int64_t fifo_seq_errors;
-
-    // Parser stats
-    //int64_t fc_seq_errors;
-    int64_t frame_seq_errors;
-    int64_t framecounter_overflows;
-    int64_t timestamp_lost_errors;
-    int64_t timestamp_seq_errors; 
-    int64_t timestamp_overflows;
-    int64_t bad_frames;
-    int64_t good_frames;
-    int64_t readouts_error_bytes;
-    int64_t readouts_total;
-
-    // Builder Counters
-    int64_t readouts_bad_geometry;
-    int64_t readouts_bad_adc;
-    int64_t readouts_adc_zero;
-    int64_t readouts_good;
-
-    // Clustering
-    int64_t clusters_total;
-    int64_t clusters_x_only;
-    int64_t clusters_y_only;
-    int64_t clusters_xy;
-
-    // Analysis
-    int64_t events_bad_utpc;
-    int64_t events_filter_rejects;
-    int64_t events_geom_errors;
-    int64_t events_good;
-    int64_t readouts_in_good_events;
-
-    // Producer
-    int64_t tx_bytes;
-
-    // Kafka stats below are common to all detectors
-    int64_t kafka_produce_fails;
-    int64_t kafka_ev_errors;
-    int64_t kafka_ev_others;
-    int64_t kafka_dr_errors;
-    int64_t kafka_dr_noerrors;
-  } __attribute__((aligned(64))) mystats;
-
   struct NMXSettings NMXSettings;
   Gem::NMXConfig nmx_opts;
 
@@ -113,6 +60,9 @@ protected:
   std::shared_ptr<AbstractClusterer> clusterer_x_;
   std::shared_ptr<AbstractClusterer> clusterer_y_;
   std::shared_ptr<AbstractMatcher> matcher_;
+
+  Gem::NMXStats stats_;
+
   Hists hists_{std::numeric_limits<uint16_t>::max(),
                std::numeric_limits<uint16_t>::max()};
 

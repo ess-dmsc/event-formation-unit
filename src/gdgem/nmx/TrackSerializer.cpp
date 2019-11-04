@@ -24,10 +24,9 @@ static_assert(FLATBUFFERS_LITTLEENDIAN,
 
 namespace Gem {
 
-TrackSerializer::TrackSerializer(size_t maxarraylength, double target_res, std::string source_name)
+TrackSerializer::TrackSerializer(size_t maxarraylength, std::string source_name)
     : maxlen(maxarraylength)
     , builder(maxlen * EV_SIZE * 2 + BUF_STATIC_SIZE + 256)
-    , target_resolution_(target_res)
     , SourceName (source_name) {
   builder.Clear();
 }
@@ -47,14 +46,14 @@ bool TrackSerializer::add_track(const Event &event, double utpc_x, double utpc_y
   for (auto &evx : event.ClusterA.hits) {
     xtrack.push_back(
         Createpos(builder,
-                  static_cast<uint16_t>((evx.time - time_offset) * target_resolution_),
+                  static_cast<uint16_t>((evx.time - time_offset)),
                   evx.coordinate, evx.weight));
   }
 
   for (auto &evy : event.ClusterB.hits) {
     ytrack.push_back(
         Createpos(builder,
-                  static_cast<uint16_t>((evy.time - time_offset) * target_resolution_),
+                  static_cast<uint16_t>((evy.time - time_offset)),
                   evy.coordinate, evy.weight));
   }
 

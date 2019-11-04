@@ -54,10 +54,11 @@
 
   "filters" :
   {
-    "enforce_lower_uncertainty_limit" : false,
-    "lower_uncertainty_limit" : 6,
     "enforce_minimum_hits" : false,
-    "minimum_hits" : 6
+    "minimum_hits" : 6,
+    "enforce_charge_ratio": false,
+    "plane_0_vs_1_ratio_max": 10,
+  	"plane_0_vs_1_ratio_min": 0.1
   },
 
   "cluster_adc_downshift" : 6,

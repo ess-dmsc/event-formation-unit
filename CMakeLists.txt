@@ -88,7 +88,7 @@ add_subdirectory(utils/udp)
 
 add_custom_target(unit_tests
     DEPENDS ${unit_test_targets})
-add_custom_target(runtest
+add_custom_target(run-test
     COMMAND ${CMAKE_CTEST_COMMAND} -V -R regular_*
     DEPENDS unit_tests)
 add_custom_target(valgrind
@@ -134,7 +134,7 @@ add_custom_target(hints
   COMMAND echo "Specify a build string:                 cmake -DBUILDSTR=v1.2.3"
   COMMAND echo "Set build type to debug - default:      cmake -DCMAKE_BUILD_TYPE=Debug"
   COMMAND echo "Set build type to release:              cmake -DCMAKE_BUILD_TYPE=Release"
-  COMMAND echo "    NOTE: Relase mode requires a build string"
+  COMMAND echo "    NOTE: Release mode requires a build string"
   COMMAND echo ""
   COMMAND echo "CMake hints advanced/not generally used"
   COMMAND echo "--------------------------------------------------------------------------------"

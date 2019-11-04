@@ -32,7 +32,7 @@ protected:
 };
 
 TEST_F(TrackSerializerTest, Constructor) {
-  TrackSerializer tser(2560, 1, "some_source");
+  TrackSerializer tser(2560, "some_source");
   auto buffer = tser.serialize();
   EXPECT_EQ(buffer.size, 0);
   EXPECT_EQ(buffer.address, nullptr);
@@ -40,7 +40,7 @@ TEST_F(TrackSerializerTest, Constructor) {
 
 TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
   int entries = NB_ENTRIES;
-  TrackSerializer tser(entries, 1, "some_source");
+  TrackSerializer tser(entries,"some_source");
   for (int i = 0; i < entries + 1; i++) {
     addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
@@ -49,7 +49,7 @@ TEST_F(TrackSerializerTest, AddTrackTooManyHits) {
 
 TEST_F(TrackSerializerTest, Serialize) {
   unsigned int entries = NB_ENTRIES;
-  TrackSerializer tser(entries, 1, "some_source");
+  TrackSerializer tser(entries, "some_source");
   for (unsigned int i = 0; i < entries; i++) {
     addxandy(i, 2 * i, 500, i - 1, 3 * i - 1, 500);
   }
@@ -68,7 +68,7 @@ TEST_F(TrackSerializerTest, DeSerialize) {
   unsigned int entries = NB_ENTRIES;
   unsigned int entry_size = 4 * 3; // Three uint32_t's
 
-  TrackSerializer tser(entries, 1, "some_source");
+  TrackSerializer tser(entries, "some_source");
   for (unsigned int i = 0; i < entries; i++) {
     addxandy(i, 0x1111, 0x2222, 100 + i, 0x3333, 0x4444);
   }
@@ -110,7 +110,7 @@ TEST_F(TrackSerializerTest, Validate1000IncreasingSize) {
     EXPECT_FALSE(event.ClusterA.hits.size());
     EXPECT_FALSE(event.ClusterB.hits.size());
 
-    TrackSerializer tser(entries, 1, "some_source");
+    TrackSerializer tser(entries, "some_source");
     for (unsigned int i = 0; i < entries; i++) {
       addxandy(i, i * 2, i * 3 + 1, entries - i, i * 2 + 0x1000,
                i * 3 + 0x2000);
@@ -156,7 +156,7 @@ TEST_F(TrackSerializerTest, Validate1000SameSize) {
   unsigned int entries = 256;
   unsigned int entry_size = 4 * 3; // Three uint32_t's
   MESSAGE() << "Reusing the same TrackSerializer object\n";
-  TrackSerializer tser(entries, 1, "some_source");
+  TrackSerializer tser(entries, "some_source");
   for (unsigned int i = 1; i <= 1000; i *= 2) {
     event.ClusterA.hits.clear();
     event.ClusterB.hits.clear();
