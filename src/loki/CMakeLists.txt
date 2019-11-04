@@ -31,4 +31,5 @@ set(LokiBaseTest_SRC
 )
 create_test_executable(LokiBaseTest)
 
+add_subdirectory(readout)
 add_subdirectory(test)
