@@ -1,7 +1,7 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
 //#include <common/gccintel.h> // UNUSED macros
-#include <algorithm>
+#include <cstring>
 #include <common/Trace.h>
 #include <readout/Readout.h>
 
