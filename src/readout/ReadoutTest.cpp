@@ -67,6 +67,20 @@ TEST_F(ReadoutTest, OkVersion) {
 }
 
 
+TEST_F(ReadoutTest, SeqNumbers) {
+  ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 0);
+
+  RdOut.validate((char *)&OkVersion[0], OkVersion.size(), DataType);
+  ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 1);
+
+  RdOut.validate((char *)&OkVersionNextSeq[0], OkVersionNextSeq.size(), DataType);
+  ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 1);
+
+  RdOut.validate((char *)&OkVersionNextSeq[0], OkVersionNextSeq.size(), DataType);
+  ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 2);
+}
+
+
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
