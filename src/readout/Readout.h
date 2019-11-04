@@ -14,6 +14,10 @@
 class Readout {
 public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
+  enum DetectorType { Loki4Amp = 0x30 };
+
+  /// \todo sequence numbers should be per output queue, eventually
+  uint64_t NextSeqNum{0};
 
   // Header common to all ESS readout data
   struct PacketHeaderV0 {
@@ -21,14 +25,22 @@ public:
     uint8_t TypeSubType;
     uint8_t OutputQueue;
     uint16_t TotalLength;
-    uint32_t SeqNum;
     uint32_t PulseHigh;
     uint32_t PulseLow;
     uint32_t PrevPulseHigh;
     uint32_t PrevPulseLow;
-  } Header __attribute__((packed));
+    uint32_t SeqNum;
+  } __attribute__((packed));
 
-  // Header for eack data block
+  // Holds data relevant for processing of the current packet
+  struct {
+    PacketHeaderV0 * HeaderPtr;
+    uint16_t DataLength;
+    char * DataPtr;
+  } Packet;
+
+  // Header for each data block
+  /// \todo change order to uint16, uint8, uint8
   struct DataHeader {
     uint8_t RingId;
     uint8_t FENId;
@@ -36,17 +48,19 @@ public:
   } __attribute__((packed));
 
   /// \brief validate a readout buffer
-  /// \param[in] buffer pointer to data
-  /// \param[in] size length of buffer in bytes
-  /// \return on success return 0, else -1
+  /// \param[in] Buffer pointer to data
+  /// \param[in] Size length of buffer in bytes
+  /// \param[in] Type expected detector type
+  /// \return on success return 0, else < 0
   int validate(const char *Buffer, uint32_t Size, uint8_t Type);
 
-  // For Grafana eventually
+  // Counters(for Grafana)
   struct {
     int64_t ErrorBuffer{0};
     int64_t ErrorSize{0};
     int64_t ErrorVersion{0};
     int64_t ErrorTypeSubType{0};
+    int64_t ErrorSeqNum{0};
   } Stats;
 };
 

@@ -4,18 +4,19 @@
 #include <common/gccintel.h> // UNUSED macros
 #include <readout/Readout.h>
 
-#define CKSUMSIZE 4U
-
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 const unsigned int MaxUdpDataSize{8972};
 const unsigned int MinDataSize{4}; // just cookie and version
 
 int Readout::validate(const char *Buffer, uint32_t Size, uint8_t UNUSED Type) {
-  if (Buffer == nullptr) {
-    XTRACE(PROCESS, WAR,
-           "no buffer specified"); /**< \todo increment counter */
+  Packet.HeaderPtr = 0;
+  Packet.DataPtr = 0;
+  Packet.DataLength = 0;
+
+  if (Buffer == nullptr or Size == 0) {
+    XTRACE(PROCESS, WAR, "no buffer specified");
     Stats.ErrorBuffer++;
     return -Readout::EBUFFER;
   }
@@ -33,21 +34,40 @@ int Readout::validate(const char *Buffer, uint32_t Size, uint8_t UNUSED Type) {
     return -Readout::EHEADER;
   }
 
-  // Now we can add more header size checks
-  if (Size < sizeof(Readout::PacketHeaderV0)) {
+  // Packet is ESS readout version 0,
+  // now we can add more header size checks
+  if (Size < sizeof(PacketHeaderV0)) {
     XTRACE(PROCESS, WAR, "Invalid data size for v0 (%u)", Size);
     Stats.ErrorSize++;
     return -Readout::ESIZE;
   }
 
-  auto HeaderPtr = (Readout::PacketHeaderV0 *)Buffer;
+  // Is is safe to cast packet header v0 strut to data
+  Packet.HeaderPtr = (PacketHeaderV0 *)Buffer;
 
-  if (HeaderPtr->TypeSubType != Type) {
+  if (Size < Packet.HeaderPtr->TotalLength or Packet.HeaderPtr->TotalLength < sizeof(PacketHeaderV0)) {
+    XTRACE(PROCESS, WAR, "Data length mismatch, expected %u, got %u",
+      Packet.HeaderPtr->TotalLength, Size);
+    Stats.ErrorSize++;
+    return -Readout::ESIZE;
+  }
+
+  if (Packet.HeaderPtr->TypeSubType != Type) {
     XTRACE(PROCESS, WAR, "Unsupported data type for v0 (%u)", Type);
     Stats.ErrorTypeSubType++;
     return -Readout::EHEADER;
   }
 
+  if (NextSeqNum != Packet.HeaderPtr->SeqNum) {
+    XTRACE(PROCESS, WAR, "Bad sequence number (expected %u, got %u)",
+        NextSeqNum, Packet.HeaderPtr->SeqNum);
+    Stats.ErrorSeqNum++;
+    NextSeqNum = Packet.HeaderPtr->SeqNum;
+  }
+
+  NextSeqNum++;
+  Packet.DataPtr = (char * )(Buffer + sizeof(PacketHeaderV0));
+  Packet.DataLength = Packet.HeaderPtr->TotalLength - sizeof(PacketHeaderV0);
 
   return Readout::OK;
 }

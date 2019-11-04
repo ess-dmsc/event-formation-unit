@@ -7,9 +7,8 @@
 class ReadoutTest : public TestBase {
 protected:
   Readout RdOut;
-  char buffer[9000];
   const int DataType{0x30};
-  void SetUp() override { memset(buffer, 0, sizeof(buffer)); }
+  void SetUp() override {}
   void TearDown() override {}
 };
 
@@ -18,6 +17,7 @@ TEST_F(ReadoutTest, Constructor) {
   ASSERT_EQ(RdOut.Stats.ErrorSize, 0);
   ASSERT_EQ(RdOut.Stats.ErrorVersion, 0);
   ASSERT_EQ(RdOut.Stats.ErrorTypeSubType, 0);
+  ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 0);
 }
 
 // nullptr as buffer
@@ -28,7 +28,7 @@ TEST_F(ReadoutTest, ErrorBuffer) {
 }
 
 TEST_F(ReadoutTest, HeaderLTMin) {
-  auto Res = RdOut.validate((char *)&ErrCookie[0], 3, DataType);
+  auto Res = RdOut.validate((char *)&ErrCookie[0], 3, Readout::Loki4Amp);
   ASSERT_EQ(Res, -Readout::ESIZE);
   ASSERT_EQ(RdOut.Stats.ErrorSize, 1);
 }
@@ -58,10 +58,14 @@ TEST_F(ReadoutTest, OkVersion) {
     auto Res = RdOut.validate((char *)&OkVersion[0], Size, DataType);
     ASSERT_EQ(Res, -Readout::ESIZE);
     ASSERT_EQ(RdOut.Stats.ErrorSize, Errors);
+    ASSERT_EQ(RdOut.Packet.DataPtr, nullptr);
   }
   auto Res = RdOut.validate((char *)&OkVersion[0], OkVersion.size(), DataType);
   ASSERT_EQ(Res, Readout::OK);
+  ASSERT_EQ(RdOut.Packet.DataPtr, (char *)(&OkVersion[0] + sizeof(Readout::PacketHeaderV0)));
+  ASSERT_EQ(RdOut.Packet.DataLength, 0);
 }
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
