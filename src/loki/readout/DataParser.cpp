@@ -16,10 +16,23 @@ int DataParser::parse(const char * Buffer, unsigned int Size) {
 
   if (BytesLeft < sizeof(Readout::DataHeader)) {
     Stats.ErrorBytes += BytesLeft;
+    XTRACE(DATA, DEB, "Not enough data left for header");
     return Stats.Readouts;
   }
+
+
   auto DataHdrPtr = (Readout::DataHeader *)Buffer;
+
+  if (BytesLeft < DataHdrPtr->DataLength) {
+    XTRACE(DATA, DEB, "Data size mismatch, header says %u got %d",
+       DataHdrPtr->DataLength, BytesLeft);
+    Stats.ErrorBytes += BytesLeft;
+    return Stats.Readouts;
+  }
+
   if (DataHdrPtr->RingId > MaxRingId or DataHdrPtr->FENId > MaxFENId) {
+    XTRACE(DATA, WAR, "Invalid RingId (%u) or FENId (%u)",
+       DataHdrPtr->RingId, DataHdrPtr->FENId);
     Stats.ErrorHeaders++;
     Stats.ErrorBytes += BytesLeft;
     return Stats.Readouts;

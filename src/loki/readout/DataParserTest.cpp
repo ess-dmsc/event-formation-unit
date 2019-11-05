@@ -45,7 +45,7 @@ TEST_F(DataParserTest, GoodRingBadFEN) {
 }
 
 TEST_F(DataParserTest, GoodRingGoodFEN) {
-  auto Res = Parser.parse((char *)&OkThreeLokiReadouts[0], 4);
+  auto Res = Parser.parse((char *)&OkThreeLokiReadouts[0], OkThreeLokiReadouts.size());
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
   ASSERT_EQ(Parser.Stats.ErrorHeaders, 0);
