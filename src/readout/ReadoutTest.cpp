@@ -21,8 +21,15 @@ TEST_F(ReadoutTest, Constructor) {
 }
 
 // nullptr as buffer
-TEST_F(ReadoutTest, ErrorBuffer) {
+TEST_F(ReadoutTest, ErrorBufferPtr) {
   auto Res = RdOut.validate(0, 100, DataType);
+  ASSERT_EQ(Res, -Readout::EBUFFER);
+  ASSERT_EQ(RdOut.Stats.ErrorBuffer, 1);
+}
+
+// size is 0
+TEST_F(ReadoutTest, ErrorBufferSize) {
+  auto Res = RdOut.validate((char *)100, 0, DataType);
   ASSERT_EQ(Res, -Readout::EBUFFER);
   ASSERT_EQ(RdOut.Stats.ErrorBuffer, 1);
 }
@@ -79,6 +86,18 @@ TEST_F(ReadoutTest, SeqNumbers) {
   RdOut.validate((char *)&OkVersionNextSeq[0], OkVersionNextSeq.size(), DataType);
   ASSERT_EQ(RdOut.Stats.ErrorSeqNum, 2);
 }
+
+TEST_F(ReadoutTest, BadReadoutType) {
+  auto Res = RdOut.validate((char *)&OkThreeLokiReadouts[0], OkThreeLokiReadouts.size(), 0xff);
+  ASSERT_EQ(Res, -Readout::EHEADER);
+  ASSERT_EQ(RdOut.Stats.ErrorTypeSubType, 1);
+}
+
+TEST_F(ReadoutTest, DataLengthMismatch) {
+  auto res = RdOut.validate((char *)&OkThreeLokiReadouts[0], OkThreeLokiReadouts.size() - 1, DataType);
+  ASSERT_EQ(res, -Readout::ESIZE);
+}
+
 
 
 int main(int argc, char **argv) {
