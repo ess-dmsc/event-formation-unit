@@ -13,7 +13,6 @@ protected:
   void TearDown() override {}
 };
 
-
 TEST_F(DataParserTest, Constructor) {
   ASSERT_EQ(Parser.Stats.Readouts, 0);
   ASSERT_EQ(Parser.Stats.Headers, 0);
@@ -23,36 +22,31 @@ TEST_F(DataParserTest, Constructor) {
 
 TEST_F(DataParserTest, BadSize) {
   auto Res = Parser.parse((char *)&ErrBadRingGoodFEN[0], 3);
-  ASSERT_EQ(Res, 0);
-  ASSERT_EQ(Parser.Stats.Readouts, 0);
+  ASSERT_EQ(Parser.Stats.Readouts, Res);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 3);
 }
 
 TEST_F(DataParserTest, BadRingGoodFEN) {
   auto Res = Parser.parse((char *)&ErrBadRingGoodFEN[0], 4);
-  ASSERT_EQ(Res, 0);
-  ASSERT_EQ(Parser.Stats.Readouts, 0);
+  ASSERT_EQ(Parser.Stats.Readouts, Res);
   ASSERT_EQ(Parser.Stats.ErrorHeaders, 1);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 4);
 }
 
 TEST_F(DataParserTest, GoodRingBadFEN) {
   auto Res = Parser.parse((char *)&ErrGoodRingBadFEN[0], 4);
-  ASSERT_EQ(Res, 0);
-  ASSERT_EQ(Parser.Stats.Readouts, 0);
+  ASSERT_EQ(Parser.Stats.Readouts, Res);
   ASSERT_EQ(Parser.Stats.ErrorHeaders, 1);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 4);
 }
 
-TEST_F(DataParserTest, GoodRingGoodFEN) {
-  auto Res = Parser.parse((char *)&OkThreeLokiReadouts[0], OkThreeLokiReadouts.size());
-  ASSERT_EQ(Res, 0);
-  ASSERT_EQ(Parser.Stats.Readouts, 0);
+TEST_F(DataParserTest, ParseThree) {
+  auto Res =
+      Parser.parse((char *)&OkThreeLokiReadouts[0], OkThreeLokiReadouts.size());
+  ASSERT_EQ(Parser.Stats.Readouts, Res);
   ASSERT_EQ(Parser.Stats.ErrorHeaders, 0);
   ASSERT_EQ(Parser.Stats.ErrorBytes, 0);
 }
-
-
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
