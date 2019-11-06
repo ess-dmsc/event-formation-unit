@@ -446,7 +446,7 @@ void GdGemBase::processing_thread() {
           rep++;
           total += ms*0.001;
           avg = total/rep;
-          std::cout << rep << ": 10000 x process_buffer " << ms*0.001 << " s, avg = " << avg << " ms\n";
+          std::cout << rep << ": 10000 x process_buffer " << ms*0.001 << " s, avg = " << avg << " s\n";
           timeStart = std::chrono::system_clock::now();
         }
         
