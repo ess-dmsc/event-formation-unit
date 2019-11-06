@@ -64,8 +64,6 @@ TEST_F(GdGemBaseTest, DataReceive) {
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
   EXPECT_EQ(Readout.stats_.rx_packets, 1);
-  EXPECT_EQ(Readout.stats_.parser_data, 53);
-  EXPECT_EQ(Readout.stats_.parser_error_bytes, 0);
 }
 
 int main(int argc, char **argv) {
