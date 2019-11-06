@@ -62,7 +62,7 @@ using namespace Loki;
 class CombinedParserTest : public TestBase {
 protected:
   const int DataType{0x30};
-  Readout Readout;
+  Readout CommonReadout;
   DataParser LokiParser;
   void SetUp() override {}
   void TearDown() override {}
@@ -70,9 +70,9 @@ protected:
 
 
 TEST_F(CombinedParserTest, ParseUDPPacket) {
-  auto Res = Readout.validate((char *)&UdpPayload[0], UdpPayload.size(), DataType);
+  auto Res = CommonReadout.validate((char *)&UdpPayload[0], UdpPayload.size(), DataType);
   ASSERT_EQ(Res, Readout::OK);
-  Res = LokiParser.parse(Readout.Packet.DataPtr, Readout.Packet.DataLength);
+  Res = LokiParser.parse(CommonReadout.Packet.DataPtr, CommonReadout.Packet.DataLength);
   ASSERT_EQ(Res, 6);
 
   // Just for visual inspection for now
