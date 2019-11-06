@@ -19,6 +19,7 @@ public:
 
   const unsigned int MaxRingId{11};
   const unsigned int MaxFENId{23};
+  const unsigned int MaxReadoutsInPacket{500};
 
   struct LokiReadout // 32 bytes
   {
@@ -32,10 +33,23 @@ public:
     uint16_t AmpD;
   } __attribute__((__packed__));
 
-  DataParser(){};
+  DataParser(){
+    Result.reserve(MaxReadoutsInPacket);
+  };
   ~DataParser(){};
 
+  //
   int parse(const char *buffer, unsigned int size);
+
+  //
+  struct ParsedData {
+    uint8_t RingId;
+    uint8_t FENId;
+    std::vector<LokiReadout> Data;
+  };
+
+  // To be iterated over in processing thread
+  std::vector<struct ParsedData> Result;
 
   struct {
     int64_t Readouts{0};
