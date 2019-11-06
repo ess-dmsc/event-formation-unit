@@ -16,8 +16,6 @@ public:
       : GdGemBase(Settings, ReadoutSettings){};
   ~GdGemBaseStandIn() = default;
   using Detector::Threads;
-  //using GdGemBase::mystats;
-  //using Gem::NMXStats stats_;
   using GdGemBase::stats_;
 };
 
@@ -56,7 +54,6 @@ TEST_F(GdGemBaseTest, GetCalibrationCmd) {
 }
 
 
-#if 0
 TEST_F(GdGemBaseTest, DataReceive) {
   GdGemBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
@@ -67,10 +64,9 @@ TEST_F(GdGemBaseTest, DataReceive) {
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
   EXPECT_EQ(Readout.stats_.rx_packets, 1);
-  EXPECT_EQ(Readout.stats_.readouts_data, 53);
-  EXPECT_EQ(Readout.stats_.readouts_error_bytes, 0);
+  EXPECT_EQ(Readout.stats_.parser_data, 53);
+  EXPECT_EQ(Readout.stats_.parser_error_bytes, 0);
 }
-#endif
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);

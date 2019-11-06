@@ -18,9 +18,9 @@ const int ETHERTYPE_IPV4 = 0x0800;
 //const int IPPROTO_UDP = 17;
 // Header and data location specifications
 const int ETHERTYPE_OFFSET = 12;
-const int ETHERNET_HEADER_SIZE = 14;
+//const int ETHERNET_HEADER_SIZE = 14;
 const int IP_HEADR_OFFSET = 14;
-const int IP_HEADER_SIZE = 20;
+//const int IP_HEADER_SIZE = 20;
 const int UDP_HEADER_OFFSET = 34;
 const int UDP_HEADER_SIZE = 8;
 const int UDP_DATA_OFFSET = 42;
@@ -81,7 +81,7 @@ int ReaderPcap::validatePacket(pcap_pkthdr *header, const unsigned char *data) {
   }
   Stats.IpProtoUDP++;
 
-  assert(header->len > ETHERNET_HEADER_SIZE + IP_HEADER_SIZE + UDP_HEADER_SIZE);
+  //assert(header->len > ETHERNET_HEADER_SIZE + IP_HEADER_SIZE + UDP_HEADER_SIZE);
   assert(Stats.PacketsTotal == Stats.EtherTypeIpv4 + Stats.EtherTypeArp + Stats.EtherTypeUnknown);
   assert(Stats.EtherTypeIpv4 == Stats.IpProtoUDP + Stats.IpProtoUnknown);
 
