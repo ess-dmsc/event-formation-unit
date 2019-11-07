@@ -166,7 +166,7 @@ void GdGemBase::input_thread() {
     if ((rdsize = nmxdata.receive(eth_ringbuf->getDataBuffer(eth_index),
                                   eth_ringbuf->getMaxBufSize())) > 0) {
       eth_ringbuf->setDataLength(eth_index, rdsize);
-//      LOG(INPUT, Sev::Debug, "rdsize: {}", rdsize);
+      XTRACE(PROCESS, DEB, "rdsize: %zu", rdsize);
       stats_.rx_packets++;
       stats_.rx_bytes += rdsize;
 
@@ -232,7 +232,7 @@ void GdGemBase::apply_configuration() {
     auto matcher = std::make_shared<CenterMatcher>(
         nmx_opts.time_config.acquisition_window()*5, 0, 1);
     matcher->set_max_delta_time(nmx_opts.matcher_max_delta_time);
-    matcher->set_time_algorithm(nmx_opts.time_algorithm); 
+    matcher->set_time_algorithm(nmx_opts.time_algorithm);
     matcher_ = matcher;
   }
   else {
@@ -399,24 +399,29 @@ void GdGemBase::processing_thread() {
   Producer monitor_producer(EFUSettings.KafkaBroker, "NMX_monitor");
   Producer hits_producer(EFUSettings.KafkaBroker, "NMX_hits");
 
-  EV42Serializer ev42serializer(kafka_buffer_size, "nmx");
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-  ev42serializer.setProducerCallback(
-      std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
+  auto ProduceEvents = [&event_producer](auto DataBuffer, auto Timestamp) {
+    event_producer.produce(DataBuffer, Timestamp);
+  };
+
+  auto ProduceMonitor = [&monitor_producer](auto DataBuffer, auto Timestamp) {
+    monitor_producer.produce(DataBuffer, Timestamp);
+  };
+
+  auto ProduceHits = [&hits_producer](auto DataBuffer, auto Timestamp) {
+    hits_producer.produce(DataBuffer, Timestamp);
+  };
+
+  EV42Serializer ev42serializer(kafka_buffer_size, "nmx", ProduceEvents);
 
   Gem::TrackSerializer track_serializer(256, "nmx_tracks");
-  track_serializer.set_callback(
-      std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
+  track_serializer.set_callback(ProduceMonitor);
 
   HistogramSerializer hist_serializer(hists_.needed_buffer_size(), "nmx");
-  hist_serializer.set_callback(
-      std::bind(&Producer::produce2<uint8_t>, &monitor_producer, std::placeholders::_1));
+  hist_serializer.set_callback(ProduceMonitor);
 
   Gem::TrackSerializer raw_serializer(1500, "nmx_hits");
-  raw_serializer.set_callback(
-          std::bind(&Producer::produce2<uint8_t>, &hits_producer, std::placeholders::_1));
-#pragma GCC diagnostic pop
+  raw_serializer.set_callback(ProduceHits);
+
   TSCTimer global_time, report_timer;
 
   unsigned int data_index;

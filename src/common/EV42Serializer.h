@@ -19,7 +19,7 @@ public:
   /// \brief creates ev42 flat buffer serializer
   /// \param max_array_length maximum number of events
   /// \param source_name value for source_name field
-  EV42Serializer(size_t MaxArrayLength, std::string SourceName);
+  EV42Serializer(size_t MaxArrayLength, std::string SourceName, ProducerCallback Callback = {});
 
   /// \brief sets producer callback
   /// \param cb function to be called to send buffer to Kafka
@@ -50,7 +50,7 @@ public:
   // \todo make private?
   /// \brief serializes buffer
   /// \returns reference to internally stored buffer
-  Buffer<uint8_t> serialize();
+  nonstd::span<const uint8_t> serialize();
 
 private:
   // \todo should this not be predefined in terms of jumbo frame?
@@ -60,16 +60,17 @@ private:
   // \todo maybe should be mutated directly in buffer? Start at 0?
   uint64_t MessageId{1};
 
-  ProducerCallback ProduceFunctor;
-
   // All of this is the flatbuffer
   flatbuffers::FlatBufferBuilder Builder_;
+
+  ProducerCallback ProduceFunctor;
+
   uint8_t *TimePtr{nullptr};
   uint8_t *PixelPtr{nullptr};
 
   EventMessage *EventMessage_;
 
-  Buffer<uint8_t> Buffer_;
+  nonstd::span<const uint8_t> Buffer_;
   flatbuffers::uoffset_t *TimeLengthPtr;
   flatbuffers::uoffset_t *PixelLengthPtr;
 };

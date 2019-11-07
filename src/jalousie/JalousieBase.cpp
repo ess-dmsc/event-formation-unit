@@ -44,36 +44,36 @@ JalousieBase::JalousieBase(BaseSettings const &settings, CLISettings const &Loca
 
   XTRACE(INIT, ALW, "Adding stats");
   // clang-format off
-  Stats.create("receive.packets", mystats.rx_packets);
-  Stats.create("receive.bytes", mystats.rx_bytes);
-  Stats.create("receive.dropped", mystats.fifo_push_errors);
+  Stats.create("receive.packets", Counters.RxPackets);
+  Stats.create("receive.bytes", Counters.RxBytes);
+  Stats.create("receive.dropped", Counters.FifoPushErrors);
 
-  Stats.create("readouts.count", mystats.readout_count);
-  Stats.create("readouts.bad_module_id", mystats.bad_module_id);
-  Stats.create("readouts.chopper_pulses", mystats.chopper_pulses);
+  Stats.create("readouts.count", Counters.ReadoutCount);
+  Stats.create("readouts.BadModuleId", Counters.BadModuleId);
+  Stats.create("readouts.ChopperPulses", Counters.ChopperPulses);
 
-  Stats.create("events.count", mystats.events);
-  Stats.create("events.mapping_errors", mystats.mapping_errors);
-  Stats.create("events.geometry_errors", mystats.geometry_errors);
-  Stats.create("events.timing_errors", mystats.timing_errors);
-  Stats.create("transmit.bytes", mystats.tx_bytes);
+  Stats.create("events.count", Counters.Events);
+  Stats.create("events.MappingErrors", Counters.MappingErrors);
+  Stats.create("events.GeometryErrors", Counters.GeometryErrors);
+  Stats.create("events.TimingErrors", Counters.TimingErrors);
+  Stats.create("transmit.bytes", Counters.TxBytes);
 
-  Stats.create("thread.seq_errors", mystats.fifo_seq_errors);
-  Stats.create("thread.processing_idle", mystats.processing_idle);
+  Stats.create("thread.seq_errors", Counters.FifoSeqErrors);
+  Stats.create("thread.ProcessingIdle", Counters.ProcessingIdle);
 
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_fails", mystats.kafka_produce_fails);
-  Stats.create("kafka.ev_errors", mystats.kafka_ev_errors);
-  Stats.create("kafka.ev_others", mystats.kafka_ev_others);
-  Stats.create("kafka.dr_errors", mystats.kafka_dr_errors);
-  Stats.create("kafka.dr_others", mystats.kafka_dr_noerrors);
+  Stats.create("kafka.produce_fails", Counters.kafka_produce_fails);
+  Stats.create("kafka.ev_errors", Counters.kafka_ev_errors);
+  Stats.create("kafka.ev_others", Counters.kafka_ev_others);
+  Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
+  Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
   // clang-format on
 
-  std::function<void()> inputFunc = [this]() { JalousieBase::input_thread(); };
+  std::function<void()> inputFunc = [this]() { JalousieBase::inputThread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
   std::function<void()> processingFunc = [this]() {
-    JalousieBase::processing_thread();
+    JalousieBase::processingThread();
   };
   Detector::AddThreadFunction(processingFunc, "processing");
 
@@ -84,7 +84,7 @@ JalousieBase::JalousieBase(BaseSettings const &settings, CLISettings const &Loca
   assert(eth_ringbuf != 0);
 }
 
-void JalousieBase::input_thread() {
+void JalousieBase::inputThread() {
   /** Connection setup */
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
@@ -95,33 +95,29 @@ void JalousieBase::input_thread() {
   receiver.printBufferSizes();
   receiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
-  for (;;) {
-    int rdsize;
+  while (runThreads) {
+    int ReadSize;
     unsigned int eth_index = eth_ringbuf->getDataIndex();
 
     /** this is the processing step */
     eth_ringbuf->setDataLength(eth_index, 0);
-    if ((rdsize = receiver.receive(eth_ringbuf->getDataBuffer(eth_index),
+    if ((ReadSize = receiver.receive(eth_ringbuf->getDataBuffer(eth_index),
                                    eth_ringbuf->getMaxBufSize())) > 0) {
-      eth_ringbuf->setDataLength(eth_index, rdsize);
-//      XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
-//             rdsize);
-      mystats.rx_packets++;
-      mystats.rx_bytes += rdsize;
+      eth_ringbuf->setDataLength(eth_index, ReadSize);
+     XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes",
+            ReadSize);
+      Counters.RxPackets++;
+      Counters.RxBytes += ReadSize;
 
       if (input2proc_fifo.push(eth_index) == false) {
-        mystats.fifo_push_errors++;
+        Counters.FifoPushErrors++;
       } else {
         eth_ringbuf->getNextBuffer();
       }
     }
-
-    // Checking for exit
-    if (not runThreads) {
-      XTRACE(INPUT, ALW, "Stopping input thread.");
-      return;
-    }
   }
+  XTRACE(INPUT, ALW, "Stopping input thread.");
+  return;
 }
 
 void JalousieBase::convert_and_enqueue_event(const Readout &readout) {
@@ -130,13 +126,13 @@ void JalousieBase::convert_and_enqueue_event(const Readout &readout) {
   constexpr size_t invalid_board_mapping{std::numeric_limits<size_t>::max()};
   size_t module = config.board_mappings[readout.board];
   if (module == invalid_board_mapping) {
-    mystats.bad_module_id++;
+    Counters.BadModuleId++;
     return;
   }
 
   if (readout.sub_id == Readout::chopper_sub_id) {
     /// If this is a pulse, then we queue this with pixel_id=0
-    mystats.chopper_pulses++;
+    Counters.ChopperPulses++;
     config.merger.insert(module, {readout.time, 0});
   } else {
     uint32_t pixel_id{0};
@@ -144,7 +140,7 @@ void JalousieBase::convert_and_enqueue_event(const Readout &readout) {
       /// SUMO mappings appear to be available, let's use this for pixel id
       SumoCoordinates c = config.SUMO_mappings[module].map(readout.anode, readout.cathode);
       if (!c.is_valid()) {
-        mystats.mapping_errors++;
+        Counters.MappingErrors++;
         return;
       }
       pixel_id = config.geometry.pixelMP3D(c.wire_layer, c.wire, c.strip, module);
@@ -155,10 +151,10 @@ void JalousieBase::convert_and_enqueue_event(const Readout &readout) {
 
     /// In this case, pixel_id cannot be 0, we must reject before queueing
     if (pixel_id == 0) {
-      mystats.geometry_errors++;
+      Counters.GeometryErrors++;
     } else {
       config.merger.insert(module, {readout.time, pixel_id});
-      mystats.events++;
+      Counters.Events++;
     }
   }
 }
@@ -166,52 +162,48 @@ void JalousieBase::convert_and_enqueue_event(const Readout &readout) {
 void JalousieBase::process_one_queued_event(EV42Serializer &serializer) {
   auto event = config.merger.pop_earliest();
   if (previous_time > event.time)
-    mystats.timing_errors++;
+    Counters.TimingErrors++;
   previous_time = event.time;
 
   if (event.pixel_id == 0) {
     /// chopper pulse
     if (serializer.eventCount()) {
       /// Flush any events if incrementing pulse
-      mystats.tx_bytes += serializer.produce();
+      Counters.TxBytes += serializer.produce();
     }
     serializer.pulseTime(event.time);
   } else {     /// regular neutron event
     /// rebaste time in terms of most recent pulse
     uint32_t event_time = event.time - serializer.pulseTime();
-    mystats.tx_bytes += serializer.addEvent(event_time, event.pixel_id);
+    Counters.TxBytes += serializer.addEvent(event_time, event.pixel_id);
   }
 }
 
 void JalousieBase::force_produce_and_update_kafka_stats(
     EV42Serializer &serializer,
     Producer &producer) {
-  mystats.tx_bytes += serializer.produce();
+  Counters.TxBytes += serializer.produce();
   /// Kafka stats update - common to all detectors
   /// don't increment as producer keeps absolute count
-  mystats.kafka_produce_fails = producer.stats.produce_fails;
-  mystats.kafka_ev_errors = producer.stats.ev_errors;
-  mystats.kafka_ev_others = producer.stats.ev_others;
-  mystats.kafka_dr_errors = producer.stats.dr_errors;
-  mystats.kafka_dr_noerrors = producer.stats.dr_noerrors;
+  Counters.kafka_produce_fails = producer.stats.produce_fails;
+  Counters.kafka_ev_errors = producer.stats.ev_errors;
+  Counters.kafka_ev_others = producer.stats.ev_others;
+  Counters.kafka_dr_errors = producer.stats.dr_errors;
+  Counters.kafka_dr_noerrors = producer.stats.dr_noerrors;
 }
 
-void JalousieBase::processing_thread() {
+void JalousieBase::processingThread() {
   LOG(INIT, Sev::Info, "Jalousie Config file: {}", ModuleSettings.ConfigFile);
   config = Config(ModuleSettings.ConfigFile);
   LOG(INIT, Sev::Info, "Jalousie Config\n{}", config.debug());
 
-  std::string topic{""};
+  Producer EventProducer(EFUSettings.KafkaBroker, "DREAM_detector");
 
-  topic = "DREAM_detector";
+  auto Produce = [&EventProducer](auto DataBuffer, auto Timestamp) {
+    EventProducer.produce(DataBuffer, Timestamp);
+  };
 
-  EV42Serializer ev42Serializer(kafka_buffer_size, "DREAM_detector");
-  Producer producer(EFUSettings.KafkaBroker, topic);
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-  ev42Serializer.setProducerCallback(
-      std::bind(&Producer::produce2<uint8_t>, &producer, std::placeholders::_1));
-#pragma GCC diagnostic pop
+  EV42Serializer ev42Serializer(kafka_buffer_size, "jalo", Produce);
 
   unsigned int data_index;
   TSCTimer produce_timer;
@@ -219,7 +211,7 @@ void JalousieBase::processing_thread() {
     if (input2proc_fifo.pop(data_index)) { // There is data in the FIFO - do processing
       auto datalen = eth_ringbuf->getDataLength(data_index);
       if (datalen == 0) {
-        mystats.fifo_seq_errors++;
+        Counters.FifoSeqErrors++;
         continue;
       }
 
@@ -229,10 +221,10 @@ void JalousieBase::processing_thread() {
       /// Parse and convert readouts to events
       for (size_t i = 0; i < datalen / sizeof(Jalousie::Readout); i++) {
         auto readout = (Jalousie::Readout *) dataptr;
-//        printf("time %lu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
-//           readout->time, readout->board, readout->sub_id, readout->anode, readout->cathode);
+       // printf("time %lu, board: %u, sub_id: %u, anode: %u, cathode: %u\n",
+       //    readout->time, readout->board, readout->sub_id, readout->anode, readout->cathode);
         dataptr += sizeof(Jalousie::Readout);
-        mystats.readout_count++;
+        Counters.ReadoutCount++;
         convert_and_enqueue_event(*readout);
       }
 
@@ -244,14 +236,14 @@ void JalousieBase::processing_thread() {
 
     } else {
       /// There is NO data in the FIFO - do stop checks and sleep a little
-      mystats.processing_idle++;
+      Counters.ProcessingIdle++;
       usleep(10);
     }
 
     /// Periodic producing regardless of rates
     if (produce_timer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TSC_MHZ) {
-      force_produce_and_update_kafka_stats(ev42Serializer, producer);
+      force_produce_and_update_kafka_stats(ev42Serializer, EventProducer);
       produce_timer.now();
     }
 
@@ -261,7 +253,7 @@ void JalousieBase::processing_thread() {
       while (!config.merger.empty()) {
         process_one_queued_event(ev42Serializer);
       }
-      force_produce_and_update_kafka_stats(ev42Serializer, producer);
+      force_produce_and_update_kafka_stats(ev42Serializer, EventProducer);
       XTRACE(INPUT, ALW, "Stopping processing thread.");
       return;
     }

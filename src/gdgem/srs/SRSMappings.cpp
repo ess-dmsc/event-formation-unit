@@ -49,6 +49,8 @@ void SRSMappings::set_mapping(uint16_t fecID, uint16_t vmmID, uint16_t channel,
   VMM[channel] = {plane, coord};
 }
 
+/// \todo this seems to validate too much, plane can be
+/// valid but channel still invalid?
 uint8_t SRSMappings::get_plane(const Readout &readout) const {
   if (readout.fec >= mappings_.size())
     return Hit::InvalidPlane;

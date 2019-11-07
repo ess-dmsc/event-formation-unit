@@ -2,8 +2,8 @@
 
 #include <gdgem/srs/CalibrationFile.h>
 #include <gdgem/srs/CalibrationFileTestData.h>
-#include <common/DataSave.h>
 #include <test/TestBase.h>
+#include <test/SaveBuffer.h>
 #include <vector>
 
 using namespace Gem;
@@ -116,7 +116,7 @@ TEST_F(CalibrationFileTest, LoadCalibrationSizeMismatch) {
 // and verifies that the values have been applied correctly
 TEST_F(CalibrationFileTest, LoadCalibrationFile) {
  std::string filename = "deleteme.json";
- DataSave tempfile(filename, (void *)TestData_DummyCal.c_str(), TestData_DummyCal.size());
+ saveBuffer(filename, (void *)TestData_DummyCal.c_str(), TestData_DummyCal.size());
  CalibrationFile cf(filename);
 
  auto cal = cf.getCalibration(1, 0, 0);
@@ -126,6 +126,18 @@ TEST_F(CalibrationFileTest, LoadCalibrationFile) {
  cal = cf.getCalibration(1, 0, 63);
  EXPECT_FLOAT_EQ(cal.time_offset, 10.7);
  EXPECT_FLOAT_EQ(cal.time_slope, 1010.7);
+}
+
+// No test, just checking that debug() doesn't crash
+TEST_F(CalibrationFileTest, NoTestDebug) {
+  CalibrationFile cf;
+  auto res = cf.debug();
+  ASSERT_TRUE(res.size() == 0);
+
+  std::string filename = "deleteme.json";
+  CalibrationFile cf2(filename);
+  res = cf2.debug();
+  ASSERT_TRUE(res.size() != 0);
 }
 
 int main(int argc, char **argv) {

@@ -31,9 +31,11 @@ create_test_executable(ParserVMM3Test)
 set(VMM3CalibrationFileTest_SRC
   CalibrationFile.cpp
   CalibrationFileTest.cpp
+  ../../test/SaveBuffer.cpp
   )
 set(VMM3CalibrationFileTest_INC
   CalibrationFile.h
+  ../../test/SaveBuffer.h
   )
 create_test_executable(VMM3CalibrationFileTest)
 

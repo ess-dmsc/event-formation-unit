@@ -14,7 +14,7 @@ protected:
   Geometry geometry;
   IDEASData *readout;
   void SetUp() override {
-    readout = new IDEASData(&geometry);
+    readout = new IDEASData(&geometry, "deleteme_sonde_test_");
     memset(readout->data, 0, sizeof(readout->data));
   }
   void TearDown() override {
@@ -77,8 +77,8 @@ TEST_F(IDEASDataTest, OkThreeEvents) {
   ASSERT_EQ(readout->events, 3);
 
   for (int i = 0; i < res; i++) {
-    ASSERT_NE(0, readout->data[i].time);
-    ASSERT_NE(0, readout->data[i].pixel_id);
+    ASSERT_NE(0, readout->data[i].Time);
+    ASSERT_NE(0, readout->data[i].PixelId);
   }
 }
 
@@ -92,8 +92,11 @@ TEST_F(IDEASDataTest, SEPHOkOneSample) {
 TEST_F(IDEASDataTest, SEPHOkThreeSamples) {
   int size = type_0xd5_seph_ok_3.size();
   int res = readout->parse_buffer((char *)&type_0xd5_seph_ok_3[0], size);
-  ASSERT_EQ(res, 1); // Should always return 0 events
+  ASSERT_EQ(res, 3); // Currently returns one event per sample
   ASSERT_EQ(readout->samples, 3);
+  ASSERT_EQ(readout->data[0].Adc, 0x1234);
+  ASSERT_EQ(readout->data[1].Adc, 0x5678);
+  ASSERT_EQ(readout->data[2].Adc, 0x9abc);
 }
 
 TEST_F(IDEASDataTest, SEPHErrHdrLenMismatch) {
@@ -126,8 +129,27 @@ TEST_F(IDEASDataTest, MEPHOkOneSample) {
 TEST_F(IDEASDataTest, MEPHOkN3M1) {
   int size = type_0xd4_meph_ok_n3m1.size();
   int res = readout->parse_buffer((char *)&type_0xd4_meph_ok_n3m1[0], size);
-  ASSERT_EQ(res, 3); // Should always return 0 events
+  ASSERT_EQ(res, 3); // Should always return 3 events
+  // This also implicitly testes the data endianness
   ASSERT_EQ(readout->samples, 3);
+  ASSERT_EQ(readout->data[0].Time, 0x00000001);
+  ASSERT_EQ(readout->data[0].Adc, 0x1234);
+  ASSERT_EQ(readout->data[1].Time, 0x00000005);
+  ASSERT_EQ(readout->data[1].Adc, 0x5678);
+  ASSERT_EQ(readout->data[2].Time, 0x00000009);
+  ASSERT_EQ(readout->data[2].Adc, 0x9abc);
+}
+
+TEST_F(IDEASDataTest, SCRO_pkt) {
+  int size = scro_pkt.size();
+  int res = readout->parse_buffer((char *)&scro_pkt[0], size);
+  ASSERT_EQ(res, 150); // There is really only one event but 150 samples
+}
+
+TEST_F(IDEASDataTest, ACRO_pkt) {
+  int size = acro_pkt.size();
+  int res = readout->parse_buffer((char *)&acro_pkt[0], size);
+  ASSERT_EQ(res, 64); // There is really only one event but 1 sample per channel
 }
 
 int main(int argc, char **argv) {

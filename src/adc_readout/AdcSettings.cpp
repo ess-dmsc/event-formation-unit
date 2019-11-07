@@ -98,16 +98,16 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
       ->group("Delay Line Options")
       ->default_str("1.0");
   std::vector<std::pair<std::string, PosType>> PosTypeMap{
-    {"AMP", PosType::AMPLITUDE},
-    {"AMPLITUDE", PosType::AMPLITUDE},
-    {"CONST", PosType::CONST},
-    {"TIME", PosType::TIME}
-  };
+      {"AMP", PosType::AMPLITUDE},
+      {"AMPLITUDE", PosType::AMPLITUDE},
+      {"CONST", PosType::CONST},
+      {"TIME", PosType::TIME}};
   Parser
-      .add_option("--xaxis_position_type", ReadoutSettings.XAxis,
-               "How to calculate the x-axis position. If set to \"CONST\", use "
-                  "the value of \"xaxis_offset\".")->
-  transform(CLI::CheckedTransformer(PosTypeMap, CLI::ignore_case))
+      .add_option(
+          "--xaxis_position_type", ReadoutSettings.XAxis,
+          "How to calculate the x-axis position. If set to \"CONST\", use "
+          "the value of \"xaxis_offset\".")
+      ->transform(CLI::CheckedTransformer(PosTypeMap, CLI::ignore_case))
       ->group("Delay Line Options")
       ->default_val("CONST");
 
@@ -122,10 +122,11 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
       ->group("Delay Line Options")
       ->default_str("1.0");
   Parser
-      .add_option("--yaxis_position_type", ReadoutSettings.YAxis,
-               "How to calculate the y-axis position. If set to \"CONST\", use "
-               "the value of \"yaxis_offset\".")->
-  transform(CLI::CheckedTransformer(PosTypeMap, CLI::ignore_case))
+      .add_option(
+          "--yaxis_position_type", ReadoutSettings.YAxis,
+          "How to calculate the y-axis position. If set to \"CONST\", use "
+          "the value of \"yaxis_offset\".")
+      ->transform(CLI::CheckedTransformer(PosTypeMap, CLI::ignore_case))
       ->group("Delay Line Options")
       ->default_val("CONST");
 
@@ -142,64 +143,64 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
                   "(relative to the maximum value) is exceeded.")
       ->group("Delay Line Options")
       ->default_str("0.1");
-  
+
   std::vector<std::pair<std::string, ChRole>> ChRoleMap{
-    {"REF_TIME", ChRole::REFERENCE_TIME},
-    {"AMP_X_1", ChRole::AMPLITUDE_X_AXIS_1},
-    {"AMP_X_2", ChRole::AMPLITUDE_X_AXIS_2},
-    {"AMP_Y_1", ChRole::AMPLITUDE_Y_AXIS_1},
-    {"AMP_Y_2", ChRole::AMPLITUDE_Y_AXIS_2},
-    {"TIME_X_1", ChRole::TIME_X_AXIS_1},
-    {"TIME_X_2", ChRole::TIME_X_AXIS_2},
-    {"TIME_Y_1", ChRole::TIME_Y_AXIS_1},
-    {"TIME_Y_2", ChRole::TIME_Y_AXIS_2},
-    {"NONE", ChRole::NONE}
-  };
+      {"REF_TIME", ChRole::REFERENCE_TIME},
+      {"AMP_X_1", ChRole::AMPLITUDE_X_AXIS_1},
+      {"AMP_X_2", ChRole::AMPLITUDE_X_AXIS_2},
+      {"AMP_Y_1", ChRole::AMPLITUDE_Y_AXIS_1},
+      {"AMP_Y_2", ChRole::AMPLITUDE_Y_AXIS_2},
+      {"TIME_X_1", ChRole::TIME_X_AXIS_1},
+      {"TIME_X_2", ChRole::TIME_X_AXIS_2},
+      {"TIME_Y_1", ChRole::TIME_Y_AXIS_1},
+      {"TIME_Y_2", ChRole::TIME_Y_AXIS_2},
+      {"NONE", ChRole::NONE}};
   Parser
-      .add_option("--adc1_ch1_role", ReadoutSettings.ADC1Channel1, "Set the role of an input-channel.")
+      .add_option("--adc1_ch1_role", ReadoutSettings.ADC1Channel1,
+                  "Set the role of an input-channel.")
       ->group("Delay Line Options")
       ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
       .add_option("--adc1_ch2_role", ReadoutSettings.ADC1Channel2,
-               "Set the role of an input-channel.")
+                  "Set the role of an input-channel.")
       ->group("Delay Line Options")
       ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
       .add_option("--adc1_ch3_role", ReadoutSettings.ADC1Channel3,
-               "Set the role of an input-channel.")
+                  "Set the role of an input-channel.")
       ->group("Delay Line Options")
       ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
       .add_option("--adc1_ch4_role", ReadoutSettings.ADC1Channel4,
-               "Set the role of an input-channel.")
+                  "Set the role of an input-channel.")
       ->group("Delay Line Options")
       ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
 
   Parser
       .add_option("--adc2_ch1_role", ReadoutSettings.ADC2Channel1,
-               "Set the role of an input-channel.")
+                  "Set the role of an input-channel.")
       ->group("Delay Line Options")
       ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
       .add_option("--adc2_ch2_role", ReadoutSettings.ADC2Channel2,
-               "Set the role of an input-channel.")
+                  "Set the role of an input-channel.")
       ->group("Delay Line Options")
       ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
       .add_option("--adc2_ch3_role", ReadoutSettings.ADC2Channel3,
-               "Set the role of an input-channel.")
+                  "Set the role of an input-channel.")
       ->group("Delay Line Options")
       ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
       .add_option("--adc2_ch4_role", ReadoutSettings.ADC2Channel4,
-               "Set the role of an input-channel.")
+                  "Set the role of an input-channel.")
       ->group("Delay Line Options")
       ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11

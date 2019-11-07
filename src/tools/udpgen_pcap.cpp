@@ -92,8 +92,11 @@ int main(int argc, char *argv[]) {
         }
       }
     }
-    if (!Settings.Loop)
+    if (Settings.Loop) {
+      pcap.open();
+    } else {
       pcap.printStats();
+    }
     printf("Sent %" PRIu64 " packets\n", totpackets);
   } while (Settings.Loop);
   // pcap.printstats();

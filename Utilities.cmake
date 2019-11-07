@@ -9,7 +9,7 @@ function(create_module module_name)
   add_library(${module_name} MODULE
     ${${module_name}_SRC}
     ${${module_name}_INC})
-  
+
   if (CMAKE_BUILD_TYPE STREQUAL "RELEASE" OR CMAKE_BUILD_TYPE STREQUAL "Release")
     if( lto_supported )
         message(STATUS "LTO enabled for ${module_name}")
@@ -18,7 +18,7 @@ function(create_module module_name)
         message(STATUS "LTO not supported (for target ${module_name}): <${lto_error}>")
     endif()
   endif ()
-  
+
   set_target_properties(${module_name} PROPERTIES PREFIX "")
   set_target_properties(${module_name} PROPERTIES SUFFIX ".so")
   target_link_libraries(${module_name} efu
@@ -99,7 +99,7 @@ function(create_test_executable)
   target_link_libraries(${exec_name}
     ${${exec_name}_LIB}
     ${EFU_COMMON_LIBS}
-    ${GTEST_LIBRARIES} efu_common)
+    ${CONAN_LIBS_GTEST} efu_common)
 
   if(${CMAKE_COMPILER_IS_GNUCXX})
     add_linker_flags(${exec_name} "-Wl,--no-as-needed")

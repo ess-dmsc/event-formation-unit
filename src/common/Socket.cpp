@@ -182,12 +182,13 @@ ssize_t Socket::receive(void *buffer, int buflen) {
 //
 
 int Socket::getSockOpt(int option) {
+  XTRACE(IPC, DEB, "getSockOpt(%d), fd %d", option, SocketFileDescriptor);
   int optval, ret;
   socklen_t optlen;
   optlen = sizeof(optval);
   if ((ret = getsockopt(SocketFileDescriptor, SOL_SOCKET, option, (void *)&optval, &optlen)) <
       0) {
-    std::cout << "getsockopt() failed" << std::endl;
+    XTRACE(IPC, WAR, "getSockOpt(%d) failed, fd %d, ret %d", option, SocketFileDescriptor, ret);
     return ret;
   }
   return optval;

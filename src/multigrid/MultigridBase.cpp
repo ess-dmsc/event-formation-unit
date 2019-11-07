@@ -80,13 +80,7 @@ MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings con
 
 bool MultigridBase::init_config() {
   LOG(INIT, Sev::Info, "MG Config file: {}", ModuleSettings.ConfigFile);
-  try {
-    mg_config = Multigrid::Config(ModuleSettings.ConfigFile);
-  }
-  catch (...) {
-    LOG(INIT, Sev::Warning, "Invalid Json file: {}", ModuleSettings.ConfigFile);
-    return false;
-  }
+  mg_config = Multigrid::Config(ModuleSettings.ConfigFile);
 
   LOG(INIT, Sev::Info, "Multigrid Config\n{}", mg_config.debug());
   if (ModuleSettings.monitor) {
@@ -160,13 +154,12 @@ void MultigridBase::mainThread() {
   cspecdata.printBufferSizes();
   cspecdata.setRecvTimeout(0, one_tenth_second_usecs); /// secs, usecs
 
-  EV42Serializer ev42serializer(kafka_buffer_size, "multigrid");
   Producer event_producer(EFUSettings.KafkaBroker, "C-SPEC_detector");
+  auto Produce = [&event_producer](auto DataBuffer, auto Timestamp) {
+    event_producer.produce(DataBuffer, Timestamp);
+  };
 
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-  ev42serializer.setProducerCallback(std::bind(&Producer::produce2<uint8_t>, &event_producer, std::placeholders::_1));
-#pragma GCC diagnostic pop
+  EV42Serializer ev42serializer(kafka_buffer_size, "multigrid", Produce);
 
   ev42serializer.pulseTime(0);
 

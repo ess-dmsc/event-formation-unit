@@ -40,8 +40,7 @@ bool PulseBuffer::hasValidPulses() {
 }
 
 void PulseBuffer::addChannel(ChannelID ID) {
-  if (Pulses.find(ID) == Pulses.end()) {
-    Pulses[ID] = PulseQueue();
+  if (Pulses.insert({ID, PulseQueue()}).second) {
     QueueList.push_back(&Pulses[ID]);
   }
 }

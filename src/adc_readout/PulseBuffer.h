@@ -17,7 +17,7 @@
 
 class PulseBuffer {
 public:
-  PulseBuffer(std::uint64_t TimeoutNS, size_t BufferSize = 1000);
+  explicit PulseBuffer(std::uint64_t TimeoutNS, size_t BufferSize = 1000);
   void addChannel(ChannelID ID);
   void addPulse(PulseParameters const &Pulse);
   bool hasValidPulses();

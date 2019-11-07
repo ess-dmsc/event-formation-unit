@@ -17,9 +17,9 @@ protected:
 
 
 public:
-  void copy_buffer(Buffer<uint8_t> b)
+  void copy_buffer(nonstd::span<const uint8_t> b)
   {
-    memcpy(flatbuffer, b.address, b.size);
+    memcpy(flatbuffer, b.data(), b.size_bytes());
   }
 
 };
@@ -52,8 +52,10 @@ TEST_F(HitSerializerTest, AddEntries) {
 TEST_F(HitSerializerTest, ManualProduce) {
   for (int maxlen = 10; maxlen < 1000; maxlen++) {
     HitSerializer serializer(maxlen, "some_source");
-    serializer.set_callback(std::bind(&HitSerializerTest::copy_buffer,
-        this, std::placeholders::_1));
+    auto Produce = [this](auto DataBuffer, auto) {
+      this->copy_buffer(DataBuffer);
+    };
+    serializer.set_callback(Produce);
 
     ASSERT_EQ(0, serializer.getNumEntries());
     int res = serializer.addEntry(0,0,0,0);

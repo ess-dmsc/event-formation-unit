@@ -12,11 +12,11 @@
 #include <vector>
 
 int ConstDelayLinePosition::getPosition() {
-  return DelayLinePositionInterface::Origin;
+  return std::lround(DelayLinePositionInterface::Origin);
 }
 
 DelayLinePosCalcInterface::DelayLinePosCalcInterface(std::uint64_t Timeout)
-    : DelayLinePositionInterface(), EventTimeout(Timeout) {}
+    : EventTimeout(Timeout) {}
 
 void DelayLinePosCalcInterface::setChannelRole(ChannelID const &ID,
                                                ChannelRole const &Role) {

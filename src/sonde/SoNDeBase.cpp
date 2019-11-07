@@ -30,6 +30,10 @@ SONDEIDEABase::SONDEIDEABase(BaseSettings const &settings, struct SoNDeSettings 
   Stats.create("receive.dropped",                 mystats.fifo_push_errors);
 
   Stats.create("readouts.seq_errors",             mystats.rx_seq_errors);
+  Stats.create("ideas.packets.triggertime",       mystats.rx_pkt_triggertime);
+  Stats.create("ideas.packets.singleevent",       mystats.rx_pkt_singleevent);
+  Stats.create("ideas.packets.multievent",        mystats.rx_pkt_multievent);
+  Stats.create("ideas.packets.unsupported",       mystats.rx_pkt_unsupported);
 
   Stats.create("events.count",                    mystats.rx_events);
   Stats.create("events.geometry_errors",          mystats.rx_geometry_errors);
@@ -104,22 +108,24 @@ void SONDEIDEABase::processing_thread() {
   Sonde::Geometry geometry;
   Sonde::IDEASData ideasdata(&geometry, SoNDeSettings.fileprefix);
 
-  EV42Serializer flatbuffer(kafka_buffer_size, "SONDE");
   Producer eventprod(EFUSettings.KafkaBroker, "SKADI_detector");
-#pragma GCC diagnostic push
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
+  auto Produce = [&eventprod](auto DataBuffer, auto Timestamp) {
+    eventprod.produce(DataBuffer, Timestamp);
+  };
 
-  flatbuffer.setProducerCallback(
-    std::bind(&Producer::produce2<uint8_t>, &eventprod, std::placeholders::_1));
+  EV42Serializer flatbuffer(kafka_buffer_size, "SONDE", Produce);
 
   constexpr uint16_t maxChannels{64};
   constexpr uint16_t maxAdc{65535};
   Hists histograms(maxChannels, maxAdc);
   HistogramSerializer histfb(histograms.needed_buffer_size(), "SONDE");
   Producer monitorprod(EFUSettings.KafkaBroker, "SKADI_monitor");
-  histfb.set_callback(
-    std::bind(&Producer::produce2<uint8_t>, &monitorprod, std::placeholders::_1));
-#pragma GCC diagnostic pop
+
+  auto ProduceHist = [&monitorprod](auto DataBuffer, auto Timestamp) {
+    monitorprod.produce(DataBuffer, Timestamp);
+  };
+
+  histfb.set_callback(ProduceHist);
   unsigned int data_index;
 
   TSCTimer produce_timer;
@@ -160,16 +166,21 @@ void SONDEIDEABase::processing_thread() {
 
         mystats.rx_geometry_errors += ideasdata.errors;
         mystats.rx_events += ideasdata.events;
+        // don't add to mystats. These internal counters are absolute
         mystats.rx_seq_errors = ideasdata.ctr_outof_sequence;
+        mystats.rx_pkt_triggertime = ideasdata.counterPacketTriggerTime;
+        mystats.rx_pkt_singleevent = ideasdata.counterPacketSingleEventPulseHeight;
+        mystats.rx_pkt_multievent = ideasdata.counterPacketMultiEventPulseHeight;
+        mystats.rx_pkt_unsupported = ideasdata.counterPacketUnsupported;
 
         if (events > 0) {
           for (int i = 0; i < events; i++) {
-            assert(ideasdata.data[i].pixel_id < maxChannels);
-            histograms.bin_x(ideasdata.data[i].pixel_id, 1000); /// \todo adc not available
+            assert(ideasdata.data[i].PixelId <= maxChannels);
+            histograms.bin_x(ideasdata.data[i].PixelId, ideasdata.data[i].Adc);
             XTRACE(PROCESS, DEB, "flatbuffer.addevent[i: %d](t: %d, pix: %d)",
-                   i, ideasdata.data[i].time, ideasdata.data[i].pixel_id);
-            mystats.tx_bytes += flatbuffer.addEvent(ideasdata.data[i].time,
-                                                    ideasdata.data[i].pixel_id);
+                   i, ideasdata.data[i].Time, ideasdata.data[i].PixelId);
+            mystats.tx_bytes += flatbuffer.addEvent(ideasdata.data[i].Time,
+                                                    ideasdata.data[i].PixelId);
           }
         }
       }

@@ -62,17 +62,18 @@ bool TrackSerializer::add_track(const Event &event, double utpc_x, double utpc_y
 
   if (producer_callback) {
     auto buffer = serialize();
-    XTRACE(PROCESS, INF, "Producing track as buffer size: %d", buffer.size);
-    producer_callback(buffer);
-    return (0 != buffer.size);
+    XTRACE(PROCESS, INF, "Producing track as buffer size: %d", buffer.size_bytes());
+#pragma message("Producer::produce() in TrackSerializer should be provided with a proper timestmap.")
+    producer_callback(buffer, time(nullptr) * 1000);
+    return (0 != buffer.size_bytes());
   }
 
   return true;
 }
 
-Buffer<uint8_t> TrackSerializer::serialize() {
+nonstd::span<uint8_t> TrackSerializer::serialize() {
   if ((xtrack.size() == 0) && (ytrack.size() == 0)) {
-    return Buffer<uint8_t>();
+    return {};
   }
 
   auto SourceNameOffset = builder.CreateString(SourceName);
@@ -86,7 +87,7 @@ Buffer<uint8_t> TrackSerializer::serialize() {
   FinishMonitorMessageBuffer(builder, msg);
   xtrack.clear();
   ytrack.clear();
-  Buffer<uint8_t> ret(builder.GetBufferPointer(), builder.GetSize());
+  nonstd::span<uint8_t> ret(builder.GetBufferPointer(), builder.GetSize());
 
   builder.Clear();
 

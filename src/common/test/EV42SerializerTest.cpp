@@ -10,9 +10,7 @@
 #define ARRAYLENGTH 10
 
 struct MockProducer {
-
-  template<typename T>
-  inline void produce(const Buffer<T>&)
+  inline void produce(nonstd::span<const uint8_t>, int64_t)
   {
     NumberOfCalls++;
   }
@@ -42,9 +40,9 @@ TEST_F(EV42SerializerTest, Serialize) {
   for (size_t i=0; i < ARRAYLENGTH; i++)
     fb.addEvent(i,i);
   auto buffer = fb.serialize();
-  EXPECT_GE(buffer.size, ARRAYLENGTH * 8);
-  EXPECT_LE(buffer.size, ARRAYLENGTH * 8 + 2048);
-  ASSERT_TRUE(buffer);
+  EXPECT_GE(buffer.size_bytes(), ARRAYLENGTH * 8);
+  EXPECT_LE(buffer.size_bytes(), ARRAYLENGTH * 8 + 2048);
+  ASSERT_TRUE(not buffer.empty());
 
   EXPECT_EQ(std::string(reinterpret_cast<const char*>(&buffer[4]), 4), "ev42");
 }
@@ -60,7 +58,7 @@ TEST_F(EV42SerializerTest, SerDeserialize) {
 
   ASSERT_NE(events->message_id(), 1);
 
-  memcpy(flatbuffer, buffer.address, buffer.size);
+  memcpy(flatbuffer, buffer.data(), buffer.size_bytes());
   EXPECT_EQ(std::string(&flatbuffer[4], 4), "ev42");
   events = GetEventMessage(flatbuffer);
   EXPECT_EQ(events->source_name()->str(), "nameless");
@@ -77,7 +75,7 @@ TEST_F(EV42SerializerTest, SerPulseTime) {
   auto events = GetEventMessage(flatbuffer);
   ASSERT_NE(events->pulse_time(), 12345);
 
-  memcpy(flatbuffer, buffer.address, buffer.size);
+  memcpy(flatbuffer, buffer.data(), buffer.size_bytes());
   EXPECT_EQ(std::string(&flatbuffer[4], 4), "ev42");
   events = GetEventMessage(flatbuffer);
   EXPECT_EQ(events->source_name()->str(), "nameless");
@@ -92,12 +90,12 @@ TEST_F(EV42SerializerTest, DeserializeCheckData) {
   }
 
   auto buffer = fb.serialize();
-  ASSERT_TRUE(buffer);
+  ASSERT_TRUE(not buffer.empty());
 
-  memcpy(flatbuffer, buffer.address, buffer.size);
+  memcpy(flatbuffer, buffer.data(), buffer.size_bytes());
   EXPECT_EQ(std::string(&flatbuffer[4], 4), "ev42");
 
-  auto veri = flatbuffers::Verifier((uint8_t *)flatbuffer, buffer.size);
+  auto veri = flatbuffers::Verifier((uint8_t *)flatbuffer, buffer.size_bytes());
   ASSERT_TRUE(VerifyEventMessageBuffer(veri));
   auto events = GetEventMessage(flatbuffer);
   EXPECT_EQ(events->source_name()->str(), "nameless");
@@ -118,7 +116,10 @@ TEST_F(EV42SerializerTest, DeserializeCheckData) {
 
 TEST_F(EV42SerializerTest, AutoDeserialize) {
   MockProducer mp;
-  fb.setProducerCallback(std::bind(&MockProducer::produce<uint8_t>, &mp, std::placeholders::_1));
+  auto Produce = [&mp](auto A, auto B) {
+    mp.produce(A, B);
+  };
+  fb.setProducerCallback(Produce);
 
   for (int i = 0; i < ARRAYLENGTH - 1; i++) {
     auto len = fb.addEvent(time[i], pixel[i]);

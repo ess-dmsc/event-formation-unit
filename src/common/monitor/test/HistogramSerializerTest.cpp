@@ -22,9 +22,9 @@ protected:
   char flatbuffer[1024 * 1024 * 5];
 
 public:
-  void copy_buffer(Buffer<uint8_t> b)
+  void copy_buffer(nonstd::span<const uint8_t> b)
   {
-    memcpy(flatbuffer, b.address, b.size);
+    memcpy(flatbuffer, b.data(), b.size_bytes());
   }
 
 };
@@ -37,8 +37,12 @@ TEST_F(HistogramSerializerTest, Serialize) {
 
 TEST_F(HistogramSerializerTest, DeSerialize) {
   HistogramSerializer histfb(hists.needed_buffer_size(), "some_source");
-  histfb.set_callback(std::bind(&HistogramSerializerTest::copy_buffer,
-      this, std::placeholders::_1));
+
+  auto Produce = [this](auto DataBuffer, auto) {
+    this->copy_buffer(DataBuffer);
+  };
+
+  histfb.set_callback(Produce);
 
   histfb.produce(hists);
   EXPECT_EQ(std::string(&flatbuffer[4], 4), "mo01");

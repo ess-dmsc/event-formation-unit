@@ -24,7 +24,7 @@ public:
   /// \brief Initializes the event buffer.
   ///
   /// \param BufferSize The maximum number events in the buffer.
-  EventBuffer(size_t BufferSize);
+  explicit EventBuffer(size_t BufferSize);
   /// \brief Add event to buffer.
   ///
   /// \param Event The event that should be added
@@ -32,12 +32,17 @@ public:
   bool addEvent(std::unique_ptr<EventData> const &Event);
   void addReferenceTimestamp(std::uint64_t NewReferenceTime);
   void setTimespan(std::uint64_t NewTimespan) { MaxOffsetTime = NewTimespan; }
-  std::pair<EventList, std::uint64_t> getEvents();
-  /// \brief Clear events from the buffer that fall within the range of
-  /// ReferenceTime to ReferenceTime + Timespan
+  std::pair<EventList, std::uint64_t> getFrameEvents();
+
+  /// \brief Get all events from the buffer.
   std::pair<EventList, std::uint64_t> getAllEvents() const;
+  /// \brief Remove events from the buffer.
+  /// \param[in] NrOfEvents The nr of events from the start of the buffer to
+  /// remove.
   void cullEvents(size_t NrOfEvents);
+  /// \brief Remove all events.
   void clearAllEvents();
+  /// \brief Get the number of events in the buffer.
   size_t size() const { return Size; }
 
 private:

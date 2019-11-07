@@ -68,7 +68,7 @@ make runtest
 
 ### Other tests
 
-It is also possible to get a test coverage report if the required prerequisites have been installed. To get the coverage report, run:
+It is also possible to get a test coverage report if the required prerequisites have been installed. To get the coverage report, run
 
 ```
 make coverage
@@ -89,7 +89,7 @@ En example of the commands required to run an event formation pipeline (in this 
 ```
 make efu mbcaen
 cd bin
-./efu -d ../modules/mbcaen -f configfile --nohwcheck
+./efu -d ../modules/sonde --nohwcheck
 ```
 
 Note you will need to provide a config file in the case of the *mbcaen* module as well.

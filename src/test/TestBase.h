@@ -24,26 +24,9 @@ extern void ColoredPrintf(GTestColor color, const char *fmt, ...);
 class TestBase : public ::testing::Test {
 protected:
   class Message : public std::stringstream {
-  public:
-    virtual ~Message() { //{cout << "[          ] " << str() << endl;}
-      testing::internal::ColoredPrintf(testing::internal::COLOR_GREEN,
-                                       "[          ] ");
-      testing::internal::ColoredPrintf(testing::internal::COLOR_YELLOW, "%s",
-                                       str().c_str());
-    }
+public:
+  static void saveToFile(std::string filename, void *buffer, uint64_t datasize);
+
   };
 #define MESSAGE Message
 };
-
-// //Minimal Code for adding a test
-// #include <test/TestBase.h>
-//
-// class MyNewTest : public TestBase {};
-//
-// TEST_F(MyNewTest, FirstTest) {
-// }
-//
-// int main(int argc, char **argv) {
-//   testing::InitGoogleTest(&argc, argv);
-//   return RUN_ALL_TESTS();
-// }

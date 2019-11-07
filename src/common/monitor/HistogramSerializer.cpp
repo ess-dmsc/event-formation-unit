@@ -52,11 +52,12 @@ size_t HistogramSerializer::produce(const Hists &hists) {
 
   FinishMonitorMessageBuffer(builder, msg);
 
-  Buffer<uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
+  nonstd::span<const uint8_t> buffer(builder.GetBufferPointer(), builder.GetSize());
 
   if (producer_callback) {
-    producer_callback(buffer);
+#pragma message("Producer::produce() in HistogramSerializer should be provided with a proper timestmap.")
+    producer_callback(buffer, time(nullptr) * 1000);
   }
 
-  return buffer.size;
+  return buffer.size_bytes();
 }

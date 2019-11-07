@@ -60,8 +60,7 @@ bool FilterSet::valid(uint16_t coord, uint16_t adc) const {
 
 void FilterSet::set_filters(size_t channels, Filter mgf) {
   filters_.resize(channels);
-  for (auto &f : filters_)
-    f = mgf;
+  std::fill(filters_.begin(), filters_.end(), mgf);
 }
 
 void FilterSet::override_filter(uint16_t n, Filter mgf) {

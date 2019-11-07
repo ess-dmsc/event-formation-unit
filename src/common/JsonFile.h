@@ -4,14 +4,19 @@
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include <nlohmann/json.hpp>
 #pragma GCC diagnostic pop
+#include <fmt/format.h>
 #include <fstream>
 
 inline nlohmann::json from_json_file(const std::string& fname)
 {
   nlohmann::json j;
   std::ifstream ifs(fname, std::ofstream::in);
+  if (ifs.fail()) {
+    throw std::runtime_error(fmt::format("file permission error or missing json file {}", fname));
+  }
   if (ifs.good())
     ifs >> j;
+
   return j;
 }
 
