@@ -51,7 +51,7 @@ TEST_F(LokiBaseTest, DataReceive) {
   Readout.stopThreads();
   EXPECT_EQ(Readout.Counters.RxPackets, 1);
   EXPECT_EQ(Readout.Counters.RxBytes, TestPacket.size());
-  EXPECT_EQ(Readout.Counters.ReadoutsCount, 0); // no parser yet
+  EXPECT_EQ(Readout.Counters.Readouts, 0); // no parser yet
 }
 
 int main(int argc, char **argv) {
