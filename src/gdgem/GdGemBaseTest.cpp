@@ -55,6 +55,7 @@ TEST_F(GdGemBaseTest, GetCalibrationCmd) {
 
 /// \todo This needs a little more work, better test data
 TEST_F(GdGemBaseTest, DataReceive) {
+  Settings.UpdateIntervalSec = 0;
   GdGemBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
   std::chrono::duration<std::int64_t, std::milli> SleepTime(400);

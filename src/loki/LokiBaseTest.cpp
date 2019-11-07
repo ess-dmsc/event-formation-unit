@@ -108,6 +108,7 @@ TEST_F(LokiBaseTest, DataReceive) {
 
 TEST_F(LokiBaseTest, DataReceiveGood) {
   Settings.DetectorPort = 9001;
+  Settings.UpdateIntervalSec = 0;
   LokiBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
 
@@ -120,6 +121,7 @@ TEST_F(LokiBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Readouts, 6);
   EXPECT_EQ(Readout.Counters.Headers, 2);
+  EXPECT_EQ(Readout.Counters.kafka_ev_errors, 2);
 }
 
 int main(int argc, char **argv) {
