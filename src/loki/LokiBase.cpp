@@ -29,9 +29,12 @@
 #include <loki/readout/DataParser.h>
 
 #include <loki/geometry/Geometry.h>
+#include <loki/geometry/HeliumTube.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
+
+constexpr float NsPerClock{11.356860963629653};
 
 namespace Loki {
 
@@ -173,6 +176,7 @@ void LokiBase::processingThread() {
   Geometry geometry(NXTubes, NZTubes, NStraws, NYpos);
   Readout ESSReadout;
   DataParser LokiParser;
+  HeliumTube Amp2Pos;
 
   Producer EventProducer(EFUSettings.KafkaBroker, "LOKI_detector");
 
@@ -209,6 +213,10 @@ void LokiBase::processingThread() {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
         continue;
       }
+      XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
+        ESSReadout.Packet.HeaderPtr->PulseHigh,
+        ESSReadout.Packet.HeaderPtr->PulseLow);
+
       // We have good header information, now parse readout data
       Res = LokiParser.parse(ESSReadout.Packet.DataPtr, ESSReadout.Packet.DataLength);
       Counters.Readouts = LokiParser.Stats.Readouts;
@@ -217,29 +225,52 @@ void LokiBase::processingThread() {
       Counters.ErrorBytes = LokiParser.Stats.ErrorBytes;
 
 
-      uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
-      FlatBuffer.pulseTime(EfuTime);
+      //Fake pulse time
+      uint64_t PulseTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+      FlatBuffer.pulseTime(PulseTime);
+
+      bool RealPulseTime = true;
+      if (RealPulseTime) {
+        auto PacketHeader = ESSReadout.Packet.HeaderPtr;
+        PulseTime = PacketHeader->PulseHigh * 1000000000LU;
+        PulseTime += (uint64_t)(PacketHeader->PulseLow * NsPerClock);
+        XTRACE(DATA, DEB, "PulseTime is %u (raw), %" PRIu64 "", PacketHeader->PulseHigh, PulseTime);
+        FlatBuffer.pulseTime(PulseTime);
+      }
 
 
-      /// \todo traverse readouts
-      //for (...) {
-        // calculate strawid and ypos from four amplitudes
-        // possibly add fpgaid to the stew
-        auto Tube = 0;
-        auto Straw = 0;
-        auto YPos = 0;
-        auto Time = 0 ; // TOF in ns
-        auto PixelId = geometry.getPixelId(Tube, Straw, YPos);
-        XTRACE(EVENT, DEB, "time: %u, tube %u, straw %u, ypos %u, pixel: %u",
-               Time, Tube, Straw, YPos, PixelId);
+      /// Traverse readouts
+      for (auto & Section : LokiParser.Result) {
+        XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
 
-        if (PixelId == 0) {
-          Counters.GeometryErrors++;
-        } else {
-          Counters.TxBytes += FlatBuffer.addEvent(Time, PixelId);
-          Counters.Events++;
+        for (auto & Data : Section.Data) {
+          XTRACE(DATA, DEB, "time (%u, %u), FPGA %u, A %u, B %u, C %u, D %u",
+            Data.TimeHigh, Data.TimeLow, Data.FpgaAndTube, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+
+          Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+          /// \todo include FENId in global tube calculation, eventually
+          /// \todo New format will split FPGA and Tube
+          uint64_t DataTime = Data.TimeHigh * 1000000000LU;
+          DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
+          XTRACE(DATA, DEB, "DataTime %" PRIu64 "", DataTime);
+          auto GlobalTube = Data.FpgaAndTube;
+          auto Straw = Amp2Pos.StrawId;
+          auto YPos = Amp2Pos.PosId;
+
+          auto TimeOfFlight =  DataTime - PulseTime; // TOF in ns
+          auto PixelId = geometry.getPixelId(GlobalTube, Straw, YPos);
+          XTRACE(EVENT, DEB, "time: %" PRIu64 ", tube %u, straw %u, ypos %u, pixel: %u",
+                 TimeOfFlight, GlobalTube, Straw, YPos, PixelId);
+
+          if (PixelId == 0) {
+            Counters.GeometryErrors++;
+          } else {
+            Counters.TxBytes += FlatBuffer.addEvent(PulseTime, PixelId);
+            Counters.Events++;
+          }
+
         }
-      //}
+      } // for()
 
     } else {
       // There is NO data in the FIFO - do stop checks and sleep a little
