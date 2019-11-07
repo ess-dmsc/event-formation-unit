@@ -51,9 +51,19 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   Stats.create("receive.dropped", Counters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
-  Stats.create("readouts.count", Counters.ReadoutsCount);
-  Stats.create("readouts.error_bytes", Counters.ReadoutsErrorBytes);
+  // ESS Readout
+  Stats.create("readouts.error_buffer", Counters.ErrorBuffer);
+  Stats.create("readouts.error_size", Counters.ErrorSize);
+  Stats.create("readouts.error_version", Counters.ErrorVersion);
+  Stats.create("readouts.error_type", Counters.ErrorTypeSubType);
+  Stats.create("readouts.error_seqno", Counters.ErrorSeqNum);
+  // LoKI Readout Data
+  Stats.create("readouts.count", Counters.Readouts);
+  Stats.create("readouts.headers", Counters.Headers);
+  Stats.create("readouts.error_bytes", Counters.ErrorBytes);
+  Stats.create("readouts.error_header", Counters.ErrorHeaders);
 
+  //
   Stats.create("thread.processing_idle", Counters.RxIdle);
 
   Stats.create("events.count", Counters.Events);

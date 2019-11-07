@@ -54,8 +54,6 @@ protected:
 
     // Processing Counters - accessed in processing thread
     int64_t FifoSeqErrors;
-    int64_t ReadoutsErrorBytes;
-    int64_t ReadoutsCount;
 
     // ESSReadout parser
     // \todo checkout Doro's method for stats instead of copying.
@@ -70,7 +68,7 @@ protected:
     int64_t ErrorHeaders;
     int64_t ErrorBytes;
 
-    // 
+    //
     int64_t RxIdle;
     int64_t Events;
     int64_t EventsUdder;
