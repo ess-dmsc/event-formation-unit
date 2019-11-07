@@ -15,8 +15,6 @@ namespace Loki {
 
 class DataParser {
 public:
-  enum error { OK = 0, EHEADER, ESIZE };
-
   const unsigned int MaxRingId{11};
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{500};

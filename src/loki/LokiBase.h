@@ -57,6 +57,20 @@ protected:
     int64_t ReadoutsErrorBytes;
     int64_t ReadoutsCount;
 
+    // ESSReadout parser
+    // \todo checkout Doro's method for stats instead of copying.
+    int64_t ErrorBuffer;
+    int64_t ErrorSize;
+    int64_t ErrorVersion;
+    int64_t ErrorTypeSubType;
+    int64_t ErrorSeqNum;
+    // LoKI DataParser
+    int64_t Readouts;
+    int64_t Headers;
+    int64_t ErrorHeaders;
+    int64_t ErrorBytes;
+
+    // 
     int64_t RxIdle;
     int64_t Events;
     int64_t EventsUdder;

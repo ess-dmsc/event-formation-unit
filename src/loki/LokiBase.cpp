@@ -25,6 +25,9 @@
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
 
+#include <readout/Readout.h>
+#include <loki/readout/DataParser.h>
+
 #include <loki/geometry/Geometry.h>
 
 // #undef TRC_LEVEL
@@ -158,6 +161,8 @@ void LokiBase::processingThread() {
   const unsigned int NStraws{7};
   const unsigned int NYpos{512};
   Geometry geometry(NXTubes, NZTubes, NStraws, NYpos);
+  Readout ESSReadout;
+  DataParser LokiParser;
 
   Producer EventProducer(EFUSettings.KafkaBroker, "LOKI_detector");
 
@@ -182,11 +187,29 @@ void LokiBase::processingThread() {
       }
 
       /// \todo use the Buffer<T> class here and in parser
-      auto __attribute__((unused)) DataPtr = EthernetRingbuffer.getDataBuffer(DataIndex);
-      /// \todo add parser
+      auto DataPtr = EthernetRingbuffer.getDataBuffer(DataIndex);
+      auto Res = ESSReadout.validate(DataPtr, DataLen, Readout::Loki4Amp);
+      Counters.ErrorBuffer = ESSReadout.Stats.ErrorBuffer;
+      Counters.ErrorSize = ESSReadout.Stats.ErrorSize;
+      Counters.ErrorVersion = ESSReadout.Stats.ErrorVersion;
+      Counters.ErrorTypeSubType = ESSReadout.Stats.ErrorTypeSubType;
+      Counters.ErrorSeqNum = ESSReadout.Stats.ErrorSeqNum;
+
+      if (Res != Readout::OK) {
+        XTRACE(DATA, DEB, "Error parsing ESS readout header");
+        continue;
+      }
+      // We have good header information, now parse readout data
+      Res = LokiParser.parse(ESSReadout.Packet.DataPtr, ESSReadout.Packet.DataLength);
+      Counters.Readouts = LokiParser.Stats.Readouts;
+      Counters.Headers = LokiParser.Stats.Headers;
+      Counters.ErrorHeaders = LokiParser.Stats.ErrorHeaders;
+      Counters.ErrorBytes = LokiParser.Stats.ErrorBytes;
+
 
       uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
       FlatBuffer.pulseTime(EfuTime);
+
 
       /// \todo traverse readouts
       //for (...) {
