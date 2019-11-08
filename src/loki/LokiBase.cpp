@@ -25,16 +25,13 @@
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
 
-#include <readout/Readout.h>
 #include <loki/readout/DataParser.h>
-
+#include <readout/ESSTime.h>
 #include <loki/geometry/Geometry.h>
 #include <loki/geometry/HeliumTube.h>
 
-// #undef TRC_LEVEL
-// #define TRC_LEVEL TRC_L_DEB
-
-constexpr float NsPerClock{11.356860963629653};
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 namespace Loki {
 
@@ -177,6 +174,7 @@ void LokiBase::processingThread() {
   Readout ESSReadout;
   DataParser LokiParser;
   HeliumTube Amp2Pos;
+  ESSTime Time;
 
   Producer EventProducer(EFUSettings.KafkaBroker, "LOKI_detector");
 
@@ -232,9 +230,9 @@ void LokiBase::processingThread() {
       bool RealPulseTime = true;
       if (RealPulseTime) {
         auto PacketHeader = ESSReadout.Packet.HeaderPtr;
-        PulseTime = PacketHeader->PulseHigh * 1000000000LU;
-        PulseTime += (uint64_t)(PacketHeader->PulseLow * NsPerClock);
-        XTRACE(DATA, DEB, "PulseTime is %u (raw), %" PRIu64 "", PacketHeader->PulseHigh, PulseTime);
+        PulseTime = Time.setReference(PacketHeader->PulseHigh,PacketHeader->PulseLow);
+        XTRACE(DATA, DEB, "PulseTime (%u,%u) %" PRIu64 "", PacketHeader->PulseHigh,
+         PacketHeader->PulseLow, PulseTime);
         FlatBuffer.pulseTime(PulseTime);
       }
 
@@ -244,20 +242,20 @@ void LokiBase::processingThread() {
         XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
 
         for (auto & Data : Section.Data) {
-          XTRACE(DATA, DEB, "time (%u, %u), FPGA %u, A %u, B %u, C %u, D %u",
+          XTRACE(DATA, DEB, "Data: time (%u, %u), FPGA %u, A %u, B %u, C %u, D %u",
             Data.TimeHigh, Data.TimeLow, Data.FpgaAndTube, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
           Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
           /// \todo include FENId in global tube calculation, eventually
           /// \todo New format will split FPGA and Tube
-          uint64_t DataTime = Data.TimeHigh * 1000000000LU;
-          DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
-          XTRACE(DATA, DEB, "DataTime %" PRIu64 "", DataTime);
+          // uint64_t DataTime = Data.TimeHigh * 1000000000LU;
+          // DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
+          // XTRACE(DATA, DEB, "DataTime %" PRIu64 "", DataTime);
           auto GlobalTube = Data.FpgaAndTube;
           auto Straw = Amp2Pos.StrawId;
           auto YPos = Amp2Pos.PosId;
 
-          auto TimeOfFlight =  DataTime - PulseTime; // TOF in ns
+          auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
           auto PixelId = geometry.getPixelId(GlobalTube, Straw, YPos);
           XTRACE(EVENT, DEB, "time: %" PRIu64 ", tube %u, straw %u, ypos %u, pixel: %u",
                  TimeOfFlight, GlobalTube, Straw, YPos, PixelId);

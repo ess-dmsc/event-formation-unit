@@ -23,16 +23,19 @@ set(loki_SRC
 )
 create_module(loki)
 
-# Pipeline test
+##
+## Pipeline test
+##
 set(LokiBaseTest_INC
   ${loki_common_inc}
   ../adc_readout/test/TestUDPServer.h
 )
 set(LokiBaseTest_SRC
-  LokiBaseTest.cpp
+  test/LokiBaseTest.cpp
   ${loki_common_src}
   ../adc_readout/test/TestUDPServer.cpp
 )
 create_test_executable(LokiBaseTest)
+
 
 add_subdirectory(test)

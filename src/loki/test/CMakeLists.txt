@@ -3,6 +3,10 @@
 #=============================================================================
 
 ##
+## Pure unit tests
+##
+
+##
 ## geometry/
 ##
 set(LokiGeometryTest_SRC GeometryTest.cpp)
@@ -19,6 +23,11 @@ create_test_executable(HeliumTubeTest)
 set(LokiDataParserTest_INC ../readout/DataParser.h ../../readout/Readout.h)
 set(LokiDataParserTest_SRC ../readout/DataParser.cpp DataParserTest.cpp)
 create_test_executable(LokiDataParserTest)
+
+
+##
+## Module Integration tests below
+##
 
 
 ##
