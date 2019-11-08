@@ -256,7 +256,9 @@ void LokiBase::processingThread() {
           auto YPos = Amp2Pos.PosId;
 
           auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
-          auto PixelId = geometry.getPixelId(GlobalTube, Straw, YPos);
+          auto PixelId =  LokiModuleSettings.DetectorImage3D
+              ? geometry.getPixelId3D(GlobalTube, Straw, YPos)
+              : geometry.getPixelId2D(GlobalTube, Straw, YPos);
           XTRACE(EVENT, DEB, "time: %" PRIu64 ", tube %u, straw %u, ypos %u, pixel: %u",
                  TimeOfFlight, GlobalTube, Straw, YPos, PixelId);
 

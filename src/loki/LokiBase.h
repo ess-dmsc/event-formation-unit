@@ -16,7 +16,7 @@
 namespace Loki {
 
 struct LokiSettings {
-  uint32_t Unused;
+  bool DetectorImage3D{true}; ///< generate pixels for 3D detector (else 2D)
 };
 
 using namespace memory_sequential_consistent; // Lock free fifo

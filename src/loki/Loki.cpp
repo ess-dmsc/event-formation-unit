@@ -13,6 +13,9 @@
 static Loki::LokiSettings LocalLokiSettings;
 
 void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
+  parser.add_flag("--3D", LocalLokiSettings.DetectorImage3D,
+                    "Generate Pixels for 3D detector (else 2D)")
+                    ->group("LOKI");
 }
 
 PopulateCLIParser PopulateParser{SetCLIArguments};
