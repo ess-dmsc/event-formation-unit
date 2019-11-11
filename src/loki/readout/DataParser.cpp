@@ -46,7 +46,17 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
+
+    XTRACE(DATA, DEB, "Ring %u, FEN %u, Length %u\n", DataHdrPtr->RingId,
+      DataHdrPtr->FENId, DataHdrPtr->DataLength);
     Stats.Headers++;
+
+    if (DataHdrPtr->DataLength < sizeof(DataParser::LokiReadout)) {
+      XTRACE(DATA, WAR, "Invalid data length %u", DataHdrPtr->DataLength);
+      Stats.ErrorHeaders++;
+      Stats.ErrorBytes += BytesLeft;
+      return ParsedReadouts;
+    }
 
     ParsedData CurrentDataSection;
     CurrentDataSection.RingId = DataHdrPtr->RingId;
