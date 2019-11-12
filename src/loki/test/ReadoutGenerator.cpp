@@ -1,5 +1,6 @@
 /** Copyright (C) 2019 European Spallation Source ERIC */
 
+#include <cassert>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
