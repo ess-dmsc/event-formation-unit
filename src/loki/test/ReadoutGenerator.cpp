@@ -41,10 +41,10 @@ uint16_t lokiReadoutDataGen(uint16_t DataSections, uint16_t DataElements,
       auto DataBlock = (DataParser::LokiReadout *)DP;
       DataBlock->TimeLow = 100;
       DataBlock->FpgaAndTube = 0;
-      DataBlock->AmpA = Element;
-      DataBlock->AmpB = Element;
-      DataBlock->AmpC = Element;
-      DataBlock->AmpD = Element;
+      DataBlock->AmpA = Element + 1;
+      DataBlock->AmpB = Element + 1;
+      DataBlock->AmpC = Element + 1;
+      DataBlock->AmpD = Element + 1;
       //printf("    Data Element %u @ %p (20 bytes)\n", Element, (void *)DP);
       assert(sizeof(DataParser::LokiReadout) == 20);
       DP += sizeof(DataParser::LokiReadout);

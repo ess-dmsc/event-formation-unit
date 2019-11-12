@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
       Packets = 0;
       break;
     }
-    printf("Sent %" PRIu64 " packets\n", TotalPackets);
+    //printf("Sent %" PRIu64 " packets\n", TotalPackets);
   } while (Settings.Loop or TotalPackets < Settings.NumberOfPackets);
   // pcap.printstats();
 

@@ -264,6 +264,7 @@ void LokiBase::processingThread() {
 
           if (PixelId == 0) {
             Counters.GeometryErrors++;
+            exit(1);
           } else {
             Counters.TxBytes += FlatBuffer.addEvent(PulseTime, PixelId);
             Counters.Events++;
