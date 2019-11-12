@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <readout/Readout.h>
+#include <readout/ReadoutParser.h>
 #include <vector>
 
 namespace Loki {

@@ -11,7 +11,7 @@
 
 #include <cinttypes>
 
-class Readout {
+class ReadoutParser {
 public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
   enum DetectorType { Loki4Amp = 0x30 };
@@ -64,5 +64,5 @@ public:
   } Stats;
 };
 
-static_assert(sizeof(Readout::PacketHeaderV0) == 28,
+static_assert(sizeof(ReadoutParser::PacketHeaderV0) == 28,
               "Wrong header size (update assert or check packing)");

@@ -1,6 +1,6 @@
 /** Copyright (C) 2016, 2017 European Spallation Source ERIC */
 
-#include <readout/Readout.h>
+#include <readout/ReadoutParser.h>
 #include <loki/readout/DataParser.h>
 #include <test/TestBase.h>
 #include <loki/test/ReadoutGenerator.h>
@@ -65,7 +65,7 @@ using namespace Loki;
 class CombinedParserTest : public TestBase {
 protected:
   const int DataType{0x30};
-  Readout CommonReadout;
+  ReadoutParser CommonReadout;
   DataParser LokiParser;
   void SetUp() override {}
   void TearDown() override {}
@@ -83,7 +83,7 @@ TEST_F(CombinedParserTest, DataGen) {
     ASSERT_EQ(Length, 28 + Sections *(4 + Elements * 20));
 
     auto Res = CommonReadout.validate((char *)&Buffer[0], Length, DataType);
-    ASSERT_EQ(Res, Readout::OK);
+    ASSERT_EQ(Res, ReadoutParser::OK);
     Res = LokiParser.parse(CommonReadout.Packet.DataPtr, CommonReadout.Packet.DataLength);
     ASSERT_EQ(Res, Sections*Elements);
   }
@@ -92,7 +92,7 @@ TEST_F(CombinedParserTest, DataGen) {
 
 TEST_F(CombinedParserTest, ParseUDPPacket) {
   auto Res = CommonReadout.validate((char *)&UdpPayload[0], UdpPayload.size(), DataType);
-  ASSERT_EQ(Res, Readout::OK);
+  ASSERT_EQ(Res, ReadoutParser::OK);
   Res = LokiParser.parse(CommonReadout.Packet.DataPtr, CommonReadout.Packet.DataLength);
   ASSERT_EQ(Res, 6);
 

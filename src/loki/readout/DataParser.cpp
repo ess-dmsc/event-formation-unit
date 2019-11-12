@@ -2,14 +2,14 @@
 
 #include <common/Trace.h>
 #include <loki/readout/DataParser.h>
-#include <readout/Readout.h>
+#include <readout/ReadoutParser.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 namespace Loki {
 
-constexpr unsigned int DataHeaderSize{sizeof(Readout::DataHeader)};
+constexpr unsigned int DataHeaderSize{sizeof(ReadoutParser::DataHeader)};
 constexpr unsigned int LokiReadoutSize{sizeof(DataParser::LokiReadout)};
 
 // Assume we start after the PacketHeader
@@ -22,14 +22,14 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
 
   while (BytesLeft) {
     // Parse Data Header
-    if (BytesLeft < sizeof(Readout::DataHeader)) {
+    if (BytesLeft < sizeof(ReadoutParser::DataHeader)) {
       XTRACE(DATA, DEB, "Not enough data left for header");
       Stats.ErrorHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;
     }
 
-    auto DataHdrPtr = (Readout::DataHeader *)DataPtr;
+    auto DataHdrPtr = (ReadoutParser::DataHeader *)DataPtr;
 
     if (BytesLeft < DataHdrPtr->DataLength) {
       XTRACE(DATA, DEB, "Data size mismatch, header says %u got %d",

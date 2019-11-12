@@ -2,9 +2,9 @@
 # ESS Readout System Tests
 #=============================================================================
 
-set(ReadoutTest_INC Readout.h ReadoutTestData.h)
-set(ReadoutTest_SRC ReadoutTest.cpp Readout.cpp)
-create_test_executable(ReadoutTest)
+set(ReadoutParserTest_INC ReadoutParser.h ReadoutParserTestData.h)
+set(ReadoutParserTest_SRC ReadoutParserTest.cpp ReadoutParser.cpp)
+create_test_executable(ReadoutParserTest)
 
 #
 set(ESSTimeTest_INC ESSTime.h)

@@ -45,14 +45,18 @@ struct __attribute__ ((packed)) Readout {
 
   /// \todo consider reordering these to optimize
   /// !!! DO NOT MODIFY BELOW - READ HEADER FIRST !!!
-  uint64_t global_time {0};
-  uint32_t local_time {0};
-  uint16_t amp_a{0};
-  uint16_t amp_b{0};
-  uint16_t amp_c{0};
-  uint16_t amp_d{0};
-  uint8_t fpga_id {0};
-  uint8_t tube_id {0};
+  uint32_t PulseTimeHigh {0};
+  uint32_t PulseTimeLow {0};
+  uint32_t EventTimeHigh {0};
+  uint32_t EventTimeLow {0};
+  uint16_t AmpA{0};
+  uint16_t AmpB{0};
+  uint16_t AmpC{0};
+  uint16_t AmpD{0};
+  uint8_t RingId;
+  uint8_t FENId;
+  uint8_t FPGAId {0};
+  uint8_t TubeId {0};
   // !!! DO NOT MODIFY ABOVE -- READ HEADER FIRST !!!
 
   // \brief prints values for to_string purposes
@@ -70,14 +74,19 @@ public:
   H5_COMPOUND_DEFINE_TYPE(Loki::Readout) {
     H5_COMPOUND_INIT;
     /// Make sure ALL member variables are inserted
-    H5_COMPOUND_INSERT_MEMBER(global_time);
-    H5_COMPOUND_INSERT_MEMBER(local_time);
-    H5_COMPOUND_INSERT_MEMBER(amp_a);
-    H5_COMPOUND_INSERT_MEMBER(amp_b);
-    H5_COMPOUND_INSERT_MEMBER(amp_c);
-    H5_COMPOUND_INSERT_MEMBER(amp_d);
-    H5_COMPOUND_INSERT_MEMBER(fpga_id);
-    H5_COMPOUND_INSERT_MEMBER(tube_id);
+    H5_COMPOUND_INSERT_MEMBER(PulseTimeHigh);
+    H5_COMPOUND_INSERT_MEMBER(PulseTimeLow);
+    H5_COMPOUND_INSERT_MEMBER(EventTimeHigh);
+    H5_COMPOUND_INSERT_MEMBER(EventTimeLow);
+    H5_COMPOUND_INSERT_MEMBER(AmpA);
+    H5_COMPOUND_INSERT_MEMBER(AmpB);
+    H5_COMPOUND_INSERT_MEMBER(AmpC);
+    H5_COMPOUND_INSERT_MEMBER(AmpD);
+    H5_COMPOUND_INSERT_MEMBER(RingId);
+    H5_COMPOUND_INSERT_MEMBER(FENId);
+    H5_COMPOUND_INSERT_MEMBER(FPGAId);
+    H5_COMPOUND_INSERT_MEMBER(TubeId);
+
     H5_COMPOUND_RETURN;
   }
 };

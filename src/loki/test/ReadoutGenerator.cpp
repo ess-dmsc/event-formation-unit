@@ -22,21 +22,21 @@ uint16_t lokiReadoutDataGen(uint16_t DataSections, uint16_t DataElements,
   memset(Buffer, 0, MaxSize);
   auto DP = (uint8_t *)Buffer;
   //printf("Buffer pointer %p\n", (void *)Buffer);
-  auto Header = (Readout::PacketHeaderV0 *)DP;
+  auto Header = (ReadoutParser::PacketHeaderV0 *)DP;
   Header->CookieVersion = 0x00535345;
   Header->TypeSubType = 0x30;
   //Header->OutputQueue = 0x00;
   Header->TotalLength = DataSize;
   DP += 28;
   for (auto Section = 0; Section < DataSections; Section++) {
-    auto DataHeader = (Readout::DataHeader *)DP;
+    auto DataHeader = (ReadoutParser::DataHeader *)DP;
     DataHeader->RingId = 0x00;
     DataHeader->FENId = 0x00;
-    DataHeader->DataLength = sizeof(Readout::DataHeader) +
+    DataHeader->DataLength = sizeof(ReadoutParser::DataHeader) +
        DataElements * sizeof(DataParser::LokiReadout);
     assert(DataHeader->DataLength == 4 + 20 * DataElements);
     //printf("  Data Header %u @ %p (4 bytes)\n", Section, (void *)DP);
-    DP += sizeof(Readout::DataHeader);
+    DP += sizeof(ReadoutParser::DataHeader);
     for (auto Element = 0; Element < DataElements; Element++) {
       auto DataBlock = (DataParser::LokiReadout *)DP;
       DataBlock->TimeLow = 100;

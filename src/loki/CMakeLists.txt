@@ -6,12 +6,12 @@ include_directories(.)
 set(loki_common_inc
   LokiBase.h
   readout/DataParser.h
-  ../readout/Readout.h
+  ../readout/ReadoutParser.h
   )
 set(loki_common_src
   LokiBase.cpp
   readout/DataParser.cpp
-  ../readout/Readout.cpp
+  ../readout/ReadoutParser.cpp
   )
 
 set(loki_INC

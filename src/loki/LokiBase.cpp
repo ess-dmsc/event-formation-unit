@@ -26,6 +26,7 @@
 #include <common/Timer.h>
 
 #include <loki/readout/DataParser.h>
+#include <loki/readout/Readout.h>
 #include <readout/ESSTime.h>
 #include <loki/geometry/Geometry.h>
 #include <loki/geometry/HeliumTube.h>
@@ -171,10 +172,15 @@ void LokiBase::processingThread() {
   const unsigned int NStraws{7};
   const unsigned int NYpos{512};
   Geometry geometry(NXTubes, NZTubes, NStraws, NYpos);
-  Readout ESSReadout;
+  ReadoutParser ESSReadout;
   DataParser LokiParser;
   HeliumTube Amp2Pos;
   ESSTime Time;
+
+  std::shared_ptr<ReadoutFile> DumpFile;
+  if (!LokiModuleSettings.FilePrefix.empty()) {
+    DumpFile = ReadoutFile::create(LokiModuleSettings.FilePrefix + "-todo_add_time");
+  }
 
   Producer EventProducer(EFUSettings.KafkaBroker, "LOKI_detector");
 
@@ -200,14 +206,14 @@ void LokiBase::processingThread() {
 
       /// \todo use the Buffer<T> class here and in parser
       auto DataPtr = EthernetRingbuffer.getDataBuffer(DataIndex);
-      auto Res = ESSReadout.validate(DataPtr, DataLen, Readout::Loki4Amp);
+      auto Res = ESSReadout.validate(DataPtr, DataLen, ReadoutParser::Loki4Amp);
       Counters.ErrorBuffer = ESSReadout.Stats.ErrorBuffer;
       Counters.ErrorSize = ESSReadout.Stats.ErrorSize;
       Counters.ErrorVersion = ESSReadout.Stats.ErrorVersion;
       Counters.ErrorTypeSubType = ESSReadout.Stats.ErrorTypeSubType;
       Counters.ErrorSeqNum = ESSReadout.Stats.ErrorSeqNum;
 
-      if (Res != Readout::OK) {
+      if (Res != ReadoutParser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
         continue;
       }
@@ -261,6 +267,23 @@ void LokiBase::processingThread() {
               : geometry.getPixelId2D(GlobalTube, Straw, YPos);
           XTRACE(EVENT, DEB, "time: %" PRIu64 ", tube %u, straw %u, ypos %u, pixel: %u",
                  TimeOfFlight, GlobalTube, Straw, YPos, PixelId);
+
+          if (DumpFile) {
+            Readout CurrentReadout;
+            CurrentReadout.PulseTimeHigh = ESSReadout.Packet.HeaderPtr->PulseHigh;
+            CurrentReadout.PulseTimeLow = ESSReadout.Packet.HeaderPtr->PulseLow;
+            CurrentReadout.EventTimeHigh = Data.TimeHigh;
+            CurrentReadout.EventTimeLow = Data.TimeLow;
+            CurrentReadout.AmpA = Data.AmpA;
+            CurrentReadout.AmpB = Data.AmpB;
+            CurrentReadout.AmpC = Data.AmpC;
+            CurrentReadout.AmpD = Data.AmpD;
+            CurrentReadout.RingId = Section.RingId;
+            CurrentReadout.FENId = Section.FENId;
+            CurrentReadout.FPGAId = Data.FpgaAndTube; ///< \todo split FPGA and Tube
+            CurrentReadout.TubeId = Data.FpgaAndTube; ///< \todo split FPGA and Tube
+            DumpFile->push(CurrentReadout);
+          }
 
           if (PixelId == 0) {
             Counters.GeometryErrors++;

@@ -16,6 +16,7 @@
 namespace Loki {
 
 struct LokiSettings {
+  std::string FilePrefix{""}; ///< for HDF5 file dumping
   bool DetectorImage3D{true}; ///< generate pixels for 3D detector (else 2D)
 };
 
