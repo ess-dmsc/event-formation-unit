@@ -37,5 +37,5 @@ set(LokiBaseTest_SRC
 )
 create_test_executable(LokiBaseTest)
 
-
+add_subdirectory(generators)
 add_subdirectory(test)

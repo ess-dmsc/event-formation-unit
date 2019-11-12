@@ -35,5 +35,5 @@ create_test_executable(LokiDataParserTest)
 ##
 set(CombinedParserTest_INC ../readout/DataParser.h ../../readout/Readout.h)
 set(CombinedParserTest_SRC ../../readout/Readout.cpp ../readout/DataParser.cpp
-  CombinedParserTest.cpp)
+CombinedParserTest.cpp ReadoutGenerator.cpp)
 create_test_executable(CombinedParserTest)

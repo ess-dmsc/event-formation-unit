@@ -30,8 +30,8 @@
 #include <loki/geometry/Geometry.h>
 #include <loki/geometry/HeliumTube.h>
 
-#undef TRC_LEVEL
-#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 namespace Loki {
 
