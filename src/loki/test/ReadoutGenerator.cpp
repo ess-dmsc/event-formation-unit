@@ -1,6 +1,8 @@
 /** Copyright (C) 2019 European Spallation Source ERIC */
 
 #include <cstdint>
+#include <cstdio>
+#include <cstring>
 #include <loki/readout/DataParser.h>
 
 using namespace Loki;
