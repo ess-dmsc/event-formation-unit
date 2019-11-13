@@ -179,7 +179,7 @@ void LokiBase::processingThread() {
 
   std::shared_ptr<ReadoutFile> DumpFile;
   if (!LokiModuleSettings.FilePrefix.empty()) {
-    DumpFile = ReadoutFile::create(LokiModuleSettings.FilePrefix + "-todo_add_time");
+    DumpFile = ReadoutFile::create(LokiModuleSettings.FilePrefix + "loki_" + timeString());
   }
 
   Producer EventProducer(EFUSettings.KafkaBroker, "LOKI_detector");
@@ -204,7 +204,8 @@ void LokiBase::processingThread() {
         continue;
       }
 
-      /// \todo use the Buffer<T> class here and in parser
+      /// \todo use the Buffer<T> class here and in parser?
+      /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = EthernetRingbuffer.getDataBuffer(DataIndex);
       auto Res = ESSReadout.validate(DataPtr, DataLen, ReadoutParser::Loki4Amp);
       Counters.ErrorBuffer = ESSReadout.Stats.ErrorBuffer;
@@ -287,7 +288,6 @@ void LokiBase::processingThread() {
 
           if (PixelId == 0) {
             Counters.GeometryErrors++;
-            exit(1);
           } else {
             Counters.TxBytes += FlatBuffer.addEvent(PulseTime, PixelId);
             Counters.Events++;
@@ -318,8 +318,7 @@ void LokiBase::processingThread() {
       ProduceTimer.now();
     }
   }
-  // \todo flush everything here
   XTRACE(INPUT, ALW, "Stopping processing thread.");
   return;
 }
-} // namespace
+} // namespace Loki

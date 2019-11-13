@@ -34,7 +34,8 @@ public:
   static const int EthernetBufferMaxEntries = 500;
   static const int EthernetBufferSize = 9000; /// bytes
   static const int KafkaBufferSize = 124000; /// entries ~ 1MB
-  // Ideally should match the CPU speed, bust at this varies across
+
+  // Ideally should match the CPU speed, but as this varies across
   // CPU versions we just select something in the 'middle'. This is
   // used to get an approximate time for periodic housekeeping so
   // it is not critical that this is precise.
