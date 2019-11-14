@@ -31,6 +31,16 @@ TEST_F(DataParserTest, BadSize) {
   ASSERT_EQ(Parser.Result.size(), 0);
 }
 
+TEST_F(DataParserTest, HeaderSizeError) {
+  auto Res = Parser.parse((char *)&ErrSizeMismatch[0], ErrSizeMismatch.size());
+  ASSERT_EQ(Res, 0);
+  ASSERT_EQ(Parser.Stats.Readouts, 0);
+  ASSERT_EQ(Parser.Stats.Headers, 0);
+  ASSERT_EQ(Parser.Stats.ErrorHeaders, 1);
+  ASSERT_EQ(Parser.Stats.ErrorBytes, ErrSizeMismatch.size());
+  ASSERT_EQ(Parser.Result.size(), 0);
+}
+
 TEST_F(DataParserTest, BadRingGoodFEN) {
   auto Res = Parser.parse((char *)&ErrBadRingGoodFEN[0], 4);
   ASSERT_EQ(Res, 0);
