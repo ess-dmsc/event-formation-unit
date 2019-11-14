@@ -27,6 +27,7 @@ TEST_F(LokiGeometryTest, Constructor) {
   ASSERT_EQ(Geom.getPixelId2D( 0,  6, 511),     56); // valid tubeid
   ASSERT_EQ(Geom.getPixelId2D(29,  0, 511),     57); // valid tubeid
   ASSERT_EQ(Geom.getPixelId2D( 3,  6, 511),    224); // valid tubeid
+  ASSERT_EQ(Geom.getPixelId2D( 3,  6, 512),      0); // invalid ypos
 }
 
 TEST_F(LokiGeometryTest, CornersZ0) {

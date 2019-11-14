@@ -72,6 +72,18 @@ protected:
 };
 
 
+TEST_F(CombinedParserTest, DataGenSizeTooBig) {
+  const uint16_t BufferSize{8972};
+  uint8_t Buffer[BufferSize];
+
+  uint16_t Sections{1000};
+  uint16_t Elements{1000};
+
+  auto Length = lokiReadoutDataGen(Sections, Elements, Buffer, BufferSize);
+  ASSERT_EQ(Length, 0);
+}
+
+
 // Cycle through all section values with equal number of readouts
 TEST_F(CombinedParserTest, DataGen) {
   const uint16_t BufferSize{8972};
