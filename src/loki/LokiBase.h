@@ -31,9 +31,9 @@ public:
   void testImageUdder(EV42Serializer& FlatBuffer);
 
   /** @todo figure out the right size  of the .._max_entries  */
-  static const int EthernetBufferMaxEntries = 500;
-  static const int EthernetBufferSize = 9000; /// bytes
-  static const int KafkaBufferSize = 124000; /// entries ~ 1MB
+  static const int EthernetBufferMaxEntries {2000};
+  static const int EthernetBufferSize {9000}; /// bytes
+  static const int KafkaBufferSize {124000}; /// entries ~ 1MB
 
   // Ideally should match the CPU speed, but as this varies across
   // CPU versions we just select something in the 'middle'. This is
