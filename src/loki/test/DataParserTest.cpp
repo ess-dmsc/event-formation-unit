@@ -35,7 +35,7 @@ TEST_F(DataParserTest, HeaderSizeError) {
   auto Res = Parser.parse((char *)&ErrSizeMismatch[0], ErrSizeMismatch.size());
   ASSERT_EQ(Res, 0);
   ASSERT_EQ(Parser.Stats.Readouts, 0);
-  ASSERT_EQ(Parser.Stats.Headers, 0);
+  ASSERT_EQ(Parser.Stats.Headers, 1);
   ASSERT_EQ(Parser.Stats.ErrorHeaders, 1);
   ASSERT_EQ(Parser.Stats.ErrorBytes, ErrSizeMismatch.size());
   ASSERT_EQ(Parser.Result.size(), 0);
