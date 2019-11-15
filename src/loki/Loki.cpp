@@ -16,8 +16,8 @@ void SetCLIArguments(CLI::App __attribute__((unused)) & parser) {
   parser.add_option("--dumptofile", LocalLokiSettings.FilePrefix,
                     "dump to specified file")->group("LOKI");
 
-  parser.add_flag("--3D", LocalLokiSettings.DetectorImage3D,
-                    "Generate Pixels for 3D detector (else 2D)")
+  parser.add_flag("--2D", LocalLokiSettings.DetectorImage2D,
+                    "Generate Pixels for 2D detector (else 3D)")
                     ->group("LOKI");
 }
 

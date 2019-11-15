@@ -17,7 +17,7 @@ namespace Loki {
 
 struct LokiSettings {
   std::string FilePrefix{""}; ///< for HDF5 file dumping
-  bool DetectorImage3D{true}; ///< generate pixels for 3D detector (else 2D)
+  bool DetectorImage2D{false}; ///< generate pixels for 2D detector (else 3D)
 };
 
 using namespace memory_sequential_consistent; // Lock free fifo
