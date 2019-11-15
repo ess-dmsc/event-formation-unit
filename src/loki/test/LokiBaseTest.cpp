@@ -109,6 +109,7 @@ TEST_F(LokiBaseTest, DataReceive) {
 TEST_F(LokiBaseTest, DataReceiveGood) {
   Settings.DetectorPort = 9001;
   Settings.UpdateIntervalSec = 0;
+  LocalSettings.FilePrefix = "deleteme_";
   LokiBaseStandIn Readout(Settings, LocalSettings);
   Readout.startThreads();
 
