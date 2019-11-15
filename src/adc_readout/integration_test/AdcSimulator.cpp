@@ -88,7 +88,7 @@ auto SetUpNoiseGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
                          int ChNr, std::map<std::string, double> Settings) {
   auto SampleGen = std::make_shared<SampleRunGenerator>(
       100, 50, 20, 1.0, Settings.at("offset"), BoxNr, ChNr);
-  auto Glue = [Settings, SampleGen, FPGAPtr](RawTimeStamp const &Time) {
+  auto Glue = [Settings, SampleGen, FPGAPtr](TimeStamp const &Time) {
     auto SampleRun = SampleGen->generate(Settings.at("amplitude"), Time);
     FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, Time);
   };
@@ -101,7 +101,7 @@ auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
   const int OversamplingFactor = 4;
   auto SampleGen = std::make_shared<SampleRunGenerator>(
       NrOfSamples, 50, 20, 1.0, Settings.at("offset"), BoxNr, ChNr);
-  auto Glue = [Settings, SampleGen, FPGAPtr](RawTimeStamp const &Time) {
+  auto Glue = [Settings, SampleGen, FPGAPtr](TimeStamp const &Time) {
     auto SampleRun = SampleGen->generate(Settings.at("amplitude"), Time);
     FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, Time);
   };
@@ -130,7 +130,7 @@ auto SetUpAmpPosGenerator(asio::io_service &Service, FPGASim *FPGAPtr,
                                                       500, BoxNr, 1);
   auto YPosGen = std::make_shared<SampleRunGenerator>(NrOfSamples, 50, 20, 1.0,
                                                       500, BoxNr, 2);
-  auto Glue = [AnodeGen, XPosGen, YPosGen, FPGAPtr](RawTimeStamp const &Time) {
+  auto Glue = [AnodeGen, XPosGen, YPosGen, FPGAPtr](TimeStamp const &Time) {
     auto SampleRunAnode = AnodeGen->generate(2000.0, Time);
     auto Amplitudes = generateCircleAmplitudes();
     auto SampleRunX = XPosGen->generate(Amplitudes.first, Time);

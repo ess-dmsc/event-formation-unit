@@ -13,7 +13,7 @@
 
 class AmpEventDelay : public PoissonDelay {
 public:
-  AmpEventDelay(std::function<void(RawTimeStamp const &)> OnEvent,
+  AmpEventDelay(std::function<void(TimeStamp const &)> OnEvent,
                 asio::io_service &AsioService, double EventRate)
       : PoissonDelay(std::move(OnEvent), AsioService, EventRate){};
 };

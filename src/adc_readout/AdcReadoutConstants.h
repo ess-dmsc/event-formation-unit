@@ -12,8 +12,6 @@
 #include <cstdint>
 
 /// \brief Clock frequency of the MRF timing hardware clock.
-static const std::int32_t TimerClockFrequency = 88052500;
-static const std::int32_t AdcSamplingRate = TimerClockFrequency / 2;
-static const std::int32_t AdcTimerCounterMax = AdcSamplingRate;
-static const double CycleLengthNS = 1e9 / TimerClockFrequency;
-static const double SampleLengthNS = 2e9 / TimerClockFrequency;
+static const std::int32_t TimerClockFrequencyExternal = 88052500;
+
+static const std::int32_t TimerClockFrequencyInternal = 90000000;

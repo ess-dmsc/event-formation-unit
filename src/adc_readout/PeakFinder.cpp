@@ -17,7 +17,7 @@ PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod, std::string SourceName)
 
 void PeakFinder::processData(SamplingRun const &Data) {
   auto PulseInfo = analyseSampleRun(Data, 0.1);
-  std::uint64_t PeakTimeStamp = PulseInfo.PeakTimestamp.getTimeStampNS();
+  std::uint64_t PeakTimeStamp = PulseInfo.PeakTime.getTimeStampNS();
 
   if (Serialisers.find(Data.Identifier) == Serialisers.end()) {
     Serialisers[Data.Identifier] = std::make_unique<EventSerializer>(
@@ -37,5 +37,5 @@ void PeakFinder::processData(SamplingRun const &Data) {
       static_cast<std::uint32_t>(PulseInfo.PeakAmplitude),
       static_cast<std::uint32_t>(PulseInfo.PeakArea),
       static_cast<std::uint32_t>(PulseInfo.BackgroundLevel),
-      PulseInfo.ThresholdTimestamp.getTimeStampNS(), PeakTimeStamp}));
+      PulseInfo.ThresholdTime.getTimeStampNS(), PeakTimeStamp}));
 }

@@ -104,7 +104,7 @@ HeaderInfo parseHeader(const InData &Packet) {
   }
   ReturnInfo.DataStart = sizeof(PacketHeader);
   ReturnInfo.ReadoutCount = Header.ReadoutCount;
-  ReturnInfo.ReferenceTimestamp = Header.ReferenceTimeStamp;
+  ReturnInfo.ReferenceTimestamp = {Header.ReferenceTimeStamp, TimeStamp::ClockMode(Header.ClockMode)};
   if (Packet.Length != Header.ReadoutLength + 8u) {
     throw ParserException(ParserException::Type::HEADER_LENGTH);
   }
@@ -112,7 +112,7 @@ HeaderInfo parseHeader(const InData &Packet) {
 }
 
 size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte,
-                               RawTimeStamp const &ReferenceTimestamp) {
+                               TimeStamp const &ReferenceTimestamp) {
   while (StartByte + sizeof(DataHeader) < Packet.Length) {
     auto HeaderRaw =
         reinterpret_cast<const DataHeader *>(Packet.Data + StartByte);
@@ -135,7 +135,7 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte,
     if (CurrentDataModule != nullptr) {
       CurrentDataModule->Data.resize(NrOfSamples);
       CurrentDataModule->Identifier = CurrentChannelID;
-      CurrentDataModule->TimeStamp = Header.TimeStamp;
+      CurrentDataModule->StartTime = {Header.TimeStamp, ReferenceTimestamp.getClockMode()};
       CurrentDataModule->ReferenceTimestamp = ReferenceTimestamp;
       CurrentDataModule->OversamplingFactor = Header.Oversampling;
       auto ElementPointer = reinterpret_cast<const std::uint16_t *>(

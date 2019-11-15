@@ -42,8 +42,8 @@ struct ProcessedSamples {
 /// \param[in] End Time stamp of last sample.
 /// \param[in] Location Which timestamp to return.
 /// \return The selected timestamp converted to nanoseconds.
-std::uint64_t CalcSampleTimeStamp(RawTimeStamp const &Start,
-                                  RawTimeStamp const &End,
+std::uint64_t CalcSampleTimeStamp(TimeStamp const &Start,
+                                  TimeStamp const &End,
                                   TimeStampLocation const Location);
 
 /// \brief Does processing of individual samples before serialisation.
@@ -83,7 +83,7 @@ private:
   int MeanOfNrOfSamples{1};
   int SumOfSamples{0};
   int NrOfSamplesSummed{0};
-  RawTimeStamp TimeStampOfFirstSample;
+  TimeStamp TimeStampOfFirstSample;
   TimeStampLocation TSLocation{TimeStampLocation::Middle};
 };
 

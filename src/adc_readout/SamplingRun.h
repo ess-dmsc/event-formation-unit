@@ -24,17 +24,16 @@ struct SamplingRun {
   ~SamplingRun() = default;
   SamplingRun(SamplingRun const &) = default;
   explicit SamplingRun(const SamplingRun &&Other)
-      : TimeStamp(Other.TimeStamp), Identifier(Other.Identifier),
+      : StartTime(Other.StartTime), Identifier(Other.Identifier),
         OversamplingFactor(Other.OversamplingFactor),
         Data(std::move(Other.Data)) {}
   SamplingRun &operator=(const SamplingRun &) = default;
-  RawTimeStamp TimeStamp;
-  RawTimeStamp ReferenceTimestamp;
+  TimeStamp StartTime;
+  TimeStamp ReferenceTimestamp;
   void reset() {
     Data.clear();
     OversamplingFactor = 1;
-    TimeStamp.Seconds = 0;
-    TimeStamp.SecondsFrac = 0;
+    StartTime.reset();
     Identifier.ChannelNr = 0;
     Identifier.SourceID = 0;
   }

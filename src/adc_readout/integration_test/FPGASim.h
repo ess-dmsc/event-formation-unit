@@ -31,7 +31,7 @@ public:
   ~FPGASim() = default;
 
   void addSamplingRun(void const *const DataPtr, size_t Bytes,
-                      RawTimeStamp Timestamp);
+                      TimeStamp Timestamp);
   int getNrOfRuns() const { return SamplingRuns; };
   int getNrOfPackets() const { return PacketCount; };
   int getNrOfSentPackets() const { return SentPackets; };

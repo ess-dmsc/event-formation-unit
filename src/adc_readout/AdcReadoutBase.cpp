@@ -131,7 +131,7 @@ void AdcReadoutBase::inputThread() {
       [this](auto Identifier) { return this->GetDataModule(Identifier); });
 
   std::function<bool(SamplingRun *)> QueingFunction1([this](SamplingRun *Data) {
-    this->AdcStats.current_ts_sec = Data->TimeStamp.Seconds;
+    this->AdcStats.current_ts_sec = Data->StartTime.getSeconds();
     return this->QueueUpDataModule(Data);
   });
 
@@ -143,7 +143,7 @@ void AdcReadoutBase::inputThread() {
       }));
 
   std::function<bool(SamplingRun *)> QueingFunction2([this](SamplingRun *Data) {
-    this->AdcStats.current_ts_alt_sec = Data->TimeStamp.Seconds;
+    this->AdcStats.current_ts_alt_sec = Data->StartTime.getSeconds();
     return this->QueueUpDataModule(Data);
   });
 

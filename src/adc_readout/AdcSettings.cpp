@@ -41,7 +41,7 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
     int InputVal;
     try {
       InputVal = std::stoi(Input[0]);
-      if (InputVal < 1 or InputVal > AdcTimerCounterMax) {
+      if (InputVal < 1 or InputVal > TimerClockFrequencyInternal / 2) {
         return false;
       }
     } catch (std::invalid_argument &E) {

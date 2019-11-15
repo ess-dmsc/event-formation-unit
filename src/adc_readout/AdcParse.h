@@ -71,7 +71,7 @@ struct PacketInfo {
 /// \brief Returned by the header parser.
 struct HeaderInfo {
   PacketType Type = PacketType::Unknown;
-  RawTimeStamp ReferenceTimestamp;
+  TimeStamp ReferenceTimestamp;
   std::uint16_t ReadoutCount{0};
   std::int32_t DataStart{0};
 };
@@ -93,7 +93,8 @@ struct PacketHeader {
   std::uint16_t PacketType;
   std::uint16_t ReadoutLength;
   std::uint16_t ReadoutCount;
-  std::uint16_t Reserved;
+  std::uint8_t ClockMode;
+  std::uint8_t OversamplingFactor;
   RawTimeStamp ReferenceTimeStamp;
   void fixEndian() {
     PacketType = ntohs(PacketType);
@@ -155,7 +156,7 @@ protected:
   /// \return The start of the filler/trailer in the array.
   /// \throw ParserException See exception type for possible parsing failures.
   size_t parseData(const InData &Packet, std::uint32_t StartByte,
-                   RawTimeStamp const &ReferenceTimestamp);
+                   TimeStamp const &ReferenceTimestamp);
 
 private:
   std::function<bool(SamplingRun *)> HandleModule;

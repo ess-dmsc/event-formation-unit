@@ -70,7 +70,7 @@ DelayLineProducer::~DelayLineProducer() {
 }
 
 void DelayLineProducer::addReferenceTimestamp(
-    RawTimeStamp const &ReferenceTimestamp) {
+    TimeStamp const &ReferenceTimestamp) {
   std::uint64_t TempRefTimeStamp = ReferenceTimestamp.getTimeStampNS();
   if (CurrentReferenceTimestamp != TempRefTimeStamp) {
     CurrentReferenceTimestamp = TempRefTimeStamp;

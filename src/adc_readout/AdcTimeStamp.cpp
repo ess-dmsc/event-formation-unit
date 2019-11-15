@@ -11,50 +11,66 @@
 
 const static std::uint64_t NSecMultiplier = 1000000000;
 
-RawTimeStamp::RawTimeStamp(std::uint64_t NSec)
-    : Seconds(NSec / NSecMultiplier) {
+struct Timing {
+  constexpr Timing(std::uint64_t ClockFrequency) : TimeClockFrequency(ClockFrequency),
+  SamplingRate(ClockFrequency / 2), AdcTimerCounterMax(SamplingRate), SampleLengthNS(2e9 / ClockFrequency) {}
+  std::uint32_t const TimeClockFrequency;
+  std::uint32_t const SamplingRate;
+  std::uint32_t const AdcTimerCounterMax;
+  double const SampleLengthNS;
+};
+
+static constexpr Timing const TimeConst[2] = {TimerClockFrequencyInternal, TimerClockFrequencyExternal};
+
+TimeStamp::TimeStamp(std::uint64_t NSec, ClockMode Mode) : CMode(Mode) {
+  CTime.Seconds = NSec / NSecMultiplier;
   auto NanoSecPart = NSec % NSecMultiplier;
-  SecondsFrac = std::lround(NanoSecPart / SampleLengthNS);
-  if (SecondsFrac == AdcTimerCounterMax) {
-    ++Seconds;
-    SecondsFrac = 0;
+  auto &CConst = TimeConst[int(CMode)];
+  CTime.SecondsFrac = std::lround(NanoSecPart / TimeConst[int(CMode)].SampleLengthNS);
+  if (CTime.SecondsFrac == CConst.AdcTimerCounterMax) {
+    ++CTime.Seconds;
+    CTime.SecondsFrac = 0;
   }
 }
 
-std::uint64_t RawTimeStamp::getTimeStampNS() const {
+std::uint64_t TimeStamp::getTimeStampNS() const {
   auto NanoSec = static_cast<std::uint64_t>(
-      std::llround(static_cast<double>(SecondsFrac) /
-                   static_cast<double>(AdcTimerCounterMax) * 1e9));
+      std::llround(static_cast<double>(CTime.SecondsFrac) /
+                   static_cast<double>(TimeConst[int(CMode)].AdcTimerCounterMax) * 1e9));
   return static_cast<std::uint64_t>(
-      static_cast<std::uint64_t>(Seconds) * NSecMultiplier + NanoSec);
+      static_cast<std::uint64_t>(CTime.Seconds) * NSecMultiplier + NanoSec);
 }
 
 // Note: This function might be significantly slower than CalcTimeStamp() for
 // some cases.
-std::uint64_t RawTimeStamp::getTimeStampNSFast() const {
+std::uint64_t TimeStamp::getTimeStampNSFast() const {
 
   std::uint64_t NanoSec =
-      (((SecondsFrac * 100000000000) / (AdcTimerCounterMax)) + 50) / 100;
+      (((CTime.SecondsFrac * 100000000000) / (TimeConst[int(CMode)].AdcTimerCounterMax)) + 50) / 100;
   return static_cast<std::uint64_t>(
-      static_cast<std::uint64_t>(Seconds) * 100000000000 + NanoSec);
+      static_cast<std::uint64_t>(CTime.Seconds) * 100000000000 + NanoSec);
 }
 
-RawTimeStamp
-RawTimeStamp::getOffsetTimeStamp(const std::int32_t &SampleOffset) const {
-  std::int32_t TempSecondsFrac = SecondsFrac + SampleOffset;
-  std::int32_t RemainderSecondsFrac = TempSecondsFrac % AdcTimerCounterMax;
+TimeStamp
+TimeStamp::getOffsetTimeStamp(const std::int32_t &SampleOffset) const {
+  std::int32_t TempSecondsFrac = CTime.SecondsFrac + SampleOffset;
+  std::int32_t RemainderSecondsFrac = TempSecondsFrac % static_cast<std::int32_t >(TimeConst[int(CMode)].AdcTimerCounterMax);
   std::int32_t NewSecondsFrac = RemainderSecondsFrac;
   int SecondsChange =
-      static_cast<std::int32_t>(TempSecondsFrac) / AdcTimerCounterMax;
+      static_cast<std::int32_t>(TempSecondsFrac) / static_cast<std::int32_t >(TimeConst[int(CMode)].AdcTimerCounterMax);
   if (TempSecondsFrac < 0) {
     SecondsChange = -SecondsChange - 1;
   }
   if (RemainderSecondsFrac < 0) {
-    NewSecondsFrac = AdcTimerCounterMax + RemainderSecondsFrac;
+    NewSecondsFrac = TimeConst[int(CMode)].AdcTimerCounterMax + RemainderSecondsFrac;
   }
-  return {Seconds + SecondsChange, static_cast<uint32_t>(NewSecondsFrac)};
+  return {RawTimeStamp{CTime.Seconds + SecondsChange, static_cast<uint32_t>(NewSecondsFrac)}, CMode};
 }
 
-bool RawTimeStamp::operator==(const RawTimeStamp &Other) const {
-  return Other.Seconds == Seconds and Other.SecondsFrac == SecondsFrac;
+bool TimeStamp::operator==(const TimeStamp &Other) const {
+  return Other.CTime.Seconds == CTime.Seconds and Other.CTime.SecondsFrac == CTime.SecondsFrac and Other.CMode == CMode;
+}
+
+double TimeStamp::getClockCycleLength() const {
+  return 1e9 / TimeConst[int(CMode)].AdcTimerCounterMax;
 }

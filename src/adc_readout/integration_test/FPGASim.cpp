@@ -50,7 +50,8 @@ FPGASim::FPGASim(std::string DstAddress, std::uint16_t DstPort,
   IdlePacket.Head.PacketType = 0x2222; // Idle/heartbeat
   IdlePacket.Head.ReadoutLength = 20;
   IdlePacket.Head.ReadoutCount = 0;
-  IdlePacket.Head.Reserved = 0;
+  IdlePacket.Head.ClockMode = 1;
+  IdlePacket.Head.OversamplingFactor = 1;
   IdlePacket.Idle.TimeStamp = {1, 2};
   IdlePacket.fixEndian();
 }
@@ -136,7 +137,7 @@ void FPGASim::transmitPacket(const void *DataPtr, const size_t Size) {
 }
 
 void FPGASim::addSamplingRun(void const *const DataPtr, size_t Bytes,
-                             RawTimeStamp Timestamp) {
+                             TimeStamp Timestamp) {
   if (CurrentRefTimeNS == 0) {
     CurrentRefTimeNS = Timestamp.getTimeStampNS();
   }

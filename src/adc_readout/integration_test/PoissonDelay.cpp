@@ -9,7 +9,7 @@
 #include <ciso646>
 #include <iostream>
 
-PoissonDelay::PoissonDelay(std::function<void(RawTimeStamp const &)> OnEvent,
+PoissonDelay::PoissonDelay(std::function<void(TimeStamp const &)> OnEvent,
                            asio::io_service &AsioService, double EventRate)
     : SamplingTimer(std::move(OnEvent)), EventTimer(AsioService),
       RandomGenerator(RD()), RandomDistribution(EventRate) {}

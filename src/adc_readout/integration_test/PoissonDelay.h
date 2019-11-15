@@ -15,7 +15,7 @@
 
 class PoissonDelay : public SamplingTimer {
 public:
-  PoissonDelay(std::function<void(RawTimeStamp const &)> OnEvent,
+  PoissonDelay(std::function<void(TimeStamp const &)> OnEvent,
                asio::io_service &AsioService, double EventRate);
   void start() override;
   void stop() override;

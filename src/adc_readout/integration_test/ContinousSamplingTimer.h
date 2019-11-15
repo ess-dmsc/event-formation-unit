@@ -15,7 +15,7 @@
 
 class ContinousSamplingTimer : public SamplingTimer {
 public:
-  ContinousSamplingTimer(std::function<void(RawTimeStamp const &)> OnTimer,
+  ContinousSamplingTimer(std::function<void(TimeStamp const &)> OnTimer,
                          asio::io_service &AsioService, int NrOfSamples,
                          int OversamplingFactor);
   void start() override;
