@@ -87,8 +87,8 @@ std::vector<uint8_t> TestPacket2{
     0x11, 0x00, 0x00, 0x00, // Readout 3
     0x03, 0x02, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00,
-    0x01, 0x03, 0x02, 0x03,
-    0x03, 0x03, 0x04, 0x03,
+    0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00,
 };
 
 TEST_F(LokiBaseTest, DataReceive) {
@@ -122,6 +122,7 @@ TEST_F(LokiBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.RxBytes, TestPacket2.size());
   EXPECT_EQ(Readout.Counters.Readouts, 6);
   EXPECT_EQ(Readout.Counters.Headers, 2);
+  EXPECT_EQ(Readout.Counters.GeometryErrors, 1);
   EXPECT_EQ(Readout.Counters.kafka_ev_errors, 2);
 }
 
