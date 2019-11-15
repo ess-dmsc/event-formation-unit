@@ -35,7 +35,7 @@ struct RawTimeStamp {
 /// hardware.
 class TimeStamp {
 public:
-  enum class ClockMode {External = 1, Internal = 0};
+  enum class ClockMode { External = 1, Internal = 0 };
   TimeStamp() = default;
 
   /// \brief Create a raw timestamp from a timestamp in nanoseconds since Unix
@@ -43,10 +43,7 @@ public:
   TimeStamp(std::uint64_t NSec, ClockMode Mode);
 
   /// \brief Create a raw timestamp from a timing system timestamp.
-  TimeStamp(RawTimeStamp Time, ClockMode Mode)
-      : CTime(Time), CMode(Mode) {}
-
-
+  TimeStamp(RawTimeStamp Time, ClockMode Mode) : CTime(Time), CMode(Mode) {}
 
   bool operator==(TimeStamp const &Other) const;
 
@@ -75,24 +72,20 @@ public:
   /// \return Number of nanoseconds since epoch (currently EPICS epoch).
   std::uint64_t getTimeStampNSFast() const;
 
-  ClockMode getClockMode() const {return CMode;}
+  ClockMode getClockMode() const { return CMode; }
 
   double getClockCycleLength() const;
 
-  std::uint32_t getSeconds() const {
-    return CTime.Seconds;
-  }
+  std::uint32_t getSeconds() const { return CTime.Seconds; }
 
-  std::uint32_t getSecondsFrac() const {
-    return CTime.SecondsFrac;
-  }
+  std::uint32_t getSecondsFrac() const { return CTime.SecondsFrac; }
 
   void reset() {
-    CTime = {0,0};
+    CTime = {0, 0};
     CMode = ClockMode::External;
   }
 
 private:
-  RawTimeStamp CTime{0,0};
+  RawTimeStamp CTime{0, 0};
   ClockMode CMode{ClockMode::External};
 };

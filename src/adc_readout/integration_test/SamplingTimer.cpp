@@ -26,5 +26,6 @@ void SamplingTimer::runFunction() {
       (duration_cast<nanoseconds>(Now.time_since_epoch()).count() / 1e9) -
       NowSeconds;
   std::uint32_t Ticks = std::lround(NowSecFrac * (88052500 / 2.0));
-  SamplingFunc({{static_cast<uint32_t>(NowSeconds), Ticks}, TimeStamp::ClockMode::External});
+  SamplingFunc({{static_cast<uint32_t>(NowSeconds), Ticks},
+                TimeStamp::ClockMode::External});
 }

@@ -25,8 +25,10 @@ TEST(TimeStampCalcTest, CalcSeconds) {
 TEST(TimeStampCalcTest, CalcNanoSec) {
   std::uint32_t SecondsFrac = 1;
   TimeStamp TS{{0, SecondsFrac}, ExtClk};
-  std::uint64_t TestTimeStamp = std::llround(
-      (double(SecondsFrac) / static_cast<double>(TimerClockFrequencyExternal / 2)) * 1e9);
+  std::uint64_t TestTimeStamp =
+      std::llround((double(SecondsFrac) /
+                    static_cast<double>(TimerClockFrequencyExternal / 2)) *
+                   1e9);
   EXPECT_EQ(TS.getTimeStampNS(), static_cast<std::uint64_t>(TestTimeStamp));
 }
 
@@ -42,7 +44,7 @@ TEST(TimeStampCalcTest, ComparisonInternalClock) {
   for (unsigned int i = 0; i < TimerClockFrequencyInternal / 2; ++i) {
     TimeStamp TS{{0, i}, IntClk};
     ASSERT_EQ(TS.getTimeStampNS(), TS.getTimeStampNSFast())
-                  << "Failed with input: " << i;
+        << "Failed with input: " << i;
   }
 }
 
@@ -108,7 +110,9 @@ TEST(TimeStampCalcTest, Sample6) {
   std::uint32_t SecFrac = 10;
   std::int32_t SampleNr = -50;
   TimeStamp TS1{{Sec, SecFrac}, ExtClk};
-  TimeStamp TS2{{Sec - 1, (TimerClockFrequencyExternal / 2) + SecFrac + SampleNr}, ExtClk};
+  TimeStamp TS2{
+      {Sec - 1, (TimerClockFrequencyExternal / 2) + SecFrac + SampleNr},
+      ExtClk};
   EXPECT_EQ(TS1.getOffsetTimeStamp(SampleNr).getTimeStampNS(),
             TS2.getTimeStampNS());
 }

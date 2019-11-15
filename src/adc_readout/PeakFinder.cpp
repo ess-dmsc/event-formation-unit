@@ -29,13 +29,13 @@ void PeakFinder::processData(SamplingRun const &Data) {
   auto &CurrentSerialiser = Serialisers[Data.Identifier];
   CurrentSerialiser->addReferenceTimestamp(
       Data.ReferenceTimestamp.getTimeStampNS());
-  constexpr std::uint32_t PixelIdOffset{512*512};
+  constexpr std::uint32_t PixelIdOffset{512 * 512};
   auto EventId =
       PixelIdOffset + static_cast<std::uint32_t>(Data.Identifier.ChannelNr);
-  CurrentSerialiser->addEvent(std::unique_ptr<EventData>(new EventData{
-      PeakTimeStamp, EventId,
-      static_cast<std::uint32_t>(PulseInfo.PeakAmplitude),
-      static_cast<std::uint32_t>(PulseInfo.PeakArea),
-      static_cast<std::uint32_t>(PulseInfo.BackgroundLevel),
-      PulseInfo.ThresholdTime.getTimeStampNS(), PeakTimeStamp}));
+  CurrentSerialiser->addEvent(std::unique_ptr<EventData>(
+      new EventData{PeakTimeStamp, EventId,
+                    static_cast<std::uint32_t>(PulseInfo.PeakAmplitude),
+                    static_cast<std::uint32_t>(PulseInfo.PeakArea),
+                    static_cast<std::uint32_t>(PulseInfo.BackgroundLevel),
+                    PulseInfo.ThresholdTime.getTimeStampNS(), PeakTimeStamp}));
 }

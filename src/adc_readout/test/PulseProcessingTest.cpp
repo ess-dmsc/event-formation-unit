@@ -35,8 +35,10 @@ TEST_F(SampleRunAnalysis, MaxValueTest) {
   EXPECT_EQ(Result.PeakAmplitude, MaxValue);
   EXPECT_EQ(Result.PeakArea, MaxValue);
   EXPECT_EQ(Result.PeakTime,
-            TimeStamp({0, MaxPosition * TestData.OversamplingFactor}, TimeStamp::ClockMode::External));
-  EXPECT_EQ(Result.ThresholdTime, TimeStamp({0, MaxPosition - 1}, TimeStamp::ClockMode::External));
+            TimeStamp({0, MaxPosition * TestData.OversamplingFactor},
+                      TimeStamp::ClockMode::External));
+  EXPECT_EQ(Result.ThresholdTime,
+            TimeStamp({0, MaxPosition - 1}, TimeStamp::ClockMode::External));
   EXPECT_EQ(Result.Identifier.SourceID, SourceID);
   EXPECT_EQ(Result.Identifier.ChannelNr, ChannelNr);
 }
@@ -101,10 +103,12 @@ TEST_F(SampleRunAnalysis, ThresholdTest1) {
   EXPECT_EQ(Result.BackgroundLevel, 0);
   EXPECT_EQ(Result.PeakLevel, AddValue);
   EXPECT_EQ(Result.PeakAmplitude, AddValue);
-  EXPECT_EQ(Result.PeakTime,
-            TimeStamp({0, StartPosition * TestData.OversamplingFactor}, ExtClk));
-  EXPECT_EQ(Result.ThresholdTime,
-            TimeStamp({0, StartPosition * TestData.OversamplingFactor}, ExtClk));
+  EXPECT_EQ(
+      Result.PeakTime,
+      TimeStamp({0, StartPosition * TestData.OversamplingFactor}, ExtClk));
+  EXPECT_EQ(
+      Result.ThresholdTime,
+      TimeStamp({0, StartPosition * TestData.OversamplingFactor}, ExtClk));
 }
 
 TEST_F(SampleRunAnalysis, ThresholdTest2) {
@@ -116,7 +120,9 @@ TEST_F(SampleRunAnalysis, ThresholdTest2) {
   EXPECT_EQ(Result.ThresholdTime,
             TimeStamp({0, 3u * TestData.OversamplingFactor}, ExtClk));
   EXPECT_NEAR(Result.ThresholdTimestampNS,
-              2.5 * Result.PeakTime.getClockCycleLength() * TestData.OversamplingFactor, 1.0);
+              2.5 * Result.PeakTime.getClockCycleLength() *
+                  TestData.OversamplingFactor,
+              1.0);
 }
 
 TEST_F(SampleRunAnalysis, ThresholdTest3) {
@@ -126,9 +132,13 @@ TEST_F(SampleRunAnalysis, ThresholdTest3) {
   TestData.OversamplingFactor = 4;
   auto Result = analyseSampleRun(TestData, Threshold);
   EXPECT_EQ(Result.ThresholdTime,
-            TimeStamp({0, static_cast<std::uint32_t >(lround(2.5 * TestData.OversamplingFactor))}, ExtClk));
+            TimeStamp({0, static_cast<std::uint32_t>(
+                              lround(2.5 * TestData.OversamplingFactor))},
+                      ExtClk));
   EXPECT_NEAR(Result.ThresholdTimestampNS,
-              2.5 * Result.PeakTime.getClockCycleLength() * TestData.OversamplingFactor, 1.0);
+              2.5 * Result.PeakTime.getClockCycleLength() *
+                  TestData.OversamplingFactor,
+              1.0);
 }
 
 TEST_F(SampleRunAnalysis, ThresholdTest4) {
@@ -138,9 +148,13 @@ TEST_F(SampleRunAnalysis, ThresholdTest4) {
   TestData.OversamplingFactor = 4;
   auto Result = analyseSampleRun(TestData, Threshold);
   EXPECT_EQ(Result.ThresholdTime,
-            TimeStamp({0, static_cast<std::uint32_t>(lround(2.5 * TestData.OversamplingFactor))}, ExtClk));
+            TimeStamp({0, static_cast<std::uint32_t>(
+                              lround(2.5 * TestData.OversamplingFactor))},
+                      ExtClk));
   EXPECT_NEAR(Result.ThresholdTimestampNS,
-              2.5 * Result.PeakTime.getClockCycleLength() * TestData.OversamplingFactor, 1.0);
+              2.5 * Result.PeakTime.getClockCycleLength() *
+                  TestData.OversamplingFactor,
+              1.0);
 }
 
 TEST_F(SampleRunAnalysis, ThresholdTest5) {
@@ -150,9 +164,13 @@ TEST_F(SampleRunAnalysis, ThresholdTest5) {
   TestData.OversamplingFactor = 4;
   auto Result = analyseSampleRun(TestData, Threshold);
   EXPECT_EQ(Result.ThresholdTime,
-            TimeStamp({0, static_cast<std::uint32_t>(lround(2.5 * TestData.OversamplingFactor))}, ExtClk));
+            TimeStamp({0, static_cast<std::uint32_t>(
+                              lround(2.5 * TestData.OversamplingFactor))},
+                      ExtClk));
   EXPECT_NEAR(Result.ThresholdTimestampNS,
-              2.5 * Result.PeakTime.getClockCycleLength() * TestData.OversamplingFactor, 1.0);
+              2.5 * Result.PeakTime.getClockCycleLength() *
+                  TestData.OversamplingFactor,
+              1.0);
 }
 
 TEST_F(SampleRunAnalysis, ThresholdTest6) {
@@ -162,9 +180,13 @@ TEST_F(SampleRunAnalysis, ThresholdTest6) {
   TestData.OversamplingFactor = 4;
   auto Result = analyseSampleRun(TestData, Threshold);
   EXPECT_EQ(Result.ThresholdTime,
-            TimeStamp({0, static_cast<std::uint32_t>(lround(2.5 * TestData.OversamplingFactor))}, ExtClk));
+            TimeStamp({0, static_cast<std::uint32_t>(
+                              lround(2.5 * TestData.OversamplingFactor))},
+                      ExtClk));
   EXPECT_NEAR(Result.ThresholdTimestampNS,
-              2.5 * Result.PeakTime.getClockCycleLength() * TestData.OversamplingFactor, 1.0);
+              2.5 * Result.PeakTime.getClockCycleLength() *
+                  TestData.OversamplingFactor,
+              1.0);
 }
 
 TEST_F(SampleRunAnalysis, ThresholdTest7) {
@@ -184,9 +206,13 @@ TEST_F(SampleRunAnalysis, ThresholdTest8) {
   TestData.OversamplingFactor = 2;
   auto Result = analyseSampleRun(TestData, Threshold);
   EXPECT_EQ(Result.ThresholdTime,
-            TimeStamp({0, static_cast<std::uint32_t>(lround(1 * TestData.OversamplingFactor))}, ExtClk));
+            TimeStamp({0, static_cast<std::uint32_t>(
+                              lround(1 * TestData.OversamplingFactor))},
+                      ExtClk));
   EXPECT_NEAR(Result.ThresholdTimestampNS,
-              1 * Result.PeakTime.getClockCycleLength() * TestData.OversamplingFactor, 1.0);
+              1 * Result.PeakTime.getClockCycleLength() *
+                  TestData.OversamplingFactor,
+              1.0);
 }
 
 TEST_F(SampleRunAnalysis, ThresholdTest9) {
@@ -196,9 +222,13 @@ TEST_F(SampleRunAnalysis, ThresholdTest9) {
   TestData.OversamplingFactor = 2;
   auto Result = analyseSampleRun(TestData, Threshold);
   EXPECT_EQ(Result.ThresholdTime,
-            TimeStamp({0, static_cast<std::uint32_t >(lround(1.5 * TestData.OversamplingFactor))}, ExtClk));
+            TimeStamp({0, static_cast<std::uint32_t>(
+                              lround(1.5 * TestData.OversamplingFactor))},
+                      ExtClk));
   EXPECT_NEAR(Result.ThresholdTimestampNS,
-              1.5 * Result.PeakTime.getClockCycleLength() * TestData.OversamplingFactor, 1.0);
+              1.5 * Result.PeakTime.getClockCycleLength() *
+                  TestData.OversamplingFactor,
+              1.0);
 }
 
 TEST_F(SampleRunAnalysis, ThresholdTest10) {
@@ -208,9 +238,13 @@ TEST_F(SampleRunAnalysis, ThresholdTest10) {
   TestData.OversamplingFactor = 2;
   auto Result = analyseSampleRun(TestData, Threshold);
   EXPECT_EQ(Result.ThresholdTime,
-            TimeStamp({0, static_cast<std::uint32_t>(lround(1.5 * TestData.OversamplingFactor))}, ExtClk));
+            TimeStamp({0, static_cast<std::uint32_t>(
+                              lround(1.5 * TestData.OversamplingFactor))},
+                      ExtClk));
   EXPECT_NEAR(Result.ThresholdTimestampNS,
-              1.5 * Result.PeakTime.getClockCycleLength() * TestData.OversamplingFactor, 1.0);
+              1.5 * Result.PeakTime.getClockCycleLength() *
+                  TestData.OversamplingFactor,
+              1.0);
 }
 
 TEST_F(SampleRunAnalysis, TimestampTest1) {
@@ -227,8 +261,9 @@ TEST_F(SampleRunAnalysis, TimestampTest1) {
   std::uint32_t SecondsFrac{0};
   for (int y = 0u; y < 1000; ++y) {
     SecondsFrac = RandomDistribution(RandomGenerator);
-    TestData.StartTime = {{static_cast<uint32_t>(Seconds),
-                          static_cast<uint32_t>(SecondsFrac)}, ExtClk};
+    TestData.StartTime = {
+        {static_cast<uint32_t>(Seconds), static_cast<uint32_t>(SecondsFrac)},
+        ExtClk};
     auto Result =
         analyseSampleRun(TestData, ThresholdSelection(RandomGenerator));
     ASSERT_LT(std::abs(static_cast<std::int64_t>(Result.ThresholdTimestampNS) -

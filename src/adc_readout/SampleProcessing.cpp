@@ -10,8 +10,7 @@
 #include "senv_data_generated.h"
 #include <cmath>
 
-std::uint64_t CalcSampleTimeStamp(const TimeStamp &Start,
-                                  const TimeStamp &End,
+std::uint64_t CalcSampleTimeStamp(const TimeStamp &Start, const TimeStamp &End,
                                   const TimeStampLocation Location) {
   std::uint64_t StartNS = Start.getTimeStampNS();
   std::uint64_t EndNS = End.getTimeStampNS();
@@ -34,7 +33,8 @@ ProcessedSamples ChannelProcessing::processModule(const SamplingRun &Samples) {
       (Samples.Data.size() + NrOfSamplesSummed) / MeanOfNrOfSamples;
   ProcessedSamples ReturnSamples(TotalNumberOfSamples);
 
-  ReturnSamples.TimeDelta = FinalOversamplingFactor * Samples.ReferenceTimestamp.getClockCycleLength();
+  ReturnSamples.TimeDelta = FinalOversamplingFactor *
+                            Samples.ReferenceTimestamp.getClockCycleLength();
   std::uint64_t TimeStampOffset{0};
   if (TSLocation == TimeStampLocation::Middle) {
     TimeStampOffset =
