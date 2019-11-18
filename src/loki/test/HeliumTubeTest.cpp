@@ -58,3 +58,8 @@ TEST_F(HeliumTubeTest, MinMaxPos) {
     ASSERT_EQ(tube.PosId, 511);
   }
 }
+
+int main(int argc, char **argv) {
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}

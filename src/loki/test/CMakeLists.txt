@@ -17,6 +17,12 @@ set(HeliumTubeTest_SRC HeliumTubeTest.cpp)
 set(HeliumTubeTest_INC ../geometry/HeliumTube.h)
 create_test_executable(HeliumTubeTest)
 
+set(LokiPanelGeometryTest_SRC PanelGeometryTest.cpp)
+set(LokiPanelGeometryTest_INC
+  ../geometry/HeliumTube.h
+  ../geometry/PanelGeometry.h)
+create_test_executable(LokiPanelGeometryTest)
+
 ##
 ## readout/
 ##

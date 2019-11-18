@@ -64,3 +64,8 @@ TEST_F(LokiGeometryTest, CornersZ3) {
   ASSERT_EQ(Geom.getPixelId3D(31,  0,   0),   28617 + offset); // bottom left
   ASSERT_EQ(Geom.getPixelId3D(31,  0, 511),       1 + offset); // top left
 }
+
+int main(int argc, char **argv) {
+  testing::InitGoogleTest(&argc, argv);
+  return RUN_ALL_TESTS();
+}
