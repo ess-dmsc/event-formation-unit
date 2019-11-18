@@ -33,6 +33,15 @@ TEST_F(PanelGeometryTest, CanonicalCorners) {
   ASSERT_EQ(PG.getPixel2D(0, 0, 3, 6, 0),  (8*7*4)*512); // Bottom Right
 }
 
+TEST_F(PanelGeometryTest, CanonicalCornersWithOffset) {
+  const uint32_t Offset{10000};
+  PanelGeometry PG(true, 4, 8, Offset);
+  ASSERT_EQ(PG.getPixel2D(3, 3, 4, 0, 511), 1 + Offset); // Top Left
+  ASSERT_EQ(PG.getPixel2D(0, 0, 3, 6, 511), 8*7*4 + Offset); // Top Right
+  ASSERT_EQ(PG.getPixel2D(3, 3, 4, 0, 0), 114465 + Offset); // Bottom Left
+  ASSERT_EQ(PG.getPixel2D(0, 0, 3, 6, 0),  (8*7*4)*512 + Offset); // Bottom Right
+}
+
 TEST_F(PanelGeometryTest, CanonicalCornersRotated) {
   PanelGeometry PG(false, 4, 8, 0);
   ASSERT_EQ(PG.getPixel2D(0, 0, 3, 6, 511), 1); // Top Left
