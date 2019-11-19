@@ -2,6 +2,12 @@
 
 #include <loki/geometry/Config.h>
 #include <test/TestBase.h>
+#include <test/SaveBuffer.h>
+
+std::string notjson = R"(
+{
+  Ceci n’est pas Json
+)";
 
 using namespace Loki;
 
@@ -30,6 +36,8 @@ TEST_F(ConfigTest, InvalidJson) {
 
 
 int main(int argc, char **argv) {
+  std::string filename{"deleteme_notjson.json"};
+  saveBuffer(filename, (void *)notjson.c_str(), notjson.size());
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }

@@ -21,9 +21,12 @@ set(LokiPanelGeometryTest_SRC PanelGeometryTest.cpp)
 create_test_executable(LokiPanelGeometryTest)
 
 
-set(LokiConfigTest_INC ../geometry/Config.h)
+set(LokiConfigTest_INC
+  ../../test/SaveBuffer.cpp
+  ../geometry/Config.h)
 set(LokiConfigTest_SRC
   ../geometry/Config.cpp
+  ../../test/SaveBuffer.cpp
   ConfigTest.cpp)
 create_test_executable(LokiConfigTest)
 
