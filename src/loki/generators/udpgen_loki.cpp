@@ -12,6 +12,10 @@
 // GCOVR_EXCL_START
 
 struct {
+  /// Loki specific
+  uint16_t NRings{2};
+  //uint16_t FENs{1};
+  ///
   std::string IpAddress{"127.0.0.1"};
   uint16_t UDPPort{9000};
   uint64_t NumberOfPackets{0}; // 0 == all packets
@@ -31,6 +35,8 @@ int main(int argc, char *argv[]) {
   app.add_option("-t, --throttle", Settings.SpeedThrottle, "Speed throttle (0 is fastest, larger is slower)");
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle, "Extra usleep() after n packets");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
+
+  app.add_option("-r, --rings", Settings.NRings, "Number of Rings used in data header");
   CLI11_PARSE(app, argc, argv);
 
   const int BufferSize{8972};
@@ -48,7 +54,7 @@ int main(int argc, char *argv[]) {
   uint64_t Packets = 0;
   uint64_t TotalPackets = 0;
   do {
-    uint16_t DataSize = lokiReadoutDataGen(DataSections,DataElements, Buffer, BufferSize);
+    uint16_t DataSize = lokiReadoutDataGen(DataSections,DataElements, Settings.NRings, Buffer, BufferSize);
 
     uint32_t * SeqNum = (uint32_t *)(Buffer + 24);
     *SeqNum = TotalPackets;

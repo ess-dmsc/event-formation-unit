@@ -9,7 +9,7 @@
 using namespace Loki;
 
 /// in benchmark tests
-uint16_t lokiReadoutDataGen(uint16_t DataSections, uint16_t DataElements,
+uint16_t lokiReadoutDataGen(uint16_t DataSections, uint16_t DataElements, uint8_t Rings,
      uint8_t * Buffer, uint16_t MaxSize) {
 
   auto DataSize = 28 + DataSections * (4 + DataElements * 20);
@@ -27,21 +27,23 @@ uint16_t lokiReadoutDataGen(uint16_t DataSections, uint16_t DataElements,
   Header->TypeSubType = 0x30;
   //Header->OutputQueue = 0x00;
   Header->TotalLength = DataSize;
+  uint8_t RingCount{0};
   DP += 28;
   for (auto Section = 0; Section < DataSections; Section++) {
     auto DataHeader = (ReadoutParser::DataHeader *)DP;
-    DataHeader->RingId = 0x00;
+    DataHeader->RingId = RingCount % Rings;
     DataHeader->FENId = 0x00;
     DataHeader->DataLength = sizeof(ReadoutParser::DataHeader) +
        DataElements * sizeof(DataParser::LokiReadout);
     assert(DataHeader->DataLength == 4 + 20 * DataElements);
+    RingCount++;
     //printf("  Data Header %u @ %p (4 bytes)\n", Section, (void *)DP);
     DP += sizeof(ReadoutParser::DataHeader);
     for (auto Element = 0; Element < DataElements; Element++) {
       auto DataBlock = (DataParser::LokiReadout *)DP;
       DataBlock->TimeLow = 100;
       DataBlock->FpgaAndTube = 0;
-      DataBlock->AmpA = Element + 1;
+      DataBlock->AmpA = DataElements - Element;
       DataBlock->AmpB = Element + 1;
       DataBlock->AmpC = Element + 1;
       DataBlock->AmpD = Element + 1;

@@ -79,7 +79,7 @@ TEST_F(CombinedParserTest, DataGenSizeTooBig) {
   uint16_t Sections{1000};
   uint16_t Elements{1000};
 
-  auto Length = lokiReadoutDataGen(Sections, Elements, Buffer, BufferSize);
+  auto Length = lokiReadoutDataGen(Sections, Elements, 1, Buffer, BufferSize);
   ASSERT_EQ(Length, 0);
 }
 
@@ -91,7 +91,7 @@ TEST_F(CombinedParserTest, DataGen) {
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
     uint16_t Elements = ((BufferSize - 28 - Sections*4)/20/Sections);
-    auto Length = lokiReadoutDataGen(Sections, Elements, Buffer, BufferSize);
+    auto Length = lokiReadoutDataGen(Sections, Elements, 1, Buffer, BufferSize);
     ASSERT_EQ(Length, 28 + Sections *(4 + Elements * 20));
 
     auto Res = CommonReadout.validate((char *)&Buffer[0], Length, DataType);
