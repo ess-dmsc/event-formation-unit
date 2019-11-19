@@ -51,7 +51,7 @@ protected:
   RingBuffer<EthernetBufferSize> EthernetRingbuffer{EthernetBufferMaxEntries + 11};
 
   // From Counters.h
-  Counters Counters;
+  struct Counters Counters;
 
   LokiSettings LokiModuleSettings;
 
