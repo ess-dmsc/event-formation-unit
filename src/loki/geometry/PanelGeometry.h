@@ -27,17 +27,15 @@ public:
   /// RingId in its calculations.
   PanelGeometry(bool VerticalTubes, uint8_t TubesZ, uint8_t TubesN, uint32_t PixelOffset) :
     Vertical(VerticalTubes), TZ(TubesZ), TN(TubesN), Offset(PixelOffset) {
-    uint16_t NX{0};
-    uint16_t NY{0};
     if (Vertical) {
-      NX = TN * NStraws * TZ;
-      NY = NPos;
+      Geometry2D = ESSGeometry(TN * NStraws * TZ, NPos, 1, 1);
+      Geometry3D = ESSGeometry(TN * NStraws, NPos, TZ, 1);
     } else {
-      NX = NPos;
-      NY = TN * NStraws * TZ;
+      Geometry2D = ESSGeometry(NPos, TN * NStraws * TZ, 1, 1);
+      Geometry3D = ESSGeometry(NPos, TN * NStraws, TZ, 1);
     }
-    XTRACE(INIT, DEB, "ESSGeometry(%u, %u, %u, %u)", NX, NY, 1, 1);
-    Geometry2D = ESSGeometry(NX, NY, 1, 1);
+    XTRACE(INIT, DEB, "ESSGeometry (2D)(%u, %u, %u, %u)",
+        Geometry2D.nx(), Geometry2D.ny(), Geometry2D.nz(), Geometry2D.np());
   };
 
   /// \brief Calculate PixelId for a readout
@@ -45,16 +43,51 @@ public:
   /// (x,y) -> (NPos - 1 - y, x)
   uint32_t getPixel2D(uint8_t __attribute__((unused)) FENId, uint8_t FPGAId,
       uint8_t LocalTube, uint16_t StrawId, uint16_t Pos) {
+    /// Straws are enumerated 0-6 and (local) tubes 0-7
+    /// \todo We have no good numbers for maximum FENs or FPGAs
+    if ((StrawId >= NStraws) or (LocalTube >= 2 * TZ)) {
+      return 0;
+    }
+
     uint16_t TubeId = (FPGAId << 3) + LocalTube;
+    if (TubeId > TN * TZ) {
+      return 0;
+    }
     uint32_t x = (TN - 1 - (TubeId / TZ)) * NStraws + StrawId + (TubeId % TZ) * TN * NStraws;
     uint32_t y = NPos - 1 - Pos;
 
     if (Vertical) {
-      XTRACE(PROCESS, DEB, "Vert: tube %u straw %u pos %u - x %u y %u", TubeId, StrawId, Pos, x, y);
+      XTRACE(PROCESS, DEB, "2D Vert: tube %u straw %u pos %u - x %u y %u", TubeId, StrawId, Pos, x, y);
       return Geometry2D.pixel2D(x, y) + Offset;
     } else { // Rotated 90 degrees counter clock wise
-      XTRACE(PROCESS, DEB, "Horiz: tube %u straw %u pos %u - x %u y %u", TubeId, StrawId, Pos, y, x);
+      XTRACE(PROCESS, DEB, "2D Horiz: tube %u straw %u pos %u - x %u y %u", TubeId, StrawId, Pos, y, x);
       return Geometry2D.pixel2D(y, TZ*TN*NStraws - 1 - x) + Offset;
+    }
+  }
+
+  /// \brief for now also support generating 3D pixels
+  uint32_t getPixel3D(uint8_t __attribute__((unused)) FENId, uint8_t FPGAId,
+      uint8_t LocalTube, uint16_t StrawId, uint16_t Pos) {
+    /// Straws are enumerated 0-6 and (local) tubes 0-7
+    /// \todo We have no good numbers for maximum FENs or FPGAs
+    if ((StrawId >= NStraws) or (LocalTube >= 2 * TZ)) {
+      return 0;
+    }
+
+    uint16_t TubeId = (FPGAId << 3) + LocalTube;
+    if (TubeId > TN * TZ) {
+      return 0;
+    }
+    uint32_t x = (TN - 1 - (TubeId / TZ)) * NStraws + StrawId;
+    uint32_t y = NPos - 1 - Pos;
+    uint32_t z = (TubeId % TZ);
+
+    if (Vertical) {
+      XTRACE(PROCESS, DEB, "3D Vert: tube %u straw %u pos %u - x %u y %u", TubeId, StrawId, Pos, x, y);
+      return Geometry3D.pixel3D(x, y, z) + Offset;
+    } else { // Rotated 90 degrees counter clock wise
+      XTRACE(PROCESS, DEB, "3D Horiz: tube %u straw %u pos %u - x %u y %u", TubeId, StrawId, Pos, y, x);
+      return Geometry3D.pixel3D(y, TN*NStraws - 1 - x, z) + Offset;
     }
   }
 
@@ -68,7 +101,9 @@ private:
   uint8_t TN{8}; ///< Tubes in the y/x direction depending on orientation
   uint32_t Offset{0};
 
-  ///
+  /// For now support both 2D and 3D representation
   ESSGeometry Geometry2D;
+  /// \todo Eventually delete 3D?
+  ESSGeometry Geometry3D;
 };
 } // namespace Loki

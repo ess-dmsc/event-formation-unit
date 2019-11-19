@@ -28,8 +28,8 @@
 #include <loki/readout/DataParser.h>
 #include <loki/readout/Readout.h>
 #include <readout/ESSTime.h>
-#include <loki/geometry/Geometry.h>
 #include <loki/geometry/HeliumTube.h>
+#include <loki/geometry/Config.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -69,6 +69,7 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
 
   Stats.create("events.count", Counters.Events);
   Stats.create("events.udder", Counters.EventsUdder);
+  Stats.create("events.mapping_errors", Counters.MappingErrors);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
   Stats.create("transmit.bytes", Counters.TxBytes);
@@ -167,15 +168,12 @@ void LokiBase::testImageUdder(EV42Serializer & FlatBuffer) {
 
 /// \brief Normal processing thread
 void LokiBase::processingThread() {
-  const unsigned int NXTubes{8};
-  const unsigned int NZTubes{4};
-  const unsigned int NStraws{7};
-  const unsigned int NYpos{512};
-  Geometry geometry(NXTubes, NZTubes, NStraws, NYpos);
   ReadoutParser ESSReadout;
   DataParser LokiParser;
   HeliumTube Amp2Pos;
   ESSTime Time;
+
+  LokiMappings = Config(LokiModuleSettings.ConfigFile);
 
   std::shared_ptr<ReadoutFile> DumpFile;
   if (!LokiModuleSettings.FilePrefix.empty()) {
@@ -245,29 +243,38 @@ void LokiBase::processingThread() {
 
 
       /// Traverse readouts
+      /// \todo include FENId in global tube calculation, eventually
+      /// \todo New format will split FPGA and Tube
       for (auto & Section : LokiParser.Result) {
         XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
 
+        if (Section.RingId >= LokiMappings.Panels.size()) {
+          Counters.MappingErrors++;
+          continue;
+        }
+
         for (auto & Data : Section.Data) {
-          XTRACE(DATA, DEB, "Data: time (%u, %u), FPGA %u, A %u, B %u, C %u, D %u",
-            Data.TimeHigh, Data.TimeLow, Data.FpgaAndTube, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+          auto FPGAId = Data.FpgaAndTube >> 3; /// \todo eventually get from parser
+          auto LocalTube = Data.FpgaAndTube & 0x7; /// \todo eventually get from parser
+
+          XTRACE(DATA, DEB, "Data: time (%u, %u), FPGA %u, Tube %u, A %u, B %u, C %u, D %u",
+            Data.TimeHigh, Data.TimeLow, FPGAId, LocalTube, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
 
           Amp2Pos.calcPositions(Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
-          /// \todo include FENId in global tube calculation, eventually
-          /// \todo New format will split FPGA and Tube
-          // uint64_t DataTime = Data.TimeHigh * 1000000000LU;
-          // DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
-          // XTRACE(DATA, DEB, "DataTime %" PRIu64 "", DataTime);
-          auto GlobalTube = Data.FpgaAndTube;
           auto Straw = Amp2Pos.StrawId;
           auto YPos = Amp2Pos.PosId;
 
+          // uint64_t DataTime = Data.TimeHigh * 1000000000LU;
+          // DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
+          // XTRACE(DATA, DEB, "DataTime %" PRIu64 "", DataTime);
+
+          auto Panel = LokiMappings.Panels[Section.RingId];
           auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
           auto PixelId =  LokiModuleSettings.DetectorImage2D
-              ? geometry.getPixelId2D(GlobalTube, Straw, YPos)
-              : geometry.getPixelId3D(GlobalTube, Straw, YPos);
-          XTRACE(EVENT, DEB, "time: %" PRIu64 ", tube %u, straw %u, ypos %u, pixel: %u",
-                 TimeOfFlight, GlobalTube, Straw, YPos, PixelId);
+              ? Panel.getPixel2D(Section.FENId, FPGAId, LocalTube, Straw, YPos)
+              : Panel.getPixel3D(Section.FENId, FPGAId, LocalTube, Straw, YPos);
+          XTRACE(EVENT, DEB, "time: %" PRIu64 ", straw %u, ypos %u, pixel: %u",
+                 TimeOfFlight, Straw, YPos, PixelId);
 
           if (DumpFile) {
             Readout CurrentReadout;

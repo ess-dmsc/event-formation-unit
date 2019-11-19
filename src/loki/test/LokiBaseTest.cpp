@@ -9,7 +9,19 @@
 
 #include <loki/LokiBase.h>
 #include <../src/adc_readout/test/TestUDPServer.h>
+#include <test/SaveBuffer.h>
 #include <test/TestBase.h>
+
+ std::string lokijson = R"(
+{
+  "Detector": "LoKI4x8",
+
+  "PanelConfig" : [
+    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 },
+    { "Ring" : 1, "Vertical" :  false, "TubesZ" : 4, "TubesN" : 8, "Offset" : 114688 }
+  ]
+}
+)";
 
 class LokiBaseStandIn : public Loki::LokiBase {
 public:
@@ -25,6 +37,7 @@ public:
   void SetUp() override {
     Settings.DetectorRxBufferSize = 100000;
     Settings.NoHwCheck = true;
+    LocalSettings.ConfigFile = "deleteme_loki.json";
   }
   void TearDown() override {}
 
@@ -127,6 +140,9 @@ TEST_F(LokiBaseTest, DataReceiveGood) {
 }
 
 int main(int argc, char **argv) {
+  std::string filename{"deleteme_loki.json"};
+  saveBuffer(filename, (void *)lokijson.c_str(), lokijson.size());
+
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
