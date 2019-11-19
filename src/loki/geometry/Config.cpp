@@ -12,7 +12,6 @@
 #pragma GCC diagnostic ignored "-Wpedantic"
 #include <nlohmann/json.hpp>
 #pragma GCC diagnostic pop
-#include <common/Trace.h>
 
 namespace Loki {
 
@@ -23,8 +22,8 @@ Config::Config(std::string ConfigFile) {
     nlohmann::json root;
 
     if (ConfigFile.empty()) {
-      LOG(INIT, Sev::Info, "JSON config - no config file specified, using default configuration");
-      throw std::runtime_error("No config file provided.");
+      LOG(INIT, Sev::Error, "JSON config - no config file specified.");
+      throw std::runtime_error("No config file specified.");
     }
 
     LOG(INIT, Sev::Info, "JSON config - loading configuration from file {}", ConfigFile);
@@ -33,8 +32,8 @@ Config::Config(std::string ConfigFile) {
                            std::istreambuf_iterator<char>());
 
     if (!t.good()) {
-      XTRACE(INIT, ERR, "Invalid Json file: %s", ConfigFile.c_str());
-      throw std::runtime_error("Caen config file error - requested file unavailable.");
+      LOG(INIT, Sev::Error, "Invalid Json file: {}", ConfigFile);
+      throw std::runtime_error("LoKI config file error - requested file unavailable.");
     }
     /// \todo Above is copied verbatim from multiblade and should be refactored
 
@@ -64,6 +63,7 @@ Config::Config(std::string ConfigFile) {
     }
     catch (...) {
       LOG(INIT, Sev::Error, "JSON config - error: Invalid Json file: {}", ConfigFile);
+      throw std::runtime_error("Invalid Json file");
       return;
     }
 }

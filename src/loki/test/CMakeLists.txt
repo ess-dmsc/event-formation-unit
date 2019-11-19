@@ -10,15 +10,22 @@
 ## geometry/
 ##
 
-set(HeliumTubeTest_SRC HeliumTubeTest.cpp)
 set(HeliumTubeTest_INC ../geometry/HeliumTube.h)
+set(HeliumTubeTest_SRC HeliumTubeTest.cpp)
 create_test_executable(HeliumTubeTest)
 
-set(LokiPanelGeometryTest_SRC PanelGeometryTest.cpp)
 set(LokiPanelGeometryTest_INC
   ../geometry/HeliumTube.h
   ../geometry/PanelGeometry.h)
+set(LokiPanelGeometryTest_SRC PanelGeometryTest.cpp)
 create_test_executable(LokiPanelGeometryTest)
+
+
+set(LokiConfigTest_INC ../geometry/Config.h)
+set(LokiConfigTest_SRC
+  ../geometry/Config.cpp
+  ConfigTest.cpp)
+create_test_executable(LokiConfigTest)
 
 ##
 ## readout/
