@@ -46,11 +46,13 @@ public:
     /// Straws are enumerated 0-6 and (local) tubes 0-7
     /// \todo We have no good numbers for maximum FENs or FPGAs
     if ((StrawId >= NStraws) or (LocalTube >= 2 * TZ)) {
+      XTRACE(PROCESS, WAR, "Invalid StrawId (%u) or TubeID (%u)", StrawId, LocalTube);
       return 0;
     }
 
     uint16_t TubeId = (FPGAId << 3) + LocalTube;
-    if (TubeId > TN * TZ) {
+    if (TubeId >= TN * TZ) {
+      XTRACE(PROCESS, WAR, "Invalid TubeID (%u)", TubeId);
       return 0;
     }
     uint32_t x = (TN - 1 - (TubeId / TZ)) * NStraws + StrawId + (TubeId % TZ) * TN * NStraws;
@@ -71,11 +73,13 @@ public:
     /// Straws are enumerated 0-6 and (local) tubes 0-7
     /// \todo We have no good numbers for maximum FENs or FPGAs
     if ((StrawId >= NStraws) or (LocalTube >= 2 * TZ)) {
+      XTRACE(PROCESS, WAR, "Invalid StrawId (%u) or TubeID (%u)", StrawId, LocalTube);
       return 0;
     }
 
     uint16_t TubeId = (FPGAId << 3) + LocalTube;
-    if (TubeId > TN * TZ) {
+    if (TubeId >= TN * TZ) {
+      XTRACE(PROCESS, WAR, "Invalid TubeID (%u)", TubeId);
       return 0;
     }
     uint32_t x = (TN - 1 - (TubeId / TZ)) * NStraws + StrawId;
