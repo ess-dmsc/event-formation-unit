@@ -96,8 +96,8 @@ public:
   }
 
 private:
-  const uint8_t NStraws{7}; /// \todo not hardcode, should match HeliumTube.h
-  const uint16_t NPos{512}; /// \todo not hardcode, should match HeliumTube.h
+  const uint8_t NStraws{7}; /// \todo not hardcode, should match TubeAmps.h
+  const uint16_t NPos{512}; /// \todo not hardcode, should match TubeAmps.h
 
   ///< Initialised in constructor
   bool Vertical{true}; ///< Vertical is the canonical orientation

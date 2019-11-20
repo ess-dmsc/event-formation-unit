@@ -28,7 +28,7 @@
 #include <loki/readout/DataParser.h>
 #include <loki/readout/Readout.h>
 #include <readout/ESSTime.h>
-#include <loki/geometry/HeliumTube.h>
+#include <loki/geometry/TubeAmps.h>
 #include <loki/geometry/Config.h>
 
 // #undef TRC_LEVEL
@@ -170,7 +170,7 @@ void LokiBase::testImageUdder(EV42Serializer & FlatBuffer) {
 void LokiBase::processingThread() {
   ReadoutParser ESSReadout;
   DataParser LokiParser;
-  HeliumTube Amp2Pos;
+  TubeAmps Amp2Pos;
   ESSTime Time;
 
   LokiMappings = Config(LokiModuleSettings.ConfigFile);
