@@ -23,7 +23,8 @@ public:
   {
     uint32_t TimeHigh;
     uint32_t TimeLow;
-    uint16_t FpgaAndTube;
+    uint8_t FPGAId;
+    uint8_t TubeId;
     uint16_t ADC;
     uint16_t AmpA;
     uint16_t AmpB;

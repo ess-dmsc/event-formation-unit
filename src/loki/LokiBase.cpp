@@ -254,8 +254,8 @@ void LokiBase::processingThread() {
         }
 
         for (auto & Data : Section.Data) {
-          auto FPGAId = Data.FpgaAndTube >> 3; /// \todo eventually get from parser
-          auto LocalTube = Data.FpgaAndTube & 0x7; /// \todo eventually get from parser
+          uint8_t FPGAId = Data.FPGAId;
+          uint8_t LocalTube = Data.TubeId;
 
           XTRACE(DATA, DEB, "Data: time (%u, %u), FPGA %u, Tube %u, A %u, B %u, C %u, D %u",
             Data.TimeHigh, Data.TimeLow, FPGAId, LocalTube, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
@@ -288,8 +288,8 @@ void LokiBase::processingThread() {
             CurrentReadout.AmpD = Data.AmpD;
             CurrentReadout.RingId = Section.RingId;
             CurrentReadout.FENId = Section.FENId;
-            CurrentReadout.FPGAId = Data.FpgaAndTube; ///< \todo split FPGA and Tube
-            CurrentReadout.TubeId = Data.FpgaAndTube; ///< \todo split FPGA and Tube
+            CurrentReadout.FPGAId = Data.FPGAId;
+            CurrentReadout.TubeId = Data.TubeId;
             DumpFile->push(CurrentReadout);
           }
 

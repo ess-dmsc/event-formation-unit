@@ -112,8 +112,8 @@ TEST_F(CombinedParserTest, ParseUDPPacket) {
   for (auto & Section : LokiParser.Result) {
     printf("Ring %u, FEN %u\n", Section.RingId, Section.FENId);
     for (auto & Data : Section.Data) {
-      printf("time (%u, %u), FPGA %u, A %u, B %u, C %u, D %u\n",
-        Data.TimeHigh, Data.TimeLow, Data.FpgaAndTube, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
+      printf("time (%u, %u), FPGA %u, Tube %u, A %u, B %u, C %u, D %u\n",
+        Data.TimeHigh, Data.TimeLow, Data.FPGAId, Data.TubeId, Data.AmpA, Data.AmpB, Data.AmpC, Data.AmpD);
     }
   }
 }

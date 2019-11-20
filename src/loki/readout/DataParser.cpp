@@ -67,10 +67,10 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
     for (unsigned int i = 0; i < ReadoutsInDataSection; i++) {
       auto Data = (LokiReadout *)((char *)DataHdrPtr + DataHeaderSize +
                                   i * LokiReadoutSize);
-      XTRACE(DATA, DEB, "%u: ring %u, fen %u, t(%u,%u) FpgaTube 0x%02x, A 0x%04x B "
+      XTRACE(DATA, DEB, "%u: ring %u, fen %u, t(%u,%u) FPGAId %u TubeId %u , A 0x%04x B "
                         "0x%04x C 0x%04x D 0x%04x",
              i, DataHdrPtr->RingId, DataHdrPtr->FENId,
-             Data->TimeHigh, Data->TimeLow, Data->FpgaAndTube, Data->AmpA,
+             Data->TimeHigh, Data->TimeLow, Data->FPGAId, Data->TubeId, Data->AmpA,
              Data->AmpB, Data->AmpC, Data->AmpD);
 
       CurrentDataSection.Data.push_back(*Data);
