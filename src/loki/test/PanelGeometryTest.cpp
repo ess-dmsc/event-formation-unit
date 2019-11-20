@@ -35,8 +35,8 @@ TEST_F(PanelGeometryTest, CanonicalCorners) {
   PanelGeometry PG(Vertical, TZ4, TN8, Offset0);
   ASSERT_EQ(PG.getPixel2D(3, 3, 4, 0, 511), 1); // Top Left
   ASSERT_EQ(PG.getPixel2D(0, 0, 3, 6, 511), 8*7*4); // Top Right
-  ASSERT_EQ(PG.getPixel2D(3, 3, 4, 0, 0), 114465); // Bottom Left
-  ASSERT_EQ(PG.getPixel2D(0, 0, 3, 6, 0),  (8*7*4)*512); // Bottom Right
+  ASSERT_EQ(PG.getPixel2D(3, 3, 4, 0,   0), 114465); // Bottom Left
+  ASSERT_EQ(PG.getPixel2D(0, 0, 3, 6,   0),  (8*7*4)*512); // Bottom Right
 }
 
 TEST_F(PanelGeometryTest, CanonicalCornersWithOffset) {
@@ -56,8 +56,7 @@ TEST_F(PanelGeometryTest, CanonicalCornersRotated) {
   ASSERT_EQ(PG.getPixel2D(3, 3, 4, 0,   0), (8*7*4)*512); // Bottom Right
 }
 
-/** Old GeometryTest cases below */
-TEST_F(PanelGeometryTest, InvalidIndices) {
+TEST_F(PanelGeometryTest, InvalidIndices3D) {
   PanelGeometry PG(Vertical, TZ4, TN8, Offset0); // 4*8==32 tubes in total
   ASSERT_GT(PG.getPixel3D(0, 0, 7, 0, 511),      0); // max valid tubeid
   ASSERT_EQ(PG.getPixel3D(0, 0, 8, 0, 511),      0); // invalid tubeid
@@ -65,6 +64,18 @@ TEST_F(PanelGeometryTest, InvalidIndices) {
   ASSERT_EQ(PG.getPixel3D(0, 0, 0, 7, 511),      0); // invalid strawid
   ASSERT_GT(PG.getPixel3D(0, 0, 0, 0, 511),      0); // max valid ypos
   ASSERT_EQ(PG.getPixel3D(0, 0, 0, 0, 512),      0); // invalid ypos
+  ASSERT_EQ(PG.getPixel3D(0, 4, 0, 0, 511),      0); // 'invalid' FPGAId (for geometry)
+}
+
+TEST_F(PanelGeometryTest, InvalidIndices2D) {
+  PanelGeometry PG(Vertical, TZ4, TN8, Offset0); // 4*8==32 tubes in total
+  ASSERT_GT(PG.getPixel2D(0, 0, 7, 0, 511),      0); // max valid tubeid
+  ASSERT_EQ(PG.getPixel2D(0, 0, 8, 0, 511),      0); // invalid tubeid
+  ASSERT_GT(PG.getPixel2D(0, 0, 7, 6, 511),      0); // max valid strawid
+  ASSERT_EQ(PG.getPixel2D(0, 0, 0, 7, 511),      0); // invalid strawid
+  ASSERT_GT(PG.getPixel2D(0, 0, 0, 0, 511),      0); // max valid ypos
+  ASSERT_EQ(PG.getPixel2D(0, 0, 0, 0, 512),      0); // invalid ypos
+  ASSERT_EQ(PG.getPixel2D(0, 4, 0, 0, 511),      0); // 'invalid' FPGAId (for geometry)
 }
 
 TEST_F(PanelGeometryTest, CornersZ0) {

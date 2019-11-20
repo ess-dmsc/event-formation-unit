@@ -63,7 +63,7 @@ std::vector<uint8_t> TestPacket2{
     0x00, 0x01, 0x00, 0x00,
     0x01, 0x00, 0x00, 0x00, // Seq number 1
 
-    0x00, 0x00, 0x40, 0x00, // Data Header, ring 0, fen 0
+    0x05, 0x00, 0x40, 0x00, // Data Header, ring 0, fen 0
 
     0x11, 0x00, 0x00, 0x00, // Readout 1, time 17s,
     0x01, 0x01, 0x00, 0x00, // (257 clocks)
@@ -136,6 +136,7 @@ TEST_F(LokiBaseTest, DataReceiveGood) {
   EXPECT_EQ(Readout.Counters.Readouts, 6);
   EXPECT_EQ(Readout.Counters.Headers, 2);
   EXPECT_EQ(Readout.Counters.GeometryErrors, 1);
+  EXPECT_EQ(Readout.Counters.MappingErrors, 1);
   EXPECT_EQ(Readout.Counters.kafka_ev_errors, 2);
 }
 
