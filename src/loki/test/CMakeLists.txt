@@ -22,7 +22,7 @@ create_test_executable(LokiPanelGeometryTest)
 
 
 set(LokiConfigTest_INC
-  ../../test/SaveBuffer.cpp
+  ../../test/SaveBuffer.h
   ../geometry/Config.h)
 set(LokiConfigTest_SRC
   ../geometry/Config.cpp

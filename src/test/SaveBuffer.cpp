@@ -2,7 +2,7 @@
 //===----------------------------------------------------------------------===//
 ///
 /// \file
-/// Save a buffer to file - used in unit tests
+/// Save a buffer to file - only to be used in unit tests!
 //===----------------------------------------------------------------------===//
 
 #include <test/SaveBuffer.h>

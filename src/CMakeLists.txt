@@ -44,7 +44,6 @@ add_subdirectory(multiblade)
 add_subdirectory(multigrid)
 add_subdirectory(sonde)
 add_subdirectory(jalousie)
-add_subdirectory(udp)
 add_subdirectory(loki)
 add_subdirectory(adc_readout)
 add_subdirectory(perfgen)
@@ -82,9 +81,8 @@ add_custom_target(runefu
     COMMAND efu "-d" "AdcReadout" "-s" "1" "--nohwcheck"
     COMMAND efu "-d" "../modules/loki" "-f" "../configs/STFCTest.json" "-s" "1" "--nohwcheck" "--dumptofile" "deleteme_"
     COMMAND efu "-d" "../modules/loki" "-f" "../configs/STFCTest.json" "-s" "1" "--nohwcheck" "--udder"
-    COMMAND efu "-d" "../modules/udp" "-s" "1" "--nohwcheck"
     COMMAND efu "-d" "../modules/gdgem" "-f" "../configs/vmm3.json" "-s" "2" "--nohwcheck"
     COMMAND efu "-d" "../modules/perfgen" "-s" "1" "--nohwcheck"
     COMMAND efu "-d" "../modules/jalousie" "-f" "../configs/v20_mappings.json" "-s" "2" "--nohwcheck"
-    DEPENDS copycfgs efu mgmesytec gdgem sonde mbcaen udp AdcReadout
+    DEPENDS copycfgs efu mgmesytec gdgem sonde mbcaen AdcReadout
     )
