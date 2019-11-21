@@ -449,7 +449,7 @@ void GdGemBase::processing_thread() {
           uint64_t us = duration.timeus();
           rep++;
           total += us*0.000001;
-          avg = total/rep;
+          //avg = total/rep;
           //LOG(PROCESS, Sev::Debug, "10000 x process_buffer: last time={}, avg time={}",
           //  us*0.000001, avg);
         }
