@@ -7,9 +7,38 @@
 
 #include "AdcSettings.h"
 #include "AdcReadoutConstants.h"
+#include <regex>
 
 using PosType = AdcSettings::PositionSensingType;
 using ChRole = AdcSettings::ChannelRole;
+
+auto stringToTime(std::string const &TimeString) {
+  using std::string_literals::operator""s;
+  std::regex DateTimeRegex{
+      R"rr(^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$)rr"};
+  std::smatch Match;
+  if (not std::regex_match(TimeString, Match, DateTimeRegex)) {
+    throw std::runtime_error("The string \"" + TimeString +
+                             "\" is not a valid date time string.");
+  }
+  auto GetValue = [](auto Match, auto MinValue, auto MaxValue,
+                     auto TypeOfValue) {
+    auto IntValue = std::atoi(Match.c_str());
+    if (IntValue > MaxValue or IntValue < MinValue) {
+      throw std::runtime_error("The value "s + std::to_string(MaxValue) +
+                               " is not a valid "s + TypeOfValue + " value."s);
+    }
+    return IntValue;
+  };
+  std::tm t{};
+  t.tm_year = GetValue(Match[1].str(), 1970, 3000, "year") - 1900;
+  t.tm_mon = GetValue(Match[2].str(), 1, 12, "month") - 1;
+  t.tm_mday = GetValue(Match[3].str(), 1, 31, "day");
+  t.tm_hour = GetValue(Match[4].str(), 0, 23, "hour");
+  t.tm_min = GetValue(Match[5].str(), 0, 59, "minute");
+  t.tm_sec = GetValue(Match[6].str(), 0, 60, "second");
+  return std::chrono::system_clock::from_time_t(timegm(&t));
+}
 
 void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
   Parser
@@ -43,7 +72,14 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
     } else if (TestString == "now") {
       ReadoutSettings.TimeOffsetSetting = OffsetTime::NOW;
       return true;
-    } // \todo Implement handling of reference times that are not "now()".
+    } else {
+      try {
+        ReadoutSettings.ReferenceTime = stringToTime(TestString);
+        return true;
+      } catch (std::runtime_error &Error) {
+        return false;
+      }
+    }
     return false;
   };
   CLI::callback_t CBOffsetTime(ParseOffsetTimestamp);
@@ -53,9 +89,9 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
                   "two options:"
                   "\n1. NONE (No timestamp offset.)"
                   "\n2. NOW (The first packet timestamp will be offset such "
-                  "that it will be the current timestamp).")
-      //                  "\n3. \"Date and time\" (Reference data and time in
-      //                  ISO8601. E.g. \"1980-07-21T02:51:04Z\")")
+                  "that it will be the current timestamp)."
+                  "\n3. Reference data and time the following format "
+                  "\"1980-07-21T02:51:04Z\".")
       ->group("ADC Readout Options")
       ->default_str("NONE");
   Parser

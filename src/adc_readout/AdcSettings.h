@@ -21,6 +21,7 @@ struct AdcSettings {
   bool SampleTimeStamp{false};
   int TakeMeanOfNrOfSamples{1};
   OffsetTime::Offset TimeOffsetSetting{OffsetTime::Offset::NONE};
+  std::chrono::system_clock::time_point ReferenceTime;
   std::string DelayLineKafkaTopic;
   std::string TimeStampLocation{"Middle"};
   std::string Name;
