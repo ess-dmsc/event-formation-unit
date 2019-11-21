@@ -235,7 +235,7 @@ TEST(AdcHeadParse, IdleHeadTest) {
   InData Packet;
   Packet.Length = 28; // Current length of packet
   PacketHeader *HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
-  HeaderPointer->PacketType = 0x2222;
+  HeaderPointer->Type = PacketType::Idle;
   HeaderPointer->ReadoutLength = htons(20); // Currently a magic value
   HeaderInfo Header;
   EXPECT_NO_THROW(Header = parseHeader(Packet));
@@ -301,7 +301,7 @@ TEST(AdcHeadParse, UnknownHeadTest) {
   InData Packet;
   Packet.Length = sizeof(PacketHeader);
   auto HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
-  HeaderPointer->PacketType = 0x6666;
+  HeaderPointer->Type = PacketType(0x66);
   HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader) - 2);
   EXPECT_THROW(parseHeader(Packet), ParserException);
 }
@@ -310,7 +310,7 @@ TEST(AdcHeadParse, ShortPacketFailure) {
   InData Packet;
   Packet.Length = sizeof(PacketHeader) - 2;
   auto HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
-  HeaderPointer->PacketType = 0x1111;
+  HeaderPointer->Type = PacketType::Data;
   HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader) - 4);
   EXPECT_THROW(parseHeader(Packet), ParserException);
 }
@@ -319,7 +319,7 @@ TEST(AdcHeadParse, WrongReadoutLengthFailure) {
   InData Packet;
   Packet.Length = sizeof(PacketHeader);
   auto HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
-  HeaderPointer->PacketType = 0x1111;
+  HeaderPointer->Type = PacketType::Data;
   HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader)) + 54;
   EXPECT_THROW(parseHeader(Packet), ParserException);
 }

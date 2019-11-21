@@ -36,7 +36,7 @@ public:
   /// \param[in] EfuSettings The required settings for setting up the delay line
   /// position calculation.
   DelayLineProducer(std::string Broker, std::string Topic,
-                    AdcSettings EfuSettings);
+                    AdcSettings EfuSettings, OffsetTime UsedOffset);
 
   /// \brief Stop processing thread and deallocate resources.
   ~DelayLineProducer();

@@ -12,8 +12,8 @@
 
 using namespace std::chrono_literals;
 
-PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod, std::string SourceName)
-    : AdcDataProcessor(std::move(Prod)), Name(std::move(SourceName)) {}
+PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod, std::string SourceName, OffsetTime RefTimeOffset)
+    : AdcDataProcessor(std::move(Prod)), Name(std::move(SourceName)), UsedTimeOffset(RefTimeOffset) {}
 
 void PeakFinder::processData(SamplingRun const &Data) {
   auto PulseInfo = analyseSampleRun(Data, 0.1);
@@ -24,7 +24,7 @@ void PeakFinder::processData(SamplingRun const &Data) {
         Name + "_Adc" + std::to_string(Data.Identifier.SourceID) + "_Ch" +
             std::to_string(Data.Identifier.ChannelNr),
         200, 500ms, ProducerPtr.get(),
-        EventSerializer::TimestampMode::TIME_REFERENCED);
+        EventSerializer::TimestampMode::TIME_REFERENCED, UsedTimeOffset);
   }
   auto &CurrentSerialiser = Serialisers[Data.Identifier];
   CurrentSerialiser->addReferenceTimestamp(

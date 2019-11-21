@@ -12,6 +12,7 @@
 #include "UDPClient.h"
 #include <common/Log.h>
 #include <memory>
+#include <iostream>
 
 AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
                                AdcSettings const &ReadoutSettings)
@@ -44,7 +45,7 @@ std::shared_ptr<Producer> AdcReadoutBase::getProducer() {
   return ProducerPtr;
 }
 
-std::shared_ptr<DelayLineProducer> AdcReadoutBase::getDelayLineProducer() {
+std::shared_ptr<DelayLineProducer> AdcReadoutBase::getDelayLineProducer(OffsetTime UsedOffset) {
   std::lock_guard<std::mutex> Guard(DelayLineProducerMutex);
   if (DelayLineProducerPtr == nullptr) {
     std::string UsedTopic = GeneralSettings.KafkaTopic;
@@ -52,7 +53,7 @@ std::shared_ptr<DelayLineProducer> AdcReadoutBase::getDelayLineProducer() {
       UsedTopic = ReadoutSettings.DelayLineKafkaTopic;
     }
     DelayLineProducerPtr = std::make_shared<DelayLineProducer>(
-        GeneralSettings.KafkaBroker, UsedTopic, ReadoutSettings);
+        GeneralSettings.KafkaBroker, UsedTopic, ReadoutSettings, UsedOffset);
     Stats.create("events.delay_line", DelayLineProducerPtr->getNrOfEvents());
   }
   return DelayLineProducerPtr;
@@ -125,7 +126,8 @@ void AdcReadoutBase::packetFunction(InData const &Packet,
 }
 
 void AdcReadoutBase::inputThread() {
-  std::vector<std::unique_ptr<UDPClient>> UDPReceivers;
+  std::unique_ptr<UDPClient> Receiver1;
+  std::unique_ptr<UDPClient> Receiver2;
 
   std::function<SamplingRun *(ChannelID)> DataModuleProducer(
       [this](auto Identifier) { return this->GetDataModule(Identifier); });
@@ -134,13 +136,11 @@ void AdcReadoutBase::inputThread() {
     this->AdcStats.current_ts_sec = Data->StartTime.getSeconds();
     return this->QueueUpDataModule(Data);
   });
-
   PacketParser Parser1(QueingFunction1, DataModuleProducer, 0);
-  UDPReceivers.emplace_back(std::make_unique<UDPClient>(
-      Service, EFUSettings.DetectorAddress, EFUSettings.DetectorPort,
-      [&Parser1, this](auto Packet) {
-        this->packetFunction(Packet, Parser1);
-      }));
+
+  auto PacketHandler1 = [&Parser1, this](auto Packet) {
+    this->packetFunction(Packet, Parser1);
+  };
 
   std::function<bool(SamplingRun *)> QueingFunction2([this](SamplingRun *Data) {
     this->AdcStats.current_ts_alt_sec = Data->StartTime.getSeconds();
@@ -148,28 +148,69 @@ void AdcReadoutBase::inputThread() {
   });
 
   PacketParser Parser2(QueingFunction2, DataModuleProducer, 1);
-  if (not ReadoutSettings.AltDetectorInterface.empty() and
-      ReadoutSettings.AltDetectorPort != 0) {
-    UDPReceivers.emplace_back(std::make_unique<UDPClient>(
-        Service, ReadoutSettings.AltDetectorInterface,
-        ReadoutSettings.AltDetectorPort, [&Parser2, this](auto Packet) {
-          this->packetFunction(Packet, Parser2);
-        }));
-  }
+
+  auto PacketHandler2 = [&Parser2, this](auto Packet) {
+    this->packetFunction(Packet, Parser2);};
+
+  auto SetUpInputForProcessing = [&](){
+    Receiver1->setPacketHandler(PacketHandler1);
+    if (not ReadoutSettings.AltDetectorInterface.empty() and
+        ReadoutSettings.AltDetectorPort != 0) {
+      Receiver2 = std::make_unique<UDPClient>(
+          Service, ReadoutSettings.AltDetectorInterface,
+          ReadoutSettings.AltDetectorPort, PacketHandler2);
+    }
+  };
+  auto GetPacketsForConfig = [&](auto Packet){
+    try {
+      auto Config = parseHeaderForConfigInfo(Packet);
+      TimestampOffset = OffsetTime(ReadoutSettings.TimeOffsetSetting, std::chrono::system_clock::now(), Config.BaseTime.getTimeStampNS());
+      TimeConfigDone = true;
+      {
+        std::unique_lock<std::mutex> Guard(ConditionVariableMutex);
+        TimeOffsetConditionVariable.notify_all();
+      }
+      LOG(INIT, Sev::Info,
+          "Config packet received, starting data processing.");
+      SetUpInputForProcessing();
+    } catch (ParserException &E) {
+      // Do nothing
+    }
+  };
+
+  Receiver1 = std::make_unique<UDPClient>(
+      Service, EFUSettings.DetectorAddress, EFUSettings.DetectorPort, GetPacketsForConfig);
+  LOG(INIT, Sev::Info,
+      "Waiting for data packet to be used for parser configuration.");
   Service->run();
 }
 
 void AdcReadoutBase::processingThread(
     Queue &DataModuleQueue, std::shared_ptr<std::int64_t> EventCounter) {
+
   std::vector<std::unique_ptr<AdcDataProcessor>> Processors;
+
+  using std::chrono_literals::operator""ms;
+  while (not TimeConfigDone) {
+    std::unique_lock<std::mutex> Guard(ConditionVariableMutex);
+    TimeOffsetConditionVariable.wait_for(Guard, 200ms);
+    if (not Detector::runThreads) {
+      LOG(INIT, Sev::Debug,
+          "Early exit in AdcReadoutBase::processingThread(). Time config was never completed.");
+      return;
+    }
+  }
+  LOG(INIT, Sev::Info,
+      "Timing config completed. Lazily starting pulse processing.");
+  auto UsedOffset = TimestampOffset;
 
   if (ReadoutSettings.PeakDetection) {
     Processors.emplace_back(
-        std::make_unique<PeakFinder>(getProducer(), ReadoutSettings.Name));
+        std::make_unique<PeakFinder>(getProducer(), ReadoutSettings.Name, UsedOffset));
   }
   if (ReadoutSettings.SerializeSamples) {
     auto Processor =
-        std::make_unique<SampleProcessing>(getProducer(), ReadoutSettings.Name);
+        std::make_unique<SampleProcessing>(getProducer(), ReadoutSettings.Name, UsedOffset);
     Processor->setTimeStampLocation(
         TimeStampLocationMap.at(ReadoutSettings.TimeStampLocation));
     Processor->setMeanOfSamples(ReadoutSettings.TakeMeanOfNrOfSamples);
@@ -178,7 +219,7 @@ void AdcReadoutBase::processingThread(
   }
   if (ReadoutSettings.DelayLineDetector) {
     Processors.emplace_back(std::make_unique<DelayLineProcessing>(
-        getDelayLineProducer(), ReadoutSettings.Threshold));
+        getDelayLineProducer(UsedOffset), ReadoutSettings.Threshold));
   }
 
   DataModulePtr Data = nullptr;

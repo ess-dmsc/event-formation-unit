@@ -112,7 +112,7 @@ void EventSerializer::serialiseFunction() {
     }
 
     Producer->produce({Builder.GetBufferPointer(), Builder.GetSize()},
-                      RefTimeOffset.calcTimestamp(ReferenceTime) / 1000000);
+                      RefTimeOffset.calcTimestampNS(ReferenceTime) / 1000000);
     TimeOffset.clear();
     EventId.clear();
     Amplitude.clear();

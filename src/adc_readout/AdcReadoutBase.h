@@ -20,6 +20,7 @@
 #include <common/Producer.h>
 #include <cstdint>
 #include <mutex>
+#include <condition_variable>
 
 /// \brief Implements the code for the ADC detector module. Is a base of
 /// AdcReadout in order to simplify unit testing.
@@ -45,7 +46,7 @@ protected:
 
   /// \brief Implements the thread doing the socket communication.
   /// This function will return when Detector::runThreads is set to false.
-  /// \note There is probably no performance benefit running this on a seperate
+  /// \note There is probably no performance benefit running this on a separate
   /// thread.
   virtual void inputThread();
 
@@ -57,11 +58,11 @@ protected:
   virtual void processingThread(Queue &DataModuleQueue,
                                 std::shared_ptr<std::int64_t> EventCounter);
 
-  /// \brief Does on demand instatiation of Kafka producer.
+  /// \brief Does on demand instantiation of Kafka producer.
   /// Used in order to simplify unit testing.
   virtual std::shared_ptr<Producer> getProducer();
 
-  virtual std::shared_ptr<DelayLineProducer> getDelayLineProducer();
+  virtual std::shared_ptr<DelayLineProducer> getDelayLineProducer(OffsetTime UsedOffset);
 
   SamplingRun *GetDataModule(ChannelID const Identifier);
   bool QueueUpDataModule(SamplingRun *Data);
@@ -95,4 +96,9 @@ protected:
   asio::io_service::work Worker;
   std::mutex ProducerMutex;
   std::mutex DelayLineProducerMutex;
+
+  bool TimeConfigDone{false};
+  std::mutex ConditionVariableMutex;
+  std::condition_variable TimeOffsetConditionVariable;
+  OffsetTime TimestampOffset{OffsetTime::Offset::NONE};
 };

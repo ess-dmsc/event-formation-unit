@@ -47,12 +47,13 @@ FPGASim::FPGASim(std::string DstAddress, std::uint16_t DstPort,
       StandbyBuffer(std::make_unique<DataPacket>(MaxPacketSize)) {
   resolveDestination();
 
-  IdlePacket.Head.PacketType = 0x2222; // Idle/heartbeat
+  IdlePacket.Head.Version = Protocol::VER_1;
+  IdlePacket.Head.Type = PacketType::Idle;
   IdlePacket.Head.ReadoutLength = 20;
   IdlePacket.Head.ReadoutCount = 0;
-  IdlePacket.Head.ClockMode = 1;
+  IdlePacket.Head.ClockMode = Clock::Clk_Ext;
   IdlePacket.Head.OversamplingFactor = 1;
-  IdlePacket.Idle.TimeStamp = {1, 2};
+  IdlePacket.Idle.TimeStamp = {0, 0};
   IdlePacket.fixEndian();
 }
 
@@ -127,6 +128,12 @@ void FPGASim::handleHeartbeat(const asio::error_code &Error) {
 }
 
 void FPGASim::transmitHeartbeat() {
+  TimeStamp IdleTS{CurrentRefTimeNS + RefTimeDeltaNS, TimeStamp::ClockMode::External};
+  auto IdleRawTS = RawTimeStamp{IdleTS.getSeconds(), IdleTS.getSecondsFrac()};
+  IdleRawTS.fixEndian();
+  IdlePacket.Head.ReferenceTimeStamp = IdleRawTS;
+  IdlePacket.Idle.TimeStamp = IdleRawTS;
+
   transmitPacket(&IdlePacket, sizeof(IdlePacket));
 }
 

@@ -10,6 +10,7 @@
 #pragma once
 
 #include <CLI/CLI.hpp>
+#include "OffsetTime.h"
 
 /// \brief ADC readout (and processing) specific settings.
 struct AdcSettings {
@@ -19,7 +20,7 @@ struct AdcSettings {
   bool DelayLineDetector{false};
   bool SampleTimeStamp{false};
   int TakeMeanOfNrOfSamples{1};
-  bool IncludeTimeStamp{false};
+  OffsetTime::Offset TimeOffsetSetting{OffsetTime::Offset::NONE};
   std::string DelayLineKafkaTopic;
   std::string TimeStampLocation{"Middle"};
   std::string Name;

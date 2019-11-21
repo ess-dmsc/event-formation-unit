@@ -8,14 +8,13 @@
 #include "DataPacket.h"
 #include <cstring>
 
-const std::uint32_t DATA_PACKET = 0x1111;
-
 DataPacket::DataPacket(size_t MaxPacketSize)
     : Buffer(std::make_unique<std::uint8_t[]>(MaxPacketSize)),
       HeaderPtr(reinterpret_cast<PacketHeader *>(Buffer.get())),
       Size(sizeof(PacketHeader)), MaxSize(MaxPacketSize) {
-  HeaderPtr->PacketType = DATA_PACKET;
-  HeaderPtr->ClockMode = 1;
+  HeaderPtr->Type = PacketType::Data;
+  HeaderPtr->Version = Protocol::VER_1;
+  HeaderPtr->ClockMode = Clock::Clk_Ext;
   HeaderPtr->OversamplingFactor = 1;
 }
 

@@ -20,7 +20,7 @@ public:
             std::string const &Interface, std::uint16_t Port,
             std::function<void(InData const &Packet)> Handler);
   virtual ~UDPClient() = default;
-
+  void setPacketHandler(std::function<void(InData const &Packet)> Handler);
 protected:
   InData InputBuffer;
   void receiveHandler(const asio::error_code &Error, std::size_t BytesReceived);

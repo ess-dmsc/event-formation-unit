@@ -13,55 +13,57 @@
 
 TEST(OffsetTimeTest, NoOffset) {
   OffsetTime UnderTest(OffsetTime::NONE);
-  EXPECT_EQ(UnderTest.calcTimestamp(123456789), 123456789u);
+  EXPECT_EQ(UnderTest.calcTimestampNS(123456789), 123456789u);
 }
 
-TEST(OffsetTimeTest, OffsetToNow) {
-  OffsetTime UnderTest(OffsetTime::NOW);
+TEST(OffsetTimeTest, OffsetToNow1) {
   auto Now = std::chrono::system_clock::now();
   auto NowNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
                    Now.time_since_epoch())
                    .count();
-  EXPECT_NEAR(UnderTest.calcTimestamp(123456789), NowNS, 1e8);
+  std::uint64_t SomeTimeStamp{NowNS + 1000000000ull};
+  OffsetTime UnderTest(OffsetTime::NOW, {}, SomeTimeStamp);
+  EXPECT_NEAR(UnderTest.calcTimestampNS(SomeTimeStamp), static_cast<std::uint64_t>(NowNS), 1e6);
+}
+
+TEST(OffsetTimeTest, OffsetToNow2) {
+  auto Now = std::chrono::system_clock::now();
+  auto NowNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
+      Now.time_since_epoch())
+      .count();
+  std::uint64_t SomeTimeStamp{NowNS - 1000000000ull};
+  OffsetTime UnderTest(OffsetTime::NOW, {}, SomeTimeStamp);
+  EXPECT_NEAR(UnderTest.calcTimestampNS(SomeTimeStamp), static_cast<std::uint64_t>(NowNS), 1e6);
 }
 
 TEST(OffsetTimeTest, OffsetToTimePoint1) {
-  OffsetTime UnderTest(OffsetTime::TIME_POINT);
-  auto Now = std::chrono::system_clock::now();
-  auto NowNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                   Now.time_since_epoch())
-                   .count();
-  EXPECT_NEAR(UnderTest.calcTimestamp(123456789), NowNS, 1e8);
+  auto SomeTimeStamp = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
+  std::tm t;
+  std::string DateTimeString("1996-02-25 12:13:14");
+  std::istringstream InSS(DateTimeString);
+  InSS >> std::get_time(&t, "%Y-%m-%d %H:%M:%S");
+
+  auto TestTimePoint = std::chrono::system_clock::from_time_t(std::mktime(&t));
+
+  OffsetTime UnderTest(OffsetTime::TIME_POINT, TestTimePoint, SomeTimeStamp);
+  auto TestNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                    TestTimePoint.time_since_epoch())
+                    .count();
+  EXPECT_EQ(UnderTest.calcTimestampNS(SomeTimeStamp), static_cast<std::uint64_t>(TestNS));
 }
 
 TEST(OffsetTimeTest, OffsetToTimePoint2) {
+  auto SomeTimeStamp = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now().time_since_epoch()).count();
   std::tm t;
-  std::string DateTimeString("1996-02-25 12:13:14");
+  std::string DateTimeString("2026-02-25 12:13:14");
   std::istringstream InSS(DateTimeString);
   InSS >> std::get_time(&t, "%Y-%m-%d %H:%M:%S");
 
   auto TestTimePoint = std::chrono::system_clock::from_time_t(std::mktime(&t));
 
-  OffsetTime UnderTest(OffsetTime::TIME_POINT, TestTimePoint);
+  OffsetTime UnderTest(OffsetTime::TIME_POINT, TestTimePoint, SomeTimeStamp);
   auto TestNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                    TestTimePoint.time_since_epoch())
-                    .count();
-  auto CalculatedTS = UnderTest.calcTimestamp(123456789);
-  EXPECT_NEAR(CalculatedTS, TestNS, 1e8);
-}
-
-TEST(OffsetTimeTest, OffsetToTimePoint3) {
-  std::tm t;
-  std::string DateTimeString("1996-02-25 12:13:14");
-  std::istringstream InSS(DateTimeString);
-  InSS >> std::get_time(&t, "%Y-%m-%d %H:%M:%S");
-
-  auto TestTimePoint = std::chrono::system_clock::from_time_t(std::mktime(&t));
-
-  OffsetTime UnderTest(TestTimePoint);
-  auto TestNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                    TestTimePoint.time_since_epoch())
-                    .count();
-  auto CalculatedTS = UnderTest.calcTimestamp(123456789);
-  EXPECT_NEAR(CalculatedTS, TestNS, 1e8);
+      TestTimePoint.time_since_epoch())
+      .count();
+  EXPECT_EQ(UnderTest.calcTimestampNS(SomeTimeStamp), static_cast<std::uint64_t>(TestNS));
 }
