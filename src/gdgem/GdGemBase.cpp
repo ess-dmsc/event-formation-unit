@@ -24,12 +24,12 @@
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
 #include <common/Trace.h>
-//#undef TRC_LEVEL
-//#define TRC_LEVEL TRC_L_DEB
+// #undef TRC_LEVEL
+// #define TRC_LEVEL TRC_L_DEB
 
 #include <common/Log.h>
-//#undef TRC_MASK
-//#define TRC_MASK 0
+// #undef TRC_MASK
+// #define TRC_MASK 0
 
 // \todo MJC's workstation - not reliable
 static constexpr int TscMHz {2900};
