@@ -428,9 +428,9 @@ void GdGemBase::processing_thread() {
   duration.now();
   unsigned int data_index;
   int cnt = 0;
-  double avg = 0;
-  double total = 0;
-  int rep = 0;
+  //double avg = 0;
+  //double total = 0;
+  //int rep = 0;
   while (true) {
     // stats_.fifo_free = input2proc_fifo.free();
     if (!input2proc_fifo.pop(data_index)) {
@@ -447,11 +447,12 @@ void GdGemBase::processing_thread() {
         if(cnt == 10000) {
           cnt = 0;
           uint64_t us = duration.timeus();
-          rep++;
-          total += us*0.000001;
+          //rep++;
+          //total += us*0.000001;
           //avg = total/rep;
           //LOG(PROCESS, Sev::Debug, "10000 x process_buffer: last time={}, avg time={}",
           //  us*0.000001, avg);
+          duration.now();
         }
         
         if (nmx_opts.enable_data_processing) {
