@@ -18,9 +18,9 @@
 #include <asio.hpp>
 #include <common/Detector.h>
 #include <common/Producer.h>
+#include <condition_variable>
 #include <cstdint>
 #include <mutex>
-#include <condition_variable>
 
 /// \brief Implements the code for the ADC detector module. Is a base of
 /// AdcReadout in order to simplify unit testing.
@@ -62,7 +62,8 @@ protected:
   /// Used in order to simplify unit testing.
   virtual std::shared_ptr<Producer> getProducer();
 
-  virtual std::shared_ptr<DelayLineProducer> getDelayLineProducer(OffsetTime UsedOffset);
+  virtual std::shared_ptr<DelayLineProducer>
+  getDelayLineProducer(OffsetTime UsedOffset);
 
   SamplingRun *GetDataModule(ChannelID const Identifier);
   bool QueueUpDataModule(SamplingRun *Data);

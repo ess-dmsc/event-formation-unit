@@ -11,8 +11,8 @@
 #include "SampleProcessing.h"
 #include "UDPClient.h"
 #include <common/Log.h>
-#include <memory>
 #include <iostream>
+#include <memory>
 
 AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
                                AdcSettings const &ReadoutSettings)
@@ -45,7 +45,8 @@ std::shared_ptr<Producer> AdcReadoutBase::getProducer() {
   return ProducerPtr;
 }
 
-std::shared_ptr<DelayLineProducer> AdcReadoutBase::getDelayLineProducer(OffsetTime UsedOffset) {
+std::shared_ptr<DelayLineProducer>
+AdcReadoutBase::getDelayLineProducer(OffsetTime UsedOffset) {
   std::lock_guard<std::mutex> Guard(DelayLineProducerMutex);
   if (DelayLineProducerPtr == nullptr) {
     std::string UsedTopic = GeneralSettings.KafkaTopic;
@@ -150,9 +151,10 @@ void AdcReadoutBase::inputThread() {
   PacketParser Parser2(QueingFunction2, DataModuleProducer, 1);
 
   auto PacketHandler2 = [&Parser2, this](auto Packet) {
-    this->packetFunction(Packet, Parser2);};
+    this->packetFunction(Packet, Parser2);
+  };
 
-  auto SetUpInputForProcessing = [&](){
+  auto SetUpInputForProcessing = [&]() {
     Receiver1->setPacketHandler(PacketHandler1);
     if (not ReadoutSettings.AltDetectorInterface.empty() and
         ReadoutSettings.AltDetectorPort != 0) {
@@ -161,25 +163,27 @@ void AdcReadoutBase::inputThread() {
           ReadoutSettings.AltDetectorPort, PacketHandler2);
     }
   };
-  auto GetPacketsForConfig = [&](auto Packet){
+  auto GetPacketsForConfig = [&](auto Packet) {
     try {
       auto Config = parseHeaderForConfigInfo(Packet);
-      TimestampOffset = OffsetTime(ReadoutSettings.TimeOffsetSetting, std::chrono::system_clock::now(), Config.BaseTime.getTimeStampNS());
+      TimestampOffset = OffsetTime(ReadoutSettings.TimeOffsetSetting,
+                                   std::chrono::system_clock::now(),
+                                   Config.BaseTime.getTimeStampNS());
       TimeConfigDone = true;
       {
         std::unique_lock<std::mutex> Guard(ConditionVariableMutex);
         TimeOffsetConditionVariable.notify_all();
       }
-      LOG(INIT, Sev::Info,
-          "Config packet received, starting data processing.");
+      LOG(INIT, Sev::Info, "Config packet received, starting data processing.");
       SetUpInputForProcessing();
     } catch (ParserException &E) {
       // Do nothing
     }
   };
 
-  Receiver1 = std::make_unique<UDPClient>(
-      Service, EFUSettings.DetectorAddress, EFUSettings.DetectorPort, GetPacketsForConfig);
+  Receiver1 = std::make_unique<UDPClient>(Service, EFUSettings.DetectorAddress,
+                                          EFUSettings.DetectorPort,
+                                          GetPacketsForConfig);
   LOG(INIT, Sev::Info,
       "Waiting for data packet to be used for parser configuration.");
   Service->run();
@@ -196,7 +200,8 @@ void AdcReadoutBase::processingThread(
     TimeOffsetConditionVariable.wait_for(Guard, 200ms);
     if (not Detector::runThreads) {
       LOG(INIT, Sev::Debug,
-          "Early exit in AdcReadoutBase::processingThread(). Time config was never completed.");
+          "Early exit in AdcReadoutBase::processingThread(). Time config was "
+          "never completed.");
       return;
     }
   }
@@ -205,12 +210,12 @@ void AdcReadoutBase::processingThread(
   auto UsedOffset = TimestampOffset;
 
   if (ReadoutSettings.PeakDetection) {
-    Processors.emplace_back(
-        std::make_unique<PeakFinder>(getProducer(), ReadoutSettings.Name, UsedOffset));
+    Processors.emplace_back(std::make_unique<PeakFinder>(
+        getProducer(), ReadoutSettings.Name, UsedOffset));
   }
   if (ReadoutSettings.SerializeSamples) {
-    auto Processor =
-        std::make_unique<SampleProcessing>(getProducer(), ReadoutSettings.Name, UsedOffset);
+    auto Processor = std::make_unique<SampleProcessing>(
+        getProducer(), ReadoutSettings.Name, UsedOffset);
     Processor->setTimeStampLocation(
         TimeStampLocationMap.at(ReadoutSettings.TimeStampLocation));
     Processor->setMeanOfSamples(ReadoutSettings.TakeMeanOfNrOfSamples);

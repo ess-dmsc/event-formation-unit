@@ -49,7 +49,8 @@ const char *ParserException::what() const noexcept {
       {ParserException::Type::HEADER_LENGTH,
        "Packet size was to short to hold header and expected payload."},
       {ParserException::Type::HEADER_TYPE, "Indicated packet type is unknown."},
-      {ParserException::Type::HEADER_PROTOCOL_VERSION, "Unknown protocol version encountered in header."},
+      {ParserException::Type::HEADER_PROTOCOL_VERSION,
+       "Unknown protocol version encountered in header."},
       {ParserException::Type::IDLE_LENGTH,
        "Packet size was to short to hold idle time stamp."},
   };
@@ -119,14 +120,17 @@ ConfigInfo parseHeaderForConfigInfo(const InData &Packet) {
   if (Header.Type != PacketType::Idle and Header.Type != PacketType::Data) {
     throw ParserException(ParserException::Type::HEADER_TYPE);
   }
-  std::map<Protocol, ConfigInfo::Version> VersionMap{{Protocol::VER_0_1, ConfigInfo::Version::VER_0}, {Protocol::VER_0_2, ConfigInfo::Version::VER_0}, {Protocol::VER_1, ConfigInfo::Version::VER_1}};
+  std::map<Protocol, ConfigInfo::Version> VersionMap{
+      {Protocol::VER_0_1, ConfigInfo::Version::VER_0},
+      {Protocol::VER_0_2, ConfigInfo::Version::VER_0},
+      {Protocol::VER_1, ConfigInfo::Version::VER_1}};
   if (VersionMap.find(Header.Version) == VersionMap.end()) {
     throw ParserException(ParserException::Type::HEADER_PROTOCOL_VERSION);
   }
   ReturnInfo.ProtocolVersion = VersionMap[Header.Version];
 
   ReturnInfo.BaseTime = {Header.ReferenceTimeStamp,
-                                   TimeStamp::ClockMode(Header.ClockMode)};
+                         TimeStamp::ClockMode(Header.ClockMode)};
   if (Packet.Length != Header.ReadoutLength + 8u) {
     throw ParserException(ParserException::Type::HEADER_LENGTH);
   }

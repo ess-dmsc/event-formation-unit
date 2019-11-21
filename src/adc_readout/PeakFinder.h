@@ -19,7 +19,8 @@ class PeakFinder : public AdcDataProcessor {
 public:
   /// \param[in] Prod A shared pointer to the Kafka producer that handles data
   /// production.
-  PeakFinder(std::shared_ptr<Producer> Prod, std::string SourceName, OffsetTime RefTimeOffset);
+  PeakFinder(std::shared_ptr<Producer> Prod, std::string SourceName,
+             OffsetTime RefTimeOffset);
 
   /// \brief Handles peak detection, serialisation of the result and
   /// transmission to the Kafka broker.

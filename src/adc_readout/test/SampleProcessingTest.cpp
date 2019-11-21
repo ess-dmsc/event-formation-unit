@@ -31,7 +31,8 @@ using trompeloeil::_;
 class SampleProcessingStandIn : public SampleProcessing {
 public:
   SampleProcessingStandIn(std::shared_ptr<ProducerBase> Prod, std::string Name)
-      : SampleProcessing(std::move(Prod), std::move(Name), {OffsetTime::Offset::NONE}) {}
+      : SampleProcessing(std::move(Prod), std::move(Name),
+                         {OffsetTime::Offset::NONE}) {}
   using SampleProcessing::MeanOfNrOfSamples;
   using SampleProcessing::ProcessingInstance;
   using SampleProcessing::TSLocation;

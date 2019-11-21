@@ -12,8 +12,10 @@
 
 using namespace std::chrono_literals;
 
-PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod, std::string SourceName, OffsetTime RefTimeOffset)
-    : AdcDataProcessor(std::move(Prod)), Name(std::move(SourceName)), UsedTimeOffset(RefTimeOffset) {}
+PeakFinder::PeakFinder(std::shared_ptr<Producer> Prod, std::string SourceName,
+                       OffsetTime RefTimeOffset)
+    : AdcDataProcessor(std::move(Prod)), Name(std::move(SourceName)),
+      UsedTimeOffset(RefTimeOffset) {}
 
 void PeakFinder::processData(SamplingRun const &Data) {
   auto PulseInfo = analyseSampleRun(Data, 0.1);

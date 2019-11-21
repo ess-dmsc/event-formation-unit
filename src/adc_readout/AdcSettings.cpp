@@ -33,26 +33,29 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
       ->default_str("AdcDemonstrator");
 
   auto ParseOffsetTimestamp =
-      [&ReadoutSettings](std::vector<std::string>const& Input) -> bool {
-        auto TestString = Input.at(0);
-        std::transform(TestString.begin(), TestString.end(), TestString.begin(),
-                       [](unsigned char c){ return std::tolower(c); });
-        if (TestString == "none") {
-          ReadoutSettings.TimeOffsetSetting = OffsetTime::NONE;
-          return true;
-        } else if (TestString == "now") {
-          ReadoutSettings.TimeOffsetSetting = OffsetTime::NOW;
-          return true;
-        } // \todo Implement handling of reference times that are not "now()".
-        return false;
-      };
+      [&ReadoutSettings](std::vector<std::string> const &Input) -> bool {
+    auto TestString = Input.at(0);
+    std::transform(TestString.begin(), TestString.end(), TestString.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    if (TestString == "none") {
+      ReadoutSettings.TimeOffsetSetting = OffsetTime::NONE;
+      return true;
+    } else if (TestString == "now") {
+      ReadoutSettings.TimeOffsetSetting = OffsetTime::NOW;
+      return true;
+    } // \todo Implement handling of reference times that are not "now()".
+    return false;
+  };
   CLI::callback_t CBOffsetTime(ParseOffsetTimestamp);
   Parser
       .add_option("--time_stamp_offset", CBOffsetTime,
-                  "Offset the timestamp of the processed events. Takes one of two options:"
+                  "Offset the timestamp of the processed events. Takes one of "
+                  "two options:"
                   "\n1. NONE (No timestamp offset.)"
-                  "\n2. NOW (The first packet timestamp will be offset such that it will be the current timestamp).")
-//                  "\n3. \"Date and time\" (Reference data and time in ISO8601. E.g. \"1980-07-21T02:51:04Z\")")
+                  "\n2. NOW (The first packet timestamp will be offset such "
+                  "that it will be the current timestamp).")
+      //                  "\n3. \"Date and time\" (Reference data and time in
+      //                  ISO8601. E.g. \"1980-07-21T02:51:04Z\")")
       ->group("ADC Readout Options")
       ->default_str("NONE");
   Parser

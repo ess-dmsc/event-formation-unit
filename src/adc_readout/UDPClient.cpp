@@ -28,7 +28,8 @@ UDPClient::UDPClient(std::shared_ptr<asio::io_service> const &IOService,
   setupReceiver();
 }
 
-void UDPClient::setPacketHandler(std::function<void(InData const &Packet)> Handler) {
+void UDPClient::setPacketHandler(
+    std::function<void(InData const &Packet)> Handler) {
   PacketHandler = std::move(Handler);
 }
 

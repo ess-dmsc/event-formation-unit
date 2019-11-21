@@ -9,8 +9,8 @@
 
 #pragma once
 
-#include <CLI/CLI.hpp>
 #include "OffsetTime.h"
+#include <CLI/CLI.hpp>
 
 /// \brief ADC readout (and processing) specific settings.
 struct AdcSettings {

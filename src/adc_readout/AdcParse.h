@@ -13,13 +13,13 @@
 #include "AdcTimeStamp.h"
 #include "ChannelID.h"
 #include "SamplingRun.h"
+#include <cstdint>
 #include <exception>
 #include <functional>
 #include <netinet/in.h>
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <cstdint>
 
 /// \brief Custom exception to handle parsing errors.
 class ParserException : public std::runtime_error {
@@ -89,14 +89,14 @@ struct IdleInfo {
   std::int32_t FillerStart = 0;
 };
 
-enum class Protocol: std::uint8_t {
+enum class Protocol : std::uint8_t {
   VER_0 = 0x11,
   VER_0_1 = 0x11,
   VER_0_2 = 0x22,
   VER_1 = 0x01,
 };
 
-enum class Clock: std::uint8_t {
+enum class Clock : std::uint8_t {
   Clk_Ext = 0x01,
   Clk_45MHz = 0x00,
 };
@@ -200,17 +200,13 @@ TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte);
 /// \throw ParserException See exception type for possible parsing failures.
 IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte);
 
-
 struct ConfigInfo {
-  enum class Version {
-    VER_0,
-    VER_1
-  } ProtocolVersion;
+  enum class Version { VER_0, VER_1 } ProtocolVersion;
   TimeStamp BaseTime;
 };
 
-/// \brief Extract information from the header of a packet for the purpose of setting up the parsing of subsequent packets.
-/// \param[in] Packet Raw data buffer.
-/// \return Packet information, i.e. protocol version and time stamp.
+/// \brief Extract information from the header of a packet for the purpose of
+/// setting up the parsing of subsequent packets. \param[in] Packet Raw data
+/// buffer. \return Packet information, i.e. protocol version and time stamp.
 /// \throw ParserException See exceptions type for possible parsing failures.
 ConfigInfo parseHeaderForConfigInfo(const InData &Packet);

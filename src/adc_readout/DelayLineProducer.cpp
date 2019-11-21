@@ -13,7 +13,8 @@
 using namespace std::chrono_literals;
 
 DelayLineProducer::DelayLineProducer(std::string Broker, std::string Topic,
-                                     AdcSettings EfuSettings, OffsetTime UsedOffset)
+                                     AdcSettings EfuSettings,
+                                     OffsetTime UsedOffset)
     : Producer(std::move(Broker), std::move(Topic)),
       Settings(std::move(EfuSettings)),
       Serializer("delay_line_detector", 200, 500ms, this,

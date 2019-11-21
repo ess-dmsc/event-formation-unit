@@ -8,8 +8,8 @@
 #include "SampleProcessing.h"
 #include "AdcReadoutConstants.h"
 #include "senv_data_generated.h"
-#include <cmath>
 #include <algorithm>
+#include <cmath>
 
 std::uint64_t CalcSampleTimeStamp(const TimeStamp &Start, const TimeStamp &End,
                                   const TimeStampLocation Location) {
@@ -87,7 +87,8 @@ void ChannelProcessing::reset() {
 
 SampleProcessing::SampleProcessing(std::shared_ptr<ProducerBase> Prod,
                                    std::string Name, OffsetTime UsedOffset)
-    : AdcDataProcessor(std::move(Prod)), AdcName(std::move(Name)), TimeOffset(UsedOffset) {}
+    : AdcDataProcessor(std::move(Prod)), AdcName(std::move(Name)),
+      TimeOffset(UsedOffset) {}
 
 void SampleProcessing::setMeanOfSamples(int NrOfSamples) {
   MeanOfNrOfSamples = NrOfSamples;
@@ -116,9 +117,9 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
   flatbuffers::Offset<flatbuffers::Vector<std::uint64_t>> FBTimeStamps;
   if (SampleTimestamps) {
     auto SampleTimes = Data.TimeStamps;
-    std::transform(SampleTimes.begin(), SampleTimes.end(), SampleTimes.begin(), [this](auto const &TS){
-      return TimeOffset.calcTimestampNS(TS);
-    });
+    std::transform(
+        SampleTimes.begin(), SampleTimes.end(), SampleTimes.begin(),
+        [this](auto const &TS) { return TimeOffset.calcTimestampNS(TS); });
     FBTimeStamps = builder.CreateVector(SampleTimes);
   }
 

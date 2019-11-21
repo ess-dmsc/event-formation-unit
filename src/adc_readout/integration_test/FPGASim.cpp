@@ -128,7 +128,8 @@ void FPGASim::handleHeartbeat(const asio::error_code &Error) {
 }
 
 void FPGASim::transmitHeartbeat() {
-  TimeStamp IdleTS{CurrentRefTimeNS + RefTimeDeltaNS, TimeStamp::ClockMode::External};
+  TimeStamp IdleTS{CurrentRefTimeNS + RefTimeDeltaNS,
+                   TimeStamp::ClockMode::External};
   auto IdleRawTS = RawTimeStamp{IdleTS.getSeconds(), IdleTS.getSecondsFrac()};
   IdleRawTS.fixEndian();
   IdlePacket.Head.ReferenceTimeStamp = IdleRawTS;

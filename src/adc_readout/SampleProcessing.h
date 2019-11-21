@@ -93,7 +93,8 @@ public:
   /// \param[in] Prod Shared pointer to Kafka producer instance.
   /// \param[in] Name Name of the data source. Used when setting the name of the
   /// source of the flatbuffer.
-  SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string Name, OffsetTime UsedOffset);
+  SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string Name,
+                   OffsetTime UsedOffset);
   ~SampleProcessing() = default;
 
   /// \brief Called to actually process, serialise and transmit the (already)
