@@ -167,7 +167,7 @@ void AdcReadoutBase::inputThread() {
     try {
       auto Config = parseHeaderForConfigInfo(Packet);
       TimestampOffset = OffsetTime(ReadoutSettings.TimeOffsetSetting,
-                                   std::chrono::system_clock::now(),
+                                   ReadoutSettings.ReferenceTime,
                                    Config.BaseTime.getTimeStampNS());
       LOG(INIT, Sev::Info, "Config packet received, starting data processing.");
       SetUpInputForProcessing();

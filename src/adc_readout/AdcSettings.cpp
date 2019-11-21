@@ -15,7 +15,7 @@ using ChRole = AdcSettings::ChannelRole;
 auto stringToTime(std::string const &TimeString) {
   using std::string_literals::operator""s;
   std::regex DateTimeRegex{
-      R"rr(^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})Z$)rr"};
+      R"rr(^(\d{4})-(\d{2})-(\d{2})t(\d{2}):(\d{2}):(\d{2})z$)rr"};
   std::smatch Match;
   if (not std::regex_match(TimeString, Match, DateTimeRegex)) {
     throw std::runtime_error("The string \"" + TimeString +
@@ -75,6 +75,7 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
     } else {
       try {
         ReadoutSettings.ReferenceTime = stringToTime(TestString);
+        ReadoutSettings.TimeOffsetSetting = OffsetTime::TIME_POINT;
         return true;
       } catch (std::runtime_error &Error) {
         return false;
