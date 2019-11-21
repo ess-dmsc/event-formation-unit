@@ -16,8 +16,8 @@
 #include <gdgem/NMXStats.h>
 #include <gdgem/srs/SRSTime.h>
 
-static const int VMMS{16};
-static const int FECS{16};
+static const int MaxVMMs{16}; ///Maximum number of VMMs per FEC card
+static const int MaxFECs{16}; ///Maximum number of FECs per EFU
 
 namespace Gem {
 
@@ -67,9 +67,9 @@ public:
   /// \param maxelements The maximum number of readout elements
   ParserVMM3(int maxelements, NMXStats & stats, SRSTime time_intepreter) : maxHits(maxelements), 
   stats(stats), srsTime(time_intepreter) {
-    markers = new struct VMM3Marker[FECS * VMMS];
+    markers = new struct VMM3Marker[MaxFECs * MaxVMMs];
     data = new struct VMM3Data[maxHits];
-    memset(markers, 0, sizeof(struct VMM3Marker) * FECS * VMMS);
+    memset(markers, 0, sizeof(struct VMM3Marker) * MaxFECs * MaxVMMs);
   }
 
   /// Delete allocated data, set pointers to nullptr

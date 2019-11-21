@@ -26,7 +26,7 @@ int ParserVMM3::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vd) {
     vd->tdc = data2 & 0xff;
     vd->vmmid = (data1 >> 22) & 0x1F;
     vd->triggerOffset = (data1 >> 27) & 0x1F;
-    uint16_t idx = (pd.fecId - 1) * VMMS + vd->vmmid;
+    uint16_t idx = (pd.fecId - 1) * MaxVMMs + vd->vmmid;
     if(vd->triggerOffset < markers[idx].lastTriggerOffset) { 
       if(markers[idx].calcTimeStamp != 0) {
         markers[idx].calcTimeStamp +=32*srsTime.trigger_period_ns()/SRSTime::internal_SRS_clock_period_ns;
@@ -53,24 +53,21 @@ int ParserVMM3::parse(uint32_t data1, uint16_t data2, struct VMM3Data *vd) {
   } else {
     /// Marker
     uint8_t vmmid = (data2 >> 10) & 0x1F;
-    uint16_t idx = (pd.fecId - 1) * VMMS + vmmid;
+    uint16_t idx = (pd.fecId - 1) * MaxVMMs + vmmid;
     uint64_t timestamp_lower_10bit = data2 & 0x03FF;
     uint64_t timestamp_upper_32bit = data1;
 
     uint64_t timestamp_42bit = (timestamp_upper_32bit << 10)
         + timestamp_lower_10bit;
     XTRACE(PROCESS, DEB, "SRS Marker vmmid %d: timestamp lower 10bit %u, timestamp upper 32 bit %u, 42 bit timestamp %"
-        PRIu64
-        "", vmmid, timestamp_lower_10bit, timestamp_upper_32bit, timestamp_42bit);
+        PRIu64"", vmmid, timestamp_lower_10bit, timestamp_upper_32bit, timestamp_42bit);
     
     if(markers[idx].fecTimeStamp 
     > timestamp_42bit) {
       if (markers[idx].fecTimeStamp 
       < 0x1FFFFFFF + timestamp_42bit) {
         stats.parser_timestamp_seq_errors++;
-        XTRACE(PROCESS, DEB, "parser_timestamp_seq_errors:  fc %d, ts %llu, marker ts %llu", 
-          timestamp_42bit,
-          markers[idx].fecTimeStamp);
+        XTRACE(PROCESS, DEB, "parser_timestamp_seq_errors:  fc %d, ts %llu, marker ts %llu", timestamp_42bit, markers[idx].fecTimeStamp);
       }
       else {
         stats.parser_timestamp_overflows++;
@@ -97,18 +94,13 @@ int ParserVMM3::receive(const char *buffer, int size) {
   struct SRSHeader *srsHeaderPtr = (struct SRSHeader *) buffer;
   hdr.frameCounter = ntohl(srsHeaderPtr->frameCounter);
  
-  if (pd.nextFrameCounter == hdr.frameCounter) {
-    if(hdr.frameCounter == 0) {
-      stats.parser_framecounter_overflows++;  
-    }
-  }
-  else {
+  if (pd.nextFrameCounter != hdr.frameCounter) {
     if(hdr.frameCounter > pd.nextFrameCounter) {
       if(stats.parser_good_frames > 0) {
         stats.parser_frame_missing_errors += 
-        (hdr.frameCounter-pd.nextFrameCounter);
+         (hdr.frameCounter-pd.nextFrameCounter);
         XTRACE(PROCESS, WAR, "parser_frame_missing_errors: fc %d, next fc %d", 
-          hdr.frameCounter, pd.nextFrameCounter);
+        hdr.frameCounter, pd.nextFrameCounter);
       }
     }
     else {
@@ -122,12 +114,18 @@ int ParserVMM3::receive(const char *buffer, int size) {
         XTRACE(PROCESS, WAR, "parser_frame_seq_errors: fc %d, next fc %d",  
           hdr.frameCounter, pd.nextFrameCounter);
 
-        for(int vmmid=0; vmmid < VMMS; vmmid++) {
-          markers[(pd.fecId - 1) * VMMS + vmmid].fecTimeStamp = 0;
-          markers[(pd.fecId - 1) * VMMS + vmmid].calcTimeStamp = 0;
+        for(int vmmid=0; vmmid < MaxVMMs; vmmid++) {
+          markers[(pd.fecId - 1) * MaxVMMs + vmmid].fecTimeStamp = 0;
+          markers[(pd.fecId - 1) * MaxVMMs + vmmid].calcTimeStamp = 0;
         }
       }
+    }  
+  }
+  else {
+    if(hdr.frameCounter == 0) {
+      stats.parser_framecounter_overflows++;  
     }
+    
   }   
   pd.nextFrameCounter = hdr.frameCounter + 1;
   

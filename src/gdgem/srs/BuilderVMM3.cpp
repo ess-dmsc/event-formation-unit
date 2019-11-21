@@ -11,7 +11,7 @@
 
 #include <common/Log.h>
 #undef TRC_MASK
-#define TRC_MASK 1
+#define TRC_MASK TRC_M_NONE
 
 namespace Gem {
 
@@ -89,7 +89,7 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
     
 
         if ((hit.plane != 0) && (hit.plane != 1)) {
-          stats_.hits_bad_geometry++;
+          stats_.hits_bad_plane++;
           XTRACE(PROCESS, DEB, "Bad SRS mapping (plane) -- fec=%d, chip=%d",
                 readout.fec, readout.chip_id);
           continue;

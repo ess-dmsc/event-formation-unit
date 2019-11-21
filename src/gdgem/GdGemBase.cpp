@@ -22,7 +22,7 @@
 #include <efu/Server.h>
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
-
+#include <common/Timer.h>
 #include <common/Trace.h>
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -95,6 +95,7 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
   Stats.create("parser_total", stats_.parser_readouts);
 
   // Builder
+  Stats.create("hits_bad_plane", stats_.hits_bad_plane);
   Stats.create("hits_bad_geometry", stats_.hits_bad_geometry);
   Stats.create("hits_bad_adc", stats_.hits_bad_adc);
   Stats.create("hits_good", stats_.hits_good);
@@ -422,12 +423,11 @@ void GdGemBase::processing_thread() {
   Gem::TrackSerializer raw_serializer(1500, "nmx_hits");
   raw_serializer.set_callback(ProduceHits);
 
-  TSCTimer global_time, report_timer;
-
+  TSCTimer report_timer;
+  Timer duration;
+  duration.now();
   unsigned int data_index;
   int cnt = 0;
-  std::chrono::time_point<std::chrono::system_clock> timeEnd, timeStart;
-  timeStart = std::chrono::system_clock::now();
   double avg = 0;
   double total = 0;
   int rep = 0;
@@ -446,13 +446,12 @@ void GdGemBase::processing_thread() {
         cnt++;
         if(cnt == 10000) {
           cnt = 0;
-          timeEnd = std::chrono::system_clock::now();
-          int ms = std::chrono::duration_cast < std::chrono::milliseconds > (timeEnd - timeStart).count();
+          uint64_t us = duration.timeus();
           rep++;
-          total += ms*0.001;
+          total += us*0.000001;
           avg = total/rep;
-          std::cout << rep << ": 10000 x process_buffer " << ms*0.001 << " s, avg = " << avg << " s\n";
-          timeStart = std::chrono::system_clock::now();
+          //LOG(PROCESS, Sev::Debug, "10000 x process_buffer: last time={}, avg time={}",
+          //  us*0.000001, avg);
         }
         
         if (nmx_opts.enable_data_processing) {

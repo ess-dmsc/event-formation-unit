@@ -23,6 +23,39 @@ TEST_F(EventAnalyzerTest, AnalyzeInvalid) {
 }
 
 TEST_F(EventAnalyzerTest, AnalyzeAverage) {
+//Explanation of algorithms
+//
+//1. center-of-mass
+//- position: 
+//  calculation using the position and the adc values as weight
+//- time:
+//  calculation using the position and the adc values as weight
+//
+//2. charge2 (center-of-mass with squared charge)
+//- position: 
+//  calculation using the position and the square of the adc values as weight
+//- time:
+//  calculation using the position and the adc values as weight
+//
+//3. utpc
+//-position:
+//  strip with latest time, in case of several strips with the same time, 
+//  take the outermost strip. If two strips have the same distance from
+//  the track start/end, take the one with the highest charge. If the charge
+//  is the same, take the smallest strip no.
+//  Example strips (1,2,3,4,5), times (1,4,4,3,2), largest time in strips 2,3.
+//  strip 2 is closer to the track start than strip 2.
+//-time:
+//  latest time
+//
+//4. utpc_weighted
+//-position: as in 3. utpc, determine the strip with the latest time. Depending
+//  on its position in the track, the strip has one or two neighbours. Calculate
+//  the position with the charge2 algorithm (center-of-mass with charge squared
+//  as weights) from these 2-3 strips
+//-time: 
+//  lastest time  
+
   cluster.clear();
   Hit hit;
   hit.coordinate = 0;

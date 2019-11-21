@@ -37,7 +37,7 @@ TEST_F(NMXConfigTest, NoConfigFile) {
 }
 
 TEST_F(NMXConfigTest, DebugPrint) {
-  MESSAGE() << "This is not a test, but simply exercises the debug print code" << "\n";
+  MESSAGE() << "This is NOT a test, but simply exercises the debug print code" << "\n";
   NMXConfig nmxconfig;
   nmxconfig.filter.enforce_minimum_hits = true;
   auto str = nmxconfig.debug();
