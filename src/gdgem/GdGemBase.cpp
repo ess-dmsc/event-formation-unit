@@ -446,7 +446,7 @@ void GdGemBase::processing_thread() {
         cnt++;
         if(cnt == 10000) {
           cnt = 0;
-          uint64_t us = duration.timeus();
+          //uint64_t us = duration.timeus();
           //rep++;
           //total += us*0.000001;
           //avg = total/rep;
