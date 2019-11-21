@@ -18,7 +18,6 @@
 #include <asio.hpp>
 #include <common/Detector.h>
 #include <common/Producer.h>
-#include <condition_variable>
 #include <cstdint>
 #include <mutex>
 
@@ -98,8 +97,5 @@ protected:
   std::mutex ProducerMutex;
   std::mutex DelayLineProducerMutex;
 
-  bool TimeConfigDone{false};
-  std::mutex ConditionVariableMutex;
-  std::condition_variable TimeOffsetConditionVariable;
   OffsetTime TimestampOffset{OffsetTime::Offset::NONE};
 };

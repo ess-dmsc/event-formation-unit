@@ -169,11 +169,6 @@ void AdcReadoutBase::inputThread() {
       TimestampOffset = OffsetTime(ReadoutSettings.TimeOffsetSetting,
                                    std::chrono::system_clock::now(),
                                    Config.BaseTime.getTimeStampNS());
-      TimeConfigDone = true;
-      {
-        std::unique_lock<std::mutex> Guard(ConditionVariableMutex);
-        TimeOffsetConditionVariable.notify_all();
-      }
       LOG(INIT, Sev::Info, "Config packet received, starting data processing.");
       SetUpInputForProcessing();
     } catch (ParserException &E) {
@@ -194,19 +189,6 @@ void AdcReadoutBase::processingThread(
 
   std::vector<std::unique_ptr<AdcDataProcessor>> Processors;
 
-  using std::chrono_literals::operator""ms;
-  while (not TimeConfigDone) {
-    std::unique_lock<std::mutex> Guard(ConditionVariableMutex);
-    TimeOffsetConditionVariable.wait_for(Guard, 200ms);
-    if (not Detector::runThreads) {
-      LOG(INIT, Sev::Debug,
-          "Early exit in AdcReadoutBase::processingThread(). Time config was "
-          "never completed.");
-      return;
-    }
-  }
-  LOG(INIT, Sev::Info,
-      "Timing config completed. Lazily starting pulse processing.");
   auto UsedOffset = TimestampOffset;
 
   if (ReadoutSettings.PeakDetection) {
