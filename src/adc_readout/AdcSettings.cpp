@@ -13,7 +13,7 @@ using PosType = AdcSettings::PositionSensingType;
 using ChRole = AdcSettings::ChannelRole;
 
 auto stringToTime(std::string const &TimeString) {
-  using std::string_literals::operator""s;
+  using namespace std::string_literals;
   std::regex DateTimeRegex{
       R"rr(^(\d{4})-(\d{2})-(\d{2})t(\d{2}):(\d{2}):(\d{2})z$)rr"};
   std::smatch Match;
