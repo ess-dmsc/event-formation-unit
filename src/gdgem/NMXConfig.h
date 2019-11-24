@@ -22,16 +22,15 @@ struct ClustererConfig {
 };
 
 struct EventFilter {
-
-  bool enforce_lower_uncertainty_limit{false};
-  int16_t lower_uncertainty_limit{6};
-  size_t lower_uncertainty_dropped{0};
-
   bool enforce_minimum_hits{false};
   uint32_t minimum_hits{6};
+  float plane_0_vs_1_ratio_max{10};
+  float plane_0_vs_1_ratio_min{0.1};
+  bool enforce_charge_ratio{false};
   size_t minimum_hits_dropped{0};
+  size_t charge_ratio_dropped{0};
 
-  bool valid(Event &event, const ReducedEvent& utpc);
+  bool valid(Event &event);
 };
 
 struct NMXConfig {
@@ -49,6 +48,7 @@ struct NMXConfig {
 
   uint16_t adc_threshold{0};
 
+  bool enable_data_processing {true};
   bool perform_clustering {true};
   bool send_raw_hits {false};
 

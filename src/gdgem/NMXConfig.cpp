@@ -17,17 +17,19 @@
 namespace Gem {
 
 /// \todo bug? uncertainty takes precedence if both enforce options are true
-bool EventFilter::valid(Event &event, const ReducedEvent& utpc) {
-  if (enforce_lower_uncertainty_limit &&
-      !utpcAnalyzer::meets_lower_criterion(utpc.x, utpc.y, lower_uncertainty_limit)) {
-    lower_uncertainty_dropped++;
-    return false;
-  }
+bool EventFilter::valid(Event &event) {
   if (enforce_minimum_hits &&
       ((event.ClusterA.hit_count() < minimum_hits) ||
           (event.ClusterB.hit_count() < minimum_hits))) {
     minimum_hits_dropped++;
     return false;
+  }
+  if (enforce_charge_ratio) {
+    float ratio = event.ClusterA.weight_sum()/event.ClusterB.weight_sum();
+    if(ratio < plane_0_vs_1_ratio_min || ratio > plane_0_vs_1_ratio_max) {
+      charge_ratio_dropped++;
+      return false;
+    }
   }
   return true;
 }
@@ -105,7 +107,9 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   perform_clustering = root["perform_clustering"].get<bool>();
 
   send_raw_hits = root["send_raw_hits"].get<bool>();
-
+  if(root.count("enable_data_processing")) {
+      enable_data_processing = root["enable_data_processing"].get<bool>();
+  }
   if (perform_clustering) {
    if(root.count("time_algorithm")) {
       time_algorithm = root["time_algorithm"].get<std::string>();
@@ -148,18 +152,24 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
       geometry.nz(1);
       geometry.np(1);
     }
-    
-    auto f = root["filters"];
-    filter.enforce_lower_uncertainty_limit =
-            f["enforce_lower_uncertainty_limit"].get<bool>();
-    filter.lower_uncertainty_limit = f["lower_uncertainty_limit"].get<unsigned int>();
+  }  
+  auto f = root["filters"];
+  filter.enforce_minimum_hits = false;
+  if(root.count("enforce_minimum_hits")) {
     filter.enforce_minimum_hits = f["enforce_minimum_hits"].get<bool>();
     filter.minimum_hits = f["minimum_hits"].get<unsigned int>();
-
-    track_sample_minhits = root["track_sample_minhits"].get<unsigned int>();
-    cluster_adc_downshift = root["cluster_adc_downshift"].get<unsigned int>();
-    send_tracks = root["send_tracks"].get<bool>();
   }
+  filter.enforce_charge_ratio = false;
+  if(root.count("enforce_charge_ratio")) {
+    filter.enforce_charge_ratio = f["enforce_charge_ratio"].get<bool>();
+    filter.plane_0_vs_1_ratio_max = f["plane_0_vs_1_ratio_max"].get<float>();
+    filter.plane_0_vs_1_ratio_min = f["plane_0_vs_1_ratio_min"].get<float>();
+  }
+  
+  track_sample_minhits = root["track_sample_minhits"].get<unsigned int>();
+  cluster_adc_downshift = root["cluster_adc_downshift"].get<unsigned int>();
+  send_tracks = root["send_tracks"].get<bool>();
+  
 }
 
 std::string NMXConfig::debug() const {
@@ -219,12 +229,6 @@ std::string NMXConfig::debug() const {
       ret += analyzer_->debug("  ");
 
     ret += "  Filters:\n";
-    ret += fmt::format("    enforce_lower_uncertainty_limit = {}\n",
-        (filter.enforce_lower_uncertainty_limit ? "YES" : "no"));
-    if (filter.enforce_lower_uncertainty_limit) {
-      ret += fmt::format("    lower_uncertainty_limit = {}\n",
-          filter.lower_uncertainty_limit);
-    }
     ret += fmt::format("    enforce_minimum_hits = {}\n",
         (filter.enforce_minimum_hits ? "YES" : "no"));
     if (filter.enforce_minimum_hits) {

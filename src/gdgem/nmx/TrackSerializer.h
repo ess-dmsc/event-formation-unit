@@ -19,7 +19,7 @@ namespace Gem {
 class TrackSerializer {
 public:
   /// \todo document
-  TrackSerializer(size_t maxarraylength, double target_res, std::string source_name);
+  TrackSerializer(size_t maxarraylength, std::string source_name);
 
   void set_callback(ProducerCallback cb);
 
@@ -33,8 +33,7 @@ public:
 private:
   size_t maxlen{0};
   flatbuffers::FlatBufferBuilder builder;
-  double target_resolution_{1};
-
+ 
   std::string SourceName;
 
   ProducerCallback producer_callback;

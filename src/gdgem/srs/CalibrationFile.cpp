@@ -23,6 +23,7 @@ using json = nlohmann::json;
 
 namespace Gem {
 
+
 /// \brief load calibration from file
 CalibrationFile::CalibrationFile(std::string jsonfile) : CalibrationFile() {
 

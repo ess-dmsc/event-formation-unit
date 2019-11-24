@@ -23,6 +23,39 @@ TEST_F(EventAnalyzerTest, AnalyzeInvalid) {
 }
 
 TEST_F(EventAnalyzerTest, AnalyzeAverage) {
+//Explanation of algorithms
+//
+//1. center-of-mass
+//- position: 
+//  calculation using the position and the adc values as weight
+//- time:
+//  calculation using the position and the adc values as weight
+//
+//2. charge2 (center-of-mass with squared charge)
+//- position: 
+//  calculation using the position and the square of the adc values as weight
+//- time:
+//  calculation using the position and the adc values as weight
+//
+//3. utpc
+//-position:
+//  strip with latest time, in case of several strips with the same time, 
+//  take the outermost strip. If two strips have the same distance from
+//  the track start/end, take the one with the highest charge. If the charge
+//  is the same, take the smallest strip no.
+//  Example strips (1,2,3,4,5), times (1,4,4,3,2), largest time in strips 2,3.
+//  strip 2 is closer to the track start than strip 2.
+//-time:
+//  latest time
+//
+//4. utpc_weighted
+//-position: as in 3. utpc, determine the strip with the latest time. Depending
+//  on its position in the track, the strip has one or two neighbours. Calculate
+//  the position with the charge2 algorithm (center-of-mass with charge squared
+//  as weights) from these 2-3 strips
+//-time: 
+//  lastest time  
+
   cluster.clear();
   Hit hit;
   hit.coordinate = 0;
@@ -42,7 +75,7 @@ TEST_F(EventAnalyzerTest, AnalyzeAverage) {
 
   result = EventAnalyzer("utpc_weighted").analyze(cluster);
   EXPECT_EQ(result.center, 0.8);
-  EXPECT_EQ(result.time, 0);  
+  EXPECT_EQ(result.time, 2);  
 
   cluster.clear();
   hit.time = 1;
@@ -80,18 +113,16 @@ TEST_F(EventAnalyzerTest, AnalyzeAverage) {
   EXPECT_EQ(result.time,3);
     
   result = EventAnalyzer("charge2").analyze(cluster);
-  EXPECT_GT(result.center,2.74);
-  EXPECT_LT(result.center,2.75);
+  ASSERT_NEAR(result.center, 2.74, 0.01);
   EXPECT_EQ(result.time, 3);
   
   result = EventAnalyzer("utpc").analyze(cluster);
-  EXPECT_EQ(result.center, 5);
+  EXPECT_EQ(result.center, 7);
   EXPECT_EQ(result.time, 5);
 
   result = EventAnalyzer("utpc_weighted").analyze(cluster);
-  EXPECT_GT(result.center, 4.46);
-  EXPECT_LT(result.center, 4.47);
-  EXPECT_EQ(result.time, 4);
+  EXPECT_EQ(result.center, 5.2);
+  EXPECT_EQ(result.time, 5);
 }
 
 

@@ -208,3 +208,4 @@ void DumpFile<T>::push(const std::vector<T>& Hits) {
     }
   }
 }
+

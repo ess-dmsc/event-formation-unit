@@ -16,7 +16,11 @@ namespace Gem {
 class AbstractBuilder {
 public:
   struct ResultStats {
-    uint32_t parser_fc_seq_errors{0}; /// added in ParserVMM3
+    uint32_t parser_frame_seq_errors{0}; /// added in ParserVMM3
+    uint32_t parser_framecounter_overflows{0}; /// added in ParserVMM3
+    uint32_t parser_timestamp_lost_errors{0}; /// added in ParserVMM3
+    uint32_t parser_timestamp_seq_errors{0}; /// added in ParserVMM3
+    uint32_t parser_timestamp_overflows{0}; /// added in ParserVMM3
     uint32_t parser_bad_frames{0};  /// added in ParserVMM3
     uint32_t parser_good_frames{0}; /// added in ParserVMM3
     uint32_t parser_error_bytes{0};

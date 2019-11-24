@@ -13,13 +13,15 @@
 #include <cinttypes>
 #include <string.h>
 #include <common/BitMath.h>
+#include <gdgem/NMXStats.h>
+#include <gdgem/srs/SRSTime.h>
 
-static const int maximumNumberVMM{32};
-static const int maximumNumberFECs{16};
+static const int MaxVMMs{16}; ///Maximum number of VMMs per FEC card
+static const int MaxFECs{16}; ///Maximum number of FECs per EFU
 
 namespace Gem {
 
-class VMM3SRSData {
+class ParserVMM3 {
 public:
   // bytes
   static const int SRSHeaderSize{16};
@@ -27,16 +29,19 @@ public:
   static const int Data1Size{4};
 
   ///< Do NOT rearrange fields, used for casting to data pointer
-  struct SRSHdr {
+  struct SRSHeader {
     uint32_t frameCounter;   /// frame counter packet field
     uint32_t dataId;         /// data type identifier packet field + ID of the FEC card (0-255)
     uint32_t udpTimeStamp;   /// Transmission time for UDP packet
-    uint32_t offsetOverflow; /// offset overflow in last frame (1 bit per VMM)
+    uint32_t offsetOverflow; /// indicates if marker for vmm was sent in last frame
   };
 
   // \todo no need for this struct
   struct VMM3Marker {
-    uint64_t fecTimeStamp;   /// 42 bit
+    uint64_t fecTimeStamp{0};   /// 42 bit
+    uint64_t calcTimeStamp{0};   /// 42 bit
+    uint16_t lastTriggerOffset{0}; 
+    bool hasDataMarker{false};
   };
 
   /// Data common to all hits and markers, or other parser related data
@@ -60,14 +65,15 @@ public:
 
   /// \brief create a data handler for VMM3 SRS data of fixed size Capacity
   /// \param maxelements The maximum number of readout elements
-  VMM3SRSData(int maxelements) : maxHits(maxelements) {
-    markers = new struct VMM3Marker[maximumNumberFECs * maximumNumberVMM];
+  ParserVMM3(int maxelements, NMXStats & stats, SRSTime time_intepreter) : maxHits(maxelements), 
+  stats(stats), srsTime(time_intepreter) {
+    markers = new struct VMM3Marker[MaxFECs * MaxVMMs];
     data = new struct VMM3Data[maxHits];
-    memset(markers, 0, sizeof(struct VMM3Marker) * maximumNumberFECs * maximumNumberVMM);
+    memset(markers, 0, sizeof(struct VMM3Marker) * MaxFECs * MaxVMMs);
   }
 
   /// Delete allocated data, set pointers to nullptr
-  ~VMM3SRSData() {
+  ~ParserVMM3() {
     delete[] data;
     data = nullptr;
     delete[] markers;
@@ -86,28 +92,22 @@ public:
   int parse(uint32_t data1, uint16_t data2, struct VMM3Data *vmd);
 
   /// Holds data common to all readouts in a packet
-  struct SRSHdr srsHeader;
+  struct SRSHeader hdr;
 
   /// holds all readout data in a packet (up to max_elems)
   struct VMM3Data *data{nullptr};
 
   /// See description above
-  struct ParserData parserData;
+  struct ParserData pd;
 
   /// holds time bases for all vmms in a readout
   struct VMM3Marker *markers{nullptr};
 
-  // Stat counters: Results of the data parsing
-  struct {
-    uint32_t readouts{0};        /// number of hits
-    uint32_t markers{0};    ///  number of markers
-    uint32_t errors{0};      /// bytes of invalid data
-    uint32_t rxSeqErrors{0};  /// gaps in frame counter values
-    uint32_t badFrames{0};   /// frames failing parsing
-    uint32_t goodFrames{0};  /// frames passing parsing
-  } stats;
+  int maxHits{0};       /// Maximum capacity of data array
 
-  uint32_t maxHits{0};       /// Maximum capacity of data array
-};
+  NMXStats & stats;
+  SRSTime srsTime;
+
+ };
 
 }

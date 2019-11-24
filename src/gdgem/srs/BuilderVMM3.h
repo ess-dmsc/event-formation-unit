@@ -21,11 +21,13 @@
 
 namespace Gem {
 
+struct NMXStats;
+
 class BuilderVMM3 : public AbstractBuilder {
 public:
-  BuilderVMM3(SRSTime time_intepreter, SRSMappings digital_geometry,
+  BuilderVMM3(SRSTime time_intepreter, SRSMappings  digital_geometry,
               uint16_t adc_threshold, std::string dump_dir,
-              std::shared_ptr<CalibrationFile> calfile);
+              std::shared_ptr<CalibrationFile> calfile, NMXStats & stats, bool enable_data_processing);
 
   ~BuilderVMM3() { XTRACE(INIT, DEB, "BuilderVMM3 destructor called"); }
 
@@ -34,13 +36,14 @@ public:
 
  private:
   std::shared_ptr<CalibrationFile> calfile_;
-  VMM3SRSData parser_;
+  
   SRSTime time_intepreter_;
   SRSMappings digital_geometry_;
-
   uint16_t adc_threshold_ {0};
-
+  NMXStats & stats_;
+  ParserVMM3 parser_;
   std::shared_ptr<ReadoutFile> readout_file_;
+  bool data_processing_ {true};
 
   // preallocated and reused
   Readout readout;

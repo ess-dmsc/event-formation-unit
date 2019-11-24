@@ -19,6 +19,7 @@ set(pipeline_common_source
 set(pipeline_common_inc
   GdGemBase.h
   NMXConfig.h
+  NMXStats.h
   nmx/Readout.h
   nmx/TrackSerializer.h
   nmx/AbstractBuilder.h

@@ -18,10 +18,13 @@ create_test_executable(SRSTimeTest)
 set(ParserVMM3Test_SRC
   ParserVMM3Test.cpp
   ParserVMM3.cpp
+  SRSTime.cpp
   )
+  
 set(ParserVMM3Test_INC
   ParserVMM3TestData.h
   ParserVMM3.h
+  SRSTime.h
   )
 create_test_executable(ParserVMM3Test)
 

@@ -105,9 +105,7 @@ public:
 
  /// \returns utpc coordinate, optionally weighted with charge
   double coord_utpc(bool weighted) const;
-  /// \returns utpc time, optionally weighted with charge 
-  double time_utpc(bool weighted) const;
-  
+    
   /// \brief calculates the overlapping time span of two clusters
   /// \param other cluster to be compared
   /// \returns overlapping time span inclusive of end points
@@ -144,10 +142,7 @@ private:
   double weight2_sum_{0.0};
   double coord_mass2_{0.0}; ///< sum of coord*weight*weight
   double time_mass2_{0.0};  ///< sum of time*weight*weight
-
-  double coord_utpc_{0.0}; ///< sum of coord for latest time
-  double time_utpc_{0.0}; ///< sum of time for latest time
   
-  int highest_time_idx = 0;
-
+  int utpc_idx_min_{0};
+  int utpc_idx_max_{0};
 };
