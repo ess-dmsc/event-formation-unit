@@ -138,20 +138,6 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
       ->group("Sampling Options")
       ->default_str("delayline_detector");
   Parser
-      .add_option(
-          "--alt_detector_interface", ReadoutSettings.AltDetectorInterface,
-          "The interface (actualy IP address) to which the alternative (other) "
-          "ADC readout box is connected. Ignored if \"--alt_detector_port=0\".")
-      ->group("Delay Line Options")
-      ->default_str("0.0.0.0");
-  Parser
-      .add_option("--alt_detector_port", ReadoutSettings.AltDetectorPort,
-                  "The UDP port to which the second (alternative) ADC readout "
-                  "box sends its data. Disables the second ADC readout box if "
-                  "set to 0.")
-      ->group("Delay Line Options")
-      ->default_str("0");
-  Parser
       .add_option("--xaxis_offset", ReadoutSettings.XAxisCalibOffset,
                   "The offset of the x-axis postion value.")
       ->group("Delay Line Options")
@@ -239,31 +225,6 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
       .add_option("--adc1_ch4_role", ReadoutSettings.ADC1Channel4,
-                  "Set the role of an input-channel.")
-      ->group("Delay Line Options")
-      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
-      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
-
-  Parser
-      .add_option("--adc2_ch1_role", ReadoutSettings.ADC2Channel1,
-                  "Set the role of an input-channel.")
-      ->group("Delay Line Options")
-      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
-      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
-  Parser
-      .add_option("--adc2_ch2_role", ReadoutSettings.ADC2Channel2,
-                  "Set the role of an input-channel.")
-      ->group("Delay Line Options")
-      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
-      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
-  Parser
-      .add_option("--adc2_ch3_role", ReadoutSettings.ADC2Channel3,
-                  "Set the role of an input-channel.")
-      ->group("Delay Line Options")
-      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
-      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
-  Parser
-      .add_option("--adc2_ch4_role", ReadoutSettings.ADC2Channel4,
                   "Set the role of an input-channel.")
       ->group("Delay Line Options")
       ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))

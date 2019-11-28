@@ -25,8 +25,6 @@ struct AdcSettings {
   std::string DelayLineKafkaTopic;
   std::string TimeStampLocation{"Middle"};
   std::string Name;
-  std::string AltDetectorInterface{"0.0.0.0"};
-  std::uint16_t AltDetectorPort{0};
 
   double Threshold{0.1};
 
@@ -61,11 +59,6 @@ struct AdcSettings {
   ChannelRole ADC1Channel2{ChannelRole::NONE};
   ChannelRole ADC1Channel3{ChannelRole::NONE};
   ChannelRole ADC1Channel4{ChannelRole::NONE};
-
-  ChannelRole ADC2Channel1{ChannelRole::NONE};
-  ChannelRole ADC2Channel2{ChannelRole::NONE};
-  ChannelRole ADC2Channel3{ChannelRole::NONE};
-  ChannelRole ADC2Channel4{ChannelRole::NONE};
 };
 
 void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings);

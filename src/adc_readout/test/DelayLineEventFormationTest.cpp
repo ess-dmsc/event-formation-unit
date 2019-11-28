@@ -120,12 +120,8 @@ TEST_F(FormationOfEventsInit, ChannelInitAllChannels1) {
   DefaultSettings.ADC1Channel2 = ChRole::AMPLITUDE_X_AXIS_2;
   DefaultSettings.ADC1Channel3 = ChRole::AMPLITUDE_Y_AXIS_1;
   DefaultSettings.ADC1Channel4 = ChRole::AMPLITUDE_Y_AXIS_2;
-  DefaultSettings.ADC2Channel1 = ChRole::AMPLITUDE_X_AXIS_1;
-  DefaultSettings.ADC2Channel2 = ChRole::AMPLITUDE_X_AXIS_2;
-  DefaultSettings.ADC2Channel3 = ChRole::AMPLITUDE_Y_AXIS_1;
-  DefaultSettings.ADC2Channel4 = ChRole::AMPLITUDE_Y_AXIS_2;
   DelayLineEventFormationStandIn Tester(DefaultSettings);
-  EXPECT_EQ(Tester.PulseHandlerMap.size(), 8u);
+  EXPECT_EQ(Tester.PulseHandlerMap.size(), 4u);
 }
 
 TEST_F(FormationOfEventsInit, ChannelInitAllChannels2) {
@@ -137,12 +133,8 @@ TEST_F(FormationOfEventsInit, ChannelInitAllChannels2) {
   DefaultSettings.ADC1Channel2 = ChRole::AMPLITUDE_X_AXIS_2;
   DefaultSettings.ADC1Channel3 = ChRole::AMPLITUDE_X_AXIS_1;
   DefaultSettings.ADC1Channel4 = ChRole::AMPLITUDE_X_AXIS_2;
-  DefaultSettings.ADC2Channel1 = ChRole::AMPLITUDE_X_AXIS_1;
-  DefaultSettings.ADC2Channel2 = ChRole::AMPLITUDE_X_AXIS_2;
-  DefaultSettings.ADC2Channel3 = ChRole::REFERENCE_TIME;
-  DefaultSettings.ADC2Channel4 = ChRole::REFERENCE_TIME;
   DelayLineEventFormationStandIn Tester(DefaultSettings);
-  EXPECT_EQ(Tester.PulseHandlerMap.size(), 10u);
+  EXPECT_EQ(Tester.PulseHandlerMap.size(), 4u);
 }
 
 TEST_F(FormationOfEventsInit, ChannelInitAllChannels3) {
@@ -154,12 +146,8 @@ TEST_F(FormationOfEventsInit, ChannelInitAllChannels3) {
   DefaultSettings.ADC1Channel2 = ChRole::TIME_X_AXIS_2;
   DefaultSettings.ADC1Channel3 = ChRole::TIME_Y_AXIS_1;
   DefaultSettings.ADC1Channel4 = ChRole::TIME_Y_AXIS_2;
-  DefaultSettings.ADC2Channel1 = ChRole::TIME_X_AXIS_1;
-  DefaultSettings.ADC2Channel2 = ChRole::TIME_X_AXIS_2;
-  DefaultSettings.ADC2Channel3 = ChRole::TIME_Y_AXIS_1;
-  DefaultSettings.ADC2Channel4 = ChRole::TIME_Y_AXIS_2;
   DelayLineEventFormationStandIn Tester(DefaultSettings);
-  EXPECT_EQ(Tester.PulseHandlerMap.size(), 8u);
+  EXPECT_EQ(Tester.PulseHandlerMap.size(), 4u);
 }
 
 TEST_F(FormationOfEventsInit, ChannelInitAllChannelsFailure1) {
@@ -171,10 +159,6 @@ TEST_F(FormationOfEventsInit, ChannelInitAllChannelsFailure1) {
   DefaultSettings.ADC1Channel2 = ChRole::TIME_X_AXIS_2;
   DefaultSettings.ADC1Channel3 = ChRole::TIME_Y_AXIS_1;
   DefaultSettings.ADC1Channel4 = ChRole::TIME_Y_AXIS_2;
-  DefaultSettings.ADC2Channel1 = ChRole::TIME_X_AXIS_1;
-  DefaultSettings.ADC2Channel2 = ChRole::TIME_X_AXIS_2;
-  DefaultSettings.ADC2Channel3 = ChRole::TIME_Y_AXIS_1;
-  DefaultSettings.ADC2Channel4 = ChRole::TIME_Y_AXIS_2;
   DelayLineEventFormationStandIn Tester(DefaultSettings);
   EXPECT_TRUE(Tester.PulseHandlerMap.empty());
 }
@@ -188,10 +172,6 @@ TEST_F(FormationOfEventsInit, ChannelInitAllChannelsFailure2) {
   DefaultSettings.ADC1Channel2 = ChRole::AMPLITUDE_X_AXIS_2;
   DefaultSettings.ADC1Channel3 = ChRole::AMPLITUDE_Y_AXIS_1;
   DefaultSettings.ADC1Channel4 = ChRole::AMPLITUDE_Y_AXIS_2;
-  DefaultSettings.ADC2Channel1 = ChRole::AMPLITUDE_X_AXIS_1;
-  DefaultSettings.ADC2Channel2 = ChRole::AMPLITUDE_X_AXIS_2;
-  DefaultSettings.ADC2Channel3 = ChRole::AMPLITUDE_Y_AXIS_1;
-  DefaultSettings.ADC2Channel4 = ChRole::AMPLITUDE_Y_AXIS_2;
   DelayLineEventFormationStandIn Tester(DefaultSettings);
   EXPECT_TRUE(Tester.PulseHandlerMap.empty());
 }
@@ -205,10 +185,6 @@ TEST_F(FormationOfEventsInit, ChannelInitAllChannelsFailure3) {
   DefaultSettings.ADC1Channel2 = ChRole::REFERENCE_TIME;
   DefaultSettings.ADC1Channel3 = ChRole::REFERENCE_TIME;
   DefaultSettings.ADC1Channel4 = ChRole::REFERENCE_TIME;
-  DefaultSettings.ADC2Channel1 = ChRole::REFERENCE_TIME;
-  DefaultSettings.ADC2Channel2 = ChRole::REFERENCE_TIME;
-  DefaultSettings.ADC2Channel3 = ChRole::REFERENCE_TIME;
-  DefaultSettings.ADC2Channel4 = ChRole::REFERENCE_TIME;
   DelayLineEventFormationStandIn Tester(DefaultSettings);
   EXPECT_TRUE(Tester.PulseHandlerMap.empty());
 }
@@ -222,12 +198,8 @@ TEST_F(FormationOfEventsInit, ChannelInitAllChannels4) {
   DefaultSettings.ADC1Channel2 = ChRole::REFERENCE_TIME;
   DefaultSettings.ADC1Channel3 = ChRole::REFERENCE_TIME;
   DefaultSettings.ADC1Channel4 = ChRole::REFERENCE_TIME;
-  DefaultSettings.ADC2Channel1 = ChRole::REFERENCE_TIME;
-  DefaultSettings.ADC2Channel2 = ChRole::REFERENCE_TIME;
-  DefaultSettings.ADC2Channel3 = ChRole::REFERENCE_TIME;
-  DefaultSettings.ADC2Channel4 = ChRole::REFERENCE_TIME;
   DelayLineEventFormationStandIn Tester(DefaultSettings);
-  EXPECT_EQ(Tester.PulseHandlerMap.size(), 8u);
+  EXPECT_EQ(Tester.PulseHandlerMap.size(), 4u);
 }
 
 using trompeloeil::_;

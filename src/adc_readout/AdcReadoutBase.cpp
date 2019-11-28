@@ -32,7 +32,6 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
   Stats.create("parser.packets.data", AdcStats.parser_packets_data);
   Stats.create("processing.packets.lost", AdcStats.processing_packets_lost);
   Stats.create("current_ts", AdcStats.current_ts_sec);
-  Stats.create("current_ts_alt", AdcStats.current_ts_alt_sec);
   AdcStats.processing_packets_lost = -1; // To compensate for the first error.
 }
 
@@ -128,7 +127,6 @@ void AdcReadoutBase::packetFunction(InData const &Packet,
 
 void AdcReadoutBase::inputThread() {
   std::unique_ptr<UDPClient> Receiver1;
-  std::unique_ptr<UDPClient> Receiver2;
 
   std::function<SamplingRun *(ChannelID)> DataModuleProducer(
       [this](auto Identifier) { return this->GetDataModule(Identifier); });
@@ -143,25 +141,8 @@ void AdcReadoutBase::inputThread() {
     this->packetFunction(Packet, Parser1);
   };
 
-  std::function<bool(SamplingRun *)> QueingFunction2([this](SamplingRun *Data) {
-    this->AdcStats.current_ts_alt_sec = Data->StartTime.getSeconds();
-    return this->QueueUpDataModule(Data);
-  });
-
-  PacketParser Parser2(QueingFunction2, DataModuleProducer, 1);
-
-  auto PacketHandler2 = [&Parser2, this](auto Packet) {
-    this->packetFunction(Packet, Parser2);
-  };
-
   auto SetUpInputForProcessing = [&]() {
     Receiver1->setPacketHandler(PacketHandler1);
-    if (not ReadoutSettings.AltDetectorInterface.empty() and
-        ReadoutSettings.AltDetectorPort != 0) {
-      Receiver2 = std::make_unique<UDPClient>(
-          Service, ReadoutSettings.AltDetectorInterface,
-          ReadoutSettings.AltDetectorPort, PacketHandler2);
-    }
   };
   auto GetPacketsForConfig = [&](auto Packet) {
     try {

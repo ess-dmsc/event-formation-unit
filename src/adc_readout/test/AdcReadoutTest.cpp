@@ -43,8 +43,6 @@ public:
   void SetUp() override {
     Settings.DetectorAddress = "0.0.0.0";
     Settings.DetectorPort = GetPortNumber();
-    ReadoutSettings.AltDetectorInterface = "0.0.0.0";
-    ReadoutSettings.AltDetectorPort = GetPortNumber();
   }
   BaseSettings Settings;
   AdcSettings ReadoutSettings;
@@ -123,20 +121,17 @@ TEST_F(AdcReadoutTest, DISABLED_LazyThreadLaunching) {
   Readout.stopThreads();
 }
 
-TEST_F(AdcReadoutTest, DISABLED_DoubleReceiveTest) {
+TEST_F(AdcReadoutTest, DISABLED_ReceiveTest) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   LoadPacketFile("test_packet_1.dat");
   TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort,
                         BufferPtr.data(), PacketSize);
-  TestUDPServer Server2(GetPortNumber(), ReadoutSettings.AltDetectorPort,
-                        BufferPtr.data(), PacketSize);
   std::this_thread::sleep_for(SleepTime);
   Server1.startPacketTransmission(1, 100);
-  Server2.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   EXPECT_EQ(Readout.Threads.size(), 3u);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_total, 2);
+  EXPECT_EQ(Readout.AdcStats.parser_packets_total, 1);
   Readout.stopThreads();
 }
 

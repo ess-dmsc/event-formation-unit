@@ -126,11 +126,6 @@ DelayLineEventFormation::DelayLineEventFormation(
   DoChannelRoleMapping({0, 1}, ReadoutSettings.ADC1Channel2);
   DoChannelRoleMapping({0, 2}, ReadoutSettings.ADC1Channel3);
   DoChannelRoleMapping({0, 3}, ReadoutSettings.ADC1Channel4);
-
-  DoChannelRoleMapping({1, 0}, ReadoutSettings.ADC2Channel1);
-  DoChannelRoleMapping({1, 1}, ReadoutSettings.ADC2Channel2);
-  DoChannelRoleMapping({1, 2}, ReadoutSettings.ADC2Channel3);
-  DoChannelRoleMapping({1, 3}, ReadoutSettings.ADC2Channel4);
 }
 
 void DelayLineEventFormation::addPulse(const PulseParameters &NewPulse) {
