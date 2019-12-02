@@ -3,8 +3,7 @@
   "Detector": "LoKI4x8",
 
   "PanelConfig" : [
-    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 },
-    { "Ring" : 1, "Vertical" :  false, "TubesZ" : 4, "TubesN" : 8, "Offset" : 114688 }
+    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
   ]
 
 }

@@ -31,7 +31,7 @@ TEST_F(ConfigTest, NotJson) {
 }
 
 TEST_F(ConfigTest, InvalidJson) {
-  ASSERT_THROW(config = Config("deleteme_notjson.json"), std::runtime_error);
+  ASSERT_ANY_THROW(config = Config("deleteme_notjson.json"));
 }
 
 

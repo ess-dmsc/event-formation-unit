@@ -8,10 +8,7 @@
 
 #include <common/Log.h>
 #include <loki/geometry/Config.h>
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpedantic"
-#include <nlohmann/json.hpp>
-#pragma GCC diagnostic pop
+#include <common/JsonFile.h>
 
 namespace Loki {
 
@@ -19,27 +16,9 @@ namespace Loki {
 Config::Config() {}
 
 Config::Config(std::string ConfigFile) {
-    nlohmann::json root;
-
-    if (ConfigFile.empty()) {
-      LOG(INIT, Sev::Error, "JSON config - no config file specified.");
-      throw std::runtime_error("No config file specified.");
-    }
-
-    LOG(INIT, Sev::Info, "JSON config - loading configuration from file {}", ConfigFile);
-    std::ifstream t(ConfigFile);
-    std::string jsonstring((std::istreambuf_iterator<char>(t)),
-                           std::istreambuf_iterator<char>());
-
-    if (!t.good()) {
-      LOG(INIT, Sev::Error, "Invalid Json file: {}", ConfigFile);
-      throw std::runtime_error("LoKI config file error - requested file unavailable.");
-    }
-    /// \todo Above is copied verbatim from multiblade and should be refactored
+    nlohmann::json root = from_json_file(ConfigFile);
 
     try {
-      root = nlohmann::json::parse(jsonstring);
-
       auto Name = root["Detector"].get<std::string>();
 
       auto PanelConfig = root["PanelConfig"];
@@ -51,6 +30,8 @@ Config::Config(std::string ConfigFile) {
         auto TZ = Mapping["TubesZ"].get<unsigned int>();
         auto TN = Mapping["TubesN"].get<unsigned int>();
         auto Offset = Mapping["Offset"].get<unsigned int>();
+
+        Pixels += TZ * TN * 7 * 512; ///< \todo not hardcode - should parametrise
 
         LOG(INIT, Sev::Info, "JSON config - Detector {}, Ring {}, Vertical {}, TubesZ {}, TubesN {}, Offset {}",
           Name, Ring, Vertical, TZ, TN, Offset);

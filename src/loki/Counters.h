@@ -38,6 +38,7 @@ struct Counters {
   int64_t RxIdle;
   int64_t Events;
   int64_t EventsUdder;
+  int64_t CalibrationErrors;
   int64_t MappingErrors;
   int64_t GeometryErrors;
   int64_t TxBytes;

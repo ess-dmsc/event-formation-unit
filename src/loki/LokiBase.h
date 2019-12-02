@@ -14,11 +14,13 @@
 #include <common/SPSCFifo.h>
 #include <loki/Counters.h>
 #include <loki/geometry/Config.h>
+#include <loki/geometry/Calibration.h>
 
 namespace Loki {
 
 struct LokiSettings {
   std::string ConfigFile{""}; ///< panel mappings
+  std::string CalibFile{""}; ///< calibration file
   std::string FilePrefix{""}; ///< HDF5 file dumping
   bool DetectorImage2D{false}; ///< generate pixels for 2D detector (else 3D)
 };
@@ -56,7 +58,9 @@ protected:
   LokiSettings LokiModuleSettings;
 
   // From geometry/Config.h
-  Config LokiMappings;
+  Config LokiConfiguration;
+
+  Calibration LokiCalibration;
 };
 
 }

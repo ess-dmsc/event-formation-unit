@@ -26,7 +26,11 @@ public:
 
   Config(std::string ConfigFile);
 
+  uint32_t getMaxPixel() { return Pixels; }
+
   std::vector<PanelGeometry> Panels;
   uint8_t NPanels{0}; // Loki panels, not logical geometry panels
+private:
+  uint32_t Pixels{0};
 };
 } // namespace

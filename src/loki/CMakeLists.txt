@@ -8,12 +8,14 @@ set(loki_common_inc
   Counters.h
   geometry/PanelGeometry.h
   geometry/Config.h
+  geometry/Calibration.h
   readout/DataParser.h
   ../readout/ReadoutParser.h
   )
 set(loki_common_src
   LokiBase.cpp
   geometry/Config.cpp
+  geometry/Calibration.cpp
   readout/DataParser.cpp
   ../readout/ReadoutParser.cpp
   )

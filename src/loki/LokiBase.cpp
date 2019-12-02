@@ -12,6 +12,7 @@
 #include <common/EFUArgs.h>
 #include <common/EV42Serializer.h>
 #include <common/Producer.h>
+#include <common/Log.h>
 #include <common/monitor/HistogramSerializer.h>
 #include <common/RingBuffer.h>
 #include <common/Trace.h>
@@ -29,7 +30,6 @@
 #include <loki/readout/Readout.h>
 #include <readout/ESSTime.h>
 #include <loki/geometry/TubeAmps.h>
-#include <loki/geometry/Config.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
@@ -69,6 +69,7 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
 
   Stats.create("events.count", Counters.Events);
   Stats.create("events.udder", Counters.EventsUdder);
+  Stats.create("events.calib_errors", Counters.CalibrationErrors);
   Stats.create("events.mapping_errors", Counters.MappingErrors);
   Stats.create("events.geometry_errors", Counters.GeometryErrors);
 
@@ -173,7 +174,22 @@ void LokiBase::processingThread() {
   TubeAmps Amp2Pos;
   ESSTime Time;
 
-  LokiMappings = Config(LokiModuleSettings.ConfigFile);
+  LokiConfiguration = Config(LokiModuleSettings.ConfigFile);
+
+  if (LokiModuleSettings.CalibFile.empty()) {
+    uint32_t MaxPixels = LokiConfiguration.getMaxPixel();
+    LokiCalibration.nullCalibration(MaxPixels);
+  } else {
+    LokiCalibration = Calibration(LokiModuleSettings.CalibFile);
+  }
+
+  if (LokiCalibration.getMaxPixel() != LokiConfiguration.getMaxPixel()) {
+      LOG(PROCESS, Sev::Error, "Error: pixel mismatch Config ({}) and Calib ({})",
+        LokiConfiguration.getMaxPixel(), LokiCalibration.getMaxPixel());
+      throw std::runtime_error("Pixel mismatch");
+  }
+
+  uint32_t MaxPixel = LokiCalibration.getMaxPixel();
 
   std::shared_ptr<ReadoutFile> DumpFile;
   if (!LokiModuleSettings.FilePrefix.empty()) {
@@ -248,7 +264,7 @@ void LokiBase::processingThread() {
       for (auto & Section : LokiParser.Result) {
         XTRACE(DATA, DEB, "Ring %u, FEN %u", Section.RingId, Section.FENId);
 
-        if (Section.RingId >= LokiMappings.Panels.size()) {
+        if (Section.RingId >= LokiConfiguration.Panels.size()) {
           Counters.MappingErrors++;
           continue;
         }
@@ -268,13 +284,20 @@ void LokiBase::processingThread() {
           // DataTime += (uint64_t)(Data.TimeLow * NsPerClock);
           // XTRACE(DATA, DEB, "DataTime %" PRIu64 "", DataTime);
 
-          auto Panel = LokiMappings.Panels[Section.RingId];
+          auto Panel = LokiConfiguration.Panels[Section.RingId];
           auto TimeOfFlight =  Time.getTOF(Data.TimeHigh, Data.TimeLow); // TOF in ns
           auto PixelId =  LokiModuleSettings.DetectorImage2D
               ? Panel.getPixel2D(Section.FENId, FPGAId, LocalTube, Straw, YPos)
               : Panel.getPixel3D(Section.FENId, FPGAId, LocalTube, Straw, YPos);
-          XTRACE(EVENT, DEB, "time: %" PRIu64 ", straw %u, ypos %u, pixel: %u",
-                 TimeOfFlight, Straw, YPos, PixelId);
+
+          if (PixelId > MaxPixel) {
+            Counters.CalibrationErrors++;
+            continue;
+          }
+
+          uint32_t MappedPixelId = LokiCalibration.Mapping[PixelId];
+          XTRACE(EVENT, DEB, "time: %" PRIu64 ", straw %u, ypos %u, pixel: %u(mapped %u)",
+                 TimeOfFlight, Straw, YPos, PixelId, MappedPixelId);
 
           if (DumpFile) {
             Readout CurrentReadout;
@@ -296,7 +319,7 @@ void LokiBase::processingThread() {
           if (PixelId == 0) {
             Counters.GeometryErrors++;
           } else {
-            Counters.TxBytes += FlatBuffer.addEvent(PulseTime, PixelId);
+            Counters.TxBytes += FlatBuffer.addEvent(PulseTime, MappedPixelId);
             Counters.Events++;
           }
 
