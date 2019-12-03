@@ -60,7 +60,8 @@ TEST_F(ReadoutTest, ErrorVersion) {
 
 TEST_F(ReadoutTest, OkVersion) {
   unsigned int Errors{0};
-  for (unsigned int Size = 4; Size < OkVersion.size(); Size++) {
+  unsigned int MinSize{4 + PAD_SIZE};
+  for (unsigned int Size = MinSize; Size < OkVersion.size(); Size++) {
     Errors++;
     auto Res = RdOut.validate((char *)&OkVersion[0], Size, DataType);
     ASSERT_EQ(Res, -ReadoutParser::ESIZE);

@@ -9,7 +9,7 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 const unsigned int MaxUdpDataSize{8972};
-const unsigned int MinDataSize{4}; // just cookie and version
+const unsigned int MinDataSize{4 + PAD_SIZE}; // just cookie and version
 
 int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
   std::memset(&Packet, 0, sizeof(Packet));
@@ -26,7 +26,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
     return -ReadoutParser::ESIZE;
   }
 
-  uint32_t CookieVer = *(uint32_t *)Buffer;
+  uint32_t CookieVer = *(uint32_t *)(Buffer + PAD_SIZE);
   // 'E', 'S', 'S', 0x00 - cookie + version 0
   if (CookieVer != 0x00535345) { // 'ESS0' little endian
     Stats.ErrorVersion++;

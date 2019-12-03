@@ -9,8 +9,9 @@
 // Two Data Sections each containing three readouts
 std::vector<uint8_t> UdpPayload
 {
+    EXTRA_PADDING
     0x45, 0x53, 0x53, 0x00, //  'E' 'S' 'S' 0x00
-    0x30, 0x00, 0x9c, 0x00, // 0x009c = 156
+    0x30, 0x00, 0x9c + PAD_SIZE, 0x00, // 0x009c = 156
     0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00,
@@ -90,9 +91,9 @@ TEST_F(CombinedParserTest, DataGen) {
   uint8_t Buffer[BufferSize];
 
   for (unsigned int Sections = 1; Sections < 372; Sections++) {
-    uint16_t Elements = ((BufferSize - 28 - Sections*4)/20/Sections);
+    uint16_t Elements = ((BufferSize - sizeof(ReadoutParser::PacketHeaderV0) - Sections*4)/20/Sections);
     auto Length = lokiReadoutDataGen(Sections, Elements, 1, Buffer, BufferSize);
-    ASSERT_EQ(Length, 28 + Sections *(4 + Elements * 20));
+    ASSERT_EQ(Length, sizeof(ReadoutParser::PacketHeaderV0) + Sections *(4 + Elements * 20));
 
     auto Res = CommonReadout.validate((char *)&Buffer[0], Length, DataType);
     ASSERT_EQ(Res, ReadoutParser::OK);

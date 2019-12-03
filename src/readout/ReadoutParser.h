@@ -11,6 +11,15 @@
 
 #include <cinttypes>
 
+#define READOUT_EXTRA_PADDING
+#ifdef READOUT_EXTRA_PADDING
+  #define PAD_SIZE 2
+  #define EXTRA_PADDING 0x00, 0x00,
+#else
+  #define PAD_SIZE 0
+  #define EXTRA_PADDING
+#endif
+
 class ReadoutParser {
 public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
@@ -21,6 +30,9 @@ public:
 
   // Header common to all ESS readout data
   struct PacketHeaderV0 {
+  #ifdef READOUT_EXTRA_PADDING
+    uint16_t __attribute__((unused)) Padding;
+  #endif
     uint32_t CookieVersion;
     uint8_t TypeSubType;
     uint8_t OutputQueue;
@@ -64,5 +76,5 @@ public:
   } Stats;
 };
 
-static_assert(sizeof(ReadoutParser::PacketHeaderV0) == 28,
+static_assert(sizeof(ReadoutParser::PacketHeaderV0) == (28 + PAD_SIZE),
               "Wrong header size (update assert or check packing)");

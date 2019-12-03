@@ -11,6 +11,7 @@
 #include <../src/adc_readout/test/TestUDPServer.h>
 #include <test/SaveBuffer.h>
 #include <test/TestBase.h>
+#include <readout/ReadoutParser.h>
 
  std::string lokijson = R"(
 {
@@ -55,8 +56,9 @@ TEST_F(LokiBaseTest, Constructor) {
 std::vector<uint8_t> TestPacket{0x00, 0x01, 0x02};
 
 std::vector<uint8_t> TestPacket2{
+    EXTRA_PADDING
     0x45, 0x53, 0x53, 0x00, //  'E' 'S' 'S' 0x00
-    0x30, 0x00, 0x9c, 0x00, // 0x009c = 156
+    0x30, 0x00, 0x9c + PAD_SIZE, 0x00, // 0x009c = 156
     0x11, 0x00, 0x00, 0x00, // Pulse time High (17s)
     0x00, 0x01, 0x00, 0x00, // Pulse time Low (256 clocks)
     0x10, 0x00, 0x00, 0x00,

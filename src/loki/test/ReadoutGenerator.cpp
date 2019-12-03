@@ -12,7 +12,7 @@ using namespace Loki;
 uint16_t lokiReadoutDataGen(uint16_t DataSections, uint16_t DataElements, uint8_t Rings,
      uint8_t * Buffer, uint16_t MaxSize) {
 
-  auto DataSize = 28 + DataSections * (4 + DataElements * 20);
+  auto DataSize = sizeof(ReadoutParser::PacketHeaderV0) + DataSections * (4 + DataElements * 20);
   if (DataSize > MaxSize) {
     printf("Too much data for buffer\n");
     return 0;
@@ -23,12 +23,15 @@ uint16_t lokiReadoutDataGen(uint16_t DataSections, uint16_t DataElements, uint8_
   auto DP = (uint8_t *)Buffer;
   //printf("Buffer pointer %p\n", (void *)Buffer);
   auto Header = (ReadoutParser::PacketHeaderV0 *)DP;
+  #ifdef READOUT_EXTRA_PADDING
+  Header->Padding = 0;
+  #endif
   Header->CookieVersion = 0x00535345;
   Header->TypeSubType = 0x30;
   //Header->OutputQueue = 0x00;
   Header->TotalLength = DataSize;
   uint8_t RingCount{0};
-  DP += 28;
+  DP += sizeof(ReadoutParser::PacketHeaderV0);
   for (auto Section = 0; Section < DataSections; Section++) {
     auto DataHeader = (ReadoutParser::DataHeader *)DP;
     DataHeader->RingId = RingCount % Rings;
