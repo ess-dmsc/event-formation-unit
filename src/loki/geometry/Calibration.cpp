@@ -13,7 +13,7 @@
 namespace Loki {
 
 ///
-Calibration::Calibration() {};
+Calibration::Calibration() {}
 
 Calibration::Calibration(std::string CalibrationFile) {
   nlohmann::json root = from_json_file(CalibrationFile);
