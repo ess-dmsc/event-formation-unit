@@ -31,7 +31,7 @@ public:
   // Header common to all ESS readout data
   struct PacketHeaderV0 {
   #ifdef READOUT_EXTRA_PADDING
-    uint16_t __attribute__((unused)) Padding;
+    uint16_t Padding;
   #endif
     uint32_t CookieVersion;
     uint8_t TypeSubType;
