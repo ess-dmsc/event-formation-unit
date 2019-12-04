@@ -4,9 +4,21 @@
 #include <test/TestBase.h>
 #include <test/SaveBuffer.h>
 
-std::string notjson = R"(
+std::string NotJsonName{"deleteme_notjson.json"};
+std::string NotJsonStr = R"(
 {
   Ceci n’est pas Json
+)";
+
+std::string InvalidConfigName{"deleteme_invalidconfig.json"};
+std::string InvalidConfigStr = R"(
+{
+  "NotDetector": "LoKI4x8",
+
+  "NotPanelConfig" : [
+    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
+  ]
+}
 )";
 
 using namespace Loki;
@@ -26,18 +38,22 @@ TEST_F(ConfigTest, NoConfigFile) {
   ASSERT_THROW(config = Config(""), std::runtime_error);
 }
 
-TEST_F(ConfigTest, NotJson) {
+TEST_F(ConfigTest, JsonFileNotExist) {
   ASSERT_THROW(config = Config("/this_file_doesnt_exist"), std::runtime_error);
 }
 
-TEST_F(ConfigTest, InvalidJson) {
-  ASSERT_ANY_THROW(config = Config("deleteme_notjson.json"));
+TEST_F(ConfigTest, NotJson) {
+  ASSERT_ANY_THROW(config = Config(NotJsonName));
+}
+
+TEST_F(ConfigTest, InvalidConfig) {
+  ASSERT_ANY_THROW(config = Config(InvalidConfigName));
 }
 
 
 int main(int argc, char **argv) {
-  std::string filename{"deleteme_notjson.json"};
-  saveBuffer(filename, (void *)notjson.c_str(), notjson.size());
+  saveBuffer(NotJsonName, (void *)NotJsonStr.c_str(), NotJsonStr.size());
+  saveBuffer(InvalidConfigName, (void *)InvalidConfigStr.c_str(), InvalidConfigStr.size());
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
