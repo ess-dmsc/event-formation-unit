@@ -15,6 +15,16 @@ std::string CalibrationStr = R"(
 }
 )";
 
+std::string InvalidCalibName{"deleteme_invalid_calib.json"};
+std::string InvalidCalibrationStr = R"(
+{
+  "LokiCalibration":
+    {
+      "NoMapping":[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    }
+}
+)";
+
 using namespace Loki;
 
 class CalibrationTest : public TestBase {
@@ -27,6 +37,12 @@ TEST_F(CalibrationTest, Constructor) {
   Calibration calib;
   ASSERT_EQ(calib.Mapping.size(), 0);
   ASSERT_EQ(calib.getMaxPixel(), 0);
+}
+
+TEST_F(CalibrationTest, NullCalibrationWrongSize) {
+  Calibration calib;
+  uint32_t Pixels{1};
+  ASSERT_ANY_THROW(calib.nullCalibration(Pixels));
 }
 
 TEST_F(CalibrationTest, NullCalibration) {
@@ -46,8 +62,13 @@ TEST_F(CalibrationTest, LoadCalib) {
   ASSERT_EQ(calib.getMaxPixel(), 10);
 }
 
+TEST_F(CalibrationTest, LoadInvalidCalib) {
+  ASSERT_ANY_THROW(Calibration calib = Calibration(InvalidCalibName));
+}
+
 int main(int argc, char **argv) {
   saveBuffer(CalibName, (void *)CalibrationStr.c_str(), CalibrationStr.size());
+  saveBuffer(InvalidCalibName, (void *)InvalidCalibrationStr.c_str(), InvalidCalibrationStr.size());
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
