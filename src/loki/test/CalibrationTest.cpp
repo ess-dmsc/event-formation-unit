@@ -25,6 +25,16 @@ std::string InvalidCalibrationStr = R"(
 }
 )";
 
+std::string BadMappingName{"deleteme_invalid_badmapping.json"};
+std::string BadMappingStr = R"(
+{
+  "LokiCalibration":
+    {
+      "NoMapping":[7]
+    }
+}
+)";
+
 using namespace Loki;
 
 class CalibrationTest : public TestBase {
@@ -62,6 +72,10 @@ TEST_F(CalibrationTest, LoadCalib) {
   ASSERT_EQ(calib.getMaxPixel(), 10);
 }
 
+TEST_F(CalibrationTest, LoadCalibBadMapping) {
+  ASSERT_ANY_THROW(Calibration calib = Calibration(BadMappingName));
+}
+
 TEST_F(CalibrationTest, LoadInvalidCalib) {
   ASSERT_ANY_THROW(Calibration calib = Calibration(InvalidCalibName));
 }
@@ -69,6 +83,7 @@ TEST_F(CalibrationTest, LoadInvalidCalib) {
 int main(int argc, char **argv) {
   saveBuffer(CalibName, (void *)CalibrationStr.c_str(), CalibrationStr.size());
   saveBuffer(InvalidCalibName, (void *)InvalidCalibrationStr.c_str(), InvalidCalibrationStr.size());
+  saveBuffer(BadMappingName, (void *)BadMappingStr.c_str(), BadMappingStr.size());
   testing::InitGoogleTest(&argc, argv);
   return RUN_ALL_TESTS();
 }
