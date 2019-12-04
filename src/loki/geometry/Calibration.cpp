@@ -31,6 +31,7 @@ Calibration::Calibration(std::string CalibrationFile) {
     }
 
     if (Mapping.size() <= 1) {
+      LOG(INIT, Sev::Error, "JSON calibration - error: Invalid Calibration file: {}", CalibrationFile);
       throw std::runtime_error("Invalid Mapping array size");
     }
     MaxPixelId = Mapping.size() - 1;

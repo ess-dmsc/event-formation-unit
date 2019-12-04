@@ -30,7 +30,7 @@ std::string BadMappingStr = R"(
 {
   "LokiCalibration":
     {
-      "NoMapping":[7]
+      "Mapping":[7]
     }
 }
 )";
