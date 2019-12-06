@@ -49,6 +49,7 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   // clang-format off
   Stats.create("receive.packets", Counters.RxPackets);
   Stats.create("receive.bytes", Counters.RxBytes);
+  Stats.create("receive.input_idle", Counters.InputIdle);
   Stats.create("receive.dropped", Counters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
@@ -57,6 +58,7 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   Stats.create("readouts.error_size", Counters.ErrorSize);
   Stats.create("readouts.error_version", Counters.ErrorVersion);
   Stats.create("readouts.error_type", Counters.ErrorTypeSubType);
+  Stats.create("readouts.error_output_queue", Counters.ErrorOutputQueue);
   Stats.create("readouts.error_seqno", Counters.ErrorSeqNum);
   // LoKI Readout Data
   Stats.create("readouts.count", Counters.Readouts);
@@ -105,14 +107,19 @@ void LokiBase::inputThread() {
   dataReceiver.printBufferSizes();
   dataReceiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
+  TSCTimer IdleTimer;
   while (runThreads) {
     int readSize;
-    unsigned int rxBufferIndex = EthernetRingbuffer.getDataIndex();
 
-    EthernetRingbuffer.setDataLength(rxBufferIndex, 0);
-    if ((readSize = dataReceiver.receive(EthernetRingbuffer.getDataBuffer(rxBufferIndex),
-                                   EthernetRingbuffer.getMaxBufSize())) > 0) {
-      EthernetRingbuffer.setDataLength(rxBufferIndex, readSize);
+    Counters.InputIdle+= IdleTimer.timetsc();
+
+    unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
+
+    RxRingbuffer.setDataLength(rxBufferIndex, 0);
+
+    if ((readSize = dataReceiver.receive(RxRingbuffer.getDataBuffer(rxBufferIndex),
+                                   RxRingbuffer.getMaxBufSize())) > 0) {
+      RxRingbuffer.setDataLength(rxBufferIndex, readSize);
       XTRACE(INPUT, DEB, "Received an udp packet of length %d bytes", readSize);
       Counters.RxPackets++;
       Counters.RxBytes += readSize;
@@ -120,9 +127,10 @@ void LokiBase::inputThread() {
       if (InputFifo.push(rxBufferIndex) == false) {
         Counters.FifoPushErrors++;
       } else {
-        EthernetRingbuffer.getNextBuffer();
+        RxRingbuffer.getNextBuffer();
       }
     }
+    IdleTimer.now();
   }
   XTRACE(INPUT, ALW, "Stopping input thread.");
   return;
@@ -212,7 +220,7 @@ void LokiBase::processingThread() {
   TSCTimer ProduceTimer;
   while (runThreads) {
     if (InputFifo.pop(DataIndex)) { // There is data in the FIFO - do processing
-      auto DataLen = EthernetRingbuffer.getDataLength(DataIndex);
+      auto DataLen = RxRingbuffer.getDataLength(DataIndex);
       if (DataLen == 0) {
         Counters.FifoSeqErrors++;
         continue;
@@ -220,12 +228,13 @@ void LokiBase::processingThread() {
 
       /// \todo use the Buffer<T> class here and in parser?
       /// \todo avoid copying by passing reference to stats like for gdgem?
-      auto DataPtr = EthernetRingbuffer.getDataBuffer(DataIndex);
+      auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
       auto Res = ESSReadout.validate(DataPtr, DataLen, ReadoutParser::Loki4Amp);
       Counters.ErrorBuffer = ESSReadout.Stats.ErrorBuffer;
       Counters.ErrorSize = ESSReadout.Stats.ErrorSize;
       Counters.ErrorVersion = ESSReadout.Stats.ErrorVersion;
       Counters.ErrorTypeSubType = ESSReadout.Stats.ErrorTypeSubType;
+      Counters.ErrorOutputQueue = ESSReadout.Stats.ErrorOutputQueue;
       Counters.ErrorSeqNum = ESSReadout.Stats.ErrorSeqNum;
 
       if (Res != ReadoutParser::OK) {

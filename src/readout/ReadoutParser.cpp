@@ -11,6 +11,10 @@
 const unsigned int MaxUdpDataSize{8972};
 const unsigned int MinDataSize{4 + PAD_SIZE}; // just cookie and version
 
+ReadoutParser::ReadoutParser() {
+  std::memset(NextSeqNum, 0, sizeof(NextSeqNum));
+}
+
 int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
   std::memset(&Packet, 0, sizeof(Packet));
 
@@ -58,14 +62,21 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
     return -ReadoutParser::EHEADER;
   }
 
-  if (NextSeqNum != Packet.HeaderPtr->SeqNum) {
+  if (Packet.HeaderPtr->OutputQueue >= MaxOutputQueues) {
+    XTRACE(PROCESS, WAR, "Output queue %u exceeds max size %u",
+           Packet.HeaderPtr->OutputQueue, MaxOutputQueues);
+    Stats.ErrorOutputQueue++;
+    return -ReadoutParser::EHEADER;
+  }
+
+  if (NextSeqNum[Packet.HeaderPtr->OutputQueue] != Packet.HeaderPtr->SeqNum) {
     XTRACE(PROCESS, WAR, "Bad sequence number (expected %u, got %u)",
            NextSeqNum, Packet.HeaderPtr->SeqNum);
     Stats.ErrorSeqNum++;
-    NextSeqNum = Packet.HeaderPtr->SeqNum;
+    NextSeqNum[Packet.HeaderPtr->OutputQueue] = Packet.HeaderPtr->SeqNum;
   }
 
-  NextSeqNum++;
+  NextSeqNum[Packet.HeaderPtr->OutputQueue]++;
   Packet.DataPtr = (char *)(Buffer + sizeof(PacketHeaderV0));
   Packet.DataLength = Packet.HeaderPtr->TotalLength - sizeof(PacketHeaderV0);
 

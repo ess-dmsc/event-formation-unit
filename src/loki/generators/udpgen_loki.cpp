@@ -54,10 +54,9 @@ int main(int argc, char *argv[]) {
   uint64_t Packets = 0;
   uint64_t TotalPackets = 0;
   do {
-    uint16_t DataSize = lokiReadoutDataGen(DataSections,DataElements, Settings.NRings, Buffer, BufferSize);
-
-    uint32_t * SeqNum = (uint32_t *)(Buffer + 24);
-    *SeqNum = TotalPackets;
+    uint32_t SeqNum = TotalPackets;
+    uint16_t DataSize = lokiReadoutDataGen(DataSections,DataElements,
+         Settings.NRings, Buffer, BufferSize, SeqNum);
 
     DataSource.send(Buffer, DataSize);
 

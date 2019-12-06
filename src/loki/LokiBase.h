@@ -50,7 +50,7 @@ protected:
   /** Shared between input_thread and processing_thread*/
   CircularFifo<unsigned int, EthernetBufferMaxEntries> InputFifo;
   /// \todo the number 11 is a workaround
-  RingBuffer<EthernetBufferSize> EthernetRingbuffer{EthernetBufferMaxEntries + 11};
+  RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
 
   // From Counters.h
   struct Counters Counters;

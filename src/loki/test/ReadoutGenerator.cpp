@@ -4,13 +4,13 @@
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
-#include <loki/readout/DataParser.h>
+#include <loki/test/ReadoutGenerator.h>
 
 using namespace Loki;
 
 /// in benchmark tests
 uint16_t lokiReadoutDataGen(uint16_t DataSections, uint16_t DataElements, uint8_t Rings,
-     uint8_t * Buffer, uint16_t MaxSize) {
+     uint8_t * Buffer, uint16_t MaxSize, uint32_t SeqNum) {
 
   auto DataSize = sizeof(ReadoutParser::PacketHeaderV0) + DataSections * (4 + DataElements * 20);
   if (DataSize > MaxSize) {
@@ -30,6 +30,7 @@ uint16_t lokiReadoutDataGen(uint16_t DataSections, uint16_t DataElements, uint8_
   Header->TypeSubType = 0x30;
   //Header->OutputQueue = 0x00;
   Header->TotalLength = DataSize;
+  Header->SeqNum = SeqNum;
   uint8_t RingCount{0};
   DP += sizeof(ReadoutParser::PacketHeaderV0);
   for (auto Section = 0; Section < DataSections; Section++) {

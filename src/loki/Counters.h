@@ -16,7 +16,8 @@ struct Counters {
   int64_t RxPackets;
   int64_t RxBytes;
   int64_t FifoPushErrors;
-  int64_t PaddingFor64ByteAlignment[5]; // cppcheck-suppress unusedStructMember
+  int64_t InputIdle;
+  int64_t PaddingFor64ByteAlignment[4]; // cppcheck-suppress unusedStructMember
 
   // Processing Counters - accessed in processing thread
   int64_t FifoSeqErrors;
@@ -26,6 +27,7 @@ struct Counters {
   int64_t ErrorBuffer;
   int64_t ErrorSize;
   int64_t ErrorVersion;
+  int64_t ErrorOutputQueue;
   int64_t ErrorTypeSubType;
   int64_t ErrorSeqNum;
   // LoKI DataParser

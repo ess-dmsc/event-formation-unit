@@ -11,6 +11,8 @@
 
 #include <cinttypes>
 
+const uint8_t MaxOutputQueues{64};
+
 #define READOUT_EXTRA_PADDING
 #ifdef READOUT_EXTRA_PADDING
   #define PAD_SIZE 2
@@ -25,8 +27,7 @@ public:
   enum error { OK = 0, EBUFFER, ESIZE, EHEADER };
   enum DetectorType { Loki4Amp = 0x30 };
 
-  /// \todo sequence numbers should be per output queue, eventually
-  uint64_t NextSeqNum{0};
+  uint64_t NextSeqNum[MaxOutputQueues];
 
   // Header common to all ESS readout data
   struct PacketHeaderV0 {
@@ -59,6 +60,9 @@ public:
     uint16_t DataLength;
   } __attribute__((packed));
 
+
+  ReadoutParser();
+
   /// \brief validate a readout buffer
   /// \param[in] Buffer pointer to data
   /// \param[in] Size length of buffer in bytes
@@ -72,6 +76,7 @@ public:
     int64_t ErrorSize{0};
     int64_t ErrorVersion{0};
     int64_t ErrorTypeSubType{0};
+    int64_t ErrorOutputQueue{0};
     int64_t ErrorSeqNum{0};
   } Stats;
 };
