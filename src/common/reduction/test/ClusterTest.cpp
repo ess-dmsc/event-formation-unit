@@ -28,6 +28,13 @@ TEST_F(ClusterTest, PlaneIdentity) {
   EXPECT_EQ(cluster.plane(), 1);
 }
 
+TEST_F(ClusterTest, PlaneIdentity2) {
+  cluster.insert({0, 0, 0, 1});
+  EXPECT_FALSE(cluster.empty());
+  EXPECT_TRUE(cluster.valid());
+  EXPECT_EQ(cluster.plane(), 1);
+}
+
 TEST_F(ClusterTest, PlaneInvalidated) {
   cluster.insert({0, 0, 0, 1});
   cluster.insert({0, 0, 0, 2});
