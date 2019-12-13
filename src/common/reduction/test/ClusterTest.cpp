@@ -28,13 +28,6 @@ TEST_F(ClusterTest, PlaneIdentity) {
   EXPECT_EQ(cluster.plane(), 1);
 }
 
-TEST_F(ClusterTest, PlaneIdentity2) {
-  cluster.insert({0, 0, 0, 1});
-  EXPECT_FALSE(cluster.empty());
-  EXPECT_TRUE(cluster.valid());
-  EXPECT_EQ(cluster.plane(), 1);
-}
-
 TEST_F(ClusterTest, PlaneInvalidated) {
   cluster.insert({0, 0, 0, 1});
   cluster.insert({0, 0, 0, 2});
@@ -138,6 +131,12 @@ TEST_F(ClusterTest, CoordsMass) {
   cluster.insert({0, 0, 8, 0});
   EXPECT_EQ(cluster.coord_mass(), 20);
   EXPECT_EQ(cluster.coord_center(), 2);
+}
+
+TEST_F(ClusterTest, CoordMass2) {
+  cluster.insert(Hit{0, 2, 3, 0});
+  EXPECT_TRUE(cluster.valid());
+  EXPECT_EQ(cluster.coord_mass2(), 3*3 * 2);
 }
 
 TEST_F(ClusterTest, TimeOverlapNoOverlap) {
