@@ -29,14 +29,17 @@ void Cluster::insert(const Hit &e) {
     // For now it's decided to not discard everything in this case
     // clear();
   }
+  
+  uint64_t weight64 = static_cast<uint64_t>(e.weight);
+  uint64_t coordinate64 = static_cast<uint64_t>(e.coordinate);
 
   hits.push_back(e);
-  weight_sum_ += e.weight;
-  weight2_sum_ += e.weight * e.weight;
-  coord_mass_ += e.weight * e.coordinate;
-  coord_mass2_ += e.weight * e.weight * e.coordinate;
-  time_mass_ += e.weight * e.time;
-  time_mass2_ += e.weight * e.weight * e.time;
+  weight_sum_ += weight64;
+  weight2_sum_ += weight64 * weight64;
+  coord_mass_ += weight64 * coordinate64;
+  coord_mass2_ += weight64 * weight64 * coordinate64;
+  time_mass_ += weight64 * e.time;
+  time_mass2_ += weight64 * weight64 * e.time;
   time_start_ = std::min(time_start_, e.time);
   
   //more than one hit with identical largest time in cluster
