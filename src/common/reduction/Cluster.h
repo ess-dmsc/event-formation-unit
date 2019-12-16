@@ -126,7 +126,7 @@ public:
                         uint8_t downsample_coords = 0) const;
 
 private:
-  // \todo uint8 might not be enough, if detectors have more independent modules/segments
+  /// \todo uint8 might not be enough, if detectors have more independent modules/segments
   uint8_t plane_{Hit::InvalidPlane};  ///< plane identity of cluster
 
   uint16_t coord_start_;
