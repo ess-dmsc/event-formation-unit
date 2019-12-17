@@ -10,6 +10,15 @@ set(NMXReadoutTest_INC
   )
 create_test_executable(NMXReadoutTest SKIP_MEMGRIND)
 
+set(NMXCombinedProcesingTest_SRC
+  NMXCombinedProcesingTest.cpp
+  ../generators/BuilderHits.cpp
+  )
+set(NMXCombinedProcesingTest_INC
+  ../generators/BuilderHits.h  
+)
+create_test_executable(NMXCombinedProcesingTest)
+
 set(TrackSerializerTest_SRC
   TrackSerializerTest.cpp
   TrackSerializer.cpp
