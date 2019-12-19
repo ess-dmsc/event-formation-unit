@@ -2,6 +2,7 @@
 
 
 #include <gdgem/tests/HitGenerator.h>
+#include <fmt/format.h>
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
@@ -12,7 +13,7 @@ namespace Gem {
 
 void HitGenerator::printHits() {
   for (auto & Hit : Hits) {
-    printf("%llu, %u, %u, %u\n", Hit.time, Hit.plane, Hit.coordinate, Hit.weight);
+    fmt::print("{}, {}, {}, {}\n", Hit.time, Hit.plane, Hit.coordinate, Hit.weight);
   }
 }
 
@@ -59,12 +60,9 @@ std::vector<Hit> & HitGenerator::makeHits(
   for (unsigned int Event = 0; Event < EventCount; Event++) {
     uint16_t Coord = Event;
     for (unsigned int RO = 0; RO < MaxReadouts; RO++) {
-      uint8_t Plane = 0;
       uint16_t Weight = 2345;
-      // printf("Event %d, readout %d: {time %llu, plane %u, ch %u, weight %u}\n",
-      //       Event, RO, Time, Plane, Coord, Weight);
       Hit HitX{Time, Coord, Weight, PlaneX};
-      TmpHits.push_back(H);
+      TmpHits.push_back(HitX);
       Coord++;
       Time += dT;
     }
