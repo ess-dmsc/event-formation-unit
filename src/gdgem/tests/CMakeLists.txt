@@ -2,6 +2,16 @@
 # Tests
 #=============================================================================
 
+
+set(HitGeneratorTest_INC
+  HitGenerator.h
+  )
+set(HitGeneratorTest_SRC
+  HitGeneratorTest.cpp
+  HitGenerator.cpp
+  )
+create_test_executable(HitGeneratorTest)
+
 set(TEST_DATA_PATH "${REFDATA}/gdgem/2018_11")
 
 set(ClusteringBase_SRC
