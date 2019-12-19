@@ -9,6 +9,7 @@
 #pragma once
 
 #include <readout/ReadoutParser.h>
+#include <loki/Counters.h>
 #include <vector>
 
 namespace Loki {
@@ -32,7 +33,7 @@ public:
     uint16_t AmpD;
   } __attribute__((__packed__));
 
-  DataParser(){
+  DataParser(struct Counters & counters) : counters(counters){
     Result.reserve(MaxReadoutsInPacket);
   };
   ~DataParser(){};
@@ -50,11 +51,6 @@ public:
   // To be iterated over in processing thread
   std::vector<struct ParsedData> Result;
 
-  struct {
-    int64_t Readouts{0};
-    int64_t Headers{0};
-    int64_t ErrorHeaders{0};
-    int64_t ErrorBytes{0};
-  } Stats;
+  struct Counters & Stats;
 };
 }

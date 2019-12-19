@@ -26,11 +26,6 @@
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
 
-#include <loki/readout/DataParser.h>
-#include <loki/readout/Readout.h>
-#include <readout/ESSTime.h>
-#include <loki/geometry/TubeAmps.h>
-
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
@@ -138,6 +133,7 @@ void LokiBase::inputThread() {
 
 /// \brief Generate an Udder test image in '3D' one image
 /// at z = 0 and one at z = 3
+/// \todo will not work for the full detector
 void LokiBase::testImageUdder(EV42Serializer & FlatBuffer) {
   ESSGeometry LoKIGeometry(56, 512, 4, 1);
   XTRACE(PROCESS, ALW, "GENERATING TEST IMAGE!");
@@ -177,11 +173,6 @@ void LokiBase::testImageUdder(EV42Serializer & FlatBuffer) {
 
 /// \brief Normal processing thread
 void LokiBase::processingThread() {
-  ReadoutParser ESSReadout;
-  DataParser LokiParser;
-  TubeAmps Amp2Pos;
-  ESSTime Time;
-
   LokiConfiguration = Config(LokiModuleSettings.ConfigFile);
 
   if (LokiModuleSettings.CalibFile.empty()) {
@@ -247,11 +238,6 @@ void LokiBase::processingThread() {
 
       // We have good header information, now parse readout data
       Res = LokiParser.parse(ESSReadout.Packet.DataPtr, ESSReadout.Packet.DataLength);
-      Counters.Readouts = LokiParser.Stats.Readouts;
-      Counters.Headers = LokiParser.Stats.Headers;
-      Counters.ErrorHeaders = LokiParser.Stats.ErrorHeaders;
-      Counters.ErrorBytes = LokiParser.Stats.ErrorBytes;
-
 
       //Fake pulse time
       uint64_t PulseTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970

@@ -15,6 +15,11 @@
 #include <loki/Counters.h>
 #include <loki/geometry/Config.h>
 #include <loki/geometry/Calibration.h>
+#include <loki/readout/DataParser.h>
+#include <loki/readout/Readout.h>
+#include <readout/ReadoutParser.h>
+#include <readout/ESSTime.h>
+#include <loki/geometry/TubeAmps.h>
 
 namespace Loki {
 
@@ -57,10 +62,14 @@ protected:
 
   LokiSettings LokiModuleSettings;
 
+  /// \brief Used in Processing thread
   // From geometry/Config.h
   Config LokiConfiguration;
-
   Calibration LokiCalibration;
+  ReadoutParser ESSReadout;
+  DataParser LokiParser{Counters};
+  TubeAmps Amp2Pos;
+  ESSTime Time;
 };
 
 }
