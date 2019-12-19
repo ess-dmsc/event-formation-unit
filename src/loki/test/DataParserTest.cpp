@@ -8,8 +8,12 @@ using namespace Loki;
 
 class DataParserTest : public TestBase {
 protected:
-  DataParser Parser;
-  void SetUp() override {}
+  // From Counters.h
+  struct Counters Counters;
+  DataParser Parser{Counters};
+  void SetUp() override {
+    memset(&Counters, 0, sizeof(Counters));
+  }
   void TearDown() override {}
 };
 

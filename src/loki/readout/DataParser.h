@@ -33,7 +33,7 @@ public:
     uint16_t AmpD;
   } __attribute__((__packed__));
 
-  DataParser(struct Counters & counters) : counters(counters){
+  DataParser(struct Counters & counters) : Stats(counters){
     Result.reserve(MaxReadoutsInPacket);
   };
   ~DataParser(){};

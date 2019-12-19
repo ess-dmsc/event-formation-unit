@@ -63,14 +63,17 @@ std::vector<uint8_t> UdpPayload
 
 using namespace Loki;
 
-
-
 class CombinedParserTest : public TestBase {
 protected:
+  // From Counters.h
+  struct Counters Counters;
+
   const int DataType{0x30};
   ReadoutParser CommonReadout;
-  DataParser LokiParser;
-  void SetUp() override {}
+  DataParser LokiParser{Counters};
+  void SetUp() override {
+    memset(&Counters, 0, sizeof(Counters));
+  }
   void TearDown() override {}
 };
 
