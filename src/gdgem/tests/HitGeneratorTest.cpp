@@ -22,28 +22,23 @@ TEST_F(HitGeneratorTest, Constructor) {
   HitGenerator HitGen;
 }
 
-TEST_F(HitGeneratorTest, Generate) {
-  HitGenerator HitGen;
-  HitGen.setTimes(200, 40, 1);
-  HitGen.makeHits(2, 6, false);
-  HitGen.makeHits(2, 6, true);
-  HitGen.makeHits(2, 6, true);
-  HitGen.printHits();
-}
-
 TEST_F(HitGeneratorTest, GenerateAngle0) {
   HitGenerator HitGen;
   float Angle0{0.0};
+  uint16_t NumHits{6};
   HitGen.setTimes(200, 40, 1);
-  HitGen.makeHit(6, 0, 0, Angle0, false);
+  auto hits = HitGen.makeHit(NumHits, 0, 0, Angle0, false);
+  ASSERT_TRUE(hits.size() <= NumHits*2);
   HitGen.printHits();
 }
 
 TEST_F(HitGeneratorTest, GenerateAngle45) {
   HitGenerator HitGen;
   float Angle45 = D2R(45);
+  uint16_t NumHits{6};
   HitGen.setTimes(200, 40, 1);
-  HitGen.makeHit(6, 0, 0, Angle45, false);
+  auto hits = HitGen.makeHit(NumHits, 0, 0, Angle45, false);
+  ASSERT_TRUE(hits.size() <= NumHits*2);
   HitGen.printHits();
 }
 

@@ -18,17 +18,23 @@ namespace Gem {
   public:
 
     /// \brief configure absolute time and gap between events
+    /// \param TimeZero Hits start at this time (ns)
+    /// \param TimeGap Minimum time gap between events
+    /// \param DeltaT Minimum timegap between Hits
     void setTimes(uint64_t TimeZero, uint32_t TimeGap, uint32_t DeltaT) {
       T0 = TimeZero;
       TGap = TimeGap;
       dT = DeltaT;
     }
 
-    std::vector<Hit> & makeHit(uint8_t MaxReadouts,
+    /// \brief Make Hit data corresponding to one event.
+    /// \param MaxHits the maximum number of Hits generated
+    /// \param X0 coordinate offset for planeX
+    /// \param Y0 coordinate offset for planeY
+    /// \param Theta angle (degree) of Hit 'track'
+    /// \param Shuffle scrambles the Hits
+    std::vector<Hit> & makeHit(uint8_t MaxHits,
          uint16_t X0, uint16_t Y0, float Theta, bool Shuffle);
-
-    /// \brief Reconfigure absolute time and gap between events
-    std::vector<Hit> & makeHits(uint32_t EventCount, uint8_t MaxReadouts, bool Shuffle);
 
     /// \brief debug and testing function
     void printHits();
@@ -36,7 +42,7 @@ namespace Gem {
   private:
     uint64_t T0{0}; // ns
     uint32_t TGap{100}; // ns between events
-    uint32_t dT{1}; // ns between readouts
+    uint32_t dT{1}; // ns between hits
     std::vector<Hit> Hits;
     std::mt19937 RandGen; ///< mersenne twister random number generator
     const uint8_t PlaneX{0};

@@ -17,14 +17,14 @@ void HitGenerator::printHits() {
   }
 }
 
-std::vector<Hit> & HitGenerator::makeHit(uint8_t MaxReadouts,
+std::vector<Hit> & HitGenerator::makeHit(uint8_t MaxHits,
      uint16_t X0, uint16_t Y0, float Theta, bool Shuffle) {
 
   uint64_t Time = T0;
   std::vector<Hit> TmpHits;
   uint16_t OldX{65535};
   uint16_t OldY{65535};
-  for (unsigned int RO = 0; RO < MaxReadouts; RO++) {
+  for (unsigned int RO = 0; RO < MaxHits; RO++) {
     uint16_t ChX = X0 + RO * 1.0 * cos(Theta);
     uint16_t ChY = Y0 + RO * 1.0 * sin(Theta);
 
@@ -53,29 +53,4 @@ std::vector<Hit> & HitGenerator::makeHit(uint8_t MaxReadouts,
   return Hits;
 }
 
-std::vector<Hit> & HitGenerator::makeHits(
-    uint32_t EventCount, uint8_t MaxReadouts, bool Shuffle) {
-  uint64_t Time = T0;
-  std::vector<Hit> TmpHits;
-  for (unsigned int Event = 0; Event < EventCount; Event++) {
-    uint16_t Coord = Event;
-    for (unsigned int RO = 0; RO < MaxReadouts; RO++) {
-      uint16_t Weight = 2345;
-      Hit HitX{Time, Coord, Weight, PlaneX};
-      TmpHits.push_back(HitX);
-      Coord++;
-      Time += dT;
-    }
-    Time += TGap;
-  }
-
-  if (Shuffle) {
-    std::shuffle(TmpHits.begin(), TmpHits.end(), RandGen);
-  }
-
-  for (auto & Hit : TmpHits) {
-    Hits.push_back(Hit);
-  }
-  return Hits;
-}
 } // namespace
