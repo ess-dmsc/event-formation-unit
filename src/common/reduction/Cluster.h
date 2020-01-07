@@ -129,11 +129,11 @@ private:
   /// \todo uint8 might not be enough, if detectors have more independent modules/segments
   uint8_t plane_{Hit::InvalidPlane};  ///< plane identity of cluster
 
-  uint16_t coord_start_;
-  uint16_t coord_end_;
+  uint16_t coord_start_ {Hit::InvalidCoord};
+  uint16_t coord_end_ {0};
 
-  uint64_t time_start_;
-  uint64_t time_end_;
+  uint64_t time_start_ {0xFFFFFFFFFFFFFFFFULL};
+  uint64_t time_end_ {0};
 
   double weight_sum_{0.0}; ///< sum of weight
   double coord_mass_{0.0}; ///< sum of coord*weight
