@@ -13,9 +13,11 @@ create_test_executable(NMXReadoutTest SKIP_MEMGRIND)
 set(NMXCombinedProcesingTest_SRC
   NMXCombinedProcesingTest.cpp
   ../generators/BuilderHits.cpp
+  ../tests/HitGenerator.cpp
   )
 set(NMXCombinedProcesingTest_INC
-  ../generators/BuilderHits.h  
+  ../generators/BuilderHits.h
+  ../tests/HitGenerator.h
 )
 create_test_executable(NMXCombinedProcesingTest)
 

@@ -1,8 +1,7 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
-#include <gdgem/generators/BuilderHits.h>
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 #include <common/TimeString.h>
 #include <cstring>
+#include <gdgem/generators/BuilderHits.h>
 
 #include <common/Trace.h>
 //#undef TRC_LEVEL
@@ -14,9 +13,7 @@
 
 namespace Gem {
 
-BuilderHits::BuilderHits() {
-  converted_data.reserve(9000 / sizeof(Hit));
-}
+BuilderHits::BuilderHits() { converted_data.reserve(9000 / sizeof(Hit)); }
 
 void BuilderHits::process_buffer(char *buf, size_t size) {
   size_t count = std::min(size / sizeof(Hit), size_t(9000 / sizeof(Hit)));
@@ -27,21 +24,22 @@ void BuilderHits::process_buffer(char *buf, size_t size) {
   for (auto &hit : converted_data) {
 
     if (hit.weight == 0) {
-//        LOG(PROCESS, Sev::Warning,
-//            "Accepted readout with adc=0, may distort uTPC results, hit={}",
-//            hit.to_string());
+      //XTRACE(BUILDER, DEB,
+      //    "Accepted readout with adc=0, may distort uTPC results,
+      //    hit={}", hit.to_string());
       // \todo What to do? Cannot be 0 for CoM in uTPC. Reject?
       hit.weight = 1;
     }
 
-
     if (hit.plane == 1) {
+      XTRACE(BUILDER, DEB, "adding hit %s to plane y", hit.to_string().c_str());
       hit_buffer_y.emplace_back(hit);
     }
 
     if (hit.plane == 0) {
+      XTRACE(BUILDER, DEB, "adding hit %s to plane x", hit.to_string().c_str());
       hit_buffer_x.emplace_back(hit);
     }
   }
 }
-}
+} // namespace Gem

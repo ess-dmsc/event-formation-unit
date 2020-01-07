@@ -1,82 +1,122 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
-
+// Copyright (C) 2016, 2017 European Spallation Source ERIC
 #include <test/TestBase.h>
 
-#include <gdgem/generators/BuilderHits.h>
 #include <common/reduction/analysis/EventAnalyzer.h>
-#include <common/reduction/matching/CenterMatcher.h>
 #include <common/reduction/clustering/GapClusterer.h>
+#include <common/reduction/matching/CenterMatcher.h>
+#include <gdgem/generators/BuilderHits.h>
+#include <gdgem/tests/HitGenerator.h>
+
+#include <common/Trace.h>
+
+#include <memory>
+
+#undef TRC_LEVEL
+#define TRC_LEVEL TRC_L_DEB
 
 using namespace Gem;
 
-class NMXCombinedProcessingTest : public TestBase
-{
+class NMXCombinedProcessingTest : public TestBase {
 protected:
+  typedef Gem::BuilderHits HitBuilder_t;
+  std::shared_ptr<AbstractBuilder> builder_;
+  std::shared_ptr<AbstractAnalyzer> analyzer_;
+  std::shared_ptr<AbstractMatcher> matcher_;
+  std::shared_ptr<AbstractClusterer> clusterer_x_;
+  std::shared_ptr<AbstractClusterer> clusterer_y_;
 
-    std::shared_ptr<Gem::BuilderHits> builder_;
-    std::shared_ptr<EventAnalyzer> analyzer_;
-    std::shared_ptr<CenterMatcher> matcher_;
-    std::shared_ptr<GapClusterer> clusterer_x_;
-    std::shared_ptr<GapClusterer> clusterer_y_;
+  void SetUp() override {
+    builder_ = std::make_shared<HitBuilder_t>();
 
-    void SetUp() override
-    {
-        builder_ = std::make_shared<Gem::BuilderHits>();
+    analyzer_ = std::make_shared<EventAnalyzer>("center-of-mass");
 
-        analyzer_ = std::make_shared<EventAnalyzer>("center-of-mass");
+    uint64_t maximum_latency = 5;
+    uint8_t planeA = 0;
+    uint8_t planeB = 1;
+    auto matcher =
+        std::make_shared<CenterMatcher>(maximum_latency, planeA, planeB);
+    matcher->set_max_delta_time(30);
+    matcher->set_time_algorithm("utpc");
+    matcher_ = matcher;
 
-        matcher_ = std::make_shared<CenterMatcher>(8192 * 5, 0, 1);
-        matcher_->set_max_delta_time(200);
-        matcher_->set_time_algorithm("utpc");
-
-        clusterer_x_ = std::make_shared<GapClusterer>(200, 2);
-        clusterer_y_ = std::make_shared<GapClusterer>(200, 2);
-    }
-    void TearDown() override {}
+    uint64_t max_time_gap = 5;
+    uint16_t max_coord_gap = 100;
+    clusterer_x_ = std::make_shared<GapClusterer>(max_time_gap, max_coord_gap);
+    clusterer_y_ = std::make_shared<GapClusterer>(max_time_gap, max_coord_gap);
+  }
+  void TearDown() override {}
 };
 
 void _cluster_plane(HitVector &hits,
-                    std::shared_ptr<AbstractClusterer> clusterer, std::shared_ptr<CenterMatcher>& matcher)
-{
-    sort_chronologically(hits);
-    clusterer->cluster(hits);
-    hits.clear();
+                    std::shared_ptr<AbstractClusterer> clusterer,
+                    std::shared_ptr<AbstractMatcher> &matcher, bool flush) {
+  sort_chronologically(hits);
+  clusterer->cluster(hits);
+  hits.clear();
+  if (flush) {
+    clusterer->flush();
+  }
 
-    if (!clusterer->clusters.empty())
-    {
-        matcher->insert(clusterer->clusters.front().plane(), clusterer->clusters);
-    }
+  if (!clusterer->clusters.empty()) {
+    XTRACE(CLUSTER, DEB, "inserting %i cluster(s) in plane %i into matcher",
+           clusterer->clusters.size(), clusterer->clusters.front().plane());
+    matcher->insert(clusterer->clusters.front().plane(), clusterer->clusters);
+  }
 }
 
 TEST_F(NMXCombinedProcessingTest, Dummy) {
-    Hit h{0,0,0,0};
-    builder_->process_buffer (reinterpret_cast<char*>(&h), sizeof(h));
 
-    bool flush = false;
-    if (builder_->hit_buffer_x.size())
-    {
-        _cluster_plane(builder_->hit_buffer_x, clusterer_x_, matcher_);
+  int numEvents = 2;
+  uint64_t time = 0;
+  uint16_t numHits{2};
+  uint64_t timeGap = 40;
+  uint32_t interHitTime = 1;
+
+  HitGenerator HitGen;
+  float Angle0{0.0};
+
+  // accumulate several hits from several events into a pseudo packet
+  for (int i = 0; i < numEvents; ++i) {
+    HitGen.setTimes(time, timeGap, interHitTime);
+    HitGen.makeHit(numHits, 0, 0, Angle0, false);
+    time += numHits * 2 * interHitTime + timeGap;
+  }
+  HitGen.printHits();
+
+  builder_->process_buffer(reinterpret_cast<char *>(&HitGen.Hits[0]),
+                           sizeof(Hit) * HitGen.Hits.size());
+
+  std::shared_ptr<HitBuilder_t> hitBuilderConcrete =
+      std::dynamic_pointer_cast<HitBuilder_t>(builder_);
+  ASSERT_EQ(hitBuilderConcrete->converted_data.size(), HitGen.Hits.size());
+
+  // from perform_clustering()
+  {                    
+    bool flush = true; // we're matching the last time for this clustering
+
+    if (builder_->hit_buffer_x.size()) {
+      _cluster_plane(builder_->hit_buffer_x, clusterer_x_, matcher_, flush);
     }
 
-    if (builder_->hit_buffer_y.size())
-    {
-        _cluster_plane(builder_->hit_buffer_y, clusterer_y_, matcher_);
+    if (builder_->hit_buffer_y.size()) {
+      _cluster_plane(builder_->hit_buffer_y, clusterer_y_, matcher_, flush);
     }
 
-    // \todo but we cannot parallelize this, this is the critical path
     matcher_->match(flush);
+    ASSERT_EQ(matcher_->matched_events.size(), numEvents);
+  }
 
-    for (auto &event : matcher_->matched_events)
-    {
-        if (!event.both_planes())
-        {
-           
-            continue;
-        }
-        ReducedEvent neutron_event_ = analyzer_->analyze(event);
-        ASSERT_TRUE(neutron_event_.good);
+  // from process_events()
+  { 
+    for (auto &event : matcher_->matched_events) {
+      if (!event.both_planes()) {
+        continue;
+      }
+      ReducedEvent neutron_event_ = analyzer_->analyze(event);
+      ASSERT_TRUE(neutron_event_.good);
     }
+  }
 
-    builder_->hit_buffer_x.clear();
-    builder_->hit_buffer_y.clear();
+  builder_->hit_buffer_x.clear();
+  builder_->hit_buffer_y.clear();
 }

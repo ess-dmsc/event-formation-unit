@@ -1,24 +1,24 @@
-/** Copyright (C) 2019 European Spallation Source ERIC */
-
-
-#include <gdgem/tests/HitGenerator.h>
-#include <fmt/format.h>
+// Copyright (C) 2019 European Spallation Source ERIC 
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <fmt/format.h>
+#include <gdgem/tests/HitGenerator.h>
 #include <vector>
 
 /// \todo Should not belong to gdgem but to common, reduction?
 namespace Gem {
 
 void HitGenerator::printHits() {
-  for (auto & Hit : Hits) {
-    fmt::print("{}, {}, {}, {}\n", Hit.time, Hit.plane, Hit.coordinate, Hit.weight);
+  for (auto &Hit : Hits) {
+    fmt::print("time = {}, plane = {}, coord = {}, weight = {}\n", Hit.time,
+               Hit.plane, Hit.coordinate, Hit.weight);
   }
 }
 
-std::vector<Hit> & HitGenerator::makeHit(uint8_t MaxHits,
-     uint16_t X0, uint16_t Y0, float Theta, bool Shuffle) {
+std::vector<Hit> &HitGenerator::makeHit(uint8_t MaxHits, uint16_t X0,
+                                        uint16_t Y0, float Theta,
+                                        bool Shuffle) {
 
   uint64_t Time = T0;
   std::vector<Hit> TmpHits;
@@ -47,10 +47,10 @@ std::vector<Hit> & HitGenerator::makeHit(uint8_t MaxHits,
     std::shuffle(TmpHits.begin(), TmpHits.end(), RandGen);
   }
 
-  for (auto & Hit : TmpHits) {
+  for (auto &Hit : TmpHits) {
     Hits.push_back(Hit);
   }
   return Hits;
 }
 
-} // namespace
+} // namespace Gem
