@@ -220,24 +220,24 @@ void LokiBase::processingThread() {
       /// \todo use the Buffer<T> class here and in parser?
       /// \todo avoid copying by passing reference to stats like for gdgem?
       auto DataPtr = RxRingbuffer.getDataBuffer(DataIndex);
-      auto Res = ESSReadout.validate(DataPtr, DataLen, ReadoutParser::Loki4Amp);
-      Counters.ErrorBuffer = ESSReadout.Stats.ErrorBuffer;
-      Counters.ErrorSize = ESSReadout.Stats.ErrorSize;
-      Counters.ErrorVersion = ESSReadout.Stats.ErrorVersion;
-      Counters.ErrorTypeSubType = ESSReadout.Stats.ErrorTypeSubType;
-      Counters.ErrorOutputQueue = ESSReadout.Stats.ErrorOutputQueue;
-      Counters.ErrorSeqNum = ESSReadout.Stats.ErrorSeqNum;
+      auto Res = ESSReadoutParser.validate(DataPtr, DataLen, ReadoutParser::Loki4Amp);
+      Counters.ErrorBuffer = ESSReadoutParser.Stats.ErrorBuffer;
+      Counters.ErrorSize = ESSReadoutParser.Stats.ErrorSize;
+      Counters.ErrorVersion = ESSReadoutParser.Stats.ErrorVersion;
+      Counters.ErrorTypeSubType = ESSReadoutParser.Stats.ErrorTypeSubType;
+      Counters.ErrorOutputQueue = ESSReadoutParser.Stats.ErrorOutputQueue;
+      Counters.ErrorSeqNum = ESSReadoutParser.Stats.ErrorSeqNum;
 
       if (Res != ReadoutParser::OK) {
         XTRACE(DATA, DEB, "Error parsing ESS readout header");
         continue;
       }
       XTRACE(DATA, DEB, "PulseHigh %u, PulseLow %u",
-        ESSReadout.Packet.HeaderPtr->PulseHigh,
-        ESSReadout.Packet.HeaderPtr->PulseLow);
+        ESSReadoutParser.Packet.HeaderPtr->PulseHigh,
+        ESSReadoutParser.Packet.HeaderPtr->PulseLow);
 
       // We have good header information, now parse readout data
-      Res = LokiParser.parse(ESSReadout.Packet.DataPtr, ESSReadout.Packet.DataLength);
+      Res = LokiParser.parse(ESSReadoutParser.Packet.DataPtr, ESSReadoutParser.Packet.DataLength);
 
       //Fake pulse time
       uint64_t PulseTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
@@ -245,7 +245,7 @@ void LokiBase::processingThread() {
 
       bool RealPulseTime = true;
       if (RealPulseTime) {
-        auto PacketHeader = ESSReadout.Packet.HeaderPtr;
+        auto PacketHeader = ESSReadoutParser.Packet.HeaderPtr;
         PulseTime = Time.setReference(PacketHeader->PulseHigh,PacketHeader->PulseLow);
         XTRACE(DATA, DEB, "PulseTime (%u,%u) %" PRIu64 "", PacketHeader->PulseHigh,
          PacketHeader->PulseLow, PulseTime);
@@ -296,8 +296,8 @@ void LokiBase::processingThread() {
 
           if (DumpFile) {
             Readout CurrentReadout;
-            CurrentReadout.PulseTimeHigh = ESSReadout.Packet.HeaderPtr->PulseHigh;
-            CurrentReadout.PulseTimeLow = ESSReadout.Packet.HeaderPtr->PulseLow;
+            CurrentReadout.PulseTimeHigh = ESSReadoutParser.Packet.HeaderPtr->PulseHigh;
+            CurrentReadout.PulseTimeLow = ESSReadoutParser.Packet.HeaderPtr->PulseLow;
             CurrentReadout.EventTimeHigh = Data.TimeHigh;
             CurrentReadout.EventTimeLow = Data.TimeLow;
             CurrentReadout.AmpA = Data.AmpA;

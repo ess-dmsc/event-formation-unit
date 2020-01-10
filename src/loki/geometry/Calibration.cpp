@@ -18,11 +18,8 @@ Calibration::Calibration() {}
 Calibration::Calibration(std::string CalibrationFile) {
   nlohmann::json root = from_json_file(CalibrationFile);
   try {
-
     auto LokiCalibration = root["LokiCalibration"];
-
     Mapping = LokiCalibration["Mapping"].get<std::vector<uint32_t>>();
-
     }
     catch (...) {
       LOG(INIT, Sev::Error, "JSON calibration - error: Invalid Json file: {}", CalibrationFile);

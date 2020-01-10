@@ -66,7 +66,7 @@ protected:
   // From geometry/Config.h
   Config LokiConfiguration;
   Calibration LokiCalibration;
-  ReadoutParser ESSReadout;
+  ReadoutParser ESSReadoutParser;
   DataParser LokiParser{Counters};
   TubeAmps Amp2Pos;
   ESSTime Time;

@@ -12,6 +12,8 @@
 
 // clang-format off
 
+/// \todo add link to ESS Readout and LoKI data formats eventually
+
 // Wrong cookie, good version
 std::vector<uint8_t> ErrCookie
 {   EXTRA_PADDING

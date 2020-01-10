@@ -20,7 +20,7 @@ public:
   const unsigned int MaxFENId{23};
   const unsigned int MaxReadoutsInPacket{500};
 
-  struct LokiReadout // 32 bytes
+  struct LokiReadout //
   {
     uint32_t TimeHigh;
     uint32_t TimeLow;
@@ -32,6 +32,8 @@ public:
     uint16_t AmpC;
     uint16_t AmpD;
   } __attribute__((__packed__));
+
+  static_assert(sizeof(LokiReadout) == 20, "LoKI readout header length error");
 
   DataParser(struct Counters & counters) : Stats(counters){
     Result.reserve(MaxReadoutsInPacket);

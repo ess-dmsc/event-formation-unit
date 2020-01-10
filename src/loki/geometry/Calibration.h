@@ -33,7 +33,6 @@ public:
   /// \brief return the maximum pixel id
   uint32_t getMaxPixel() { return MaxPixelId; }
 
-
   std::vector<uint32_t> Mapping; ///< The calibration as a mapping between pixels
 private:
   uint32_t MaxPixelId{0}; ///< The maximum pixelid in the map

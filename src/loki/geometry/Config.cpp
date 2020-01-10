@@ -27,16 +27,16 @@ Config::Config(std::string ConfigFile) {
         auto Ring = Mapping["Ring"].get<unsigned int>();
         assert(Ring == Index);
         bool Vertical = Mapping["Vertical"].get<bool>();
-        auto TZ = Mapping["TubesZ"].get<unsigned int>();
-        auto TN = Mapping["TubesN"].get<unsigned int>();
+        auto TubesZ = Mapping["TubesZ"].get<unsigned int>();
+        auto TubesN = Mapping["TubesN"].get<unsigned int>();
         auto Offset = Mapping["Offset"].get<unsigned int>();
 
-        Pixels += TZ * TN * 7 * 512; ///< \todo not hardcode - should parametrise
+        Pixels += TubesZ * TubesN * 7 * 512; ///< \todo not hardcode - should parametrise
 
         LOG(INIT, Sev::Info, "JSON config - Detector {}, Ring {}, Vertical {}, TubesZ {}, TubesN {}, Offset {}",
-          Name, Ring, Vertical, TZ, TN, Offset);
+          Name, Ring, Vertical, TubesZ, TubesN, Offset);
 
-        PanelGeometry Temp(Vertical, TZ, TN, Offset);
+        PanelGeometry Temp(Vertical, TubesZ, TubesN, Offset);
         Panels.push_back(Temp);
         Index++;
       }

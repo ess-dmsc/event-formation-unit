@@ -45,7 +45,7 @@ int ReadoutParser::validate(const char *Buffer, uint32_t Size, uint8_t Type) {
     return -ReadoutParser::ESIZE;
   }
 
-  // Is is safe to cast packet header v0 strut to data
+  // It is safe to cast packet header v0 strut to data
   Packet.HeaderPtr = (PacketHeaderV0 *)Buffer;
 
   if (Size < Packet.HeaderPtr->TotalLength or

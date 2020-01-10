@@ -23,7 +23,7 @@ int DataParser::parse(const char *Buffer, unsigned int Size) {
   while (BytesLeft) {
     // Parse Data Header
     if (BytesLeft < sizeof(ReadoutParser::DataHeader)) {
-      XTRACE(DATA, DEB, "Not enough data left for header");
+      XTRACE(DATA, DEB, "Not enough data left for header: %u", BytesLeft);
       Stats.ErrorHeaders++;
       Stats.ErrorBytes += BytesLeft;
       return ParsedReadouts;

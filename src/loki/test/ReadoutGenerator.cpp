@@ -14,7 +14,7 @@ uint16_t lokiReadoutDataGen(uint16_t DataSections, uint16_t DataElements, uint8_
 
   auto DataSize = sizeof(ReadoutParser::PacketHeaderV0) + DataSections * (4 + DataElements * 20);
   if (DataSize > MaxSize) {
-    printf("Too much data for buffer\n");
+    printf("Too much data for buffer. DataSize: %zu, MaxSize: %u\n", DataSize, MaxSize);
     return 0;
   }
 
