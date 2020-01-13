@@ -46,6 +46,8 @@ public:
   static void read(const boost::filesystem::path &FilePath,
       std::vector<T> &ExternalData);
 
+  /// \todo 9000 is MTU? Correct size is <= 8972 else packet
+  /// fragmentation will occur.
   static constexpr size_t ChunkSize{9000 / sizeof(T)};
 
   boost::filesystem::path get_full_path() const;
