@@ -66,7 +66,7 @@ function(create_executable exec_name)
     efu_common)
 
   if(GPERF)
-    target_link_libraries(${exec_name} ${GPERFTOOLS_PROFILER})
+    target_link_libraries(${exec_name} PUBLIC ${GPERFTOOLS_PROFILER})
   endif()
 
   set_target_properties(${exec_name} PROPERTIES
