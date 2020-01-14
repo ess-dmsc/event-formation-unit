@@ -57,8 +57,8 @@ void addCLIOptions(CLI::App &Parser, StreamSettings &Settings) {
 
 class FileSampler {
 public:
-  FileSampler(std::string const &FileName, std::string const &NexusPath) {
-    InFile = hdf5::file::open(FileName, hdf5::file::AccessFlags::READONLY);
+  FileSampler(std::string const &FileName, std::string const &NexusPath)
+      : InFile(hdf5::file::open(FileName, hdf5::file::AccessFlags::READONLY)) {
     RootNode = InFile.root();
     for (int i = 0; i < 4; i++) {
       auto Group = RootNode.get_group(NexusPath + std::to_string(i));

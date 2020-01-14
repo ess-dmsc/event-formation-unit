@@ -12,7 +12,7 @@
 const static std::uint64_t NSecMultiplier = 1000000000;
 
 struct Timing {
-  constexpr Timing(std::uint64_t ClockFrequency)
+  constexpr Timing(std::uint64_t const ClockFrequency)
       : TimeClockFrequency(ClockFrequency), SamplingRate(ClockFrequency / 2),
         AdcTimerCounterMax(SamplingRate), SampleLengthNS(2e9 / ClockFrequency) {
   }

@@ -171,7 +171,7 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte,
         CurrentDataModule->Data[i] = ntohs(ElementPointer[i]);
       }
       if (not HandleModule(std::move(CurrentDataModule))) {
-        // Things will be very problematic for us if we dont get rid of the
+        // Things will be very problematic for us if we don't get rid of the
         // claimed data module, hence why we have a special exception for this
         // case.
         throw ModuleProcessingException(std::move(CurrentDataModule));

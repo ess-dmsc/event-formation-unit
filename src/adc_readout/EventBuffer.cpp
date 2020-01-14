@@ -74,7 +74,7 @@ std::pair<EventList, std::uint64_t> EventBuffer::getFrameEvents() {
     }
     ++ReturnSize;
   }
-  return {}; // If buffer is not full or we are not out of our time range, dont
+  return {}; // If buffer is not full or we are not out of our time range, don't
              // return any events
 }
 

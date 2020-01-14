@@ -21,7 +21,7 @@ public:
              std::chrono::system_clock::time_point ReferenceTimePoint =
                  std::chrono::system_clock::now(),
              std::uint64_t StartTimestampNS = 0);
-  std::uint64_t calcTimestampNS(std::uint64_t InputTimeNS) {
+  std::uint64_t calcTimestampNS(std::uint64_t InputTimeNS) const {
     return InputTimeNS + UsedOffset;
   }
 
