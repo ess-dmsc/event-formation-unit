@@ -206,7 +206,8 @@ struct ConfigInfo {
 };
 
 /// \brief Extract information from the header of a packet for the purpose of
-/// setting up the parsing of subsequent packets. \param[in] Packet Raw data
-/// buffer. \return Packet information, i.e. protocol version and time stamp.
+/// setting up the parsing of subsequent packets.
+/// \param[in] Packet Raw data buffer.
+/// \return Packet information, i.e. protocol version and time stamp.
 /// \throw ParserException See exceptions type for possible parsing failures.
 ConfigInfo parseHeaderForConfigInfo(const InData &Packet);

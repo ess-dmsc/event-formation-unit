@@ -58,19 +58,8 @@ public:
 
   /// \brief Convert from raw timestamp (seconds plus fractional seconds) into
   /// nanoseconds since epoch.
-  /// This version uses floating point math to do the conversion and is likely
-  /// to be slower than RawTimeStamp::GetTimeStampNSFast() on machines with a
-  /// slow floating point unit.
   /// \return Number of nanoseconds since epoch (currently EPICS epoch).
   std::uint64_t getTimeStampNS() const;
-
-  /// \brief Convert from raw timestamp (seconds plus fractional seconds) into
-  /// nanoseconds since epoch.
-  /// This version uses integer math to do the conversion and is likely to as
-  /// fast as or slower than RawTimeStamp::GetTimeStampNS() on CPUs that have a
-  /// fast floating point unit.
-  /// \return Number of nanoseconds since epoch (currently EPICS epoch).
-  std::uint64_t getTimeStampNSFast() const;
 
   ClockMode getClockMode() const { return CMode; }
 

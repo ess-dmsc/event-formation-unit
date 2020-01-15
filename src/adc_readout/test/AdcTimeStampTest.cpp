@@ -32,22 +32,6 @@ TEST(TimeStampCalcTest, CalcNanoSec) {
   EXPECT_EQ(TS.getTimeStampNS(), static_cast<std::uint64_t>(TestTimeStamp));
 }
 
-TEST(TimeStampCalcTest, ComparisonExternalClock) {
-  for (unsigned int i = 0; i < TimerClockFrequencyExternal / 2; ++i) {
-    TimeStamp TS{{0, i}, ExtClk};
-    ASSERT_EQ(TS.getTimeStampNS(), TS.getTimeStampNSFast())
-        << "Failed with input: " << i;
-  }
-}
-
-TEST(TimeStampCalcTest, ComparisonInternalClock) {
-  for (unsigned int i = 0; i < TimerClockFrequencyInternal / 2; ++i) {
-    TimeStamp TS{{0, i}, IntClk};
-    ASSERT_EQ(TS.getTimeStampNS(), TS.getTimeStampNSFast())
-        << "Failed with input: " << i;
-  }
-}
-
 TEST(TimeStampCalcTest, Sample1) {
   std::uint32_t Sec = 54;
   std::uint32_t SecFrac = TimerClockFrequencyExternal / 2;

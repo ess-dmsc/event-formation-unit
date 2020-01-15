@@ -141,9 +141,6 @@ void AdcReadoutBase::inputThread() {
     this->packetFunction(Packet, Parser1);
   };
 
-  auto SetUpInputForProcessing = [&]() {
-    Receiver1->setPacketHandler(PacketHandler1);
-  };
   auto GetPacketsForConfig = [&](auto Packet) {
     try {
       auto Config = parseHeaderForConfigInfo(Packet);
@@ -151,7 +148,7 @@ void AdcReadoutBase::inputThread() {
                                    ReadoutSettings.ReferenceTime,
                                    Config.BaseTime.getTimeStampNS());
       LOG(INIT, Sev::Info, "Config packet received, starting data processing.");
-      SetUpInputForProcessing();
+      Receiver1->setPacketHandler(PacketHandler1);
     } catch (ParserException &E) {
       // Do nothing
     }

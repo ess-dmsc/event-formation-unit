@@ -45,18 +45,6 @@ std::uint64_t TimeStamp::getTimeStampNS() const {
       static_cast<std::uint64_t>(CTime.Seconds) * NSecMultiplier + NanoSec);
 }
 
-// Note: This function might be significantly slower than CalcTimeStamp() for
-// some cases.
-std::uint64_t TimeStamp::getTimeStampNSFast() const {
-
-  std::uint64_t NanoSec = (((CTime.SecondsFrac * 100000000000) /
-                            (TimeConst[int(CMode)].AdcTimerCounterMax)) +
-                           50) /
-                          100;
-  return static_cast<std::uint64_t>(
-      static_cast<std::uint64_t>(CTime.Seconds) * 100000000000 + NanoSec);
-}
-
 TimeStamp
 TimeStamp::getOffsetTimeStamp(const std::int32_t &SampleOffset) const {
   std::int32_t TempSecondsFrac = CTime.SecondsFrac + SampleOffset;

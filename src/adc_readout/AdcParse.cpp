@@ -17,6 +17,7 @@ static const std::uint16_t MODULE_HEADER{0xABCD};
 static const std::uint32_t MODULE_TRAILER{0xBEEFCAFE};
 static const std::uint8_t FILLER_BYTE{0x55};
 static const std::uint16_t TWO_FILLER_BYTES{0x5555};
+static const std::uint32_t PACKET_LENGTH_OFFSET{8u};
 
 ParserException::ParserException(std::string const &ErrorStr)
     : std::runtime_error(ErrorStr), ParserErrorType(Type::UNKNOWN),
@@ -103,7 +104,7 @@ HeaderInfo parseHeader(const InData &Packet) {
   ReturnInfo.ReadoutCount = Header.ReadoutCount;
   ReturnInfo.ReferenceTimestamp = {Header.ReferenceTimeStamp,
                                    TimeStamp::ClockMode(Header.ClockMode)};
-  if (Packet.Length != Header.ReadoutLength + 8u) {
+  if (Packet.Length != Header.ReadoutLength + PACKET_LENGTH_OFFSET) {
     throw ParserException(ParserException::Type::HEADER_LENGTH);
   }
   return ReturnInfo;
@@ -131,7 +132,7 @@ ConfigInfo parseHeaderForConfigInfo(const InData &Packet) {
 
   ReturnInfo.BaseTime = {Header.ReferenceTimeStamp,
                          TimeStamp::ClockMode(Header.ClockMode)};
-  if (Packet.Length != Header.ReadoutLength + 8u) {
+  if (Packet.Length != Header.ReadoutLength + PACKET_LENGTH_OFFSET) {
     throw ParserException(ParserException::Type::HEADER_LENGTH);
   }
   return ReturnInfo;
