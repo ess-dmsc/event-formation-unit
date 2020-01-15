@@ -56,6 +56,8 @@ public:
   ///         not all hits belong to the same plane
   uint8_t plane() const;
 
+  uint8_t plane_header() const { return plane_; }
+
   /// \returns number of hits in cluster
   size_t hit_count() const;
 

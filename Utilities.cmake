@@ -29,6 +29,8 @@ function(create_module module_name)
     add_linker_flags(${module_name} "-Wl,--no-as-needed")
   endif()
 
+  add_linker_flags(${module_name} "-g") # we need debug symbol info for profiling
+
   if(GPERF)
     target_link_libraries(${module_name} ${GPERFTOOLS_PROFILER})
   endif()

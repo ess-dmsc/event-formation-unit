@@ -3,6 +3,15 @@ option(GOOGLE_BENCHMARK "Enable google benchmark for unit tests" OFF)
 
 set(benchmark_targets "" CACHE INTERNAL "All targets")
 
+set(callgrind_INCLUDE_DIR 
+  /Users/mortenhilkerskaaning/Library/Caches/Homebrew/valgrind--git/callgrind/
+  /Users/mortenhilkerskaaning/Library/Caches/Homebrew/valgrind--git/include/
+)
+
+message(STATUS "+++ valgrind +++: ${callgrind_INCLUDE_DIR}")
+
+#if(valgrind_INCLUDE_DIRS)
+
 #
 # Generate benchmark targets
 #
@@ -12,7 +21,7 @@ function(create_benchmark_executable exec_name)
       ${${exec_name}_SRC}
       ${${exec_name}_INC})
     target_include_directories(${exec_name}
-      PRIVATE ${GTEST_INCLUDE_DIRS})
+      PRIVATE ${GTEST_INCLUDE_DIRS} ${callgrind_INCLUDE_DIR})
     set_target_properties(${exec_name} PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/benchmarks")
 
@@ -22,7 +31,7 @@ function(create_benchmark_executable exec_name)
       ${EFU_COMMON_LIBS}
       ${GTEST_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
-      -lbenchmark -lpthread efu_common)
+      -g -lbenchmark -lpthread efu_common)
       
     set(benchmark_targets
       ${exec_name}

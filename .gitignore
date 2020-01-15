@@ -16,6 +16,8 @@ a.out
 build*/
 cmake-build-*/
 doxygen/
+# MacOs folder metadata
+.DS_Store
 
 #IDE
 CMakeLists.txt.user

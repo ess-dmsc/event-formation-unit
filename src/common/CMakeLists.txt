@@ -64,6 +64,8 @@ target_include_directories(efu_common
   PUBLIC ..
   )
 
+add_linker_flags(efu_common "-g")
+
 if(${CMAKE_COMPILER_IS_GNUCXX})
   add_linker_flags(efu_common "-Wl,--no-as-needed")
 endif()

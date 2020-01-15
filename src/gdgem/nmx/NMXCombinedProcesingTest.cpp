@@ -6,6 +6,7 @@
 #include <common/reduction/matching/CenterMatcher.h>
 #include <gdgem/generators/BuilderHits.h>
 #include <gdgem/tests/HitGenerator.h>
+#include <common/reduction/HitVector.h>
 
 #include <common/Trace.h>
 
@@ -90,6 +91,10 @@ TEST_F(NMXCombinedProcessingTest, Dummy) {
       std::dynamic_pointer_cast<HitBuilder_t>(builder_);
   ASSERT_EQ(hitBuilderConcrete->converted_data.size(), HitGen.Hits.size());
 
+    //XTRACE(CLUSTER, DEB, "x hits \n%s", visualize (builder_->hit_buffer_x, "").c_str());
+    //XTRACE(CLUSTER, DEB, "y hits \n%s", visualize (builder_->hit_buffer_y, "").c_str());
+
+
   // from perform_clustering()
   {                    
     bool flush = true; // we're matching the last time for this clustering
@@ -114,6 +119,8 @@ TEST_F(NMXCombinedProcessingTest, Dummy) {
       }
       ReducedEvent neutron_event_ = analyzer_->analyze(event);
       ASSERT_TRUE(neutron_event_.good);
+
+      XTRACE(CLUSTER, DEB, "matched event\n%s", event.visualize ("").c_str());
     }
   }
 

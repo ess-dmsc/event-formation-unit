@@ -9,7 +9,7 @@ endif()
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(EXTRA_CXX_FLAGS "-Werror -Wall -Wpedantic -Wextra")
-set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -O3 -DRELEASE -DNDEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-Ofast -O3 -DRELEASE -DNDEBUG -g")
 #set(CMAKE_CXX_FLAGS_RELEASE ${CMAKE_CXX_FLAGS_RELEASE} "-ggdb -fno-omit-frame-pointer")
 
 add_definitions("-D__FAVOR_BSD") #Not working correctly?
