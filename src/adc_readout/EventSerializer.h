@@ -85,7 +85,7 @@ public:
   EventSerializer(std::string SourceName, size_t BufferSize,
                   std::chrono::milliseconds TransmitTimeout,
                   ProducerBase *KafkaProducer, TimestampMode Mode,
-                  OffsetTime UseOffset = OffsetTime::NONE);
+                  OffsetTime UseOffset);
   /// \brief Stops the thread and may for this reason take a long time before
   /// returning.
   virtual ~EventSerializer();

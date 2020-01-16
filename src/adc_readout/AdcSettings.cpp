@@ -7,9 +7,38 @@
 
 #include "AdcSettings.h"
 #include "AdcReadoutConstants.h"
+#include <regex>
 
 using PosType = AdcSettings::PositionSensingType;
 using ChRole = AdcSettings::ChannelRole;
+
+auto stringToTime(std::string const &TimeString) {
+  using namespace std::string_literals;
+  std::regex DateTimeRegex{
+      R"rr(^(\d{4})-(\d{2})-(\d{2})t(\d{2}):(\d{2}):(\d{2})z$)rr"};
+  std::smatch Match;
+  if (not std::regex_match(TimeString, Match, DateTimeRegex)) {
+    throw std::runtime_error("The string \"" + TimeString +
+                             "\" is not a valid date time string.");
+  }
+  auto GetValue = [](auto Match, auto MinValue, auto MaxValue,
+                     auto TypeOfValue) {
+    auto IntValue = std::atoi(Match.c_str());
+    if (IntValue > MaxValue or IntValue < MinValue) {
+      throw std::runtime_error("The value "s + std::to_string(MaxValue) +
+                               " is not a valid "s + TypeOfValue + " value."s);
+    }
+    return IntValue;
+  };
+  std::tm t{};
+  t.tm_year = GetValue(Match[1].str(), 1970, 3000, "year") - 1900;
+  t.tm_mon = GetValue(Match[2].str(), 1, 12, "month") - 1;
+  t.tm_mday = GetValue(Match[3].str(), 1, 31, "day");
+  t.tm_hour = GetValue(Match[4].str(), 0, 23, "hour");
+  t.tm_min = GetValue(Match[5].str(), 0, 59, "minute");
+  t.tm_sec = GetValue(Match[6].str(), 0, 60, "second");
+  return std::chrono::system_clock::from_time_t(timegm(&t));
+}
 
 void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
   Parser
@@ -31,6 +60,41 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
                   "Kafka broker.")
       ->group("ADC Readout Options")
       ->default_str("AdcDemonstrator");
+
+  auto ParseOffsetTimestamp =
+      [&ReadoutSettings](std::vector<std::string> const &Input) -> bool {
+    auto TestString = Input.at(0);
+    std::transform(TestString.begin(), TestString.end(), TestString.begin(),
+                   [](unsigned char c) { return std::tolower(c); });
+    if (TestString == "none") {
+      ReadoutSettings.TimeOffsetSetting = OffsetTime::NONE;
+      return true;
+    } else if (TestString == "now") {
+      ReadoutSettings.TimeOffsetSetting = OffsetTime::NOW;
+      return true;
+    } else {
+      try {
+        ReadoutSettings.ReferenceTime = stringToTime(TestString);
+        ReadoutSettings.TimeOffsetSetting = OffsetTime::TIME_POINT;
+        return true;
+      } catch (std::runtime_error &Error) {
+        return false;
+      }
+    }
+    return false;
+  };
+  CLI::callback_t CBOffsetTime(ParseOffsetTimestamp);
+  Parser
+      .add_option("--time_stamp_offset", CBOffsetTime,
+                  "Offset the timestamp of the processed events. Takes one of "
+                  "two options:"
+                  "\n1. NONE (No timestamp offset.)"
+                  "\n2. NOW (The first packet timestamp will be offset such "
+                  "that it will be the current timestamp)."
+                  "\n3. Reference data and time the following format "
+                  "\"1980-07-21T02:51:04Z\".")
+      ->group("ADC Readout Options")
+      ->default_str("NONE");
   Parser
       .add_flag("--sample_timestamp", ReadoutSettings.SampleTimeStamp,
                 "Provide a timestamp with every single ADC sample. Note: this "
@@ -41,7 +105,7 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
     int InputVal;
     try {
       InputVal = std::stoi(Input[0]);
-      if (InputVal < 1 or InputVal > AdcTimerCounterMax) {
+      if (InputVal < 1 or InputVal > TimerClockFrequencyInternal / 2) {
         return false;
       }
     } catch (std::invalid_argument &E) {
@@ -73,20 +137,6 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
                   "enabled. If empty string, use the default setting.")
       ->group("Sampling Options")
       ->default_str("delayline_detector");
-  Parser
-      .add_option(
-          "--alt_detector_interface", ReadoutSettings.AltDetectorInterface,
-          "The interface (actualy IP address) to which the alternative (other) "
-          "ADC readout box is connected. Ignored if \"--alt_detector_port=0\".")
-      ->group("Delay Line Options")
-      ->default_str("0.0.0.0");
-  Parser
-      .add_option("--alt_detector_port", ReadoutSettings.AltDetectorPort,
-                  "The UDP port to which the second (alternative) ADC readout "
-                  "box sends its data. Disables the second ADC readout box if "
-                  "set to 0.")
-      ->group("Delay Line Options")
-      ->default_str("0");
   Parser
       .add_option("--xaxis_offset", ReadoutSettings.XAxisCalibOffset,
                   "The offset of the x-axis postion value.")
@@ -175,31 +225,6 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
       ->default_str("NONE"); // Use std::move to work around a bug in CLI11
   Parser
       .add_option("--adc1_ch4_role", ReadoutSettings.ADC1Channel4,
-                  "Set the role of an input-channel.")
-      ->group("Delay Line Options")
-      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
-      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
-
-  Parser
-      .add_option("--adc2_ch1_role", ReadoutSettings.ADC2Channel1,
-                  "Set the role of an input-channel.")
-      ->group("Delay Line Options")
-      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
-      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
-  Parser
-      .add_option("--adc2_ch2_role", ReadoutSettings.ADC2Channel2,
-                  "Set the role of an input-channel.")
-      ->group("Delay Line Options")
-      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
-      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
-  Parser
-      .add_option("--adc2_ch3_role", ReadoutSettings.ADC2Channel3,
-                  "Set the role of an input-channel.")
-      ->group("Delay Line Options")
-      ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))
-      ->default_str("NONE"); // Use std::move to work around a bug in CLI11
-  Parser
-      .add_option("--adc2_ch4_role", ReadoutSettings.ADC2Channel4,
                   "Set the role of an input-channel.")
       ->group("Delay Line Options")
       ->transform(CLI::CheckedTransformer(ChRoleMap, CLI::ignore_case))

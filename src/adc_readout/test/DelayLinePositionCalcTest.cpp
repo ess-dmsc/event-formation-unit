@@ -517,7 +517,6 @@ TEST_F(DelayLineTimeCalc, DoubleEndCalc) {
 TEST_F(DelayLineTimeCalc, AmplitudeTest1) {
   Tester.setChannelRole({0, 2},
                         DelayLinePosCalcInterface::ChannelRole::REFERENCE);
-  RawTimeStamp TimeStamp{1, 10};
   auto TestAmplitude = 213;
   TestPulse.Identifier = ChannelID{0, 2};
   TestPulse.PeakArea = TestAmplitude;

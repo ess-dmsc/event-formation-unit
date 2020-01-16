@@ -17,7 +17,8 @@ using namespace std::chrono_literals;
 class DelayLineProducerStandIn : public DelayLineProducer {
 public:
   explicit DelayLineProducerStandIn(AdcSettings Settings)
-      : DelayLineProducer("no_broker", "no_topic", std::move(Settings)) {}
+      : DelayLineProducer("no_broker", "no_topic", std::move(Settings),
+                          {OffsetTime::Offset::NONE}) {}
   void bypassMockSerializeAndSendEvent(DelayLineEvent const &Evt) {
     DelayLineProducer::serializeAndSendEvent(Evt);
   }

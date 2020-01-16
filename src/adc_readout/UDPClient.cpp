@@ -28,6 +28,11 @@ UDPClient::UDPClient(std::shared_ptr<asio::io_service> const &IOService,
   setupReceiver();
 }
 
+void UDPClient::setPacketHandler(
+    std::function<void(InData const &Packet)> Handler) {
+  PacketHandler = std::move(Handler);
+}
+
 void UDPClient::receiveHandler(const asio::error_code &Error,
                                std::size_t BytesReceived) {
   if (Error) {

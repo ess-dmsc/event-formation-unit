@@ -12,7 +12,7 @@
 
 class SamplingTimer {
 public:
-  explicit SamplingTimer(std::function<void(RawTimeStamp const &)> OnTimer);
+  explicit SamplingTimer(std::function<void(TimeStamp const &)> OnTimer);
   virtual ~SamplingTimer() = default;
   virtual void start() = 0;
   virtual void stop() = 0;
@@ -21,5 +21,5 @@ protected:
   void runFunction();
 
 private:
-  std::function<void(RawTimeStamp const &)> SamplingFunc;
+  std::function<void(TimeStamp const &)> SamplingFunc;
 };

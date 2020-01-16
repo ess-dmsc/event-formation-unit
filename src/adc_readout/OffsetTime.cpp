@@ -10,19 +10,15 @@
 #include "OffsetTime.h"
 
 OffsetTime::OffsetTime(OffsetTime::Offset Time,
-                       std::chrono::system_clock::time_point OffsetPoint)
-    : OffsetSetting(Time), StartTime(OffsetPoint) {}
-
-OffsetTime::OffsetTime(std::chrono::system_clock::time_point OffsetPoint)
-    : OffsetSetting(OffsetTime::TIME_POINT), StartTime(OffsetPoint) {}
-
-std::uint64_t OffsetTime::calcTimestamp(std::uint64_t InputTime) {
-  if ((OffsetSetting == NOW or OffsetSetting == TIME_POINT) and
-      UsedOffset == 0) {
-    auto TimePointNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                           StartTime.time_since_epoch())
-                           .count();
-    UsedOffset = TimePointNS - InputTime;
+                       std::chrono::system_clock::time_point ReferenceTimePoint,
+                       std::uint64_t StartTimestampNS) {
+  if (Time == Offset::NONE) {
+    return; // Do nothing
+  } else if (Time == Offset::NOW) {
+    ReferenceTimePoint = std::chrono::system_clock::now();
   }
-  return InputTime + UsedOffset;
+  auto RefTimePointNS = std::chrono::duration_cast<std::chrono::nanoseconds>(
+                            ReferenceTimePoint.time_since_epoch())
+                            .count();
+  UsedOffset = RefTimePointNS - StartTimestampNS;
 }

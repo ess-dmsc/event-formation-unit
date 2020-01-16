@@ -17,13 +17,14 @@ public:
   static const Offset NOW = Offset::NOW;
   static const Offset NONE = Offset::NONE;
   static const Offset TIME_POINT = Offset::TIME_POINT;
-  OffsetTime(Offset Time, std::chrono::system_clock::time_point OffsetPoint =
-                              std::chrono::system_clock::now());
-  explicit OffsetTime(std::chrono::system_clock::time_point OffsetPoint);
-  std::uint64_t calcTimestamp(std::uint64_t InputTime);
+  OffsetTime(Offset Time,
+             std::chrono::system_clock::time_point ReferenceTimePoint =
+                 std::chrono::system_clock::now(),
+             std::uint64_t StartTimestampNS = 0);
+  std::uint64_t calcTimestampNS(std::uint64_t InputTimeNS) const {
+    return InputTimeNS + UsedOffset;
+  }
 
 private:
-  Offset OffsetSetting{Offset::NONE};
-  std::uint64_t UsedOffset{0};
-  std::chrono::system_clock::time_point StartTime;
+  std::int64_t UsedOffset{0};
 };

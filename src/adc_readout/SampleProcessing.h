@@ -42,8 +42,7 @@ struct ProcessedSamples {
 /// \param[in] End Time stamp of last sample.
 /// \param[in] Location Which timestamp to return.
 /// \return The selected timestamp converted to nanoseconds.
-std::uint64_t CalcSampleTimeStamp(RawTimeStamp const &Start,
-                                  RawTimeStamp const &End,
+std::uint64_t CalcSampleTimeStamp(TimeStamp const &Start, TimeStamp const &End,
                                   TimeStampLocation const Location);
 
 /// \brief Does processing of individual samples before serialisation.
@@ -83,18 +82,19 @@ private:
   int MeanOfNrOfSamples{1};
   int SumOfSamples{0};
   int NrOfSamplesSummed{0};
-  RawTimeStamp TimeStampOfFirstSample;
+  TimeStamp TimeStampOfFirstSample;
   TimeStampLocation TSLocation{TimeStampLocation::Middle};
 };
 
 /// \brief Handles processing of sample data, serialization and transmission
-/// (prouction) to a Kafka broker.
+/// (production) to a Kafka broker.
 class SampleProcessing : public AdcDataProcessor {
 public:
   /// \param[in] Prod Shared pointer to Kafka producer instance.
   /// \param[in] Name Name of the data source. Used when setting the name of the
   /// source of the flatbuffer.
-  SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string Name);
+  SampleProcessing(std::shared_ptr<ProducerBase> Prod, std::string Name,
+                   OffsetTime UsedOffset);
   ~SampleProcessing() = default;
 
   /// \brief Called to actually process, serialise and transmit the (already)
@@ -124,4 +124,5 @@ protected:
   int MeanOfNrOfSamples{1};
   bool SampleTimestamps{false};
   TimeStampLocation TSLocation{TimeStampLocation::Middle};
+  OffsetTime TimeOffset;
 };

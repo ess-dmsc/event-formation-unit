@@ -98,13 +98,15 @@ void EventSerializer::serialiseFunction() {
       return;
     }
     EventMessage->mutate_message_id(MessageId++);
-    EventMessage->mutate_pulse_time(ReferenceTime);
+    EventMessage->mutate_pulse_time(
+        RefTimeOffset.calcTimestampNS(ReferenceTime));
 
     for (auto const &CEvent : SendEvents) {
       TimeOffset.push_back(
           static_cast<std::uint32_t>(CEvent.Timestamp - ReferenceTime));
-      ThresholdTime.push_back(CEvent.ThresholdTime);
-      PeakTime.push_back(CEvent.PeakTime);
+      ThresholdTime.push_back(
+          RefTimeOffset.calcTimestampNS(CEvent.ThresholdTime));
+      PeakTime.push_back(RefTimeOffset.calcTimestampNS(CEvent.PeakTime));
       EventId.push_back(CEvent.EventId);
       Amplitude.push_back(CEvent.Amplitude);
       PeakArea.push_back(CEvent.PeakArea);
@@ -112,7 +114,7 @@ void EventSerializer::serialiseFunction() {
     }
 
     Producer->produce({Builder.GetBufferPointer(), Builder.GetSize()},
-                      RefTimeOffset.calcTimestamp(ReferenceTime) / 1000000);
+                      RefTimeOffset.calcTimestampNS(ReferenceTime) / 1000000);
     TimeOffset.clear();
     EventId.clear();
     Amplitude.clear();

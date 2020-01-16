@@ -8,10 +8,10 @@
 #include "SampleProcessing.h"
 #include "AdcReadoutConstants.h"
 #include "senv_data_generated.h"
+#include <algorithm>
 #include <cmath>
 
-std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start,
-                                  const RawTimeStamp &End,
+std::uint64_t CalcSampleTimeStamp(const TimeStamp &Start, const TimeStamp &End,
                                   const TimeStampLocation Location) {
   std::uint64_t StartNS = Start.getTimeStampNS();
   std::uint64_t EndNS = End.getTimeStampNS();
@@ -24,11 +24,6 @@ std::uint64_t CalcSampleTimeStamp(const RawTimeStamp &Start,
   return StartNS + (EndNS - StartNS) / 2;
 }
 
-double CalcTimeStampDelta(int OversamplingFactor) {
-  constexpr double SampleTime = 1e9 / AdcTimerCounterMax;
-  return SampleTime * OversamplingFactor;
-}
-
 ProcessedSamples ChannelProcessing::processModule(const SamplingRun &Samples) {
   int FinalOversamplingFactor = MeanOfNrOfSamples * Samples.OversamplingFactor;
   if (FinalOversamplingFactor == 0) {
@@ -39,7 +34,8 @@ ProcessedSamples ChannelProcessing::processModule(const SamplingRun &Samples) {
       (Samples.Data.size() + NrOfSamplesSummed) / MeanOfNrOfSamples;
   ProcessedSamples ReturnSamples(TotalNumberOfSamples);
 
-  ReturnSamples.TimeDelta = CalcTimeStampDelta(FinalOversamplingFactor);
+  ReturnSamples.TimeDelta = FinalOversamplingFactor *
+                            Samples.ReferenceTimestamp.getClockCycleLength();
   std::uint64_t TimeStampOffset{0};
   if (TSLocation == TimeStampLocation::Middle) {
     TimeStampOffset =
@@ -53,7 +49,7 @@ ProcessedSamples ChannelProcessing::processModule(const SamplingRun &Samples) {
 
   for (size_t i = 0; i < Samples.Data.size(); i++) {
     if (0 == NrOfSamplesSummed) {
-      TimeStampOfFirstSample = Samples.TimeStamp.getOffsetTimeStamp(
+      TimeStampOfFirstSample = Samples.StartTime.getOffsetTimeStamp(
           i * Samples.OversamplingFactor - (Samples.OversamplingFactor - 1));
     }
     SumOfSamples += Samples.Data[i];
@@ -90,8 +86,9 @@ void ChannelProcessing::reset() {
 }
 
 SampleProcessing::SampleProcessing(std::shared_ptr<ProducerBase> Prod,
-                                   std::string Name)
-    : AdcDataProcessor(std::move(Prod)), AdcName(std::move(Name)) {}
+                                   std::string Name, OffsetTime UsedOffset)
+    : AdcDataProcessor(std::move(Prod)), AdcName(std::move(Name)),
+      TimeOffset(UsedOffset) {}
 
 void SampleProcessing::setMeanOfSamples(int NrOfSamples) {
   MeanOfNrOfSamples = NrOfSamples;
@@ -119,7 +116,11 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
   auto FBSampleData = builder.CreateVector(Data.Samples);
   flatbuffers::Offset<flatbuffers::Vector<std::uint64_t>> FBTimeStamps;
   if (SampleTimestamps) {
-    FBTimeStamps = builder.CreateVector(Data.TimeStamps);
+    auto SampleTimes = Data.TimeStamps;
+    std::transform(
+        SampleTimes.begin(), SampleTimes.end(), SampleTimes.begin(),
+        [this](auto const &TS) { return TimeOffset.calcTimestampNS(TS); });
+    FBTimeStamps = builder.CreateVector(SampleTimes);
   }
 
   auto FBName = builder.CreateString(
@@ -132,7 +133,8 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
     MessageBuilder.add_Timestamps(FBTimeStamps);
   }
   MessageBuilder.add_Channel(Data.Identifier.ChannelNr);
-  MessageBuilder.add_PacketTimestamp(Data.TimeStamp);
+  auto NewOffsetTimestamp = TimeOffset.calcTimestampNS(Data.TimeStamp);
+  MessageBuilder.add_PacketTimestamp(NewOffsetTimestamp);
   MessageBuilder.add_TimeDelta(Data.TimeDelta);
 
   MessageBuilder.add_MessageCounter(MessageCounter++);
@@ -140,5 +142,5 @@ void SampleProcessing::serializeAndTransmitData(ProcessedSamples const &Data) {
       Location(TimeLocSerialisationMap.at(TSLocation)));
   builder.Finish(MessageBuilder.Finish(), SampleEnvironmentDataIdentifier());
   ProducerPtr->produce({builder.GetBufferPointer(), builder.GetSize()},
-                       Data.TimeStamp / 1000000);
+                       NewOffsetTimestamp / 1000000);
 }

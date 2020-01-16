@@ -13,11 +13,12 @@
 using namespace std::chrono_literals;
 
 DelayLineProducer::DelayLineProducer(std::string Broker, std::string Topic,
-                                     AdcSettings EfuSettings)
+                                     AdcSettings EfuSettings,
+                                     OffsetTime UsedOffset)
     : Producer(std::move(Broker), std::move(Topic)),
       Settings(std::move(EfuSettings)),
       Serializer("delay_line_detector", 200, 500ms, this,
-                 EventSerializer::TimestampMode::TIME_REFERENCED) {
+                 EventSerializer::TimestampMode::TIME_REFERENCED, UsedOffset) {
   PulseProcessingThread =
       std::thread(&DelayLineProducer::pulseProcessingFunction, this);
 }
@@ -70,7 +71,7 @@ DelayLineProducer::~DelayLineProducer() {
 }
 
 void DelayLineProducer::addReferenceTimestamp(
-    RawTimeStamp const &ReferenceTimestamp) {
+    TimeStamp const &ReferenceTimestamp) {
   std::uint64_t TempRefTimeStamp = ReferenceTimestamp.getTimeStampNS();
   if (CurrentReferenceTimestamp != TempRefTimeStamp) {
     CurrentReferenceTimestamp = TempRefTimeStamp;

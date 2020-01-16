@@ -36,7 +36,7 @@ public:
   /// \param[in] EfuSettings The required settings for setting up the delay line
   /// position calculation.
   DelayLineProducer(std::string Broker, std::string Topic,
-                    AdcSettings EfuSettings);
+                    AdcSettings EfuSettings, OffsetTime UsedOffset);
 
   /// \brief Stop processing thread and deallocate resources.
   ~DelayLineProducer();
@@ -45,7 +45,7 @@ public:
   /// \param[in] Pulse Pulse parameters of the registered pulse.
   void addPulse(PulseParameters const Pulse);
 
-  void addReferenceTimestamp(RawTimeStamp const &ReferenceTimestamp);
+  void addReferenceTimestamp(TimeStamp const &ReferenceTimestamp);
 
   std::int64_t &getNrOfEvents() { return EventCounter; }
 

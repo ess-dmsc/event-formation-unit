@@ -13,6 +13,7 @@
 #include "AdcTimeStamp.h"
 #include "ChannelID.h"
 #include "SamplingRun.h"
+#include <cstdint>
 #include <exception>
 #include <functional>
 #include <netinet/in.h>
@@ -35,6 +36,7 @@ public:
     DATA_CANT_PROCESS,
     HEADER_LENGTH,
     HEADER_TYPE,
+    HEADER_PROTOCOL_VERSION,
     IDLE_LENGTH,
   };
   /// \brief Sets the (parsing) error type to Type::UNKNOWN.
@@ -60,7 +62,7 @@ public:
 };
 
 /// \brief Different types of data packets form teh ADC hardware.
-enum class PacketType { Idle, Data, Unknown };
+enum class PacketType : std::uint8_t { Idle = 0x22, Data = 0x11, Unknown };
 
 /// \brief Parsed data containing 0 or more data modules form sampling runs.
 struct PacketInfo {
@@ -71,7 +73,7 @@ struct PacketInfo {
 /// \brief Returned by the header parser.
 struct HeaderInfo {
   PacketType Type = PacketType::Unknown;
-  RawTimeStamp ReferenceTimestamp;
+  TimeStamp ReferenceTimestamp;
   std::uint16_t ReadoutCount{0};
   std::int32_t DataStart{0};
 };
@@ -87,16 +89,29 @@ struct IdleInfo {
   std::int32_t FillerStart = 0;
 };
 
+enum class Protocol : std::uint8_t {
+  VER_0 = 0x11,
+  VER_0_1 = 0x11,
+  VER_0_2 = 0x22,
+  VER_1 = 0x01,
+};
+
+enum class Clock : std::uint8_t {
+  Clk_Ext = 0x01,
+  Clk_45MHz = 0x00,
+};
+
 #pragma pack(push, 2)
 /// \brief Used by the header parser to map types to the binary data.
 struct PacketHeader {
-  std::uint16_t PacketType;
+  Protocol Version;
+  PacketType Type;
   std::uint16_t ReadoutLength;
   std::uint16_t ReadoutCount;
-  std::uint16_t Reserved;
+  Clock ClockMode;
+  std::uint8_t OversamplingFactor;
   RawTimeStamp ReferenceTimeStamp;
   void fixEndian() {
-    PacketType = ntohs(PacketType);
     ReadoutLength = ntohs(ReadoutLength);
     ReadoutCount = ntohs(ReadoutCount);
     ReferenceTimeStamp.fixEndian();
@@ -155,7 +170,7 @@ protected:
   /// \return The start of the filler/trailer in the array.
   /// \throw ParserException See exception type for possible parsing failures.
   size_t parseData(const InData &Packet, std::uint32_t StartByte,
-                   RawTimeStamp const &ReferenceTimestamp);
+                   TimeStamp const &ReferenceTimestamp);
 
 private:
   std::function<bool(SamplingRun *)> HandleModule;
@@ -184,3 +199,15 @@ TrailerInfo parseTrailer(const InData &Packet, std::uint32_t StartByte);
 /// \return Idle packet timestamp.
 /// \throw ParserException See exception type for possible parsing failures.
 IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte);
+
+struct ConfigInfo {
+  enum class Version { VER_0, VER_1 } ProtocolVersion;
+  TimeStamp BaseTime;
+};
+
+/// \brief Extract information from the header of a packet for the purpose of
+/// setting up the parsing of subsequent packets.
+/// \param[in] Packet Raw data buffer.
+/// \return Packet information, i.e. protocol version and time stamp.
+/// \throw ParserException See exceptions type for possible parsing failures.
+ConfigInfo parseHeaderForConfigInfo(const InData &Packet);
