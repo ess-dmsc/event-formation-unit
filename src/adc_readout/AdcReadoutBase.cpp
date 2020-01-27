@@ -132,7 +132,7 @@ void AdcReadoutBase::inputThread() {
       [this](auto Identifier) { return this->GetDataModule(Identifier); });
 
   std::function<bool(SamplingRun *)> QueingFunction1([this](SamplingRun *Data) {
-    this->AdcStats.current_ts_sec = Data->StartTime.getSeconds();
+    this->AdcStats.current_ts_sec = TimestampOffset.calcTimestampNS(Data->StartTime.getTimeStampNS()) / 1000000;
     return this->QueueUpDataModule(Data);
   });
   PacketParser Parser1(QueingFunction1, DataModuleProducer, 0);
