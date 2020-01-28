@@ -90,9 +90,10 @@ builders = pipeline_builder.createBuilders { container ->
         pipeline_builder.stage("${container.key}: cppcheck") {
         try {
                 def test_output = "cppcheck.txt"
+                // Ignore file that crashes cppcheck
                 container.sh """
                                 cd ${project}
-                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ 2> ${test_output}
+                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ -isrc/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
                             """
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"

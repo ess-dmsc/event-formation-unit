@@ -1,14 +1,7 @@
 /** Copyright (C) 2017 European Spallation Source ERIC */
 
 #include <test/TestBase.h>
-
-#pragma GCC diagnostic push
-#ifdef SYSTEM_NAME_DARWIN
-#pragma GCC diagnostic ignored "-Wkeyword-macro"
-#pragma GCC diagnostic ignored "-Wmacro-redefined"
-#endif
 #include <common/reduction/matching/AbstractMatcher.h>
-#pragma GCC diagnostic pop
 
 class MockMatcher : public AbstractMatcher {
 public:
