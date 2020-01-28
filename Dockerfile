@@ -9,10 +9,12 @@ ARG https_proxy
 ARG local_conan_server
 
 RUN apt-get update -y && \
-    apt-get --no-install-recommends -y install build-essential git python-pip cmake tzdata vim m4 flex bison && \
+    apt-get --no-install-recommends -y install gcc-8 g++-8 git python-pip cmake tzdata vim m4 flex bison && \
     apt-get -y autoremove && \
     apt-get clean all && \
     rm -rf /var/lib/apt/lists/*
+  
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-8 800 --slave /usr/bin/g++ g++ /usr/bin/g++-8
 
 RUN pip install --upgrade pip==9.0.3 && pip install setuptools && \
     pip install conan && \
