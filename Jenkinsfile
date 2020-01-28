@@ -20,10 +20,10 @@ archive_what = "centos7-release"
  ]]);
 
 container_build_nodes = [
-  'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7'),
-  'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7'),
-  'debian9': ContainerBuildNode.getDefaultContainerBuildNode('debian9'),
-  'ubuntu1804': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu1804')
+  'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8'),
+  'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8'),
+  'debian9': ContainerBuildNode.getDefaultContainerBuildNode('debian10'),
+  'ubuntu1804': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu1804-gcc8')
 ]
 
 def failure_function(exception_obj, failureMessage) {
