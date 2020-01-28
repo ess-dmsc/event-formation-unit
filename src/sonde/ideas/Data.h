@@ -133,7 +133,7 @@ private:
   int hdr_length{0};
 
   bool dumptofile{false};
-  std::shared_ptr<DataSave>(datafile);
+  std::shared_ptr<DataSave> datafile;
 };
 
 }
