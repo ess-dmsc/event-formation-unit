@@ -4,7 +4,7 @@ import ecdcpipeline.PipelineBuilder
 
 project = "event-formation-unit"
 coverage_on = "centos7"
-clangformat_os = "debian9"
+clangformat_os = "debian10"
 archive_what = "centos7-release"
 
 // Set number of old builds to keep.
@@ -22,7 +22,7 @@ archive_what = "centos7-release"
 container_build_nodes = [
   'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8'),
   'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8'),
-  'debian9': ContainerBuildNode.getDefaultContainerBuildNode('debian10'),
+  'debian10': ContainerBuildNode.getDefaultContainerBuildNode('debian10'),
   'ubuntu1804': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu1804-gcc8')
 ]
 
