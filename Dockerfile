@@ -26,5 +26,5 @@ RUN cd efu && \
     cmake -DCONAN="MANUAL" ../efu_src && \
     make -j4
 
-COPY docker_launch.sh /
+COPY docker_launch.sh .
 CMD ["./docker_launch.sh"]
