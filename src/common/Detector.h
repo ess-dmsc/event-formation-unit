@@ -129,6 +129,6 @@ public:
   ///
   /// This member function is only called by the efu when loading a detector module.
   std::shared_ptr<Detector> create(BaseSettings Settings) override {
-    return std::shared_ptr<Detector>(new DetectorModule(Settings));
+    return std::make_shared<DetectorModule>(Settings);
   }
 };
