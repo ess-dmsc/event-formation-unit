@@ -34,7 +34,7 @@ services:
       - kafka
     environment:
       EXECUTABLE: efu
-      OPT_ARGS: -d ./efu/modules/mbcaen.so -f ./MB18Freia.json -b kafka --nohwcheck
+      OPT_ARGS: -d ./efu/modules/mbcaen.so -f /MB18Freia.json -b kafka --nohwcheck
     hostname: efu
     volumes:
       - JSON_DATA_PATH/MB18Freia.json:/MB18Freia.json
