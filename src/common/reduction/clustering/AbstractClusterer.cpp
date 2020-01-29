@@ -14,6 +14,10 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+char *ClusterContainerAllocatorBase::s_MemBegin = (char*)malloc(1024 * 1024 * 1024);
+char *ClusterContainerAllocatorBase::s_MemEnd = s_MemBegin + (1024 * 1024 * 1024);
+
+
 std::string to_string(const ClusterContainer &container,
                       const std::string &prepend, bool verbose) {
   if (container.empty())

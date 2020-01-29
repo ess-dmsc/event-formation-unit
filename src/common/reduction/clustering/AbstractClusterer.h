@@ -12,11 +12,47 @@
 #include <list>
 //#include <deque>
 
+
+struct ClusterContainerAllocatorBase {
+  static char *s_MemBegin;
+  static char *s_MemEnd;
+};
+
+template <class T> struct ClusterContainerAllocator : public ClusterContainerAllocatorBase {
+  typedef T value_type;
+
+  ClusterContainerAllocator() = default;
+  template <class U> constexpr ClusterContainerAllocator(const ClusterContainerAllocator<U> &) noexcept {}
+
+  T *allocate(std::size_t n) {
+    char* p = s_MemBegin;
+    s_MemBegin += n * sizeof(T);
+    if (s_MemBegin < s_MemEnd)
+      return (T*)p;
+    return nullptr;
+    //throw std::bad_alloc();
+  }
+  void deallocate(T *, std::size_t) noexcept { /* do nothing*/
+  }
+};
+
+template <class T, class U>
+bool operator==(const ClusterContainerAllocator<T> &, const ClusterContainerAllocator<U> &) {
+  return true;
+}
+template <class T, class U>
+bool operator!=(const ClusterContainerAllocator<T> &, const ClusterContainerAllocator<U> &) {
+  return false;
+}
+
+
+
 // \todo the abstract class code needs tests
 
 // \todo refactor: move out to separate header
 // \todo replace by deque, or....?
-using ClusterContainer = std::list<Cluster>;
+using ClusterContainer = std::list<Cluster, ClusterContainerAllocator<Cluster>>;
+//using ClusterContainer = std::list<Cluster>;
 
 /// \brief convenience function for printing a ClusterContainer
 std::string to_string(const ClusterContainer &container,

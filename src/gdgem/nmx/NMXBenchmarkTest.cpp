@@ -16,8 +16,7 @@
 
 #include <memory>
 
-#include <callgrind.h>
-//#include </Users/mortenhilkerskaaning/Library/Caches/Homebrew/valgrind--git/callgrind/callgrind.h> // hack
+#include <valgrind/callgrind.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -84,16 +83,14 @@ BENCHMARK_DEFINE_F(NmxBenchmarkTest, Dummy)(benchmark::State &state) {
   //fmt::print("state range {}\n", state.range(0));
   uint32_t totalHitCount = 0;
 
-  //CALLGRIND_START_INSTRUMENTATION;
   CALLGRIND_TOGGLE_COLLECT; // turn on
 
   for (auto _ : state) {
 
-    int numEvents = state.range(0) / 4;//2;
+    int numEvents = state.range(0) / (4 * 2);//2;
 
     // generate Hits for builder
     state.PauseTiming();
-    //CALLGRIND_STOP_INSTRUMENTATION;
     CALLGRIND_TOGGLE_COLLECT; // turn off
 
     SetUp (state);// HACK RESET
@@ -114,24 +111,22 @@ BENCHMARK_DEFINE_F(NmxBenchmarkTest, Dummy)(benchmark::State &state) {
       }
       //HitGen.printHits();
 
-      //fmt::print("hits {}\n", HitGen.Hits.size());
-
       // store hits in builder
       builder_->process_buffer(reinterpret_cast<char *>(&HitGen.Hits[0]),
                                sizeof(Hit) * HitGen.Hits.size());
 
       std::shared_ptr<HitBuilder_t> hitBuilderConcrete =
           std::dynamic_pointer_cast<HitBuilder_t>(builder_);
+
+      //fmt::print("converted_data.size {}, hits {}\n", hitBuilderConcrete->converted_data.size(), HitGen.Hits.size());
       assert(hitBuilderConcrete->converted_data.size() == HitGen.Hits.size());
 
-      totalHitCount += HitGen.Hits.size();
+      totalHitCount += hitBuilderConcrete->converted_data.size();
     }
     
-    //CALLGRIND_START_INSTRUMENTATION;
     CALLGRIND_TOGGLE_COLLECT; // turn on
     state.ResumeTiming();
    
-
     // perform_clustering()
     {
       bool flush = true; // we're matching the last time for this clustering
@@ -161,7 +156,6 @@ BENCHMARK_DEFINE_F(NmxBenchmarkTest, Dummy)(benchmark::State &state) {
     builder_->hit_buffer_y.clear();
   }
 
-  //CALLGRIND_STOP_INSTRUMENTATION;
   CALLGRIND_TOGGLE_COLLECT; // turn off
 
   state.SetBytesProcessed(sizeof(Hit) * totalHitCount);
@@ -169,9 +163,9 @@ BENCHMARK_DEFINE_F(NmxBenchmarkTest, Dummy)(benchmark::State &state) {
   state.SetComplexityN(totalHitCount);
 }
 
-BENCHMARK_REGISTER_F(NmxBenchmarkTest, Dummy)->RangeMultiplier(2)->Range(8, 8)->Complexity();
+//BENCHMARK_REGISTER_F(NmxBenchmarkTest, Dummy)->RangeMultiplier(2)->Range(8, 8)->Complexity();
 //BENCHMARK_REGISTER_F(NmxBenchmarkTest, Dummy)->RangeMultiplier(2)->Range(8, 8000)->Complexity();
-//BENCHMARK_REGISTER_F(NmxBenchmarkTest, Dummy)->RangeMultiplier(2)->Range(8000, 8000)->Complexity();
+BENCHMARK_REGISTER_F(NmxBenchmarkTest, Dummy)->RangeMultiplier(2)->Range(692, 692)->Complexity();
 // BENCHMARK(NmxBenchmarkTest);
 
 static void ClusterPlaneNoinline(benchmark::State &state) {

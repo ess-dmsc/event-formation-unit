@@ -10,7 +10,40 @@
 
 #include <common/reduction/Hit.h>
 
-using HitVector = std::vector<Hit>;
+struct HitAllocatorBase {
+  static char *s_MemBegin;
+  static char *s_MemEnd;
+};
+
+template <class T> struct HitAllocator : public HitAllocatorBase {
+  typedef T value_type;
+
+  HitAllocator() = default;
+  template <class U> constexpr HitAllocator(const HitAllocator<U> &) noexcept {}
+
+  T *allocate(std::size_t n) {
+    char* p = s_MemBegin;
+    s_MemBegin += n * sizeof(T);
+    if (s_MemBegin < s_MemEnd)
+      return (T*)p;
+    //return nullptr;
+    throw std::bad_alloc();
+  }
+  void deallocate(T *, std::size_t) noexcept { /* do nothing*/
+  }
+};
+
+template <class T, class U>
+bool operator==(const HitAllocator<T> &, const HitAllocator<U> &) {
+  return true;
+}
+template <class T, class U>
+bool operator!=(const HitAllocator<T> &, const HitAllocator<U> &) {
+  return false;
+}
+
+using HitVector = std::vector<Hit, HitAllocator<Hit>>;
+//using HitVector = std::vector<Hit>;
 
 /// \brief convenience function for sorting Hits by increasing time
 inline void sort_chronologically(HitVector &hits) {

@@ -16,17 +16,14 @@
 ///        are treated as having an uncertainty of 1 when evaluating dimensions,
 ///        thus including the endpoints.
 
-class Cluster {
+class  Cluster {
 public:
-  // \todo should be protected?
+  /// \todo should be protected?
   /// \note This variable is left public, because event reduction/analysis strategies
   ///       must be able to sort hits in their preferred way without copying the contents
   HitVector hits;
 
-public:
-  Cluster() = default;
-  virtual ~Cluster() = default;
-
+public:  
   /// \brief adds hit to cluster, accumulates mass and recalculates bounds
   ///        no validation is enforced, duplicates possible
   ///        no particular time or spatial ordering is expected

@@ -9,6 +9,7 @@
 #include <common/reduction/Cluster.h>
 #include <fmt/format.h>
 #include <cmath>
+#include <algorithm>
 
 #define ASCII_grayscale94 " .`:,;'_^\"></-!~=)(|j?}{][ti+l7v1%yrfcJ32uIC$zwo96sngaT5qpkYVOL40&mG8*xhedbZUSAQPFDXWK#RNEHBM@"
 #define ASCII_grayscale70 " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
@@ -21,6 +22,8 @@ void Cluster::insert(const Hit &e) {
     coord_start_ = coord_end_ = e.coordinate;
     utpc_idx_min_ = 0;
     utpc_idx_max_ = 0;
+
+    hits.reserve(8); // reserve size should be proportional to expected cluster size?
   }
 
   // If plane identities don't match, invalidate
@@ -73,7 +76,7 @@ void Cluster::merge(Cluster &other) {
     // clear();
   }
 
-  hits.reserve(hits.size() + other.hits.size()); // preallocate memory
+  hits.reserve(std::max (hits.size() + other.hits.size(), size_t(8))); // preallocate memory
   hits.insert(hits.end(), other.hits.begin(), other.hits.end());
 
   weight_sum_ += other.weight_sum_;

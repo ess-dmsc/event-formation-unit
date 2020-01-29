@@ -30,7 +30,7 @@ void GapClusterer::insert(const Hit &hit) {
   current_time_cluster_.emplace_back(hit);
 }
 
-void GapClusterer::cluster(const HitVector &hits) {
+void GapClusterer:: cluster(const HitVector &hits) {
   /// It is assumed that hits are sorted in time
   for (const auto &hit : hits) {
     XTRACE(CLUSTER, DEB, "insert hit %s", hit.to_string().c_str());

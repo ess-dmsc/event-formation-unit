@@ -12,8 +12,11 @@
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
-AbstractMatcher::AbstractMatcher(uint64_t maximum_latency, uint8_t planeA, uint8_t planeB)
-    : maximum_latency_(maximum_latency), PlaneA(planeA), PlaneB(planeB) {}
+AbstractMatcher::AbstractMatcher(uint64_t maximum_latency, uint8_t planeA,
+                                 uint8_t planeB)
+    : maximum_latency_(maximum_latency), PlaneA(planeA), PlaneB(planeB) {
+  matched_events.reserve(10000);
+}
 
 void AbstractMatcher::insert(const Cluster &cluster) {
   if (cluster.plane() == PlaneA) {

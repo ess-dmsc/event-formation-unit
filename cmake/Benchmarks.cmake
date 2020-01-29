@@ -3,14 +3,15 @@ option(GOOGLE_BENCHMARK "Enable google benchmark for unit tests" OFF)
 
 set(benchmark_targets "" CACHE INTERNAL "All targets")
 
-set(callgrind_INCLUDE_DIR 
-  /Users/mortenhilkerskaaning/Library/Caches/Homebrew/valgrind--git/callgrind/
-  /Users/mortenhilkerskaaning/Library/Caches/Homebrew/valgrind--git/include/
-)
+
+set(callgrind_INCLUDE_DIR /usr/local/opt/valgrind/include/)
+set(callgrind_USING_DEFINE -DBUILD_USE_VALGRIND)
+if(NOT EXISTS ${callgrind_INCLUDE_DIR})
+  set(callgrind_INCLUDE_DIR )
+  set(callgrind_USING_DEFINE )
+endif()
 
 message(STATUS "+++ valgrind +++: ${callgrind_INCLUDE_DIR}")
-
-#if(valgrind_INCLUDE_DIRS)
 
 #
 # Generate benchmark targets
