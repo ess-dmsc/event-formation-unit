@@ -12,6 +12,13 @@
 #include <common/reduction/analysis/AbstractAnalyzer.h>
 #include <limits>
 
+enum TimeAlgo{
+ TA_center_of_mass,
+ TA_charge2,
+ TA_utpc,
+ TA_utpc_weighted 
+};
+
 class EventAnalyzer : public AbstractAnalyzer {
  public:
   /// \param time_algorithm determines algorithm to determine position and time
@@ -32,5 +39,6 @@ class EventAnalyzer : public AbstractAnalyzer {
   
  private:
   std::string time_algorithm_ = "utpc_weighted";
+  TimeAlgo time_algo = TA_utpc_weighted;
 };
 
