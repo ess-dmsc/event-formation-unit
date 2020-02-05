@@ -119,7 +119,7 @@ TEST_F(NMXCombinedProcessingTest, Dummy) {
       }
       ReducedEvent neutron_event_ = analyzer_->analyze(event);
       ASSERT_TRUE(neutron_event_.good);
-
+      // TODO, make test comparing the computed ReduceEvent with generated input events.
       XTRACE(CLUSTER, DEB, "matched event\n%s", event.visualize ("").c_str());
     }
   }
