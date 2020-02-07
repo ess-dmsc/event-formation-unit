@@ -18,7 +18,6 @@ void HitGenerator::printHits() {
   }
 }
 
-
 std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, uint8_t MaxHits,
          uint16_t X0, uint16_t Y0, float Angle, uint8_t __attribute__((unused)) Gaps, uint32_t DeadTimeNs, bool Shuffle) {
 
@@ -32,12 +31,12 @@ std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, uint8_t M
 
   assert((Plane == PlaneX) or (Plane == PlaneY));
 
-  for (unsigned int RO = 0; RO < MaxHits; RO++) {
+  for (unsigned int hit = 0; hit < MaxHits; hit++) {
     if (Plane == 0) {
-      TmpCoord = X0 + (int16_t)(RO * 1.0 * cos(D2R(Angle)));
+      TmpCoord = X0 + (int16_t)(hit * 1.0 * cos(D2R(Angle)));
       //fmt::print("X0 {}, RO {}, Angle {}, cos(angle) {}, TmpCoord {}\n", X0, RO, Angle, cosa, TmpCoord);
     } else {
-      TmpCoord = Y0 + (int16_t)(RO * 1.0 * sin(D2R(Angle)));
+      TmpCoord = Y0 + (int16_t)(hit * 1.0 * sin(D2R(Angle)));
     }
 
     if ((TmpCoord > CoordMax) or (TmpCoord < CoordMin)) {
@@ -67,6 +66,21 @@ std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, uint8_t M
     OldCoord = Coord;
   }
 
+  // Handle gaps
+  if (Gaps) {
+    std::vector<Hit> GapHits;
+    if (Gaps > TmpHits.size() - 2) {
+      //fmt::print("Gaps requestes {}, available {}\n", Gaps, TmpHits.size() - 2);
+      TmpHits.clear();
+    }
+    for (unsigned int i = 0; i < TmpHits.size(); i ++) {
+      if ((i == 0) or (i > Gaps)) {
+        GapHits.push_back(TmpHits[i]);
+      }
+    }
+    TmpHits = GapHits;
+  }
+
   if (Shuffle) {
     std::shuffle(TmpHits.begin(), TmpHits.end(), RandGen);
   }
@@ -76,6 +90,5 @@ std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, uint8_t M
   }
   return Hits;
 }
-
 
 } // namespace

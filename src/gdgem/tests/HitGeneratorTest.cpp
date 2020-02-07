@@ -17,11 +17,9 @@ protected:
   float Angle180{180.0};
   float Angle270{270.0};
 
-  uint8_t Gap0{0};
-  uint32_t DeadTime0{0};
-  uint32_t DeadTime200{200};
-  bool Shuffle{true};
-  bool NoShuffle{false};
+  uint8_t Gap0{0}, Gap1{1}, Gap2{2};
+  uint32_t DeadTime0{0}, DeadTime200{200};
+  bool Shuffle{true}, NoShuffle{false};
 
   bool validate(uint16_t x, uint16_t y, float angle, size_t nx, size_t ny) {
     HitGenerator GenX, GenY;
@@ -72,7 +70,7 @@ TEST_F(HitGeneratorTest, Generate10Angle90Offset100DT200) {
   }
 }
 
-TEST_F(HitGeneratorTest, DT2) {
+TEST_F(HitGeneratorTest, DeadTime2) {
   auto & H = HitGen.makeHitsForSinglePlane(0, 10, 100, 100, Angle90, Gap0, 2, NoShuffle);
   ASSERT_EQ(H.size(), 5); // Every second should be accepted
   for (auto & hit : H ) {
@@ -81,7 +79,7 @@ TEST_F(HitGeneratorTest, DT2) {
   }
 }
 
-TEST_F(HitGeneratorTest, TestCorners) {
+TEST_F(HitGeneratorTest, Borders) {
   // Run through all borders in four directions, check that regions are
   // obeyed
   for (uint16_t i = 0; i < 1280; i++) {
@@ -111,6 +109,49 @@ TEST_F(HitGeneratorTest, TestCorners) {
   }
 }
 
+
+TEST_F(HitGeneratorTest, NoShuffle) {
+  // Expect channels and times to be strictly increasing
+  auto & Hits = HitGen.makeHitsForSinglePlane(0, 100, 640, 640, Angle45, Gap0, 2, NoShuffle);
+  uint32_t Time{0}, Coordinate{0};
+  for (auto & H : Hits) {
+    ASSERT_TRUE(H.time > Time);
+    Time = H.time;
+    ASSERT_TRUE(H.coordinate > Coordinate);
+    Coordinate = H.coordinate;
+  }
+}
+
+TEST_F(HitGeneratorTest, Shuffle) {
+  // Expect channels and times to be strictly increasing
+  auto & Hits = HitGen.makeHitsForSinglePlane(0, 100, 640, 640, Angle45, Gap0, 2, Shuffle);
+  uint32_t Time{0}, Coordinate{0}, OutOfOrder{0};
+  for (auto & H : Hits) {
+    if (H.time < Time) {
+      OutOfOrder++;
+    }
+    Time = H.time;
+    if (H.coordinate < Coordinate) {
+      OutOfOrder++;
+    }
+    Coordinate = H.coordinate;
+  }
+  ASSERT_TRUE(OutOfOrder != 0);
+}
+
+
+TEST_F(HitGeneratorTest, Gaps) {
+  for (unsigned int Gaps = 0; Gaps < 9; Gaps++) {
+    HitGenerator GapGen;
+    auto & Hits = GapGen.makeHitsForSinglePlane(0, 10, 640, 640, Angle0, Gaps, DeadTime200, NoShuffle);
+    ASSERT_EQ(Hits.size(), 10 - Gaps);
+  }
+  for (unsigned int Gaps = 9; Gaps < 100; Gaps++) {
+    HitGenerator GapGen;
+    auto & Hits = GapGen.makeHitsForSinglePlane(0, 10, 640, 640, Angle0, Gaps, DeadTime200, NoShuffle);
+    ASSERT_EQ(Hits.size(), 0);
+  }
+}
 
 
 int main(int argc, char **argv) {
