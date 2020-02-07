@@ -29,11 +29,8 @@ set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
 #=============================================================================
 # Dependencies common to EFU and plugins
 #=============================================================================
-
 add_subdirectory(common)
-
 add_subdirectory(readout)
-
 add_subdirectory(generators)
 
 #=============================================================================
