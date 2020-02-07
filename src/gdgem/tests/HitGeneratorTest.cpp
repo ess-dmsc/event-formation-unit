@@ -23,6 +23,13 @@ protected:
   bool Shuffle{true};
   bool NoShuffle{false};
 
+  bool validate(uint16_t x, uint16_t y, float angle, size_t nx, size_t ny) {
+    HitGenerator GenX, GenY;
+    auto & Hx = GenX.makeHitsForSinglePlane(0, 10, x, y, angle, Gap0, DeadTime0, NoShuffle);
+    auto & Hy = GenY.makeHitsForSinglePlane(1, 10, x, y, angle, Gap0, DeadTime0, NoShuffle);
+    return ((Hx.size() == nx) and (Hy.size() == ny));
+  }
+
   void SetUp() override {
     HitGen.setTimeParms(200, 40, 1);
   }
@@ -45,7 +52,7 @@ TEST_F(HitGeneratorTest, Generate10Angle0Offset100DT0) {
 }
 
 // With dead time 0ns all Hits should be accepted
-TEST_F(HitGeneratorTest, Generate10Angle90Offset100,DT0) {
+TEST_F(HitGeneratorTest, Generate10Angle90Offset100DT0) {
   auto & H = HitGen.makeHitsForSinglePlane(0, 10, 100, 100, Angle90, Gap0, DeadTime0, NoShuffle);
   ASSERT_EQ(H.size(), 10); // Unrealistic dead time, should allow all Hits
   for (auto & hit : H ) {
@@ -58,7 +65,6 @@ TEST_F(HitGeneratorTest, Generate10Angle90Offset100,DT0) {
 // should be discarded
 TEST_F(HitGeneratorTest, Generate10Angle90Offset100DT200) {
   auto & H = HitGen.makeHitsForSinglePlane(0, 10, 100, 100, Angle90, Gap0, DeadTime200, NoShuffle);
-  HitGen.printHits();
   ASSERT_EQ(H.size(), 1);
   for (auto & hit : H ) {
     ASSERT_TRUE(hit.time >= 200);
@@ -66,11 +72,8 @@ TEST_F(HitGeneratorTest, Generate10Angle90Offset100DT200) {
   }
 }
 
-TEST_F(HitGeneratorTest, Generate90Offset100DT1) {
-  HitGenerator HitGen;
-  HitGen.setTimeParms(200, 40, 1);
+TEST_F(HitGeneratorTest, DT2) {
   auto & H = HitGen.makeHitsForSinglePlane(0, 10, 100, 100, Angle90, Gap0, 2, NoShuffle);
-  HitGen.printHits();
   ASSERT_EQ(H.size(), 5); // Every second should be accepted
   for (auto & hit : H ) {
     ASSERT_TRUE(hit.time >= 200);
@@ -78,48 +81,37 @@ TEST_F(HitGeneratorTest, Generate90Offset100DT1) {
   }
 }
 
+TEST_F(HitGeneratorTest, TestCorners) {
+  // Run through all borders in four directions, check that regions are
+  // obeyed
+  for (uint16_t i = 0; i < 1280; i++) {
+    // Left border
+    ASSERT_TRUE(validate(0, i, Angle0,   10, 10));
+    ASSERT_TRUE(validate(0, i, Angle90,  10, std::min(10U, 1280U - i)));
+    ASSERT_TRUE(validate(0, i, Angle180,  1, 10));
+    ASSERT_TRUE(validate(0, i, Angle270, 10, std::min(10U,    1U + i)));
 
-// TEST_F(HitGeneratorTest, GenerateAnglesPlaneX) {
-//   uint16_t MaxHits{6};
-//   for (uint16_t xoffset = 0; xoffset < 10; xoffset++) {
-//     {
-//       printf("Test 1 - 0 Degree\n");
-//       HitGenerator HitGen;
-//       HitGen.setTimeParms(200, 40, 1);
-//       auto Generated = HitGen.makeHitsForSinglePlane(0, MaxHits, xoffset, 0, Angle0, Gap0, 200, NoShuffle);
-//       ASSERT_EQ(Generated.size(), MaxHits);
-//       HitGen.printHits();
-//     }
-//
-//     {
-//       printf("Test 1 - 90 Degree\n");
-//       HitGenerator HitGen;
-//       HitGen.setTimeParms(200, 40, 1);
-//       auto Generated = HitGen.makeHitsForSinglePlane(0, MaxHits, xoffset, 0, Angle90, Gap0, 200, NoShuffle);
-//       HitGen.printHits();
-//       ASSERT_EQ(Generated.size(), 1);
-//
-//     }
-//
-//     {
-//       printf("Test 1 - 180 Degree\n");
-//       HitGenerator HitGen;
-//       HitGen.setTimeParms(200, 40, 1);
-//       auto Generated = HitGen.makeHitsForSinglePlane(0, MaxHits, xoffset, 0, Angle180, Gap0, 200, NoShuffle);
-//       ASSERT_EQ(Generated.size(), std::min(uint16_t(xoffset + 1), MaxHits));
-//       HitGen.printHits();
-//     }
-//
-//     {
-//       printf("Test 1 - 270 Degree\n");
-//       HitGenerator HitGen;
-//       HitGen.setTimeParms(200, 40, 1);
-//       auto Generated = HitGen.makeHitsForSinglePlane(0, MaxHits, xoffset, 0, Angle270, Gap0, 200, NoShuffle);
-//       ASSERT_EQ(Generated.size(), 1);
-//       HitGen.printHits();
-//     }
-//   }
-// }
+    // Right border
+    ASSERT_TRUE(validate(1279, i, Angle0,    1, 10));
+    ASSERT_TRUE(validate(1279, i, Angle90,  10, std::min(10U, 1280U - i)));
+    ASSERT_TRUE(validate(1279, i, Angle180, 10, 10));
+    ASSERT_TRUE(validate(1279, i, Angle270, 10, std::min(10U,    1U + i)));
+
+    // Bottom border
+    ASSERT_TRUE(validate(i, 0, Angle0,   std::min(10U, 1280U - i), 10));
+    ASSERT_TRUE(validate(i, 0, Angle90,  10, 10));
+    ASSERT_TRUE(validate(i, 0, Angle180, std::min(10U, 1U + i), 10));
+    ASSERT_TRUE(validate(i, 0, Angle270, 10,  1));
+
+    // Top border
+    ASSERT_TRUE(validate(i, 1279, Angle0,   std::min(10U, 1280U - i), 10));
+    ASSERT_TRUE(validate(i, 1279, Angle90,  10,  1));
+    ASSERT_TRUE(validate(i, 1279, Angle180, std::min(10U, 1U + i), 10));
+    ASSERT_TRUE(validate(i, 1279, Angle270, 10, 10));
+  }
+}
+
+
 
 int main(int argc, char **argv) {
   testing::InitGoogleTest(&argc, argv);
