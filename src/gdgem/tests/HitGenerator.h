@@ -41,6 +41,13 @@ namespace Gem {
     std::vector<Hit> & makeHitsForSinglePlane(uint8_t Plane, int MaxHits,
          int X0, int Y0, float Degrees, uint8_t Gaps, uint32_t DeadTime, bool Shuffle);
 
+
+    /// \brief make gaps in vector of Hits
+    /// Removes Hits to create one or more Gaps
+    /// Currently just drops Hits after the first one. If more gaps
+    /// are specified than the number of Hits allow, no Hits are returned.
+    std::vector<Hit> & makeGaps(std::vector<Hit> & Hits, uint8_t Gaps);
+
     /// \brief debug and testing function
     void printHits();
 

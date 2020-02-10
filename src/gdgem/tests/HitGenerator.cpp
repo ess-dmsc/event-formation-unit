@@ -12,13 +12,14 @@
 /// \todo Should not belong to gdgem but to common, reduction?
 namespace Gem {
 
+//
 void HitGenerator::printHits() {
   for (auto & Hit : Hits) {
     fmt::print("t {}, p {}, c {}, w {}\n", Hit.time, Hit.plane, Hit.coordinate, Hit.weight);
   }
 }
 
-
+//
 std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, int MaxHits,
          int X0, int Y0, float Angle, uint8_t __attribute__((unused)) Gaps, uint32_t DeadTimeNs, bool Shuffle) {
   uint64_t Time = T0;
@@ -39,16 +40,10 @@ std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, int MaxHi
     }
 
     Coord = (int)TmpCoord;
-
     if ((Coord > CoordMax) or (Coord < CoordMin)) {
-      //fmt::print("Coordinate {} out of bounds\n", Coord);
       continue;
     }
 
-    //fmt::print("Candidate: plane {}, time {}, coord {}, oldtime {}, oldcoord {}\n",
-    //           Plane, Time, Coord, OldTime, OldCoord);
-
-    // Check coordinate and time conditions
     // Same coordinate - time gap is critical
     if (Coord == OldCoord) {
       //fmt::print("Same coordinate, OldTime {}, Time {}\n", OldTime, Time);
@@ -68,19 +63,7 @@ std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, int MaxHi
   }
 
   // Handle gaps
-  if (Gaps) {
-    std::vector<Hit> GapHits;
-    if (Gaps > TmpHits.size() - 2) {
-      //fmt::print("Gaps requestes {}, available {}\n", Gaps, TmpHits.size() - 2);
-      TmpHits.clear();
-    }
-    for (unsigned int i = 0; i < TmpHits.size(); i ++) {
-      if ((i == 0) or (i > Gaps)) {
-        GapHits.push_back(TmpHits[i]);
-      }
-    }
-    TmpHits = GapHits;
-  }
+  TmpHits = makeGaps(TmpHits, Gaps);
 
   if (Shuffle) {
     std::shuffle(TmpHits.begin(), TmpHits.end(), RandGen);
@@ -89,6 +72,25 @@ std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, int MaxHi
   for (auto & Hit : TmpHits) {
     Hits.push_back(Hit);
   }
+  return Hits;
+}
+
+//
+std::vector<Hit> & HitGenerator::makeGaps(std::vector<Hit> & Hits, uint8_t Gaps) {
+  if (Gaps == 0) {
+    return Hits;
+  }
+  std::vector<Hit> GapHits;
+  if (Gaps > Hits.size() - 2) {
+    //fmt::print("Gaps requestes {}, available {}\n", Gaps, TmpHits.size() - 2);
+    Hits.clear();
+  }
+  for (unsigned int i = 0; i < Hits.size(); i ++) {
+    if ((i == 0) or (i > Gaps)) {
+      GapHits.push_back(Hits[i]);
+    }
+  }
+  Hits = GapHits;
   return Hits;
 }
 
