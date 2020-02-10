@@ -20,10 +20,10 @@ void HitGenerator::printHits() {
 }
 
 //
-std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, int MaxHits,
-         int X0, int Y0, float Angle, uint8_t __attribute__((unused)) Gaps, uint32_t DeadTimeNs, bool Shuffle) {
-  uint64_t Time = T0;
-  uint32_t OldTime = Time;
+std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(int Plane, int MaxHits,
+         float X0, float Y0, float Angle, int Gaps, int DeadTimeNs, bool Shuffle) {
+  int64_t Time = T0;
+  int32_t OldTime = Time;
   float TmpCoord{0};
   int Coord{32767}, OldCoord{32767};
   uint16_t ADC{2345};
@@ -55,7 +55,7 @@ std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, int MaxHi
       }
     }
 
-    Hit CurrHit{Time, (uint16_t)Coord, ADC, Plane};
+    Hit CurrHit{(uint64_t)Time, (uint16_t)Coord, ADC, (uint8_t)Plane};
     TmpHits.push_back(CurrHit);
     OldTime = Time;
     Time += dT;

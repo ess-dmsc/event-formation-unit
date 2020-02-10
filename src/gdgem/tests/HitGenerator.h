@@ -38,8 +38,8 @@ namespace Gem {
     /// \todo Should deadtime comparison be strictly less than or less than or equal?
     /// For now it is strictly less than. Hence (oldtime - time) == 1 is within DT
     /// and (OT - NT) == 2 is outside DT if DT == 2
-    std::vector<Hit> & makeHitsForSinglePlane(uint8_t Plane, int MaxHits,
-         int X0, int Y0, float Degrees, uint8_t Gaps, uint32_t DeadTime, bool Shuffle);
+    std::vector<Hit> & makeHitsForSinglePlane(int Plane, int MaxHits,
+         float X0, float Y0, float Degrees, int Gaps, int DeadTime, bool Shuffle);
 
 
     /// \brief make gaps in vector of Hits
