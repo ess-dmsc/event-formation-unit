@@ -18,39 +18,40 @@ void HitGenerator::printHits() {
   }
 }
 
-std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, uint8_t MaxHits,
-         uint16_t X0, uint16_t Y0, float Angle, uint8_t __attribute__((unused)) Gaps, uint32_t DeadTimeNs, bool Shuffle) {
 
+std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, int MaxHits,
+         int X0, int Y0, float Angle, uint8_t __attribute__((unused)) Gaps, uint32_t DeadTimeNs, bool Shuffle) {
   uint64_t Time = T0;
   uint32_t OldTime = Time;
-  int16_t TmpCoord{0};
-  uint16_t Coord{32767};
-  uint16_t OldCoord{32767};
+  float TmpCoord{0};
+  int Coord{32767}, OldCoord{32767};
   uint16_t ADC{2345};
   std::vector<Hit> TmpHits;
 
   assert((Plane == PlaneX) or (Plane == PlaneY));
 
-  for (unsigned int hit = 0; hit < MaxHits; hit++) {
+  for (int hit = 0; hit < MaxHits; hit++) {
     if (Plane == 0) {
-      TmpCoord = X0 + (int16_t)(hit * 1.0 * cos(D2R(Angle)));
-      //fmt::print("X0 {}, RO {}, Angle {}, cos(angle) {}, TmpCoord {}\n", X0, RO, Angle, cosa, TmpCoord);
+      TmpCoord = X0 + hit * 1.0 * cos(D2R(Angle));
+      //fmt::print("X0 {}, RO {}, Angle {}, cos(angle) {}, TmpCoord {}\n", X0, hit, Angle, cosa, TmpCoord);
     } else {
-      TmpCoord = Y0 + (int16_t)(hit * 1.0 * sin(D2R(Angle)));
+      TmpCoord = Y0 + hit * 1.0 * sin(D2R(Angle));
     }
 
-    if ((TmpCoord > CoordMax) or (TmpCoord < CoordMin)) {
+    Coord = (int)TmpCoord;
+
+    if ((Coord > CoordMax) or (Coord < CoordMin)) {
       //fmt::print("Coordinate {} out of bounds\n", Coord);
       continue;
     }
-    Coord = (uint16_t)TmpCoord;
+
     //fmt::print("Candidate: plane {}, time {}, coord {}, oldtime {}, oldcoord {}\n",
     //           Plane, Time, Coord, OldTime, OldCoord);
 
     // Check coordinate and time conditions
     // Same coordinate - time gap is critical
     if (Coord == OldCoord) {
-      //fmt::print("Same coordinate, oletime {}, Time {}\n", OldTime, Time);
+      //fmt::print("Same coordinate, OldTime {}, Time {}\n", OldTime, Time);
       if ((OldTime != Time) and (Time - OldTime < DeadTimeNs) ) {
         // Not the first Hit but within deadtime
         //fmt::print("  dT {} shorter than deadtime - skipping\n", Time - OldTime);
@@ -59,7 +60,7 @@ std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(uint8_t Plane, uint8_t M
       }
     }
 
-    Hit CurrHit{Time, Coord, ADC, Plane};
+    Hit CurrHit{Time, (uint16_t)Coord, ADC, Plane};
     TmpHits.push_back(CurrHit);
     OldTime = Time;
     Time += dT;
