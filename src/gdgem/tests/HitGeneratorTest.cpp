@@ -164,11 +164,13 @@ TEST_F(HitGeneratorTest, RandomEvents) {
     ASSERT_TRUE(Event.XPos >= 10 and Event.XPos <= 1259);
     ASSERT_TRUE(Event.YPos >= 10 and Event.YPos <= 1259);
   }
+  //RandGen.printEvents(); // You might want to reduce NBEvents
 
   // Then generate hits from the neutron events
   auto & Hits = RandGen.randomHits(MaxHits, Gap0, DeadTime200, NoShuffle);
   ASSERT_TRUE((int)Hits.size() > NBEvents * 2);
   ASSERT_TRUE((int)Hits.size() <= NBEvents * 2 * MaxHits);
+  //RandGen.printHits(); // You might want to reduce NBEvents
 }
 
 int main(int argc, char **argv) {

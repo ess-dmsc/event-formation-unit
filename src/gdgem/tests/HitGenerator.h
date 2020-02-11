@@ -73,6 +73,9 @@ namespace Gem {
     /// \brief debug and testing function
     void printHits();
 
+    /// \brief debug and testing function
+    void printEvents();
+
     /// \brief getter for Hits
     std::vector<Hit> & getHits() { return Hits; }
 

@@ -20,6 +20,14 @@ void HitGenerator::printHits() {
 }
 
 //
+void HitGenerator::printEvents() {
+  fmt::print("t    (x, y)\n");
+  for (auto & Event : Events) {
+    fmt::print("{}    ({}, {})\n", Event.Time, Event.XPos, Event.YPos);
+  }
+}
+
+//
 std::vector<NeutronEvent> & HitGenerator::randomEvents(int NEvents, int MinCoord, int MaxCoord) {
   auto Time = T0;
   std::uniform_int_distribution<int> coords(MinCoord, MaxCoord);
