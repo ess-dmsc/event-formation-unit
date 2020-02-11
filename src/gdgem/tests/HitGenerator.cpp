@@ -35,7 +35,7 @@ std::vector<NeutronEvent> & HitGenerator::randomEvents(int NEvents, int MinCoord
 
 //
 std::vector<Hit> & HitGenerator::randomHits(int MaxHits, int Gaps, int DeadTime, bool Shuffle) {
-  std::uniform_int_distribution<float> angle(0.0, 360.0);
+  std::uniform_int_distribution<int> angle(0, 360);
   for (auto & Event : Events) {
     auto Degrees = angle(RandGen);
     //fmt::print("({},{}) @ {}\n", Event.XPos, Event.YPos, Degrees);
