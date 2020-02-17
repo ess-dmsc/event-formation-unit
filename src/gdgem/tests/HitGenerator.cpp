@@ -23,32 +23,32 @@ void HitGenerator::printHits() {
 void HitGenerator::printEvents() {
   fmt::print("t    (x, y)\n");
   for (auto & Event : Events) {
-    fmt::print("{}    ({}, {})\n", Event.Time, Event.XPos, Event.YPos);
+    fmt::print("{}    ({}, {})\n", Event.TimeNs, Event.XPos, Event.YPos);
   }
 }
 
 //
-std::vector<NeutronEvent> & HitGenerator::randomEvents(int NEvents, int MinCoord, int MaxCoord) {
-  auto Time = T0;
+std::vector<NeutronEvent> & HitGenerator::randomEvents(int NumEvents, int MinCoord, int MaxCoord) {
+  auto TimeNs = T0;
   std::uniform_int_distribution<int> coords(MinCoord, MaxCoord);
-  for (int i = 0; i < NEvents; i++) {
+  for (int i = 0; i < NumEvents; i++) {
     auto XPos = coords(RandGen);
     auto YPos = coords(RandGen);
     //fmt::print("Event: ({}, {}), t={}\n", XPos, YPos, Time);
-    Events.push_back({XPos, YPos, Time});
-    Time += TGap;
+    Events.push_back({XPos, YPos, TimeNs});
+    TimeNs += TGap;
   }
   return Events;
 }
 
 //
-std::vector<Hit> & HitGenerator::randomHits(int MaxHits, int Gaps, int DeadTime, bool Shuffle) {
+std::vector<Hit> & HitGenerator::randomHits(int MaxHits, int Gaps, int DeadTimeNs, bool Shuffle) {
   std::uniform_int_distribution<int> angle(0, 360);
   for (auto & Event : Events) {
     auto Degrees = angle(RandGen);
     //fmt::print("({},{}) @ {}\n", Event.XPos, Event.YPos, Degrees);
-    makeHitsForSinglePlane(0, MaxHits, Event.XPos, Event.YPos, Degrees, Gaps, DeadTime, Shuffle);
-    makeHitsForSinglePlane(1, MaxHits, Event.XPos, Event.YPos, Degrees, Gaps, DeadTime, Shuffle);
+    makeHitsForSinglePlane(0, MaxHits, Event.XPos, Event.YPos, Degrees, Gaps, DeadTimeNs, Shuffle);
+    makeHitsForSinglePlane(1, MaxHits, Event.XPos, Event.YPos, Degrees, Gaps, DeadTimeNs, Shuffle);
     advanceTime(TGap);
   }
   return Hits;
@@ -57,14 +57,16 @@ std::vector<Hit> & HitGenerator::randomHits(int MaxHits, int Gaps, int DeadTime,
 //
 std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(int Plane, int MaxHits,
          float X0, float Y0, float Angle, int Gaps, int DeadTimeNs, bool Shuffle) {
-  int64_t Time = T0;
-  int32_t OldTime = Time;
+  int64_t TimeNs = T0;
+  int32_t OldTime = TimeNs;
   float TmpCoord{0};
   int Coord{32767}, OldCoord{32767};
   uint16_t ADC{2345};
   std::vector<Hit> TmpHits;
 
-  assert((Plane == PlaneX) or (Plane == PlaneY));
+  if ((Plane != PlaneX) and (Plane != PlaneY)) {
+    return Hits;
+  }
 
   for (int hit = 0; hit < MaxHits; hit++) {
     if (Plane == PlaneX) {
@@ -82,18 +84,18 @@ std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(int Plane, int MaxHits,
     // Same coordinate - time gap is critical
     if (Coord == OldCoord) {
       //fmt::print("Same coordinate, OldTime {}, Time {}\n", OldTime, Time);
-      if ((OldTime != Time) and (Time - OldTime < DeadTimeNs) ) {
+      if ((OldTime != TimeNs) and (TimeNs - OldTime < DeadTimeNs) ) {
         // Not the first Hit but within deadtime
         //fmt::print("  dT {} shorter than deadtime - skipping\n", Time - OldTime);
-        Time += DeltaT;
+        TimeNs += DeltaT;
         continue;
       }
     }
 
-    Hit CurrHit{(uint64_t)Time, (uint16_t)Coord, ADC, (uint8_t)Plane};
+    Hit CurrHit{(uint64_t)TimeNs, (uint16_t)Coord, ADC, (uint8_t)Plane};
     TmpHits.push_back(CurrHit);
-    OldTime = Time;
-    Time += DeltaT;
+    OldTime = TimeNs;
+    TimeNs += DeltaT;
     OldCoord = Coord;
   }
 

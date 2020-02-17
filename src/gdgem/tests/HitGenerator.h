@@ -18,7 +18,7 @@ namespace Gem {
   class NeutronEvent {
   public:
     int XPos{0}, YPos{0};
-    uint64_t Time;
+    uint64_t TimeNs;
   };
 
   class HitGenerator {
@@ -42,12 +42,12 @@ namespace Gem {
     /// \param NEvents number of events (x,y,t)
     /// \param MinCoord minimum coordinate value
     /// \param MaxCoord maxumum coordinate value
-    std::vector<NeutronEvent> & randomEvents(int NEvents, int MinCoord, int MaxCoord);
+    std::vector<NeutronEvent> & randomEvents(int NumEvents, int MinCoord, int MaxCoord);
 
     /// \brief generate Hits with random angles based on positions in Events
     /// The parameters MaxHits, Gaps, DeadTime and Shuffle are the same as the ones
     /// used in makeHitsForSinglePlane() below. This method DO ADVANCE internal time.
-    std::vector<Hit> & randomHits(int MaxHits, int Gaps, int DeadTime, bool Shuffle);
+    std::vector<Hit> & randomHits(int MaxHits, int Gaps, int DeadTimeNs, bool Shuffle);
 
     /// \brief make hits for a single plane
     /// \param Plane 0 for x, 1 for y
