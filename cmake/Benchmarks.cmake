@@ -6,15 +6,7 @@ option(GOOGLE_BENCHMARK "Enable google benchmark for unit tests" OFF)
 
 set(benchmark_targets "" CACHE INTERNAL "All targets")
 
-
-set(callgrind_INCLUDE_DIR /usr/local/opt/valgrind/include/)
-set(callgrind_USING_DEFINE -DBUILD_USE_VALGRIND)
-if(NOT EXISTS ${callgrind_INCLUDE_DIR})
-  set(callgrind_INCLUDE_DIR )
-  set(callgrind_USING_DEFINE )
-endif()
-
-message(STATUS "+++ valgrind +++: ${callgrind_INCLUDE_DIR}")
+find_package(ValgrindSdk)
 
 #
 # Generate benchmark targets
@@ -25,18 +17,25 @@ function(create_benchmark_executable exec_name)
       ${${exec_name}_SRC}
       ${${exec_name}_INC})
     target_include_directories(${exec_name}
-      PRIVATE ${GTEST_INCLUDE_DIRS} ${callgrind_INCLUDE_DIR})
+      PRIVATE ${GTEST_INCLUDE_DIRS})
     set_target_properties(${exec_name} PROPERTIES
       RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/benchmarks")
 
-    if (CMAKE_BUILD_TYPE STREQUAL "RELEASE" OR CMAKE_BUILD_TYPE STREQUAL "Release")
-      if( lto_supported )
-          message(STATUS "LTO enabled for ${exec_name}")
-          set_property(TARGET ${exec_name} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-      else()
-          message(STATUS "LTO not supported (for target ${exec_name}): <${lto_error}>")
-      endif()
-    endif ()
+    set_property( TARGET ${exec_name} APPEND_STRING PROPERTY COMPILE_FLAGS "-g ")
+
+    add_valgrind_sdk (${exec_name})
+
+    ## TODO investigate why LTO doesn't seem to have any effect.
+    #if (CMAKE_BUILD_TYPE STREQUAL "RELEASE" OR CMAKE_BUILD_TYPE STREQUAL "Release")
+    #  if( lto_supported )
+    #      message(STATUS "LTO enabled for ${exec_name}")
+    #      set_property(TARGET ${exec_name} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+    #  else()
+    #      message(STATUS "LTO not supported (for target ${exec_name}): <${lto_error}>")
+    #  endif()
+    #endif ()
+
+    add_linker_flags(${exec_name} "-g") # we need symbol info for profiling
 
     target_link_libraries(${exec_name}
       ${${exec_name}_LIB}

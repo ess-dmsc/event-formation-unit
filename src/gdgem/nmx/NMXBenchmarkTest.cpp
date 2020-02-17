@@ -3,7 +3,6 @@
 #include <benchmark/benchmark.h>
 #include <unistd.h>
 
-
 #include <common/reduction/analysis/EventAnalyzer.h>
 #include <common/reduction/clustering/GapClusterer.h>
 #include <common/reduction/matching/CenterMatcher.h>
@@ -12,11 +11,10 @@
 
 #include <fmt/format.h>
 
+#include <common/BenchmarkUtil.h>
 #include <common/Trace.h>
 
 #include <memory>
-
-#include <valgrind/callgrind.h>
 
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
@@ -78,46 +76,10 @@ void _cluster_plane(HitVector &hits,
   }
 }
 
-inline void BenchmarkStartTiming() {
-  CALLGRIND_TOGGLE_COLLECT; // turn on
-}
-
-inline void BenchmarkStopTiming() {
-  CALLGRIND_TOGGLE_COLLECT; // turn off
-}
-
-inline void BenchmarkLoopPauseTiming(benchmark::State &state) {
-  state.PauseTiming();
-  CALLGRIND_TOGGLE_COLLECT; // turn off
-}
-
-inline void BenchmarkLoopResumeTiming(benchmark::State &state) {
-  CALLGRIND_TOGGLE_COLLECT; // turn on
-  state.ResumeTiming();
-}
-
-template<typename Lambda>
-void BenchmarkTimedLoop(benchmark::State &state, Lambda loopBody)
-{
-  BenchmarkStartTiming();
-  for (auto _ : state) {
-    loopBody();
-  }
-  BenchmarkStopTiming();
-}
-
-template<typename Lambda>
-void BenchmarkLoopPaused(benchmark::State &state, Lambda runMe)
-{
-  BenchmarkLoopPauseTiming (state);
-  runMe();
-  BenchmarkLoopResumeTiming (state);
-}
-
-BENCHMARK_DEFINE_F(NmxBenchmarkTest, FancyApi)(benchmark::State &state) {
+BENCHMARK_DEFINE_F(NmxBenchmarkTest, Dummy)(benchmark::State &state) {
   uint32_t totalHitCount = 0;
 
-  BenchmarkTimedLoop(state, [&]{
+  BenchmarkLoop(state, [&]{
     int numEvents = state.range(0) / (4 * 2);
 
     // generate Hits for builder
@@ -138,7 +100,6 @@ BENCHMARK_DEFINE_F(NmxBenchmarkTest, FancyApi)(benchmark::State &state) {
         HitGen.makeHit(numHits, 0, 0, Angle0, false);
         time += numHits * 2 * interHitTime + timeGap;
       }
-      // HitGen.printHits();
 
       // store hits in builder
       builder_->process_buffer(reinterpret_cast<char *>(&HitGen.Hits[0]),
@@ -147,8 +108,6 @@ BENCHMARK_DEFINE_F(NmxBenchmarkTest, FancyApi)(benchmark::State &state) {
       std::shared_ptr<HitBuilder_t> hitBuilderConcrete =
           std::dynamic_pointer_cast<HitBuilder_t>(builder_);
 
-      // fmt::print("converted_data.size {}, hits {}\n",
-      // hitBuilderConcrete->converted_data.size(), HitGen.Hits.size());
       assert(hitBuilderConcrete->converted_data.size() == HitGen.Hits.size());
 
       totalHitCount += hitBuilderConcrete->converted_data.size();
@@ -187,116 +146,43 @@ BENCHMARK_DEFINE_F(NmxBenchmarkTest, FancyApi)(benchmark::State &state) {
   state.SetItemsProcessed(totalHitCount);
   state.SetComplexityN(totalHitCount);
 }
-BENCHMARK_REGISTER_F(NmxBenchmarkTest, FancyApi)->RangeMultiplier(2)->Range(692, 692)->Complexity();
-
-BENCHMARK_DEFINE_F(NmxBenchmarkTest, Dummy)(benchmark::State &state) {
-
-  //fmt::print("state range {}\n", state.range(0));
-  uint32_t totalHitCount = 0;
-
-  CALLGRIND_TOGGLE_COLLECT; // turn on
-
-  for (auto _ : state) {
-
-    int numEvents = state.range(0) / (4 * 2);//2;
-
-    // generate Hits for builder
-    state.PauseTiming();
-    CALLGRIND_TOGGLE_COLLECT; // turn off
-
-    SetUp (state);// HACK RESET
-    {
-      uint64_t time = 0;
-      uint16_t numHits = 4;//state.range(0);
-      uint64_t timeGap = 40;
-      uint32_t interHitTime = 1;
-
-      HitGenerator HitGen;
-      float Angle0{0.0};
-
-      // accumulate several hits from several events into a pseudo packet
-      for (int i = 0; i < numEvents; ++i) {
-        HitGen.setTimes(time, timeGap, interHitTime);
-        HitGen.makeHit(numHits, 0, 0, Angle0, false); 
-        time += numHits * 2 * interHitTime + timeGap;
-      }
-      //HitGen.printHits();
-
-      // store hits in builder
-      builder_->process_buffer(reinterpret_cast<char *>(&HitGen.Hits[0]),
-                               sizeof(Hit) * HitGen.Hits.size());
-
-      std::shared_ptr<HitBuilder_t> hitBuilderConcrete =
-          std::dynamic_pointer_cast<HitBuilder_t>(builder_);
-
-      //fmt::print("converted_data.size {}, hits {}\n", hitBuilderConcrete->converted_data.size(), HitGen.Hits.size());
-      assert(hitBuilderConcrete->converted_data.size() == HitGen.Hits.size());
-
-      totalHitCount += hitBuilderConcrete->converted_data.size();
-    }
-    
-    CALLGRIND_TOGGLE_COLLECT; // turn on
-    state.ResumeTiming();
-   
-    // perform_clustering()
-    {
-      bool flush = true; // we're matching the last time for this clustering
-
-      if (builder_->hit_buffer_x.size())
-        _cluster_plane(builder_->hit_buffer_x, clusterer_x_, matcher_, flush);
-
-      if (builder_->hit_buffer_y.size())
-        _cluster_plane(builder_->hit_buffer_y, clusterer_y_, matcher_, flush);
-
-      matcher_->match(flush);
-      assert(matcher_->matched_events.size() == (size_t)numEvents);
-    }
-
-    // process_events()
-    {
-      for (auto &event : matcher_->matched_events) {
-        if (!event.both_planes())
-          continue;
-
-        ReducedEvent neutron_event_ = analyzer_->analyze(event);
-        ::benchmark::DoNotOptimize (neutron_event_.good);
-      }
-    }
-
-    builder_->hit_buffer_x.clear();
-    builder_->hit_buffer_y.clear();
-  }
-
-  CALLGRIND_TOGGLE_COLLECT; // turn off
-
-  state.SetBytesProcessed(sizeof(Hit) * totalHitCount);
-  state.SetItemsProcessed(totalHitCount);
-  state.SetComplexityN(totalHitCount);
-}
-
 //BENCHMARK_REGISTER_F(NmxBenchmarkTest, Dummy)->RangeMultiplier(2)->Range(8, 8)->Complexity();
 //BENCHMARK_REGISTER_F(NmxBenchmarkTest, Dummy)->RangeMultiplier(2)->Range(8, 8000)->Complexity();
 BENCHMARK_REGISTER_F(NmxBenchmarkTest, Dummy)->RangeMultiplier(2)->Range(692, 692)->Complexity();
 // BENCHMARK(NmxBenchmarkTest);
 
 static void ClusterPlaneNoinline(benchmark::State &state) {
-  CALLGRIND_TOGGLE_COLLECT; // turn on
   Cluster c;
   uint8_t p;
   for (auto _ : state)
     ::benchmark::DoNotOptimize(p = c.plane());
-  CALLGRIND_TOGGLE_COLLECT; // turn off
 }
 BENCHMARK(ClusterPlaneNoinline);
 
 static void ClusterPlaneInline(benchmark::State &state) {
-  CALLGRIND_TOGGLE_COLLECT; // turn on
   Cluster c;
   uint8_t p;
   for (auto _ : state)
     ::benchmark::DoNotOptimize(p = c.plane_header());
-  CALLGRIND_TOGGLE_COLLECT; // turn off
 }
 BENCHMARK(ClusterPlaneInline);
+
+static void ClusterPlaneNoinlineFancyExtra(benchmark::State &state) {
+  Cluster c;
+  uint8_t p;
+  BenchmarkLoop(state, [&] {
+    ::benchmark::DoNotOptimize(p = c.plane());
+  });
+}
+BENCHMARK(ClusterPlaneNoinlineFancyExtra);
+
+static void ClusterPlaneInlineFancy(benchmark::State &state) {
+  Cluster c;
+  uint8_t p;
+  BenchmarkLoop(state, [&]{
+    ::benchmark::DoNotOptimize(p = c.plane_header());
+  });
+}
+BENCHMARK(ClusterPlaneInlineFancy);
 
 BENCHMARK_MAIN();
