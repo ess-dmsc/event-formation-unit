@@ -40,7 +40,7 @@ public:
   size_t count() const;
 
   void push(const T& Hit);
-  void push(const std::vector<T>& Hits);
+  template<typename Container> void push(const Container& Hits);
 
   void readAt(size_t Index, size_t Count);
   static void read(const boost::filesystem::path &FilePath,
@@ -198,7 +198,8 @@ void DumpFile<T>::push(const T& Hit) {
 }
 
 template<typename T>
-void DumpFile<T>::push(const std::vector<T>& Hits) {
+template<typename Container>
+void DumpFile<T>::push(const Container& Hits) {
   Data.insert(Data.end(), Hits.begin(), Hits.end());
   if (Data.size() >= ChunkSize) {
     flush();
