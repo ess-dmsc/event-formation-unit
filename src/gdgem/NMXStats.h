@@ -30,7 +30,7 @@ namespace Gem {
     int64_t parser_frame_missing_errors{0};
     int64_t parser_framecounter_overflows{0};
     int64_t parser_timestamp_lost_errors{0};
-    int64_t parser_timestamp_seq_errors{0}; 
+    int64_t parser_timestamp_seq_errors{0};
     int64_t parser_timestamp_overflows{0};
     int64_t parser_bad_frames{0};
     int64_t parser_good_frames{0};
@@ -38,6 +38,7 @@ namespace Gem {
     int64_t parser_markers{0};
     int64_t parser_data{0};
     int64_t parser_readouts{0};
+    int64_t parser_over_threshold{0};
 
 
     // Hit counters in builder
@@ -45,7 +46,7 @@ namespace Gem {
     int64_t hits_bad_geometry{0};
     int64_t hits_bad_adc{0};
     int64_t hits_good{0};
-    
+
 
     // Clustering
     int64_t clusters_total{0};
@@ -59,8 +60,8 @@ namespace Gem {
     int64_t events_bad{0};
     int64_t events_filter_rejects{0};
     int64_t events_geom_errors{0};
-    
-   
+
+
 
     // Producer
     int64_t tx_bytes{0};

@@ -19,10 +19,16 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
                          SRSMappings  digital_geometry,
                          uint16_t adc_threshold,
                          std::string dump_dir,
+                         unsigned int pmin,
+                         unsigned int pmax,
+                         unsigned int pwidth,
                          std::shared_ptr<CalibrationFile> calfile, NMXStats & stats, bool enable_data_processing)
                          : time_intepreter_(time_intepreter)
                          , digital_geometry_(digital_geometry)
                          , adc_threshold_ (adc_threshold)
+                         , PMin(pmin)
+                         , PMax(pmax)
+                         , PWidth(pwidth)
                          , stats_(stats),parser_(1500, stats,time_intepreter), data_processing_(enable_data_processing)
                           {
   assert(calfile != nullptr);
@@ -36,7 +42,7 @@ BuilderVMM3::BuilderVMM3(SRSTime time_intepreter,
 
 void BuilderVMM3::process_buffer(char *buf, size_t size) {
   int hits = parser_.receive(buf, size);
-  if (!hits) {  
+  if (!hits) {
     XTRACE(PROCESS, DEB, "No readouts after parse");
     return;
   }
@@ -58,7 +64,7 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
       readout.bcid = d.bcid;
       readout.tdc = d.tdc;
       readout.over_threshold = (d.overThreshold != 0);
-      
+
       auto calib = calfile_->getCalibration(readout.fec, readout.chip_id, readout.channel);
       // \todo does this really need to be a floating point value?
       readout.chiptime = static_cast<float>(time_intepreter_.chip_time_ns(d.bcid, d.tdc,
@@ -72,11 +78,11 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
       XTRACE(PROCESS, DEB, "srs/vmm chip: %d, channel: %d",
              readout.chip_id, d.chno);
 
-      
+
       if (readout_file_) {
         readout_file_->push(readout);
-      }  
-    
+      }
+
       if(data_processing_) {
         hit.plane = digital_geometry_.get_plane(readout);
         hit.coordinate = digital_geometry_.get_strip(readout);
@@ -86,7 +92,7 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
           hit.time += static_cast<uint64_t>(readout.chiptime);
         else
           hit.time -= static_cast<uint64_t>(-readout.chiptime);
-    
+
 
         if ((hit.plane != 0) && (hit.plane != 1)) {
           stats_.hits_bad_plane++;
@@ -113,7 +119,10 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
         }
 
         if (hit.plane == 0) {
-          hit_buffer_x.emplace_back(hit);
+          auto c = hit.coordinate;
+          if ( c >= std::max(0, (int)(PMin - PWidth)) and (c <= std::min(1279, (int)(PMax + PWidth)))) {
+            hit_buffer_x.emplace_back(hit);
+          }
         }
 
       } else {
