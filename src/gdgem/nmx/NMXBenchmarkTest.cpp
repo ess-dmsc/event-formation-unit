@@ -23,7 +23,7 @@ using namespace Gem;
 
 class NmxBenchmarkTest : public benchmark::Fixture {
 public:
-  
+
   typedef Gem::BuilderHits HitBuilder_t;
   std::shared_ptr<AbstractBuilder> builder_;
   std::shared_ptr<AbstractAnalyzer> analyzer_;
@@ -90,25 +90,24 @@ BENCHMARK_DEFINE_F(NmxBenchmarkTest, Dummy)(benchmark::State &state) {
       uint16_t numHits = 4; // state.range(0);
       uint64_t timeGap = 40;
       uint32_t interHitTime = 1;
-
+      int HitGap0{0};
+      int DeadTime0Ns{0};
+      bool NoShuffle{false};
       HitGenerator HitGen;
-      float Angle0{0.0};
 
       // accumulate several hits from several events into a pseudo packet
-      for (int i = 0; i < numEvents; ++i) {
-        HitGen.setTimes(time, timeGap, interHitTime);
-        HitGen.makeHit(numHits, 0, 0, Angle0, false);
-        time += numHits * 2 * interHitTime + timeGap;
-      }
+      HitGen.setTimeParms(time, timeGap, interHitTime);
+      HitGen.randomEvents(numEvents, 0, 1279);
+      auto & Hits = HitGen.randomHits(numHits, HitGap0, DeadTime0Ns, NoShuffle);
 
       // store hits in builder
-      builder_->process_buffer(reinterpret_cast<char *>(&HitGen.Hits[0]),
-                               sizeof(Hit) * HitGen.Hits.size());
+      builder_->process_buffer(reinterpret_cast<char *>(&Hits[0]),
+                               sizeof(Hit) * Hits.size());
 
       std::shared_ptr<HitBuilder_t> hitBuilderConcrete =
           std::dynamic_pointer_cast<HitBuilder_t>(builder_);
 
-      assert(hitBuilderConcrete->converted_data.size() == HitGen.Hits.size());
+      assert(hitBuilderConcrete->converted_data.size() == Hits.size());
 
       totalHitCount += hitBuilderConcrete->converted_data.size();
     });
