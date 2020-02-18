@@ -110,6 +110,14 @@ TEST_F(HitGeneratorTest, Borders) {
 }
 
 
+TEST_F(HitGeneratorTest, InvalidPlane) {
+  for (int i = 2; i < 256; i++) {
+    auto & Hits = HitGen.makeHitsForSinglePlane(i, 100, 640, 640, Angle45, Gap0, 2, NoShuffle);
+    ASSERT_EQ(Hits.size(), 0);
+  }
+}
+
+
 TEST_F(HitGeneratorTest, NoShuffle) {
   // Expect channels and times to be strictly increasing
   auto & Hits = HitGen.makeHitsForSinglePlane(0, 100, 640, 640, Angle45, Gap0, 2, NoShuffle);
@@ -171,6 +179,16 @@ TEST_F(HitGeneratorTest, RandomEvents) {
   ASSERT_TRUE((int)Hits.size() > NBEvents * 2);
   ASSERT_TRUE((int)Hits.size() <= NBEvents * 2 * MaxHits);
   //RandGen.printHits(); // You might want to reduce NBEvents
+}
+
+
+
+// NOT A TEST just printing
+TEST_F(HitGeneratorTest, PrintEventsAndHits) {
+  HitGen.randomEvents(10, 0, 1279);
+  HitGen.printEvents();
+  HitGen.randomHits(12, Gap0, DeadTime200, NoShuffle);
+  HitGen.printHits();
 }
 
 int main(int argc, char **argv) {
