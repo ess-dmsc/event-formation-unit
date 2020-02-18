@@ -1,0 +1,9 @@
+
+{
+  "Detector": "LoKI4x8",
+
+  "PanelConfig" : [
+    { "Ring" : 0, "Vertical" :  true,  "TubesZ" : 4, "TubesN" : 8, "Offset" :      0 }
+  ]
+
+}

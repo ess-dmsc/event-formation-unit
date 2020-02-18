@@ -4,7 +4,7 @@ import ecdcpipeline.PipelineBuilder
 
 project = "event-formation-unit"
 coverage_on = "centos7"
-clangformat_os = "debian9"
+clangformat_os = "debian10"
 archive_what = "centos7-release"
 
 // Set number of old builds to keep.
@@ -20,10 +20,10 @@ archive_what = "centos7-release"
  ]]);
 
 container_build_nodes = [
-  'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7'),
-  'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7'),
-  'debian9': ContainerBuildNode.getDefaultContainerBuildNode('debian9'),
-  'ubuntu1804': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu1804')
+  'centos7': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8'),
+  'centos7-release': ContainerBuildNode.getDefaultContainerBuildNode('centos7-gcc8'),
+  'debian10': ContainerBuildNode.getDefaultContainerBuildNode('debian10'),
+  'ubuntu1804': ContainerBuildNode.getDefaultContainerBuildNode('ubuntu1804-gcc8')
 ]
 
 def failure_function(exception_obj, failureMessage) {
@@ -90,9 +90,10 @@ builders = pipeline_builder.createBuilders { container ->
         pipeline_builder.stage("${container.key}: cppcheck") {
         try {
                 def test_output = "cppcheck.txt"
+                // Ignore file that crashes cppcheck
                 container.sh """
                                 cd ${project}
-                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ 2> ${test_output}
+                                cppcheck --enable=all --inconclusive --template="{file},{line},{severity},{id},{message}" ./ -isrc/adc_readout/test/SampleProcessingTest.cpp 2> ${test_output}
                             """
                 container.copyFrom("${project}", '.')
                 sh "mv -f ./${project}/* ./"

@@ -12,11 +12,22 @@
 #include <common/EV42Serializer.h>
 #include <common/RingBuffer.h>
 #include <common/SPSCFifo.h>
+#include <loki/Counters.h>
+#include <loki/geometry/Config.h>
+#include <loki/geometry/Calibration.h>
+#include <loki/readout/DataParser.h>
+#include <loki/readout/Readout.h>
+#include <readout/ReadoutParser.h>
+#include <readout/ESSTime.h>
+#include <loki/geometry/TubeAmps.h>
 
 namespace Loki {
 
 struct LokiSettings {
-  uint32_t Unused;
+  std::string ConfigFile{""}; ///< panel mappings
+  std::string CalibFile{""}; ///< calibration file
+  std::string FilePrefix{""}; ///< HDF5 file dumping
+  bool DetectorImage2D{false}; ///< generate pixels for 2D detector (else 3D)
 };
 
 using namespace memory_sequential_consistent; // Lock free fifo
@@ -29,11 +40,12 @@ public:
   void processingThread();
   void testImageUdder(EV42Serializer& FlatBuffer);
 
-  /** @todo figure out the right size  of the .._max_entries  */
-  static const int EthernetBufferMaxEntries = 500;
-  static const int EthernetBufferSize = 9000; /// bytes
-  static const int KafkaBufferSize = 124000; /// entries ~ 1MB
-  // Ideally should match the CPU speed, bust at this varies across
+  /// \todo figure out the right size  of EthernetBufferMaxEntries
+  static const int EthernetBufferMaxEntries {2000};
+  static const int EthernetBufferSize {9000}; /// bytes
+  static const int KafkaBufferSize {124000}; /// entries ~ 1MB
+
+  // Ideally should match the CPU speed, but as this varies across
   // CPU versions we just select something in the 'middle'. This is
   // used to get an approximate time for periodic housekeeping so
   // it is not critical that this is precise.
@@ -43,34 +55,21 @@ protected:
   /** Shared between input_thread and processing_thread*/
   CircularFifo<unsigned int, EthernetBufferMaxEntries> InputFifo;
   /// \todo the number 11 is a workaround
-  RingBuffer<EthernetBufferSize> EthernetRingbuffer{EthernetBufferMaxEntries + 11};
+  RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
 
-  struct {
-    // Input Counters - accessed in input thread
-    int64_t RxPackets;
-    int64_t RxBytes;
-    int64_t FifoPushErrors;
-    int64_t PaddingFor64ByteAlignment[5]; // cppcheck-suppress unusedStructMember
-
-    // Processing Counters - accessed in processing thread
-    int64_t FifoSeqErrors;
-    int64_t ReadoutsErrorBytes;
-    int64_t ReadoutsCount;
-
-    int64_t RxIdle;
-    int64_t Events;
-    int64_t EventsUdder;
-    int64_t GeometryErrors;
-    int64_t TxBytes;
-    // Kafka stats below are common to all detectors
-    int64_t kafka_produce_fails;
-    int64_t kafka_ev_errors;
-    int64_t kafka_ev_others;
-    int64_t kafka_dr_errors;
-    int64_t kafka_dr_noerrors;
-  } __attribute__((aligned(64))) Counters;
+  // From Counters.h
+  struct Counters Counters;
 
   LokiSettings LokiModuleSettings;
+
+  /// \brief Used in Processing thread
+  // From geometry/Config.h
+  Config LokiConfiguration;
+  Calibration LokiCalibration;
+  ReadoutParser ESSReadoutParser;
+  DataParser LokiParser{Counters};
+  TubeAmps Amp2Pos;
+  ESSTime Time;
 };
 
 }

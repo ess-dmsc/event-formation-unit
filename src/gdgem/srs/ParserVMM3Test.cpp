@@ -12,15 +12,14 @@ class ParserVMM3Test : public TestBase {
 
 protected:
   NMXStats stats;
-  ParserVMM3 *parser;
+  std::unique_ptr<ParserVMM3> parser;
   SRSTime srsTime;
   void SetUp() override { 
     srsTime.bc_clock_MHz(40);
     srsTime.tac_slope_ns(60);
     srsTime.trigger_resolution_ns(1);
-    parser = new ParserVMM3(1125, stats, srsTime); 
+    parser = std::make_unique<ParserVMM3>(1125, stats, srsTime);
   }
-  void TearDown() override { delete parser; }
 
   void memSet() {
     parser->stats.parser_readouts = 0;

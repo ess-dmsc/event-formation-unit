@@ -19,7 +19,7 @@ public:
   SampleRunGenerator(std::size_t Samples, double PeakPos, double PeakSigma,
                      double Slope, double Offset, int ADCBox, int ADCChannel);
   std::pair<void *, std::size_t> generate(double Amplitude,
-                                          RawTimeStamp const Time);
+                                          TimeStamp const Time);
 
 private:
   std::unique_ptr<std::uint8_t[]> Buffer;

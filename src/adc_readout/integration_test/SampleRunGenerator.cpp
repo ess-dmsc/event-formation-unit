@@ -85,8 +85,8 @@ SampleRunGenerator::SampleRunGenerator(size_t Samples, double PeakPos,
 }
 
 std::pair<void *, std::size_t>
-SampleRunGenerator::generate(double Amplitude, RawTimeStamp const Time) {
-  HeaderPtr->TimeStamp = Time;
+SampleRunGenerator::generate(double Amplitude, TimeStamp const Time) {
+  HeaderPtr->TimeStamp = {Time.getSeconds(), Time.getSecondsFrac()};
   HeaderPtr->TimeStamp.fixEndian();
   for (auto i = 0u; i < NrOFSamples; ++i) {
     SamplePtr[i] = htons(

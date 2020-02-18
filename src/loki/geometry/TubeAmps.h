@@ -14,7 +14,7 @@
 #include <cinttypes>
 
 namespace Loki {
-class HeliumTube {
+class TubeAmps {
 public:
   /// \brief The four amplitudes measured at certain points in the
   /// Helium tube circuit diagram are used to identify the straw that

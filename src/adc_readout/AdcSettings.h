@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include "OffsetTime.h"
 #include <CLI/CLI.hpp>
 
 /// \brief ADC readout (and processing) specific settings.
@@ -19,12 +20,11 @@ struct AdcSettings {
   bool DelayLineDetector{false};
   bool SampleTimeStamp{false};
   int TakeMeanOfNrOfSamples{1};
-  bool IncludeTimeStamp{false};
+  OffsetTime::Offset TimeOffsetSetting{OffsetTime::Offset::NONE};
+  std::chrono::system_clock::time_point ReferenceTime;
   std::string DelayLineKafkaTopic;
   std::string TimeStampLocation{"Middle"};
   std::string Name;
-  std::string AltDetectorInterface{"0.0.0.0"};
-  std::uint16_t AltDetectorPort{0};
 
   double Threshold{0.1};
 
@@ -59,11 +59,6 @@ struct AdcSettings {
   ChannelRole ADC1Channel2{ChannelRole::NONE};
   ChannelRole ADC1Channel3{ChannelRole::NONE};
   ChannelRole ADC1Channel4{ChannelRole::NONE};
-
-  ChannelRole ADC2Channel1{ChannelRole::NONE};
-  ChannelRole ADC2Channel2{ChannelRole::NONE};
-  ChannelRole ADC2Channel3{ChannelRole::NONE};
-  ChannelRole ADC2Channel4{ChannelRole::NONE};
 };
 
 void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings);

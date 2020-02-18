@@ -10,6 +10,9 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wall"
 #pragma GCC diagnostic ignored "-Wsign-compare"
+#ifndef __clang__
+#pragma GCC diagnostic ignored "-Waligned-new="
+#endif
 #include <gtest/gtest.h>
 #pragma GCC diagnostic pop
 

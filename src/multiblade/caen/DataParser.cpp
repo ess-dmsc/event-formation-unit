@@ -26,7 +26,7 @@ int DataParser::parse(const char *buffer, unsigned int size) {
   readouts.clear();
   MBHeader = nullptr;
   Data = nullptr;
-  memset(&Stats, 0, sizeof(struct Stats));
+  Stats = {};
 
   auto headerlen = sizeof(struct Header);
   if (size < headerlen) {

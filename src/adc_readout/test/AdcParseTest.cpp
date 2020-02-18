@@ -110,7 +110,7 @@ public:
 
 TEST_F(AdcParsing, ParseCorrectDataModule) {
   int NrOfModules{0};
-  RawTimeStamp RefTimestamp;
+  TimeStamp RefTimestamp;
   std::function<bool(SamplingRun *)> ProccessingFunction(
       [&NrOfModules, &RefTimestamp](SamplingRun *Run) {
         NrOfModules++;
@@ -235,7 +235,7 @@ TEST(AdcHeadParse, IdleHeadTest) {
   InData Packet;
   Packet.Length = 28; // Current length of packet
   PacketHeader *HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
-  HeaderPointer->PacketType = 0x2222;
+  HeaderPointer->Type = PacketType::Idle;
   HeaderPointer->ReadoutLength = htons(20); // Currently a magic value
   HeaderInfo Header;
   EXPECT_NO_THROW(Header = parseHeader(Packet));
@@ -301,7 +301,7 @@ TEST(AdcHeadParse, UnknownHeadTest) {
   InData Packet;
   Packet.Length = sizeof(PacketHeader);
   auto HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
-  HeaderPointer->PacketType = 0x6666;
+  HeaderPointer->Type = PacketType(0x66);
   HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader) - 2);
   EXPECT_THROW(parseHeader(Packet), ParserException);
 }
@@ -310,7 +310,7 @@ TEST(AdcHeadParse, ShortPacketFailure) {
   InData Packet;
   Packet.Length = sizeof(PacketHeader) - 2;
   auto HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
-  HeaderPointer->PacketType = 0x1111;
+  HeaderPointer->Type = PacketType::Data;
   HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader) - 4);
   EXPECT_THROW(parseHeader(Packet), ParserException);
 }
@@ -319,7 +319,7 @@ TEST(AdcHeadParse, WrongReadoutLengthFailure) {
   InData Packet;
   Packet.Length = sizeof(PacketHeader);
   auto HeaderPointer = reinterpret_cast<PacketHeader *>(Packet.Data);
-  HeaderPointer->PacketType = 0x1111;
+  HeaderPointer->Type = PacketType::Data;
   HeaderPointer->ReadoutLength = htons(sizeof(PacketHeader)) + 54;
   EXPECT_THROW(parseHeader(Packet), ParserException);
 }
@@ -369,16 +369,18 @@ TEST_F(AdcDataParsing, FakeDataTest) {
   std::uint16_t SourceIDUsed = 42;
   ParserStandIn Parser(ProccessingFunction, GetModule, SourceIDUsed);
 
-  EXPECT_NO_THROW(Parser.parseData(Packet, 0, {1, 2}));
+  EXPECT_NO_THROW(
+      Parser.parseData(Packet, 0, {{1, 2}, TimeStamp::ClockMode::External}));
   EXPECT_EQ(NrOfModules, 2);
-  EXPECT_EQ(ModulePtr.TimeStamp.SecondsFrac, 0x0000FFFFu);
-  EXPECT_EQ(ModulePtr.TimeStamp.Seconds, 0xAAAA0000u);
+  EXPECT_EQ(ModulePtr.StartTime.getSecondsFrac(), 0x0000FFFFu);
+  EXPECT_EQ(ModulePtr.StartTime.getSeconds(), 0xAAAA0000u);
   EXPECT_EQ(ModulePtr.Identifier.ChannelNr, 0xAA00);
   EXPECT_EQ(ModulePtr.Identifier.SourceID, SourceIDUsed);
   EXPECT_EQ(ModulePtr.Data.size(), 2u);
   EXPECT_EQ(ModulePtr.Data[0], 0xFF00);
   EXPECT_EQ(ModulePtr.Data[1], 0x00FF);
-  EXPECT_EQ(ModulePtr.ReferenceTimestamp, RawTimeStamp(1, 2));
+  EXPECT_EQ(ModulePtr.ReferenceTimestamp,
+            TimeStamp({1, 2}, TimeStamp::ClockMode::External));
 }
 
 TEST_F(AdcDataParsing, MagicWordFail) {
@@ -386,7 +388,9 @@ TEST_F(AdcDataParsing, MagicWordFail) {
       [](SamplingRun *) { return true; });
   ParserStandIn Parser(ProccessingFunction, GetModule, 0);
   DataPointer[1].Data.MagicValue = 0x0000;
-  EXPECT_THROW(Parser.parseData(Packet, 0, {0, 0}), ParserException);
+  EXPECT_THROW(
+      Parser.parseData(Packet, 0, {{0, 0}, TimeStamp::ClockMode::External}),
+      ParserException);
 }
 
 TEST_F(AdcDataParsing, TrailerFail) {
@@ -394,7 +398,9 @@ TEST_F(AdcDataParsing, TrailerFail) {
       [](SamplingRun *) { return true; });
   ParserStandIn Parser(ProccessingFunction, GetModule, 0);
   DataPointer[1].Trailer = 0;
-  EXPECT_THROW(Parser.parseData(Packet, 0, {0, 0}), ParserException);
+  EXPECT_THROW(
+      Parser.parseData(Packet, 0, {{0, 0}, TimeStamp::ClockMode::External}),
+      ParserException);
 }
 
 TEST_F(AdcDataParsing, NrOfSamplesFail) {
@@ -402,7 +408,9 @@ TEST_F(AdcDataParsing, NrOfSamplesFail) {
       [](SamplingRun *) { return true; });
   ParserStandIn Parser(ProccessingFunction, GetModule, 0);
   DataPointer[1].Data.Length = 20;
-  EXPECT_THROW(Parser.parseData(Packet, 0, {0, 0}), ParserException);
+  EXPECT_THROW(
+      Parser.parseData(Packet, 0, {{0, 0}, TimeStamp::ClockMode::External}),
+      ParserException);
 }
 
 struct FillerDataStruct1 {

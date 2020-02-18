@@ -25,9 +25,9 @@ struct PulseParameters {
   /// Area under the curve with background subtracted
   int PeakArea{0};
   /// Timestamp of maximum of peak
-  RawTimeStamp PeakTimestamp;
+  TimeStamp PeakTime;
   /// Timestamp where line goes above threshold
-  RawTimeStamp ThresholdTimestamp;
+  TimeStamp ThresholdTime;
   /// Threshold timestamp as ns
   std::uint64_t ThresholdTimestampNS{0};
 };

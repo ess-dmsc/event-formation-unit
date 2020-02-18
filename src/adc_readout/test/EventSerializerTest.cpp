@@ -37,7 +37,7 @@ public:
                     std::chrono::milliseconds TransmitTimeout,
                     ProducerBase *KafkaProducer, TimestampMode Mode)
       : EventSerializer(std::move(SourceName), BufferSize, TransmitTimeout,
-                        KafkaProducer, Mode) {}
+                        KafkaProducer, Mode, {OffsetTime::Offset::NONE}) {}
   using EventSerializer::EventQueue;
   using EventSerializer::ReferenceTimeQueue;
   std::chrono::system_clock::time_point getCurrentTime() const override {

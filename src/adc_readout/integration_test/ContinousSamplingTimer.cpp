@@ -16,7 +16,7 @@ using std::chrono::seconds;
 using std::chrono::system_clock;
 
 ContinousSamplingTimer::ContinousSamplingTimer(
-    std::function<void(RawTimeStamp const &)> OnTimer,
+    std::function<void(TimeStamp const &)> OnTimer,
     asio::io_service &AsioService, int NrOfSamples, int OversamplingFactor)
     : SamplingTimer(std::move(OnTimer)), SampleTimer(AsioService),
       NextSampleTime(system_clock::now()),

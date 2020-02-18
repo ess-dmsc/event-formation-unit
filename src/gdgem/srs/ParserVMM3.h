@@ -69,7 +69,6 @@ public:
   stats(stats), srsTime(time_intepreter) {
     markers = new struct VMM3Marker[MaxFECs * MaxVMMs];
     data = new struct VMM3Data[maxHits];
-    memset(markers, 0, sizeof(struct VMM3Marker) * MaxFECs * MaxVMMs);
   }
 
   /// Delete allocated data, set pointers to nullptr

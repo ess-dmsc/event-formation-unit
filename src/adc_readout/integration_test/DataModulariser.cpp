@@ -21,7 +21,8 @@ DataModulariser::modularise(nonstd::span<std::uint16_t const> InSamples,
   HeaderPtr->Length = TotalBytes;
   HeaderPtr->Channel = Channel;
   HeaderPtr->Oversampling = 1;
-  HeaderPtr->TimeStamp = RawTimeStamp{Timestamp};
+  auto Time = TimeStamp{Timestamp, TimeStamp::ClockMode::External};
+  HeaderPtr->TimeStamp = {Time.getSeconds(), Time.getSecondsFrac()};
   HeaderPtr->fixEndian();
   nonstd::span<std::int16_t> OutSpan(
       reinterpret_cast<std::int16_t *>(Buffer.get() + sizeof(DataHeader)),

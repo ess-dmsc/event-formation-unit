@@ -12,13 +12,12 @@
 #include <map>
 #include <netinet/in.h>
 
-static const std::uint16_t DATA_PACKET{0x1111};
-static const std::uint16_t IDLE_PACKET{0x2222};
 static const std::uint32_t PACKET_TRAILER{0xFEEDF00D};
 static const std::uint16_t MODULE_HEADER{0xABCD};
 static const std::uint32_t MODULE_TRAILER{0xBEEFCAFE};
 static const std::uint8_t FILLER_BYTE{0x55};
 static const std::uint16_t TWO_FILLER_BYTES{0x5555};
+static const std::uint32_t PACKET_LENGTH_OFFSET{8u};
 
 ParserException::ParserException(std::string const &ErrorStr)
     : std::runtime_error(ErrorStr), ParserErrorType(Type::UNKNOWN),
@@ -51,6 +50,8 @@ const char *ParserException::what() const noexcept {
       {ParserException::Type::HEADER_LENGTH,
        "Packet size was to short to hold header and expected payload."},
       {ParserException::Type::HEADER_TYPE, "Indicated packet type is unknown."},
+      {ParserException::Type::HEADER_PROTOCOL_VERSION,
+       "Unknown protocol version encountered in header."},
       {ParserException::Type::IDLE_LENGTH,
        "Packet size was to short to hold idle time stamp."},
   };
@@ -95,24 +96,50 @@ HeaderInfo parseHeader(const InData &Packet) {
   auto HeaderRaw = reinterpret_cast<const PacketHeader *>(Packet.Data);
   PacketHeader Header(*HeaderRaw);
   Header.fixEndian();
-  if (IDLE_PACKET == Header.PacketType) {
-    ReturnInfo.Type = PacketType::Idle;
-  } else if (DATA_PACKET == Header.PacketType) {
-    ReturnInfo.Type = PacketType::Data;
-  } else {
+  if (Header.Type != PacketType::Idle and Header.Type != PacketType::Data) {
     throw ParserException(ParserException::Type::HEADER_TYPE);
   }
+  ReturnInfo.Type = Header.Type;
   ReturnInfo.DataStart = sizeof(PacketHeader);
   ReturnInfo.ReadoutCount = Header.ReadoutCount;
-  ReturnInfo.ReferenceTimestamp = Header.ReferenceTimeStamp;
-  if (Packet.Length != Header.ReadoutLength + 8u) {
+  ReturnInfo.ReferenceTimestamp = {Header.ReferenceTimeStamp,
+                                   TimeStamp::ClockMode(Header.ClockMode)};
+  if (Packet.Length != Header.ReadoutLength + PACKET_LENGTH_OFFSET) {
+    throw ParserException(ParserException::Type::HEADER_LENGTH);
+  }
+  return ReturnInfo;
+}
+
+ConfigInfo parseHeaderForConfigInfo(const InData &Packet) {
+  ConfigInfo ReturnInfo;
+  if (Packet.Length < sizeof(PacketHeader)) {
+    throw ParserException(ParserException::Type::HEADER_LENGTH);
+  }
+  auto HeaderRaw = reinterpret_cast<const PacketHeader *>(Packet.Data);
+  PacketHeader Header(*HeaderRaw);
+  Header.fixEndian();
+  if (Header.Type != PacketType::Idle and Header.Type != PacketType::Data) {
+    throw ParserException(ParserException::Type::HEADER_TYPE);
+  }
+  std::map<Protocol, ConfigInfo::Version> VersionMap{
+      {Protocol::VER_0_1, ConfigInfo::Version::VER_0},
+      {Protocol::VER_0_2, ConfigInfo::Version::VER_0},
+      {Protocol::VER_1, ConfigInfo::Version::VER_1}};
+  if (VersionMap.find(Header.Version) == VersionMap.end()) {
+    throw ParserException(ParserException::Type::HEADER_PROTOCOL_VERSION);
+  }
+  ReturnInfo.ProtocolVersion = VersionMap[Header.Version];
+
+  ReturnInfo.BaseTime = {Header.ReferenceTimeStamp,
+                         TimeStamp::ClockMode(Header.ClockMode)};
+  if (Packet.Length != Header.ReadoutLength + PACKET_LENGTH_OFFSET) {
     throw ParserException(ParserException::Type::HEADER_LENGTH);
   }
   return ReturnInfo;
 }
 
 size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte,
-                               RawTimeStamp const &ReferenceTimestamp) {
+                               TimeStamp const &ReferenceTimestamp) {
   while (StartByte + sizeof(DataHeader) < Packet.Length) {
     auto HeaderRaw =
         reinterpret_cast<const DataHeader *>(Packet.Data + StartByte);
@@ -135,7 +162,8 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte,
     if (CurrentDataModule != nullptr) {
       CurrentDataModule->Data.resize(NrOfSamples);
       CurrentDataModule->Identifier = CurrentChannelID;
-      CurrentDataModule->TimeStamp = Header.TimeStamp;
+      CurrentDataModule->StartTime = {Header.TimeStamp,
+                                      ReferenceTimestamp.getClockMode()};
       CurrentDataModule->ReferenceTimestamp = ReferenceTimestamp;
       CurrentDataModule->OversamplingFactor = Header.Oversampling;
       auto ElementPointer = reinterpret_cast<const std::uint16_t *>(
@@ -144,7 +172,7 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte,
         CurrentDataModule->Data[i] = ntohs(ElementPointer[i]);
       }
       if (not HandleModule(std::move(CurrentDataModule))) {
-        // Things will be very problematic for us if we dont get rid of the
+        // Things will be very problematic for us if we don't get rid of the
         // claimed data module, hence why we have a special exception for this
         // case.
         throw ModuleProcessingException(std::move(CurrentDataModule));

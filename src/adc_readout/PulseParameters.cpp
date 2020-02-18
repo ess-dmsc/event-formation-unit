@@ -43,14 +43,14 @@ PulseParameters analyseSampleRun(SamplingRun const &Run,
     if (Run.Data[i] - TempBackground > Result.PeakAmplitude) {
       PeakPosition = i;
       Result.PeakLevel = Run.Data[i];
-      Result.PeakTimestamp = Run.TimeStamp.getOffsetTimeStamp(i);
+      Result.PeakTime = Run.StartTime.getOffsetTimeStamp(i);
       Result.BackgroundLevel = std::lround(TempBackground);
       Result.PeakAmplitude = Result.PeakLevel - Result.BackgroundLevel;
     }
   }
   if (Run.Data.size() == 1 or PeakPosition < 1) {
-    Result.ThresholdTimestamp = Run.TimeStamp;
-    Result.ThresholdTimestampNS = Run.TimeStamp.getTimeStampNS();
+    Result.ThresholdTime = Run.StartTime;
+    Result.ThresholdTimestampNS = Run.StartTime.getTimeStampNS();
     return Result;
   }
   for (auto i = 1u; i <= PeakPosition; ++i) {
@@ -63,14 +63,14 @@ PulseParameters analyseSampleRun(SamplingRun const &Run,
           interpolateThreshold(PrevAmp, CurAmp, ThresholdLevel);
       auto ThresholdPosition = (i - 1) + ThresholdSubPosition;
       auto ActualThresholdPosition = ThresholdPosition * Run.OversamplingFactor;
-      Result.ThresholdTimestamp =
-          Run.TimeStamp.getOffsetTimeStamp(lround(ActualThresholdPosition));
+      Result.ThresholdTime =
+          Run.StartTime.getOffsetTimeStamp(lround(ActualThresholdPosition));
       auto TempNSTimestampCalc =
-          Run.TimeStamp.getOffsetTimeStamp(int(ActualThresholdPosition));
+          Run.StartTime.getOffsetTimeStamp(int(ActualThresholdPosition));
       Result.ThresholdTimestampNS =
           TempNSTimestampCalc.getTimeStampNS() +
           llround((ActualThresholdPosition - int(ActualThresholdPosition)) *
-                  SampleLengthNS);
+                  Run.StartTime.getClockCycleLength());
       break;
     }
   }

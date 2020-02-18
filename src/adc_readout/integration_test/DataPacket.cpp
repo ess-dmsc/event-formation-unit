@@ -8,13 +8,14 @@
 #include "DataPacket.h"
 #include <cstring>
 
-const std::uint32_t DATA_PACKET = 0x1111;
-
 DataPacket::DataPacket(size_t MaxPacketSize)
     : Buffer(std::make_unique<std::uint8_t[]>(MaxPacketSize)),
       HeaderPtr(reinterpret_cast<PacketHeader *>(Buffer.get())),
       Size(sizeof(PacketHeader)), MaxSize(MaxPacketSize) {
-  HeaderPtr->PacketType = DATA_PACKET;
+  HeaderPtr->Type = PacketType::Data;
+  HeaderPtr->Version = Protocol::VER_1;
+  HeaderPtr->ClockMode = Clock::Clk_Ext;
+  HeaderPtr->OversamplingFactor = 1;
 }
 
 bool DataPacket::addSamplingRun(void const *const DataPtr, size_t Bytes,
@@ -38,7 +39,8 @@ std::pair<void *, size_t> DataPacket::getBuffer(std::uint16_t ReadoutCount) {
   Size += 4;
   HeaderPtr->ReadoutCount = htons(ReadoutCount);
   HeaderPtr->ReadoutLength = htons(Size - 8);
-  HeaderPtr->ReferenceTimeStamp = RawTimeStamp(TempReferenceTime);
+  auto Time = TimeStamp(TempReferenceTime, TimeStamp::ClockMode::External);
+  HeaderPtr->ReferenceTimeStamp = {Time.getSeconds(), Time.getSecondsFrac()};
   HeaderPtr->ReferenceTimeStamp.fixEndian();
   TempReferenceTime = 0;
   return std::make_pair(Buffer.get(), Size);
