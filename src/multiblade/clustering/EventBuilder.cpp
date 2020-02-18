@@ -14,8 +14,6 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-#error asdfasdfasdf
-
 namespace Multiblade {
 
 EventBuilder::EventBuilder() {
