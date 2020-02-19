@@ -96,7 +96,6 @@ TEST_F(NMXCombinedProcessingTest, Dummy) {
     //XTRACE(CLUSTER, DEB, "x hits \n%s", visualize (builder_->hit_buffer_x, "").c_str());
     //XTRACE(CLUSTER, DEB, "y hits \n%s", visualize (builder_->hit_buffer_y, "").c_str());
 
-
   // from perform_clustering()
   {
     bool flush = true; // we're matching the last time for this clustering
@@ -121,12 +120,23 @@ TEST_F(NMXCombinedProcessingTest, Dummy) {
       }
       ReducedEvent neutron_event_ = analyzer_->analyze(event);
       ASSERT_TRUE(neutron_event_.good);
-      // TODO, make test comparing the computed ReduceEvent with generated input events.
-      // generated input events are available in Events[i].XPos, Events[i].YPos,
-      // Events[i].TimeNs
-      XTRACE(CLUSTER, DEB, "matched event\n%s", event.visualize ("").c_str());
+      
+      XTRACE(CLUSTER, DEB, "matched event\n%s", event.visualize("").c_str());
+
+      // check that the ReducedEvent matches a precomputed Event.
+      auto foundEventIt = std::find_if(
+          Events.begin(), Events.end(), [&](const NeutronEvent &e) -> bool {
+            return e.XPos == (int)neutron_event_.x.center_rounded() &&
+                   e.YPos == (int)neutron_event_.y.center_rounded() &&
+                   e.TimeNs == neutron_event_.time;
+          });
+      ASSERT_NE(foundEventIt, Events.end());
+      std::swap(*foundEventIt, Events.back());
+      Events.pop_back();
     }
   }
+  // checking should have emptied the precomuted Events.
+  ASSERT_TRUE (Events.empty());
 
   builder_->hit_buffer_x.clear();
   builder_->hit_buffer_y.clear();
