@@ -79,9 +79,10 @@ TEST_F(NMXCombinedProcessingTest, Dummy) {
 
   // accumulate several hits from several events into a pseudo packet
   HitGen.setTimeParms(time, timeGap, interHitTime);
-  HitGen.randomEvents(numEvents, 0, 1279);
+  auto & Events = HitGen.randomEvents(numEvents, 20, 1259); // avoid edge effects
   auto & Hits = HitGen.randomHits(numHits, HitGap0, DeadTime0Ns, NoShuffle);
 
+  ASSERT_EQ(Events.size(), numEvents);
   HitGen.printEvents();
   HitGen.printHits();
 
@@ -121,6 +122,8 @@ TEST_F(NMXCombinedProcessingTest, Dummy) {
       ReducedEvent neutron_event_ = analyzer_->analyze(event);
       ASSERT_TRUE(neutron_event_.good);
       // TODO, make test comparing the computed ReduceEvent with generated input events.
+      // generated input events are available in Events[i].XPos, Events[i].YPos,
+      // Events[i].TimeNs
       XTRACE(CLUSTER, DEB, "matched event\n%s", event.visualize ("").c_str());
     }
   }
