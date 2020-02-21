@@ -35,36 +35,21 @@ ReducedHit EventAnalyzer::analyze(Cluster &cluster) const {
   if (cluster.hits.empty()) {
     return ret;
   }
-  if (0) {
-    if (time_algorithm_ == "center-of-mass") {
-      ret.center = cluster.coord_center();
-      ret.time = cluster.time_center();
-    } else if (time_algorithm_ == "charge2") {
-      ret.center = cluster.coord_center2();
-      ret.time = cluster.time_center2();
-    } else {
-      if (time_algorithm_ == "utpc") {
-        ret.center = cluster.coord_utpc(false);
-      } else {
-        ret.center = cluster.coord_utpc(true);
-      }
-      ret.time = cluster.time_end();
-    }
+
+  if (time_algo == TA_center_of_mass) {
+    ret.center = cluster.coord_center();
+    ret.time = cluster.time_center();
+  } else if (time_algo == TA_charge2) {
+    ret.center = cluster.coord_center2();
+    ret.time = cluster.time_center2();
   } else {
-    if (time_algo == TA_center_of_mass) {
-      ret.center = cluster.coord_center();
-      ret.time = cluster.time_center();
-    } else if (time_algo == TA_charge2) {
-      ret.center = cluster.coord_center2();
-      ret.time = cluster.time_center2();
+    if (time_algo == TA_utpc) {
+      ret.center = cluster.coord_utpc(false);
     } else {
-      if (time_algo == TA_utpc) {
-        ret.center = cluster.coord_utpc(false);
-      } else {
-        ret.center = cluster.coord_utpc(true);
-      }
-      ret.time = cluster.time_end();
+      ret.center = cluster.coord_utpc(true);
     }
+    ret.time = cluster.time_end(); /// \TODO we get he nicest results for
+                                   /// HitGenerator with 'cluster.time_start()'.
   }
 
   return ret;

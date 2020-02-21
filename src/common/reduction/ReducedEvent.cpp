@@ -27,3 +27,8 @@ std::string ReducedEvent::to_string() const {
                      x.to_string(), y.to_string(), z.to_string(),
                      time, (good ? "good" : "bad"));
 }
+
+std::string ReducedEvent::to_string_simple() const {
+  return fmt::format("x={}  y={}   z=[{}]   t={}", x.center, y.center,
+                     z.center, time);
+}

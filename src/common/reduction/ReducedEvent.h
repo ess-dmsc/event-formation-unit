@@ -70,4 +70,5 @@ struct ReducedEvent {
 
   /// \brief prints values for debug purposes
   std::string to_string() const;
+  std::string to_string_simple() const;
 };
