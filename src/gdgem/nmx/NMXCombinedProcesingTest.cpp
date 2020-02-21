@@ -133,7 +133,7 @@ TEST_F(NMXCombinedProcessingTest, Dummy) {
       int leastL1ErrorIndex = -1;
 
       double leastMaxError = 10000.0;
-      int leastMaxErrorIndex = -1;
+      __attribute__((unused)) int leastMaxErrorIndex = -1;
 
       double leastXError = 10000.0;
       double leastYError = 10000.0;
