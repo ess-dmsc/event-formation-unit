@@ -1,72 +1,70 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2016 - 2020 European Spallation Source ERIC */
 #define __STDC_FORMAT_MACROS 1
 
-#include <Args.h>
+#include <CLI/CLI.hpp>
 #include <cinttypes>
 #include <iostream>
 #include <common/Socket.h>
 #include <common/TSCTimer.h>
 #include <common/Timer.h>
+#include <fmt/format.h>
 #include <stdio.h>
 #include <unistd.h>
 
 #define TSC_MHZ 3000
 
+struct {
+  std::string IpAddress{"127.0.0.1"};
+  int UDPPort{9000};
+  int DataSize{9000};
+  int SocketBufferSize{4000000};
+} Settings;
+
+CLI::App app{"UDP transmitter with 32 bit sequence number."};
+
+char Buffer[10000];
+
 int main(int argc, char *argv[]) {
+  app.add_option("-p, --port", Settings.UDPPort, "UDP transmit port");
+  app.add_option("-d, --data_size", Settings.DataSize, "Size of UDP payload (bytes)");
+  app.add_option("-b, --socket_buffer_size", Settings.SocketBufferSize, "socket buffer size (bytes)");
+  CLI11_PARSE(app, argc, argv);
 
-  Args opts(argc, argv);
+  uint64_t TxBytesTotal{0};
+  uint64_t TxBytes{0};
+  uint64_t TxPackets{0};
+  const int B1M{1000000};
 
-  uint64_t tx_total = 0;
-  uint64_t tx = 0;
-  uint64_t txp = 0;
-  const int B1M = 1000000;
+  Socket::Endpoint Local("0.0.0.0", 0);
+  Socket::Endpoint Remote(Settings.IpAddress.c_str(), Settings.UDPPort);
+  UDPTransmitter UDPTx(Local, Remote);
+  UDPTx.setBufferSizes(Settings.SocketBufferSize, Settings.SocketBufferSize);
+  UDPTx.printBufferSizes();
 
-  Socket::Endpoint local("0.0.0.0", 0);
-  Socket::Endpoint remote(opts.dest_ip.c_str(), opts.port);
-  UDPTransmitter udptx(local, remote);
-  udptx.setBufferSizes(4000000, 4000000);
-  udptx.printBufferSizes();
+  Timer RateTimer;
+  TSCTimer ReportTimer;
+  uint32_t SeqNo{1};
 
-  Timer rate_timer;
-  TSCTimer report_timer;
-  TSCTimer pkt_rate_timer;
-
-  uint32_t seqno = 1;
-  // Timer pkt_rate;
-  // uint32_t txremain = 0;
-  // printf("TX: %d pps specified\n", opts.txpps);
   for (;;) {
-    char buffer[10000];
-    *((uint32_t *)buffer) = seqno;
-    auto txtmp = udptx.send(buffer, opts.buflen);
-    seqno++;
+    *((uint32_t *)Buffer) = SeqNo;
+    auto TxTmpBytes = UDPTx.send(Buffer, Settings.DataSize);
 
-    if (txtmp > 0) {
-      txp++;
-      tx += txtmp;
-      // txremain--;
+    if (TxTmpBytes > 0) {
+      SeqNo++;
+      TxPackets++;
+      TxBytes += TxTmpBytes;
     }
 
-#if 0
-    if (pkt_rate_timer.timetsc() >= 10000UL * TSC_MHZ) {
-      auto usecs = pkt_rate.timeus();
-      txremain = usecs * opts.txpps / 1000000;
-      pkt_rate_timer.now();
-      pkt_rate.now();
-    }
-#endif
-
-    if (report_timer.timetsc() >= 1000000UL * TSC_MHZ) {
-      auto usecs = rate_timer.timeus();
-      tx_total += tx;
-      printf("Tx rate: %.2f Mbps, %.0f pps, tx %" PRIu64 " MB (total: %" PRIu64
-             " MB) %" PRIu64 " usecs\n",
-             tx * 8.0 / usecs, txp * 1000000.0 / usecs, tx / B1M,
-             tx_total / B1M, usecs);
-      tx = 0;
-      txp = 0;
-      rate_timer.now();
-      report_timer.now();
+    if (ReportTimer.timetsc() >= 1000000UL * TSC_MHZ) {
+      auto USecs = RateTimer.timeus();
+      TxBytesTotal += TxBytes;
+      fmt::print("Tx rate: {} Mbps, {} pps, tx {} MB (total: {} MB) {} usecs\n",
+             TxBytes * 8.0 / USecs, TxPackets * 1000000.0 / USecs, TxBytes / B1M,
+             TxBytesTotal / B1M, USecs);
+      TxBytes = 0;
+      TxPackets = 0;
+      RateTimer.now();
+      ReportTimer.now();
     }
   }
 }
