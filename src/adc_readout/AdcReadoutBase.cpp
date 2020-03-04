@@ -150,7 +150,8 @@ void AdcReadoutBase::inputThread() {
       LOG(INIT, Sev::Info, "Config packet received, starting data processing.");
       Receiver1->setPacketHandler(PacketHandler1);
     } catch (ParserException &E) {
-      // Do nothing
+      LOG(INIT, Sev::Error,
+      "Failed to extract config data from packet due to the following error: {}", E.what());
     }
   };
 
