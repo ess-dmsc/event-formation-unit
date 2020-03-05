@@ -66,6 +66,11 @@ set(TestImageUdderTest_SRC
   )
 create_test_executable(TestImageUdderTest)
 
+set(CharacteristicSizeAllocatorTest_SRC
+  CharacteristicSizeAllocatorTest.cpp
+  )
+create_test_executable(CharacteristicSizeAllocatorTest)
+
 # GOOGLE BENCHMARKS
 set(ESSGeometryBenchmarkTest_SRC
   ESSGeometryBenchmarkTest.cpp
