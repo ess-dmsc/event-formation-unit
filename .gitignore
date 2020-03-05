@@ -23,4 +23,5 @@ doxygen/
 CMakeLists.txt.user
 .idea/
 .atom*
+.vscode/
 *.code-workspace
