@@ -24,6 +24,10 @@ struct NMXSettings {
   std::string ConfigFile;
   std::string CalibrationFile;
   std::string fileprefix;
+  /// \todo REMOVE eventually
+  unsigned int PMin{0};
+  unsigned int PMax{1279};
+  unsigned int PWidth{0};
 };
 
 using namespace memory_sequential_consistent; // Lock free fifo

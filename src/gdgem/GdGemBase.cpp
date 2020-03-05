@@ -73,47 +73,52 @@ GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSett
 
   LOG(INIT, Sev::Info, "Adding stats");
   // clang-format off
-  Stats.create("rx_packets", stats_.rx_packets);
-  Stats.create("rx_bytes", stats_.rx_bytes);
-  Stats.create("i2pfifo_dropped", stats_.fifo_push_errors);
+  Stats.create("receive.packets", stats_.rx_packets);
+  Stats.create("receive.bytes", stats_.rx_bytes);
+  Stats.create("receive.dropped", stats_.fifo_push_errors);
+  Stats.create("receive.fifo_seq_errors", stats_.fifo_seq_errors);
 
-  Stats.create("processing_idle", stats_.processing_idle);
-  Stats.create("fifo_seq_errors", stats_.fifo_seq_errors);
+  Stats.create("thread.processing_idle", stats_.processing_idle);
 
   // Parser
-  Stats.create("parser_frame_seq_errors", stats_.parser_frame_seq_errors);
-  Stats.create("parser_frame_missing_errors", stats_.parser_frame_missing_errors);
-  Stats.create("parser_framecounter_overflows", stats_.parser_framecounter_overflows);
-  Stats.create("parser_timestamp_seq_errors", stats_.parser_timestamp_seq_errors);
-  Stats.create("parser_timestamp_lost_errors", stats_.parser_timestamp_lost_errors);
-  Stats.create("parser_timestamp_overflows", stats_.parser_timestamp_overflows);
-  Stats.create("parser_good_frames", stats_.parser_good_frames);
-  Stats.create("parser_bad_frames", stats_.parser_bad_frames);
-  Stats.create("parser_error_bytes", stats_.parser_error_bytes);
-  Stats.create("parser_markers", stats_.parser_markers);
-  Stats.create("parser_data", stats_.parser_data);
-  Stats.create("parser_total", stats_.parser_readouts);
+  Stats.create("readouts.good_frames", stats_.parser_good_frames);
+  Stats.create("readouts.bad_frames", stats_.parser_bad_frames);
+  Stats.create("readouts.error_bytes", stats_.parser_error_bytes);
+
+  Stats.create("readouts.frame_seq_errors", stats_.parser_frame_seq_errors);
+  Stats.create("readouts.frame_missing_errors", stats_.parser_frame_missing_errors);
+  Stats.create("readouts.framecounter_overflows", stats_.parser_framecounter_overflows);
+
+  Stats.create("readouts.timestamp_seq_errors", stats_.parser_timestamp_seq_errors);
+  Stats.create("readouts.timestamp_lost_errors", stats_.parser_timestamp_lost_errors);
+  Stats.create("readouts.timestamp_overflows", stats_.parser_timestamp_overflows);
+
+  Stats.create("readouts.count", stats_.parser_readouts);
+  Stats.create("readouts.markers", stats_.parser_markers);
+  Stats.create("readouts.data", stats_.parser_data);
+
 
   // Builder
-  Stats.create("hits_bad_plane", stats_.hits_bad_plane);
-  Stats.create("hits_bad_geometry", stats_.hits_bad_geometry);
-  Stats.create("hits_bad_adc", stats_.hits_bad_adc);
-  Stats.create("hits_good", stats_.hits_good);
+  Stats.create("hits.good", stats_.hits_good);
+  Stats.create("hits.over_threshold", stats_.parser_over_threshold);
+  Stats.create("hits.bad_plane", stats_.hits_bad_plane);
+  Stats.create("hits.bad_geometry", stats_.hits_bad_geometry);
+  Stats.create("hits.bad_adc", stats_.hits_bad_adc);
 
   // Clustering
-  Stats.create("clusters_total", stats_.clusters_total);
-  Stats.create("clusters_x_only", stats_.clusters_x_only);
-  Stats.create("clusters_y_only", stats_.clusters_y_only);
-  Stats.create("clusters_xy", stats_.clusters_xy);
+  Stats.create("clusters.total", stats_.clusters_total);
+  Stats.create("clusters.x", stats_.clusters_x_only);
+  Stats.create("clusters.y", stats_.clusters_y_only);
+  Stats.create("clusters.x_and_y", stats_.clusters_xy);
 
-  // Event Analysis  
-  Stats.create("events_good", stats_.events_good);
-  Stats.create("events_bad", stats_.events_bad);
-  Stats.create("events_filter_rejects", stats_.events_filter_rejects);
-  Stats.create("events_geom_errors", stats_.events_geom_errors);
-  Stats.create("events_good_hits", stats_.events_good_hits);
+  // Event Analysis
+  Stats.create("events.good", stats_.events_good);
+  Stats.create("events.bad", stats_.events_bad);
+  Stats.create("events.filter_rejects", stats_.events_filter_rejects);
+  Stats.create("events.geom_errors", stats_.events_geom_errors);
+  Stats.create("events.good_hits", stats_.events_good_hits);
 
-  Stats.create("tx_bytes", stats_.tx_bytes);
+  Stats.create("transmit.bytes", stats_.tx_bytes);
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_fails", stats_.kafka_produce_fails);
   Stats.create("kafka.ev_errors", stats_.kafka_ev_errors);
@@ -210,6 +215,9 @@ void GdGemBase::apply_configuration() {
         nmx_opts.time_config, nmx_opts.srs_mappings,
         nmx_opts.adc_threshold,
         NMXSettings.fileprefix,
+        NMXSettings.PMin,
+        NMXSettings.PMax,
+        NMXSettings.PWidth,
         nmx_opts.calfile, stats_, nmx_opts.enable_data_processing);
 
   } else if (nmx_opts.builder_type == "Readouts") {
@@ -338,8 +346,13 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
           neutron_event_.y.center_rounded(),
           neutron_event_.z.center_rounded());
     } else {
-      pixelid_ = nmx_opts.geometry.pixel2D(
-          neutron_event_.x.center_rounded(), neutron_event_.y.center_rounded());
+      auto x = neutron_event_.x.center_rounded();
+      if (( x >= NMXSettings.PMin ) and ( x <= NMXSettings.PMax)) {
+        pixelid_ = nmx_opts.geometry.pixel2D(
+            neutron_event_.x.center_rounded(), neutron_event_.y.center_rounded());
+      } else {
+        pixelid_ = 0;
+      }
     }
 
     if (!nmx_opts.geometry.valid_id(pixelid_))
@@ -445,7 +458,7 @@ void GdGemBase::processing_thread() {
       } else {
         builder_->process_buffer(
             eth_ringbuf->getDataBuffer(data_index), len);
-        /* Performance measurement   
+        /* Performance measurement
         cnt++;
         if(cnt == 10000) {
           cnt = 0;
@@ -458,7 +471,7 @@ void GdGemBase::processing_thread() {
           duration.now();
         }
         */
-        
+
         if (nmx_opts.enable_data_processing) {
           stats_.hits_good += (builder_->hit_buffer_x.size()
             + builder_->hit_buffer_y.size());
@@ -489,8 +502,8 @@ void GdGemBase::processing_thread() {
             process_events(ev42serializer, track_serializer);
           }
           builder_->hit_buffer_x.clear();
-          builder_->hit_buffer_y.clear(); 
-        } 
+          builder_->hit_buffer_y.clear();
+        }
       }
     }
 
