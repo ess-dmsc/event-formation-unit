@@ -1,7 +1,21 @@
 #include <test/TestBase.h>
 
-// Use (void) to silent unused warnings.
-#define AssertMsg(exp, msg) assert(((void)msg, exp))
+#include <common/Trace.h>
+
+//#undef TRC_LEVEL
+//#define TRC_LEVEL TRC_L_DEB
+
+#define HandleAssertFail(exp, file, line, msg)                                 \
+  ((void)fprintf(stderr, "%s:%u: failed assertion `%s': \"%s\"\n", file, line, \
+                 exp, msg),                                                    \
+   abort())
+
+// for now the asserts are always on!
+// TODO make the asserts primarity for DEBUG and google test.
+#define RelAssertMsg(exp, msg)                                                 \
+  (__builtin_expect(!(exp), 0)                                                 \
+       ? HandleAssertFail(#exp, __FILE__, __LINE__, msg)                       \
+       : (void)0)
 
 template <size_t kSlotBytes_, size_t kNumSlots,
           size_t kSlotAlignment = kSlotBytes_, size_t kStartAlignment_ = 16,
@@ -21,6 +35,13 @@ public:
   alignas(kStartAlignment) unsigned char m_PoolBytes[kSlotBytes * kNumSlots];
 
   FixedSizePool() {
+
+    XTRACE(MAIN, DEB,
+           "FixedSizePool: kSlotBytes %u, kNumSlots %u, kSlotAlignment %u, "
+           "kStartAlignment %u, kDebug %u, TotalBytes %u",
+           (uint32_t)kSlotBytes, (uint32_t)kNumSlots, (uint32_t)kSlotAlignment,
+           (uint32_t)kStartAlignment, kDebug ? 1 : 0, (uint32_t)sizeof(*this));
+
     m_NumSlotsUsed = 0;
     for (size_t i = 0; i < kNumSlots; ++i) {
       m_NextFreeSlot[i] = i;
@@ -32,7 +53,7 @@ public:
   }
 
   ~FixedSizePool() {
-    AssertMsg(m_NumSlotsUsed == 0, "All slots in pool must be empty");
+    RelAssertMsg(m_NumSlotsUsed == 0, "All slots in pool must be empty");
 
     if (kDebug) {
       // test m_NextFreeSlot indices are unique
@@ -40,35 +61,35 @@ public:
         __attribute__((unused)) bool testIndexFound = false;
         for (size_t i = 0; i < kNumSlots; ++i) {
           if (m_NextFreeSlot[i] == testIndex) {
-            AssertMsg(!testIndexFound,
-                      "Free slots must be unique. Could mean double delete");
+            RelAssertMsg(!testIndexFound,
+                         "Free slots must be unique. Could mean double delete");
             testIndexFound = true;
           }
         }
-        AssertMsg(testIndexFound, "All slots must be used");
+        RelAssertMsg(testIndexFound, "All slots must be used");
       }
 
       for (size_t i = 0; i < sizeof(m_PoolBytes); ++i) {
-        AssertMsg(m_PoolBytes[i] == kMemDeletedPat,
-                  "Deleted memory must have reference pattern");
+        RelAssertMsg(m_PoolBytes[i] == kMemDeletedPat,
+                     "Deleted memory must have reference pattern");
       }
     }
   }
 
   inline void *AllocateOne() {
-    AssertMsg(m_NumSlotsUsed < kNumSlots, "Implement fallover to malloc()");
+    RelAssertMsg(m_NumSlotsUsed < kNumSlots, "Implement fallover to malloc()");
     size_t index = m_NextFreeSlot[m_NumSlotsUsed];
-    AssertMsg(index < kNumSlots, "Expect capacity");
+    RelAssertMsg(index < kNumSlots, "Expect capacity");
 
     m_NumSlotsUsed++;
     unsigned char *p = m_PoolBytes + (index * kSlotBytes);
-    AssertMsg(p + kSlotBytes <= m_PoolBytes + sizeof(m_PoolBytes),
-              "Don't go past end of capacity");
+    RelAssertMsg(p + kSlotBytes <= m_PoolBytes + sizeof(m_PoolBytes),
+                 "Don't go past end of capacity");
 
     if (kDebug) {
       for (size_t i = 0; i < kSlotBytes; ++i) {
-        AssertMsg(p[i] == kMemDeletedPat,
-                  "Unused memory must have deletion pattern");
+        RelAssertMsg(p[i] == kMemDeletedPat,
+                     "Unused memory must have deletion pattern");
       }
       memset(p, kMemAllocatedPat, kSlotBytes);
     }
@@ -78,9 +99,9 @@ public:
 
   inline void Deallocate(void *p) {
     size_t index = ((unsigned char *)p - m_PoolBytes) / kSlotBytes;
-    AssertMsg(index < kNumSlots, "Implement fallover to free()");
+    RelAssertMsg(index < kNumSlots, "Implement fallover to free()");
 
-    AssertMsg(m_NumSlotsUsed > 0, "Pool must have content");
+    RelAssertMsg(m_NumSlotsUsed > 0, "Pool must have content");
     --m_NumSlotsUsed;
 
     m_NextFreeSlot[m_NumSlotsUsed] = index;
