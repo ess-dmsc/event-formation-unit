@@ -37,7 +37,7 @@ public:
     if (kDebug) {
       // test m_NextFreeSlot indices are unique
       for (size_t testIndex = 0; testIndex < kNumSlots; ++testIndex) {
-        bool testIndexFound = false;
+        __attribute__((unused)) bool testIndexFound = false;
         for (size_t i = 0; i < kNumSlots; ++i) {
           if (m_NextFreeSlot[i] == testIndex) {
             AssertMsg(!testIndexFound,
