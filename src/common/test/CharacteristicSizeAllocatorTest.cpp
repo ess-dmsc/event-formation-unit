@@ -222,8 +222,6 @@ TEST_F(FixedSizePoolTest, Large_All) {
   }
 }
 
-//----------------------------------------------------------------------
-
 TEST_F(FixedSizePoolTest, Align_AtSame) {
   FixedSizePool<8, 2, 8> pool;
 
@@ -267,4 +265,90 @@ TEST_F(FixedSizePoolTest, Align_At2) {
 
   pool.Deallocate(mem);
   pool.Deallocate(mem2);
+}
+
+//----------------------------------------------------------------------
+
+
+template <class T, size_t kTotalBytes, size_t kObjectsPerSlot>
+struct FixedSizeAllocator {
+  typedef T value_type;
+
+  // enum : size_t { kObjectsPerSlot = 16 };
+  enum : size_t { kSlotBytes = sizeof(T) * kObjectsPerSlot };
+  enum : size_t { kNumSlots = kTotalBytes / kSlotBytes };
+
+  static_assert(kTotalBytes >= kSlotBytes,
+                "FixedSizeAllocator must have enough bytes for one slot. Is "
+                "kObjectsPerSlot sensible?");
+
+  FixedSizePool<kSlotBytes, kNumSlots, alignof(T), 16, true> m_Pool;
+
+  FixedSizeAllocator() {
+    XTRACE(MAIN, DEB, "FixedSizeAllocator: kTotalBytes %u",
+           (uint32_t)kTotalBytes);
+  }
+
+  template <class U, size_t U_sz, size_t U_num>
+  constexpr FixedSizeAllocator(const FixedSizeAllocator<U, U_sz, U_num> &) noexcept {}
+
+  T *allocate(std::size_t n) {
+    if (sizeof(T) * n <= m_Pool.kSlotBytes)
+      return (T *)m_Pool.AllocateOne();
+
+    XTRACE(MAIN, CRI,
+           "No pool for alloc: FixedSizeAllocator %u objs, %u bytes, %u "
+           "maxBytes",
+           n, sizeof(T) * n, m_Pool.kSlotBytes);
+    RelAssertMsg(0, "No pool for alloc");
+    // throw std::bad_alloc();
+    return NULL;
+  }
+
+  void deallocate(T *p, std::size_t) noexcept { m_Pool.Deallocate(p); }
+};
+
+template <class T, size_t T_sz, size_t T_num, class U, size_t U_sz, size_t U_num>
+bool operator==(const FixedSizeAllocator<T, T_sz, T_num> &,
+                const FixedSizeAllocator<U, U_sz, U_num> &) {
+  return true;
+}
+template <class T, size_t T_sz, size_t T_num, class U, size_t U_sz, size_t U_num>
+bool operator!=(const FixedSizeAllocator<T, T_sz, T_num> &,
+                const FixedSizeAllocator<U, U_sz, U_num> &) {
+  return false;
+}
+
+class FixedSizeAllocatorTest : public TestBase {
+public:
+};
+
+TEST_F(FixedSizeAllocatorTest, Small_Empty) {
+  FixedSizeAllocator<int, sizeof(int) * 1, 1> alloc;
+}
+
+TEST_F(FixedSizeAllocatorTest, Small_1) {
+  std::vector<int, FixedSizeAllocator<int, sizeof(int) * 1, 1>> v;
+  v.push_back(1);
+  ASSERT_TRUE(v[0] == 1);
+}
+
+TEST_F(FixedSizeAllocatorTest, Small_Overflow) {
+  using vecType = std::vector<int, FixedSizeAllocator<int, sizeof(int) * 1, 1>>;
+  ASSERT_DEATH(
+      {
+        vecType v;
+        v.push_back(1);
+        v.push_back(1);
+      },
+      ""); // this gives a segfault
+}
+
+TEST_F(FixedSizeAllocatorTest, Small_2) {
+  std::vector<int, FixedSizeAllocator<int, sizeof(int) * 2, 2>> v;
+  v.reserve(2);
+  v.push_back(1);
+  v.push_back(2);
+  ASSERT_TRUE(v[0] == 1);
+  ASSERT_TRUE(v[1] == 2);
 }
