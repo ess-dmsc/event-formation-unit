@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// plugin for gdgem detector data reception, parsing and event_ formation
+/// plugin for gdgem detector data reception, parsing and event formation
 ///
 //===----------------------------------------------------------------------===//
 
@@ -28,159 +28,155 @@
 // #define TRC_LEVEL TRC_L_DEB
 
 #include <common/Log.h>
-// #undef TRC_MASK
-// #define TRC_MASK 0
 
-// \todo MJC's workstation - not reliable
+// This is depending on the CPU, but we do not rely on this to be accurate
 static constexpr int TscMHz {2900};
 
-// Emulating ESS 17Hz pulse
-static constexpr uint64_t max_pulse_window_ns {1000000000 / 17};
+// Emulating ESS 14Hz pulse
+static constexpr uint64_t MaxPulseWindowNs {1000000000 / 14};
 
-int GdGemBase::getCalibration(std::vector<std::string> cmdargs,
-                        char *output,
-                        unsigned int *obytes) {
-  std::string cmd = "NMX_GET_CALIB";
-  LOG(CMD, Sev::Info, "{}", cmd);
-  if (cmdargs.size() != 4) {
-    LOG(CMD, Sev::Warning, "{}: wrong number of arguments", cmd);
+int GdGemBase::getCalibration(std::vector<std::string> CmdArgs,
+                        char *Output,
+                        unsigned int *OutputBytes) {
+  std::string Command = "NMX_GET_CALIB";
+  LOG(CMD, Sev::Info, "{}", Command);
+  if (CmdArgs.size() != 4) {
+    LOG(CMD, Sev::Warning, "{}: wrong number of arguments", Command);
     return -Parser::EBADARGS;
   }
 
-  int fec = atoi(cmdargs.at(1).c_str());
-  int asic = atoi(cmdargs.at(2).c_str());
-  int channel = atoi(cmdargs.at(3).c_str());
-  auto calib = nmx_opts.calfile->getCalibration(fec, asic, channel);
-  if ((std::abs(calib.adc_offset) <= 1e-6) and (std::abs(calib.adc_slope) <= 1e-6) and (std::abs(calib.time_offset) <= 1e-6) and (std::abs(calib.time_slope) <= 1e-6)) {
-    *obytes =
-        snprintf(output, SERVER_BUFFER_SIZE, "<error> no calibration exist");
+  int Fec = atoi(CmdArgs.at(1).c_str());
+  int Asic = atoi(CmdArgs.at(2).c_str());
+  int Channel = atoi(CmdArgs.at(3).c_str());
+  auto Calib = NMXOpts.calfile->getCalibration(Fec, Asic, Channel);
+  if ((std::abs(Calib.adc_offset) <= 1e-6) and
+      (std::abs(Calib.adc_slope) <= 1e-6) and
+      (std::abs(Calib.time_offset) <= 1e-6) and
+      (std::abs(Calib.time_slope) <= 1e-6)) {
+    *OutputBytes =
+        snprintf(Output, SERVER_BUFFER_SIZE, "<error> no calibration exist");
     return -Parser::EBADARGS;
   }
 
- *obytes = snprintf(output, SERVER_BUFFER_SIZE, "%s adc_offset: %f adc_slope: %f, time_offset: %f time_slope: %f",
-                     cmd.c_str(), calib.adc_offset, calib.adc_slope, calib.time_offset, calib.time_slope);
+ *OutputBytes = snprintf(Output, SERVER_BUFFER_SIZE, "%s adc_offset: %f adc_slope: %f, time_offset: %f time_slope: %f",
+                     Command.c_str(), Calib.adc_offset, Calib.adc_slope, Calib.time_offset, Calib.time_slope);
 
   return Parser::OK;
 }
 
-GdGemBase::GdGemBase(BaseSettings const &settings, struct NMXSettings &LocalSettings) :
-       Detector("NMX", settings), NMXSettings(LocalSettings) {
+GdGemBase::GdGemBase(BaseSettings const &Settings, struct NMXSettings &LocalSettings) :
+       Detector("NMX", Settings), NMXSettings(LocalSettings) {
 
   Stats.setPrefix(EFUSettings.GraphitePrefix, EFUSettings.GraphiteRegion);
 
   LOG(INIT, Sev::Info, "NMX Config file: {}", NMXSettings.ConfigFile);
-  nmx_opts = Gem::NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
+  NMXOpts = Gem::NMXConfig(NMXSettings.ConfigFile, NMXSettings.CalibrationFile);
 
   LOG(INIT, Sev::Info, "Adding stats");
   // clang-format off
-  Stats.create("receive.packets", stats_.rx_packets);
-  Stats.create("receive.bytes", stats_.rx_bytes);
-  Stats.create("receive.dropped", stats_.fifo_push_errors);
-  Stats.create("receive.fifo_seq_errors", stats_.fifo_seq_errors);
+  Stats.create("receive.packets", stats_.RxPackets);
+  Stats.create("receive.bytes", stats_.RxBytes);
+  Stats.create("receive.dropped", stats_.FifoPushErrors);
+  Stats.create("receive.FifoSeqErrors", stats_.FifoSeqErrors);
 
-  Stats.create("thread.processing_idle", stats_.processing_idle);
+  Stats.create("thread.ProcessingIdle", stats_.ProcessingIdle);
 
   // Parser
-  Stats.create("readouts.good_frames", stats_.parser_good_frames);
-  Stats.create("readouts.bad_frames", stats_.parser_bad_frames);
-  Stats.create("readouts.error_bytes", stats_.parser_error_bytes);
+  Stats.create("readouts.good_frames", stats_.ParserGoodFrames);
+  Stats.create("readouts.bad_frames", stats_.ParserBadFrames);
+  Stats.create("readouts.error_bytes", stats_.ParserErrorBytes);
 
-  Stats.create("readouts.frame_seq_errors", stats_.parser_frame_seq_errors);
-  Stats.create("readouts.frame_missing_errors", stats_.parser_frame_missing_errors);
-  Stats.create("readouts.framecounter_overflows", stats_.parser_framecounter_overflows);
+  Stats.create("readouts.frame_seq_errors", stats_.ParserFrameSeqErrors);
+  Stats.create("readouts.frame_missing_errors", stats_.ParserFrameMissingErrors);
+  Stats.create("readouts.framecounter_overflows", stats_.ParserFramecounterOverflows);
 
-  Stats.create("readouts.timestamp_seq_errors", stats_.parser_timestamp_seq_errors);
-  Stats.create("readouts.timestamp_lost_errors", stats_.parser_timestamp_lost_errors);
-  Stats.create("readouts.timestamp_overflows", stats_.parser_timestamp_overflows);
+  Stats.create("readouts.timestamp_seq_errors", stats_.ParserTimestampSeqErrors);
+  Stats.create("readouts.timestamp_lost_errors", stats_.ParserTimestampLostErrors);
+  Stats.create("readouts.timestamp_overflows", stats_.ParserTimestampOverflows);
 
-  Stats.create("readouts.count", stats_.parser_readouts);
-  Stats.create("readouts.markers", stats_.parser_markers);
-  Stats.create("readouts.data", stats_.parser_data);
+  Stats.create("readouts.count", stats_.ParserReadouts);
+  Stats.create("readouts.markers", stats_.ParserMarkers);
+  Stats.create("readouts.data", stats_.ParserData);
 
 
   // Builder
-  Stats.create("hits.good", stats_.hits_good);
-  Stats.create("hits.over_threshold", stats_.parser_over_threshold);
-  Stats.create("hits.bad_plane", stats_.hits_bad_plane);
-  Stats.create("hits.bad_geometry", stats_.hits_bad_geometry);
-  Stats.create("hits.bad_adc", stats_.hits_bad_adc);
+  Stats.create("hits.good", stats_.HitsGood);
+  Stats.create("hits.outside_roi", stats_.HitsOutsideRegion);
+  Stats.create("hits.over_threshold", stats_.ParserOverThreshold);
+  Stats.create("hits.bad_plane", stats_.HitsBadPlane);
+  Stats.create("hits.bad_geometry", stats_.HitsBadGeometry);
+  Stats.create("hits.bad_adc", stats_.HitsBadAdc);
 
   // Clustering
-  Stats.create("clusters.total", stats_.clusters_total);
-  Stats.create("clusters.x", stats_.clusters_x_only);
-  Stats.create("clusters.y", stats_.clusters_y_only);
-  Stats.create("clusters.x_and_y", stats_.clusters_xy);
+  Stats.create("clusters.total", stats_.ClustersTotal);
+  Stats.create("clusters.x", stats_.ClustersXOnly);
+  Stats.create("clusters.y", stats_.ClustersYOnly);
+  Stats.create("clusters.x_and_y", stats_.ClustersXAndY);
 
   // Event Analysis
-  Stats.create("events.good", stats_.events_good);
-  Stats.create("events.bad", stats_.events_bad);
-  Stats.create("events.filter_rejects", stats_.events_filter_rejects);
-  Stats.create("events.geom_errors", stats_.events_geom_errors);
-  Stats.create("events.good_hits", stats_.events_good_hits);
+  Stats.create("events.good", stats_.EventsGood);
+  Stats.create("events.bad", stats_.EventsBad);
+  Stats.create("events.outside_region", stats_.EventsOutsideRegion);
+  Stats.create("events.filter_rejects", stats_.EventsFilterRejects);
+  Stats.create("events.geom_errors", stats_.EventsGeomErrors);
+  Stats.create("events.good_hits", stats_.EventsGoodHits);
 
-  Stats.create("transmit.bytes", stats_.tx_bytes);
+  Stats.create("transmit.bytes", stats_.TxBytes);
   /// \todo below stats are common to all detectors and could/should be moved
-  Stats.create("kafka.produce_fails", stats_.kafka_produce_fails);
-  Stats.create("kafka.ev_errors", stats_.kafka_ev_errors);
-  Stats.create("kafka.ev_others", stats_.kafka_ev_others);
-  Stats.create("kafka.dr_errors", stats_.kafka_dr_errors);
-  Stats.create("kafka.dr_others", stats_.kafka_dr_noerrors);
+  Stats.create("kafka.produce_fails", stats_.KafkaProduceFails);
+  Stats.create("kafka.ev_errors", stats_.KafkaEvErrors);
+  Stats.create("kafka.ev_others", stats_.KafkaEvOthers);
+  Stats.create("kafka.dr_errors", stats_.KafkaDrErrors);
+  Stats.create("kafka.dr_others", stats_.KafkaDrNoErrors);
   // clang-format on
 
-  if (!NMXSettings.fileprefix.empty())
+  if (!NMXSettings.FilePrefix.empty())
     LOG(INIT, Sev::Info, "Dump h5 data in path: {}",
-           NMXSettings.fileprefix);
+           NMXSettings.FilePrefix);
 
-  std::function<void()> inputFunc = [this]() { GdGemBase::input_thread(); };
+  std::function<void()> inputFunc = [this]() { GdGemBase::inputThread(); };
   Detector::AddThreadFunction(inputFunc, "input");
 
-  std::function<void()> processingFunc = [this]() { GdGemBase::processing_thread(); };
+  std::function<void()> processingFunc = [this]() { GdGemBase::processingThread(); };
   Detector::AddThreadFunction(processingFunc, "processing");
 
   AddCommandFunction("NMX_GET_CALIB",
-                     [this](std::vector<std::string> cmdargs, char *output,
-                            unsigned int *obytes) {
-                       return GdGemBase::getCalibration(cmdargs, output, obytes);
+                     [this](std::vector<std::string> CmdArgs, char *Output,
+                            unsigned int *OutputBytes) {
+                       return GdGemBase::getCalibration(CmdArgs, Output, OutputBytes);
                      });
-
-//  LOG(INIT, Sev::Info, "Creating {} NMX Rx ringbuffers of size {}",
-//         eth_buffer_max_entries, eth_buffer_size);
-  eth_ringbuf = new RingBuffer<eth_buffer_size>(
-      eth_buffer_max_entries + 11); /**< \todo testing workaround */
-  assert(eth_ringbuf != 0);
 }
 
-void GdGemBase::input_thread() {
+void GdGemBase::inputThread() {
   /** Connection setup */
-  Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
+  Socket::Endpoint LocalSocket(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
-  UDPReceiver nmxdata(local);
+  UDPReceiver DataReceiver(LocalSocket);
 
-  nmxdata.setBufferSizes(0 /*use default */, EFUSettings.DetectorRxBufferSize);
-  nmxdata.checkRxBufferSizes(EFUSettings.DetectorRxBufferSize);
-  nmxdata.printBufferSizes();
-  nmxdata.setRecvTimeout(0, 100000); /// secs, usecs
+  DataReceiver.setBufferSizes(0 /*use default */, EFUSettings.DetectorRxBufferSize);
+  DataReceiver.checkRxBufferSizes(EFUSettings.DetectorRxBufferSize);
+  DataReceiver.printBufferSizes();
+  DataReceiver.setRecvTimeout(0, 100000); /// secs, usecs
 
-  TSCTimer report_timer;
   for (;;) {
-    ssize_t rdsize {0};
-    unsigned int eth_index = eth_ringbuf->getDataIndex();
+    ssize_t ReadSize{0};
+    unsigned int RxBufferIndex = RxRingbuffer.getDataIndex();
 
     /** this is the processing step */
-    eth_ringbuf->setDataLength(eth_index,
+    RxRingbuffer.setDataLength(RxBufferIndex,
                                0); /**\todo \todo buffer corruption can occur */
-    if ((rdsize = nmxdata.receive(eth_ringbuf->getDataBuffer(eth_index),
-                                  eth_ringbuf->getMaxBufSize())) > 0) {
-      eth_ringbuf->setDataLength(eth_index, rdsize);
-      XTRACE(PROCESS, DEB, "rdsize: %zu", rdsize);
-      stats_.rx_packets++;
-      stats_.rx_bytes += rdsize;
+    if ((ReadSize = DataReceiver.receive(RxRingbuffer.getDataBuffer(RxBufferIndex),
+                                  RxRingbuffer.getMaxBufSize())) > 0) {
+      RxRingbuffer.setDataLength(RxBufferIndex, ReadSize);
+      XTRACE(PROCESS, DEB, "rdsize: %zu", ReadSize);
+      stats_.RxPackets++;
+      stats_.RxBytes += ReadSize;
 
-      // stats_.fifo_free = input2proc_fifo.free();
-      if (!input2proc_fifo.push(eth_index)) {
-        stats_.fifo_push_errors++;
+      // stats_.fifo_free = InputFifo.free();
+      if (!InputFifo.push(RxBufferIndex)) {
+        stats_.FifoPushErrors++;
       } else {
-        eth_ringbuf->getNextBuffer();
+        RxRingbuffer.getNextBuffer();
       }
     }
 
@@ -207,56 +203,56 @@ void bin(Hists& hists, const Hit &e)
   }
 }
 
-void GdGemBase::apply_configuration() {
-  LOG(INIT, Sev::Info, "NMXConfig:\n{}", nmx_opts.debug());
+void GdGemBase::applyConfiguration() {
+  LOG(INIT, Sev::Info, "NMXConfig:\n{}", NMXOpts.debug());
 
-  if (nmx_opts.builder_type == "VMM3") {
+  if (NMXOpts.builder_type == "VMM3") {
     builder_ = std::make_shared<Gem::BuilderVMM3>(
-        nmx_opts.time_config, nmx_opts.srs_mappings,
-        nmx_opts.adc_threshold,
-        NMXSettings.fileprefix,
+        NMXOpts.time_config, NMXOpts.srs_mappings,
+        NMXOpts.adc_threshold,
+        NMXSettings.FilePrefix,
         NMXSettings.PMin,
         NMXSettings.PMax,
         NMXSettings.PWidth,
-        nmx_opts.calfile, stats_, nmx_opts.enable_data_processing);
+        NMXOpts.calfile, stats_, NMXOpts.enable_data_processing);
 
-  } else if (nmx_opts.builder_type == "Readouts") {
+  } else if (NMXOpts.builder_type == "Readouts") {
     builder_ = std::make_shared<Gem::BuilderReadouts>(
-        nmx_opts.srs_mappings,
-        nmx_opts.adc_threshold,
-        NMXSettings.fileprefix);
+        NMXOpts.srs_mappings,
+        NMXOpts.adc_threshold,
+        NMXSettings.FilePrefix);
 
-  } else if (nmx_opts.builder_type == "Hits") {
+  } else if (NMXOpts.builder_type == "Hits") {
     builder_ = std::make_shared<Gem::BuilderHits>();
   } else {
     LOG(INIT, Sev::Error, "Unrecognized builder type in config");
   }
 
   clusterer_x_ = std::make_shared<GapClusterer>(
-      nmx_opts.clusterer_x.max_time_gap, nmx_opts.clusterer_x.max_strip_gap);
+      NMXOpts.clusterer_x.max_time_gap, NMXOpts.clusterer_x.max_strip_gap);
   clusterer_y_ = std::make_shared<GapClusterer>(
-      nmx_opts.clusterer_y.max_time_gap, nmx_opts.clusterer_y.max_strip_gap);
+      NMXOpts.clusterer_y.max_time_gap, NMXOpts.clusterer_y.max_strip_gap);
 
-  if(nmx_opts.matcher_name == "CenterMatcher") {
+  if(NMXOpts.matcher_name == "CenterMatcher") {
     auto matcher = std::make_shared<CenterMatcher>(
-        nmx_opts.time_config.acquisition_window()*5, 0, 1);
-    matcher->set_max_delta_time(nmx_opts.matcher_max_delta_time);
-    matcher->set_time_algorithm(nmx_opts.time_algorithm);
+        NMXOpts.time_config.acquisition_window()*5, 0, 1);
+    matcher->set_max_delta_time(NMXOpts.matcher_max_delta_time);
+    matcher->set_time_algorithm(NMXOpts.time_algorithm);
     matcher_ = matcher;
   }
   else {
     auto matcher = std::make_shared<GapMatcher>(
-        nmx_opts.time_config.acquisition_window()*5, 0, 1);
-    matcher->set_minimum_time_gap(nmx_opts.matcher_max_delta_time);
+        NMXOpts.time_config.acquisition_window()*5, 0, 1);
+    matcher->set_minimum_time_gap(NMXOpts.matcher_max_delta_time);
     matcher_ = matcher;
   }
 
-  hists_.set_cluster_adc_downshift(nmx_opts.cluster_adc_downshift);
+  hists_.set_cluster_adc_downshift(NMXOpts.cluster_adc_downshift);
 
-  sample_next_track_ = nmx_opts.send_tracks;
+  sample_next_track_ = NMXOpts.send_tracks;
 }
 
-void GdGemBase::cluster_plane(HitVector &hits,
+void GdGemBase::clusterPlane(HitVector &hits,
                               std::shared_ptr<AbstractClusterer> clusterer, bool flush) {
   sort_chronologically(hits);
   clusterer->cluster(hits);
@@ -272,22 +268,22 @@ void GdGemBase::cluster_plane(HitVector &hits,
   }
 }
 
-void GdGemBase::perform_clustering(bool flush) {
+void GdGemBase::performClustering(bool flush) {
   // \todo we can parallelize this (per plane)
 
   if (builder_->hit_buffer_x.size()) {
-    cluster_plane(builder_->hit_buffer_x, clusterer_x_, flush);
+    clusterPlane(builder_->hit_buffer_x, clusterer_x_, flush);
   }
 
   if (builder_->hit_buffer_y.size()) {
-    cluster_plane(builder_->hit_buffer_y, clusterer_y_, flush);
+    clusterPlane(builder_->hit_buffer_y, clusterer_y_, flush);
   }
 
   // \todo but we cannot parallelize this, this is the critical path
   matcher_->match(flush);
 }
 
-void GdGemBase::process_events(EV42Serializer& event_serializer,
+void GdGemBase::processEvents(EV42Serializer& event_serializer,
                                Gem::TrackSerializer& track_serializer) {
 
   // This may be required if you start seeing "Event time sequence error" messages
@@ -300,26 +296,26 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
   //       as each iteration is completely independent, other than
   //       everything going to the same serializers
 
-  stats_.clusters_total  += matcher_->matched_events.size();
+  stats_.ClustersTotal  += matcher_->matched_events.size();
   for (auto& event : matcher_->matched_events)
   {
     if (!event.both_planes()) {
       if (event.ClusterA.hit_count() != 0) {
-        stats_.clusters_x_only++;
+        stats_.ClustersXOnly++;
       }
       else {
-        stats_.clusters_y_only++;
+        stats_.ClustersYOnly++;
       }
       continue;
     }
 
-    stats_.clusters_xy++;
+    stats_.ClustersXAndY++;
 
-    neutron_event_ = nmx_opts.analyzer_->analyze(event);
+    neutron_event_ = NMXOpts.analyzer_->analyze(event);
 
     /// Sample only tracks that are good in both planes
     if (sample_next_track_
-        && (event.total_hit_count() >= nmx_opts.track_sample_minhits))
+        && (event.total_hit_count() >= NMXOpts.track_sample_minhits))
     {
 //      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.to_string(true));
       sample_next_track_ = !track_serializer.add_track(event,
@@ -329,40 +325,41 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 
     if (!neutron_event_.good)
     {
-      stats_.events_bad++;
+      stats_.EventsBad++;
       continue;
     }
 
-    if (!nmx_opts.filter.valid(event))
+    if (!NMXOpts.filter.valid(event))
     {
-      stats_.events_filter_rejects++;
+      stats_.EventsFilterRejects++;
       continue;
     }
 
     // \todo this logic is a hack to accomodate MG
-    if (nmx_opts.geometry.nz() > 1) {
-      pixelid_ = nmx_opts.geometry.pixel3D(
+    if (NMXOpts.geometry.nz() > 1) {
+      pixelid_ = NMXOpts.geometry.pixel3D(
           neutron_event_.x.center_rounded(),
           neutron_event_.y.center_rounded(),
           neutron_event_.z.center_rounded());
     } else {
       auto x = neutron_event_.x.center_rounded();
       if (( x >= NMXSettings.PMin ) and ( x <= NMXSettings.PMax)) {
-        pixelid_ = nmx_opts.geometry.pixel2D(
+        pixelid_ = NMXOpts.geometry.pixel2D(
             neutron_event_.x.center_rounded(), neutron_event_.y.center_rounded());
       } else {
+        stats_.EventsOutsideRegion++;
         pixelid_ = 0;
       }
     }
 
-    if (!nmx_opts.geometry.valid_id(pixelid_))
+    if (!NMXOpts.geometry.valid_id(pixelid_))
     {
-      stats_.events_geom_errors++;
+      stats_.EventsGeomErrors++;
       continue;
     }
 
     // Histogram cluster ADC only for valid events
-    if (nmx_opts.hit_histograms)
+    if (NMXOpts.hit_histograms)
     {
       bin(hists_, event);
     }
@@ -379,12 +376,12 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
     truncated_time_ = neutron_event_.time - recent_pulse_time_;
     // \todo try different limits
     if (!have_pulse_time_ ||
-        (truncated_time_ > max_pulse_window_ns)) {
+        (truncated_time_ > MaxPulseWindowNs)) {
       have_pulse_time_ = true;
       recent_pulse_time_ = neutron_event_.time;
       truncated_time_ = 0;
       if (event_serializer.eventCount())
-        stats_.tx_bytes += event_serializer.produce();
+        stats_.TxBytes += event_serializer.produce();
       event_serializer.pulseTime(recent_pulse_time_);
 //      LOG(PROCESS, Sev::Debug, "New offset time selected: {}", recent_pulse_time_);
     }
@@ -392,17 +389,17 @@ void GdGemBase::process_events(EV42Serializer& event_serializer,
 //    LOG(PROCESS, Sev::Debug, "Good event: time={}, pixel={} from {}",
 //        truncated_time_, pixelid_, neutron_event_.to_string());
 
-    stats_.tx_bytes += event_serializer.addEvent(
+    stats_.TxBytes += event_serializer.addEvent(
         static_cast<uint32_t>(truncated_time_), pixelid_);
-    stats_.events_good++;
-    stats_.events_good_hits += event.total_hit_count();
+    stats_.EventsGood++;
+    stats_.EventsGoodHits += event.total_hit_count();
   }
   matcher_->matched_events.clear();
 }
 
 
-void GdGemBase::processing_thread() {
-  apply_configuration();
+void GdGemBase::processingThread() {
+  applyConfiguration();
   if (!builder_) {
     LOG(PROCESS, Sev::Error, "No builder specified, exiting thread");
     return;
@@ -425,7 +422,7 @@ void GdGemBase::processing_thread() {
     hits_producer.produce(DataBuffer, Timestamp);
   };
 
-  EV42Serializer ev42serializer(kafka_buffer_size, "nmx", ProduceEvents);
+  EV42Serializer ev42serializer(KafkaBufferSize, "nmx", ProduceEvents);
 
   Gem::TrackSerializer track_serializer(256, "nmx_tracks");
   track_serializer.set_callback(ProduceMonitor);
@@ -436,8 +433,8 @@ void GdGemBase::processing_thread() {
   Gem::TrackSerializer raw_serializer(1500, "nmx_hits");
   raw_serializer.set_callback(ProduceHits);
 
-  TSCTimer report_timer;
-  unsigned int data_index;
+  TSCTimer ReportTimer;
+  unsigned int DataIndex;
   /* Time for performance measurement
   Timer duration;
   duration.now();
@@ -447,17 +444,16 @@ void GdGemBase::processing_thread() {
   int rep = 0;
   */
   while (true) {
-    // stats_.fifo_free = input2proc_fifo.free();
-    if (!input2proc_fifo.pop(data_index)) {
-      stats_.processing_idle++;
+    // stats_.fifo_free = InputFifo.free();
+    if (!InputFifo.pop(DataIndex)) {
+      stats_.ProcessingIdle++;
       usleep(1);
     } else {
-      auto len = eth_ringbuf->getDataLength(data_index);
-      if (len == 0) {
-        stats_.fifo_seq_errors++;
+      auto Length = RxRingbuffer.getDataLength(DataIndex);
+      if (Length == 0) {
+        stats_.FifoSeqErrors++;
       } else {
-        builder_->process_buffer(
-            eth_ringbuf->getDataBuffer(data_index), len);
+        builder_->process_buffer(RxRingbuffer.getDataBuffer(DataIndex), Length);
         /* Performance measurement
         cnt++;
         if(cnt == 10000) {
@@ -472,10 +468,10 @@ void GdGemBase::processing_thread() {
         }
         */
 
-        if (nmx_opts.enable_data_processing) {
-          stats_.hits_good += (builder_->hit_buffer_x.size()
+        if (NMXOpts.enable_data_processing) {
+          stats_.HitsGood += (builder_->hit_buffer_x.size()
             + builder_->hit_buffer_y.size());
-          if (nmx_opts.send_raw_hits) {
+          if (NMXOpts.send_raw_hits) {
             Event dummy_event;
             for (const auto& e : builder_->hit_buffer_x) {
               dummy_event.ClusterA.insert(e);
@@ -487,7 +483,7 @@ void GdGemBase::processing_thread() {
             raw_serializer.add_track(dummy_event, 0, 0);
           }
 
-          if (nmx_opts.hit_histograms) {
+          if (NMXOpts.hit_histograms) {
             for (const auto& e : builder_->hit_buffer_x) {
               bin(hists_, e);
             }
@@ -496,10 +492,10 @@ void GdGemBase::processing_thread() {
             }
           }
 
-          if (nmx_opts.perform_clustering) {
+          if (NMXOpts.perform_clustering) {
             // do not flush
-            perform_clustering(false);
-            process_events(ev42serializer, track_serializer);
+            performClustering(false);
+            processEvents(ev42serializer, track_serializer);
           }
           builder_->hit_buffer_x.clear();
           builder_->hit_buffer_y.clear();
@@ -508,26 +504,26 @@ void GdGemBase::processing_thread() {
     }
 
     // Flush on interval or exit
-    if ((not runThreads) || (report_timer.timetsc() >=
+    if ((not runThreads) || (ReportTimer.timetsc() >=
         EFUSettings.UpdateIntervalSec * 1000000 * TscMHz)) {
 
-      if (not runThreads && nmx_opts.perform_clustering) {
+      if (not runThreads && NMXOpts.perform_clustering) {
         // flush everything first
-        perform_clustering(true);
-        process_events(ev42serializer, track_serializer);
+        performClustering(true);
+        processEvents(ev42serializer, track_serializer);
       }
 
-      sample_next_track_ = nmx_opts.send_tracks;
+      sample_next_track_ = NMXOpts.send_tracks;
 
-      stats_.tx_bytes += ev42serializer.produce();
+      stats_.TxBytes += ev42serializer.produce();
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
-      stats_.kafka_produce_fails = event_producer.stats.produce_fails;
-      stats_.kafka_ev_errors = event_producer.stats.ev_errors;
-      stats_.kafka_ev_others = event_producer.stats.ev_others;
-      stats_.kafka_dr_errors = event_producer.stats.dr_errors;
-      stats_.kafka_dr_noerrors = event_producer.stats.dr_noerrors;
+      stats_.KafkaProduceFails = event_producer.stats.produce_fails;
+      stats_.KafkaEvErrors = event_producer.stats.ev_errors;
+      stats_.KafkaEvOthers = event_producer.stats.ev_others;
+      stats_.KafkaDrErrors = event_producer.stats.dr_errors;
+      stats_.KafkaDrNoErrors = event_producer.stats.dr_noerrors;
 
       if (!hists_.isEmpty()) {
         LOG(PROCESS, Sev::Debug, "Sending histogram for {} readouts and {} clusters ",
@@ -546,7 +542,7 @@ void GdGemBase::processing_thread() {
         return;
       }
 
-      report_timer.now();
+      ReportTimer.now();
     }
   }
 }

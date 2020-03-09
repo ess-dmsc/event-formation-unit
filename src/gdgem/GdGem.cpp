@@ -19,7 +19,7 @@ void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {
   parser.add_option("--calibration", LocalNMXSettings.CalibrationFile,
                     "NMX (gdgem) specific calibration (json) file")
       ->group("NMX");
-  parser.add_option("--dumptofile", LocalNMXSettings.fileprefix,
+  parser.add_option("--dumptofile", LocalNMXSettings.FilePrefix,
                     "dump to specified file")
       ->group("NMX")->configurable(true);
 
