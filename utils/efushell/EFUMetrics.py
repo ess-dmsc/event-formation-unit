@@ -12,7 +12,7 @@ class Metrics:
     def _get_efu_command(self, cmd):
         res = self.driver.Ask(cmd)
 
-        if res.find(b"Error") != -1:
+        if res.find(b"Error:") != -1:
             print("Error getting EFU command")
             sys.exit(1)
         return res
