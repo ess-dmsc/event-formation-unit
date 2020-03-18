@@ -77,9 +77,9 @@ GdGemBase::GdGemBase(BaseSettings const &Settings, struct NMXSettings &LocalSett
   Stats.create("receive.packets", stats_.RxPackets);
   Stats.create("receive.bytes", stats_.RxBytes);
   Stats.create("receive.dropped", stats_.FifoPushErrors);
-  Stats.create("receive.FifoSeqErrors", stats_.FifoSeqErrors);
+  Stats.create("receive.fifo_seq_errors", stats_.FifoSeqErrors);
 
-  Stats.create("thread.ProcessingIdle", stats_.ProcessingIdle);
+  Stats.create("thread.processing_idle", stats_.ProcessingIdle);
 
   // Parser
   Stats.create("readouts.good_frames", stats_.ParserGoodFrames);
