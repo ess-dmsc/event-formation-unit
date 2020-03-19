@@ -3,11 +3,11 @@
 #include <gdgem/NMXConfig.h>
 #include <test/TestBase.h>
 
-std::string nocalibration{""};
+std::string NoCalibration{""};
 
 using namespace Gem;
 
-class NMXConfigTest : public TestBase {
+class NmxConfigTest : public TestBase {
 protected:
   std::string TestJsonPath {TEST_JSON_PATH};
 };
@@ -15,52 +15,52 @@ protected:
 // \todo improve everything about this
 
 /** Test cases below */
-TEST_F(NMXConfigTest, ConstructorDefaults) {
-  NMXConfig nmxconfig;
-  EXPECT_TRUE(nmxconfig.builder_type.empty());
-  EXPECT_EQ(nmxconfig.calfile, nullptr);
+TEST_F(NmxConfigTest, ConstructorDefaults) {
+  NMXConfig NmxConfig;
+  EXPECT_TRUE(NmxConfig.builder_type.empty());
+  EXPECT_EQ(NmxConfig.calfile, nullptr);
 }
 
-TEST_F(NMXConfigTest, EventFilter) {
-  EventFilter filter;
-  Event e; // use empty Event
-  filter.enforce_minimum_hits = false;
-  EXPECT_TRUE(filter.valid(e));
+TEST_F(NmxConfigTest, EventFilter) {
+  EventFilter Filter;
+  Event E; // use empty Event
+  Filter.enforce_minimum_hits = false;
+  EXPECT_TRUE(Filter.valid(E));
 
-  filter.enforce_minimum_hits = true;
-  EXPECT_FALSE(filter.valid(e));
+  Filter.enforce_minimum_hits = true;
+  EXPECT_FALSE(Filter.valid(E));
 }
 
 
-TEST_F(NMXConfigTest, NoConfigFile) {
-  EXPECT_THROW(NMXConfig nmxconfig("file_does_not_exist", nocalibration);, std::runtime_error);
+TEST_F(NmxConfigTest, NoConfigFile) {
+  EXPECT_THROW(NMXConfig NmxConfig("file_does_not_exist", NoCalibration);, std::runtime_error);
 }
 
-TEST_F(NMXConfigTest, DebugPrint) {
+TEST_F(NmxConfigTest, DebugPrint) {
   MESSAGE() << "This is NOT a test, but simply exercises the debug print code" << "\n";
-  NMXConfig nmxconfig;
-  nmxconfig.filter.enforce_minimum_hits = true;
-  auto str = nmxconfig.debug();
-  MESSAGE() << str << "\n";
+  NMXConfig NmxConfig;
+  NmxConfig.filter.enforce_minimum_hits = true;
+  auto Str = NmxConfig.debug();
+  MESSAGE() << Str << "\n";
 }
 
-TEST_F(NMXConfigTest, JsonConfig) {
-  NMXConfig nmxconfig(TestJsonPath + "vmm3.json", nocalibration);
-  EXPECT_EQ(100, nmxconfig.time_config.tac_slope_ns()); // Parsed from json
-  EXPECT_EQ(20, nmxconfig.time_config.bc_clock_MHz());
-  EXPECT_EQ(384, nmxconfig.geometry.nx());
-  EXPECT_EQ(384, nmxconfig.geometry.ny());
-  EXPECT_EQ(500, nmxconfig.matcher_max_delta_time);
-  EXPECT_EQ("CenterMatcher", nmxconfig.matcher_name);
-  EXPECT_EQ("GapClusterer", nmxconfig.clusterer_name);
-  EXPECT_EQ("EventAnalyzer", nmxconfig.analyzer_name);
-  EXPECT_EQ("center-of-mass", nmxconfig.time_algorithm);
-  MESSAGE() << "\n" << nmxconfig.debug() << "\n";
+TEST_F(NmxConfigTest, JsonConfig) {
+  NMXConfig NmxConfig(TestJsonPath + "vmm3.json", NoCalibration);
+  EXPECT_EQ(100, NmxConfig.time_config.tac_slope_ns()); // Parsed from json
+  EXPECT_EQ(20, NmxConfig.time_config.bc_clock_MHz());
+  EXPECT_EQ(384, NmxConfig.geometry.nx());
+  EXPECT_EQ(384, NmxConfig.geometry.ny());
+  EXPECT_EQ(500, NmxConfig.matcher_max_delta_time);
+  EXPECT_EQ("CenterMatcher", NmxConfig.matcher_name);
+  EXPECT_EQ("GapClusterer", NmxConfig.clusterer_name);
+  EXPECT_EQ("EventAnalyzer", NmxConfig.analyzer_name);
+  EXPECT_EQ("center-of-mass", NmxConfig.time_algorithm);
+  MESSAGE() << "\n" << NmxConfig.debug() << "\n";
 }
-  
-TEST_F(NMXConfigTest, JsonConfigMG) {
-  NMXConfig nmxconfig(TestJsonPath + "vmm3_mg.json", nocalibration);
-  MESSAGE() << "\n" << nmxconfig.debug() << "\n";
+
+TEST_F(NmxConfigTest, JsonConfigMG) {
+  NMXConfig NmxConfig(TestJsonPath + "vmm3_mg.json", NoCalibration);
+  MESSAGE() << "\n" << NmxConfig.debug() << "\n";
 }
 
 int main(int argc, char **argv) {

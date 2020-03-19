@@ -17,7 +17,7 @@ metrics = Metrics(args.i, args.p)
 
 res = metrics._get_efu_command("STAT_GET_COUNT")
 numstats = int(res.split()[1])
-print("Available stats:")
+print("Available stats ({}):".format(numstats))
 verify = ""
 for statnum in range(1, numstats + 1):
     res = metrics._get_efu_command("STAT_GET " + str(statnum))

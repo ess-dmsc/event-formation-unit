@@ -95,21 +95,21 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
 
 
         if ((hit.plane != 0) && (hit.plane != 1)) {
-          stats_.hits_bad_plane++;
+          stats_.HitsBadPlane++;
           XTRACE(PROCESS, DEB, "Bad SRS mapping (plane) -- fec=%d, chip=%d",
                 readout.fec, readout.chip_id);
           continue;
         }
 
         if (hit.coordinate == Hit::InvalidCoord) {
-          stats_.hits_bad_geometry++;
+          stats_.HitsBadGeometry++;
           XTRACE(PROCESS, DEB, "Bad SRS mapping (coordinate) -- fec=%d, chip=%d",
               readout.fec, readout.chip_id);
           continue;
         }
 
         if (hit.weight == 0 || (!readout.over_threshold && hit.weight < adc_threshold_)) {
-          stats_.hits_bad_adc++;
+          stats_.HitsBadAdc++;
           XTRACE(PROCESS, DEB, "ADC=0 or ADC below threshold  adc=%d", hit.weight);
           continue;
         }
@@ -122,6 +122,8 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
           auto c = hit.coordinate;
           if ( c >= std::max(0, (int)(PMin - PWidth)) and (c <= std::min(1279, (int)(PMax + PWidth)))) {
             hit_buffer_x.emplace_back(hit);
+          } else {
+            stats_.HitsOutsideRegion++;
           }
         }
 

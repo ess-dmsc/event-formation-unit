@@ -16,15 +16,15 @@ namespace Gem {
 class AbstractBuilder {
 public:
   struct ResultStats {
-    uint32_t parser_frame_seq_errors{0}; /// added in ParserVMM3
-    uint32_t parser_framecounter_overflows{0}; /// added in ParserVMM3
-    uint32_t parser_timestamp_lost_errors{0}; /// added in ParserVMM3
-    uint32_t parser_timestamp_seq_errors{0}; /// added in ParserVMM3
-    uint32_t parser_timestamp_overflows{0}; /// added in ParserVMM3
-    uint32_t parser_bad_frames{0};  /// added in ParserVMM3
-    uint32_t parser_good_frames{0}; /// added in ParserVMM3
-    uint32_t parser_error_bytes{0};
-    uint32_t parser_readouts{0};
+    uint32_t ParserFrameSeqErrors{0}; /// added in ParserVMM3
+    uint32_t ParserFramecounterOverflows{0}; /// added in ParserVMM3
+    uint32_t ParserTimestampLostErrors{0}; /// added in ParserVMM3
+    uint32_t ParserTimestampSeqErrors{0}; /// added in ParserVMM3
+    uint32_t ParserTimestampOverflows{0}; /// added in ParserVMM3
+    uint32_t ParserBadFrames{0};  /// added in ParserVMM3
+    uint32_t ParserGoodFrames{0}; /// added in ParserVMM3
+    uint32_t ParserErrorBytes{0};
+    uint32_t ParserReadouts{0};
     uint32_t geom_errors{0};
     uint32_t adc_rejects{0};
     uint32_t adc_zero{0};
