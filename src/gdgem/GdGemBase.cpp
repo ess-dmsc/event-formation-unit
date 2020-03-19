@@ -188,14 +188,12 @@ void GdGemBase::inputThread() {
   }
 }
 
-void bin(Hists& hists, const Event &e)
-{
+void bin(Hists& hists, const Event &e) {
   auto sum = e.ClusterA.weight_sum() + e.ClusterB.weight_sum();
   hists.bincluster(static_cast<uint32_t>(sum));
 }
 
-void bin(Hists& hists, const Hit &e)
-{
+void bin(Hists& hists, const Hit &e) {
   if (e.plane == 0) {
     hists.bin_x(e.coordinate, e.weight);
   } else if (e.plane == 1) {
@@ -234,17 +232,17 @@ void GdGemBase::applyConfiguration() {
       NMXOpts.clusterer_y.max_time_gap, NMXOpts.clusterer_y.max_strip_gap);
 
   if(NMXOpts.matcher_name == "CenterMatcher") {
-    auto matcher = std::make_shared<CenterMatcher>(
+    auto Matcher = std::make_shared<CenterMatcher>(
         NMXOpts.time_config.acquisition_window()*5, 0, 1);
-    matcher->set_max_delta_time(NMXOpts.matcher_max_delta_time);
-    matcher->set_time_algorithm(NMXOpts.time_algorithm);
-    matcher_ = matcher;
+    Matcher->set_max_delta_time(NMXOpts.matcher_max_delta_time);
+    Matcher->set_time_algorithm(NMXOpts.time_algorithm);
+    matcher_ = Matcher;
   }
   else {
-    auto matcher = std::make_shared<GapMatcher>(
+    auto Matcher = std::make_shared<GapMatcher>(
         NMXOpts.time_config.acquisition_window()*5, 0, 1);
-    matcher->set_minimum_time_gap(NMXOpts.matcher_max_delta_time);
-    matcher_ = matcher;
+    Matcher->set_minimum_time_gap(NMXOpts.matcher_max_delta_time);
+    matcher_ = Matcher;
   }
 
   hists_.set_cluster_adc_downshift(NMXOpts.cluster_adc_downshift);
@@ -253,18 +251,18 @@ void GdGemBase::applyConfiguration() {
 }
 
 void GdGemBase::clusterPlane(HitVector &hits,
-                              std::shared_ptr<AbstractClusterer> clusterer, bool flush) {
+                              std::shared_ptr<AbstractClusterer> Clusterer, bool Flush) {
   sort_chronologically(hits);
-  clusterer->cluster(hits);
+  Clusterer->cluster(hits);
   hits.clear();
-  if (flush) {
-    clusterer->flush();
+  if (Flush) {
+    Clusterer->flush();
   }
-  if (!clusterer->clusters.empty()) {
+  if (!Clusterer->clusters.empty()) {
 //    LOG(PROCESS, Sev::Debug, "Adding {} clusters to matcher for plane {}",
 //        clusterer->clusters.size(),
 //        clusterer->clusters.front().plane());
-    matcher_->insert(clusterer->clusters.front().plane(), clusterer->clusters);
+    matcher_->insert(Clusterer->clusters.front().plane(), Clusterer->clusters);
   }
 }
 
@@ -297,13 +295,11 @@ void GdGemBase::processEvents(EV42Serializer& event_serializer,
   //       everything going to the same serializers
 
   stats_.ClustersTotal  += matcher_->matched_events.size();
-  for (auto& event : matcher_->matched_events)
-  {
+  for (auto& event : matcher_->matched_events) {
     if (!event.both_planes()) {
       if (event.ClusterA.hit_count() != 0) {
         stats_.ClustersXOnly++;
-      }
-      else {
+      } else {
         stats_.ClustersYOnly++;
       }
       continue;
@@ -315,22 +311,19 @@ void GdGemBase::processEvents(EV42Serializer& event_serializer,
 
     /// Sample only tracks that are good in both planes
     if (sample_next_track_
-        && (event.total_hit_count() >= NMXOpts.track_sample_minhits))
-    {
+        && (event.total_hit_count() >= NMXOpts.track_sample_minhits)) {
 //      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.to_string(true));
       sample_next_track_ = !track_serializer.add_track(event,
                                                        neutron_event_.x.center,
                                                        neutron_event_.y.center);
     }
 
-    if (!neutron_event_.good)
-    {
+    if (!neutron_event_.good) {
       stats_.EventsBad++;
       continue;
     }
 
-    if (!NMXOpts.filter.valid(event))
-    {
+    if (!NMXOpts.filter.valid(event)) {
       stats_.EventsFilterRejects++;
       continue;
     }
@@ -352,15 +345,13 @@ void GdGemBase::processEvents(EV42Serializer& event_serializer,
       }
     }
 
-    if (!NMXOpts.geometry.valid_id(pixelid_))
-    {
+    if (!NMXOpts.geometry.valid_id(pixelid_)) {
       stats_.EventsGeomErrors++;
       continue;
     }
 
     // Histogram cluster ADC only for valid events
-    if (NMXOpts.hit_histograms)
-    {
+    if (NMXOpts.hit_histograms) {
       bin(hists_, event);
     }
     //not needed, gives wrong results, since time order of clusters

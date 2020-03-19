@@ -51,9 +51,8 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
 
   try {
     root = nlohmann::json::parse(jsonstring);
-  }
-  catch (...) {
-    XTRACE(INIT, WAR, "Invalid Json file format: %s", configfile.c_str());   	
+  } catch (...) {
+    XTRACE(INIT, WAR, "Invalid Json file format: %s", configfile.c_str());
     throw std::runtime_error("NMXConfig error - Invalid JSON file.");
   }
 
@@ -69,8 +68,7 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
   }
 
   if (builder_type != "Hits") {
-    if (root.count("srs_mappings"))
-    {
+    if (root.count("srs_mappings")) {
       auto sm = root["srs_mappings"];
       for (unsigned int index = 0; index < sm.size(); index++) {
         auto fecID = sm[index]["fecID"].get<int>();
@@ -81,8 +79,7 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
       }
     }
 
-    if (root.count("granular_mappings"))
-    {
+    if (root.count("granular_mappings")) {
       auto sm = root["granular_mappings"];
       for (unsigned int index = 0; index < sm.size(); index++) {
         auto item = sm[index];
@@ -152,7 +149,7 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
       geometry.nz(1);
       geometry.np(1);
     }
-  }  
+  }
   auto f = root["filters"];
   filter.enforce_minimum_hits = false;
   if(root.count("enforce_minimum_hits")) {
@@ -165,11 +162,10 @@ NMXConfig::NMXConfig(std::string configfile, std::string calibrationfile) {
     filter.plane_0_vs_1_ratio_max = f["plane_0_vs_1_ratio_max"].get<float>();
     filter.plane_0_vs_1_ratio_min = f["plane_0_vs_1_ratio_min"].get<float>();
   }
-  
+
   track_sample_minhits = root["track_sample_minhits"].get<unsigned int>();
   cluster_adc_downshift = root["cluster_adc_downshift"].get<unsigned int>();
   send_tracks = root["send_tracks"].get<bool>();
-  
 }
 
 std::string NMXConfig::debug() const {
