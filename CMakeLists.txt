@@ -143,3 +143,5 @@ add_custom_target(hints
   COMMAND echo "List cmake variables:                   cmake -LH"
   COMMAND echo ""
   )
+
+  message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
