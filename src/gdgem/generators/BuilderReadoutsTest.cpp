@@ -88,7 +88,7 @@ protected:
 // AbstractBuilder
 TEST_F(BuilderReadoutsTest, Constructor) {
   BuilderReadouts BR(Mappings, AdcThreshold, DumpDirectory);
-  ASSERT_EQ(BR.stats.parser_readouts, 0);
+  ASSERT_EQ(BR.stats.ParserReadouts, 0);
   ASSERT_EQ(BR.stats.geom_errors, 0);
   ASSERT_EQ(BR.hit_buffer_x.size(), 0);
   ASSERT_EQ(BR.hit_buffer_y.size(), 0);

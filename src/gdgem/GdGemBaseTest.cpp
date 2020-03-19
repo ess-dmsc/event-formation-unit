@@ -34,7 +34,7 @@ public:
 
 TEST_F(GdGemBaseTest, Constructor) {
   GdGemBaseStandIn Readout(Settings, LocalSettings);
-  EXPECT_EQ(Readout.stats_.rx_packets, 0);
+  EXPECT_EQ(Readout.stats_.RxPackets, 0);
 }
 
 // \todo this needs to be redone using the reference binary
@@ -64,7 +64,7 @@ TEST_F(GdGemBaseTest, DataReceive) {
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.stats_.rx_packets, 1);
+  EXPECT_EQ(Readout.stats_.RxPackets, 1);
 }
 
 int main(int argc, char **argv) {

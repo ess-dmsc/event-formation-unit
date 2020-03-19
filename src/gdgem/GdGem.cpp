@@ -19,8 +19,19 @@ void SetCLIArguments(CLI::App __attribute__((unused)) &parser) {
   parser.add_option("--calibration", LocalNMXSettings.CalibrationFile,
                     "NMX (gdgem) specific calibration (json) file")
       ->group("NMX");
-  parser.add_option("--dumptofile", LocalNMXSettings.fileprefix,
+  parser.add_option("--dumptofile", LocalNMXSettings.FilePrefix,
                     "dump to specified file")
+      ->group("NMX")->configurable(true);
+
+  // \todo REMOVE eventually
+  parser.add_option("--pmin", LocalNMXSettings.PMin,
+                    "min x-coordinate for this partition")
+      ->group("NMX")->configurable(true);
+  parser.add_option("--pmax", LocalNMXSettings.PMax,
+                  "max x-coordinate for this partition")
+      ->group("NMX")->configurable(true);
+  parser.add_option("--pwidth", LocalNMXSettings.PWidth,
+                    "Number of channels in overlap region")
       ->group("NMX")->configurable(true);
 }
 

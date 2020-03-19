@@ -1,58 +1,70 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2016 - 2020 European Spallation Source ERIC */
 #define __STDC_FORMAT_MACROS 1
 
-#include <Args.h>
+#include <CLI/CLI.hpp>
 #include <cassert>
-#include <chrono>
 #include <inttypes.h>
 #include <iostream>
 #include <common/Socket.h>
 #include <common/Timer.h>
 #include <stdio.h>
 
-typedef std::chrono::high_resolution_clock Clock;
+struct {
+  int UDPPort{9000};
+  int DataSize{9000};
+  int SocketBufferSize{2000000};
+} Settings;
+
+CLI::App app{"UDP receiver with 32 bit sequence number check."};
 
 int main(int argc, char *argv[]) {
-  Args opts(argc, argv);
+  app.add_option("-p, --port", Settings.UDPPort, "UDP receive port");
+  app.add_option("-b, --socket_buffer_size", Settings.SocketBufferSize, "socket buffer size (bytes)");
+  CLI11_PARSE(app, argc, argv);
 
-  static const int BUFFERSIZE = 9000;
+  static const int BUFFERSIZE{9200};
   char buffer[BUFFERSIZE];
-  uint64_t rx_total = 0;
-  uint64_t rx = 0;
-  uint64_t rxp = 0;
+  uint64_t RxBytesTotal{0};
+  uint64_t RxBytes{0};
+  uint64_t RxPackets{0};
+  uint32_t SeqNo{0};
   const int intervalUs = 1000000;
   const int B1M = 1000000;
 
-  Socket::Endpoint local("0.0.0.0", 9000);
-  UDPReceiver NMX(local);
-  NMX.setBufferSizes(0, 500000);
-  NMX.printBufferSizes();
+  Socket::Endpoint local("0.0.0.0", Settings.UDPPort);
+  UDPReceiver Receive(local);
+  Receive.setBufferSizes(Settings.SocketBufferSize, Settings.SocketBufferSize);
+  Receive.printBufferSizes();
 
-  Timer upd;
-  auto usecs = upd.timeus();
+  Timer UpdateTimer;
+  auto USecs = UpdateTimer.timeus();
 
   for (;;) {
-    int rdsize = NMX.receive(buffer, BUFFERSIZE);
-    assert(rdsize > 0);
-    assert(rdsize == opts.buflen);
+    int ReadSize = Receive.receive(buffer, BUFFERSIZE);
 
-    if (rdsize > 0) {
-      rx += rdsize;
-      rxp++;
+    assert(ReadSize > 0);
+    assert(ReadSize == Settings.DataSize);
+
+    if (ReadSize > 0) {
+      SeqNo = *((uint32_t *)buffer);
+      RxBytes += ReadSize;
+      RxPackets++;
     }
 
-    if ((rxp % 100) == 0)
-      usecs = upd.timeus();
+    assert(RxPackets <= SeqNo);
 
-    if (usecs >= intervalUs) {
-      rx_total += rx;
+    if ((RxPackets % 100) == 0)
+      USecs = UpdateTimer.timeus();
+
+    if (USecs >= intervalUs) {
+      RxBytesTotal += RxBytes;
       printf("Rx rate: %.2f Mbps, rx %" PRIu64 " MB (total: %" PRIu64
-             " MB) %" PRIu64 " usecs\n",
-             rx * 8.0 / (usecs / 1000000.0) / B1M, rx / B1M, rx_total / B1M,
-             usecs);
-      rx = 0;
-      upd.now();
-      usecs = upd.timeus();
+             " MB) %" PRIu64 " usecs, PER %4.3e\n",
+             RxBytes * 8.0 / (USecs / 1000000.0) / B1M, RxBytes / B1M, RxBytesTotal / B1M,
+             USecs, (1.0 * SeqNo - RxPackets)/SeqNo);
+      RxBytes = 0;
+      UpdateTimer.now();
+      USecs = UpdateTimer.timeus();
     }
   }
 }

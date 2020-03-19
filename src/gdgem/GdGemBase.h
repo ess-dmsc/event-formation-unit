@@ -20,10 +20,19 @@
 #include <common/EV42Serializer.h>
 #include <gdgem/nmx/TrackSerializer.h>
 
+const unsigned int MinNMXChannel{0};
+const unsigned int MaxNMXChannel{1279};
+const unsigned int ZeroNMXOverlapSize{0};
+
 struct NMXSettings {
   std::string ConfigFile;
   std::string CalibrationFile;
-  std::string fileprefix;
+  std::string FilePrefix;
+
+  // Parameters to handle detector partition (in x) with overlap region
+  unsigned int PMin{MinNMXChannel};
+  unsigned int PMax{MaxNMXChannel};
+  unsigned int PWidth{ZeroNMXOverlapSize};
 };
 
 using namespace memory_sequential_consistent; // Lock free fifo
@@ -31,12 +40,10 @@ using namespace memory_sequential_consistent; // Lock free fifo
 class GdGemBase : public Detector {
 public:
   GdGemBase(BaseSettings const & settings, NMXSettings & LocalSettings);
-  ~GdGemBase() {delete eth_ringbuf;}
-
 
   /// \brief detector specific threads
-  void input_thread();
-  void processing_thread();
+  void inputThread();
+  void processingThread();
 
   /// \brief detector specific commands
   int getCalibration(std::vector<std::string> cmdargs, char *output,
@@ -44,17 +51,17 @@ public:
 protected:
 
   /** \todo figure out the right size  of the .._max_entries  */
-  static constexpr int eth_buffer_max_entries {2000};
-  static constexpr int eth_buffer_size {9000};
-  static constexpr int kafka_buffer_size {12400};
+  static constexpr int EthernetBufferMaxEntries {2000};
+  static constexpr int EthernetBufferSize {9000};
+  static constexpr int KafkaBufferSize {12400};
 
 
   /** Shared between input_thread and processing_thread*/
-  CircularFifo<unsigned int, eth_buffer_max_entries> input2proc_fifo;
-  RingBuffer<eth_buffer_size> *eth_ringbuf;
+  CircularFifo<unsigned int, EthernetBufferMaxEntries> InputFifo;
+  RingBuffer<EthernetBufferSize> RxRingbuffer{EthernetBufferMaxEntries + 11};
 
   struct NMXSettings NMXSettings;
-  Gem::NMXConfig nmx_opts;
+  Gem::NMXConfig NMXOpts;
 
   std::shared_ptr<Gem::AbstractBuilder> builder_;
   std::shared_ptr<AbstractClusterer> clusterer_x_;
@@ -77,8 +84,8 @@ protected:
 
   bool sample_next_track_ {false};
 
-  void apply_configuration();
-  void cluster_plane(HitVector& hits, std::shared_ptr<AbstractClusterer> clusterer, bool flush);
-  void perform_clustering(bool flush);
-  void process_events(EV42Serializer&, Gem::TrackSerializer&);
+  void applyConfiguration();
+  void clusterPlane(HitVector& hits, std::shared_ptr<AbstractClusterer> clusterer, bool flush);
+  void performClustering(bool flush);
+  void processEvents(EV42Serializer&, Gem::TrackSerializer&);
 };
