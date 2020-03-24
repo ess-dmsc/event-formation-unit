@@ -19,7 +19,7 @@
 
 template <size_t kSlotBytes_, size_t kNumSlots,
           size_t kSlotAlignment = kSlotBytes_, size_t kStartAlignment_ = 16,
-          bool kDebug = true>
+          bool kValidate = true>
 class FixedSizePool {
 public:
   static const size_t kSlotBytes = std::max(kSlotBytes_, kSlotAlignment);
@@ -38,16 +38,17 @@ public:
 
     XTRACE(MAIN, DEB,
            "FixedSizePool: kSlotBytes %u, kNumSlots %u, kSlotAlignment %u, "
-           "kStartAlignment %u, kDebug %u, TotalBytes %u",
+           "kStartAlignment %u, kValidate %u, TotalBytes %u",
            (uint32_t)kSlotBytes, (uint32_t)kNumSlots, (uint32_t)kSlotAlignment,
-           (uint32_t)kStartAlignment, kDebug ? 1 : 0, (uint32_t)sizeof(*this));
+           (uint32_t)kStartAlignment, kValidate ? 1 : 0,
+           (uint32_t)sizeof(*this));
 
     m_NumSlotsUsed = 0;
     for (size_t i = 0; i < kNumSlots; ++i) {
       m_NextFreeSlot[i] = i;
     }
 
-    if (kDebug) {
+    if (kValidate) {
       memset(m_PoolBytes, kMemDeletedPat, sizeof(m_PoolBytes));
     }
   }
@@ -55,7 +56,7 @@ public:
   ~FixedSizePool() {
     RelAssertMsg(m_NumSlotsUsed == 0, "All slots in pool must be empty");
 
-    if (kDebug) {
+    if (kValidate) {
       // test m_NextFreeSlot indices are unique
       for (size_t testIndex = 0; testIndex < kNumSlots; ++testIndex) {
         __attribute__((unused)) bool testIndexFound = false;
@@ -69,6 +70,7 @@ public:
         RelAssertMsg(testIndexFound, "All slots must be used");
       }
 
+      // test for deletion reference pattern
       for (size_t i = 0; i < sizeof(m_PoolBytes); ++i) {
         RelAssertMsg(m_PoolBytes[i] == kMemDeletedPat,
                      "Deleted memory must have reference pattern");
@@ -76,7 +78,7 @@ public:
     }
   }
 
-  inline void *AllocateOne() {
+  inline void *AllocateSlot() {
     RelAssertMsg(m_NumSlotsUsed < kNumSlots, "Implement fallover to malloc()");
     size_t index = m_NextFreeSlot[m_NumSlotsUsed];
     RelAssertMsg(index < kNumSlots, "Expect capacity");
@@ -86,7 +88,7 @@ public:
     RelAssertMsg(p + kSlotBytes <= m_PoolBytes + sizeof(m_PoolBytes),
                  "Don't go past end of capacity");
 
-    if (kDebug) {
+    if (kValidate) {
       for (size_t i = 0; i < kSlotBytes; ++i) {
         RelAssertMsg(p[i] == kMemDeletedPat,
                      "Unused memory must have deletion pattern");
@@ -97,7 +99,7 @@ public:
     return static_cast<void *>(p);
   }
 
-  inline void Deallocate(void *p) {
+  inline void DeallocateSlot(void *p) {
     size_t index = ((unsigned char *)p - m_PoolBytes) / kSlotBytes;
     RelAssertMsg(index < kNumSlots, "Implement fallover to free()");
 
@@ -106,7 +108,7 @@ public:
 
     m_NextFreeSlot[m_NumSlotsUsed] = index;
 
-    if (kDebug) {
+    if (kValidate) {
       memset(p, kMemDeletedPat, kSlotBytes);
     }
   }
@@ -127,22 +129,22 @@ TEST_F(FixedSizePoolTest, Small_Empty) {
 TEST_F(FixedSizePoolTest, Small_1) {
   FixedSizePool<8, 1> pool;
 
-  void *mem = pool.AllocateOne();
+  void *mem = pool.AllocateSlot();
 
   ASSERT_TRUE(pool.m_NumSlotsUsed == 1);
   ASSERT_TRUE(mem >= (void *)pool.m_PoolBytes);
   ASSERT_TRUE(mem < (void *)(pool.m_PoolBytes + sizeof(pool.m_PoolBytes)));
 
-  pool.Deallocate(mem);
+  pool.DeallocateSlot(mem);
 }
 
 TEST_F(FixedSizePoolTest, Small_1_NewlyAllocatedPattern) {
   FixedSizePool<8, 1> pool;
-  unsigned char *mem = (unsigned char *)pool.AllocateOne();
+  unsigned char *mem = (unsigned char *)pool.AllocateSlot();
   for (size_t i = 0; i < pool.kSlotBytes; ++i) {
     ASSERT_TRUE(mem[i] == pool.kMemAllocatedPat);
   }
-  pool.Deallocate(mem);
+  pool.DeallocateSlot(mem);
 }
 
 TEST_F(FixedSizePoolTest, Small_1_Fail_DoubleFree) {
@@ -150,10 +152,10 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_DoubleFree) {
   ASSERT_DEATH(
       {
         FixedSizePool_t pool;
-        void *mem = pool.AllocateOne();
-        pool.AllocateOne();
-        pool.Deallocate(mem);
-        pool.Deallocate(mem);
+        void *mem = pool.AllocateSlot();
+        pool.AllocateSlot();
+        pool.DeallocateSlot(mem);
+        pool.DeallocateSlot(mem);
       },
       "Free slots must be unique. Could mean double delete");
 }
@@ -163,9 +165,9 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_DeallocateWrong) {
   ASSERT_DEATH(
       {
         FixedSizePool_t pool;
-        void *mem = pool.AllocateOne();
-        pool.Deallocate(mem);
-        pool.Deallocate(mem);
+        void *mem = pool.AllocateSlot();
+        pool.DeallocateSlot(mem);
+        pool.DeallocateSlot(mem);
       },
       "Pool must have content");
 }
@@ -175,7 +177,7 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_NotEmpty) {
   ASSERT_DEATH(
       {
         FixedSizePool_t pool;
-        pool.AllocateOne();
+        pool.AllocateSlot();
       },
       "All slots in pool must be empty");
 }
@@ -185,8 +187,8 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_DirtyRefPattern) {
   ASSERT_DEATH(
       {
         FixedSizePool_t pool;
-        void *mem = pool.AllocateOne();
-        pool.Deallocate(mem);
+        void *mem = pool.AllocateSlot();
+        pool.DeallocateSlot(mem);
         *(uint32_t *)mem = 0; // dirty the kMemDeleted zone
       },
       "Deleted memory must have reference pattern");
@@ -195,13 +197,13 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_DirtyRefPattern) {
 TEST_F(FixedSizePoolTest, Large_1) {
   FixedSizePool<8, 1000> pool;
 
-  void *mem = pool.AllocateOne();
+  void *mem = pool.AllocateSlot();
 
   ASSERT_TRUE(pool.m_NumSlotsUsed == 1);
   ASSERT_TRUE(mem >= (void *)pool.m_PoolBytes);
   ASSERT_TRUE(mem < (void *)(pool.m_PoolBytes + sizeof(pool.m_PoolBytes)));
 
-  pool.Deallocate(mem);
+  pool.DeallocateSlot(mem);
 }
 
 TEST_F(FixedSizePoolTest, Large_All) {
@@ -209,7 +211,7 @@ TEST_F(FixedSizePoolTest, Large_All) {
 
   void *allocs[1000];
   for (uint32_t i = 0; i < 1000; ++i) {
-    allocs[i] = pool.AllocateOne();
+    allocs[i] = pool.AllocateSlot();
 
     ASSERT_TRUE(pool.m_NumSlotsUsed == i + 1);
     ASSERT_TRUE(allocs[i] >= (void *)pool.m_PoolBytes);
@@ -218,57 +220,56 @@ TEST_F(FixedSizePoolTest, Large_All) {
   }
 
   for (int i = 0; i < 1000; ++i) {
-    pool.Deallocate(allocs[i]);
+    pool.DeallocateSlot(allocs[i]);
   }
 }
 
 TEST_F(FixedSizePoolTest, Align_AtSame) {
   FixedSizePool<8, 2, 8> pool;
 
-  void *mem = pool.AllocateOne();
+  void *mem = pool.AllocateSlot();
   ASSERT_EQ(size_t(mem) % 8, 0);
 
-  void *mem2 = pool.AllocateOne();
+  void *mem2 = pool.AllocateSlot();
   ASSERT_EQ(size_t(mem2) % 8, 0);
 
   ASSERT_TRUE(size_t(mem2) - size_t(mem) >= 8);
 
-  pool.Deallocate(mem);
-  pool.Deallocate(mem2);
+  pool.DeallocateSlot(mem);
+  pool.DeallocateSlot(mem2);
 }
 
 TEST_F(FixedSizePoolTest, Align_At64) {
   FixedSizePool<8, 2, 64> pool;
 
-  void *mem = pool.AllocateOne();
+  void *mem = pool.AllocateSlot();
   ASSERT_EQ(size_t(mem) % 64, 0);
 
-  void *mem2 = pool.AllocateOne();
+  void *mem2 = pool.AllocateSlot();
   ASSERT_EQ(size_t(mem2) % 64, 0);
 
   ASSERT_TRUE(size_t(mem2) - size_t(mem) >= 8);
 
-  pool.Deallocate(mem);
-  pool.Deallocate(mem2);
+  pool.DeallocateSlot(mem);
+  pool.DeallocateSlot(mem2);
 }
 
 TEST_F(FixedSizePoolTest, Align_At2) {
   FixedSizePool<64, 2, 2> pool;
 
-  void *mem = pool.AllocateOne();
+  void *mem = pool.AllocateSlot();
   ASSERT_EQ(size_t(mem) % 2, 0);
 
-  void *mem2 = pool.AllocateOne();
+  void *mem2 = pool.AllocateSlot();
   ASSERT_EQ(size_t(mem2) % 2, 0);
 
   ASSERT_TRUE(size_t(mem2) - size_t(mem) >= 64);
 
-  pool.Deallocate(mem);
-  pool.Deallocate(mem2);
+  pool.DeallocateSlot(mem);
+  pool.DeallocateSlot(mem2);
 }
 
 //----------------------------------------------------------------------
-
 
 template <class T, size_t kTotalBytes, size_t kObjectsPerSlot>
 struct FixedSizeAllocator {
@@ -290,11 +291,12 @@ struct FixedSizeAllocator {
   }
 
   template <class U, size_t U_sz, size_t U_num>
-  constexpr FixedSizeAllocator(const FixedSizeAllocator<U, U_sz, U_num> &) noexcept {}
+  constexpr FixedSizeAllocator(
+      const FixedSizeAllocator<U, U_sz, U_num> &) noexcept {}
 
   T *allocate(std::size_t n) {
     if (sizeof(T) * n <= m_Pool.kSlotBytes)
-      return (T *)m_Pool.AllocateOne();
+      return (T *)m_Pool.AllocateSlot();
 
     XTRACE(MAIN, CRI,
            "No pool for alloc: FixedSizeAllocator %u objs, %u bytes, %u "
@@ -305,15 +307,17 @@ struct FixedSizeAllocator {
     return NULL;
   }
 
-  void deallocate(T *p, std::size_t) noexcept { m_Pool.Deallocate(p); }
+  void deallocate(T *p, std::size_t) noexcept { m_Pool.DeallocateSlot(p); }
 };
 
-template <class T, size_t T_sz, size_t T_num, class U, size_t U_sz, size_t U_num>
+template <class T, size_t T_sz, size_t T_num, class U, size_t U_sz,
+          size_t U_num>
 bool operator==(const FixedSizeAllocator<T, T_sz, T_num> &,
                 const FixedSizeAllocator<U, U_sz, U_num> &) {
   return true;
 }
-template <class T, size_t T_sz, size_t T_num, class U, size_t U_sz, size_t U_num>
+template <class T, size_t T_sz, size_t T_num, class U, size_t U_sz,
+          size_t U_num>
 bool operator!=(const FixedSizeAllocator<T, T_sz, T_num> &,
                 const FixedSizeAllocator<U, U_sz, U_num> &) {
   return false;
