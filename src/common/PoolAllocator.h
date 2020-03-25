@@ -24,6 +24,10 @@ struct PoolAllocator {
   template <class U, size_t U_sz, size_t U_num>
   constexpr PoolAllocator(const PoolAllocator<U, U_sz, U_num> &) noexcept {}
 
+  template <typename U> struct rebind {
+    using other = PoolAllocator<U, kTotalBytes, kObjectsPerSlot>;
+  };
+
   T *allocate(std::size_t n);
   void deallocate(T *p, std::size_t) noexcept;
 };
