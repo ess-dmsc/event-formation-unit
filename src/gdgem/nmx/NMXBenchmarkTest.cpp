@@ -228,6 +228,19 @@ static void Vec_PushBackTest_MyVector(benchmark::State &state) {
 }
 BENCHMARK(Vec_PushBackTest_MyVector);
 
+static void Vec_PushBackTest_MyVector_NoDealloc(benchmark::State &state) {
+  MyVector<Hit> v;
+  BenchmarkLoop(state, [&] {
+    v.clear();
+    for (int i = 0; i < 16; ++i) {
+      v.push_back(Hit{});
+    }
+    ::benchmark::DoNotOptimize(v.data());
+    ::benchmark::ClobberMemory();
+  });
+}
+BENCHMARK(Vec_PushBackTest_MyVector_NoDealloc);
+
 static void Vec_PushBackTest_MyVector_Reserve(benchmark::State &state) {
   BenchmarkLoop(state, [&] {
     MyVector<Hit> v;
