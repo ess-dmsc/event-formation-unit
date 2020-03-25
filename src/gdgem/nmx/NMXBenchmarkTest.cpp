@@ -184,6 +184,8 @@ static void ClusterPlaneInlineFancy(benchmark::State &state) {
 }
 BENCHMARK(ClusterPlaneInlineFancy);
 
+//------------------------------------------------------------------------
+
 static void Vec_PushBackTest_StdVector(benchmark::State &state) {
   BenchmarkLoop(state, [&] {
     std::vector<Hit> v;
@@ -208,9 +210,10 @@ static void Vec_PushBackTest_MyVector(benchmark::State &state) {
 }
 BENCHMARK(Vec_PushBackTest_MyVector);
 
-static void Vec_PushBackTest_MyVector_Alloc(benchmark::State &state) {
+static void Vec_PushBackTest_MyVector_Reserve(benchmark::State &state) {
   BenchmarkLoop(state, [&] {
     MyVector<Hit> v;
+    v.reserve(16);
     for (int i = 0; i < 16; ++i) {
       v.push_back(Hit{});
     }
@@ -218,6 +221,6 @@ static void Vec_PushBackTest_MyVector_Alloc(benchmark::State &state) {
     ::benchmark::ClobberMemory();
   });
 }
-BENCHMARK(Vec_PushBackTest_MyVector_Alloc);
+BENCHMARK(Vec_PushBackTest_MyVector_Reserve);
 
 BENCHMARK_MAIN();
