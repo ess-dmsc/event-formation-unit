@@ -294,6 +294,10 @@ struct FixedSizeAllocator {
   constexpr FixedSizeAllocator(
       const FixedSizeAllocator<U, U_sz, U_num> &) noexcept {}
 
+  template <typename U> struct rebind {
+    using other = FixedSizeAllocator<U, kTotalBytes, kObjectsPerSlot>;
+  };
+
   T *allocate(std::size_t n) {
     if (sizeof(T) * n <= m_Pool.kSlotBytes)
       return (T *)m_Pool.AllocateSlot();
