@@ -17,6 +17,12 @@ struct HitAllocatorBase {
 
 template <class T> struct HitAllocator : public HitAllocatorBase {
   typedef T value_type;
+  typedef T &reference;
+  typedef const T &const_reference;
+  typedef size_t size_type;
+  typedef ptrdiff_t difference_type;
+  typedef T *pointer;
+  typedef const T *const_pointer;
 
   HitAllocator() = default;
   template <class U> constexpr HitAllocator(const HitAllocator<U> &) noexcept {}
@@ -64,8 +70,9 @@ public:
   typedef std::reverse_iterator<iterator> reverse_iterator;
   typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
 
-  //static const size_type kMinReserveCount = 16;
   enum { kMinReserveCount = 16 };
+
+  MyVector() { reserve(kMinReserveCount); }
 
   iterator begin() noexcept { return m_Vec.begin(); }
   const_iterator begin() const noexcept { return m_Vec.begin(); }
@@ -96,30 +103,30 @@ public:
   const value_type *data() const noexcept { return m_Vec.data(); }
 
   void push_back(const value_type &x) {
-    if (m_Vec.capacity() > m_Vec.size()) {
+    /*if (m_Vec.capacity() > m_Vec.size()) {*/
       m_Vec.push_back(x);
-    } else {
+    /*} else {
       m_Vec.reserve(m_Vec.size() + kMinReserveCount); // TODO growth policy
       m_Vec.push_back(x);
-    }
+    }*/
   }
 
   void push_back(value_type &&x) {
-    if (m_Vec.capacity() > m_Vec.size()) {
+    /*if (m_Vec.capacity() > m_Vec.size()) {*/
       m_Vec.push_back(std::move(x));
-    } else {
+    /*} else {
       m_Vec.reserve(m_Vec.size() + kMinReserveCount); // TODO growth policy
       m_Vec.push_back(std::move(x));
-    }
+    }*/
   }
 
   template <class... Args> void emplace_back(Args &&... args) {
-    if (m_Vec.capacity() > m_Vec.size()) {
+    /*if (m_Vec.capacity() > m_Vec.size()) {*/
       m_Vec.emplace_back(std::forward<Args>(args)...);
-    } else {
+    /*} else {
       m_Vec.reserve(m_Vec.size() + kMinReserveCount); // TODO growth policy
       m_Vec.emplace_back(std::forward<Args>(args)...);
-    }
+    }*/
   }
 
   void pop_back() { m_Vec.pop_back(); }

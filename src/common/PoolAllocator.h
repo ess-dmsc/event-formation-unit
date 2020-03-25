@@ -7,6 +7,12 @@
 template <class T, size_t kTotalBytes, size_t kObjectsPerSlot>
 struct PoolAllocator {
   typedef T value_type;
+  typedef T &reference;
+  typedef const T &const_reference;
+  typedef size_t size_type;
+  typedef ptrdiff_t difference_type;
+  typedef T *pointer;
+  typedef const T *const_pointer;
 
   enum : size_t { kSlotBytes = sizeof(T) * kObjectsPerSlot };
   enum : size_t { kNumSlots = kTotalBytes / kSlotBytes };

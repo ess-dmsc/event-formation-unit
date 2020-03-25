@@ -3,6 +3,12 @@
 #include <common/Assert.h>
 #include <common/Trace.h>
 
+#if 1 /* option for speed tests */
+#define PoolAssertMsg(...) RelAssertMsg(__VA_ARGS__)
+#else
+#define PoolAssertMsg(...)
+#endif
+
 template <size_t kSlotBytes_, size_t kNumSlots,
           size_t kSlotAlignment = kSlotBytes_, size_t kStartAlignment_ = 16,
           bool kValidate = true>
@@ -50,7 +56,7 @@ template <size_t kSlotBytes, size_t kNumSlots, size_t kSlotAlignment,
           size_t kStartAlignment, bool kValidate>
 FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
               kValidate>::~FixedSizePool() {
-  RelAssertMsg(m_NumSlotsUsed == 0, "All slots in pool must be empty");
+  PoolAssertMsg(m_NumSlotsUsed == 0, "All slots in pool must be empty");
 
   if (kValidate) {
     // test m_NextFreeSlot indices are unique
@@ -58,17 +64,17 @@ FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
       __attribute__((unused)) bool testIndexFound = false;
       for (size_t i = 0; i < kNumSlots; ++i) {
         if (m_NextFreeSlot[i] == testIndex) {
-          RelAssertMsg(!testIndexFound,
+          PoolAssertMsg(!testIndexFound,
                        "Free slots must be unique. Could mean double delete");
           testIndexFound = true;
         }
       }
-      RelAssertMsg(testIndexFound, "All slots must be used");
+      PoolAssertMsg(testIndexFound, "All slots must be used");
     }
 
     // test for deletion reference pattern
     for (size_t i = 0; i < sizeof(m_PoolBytes); ++i) {
-      RelAssertMsg(m_PoolBytes[i] == kMemDeletedPat,
+      PoolAssertMsg(m_PoolBytes[i] == kMemDeletedPat,
                    "Deleted memory must have reference pattern");
     }
   }
@@ -78,18 +84,18 @@ template <size_t kSlotBytes, size_t kNumSlots, size_t kSlotAlignment,
           size_t kStartAlignment, bool kValidate>
 void *FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
                     kValidate>::AllocateSlot() {
-  RelAssertMsg(m_NumSlotsUsed < kNumSlots, "Implement fallover to malloc()");
+  PoolAssertMsg(m_NumSlotsUsed < kNumSlots, "Implement fallover to malloc()");
   size_t index = m_NextFreeSlot[m_NumSlotsUsed];
-  RelAssertMsg(index < kNumSlots, "Expect capacity");
+  PoolAssertMsg(index < kNumSlots, "Expect capacity");
 
   m_NumSlotsUsed++;
   unsigned char *p = m_PoolBytes + (index * kSlotBytes);
-  RelAssertMsg(p + kSlotBytes <= m_PoolBytes + sizeof(m_PoolBytes),
+  PoolAssertMsg(p + kSlotBytes <= m_PoolBytes + sizeof(m_PoolBytes),
                "Don't go past end of capacity");
 
   if (kValidate) {
     for (size_t i = 0; i < kSlotBytes; ++i) {
-      RelAssertMsg(p[i] == kMemDeletedPat,
+      PoolAssertMsg(p[i] == kMemDeletedPat,
                    "Unused memory must have deletion pattern");
     }
     memset(p, kMemAllocatedPat, kSlotBytes);
@@ -103,9 +109,9 @@ template <size_t kSlotBytes, size_t kNumSlots, size_t kSlotAlignment,
 void FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
                    kValidate>::DeallocateSlot(void *p) {
   size_t index = ((unsigned char *)p - m_PoolBytes) / kSlotBytes;
-  RelAssertMsg(index < kNumSlots, "Implement fallover to free()");
+  PoolAssertMsg(index < kNumSlots, "Implement fallover to free()");
 
-  RelAssertMsg(m_NumSlotsUsed > 0, "Pool must have content");
+  PoolAssertMsg(m_NumSlotsUsed > 0, "Pool must have content");
   --m_NumSlotsUsed;
 
   m_NextFreeSlot[m_NumSlotsUsed] = index;
