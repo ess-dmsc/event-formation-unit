@@ -66,10 +66,15 @@ set(TestImageUdderTest_SRC
   )
 create_test_executable(TestImageUdderTest)
 
-set(CharacteristicSizeAllocatorTest_SRC
-  CharacteristicSizeAllocatorTest.cpp
+set(FixedSizePoolTest_SRC
+  FixedSizePoolTest.cpp
   )
-create_test_executable(CharacteristicSizeAllocatorTest)
+create_test_executable(FixedSizePoolTest)
+
+set(PoolAllocatorTest_SRC
+  PoolAllocatorTest.cpp
+  )
+create_test_executable(PoolAllocatorTest)
 
 # GOOGLE BENCHMARKS
 set(ESSGeometryBenchmarkTest_SRC
