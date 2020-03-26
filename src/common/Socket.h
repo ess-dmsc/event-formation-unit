@@ -42,6 +42,9 @@ public:
   /// Create a socker abstraction of type UDP or TCP
   Socket(Socket::type type);
 
+  /// Set TTL to 1 for IP multicast
+  int setMulticastTTL();
+
   /// Attempt to specify the socket receive and transmit buffer sizes (for performance)
   int setBufferSizes(int sndbuf, int rcvbuf);
 

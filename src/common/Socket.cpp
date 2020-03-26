@@ -45,6 +45,16 @@ Socket::Socket(Socket::type stype) {
   }
 }
 
+int Socket::setMulticastTTL() {
+  int MulticastTTL{1};
+
+  if ((setsockopt(SocketFileDescriptor, IPPROTO_IP, IP_MULTICAST_TTL, (void *)&MulticastTTL, sizeof(MulticastTTL))) < 0) {
+    LOG(IPC, Sev::Error, "setsockopt(IPPROTO_IP, IP_MULTICAST_TTL) failed");
+    throw std::runtime_error("system error - setsockopt(IPPROTO_IP, IP_MULTICAST_TTL) failed");
+  }
+  return 0;
+}
+
 int Socket::setBufferSizes(int sndbuf, int rcvbuf) {
   if (sndbuf) {
     setSockOpt(SO_SNDBUF, &sndbuf, sizeof(sndbuf));
