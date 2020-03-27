@@ -3,11 +3,16 @@
 #include <common/Assert.h>
 #include <common/Trace.h>
 
+#include <algorithm>
+
 #if 1 /* option for speed tests */
 #define PoolAssertMsg(...) RelAssertMsg(__VA_ARGS__)
 #else
 #define PoolAssertMsg(...)
 #endif
+
+//undef TRC_LEVEL
+//define TRC_LEVEL TRC_L_DEB
 
 template <size_t kSlotBytes_, size_t kNumSlots,
           size_t kSlotAlignment = kSlotBytes_, size_t kStartAlignment_ = 16,
@@ -30,6 +35,21 @@ public:
 
   void *AllocateSlot();
   void DeallocateSlot(void *p);
+};
+
+template <class T_, size_t kTotalBytes_, size_t kObjectsPerSlot_>
+struct FixedPoolConfig {
+  using T = T_;
+  enum : size_t { kTotalBytes = kTotalBytes_ };
+  enum : size_t { kObjectsPerSlot = kObjectsPerSlot_ };
+  enum : size_t { kSlotBytes = sizeof(T) * kObjectsPerSlot };
+  enum : size_t { kNumSlots = kTotalBytes / kSlotBytes };
+
+  static_assert(kTotalBytes >= kSlotBytes,
+                "PoolAllocator must have enough bytes for one slot. Is "
+                "kObjectsPerSlot sensible?");
+
+  using PoolType = FixedSizePool<kSlotBytes, kNumSlots, alignof(T), 16, true>;
 };
 
 template <size_t kSlotBytes, size_t kNumSlots, size_t kSlotAlignment,

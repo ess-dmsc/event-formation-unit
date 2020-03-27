@@ -73,6 +73,7 @@ public:
   enum { kMinReserveCount = 16 };
 
   MyVector() { reserve(kMinReserveCount); }
+  MyVector(Alloc &alloc) : m_Vec(alloc) { reserve(kMinReserveCount); }
 
   iterator begin() noexcept { return m_Vec.begin(); }
   const_iterator begin() const noexcept { return m_Vec.begin(); }

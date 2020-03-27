@@ -256,7 +256,11 @@ BENCHMARK(Vec_PushBackTest_MyVector_Reserve);
 
 static void Vec_PushBackTest_MyVector_PoolAllocator(benchmark::State &state) {
   BenchmarkLoop(state, [&] {
-    MyVector<Hit, PoolAllocator<Hit, sizeof(Hit) * 16, 16>> v;
+    using FixedPoolCfg = FixedPoolConfig<Hit, sizeof(Hit) * 16, 16>;
+    FixedPoolCfg::PoolType pool;
+    PoolAllocator<FixedPoolCfg> alloc(pool);
+
+    MyVector<Hit, decltype(alloc)> v(alloc);
     for (int i = 0; i < 16; ++i) {
       v.push_back(Hit{});
     }
@@ -268,7 +272,11 @@ BENCHMARK(Vec_PushBackTest_MyVector_PoolAllocator);
 
 static void
 Vec_PushBackTest_MyVector_PoolAllocator_NoDealloc(benchmark::State &state) {
-  MyVector<Hit, PoolAllocator<Hit, sizeof(Hit) * 16, 16>> v;
+  using FixedPoolCfg = FixedPoolConfig<Hit, sizeof(Hit) * 16, 16>;
+  FixedPoolCfg::PoolType pool;
+  PoolAllocator<FixedPoolCfg> alloc(pool);
+
+  MyVector<Hit, decltype(alloc)> v(alloc);
   BenchmarkLoop(state, [&] {
     v.clear();
     for (int i = 0; i < 16; ++i) {
@@ -291,7 +299,7 @@ static void Vec_PushBackTest_RawArray(benchmark::State &state) {
 
     count = 0;
     for (int i = 0; i < 16; ++i) {
-      v[count++] = Hit{};
+      ::benchmark::DoNotOptimize(v[count++] = Hit{});
     }
     ::benchmark::DoNotOptimize(v);
     ::benchmark::ClobberMemory();

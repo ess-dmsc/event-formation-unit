@@ -4,8 +4,8 @@
 #include <common/FixedSizePool.h>
 #include <common/Trace.h>
 
-template <class T, size_t kTotalBytes, size_t kObjectsPerSlot>
-struct PoolAllocator {
+template <typename FixedPoolConfigT> struct PoolAllocator {
+  using T = typename FixedPoolConfigT::T;
   typedef T value_type;
   typedef T &reference;
   typedef const T &const_reference;
@@ -14,32 +14,28 @@ struct PoolAllocator {
   typedef T *pointer;
   typedef const T *const_pointer;
 
-  enum : size_t { kSlotBytes = sizeof(T) * kObjectsPerSlot };
-  enum : size_t { kNumSlots = kTotalBytes / kSlotBytes };
+  using PoolType = typename FixedPoolConfigT::PoolType;
 
-  static_assert(kTotalBytes >= kSlotBytes,
-                "PoolAllocator must have enough bytes for one slot. Is "
-                "kObjectsPerSlot sensible?");
+  PoolType &m_Pool;
 
-  FixedSizePool<kSlotBytes, kNumSlots, alignof(T), 16, true> m_Pool;
+  PoolAllocator(const PoolAllocator &) = default;
+  PoolAllocator &operator=(const PoolAllocator &) = delete;
 
-  PoolAllocator() {
-    XTRACE(MAIN, DEB, "PoolAllocator: kTotalBytes %u", (uint32_t)kTotalBytes);
-  }
-
-  template <class U, size_t U_sz, size_t U_num>
-  constexpr PoolAllocator(const PoolAllocator<U, U_sz, U_num> &) noexcept {}
+  PoolAllocator(PoolType &pool) noexcept : m_Pool(pool) {}
 
   template <typename U> struct rebind {
-    using other = PoolAllocator<U, kTotalBytes, kObjectsPerSlot>;
+    using other =
+        PoolAllocator<FixedPoolConfig<U, FixedPoolConfigT::kTotalBytes,
+                                      FixedPoolConfigT::kObjectsPerSlot>>;
   };
 
   T *allocate(std::size_t n);
   void deallocate(T *p, std::size_t) noexcept;
 };
 
-template <class T, size_t kTotalBytes, size_t kObjectsPerSlot>
-T *PoolAllocator<T, kTotalBytes, kObjectsPerSlot>::allocate(std::size_t n) {
+template <typename FixedPoolConfigT>
+typename FixedPoolConfigT::T *
+PoolAllocator<FixedPoolConfigT>::allocate(std::size_t n) {
   if (sizeof(T) * n <= m_Pool.kSlotBytes)
     return (T *)m_Pool.AllocateSlot();
 
@@ -52,21 +48,19 @@ T *PoolAllocator<T, kTotalBytes, kObjectsPerSlot>::allocate(std::size_t n) {
   return NULL;
 }
 
-template <class T, size_t kTotalBytes, size_t kObjectsPerSlot>
-void PoolAllocator<T, kTotalBytes, kObjectsPerSlot>::deallocate(
-    T *p, std::size_t) noexcept {
+template <typename FixedPoolConfigT>
+void PoolAllocator<FixedPoolConfigT>::deallocate(T *p, std::size_t) noexcept {
   m_Pool.DeallocateSlot(p);
 }
 
-template <class T, size_t T_sz, size_t T_num, class U, size_t U_sz,
-          size_t U_num>
-bool operator==(const PoolAllocator<T, T_sz, T_num> &,
-                const PoolAllocator<U, U_sz, U_num> &) {
+template <typename FixedPoolConfigT, typename FixedPoolConfigU>
+bool operator==(const PoolAllocator<FixedPoolConfigT> &,
+                const PoolAllocator<FixedPoolConfigU> &) {
   return true;
 }
-template <class T, size_t T_sz, size_t T_num, class U, size_t U_sz,
-          size_t U_num>
-bool operator!=(const PoolAllocator<T, T_sz, T_num> &,
-                const PoolAllocator<U, U_sz, U_num> &) {
+
+template <typename FixedPoolConfigT, typename FixedPoolConfigU>
+bool operator!=(const PoolAllocator<FixedPoolConfigT> &,
+                const PoolAllocator<FixedPoolConfigU> &) {
   return false;
 }
