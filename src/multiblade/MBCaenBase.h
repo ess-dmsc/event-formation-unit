@@ -45,8 +45,9 @@ protected:
     // Input Counters - accessed in input thread
     int64_t RxPackets;
     int64_t RxBytes;
+    int64_t RxIdle;
     int64_t FifoPushErrors;
-    int64_t PaddingFor64ByteAlignment[5]; // cppcheck-suppress unusedStructMember
+    int64_t PaddingFor64ByteAlignment[4]; // cppcheck-suppress unusedStructMember
 
     // Processing Counters - accessed in processing thread
     int64_t FifoSeqErrors;
@@ -62,7 +63,7 @@ protected:
     int64_t FiltersMaxTimeSpan;
     int64_t FiltersMaxMulti1;
     int64_t FiltersMaxMulti2;
-    int64_t RxIdle;
+    int64_t ProcessingIdle;
     int64_t Events;
     int64_t EventsUdder;
     int64_t EventsNoCoincidence;

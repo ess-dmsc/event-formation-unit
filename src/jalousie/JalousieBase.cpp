@@ -59,7 +59,8 @@ JalousieBase::JalousieBase(BaseSettings const &settings, CLISettings const &Loca
   Stats.create("transmit.bytes", Counters.TxBytes);
 
   Stats.create("thread.seq_errors", Counters.FifoSeqErrors);
-  Stats.create("thread.ProcessingIdle", Counters.ProcessingIdle);
+  Stats.create("thread.input_idle", Counters.RxIdle);
+  Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_fails", Counters.kafka_produce_fails);
@@ -114,6 +115,8 @@ void JalousieBase::inputThread() {
       } else {
         eth_ringbuf->getNextBuffer();
       }
+    } else {
+      Counters.RxIdle++;
     }
   }
   XTRACE(INPUT, ALW, "Stopping input thread.");
