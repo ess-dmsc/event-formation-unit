@@ -4,6 +4,8 @@
 #include <common/FixedSizePool.h>
 #include <common/Trace.h>
 
+#include <cstdint>
+
 template <typename FixedPoolConfigT> struct PoolAllocator {
   using T = typename FixedPoolConfigT::T;
   typedef T value_type;
