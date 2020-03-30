@@ -4,6 +4,7 @@
 #include <common/Trace.h>
 
 #include <algorithm>
+#include <cstdint>
 
 #if 1 /* option for speed tests */
 #define PoolAssertMsg(...) RelAssertMsg(__VA_ARGS__)
