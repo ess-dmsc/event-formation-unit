@@ -12,8 +12,8 @@
 #define PoolAssertMsg(...)
 #endif
 
-//undef TRC_LEVEL
-//define TRC_LEVEL TRC_L_DEB
+// undef TRC_LEVEL
+// define TRC_LEVEL TRC_L_DEB
 
 template <size_t kSlotBytes_, size_t kNumSlots,
           size_t kSlotAlignment = kSlotBytes_, size_t kStartAlignment_ = 16,
@@ -41,10 +41,12 @@ public:
 template <class T_, size_t kTotalBytes_, size_t kObjectsPerSlot_>
 struct FixedPoolConfig {
   using T = T_;
-  enum : size_t { kTotalBytes = kTotalBytes_ };
-  enum : size_t { kObjectsPerSlot = kObjectsPerSlot_ };
-  enum : size_t { kSlotBytes = sizeof(T) * kObjectsPerSlot };
-  enum : size_t { kNumSlots = kTotalBytes / kSlotBytes };
+  enum : size_t {
+    kTotalBytes = kTotalBytes_,
+    kObjectsPerSlot = kObjectsPerSlot_,
+    kSlotBytes = sizeof(T) * kObjectsPerSlot,
+    kNumSlots = kTotalBytes / kSlotBytes
+  };
 
   static_assert(kTotalBytes >= kSlotBytes,
                 "PoolAllocator must have enough bytes for one slot. Is "
@@ -86,7 +88,7 @@ FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
       for (size_t i = 0; i < kNumSlots; ++i) {
         if (m_NextFreeSlot[i] == testIndex) {
           PoolAssertMsg(!testIndexFound,
-                       "Free slots must be unique. Could mean double delete");
+                        "Free slots must be unique. Could mean double delete");
           testIndexFound = true;
         }
       }
@@ -96,7 +98,7 @@ FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
     // test for deletion reference pattern
     for (size_t i = 0; i < sizeof(m_PoolBytes); ++i) {
       PoolAssertMsg(m_PoolBytes[i] == kMemDeletedPat,
-                   "Deleted memory must have reference pattern");
+                    "Deleted memory must have reference pattern");
     }
   }
 }
@@ -112,12 +114,12 @@ void *FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
   m_NumSlotsUsed++;
   unsigned char *p = m_PoolBytes + (index * kSlotBytes);
   PoolAssertMsg(p + kSlotBytes <= m_PoolBytes + sizeof(m_PoolBytes),
-               "Don't go past end of capacity");
+                "Don't go past end of capacity");
 
   if (kValidate) {
     for (size_t i = 0; i < kSlotBytes; ++i) {
       PoolAssertMsg(p[i] == kMemDeletedPat,
-                   "Unused memory must have deletion pattern");
+                    "Unused memory must have deletion pattern");
     }
     memset(p, kMemAllocatedPat, kSlotBytes);
   }
