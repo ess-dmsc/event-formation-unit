@@ -1,4 +1,4 @@
-/* Copyright (C) 2016-2018 European Spallation Source, ERIC. See LICENSE file */
+/* Copyright (C) 2016-2020 European Spallation Source, ERIC. See LICENSE file */
 //===----------------------------------------------------------------------===//
 ///
 /// \file
@@ -18,7 +18,7 @@ class ReaderPcap {
 public:
   /// \brief construct a reader for a specific file
   /// \param filename name of pcap file
-  ReaderPcap(std::string filename);
+  ReaderPcap(std::string FileName);
 
   /// closes pcap handle
   ~ReaderPcap();
@@ -31,7 +31,7 @@ public:
   /// \param buffer user allocated buffer, must be at least bufferlen bytes
   /// \param bufferlen length in bytes
   /// \return -1 no more data, 0 non UDP, >0 size of UDP payload
-  int read(char *buffer, size_t bufferlen);
+  int read(char *Buffer, size_t BufferSize);
 
   /// \brief update stats counters, use printStats next
   /// \return 0 on OK, -1 on error (failed open())
@@ -41,7 +41,7 @@ public:
   void printStats();
 
   /// \brief hexdump of packet, for debug
-  void printPacket(unsigned char *data, size_t payloadlen);
+  void printPacket(unsigned char *Data, size_t PayloadLength);
 
   struct stats_t {
     uint64_t PacketsTotal;
@@ -57,7 +57,7 @@ private:
 
   /// \brief checking consistency and updating stats
   /// \return 0 for non UDP, >0 udp payload length
-  int validatePacket(pcap_pkthdr *header, const unsigned char *data);
+  int validatePacket(pcap_pkthdr *Header, const unsigned char *Data);
 
   std::string FileName;
   pcap_t *PcapHandle{nullptr};

@@ -18,15 +18,14 @@
 /// BSD Socket abstractions for TCP and UDP transmitters and receivers
 class Socket {
 public:
-  enum class type { UDP, TCP };
-  static const int buflen_max = 9000;
+  enum class SocketType { UDP, TCP };
 
   class Endpoint {
   public:
-    const std::string ipaddr;
-    uint16_t port;
+    const std::string IpAddress;
+    uint16_t Port;
     Endpoint(const std::string ip_address, uint16_t port_number)
-        : ipaddr(ip_address), port(port_number) {}
+        : IpAddress(ip_address), Port(port_number) {}
   };
 
   /// \brief Is this a dotted quad ip address?
@@ -40,10 +39,14 @@ public:
   static std::string getHostByName(std::string &name);
 
   /// Create a socker abstraction of type UDP or TCP
-  Socket(Socket::type type);
+  Socket(Socket::SocketType Type);
 
-  /// Set TTL to 1 for IP multicast
-  int setMulticastTTL();
+  /// Set TTL to 1 for IP multicast (for transmitters)
+  void setMulticastTTL();
+
+  /// Allow reuse of ip and port, send igmp membership info
+  //void setMulticastReceive(std::string MultiCastAddress);
+  void setMulticastReceive();
 
   /// Attempt to specify the socket receive and transmit buffer sizes (for performance)
   int setBufferSizes(int sndbuf, int rcvbuf);
@@ -81,11 +84,19 @@ public:
   /// \brief To check if data can be transmitted or received
   bool isValidSocket();
 
+  /// \brief Check if address is IP multicast (Class 'D')
+  static bool isMulticast(std::string IpAddress) {
+    return IN_MULTICAST(ntohl(inet_addr(IpAddress.c_str())));
+  };
+
 private:
   int SocketFileDescriptor{-1};
+  int SockOptFlagOn{1};
+  struct ip_mreq  MulticastRequest;
   std::string RemoteIp;
   int RemotePort;
   struct sockaddr_in remoteSockAddr;
+  struct sockaddr_in localSockAddr;
 
   /// wrapper for getsockopt() system call
   int getSockOpt(int option);
@@ -97,17 +108,17 @@ private:
 /// UDP receiver only needs to specify local socket
 class UDPReceiver : public Socket {
 public:
-  UDPReceiver(Endpoint local) : Socket(Socket::type::UDP) {
-    this->setLocalSocket(local.ipaddr, local.port);
+  UDPReceiver(Endpoint Local) : Socket(Socket::SocketType::UDP) {
+    this->setLocalSocket(Local.IpAddress, Local.Port);
   };
 };
 
 /// UDP transmitter needs to specify both local and remote socket
 class UDPTransmitter : public Socket {
 public:
-  UDPTransmitter(Endpoint local, Endpoint remote) : Socket(Socket::type::UDP) {
-    this->setLocalSocket(local.ipaddr, local.port);
-    this->setRemoteSocket(remote.ipaddr, remote.port);
+  UDPTransmitter(Endpoint Local, Endpoint Remote) : Socket(Socket::SocketType::UDP) {
+    this->setLocalSocket(Local.IpAddress, Local.Port);
+    this->setRemoteSocket(Remote.IpAddress, Remote.Port);
   };
 };
 

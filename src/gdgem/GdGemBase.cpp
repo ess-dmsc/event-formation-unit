@@ -149,7 +149,7 @@ GdGemBase::GdGemBase(BaseSettings const &Settings, struct NMXSettings &LocalSett
 
 void GdGemBase::inputThread() {
   /** Connection setup */
-  Socket::Endpoint LocalSocket(EFUSettings.DetectorAddress.c_str(),
+  Socket::Endpoint LocalSocket(EFUSettings.DetectorAddress,
                          EFUSettings.DetectorPort);
   UDPReceiver DataReceiver(LocalSocket);
 
