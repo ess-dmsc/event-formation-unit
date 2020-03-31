@@ -34,7 +34,7 @@ PoolAllocator<FixedPoolConfigT>::allocate(std::size_t n) {
   if (sizeof(T) * n <= m_Pool.kSlotBytes)
     return (T *)m_Pool.AllocateSlot();
 
-  T* heap = new T[n];
+  T *heap = (T *)std::malloc(sizeof(T) * n);
   //XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", n, sizeof(T) * n);
   return heap;
 }
@@ -44,7 +44,7 @@ void PoolAllocator<FixedPoolConfigT>::deallocate(T *p, std::size_t) noexcept {
   if (m_Pool.Contains(p)) {
     m_Pool.DeallocateSlot(p);
   } else {
-    delete[] p;
+    std::free(p);
   }
 }
 
