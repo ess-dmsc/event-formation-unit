@@ -46,14 +46,15 @@ struct FixedPoolConfig {
     kTotalBytes = kTotalBytes_,
     kObjectsPerSlot = kObjectsPerSlot_,
     kSlotBytes = sizeof(T) * kObjectsPerSlot,
-    kNumSlots = kTotalBytes / kSlotBytes
+    kNumSlots = kTotalBytes / kSlotBytes,
+    kValidate = false // validate is too slow on a 1 gb mem block. This is a workaround.
   };
 
   static_assert(kTotalBytes >= kSlotBytes,
                 "PoolAllocator must have enough bytes for one slot. Is "
                 "kObjectsPerSlot sensible?");
 
-  using PoolType = FixedSizePool<kSlotBytes, kNumSlots, alignof(T), 16, true>;
+  using PoolType = FixedSizePool<kSlotBytes, kNumSlots, alignof(T), 16, kValidate>;
 };
 
 template <size_t kSlotBytes, size_t kNumSlots, size_t kSlotAlignment,
