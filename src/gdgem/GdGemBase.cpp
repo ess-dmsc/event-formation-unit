@@ -178,6 +178,8 @@ void GdGemBase::inputThread() {
       } else {
         RxRingbuffer.getNextBuffer();
       }
+    } else {
+      usleep(100);
     }
 
     // Checking for exit
@@ -438,7 +440,7 @@ void GdGemBase::processingThread() {
     // stats_.fifo_free = InputFifo.free();
     if (!InputFifo.pop(DataIndex)) {
       stats_.ProcessingIdle++;
-      usleep(1);
+      usleep(100);
     } else {
       auto Length = RxRingbuffer.getDataLength(DataIndex);
       if (Length == 0) {
