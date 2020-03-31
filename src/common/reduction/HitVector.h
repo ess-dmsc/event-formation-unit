@@ -9,7 +9,9 @@
 #pragma once
 
 #include <common/reduction/Hit.h>
+#include <common/PoolAllocator.h>
 
+// TODO rename to GreedyLinearAllocator
 struct HitAllocatorBase {
   static char *s_MemBegin;
   static char *s_MemEnd;
@@ -144,9 +146,45 @@ public:
   void resize(size_type sz, const value_type &c) { m_Vec.resize(sz, c); }
 };
 
+struct HitVectorStorage {
+  using PoolCfg =
+      FixedPoolConfig<Hit, 1024 * 1024 * 1024, MyVector<Hit>::kMinReserveCount>;
+  static PoolCfg::PoolType s_Pool;
+  static PoolAllocator<PoolCfg> s_Alloc;
+};
+
+template <class T> struct HitVectorAllocator : public HitVectorStorage {
+  typedef T value_type;
+  // TODO move to allocator_traits
+  typedef T &reference;
+  typedef const T &const_reference;
+  typedef size_t size_type;
+  typedef ptrdiff_t difference_type;
+  typedef T *pointer;
+  typedef const T *const_pointer;
+
+  HitVectorAllocator() = default;
+  template <class U>
+  constexpr HitVectorAllocator(const HitVectorAllocator<U> &) noexcept {}
+
+  T *allocate(std::size_t n) { return s_Alloc.allocate(n); }
+  void deallocate(T *p, std::size_t n) noexcept { s_Alloc.deallocate(p, n); }
+};
+
+template <class T, class U>
+bool operator==(const HitVectorAllocator<T> &, const HitVectorAllocator<U> &) {
+  return true;
+}
+template <class T, class U>
+bool operator!=(const HitVectorAllocator<T> &, const HitVectorAllocator<U> &) {
+  return false;
+}
+
 //using HitVector = std::vector<Hit, HitAllocator<Hit>>;
 //using HitVector = std::vector<Hit>;
-using HitVector = MyVector<Hit>;
+//using HitVector = MyVector<Hit>;
+//using HitVector = MyVector<Hit, HitAllocator<Hit>>;
+using HitVector = MyVector<Hit, HitVectorAllocator<Hit>>;
 
 /// \brief convenience function for sorting Hits by increasing time
 inline void sort_chronologically(HitVector &hits) {

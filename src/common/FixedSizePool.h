@@ -36,6 +36,7 @@ public:
 
   void *AllocateSlot();
   void DeallocateSlot(void *p);
+  bool Contains(void* p);
 };
 
 template <class T_, size_t kTotalBytes_, size_t kObjectsPerSlot_>
@@ -142,4 +143,12 @@ void FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
   if (kValidate) {
     memset(p, kMemDeletedPat, kSlotBytes);
   }
+}
+
+template <size_t kSlotBytes, size_t kNumSlots, size_t kSlotAlignment,
+          size_t kStartAlignment, bool kValidate>
+bool FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
+                   kValidate>::Contains(void *p) {
+  return (unsigned char *)p >= m_PoolBytes &&
+         (unsigned char *)p < m_PoolBytes + sizeof(m_PoolBytes);
 }

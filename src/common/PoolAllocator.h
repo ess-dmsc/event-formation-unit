@@ -41,18 +41,18 @@ PoolAllocator<FixedPoolConfigT>::allocate(std::size_t n) {
   if (sizeof(T) * n <= m_Pool.kSlotBytes)
     return (T *)m_Pool.AllocateSlot();
 
-  XTRACE(MAIN, CRI,
-         "No pool for alloc: PoolAllocator %u objs, %u bytes, %u "
-         "maxBytes",
-         n, sizeof(T) * n, m_Pool.kSlotBytes);
-  RelAssertMsg(0, "No pool for alloc");
-  // throw std::bad_alloc();
-  return NULL;
+  T* heap = new T[n];
+  //XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", n, sizeof(T) * n);
+  return heap;
 }
 
 template <typename FixedPoolConfigT>
 void PoolAllocator<FixedPoolConfigT>::deallocate(T *p, std::size_t) noexcept {
-  m_Pool.DeallocateSlot(p);
+  if (m_Pool.Contains(p)) {
+    m_Pool.DeallocateSlot(p);
+  } else {
+    delete[] p;
+  }
 }
 
 template <typename FixedPoolConfigT, typename FixedPoolConfigU>

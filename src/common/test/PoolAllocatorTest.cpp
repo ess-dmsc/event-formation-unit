@@ -28,9 +28,12 @@ TEST_F(PoolAllocatorTest, Small_Overflow) {
 
   using vecType = std::vector<int, PoolAllocator<FixedPoolCfg>>;
   vecType v(alloc);
+  
   v.push_back(1);
-  ASSERT_DEATH({ v.push_back(1); },
-               ""); // this gives a segfault as there is only mem for one.
+  ASSERT_EQ(pool.Contains(v.data()), true);
+
+  v.push_back(1);
+  ASSERT_EQ(pool.Contains(v.data()), false);
 }
 
 TEST_F(PoolAllocatorTest, Small_2) {

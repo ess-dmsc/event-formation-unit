@@ -16,6 +16,12 @@
 char *HitAllocatorBase::s_MemBegin = (char*)malloc(2ULL * 1024 * 1024 * 1024);
 char *HitAllocatorBase::s_MemEnd = s_MemBegin + (2ULL * 1024 * 1024 * 1024);
 
+
+HitVectorStorage::PoolCfg::PoolType HitVectorStorage::s_Pool;
+
+PoolAllocator<HitVectorStorage::PoolCfg>
+    HitVectorStorage::s_Alloc(HitVectorStorage::s_Pool);
+
 std::string to_string(const HitVector &vec, const std::string &prepend) {
   std::stringstream ss;
   for (const auto &h : vec) {

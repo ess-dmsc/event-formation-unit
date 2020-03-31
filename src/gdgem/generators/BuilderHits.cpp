@@ -21,6 +21,10 @@ void BuilderHits::process_buffer(char *buf, size_t size) {
   converted_data.resize(count);
   memcpy(converted_data.data(), buf, count * sizeof(Hit));
 
+  // alloc approx 2x to reduce noise
+  hit_buffer_x.reserve (count);
+  hit_buffer_y.reserve (count);
+
   for (auto &hit : converted_data) {
 
     if (hit.weight == 0) {

@@ -153,3 +153,25 @@ TEST_F(FixedSizePoolTest, Align_At2) {
   pool.DeallocateSlot(mem);
   pool.DeallocateSlot(mem2);
 }
+
+TEST_F(FixedSizePoolTest, Contains) {
+  FixedSizePool<8, 2> pool;
+
+  void *mem = pool.AllocateSlot();
+  ASSERT_TRUE(pool.Contains(mem));
+
+  int dummy;
+  ASSERT_TRUE(!pool.Contains((void*)&dummy));
+
+  ASSERT_TRUE(!pool.Contains(NULL));
+
+  int* ip = new int;
+  ASSERT_TRUE(!pool.Contains(ip));
+  delete ip;
+
+  void *mem2 = pool.AllocateSlot();
+  ASSERT_TRUE(pool.Contains(mem2));
+
+  pool.DeallocateSlot(mem);
+  pool.DeallocateSlot(mem2);
+}
