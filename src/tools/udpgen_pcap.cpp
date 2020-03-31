@@ -20,6 +20,7 @@ struct {
   uint64_t PktThrottle{0}; // 0 is fastest
   bool Read{false};
   bool Loop{false}; // Keep looping the same file forever
+  bool Multicast{false};
   // Not yet CLI settings
   uint64_t PcapOffset{0};
   uint32_t KernelTxBufferSize{1000000};
@@ -36,15 +37,26 @@ int main(int argc, char *argv[]) {
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle, "Extra usleep() after n packets");
   app.add_flag("-r, --read_only", Settings.Read, "Read pcap file and return stats");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
+  app.add_flag("-m, --multicast", Settings.Multicast, "Allow IP multicast");
   CLI11_PARSE(app, argc, argv);
   char buffer[10000];
 
+  bool IsMulticast = IN_MULTICAST(ntohl(inet_addr(Settings.IpAddress.c_str())));
+
+  if (IsMulticast and not Settings.Multicast) {
+    printf("IP multicast addresses requires -m flag\n");
+    return -1;
+  }
+
   Socket::Endpoint local("0.0.0.0", 0);
   Socket::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
-
   UDPTransmitter DataSource(local, remote);
   DataSource.setBufferSizes(Settings.KernelTxBufferSize, 0);
   DataSource.printBufferSizes();
+  if (IsMulticast) {
+    printf("IP multicast!\n");
+    DataSource.setMulticastTTL();
+  }
 
   std::string pcapfile(Settings.FileName);
 
