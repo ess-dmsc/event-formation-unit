@@ -18,13 +18,7 @@ struct HitAllocatorBase {
 };
 
 template <class T> struct HitAllocator : public HitAllocatorBase {
-  typedef T value_type;
-  typedef T &reference;
-  typedef const T &const_reference;
-  typedef size_t size_type;
-  typedef ptrdiff_t difference_type;
-  typedef T *pointer;
-  typedef const T *const_pointer;
+  using value_type = T;
 
   HitAllocator() = default;
   template <class U> constexpr HitAllocator(const HitAllocator<U> &) noexcept {}
@@ -50,6 +44,8 @@ bool operator!=(const HitAllocator<T> &, const HitAllocator<U> &) {
   return false;
 }
 
+//-----------------------------------------------------------------------------
+
 #include <algorithm> // TODO remove
 
 template <typename T, typename Alloc = std::allocator<T>>
@@ -61,16 +57,16 @@ public:
 
   typedef T value_type;
   typedef Alloc allocator_type;
-  typedef typename allocator_type::reference reference;
-  typedef typename allocator_type::const_reference const_reference;
   typedef typename Vector::iterator iterator;
   typedef typename Vector::const_iterator const_iterator;
-  typedef typename allocator_type::size_type size_type;
-  typedef typename allocator_type::difference_type difference_type;
-  typedef typename allocator_type::pointer pointer;
-  typedef typename allocator_type::const_pointer const_pointer;
-  typedef std::reverse_iterator<iterator> reverse_iterator;
-  typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
+  typedef typename Vector::reference reference;
+  typedef typename Vector::const_reference const_reference;
+  typedef typename Vector::size_type size_type;
+  typedef typename Vector::difference_type difference_type;
+  typedef typename Vector::pointer pointer;
+  typedef typename Vector::const_pointer const_pointer;
+  typedef typename Vector::reverse_iterator reverse_iterator;
+  typedef typename Vector::const_reverse_iterator const_reverse_iterator;
 
   enum { kMinReserveCount = 16 };
 
@@ -106,30 +102,15 @@ public:
   const value_type *data() const noexcept { return m_Vec.data(); }
 
   void push_back(const value_type &x) {
-    /*if (m_Vec.capacity() > m_Vec.size()) {*/
       m_Vec.push_back(x);
-    /*} else {
-      m_Vec.reserve(m_Vec.size() + kMinReserveCount); // TODO growth policy
-      m_Vec.push_back(x);
-    }*/
   }
 
   void push_back(value_type &&x) {
-    /*if (m_Vec.capacity() > m_Vec.size()) {*/
       m_Vec.push_back(std::move(x));
-    /*} else {
-      m_Vec.reserve(m_Vec.size() + kMinReserveCount); // TODO growth policy
-      m_Vec.push_back(std::move(x));
-    }*/
   }
 
   template <class... Args> void emplace_back(Args &&... args) {
-    /*if (m_Vec.capacity() > m_Vec.size()) {*/
       m_Vec.emplace_back(std::forward<Args>(args)...);
-    /*} else {
-      m_Vec.reserve(m_Vec.size() + kMinReserveCount); // TODO growth policy
-      m_Vec.emplace_back(std::forward<Args>(args)...);
-    }*/
   }
 
   void pop_back() { m_Vec.pop_back(); }
@@ -146,6 +127,8 @@ public:
   void resize(size_type sz, const value_type &c) { m_Vec.resize(sz, c); }
 };
 
+//-----------------------------------------------------------------------------
+
 struct HitVectorStorage {
   using PoolCfg =
       FixedPoolConfig<Hit, 1024 * 1024 * 1024, MyVector<Hit>::kMinReserveCount>;
@@ -154,14 +137,7 @@ struct HitVectorStorage {
 };
 
 template <class T> struct HitVectorAllocator : public HitVectorStorage {
-  typedef T value_type;
-  // TODO move to allocator_traits
-  typedef T &reference;
-  typedef const T &const_reference;
-  typedef size_t size_type;
-  typedef ptrdiff_t difference_type;
-  typedef T *pointer;
-  typedef const T *const_pointer;
+  using value_type = T;
 
   HitVectorAllocator() = default;
   template <class U>
@@ -179,6 +155,8 @@ template <class T, class U>
 bool operator!=(const HitVectorAllocator<T> &, const HitVectorAllocator<U> &) {
   return false;
 }
+
+//-----------------------------------------------------------------------------
 
 //using HitVector = std::vector<Hit, HitAllocator<Hit>>;
 //using HitVector = std::vector<Hit>;

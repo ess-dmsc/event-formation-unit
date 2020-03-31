@@ -8,14 +8,7 @@
 
 template <typename FixedPoolConfigT> struct PoolAllocator {
   using T = typename FixedPoolConfigT::T;
-  typedef T value_type;
-  typedef T &reference;
-  typedef const T &const_reference;
-  typedef size_t size_type;
-  typedef ptrdiff_t difference_type;
-  typedef T *pointer;
-  typedef const T *const_pointer;
-
+  using value_type = T;
   using PoolType = typename FixedPoolConfigT::PoolType;
 
   PoolType &m_Pool;
