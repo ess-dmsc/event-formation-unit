@@ -48,12 +48,13 @@ protected:
     // Input Counters
     int64_t rx_packets;
     int64_t rx_bytes;
+    int64_t rx_idle;
     int64_t fifo_push_errors;
-    int64_t pad[5]; // cppcheck-suppress unusedStructMember
+    int64_t PaddingFor64ByteAlignment[4]; // cppcheck-suppress unusedStructMember
 
     // Processing and Output counters
-    int64_t rx_idle1;
-    int64_t rx_pkt_triggertime; 
+    int64_t processing_idle;
+    int64_t rx_pkt_triggertime;
     int64_t rx_pkt_singleevent;
     int64_t rx_pkt_multievent;
     int64_t rx_pkt_unsupported;

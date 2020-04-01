@@ -53,6 +53,7 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   // clang-format off
   Stats.create("receive.packets", Counters.RxPackets);
   Stats.create("receive.bytes", Counters.RxBytes);
+  Stats.create("receive.idle", Counters.RxIdle);
   Stats.create("receive.dropped", Counters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
@@ -67,7 +68,7 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("readouts.error_bytes", Counters.ReadoutsErrorBytes);
   Stats.create("readouts.seq_errors", Counters.ReadoutsSeqErrors);
 
-  Stats.create("thread.processing_idle", Counters.RxIdle);
+  Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
   Stats.create("events.udder", Counters.EventsUdder);
@@ -135,6 +136,8 @@ void CAENBase::input_thread() {
       } else {
         EthernetRingbuffer->getNextBuffer();
       }
+    } else {
+      Counters.RxIdle++;
     }
 
     // Checking for exit
@@ -379,7 +382,7 @@ void CAENBase::processing_thread() {
 
     } else {
       // There is NO data in the FIFO - do stop checks and sleep a little
-      Counters.RxIdle++;
+      Counters.ProcessingIdle++;
       usleep(10);
     }
 

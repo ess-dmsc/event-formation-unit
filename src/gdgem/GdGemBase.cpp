@@ -79,6 +79,7 @@ GdGemBase::GdGemBase(BaseSettings const &Settings, struct NMXSettings &LocalSett
   Stats.create("receive.dropped", stats_.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", stats_.FifoSeqErrors);
 
+  Stats.create("thread.input_idle", stats_.RxIdle);
   Stats.create("thread.processing_idle", stats_.ProcessingIdle);
 
   // Parser
@@ -179,7 +180,11 @@ void GdGemBase::inputThread() {
         RxRingbuffer.getNextBuffer();
       }
     } else {
+<<<<<<< HEAD
       usleep(10);
+=======
+      stats_.RxIdle++;
+>>>>>>> origin/master
     }
 
     // Checking for exit
