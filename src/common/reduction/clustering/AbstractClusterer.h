@@ -58,7 +58,7 @@ struct ClusterPoolStorage {
   };
   using PoolCfg =
       FixedPoolConfig<ClusterAndlListNodeGuess, 1024 * 1024 * 1024, 1>;
-  static PoolCfg::PoolType s_Pool;
+  static PoolCfg::PoolType* s_Pool;
   static PoolAllocator<PoolCfg> s_Alloc;
 };
 
