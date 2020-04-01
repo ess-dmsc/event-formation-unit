@@ -180,11 +180,7 @@ void GdGemBase::inputThread() {
         RxRingbuffer.getNextBuffer();
       }
     } else {
-<<<<<<< HEAD
-      usleep(10);
-=======
       stats_.RxIdle++;
->>>>>>> origin/master
     }
 
     // Checking for exit
