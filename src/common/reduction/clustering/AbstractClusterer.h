@@ -69,6 +69,12 @@ template <class T> struct ClusterPoolAllocator : public ClusterPoolStorage {
     using other = ClusterPoolAllocator<U>;
   };
 
+  ClusterPoolAllocator() = default;
+
+  // needed to convert from internal node alloc to cluster alloc.
+  template <class U>
+  constexpr ClusterPoolAllocator(const ClusterPoolAllocator<U> &) noexcept {}
+
   T *allocate(std::size_t n) {
     static_assert(sizeof(T) <= sizeof(ClusterAndlListNodeGuess),
                   "ClusterAndlListNodeGuess needs more space");
