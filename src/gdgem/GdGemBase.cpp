@@ -179,7 +179,7 @@ void GdGemBase::inputThread() {
         RxRingbuffer.getNextBuffer();
       }
     } else {
-      usleep(100);
+      usleep(10);
     }
 
     // Checking for exit
@@ -428,38 +428,17 @@ void GdGemBase::processingThread() {
 
   TSCTimer ReportTimer;
   unsigned int DataIndex;
-  /* Time for performance measurement
-  Timer duration;
-  duration.now();
-  int cnt = 0;
-  double avg = 0;
-  double total = 0;
-  int rep = 0;
-  */
+
   while (true) {
-    // stats_.fifo_free = InputFifo.free();
     if (!InputFifo.pop(DataIndex)) {
       stats_.ProcessingIdle++;
-      usleep(100);
+      usleep(50); // reduces CPU usage from 100% to ~6% when idle
     } else {
       auto Length = RxRingbuffer.getDataLength(DataIndex);
       if (Length == 0) {
         stats_.FifoSeqErrors++;
       } else {
         builder_->process_buffer(RxRingbuffer.getDataBuffer(DataIndex), Length);
-        /* Performance measurement
-        cnt++;
-        if(cnt == 10000) {
-          cnt = 0;
-          uint64_t us = duration.timeus();
-          rep++;
-          total += us*0.000001;
-          avg = total/rep;
-          LOG(PROCESS, Sev::Debug, "10000 x process_buffer: last time={}, avg time={}",
-            us*0.000001, avg);
-          duration.now();
-        }
-        */
 
         if (NMXOpts.enable_data_processing) {
           stats_.HitsGood += (builder_->hit_buffer_x.size()
