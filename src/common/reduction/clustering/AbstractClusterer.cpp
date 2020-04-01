@@ -17,6 +17,10 @@
 char *ClusterContainerAllocatorBase::s_MemBegin = (char*)malloc(1024 * 1024 * 1024);
 char *ClusterContainerAllocatorBase::s_MemEnd = s_MemBegin + (1024 * 1024 * 1024);
 
+ClusterPoolStorage::PoolCfg::PoolType ClusterPoolStorage::s_Pool;
+
+PoolAllocator<ClusterPoolStorage::PoolCfg>
+    ClusterPoolStorage::s_Alloc(ClusterPoolStorage::s_Pool);
 
 std::string to_string(const ClusterContainer &container,
                       const std::string &prepend, bool verbose) {

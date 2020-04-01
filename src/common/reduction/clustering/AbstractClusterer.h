@@ -1,4 +1,4 @@
-/** Copyright (C) 2018-2019 European Spallation Source, ERIC. See LICENSE file **/
+/*Copyright (C) 2018-2019 European Spallation Source, ERIC. See LICENSE file*/
 //===----------------------------------------------------------------------===//
 ///
 /// \file AbstractClusterer.h
@@ -12,52 +12,106 @@
 #include <list>
 //#include <deque>
 
-
 struct ClusterContainerAllocatorBase {
   static char *s_MemBegin;
   static char *s_MemEnd;
 };
 
-template <class T> struct ClusterContainerAllocator : public ClusterContainerAllocatorBase {
+template <class T>
+struct ClusterContainerAllocator : public ClusterContainerAllocatorBase {
   typedef T value_type;
 
   ClusterContainerAllocator() = default;
-  template <class U> constexpr ClusterContainerAllocator(const ClusterContainerAllocator<U> &) noexcept {}
+  template <class U>
+  constexpr ClusterContainerAllocator(
+      const ClusterContainerAllocator<U> &) noexcept {}
 
   T *allocate(std::size_t n) {
-    char* p = s_MemBegin;
+    char *p = s_MemBegin;
     s_MemBegin += n * sizeof(T);
     if (s_MemBegin < s_MemEnd)
-      return (T*)p;
+      return (T *)p;
     return nullptr;
-    //throw std::bad_alloc();
+    // throw std::bad_alloc();
   }
   void deallocate(T *, std::size_t) noexcept { /* do nothing*/
   }
 };
 
 template <class T, class U>
-bool operator==(const ClusterContainerAllocator<T> &, const ClusterContainerAllocator<U> &) {
+bool operator==(const ClusterContainerAllocator<T> &,
+                const ClusterContainerAllocator<U> &) {
   return true;
 }
 template <class T, class U>
-bool operator!=(const ClusterContainerAllocator<T> &, const ClusterContainerAllocator<U> &) {
+bool operator!=(const ClusterContainerAllocator<T> &,
+                const ClusterContainerAllocator<U> &) {
   return false;
 }
 
+//-----------------------------------------------------------------------------
 
+struct ClusterPoolStorage {
+  struct ClusterAndlListNodeGuess {
+    Cluster cluster;
+    Cluster listNodeGuess;
+  };
+  using PoolCfg =
+      FixedPoolConfig<ClusterAndlListNodeGuess, 1024 * 1024 * 1024, 1>;
+  static PoolCfg::PoolType s_Pool;
+  static PoolAllocator<PoolCfg> s_Alloc;
+};
+
+template <class T> struct ClusterPoolAllocator : public ClusterPoolStorage {
+  using value_type = T;
+
+  template <typename U> struct rebind {
+    using other = ClusterPoolAllocator<U>;
+  };
+
+  T *allocate(std::size_t n) {
+    static_assert(sizeof(T) <= sizeof(ClusterAndlListNodeGuess),
+                  "ClusterAndlListNodeGuess needs more space");
+    static_assert(alignof(T) <= alignof(ClusterAndlListNodeGuess),
+                  "ClusterAndlListNodeGuess needs higher align");
+
+    RelAssertMsg(n == 1, "not expecting bulk allocation from std::list");
+    //if (!std::is_same<T, Cluster>::value) {
+    //  XTRACE(MAIN, CRI, "hello node type");
+    //}
+    return (T *)s_Alloc.allocate(1);
+  }
+
+  void deallocate(T *p, std::size_t n) noexcept {
+    s_Alloc.deallocate((ClusterAndlListNodeGuess *)p, n);
+  }
+};
+
+template <class T, class U>
+bool operator==(const ClusterPoolAllocator<T> &,
+                const ClusterPoolAllocator<U> &) {
+  return true;
+}
+template <class T, class U>
+bool operator!=(const ClusterPoolAllocator<T> &,
+                const ClusterPoolAllocator<U> &) {
+  return false;
+}
+
+//-----------------------------------------------------------------------------
 
 // \todo the abstract class code needs tests
 
 // \todo refactor: move out to separate header
 // \todo replace by deque, or....?
-using ClusterContainer = std::list<Cluster, ClusterContainerAllocator<Cluster>>;
-//using ClusterContainer = std::list<Cluster>;
+// using ClusterContainer = std::list<Cluster,
+// ClusterContainerAllocator<Cluster>>;
+// using ClusterContainer = std::list<Cluster>;
+using ClusterContainer = std::list<Cluster, ClusterPoolAllocator<Cluster>>;
 
 /// \brief convenience function for printing a ClusterContainer
 std::string to_string(const ClusterContainer &container,
-                      const std::string &prepend,
-                      bool verbose);
+                      const std::string &prepend, bool verbose);
 
 /// \class AbstractClusterer AbstractClusterer.h
 /// \brief AbstractClusterer declares the interface for a clusterer class
@@ -68,8 +122,9 @@ std::string to_string(const ClusterContainer &container,
 
 class AbstractClusterer {
 public:
-  ClusterContainer clusters;     ///< clustered hits
-  mutable size_t stats_cluster_count{0}; ///< cumulative number of clusters produced
+  ClusterContainer clusters; ///< clustered hits
+  mutable size_t stats_cluster_count{
+      0}; ///< cumulative number of clusters produced
 
 public:
   AbstractClusterer() = default;
@@ -95,9 +150,7 @@ public:
   bool empty() const;
 
 protected:
-
   /// \brief moves cluster into clusters container, increments counter
   /// \param cluster to be stashed
   void stash_cluster(Cluster &cluster);
-
 };
