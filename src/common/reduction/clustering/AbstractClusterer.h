@@ -65,6 +65,12 @@ struct ClusterPoolStorage {
 template <class T> struct ClusterPoolAllocator : public ClusterPoolStorage {
   using value_type = T;
 
+  // checks due to std::list::__node_type is implementation defined
+  static_assert(sizeof(T) <= sizeof(ClusterAndlListNodeGuess),
+                "ClusterAndlListNodeGuess needs more space");
+  static_assert(alignof(T) <= alignof(ClusterAndlListNodeGuess),
+                "ClusterAndlListNodeGuess needs higher align");
+
   template <typename U> struct rebind {
     using other = ClusterPoolAllocator<U>;
   };
@@ -76,15 +82,8 @@ template <class T> struct ClusterPoolAllocator : public ClusterPoolStorage {
   constexpr ClusterPoolAllocator(const ClusterPoolAllocator<U> &) noexcept {}
 
   T *allocate(std::size_t n) {
-    static_assert(sizeof(T) <= sizeof(ClusterAndlListNodeGuess),
-                  "ClusterAndlListNodeGuess needs more space");
-    static_assert(alignof(T) <= alignof(ClusterAndlListNodeGuess),
-                  "ClusterAndlListNodeGuess needs higher align");
-
     RelAssertMsg(n == 1, "not expecting bulk allocation from std::list");
-    //if (!std::is_same<T, Cluster>::value) {
-    //  XTRACE(MAIN, CRI, "hello node type");
-    //}
+    //if (!std::is_same<T, Cluster>::value) XTRACE(MAIN, CRI, "node");
     return (T *)s_Alloc.allocate(1);
   }
 
