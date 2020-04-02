@@ -11,22 +11,22 @@ protected:
 };
 
 TEST_F(SocketTest, ConstructorValid) {
-  Socket udpsocket(Socket::type::UDP);
+  Socket udpsocket(Socket::SocketType::UDP);
   ASSERT_TRUE(udpsocket.isValidSocket());
 
-  Socket tcpsocket(Socket::type::TCP);
+  Socket tcpsocket(Socket::SocketType::TCP);
   ASSERT_TRUE(tcpsocket.isValidSocket());
 }
 
 TEST_F(SocketTest, SendUninitialized) {
   char buffer[100];
-  Socket udpsocket(Socket::type::UDP);
+  Socket udpsocket(Socket::SocketType::UDP);
   ASSERT_TRUE(udpsocket.isValidSocket());
   auto res = udpsocket.send(buffer, 100);
   ASSERT_TRUE(res < 0);
   ASSERT_FALSE(udpsocket.isValidSocket());
 
-  Socket tcpsocket(Socket::type::TCP);
+  Socket tcpsocket(Socket::SocketType::TCP);
   ASSERT_TRUE(tcpsocket.isValidSocket());
   res = tcpsocket.send(buffer, 100);
   ASSERT_TRUE(res < 0);
@@ -45,21 +45,21 @@ TEST_F(SocketTest, ValidInvalidIp) {
 }
 
 TEST_F(SocketTest, InetAtonInvalidIP) {
-  Socket tcpsocket(Socket::type::TCP);
+  Socket tcpsocket(Socket::SocketType::TCP);
   ASSERT_THROW(tcpsocket.setLocalSocket("invalidipaddress", 9000), std::runtime_error);
   ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", 22), std::runtime_error);
   ASSERT_THROW(tcpsocket.setRemoteSocket("invalidipaddress", 9000), std::runtime_error);
 }
 
 TEST_F(SocketTest, PortInUse) {
-  Socket tcpsocket(Socket::type::TCP);
+  Socket tcpsocket(Socket::SocketType::TCP);
   // ssh port is already in use on all platforms
   ASSERT_THROW(tcpsocket.setLocalSocket("127.0.0.1", 22), std::runtime_error);
 }
 
 
 TEST_F(SocketTest, InvalidGetSockOpt) {
-  Socket tcpsocket(Socket::type::TCP);
+  Socket tcpsocket(Socket::SocketType::TCP);
   // force file descriptor (fd) to be set to -1 by failes send()
   auto res = tcpsocket.send(nullptr, 0);
   ASSERT_TRUE(res < 0);

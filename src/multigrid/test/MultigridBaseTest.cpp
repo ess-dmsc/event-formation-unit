@@ -26,7 +26,7 @@ class MultigridBaseTest : public TestBase {
 public:
   void SetUp() override {
     LocalSettings.ConfigFile = TEST_JSON_PATH "ILL_mappings.json";
-    Settings.DetectorRxBufferSize = 100000;
+    Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
   }
   void TearDown() override {}

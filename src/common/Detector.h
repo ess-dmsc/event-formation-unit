@@ -26,8 +26,8 @@ struct BaseSettings {
   std::uint16_t DetectorPort         {9000};
   std::uint16_t CommandServerPort    {8888}; /// \todo make same as detector port
   std::int32_t  ReceiveMaxBytes      {9000}; // Jumbo frame support
-  std::int32_t  DetectorRxBufferSize {2000000};
-  std::int32_t  DetectorTxBufferSize {200000};
+  std::int32_t  RxSocketBufferSize   {2000000}; // bytes
+  std::int32_t  TxSocketBufferSize   {2000000}; // bytes
   std::string   KafkaBroker          {"localhost:9092"};
   std::string   GraphitePrefix       {"efu.null"};
   std::string   GraphiteRegion       {"0"};

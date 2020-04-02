@@ -98,7 +98,8 @@ void LokiBase::inputThread() {
                          EFUSettings.DetectorPort);
 
   UDPReceiver dataReceiver(local);
-  dataReceiver.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  dataReceiver.setBufferSizes(EFUSettings.TxSocketBufferSize,
+                              EFUSettings.RxSocketBufferSize);
   dataReceiver.printBufferSizes();
   dataReceiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 

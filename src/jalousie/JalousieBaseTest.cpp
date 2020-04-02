@@ -25,7 +25,7 @@ public:
 class JalousieBaseTest : public ::testing::Test {
 public:
   void SetUp() override {
-    Settings.DetectorRxBufferSize = 100000;
+    Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
     LocalSettings.ConfigFile = TEST_JSON_PATH "v20_mappings.json";
   }
