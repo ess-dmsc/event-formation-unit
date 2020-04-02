@@ -73,8 +73,9 @@ void SONDEIDEABase::input_thread() {
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver sondedata(local);
-  sondedata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
-  sondedata.checkRxBufferSizes(EFUSettings.DetectorRxBufferSize);
+  sondedata.setBufferSizes(EFUSettings.TxSocketBufferSize,
+                           EFUSettings.RxSocketBufferSize);
+  sondedata.checkRxBufferSizes(EFUSettings.RxSocketBufferSize);
   sondedata.printBufferSizes();
   sondedata.setRecvTimeout(0, 100000); // secs, usecs, 1/10 second
 

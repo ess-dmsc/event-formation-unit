@@ -151,11 +151,12 @@ GdGemBase::GdGemBase(BaseSettings const &Settings, struct NMXSettings &LocalSett
 void GdGemBase::inputThread() {
   /** Connection setup */
   Socket::Endpoint LocalSocket(EFUSettings.DetectorAddress,
-                         EFUSettings.DetectorPort);
+                               EFUSettings.DetectorPort);
   UDPReceiver DataReceiver(LocalSocket);
 
-  DataReceiver.setBufferSizes(0 /*use default */, EFUSettings.DetectorRxBufferSize);
-  DataReceiver.checkRxBufferSizes(EFUSettings.DetectorRxBufferSize);
+  DataReceiver.setBufferSizes(EFUSettings.TxSocketBufferSize,
+                              EFUSettings.RxSocketBufferSize);
+  DataReceiver.checkRxBufferSizes(EFUSettings.RxSocketBufferSize);
   DataReceiver.printBufferSizes();
   DataReceiver.setRecvTimeout(0, 100000); /// secs, usecs
 
