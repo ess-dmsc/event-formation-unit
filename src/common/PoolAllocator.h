@@ -13,7 +13,7 @@ template <typename FixedPoolConfigT> struct PoolAllocator {
 
   PoolType &m_Pool;
 
-  PoolAllocator(const PoolAllocator &) = default;
+  PoolAllocator(const PoolAllocator &) noexcept = default;
   PoolAllocator &operator=(const PoolAllocator &) = delete;
 
   PoolAllocator(PoolType &pool) noexcept : m_Pool(pool) {}
