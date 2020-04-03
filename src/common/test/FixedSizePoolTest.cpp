@@ -109,6 +109,12 @@ TEST_F(FixedSizePoolTest, Large_All) {
   }
 }
 
+TEST_F(FixedSizePoolTest, Large_1mb) {
+  // tests the validation can run in proper time on 1 gb pool
+  auto pool = new FixedSizePool<1, 1 * 1024 * 1024>();
+  delete pool;
+}
+
 TEST_F(FixedSizePoolTest, Align_AtSame) {
   FixedSizePool<8, 2, 8> pool;
 
@@ -175,3 +181,33 @@ TEST_F(FixedSizePoolTest, Contains) {
   pool.DeallocateSlot(mem);
   pool.DeallocateSlot(mem2);
 }
+
+
+//inline bool bitset64_get (uint64_t* array, uint64_t arrayBitCount, uint64_t index)
+//{
+//  assert(index < arrayBitCount);
+//  return (array[index >> 6] & (1ULL << (index & 63))) != 0;
+//}
+//
+//inline void bitset64_raise (uint64_t* array, uint64_t arrayBitCount, uint64_t index)
+//{
+//  assert(index < arrayBitCount);
+//  array[index >> 6] |= (1ULL << (index & 63));
+//}
+//
+//inline void bitset64_clear (uint64_t* array, uint64_t arrayBitCount, uint64_t index)
+//{
+//  assert(index < arrayBitCount);
+//  array[index >> 6] &= ~(1ULL << (index & 63));
+//}
+//
+//TEST_F(FixedSizePoolTest, ArrayBit64) {
+//  static const uint64_t bitCount = 1;
+//  uint64_t bitArray[bitCount / 64 + 1];
+//  memset(bitArray, 0, sizeof(bitArray));
+//  uint64_t setBitIndex = 0;
+//  bitset64_raise(bitArray, bitCount, setBitIndex);
+//  for (uint64_t i = 0; i < bitCount; ++i) {
+//    ASSERT_EQ(bitset64_get(bitArray, bitCount, setBitIndex), i == setBitIndex);
+//  }
+//}

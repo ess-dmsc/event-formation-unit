@@ -4,6 +4,7 @@
 #include <common/Trace.h>
 
 #include <algorithm>
+#include <bitset>
 #include <cstdint>
 
 #define PoolAssertMsg(kEnable, ...)                                            \
@@ -18,14 +19,13 @@
 template <size_t kSlotBytes_, size_t kNumSlots,
           size_t kSlotAlignment = kSlotBytes_, size_t kStartAlignment_ = 16,
           bool kValidate = true, bool kUseAsserts = true>
-class FixedSizePool {
-public:
-  static const size_t kSlotBytes = std::max(kSlotBytes_, kSlotAlignment);
-  static const size_t kStartAlignment =
-      std::max(kSlotAlignment, kStartAlignment_);
+struct FixedSizePool {
+  enum : size_t {
+    kSlotBytes = std::max(kSlotBytes_, kSlotAlignment),
+    kStartAlignment = std::max(kSlotAlignment, kStartAlignment_)
+  };
 
-  static const unsigned char kMemDeletedPat = 0xED;
-  static const unsigned char kMemAllocatedPat = 0xCD;
+  enum : unsigned char { kMemDeletedPat = 0xED, kMemAllocatedPat = 0xCD };
 
   uint32_t m_NumSlotsUsed;
   uint32_t m_NextFreeSlot[kNumSlots];
@@ -39,7 +39,7 @@ public:
   bool Contains(void *p);
 };
 
-template <class T_, size_t kTotalBytes_, size_t kObjectsPerSlot_>
+template <class T_, size_t kTotalBytes_, size_t kObjectsPerSlot_, bool kValidate = false>
 struct FixedPoolConfig {
   using T = T_;
   enum : size_t {
@@ -47,9 +47,7 @@ struct FixedPoolConfig {
     kObjectsPerSlot = kObjectsPerSlot_,
     kSlotBytes = sizeof(T) * kObjectsPerSlot,
     kNumSlots = kTotalBytes / kSlotBytes,
-    kValidate = false, // validate is too slow on a 1 gb mem block. This is a
-                       // workaround.
-    kUseAssets = false // fails as there are leaks when programs shutdown
+    kUseAssets = true
   };
 
   static_assert(kTotalBytes >= kSlotBytes,
@@ -89,18 +87,16 @@ FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment, kValidate,
 
   if (kValidate) {
     // test m_NextFreeSlot indices are unique
-    for (size_t testIndex = 0; testIndex < kNumSlots; ++testIndex) {
-      __attribute__((unused)) bool testIndexFound = false;
+    {
+      std::bitset<kNumSlots> &foundSlots = *new std::bitset<kNumSlots>();
       for (size_t i = 0; i < kNumSlots; ++i) {
-        if (m_NextFreeSlot[i] == testIndex) {
-          PoolAssertMsg(kUseAsserts, !testIndexFound,
-                        "Free slots must be unique. Could mean double delete");
-          testIndexFound = true;
-        }
+        uint32_t curSlot = m_NextFreeSlot[i];
+        PoolAssertMsg(kUseAsserts, !foundSlots[curSlot],
+                      "Free slots must be unique. Could mean double delete");
+        foundSlots[curSlot] = true;
       }
-      PoolAssertMsg(kUseAsserts, testIndexFound, "All slots must be used");
+      delete &foundSlots;
     }
-
     // test for deletion reference pattern
     for (size_t i = 0; i < sizeof(m_PoolBytes); ++i) {
       PoolAssertMsg(kUseAsserts, m_PoolBytes[i] == kMemDeletedPat,

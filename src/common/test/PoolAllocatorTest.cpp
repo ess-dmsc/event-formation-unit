@@ -6,13 +6,13 @@ public:
 };
 
 TEST_F(PoolAllocatorTest, Small_Empty) {
-  using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 1, 1>;
+  using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 1, 1, true>;
   FixedPoolCfg::PoolType pool;
   PoolAllocator<FixedPoolCfg> alloc(pool);
 }
 
 TEST_F(PoolAllocatorTest, Small_1) {
-  using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 1, 1>;
+  using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 1, 1, true>;
   FixedPoolCfg::PoolType pool;
   PoolAllocator<FixedPoolCfg> alloc(pool);
 
@@ -22,13 +22,13 @@ TEST_F(PoolAllocatorTest, Small_1) {
 }
 
 TEST_F(PoolAllocatorTest, Small_Overflow) {
-  using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 1, 1>;
+  using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 1, 1, true>;
   FixedPoolCfg::PoolType pool;
   PoolAllocator<FixedPoolCfg> alloc(pool);
 
   using vecType = std::vector<int, PoolAllocator<FixedPoolCfg>>;
   vecType v(alloc);
-  
+
   v.push_back(1);
   ASSERT_EQ(pool.Contains(v.data()), true);
 
@@ -37,7 +37,7 @@ TEST_F(PoolAllocatorTest, Small_Overflow) {
 }
 
 TEST_F(PoolAllocatorTest, Small_2) {
-  using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 2, 2>;
+  using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 2, 2, true>;
   FixedPoolCfg::PoolType pool;
   PoolAllocator<FixedPoolCfg> alloc(pool);
 
@@ -50,7 +50,7 @@ TEST_F(PoolAllocatorTest, Small_2) {
 }
 
 TEST_F(PoolAllocatorTest, Share_2) {
-  using FixedPoolCfg = FixedPoolConfig<int, (sizeof(int) * 2) * 2, 2>;
+  using FixedPoolCfg = FixedPoolConfig<int, (sizeof(int) * 2) * 2, 2, true>;
   FixedPoolCfg::PoolType pool;
   PoolAllocator<FixedPoolCfg> alloc(pool);
 
