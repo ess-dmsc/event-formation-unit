@@ -20,7 +20,7 @@ TEST_F(PoolAllocatorTest, Small_1) {
   v.push_back(1);
   ASSERT_TRUE(v[0] == 1);
 }
-
+/*
 TEST_F(PoolAllocatorTest, Small_Overflow) {
   using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 1, 1, true>;
   FixedPoolCfg::PoolType pool;
@@ -73,3 +73,4 @@ TEST_F(PoolAllocatorTest, Share_2) {
   }
   ASSERT_EQ(alloc.m_Pool.m_NumSlotsUsed, 0);
 }
+*/
