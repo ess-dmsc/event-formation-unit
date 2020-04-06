@@ -39,7 +39,7 @@ struct FixedSizePool {
   bool Contains(void *p);
 };
 
-template <class T_, size_t kTotalBytes_, size_t kObjectsPerSlot_, bool kValidate = false>
+template <class T_, size_t kTotalBytes_, size_t kObjectsPerSlot_, bool kValidate_ = false>
 struct FixedPoolConfig {
   using T = T_;
   enum : size_t {
@@ -47,7 +47,8 @@ struct FixedPoolConfig {
     kObjectsPerSlot = kObjectsPerSlot_,
     kSlotBytes = sizeof(T) * kObjectsPerSlot,
     kNumSlots = kTotalBytes / kSlotBytes,
-    kUseAssets = true
+    kUseAssets = true,
+    kValidate = kValidate_
   };
 
   static_assert(kTotalBytes >= kSlotBytes,

@@ -21,7 +21,8 @@ template <typename FixedPoolConfigT> struct PoolAllocator {
   template <typename U> struct rebind {
     using other =
         PoolAllocator<FixedPoolConfig<U, FixedPoolConfigT::kTotalBytes,
-                                      FixedPoolConfigT::kObjectsPerSlot>>;
+                                      FixedPoolConfigT::kObjectsPerSlot,
+                                      FixedPoolConfigT::kValidate>>;
   };
 
   T *allocate(std::size_t n);
