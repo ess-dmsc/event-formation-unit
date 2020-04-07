@@ -256,7 +256,7 @@ BENCHMARK(Vec_PushBackTest_MyVector_Reserve);
 
 static void Vec_PushBackTest_MyVector_PoolAllocator(benchmark::State &state) {
   BenchmarkLoop(state, [&] {
-    using FixedPoolCfg = FixedPoolConfig<Hit, sizeof(Hit) * 16, 16>;
+    using FixedPoolCfg = PoolAllocatorConfig<Hit, sizeof(Hit) * 16, 16>;
     FixedPoolCfg::PoolType pool;
     PoolAllocator<FixedPoolCfg> alloc(pool);
 
@@ -272,7 +272,7 @@ BENCHMARK(Vec_PushBackTest_MyVector_PoolAllocator);
 
 static void
 Vec_PushBackTest_MyVector_PoolAllocator_NoDealloc(benchmark::State &state) {
-  using FixedPoolCfg = FixedPoolConfig<Hit, sizeof(Hit) * 16, 16>;
+  using FixedPoolCfg = PoolAllocatorConfig<Hit, sizeof(Hit) * 16, 16>;
   FixedPoolCfg::PoolType pool;
   PoolAllocator<FixedPoolCfg> alloc(pool);
 

@@ -16,15 +16,29 @@
 // undef TRC_LEVEL
 // define TRC_LEVEL TRC_L_DEB
 
-template <size_t kSlotBytes_, size_t kNumSlots,
-          size_t kSlotAlignment = kSlotBytes_, size_t kStartAlignment_ = 16,
-          bool kValidate = true, bool kUseAsserts = true>
-struct FixedSizePool {
+template <size_t kSlotBytes_, size_t kNumSlots_,
+          size_t kSlotAlignment_ = kSlotBytes_, size_t kStartAlignment_ = 16,
+          bool kValidate_ = true, bool kUseAsserts_ = true>
+struct FixedSizePoolParams {
   enum : size_t {
-    kSlotBytes = std::max(kSlotBytes_, kSlotAlignment),
-    kStartAlignment = std::max(kSlotAlignment, kStartAlignment_)
+    kSlotBytes = std::max(kSlotBytes_, kSlotAlignment_),
+    kNumSlots = kNumSlots_,
+    kSlotAlignment = kSlotAlignment_,
+    kStartAlignment = std::max(kSlotAlignment_, kStartAlignment_),
+    kValidate = kValidate_,
+    kUseAsserts = kUseAsserts_
   };
+};
 
+template <typename FixedSizePoolParamsT> struct FixedSizePool {
+  enum : size_t {
+    kSlotBytes = FixedSizePoolParamsT::kSlotBytes,
+    kNumSlots = FixedSizePoolParamsT::kNumSlots,
+    kSlotAlignment = FixedSizePoolParamsT::kSlotAlignment,
+    kStartAlignment = FixedSizePoolParamsT::kStartAlignment,
+    kValidate = FixedSizePoolParamsT::kValidate,
+    kUseAsserts = FixedSizePoolParamsT::kUseAsserts
+  };
   enum : unsigned char { kMemDeletedPat = 0xED, kMemAllocatedPat = 0xCD };
 
   uint32_t m_NumSlotsUsed;
@@ -39,30 +53,8 @@ struct FixedSizePool {
   bool Contains(void *p);
 };
 
-template <class T_, size_t kTotalBytes_, size_t kObjectsPerSlot_, bool kValidate_ = false>
-struct FixedPoolConfig {
-  using T = T_;
-  enum : size_t {
-    kTotalBytes = kTotalBytes_,
-    kObjectsPerSlot = kObjectsPerSlot_,
-    kSlotBytes = sizeof(T) * kObjectsPerSlot,
-    kNumSlots = kTotalBytes / kSlotBytes,
-    kUseAssets = true,
-    kValidate = kValidate_
-  };
-
-  static_assert(kTotalBytes >= kSlotBytes,
-                "PoolAllocator must have enough bytes for one slot. Is "
-                "kObjectsPerSlot sensible?");
-
-  using PoolType = FixedSizePool<kSlotBytes, kNumSlots, alignof(T), 16,
-                                 kValidate, kUseAssets>;
-};
-
-template <size_t kSlotBytes, size_t kNumSlots, size_t kSlotAlignment,
-          size_t kStartAlignment, bool kValidate, bool kUseAsserts>
-FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment, kValidate,
-              kUseAsserts>::FixedSizePool() {
+template <typename FixedSizePoolParamsT>
+FixedSizePool<FixedSizePoolParamsT>::FixedSizePool() {
   XTRACE(MAIN, DEB,
          "FixedSizePool: kSlotBytes %u, kNumSlots %u, kSlotAlignment %u, "
          "kStartAlignment %u, kValidate %u, TotalBytes %u",
@@ -79,10 +71,8 @@ FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment, kValidate,
   }
 }
 
-template <size_t kSlotBytes, size_t kNumSlots, size_t kSlotAlignment,
-          size_t kStartAlignment, bool kValidate, bool kUseAsserts>
-FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment, kValidate,
-              kUseAsserts>::~FixedSizePool() {
+template <typename FixedSizePoolParamsT>
+FixedSizePool<FixedSizePoolParamsT>::~FixedSizePool() {
   PoolAssertMsg(kUseAsserts, m_NumSlotsUsed == 0,
                 "All slots in pool must be empty");
 
@@ -106,10 +96,8 @@ FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment, kValidate,
   }
 }
 
-template <size_t kSlotBytes, size_t kNumSlots, size_t kSlotAlignment,
-          size_t kStartAlignment, bool kValidate, bool kUseAsserts>
-void *FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
-                    kValidate, kUseAsserts>::AllocateSlot() {
+template <typename FixedSizePoolParamsT>
+void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot() {
   PoolAssertMsg(kUseAsserts, m_NumSlotsUsed < kNumSlots,
                 "Implement fallover to malloc()");
   size_t index = m_NextFreeSlot[m_NumSlotsUsed];
@@ -132,10 +120,8 @@ void *FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
   return static_cast<void *>(p);
 }
 
-template <size_t kSlotBytes, size_t kNumSlots, size_t kSlotAlignment,
-          size_t kStartAlignment, bool kValidate, bool kUseAsserts>
-void FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
-                   kValidate, kUseAsserts>::DeallocateSlot(void *p) {
+template <typename FixedSizePoolParamsT>
+void FixedSizePool<FixedSizePoolParamsT>::DeallocateSlot(void *p) {
   size_t index = ((unsigned char *)p - m_PoolBytes) / kSlotBytes;
   PoolAssertMsg(kUseAsserts, index < kNumSlots, "Implement fallover to free()");
 
@@ -149,10 +135,8 @@ void FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
   }
 }
 
-template <size_t kSlotBytes, size_t kNumSlots, size_t kSlotAlignment,
-          size_t kStartAlignment, bool kValidate, bool kUseAsserts>
-bool FixedSizePool<kSlotBytes, kNumSlots, kSlotAlignment, kStartAlignment,
-                   kValidate, kUseAsserts>::Contains(void *p) {
+template <typename FixedSizePoolParamsT>
+bool FixedSizePool<FixedSizePoolParamsT>::Contains(void *p) {
   return (unsigned char *)p >= m_PoolBytes &&
          (unsigned char *)p < m_PoolBytes + sizeof(m_PoolBytes);
 }

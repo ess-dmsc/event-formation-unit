@@ -1,18 +1,18 @@
-#include <test/TestBase.h>
 #include <common/FixedSizePool.h>
+#include <test/TestBase.h>
 
 class FixedSizePoolTest : public TestBase {
 public:
 };
 
 TEST_F(FixedSizePoolTest, Small_Empty) {
-  FixedSizePool<8, 1> pool;
+  FixedSizePool<FixedSizePoolParams<8, 1>> pool;
 
   ASSERT_TRUE(pool.m_NumSlotsUsed == 0);
 }
 
 TEST_F(FixedSizePoolTest, Small_1) {
-  FixedSizePool<8, 1> pool;
+  FixedSizePool<FixedSizePoolParams<8, 1>> pool;
 
   void *mem = pool.AllocateSlot();
 
@@ -24,7 +24,7 @@ TEST_F(FixedSizePoolTest, Small_1) {
 }
 
 TEST_F(FixedSizePoolTest, Small_1_NewlyAllocatedPattern) {
-  FixedSizePool<8, 1> pool;
+  FixedSizePool<FixedSizePoolParams<8, 1>> pool;
   unsigned char *mem = (unsigned char *)pool.AllocateSlot();
   for (size_t i = 0; i < pool.kSlotBytes; ++i) {
     ASSERT_TRUE(mem[i] == pool.kMemAllocatedPat);
@@ -33,7 +33,7 @@ TEST_F(FixedSizePoolTest, Small_1_NewlyAllocatedPattern) {
 }
 
 TEST_F(FixedSizePoolTest, Small_1_Fail_DoubleFree) {
-  using FixedSizePool_t = FixedSizePool<8, 2>;
+  using FixedSizePool_t = FixedSizePool<FixedSizePoolParams<8, 2>>;
   ASSERT_DEATH(
       {
         FixedSizePool_t pool;
@@ -46,7 +46,7 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_DoubleFree) {
 }
 
 TEST_F(FixedSizePoolTest, Small_1_Fail_DeallocateWrong) {
-  using FixedSizePool_t = FixedSizePool<8, 1>;
+  using FixedSizePool_t = FixedSizePool<FixedSizePoolParams<8, 1>>;
   ASSERT_DEATH(
       {
         FixedSizePool_t pool;
@@ -58,7 +58,7 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_DeallocateWrong) {
 }
 
 TEST_F(FixedSizePoolTest, Small_1_Fail_NotEmpty) {
-  using FixedSizePool_t = FixedSizePool<8, 1>;
+  using FixedSizePool_t = FixedSizePool<FixedSizePoolParams<8, 1>>;
   ASSERT_DEATH(
       {
         FixedSizePool_t pool;
@@ -68,7 +68,7 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_NotEmpty) {
 }
 
 TEST_F(FixedSizePoolTest, Small_1_Fail_DirtyRefPattern) {
-  using FixedSizePool_t = FixedSizePool<8, 1>;
+  using FixedSizePool_t = FixedSizePool<FixedSizePoolParams<8, 1>>;
   ASSERT_DEATH(
       {
         FixedSizePool_t pool;
@@ -80,7 +80,7 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_DirtyRefPattern) {
 }
 
 TEST_F(FixedSizePoolTest, Large_1) {
-  FixedSizePool<8, 1000> pool;
+  FixedSizePool<FixedSizePoolParams<8, 1000>> pool;
 
   void *mem = pool.AllocateSlot();
 
@@ -92,7 +92,7 @@ TEST_F(FixedSizePoolTest, Large_1) {
 }
 
 TEST_F(FixedSizePoolTest, Large_All) {
-  FixedSizePool<8, 1000> pool;
+  FixedSizePool<FixedSizePoolParams<8, 1000>> pool;
 
   void *allocs[1000];
   for (uint32_t i = 0; i < 1000; ++i) {
@@ -111,12 +111,12 @@ TEST_F(FixedSizePoolTest, Large_All) {
 
 TEST_F(FixedSizePoolTest, Large_1mb) {
   // tests the validation can run in proper time on 1 gb pool
-  auto pool = new FixedSizePool<1, 1 * 1024 * 1024>();
+  auto pool = new FixedSizePool<FixedSizePoolParams<1, 1 * 1024 * 1024>>();
   delete pool;
 }
 
 TEST_F(FixedSizePoolTest, Align_AtSame) {
-  FixedSizePool<8, 2, 8> pool;
+  FixedSizePool<FixedSizePoolParams<8, 2, 8>> pool;
 
   void *mem = pool.AllocateSlot();
   ASSERT_EQ(size_t(mem) % 8, 0);
@@ -131,7 +131,7 @@ TEST_F(FixedSizePoolTest, Align_AtSame) {
 }
 
 TEST_F(FixedSizePoolTest, Align_At64) {
-  FixedSizePool<8, 2, 64> pool;
+  FixedSizePool<FixedSizePoolParams<8, 2, 64>> pool;
 
   void *mem = pool.AllocateSlot();
   ASSERT_EQ(size_t(mem) % 64, 0);
@@ -146,7 +146,7 @@ TEST_F(FixedSizePoolTest, Align_At64) {
 }
 
 TEST_F(FixedSizePoolTest, Align_At2) {
-  FixedSizePool<64, 2, 2> pool;
+  FixedSizePool<FixedSizePoolParams<64, 2, 2>> pool;
 
   void *mem = pool.AllocateSlot();
   ASSERT_EQ(size_t(mem) % 2, 0);
@@ -161,17 +161,17 @@ TEST_F(FixedSizePoolTest, Align_At2) {
 }
 
 TEST_F(FixedSizePoolTest, Contains) {
-  FixedSizePool<8, 2> pool;
+  FixedSizePool<FixedSizePoolParams<8, 2>> pool;
 
   void *mem = pool.AllocateSlot();
   ASSERT_TRUE(pool.Contains(mem));
 
   int dummy;
-  ASSERT_TRUE(!pool.Contains((void*)&dummy));
+  ASSERT_TRUE(!pool.Contains((void *)&dummy));
 
   ASSERT_TRUE(!pool.Contains(NULL));
 
-  int* ip = new int;
+  int *ip = new int;
   ASSERT_TRUE(!pool.Contains(ip));
   delete ip;
 
@@ -182,32 +182,35 @@ TEST_F(FixedSizePoolTest, Contains) {
   pool.DeallocateSlot(mem2);
 }
 
-
-//inline bool bitset64_get (uint64_t* array, uint64_t arrayBitCount, uint64_t index)
+// inline bool bitset64_get (uint64_t* array, uint64_t arrayBitCount, uint64_t
+// index)
 //{
 //  assert(index < arrayBitCount);
 //  return (array[index >> 6] & (1ULL << (index & 63))) != 0;
 //}
 //
-//inline void bitset64_raise (uint64_t* array, uint64_t arrayBitCount, uint64_t index)
+// inline void bitset64_raise (uint64_t* array, uint64_t arrayBitCount, uint64_t
+// index)
 //{
 //  assert(index < arrayBitCount);
 //  array[index >> 6] |= (1ULL << (index & 63));
 //}
 //
-//inline void bitset64_clear (uint64_t* array, uint64_t arrayBitCount, uint64_t index)
+// inline void bitset64_clear (uint64_t* array, uint64_t arrayBitCount, uint64_t
+// index)
 //{
 //  assert(index < arrayBitCount);
 //  array[index >> 6] &= ~(1ULL << (index & 63));
 //}
 //
-//TEST_F(FixedSizePoolTest, ArrayBit64) {
+// TEST_F(FixedSizePoolTest, ArrayBit64) {
 //  static const uint64_t bitCount = 1;
 //  uint64_t bitArray[bitCount / 64 + 1];
 //  memset(bitArray, 0, sizeof(bitArray));
 //  uint64_t setBitIndex = 0;
 //  bitset64_raise(bitArray, bitCount, setBitIndex);
 //  for (uint64_t i = 0; i < bitCount; ++i) {
-//    ASSERT_EQ(bitset64_get(bitArray, bitCount, setBitIndex), i == setBitIndex);
+//    ASSERT_EQ(bitset64_get(bitArray, bitCount, setBitIndex), i ==
+//    setBitIndex);
 //  }
 //}

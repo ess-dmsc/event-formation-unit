@@ -131,7 +131,7 @@ public:
 
 struct HitVectorStorage {
   using PoolCfg =
-      FixedPoolConfig<Hit, 1024 * 1024 * 1024, MyVector<Hit>::kMinReserveCount>;
+      PoolAllocatorConfig<Hit, 1024 * 1024 * 1024, MyVector<Hit>::kMinReserveCount>;
   static PoolCfg::PoolType* s_Pool;
   static PoolAllocator<PoolCfg> s_Alloc;
 };

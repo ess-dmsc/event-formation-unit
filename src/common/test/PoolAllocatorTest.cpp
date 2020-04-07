@@ -6,27 +6,27 @@ public:
 };
 
 TEST_F(PoolAllocatorTest, Small_Empty) {
-  using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 1, 1, true>;
-  FixedPoolCfg::PoolType pool;
-  PoolAllocator<FixedPoolCfg> alloc(pool);
+  using AllocConfig = PoolAllocatorConfig<int, sizeof(int) * 1, 1, true>;
+  AllocConfig::PoolType pool;
+  PoolAllocator<AllocConfig> alloc(pool);
 }
 
 TEST_F(PoolAllocatorTest, Small_1) {
-  using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 1, 1, true>;
-  FixedPoolCfg::PoolType pool;
-  PoolAllocator<FixedPoolCfg> alloc(pool);
+  using AllocConfig = PoolAllocatorConfig<int, sizeof(int) * 1, 1, true>;
+  AllocConfig::PoolType pool;
+  PoolAllocator<AllocConfig> alloc(pool);
 
-  std::vector<int, PoolAllocator<FixedPoolCfg>> v(alloc);
+  std::vector<int, PoolAllocator<AllocConfig>> v(alloc);
   v.push_back(1);
   ASSERT_TRUE(v[0] == 1);
 }
 
 TEST_F(PoolAllocatorTest, Small_Overflow) {
-  using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 1, 1, true>;
-  FixedPoolCfg::PoolType pool;
-  PoolAllocator<FixedPoolCfg> alloc(pool);
+  using AllocConfig = PoolAllocatorConfig<int, sizeof(int) * 1, 1, true>;
+  AllocConfig::PoolType pool;
+  PoolAllocator<AllocConfig> alloc(pool);
 
-  using vecType = std::vector<int, PoolAllocator<FixedPoolCfg>>;
+  using vecType = std::vector<int, PoolAllocator<AllocConfig>>;
   vecType v(alloc);
 
   v.push_back(1);
@@ -37,9 +37,9 @@ TEST_F(PoolAllocatorTest, Small_Overflow) {
 }
 
 TEST_F(PoolAllocatorTest, Small_2) {
-  using FixedPoolCfg = FixedPoolConfig<int, sizeof(int) * 2, 2, true>;
-  FixedPoolCfg::PoolType pool;
-  PoolAllocator<FixedPoolCfg> alloc(pool);
+  using AllocConfig = PoolAllocatorConfig<int, sizeof(int) * 2, 2, true>;
+  AllocConfig::PoolType pool;
+  PoolAllocator<AllocConfig> alloc(pool);
 
   std::vector<int, decltype(alloc)> v(alloc);
   v.reserve(2);
@@ -50,9 +50,9 @@ TEST_F(PoolAllocatorTest, Small_2) {
 }
 
 TEST_F(PoolAllocatorTest, Share_2) {
-  using FixedPoolCfg = FixedPoolConfig<int, (sizeof(int) * 2) * 2, 2, true>;
-  FixedPoolCfg::PoolType pool;
-  PoolAllocator<FixedPoolCfg> alloc(pool);
+  using AllocConfig = PoolAllocatorConfig<int, (sizeof(int) * 2) * 2, 2, true>;
+  AllocConfig::PoolType pool;
+  PoolAllocator<AllocConfig> alloc(pool);
 
   ASSERT_EQ(alloc.m_Pool.m_NumSlotsUsed, 0);
   {
