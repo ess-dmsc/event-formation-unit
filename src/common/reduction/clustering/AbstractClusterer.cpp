@@ -14,13 +14,15 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-char *ClusterContainerAllocatorBase::s_MemBegin = (char*)malloc(1024 * 1024 * 1024);
-char *ClusterContainerAllocatorBase::s_MemEnd = s_MemBegin + (1024 * 1024 * 1024);
+char *GreedyClusterStorage::s_MemBegin = (char*)malloc(1024 * 1024 * 1024);
+char *GreedyClusterStorage::s_MemEnd = s_MemBegin + (1024 * 1024 * 1024);
 
-ClusterPoolStorage::PoolCfg::PoolType* ClusterPoolStorage::s_Pool =
-    new PoolCfg::PoolType();
+ClusterPoolStorage::AllocConfig::PoolType* ClusterPoolStorage::s_Pool =
+    new AllocConfig::PoolType();
 
-PoolAllocator<ClusterPoolStorage::PoolCfg>
+// Note: We purposefully leak the storage, since the EFU doesn't guaranteed that
+// all memory is freed in the proper order (or at all).
+PoolAllocator<ClusterPoolStorage::AllocConfig>
     ClusterPoolStorage::s_Alloc(*ClusterPoolStorage::s_Pool);
 
 std::string to_string(const ClusterContainer &container,

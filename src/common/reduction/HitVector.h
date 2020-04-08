@@ -11,44 +11,39 @@
 #include <common/reduction/Hit.h>
 #include <common/PoolAllocator.h>
 
-// TODO rename to GreedyLinearAllocator
-struct HitAllocatorBase {
+struct GreedyHitStorage {
   static char *s_MemBegin;
   static char *s_MemEnd;
 };
 
-template <class T> struct HitAllocator : public HitAllocatorBase {
+template <class T> struct GreedyHitAllocator {
   using value_type = T;
 
-  HitAllocator() = default;
-  template <class U> constexpr HitAllocator(const HitAllocator<U> &) noexcept {}
+  GreedyHitAllocator() = default;
+  template <class U> constexpr GreedyHitAllocator(const GreedyHitAllocator<U> &) noexcept {}
 
   T *allocate(std::size_t n) {
-    char* p = s_MemBegin;
-    s_MemBegin += n * sizeof(T);
-    if (s_MemBegin < s_MemEnd)
+    char* p = GreedyHitStorage::s_MemBegin;
+    GreedyHitStorage::s_MemBegin += n * sizeof(T);
+    if (GreedyHitStorage::s_MemBegin < GreedyHitStorage::s_MemEnd)
       return (T*)p;
-    //return nullptr;
     throw std::bad_alloc();
   }
-  void deallocate(T *, std::size_t) noexcept { /* do nothing*/
-  }
+  void deallocate(T *, std::size_t) noexcept {}
 };
 
 template <class T, class U>
-bool operator==(const HitAllocator<T> &, const HitAllocator<U> &) {
+bool operator==(const GreedyHitAllocator<T> &, const GreedyHitAllocator<U> &) {
   return true;
 }
 template <class T, class U>
-bool operator!=(const HitAllocator<T> &, const HitAllocator<U> &) {
+bool operator!=(const GreedyHitAllocator<T> &, const GreedyHitAllocator<U> &) {
   return false;
 }
 
 //-----------------------------------------------------------------------------
 
-#include <algorithm> // TODO remove
-
-template <typename T, typename Alloc = std::allocator<T>>
+template <typename T, typename Alloc = std::allocator<T>> 
 class MyVector {
 public:
   typedef std::vector<T, Alloc> Vector;
@@ -88,7 +83,7 @@ public:
   size_type capacity() const noexcept { return m_Vec.capacity(); }
   bool empty() const noexcept { return m_Vec.empty(); }
 
-  void reserve(size_type n) { m_Vec.reserve(std::max(n, (size_type)kMinReserveCount)); }
+  void reserve(size_type n) { m_Vec.reserve(n); }
 
   reference operator[](size_type n) { return m_Vec.operator[](n); }
   const_reference operator[](size_type n) const { return m_Vec.operator[](n); }
@@ -101,16 +96,12 @@ public:
   value_type *data() noexcept { return m_Vec.data(); }
   const value_type *data() const noexcept { return m_Vec.data(); }
 
-  void push_back(const value_type &x) {
-      m_Vec.push_back(x);
-  }
+  void push_back(const value_type &x) { m_Vec.push_back(x); }
 
-  void push_back(value_type &&x) {
-      m_Vec.push_back(std::move(x));
-  }
+  void push_back(value_type &&x) { m_Vec.push_back(std::move(x)); }
 
   template <class... Args> void emplace_back(Args &&... args) {
-      m_Vec.emplace_back(std::forward<Args>(args)...);
+    m_Vec.emplace_back(std::forward<Args>(args)...);
   }
 
   void pop_back() { m_Vec.pop_back(); }
@@ -130,21 +121,23 @@ public:
 //-----------------------------------------------------------------------------
 
 struct HitVectorStorage {
-  using PoolCfg =
-      PoolAllocatorConfig<Hit, 1024 * 1024 * 1024, MyVector<Hit>::kMinReserveCount>;
-  static PoolCfg::PoolType* s_Pool;
-  static PoolAllocator<PoolCfg> s_Alloc;
+  using AllocConfig = PoolAllocatorConfig<Hit, 1024 * 1024 * 1024,
+                                          MyVector<Hit>::kMinReserveCount>;
+  static AllocConfig::PoolType *s_Pool;
+  static PoolAllocator<AllocConfig> s_Alloc;
 };
 
-template <class T> struct HitVectorAllocator : public HitVectorStorage {
+template <class T> struct HitVectorAllocator {
   using value_type = T;
 
   HitVectorAllocator() = default;
   template <class U>
   constexpr HitVectorAllocator(const HitVectorAllocator<U> &) noexcept {}
 
-  T *allocate(std::size_t n) { return s_Alloc.allocate(n); }
-  void deallocate(T *p, std::size_t n) noexcept { s_Alloc.deallocate(p, n); }
+  T *allocate(std::size_t n) { return HitVectorStorage::s_Alloc.allocate(n); }
+  void deallocate(T *p, std::size_t n) noexcept {
+    HitVectorStorage::s_Alloc.deallocate(p, n);
+  }
 };
 
 template <class T, class U>
@@ -158,10 +151,10 @@ bool operator!=(const HitVectorAllocator<T> &, const HitVectorAllocator<U> &) {
 
 //-----------------------------------------------------------------------------
 
-//using HitVector = std::vector<Hit, HitAllocator<Hit>>;
+//using HitVector = std::vector<Hit, GreedyHitAllocator<Hit>>;
 //using HitVector = std::vector<Hit>;
 //using HitVector = MyVector<Hit>;
-//using HitVector = MyVector<Hit, HitAllocator<Hit>>;
+//using HitVector = MyVector<Hit, GreedyHitAllocator<Hit>>;
 using HitVector = MyVector<Hit, HitVectorAllocator<Hit>>;
 
 /// \brief convenience function for sorting Hits by increasing time

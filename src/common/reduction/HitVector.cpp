@@ -13,13 +13,15 @@
 #define ASCII_grayscale70 " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
 #define ASCII_grayscale10 " .:-=+*#%@"
 
-char *HitAllocatorBase::s_MemBegin = (char*)malloc(2ULL * 1024 * 1024 * 1024);
-char *HitAllocatorBase::s_MemEnd = s_MemBegin + (2ULL * 1024 * 1024 * 1024);
+char *GreedyHitStorage::s_MemBegin = (char*)malloc(2ULL * 1024 * 1024 * 1024);
+char *GreedyHitStorage::s_MemEnd = s_MemBegin + (2ULL * 1024 * 1024 * 1024);
 
-HitVectorStorage::PoolCfg::PoolType* HitVectorStorage::s_Pool =
-    new HitVectorStorage::PoolCfg::PoolType();
+HitVectorStorage::AllocConfig::PoolType* HitVectorStorage::s_Pool =
+    new HitVectorStorage::AllocConfig::PoolType();
 
-PoolAllocator<HitVectorStorage::PoolCfg>
+// Note: We purposefully leak the storage, since the EFU doesn't guaranteed that
+// all memory is freed in the proper order (or at all).
+PoolAllocator<HitVectorStorage::AllocConfig>
     HitVectorStorage::s_Alloc(*HitVectorStorage::s_Pool);
 
 std::string to_string(const HitVector &vec, const std::string &prepend) {

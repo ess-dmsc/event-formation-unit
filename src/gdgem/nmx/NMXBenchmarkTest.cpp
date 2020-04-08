@@ -309,7 +309,7 @@ BENCHMARK(Vec_PushBackTest_RawArray);
 
 static void Vec_PushBackTest_MyVector_LinearAllocator(benchmark::State &state) {
   BenchmarkLoop(state, [&] {
-    MyVector<Hit, HitAllocator<Hit>> v;
+    MyVector<Hit, GreedyHitAllocator<Hit>> v;
     v.reserve(16);
     for (int i = 0; i < 16; ++i) {
       v.push_back(Hit{});
@@ -322,7 +322,7 @@ BENCHMARK(Vec_PushBackTest_MyVector_LinearAllocator);
 
 static void
 Vec_PushBackTest_MyVector_LinearAllocator_NoDealloc(benchmark::State &state) {
-  MyVector<Hit, HitAllocator<Hit>> v;
+  MyVector<Hit, GreedyHitAllocator<Hit>> v;
   v.reserve(16);
   BenchmarkLoop(state, [&] {
     v.clear();

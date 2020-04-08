@@ -12,13 +12,12 @@
 #include <list>
 //#include <deque>
 
-struct ClusterContainerAllocatorBase {
+struct GreedyClusterStorage {
   static char *s_MemBegin;
   static char *s_MemEnd;
 };
 
-template <class T>
-struct ClusterContainerAllocator : public ClusterContainerAllocatorBase {
+template <class T> struct ClusterContainerAllocator {
   typedef T value_type;
 
   ClusterContainerAllocator() = default;
@@ -27,12 +26,11 @@ struct ClusterContainerAllocator : public ClusterContainerAllocatorBase {
       const ClusterContainerAllocator<U> &) noexcept {}
 
   T *allocate(std::size_t n) {
-    char *p = s_MemBegin;
-    s_MemBegin += n * sizeof(T);
-    if (s_MemBegin < s_MemEnd)
+    char *p = GreedyClusterStorage::s_MemBegin;
+    GreedyClusterStorage::s_MemBegin += n * sizeof(T);
+    if (GreedyClusterStorage::s_MemBegin < GreedyClusterStorage::s_MemEnd)
       return (T *)p;
-    return nullptr;
-    // throw std::bad_alloc();
+    throw std::bad_alloc();
   }
   void deallocate(T *, std::size_t) noexcept { /* do nothing*/
   }
@@ -52,24 +50,24 @@ bool operator!=(const ClusterContainerAllocator<T> &,
 //-----------------------------------------------------------------------------
 
 struct ClusterPoolStorage {
-  struct ClusterAndlListNodeGuess {
+  struct StorageGuess {
     Cluster cluster;
-    Cluster listNodeGuess;
+    void *nodeGuess1;
+    void *nodeGuess2;
   };
-  using PoolCfg =
-      PoolAllocatorConfig<ClusterAndlListNodeGuess, 1024 * 1024 * 1024, 1>;
-  static PoolCfg::PoolType* s_Pool;
-  static PoolAllocator<PoolCfg> s_Alloc;
+  using AllocConfig = PoolAllocatorConfig<StorageGuess, 1024 * 1024 * 1024, 1>;
+  static AllocConfig::PoolType *s_Pool;
+  static PoolAllocator<AllocConfig> s_Alloc;
 };
 
-template <class T> struct ClusterPoolAllocator : public ClusterPoolStorage {
+template <class T> struct ClusterPoolAllocator {
   using value_type = T;
 
   // checks due to std::list::__node_type is implementation defined
-  static_assert(sizeof(T) <= sizeof(ClusterAndlListNodeGuess),
-                "ClusterAndlListNodeGuess needs more space");
-  static_assert(alignof(T) <= alignof(ClusterAndlListNodeGuess),
-                "ClusterAndlListNodeGuess needs higher align");
+  static_assert(sizeof(T) <= sizeof(ClusterPoolStorage::StorageGuess),
+                "StorageGuess needs more space");
+  static_assert(alignof(T) <= alignof(ClusterPoolStorage::StorageGuess),
+                "StorageGuess needs higher align");
 
   template <typename U> struct rebind {
     using other = ClusterPoolAllocator<U>;
@@ -83,12 +81,13 @@ template <class T> struct ClusterPoolAllocator : public ClusterPoolStorage {
 
   T *allocate(std::size_t n) {
     RelAssertMsg(n == 1, "not expecting bulk allocation from std::list");
-    //if (!std::is_same<T, Cluster>::value) XTRACE(MAIN, CRI, "node");
-    return (T *)s_Alloc.allocate(1);
+    // if (!std::is_same<T, Cluster>::value) XTRACE(MAIN, CRI, "node");
+    return (T *)ClusterPoolStorage::s_Alloc.allocate(1);
   }
 
   void deallocate(T *p, std::size_t n) noexcept {
-    s_Alloc.deallocate((ClusterAndlListNodeGuess *)p, n);
+    ClusterPoolStorage::s_Alloc.deallocate(
+        (ClusterPoolStorage::StorageGuess *)p, n);
   }
 };
 
