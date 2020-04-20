@@ -16,6 +16,8 @@
 // undef TRC_LEVEL
 // define TRC_LEVEL TRC_L_DEB
 
+#define FIXED_SIZE_POOL_DISABLE_ALL_CHECKS 1
+
 template <size_t kSlotBytes_, size_t kNumSlots_,
           size_t kSlotAlignment_ = kSlotBytes_, size_t kStartAlignment_ = 16,
           bool kValidate_ = true, bool kUseAsserts_ = true>
@@ -36,8 +38,13 @@ template <typename FixedSizePoolParamsT> struct FixedSizePool {
     kNumSlots = FixedSizePoolParamsT::kNumSlots,
     kSlotAlignment = FixedSizePoolParamsT::kSlotAlignment,
     kStartAlignment = FixedSizePoolParamsT::kStartAlignment,
+#if FIXED_SIZE_POOL_DISABLE_ALL_CHECKS
+    kValidate = false,
+    kUseAsserts = false
+#else
     kValidate = FixedSizePoolParamsT::kValidate,
-    kUseAsserts = FixedSizePoolParamsT::kUseAsserts
+    kUseAsserts = FixedSizePoolParamsT::kUseAsserts,
+#endif
   };
   enum : unsigned char { kMemDeletedPat = 0xED, kMemAllocatedPat = 0xCD };
 
