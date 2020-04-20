@@ -67,8 +67,10 @@ size_t EV42Serializer::produce() {
   if (EventCount != 0) {
     XTRACE(OUTPUT, DEB, "autoproduce %zu EventCount_ \n", EventCount);
     serialize();
-    if (ProduceFunctor)
-      ProduceFunctor(Buffer_, EventMessage_->pulse_time());
+    if (ProduceFunctor) {
+      // pulse_time is currently ns since 1970, produce time should be ms.
+      ProduceFunctor(Buffer_, EventMessage_->pulse_time()/1000000);
+    }
     return Buffer_.size_bytes();
   }
   return 0;
