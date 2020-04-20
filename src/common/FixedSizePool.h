@@ -16,7 +16,7 @@
 // undef TRC_LEVEL
 // define TRC_LEVEL TRC_L_DEB
 
-#define FIXED_SIZE_POOL_DISABLE_ALL_CHECKS 1
+#define FIXED_SIZE_POOL_DISABLE_ALL_CHECKS 0
 
 template <size_t kSlotBytes_, size_t kNumSlots_,
           size_t kSlotAlignment_ = kSlotBytes_, size_t kStartAlignment_ = 16,
