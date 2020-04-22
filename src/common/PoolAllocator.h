@@ -58,8 +58,10 @@ PoolAllocator<PoolAllocatorConfigT>::allocate(std::size_t n) {
     return (T *)m_Pool.AllocateSlot();
 
   T *heap = (T *)std::malloc(sizeof(T) * n);
-  // XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", n, sizeof(T) *
-  // n);
+  if (0) {
+    XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", n,
+           sizeof(T) * n);
+  }
   return heap;
 }
 
