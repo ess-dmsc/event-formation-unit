@@ -94,9 +94,9 @@ void CenterMatcher::match(bool flush) {
       // Else return to queue
       // \todo this needs explicit testing
       if (!evt.ClusterA.empty())
-        unmatched_clusters_.push_front(evt.ClusterA);
+        unmatched_clusters_.push_front(std::move(evt.ClusterA));
       if (!evt.ClusterB.empty())
-        unmatched_clusters_.push_front(evt.ClusterB);
+        unmatched_clusters_.push_front(std::move(evt.ClusterB));
     }
   }
 }
