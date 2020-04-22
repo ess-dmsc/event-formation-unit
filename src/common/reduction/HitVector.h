@@ -43,8 +43,7 @@ bool operator!=(const GreedyHitAllocator<T> &, const GreedyHitAllocator<U> &) {
 
 //-----------------------------------------------------------------------------
 
-template <typename T, typename Alloc = std::allocator<T>> 
-class MyVector {
+template <typename T, typename Alloc = std::allocator<T>> class MyVector {
 public:
   typedef std::vector<T, Alloc> Vector;
 
@@ -63,7 +62,8 @@ public:
   typedef typename Vector::reverse_iterator reverse_iterator;
   typedef typename Vector::const_reverse_iterator const_reverse_iterator;
 
-  enum { kMinReserveCount = 16 };
+  // 1024 is enough to avoid allocs in "bat" example.
+  enum { kMinReserveCount = 1024 };
 
   MyVector() { reserve(kMinReserveCount); }
   MyVector(Alloc &alloc) : m_Vec(alloc) { reserve(kMinReserveCount); }
@@ -83,7 +83,9 @@ public:
   size_type capacity() const noexcept { return m_Vec.capacity(); }
   bool empty() const noexcept { return m_Vec.empty(); }
 
-  void reserve(size_type n) { m_Vec.reserve(n); }
+  void reserve(size_type n) {
+    m_Vec.reserve(n > kMinReserveCount ? n : kMinReserveCount);
+  }
 
   reference operator[](size_type n) { return m_Vec.operator[](n); }
   const_reference operator[](size_type n) const { return m_Vec.operator[](n); }
@@ -113,7 +115,12 @@ public:
     return m_Vec.insert(position, first, last);
   }
 
-  void clear() noexcept { m_Vec.clear(); }
+  // make sure we reserve enough, as clear() is (possibly) needed to re-use a
+  // vector after it has been std::move'd
+  void clear() noexcept {
+    m_Vec.clear();
+    reserve(kMinReserveCount);
+  }
   void resize(size_type sz) { m_Vec.resize(sz); }
   void resize(size_type sz, const value_type &c) { m_Vec.resize(sz, c); }
 };
@@ -125,6 +132,7 @@ struct HitVectorStorage {
                                           MyVector<Hit>::kMinReserveCount>;
   static AllocConfig::PoolType *s_Pool;
   static PoolAllocator<AllocConfig> s_Alloc;
+  static std::size_t MaxAllocCount;
 };
 
 template <class T> struct HitVectorAllocator {
@@ -134,7 +142,18 @@ template <class T> struct HitVectorAllocator {
   template <class U>
   constexpr HitVectorAllocator(const HitVectorAllocator<U> &) noexcept {}
 
-  T *allocate(std::size_t n) { return HitVectorStorage::s_Alloc.allocate(n); }
+  T *allocate(std::size_t n) {
+    RelAssertMsg(n >= MyVector<Hit>::kMinReserveCount,
+                 "Reserve not properly called somewhere. Could be a move-"
+                 "semantic issue.");
+
+    if (0 && n > HitVectorStorage::MaxAllocCount) {
+      XTRACE(MAIN, CRI, "HitVector max size %zu", n);
+      HitVectorStorage::MaxAllocCount = n;
+    }
+
+    return HitVectorStorage::s_Alloc.allocate(n);
+  }
   void deallocate(T *p, std::size_t n) noexcept {
     HitVectorStorage::s_Alloc.deallocate(p, n);
   }

@@ -24,6 +24,8 @@ HitVectorStorage::AllocConfig::PoolType* HitVectorStorage::s_Pool =
 PoolAllocator<HitVectorStorage::AllocConfig>
     HitVectorStorage::s_Alloc(*HitVectorStorage::s_Pool);
 
+std::size_t HitVectorStorage::MaxAllocCount = 0;
+
 std::string to_string(const HitVector &vec, const std::string &prepend) {
   std::stringstream ss;
   for (const auto &h : vec) {
