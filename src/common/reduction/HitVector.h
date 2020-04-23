@@ -143,10 +143,12 @@ template <class T> struct HitVectorAllocator {
   constexpr HitVectorAllocator(const HitVectorAllocator<U> &) noexcept {}
 
   T *allocate(std::size_t n) {
-    RelAssertMsg(n >= MyVector<Hit>::kMinReserveCount,
-                 "Reserve not properly called somewhere. Could be a move-"
-                 "semantic issue.");
-
+    // TODO(mortenhs): This don't work when a vector is (default)
+    // copy-constructed because it will only have the capacity of it's source
+    // vector.
+    // RelAssertMsg(n >= MyVector<Hit>::kMinReserveCount,
+    //             "Reserve not properly called somewhere. Could be a move-"
+    //             "semantic issue.");
     if (0 && n > HitVectorStorage::MaxAllocCount) {
       XTRACE(MAIN, CRI, "HitVector max size %zu", n);
       HitVectorStorage::MaxAllocCount = n;
