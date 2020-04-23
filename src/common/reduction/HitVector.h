@@ -84,7 +84,8 @@ public:
   bool empty() const noexcept { return m_Vec.empty(); }
 
   void reserve(size_type n) {
-    m_Vec.reserve(n > kMinReserveCount ? n : kMinReserveCount);
+    m_Vec.reserve(
+        n > (size_type)kMinReserveCount ? n : (size_type)kMinReserveCount);
   }
 
   reference operator[](size_type n) { return m_Vec.operator[](n); }
