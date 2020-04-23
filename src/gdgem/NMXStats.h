@@ -16,9 +16,9 @@ namespace Gem {
     // Input thread
     int64_t RxPackets{0};
     int64_t RxBytes{0};
+    int64_t RxIdle{0};
     int64_t FifoPushErrors{0};
-    // Padding to 64 byte cache line
-    int64_t Padding[5]; // cppcheck-suppress unusedStructMember
+    int64_t PaddingFor64ByteAlignment[4]; // cppcheck-suppress unusedStructMember
 
     // Processing thread
     int64_t ProcessingIdle {0};

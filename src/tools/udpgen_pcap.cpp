@@ -20,6 +20,7 @@ struct {
   uint64_t PktThrottle{0}; // 0 is fastest
   bool Read{false};
   bool Loop{false}; // Keep looping the same file forever
+  bool Multicast{false};
   // Not yet CLI settings
   uint64_t PcapOffset{0};
   uint32_t KernelTxBufferSize{1000000};
@@ -36,68 +37,80 @@ int main(int argc, char *argv[]) {
   app.add_option("-s, --pkt_throttle", Settings.PktThrottle, "Extra usleep() after n packets");
   app.add_flag("-r, --read_only", Settings.Read, "Read pcap file and return stats");
   app.add_flag("-l, --loop", Settings.Loop, "Run forever");
+  app.add_flag("-m, --multicast", Settings.Multicast, "Allow IP multicast");
   CLI11_PARSE(app, argc, argv);
-  char buffer[10000];
 
-  Socket::Endpoint local("0.0.0.0", 0);
-  Socket::Endpoint remote(Settings.IpAddress.c_str(), Settings.UDPPort);
+  bool IsMulticast = Socket::isMulticast(Settings.IpAddress);
 
-  UDPTransmitter DataSource(local, remote);
+  if (IsMulticast and not Settings.Multicast) {
+    printf("IP multicast addresses requires -m flag, exiting...\n");
+    return -1;
+  }
+
+  Socket::Endpoint LocalEndpoint("0.0.0.0", 0);
+  Socket::Endpoint RemoteEndpoint(Settings.IpAddress, Settings.UDPPort);
+  UDPTransmitter DataSource(LocalEndpoint, RemoteEndpoint);
   DataSource.setBufferSizes(Settings.KernelTxBufferSize, 0);
   DataSource.printBufferSizes();
 
-  std::string pcapfile(Settings.FileName);
+  if (IsMulticast) {
+    printf("IP multicast!\n");
+    DataSource.setMulticastTTL();
+  }
 
-  ReaderPcap pcap(pcapfile);
-  if (pcap.open() < 0) {
-    printf("Error opening file: %s\n", pcapfile.c_str());
+  std::string PcapFile(Settings.FileName);
+
+  ReaderPcap Pcap(PcapFile);
+  if (Pcap.open() < 0) {
+    printf("Error opening file: %s\n", PcapFile.c_str());
     return -1;
   }
 
   // Don't send UDP, just read through pcap file to get stats
   if (Settings.Read) {
-    pcap.getStats();
-    pcap.printStats();
+    Pcap.getStats();
+    Pcap.printStats();
     return 0;
   }
 
-  uint64_t packets = 0;
-  uint64_t totpackets = 0;
-  uint64_t pcappackets = 0;
+  uint64_t Packets = 0;
+  uint64_t TotPackets = 0;
+  uint64_t PcapPackets = 0;
+  char RxBuffer[10000];
   do {
-    int rdsize;
-    while ((rdsize = pcap.read((char *)&buffer, sizeof(buffer))) != -1) {
-      if (rdsize == 0) {
+    int ReadSize;
+    while ((ReadSize = Pcap.read((char *)&RxBuffer, sizeof(RxBuffer))) != -1) {
+      if (ReadSize == 0) {
         printf("read non udp data - ignoring\n");
         continue; // non udp data
       }
-      pcappackets++;
+      PcapPackets++;
 
-      if (pcappackets >= Settings.PcapOffset) {
-        DataSource.send(buffer, rdsize);
+      if (PcapPackets >= Settings.PcapOffset) {
+        DataSource.send(RxBuffer, ReadSize);
         if (Settings.SpeedThrottle) {
           usleep(Settings.SpeedThrottle);
         }
-        packets++;
-        totpackets++;
+        Packets++;
+        TotPackets++;
         if (Settings.PktThrottle) {
-          if (totpackets % Settings.PktThrottle == 0) {
+          if (TotPackets % Settings.PktThrottle == 0) {
             usleep(10);
           }
         }
-        if (Settings.NumberOfPackets != 0 and packets >= Settings.NumberOfPackets) {
-          printf("Sent %" PRIu64 " packets\n", totpackets);
-          packets = 0;
+        if (Settings.NumberOfPackets != 0 and Packets >= Settings.NumberOfPackets) {
+          printf("Sent %" PRIu64 " packets\n", TotPackets);
+          Packets = 0;
           break;
         }
       }
     }
     if (Settings.Loop) {
-      pcap.open();
+      Pcap.open();
     } else {
-      pcap.printStats();
+      Pcap.printStats();
     }
-    printf("Sent %" PRIu64 " packets\n", totpackets);
+    printf("Sent %" PRIu64 " packets\n", TotPackets);
   } while (Settings.Loop);
   // pcap.printstats();
 

@@ -40,7 +40,8 @@ SONDEIDEABase::SONDEIDEABase(BaseSettings const &settings, struct SoNDeSettings 
 
   Stats.create("transmit.bytes",                  mystats.tx_bytes);
 
-  Stats.create("thread.idle",                     mystats.rx_idle1);
+  Stats.create("thread.input_idle",               mystats.rx_idle);
+  Stats.create("thread.processing_idle",          mystats.processing_idle);
   Stats.create("thread.fifo_synch_errors",        mystats.fifo_synch_errors);
 
   /// \todo Kafka stats are common to all detectors and could/should be moved
@@ -72,8 +73,9 @@ void SONDEIDEABase::input_thread() {
   Socket::Endpoint local(EFUSettings.DetectorAddress.c_str(),
                          EFUSettings.DetectorPort);
   UDPReceiver sondedata(local);
-  sondedata.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
-  sondedata.checkRxBufferSizes(EFUSettings.DetectorRxBufferSize);
+  sondedata.setBufferSizes(EFUSettings.TxSocketBufferSize,
+                           EFUSettings.RxSocketBufferSize);
+  sondedata.checkRxBufferSizes(EFUSettings.RxSocketBufferSize);
   sondedata.printBufferSizes();
   sondedata.setRecvTimeout(0, 100000); // secs, usecs, 1/10 second
 
@@ -94,6 +96,8 @@ void SONDEIDEABase::input_thread() {
       } else {
         eth_ringbuf->getNextBuffer();
       }
+    } else {
+      mystats.rx_idle++;
     }
 
     // Checking for exit
@@ -131,7 +135,7 @@ void SONDEIDEABase::processing_thread() {
   TSCTimer produce_timer;
   while (1) {
     if ((input2proc_fifo.pop(data_index)) == false) {
-      mystats.rx_idle1++;
+      mystats.processing_idle++;
 
       if (produce_timer.timetsc() >=
           EFUSettings.UpdateIntervalSec * 1000000 * TscMHz) {

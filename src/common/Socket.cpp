@@ -35,13 +35,42 @@ std::string Socket::getHostByName(std::string &name) {
   }
 }
 
-Socket::Socket(Socket::type stype) {
-  auto type = (stype == Socket::type::UDP) ? SOCK_DGRAM : SOCK_STREAM;
-  auto proto = (stype == Socket::type::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
+Socket::Socket(Socket::SocketType SocketType) {
+  auto Type = (SocketType == Socket::SocketType::UDP) ? SOCK_DGRAM : SOCK_STREAM;
+  auto Protocol = (SocketType == Socket::SocketType::UDP) ? IPPROTO_UDP : IPPROTO_TCP;
 
-  if ((SocketFileDescriptor = socket(AF_INET, type, proto)) == -1) {
+  if ((SocketFileDescriptor = socket(AF_INET, Type, Protocol)) == -1) {
     LOG(IPC, Sev::Error, "socket() failed");
     throw std::runtime_error("system error - socket() failed");
+  }
+}
+
+void Socket::setMulticastTTL() {
+  int MulticastTTL{1};
+
+  if ((setsockopt(SocketFileDescriptor, IPPROTO_IP, IP_MULTICAST_TTL, (void *)&MulticastTTL, sizeof(MulticastTTL))) < 0) {
+    LOG(IPC, Sev::Error, "setsockopt(IPPROTO_IP, IP_MULTICAST_TTL) failed");
+    throw std::runtime_error("system error - setsockopt(IPPROTO_IP, IP_MULTICAST_TTL) failed");
+  }
+}
+
+void Socket::setMulticastReceive() {
+  if ((setsockopt(SocketFileDescriptor, SOL_SOCKET, SO_REUSEADDR, &SockOptFlagOn, sizeof(SockOptFlagOn))) < 0) {
+    LOG(IPC, Sev::Error, "setsockopt(SOL_SOCKET, SO_REUSEADDR) failed");
+    throw std::runtime_error("system error - setsockopt(SOL_SOCKET, SO_REUSEADDR) failed");
+  }
+
+  if ((setsockopt(SocketFileDescriptor, SOL_SOCKET, SO_REUSEPORT, &SockOptFlagOn, sizeof(SockOptFlagOn))) < 0) {
+    LOG(IPC, Sev::Error, "setsockopt(SOL_SOCKET, SO_REUSEPORT) failed");
+    throw std::runtime_error("system error - setsockopt(SOL_SOCKET, SO_REUSEPORT) failed");
+  }
+
+  MulticastRequest.imr_multiaddr.s_addr = localSockAddr.sin_addr.s_addr;
+  MulticastRequest.imr_interface.s_addr = htonl(INADDR_ANY);
+  if ((setsockopt(SocketFileDescriptor, IPPROTO_IP, IP_ADD_MEMBERSHIP, (void *)&MulticastRequest, sizeof(MulticastRequest))) < 0) {
+    perror("setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP) failed");
+    LOG(IPC, Sev::Error, "setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP) failed");
+    throw std::runtime_error("system error - setsockopt(IPPROTO_IP, IP_ADD_MEMBERSHIP) failed");
   }
 }
 
@@ -101,7 +130,6 @@ int Socket::setNOSIGPIPE() {
 
 void Socket::setLocalSocket(const std::string ipaddr, int port) {
   // zero out the structures
-  struct sockaddr_in localSockAddr;
   std::memset((char *)&localSockAddr, 0, sizeof(localSockAddr));
   localSockAddr.sin_family = AF_INET;
   localSockAddr.sin_port = htons(port);
@@ -111,6 +139,12 @@ void Socket::setLocalSocket(const std::string ipaddr, int port) {
     auto Msg = fmt::format("setLocalSocket() - invalid ip address {}", ipaddr);
     LOG(IPC, Sev::Error, Msg);
     throw std::runtime_error(Msg);
+  }
+
+  if ((htonl(localSockAddr.sin_addr.s_addr) & 0xe0000000) == 0xe0000000) {
+    LOG(IPC, Sev::Info, fmt::format("Multicast address {}, allow address and port reuse",
+        htonl(localSockAddr.sin_addr.s_addr)));
+    setMulticastReceive();
   }
 
   // bind socket to port
@@ -209,8 +243,8 @@ bool Socket::isValidSocket() {
 ///
 ///
 ///
-TCPTransmitter::TCPTransmitter(const std::string ipaddr, int port) : Socket(Socket::type::TCP) {
-  setRemoteSocket(ipaddr, port);
+TCPTransmitter::TCPTransmitter(const std::string IpAddress, int Port) : Socket(Socket::SocketType::TCP) {
+  setRemoteSocket(IpAddress, Port);
   setNOSIGPIPE();
   connectToRemote();
 }

@@ -44,7 +44,6 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   // clang-format off
   Stats.create("receive.packets", Counters.RxPackets);
   Stats.create("receive.bytes", Counters.RxBytes);
-  Stats.create("receive.input_idle", Counters.InputIdle);
   Stats.create("receive.dropped", Counters.FifoPushErrors);
   Stats.create("receive.fifo_seq_errors", Counters.FifoSeqErrors);
 
@@ -62,7 +61,8 @@ LokiBase::LokiBase(BaseSettings const &Settings, struct LokiSettings &LocalLokiS
   Stats.create("readouts.error_header", Counters.ErrorHeaders);
 
   //
-  Stats.create("thread.processing_idle", Counters.RxIdle);
+  Stats.create("thread.input_idle", Counters.RxIdle);
+  Stats.create("thread.processing_idle", Counters.ProcessingIdle);
 
   Stats.create("events.count", Counters.Events);
   Stats.create("events.udder", Counters.EventsUdder);
@@ -98,15 +98,13 @@ void LokiBase::inputThread() {
                          EFUSettings.DetectorPort);
 
   UDPReceiver dataReceiver(local);
-  dataReceiver.setBufferSizes(0, EFUSettings.DetectorRxBufferSize);
+  dataReceiver.setBufferSizes(EFUSettings.TxSocketBufferSize,
+                              EFUSettings.RxSocketBufferSize);
   dataReceiver.printBufferSizes();
   dataReceiver.setRecvTimeout(0, 100000); /// secs, usecs 1/10s
 
-  TSCTimer IdleTimer;
   while (runThreads) {
     int readSize;
-
-    Counters.InputIdle+= IdleTimer.timetsc();
 
     unsigned int rxBufferIndex = RxRingbuffer.getDataIndex();
 
@@ -124,8 +122,10 @@ void LokiBase::inputThread() {
       } else {
         RxRingbuffer.getNextBuffer();
       }
+    } else {
+      Counters.RxIdle++;
     }
-    IdleTimer.now();
+
   }
   XTRACE(INPUT, ALW, "Stopping input thread.");
   return;

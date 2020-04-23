@@ -39,6 +39,7 @@ protected:
     // Input Counters
     int64_t rx_packets{0};
     int64_t rx_bytes{0};
+    int64_t rx_idle{0};
     int64_t readouts_total{0};
     int64_t parser_discarded_bytes{0};
     int64_t parser_triggers{0};
@@ -65,7 +66,7 @@ protected:
     int64_t kafka_ev_others{0};
     int64_t kafka_dr_errors{0};
     int64_t kafka_dr_noerrors{0};
-  } __attribute__((aligned(64))) mystats;
+  } __attribute__((aligned(64))) Counters;
 
   MultigridSettings ModuleSettings;
   Multigrid::Config mg_config;

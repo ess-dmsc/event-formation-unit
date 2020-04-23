@@ -113,11 +113,11 @@ EFUArgs::EFUArgs() {
                        "Stats and event data update interval (seconds).")
       ->group("EFU Options")->default_str("1");
 
-  CLIParser.add_option("--rxbuffer", EFUSettings.DetectorRxBufferSize,
+  CLIParser.add_option("--rxbuffer", EFUSettings.RxSocketBufferSize,
                        "Receive from detector buffer size.")
       ->group("EFU Options")->default_str("2000000");
 
-  CLIParser.add_option("--txbuffer", EFUSettings.DetectorTxBufferSize,
+  CLIParser.add_option("--txbuffer", EFUSettings.TxSocketBufferSize,
                   "Transmit to detector buffer size.")
       ->group("EFU Options")->default_str("9216");
   // clang-format on

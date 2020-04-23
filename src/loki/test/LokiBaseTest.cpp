@@ -36,7 +36,7 @@ public:
 class LokiBaseTest : public ::testing::Test {
 public:
   void SetUp() override {
-    Settings.DetectorRxBufferSize = 100000;
+    Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
     LocalSettings.ConfigFile = "deleteme_loki.json";
   }

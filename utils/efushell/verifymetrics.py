@@ -34,7 +34,12 @@ if __name__ == '__main__':
                         help='grafana metrics to be verified, examples: efu.rx_packets:1234 - strict match. efu.rx_packets:+1234 at least)')
     args = parser.parse_args()
 
-    for test_metric in args.metrics:
+    if len(args.metrics) > 1:
+        metrics = args.metrics
+    else:
+        metrics = args.metrics[0].split()
+
+    for test_metric in metrics:
         res, name, op, value, retval = verify_metric(args.i, args.p, test_metric)
         if not res:
             print("Validation failed for %s: expected %s %d, got %d" % (name, op, value, retval))

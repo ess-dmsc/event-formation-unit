@@ -49,7 +49,7 @@ class CAENBaseTest : public ::testing::Test {
 public:
   void SetUp() override {
     LocalSettings.ConfigFile = "MB18Estia.json";
-    Settings.DetectorRxBufferSize = 100000;
+    Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
   }
   void TearDown() override {}

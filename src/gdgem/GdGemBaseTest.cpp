@@ -23,7 +23,7 @@ class GdGemBaseTest : public TestBase {
 public:
   void SetUp() override {
     LocalSettings.ConfigFile = TEST_JSON_PATH "vmm3.json";
-    Settings.DetectorRxBufferSize = 100000;
+    Settings.RxSocketBufferSize = 100000;
     Settings.NoHwCheck = true;
   }
   void TearDown() override {}

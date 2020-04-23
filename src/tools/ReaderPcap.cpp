@@ -1,4 +1,4 @@
-/** Copyright (C) 2016, 2017 European Spallation Source ERIC */
+/** Copyright (C) 2016-2020 European Spallation Source ERIC */
 
 #include <algorithm>
 #include <arpa/inet.h>
@@ -22,8 +22,8 @@ const int IP_HEADR_OFFSET = ETHERNET_HEADER_SIZE;
 const int UDP_HEADER_OFFSET = IP_HEADR_OFFSET + IP_HEADER_SIZE;
 const int UDP_DATA_OFFSET = UDP_HEADER_OFFSET + UDP_HEADER_SIZE;
 
-ReaderPcap::ReaderPcap(std::string filename)
-  : FileName(filename) {
+ReaderPcap::ReaderPcap(std::string FileName)
+  : FileName(FileName) {
   memset(&Stats, 0, sizeof(stats_t));
 }
 
@@ -36,8 +36,8 @@ ReaderPcap::~ReaderPcap() {
 
 
 int ReaderPcap::open() {
-  char errbuff[PCAP_ERRBUF_SIZE];
-  PcapHandle = pcap_open_offline(FileName.c_str(), errbuff);
+  char ErrorBuffer[PCAP_ERRBUF_SIZE];
+  PcapHandle = pcap_open_offline(FileName.c_str(), ErrorBuffer);
   if (PcapHandle == nullptr) {
     return -1;
   }
@@ -50,26 +50,26 @@ int ReaderPcap::open() {
 }
 
 
-int ReaderPcap::validatePacket(pcap_pkthdr *header, const unsigned char *data) {
+int ReaderPcap::validatePacket(pcap_pkthdr *Header, const unsigned char *Data) {
 
   Stats.PacketsTotal++; /**< total packets in pcap file */
-  Stats.BytesTotal += header->len;
+  Stats.BytesTotal += Header->len;
 
-  if (header->len != header->caplen) {
+  if (Header->len != Header->caplen) {
     Stats.PacketsTruncated++;
     return 0;
   }
 
-  if (pcap_offline_filter(&PcapFilter, header, data) == 0) {
+  if (pcap_offline_filter(&PcapFilter, Header, Data) == 0) {
     Stats.PacketsNoMatch++;
     return 0;
   }
 
   Stats.IpProtoUDP++;
   assert(Stats.PacketsTotal == Stats.PacketsTruncated+ Stats.PacketsNoMatch + Stats.IpProtoUDP);
-  assert(header->len > ETHERNET_HEADER_SIZE + IP_HEADER_SIZE + UDP_HEADER_SIZE);
+  assert(Header->len > ETHERNET_HEADER_SIZE + IP_HEADER_SIZE + UDP_HEADER_SIZE);
 
-  udphdr *udp = (udphdr *)&data[UDP_HEADER_OFFSET];
+  udphdr *udp = (udphdr *)&Data[UDP_HEADER_OFFSET];
   #ifndef __FAVOR_BSD // Why is __FAVOR_BSD not defined here?
   uint16_t UdpLen = htons(udp->len);
   #else
@@ -89,7 +89,7 @@ int ReaderPcap::validatePacket(pcap_pkthdr *header, const unsigned char *data) {
   return UdpLen;
 }
 
-int ReaderPcap::read(char *buffer, size_t bufferlen) {
+int ReaderPcap::read(char *Buffer, size_t BufferSize) {
   if (PcapHandle == nullptr) {
     return -1;
   }
@@ -106,8 +106,8 @@ int ReaderPcap::read(char *buffer, size_t bufferlen) {
     return UdpDataLength;
   }
 
-  auto DataLength = std::min((size_t)(UdpDataLength - UDP_HEADER_SIZE), bufferlen);
-  std::memcpy(buffer, &Data[UDP_DATA_OFFSET], DataLength);
+  auto DataLength = std::min((size_t)(UdpDataLength - UDP_HEADER_SIZE), BufferSize);
+  std::memcpy(Buffer, &Data[UDP_DATA_OFFSET], DataLength);
 
   return DataLength;
 }
@@ -131,12 +131,12 @@ int ReaderPcap::getStats() {
 }
 
 
-void ReaderPcap::printPacket(unsigned char *data, size_t len) {
-  for (unsigned int i = 0; i < len; i++) {
+void ReaderPcap::printPacket(unsigned char *Data, size_t Size) {
+  for (unsigned int i = 0; i < Size; i++) {
     if ((i % 16) == 0 && i != 0) {
       printf("\n");
     }
-    printf("%.2x ", data[i]);
+    printf("%.2x ", Data[i]);
   }
   printf("\n");
 }
