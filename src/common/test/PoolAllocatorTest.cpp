@@ -2,7 +2,7 @@
 #include <test/TestBase.h>
 
 class PoolAllocatorTest : public TestBase {
-public:
+public: 
 };
 
 TEST_F(PoolAllocatorTest, Small_Empty) {
