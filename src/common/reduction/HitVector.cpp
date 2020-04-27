@@ -13,16 +13,17 @@
 #define ASCII_grayscale70 " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
 #define ASCII_grayscale10 " .:-=+*#%@"
 
-char *GreedyHitStorage::s_MemBegin = (char*)malloc(2ULL * 1024 * 1024 * 1024);
-char *GreedyHitStorage::s_MemEnd = s_MemBegin + (2ULL * 1024 * 1024 * 1024);
+const size_t Bytes_2GB = 2ULL * 1024 * 1024 * 1024;
+char *GreedyHitStorage::MemBegin = (char*)malloc(Bytes_2GB);
+char *GreedyHitStorage::MemEnd = MemBegin + Bytes_2GB;
 
-HitVectorStorage::AllocConfig::PoolType* HitVectorStorage::s_Pool =
+HitVectorStorage::AllocConfig::PoolType* HitVectorStorage::Pool =
     new HitVectorStorage::AllocConfig::PoolType();
 
 // Note: We purposefully leak the storage, since the EFU doesn't guaranteed that
 // all memory is freed in the proper order (or at all).
 PoolAllocator<HitVectorStorage::AllocConfig>
-    HitVectorStorage::s_Alloc(*HitVectorStorage::s_Pool);
+    HitVectorStorage::Alloc(*HitVectorStorage::Pool);
 
 std::size_t HitVectorStorage::MaxAllocCount = 0;
 

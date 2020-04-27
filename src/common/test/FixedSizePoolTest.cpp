@@ -8,7 +8,7 @@ public:
 TEST_F(FixedSizePoolTest, Small_Empty) {
   FixedSizePool<FixedSizePoolParams<8, 1>> pool;
 
-  ASSERT_TRUE(pool.m_NumSlotsUsed == 0);
+  ASSERT_TRUE(pool.NumSlotsUsed == 0);
 }
 
 TEST_F(FixedSizePoolTest, Small_1) {
@@ -16,9 +16,20 @@ TEST_F(FixedSizePoolTest, Small_1) {
 
   void *mem = pool.AllocateSlot();
 
-  ASSERT_TRUE(pool.m_NumSlotsUsed == 1);
-  ASSERT_TRUE(mem >= (void *)pool.m_PoolBytes);
-  ASSERT_TRUE(mem < (void *)(pool.m_PoolBytes + sizeof(pool.m_PoolBytes)));
+  ASSERT_TRUE(pool.NumSlotsUsed == 1);
+  ASSERT_TRUE(mem >= (void *)pool.PoolBytes);
+  ASSERT_TRUE(mem < (void *)(pool.PoolBytes + sizeof(pool.PoolBytes)));
+
+  pool.DeallocateSlot(mem);
+}
+
+TEST_F(FixedSizePoolTest, Small_NoOfSpace) {
+  FixedSizePool<FixedSizePoolParams<8, 1>> pool;
+
+  void *mem = pool.AllocateSlot();
+
+  void *noSpace = pool.AllocateSlot();
+  ASSERT_EQ(noSpace, nullptr);
 
   pool.DeallocateSlot(mem);
 }
@@ -26,8 +37,8 @@ TEST_F(FixedSizePoolTest, Small_1) {
 TEST_F(FixedSizePoolTest, Small_1_NewlyAllocatedPattern) {
   FixedSizePool<FixedSizePoolParams<8, 1>> pool;
   unsigned char *mem = (unsigned char *)pool.AllocateSlot();
-  for (size_t i = 0; i < pool.kSlotBytes; ++i) {
-    ASSERT_TRUE(mem[i] == pool.kMemAllocatedPat);
+  for (size_t i = 0; i < pool.SlotBytes; ++i) {
+    ASSERT_TRUE(mem[i] == pool.MemAllocatedPattern);
   }
   pool.DeallocateSlot(mem);
 }
@@ -54,7 +65,7 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_DeallocateWrong) {
         pool.DeallocateSlot(mem);
         pool.DeallocateSlot(mem);
       },
-      "Pool must have content");
+      "Pool is already empty");
 }
 
 TEST_F(FixedSizePoolTest, Small_1_Fail_NotEmpty) {
@@ -84,9 +95,9 @@ TEST_F(FixedSizePoolTest, Large_1) {
 
   void *mem = pool.AllocateSlot();
 
-  ASSERT_TRUE(pool.m_NumSlotsUsed == 1);
-  ASSERT_TRUE(mem >= (void *)pool.m_PoolBytes);
-  ASSERT_TRUE(mem < (void *)(pool.m_PoolBytes + sizeof(pool.m_PoolBytes)));
+  ASSERT_TRUE(pool.NumSlotsUsed == 1);
+  ASSERT_TRUE(mem >= (void *)pool.PoolBytes);
+  ASSERT_TRUE(mem < (void *)(pool.PoolBytes + sizeof(pool.PoolBytes)));
 
   pool.DeallocateSlot(mem);
 }
@@ -98,10 +109,9 @@ TEST_F(FixedSizePoolTest, Large_All) {
   for (uint32_t i = 0; i < 1000; ++i) {
     allocs[i] = pool.AllocateSlot();
 
-    ASSERT_TRUE(pool.m_NumSlotsUsed == i + 1);
-    ASSERT_TRUE(allocs[i] >= (void *)pool.m_PoolBytes);
-    ASSERT_TRUE(allocs[i] <
-                (void *)(pool.m_PoolBytes + sizeof(pool.m_PoolBytes)));
+    ASSERT_TRUE(pool.NumSlotsUsed == i + 1);
+    ASSERT_TRUE(allocs[i] >= (void *)pool.PoolBytes);
+    ASSERT_TRUE(allocs[i] < (void *)(pool.PoolBytes + sizeof(pool.PoolBytes)));
   }
 
   for (int i = 0; i < 1000; ++i) {
@@ -180,6 +190,18 @@ TEST_F(FixedSizePoolTest, Contains) {
 
   pool.DeallocateSlot(mem);
   pool.DeallocateSlot(mem2);
+}
+
+TEST_F(FixedSizePoolTest, NextPowerOfTwo) {
+  ASSERT_EQ(NextPowerOfTwo(0ull), 0ull); // edge case
+  ASSERT_EQ(NextPowerOfTwo(1ull), 1ull);
+  ASSERT_EQ(NextPowerOfTwo(3ull), 4ull);
+  ASSERT_EQ(NextPowerOfTwo(7ull), 8ull);
+  ASSERT_EQ(NextPowerOfTwo(31ull), 32ull);
+  ASSERT_EQ(NextPowerOfTwo((1ull << 31) + 1), (1ull << 32));
+  ASSERT_EQ(NextPowerOfTwo((1ull << 32) + 1), (1ull << 33));
+  ASSERT_EQ(NextPowerOfTwo((1ull << 47) + 1), (1ull << 48));
+  ASSERT_EQ(NextPowerOfTwo((1ull << 62) + 1), (1ull << 63));
 }
 
 // inline bool bitset64_get (uint64_t* array, uint64_t arrayBitCount, uint64_t

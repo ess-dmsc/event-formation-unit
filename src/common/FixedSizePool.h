@@ -1,3 +1,4 @@
+// Copyright (C) 2018-2020 European Spallation Source, ERIC. See LICENSE file
 #pragma once
 
 #include <common/Assert.h>
@@ -18,39 +19,68 @@
 
 #define FIXED_SIZE_POOL_DISABLE_ALL_CHECKS 0
 
-template <size_t kSlotBytes_, size_t kNumSlots_,
-          size_t kSlotAlignment_ = kSlotBytes_, size_t kStartAlignment_ = 16,
-          bool kValidate_ = true, bool kUseAsserts_ = true>
+constexpr size_t NextPowerOfTwo(size_t n) {
+  n--;
+  n |= n >> 1;
+  n |= n >> 2;
+  n |= n >> 4;
+  n |= n >> 8;
+  n |= n >> 16;
+  n |= n >> 32;
+  n++;
+  return n;
+}
+
+/// \class FixedSizePoolParams
+/// \brief Contains the compile-time constants and parameters for \class
+///        FixedSizePool. This makes the template implementation less cluttery.
+template <size_t SlotBytes_, size_t NumSlots_,
+          size_t SlotAlignment_ = SlotBytes_, size_t StartAlignment_ = 16,
+          bool Validate_ = true, bool UseAsserts_ = true>
 struct FixedSizePoolParams {
   enum : size_t {
-    kSlotBytes = std::max(kSlotBytes_, kSlotAlignment_),
-    kNumSlots = kNumSlots_,
-    kSlotAlignment = kSlotAlignment_,
-    kStartAlignment = std::max(kSlotAlignment_, kStartAlignment_),
-    kValidate = kValidate_,
-    kUseAsserts = kUseAsserts_
+    SlotBytes = NextPowerOfTwo(std::max(SlotBytes_, SlotAlignment_)),
+    NumSlots = NumSlots_,
+    SlotAlignment = SlotAlignment_,
+    StartAlignment = std::max(SlotAlignment_, StartAlignment_),
+    Validate = Validate_,
+    UseAsserts = UseAsserts_
   };
 };
 
+/// \class FixedSizePool
+/// \brief This keeps a stack of available indices (FreeSlotStack) into block of
+///        memory (PoolBytes), which is partitioned into NumSlots slots of
+///        SlotBytes. Allocation and deallocation is respectivly done by popping
+///        and pushing from the stack.
+/// The validation mode (Validate) fills the slots with a pattern
+///        (MemDeletedPattern, MemAllocatedPattern) to make it easier to detect
+///        use-after-free. It also checks on destruction that all indices in the
+///        stack are unique, meaning no double-free.
 template <typename FixedSizePoolParamsT> struct FixedSizePool {
   enum : size_t {
-    kSlotBytes = FixedSizePoolParamsT::kSlotBytes,
-    kNumSlots = FixedSizePoolParamsT::kNumSlots,
-    kSlotAlignment = FixedSizePoolParamsT::kSlotAlignment,
-    kStartAlignment = FixedSizePoolParamsT::kStartAlignment,
+    SlotBytes = FixedSizePoolParamsT::SlotBytes,
+    NumSlots = FixedSizePoolParamsT::NumSlots,
+    SlotAlignment = FixedSizePoolParamsT::SlotAlignment,
+    StartAlignment = FixedSizePoolParamsT::StartAlignment,
 #if FIXED_SIZE_POOL_DISABLE_ALL_CHECKS
-    kValidate = false,
-    kUseAsserts = false
+    Validate = false,
+    UseAsserts = false
 #else
-    kValidate = FixedSizePoolParamsT::kValidate,
-    kUseAsserts = FixedSizePoolParamsT::kUseAsserts,
+    Validate = FixedSizePoolParamsT::Validate,
+    UseAsserts = FixedSizePoolParamsT::UseAsserts,
 #endif
   };
-  enum : unsigned char { kMemDeletedPat = 0xED, kMemAllocatedPat = 0xCD };
 
-  uint32_t m_NumSlotsUsed;
-  uint32_t m_NextFreeSlot[kNumSlots];
-  alignas(kStartAlignment) unsigned char m_PoolBytes[kSlotBytes * kNumSlots];
+  enum : unsigned char { MemDeletedPattern = 0xED, MemAllocatedPattern = 0xCD };
+
+  static_assert((SlotBytes & (SlotBytes - 1)) == 0,
+                "SlotBytes must be power-of-two. Consider arounding up to "
+                "nearest pwer-of-two");
+
+  uint32_t NumSlotsUsed;
+  uint32_t FreeSlotStack[NumSlots];
+  alignas(StartAlignment) unsigned char PoolBytes[SlotBytes * NumSlots];
 
   FixedSizePool();
   ~FixedSizePool();
@@ -63,41 +93,41 @@ template <typename FixedSizePoolParamsT> struct FixedSizePool {
 template <typename FixedSizePoolParamsT>
 FixedSizePool<FixedSizePoolParamsT>::FixedSizePool() {
   XTRACE(MAIN, DEB,
-         "FixedSizePool: kSlotBytes %u, kNumSlots %u, kSlotAlignment %u, "
-         "kStartAlignment %u, kValidate %u, TotalBytes %u",
-         (uint32_t)kSlotBytes, (uint32_t)kNumSlots, (uint32_t)kSlotAlignment,
-         (uint32_t)kStartAlignment, kValidate ? 1 : 0, (uint32_t)sizeof(*this));
+         "FixedSizePool: SlotBytes %u, NumSlots %u, SlotAlignment %u, "
+         "StartAlignment %u, Validate %u, TotalBytes %u",
+         (uint32_t)SlotBytes, (uint32_t)NumSlots, (uint32_t)SlotAlignment,
+         (uint32_t)StartAlignment, Validate ? 1 : 0, (uint32_t)sizeof(*this));
 
-  m_NumSlotsUsed = 0;
-  for (size_t i = 0; i < kNumSlots; ++i) {
-    m_NextFreeSlot[i] = i;
+  NumSlotsUsed = 0;
+  for (size_t i = 0; i < NumSlots; ++i) {
+    FreeSlotStack[i] = i;
   }
 
-  if (kValidate) {
-    memset(m_PoolBytes, kMemDeletedPat, sizeof(m_PoolBytes));
+  if (Validate) {
+    memset(PoolBytes, MemDeletedPattern, sizeof(PoolBytes));
   }
 }
 
 template <typename FixedSizePoolParamsT>
 FixedSizePool<FixedSizePoolParamsT>::~FixedSizePool() {
-  PoolAssertMsg(kUseAsserts, m_NumSlotsUsed == 0,
+  PoolAssertMsg(UseAsserts, NumSlotsUsed == 0,
                 "All slots in pool must be empty");
 
-  if (kValidate) {
-    // test m_NextFreeSlot indices are unique
+  if (Validate) {
+    // test FreeSlotStack indices are unique
     {
-      std::bitset<kNumSlots> &foundSlots = *new std::bitset<kNumSlots>();
-      for (size_t i = 0; i < kNumSlots; ++i) {
-        uint32_t curSlot = m_NextFreeSlot[i];
-        PoolAssertMsg(kUseAsserts, !foundSlots[curSlot],
+      std::bitset<NumSlots> &foundSlots = *new std::bitset<NumSlots>();
+      for (size_t i = 0; i < NumSlots; ++i) {
+        uint32_t curSlot = FreeSlotStack[i];
+        PoolAssertMsg(UseAsserts, !foundSlots[curSlot],
                       "Free slots must be unique. Could mean double delete");
         foundSlots[curSlot] = true;
       }
       delete &foundSlots;
     }
     // test for deletion reference pattern
-    for (size_t i = 0; i < sizeof(m_PoolBytes); ++i) {
-      PoolAssertMsg(kUseAsserts, m_PoolBytes[i] == kMemDeletedPat,
+    for (size_t i = 0; i < sizeof(PoolBytes); ++i) {
+      PoolAssertMsg(UseAsserts, PoolBytes[i] == MemDeletedPattern,
                     "Deleted memory must have reference pattern");
     }
   }
@@ -105,23 +135,24 @@ FixedSizePool<FixedSizePoolParamsT>::~FixedSizePool() {
 
 template <typename FixedSizePoolParamsT>
 void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot() {
-  PoolAssertMsg(kUseAsserts, m_NumSlotsUsed < kNumSlots,
-                "Implement fallover to malloc()");
-  size_t index = m_NextFreeSlot[m_NumSlotsUsed];
-  PoolAssertMsg(kUseAsserts, index < kNumSlots, "Expect capacity");
+  if (NumSlotsUsed == NumSlots) {
+    return nullptr;
+  }
 
-  m_NumSlotsUsed++;
-  unsigned char *p = m_PoolBytes + (index * kSlotBytes);
-  PoolAssertMsg(kUseAsserts,
-                p + kSlotBytes <= m_PoolBytes + sizeof(m_PoolBytes),
+  size_t index = FreeSlotStack[NumSlotsUsed];
+  PoolAssertMsg(UseAsserts, index < NumSlots, "Expect capacity");
+
+  NumSlotsUsed++;
+  unsigned char *p = PoolBytes + (index * SlotBytes);
+  PoolAssertMsg(UseAsserts, p + SlotBytes <= PoolBytes + sizeof(PoolBytes),
                 "Don't go past end of capacity");
 
-  if (kValidate) {
-    for (size_t i = 0; i < kSlotBytes; ++i) {
-      PoolAssertMsg(kUseAsserts, p[i] == kMemDeletedPat,
+  if (Validate) {
+    for (size_t i = 0; i < SlotBytes; ++i) {
+      PoolAssertMsg(UseAsserts, p[i] == MemDeletedPattern,
                     "Unused memory must have deletion pattern");
     }
-    memset(p, kMemAllocatedPat, kSlotBytes);
+    memset(p, MemAllocatedPattern, SlotBytes);
   }
 
   return static_cast<void *>(p);
@@ -129,21 +160,21 @@ void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot() {
 
 template <typename FixedSizePoolParamsT>
 void FixedSizePool<FixedSizePoolParamsT>::DeallocateSlot(void *p) {
-  size_t index = ((unsigned char *)p - m_PoolBytes) / kSlotBytes;
-  PoolAssertMsg(kUseAsserts, index < kNumSlots, "Implement fallover to free()");
+  size_t index = ((unsigned char *)p - PoolBytes) / SlotBytes;
+  PoolAssertMsg(UseAsserts, index < NumSlots, "Dealloc pointer is not from pool");
 
-  PoolAssertMsg(kUseAsserts, m_NumSlotsUsed > 0, "Pool must have content");
-  --m_NumSlotsUsed;
+  PoolAssertMsg(UseAsserts, NumSlotsUsed > 0, "Pool is already empty");
+  --NumSlotsUsed;
 
-  m_NextFreeSlot[m_NumSlotsUsed] = index;
+  FreeSlotStack[NumSlotsUsed] = index;
 
-  if (kValidate) {
-    memset(p, kMemDeletedPat, kSlotBytes);
+  if (Validate) {
+    memset(p, MemDeletedPattern, SlotBytes);
   }
 }
 
 template <typename FixedSizePoolParamsT>
 bool FixedSizePool<FixedSizePoolParamsT>::Contains(void *p) {
-  return (unsigned char *)p >= m_PoolBytes &&
-         (unsigned char *)p < m_PoolBytes + sizeof(m_PoolBytes);
+  return (unsigned char *)p >= PoolBytes &&
+         (unsigned char *)p < PoolBytes + sizeof(PoolBytes);
 }

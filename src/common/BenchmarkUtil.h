@@ -1,4 +1,11 @@
+// Copyright (C) 2018-2020 European Spallation Source, ERIC. See LICENSE file
 #pragma once
+
+/// \brief This utility supports various profiler/timer instrumentation in
+///        Google Benchmark by adding the BenchmarkLoop() and
+///        BenchmarkLoopPaused() functions.
+///        Both functions allow the user to execute their code in a lambda,
+///        while turning instrumentation on/off at the correct times.
 
 #include <benchmark/benchmark.h>
 
@@ -35,8 +42,8 @@ inline void BenchmarkLoopResumeTiming(benchmark::State &state) {
   state.ResumeTiming();
 }
 
-// main benchmark loop. Replaces the 'for (auto _ : state){...}'.
-// usage: 'BenchmarkLoop(state, [&]{ MyFancyCode });'
+/// \brief Main benchmark loop. Replaces the 'for (auto _ : state){...}'.
+///        Usage: 'BenchmarkLoop(state, [&]{ MyFancyCode });'
 template <typename Lambda>
 void BenchmarkLoop(benchmark::State &state, Lambda loopBody) {
   BenchmarkOuterStartTiming();
@@ -46,8 +53,14 @@ void BenchmarkLoop(benchmark::State &state, Lambda loopBody) {
   BenchmarkOuterStopTiming();
 }
 
-// used for running setup/data generation code during a test. Adds
-// overhead of 1000 ns in tests.
+/// \brief Used for running setup/data generation code during a test. Adds
+///        overhead of 1000 ns in tests.
+/// Usage:
+///        BenchmarkLoop(state, [&] {
+///           BenchmarkLoopPaused(state, [&] {
+///             ... Initialize and build data arrays, etc. here ...
+///           });
+///        });
 template <typename Lambda>
 void BenchmarkLoopPaused(benchmark::State &state, Lambda runWithoutTiming) {
   BenchmarkLoopPauseTiming(state);

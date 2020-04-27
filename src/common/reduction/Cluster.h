@@ -15,8 +15,11 @@
 ///        Hits can be added, but not removed. Coordinates and timestamps
 ///        are treated as having an uncertainty of 1 when evaluating dimensions,
 ///        thus including the endpoints.
+///
+/// \note  This class does not have defaulted virtual destructor as it can
+///        inhibit automatic implicit move-semantics for the HitVector.
 
-class  Cluster {
+class Cluster {
 public:
   /// \todo should be protected?
   /// \note This variable is left public, because event reduction/analysis strategies

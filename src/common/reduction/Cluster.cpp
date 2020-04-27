@@ -16,8 +16,8 @@
 #define ASCII_grayscale10 " .:-=+*#%@"
 
 // Debug code to try to split the basic blocks, to see what the optimizer is
-// doing on which sections of code.
-// Code taken from Google Benchmark ::benchmark::ClobberMemory()
+// doing on which sections of code. Code taken from Google Benchmark
+// ::benchmark::ClobberMemory().
 // Idea:
 // https://cellperformance.beyond3d.com/articles/2006/04/a-practical-gcc-trick-to-use-during-optimization.html
 #if 0

@@ -1,3 +1,4 @@
+// Copyright (C) 2018-2020 European Spallation Source, ERIC. See LICENSE file
 #pragma once
 
 #include <common/Assert.h>
@@ -6,45 +7,54 @@
 
 #include <cstdint>
 
-template <class T_, size_t kTotalBytes_, size_t kObjectsPerSlot_,
-          bool kValidate_ = true>
+/// \class PoolAllocatorConfig
+/// \brief The class contains the compile-time parameters and configuration for
+///        \class PoolAllocator. \class FixedSizePool is used for storage.
+template <class T_, size_t TotalBytes_, size_t ObjectsPerSlot_,
+          bool Validate_ = true>
 struct PoolAllocatorConfig {
   using T = T_;
   enum : size_t {
-    kTotalBytes = kTotalBytes_,
-    kObjectsPerSlot = kObjectsPerSlot_,
-    kSlotBytes = sizeof(T) * kObjectsPerSlot,
-    kNumSlots = kTotalBytes / kSlotBytes,
-    kUseAssets = true,
-    kValidate = kValidate_
+    TotalBytes = TotalBytes_,
+    ObjectsPerSlot = ObjectsPerSlot_,
+    SlotBytes = sizeof(T) * ObjectsPerSlot,
+    NumSlots = TotalBytes / SlotBytes,
+    UseAssets = true,
+    Validate = Validate_
   };
 
-  static_assert(kTotalBytes >= kSlotBytes,
+  static_assert(TotalBytes >= SlotBytes,
                 "PoolAllocator must have enough bytes for one slot. Is "
-                "kObjectsPerSlot sensible?");
+                "ObjectsPerSlot sensible?");
 
   using PoolType =
-      FixedSizePool<FixedSizePoolParams<kSlotBytes, kNumSlots, alignof(T), 16,
-                                        kValidate, kUseAssets>>;
+      FixedSizePool<FixedSizePoolParams<SlotBytes, NumSlots, alignof(T), 16,
+                                        Validate, UseAssets>>;
 };
 
+/// \class PoolAllocator
+/// \brief This provides the Allocator interface that STL requires. The user is
+///        required to provide a \class FixedSizePool instance to create the
+///        allocator object. Config is provided by \class PoolAllocatorConfig.
+///        If the FixedSizePool does not have capacity for a requested
+///        allocation the allocator will fallback to malloc/free.
 template <typename PoolAllocatorConfigT> struct PoolAllocator {
   using T = typename PoolAllocatorConfigT::T;
   using value_type = T;
   using PoolType = typename PoolAllocatorConfigT::PoolType;
 
-  PoolType &m_Pool;
+  PoolType &Pool;
 
   PoolAllocator(const PoolAllocator &) noexcept = default;
   PoolAllocator &operator=(const PoolAllocator &) = delete;
 
-  PoolAllocator(PoolType &pool) noexcept : m_Pool(pool) {}
+  PoolAllocator(PoolType &pool) noexcept : Pool(pool) {}
 
   template <typename U> struct rebind {
     using other =
-        PoolAllocator<PoolAllocatorConfig<U, PoolAllocatorConfigT::kTotalBytes,
-                                          PoolAllocatorConfigT::kObjectsPerSlot,
-                                          PoolAllocatorConfigT::kValidate>>;
+        PoolAllocator<PoolAllocatorConfig<U, PoolAllocatorConfigT::TotalBytes,
+                                          PoolAllocatorConfigT::ObjectsPerSlot,
+                                          PoolAllocatorConfigT::Validate>>;
   };
 
   T *allocate(std::size_t n);
@@ -54,35 +64,38 @@ template <typename PoolAllocatorConfigT> struct PoolAllocator {
 template <typename PoolAllocatorConfigT>
 typename PoolAllocatorConfigT::T *
 PoolAllocator<PoolAllocatorConfigT>::allocate(std::size_t n) {
-  if (sizeof(T) * n <= m_Pool.kSlotBytes)
-    return (T *)m_Pool.AllocateSlot();
-
-  T *heap = (T *)std::malloc(sizeof(T) * n);
-  if (0) {
-    XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", n,
-           sizeof(T) * n);
+  T *bytes = nullptr;
+  if (sizeof(T) * n <= Pool.SlotBytes) {
+    bytes = (T *)Pool.AllocateSlot();
   }
-  return heap;
+  if (bytes == nullptr) {
+    bytes = (T *)std::malloc(sizeof(T) * n);
+    if (0) {
+      XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", n,
+             sizeof(T) * n);
+    }
+  }
+  return bytes;
 }
 
 template <typename PoolAllocatorConfigT>
 void PoolAllocator<PoolAllocatorConfigT>::deallocate(T *p,
                                                      std::size_t) noexcept {
-  if (m_Pool.Contains(p)) {
-    m_Pool.DeallocateSlot(p);
+  if (Pool.Contains(p)) {
+    Pool.DeallocateSlot(p);
   } else {
     std::free(p);
   }
 }
 
-template <typename PoolAllocatorConfigT, typename FixedPoolConfigU>
+template <typename PoolAllocatorConfigT, typename PoolAllocatorConfigU>
 bool operator==(const PoolAllocator<PoolAllocatorConfigT> &,
-                const PoolAllocator<FixedPoolConfigU> &) {
+                const PoolAllocator<PoolAllocatorConfigU> &) {
   return true;
 }
 
-template <typename PoolAllocatorConfigT, typename FixedPoolConfigU>
+template <typename PoolAllocatorConfigT, typename PoolAllocatorConfigU>
 bool operator!=(const PoolAllocator<PoolAllocatorConfigT> &,
-                const PoolAllocator<FixedPoolConfigU> &) {
+                const PoolAllocator<PoolAllocatorConfigU> &) {
   return false;
 }

@@ -25,17 +25,15 @@ function(create_benchmark_executable exec_name)
 
     add_valgrind_sdk (${exec_name})
 
-    ## TODO investigate why LTO doesn't seem to have any effect.
-    #if (CMAKE_BUILD_TYPE STREQUAL "RELEASE" OR CMAKE_BUILD_TYPE STREQUAL "Release")
-    #  if( lto_supported )
-    #      message(STATUS "LTO enabled for ${exec_name}")
-    #      set_property(TARGET ${exec_name} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-    #  else()
-    #      message(STATUS "LTO not supported (for target ${exec_name}): <${lto_error}>")
-    #  endif()
-    #endif ()
-
-    add_linker_flags(${exec_name} "-g") # we need symbol info for profiling
+    # TODO investigate why LTO doesn't seem to have any effect.
+    if (CMAKE_BUILD_TYPE STREQUAL "RELEASE" OR CMAKE_BUILD_TYPE STREQUAL "Release")
+      if( lto_supported )
+          message(STATUS "LTO enabled for ${exec_name}")
+          set_property(TARGET ${exec_name} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+      else()
+          message(STATUS "LTO not supported (for target ${exec_name}): <${lto_error}>")
+      endif()
+    endif ()
 
     target_link_libraries(${exec_name}
       ${${exec_name}_LIB}
@@ -43,7 +41,7 @@ function(create_benchmark_executable exec_name)
       ${EFU_COMMON_LIBS}
       ${GTEST_LIBRARIES}
       ${CMAKE_THREAD_LIBS_INIT}
-      -g -lbenchmark -lpthread efu_common)
+      -lbenchmark -lpthread efu_common)
       
     set(benchmark_targets
       ${exec_name}

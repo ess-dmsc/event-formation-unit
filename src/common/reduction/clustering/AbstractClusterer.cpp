@@ -14,16 +14,17 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
-char *GreedyClusterStorage::s_MemBegin = (char*)malloc(1024 * 1024 * 1024);
-char *GreedyClusterStorage::s_MemEnd = s_MemBegin + (1024 * 1024 * 1024);
+enum : size_t { Bytes_1GB = 1024 * 1024 * 1024 };
+char *GreedyClusterStorage::MemBegin = (char *)malloc(Bytes_1GB);
+char *GreedyClusterStorage::MemEnd = MemBegin + Bytes_1GB;
 
-ClusterPoolStorage::AllocConfig::PoolType* ClusterPoolStorage::s_Pool =
+ClusterPoolStorage::AllocConfig::PoolType* ClusterPoolStorage::Pool =
     new AllocConfig::PoolType();
 
 // Note: We purposefully leak the storage, since the EFU doesn't guaranteed that
 // all memory is freed in the proper order (or at all).
 PoolAllocator<ClusterPoolStorage::AllocConfig>
-    ClusterPoolStorage::s_Alloc(*ClusterPoolStorage::s_Pool);
+    ClusterPoolStorage::Alloc(*ClusterPoolStorage::Pool);
 
 std::string to_string(const ClusterContainer &container,
                       const std::string &prepend, bool verbose) {
@@ -48,7 +49,8 @@ std::string AbstractClusterer::status(const std::string &prepend,
   return ss.str();
 }
 
-bool AbstractClusterer::empty() const { return clusters.empty(); }
+bool AbstractClusterer::empty() const {
+  return clusters.empty(); }
 
 void AbstractClusterer::stash_cluster(Cluster &cluster) {
   XTRACE(CLUSTER, DEB, status("", true).c_str());

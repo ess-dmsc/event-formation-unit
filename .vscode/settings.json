@@ -1,3 +1,8 @@
 {
-    "C_Cpp.default.configurationProvider": "go2sh.cmake-integration"
+  "catch2TestExplorer.executables": [
+    {
+      "pattern": "build_debug/**/*{test,Test,TEST}*",
+      "cwd": "${workspaceFolder}/build_debug/"
+    }
+  ]
 }

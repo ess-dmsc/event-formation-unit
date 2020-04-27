@@ -10,11 +10,10 @@
 
 #include <common/reduction/Cluster.h>
 #include <list>
-//#include <deque>
 
 struct GreedyClusterStorage {
-  static char *s_MemBegin;
-  static char *s_MemEnd;
+  static char *MemBegin;
+  static char *MemEnd;
 };
 
 template <class T> struct ClusterContainerAllocator {
@@ -26,9 +25,9 @@ template <class T> struct ClusterContainerAllocator {
       const ClusterContainerAllocator<U> &) noexcept {}
 
   T *allocate(std::size_t n) {
-    char *p = GreedyClusterStorage::s_MemBegin;
-    GreedyClusterStorage::s_MemBegin += n * sizeof(T);
-    if (GreedyClusterStorage::s_MemBegin < GreedyClusterStorage::s_MemEnd)
+    char *p = GreedyClusterStorage::MemBegin;
+    GreedyClusterStorage::MemBegin += n * sizeof(T);
+    if (GreedyClusterStorage::MemBegin < GreedyClusterStorage::MemEnd)
       return (T *)p;
     throw std::bad_alloc();
   }
@@ -55,9 +54,11 @@ struct ClusterPoolStorage {
     void *nodeGuess1;
     void *nodeGuess2;
   };
-  using AllocConfig = PoolAllocatorConfig<StorageGuess, 1024 * 1024 * 1024, 1>;
-  static AllocConfig::PoolType *s_Pool;
-  static PoolAllocator<AllocConfig> s_Alloc;
+  enum : size_t { Bytes_1GB = 1024 * 1024 * 1024, ObjectsPerSlot = 1 };
+  using AllocConfig =
+      PoolAllocatorConfig<StorageGuess, Bytes_1GB, ObjectsPerSlot>;
+  static AllocConfig::PoolType *Pool;
+  static PoolAllocator<AllocConfig> Alloc;
 };
 
 template <class T> struct ClusterPoolAllocator {
@@ -82,12 +83,12 @@ template <class T> struct ClusterPoolAllocator {
   T *allocate(std::size_t n) {
     RelAssertMsg(n == 1, "not expecting bulk allocation from std::list");
     // if (!std::is_same<T, Cluster>::value) XTRACE(MAIN, CRI, "node");
-    return (T *)ClusterPoolStorage::s_Alloc.allocate(1);
+    return (T *)ClusterPoolStorage::Alloc.allocate(1);
   }
 
   void deallocate(T *p, std::size_t n) noexcept {
-    ClusterPoolStorage::s_Alloc.deallocate(
-        (ClusterPoolStorage::StorageGuess *)p, n);
+    ClusterPoolStorage::Alloc.deallocate((ClusterPoolStorage::StorageGuess *)p,
+                                         n);
   }
 };
 
