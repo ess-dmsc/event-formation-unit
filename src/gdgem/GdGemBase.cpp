@@ -32,9 +32,6 @@
 // This is depending on the CPU, but we do not rely on this to be accurate
 static constexpr int TscMHz {2900};
 
-// Emulating ESS 14Hz pulse
-static constexpr uint64_t MaxPulseWindowNs {1000000000 / 14};
-
 int GdGemBase::getCalibration(std::vector<std::string> CmdArgs,
                         char *Output,
                         unsigned int *OutputBytes) {
@@ -358,34 +355,20 @@ void GdGemBase::processEvents(EV42Serializer& event_serializer,
     if (NMXOpts.hit_histograms) {
       bin(hists_, event);
     }
-    //not needed, gives wrong results, since time order of clusters
-    //not guaranteed
-    /*
-    if (neutron_event_.time < previous_full_time_) {
-      LOG(PROCESS, Sev::Error, "Event time sequence error: {} < {}",
-             neutron_event_.time, previous_full_time_);
-    }
-    previous_full_time_ = neutron_event_.time;
-    */
 
-    truncated_time_ = neutron_event_.time - recent_pulse_time_;
-    // \todo try different limits
-    if (!have_pulse_time_ ||
-        (truncated_time_ > MaxPulseWindowNs)) {
-      have_pulse_time_ = true;
-      recent_pulse_time_ = neutron_event_.time;
-      truncated_time_ = 0;
-      if (event_serializer.eventCount())
-        stats_.TxBytes += event_serializer.produce();
-      event_serializer.pulseTime(recent_pulse_time_);
-//      LOG(PROCESS, Sev::Debug, "New offset time selected: {}", recent_pulse_time_);
-    }
+// Currently we have no concept of pulse time. Eventually this will
+// be added to the readout data.
+// For now we just use ns since unix epoch.
+    uint64_t efu_time = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+    event_serializer.pulseTime(efu_time);
 
-//    LOG(PROCESS, Sev::Debug, "Good event: time={}, pixel={} from {}",
-//        truncated_time_, pixelid_, neutron_event_.to_string());
+// LOG(PROCESS, Sev::Debug, "Good event: time={}, pixel={} from {}",
+//    truncated_time_, pixelid_, neutron_event_.to_string());
+
+    uint64_t TOF = neutron_event_.time - CurrentPulseTime;
 
     stats_.TxBytes += event_serializer.addEvent(
-        static_cast<uint32_t>(truncated_time_), pixelid_);
+        static_cast<uint32_t>(TOF), pixelid_);
     stats_.EventsGood++;
     stats_.EventsGoodHits += event.total_hit_count();
   }
