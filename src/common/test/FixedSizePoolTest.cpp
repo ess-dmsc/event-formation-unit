@@ -193,15 +193,15 @@ TEST_F(FixedSizePoolTest, Contains) {
 }
 
 TEST_F(FixedSizePoolTest, NextPowerOfTwo) {
-  ASSERT_EQ(NextPowerOfTwo(0ull), 0ull); // edge case
-  ASSERT_EQ(NextPowerOfTwo(1ull), 1ull);
-  ASSERT_EQ(NextPowerOfTwo(3ull), 4ull);
-  ASSERT_EQ(NextPowerOfTwo(7ull), 8ull);
-  ASSERT_EQ(NextPowerOfTwo(31ull), 32ull);
-  ASSERT_EQ(NextPowerOfTwo((1ull << 31) + 1), (1ull << 32));
-  ASSERT_EQ(NextPowerOfTwo((1ull << 32) + 1), (1ull << 33));
-  ASSERT_EQ(NextPowerOfTwo((1ull << 47) + 1), (1ull << 48));
-  ASSERT_EQ(NextPowerOfTwo((1ull << 62) + 1), (1ull << 63));
+  ASSERT_EQ(BitMath::NextPowerOfTwo(0ull), 0ull); // edge case
+  ASSERT_EQ(BitMath::NextPowerOfTwo(1ull), 1ull);
+  ASSERT_EQ(BitMath::NextPowerOfTwo(3ull), 4ull);
+  ASSERT_EQ(BitMath::NextPowerOfTwo(7ull), 8ull);
+  ASSERT_EQ(BitMath::NextPowerOfTwo(31ull), 32ull);
+  ASSERT_EQ(BitMath::NextPowerOfTwo((1ull << 31) + 1), (1ull << 32));
+  ASSERT_EQ(BitMath::NextPowerOfTwo((1ull << 32) + 1), (1ull << 33));
+  ASSERT_EQ(BitMath::NextPowerOfTwo((1ull << 47) + 1), (1ull << 48));
+  ASSERT_EQ(BitMath::NextPowerOfTwo((1ull << 62) + 1), (1ull << 63));
 }
 
 // inline bool bitset64_get (uint64_t* array, uint64_t arrayBitCount, uint64_t

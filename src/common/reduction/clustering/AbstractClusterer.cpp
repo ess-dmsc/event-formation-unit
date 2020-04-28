@@ -26,7 +26,7 @@ char *GreedyClusterStorage::MemEnd = nullptr;
 ClusterPoolStorage::AllocConfig::PoolType* ClusterPoolStorage::Pool =
     new AllocConfig::PoolType();
 
-// Note: We purposefully leak the storage, since the EFU doesn't guaranteed that
+// Note: We purposefully leak the storage, since the EFU doesn't guarantee that
 // all memory is freed in the proper order (or at all).
 PoolAllocator<ClusterPoolStorage::AllocConfig>
     ClusterPoolStorage::Alloc(*ClusterPoolStorage::Pool);

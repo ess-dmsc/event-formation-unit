@@ -2,6 +2,7 @@
 #pragma once
 
 #include <common/Assert.h>
+#include <common/BitMath.h>
 #include <common/Trace.h>
 
 #include <algorithm>
@@ -19,18 +20,6 @@
 
 #define FIXED_SIZE_POOL_DISABLE_ALL_CHECKS 0
 
-constexpr size_t NextPowerOfTwo(size_t n) {
-  n--;
-  n |= n >> 1;
-  n |= n >> 2;
-  n |= n >> 4;
-  n |= n >> 8;
-  n |= n >> 16;
-  n |= n >> 32;
-  n++;
-  return n;
-}
-
 /// \class FixedSizePoolParams
 /// \brief Contains the compile-time constants and parameters for \class
 ///        FixedSizePool. This makes the template implementation less cluttery.
@@ -39,7 +28,7 @@ template <size_t SlotBytes_, size_t NumSlots_,
           bool Validate_ = true, bool UseAsserts_ = true>
 struct FixedSizePoolParams {
   enum : size_t {
-    SlotBytes = NextPowerOfTwo(std::max(SlotBytes_, SlotAlignment_)),
+    SlotBytes = BitMath::NextPowerOfTwo(std::max(SlotBytes_, SlotAlignment_)),
     NumSlots = NumSlots_,
     SlotAlignment = SlotAlignment_,
     StartAlignment = std::max(SlotAlignment_, StartAlignment_),

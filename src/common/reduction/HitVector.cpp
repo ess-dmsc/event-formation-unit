@@ -25,7 +25,7 @@ char *GreedyHitStorage::MemEnd = nullptr;
 HitVectorStorage::AllocConfig::PoolType* HitVectorStorage::Pool =
     new HitVectorStorage::AllocConfig::PoolType();
 
-// Note: We purposefully leak the storage, since the EFU doesn't guaranteed that
+// Note: We purposefully leak the storage, since the EFU doesn't guarantee that
 // all memory is freed in the proper order (or at all).
 PoolAllocator<HitVectorStorage::AllocConfig>
     HitVectorStorage::Alloc(*HitVectorStorage::Pool);
