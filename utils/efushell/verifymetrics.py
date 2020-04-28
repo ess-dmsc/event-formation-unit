@@ -23,7 +23,7 @@ def verify_metric(ip_address, port, validation, printAllMetrics=False):
 
     if printAllMetrics:
         print("-All Metrics-")
-        for k, v in metrics.metrics:
+        for k, v in metrics.metrics.items():
             print(k, "=", v)
 
     return res, name, op, value, retval
