@@ -59,7 +59,7 @@ struct ClusterPoolStorage {
   };
   enum : size_t { Bytes_1GB = 1024 * 1024 * 1024, ObjectsPerSlot = 1 };
   using AllocConfig =
-      PoolAllocatorConfig<StorageGuess, Bytes_1GB, ObjectsPerSlot>;
+      PoolAllocatorConfig<StorageGuess, Bytes_1GB, ObjectsPerSlot, false>;
   static AllocConfig::PoolType *Pool;
   static PoolAllocator<AllocConfig> Alloc;
 };
