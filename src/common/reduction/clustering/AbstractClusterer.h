@@ -11,20 +11,23 @@
 #include <common/reduction/Cluster.h>
 #include <list>
 
+#define ENABLE_GREEDY_CLUSTER_ALLOCATOR 0
+
 struct GreedyClusterStorage {
   static char *MemBegin;
   static char *MemEnd;
 };
 
-template <class T> struct ClusterContainerAllocator {
+template <class T> struct GreedyClusterAllocator {
   typedef T value_type;
 
-  ClusterContainerAllocator() = default;
+  GreedyClusterAllocator() = default;
   template <class U>
-  constexpr ClusterContainerAllocator(
-      const ClusterContainerAllocator<U> &) noexcept {}
+  constexpr GreedyClusterAllocator(const GreedyClusterAllocator<U> &) noexcept {
+  }
 
   T *allocate(std::size_t n) {
+    RelAssertMsg (ENABLE_GREEDY_CLUSTER_ALLOCATOR, "Remember to enable");
     char *p = GreedyClusterStorage::MemBegin;
     GreedyClusterStorage::MemBegin += n * sizeof(T);
     if (GreedyClusterStorage::MemBegin < GreedyClusterStorage::MemEnd)
@@ -36,13 +39,13 @@ template <class T> struct ClusterContainerAllocator {
 };
 
 template <class T, class U>
-bool operator==(const ClusterContainerAllocator<T> &,
-                const ClusterContainerAllocator<U> &) {
+bool operator==(const GreedyClusterAllocator<T> &,
+                const GreedyClusterAllocator<U> &) {
   return true;
 }
 template <class T, class U>
-bool operator!=(const ClusterContainerAllocator<T> &,
-                const ClusterContainerAllocator<U> &) {
+bool operator!=(const GreedyClusterAllocator<T> &,
+                const GreedyClusterAllocator<U> &) {
   return false;
 }
 

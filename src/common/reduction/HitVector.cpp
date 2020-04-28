@@ -13,9 +13,14 @@
 #define ASCII_grayscale70 " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
 #define ASCII_grayscale10 " .:-=+*#%@"
 
+#if ENABLE_GREEDY_HIT_ALLOCATOR
 const size_t Bytes_2GB = 2ULL * 1024 * 1024 * 1024;
 char *GreedyHitStorage::MemBegin = (char*)malloc(Bytes_2GB);
 char *GreedyHitStorage::MemEnd = MemBegin + Bytes_2GB;
+#else
+char *GreedyHitStorage::MemBegin = nullptr;
+char *GreedyHitStorage::MemEnd = nullptr;
+#endif
 
 HitVectorStorage::AllocConfig::PoolType* HitVectorStorage::Pool =
     new HitVectorStorage::AllocConfig::PoolType();

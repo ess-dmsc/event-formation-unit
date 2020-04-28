@@ -4,7 +4,7 @@ from EFUMetrics import Metrics
 import argparse, sys
 
 
-def verify_metric(ip_address, port, validation):
+def verify_metric(ip_address, port, validation, printAllMetrics=False):
     metrics = Metrics(ip_address, port)
     metrics.get_all_metrics(metrics.get_number_of_stats())
 
@@ -20,6 +20,11 @@ def verify_metric(ip_address, port, validation):
         value = int(m[1][1:])
     retval = metrics.return_metric(name)
     res, op = f(retval, value)
+
+    if printAllMetrics:
+        print("-All Metrics-")
+        for k, v in metrics.metrics:
+            print(k, "=", v)
 
     return res, name, op, value, retval
 

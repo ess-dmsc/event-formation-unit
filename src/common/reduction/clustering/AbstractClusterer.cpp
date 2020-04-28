@@ -14,9 +14,14 @@
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
+#if ENABLE_GREEDY_CLUSTER_ALLOCATOR
 enum : size_t { Bytes_1GB = 1024 * 1024 * 1024 };
 char *GreedyClusterStorage::MemBegin = (char *)malloc(Bytes_1GB);
 char *GreedyClusterStorage::MemEnd = MemBegin + Bytes_1GB;
+#else
+char *GreedyClusterStorage::MemBegin = nullptr;
+char *GreedyClusterStorage::MemEnd = nullptr;
+#endif
 
 ClusterPoolStorage::AllocConfig::PoolType* ClusterPoolStorage::Pool =
     new AllocConfig::PoolType();

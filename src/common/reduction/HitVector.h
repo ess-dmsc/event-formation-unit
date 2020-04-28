@@ -11,6 +11,8 @@
 #include <common/PoolAllocator.h>
 #include <common/reduction/Hit.h>
 
+#define ENABLE_GREEDY_HIT_ALLOCATOR 0
+
 struct GreedyHitStorage {
   static char *MemBegin;
   static char *MemEnd;
@@ -24,6 +26,7 @@ template <class T> struct GreedyHitAllocator {
   constexpr GreedyHitAllocator(const GreedyHitAllocator<U> &) noexcept {}
 
   T *allocate(std::size_t n) {
+    RelAssertMsg (ENABLE_GREEDY_HIT_ALLOCATOR, "Remember to enable");
     char *p = GreedyHitStorage::MemBegin;
     GreedyHitStorage::MemBegin += n * sizeof(T);
     if (GreedyHitStorage::MemBegin < GreedyHitStorage::MemEnd)

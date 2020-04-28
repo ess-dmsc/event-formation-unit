@@ -7,5 +7,5 @@ from time import sleep
 
 def test_efu_received_all_sent_udp_packets(docker_compose):
     sleep(500)  # Wait (some random amount) of time for the EFU to receive and process the event data
-    res, name, op, value, retval = verify_metric("localhost", 8889, "efu.mbcaen.0.receive.packets:30870")
+    res, name, op, value, retval = verify_metric("localhost", 8889, "efu.mbcaen.0.receive.packets:30870", True)
     assert res, "Tested metric {}: expected {} {}, got {}".format(name, op, value, retval)
