@@ -75,11 +75,7 @@ protected:
 
   ReducedEvent neutron_event_;
 
-  uint64_t previous_full_time_{0};
-  uint64_t recent_pulse_time_{0};
-  bool have_pulse_time_{false};
-
-  uint64_t truncated_time_;
+  uint64_t CurrentPulseTime {0}; /// \todo get PT from data eventually
   uint32_t pixelid_;
 
   bool sample_next_track_ {false};
