@@ -57,7 +57,6 @@ protected:
     int64_t events_multiplicity_rejects{0};
     int64_t events_bad{0};
     int64_t events_geometry_err{0};
-    int64_t events_time_err{0};
     int64_t tx_events{0};
     int64_t tx_bytes{0};
     // Kafka stats below are common to all detectors

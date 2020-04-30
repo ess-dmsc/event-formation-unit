@@ -72,9 +72,7 @@ TEST_F(MultigridBaseTest, DataReceive) {
   EXPECT_EQ(Readout.Counters.events_multiplicity_rejects, 1);
   EXPECT_EQ(Readout.Counters.events_bad, 0);
   EXPECT_EQ(Readout.Counters.events_geometry_err, 0);
-  EXPECT_EQ(Readout.Counters.events_time_err, 22);
-  EXPECT_EQ(Readout.Counters.tx_events, 0);
-  EXPECT_EQ(Readout.Counters.tx_bytes, 0);
+  EXPECT_EQ(Readout.Counters.tx_events, 22);
 }
 
 int main(int argc, char **argv) {

@@ -57,7 +57,6 @@ MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings con
   Stats.create("events_multiplicity_rejects", Counters.events_multiplicity_rejects);
   Stats.create("events_bad", Counters.events_bad);
   Stats.create("events_geometry_err", Counters.events_geometry_err);
-  Stats.create("events_time_err", Counters.events_time_err);
   Stats.create("tx_events", Counters.tx_events);
   Stats.create("tx_bytes", Counters.tx_bytes);
 
@@ -122,33 +121,16 @@ void MultigridBase::process_events(EV42Serializer &ev42serializer) {
     if (event.pixel_id == 0) {
       Counters.pulses++;
 
-      if (HavePulseTime) {
-        uint64_t PulsePeriod = event.time - ev42serializer.pulseTime();
-        ShortestPulsePeriod = std::min(ShortestPulsePeriod, PulsePeriod);
-      }
-      HavePulseTime = true;
-
-      if (ev42serializer.eventCount())
+      if (ev42serializer.eventCount()) {
         Counters.tx_bytes += ev42serializer.produce();
-      ev42serializer.pulseTime(event.time);
-
-//            XTRACE(PROCESS, DEB, "New pulse time: %u   shortest pulse period: %u",
-//                   ev42serializer.pulseTime(), ShortestPulsePeriod);
-    } else {
-
-      auto time = static_cast<uint32_t>(event.time - ev42serializer.pulseTime());
-//            XTRACE(PROCESS, DEB, "Event: pixel: %d, time: %d ", pixel, time);
-      if (!HavePulseTime || (event.time < ev42serializer.pulseTime())) {
-        XTRACE(PROCESS, DEB, "Event before pulse");
-        Counters.events_time_err++;
-      } else if (time > (1.00004 * ShortestPulsePeriod)) {
-        XTRACE(PROCESS, DEB, "Event out of pulse range");
-        Counters.events_time_err++;
-      } else {
-//              XTRACE(PROCESS, DEB, "Event good");
-        Counters.tx_events++;
-        Counters.tx_bytes += ev42serializer.addEvent(time, event.pixel_id);
       }
+      uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+      ev42serializer.pulseTime(EfuTime);
+
+    } else {
+      auto TOF = static_cast<uint32_t>(event.time); /// \todo this is NOT TOF
+      Counters.tx_events++;
+      Counters.tx_bytes += ev42serializer.addEvent(TOF, event.pixel_id);
     }
   }
   mg_config.reduction.out_queue.clear();

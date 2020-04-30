@@ -32,9 +32,6 @@
 // This is depending on the CPU, but we do not rely on this to be accurate
 static constexpr int TscMHz {2900};
 
-// Emulating ESS 14Hz pulse
-static constexpr uint64_t MaxPulseWindowNs {1000000000 / 14};
-
 int GdGemBase::getCalibration(std::vector<std::string> CmdArgs,
                         char *Output,
                         unsigned int *OutputBytes) {
@@ -299,7 +296,7 @@ void GdGemBase::performClustering(bool flush) {
 }
 
 void GdGemBase::processEvents(EV42Serializer& event_serializer,
-                               Gem::TrackSerializer& track_serializer) {
+                               Gem::TrackSerializer& TrackSerializer) {
 
   // This may be required if you start seeing "Event time sequence error" messages
 //  std::sort(matcher_->matched_events.begin(), matcher_->matched_events.end(),
@@ -330,7 +327,7 @@ void GdGemBase::processEvents(EV42Serializer& event_serializer,
     if (sample_next_track_
         && (event.total_hit_count() >= NMXOpts.track_sample_minhits)) {
 //      LOG(PROCESS, Sev::Debug, "Serializing track: {}", event.to_string(true));
-      sample_next_track_ = !track_serializer.add_track(event,
+      sample_next_track_ = !TrackSerializer.add_track(event,
                                                        neutron_event_.x.center,
                                                        neutron_event_.y.center);
     }
@@ -371,34 +368,20 @@ void GdGemBase::processEvents(EV42Serializer& event_serializer,
     if (NMXOpts.hit_histograms) {
       bin(hists_, event);
     }
-    //not needed, gives wrong results, since time order of clusters
-    //not guaranteed
-    /*
-    if (neutron_event_.time < previous_full_time_) {
-      LOG(PROCESS, Sev::Error, "Event time sequence error: {} < {}",
-             neutron_event_.time, previous_full_time_);
-    }
-    previous_full_time_ = neutron_event_.time;
-    */
 
-    truncated_time_ = neutron_event_.time - recent_pulse_time_;
-    // \todo try different limits
-    if (!have_pulse_time_ ||
-        (truncated_time_ > MaxPulseWindowNs)) {
-      have_pulse_time_ = true;
-      recent_pulse_time_ = neutron_event_.time;
-      truncated_time_ = 0;
-      if (event_serializer.eventCount())
-        stats_.TxBytes += event_serializer.produce();
-      event_serializer.pulseTime(recent_pulse_time_);
-//      LOG(PROCESS, Sev::Debug, "New offset time selected: {}", recent_pulse_time_);
-    }
+// Currently we have no concept of pulse time. Eventually this will
+// be added to the readout data.
+// For now we just use ns since unix epoch.
+    uint64_t EfuTime = 1000000000LU * (uint64_t)time(NULL); // ns since 1970
+    event_serializer.pulseTime(EfuTime);
 
-//    LOG(PROCESS, Sev::Debug, "Good event: time={}, pixel={} from {}",
-//        truncated_time_, pixelid_, neutron_event_.to_string());
+// LOG(PROCESS, Sev::Debug, "Good event: time={}, pixel={} from {}",
+//    truncated_time_, pixelid_, neutron_event_.to_string());
+
+    uint64_t TOF = neutron_event_.time - CurrentPulseTime;
 
     stats_.TxBytes += event_serializer.addEvent(
-        static_cast<uint32_t>(truncated_time_), pixelid_);
+        static_cast<uint32_t>(TOF), pixelid_);
     stats_.EventsGood++;
     stats_.EventsGoodHits += event.total_hit_count();
   }
@@ -414,32 +397,32 @@ void GdGemBase::processingThread() {
     // \todo this only exits this thread, but EFU continues running
   }
 
-  Producer event_producer(EFUSettings.KafkaBroker, "NMX_detector");
-  Producer monitor_producer(EFUSettings.KafkaBroker, "NMX_monitor");
-  Producer hits_producer(EFUSettings.KafkaBroker, "NMX_hits");
+  Producer EventProducer(EFUSettings.KafkaBroker, "NMX_detector");
+  Producer MonitorProducer(EFUSettings.KafkaBroker, "NMX_monitor");
+  Producer HitsProducer(EFUSettings.KafkaBroker, "NMX_hits");
 
-  auto ProduceEvents = [&event_producer](auto DataBuffer, auto Timestamp) {
-    event_producer.produce(DataBuffer, Timestamp);
+  auto ProduceEvents = [&EventProducer](auto DataBuffer, auto Timestamp) {
+    EventProducer.produce(DataBuffer, Timestamp);
   };
 
-  auto ProduceMonitor = [&monitor_producer](auto DataBuffer, auto Timestamp) {
-    monitor_producer.produce(DataBuffer, Timestamp);
+  auto ProduceMonitor = [&MonitorProducer](auto DataBuffer, auto Timestamp) {
+    MonitorProducer.produce(DataBuffer, Timestamp);
   };
 
-  auto ProduceHits = [&hits_producer](auto DataBuffer, auto Timestamp) {
-    hits_producer.produce(DataBuffer, Timestamp);
+  auto ProduceHits = [&HitsProducer](auto DataBuffer, auto Timestamp) {
+    HitsProducer.produce(DataBuffer, Timestamp);
   };
 
   EV42Serializer ev42serializer(KafkaBufferSize, "nmx", ProduceEvents);
 
-  Gem::TrackSerializer track_serializer(256, "nmx_tracks");
-  track_serializer.set_callback(ProduceMonitor);
+  Gem::TrackSerializer TrackSerializer(256, "nmx_tracks");
+  TrackSerializer.set_callback(ProduceMonitor);
 
-  HistogramSerializer hist_serializer(hists_.needed_buffer_size(), "nmx");
-  hist_serializer.set_callback(ProduceMonitor);
+  HistogramSerializer HistSerializer(hists_.needed_buffer_size(), "nmx");
+  HistSerializer.set_callback(ProduceMonitor);
 
-  Gem::TrackSerializer raw_serializer(1500, "nmx_hits");
-  raw_serializer.set_callback(ProduceHits);
+  Gem::TrackSerializer RawSerializer(1500, "nmx_hits");
+  RawSerializer.set_callback(ProduceHits);
 
   TSCTimer ReportTimer;
   unsigned int DataIndex;
@@ -467,7 +450,7 @@ void GdGemBase::processingThread() {
               dummy_event.ClusterB.insert(e);
             }
             //LOG(PROCESS, Sev::Debug, "Sending raw data: {}", dummy_event.total_hit_count());
-            raw_serializer.add_track(dummy_event, 0, 0);
+            RawSerializer.add_track(dummy_event, 0, 0);
           }
 
           if (NMXOpts.hit_histograms) {
@@ -482,7 +465,7 @@ void GdGemBase::processingThread() {
           if (NMXOpts.perform_clustering) {
             // do not flush
             performClustering(false);
-            processEvents(ev42serializer, track_serializer);
+            processEvents(ev42serializer, TrackSerializer);
           }
           builder_->hit_buffer_x.clear();
           builder_->hit_buffer_y.clear();
@@ -497,7 +480,7 @@ void GdGemBase::processingThread() {
       if (not runThreads && NMXOpts.perform_clustering) {
         // flush everything first
         performClustering(true);
-        processEvents(ev42serializer, track_serializer);
+        processEvents(ev42serializer, TrackSerializer);
       }
 
       sample_next_track_ = NMXOpts.send_tracks;
@@ -506,16 +489,16 @@ void GdGemBase::processingThread() {
 
       /// Kafka stats update - common to all detectors
       /// don't increment as producer keeps absolute count
-      stats_.KafkaProduceFails = event_producer.stats.produce_fails;
-      stats_.KafkaEvErrors = event_producer.stats.ev_errors;
-      stats_.KafkaEvOthers = event_producer.stats.ev_others;
-      stats_.KafkaDrErrors = event_producer.stats.dr_errors;
-      stats_.KafkaDrNoErrors = event_producer.stats.dr_noerrors;
+      stats_.KafkaProduceFails = EventProducer.stats.produce_fails;
+      stats_.KafkaEvErrors = EventProducer.stats.ev_errors;
+      stats_.KafkaEvOthers = EventProducer.stats.ev_others;
+      stats_.KafkaDrErrors = EventProducer.stats.dr_errors;
+      stats_.KafkaDrNoErrors = EventProducer.stats.dr_noerrors;
 
       if (!hists_.isEmpty()) {
         LOG(PROCESS, Sev::Debug, "Sending histogram for {} readouts and {} clusters ",
                hists_.hit_count(), hists_.cluster_count());
-        hist_serializer.produce(hists_);
+        HistSerializer.produce(hists_);
         hists_.clear();
       }
 
