@@ -18,6 +18,13 @@
 // undef TRC_LEVEL
 // define TRC_LEVEL TRC_L_DEB
 
+template <typename T> inline constexpr T EfuMax(T a, T b) {
+  return a > b ? a : b;
+}
+template <typename T> inline constexpr T EfuMin(T a, T b) {
+  return a < b ? a : b;
+}
+
 #define FIXED_SIZE_POOL_DISABLE_ALL_CHECKS 0
 
 /// \class FixedSizePoolParams
@@ -61,6 +68,16 @@ template <typename FixedSizePoolParamsT> struct FixedSizePool {
 #endif
   };
 
+  /// \note Doing stats wastes from performance due to cache misses.
+  ///       Data needs to be int64 as required by common::Statstics.
+  struct MemStats {
+    int64_t TotalBytes;
+    int64_t LargestByteAlloc;
+    int64_t AllocCount;
+    int64_t MaxAllocCount;
+    int64_t AccumAllocCount;
+  };
+
   enum : unsigned char { MemDeletedPattern = 0xED, MemAllocatedPattern = 0xCD };
 
   static_assert((SlotBytes & (SlotBytes - 1)) == 0,
@@ -68,13 +85,15 @@ template <typename FixedSizePoolParamsT> struct FixedSizePool {
                 "nearest pwer-of-two");
 
   uint32_t NumSlotsUsed;
-  uint32_t FreeSlotStack[NumSlots];
+  MemStats Stats;
+  uint32_t FreeSlotStack[NumSlots]; // no order
+  uint32_t SlotAllocSize[NumSlots]; // indexed by Slot index
   alignas(StartAlignment) unsigned char PoolBytes[SlotBytes * NumSlots];
 
   FixedSizePool();
   ~FixedSizePool();
 
-  void *AllocateSlot();
+  void *AllocateSlot(size_t byteCount = SlotBytes);
   void DeallocateSlot(void *p);
   bool Contains(void *p);
 };
@@ -90,7 +109,14 @@ FixedSizePool<FixedSizePoolParamsT>::FixedSizePool() {
   NumSlotsUsed = 0;
   for (size_t i = 0; i < NumSlots; ++i) {
     FreeSlotStack[i] = i;
+    SlotAllocSize[i] = 0;
   }
+
+  Stats.TotalBytes = 0;
+  Stats.LargestByteAlloc = 0;
+  Stats.AllocCount = 0;
+  Stats.MaxAllocCount = 0;
+  Stats.AccumAllocCount = 0;
 
   if (Validate) {
     memset(PoolBytes, MemDeletedPattern, sizeof(PoolBytes));
@@ -107,6 +133,9 @@ FixedSizePool<FixedSizePoolParamsT>::~FixedSizePool() {
     {
       std::bitset<NumSlots> &foundSlots = *new std::bitset<NumSlots>();
       for (size_t i = 0; i < NumSlots; ++i) {
+        PoolAssertMsg(UseAsserts, SlotAllocSize[i] == 0,
+                      "Slot not properly deallocated");
+
         uint32_t curSlot = FreeSlotStack[i];
         PoolAssertMsg(UseAsserts, !foundSlots[curSlot],
                       "Free slots must be unique. Could mean double delete");
@@ -123,18 +152,30 @@ FixedSizePool<FixedSizePoolParamsT>::~FixedSizePool() {
 }
 
 template <typename FixedSizePoolParamsT>
-void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot() {
+void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot(size_t byteCount) {
   if (NumSlotsUsed == NumSlots) {
     return nullptr;
   }
 
-  size_t index = FreeSlotStack[NumSlotsUsed];
-  PoolAssertMsg(UseAsserts, index < NumSlots, "Expect capacity");
+  size_t slotIndex = FreeSlotStack[NumSlotsUsed];
+  PoolAssertMsg(UseAsserts, slotIndex < NumSlots, "Expect capacity");
+
+  PoolAssertMsg(UseAsserts, SlotAllocSize[slotIndex] == 0,
+                "Expect slot to be empty");
+  PoolAssertMsg(UseAsserts, byteCount <= 0xFFFFFFFFull,
+                "Not expecting >32 bit alloc");
 
   NumSlotsUsed++;
-  unsigned char *p = PoolBytes + (index * SlotBytes);
+  unsigned char *p = PoolBytes + (slotIndex * SlotBytes);
   PoolAssertMsg(UseAsserts, p + SlotBytes <= PoolBytes + sizeof(PoolBytes),
                 "Don't go past end of capacity");
+
+  Stats.TotalBytes += (int64_t)byteCount;
+  Stats.LargestByteAlloc = EfuMax(Stats.LargestByteAlloc, (int64_t)byteCount);
+  Stats.AllocCount++;
+  Stats.MaxAllocCount = EfuMax(Stats.MaxAllocCount, Stats.AllocCount);
+  Stats.AccumAllocCount++;
+  SlotAllocSize[slotIndex] = (uint32_t)byteCount;
 
   if (Validate) {
     for (size_t i = 0; i < SlotBytes; ++i) {
@@ -149,13 +190,21 @@ void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot() {
 
 template <typename FixedSizePoolParamsT>
 void FixedSizePool<FixedSizePoolParamsT>::DeallocateSlot(void *p) {
-  size_t index = ((unsigned char *)p - PoolBytes) / SlotBytes;
-  PoolAssertMsg(UseAsserts, index < NumSlots, "Dealloc pointer is not from pool");
+  size_t slotIndex = ((unsigned char *)p - PoolBytes) / SlotBytes;
+  PoolAssertMsg(UseAsserts, slotIndex < NumSlots,
+                "Dealloc pointer is not from pool");
 
   PoolAssertMsg(UseAsserts, NumSlotsUsed > 0, "Pool is already empty");
   --NumSlotsUsed;
 
-  FreeSlotStack[NumSlotsUsed] = index;
+  PoolAssertMsg(UseAsserts, SlotAllocSize[slotIndex] != 0,
+                "Excepting dealloc slot to be in use.");
+
+  Stats.TotalBytes -= (int64_t)SlotAllocSize[slotIndex];
+  Stats.AllocCount--;
+  SlotAllocSize[slotIndex] = 0;
+
+  FreeSlotStack[NumSlotsUsed] = slotIndex;
 
   if (Validate) {
     memset(p, MemDeletedPattern, SlotBytes);

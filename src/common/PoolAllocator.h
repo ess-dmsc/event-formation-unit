@@ -64,15 +64,15 @@ template <typename PoolAllocatorConfigT> struct PoolAllocator {
 template <typename PoolAllocatorConfigT>
 typename PoolAllocatorConfigT::T *
 PoolAllocator<PoolAllocatorConfigT>::allocate(std::size_t n) {
+  size_t byteCount = sizeof(T) * n;
   T *bytes = nullptr;
-  if (sizeof(T) * n <= Pool.SlotBytes) {
-    bytes = (T *)Pool.AllocateSlot();
+  if (byteCount <= Pool.SlotBytes) {
+    bytes = (T *)Pool.AllocateSlot(byteCount);
   }
   if (bytes == nullptr) {
-    bytes = (T *)std::malloc(sizeof(T) * n);
+    bytes = (T *)std::malloc(byteCount);
     if (0) {
-      XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", n,
-             sizeof(T) * n);
+      XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", n, byteCount);
     }
   }
   return bytes;

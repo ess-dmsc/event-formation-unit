@@ -27,7 +27,7 @@ template <class T> struct GreedyClusterAllocator {
   }
 
   T *allocate(std::size_t n) {
-    RelAssertMsg (ENABLE_GREEDY_CLUSTER_ALLOCATOR, "Remember to enable");
+    RelAssertMsg(ENABLE_GREEDY_CLUSTER_ALLOCATOR, "Remember to enable");
     char *p = GreedyClusterStorage::MemBegin;
     GreedyClusterStorage::MemBegin += n * sizeof(T);
     if (GreedyClusterStorage::MemBegin < GreedyClusterStorage::MemEnd)

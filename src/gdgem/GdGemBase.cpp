@@ -99,7 +99,6 @@ GdGemBase::GdGemBase(BaseSettings const &Settings, struct NMXSettings &LocalSett
   Stats.create("readouts.markers", stats_.ParserMarkers);
   Stats.create("readouts.data", stats_.ParserData);
 
-
   // Builder
   Stats.create("hits.good", stats_.HitsGood);
   Stats.create("hits.outside_roi", stats_.HitsOutsideRegion);
@@ -123,12 +122,26 @@ GdGemBase::GdGemBase(BaseSettings const &Settings, struct NMXSettings &LocalSett
   Stats.create("events.good_hits", stats_.EventsGoodHits);
 
   Stats.create("transmit.bytes", stats_.TxBytes);
+  
   /// \todo below stats are common to all detectors and could/should be moved
   Stats.create("kafka.produce_fails", stats_.KafkaProduceFails);
   Stats.create("kafka.ev_errors", stats_.KafkaEvErrors);
   Stats.create("kafka.ev_others", stats_.KafkaEvOthers);
   Stats.create("kafka.dr_errors", stats_.KafkaDrErrors);
   Stats.create("kafka.dr_others", stats_.KafkaDrNoErrors);
+  
+  Stats.create("memory.hitvec_storage.total_bytes"       , HitVectorStorage::Pool->Stats.TotalBytes);
+  Stats.create("memory.hitvec_storage.largest_byte_alloc", HitVectorStorage::Pool->Stats.LargestByteAlloc);
+  Stats.create("memory.hitvec_storage.alloc_count"       , HitVectorStorage::Pool->Stats.AllocCount);
+  Stats.create("memory.hitvec_storage.max_alloc_count"   , HitVectorStorage::Pool->Stats.MaxAllocCount);
+  Stats.create("memory.hitvec_storage.accum_alloc_count" , HitVectorStorage::Pool->Stats.AccumAllocCount);
+
+  Stats.create("memory.cluster_storage.total_bytes"       , ClusterPoolStorage::Pool->Stats.TotalBytes);
+  Stats.create("memory.cluster_storage.largest_byte_alloc", ClusterPoolStorage::Pool->Stats.LargestByteAlloc);
+  Stats.create("memory.cluster_storage.alloc_count"       , ClusterPoolStorage::Pool->Stats.AllocCount);
+  Stats.create("memory.cluster_storage.max_alloc_count"   , ClusterPoolStorage::Pool->Stats.MaxAllocCount);
+  Stats.create("memory.cluster_storage.accum_alloc_count" , ClusterPoolStorage::Pool->Stats.AccumAllocCount);
+
   // clang-format on
 
   if (!NMXSettings.FilePrefix.empty())
