@@ -66,10 +66,10 @@ typename PoolAllocatorConfigT::T *
 PoolAllocator<PoolAllocatorConfigT>::allocate(std::size_t n) {
   size_t byteCount = sizeof(T) * n;
   T *bytes = nullptr;
-  if (byteCount <= Pool.SlotBytes) {
+  if (__builtin_expect(byteCount <= Pool.SlotBytes, 1)) {
     bytes = (T *)Pool.AllocateSlot(byteCount);
   }
-  if (bytes == nullptr) {
+  if (__builtin_expect(bytes == nullptr, 0)) {
     bytes = (T *)std::malloc(byteCount);
     if (0) {
       XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", n, byteCount);
@@ -81,7 +81,7 @@ PoolAllocator<PoolAllocatorConfigT>::allocate(std::size_t n) {
 template <typename PoolAllocatorConfigT>
 void PoolAllocator<PoolAllocatorConfigT>::deallocate(T *p,
                                                      std::size_t) noexcept {
-  if (Pool.Contains(p)) {
+  if (__builtin_expect(Pool.Contains(p), 1)) {
     Pool.DeallocateSlot(p);
   } else {
     std::free(p);

@@ -153,7 +153,7 @@ FixedSizePool<FixedSizePoolParamsT>::~FixedSizePool() {
 
 template <typename FixedSizePoolParamsT>
 void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot(size_t byteCount) {
-  if (NumSlotsUsed == NumSlots) {
+  if (__builtin_expect(NumSlotsUsed == NumSlots, 0)) {
     return nullptr;
   }
 
