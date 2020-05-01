@@ -87,6 +87,19 @@ CAENBase::CAENBase(BaseSettings const &settings, struct CAENSettings &LocalMBCAE
   Stats.create("kafka.ev_others", Counters.kafka_ev_others);
   Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
   Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
+  
+  Stats.create("memory.hitvec_storage.total_bytes"       , HitVectorStorage::Pool->Stats.TotalBytes);
+  Stats.create("memory.hitvec_storage.largest_byte_alloc", HitVectorStorage::Pool->Stats.LargestByteAlloc);
+  Stats.create("memory.hitvec_storage.alloc_count"       , HitVectorStorage::Pool->Stats.AllocCount);
+  Stats.create("memory.hitvec_storage.max_alloc_count"   , HitVectorStorage::Pool->Stats.MaxAllocCount);
+  Stats.create("memory.hitvec_storage.accum_alloc_count" , HitVectorStorage::Pool->Stats.AccumAllocCount);
+
+  Stats.create("memory.cluster_storage.total_bytes"       , ClusterPoolStorage::Pool->Stats.TotalBytes);
+  Stats.create("memory.cluster_storage.largest_byte_alloc", ClusterPoolStorage::Pool->Stats.LargestByteAlloc);
+  Stats.create("memory.cluster_storage.alloc_count"       , ClusterPoolStorage::Pool->Stats.AllocCount);
+  Stats.create("memory.cluster_storage.max_alloc_count"   , ClusterPoolStorage::Pool->Stats.MaxAllocCount);
+  Stats.create("memory.cluster_storage.accum_alloc_count" , ClusterPoolStorage::Pool->Stats.AccumAllocCount);
+
   // clang-format on
 
   std::function<void()> inputFunc = [this]() { CAENBase::input_thread(); };

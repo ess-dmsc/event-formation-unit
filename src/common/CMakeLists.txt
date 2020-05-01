@@ -10,7 +10,7 @@ set(efu_common_SRC
   DetectorModuleRegister.cpp
   EFUArgs.cpp
   EV42Serializer.cpp
-    Statistics.cpp
+  Statistics.cpp
   Producer.cpp
   Socket.cpp
   StatPublisher.cpp
@@ -20,6 +20,7 @@ set(efu_common_SRC
   )
 
 set(efu_common_INC
+  Assert.h
   BitMath.h
   Buffer.h
   DataSave.h
@@ -28,11 +29,13 @@ set(efu_common_INC
   DumpFile.h
   EFUArgs.h
   EV42Serializer.h
+  FixedSizePool.h
   JsonFile.h
   gccintel.h
   Log.h
-    Statistics.h
-  Producer.h
+  Statistics.h
+  PoolAllocator.h
+  Producer.h  
   RingBuffer.h
   Socket.h
   StatPublisher.h

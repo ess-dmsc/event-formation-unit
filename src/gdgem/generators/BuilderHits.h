@@ -21,9 +21,8 @@ public:
   /// \todo Martin document
   void process_buffer(char *buf, size_t size) override;
 
-private:
   // preallocated
   std::vector<Hit> converted_data;
 };
 
-}
+} // namespace Gem

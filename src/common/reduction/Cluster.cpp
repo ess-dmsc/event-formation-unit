@@ -9,12 +9,29 @@
 #include <common/reduction/Cluster.h>
 #include <fmt/format.h>
 #include <cmath>
+#include <algorithm>
 
 #define ASCII_grayscale94 " .`:,;'_^\"></-!~=)(|j?}{][ti+l7v1%yrfcJ32uIC$zwo96sngaT5qpkYVOL40&mG8*xhedbZUSAQPFDXWK#RNEHBM@"
 #define ASCII_grayscale70 " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$"
 #define ASCII_grayscale10 " .:-=+*#%@"
 
+// Debug code to try to split the basic blocks, to see what the optimizer is
+// doing on which sections of code. Code taken from Google Benchmark
+// ::benchmark::ClobberMemory().
+// Idea:
+// https://cellperformance.beyond3d.com/articles/2006/04/a-practical-gcc-trick-to-use-during-optimization.html
+#if 0
+__attribute__((noinline)) void DebugSplitOptimizer() {
+  asm volatile("" : : : "memory");
+}
+#else
+#define DebugSplitOptimizer() ((void)0)
+#endif
+
 void Cluster::insert(const Hit &e) {
+
+  DebugSplitOptimizer();
+
   if (hits.empty()) {
     plane_ = e.plane;
     time_start_ = time_end_ = e.time;
@@ -23,25 +40,50 @@ void Cluster::insert(const Hit &e) {
     utpc_idx_max_ = 0;
   }
 
+  DebugSplitOptimizer();
+
   // If plane identities don't match, invalidate
   if (plane_ != e.plane) {
     plane_ = Hit::InvalidPlane;
     // For now it's decided to not discard everything in this case
     // clear();
   }
-  
-  uint64_t weight64 = static_cast<uint64_t>(e.weight);
-  uint64_t coordinate64 = static_cast<uint64_t>(e.coordinate);
+
+  DebugSplitOptimizer();
 
   hits.push_back(e);
-  weight_sum_ += weight64;
-  weight2_sum_ += weight64 * weight64;
-  coord_mass_ += weight64 * coordinate64;
-  coord_mass2_ += weight64 * weight64 * coordinate64;
-  time_mass_ += weight64 * e.time;
-  time_mass2_ += weight64 * weight64 * e.time;
+
+  DebugSplitOptimizer();
+
+  // TODO can we avoid converting to doubles and stay in uint64?
+  double weight64 = static_cast<double>(e.weight);
+  double coordinate64 = static_cast<double>(e.coordinate);
+  double time64 = static_cast<double>(e.time);
+
+  DebugSplitOptimizer();
+
+  double We = weight64;
+  double We2 = weight64 * weight64;
+  double WeCo = weight64 * coordinate64;
+  double We2Co = weight64 * weight64 * coordinate64;
+  double WeTi = weight64 * time64;
+  double We2Ti = weight64 * weight64 * time64;
+
+  DebugSplitOptimizer();
+
+  weight_sum_ += We;
+  coord_mass_ += WeCo;
+  time_mass_ += WeTi;
+  weight2_sum_ += We2;
+  coord_mass2_ += We2Co;
+  time_mass2_ += We2Ti;
+
+  DebugSplitOptimizer();
+
   time_start_ = std::min(time_start_, e.time);
   
+  DebugSplitOptimizer();
+
   //more than one hit with identical largest time in cluster
   if (e.time == time_end_) {
     utpc_idx_max_ = static_cast<int>(hits.size()-1);
@@ -51,6 +93,8 @@ void Cluster::insert(const Hit &e) {
     utpc_idx_max_ = utpc_idx_min_;
     time_end_ = e.time;
   }
+
+  DebugSplitOptimizer();
    
   coord_start_ = std::min(coord_start_, e.coordinate);
   coord_end_ = std::max(coord_end_, e.coordinate);
@@ -73,7 +117,7 @@ void Cluster::merge(Cluster &other) {
     // clear();
   }
 
-  hits.reserve(hits.size() + other.hits.size()); // preallocate memory
+  hits.reserve(std::max (hits.size() + other.hits.size(), size_t(8))); // preallocate memory
   hits.insert(hits.end(), other.hits.begin(), other.hits.end());
 
   weight_sum_ += other.weight_sum_;

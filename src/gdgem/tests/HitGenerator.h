@@ -3,7 +3,7 @@
 ///
 /// \file
 ///
-/// \brief Generator for artificial Hits
+/// \brief Generator for artificial Events and Hits
 ///
 //===----------------------------------------------------------------------===//
 
@@ -15,6 +15,8 @@
 
 namespace Gem {
 
+  /// \todo replace by Martins Event primitive even if it contains stuff we
+  /// don't care about.
   class NeutronEvent {
   public:
     int XPos{0}, YPos{0};

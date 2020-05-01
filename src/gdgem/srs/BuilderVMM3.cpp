@@ -48,6 +48,10 @@ void BuilderVMM3::process_buffer(char *buf, size_t size) {
   }
   XTRACE(PROCESS, DEB, "Readouts after parse: %d", hits);
 
+  // reserve some space up front to avoid allocator noise
+  hit_buffer_x.reserve (1000);
+  hit_buffer_y.reserve (1000);
+
   //field fec id starts at 1
   readout.fec = parser_.pd.fecId;
   for (int i = 0; i < hits; i++) {

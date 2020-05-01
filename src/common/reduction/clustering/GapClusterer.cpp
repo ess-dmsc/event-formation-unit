@@ -1,4 +1,4 @@
-/** Copyright (C) 2018-2019 European Spallation Source, ERIC. See LICENSE file **/
+// Copyright (C) 2018-2019 European Spallation Source, ERIC. See LICENSE file
 //===----------------------------------------------------------------------===//
 ///
 /// \file GapClusterer.cpp
@@ -6,47 +6,40 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include <common/reduction/clustering/GapClusterer.h>
 #include <common/Trace.h>
+#include <common/reduction/clustering/GapClusterer.h>
 
 // #undef TRC_LEVEL
 // #define TRC_LEVEL TRC_L_DEB
 
 GapClusterer::GapClusterer(uint64_t max_time_gap, uint16_t max_coord_gap)
-    : AbstractClusterer(), max_time_gap_(max_time_gap), max_coord_gap_(max_coord_gap) {}
+    : AbstractClusterer(), max_time_gap_(max_time_gap),
+      max_coord_gap_(max_coord_gap) {}
 
 void GapClusterer::insert(const Hit &hit) {
   /// Process time-cluster if time gap to next hit is large enough
   if (!current_time_cluster_.empty() &&
       (hit.time - current_time_cluster_.back().time) > max_time_gap_) {
-    XTRACE(CLUSTER,
-           DEB,
-           "timegap > %lu, hit: %lu, current: %lu",
-           max_time_gap_,
-           hit.time,
-           current_time_cluster_.back().time);
+    XTRACE(CLUSTER, DEB, "timegap > %lu, hit: %lu, current: %lu", max_time_gap_,
+           hit.time, current_time_cluster_.back().time);
     flush();
   }
 
   /// Insert hit in either case
-  XTRACE(CLUSTER,
-         DEB,
-         "insert plane %d, time %u, coord %u, weight %u",
-         hit.plane,
-         hit.time,
-         hit.coordinate,
-         hit.weight);
+  XTRACE(CLUSTER, DEB, "insert hit %s", hit.to_string().c_str());
   current_time_cluster_.emplace_back(hit);
 }
 
 void GapClusterer::cluster(const HitVector &hits) {
-  ///It is assumed that hits are sorted in time
+  /// It is assumed that hits are sorted in time
   for (const auto &hit : hits) {
+    XTRACE(CLUSTER, DEB, "insert hit %s", hit.to_string().c_str());
     insert(hit);
   }
 }
 
 void GapClusterer::flush() {
+  XTRACE(CLUSTER, DEB, "flushing");
   if (current_time_cluster_.empty()) {
     return;
   }
@@ -59,22 +52,26 @@ void GapClusterer::cluster_by_coordinate() {
   sort_by_increasing_coordinate(current_time_cluster_);
 
   Cluster cluster;
-  XTRACE(CLUSTER, DEB, "first coord %u, last coord %u",
+  XTRACE(CLUSTER, DEB, "cur time cluster: first coord %u, last coord %u",
          current_time_cluster_.front().coordinate,
          current_time_cluster_.back().coordinate);
 
   for (auto &hit : current_time_cluster_) {
     /// Stash cluster if coordinate gap to next hit is too large
-    XTRACE(CLUSTER, DEB, "hit coord %u, cluster coord end %u", hit.coordinate, cluster.coord_end());
+    XTRACE(CLUSTER, DEB, "hit coord %u, cluster coord end %u", hit.coordinate,
+           cluster.coord_end());
 
     if (!cluster.empty() &&
         (hit.coordinate - cluster.coord_end()) > max_coord_gap_) {
-      // XTRACE(CLUSTER, DEB, "Stashing cluster");
+      XTRACE(CLUSTER, DEB,
+             "Stashing cluster - max_coord_gap exceeded (%i > %i)",
+             hit.coordinate - cluster.coord_end(), max_coord_gap_);
       stash_cluster(cluster);
       cluster.clear();
     }
 
     /// insert in either case
+    XTRACE(CLUSTER, DEB, "insert hit=%s", hit.to_string().c_str());
     cluster.insert(hit);
   }
 
@@ -91,7 +88,8 @@ std::string GapClusterer::config(const std::string &prepend) const {
   return ss.str();
 }
 
-std::string GapClusterer::status(const std::string &prepend, bool verbose) const {
+std::string GapClusterer::status(const std::string &prepend,
+                                 bool verbose) const {
   std::stringstream ss;
   ss << AbstractClusterer::status(prepend, verbose);
   if (!current_time_cluster_.empty())
@@ -99,4 +97,3 @@ std::string GapClusterer::status(const std::string &prepend, bool verbose) const
        << to_string(current_time_cluster_, prepend + "  ") + "\n";
   return ss.str();
 }
-

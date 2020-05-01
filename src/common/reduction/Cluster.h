@@ -15,18 +15,18 @@
 ///        Hits can be added, but not removed. Coordinates and timestamps
 ///        are treated as having an uncertainty of 1 when evaluating dimensions,
 ///        thus including the endpoints.
+///
+/// \note  This class does not have defaulted virtual destructor as it can
+///        inhibit automatic implicit move-semantics for the HitVector.
 
 class Cluster {
 public:
-  // \todo should be protected?
+  /// \todo should be protected?
   /// \note This variable is left public, because event reduction/analysis strategies
   ///       must be able to sort hits in their preferred way without copying the contents
   HitVector hits;
 
-public:
-  Cluster() = default;
-  virtual ~Cluster() = default;
-
+public:  
   /// \brief adds hit to cluster, accumulates mass and recalculates bounds
   ///        no validation is enforced, duplicates possible
   ///        no particular time or spatial ordering is expected
@@ -55,6 +55,8 @@ public:
   /// \returns returns plane of all hits in cluster, can be Hit::InvalidPlane if
   ///         not all hits belong to the same plane
   uint8_t plane() const;
+
+  uint8_t plane_header() const { return plane_; }
 
   /// \returns number of hits in cluster
   size_t hit_count() const;
@@ -129,11 +131,11 @@ private:
   /// \todo uint8 might not be enough, if detectors have more independent modules/segments
   uint8_t plane_{Hit::InvalidPlane};  ///< plane identity of cluster
 
-  uint16_t coord_start_;
-  uint16_t coord_end_;
+  uint16_t coord_start_ {Hit::InvalidCoord};
+  uint16_t coord_end_ {0};
 
-  uint64_t time_start_;
-  uint64_t time_end_;
+  uint64_t time_start_ {0xFFFFFFFFFFFFFFFFULL};
+  uint64_t time_end_ {0};
 
   double weight_sum_{0.0}; ///< sum of weight
   double coord_mass_{0.0}; ///< sum of coord*weight

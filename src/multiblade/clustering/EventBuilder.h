@@ -25,7 +25,7 @@ public:
 
   void clear();
 
-  std::vector<Hit> p0, p1;
+  HitVector p0, p1;
 
   // \todo parametrize
   GapClusterer c0{timegap, coordgap}, c1{timegap, coordgap};

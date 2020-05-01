@@ -1,11 +1,9 @@
-/** Copyright (C) 2019 European Spallation Source ERIC */
-
-
-#include <gdgem/tests/HitGenerator.h>
-#include <fmt/format.h>
+// Copyright (C) 2019 European Spallation Source ERIC
 #include <algorithm>
 #include <cmath>
 #include <cstdio>
+#include <fmt/format.h>
+#include <gdgem/tests/HitGenerator.h>
 #include <vector>
 #include <cassert>
 
@@ -106,7 +104,7 @@ std::vector<Hit> & HitGenerator::makeHitsForSinglePlane(int Plane, int MaxHits,
     std::shuffle(TmpHits.begin(), TmpHits.end(), RandGen);
   }
 
-  for (auto & Hit : TmpHits) {
+  for (auto &Hit : TmpHits) {
     Hits.push_back(Hit);
   }
   return Hits;

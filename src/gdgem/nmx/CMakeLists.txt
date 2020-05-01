@@ -10,6 +10,28 @@ set(NMXReadoutTest_INC
   )
 create_test_executable(NMXReadoutTest SKIP_MEMGRIND)
 
+set(NMXCombinedProcesingTest_SRC
+  NMXCombinedProcesingTest.cpp
+  ../generators/BuilderHits.cpp
+  ../tests/HitGenerator.cpp
+  )
+set(NMXCombinedProcesingTest_INC
+  ../generators/BuilderHits.h
+  ../tests/HitGenerator.h
+)
+create_test_executable(NMXCombinedProcesingTest)
+
+set(NMXBenchmarkTest_SRC
+  NMXBenchmarkTest.cpp
+  ../generators/BuilderHits.cpp
+  ../tests/HitGenerator.cpp
+)
+set(NMXBenchmarkTest_INC
+  ../generators/BuilderHits.h
+  ../tests/HitGenerator.h
+)
+create_benchmark_executable(NMXBenchmarkTest)
+
 set(TrackSerializerTest_SRC
   TrackSerializerTest.cpp
   TrackSerializer.cpp

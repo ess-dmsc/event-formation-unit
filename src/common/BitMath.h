@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <cstdint>
+
 class BitMath {
 public:
   ///
@@ -24,7 +26,7 @@ public:
   inline static uint16_t reversebits16(uint16_t x) {
     uint32_t temp = reversebits32(x);
     return (temp >> 16);
-  };
+  }
 
   inline static uint32_t gray2bin32(uint32_t num) {
     num = num ^ (num >> 16);
@@ -33,6 +35,17 @@ public:
     num = num ^ (num >> 2);
     num = num ^ (num >> 1);
     return num;
-  };
+  }
 
+  inline static constexpr uint64_t NextPowerOfTwo(uint64_t n) {
+    n--;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    n |= n >> 32;
+    n++;
+    return n;
+  }
 };

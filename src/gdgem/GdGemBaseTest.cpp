@@ -53,7 +53,7 @@ TEST_F(GdGemBaseTest, GetCalibrationCmd) {
   EXPECT_EQ(res, 0);
 }
 
-/// \todo This needs a little more work, better test data
+/// \todo This needs a little more work, better test data.
 TEST_F(GdGemBaseTest, DataReceive) {
   Settings.UpdateIntervalSec = 0;
   GdGemBaseStandIn Readout(Settings, LocalSettings);
