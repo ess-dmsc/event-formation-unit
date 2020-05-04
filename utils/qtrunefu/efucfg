@@ -1,0 +1,16 @@
+[directories]
+basedir: /Users/mortenchristensen
+efudir: /essproj/event-formation-unit/build
+datadir: /ownCloud/DM/data/EFU_reference
+
+[servers]
+efu: 127.0.0.1
+grafana: 172.17.12.31
+kafka: 172.17.5.38:9092
+
+[efuopts]
+hwcheck: False
+
+[datagen]
+throttle:50
+bytes: 1472
