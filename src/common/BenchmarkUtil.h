@@ -1,4 +1,4 @@
-// Copyright (C) 2018-2020 European Spallation Source, ERIC. See LICENSE file
+// Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
 #pragma once
 
 /// \brief This utility supports various profiler/timer instrumentation in

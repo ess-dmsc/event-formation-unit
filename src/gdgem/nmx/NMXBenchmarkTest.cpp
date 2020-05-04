@@ -1,4 +1,4 @@
-/** Copyright (C) 2017 European Spallation Source ERIC */
+// Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
 
 #include <benchmark/benchmark.h>
 #include <unistd.h>
