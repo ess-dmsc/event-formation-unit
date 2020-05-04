@@ -18,3 +18,7 @@ Still under development
 ## Custom configuration
 To customise the basedir and the location of efu binaries and configuration files, you
 can edit the efucfg file, rename it to .efucfg and place it in your homedir.
+
+## Prerequisites
+We need Qt5 support which can be gotten by
+    pip3 install PyQt5
