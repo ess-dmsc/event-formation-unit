@@ -5,9 +5,8 @@ from PyQt5 import QtCore
 from os.path import expanduser
 import sys, os, re, subprocess, signal, configparser
 
-#
-# #
-#
+
+# Reads configuration from file or use reasonable default values
 class Configuration:
     def __init__(self):
         self.options = {}
@@ -27,9 +26,8 @@ class Configuration:
         else:
             self.options[opt] = default
 
-#
-# #
-#
+
+# Maintain a set of directories for searching
 class Directories:
     def __init__(self, base, efu, data):
         self.set_dirs(base, efu, data)
@@ -40,31 +38,33 @@ class Directories:
         self.datadir = data
         self.searchdirs = [self.basedir + self.datadir, self.basedir + self.efudir]
 
-#
-# #
-#
-class Searcher:
-    def __init__(self, dirs, basedir):
-        self.dirs = dirs
-        self.basedir = basedir
 
-    def find_files(self, dirs, extension, exclude):
+# search for relevant files specified by regexp
+class Searcher:
+    def __init__(self, dirs):
+        self.dirs = dirs
+
+    # omit files matching 'exclude', then add files matching 'match'
+    # since our filenaming is somewhat inconsistent there might be
+    # false positives.
+    def find_files(self, dirs, match, exclude):
         results = []
         for dir in dirs:
             for r, s, f in os.walk(dir):
                 if re.search(exclude, r):
                     continue
                 for file in f:
-                    if re.search(extension, file):
+                    if re.search(match, file):
                         filepath = os.path.join(r, file)
-                        results += [os.path.relpath(filepath, self.basedir)]
+                        results += [os.path.relpath(filepath, self.dirs.basedir)]
         return results
 
+    # Here we search for efu binary, module plugins (.so), config and calib files (.json)
     def get_values(self):
         return [ self.find_files(self.dirs.searchdirs, 'efu$', '-X--xXX'),
                  self.find_files(self.dirs.searchdirs, '\.so', '-X--xXX'),
-                 self.find_files(self.dirs.searchdirs, '\.json', 'build'),
-                 self.find_files(self.dirs.searchdirs, '.*calib.*\.json', 'build') ]
+                 [''] + self.find_files(self.dirs.searchdirs, '\.json', 'build'),
+                 [''] + self.find_files(self.dirs.searchdirs, '.*calib.*\.json', 'build') ]
 #
 # #
 #
@@ -86,7 +86,7 @@ class Dialog(QDialog): #WMainWindow
         mainLayout.addWidget(buttonBox)
         self.setLayout(mainLayout)
 
-        self.setWindowTitle("Launch Event Formation Unit")
+        self.setWindowTitle("Event Formation Unit (EFU) Launcher")
 
     # Add a 'row' consisting of a label and a text box widget
     def add_row(self, layout, label, type):
@@ -160,12 +160,9 @@ class Dialog(QDialog): #WMainWindow
         self.detcb.clear()
         self.cfgcb.clear()
         self.calcb.clear()
-        basedir = self.basedirle.text()
-        self.dirs.set_dirs(basedir, self.efudirle.text(), self.datadirle.text())
-        search = Searcher(self.dirs, basedir)
+        self.dirs.set_dirs(self.basedirle.text(), self.efudirle.text(), self.datadirle.text())
+        search = Searcher(self.dirs)
         efu, detector, config, calib = search.get_values()
-        config = [''] + config
-        calib = [''] + calib
         self.populate(efu, detector, config, calib)
 
 #
@@ -175,14 +172,11 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
 
     cfg = Configuration()
-    basedir = cfg.options['basedir']
-    dirs = Directories(basedir, cfg.options['efudir'], cfg.options['datadir'])
-    searcher = Searcher(dirs, basedir)
+    dirs = Directories(cfg.options['basedir'], cfg.options['efudir'], cfg.options['datadir'])
+    searcher = Searcher(dirs)
     dialog = Dialog(cfg, dirs)
 
     efu, detector, config, calib = searcher.get_values()
-    config = [''] + config
-    calib = [''] + calib
     dialog.populate(efu, detector, config, calib)
 
     retval = dialog.exec_()
@@ -192,12 +186,12 @@ if __name__ == '__main__':
         if hwcheck == "False":
             cmdlopts += ['--nohwcheck']
         if grafana != "":
-            cmdlopts += ['-g', grafana]
+            cmdlopts += ['--graphite', grafana]
         if kafka != "":
-            cmdlopts += ['-b', kafka]
+            cmdlopts += ['--broker_addr', kafka]
         if config != "":
             cmdlopts += ['--file', os.path.join(basedir, config)]
         if calib != "":
             cmdlopts += ['--calibration', os.path.join(basedir, calib)]
-        subprocess.call([os.path.join(basedir, efu), '-d', os.path.join(basedir, det)] + cmdlopts)
+        subprocess.call([os.path.join(basedir, efu), '--det', os.path.join(basedir, det)] + cmdlopts)
     sys.exit()
