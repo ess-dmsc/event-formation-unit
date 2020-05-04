@@ -1,4 +1,5 @@
-// Copyright (C) 2016, 2017 European Spallation Source ERIC
+// Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
+
 #include <test/TestBase.h>
 
 #include <common/reduction/HitVector.h>
