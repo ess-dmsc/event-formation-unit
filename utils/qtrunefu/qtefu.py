@@ -190,8 +190,8 @@ if __name__ == '__main__':
         if kafka != "":
             cmdlopts += ['--broker_addr', kafka]
         if config != "":
-            cmdlopts += ['--file', os.path.join(basedir, config)]
+            cmdlopts += ['--file', os.path.join(dirs.basedir, config)]
         if calib != "":
-            cmdlopts += ['--calibration', os.path.join(basedir, calib)]
-        subprocess.call([os.path.join(basedir, efu), '--det', os.path.join(basedir, det)] + cmdlopts)
+            cmdlopts += ['--calibration', os.path.join(dirs.basedir, calib)]
+        subprocess.call([os.path.join(dirs.basedir, efu), '--det', os.path.join(dirs.basedir, det)] + cmdlopts)
     sys.exit()
