@@ -3,17 +3,17 @@
 This tool helps build a command line for launching efu.
 
 ## qtefu.py
-The user speficies three directories: basedir, efudir and datadir. The latter two must
+The user specifies three directories: basedir, efudir and datadir. The latter two must
 be relative to basedir.
 
-The prgram then finds the relevant binary files (efu executable and detector libraries),
+The program then finds the relevant binary files (efu executable and detector libraries),
 and configuration and calibration files.
 
-The user then selects the relevant files form the drop down menus and presses OK
+The user then selects the relevant files from the drop down menus and presses OK
 to launch the EFU.
 
 ## qtdatagen.py
-Still under development
+Still under development - do not use
 
 ## Custom configuration
 To customise the basedir and the location of efu binaries and configuration files, you
