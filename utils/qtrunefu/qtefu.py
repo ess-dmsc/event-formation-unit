@@ -181,8 +181,8 @@ if __name__ == '__main__':
 
     retval = dialog.exec_()
     if retval != 0:
-        cmdlopts=[]
         efu, det, config, calib, grafana, kafka, hwcheck = dialog.get_selection()
+        cmdlopts = [os.path.join(dirs.basedir, efu), '--det', os.path.join(dirs.basedir, det)]
         if hwcheck == "False":
             cmdlopts += ['--nohwcheck']
         if grafana != "":
@@ -193,5 +193,6 @@ if __name__ == '__main__':
             cmdlopts += ['--file', os.path.join(dirs.basedir, config)]
         if calib != "":
             cmdlopts += ['--calibration', os.path.join(dirs.basedir, calib)]
-        subprocess.call([os.path.join(dirs.basedir, efu), '--det', os.path.join(dirs.basedir, det)] + cmdlopts)
+        print(' '.join(cmdlopts))
+        subprocess.call(cmdlopts)
     sys.exit()
