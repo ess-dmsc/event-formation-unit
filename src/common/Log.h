@@ -8,6 +8,7 @@
 #include <libgen.h>
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wmissing-field-initializers"
+#pragma GCC diagnostic ignored "-Wpedantic"
 #include <graylog_logger/GraylogInterface.hpp>
 #include <graylog_logger/FileInterface.hpp>
 #include <graylog_logger/ConsoleInterface.hpp>
