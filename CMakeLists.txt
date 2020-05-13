@@ -6,6 +6,7 @@ project("event-formation-unit")
 #=============================================================================
 set(EXTRA_MODULES_DIR ${CMAKE_CURRENT_LIST_DIR}/cmake)
 list(APPEND CMAKE_MODULE_PATH ${EXTRA_MODULES_DIR}/modules)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_BINARY_DIR})
 
 #=============================================================================
 # Versioning
@@ -32,7 +33,7 @@ create_version_header(
 SET(CONAN_PROFILE "default" CACHE STRING "Name of conan profile to use, uses default by default")
 SET(CONAN "AUTO" CACHE STRING "conan options AUTO (conan must be in path), MANUAL (expects conanbuildinfo.cmake in build directory) or DISABLE")
 if(${CONAN} MATCHES "AUTO")
-  include(${CMAKE_MODULE_PATH}/conan.cmake)
+  include(${EXTRA_MODULES_DIR}/modules/conan.cmake)
   conan_cmake_run(CONANFILE conanfile.txt
       PROFILE ${CONAN_PROFILE}
       BASIC_SETUP NO_OUTPUT_DIRS KEEP_RPATHS NO_IMPORTS
