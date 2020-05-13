@@ -54,7 +54,7 @@ void BuilderReadouts::process_buffer(char *buf, size_t size) {
 
     if (!readout.over_threshold && (hit.weight < adc_threshold_)) {
       stats.adc_rejects++;
-      LOG(PROCESS, Sev::Debug, "Below ADC threshold  adc={}", hit.weight);
+      LOG(PROCESS, Sev::Debug, "Below ADC threshold  adc={}", int(hit.weight));
       continue;
     }
 

@@ -13,7 +13,7 @@ namespace Gem {
 //
 void HitGenerator::printHits() {
   for (auto & Hit : Hits) {
-    fmt::print("t {}, p {}, c {}, w {}\n", Hit.time, Hit.plane, Hit.coordinate, Hit.weight);
+    fmt::print("t {}, p {}, c {}, w {}\n", uint64_t(Hit.time), int(Hit.plane), int(Hit.coordinate), int(Hit.weight));
   }
 }
 

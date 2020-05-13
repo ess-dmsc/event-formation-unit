@@ -1,4 +1,4 @@
-find_package(ASIO REQUIRED)
+find_package(asio REQUIRED)
 find_package(Trompeloeil REQUIRED)
 
 set(AdcReadout_SRC

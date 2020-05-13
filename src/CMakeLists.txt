@@ -11,6 +11,8 @@ find_package(fmt REQUIRED)
 find_package(GraylogLogger REQUIRED)
 find_package(h5cpp REQUIRED)
 find_package(PCAP REQUIRED)
+find_package(asio REQUIRED)
+find_package(jsonformoderncpp REQUIRED)
 
 set(EFU_COMMON_LIBS
   ${CMAKE_DL_LIBS}
@@ -21,7 +23,7 @@ set(EFU_COMMON_LIBS
   ${Boost_LIBRARIES}
   GraylogLogger::graylog_logger_static
   fmt::fmt
-  h5cpp
+  h5cpp::h5cpp
   )
 
 set(EFU_COMMON_LIBS ${EFU_COMMON_LIBS} PARENT_SCOPE)
