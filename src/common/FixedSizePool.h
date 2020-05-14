@@ -91,11 +91,12 @@ template <typename FixedSizePoolParamsT> struct FixedSizePool {
   alignas(StartAlignment) unsigned char PoolBytes[SlotBytes * NumSlots];
 
   FixedSizePool();
-  ~FixedSizePool();
 
   void *AllocateSlot(size_t byteCount = SlotBytes);
   void DeallocateSlot(void *p);
   bool Contains(void *p);
+  /// \return null on no error, else returns error description
+  const char *ValidateEmptyStateAndReturnError();
 };
 
 template <typename FixedSizePoolParamsT>
@@ -119,34 +120,6 @@ FixedSizePool<FixedSizePoolParamsT>::FixedSizePool() {
 
   if (Validate) {
     memset(PoolBytes, MemDeletedPattern, sizeof(PoolBytes));
-  }
-}
-
-template <typename FixedSizePoolParamsT>
-FixedSizePool<FixedSizePoolParamsT>::~FixedSizePool() {
-  PoolAssertMsg(UseAsserts, NumSlotsUsed == 0,
-                "All slots in pool must be empty");
-
-  if (Validate) {
-    // test FreeSlotStack indices are unique
-    {
-      std::bitset<NumSlots> &foundSlots = *new std::bitset<NumSlots>();
-      for (size_t i = 0; i < NumSlots; ++i) {
-        PoolAssertMsg(UseAsserts, SlotAllocSize[i] == 0,
-                      "Slot not properly deallocated");
-
-        uint32_t curSlot = FreeSlotStack[i];
-        PoolAssertMsg(UseAsserts, !foundSlots[curSlot],
-                      "Free slots must be unique. Could mean double delete");
-        foundSlots[curSlot] = true;
-      }
-      delete &foundSlots;
-    }
-    // test for deletion reference pattern
-    for (size_t i = 0; i < sizeof(PoolBytes); ++i) {
-      PoolAssertMsg(UseAsserts, PoolBytes[i] == MemDeletedPattern,
-                    "Deleted memory must have reference pattern");
-    }
   }
 }
 
@@ -211,4 +184,36 @@ template <typename FixedSizePoolParamsT>
 bool FixedSizePool<FixedSizePoolParamsT>::Contains(void *p) {
   return (unsigned char *)p >= PoolBytes &&
          (unsigned char *)p < PoolBytes + sizeof(PoolBytes);
+}
+
+template <typename FixedSizePoolParamsT>
+const char *
+FixedSizePool<FixedSizePoolParamsT>::ValidateEmptyStateAndReturnError() {
+  if (NumSlotsUsed != 0) {
+    return "All slots in pool must be empty";
+  }
+  if (Validate) {
+    // test FreeSlotStack indices are unique
+    {
+      std::bitset<NumSlots> &foundSlots = *new std::bitset<NumSlots>();
+      for (size_t i = 0; i < NumSlots; ++i) {
+        if (SlotAllocSize[i] != 0) {
+          return "Slot not properly deallocated";
+        }
+        uint32_t curSlot = FreeSlotStack[i];
+        if (foundSlots[curSlot]) {
+          return "Free slots must be unique. Could mean double delete";
+        }
+        foundSlots[curSlot] = true;
+      }
+      delete &foundSlots;
+    }
+    // test for deletion reference pattern
+    for (size_t i = 0; i < sizeof(PoolBytes); ++i) {
+      if (PoolBytes[i] != MemDeletedPattern) {
+        return "Deleted memory must have reference pattern";
+      }
+    }
+  }
+  return nullptr;
 }
