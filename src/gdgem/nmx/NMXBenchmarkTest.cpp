@@ -374,7 +374,7 @@ void BenchmarkLoop_StdFun(benchmark::State &state,
   BenchmarkOuterStopTiming();
 }
 
-__attribute__((always_inline)) void
+inline __attribute__((always_inline)) void
 BenchmarkLoop_StdFunInline(benchmark::State &state,
                            std::function<void()> loopBody) {
   BenchmarkOuterStartTiming();
