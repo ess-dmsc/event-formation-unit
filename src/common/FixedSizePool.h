@@ -72,11 +72,11 @@ template <typename FixedSizePoolParamsT> struct FixedSizePool {
   /// \note Doing stats wastes from performance due to cache misses.
   ///       Data needs to be int64 as required by common::Statstics.
   struct MemStats {
-    int64_t TotalBytes;
-    int64_t LargestByteAlloc;
     int64_t AllocCount;
-    int64_t MaxAllocCount;
-    int64_t AccumAllocCount;
+    int64_t AllocBytes;
+    int64_t DeallocCount;
+    int64_t DeallocBytes;
+    int64_t LargestByteAlloc;
   };
 
   enum : unsigned char { MemDeletedPattern = 0xED, MemAllocatedPattern = 0xCD };
@@ -113,11 +113,11 @@ FixedSizePool<FixedSizePoolParamsT>::FixedSizePool() {
     SlotAllocSize[i] = 0;
   }
 
-  Stats.TotalBytes = 0;
-  Stats.LargestByteAlloc = 0;
   Stats.AllocCount = 0;
-  Stats.MaxAllocCount = 0;
-  Stats.AccumAllocCount = 0;
+  Stats.AllocBytes = 0;
+  Stats.DeallocCount = 0;
+  Stats.DeallocBytes = 0;
+  Stats.LargestByteAlloc = 0;
 
   if (Validate) {
     memset(PoolBytes, MemDeletedPattern, sizeof(PoolBytes));
@@ -171,11 +171,9 @@ void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot(size_t byteCount) {
   PoolAssertMsg(UseAsserts, p + SlotBytes <= PoolBytes + sizeof(PoolBytes),
                 "Don't go past end of capacity");
 
-  Stats.TotalBytes += (int64_t)byteCount;
-  Stats.LargestByteAlloc = EfuMax(Stats.LargestByteAlloc, (int64_t)byteCount);
   Stats.AllocCount++;
-  Stats.MaxAllocCount = EfuMax(Stats.MaxAllocCount, Stats.AllocCount);
-  Stats.AccumAllocCount++;
+  Stats.AllocBytes += (int64_t)byteCount;
+  Stats.LargestByteAlloc = EfuMax(Stats.LargestByteAlloc, (int64_t)byteCount);
   SlotAllocSize[slotIndex] = (uint32_t)byteCount;
 
   if (Validate) {
@@ -201,8 +199,8 @@ void FixedSizePool<FixedSizePoolParamsT>::DeallocateSlot(void *p) {
   PoolAssertMsg(UseAsserts, SlotAllocSize[slotIndex] != 0,
                 "Excepting dealloc slot to be in use.");
 
-  Stats.TotalBytes -= (int64_t)SlotAllocSize[slotIndex];
-  Stats.AllocCount--;
+  Stats.DeallocCount++;
+  Stats.DeallocBytes += (int64_t)SlotAllocSize[slotIndex];
   SlotAllocSize[slotIndex] = 0;
 
   FreeSlotStack[NumSlotsUsed] = slotIndex;
