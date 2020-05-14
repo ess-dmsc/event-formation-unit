@@ -213,35 +213,30 @@ TEST_F(FixedSizePoolTest, Stats) {
   ASSERT_EQ(pool.Stats.AllocBytes, 0);
   ASSERT_EQ(pool.Stats.DeallocCount, 0);
   ASSERT_EQ(pool.Stats.DeallocBytes, 0);
-  ASSERT_EQ(pool.Stats.LargestByteAlloc, 0);
 
   void *mem = pool.AllocateSlot(1);
   ASSERT_EQ(pool.Stats.AllocCount, 1);
   ASSERT_EQ(pool.Stats.AllocBytes, 1);
   ASSERT_EQ(pool.Stats.DeallocCount, 0);
   ASSERT_EQ(pool.Stats.DeallocBytes, 0);
-  ASSERT_EQ(pool.Stats.LargestByteAlloc, 1);
 
   void *mem2 = pool.AllocateSlot(2);
   ASSERT_EQ(pool.Stats.AllocCount, 2);
   ASSERT_EQ(pool.Stats.AllocBytes, 3);
   ASSERT_EQ(pool.Stats.DeallocCount, 0);
   ASSERT_EQ(pool.Stats.DeallocBytes, 0);
-  ASSERT_EQ(pool.Stats.LargestByteAlloc, 2);
 
   pool.DeallocateSlot(mem);
   ASSERT_EQ(pool.Stats.AllocCount, 2);
   ASSERT_EQ(pool.Stats.AllocBytes, 3);
   ASSERT_EQ(pool.Stats.DeallocCount, 1);
   ASSERT_EQ(pool.Stats.DeallocBytes, 1);
-  ASSERT_EQ(pool.Stats.LargestByteAlloc, 2);
 
   pool.DeallocateSlot(mem2);
   ASSERT_EQ(pool.Stats.AllocCount, 2);
   ASSERT_EQ(pool.Stats.AllocBytes, 3);
   ASSERT_EQ(pool.Stats.DeallocCount, 2);
   ASSERT_EQ(pool.Stats.DeallocBytes, 3);
-  ASSERT_EQ(pool.Stats.LargestByteAlloc, 2);
 }
 
 // inline bool bitset64_get (uint64_t* array, uint64_t arrayBitCount, uint64_t

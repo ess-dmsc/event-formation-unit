@@ -76,7 +76,6 @@ template <typename FixedSizePoolParamsT> struct FixedSizePool {
     int64_t AllocBytes;
     int64_t DeallocCount;
     int64_t DeallocBytes;
-    int64_t LargestByteAlloc;
   };
 
   enum : unsigned char { MemDeletedPattern = 0xED, MemAllocatedPattern = 0xCD };
@@ -117,7 +116,6 @@ FixedSizePool<FixedSizePoolParamsT>::FixedSizePool() {
   Stats.AllocBytes = 0;
   Stats.DeallocCount = 0;
   Stats.DeallocBytes = 0;
-  Stats.LargestByteAlloc = 0;
 
   if (Validate) {
     memset(PoolBytes, MemDeletedPattern, sizeof(PoolBytes));
@@ -173,7 +171,6 @@ void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot(size_t byteCount) {
 
   Stats.AllocCount++;
   Stats.AllocBytes += (int64_t)byteCount;
-  Stats.LargestByteAlloc = EfuMax(Stats.LargestByteAlloc, (int64_t)byteCount);
   SlotAllocSize[slotIndex] = (uint32_t)byteCount;
 
   if (Validate) {
