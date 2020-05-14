@@ -1,6 +1,7 @@
 // Copyright (C) 2020-2020 European Spallation Source, ERIC. See LICENSE file
 #pragma once
 
+#include <common/Expect.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -19,6 +20,4 @@
 // for now the asserts are always on!
 // TODO make the asserts primarity for DEBUG and google test.
 #define RelAssertMsg(exp, msg)                                                 \
-  (__builtin_expect(!(exp), 0)                                                 \
-       ? HandleAssertFail(#exp, __FILE__, __LINE__, msg)                       \
-       : (void)0)
+  (UNLIKELY(!(exp)) ? HandleAssertFail(#exp, __FILE__, __LINE__, msg) : (void)0)

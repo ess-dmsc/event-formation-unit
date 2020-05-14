@@ -3,6 +3,7 @@
 
 #include <common/Assert.h>
 #include <common/BitMath.h>
+#include <common/Expect.h>
 #include <common/Trace.h>
 
 #include <algorithm>
@@ -153,7 +154,7 @@ FixedSizePool<FixedSizePoolParamsT>::~FixedSizePool() {
 
 template <typename FixedSizePoolParamsT>
 void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot(size_t byteCount) {
-  if (__builtin_expect(NumSlotsUsed == NumSlots, 0)) {
+  if (UNLIKELY(NumSlotsUsed == NumSlots)) {
     return nullptr;
   }
 
