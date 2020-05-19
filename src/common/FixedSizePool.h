@@ -40,8 +40,13 @@ struct FixedSizePoolParams {
     NumSlots = NumSlots_,
     SlotAlignment = SlotAlignment_,
     StartAlignment = std::max(SlotAlignment_, StartAlignment_),
+#if FIXED_SIZE_POOL_DISABLE_ALL_CHECKS
+    Validate = false,
+    UseAsserts = false
+#else
     Validate = Validate_,
     UseAsserts = UseAsserts_
+#endif
   };
 };
 
@@ -60,13 +65,8 @@ template <typename FixedSizePoolParamsT> struct FixedSizePool {
     NumSlots = FixedSizePoolParamsT::NumSlots,
     SlotAlignment = FixedSizePoolParamsT::SlotAlignment,
     StartAlignment = FixedSizePoolParamsT::StartAlignment,
-#if FIXED_SIZE_POOL_DISABLE_ALL_CHECKS
-    Validate = false,
-    UseAsserts = false
-#else
     Validate = FixedSizePoolParamsT::Validate,
     UseAsserts = FixedSizePoolParamsT::UseAsserts,
-#endif
   };
 
   /// \note Doing stats wastes from performance due to cache misses.
@@ -200,10 +200,12 @@ FixedSizePool<FixedSizePoolParamsT>::ValidateEmptyStateAndReturnError() {
       std::bitset<NumSlots> &foundSlots = *new std::bitset<NumSlots>();
       for (size_t i = 0; i < NumSlots; ++i) {
         if (SlotAllocSize[i] != 0) {
+          delete &foundSlots;
           return "Slot not properly deallocated";
         }
         uint32_t curSlot = FreeSlotStack[i];
         if (foundSlots[curSlot]) {
+          delete &foundSlots;
           return "Free slots must be unique. Could mean double delete";
         }
         foundSlots[curSlot] = true;

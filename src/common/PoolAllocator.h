@@ -11,7 +11,7 @@
 /// \brief The class contains the compile-time parameters and configuration for
 ///        \class PoolAllocator. \class FixedSizePool is used for storage.
 template <class T_, size_t TotalBytes_, size_t ObjectsPerSlot_,
-          bool Validate_ = true>
+          bool Validate_ = true, bool UseAsserts_ = true>
 struct PoolAllocatorConfig {
   using T = T_;
   enum : size_t {
@@ -19,8 +19,8 @@ struct PoolAllocatorConfig {
     ObjectsPerSlot = ObjectsPerSlot_,
     SlotBytes = sizeof(T) * ObjectsPerSlot,
     NumSlots = TotalBytes / SlotBytes,
-    UseAssets = true,
-    Validate = Validate_
+    Validate = Validate_,
+    UseAssets = UseAsserts_
   };
 
   static_assert(TotalBytes >= SlotBytes,
@@ -54,7 +54,8 @@ template <typename PoolAllocatorConfigT> struct PoolAllocator {
     using other =
         PoolAllocator<PoolAllocatorConfig<U, PoolAllocatorConfigT::TotalBytes,
                                           PoolAllocatorConfigT::ObjectsPerSlot,
-                                          PoolAllocatorConfigT::Validate>>;
+                                          PoolAllocatorConfigT::Validate,
+                                          PoolAllocatorConfigT::UseAsserts>>;
   };
 
   T *allocate(std::size_t numElements);

@@ -135,7 +135,7 @@ public:
 struct HitVectorStorage {
   enum : size_t { Bytes_1GB = 1024 * 1024 * 1024 };
   using AllocConfig =
-      PoolAllocatorConfig<Hit, Bytes_1GB, MyVector<Hit>::MinReserveCount, false>;
+      PoolAllocatorConfig<Hit, Bytes_1GB, MyVector<Hit>::MinReserveCount, false, true>;
   static AllocConfig::PoolType *Pool;
   static PoolAllocator<AllocConfig> Alloc;
   static std::size_t MaxAllocCount;
