@@ -71,6 +71,7 @@ PoolAllocator<PoolAllocatorConfigT>::allocate(std::size_t numElements) {
   }
   if (UNLIKELY(alloc == nullptr)) {
     alloc = (T *)std::malloc(byteCount);
+    Pool.Stats.MallocFallbackCount++;
     if (0) {
       XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", numElements, byteCount);
     }

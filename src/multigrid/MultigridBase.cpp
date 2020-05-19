@@ -67,15 +67,17 @@ MultigridBase::MultigridBase(BaseSettings const &settings, MultigridSettings con
   Stats.create("kafka.dr_errors", Counters.kafka_dr_errors);
   Stats.create("kafka.dr_others", Counters.kafka_dr_noerrors);
   
-  Stats.create("memory.hitvec_storage.alloc_count"       , HitVectorStorage::Pool->Stats.AllocCount);
-  Stats.create("memory.hitvec_storage.alloc_bytes"       , HitVectorStorage::Pool->Stats.AllocBytes);
-  Stats.create("memory.hitvec_storage.dealloc_count"     , HitVectorStorage::Pool->Stats.DeallocCount);
-  Stats.create("memory.hitvec_storage.dealloc_bytes"     , HitVectorStorage::Pool->Stats.DeallocBytes);
+  Stats.create("memory.hitvec_storage.alloc_count", HitVectorStorage::Pool->Stats.AllocCount);
+  Stats.create("memory.hitvec_storage.alloc_bytes", HitVectorStorage::Pool->Stats.AllocBytes);
+  Stats.create("memory.hitvec_storage.dealloc_count", HitVectorStorage::Pool->Stats.DeallocCount);
+  Stats.create("memory.hitvec_storage.dealloc_bytes", HitVectorStorage::Pool->Stats.DeallocBytes);
+  Stats.create("memory.hitvec_storage.malloc_fallback_count", HitVectorStorage::Pool->Stats.MallocFallbackCount);
 
-  Stats.create("memory.cluster_storage.alloc_count"       , ClusterPoolStorage::Pool->Stats.AllocCount);
-  Stats.create("memory.cluster_storage.alloc_bytes"       , ClusterPoolStorage::Pool->Stats.AllocBytes);
-  Stats.create("memory.cluster_storage.dealloc_count"     , ClusterPoolStorage::Pool->Stats.DeallocCount);
-  Stats.create("memory.cluster_storage.dealloc_bytes"     , ClusterPoolStorage::Pool->Stats.DeallocBytes);
+  Stats.create("memory.cluster_storage.alloc_count", ClusterPoolStorage::Pool->Stats.AllocCount);
+  Stats.create("memory.cluster_storage.alloc_bytes", ClusterPoolStorage::Pool->Stats.AllocBytes);
+  Stats.create("memory.cluster_storage.dealloc_count", ClusterPoolStorage::Pool->Stats.DeallocCount);
+  Stats.create("memory.cluster_storage.dealloc_bytes", ClusterPoolStorage::Pool->Stats.DeallocBytes);
+  Stats.create("memory.cluster_storage.malloc_fallback_count", ClusterPoolStorage::Pool->Stats.MallocFallbackCount);
 
   // clang-format on
 

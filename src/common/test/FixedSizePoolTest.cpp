@@ -12,7 +12,7 @@ TEST_F(FixedSizePoolTest, Small_Empty) {
 
   ASSERT_TRUE(pool.NumSlotsUsed == 0);
 
-  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Small_1) {
@@ -26,7 +26,7 @@ TEST_F(FixedSizePoolTest, Small_1) {
 
   pool.DeallocateSlot(mem);
 
-  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Small_NoSpace) {
@@ -39,7 +39,7 @@ TEST_F(FixedSizePoolTest, Small_NoSpace) {
 
   pool.DeallocateSlot(mem);
 
-  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Small_1_NewlyAllocatedPattern) {
@@ -51,7 +51,7 @@ TEST_F(FixedSizePoolTest, Small_1_NewlyAllocatedPattern) {
   }
   pool.DeallocateSlot(mem);
 
-  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Small_1_Fail_DoubleFree) {
@@ -84,8 +84,8 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_NotEmpty) {
 
   pool.AllocateSlot();
 
-  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(),
-            "All slots in pool must be empty");
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(),
+               "All slots in pool must be empty");
 }
 
 TEST_F(FixedSizePoolTest, Small_1_Fail_DirtyRefPattern) {
@@ -95,8 +95,8 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_DirtyRefPattern) {
   pool.DeallocateSlot(mem);
   *(uint32_t *)mem = 0; // dirty the kMemDeleted zone
 
-  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(),
-            "Deleted memory must have reference pattern");
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(),
+               "Deleted memory must have reference pattern");
 }
 
 TEST_F(FixedSizePoolTest, Large_1) {
@@ -110,7 +110,7 @@ TEST_F(FixedSizePoolTest, Large_1) {
 
   pool.DeallocateSlot(mem);
 
-  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Large_All) {
@@ -129,13 +129,13 @@ TEST_F(FixedSizePoolTest, Large_All) {
     pool.DeallocateSlot(allocs[i]);
   }
 
-  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Large_1mb) {
   // tests the validation can run in proper time on 1 mb pool
   auto pool = new FixedSizePool<FixedSizePoolParams<1, 1ull * 1024 * 1024>>();
-  ASSERT_EQ(pool->ValidateEmptyStateAndReturnError(), nullptr);  
+  ASSERT_STREQ(pool->ValidateEmptyStateAndReturnError(), nullptr);
   delete pool;
 }
 
@@ -153,7 +153,7 @@ TEST_F(FixedSizePoolTest, Align_AtSame) {
   pool.DeallocateSlot(mem);
   pool.DeallocateSlot(mem2);
 
-  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Align_At64) {
@@ -170,7 +170,7 @@ TEST_F(FixedSizePoolTest, Align_At64) {
   pool.DeallocateSlot(mem);
   pool.DeallocateSlot(mem2);
 
-  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Align_At2) {
@@ -187,7 +187,7 @@ TEST_F(FixedSizePoolTest, Align_At2) {
   pool.DeallocateSlot(mem);
   pool.DeallocateSlot(mem2);
 
-  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Contains) {
@@ -211,7 +211,7 @@ TEST_F(FixedSizePoolTest, Contains) {
   pool.DeallocateSlot(mem);
   pool.DeallocateSlot(mem2);
 
-  ASSERT_EQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, NextPowerOfTwo) {

@@ -76,6 +76,7 @@ template <typename FixedSizePoolParamsT> struct FixedSizePool {
     int64_t AllocBytes;
     int64_t DeallocCount;
     int64_t DeallocBytes;
+    int64_t MallocFallbackCount; // tracked by outside allocator
   };
 
   enum : unsigned char { MemDeletedPattern = 0xED, MemAllocatedPattern = 0xCD };
@@ -117,6 +118,7 @@ FixedSizePool<FixedSizePoolParamsT>::FixedSizePool() {
   Stats.AllocBytes = 0;
   Stats.DeallocCount = 0;
   Stats.DeallocBytes = 0;
+  Stats.MallocFallbackCount = 0;
 
   if (Validate) {
     memset(PoolBytes, MemDeletedPattern, sizeof(PoolBytes));
