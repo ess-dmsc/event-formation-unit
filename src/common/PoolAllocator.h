@@ -20,7 +20,7 @@ struct PoolAllocatorConfig {
     SlotBytes = sizeof(T) * ObjectsPerSlot,
     NumSlots = TotalBytes / SlotBytes,
     Validate = Validate_,
-    UseAssets = UseAsserts_
+    UseAsserts = UseAsserts_
   };
 
   static_assert(TotalBytes >= SlotBytes,
@@ -29,7 +29,7 @@ struct PoolAllocatorConfig {
 
   using PoolType =
       FixedSizePool<FixedSizePoolParams<SlotBytes, NumSlots, alignof(T), 16,
-                                        Validate, UseAssets>>;
+                                        Validate, UseAsserts>>;
 };
 
 /// \class PoolAllocator
@@ -74,7 +74,8 @@ PoolAllocator<PoolAllocatorConfigT>::allocate(std::size_t numElements) {
     alloc = (T *)std::malloc(byteCount);
     Pool.Stats.MallocFallbackCount++;
     if (0) {
-      XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", numElements, byteCount);
+      XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", numElements,
+             byteCount);
     }
   }
   return alloc;
