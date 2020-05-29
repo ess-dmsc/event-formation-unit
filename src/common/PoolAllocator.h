@@ -11,7 +11,7 @@
 /// \brief The class contains the compile-time parameters and configuration for
 ///        \class PoolAllocator. \class FixedSizePool is used for storage.
 template <class T_, size_t TotalBytes_, size_t ObjectsPerSlot_,
-          bool Validate_ = true>
+          bool Validate_ = true, bool UseAsserts_ = true>
 struct PoolAllocatorConfig {
   using T = T_;
   enum : size_t {
@@ -19,8 +19,8 @@ struct PoolAllocatorConfig {
     ObjectsPerSlot = ObjectsPerSlot_,
     SlotBytes = sizeof(T) * ObjectsPerSlot,
     NumSlots = TotalBytes / SlotBytes,
-    UseAssets = true,
-    Validate = Validate_
+    Validate = Validate_,
+    UseAsserts = UseAsserts_
   };
 
   static_assert(TotalBytes >= SlotBytes,
@@ -29,7 +29,7 @@ struct PoolAllocatorConfig {
 
   using PoolType =
       FixedSizePool<FixedSizePoolParams<SlotBytes, NumSlots, alignof(T), 16,
-                                        Validate, UseAssets>>;
+                                        Validate, UseAsserts>>;
 };
 
 /// \class PoolAllocator
@@ -54,34 +54,37 @@ template <typename PoolAllocatorConfigT> struct PoolAllocator {
     using other =
         PoolAllocator<PoolAllocatorConfig<U, PoolAllocatorConfigT::TotalBytes,
                                           PoolAllocatorConfigT::ObjectsPerSlot,
-                                          PoolAllocatorConfigT::Validate>>;
+                                          PoolAllocatorConfigT::Validate,
+                                          PoolAllocatorConfigT::UseAsserts>>;
   };
 
-  T *allocate(std::size_t n);
+  T *allocate(std::size_t numElements);
   void deallocate(T *p, std::size_t) noexcept;
 };
 
 template <typename PoolAllocatorConfigT>
 typename PoolAllocatorConfigT::T *
-PoolAllocator<PoolAllocatorConfigT>::allocate(std::size_t n) {
-  size_t byteCount = sizeof(T) * n;
-  T *bytes = nullptr;
-  if (__builtin_expect(byteCount <= Pool.SlotBytes, 1)) {
-    bytes = (T *)Pool.AllocateSlot(byteCount);
+PoolAllocator<PoolAllocatorConfigT>::allocate(std::size_t numElements) {
+  size_t byteCount = sizeof(T) * numElements;
+  T *alloc = nullptr;
+  if (LIKELY(byteCount <= Pool.SlotBytes)) {
+    alloc = (T *)Pool.AllocateSlot(byteCount);
   }
-  if (__builtin_expect(bytes == nullptr, 0)) {
-    bytes = (T *)std::malloc(byteCount);
+  if (UNLIKELY(alloc == nullptr)) {
+    alloc = (T *)std::malloc(byteCount);
+    Pool.Stats.MallocFallbackCount++;
     if (0) {
-      XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", n, byteCount);
+      XTRACE(MAIN, CRI, "PoolAlloc fallover: %u objs, %u bytes", numElements,
+             byteCount);
     }
   }
-  return bytes;
+  return alloc;
 }
 
 template <typename PoolAllocatorConfigT>
 void PoolAllocator<PoolAllocatorConfigT>::deallocate(T *p,
                                                      std::size_t) noexcept {
-  if (__builtin_expect(Pool.Contains(p), 1)) {
+  if (LIKELY(Pool.Contains(p))) {
     Pool.DeallocateSlot(p);
   } else {
     std::free(p);

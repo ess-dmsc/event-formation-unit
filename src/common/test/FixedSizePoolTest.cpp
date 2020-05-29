@@ -11,6 +11,8 @@ TEST_F(FixedSizePoolTest, Small_Empty) {
   FixedSizePool<FixedSizePoolParams<8, 1>> pool;
 
   ASSERT_TRUE(pool.NumSlotsUsed == 0);
+
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Small_1) {
@@ -23,6 +25,8 @@ TEST_F(FixedSizePoolTest, Small_1) {
   ASSERT_TRUE(mem < (void *)(pool.PoolBytes + sizeof(pool.PoolBytes)));
 
   pool.DeallocateSlot(mem);
+
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Small_NoSpace) {
@@ -34,15 +38,20 @@ TEST_F(FixedSizePoolTest, Small_NoSpace) {
   ASSERT_EQ(noSpace, nullptr);
 
   pool.DeallocateSlot(mem);
+
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Small_1_NewlyAllocatedPattern) {
   FixedSizePool<FixedSizePoolParams<8, 1>> pool;
+
   unsigned char *mem = (unsigned char *)pool.AllocateSlot();
   for (size_t i = 0; i < pool.SlotBytes; ++i) {
     ASSERT_TRUE(mem[i] == pool.MemAllocatedPattern);
   }
   pool.DeallocateSlot(mem);
+
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Small_1_Fail_DoubleFree) {
@@ -55,8 +64,7 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_DoubleFree) {
         pool.DeallocateSlot(mem);
         pool.DeallocateSlot(mem);
       },
-      "Excepting dealloc slot to be in use"
-      /*"Free slots must be unique. Could mean double delete"*/);
+      "Excepting dealloc slot to be in use");
 }
 
 TEST_F(FixedSizePoolTest, Small_1_Fail_DeallocateWrong) {
@@ -72,25 +80,23 @@ TEST_F(FixedSizePoolTest, Small_1_Fail_DeallocateWrong) {
 }
 
 TEST_F(FixedSizePoolTest, Small_1_Fail_NotEmpty) {
-  using FixedSizePool_t = FixedSizePool<FixedSizePoolParams<8, 1>>;
-  ASSERT_DEATH(
-      {
-        FixedSizePool_t pool;
-        pool.AllocateSlot();
-      },
-      "All slots in pool must be empty");
+  FixedSizePool<FixedSizePoolParams<8, 1>> pool;
+
+  pool.AllocateSlot();
+
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(),
+               "All slots in pool must be empty");
 }
 
 TEST_F(FixedSizePoolTest, Small_1_Fail_DirtyRefPattern) {
-  using FixedSizePool_t = FixedSizePool<FixedSizePoolParams<8, 1>>;
-  ASSERT_DEATH(
-      {
-        FixedSizePool_t pool;
-        void *mem = pool.AllocateSlot();
-        pool.DeallocateSlot(mem);
-        *(uint32_t *)mem = 0; // dirty the kMemDeleted zone
-      },
-      "Deleted memory must have reference pattern");
+  FixedSizePool<FixedSizePoolParams<8, 1>> pool;
+
+  void *mem = pool.AllocateSlot();
+  pool.DeallocateSlot(mem);
+  *(uint32_t *)mem = 0; // dirty the kMemDeleted zone
+
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(),
+               "Deleted memory must have reference pattern");
 }
 
 TEST_F(FixedSizePoolTest, Large_1) {
@@ -103,6 +109,8 @@ TEST_F(FixedSizePoolTest, Large_1) {
   ASSERT_TRUE(mem < (void *)(pool.PoolBytes + sizeof(pool.PoolBytes)));
 
   pool.DeallocateSlot(mem);
+
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Large_All) {
@@ -120,11 +128,14 @@ TEST_F(FixedSizePoolTest, Large_All) {
   for (int i = 0; i < 1000; ++i) {
     pool.DeallocateSlot(allocs[i]);
   }
+
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Large_1mb) {
   // tests the validation can run in proper time on 1 mb pool
   auto pool = new FixedSizePool<FixedSizePoolParams<1, 1ull * 1024 * 1024>>();
+  ASSERT_STREQ(pool->ValidateEmptyStateAndReturnError(), nullptr);
   delete pool;
 }
 
@@ -141,6 +152,8 @@ TEST_F(FixedSizePoolTest, Align_AtSame) {
 
   pool.DeallocateSlot(mem);
   pool.DeallocateSlot(mem2);
+
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Align_At64) {
@@ -156,6 +169,8 @@ TEST_F(FixedSizePoolTest, Align_At64) {
 
   pool.DeallocateSlot(mem);
   pool.DeallocateSlot(mem2);
+
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Align_At2) {
@@ -171,6 +186,8 @@ TEST_F(FixedSizePoolTest, Align_At2) {
 
   pool.DeallocateSlot(mem);
   pool.DeallocateSlot(mem2);
+
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, Contains) {
@@ -193,6 +210,8 @@ TEST_F(FixedSizePoolTest, Contains) {
 
   pool.DeallocateSlot(mem);
   pool.DeallocateSlot(mem2);
+
+  ASSERT_STREQ(pool.ValidateEmptyStateAndReturnError(), nullptr);
 }
 
 TEST_F(FixedSizePoolTest, NextPowerOfTwo) {
@@ -209,34 +228,34 @@ TEST_F(FixedSizePoolTest, NextPowerOfTwo) {
 
 TEST_F(FixedSizePoolTest, Stats) {
   FixedSizePool<FixedSizePoolParams<8, 3>> pool;
+  ASSERT_EQ(pool.Stats.AllocCount, 0);
+  ASSERT_EQ(pool.Stats.AllocBytes, 0);
+  ASSERT_EQ(pool.Stats.DeallocCount, 0);
+  ASSERT_EQ(pool.Stats.DeallocBytes, 0);
 
   void *mem = pool.AllocateSlot(1);
-  ASSERT_EQ(pool.Stats.TotalBytes, 1);
-  ASSERT_EQ(pool.Stats.LargestByteAlloc, 1);
   ASSERT_EQ(pool.Stats.AllocCount, 1);
-  ASSERT_EQ(pool.Stats.MaxAllocCount, 1);
-  ASSERT_EQ(pool.Stats.AccumAllocCount, 1);
+  ASSERT_EQ(pool.Stats.AllocBytes, 1);
+  ASSERT_EQ(pool.Stats.DeallocCount, 0);
+  ASSERT_EQ(pool.Stats.DeallocBytes, 0);
 
   void *mem2 = pool.AllocateSlot(2);
-  ASSERT_EQ(pool.Stats.TotalBytes, 3);
-  ASSERT_EQ(pool.Stats.LargestByteAlloc, 2);
   ASSERT_EQ(pool.Stats.AllocCount, 2);
-  ASSERT_EQ(pool.Stats.MaxAllocCount, 2);
-  ASSERT_EQ(pool.Stats.AccumAllocCount, 2);
+  ASSERT_EQ(pool.Stats.AllocBytes, 3);
+  ASSERT_EQ(pool.Stats.DeallocCount, 0);
+  ASSERT_EQ(pool.Stats.DeallocBytes, 0);
 
   pool.DeallocateSlot(mem);
-  ASSERT_EQ(pool.Stats.TotalBytes, 2);
-  ASSERT_EQ(pool.Stats.LargestByteAlloc, 2);
-  ASSERT_EQ(pool.Stats.AllocCount, 1);
-  ASSERT_EQ(pool.Stats.MaxAllocCount, 2);
-  ASSERT_EQ(pool.Stats.AccumAllocCount, 2);
+  ASSERT_EQ(pool.Stats.AllocCount, 2);
+  ASSERT_EQ(pool.Stats.AllocBytes, 3);
+  ASSERT_EQ(pool.Stats.DeallocCount, 1);
+  ASSERT_EQ(pool.Stats.DeallocBytes, 1);
 
   pool.DeallocateSlot(mem2);
-  ASSERT_EQ(pool.Stats.TotalBytes, 0);
-  ASSERT_EQ(pool.Stats.LargestByteAlloc, 2);
-  ASSERT_EQ(pool.Stats.AllocCount, 0);
-  ASSERT_EQ(pool.Stats.MaxAllocCount, 2);
-  ASSERT_EQ(pool.Stats.AccumAllocCount, 2);
+  ASSERT_EQ(pool.Stats.AllocCount, 2);
+  ASSERT_EQ(pool.Stats.AllocBytes, 3);
+  ASSERT_EQ(pool.Stats.DeallocCount, 2);
+  ASSERT_EQ(pool.Stats.DeallocBytes, 3);
 }
 
 // inline bool bitset64_get (uint64_t* array, uint64_t arrayBitCount, uint64_t

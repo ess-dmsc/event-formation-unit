@@ -18,6 +18,8 @@
 
 #include <memory>
 
+#include <thread>
+
 //#undef TRC_LEVEL
 //#define TRC_LEVEL TRC_L_DEB
 
@@ -158,37 +160,43 @@ BENCHMARK_REGISTER_F(NmxBenchmarkTest, Dummy)
 // BENCHMARK(NmxBenchmarkTest);
 
 static void ClusterPlaneNoinline(benchmark::State &state) {
-  Cluster c;
+  Cluster &c = *new Cluster();
   uint8_t p;
   for (auto _ : state)
     ::benchmark::DoNotOptimize(p = c.plane());
+  delete &c;
 }
 BENCHMARK(ClusterPlaneNoinline);
 
 static void ClusterPlaneInline(benchmark::State &state) {
-  Cluster c;
+  Cluster &c = *new Cluster();
   uint8_t p;
   for (auto _ : state)
     ::benchmark::DoNotOptimize(p = c.plane_header());
+  delete &c;
 }
 BENCHMARK(ClusterPlaneInline);
 
 static void ClusterPlaneNoinlineFancyExtra(benchmark::State &state) {
-  Cluster c;
+  Cluster &c = *new Cluster();
   uint8_t p;
   BenchmarkLoop(state, [&] { ::benchmark::DoNotOptimize(p = c.plane()); });
+  delete &c;
 }
 BENCHMARK(ClusterPlaneNoinlineFancyExtra);
 
 static void ClusterPlaneInlineFancy(benchmark::State &state) {
-  Cluster c;
+  Cluster &c = *new Cluster();
   uint8_t p;
   BenchmarkLoop(state,
                 [&] { ::benchmark::DoNotOptimize(p = c.plane_header()); });
+  delete &c;
 }
 BENCHMARK(ClusterPlaneInlineFancy);
 
-//------------------------------------------------------------------------
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
 static void Vec_PushBackTest_StdVector(benchmark::State &state) {
   BenchmarkLoop(state, [&] {
@@ -334,5 +342,398 @@ Vec_PushBackTest_MyVector_LinearAllocator_NoDealloc(benchmark::State &state) {
   });
 }
 BENCHMARK(Vec_PushBackTest_MyVector_LinearAllocator_NoDealloc);
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+template <typename Lambda>
+void BenchmarkLoop_Copy(benchmark::State &state, Lambda loopBody) {
+  BenchmarkOuterStartTiming();
+  for (auto _ : state) {
+    loopBody();
+  }
+  BenchmarkOuterStopTiming();
+}
+
+template <typename Lambda>
+void BenchmarkLoop_Ref(benchmark::State &state, const Lambda &loopBody) {
+  BenchmarkOuterStartTiming();
+  for (auto _ : state) {
+    loopBody();
+  }
+  BenchmarkOuterStopTiming();
+}
+
+void BenchmarkLoop_StdFun(benchmark::State &state,
+                          std::function<void()> loopBody) {
+  BenchmarkOuterStartTiming();
+  for (auto _ : state) {
+    loopBody();
+  }
+  BenchmarkOuterStopTiming();
+}
+
+inline __attribute__((always_inline)) void
+BenchmarkLoop_StdFunInline(benchmark::State &state,
+                           std::function<void()> loopBody) {
+  BenchmarkOuterStartTiming();
+  for (auto _ : state) {
+    loopBody();
+  }
+  BenchmarkOuterStopTiming();
+}
+
+size_t _x, _y, _z, _w, _b, _c, _e, _t, _u, _i, _o, _p, _v, _n, _m;
+
+//////////////////////////////////////////////////////////////////////////
+// NoOp Small
+
+static void CallTest_Small_Copy(benchmark::State &state) {
+  size_t x = _x, y = _y;
+  BenchmarkLoop_Copy(state, [&] {
+    x += y;
+    ::benchmark::DoNotOptimize(x);
+    ::benchmark::ClobberMemory();
+  });
+  ::benchmark::DoNotOptimize(x);
+}
+BENCHMARK(CallTest_Small_Copy);
+
+static void CallTest_Small_Ref(benchmark::State &state) {
+  size_t x = _x, y = _y;
+  BenchmarkLoop_Ref(state, [&] {
+    x += y;
+    ::benchmark::DoNotOptimize(x);
+    ::benchmark::ClobberMemory();
+  });
+  ::benchmark::DoNotOptimize(x);
+}
+BENCHMARK(CallTest_Small_Ref);
+
+static void CallTest_Small_RefCap(benchmark::State &state) {
+  size_t x = _x, y = _y;
+  BenchmarkLoop_Ref(state, [&x, y] {
+    x += y;
+    ::benchmark::DoNotOptimize(x);
+    ::benchmark::ClobberMemory();
+  });
+  ::benchmark::DoNotOptimize(x);
+}
+BENCHMARK(CallTest_Small_RefCap);
+
+static void CallTest_Small_StdFun(benchmark::State &state) {
+  size_t x = _x, y = _y;
+  auto fun = [&x, &y] {
+    x += y;
+    ::benchmark::DoNotOptimize(x);
+    ::benchmark::ClobberMemory();
+  };
+  BenchmarkLoop_StdFun(state, std::move(fun));
+  ::benchmark::DoNotOptimize(x);
+}
+BENCHMARK(CallTest_Small_StdFun);
+
+static void CallTest_Small_StdFunInline(benchmark::State &state) {
+  size_t x = _x, y = _y;
+  auto fun = [&x, &y] {
+    x += y;
+    ::benchmark::DoNotOptimize(x);
+    ::benchmark::ClobberMemory();
+  };
+  BenchmarkLoop_StdFunInline(state, std::move(fun));
+  ::benchmark::DoNotOptimize(x);
+}
+BENCHMARK(CallTest_Small_StdFunInline);
+
+static void CallTest_Small_StdFunRef(benchmark::State &state) {
+  size_t x = _x, y = _y;
+  auto fun = [&] {
+    x += y;
+    ::benchmark::DoNotOptimize(x);
+    ::benchmark::ClobberMemory();
+  };
+  BenchmarkLoop_StdFun(state, std::move(fun));
+  ::benchmark::DoNotOptimize(x);
+}
+BENCHMARK(CallTest_Small_StdFunRef);
+
+static void CallTest_Small_StdFunRefGlob(benchmark::State &state) {
+  auto fun = [&] {
+    _x += _y;
+    ::benchmark::DoNotOptimize(_x);
+    ::benchmark::ClobberMemory();
+  };
+  BenchmarkLoop_StdFun(state, std::move(fun));
+  ::benchmark::DoNotOptimize(_x);
+}
+BENCHMARK(CallTest_Small_StdFunRefGlob);
+
+//////////////////////////////////////////////////////////////////////////
+// NoOp Big
+
+static void CallTest_Big_Copy(benchmark::State &state) {
+  BenchmarkLoop_Copy(state, [&] {
+    _z += _w + _b + _c + _e + _t + _u + _i + _o + _p + _c + _v + _b + _n + _m;
+    ::benchmark::DoNotOptimize(_z);
+    ::benchmark::ClobberMemory();
+  });
+  ::benchmark::DoNotOptimize(_z);
+}
+BENCHMARK(CallTest_Big_Copy);
+
+static void CallTest_Big_Ref(benchmark::State &state) {
+  BenchmarkLoop_Ref(state, [&] {
+    _z += _w + _b + _c + _e + _t + _u + _i + _o + _p + _c + _v + _b + _n + _m;
+    ::benchmark::DoNotOptimize(_z);
+    ::benchmark::ClobberMemory();
+  });
+  ::benchmark::DoNotOptimize(_z);
+}
+BENCHMARK(CallTest_Big_Ref);
+
+static void CallTest_Big_RefCap(benchmark::State &state) {
+  size_t z = _z, w = _w, b = _b, c = _c, e = _e, t = _t, u = _u, i = _i, o = _o,
+         p = _p, v = _v, n = _n, m = _m;
+
+  BenchmarkLoop_Ref(state, [&z, w, b, c, e, t, u, i, o, p, v, n, m] {
+    z += w + b + c + e + t + u + i + o + p + c + v + b + n + m;
+    ::benchmark::DoNotOptimize(z);
+    ::benchmark::ClobberMemory();
+  });
+  ::benchmark::DoNotOptimize(z);
+}
+BENCHMARK(CallTest_Big_RefCap);
+
+static void CallTest_Big_StdFun(benchmark::State &state) {
+  size_t z = _z, w = _w, b = _b, c = _c, e = _e, t = _t, u = _u, i = _i, o = _o,
+         p = _p, v = _v, n = _n, m = _m;
+
+  auto fun = [&z, w, b, c, e, t, u, i, o, p, v, n, m] {
+    z += w + b + c + e + t + u + i + o + p + c + v + b + n + m;
+    ::benchmark::DoNotOptimize(z);
+    ::benchmark::ClobberMemory();
+  };
+  BenchmarkLoop_StdFun(state, std::move(fun));
+  ::benchmark::DoNotOptimize(_z);
+}
+BENCHMARK(CallTest_Big_StdFun);
+
+static void CallTest_Big_StdFunInline(benchmark::State &state) {
+  size_t z = _z, w = _w, b = _b, c = _c, e = _e, t = _t, u = _u, i = _i, o = _o,
+         p = _p, v = _v, n = _n, m = _m;
+
+  auto fun = [&z, w, b, c, e, t, u, i, o, p, v, n, m] {
+    z += w + b + c + e + t + u + i + o + p + c + v + b + n + m;
+    ::benchmark::DoNotOptimize(z);
+    ::benchmark::ClobberMemory();
+  };
+  BenchmarkLoop_StdFunInline(state, std::move(fun));
+  ::benchmark::DoNotOptimize(_z);
+}
+BENCHMARK(CallTest_Big_StdFunInline);
+
+static void CallTest_Big_StdFunRef(benchmark::State &state) {
+  size_t z = _z, w = _w, b = _b, c = _c, e = _e, t = _t, u = _u, i = _i, o = _o,
+         p = _p, v = _v, n = _n, m = _m;
+
+  auto fun = [&] {
+    z += w + b + c + e + t + u + i + o + p + c + v + b + n + m;
+    ::benchmark::DoNotOptimize(z);
+    ::benchmark::ClobberMemory();
+  };
+  BenchmarkLoop_StdFun(state, std::move(fun));
+  ::benchmark::DoNotOptimize(_z);
+}
+BENCHMARK(CallTest_Big_StdFunRef);
+
+static void CallTest_Big_StdFunRefGlob(benchmark::State &state) {
+  auto fun = [&] {
+    _z += _w + _b + _c + _e + _t + _u + _i + _o + _p + _c + _v + _b + _n + _m;
+    ::benchmark::DoNotOptimize(_z);
+    ::benchmark::ClobberMemory();
+  };
+  BenchmarkLoop_StdFun(state, std::move(fun));
+  ::benchmark::DoNotOptimize(_z);
+}
+BENCHMARK(CallTest_Big_StdFunRefGlob);
+
+//////////////////////////////////////////////////////////////////////////
+// Op Small
+
+static void CallTest_Op_Small_Copy(benchmark::State &state) {
+  size_t x = _x, y = _y;
+  BenchmarkLoop_Copy(state, [&] { x += y; });
+  ::benchmark::DoNotOptimize(x);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Small_Copy);
+
+static void CallTest_Op_Small_Ref(benchmark::State &state) {
+  size_t x = _x, y = _y;
+  BenchmarkLoop_Ref(state, [&] { x += y; });
+  ::benchmark::DoNotOptimize(x);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Small_Ref);
+
+static void CallTest_Op_Small_RefCap(benchmark::State &state) {
+  size_t x = _x, y = _y;
+  BenchmarkLoop_Ref(state, [&x, y] { x += y; });
+  ::benchmark::DoNotOptimize(x);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Small_RefCap);
+
+static void CallTest_Op_Small_StdFun(benchmark::State &state) {
+  size_t x = _x, y = _y;
+  auto fun = [&x, &y] { x += y; };
+  BenchmarkLoop_StdFun(state, std::move(fun));
+  ::benchmark::DoNotOptimize(x);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Small_StdFun);
+
+static void CallTest_Op_Small_StdFunInline(benchmark::State &state) {
+  size_t x = _x, y = _y;
+  auto fun = [&x, &y] { x += y; };
+  BenchmarkLoop_StdFunInline(state, std::move(fun));
+  ::benchmark::DoNotOptimize(x);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Small_StdFunInline);
+
+static void CallTest_Op_Small_StdFunRef(benchmark::State &state) {
+  size_t x = _x, y = _y;
+  auto fun = [&] { x += y; };
+  BenchmarkLoop_StdFun(state, std::move(fun));
+  ::benchmark::DoNotOptimize(x);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Small_StdFunRef);
+
+static void CallTest_Op_Small_StdFunRefGlob(benchmark::State &state) {
+  auto fun = [&] { _x += _y; };
+  BenchmarkLoop_StdFun(state, std::move(fun));
+  ::benchmark::DoNotOptimize(_x);
+}
+BENCHMARK(CallTest_Op_Small_StdFunRefGlob);
+
+//////////////////////////////////////////////////////////////////////////
+// Op Big
+
+static void CallTest_Op_Big_Copy(benchmark::State &state) {
+  BenchmarkLoop_Copy(state, [&] {
+    _z += _w + _b + _c + _e + _t + _u + _i + _o + _p + _c + _v + _b + _n + _m;
+  });
+  ::benchmark::DoNotOptimize(_z);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Big_Copy);
+
+static void CallTest_Op_Big_Ref(benchmark::State &state) {
+  BenchmarkLoop_Ref(state, [&] {
+    _z += _w + _b + _c + _e + _t + _u + _i + _o + _p + _c + _v + _b + _n + _m;
+  });
+  ::benchmark::DoNotOptimize(_z);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Big_Ref);
+
+static void CallTest_Op_Big_RefCap(benchmark::State &state) {
+  size_t z = _z, w = _w, b = _b, c = _c, e = _e, t = _t, u = _u, i = _i, o = _o,
+         p = _p, v = _v, n = _n, m = _m;
+
+  BenchmarkLoop_Ref(state, [&z, w, b, c, e, t, u, i, o, p, v, n, m] {
+    z += w + b + c + e + t + u + i + o + p + c + v + b + n + m;
+  });
+  ::benchmark::DoNotOptimize(z);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Big_RefCap);
+
+static void CallTest_Op_Big_StdFun(benchmark::State &state) {
+  size_t z = _z, w = _w, b = _b, c = _c, e = _e, t = _t, u = _u, i = _i, o = _o,
+         p = _p, v = _v, n = _n, m = _m;
+
+  auto fun = [&z, w, b, c, e, t, u, i, o, p, v, n, m] {
+    z += w + b + c + e + t + u + i + o + p + c + v + b + n + m;
+  };
+  BenchmarkLoop_StdFun(state, std::move(fun));
+  ::benchmark::DoNotOptimize(z);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Big_StdFun);
+
+static void CallTest_Op_Big_StdFunInline(benchmark::State &state) {
+  size_t z = _z, w = _w, b = _b, c = _c, e = _e, t = _t, u = _u, i = _i, o = _o,
+         p = _p, v = _v, n = _n, m = _m;
+
+  auto fun = [&z, w, b, c, e, t, u, i, o, p, v, n, m] {
+    z += w + b + c + e + t + u + i + o + p + c + v + b + n + m;
+  };
+  BenchmarkLoop_StdFunInline(state, std::move(fun));
+  ::benchmark::DoNotOptimize(z);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Big_StdFunInline);
+
+static void CallTest_Op_Big_StdFunRef(benchmark::State &state) {
+  size_t z = _z, w = _w, b = _b, c = _c, e = _e, t = _t, u = _u, i = _i, o = _o,
+         p = _p, v = _v, n = _n, m = _m;
+
+  auto fun = [&] {
+    z += w + b + c + e + t + u + i + o + p + c + v + b + n + m;
+  };
+  BenchmarkLoop_StdFun(state, std::move(fun));
+  ::benchmark::DoNotOptimize(z);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Big_StdFunRef);
+
+static void CallTest_Op_Big_StdFunRefGlob(benchmark::State &state) {
+  auto fun = [&] {
+    _z += _w + _b + _c + _e + _t + _u + _i + _o + _p + _c + _v + _b + _n + _m;
+  };
+  BenchmarkLoop_StdFun(state, std::move(fun));
+  ::benchmark::DoNotOptimize(_z);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(CallTest_Op_Big_StdFunRefGlob);
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+void someFunc(){}
+
+static void SharedPtr_SharedPtrVec(benchmark::State &state) {
+  //std::thread someThread (someFunc);
+  auto ptrVec = std::make_shared<std::vector<int>>();
+  size_t x = 0;
+  BenchmarkLoop(state, [&] {
+    x += ptrVec->size();
+    ::benchmark::DoNotOptimize(x);
+    ::benchmark::ClobberMemory();
+  });
+  //someThread.join();
+  ::benchmark::DoNotOptimize(x);
+  ::benchmark::ClobberMemory();
+}
+BENCHMARK(SharedPtr_SharedPtrVec);
+
+static void SharedPtr_RawVec(benchmark::State &state) {
+  auto ptrVec = new std::vector<int>();
+  size_t x = 0;
+  BenchmarkLoop(state, [&] {
+    x += ptrVec->size();
+    ::benchmark::DoNotOptimize(x);
+    ::benchmark::ClobberMemory();
+  });
+  ::benchmark::DoNotOptimize(x);
+  ::benchmark::ClobberMemory();
+  delete ptrVec;
+}
+BENCHMARK(SharedPtr_RawVec);
 
 BENCHMARK_MAIN();

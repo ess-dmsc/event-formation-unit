@@ -29,6 +29,7 @@ set(efu_common_INC
   DumpFile.h
   EFUArgs.h
   EV42Serializer.h
+  Expect.h
   FixedSizePool.h
   JsonFile.h
   gccintel.h

@@ -3,6 +3,7 @@
 
 #include <common/Assert.h>
 #include <common/BitMath.h>
+#include <common/Expect.h>
 #include <common/Trace.h>
 
 #include <algorithm>
@@ -39,8 +40,13 @@ struct FixedSizePoolParams {
     NumSlots = NumSlots_,
     SlotAlignment = SlotAlignment_,
     StartAlignment = std::max(SlotAlignment_, StartAlignment_),
+#if FIXED_SIZE_POOL_DISABLE_ALL_CHECKS
+    Validate = false,
+    UseAsserts = false
+#else
     Validate = Validate_,
     UseAsserts = UseAsserts_
+#endif
   };
 };
 
@@ -59,23 +65,18 @@ template <typename FixedSizePoolParamsT> struct FixedSizePool {
     NumSlots = FixedSizePoolParamsT::NumSlots,
     SlotAlignment = FixedSizePoolParamsT::SlotAlignment,
     StartAlignment = FixedSizePoolParamsT::StartAlignment,
-#if FIXED_SIZE_POOL_DISABLE_ALL_CHECKS
-    Validate = false,
-    UseAsserts = false
-#else
     Validate = FixedSizePoolParamsT::Validate,
     UseAsserts = FixedSizePoolParamsT::UseAsserts,
-#endif
   };
 
   /// \note Doing stats wastes from performance due to cache misses.
   ///       Data needs to be int64 as required by common::Statstics.
   struct MemStats {
-    int64_t TotalBytes;
-    int64_t LargestByteAlloc;
     int64_t AllocCount;
-    int64_t MaxAllocCount;
-    int64_t AccumAllocCount;
+    int64_t AllocBytes;
+    int64_t DeallocCount;
+    int64_t DeallocBytes;
+    int64_t MallocFallbackCount; // tracked by outside allocator
   };
 
   enum : unsigned char { MemDeletedPattern = 0xED, MemAllocatedPattern = 0xCD };
@@ -91,11 +92,12 @@ template <typename FixedSizePoolParamsT> struct FixedSizePool {
   alignas(StartAlignment) unsigned char PoolBytes[SlotBytes * NumSlots];
 
   FixedSizePool();
-  ~FixedSizePool();
 
   void *AllocateSlot(size_t byteCount = SlotBytes);
   void DeallocateSlot(void *p);
   bool Contains(void *p);
+  /// \return null on no error, else returns error description
+  const char *ValidateEmptyStateAndReturnError();
 };
 
 template <typename FixedSizePoolParamsT>
@@ -112,11 +114,11 @@ FixedSizePool<FixedSizePoolParamsT>::FixedSizePool() {
     SlotAllocSize[i] = 0;
   }
 
-  Stats.TotalBytes = 0;
-  Stats.LargestByteAlloc = 0;
   Stats.AllocCount = 0;
-  Stats.MaxAllocCount = 0;
-  Stats.AccumAllocCount = 0;
+  Stats.AllocBytes = 0;
+  Stats.DeallocCount = 0;
+  Stats.DeallocBytes = 0;
+  Stats.MallocFallbackCount = 0;
 
   if (Validate) {
     memset(PoolBytes, MemDeletedPattern, sizeof(PoolBytes));
@@ -124,36 +126,8 @@ FixedSizePool<FixedSizePoolParamsT>::FixedSizePool() {
 }
 
 template <typename FixedSizePoolParamsT>
-FixedSizePool<FixedSizePoolParamsT>::~FixedSizePool() {
-  PoolAssertMsg(UseAsserts, NumSlotsUsed == 0,
-                "All slots in pool must be empty");
-
-  if (Validate) {
-    // test FreeSlotStack indices are unique
-    {
-      std::bitset<NumSlots> &foundSlots = *new std::bitset<NumSlots>();
-      for (size_t i = 0; i < NumSlots; ++i) {
-        PoolAssertMsg(UseAsserts, SlotAllocSize[i] == 0,
-                      "Slot not properly deallocated");
-
-        uint32_t curSlot = FreeSlotStack[i];
-        PoolAssertMsg(UseAsserts, !foundSlots[curSlot],
-                      "Free slots must be unique. Could mean double delete");
-        foundSlots[curSlot] = true;
-      }
-      delete &foundSlots;
-    }
-    // test for deletion reference pattern
-    for (size_t i = 0; i < sizeof(PoolBytes); ++i) {
-      PoolAssertMsg(UseAsserts, PoolBytes[i] == MemDeletedPattern,
-                    "Deleted memory must have reference pattern");
-    }
-  }
-}
-
-template <typename FixedSizePoolParamsT>
 void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot(size_t byteCount) {
-  if (__builtin_expect(NumSlotsUsed == NumSlots, 0)) {
+  if (UNLIKELY(NumSlotsUsed == NumSlots)) {
     return nullptr;
   }
 
@@ -170,11 +144,8 @@ void *FixedSizePool<FixedSizePoolParamsT>::AllocateSlot(size_t byteCount) {
   PoolAssertMsg(UseAsserts, p + SlotBytes <= PoolBytes + sizeof(PoolBytes),
                 "Don't go past end of capacity");
 
-  Stats.TotalBytes += (int64_t)byteCount;
-  Stats.LargestByteAlloc = EfuMax(Stats.LargestByteAlloc, (int64_t)byteCount);
   Stats.AllocCount++;
-  Stats.MaxAllocCount = EfuMax(Stats.MaxAllocCount, Stats.AllocCount);
-  Stats.AccumAllocCount++;
+  Stats.AllocBytes += (int64_t)byteCount;
   SlotAllocSize[slotIndex] = (uint32_t)byteCount;
 
   if (Validate) {
@@ -200,8 +171,8 @@ void FixedSizePool<FixedSizePoolParamsT>::DeallocateSlot(void *p) {
   PoolAssertMsg(UseAsserts, SlotAllocSize[slotIndex] != 0,
                 "Excepting dealloc slot to be in use.");
 
-  Stats.TotalBytes -= (int64_t)SlotAllocSize[slotIndex];
-  Stats.AllocCount--;
+  Stats.DeallocCount++;
+  Stats.DeallocBytes += (int64_t)SlotAllocSize[slotIndex];
   SlotAllocSize[slotIndex] = 0;
 
   FreeSlotStack[NumSlotsUsed] = slotIndex;
@@ -215,4 +186,38 @@ template <typename FixedSizePoolParamsT>
 bool FixedSizePool<FixedSizePoolParamsT>::Contains(void *p) {
   return (unsigned char *)p >= PoolBytes &&
          (unsigned char *)p < PoolBytes + sizeof(PoolBytes);
+}
+
+template <typename FixedSizePoolParamsT>
+const char *
+FixedSizePool<FixedSizePoolParamsT>::ValidateEmptyStateAndReturnError() {
+  if (NumSlotsUsed != 0) {
+    return "All slots in pool must be empty";
+  }
+  if (Validate) {
+    // test FreeSlotStack indices are unique
+    {
+      std::bitset<NumSlots> &foundSlots = *new std::bitset<NumSlots>();
+      for (size_t i = 0; i < NumSlots; ++i) {
+        if (SlotAllocSize[i] != 0) {
+          delete &foundSlots;
+          return "Slot not properly deallocated";
+        }
+        uint32_t curSlot = FreeSlotStack[i];
+        if (foundSlots[curSlot]) {
+          delete &foundSlots;
+          return "Free slots must be unique. Could mean double delete";
+        }
+        foundSlots[curSlot] = true;
+      }
+      delete &foundSlots;
+    }
+    // test for deletion reference pattern
+    for (size_t i = 0; i < sizeof(PoolBytes); ++i) {
+      if (PoolBytes[i] != MemDeletedPattern) {
+        return "Deleted memory must have reference pattern";
+      }
+    }
+  }
+  return nullptr;
 }
