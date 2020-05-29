@@ -1,8 +1,0 @@
-{
-  "testMate.cpp.test.advancedExecutables": [
-    {
-      "pattern": "build_debug/**/*{test,Test,TEST}*",
-      "cwd": "${workspaceFolder}/build_debug/"
-    }
-  ]
-}
