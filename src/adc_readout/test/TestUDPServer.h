@@ -13,6 +13,9 @@
 #pragma GCC diagnostic ignored "-Wdeprecated"
 #pragma GCC diagnostic ignored "-Wall"
 #pragma GCC diagnostic ignored "-Wunused-variable"
+#ifndef assert
+#define assert(...) /**/
+#endif
 #include <asio.hpp>
 #pragma GCC diagnostic pop
 

@@ -9,6 +9,9 @@
 
 #include "../AdcTimeStamp.h"
 #include "SamplingTimer.h"
+#ifndef assert
+#define assert(...) /**/
+#endif
 #include <asio.hpp>
 #include <functional>
 #include <random>
