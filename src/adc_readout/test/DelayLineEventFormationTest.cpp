@@ -96,11 +96,11 @@ TEST_F(FormationOfEventsInit, CalibrationTest) {
   DelayLineEventFormationStandIn Tester(DefaultSettings);
   auto XAxisCalib = Tester.XAxisCalc->getCalibrationValues();
   auto YAxisCalib = Tester.YAxisCalc->getCalibrationValues();
-  EXPECT_EQ(XAxisCalib.first, DefaultSettings.XAxisCalibOffset);
-  EXPECT_EQ(XAxisCalib.second, DefaultSettings.XAxisCalibSlope);
+  EXPECT_EQ(XAxisCalib.Origin, DefaultSettings.XAxisCalibOffset);
+  EXPECT_EQ(XAxisCalib.Slope, DefaultSettings.XAxisCalibSlope);
 
-  EXPECT_EQ(YAxisCalib.first, DefaultSettings.YAxisCalibOffset);
-  EXPECT_EQ(YAxisCalib.second, DefaultSettings.YAxisCalibSlope);
+  EXPECT_EQ(YAxisCalib.Origin, DefaultSettings.YAxisCalibOffset);
+  EXPECT_EQ(YAxisCalib.Slope, DefaultSettings.YAxisCalibSlope);
 }
 
 TEST_F(FormationOfEventsInit, ChannelInitNoRoles) {

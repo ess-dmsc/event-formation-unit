@@ -32,7 +32,11 @@ public:
     Slope = NewSlope;
   };
 
-  virtual std::pair<double, double> getCalibrationValues() {
+  struct CalibData {
+    double Origin;
+    double Slope;
+  };
+  virtual CalibData getCalibrationValues() {
     return {Origin, Slope};
   };
 
