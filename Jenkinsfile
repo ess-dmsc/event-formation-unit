@@ -322,6 +322,15 @@ node('docker') {
         builders['system tests'] = get_system_tests_pipeline()
     }
 
+    result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+    if (result != 0) {
+      echo "performing build..."
+    } else {
+      echo "not running... AA"
+      currentBuild.result = 'SUCCESS'
+      return
+    }
+
     try {
         timeout(time: 2, unit: 'HOURS') {
             parallel builders
