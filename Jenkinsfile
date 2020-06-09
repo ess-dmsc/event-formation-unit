@@ -269,16 +269,16 @@ def get_system_tests_pipeline() {
 node('docker') {
     dir("${project}_code") {
 
-        stage('Skip some builds') {
-            scmSkip(deleteBuild: true, skipPattern:'.*\\[ci skip\\].*')
-        }
-
         stage('Checkout') {
             try {
                 scm_vars = checkout scm
             } catch (e) {
                 failure_function(e, 'Checkout failed')
             }
+        }
+
+        stage('Skip some builds') {
+            scmSkip(deleteBuild: true, skipPattern:'.*\\[ci skip\\].*')
         }
 
         stage("Static analysis") {

@@ -16,5 +16,3 @@ Running the EFU
 [Clustering](../src/common/reduction/clustering/clusterer.md)
 
 [Matching](../src/common/reduction/matching/matcher.md)
-
-EOF
