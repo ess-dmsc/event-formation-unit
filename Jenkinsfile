@@ -34,31 +34,24 @@ def failure_function(exception_obj, failureMessage) {
     throw exception_obj
 }
 
-result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
-if (result != 0) {
-  echo "performing build..."
-} else {
-  echo "not running... AA"
-  currentBuild.result = 'SUCCESS'
-  return
-}
-
 pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/home/jenkins/data:/home/jenkins/refdata")
 pipeline_builder.activateEmailFailureNotifications()
 
-builders = pipeline_builder.createBuilders { container ->
+builders = pipeline_builder.createBuilders {
+    result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+    if (result != 0) {
+      echo "performing build..."
+    } else {
+      echo "not running... AA"
+      currentBuild.result = 'SUCCESS'
+      return
+    }
+
+    container ->
 
     pipeline_builder.stage("${container.key}: checkout") {
         dir(pipeline_builder.project) {
             scm_vars = checkout scm
-            result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
-            if (result != 0) {
-              echo "performing build..."
-            } else {
-              echo "not running... ZZ"
-              currentBuild.result = 'SUCCESS'
-              return
-            }
         }
         // Copy source code to container
         container.copyTo(pipeline_builder.project, pipeline_builder.project)
