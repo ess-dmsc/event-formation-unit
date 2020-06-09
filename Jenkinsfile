@@ -38,11 +38,13 @@ pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/home/jenki
 pipeline_builder.activateEmailFailureNotifications()
 
 pipeline_builder.stage("mjc testing") {
-  result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
-  if (result == 0) {
-    echo "not running... xxx"
-    currentBuild.result = 'SUCCESS'
-    return
+  dir(pipeline_builder.project) {
+      scm_vars = checkout scm
+      result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+      if (result == 0) {
+        currentBuild.result = 'NOT_BUILT'
+        return
+      }
   }
 }
 
