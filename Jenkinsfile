@@ -34,6 +34,15 @@ def failure_function(exception_obj, failureMessage) {
     throw exception_obj
 }
 
+result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+if (result != 0) {
+  echo "performing build..."
+} else {
+  echo "not running... AA"
+  currentBuild.result = 'SUCCESS'
+  return
+}
+
 pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/home/jenkins/data:/home/jenkins/refdata")
 pipeline_builder.activateEmailFailureNotifications()
 
@@ -320,15 +329,6 @@ node('docker') {
 
     if ( env.CHANGE_ID ) {
         builders['system tests'] = get_system_tests_pipeline()
-    }
-
-    result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
-    if (result != 0) {
-      echo "performing build..."
-    } else {
-      echo "not running... AA"
-      currentBuild.result = 'SUCCESS'
-      return
     }
 
     try {
