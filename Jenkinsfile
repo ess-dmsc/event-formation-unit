@@ -48,7 +48,16 @@ builders = pipeline_builder.createBuilders { container ->
     }  // stage
 
     if (container.key != clangformat_os) {
+
         pipeline_builder.stage("${container.key}: get dependencies") {
+            result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+            if (result != 0) {
+              echo "performing build..."
+            } else {
+              echo "not running... xx"
+              currentBuild.result = 'SUCCESS'
+              return
+            }
             container.sh """
                 cd ${project}
                 mkdir build
