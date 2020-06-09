@@ -221,6 +221,13 @@ def get_macos_pipeline()
 
                 dir("${project}") {
                     checkout scm
+                    result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+                    if (result != 0) {
+                      echo "performing build..."
+                    } else {
+                      echo "not running..."
+                      exit 0
+                    }
                 }
 
                 dir("${project}/build") {
@@ -275,6 +282,7 @@ def get_system_tests_pipeline() {
 
 node('docker') {
     dir("${project}_code") {
+        scmSkip(deleteBuild: true, skipPattern:'.*\\[ci skip\\].*')
 
         stage('Checkout') {
             try {
@@ -282,6 +290,14 @@ node('docker') {
             } catch (e) {
                 failure_function(e, 'Checkout failed')
             }
+        }
+
+        result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+        if (result != 0) {
+          echo "performing build..."
+        } else {
+          echo "not running..."
+          exit 0
         }
 
         stage('Skip some builds') {
