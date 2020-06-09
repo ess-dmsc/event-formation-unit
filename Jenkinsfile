@@ -282,7 +282,6 @@ def get_system_tests_pipeline() {
 
 node('docker') {
     dir("${project}_code") {
-        scmSkip(deleteBuild: true, skipPattern:'.*\\[ci skip\\].*')
 
         stage('Checkout') {
             try {
@@ -297,11 +296,8 @@ node('docker') {
           echo "performing build..."
         } else {
           echo "not running..."
-          exit 0
-        }
-
-        stage('Skip some builds') {
-            scmSkip(deleteBuild: true, skipPattern:'.*\\[ci skip\\].*')
+          currentBuild.result = 'SUCCESS'
+          return
         }
 
         stage("Static analysis") {
