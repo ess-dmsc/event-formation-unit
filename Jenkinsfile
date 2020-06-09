@@ -42,6 +42,13 @@ builders = pipeline_builder.createBuilders { container ->
     pipeline_builder.stage("${container.key}: checkout") {
         dir(pipeline_builder.project) {
             scm_vars = checkout scm
+            result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+            if (result != 0) {
+              echo "performing build..."
+            } else {
+              echo "not running..."
+              exit 0
+            }
         }
         // Copy source code to container
         container.copyTo(pipeline_builder.project, pipeline_builder.project)
