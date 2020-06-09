@@ -47,16 +47,6 @@ builders = pipeline_builder.createBuilders { container ->
         container.copyTo(pipeline_builder.project, pipeline_builder.project)
     }  // stage
 
-    result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
-    if (result != 0) {
-      echo "performing build..."
-    } else {
-      echo "not running... AA"
-      currentBuild.result = 'SUCCESS'
-      return
-    }
-
-
     if (container.key != clangformat_os) {
         pipeline_builder.stage("${container.key}: get dependencies") {
             container.sh """
@@ -83,6 +73,15 @@ builders = pipeline_builder.createBuilders { container ->
                 cmake -DREFDATA=/home/jenkins/refdata/EFU_reference -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
             """
         }  // stage
+
+        result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+        if (result != 0) {
+          echo "performing build..."
+        } else {
+          echo "not running... x"
+          currentBuild.result = 'SUCCESS'
+          return
+        }
 
         pipeline_builder.stage("${container.key}: build") {
             container.sh """
@@ -223,6 +222,9 @@ def get_macos_pipeline()
 
                 dir("${project}") {
                     checkout scm
+                }
+
+                dir("${project}/build") {
                     result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
                     if (result != 0) {
                       echo "performing build..."
@@ -231,9 +233,6 @@ def get_macos_pipeline()
                       currentBuild.result = 'SUCCESS'
                       return
                     }
-                }
-
-                dir("${project}/build") {
                     sh "conan install --build=outdated .."
                     sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
                     sh "make -j${pipeline_builder.numCpus}"
