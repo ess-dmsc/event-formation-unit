@@ -270,7 +270,6 @@ node('docker') {
     dir("${project}_code") {
 
         stage('Checkout') {
-            scmSkip(deleteBuild: true, skipPattern:'.*\\[ci skip\\].*')
             try {
                 scm_vars = checkout scm
             } catch (e) {
