@@ -46,8 +46,9 @@ builders = pipeline_builder.createBuilders { container ->
             if (result != 0) {
               echo "performing build..."
             } else {
-              echo "not running..."
-              exit 0
+              echo "not running... ZZ"
+              currentBuild.result = 'SUCCESS'
+              return
             }
         }
         // Copy source code to container
@@ -225,8 +226,9 @@ def get_macos_pipeline()
                     if (result != 0) {
                       echo "performing build..."
                     } else {
-                      echo "not running..."
-                      exit 0
+                      echo "not running... XX"
+                      currentBuild.result = 'SUCCESS'
+                      return
                     }
                 }
 
@@ -295,7 +297,7 @@ node('docker') {
         if (result != 0) {
           echo "performing build..."
         } else {
-          echo "not running..."
+          echo "not running... YY"
           currentBuild.result = 'SUCCESS'
           return
         }
