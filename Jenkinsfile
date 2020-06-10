@@ -34,23 +34,6 @@ def failure_function(exception_obj, failureMessage) {
     throw exception_obj
 }
 
-pipeline {
-    agent { any }
-    stages {
-        stage('skip') {
-            steps {
-              result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
-              if (result == 0) {
-                echo "not running... xx"
-                currentBuild.result = 'SUCCESS'
-                return
-              }
-            }
-        }
-    }
-}
-
-
 pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/home/jenkins/data:/home/jenkins/refdata")
 pipeline_builder.activateEmailFailureNotifications()
 
@@ -59,6 +42,12 @@ builders = pipeline_builder.createBuilders { container ->
     pipeline_builder.stage("${container.key}: checkout") {
         dir(pipeline_builder.project) {
             scm_vars = checkout scm
+            result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+            if (result == 0) {
+              echo "not running... xx"
+              currentBuild.result = 'FAILURE'
+              return
+            }
         }
         // Copy source code to container
         container.copyTo(pipeline_builder.project, pipeline_builder.project)
@@ -91,15 +80,6 @@ builders = pipeline_builder.createBuilders { container ->
                 cmake -DREFDATA=/home/jenkins/refdata/EFU_reference -DCONAN=MANUAL -DGOOGLE_BENCHMARK=ON ${xtra_flags} ..
             """
         }  // stage
-
-        result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
-        if (result != 0) {
-          echo "performing build..."
-        } else {
-          echo "not running... x"
-          currentBuild.result = 'SUCCESS'
-          return
-        }
 
         pipeline_builder.stage("${container.key}: build") {
             container.sh """
@@ -243,14 +223,6 @@ def get_macos_pipeline()
                 }
 
                 dir("${project}/build") {
-                    result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
-                    if (result != 0) {
-                      echo "performing build..."
-                    } else {
-                      echo "not running... XX"
-                      currentBuild.result = 'SUCCESS'
-                      return
-                    }
                     sh "conan install --build=outdated .."
                     sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
                     sh "make -j${pipeline_builder.numCpus}"
@@ -309,15 +281,6 @@ node('docker') {
             } catch (e) {
                 failure_function(e, 'Checkout failed')
             }
-        }
-
-        result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
-        if (result != 0) {
-          echo "performing build..."
-        } else {
-          echo "not running... YY"
-          currentBuild.result = 'SUCCESS'
-          return
         }
 
         stage("Static analysis") {
