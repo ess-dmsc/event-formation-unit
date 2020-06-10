@@ -283,6 +283,13 @@ node('docker') {
             }
         }
 
+        result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+        if (result == 0) {
+          echo "not running... xx"
+          currentBuild.result = 'FAILURE'
+          return
+        }
+
         stage("Static analysis") {
             try {
                 sh "find . -name '*TestData.h' > exclude_cloc"
