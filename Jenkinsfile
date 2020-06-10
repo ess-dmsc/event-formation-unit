@@ -42,7 +42,6 @@ builders = pipeline_builder.createBuilders { container ->
     pipeline_builder.stage("${container.key}: checkout") {
         dir(pipeline_builder.project) {
             scm_vars = checkout scm
-            result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
         }
         // Copy source code to container
         container.copyTo(pipeline_builder.project, pipeline_builder.project)
@@ -270,21 +269,17 @@ def get_system_tests_pipeline() {
 // Script actions start here
 node('docker') {
     dir("${project}_code") {
-
         stage('Checkout') {
             try {
                 scm_vars = checkout scm
-                result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+
             } catch (e) {
                 failure_function(e, 'Checkout failed')
             }
         }
 
-        if (result == 0) {
-          echo "Ignoring this build because of commit message"
-          currentBuild.result = 'ABORTED'
-          error('Build skipped')
-        }
+        // skip build process if message contains '[ci skip]'
+        pipeline_builder.abortBuildOnMagicCommitMessage()
 
         stage("Static analysis") {
             try {
@@ -300,14 +295,17 @@ node('docker') {
         }
     }
 
+    // Add macOS pipeline to builders
     builders['macOS'] = get_macos_pipeline()
 
+    // Only add system test pipeline if this is a Pull Request
     if ( env.CHANGE_ID ) {
         builders['system tests'] = get_system_tests_pipeline()
     }
 
     try {
         timeout(time: 2, unit: 'HOURS') {
+            // run all builders in parallel
             parallel builders
         }
     } catch (e) {
