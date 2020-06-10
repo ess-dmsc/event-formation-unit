@@ -40,18 +40,19 @@ pipeline_builder.activateEmailFailureNotifications()
 builders = pipeline_builder.createBuilders { container ->
 
     pipeline_builder.stage("${container.key}: checkout") {
-        result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
-        if (result == 0) {
-          echo "not running... pipeline_builder.stage"
-          currentBuild.result = 'FAILURE'
-          return
-        }
         dir(pipeline_builder.project) {
             scm_vars = checkout scm
         }
         // Copy source code to container
         container.copyTo(pipeline_builder.project, pipeline_builder.project)
     }  // stage
+
+    result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+    if (result == 0) {
+      echo "not running... pipeline_builder.stage"
+      currentBuild.result = 'FAILURE'
+      return
+    }
 
     if (container.key != clangformat_os) {
 
