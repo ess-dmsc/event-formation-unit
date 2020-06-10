@@ -48,13 +48,6 @@ builders = pipeline_builder.createBuilders { container ->
         container.copyTo(pipeline_builder.project, pipeline_builder.project)
     }  // stage
 
-
-    if (result == 0) {
-      echo "not running... pipeline_builder.stage"
-      currentBuild.result = 'FAILURE'
-      return
-    }
-
     if (container.key != clangformat_os) {
 
         pipeline_builder.stage("${container.key}: get dependencies") {
@@ -274,15 +267,23 @@ def get_system_tests_pipeline() {
     }  // return
 }  // def
 
+// Script actions start here
 node('docker') {
     dir("${project}_code") {
 
         stage('Checkout') {
             try {
                 scm_vars = checkout scm
+                result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
             } catch (e) {
                 failure_function(e, 'Checkout failed')
             }
+        }
+
+        if (result == 0) {
+          echo "Ignoring this build because of commit message"
+          currentBuild.result = 'FAILURE'
+          return
         }
 
         stage("Static analysis") {
