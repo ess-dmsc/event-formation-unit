@@ -283,7 +283,7 @@ node('docker') {
         if (result == 0) {
           echo "Ignoring this build because of commit message"
           currentBuild.result = 'FAILURE'
-          return
+          error('Build skipped')
         }
 
         stage("Static analysis") {
