@@ -34,20 +34,25 @@ def failure_function(exception_obj, failureMessage) {
     throw exception_obj
 }
 
-pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/home/jenkins/data:/home/jenkins/refdata")
-pipeline_builder.activateEmailFailureNotifications()
-
-pipeline_builder.stage("mjc testing") {
-  dir(pipeline_builder.project) {
-      scm_vars = checkout scm
-      result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
-      if (result == 0) {
-        currentBuild.result = 'NOT_BUILT'
-        return
-      }
-  }
+pipeline {
+    agent { any }
+    stages {
+        stage('skip') {
+            steps {
+              result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
+              if (result == 0) {
+                echo "not running... xx"
+                currentBuild.result = 'SUCCESS'
+                return
+              }
+            }
+        }
+    }
 }
 
+
+pipeline_builder = new PipelineBuilder(this, container_build_nodes, "/home/jenkins/data:/home/jenkins/refdata")
+pipeline_builder.activateEmailFailureNotifications()
 
 builders = pipeline_builder.createBuilders { container ->
 
@@ -62,14 +67,6 @@ builders = pipeline_builder.createBuilders { container ->
     if (container.key != clangformat_os) {
 
         pipeline_builder.stage("${container.key}: get dependencies") {
-            result = sh (script: "git log -1 | grep '\\[ci skip\\]'", returnStatus: true)
-            if (result != 0) {
-              echo "performing build..."
-            } else {
-              echo "not running... xx"
-              currentBuild.result = 'SUCCESS'
-              return
-            }
             container.sh """
                 cd ${project}
                 mkdir build
