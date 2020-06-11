@@ -26,7 +26,7 @@ ContinousSamplingTimer::ContinousSamplingTimer(ContinousSamplingTimerData &data)
 
   duration<std::uint64_t, std::nano> Temp(static_cast<std::uint64_t>(
       (data.NrOfOriginalSamples / TimeFracMax) * 1e9));
-      
+
   TimeStep = duration_cast<system_clock::duration>(Temp);
 }
 
@@ -35,13 +35,13 @@ void ContinousSamplingTimer::start() {
   SampleTimer.expires_at(NextSampleTime);
   SampleTimer.async_wait([this](auto &Error) {
     if (not Error) {
-      runFunction();
+      genSamplesAndEnqueueSend();
       start();
     }
   });
 }
 
-void ContinousSamplingTimer::runFunction() {
+void ContinousSamplingTimer::genSamplesAndEnqueueSend() {
   auto Now = system_clock::now();
   auto NowSeconds = duration_cast<seconds>(Now.time_since_epoch()).count();
   double NowSecFrac =

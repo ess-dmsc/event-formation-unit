@@ -19,7 +19,7 @@ using std::chrono::system_clock;
 SamplingTimer::SamplingTimer(std::function<void(TimeStamp const &)> OnTimer)
     : SamplingFunc(std::move(OnTimer)) {}
 
-void SamplingTimer::runFunction() {
+void SamplingTimer::genSamplesAndEnqueueSend() {
   auto Now = system_clock::now();
   auto NowSeconds = duration_cast<seconds>(Now.time_since_epoch()).count();
   double NowSecFrac =

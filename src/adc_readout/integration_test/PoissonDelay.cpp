@@ -30,13 +30,13 @@ void PoissonDelay::start() {
 
   EventTimer.async_wait([this](auto &Error) {
     if (not Error) {
-      runFunction();
+      genSamplesAndEnqueueSend();
       start();
     }
   });
 }
 
-void PoissonDelay::runFunction() {
+void PoissonDelay::genSamplesAndEnqueueSend() {
   auto Now = system_clock::now();
   auto NowSeconds = duration_cast<seconds>(Now.time_since_epoch()).count();
   double NowSecFrac =

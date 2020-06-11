@@ -44,7 +44,7 @@ FPGASim::FPGASim(std::string DstAddress, std::uint16_t DstPort,
       ReconnectTimeout(Service), HeartbeatTimeout(Service),
       DataPacketTimeout(Service),
       TransmitBuffer(std::make_unique<DataPacket>(MaxPacketSize)),
-      StandbyBuffer(std::make_unique<DataPacket>(MaxPacketSize)) {
+      SharedStandbyBuffer(std::make_unique<DataPacket>(MaxPacketSize)) {
   resolveDestination();
 
   IdlePacket.Head.Version = Protocol::VER_1;
@@ -105,26 +105,23 @@ void FPGASim::handleConnect(const asio::error_code &Error,
 }
 
 void FPGASim::startHeartbeatTimer() {
-  auto HeartbeatHandlerGlue = [this](auto &Error) {
-    this->handleHeartbeat(Error);
-  };
   HeartbeatTimeout.expires_after(4s);
-  HeartbeatTimeout.async_wait(HeartbeatHandlerGlue);
+  HeartbeatTimeout.async_wait([this](auto &Error) {
+    if (not Error) {
+      transmitHeartbeat();
+      startHeartbeatTimer();
+    }
+  });
 }
 
 void FPGASim::startPacketTimer() {
-  auto PacketHandlerGlue = [this](auto &Error) {
-    this->handlePacketTimeout(Error);
-  };
   DataPacketTimeout.expires_after(500ms);
-  DataPacketTimeout.async_wait(PacketHandlerGlue);
-}
-
-void FPGASim::handleHeartbeat(const asio::error_code &Error) {
-  if (not Error) {
-    transmitHeartbeat();
-    startHeartbeatTimer();
-  }
+  DataPacketTimeout.async_wait([this](auto &Error) {
+    if (not Error) {
+      swapAndTransmitSharedStandbyBuffer();
+      startHeartbeatTimer();
+    }
+  });
 }
 
 void FPGASim::transmitHeartbeat() {
@@ -139,11 +136,11 @@ void FPGASim::transmitHeartbeat() {
 }
 
 void FPGASim::transmitPacket(const void *DataPtr, const size_t Size) {
-  auto TransmitHandlerGlue = [this](auto &, auto) { this->incNumSentPackets(); };
-
-  Socket.async_send(asio::buffer(DataPtr, Size), TransmitHandlerGlue);
+  Socket.async_send(asio::buffer(DataPtr, Size),
+                    [this](auto &, auto) { this->incNumSentPackets(); });
 }
 
+// used by the generators
 void FPGASim::addSamplingRun(void const *const DataPtr, size_t Bytes,
                              TimeStamp Timestamp) {
   if (CurrentRefTimeNS == 0) {
@@ -152,12 +149,16 @@ void FPGASim::addSamplingRun(void const *const DataPtr, size_t Bytes,
   while (Timestamp.getTimeStampNS() > CurrentRefTimeNS + RefTimeDeltaNS) {
     CurrentRefTimeNS += RefTimeDeltaNS;
   }
-  auto Success =
-      StandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS);
-  auto BufferSizes = StandbyBuffer->getBufferSizes();
-  if (not Success or BufferSizes.second - BufferSizes.first < 20) {
-    transmitStandbyBuffer();
-    assert(StandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS));
+
+  bool Success =
+      SharedStandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS);
+  std::pair<size_t, size_t> BufferSizes = SharedStandbyBuffer->getBufferSizes();
+  size_t Size = BufferSizes.first;
+  size_t MaxSize = BufferSizes.second;
+
+  if (not Success or MaxSize - Size < 20) {
+    swapAndTransmitSharedStandbyBuffer();
+    assert(SharedStandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS));
   } else {
     startPacketTimer();
   }
@@ -165,16 +166,9 @@ void FPGASim::addSamplingRun(void const *const DataPtr, size_t Bytes,
   startHeartbeatTimer();
 }
 
-void FPGASim::handlePacketTimeout(const asio::error_code &Error) {
-  if (not Error) {
-    transmitStandbyBuffer();
-    startHeartbeatTimer();
-  }
-}
-
-void FPGASim::transmitStandbyBuffer() {
-  std::swap(TransmitBuffer, StandbyBuffer);
-  StandbyBuffer->resetPacket();
+void FPGASim::swapAndTransmitSharedStandbyBuffer() {
+  std::swap(TransmitBuffer, SharedStandbyBuffer);
+  SharedStandbyBuffer->resetPacket();
   auto DataInfo = TransmitBuffer->getBuffer(PacketCount);
   PacketCount++;
   transmitPacket(DataInfo.first, DataInfo.second);

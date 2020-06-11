@@ -25,5 +25,5 @@ public:
 
   AmpEventDelayData data;
 
-  void runFunction() override;
+  void genSamplesAndEnqueueSend() override;
 };

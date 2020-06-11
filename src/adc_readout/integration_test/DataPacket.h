@@ -27,5 +27,5 @@ private:
   PacketHeader *HeaderPtr;
   std::size_t Size{0};
   std::size_t MaxSize;
-  std::uint64_t TempReferenceTime{0};
+  std::uint64_t FirstRefTimeInPacket{0};
 };

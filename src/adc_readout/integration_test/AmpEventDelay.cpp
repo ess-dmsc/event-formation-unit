@@ -19,7 +19,7 @@ auto generateCircleAmplitudes() {
                         Center + Amplitude * std::sin(Angle));
 }
 
-void AmpEventDelay::runFunction() {
+void AmpEventDelay::genSamplesAndEnqueueSend() {
   auto Now = system_clock::now();
   auto NowSeconds = duration_cast<seconds>(Now.time_since_epoch()).count();
   double NowSecFrac =

@@ -33,8 +33,10 @@ public:
           asio::io_service &Service);
   ~FPGASim() = default;
 
+  // used by the generators
   void addSamplingRun(void const *const DataPtr, size_t Bytes,
                       TimeStamp Timestamp);
+                      
   int getNrOfRuns() const { return SamplingRuns; };
   int getNrOfPackets() const { return PacketCount; };
   int getNrOfSentPackets() const { return SentPackets; };
@@ -55,18 +57,15 @@ private:
   void tryConnect(QueryResult AllEndpoints);
   void startHeartbeatTimer();
   void startPacketTimer();
-  void transmitStandbyBuffer();
+  void swapAndTransmitSharedStandbyBuffer();
   void transmitPacket(const void *DataPtr, const size_t Size);
 
   void transmitHeartbeat();
 
   void handleResolve(const asio::error_code &Error,
                      asio::ip::udp::resolver::iterator EndpointIter);
-  void handleHeartbeat(const asio::error_code &Error);
   void handleConnect(const asio::error_code &Error,
                      QueryResult const &AllEndpoints);
-
-  void handlePacketTimeout(const asio::error_code &Error);
 
   asio::system_timer ReconnectTimeout;
   asio::system_timer HeartbeatTimeout;
@@ -74,7 +73,7 @@ private:
   std::uint16_t PacketCount{0};
   std::atomic_int SentPackets{0};
   std::unique_ptr<DataPacket> TransmitBuffer;
-  std::unique_ptr<DataPacket> StandbyBuffer;
+  std::unique_ptr<DataPacket> SharedStandbyBuffer;
 
 #pragma pack(push, 2)
   struct {

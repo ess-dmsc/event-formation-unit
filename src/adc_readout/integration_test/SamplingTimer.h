@@ -17,7 +17,7 @@ public:
   virtual void start() = 0;
   virtual void stop() = 0;
 
-  virtual void runFunction();
+  virtual void genSamplesAndEnqueueSend();
 
   std::function<void(TimeStamp const &)> SamplingFunc;
 };

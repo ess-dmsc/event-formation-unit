@@ -23,8 +23,8 @@ bool DataPacket::addSamplingRun(void const *const DataPtr, size_t Bytes,
   if (Size + Bytes + 4 > MaxSize) {
     return false;
   }
-  if (TempReferenceTime == 0) {
-    TempReferenceTime = ReferenceTime;
+  if (FirstRefTimeInPacket == 0) {
+    FirstRefTimeInPacket = ReferenceTime;
   }
   std::memcpy(Buffer.get() + Size, DataPtr, Bytes);
   Size += Bytes;
@@ -39,10 +39,10 @@ std::pair<void *, size_t> DataPacket::getBuffer(std::uint16_t ReadoutCount) {
   Size += 4;
   HeaderPtr->ReadoutCount = htons(ReadoutCount);
   HeaderPtr->ReadoutLength = htons(Size - 8);
-  auto Time = TimeStamp(TempReferenceTime, TimeStamp::ClockMode::External);
+  auto Time = TimeStamp(FirstRefTimeInPacket, TimeStamp::ClockMode::External);
   HeaderPtr->ReferenceTimeStamp = {Time.getSeconds(), Time.getSecondsFrac()};
   HeaderPtr->ReferenceTimeStamp.fixEndian();
-  TempReferenceTime = 0;
+  FirstRefTimeInPacket = 0;
   return std::make_pair(Buffer.get(), Size);
 }
 

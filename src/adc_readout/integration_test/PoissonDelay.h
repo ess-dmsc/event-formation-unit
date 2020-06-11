@@ -38,7 +38,7 @@ public:
 
   PoissonDelayData data;
 
-  void runFunction() override;
+  void genSamplesAndEnqueueSend() override;
 
   asio::high_resolution_timer EventTimer;
   // asio::system_timer EventTimer;

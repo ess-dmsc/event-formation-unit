@@ -37,7 +37,7 @@ public:
 
   ContinousSamplingTimerData Data;
 
-  void runFunction() override;
+  void genSamplesAndEnqueueSend() override;
 
 private:
   void handleEventTimer(const asio::error_code &Error);
