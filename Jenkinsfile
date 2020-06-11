@@ -47,8 +47,8 @@ builders = pipeline_builder.createBuilders { container ->
         container.copyTo(pipeline_builder.project, pipeline_builder.project)
     }  // stage
 
-    if (container.key != clangformat_os) {
 
+    if (container.key != clangformat_os) {
         pipeline_builder.stage("${container.key}: get dependencies") {
             container.sh """
                 cd ${project}
@@ -269,10 +269,10 @@ def get_system_tests_pipeline() {
 // Script actions start here
 node('docker') {
     dir("${project}_code") {
+
         stage('Checkout') {
             try {
                 scm_vars = checkout scm
-
             } catch (e) {
                 failure_function(e, 'Checkout failed')
             }
