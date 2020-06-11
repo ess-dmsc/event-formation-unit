@@ -38,7 +38,7 @@ public:
   int getNrOfRuns() const { return SamplingRuns; };
   int getNrOfPackets() const { return PacketCount; };
   int getNrOfSentPackets() const { return SentPackets; };
-  void packetIsSent() { SentPackets.store(SentPackets + 1); };
+  void incNumSentPackets() { SentPackets.store(SentPackets + 1); };
 
 private:
   const std::uint64_t RefTimeDeltaNS{1000000000ull / 14ull};

@@ -1,5 +1,6 @@
 set(AdcSimulator_SRC
   AdcSimulator.cpp
+  AmpEventDelay.cpp
   ContinousSamplingTimer.cpp
   DataPacket.cpp
   FPGASim.cpp

@@ -29,15 +29,13 @@ ContinousSamplingTimer::ContinousSamplingTimer(
 void ContinousSamplingTimer::start() {
   NextSampleTime += TimeStep;
   SampleTimer.expires_at(NextSampleTime);
-  auto WaitHandlerGlue = [this](auto &Error) { this->handleEventTimer(Error); };
-  SampleTimer.async_wait(WaitHandlerGlue);
+  SampleTimer.async_wait([this](auto &Error) {
+    if (not Error) {
+      runFunction();
+      start();
+    }
+  });
 }
 
-void ContinousSamplingTimer::stop() { SampleTimer.cancel(); }
-
-void ContinousSamplingTimer::handleEventTimer(const asio::error_code &Error) {
-  if (not Error) {
-    runFunction();
-    start();
-  }
-}
+void ContinousSamplingTimer::stop() {
+    SampleTimer.cancel(); }

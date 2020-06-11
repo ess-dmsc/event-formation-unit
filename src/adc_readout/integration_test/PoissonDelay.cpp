@@ -9,25 +9,48 @@
 #include <ciso646>
 #include <iostream>
 
-PoissonDelay::PoissonDelay(std::function<void(TimeStamp const &)> OnEvent,
-                           asio::io_service &AsioService, double EventRate)
-    : SamplingTimer(std::move(OnEvent)), EventTimer(AsioService),
-      RandomGenerator(RD()), RandomDistribution(EventRate) {}
+using std::chrono::duration_cast;
+using std::chrono::milliseconds;
+using std::chrono::nanoseconds;
+using std::chrono::seconds;
+using std::chrono::system_clock;
+
+PoissonDelay::PoissonDelay(PoissonDelayData &sdg)
+    : SamplingTimer([](TimeStamp const &Time) {
+        std::cout << "bad PoissonDelay::PoissonDelay bind" << Time.getSeconds();
+      }),
+      data(sdg), EventTimer(*data.Service), RandomGenerator(RandomDevice()),
+      RandomDistribution(data.Settings_rate) {}
 
 void PoissonDelay::start() {
   auto DelayTime = RandomDistribution(RandomGenerator);
-  auto NextEventDelay =
-      std::chrono::duration<int, std::micro>(static_cast<int>(DelayTime * 1e6));
+  auto NextEventDelay = std::chrono::duration<size_t, std::nano>(
+      static_cast<size_t>(DelayTime /** 1e6*/));
   EventTimer.expires_after(NextEventDelay);
-  auto WaitHandlerGlue = [this](auto &Error) { this->handleEventTimer(Error); };
-  EventTimer.async_wait(WaitHandlerGlue);
+
+  EventTimer.async_wait([this](auto &Error) {
+    if (not Error) {
+      runFunction();
+      start();
+    }
+  });
+}
+
+void PoissonDelay::runFunction() {
+  auto Now = system_clock::now();
+  auto NowSeconds = duration_cast<seconds>(Now.time_since_epoch()).count();
+  double NowSecFrac =
+      (duration_cast<nanoseconds>(Now.time_since_epoch()).count() / 1e9) -
+      NowSeconds;
+  std::uint32_t Ticks = std::lround(NowSecFrac * (88052500 / 2.0));
+
+  RawTimeStamp rts{static_cast<uint32_t>(NowSeconds), Ticks};
+  TimeStamp Time(rts, TimeStamp::ClockMode::External);
+
+  ////////////////
+  std::pair<void *, std::size_t> SampleRun =
+      data.SampleGen.generate(data.Settings_amplitude, Time);
+  data.FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, Time);
 }
 
 void PoissonDelay::stop() { EventTimer.cancel(); }
-
-void PoissonDelay::handleEventTimer(const asio::error_code &Error) {
-  if (not Error) {
-    runFunction();
-    start();
-  }
-}

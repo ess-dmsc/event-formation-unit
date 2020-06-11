@@ -11,9 +11,19 @@
 
 #include "PoissonDelay.h"
 
+struct AmpEventDelayData {
+  SampleRunGenerator AnodeGen;
+  SampleRunGenerator XPosGen;
+  SampleRunGenerator YPosGen;
+
+  PoissonDelayData sgd;
+};
+
 class AmpEventDelay : public PoissonDelay {
 public:
-  AmpEventDelay(std::function<void(TimeStamp const &)> OnEvent,
-                asio::io_service &AsioService, double EventRate)
-      : PoissonDelay(std::move(OnEvent), AsioService, EventRate){};
+  AmpEventDelay(AmpEventDelayData &agd) : PoissonDelay(agd.sgd), data(agd) {}
+
+  AmpEventDelayData data;
+
+  void runFunction() override;
 };

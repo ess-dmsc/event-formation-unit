@@ -17,9 +17,7 @@ public:
   virtual void start() = 0;
   virtual void stop() = 0;
 
-protected:
-  void runFunction();
+  virtual void runFunction();
 
-private:
   std::function<void(TimeStamp const &)> SamplingFunc;
 };

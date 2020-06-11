@@ -16,17 +16,33 @@
 #include <functional>
 #include <random>
 
+#include "SampleRunGenerator.h"
+#include "FPGASim.h"
+
+struct PoissonDelayData {
+  asio::io_service *Service;
+  FPGASim *FPGAPtr;
+  SampleRunGenerator SampleGen;
+
+  double Settings_offset;
+  double Settings_amplitude;
+  double Settings_rate;
+};
+
 class PoissonDelay : public SamplingTimer {
 public:
-  PoissonDelay(std::function<void(TimeStamp const &)> OnEvent,
-               asio::io_service &AsioService, double EventRate);
+  PoissonDelay(PoissonDelayData &sdg);
+
   void start() override;
   void stop() override;
 
-private:
-  void handleEventTimer(const asio::error_code &Error);
-  asio::system_timer EventTimer;
-  std::random_device RD;
+  PoissonDelayData data;
+
+  void runFunction() override;
+
+  asio::high_resolution_timer EventTimer;
+  // asio::system_timer EventTimer;
+  std::random_device RandomDevice;
   std::default_random_engine RandomGenerator;
   std::exponential_distribution<double> RandomDistribution;
 };

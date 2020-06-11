@@ -139,7 +139,7 @@ void FPGASim::transmitHeartbeat() {
 }
 
 void FPGASim::transmitPacket(const void *DataPtr, const size_t Size) {
-  auto TransmitHandlerGlue = [this](auto &, auto) { this->packetIsSent(); };
+  auto TransmitHandlerGlue = [this](auto &, auto) { this->incNumSentPackets(); };
 
   Socket.async_send(asio::buffer(DataPtr, Size), TransmitHandlerGlue);
 }
