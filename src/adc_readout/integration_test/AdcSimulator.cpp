@@ -86,10 +86,6 @@ using namespace std::chrono_literals;
 
 auto SetUpNoiseGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
                          int ChNr, std::map<std::string, double> Settings) {
-  // std::shared_ptr<SampleRunGenerator> SampleGen =
-  //    std::make_shared<SampleRunGenerator>(100, 50, 20, 1.0,
-  //                                         Settings.at("offset"), BoxNr,
-  //                                         ChNr);
 
   double Settings_offset = Settings.at("offset");
   double Settings_amplitude = Settings.at("amplitude");
@@ -100,49 +96,35 @@ auto SetUpNoiseGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
   PoissonDelayData sgd = {&Service,           FPGAPtr,
                         SampleGen,          Settings_offset,
                         Settings_amplitude, Settings_rate};
-  /*
-    struct NoiseGenSampleRunData{
-      std::map<std::string, double> Settings;
-      std::shared_ptr<SampleRunGenerator> SampleGen;
-      FPGASim* FPGAPtr;
-
-        std::shared_ptr<SampleRunGenerator> SampleGen =
-        std::make_shared<SampleRunGenerator>(100, 50, 20, 1.0,
-                                             Settings.at("offset"), BoxNr,
-    ChNr);
-
-      void samplingFunc(TimeStamp const &Time) {
-        std::pair<void *, std::size_t> SampleRun =
-            SampleGen->generate(Settings.at("amplitude"), Time);
-        FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, Time);
-      }
-    };
-    */
-
-  // auto Glue = [Settings, SampleGen, FPGAPtr](TimeStamp const &Time) {
-  //  auto SampleRun = SampleGen->generate(Settings.at("amplitude"), Time);
-  //  FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, Time);
-  //};
-
-  //     std::make_shared<PoissonDelay>(Glue, Service, Settings.at("rate"));
 
   return std::make_shared<PoissonDelay>(sgd);
 }
 
+
+
+
 auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
                         int ChNr, std::map<std::string, double> Settings) {
-  const int NrOfSamples = 4468;
-  const int OversamplingFactor = 4;
-  auto SampleGen = std::make_shared<SampleRunGenerator>(
-      NrOfSamples, 50, 20, 1.0, Settings.at("offset"), BoxNr, ChNr);
-  auto Glue = [Settings, SampleGen, FPGAPtr](TimeStamp const &Time) {
-    auto SampleRun = SampleGen->generate(Settings.at("amplitude"), Time);
-    FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, Time);
-  };
-  return std::make_shared<ContinousSamplingTimer>(Glue, Service, NrOfSamples,
-                                                  OversamplingFactor);
-}
 
+  double Settings_offset = Settings.at("offset");
+  double Settings_amplitude = Settings.at("amplitude");
+  double Settings_rate = 0;
+
+  const int NrOfSamples = 4468;
+  const int NrOfOriginalSamples = NrOfSamples * OversamplingFactor;
+  //const int NrOfSamples = 100; // for high overhead test
+  //const int OversamplingFactor = 1; // for high overhead test
+
+  SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Settings_offset, BoxNr,
+                               ChNr);
+
+  ContinousSamplingTimerData csta = {&Service,        FPGAPtr,
+                                     SampleGen,       NrOfOriginalSamples,
+                                     Settings_offset, Settings_amplitude,
+                                     Settings_rate};
+
+  return std::make_shared<ContinousSamplingTimer>(csta);
+}
 
 auto SetUpAmpPosGenerator(asio::io_service &Service, FPGASim *FPGAPtr,
                           int BoxNr, double EventRate) {
@@ -321,9 +303,9 @@ int main(const int argc, char *argv[]) {
   StatsTimer Stats(PrintStats, Service);
   Stats.start();
 
-  //std::thread AsioThread([&Service]() { Service.run(); });
-  std::thread AsioThread([]{});
-  Service.run();
+  std::thread AsioThread([&Service]() { Service.run(); });
+  //std::thread AsioThread([]{});
+  //Service.run();
 
   while (RunLoop) {
     std::this_thread::sleep_for(500ms);

@@ -28,12 +28,12 @@ SampleRunGenerator::SampleRunGenerator(size_t Samples, double PeakPos,
       ADCChannelNr(ADCChannel), PeakBuffer(Samples) {
 
   // Set-up sample run header and trailer
-  HeaderPtr()->Channel = ADCChannelNr;
-  HeaderPtr()->MagicValue = 0xABCD;
-  HeaderPtr()->Oversampling = 1;
-  HeaderPtr()->Length =
+  GetHeaderPtr()->Channel = ADCChannelNr;
+  GetHeaderPtr()->MagicValue = 0xABCD;
+  GetHeaderPtr()->Oversampling = 1;
+  GetHeaderPtr()->Length =
       Samples * sizeof(std::uint16_t) + sizeof(DataHeader) + 4;
-  HeaderPtr()->fixEndian();
+  GetHeaderPtr()->fixEndian();
   auto TrailerPtr = reinterpret_cast<std::uint32_t *>(
       Buffer.data() + Samples * sizeof(std::uint16_t) + sizeof(DataHeader));
   *TrailerPtr = htonl(0xBEEFCAFEu);
@@ -83,14 +83,14 @@ SampleRunGenerator::SampleRunGenerator(size_t Samples, double PeakPos,
 
 std::pair<void *, std::size_t>
 SampleRunGenerator::generate(double Amplitude, TimeStamp const Time) {
-  HeaderPtr()->TimeStamp = {Time.getSeconds(), Time.getSecondsFrac()};
-  HeaderPtr()->TimeStamp.fixEndian();
+  GetHeaderPtr()->TimeStamp = {Time.getSeconds(), Time.getSecondsFrac()};
+  GetHeaderPtr()->TimeStamp.fixEndian();
 
-  std::uint16_t *samplePtr = SamplePtr();
+  std::uint16_t *SamplePtr = GetSamplePtr();
 
   if (0) {
     for (auto i = 0u; i < NrOFSamples; ++i) {
-      samplePtr[i] = htons(
+      SamplePtr[i] = htons(
           std::lround(PeakBuffer[i] * Amplitude + BkgSlope * i + BkgOffset));
     }
   } else {
@@ -101,7 +101,7 @@ SampleRunGenerator::generate(double Amplitude, TimeStamp const Time) {
     float f32_i_mul_BkgSlope_plus_BkgOffset = f32_BkgOffset;
 
     for (int i = 0; i < i32_NumSamples; ++i) {
-      samplePtr[i] = htons(std::lround(PeakBuffer[i] * f32_Amplitude +
+      SamplePtr[i] = htons(std::lround(PeakBuffer[i] * f32_Amplitude +
                                        f32_i_mul_BkgSlope_plus_BkgOffset));
       f32_i_mul_BkgSlope_plus_BkgOffset += f32_BkgSlope;
     }

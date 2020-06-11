@@ -9,6 +9,8 @@
 
 #include "../AdcTimeStamp.h"
 #include "SamplingTimer.h"
+#include "FPGASim.h"
+#include "SampleRunGenerator.h"
 #ifndef assert
 #define assert(...) /**/
 #endif
@@ -16,20 +18,32 @@
 #include <chrono>
 #include <functional>
 
+struct ContinousSamplingTimerData {
+  asio::io_service *Service;
+  FPGASim *FPGAPtr;
+  SampleRunGenerator SampleGen;
+  int NrOfOriginalSamples;
+
+  double Settings_offset;
+  double Settings_amplitude;
+  double Settings_rate;
+};
+
 class ContinousSamplingTimer : public SamplingTimer {
 public:
-  ContinousSamplingTimer(std::function<void(TimeStamp const &)> OnTimer,
-                         asio::io_service &AsioService, int NrOfSamples,
-                         int OversamplingFactor);
+  ContinousSamplingTimer(ContinousSamplingTimerData& data);
   void start() override;
   void stop() override;
+
+  ContinousSamplingTimerData Data;
+
+  void runFunction() override;
 
 private:
   void handleEventTimer(const asio::error_code &Error);
   asio::system_timer SampleTimer;
 
   std::chrono::system_clock::time_point NextSampleTime;
-  const int NrOfOriginalSamples;
-  const double TimeFracMax = 88052500.0 / 2;
+  //const int NrOfOriginalSamples;
   std::chrono::system_clock::duration TimeStep;
 };
