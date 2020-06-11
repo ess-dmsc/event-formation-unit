@@ -5,7 +5,7 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#include "FPGASim.h"
+#include "UdpConnection.h"
 #include <ciso646>
 #include <functional>
 #include <iostream>
@@ -37,8 +37,8 @@ struct QueryResult {
   unsigned int NextEndpoint{0};
 };
 
-FPGASim::FPGASim(std::string DstAddress, std::uint16_t DstPort,
-                 asio::io_service &Service)
+UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort,
+                             asio::io_service &Service)
     : Address(std::move(DstAddress)), Port(DstPort),
       Socket(Service, UdpEndpoint()), Resolver(Service),
       ReconnectTimeout(Service), HeartbeatTimeout(Service),
@@ -57,7 +57,7 @@ FPGASim::FPGASim(std::string DstAddress, std::uint16_t DstPort,
   IdlePacket.fixEndian();
 }
 
-void FPGASim::resolveDestination() {
+void UdpConnection::resolveDestination() {
   asio::ip::udp::resolver::query Query(asio::ip::udp::v4(), Address,
                                        std::to_string(Port));
   auto ResolveHandlerGlue = [this](auto &Error, auto EndpointIterator) {
@@ -66,13 +66,13 @@ void FPGASim::resolveDestination() {
   Resolver.async_resolve(Query, ResolveHandlerGlue);
 }
 
-void FPGASim::reconnectWait() {
+void UdpConnection::reconnectWait() {
   auto HandlerGlue = [this](auto &) { this->resolveDestination(); };
   ReconnectTimeout.expires_after(1s);
   ReconnectTimeout.async_wait(HandlerGlue);
 }
 
-void FPGASim::tryConnect(QueryResult AllEndpoints) {
+void UdpConnection::tryConnect(QueryResult AllEndpoints) {
   UdpEndpoint CurrentEndpoint = AllEndpoints.getNextEndpoint();
   auto HandlerGlue = [this, AllEndpoints](auto &Error) {
     this->handleConnect(Error, AllEndpoints);
@@ -80,8 +80,9 @@ void FPGASim::tryConnect(QueryResult AllEndpoints) {
   Socket.async_connect(CurrentEndpoint, HandlerGlue);
 }
 
-void FPGASim::handleResolve(const asio::error_code &Error,
-                            asio::ip::udp::resolver::iterator EndpointIter) {
+void UdpConnection::handleResolve(
+    const asio::error_code &Error,
+    asio::ip::udp::resolver::iterator EndpointIter) {
   if (Error) {
     reconnectWait();
     return;
@@ -90,8 +91,8 @@ void FPGASim::handleResolve(const asio::error_code &Error,
   tryConnect(AllEndpoints);
 }
 
-void FPGASim::handleConnect(const asio::error_code &Error,
-                            QueryResult const &AllEndpoints) {
+void UdpConnection::handleConnect(const asio::error_code &Error,
+                                  QueryResult const &AllEndpoints) {
   if (!Error) {
     startHeartbeatTimer();
     return;
@@ -104,7 +105,7 @@ void FPGASim::handleConnect(const asio::error_code &Error,
   tryConnect(AllEndpoints);
 }
 
-void FPGASim::startHeartbeatTimer() {
+void UdpConnection::startHeartbeatTimer() {
   HeartbeatTimeout.expires_after(4s);
   HeartbeatTimeout.async_wait([this](auto &Error) {
     if (not Error) {
@@ -114,7 +115,7 @@ void FPGASim::startHeartbeatTimer() {
   });
 }
 
-void FPGASim::startPacketTimer() {
+void UdpConnection::startPacketTimer() {
   DataPacketTimeout.expires_after(500ms);
   DataPacketTimeout.async_wait([this](auto &Error) {
     if (not Error) {
@@ -124,7 +125,7 @@ void FPGASim::startPacketTimer() {
   });
 }
 
-void FPGASim::transmitHeartbeat() {
+void UdpConnection::transmitHeartbeat() {
   TimeStamp IdleTS{CurrentRefTimeNS + RefTimeDeltaNS,
                    TimeStamp::ClockMode::External};
   auto IdleRawTS = RawTimeStamp{IdleTS.getSeconds(), IdleTS.getSecondsFrac()};
@@ -135,14 +136,14 @@ void FPGASim::transmitHeartbeat() {
   transmitPacket(&IdlePacket, sizeof(IdlePacket));
 }
 
-void FPGASim::transmitPacket(const void *DataPtr, const size_t Size) {
+void UdpConnection::transmitPacket(const void *DataPtr, const size_t Size) {
   Socket.async_send(asio::buffer(DataPtr, Size),
                     [this](auto &, auto) { this->incNumSentPackets(); });
 }
 
 // used by the generators
-void FPGASim::addSamplingRun(void const *const DataPtr, size_t Bytes,
-                             TimeStamp Timestamp) {
+void UdpConnection::addSamplingRun(void const *const DataPtr, size_t Bytes,
+                                   TimeStamp Timestamp) {
   if (CurrentRefTimeNS == 0) {
     CurrentRefTimeNS = Timestamp.getTimeStampNS();
   }
@@ -158,7 +159,8 @@ void FPGASim::addSamplingRun(void const *const DataPtr, size_t Bytes,
 
   if (not Success or MaxSize - Size < 20) {
     swapAndTransmitSharedStandbyBuffer();
-    assert(SharedStandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS));
+    assert(
+        SharedStandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS));
   } else {
     startPacketTimer();
   }
@@ -166,7 +168,7 @@ void FPGASim::addSamplingRun(void const *const DataPtr, size_t Bytes,
   startHeartbeatTimer();
 }
 
-void FPGASim::swapAndTransmitSharedStandbyBuffer() {
+void UdpConnection::swapAndTransmitSharedStandbyBuffer() {
   std::swap(TransmitBuffer, SharedStandbyBuffer);
   SharedStandbyBuffer->resetPacket();
   auto DataInfo = TransmitBuffer->getBuffer(PacketCount);

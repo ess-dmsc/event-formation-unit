@@ -8,9 +8,9 @@
 #pragma once
 
 #include "../AdcTimeStamp.h"
-#include "SamplingTimer.h"
-#include "FPGASim.h"
 #include "SampleRunGenerator.h"
+#include "SamplingTimer.h"
+#include "UdpConnection.h"
 #ifndef assert
 #define assert(...) /**/
 #endif
@@ -20,7 +20,7 @@
 
 struct ContinousSamplingTimerData {
   asio::io_service *Service;
-  FPGASim *FPGAPtr;
+  UdpConnection *UdpCon;
   SampleRunGenerator SampleGen;
   int NrOfOriginalSamples;
 
@@ -31,7 +31,7 @@ struct ContinousSamplingTimerData {
 
 class ContinousSamplingTimer : public SamplingTimer {
 public:
-  ContinousSamplingTimer(ContinousSamplingTimerData& data);
+  ContinousSamplingTimer(ContinousSamplingTimerData &data);
   void start() override;
   void stop() override;
 
@@ -44,6 +44,6 @@ private:
   asio::system_timer SampleTimer;
 
   std::chrono::system_clock::time_point NextSampleTime;
-  //const int NrOfOriginalSamples;
+  // const int NrOfOriginalSamples;
   std::chrono::system_clock::duration TimeStep;
 };

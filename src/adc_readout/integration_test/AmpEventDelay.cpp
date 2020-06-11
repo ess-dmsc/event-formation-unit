@@ -36,8 +36,8 @@ void AmpEventDelay::genSamplesAndEnqueueSend() {
   auto Amplitudes = generateCircleAmplitudes();
   auto SampleRunX = data.XPosGen.generate(Amplitudes.first, Time);
   auto SampleRunY = data.YPosGen.generate(Amplitudes.second, Time);
-  data.sgd.FPGAPtr->addSamplingRun(SampleRunAnode.first, SampleRunAnode.second,
-                              Time);
-  data.sgd.FPGAPtr->addSamplingRun(SampleRunX.first, SampleRunX.second, Time);
-  data.sgd.FPGAPtr->addSamplingRun(SampleRunY.first, SampleRunY.second, Time);
+  data.sgd.UdpCon->addSamplingRun(SampleRunAnode.first, SampleRunAnode.second,
+                                  Time);
+  data.sgd.UdpCon->addSamplingRun(SampleRunX.first, SampleRunX.second, Time);
+  data.sgd.UdpCon->addSamplingRun(SampleRunY.first, SampleRunY.second, Time);
 }

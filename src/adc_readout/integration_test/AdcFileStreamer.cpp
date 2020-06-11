@@ -8,8 +8,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "DataModulariser.h"
-#include "FPGASim.h"
 #include "PoissonDelay.h"
+#include "UdpConnection.h"
 #include "WaveformData.h"
 #include <CLI/CLI.hpp>
 #include <h5cpp/hdf5.hpp>
@@ -94,13 +94,13 @@ private:
   DataModulariser Modulariser;
 };
 
-auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr,
+auto SetUpContGenerator(asio::io_service &Service, UdpConnection *UdpCon,
                         StreamSettings &Settings) {
   auto SampleGen =
       std::make_shared<FileSampler>(Settings.NeXuSFile, Settings.WaveformPath);
-  auto Glue = [Settings, SampleGen, FPGAPtr](TimeStamp const &ts) {
+  auto Glue = [Settings, SampleGen, UdpCon](TimeStamp const &ts) {
     auto SampleRun = SampleGen->generate();
-    FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second,ts);
+    UdpCon->addSamplingRun(SampleRun.first, SampleRun.second, ts);
   };
   return std::make_shared<PoissonDelay>(Glue, Service, Settings.EventRate);
 }
@@ -143,8 +143,8 @@ int main(const int argc, char *argv[]) {
   asio::io_service Service;
   asio::io_service::work Worker(Service);
 
-  auto AdcBox = std::make_shared<FPGASim>(UsedSettings.EFUAddress,
-                                          UsedSettings.Port, Service);
+  auto AdcBox = std::make_shared<UdpConnection>(UsedSettings.EFUAddress,
+                                                UsedSettings.Port, Service);
 
   std::shared_ptr<SamplingTimer> DataTimer =
       SetUpContGenerator(Service, AdcBox.get(), UsedSettings);

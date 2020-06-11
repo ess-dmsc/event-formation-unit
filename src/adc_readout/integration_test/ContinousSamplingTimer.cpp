@@ -56,7 +56,7 @@ void ContinousSamplingTimer::genSamplesAndEnqueueSend() {
 
   std::pair<void *, std::size_t> SampleRun =
       Data.SampleGen.generate(Data.Settings_amplitude, Time);
-  Data.FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, Time);
+  Data.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second, Time);
 }
 
 void ContinousSamplingTimer::stop() { SampleTimer.cancel(); }

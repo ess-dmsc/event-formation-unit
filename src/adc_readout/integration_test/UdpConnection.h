@@ -27,16 +27,16 @@ using BufferPtr = std::shared_ptr<std::uint8_t>;
 
 struct QueryResult;
 
-class FPGASim {
+class UdpConnection {
 public:
-  FPGASim(std::string DstAddress, std::uint16_t DstPort,
-          asio::io_service &Service);
-  ~FPGASim() = default;
+  UdpConnection(std::string DstAddress, std::uint16_t DstPort,
+                asio::io_service &Service);
+  ~UdpConnection() = default;
 
   // used by the generators
   void addSamplingRun(void const *const DataPtr, size_t Bytes,
                       TimeStamp Timestamp);
-                      
+
   int getNrOfRuns() const { return SamplingRuns; };
   int getNrOfPackets() const { return PacketCount; };
   int getNrOfSentPackets() const { return SentPackets; };

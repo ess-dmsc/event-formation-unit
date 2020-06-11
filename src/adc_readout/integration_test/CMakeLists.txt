@@ -3,7 +3,7 @@ set(AdcSimulator_SRC
   AmpEventDelay.cpp
   ContinousSamplingTimer.cpp
   DataPacket.cpp
-  FPGASim.cpp
+  UdpConnection.cpp
   PoissonDelay.cpp
   SampleRunGenerator.cpp
   SamplingTimer.cpp
@@ -13,7 +13,7 @@ set(AdcSimulator_INC
   AmpEventDelay.h
   ContinousSamplingTimer.h
   DataPacket.h
-  FPGASim.h
+  UdpConnection.h
   PoissonDelay.h
   SampleRunGenerator.h
   SamplingTimer.h
@@ -41,7 +41,7 @@ set(AdcFileStreamer_SRC
         WaveformData.cpp
         DataModulariser.cpp
         PoissonDelay.cpp
-        FPGASim.cpp
+        UdpConnection.cpp
         DataPacket.cpp
         ../AdcTimeStamp.cpp
         SamplingTimer.cpp)
@@ -50,7 +50,7 @@ set(AdcFileStreamer_INC
         WaveformData.h
         DataModulariser.h
         PoissonDelay.h
-        FPGASim.h
+        UdpConnection.h
         DataPacket.h
         ../AdcTimeStamp.h
         SamplingTimer.h)

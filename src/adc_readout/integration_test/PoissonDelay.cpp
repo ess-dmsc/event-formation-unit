@@ -48,10 +48,10 @@ void PoissonDelay::genSamplesAndEnqueueSend() {
   TimeStamp Time(rts, TimeStamp::ClockMode::External);
 
   ////////////////
-  
+
   std::pair<void *, std::size_t> SampleRun =
       data.SampleGen.generate(data.Settings_amplitude, Time);
-  data.FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, Time);
+  data.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second, Time);
 }
 
 void PoissonDelay::stop() { EventTimer.cancel(); }

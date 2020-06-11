@@ -8,9 +8,9 @@
 
 #include "AmpEventDelay.h"
 #include "ContinousSamplingTimer.h"
-#include "FPGASim.h"
 #include "PoissonDelay.h"
 #include "SampleRunGenerator.h"
+#include "UdpConnection.h"
 #include <CLI/CLI.hpp>
 #include <algorithm>
 #include <chrono>
@@ -84,8 +84,9 @@ void addCLIOptions(CLI::App &Parser, SimSettings &Settings) {
 
 using namespace std::chrono_literals;
 
-auto SetUpNoiseGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
-                         int ChNr, std::map<std::string, double> Settings) {
+auto SetUpNoiseGenerator(asio::io_service &Service, UdpConnection *UdpCon,
+                         int BoxNr, int ChNr,
+                         std::map<std::string, double> Settings) {
 
   double Settings_offset = Settings.at("offset");
   double Settings_amplitude = Settings.at("amplitude");
@@ -93,18 +94,16 @@ auto SetUpNoiseGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
 
   SampleRunGenerator SampleGen(100, 50, 20, 1.0, Settings_offset, BoxNr, ChNr);
 
-  PoissonDelayData sgd = {&Service,           FPGAPtr,
-                        SampleGen,          Settings_offset,
-                        Settings_amplitude, Settings_rate};
+  PoissonDelayData sgd = {&Service,           UdpCon,
+                          SampleGen,          Settings_offset,
+                          Settings_amplitude, Settings_rate};
 
   return std::make_shared<PoissonDelay>(sgd);
 }
 
-
-
-
-auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
-                        int ChNr, std::map<std::string, double> Settings) {
+auto SetUpContGenerator(asio::io_service &Service, UdpConnection *UdpCon,
+                        int BoxNr, int ChNr,
+                        std::map<std::string, double> Settings) {
 
   double Settings_offset = Settings.at("offset");
   double Settings_amplitude = Settings.at("amplitude");
@@ -121,7 +120,7 @@ auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
   SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Settings_offset, BoxNr,
                                ChNr);
 
-  ContinousSamplingTimerData csta = {&Service,        FPGAPtr,
+  ContinousSamplingTimerData csta = {&Service,        UdpCon,
                                      SampleGen,       NrOfOriginalSamples,
                                      Settings_offset, Settings_amplitude,
                                      Settings_rate};
@@ -129,7 +128,7 @@ auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
   return std::make_shared<ContinousSamplingTimer>(csta);
 }
 
-auto SetUpAmpPosGenerator(asio::io_service &Service, FPGASim *FPGAPtr,
+auto SetUpAmpPosGenerator(asio::io_service &Service, UdpConnection *UdpCon,
                           int BoxNr, double EventRate) {
 
   const int NrOfSamples{100};
@@ -139,9 +138,9 @@ auto SetUpAmpPosGenerator(asio::io_service &Service, FPGASim *FPGAPtr,
   double Settings_rate = EventRate;
   SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Settings_offset, 0, 0);
 
-  PoissonDelayData sgd = {&Service,           FPGAPtr,
-                        SampleGen,          Settings_offset,
-                        Settings_amplitude, Settings_rate};
+  PoissonDelayData sgd = {&Service,           UdpCon,
+                          SampleGen,          Settings_offset,
+                          Settings_amplitude, Settings_rate};
 
   SampleRunGenerator AnodeGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 0);
   SampleRunGenerator XPosGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 1);
@@ -190,10 +189,10 @@ int main(const int argc, char *argv[]) {
   asio::io_service Service;
   asio::io_service::work Worker(Service);
 
-  auto AdcBox1 = std::make_shared<FPGASim>(UsedSettings.EFUAddress,
-                                           UsedSettings.Port1, Service);
-  auto AdcBox2 = std::make_shared<FPGASim>(UsedSettings.EFUAddress,
-                                           UsedSettings.Port2, Service);
+  auto AdcBox1 = std::make_shared<UdpConnection>(UsedSettings.EFUAddress,
+                                                 UsedSettings.Port1, Service);
+  auto AdcBox2 = std::make_shared<UdpConnection>(UsedSettings.EFUAddress,
+                                                 UsedSettings.Port2, Service);
 
   std::vector<std::shared_ptr<SamplingTimer>> Box1Timers;
 
@@ -307,8 +306,8 @@ int main(const int argc, char *argv[]) {
   Stats.start();
 
   std::thread AsioThread([&Service]() { Service.run(); });
-  //std::thread AsioThread([]{});
-  //Service.run();
+  // std::thread AsioThread([]{});
+  // Service.run();
 
   while (RunLoop) {
     std::this_thread::sleep_for(500ms);

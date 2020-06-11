@@ -17,11 +17,11 @@
 #include <random>
 
 #include "SampleRunGenerator.h"
-#include "FPGASim.h"
+#include "UdpConnection.h"
 
 struct PoissonDelayData {
   asio::io_service *Service;
-  FPGASim *FPGAPtr;
+  UdpConnection *UdpCon;
   SampleRunGenerator SampleGen;
 
   double Settings_offset;
