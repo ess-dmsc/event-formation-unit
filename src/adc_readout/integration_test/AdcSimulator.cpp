@@ -110,10 +110,12 @@ auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr, int BoxNr,
   double Settings_amplitude = Settings.at("amplitude");
   double Settings_rate = 0;
 
-  const int NrOfSamples = 4468;
-  const int NrOfOriginalSamples = NrOfSamples * OversamplingFactor;
-  //const int NrOfSamples = 100; // for high overhead test
-  //const int OversamplingFactor = 1; // for high overhead test
+  int NrOfSamples = 4468;
+  int NrOfOriginalSamples = NrOfSamples * OversamplingFactor;
+  if (0) { // high overhead test
+    NrOfSamples = 100;
+    OversamplingFactor = 1;
+  }
 
   SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Settings_offset, BoxNr,
                                ChNr);
