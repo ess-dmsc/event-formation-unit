@@ -3,6 +3,8 @@
 /** @file
  *
  *  \brief ADC readout detector module.
+ *  \todo This file should contain more comments
+ *  \todo consider not creating stats dynamically
  */
 
 #include "AdcReadoutBase.h"
@@ -32,6 +34,8 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
   Stats.create("parser.packets.data", AdcStats.parser_packets_data);
   Stats.create("processing.packets.lost", AdcStats.processing_packets_lost);
   Stats.create("current_ts", AdcStats.current_ts_ms);
+  /// \todo mjc don't like this, also this is the second assignment to -1
+  /// (also done in AdcReadoutBase.h)
   AdcStats.processing_packets_lost = -1; // To compensate for the first error.
 }
 
@@ -100,6 +104,9 @@ bool AdcReadoutBase::QueueUpDataModule(SamplingRun *Data) {
       ->tryPutData(SpscBuffer::ElementPtr<SamplingRun>(Data));
 }
 
+/// \todo better packet counting semantics needed? Normally
+/// all packets should be counted so that
+/// packets_total == packets_idle + _data + _errors
 void AdcReadoutBase::packetFunction(InData const &Packet,
                                     PacketParser &Parser) {
   if (Packet.Length > 0) {
