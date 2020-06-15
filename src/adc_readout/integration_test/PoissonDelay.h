@@ -20,18 +20,12 @@
 #include "UdpConnection.h"
 
 struct PoissonDelayData {
-  asio::io_service *Service;
-  UdpConnection *UdpCon;
-  SampleRunGenerator SampleGen;
-
-  double Settings_offset;
-  double Settings_amplitude;
-  double Settings_rate;
+  SamplingTimerData TimerData;
 };
 
 class PoissonDelay : public SamplingTimer {
 public:
-  PoissonDelay(PoissonDelayData &sdg);
+  PoissonDelay(PoissonDelayData &data);
 
   void start() override;
   void stop() override;

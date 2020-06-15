@@ -19,14 +19,17 @@
 #include <functional>
 
 struct ContinousSamplingTimerData {
-  asio::io_service *Service;
+  /*asio::io_service *Service;
   UdpConnection *UdpCon;
   SampleRunGenerator SampleGen;
-  int NrOfOriginalSamples;
-
+  
   double Settings_offset;
   double Settings_amplitude;
   double Settings_rate;
+*/
+  SamplingTimerData TimerData;
+
+  int NrOfOriginalSamples;
 };
 
 class ContinousSamplingTimer : public SamplingTimer {

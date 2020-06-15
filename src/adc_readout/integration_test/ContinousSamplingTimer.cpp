@@ -18,7 +18,7 @@ using std::chrono::system_clock;
 
 ContinousSamplingTimer::ContinousSamplingTimer(ContinousSamplingTimerData &data)
     : SamplingTimer([](TimeStamp const &) {}), Data(data),
-      SampleTimer(*data.Service) {
+      SampleTimer(*data.TimerData.Service) {
 
   NextSampleTime = system_clock::now();
 
@@ -55,8 +55,8 @@ void ContinousSamplingTimer::genSamplesAndEnqueueSend() {
   ////////////////
 
   std::pair<void *, std::size_t> SampleRun =
-      Data.SampleGen.generate(Data.Settings_amplitude, Time);
-  Data.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second, Time);
+      Data.TimerData.SampleGen.generate(Data.TimerData.Settings_amplitude, Time);
+  Data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second, Time);
 }
 
 void ContinousSamplingTimer::stop() { SampleTimer.cancel(); }

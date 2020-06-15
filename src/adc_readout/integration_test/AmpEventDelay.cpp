@@ -9,12 +9,12 @@ using std::chrono::system_clock;
 
 std::random_device RandomDevice;
 std::default_random_engine Generator(RandomDevice());
-std::uniform_real_distribution<double> Distribution(0, 3.141592653);
+std::uniform_real_distribution<double> DistributionPi(0, 3.141592653);
 
 auto generateCircleAmplitudes() {
   const double Amplitude{2000};
   const double Center{3000};
-  auto Angle = Distribution(Generator);
+  auto Angle = DistributionPi(Generator);
   return std::make_pair(Center + Amplitude * std::cos(Angle),
                         Center + Amplitude * std::sin(Angle));
 }
@@ -36,8 +36,10 @@ void AmpEventDelay::genSamplesAndEnqueueSend() {
   auto Amplitudes = generateCircleAmplitudes();
   auto SampleRunX = data.XPosGen.generate(Amplitudes.first, Time);
   auto SampleRunY = data.YPosGen.generate(Amplitudes.second, Time);
-  data.sgd.UdpCon->addSamplingRun(SampleRunAnode.first, SampleRunAnode.second,
-                                  Time);
-  data.sgd.UdpCon->addSamplingRun(SampleRunX.first, SampleRunX.second, Time);
-  data.sgd.UdpCon->addSamplingRun(SampleRunY.first, SampleRunY.second, Time);
+  data.PoissonData.TimerData.UdpCon->addSamplingRun(
+      SampleRunAnode.first, SampleRunAnode.second, Time);
+  data.PoissonData.TimerData.UdpCon->addSamplingRun(SampleRunX.first,
+                                                    SampleRunX.second, Time);
+  data.PoissonData.TimerData.UdpCon->addSamplingRun(SampleRunY.first,
+                                                    SampleRunY.second, Time);
 }

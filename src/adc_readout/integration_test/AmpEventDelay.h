@@ -16,12 +16,12 @@ struct AmpEventDelayData {
   SampleRunGenerator XPosGen;
   SampleRunGenerator YPosGen;
 
-  PoissonDelayData sgd;
+  PoissonDelayData PoissonData;
 };
 
 class AmpEventDelay : public PoissonDelay {
 public:
-  AmpEventDelay(AmpEventDelayData &agd) : PoissonDelay(agd.sgd), data(agd) {}
+  AmpEventDelay(AmpEventDelayData &data) : PoissonDelay(data.PoissonData), data(data) {}
 
   AmpEventDelayData data;
 

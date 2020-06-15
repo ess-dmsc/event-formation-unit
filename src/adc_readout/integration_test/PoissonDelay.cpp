@@ -15,12 +15,12 @@ using std::chrono::nanoseconds;
 using std::chrono::seconds;
 using std::chrono::system_clock;
 
-PoissonDelay::PoissonDelay(PoissonDelayData &sdg)
+PoissonDelay::PoissonDelay(PoissonDelayData &data)
     : SamplingTimer([](TimeStamp const &Time) {
         std::cout << "bad PoissonDelay::PoissonDelay bind" << Time.getSeconds();
       }),
-      data(sdg), EventTimer(*data.Service), RandomGenerator(RandomDevice()),
-      RandomDistribution(data.Settings_rate) {}
+      data(data), EventTimer(*data.TimerData.Service), RandomGenerator(RandomDevice()),
+      RandomDistribution(data.TimerData.Settings_rate) {}
 
 void PoissonDelay::start() {
   auto DelayTime = RandomDistribution(RandomGenerator);
@@ -50,8 +50,8 @@ void PoissonDelay::genSamplesAndEnqueueSend() {
   ////////////////
 
   std::pair<void *, std::size_t> SampleRun =
-      data.SampleGen.generate(data.Settings_amplitude, Time);
-  data.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second, Time);
+      data.TimerData.SampleGen.generate(data.TimerData.Settings_amplitude, Time);
+  data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second, Time);
 }
 
 void PoissonDelay::stop() { EventTimer.cancel(); }
