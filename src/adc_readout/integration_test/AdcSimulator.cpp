@@ -86,24 +86,21 @@ using namespace std::chrono_literals;
 
 template <class T> struct VecFixed {
   T *Elms;
-  uint32_t Count;
-  uint32_t Capacity;
+  int32_t Count;
+  int32_t Capacity;
 
-  VecFixed(uint32_t Capacity) : Capacity(Capacity) {
+  VecFixed(int32_t Capacity) : Capacity(Capacity) {
     Elms = (T *)malloc(sizeof(T) * Capacity);
     Count = 0;
   }
 
   ~VecFixed() {
-    if (Count > 0) {
-      for (uint32_t i = Count - 1; i >= 0; --i) {
-        Elms[i].~T();
-      }
-    }
-    free (Elms);
+    for (int32_t i = Count - 1; i >= 0; --i)
+      Elms[i].~T();
+    free(Elms);
   }
 
-  T *push_back_uninitialized() {
+  T *allocate() {
     RelAssertMsg(Count < Capacity, "");
     return &Elms[Count++];
   }
@@ -263,7 +260,7 @@ int main(const int argc, char *argv[]) {
                             {{"rate", UsedSettings.NoiseRate},
                              {"offset", 1.0},
                              {"amplitude", 2000.0}},
-                            PoissionTimers.push_back_uninitialized());
+                            PoissionTimers.allocate());
     }
 
     if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
@@ -272,7 +269,7 @@ int main(const int argc, char *argv[]) {
                             {{"rate", UsedSettings.NoiseRate},
                              {"offset", 10.0},
                              {"amplitude", 3000.0}},
-                            PoissionTimers.push_back_uninitialized());
+                            PoissionTimers.allocate());
     }
 
     if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
@@ -281,7 +278,7 @@ int main(const int argc, char *argv[]) {
                             {{"rate", UsedSettings.NoiseRate},
                              {"offset", 100.0},
                              {"amplitude", 4000.0}},
-                            PoissionTimers.push_back_uninitialized());
+                            PoissionTimers.allocate());
     }
 
     if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
@@ -290,20 +287,20 @@ int main(const int argc, char *argv[]) {
                             {{"rate", UsedSettings.NoiseRate},
                              {"offset", 1000.0},
                              {"amplitude", 5000.0}},
-                            PoissionTimers.push_back_uninitialized());
+                            PoissionTimers.allocate());
     }
 
     if (ShouldCreateTimer(SamplerType::Continous, CurAdc, &AdcBox2,
                           UsedSettings)) {
       SetUpContinousGenerator(Service, CurAdc, 0, 0,
                               {{"offset", 1000.0}, {"amplitude", 1000.0}},
-                              ContinousTimers.push_back_uninitialized());
+                              ContinousTimers.allocate());
     }
 
     if (ShouldCreateTimer(SamplerType::AmpEventDelay, CurAdc, &AdcBox2,
                           UsedSettings)) {
       SetUpAmpPosGenerator(Service, CurAdc, 0, UsedSettings.EventRate,
-                           AmpDelayTimers.push_back_uninitialized());
+                           AmpDelayTimers.allocate());
     }
   }
 
@@ -317,7 +314,7 @@ int main(const int argc, char *argv[]) {
                             {{"rate", UsedSettings.NoiseRate},
                              {"offset", 1.0},
                              {"amplitude", 2000.0}},
-                            PoissionTimers.push_back_uninitialized());
+                            PoissionTimers.allocate());
     }
 
     if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
@@ -326,7 +323,7 @@ int main(const int argc, char *argv[]) {
                             {{"rate", UsedSettings.NoiseRate},
                              {"offset", 10.0},
                              {"amplitude", 3000.0}},
-                            PoissionTimers.push_back_uninitialized());
+                            PoissionTimers.allocate());
     }
 
     if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
@@ -335,7 +332,7 @@ int main(const int argc, char *argv[]) {
                             {{"rate", UsedSettings.NoiseRate},
                              {"offset", 100.0},
                              {"amplitude", 4000.0}},
-                            PoissionTimers.push_back_uninitialized());
+                            PoissionTimers.allocate());
     }
 
     if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
@@ -344,14 +341,14 @@ int main(const int argc, char *argv[]) {
                             {{"rate", UsedSettings.NoiseRate},
                              {"offset", 1000.0},
                              {"amplitude", 5000.0}},
-                            PoissionTimers.push_back_uninitialized());
+                            PoissionTimers.allocate());
     }
 
     if (ShouldCreateTimer(SamplerType::Continous, CurAdc, &AdcBox2,
                           UsedSettings)) {
       SetUpContinousGenerator(Service, &AdcBox2, 1, 0,
                               {{"offset", 1000.0}, {"amplitude", 500.0}},
-                              ContinousTimers.push_back_uninitialized());
+                              ContinousTimers.allocate());
     }
   }
 
