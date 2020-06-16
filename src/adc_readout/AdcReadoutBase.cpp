@@ -135,7 +135,9 @@ void AdcReadoutBase::inputThread() {
       [this](auto Identifier) { return this->GetDataModule(Identifier); });
 
   std::function<bool(SamplingRun *)> QueingFunction1([this](SamplingRun *Data) {
-    this->AdcStats.CurrentTsMs = TimestampOffset.calcTimestampNS(Data->StartTime.getTimeStampNS()) / 1000000;
+    this->AdcStats.CurrentTsMs =
+        TimestampOffset.calcTimestampNS(Data->StartTime.getTimeStampNS()) /
+        1000000;
     return this->QueueUpDataModule(Data);
   });
   PacketParser Parser1(QueingFunction1, DataModuleProducer, 0);
@@ -154,7 +156,9 @@ void AdcReadoutBase::inputThread() {
       Receiver1->setPacketHandler(PacketHandler1);
     } catch (ParserException &E) {
       LOG(INIT, Sev::Error,
-      "Failed to extract config data from packet due to the following error: {}", E.what());
+          "Failed to extract config data from packet due to the following "
+          "error: {}",
+          E.what());
     }
   };
 
