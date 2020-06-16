@@ -29,6 +29,8 @@ public:
   TestUDPServer(std::uint16_t SrcPort, std::uint16_t DstPort, int PacketSize);
   TestUDPServer(std::uint16_t SrcPort, std::uint16_t DstPort,
                 std::uint8_t *DataPtr, size_t DataLength);
+  // \brief Call before TestUDPServer::startPacketPtransmission() if it is to be called.
+  void setConfigPacket(std::uint8_t *DataPtr, size_t DataLength);
   void startPacketTransmission(int TotalPackets, int PacketGapNS);
   ~TestUDPServer();
 
@@ -39,6 +41,10 @@ private:
   std::thread AsioThread;
   asio::ip::udp::socket Socket;
   asio::ip::udp::resolver Resolver;
+
+  bool HasConfigBuffer{false};
+  int ConfigBufferSize;
+  std::unique_ptr<std::uint8_t[]> ConfigBuffer;
 
   int BufferSize;
   std::unique_ptr<std::uint8_t[]> SendBuffer;

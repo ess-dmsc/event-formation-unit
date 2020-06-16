@@ -38,6 +38,17 @@ public:
 
 using namespace std::chrono_literals;
 
+void LoadPacketFile(std::string const &FileName, std::uint8_t *BufferPtr, int &BufferSize) {
+  std::string PacketPath = TEST_PACKET_PATH;
+  std::ifstream PacketFile(PacketPath + FileName, std::ios::binary);
+  ASSERT_TRUE(PacketFile.good());
+  PacketFile.seekg(0, std::ios::end);
+  BufferSize = PacketFile.tellg();
+  PacketFile.seekg(0, std::ios::beg);
+  PacketFile.read(reinterpret_cast<char *>(BufferPtr), BufferSize);
+  ASSERT_TRUE(PacketFile.good());
+};
+
 class AdcReadoutTest : public ::testing::Test {
 public:
   void SetUp() override {
@@ -49,17 +60,8 @@ public:
   static const int MaxPacketSize = 10000;
   std::array<std::uint8_t, MaxPacketSize> BufferPtr;
   int PacketSize{0};
-
-  void LoadPacketFile(std::string const &FileName) {
-    std::string PacketPath = TEST_PACKET_PATH;
-    std::ifstream PacketFile(PacketPath + FileName, std::ios::binary);
-    ASSERT_TRUE(PacketFile.good());
-    PacketFile.seekg(0, std::ios::end);
-    PacketSize = PacketFile.tellg();
-    PacketFile.seekg(0, std::ios::beg);
-    PacketFile.read(reinterpret_cast<char *>(BufferPtr.data()), PacketSize);
-    ASSERT_TRUE(PacketFile.good());
-  };
+  std::array<std::uint8_t, MaxPacketSize> ConfigBufferPtr;
+  int ConfigPacketSize{0};
   std::chrono::duration<std::int64_t, std::milli> SleepTime{100ms};
 };
 
@@ -67,53 +69,59 @@ TEST_F(AdcReadoutTest, DISABLED_SinglePacketStats) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, 1470);
+  LoadPacketFile("test_packet_idle.dat", ConfigBufferPtr.data(), ConfigPacketSize);
+  Server.setConfigPacket(ConfigBufferPtr.data(), ConfigPacketSize);
   std::this_thread::sleep_for(SleepTime);
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 1470);
-  EXPECT_EQ(Readout.AdcStats.parser_errors, 1);
+  EXPECT_EQ(Readout.AdcStats.InputBytesReceived, 1470);
+  EXPECT_EQ(Readout.AdcStats.ParseErrors, 1);
 }
 
 TEST_F(AdcReadoutTest, DISABLED_SingleIdlePacket) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
-  LoadPacketFile("test_packet_idle.dat");
+  LoadPacketFile("test_packet_idle.dat", BufferPtr.data(), PacketSize);
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
                        PacketSize);
+  LoadPacketFile("test_packet_idle.dat", ConfigBufferPtr.data(), ConfigPacketSize);
+  Server.setConfigPacket(ConfigBufferPtr.data(), ConfigPacketSize);
   std::this_thread::sleep_for(SleepTime);
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, PacketSize);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_total, 1);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_idle, 1);
-  EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
+  EXPECT_EQ(Readout.AdcStats.InputBytesReceived, PacketSize);
+  EXPECT_EQ(Readout.AdcStats.ParserPacketsTotal, 1);
+  EXPECT_EQ(Readout.AdcStats.ParserPacketsIdle, 1);
 }
 
 TEST_F(AdcReadoutTest, DISABLED_SingleDataPacket) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
-  LoadPacketFile("test_packet_1.dat");
+  LoadPacketFile("test_packet_1.dat", BufferPtr.data(), PacketSize);
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
                        PacketSize);
+  LoadPacketFile("test_packet_idle.dat", ConfigBufferPtr.data(), ConfigPacketSize);
+  Server.setConfigPacket(ConfigBufferPtr.data(), ConfigPacketSize);
   std::this_thread::sleep_for(20ms);
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(20ms);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, PacketSize);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_total, 1);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_data, 1);
-  EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
+  EXPECT_EQ(Readout.AdcStats.InputBytesReceived, PacketSize);
+  EXPECT_EQ(Readout.AdcStats.ParserPacketsTotal, 1);
+  EXPECT_EQ(Readout.AdcStats.ParserPacketsData, 1);
 }
 
 TEST_F(AdcReadoutTest, DISABLED_LazyThreadLaunching) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
   EXPECT_EQ(Readout.Threads.size(), 1u);
-  LoadPacketFile("test_packet_1.dat");
+  LoadPacketFile("test_packet_1.dat", BufferPtr.data(), PacketSize);
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
                        PacketSize);
+  LoadPacketFile("test_packet_idle.dat", ConfigBufferPtr.data(), ConfigPacketSize);
+  Server.setConfigPacket(ConfigBufferPtr.data(), ConfigPacketSize);
   std::this_thread::sleep_for(SleepTime);
   Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
@@ -124,43 +132,48 @@ TEST_F(AdcReadoutTest, DISABLED_LazyThreadLaunching) {
 TEST_F(AdcReadoutTest, DISABLED_ReceiveTest) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
-  LoadPacketFile("test_packet_1.dat");
-  TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort,
+  LoadPacketFile("test_packet_1.dat", BufferPtr.data(), PacketSize);
+  TestUDPServer Server(GetPortNumber(), Settings.DetectorPort,
                         BufferPtr.data(), PacketSize);
+  LoadPacketFile("test_packet_idle.dat", ConfigBufferPtr.data(), ConfigPacketSize);
+  Server.setConfigPacket(ConfigBufferPtr.data(), ConfigPacketSize);
   std::this_thread::sleep_for(SleepTime);
-  Server1.startPacketTransmission(1, 100);
+  Server.startPacketTransmission(1, 100);
   std::this_thread::sleep_for(SleepTime);
-  EXPECT_EQ(Readout.Threads.size(), 3u);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_total, 1);
+  EXPECT_EQ(Readout.Threads.size(), 2u);
+  EXPECT_EQ(Readout.AdcStats.ParserPacketsTotal, 1);
   Readout.stopThreads();
 }
 
 TEST_F(AdcReadoutTest, DISABLED_GlobalCounterError) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
-  LoadPacketFile("test_packet_1.dat");
+  LoadPacketFile("test_packet_1.dat", BufferPtr.data(), PacketSize);
   TestUDPServer Server(GetPortNumber(), Settings.DetectorPort, BufferPtr.data(),
                        PacketSize);
+  LoadPacketFile("test_packet_idle.dat", ConfigBufferPtr.data(), ConfigPacketSize);
+  Server.setConfigPacket(ConfigBufferPtr.data(), ConfigPacketSize);
   std::this_thread::sleep_for(SleepTime);
   Server.startPacketTransmission(2, 100);
   std::this_thread::sleep_for(SleepTime);
   Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 2 * PacketSize);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_total, 2);
-  EXPECT_EQ(Readout.AdcStats.parser_errors, 0);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_data, 2);
-  EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 1);
+  EXPECT_EQ(Readout.AdcStats.InputBytesReceived, 2 * PacketSize);
+  EXPECT_EQ(Readout.AdcStats.ParserPacketsTotal, 2);
+  EXPECT_EQ(Readout.AdcStats.ParseErrors, 0);
+  EXPECT_EQ(Readout.AdcStats.ParserPacketsData, 2);
 }
 
 TEST_F(AdcReadoutTest, DISABLED_GlobalCounterCorrect) {
   AdcReadoutStandIn Readout(Settings, ReadoutSettings);
   Readout.startThreads();
-  LoadPacketFile("test_packet_1.dat");
+  LoadPacketFile("test_packet_1.dat", BufferPtr.data(), PacketSize);
   std::this_thread::sleep_for(SleepTime);
   auto PacketHeadPointer = reinterpret_cast<PacketHeader *>(BufferPtr.data());
   {
     TestUDPServer Server1(GetPortNumber(), Settings.DetectorPort,
                           BufferPtr.data(), PacketSize);
+    LoadPacketFile("test_packet_idle.dat", ConfigBufferPtr.data(), ConfigPacketSize);
+    Server1.setConfigPacket(ConfigBufferPtr.data(), ConfigPacketSize);
     Server1.startPacketTransmission(1, 100);
     std::this_thread::sleep_for(SleepTime);
   }
@@ -173,11 +186,10 @@ TEST_F(AdcReadoutTest, DISABLED_GlobalCounterCorrect) {
     std::this_thread::sleep_for(SleepTime);
   }
   Readout.stopThreads();
-  EXPECT_EQ(Readout.AdcStats.input_bytes_received, 2 * PacketSize);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_total, 2);
-  EXPECT_EQ(Readout.AdcStats.parser_errors, 0);
-  EXPECT_EQ(Readout.AdcStats.parser_packets_data, 2);
-  EXPECT_EQ(Readout.AdcStats.processing_packets_lost, 0);
+  EXPECT_EQ(Readout.AdcStats.InputBytesReceived, 2 * PacketSize);
+  EXPECT_EQ(Readout.AdcStats.ParserPacketsTotal, 2);
+  EXPECT_EQ(Readout.AdcStats.ParseErrors, 0);
+  EXPECT_EQ(Readout.AdcStats.ParserPacketsData, 2);
 }
 
 using trompeloeil::_;
