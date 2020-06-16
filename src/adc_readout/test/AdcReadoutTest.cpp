@@ -48,7 +48,7 @@ void LoadPacketFile(std::string const &FileName, std::uint8_t *BufferPtr,
   PacketFile.seekg(0, std::ios::beg);
   PacketFile.read(reinterpret_cast<char *>(BufferPtr), BufferSize);
   ASSERT_TRUE(PacketFile.good());
-};
+}
 
 class AdcReadoutTest : public ::testing::Test {
 public:
