@@ -45,6 +45,13 @@ TestUDPServer::TestUDPServer(std::uint16_t SrcPort, std::uint16_t DstPort,
 }
 #pragma GCC diagnostic pop
 
+void TestUDPServer::setConfigPacket(std::uint8_t *DataPtr, size_t DataLength) {
+  ConfigBuffer = std::make_unique<std::uint8_t[]>(DataLength);
+  ConfigBufferSize = DataLength;
+  std::memcpy(ConfigBuffer.get(), DataPtr, DataLength);
+  HasConfigBuffer = true;
+}
+
 void TestUDPServer::startPacketTransmission(int TotalPackets, int PacketGapNS) {
   NrOfPackets = TotalPackets;
   WaitTimeNSec = PacketGapNS;
@@ -86,7 +93,12 @@ void TestUDPServer::handleConnect(
     const asio::error_code &Err,
     asio::ip::udp::resolver::iterator EndpointIter) {
   if (!Err) {
-    Socket.async_send(asio::buffer(SendBuffer.get(), BufferSize),
+    auto UsedBuffer = asio::buffer(SendBuffer.get(), BufferSize);
+    if (HasConfigBuffer) {
+      UsedBuffer = asio::buffer(ConfigBuffer.get(), ConfigBufferSize);
+      ++NrOfPackets;
+    }
+    Socket.async_send(UsedBuffer,
                       std::bind(&TestUDPServer::handleWrite, this,
                                 std::placeholders::_1, std::placeholders::_2));
     --NrOfPackets;
