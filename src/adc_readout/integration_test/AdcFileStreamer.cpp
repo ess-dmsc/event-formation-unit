@@ -98,9 +98,9 @@ auto SetUpContGenerator(asio::io_service &Service, FPGASim *FPGAPtr,
                         StreamSettings &Settings) {
   auto SampleGen =
       std::make_shared<FileSampler>(Settings.NeXuSFile, Settings.WaveformPath);
-  auto Glue = [Settings, SampleGen, FPGAPtr](TimeStamp const &) {
+  auto Glue = [Settings, SampleGen, FPGAPtr](TimeStamp const &TS) {
     auto SampleRun = SampleGen->generate();
-    FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second);
+    FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, TS);
   };
   return std::make_shared<PoissonDelay>(Glue, Service, Settings.EventRate);
 }

@@ -1,11 +1,11 @@
 [requires]
-asio/1.16.0
+asio/1.16.1
 CLI11/1.8.0@cliutils/stable
 fmt/6.2.0
 google-benchmark/1.4.1-dm2@ess-dmsc/testing
 graylog-logger/2.0.3-dm1@ess-dmsc/stable
 gtest/1.8.1@bincrafters/stable
-h5cpp/e99b997@ess-dmsc/test
+h5cpp/0.3.3@ess-dmsc/stable
 jsonformoderncpp/3.7.0
 libpcap/1.8.1@bincrafters/stable
 librdkafka/0.11.5-dm2@ess-dmsc/stable

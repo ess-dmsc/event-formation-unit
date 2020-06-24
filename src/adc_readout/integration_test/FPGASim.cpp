@@ -157,7 +157,7 @@ void FPGASim::addSamplingRun(void const *const DataPtr, size_t Bytes,
   auto BufferSizes = StandbyBuffer->getBufferSizes();
   if (not Success or BufferSizes.second - BufferSizes.first < 20) {
     transmitStandbyBuffer();
-    assert(StandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS));
+    StandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS);
   } else {
     startPacketTimer();
   }
