@@ -18,6 +18,9 @@ double gaussian(int i, double PeakPos, double Width) {
          std::sqrt(2 * Pi * Width * Width);
 }
 
+extern "C" void SampleGen(uint16_t output[], int count, float PeakBuffer[], 
+    float Amplitude, float BkgSlope, float BkgOffset);
+
 SampleRunGenerator::SampleRunGenerator(size_t Samples, double PeakPos,
                                        double PeakSigma, double Slope,
                                        double Offset, int ADCBox,
@@ -88,25 +91,36 @@ SampleRunGenerator::generate(double Amplitude, TimeStamp const Time) {
 
   std::uint16_t *SamplePtr = GetSamplePtr();
 
-  if (0) {
-    for (auto i = 0u; i < NrOFSamples; ++i) {
-      SamplePtr[i] = htons(
-          std::lround(PeakBuffer[i] * Amplitude + BkgSlope * i + BkgOffset));
-    }
-  } else {
-    int i32_NumSamples = (int)NrOFSamples;
-    float f32_Amplitude = (float)Amplitude;
-    float f32_BkgSlope = (float)BkgSlope;
-    float f32_BkgOffset = (float)BkgOffset;
-    float f32_i_mul_BkgSlope_plus_BkgOffset = f32_BkgOffset;
+  static const bool Ispc = true;
+  if (Ispc) {
+    
+    //extern "C" void SampleGen(uint16_t output[], int count, float PeakBuffer[], 
+    //float Amplitude, float BkgSlope, float BkgOffset);
 
-    for (int i = 0; i < i32_NumSamples; ++i) {
-      SamplePtr[i] = htons(std::lround(PeakBuffer[i] * f32_Amplitude +
-                                       f32_i_mul_BkgSlope_plus_BkgOffset));
-      f32_i_mul_BkgSlope_plus_BkgOffset += f32_BkgSlope;
+    SampleGen(SamplePtr, (int)NrOFSamples, PeakBuffer.data(), (float)Amplitude, (float)BkgSlope, (float)BkgOffset);
+    
+  } else {
+    if (0) {
+      for (auto i = 0u; i < NrOFSamples; ++i) {
+        SamplePtr[i] = htons(
+            std::lround(PeakBuffer[i] * Amplitude + BkgSlope * i + BkgOffset));
+      }
+    } else {
+      if (1) {
+        int i32_NumSamples = (int)NrOFSamples;
+        float f32_Amplitude = (float)Amplitude;
+        float f32_BkgSlope = (float)BkgSlope;
+        float f32_BkgOffset = (float)BkgOffset;
+        float f32_i_mul_BkgSlope_plus_BkgOffset = f32_BkgOffset;
+
+        for (int i = 0; i < i32_NumSamples; ++i) {
+          SamplePtr[i] = htons(std::lround(PeakBuffer[i] * f32_Amplitude +
+                                           f32_i_mul_BkgSlope_plus_BkgOffset));
+          f32_i_mul_BkgSlope_plus_BkgOffset += f32_BkgSlope;
+        }
+      }
     }
   }
-
   return std::make_pair(Buffer.data(), NrOFSamples * sizeof(std::uint16_t) +
                                            sizeof(DataHeader) + 4);
 }

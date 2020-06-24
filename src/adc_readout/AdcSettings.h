@@ -43,6 +43,7 @@ struct AdcSettings {
   PositionSensingType XAxis{PositionSensingType::CONST};
   PositionSensingType YAxis{PositionSensingType::CONST};
 
+  // Only for DelayLine system
   enum class ChannelRole {
     REFERENCE_TIME,
     AMPLITUDE_X_AXIS_1,

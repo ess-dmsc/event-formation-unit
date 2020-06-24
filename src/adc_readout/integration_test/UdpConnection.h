@@ -20,6 +20,10 @@
 #include "../AdcParse.h"
 #include "DataPacket.h"
 #include <map>
+#include <deque>
+#include <mutex>
+
+#include <common/Socket.h>
 
 using SocketPtr = std::shared_ptr<asio::ip::udp::socket>;
 using WorkPtr = std::unique_ptr<asio::io_service::work>;
@@ -28,6 +32,7 @@ using BufferPtr = std::shared_ptr<std::uint8_t>;
 struct QueryResult;
 
 class UdpConnection {
+  friend void* TransmitThreadStart(void* arg);
 public:
   UdpConnection(std::string DstAddress, std::uint16_t DstPort,
                 asio::io_service &Service);
@@ -49,12 +54,16 @@ private:
   const int MaxPacketSize{9000};
   std::string Address;
   std::uint16_t Port;
-  asio::ip::udp::socket Socket;
-  asio::ip::udp::resolver Resolver;
+  //asio::ip::udp::socket Socket;
+  //asio::ip::udp::resolver Resolver;
+
+  const uint32_t KernelTxBufferSize{1000000};
+  Socket::Endpoint RemoteEndpoint;
+  UDPTransmitter DataSource;
 
   void resolveDestination();
   void reconnectWait();
-  void tryConnect(QueryResult AllEndpoints);
+  //void tryConnect(QueryResult AllEndpoints);
   void startHeartbeatTimer();
   void startPacketTimer();
   void swapAndTransmitSharedStandbyBuffer();
@@ -62,18 +71,33 @@ private:
 
   void transmitHeartbeat();
 
-  void handleResolve(const asio::error_code &Error,
-                     asio::ip::udp::resolver::iterator EndpointIter);
-  void handleConnect(const asio::error_code &Error,
-                     QueryResult const &AllEndpoints);
+  //void handleResolve(const asio::error_code &Error,
+  //                   asio::ip::udp::resolver::iterator EndpointIter);
+  //void handleConnect(const asio::error_code &Error,
+  //                   QueryResult const &AllEndpoints);
 
-  asio::system_timer ReconnectTimeout;
-  asio::system_timer HeartbeatTimeout;
-  asio::system_timer DataPacketTimeout;
+  //asio::system_timer ReconnectTimeout;
+  //asio::system_timer HeartbeatTimeout;
+  //asio::system_timer DataPacketTimeout;
   std::uint16_t PacketCount{0};
   std::atomic_int SentPackets{0};
-  std::unique_ptr<DataPacket> TransmitBuffer;
-  std::unique_ptr<DataPacket> SharedStandbyBuffer;
+
+  //std::unique_ptr<DataPacket> TransmitBuffer; ////////// this is nolonger relevant
+  //std::atomic_int             TransmitBufferInUse{0};
+
+  //std::unique_ptr<DataPacket> SharedStandbyBuffer;
+  DataPacket*                 SharedStandbyBuffer;
+  std::atomic_int             SharedStandbyInUse{0};
+
+  std::thread                 TransmitThread;
+
+  std::mutex                  TransmitRequestsAccess;
+  std::deque<DataPacket *>    TransmitRequests;
+
+  std::mutex                  FreePacketsAccess;
+  std::vector<DataPacket *>   FreePackets;
+
+  void transmitThread();
 
 #pragma pack(push, 2)
   struct {
