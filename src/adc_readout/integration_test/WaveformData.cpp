@@ -17,7 +17,7 @@ WaveformData::WaveformData(hdf5::node::Group const &Group)
   EndWaveformPos = CueIndex[1];
 }
 
-std::uint64_t WaveformData::getTimestamp() const {
+std::uint64_t WaveformData::getTimestamp() {
   return CueTimestampZero[EventCounter];
 }
 

@@ -58,6 +58,8 @@ add_executable(AdcFileStreamer EXCLUDE_FROM_ALL ${AdcFileStreamer_SRC} ${AdcFile
 set_target_properties(AdcFileStreamer PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+target_compile_definitions(AdcFileStreamer PRIVATE BOOST_DISABLE_ASSERTS=1 ASIO_HAS_BOOST_ASSERT=1)
+
 target_include_directories(AdcFileStreamer PRIVATE ${ASIO_INCLUDE_DIR} "../" "../../common/")
 
 target_link_libraries(AdcFileStreamer ${CMAKE_THREAD_LIBS_INIT} ${EFU_COMMON_LIBS})
