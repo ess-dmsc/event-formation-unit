@@ -441,9 +441,7 @@ void UdpConnection::addSamplingRun(void const *const DataPtr, size_t Bytes,
 
   if (not Success or MaxSize - Size < 20) {
     swapAndTransmitSharedStandbyBuffer();
-    // assert(
-    //    SharedStandbyBuffer->addSamplingRun(DataPtr, Bytes,
-    //    CurrentRefTimeNS));
+    SharedStandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS);
   } else {
     // startPacketTimer();
   }
