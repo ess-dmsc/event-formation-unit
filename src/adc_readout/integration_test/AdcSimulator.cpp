@@ -267,7 +267,7 @@ int main(const int argc, char *argv[]) {
                              {"amplitude", 2000.0}},
                             PoissionTimers.allocate());
     }
-/*
+
     if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
                           UsedSettings)) {
       SetUpPoissonGenerator(Service, CurAdc, 0, 1,
@@ -307,7 +307,6 @@ int main(const int argc, char *argv[]) {
       SetUpAmpPosGenerator(Service, CurAdc, 0, UsedSettings.EventRate,
                            AmpDelayTimers.allocate());
     }
-    */
   }
 
   // Box 2 timers
@@ -397,7 +396,7 @@ int main(const int argc, char *argv[]) {
       // //  }
       // //});
 
-      RelAssertMsg(PoissionTimers.Count == 1, "");
+      //RelAssertMsg(PoissionTimers.Count == 1, "");
 
       /// genSamplesAndEnqueueSend
       auto WantedTimeNow = std::chrono::system_clock::now();

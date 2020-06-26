@@ -282,13 +282,6 @@ TEST(ExceptionTypes, ExceptionTypeTest) {
   EXPECT_EQ(SomeException.getErrorType(), SomeType);
 }
 
-TEST(ExceptionTypes, InitWithString) {
-  std::string SomeTestString = "Something";
-  ParserException SomeException(SomeTestString);
-  EXPECT_STREQ(SomeException.what(), SomeTestString.c_str());
-  EXPECT_EQ(SomeException.getErrorType(), ParserException::Type::UNKNOWN);
-}
-
 TEST(ExceptionTypes, IncorrectExceptionType) {
   int ExceptionTypeInt = 4242;
   ParserException SomeException((ParserException::Type(ExceptionTypeInt)));

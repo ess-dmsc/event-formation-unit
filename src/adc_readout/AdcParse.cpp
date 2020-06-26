@@ -19,14 +19,16 @@ static const std::uint8_t FILLER_BYTE{0x55};
 static const std::uint16_t TWO_FILLER_BYTES{0x5555};
 static const std::uint32_t PACKET_LENGTH_OFFSET{8u};
 
-ParserException::ParserException(std::string const &ErrorStr)
-    : std::runtime_error(ErrorStr), ParserErrorType(Type::UNKNOWN),
-      Error(ErrorStr) {}
+uint64_t ParserException::ErrorTypeCount[static_cast<int>(Type::Count)] = {0};
 
 ParserException::ParserException(Type ErrorType)
     : std::runtime_error("Parser error of type " +
                          std::to_string(static_cast<int>(ErrorType))),
-      ParserErrorType(ErrorType) {}
+      ParserErrorType(ErrorType) {
+  if (ErrorType < Type::Count) {
+    ErrorTypeCount[static_cast<int>(ErrorType)]++;
+  }
+}
 
 ParserException::Type ParserException::getErrorType() const {
   return ParserErrorType;
@@ -66,11 +68,12 @@ const char *ParserException::what() const noexcept {
 }
 
 PacketParser::PacketParser(
-    std::function<bool(SamplingRun *)> ModuleHandler,
-    std::function<SamplingRun *(ChannelID Identifier)> ModuleProducer,
+    std::function<bool(SamplingRun *)> PushDataModuleToQueue,
+    std::function<SamplingRun *(ChannelID Identifier)> PullDataModuleFromQueue,
     std::uint16_t SourceID)
-    : HandleModule(std::move(ModuleHandler)),
-      ProduceModule(std::move(ModuleProducer)), Source(SourceID) {}
+    : PushDataModuleToQueue(std::move(PushDataModuleToQueue)),
+      PullDataModuleFromQueue(std::move(PullDataModuleFromQueue)),
+      Source(SourceID) {}
 
 PacketInfo PacketParser::parsePacket(const InData &Packet) {
   HeaderInfo Header = parseHeader(Packet);
@@ -158,7 +161,9 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte,
       throw ParserException(ParserException::Type::DATA_LENGTH);
     }
     auto CurrentChannelID = ChannelID{Source, Header.Channel};
-    SamplingRun *CurrentDataModule = ProduceModule(CurrentChannelID);
+
+    // Put the parsed data into the system
+    SamplingRun *CurrentDataModule = PullDataModuleFromQueue(CurrentChannelID);
     if (CurrentDataModule != nullptr) {
       CurrentDataModule->Data.resize(NrOfSamples);
       CurrentDataModule->Identifier = CurrentChannelID;
@@ -171,11 +176,12 @@ size_t PacketParser::parseData(const InData &Packet, std::uint32_t StartByte,
       for (int i = 0; i < NrOfSamples; ++i) {
         CurrentDataModule->Data[i] = ntohs(ElementPointer[i]);
       }
-      if (not HandleModule(std::move(CurrentDataModule))) {
+
+      if (not PushDataModuleToQueue(CurrentDataModule)) {
         // Things will be very problematic for us if we don't get rid of the
         // claimed data module, hence why we have a special exception for this
         // case.
-        throw ModuleProcessingException(std::move(CurrentDataModule));
+        throw ModuleProcessingException(CurrentDataModule);
       }
     } else {
       throw ParserException(ParserException::Type::DATA_NO_MODULE);
