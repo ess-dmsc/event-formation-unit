@@ -37,7 +37,14 @@ public:
     return num;
   }
 
-  inline static constexpr uint64_t NextPowerOfTwo(uint64_t n) {
+
+  /// \todo this is a hack to allow compilation of code from
+  /// ROOT using cling (variant of clang) without c++14 support.
+  inline static
+  #ifndef VMM_SDAT
+  constexpr
+  #endif
+  uint64_t NextPowerOfTwo(uint64_t n) {
     n--;
     n |= n >> 1;
     n |= n >> 2;
