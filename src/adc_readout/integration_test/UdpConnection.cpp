@@ -472,7 +472,7 @@ void UdpConnection::swapAndTransmitSharedStandbyBuffer() {
   // int prevSharedStandbyUse2 = SharedStandbyInUse.exchange (0);
   ////fprintf(stdout, "swapAndTransmitSharedStandbyBuffer() release
   ///SharedStandbyInUse\n");
-  // RelAssertMsg (prevSharedStandbyUse2 == 1, "we release it");
+  // RelAssertMsg (prevSharedStandbyUse2 == 1, "we release it"); 
 
   DataPacket *TransmitBuffer = SharedStandbyBuffer;
   SharedStandbyBuffer = nullptr;
