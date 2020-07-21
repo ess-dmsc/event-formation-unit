@@ -20,6 +20,7 @@ static const std::uint16_t TWO_FILLER_BYTES{0x5555};
 static const std::uint32_t PACKET_LENGTH_OFFSET{8u};
 
 uint64_t ParserException::ErrorTypeCount[static_cast<int>(Type::Count)] = {0};
+constexpr const char *ParserException::TypeNames[];
 
 ParserException::ParserException(Type ErrorType)
     : std::runtime_error("Parser error of type " +
