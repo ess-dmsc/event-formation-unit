@@ -266,6 +266,7 @@ def get_system_tests_pipeline() {
     }  // return
 }  // def
 
+// Script actions start here
 node('docker') {
     dir("${project}_code") {
 
@@ -276,6 +277,9 @@ node('docker') {
                 failure_function(e, 'Checkout failed')
             }
         }
+
+        // skip build process if message contains '[ci skip]'
+        pipeline_builder.abortBuildOnMagicCommitMessage()
 
         stage("Static analysis") {
             try {
@@ -291,14 +295,17 @@ node('docker') {
         }
     }
 
+    // Add macOS pipeline to builders
     builders['macOS'] = get_macos_pipeline()
 
+    // Only add system test pipeline if this is a Pull Request
     if ( env.CHANGE_ID ) {
         builders['system tests'] = get_system_tests_pipeline()
     }
 
     try {
         timeout(time: 2, unit: 'HOURS') {
+            // run all builders in parallel
             parallel builders
         }
     } catch (e) {

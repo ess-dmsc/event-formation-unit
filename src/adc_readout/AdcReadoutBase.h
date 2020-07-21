@@ -52,6 +52,7 @@ protected:
   /// thread.
   virtual void inputThread();
 
+  /// \brief Process a data packet.
   void parsePacketWithStats(InData const &Packet, PacketParser &Parser);
 
   /// \brief The function that executes the code for parsing and processing the
@@ -79,14 +80,15 @@ protected:
 
   /// \brief Counters that are used to store stats that are sent to Grafana.
   struct {
-    std::int64_t current_ts_ms = 0;
-    std::int64_t input_bytes_received = 0;
-    std::int64_t parser_errors = 0;
-    std::int64_t parser_packets_total = 0;
-    std::int64_t parser_packets_idle = 0;
-    std::int64_t parser_packets_data = 0;
-    std::int64_t processing_buffer_full = 0;
-    std::int64_t processing_packets_lost = -1; // This should be -1
+    /// \todo stat counter used as a timestamp, might be ok, but is
+    /// a slight abuse of the intented use.
+    std::int64_t CurrentTsMs = 0;
+    std::int64_t InputBytesReceived = 0;
+    std::int64_t ParseErrors = 0;
+    std::int64_t ParserPacketsTotal = 0;
+    std::int64_t ParserPacketsIdle = 0;
+    std::int64_t ParserPacketsData = 0;
+    std::int64_t ProcessingBufferFull = 0;
   } AdcStats;
 
   std::shared_ptr<Producer> ProducerPtr{nullptr};

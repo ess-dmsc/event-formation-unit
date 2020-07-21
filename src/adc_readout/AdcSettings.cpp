@@ -12,6 +12,12 @@
 using PosType = AdcSettings::PositionSensingType;
 using ChRole = AdcSettings::ChannelRole;
 
+/// \todo use int instead of auto
+/// \todo consider moving this function to common
+/// \todo describe data format (other than regexp) is there a
+/// standard? then reference it.
+/// \todo Leap second is supported but no documentation of 60 second
+/// in a minute corner case.
 auto stringToTime(std::string const &TimeString) {
   using namespace std::string_literals;
   std::regex DateTimeRegex{

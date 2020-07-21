@@ -3,6 +3,8 @@
 /** @file
  *
  *  \brief ADC readout detector module.
+ *  \todo This file should contain more comments
+ *  \todo consider not creating stats dynamically
  */
 
 #include "AdcReadoutBase.h"
@@ -25,14 +27,12 @@ AdcReadoutBase::AdcReadoutBase(BaseSettings const &Settings,
   Detector::AddThreadFunction(inputFunc, "input");
 
   Stats.setPrefix("adc_readout" + GeneralSettings.GraphiteRegion, "");
-  Stats.create("input.bytes.received", AdcStats.input_bytes_received);
-  Stats.create("parser.errors", AdcStats.parser_errors);
-  Stats.create("parser.packets.total", AdcStats.parser_packets_total);
-  Stats.create("parser.packets.idle", AdcStats.parser_packets_idle);
-  Stats.create("parser.packets.data", AdcStats.parser_packets_data);
-  Stats.create("processing.packets.lost", AdcStats.processing_packets_lost);
-  Stats.create("current_ts", AdcStats.current_ts_ms);
-  AdcStats.processing_packets_lost = -1; // To compensate for the first error.
+  Stats.create("input.bytes.received", AdcStats.InputBytesReceived);
+  Stats.create("parser.errors", AdcStats.ParseErrors);
+  Stats.create("parser.packets.total", AdcStats.ParserPacketsTotal);
+  Stats.create("parser.packets.idle", AdcStats.ParserPacketsIdle);
+  Stats.create("parser.packets.data", AdcStats.ParserPacketsData);
+  Stats.create("current_ts", AdcStats.CurrentTsMs);
 }
 
 std::shared_ptr<Producer> AdcReadoutBase::getProducer() {
@@ -112,24 +112,27 @@ bool AdcReadoutBase::queueUpDataModule(SamplingRun *Data) {
       ->tryPutData(SpscBuffer::ElementPtr<SamplingRun>(Data));
 }
 
+/// \todo better packet counting semantics needed? Normally
+/// all packets should be counted so that
+/// packets_total == packets_idle + _data + _errors
 void AdcReadoutBase::parsePacketWithStats(InData const &Packet,
                                     PacketParser &Parser) {
   if (Packet.Length > 0) {
-    AdcStats.input_bytes_received += Packet.Length;
+    AdcStats.InputBytesReceived += Packet.Length;
     try {
       try {
         PacketInfo pi = Parser.parsePacket(Packet);
-        ++AdcStats.parser_packets_total;
+        ++AdcStats.ParserPacketsTotal;
         if (PacketType::Data == pi.Type) {
-          ++AdcStats.parser_packets_data;
+          ++AdcStats.ParserPacketsData;
         } else if (PacketType::Idle == pi.Type) {
-          ++AdcStats.parser_packets_idle;
+          ++AdcStats.ParserPacketsIdle;
         }
       } catch (ParserException &e) {
-        ++AdcStats.parser_errors;
+        ++AdcStats.ParseErrors;
       }
     } catch (ModuleProcessingException &E) {
-      AdcStats.processing_buffer_full++;
+      AdcStats.ProcessingBufferFull++;
       while (Detector::runThreads and
              not queueUpDataModule(std::move(E.UnproccesedData))) {
       }
@@ -159,7 +162,7 @@ void AdcReadoutBase::inputThread() {
 
   std::function<bool(SamplingRun *)> PushDataModuleToQueue(
       [this](SamplingRun *Data) {
-        this->AdcStats.current_ts_ms =
+        this->AdcStats.CurrentTsMs =
             TimestampOffset.calcTimestampNS(Data->StartTime.getTimeStampNS()) /
             1000000;
         return this->queueUpDataModule(Data);
@@ -246,7 +249,7 @@ void AdcReadoutBase::processingThread(
         }
         ++(*EventCounter);
       } catch (ParserException &e) {
-        ++AdcStats.parser_errors;
+        ++AdcStats.ParseErrors;
       }
       while (not DataModuleQueue.tryPutEmpty(std::move(Data)) and
              Detector::runThreads) {

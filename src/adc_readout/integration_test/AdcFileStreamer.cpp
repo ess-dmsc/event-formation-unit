@@ -98,9 +98,9 @@ auto SetUpContGenerator(asio::io_service &Service, UdpConnection *UdpCon,
                         StreamSettings &Settings) {
   auto SampleGen =
       std::make_shared<FileSampler>(Settings.NeXuSFile, Settings.WaveformPath);
-  auto Glue = [Settings, SampleGen, UdpCon](TimeStamp const &ts) {
+  auto Glue = [Settings, SampleGen, FPGAPtr](TimeStamp const &TS) {
     auto SampleRun = SampleGen->generate();
-    UdpCon->addSamplingRun(SampleRun.first, SampleRun.second, ts);
+    FPGAPtr->addSamplingRun(SampleRun.first, SampleRun.second, TS);
   };
   return std::make_shared<PoissonDelay>(Glue, Service, Settings.EventRate);
 }
