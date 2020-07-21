@@ -139,15 +139,16 @@ void AdcReadoutBase::parsePacketWithStats(InData const &Packet,
     }
   }
 
-  static uint64_t DumpExceptionsCount = 0;  
-  if (ReadoutSettings.DumpParserExceptionsCount && (DumpExceptionsCount++ & ((1 << 14) - 1)) == 0) {
+  static uint64_t DumpExceptionsCount = 0;
+  if (ReadoutSettings.DumpParserExceptionsCount &&
+      (DumpExceptionsCount++ & ((1 << 14) - 1)) == 0) {
     printf("\n");
     for (int i = 0; i < static_cast<int>(ParserException::Type::Count); i++) {
-      printf("%s = %llu\n", ParserException::TypeNames[i],
+      printf("%s = %" PRIu64 "\n", ParserException::TypeNames[i],
              ParserException::ErrorTypeCount[i]);
     }
-    printf("DataQueueIsEmpty = %llu\n"
-           "DequeueModuleIsNull = %llu\n",
+    printf("DataQueueIsEmpty = %" PRIu64 "\n"
+           "DequeueModuleIsNull = %" PRIu64 "\n",
            DataQueueIsEmpty, DequeueModuleIsNull);
   }
 }
