@@ -38,19 +38,37 @@ public:
     HEADER_TYPE,
     HEADER_PROTOCOL_VERSION,
     IDLE_LENGTH,
+    Count
   };
-  /// \brief Sets the (parsing) error type to Type::UNKNOWN.
-  /// \param[in] ErrorStr The string describing the exception.
-  explicit ParserException(std::string const &ErrorStr);
+
+  constexpr static const char *TypeNames[static_cast<int>(Type::Count) + 1] = {
+      "UNKNOWN",
+      "TRAILER_FEEDF00D",
+      "TRAILER_0x55",
+      "DATA_BEEFCAFE",
+      "DATA_LENGTH",
+      "DATA_ABCD",
+      "DATA_NO_MODULE",
+      "DATA_CANT_PROCESS",
+      "HEADER_LENGTH",
+      "HEADER_TYPE",
+      "HEADER_PROTOCOL_VERSION",
+      "IDLE_LENGTH",
+      "Count"};
+
   /// \brief Sets the parsing error to the give type.
   /// \param[in] ErrorType The parser error type.
   explicit ParserException(Type ErrorType);
+  
   virtual const char *what() const noexcept override;
   Type getErrorType() const;
 
 private:
   Type ParserErrorType;
   std::string Error;
+
+public:
+  static uint64_t ErrorTypeCount[static_cast<int>(Type::Count)];
 };
 
 class ModuleProcessingException : public std::runtime_error {
@@ -145,16 +163,17 @@ class PacketParser {
 public:
   /// \brief Constructor, one instance should only handle data from a single
   /// data source (ADC box).
-  /// \param[in] ModuleHandler Function for submitting the result of a parsed
-  /// packet to a handler which does further processing.
-  /// \param[in] ModuleProducer Function for getting an empty module for storing
-  /// processed data into.
-  /// \param[in] SourceID An integer used to identify the data source. This
-  /// value is passed on together with the parsed data.
-  PacketParser(
-      std::function<bool(SamplingRun *)> ModuleHandler,
-      std::function<SamplingRun *(ChannelID Identifier)> ModuleProducer,
-      std::uint16_t SourceID);
+  /// \param[in] PushDataModuleToQueue Function for submitting the result of a
+  /// parsed packet to a handler which does further processing.
+  /// \param[in] PullDataModuleFromQueue Function for getting an empty module for
+  /// storing processed data into. 
+  /// \param[in] SourceID An integer used to
+  /// identify the data source. This value is passed on together with the parsed
+  /// data.
+  PacketParser(std::function<bool(SamplingRun *)> PushDataModuleToQueue,
+               std::function<SamplingRun *(ChannelID Identifier)>
+                   PullDataModuleFromQueue,
+               std::uint16_t SourceID);
   /// \brief Parses a packet of binary data.
   /// \param[in] Packet Raw data, straight from the socket.
   /// \return Some general information about the packet.
@@ -173,8 +192,8 @@ protected:
                    TimeStamp const &ReferenceTimestamp);
 
 private:
-  std::function<bool(SamplingRun *)> HandleModule;
-  std::function<SamplingRun *(ChannelID Identifier)> ProduceModule;
+  std::function<bool(SamplingRun *)> PushDataModuleToQueue;
+  std::function<SamplingRun *(ChannelID Identifier)> PullDataModuleFromQueue;
   std::uint16_t Source;
 };
 

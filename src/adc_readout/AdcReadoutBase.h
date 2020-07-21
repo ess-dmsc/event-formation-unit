@@ -52,7 +52,7 @@ protected:
   /// thread.
   virtual void inputThread();
 
-  void packetFunction(InData const &Packet, PacketParser &Parser);
+  void parsePacketWithStats(InData const &Packet, PacketParser &Parser);
 
   /// \brief The function that executes the code for parsing and processing the
   /// sample data.
@@ -67,8 +67,8 @@ protected:
   virtual std::shared_ptr<DelayLineProducer>
   getDelayLineProducer(OffsetTime UsedOffset);
 
-  SamplingRun *GetDataModule(ChannelID const Identifier);
-  bool QueueUpDataModule(SamplingRun *Data);
+  SamplingRun *getDataModuleFromQueue(ChannelID const Identifier);
+  bool queueUpDataModule(SamplingRun *Data);
 
   std::map<ChannelID, std::unique_ptr<Queue>> DataModuleQueues{};
 

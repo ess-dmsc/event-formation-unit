@@ -64,7 +64,14 @@ void AdcReadoutBase::stopThreads() {
   Detector::stopThreads();
 }
 
-SamplingRun *AdcReadoutBase::GetDataModule(ChannelID const Identifier) {
+uint64_t DataQueueIsEmpty = 0;
+uint64_t DequeueModuleIsNull = 0;
+
+SamplingRun *
+AdcReadoutBase::getDataModuleFromQueue(ChannelID const Identifier) {
+
+  // where we bind a queue in DataModuleQueues to processing in
+  // processingThread().
   if (DataModuleQueues.find(Identifier) == DataModuleQueues.end()) {
     DataModuleQueues.emplace(
         std::make_pair(Identifier, std::make_unique<Queue>(MessageQueueSize)));
@@ -87,30 +94,35 @@ SamplingRun *AdcReadoutBase::GetDataModule(ChannelID const Identifier) {
         "Lazily launching processing thread for channel {} of ADC #{}.",
         Identifier.ChannelNr, Identifier.SourceID);
   }
+
   SpscBuffer::ElementPtr<SamplingRun> ReturnModule{nullptr};
   bool Success = DataModuleQueues.at(Identifier)->tryGetEmpty(ReturnModule);
   if (Success) {
+    if (ReturnModule == nullptr) {
+      DequeueModuleIsNull++;
+    }
     return ReturnModule;
   }
+  DataQueueIsEmpty++;
   return nullptr;
 }
 
-bool AdcReadoutBase::QueueUpDataModule(SamplingRun *Data) {
+bool AdcReadoutBase::queueUpDataModule(SamplingRun *Data) {
   return DataModuleQueues.at(Data->Identifier)
       ->tryPutData(SpscBuffer::ElementPtr<SamplingRun>(Data));
 }
 
-void AdcReadoutBase::packetFunction(InData const &Packet,
+void AdcReadoutBase::parsePacketWithStats(InData const &Packet,
                                     PacketParser &Parser) {
   if (Packet.Length > 0) {
     AdcStats.input_bytes_received += Packet.Length;
     try {
       try {
-        auto PacketInfo = Parser.parsePacket(Packet);
+        PacketInfo pi = Parser.parsePacket(Packet);
         ++AdcStats.parser_packets_total;
-        if (PacketType::Data == PacketInfo.Type) {
+        if (PacketType::Data == pi.Type) {
           ++AdcStats.parser_packets_data;
-        } else if (PacketType::Idle == PacketInfo.Type) {
+        } else if (PacketType::Idle == pi.Type) {
           ++AdcStats.parser_packets_idle;
         }
       } catch (ParserException &e) {
@@ -119,47 +131,69 @@ void AdcReadoutBase::packetFunction(InData const &Packet,
     } catch (ModuleProcessingException &E) {
       AdcStats.processing_buffer_full++;
       while (Detector::runThreads and
-             not QueueUpDataModule(std::move(E.UnproccesedData))) {
+             not queueUpDataModule(std::move(E.UnproccesedData))) {
       }
     }
+  }
+
+  static uint64_t DumpExceptionsCount = 0;  
+  if (ReadoutSettings.DumpParserExceptionsCount && (DumpExceptionsCount++ & ((1 << 14) - 1)) == 0) {
+    printf("\n");
+    for (int i = 0; i < static_cast<int>(ParserException::Type::Count); i++) {
+      printf("%s = %llu\n", ParserException::TypeNames[i],
+             ParserException::ErrorTypeCount[i]);
+    }
+    printf("DataQueueIsEmpty = %llu\n"
+           "DequeueModuleIsNull = %llu\n",
+           DataQueueIsEmpty, DequeueModuleIsNull);
   }
 }
 
 void AdcReadoutBase::inputThread() {
-  std::unique_ptr<UDPClient> Receiver1;
+  std::unique_ptr<UDPClient> UdpReceiver;
 
-  std::function<SamplingRun *(ChannelID)> DataModuleProducer(
-      [this](auto Identifier) { return this->GetDataModule(Identifier); });
+  std::function<SamplingRun *(ChannelID)> PullDataModuleFromQueue(
+      [this](auto Identifier) {
+        return this->getDataModuleFromQueue(Identifier);
+      });
 
-  std::function<bool(SamplingRun *)> QueingFunction1([this](SamplingRun *Data) {
-    this->AdcStats.current_ts_ms = TimestampOffset.calcTimestampNS(Data->StartTime.getTimeStampNS()) / 1000000;
-    return this->QueueUpDataModule(Data);
-  });
-  PacketParser Parser1(QueingFunction1, DataModuleProducer, 0);
+  std::function<bool(SamplingRun *)> PushDataModuleToQueue(
+      [this](SamplingRun *Data) {
+        this->AdcStats.current_ts_ms =
+            TimestampOffset.calcTimestampNS(Data->StartTime.getTimeStampNS()) /
+            1000000;
+        return this->queueUpDataModule(Data);
+      });
 
-  auto PacketHandler1 = [&Parser1, this](auto Packet) {
-    this->packetFunction(Packet, Parser1);
+  PacketParser Parser1(PushDataModuleToQueue, PullDataModuleFromQueue, 0);
+
+  auto PacketParser = [&Parser1, this](auto Packet) {
+    this->parsePacketWithStats(Packet, Parser1);
   };
 
   auto GetPacketsForConfig = [&](auto Packet) {
     try {
-      auto Config = parseHeaderForConfigInfo(Packet);
+      ConfigInfo Config = parseHeaderForConfigInfo(Packet);
       TimestampOffset = OffsetTime(ReadoutSettings.TimeOffsetSetting,
                                    ReadoutSettings.ReferenceTime,
                                    Config.BaseTime.getTimeStampNS());
       LOG(INIT, Sev::Info, "Config packet received, starting data processing.");
-      Receiver1->setPacketHandler(PacketHandler1);
+      UdpReceiver->setPacketHandler(PacketParser);
     } catch (ParserException &E) {
       LOG(INIT, Sev::Error,
-      "Failed to extract config data from packet due to the following error: {}", E.what());
+          "Failed to extract config data from packet due to the following "
+          "error: {}",
+          E.what());
     }
   };
 
-  Receiver1 = std::make_unique<UDPClient>(Service, EFUSettings.DetectorAddress,
-                                          EFUSettings.DetectorPort,
-                                          GetPacketsForConfig);
+  UdpReceiver = std::make_unique<UDPClient>(
+      Service, EFUSettings.DetectorAddress, EFUSettings.DetectorPort,
+      GetPacketsForConfig);
+
   LOG(INIT, Sev::Info,
       "Waiting for data packet to be used for parser configuration.");
+
   Service->run();
 }
 
@@ -170,19 +204,32 @@ void AdcReadoutBase::processingThread(
 
   auto UsedOffset = TimestampOffset;
 
+  LOG(INIT, Sev::Info, "Process PeakDetection = {}", ReadoutSettings.PeakDetection);
   if (ReadoutSettings.PeakDetection) {
-    Processors.emplace_back(std::make_unique<PeakFinder>(
-        getProducer(), ReadoutSettings.Name, UsedOffset));
+    Processors.emplace_back(
+        std::make_unique<PeakFinder>( /// \todo likeky to continously alloc/free
+                                      /// PulseParameters and likely leak
+                                      /// EventData.
+            getProducer(), ReadoutSettings.Name, UsedOffset));
   }
+
+  LOG(INIT, Sev::Info, "Process SerializeSamples = {}",
+      ReadoutSettings.SerializeSamples);
   if (ReadoutSettings.SerializeSamples) {
-    auto Processor = std::make_unique<SampleProcessing>(
-        getProducer(), ReadoutSettings.Name, UsedOffset);
+    auto Processor =
+        std::make_unique<SampleProcessing>( /// \todo this is likely to
+                                            /// continuously alloc/free
+                                            /// ProcessedSamples.
+            getProducer(), ReadoutSettings.Name, UsedOffset);
     Processor->setTimeStampLocation(
         TimeStampLocationMap.at(ReadoutSettings.TimeStampLocation));
     Processor->setMeanOfSamples(ReadoutSettings.TakeMeanOfNrOfSamples);
     Processor->setSerializeTimestamps(ReadoutSettings.SampleTimeStamp);
     Processors.emplace_back(std::move(Processor));
   }
+
+  LOG(INIT, Sev::Info, "Process DelayLineDetector = {}",
+      ReadoutSettings.DelayLineDetector);
   if (ReadoutSettings.DelayLineDetector) {
     Processors.emplace_back(std::make_unique<DelayLineProcessing>(
         getDelayLineProducer(UsedOffset), ReadoutSettings.Threshold));
@@ -191,7 +238,7 @@ void AdcReadoutBase::processingThread(
   DataModulePtr Data = nullptr;
   const std::int64_t TimeoutUSecs = 20000;
   while (Detector::runThreads) {
-    auto GotModule = DataModuleQueue.waitGetData(Data, TimeoutUSecs);
+    bool GotModule = DataModuleQueue.waitGetData(Data, TimeoutUSecs);
     if (GotModule) {
       try {
         for (auto &Processor : Processors) {

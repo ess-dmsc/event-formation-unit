@@ -51,6 +51,12 @@ void setCLIArguments(CLI::App &Parser, AdcSettings &ReadoutSettings) {
                 "value along with its time-stamp to he Kafka broker.")
       ->group("ADC Readout Options");
   Parser
+      .add_flag("--dump_parser_exceptions_count",
+                ReadoutSettings.DumpParserExceptionsCount,
+                "Dumps the counts of the different Parser exceptions after a "
+                "high number of parsed packets")
+      ->group("ADC Readout Options");
+  Parser
       .add_flag("--delayline_efu", ReadoutSettings.DelayLineDetector,
                 "Enable event formation of delay line pulse data.")
       ->group("ADC Readout Options");

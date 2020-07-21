@@ -19,6 +19,7 @@ struct AdcSettings {
   bool PeakDetection{false};
   bool DelayLineDetector{false};
   bool SampleTimeStamp{false};
+  bool DumpParserExceptionsCount{false};
   int TakeMeanOfNrOfSamples{1};
   OffsetTime::Offset TimeOffsetSetting{OffsetTime::Offset::NONE};
   std::chrono::system_clock::time_point ReferenceTime;
