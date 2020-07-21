@@ -110,14 +110,14 @@ template <class T> struct VecFixed {
     return &Elms[Count++];
   }
 
-  T* begin() { return Elms; }
-  T* end() { return Elms + Count; }
+  T *begin() { return Elms; }
+  T *end() { return Elms + Count; }
 };
 
-void SetUpPoissonGenerator(asio::io_service &Service, UdpConnection *UdpCon,
-                           int BoxNr, int ChNr,
-                           std::map<std::string, double> Settings,
-                           PoissonDelay *out) {
+void CreatePoissonGenerator(asio::io_service &Service, UdpConnection *UdpCon,
+                            int BoxNr, int ChNr,
+                            std::map<std::string, double> Settings,
+                            PoissonDelay *out) {
 
   double Settings_offset = Settings.at("offset");
   double Settings_amplitude = Settings.at("amplitude");
@@ -132,10 +132,10 @@ void SetUpPoissonGenerator(asio::io_service &Service, UdpConnection *UdpCon,
   new (out) PoissonDelay{data};
 }
 
-void SetUpContinousGenerator(asio::io_service &Service, UdpConnection *UdpCon,
-                             int BoxNr, int ChNr,
-                             std::map<std::string, double> Settings,
-                             ContinousSamplingTimer *out) {
+void CreateContinousGenerator(asio::io_service &Service, UdpConnection *UdpCon,
+                              int BoxNr, int ChNr,
+                              std::map<std::string, double> Settings,
+                              ContinousSamplingTimer *out) {
 
   double Settings_offset = Settings.at("offset");
   double Settings_amplitude = Settings.at("amplitude");
@@ -159,8 +159,9 @@ void SetUpContinousGenerator(asio::io_service &Service, UdpConnection *UdpCon,
   new (out) ContinousSamplingTimer{data};
 }
 
-void SetUpAmpPosGenerator(asio::io_service &Service, UdpConnection *UdpCon,
-                          int BoxNr, double EventRate, AmpEventDelay *out) {
+void CreateAmpEventDelayGenerator(asio::io_service &Service,
+                                  UdpConnection *UdpCon, int BoxNr,
+                                  double EventRate, AmpEventDelay *out) {
 
   const int NrOfSamples{100};
 
@@ -207,8 +208,8 @@ private:
   asio::system_timer Timer;
 };
 
-bool ShouldCreateTimer(SamplerType Type, UdpConnection *TargetAdcBox,
-                       UdpConnection *AdcBox2, SimSettings UsedSettings) {
+bool ShouldCreateGenerator(SamplerType Type, UdpConnection *TargetAdcBox,
+                           UdpConnection *AdcBox2, SimSettings UsedSettings) {
   if (!UsedSettings.SecondFPGA && TargetAdcBox == AdcBox2)
     return false;
 
@@ -259,53 +260,53 @@ int main(const int argc, char *argv[]) {
   {
     UdpConnection *CurAdc = &AdcBox1;
 
-    if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
-                          UsedSettings)) {
-      SetUpPoissonGenerator(Service, CurAdc, 0, 0,
-                            {{"rate", UsedSettings.NoiseRate},
-                             {"offset", 1.0},
-                             {"amplitude", 2000.0}},
-                            PoissionTimers.allocate());
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      CreatePoissonGenerator(Service, CurAdc, 0, 0,
+                             {{"rate", UsedSettings.NoiseRate},
+                              {"offset", 1.0},
+                              {"amplitude", 2000.0}},
+                             PoissionTimers.allocate());
     }
 
-    if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
-                          UsedSettings)) {
-      SetUpPoissonGenerator(Service, CurAdc, 0, 1,
-                            {{"rate", UsedSettings.NoiseRate},
-                             {"offset", 10.0},
-                             {"amplitude", 3000.0}},
-                            PoissionTimers.allocate());
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      CreatePoissonGenerator(Service, CurAdc, 0, 1,
+                             {{"rate", UsedSettings.NoiseRate},
+                              {"offset", 10.0},
+                              {"amplitude", 3000.0}},
+                             PoissionTimers.allocate());
     }
 
-    if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
-                          UsedSettings)) {
-      SetUpPoissonGenerator(Service, CurAdc, 0, 2,
-                            {{"rate", UsedSettings.NoiseRate},
-                             {"offset", 100.0},
-                             {"amplitude", 4000.0}},
-                            PoissionTimers.allocate());
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      CreatePoissonGenerator(Service, CurAdc, 0, 2,
+                             {{"rate", UsedSettings.NoiseRate},
+                              {"offset", 100.0},
+                              {"amplitude", 4000.0}},
+                             PoissionTimers.allocate());
     }
 
-    if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
-                          UsedSettings)) {
-      SetUpPoissonGenerator(Service, CurAdc, 0, 3,
-                            {{"rate", UsedSettings.NoiseRate},
-                             {"offset", 1000.0},
-                             {"amplitude", 5000.0}},
-                            PoissionTimers.allocate());
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      CreatePoissonGenerator(Service, CurAdc, 0, 3,
+                             {{"rate", UsedSettings.NoiseRate},
+                              {"offset", 1000.0},
+                              {"amplitude", 5000.0}},
+                             PoissionTimers.allocate());
     }
 
-    if (ShouldCreateTimer(SamplerType::Continous, CurAdc, &AdcBox2,
-                          UsedSettings)) {
-      SetUpContinousGenerator(Service, CurAdc, 0, 0,
-                              {{"offset", 1000.0}, {"amplitude", 1000.0}},
-                              ContinousTimers.allocate());
+    if (ShouldCreateGenerator(SamplerType::Continous, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      CreateContinousGenerator(Service, CurAdc, 0, 0,
+                               {{"offset", 1000.0}, {"amplitude", 1000.0}},
+                               ContinousTimers.allocate());
     }
 
-    if (ShouldCreateTimer(SamplerType::AmpEventDelay, CurAdc, &AdcBox2,
-                          UsedSettings)) {
-      SetUpAmpPosGenerator(Service, CurAdc, 0, UsedSettings.EventRate,
-                           AmpDelayTimers.allocate());
+    if (ShouldCreateGenerator(SamplerType::AmpEventDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      CreateAmpEventDelayGenerator(Service, CurAdc, 0, UsedSettings.EventRate,
+                                   AmpDelayTimers.allocate());
     }
   }
 
@@ -313,56 +314,56 @@ int main(const int argc, char *argv[]) {
   {
     UdpConnection *CurAdc = &AdcBox2;
 
-    if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
-                          UsedSettings)) {
-      SetUpPoissonGenerator(Service, CurAdc, 1, 0,
-                            {{"rate", UsedSettings.NoiseRate},
-                             {"offset", 1.0},
-                             {"amplitude", 2000.0}},
-                            PoissionTimers.allocate());
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      CreatePoissonGenerator(Service, CurAdc, 1, 0,
+                             {{"rate", UsedSettings.NoiseRate},
+                              {"offset", 1.0},
+                              {"amplitude", 2000.0}},
+                             PoissionTimers.allocate());
     }
 
-    if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
-                          UsedSettings)) {
-      SetUpPoissonGenerator(Service, &AdcBox2, 1, 1,
-                            {{"rate", UsedSettings.NoiseRate},
-                             {"offset", 10.0},
-                             {"amplitude", 3000.0}},
-                            PoissionTimers.allocate());
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      CreatePoissonGenerator(Service, &AdcBox2, 1, 1,
+                             {{"rate", UsedSettings.NoiseRate},
+                              {"offset", 10.0},
+                              {"amplitude", 3000.0}},
+                             PoissionTimers.allocate());
     }
 
-    if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
-                          UsedSettings)) {
-      SetUpPoissonGenerator(Service, &AdcBox2, 1, 2,
-                            {{"rate", UsedSettings.NoiseRate},
-                             {"offset", 100.0},
-                             {"amplitude", 4000.0}},
-                            PoissionTimers.allocate());
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      CreatePoissonGenerator(Service, &AdcBox2, 1, 2,
+                             {{"rate", UsedSettings.NoiseRate},
+                              {"offset", 100.0},
+                              {"amplitude", 4000.0}},
+                             PoissionTimers.allocate());
     }
 
-    if (ShouldCreateTimer(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
-                          UsedSettings)) {
-      SetUpPoissonGenerator(Service, &AdcBox2, 1, 3,
-                            {{"rate", UsedSettings.NoiseRate},
-                             {"offset", 1000.0},
-                             {"amplitude", 5000.0}},
-                            PoissionTimers.allocate());
+    if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      CreatePoissonGenerator(Service, &AdcBox2, 1, 3,
+                             {{"rate", UsedSettings.NoiseRate},
+                              {"offset", 1000.0},
+                              {"amplitude", 5000.0}},
+                             PoissionTimers.allocate());
     }
 
-    if (ShouldCreateTimer(SamplerType::Continous, CurAdc, &AdcBox2,
-                          UsedSettings)) {
-      SetUpContinousGenerator(Service, &AdcBox2, 1, 0,
-                              {{"offset", 1000.0}, {"amplitude", 500.0}},
-                              ContinousTimers.allocate());
+    if (ShouldCreateGenerator(SamplerType::Continous, CurAdc, &AdcBox2,
+                              UsedSettings)) {
+      CreateContinousGenerator(Service, &AdcBox2, 1, 0,
+                               {{"offset", 1000.0}, {"amplitude", 500.0}},
+                               ContinousTimers.allocate());
     }
   }
 
   // for (auto &t : PoissionTimers)
   //  t.start();
 
-  //for (auto &t : AmpDelayTimers)
+  // for (auto &t : AmpDelayTimers)
   //  t.start();
-  //for (auto &t : ContinousTimers)
+  // for (auto &t : ContinousTimers)
   //  t.start();
 
   auto PrintStats = [&AdcBox1, &AdcBox2]() {
@@ -396,7 +397,7 @@ int main(const int argc, char *argv[]) {
       // //  }
       // //});
 
-      //RelAssertMsg(PoissionTimers.Count == 1, "");
+      // RelAssertMsg(PoissionTimers.Count == 1, "");
 
       /// genSamplesAndEnqueueSend
       auto WantedTimeNow = std::chrono::system_clock::now();
@@ -415,14 +416,14 @@ int main(const int argc, char *argv[]) {
 
       ////////////////
 
-      //static // Adding this static will recycle the first generate(), which will be fast!
+      // static // Adding this static will recycle the first generate(), which
+      // will be fast!
       std::pair<void *, std::size_t> SampleRun =
           self.data.TimerData.SampleGen.generate(
               self.data.TimerData.Settings_amplitude, Time);
 
       self.data.TimerData.UdpCon->addSamplingRun(SampleRun.first,
                                                  SampleRun.second, Time);
-
     }
   }
 
