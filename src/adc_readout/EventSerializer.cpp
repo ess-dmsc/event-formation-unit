@@ -21,7 +21,7 @@ EventSerializer::EventSerializer(std::string SourceName, size_t BufferSize,
     : Name(std::move(SourceName)), Timeout(TransmitTimeout),
       EventBufferSize(BufferSize), Producer(KafkaProducer), CMode(Mode),
       RefTimeOffset(UseOffset) {
-  SerializeThread = std::thread(&EventSerializer::serialiseThreadFunc, this);
+  SerializeThread = std::thread(&EventSerializer::serialiseFunction, this);
 }
 
 EventSerializer::~EventSerializer() {
@@ -66,7 +66,7 @@ struct FBVector {
 
 using namespace std::chrono_literals;
 
-void EventSerializer::serialiseThreadFunc() {
+void EventSerializer::serialiseFunction() {
   flatbuffers::FlatBufferBuilder Builder(
       sizeof(std::uint32_t) * EventBufferSize * 8 + 2048);
   // We do not want the buffer to be too small or the vector offset addresses
@@ -93,7 +93,6 @@ void EventSerializer::serialiseThreadFunc() {
   std::uint64_t MessageId{0};
   std::chrono::system_clock::time_point FirstEventTime;
   EventBuffer Events(EventBufferSize);
-
   auto ProduceFB = [&](auto const &SendEvents, auto const ReferenceTime) {
     if (SendEvents.empty()) {
       return;
@@ -124,7 +123,6 @@ void EventSerializer::serialiseThreadFunc() {
     ThresholdTime.clear();
     PeakTime.clear();
   };
-  
   std::uint64_t LastAddedRefTimestamp{0};
   auto getReferenceTimestamps = [&LastAddedRefTimestamp, &Events, this]() {
     auto NumberOfIterations{0};
@@ -142,7 +140,6 @@ void EventSerializer::serialiseThreadFunc() {
     }
   };
   getReferenceTimestamps();
-
   do {
     while (EventQueue.try_dequeue(NewEvent)) {
       if (Events.size() == 0) {
@@ -168,7 +165,6 @@ void EventSerializer::serialiseThreadFunc() {
       Events.clearAllEvents();
     }
   } while (RunThread);
-
   if (Events.size() > 0) {
     // Reference time is calculated by Events.getEvents() so we must call that
     // function first.

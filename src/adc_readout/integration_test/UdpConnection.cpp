@@ -111,7 +111,7 @@ void* TransmitThreadStart(void* arg)
   return nullptr;
 }
 
-static const int kTransmitQueueSize = 10;
+static const int kTransmitQueueSize = 50;
 
 UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort,
                              asio::io_service &__attribute__((unused)) Service)
@@ -483,26 +483,17 @@ void UdpConnection::swapAndTransmitSharedStandbyBuffer() {
 
 
   // allocate new standby buffer
-  uint32_t EmptyStreakCount = 0;
   while (SharedStandbyBuffer == nullptr) {
     //usleep(10000); // test
     FreePacketsAccess.lock();
     if (FreePackets.size()) {
       SharedStandbyBuffer = FreePackets.back();
       FreePackets.pop_back();
-      EmptyStreakCount = 0;
-    } else {
-      EmptyStreakCount++;
     }
     FreePacketsAccess.unlock();
 
     if (SharedStandbyBuffer == nullptr) {
-      uint32_t waitUSec = 1;
-      if (EmptyStreakCount > 10)
-        waitUSec = 10;
-      if (EmptyStreakCount > 100)
-        waitUSec = 100;
-      usleep(waitUSec);
+      usleep(1);
     }
   }
 

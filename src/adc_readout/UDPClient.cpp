@@ -33,17 +33,22 @@ void UDPClient::setPacketHandler(
   PacketHandler = std::move(Handler);
 }
 
+void UDPClient::receiveHandler(const asio::error_code &Error,
+                               std::size_t BytesReceived) {
+  if (Error) {
+    LOG(INPUT, Sev::Warning, "Error on receiving UDP packet. Message is: {}",
+        Error.message());
+    return;
+  }
+  InputBuffer.Length = BytesReceived;
+  PacketHandler(InputBuffer);
+  setupReceiver();
+}
+
 void UDPClient::setupReceiver() {
+  auto HandlerGlue = [this](auto &Error, auto Size) {
+    this->receiveHandler(Error, Size);
+  };
   Socket.async_receive(asio::buffer(InputBuffer.Data, InData::MaxLength),
-                       [this](auto &Error, auto BytesReceived) {
-                         if (Error) {
-                           LOG(INPUT, Sev::Warning,
-                               "Error on receiving UDP packet. Message is: {}",
-                               Error.message());
-                           return;
-                         }
-                         InputBuffer.Length = BytesReceived;
-                         PacketHandler(InputBuffer);
-                         setupReceiver();
-                       });
+                       HandlerGlue);
 }

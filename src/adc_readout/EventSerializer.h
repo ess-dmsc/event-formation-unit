@@ -108,7 +108,7 @@ protected:
   virtual std::chrono::system_clock::time_point getCurrentTime() const {
     return std::chrono::system_clock::now();
   };
-  void serialiseThreadFunc();
+  void serialiseFunction();
   std::atomic_bool RunThread{true};
   std::string Name;
   std::chrono::milliseconds Timeout;
