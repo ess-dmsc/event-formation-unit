@@ -6,16 +6,14 @@
 //===----------------------------------------------------------------------===//
 
 #include "UdpConnection.h"
+
 #include <ciso646>
+#include <common/Timer.h>
 #include <functional>
 #include <iostream>
-#include <common/Timer.h>
+#include <unistd.h>
 
 #include <mach/thread_policy.h>
-
-
-
-
 
 /// from https://github.com/elazarl/cpu_affinity/blob/master/affinity_darwin.c
 /// "The Unlicense" license:
@@ -45,23 +43,20 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 For more information, please refer to <http://unlicense.org>
 */
-#include <stdio.h>
-#include <mach/thread_policy.h>
 #include <mach/task_info.h>
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#include <mach/thread_policy.h>
 #include <mach/thread_act.h>
+#include <mach/thread_policy.h>
 #include <pthread.h>
-
-
+#include <stdio.h>
+#include <sys/sysctl.h>
+#include <sys/types.h>
 
 /*
 int pthread_create_with_cpu_affinity(pthread_t *restrict thread, int cpu,
                                      const pthread_attr_t *restrict attr,
-                                     void *(*start_routine)(void *), void *restrict arg) {
-  int rv = pthread_create_suspended_np(thread, attr, start_routine, arg);
-  mach_port_t mach_thread = pthread_mach_thread_np(*thread);
+                                     void *(*start_routine)(void *), void
+*restrict arg) { int rv = pthread_create_suspended_np(thread, attr,
+start_routine, arg); mach_port_t mach_thread = pthread_mach_thread_np(*thread);
   if (rv != 0) {
     return rv;
   }
@@ -71,61 +66,25 @@ int pthread_create_with_cpu_affinity(pthread_t *restrict thread, int cpu,
 
   thread_affinity_policy_data_t policy_data = { 3 };
   mach_port_t myThread = pthread_mach_thread_np(pthread_self())
-  thread_policy_set((myThread, THREAD_AFFINITY_POLICY, (thread_policy_t)&policy_data, THREAD_AFFINITY_POLICY_COUNT);
-  return 0;
+  thread_policy_set((myThread, THREAD_AFFINITY_POLICY,
+(thread_policy_t)&policy_data, THREAD_AFFINITY_POLICY_COUNT); return 0;
 }*/
 
-
-
-using UdpEndpoint = asio::ip::udp::endpoint;
 using namespace std::chrono_literals;
 
-// struct QueryResult {
-//  explicit QueryResult(asio::ip::udp::resolver::iterator &&Endpoints)
-//      : EndpointIterator(std::move(Endpoints)) {
-//    while (EndpointIterator != asio::ip::udp::resolver::iterator()) {
-//      auto CEndpoint = *EndpointIterator;
-//      EndpointList.push_back(CEndpoint);
-//      ++EndpointIterator;
-//    }
-//    std::sort(EndpointList.begin(), EndpointList.end(), [](auto &a, auto &b) {
-//      return a.address().is_v6() < b.address().is_v6();
-//    });
-//  }
-//  asio::ip::udp::endpoint getNextEndpoint() {
-//    if (NextEndpoint < EndpointList.size()) {
-//      return EndpointList[NextEndpoint++];
-//    }
-//    return {};
-//  }
-//  bool isDone() const { return NextEndpoint >= EndpointList.size(); }
-//  asio::ip::udp::resolver::iterator EndpointIterator;
-//  std::vector<UdpEndpoint> EndpointList;
-//  unsigned int NextEndpoint{0};
-//};
-
-void* TransmitThreadStart(void* arg)
-{
-  UdpConnection* This = (UdpConnection*)arg;
+void *TransmitThreadStart(void *arg) {
+  UdpConnection *This = (UdpConnection *)arg;
   This->transmitThread();
   return nullptr;
 }
 
 static const int kTransmitQueueSize = 10;
 
-UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort,
-                             asio::io_service &__attribute__((unused)) Service)
-    : Address(std::move(DstAddress)), Port(DstPort)
-      // Socket(Service, UdpEndpoint()), Resolver(Service),
-      // ReconnectTimeout(Service), HeartbeatTimeout(Service),
-      // DataPacketTimeout(Service),
-      // TransmitBuffer(std::make_unique<DataPacket>(MaxPacketSize)),
-      ,
+UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort)
+    : Address(std::move(DstAddress)), Port(DstPort),
       RemoteEndpoint(Address, Port),
       DataSource(Socket::Endpoint("0.0.0.0", 0), RemoteEndpoint),
-      SharedStandbyBuffer(
-          nullptr /*std::make_unique<DataPacket>(MaxPacketSize)*/) {
-  // resolveDestination();
+      SharedStandbyBuffer(nullptr) {
 
   DataSource.setBufferSizes(KernelTxBufferSize, 0);
   DataSource.printBufferSizes();
@@ -146,14 +105,14 @@ UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort,
   SharedStandbyBuffer = FreePackets.back();
   FreePackets.pop_back();
   TransmitRequests.clear();
-  
 
+  // kern_return_t thread_policy_set(thread_act_t thread, thread_policy_flavor_t
+  // flavor, thread_policy_t policy_info, mach_msg_type_number_t policy_infoCnt);
 
-//kern_return_t thread_policy_set(thread_act_t thread, thread_policy_flavor_t flavor, thread_policy_t policy_info, mach_msg_type_number_t policy_infoCnt);
-
-  //thread_affinity_policy_data_t policy_data = { /*int cpu*/ 3 };
-  //mach_port_t myThread = pthread_mach_thread_np(pthread_self());
-  //thread_policy_set(myThread, THREAD_AFFINITY_POLICY, (thread_policy_t)&policy_data, THREAD_AFFINITY_POLICY_COUNT);
+  // thread_affinity_policy_data_t policy_data = { /*int cpu*/ 3 };
+  // mach_port_t myThread = pthread_mach_thread_np(pthread_self());
+  // thread_policy_set(myThread, THREAD_AFFINITY_POLICY,
+  // (thread_policy_t)&policy_data, THREAD_AFFINITY_POLICY_COUNT);
 
   pthread_t thread1;
   if (pthread_create_suspended_np(&thread1, NULL, TransmitThreadStart, this) !=
@@ -162,16 +121,23 @@ UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort,
   }
   mach_port_t mach_thread1 = pthread_mach_thread_np(thread1);
   int wantedCpu = 7;
-  thread_affinity_policy_data_t policyData1 = { 1 << wantedCpu };
+  thread_affinity_policy_data_t policyData1 = {1 << wantedCpu};
   int res = thread_policy_set(mach_thread1, THREAD_AFFINITY_POLICY,
-                    (thread_policy_t)&policyData1, THREAD_AFFINITY_POLICY_COUNT);
+                              (thread_policy_t)&policyData1,
+                              THREAD_AFFINITY_POLICY_COUNT);
   if (res != 0) {
     fprintf(stderr, "bad thread_policy_set %i", res);
   }
 
-  //thread_resume(mach_thread1);
+  // thread_resume(mach_thread1);
 
   TransmitThread = std::thread([this]() { this->transmitThread(); });
+}
+
+UdpConnection::~UdpConnection() {
+  if (TransmitThread.joinable()) {
+    TransmitThread.join();
+  }
 }
 
 void UdpConnection::resolveDestination() {
@@ -284,7 +250,7 @@ void UdpConnection::transmitPacket(const void *DataPtr,
 extern bool RunLoop;
 
 void UdpConnection::transmitThread() {
-  
+
   static const bool ContinuousSpeedTest = false;
   if (ContinuousSpeedTest) {
     fprintf(stdout, "ContinuousSpeedTest\n");
@@ -298,7 +264,7 @@ void UdpConnection::transmitThread() {
   uint64_t SendCount = 0;
 
   std::vector<DataPacket *> LocalQueue;
-  LocalQueue.reserve (kTransmitQueueSize);
+  LocalQueue.reserve(kTransmitQueueSize);
 
 #define LOCAL_QUEUE 1
 
@@ -437,7 +403,6 @@ void UdpConnection::addSamplingRun(void const *const DataPtr, size_t Bytes,
   size_t Size = BufferSizes.first;
   size_t MaxSize = BufferSizes.second;
 
-
   // int prevSharedStandbyUse2 = SharedStandbyInUse.exchange(0);
   // //fprintf(stdout, "addSamplingRun() release SharedStandbyInUse\n");
   // RelAssertMsg (prevSharedStandbyUse2 == 1, "we release it");
@@ -461,12 +426,12 @@ void UdpConnection::swapAndTransmitSharedStandbyBuffer() {
   //};
   ////TransmitBufferInUse.exchange (1);
   ////fprintf(stdout, "swapAndTransmitSharedStandbyBuffer() lock
-  ///TransmitBufferInUse\n");
+  /// TransmitBufferInUse\n");
   // RelAssertMsg (prevTransmitUse == 0, "");
   //
   // int prevSharedStandbyUse = SharedStandbyInUse.exchange (1);
   ////fprintf(stdout, "swapAndTransmitSharedStandbyBuffer() lock
-  ///SharedStandbyInUse\n");
+  /// SharedStandbyInUse\n");
   // RelAssertMsg (prevSharedStandbyUse == 0, "");
 
   // std::swap(TransmitBuffer, SharedStandbyBuffer);
@@ -474,21 +439,20 @@ void UdpConnection::swapAndTransmitSharedStandbyBuffer() {
 
   // int prevSharedStandbyUse2 = SharedStandbyInUse.exchange (0);
   ////fprintf(stdout, "swapAndTransmitSharedStandbyBuffer() release
-  ///SharedStandbyInUse\n");
-  // RelAssertMsg (prevSharedStandbyUse2 == 1, "we release it"); 
+  /// SharedStandbyInUse\n");
+  // RelAssertMsg (prevSharedStandbyUse2 == 1, "we release it");
 
   DataPacket *TransmitBuffer = SharedStandbyBuffer;
   SharedStandbyBuffer = nullptr;
-  /*auto DataInfo =*/ TransmitBuffer->formatPacketForSend(PacketCount);
+  /*auto DataInfo =*/TransmitBuffer->formatPacketForSend(PacketCount);
   PacketCount++;
-  //transmitPacket(DataInfo.first, DataInfo.second);
-  transmitPacket((void*)TransmitBuffer, 0);
-
+  // transmitPacket(DataInfo.first, DataInfo.second);
+  transmitPacket((void *)TransmitBuffer, 0);
 
   // allocate new standby buffer
   uint32_t EmptyStreakCount = 0;
   while (SharedStandbyBuffer == nullptr) {
-    //usleep(10000); // test
+    // usleep(10000); // test
     FreePacketsAccess.lock();
     if (FreePackets.size()) {
       SharedStandbyBuffer = FreePackets.back();

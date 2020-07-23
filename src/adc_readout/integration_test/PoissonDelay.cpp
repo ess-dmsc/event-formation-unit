@@ -19,7 +19,7 @@ PoissonDelay::PoissonDelay(PoissonDelayData &data)
     : SamplingTimer([](TimeStamp const &Time) {
         std::cout << "bad PoissonDelay::PoissonDelay bind" << Time.getSeconds();
       }),
-      data(data), EventTimer(*data.TimerData.Service), RandomGenerator(RandomDevice()),
+      data(data), RandomGenerator(RandomDevice()),
       RandomDistribution(data.TimerData.Settings_rate) {}
 
 std::chrono::duration<size_t, std::nano> PoissonDelay::calcDelaTime() {
@@ -29,14 +29,13 @@ std::chrono::duration<size_t, std::nano> PoissonDelay::calcDelaTime() {
   return NextEventDelay;
 }
 
-void PoissonDelay::start() {
-  
+void PoissonDelay::start() {}
+
+void PoissonDelay::genSamplesAndQueueSend(const TimeStamp &Time) {
+  std::pair<void *, std::size_t> SampleRun = data.TimerData.SampleGen.generate(
+      data.TimerData.Settings_amplitude, Time);
+  data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second,
+                                        Time);
 }
 
-void PoissonDelay::genSamplesAndQueueSend(const TimeStamp& Time) {
-  std::pair<void *, std::size_t> SampleRun =
-      data.TimerData.SampleGen.generate(data.TimerData.Settings_amplitude, Time);
-  data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second, Time);
-}
-
-void PoissonDelay::stop() { EventTimer.cancel(); }
+void PoissonDelay::stop() {}

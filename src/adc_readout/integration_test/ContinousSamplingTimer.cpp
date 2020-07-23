@@ -17,31 +17,31 @@ using std::chrono::seconds;
 using std::chrono::system_clock;
 
 ContinousSamplingTimer::ContinousSamplingTimer(ContinousSamplingTimerData &data)
-    : SamplingTimer([](TimeStamp const &) {}), Data(data),
-      SampleTimer(*data.TimerData.Service) {
+    : SamplingTimer([](TimeStamp const &) {}), Data(data) {
 
   NextSampleTime = system_clock::now();
 
   const double TimeFracMax = 88052500.0 / 2;
 
-  TimeStepNano = std::chrono::duration<size_t, std::nano>(static_cast<std::uint64_t>(
-      (data.NrOfOriginalSamples / TimeFracMax) * 1e9));
+  TimeStepNano =
+      std::chrono::duration<size_t, std::nano>(static_cast<std::uint64_t>(
+          (data.NrOfOriginalSamples / TimeFracMax) * 1e9));
 
   TimeStep = duration_cast<system_clock::duration>(TimeStepNano);
 }
 
-std::chrono::duration<size_t, std::nano> ContinousSamplingTimer::calcDelaTime() {
+std::chrono::duration<size_t, std::nano>
+ContinousSamplingTimer::calcDelaTime() {
   return TimeStepNano;
 }
 
-void ContinousSamplingTimer::start() {
+void ContinousSamplingTimer::start() {}
 
+void ContinousSamplingTimer::genSamplesAndQueueSend(const TimeStamp &Time) {
+  std::pair<void *, std::size_t> SampleRun = Data.TimerData.SampleGen.generate(
+      Data.TimerData.Settings_amplitude, Time);
+  Data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second,
+                                        Time);
 }
 
-void ContinousSamplingTimer::genSamplesAndQueueSend(const TimeStamp& Time) {
-  std::pair<void *, std::size_t> SampleRun =
-      Data.TimerData.SampleGen.generate(Data.TimerData.Settings_amplitude, Time);
-  Data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second, Time);
-}
-
-void ContinousSamplingTimer::stop() { SampleTimer.cancel(); }
+void ContinousSamplingTimer::stop() {}

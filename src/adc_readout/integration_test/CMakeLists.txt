@@ -31,7 +31,7 @@ add_executable(AdcSimulator EXCLUDE_FROM_ALL ${AdcSimulator_SRC} ${AdcSimulator_
 set_target_properties(AdcSimulator PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-target_include_directories(AdcSimulator PRIVATE ${ASIO_INCLUDE_DIR} "../" "../../common/")
+target_include_directories(AdcSimulator PRIVATE "../" "../../common/")
 
 target_link_libraries(AdcSimulator ${CMAKE_THREAD_LIBS_INIT} efu_common $<TARGET_OBJECTS:AdcReadout>)
 

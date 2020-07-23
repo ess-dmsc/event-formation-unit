@@ -11,10 +11,6 @@
 #include "SampleRunGenerator.h"
 #include "SamplingTimer.h"
 #include "UdpConnection.h"
-#ifndef assert
-#define assert(...) /**/
-#endif
-#include <asio.hpp>
 #include <chrono>
 #include <functional>
 
@@ -22,7 +18,7 @@ struct ContinousSamplingTimerData {
   /*asio::io_service *Service;
   UdpConnection *UdpCon;
   SampleRunGenerator SampleGen;
-  
+
   double Settings_offset;
   double Settings_amplitude;
   double Settings_rate;
@@ -42,11 +38,10 @@ public:
 
   ContinousSamplingTimerData Data;
 
-  void genSamplesAndQueueSend(const TimeStamp& Time);
+  void genSamplesAndQueueSend(const TimeStamp &Time);
 
 private:
-  void handleEventTimer(const asio::error_code &Error);
-  asio::system_timer SampleTimer;
+  // void handleEventTimer(const asio::error_code &Error);
 
   std::chrono::system_clock::time_point NextSampleTime;
   // const int NrOfOriginalSamples;

@@ -10,22 +10,14 @@
 #include "../AdcTimeStamp.h"
 #include <functional>
 
-#ifndef assert
-#define assert(...) /**/
-#endif
-#include <asio.hpp>
 #include "SampleRunGenerator.h"
 #include "UdpConnection.h"
 
-enum class SamplerType{
-  PoissonDelay,
-  AmpEventDelay,
-  Continous
-};
+enum class SamplerType { PoissonDelay, AmpEventDelay, Continous };
 
 struct SamplingTimerData {
   SamplerType Type;
-  asio::io_service *Service;
+  // asio::io_service *Service;
   UdpConnection *UdpCon;
   SampleRunGenerator SampleGen;
 
@@ -41,7 +33,7 @@ public:
   virtual void start() = 0;
   virtual void stop() = 0;
 
-  //virtual void genSamplesAndQueueSend();
+  // virtual void genSamplesAndQueueSend();
 
   std::function<void(TimeStamp const &)> SamplingFunc;
 };
