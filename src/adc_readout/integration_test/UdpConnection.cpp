@@ -339,6 +339,7 @@ void UdpConnection::transmitThread() {
       void *DataBuf = data->Buffer.get();
       std::size_t DataSize = data->Size;
 
+      // ContinuousSpeedTest
       if (ContinuousSpeedTest) {
         for (;;) {
           DataSource.send(DataBuf, DataSize);
@@ -352,7 +353,8 @@ void UdpConnection::transmitThread() {
                     GbPerSec, PkgPerSec, (uint32_t)DataSize);
           }
         }
-      } else if (RepeatPacketSpeedTest) {
+      } // RepeatPacketSpeedTest
+      else if (RepeatPacketSpeedTest) {
         DataSource.send(DataBuf, DataSize);
 
         if ((SendCount++ & ((1 << 17) - 1)) == 0) {
@@ -363,7 +365,8 @@ void UdpConnection::transmitThread() {
           fprintf(stderr, "GbPerSec %0.3f, pkg/sec %0.3f, pkg bytes %u\n",
                   GbPerSec, PkgPerSec, (uint32_t)DataSize);
         }
-      } else {
+      } // normal send
+      else {
         DataSource.send(DataBuf, DataSize);
 
         if ((SendCount++ & ((1 << 16) - 1)) == 0) {

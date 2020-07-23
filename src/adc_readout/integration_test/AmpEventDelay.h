@@ -25,5 +25,5 @@ public:
 
   AmpEventDelayData data;
 
-  void genSamplesAndEnqueueSend() override;
+  void genSamplesAndQueueSend(const TimeStamp& Time);
 };

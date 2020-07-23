@@ -19,19 +19,8 @@ auto generateCircleAmplitudes() {
                         Center + Amplitude * std::sin(Angle));
 }
 
-void AmpEventDelay::genSamplesAndEnqueueSend() {
-  auto Now = system_clock::now();
-  auto NowSeconds = duration_cast<seconds>(Now.time_since_epoch()).count();
-  double NowSecFrac =
-      (duration_cast<nanoseconds>(Now.time_since_epoch()).count() / 1e9) -
-      NowSeconds;
-  std::uint32_t Ticks = std::lround(NowSecFrac * (88052500 / 2.0));
-
-  RawTimeStamp rts{static_cast<uint32_t>(NowSeconds), Ticks};
-  TimeStamp Time(rts, TimeStamp::ClockMode::External);
-
-  ////////////////
-
+void AmpEventDelay::genSamplesAndQueueSend(const TimeStamp& Time) {
+ 
   auto SampleRunAnode = data.AnodeGen.generate(2000.0, Time);
   auto Amplitudes = generateCircleAmplitudes();
   auto SampleRunX = data.XPosGen.generate(Amplitudes.first, Time);

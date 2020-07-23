@@ -38,9 +38,11 @@ public:
   void start() override;
   void stop() override;
 
+  std::chrono::duration<size_t, std::nano> calcDelaTime();
+
   ContinousSamplingTimerData Data;
 
-  void genSamplesAndEnqueueSend() override;
+  void genSamplesAndQueueSend(const TimeStamp& Time);
 
 private:
   void handleEventTimer(const asio::error_code &Error);
@@ -49,4 +51,5 @@ private:
   std::chrono::system_clock::time_point NextSampleTime;
   // const int NrOfOriginalSamples;
   std::chrono::system_clock::duration TimeStep;
+  std::chrono::duration<size_t, std::nano> TimeStepNano;
 };

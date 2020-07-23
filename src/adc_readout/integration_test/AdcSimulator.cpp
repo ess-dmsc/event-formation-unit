@@ -110,6 +110,11 @@ template <class T> struct VecFixed {
     return &Elms[Count++];
   }
 
+  T &operator[](int32_t i) {
+    RelAssertMsg(i < Count, "");
+    return Elms[i];
+  }
+
   T *begin() { return Elms; }
   T *end() { return Elms + Count; }
 };
@@ -252,9 +257,14 @@ int main(const int argc, char *argv[]) {
   UdpConnection AdcBox1(UsedSettings.EFUAddress, UsedSettings.Port1, Service);
   UdpConnection AdcBox2(UsedSettings.EFUAddress, UsedSettings.Port2, Service);
 
-  VecFixed<PoissonDelay> PoissionTimers(20);
-  VecFixed<AmpEventDelay> AmpDelayTimers(20);
-  VecFixed<ContinousSamplingTimer> ContinousTimers(20);
+  VecFixed<PoissonDelay> PoissionGenerators(20);
+  std::vector<std::chrono::high_resolution_clock::time_point> TriggerTime_Poisson(20);
+
+  VecFixed<AmpEventDelay> AmpDelayGenerators(20);
+  std::vector<std::chrono::high_resolution_clock::time_point> TriggerTime_AmpDelay(20);
+
+  VecFixed<ContinousSamplingTimer> ContinousGenerators(20);
+  std::vector<std::chrono::high_resolution_clock::time_point> TriggerTime_Continous(20);
 
   // Box 1 timers
   {
@@ -266,7 +276,8 @@ int main(const int argc, char *argv[]) {
                              {{"rate", UsedSettings.NoiseRate},
                               {"offset", 1.0},
                               {"amplitude", 2000.0}},
-                             PoissionTimers.allocate());
+                             PoissionGenerators.allocate());
+      TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
@@ -275,7 +286,8 @@ int main(const int argc, char *argv[]) {
                              {{"rate", UsedSettings.NoiseRate},
                               {"offset", 10.0},
                               {"amplitude", 3000.0}},
-                             PoissionTimers.allocate());
+                             PoissionGenerators.allocate());
+      TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
@@ -284,7 +296,8 @@ int main(const int argc, char *argv[]) {
                              {{"rate", UsedSettings.NoiseRate},
                               {"offset", 100.0},
                               {"amplitude", 4000.0}},
-                             PoissionTimers.allocate());
+                             PoissionGenerators.allocate());
+      TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
@@ -293,20 +306,23 @@ int main(const int argc, char *argv[]) {
                              {{"rate", UsedSettings.NoiseRate},
                               {"offset", 1000.0},
                               {"amplitude", 5000.0}},
-                             PoissionTimers.allocate());
+                             PoissionGenerators.allocate());
+      TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::Continous, CurAdc, &AdcBox2,
                               UsedSettings)) {
       CreateContinousGenerator(Service, CurAdc, 0, 0,
                                {{"offset", 1000.0}, {"amplitude", 1000.0}},
-                               ContinousTimers.allocate());
+                               ContinousGenerators.allocate());
+      TriggerTime_Continous.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::AmpEventDelay, CurAdc, &AdcBox2,
                               UsedSettings)) {
       CreateAmpEventDelayGenerator(Service, CurAdc, 0, UsedSettings.EventRate,
-                                   AmpDelayTimers.allocate());
+                                   AmpDelayGenerators.allocate());
+      TriggerTime_AmpDelay.emplace_back();
     }
   }
 
@@ -320,7 +336,8 @@ int main(const int argc, char *argv[]) {
                              {{"rate", UsedSettings.NoiseRate},
                               {"offset", 1.0},
                               {"amplitude", 2000.0}},
-                             PoissionTimers.allocate());
+                             PoissionGenerators.allocate());
+      TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
@@ -329,7 +346,8 @@ int main(const int argc, char *argv[]) {
                              {{"rate", UsedSettings.NoiseRate},
                               {"offset", 10.0},
                               {"amplitude", 3000.0}},
-                             PoissionTimers.allocate());
+                             PoissionGenerators.allocate());
+      TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
@@ -338,7 +356,8 @@ int main(const int argc, char *argv[]) {
                              {{"rate", UsedSettings.NoiseRate},
                               {"offset", 100.0},
                               {"amplitude", 4000.0}},
-                             PoissionTimers.allocate());
+                             PoissionGenerators.allocate());
+      TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
@@ -347,23 +366,25 @@ int main(const int argc, char *argv[]) {
                              {{"rate", UsedSettings.NoiseRate},
                               {"offset", 1000.0},
                               {"amplitude", 5000.0}},
-                             PoissionTimers.allocate());
+                             PoissionGenerators.allocate());
+      TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::Continous, CurAdc, &AdcBox2,
                               UsedSettings)) {
       CreateContinousGenerator(Service, &AdcBox2, 1, 0,
                                {{"offset", 1000.0}, {"amplitude", 500.0}},
-                               ContinousTimers.allocate());
+                               ContinousGenerators.allocate());
+      TriggerTime_Continous.emplace_back();
     }
   }
 
-  // for (auto &t : PoissionTimers)
+  // for (auto &t : PoissionGenerators)
   //  t.start();
 
-  // for (auto &t : AmpDelayTimers)
+  // for (auto &t : AmpDelayGenerators)
   //  t.start();
-  // for (auto &t : ContinousTimers)
+  // for (auto &t : ContinousGenerators)
   //  t.start();
 
   auto PrintStats = [&AdcBox1, &AdcBox2]() {
@@ -373,58 +394,83 @@ int main(const int argc, char *argv[]) {
               << AdcBox2.getNrOfRuns() << "\n";
   };
 
-  StatsTimer Stats(PrintStats, Service);
-  Stats.start();
+  auto PrintStatsCalcDeltaTime = [] {
+    return std::chrono::duration<size_t, std::nano>(5'000'000'000ull);
+  };
+
+  std::chrono::high_resolution_clock::time_point TriggerTime_PrintStats;
+
+  //StatsTimer Stats(PrintStats, Service);
+  //Stats.start();
 
   std::thread AsioThread([&Service]() { Service.run(); });
   // std::thread AsioThread([]{});
   // Service.run();
 
+  bool runTriggers = false;
   while (RunLoop) {
-    // std::this_thread::sleep_for(500ms);
 
-    for (auto &self : PoissionTimers) {
-      // /// start()
-      // double DelayTimeSec = self.RandomDistribution(self.RandomGenerator);
-      // std::chrono::duration<size_t, std::nano> DelayTimeNs(
-      //     static_cast<size_t>(DelayTimeSec /** 1e6*/));
-
-      // self.EventTimer.expires_after(DelayTimeNs);
-      // // self.EventTimer.async_wait([this](auto &Error) {
-      // //  if (not Error) {
-      // //    genSamplesAndEnqueueSend();
-      // //    start();
-      // //  }
-      // //});
-
-      // RelAssertMsg(PoissionTimers.Count == 1, "");
-
-      /// genSamplesAndEnqueueSend
-      auto WantedTimeNow = std::chrono::system_clock::now();
+    // Get TimeStep for current time
+    auto TimeNow = std::chrono::high_resolution_clock::now();
+    TimeStamp TimeTS = [&] {
       auto NowSeconds = std::chrono::duration_cast<std::chrono::seconds>(
-                            WantedTimeNow.time_since_epoch())
+                            TimeNow.time_since_epoch())
                             .count();
       double NowSecFrac = (std::chrono::duration_cast<std::chrono::nanoseconds>(
-                               WantedTimeNow.time_since_epoch())
+                               TimeNow.time_since_epoch())
                                .count() /
                            1e9) -
                           NowSeconds;
       std::uint32_t Ticks = std::lround(NowSecFrac * (88052500 / 2.0));
 
       RawTimeStamp rts{static_cast<uint32_t>(NowSeconds), Ticks};
-      TimeStamp Time(rts, TimeStamp::ClockMode::External);
+      return TimeStamp(rts, TimeStamp::ClockMode::External);
+    }();
 
-      ////////////////
-
-      // static // Adding this static will recycle the first generate(), which
-      // will be fast!
-      std::pair<void *, std::size_t> SampleRun =
-          self.data.TimerData.SampleGen.generate(
-              self.data.TimerData.Settings_amplitude, Time);
-
-      self.data.TimerData.UdpCon->addSamplingRun(SampleRun.first,
-                                                 SampleRun.second, Time);
+    // Poission
+    for (int32_t i = 0, count = PoissionGenerators.Count; i < count; i++) {
+      if (TriggerTime_Poisson[i] <= TimeNow) {
+        auto &self = PoissionGenerators[i];
+        TriggerTime_Poisson[i] = TimeNow + self.calcDelaTime();
+        if (runTriggers) {
+          self.genSamplesAndQueueSend(TimeTS);
+        }
+      }
     }
+
+    // AmpDelay
+    for (int32_t i = 0, count = AmpDelayGenerators.Count; i < count; i++) {
+      if (TriggerTime_AmpDelay[i] <= TimeNow) {
+        auto &self = AmpDelayGenerators[i];
+        TriggerTime_AmpDelay[i] = TimeNow + self.calcDelaTime();
+        if (runTriggers) {
+          self.genSamplesAndQueueSend(TimeTS);
+        }
+      }
+    }
+
+    // Continous
+    for (int32_t i = 0, count = ContinousGenerators.Count; i < count; i++) {
+      if (TriggerTime_Continous[i] <= TimeNow) {
+        auto &self = ContinousGenerators[i];
+        TriggerTime_Continous[i] = TimeNow + self.calcDelaTime();
+        if (runTriggers) {
+          self.genSamplesAndQueueSend(TimeTS);
+        }
+      }
+    }
+
+    // PrintStats
+    {
+      if (TriggerTime_PrintStats <= TimeNow) {
+        TriggerTime_PrintStats = TimeNow + PrintStatsCalcDeltaTime();
+        if (runTriggers) {
+          PrintStats();
+        }
+      }
+    }
+
+    runTriggers = true;
   }
 
   std::cout << "Waiting for transmit thread to exit!" << std::endl;

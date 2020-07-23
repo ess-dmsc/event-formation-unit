@@ -22,33 +22,18 @@ PoissonDelay::PoissonDelay(PoissonDelayData &data)
       data(data), EventTimer(*data.TimerData.Service), RandomGenerator(RandomDevice()),
       RandomDistribution(data.TimerData.Settings_rate) {}
 
-void PoissonDelay::start() {
+std::chrono::duration<size_t, std::nano> PoissonDelay::calcDelaTime() {
   auto DelayTime = RandomDistribution(RandomGenerator);
   auto NextEventDelay = std::chrono::duration<size_t, std::nano>(
       static_cast<size_t>(DelayTime /** 1e6*/));
-  EventTimer.expires_after(NextEventDelay);
-
-  EventTimer.async_wait([this](auto &Error) {
-    if (not Error) {
-      genSamplesAndEnqueueSend();
-      start();
-    }
-  });
+  return NextEventDelay;
 }
 
-void PoissonDelay::genSamplesAndEnqueueSend() {
-  auto Now = system_clock::now();
-  auto NowSeconds = duration_cast<seconds>(Now.time_since_epoch()).count();
-  double NowSecFrac =
-      (duration_cast<nanoseconds>(Now.time_since_epoch()).count() / 1e9) -
-      NowSeconds;
-  std::uint32_t Ticks = std::lround(NowSecFrac * (88052500 / 2.0));
+void PoissonDelay::start() {
+  
+}
 
-  RawTimeStamp rts{static_cast<uint32_t>(NowSeconds), Ticks};
-  TimeStamp Time(rts, TimeStamp::ClockMode::External);
-
-  ////////////////
-
+void PoissonDelay::genSamplesAndQueueSend(const TimeStamp& Time) {
   std::pair<void *, std::size_t> SampleRun =
       data.TimerData.SampleGen.generate(data.TimerData.Settings_amplitude, Time);
   data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second, Time);

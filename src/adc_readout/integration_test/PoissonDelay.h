@@ -30,12 +30,14 @@ public:
   void start() override;
   void stop() override;
 
+  std::chrono::duration<size_t, std::nano> calcDelaTime();
+
   PoissonDelayData data;
 
-  void genSamplesAndEnqueueSend() override;
+  void genSamplesAndQueueSend(const TimeStamp& Time);
 
   asio::high_resolution_timer EventTimer;
-  // asio::system_timer EventTimer;
+  
   std::random_device RandomDevice;
   std::default_random_engine RandomGenerator;
   std::exponential_distribution<double> RandomDistribution;

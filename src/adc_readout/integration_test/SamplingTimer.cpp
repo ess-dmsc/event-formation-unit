@@ -9,7 +9,6 @@
 #include <chrono>
 #include <ciso646>
 #include <cmath>
-
 using std::chrono::duration_cast;
 using std::chrono::milliseconds;
 using std::chrono::nanoseconds;
@@ -18,8 +17,8 @@ using std::chrono::system_clock;
 
 SamplingTimer::SamplingTimer(std::function<void(TimeStamp const &)> OnTimer)
     : SamplingFunc(std::move(OnTimer)) {}
-
-void SamplingTimer::genSamplesAndEnqueueSend() {
+/*
+void SamplingTimer::genSamplesAndQueueSend() {
   auto Now = system_clock::now();
   auto NowSeconds = duration_cast<seconds>(Now.time_since_epoch()).count();
   double NowSecFrac =
@@ -29,3 +28,4 @@ void SamplingTimer::genSamplesAndEnqueueSend() {
   SamplingFunc({{static_cast<uint32_t>(NowSeconds), Ticks},
                 TimeStamp::ClockMode::External});
 }
+*/

@@ -24,36 +24,21 @@ ContinousSamplingTimer::ContinousSamplingTimer(ContinousSamplingTimerData &data)
 
   const double TimeFracMax = 88052500.0 / 2;
 
-  duration<std::uint64_t, std::nano> Temp(static_cast<std::uint64_t>(
+  TimeStepNano = std::chrono::duration<size_t, std::nano>(static_cast<std::uint64_t>(
       (data.NrOfOriginalSamples / TimeFracMax) * 1e9));
 
-  TimeStep = duration_cast<system_clock::duration>(Temp);
+  TimeStep = duration_cast<system_clock::duration>(TimeStepNano);
+}
+
+std::chrono::duration<size_t, std::nano> ContinousSamplingTimer::calcDelaTime() {
+  return TimeStepNano;
 }
 
 void ContinousSamplingTimer::start() {
-  NextSampleTime += TimeStep;
-  SampleTimer.expires_at(NextSampleTime);
-  SampleTimer.async_wait([this](auto &Error) {
-    if (not Error) {
-      genSamplesAndEnqueueSend();
-      start();
-    }
-  });
+
 }
 
-void ContinousSamplingTimer::genSamplesAndEnqueueSend() {
-  auto Now = system_clock::now();
-  auto NowSeconds = duration_cast<seconds>(Now.time_since_epoch()).count();
-  double NowSecFrac =
-      (duration_cast<nanoseconds>(Now.time_since_epoch()).count() / 1e9) -
-      NowSeconds;
-  std::uint32_t Ticks = std::lround(NowSecFrac * (88052500 / 2.0));
-
-  RawTimeStamp rts{static_cast<uint32_t>(NowSeconds), Ticks};
-  TimeStamp Time(rts, TimeStamp::ClockMode::External);
-
-  ////////////////
-
+void ContinousSamplingTimer::genSamplesAndQueueSend(const TimeStamp& Time) {
   std::pair<void *, std::size_t> SampleRun =
       Data.TimerData.SampleGen.generate(Data.TimerData.Settings_amplitude, Time);
   Data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second, Time);

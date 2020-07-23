@@ -41,7 +41,7 @@ public:
   virtual void start() = 0;
   virtual void stop() = 0;
 
-  virtual void genSamplesAndEnqueueSend();
+  //virtual void genSamplesAndQueueSend();
 
   std::function<void(TimeStamp const &)> SamplingFunc;
 };
