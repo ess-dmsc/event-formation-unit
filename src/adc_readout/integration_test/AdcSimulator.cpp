@@ -26,9 +26,9 @@ bool RunLoop = true;
 void signalHandler(int signal) {
   std::cout << "Got exit signal:" << signal << std::endl;
   RunLoop = false;
-  static int repeat2 = 0;
-  if (signal == 2 && repeat2++ == 3) {
-    std::cout << "many repeats of sig 2, aborting." << std::endl;
+  static int countSIGINT = 0;
+  if (signal == SIGINT && countSIGINT++ == 3) {
+    std::cout << "many repeats of SIGINT, aborting." << std::endl;
     abort();
   }
 }
