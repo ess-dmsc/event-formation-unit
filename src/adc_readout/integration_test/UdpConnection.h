@@ -24,10 +24,15 @@ public:
   void addSamplingRun(void const *const DataPtr, size_t Bytes,
                       TimeStamp Timestamp);
 
+  void transmitHeartbeat();
+
   int getNrOfRuns() const { return SamplingRuns; };
   int getNrOfPackets() const { return PacketCount; };
   int getNrOfSentPackets() const { return SentPackets; };
   void incNumSentPackets() { SentPackets.store(SentPackets + 1); };
+
+  std::chrono::duration<size_t, std::nano> heartBeatIntervalTime{
+      4'000'000'000ull};
 
 private:
 #pragma pack(push, 2)
@@ -43,7 +48,6 @@ private:
   };
 #pragma pack(pop)
 
-  friend struct TransmitRequest;
   struct TransmitRequest {
     bool IsData; /// \note if we need more types to be sent we could probably
                  /// put a "free request" callback in here.
@@ -59,6 +63,7 @@ private:
     size_t GetTxSize();
     void FreePacket(UdpConnection *UdpCon);
   };
+  friend struct TransmitRequest;
 
 private:
   const std::uint64_t RefTimeDeltaNS{1000000000ull / 14ull};
@@ -84,8 +89,6 @@ private:
 
   DataPacket *AllocDataPacket();
   void FreeDataPacket(DataPacket *data);
-
-  void transmitHeartbeat();
 
   std::uint16_t PacketCount{0};
   std::atomic_int SentPackets{0};

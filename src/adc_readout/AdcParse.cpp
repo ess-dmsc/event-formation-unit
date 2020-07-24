@@ -229,5 +229,10 @@ IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte) {
   IdleHeader Header(*HeaderRaw);
   Header.fixEndian();
   ReturnData.TimeStamp = Header.TimeStamp;
+
+  if (0) {
+    printf("got heartbeat with sec %u, frac %u\n", ReturnData.TimeStamp.Seconds,
+           ReturnData.TimeStamp.SecondsFrac);
+  }
   return ReturnData;
 }
