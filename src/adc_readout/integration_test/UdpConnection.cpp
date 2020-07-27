@@ -18,7 +18,7 @@ UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort)
     : Address(std::move(DstAddress)), Port(DstPort),
       RemoteEndpoint(Address, Port),
       DataSource(Socket::Endpoint("0.0.0.0", 0), RemoteEndpoint),
-      SharedStandbyBuffer(nullptr) {
+      DataPacketBuilder(nullptr) {
 
   DataSource.setBufferSizes(KernelTxBufferSize, 0);
   DataSource.printBufferSizes();
@@ -40,7 +40,7 @@ UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort)
     FreeDataPackets.push_back(new DataPacket(MaxPacketSize));
     TransmitRequests.push_back(TransmitRequest((DataPacket *)nullptr));
   }
-  SharedStandbyBuffer = FreeDataPackets.back();
+  DataPacketBuilder = FreeDataPackets.back();
   FreeDataPackets.pop_back();
 
   TransmitRequests.clear();
@@ -54,28 +54,8 @@ UdpConnection::~UdpConnection() {
   }
 }
 
-void UdpConnection::startHeartbeatTimer() {
-  // HeartbeatTimeout.expires_after(4s);
-  // HeartbeatTimeout.async_wait([this](auto &Error) {
-  //  if (not Error) {
-  //    transmitHeartbeat();
-  //    startHeartbeatTimer();
-  //  }
-  //});
-}
-
-void UdpConnection::startPacketTimer() {
-  // DataPacketTimeout.expires_after(500ms);
-  // DataPacketTimeout.async_wait([this](auto &Error) {
-  //  if (not Error) {
-  //    swapAndTransmitSharedStandbyBuffer();
-  //    startHeartbeatTimer();
-  //  }
-  //});
-}
-
 void UdpConnection::transmitHeartbeat() {
-  IdlePacket_t *IdlePacket = AllocIdlePacket();
+  IdlePacket_t *IdlePacket = allocIdlePacket();
 
   TimeStamp IdleTS{CurrentRefTimeNS + RefTimeDeltaNS,
                    TimeStamp::ClockMode::External};
@@ -88,13 +68,41 @@ void UdpConnection::transmitHeartbeat() {
   queueTransmitRequest(TransmitRequest(IdlePacket));
 }
 
+bool UdpConnection::shouldFlushIdleDataPacket(TimePointNano TimeNow) {
+  bool IdleFlushTimeoutExceeded =
+      (TimeNow >= LastSampleDataAddTime + DataIdleFlushInterval);
+  bool HasUnflushedData = (LastDataIdleFlushTime < LastSampleDataAddTime);
+  if (0) {
+    // clang-format off
+    printf("IdleFlushTimeoutExceeded %i = (TimeNow %" PRIu64" >= LastSampleDataAddTime %" PRIu64" + DataIdleFlushInterval %zu)\n"
+         "HasUnflushedData         %i = (LastDataIdleFlushTime %" PRIu64" <  LastSampleDataAddTime %" PRIu64")\n"
+         , IdleFlushTimeoutExceeded ?1:0
+         , TimeNow.time_since_epoch().count()
+         , LastSampleDataAddTime.time_since_epoch().count()
+         , DataIdleFlushInterval.count()
+         , HasUnflushedData ?1:0
+         , LastDataIdleFlushTime.time_since_epoch().count()
+         , LastSampleDataAddTime.time_since_epoch().count());
+    // clang-format on
+  }
+  return IdleFlushTimeoutExceeded && HasUnflushedData;
+}
+
+void UdpConnection::flushIdleDataPacket(TimePointNano TimeNow) {
+  if (0) {
+    printf("flushIdleDataPacket\n");
+  }
+  LastDataIdleFlushTime = TimeNow;
+  queueTransmitAndResetDataPacketBuilder();
+}
+
 void UdpConnection::queueTransmitRequest(TransmitRequest TR) {
   TransmitRequestsAccess.lock();
   TransmitRequests.push_back(TR);
   TransmitRequestsAccess.unlock();
 }
 
-void *UdpConnection::TransmitRequest::GetTxData() {
+void *UdpConnection::TransmitRequest::getTxData() {
   if (IsData) {
     return DataPtr->Buffer.get();
   } else {
@@ -102,7 +110,7 @@ void *UdpConnection::TransmitRequest::GetTxData() {
   }
 }
 
-size_t UdpConnection::TransmitRequest::GetTxSize() {
+size_t UdpConnection::TransmitRequest::getTxSize() {
   if (IsData) {
     return DataPtr->Size;
   } else {
@@ -110,11 +118,11 @@ size_t UdpConnection::TransmitRequest::GetTxSize() {
   }
 }
 
-void UdpConnection::TransmitRequest::FreePacket(UdpConnection *UdpCon) {
+void UdpConnection::TransmitRequest::freePacket(UdpConnection *UdpCon) {
   if (IsData) {
-    UdpCon->FreeDataPacket(DataPtr);
+    UdpCon->freeDataPacket(DataPtr);
   } else {
-    UdpCon->FreeIdlePacket(IdlePtr);
+    UdpCon->freeIdlePacket(IdlePtr);
   }
 }
 
@@ -154,8 +162,8 @@ void UdpConnection::transmitThread() {
       }
     }
 
-    void *DataBuf = TR.GetTxData();
-    std::size_t DataSize = TR.GetTxSize();
+    void *DataBuf = TR.getTxData();
+    std::size_t DataSize = TR.getTxSize();
 
     // ContinuousSpeedTest
     if (ContinuousSpeedTest) {
@@ -202,7 +210,7 @@ void UdpConnection::transmitThread() {
     if (RepeatPacketSpeedTest) {
       queueTransmitRequest(TR);
     } else {
-      TR.FreePacket(this);
+      TR.freePacket(this);
     }
   }
 }
@@ -224,34 +232,32 @@ void UdpConnection::addSamplingRun(void const *const DataPtr, size_t Bytes,
   }
 
   bool Success =
-      SharedStandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS);
-  std::pair<size_t, size_t> BufferSizes = SharedStandbyBuffer->getBufferSizes();
+      DataPacketBuilder->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS);
+  std::pair<size_t, size_t> BufferSizes = DataPacketBuilder->getBufferSizes();
   size_t Size = BufferSizes.first;
   size_t MaxSize = BufferSizes.second;
 
   if (not Success or MaxSize - Size < 20) {
-    swapAndTransmitSharedStandbyBuffer();
-    SharedStandbyBuffer->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS);
-  } else {
-    // startPacketTimer();
+    queueTransmitAndResetDataPacketBuilder();
+    DataPacketBuilder->addSamplingRun(DataPtr, Bytes, CurrentRefTimeNS);
   }
+
+  LastSampleDataAddTime = std::chrono::high_resolution_clock::now();
   ++SamplingRuns;
-  // startHeartbeatTimer();
 }
 
-void UdpConnection::swapAndTransmitSharedStandbyBuffer() {
-  DataPacket *TransmitBuffer = SharedStandbyBuffer;
-  SharedStandbyBuffer = nullptr;
-  TransmitBuffer->formatPacketForSend(PacketCount);
+void UdpConnection::queueTransmitAndResetDataPacketBuilder() {
+  DataPacket *SendPacket = DataPacketBuilder;
+  DataPacketBuilder = nullptr;
+  SendPacket->formatPacketForSend(PacketCount);
+  queueTransmitRequest(TransmitRequest(SendPacket));
   PacketCount++;
 
-  queueTransmitRequest(TransmitRequest(TransmitBuffer));
-
-  SharedStandbyBuffer = AllocDataPacket();
-  SharedStandbyBuffer->resetPacket();
+  DataPacketBuilder = allocDataPacket();
+  DataPacketBuilder->resetPacket();
 }
 
-UdpConnection::IdlePacket_t *UdpConnection::AllocIdlePacket() {
+UdpConnection::IdlePacket_t *UdpConnection::allocIdlePacket() {
   IdlePacket_t *IdlePacket = nullptr;
   while (IdlePacket == nullptr) {
     FreeIdlePacketsAccess.lock();
@@ -267,13 +273,13 @@ UdpConnection::IdlePacket_t *UdpConnection::AllocIdlePacket() {
   return IdlePacket;
 }
 
-void UdpConnection::FreeIdlePacket(IdlePacket_t *idle) {
+void UdpConnection::freeIdlePacket(IdlePacket_t *idle) {
   FreeIdlePacketsAccess.lock();
   FreeIdlePackets.push_back(idle);
   FreeIdlePacketsAccess.unlock();
 }
 
-DataPacket *UdpConnection::AllocDataPacket() {
+DataPacket *UdpConnection::allocDataPacket() {
   DataPacket *DataPacket = nullptr;
   uint32_t EmptyStreakCount = 0;
   while (DataPacket == nullptr) {
@@ -299,7 +305,7 @@ DataPacket *UdpConnection::AllocDataPacket() {
   return DataPacket;
 }
 
-void UdpConnection::FreeDataPacket(DataPacket *data) {
+void UdpConnection::freeDataPacket(DataPacket *data) {
   FreeDataPacketsAccess.lock();
   FreeDataPackets.push_back(data);
   FreeDataPacketsAccess.unlock();

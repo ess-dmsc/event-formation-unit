@@ -15,6 +15,9 @@
 #include <mutex>
 #include <thread>
 
+using TimePointNano = std::chrono::high_resolution_clock::time_point;
+using TimeDurationNano = std::chrono::duration<size_t, std::nano>;
+
 class UdpConnection {
 public:
   UdpConnection(std::string DstAddress, std::uint16_t DstPort);
@@ -26,13 +29,17 @@ public:
 
   void transmitHeartbeat();
 
+  bool shouldFlushIdleDataPacket(TimePointNano TimeNow);
+  void flushIdleDataPacket(TimePointNano TimeNow);
+
   int getNrOfRuns() const { return SamplingRuns; };
   int getNrOfPackets() const { return PacketCount; };
   int getNrOfSentPackets() const { return SentPackets; };
   void incNumSentPackets() { SentPackets.store(SentPackets + 1); };
 
-  std::chrono::duration<size_t, std::nano> heartBeatIntervalTime{
-      4'000'000'000ull};
+  const TimeDurationNano HeartbeatInterval{4'000'000'000ull};
+
+  const TimeDurationNano DataIdleFlushInterval{500'000'000ull};
 
 private:
 #pragma pack(push, 2)
@@ -59,36 +66,37 @@ private:
     TransmitRequest(DataPacket *DataPtr) : IsData(true), DataPtr(DataPtr) {}
     TransmitRequest(IdlePacket_t *IdlePtr) : IsData(false), IdlePtr(IdlePtr) {}
 
-    void *GetTxData();
-    size_t GetTxSize();
-    void FreePacket(UdpConnection *UdpCon);
+    void *getTxData();
+    size_t getTxSize();
+    void freePacket(UdpConnection *UdpCon);
   };
   friend struct TransmitRequest;
 
 private:
-  const std::uint64_t RefTimeDeltaNS{1000000000ull / 14ull};
+  const std::uint64_t RefTimeDeltaNS{1'000'000'000ull / 14ull};
   std::uint64_t CurrentRefTimeNS{0};
   int SamplingRuns{0};
   const int MaxPacketSize{9000};
   std::string Address;
   std::uint16_t Port;
 
-  const uint32_t KernelTxBufferSize{1000000};
+  const uint32_t KernelTxBufferSize{1'000'000};
   Socket::Endpoint RemoteEndpoint;
   UDPTransmitter DataSource;
 
+  TimePointNano LastSampleDataAddTime;
+  TimePointNano LastDataIdleFlushTime;
+
   void transmitThread();
 
-  void startHeartbeatTimer();
-  void startPacketTimer();
-  void swapAndTransmitSharedStandbyBuffer();
   void queueTransmitRequest(TransmitRequest TR);
+  void queueTransmitAndResetDataPacketBuilder();
 
-  IdlePacket_t *AllocIdlePacket();
-  void FreeIdlePacket(IdlePacket_t *idle);
+  IdlePacket_t *allocIdlePacket();
+  void freeIdlePacket(IdlePacket_t *idle);
 
-  DataPacket *AllocDataPacket();
-  void FreeDataPacket(DataPacket *data);
+  DataPacket *allocDataPacket();
+  void freeDataPacket(DataPacket *data);
 
   std::uint16_t PacketCount{0};
   std::atomic_int SentPackets{0};
@@ -103,7 +111,7 @@ private:
   std::mutex FreeIdlePacketsAccess;
   std::vector<IdlePacket_t *> FreeIdlePackets;
 
-  DataPacket *SharedStandbyBuffer;
+  DataPacket *DataPacketBuilder;
 
   std::mutex FreeDataPacketsAccess;
   std::vector<DataPacket *> FreeDataPackets;

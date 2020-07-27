@@ -16,16 +16,14 @@ using std::chrono::seconds;
 using std::chrono::system_clock;
 
 PoissonDelay::PoissonDelay(PoissonDelayData &data)
-    : SamplingTimer([](TimeStamp const &Time) {
-        std::cout << "bad PoissonDelay::PoissonDelay bind" << Time.getSeconds();
-      }),
+    : SamplingTimer([](TimeStamp const &__attribute__((unused)) Time) {}),
       data(data), RandomGenerator(RandomDevice()),
       RandomDistribution(data.TimerData.Settings_rate) {}
 
 std::chrono::duration<size_t, std::nano> PoissonDelay::calcDelaTime() {
   auto DelayTime = RandomDistribution(RandomGenerator);
   auto NextEventDelay = std::chrono::duration<size_t, std::nano>(
-      static_cast<size_t>(DelayTime /** 1e6*/));
+      static_cast<size_t>(DelayTime * 1e9));
   return NextEventDelay;
 }
 
