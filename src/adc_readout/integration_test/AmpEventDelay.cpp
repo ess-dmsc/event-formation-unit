@@ -1,15 +1,9 @@
 #include "AmpEventDelay.h"
 #include <random>
 
-using std::chrono::duration_cast;
-using std::chrono::milliseconds;
-using std::chrono::nanoseconds;
-using std::chrono::seconds;
-using std::chrono::system_clock;
-
-std::random_device RandomDevice;
-std::default_random_engine Generator(RandomDevice());
-std::uniform_real_distribution<double> DistributionPi(0, 3.141592653);
+static std::random_device RandomDevice;
+static std::default_random_engine Generator(RandomDevice());
+static std::uniform_real_distribution<double> DistributionPi(0, 3.141592653);
 
 auto generateCircleAmplitudes() {
   const double Amplitude{2000};
@@ -19,8 +13,16 @@ auto generateCircleAmplitudes() {
                         Center + Amplitude * std::sin(Angle));
 }
 
-void AmpEventDelay::genSamplesAndQueueSend(const TimeStamp& Time) {
- 
+std::chrono::duration<size_t, std::nano> AmpEventDelay::calcDelaTime() {
+  auto DelayTime =
+      data.PoissonData.RandomDistribution(data.PoissonData.RandomGenerator);
+  auto NextEventDelay = std::chrono::duration<size_t, std::nano>(
+      static_cast<size_t>(DelayTime * 1e9));
+  return NextEventDelay;
+}
+
+void AmpEventDelay::genSamplesAndQueueSend(const TimeStamp &Time) {
+
   auto SampleRunAnode = data.AnodeGen.generate(2000.0, Time);
   auto Amplitudes = generateCircleAmplitudes();
   auto SampleRunX = data.XPosGen.generate(Amplitudes.first, Time);

@@ -12,39 +12,25 @@
 #include "SamplingTimer.h"
 #include "UdpConnection.h"
 #include <chrono>
-#include <functional>
 
 struct ContinousSamplingTimerData {
-  /*asio::io_service *Service;
-  UdpConnection *UdpCon;
-  SampleRunGenerator SampleGen;
-
-  double Settings_offset;
-  double Settings_amplitude;
-  double Settings_rate;
-*/
   SamplingTimerData TimerData;
-
-  int NrOfOriginalSamples;
+  std::chrono::duration<size_t, std::nano> TimeStepNano;
 };
 
-class ContinousSamplingTimer : public SamplingTimer {
+class ContinousSamplingTimer {
 public:
-  ContinousSamplingTimer(ContinousSamplingTimerData &data);
-  void start() override;
-  void stop() override;
-
-  std::chrono::duration<size_t, std::nano> calcDelaTime();
-
   ContinousSamplingTimerData Data;
 
-  void genSamplesAndQueueSend(const TimeStamp &Time);
+  std::chrono::duration<size_t, std::nano> calcDelaTime() {
+    return Data.TimeStepNano;
+  }
 
-private:
-  // void handleEventTimer(const asio::error_code &Error);
-
-  std::chrono::system_clock::time_point NextSampleTime;
-  // const int NrOfOriginalSamples;
-  std::chrono::system_clock::duration TimeStep;
-  std::chrono::duration<size_t, std::nano> TimeStepNano;
+  void genSamplesAndQueueSend(const TimeStamp &Time) {
+    std::pair<void *, std::size_t> SampleRun =
+        Data.TimerData.SampleGen.generate(Data.TimerData.Settings_amplitude,
+                                          Time);
+    Data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second,
+                                          Time);
+  }
 };

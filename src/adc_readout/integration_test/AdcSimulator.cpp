@@ -131,8 +131,40 @@ void CreatePoissonGenerator(UdpConnection *UdpCon, int BoxNr, int ChNr,
   SamplingTimerData TimerData{
       SamplerType::PoissonDelay, UdpCon,       SampleGen, Settings_offset,
       Settings_amplitude,        Settings_rate};
-  PoissonDelayData data = {TimerData};
+
+  std::random_device RandomDevice;
+  PoissonDelayData data = {
+      TimerData, std::default_random_engine(RandomDevice()),
+      std::exponential_distribution<double>(Settings_rate)};
+
   new (out) PoissonDelay{data};
+}
+
+void CreateAmpEventDelayGenerator(UdpConnection *UdpCon, int BoxNr,
+                                  double EventRate, AmpEventDelay *out) {
+
+  const int NrOfSamples{100};
+
+  double Settings_offset = 0.0;
+  double Settings_amplitude = 0.0;
+  double Settings_rate = EventRate;
+  SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Settings_offset, 0, 0);
+
+  SamplingTimerData TimerData = {
+      SamplerType::AmpEventDelay, UdpCon,       SampleGen, Settings_offset,
+      Settings_amplitude,         Settings_rate};
+
+  std::random_device RandomDevice;
+  PoissonDelayData PoissonData = {
+      TimerData, std::default_random_engine(RandomDevice()),
+      std::exponential_distribution<double>(Settings_rate)};
+
+  SampleRunGenerator AnodeGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 0);
+  SampleRunGenerator XPosGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 1);
+  SampleRunGenerator YPosGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 2);
+
+  AmpEventDelayData data = {AnodeGen, XPosGen, YPosGen, PoissonData};
+  new (out) AmpEventDelay{data};
 }
 
 void CreateContinousGenerator(UdpConnection *UdpCon, int BoxNr, int ChNr,
@@ -154,34 +186,18 @@ void CreateContinousGenerator(UdpConnection *UdpCon, int BoxNr, int ChNr,
   SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Settings_offset, BoxNr,
                                ChNr);
 
+  const double TimeFracMax = 88052500.0 / 2;
+  std::chrono::duration<size_t, std::nano> TimeStepNano =
+      std::chrono::duration<size_t, std::nano>(static_cast<std::uint64_t>(
+          (NrOfOriginalSamples / TimeFracMax) * 1e9));
+
   SamplingTimerData TimerData{
       SamplerType::Continous, UdpCon,       SampleGen, Settings_offset,
       Settings_amplitude,     Settings_rate};
-  ContinousSamplingTimerData data = {TimerData, NrOfOriginalSamples};
+
+  ContinousSamplingTimerData data = {TimerData, TimeStepNano};
+
   new (out) ContinousSamplingTimer{data};
-}
-
-void CreateAmpEventDelayGenerator(UdpConnection *UdpCon, int BoxNr,
-                                  double EventRate, AmpEventDelay *out) {
-
-  const int NrOfSamples{100};
-
-  double Settings_offset = 0.0;
-  double Settings_amplitude = 0.0;
-  double Settings_rate = EventRate;
-  SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Settings_offset, 0, 0);
-
-  SamplingTimerData TimerData = {
-      SamplerType::AmpEventDelay, UdpCon,       SampleGen, Settings_offset,
-      Settings_amplitude,         Settings_rate};
-  PoissonDelayData PoissonData = {TimerData};
-
-  SampleRunGenerator AnodeGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 0);
-  SampleRunGenerator XPosGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 1);
-  SampleRunGenerator YPosGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 2);
-
-  AmpEventDelayData data = {AnodeGen, XPosGen, YPosGen, PoissonData};
-  new (out) AmpEventDelay{data};
 }
 
 bool ShouldCreateGenerator(SamplerType Type, UdpConnection *TargetAdcBox,

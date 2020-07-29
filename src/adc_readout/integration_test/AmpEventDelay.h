@@ -12,18 +12,16 @@
 #include "PoissonDelay.h"
 
 struct AmpEventDelayData {
+  PoissonDelayData PoissonData;
   SampleRunGenerator AnodeGen;
   SampleRunGenerator XPosGen;
   SampleRunGenerator YPosGen;
-
-  PoissonDelayData PoissonData;
 };
 
-class AmpEventDelay : public PoissonDelay {
+class AmpEventDelay {
 public:
-  AmpEventDelay(AmpEventDelayData &data) : PoissonDelay(data.PoissonData), data(data) {}
-
   AmpEventDelayData data;
 
-  void genSamplesAndQueueSend(const TimeStamp& Time);
+  std::chrono::duration<size_t, std::nano> calcDelaTime();
+  void genSamplesAndQueueSend(const TimeStamp &Time);
 };
