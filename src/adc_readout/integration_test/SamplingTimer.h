@@ -12,9 +12,9 @@
 #include "SampleRunGenerator.h"
 #include "UdpConnection.h"
 
-#include <random>
 #include <chrono>
 #include <map>
+#include <random>
 
 enum class SamplerType { PoissonDelay, AmpEventDelay, Continous };
 
@@ -23,9 +23,9 @@ struct SamplingTimerData {
   UdpConnection *UdpCon;
   SampleRunGenerator SampleGen;
 
-  double Settings_offset;
-  double Settings_amplitude;
-  double Settings_rate;
+  double Offset;
+  double Amplitude;
+  double Rate;
 };
 
 //-----------------------------------------------------------------------------

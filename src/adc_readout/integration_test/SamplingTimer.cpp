@@ -15,44 +15,43 @@ std::chrono::duration<size_t, std::nano> PoissonDelay::calcDelaTime() {
 }
 
 void PoissonDelay::genSamplesAndQueueSend(const TimeStamp &Time) {
-  std::pair<void *, std::size_t> SampleRun = data.TimerData.SampleGen.generate(
-      data.TimerData.Settings_amplitude, Time);
+  std::pair<void *, std::size_t> SampleRun =
+      data.TimerData.SampleGen.generate(data.TimerData.Amplitude, Time);
   data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second,
                                         Time);
 }
 
 PoissonDelay PoissonDelay::Create(UdpConnection *UdpCon, int BoxNr, int ChNr,
                                   std::map<std::string, double> Settings) {
-  double Settings_offset = Settings.at("offset");
-  double Settings_amplitude = Settings.at("amplitude");
-  double Settings_rate = Settings.at("rate");
+  double Offset = Settings.at("offset");
+  double Amplitude = Settings.at("amplitude");
+  double Rate = Settings.at("rate");
 
-  SampleRunGenerator SampleGen(100, 50, 20, 1.0, Settings_offset, BoxNr, ChNr);
+  SampleRunGenerator SampleGen(100, 50, 20, 1.0, Offset, BoxNr, ChNr);
 
   SamplingTimerData TimerData{
-      SamplerType::PoissonDelay, UdpCon,       SampleGen, Settings_offset,
-      Settings_amplitude,        Settings_rate};
+      SamplerType::PoissonDelay, UdpCon, SampleGen, Offset, Amplitude, Rate};
 
   std::random_device RandomDevice;
-  PoissonDelayData data = {
-      TimerData, std::default_random_engine(RandomDevice()),
-      std::exponential_distribution<double>(Settings_rate)};
+  PoissonDelayData data = {TimerData,
+                           std::default_random_engine(RandomDevice()),
+                           std::exponential_distribution<double>(Rate)};
 
   return PoissonDelay{data};
 }
 
 //-----------------------------------------------------------------------------
 
-static std::random_device AmyEventDelay_RandomDevice;
+static std::random_device AmpEventDelay_RandomDevice;
 static std::default_random_engine
-    AmyEventDelay_Generator(AmyEventDelay_RandomDevice());
+    AmpEventDelay_Generator(AmpEventDelay_RandomDevice());
 static std::uniform_real_distribution<double>
-    AmyEventDelay_DistributionPi(0, 3.141592653);
+    AmpEventDelay_DistributionPi(0, 3.141592653);
 
 auto generateCircleAmplitudes() {
   const double Amplitude{2000};
   const double Center{3000};
-  auto Angle = AmyEventDelay_DistributionPi(AmyEventDelay_Generator);
+  auto Angle = AmpEventDelay_DistributionPi(AmpEventDelay_Generator);
   return std::make_pair(Center + Amplitude * std::cos(Angle),
                         Center + Amplitude * std::sin(Angle));
 }
@@ -84,19 +83,18 @@ AmpEventDelay AmpEventDelay::Create(UdpConnection *UdpCon, int BoxNr,
 
   const int NrOfSamples{100};
 
-  double Settings_offset = 0.0;
-  double Settings_amplitude = 0.0;
-  double Settings_rate = EventRate;
-  SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Settings_offset, 0, 0);
+  double Offset = 0.0;
+  double Amplitude = 0.0;
+  double Rate = EventRate;
+  SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Offset, 0, 0);
 
   SamplingTimerData TimerData = {
-      SamplerType::AmpEventDelay, UdpCon,       SampleGen, Settings_offset,
-      Settings_amplitude,         Settings_rate};
+      SamplerType::AmpEventDelay, UdpCon, SampleGen, Offset, Amplitude, Rate};
 
   std::random_device RandomDevice;
-  PoissonDelayData PoissonData = {
-      TimerData, std::default_random_engine(RandomDevice()),
-      std::exponential_distribution<double>(Settings_rate)};
+  PoissonDelayData PoissonData = {TimerData,
+                                  std::default_random_engine(RandomDevice()),
+                                  std::exponential_distribution<double>(Rate)};
 
   SampleRunGenerator AnodeGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 0);
   SampleRunGenerator XPosGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 1);
@@ -115,8 +113,8 @@ ContinousSamplingTimer::calcDelaTime() {
 }
 
 void ContinousSamplingTimer::genSamplesAndQueueSend(const TimeStamp &Time) {
-  std::pair<void *, std::size_t> SampleRun = Data.TimerData.SampleGen.generate(
-      Data.TimerData.Settings_amplitude, Time);
+  std::pair<void *, std::size_t> SampleRun =
+      Data.TimerData.SampleGen.generate(Data.TimerData.Amplitude, Time);
   Data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second,
                                         Time);
 }
@@ -125,9 +123,9 @@ ContinousSamplingTimer
 ContinousSamplingTimer::Create(UdpConnection *UdpCon, int BoxNr, int ChNr,
                                std::map<std::string, double> Settings) {
 
-  double Settings_offset = Settings.at("offset");
-  double Settings_amplitude = Settings.at("amplitude");
-  double Settings_rate = 0;
+  double Offset = Settings.at("offset");
+  double Amplitude = Settings.at("amplitude");
+  double Rate = 0;
 
   int NrOfSamples = 4468;
   int OversamplingFactor = 4;
@@ -137,8 +135,7 @@ ContinousSamplingTimer::Create(UdpConnection *UdpCon, int BoxNr, int ChNr,
   }
   int NrOfOriginalSamples = NrOfSamples * OversamplingFactor;
 
-  SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Settings_offset, BoxNr,
-                               ChNr);
+  SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Offset, BoxNr, ChNr);
 
   const double TimeFracMax = 88052500.0 / 2;
   std::chrono::duration<size_t, std::nano> TimeStepNano =
@@ -146,8 +143,7 @@ ContinousSamplingTimer::Create(UdpConnection *UdpCon, int BoxNr, int ChNr,
           (NrOfOriginalSamples / TimeFracMax) * 1e9));
 
   SamplingTimerData TimerData{
-      SamplerType::Continous, UdpCon,       SampleGen, Settings_offset,
-      Settings_amplitude,     Settings_rate};
+      SamplerType::Continous, UdpCon, SampleGen, Offset, Amplitude, Rate};
 
   ContinousSamplingTimerData data = {TimerData, TimeStepNano};
 

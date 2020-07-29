@@ -7,7 +7,6 @@
  */
 
 #include "SamplingTimer.h"
-#include "SampleRunGenerator.h"
 #include "UdpConnection.h"
 #include <CLI/CLI.hpp>
 
