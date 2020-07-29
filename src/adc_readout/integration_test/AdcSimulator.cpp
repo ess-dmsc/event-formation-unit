@@ -132,7 +132,7 @@ void CreatePoissonGenerator(UdpConnection *UdpCon, int BoxNr, int ChNr,
       SamplerType::PoissonDelay, UdpCon,       SampleGen, Settings_offset,
       Settings_amplitude,        Settings_rate};
 
-  std::random_device RandomDevice;
+  std::random_device RandomDevice; 
   PoissonDelayData data = {
       TimerData, std::default_random_engine(RandomDevice()),
       std::exponential_distribution<double>(Settings_rate)};
