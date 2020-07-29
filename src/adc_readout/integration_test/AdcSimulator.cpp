@@ -6,20 +6,13 @@
  * production.
  */
 
-#include "AmpEventDelay.h"
-#include "ContinousSamplingTimer.h"
-#include "PoissonDelay.h"
+#include "SamplingTimer.h"
 #include "SampleRunGenerator.h"
 #include "UdpConnection.h"
 #include <CLI/CLI.hpp>
-#include <algorithm>
-#include <chrono>
-#include <cmath>
+
 #include <csignal>
-#include <iomanip>
 #include <iostream>
-#include <random>
-#include <thread>
 
 bool RunLoop = true;
 
@@ -87,122 +80,9 @@ void addCLIOptions(CLI::App &Parser, SimSettings &Settings) {
       ->default_str("0.5");
 }
 
-using namespace std::chrono_literals;
-
-template <class T> struct VecFixed {
-  T *Elms;
-  int32_t Count;
-  int32_t Capacity;
-
-  VecFixed(int32_t Capacity) : Capacity(Capacity) {
-    Elms = (T *)malloc(sizeof(T) * Capacity);
-    Count = 0;
-  }
-
-  ~VecFixed() {
-    for (int32_t i = Count - 1; i >= 0; --i)
-      Elms[i].~T();
-    free(Elms);
-  }
-
-  T *allocate() {
-    RelAssertMsg(Count < Capacity, "");
-    return &Elms[Count++];
-  }
-
-  T &operator[](int32_t i) {
-    RelAssertMsg(i < Count, "");
-    return Elms[i];
-  }
-
-  T *begin() { return Elms; }
-  T *end() { return Elms + Count; }
-};
-
-void CreatePoissonGenerator(UdpConnection *UdpCon, int BoxNr, int ChNr,
-                            std::map<std::string, double> Settings,
-                            PoissonDelay *out) {
-  double Settings_offset = Settings.at("offset");
-  double Settings_amplitude = Settings.at("amplitude");
-  double Settings_rate = Settings.at("rate");
-
-  SampleRunGenerator SampleGen(100, 50, 20, 1.0, Settings_offset, BoxNr, ChNr);
-
-  SamplingTimerData TimerData{
-      SamplerType::PoissonDelay, UdpCon,       SampleGen, Settings_offset,
-      Settings_amplitude,        Settings_rate};
-
-  std::random_device RandomDevice; 
-  PoissonDelayData data = {
-      TimerData, std::default_random_engine(RandomDevice()),
-      std::exponential_distribution<double>(Settings_rate)};
-
-  new (out) PoissonDelay{data};
-}
-
-void CreateAmpEventDelayGenerator(UdpConnection *UdpCon, int BoxNr,
-                                  double EventRate, AmpEventDelay *out) {
-
-  const int NrOfSamples{100};
-
-  double Settings_offset = 0.0;
-  double Settings_amplitude = 0.0;
-  double Settings_rate = EventRate;
-  SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Settings_offset, 0, 0);
-
-  SamplingTimerData TimerData = {
-      SamplerType::AmpEventDelay, UdpCon,       SampleGen, Settings_offset,
-      Settings_amplitude,         Settings_rate};
-
-  std::random_device RandomDevice;
-  PoissonDelayData PoissonData = {
-      TimerData, std::default_random_engine(RandomDevice()),
-      std::exponential_distribution<double>(Settings_rate)};
-
-  SampleRunGenerator AnodeGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 0);
-  SampleRunGenerator XPosGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 1);
-  SampleRunGenerator YPosGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 2);
-
-  AmpEventDelayData data = {AnodeGen, XPosGen, YPosGen, PoissonData};
-  new (out) AmpEventDelay{data};
-}
-
-void CreateContinousGenerator(UdpConnection *UdpCon, int BoxNr, int ChNr,
-                              std::map<std::string, double> Settings,
-                              ContinousSamplingTimer *out) {
-
-  double Settings_offset = Settings.at("offset");
-  double Settings_amplitude = Settings.at("amplitude");
-  double Settings_rate = 0;
-
-  int NrOfSamples = 4468;
-  int OversamplingFactor = 4;
-  if (0) { // high overhead test
-    NrOfSamples = 100;
-    OversamplingFactor = 1;
-  }
-  int NrOfOriginalSamples = NrOfSamples * OversamplingFactor;
-
-  SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Settings_offset, BoxNr,
-                               ChNr);
-
-  const double TimeFracMax = 88052500.0 / 2;
-  std::chrono::duration<size_t, std::nano> TimeStepNano =
-      std::chrono::duration<size_t, std::nano>(static_cast<std::uint64_t>(
-          (NrOfOriginalSamples / TimeFracMax) * 1e9));
-
-  SamplingTimerData TimerData{
-      SamplerType::Continous, UdpCon,       SampleGen, Settings_offset,
-      Settings_amplitude,     Settings_rate};
-
-  ContinousSamplingTimerData data = {TimerData, TimeStepNano};
-
-  new (out) ContinousSamplingTimer{data};
-}
-
 bool ShouldCreateGenerator(SamplerType Type, UdpConnection *TargetAdcBox,
                            UdpConnection *AdcBox2, SimSettings UsedSettings) {
-  if (0) {
+  if (0) { // only create first generator
     static uint32_t callcount = 0;
     if (callcount++ != 0) {
       return false;
@@ -252,14 +132,14 @@ int main(const int argc, char *argv[]) {
   std::vector<TimePointNano> TriggerTime_UdpHeartBeat;
   TriggerTime_UdpHeartBeat.resize(2);
 
-  VecFixed<PoissonDelay> PoissionGenerators(20);
-  std::vector<TimePointNano> TriggerTime_Poisson(20);
+  std::vector<PoissonDelay> PoissionGenerators;
+  std::vector<TimePointNano> TriggerTime_Poisson;
 
-  VecFixed<AmpEventDelay> AmpDelayGenerators(20);
-  std::vector<TimePointNano> TriggerTime_AmpDelay(20);
+  std::vector<AmpEventDelay> AmpDelayGenerators;
+  std::vector<TimePointNano> TriggerTime_AmpDelay;
 
-  VecFixed<ContinousSamplingTimer> ContinousGenerators(20);
-  std::vector<TimePointNano> TriggerTime_Continous(20);
+  std::vector<ContinousSamplingTimer> ContinousGenerators;
+  std::vector<TimePointNano> TriggerTime_Continous;
 
   // Box 1 timers
   {
@@ -267,56 +147,55 @@ int main(const int argc, char *argv[]) {
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
                               UsedSettings)) {
-      CreatePoissonGenerator(CurAdc, 0, 0,
-                             {{"rate", UsedSettings.NoiseRate},
-                              {"offset", 1.0},
-                              {"amplitude", 2000.0}},
-                             PoissionGenerators.allocate());
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 0, 0,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 1.0},
+                                {"amplitude", 2000.0}}));
       TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
                               UsedSettings)) {
-      CreatePoissonGenerator(CurAdc, 0, 1,
-                             {{"rate", UsedSettings.NoiseRate},
-                              {"offset", 10.0},
-                              {"amplitude", 3000.0}},
-                             PoissionGenerators.allocate());
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 0, 1,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 10.0},
+                                {"amplitude", 3000.0}}));
       TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
                               UsedSettings)) {
-      CreatePoissonGenerator(CurAdc, 0, 2,
-                             {{"rate", UsedSettings.NoiseRate},
-                              {"offset", 100.0},
-                              {"amplitude", 4000.0}},
-                             PoissionGenerators.allocate());
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 0, 2,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 100.0},
+                                {"amplitude", 4000.0}}));
       TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
                               UsedSettings)) {
-      CreatePoissonGenerator(CurAdc, 0, 3,
-                             {{"rate", UsedSettings.NoiseRate},
-                              {"offset", 1000.0},
-                              {"amplitude", 5000.0}},
-                             PoissionGenerators.allocate());
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 0, 3,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 1000.0},
+                                {"amplitude", 5000.0}}));
       TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::Continous, CurAdc, &AdcBox2,
                               UsedSettings)) {
-      CreateContinousGenerator(CurAdc, 0, 0,
-                               {{"offset", 1000.0}, {"amplitude", 1000.0}},
-                               ContinousGenerators.allocate());
+      ContinousGenerators.emplace_back(ContinousSamplingTimer::Create(
+          CurAdc, 0, 0, {{"offset", 1000.0}, {"amplitude", 1000.0}}));
       TriggerTime_Continous.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::AmpEventDelay, CurAdc, &AdcBox2,
                               UsedSettings)) {
-      CreateAmpEventDelayGenerator(CurAdc, 0, UsedSettings.EventRate,
-                                   AmpDelayGenerators.allocate());
+      AmpDelayGenerators.emplace_back(
+          AmpEventDelay::Create(CurAdc, 0, UsedSettings.EventRate));
       TriggerTime_AmpDelay.emplace_back();
     }
   }
@@ -327,49 +206,48 @@ int main(const int argc, char *argv[]) {
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
                               UsedSettings)) {
-      CreatePoissonGenerator(CurAdc, 1, 0,
-                             {{"rate", UsedSettings.NoiseRate},
-                              {"offset", 1.0},
-                              {"amplitude", 2000.0}},
-                             PoissionGenerators.allocate());
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 1, 0,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 1.0},
+                                {"amplitude", 2000.0}}));
       TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
                               UsedSettings)) {
-      CreatePoissonGenerator(CurAdc, 1, 1,
-                             {{"rate", UsedSettings.NoiseRate},
-                              {"offset", 10.0},
-                              {"amplitude", 3000.0}},
-                             PoissionGenerators.allocate());
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 1, 1,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 10.0},
+                                {"amplitude", 3000.0}}));
       TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
                               UsedSettings)) {
-      CreatePoissonGenerator(CurAdc, 1, 2,
-                             {{"rate", UsedSettings.NoiseRate},
-                              {"offset", 100.0},
-                              {"amplitude", 4000.0}},
-                             PoissionGenerators.allocate());
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 1, 2,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 100.0},
+                                {"amplitude", 4000.0}}));
       TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::PoissonDelay, CurAdc, &AdcBox2,
                               UsedSettings)) {
-      CreatePoissonGenerator(CurAdc, 1, 3,
-                             {{"rate", UsedSettings.NoiseRate},
-                              {"offset", 1000.0},
-                              {"amplitude", 5000.0}},
-                             PoissionGenerators.allocate());
+      PoissionGenerators.emplace_back(
+          PoissonDelay::Create(CurAdc, 1, 3,
+                               {{"rate", UsedSettings.NoiseRate},
+                                {"offset", 1000.0},
+                                {"amplitude", 5000.0}}));
       TriggerTime_Poisson.emplace_back();
     }
 
     if (ShouldCreateGenerator(SamplerType::Continous, CurAdc, &AdcBox2,
                               UsedSettings)) {
-      CreateContinousGenerator(CurAdc, 1, 0,
-                               {{"offset", 1000.0}, {"amplitude", 500.0}},
-                               ContinousGenerators.allocate());
+      ContinousGenerators.emplace_back(ContinousSamplingTimer::Create(
+          CurAdc, 1, 0, {{"offset", 1000.0}, {"amplitude", 500.0}}));
       TriggerTime_Continous.emplace_back();
     }
   }
@@ -405,7 +283,7 @@ int main(const int argc, char *argv[]) {
     }();
 
     // Poission
-    for (int32_t i = 0, count = PoissionGenerators.Count; i < count; i++) {
+    for (int32_t i = 0, count = PoissionGenerators.size(); i < count; i++) {
       auto &self = PoissionGenerators[i];
       auto &TriggerTime = TriggerTime_Poisson[i];
       if (TriggerTime <= TimeNow) {
@@ -417,7 +295,7 @@ int main(const int argc, char *argv[]) {
     }
 
     // AmpDelay
-    for (int32_t i = 0, count = AmpDelayGenerators.Count; i < count; i++) {
+    for (int32_t i = 0, count = AmpDelayGenerators.size(); i < count; i++) {
       auto &self = AmpDelayGenerators[i];
       auto &TriggerTime = TriggerTime_AmpDelay[i];
       if (TriggerTime <= TimeNow) {
@@ -429,7 +307,7 @@ int main(const int argc, char *argv[]) {
     }
 
     // Continous
-    for (int32_t i = 0, count = ContinousGenerators.Count; i < count; i++) {
+    for (int32_t i = 0, count = ContinousGenerators.size(); i < count; i++) {
       auto &self = ContinousGenerators[i];
       auto &TriggerTime = TriggerTime_Continous[i];
       if (TriggerTime <= TimeNow) {

@@ -1,24 +1,17 @@
 set(AdcSimulator_SRC
   AdcSimulator.cpp
-  AmpEventDelay.cpp
-  ContinousSamplingTimer.cpp
   DataPacket.cpp
   UdpConnection.cpp
-  PoissonDelay.cpp
   SampleRunGenerator.cpp
   SamplingTimer.cpp
 )
 
 set(AdcSimulator_INC
-  AmpEventDelay.h
-  ContinousSamplingTimer.h
   DataPacket.h
   UdpConnection.h
-  PoissonDelay.h
   SampleRunGenerator.h
   SamplingTimer.h
 )
-
 
 add_custom_command(OUTPUT SampleGen.o
                    COMMAND ispc --target=avx2 ${CMAKE_CURRENT_LIST_DIR}/SampleGen.ispc -o SampleGen.o
@@ -46,7 +39,6 @@ set(AdcFileStreamer_SRC
         AdcFileStreamer.cpp
         WaveformData.cpp
         DataModulariser.cpp
-        PoissonDelay.cpp
         UdpConnection.cpp
         DataPacket.cpp
         ../AdcTimeStamp.cpp
@@ -55,7 +47,6 @@ set(AdcFileStreamer_SRC
 set(AdcFileStreamer_INC
         WaveformData.h
         DataModulariser.h
-        PoissonDelay.h
         UdpConnection.h
         DataPacket.h
         ../AdcTimeStamp.h
