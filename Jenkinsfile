@@ -80,6 +80,7 @@ builders = pipeline_builder.createBuilders { container ->
                 cd ${project}/build
                 make --version
                 make -j${pipeline_builder.numCpus} all unit_tests benchmark
+                make -j${pipeline_builder.numCpus} AdcSimulator
                 cd ../utils/udpredirect
                 make
             """
@@ -220,6 +221,7 @@ def get_macos_pipeline()
                     sh "conan install --build=outdated .."
                     sh "cmake -DREFDATA=/Users/jenkins/data/EFU_reference -DCONAN=MANUAL -DCMAKE_MACOSX_RPATH=ON .."
                     sh "make -j${pipeline_builder.numCpus}"
+                    sh "make -j${pipeline_builder.numCpus} AdcSimulator"
                     sh "make -j${pipeline_builder.numCpus} unit_tests"
                     sh "make runtest"
                     sh "make runefu"
