@@ -5,9 +5,9 @@ uint16 htons(uint16 a){
 }
 
 // \todo
-// - do computation in uint16 only?
-// - align input and output data to target SIMD memory alignment.
-export void SampleGen(uniform uint16 output[], uniform int count, uniform float PeakBuffer[], 
+// - do computation in uint16 only? (scale up before mul and scale down after mul)
+// - align input and output data to target SIMD memory alignment
+export void SampleGenIspc(uniform uint16 output[], uniform int count, uniform float PeakBuffer[], 
     uniform float Amplitude, uniform float BkgSlope, uniform float BkgOffset)
 {
     foreach (i = 0 ... count){

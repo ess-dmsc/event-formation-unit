@@ -13,16 +13,19 @@ set(AdcSimulator_INC
   SamplingTimer.h
 )
 
-add_custom_command(OUTPUT SampleGen.o
-                   COMMAND ispc --target=avx2 ${CMAKE_CURRENT_LIST_DIR}/SampleGen.ispc -o SampleGen.o
-                   DEPENDS ${CMAKE_CURRENT_LIST_DIR}/SampleGen.ispc)
+find_package(Ispc)
 
+set(AdcSimulator_ISPC_OBJ "")
+
+ispc_compile_single_file(AdcSimulator_ISPC_OBJ SampleGen.ispc avx2)
 
 find_package(Threads REQUIRED)
 
-add_executable(AdcSimulator EXCLUDE_FROM_ALL ${AdcSimulator_SRC} ${AdcSimulator_INC} SampleGen.o)
+add_executable(AdcSimulator EXCLUDE_FROM_ALL ${AdcSimulator_SRC} ${AdcSimulator_INC} ${AdcSimulator_ISPC_OBJ})
 set_target_properties(AdcSimulator PROPERTIES
   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+
+add_ispc_support(AdcSimulator)
 
 target_include_directories(AdcSimulator PRIVATE "../" "../../common/")
 
