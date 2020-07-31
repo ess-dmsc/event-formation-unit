@@ -59,12 +59,11 @@ void UdpConnection::transmitHeartbeat() {
 
   TimeStamp IdleTS{CurrentRefTimeNS + RefTimeDeltaNS,
                    TimeStamp::ClockMode::External};
-
   RawTimeStamp IdleRawTS{IdleTS.getSeconds(), IdleTS.getSecondsFrac()};
   IdleRawTS.fixEndian();
-
   IdlePacket->Head.ReferenceTimeStamp = IdleRawTS;
   IdlePacket->Idle.TimeStamp = IdleRawTS;
+
   queueTransmitRequest(TransmitRequest(IdlePacket));
 }
 
@@ -127,15 +126,8 @@ void UdpConnection::TransmitRequest::freePacket(UdpConnection *UdpCon) {
 }
 
 void UdpConnection::transmitThread() {
-
   static const bool ContinuousSpeedTest = false;
-  if (ContinuousSpeedTest) {
-    fprintf(stdout, "ContinuousSpeedTest\n");
-  }
   static const bool RepeatPacketSpeedTest = false;
-  if (RepeatPacketSpeedTest) {
-    fprintf(stdout, "RepeatPacketSpeedTest\n");
-  }
   bool FirstData = true;
   Timer FirstDataTimer;
   uint64_t SendCount = 0;
@@ -175,8 +167,9 @@ void UdpConnection::transmitThread() {
           double Secs = FirstDataTimer.timeus() / 1e6;
           double GbPerSec = AccumSize / (1024 * 1024 * 1024 * Secs);
           double PkgPerSec = SendCount / Secs;
-          fprintf(stderr, "GbPerSec %0.3f, pkg/sec %0.3f, pkg bytes %u\n",
-                  GbPerSec, PkgPerSec, (uint32_t)DataSize);
+          const char *Name = "ContinuousSpeedTest";
+          printf("GbPerSec %0.3f, pkg/sec %0.3f, pkg bytes %u [%s, %u]\n",
+                 GbPerSec, PkgPerSec, (uint32_t)DataSize, Name, Port);
         }
       }
     } // RepeatPacketSpeedTest
@@ -188,8 +181,9 @@ void UdpConnection::transmitThread() {
         double Secs = FirstDataTimer.timeus() / 1e6;
         double GbPerSec = AccumSize / (1024 * 1024 * 1024 * Secs);
         double PkgPerSec = SendCount / Secs;
-        fprintf(stderr, "GbPerSec %0.3f, pkg/sec %0.3f, pkg bytes %u\n",
-                GbPerSec, PkgPerSec, (uint32_t)DataSize);
+        const char *Name = "RepeatPacketSpeedTest";
+        printf("GbPerSec %0.3f, pkg/sec %0.3f, pkg bytes %u [%s, %u]\n",
+               GbPerSec, PkgPerSec, (uint32_t)DataSize, Name, Port);
       }
     } // normal send
     else {
@@ -200,8 +194,9 @@ void UdpConnection::transmitThread() {
         double Secs = FirstDataTimer.timeus() / 1e6;
         double GbPerSec = AccumSize / (1024 * 1024 * 1024 * Secs);
         double PkgPerSec = SendCount / Secs;
-        fprintf(stderr, "GbPerSec %0.3f, pkg/sec %0.3f, pkg bytes %u\n",
-                GbPerSec, PkgPerSec, (uint32_t)DataSize);
+        const char *Name = "normal send";
+        printf("GbPerSec %0.3f, pkg/sec %0.3f, pkg bytes %u [%s, %u]\n",
+               GbPerSec, PkgPerSec, (uint32_t)DataSize, Name, Port);
       }
     }
 

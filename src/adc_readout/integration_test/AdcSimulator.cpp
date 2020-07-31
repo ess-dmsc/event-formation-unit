@@ -127,9 +127,12 @@ int main(const int argc, char *argv[]) {
   UdpConnection AdcBox1(UsedSettings.EFUAddress, UsedSettings.Port1);
   UdpConnection AdcBox2(UsedSettings.EFUAddress, UsedSettings.Port2);
 
-  std::vector<UdpConnection *> UdpConnections = {&AdcBox1, &AdcBox2};
+  std::vector<UdpConnection *> UdpConnections = {&AdcBox1};
+  if (UsedSettings.SecondFPGA) {
+    UdpConnections.push_back(&AdcBox2);
+  }
   std::vector<TimePointNano> TriggerTime_UdpHeartBeat;
-  TriggerTime_UdpHeartBeat.resize(2);
+  TriggerTime_UdpHeartBeat.resize(UdpConnections.size());
 
   std::vector<PoissonDelay> PoissionGenerators;
   std::vector<TimePointNano> TriggerTime_Poisson;
