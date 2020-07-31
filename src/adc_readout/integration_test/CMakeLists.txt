@@ -13,10 +13,9 @@ set(AdcSimulator_INC
   SamplingTimer.h
 )
 
-find_package(Ispc)
-
 set(AdcSimulator_ISPC_OBJ "")
 
+find_package(Ispc)
 ispc_compile_single_file(AdcSimulator_ISPC_OBJ SampleGen.ispc avx2)
 
 find_package(Threads REQUIRED)
