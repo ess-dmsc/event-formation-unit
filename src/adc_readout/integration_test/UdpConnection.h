@@ -11,6 +11,7 @@
 #include "DataPacket.h"
 #include <common/Socket.h>
 
+#include <atomic>
 #include <deque>
 #include <mutex>
 #include <thread>
