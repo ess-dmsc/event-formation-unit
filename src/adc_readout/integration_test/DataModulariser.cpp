@@ -11,7 +11,7 @@
 DataModulariser::DataModulariser(std::size_t MaxSize)
     : Buffer{std::make_unique<std::uint8_t[]>(MaxSize)} {}
 
-std::pair<void const *const, std::size_t>
+std::pair<const void *, std::size_t>
 DataModulariser::modularise(nonstd::span<std::uint16_t const> InSamples,
                             std::uint64_t Timestamp, std::uint16_t Channel) {
   DataHeader *HeaderPtr{reinterpret_cast<DataHeader *>(Buffer.get())};
@@ -34,6 +34,6 @@ DataModulariser::modularise(nonstd::span<std::uint16_t const> InSamples,
       sizeof(DataHeader));
   *TrailerPtr = htonl(0xBEEFCAFEu);
 
-  auto BufPtr = reinterpret_cast<void const *const>(Buffer.get());
+  auto BufPtr = reinterpret_cast<const void *>(Buffer.get());
   return std::make_pair(BufPtr, TotalBytes);
 }
