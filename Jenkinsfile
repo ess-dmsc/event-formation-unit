@@ -203,7 +203,7 @@ def get_macos_pipeline()
 {
     return {
         stage("macOS") {
-            node ("macos") {
+           timestamps{ node ("macos") {
             // Delete workspace when build is done
                 cleanWs()
 
@@ -226,14 +226,14 @@ def get_macos_pipeline()
                     sh "make runtest"
                     sh "make runefu"
                 }
-            }
+            }}
         }
     }
 }
 
 def get_system_tests_pipeline() {
     return {
-        node('system-test') {
+        timestamps { node('system-test') {
             cleanWs()
             dir("${project}") {
                 try{
@@ -264,12 +264,12 @@ def get_system_tests_pipeline() {
                     }
                 }
             } // dir
-        }  // node
+        } } // node
     }  // return
 }  // def
 
 // Script actions start here
-node('docker') {
+timestamps { node('docker') {
     dir("${project}_code") {
 
         stage('Checkout') {
@@ -317,4 +317,4 @@ node('docker') {
         // Delete workspace when build is done
         cleanWs()
     }
-}
+} }
