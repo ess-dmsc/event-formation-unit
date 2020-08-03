@@ -34,5 +34,6 @@ DataModulariser::modularise(nonstd::span<std::uint16_t const> InSamples,
       sizeof(DataHeader));
   *TrailerPtr = htonl(0xBEEFCAFEu);
 
-  return {reinterpret_cast<void const *const>(Buffer.get()), TotalBytes};
+  auto BufPtr = reinterpret_cast<void const *const>(Buffer.get());
+  return std::make_pair(BufPtr, TotalBytes);
 }
