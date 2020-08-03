@@ -28,7 +28,7 @@ add_ispc_support(AdcSimulator)
 
 target_include_directories(AdcSimulator PRIVATE "../" "../../common/")
 
-target_link_libraries(AdcSimulator ${CMAKE_THREAD_LIBS_INIT} efu_common $<TARGET_OBJECTS:AdcReadout>)
+target_link_libraries(AdcSimulator ${CMAKE_THREAD_LIBS_INIT} efu_common)
 
 get_filename_component(ADC_CONFIG_FILE "AdcIntegrationTestConfig.ini" ABSOLUTE)
 add_custom_command(
@@ -43,7 +43,6 @@ set(AdcFileStreamer_SRC
         DataModulariser.cpp
         UdpConnection.cpp
         DataPacket.cpp
-        ../AdcTimeStamp.cpp
         SamplingTimer.cpp)
 
 set(AdcFileStreamer_INC

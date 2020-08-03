@@ -59,7 +59,7 @@ public:
   /// \brief Sets the parsing error to the give type.
   /// \param[in] ErrorType The parser error type.
   explicit ParserException(Type ErrorType);
-  
+
   virtual const char *what() const noexcept override;
   Type getErrorType() const;
 
@@ -165,9 +165,8 @@ public:
   /// data source (ADC box).
   /// \param[in] PushDataModuleToQueue Function for submitting the result of a
   /// parsed packet to a handler which does further processing.
-  /// \param[in] PullDataModuleFromQueue Function for getting an empty module for
-  /// storing processed data into. 
-  /// \param[in] SourceID An integer used to
+  /// \param[in] PullDataModuleFromQueue Function for getting an empty module
+  /// for storing processed data into. \param[in] SourceID An integer used to
   /// identify the data source. This value is passed on together with the parsed
   /// data.
   PacketParser(std::function<bool(SamplingRun *)> PushDataModuleToQueue,

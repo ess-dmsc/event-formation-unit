@@ -9,7 +9,6 @@ set(AdcReadout_SRC
     AdcDataProcessor.cpp
     SampleProcessing.cpp
     AdcSettings.cpp
-    AdcTimeStamp.cpp
     UDPClient.cpp
     DelayLineProducer.cpp
     DelayLineEventFormation.cpp
