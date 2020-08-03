@@ -23,6 +23,7 @@ class UdpConnection {
 public:
   UdpConnection(std::string DstAddress, std::uint16_t DstPort);
   ~UdpConnection();
+  void waitTransmitDone();
 
   // used by the generators
   void addSamplingRun(void const *const DataPtr, size_t Bytes,

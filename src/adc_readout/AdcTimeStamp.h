@@ -13,9 +13,10 @@
 
 #include <cmath>
 #include <cstdint>
+#include <chrono>
 #include <netinet/in.h>
 
-const static std::uint64_t NSecMultiplier = 1000000000;
+const static std::uint64_t NSecMultiplier = 1'000'000'000;
 
 struct Timing {
   constexpr Timing(std::uint64_t const ClockFrequency)
@@ -97,6 +98,22 @@ private:
   RawTimeStamp CTime{0, 0};
   ClockMode CMode{ClockMode::External};
 };
+
+template <typename ChronoTime>
+TimeStamp MakeTimeStampFromClock(ChronoTime TimeNow) {
+  auto NowSeconds = std::chrono::duration_cast<std::chrono::seconds>(
+                        TimeNow.time_since_epoch())
+                        .count();
+  double NowSecFrac = (std::chrono::duration_cast<std::chrono::nanoseconds>(
+                           TimeNow.time_since_epoch())
+                           .count() /
+                       1e9) -
+                      NowSeconds;
+  std::uint32_t Ticks = std::lround(NowSecFrac * (88052500 / 2.0));
+
+  RawTimeStamp rts{static_cast<uint32_t>(NowSeconds), Ticks};
+  return TimeStamp(rts, TimeStamp::ClockMode::External);
+}
 
 //-----------------------------------------------------------------------------
 

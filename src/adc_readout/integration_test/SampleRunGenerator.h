@@ -20,7 +20,6 @@ public:
                      double Slope, double Offset, int ADCBox, int ADCChannel);
   std::pair<void *, std::size_t> generate(double Amplitude,
                                           TimeStamp const Time);
-  //SampleRunGenerator(SampleRunGenerator &) = default;
 
 private:
   DataHeader *GetHeaderPtr() {

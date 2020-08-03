@@ -48,7 +48,9 @@ UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort)
   TransmitThread = std::thread([this]() { this->transmitThread(); });
 }
 
-UdpConnection::~UdpConnection() {
+UdpConnection::~UdpConnection() { waitTransmitDone(); }
+
+void UdpConnection::waitTransmitDone() {
   if (TransmitThread.joinable()) {
     TransmitThread.join();
   }

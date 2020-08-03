@@ -43,6 +43,7 @@ set(AdcFileStreamer_SRC
         DataModulariser.cpp
         UdpConnection.cpp
         DataPacket.cpp
+        SampleRunGenerator.cpp
         SamplingTimer.cpp)
 
 set(AdcFileStreamer_INC
@@ -51,14 +52,13 @@ set(AdcFileStreamer_INC
         UdpConnection.h
         DataPacket.h
         ../AdcTimeStamp.h
+        SampleRunGenerator.h
         SamplingTimer.h)
 
 add_executable(AdcFileStreamer EXCLUDE_FROM_ALL ${AdcFileStreamer_SRC} ${AdcFileStreamer_INC})
 set_target_properties(AdcFileStreamer PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
-target_compile_definitions(AdcFileStreamer PRIVATE BOOST_DISABLE_ASSERTS=1 ASIO_HAS_BOOST_ASSERT=1)
+target_include_directories(AdcFileStreamer PRIVATE "../" "../../common/")
 
-target_include_directories(AdcFileStreamer PRIVATE ${ASIO_INCLUDE_DIR} "../" "../../common/")
-
-target_link_libraries(AdcFileStreamer ${CMAKE_THREAD_LIBS_INIT} ${EFU_COMMON_LIBS})
+target_link_libraries(AdcFileStreamer ${CMAKE_THREAD_LIBS_INIT} efu_common)
