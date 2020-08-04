@@ -268,7 +268,7 @@ int main(const int argc, char *argv[]) {
   while (RunLoop) {
 
     auto TimeNow = std::chrono::high_resolution_clock::now();
-    TimeStamp TimeTS = MakeTimeStampFromClock(TimeNow);
+    TimeStamp TimeTS = MakeExternalTimeStampFromClock(TimeNow);
 
     // Poission
     for (int32_t i = 0, count = PoissionGenerators.size(); i < count; i++) {

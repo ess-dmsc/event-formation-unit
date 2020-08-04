@@ -99,11 +99,11 @@ struct PoissionFileGenerator {
   PoissonDelayData PoissonData;
   FileSampler FS;
 
-  std::chrono::duration<size_t, std::nano> calcDelaTime() {
+  TimeDurationNano calcDelaTime() {
     auto DelayTime =
         PoissonData.RandomDistribution(PoissonData.RandomGenerator);
-    auto NextEventDelay = std::chrono::duration<size_t, std::nano>(
-        static_cast<size_t>(DelayTime * 1e9));
+    auto NextEventDelay =
+        TimeDurationNano(static_cast<size_t>(DelayTime * 1e9));
     return NextEventDelay;
   }
 
@@ -164,7 +164,7 @@ int main(const int argc, char *argv[]) {
   while (RunLoop) {
 
     auto TimeNow = std::chrono::high_resolution_clock::now();
-    TimeStamp TimeTS = MakeTimeStampFromClock(TimeNow);
+    TimeStamp TimeTS = MakeExternalTimeStampFromClock(TimeNow);
 
     // PoissionFile
     {

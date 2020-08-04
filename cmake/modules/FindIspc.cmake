@@ -3,10 +3,11 @@
 #
 # Used in the following way:
 #
-# set(AdcSimulator_ISPC_OBJ "")
+# set(myTarget_ISPC_OBJ "")
 # find_package(Ispc)
-# ispc_compile_single_file(AdcSimulator_ISPC_OBJ SampleGen.ispc avx2)
-# add_executable(AdcSimulator EXCLUDE_FROM_ALL ${AdcSimulator_SRC} ${AdcSimulator_INC} ${AdcSimulator_ISPC_OBJ})
+# ispc_compile_single_file(myTarget_ISPC_OBJ SampleGen.ispc avx2) # avx2 instruction set support
+# add_executable(myTarget EXCLUDE_FROM_ALL ${myTarget_SRC} ${myTarget_INC} ${myTarget_ISPC_OBJ})
+# add_ispc_support(myTarget)
 
 #unset(ISPC_CMD CACHE) # test add/remove
 

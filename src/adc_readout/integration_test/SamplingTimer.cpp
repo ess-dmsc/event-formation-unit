@@ -9,8 +9,7 @@
 
 std::chrono::duration<size_t, std::nano> PoissonDelay::calcDelaTime() {
   auto DelayTime = data.RandomDistribution(data.RandomGenerator);
-  auto NextEventDelay = std::chrono::duration<size_t, std::nano>(
-      static_cast<size_t>(DelayTime * 1e9));
+  auto NextEventDelay = TimeDurationNano(static_cast<size_t>(DelayTime * 1e9));
   return NextEventDelay;
 }
 
@@ -56,11 +55,10 @@ auto generateCircleAmplitudes() {
                         Center + Amplitude * std::sin(Angle));
 }
 
-std::chrono::duration<size_t, std::nano> AmpEventDelay::calcDelaTime() {
+TimeDurationNano AmpEventDelay::calcDelaTime() {
   auto DelayTime =
       data.PoissonData.RandomDistribution(data.PoissonData.RandomGenerator);
-  auto NextEventDelay = std::chrono::duration<size_t, std::nano>(
-      static_cast<size_t>(DelayTime * 1e9));
+  auto NextEventDelay = TimeDurationNano(static_cast<size_t>(DelayTime * 1e9));
   return NextEventDelay;
 }
 
@@ -107,8 +105,7 @@ AmpEventDelay AmpEventDelay::Create(UdpConnection *UdpCon, int BoxNr,
 
 //-----------------------------------------------------------------------------
 
-std::chrono::duration<size_t, std::nano>
-ContinousSamplingTimer::calcDelaTime() {
+TimeDurationNano ContinousSamplingTimer::calcDelaTime() {
   return Data.TimeStepNano;
 }
 
@@ -137,10 +134,9 @@ ContinousSamplingTimer::Create(UdpConnection *UdpCon, int BoxNr, int ChNr,
 
   SampleRunGenerator SampleGen(NrOfSamples, 50, 20, 1.0, Offset, BoxNr, ChNr);
 
-  const double TimeFracMax = 88052500.0 / 2;
-  std::chrono::duration<size_t, std::nano> TimeStepNano =
-      std::chrono::duration<size_t, std::nano>(static_cast<std::uint64_t>(
-          (NrOfOriginalSamples / TimeFracMax) * 1e9));
+  const double TimeFracMax = TimerClockFrequencyExternal / 2.0;
+  TimeDurationNano TimeStepNano(
+      static_cast<std::uint64_t>((NrOfOriginalSamples / TimeFracMax) * 1e9));
 
   SamplingTimerData TimerData{
       SamplerType::Continous, UdpCon, SampleGen, Offset, Amplitude, Rate};

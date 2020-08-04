@@ -15,9 +15,6 @@
 #include "CircularBuffer.h"
 #include "DelayLineProcessing.h"
 #include "SampleProcessing.h"
-#ifndef assert
-#define assert(...) /**/
-#endif
 #include <asio.hpp>
 #include <common/Detector.h>
 #include <common/Producer.h>

@@ -9,9 +9,6 @@
 
 #pragma once
 #include "AdcBufferElements.h"
-#ifndef assert
-#define assert(...) /**/
-#endif
 #include <asio.hpp>
 #include <cstdint>
 #include <memory>

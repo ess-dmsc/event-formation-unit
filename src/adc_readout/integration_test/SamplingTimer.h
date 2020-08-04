@@ -42,7 +42,7 @@ public:
 
   static PoissonDelay Create(UdpConnection *UdpCon, int BoxNr, int ChNr,
                              std::map<std::string, double> Settings);
-  std::chrono::duration<size_t, std::nano> calcDelaTime();
+  TimeDurationNano calcDelaTime();
   void genSamplesAndQueueSend(const TimeStamp &Time);
 };
 
@@ -61,7 +61,7 @@ public:
 
   static AmpEventDelay Create(UdpConnection *UdpCon, int BoxNr,
                               double EventRate);
-  std::chrono::duration<size_t, std::nano> calcDelaTime();
+  TimeDurationNano calcDelaTime();
   void genSamplesAndQueueSend(const TimeStamp &Time);
 };
 
@@ -69,7 +69,7 @@ public:
 
 struct ContinousSamplingTimerData {
   SamplingTimerData TimerData;
-  std::chrono::duration<size_t, std::nano> TimeStepNano;
+  TimeDurationNano TimeStepNano;
 };
 
 class ContinousSamplingTimer {
@@ -79,6 +79,6 @@ public:
   static ContinousSamplingTimer Create(UdpConnection *UdpCon, int BoxNr,
                                        int ChNr,
                                        std::map<std::string, double> Settings);
-  std::chrono::duration<size_t, std::nano> calcDelaTime();
+  TimeDurationNano calcDelaTime();
   void genSamplesAndQueueSend(const TimeStamp &Time);
 };
