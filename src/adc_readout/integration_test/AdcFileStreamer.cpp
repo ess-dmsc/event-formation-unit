@@ -168,12 +168,12 @@ int main(const int argc, char *argv[]) {
 
     // PoissionFile
     {
-      auto &self = PoissionFile;
+      auto &Self = PoissionFile;
       auto &TriggerTime = TriggerTime_PoissonFile;
       if (TriggerTime <= TimeNow) {
-        TriggerTime = TimeNow + self.calcDelaTime();
+        TriggerTime = TimeNow + Self.calcDelaTime();
         if (runTriggers) {
-          self.genSamplesAndQueueSend(TimeTS);
+          Self.genSamplesAndQueueSend(TimeTS);
         }
       }
     }
@@ -191,22 +191,22 @@ int main(const int argc, char *argv[]) {
 
     // UdpConnection HeatBeat
     {
-      auto &self = UdpCon;
+      auto &Self = UdpCon;
       auto &TriggerTime = TriggerTime_UdpHeartBeat;
       if (TriggerTime <= TimeNow) {
-        TriggerTime = TimeNow + self.HeartbeatInterval;
+        TriggerTime = TimeNow + Self.HeartbeatInterval;
         if (runTriggers) {
-          self.transmitHeartbeat();
+          Self.transmitHeartbeat();
         }
       }
     }
 
     // UdpConnection FlushIdleData
     {
-      auto &self = UdpCon;
-      if (self.shouldFlushIdleDataPacket(TimeNow)) {
+      auto &Self = UdpCon;
+      if (Self.shouldFlushIdleDataPacket(TimeNow)) {
         if (runTriggers) {
-          self.flushIdleDataPacket(TimeNow);
+          Self.flushIdleDataPacket(TimeNow);
         }
       }
     }

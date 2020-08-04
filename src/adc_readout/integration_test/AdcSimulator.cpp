@@ -18,8 +18,8 @@ bool RunLoop = true;
 void signalHandler(int signal) {
   std::cout << "Got exit signal:" << signal << std::endl;
   RunLoop = false;
-  static int countSIGINT = 0;
-  if (signal == SIGINT && countSIGINT++ == 3) {
+  static int SigIntCount = 0;
+  if (signal == SIGINT && SigIntCount++ == 3) {
     std::cout << "many repeats of SIGINT, aborting." << std::endl;
     abort();
   }
@@ -272,36 +272,36 @@ int main(const int argc, char *argv[]) {
 
     // Poission
     for (int32_t i = 0, count = PoissionGenerators.size(); i < count; i++) {
-      auto &self = PoissionGenerators[i];
+      auto &Self = PoissionGenerators[i];
       auto &TriggerTime = TriggerTime_Poisson[i];
       if (TriggerTime <= TimeNow) {
-        TriggerTime = TimeNow + self.calcDelaTime();
+        TriggerTime = TimeNow + Self.calcDelaTime();
         if (runTriggers) {
-          self.genSamplesAndQueueSend(TimeTS);
+          Self.genSamplesAndQueueSend(TimeTS);
         }
       }
     }
 
     // AmpDelay
     for (int32_t i = 0, count = AmpDelayGenerators.size(); i < count; i++) {
-      auto &self = AmpDelayGenerators[i];
+      auto &Self = AmpDelayGenerators[i];
       auto &TriggerTime = TriggerTime_AmpDelay[i];
       if (TriggerTime <= TimeNow) {
-        TriggerTime = TimeNow + self.calcDelaTime();
+        TriggerTime = TimeNow + Self.calcDelaTime();
         if (runTriggers) {
-          self.genSamplesAndQueueSend(TimeTS);
+          Self.genSamplesAndQueueSend(TimeTS);
         }
       }
     }
 
     // Continous
     for (int32_t i = 0, count = ContinousGenerators.size(); i < count; i++) {
-      auto &self = ContinousGenerators[i];
+      auto &Self = ContinousGenerators[i];
       auto &TriggerTime = TriggerTime_Continous[i];
       if (TriggerTime <= TimeNow) {
-        TriggerTime = TimeNow + self.calcDelaTime();
+        TriggerTime = TimeNow + Self.calcDelaTime();
         if (runTriggers) {
-          self.genSamplesAndQueueSend(TimeTS);
+          Self.genSamplesAndQueueSend(TimeTS);
         }
       }
     }
@@ -319,22 +319,22 @@ int main(const int argc, char *argv[]) {
 
     // UdpConnection HeatBeat
     for (int32_t i = 0, count = UdpConnections.size(); i < count; i++) {
-      auto &self = *UdpConnections[i];
+      auto &Self = *UdpConnections[i];
       auto &TriggerTime = TriggerTime_UdpHeartBeat[i];
       if (TriggerTime <= TimeNow) {
-        TriggerTime = TimeNow + self.HeartbeatInterval;
+        TriggerTime = TimeNow + Self.HeartbeatInterval;
         if (runTriggers) {
-          self.transmitHeartbeat();
+          Self.transmitHeartbeat();
         }
       }
     }
 
     // UdpConnection FlushIdleData
     for (int32_t i = 0, count = UdpConnections.size(); i < count; i++) {
-      auto &self = *UdpConnections[i];
-      if (self.shouldFlushIdleDataPacket(TimeNow)) {
+      auto &Self = *UdpConnections[i];
+      if (Self.shouldFlushIdleDataPacket(TimeNow)) {
         if (runTriggers) {
-          self.flushIdleDataPacket(TimeNow);
+          Self.flushIdleDataPacket(TimeNow);
         }
       }
     }
