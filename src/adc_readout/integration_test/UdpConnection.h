@@ -10,14 +10,12 @@
 #include "../AdcParse.h"
 #include "DataPacket.h"
 #include <common/Socket.h>
+#include <common/TimeNano.h>
 
 #include <atomic>
 #include <deque>
 #include <mutex>
 #include <thread>
-
-using TimePointNano = std::chrono::high_resolution_clock::time_point;
-using TimeDurationNano = std::chrono::duration<size_t, std::nano>;
 
 class UdpConnection {
 public:

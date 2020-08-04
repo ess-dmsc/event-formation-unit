@@ -9,9 +9,6 @@
 
 #pragma once
 
-#ifndef assert
-#define assert(...) /**/
-#endif
 #include <h5cpp/hdf5.hpp>
 #include <h5cpp/property/dataset_access.hpp>
 #include <h5cpp/property/property_class.hpp>

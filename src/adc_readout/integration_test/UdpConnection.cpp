@@ -168,7 +168,7 @@ void UdpConnection::transmitThread() {
           double GbPerSec = AccumSize / (1024 * 1024 * 1024 * Secs);
           double PkgPerSec = SendCount / Secs;
           const char *Name = "ContinuousSpeedTest";
-          printf("GbPerSec %0.3f, pkg/sec %0.3f, pkg bytes %u [%s, %u]\n",
+          printf("Gb/sec %0.3f, pkg/sec %0.3f, pkg bytes %u [%s, %u]\n",
                  GbPerSec, PkgPerSec, (uint32_t)DataSize, Name, Port);
         }
       }
@@ -182,8 +182,8 @@ void UdpConnection::transmitThread() {
         double GbPerSec = AccumSize / (1024 * 1024 * 1024 * Secs);
         double PkgPerSec = SendCount / Secs;
         const char *Name = "RepeatPacketSpeedTest";
-        printf("GbPerSec %0.3f, pkg/sec %0.3f, pkg bytes %u [%s, %u]\n",
-               GbPerSec, PkgPerSec, (uint32_t)DataSize, Name, Port);
+        printf("Gb/sec %0.3f, pkg/sec %0.3f, pkg bytes %u [%s, %u]\n", GbPerSec,
+               PkgPerSec, (uint32_t)DataSize, Name, Port);
       }
     } // normal send
     else {
@@ -195,8 +195,8 @@ void UdpConnection::transmitThread() {
         double GbPerSec = AccumSize / (1024 * 1024 * 1024 * Secs);
         double PkgPerSec = SendCount / Secs;
         const char *Name = "normal send";
-        printf("GbPerSec %0.3f, pkg/sec %0.3f, pkg bytes %u [%s, %u]\n",
-               GbPerSec, PkgPerSec, (uint32_t)DataSize, Name, Port);
+        printf("Gb/sec %0.3f, pkg/sec %0.3f, pkg bytes %u [%s, %u]\n", GbPerSec,
+               PkgPerSec, (uint32_t)DataSize, Name, Port);
       }
     }
 
