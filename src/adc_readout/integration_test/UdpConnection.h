@@ -72,7 +72,6 @@ private:
     size_t getTxSize();
     void freePacket(UdpConnection *UdpCon);
   };
-  friend struct TransmitRequest;
 
 private:
   const std::uint64_t RefTimeDeltaNS{1'000'000'000ull / 14ull};
@@ -105,6 +104,7 @@ private:
 
   std::thread TransmitThread;
 
+  static const int TransmitQueueSize = 10;
   std::mutex TransmitRequestsAccess;
   std::deque<TransmitRequest> TransmitRequests;
 

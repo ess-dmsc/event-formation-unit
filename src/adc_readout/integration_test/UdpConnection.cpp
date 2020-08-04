@@ -10,8 +10,6 @@
 #include <common/Timer.h>
 #include <unistd.h>
 
-static const int kTransmitQueueSize = 10;
-
 extern bool RunLoop;
 
 UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort)
@@ -36,7 +34,7 @@ UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort)
     TransmitRequests.push_back(TransmitRequest((IdlePacket_t *)nullptr));
   }
 
-  for (int i = 0; i < kTransmitQueueSize; i++) {
+  for (int i = 0; i < TransmitQueueSize; i++) {
     FreeDataPackets.push_back(new DataPacket(MaxPacketSize));
     TransmitRequests.push_back(TransmitRequest((DataPacket *)nullptr));
   }
@@ -130,7 +128,7 @@ void UdpConnection::TransmitRequest::freePacket(UdpConnection *UdpCon) {
 void UdpConnection::transmitThread() {
   static const bool ContinuousSpeedTest = false;
   static const bool RepeatPacketSpeedTest = false;
-  bool FirstData = true;
+  bool FirstData = false;
   Timer FirstDataTimer;
   uint64_t SendCount = 0;
 
@@ -147,11 +145,11 @@ void UdpConnection::transmitThread() {
     TransmitRequestsAccess.unlock();
 
     if (empty) {
-      usleep(FirstData ? 10000 : 1);
+      usleep(FirstData ? 1 : 10000);
       continue;
     } else {
-      if (FirstData) {
-        FirstData = false;
+      if (!FirstData) {
+        FirstData = true;
         FirstDataTimer.now();
       }
     }
