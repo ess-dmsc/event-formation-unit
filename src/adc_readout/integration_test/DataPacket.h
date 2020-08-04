@@ -22,7 +22,6 @@ public:
   std::pair<void *, size_t> formatPacketForSend(std::uint16_t ReadoutCount);
   void resetPacket();
 
-//private:
   std::unique_ptr<std::uint8_t[]> Buffer;
   PacketHeader *HeaderPtr;
   std::size_t Size{0};

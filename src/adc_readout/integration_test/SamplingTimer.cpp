@@ -8,15 +8,15 @@
 #include "SamplingTimer.h"
 
 std::chrono::duration<size_t, std::nano> PoissonDelay::calcDelaTime() {
-  auto DelayTime = data.RandomDistribution(data.RandomGenerator);
+  auto DelayTime = Data.RandomDistribution(Data.RandomGenerator);
   auto NextEventDelay = TimeDurationNano(static_cast<size_t>(DelayTime * 1e9));
   return NextEventDelay;
 }
 
 void PoissonDelay::genSamplesAndQueueSend(const TimeStamp &Time) {
   std::pair<void *, std::size_t> SampleRun =
-      data.TimerData.SampleGen.generate(data.TimerData.Amplitude, Time);
-  data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second,
+      Data.TimerData.SampleGen.generate(Data.TimerData.Amplitude, Time);
+  Data.TimerData.UdpCon->addSamplingRun(SampleRun.first, SampleRun.second,
                                         Time);
 }
 
@@ -32,11 +32,11 @@ PoissonDelay PoissonDelay::Create(UdpConnection *UdpCon, int BoxNr, int ChNr,
       SamplerType::PoissonDelay, UdpCon, SampleGen, Offset, Amplitude, Rate};
 
   std::random_device RandomDevice;
-  PoissonDelayData data = {TimerData,
+  PoissonDelayData Data = {TimerData,
                            std::default_random_engine(RandomDevice()),
                            std::exponential_distribution<double>(Rate)};
 
-  return PoissonDelay{data};
+  return PoissonDelay{Data};
 }
 
 //-----------------------------------------------------------------------------
@@ -57,22 +57,22 @@ auto generateCircleAmplitudes() {
 
 TimeDurationNano AmpEventDelay::calcDelaTime() {
   auto DelayTime =
-      data.PoissonData.RandomDistribution(data.PoissonData.RandomGenerator);
+      Data.PoissonData.RandomDistribution(Data.PoissonData.RandomGenerator);
   auto NextEventDelay = TimeDurationNano(static_cast<size_t>(DelayTime * 1e9));
   return NextEventDelay;
 }
 
 void AmpEventDelay::genSamplesAndQueueSend(const TimeStamp &Time) {
 
-  auto SampleRunAnode = data.AnodeGen.generate(2000.0, Time);
+  auto SampleRunAnode = Data.AnodeGen.generate(2000.0, Time);
   auto Amplitudes = generateCircleAmplitudes();
-  auto SampleRunX = data.XPosGen.generate(Amplitudes.first, Time);
-  auto SampleRunY = data.YPosGen.generate(Amplitudes.second, Time);
-  data.PoissonData.TimerData.UdpCon->addSamplingRun(
+  auto SampleRunX = Data.XPosGen.generate(Amplitudes.first, Time);
+  auto SampleRunY = Data.YPosGen.generate(Amplitudes.second, Time);
+  Data.PoissonData.TimerData.UdpCon->addSamplingRun(
       SampleRunAnode.first, SampleRunAnode.second, Time);
-  data.PoissonData.TimerData.UdpCon->addSamplingRun(SampleRunX.first,
+  Data.PoissonData.TimerData.UdpCon->addSamplingRun(SampleRunX.first,
                                                     SampleRunX.second, Time);
-  data.PoissonData.TimerData.UdpCon->addSamplingRun(SampleRunY.first,
+  Data.PoissonData.TimerData.UdpCon->addSamplingRun(SampleRunY.first,
                                                     SampleRunY.second, Time);
 }
 
@@ -98,9 +98,9 @@ AmpEventDelay AmpEventDelay::Create(UdpConnection *UdpCon, int BoxNr,
   SampleRunGenerator XPosGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 1);
   SampleRunGenerator YPosGen(NrOfSamples, 50, 20, 1.0, 500, BoxNr, 2);
 
-  AmpEventDelayData data = {PoissonData, AnodeGen, XPosGen, YPosGen};
+  AmpEventDelayData Data = {PoissonData, AnodeGen, XPosGen, YPosGen};
 
-  return AmpEventDelay{data};
+  return AmpEventDelay{Data};
 }
 
 //-----------------------------------------------------------------------------
@@ -141,7 +141,7 @@ ContinousSamplingTimer::Create(UdpConnection *UdpCon, int BoxNr, int ChNr,
   SamplingTimerData TimerData{
       SamplerType::Continous, UdpCon, SampleGen, Offset, Amplitude, Rate};
 
-  ContinousSamplingTimerData data = {TimerData, TimeStepNano};
+  ContinousSamplingTimerData Data = {TimerData, TimeStepNano};
 
-  return ContinousSamplingTimer{data};
+  return ContinousSamplingTimer{Data};
 }

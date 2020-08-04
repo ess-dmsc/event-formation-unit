@@ -38,7 +38,7 @@ struct PoissonDelayData {
 
 class PoissonDelay {
 public:
-  PoissonDelayData data;
+  PoissonDelayData Data;
 
   static PoissonDelay Create(UdpConnection *UdpCon, int BoxNr, int ChNr,
                              std::map<std::string, double> Settings);
@@ -57,7 +57,7 @@ struct AmpEventDelayData {
 
 class AmpEventDelay {
 public:
-  AmpEventDelayData data;
+  AmpEventDelayData Data;
 
   static AmpEventDelay Create(UdpConnection *UdpCon, int BoxNr,
                               double EventRate);
