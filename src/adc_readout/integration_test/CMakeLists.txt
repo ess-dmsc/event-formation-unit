@@ -59,6 +59,9 @@ add_executable(AdcFileStreamer EXCLUDE_FROM_ALL ${AdcFileStreamer_SRC} ${AdcFile
 set_target_properties(AdcFileStreamer PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
 
+# HDF5 pulls in boost
+target_compile_definitions(AdcFileStreamer PRIVATE BOOST_DISABLE_ASSERTS=1)
+
 target_include_directories(AdcFileStreamer PRIVATE "../" "../../common/")
 
 target_link_libraries(AdcFileStreamer ${CMAKE_THREAD_LIBS_INIT} efu_common)
