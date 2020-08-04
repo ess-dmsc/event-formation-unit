@@ -7,9 +7,9 @@
 
 #include "SamplingTimer.h"
 
-std::chrono::duration<size_t, std::nano> PoissonDelay::calcDelaTime() {
-  auto DelayTime = Data.RandomDistribution(Data.RandomGenerator);
-  auto NextEventDelay = TimeDurationNano(static_cast<size_t>(DelayTime * 1e9));
+TimeDurationNano PoissonDelay::calcDelaTime() {
+  double DelayTime = Data.RandomDistribution(Data.RandomGenerator);
+  TimeDurationNano NextEventDelay(static_cast<size_t>(DelayTime * 1e9));
   return NextEventDelay;
 }
 
@@ -56,9 +56,9 @@ auto generateCircleAmplitudes() {
 }
 
 TimeDurationNano AmpEventDelay::calcDelaTime() {
-  auto DelayTime =
+  double DelayTime =
       Data.PoissonData.RandomDistribution(Data.PoissonData.RandomGenerator);
-  auto NextEventDelay = TimeDurationNano(static_cast<size_t>(DelayTime * 1e9));
+  TimeDurationNano NextEventDelay(static_cast<size_t>(DelayTime * 1e9));
   return NextEventDelay;
 }
 

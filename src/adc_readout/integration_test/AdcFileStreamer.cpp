@@ -100,10 +100,9 @@ struct PoissionFileGenerator {
   FileSampler FS;
 
   TimeDurationNano calcDelaTime() {
-    auto DelayTime =
+    double DelayTime =
         PoissonData.RandomDistribution(PoissonData.RandomGenerator);
-    auto NextEventDelay =
-        TimeDurationNano(static_cast<size_t>(DelayTime * 1e9));
+    TimeDurationNano NextEventDelay(static_cast<size_t>(DelayTime * 1e9));
     return NextEventDelay;
   }
 
