@@ -17,7 +17,7 @@ protected:
 
 /** Test cases below */
 TEST_F(HwCheckTest, HwCheckPass) {
-  std::vector<std::string> IgnoredInterfaces {"0", "00"};
+  std::vector<std::string> IgnoredInterfaces {"0", "00", "br-"};
   HwCheck check;
   bool pass = check.checkMTU(IgnoredInterfaces);
   ASSERT_TRUE(pass);
