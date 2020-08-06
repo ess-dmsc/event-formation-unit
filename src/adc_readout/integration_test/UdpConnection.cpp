@@ -11,7 +11,7 @@
 #include <unistd.h>
  
 extern bool RunLoop;
-
+ 
 UdpConnection::UdpConnection(std::string DstAddress, std::uint16_t DstPort)
     : Address(std::move(DstAddress)), Port(DstPort),
       RemoteEndpoint(Address, Port),
