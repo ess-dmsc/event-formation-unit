@@ -60,6 +60,8 @@ bool HwCheck::checkMTU(std::vector<std::string> ignore) {
         LOG(INIT, Sev::Warning, "MTU check failed for interface {}", ifa->ifa_name);
         freeifaddrs(ifaddr);
         return false;
+      } else {
+        LOG(INIT, Sev::Warning, "[debug] MTU check succeded for interface {}", ifa->ifa_name);
       }
     }
   }
