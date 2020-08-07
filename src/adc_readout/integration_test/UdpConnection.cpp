@@ -74,7 +74,7 @@ bool UdpConnection::shouldFlushIdleDataPacket(TimePointNano TimeNow) {
   if (0) {
     // clang-format off
     printf("IdleFlushTimeoutExceeded %i = (TimeNow %" PRIu64" >= LastSampleDataAddTime %" PRIu64" + DataIdleFlushInterval %zu)\n"
-           "HasUnflushedData         %i = (LastDataIdleFlushTime %" PRIu64" <  LastSampleDataAddTime %" PRIu64")\n"
+         "HasUnflushedData         %i = (LastDataIdleFlushTime %" PRIu64" <  LastSampleDataAddTime %" PRIu64")\n"
          , IdleFlushTimeoutExceeded ?1:0
          , TimeNow.time_since_epoch().count()
          , LastSampleDataAddTime.time_since_epoch().count()
@@ -253,10 +253,10 @@ void UdpConnection::queueTransmitAndResetDataPacketBuilder() {
 }
 
 UdpConnection::IdlePacket_t *UdpConnection::allocIdlePacket() {
-IdlePacket_t *IdlePacket = nullptr;
+  IdlePacket_t *IdlePacket = nullptr;
   while (IdlePacket == nullptr) {
     FreeIdlePacketsAccess.lock();
-    if (!FreeIdlePackets.empty()) {
+    if (FreeIdlePackets.size()) {
       IdlePacket = FreeIdlePackets.back();
       FreeIdlePackets.pop_back();
     }
@@ -279,12 +279,12 @@ DataPacket *UdpConnection::allocDataPacket() {
   uint32_t EmptyStreakCount = 0;
   while (DataPacket == nullptr) {
     FreeDataPacketsAccess.lock();
-    if (FreeDataPackets.empty()) {
-      EmptyStreakCount++;
-    } else {
+    if (FreeDataPackets.size()) {
       DataPacket = FreeDataPackets.back();
       FreeDataPackets.pop_back();
       EmptyStreakCount = 0;
+    } else {
+      EmptyStreakCount++;
     }
     FreeDataPacketsAccess.unlock();
 
