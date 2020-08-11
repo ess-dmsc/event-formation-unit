@@ -114,11 +114,11 @@ void AdcReadoutBase::parsePacketWithStats(InData const &Packet,
     AdcStats.InputBytesReceived += Packet.Length;
     try {
       try {
-        PacketInfo pi = Parser.parsePacket(Packet);
+        PacketInfo Info = Parser.parsePacket(Packet);
         ++AdcStats.ParserPacketsTotal;
-        if (PacketType::Data == pi.Type) {
+        if (PacketType::Data == Info.Type) {
           ++AdcStats.ParserPacketsData;
-        } else if (PacketType::Idle == pi.Type) {
+        } else if (PacketType::Idle == Info.Type) {
           ++AdcStats.ParserPacketsIdle;
         }
       } catch (ParserException &e) {
