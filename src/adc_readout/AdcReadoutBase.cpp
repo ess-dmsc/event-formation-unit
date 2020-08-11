@@ -64,9 +64,6 @@ void AdcReadoutBase::stopThreads() {
   Detector::stopThreads();
 }
 
-uint64_t DataQueueIsEmpty = 0;
-uint64_t DequeueModuleIsNull = 0;
-
 SamplingRun *
 AdcReadoutBase::getDataModuleFromQueue(ChannelID const Identifier) {
 
@@ -98,12 +95,8 @@ AdcReadoutBase::getDataModuleFromQueue(ChannelID const Identifier) {
   SpscBuffer::ElementPtr<SamplingRun> ReturnModule{nullptr};
   bool Success = DataModuleQueues.at(Identifier)->tryGetEmpty(ReturnModule);
   if (Success) {
-    if (ReturnModule == nullptr) {
-      DequeueModuleIsNull++;
-    }
     return ReturnModule;
   }
-  DataQueueIsEmpty++;
   return nullptr;
 }
 
@@ -147,9 +140,6 @@ void AdcReadoutBase::parsePacketWithStats(InData const &Packet,
       printf("%s = %" PRIu64 "\n", ParserException::TypeNames[i],
              ParserException::ErrorTypeCount[i]);
     }
-    printf("DataQueueIsEmpty = %" PRIu64 "\n"
-           "DequeueModuleIsNull = %" PRIu64 "\n",
-           DataQueueIsEmpty, DequeueModuleIsNull);
   }
 }
 
