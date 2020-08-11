@@ -56,7 +56,8 @@ protected:
   /// sample data.
   /// This function will return when Detector::runThreads is set to false.
   virtual void processingThread(Queue &DataModuleQueue,
-                                std::shared_ptr<std::int64_t> EventCounter);
+                                std::shared_ptr<std::int64_t> EventCounter,
+                                size_t QueueId, ChannelID Identifier);
 
   /// \brief Does on demand instantiation of Kafka producer.
   /// Used in order to simplify unit testing.

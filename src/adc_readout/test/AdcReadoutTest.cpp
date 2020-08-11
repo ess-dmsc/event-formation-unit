@@ -210,7 +210,8 @@ public:
   using AdcReadoutBase::DataModuleQueues;
   using Detector::Threads;
   MAKE_MOCK0(inputThread, void(), override);
-  MAKE_MOCK2(processingThread, void(Queue &, std::shared_ptr<std::int64_t>),
+  MAKE_MOCK4(processingThread,
+             void(Queue &, std::shared_ptr<std::int64_t>, size_t, ChannelID),
              override);
 };
 
@@ -223,7 +224,7 @@ public:
 TEST_F(AdcReadoutSimpleTest, StartProcessingThreads) {
   AdcReadoutMock Readout(Settings, ReadoutSettings);
   REQUIRE_CALL(Readout, inputThread()).TIMES(1);
-  REQUIRE_CALL(Readout, processingThread(_, _)).TIMES(0);
+  REQUIRE_CALL(Readout, processingThread(_, _, _, _)).TIMES(0);
   Readout.startThreads();
   Readout.stopThreads();
 }

@@ -72,17 +72,17 @@ AdcReadoutBase::getDataModuleFromQueue(ChannelID const Identifier) {
   if (DataModuleQueues.find(Identifier) == DataModuleQueues.end()) {
     DataModuleQueues.emplace(
         std::make_pair(Identifier, std::make_unique<Queue>(MessageQueueSize)));
-    auto ProcessingID = DataModuleQueues.size() - 1;
-    auto ThreadName = "processing_" + std::to_string(ProcessingID);
+    auto QueueId = DataModuleQueues.size() - 1;
+    auto ThreadName = "processing_" + std::to_string(QueueId);
     auto TempEventCounter = std::make_shared<std::int64_t>();
     *TempEventCounter = 0;
     Stats.create("events.adc" + std::to_string(Identifier.SourceID) + "_ch" +
                      std::to_string(Identifier.ChannelNr),
                  (*TempEventCounter));
-    std::function<void()> processingFunc = [this, ThreadName, Identifier,
-                                            TempEventCounter]() {
+    std::function<void()> processingFunc = [this, ThreadName, QueueId,
+                                            Identifier, TempEventCounter]() {
       this->processingThread(*this->DataModuleQueues.at(Identifier),
-                             TempEventCounter);
+                             TempEventCounter, QueueId, Identifier);
     };
     Detector::AddThreadFunction(processingFunc, ThreadName);
     auto &NewThread = Detector::Threads.at(Detector::Threads.size() - 1);
@@ -109,7 +109,7 @@ bool AdcReadoutBase::queueUpDataModule(SamplingRun *Data) {
 /// all packets should be counted so that
 /// packets_total == packets_idle + _data + _errors
 void AdcReadoutBase::parsePacketWithStats(InData const &Packet,
-                                    PacketParser &Parser) {
+                                          PacketParser &Parser) {
   if (Packet.Length > 0) {
     AdcStats.InputBytesReceived += Packet.Length;
     try {
@@ -134,7 +134,7 @@ void AdcReadoutBase::parsePacketWithStats(InData const &Packet,
 
   static uint64_t DumpExceptionsCount = 0;
   if (ReadoutSettings.DumpParserExceptionsCount &&
-      (DumpExceptionsCount++ & ((1 << 14) - 1)) == 0) {
+      (++DumpExceptionsCount & ((1 << 14) - 1)) == 0) {
     printf("\n");
     for (int i = 0; i < static_cast<int>(ParserException::Type::Count); i++) {
       printf("%s = %" PRIu64 "\n", ParserException::TypeNames[i],
@@ -192,13 +192,13 @@ void AdcReadoutBase::inputThread() {
 }
 
 void AdcReadoutBase::processingThread(
-    Queue &DataModuleQueue, std::shared_ptr<std::int64_t> EventCounter) {
+    Queue &DataModuleQueue, std::shared_ptr<std::int64_t> EventCounter,
+    size_t QueueID, ChannelID Identifier) {
 
   std::vector<std::unique_ptr<AdcDataProcessor>> Processors;
 
   auto UsedOffset = TimestampOffset;
 
-  LOG(INIT, Sev::Info, "Process PeakDetection = {}", ReadoutSettings.PeakDetection);
   if (ReadoutSettings.PeakDetection) {
     Processors.emplace_back(
         std::make_unique<PeakFinder>( /// \todo likeky to continously alloc/free
@@ -207,8 +207,6 @@ void AdcReadoutBase::processingThread(
             getProducer(), ReadoutSettings.Name, UsedOffset));
   }
 
-  LOG(INIT, Sev::Info, "Process SerializeSamples = {}",
-      ReadoutSettings.SerializeSamples);
   if (ReadoutSettings.SerializeSamples) {
     auto Processor =
         std::make_unique<SampleProcessing>( /// \todo this is likely to
@@ -222,12 +220,17 @@ void AdcReadoutBase::processingThread(
     Processors.emplace_back(std::move(Processor));
   }
 
-  LOG(INIT, Sev::Info, "Process DelayLineDetector = {}",
-      ReadoutSettings.DelayLineDetector);
   if (ReadoutSettings.DelayLineDetector) {
     Processors.emplace_back(std::make_unique<DelayLineProcessing>(
         getDelayLineProducer(UsedOffset), ReadoutSettings.Threshold));
   }
+
+  LOG(INIT, Sev::Info,
+      "DataQueue {} Adc {} Chan {}: Processors: PeakFinder={}, "
+      "SampleProcessing={}, DelayLineProcessing={}",
+      QueueID, Identifier.SourceID, Identifier.ChannelNr,
+      ReadoutSettings.PeakDetection, ReadoutSettings.SerializeSamples,
+      ReadoutSettings.DelayLineDetector);
 
   DataModulePtr Data = nullptr;
   const std::int64_t TimeoutUSecs = 20000;
