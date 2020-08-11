@@ -6,6 +6,8 @@
  */
 
 #include "AdcParse.h"
+#include <common/Log.h>
+
 #include <arpa/inet.h>
 #include <bitset>
 #include <cstring>
@@ -230,9 +232,8 @@ IdleInfo parseIdle(const InData &Packet, std::uint32_t StartByte) {
   Header.fixEndian();
   ReturnData.TimeStamp = Header.TimeStamp;
 
-  if (0) {
-    printf("got heartbeat with sec %u, frac %u\n", ReturnData.TimeStamp.Seconds,
-           ReturnData.TimeStamp.SecondsFrac);
-  }
+  LOG(DATA, Sev::Debug, "got heartbeat with sec {}, frac {}",
+      ReturnData.TimeStamp.Seconds, ReturnData.TimeStamp.SecondsFrac);
+
   return ReturnData;
 }
